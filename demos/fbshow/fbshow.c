@@ -26,6 +26,7 @@
 
   */
 
+#include <signal.h>
 #include <unistd.h>
 
 #include <GP.h>
@@ -34,6 +35,17 @@
 
 static GP_Pixel black_pixel;
 static GP_Pixel white_pixel;
+
+
+static GP_Framebuffer *fb = NULL;
+
+static void sighandler(int signo __attribute__((unused)))
+{
+	if (fb != NULL)
+		GP_FramebufferExit(fb);
+
+	exit(1);
+}
 
 static float calc_img_size(uint32_t img_w, uint32_t img_h,
                            uint32_t src_w, uint32_t src_h)
@@ -47,6 +59,8 @@ static float calc_img_size(uint32_t img_w, uint32_t img_h,
 static GP_Context *image_to_display(GP_Context *img, uint32_t w, uint32_t h)
 {
 	float rat = calc_img_size(img->w, img->h, w, h);
+
+//	GP_FilterGaussianBlur(img, img, 1, 1, NULL);
 
 	return GP_FilterResize(img, NULL, GP_INTERP_CUBIC, img->w * rat, img->h * rat, NULL);
 }
@@ -87,7 +101,6 @@ static int show_image(GP_Framebuffer *fb, const char *img_path, int clear)
 
 int main(int argc, char *argv[])
 {
-	GP_Framebuffer *fb;
 	GP_InputDriverLinux *drv = NULL;
 	char *input_dev = NULL;
 	int sleep_sec = 0;
@@ -120,6 +133,8 @@ int main(int argc, char *argv[])
 			return 1;
 		}
 	}
+
+	signal(SIGINT, sighandler);
 
 	fb = GP_FramebufferInit("/dev/fb0");
 
