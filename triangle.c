@@ -237,30 +237,41 @@ void GP_FillTriangle(SDL_Surface * surf, long color, int x0, int y0, int x1, int
 	for (ABx = Ax, ACx = Ax, y = Ay; y < By; y++) {
 		for (;;) {
 			ABerr = (ABx - Ax) * ABdy - (y - Ay) * ABdx;
-			if (ABxstep > 0 ? ABerr >= 0 : ABerr <= 0)
+			if (ABxstep > 0 ? ABerr >= 0 : ABerr <= 0) {
+				GP_SetPixel(surf, color, ABx, y);
 				break;
+			}
 			ABx += ABxstep;
+			GP_SetPixel(surf, color, ABx, y);
 		}
 		for (;;) {
 			ACerr = (ACx - Ax) * ACdy - (y - Ay) * ACdx;
-			if (ACxstep > 0 ? ACerr >= 0 : ACerr <= 0)
+			if (ACxstep > 0 ? ACerr >= 0 : ACerr <= 0) {
+				GP_SetPixel(surf, color, ACx, y);
 				break;
+			}
 			ACx += ACxstep;
+			GP_SetPixel(surf, color, ACx, y);
 		}
 		GP_HLine(surf, color, ABx, ACx, y);
 	}
 	for (BCx = Bx, y = By; y <= Cy; y++) {
 		for (;;) {
 			BCerr = (BCx - Bx) * BCdy - (y - By) * BCdx;
-			if (BCxstep > 0 ? BCerr >= 0 : BCerr <= 0)
+			if (BCxstep > 0 ? BCerr >= 0 : BCerr <= 0) {
+				GP_SetPixel(surf, color, BCx, y);
 				break;
+			}
 			BCx += BCxstep;
 		}
 		for (;;) {
 			ACerr = (ACx - Ax) * ACdy - (y - Ay) * ACdx;
-			if (ACxstep > 0 ? ACerr >= 0 : ACerr <= 0)
+			if (ACxstep > 0 ? ACerr >= 0 : ACerr <= 0) {
+				GP_SetPixel(surf, color, ACx, y);
 				break;
+			}
 			ACx += ACxstep;
+			GP_SetPixel(surf, color, ACx, y);
 		}
 		GP_HLine(surf, color, BCx, ACx, y);
 	}

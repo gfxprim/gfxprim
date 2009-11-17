@@ -1,6 +1,6 @@
 LIBRARY=gfxprim.a
 
-gfxprim.a: circle.o ellipse.o getpixel.o line.o rect.o setpixel.o triangle.o
+gfxprim.a: circle.o clear.o ellipse.o getpixel.o line.o rect.o setpixel.o triangle.o
 	ar crus $@ $^
 
 clean:

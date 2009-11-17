@@ -33,7 +33,7 @@ void draw_lines(void)
 
 	SDL_LockSurface(display);
 
-	GP_FillRect(display, black, 0, 0, 320, 240);
+	GP_Clear(display, black);
 
 	/* axes */
 	GP_Line(display, white, 0, 120, 320, 120);
