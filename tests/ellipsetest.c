@@ -40,7 +40,7 @@ int min_radius = 3;
 
 void draw_pixels(void)
 {
-	int x, y, rx, ry, active_rx, active_ry;
+	int rx, ry, active_rx, active_ry;
 	long black = SDL_MapRGB(display->format, 0, 0, 0);
 	long white = SDL_MapRGB(display->format, 255, 255, 255);
 	long red = SDL_MapRGB(display->format, 255, 0, 0);
@@ -175,7 +175,7 @@ void event_loop(void)
 	}
 }
 
-int main(int argc, char *argv[])
+int main(void)
 {
 	/* Initialize SDL */
 	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) != 0) {

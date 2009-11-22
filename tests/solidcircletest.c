@@ -62,15 +62,19 @@ void event_loop(void)
 				break;
 			case SDLK_ESCAPE:
 				return;
+			default:
+				break;
 			}
 			break;
 		case SDL_QUIT:
 			return;
+		default:
+			break;
 		}
 	}
 }
 
-int main(int argc, char *argv[])
+int main(void)
 {
 	/* Initialize SDL */
 	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) != 0) {

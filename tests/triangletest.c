@@ -20,9 +20,10 @@ Uint32 timer_callback(Uint32 interval, void * param)
 	return 60;
 }
 
-int radius = 1;
-int outline = 0;
-int shape = 1;
+static int radius = 1;
+static int outline = 0;
+static int shape = 1;
+static int radius_add = 0;
 
 void draw_pixels(void)
 {
@@ -30,9 +31,6 @@ void draw_pixels(void)
 	int y = 240;
 	long white = SDL_MapRGB(display->format, 255, 255, 255);
 	long blue = SDL_MapRGB(display->format, 0, 0, 255);
-	long red = SDL_MapRGB(display->format, 255, 0, 0);
-	long green = SDL_MapRGB(display->format, 0, 255, 0);
-	long yellow = SDL_MapRGB(display->format, 255, 255, 0);
 	long gray = SDL_MapRGB(display->format, 127, 127, 127);
 	long darkgray = SDL_MapRGB(display->format, 63, 63, 63);
 	long black = SDL_MapRGB(display->format, 0, 0, 0);
@@ -95,6 +93,9 @@ void event_loop(void)
 
 		switch (event.type) {
 		case SDL_USEREVENT:
+			if (radius + radius_add > 1 || radius + radius_add < 400)
+				radius += radius_add;
+			
 			draw_pixels();
 			SDL_Flip(display);
 			break;
@@ -108,13 +109,11 @@ void event_loop(void)
 				return;
 
 			case SDLK_LEFT:
-				if (radius > 1)
-					radius--;
+				radius_add = -1;
 				break;
 
 			case SDLK_RIGHT:
-				if (radius < 400)
-					radius++;
+				radius_add = 1;
 				break;
 
 			case SDLK_1:
@@ -128,15 +127,27 @@ void event_loop(void)
 			case SDLK_3:
 				shape = 3;
 				break;
+			default:
+				break;
 			}
 			break;
+		case SDL_KEYUP:
+			switch (event.key.keysym.sym) {
+			case SDLK_LEFT:
+			case SDLK_RIGHT:
+				radius_add = 0;
+				break;
+			default:
+				break;
+			}
+		break;
 		case SDL_QUIT:
 			return;
 		}
 	}
 }
 
-int main(int argc, char *argv[])
+int main(void)
 {
 	/* Initialize SDL */
 	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) != 0) {

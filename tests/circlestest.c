@@ -161,7 +161,7 @@ void event_loop(void)
 	}
 }
 
-int main(int argc, char *argv[])
+int main(void)
 {
 	/* Initialize SDL */
 	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) != 0) {

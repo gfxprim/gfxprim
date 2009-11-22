@@ -20,10 +20,9 @@ Uint32 timer_callback(Uint32 interval, void * param)
 	return 60;
 }
 
-int radius = 1;
-
-/* Outline drawing flag. */
-int outline = 0;
+static int radius = 1;
+static int outline = 0;
+static int radius_add = 0;
 
 void draw_pixels(void)
 {
@@ -66,33 +65,48 @@ void event_loop(void)
 
 		switch (event.type) {
 		case SDL_USEREVENT:
+			if (radius + radius_add > 1 || radius + radius_add < 400)
+				radius += radius_add;
+
 			draw_pixels();
 			SDL_Flip(display);
 			break;
 		case SDL_KEYDOWN:
 			switch (event.key.keysym.sym) {
 			case SDLK_LEFT:
-				if (radius > 1)
-					radius--;
+				radius_add = -1;
 				break;
 			case SDLK_RIGHT:
-				if (radius < 400)
-					radius++;
+				radius_add = 1;
 				break;
 			case SDLK_o:
 				outline = !outline;
 				break;
 			case SDLK_ESCAPE:
 				return;
+			default:
+				break;
+			}
+			break;
+		case SDL_KEYUP:
+			switch (event.key.keysym.sym) {
+			case SDLK_LEFT:
+			case SDLK_RIGHT:
+				radius_add = 0;
+				break;
+			default:
+				break;
 			}
 			break;
 		case SDL_QUIT:
 			return;
+		default:
+			break;
 		}
 	}
 }
 
-int main(int argc, char *argv[])
+int main(void)
 {
 	/* Initialize SDL */
 	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) != 0) {
