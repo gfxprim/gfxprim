@@ -1,11 +1,26 @@
-LIBRARY=gfxprim.a
+LIBRARY=libgfxprim
+OBJECTS=circle.o clear.o ellipse.o getpixel.o line.o rect.o setpixel.o triangle.o
+CFLAGS=-W -Wall -fPIC
 
-gfxprim.a: circle.o clear.o ellipse.o getpixel.o line.o rect.o setpixel.o triangle.o
+all: $(LIBRARY)
+
+$(LIBRARY): $(LIBRARY).a $(LIBRARY).so
+
+$(OBJECTS): GP.h
+
+$(LIBRARY).a: $(OBJECTS) 
 	ar crus $@ $^
 
+$(LIBRARY).so:
+	$(CC) --shared -Wl,-soname -Wl,$@.0 $(CFLAGS) $(OBJECTS) -o $@
+	ln -s $@ $@.0
+
+%.o: %.c
+	$(CC) $(CFLAGS) $< -c -o $@ 
+
 clean:
-	rm -f *.o
-	rm -f $(LIBRARY)
+	rm -f $(OBJECTS)
+	rm -f $(LIBRARY).a $(LIBRARY).so $(LIBRARY).so.0
 	cd tests && $(MAKE) clean
 
 tar: clean

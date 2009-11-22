@@ -58,7 +58,6 @@ void GP_Ellipse(SDL_Surface * surf, long color, int xcenter, int ycenter,
 
 	int a2 = a*a;
 	int b2 = b*b;
-	int a2b2 = a2*b2;
 	int x, y, error;
 
 	/*
@@ -155,8 +154,7 @@ void GP_FillEllipse(SDL_Surface * surf, long color, int xcenter, int ycenter,
 
 	int a2 = a*a;
 	int b2 = b*b;
-	int a2b2 = a2*b2;
-	int x, y, x2b2, y2a2, error;
+	int x, y, error;
 
 	/*
 	 * Draw the ellipse. The algorithm is exactly the same

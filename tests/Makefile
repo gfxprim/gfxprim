@@ -1,4 +1,13 @@
-LIBRARY=../gfxprim.a
+#
+# Comment one of these lines.
+#
+# First one triggers static linking.
+#
+# Second one triggers dynamic.
+#
+LIBRARY=../libgfxprim.a
+#LDFLAGS=-lgfxprim -lSDL -L..
+
 INCLUDE=-I..
 # Some warnings are triggered only with -O2
 # thuss added here
@@ -9,7 +18,7 @@ TESTS=$(SOURCES:.c=)
 all: $(TESTS)
 
 %: %.c $(LIBRARY)
-	gcc $(CFLAGS) $^ $(LIBRARY) -o $@ -lSDL
+	gcc $(CFLAGS) $(LDFLAGS) $^ $(LIBRARY) -o $@ -lSDL
 
 clean:
 	rm -f *.o
