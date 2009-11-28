@@ -34,10 +34,10 @@
  */
 void GP_Rect(SDL_Surface * surf, long color, int x0, int y0, int x1, int y1)
 {
-	GP_Line(surf, color, x0, y0, x1, y0);
-	GP_Line(surf, color, x0, y1, x1, y1);
-	GP_Line(surf, color, x0, y0, x0, y1);
-	GP_Line(surf, color, x1, y0, x1, y1);
+	GP_HLine(surf, color, x0, x1, y0);
+	GP_HLine(surf, color, x0, x1, y1);
+	GP_VLine(surf, color, x0, y0, y1);
+	GP_VLine(surf, color, x1, y0, y1);
 }
 
 /*
@@ -45,27 +45,25 @@ void GP_Rect(SDL_Surface * surf, long color, int x0, int y0, int x1, int y1)
  */
 void GP_FillRect(SDL_Surface * surf, long color, int x0, int y0, int x1, int y1)
 {
-	int top, left, width, height;
+	int top, left, bottom, right;
 
 	if (y0 <= y1) {
 		top = y0;
-		height = y1 - y0;
-	}
-	else {
+		bottom = y1;
+	} else {
 		top = y1;
-		height = y0 - y1;
+		bottom = y0;
 	}
 
 	if (x0 <= x1) {
 		left = x0;
-		width = x1 - x0;
-	}
-	else {
+		right = x1;
+	} else {
 		left = x1;
-		width = x0 - x1;
+		right = x0;
 	}
 
-	SDL_Rect rect = { x0, y0, width + 1, height + 1 };
+	SDL_Rect rect = { left, top, right - left + 1, bottom - top + 1 };
 	SDL_FillRect(surf, &rect, color);
 }
 
