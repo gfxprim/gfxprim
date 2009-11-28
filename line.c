@@ -79,28 +79,14 @@ void GP_Line(SDL_Surface * surf, long color, int x0, int y0, int x1, int y1)
 				}
 			}
 		} else {			/* X decreases */
-			if (deltay > 0) {	/* Y increases */
 
-				for (; x >= x1; x--) {
-					GP_SetPixel(surf, color, x, y);
-					error -= deltay;
-					if (error < 0) { 
-						y++;
-						error += -deltax;
-					}
-				}
-			} else {		/* Y decreases */
-
-				for (; x >= x1; x--) {
-					GP_SetPixel(surf, color, x, y);
-					error -= -deltay;
-					if (error < 0) { 
-						y--;
-						error += -deltax;
-					}
-				}
-
-			}
+			/*
+			 * Swap endpoints and draw with increasing X.
+			 * This ensures that the pixels plotted are exactly
+			 * the same as with the opposite direction.
+			 */
+			GP_Line(surf, color, x1, y1, x0, y0);
+			return;
 		}
 	} else {				/* Y changes faster */
 
@@ -128,26 +114,14 @@ void GP_Line(SDL_Surface * surf, long color, int x0, int y0, int x1, int y1)
 				}
 			}
 		} else {			/* Y decreases */
-			if (deltax > 0) {	/* X increases */
 
-				for (; y >= y1; y--) {
-					GP_SetPixel(surf, color, x, y);
-					error -= deltax;
-					if (error < 0) {
-						x++;
-						error += -deltay;
-					}
-				}
-			} else {		/* X decreases */
-				for (; y >= y1; y--) {
-					GP_SetPixel(surf, color, x, y);
-					error -= -deltax;
-					if (error < 0) {
-						x--;
-						error += -deltay;
-					}
-				}
-			}
+			/*
+			 * Swap endpoints and draw the line with increasing Y.
+			 * This ensures that the pixels plotted are exactly
+			 * the same as with the opposite direction.
+			 */
+			GP_Line(surf, color, x1, y1, x0, y0);
+			return;
 		}
 	}
 }
