@@ -56,7 +56,7 @@ void GP_Line(SDL_Surface * surf, long color, int x0, int y0, int x1, int y1)
 
 		error = abs(deltax) / 2;
 
-		if (deltax > 0) {		/* X increases */
+		if (deltax >= 0) {		/* X increases */
 			if (deltay > 0) {	/* Y increases */
 
 				for (; x <= x1; x++) {
@@ -92,7 +92,7 @@ void GP_Line(SDL_Surface * surf, long color, int x0, int y0, int x1, int y1)
 
 		error = abs(deltay) / 2;
 
-		if (deltay > 0) {		/* Y increases */
+		if (deltay >= 0) {		/* Y increases */
 			if (deltax > 0) {	/* X increases */
 				for (; y <= y1; y++) {
 					GP_SetPixel(surf, color, x, y);
@@ -211,7 +211,7 @@ void GP_VLine(SDL_Surface * surf, long color, int x, int y0, int y1)
 
 	/* Ensure that y0 <= y1, swap coordinates if needed. */
 	if (y0 > y1) {
-		GP_VLine(surf, color, x, y0, y1);
+		GP_VLine(surf, color, x, y1, y0);
 		return;
 	}
 
