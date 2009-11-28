@@ -65,7 +65,7 @@ void GP_FillRect(SDL_Surface * surf, long color, int x0, int y0, int x1, int y1)
 		width = x0 - x1;
 	}
 
-	SDL_Rect rect = { x0, y0, width, height };
+	SDL_Rect rect = { x0, y0, width + 1, height + 1 };
 	SDL_FillRect(surf, &rect, color);
 }
 

@@ -30,12 +30,11 @@
 #include "GP.h"
 
 /*
- * Clears the surface to the specified color and reinitializes its clipping
- * rectangle to the whole surface area.
+ * Clears the surface to the specified color.
+ * Only the part bounded by the clipping rectangle is affected.
  */
 void GP_Clear(SDL_Surface * surf, long color)
 {
-	SDL_SetClipRect(surf, NULL);
 	SDL_FillRect(surf, NULL, color);
 }
 
