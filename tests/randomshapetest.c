@@ -14,7 +14,7 @@ SDL_TimerID timer;
 SDL_UserEvent timer_event;
 
 /* Globally used colors. */
-static long white, black;
+static long colors[GP_BASIC_COLOR_COUNT];
 
 /* Holding flag (pauses drawing). */
 static int pause_flag = 0;
@@ -42,12 +42,6 @@ static int outline_flag = 0;
 /* Draw filled shapes? */
 static int fill_flag = 1;
 
-void init_colors(void)
-{
-	white = SDL_MapRGB(display->format, 255, 255, 255);
-	black = SDL_MapRGB(display->format, 0, 0, 0);
-}
-
 void random_point(SDL_Surface * surf, int * x, int * y)
 {
 	*x = random() % surf->w;
@@ -65,7 +59,7 @@ void draw_random_circle(long color)
 	}
 
 	if (outline_flag) {
-		GP_Circle(display, white, x, y, r);
+		GP_Circle(display, colors[GP_WHITE], x, y, r);
 	}
 }
 
@@ -81,7 +75,7 @@ void draw_random_ellipse(long color)
 	}
 
 	if (outline_flag) {
-		GP_Ellipse(display, white, x, y, rx, ry);
+		GP_Ellipse(display, colors[GP_WHITE], x, y, rx, ry);
 	}
 }
 
@@ -97,7 +91,7 @@ void draw_random_triangle(long color)
 	}
 
 	if (outline_flag) {
-		GP_Triangle(display, white, x0, y0, x1, y1, x2, y2);
+		GP_Triangle(display, colors[GP_WHITE], x0, y0, x1, y1, x2, y2);
 	}
 }
 
@@ -112,14 +106,14 @@ void draw_random_rectangle(long color)
 	}
 
 	if (outline_flag) {
-		GP_Rect(display, white, x0, y0, x1, y1);
+		GP_Rect(display, colors[GP_WHITE], x0, y0, x1, y1);
 	}
 }
 
 void clear_screen(void)
 {
 	SDL_LockSurface(display);
-	GP_Clear(display, black);
+	GP_Clear(display, colors[GP_BLACK]);
 	SDL_UnlockSurface(display);
 }
 
@@ -231,7 +225,7 @@ int main(void)
 	}
 
 	/* Load pixel values for default colors */
-	init_colors();
+	GP_LoadBasicColors(display, colors);
 
 	/* Set up a clipping rectangle to test proper clipping of pixels */
 	SDL_Rect clip_rect = { 10, 10, 300, 220 };

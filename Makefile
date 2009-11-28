@@ -1,5 +1,5 @@
 LIBRARY=libgfxprim
-OBJECTS=circle.o clear.o ellipse.o getpixel.o line.o rect.o setpixel.o triangle.o
+OBJECTS=basic_colors.o circle.o clear.o ellipse.o getpixel.o line.o rect.o setpixel.o triangle.o
 CFLAGS=-W -Wall -O2 -fPIC
 
 all: $(LIBRARY)

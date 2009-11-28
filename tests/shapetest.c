@@ -21,18 +21,8 @@ Uint32 timer_callback(__attribute__((unused)) Uint32 interval,
 	return 60;
 }
 
-/* Colors */
-long white, red, blue, gray, darkgray, black;
-
-void init_colors(SDL_Surface * surf)
-{
-	white = SDL_MapRGB(surf->format, 255, 255, 255);
-	red = SDL_MapRGB(surf->format, 255, 0, 0);
-	blue = SDL_MapRGB(surf->format, 0, 0, 255);
-	gray = SDL_MapRGB(surf->format, 127, 127, 127);
-	darkgray = SDL_MapRGB(surf->format, 63, 63, 63);
-	black = SDL_MapRGB(surf->format, 0, 0, 0);
-}
+/* Basic colors in display-specific format. */
+long colors[GP_BASIC_COLOR_COUNT];
 
 /* Radius of the shape being drawn */
 static int xradius = 5;
@@ -96,11 +86,11 @@ void draw_testing_triangle(int x, int y, int xradius, int yradius)
 	}
 
 	if (fill) {
-		GP_FillTriangle(display, red, x0, y0, x1, y1, x2, y2);
+		GP_FillTriangle(display, colors[GP_RED], x0, y0, x1, y1, x2, y2);
 	}
 
 	if (outline) {
-		GP_Triangle(display, white, x0, y0, x1, y1, x2, y2);
+		GP_Triangle(display, colors[GP_WHITE], x0, y0, x1, y1, x2, y2);
 	}
 }
 
@@ -108,30 +98,30 @@ void draw_testing_circle(int x, int y, int xradius,
 			__attribute__((unused)) int yradius)
 {
 	if (fill) {
-		GP_FillCircle(display, red, x, y, xradius);
+		GP_FillCircle(display, colors[GP_RED], x, y, xradius);
 	}
 	if (outline) {
-		GP_Circle(display, white, x, y, xradius);
+		GP_Circle(display, colors[GP_WHITE], x, y, xradius);
 	}
 }
 
 void draw_testing_ellipse(int x, int y, int xradius, int yradius)
 {
 	if (fill) {
-		GP_FillEllipse(display, red, x, y, xradius, yradius);
+		GP_FillEllipse(display, colors[GP_RED], x, y, xradius, yradius);
 	}
 	if (outline) {
-		GP_Ellipse(display, white, x, y, xradius, yradius);
+		GP_Ellipse(display, colors[GP_WHITE], x, y, xradius, yradius);
 	}
 }
 
 void draw_testing_rectangle(int x, int y, int xradius, int yradius)
 {
 	if (fill) {
-		GP_FillRect(display, red, x - xradius, y - yradius, x + xradius, y + yradius);
+		GP_FillRect(display, colors[GP_RED], x - xradius, y - yradius, x + xradius, y + yradius);
 	}
 	if (outline) {
-		GP_Rect(display, white, x - xradius, y - yradius, x + xradius, y + yradius);
+		GP_Rect(display, colors[GP_WHITE], x - xradius, y - yradius, x + xradius, y + yradius);
 	}
 }
 
@@ -141,16 +131,16 @@ void redraw_screen(void)
 	int y = 240;
 
 	SDL_LockSurface(display);
-	GP_FillRect(display, black, 0, 0, 640, 480);
+	GP_FillRect(display, colors[GP_BLACK], 0, 0, 640, 480);
 
 	/* axes */
 	if (show_axes) {
-		GP_HLine(display, gray, 0, 640, y);
-		GP_HLine(display, darkgray, 0, 640, y-yradius);
-		GP_HLine(display, darkgray, 0, 640, y+yradius);
-		GP_VLine(display, gray, x, 0, 480);
-		GP_VLine(display, darkgray, x-xradius, 0, 480);
-		GP_VLine(display, darkgray, x+xradius, 0, 480);
+		GP_HLine(display, colors[GP_GRAY], 0, 640, y);
+		GP_HLine(display, colors[GP_DARK_GRAY], 0, 640, y-yradius);
+		GP_HLine(display, colors[GP_DARK_GRAY], 0, 640, y+yradius);
+		GP_VLine(display, colors[GP_GRAY], x, 0, 480);
+		GP_VLine(display, colors[GP_DARK_GRAY], x-xradius, 0, 480);
+		GP_VLine(display, colors[GP_DARK_GRAY], x+xradius, 0, 480);
 	}
 
 	/* the shape */
@@ -329,7 +319,7 @@ int main(void)
 	}
 
 	/* Find pixel representations of needed colors */
-	init_colors(display);
+	GP_LoadBasicColors(display, colors);
 
 	/* Set up a clipping rectangle to exercise clipping */
 	SDL_Rect clip_rect = { 10, 10, 620, 460 };

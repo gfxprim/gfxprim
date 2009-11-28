@@ -17,7 +17,8 @@ SDL_UserEvent timer_event;
 /* Values for color pixels in display format. */
 long black, red, green, blue, yellow, white;
 
-Uint32 timer_callback(Uint32 interval, void * param)
+Uint32 timer_callback(__attribute__((unused)) Uint32 interval,
+			__attribute__((unused)) void * param)
 {
 	timer_event.type = SDL_USEREVENT;
 	SDL_PushEvent((SDL_Event *) &timer_event);
@@ -26,32 +27,37 @@ Uint32 timer_callback(Uint32 interval, void * param)
 
 double start_angle = 0.0;
 
-void draw_lines(void)
+void redraw_screen(void)
 {
 	double angle;
 	int x, y;
+	int xcenter = display->w/2;
+	int ycenter = display->h/2;
 
 	SDL_LockSurface(display);
 
 	GP_Clear(display, black);
 
-	/* axes */
-	GP_Line(display, white, 0, 120, 320, 120);
-	GP_Line(display, white, 160, 0, 160, 240);
-
 	for (angle = 0.0; angle < 2*M_PI; angle += 0.1) {
-		x = (int) (120.0 * cos(start_angle + angle));
-		y = (int) (90.0 * sin(start_angle + angle));
+		x = (int) (display->w/2 * cos(start_angle + angle));
+		y = (int) (display->h/2 * sin(start_angle + angle));
 
 		Uint8 r = 127.0 + 127.0 * cos(start_angle + angle);
 		Uint8 g = 127.0 + 127.0 * sin(start_angle + angle);
 		
 		Uint32 color = SDL_MapRGB(display->format, r, 0, g);
-		
-		GP_SetPixel(display, white, 160 + x, 120 + y);
-		GP_Line(display, color, 160, 120, 160 + x, 120 + y);
-		GP_Line(display, color, 160 + x, 120 + y, 160, 120);
+	
+		/*
+		 * Draw the line forth and back to detect any pixel change
+		 * between one direction and the other.
+		 */
+		GP_Line(display, color, xcenter, ycenter, xcenter + x, ycenter + y);
+		GP_Line(display, color, xcenter + x, ycenter + y, xcenter, ycenter);
 	}
+
+	/* axes */
+	GP_HLine(display, white, 0, display->w, ycenter);
+	GP_VLine(display, white, xcenter, 0, display->h);
 
 	SDL_UnlockSurface(display);
 }
@@ -63,7 +69,7 @@ void event_loop(void)
         while (SDL_WaitEvent(&event) > 0) {
 		switch (event.type) {
 			case SDL_USEREVENT:
-                		draw_lines();
+                		redraw_screen();
 				SDL_Flip(display);
 				start_angle += 0.01;
 				if (start_angle > 2*M_PI) {
@@ -86,7 +92,7 @@ int main(void)
 	}
 
 	/* Create a window with a software back surface */
-	display = SDL_SetVideoMode(320, 240, 0, SDL_SWSURFACE);
+	display = SDL_SetVideoMode(640, 480, 0, SDL_SWSURFACE);
 	if (display == NULL) {
 		fprintf(stderr, "Could not open display: %s\n", SDL_GetError());
 		goto fail;
@@ -108,7 +114,7 @@ int main(void)
 	yellow = SDL_MapRGB(display->format, 255, 255, 0);
 
 	/* Set up a clipping rectangle to test proper clipping of pixels */
-	SDL_Rect clip_rect = { 10, 10, 300, 220 };
+	SDL_Rect clip_rect = { 10, 10, 620, 460 };
 	SDL_SetClipRect(display, &clip_rect);
 
 	/* Set up the refresh timer */

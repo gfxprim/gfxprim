@@ -13,7 +13,8 @@ SDL_TimerID timer;
 /* An event used for signaling that the timer was triggered. */
 SDL_UserEvent timer_event;
 
-Uint32 timer_callback(Uint32 interval, void * param)
+Uint32 timer_callback(__attribute__((unused)) Uint32 interval,
+			__attribute__((unused)) void * param)
 {
 	timer_event.type = SDL_USEREVENT;
 	SDL_PushEvent((SDL_Event *) &timer_event);

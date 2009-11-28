@@ -18,7 +18,8 @@ long red;
 long green;
 long blue;
 
-Uint32 timer_callback(Uint32 interval, void * param)
+Uint32 timer_callback(__attribute__((unused)) Uint32 interval,
+			__attribute__((unused)) void * param)
 {
 	timer_event.type = SDL_USEREVENT;
 	SDL_PushEvent((SDL_Event *) &timer_event);
