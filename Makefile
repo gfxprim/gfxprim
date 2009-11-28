@@ -1,8 +1,9 @@
 LIBRARY=libgfxprim
 OBJECTS=circle.o clear.o ellipse.o getpixel.o line.o rect.o setpixel.o triangle.o
-CFLAGS=-W -Wall -fPIC
+CFLAGS=-W -Wall -O2 -fPIC
 
 all: $(LIBRARY)
+	cd tests && $(MAKE) all
 
 $(LIBRARY): $(LIBRARY).a $(LIBRARY).so
 

@@ -29,9 +29,6 @@
 
 #include "GP.h"
 
-#include <stdio.h>
-#include <math.h>
-
 /*
  * Draws a circle with center at (xcenter, ycenter) and radius r (in pixels).
  * The clipping rectangle of the target surface is honored; overdrawing

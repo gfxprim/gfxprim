@@ -52,13 +52,12 @@ void GP_Ellipse(SDL_Surface * surf, long color, int xcenter, int ycenter,
 {
 	if (surf == NULL || surf->pixels == NULL)
 		return;
-
 	if (a <= 0 || b <= 0)
 		return;
 
+	/* Precompute quadratic terms. */
 	int a2 = a*a;
 	int b2 = b*b;
-	int x, y, error;
 
 	/*
 	 * Draw the ellipse from top to down. The ellipse is
@@ -103,37 +102,27 @@ void GP_Ellipse(SDL_Surface * surf, long color, int xcenter, int ycenter,
 	 * The same applies to x-1, y+1 and y-1.
 	 */
 	
-	/* Evaluate points along the Y axis. */
-	for (error = 0, x = 0, y = b; y >= 0; y--) {
-		for (;;) {
-
-			if (error >= 0) {
-				break;
-			}
+	int x, y, error;
+	for (x = 0, error = -b2*a, y = b; y >= 0; y--) {
+		while (error < 0) {
 
 			/* Calculate error(x+1) from error(x). */
 			error += 2*x*b2 + b2;
-
 			x++;
+
+			GP_SetPixel(surf, color, xcenter-x+1, ycenter-y);
+			GP_SetPixel(surf, color, xcenter+x-1, ycenter-y);
+			GP_SetPixel(surf, color, xcenter-x+1, ycenter+y);
+			GP_SetPixel(surf, color, xcenter+x-1, ycenter+y);
 		}
 
 		/* Calculate error(y-1) from error(y). */
 		error += -2*y*a2 + a2;
 
-		GP_4MirroredPixels(surf, color, xcenter, ycenter, x, y);
-	}
-
-	/* Evaluate the points along the X axis. */
-	for (error = 0, x = a, y = 0; x >= 0; x--) {
-		for (;;) {
-			if (error >= 0) {
-				break;
-			}
-			error += 2*y*a2 + a2;
-			y++;
-		}
-		error += -2*x*b2 + b2;
-		GP_4MirroredPixels(surf, color, xcenter, ycenter, x, y);
+		GP_SetPixel(surf, color, xcenter-x+1, ycenter-y);
+		GP_SetPixel(surf, color, xcenter+x-1, ycenter-y);
+		GP_SetPixel(surf, color, xcenter-x+1, ycenter+y);
+		GP_SetPixel(surf, color, xcenter+x-1, ycenter+y);
 	}
 }
 
@@ -148,52 +137,30 @@ void GP_FillEllipse(SDL_Surface * surf, long color, int xcenter, int ycenter,
 {
 	if (surf == NULL || surf->pixels == NULL)
 		return;
-
 	if (a <= 0 || b <= 0)
 		return;
 
+	/* Precompute quadratic terms. */
 	int a2 = a*a;
 	int b2 = b*b;
-	int x, y, error;
 
 	/*
 	 * Draw the ellipse. The algorithm is exactly the same
 	 * as with GP_Ellipse() except that we draw a line between
 	 * each two points at each side of the X axis.
 	 */
-	for (error = 0, x = 0, y = b; y >= 0; y--) {
+	int x, y, error;
+	for (x = 0, error = -b2*a, y = b; y >= 0; y--) {
 
-		for (;;) {
-			if (error >= 0) {
-				break;
-			}
-			error += 2*x*b2 + b2;
+		while (error < 0) {
+			error += b2 * (2*x + 1);
 			x++;
 		}
-		error += -2*y*a2 + a2;
+		error += a2 * (-2*y + 1);
 
 		/* Draw two horizontal lines reflected across Y. */
-		GP_HLine(surf, color, xcenter-x, xcenter+x, ycenter-y);
-		GP_HLine(surf, color, xcenter-x, xcenter+x, ycenter+y);
+		GP_HLine(surf, color, xcenter-x+1, xcenter+x-1, ycenter-y);
+		GP_HLine(surf, color, xcenter-x+1, xcenter+x-1, ycenter+y);
 	}
-
-#if 0
-	/*
-	 * Evaluate the points along the X axis; here we draw just points,
-	 * as the lines are already drawn and we are just patching the holes.
-	 * FIXME: is this really necessary? Looks more like a hack.
-	 */
-	for (error = 0, x = a, y = 0; x >= 0; x--) {
-		for (;;) {
-			if (error >= 0) {
-				break;
-			}
-			error += 2*y*a2 + a2;
-			y++;
-		}
-		error += -2*x*b2 + b2;
-		GP_4MirroredPixels(surf, color, xcenter, ycenter, x, y);
-	}
-#endif
 }
 
