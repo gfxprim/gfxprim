@@ -82,11 +82,14 @@ enum {
 	GP_DARK_MAGENTA,
 	GP_DARK_WHITE,
 	GP_DARK_GRAY = GP_DARK_WHITE,
+
 	GP_BASIC_COLOR_COUNT,
 }
 GP_BasicColor;
 
 void GP_LoadBasicColors(SDL_Surface * surf, long * colors);
+
+#include "GP_font.h"
 
 #endif
 
