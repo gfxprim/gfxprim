@@ -39,13 +39,12 @@ int draw_axes = 0;
 /* Minimum radius. */
 int min_radius = 3;
 
+/* Basic colors in display format. */
+static long colors[GP_BASIC_COLOR_COUNT];
+
 void draw_pixels(void)
 {
 	int rx, ry, active_rx, active_ry;
-	long black = SDL_MapRGB(display->format, 0, 0, 0);
-	long white = SDL_MapRGB(display->format, 255, 255, 255);
-	long red = SDL_MapRGB(display->format, 255, 0, 0);
-	long green = SDL_MapRGB(display->format, 0, 255, 0);
 	int intensity;
 	long fill_color;
 
@@ -56,7 +55,7 @@ void draw_pixels(void)
 	SDL_LockSurface(display);
 
 	/* Clear screen */
-	GP_FillRect(display, black, 0, 0, 639, 479);
+	GP_Clear(display, colors[GP_BLACK]);
 
 	for (rx = 210 + min_radius; rx >= min_radius; rx -= 7) {
 		ry = rratio*rx;
@@ -75,15 +74,15 @@ void draw_pixels(void)
 		if (fill_flag) {
 			if (fill_first) {
 				GP_FillEllipse(display, fill_color, 320, 240, active_rx, active_ry);
-				GP_Ellipse(display, white, 320, 240, active_rx, active_ry);
+				GP_Ellipse(display, colors[GP_WHITE], 320, 240, active_rx, active_ry);
 			}
 			else {
-				GP_Ellipse(display, white, 320, 240, active_rx, active_ry);
+				GP_Ellipse(display, colors[GP_WHITE], 320, 240, active_rx, active_ry);
 				GP_FillEllipse(display, fill_color, 320, 240, active_rx, active_ry);
 			}
 		}
 		else {
-			GP_Ellipse(display, white, 320, 240, active_rx, active_ry);
+			GP_Ellipse(display, colors[GP_WHITE], 320, 240, active_rx, active_ry);
 		}
 	}
 
@@ -97,12 +96,12 @@ void draw_pixels(void)
 			active_ry = rratio*min_radius;
 		}
 
-		GP_Line(display, red, 0, 240, 640, 240);
-		GP_Line(display, red, 320, 0, 320, 640);
-		GP_Line(display, green, 0, 240+active_ry, 640, 240+active_ry);
-		GP_Line(display, green, 0, 240-active_ry, 640, 240-active_ry);
-		GP_Line(display, green, 320+active_rx, 0, 320+active_rx, 640);
-		GP_Line(display, green, 320-active_rx, 0, 320-active_rx, 640);
+		GP_Line(display, colors[GP_RED], 0, 240, 640, 240);
+		GP_Line(display, colors[GP_RED], 320, 0, 320, 640);
+		GP_Line(display, colors[GP_GREEN], 0, 240+active_ry, 640, 240+active_ry);
+		GP_Line(display, colors[GP_GREEN], 0, 240-active_ry, 640, 240-active_ry);
+		GP_Line(display, colors[GP_GREEN], 320+active_rx, 0, 320+active_rx, 640);
+		GP_Line(display, colors[GP_GREEN], 320-active_rx, 0, 320-active_rx, 640);
 	}
 
 	SDL_UnlockSurface(display);
@@ -199,6 +198,8 @@ int main(void)
 		goto fail;
 	}
 #endif
+
+	GP_LoadBasicColors(display, colors);
 
 	/* Enter the event loop */
 	event_loop();

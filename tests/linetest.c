@@ -15,7 +15,7 @@ SDL_TimerID timer;
 SDL_UserEvent timer_event;
 
 /* Values for color pixels in display format. */
-long black, red, green, blue, yellow, white;
+static long colors[GP_BASIC_COLOR_COUNT];
 
 Uint32 timer_callback(__attribute__((unused)) Uint32 interval,
 			__attribute__((unused)) void * param)
@@ -36,7 +36,7 @@ void redraw_screen(void)
 
 	SDL_LockSurface(display);
 
-	GP_Clear(display, black);
+	GP_Clear(display, colors[GP_BLACK]);
 
 	for (angle = 0.0; angle < 2*M_PI; angle += 0.1) {
 		x = (int) (display->w/2 * cos(start_angle + angle));
@@ -56,8 +56,8 @@ void redraw_screen(void)
 	}
 
 	/* axes */
-	GP_HLine(display, white, 0, display->w, ycenter);
-	GP_VLine(display, white, xcenter, 0, display->h);
+	GP_HLine(display, colors[GP_WHITE], 0, display->w, ycenter);
+	GP_VLine(display, colors[GP_WHITE], xcenter, 0, display->h);
 
 	SDL_UnlockSurface(display);
 }
@@ -106,12 +106,7 @@ int main(void)
 	       display->format->BitsPerPixel, display->format->BytesPerPixel);
 
 	/* Get colors */
-	black = SDL_MapRGB(display->format, 0, 0, 0);
-	white = SDL_MapRGB(display->format, 255, 255, 255);
-	red = SDL_MapRGB(display->format, 255, 0, 0);
-	green = SDL_MapRGB(display->format, 0, 255, 0);
-	blue = SDL_MapRGB(display->format, 0, 0, 255);
-	yellow = SDL_MapRGB(display->format, 255, 255, 0);
+	GP_LoadBasicColors(display, colors);
 
 	/* Set up a clipping rectangle to test proper clipping of pixels */
 	SDL_Rect clip_rect = { 10, 10, 620, 460 };
