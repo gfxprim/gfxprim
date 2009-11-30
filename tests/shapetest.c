@@ -130,8 +130,17 @@ void redraw_screen(void)
 	int x = 320;
 	int y = 240;
 
+	/* text style for the label */
+	GP_TextStyle style = {
+		.font = &GP_default_font,
+		.foreground = colors[GP_WHITE],
+		.pixel_width = 2,
+		.pixel_hspace = 0,
+		.pixel_vspace = 1,
+	};
+
 	SDL_LockSurface(display);
-	GP_FillRect(display, colors[GP_BLACK], 0, 0, 640, 480);
+	GP_Clear(display, colors[GP_BLACK]);
 
 	/* axes */
 	if (show_axes) {
@@ -147,15 +156,19 @@ void redraw_screen(void)
 	switch (shape) {
 	case SHAPE_TRIANGLE:
 		draw_testing_triangle(x, y, xradius, yradius);
+		GP_Text(display, &style, 16, 16, "TRIANGLE");
 		break;
 	case SHAPE_CIRCLE:
 		draw_testing_circle(x, y, xradius, yradius);
+		GP_Text(display, &style, 16, 16, "CIRCLE");
 		break;
 	case SHAPE_ELLIPSE:
 		draw_testing_ellipse(x, y, xradius, yradius);
+		GP_Text(display, &style, 16, 16, "ELLIPSE");
 		break;
 	case SHAPE_RECTANGLE:
 		draw_testing_rectangle(x, y, xradius, yradius);
+		GP_Text(display, &style, 16, 16, "RECTANGLE");
 		break;
 	}
 

@@ -11,6 +11,7 @@ static long colors[GP_BASIC_COLOR_COUNT];
 void redraw_screen(void)
 {
 	const char * ascii_part1 = " !\"#$%&\047()*+,-./0123456789:;<=>?@";
+	const char * ascii_part2 = "0ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
 	SDL_LockSurface(display);
 	
@@ -39,6 +40,25 @@ void redraw_screen(void)
 
 	GP_Text(display, &style, 64, 64, ascii_part1);
 
+	style.foreground = colors[GP_WHITE];
+	style.pixel_width = 1;
+	style.pixel_hspace = 0;
+	style.pixel_vspace = 0;
+
+	GP_Text(display, &style, 16, 116, ascii_part2);
+	
+	style.foreground = colors[GP_GRAY];
+	style.pixel_width = 2;
+	style.pixel_vspace = 1;
+
+	GP_Text(display, &style, 34, 134, ascii_part2);
+
+	style.foreground = colors[GP_DARK_GRAY];
+	style.pixel_width = 4;
+	style.pixel_hspace = 1;
+	style.pixel_vspace = 1;
+
+	GP_Text(display, &style, 64, 164, ascii_part2);
 	SDL_UnlockSurface(display);
 }
 
