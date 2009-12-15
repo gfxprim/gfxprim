@@ -8,57 +8,47 @@ SDL_Surface * display = NULL;
 
 static long colors[GP_BASIC_COLOR_COUNT];
 
+static const char * test_strings[] = {
+	" !\"#$%&\047()*+,-./0123456789:;<=>?@",
+	"ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]",
+	"abcdefghijklmnopqrstuvwxyz{|}"
+};
+
 void redraw_screen(void)
 {
-	const char * ascii_part1 = " !\"#$%&\047()*+,-./0123456789:;<=>?@";
-	const char * ascii_part2 = "0ABCDEFGHIJKLMNOPQRSTUVWXYZ";
-
 	SDL_LockSurface(display);
 	
 	GP_Clear(display, colors[GP_BLACK]);
 	
-	GP_TextStyle style = {
-		.font = &GP_default_font,
-		.foreground = colors[GP_WHITE],
-		.pixel_width = 1,
-		.pixel_hspace = 0,
-		.pixel_vspace = 0,
-	};
-
-	GP_Text(display, &style, 16, 16, ascii_part1);
-	
-	style.foreground = colors[GP_GRAY];
-	style.pixel_width = 2;
-	style.pixel_vspace = 1;
-
-	GP_Text(display, &style, 34, 34, ascii_part1);
-
-	style.foreground = colors[GP_DARK_GRAY];
-	style.pixel_width = 4;
-	style.pixel_hspace = 1;
-	style.pixel_vspace = 1;
-
-	GP_Text(display, &style, 64, 64, ascii_part1);
-
+	GP_TextStyle style = GP_DEFAULT_TEXT_STYLE;
 	style.foreground = colors[GP_WHITE];
-	style.pixel_width = 1;
-	style.pixel_hspace = 0;
-	style.pixel_vspace = 0;
 
-	GP_Text(display, &style, 16, 116, ascii_part2);
+	const size_t TEST_STRING_COUNT = sizeof(test_strings)/sizeof(const char *);
+	size_t i;
+	for (i = 0; i < TEST_STRING_COUNT; i++) {
+		const char * test_string = test_strings[i];
+
+		style.foreground = colors[GP_WHITE];
+		style.pixel_width = 1;
+		style.pixel_hspace = 0;
+		style.pixel_vspace = 0;
+
+		GP_Text(display, &style, 16, 100*i + 16, test_string);
 	
-	style.foreground = colors[GP_GRAY];
-	style.pixel_width = 2;
-	style.pixel_vspace = 1;
+		style.foreground = colors[GP_GRAY];
+		style.pixel_width = 2;
+		style.pixel_vspace = 1;
 
-	GP_Text(display, &style, 34, 134, ascii_part2);
+		GP_Text(display, &style, 34, 100*i + 34, test_string);
 
-	style.foreground = colors[GP_DARK_GRAY];
-	style.pixel_width = 4;
-	style.pixel_hspace = 1;
-	style.pixel_vspace = 1;
+		style.foreground = colors[GP_DARK_GRAY];
+		style.pixel_width = 4;
+		style.pixel_hspace = 1;
+		style.pixel_vspace = 1;
 
-	GP_Text(display, &style, 64, 164, ascii_part2);
+		GP_Text(display, &style, 64, 100*i + 64, test_string);
+	}
+
 	SDL_UnlockSurface(display);
 }
 

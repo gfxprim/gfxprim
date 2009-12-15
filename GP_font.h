@@ -95,6 +95,14 @@ typedef struct {
 }
 GP_TextStyle;
 
+/*
+ * Static initializer for initializing a GP_TextStyle structure to default
+ * values.
+ * Note that at least the colors should always be changed afterwards,
+ * as there is no sensible default (they are initialized to 0).
+ */
+#define GP_DEFAULT_TEXT_STYLE { &GP_default_font, 0, 0, 1, 0, 0 }
+
 void GP_Text(SDL_Surface * surf, const GP_TextStyle * style,
 		int x, int y, const char * text);
 
