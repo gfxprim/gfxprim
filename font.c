@@ -118,15 +118,31 @@ void GP_Text(SDL_Surface * surf, const GP_TextStyle * style,
 	}
 }
 
-int GP_CalculateTextWidth(const GP_TextStyle * style, const char * str)
+static int GP_CharWidth(const GP_TextStyle * style, char c)
+{
+	int bytes_per_char = 2 + style->font->bytes_per_line * style->font->height;
+
+	const uint8_t * char_data = style->font->data + ((int) c - 0x20) * bytes_per_char;
+
+	/* The first byte specifies width in pixels. */
+	const uint8_t char_width = *char_data;
+
+	return char_width * (style->pixel_width + style->pixel_hspace);
+}
+
+int GP_CalcTextWidth(const GP_TextStyle * style, const char * str)
 {
 	if (style == NULL || str == NULL)
 		return 0;
 
-	int hstep = (style->font->char_width + style->font->hspace) * style->pixel_width
-		+ style->font->char_width * style->pixel_hspace;
+	int width = 0;
 
-	int pixelwidth = strlen(str) * hstep;
-	return pixelwidth;
+	const char *p;
+	for (p = str; *p; p++) {
+		width += style->font->hspace * style->pixel_width;
+		width += GP_CharWidth(style, *p);
+	}
+
+	return width;
 }
 
