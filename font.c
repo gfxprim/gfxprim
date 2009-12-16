@@ -48,24 +48,39 @@ static int GP_PutChar(SDL_Surface * surf, const GP_TextStyle * style,
 	const uint8_t char_width = *src;
 	src++;
 
+	/* Next byte specifies the left margin. */
+	const uint8_t lmargin = *src;
+	src++;
+
 	int x1 = x0 + char_width * xdelta;
 	int y1 = y0 + style->font->height * ydelta;
 
 	long foreground = style->foreground;
 
-	int x, y;
+#define ADVANCE_MASK { \
+	mask >>= 1; \
+	if (mask == 0) { \
+		src++; \
+		mask = 0x80; \
+	} \
+}
+
+	int i, x, y;
 	uint8_t mask = 0x80;
 	for (y = y0; y < y1; y += ydelta) {
-		for (x = x0; x < x1; x += xdelta) {
+
+		x = x0;
+
+		for (i = 0; i < lmargin; i++) {
+			ADVANCE_MASK;
+		}
+
+		for (; x < x1; x += xdelta) {
 			if (*src & mask) {
 				GP_HLine(surf, foreground, x,
 					x + pixel_width - 1, y);
 			}
-			mask >>= 1;
-			if (mask == 0) {
-				src++;
-				mask = 0x80;
-			}
+			ADVANCE_MASK;
 		}
 
 		/* The next row always starts at the byte boundary. */
@@ -84,7 +99,7 @@ void GP_Text(SDL_Surface * surf, const GP_TextStyle * style,
 	if (surf == NULL || style == NULL || style->font == NULL || str == NULL)
 		return;
 
-	int bytes_per_char = 1 + style->font->bytes_per_line * style->font->height;
+	int bytes_per_char = 2 + style->font->bytes_per_line * style->font->height;
 
 	const char * p;
 	for (p = str; *p != '\0'; p++) {
