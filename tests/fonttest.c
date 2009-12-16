@@ -10,9 +10,12 @@ static long colors[GP_BASIC_COLOR_COUNT];
 
 static const char * test_strings[] = {
 	" !\"#$%&\047()*+,-./0123456789:;<=>?@",
-	"ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]",
-	"abcdefghijklmnopqrstuvwxyz{|}"
+	"ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`",
+	"abcdefghijklmnopqrstuvwxyz{|}~",
+	"Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor..."
 };
+
+static int flag_proportional = 0;
 
 void redraw_screen(void)
 {
@@ -21,6 +24,12 @@ void redraw_screen(void)
 	GP_Clear(display, colors[GP_BLACK]);
 	
 	GP_TextStyle style = GP_DEFAULT_TEXT_STYLE;
+
+	if (flag_proportional)
+		style.font = &GP_default_proportional_font;
+	else
+		style.font = &GP_default_console_font;
+
 	style.foreground = colors[GP_WHITE];
 
 	const size_t TEST_STRING_COUNT = sizeof(test_strings)/sizeof(const char *);
@@ -65,7 +74,15 @@ void event_loop(void)
 			break;
 
 		case SDL_KEYDOWN:
-			return;
+			if (event.key.keysym.sym == SDLK_SPACE) {
+				flag_proportional = !flag_proportional;
+				redraw_screen();
+				SDL_Flip(display);
+			}
+			else if (event.key.keysym.sym == SDLK_ESCAPE) {
+				return;
+			}
+			break;
 
 		case SDL_QUIT:
 			return;

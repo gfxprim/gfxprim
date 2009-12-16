@@ -32,21 +32,28 @@
 /*
  * Draws a single character, using (x0, y0) as the topleft corner
  * of the character cell.
+ * Returns the X coordinate of the next position where the next character
+ * can be drawn.
  */
-static void GP_PutChar(SDL_Surface * surf, const GP_TextStyle * style, int x0, int y0,
-			const uint8_t * char_data)
+static int GP_PutChar(SDL_Surface * surf, const GP_TextStyle * style,
+		int x0, int y0, const uint8_t * char_data)
 {
 	int pixel_width = style->pixel_width;
 	int xdelta = style->pixel_width + style->pixel_hspace;
 	int ydelta = 1 + style->pixel_vspace;
 
-	int x1 = x0 + style->font->char_width * xdelta;
+	const uint8_t * src = char_data;
+
+	/* The first byte specifies width in pixels. */
+	const uint8_t char_width = *src;
+	src++;
+
+	int x1 = x0 + char_width * xdelta;
 	int y1 = y0 + style->font->height * ydelta;
 
 	long foreground = style->foreground;
 
 	int x, y;
-	const uint8_t * src = char_data;
 	uint8_t mask = 0x80;
 	for (y = y0; y < y1; y += ydelta) {
 		for (x = x0; x < x1; x += xdelta) {
@@ -67,6 +74,8 @@ static void GP_PutChar(SDL_Surface * surf, const GP_TextStyle * style, int x0, i
 			mask = 0x80;
 		}
 	}
+
+	return x + style->font->hspace;
 }
 
 void GP_Text(SDL_Surface * surf, const GP_TextStyle * style,
@@ -75,23 +84,28 @@ void GP_Text(SDL_Surface * surf, const GP_TextStyle * style,
 	if (surf == NULL || style == NULL || style->font == NULL || str == NULL)
 		return;
 
-	int bytes_per_char = style->font->bytes_per_line * style->font->height;
+	int bytes_per_char = 1 + style->font->bytes_per_line * style->font->height;
 
-	int hstep = (style->font->char_width + style->font->hspace) * style->pixel_width
-			+ style->font->char_width * style->pixel_hspace;
-
-	const char * p = str;
-	while (*p != '\0') {
+	const char * p;
+	for (p = str; *p != '\0'; p++) {
 		int char_index = ((int) *p) - 0x20;
 
 		const uint8_t * char_data = style->font->data
 				+ char_index * bytes_per_char;
 
-		GP_PutChar(surf, style, x, y, char_data);
-
-		/* go to the next character */
-		x += hstep;
-		p++;
+		x = GP_PutChar(surf, style, x, y, char_data);
 	}
+}
+
+int GP_CalculateTextWidth(const GP_TextStyle * style, const char * str)
+{
+	if (style == NULL || str == NULL)
+		return 0;
+
+	int hstep = (style->font->char_width + style->font->hspace) * style->pixel_width
+		+ style->font->char_width * style->pixel_hspace;
+
+	int pixelwidth = strlen(str) * hstep;
+	return pixelwidth;
 }
 

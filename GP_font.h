@@ -50,7 +50,7 @@ typedef struct {
 	 */
 	uint8_t * data;
 
-	/* Width of a character, in pixels. */
+	/* Maximum width of a character, in pixels. */
 	uint8_t char_width;
 
 	/*
@@ -71,7 +71,8 @@ typedef struct {
 GP_Font;
 
 /* The default font, which is hardcoded and always available. */
-extern GP_Font GP_default_font;
+extern GP_Font GP_default_console_font;
+extern GP_Font GP_default_proportional_font;
 
 typedef struct {
 
@@ -101,10 +102,12 @@ GP_TextStyle;
  * Note that at least the colors should always be changed afterwards,
  * as there is no sensible default (they are initialized to 0).
  */
-#define GP_DEFAULT_TEXT_STYLE { &GP_default_font, 0, 0, 1, 0, 0 }
+#define GP_DEFAULT_TEXT_STYLE { &GP_default_console_font, 0, 0, 1, 0, 0 }
 
 void GP_Text(SDL_Surface * surf, const GP_TextStyle * style,
 		int x, int y, const char * text);
+
+int GP_CalcTextWidth(const GP_TextStyle * style, const char * text);
 
 #endif
 
