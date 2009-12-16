@@ -57,9 +57,18 @@ static int GP_PutChar(SDL_Surface * surf, const GP_TextStyle * style,
 
 	long foreground = style->foreground;
 
+/* Advances the mask by a single bit. */
 #define ADVANCE_MASK { \
 	mask >>= 1; \
 	if (mask == 0) { \
+		src++; \
+		mask = 0x80; \
+	} \
+}
+
+/* Ensures that the mask is at the start of the next byte. */
+#define ALIGN_MASK_TO_BYTE_BOUNDARY { \
+	if (mask != 0x80) { \
 		src++; \
 		mask = 0x80; \
 	} \
@@ -69,13 +78,13 @@ static int GP_PutChar(SDL_Surface * surf, const GP_TextStyle * style,
 	uint8_t mask = 0x80;
 	for (y = y0; y < y1; y += ydelta) {
 
-		x = x0;
-
+		/* Skip the left margin pixels. */
 		for (i = 0; i < lmargin; i++) {
 			ADVANCE_MASK;
 		}
 
-		for (; x < x1; x += xdelta) {
+		/* Draw the line of pixels. */
+		for (x = x0; x < x1; x += xdelta) {
 			if (*src & mask) {
 				GP_HLine(surf, foreground, x,
 					x + pixel_width - 1, y);
@@ -83,11 +92,8 @@ static int GP_PutChar(SDL_Surface * surf, const GP_TextStyle * style,
 			ADVANCE_MASK;
 		}
 
-		/* The next row always starts at the byte boundary. */
-		if (mask != 0x80) {
-			src++;
-			mask = 0x80;
-		}
+		/* Each pixel line starts at a byte boundary. */
+		ALIGN_MASK_TO_BYTE_BOUNDARY;
 	}
 
 	return x + style->font->hspace * style->pixel_width;
