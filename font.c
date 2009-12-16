@@ -75,7 +75,7 @@ static int GP_PutChar(SDL_Surface * surf, const GP_TextStyle * style,
 		}
 	}
 
-	return x + style->font->hspace;
+	return x + style->font->hspace * style->pixel_width;
 }
 
 void GP_Text(SDL_Surface * surf, const GP_TextStyle * style,
