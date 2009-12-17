@@ -11,7 +11,10 @@ OBJECTS=basic_colors.o \
 	setpixel.o \
 	triangle.o
 
-CFLAGS=-W -Wall -O2 -fPIC
+CFLAGS=-W -Wall -O2
+
+HEADER_LOC=/usr/include/
+LIB_LOC=/usr/lib/
 
 all: $(LIBRARY)
 	cd tests && $(MAKE) all
@@ -24,11 +27,16 @@ $(LIBRARY).a: $(OBJECTS)
 	ar crus $@ $^
 
 $(LIBRARY).so:
-	$(CC) --shared -Wl,-soname -Wl,$@.0 $(CFLAGS) $(OBJECTS) -o $@
+	$(CC) -fPIC -dPIC --shared -Wl,-soname -Wl,$@.0 $(CFLAGS) $(OBJECTS) -o $@
 	ln -s $@ $@.0
 
 %.o: %.c
 	$(CC) $(CFLAGS) $< -c -o $@ 
+
+install:
+	install -m 775 -d $(HEADER_LOC)gfxprim/
+	install -m 664 *.h $(HEADER_LOC)gfxprim/
+	install -m 664 *.so *.so.0 *.a $(LIB_LOC)
 
 clean:
 	rm -f $(OBJECTS)
