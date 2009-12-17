@@ -48,31 +48,52 @@ static int GP_PutChar(SDL_Surface * surf, const GP_TextStyle * style,
 	const uint8_t char_width = *src;
 	src++;
 
+	/* Next byte specifies the left margin. */
+	const uint8_t lmargin = *src;
+	src++;
+
 	int x1 = x0 + char_width * xdelta;
 	int y1 = y0 + style->font->height * ydelta;
 
 	long foreground = style->foreground;
 
-	int x, y;
+/* Advances the mask by a single bit. */
+#define ADVANCE_MASK { \
+	mask >>= 1; \
+	if (mask == 0) { \
+		src++; \
+		mask = 0x80; \
+	} \
+}
+
+/* Ensures that the mask is at the start of the next byte. */
+#define ALIGN_MASK_TO_BYTE_BOUNDARY { \
+	if (mask != 0x80) { \
+		src++; \
+		mask = 0x80; \
+	} \
+}
+
+	int i, x, y;
 	uint8_t mask = 0x80;
 	for (y = y0; y < y1; y += ydelta) {
+
+		/* Skip the left margin pixels. */
+		for (i = 0; i < lmargin; i++) {
+			ADVANCE_MASK;
+		}
+
+		/* Draw the line of pixels. */
 		for (x = x0; x < x1; x += xdelta) {
 			if (*src & mask) {
 				GP_HLine(surf, foreground, x,
 					x + pixel_width - 1, y);
 			}
-			mask >>= 1;
-			if (mask == 0) {
-				src++;
-				mask = 0x80;
-			}
+			ADVANCE_MASK;
 		}
 
-		/* The next row always starts at the byte boundary. */
-		if (mask != 0x80) {
-			src++;
-			mask = 0x80;
-		}
+		/* Each pixel line starts at a byte boundary. */
+		ALIGN_MASK_TO_BYTE_BOUNDARY;
 	}
 
 	return x + style->font->hspace * style->pixel_width;
@@ -84,7 +105,7 @@ void GP_Text(SDL_Surface * surf, const GP_TextStyle * style,
 	if (surf == NULL || style == NULL || style->font == NULL || str == NULL)
 		return;
 
-	int bytes_per_char = 1 + style->font->bytes_per_line * style->font->height;
+	int bytes_per_char = 2 + style->font->bytes_per_line * style->font->height;
 
 	const char * p;
 	for (p = str; *p != '\0'; p++) {
@@ -97,15 +118,31 @@ void GP_Text(SDL_Surface * surf, const GP_TextStyle * style,
 	}
 }
 
-int GP_CalculateTextWidth(const GP_TextStyle * style, const char * str)
+static int GP_CharWidth(const GP_TextStyle * style, char c)
+{
+	int bytes_per_char = 2 + style->font->bytes_per_line * style->font->height;
+
+	const uint8_t * char_data = style->font->data + ((int) c - 0x20) * bytes_per_char;
+
+	/* The first byte specifies width in pixels. */
+	const uint8_t char_width = *char_data;
+
+	return char_width * (style->pixel_width + style->pixel_hspace);
+}
+
+int GP_CalcTextWidth(const GP_TextStyle * style, const char * str)
 {
 	if (style == NULL || str == NULL)
 		return 0;
 
-	int hstep = (style->font->char_width + style->font->hspace) * style->pixel_width
-		+ style->font->char_width * style->pixel_hspace;
+	int width = 0;
 
-	int pixelwidth = strlen(str) * hstep;
-	return pixelwidth;
+	const char *p;
+	for (p = str; *p; p++) {
+		width += style->font->hspace * style->pixel_width;
+		width += GP_CharWidth(style, *p);
+	}
+
+	return width;
 }
 
