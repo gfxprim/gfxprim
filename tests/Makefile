@@ -5,8 +5,8 @@
 #
 # Second one triggers dynamic.
 #
-LIBRARY=../libgfxprim.a
-#LDFLAGS=-lgfxprim -lSDL -L..
+LIBRARY=../libGP.a
+#LDFLAGS=-lGP -lSDL -L..
 
 INCLUDE=-I..
 # Some warnings are triggered only with -O2

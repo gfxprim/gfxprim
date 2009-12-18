@@ -1,4 +1,4 @@
-LIBRARY=libgfxprim
+LIBRARY=libGP
 
 OBJECTS=basic_colors.o \
 	circle.o clear.o \
@@ -34,8 +34,8 @@ $(LIBRARY).so:
 	$(CC) $(CFLAGS) $< -c -o $@ 
 
 install:
-	install -m 775 -d $(HEADER_LOC)gfxprim/
-	install -m 664 *.h $(HEADER_LOC)gfxprim/
+	install -m 775 -d $(HEADER_LOC)GP/
+	install -m 664 *.h $(HEADER_LOC)GP/
 	install -m 664 *.so *.so.0 *.a $(LIB_LOC)
 
 clean:
