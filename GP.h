@@ -32,29 +32,29 @@
 
 #include <SDL/SDL.h>
 
-void GP_SetPixel(SDL_Surface * surf, long color, int x, int y);
-long GP_GetPixel(SDL_Surface * surf, int x, int y);
+void GP_SetPixel(SDL_Surface *surf, long color, int x, int y);
+long GP_GetPixel(SDL_Surface *surf, int x, int y);
 
 /* commonly used alternative name */
 #define GP_PutPixel GP_SetPixel
 
-void GP_Clear(SDL_Surface * surf, long color);
+void GP_Clear(SDL_Surface *surf, long color);
 
-void GP_Line(SDL_Surface * surf, long color, int x0, int y0, int x1, int y1);
-void GP_HLine(SDL_Surface * surf, long color, int x0, int x1, int y);
-void GP_VLine(SDL_Surface * surf, long color, int x, int y0, int y1);
+void GP_Line(SDL_Surface *surf, long color, int x0, int y0, int x1, int y1);
+void GP_HLine(SDL_Surface *surf, long color, int x0, int x1, int y);
+void GP_VLine(SDL_Surface *surf, long color, int x, int y0, int y1);
 
-void GP_Circle(SDL_Surface * surf, long color, int xcenter, int ycenter, int r);
-void GP_FillCircle(SDL_Surface * surf, long color, int xcenter, int ycenter, int r);
+void GP_Circle(SDL_Surface *surf, long color, int xcenter, int ycenter, int r);
+void GP_FillCircle(SDL_Surface *surf, long color, int xcenter, int ycenter, int r);
 
-void GP_Ellipse(SDL_Surface * surf, long color, int xcenter, int ycenter, int a, int b);
-void GP_FillEllipse(SDL_Surface * surf, long color, int xcenter, int ycenter, int a, int b);
+void GP_Ellipse(SDL_Surface *surf, long color, int xcenter, int ycenter, int a, int b);
+void GP_FillEllipse(SDL_Surface *surf, long color, int xcenter, int ycenter, int a, int b);
 
-void GP_Rect(SDL_Surface * surf, long color, int x0, int y0, int x1, int y1);
-void GP_FillRect(SDL_Surface * surf, long color, int x0, int y0, int x1, int y1);
+void GP_Rect(SDL_Surface *surf, long color, int x0, int y0, int x1, int y1);
+void GP_FillRect(SDL_Surface *surf, long color, int x0, int y0, int x1, int y1);
 
-void GP_Triangle(SDL_Surface * surf, long color, int x0, int y0, int x1, int y1, int x2, int y2);
-void GP_FillTriangle(SDL_Surface * surf, long color, int x0, int y0, int x1, int y1, int x2, int y2);
+void GP_Triangle(SDL_Surface *surf, long color, int x0, int y0, int x1, int y1, int x2, int y2);
+void GP_FillTriangle(SDL_Surface *surf, long color, int x0, int y0, int x1, int y1, int x2, int y2);
 
 /* Indexes for basic colors obtained by GP_LoadBasicColors(). */
 enum {
@@ -87,7 +87,7 @@ enum {
 }
 GP_BasicColor;
 
-void GP_LoadBasicColors(SDL_Surface * surf, long * colors);
+void GP_LoadBasicColors(SDL_Surface *surf, long *colors);
 
 #include "GP_font.h"
 

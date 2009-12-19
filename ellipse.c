@@ -32,7 +32,7 @@
 /*
  * Plots 4 pixels mirrored around the common center.
  */
-static inline void GP_4MirroredPixels(SDL_Surface * surf, long color,
+static inline void GP_4MirroredPixels(SDL_Surface *surf, long color,
 				int xcenter, int ycenter, int x, int y)
 {
 	GP_SetPixel(surf, color, xcenter-x, ycenter-y);
@@ -47,7 +47,7 @@ static inline void GP_4MirroredPixels(SDL_Surface * surf, long color,
  * surface boundary is safe.
  * If either of the radii is zero or negative, the call has no effect.
  */
-void GP_Ellipse(SDL_Surface * surf, long color, int xcenter, int ycenter,
+void GP_Ellipse(SDL_Surface *surf, long color, int xcenter, int ycenter,
 		int a, int b)
 {
 	if (surf == NULL || surf->pixels == NULL)
@@ -132,7 +132,7 @@ void GP_Ellipse(SDL_Surface * surf, long color, int xcenter, int ycenter,
  * surface boundary is safe.
  * If either of the radii is zero or negative, the call has no effect.
  */
-void GP_FillEllipse(SDL_Surface * surf, long color, int xcenter, int ycenter,
+void GP_FillEllipse(SDL_Surface *surf, long color, int xcenter, int ycenter,
 			int a, int b)
 {
 	if (surf == NULL || surf->pixels == NULL)

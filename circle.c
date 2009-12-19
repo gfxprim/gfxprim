@@ -34,7 +34,7 @@
  * The clipping rectangle of the target surface is honored; overdrawing
  * over the surface edges is safe.
  */
-void GP_Circle(SDL_Surface * surf, long color, int xcenter, int ycenter, int r)
+void GP_Circle(SDL_Surface *surf, long color, int xcenter, int ycenter, int r)
 {
 	if (surf == NULL || surf->pixels == NULL)
 		return;
@@ -106,7 +106,7 @@ void GP_Circle(SDL_Surface * surf, long color, int xcenter, int ycenter, int r)
  * The target surface clipping rectangle is honored, and overdrawing over
  * the surface boundary is safe.
  */
-void GP_FillCircle(SDL_Surface * surf, long color, int xcenter, int ycenter, int r)
+void GP_FillCircle(SDL_Surface *surf, long color, int xcenter, int ycenter, int r)
 {
 	if (surf == NULL || surf->pixels == NULL)
 		return;

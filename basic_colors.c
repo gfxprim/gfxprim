@@ -34,29 +34,29 @@
  * for the basic colors.
  * The array must accomodate at least GP_BASIC_COLOR_COUNT indices.
  */
-void GP_LoadBasicColors(SDL_Surface * surf, long * colors)
+void GP_LoadBasicColors(SDL_Surface *surf, long *colors)
 {
-	colors[GP_BLACK] 	= SDL_MapRGB(surf->format, 0, 0, 0);
-	colors[GP_RED] 		= SDL_MapRGB(surf->format, 255, 0, 0);
-	colors[GP_GREEN] 	= SDL_MapRGB(surf->format, 0, 255, 0);
-	colors[GP_BLUE] 	= SDL_MapRGB(surf->format, 0, 0, 255);
-	colors[GP_YELLOW] 	= SDL_MapRGB(surf->format, 255, 255, 0);
-	colors[GP_CYAN] 	= SDL_MapRGB(surf->format, 0, 255, 255);
-	colors[GP_MAGENTA] 	= SDL_MapRGB(surf->format, 255, 0, 255);
+	colors[GP_BLACK] 	= SDL_MapRGB(surf->format,   0,   0,   0);
+	colors[GP_RED] 		= SDL_MapRGB(surf->format, 255,   0,   0);
+	colors[GP_GREEN] 	= SDL_MapRGB(surf->format,   0, 255,   0);
+	colors[GP_BLUE] 	= SDL_MapRGB(surf->format,   0,   0, 255);
+	colors[GP_YELLOW] 	= SDL_MapRGB(surf->format, 255, 255,   0);
+	colors[GP_CYAN] 	= SDL_MapRGB(surf->format,   0, 255, 255);
+	colors[GP_MAGENTA] 	= SDL_MapRGB(surf->format, 255,   0, 255);
 	colors[GP_WHITE] 	= SDL_MapRGB(surf->format, 255, 255, 255);
-	colors[GP_MID_RED] 	= SDL_MapRGB(surf->format, 127, 0, 0);
-	colors[GP_MID_GREEN] 	= SDL_MapRGB(surf->format, 0, 127, 0);
-	colors[GP_MID_BLUE] 	= SDL_MapRGB(surf->format, 0, 0, 127);
-	colors[GP_MID_YELLOW] 	= SDL_MapRGB(surf->format, 127, 127, 0);
-	colors[GP_MID_CYAN] 	= SDL_MapRGB(surf->format, 0, 127, 127);
-	colors[GP_MID_MAGENTA] 	= SDL_MapRGB(surf->format, 127, 0, 127);
+	colors[GP_MID_RED] 	= SDL_MapRGB(surf->format, 127,   0,   0);
+	colors[GP_MID_GREEN] 	= SDL_MapRGB(surf->format,   0, 127,   0);
+	colors[GP_MID_BLUE] 	= SDL_MapRGB(surf->format,   0,   0, 127);
+	colors[GP_MID_YELLOW] 	= SDL_MapRGB(surf->format, 127, 127,   0);
+	colors[GP_MID_CYAN] 	= SDL_MapRGB(surf->format,   0, 127, 127);
+	colors[GP_MID_MAGENTA] 	= SDL_MapRGB(surf->format, 127,   0, 127);
 	colors[GP_MID_WHITE] 	= SDL_MapRGB(surf->format, 127, 127, 127);
-	colors[GP_DARK_RED]     = SDL_MapRGB(surf->format, 63, 0, 0);
-	colors[GP_DARK_GREEN]   = SDL_MapRGB(surf->format, 0, 63, 0);
-	colors[GP_DARK_BLUE]	= SDL_MapRGB(surf->format, 0, 0, 63);
-	colors[GP_DARK_YELLOW]	= SDL_MapRGB(surf->format, 63, 63, 0);
-	colors[GP_DARK_CYAN]	= SDL_MapRGB(surf->format, 0, 63, 63);
-	colors[GP_DARK_MAGENTA]	= SDL_MapRGB(surf->format, 63, 0, 63);
-	colors[GP_DARK_WHITE]   = SDL_MapRGB(surf->format, 63, 63, 63);
+	colors[GP_DARK_RED]     = SDL_MapRGB(surf->format,  63,   0,   0);
+	colors[GP_DARK_GREEN]   = SDL_MapRGB(surf->format,   0,  63,   0);
+	colors[GP_DARK_BLUE]	= SDL_MapRGB(surf->format,   0,   0,  63);
+	colors[GP_DARK_YELLOW]	= SDL_MapRGB(surf->format,  63,  63,   0);
+	colors[GP_DARK_CYAN]	= SDL_MapRGB(surf->format,   0,  63,  63);
+	colors[GP_DARK_MAGENTA]	= SDL_MapRGB(surf->format,  63,   0,  63);
+	colors[GP_DARK_WHITE]   = SDL_MapRGB(surf->format,  63,  63,  63);
 }
 

@@ -34,7 +34,7 @@
  * The clipping rectangle of the surface is ignored.
  * If the coordinates (x, y) lie outside the surface, 0 is returned.
  */
-long GP_GetPixel(SDL_Surface * surf, int x, int y)
+long GP_GetPixel(SDL_Surface *surf, int x, int y)
 {
 	if (surf == NULL || surf->pixels == NULL)
 		return 0;

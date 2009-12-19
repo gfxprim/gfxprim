@@ -48,7 +48,7 @@ typedef struct {
 	 * is 0x20 (space). A font must, at a minimum, encode all characters
 	 * of the 7-bit ASCII set (0x20 .. 0x7F, inclusive).
 	 */
-	uint8_t * data;
+	uint8_t *data;
 
 	/* Maximum width of a character, in pixels. */
 	uint8_t char_width;
@@ -77,7 +77,7 @@ extern GP_Font GP_default_proportional_font;
 typedef struct {
 
 	/* Font to use, or NULL to use the default font. */
-	GP_Font * font;
+	GP_Font *font;
 
 	/* Color for the text pixels. */
 	long foreground;
@@ -104,10 +104,10 @@ GP_TextStyle;
  */
 #define GP_DEFAULT_TEXT_STYLE { &GP_default_console_font, 0, 0, 1, 0, 0 }
 
-void GP_Text(SDL_Surface * surf, const GP_TextStyle * style,
-		int x, int y, const char * text);
+void GP_Text(SDL_Surface *surf, const GP_TextStyle *style,
+		int x, int y, const char *text);
 
-int GP_CalcTextWidth(const GP_TextStyle * style, const char * text);
+int GP_CalcTextWidth(const GP_TextStyle *style, const char *text);
 
 #endif
 

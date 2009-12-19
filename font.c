@@ -35,14 +35,14 @@
  * Returns the X coordinate of the next position where the next character
  * can be drawn.
  */
-static int GP_PutChar(SDL_Surface * surf, const GP_TextStyle * style,
-		int x0, int y0, const uint8_t * char_data)
+static int GP_PutChar(SDL_Surface *surf, const GP_TextStyle *style,
+		int x0, int y0, const uint8_t *char_data)
 {
 	int pixel_width = style->pixel_width;
 	int xdelta = style->pixel_width + style->pixel_hspace;
 	int ydelta = 1 + style->pixel_vspace;
 
-	const uint8_t * src = char_data;
+	const uint8_t *src = char_data;
 
 	/* The first byte specifies width in pixels. */
 	const uint8_t char_width = *src;
@@ -99,8 +99,8 @@ static int GP_PutChar(SDL_Surface * surf, const GP_TextStyle * style,
 	return x + style->font->hspace * style->pixel_width;
 }
 
-void GP_Text(SDL_Surface * surf, const GP_TextStyle * style,
-		int x, int y, const char * str)
+void GP_Text(SDL_Surface *surf, const GP_TextStyle *style,
+		int x, int y, const char *str)
 {
 	if (surf == NULL || style == NULL || style->font == NULL || str == NULL)
 		return;
@@ -118,7 +118,7 @@ void GP_Text(SDL_Surface * surf, const GP_TextStyle * style,
 	}
 }
 
-static int GP_CharWidth(const GP_TextStyle * style, char c)
+static int GP_CharWidth(const GP_TextStyle *style, char c)
 {
 	int bytes_per_char = 2 + style->font->bytes_per_line * style->font->height;
 
@@ -130,7 +130,7 @@ static int GP_CharWidth(const GP_TextStyle * style, char c)
 	return char_width * (style->pixel_width + style->pixel_hspace);
 }
 
-int GP_CalcTextWidth(const GP_TextStyle * style, const char * str)
+int GP_CalcTextWidth(const GP_TextStyle *style, const char *str)
 {
 	if (style == NULL || str == NULL)
 		return 0;

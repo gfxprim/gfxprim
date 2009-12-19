@@ -34,7 +34,7 @@
  * Coordinates are automatically clipped both to surface boundaries and
  * to the surface clipping rectangle.
  */
-void GP_Line(SDL_Surface * surf, long color, int x0, int y0, int x1, int y1)
+void GP_Line(SDL_Surface *surf, long color, int x0, int y0, int x1, int y1)
 {
 	/* The steepness of the line */
 	int deltax = x1 - x0;
@@ -129,7 +129,7 @@ void GP_Line(SDL_Surface * surf, long color, int x0, int y0, int x1, int y1)
 /*
  * Draws a horizontal line from (x0, y) to (x1, y), inclusive.
  */
-void GP_HLine(SDL_Surface * surf, long color, int x0, int x1, int y)
+void GP_HLine(SDL_Surface *surf, long color, int x0, int x1, int y)
 {
 	if (surf == NULL || surf->format == NULL)
 		return;
@@ -204,7 +204,7 @@ void GP_HLine(SDL_Surface * surf, long color, int x0, int x1, int y)
 /*
  * Draws a vertical line from (x, y0) to (x, y1), inclusive.
  */
-void GP_VLine(SDL_Surface * surf, long color, int x, int y0, int y1)
+void GP_VLine(SDL_Surface *surf, long color, int x, int y0, int y1)
 {
 	if (surf == NULL || surf->format == NULL)
 		return;

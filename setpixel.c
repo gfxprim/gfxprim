@@ -34,7 +34,7 @@
  * If the coordinates lie outside the surface boundaries or outside its
  * clipping rectangle, the call has no effect.
  */
-void GP_SetPixel(SDL_Surface * surf, long color, int x, int y)
+void GP_SetPixel(SDL_Surface *surf, long color, int x, int y)
 {
 	int bytes_per_pixel = surf->format->BytesPerPixel;
 
@@ -86,7 +86,7 @@ void GP_SetPixel(SDL_Surface * surf, long color, int x, int y)
  * GP_SetPixel_32bpp().
  */
 
-void GP_SetPixel_8bpp(SDL_Surface * surf, long color, int x, int y)
+void GP_SetPixel_8bpp(SDL_Surface *surf, long color, int x, int y)
 {
 	if (surf == NULL || surf->pixels == NULL)
 		return;
@@ -104,7 +104,7 @@ void GP_SetPixel_8bpp(SDL_Surface * surf, long color, int x, int y)
 	*p = (Uint8) color;
 }
 
-void GP_SetPixel_16bpp(SDL_Surface * surf, long color, int x, int y)
+void GP_SetPixel_16bpp(SDL_Surface *surf, long color, int x, int y)
 {
 	if (surf == NULL || surf->pixels == NULL)
 		return;
@@ -122,7 +122,7 @@ void GP_SetPixel_16bpp(SDL_Surface * surf, long color, int x, int y)
 	*(Uint16 *)p = (Uint16) color;
 }
 
-void GP_SetPixel_24bpp(SDL_Surface * surf, long color, int x, int y)
+void GP_SetPixel_24bpp(SDL_Surface *surf, long color, int x, int y)
 {
 	if (surf == NULL || surf->pixels == NULL)
 		return;
@@ -148,7 +148,7 @@ void GP_SetPixel_24bpp(SDL_Surface * surf, long color, int x, int y)
 	}
 }
 
-void GP_SetPixel_32bpp(SDL_Surface * surf, long color, int x, int y)
+void GP_SetPixel_32bpp(SDL_Surface *surf, long color, int x, int y)
 {
 	if (surf == NULL || surf->pixels == NULL)
 		return;

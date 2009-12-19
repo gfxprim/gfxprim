@@ -32,7 +32,7 @@
 #include <assert.h>
 #include <stdio.h>
 
-void GP_Triangle(SDL_Surface * surf, long color, int x0, int y0, int x1, int y1, int x2, int y2)
+void GP_Triangle(SDL_Surface *surf, long color, int x0, int y0, int x1, int y1, int x2, int y2)
 {
 	/*
 	 * Sort the three points according to the Y coordinate.
@@ -145,7 +145,7 @@ void GP_Triangle(SDL_Surface * surf, long color, int x0, int y0, int x1, int y1,
 	GP_HLine(surf, color, BCx, ACx, y-1);
 }
 
-void GP_FillTriangle(SDL_Surface * surf, long color, int x0, int y0, int x1, int y1, int x2, int y2)
+void GP_FillTriangle(SDL_Surface *surf, long color, int x0, int y0, int x1, int y1, int x2, int y2)
 {
 	/*
 	 * Sort the three points according to the Y coordinate.
