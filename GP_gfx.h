@@ -27,44 +27,24 @@
  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "GP_line.h"
-#include "GP_gfx.h"
+#ifndef GP_GFX_H
+#define GP_GFX_H
 
-/*
- * Draws a rectangle from (x0, y0) to (x1, y1).
- */
-void GP_Rect(SDL_Surface *surf, long color, int x0, int y0, int x1, int y1)
-{
-	GP_HLine(surf, color, x0, x1, y0);
-	GP_HLine(surf, color, x0, x1, y1);
-	GP_VLine(surf, color, x0, y0, y1);
-	GP_VLine(surf, color, x1, y0, y1);
-}
+#include <SDL/SDL.h>
 
-/*
- * Draws a solid filled rectangle from (x0, y0) to (x1, y1).
- */
-void GP_FillRect(SDL_Surface *surf, long color, int x0, int y0, int x1, int y1)
-{
-	int top, left, bottom, right;
+void GP_Clear(SDL_Surface *surf, long color);
 
-	if (y0 <= y1) {
-		top = y0;
-		bottom = y1;
-	} else {
-		top = y1;
-		bottom = y0;
-	}
+void GP_Circle(SDL_Surface *surf, long color, int xcenter, int ycenter, int r);
+void GP_FillCircle(SDL_Surface *surf, long color, int xcenter, int ycenter, int r);
 
-	if (x0 <= x1) {
-		left = x0;
-		right = x1;
-	} else {
-		left = x1;
-		right = x0;
-	}
+void GP_Ellipse(SDL_Surface *surf, long color, int xcenter, int ycenter, int a, int b);
+void GP_FillEllipse(SDL_Surface *surf, long color, int xcenter, int ycenter, int a, int b);
 
-	SDL_Rect rect = {left, top, right - left + 1, bottom - top + 1};
-	SDL_FillRect(surf, &rect, color);
-}
+void GP_Rect(SDL_Surface *surf, long color, int x0, int y0, int x1, int y1);
+void GP_FillRect(SDL_Surface *surf, long color, int x0, int y0, int x1, int y1);
+
+void GP_Triangle(SDL_Surface *surf, long color, int x0, int y0, int x1, int y1, int x2, int y2);
+void GP_FillTriangle(SDL_Surface *surf, long color, int x0, int y0, int x1, int y1, int x2, int y2);
+
+#endif /* GP_GFX_H */
 

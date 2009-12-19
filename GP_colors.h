@@ -27,44 +27,43 @@
  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "GP_line.h"
-#include "GP_gfx.h"
+#ifndef GP_COLORS_H
+#define GP_COLORS_H
 
-/*
- * Draws a rectangle from (x0, y0) to (x1, y1).
- */
-void GP_Rect(SDL_Surface *surf, long color, int x0, int y0, int x1, int y1)
-{
-	GP_HLine(surf, color, x0, x1, y0);
-	GP_HLine(surf, color, x0, x1, y1);
-	GP_VLine(surf, color, x0, y0, y1);
-	GP_VLine(surf, color, x1, y0, y1);
+#include <SDL/SDL.h>
+
+/* Indexes for basic colors obtained by GP_LoadBasicColors(). */
+enum {
+	GP_BLACK = 0,
+	GP_RED,
+	GP_GREEN,
+	GP_BLUE,
+	GP_YELLOW,
+	GP_CYAN,
+	GP_MAGENTA,
+	GP_WHITE,
+	GP_MID_RED,
+	GP_MID_GREEN,
+	GP_MID_BLUE,
+	GP_MID_YELLOW,
+	GP_MID_CYAN,
+	GP_MID_MAGENTA,
+	GP_MID_WHITE,
+	GP_GRAY = GP_MID_WHITE,
+	GP_DARK_RED,
+	GP_DARK_GREEN,
+	GP_DARK_BLUE,
+	GP_DARK_YELLOW,
+	GP_DARK_CYAN,
+	GP_DARK_MAGENTA,
+	GP_DARK_WHITE,
+	GP_DARK_GRAY = GP_DARK_WHITE,
+
+	GP_BASIC_COLOR_COUNT,
 }
+GP_BasicColor;
 
-/*
- * Draws a solid filled rectangle from (x0, y0) to (x1, y1).
- */
-void GP_FillRect(SDL_Surface *surf, long color, int x0, int y0, int x1, int y1)
-{
-	int top, left, bottom, right;
+void GP_LoadBasicColors(SDL_Surface *surf, long *colors);
 
-	if (y0 <= y1) {
-		top = y0;
-		bottom = y1;
-	} else {
-		top = y1;
-		bottom = y0;
-	}
-
-	if (x0 <= x1) {
-		left = x0;
-		right = x1;
-	} else {
-		left = x1;
-		right = x0;
-	}
-
-	SDL_Rect rect = {left, top, right - left + 1, bottom - top + 1};
-	SDL_FillRect(surf, &rect, color);
-}
+#endif /* GP_COLORS_H */
 

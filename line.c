@@ -27,7 +27,8 @@
  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "GP.h"
+#include "GP_pixel.h"
+#include "GP_line.h"
 
 /*
  * Draws a line from (x0, y0) to (x1, y1), inclusive.

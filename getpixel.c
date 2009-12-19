@@ -27,7 +27,7 @@
  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "GP.h"
+#include "GP_pixel.h"
 
 /*
  * Reads the color value of a pixel at coordinates (x, y).

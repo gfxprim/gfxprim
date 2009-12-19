@@ -27,7 +27,7 @@
  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "GP.h"
+#include "GP_colors.h"
 
 /*
  * Fills the specified array with surface-compatible values

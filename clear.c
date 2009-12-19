@@ -27,7 +27,7 @@
  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "GP.h"
+#include "GP_gfx.h"
 
 /*
  * Clears the surface to the specified color.

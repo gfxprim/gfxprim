@@ -27,7 +27,7 @@
  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "GP.h"
+#include "GP_font.h"
 
 static uint8_t GP_default_console_font_data[] = {
 	/* ' ' */ 	8, 0,	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,

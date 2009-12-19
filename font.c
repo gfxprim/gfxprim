@@ -27,7 +27,8 @@
  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "GP.h"
+#include "GP_line.h"
+#include "GP_font.h"
 
 /*
  * Draws a single character, using (x0, y0) as the topleft corner

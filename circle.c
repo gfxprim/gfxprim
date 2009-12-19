@@ -27,7 +27,9 @@
  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "GP.h"
+#include "GP_pixel.h"
+#include "GP_line.h"
+#include "GP_gfx.h"
 
 /*
  * Draws a circle with center at (xcenter, ycenter) and radius r (in pixels).

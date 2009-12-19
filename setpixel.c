@@ -27,7 +27,7 @@
  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "GP.h"
+#include "GP_pixel.h"
 
 /*
  * Sets a pixel at coordinates (x, y) to the given color.

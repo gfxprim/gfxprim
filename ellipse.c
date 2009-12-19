@@ -27,7 +27,9 @@
  * EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#include "GP.h"
+#include "GP_pixel.h"
+#include "GP_line.h"
+#include "GP_gfx.h"
 
 /*
  * Plots 4 pixels mirrored around the common center.
