@@ -18,7 +18,7 @@ TESTS=$(SOURCES:.c=)
 all: $(TESTS)
 
 %: %.c $(LIBRARY)
-	gcc $(CFLAGS) $(LDFLAGS) $^ $(LIBRARY) -o $@ -lSDL
+	$(CC) $(CFLAGS) $(LDFLAGS) $^ $(LIBRARY) -o $@ -lSDL
 
 clean:
 	rm -f *.o
