@@ -31,10 +31,20 @@
 #define GP_LINE_H
 
 #include <SDL/SDL.h>
+#include <stdint.h>
 
 void GP_Line(SDL_Surface *surf, long color, int x0, int y0, int x1, int y1);
 void GP_HLine(SDL_Surface *surf, long color, int x0, int x1, int y);
 void GP_VLine(SDL_Surface *surf, long color, int x, int y0, int y1);
+
+enum GP_LinePosition {
+	GP_LINE_ABOVE,
+	GP_LINE_BELOW,
+	GP_LINE_CENTER, /* thickness is treated as radius */
+};
+
+void GP_HLineWide(SDL_Surface *surf, long color, enum GP_LinePosition pos, uint8_t thickness, int x0, int x1, int y);
+void GP_VLineWide(SDL_Surface *surf, long color, enum GP_LinePosition pos, uint8_t thickness, int x, int y0, int y1);
 
 #endif /* GP_LINE_H */
 

@@ -29,6 +29,7 @@
 
 #include "GP_pixel.h"
 #include "GP_line.h"
+#include "GP_gfx.h"
 
 /*
  * Draws a line from (x0, y0) to (x1, y1), inclusive.
@@ -274,6 +275,36 @@ void GP_VLine(SDL_Surface *surf, long color, int x, int y0, int y1)
 	case 4:
 		for (p = p_start; p <= p_end; p += pitch)
 			*(Uint32 *)p = (Uint32) color;
+		break;
+	}
+}
+
+void GP_HLineWide(SDL_Surface *surf, long color, enum GP_LinePosition pos, uint8_t thickness, int x0, int x1, int y)
+{
+	switch (pos) {
+		case GP_LINE_ABOVE:
+			GP_FillRect(surf, color, x0, y + thickness, x1, y);
+		break;
+		case GP_LINE_BELOW:
+			GP_FillRect(surf, color, x0, y - thickness, x1, y);
+		break;
+		case GP_LINE_CENTER:
+			GP_FillRect(surf, color, x0, y - thickness, x1, y +  thickness);
+		break;
+	}
+}
+
+void GP_VLineWide(SDL_Surface *surf, long color, enum GP_LinePosition pos, uint8_t thickness, int x, int y0, int y1)
+{
+	switch (pos) {
+		case GP_LINE_ABOVE:
+			GP_FillRect(surf, color, x + thickness, y0, x, y1);
+		break;
+		case GP_LINE_BELOW:
+			GP_FillRect(surf, color, x - thickness, y0, x, y1);
+		break;
+		case GP_LINE_CENTER:
+			GP_FillRect(surf, color, x - thickness, y0, x + thickness, y1);
 		break;
 	}
 }
