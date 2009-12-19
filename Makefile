@@ -11,7 +11,7 @@ OBJECTS=basic_colors.o \
 	setpixel.o \
 	triangle.o
 
-CFLAGS=-W -Wall -O2
+CFLAGS=-W -Wall -O2 -fPIC
 
 HEADER_LOC=/usr/include/
 LIB_LOC=/usr/lib/
