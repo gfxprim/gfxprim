@@ -29,11 +29,11 @@
 
 #include "GP.h"
 
-SDL_Surface * display = NULL;
+SDL_Surface *display = NULL;
 
 static long colors[GP_BASIC_COLOR_COUNT];
 
-static const char * test_strings[] = {
+static const char *test_strings[] = {
 	" !\"#$%&\047()*+,-./0123456789:;<=>?@",
 	"ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`",
 	"abcdefghijklmnopqrstuvwxyz{|}~",

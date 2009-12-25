@@ -29,7 +29,7 @@
 
 #include "GP.h"
 
-SDL_Surface * display = NULL;
+SDL_Surface *display = NULL;
 
 static int state;
 

@@ -30,7 +30,7 @@
 #include "GP.h"
 
 /* The surface used as a display (in fact it is a software surface). */
-SDL_Surface * display = NULL;
+SDL_Surface *display = NULL;
 
 /* Timer used for refreshing the display */
 SDL_TimerID timer;
@@ -360,7 +360,7 @@ int main(void)
 	GP_LoadBasicColors(display, colors);
 
 	/* Set up a clipping rectangle to exercise clipping */
-	SDL_Rect clip_rect = { 10, 10, 620, 460 };
+	SDL_Rect clip_rect = {10, 10, 620, 460};
 	SDL_SetClipRect(display, &clip_rect);
 
 	/* Set up the refresh timer */

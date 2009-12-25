@@ -30,7 +30,7 @@
 #include "GP.h"
 
 /* The surface used as a display (in fact it is a software surface). */
-SDL_Surface * display = NULL;
+SDL_Surface *display = NULL;
 
 /* Timer used for refreshing the display */
 SDL_TimerID timer;
@@ -45,7 +45,7 @@ static long colors[GP_BASIC_COLOR_COUNT];
 static int pause_flag = 0;
 
 Uint32 timer_callback(__attribute__((unused)) Uint32 interval,
-			__attribute__((unused)) void * param)
+			__attribute__((unused)) void *param)
 {
 	timer_event.type = SDL_USEREVENT;
 	SDL_PushEvent((SDL_Event *) &timer_event);
@@ -67,7 +67,7 @@ static int outline_flag = 0;
 /* Draw filled shapes? */
 static int fill_flag = 1;
 
-void random_point(SDL_Surface * surf, int * x, int * y)
+void random_point(SDL_Surface *surf, int *x, int *y)
 {
 	*x = random() % surf->w;
 	*y = random() % surf->h;
@@ -253,7 +253,7 @@ int main(void)
 	GP_LoadBasicColors(display, colors);
 
 	/* Set up a clipping rectangle to test proper clipping of pixels */
-	SDL_Rect clip_rect = { 10, 10, 300, 220 };
+	SDL_Rect clip_rect = {10, 10, 300, 220};
 	SDL_SetClipRect(display, &clip_rect);
 
 	/* Set up the refresh timer */

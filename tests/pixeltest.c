@@ -30,7 +30,7 @@
 #include "GP.h"
 
 /* The surface used as a display (in fact it is a software surface). */
-SDL_Surface * display = NULL;
+SDL_Surface *display = NULL;
 
 /* Timer used for refreshing the display */
 SDL_TimerID timer;
@@ -44,7 +44,7 @@ long green;
 long blue;
 
 Uint32 timer_callback(__attribute__((unused)) Uint32 interval,
-			__attribute__((unused)) void * param)
+			__attribute__((unused)) void *param)
 {
 	timer_event.type = SDL_USEREVENT;
 	SDL_PushEvent((SDL_Event *) &timer_event);
@@ -114,7 +114,7 @@ int main(void)
 	blue = SDL_MapRGB(display->format, 0, 0, 255);
 
 	/* Set up a clipping rectangle to test proper clipping of pixels */
-	SDL_Rect clip_rect = { 10, 10, 300, 220 };
+	SDL_Rect clip_rect = {10, 10, 300, 220};
 	SDL_SetClipRect(display, &clip_rect);
 
 	/* Set up the refresh timer */

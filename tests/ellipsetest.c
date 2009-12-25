@@ -30,7 +30,7 @@
 #include "GP.h"
 
 /* The surface used as a display (in fact it is a software surface). */
-SDL_Surface * display = NULL;
+SDL_Surface *display = NULL;
 
 /* Timer used for refreshing the display */
 SDL_TimerID timer;
