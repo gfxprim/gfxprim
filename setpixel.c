@@ -49,7 +49,7 @@ void GP_SetPixel(SDL_Surface *surf, long color, int x, int y)
 	/* Compute the address of the pixel */
 	Uint8 *p = ((Uint8 *) surf->pixels) + y * surf->pitch + x * bytes_per_pixel;
 
-	switch(bytes_per_pixel) {
+	switch (bytes_per_pixel) {
 	case 1:
 		*p = (Uint8) color;
 		break;
@@ -59,7 +59,7 @@ void GP_SetPixel(SDL_Surface *surf, long color, int x, int y)
 		break;
 
 	case 3:
-		if(SDL_BYTEORDER == SDL_BIG_ENDIAN) {
+		if (SDL_BYTEORDER == SDL_BIG_ENDIAN) {
 			p[0] = (color >> 16) & 0xff;
 			p[1] = (color >> 8) & 0xff;
 			p[2] = color & 0xff;
@@ -133,7 +133,7 @@ void GP_SetPixel_24bpp(SDL_Surface *surf, long color, int x, int y)
 
 	Uint8 *p = ((Uint8 *) surf->pixels) + y * surf->pitch + 3*x;
 
-	if(SDL_BYTEORDER == SDL_BIG_ENDIAN) {
+	if (SDL_BYTEORDER == SDL_BIG_ENDIAN) {
 		p[0] = (color >> 16) & 0xff;
 		p[1] = (color >> 8) & 0xff;
 		p[2] = color & 0xff;

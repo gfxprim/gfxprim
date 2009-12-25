@@ -45,18 +45,18 @@ void GP_FillRect(SDL_Surface *surf, long color, int x0, int y0, int x1, int y1)
 	int top, left, bottom, right;
 
 	if (y0 <= y1) {
-		top = y0;
+		top    = y0;
 		bottom = y1;
 	} else {
-		top = y1;
+		top    = y1;
 		bottom = y0;
 	}
 
 	if (x0 <= x1) {
-		left = x0;
+		left  = x0;
 		right = x1;
 	} else {
-		left = x1;
+		left  = x1;
 		right = x0;
 	}
 
