@@ -159,9 +159,7 @@ void GP_HLine(SDL_Surface *surf, long color, int x0, int x1, int y)
 	int bytes_per_pixel = surf->format->BytesPerPixel;
 
 	/* Get the starting and ending address of the line. */
-	Uint8 *p_start = ((Uint8 *) surf->pixels)
-				+ y * surf->pitch
-				+ x0 * bytes_per_pixel;
+	Uint8 *p_start = GP_PIXEL_ADDR(surf, x0, y);
 	Uint8 *p_end = p_start + (x1 - x0) * bytes_per_pixel;
 
 	/* Write pixels. */
@@ -169,32 +167,23 @@ void GP_HLine(SDL_Surface *surf, long color, int x0, int x1, int y)
 	switch (bytes_per_pixel) {
 	case 1:
 		for (p = p_start; p <= p_end; p++)
-			*p = (Uint8) color;
+			GP_WRITE_PIXEL_1BYTE(p, color);
 		break;
 	
 	case 2:
 		for (p = p_start; p <= p_end; p += 2)
-			*(Uint16 *) p = (Uint16) color;
+			GP_WRITE_PIXEL_2BYTES(p, color);
 		break;
 	
 	case 3:
 		for (p = p_start; p <= p_end; p += 3) {
-
-#if SDL_BYTEORDER == SDL_BIG_ENDIAN
-			p[0] = (color >> 16) & 0xff;
-			p[1] = (color >> 8) & 0xff;
-			p[2] = color & 0xff;
-#else
-			p[0] = color & 0xff;
-			p[1] = (color >> 8) & 0xff;
-			p[2] = (color >> 16) & 0xff;
-#endif
+			GP_WRITE_PIXEL_3BYTES(p, color);
 		}
 		break;
 
 	case 4:
 		for (p = p_start; p <= p_end; p += 4)
-			*(Uint32 *)p = (Uint32) color;
+			GP_WRITE_PIXEL_4BYTES(p, color);
 		break;
 	}
 }
@@ -235,9 +224,7 @@ void GP_VLine(SDL_Surface *surf, long color, int x, int y0, int y1)
 	int pitch = surf->pitch;
 
 	/* Get the starting and ending address of the line. */
-	Uint8 *p_start = ((Uint8 *) surf->pixels)
-				+ y0 * surf->pitch
-				+ x * bytes_per_pixel;
+	Uint8 *p_start = GP_PIXEL_ADDR(surf, x, y0);
 	Uint8 *p_end = p_start + (y1 - y0) * surf->pitch;
 
 	/* Write pixels. */
@@ -245,32 +232,22 @@ void GP_VLine(SDL_Surface *surf, long color, int x, int y0, int y1)
 	switch (bytes_per_pixel) {
 	case 1:
 		for (p = p_start; p <= p_end; p += pitch)
-			*p = (Uint8) color;
+			GP_WRITE_PIXEL_1BYTE(p, color);
 		break;
 	
 	case 2:
 		for (p = p_start; p <= p_end; p += pitch)
-			*(Uint16 *) p = (Uint16) color;
+			GP_WRITE_PIXEL_2BYTES(p, color);
 		break;
 	
 	case 3:
-		for (p = p_start; p <= p_end; p += pitch) {
-
-#if SDL_BYTEORDER == SDL_BIG_ENDIAN
-			p[0] = (color >> 16) & 0xff;
-			p[1] = (color >> 8) & 0xff;
-			p[2] = color & 0xff;
-#else
-			p[0] = color & 0xff;
-			p[1] = (color >> 8) & 0xff;
-			p[2] = (color >> 16) & 0xff;
-#endif
-		}
+		for (p = p_start; p <= p_end; p += pitch)
+			GP_WRITE_PIXEL_3BYTES(p, color);
 		break;
 
 	case 4:
 		for (p = p_start; p <= p_end; p += pitch)
-			*(Uint32 *)p = (Uint32) color;
+			GP_WRITE_PIXEL_4BYTES(p, color);
 		break;
 	}
 }

@@ -23,80 +23,37 @@
  *                                                                           *
  *****************************************************************************/
 
-#include "GP_pixel.h"
-
 /*
- * Sets a pixel at coordinates (x, y) to the given color.
- * If the coordinates lie outside the surface boundaries or outside its
- * clipping rectangle, the call has no effect.
- */
-void GP_SetPixel(SDL_Surface *surf, long color, int x, int y)
-{
-	int bytes_per_pixel = surf->format->BytesPerPixel;
-
-	if (surf == NULL || surf->pixels == NULL)
-		return;
-
-	/* Clip coordinates against the clip rectangle of the surface */
-	int x1 = surf->clip_rect.x;
-	int y1 = surf->clip_rect.y;
-	int x2 = surf->clip_rect.x + surf->clip_rect.w;
-	int y2 = surf->clip_rect.y + surf->clip_rect.h;
-
-	if (x < x1 || y < y1 || x >= x2 || y >= y2)
-		return;
-
-	/* Compute the address of the pixel */
-	uint8_t *p = GP_PIXEL_ADDR(surf, x, y);
-
-	switch (bytes_per_pixel) {
-	case 1:
-		GP_WRITE_PIXEL_1BYTE(p, color);
-		break;
-	
-	case 2:
-		GP_WRITE_PIXEL_2BYTES(p, color);
-		break;
-
-	case 3:
-		GP_WRITE_PIXEL_3BYTES(p, color);
-		break;
-
-	case 4:
-		GP_WRITE_PIXEL_4BYTES(p, color);
-		break;
-	}
-}
-
-/*
- * Here we produce specializations of GP_SetPixel() for surfaces
- * of known bit depth:
+ * This file is #included from setpixel.c.
+ * 
+ * This file is a template for building specialized SetPixel() functions
+ * for various bit depths. It can be included multiple times; each inclusion
+ * will generate a definition of a function.
  *
- * GP_SetPixel_8bpp(), GP_SetPixel_16bpp(), GP_SetPixel_24bpp(),
- * GP_SetPixel_32bpp().
+ * Expects following arguments to be #defined:
+ *
+ *	FN_NAME
+ *		The name you wish for the newly defined function.
+ *
+ *	WRITE_PIXEL_ROUTINE
+ *		A routine to write a pixel value to a memory address;
+ *		must have format WRITE_PIXEL_ROUTINE(uint8_t *p, long color)
  */
 
-#define FN_NAME GP_SetPixel_8bpp
-#define WRITE_PIXEL_ROUTINE GP_WRITE_PIXEL_1BYTE
-#include "setpixel.tmpl.c"
-#undef FN_NAME
-#undef WRITE_PIXEL_ROUTINE
+void FN_NAME(SDL_Surface *surf, long color, int x, int y) \
+{
+	if (surf == NULL || surf->pixels == NULL) \
+		return; \
 
-#define FN_NAME GP_SetPixel_16bpp
-#define WRITE_PIXEL_ROUTINE GP_WRITE_PIXEL_2BYTES
-#include "setpixel.tmpl.c"
-#undef FN_NAME
-#undef WRITE_PIXEL_ROUTINE
+	int x1 = surf->clip_rect.x; \
+	int y1 = surf->clip_rect.y; \
+	int x2 = surf->clip_rect.x + surf->clip_rect.w; \
+	int y2 = surf->clip_rect.y + surf->clip_rect.h; \
 
-#define FN_NAME GP_SetPixel_24bpp
-#define WRITE_PIXEL_ROUTINE GP_WRITE_PIXEL_3BYTES
-#include "setpixel.tmpl.c"
-#undef FN_NAME
-#undef WRITE_PIXEL_ROUTINE
+	if (x < x1 || y < y1 || x >= x2 || y >= y2) \
+		return; \
 
-#define FN_NAME GP_SetPixel_32bpp
-#define WRITE_PIXEL_ROUTINE GP_WRITE_PIXEL_4BYTES
-#include "setpixel.tmpl.c"
-#undef FN_NAME
-#undef WRITE_PIXEL_ROUTINE
+	uint8_t *p = GP_PIXEL_ADDR(surf, x, y); \
+	WRITE_PIXEL_ROUTINE(p, color); \
+}
 

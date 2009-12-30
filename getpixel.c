@@ -41,7 +41,7 @@ long GP_GetPixel(SDL_Surface *surf, int x, int y)
 
 	/* Compute the address of the pixel */
 	int bytes_per_pixel = surf->format->BytesPerPixel;
-	Uint8 *p = ((Uint8 *) surf->pixels) + y * surf->pitch + x * bytes_per_pixel;
+	uint8_t *p = GP_PIXEL_ADDR(surf, x, y);
 
 	switch (bytes_per_pixel) {
 	case 1:
