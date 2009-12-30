@@ -4,7 +4,7 @@ OBJECTS=basic_colors.o \
 	circle.o clear.o \
 	default_font.o \
 	ellipse.o \
-	font.o \
+	text.o \
 	getpixel.o \
 	line.o \
 	rect.o \

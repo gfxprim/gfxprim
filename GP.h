@@ -34,7 +34,7 @@
 
 #include "GP_colors.h"
 
-#include "GP_font.h"
+#include "GP_text.h"
 
 #endif /* GP_H */
 

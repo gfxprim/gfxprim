@@ -68,7 +68,7 @@ void redraw_screen(void)
 		style.pixel_vspace = 0;
 
 		GP_FillRect(display, colors[GP_MID_RED], 16, 100*i + 16,
-				16 + GP_CalcTextWidth(&style, test_string),
+				16 + GP_TextWidth(&style, test_string),
 				100*i + 16 + style.font->height);
 
 		GP_Text(display, &style, 16, 100*i + 16, test_string);

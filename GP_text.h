@@ -103,7 +103,7 @@ GP_TextStyle;
 void GP_Text(SDL_Surface *surf, const GP_TextStyle *style,
 		int x, int y, const char *text);
 
-int GP_CalcTextWidth(const GP_TextStyle *style, const char *text);
+int GP_TextWidth(const GP_TextStyle *style, const char *text);
 
 #endif
 

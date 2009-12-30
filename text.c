@@ -24,7 +24,7 @@
  *****************************************************************************/
 
 #include "GP_line.h"
-#include "GP_font.h"
+#include "GP_text.h"
 
 /*
  * Draws a single character, using (x0, y0) as the topleft corner
@@ -127,7 +127,7 @@ static int GP_CharWidth(const GP_TextStyle *style, char c)
 	return char_width * (style->pixel_width + style->pixel_hspace);
 }
 
-int GP_CalcTextWidth(const GP_TextStyle *style, const char *str)
+int GP_TextWidth(const GP_TextStyle *style, const char *str)
 {
 	if (style == NULL || str == NULL)
 		return 0;
