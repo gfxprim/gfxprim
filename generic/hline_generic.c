@@ -29,33 +29,35 @@
  * This file is a macro template. With each inclusion, you get a definition
  * of a horizontal line drawing function in form:
  *
- * void FN_NAME(SDL_Surface * surf, long color, int x0, int x1, int y)
+ * void FN_NAME(GP_TARGET_TYPE *target, long color, int x0, int x1, int y)
  *
  * These arguments must be #defined in the including file:
  *
  * 	FN_NAME
  * 		Name of the function.
+ * 
  * 	BYTES_PER_PIXEL
  * 		Number of bytes per pixel of the target.
+ * 		
  * 	WRITE_PIXEL
  * 		A pixel writing routine to use. Must have form
  * 		void WRITE_PIXEL(uint8_t *p, long color).
  */
 
-void FN_NAME(SDL_Surface *surf, long color, int x0, int x1, int y)
+void FN_NAME(GP_TARGET_TYPE *target, long color, int x0, int x1, int y)
 {
-	if (surf == NULL || surf->format == NULL)
+	if (target == NULL || target->format == NULL)
 		return;
 
 	/* Ensure that x0 <= x1, swap coordinates if needed. */
 	if (x0 > x1) {
-		FN_NAME(surf, color, x1, x0, y);
+		FN_NAME(target, color, x1, x0, y);
 		return;
 	}
 
 	/* Get the clipping rectangle. */
 	int xmin, xmax, ymin, ymax;
-	GP_GET_CLIP_RECT(surf, xmin, xmax, ymin, ymax);
+	GP_GET_CLIP_RECT(target, xmin, xmax, ymin, ymax);
 
 	/* Check whether the line is not completely clipped out. */
 	if (y < ymin || y > ymax || x0 > xmax || x1 < xmin)
@@ -70,7 +72,7 @@ void FN_NAME(SDL_Surface *surf, long color, int x0, int x1, int y)
 	}
 
 	/* Get the starting and ending address of the line. */
-	uint8_t *p_start = GP_PIXEL_ADDR(surf, x0, y);
+	uint8_t *p_start = GP_PIXEL_ADDR(target, x0, y);
 	uint8_t *p_end = p_start + (x1 - x0) * BYTES_PER_PIXEL;
 
 	/* Write pixels. */

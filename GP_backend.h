@@ -23,61 +23,10 @@
  *                                                                           *
  *****************************************************************************/
 
-/*
- * File to be #included from line.c.
- *
- * This file is a macro template. With each inclusion, you get a definition
- * of a vertical line drawing function in form:
- *
- * void FN_NAME(SDL_Surface * surf, long color, int x, int y0, int y1)
- *
- * These arguments must be #defined in the including file:
- *
- * 	FN_NAME
- * 		Name of the function.
- * 
- * 	WRITE_PIXEL
- * 		A pixel writing routine to use. Must have form
- * 		void WRITE_PIXEL(uint8_t *p, long color).
- */
+#ifndef GP_BACKEND_H
+#define GP_BACKEND_H
 
-void FN_NAME(GP_TARGET_TYPE *target, long color, int x, int y0, int y1)
-{
-	if (target == NULL)
-		return;
+#include "backends/GP_backend_sdl.h"
 
-	/* Ensure that y0 <= y1, swap coordinates if needed. */
-	if (y0 > y1) {
-		FN_NAME(target, color, x, y1, y0);
-		return;
-	}
-
-	/* Get the clipping rectangle. */
-	int xmin, xmax, ymin, ymax;
-	GP_GET_CLIP_RECT(target, xmin, xmax, ymin, ymax);
-
-	/* Check whether the line is not completely clipped out. */
-	if (x < xmin || x > xmax || y0 > ymax || y1 < xmin)
-		return;
-
-	/* Clip the start and end of the line. */
-	if (y0 < ymin) {
-		y0 = ymin;
-	}
-	if (y1 > ymax) {
-		y1 = ymax;
-	}
-
-	int bytes_per_line = GP_BYTES_PER_LINE(target);
-
-	/* Get the starting and ending address of the line. */
-	uint8_t *p_start = GP_PIXEL_ADDR(target, x, y0);
-	uint8_t *p_end = p_start + (y1 - y0) * bytes_per_line;
-
-	/* Write pixels. */
-	uint8_t * p;
-	for (p = p_start; p <= p_end; p += bytes_per_line) {
-		WRITE_PIXEL(p, color);
-	}
-}
+#endif
 

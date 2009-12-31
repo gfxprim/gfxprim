@@ -23,7 +23,7 @@
  *                                                                           *
  *****************************************************************************/
 
-#include "GP_clip_rect.h"
+#include "GP_backend.h"
 #include "GP_pixel.h"
 
 /*
@@ -31,22 +31,22 @@
  * the number of bits per pixel of the image and then uses the appropriate
  * pixel writing routine.
  */
-void GP_SetPixel(SDL_Surface *surf, long color, int x, int y)
+void GP_SetPixel(GP_TARGET_TYPE *target, long color, int x, int y)
 {
-	int bytes_per_pixel = surf->format->BytesPerPixel;
-
-	if (surf == NULL || surf->pixels == NULL)
+	if (target == NULL || GP_PIXELS(target) == NULL)
 		return;
+
+	int bytes_per_pixel = GP_BYTES_PER_PIXEL(target);
 
 	/* Clip coordinates against the clip rectangle of the surface */
 	int xmin, xmax, ymin, ymax;
-	GP_GET_CLIP_RECT(surf, xmin, xmax, ymin, ymax);
+	GP_GET_CLIP_RECT(target, xmin, xmax, ymin, ymax);
 
 	if (x < xmin || y < ymin || x > xmax || y > ymax)
 		return;
 
 	/* Compute the address of the pixel */
-	uint8_t *p = GP_PIXEL_ADDR(surf, x, y);
+	uint8_t *p = GP_PIXEL_ADDR(target, x, y);
 
 	switch (bytes_per_pixel) {
 	case 1:

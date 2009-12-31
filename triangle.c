@@ -23,21 +23,17 @@
  *                                                                           *
  *****************************************************************************/
 
+#include "GP_backend.h"
 #include "GP_pixel.h"
 #include "GP_line.h"
 #include "GP_gfx.h"
 
-#include <assert.h>
-#include <stdio.h>
-
-#define TARGET_TYPE	SDL_Surface
-
-void GP_Triangle(TARGET_TYPE *target, long color, int x0, int y0, int x1, int y1, int x2, int y2)
+void GP_Triangle(GP_TARGET_TYPE *target, long color, int x0, int y0, int x1, int y1, int x2, int y2)
 {
-	if (target == NULL || target->pixels == NULL)
+	if (target == NULL || GP_PIXELS(target) == NULL)
 		return;
 
-	switch (target->format->BytesPerPixel) {
+	switch (GP_BYTES_PER_PIXEL(target)) {
 	case 1:
 		GP_Triangle_8bpp(target, color, x0, y0, x1, y1, x2, y2);
 		break;
@@ -53,12 +49,12 @@ void GP_Triangle(TARGET_TYPE *target, long color, int x0, int y0, int x1, int y1
 	}
 }
 
-void GP_FillTriangle(TARGET_TYPE *target, long color, int x0, int y0, int x1, int y1, int x2, int y2)
+void GP_FillTriangle(GP_TARGET_TYPE *target, long color, int x0, int y0, int x1, int y1, int x2, int y2)
 {
-	if (target == NULL || target->pixels == NULL)
+	if (target == NULL || GP_PIXELS(target) == NULL)
 		return;
 
-	switch (target->format->BytesPerPixel) {
+	switch (GP_BYTES_PER_PIXEL(target)) {
 	case 1:
 		GP_FillTriangle_8bpp(target, color, x0, y0, x1, y1, x2, y2);
 		break;

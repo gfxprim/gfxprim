@@ -26,23 +26,7 @@
 #ifndef GP_PIXEL_H
 #define GP_PIXEL_H
 
-#include <SDL/SDL.h>
-
-/*
- * Returns the number of bytes per each pixel line,
- * including any additional padding.
- */
-#define GP_BYTES_PER_LINE(surf) (surf->pitch)
-
-/*
- * Computes the address of a pixel at coordinates (x, y)
- * in the specified surface (the coordinates must lie within
- * the surface).
- * The result is a pointer of type uint8_t *.
- */
-#define GP_PIXEL_ADDR(surf, x, y) ( \
-	((uint8_t *) surf->pixels) + y * surf->pitch \
-		+ x * surf->format->BytesPerPixel)
+#include "GP_backend.h"
 
 /*
  * Macros for writing a single pixel value to the specified address,
@@ -83,8 +67,8 @@
  * If the coordinates lie outside the surface boundaries or outside its
  * clipping rectangle, the call has no effect.
  */
-void GP_SetPixel(SDL_Surface *surf, long color, int x, int y);
-long GP_GetPixel(SDL_Surface *surf, int x, int y);
+void GP_SetPixel(GP_TARGET_TYPE *target, long color, int x, int y);
+long GP_GetPixel(GP_TARGET_TYPE *target, int x, int y);
 
 /* commonly used alternative name */
 #define GP_PutPixel GP_SetPixel
@@ -95,10 +79,10 @@ long GP_GetPixel(SDL_Surface *surf, int x, int y);
  * These variants also respect clipping and are overdraw-safe.
  */
 
-void GP_SetPixel_8bpp(SDL_Surface *surf, long color, int x, int y);
-void GP_SetPixel_16bpp(SDL_Surface *surf, long color, int x, int y);
-void GP_SetPixel_24bpp(SDL_Surface *surf, long color, int x, int y);
-void GP_SetPixel_32bpp(SDL_Surface *surf, long color, int x, int y);
+void GP_SetPixel_8bpp(GP_TARGET_TYPE *target, long color, int x, int y);
+void GP_SetPixel_16bpp(GP_TARGET_TYPE *target, long color, int x, int y);
+void GP_SetPixel_24bpp(GP_TARGET_TYPE *target, long color, int x, int y);
+void GP_SetPixel_32bpp(GP_TARGET_TYPE *target, long color, int x, int y);
 
 #endif /* GP_PIXEL_H */
 

@@ -35,12 +35,13 @@
  *
  * 	FN_NAME
  * 		Name of the function.
+ * 
  * 	SETPIXEL
  * 		A pixel drawing routine to use. Must have form
- * 		void SETPIXEL(SDL_Surface * surf, long color, int x, int y).
+ * 		void SETPIXEL(TARGET *target, long color, int x, int y).
  */
 
-void FN_NAME(SDL_Surface *surf, long color, int x0, int y0, int x1, int y1)
+void FN_NAME(GP_TARGET_TYPE *target, long color, int x0, int y0, int x1, int y1)
 {
 	/* The steepness of the line */
 	int deltax = x1 - x0;
@@ -66,7 +67,7 @@ void FN_NAME(SDL_Surface *surf, long color, int x0, int y0, int x1, int y1)
 			if (deltay > 0) {	/* Y increases */
 
 				for (; x <= x1; x++) {
-					SETPIXEL(surf, color, x, y);
+					SETPIXEL(target, color, x, y);
 					error -= deltay;
 					if (error < 0) { 
 						y++;
@@ -76,7 +77,7 @@ void FN_NAME(SDL_Surface *surf, long color, int x0, int y0, int x1, int y1)
 			} else {		/* Y decreases */
 
 				for (; x <= x1; x++) {
-					SETPIXEL(surf, color, x, y);
+					SETPIXEL(target, color, x, y);
 					error -= -deltay;
 					if (error < 0) { 
 						y--;
@@ -91,7 +92,7 @@ void FN_NAME(SDL_Surface *surf, long color, int x0, int y0, int x1, int y1)
 			 * This ensures that the pixels plotted are exactly
 			 * the same as with the opposite direction.
 			 */
-			FN_NAME(surf, color, x1, y1, x0, y0);
+			FN_NAME(target, color, x1, y1, x0, y0);
 			return;
 		}
 	} else {				/* Y changes faster */
@@ -101,7 +102,7 @@ void FN_NAME(SDL_Surface *surf, long color, int x0, int y0, int x1, int y1)
 		if (deltay >= 0) {		/* Y increases */
 			if (deltax > 0) {	/* X increases */
 				for (; y <= y1; y++) {
-					SETPIXEL(surf, color, x, y);
+					SETPIXEL(target, color, x, y);
 					error -= deltax;
 					if (error < 0) {
 						x++;
@@ -111,7 +112,7 @@ void FN_NAME(SDL_Surface *surf, long color, int x0, int y0, int x1, int y1)
 			} else {		/* X decreases */
 
 				for (; y <= y1; y++) {
-					SETPIXEL(surf, color, x, y);
+					SETPIXEL(target, color, x, y);
 					error -= -deltax;
 					if (error < 0) {
 						x--;
@@ -126,7 +127,7 @@ void FN_NAME(SDL_Surface *surf, long color, int x0, int y0, int x1, int y1)
 			 * This ensures that the pixels plotted are exactly
 			 * the same as with the opposite direction.
 			 */
-			FN_NAME(surf, color, x1, y1, x0, y0);
+			FN_NAME(target, color, x1, y1, x0, y0);
 			return;
 		}
 	}

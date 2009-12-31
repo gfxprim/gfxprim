@@ -26,9 +26,9 @@
 #ifndef GP_H
 #define GP_H
 
-#include "GP_pixel.h"
+#include "GP_backend.h"
 
-#include "GP_clip_rect.h"
+#include "GP_pixel.h"
 
 #include "GP_line.h"
 

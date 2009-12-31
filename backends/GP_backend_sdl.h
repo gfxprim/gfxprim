@@ -23,21 +23,55 @@
  *                                                                           *
  *****************************************************************************/
 
-#ifndef GP_CLIP_RECT_H
-#define GP_CLIP_RECT_H
+#ifndef GP_BACKEND_SDL_H
+#define GP_BACKEND_SDL_H
 
 #include <SDL/SDL.h>
+
+/*
+ * These definitions are used for interfacing with SDL.
+ */
+
+/*
+ * The target object for drawing routines, which is SDL_Surface.
+ */
+#define GP_TARGET_TYPE	SDL_Surface
 
 /*
  * Loads the clipping rectangle of the given surface into variables
  * whose names are passed in 'xmin', 'xmax', 'ymin', 'ymax'.
  */
-#define GP_GET_CLIP_RECT(surf, xmin, xmax, ymin, ymax) { \
-	xmin = surf->clip_rect.x; \
-	xmax = surf->clip_rect.x + surf->clip_rect.w - 1; \
-	ymin = surf->clip_rect.y; \
-	ymax = surf->clip_rect.y + surf->clip_rect.h - 1; \
+#define GP_GET_CLIP_RECT(target, xmin, xmax, ymin, ymax) { \
+	xmin = target->clip_rect.x; \
+	xmax = target->clip_rect.x + target->clip_rect.w - 1; \
+	ymin = target->clip_rect.y; \
+	ymax = target->clip_rect.y + target->clip_rect.h - 1; \
 }
 
-#endif /* GP_CLIP_RECT_H */
+/*
+ * Determines the number of bytes per pixel of the target.
+ */
+#define GP_BYTES_PER_PIXEL(target) (target->format->BytesPerPixel)
+
+/*
+ * Determines the number of bytes per line of the target.
+ */
+#define GP_BYTES_PER_LINE(target) (target->pitch)
+
+/*
+ * Returns the pointer to the pixel data of the target.
+ */
+#define GP_PIXELS(target) ((uint8_t *)(target->pixels))
+
+/*
+ * Computes the address of a pixel at coordinates (x, y)
+ * in the specified surface (the coordinates must lie within
+ * the surface).
+ * The result is a pointer of type uint8_t *.
+ */
+#define GP_PIXEL_ADDR(target, x, y) ( \
+	GP_PIXELS(target) + y * GP_BYTES_PER_LINE(target) \
+		+ x * GP_BYTES_PER_PIXEL(target))
+
+#endif /* GP_BACKEND_SDL_H */
 

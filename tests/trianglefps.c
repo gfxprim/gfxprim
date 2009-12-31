@@ -30,6 +30,9 @@
 
 #include "GP.h"
 
+/* Draw filled triangles? */
+int filled = 0;
+
 /* The surface used as a display (in fact it is a software surface). */
 SDL_Surface *display = NULL;
 
@@ -66,7 +69,11 @@ void draw_frame(void)
 	int y2 = random() % display->h;
 	long color = SDL_MapRGB(display->format, random() % 255, random() % 255, random() % 255);
 
-	GP_Triangle(display, color, x0, y0, x1, y1, x2, y2);
+	if (filled) {
+		GP_FillTriangle(display, color, x0, y0, x1, y1, x2, y2);
+	} else {
+		GP_Triangle(display, color, x0, y0, x1, y1, x2, y2);
+	}
 }
 
 void event_loop(void)
@@ -98,8 +105,15 @@ void event_loop(void)
 	}
 }
 
-int main(void)
+int main(int argc, char ** argv)
 {
+	int i;
+	for (i = 1; i < argc; i++) {
+		if (strcmp(argv[i], "-f") == 0) {
+			filled = 1;
+		}
+	}
+
 	/* Initialize SDL */
 	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) != 0) {
 		fprintf(stderr, "Could not initialize SDL: %s\n", SDL_GetError());

@@ -23,8 +23,8 @@
  *                                                                           *
  *****************************************************************************/
 
+#include "GP_backend.h"
 #include "GP_pixel.h"
-#include "GP_clip_rect.h"
 #include "GP_line.h"
 #include "GP_gfx.h"
 
@@ -34,65 +34,65 @@
  * and then call the appropriate specialized drawing function.
  */
 
-void GP_Line(SDL_Surface * surf, long color, int x0, int y0, int x1, int y1)
+void GP_Line(GP_TARGET_TYPE *target, long color, int x0, int y0, int x1, int y1)
 {
-	if (surf == NULL || surf->pixels == NULL)
+	if (target == NULL || target->pixels == NULL)
 		return;
 
-	switch (surf->format->BytesPerPixel) {
+	switch (target->format->BytesPerPixel) {
 	case 1:
-		GP_Line_8bpp(surf, color, x0, y0, x1, y1);
+		GP_Line_8bpp(target, color, x0, y0, x1, y1);
 		break;
 	case 2:
-		GP_Line_16bpp(surf, color, x0, y0, x1, y1);
+		GP_Line_16bpp(target, color, x0, y0, x1, y1);
 		break;
 	case 3:
-		GP_Line_24bpp(surf, color, x0, y0, x1, y1);
+		GP_Line_24bpp(target, color, x0, y0, x1, y1);
 		break;
 	case 4:
-		GP_Line_32bpp(surf, color, x0, y0, x1, y1);
+		GP_Line_32bpp(target, color, x0, y0, x1, y1);
 		break;
 	}
 }
 
-void GP_HLine(SDL_Surface *surf, long color, int x0, int x1, int y)
+void GP_HLine(GP_TARGET_TYPE *target, long color, int x0, int x1, int y)
 {
-	if (surf == NULL || surf->format == NULL)
+	if (target == NULL || target->pixels == NULL)
 		return;
 
-	switch (surf->format->BytesPerPixel) {
+	switch (target->format->BytesPerPixel) {
 	case 1:
-		GP_HLine_8bpp(surf, color, x0, x1, y);
+		GP_HLine_8bpp(target, color, x0, x1, y);
 		break;
 	case 2:
-		GP_HLine_16bpp(surf, color, x0, x1, y);
+		GP_HLine_16bpp(target, color, x0, x1, y);
 		break;
 	case 3:
-		GP_HLine_24bpp(surf, color, x0, x1, y);
+		GP_HLine_24bpp(target, color, x0, x1, y);
 		break;
 	case 4:
-		GP_HLine_32bpp(surf, color, x0, x1, y);
+		GP_HLine_32bpp(target, color, x0, x1, y);
 		break;
 	}
 }
 
-void GP_VLine(SDL_Surface *surf, long color, int x, int y0, int y1)
+void GP_VLine(GP_TARGET_TYPE *target, long color, int x, int y0, int y1)
 {
-	if (surf == NULL || surf->format == NULL)
+	if (target == NULL || target->pixels == NULL)
 		return;
 
-	switch (surf->format->BytesPerPixel) {
+	switch (target->format->BytesPerPixel) {
 	case 1:
-		GP_VLine_8bpp(surf, color, x, y0, y1);
+		GP_VLine_8bpp(target, color, x, y0, y1);
 		break;
 	case 2:
-		GP_VLine_16bpp(surf, color, x, y0, y1);
+		GP_VLine_16bpp(target, color, x, y0, y1);
 		break;
 	case 3:
-		GP_VLine_24bpp(surf, color, x, y0, y1);
+		GP_VLine_24bpp(target, color, x, y0, y1);
 		break;
 	case 4:
-		GP_VLine_32bpp(surf, color, x, y0, y1);
+		GP_VLine_32bpp(target, color, x, y0, y1);
 		break;
 	}
 }

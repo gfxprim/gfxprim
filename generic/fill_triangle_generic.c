@@ -23,7 +23,7 @@
  *                                                                           *
  *****************************************************************************/
 
-void FN_NAME(TARGET_TYPE *target, long color, int x0, int y0, int x1, int y1, int x2, int y2)
+void FN_NAME(GP_TARGET_TYPE *target, long color, int x0, int y0, int x1, int y1, int x2, int y2)
 {
 	/*
 	 * Sort the three points according to the Y coordinate.

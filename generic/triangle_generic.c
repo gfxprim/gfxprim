@@ -32,15 +32,12 @@
  * 	FN_NAME
  * 		The name of the function to define.
  *
- * 	TARGET_TYPE
- * 		Type of the target object to draw onto (e.g. SDL_Surface).
- *
  * 	SETPIXEL
  * 		Name of pixel drawing routine, which must have form
  * 		void SETPIXEL(TARGET_TYPE *target, long color, int x, int y)
  */
 
-void FN_NAME(TARGET_TYPE *target, long color, int x0, int y0, int x1, int y1, int x2, int y2)
+void FN_NAME(GP_TARGET_TYPE *target, long color, int x0, int y0, int x1, int y1, int x2, int y2)
 {
 	/*
 	 * Sort the three points according to the Y coordinate.
