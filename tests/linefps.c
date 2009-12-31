@@ -64,7 +64,7 @@ void draw_frame(void)
 	int y1 = random() % display->h;
 	long color = SDL_MapRGB(display->format, random() % 255, random() % 255, random() % 255);
 
-	GP_Line_32bpp(display, color, x0, y0, x1, y1);
+	GP_Line(display, color, x0, y0, x1, y1);
 }
 
 void event_loop(void)

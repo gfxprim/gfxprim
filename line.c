@@ -27,13 +27,31 @@
 #include "GP_line.h"
 #include "GP_gfx.h"
 
-/* Build the generic GP_Line() function. */
+/*
+ * The generic GP_Line() function; first identifies the bits per pixel,
+ * and then calls the appropriate specialized function.
+ */
 
-#define FN_NAME GP_Line
-#define SETPIXEL GP_SetPixel
-#include "line.tmpl.c"
-#undef SETPIXEL
-#undef FN_NAME
+void GP_Line(SDL_Surface * surf, long color, int x0, int y0, int x1, int y1)
+{
+	if (surf == NULL || surf->pixels == NULL)
+		return;
+
+	switch (surf->format->BytesPerPixel) {
+	case 1:
+		GP_Line_8bpp(surf, color, x0, y0, x1, y1);
+		break;
+	case 2:
+		GP_Line_16bpp(surf, color, x0, y0, x1, y1);
+		break;
+	case 3:
+		GP_Line_24bpp(surf, color, x0, y0, x1, y1);
+		break;
+	case 4:
+		GP_Line_32bpp(surf, color, x0, y0, x1, y1);
+		break;
+	}
+}
 
 /*
  * Build the specialized GP_Line() variants for various bit depths:
@@ -41,26 +59,26 @@
  * for surfaces of 8, 16, 24 or 32 bits per pixel, respectively.
  */
 
-#define FN_NAME GP_Line_8bpp
-#define SETPIXEL GP_SetPixel_8bpp
+#define FN_NAME		GP_Line_8bpp
+#define SETPIXEL	GP_SetPixel_8bpp
 #include "line.tmpl.c"
 #undef SETPIXEL
 #undef FN_NAME
 
-#define FN_NAME GP_Line_16bpp
-#define SETPIXEL GP_SetPixel_16bpp
+#define FN_NAME		GP_Line_16bpp
+#define SETPIXEL	GP_SetPixel_16bpp
 #include "line.tmpl.c"
 #undef SETPIXEL
 #undef FN_NAME
 
-#define FN_NAME GP_Line_24bpp
-#define SETPIXEL GP_SetPixel_24bpp
+#define FN_NAME		GP_Line_24bpp
+#define SETPIXEL	GP_SetPixel_24bpp
 #include "line.tmpl.c"
 #undef SETPIXEL
 #undef FN_NAME
 
-#define FN_NAME GP_Line_32bpp
-#define SETPIXEL GP_SetPixel_32bpp
+#define FN_NAME		GP_Line_32bpp
+#define SETPIXEL	GP_SetPixel_32bpp
 #include "line.tmpl.c"
 #undef SETPIXEL
 #undef FN_NAME
