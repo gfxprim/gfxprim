@@ -40,12 +40,17 @@ void GP_Rect(SDL_Surface *surf, long color, int x0, int y0, int x1, int y1);
 void GP_FillRect(SDL_Surface *surf, long color, int x0, int y0, int x1, int y1);
 
 void GP_Triangle(SDL_Surface *surf, long color, int x0, int y0, int x1, int y1, int x2, int y2);
+void GP_FillTriangle(SDL_Surface *surf, long color, int x0, int y0, int x1, int y1, int x2, int y2);
+
+/* Specializations for known bit depth */
 void GP_Triangle_8bpp(SDL_Surface *surf, long color, int x0, int y0, int x1, int y1, int x2, int y2);
 void GP_Triangle_16bpp(SDL_Surface *surf, long color, int x0, int y0, int x1, int y1, int x2, int y2);
 void GP_Triangle_24bpp(SDL_Surface *surf, long color, int x0, int y0, int x1, int y1, int x2, int y2);
 void GP_Triangle_32bpp(SDL_Surface *surf, long color, int x0, int y0, int x1, int y1, int x2, int y2);
-
-void GP_FillTriangle(SDL_Surface *surf, long color, int x0, int y0, int x1, int y1, int x2, int y2);
+void GP_FillTriangle_8bpp(SDL_Surface *surf, long color, int x0, int y0, int x1, int y1, int x2, int y2);
+void GP_FillTriangle_16bpp(SDL_Surface *surf, long color, int x0, int y0, int x1, int y1, int x2, int y2);
+void GP_FillTriangle_24bpp(SDL_Surface *surf, long color, int x0, int y0, int x1, int y1, int x2, int y2);
+void GP_FillTriangle_32bpp(SDL_Surface *surf, long color, int x0, int y0, int x1, int y1, int x2, int y2);
 
 #endif /* GP_GFX_H */
 

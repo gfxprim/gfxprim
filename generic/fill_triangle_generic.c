@@ -23,23 +23,6 @@
  *                                                                           *
  *****************************************************************************/
 
-/*
- * This file is a macro template. Every inclusion gives a definition
- * of a triangle drawing function.
- *
- * Following symbols must be #defined in the outer file:
- *
- * 	FN_NAME
- * 		The name of the function to define.
- *
- * 	TARGET_TYPE
- * 		Type of the target object to draw onto (e.g. SDL_Surface).
- *
- * 	SETPIXEL
- * 		Name of pixel drawing routine, which must have form
- * 		void SETPIXEL(TARGET_TYPE *target, long color, int x, int y)
- */
-
 void FN_NAME(TARGET_TYPE *target, long color, int x0, int y0, int x1, int y1, int x2, int y2)
 {
 	/*
@@ -102,14 +85,34 @@ void FN_NAME(TARGET_TYPE *target, long color, int x0, int y0, int x1, int y1, in
 
 	/*
 	 * Draw the triangle in a top-down, line-per line manner.
-	 * The algorithm is the same as for GP_FillTriangle(), except that
-	 * from each line, we draw only the starting and ending point,
-	 * plus all points during transition from previous X to new X.
-	 * (This also means we draw the line at B twice; once to finish
-	 * the AB line, and one to start the AC line.)
+	 *
+	 * The triangle is subdivided into two parts:
+	 * from A to B (between AB and AC)
+	 * and from B to C (between BC and AC).
+	 *
+	 * For each line, the value of X is calculated for each side,
+	 * yielding a point on each side, and a horizontal line is drawn
+	 * between the points.
+	 *
+	 * The value of X for each side is calculated from the line equation
+	 * of the side. For example, for AB we have:
+	 *
+	 * ABx = (y - Ay) * ABdx / ABdy + Ax            and thus
+	 * ABx * ABdy = (y - Ay) * ABdx + Ax * ABdy     and thus
+	 * (ABx - Ax) * ABdy - (y - Ay) * ABdx = 0
+	 *
+	 * For integer-only operation, the expression will not be exactly 0;
+	 * instead, we will have an error term we try to minimize:
+	 *
+	 * ABerr = (ABx - Ax) * ABdy - (y - Ay) * ABdx
+	 *
+	 * Because sides are straight lines, we know that X is either
+	 * monotonically growing, or decreasing. Therefore we can calculate
+	 * the next value of X from the previous value simply by increasing
+	 * or decreasing it until the error term crosses the zero boundary.
 	 */
 	int y, ABx, ACx, BCx, ABerr, ACerr, BCerr;
-	for (ABx = Ax, ACx = Ax, y = Ay; y <= By; y++) {
+	for (ABx = Ax, ACx = Ax, y = Ay; y < By; y++) {
 		for (;;) {
 			ABerr = (ABx - Ax) * ABdy - (y - Ay) * ABdx;
 			if (ABxstep > 0 ? ABerr >= 0 : ABerr <= 0) {
@@ -128,6 +131,7 @@ void FN_NAME(TARGET_TYPE *target, long color, int x0, int y0, int x1, int y1, in
 			ACx += ACxstep;
 			SETPIXEL(target, color, ACx, y);
 		}
+		GP_HLine(target, color, ABx, ACx, y);
 	}
 	for (BCx = Bx, y = By; y <= Cy; y++) {
 		for (;;) {
@@ -139,7 +143,6 @@ void FN_NAME(TARGET_TYPE *target, long color, int x0, int y0, int x1, int y1, in
 			BCx += BCxstep;
 			SETPIXEL(target, color, BCx, y);
 		}
-		SETPIXEL(target, color, BCx, y);
 		for (;;) {
 			ACerr = (ACx - Ax) * ACdy - (y - Ay) * ACdx;
 			if (ACxstep > 0 ? ACerr >= 0 : ACerr <= 0) {
@@ -149,7 +152,7 @@ void FN_NAME(TARGET_TYPE *target, long color, int x0, int y0, int x1, int y1, in
 			ACx += ACxstep;
 			SETPIXEL(target, color, ACx, y);
 		}
+		GP_HLine(target, color, BCx, ACx, y);
 	}
-	GP_HLine(target, color, BCx, ACx, y-1);
 }
 
