@@ -23,75 +23,60 @@
  *                                                                           *
  *****************************************************************************/
 
-#include "GP_clip_rect.h"
-#include "GP_pixel.h"
-
 /*
- * An adaptive implementation of GP_SetPixel(); it automatically identifies
- * the number of bits per pixel of the image and then uses the appropriate
- * pixel writing routine.
+ * File to be #included from line.c.
+ *
+ * This file is a macro template. With each inclusion, you get a definition
+ * of a vertical line drawing function in form:
+ *
+ * void FN_NAME(SDL_Surface * surf, long color, int x, int y0, int y1)
+ *
+ * These arguments must be #defined in the including file:
+ *
+ * 	FN_NAME
+ * 		Name of the function.
+ * 	WRITE_PIXEL
+ * 		A pixel writing routine to use. Must have form
+ * 		void WRITE_PIXEL(uint8_t *p, long color).
  */
-void GP_SetPixel(SDL_Surface *surf, long color, int x, int y)
-{
-	int bytes_per_pixel = surf->format->BytesPerPixel;
 
-	if (surf == NULL || surf->pixels == NULL)
+void FN_NAME(SDL_Surface *surf, long color, int x, int y0, int y1)
+{
+	if (surf == NULL || surf->format == NULL)
 		return;
 
-	/* Clip coordinates against the clip rectangle of the surface */
+	/* Ensure that y0 <= y1, swap coordinates if needed. */
+	if (y0 > y1) {
+		FN_NAME(surf, color, x, y1, y0);
+		return;
+	}
+
+	/* Get the clipping rectangle. */
 	int xmin, xmax, ymin, ymax;
 	GP_GET_CLIP_RECT(surf, xmin, xmax, ymin, ymax);
 
-	if (x < xmin || y < ymin || x > xmax || y > ymax)
+	/* Check whether the line is not completely clipped out. */
+	if (x < xmin || x > xmax || y0 > ymax || y1 < xmin)
 		return;
 
-	/* Compute the address of the pixel */
-	uint8_t *p = GP_PIXEL_ADDR(surf, x, y);
+	/* Clip the start and end of the line. */
+	if (y0 < ymin) {
+		y0 = ymin;
+	}
+	if (y1 > ymax) {
+		y1 = ymax;
+	}
 
-	switch (bytes_per_pixel) {
-	case 1:
-		GP_WRITE_PIXEL_1BYTE(p, color);
-		break;
-	
-	case 2:
-		GP_WRITE_PIXEL_2BYTES(p, color);
-		break;
+	int bytes_per_line = GP_BYTES_PER_LINE(surf);
 
-	case 3:
-		GP_WRITE_PIXEL_3BYTES(p, color);
-		break;
+	/* Get the starting and ending address of the line. */
+	uint8_t *p_start = GP_PIXEL_ADDR(surf, x, y0);
+	uint8_t *p_end = p_start + (y1 - y0) * bytes_per_line;
 
-	case 4:
-		GP_WRITE_PIXEL_4BYTES(p, color);
-		break;
+	/* Write pixels. */
+	uint8_t * p;
+	for (p = p_start; p <= p_end; p += bytes_per_line) {
+		WRITE_PIXEL(p, color);
 	}
 }
-
-/*
- * Build specializations of GP_SetPixel() for various bit depths.
- */
-
-#define FN_NAME		GP_SetPixel_8bpp
-#define WRITE_PIXEL	GP_WRITE_PIXEL_1BYTE
-#include "generic/setpixel_generic.c"
-#undef FN_NAME
-#undef WRITE_PIXEL
-
-#define FN_NAME		GP_SetPixel_16bpp
-#define WRITE_PIXEL	GP_WRITE_PIXEL_2BYTES
-#include "generic/setpixel_generic.c"
-#undef FN_NAME
-#undef WRITE_PIXEL
-
-#define FN_NAME		GP_SetPixel_24bpp
-#define WRITE_PIXEL	GP_WRITE_PIXEL_3BYTES
-#include "generic/setpixel_generic.c"
-#undef FN_NAME
-#undef WRITE_PIXEL
-
-#define FN_NAME		GP_SetPixel_32bpp
-#define WRITE_PIXEL	GP_WRITE_PIXEL_4BYTES
-#include "generic/setpixel_generic.c"
-#undef FN_NAME
-#undef WRITE_PIXEL
 

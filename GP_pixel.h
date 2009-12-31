@@ -29,6 +29,12 @@
 #include <SDL/SDL.h>
 
 /*
+ * Returns the number of bytes per each pixel line,
+ * including any additional padding.
+ */
+#define GP_BYTES_PER_LINE(surf) (surf->pitch)
+
+/*
  * Computes the address of a pixel at coordinates (x, y)
  * in the specified surface (the coordinates must lie within
  * the surface).

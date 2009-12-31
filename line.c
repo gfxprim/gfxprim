@@ -29,10 +29,11 @@
 #include "GP_gfx.h"
 
 /*
- * Adaptive implementation of GP_Line() function. It first identifies
- * the number of bits per pixel of the image, and then calls the appropriate
- * specialized function.
+ * Adaptive implementations of GP_Line(), GP_HLine() and GP_VLine().
+ * They determine the bit depth of the underlying surface first,
+ * and then call the appropriate specialized drawing function.
  */
+
 void GP_Line(SDL_Surface * surf, long color, int x0, int y0, int x1, int y1)
 {
 	if (surf == NULL || surf->pixels == NULL)
@@ -54,10 +55,50 @@ void GP_Line(SDL_Surface * surf, long color, int x0, int y0, int x1, int y1)
 	}
 }
 
+void GP_HLine(SDL_Surface *surf, long color, int x0, int x1, int y)
+{
+	if (surf == NULL || surf->format == NULL)
+		return;
+
+	switch (surf->format->BytesPerPixel) {
+	case 1:
+		GP_HLine_8bpp(surf, color, x0, x1, y);
+		break;
+	case 2:
+		GP_HLine_16bpp(surf, color, x0, x1, y);
+		break;
+	case 3:
+		GP_HLine_24bpp(surf, color, x0, x1, y);
+		break;
+	case 4:
+		GP_HLine_32bpp(surf, color, x0, x1, y);
+		break;
+	}
+}
+
+void GP_VLine(SDL_Surface *surf, long color, int x, int y0, int y1)
+{
+	if (surf == NULL || surf->format == NULL)
+		return;
+
+	switch (surf->format->BytesPerPixel) {
+	case 1:
+		GP_VLine_8bpp(surf, color, x, y0, y1);
+		break;
+	case 2:
+		GP_VLine_16bpp(surf, color, x, y0, y1);
+		break;
+	case 3:
+		GP_VLine_24bpp(surf, color, x, y0, y1);
+		break;
+	case 4:
+		GP_VLine_32bpp(surf, color, x, y0, y1);
+		break;
+	}
+}
+
 /*
- * Build the specialized GP_Line() variants for various bit depths:
- * GP_Line_8bpp(), GP_Line_16bpp(), GP_Line_24bpp(), GP_Line_32bpp()
- * for surfaces of 8, 16, 24 or 32 bits per pixel, respectively.
+ * Build specialized GP_Line() variants for various bit depths.
  */
 
 #define FN_NAME		GP_Line_8bpp
@@ -83,30 +124,6 @@ void GP_Line(SDL_Surface * surf, long color, int x0, int y0, int x1, int y1)
 #include "generic/line_generic.c"
 #undef SETPIXEL
 #undef FN_NAME
-
-/*
- * A bitdepth-adaptive version of GP_HLine().
- */
-void GP_HLine(SDL_Surface *surf, long color, int x0, int x1, int y)
-{
-	if (surf == NULL || surf->format == NULL)
-		return;
-
-	switch (surf->format->BytesPerPixel) {
-	case 1:
-		GP_HLine_8bpp(surf, color, x0, x1, y);
-		break;
-	case 2:
-		GP_HLine_16bpp(surf, color, x0, x1, y);
-		break;
-	case 3:
-		GP_HLine_24bpp(surf, color, x0, x1, y);
-		break;
-	case 4:
-		GP_HLine_32bpp(surf, color, x0, x1, y);
-		break;
-	}
-}
 
 /*
  * Build specialized GP_HLine() variants for various bit depths.
@@ -145,66 +162,32 @@ void GP_HLine(SDL_Surface *surf, long color, int x0, int x1, int y)
 #undef FN_NAME
 
 /*
- * Draws a vertical line from (x, y0) to (x, y1), inclusive.
+ * Build specialized GP_VLine() variants for various bit depths.
  */
-void GP_VLine(SDL_Surface *surf, long color, int x, int y0, int y1)
-{
-	if (surf == NULL || surf->format == NULL)
-		return;
 
-	/* Ensure that y0 <= y1, swap coordinates if needed. */
-	if (y0 > y1) {
-		GP_VLine(surf, color, x, y1, y0);
-		return;
-	}
+#define FN_NAME		GP_VLine_8bpp
+#define WRITE_PIXEL	GP_WRITE_PIXEL_1BYTE
+#include "generic/vline_generic.c"
+#undef WRITE_PIXEL
+#undef FN_NAME
 
-	/* Get the clipping rectangle. */
-	int xmin, xmax, ymin, ymax;
-	GP_GET_CLIP_RECT(surf, xmin, xmax, ymin, ymax);
+#define FN_NAME		GP_VLine_16bpp
+#define WRITE_PIXEL	GP_WRITE_PIXEL_2BYTES
+#include "generic/vline_generic.c"
+#undef WRITE_PIXEL
+#undef FN_NAME
 
-	/* Check whether the line is not completely clipped out. */
-	if (x < xmin || x > xmax || y0 > ymax || y1 < xmin)
-		return;
+#define FN_NAME		GP_VLine_24bpp
+#define WRITE_PIXEL	GP_WRITE_PIXEL_3BYTES
+#include "generic/vline_generic.c"
+#undef WRITE_PIXEL
+#undef FN_NAME
 
-	/* Clip the start and end of the line. */
-	if (y0 < ymin) {
-		y0 = ymin;
-	}
-	if (y1 > ymax) {
-		y1 = ymax;
-	}
-
-	int bytes_per_pixel = surf->format->BytesPerPixel;
-	int pitch = surf->pitch;
-
-	/* Get the starting and ending address of the line. */
-	Uint8 *p_start = GP_PIXEL_ADDR(surf, x, y0);
-	Uint8 *p_end = p_start + (y1 - y0) * surf->pitch;
-
-	/* Write pixels. */
-	Uint8 * p;
-	switch (bytes_per_pixel) {
-	case 1:
-		for (p = p_start; p <= p_end; p += pitch)
-			GP_WRITE_PIXEL_1BYTE(p, color);
-		break;
-	
-	case 2:
-		for (p = p_start; p <= p_end; p += pitch)
-			GP_WRITE_PIXEL_2BYTES(p, color);
-		break;
-	
-	case 3:
-		for (p = p_start; p <= p_end; p += pitch)
-			GP_WRITE_PIXEL_3BYTES(p, color);
-		break;
-
-	case 4:
-		for (p = p_start; p <= p_end; p += pitch)
-			GP_WRITE_PIXEL_4BYTES(p, color);
-		break;
-	}
-}
+#define FN_NAME		GP_VLine_32bpp
+#define WRITE_PIXEL	GP_WRITE_PIXEL_4BYTES
+#include "generic/vline_generic.c"
+#undef WRITE_PIXEL
+#undef FN_NAME
 
 void GP_HLineWide(SDL_Surface *surf, long color, enum GP_LinePosition pos, uint8_t thickness, int x0, int x1, int y)
 {
