@@ -78,25 +78,25 @@ void GP_SetPixel(SDL_Surface *surf, long color, int x, int y)
 
 #define FN_NAME		GP_SetPixel_8bpp
 #define WRITE_PIXEL	GP_WRITE_PIXEL_1BYTE
-#include "setpixel.tmpl.c"
+#include "templates/setpixel_tmpl.c"
 #undef FN_NAME
 #undef WRITE_PIXEL
 
 #define FN_NAME		GP_SetPixel_16bpp
 #define WRITE_PIXEL	GP_WRITE_PIXEL_2BYTES
-#include "setpixel.tmpl.c"
+#include "templates/setpixel_tmpl.c"
 #undef FN_NAME
 #undef WRITE_PIXEL
 
 #define FN_NAME		GP_SetPixel_24bpp
 #define WRITE_PIXEL	GP_WRITE_PIXEL_3BYTES
-#include "setpixel.tmpl.c"
+#include "templates/setpixel_tmpl.c"
 #undef FN_NAME
 #undef WRITE_PIXEL
 
 #define FN_NAME		GP_SetPixel_32bpp
 #define WRITE_PIXEL	GP_WRITE_PIXEL_4BYTES
-#include "setpixel.tmpl.c"
+#include "templates/setpixel_tmpl.c"
 #undef FN_NAME
 #undef WRITE_PIXEL
 

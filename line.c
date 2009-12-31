@@ -61,25 +61,25 @@ void GP_Line(SDL_Surface * surf, long color, int x0, int y0, int x1, int y1)
 
 #define FN_NAME		GP_Line_8bpp
 #define SETPIXEL	GP_SetPixel_8bpp
-#include "line.tmpl.c"
+#include "templates/line_tmpl.c"
 #undef SETPIXEL
 #undef FN_NAME
 
 #define FN_NAME		GP_Line_16bpp
 #define SETPIXEL	GP_SetPixel_16bpp
-#include "line.tmpl.c"
+#include "templates/line_tmpl.c"
 #undef SETPIXEL
 #undef FN_NAME
 
 #define FN_NAME		GP_Line_24bpp
 #define SETPIXEL	GP_SetPixel_24bpp
-#include "line.tmpl.c"
+#include "templates/line_tmpl.c"
 #undef SETPIXEL
 #undef FN_NAME
 
 #define FN_NAME		GP_Line_32bpp
 #define SETPIXEL	GP_SetPixel_32bpp
-#include "line.tmpl.c"
+#include "templates/line_tmpl.c"
 #undef SETPIXEL
 #undef FN_NAME
 
