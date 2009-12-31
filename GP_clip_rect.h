@@ -23,20 +23,21 @@
  *                                                                           *
  *****************************************************************************/
 
-#ifndef GP_H
-#define GP_H
+#ifndef GP_CLIP_RECT_H
+#define GP_CLIP_RECT_H
 
-#include "GP_pixel.h"
+#include <SDL/SDL.h>
 
-#include "GP_clip_rect.h"
+/*
+ * Loads the clipping rectangle of the given surface into variables
+ * whose names are passed in 'xmin', 'xmax', 'ymin', 'ymax'.
+ */
+#define GP_GET_CLIP_RECT(surf, xmin, xmax, ymin, ymax) { \
+	xmin = surf->clip_rect.x; \
+	xmax = surf->clip_rect.x + surf->clip_rect.w - 1; \
+	ymin = surf->clip_rect.y; \
+	ymax = surf->clip_rect.y + surf->clip_rect.h - 1; \
+}
 
-#include "GP_line.h"
-
-#include "GP_gfx.h"
-
-#include "GP_colors.h"
-
-#include "GP_text.h"
-
-#endif /* GP_H */
+#endif /* GP_CLIP_RECT_H */
 

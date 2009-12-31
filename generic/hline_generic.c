@@ -23,20 +23,59 @@
  *                                                                           *
  *****************************************************************************/
 
-#ifndef GP_H
-#define GP_H
+/*
+ * File to be #included from line.c.
+ *
+ * This file is a macro template. With each inclusion, you get a definition
+ * of a horizontal line drawing function in form:
+ *
+ * void FN_NAME(SDL_Surface * surf, long color, int x0, int x1, int y)
+ *
+ * These arguments must be #defined in the including file:
+ *
+ * 	FN_NAME
+ * 		Name of the function.
+ * 	BYTES_PER_PIXEL
+ * 		Number of bytes per pixel of the target.
+ * 	WRITE_PIXEL
+ * 		A pixel writing routine to use. Must have form
+ * 		void WRITE_PIXEL(uint8_t *p, long color).
+ */
 
-#include "GP_pixel.h"
+void FN_NAME(SDL_Surface *surf, long color, int x0, int x1, int y)
+{
+	if (surf == NULL || surf->format == NULL)
+		return;
 
-#include "GP_clip_rect.h"
+	/* Ensure that x0 <= x1, swap coordinates if needed. */
+	if (x0 > x1) {
+		FN_NAME(surf, color, x1, x0, y);
+		return;
+	}
 
-#include "GP_line.h"
+	/* Get the clipping rectangle. */
+	int xmin, xmax, ymin, ymax;
+	GP_GET_CLIP_RECT(surf, xmin, xmax, ymin, ymax);
 
-#include "GP_gfx.h"
+	/* Check whether the line is not completely clipped out. */
+	if (y < ymin || y > ymax || x0 > xmax || x1 < xmin)
+		return;
 
-#include "GP_colors.h"
+	/* Clip the start and end of the line. */
+	if (x0 < xmin) {
+		x0 = xmin;
+	}
+	if (x1 > xmax) {
+		x1 = xmax;
+	}
 
-#include "GP_text.h"
+	/* Get the starting and ending address of the line. */
+	uint8_t *p_start = GP_PIXEL_ADDR(surf, x0, y);
+	uint8_t *p_end = p_start + (x1 - x0) * BYTES_PER_PIXEL;
 
-#endif /* GP_H */
+	/* Write pixels. */
+	uint8_t * p;
+	for (p = p_start; p <= p_end; p += BYTES_PER_PIXEL)
+		WRITE_PIXEL(p, color);
+}
 

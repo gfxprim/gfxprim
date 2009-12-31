@@ -22,7 +22,7 @@ all: $(LIBRARY)
 
 $(LIBRARY): $(LIBRARY).a $(LIBRARY).so
 
-$(OBJECTS): GP.h GP_gfx.h GP_colors.h GP_line.h GP_pixel.h GP_text.h
+$(OBJECTS): GP.h GP_gfx.h GP_clip_rect.h GP_colors.h GP_line.h GP_pixel.h GP_text.h
 
 $(LIBRARY).a: $(OBJECTS) 
 	ar crus $@ $^

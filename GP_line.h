@@ -31,26 +31,37 @@
 
 /*
  * Draws a line from (x0, y0) to (x1, y1), inclusive.
- * Coordinates are automatically clipped both to surface boundaries and
- * to the surface clipping rectangle.
+ * Coordinates are automatically clipped; overdrawing surface boundary
+ * is safe.
+ *
+ * GP_Line() is universal; GP_Line_8bpp(), GP_Line_16bpp(), GP_Line_24bpp()
+ * and GP_Line_32bpp() are to be used when the programmer knows in advance
+ * the bit depth of the target surface.
  */
 void GP_Line(SDL_Surface *surf, long color, int x0, int y0, int x1, int y1);
-
-/*
- * Specializations of GP_Line() for surfaces of known bit depth.
- * They also honor clipping and are overdraw safe.
- */
-
 void GP_Line_8bpp(SDL_Surface *surf, long color, int x0, int y0, int x1, int y1);
 void GP_Line_16bpp(SDL_Surface *surf, long color, int x0, int y0, int x1, int y1);
 void GP_Line_24bpp(SDL_Surface *surf, long color, int x0, int y0, int x1, int y1);
 void GP_Line_32bpp(SDL_Surface *surf, long color, int x0, int y0, int x1, int y1);
 
 /*
- * Optimized calls for drawing horizontal and vertical lines.
+ * Optimized call for drawing horizontal lines.
+ * A line is drawn from (x0, y) to (x1, y), inclusive.
+ * Coordinates are automatically clipped; overdrawing surface boundary
+ * is safe.
  */
-
 void GP_HLine(SDL_Surface *surf, long color, int x0, int x1, int y);
+void GP_HLine_8bpp(SDL_Surface * surf, long color, int x0, int x1, int y);
+void GP_HLine_16bpp(SDL_Surface * surf, long color, int x0, int x1, int y);
+void GP_HLine_24bpp(SDL_Surface * surf, long color, int x0, int x1, int y);
+void GP_HLine_32bpp(SDL_Surface * surf, long color, int x0, int x1, int y);
+
+/*
+ * Optimized call for drawing vertical lines.
+ * A line is drawn from (x, y0) to (x, y1), inclusive.
+ * Coordinates are automatically clipped; overdrawing surface boundary
+ * is safe.
+ */
 void GP_VLine(SDL_Surface *surf, long color, int x, int y0, int y1);
 
 enum GP_LinePosition {

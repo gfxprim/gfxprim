@@ -24,6 +24,7 @@
  *****************************************************************************/
 
 #include "GP_pixel.h"
+#include "GP_clip_rect.h"
 #include "GP_line.h"
 #include "GP_gfx.h"
 
@@ -84,68 +85,64 @@ void GP_Line(SDL_Surface * surf, long color, int x0, int y0, int x1, int y1)
 #undef FN_NAME
 
 /*
- * Draws a horizontal line from (x0, y) to (x1, y), inclusive.
+ * A bitdepth-adaptive version of GP_HLine().
  */
 void GP_HLine(SDL_Surface *surf, long color, int x0, int x1, int y)
 {
 	if (surf == NULL || surf->format == NULL)
 		return;
 
-	/* Ensure that x0 <= x1, swap coordinates if needed. */
-	if (x0 > x1) {
-		GP_HLine(surf, color, x1, x0, y);
-		return;
-	}
-
-	/* Get the clipping rectangle. */
-	int xmin = surf->clip_rect.x;
-	int xmax = surf->clip_rect.x + surf->clip_rect.w - 1;
-	int ymin = surf->clip_rect.y;
-	int ymax = surf->clip_rect.y + surf->clip_rect.h - 1;
-
-	/* Check whether the line is not completely clipped out. */
-	if (y < ymin || y > ymax || x0 > xmax || x1 < xmin)
-		return;
-
-	/* Clip the start and end of the line. */
-	if (x0 < xmin) {
-		x0 = xmin;
-	}
-	if (x1 > xmax) {
-		x1 = xmax;
-	}
-
-	int bytes_per_pixel = surf->format->BytesPerPixel;
-
-	/* Get the starting and ending address of the line. */
-	Uint8 *p_start = GP_PIXEL_ADDR(surf, x0, y);
-	Uint8 *p_end = p_start + (x1 - x0) * bytes_per_pixel;
-
-	/* Write pixels. */
-	Uint8 * p;
-	switch (bytes_per_pixel) {
+	switch (surf->format->BytesPerPixel) {
 	case 1:
-		for (p = p_start; p <= p_end; p++)
-			GP_WRITE_PIXEL_1BYTE(p, color);
+		GP_HLine_8bpp(surf, color, x0, x1, y);
 		break;
-	
 	case 2:
-		for (p = p_start; p <= p_end; p += 2)
-			GP_WRITE_PIXEL_2BYTES(p, color);
+		GP_HLine_16bpp(surf, color, x0, x1, y);
 		break;
-	
 	case 3:
-		for (p = p_start; p <= p_end; p += 3) {
-			GP_WRITE_PIXEL_3BYTES(p, color);
-		}
+		GP_HLine_24bpp(surf, color, x0, x1, y);
 		break;
-
 	case 4:
-		for (p = p_start; p <= p_end; p += 4)
-			GP_WRITE_PIXEL_4BYTES(p, color);
+		GP_HLine_32bpp(surf, color, x0, x1, y);
 		break;
 	}
 }
+
+/*
+ * Build specialized GP_HLine() variants for various bit depths.
+ */
+
+#define FN_NAME		GP_HLine_8bpp
+#define BYTES_PER_PIXEL	1
+#define WRITE_PIXEL	GP_WRITE_PIXEL_1BYTE
+#include "generic/hline_generic.c"
+#undef WRITE_PIXEL
+#undef BYTES_PER_PIXEL
+#undef FN_NAME
+
+#define FN_NAME		GP_HLine_16bpp
+#define BYTES_PER_PIXEL	2
+#define WRITE_PIXEL	GP_WRITE_PIXEL_2BYTES
+#include "generic/hline_generic.c"
+#undef WRITE_PIXEL
+#undef BYTES_PER_PIXEL
+#undef FN_NAME
+
+#define FN_NAME		GP_HLine_24bpp
+#define BYTES_PER_PIXEL	3
+#define WRITE_PIXEL	GP_WRITE_PIXEL_3BYTES
+#include "generic/hline_generic.c"
+#undef WRITE_PIXEL
+#undef BYTES_PER_PIXEL
+#undef FN_NAME
+
+#define FN_NAME		GP_HLine_32bpp
+#define BYTES_PER_PIXEL	4
+#define WRITE_PIXEL	GP_WRITE_PIXEL_4BYTES
+#include "generic/hline_generic.c"
+#undef WRITE_PIXEL
+#undef BYTES_PER_PIXEL
+#undef FN_NAME
 
 /*
  * Draws a vertical line from (x, y0) to (x, y1), inclusive.
@@ -162,10 +159,8 @@ void GP_VLine(SDL_Surface *surf, long color, int x, int y0, int y1)
 	}
 
 	/* Get the clipping rectangle. */
-	int xmin = surf->clip_rect.x;
-	int xmax = surf->clip_rect.x + surf->clip_rect.w - 1;
-	int ymin = surf->clip_rect.y;
-	int ymax = surf->clip_rect.y + surf->clip_rect.h - 1;
+	int xmin, xmax, ymin, ymax;
+	GP_GET_CLIP_RECT(surf, xmin, xmax, ymin, ymax);
 
 	/* Check whether the line is not completely clipped out. */
 	if (x < xmin || x > xmax || y0 > ymax || y1 < xmin)
