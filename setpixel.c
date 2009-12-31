@@ -26,9 +26,9 @@
 #include "GP_pixel.h"
 
 /*
- * Sets a pixel at coordinates (x, y) to the given color.
- * If the coordinates lie outside the surface boundaries or outside its
- * clipping rectangle, the call has no effect.
+ * An adaptive implementation of GP_SetPixel(); it automatically identifies
+ * the number of bits per pixel of the image and then uses the appropriate
+ * pixel writing routine.
  */
 void GP_SetPixel(SDL_Surface *surf, long color, int x, int y)
 {
@@ -78,25 +78,25 @@ void GP_SetPixel(SDL_Surface *surf, long color, int x, int y)
 
 #define FN_NAME		GP_SetPixel_8bpp
 #define WRITE_PIXEL	GP_WRITE_PIXEL_1BYTE
-#include "templates/setpixel_tmpl.c"
+#include "generic/setpixel_generic.c"
 #undef FN_NAME
 #undef WRITE_PIXEL
 
 #define FN_NAME		GP_SetPixel_16bpp
 #define WRITE_PIXEL	GP_WRITE_PIXEL_2BYTES
-#include "templates/setpixel_tmpl.c"
+#include "generic/setpixel_generic.c"
 #undef FN_NAME
 #undef WRITE_PIXEL
 
 #define FN_NAME		GP_SetPixel_24bpp
 #define WRITE_PIXEL	GP_WRITE_PIXEL_3BYTES
-#include "templates/setpixel_tmpl.c"
+#include "generic/setpixel_generic.c"
 #undef FN_NAME
 #undef WRITE_PIXEL
 
 #define FN_NAME		GP_SetPixel_32bpp
 #define WRITE_PIXEL	GP_WRITE_PIXEL_4BYTES
-#include "templates/setpixel_tmpl.c"
+#include "generic/setpixel_generic.c"
 #undef FN_NAME
 #undef WRITE_PIXEL
 

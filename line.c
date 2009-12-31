@@ -28,10 +28,10 @@
 #include "GP_gfx.h"
 
 /*
- * The generic GP_Line() function; first identifies the bits per pixel,
- * and then calls the appropriate specialized function.
+ * Adaptive implementation of GP_Line() function. It first identifies
+ * the number of bits per pixel of the image, and then calls the appropriate
+ * specialized function.
  */
-
 void GP_Line(SDL_Surface * surf, long color, int x0, int y0, int x1, int y1)
 {
 	if (surf == NULL || surf->pixels == NULL)
@@ -61,25 +61,25 @@ void GP_Line(SDL_Surface * surf, long color, int x0, int y0, int x1, int y1)
 
 #define FN_NAME		GP_Line_8bpp
 #define SETPIXEL	GP_SetPixel_8bpp
-#include "templates/line_tmpl.c"
+#include "generic/line_generic.c"
 #undef SETPIXEL
 #undef FN_NAME
 
 #define FN_NAME		GP_Line_16bpp
 #define SETPIXEL	GP_SetPixel_16bpp
-#include "templates/line_tmpl.c"
+#include "generic/line_generic.c"
 #undef SETPIXEL
 #undef FN_NAME
 
 #define FN_NAME		GP_Line_24bpp
 #define SETPIXEL	GP_SetPixel_24bpp
-#include "templates/line_tmpl.c"
+#include "generic/line_generic.c"
 #undef SETPIXEL
 #undef FN_NAME
 
 #define FN_NAME		GP_Line_32bpp
 #define SETPIXEL	GP_SetPixel_32bpp
-#include "templates/line_tmpl.c"
+#include "generic/line_generic.c"
 #undef SETPIXEL
 #undef FN_NAME
 

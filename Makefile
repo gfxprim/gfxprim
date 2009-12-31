@@ -39,10 +39,10 @@ $(LIBRARY).so:
 %.o: %.c
 	$(CC) $(CFLAGS) $< -c -o $@ 
 
-setpixel.o: setpixel.c templates/setpixel_tmpl.c
+setpixel.o: setpixel.c generic/setpixel_generic.c
 	$(CC) $(CFLAGS) $< -c -o $@
 
-line.o: line.c templates/line_tmpl.c
+line.o: line.c generic/line_generic.c
 	$(CC) $(CFLAGS) $< -c -o $@
 
 #############################################################################

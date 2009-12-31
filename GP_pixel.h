@@ -72,6 +72,11 @@
  * with clipping and safe behavior on edges
  */
 
+/*
+ * Sets a pixel at coordinates (x, y) to the given color.
+ * If the coordinates lie outside the surface boundaries or outside its
+ * clipping rectangle, the call has no effect.
+ */
 void GP_SetPixel(SDL_Surface *surf, long color, int x, int y);
 long GP_GetPixel(SDL_Surface *surf, int x, int y);
 
