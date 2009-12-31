@@ -18,10 +18,11 @@ LIB_LOC=/usr/lib/
 
 all: $(LIBRARY)
 	cd tests && $(MAKE) all
+	cd benchmark && $(MAKE) all
 
 $(LIBRARY): $(LIBRARY).a $(LIBRARY).so
 
-$(OBJECTS): GP.h
+$(OBJECTS): GP.h GP_gfx.h GP_colors.h GP_line.h GP_pixel.h GP_text.h
 
 $(LIBRARY).a: $(OBJECTS) 
 	ar crus $@ $^
@@ -30,8 +31,23 @@ $(LIBRARY).so:
 	$(CC) -fPIC -dPIC --shared -Wl,-soname -Wl,$@.0 $(CFLAGS) $(OBJECTS) -o $@
 	ln -s $@ $@.0
 
+#############################################################################
+# How object files from C codes are built. Many C files are including some
+# template files; the resulting object is also dependent on the templates.
+#############################################################################
+
 %.o: %.c
 	$(CC) $(CFLAGS) $< -c -o $@ 
+
+setpixel.o: setpixel.c setpixel.tmpl.c
+	$(CC) $(CFLAGS) $< -c -o $@
+
+line.o: line.c line.tmpl.c
+	$(CC) $(CFLAGS) $< -c -o $@
+
+#############################################################################
+# Installation, cleanup, and packing.
+#############################################################################
 
 install:
 	install -m 775 -d $(HEADER_LOC)GP/
@@ -42,6 +58,7 @@ clean:
 	rm -f $(OBJECTS)
 	rm -f $(LIBRARY).a $(LIBRARY).so $(LIBRARY).so.0
 	cd tests && $(MAKE) clean
+	cd benchmark && $(MAKE) clean
 
 tar: clean
 	cd .. && tar cjf gfxprim-`date +%Y-%b-%d`.tar.bz2 gfxprim
