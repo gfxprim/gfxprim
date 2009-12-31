@@ -64,6 +64,11 @@ void GP_HLine_32bpp(SDL_Surface * surf, long color, int x0, int x1, int y);
  */
 void GP_VLine(SDL_Surface *surf, long color, int x, int y0, int y1);
 
+void GP_VLine_8bpp(SDL_Surface * surf, long color, int x, int y0, int y1);
+void GP_VLine_16bpp(SDL_Surface * surf, long color, int x, int y0, int y1);
+void GP_VLine_24bpp(SDL_Surface * surf, long color, int x, int y0, int y1);
+void GP_VLine_32bpp(SDL_Surface * surf, long color, int x, int y0, int y1);
+
 enum GP_LinePosition {
 	GP_LINE_ABOVE,
 	GP_LINE_BELOW,

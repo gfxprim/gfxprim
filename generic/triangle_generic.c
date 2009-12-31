@@ -23,59 +23,7 @@
  *                                                                           *
  *****************************************************************************/
 
-#include "GP_pixel.h"
-#include "GP_line.h"
-#include "GP_gfx.h"
-
-#include <assert.h>
-#include <stdio.h>
-
-void GP_Triangle(SDL_Surface *surf, long color, int x0, int y0, int x1, int y1, int x2, int y2)
-{
-	if (surf == NULL || surf->pixels == NULL)
-		return;
-
-	switch (surf->format->BytesPerPixel) {
-	case 1:
-		GP_Triangle_8bpp(surf, color, x0, y0, x1, y1, x2, y2);
-		break;
-	case 2:
-		GP_Triangle_16bpp(surf, color, x0, y0, x1, y1, x2, y2);
-		break;
-	case 3:
-		GP_Triangle_24bpp(surf, color, x0, y0, x1, y1, x2, y2);
-		break;
-	case 4:
-		GP_Triangle_32bpp(surf, color, x0, y0, x1, y1, x2, y2);
-		break;
-	}
-}
-
-#define FN_NAME		GP_Triangle_8bpp
-#define SETPIXEL	GP_SetPixel_8bpp
-#include "generic/triangle_generic.c"
-#undef SETPIXEL
-#undef FN_NAME
-
-#define FN_NAME		GP_Triangle_16bpp
-#define SETPIXEL	GP_SetPixel_16bpp
-#include "generic/triangle_generic.c"
-#undef SETPIXEL
-#undef FN_NAME
-
-#define FN_NAME		GP_Triangle_24bpp
-#define SETPIXEL	GP_SetPixel_24bpp
-#include "generic/triangle_generic.c"
-#undef SETPIXEL
-#undef FN_NAME
-
-#define FN_NAME		GP_Triangle_32bpp
-#define SETPIXEL	GP_SetPixel_32bpp
-#include "generic/triangle_generic.c"
-#undef SETPIXEL
-#undef FN_NAME
-
-void GP_FillTriangle(SDL_Surface *surf, long color, int x0, int y0, int x1, int y1, int x2, int y2)
+void FN_NAME(SDL_Surface *surf, long color, int x0, int y0, int x1, int y1, int x2, int y2)
 {
 	/*
 	 * Sort the three points according to the Y coordinate.
@@ -137,73 +85,54 @@ void GP_FillTriangle(SDL_Surface *surf, long color, int x0, int y0, int x1, int 
 
 	/*
 	 * Draw the triangle in a top-down, line-per line manner.
-	 *
-	 * The triangle is subdivided into two parts:
-	 * from A to B (between AB and AC)
-	 * and from B to C (between BC and AC).
-	 *
-	 * For each line, the value of X is calculated for each side,
-	 * yielding a point on each side, and a horizontal line is drawn
-	 * between the points.
-	 *
-	 * The value of X for each side is calculated from the line equation
-	 * of the side. For example, for AB we have:
-	 *
-	 * ABx = (y - Ay) * ABdx / ABdy + Ax            and thus
-	 * ABx * ABdy = (y - Ay) * ABdx + Ax * ABdy     and thus
-	 * (ABx - Ax) * ABdy - (y - Ay) * ABdx = 0
-	 *
-	 * For integer-only operation, the expression will not be exactly 0;
-	 * instead, we will have an error term we try to minimize:
-	 *
-	 * ABerr = (ABx - Ax) * ABdy - (y - Ay) * ABdx
-	 *
-	 * Because sides are straight lines, we know that X is either
-	 * monotonically growing, or decreasing. Therefore we can calculate
-	 * the next value of X from the previous value simply by increasing
-	 * or decreasing it until the error term crosses the zero boundary.
+	 * The algorithm is the same as for GP_FillTriangle(), except that
+	 * from each line, we draw only the starting and ending point,
+	 * plus all points during transition from previous X to new X.
+	 * (This also means we draw the line at B twice; once to finish
+	 * the AB line, and one to start the AC line.)
 	 */
 	int y, ABx, ACx, BCx, ABerr, ACerr, BCerr;
-	for (ABx = Ax, ACx = Ax, y = Ay; y < By; y++) {
+	for (ABx = Ax, ACx = Ax, y = Ay; y <= By; y++) {
 		for (;;) {
 			ABerr = (ABx - Ax) * ABdy - (y - Ay) * ABdx;
 			if (ABxstep > 0 ? ABerr >= 0 : ABerr <= 0) {
-				GP_SetPixel(surf, color, ABx, y);
+				SETPIXEL(surf, color, ABx, y);
 				break;
 			}
 			ABx += ABxstep;
-			GP_SetPixel(surf, color, ABx, y);
+			SETPIXEL(surf, color, ABx, y);
 		}
 		for (;;) {
 			ACerr = (ACx - Ax) * ACdy - (y - Ay) * ACdx;
 			if (ACxstep > 0 ? ACerr >= 0 : ACerr <= 0) {
-				GP_SetPixel(surf, color, ACx, y);
+				SETPIXEL(surf, color, ACx, y);
 				break;
 			}
 			ACx += ACxstep;
-			GP_SetPixel(surf, color, ACx, y);
+			SETPIXEL(surf, color, ACx, y);
 		}
-		GP_HLine(surf, color, ABx, ACx, y);
 	}
 	for (BCx = Bx, y = By; y <= Cy; y++) {
 		for (;;) {
 			BCerr = (BCx - Bx) * BCdy - (y - By) * BCdx;
 			if (BCxstep > 0 ? BCerr >= 0 : BCerr <= 0) {
-				GP_SetPixel(surf, color, BCx, y);
+				SETPIXEL(surf, color, BCx, y);
 				break;
 			}
 			BCx += BCxstep;
+			SETPIXEL(surf, color, BCx, y);
 		}
+		SETPIXEL(surf, color, BCx, y);
 		for (;;) {
 			ACerr = (ACx - Ax) * ACdy - (y - Ay) * ACdx;
 			if (ACxstep > 0 ? ACerr >= 0 : ACerr <= 0) {
-				GP_SetPixel(surf, color, ACx, y);
+				SETPIXEL(surf, color, ACx, y);
 				break;
 			}
 			ACx += ACxstep;
-			GP_SetPixel(surf, color, ACx, y);
+			SETPIXEL(surf, color, ACx, y);
 		}
-		GP_HLine(surf, color, BCx, ACx, y);
 	}
+	GP_HLine(surf, color, BCx, ACx, y-1);
 }
 
