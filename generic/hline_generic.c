@@ -85,8 +85,34 @@ void FN_NAME(GP_TARGET_TYPE *target, long color, int x0, int x1, int y)
 	 */
 
 	uint32_t *p = (uint32_t *) GP_PIXEL_ADDR(target, x0, y);
-	size_t i = x1 - x0;
+	size_t i = 1 + x1 - x0;
 	uint32_t pixel = (uint32_t) color;
+	while (i >= 4) {
+		p[0] = pixel;
+		p[1] = pixel;
+		p[2] = pixel;
+		p[3] = pixel;
+		p += 4;
+		i -= 4;
+	}
+	if (i > 0) {
+		p[0] = pixel;
+		if (i > 1) {
+			p[1] = pixel;
+			if (i > 2) {
+				p[2] = pixel;
+				if (i == 3) {
+					p[3] = pixel;
+				}
+			}
+		}
+	}
+
+#elif BYTES_PER_PIXEL == 2
+
+	uint16_t *p = (uint16_t *) GP_PIXEL_ADDR(target, x0, y);
+	size_t i = 1 + x1 - x0;
+	uint16_t pixel = (uint16_t) color;
 	while (i >= 4) {
 		p[0] = pixel;
 		p[1] = pixel;

@@ -108,10 +108,18 @@ void event_loop(void)
 
 int main(int argc, char ** argv)
 {
+	int bit_depth = 0;
+
 	int i;
 	for (i = 1; i < argc; i++) {
 		if (strcmp(argv[i], "-f") == 0) {
 			filled = 1;
+		}
+		else if (strcmp(argv[i], "-16") == 0) {
+			bit_depth = 16;
+		}
+		else if (strcmp(argv[i], "-24") == 0) {
+			bit_depth = 24;
 		}
 	}
 
@@ -122,7 +130,7 @@ int main(int argc, char ** argv)
 	}
 
 	/* Create a window with a software back surface */
-	display = SDL_SetVideoMode(640, 480, 0, SDL_SWSURFACE);
+	display = SDL_SetVideoMode(640, 480, bit_depth, SDL_SWSURFACE);
 	if (display == NULL) {
 		fprintf(stderr, "Could not open display: %s\n", SDL_GetError());
 		goto fail;
