@@ -58,6 +58,8 @@ circle.o: circle.c generic/circle_generic.c
 install:
 	install -m 775 -d $(HEADER_LOC)GP/
 	install -m 664 *.h $(HEADER_LOC)GP/
+	install -m 775 -d $(HEADER_LOC)GP/backends/
+	install -m 664 backends/*.h $(HEADER_LOC)GP/backends/
 	install -m 664 *.so *.so.0 *.a $(LIB_LOC)
 
 clean:
