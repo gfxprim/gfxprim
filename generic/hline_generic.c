@@ -44,6 +44,8 @@
  * 		void WRITE_PIXEL(uint8_t *p, long color).
  */
 
+#include <wchar.h>
+
 void FN_NAME(GP_TARGET_TYPE *target, long color, int x0, int x1, int y)
 {
 	if (target == NULL || target->format == NULL)
@@ -71,13 +73,48 @@ void FN_NAME(GP_TARGET_TYPE *target, long color, int x0, int x1, int y)
 		x1 = xmax;
 	}
 
-	/* Get the starting and ending address of the line. */
-	uint8_t *p_start = GP_PIXEL_ADDR(target, x0, y);
-	uint8_t *p_end = p_start + (x1 - x0) * BYTES_PER_PIXEL;
+#if BYTES_PER_PIXEL == 4
 
-	/* Write pixels. */
-	uint8_t * p;
-	for (p = p_start; p <= p_end; p += BYTES_PER_PIXEL)
+	/*
+	 * Inspired by GNU libc's wmemset() (by Ulrich Drepper, licensed under LGPL).
+	 * 
+	 * Write the pixels in groups of four, allowing the compiler to use
+	 * MMX/SSE/similar instructions if available. The last few pixels are
+	 * copied normally one-by-one. (Speed gain is about 15% over a naive loop
+	 * on AMD Phenom CPU.)
+	 */
+
+	uint32_t *p = (uint32_t *) GP_PIXEL_ADDR(target, x0, y);
+	size_t i = x1 - x0;
+	uint32_t pixel = (uint32_t) color;
+	while (i >= 4) {
+		p[0] = pixel;
+		p[1] = pixel;
+		p[2] = pixel;
+		p[3] = pixel;
+		p += 4;
+		i -= 4;
+	}
+	if (i > 0) {
+		p[0] = pixel;
+		if (i > 1) {
+			p[1] = pixel;
+			if (i > 2) {
+				p[2] = pixel;
+				if (i == 3) {
+					p[3] = pixel;
+				}
+			}
+		}
+	}
+
+#else
+
+	uint8_t *p = GP_PIXEL_ADDR(target, x0, y);
+	uint8_t *p_end = p + (x1 - x0) * BYTES_PER_PIXEL;
+	for (; p <= p_end; p += BYTES_PER_PIXEL)
 		WRITE_PIXEL(p, color);
+
+#endif
 }
 

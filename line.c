@@ -36,10 +36,10 @@
 
 void GP_Line(GP_TARGET_TYPE *target, long color, int x0, int y0, int x1, int y1)
 {
-	if (target == NULL || target->pixels == NULL)
+	if (target == NULL || GP_PIXELS(target) == NULL)
 		return;
 
-	switch (target->format->BytesPerPixel) {
+	switch (GP_BYTES_PER_PIXEL(target)) {
 	case 1:
 		GP_Line_8bpp(target, color, x0, y0, x1, y1);
 		break;
@@ -57,10 +57,10 @@ void GP_Line(GP_TARGET_TYPE *target, long color, int x0, int y0, int x1, int y1)
 
 void GP_HLine(GP_TARGET_TYPE *target, long color, int x0, int x1, int y)
 {
-	if (target == NULL || target->pixels == NULL)
+	if (target == NULL || GP_PIXELS(target) == NULL)
 		return;
 
-	switch (target->format->BytesPerPixel) {
+	switch (GP_BYTES_PER_PIXEL(target)) {
 	case 1:
 		GP_HLine_8bpp(target, color, x0, x1, y);
 		break;
@@ -78,10 +78,10 @@ void GP_HLine(GP_TARGET_TYPE *target, long color, int x0, int x1, int y)
 
 void GP_VLine(GP_TARGET_TYPE *target, long color, int x, int y0, int y1)
 {
-	if (target == NULL || target->pixels == NULL)
+	if (target == NULL || GP_PIXELS(target) == NULL)
 		return;
 
-	switch (target->format->BytesPerPixel) {
+	switch (GP_BYTES_PER_PIXEL(target)) {
 	case 1:
 		GP_VLine_8bpp(target, color, x, y0, y1);
 		break;
