@@ -101,9 +101,6 @@ void FN_NAME(GP_TARGET_TYPE *target, long color, int x0, int x1, int y)
 			p[1] = pixel;
 			if (i > 2) {
 				p[2] = pixel;
-				if (i == 3) {
-					p[3] = pixel;
-				}
 			}
 		}
 	}
@@ -127,9 +124,6 @@ void FN_NAME(GP_TARGET_TYPE *target, long color, int x0, int x1, int y)
 			p[1] = pixel;
 			if (i > 2) {
 				p[2] = pixel;
-				if (i == 3) {
-					p[3] = pixel;
-				}
 			}
 		}
 	}

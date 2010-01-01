@@ -234,8 +234,24 @@ void event_loop(void)
 	}
 }
 
-int main(void)
+int main(int argc, char ** argv)
 {
+	/* Bits per pixel to be set for the display surface. */
+	int display_bpp = 0;
+
+	int i;
+	for (i = 1; i < argc; i++) {
+		if (strcmp(argv[i], "-16") == 0) {
+			display_bpp = 16;
+		}
+		else if (strcmp(argv[i], "-24") == 0) {
+			display_bpp = 24;
+		}
+		else if (strcmp(argv[i], "-32") == 0) {
+			display_bpp = 32;
+		}
+	}
+
 	/* Initialize SDL */
 	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) != 0) {
 		fprintf(stderr, "Could not initialize SDL: %s\n", SDL_GetError());
@@ -243,7 +259,7 @@ int main(void)
 	}
 
 	/* Create a window with a software back surface */
-	display = SDL_SetVideoMode(320, 240, 0, SDL_SWSURFACE);
+	display = SDL_SetVideoMode(320, 240, display_bpp, SDL_SWSURFACE);
 	if (display == NULL) {
 		fprintf(stderr, "Could not open display: %s\n", SDL_GetError());
 		goto fail;
