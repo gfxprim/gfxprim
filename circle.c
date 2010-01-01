@@ -23,87 +23,58 @@
  *                                                                           *
  *****************************************************************************/
 
+#include "GP_backend.h"
 #include "GP_pixel.h"
 #include "GP_line.h"
 #include "GP_gfx.h"
 
-/*
- * Draws a circle with center at (xcenter, ycenter) and radius r (in pixels).
- * The clipping rectangle of the target surface is honored; overdrawing
- * over the surface edges is safe.
- */
-void GP_Circle(SDL_Surface *surf, long color, int xcenter, int ycenter, int r)
+void GP_Circle(GP_TARGET_TYPE *target, long color, int xcenter, int ycenter, int r)
 {
-	if (surf == NULL || surf->pixels == NULL)
-		return;
-	if (r < 0)
+	if (target == NULL || GP_PIXELS(target) == NULL)
 		return;
 
-	/*
-	 * Draw the circle in top-down order, line-per-line manner;
-	 * Y is iterated from r to 0, the rest is mirrored.
-	 * For each line, X is calculated and points at +X and -X are drawn. 
-	 */
-	int x, y, error;
-	for (x = 0, error = -r, y = r; y >= 0; y--) {
-
-		/*
-		 * From the circle equation, for every point applies:
-		 *
-		 * x^2 + y^2 = r^2      ->       x^2 + y^2 - r^2 = 0
-		 *
-		 * which has an exact solution for a non-integer x.
-		 * For an integer approximation, we want to find x
-		 * for which
-		 *
-		 * x^2 + y^2 - r^2 = error
-		 *
-		 * where error should be as close to 0 as possible.
-		 * We find the x by incrementing its value until
-		 * we cross the zero error boundary.
-		 *
-		 * HINT: Significant amount of multiplications can be
-		 * saved when calculating error by re-using previous
-		 * error values. For error(x+1) we have:
-		 *
-		 * error(x+1) = (x+1)^2 + y^2 - r^2
-		 *
-		 * which can be expanded to (expanding (x+1)^2):
-		 *
-		 * error(x+1) = x^2 + 2*x + 1 + y^2 - r^2
-		 *
-		 * and after substituting the error(x) we already know:
-		 *
-		 * error(x+1) = error(x) + 2*x + 1
-		 *
-		 * The same can be done for calculating
-		 * error(y-1) from error(y).
-		 */
-		while (error < 0) {
-			error += 2*x + 1;
-			x++;
-
-			GP_SetPixel(surf, color, xcenter-x+1, ycenter-y);
-			GP_SetPixel(surf, color, xcenter+x-1, ycenter-y);
-			GP_SetPixel(surf, color, xcenter-x+1, ycenter+y);
-			GP_SetPixel(surf, color, xcenter+x-1, ycenter+y);
-		}
-		error += -2*y + 1;
-
-		/* Draw four pixels on the circle diameter. */
-		GP_SetPixel(surf, color, xcenter-x+1, ycenter-y);
-		GP_SetPixel(surf, color, xcenter+x-1, ycenter-y);
-		GP_SetPixel(surf, color, xcenter-x+1, ycenter+y);
-		GP_SetPixel(surf, color, xcenter+x-1, ycenter+y);
+	switch (GP_BYTES_PER_PIXEL(target)) {
+	case 1:
+		GP_Circle_8bpp(target, color, xcenter, ycenter, r);
+		break;
+	case 2:
+		GP_Circle_16bpp(target, color, xcenter, ycenter, r);
+		break;
+	case 3:
+		GP_Circle_24bpp(target, color, xcenter, ycenter, r);
+		break;
+	case 4:
+		GP_Circle_32bpp(target, color, xcenter, ycenter, r);
+		break;
 	}
 }
 
-/*
- * Draws a solid filled circle centered at (xcenter, ycenter)
- * with radius of r pixels.
- * The target surface clipping rectangle is honored, and overdrawing over
- * the surface boundary is safe.
- */
+/* Build specialized versions of GP_Circle() for specific bit depths. */
+
+#define FN_NAME		GP_Circle_8bpp
+#define SETPIXEL	GP_SetPixel_8bpp
+#include "generic/circle_generic.c"
+#undef SETPIXEL
+#undef FN_NAME
+
+#define FN_NAME		GP_Circle_16bpp
+#define SETPIXEL	GP_SetPixel_16bpp
+#include "generic/circle_generic.c"
+#undef SETPIXEL
+#undef FN_NAME
+
+#define FN_NAME		GP_Circle_24bpp
+#define SETPIXEL	GP_SetPixel_24bpp
+#include "generic/circle_generic.c"
+#undef SETPIXEL
+#undef FN_NAME
+
+#define FN_NAME		GP_Circle_32bpp
+#define SETPIXEL	GP_SetPixel_32bpp
+#include "generic/circle_generic.c"
+#undef SETPIXEL
+#undef FN_NAME
+
 void GP_FillCircle(SDL_Surface *surf, long color, int xcenter, int ycenter, int r)
 {
 	if (surf == NULL || surf->pixels == NULL)

@@ -48,6 +48,9 @@ line.o: line.c generic/line_generic.c generic/hline_generic.c generic/vline_gene
 triangle.o: triangle.c generic/triangle_generic.c generic/fill_triangle_generic.c
 	$(CC) $(CFLAGS) $< -c -o $@
 
+circle.o: circle.c generic/circle_generic.c
+	$(CC) $(CFLAGS) $< -c -o $@
+
 #############################################################################
 # Installation, cleanup, and packing.
 #############################################################################
