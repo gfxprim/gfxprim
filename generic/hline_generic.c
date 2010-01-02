@@ -112,9 +112,14 @@ void FN_NAME(GP_TARGET_TYPE *target, long color, int x0, int x1, int y)
 	/* How much bytes we are offset against the 32-bit boundary. */
 	int shift = ((intptr_t) bytep) % 4;
 
-	/* How much pixels must be drawn in total. */
+	/* How much pixels must be drawn in total. (The first pixel */
 	int pixelcount = 1 + x1 - x0;
-	int i;
+
+	/*
+	 * Pixels remaining to draw (one less than pixelcount because
+	 * one incomplete pixel is drawn during the preparation phase.)
+	 */
+	int i = pixelcount - 1;
 
 	/*
 	 * Handle each color component separately.
@@ -152,7 +157,6 @@ void FN_NAME(GP_TARGET_TYPE *target, long color, int x0, int x1, int y)
 		block[1] = bcab;
 		block[2] = cabc;
 		p = (uint32_t *) bytep;
-		i = pixelcount;
 		break;
 	case 3:
 		bytep[0] = a;
@@ -160,7 +164,6 @@ void FN_NAME(GP_TARGET_TYPE *target, long color, int x0, int x1, int y)
 		block[1] = cabc;
 		block[2] = abca;
 		p = (uint32_t *)(bytep + 1);
-		i = pixelcount - 1;
 		break;
 	case 2:
 		bytep[0] = a;
@@ -169,7 +172,6 @@ void FN_NAME(GP_TARGET_TYPE *target, long color, int x0, int x1, int y)
 		block[1] = abca;
 		block[2] = bcab;
 		p = (uint32_t *)(bytep + 2);
-		i = pixelcount - 2;
 		break;
 	case 1:
 		bytep[0] = a;
@@ -179,7 +181,6 @@ void FN_NAME(GP_TARGET_TYPE *target, long color, int x0, int x1, int y)
 		block[1] = bcab;
 		block[2] = cabc;
 		p = (uint32_t *)(bytep + 3);
-		i = pixelcount - 3;
 		break;
 	}
 
@@ -199,13 +200,13 @@ void FN_NAME(GP_TARGET_TYPE *target, long color, int x0, int x1, int y)
 	/* Write the rest of the last pixel of the main part */
 	bytep = (uint8_t *) p;
 	switch (shift) {
-	case 1:
+	case 0:
 		bytep[0] = a;
 		bytep[1] = b;
 		bytep[2] = c;
 		bytep += 3;
 		break;
-	case 0:
+	case 1:
 		break;
 	case 2:
 		bytep[0] = c;

@@ -42,13 +42,21 @@ $(LIBRARY).so:
 setpixel.o: setpixel.c generic/setpixel_generic.c
 	$(CC) $(CFLAGS) $< -c -o $@
 
-line.o: line.c generic/line_generic.c generic/hline_generic.c generic/vline_generic.c
+line.o: 	line.c \
+		generic/line_generic.c \
+		generic/hline_generic.c \
+		generic/vline_generic.c
 	$(CC) $(CFLAGS) $< -c -o $@
 
-triangle.o: triangle.c generic/triangle_generic.c generic/fill_triangle_generic.c
+triangle.o: 	triangle.c \
+		generic/hline_generic.c \
+		generic/triangle_generic.c \
+		generic/fill_triangle_generic.c
 	$(CC) $(CFLAGS) $< -c -o $@
 
-circle.o: circle.c generic/circle_generic.c
+circle.o: 	circle.c \
+		generic/hline_generic.c \
+		generic/circle_generic.c
 	$(CC) $(CFLAGS) $< -c -o $@
 
 #############################################################################
