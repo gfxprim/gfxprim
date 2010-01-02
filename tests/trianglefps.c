@@ -143,8 +143,8 @@ int main(int argc, char ** argv)
 	printf("    bits per pixel: %2d, bytes per pixel: %2d\n",
 	       display->format->BitsPerPixel, display->format->BytesPerPixel);
 	printf("Machine properties:\n");
-	printf("    sizeof(int) = %ld, sizeof(long) = %ld, sizeof(wchar_t) = %ld\n",
-	       sizeof(int), sizeof(long), sizeof(wchar_t));
+	printf("    sizeof(int) = %u, sizeof(long) = %u, sizeof(wchar_t) = %u\n",
+	       (unsigned int)sizeof(int), (unsigned int)sizeof(long), (unsigned int)sizeof(wchar_t));
 
 	/* Get colors */
 	GP_LoadBasicColors(display, colors);

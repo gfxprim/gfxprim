@@ -152,6 +152,7 @@ void FN_NAME(GP_TARGET_TYPE *target, long color, int x0, int x1, int y)
 	 * the repeating sequence.
 	 */
 	switch (shift) {
+	default: /* shut up gcc */
 	case 0:
 		block[0] = abca;
 		block[1] = bcab;
