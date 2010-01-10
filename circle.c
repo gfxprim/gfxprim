@@ -28,7 +28,7 @@
 #include "GP_line.h"
 #include "GP_gfx.h"
 
-void GP_Circle(GP_TARGET_TYPE *target, long color, int xcenter, int ycenter, int r)
+void GP_Circle(GP_TARGET_TYPE *target, GP_COLOR_TYPE color, int xcenter, int ycenter, int r)
 {
 	if (target == NULL || GP_PIXELS(target) == NULL)
 		return;
@@ -75,9 +75,9 @@ void GP_Circle(GP_TARGET_TYPE *target, long color, int xcenter, int ycenter, int
 #undef SETPIXEL
 #undef FN_NAME
 
-void GP_FillCircle(SDL_Surface *surf, long color, int xcenter, int ycenter, int r)
+void GP_FillCircle(GP_TARGET_TYPE *target, GP_COLOR_TYPE color, int xcenter, int ycenter, int r)
 {
-	if (surf == NULL || surf->pixels == NULL)
+	if (target == NULL || GP_PIXELS(target) == NULL)
 		return;
 	if (r < 0)
 		return;
@@ -96,8 +96,8 @@ void GP_FillCircle(SDL_Surface *surf, long color, int xcenter, int ycenter, int 
 		}
 		error += -2*y + 1;
 
-		GP_HLine(surf, color, xcenter-x+1, xcenter+x-1, ycenter-y);
-		GP_HLine(surf, color, xcenter-x+1, xcenter+x-1, ycenter+y);
+		GP_HLine(target, color, xcenter-x+1, xcenter+x-1, ycenter-y);
+		GP_HLine(target, color, xcenter-x+1, xcenter+x-1, ycenter+y);
 	}
 }
 

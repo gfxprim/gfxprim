@@ -34,7 +34,7 @@
  * and then call the appropriate specialized drawing function.
  */
 
-void GP_Line(GP_TARGET_TYPE *target, long color, int x0, int y0, int x1, int y1)
+void GP_Line(GP_TARGET_TYPE *target, GP_COLOR_TYPE color, int x0, int y0, int x1, int y1)
 {
 	if (target == NULL || GP_PIXELS(target) == NULL)
 		return;
@@ -55,7 +55,7 @@ void GP_Line(GP_TARGET_TYPE *target, long color, int x0, int y0, int x1, int y1)
 	}
 }
 
-void GP_HLine(GP_TARGET_TYPE *target, long color, int x0, int x1, int y)
+void GP_HLine(GP_TARGET_TYPE *target, GP_COLOR_TYPE color, int x0, int x1, int y)
 {
 	if (target == NULL || GP_PIXELS(target) == NULL)
 		return;
@@ -76,7 +76,7 @@ void GP_HLine(GP_TARGET_TYPE *target, long color, int x0, int x1, int y)
 	}
 }
 
-void GP_VLine(GP_TARGET_TYPE *target, long color, int x, int y0, int y1)
+void GP_VLine(GP_TARGET_TYPE *target, GP_COLOR_TYPE color, int x, int y0, int y1)
 {
 	if (target == NULL || GP_PIXELS(target) == NULL)
 		return;
@@ -189,32 +189,34 @@ void GP_VLine(GP_TARGET_TYPE *target, long color, int x, int y0, int y1)
 #undef WRITE_PIXEL
 #undef FN_NAME
 
-void GP_HLineWide(SDL_Surface *surf, long color, enum GP_LinePosition pos, uint8_t thickness, int x0, int x1, int y)
+void GP_HLineWide(GP_TARGET_TYPE *target, GP_COLOR_TYPE color,
+	enum GP_LinePosition pos, uint8_t thickness, int x0, int x1, int y)
 {
 	switch (pos) {
 		case GP_LINE_ABOVE:
-			GP_FillRect(surf, color, x0, y + thickness, x1, y);
+			GP_FillRect(target, color, x0, y + thickness, x1, y);
 		break;
 		case GP_LINE_BELOW:
-			GP_FillRect(surf, color, x0, y - thickness, x1, y);
+			GP_FillRect(target, color, x0, y - thickness, x1, y);
 		break;
 		case GP_LINE_CENTER:
-			GP_FillRect(surf, color, x0, y - thickness, x1, y +  thickness);
+			GP_FillRect(target, color, x0, y - thickness, x1, y +  thickness);
 		break;
 	}
 }
 
-void GP_VLineWide(SDL_Surface *surf, long color, enum GP_LinePosition pos, uint8_t thickness, int x, int y0, int y1)
+void GP_VLineWide(GP_TARGET_TYPE *target, GP_COLOR_TYPE color,
+	enum GP_LinePosition pos, uint8_t thickness, int x, int y0, int y1)
 {
 	switch (pos) {
 		case GP_LINE_ABOVE:
-			GP_FillRect(surf, color, x + thickness, y0, x, y1);
+			GP_FillRect(target, color, x + thickness, y0, x, y1);
 		break;
 		case GP_LINE_BELOW:
-			GP_FillRect(surf, color, x - thickness, y0, x, y1);
+			GP_FillRect(target, color, x - thickness, y0, x, y1);
 		break;
 		case GP_LINE_CENTER:
-			GP_FillRect(surf, color, x - thickness, y0, x + thickness, y1);
+			GP_FillRect(target, color, x - thickness, y0, x + thickness, y1);
 		break;
 	}
 }

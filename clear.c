@@ -29,8 +29,8 @@
  * Clears the surface to the specified color.
  * Only the part bounded by the clipping rectangle is affected.
  */
-void GP_Clear(SDL_Surface *surf, long color)
+void GP_Clear(GP_TARGET_TYPE *target, GP_COLOR_TYPE color)
 {
-	SDL_FillRect(surf, NULL, color);
+	SDL_FillRect(target, NULL, color);
 }
 

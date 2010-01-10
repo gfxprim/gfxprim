@@ -29,18 +29,18 @@
 /*
  * Draws a rectangle from (x0, y0) to (x1, y1).
  */
-void GP_Rect(SDL_Surface *surf, long color, int x0, int y0, int x1, int y1)
+void GP_Rect(GP_TARGET_TYPE *target, GP_COLOR_TYPE color, int x0, int y0, int x1, int y1)
 {
-	GP_HLine(surf, color, x0, x1, y0);
-	GP_HLine(surf, color, x0, x1, y1);
-	GP_VLine(surf, color, x0, y0, y1);
-	GP_VLine(surf, color, x1, y0, y1);
+	GP_HLine(target, color, x0, x1, y0);
+	GP_HLine(target, color, x0, x1, y1);
+	GP_VLine(target, color, x0, y0, y1);
+	GP_VLine(target, color, x1, y0, y1);
 }
 
 /*
  * Draws a solid filled rectangle from (x0, y0) to (x1, y1).
  */
-void GP_FillRect(SDL_Surface *surf, long color, int x0, int y0, int x1, int y1)
+void GP_FillRect(GP_TARGET_TYPE *target, GP_COLOR_TYPE color, int x0, int y0, int x1, int y1)
 {
 	int top, left, bottom, right;
 
@@ -61,6 +61,6 @@ void GP_FillRect(SDL_Surface *surf, long color, int x0, int y0, int x1, int y1)
 	}
 
 	SDL_Rect rect = {left, top, right - left + 1, bottom - top + 1};
-	SDL_FillRect(surf, &rect, color);
+	SDL_FillRect(target, &rect, color);
 }
 

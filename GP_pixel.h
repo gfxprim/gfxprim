@@ -67,7 +67,7 @@
  * If the coordinates lie outside the surface boundaries or outside its
  * clipping rectangle, the call has no effect.
  */
-void GP_SetPixel(GP_TARGET_TYPE *target, long color, int x, int y);
+void GP_SetPixel(GP_TARGET_TYPE *target, GP_COLOR_TYPE color, int x, int y);
 long GP_GetPixel(GP_TARGET_TYPE *target, int x, int y);
 
 /* commonly used alternative name */
@@ -79,10 +79,10 @@ long GP_GetPixel(GP_TARGET_TYPE *target, int x, int y);
  * These variants also respect clipping and are overdraw-safe.
  */
 
-void GP_SetPixel_8bpp(GP_TARGET_TYPE *target, long color, int x, int y);
-void GP_SetPixel_16bpp(GP_TARGET_TYPE *target, long color, int x, int y);
-void GP_SetPixel_24bpp(GP_TARGET_TYPE *target, long color, int x, int y);
-void GP_SetPixel_32bpp(GP_TARGET_TYPE *target, long color, int x, int y);
+void GP_SetPixel_8bpp(GP_TARGET_TYPE *target, GP_COLOR_TYPE color, int x, int y);
+void GP_SetPixel_16bpp(GP_TARGET_TYPE *target, GP_COLOR_TYPE color, int x, int y);
+void GP_SetPixel_24bpp(GP_TARGET_TYPE *target, GP_COLOR_TYPE color, int x, int y);
+void GP_SetPixel_32bpp(GP_TARGET_TYPE *target, GP_COLOR_TYPE color, int x, int y);
 
 #endif /* GP_PIXEL_H */
 

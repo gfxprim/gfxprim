@@ -31,7 +31,7 @@
  * the number of bits per pixel of the image and then uses the appropriate
  * pixel writing routine.
  */
-void GP_SetPixel(GP_TARGET_TYPE *target, long color, int x, int y)
+void GP_SetPixel(GP_TARGET_TYPE *target, GP_COLOR_TYPE color, int x, int y)
 {
 	if (target == NULL || GP_PIXELS(target) == NULL)
 		return;

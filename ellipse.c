@@ -30,13 +30,13 @@
 /*
  * Plots 4 pixels mirrored around the common center.
  */
-static inline void GP_4MirroredPixels(SDL_Surface *surf, long color,
-				int xcenter, int ycenter, int x, int y)
+static inline void GP_4MirroredPixels(GP_TARGET_TYPE *target,
+	GP_COLOR_TYPE color, int xcenter, int ycenter, int x, int y)
 {
-	GP_SetPixel(surf, color, xcenter-x, ycenter-y);
-	GP_SetPixel(surf, color, xcenter+x, ycenter-y);
-	GP_SetPixel(surf, color, xcenter-x, ycenter+y);
-	GP_SetPixel(surf, color, xcenter+x, ycenter+y);
+	GP_SetPixel(target, color, xcenter-x, ycenter-y);
+	GP_SetPixel(target, color, xcenter+x, ycenter-y);
+	GP_SetPixel(target, color, xcenter-x, ycenter+y);
+	GP_SetPixel(target, color, xcenter+x, ycenter+y);
 }
 
 /*
@@ -45,10 +45,10 @@ static inline void GP_4MirroredPixels(SDL_Surface *surf, long color,
  * surface boundary is safe.
  * If either of the radii is zero or negative, the call has no effect.
  */
-void GP_Ellipse(SDL_Surface *surf, long color, int xcenter, int ycenter,
-		int a, int b)
+void GP_Ellipse(GP_TARGET_TYPE *target, GP_COLOR_TYPE color,
+	int xcenter, int ycenter, int a, int b)
 {
-	if (surf == NULL || surf->pixels == NULL)
+	if (target == NULL || GP_PIXELS(target) == NULL)
 		return;
 	if (a <= 0 || b <= 0)
 		return;
@@ -108,19 +108,19 @@ void GP_Ellipse(SDL_Surface *surf, long color, int xcenter, int ycenter,
 			error += 2*x*b2 + b2;
 			x++;
 
-			GP_SetPixel(surf, color, xcenter-x+1, ycenter-y);
-			GP_SetPixel(surf, color, xcenter+x-1, ycenter-y);
-			GP_SetPixel(surf, color, xcenter-x+1, ycenter+y);
-			GP_SetPixel(surf, color, xcenter+x-1, ycenter+y);
+			GP_SetPixel(target, color, xcenter-x+1, ycenter-y);
+			GP_SetPixel(target, color, xcenter+x-1, ycenter-y);
+			GP_SetPixel(target, color, xcenter-x+1, ycenter+y);
+			GP_SetPixel(target, color, xcenter+x-1, ycenter+y);
 		}
 
 		/* Calculate error(y-1) from error(y). */
 		error += -2*y*a2 + a2;
 
-		GP_SetPixel(surf, color, xcenter-x+1, ycenter-y);
-		GP_SetPixel(surf, color, xcenter+x-1, ycenter-y);
-		GP_SetPixel(surf, color, xcenter-x+1, ycenter+y);
-		GP_SetPixel(surf, color, xcenter+x-1, ycenter+y);
+		GP_SetPixel(target, color, xcenter-x+1, ycenter-y);
+		GP_SetPixel(target, color, xcenter+x-1, ycenter-y);
+		GP_SetPixel(target, color, xcenter-x+1, ycenter+y);
+		GP_SetPixel(target, color, xcenter+x-1, ycenter+y);
 	}
 }
 
@@ -130,10 +130,10 @@ void GP_Ellipse(SDL_Surface *surf, long color, int xcenter, int ycenter,
  * surface boundary is safe.
  * If either of the radii is zero or negative, the call has no effect.
  */
-void GP_FillEllipse(SDL_Surface *surf, long color, int xcenter, int ycenter,
-			int a, int b)
+void GP_FillEllipse(GP_TARGET_TYPE *target, GP_COLOR_TYPE color,
+	int xcenter, int ycenter, int a, int b)
 {
-	if (surf == NULL || surf->pixels == NULL)
+	if (target == NULL || GP_PIXELS(target) == NULL)
 		return;
 	if (a <= 0 || b <= 0)
 		return;
@@ -157,8 +157,8 @@ void GP_FillEllipse(SDL_Surface *surf, long color, int xcenter, int ycenter,
 		error += a2 * (-2*y + 1);
 
 		/* Draw two horizontal lines reflected across Y. */
-		GP_HLine(surf, color, xcenter-x+1, xcenter+x-1, ycenter-y);
-		GP_HLine(surf, color, xcenter-x+1, xcenter+x-1, ycenter+y);
+		GP_HLine(target, color, xcenter-x+1, xcenter+x-1, ycenter-y);
+		GP_HLine(target, color, xcenter-x+1, xcenter+x-1, ycenter+y);
 	}
 }
 

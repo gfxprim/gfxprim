@@ -38,6 +38,11 @@
 #define GP_TARGET_TYPE	SDL_Surface
 
 /*
+ * Type used for color values.
+ */
+#define GP_COLOR_TYPE long
+
+/*
  * Loads the clipping rectangle of the given surface into variables
  * whose names are passed in 'xmin', 'xmax', 'ymin', 'ymax'.
  */

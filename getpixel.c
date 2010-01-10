@@ -30,25 +30,27 @@
  * The clipping rectangle of the surface is ignored.
  * If the coordinates (x, y) lie outside the surface, 0 is returned.
  */
-long GP_GetPixel(SDL_Surface *surf, int x, int y)
+long GP_GetPixel(GP_TARGET_TYPE *target, int x, int y)
 {
-	if (surf == NULL || surf->pixels == NULL)
+	if (target == NULL || GP_PIXELS(target) == NULL)
 		return 0;
 
 	/* Clip coordinates against the surface boundary */
-	if (x < 0 || y < 0 || x >= surf->w || y >= surf->h)
+	int xmin, ymin, xmax, ymax;
+	GP_GET_CLIP_RECT(target, xmin, ymin, xmax, ymax);
+	if (x < xmin || y < ymin || x > xmax || y > ymax)
 		return 0;
 
 	/* Compute the address of the pixel */
-	int bytes_per_pixel = surf->format->BytesPerPixel;
-	uint8_t *p = GP_PIXEL_ADDR(surf, x, y);
+	int bytes_per_pixel = GP_BYTES_PER_PIXEL(target);
+	uint8_t *p = GP_PIXEL_ADDR(target, x, y);
 
 	switch (bytes_per_pixel) {
 	case 1:
 		return (long) *p;
 
 	case 2:
-		return (long) *((Uint16 *) p);
+		return (long) *((uint16_t *) p);
 
 	case 3:
 		if(SDL_BYTEORDER == SDL_BIG_ENDIAN)
@@ -56,7 +58,7 @@ long GP_GetPixel(SDL_Surface *surf, int x, int y)
 		else
 			return (long)(p[0] | (p[1] << 8) | (p[2] << 16));
 	case 4:
-		return (long) *((Uint32 *) p);
+		return (long) *((uint32_t *) p);
 
 	default:
 		return 0;

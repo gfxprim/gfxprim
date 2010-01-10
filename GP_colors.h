@@ -26,7 +26,7 @@
 #ifndef GP_COLORS_H
 #define GP_COLORS_H
 
-#include <SDL/SDL.h>
+#include "GP_backend.h"
 
 /* Indexes for basic colors obtained by GP_LoadBasicColors(). */
 enum {
@@ -38,6 +38,7 @@ enum {
 	GP_CYAN,
 	GP_MAGENTA,
 	GP_WHITE,
+
 	GP_MID_RED,
 	GP_MID_GREEN,
 	GP_MID_BLUE,
@@ -46,6 +47,7 @@ enum {
 	GP_MID_MAGENTA,
 	GP_MID_WHITE,
 	GP_GRAY = GP_MID_WHITE,
+
 	GP_DARK_RED,
 	GP_DARK_GREEN,
 	GP_DARK_BLUE,
@@ -59,7 +61,7 @@ enum {
 }
 GP_BasicColor;
 
-void GP_LoadBasicColors(SDL_Surface *surf, long *colors);
+void GP_LoadBasicColors(GP_TARGET_TYPE *target, GP_COLOR_TYPE *colors);
 
 #endif /* GP_COLORS_H */
 

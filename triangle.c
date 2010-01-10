@@ -28,7 +28,8 @@
 #include "GP_line.h"
 #include "GP_gfx.h"
 
-void GP_Triangle(GP_TARGET_TYPE *target, long color, int x0, int y0, int x1, int y1, int x2, int y2)
+void GP_Triangle(GP_TARGET_TYPE *target, GP_COLOR_TYPE color,
+	int x0, int y0, int x1, int y1, int x2, int y2)
 {
 	if (target == NULL || GP_PIXELS(target) == NULL)
 		return;
@@ -49,7 +50,8 @@ void GP_Triangle(GP_TARGET_TYPE *target, long color, int x0, int y0, int x1, int
 	}
 }
 
-void GP_FillTriangle(GP_TARGET_TYPE *target, long color, int x0, int y0, int x1, int y1, int x2, int y2)
+void GP_FillTriangle(GP_TARGET_TYPE *target, GP_COLOR_TYPE color,
+	int x0, int y0, int x1, int y1, int x2, int y2)
 {
 	if (target == NULL || GP_PIXELS(target) == NULL)
 		return;

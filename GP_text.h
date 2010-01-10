@@ -27,7 +27,8 @@
 #define GP_FONT_H
 
 #include <stdint.h>
-#include <SDL/SDL.h>
+
+#include "GP_backend.h"
 
 /* The smallest charset, covering only the 7-bit ASCII (0x20 .. 0x7f). */
 #define GP_CHARSET_7BIT		1
@@ -100,7 +101,7 @@ GP_TextStyle;
  */
 #define GP_DEFAULT_TEXT_STYLE { &GP_default_console_font, 0, 0, 1, 0, 0 }
 
-void GP_Text(SDL_Surface *surf, const GP_TextStyle *style,
+void GP_Text(GP_TARGET_TYPE *target, const GP_TextStyle *style,
 		int x, int y, const char *text);
 
 int GP_TextWidth(const GP_TextStyle *style, const char *text);

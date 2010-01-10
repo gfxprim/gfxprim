@@ -26,50 +26,79 @@
 #ifndef GP_GFX_H
 #define GP_GFX_H
 
-#include <SDL/SDL.h>
-
-void GP_Clear(SDL_Surface *surf, long color);
+#include "GP_backend.h"
 
 /*
- * Draws a circle centered at (xcenter, ycenter) with radius of r pixels.
- * The target surface clipping rectangle is honored, and overdrawing over
- * the surface boundary is safe.
+ * Routines for drawing various basic shapes.
+ * All these calls honor the target clipping rectangle, and are safe
+ * if the shape partly or completely lies outside the target buffer.
  */
-void GP_Circle(SDL_Surface *surf, long color, int xcenter, int ycenter, int r);
 
 /*
- * Draws a solid filled circle centered at (xcenter, ycenter)
- * with radius of r pixels.
- * The target surface clipping rectangle is honored, and overdrawing over
- * the surface boundary is safe.
+ * First two arguments of all these calls are the same:
+ * the target buffer and color of the shape.
  */
-void GP_FillCircle(SDL_Surface *surf, long color, int xcenter, int ycenter, int r);
+#define TARGET_AND_COLOR GP_TARGET_TYPE *target, GP_COLOR_TYPE color
 
-void GP_Ellipse(SDL_Surface *surf, long color, int xcenter, int ycenter, int a, int b);
-void GP_FillEllipse(SDL_Surface *surf, long color, int xcenter, int ycenter, int a, int b);
+/*
+ * Clears the whole clipping rectangle to the specified color.
+ */
+void GP_Clear(TARGET_AND_COLOR);
 
-void GP_Rect(SDL_Surface *surf, long color, int x0, int y0, int x1, int y1);
-void GP_FillRect(SDL_Surface *surf, long color, int x0, int y0, int x1, int y1);
+/*
+ * Circle and filled circle. The coordinates specify the center point,
+ * and the radius (in pixels, inclusive). The circle should always
+ * fit into a rectangle (xcenter-r, ycenter-r, xcenter+r, ycenter+r).
+ */
 
-void GP_Triangle(SDL_Surface *surf, long color, int x0, int y0, int x1, int y1, int x2, int y2);
-void GP_FillTriangle(SDL_Surface *surf, long color, int x0, int y0, int x1, int y1, int x2, int y2);
+void GP_Circle(TARGET_AND_COLOR, int xcenter, int ycenter, int r);
+void GP_FillCircle(TARGET_AND_COLOR, int xcenter, int ycenter, int r);
 
-/* Specializations for known bit depths */
+/*
+ * Axis-aligned ellipses. The coordinates specify the center point
+ * and two radii.
+ */
 
-void GP_Circle_8bpp(SDL_Surface *surf, long color, int xcenter, int ycenter, int r);
-void GP_Circle_16bpp(SDL_Surface *surf, long color, int xcenter, int ycenter, int r);
-void GP_Circle_24bpp(SDL_Surface *surf, long color, int xcenter, int ycenter, int r);
-void GP_Circle_32bpp(SDL_Surface *surf, long color, int xcenter, int ycenter, int r);
+void GP_Ellipse(TARGET_AND_COLOR, int xcenter, int ycenter, int a, int b);
+void GP_FillEllipse(TARGET_AND_COLOR, int xcenter, int ycenter, int a, int b);
 
-void GP_Triangle_8bpp(SDL_Surface *surf, long color, int x0, int y0, int x1, int y1, int x2, int y2);
-void GP_Triangle_16bpp(SDL_Surface *surf, long color, int x0, int y0, int x1, int y1, int x2, int y2);
-void GP_Triangle_24bpp(SDL_Surface *surf, long color, int x0, int y0, int x1, int y1, int x2, int y2);
-void GP_Triangle_32bpp(SDL_Surface *surf, long color, int x0, int y0, int x1, int y1, int x2, int y2);
+/*
+ * Rectangle and filled rectangle. The coordinates are inclusive,
+ * i.e. the rectangle spans over whole range <x0, x1> and <y0, y1>.
+ */
 
-void GP_FillTriangle_8bpp(SDL_Surface *surf, long color, int x0, int y0, int x1, int y1, int x2, int y2);
-void GP_FillTriangle_16bpp(SDL_Surface *surf, long color, int x0, int y0, int x1, int y1, int x2, int y2);
-void GP_FillTriangle_24bpp(SDL_Surface *surf, long color, int x0, int y0, int x1, int y1, int x2, int y2);
-void GP_FillTriangle_32bpp(SDL_Surface *surf, long color, int x0, int y0, int x1, int y1, int x2, int y2);
+void GP_Rect(TARGET_AND_COLOR, int x0, int y0, int x1, int y1);
+void GP_FillRect(TARGET_AND_COLOR, int x0, int y0, int x1, int y1);
+
+/*
+ * Triangle and filled triangle. Coordinates are inclusive, i.e. all
+ * three vertices are parts of the drawn shape.
+ */
+
+void GP_Triangle(TARGET_AND_COLOR, int x0, int y0, int x1, int y1, int x2, int y2);
+void GP_FillTriangle(TARGET_AND_COLOR, int x0, int y0, int x1, int y1, int x2, int y2);
+
+/*
+ * Following calls are specializations of the above functions
+ * to various bit depths.
+ */
+
+void GP_Circle_8bpp(TARGET_AND_COLOR, int xcenter, int ycenter, int r);
+void GP_Circle_16bpp(TARGET_AND_COLOR, int xcenter, int ycenter, int r);
+void GP_Circle_24bpp(TARGET_AND_COLOR, int xcenter, int ycenter, int r);
+void GP_Circle_32bpp(TARGET_AND_COLOR, int xcenter, int ycenter, int r);
+
+void GP_Triangle_8bpp(TARGET_AND_COLOR, int x0, int y0, int x1, int y1, int x2, int y2);
+void GP_Triangle_16bpp(TARGET_AND_COLOR, int x0, int y0, int x1, int y1, int x2, int y2);
+void GP_Triangle_24bpp(TARGET_AND_COLOR, int x0, int y0, int x1, int y1, int x2, int y2);
+void GP_Triangle_32bpp(TARGET_AND_COLOR, int x0, int y0, int x1, int y1, int x2, int y2);
+
+void GP_FillTriangle_8bpp(TARGET_AND_COLOR, int x0, int y0, int x1, int y1, int x2, int y2);
+void GP_FillTriangle_16bpp(TARGET_AND_COLOR, int x0, int y0, int x1, int y1, int x2, int y2);
+void GP_FillTriangle_24bpp(TARGET_AND_COLOR, int x0, int y0, int x1, int y1, int x2, int y2);
+void GP_FillTriangle_32bpp(TARGET_AND_COLOR, int x0, int y0, int x1, int y1, int x2, int y2);
+
+#undef TARGET_AND_COLOR
 
 #endif /* GP_GFX_H */
 
