@@ -59,6 +59,10 @@ circle.o: 	circle.c \
 		generic/circle_generic.c
 	$(CC) $(CFLAGS) $< -c -o $@
 
+ellipse.o:	ellipse.c \
+		generic/hline_generic.c
+	$(CC) $(CFLAGS) $< -c -o $@
+
 #############################################################################
 # Installation, cleanup, and packing.
 #############################################################################

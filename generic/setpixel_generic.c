@@ -40,18 +40,18 @@
  *		must have form: void WRITE_PIXEL(uint8_t *p, long color)
  */
 
-void FN_NAME(SDL_Surface *surf, long color, int x, int y)
+void FN_NAME(GP_TARGET_TYPE *target, long color, int x, int y)
 {
-	if (surf == NULL || surf->pixels == NULL)
+	if (target == NULL || GP_PIXELS(target) == NULL)
 		return;
 
 	int xmin, xmax, ymin, ymax;
-	GP_GET_CLIP_RECT(surf, xmin, xmax, ymin, ymax);
+	GP_GET_CLIP_RECT(target, xmin, xmax, ymin, ymax);
 
 	if (x < xmin || y < ymin || x > xmax || y > ymax)
 		return;
 
-	uint8_t *p = GP_PIXEL_ADDR(surf, x, y);
+	uint8_t *p = GP_PIXEL_ADDR(target, x, y);
 	WRITE_PIXEL(p, color);
 }
 
