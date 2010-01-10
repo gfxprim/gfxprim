@@ -24,31 +24,22 @@
  *****************************************************************************/
 
 /*
- * File to be #included from line.c.
- *
- * This file is a macro template. With each inclusion, you get a definition
- * of a horizontal line drawing function in form:
- *
- * void FN_NAME(GP_TARGET_TYPE *target, long color, int x0, int x1, int y)
- *
- * These arguments must be #defined in the including file:
+ * Parameterized template for function for drawing horizontal lines.
+ * To be #included from line.c.
+ * Parameters that must be #defined outside:
  *
  * 	FN_NAME
  * 		Name of the function.
- * 
  * 	BYTES_PER_PIXEL
  * 		Number of bytes per pixel of the target.
- * 		
  * 	WRITE_PIXEL
  * 		A pixel writing routine to use. Must have form
  * 		void WRITE_PIXEL(uint8_t *p, long color).
  */
 
-#include <wchar.h>
-
-void FN_NAME(GP_TARGET_TYPE *target, long color, int x0, int x1, int y)
+void FN_NAME(GP_TARGET_TYPE *target, GP_COLOR_TYPE color, int x0, int x1, int y)
 {
-	if (target == NULL || target->format == NULL)
+	if (target == NULL || GP_PIXELS(target) == NULL)
 		return;
 
 	/* Ensure that x0 <= x1, swap coordinates if needed. */

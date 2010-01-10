@@ -24,25 +24,23 @@
  *****************************************************************************/
 
 /*
- * File to be #included from line.c.
- *
- * This file is a macro template. With each inclusion, you get a definition
- * of a line drawing function in form:
- *
- * void FN_NAME(SDL_Surface * surf, long color, int x0, int y0, int x1, int y1)
- *
- * These arguments must be #defined in the including file:
+ * Parameterized template for line drawing function.
+ * To be #included from line.c.
+ * Parameters that must be #defined outside:
  *
  * 	FN_NAME
  * 		Name of the function.
- * 
  * 	SETPIXEL
  * 		A pixel drawing routine to use. Must have form
  * 		void SETPIXEL(TARGET *target, long color, int x, int y).
  */
 
-void FN_NAME(GP_TARGET_TYPE *target, long color, int x0, int y0, int x1, int y1)
+void FN_NAME(GP_TARGET_TYPE *target, GP_COLOR_TYPE color,
+	int x0, int y0, int x1, int y1)
 {
+	if (target == NULL || GP_PIXELS(target) == NULL)
+		return;
+
 	/* The steepness of the line */
 	int deltax = x1 - x0;
 	int deltay = y1 - y0;

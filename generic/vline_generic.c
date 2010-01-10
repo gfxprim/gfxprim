@@ -24,26 +24,20 @@
  *****************************************************************************/
 
 /*
- * File to be #included from line.c.
- *
- * This file is a macro template. With each inclusion, you get a definition
- * of a vertical line drawing function in form:
- *
- * void FN_NAME(SDL_Surface * surf, long color, int x, int y0, int y1)
- *
- * These arguments must be #defined in the including file:
+ * Parameterized template for function for drawing vertical lines.
+ * To be #included from line.c.
+ * Parameters that must be #defined outside:
  *
  * 	FN_NAME
  * 		Name of the function.
- * 
  * 	WRITE_PIXEL
  * 		A pixel writing routine to use. Must have form
  * 		void WRITE_PIXEL(uint8_t *p, long color).
  */
 
-void FN_NAME(GP_TARGET_TYPE *target, long color, int x, int y0, int y1)
+void FN_NAME(GP_TARGET_TYPE *target, GP_COLOR_TYPE color, int x, int y0, int y1)
 {
-	if (target == NULL)
+	if (target == NULL || GP_PIXELS(target) == NULL)
 		return;
 
 	/* Ensure that y0 <= y1, swap coordinates if needed. */

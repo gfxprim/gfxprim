@@ -24,23 +24,20 @@
  *****************************************************************************/
 
 /*
- * File to be #included from setpixel.c.
- * 
- * This file is a macro template for building specialized SetPixel() functions
- * for various bit depths. It can be included multiple times; each inclusion
- * will generate a definition of a function.
+ * Parameterized template for function for drawing pixels.
+ * To be #included from setpixel.c.
+ * Parameters that must be #defined outside:
  *
  * These arguments must be #defined in the including file:
  *
  *	FN_NAME
  *		The name you wish for the newly defined function.
- *
  *	WRITE_PIXEL
  *		A routine to write a pixel value to a memory address;
  *		must have form: void WRITE_PIXEL(uint8_t *p, long color)
  */
 
-void FN_NAME(GP_TARGET_TYPE *target, long color, int x, int y)
+void FN_NAME(GP_TARGET_TYPE *target, GP_COLOR_TYPE color, int x, int y)
 {
 	if (target == NULL || GP_PIXELS(target) == NULL)
 		return;

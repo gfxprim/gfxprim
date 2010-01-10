@@ -23,8 +23,23 @@
  *                                                                           *
  *****************************************************************************/
 
-void FN_NAME(GP_TARGET_TYPE *target, long color, int x0, int y0, int x1, int y1, int x2, int y2)
+/*
+ * Parameterized template for function for drawing filled triangles.
+ * To be #included from triangle.c.
+ * Parameters that must be #defined outside:
+ *
+ *	FN_NAME
+ *		Name of the function to be defined.
+ *	SETPIXEL
+ *		Name of the SetPixel() variant to use.
+ */
+
+void FN_NAME(GP_TARGET_TYPE *target, GP_COLOR_TYPE color,
+	int x0, int y0, int x1, int y1, int x2, int y2)
 {
+	if (target == NULL || GP_PIXELS(target) == NULL)
+		return;
+
 	/*
 	 * Sort the three points according to the Y coordinate.
 	 * A is the topmost, B is between them, C is the bottommost.

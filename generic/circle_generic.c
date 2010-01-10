@@ -24,25 +24,19 @@
  *****************************************************************************/
 
 /*
- * This file is a macro template that generates a circle drawing function
- * every time it is included.
- *
- * Following arguments must be #defined outside:
+ * Parameterized template for function for drawing circles.
+ * To be #included from circle.c.
+ * Parameters that must be #defined outside:
  *
  * 	FN_NAME
  * 		Name of the function.
- *
  * 	SETPIXEL
  * 		Routine to be used for drawing pixels; must be in form
  * 		void SETPIXEL(GP_TARGET_TYPE *target, long color, int x, int y).
  */
 
-/*
- * Draws a circle with center at (xcenter, ycenter) and radius r (in pixels).
- * The clipping rectangle of the target surface is honored; overdrawing
- * over the surface edges is safe.
- */
-void FN_NAME(GP_TARGET_TYPE *target, long color, int xcenter, int ycenter, int r)
+void FN_NAME(GP_TARGET_TYPE *target, GP_COLOR_TYPE color,
+	int xcenter, int ycenter, int r)
 {
 	if (target == NULL || GP_PIXELS(target) == NULL)
 		return;
