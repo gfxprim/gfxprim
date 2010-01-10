@@ -37,7 +37,7 @@ long GP_GetPixel(GP_TARGET_TYPE *target, int x, int y)
 
 	/* Clip coordinates against the surface boundary */
 	int xmin, ymin, xmax, ymax;
-	GP_GET_CLIP_RECT(target, xmin, ymin, xmax, ymax);
+	GP_GET_CLIP_RECT(target, xmin, xmax, ymin, ymax);
 	if (x < xmin || y < ymin || x > xmax || y > ymax)
 		return 0;
 
@@ -47,18 +47,18 @@ long GP_GetPixel(GP_TARGET_TYPE *target, int x, int y)
 
 	switch (bytes_per_pixel) {
 	case 1:
-		return (long) *p;
+		return (GP_COLOR_TYPE) *p;
 
 	case 2:
-		return (long) *((uint16_t *) p);
+		return (GP_COLOR_TYPE) *((uint16_t *) p);
 
 	case 3:
 		if(SDL_BYTEORDER == SDL_BIG_ENDIAN)
-			return (long)((p[0] << 16) | (p[1] << 8) | p[2]);
+			return (GP_COLOR_TYPE)((p[0] << 16) | (p[1] << 8) | p[2]);
 		else
-			return (long)(p[0] | (p[1] << 8) | (p[2] << 16));
+			return (GP_COLOR_TYPE)(p[0] | (p[1] << 8) | (p[2] << 16));
 	case 4:
-		return (long) *((uint32_t *) p);
+		return (GP_COLOR_TYPE) *((uint32_t *) p);
 
 	default:
 		return 0;
