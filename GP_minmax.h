@@ -23,44 +23,26 @@
  *                                                                           *
  *****************************************************************************/
 
+#ifndef GP_MINMAX_H
+#define GP_MINMAX_H
+
 /*
- * Parameterized template for function for drawing pixels.
- * To be #included from setpixel.c.
- * Parameters that must be #defined outside:
- *
- * These arguments must be #defined in the including file:
- *
- *	FN_NAME
- *		The name you wish for the newly defined function.
- *	WRITE_PIXEL
- *		A routine to write a pixel value to a memory address;
- *		must have form: void WRITE_PIXEL(uint8_t *p, long color)
- *
- * Optional parameters:
- *
- *	NONULL
- *		If defined, the target is not tested for NULL.
- * 	NOCLIP
- * 		If defined, clipping and checks for surface
- * 		boundary are ignored (overdrawing is dangerous then!)
+ * Returns a minimum of the two numbers.
  */
+#define GP_MIN(a, b) ({ \
+	typeof(a) _a = (a); \
+	typeof(b) _b = (b); \
+	_a < _b ? _a : _b; \
+})
 
-void FN_NAME(GP_TARGET_TYPE *target, GP_COLOR_TYPE color, int x, int y)
-{
-#ifndef NONULL
-	if (target == NULL || GP_PIXELS(target) == NULL)
-		return;
+/*
+ * Returns a maximum of the two numbers.
+ */
+#define GP_MAX(a, b) ({ \
+	typeof(a) _a = (a); \
+	typeof(b) _b = (b); \
+	_a > _b ? _a : _b; \
+})
+
 #endif
-
-#ifndef NOCLIP
-	int xmin, xmax, ymin, ymax;
-	GP_GET_CLIP_RECT(target, xmin, xmax, ymin, ymax);
-
-	if (x < xmin || y < ymin || x > xmax || y > ymax)
-		return;
-#endif
-
-	uint8_t *p = GP_PIXEL_ADDR(target, x, y);
-	WRITE_PIXEL(p, color);
-}
 

@@ -95,3 +95,37 @@ void GP_SetPixel(GP_TARGET_TYPE *target, GP_COLOR_TYPE color, int x, int y)
 #undef FN_NAME
 #undef WRITE_PIXEL
 
+/*
+ * Build unsafe variants of GP_SetPixel().
+ */
+
+#define NONULL 1
+#define NOCLIP 1
+
+#define FN_NAME		GP_SetPixel_8bpp_unsafe
+#define WRITE_PIXEL	GP_WRITE_PIXEL_1BYTE
+#include "generic/setpixel_generic.c"
+#undef FN_NAME
+#undef WRITE_PIXEL
+
+#define FN_NAME		GP_SetPixel_16bpp_unsafe
+#define WRITE_PIXEL	GP_WRITE_PIXEL_2BYTES
+#include "generic/setpixel_generic.c"
+#undef FN_NAME
+#undef WRITE_PIXEL
+
+#define FN_NAME		GP_SetPixel_24bpp_unsafe
+#define WRITE_PIXEL	GP_WRITE_PIXEL_3BYTES
+#include "generic/setpixel_generic.c"
+#undef FN_NAME
+#undef WRITE_PIXEL
+
+#define FN_NAME		GP_SetPixel_32bpp_unsafe
+#define WRITE_PIXEL	GP_WRITE_PIXEL_4BYTES
+#include "generic/setpixel_generic.c"
+#undef FN_NAME
+#undef WRITE_PIXEL
+
+#undef NONULL
+#undef NOCLIP
+

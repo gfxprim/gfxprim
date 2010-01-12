@@ -23,10 +23,13 @@
  *                                                                           *
  *****************************************************************************/
 
+#include "GP_minmax.h"
 #include "GP_backend.h"
 #include "GP_pixel.h"
 #include "GP_line.h"
 #include "GP_gfx.h"
+
+#include <assert.h>
 
 void GP_Triangle(GP_TARGET_TYPE *target, GP_COLOR_TYPE color,
 	int x0, int y0, int x1, int y1, int x2, int y2)
@@ -123,4 +126,3 @@ void GP_FillTriangle(GP_TARGET_TYPE *target, GP_COLOR_TYPE color,
 #include "generic/fill_triangle_generic.c"
 #undef SETPIXEL
 #undef FN_NAME
-

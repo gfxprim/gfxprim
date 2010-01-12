@@ -88,8 +88,10 @@ void FN_NAME(GP_TARGET_TYPE *target, GP_COLOR_TYPE color,
 	int BCdy = Cy - By;
 
 	/* Handle degenerate cases. */
-	if (ACdx == 0 && ACdy == 0) {
-		GP_Line(target, color, Ax, Ay, Bx, By);
+	if (ACdy == 0) {
+
+		/* All three vertices in one horizontal line. */
+		GP_HLine(target, color, GP_MIN(Ax, GP_MIN(Bx, Cx)), GP_MAX(Ax, GP_MAX(Bx, Cx)), Ay);
 		return;
 	}
 
@@ -97,6 +99,26 @@ void FN_NAME(GP_TARGET_TYPE *target, GP_COLOR_TYPE color,
 	int ABxstep = (ABdx < 0) ? -1 : 1;
 	int ACxstep = (ACdx < 0) ? -1 : 1;
 	int BCxstep = (BCdx < 0) ? -1 : 1;
+
+	/*
+	 * Decide whether the AC side is at the left side
+	 * (i.e. ACx < ABx and ACx < BCx). If not, it must be
+	 * on the right side (ACx > ABx and ACx > BCx).
+	 * This determines where we start drawing.
+	 * For ACx = f(y), we ask: is ACx(By) < Bx ?
+	 * So:
+	 *
+	 * ACx(By) = Ax + (By - Ay) * (Cx - Ax) / (Cy - Ay)     and so
+	 * ACx(By) = Ax + ABdy * ACdx / ACdy                    and so
+	 * ACx(By) * ACdy = Ax * ACdy + ABdy * ACdx
+	 *
+	 * Now:
+	 *
+	 * ACx(By) < Bx ?
+	 * ACx(By) * ACdy < Bx * ACdy ?
+	 * Ax * ACdy + ABdy * ACdx < Bx * ACdy ?
+	 */
+	int AC_is_left = (Ax*ACdy + ACdx*ABdy) < (Bx * ACdy);
 
 	/*
 	 * Draw the triangle in a top-down, line-per line manner.
@@ -126,48 +148,64 @@ void FN_NAME(GP_TARGET_TYPE *target, GP_COLOR_TYPE color,
 	 * the next value of X from the previous value simply by increasing
 	 * or decreasing it until the error term crosses the zero boundary.
 	 */
-	int y, ABx, ACx, BCx, ABerr, ACerr, BCerr;
+	int y, ABx, ACx, BCx, ABerr, ACerr, BCerr, old_ABx, old_ACx, old_BCx;
 	for (ABx = Ax, ACx = Ax, y = Ay; y < By; y++) {
+		old_ABx = ABx;
+		old_ACx = ACx;
 		for (;;) {
 			ABerr = (ABx - Ax) * ABdy - (y - Ay) * ABdx;
 			if (ABxstep > 0 ? ABerr >= 0 : ABerr <= 0) {
-				SETPIXEL(target, color, ABx, y);
 				break;
 			}
 			ABx += ABxstep;
-			SETPIXEL(target, color, ABx, y);
 		}
 		for (;;) {
 			ACerr = (ACx - Ax) * ACdy - (y - Ay) * ACdx;
 			if (ACxstep > 0 ? ACerr >= 0 : ACerr <= 0) {
-				SETPIXEL(target, color, ACx, y);
 				break;
 			}
 			ACx += ACxstep;
-			SETPIXEL(target, color, ACx, y);
 		}
-		GP_HLine(target, color, ABx, ACx, y);
+		if (AC_is_left) {
+			GP_HLine(target, color,
+				ACxstep > 0 ? old_ACx : ACx,
+				ABxstep > 0 ? ABx : old_ABx,
+				y);
+		} else {
+			GP_HLine(target, color,
+				ABxstep > 0 ? old_ABx : ABx,
+				ACxstep > 0 ? ACx : old_ACx,
+				y);
+		}
 	}
 	for (BCx = Bx, y = By; y <= Cy; y++) {
+		old_BCx = BCx;
+		old_ACx = ACx;
 		for (;;) {
 			BCerr = (BCx - Bx) * BCdy - (y - By) * BCdx;
 			if (BCxstep > 0 ? BCerr >= 0 : BCerr <= 0) {
-				SETPIXEL(target, color, BCx, y);
 				break;
 			}
 			BCx += BCxstep;
-			SETPIXEL(target, color, BCx, y);
 		}
 		for (;;) {
 			ACerr = (ACx - Ax) * ACdy - (y - Ay) * ACdx;
 			if (ACxstep > 0 ? ACerr >= 0 : ACerr <= 0) {
-				SETPIXEL(target, color, ACx, y);
 				break;
 			}
 			ACx += ACxstep;
-			SETPIXEL(target, color, ACx, y);
 		}
-		GP_HLine(target, color, BCx, ACx, y);
+		if (AC_is_left) {
+			GP_HLine(target, color,
+				ACxstep > 0 ? old_ACx : ACx,
+				BCxstep > 0 ? BCx : old_BCx,
+				y);
+		} else {
+			GP_HLine(target, color,
+				BCxstep > 0 ? old_BCx : BCx,
+				ACxstep > 0 ? ACx : old_ACx,
+				y);
+		}
 	}
 }
 

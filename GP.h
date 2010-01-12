@@ -26,6 +26,8 @@
 #ifndef GP_H
 #define GP_H
 
+#include "GP_minmax.h"
+
 #include "GP_backend.h"
 
 #include "GP_pixel.h"

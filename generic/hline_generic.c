@@ -39,8 +39,10 @@
 
 void FN_NAME(GP_TARGET_TYPE *target, GP_COLOR_TYPE color, int x0, int x1, int y)
 {
+/*
 	if (target == NULL || GP_PIXELS(target) == NULL)
 		return;
+*/
 
 	/* Ensure that x0 <= x1, swap coordinates if needed. */
 	if (x0 > x1) {
