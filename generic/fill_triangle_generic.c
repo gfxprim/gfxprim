@@ -141,31 +141,45 @@ void FN_NAME(GP_TARGET_TYPE *target, GP_COLOR_TYPE color,
 	 * For integer-only operation, the expression will not be exactly 0;
 	 * instead, we will have an error term we try to minimize:
 	 *
-	 * ABerr = (ABx - Ax) * ABdy - (y - Ay) * ABdx
+	 * ABerr = (ABx - Ax) * ABdy - (y - Ay) * ABdx       and similarly
+	 * ACerr = (ACx - Ax) * ACdy - (y - Ay) * ACdx
+	 * BCerr = (BCx - Bx) * BCdy - (y - By) * BCdx
 	 *
-	 * Because sides are straight lines, we know that X is either
-	 * monotonically growing, or decreasing. Therefore we can calculate
-	 * the next value of X from the previous value simply by increasing
-	 * or decreasing it until the error term crosses the zero boundary.
+	 * In the drawing loop, we calculate each error term from the previous
+	 * value by increasing or decreasing X (according to the line direction)
+	 * until the error term crosses the zero boundary.
 	 */
-	int y, ABx, ACx, BCx, ABerr, ACerr, BCerr, old_ABx, old_ACx, old_BCx;
-	for (ABx = Ax, ACx = Ax, y = Ay; y < By; y++) {
+	int y, ABx, ACx, BCx, old_ABx, old_ACx, old_BCx, ABerr, ACerr, BCerr;
+
+	/* Top part of the triangle (from Ay to By). */
+	for (ABx = Ax, ACx = Ax, y = Ay, ABerr = 0, ACerr = 0; y < By; y++) {
 		old_ABx = ABx;
 		old_ACx = ACx;
-		for (;;) {
-			ABerr = (ABx - Ax) * ABdy - (y - Ay) * ABdx;
-			if (ABxstep > 0 ? ABerr >= 0 : ABerr <= 0) {
-				break;
+
+		if (ABxstep > 0) {
+			while (ABerr < 0) {
+				ABx++;
+				ABerr += ABdy;
 			}
-			ABx += ABxstep;
-		}
-		for (;;) {
-			ACerr = (ACx - Ax) * ACdy - (y - Ay) * ACdx;
-			if (ACxstep > 0 ? ACerr >= 0 : ACerr <= 0) {
-				break;
+		} else {
+			while (ABerr > 0) {
+				ABx--;
+				ABerr -= ABdy;
 			}
-			ACx += ACxstep;
 		}
+
+		if (ACxstep > 0) {
+			while (ACerr < 0) {
+				ACx++;
+				ACerr += ACdy;
+			}
+		} else {
+			while (ACerr > 0) {
+				ACx--;
+				ACerr -= ACdy;
+			}
+		}
+
 		if (AC_is_left) {
 			GP_HLine(target, color,
 				ACxstep > 0 ? old_ACx : ACx,
@@ -177,24 +191,45 @@ void FN_NAME(GP_TARGET_TYPE *target, GP_COLOR_TYPE color,
 				ACxstep > 0 ? ACx : old_ACx,
 				y);
 		}
+
+
+		/*
+		 * The value of ABerr and ACerr for the next loop iteration.
+		 * (from the equation above, with y = y+1).
+		 */
+		ABerr -= ABdx;
+		ACerr -= ACdx;
 	}
-	for (BCx = Bx, y = By; y <= Cy; y++) {
+
+	/* Bottom part (from By to Cy). */
+	for (BCx = Bx, y = By, BCerr = 0; y <= Cy; y++) {
 		old_BCx = BCx;
 		old_ACx = ACx;
-		for (;;) {
-			BCerr = (BCx - Bx) * BCdy - (y - By) * BCdx;
-			if (BCxstep > 0 ? BCerr >= 0 : BCerr <= 0) {
-				break;
+
+		if (BCxstep > 0) {
+			while (BCerr < 0) {
+				BCx++;
+				BCerr += BCdy;
 			}
-			BCx += BCxstep;
-		}
-		for (;;) {
-			ACerr = (ACx - Ax) * ACdy - (y - Ay) * ACdx;
-			if (ACxstep > 0 ? ACerr >= 0 : ACerr <= 0) {
-				break;
+		} else {
+			while (BCerr > 0) {
+				BCx--;
+				BCerr -= BCdy;
 			}
-			ACx += ACxstep;
 		}
+
+		if (ACxstep > 0) {
+			while (ACerr < 0) {
+				ACx++;
+				ACerr += ACdy;
+			}
+		} else {
+			while (ACerr > 0) {
+				ACx--;
+				ACerr -= ACdy;
+			}
+		}
+
 		if (AC_is_left) {
 			GP_HLine(target, color,
 				ACxstep > 0 ? old_ACx : ACx,
@@ -206,6 +241,12 @@ void FN_NAME(GP_TARGET_TYPE *target, GP_COLOR_TYPE color,
 				ACxstep > 0 ? ACx : old_ACx,
 				y);
 		}
+
+		/*
+		 * The value of ACerr and BCerr for the next loop iteration.
+		 */
+		ACerr -= ACdx;
+		BCerr -= BCdx;
 	}
 }
 
