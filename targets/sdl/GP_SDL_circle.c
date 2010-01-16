@@ -23,64 +23,74 @@
  *                                                                           *
  *****************************************************************************/
 
-/*
- * Parameterized template for function for drawing vertical lines.
- * Parameters that must be #defined outside:
- *
- * 	FN_ATTR
- * 		(Optional.) Attributes of the function (e.g. "static").
- * 	FN_NAME
- * 		Name of the function.
- * 	WRITE_PIXEL
- * 		A pixel writing routine to use. Must have form
- * 		void WRITE_PIXEL(uint8_t *p, long color).
- */
+#include "GP_SDL.h"
+#include "GP_SDL_backend.h"
 
-#ifndef FN_ATTR
-#define FN_ATTR
-#endif
+#define FN_NAME		GP_SDL_Circle_8bpp
+#define SETPIXEL	GP_SDL_SetPixel_8bpp
+#include "generic/circle_generic.c"
 
-FN_ATTR void FN_NAME(GP_TARGET_TYPE *target, GP_COLOR_TYPE color, int x, int y0, int y1)
+#define FN_NAME		GP_SDL_Circle_16bpp
+#define SETPIXEL	GP_SDL_SetPixel_16bpp
+#include "generic/circle_generic.c"
+
+#define FN_NAME		GP_SDL_Circle_24bpp
+#define SETPIXEL	GP_SDL_SetPixel_24bpp
+#include "generic/circle_generic.c"
+
+#define FN_NAME		GP_SDL_Circle_32bpp
+#define SETPIXEL	GP_SDL_SetPixel_32bpp
+#include "generic/circle_generic.c"
+
+#define FN_NAME		GP_SDL_FillCircle_8bpp
+#define HLINE		GP_SDL_HLine_8bpp
+#include "generic/fill_circle_generic.c"
+
+#define FN_NAME		GP_SDL_FillCircle_16bpp
+#define HLINE		GP_SDL_HLine_16bpp
+#include "generic/fill_circle_generic.c"
+
+#define FN_NAME		GP_SDL_FillCircle_24bpp
+#define HLINE		GP_SDL_HLine_24bpp
+#include "generic/fill_circle_generic.c"
+
+#define FN_NAME		GP_SDL_FillCircle_32bpp
+#define HLINE		GP_SDL_HLine_32bpp
+#include "generic/fill_circle_generic.c"
+
+void GP_SDL_Circle(GP_TARGET_TYPE *target, GP_COLOR_TYPE color, int xcenter, int ycenter, int r)
 {
-	if (target == NULL || GP_PIXELS(target) == NULL)
-		return;
-
-	/* Ensure that y0 <= y1, swap coordinates if needed. */
-	if (y0 > y1) {
-		FN_NAME(target, color, x, y1, y0);
-		return;
-	}
-
-	/* Get the clipping rectangle. */
-	int xmin, xmax, ymin, ymax;
-	GP_GET_CLIP_RECT(target, xmin, xmax, ymin, ymax);
-
-	/* Check whether the line is not completely clipped out. */
-	if (x < xmin || x > xmax || y0 > ymax || y1 < xmin)
-		return;
-
-	/* Clip the start and end of the line. */
-	if (y0 < ymin) {
-		y0 = ymin;
-	}
-	if (y1 > ymax) {
-		y1 = ymax;
-	}
-
-	int bytes_per_line = GP_BYTES_PER_LINE(target);
-
-	/* Get the starting and ending address of the line. */
-	uint8_t *p_start = GP_PIXEL_ADDR(target, x, y0);
-	uint8_t *p_end = p_start + (y1 - y0) * bytes_per_line;
-
-	/* Write pixels. */
-	uint8_t * p;
-	for (p = p_start; p <= p_end; p += bytes_per_line) {
-		WRITE_PIXEL(p, color);
+	switch (GP_BYTES_PER_PIXEL(target)) {
+	case 1:
+		GP_SDL_Circle_8bpp(target, color, xcenter, ycenter, r);
+		break;
+	case 2:
+		GP_SDL_Circle_16bpp(target, color, xcenter, ycenter, r);
+		break;
+	case 3:
+		GP_SDL_Circle_24bpp(target, color, xcenter, ycenter, r);
+		break;
+	case 4:
+		GP_SDL_Circle_32bpp(target, color, xcenter, ycenter, r);
+		break;
 	}
 }
 
-#undef FN_ATTR
-#undef FN_NAME
-#undef WRITE_PIXEL
+void GP_SDL_FillCircle(GP_TARGET_TYPE *target, GP_COLOR_TYPE color, int xcenter, int ycenter, int r)
+{
+	switch (GP_BYTES_PER_PIXEL(target)) {
+	case 1:
+		GP_SDL_FillCircle_8bpp(target, color, xcenter, ycenter, r);
+		break;
+	case 2:
+		GP_SDL_FillCircle_16bpp(target, color, xcenter, ycenter, r);
+		break;
+	case 3:
+		GP_SDL_FillCircle_24bpp(target, color, xcenter, ycenter, r);
+		break;
+	case 4:
+		GP_SDL_FillCircle_32bpp(target, color, xcenter, ycenter, r);
+		break;
+	}
+}
 

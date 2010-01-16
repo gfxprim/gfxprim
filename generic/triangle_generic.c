@@ -25,22 +25,27 @@
 
 /*
  * Parameterized template for a triangle drawing function.
- * To be #included from triangle.c.
  * Parameters that must be #defined outside:
  *
+ *	FN_ATTR
+ *		(Optional.) Attributes of the function (e.g. "static").
  * 	FN_NAME
  * 		The name of the function to define.
  * 	SETPIXEL
- * 		Name of pixel drawing routine, which must have form
- * 		void SETPIXEL(TARGET_TYPE *target, long color, int x, int y)
+ * 		Name of pixel drawing routine, with arguments
+ * 		as defined in setpixel_generic.c.
+ * 	LINE
+ * 		Name of line drawing routine, with arguments
+ * 		as defined in line_generic.c.
  */
 
-void FN_NAME(GP_TARGET_TYPE *target, GP_COLOR_TYPE color,
+#ifndef FN_ATTR
+#define FN_ATTR
+#endif
+
+FN_ATTR void FN_NAME(GP_TARGET_TYPE *target, GP_COLOR_TYPE color,
 	int x0, int y0, int x1, int y1, int x2, int y2)
 {
-	if (target == NULL || GP_PIXELS(target) == NULL)
-		return;
-
 	/*
 	 * Sort the three points according to the Y coordinate.
 	 * A is the topmost, B is between them, C is the bottommost.
@@ -90,7 +95,7 @@ void FN_NAME(GP_TARGET_TYPE *target, GP_COLOR_TYPE color,
 
 	/* Handle degenerate cases. */
 	if (ACdx == 0 && ACdy == 0) {
-		GP_Line(target, color, Ax, Ay, Bx, By);
+		LINE(target, color, Ax, Ay, Bx, By);
 		return;
 	}
 
@@ -149,6 +154,10 @@ void FN_NAME(GP_TARGET_TYPE *target, GP_COLOR_TYPE color,
 			SETPIXEL(target, color, ACx, y);
 		}
 	}
-	GP_HLine(target, color, BCx, ACx, y-1);
+	LINE(target, color, BCx, y-1, ACx, y-1);
 }
+
+#undef FN_NAME
+#undef SETPIXEL
+#undef LINE
 

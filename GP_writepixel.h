@@ -23,64 +23,39 @@
  *                                                                           *
  *****************************************************************************/
 
+#ifndef GP_WRITEPIXEL_H
+#define GP_WRITEPIXEL_H
+
+#include <stdint.h>
+
 /*
- * Parameterized template for function for drawing vertical lines.
- * Parameters that must be #defined outside:
- *
- * 	FN_ATTR
- * 		(Optional.) Attributes of the function (e.g. "static").
- * 	FN_NAME
- * 		Name of the function.
- * 	WRITE_PIXEL
- * 		A pixel writing routine to use. Must have form
- * 		void WRITE_PIXEL(uint8_t *p, long color).
+ * Macros for writing a single pixel value to the specified address,
+ * provided that the pixel has 1, 2, 3, or 4 bytes, respectively.
  */
 
-#ifndef FN_ATTR
-#define FN_ATTR
-#endif
-
-FN_ATTR void FN_NAME(GP_TARGET_TYPE *target, GP_COLOR_TYPE color, int x, int y0, int y1)
-{
-	if (target == NULL || GP_PIXELS(target) == NULL)
-		return;
-
-	/* Ensure that y0 <= y1, swap coordinates if needed. */
-	if (y0 > y1) {
-		FN_NAME(target, color, x, y1, y0);
-		return;
-	}
-
-	/* Get the clipping rectangle. */
-	int xmin, xmax, ymin, ymax;
-	GP_GET_CLIP_RECT(target, xmin, xmax, ymin, ymax);
-
-	/* Check whether the line is not completely clipped out. */
-	if (x < xmin || x > xmax || y0 > ymax || y1 < xmin)
-		return;
-
-	/* Clip the start and end of the line. */
-	if (y0 < ymin) {
-		y0 = ymin;
-	}
-	if (y1 > ymax) {
-		y1 = ymax;
-	}
-
-	int bytes_per_line = GP_BYTES_PER_LINE(target);
-
-	/* Get the starting and ending address of the line. */
-	uint8_t *p_start = GP_PIXEL_ADDR(target, x, y0);
-	uint8_t *p_end = p_start + (y1 - y0) * bytes_per_line;
-
-	/* Write pixels. */
-	uint8_t * p;
-	for (p = p_start; p <= p_end; p += bytes_per_line) {
-		WRITE_PIXEL(p, color);
-	}
+#define GP_WRITE_PIXEL_1BYTE(ptr, pixel) { \
+	*((uint8_t *) ptr) = (uint8_t) pixel; \
 }
 
-#undef FN_ATTR
-#undef FN_NAME
-#undef WRITE_PIXEL
+#define GP_WRITE_PIXEL_2BYTES(ptr, pixel) { \
+	*((uint16_t *) ptr) = (uint16_t) pixel; \
+}
+
+#define GP_WRITE_PIXEL_3BYTES(ptr, pixel) { \
+	if (SDL_BYTEORDER == SDL_BIG_ENDIAN) { \
+		ptr[0] = (color >> 16) & 0xff; \
+		ptr[1] = (color >> 8) & 0xff; \
+		ptr[2] = color & 0xff; \
+	} else { \
+		ptr[0] = color & 0xff; \
+		ptr[1] = (color >> 8) & 0xff; \
+		ptr[2] = (color >> 16) & 0xff; \
+	} \
+}
+
+#define GP_WRITE_PIXEL_4BYTES(ptr, pixel) { \
+	*((uint32_t *) ptr) = (uint32_t) pixel; \
+}
+
+#endif /* GP_PIXEL_H */
 

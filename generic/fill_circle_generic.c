@@ -24,63 +24,50 @@
  *****************************************************************************/
 
 /*
- * Parameterized template for function for drawing vertical lines.
+ * Parameterized template for filled circle drawing function.
  * Parameters that must be #defined outside:
  *
- * 	FN_ATTR
- * 		(Optional.) Attributes of the function (e.g. "static").
- * 	FN_NAME
- * 		Name of the function.
- * 	WRITE_PIXEL
- * 		A pixel writing routine to use. Must have form
- * 		void WRITE_PIXEL(uint8_t *p, long color).
+ *	FN_ATTR
+ *		(Optional.) Function attributes (e.g. "static").
+ *	FN_NAME
+ *		Name of the function to be defined.
+ *	HLINE
+ *		Horizontal line drawing function, in form as defined
+ *		in hline_generic.c.
  */
+
+#include "GP_minmax.h"
 
 #ifndef FN_ATTR
 #define FN_ATTR
 #endif
 
-FN_ATTR void FN_NAME(GP_TARGET_TYPE *target, GP_COLOR_TYPE color, int x, int y0, int y1)
+FN_ATTR void FN_NAME(GP_TARGET_TYPE *target, GP_COLOR_TYPE color,
+	int xcenter, int ycenter, int r)
 {
-	if (target == NULL || GP_PIXELS(target) == NULL)
+	if (r < 0)
 		return;
 
-	/* Ensure that y0 <= y1, swap coordinates if needed. */
-	if (y0 > y1) {
-		FN_NAME(target, color, x, y1, y0);
-		return;
-	}
+	/*
+	 * Draw the circle in top-down, line-per-line manner.
+	 * For each line, X is calculated and a horizontal line is drawn
+	 * between +X and -X, and reflected around the Y axis.
+	 * X is computed in the same way as for GP_Circle().
+	 */
+	int x, y, error;
+	for (x = 0, error = -r, y = r; y >= 0; y--) {
+		while (error < 0) {
+			error += 2*x + 1;
+			x++;
+		}
+		error += -2*y + 1;
 
-	/* Get the clipping rectangle. */
-	int xmin, xmax, ymin, ymax;
-	GP_GET_CLIP_RECT(target, xmin, xmax, ymin, ymax);
-
-	/* Check whether the line is not completely clipped out. */
-	if (x < xmin || x > xmax || y0 > ymax || y1 < xmin)
-		return;
-
-	/* Clip the start and end of the line. */
-	if (y0 < ymin) {
-		y0 = ymin;
-	}
-	if (y1 > ymax) {
-		y1 = ymax;
-	}
-
-	int bytes_per_line = GP_BYTES_PER_LINE(target);
-
-	/* Get the starting and ending address of the line. */
-	uint8_t *p_start = GP_PIXEL_ADDR(target, x, y0);
-	uint8_t *p_end = p_start + (y1 - y0) * bytes_per_line;
-
-	/* Write pixels. */
-	uint8_t * p;
-	for (p = p_start; p <= p_end; p += bytes_per_line) {
-		WRITE_PIXEL(p, color);
+		HLINE(target, color, xcenter-x+1, xcenter+x-1, ycenter-y);
+		HLINE(target, color, xcenter-x+1, xcenter+x-1, ycenter+y);
 	}
 }
 
 #undef FN_ATTR
 #undef FN_NAME
-#undef WRITE_PIXEL
+#undef HLINE
 

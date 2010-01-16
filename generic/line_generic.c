@@ -25,17 +25,22 @@
 
 /*
  * Parameterized template for line drawing function.
- * To be #included from line.c.
  * Parameters that must be #defined outside:
  *
+ *      FN_ATTR
+ *              Attributes of the function (e.g. "static").
  * 	FN_NAME
- * 		Name of the function.
+ * 		(Optional.) Name of the function.
  * 	SETPIXEL
  * 		A pixel drawing routine to use. Must have form
  * 		void SETPIXEL(TARGET *target, long color, int x, int y).
  */
 
-void FN_NAME(GP_TARGET_TYPE *target, GP_COLOR_TYPE color,
+#ifndef FN_ATTR
+#define FN_ATTR
+#endif
+
+FN_ATTR void FN_NAME(GP_TARGET_TYPE *target, GP_COLOR_TYPE color,
 	int x0, int y0, int x1, int y1)
 {
 	if (target == NULL || GP_PIXELS(target) == NULL)
@@ -130,4 +135,8 @@ void FN_NAME(GP_TARGET_TYPE *target, GP_COLOR_TYPE color,
 		}
 	}
 }
+
+#undef FN_ATTR
+#undef FN_NAME
+#undef SETPIXEL
 

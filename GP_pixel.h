@@ -27,35 +27,7 @@
 #define GP_PIXEL_H
 
 #include "GP_backend.h"
-
-/*
- * Macros for writing a single pixel value to the specified address,
- * provided that the pixel has 1, 2, 3, or 4 bytes, respectively.
- */
-
-#define GP_WRITE_PIXEL_1BYTE(ptr, pixel) { \
-	*((uint8_t *) ptr) = (uint8_t) pixel; \
-}
-
-#define GP_WRITE_PIXEL_2BYTES(ptr, pixel) { \
-	*((uint16_t *) ptr) = (uint16_t) pixel; \
-}
-
-#define GP_WRITE_PIXEL_3BYTES(ptr, pixel) { \
-	if (SDL_BYTEORDER == SDL_BIG_ENDIAN) { \
-		ptr[0] = (color >> 16) & 0xff; \
-		ptr[1] = (color >> 8) & 0xff; \
-		ptr[2] = color & 0xff; \
-	} else { \
-		ptr[0] = color & 0xff; \
-		ptr[1] = (color >> 8) & 0xff; \
-		ptr[2] = (color >> 16) & 0xff; \
-	} \
-}
-
-#define GP_WRITE_PIXEL_4BYTES(ptr, pixel) { \
-	*((uint32_t *) ptr) = (uint32_t) pixel; \
-}
+#include "GP_writepixel.h"
 
 /*
  * Common API functions for getting/setting pixels.

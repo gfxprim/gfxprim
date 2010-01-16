@@ -25,9 +25,10 @@
 
 /*
  * Parameterized template for function for drawing horizontal lines.
- * To be #included from line.c.
  * Parameters that must be #defined outside:
  *
+ *      FN_ATTR
+ *      	(Optional.) Attributes of the function (e.g. "static")
  * 	FN_NAME
  * 		Name of the function.
  * 	BYTES_PER_PIXEL
@@ -37,13 +38,12 @@
  * 		void WRITE_PIXEL(uint8_t *p, long color).
  */
 
-void FN_NAME(GP_TARGET_TYPE *target, GP_COLOR_TYPE color, int x0, int x1, int y)
-{
-/*
-	if (target == NULL || GP_PIXELS(target) == NULL)
-		return;
-*/
+#ifndef FN_ATTR
+#define FN_ATTR
+#endif
 
+FN_ATTR void FN_NAME(GP_TARGET_TYPE *target, GP_COLOR_TYPE color, int x0, int x1, int y)
+{
 	/* Ensure that x0 <= x1, swap coordinates if needed. */
 	if (x0 > x1) {
 		FN_NAME(target, color, x1, x0, y);
@@ -253,4 +253,9 @@ void FN_NAME(GP_TARGET_TYPE *target, GP_COLOR_TYPE color, int x0, int x1, int y)
 
 #endif
 }
+
+#undef FN_ATTR
+#undef FN_NAME
+#undef BYTES_PER_PIXEL
+#undef WRITE_PIXEL
 

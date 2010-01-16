@@ -28,13 +28,23 @@
  * To be #included from triangle.c.
  * Parameters that must be #defined outside:
  *
+ *	FN_ATTR
+ *		(Optional.) Attributes of the function (e.g. "static").
  *	FN_NAME
  *		Name of the function to be defined.
- *	SETPIXEL
- *		Name of the SetPixel() variant to use.
+ *	HLINE
+ *		Function that draws a horizontal line.
+ *		Must have form:
+ *			void HLINE(GP_TARGET_TYPE *target,
+ *				GP_COLOR_TYPE color,
+ *		    		int x0, int x1, int y);
  */
 
-void FN_NAME(GP_TARGET_TYPE *target, GP_COLOR_TYPE color,
+#ifndef FN_ATTR
+#define FN_ATTR
+#endif
+
+FN_ATTR void FN_NAME(GP_TARGET_TYPE *target, GP_COLOR_TYPE color,
 	int x0, int y0, int x1, int y1, int x2, int y2)
 {
 	if (target == NULL || GP_PIXELS(target) == NULL)
@@ -91,7 +101,7 @@ void FN_NAME(GP_TARGET_TYPE *target, GP_COLOR_TYPE color,
 	if (ACdy == 0) {
 
 		/* All three vertices in one horizontal line. */
-		GP_HLine(target, color, GP_MIN(Ax, GP_MIN(Bx, Cx)), GP_MAX(Ax, GP_MAX(Bx, Cx)), Ay);
+		HLINE(target, color, GP_MIN(Ax, GP_MIN(Bx, Cx)), GP_MAX(Ax, GP_MAX(Bx, Cx)), Ay);
 		return;
 	}
 
@@ -181,12 +191,12 @@ void FN_NAME(GP_TARGET_TYPE *target, GP_COLOR_TYPE color,
 		}
 
 		if (AC_is_left) {
-			GP_HLine(target, color,
+			HLINE(target, color,
 				ACxstep > 0 ? old_ACx : ACx,
 				ABxstep > 0 ? ABx : old_ABx,
 				y);
 		} else {
-			GP_HLine(target, color,
+			HLINE(target, color,
 				ABxstep > 0 ? old_ABx : ABx,
 				ACxstep > 0 ? ACx : old_ACx,
 				y);
@@ -231,12 +241,12 @@ void FN_NAME(GP_TARGET_TYPE *target, GP_COLOR_TYPE color,
 		}
 
 		if (AC_is_left) {
-			GP_HLine(target, color,
+			HLINE(target, color,
 				ACxstep > 0 ? old_ACx : ACx,
 				BCxstep > 0 ? BCx : old_BCx,
 				y);
 		} else {
-			GP_HLine(target, color,
+			HLINE(target, color,
 				BCxstep > 0 ? old_BCx : BCx,
 				ACxstep > 0 ? ACx : old_ACx,
 				y);
@@ -249,4 +259,7 @@ void FN_NAME(GP_TARGET_TYPE *target, GP_COLOR_TYPE color,
 		BCerr -= BCdx;
 	}
 }
+
+#undef FN_NAME
+#undef HLINE
 

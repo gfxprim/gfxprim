@@ -28,6 +28,8 @@
  * To be #included from circle.c.
  * Parameters that must be #defined outside:
  *
+ *	FN_ATTRS
+ *		(Optional.) Attributes of the function (e.g. "static").
  * 	FN_NAME
  * 		Name of the function.
  * 	SETPIXEL
@@ -35,7 +37,11 @@
  * 		void SETPIXEL(GP_TARGET_TYPE *target, long color, int x, int y).
  */
 
-void FN_NAME(GP_TARGET_TYPE *target, GP_COLOR_TYPE color,
+#ifndef FN_ATTRS
+#define FN_ATTRS
+#endif
+
+FN_ATTRS void FN_NAME(GP_TARGET_TYPE *target, GP_COLOR_TYPE color,
 	int xcenter, int ycenter, int r)
 {
 	if (target == NULL || GP_PIXELS(target) == NULL)
@@ -101,4 +107,8 @@ void FN_NAME(GP_TARGET_TYPE *target, GP_COLOR_TYPE color,
 		SETPIXEL(target, color, xcenter+x-1, ycenter+y);
 	}
 }
+
+#undef FN_ATTRS
+#undef FN_NAME
+#undef SETPIXEL
 

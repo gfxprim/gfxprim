@@ -23,64 +23,61 @@
  *                                                                           *
  *****************************************************************************/
 
+#ifndef GP_BACKEND_SDL_H
+#define GP_BACKEND_SDL_H
+
+#include <SDL/SDL.h>
+
 /*
- * Parameterized template for function for drawing vertical lines.
- * Parameters that must be #defined outside:
- *
- * 	FN_ATTR
- * 		(Optional.) Attributes of the function (e.g. "static").
- * 	FN_NAME
- * 		Name of the function.
- * 	WRITE_PIXEL
- * 		A pixel writing routine to use. Must have form
- * 		void WRITE_PIXEL(uint8_t *p, long color).
+ * These definitions are used for interfacing with SDL.
  */
 
-#ifndef FN_ATTR
-#define FN_ATTR
-#endif
+/*
+ * The target object for drawing routines, which is SDL_Surface.
+ */
+#define GP_TARGET_TYPE SDL_Surface
 
-FN_ATTR void FN_NAME(GP_TARGET_TYPE *target, GP_COLOR_TYPE color, int x, int y0, int y1)
-{
-	if (target == NULL || GP_PIXELS(target) == NULL)
-		return;
+/*
+ * Type used for color values.
+ */
+#define GP_COLOR_TYPE long
 
-	/* Ensure that y0 <= y1, swap coordinates if needed. */
-	if (y0 > y1) {
-		FN_NAME(target, color, x, y1, y0);
-		return;
-	}
-
-	/* Get the clipping rectangle. */
-	int xmin, xmax, ymin, ymax;
-	GP_GET_CLIP_RECT(target, xmin, xmax, ymin, ymax);
-
-	/* Check whether the line is not completely clipped out. */
-	if (x < xmin || x > xmax || y0 > ymax || y1 < xmin)
-		return;
-
-	/* Clip the start and end of the line. */
-	if (y0 < ymin) {
-		y0 = ymin;
-	}
-	if (y1 > ymax) {
-		y1 = ymax;
-	}
-
-	int bytes_per_line = GP_BYTES_PER_LINE(target);
-
-	/* Get the starting and ending address of the line. */
-	uint8_t *p_start = GP_PIXEL_ADDR(target, x, y0);
-	uint8_t *p_end = p_start + (y1 - y0) * bytes_per_line;
-
-	/* Write pixels. */
-	uint8_t * p;
-	for (p = p_start; p <= p_end; p += bytes_per_line) {
-		WRITE_PIXEL(p, color);
-	}
+/*
+ * Loads the clipping rectangle of the given surface into variables
+ * whose names are passed in 'xmin', 'xmax', 'ymin', 'ymax'.
+ */
+#define GP_GET_CLIP_RECT(target, xmin, xmax, ymin, ymax) { \
+	xmin = target->clip_rect.x; \
+	xmax = target->clip_rect.x + target->clip_rect.w - 1; \
+	ymin = target->clip_rect.y; \
+	ymax = target->clip_rect.y + target->clip_rect.h - 1; \
 }
 
-#undef FN_ATTR
-#undef FN_NAME
-#undef WRITE_PIXEL
+/*
+ * Determines the number of bytes per pixel of the target.
+ */
+#define GP_BYTES_PER_PIXEL(target) (target->format->BytesPerPixel)
+
+/*
+ * Determines the number of bytes per line of the target.
+ */
+#define GP_BYTES_PER_LINE(target) (target->pitch)
+
+/*
+ * Returns the pointer to the pixel data of the target.
+ */
+#define GP_PIXELS(target) ((uint8_t *)(target->pixels))
+
+/*
+ * Computes the address of a pixel at coordinates (x, y)
+ * in the specified surface (the coordinates must lie within
+ * the surface).
+ * The result is a pointer of type uint8_t *.
+ */
+#define GP_PIXEL_ADDR(target, x, y) ( \
+	GP_PIXELS(target) \
+		+ y * GP_BYTES_PER_LINE(target) \
+		+ x * GP_BYTES_PER_PIXEL(target))
+
+#endif /* GP_BACKEND_SDL_H */
 

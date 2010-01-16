@@ -23,64 +23,40 @@
  *                                                                           *
  *****************************************************************************/
 
-/*
- * Parameterized template for function for drawing vertical lines.
- * Parameters that must be #defined outside:
- *
- * 	FN_ATTR
- * 		(Optional.) Attributes of the function (e.g. "static").
- * 	FN_NAME
- * 		Name of the function.
- * 	WRITE_PIXEL
- * 		A pixel writing routine to use. Must have form
- * 		void WRITE_PIXEL(uint8_t *p, long color).
- */
+#include "GP_SDL.h"
+#include "GP_SDL_backend.h"
 
-#ifndef FN_ATTR
-#define FN_ATTR
+long GP_SDL_GetPixel(SDL_Surface *target, int x, int y)
+{
+	/* Clip coordinates against the surface boundary */
+	int xmin, ymin, xmax, ymax;
+	GP_GET_CLIP_RECT(target, xmin, xmax, ymin, ymax);
+	if (x < xmin || y < ymin || x > xmax || y > ymax)
+		return 0;
+
+	/* Compute the address of the pixel */
+	int bytes_per_pixel = GP_BYTES_PER_PIXEL(target);
+	uint8_t *p = GP_PIXEL_ADDR(target, x, y);
+
+	switch (bytes_per_pixel) {
+	case 1:
+		return (long) *p;
+
+	case 2:
+		return (long) *((uint16_t *) p);
+
+	case 3:
+#ifdef __BIG_ENDIAN__
+		return (long) ((p[0] << 16) | (p[1] << 8) | p[2]);
+#else
+		return (long) (p[0] | (p[1] << 8) | (p[2] << 16));
 #endif
 
-FN_ATTR void FN_NAME(GP_TARGET_TYPE *target, GP_COLOR_TYPE color, int x, int y0, int y1)
-{
-	if (target == NULL || GP_PIXELS(target) == NULL)
-		return;
+	case 4:
+		return (long) *((uint32_t *) p);
 
-	/* Ensure that y0 <= y1, swap coordinates if needed. */
-	if (y0 > y1) {
-		FN_NAME(target, color, x, y1, y0);
-		return;
-	}
-
-	/* Get the clipping rectangle. */
-	int xmin, xmax, ymin, ymax;
-	GP_GET_CLIP_RECT(target, xmin, xmax, ymin, ymax);
-
-	/* Check whether the line is not completely clipped out. */
-	if (x < xmin || x > xmax || y0 > ymax || y1 < xmin)
-		return;
-
-	/* Clip the start and end of the line. */
-	if (y0 < ymin) {
-		y0 = ymin;
-	}
-	if (y1 > ymax) {
-		y1 = ymax;
-	}
-
-	int bytes_per_line = GP_BYTES_PER_LINE(target);
-
-	/* Get the starting and ending address of the line. */
-	uint8_t *p_start = GP_PIXEL_ADDR(target, x, y0);
-	uint8_t *p_end = p_start + (y1 - y0) * bytes_per_line;
-
-	/* Write pixels. */
-	uint8_t * p;
-	for (p = p_start; p <= p_end; p += bytes_per_line) {
-		WRITE_PIXEL(p, color);
+	default:
+		return 0;
 	}
 }
-
-#undef FN_ATTR
-#undef FN_NAME
-#undef WRITE_PIXEL
 

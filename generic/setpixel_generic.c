@@ -25,7 +25,6 @@
 
 /*
  * Parameterized template for function for drawing pixels.
- * To be #included from setpixel.c.
  * Parameters that must be #defined outside:
  *
  * These arguments must be #defined in the including file:
@@ -38,8 +37,6 @@
  *
  * Optional parameters:
  *
- *	NONULL
- *		If defined, the target is not tested for NULL.
  * 	NOCLIP
  * 		If defined, clipping and checks for surface
  * 		boundary are ignored (overdrawing is dangerous then!)
@@ -47,11 +44,6 @@
 
 void FN_NAME(GP_TARGET_TYPE *target, GP_COLOR_TYPE color, int x, int y)
 {
-#ifndef NONULL
-	if (target == NULL || GP_PIXELS(target) == NULL)
-		return;
-#endif
-
 #ifndef NOCLIP
 	int xmin, xmax, ymin, ymax;
 	GP_GET_CLIP_RECT(target, xmin, xmax, ymin, ymax);
