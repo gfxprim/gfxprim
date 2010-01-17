@@ -27,77 +27,85 @@
 #include "GP_SDL_backend.h"
 
 #define FN_ATTR		static
-#define FN_NAME		GP_SDL_Circle_8bpp
+#define FN_NAME		GP_SDL_Ellipse_8bpp
 #define SETPIXEL	GP_SDL_SetPixel_8bpp
-#include "generic/circle_generic.c"
+#include "generic/ellipse_generic.c"
 
 #define FN_ATTR		static
-#define FN_NAME		GP_SDL_Circle_16bpp
+#define FN_NAME		GP_SDL_Ellipse_16bpp
 #define SETPIXEL	GP_SDL_SetPixel_16bpp
-#include "generic/circle_generic.c"
+#include "generic/ellipse_generic.c"
 
 #define FN_ATTR		static
-#define FN_NAME		GP_SDL_Circle_24bpp
+#define FN_NAME		GP_SDL_Ellipse_24bpp
 #define SETPIXEL	GP_SDL_SetPixel_24bpp
-#include "generic/circle_generic.c"
+#include "generic/ellipse_generic.c"
 
 #define FN_ATTR		static
-#define FN_NAME		GP_SDL_Circle_32bpp
+#define FN_NAME		GP_SDL_Ellipse_32bpp
 #define SETPIXEL	GP_SDL_SetPixel_32bpp
-#include "generic/circle_generic.c"
+#include "generic/ellipse_generic.c"
 
 #define FN_ATTR		static
-#define FN_NAME		GP_SDL_FillCircle_8bpp
+#define FN_NAME		GP_SDL_FillEllipse_8bpp
 #define HLINE		GP_SDL_HLine_8bpp
-#include "generic/fill_circle_generic.c"
+#include "generic/fill_ellipse_generic.c"
 
 #define FN_ATTR		static
-#define FN_NAME		GP_SDL_FillCircle_16bpp
+#define FN_NAME		GP_SDL_FillEllipse_16bpp
 #define HLINE		GP_SDL_HLine_16bpp
-#include "generic/fill_circle_generic.c"
+#include "generic/fill_ellipse_generic.c"
 
 #define FN_ATTR		static
-#define FN_NAME		GP_SDL_FillCircle_24bpp
+#define FN_NAME		GP_SDL_FillEllipse_24bpp
 #define HLINE		GP_SDL_HLine_24bpp
-#include "generic/fill_circle_generic.c"
+#include "generic/fill_ellipse_generic.c"
 
 #define FN_ATTR		static
-#define FN_NAME		GP_SDL_FillCircle_32bpp
+#define FN_NAME		GP_SDL_FillEllipse_32bpp
 #define HLINE		GP_SDL_HLine_32bpp
-#include "generic/fill_circle_generic.c"
+#include "generic/fill_ellipse_generic.c"
 
-void GP_SDL_Circle(GP_TARGET_TYPE *target, GP_COLOR_TYPE color, int xcenter, int ycenter, int r)
+void GP_SDL_Ellipse(GP_TARGET_TYPE *target, GP_COLOR_TYPE color,
+	int xcenter, int ycenter, int a, int b)
 {
 	switch (GP_BYTES_PER_PIXEL(target)) {
 	case 1:
-		GP_SDL_Circle_8bpp(target, color, xcenter, ycenter, r);
+		GP_SDL_Ellipse_8bpp(target, color, xcenter, ycenter, a, b);
 		break;
+	
 	case 2:
-		GP_SDL_Circle_16bpp(target, color, xcenter, ycenter, r);
+		GP_SDL_Ellipse_16bpp(target, color, xcenter, ycenter, a, b);
 		break;
+	
 	case 3:
-		GP_SDL_Circle_24bpp(target, color, xcenter, ycenter, r);
+		GP_SDL_Ellipse_24bpp(target, color, xcenter, ycenter, a, b);
 		break;
+	
 	case 4:
-		GP_SDL_Circle_32bpp(target, color, xcenter, ycenter, r);
+		GP_SDL_Ellipse_32bpp(target, color, xcenter, ycenter, a, b);
 		break;
 	}
 }
 
-void GP_SDL_FillCircle(GP_TARGET_TYPE *target, GP_COLOR_TYPE color, int xcenter, int ycenter, int r)
+void GP_SDL_FillEllipse(GP_TARGET_TYPE *target, GP_COLOR_TYPE color,
+	int xcenter, int ycenter, int a, int b)
 {
 	switch (GP_BYTES_PER_PIXEL(target)) {
 	case 1:
-		GP_SDL_FillCircle_8bpp(target, color, xcenter, ycenter, r);
+		GP_SDL_FillEllipse_8bpp(target, color, xcenter, ycenter, a, b);
 		break;
+	
 	case 2:
-		GP_SDL_FillCircle_16bpp(target, color, xcenter, ycenter, r);
+		GP_SDL_FillEllipse_16bpp(target, color, xcenter, ycenter, a, b);
 		break;
+	
 	case 3:
-		GP_SDL_FillCircle_24bpp(target, color, xcenter, ycenter, r);
+		GP_SDL_FillEllipse_24bpp(target, color, xcenter, ycenter, a, b);
 		break;
+	
 	case 4:
-		GP_SDL_FillCircle_32bpp(target, color, xcenter, ycenter, r);
+		GP_SDL_FillEllipse_32bpp(target, color, xcenter, ycenter, a, b);
 		break;
 	}
 }

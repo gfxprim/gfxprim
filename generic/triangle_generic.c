@@ -39,6 +39,11 @@
  * 		as defined in line_generic.c.
  */
 
+extern void SETPIXEL(GP_TARGET_TYPE *target, GP_COLOR_TYPE color,
+	int x, int y);
+extern void LINE(GP_TARGET_TYPE *target, GP_COLOR_TYPE color,
+	int x0, int y0, int x1, int y1);
+
 #ifndef FN_ATTR
 #define FN_ATTR
 #endif

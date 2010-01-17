@@ -33,9 +33,6 @@
  * 		Name of the function.
  * 	BYTES_PER_PIXEL
  * 		Number of bytes per pixel of the target.
- * 	WRITE_PIXEL
- * 		A pixel writing routine to use. Must have form
- * 		void WRITE_PIXEL(uint8_t *p, long color).
  */
 
 #ifndef FN_ATTR
@@ -244,18 +241,20 @@ FN_ATTR void FN_NAME(GP_TARGET_TYPE *target, GP_COLOR_TYPE color, int x0, int x1
 		}
 	}
 
-#else
+#elif BYTES_PER_PIXEL == 1
 
 	uint8_t *p = GP_PIXEL_ADDR(target, x0, y);
-	uint8_t *p_end = p + (x1 - x0) * BYTES_PER_PIXEL;
-	for (; p <= p_end; p += BYTES_PER_PIXEL)
-		WRITE_PIXEL(p, color);
+	uint8_t *p_end = p + (x1 - x0);
+	uint8_t pixel = (uint8_t) color;
+	for (; p <= p_end; p++)
+		*p = pixel;
 
+#else
+#error "Unsupported value of BYTES_PER_PIXEL"
 #endif
 }
 
 #undef FN_ATTR
 #undef FN_NAME
 #undef BYTES_PER_PIXEL
-#undef WRITE_PIXEL
 

@@ -23,59 +23,61 @@
  *                                                                           *
  *****************************************************************************/
 
-#include "GP_SDL.h"
-#include "GP_SDL_backend.h"
-#include "GP_writepixel.h"
+/*
+ * Parameterized template for a function that draws a filled ellipse.
+ * Parameters that must be #defined outside:
+ *
+ * 	FN_ATTR
+ * 		(Optional.) Function attributes (e.g. "static").
+ * 	FN_NAME
+ * 		Name of the function to define.
+ * 	HLINE
+ * 		Horizontal line drawing function to use.
+ */
 
-#define FN_ATTR		GP_INTERNAL_FN
-#define FN_NAME		GP_SDL_SetPixel_8bpp
-#define WRITE_PIXEL	GP_WRITE_PIXEL_1BYTE
-#include "generic/setpixel_generic.c"
+extern void HLINE(GP_TARGET_TYPE *target, GP_COLOR_TYPE color,
+	int x0, int x1, int y);
 
-#define FN_ATTR		GP_INTERNAL_FN
-#define FN_NAME		GP_SDL_SetPixel_16bpp
-#define WRITE_PIXEL	GP_WRITE_PIXEL_2BYTES
-#include "generic/setpixel_generic.c"
+#ifndef FN_ATTR
+#define FN_ATTR
+#endif
 
-#define FN_ATTR		GP_INTERNAL_FN
-#define FN_NAME		GP_SDL_SetPixel_24bpp
-#define WRITE_PIXEL	GP_WRITE_PIXEL_3BYTES
-#include "generic/setpixel_generic.c"
-
-#define FN_ATTR		GP_INTERNAL_FN
-#define FN_NAME		GP_SDL_SetPixel_32bpp
-#define WRITE_PIXEL	GP_WRITE_PIXEL_4BYTES
-#include "generic/setpixel_generic.c"
-
-void GP_SDL_SetPixel(SDL_Surface *target, long color, int x, int y)
+/*
+ * Draws a filled ellipse centered in (xcenter, ycenter), with radii a and b.
+ * The target surface clipping rectangle is honored; drawing over
+ * surface boundary is safe.
+ * If either of the radii is zero or negative, the call has no effect.
+ */
+FN_ATTR void FN_NAME(GP_TARGET_TYPE *target, GP_COLOR_TYPE color,
+	int xcenter, int ycenter, int a, int b)
 {
-	int bytes_per_pixel = GP_BYTES_PER_PIXEL(target);
-
-	/* Clip coordinates against the clip rectangle of the surface */
-	int xmin, xmax, ymin, ymax;
-	GP_GET_CLIP_RECT(target, xmin, xmax, ymin, ymax);
-	if (x < xmin || y < ymin || x > xmax || y > ymax)
+	if (a <= 0 || b <= 0)
 		return;
 
-	/* Compute the address of the pixel */
-	uint8_t *p = GP_PIXEL_ADDR(target, x, y);
+	/* Precompute quadratic terms. */
+	int a2 = a*a;
+	int b2 = b*b;
 
-	switch (bytes_per_pixel) {
-	case 1:
-		GP_WRITE_PIXEL_1BYTE(p, color);
-		break;
-	
-	case 2:
-		GP_WRITE_PIXEL_2BYTES(p, color);
-		break;
+	/*
+	 * Draw the ellipse. The algorithm is exactly the same
+	 * as with GP_Ellipse() except that we draw a line between
+	 * each two points at each side of the X axis.
+	 */
+	int x, y, error;
+	for (x = 0, error = -b2*a, y = b; y >= 0; y--) {
 
-	case 3:
-		GP_WRITE_PIXEL_3BYTES(p, color);
-		break;
+		while (error < 0) {
+			error += b2 * (2*x + 1);
+			x++;
+		}
+		error += a2 * (-2*y + 1);
 
-	case 4:
-		GP_WRITE_PIXEL_4BYTES(p, color);
-		break;
+		/* Draw two horizontal lines reflected across Y. */
+		HLINE(target, color, xcenter-x+1, xcenter+x-1, ycenter-y);
+		HLINE(target, color, xcenter-x+1, xcenter+x-1, ycenter+y);
 	}
 }
 
+#undef FN_ATTR
+#undef FN_NAME
+#undef HLINE

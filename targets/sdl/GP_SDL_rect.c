@@ -25,57 +25,73 @@
 
 #include "GP_SDL.h"
 #include "GP_SDL_backend.h"
-#include "GP_writepixel.h"
 
-#define FN_ATTR		GP_INTERNAL_FN
-#define FN_NAME		GP_SDL_SetPixel_8bpp
-#define WRITE_PIXEL	GP_WRITE_PIXEL_1BYTE
-#include "generic/setpixel_generic.c"
+#define FN_ATTR		static
+#define FN_NAME 	GP_SDL_Rect_8bpp
+#define HLINE 		GP_SDL_HLine_8bpp
+#define VLINE 		GP_SDL_VLine_8bpp
+#include "generic/rect_generic.c"
 
-#define FN_ATTR		GP_INTERNAL_FN
-#define FN_NAME		GP_SDL_SetPixel_16bpp
-#define WRITE_PIXEL	GP_WRITE_PIXEL_2BYTES
-#include "generic/setpixel_generic.c"
+#define FN_ATTR		static
+#define FN_NAME		GP_SDL_Rect_16bpp
+#define HLINE		GP_SDL_HLine_16bpp
+#define VLINE		GP_SDL_VLine_16bpp
+#include "generic/rect_generic.c"
 
-#define FN_ATTR		GP_INTERNAL_FN
-#define FN_NAME		GP_SDL_SetPixel_24bpp
-#define WRITE_PIXEL	GP_WRITE_PIXEL_3BYTES
-#include "generic/setpixel_generic.c"
+#define FN_ATTR		static
+#define FN_NAME		GP_SDL_Rect_24bpp
+#define HLINE		GP_SDL_HLine_24bpp
+#define VLINE		GP_SDL_VLine_24bpp
+#include "generic/rect_generic.c"
 
-#define FN_ATTR		GP_INTERNAL_FN
-#define FN_NAME		GP_SDL_SetPixel_32bpp
-#define WRITE_PIXEL	GP_WRITE_PIXEL_4BYTES
-#include "generic/setpixel_generic.c"
+#define FN_ATTR		static
+#define FN_NAME		GP_SDL_Rect_32bpp
+#define HLINE		GP_SDL_HLine_32bpp
+#define VLINE		GP_SDL_VLine_32bpp
+#include "generic/rect_generic.c"
 
-void GP_SDL_SetPixel(SDL_Surface *target, long color, int x, int y)
+void GP_SDL_Rect(GP_TARGET_TYPE *target, GP_COLOR_TYPE color, int x0, int y0, int x1, int y1)
 {
-	int bytes_per_pixel = GP_BYTES_PER_PIXEL(target);
-
-	/* Clip coordinates against the clip rectangle of the surface */
-	int xmin, xmax, ymin, ymax;
-	GP_GET_CLIP_RECT(target, xmin, xmax, ymin, ymax);
-	if (x < xmin || y < ymin || x > xmax || y > ymax)
-		return;
-
-	/* Compute the address of the pixel */
-	uint8_t *p = GP_PIXEL_ADDR(target, x, y);
-
-	switch (bytes_per_pixel) {
+	switch (GP_BYTES_PER_PIXEL(target)) {
 	case 1:
-		GP_WRITE_PIXEL_1BYTE(p, color);
+		GP_SDL_Rect_8bpp(target, color, x0, y0, x1, y1);
 		break;
 	
 	case 2:
-		GP_WRITE_PIXEL_2BYTES(p, color);
+		GP_SDL_Rect_16bpp(target, color, x0, y0, x1, y1);
 		break;
-
+	
 	case 3:
-		GP_WRITE_PIXEL_3BYTES(p, color);
+		GP_SDL_Rect_24bpp(target, color, x0, y0, x1, y1);
 		break;
-
+	
 	case 4:
-		GP_WRITE_PIXEL_4BYTES(p, color);
+		GP_SDL_Rect_32bpp(target, color, x0, y0, x1, y1);
 		break;
 	}
+}
+
+void GP_SDL_FillRect(GP_TARGET_TYPE *target, GP_COLOR_TYPE color, int x0, int y0, int x1, int y1)
+{
+	int top, left, bottom, right;
+
+	if (y0 <= y1) {
+		top    = y0;
+		bottom = y1;
+	} else {
+		top    = y1;
+		bottom = y0;
+	}
+
+	if (x0 <= x1) {
+		left  = x0;
+		right = x1;
+	} else {
+		left  = x1;
+		right = x0;
+	}
+
+	SDL_Rect rect = {left, top, right - left + 1, bottom - top + 1};
+	SDL_FillRect(target, &rect, color);
 }
 

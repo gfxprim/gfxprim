@@ -23,59 +23,42 @@
  *                                                                           *
  *****************************************************************************/
 
-#include "GP_SDL.h"
-#include "GP_SDL_backend.h"
-#include "GP_writepixel.h"
+/*
+ * Parameterized template for a rectangle drawing function.
+ * Parameters that must be #defined outside:
+ *
+ * 	FN_ATTR
+ * 		(Optional.) Attributes of the function (e.g. "static").
+ * 	FN_NAME
+ * 		Name of the function to define.
+ * 	HLINE
+ * 		Name of a horizontal line drawing routine,
+ * 		as in hline_generic.c.
+ * 	VLINE
+ * 		Name of a vertical line drawing routine,
+ * 		as in vline_generic.c.
+ */
 
-#define FN_ATTR		GP_INTERNAL_FN
-#define FN_NAME		GP_SDL_SetPixel_8bpp
-#define WRITE_PIXEL	GP_WRITE_PIXEL_1BYTE
-#include "generic/setpixel_generic.c"
+extern void HLINE(GP_TARGET_TYPE *target, GP_COLOR_TYPE color,
+	int x0, int x1, int y);
+extern void VLINE(GP_TARGET_TYPE *target, GP_COLOR_TYPE color,
+	int x, int y0, int y1);
 
-#define FN_ATTR		GP_INTERNAL_FN
-#define FN_NAME		GP_SDL_SetPixel_16bpp
-#define WRITE_PIXEL	GP_WRITE_PIXEL_2BYTES
-#include "generic/setpixel_generic.c"
+#ifndef FN_ATTR
+#define FN_ATTR
+#endif
 
-#define FN_ATTR		GP_INTERNAL_FN
-#define FN_NAME		GP_SDL_SetPixel_24bpp
-#define WRITE_PIXEL	GP_WRITE_PIXEL_3BYTES
-#include "generic/setpixel_generic.c"
-
-#define FN_ATTR		GP_INTERNAL_FN
-#define FN_NAME		GP_SDL_SetPixel_32bpp
-#define WRITE_PIXEL	GP_WRITE_PIXEL_4BYTES
-#include "generic/setpixel_generic.c"
-
-void GP_SDL_SetPixel(SDL_Surface *target, long color, int x, int y)
+FN_ATTR void FN_NAME(GP_TARGET_TYPE *target, GP_COLOR_TYPE color,
+	int x0, int y0, int x1, int y1)
 {
-	int bytes_per_pixel = GP_BYTES_PER_PIXEL(target);
-
-	/* Clip coordinates against the clip rectangle of the surface */
-	int xmin, xmax, ymin, ymax;
-	GP_GET_CLIP_RECT(target, xmin, xmax, ymin, ymax);
-	if (x < xmin || y < ymin || x > xmax || y > ymax)
-		return;
-
-	/* Compute the address of the pixel */
-	uint8_t *p = GP_PIXEL_ADDR(target, x, y);
-
-	switch (bytes_per_pixel) {
-	case 1:
-		GP_WRITE_PIXEL_1BYTE(p, color);
-		break;
-	
-	case 2:
-		GP_WRITE_PIXEL_2BYTES(p, color);
-		break;
-
-	case 3:
-		GP_WRITE_PIXEL_3BYTES(p, color);
-		break;
-
-	case 4:
-		GP_WRITE_PIXEL_4BYTES(p, color);
-		break;
-	}
+	HLINE(target, color, x0, x1, y0);
+	HLINE(target, color, x0, x1, y1);
+	VLINE(target, color, x0, y0, y1);
+	VLINE(target, color, x1, y0, y1);
 }
+
+#undef FN_ATTR
+#undef FN_NAME
+#undef HLINE
+#undef VLINE
 

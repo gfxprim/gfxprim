@@ -32,9 +32,11 @@
  * 	FN_NAME
  * 		(Optional.) Name of the function.
  * 	SETPIXEL
- * 		A pixel drawing routine to use. Must have form
- * 		void SETPIXEL(TARGET *target, long color, int x, int y).
+ * 		A pixel drawing routine to use.
  */
+
+extern void SETPIXEL(GP_TARGET_TYPE *target, GP_COLOR_TYPE color,
+	int x, int y);
 
 #ifndef FN_ATTR
 #define FN_ATTR

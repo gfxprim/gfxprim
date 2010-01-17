@@ -1,23 +1,52 @@
 LIBRARY=libGP_SDL
 
 HEADERS=GP_SDL.h \
-	GP_SDL_backend.h
+	GP_SDL_backend.h \
+	GP_SDL_specific.h
 
 EXTRA_DEPS=../../libGP.a
 
 OBJECTS=GP_SDL_circle.o \
+	GP_SDL_ellipse.o \
 	GP_SDL_getpixel.o \
 	GP_SDL_line.o \
+	GP_SDL_rect.o \
 	GP_SDL_setpixel.o \
 	GP_SDL_triangle.o
 
-all: $(LIBRARY)
-#	cd tests && $(MAKE) all
-#	cd benchmark && $(MAKE) all
+.PHONY: library tests clean tar install
+
+all: library tests
+
+library: $(LIBRARY)
+
+tests:
+	cd tests && $(MAKE) all
 
 $(LIBRARY): $(LIBRARY).a $(LIBRARY).so
 
 $(OBJECTS): GP_SDL.h
+
+#############################################################################
+# Specific dependencies.
+#############################################################################
+
+GP_SDL_circle.o: GP_SDL_circle.c \
+		../../generic/circle_generic.c \
+		../../generic/fill_circle_generic.c
+
+GP_SDL_ellipse.o: GP_SDL_ellipse.c \
+		../../generic/ellipse_generic.c \
+		../../generic/fill_ellipse_generic.c
+
+GP_SDL_line.o: GP_SDL_line.c \
+		../../generic/line_generic.c \
+		../../generic/hline_generic.c \
+		../../generic/vline_generic.c
+
+GP_SDL_triangle.o: GP_SDL_triangle.c \
+		../../generic/triangle_generic.c \
+		../../generic/fill_triangle_generic.c
 
 #############################################################################
 # Building rules.
@@ -52,8 +81,7 @@ install:
 clean:
 	rm -f $(OBJECTS)
 	rm -f $(LIBRARY).a $(LIBRARY).so $(LIBRARY).so.0
-#	cd tests && $(MAKE) clean
-#	cd benchmark && $(MAKE) clean
+	cd tests && $(MAKE) clean
 
 tar: clean
 	cd .. && tar cjf gfxprim-`date +%Y-%b-%d`.tar.bz2 gfxprim

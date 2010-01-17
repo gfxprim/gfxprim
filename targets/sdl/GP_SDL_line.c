@@ -27,54 +27,62 @@
 #include "GP_SDL_backend.h"
 #include "GP_writepixel.h"
 
+#define FN_ATTR		GP_INTERNAL_FN
 #define FN_NAME		GP_SDL_Line_8bpp
 #define SETPIXEL	GP_SDL_SetPixel_8bpp
 #include "generic/line_generic.c"
 
+#define FN_ATTR		GP_INTERNAL_FN
 #define FN_NAME		GP_SDL_Line_16bpp
 #define SETPIXEL	GP_SDL_SetPixel_16bpp
 #include "generic/line_generic.c"
 
+#define FN_ATTR		GP_INTERNAL_FN
 #define FN_NAME		GP_SDL_Line_24bpp
 #define SETPIXEL	GP_SDL_SetPixel_24bpp
 #include "generic/line_generic.c"
 
+#define FN_ATTR		GP_INTERNAL_FN
 #define FN_NAME		GP_SDL_Line_32bpp
 #define SETPIXEL	GP_SDL_SetPixel_32bpp
 #include "generic/line_generic.c"
 
+#define FN_ATTR		GP_INTERNAL_FN
 #define FN_NAME		GP_SDL_HLine_8bpp
 #define BYTES_PER_PIXEL	1
-#define WRITE_PIXEL	GP_WRITE_PIXEL_1BYTE
 #include "generic/hline_generic.c"
 
+#define FN_ATTR		GP_INTERNAL_FN
 #define FN_NAME		GP_SDL_HLine_16bpp
 #define BYTES_PER_PIXEL	2
-#define WRITE_PIXEL	GP_WRITE_PIXEL_2BYTES
 #include "generic/hline_generic.c"
 
+#define FN_ATTR		GP_INTERNAL_FN
 #define FN_NAME		GP_SDL_HLine_24bpp
 #define BYTES_PER_PIXEL	3
-#define WRITE_PIXEL	GP_WRITE_PIXEL_3BYTES
 #include "generic/hline_generic.c"
 
+#define FN_ATTR		GP_INTERNAL_FN
 #define FN_NAME		GP_SDL_HLine_32bpp
 #define BYTES_PER_PIXEL	4
-#define WRITE_PIXEL	GP_WRITE_PIXEL_4BYTES
 #include "generic/hline_generic.c"
 
+#define FN_ATTR		GP_INTERNAL_FN
 #define FN_NAME		GP_SDL_VLine_8bpp
 #define WRITE_PIXEL	GP_WRITE_PIXEL_1BYTE
 #include "generic/vline_generic.c"
 
+#define FN_ATTR		GP_INTERNAL_FN
 #define FN_NAME		GP_SDL_VLine_16bpp
 #define WRITE_PIXEL	GP_WRITE_PIXEL_2BYTES
 #include "generic/vline_generic.c"
 
+#define FN_ATTR		GP_INTERNAL_FN
 #define FN_NAME		GP_SDL_VLine_24bpp
 #define WRITE_PIXEL	GP_WRITE_PIXEL_3BYTES
 #include "generic/vline_generic.c"
 
+#define FN_ATTR		GP_INTERNAL_FN
 #define FN_NAME		GP_SDL_VLine_32bpp
 #define WRITE_PIXEL	GP_WRITE_PIXEL_4BYTES
 #include "generic/vline_generic.c"

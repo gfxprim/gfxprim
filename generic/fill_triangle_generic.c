@@ -34,11 +34,10 @@
  *		Name of the function to be defined.
  *	HLINE
  *		Function that draws a horizontal line.
- *		Must have form:
- *			void HLINE(GP_TARGET_TYPE *target,
- *				GP_COLOR_TYPE color,
- *		    		int x0, int x1, int y);
  */
+
+extern void HLINE(GP_TARGET_TYPE *target, GP_COLOR_TYPE color,
+	int x0, int x1, int y);
 
 #ifndef FN_ATTR
 #define FN_ATTR
@@ -260,6 +259,7 @@ FN_ATTR void FN_NAME(GP_TARGET_TYPE *target, GP_COLOR_TYPE color,
 	}
 }
 
+#undef FN_ATTR
 #undef FN_NAME
 #undef HLINE
 

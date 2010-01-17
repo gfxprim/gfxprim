@@ -29,7 +29,8 @@
 #include <SDL/SDL.h>
 
 /*
- * These definitions are used for interfacing with SDL.
+ * Internal definitions for interfacing with SDL.
+ * Do not include in user code - use GP_SDL.h and possibly GP_SDL_specific.h.
  */
 
 /*
@@ -78,6 +79,14 @@
 	GP_PIXELS(target) \
 		+ y * GP_BYTES_PER_LINE(target) \
 		+ x * GP_BYTES_PER_PIXEL(target))
+
+
+/*
+ * Attribute used for internal functions that are used within
+ * the library across .c files (so cannot be declared static)
+ * but should not be accessed from outside.
+ */
+#define GP_INTERNAL_FN __attribute__((visibility("internal")))
 
 #endif /* GP_BACKEND_SDL_H */
 

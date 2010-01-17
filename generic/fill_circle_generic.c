@@ -32,11 +32,11 @@
  *	FN_NAME
  *		Name of the function to be defined.
  *	HLINE
- *		Horizontal line drawing function, in form as defined
- *		in hline_generic.c.
+ *		Function for drawing horizontal lines.
  */
 
-#include "GP_minmax.h"
+extern void HLINE(GP_TARGET_TYPE *target, GP_COLOR_TYPE color,
+	int x0, int x1, int y);
 
 #ifndef FN_ATTR
 #define FN_ATTR

@@ -24,14 +24,13 @@
  *****************************************************************************/
 
 /*
- * Parameterized template for function for drawing circles.
- * To be #included from circle.c.
+ * Parameterized template for ellipse drawing function.
  * Parameters that must be #defined outside:
  *
- *	FN_ATTR
- *		(Optional.) Attributes of the function (e.g. "static").
+ * 	FN_ATTR
+ * 		(Optional.) Attributes of the function (e.g. "static").
  * 	FN_NAME
- * 		Name of the function.
+ * 		Name of the function to define.
  * 	SETPIXEL
  * 		Routine to be used for drawing pixels.
  */
@@ -43,56 +42,71 @@ extern void SETPIXEL(GP_TARGET_TYPE *target, GP_COLOR_TYPE color,
 #define FN_ATTR
 #endif
 
+/*
+ * Draws an ellipse centered in (xcenter, ycenter), with radii a and b.
+ * The target surface clipping rectangle is honored; drawing over
+ * surface boundary is safe.
+ * If either of the radii is zero or negative, the call has no effect.
+ */
 FN_ATTR void FN_NAME(GP_TARGET_TYPE *target, GP_COLOR_TYPE color,
-	int xcenter, int ycenter, int r)
+	int xcenter, int ycenter, int a, int b)
 {
-	if (target == NULL || GP_PIXELS(target) == NULL)
+	if (a <= 0 || b <= 0)
 		return;
-	if (r < 0)
-		return;
+
+	/* Precompute quadratic terms. */
+	int a2 = a*a;
+	int b2 = b*b;
 
 	/*
-	 * Draw the circle in top-down order, line-per-line manner;
-	 * Y is iterated from r to 0, the rest is mirrored.
-	 * For each line, X is calculated and points at +X and -X are drawn. 
+	 * Draw the ellipse from top to down. The ellipse is
+	 * X- and Y-symmetrical so we only need to calculate
+	 * a 1/4 of points. In this case, we calculate the
+	 * top-right quadrant (Y in range <b, 0>, X in <0, a>).
+	 *
+	 * Because ellipses are not symmetrical diagonally
+	 * (differently from circles), we have to enumerate
+	 * points both along the Y and X axis, as each enumeration
+	 * gives us only half of the points.
+	 *
+	 * Algorithm:
+	 * From the canonical implicit equation of an ellipse:
+	 *
+	 * x^2/a^2 + y^2/b^2 = 1             and therefore
+	 * x^2*b^2 + y^2*a^2 - a^2*b^2 = 0
+	 *
+	 * which has an exact solution for a non-integer x.
+	 * For an integer approximation, we need to find
+	 * an integer x so that
+	 *
+	 * x^2*b^2 + y^2*a^2 - a^2*b^2 = error
+	 *
+	 * where error is as close to 0 as possible.
+	 *
+	 * Optimization:
+	 * We can save a significant amount of multiplications
+	 * by calculating next error values from the previous ones.
+	 * For error(x+1):
+	 *
+	 * error(x+1) = (x+1)^2*b^2 + y^2*a^2 + a^2*b^2
+	 *
+	 * which can be rewritten as (after expanding (x+1)^2):
+	 *
+	 * error(x+1) = x^2*b^2 + 2*x^2*b^2 + b^2 + y^2*a^2 + a^2*b^2
+	 *
+	 * and, after substituting error(x) which we already know:
+	 *
+	 * error(x+1) = error(x) + 2*x*b^2 + b^2
+	 *
+	 * The same applies to x-1, y+1 and y-1.
 	 */
+	
 	int x, y, error;
-	for (x = 0, error = -r, y = r; y >= 0; y--) {
-
-		/*
-		 * From the circle equation, for every point applies:
-		 *
-		 * x^2 + y^2 = r^2      ->       x^2 + y^2 - r^2 = 0
-		 *
-		 * which has an exact solution for a non-integer x.
-		 * For an integer approximation, we want to find x
-		 * for which
-		 *
-		 * x^2 + y^2 - r^2 = error
-		 *
-		 * where error should be as close to 0 as possible.
-		 * We find the x by incrementing its value until
-		 * we cross the zero error boundary.
-		 *
-		 * HINT: Significant amount of multiplications can be
-		 * saved when calculating error by re-using previous
-		 * error values. For error(x+1) we have:
-		 *
-		 * error(x+1) = (x+1)^2 + y^2 - r^2
-		 *
-		 * which can be expanded to (expanding (x+1)^2):
-		 *
-		 * error(x+1) = x^2 + 2*x + 1 + y^2 - r^2
-		 *
-		 * and after substituting the error(x) we already know:
-		 *
-		 * error(x+1) = error(x) + 2*x + 1
-		 *
-		 * The same can be done for calculating
-		 * error(y-1) from error(y).
-		 */
+	for (x = 0, error = -b2*a, y = b; y >= 0; y--) {
 		while (error < 0) {
-			error += 2*x + 1;
+
+			/* Calculate error(x+1) from error(x). */
+			error += 2*x*b2 + b2;
 			x++;
 
 			SETPIXEL(target, color, xcenter-x+1, ycenter-y);
@@ -100,9 +114,10 @@ FN_ATTR void FN_NAME(GP_TARGET_TYPE *target, GP_COLOR_TYPE color,
 			SETPIXEL(target, color, xcenter-x+1, ycenter+y);
 			SETPIXEL(target, color, xcenter+x-1, ycenter+y);
 		}
-		error += -2*y + 1;
 
-		/* Draw four pixels on the circle diameter. */
+		/* Calculate error(y-1) from error(y). */
+		error += -2*y*a2 + a2;
+
 		SETPIXEL(target, color, xcenter-x+1, ycenter-y);
 		SETPIXEL(target, color, xcenter+x-1, ycenter-y);
 		SETPIXEL(target, color, xcenter-x+1, ycenter+y);

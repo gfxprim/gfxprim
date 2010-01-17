@@ -27,22 +27,23 @@
  * Parameterized template for function for drawing pixels.
  * Parameters that must be #defined outside:
  *
- * These arguments must be #defined in the including file:
- *
+ * 	FN_ATTR
+ * 		(Optional.) Attribute of the function (e.g. "static").
  *	FN_NAME
  *		The name you wish for the newly defined function.
  *	WRITE_PIXEL
  *		A routine to write a pixel value to a memory address;
  *		must have form: void WRITE_PIXEL(uint8_t *p, long color)
- *
- * Optional parameters:
- *
  * 	NOCLIP
- * 		If defined, clipping and checks for surface
+ * 		(Optional.) If defined, clipping and checks for surface
  * 		boundary are ignored (overdrawing is dangerous then!)
  */
 
-void FN_NAME(GP_TARGET_TYPE *target, GP_COLOR_TYPE color, int x, int y)
+#ifndef FN_ATTR
+#define FN_ATTR
+#endif
+
+FN_ATTR void FN_NAME(GP_TARGET_TYPE *target, GP_COLOR_TYPE color, int x, int y)
 {
 #ifndef NOCLIP
 	int xmin, xmax, ymin, ymax;
@@ -55,4 +56,9 @@ void FN_NAME(GP_TARGET_TYPE *target, GP_COLOR_TYPE color, int x, int y)
 	uint8_t *p = GP_PIXEL_ADDR(target, x, y);
 	WRITE_PIXEL(p, color);
 }
+
+#undef FN_ATTR
+#undef FN_NAME
+#undef WRITE_PIXEL
+#undef NOCLIP
 
