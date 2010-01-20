@@ -41,21 +41,28 @@
 	*((uint16_t *) ptr) = (uint16_t) pixel; \
 }
 
+#if __BYTE_ORDER==__BIG_ENDIAN
+
 #define GP_WRITE_PIXEL_3BYTES(ptr, pixel) { \
-	if (SDL_BYTEORDER == SDL_BIG_ENDIAN) { \
-		ptr[0] = (color >> 16) & 0xff; \
-		ptr[1] = (color >> 8) & 0xff; \
-		ptr[2] = color & 0xff; \
-	} else { \
-		ptr[0] = color & 0xff; \
-		ptr[1] = (color >> 8) & 0xff; \
-		ptr[2] = (color >> 16) & 0xff; \
-	} \
+	ptr[0] = (color >> 16) & 0xff; \
+	ptr[1] = (color >> 8) & 0xff; \
+	ptr[2] = color & 0xff; \
 }
+
+#elif __BYTE_ORDER==__LITTLE_ENDIAN
+
+#define GP_WRITE_PIXEL_3BYTES(ptr, pixel) { \
+	ptr[0] = color & 0xff; \
+	ptr[1] = (color >> 8) & 0xff; \
+	ptr[2] = (color >> 16) & 0xff; \
+}
+
+#else
+#error "Could not detect machine endian"
+#endif
 
 #define GP_WRITE_PIXEL_4BYTES(ptr, pixel) { \
 	*((uint32_t *) ptr) = (uint32_t) pixel; \
 }
 
-#endif /* GP_PIXEL_H */
-
+#endif /* GP_WRITEPIXEL_H */
