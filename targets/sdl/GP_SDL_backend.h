@@ -28,6 +28,8 @@
 
 #include <SDL/SDL.h>
 
+#include "GP_SDL.h"
+
 /*
  * Internal definitions for interfacing with SDL.
  * Do not include in user code - use GP_SDL.h and possibly GP_SDL_specific.h.
@@ -57,17 +59,17 @@
 /*
  * Determines the number of bytes per pixel of the target.
  */
-#define GP_BYTES_PER_PIXEL(target) (target->format->BytesPerPixel)
+#define GP_BYTES_PER_PIXEL(target) GP_SDL_BYTES_PER_PIXEL(target)
 
 /*
  * Determines the number of bytes per line of the target.
  */
-#define GP_BYTES_PER_LINE(target) (target->pitch)
+#define GP_BYTES_PER_LINE(target) GP_SDL_BYTES_PER_LINE(target)
 
 /*
  * Returns the pointer to the pixel data of the target.
  */
-#define GP_PIXELS(target) ((uint8_t *)(target->pixels))
+#define GP_PIXELS(target) GP_SDL_PIXELS(target)
 
 /*
  * Computes the address of a pixel at coordinates (x, y)
@@ -75,11 +77,7 @@
  * the surface).
  * The result is a pointer of type uint8_t *.
  */
-#define GP_PIXEL_ADDR(target, x, y) ( \
-	GP_PIXELS(target) \
-		+ y * GP_BYTES_PER_LINE(target) \
-		+ x * GP_BYTES_PER_PIXEL(target))
-
+#define GP_PIXEL_ADDR(target, x, y) GP_SDL_PIXEL_ADDR(target, x, y)
 
 /*
  * Attribute used for internal functions that are used within
