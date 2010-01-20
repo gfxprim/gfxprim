@@ -158,10 +158,11 @@ void redraw_screen(void)
 	/* text style for the label */
 	GP_TextStyle style = {
 		.font = &GP_default_console_font,
-		.foreground = colors[GP_WHITE],
-		.pixel_width = 2,
-		.pixel_hspace = 0,
-		.pixel_vspace = 1,
+//		.foreground = colors[GP_WHITE],
+		.pixel_xmul = 2,
+		.pixel_ymul = 1,
+		.pixel_xspace = 0,
+		.pixel_yspace = 1,
 	};
 
 	SDL_LockSurface(display);
@@ -178,24 +179,26 @@ void redraw_screen(void)
 	}
 
 	/* the shape */
+	const char *title = NULL;
 	switch (shape) {
 	case SHAPE_TRIANGLE:
 		draw_testing_triangle(x, y, xradius, yradius);
-		GP_Text(display, &style, 16, 16, "TRIANGLE");
+		title = "TRIANGLE";
 		break;
 	case SHAPE_CIRCLE:
 		draw_testing_circle(x, y, xradius, yradius);
-		GP_Text(display, &style, 16, 16, "CIRCLE");
+		title = "CIRCLE";
 		break;
 	case SHAPE_ELLIPSE:
 		draw_testing_ellipse(x, y, xradius, yradius);
-		GP_Text(display, &style, 16, 16, "ELLIPSE");
+		title = "ELLIPSE";
 		break;
 	case SHAPE_RECTANGLE:
 		draw_testing_rectangle(x, y, xradius, yradius);
-		GP_Text(display, &style, 16, 16, "RECTANGLE");
+		title = "RECTANGLE";
 		break;
 	}
+	GP_Text(display, colors[GP_WHITE], &style, 16, 16, title);
 
 	SDL_UnlockSurface(display);
 }

@@ -76,20 +76,11 @@ typedef struct {
 	/* Font to use, or NULL to use the default font. */
 	GP_Font *font;
 
-	/* Color for the text pixels. */
-	long foreground;
+	/* Spacing between pixels (0 is the default, no spacing). */
+	int pixel_xspace, pixel_yspace;
 
-	/* Color for the background. */
-	long background;
-
-	/* Width, in pixels, per each pixel in the character (default is 1). */
-	int pixel_width;
-
-	/* Vertical spacing between pixels (0 if none). */
-	int pixel_vspace;
-
-	/* Horizontal spacing between pixels (0 if none). */
-	int pixel_hspace;
+	/* Multiplier of pixel width/height (1 is default). */
+	int pixel_xmul, pixel_ymul;
 }
 GP_TextStyle;
 
@@ -99,10 +90,10 @@ GP_TextStyle;
  * Note that at least the colors should always be changed afterwards,
  * as there is no sensible default (they are initialized to 0).
  */
-#define GP_DEFAULT_TEXT_STYLE { &GP_default_console_font, 0, 0, 1, 0, 0 }
+#define GP_DEFAULT_TEXT_STYLE { &GP_default_console_font, 0, 0, 1, 1 }
 
-void GP_Text(GP_TARGET_TYPE *target, const GP_TextStyle *style,
-		int x, int y, const char *text);
+void GP_Text(GP_TARGET_TYPE *target, GP_COLOR_TYPE color,
+	const GP_TextStyle *style, int x, int y, const char *text);
 
 int GP_TextWidth(const GP_TextStyle *style, const char *text);
 

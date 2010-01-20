@@ -31,7 +31,7 @@
 
 SDL_Surface *display = NULL;
 
-static long colors[GP_BASIC_COLOR_COUNT];
+static long white, gray, dark_gray, black, dark_red;
 
 static const char *test_strings[] = {
 	" !\"#$%&\047()*+,-./0123456789:;<=>?@",
@@ -46,7 +46,7 @@ void redraw_screen(void)
 {
 	SDL_LockSurface(display);
 	
-	GP_Clear(display, colors[GP_BLACK]);
+	GP_Clear(display, black);
 	
 	GP_TextStyle style = GP_DEFAULT_TEXT_STYLE;
 
@@ -55,36 +55,35 @@ void redraw_screen(void)
 	else
 		style.font = &GP_default_console_font;
 
-	style.foreground = colors[GP_WHITE];
-
 	const size_t TEST_STRING_COUNT = sizeof(test_strings)/sizeof(const char *);
 	size_t i;
 	for (i = 0; i < TEST_STRING_COUNT; i++) {
 		const char * test_string = test_strings[i];
 
-		style.foreground = colors[GP_WHITE];
-		style.pixel_width = 1;
-		style.pixel_hspace = 0;
-		style.pixel_vspace = 0;
+		style.pixel_xmul = 1;
+		style.pixel_ymul = 1;
+		style.pixel_xspace = 0;
+		style.pixel_yspace = 0;
 
-		GP_FillRect(display, colors[GP_MID_RED], 16, 100*i + 16,
+		GP_FillRect(display, dark_red, 16, 100*i + 16,
 				16 + GP_TextWidth(&style, test_string),
 				100*i + 16 + style.font->height);
 
-		GP_Text(display, &style, 16, 100*i + 16, test_string);
+		GP_Text(display, white, &style, 16, 100*i + 16, test_string);
 	
-		style.foreground = colors[GP_GRAY];
-		style.pixel_width = 2;
-		style.pixel_vspace = 1;
+		style.pixel_xmul = 2;
+		style.pixel_ymul = 2;
+//		style.pixel_ymul = 1;
+		style.pixel_yspace = 1;
 
-		GP_Text(display, &style, 34, 100*i + 34, test_string);
+		GP_Text(display, gray, &style, 34, 100*i + 34, test_string);
 
-		style.foreground = colors[GP_DARK_GRAY];
-		style.pixel_width = 4;
-		style.pixel_hspace = 1;
-		style.pixel_vspace = 1;
+		style.pixel_xmul = 4;
+		style.pixel_ymul = 2;
+		style.pixel_xspace = 1;
+		style.pixel_yspace = 1;
 
-		GP_Text(display, &style, 64, 100*i + 64, test_string);
+		GP_Text(display, dark_gray, &style, 64, 100*i + 64, test_string);
 	}
 
 	SDL_UnlockSurface(display);
@@ -135,7 +134,11 @@ int main(void)
 	}
 
 	/* Load a set of basic colors */
-	GP_LoadBasicColors(display, colors);
+	white = SDL_MapRGB(display->format, 255, 255, 255);
+	gray = SDL_MapRGB(display->format, 127, 127, 127);
+	dark_gray = SDL_MapRGB(display->format, 64, 64, 64);
+	black = SDL_MapRGB(display->format, 0, 0, 0);
+	dark_red = SDL_MapRGB(display->format, 64, 0, 0);
 
 	/* Set up a clipping rectangle to test proper clipping of pixels */
 	SDL_Rect clip_rect = {10, 10, 620, 460};
