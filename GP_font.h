@@ -23,20 +23,52 @@
  *                                                                           *
  *****************************************************************************/
 
-#ifndef GP_TEXT_H
-#define GP_TEXT_H
+#ifndef GP_FONT_H
+#define GP_FONT_H
 
 #include <stdint.h>
 
-#include "GP_backend.h"
+/* The smallest charset, covering only the 7-bit ASCII (0x20 .. 0x7f). */
+#define GP_CHARSET_7BIT		1
 
-#include "GP_font.h"
-#include "GP_textstyle.h"
+/*
+ * Describes a font.
+ */
+struct GP_Font {
 
-void GP_Text(GP_TARGET_TYPE *target, GP_COLOR_TYPE color,
-	const struct GP_TextStyle *style, int x, int y, const char *text);
+	/* The charset specifies which characters are defined by the font. */
+	uint8_t charset;
 
-int GP_TextWidth(const struct GP_TextStyle *style, const char *text);
+	/*
+	 * Array of character bitmaps.
+	 *
+	 * Characters are stored sequentially. The first encoded character
+	 * is 0x20 (space). A font must, at a minimum, encode all characters
+	 * of the 7-bit ASCII set (0x20 .. 0x7F, inclusive).
+	 */
+	uint8_t *data;
+
+	/* Maximum width of a character, in pixels. */
+	uint8_t char_width;
+
+	/*
+	 * Additional horizontal space drawn between characters
+	 * (in pixels, can be 0).
+	 */
+	uint8_t hspace;
+
+	/* Height of every character in pixels. */
+	uint8_t height;
+
+	/*
+	 * Number of bytes for each pixel line in the character data
+	 * (typically 1/8 of char_width, rounded upwards).
+	 */
+	uint8_t bytes_per_line;
+};
+
+/* The default font, which is hardcoded and always available. */
+extern struct GP_Font GP_default_console_font;
+extern struct GP_Font GP_default_proportional_font;
 
 #endif
-

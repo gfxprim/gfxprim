@@ -27,7 +27,7 @@
 #include <stdlib.h>
 #include <SDL/SDL.h>
 
-#include "GP.h"
+#include "GP_SDL.h"
 
 SDL_Surface *display = NULL;
 
@@ -46,9 +46,9 @@ void redraw_screen(void)
 {
 	SDL_LockSurface(display);
 	
-	GP_Clear(display, black);
-	
-	GP_TextStyle style = GP_DEFAULT_TEXT_STYLE;
+	SDL_FillRect(display, NULL, black);
+
+	struct GP_TextStyle style = GP_DEFAULT_TEXT_STYLE;
 
 	if (flag_proportional)
 		style.font = &GP_default_proportional_font;
@@ -65,25 +65,24 @@ void redraw_screen(void)
 		style.pixel_xspace = 0;
 		style.pixel_yspace = 0;
 
-		GP_FillRect(display, dark_red, 16, 100*i + 16,
+		GP_SDL_FillRect(display, dark_red, 16, 100*i + 16,
 				16 + GP_TextWidth(&style, test_string),
 				100*i + 16 + style.font->height);
 
-		GP_Text(display, white, &style, 16, 100*i + 16, test_string);
+		GP_SDL_Text(display, white, &style, 16, 100*i + 16, test_string);
 	
 		style.pixel_xmul = 2;
 		style.pixel_ymul = 2;
-//		style.pixel_ymul = 1;
 		style.pixel_yspace = 1;
 
-		GP_Text(display, gray, &style, 34, 100*i + 34, test_string);
+		GP_SDL_Text(display, gray, &style, 34, 100*i + 34, test_string);
 
 		style.pixel_xmul = 4;
 		style.pixel_ymul = 2;
 		style.pixel_xspace = 1;
 		style.pixel_yspace = 1;
 
-		GP_Text(display, dark_gray, &style, 64, 100*i + 64, test_string);
+		GP_SDL_Text(display, dark_gray, &style, 64, 100*i + 64, test_string);
 	}
 
 	SDL_UnlockSurface(display);

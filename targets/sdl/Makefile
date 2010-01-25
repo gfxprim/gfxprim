@@ -4,7 +4,9 @@ HEADERS=GP_SDL.h \
 	GP_SDL_backend.h \
 	GP_SDL_specific.h
 
-EXTRA_DEPS=../../libGP.a
+CFLAGS=-I../.. -O2
+
+EXTRA_DEPS=
 
 OBJECTS=GP_SDL_circle.o \
 	GP_SDL_ellipse.o \
@@ -12,6 +14,7 @@ OBJECTS=GP_SDL_circle.o \
 	GP_SDL_line.o \
 	GP_SDL_rect.o \
 	GP_SDL_setpixel.o \
+	GP_SDL_text.o \
 	GP_SDL_triangle.o
 
 .PHONY: library tests clean tar install
@@ -44,6 +47,9 @@ GP_SDL_line.o: GP_SDL_line.c \
 		../../generic/hline_generic.c \
 		../../generic/vline_generic.c
 
+GP_SDL_text.o: GP_SDL_text.c \
+		../../generic/text_generic.c
+
 GP_SDL_triangle.o: GP_SDL_triangle.c \
 		../../generic/triangle_generic.c \
 		../../generic/fill_triangle_generic.c
@@ -61,7 +67,7 @@ $(LIBRARY).a: $(OBJECTS) $(EXTRA_DEPS)
 	ar crus $@ $^
 
 $(LIBRARY).so: $(OBJECTS) $(EXTRA_DEPS)
-	$(CC) -fPIC -dPIC --shared -Wl,-soname -Wl,$@.0 $(CFLAGS) $(OBJECTS) -o $@
+	$(CC) -fPIC -dPIC --shared -Wl,-soname -Wl,$@.0 $(CFLAGS) $^ -o $@
 	ln -sf $@ $@.0
 
 #############################################################################

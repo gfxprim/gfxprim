@@ -27,22 +27,18 @@
 #include "GP_SDL_backend.h"
 #include "GP_writepixel.h"
 
-#define FN_ATTR		GP_INTERNAL_FN
 #define FN_NAME		GP_SDL_SetPixel_8bpp
 #define WRITE_PIXEL	GP_WRITE_PIXEL_1BYTE
 #include "generic/setpixel_generic.c"
 
-#define FN_ATTR		GP_INTERNAL_FN
 #define FN_NAME		GP_SDL_SetPixel_16bpp
 #define WRITE_PIXEL	GP_WRITE_PIXEL_2BYTES
 #include "generic/setpixel_generic.c"
 
-#define FN_ATTR		GP_INTERNAL_FN
 #define FN_NAME		GP_SDL_SetPixel_24bpp
 #define WRITE_PIXEL	GP_WRITE_PIXEL_3BYTES
 #include "generic/setpixel_generic.c"
 
-#define FN_ATTR		GP_INTERNAL_FN
 #define FN_NAME		GP_SDL_SetPixel_32bpp
 #define WRITE_PIXEL	GP_WRITE_PIXEL_4BYTES
 #include "generic/setpixel_generic.c"

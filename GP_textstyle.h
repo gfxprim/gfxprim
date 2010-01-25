@@ -23,10 +23,35 @@
  *                                                                           *
  *****************************************************************************/
 
-#ifndef GP_BACKEND_H
-#define GP_BACKEND_H
+#ifndef GP_TEXTSTYLE_H
+#define GP_TEXTSTYLE_H
 
-#include "backends/GP_backend_sdl.h"
+#include "GP_font.h"
 
-#endif
+#include <stdint.h>
 
+/*
+ * This structure describes how a text should be rendered.
+ * It includes a font, and its various variants and transformations.
+ */
+struct GP_TextStyle {
+
+	/* Font to use, or NULL to use the default font. */
+	struct GP_Font *font;
+
+	/* Spacing between pixels (0 is the default, no spacing). */
+	int pixel_xspace, pixel_yspace;
+
+	/* Multiplier of pixel width/height (1 is default). */
+	int pixel_xmul, pixel_ymul;
+};
+
+/*
+ * Static initializer for initializing a GP_TextStyle structure to default
+ * values.
+ * Note that at least the colors should always be changed afterwards,
+ * as there is no sensible default (they are initialized to 0).
+ */
+#define GP_DEFAULT_TEXT_STYLE { NULL, 0, 0, 1, 1 }
+
+#endif /* GP_TEXTSTYLE */

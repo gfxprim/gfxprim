@@ -23,7 +23,7 @@
  *                                                                           *
  *****************************************************************************/
 
-#include "GP_text.h"
+#include "GP_font.h"
 
 static uint8_t GP_default_console_font_data[] = {
 	/* ' ' */ 	8, 0,	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -123,7 +123,7 @@ static uint8_t GP_default_console_font_data[] = {
 	/* '~' */	8, 0,	0x32, 0x4c, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 };
 
-GP_Font GP_default_console_font = {
+struct GP_Font GP_default_console_font = {
 	.charset = GP_CHARSET_7BIT,
 	.data = GP_default_console_font_data,
 	.char_width = 8,
@@ -230,7 +230,7 @@ static uint8_t GP_default_proportional_font_data[] = {
 	/* '~' */	8, 0,	0x32, 0x4c, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 };
 
-GP_Font GP_default_proportional_font = {
+struct GP_Font GP_default_proportional_font = {
 	.charset = GP_CHARSET_7BIT,
 	.data = GP_default_proportional_font_data,
 	.char_width = 8,

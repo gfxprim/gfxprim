@@ -29,8 +29,9 @@
 
  */
 
+#include "GP_SDL.h"
+
 #include <SDL/SDL.h>
-#include <GP.h>
 #include <math.h>
 
 #define TIMER_TICK 50
@@ -43,14 +44,14 @@ SDL_Surface *display;
 SDL_TimerID timer;
 
 int iter, l, way = 1;
-long colors[GP_BASIC_COLOR_COUNT];
+long black, blue, gray;
 
 static void sierpinsky(SDL_Surface *surf, long color, float x1, float y1, float x4, float y4, int iter)
 {
 	float x2, y2, x3, y3, x5, y5;
 	
 	if (iter <= 0) {
-		GP_Line(surf, colors[GP_BLACK], x1, y1, x4, y4);
+		GP_SDL_Line(surf, black, x1, y1, x4, y4);
 		return;
 	}
 
@@ -63,7 +64,7 @@ static void sierpinsky(SDL_Surface *surf, long color, float x1, float y1, float 
 	x5 = (x1+x4)/2 + (y2 - y3)*sqrt(3.00/4);
 	y5 = (y1+y4)/2 + (x3 - x2)*sqrt(3.00/4);
 
-	GP_FillTriangle(surf, color, x2, y2, x3, y3, x5, y5);
+	GP_SDL_FillTriangle(surf, color, x2, y2, x3, y3, x5, y5);
 
 	sierpinsky(surf, color, x1, y1, x2, y2, iter - 1);
 	sierpinsky(surf, color, x2, y2, x5, y5, iter - 1);
@@ -88,11 +89,12 @@ static void draw(SDL_Surface *surf, int x, int y, int l, int iter)
 	x3 = sin(1.00 * (iter+240)/57) * l + x;
 	y3 = cos(1.00 * (iter+240)/57) * l + y;
 
-	GP_Clear(surf, colors[GP_GRAY]);
-	GP_FillTriangle(surf, colors[GP_MID_BLUE], x1, y1, x2, y2, x3, y3);
-	sierpinsky(surf, colors[GP_MID_BLUE], x1, y1, x2, y2, iter/60%6);
-	sierpinsky(surf, colors[GP_MID_BLUE], x2, y2, x3, y3, iter/60%6);
-	sierpinsky(surf, colors[GP_MID_BLUE], x3, y3, x1, y1, iter/60%6);
+	SDL_FillRect(surf, NULL, gray);
+
+	GP_SDL_FillTriangle(surf, blue, x1, y1, x2, y2, x3, y3);
+	sierpinsky(surf, blue, x1, y1, x2, y2, iter/60%6);
+	sierpinsky(surf, blue, x2, y2, x3, y3, iter/60%6);
+	sierpinsky(surf, blue, x3, y3, x1, y1, iter/60%6);
 	
 	SDL_UpdateRect(surf, 0, 0, surf->w, surf->h);
 }
@@ -127,7 +129,10 @@ int main(void)
 		return -1;
 	}
 
-	GP_LoadBasicColors(display, colors);
+	black = SDL_MapRGB(display->format, 0, 0, 0);
+	gray = SDL_MapRGB(display->format, 127, 127, 127);
+	blue = SDL_MapRGB(display->format, 0, 0, 127);
+
 	iter = 0;
 	draw(display, display->w/2, display->h/2, l, iter);
 

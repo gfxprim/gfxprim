@@ -51,6 +51,11 @@ extern void LINE(GP_TARGET_TYPE *target, GP_COLOR_TYPE color,
 FN_ATTR void FN_NAME(GP_TARGET_TYPE *target, GP_COLOR_TYPE color,
 	int x0, int y0, int x1, int y1, int x2, int y2)
 {
+	LINE(target, color, x0, y0, x1, y1);
+	LINE(target, color, x0, y0, x2, y2);
+	LINE(target, color, x1, y1, x2, y2);
+
+#if 0
 	/*
 	 * Sort the three points according to the Y coordinate.
 	 * A is the topmost, B is between them, C is the bottommost.
@@ -160,6 +165,7 @@ FN_ATTR void FN_NAME(GP_TARGET_TYPE *target, GP_COLOR_TYPE color,
 		}
 	}
 	LINE(target, color, BCx, y-1, ACx, y-1);
+#endif
 }
 
 #undef FN_NAME

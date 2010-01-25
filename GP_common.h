@@ -23,20 +23,12 @@
  *                                                                           *
  *****************************************************************************/
 
-#ifndef GP_TEXT_H
-#define GP_TEXT_H
-
-#include <stdint.h>
-
-#include "GP_backend.h"
+#ifndef GP_COMMON_H
+#define GP_COMMON_H
 
 #include "GP_font.h"
+#include "GP_minmax.h"
 #include "GP_textstyle.h"
+#include "GP_text_metric.h"
 
-void GP_Text(GP_TARGET_TYPE *target, GP_COLOR_TYPE color,
-	const struct GP_TextStyle *style, int x, int y, const char *text);
-
-int GP_TextWidth(const struct GP_TextStyle *style, const char *text);
-
-#endif
-
+#endif /* GP_COMMON_H */

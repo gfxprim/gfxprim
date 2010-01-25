@@ -63,8 +63,10 @@ GP_DEF_DRAWING_FN(GP_SDL_FillTriangle, int x0, int y0, int x1, int y1, int x2, i
 
 long GP_SDL_GetPixel(SDL_Surface *target, int x, int y);
 
-#include "GP_text.h"
+#include "GP_font.h"
+#include "GP_textstyle.h"
+#include "GP_text_metric.h"
 
-GP_DEF_DRAWING_FN(GP_SDL_Text, int x, int y, GP_TextStyle *style, const char *str);
+GP_DEF_DRAWING_FN(GP_SDL_Text, const struct GP_TextStyle *style, int x, int y, const char *str);
 
 #endif

@@ -23,16 +23,14 @@
  *                                                                           *
  *****************************************************************************/
 
-#ifndef GP_BACKEND_SDL_H
-#define GP_BACKEND_SDL_H
+#ifndef GP_SDL_BACKEND_H
+#define GP_SDL_BACKEND_H
 
 #include <SDL/SDL.h>
 
-#include "GP_SDL.h"
-
 /*
  * Internal definitions for interfacing with SDL.
- * Do not include in user code - use GP_SDL.h and possibly GP_SDL_specific.h.
+ * Do not include in user code - use GP_SDL.h instead.
  */
 
 /*
@@ -79,12 +77,9 @@
  */
 #define GP_PIXEL_ADDR(target, x, y) GP_SDL_PIXEL_ADDR(target, x, y)
 
-/*
- * Attribute used for internal functions that are used within
- * the library across .c files (so cannot be declared static)
- * but should not be accessed from outside.
- */
-#define GP_INTERNAL_FN __attribute__((visibility("internal")))
+/* Names of functions for this target's backend. */
+
+#define GP_BACKEND_HLINE GP_SDL_HLine
 
 #endif /* GP_BACKEND_SDL_H */
 

@@ -23,22 +23,14 @@
  *                                                                           *
  *****************************************************************************/
 
-#ifndef GP_H
-#define GP_H
+#ifndef GP_TEXT_METRIC_H
+#define GP_TEXT_METRIC_H
 
-#include "GP_minmax.h"
+#include "GP_textstyle.h"
 
-#include "GP_backend.h"
+/*
+ * Calculates the width of the string drawn in the given style, in pixels.
+ */
+int GP_TextWidth(const struct GP_TextStyle *style, const char *str);
 
-#include "GP_pixel.h"
-
-#include "GP_line.h"
-
-#include "GP_gfx.h"
-
-#include "GP_colors.h"
-
-#include "GP_text.h"
-
-#endif /* GP_H */
-
+#endif

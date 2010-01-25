@@ -23,20 +23,9 @@
  *                                                                           *
  *****************************************************************************/
 
-#ifndef GP_TEXT_H
-#define GP_TEXT_H
+#include "GP_SDL.h"
+#include "GP_SDL_backend.h"
 
-#include <stdint.h>
-
-#include "GP_backend.h"
-
-#include "GP_font.h"
-#include "GP_textstyle.h"
-
-void GP_Text(GP_TARGET_TYPE *target, GP_COLOR_TYPE color,
-	const struct GP_TextStyle *style, int x, int y, const char *text);
-
-int GP_TextWidth(const struct GP_TextStyle *style, const char *text);
-
-#endif
+#define FN_NAME		GP_SDL_Text
+#include "generic/text_generic.c"
 

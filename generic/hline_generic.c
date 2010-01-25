@@ -39,7 +39,7 @@
 #define FN_ATTR
 #endif
 
-FN_ATTR void FN_NAME(GP_TARGET_TYPE *target, GP_COLOR_TYPE color, int x0, int x1, int y)
+void FN_NAME(GP_TARGET_TYPE *target, GP_COLOR_TYPE color, int x0, int x1, int y)
 {
 	/* Ensure that x0 <= x1, swap coordinates if needed. */
 	if (x0 > x1) {
