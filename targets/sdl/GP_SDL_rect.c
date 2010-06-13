@@ -26,49 +26,15 @@
 #include "GP_SDL.h"
 #include "GP_SDL_backend.h"
 
-#define FN_ATTR		static
-#define FN_NAME 	GP_SDL_Rect_8bpp
-#define HLINE 		GP_SDL_HLine_8bpp
-#define VLINE 		GP_SDL_VLine_8bpp
-#include "generic/rect_generic.c"
-
-#define FN_ATTR		static
-#define FN_NAME		GP_SDL_Rect_16bpp
-#define HLINE		GP_SDL_HLine_16bpp
-#define VLINE		GP_SDL_VLine_16bpp
-#include "generic/rect_generic.c"
-
-#define FN_ATTR		static
-#define FN_NAME		GP_SDL_Rect_24bpp
-#define HLINE		GP_SDL_HLine_24bpp
-#define VLINE		GP_SDL_VLine_24bpp
-#include "generic/rect_generic.c"
-
-#define FN_ATTR		static
-#define FN_NAME		GP_SDL_Rect_32bpp
-#define HLINE		GP_SDL_HLine_32bpp
-#define VLINE		GP_SDL_VLine_32bpp
-#include "generic/rect_generic.c"
-
 void GP_SDL_Rect(GP_TARGET_TYPE *target, GP_COLOR_TYPE color, int x0, int y0, int x1, int y1)
 {
-	switch (GP_BYTES_PER_PIXEL(target)) {
-	case 1:
-		GP_SDL_Rect_8bpp(target, color, x0, y0, x1, y1);
-		break;
-	
-	case 2:
-		GP_SDL_Rect_16bpp(target, color, x0, y0, x1, y1);
-		break;
-	
-	case 3:
-		GP_SDL_Rect_24bpp(target, color, x0, y0, x1, y1);
-		break;
-	
-	case 4:
-		GP_SDL_Rect_32bpp(target, color, x0, y0, x1, y1);
-		break;
-	}
+	struct GP_BufferInfo buffer;
+	struct GP_ClipInfo clip;
+
+	GP_SDL_BufferInfoFromSurface(target, &buffer);
+	GP_SDL_ClipInfoFromSurface(target, &clip);
+
+	GP_Rect(&buffer, &clip, x0, y0, x1, y1, color);
 }
 
 void GP_SDL_FillRect(GP_TARGET_TYPE *target, GP_COLOR_TYPE color, int x0, int y0, int x1, int y1)

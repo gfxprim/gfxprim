@@ -7,4 +7,4 @@ PROG="$1"
 shift
 
 echo "LD_LIBRARY_PATH=..:../../.. ./$PROG $@"
-LD_LIBRARY_PATH=..:../../.. ./$PROG $@
+LD_LIBRARY_PATH=..:../../../core ./$PROG $@

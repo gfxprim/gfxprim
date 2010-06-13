@@ -23,75 +23,52 @@
  *                                                                           *
  *****************************************************************************/
 
+#ifndef GP_FONT_H
+#define GP_FONT_H
+
+#include <stdint.h>
+
+/* The smallest charset, covering only the 7-bit ASCII (0x20 .. 0x7f). */
+#define GP_CHARSET_7BIT		1
+
 /*
- * Parameterized template for function for drawing horizontal lines.
- * Parameters that must be #defined outside:
- *
- *      FN_ATTR
- *      	(Optional.) Attributes of the function (e.g. "static")
- * 	FN_NAME
- * 		Name of the function.
- * 	BYTES_PER_PIXEL
- * 		Number of bytes per pixel of the target.
+ * Describes a font.
  */
+struct GP_Font {
 
-#ifndef FN_ATTR
-#define FN_ATTR
+	/* The charset specifies which characters are defined by the font. */
+	uint8_t charset;
+
+	/*
+	 * Array of character bitmaps.
+	 *
+	 * Characters are stored sequentially. The first encoded character
+	 * is 0x20 (space). A font must, at a minimum, encode all characters
+	 * of the 7-bit ASCII set (0x20 .. 0x7F, inclusive).
+	 */
+	uint8_t *data;
+
+	/* Maximum width of a character, in pixels. */
+	uint8_t char_width;
+
+	/*
+	 * Additional horizontal space drawn between characters
+	 * (in pixels, can be 0).
+	 */
+	uint8_t hspace;
+
+	/* Height of every character in pixels. */
+	uint8_t height;
+
+	/*
+	 * Number of bytes for each pixel line in the character data
+	 * (typically 1/8 of char_width, rounded upwards).
+	 */
+	uint8_t bytes_per_line;
+};
+
+/* The default font, which is hardcoded and always available. */
+extern struct GP_Font GP_default_console_font;
+extern struct GP_Font GP_default_proportional_font;
+
 #endif
-
-void FN_NAME(GP_TARGET_TYPE *target, GP_COLOR_TYPE color, int x0, int x1, int y)
-{
-	/* Ensure that x0 <= x1, swap coordinates if needed. */
-	if (x0 > x1) {
-		FN_NAME(target, color, x1, x0, y);
-		return;
-	}
-
-	/* Get the clipping rectangle. */
-	int xmin, xmax, ymin, ymax;
-	GP_GET_CLIP_RECT(target, xmin, xmax, ymin, ymax);
-
-	/* Check whether the line is not completely clipped out. */
-	if (y < ymin || y > ymax || x0 > xmax || x1 < xmin)
-		return;
-
-	/* Clip the start and end of the line. */
-	if (x0 < xmin) {
-		x0 = xmin;
-	}
-	if (x1 > xmax) {
-		x1 = xmax;
-	}
-
-	/* Number of pixels to draw (always at least one point). */
-	size_t pixelcount = 1 + x1 - x0;
-
-#if BYTES_PER_PIXEL == 4
-
-	GP_WritePixels32bpp(GP_PIXEL_ADDR(target, x0, y), pixelcount,
-				(uint32_t) color);
-
-#elif BYTES_PER_PIXEL == 3
-
-	GP_WritePixels24bpp(GP_PIXEL_ADDR(target, x0, y), pixelcount,
-				(uint32_t) color);
-
-#elif BYTES_PER_PIXEL == 2
-
-	GP_WritePixels16bpp(GP_PIXEL_ADDR(target, x0, y), pixelcount,
-				(uint16_t) color);
-
-#elif BYTES_PER_PIXEL == 1
-
-	GP_WritePixels8bpp(GP_PIXEL_ADDR(target, x0, y), pixelcount,
-				(uint8_t) color);
-
-#else
-#error "Unsupported value of BYTES_PER_PIXEL"
-#endif
-}
-
-#undef FN_ATTR
-#undef FN_NAME
-#undef BYTES_PER_PIXEL
-

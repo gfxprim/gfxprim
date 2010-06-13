@@ -23,75 +23,34 @@
  *                                                                           *
  *****************************************************************************/
 
-/*
- * Parameterized template for function for drawing horizontal lines.
- * Parameters that must be #defined outside:
- *
- *      FN_ATTR
- *      	(Optional.) Attributes of the function (e.g. "static")
- * 	FN_NAME
- * 		Name of the function.
- * 	BYTES_PER_PIXEL
- * 		Number of bytes per pixel of the target.
- */
+#ifndef GP_H
+#define GP_H
 
-#ifndef FN_ATTR
-#define FN_ATTR
-#endif
+#include <stdint.h>
 
-void FN_NAME(GP_TARGET_TYPE *target, GP_COLOR_TYPE color, int x0, int x1, int y)
-{
-	/* Ensure that x0 <= x1, swap coordinates if needed. */
-	if (x0 > x1) {
-		FN_NAME(target, color, x1, x0, y);
-		return;
-	}
+/* basic definitions and structures */
+#include "GP_minmax.h"
+#include "GP_bufferinfo.h"
+#include "GP_clipinfo.h"
+#include "GP_getcliplimits.h"
 
-	/* Get the clipping rectangle. */
-	int xmin, xmax, ymin, ymax;
-	GP_GET_CLIP_RECT(target, xmin, xmax, ymin, ymax);
+/* semi-public, low-level drawing API */
+#include "GP_writepixel.h"
+#include "GP_fillcolumn.h"
+#include "GP_fillrow.h"
 
-	/* Check whether the line is not completely clipped out. */
-	if (y < ymin || y > ymax || x0 > xmax || x1 < xmin)
-		return;
+/* public drawing API */
+#include "GP_putpixel.h"
+#include "GP_hline.h"
+#include "GP_vline.h"
+#include "GP_line.h"
+#include "GP_rect.h"
+#include "GP_triangle.h"
+#include "GP_filltriangle.h"
 
-	/* Clip the start and end of the line. */
-	if (x0 < xmin) {
-		x0 = xmin;
-	}
-	if (x1 > xmax) {
-		x1 = xmax;
-	}
+/* fonts */
+#include "GP_font.h"
+#include "GP_textstyle.h"
+#include "GP_textmetric.h"
 
-	/* Number of pixels to draw (always at least one point). */
-	size_t pixelcount = 1 + x1 - x0;
-
-#if BYTES_PER_PIXEL == 4
-
-	GP_WritePixels32bpp(GP_PIXEL_ADDR(target, x0, y), pixelcount,
-				(uint32_t) color);
-
-#elif BYTES_PER_PIXEL == 3
-
-	GP_WritePixels24bpp(GP_PIXEL_ADDR(target, x0, y), pixelcount,
-				(uint32_t) color);
-
-#elif BYTES_PER_PIXEL == 2
-
-	GP_WritePixels16bpp(GP_PIXEL_ADDR(target, x0, y), pixelcount,
-				(uint16_t) color);
-
-#elif BYTES_PER_PIXEL == 1
-
-	GP_WritePixels8bpp(GP_PIXEL_ADDR(target, x0, y), pixelcount,
-				(uint8_t) color);
-
-#else
-#error "Unsupported value of BYTES_PER_PIXEL"
-#endif
-}
-
-#undef FN_ATTR
-#undef FN_NAME
-#undef BYTES_PER_PIXEL
-
+#endif /* GP_COMMON_H */

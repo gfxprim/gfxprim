@@ -31,46 +31,46 @@
 
 #define FN_ATTR		static
 #define FN_NAME		GP_SDL_Triangle_8bpp
-#define LINE		GP_SDL_Line_8bpp
-#define SETPIXEL	GP_SDL_SetPixel_8bpp
+#define LINE		GP_SDL_Line
+#define SETPIXEL	GP_SDL_SetPixel
 #include "generic/triangle_generic.c"
 
 #define FN_ATTR		static
 #define FN_NAME		GP_SDL_Triangle_16bpp
-#define LINE		GP_SDL_Line_16bpp
-#define SETPIXEL	GP_SDL_SetPixel_16bpp
+#define LINE		GP_SDL_Line
+#define SETPIXEL	GP_SDL_SetPixel
 #include "generic/triangle_generic.c"
 
 #define FN_ATTR		static
 #define FN_NAME		GP_SDL_Triangle_24bpp
-#define LINE		GP_SDL_Line_24bpp
-#define SETPIXEL	GP_SDL_SetPixel_24bpp
+#define LINE		GP_SDL_Line
+#define SETPIXEL	GP_SDL_SetPixel
 #include "generic/triangle_generic.c"
 
 #define FN_ATTR		static
 #define FN_NAME		GP_SDL_Triangle_32bpp
-#define LINE		GP_SDL_Line_32bpp
-#define SETPIXEL	GP_SDL_SetPixel_32bpp
+#define LINE		GP_SDL_Line
+#define SETPIXEL	GP_SDL_SetPixel
 #include "generic/triangle_generic.c"
 
 #define FN_ATTR		static
 #define FN_NAME		GP_SDL_FillTriangle_8bpp
-#define HLINE		GP_SDL_HLine_8bpp
+#define HLINE		GP_SDL_HLine
 #include "generic/fill_triangle_generic.c"
 
 #define FN_ATTR		static
 #define FN_NAME		GP_SDL_FillTriangle_16bpp
-#define HLINE		GP_SDL_HLine_16bpp
+#define HLINE		GP_SDL_HLine
 #include "generic/fill_triangle_generic.c"
 
 #define FN_ATTR		static
 #define FN_NAME		GP_SDL_FillTriangle_24bpp
-#define HLINE		GP_SDL_HLine_24bpp
+#define HLINE		GP_SDL_HLine
 #include "generic/fill_triangle_generic.c"
 
 #define FN_ATTR		static
 #define FN_NAME		GP_SDL_FillTriangle_32bpp
-#define HLINE		GP_SDL_HLine_32bpp
+#define HLINE		GP_SDL_HLine
 #include "generic/fill_triangle_generic.c"
 
 void GP_SDL_Triangle(GP_TARGET_TYPE *target, GP_COLOR_TYPE color,

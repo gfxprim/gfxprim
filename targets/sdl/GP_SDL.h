@@ -28,6 +28,10 @@
 
 #include <SDL/SDL.h>
 
+#include "GP.h"
+#include "GP_SDL_bufferinfo.h"
+#include "GP_SDL_clipinfo.h"
+
 #define GP_SDL_BYTES_PER_PIXEL(target) (target->format->BytesPerPixel)
 
 #define GP_SDL_BYTES_PER_LINE(target) (target->pitch)
@@ -62,11 +66,6 @@ GP_DEF_DRAWING_FN(GP_SDL_FillTriangle, int x0, int y0, int x1, int y1, int x2, i
 #define GP_SDL_PutPixel GP_SDL_SetPixel
 
 long GP_SDL_GetPixel(SDL_Surface *target, int x, int y);
-
-#include "GP_font.h"
-#include "GP_textstyle.h"
-#include "GP_text_metric.h"
-
 GP_DEF_DRAWING_FN(GP_SDL_Text, const struct GP_TextStyle *style, int x, int y, const char *str);
 
 #endif

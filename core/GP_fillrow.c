@@ -23,75 +23,52 @@
  *                                                                           *
  *****************************************************************************/
 
-/*
- * Parameterized template for function for drawing horizontal lines.
- * Parameters that must be #defined outside:
- *
- *      FN_ATTR
- *      	(Optional.) Attributes of the function (e.g. "static")
- * 	FN_NAME
- * 		Name of the function.
- * 	BYTES_PER_PIXEL
- * 		Number of bytes per pixel of the target.
- */
+#include "GP.h"
 
-#ifndef FN_ATTR
-#define FN_ATTR
-#endif
+#include <stdio.h>
 
-void FN_NAME(GP_TARGET_TYPE *target, GP_COLOR_TYPE color, int x0, int x1, int y)
+void GP_FillRow(struct GP_BufferInfo *buffer, struct GP_ClipInfo *clip,
+		int row, int first_column, int last_column, uint32_t value)
 {
-	/* Ensure that x0 <= x1, swap coordinates if needed. */
-	if (x0 > x1) {
-		FN_NAME(target, color, x1, x0, y);
+	int min_row, max_row, min_column, max_column;
+	GP_GetClipLimits(buffer, clip, &min_row, &max_row, &min_column,
+			&max_column);
+
+	/* check if we are not completely outside limits */
+	if (row < min_row || row > max_row
+		|| first_column > max_column || last_column < min_column) {
 		return;
 	}
 
-	/* Get the clipping rectangle. */
-	int xmin, xmax, ymin, ymax;
-	GP_GET_CLIP_RECT(target, xmin, xmax, ymin, ymax);
+	/* clip the column value */
+	first_column = GP_MAX(first_column, min_column);
+	last_column = GP_MIN(last_column, max_column);
 
-	/* Check whether the line is not completely clipped out. */
-	if (y < ymin || y > ymax || x0 > xmax || x1 < xmin)
+	/* bail out if the coordinates are backwards */
+	if (first_column > last_column) {
 		return;
-
-	/* Clip the start and end of the line. */
-	if (x0 < xmin) {
-		x0 = xmin;
-	}
-	if (x1 > xmax) {
-		x1 = xmax;
 	}
 
-	/* Number of pixels to draw (always at least one point). */
-	size_t pixelcount = 1 + x1 - x0;
+	size_t column_count = 1 + last_column - first_column;
 
-#if BYTES_PER_PIXEL == 4
+	/* Calculate the address of the start of the filled block */
+	void *start = GP_PIXEL_ADDRESS(buffer, row, first_column);
 
-	GP_WritePixels32bpp(GP_PIXEL_ADDR(target, x0, y), pixelcount,
-				(uint32_t) color);
-
-#elif BYTES_PER_PIXEL == 3
-
-	GP_WritePixels24bpp(GP_PIXEL_ADDR(target, x0, y), pixelcount,
-				(uint32_t) color);
-
-#elif BYTES_PER_PIXEL == 2
-
-	GP_WritePixels16bpp(GP_PIXEL_ADDR(target, x0, y), pixelcount,
-				(uint16_t) color);
-
-#elif BYTES_PER_PIXEL == 1
-
-	GP_WritePixels8bpp(GP_PIXEL_ADDR(target, x0, y), pixelcount,
-				(uint8_t) color);
-
-#else
-#error "Unsupported value of BYTES_PER_PIXEL"
-#endif
+	switch(buffer->bits_per_pixel) {
+	case 32:
+		GP_WritePixels32bpp(start, column_count, value);
+		break;
+	
+	case 24:
+		GP_WritePixels24bpp(start, column_count, value);
+		break;
+	
+	case 16:
+		GP_WritePixels16bpp(start, column_count, (uint16_t) value);
+		break;
+	
+	case 8:
+		GP_WritePixels8bpp(start, column_count, (uint8_t) value);
+		break;
+	}
 }
-
-#undef FN_ATTR
-#undef FN_NAME
-#undef BYTES_PER_PIXEL
-

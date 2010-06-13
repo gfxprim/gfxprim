@@ -27,6 +27,7 @@
 #include <stdlib.h>
 #include <SDL/SDL.h>
 
+#include "GP.h"
 #include "GP_SDL.h"
 
 /* The surface used as a display (in fact it is a software surface). */
@@ -40,147 +41,36 @@ SDL_TimerID timer;
 /* An event used for signaling that the timer was triggered. */
 SDL_UserEvent timer_event;
 
-/* Globally used colors. */
-static long white, black;
-
-/* Holding flag (pauses drawing). */
-static int pause_flag = 0;
+/* Values for color pixels in display format. */
+long red;
+long green;
+long blue;
 
 Uint32 timer_callback(__attribute__((unused)) Uint32 interval,
 			__attribute__((unused)) void *param)
 {
 	timer_event.type = SDL_USEREVENT;
 	SDL_PushEvent((SDL_Event *) &timer_event);
-	return 60;
+	return 30;
 }
 
-/* Shape to draw */
-#define SHAPE_FIRST	1
-#define SHAPE_CIRCLE	1
-#define SHAPE_ELLIPSE	2
-#define SHAPE_TRIANGLE	3
-#define SHAPE_RECTANGLE	4
-#define SHAPE_LAST	4
-static int shape = SHAPE_FIRST;
-
-/* Draw outlines? */
-static int outline_flag = 0;
-
-/* Draw filled shapes? */
-static int fill_flag = 1;
-
-/* Do a clipping test? */
-static int cliptest_flag = 0;
-
-void random_point(SDL_Surface *surf, int *x, int *y)
+void draw_pixels(void)
 {
-	if (cliptest_flag) {
-		*x = random() % (3*surf->w) - surf->w;
-		*y = random() % (3*surf->h) - surf->h;
+	long pixel;
+	int x = random() % 320;
+	int y = random() % 240;
+
+	SDL_LockSurface(display);
+	pixel = GP_SDL_GetPixel(display, x, y);
+    
+	if (pixel) {
+		GP_PutPixel(&buffer, &clip, x, y, green);
 	} else {
-		*x = random() % surf->w;
-		*y = random() % surf->h;
-	}
-}
-
-void draw_random_circle(long color)
-{
-	int x, y;
-	random_point(display, &x, &y);
-	int r = random() % 50;
-
-	if (fill_flag) {
-		GP_SDL_FillCircle(display, color, x, y, r);
-	}
-
-	if (outline_flag) {
-		GP_SDL_Circle(display, white, x, y, r);
-	}
-}
-
-void draw_random_ellipse(long color)
-{
-	int x, y;
-	random_point(display, &x, &y);
-	int rx = random() % 50;
-	int ry = random() % 50;
-
-	if (fill_flag) {
-		GP_SDL_FillEllipse(display, color, x, y, rx, ry);
-	}
-
-	if (outline_flag) {
-		GP_SDL_Ellipse(display, white, x, y, rx, ry);
-	}
-}
-
-void draw_random_triangle(long color)
-{
-	int x0, y0, x1, y1, x2, y2;
-	random_point(display, &x0, &y0);
-	random_point(display, &x1, &y1);
-	random_point(display, &x2, &y2);
-
-	if (fill_flag) {
-		GP_FillTriangle(&buffer, &clip, x0, y0, x1, y1, x2, y2, color);
-	}
-
-	if (outline_flag) {
-		GP_Triangle(&buffer, &clip, x0, y0, x1, y1, x2, y2, white);
-	}
-}
-
-void draw_random_rectangle(long color)
-{
-	int x0, y0, x1, y1;
-	random_point(display, &x0, &y0);
-	random_point(display, &x1, &y1);
-
-	if (fill_flag) {
-		GP_SDL_FillRect(display, color, x0, y0, x1, y1);
-	}
-
-	if (outline_flag) {
-		GP_SDL_Rect(display, white, x0, y0, x1, y1);
-	}
-}
-
-void clear_screen(void)
-{
-	SDL_LockSurface(display);
-	SDL_FillRect(display, NULL, black);
-	SDL_UnlockSurface(display);
-}
-
-void redraw_screen(void)
-{
-	/* Random color. */
-	long color = SDL_MapRGB(display->format,
-				random() % 256,
-				random() % 256,
-				random() % 256);
-
-	if (pause_flag)
-		return;
-
-	SDL_LockSurface(display);
-
-	switch (shape) {
-	case SHAPE_CIRCLE:
-		draw_random_circle(color);
-		break;
-	
-	case SHAPE_ELLIPSE:
-		draw_random_ellipse(color);
-		break;
-	
-	case SHAPE_TRIANGLE:
-		draw_random_triangle(color);
-		break;
-	
-	case SHAPE_RECTANGLE:
-		draw_random_rectangle(color);
-		break;
+		if (x < 160) {
+			GP_PutPixel(&buffer, &clip, x, y, blue);
+		} else {
+			GP_PutPixel(&buffer, &clip, x, y, red);
+		}
 	}
 
 	SDL_UnlockSurface(display);
@@ -193,64 +83,19 @@ void event_loop(void)
 	while (SDL_WaitEvent(&event) > 0) {
 
 		switch (event.type) {
-
-		case SDL_USEREVENT:
-			redraw_screen();
-			SDL_Flip(display);
-			break;
-
-		case SDL_KEYDOWN:
-			switch (event.key.keysym.sym) {
-
-			case SDLK_SPACE:
-				shape++;
-				if (shape > SHAPE_LAST)
-					shape = SHAPE_FIRST;
-				clear_screen();
+			case SDL_USEREVENT:
+				draw_pixels();
 				SDL_Flip(display);
-				pause_flag = 0;
-				break;
-
-			case SDLK_p:
-				pause_flag = !pause_flag;
-				break;
-
-			case SDLK_f:
-				fill_flag = !fill_flag;
-				if (!fill_flag && !outline_flag) {
-					outline_flag = 1;
-				}
-				break;
-
-			case SDLK_o:
-				outline_flag = !outline_flag;
-				if (!fill_flag && !outline_flag) {
-					fill_flag = 1;
-				}
-				break;
-
-			case SDLK_c:
-				cliptest_flag = !cliptest_flag;
-				break;
-
-			case SDLK_ESCAPE:
+			break;
+			case SDL_KEYDOWN:
+			case SDL_QUIT:
 				return;
-
-			default:
-				break;
-			}
-			break;
-		case SDL_QUIT:
-			return;
-		default:
-			break;
 		}
 	}
 }
 
-int main(int argc, char ** argv)
+int main(int argc, char **argv)
 {
-	/* Bits per pixel to be set for the display surface. */
 	int display_bpp = 0;
 
 	int i;
@@ -261,9 +106,6 @@ int main(int argc, char ** argv)
 		else if (strcmp(argv[i], "-24") == 0) {
 			display_bpp = 24;
 		}
-		else if (strcmp(argv[i], "-32") == 0) {
-			display_bpp = 32;
-		}
 	}
 
 	/* Initialize SDL */
@@ -273,7 +115,7 @@ int main(int argc, char ** argv)
 	}
 
 	/* Create a window with a software back surface */
-	display = SDL_SetVideoMode(640, 480, display_bpp, SDL_SWSURFACE);
+	display = SDL_SetVideoMode(320, 240, display_bpp, SDL_SWSURFACE);
 	if (display == NULL) {
 		fprintf(stderr, "Could not open display: %s\n", SDL_GetError());
 		goto fail;
@@ -281,18 +123,26 @@ int main(int argc, char ** argv)
 
 	GP_SDL_BufferInfoFromSurface(display, &buffer);
 
-	/* Load basic colors. */
-	white = SDL_MapRGB(display->format, 255, 255, 255);
-	black = SDL_MapRGB(display->format, 0, 0, 0);
+	/* Print basic information about the surface */
+	printf("Display surface properties:\n");
+	printf("    width: %4d, height: %4d, pitch: %4d\n",
+	       display->w, display->h, display->pitch);
+	printf("    bits per pixel: %2d, bytes per pixel: %2d\n",
+	       display->format->BitsPerPixel, display->format->BytesPerPixel);
+
+	/* Get colors */
+	red = SDL_MapRGB(display->format, 255, 0, 0);
+	green = SDL_MapRGB(display->format, 0, 255, 0);
+	blue = SDL_MapRGB(display->format, 0, 0, 255);
 
 	/* Set up a clipping rectangle to test proper clipping of pixels */
-	SDL_Rect clip_rect = {10, 10, 620, 460};
+	SDL_Rect clip_rect = {10, 10, 300, 220};
 	SDL_SetClipRect(display, &clip_rect);
 
 	GP_SDL_ClipInfoFromSurface(display, &clip);
 
 	/* Set up the refresh timer */
-	timer = SDL_AddTimer(60, timer_callback, NULL);
+	timer = SDL_AddTimer(30, timer_callback, NULL);
 	if (timer == 0) {
 		fprintf(stderr, "Could not set up timer: %s\n", SDL_GetError());
 		goto fail;

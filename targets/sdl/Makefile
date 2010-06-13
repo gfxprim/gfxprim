@@ -2,13 +2,16 @@ LIBRARY=libGP_SDL
 
 HEADERS=GP_SDL.h \
 	GP_SDL_backend.h \
+	GP_SDL_bufferinfo.h \
+	GP_SDL_clipinfo.h \
 	GP_SDL_specific.h
 
-CFLAGS=-I../.. -O2
 
 EXTRA_DEPS=
 
-OBJECTS=GP_SDL_circle.o \
+OBJECTS=GP_SDL_bufferinfo.o \
+	GP_SDL_clipinfo.o \
+	GP_SDL_circle.o \
 	GP_SDL_ellipse.o \
 	GP_SDL_getpixel.o \
 	GP_SDL_line.o \
@@ -58,7 +61,7 @@ GP_SDL_triangle.o: GP_SDL_triangle.c \
 # Building rules.
 #############################################################################
 
-CFLAGS=-W -Wall -O2 -fPIC -I../..
+CFLAGS=-W -Wall -O2 -fPIC -I../.. -I../../core
 
 %.o: %.c $(HEADERS)
 	$(CC) $(CFLAGS) $< -c -o $@ 

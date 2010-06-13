@@ -23,75 +23,35 @@
  *                                                                           *
  *****************************************************************************/
 
+#ifndef GP_TEXTSTYLE_H
+#define GP_TEXTSTYLE_H
+
+#include "GP_font.h"
+
+#include <stdint.h>
+
 /*
- * Parameterized template for function for drawing horizontal lines.
- * Parameters that must be #defined outside:
- *
- *      FN_ATTR
- *      	(Optional.) Attributes of the function (e.g. "static")
- * 	FN_NAME
- * 		Name of the function.
- * 	BYTES_PER_PIXEL
- * 		Number of bytes per pixel of the target.
+ * This structure describes how a text should be rendered.
+ * It includes a font, and its various variants and transformations.
  */
+struct GP_TextStyle {
 
-#ifndef FN_ATTR
-#define FN_ATTR
-#endif
+	/* Font to use, or NULL to use the default font. */
+	struct GP_Font *font;
 
-void FN_NAME(GP_TARGET_TYPE *target, GP_COLOR_TYPE color, int x0, int x1, int y)
-{
-	/* Ensure that x0 <= x1, swap coordinates if needed. */
-	if (x0 > x1) {
-		FN_NAME(target, color, x1, x0, y);
-		return;
-	}
+	/* Spacing between pixels (0 is the default, no spacing). */
+	int pixel_xspace, pixel_yspace;
 
-	/* Get the clipping rectangle. */
-	int xmin, xmax, ymin, ymax;
-	GP_GET_CLIP_RECT(target, xmin, xmax, ymin, ymax);
+	/* Multiplier of pixel width/height (1 is default). */
+	int pixel_xmul, pixel_ymul;
+};
 
-	/* Check whether the line is not completely clipped out. */
-	if (y < ymin || y > ymax || x0 > xmax || x1 < xmin)
-		return;
+/*
+ * Static initializer for initializing a GP_TextStyle structure to default
+ * values.
+ * Note that at least the colors should always be changed afterwards,
+ * as there is no sensible default (they are initialized to 0).
+ */
+#define GP_DEFAULT_TEXT_STYLE { NULL, 0, 0, 1, 1 }
 
-	/* Clip the start and end of the line. */
-	if (x0 < xmin) {
-		x0 = xmin;
-	}
-	if (x1 > xmax) {
-		x1 = xmax;
-	}
-
-	/* Number of pixels to draw (always at least one point). */
-	size_t pixelcount = 1 + x1 - x0;
-
-#if BYTES_PER_PIXEL == 4
-
-	GP_WritePixels32bpp(GP_PIXEL_ADDR(target, x0, y), pixelcount,
-				(uint32_t) color);
-
-#elif BYTES_PER_PIXEL == 3
-
-	GP_WritePixels24bpp(GP_PIXEL_ADDR(target, x0, y), pixelcount,
-				(uint32_t) color);
-
-#elif BYTES_PER_PIXEL == 2
-
-	GP_WritePixels16bpp(GP_PIXEL_ADDR(target, x0, y), pixelcount,
-				(uint16_t) color);
-
-#elif BYTES_PER_PIXEL == 1
-
-	GP_WritePixels8bpp(GP_PIXEL_ADDR(target, x0, y), pixelcount,
-				(uint8_t) color);
-
-#else
-#error "Unsupported value of BYTES_PER_PIXEL"
-#endif
-}
-
-#undef FN_ATTR
-#undef FN_NAME
-#undef BYTES_PER_PIXEL
-
+#endif /* GP_TEXTSTYLE */

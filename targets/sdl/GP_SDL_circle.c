@@ -28,42 +28,42 @@
 
 #define FN_ATTR		static
 #define FN_NAME		GP_SDL_Circle_8bpp
-#define SETPIXEL	GP_SDL_SetPixel_8bpp
+#define SETPIXEL	GP_SDL_SetPixel
 #include "generic/circle_generic.c"
 
 #define FN_ATTR		static
 #define FN_NAME		GP_SDL_Circle_16bpp
-#define SETPIXEL	GP_SDL_SetPixel_16bpp
+#define SETPIXEL	GP_SDL_SetPixel
 #include "generic/circle_generic.c"
 
 #define FN_ATTR		static
 #define FN_NAME		GP_SDL_Circle_24bpp
-#define SETPIXEL	GP_SDL_SetPixel_24bpp
+#define SETPIXEL	GP_SDL_SetPixel
 #include "generic/circle_generic.c"
 
 #define FN_ATTR		static
 #define FN_NAME		GP_SDL_Circle_32bpp
-#define SETPIXEL	GP_SDL_SetPixel_32bpp
+#define SETPIXEL	GP_SDL_SetPixel
 #include "generic/circle_generic.c"
 
 #define FN_ATTR		static
 #define FN_NAME		GP_SDL_FillCircle_8bpp
-#define HLINE		GP_SDL_HLine_8bpp
+#define HLINE		GP_SDL_HLine
 #include "generic/fill_circle_generic.c"
 
 #define FN_ATTR		static
 #define FN_NAME		GP_SDL_FillCircle_16bpp
-#define HLINE		GP_SDL_HLine_16bpp
+#define HLINE		GP_SDL_HLine
 #include "generic/fill_circle_generic.c"
 
 #define FN_ATTR		static
 #define FN_NAME		GP_SDL_FillCircle_24bpp
-#define HLINE		GP_SDL_HLine_24bpp
+#define HLINE		GP_SDL_HLine
 #include "generic/fill_circle_generic.c"
 
 #define FN_ATTR		static
 #define FN_NAME		GP_SDL_FillCircle_32bpp
-#define HLINE		GP_SDL_HLine_32bpp
+#define HLINE		GP_SDL_HLine
 #include "generic/fill_circle_generic.c"
 
 void GP_SDL_Circle(GP_TARGET_TYPE *target, GP_COLOR_TYPE color, int xcenter, int ycenter, int r)

@@ -23,92 +23,47 @@
  *                                                                           *
  *****************************************************************************/
 
+#include "GP.h"
 #include "GP_SDL.h"
 #include "GP_SDL_backend.h"
 #include "GP_writepixel.h"
 
-#define FN_NAME		GP_SDL_Line_8bpp
-#define SETPIXEL	GP_SDL_SetPixel_8bpp
-#include "generic/line_generic.c"
-
-#define FN_NAME		GP_SDL_Line_16bpp
-#define SETPIXEL	GP_SDL_SetPixel_16bpp
-#include "generic/line_generic.c"
-
-#define FN_NAME		GP_SDL_Line_24bpp
-#define SETPIXEL	GP_SDL_SetPixel_24bpp
-#include "generic/line_generic.c"
-
-#define FN_NAME		GP_SDL_Line_32bpp
-#define SETPIXEL	GP_SDL_SetPixel_32bpp
-#include "generic/line_generic.c"
-
-#define FN_NAME		GP_SDL_HLine_8bpp
-#define BYTES_PER_PIXEL	1
-#include "generic/hline_generic.c"
-
-#define FN_NAME		GP_SDL_HLine_16bpp
-#define BYTES_PER_PIXEL	2
-#include "generic/hline_generic.c"
-
-#define FN_NAME		GP_SDL_HLine_24bpp
-#define BYTES_PER_PIXEL	3
-#include "generic/hline_generic.c"
-
-#define FN_NAME		GP_SDL_HLine_32bpp
-#define BYTES_PER_PIXEL	4
-#include "generic/hline_generic.c"
-
 #define FN_NAME		GP_SDL_VLine_8bpp
-#define WRITE_PIXEL	GP_WRITE_PIXEL_1BYTE
+#define WRITE_PIXEL	GP_WritePixel8bpp
 #include "generic/vline_generic.c"
 
 #define FN_NAME		GP_SDL_VLine_16bpp
-#define WRITE_PIXEL	GP_WRITE_PIXEL_2BYTES
+#define WRITE_PIXEL	GP_WritePixel16bpp
 #include "generic/vline_generic.c"
 
 #define FN_NAME		GP_SDL_VLine_24bpp
-#define WRITE_PIXEL	GP_WRITE_PIXEL_3BYTES
+#define WRITE_PIXEL	GP_WritePixel24bpp
 #include "generic/vline_generic.c"
 
 #define FN_NAME		GP_SDL_VLine_32bpp
-#define WRITE_PIXEL	GP_WRITE_PIXEL_4BYTES
+#define WRITE_PIXEL	GP_WritePixel32bpp
 #include "generic/vline_generic.c"
 
 void GP_SDL_Line(SDL_Surface *target, long color, int x0, int y0, int x1, int y1)
 {
-	switch (GP_BYTES_PER_PIXEL(target)) {
-	case 1:
-		GP_SDL_Line_8bpp(target, color, x0, y0, x1, y1);
-		break;
-	case 2:
-		GP_SDL_Line_16bpp(target, color, x0, y0, x1, y1);
-		break;
-	case 3:
-		GP_SDL_Line_24bpp(target, color, x0, y0, x1, y1);
-		break;
-	case 4:
-		GP_SDL_Line_32bpp(target, color, x0, y0, x1, y1);
-		break;
-	}
+	struct GP_BufferInfo buffer;
+	GP_SDL_BufferInfoFromSurface(target, &buffer);
+
+	struct GP_ClipInfo clip;
+	GP_SDL_ClipInfoFromSurface(target, &clip);
+
+	GP_Line(&buffer, &clip, x0, y0, x1, y1, color);
 }
 
 void GP_SDL_HLine(SDL_Surface *target, long color, int x0, int x1, int y)
 {
-	switch (GP_BYTES_PER_PIXEL(target)) {
-	case 1:
-		GP_SDL_HLine_8bpp(target, color, x0, x1, y);
-		break;
-	case 2:
-		GP_SDL_HLine_16bpp(target, color, x0, x1, y);
-		break;
-	case 3:
-		GP_SDL_HLine_24bpp(target, color, x0, x1, y);
-		break;
-	case 4:
-		GP_SDL_HLine_32bpp(target, color, x0, x1, y);
-		break;
-	}
+	struct GP_BufferInfo buffer;
+	GP_SDL_BufferInfoFromSurface(target, &buffer);
+
+	struct GP_ClipInfo clip;
+	GP_SDL_ClipInfoFromSurface(target, &clip);
+
+	GP_HLine(&buffer, &clip, x0, x1, y, color);
 }
 
 void GP_SDL_VLine(SDL_Surface *target, long color, int x, int y0, int y1)

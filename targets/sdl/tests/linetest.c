@@ -31,103 +31,90 @@
 #include "GP.h"
 #include "GP_SDL.h"
 
-/* Draw filled triangles? */
-int filled = 0;
-
 /* The surface used as a display (in fact it is a software surface). */
 SDL_Surface *display = NULL;
 struct GP_BufferInfo buffer;
 struct GP_ClipInfo clip;
 
-/* Frames per second. */
-int fps = 0, fps_min = 1000000, fps_max = 0;
-
-/*
- * Timer used for FPS measurement and key reactions.
- * SDL_USEREVENT is triggered each second.
- */
-
+/* Timer used for refreshing the display */
 SDL_TimerID timer;
 
+/* An event used for signaling that the timer was triggered. */
 SDL_UserEvent timer_event;
+
+/* Values for color pixels in display format. */
+long black;
+long white;
 
 Uint32 timer_callback(__attribute__((unused)) Uint32 interval,
 			__attribute__((unused)) void * param)
 {
 	timer_event.type = SDL_USEREVENT;
 	SDL_PushEvent((SDL_Event *) &timer_event);
-	return 1000;
+	return 30;
 }
 
-/* Basic colors in display format. */
-long black, white;
+double start_angle = 0.0;
 
-void draw_frame(void)
+void redraw_screen(void)
 {
-	int x0 = 0;
-	int y0 = random() % display->h;
-	int x1 = display->w;
-	int y1 = random() % display->h;
-	int x2 = display->w/2;
-	int y2 = random() % display->h;
-	long color = SDL_MapRGB(display->format, random() % 255, random() % 255, random() % 255);
+	double angle;
+	int x, y;
+	int xcenter = display->w/2;
+	int ycenter = display->h/2;
 
-	if (filled) {
-		GP_FillTriangle(&buffer, &clip, x0, y0, x1, y1, x2, y2, color);
-	} else {
-		GP_Triangle(&buffer, &clip, x0, y0, x1, y1, x2, y2, color);
+	SDL_LockSurface(display);
+	SDL_FillRect(display, NULL, black);
+
+	for (angle = 0.0; angle < 2*M_PI; angle += 0.1) {
+		x = (int) (display->w/2 * cos(start_angle + angle));
+		y = (int) (display->h/2 * sin(start_angle + angle));
+
+		Uint8 r = 127.0 + 127.0 * cos(start_angle + angle);
+		Uint8 g = 127.0 + 127.0 * sin(start_angle + angle);
+		
+		Uint32 color = SDL_MapRGB(display->format, r, 0, g);
+	
+		/*
+		 * Draw the line forth and back to detect any pixel change
+		 * between one direction and the other.
+		 */
+		GP_Line(&buffer, &clip, xcenter, ycenter, xcenter + x, ycenter + y, color);
+		GP_Line(&buffer, &clip, xcenter + x, ycenter + y, xcenter, ycenter, color);
+//		GP_SDL_Line(display, color, xcenter, ycenter, xcenter + x, ycenter + y);
+//		GP_SDL_Line(display, color, xcenter + x, ycenter + y, xcenter, ycenter);
 	}
+
+	/* axes */
+	GP_HLine(&buffer, &clip, 0, display->w, ycenter, white);
+	GP_VLine(&buffer, &clip, xcenter, 0, display->h, white);
+
+	SDL_UnlockSurface(display);
 }
 
 void event_loop(void)
 {
 	SDL_Event event;
 
-	for (;;) {
-        	while (SDL_PollEvent(&event) > 0) {
-			switch (event.type) {
-				case SDL_USEREVENT:
-					SDL_Flip(display);
-					fprintf(stdout, "%d triangles/second, min = %d, max = %d\r", fps, fps_min, fps_max);
-					fflush(stdout);
-
-					/* Update frames per second */
-					if (fps < fps_min)
-						fps_min = fps;
-					if (fps > fps_max)
-						fps_max = fps;
-					fps = 0;
-            				break;
-				case SDL_KEYDOWN:
-				case SDL_QUIT:
-					return;
-			}
+        while (SDL_WaitEvent(&event) > 0) {
+		switch (event.type) {
+			case SDL_USEREVENT:
+                		redraw_screen();
+				SDL_Flip(display);
+				start_angle += 0.01;
+				if (start_angle > 2*M_PI) {
+					start_angle = 0.0;
+				}
+            		break;
+			case SDL_KEYDOWN:
+			case SDL_QUIT:
+				return;
 		}
-		draw_frame();
-		fps++;
 	}
 }
 
-int main(int argc, char ** argv)
+int main(void)
 {
-	int bit_depth = 0;
-
-	int i;
-	for (i = 1; i < argc; i++) {
-		if (strcmp(argv[i], "-f") == 0) {
-			filled = 1;
-		}
-		else if (strcmp(argv[i], "-16") == 0) {
-			bit_depth = 16;
-		}
-		else if (strcmp(argv[i], "-24") == 0) {
-			bit_depth = 24;
-		}
-		else if (strcmp(argv[i], "-32") == 0) {
-			bit_depth = 32;
-		}
-	}
-
 	/* Initialize SDL */
 	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) != 0) {
 		fprintf(stderr, "Could not initialize SDL: %s\n", SDL_GetError());
@@ -135,13 +122,11 @@ int main(int argc, char ** argv)
 	}
 
 	/* Create a window with a software back surface */
-	display = SDL_SetVideoMode(640, 480, bit_depth, SDL_SWSURFACE);
+	display = SDL_SetVideoMode(640, 480, 0, SDL_SWSURFACE);
 	if (display == NULL) {
 		fprintf(stderr, "Could not open display: %s\n", SDL_GetError());
 		goto fail;
 	}
-
-	GP_SDL_BufferInfoFromSurface(display, &buffer);
 
 	/* Print basic information about the surface */
 	printf("Display surface properties:\n");
@@ -149,11 +134,8 @@ int main(int argc, char ** argv)
 	       display->w, display->h, display->pitch);
 	printf("    bits per pixel: %2d, bytes per pixel: %2d\n",
 	       display->format->BitsPerPixel, display->format->BytesPerPixel);
-	printf("Machine properties:\n");
-	printf("    sizeof(int) = %u, sizeof(long) = %u\n",
-	       (unsigned int)sizeof(int), (unsigned int)sizeof(long));
 
-	/* Get basic colors */
+	/* Get colors */
 	black = SDL_MapRGB(display->format, 0, 0, 0);
 	white = SDL_MapRGB(display->format, 255, 255, 255);
 
@@ -161,10 +143,11 @@ int main(int argc, char ** argv)
 	SDL_Rect clip_rect = { 10, 10, 620, 460 };
 	SDL_SetClipRect(display, &clip_rect);
 
+	GP_SDL_BufferInfoFromSurface(display, &buffer);
 	GP_SDL_ClipInfoFromSurface(display, &clip);
 
-	/* Set up the timer */
-	timer = SDL_AddTimer(1000, timer_callback, NULL);
+	/* Set up the refresh timer */
+	timer = SDL_AddTimer(30, timer_callback, NULL);
 	if (timer == 0) {
 		fprintf(stderr, "Could not set up timer: %s\n", SDL_GetError());
 		goto fail;
@@ -172,9 +155,6 @@ int main(int argc, char ** argv)
 
 	/* Enter the event loop */
 	event_loop();
-
-	/* Preserve the last result by a newline */
-	fprintf(stdout, "\n");
 
 	/* We're done */
 	SDL_Quit();

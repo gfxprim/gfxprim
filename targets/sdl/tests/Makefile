@@ -1,10 +1,10 @@
-LIBRARY=../libGP_SDL.a ../../../libGP_common.a
-LDFLAGS=-lSDL -L.. -L../../.. -lGP_SDL -lGP_common
+LIBRARY=../libGP_SDL.a ../../../libGP_core.a
+LDFLAGS=-lSDL -L.. -L../../../core -lGP_SDL -lGP_core
 
-INCLUDE=-I.. -I../../..
+INCLUDE=-I.. -I../../../core
 # Some warnings are triggered only with -O2
 # thuss added here
-CFLAGS=$(INCLUDE) -ggdb -W -Wall -O2
+CFLAGS=$(INCLUDE) -ggdb -W -Wall -O
 SOURCES=$(shell ls *.c)
 TESTS=$(SOURCES:.c=)
 
