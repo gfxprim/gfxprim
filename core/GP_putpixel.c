@@ -25,29 +25,30 @@
 
 #include "GP.h"
 
-void GP_PutPixel(struct GP_BufferInfo *buffer, struct GP_ClipInfo *clip,
-		int x, int y, uint32_t value)
+void GP_PutPixel(GP_Context *context, int x, int y, uint32_t value)
 {
-	int min_row, max_row, min_column, max_column;
-	GP_GetClipLimits(buffer, clip, &min_row, &max_row, &min_column,
-			&max_column);
+	GP_CHECK_CONTEXT(context);
 
 	uint8_t *p;
-	if (buffer->rows_are_vertical) {
-		if (x < min_row || x > max_row
-			|| y < min_column || y > max_column) {
+	if (context->rows_are_vertical) {
+		if (x < (int) context->clip_row_min
+			|| x > (int) context->clip_row_max
+			|| y < (int) context->clip_column_min
+			|| y > (int) context->clip_column_max) {
 			return;		/* clipped out */
 		}
-		p = GP_PIXEL_ADDRESS(buffer, x, y);
+		p = GP_PIXEL_ADDRESS(context, x, y);
 	} else {
-		if (x < min_column || x > max_column
-			|| y < min_row || y > max_row) {
+		if (x < (int) context->clip_column_min
+			|| x > (int) context->clip_column_max
+			|| y < (int) context->clip_row_min
+			|| y > (int) context->clip_row_max) {
 			return;		/* clipped out */
 		}
-		p = GP_PIXEL_ADDRESS(buffer, y, x);
+		p = GP_PIXEL_ADDRESS(context, y, x);
 	}
 
-	switch (buffer->bits_per_pixel) {
+	switch (context->bits_per_pixel) {
 	case 32:
 		GP_WritePixel32bpp(p, value);
 		break;
@@ -63,5 +64,8 @@ void GP_PutPixel(struct GP_BufferInfo *buffer, struct GP_ClipInfo *clip,
 	case 8:
 		GP_WritePixel8bpp(p, value);
 		break;
+	
+	default:
+		GP_ABORT("Unsupported value of context->bits_per_pixel");
 	}
 }

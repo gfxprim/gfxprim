@@ -26,10 +26,11 @@
 #ifndef GP_LINE_H
 #define GP_LINE_H
 
-#include "GP_bufferinfo.h"
-#include "GP_clipinfo.h"
+#include "GP_context.h"
 
-void GP_Line(struct GP_BufferInfo *buffer, struct GP_ClipInfo *clip,
-		int x0, int y0, int x1, int y1, uint32_t color);
+#include <stdint.h>
+
+void GP_Line(GP_Context *context, int x0, int y0, int x1, int y1,
+	uint32_t color);
 
 #endif /* GP_LINE_H */

@@ -28,13 +28,10 @@
 
 void GP_SDL_Rect(GP_TARGET_TYPE *target, GP_COLOR_TYPE color, int x0, int y0, int x1, int y1)
 {
-	struct GP_BufferInfo buffer;
-	struct GP_ClipInfo clip;
+	GP_Context context;
+	GP_SDL_ContextFromSurface(target, &context);
 
-	GP_SDL_BufferInfoFromSurface(target, &buffer);
-	GP_SDL_ClipInfoFromSurface(target, &clip);
-
-	GP_Rect(&buffer, &clip, x0, y0, x1, y1, color);
+	GP_Rect(&context, x0, y0, x1, y1, color);
 }
 
 void GP_SDL_FillRect(GP_TARGET_TYPE *target, GP_COLOR_TYPE color, int x0, int y0, int x1, int y1)
@@ -60,4 +57,3 @@ void GP_SDL_FillRect(GP_TARGET_TYPE *target, GP_COLOR_TYPE color, int x0, int y0
 	SDL_Rect rect = {left, top, right - left + 1, bottom - top + 1};
 	SDL_FillRect(target, &rect, color);
 }
-

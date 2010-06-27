@@ -25,17 +25,21 @@
 
 #include "GP.h"
 
-void GP_HLine(struct GP_BufferInfo *buffer, struct GP_ClipInfo *clip,
-		int x0, int x1, int y, uint32_t value)
+#include <stdio.h>
+
+void GP_HLine(GP_Context *context, int x0, int x1, int y, uint32_t color)
 {
+	GP_CHECK_CONTEXT(context);
+
 	/* Handle swapped coordinates gracefully. */
 	if (x1 < x0) {
-		GP_HLine(buffer, clip, x1, x0, y, value);
+		GP_HLine(context, x1, x0, y, color);
+		return;
 	}
 
-	if (buffer->rows_are_vertical) {
-		GP_FillColumn(buffer, clip, y, x0, x1, value);
+	if (context->rows_are_vertical) {
+		GP_FillColumn(context, y, x0, x1, color);
 	} else {
-		GP_FillRow(buffer, clip, y, x0, x1, value);
+		GP_FillRow(context, y, x0, x1, color);
 	}
 }

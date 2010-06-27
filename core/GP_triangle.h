@@ -23,8 +23,12 @@
  *                                                                           *
  *****************************************************************************/
 
-#include "GP_bufferinfo.h"
-#include "GP_clipinfo.h"
+#ifndef GP_TRIANGLE_H
+#define GP_TRIANGLE_H
 
-void GP_Triangle(struct GP_BufferInfo *buffer, struct GP_ClipInfo* clip,
-	int x0, int y0, int x1, int y1, int x2, int y2, uint32_t color);
+#include "GP_context.h"
+
+void GP_Triangle(GP_Context *context, int x0, int y0, int x1, int y1,
+	int x2, int y2, uint32_t color);
+
+#endif /* GP_TRIANGLE_H */

@@ -25,11 +25,11 @@
 
 #include "GP.h"
 
-void GP_Rect(struct GP_BufferInfo *buffer, struct GP_ClipInfo *clip,
-		int x0, int y0, int x1, int y1, uint32_t value)
+void GP_Rect(GP_Context *context, int x0, int y0, int x1, int y1,
+	uint32_t color)
 {
-	GP_HLine(buffer, clip, x0, x1, y0, value);
-	GP_HLine(buffer, clip, x0, x1, y1, value);
-	GP_VLine(buffer, clip, x0, y0, y1, value);
-	GP_VLine(buffer, clip, x1, y0, y1, value);
+	GP_HLine(context, x0, x1, y0, color);
+	GP_HLine(context, x0, x1, y1, color);
+	GP_VLine(context, x0, y0, y1, color);
+	GP_VLine(context, x1, y0, y1, color);
 }

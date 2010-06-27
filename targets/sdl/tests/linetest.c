@@ -33,8 +33,7 @@
 
 /* The surface used as a display (in fact it is a software surface). */
 SDL_Surface *display = NULL;
-struct GP_BufferInfo buffer;
-struct GP_ClipInfo clip;
+GP_Context context;
 
 /* Timer used for refreshing the display */
 SDL_TimerID timer;
@@ -79,15 +78,13 @@ void redraw_screen(void)
 		 * Draw the line forth and back to detect any pixel change
 		 * between one direction and the other.
 		 */
-		GP_Line(&buffer, &clip, xcenter, ycenter, xcenter + x, ycenter + y, color);
-		GP_Line(&buffer, &clip, xcenter + x, ycenter + y, xcenter, ycenter, color);
-//		GP_SDL_Line(display, color, xcenter, ycenter, xcenter + x, ycenter + y);
-//		GP_SDL_Line(display, color, xcenter + x, ycenter + y, xcenter, ycenter);
+		GP_Line(&context, xcenter, ycenter, xcenter + x, ycenter + y, color);
+		GP_Line(&context, xcenter + x, ycenter + y, xcenter, ycenter, color);
 	}
 
 	/* axes */
-	GP_HLine(&buffer, &clip, 0, display->w, ycenter, white);
-	GP_VLine(&buffer, &clip, xcenter, 0, display->h, white);
+	GP_HLine(&context, 0, display->w, ycenter, white);
+	GP_VLine(&context, xcenter, 0, display->h, white);
 
 	SDL_UnlockSurface(display);
 }
@@ -143,8 +140,7 @@ int main(void)
 	SDL_Rect clip_rect = { 10, 10, 620, 460 };
 	SDL_SetClipRect(display, &clip_rect);
 
-	GP_SDL_BufferInfoFromSurface(display, &buffer);
-	GP_SDL_ClipInfoFromSurface(display, &clip);
+	GP_SDL_ContextFromSurface(display, &context);
 
 	/* Set up the refresh timer */
 	timer = SDL_AddTimer(30, timer_callback, NULL);

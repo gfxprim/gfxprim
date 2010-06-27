@@ -29,10 +29,10 @@
 #include <stdint.h>
 
 /* basic definitions and structures */
+#include "GP_abort.h"
+#include "GP_check.h"
 #include "GP_minmax.h"
-#include "GP_bufferinfo.h"
-#include "GP_clipinfo.h"
-#include "GP_getcliplimits.h"
+#include "GP_context.h"
 
 /* semi-public, low-level drawing API */
 #include "GP_writepixel.h"

@@ -29,8 +29,7 @@
 #include <SDL/SDL.h>
 
 #include "GP.h"
-#include "GP_SDL_bufferinfo.h"
-#include "GP_SDL_clipinfo.h"
+#include "GP_SDL_context.h"
 
 #define GP_SDL_BYTES_PER_PIXEL(target) (target->format->BytesPerPixel)
 

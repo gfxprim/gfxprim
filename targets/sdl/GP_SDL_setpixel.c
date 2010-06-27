@@ -29,12 +29,8 @@
 
 void GP_SDL_SetPixel(SDL_Surface *target, long color, int x, int y)
 {
-	struct GP_BufferInfo buffer;
-	struct GP_ClipInfo clip;
+	GP_Context context;
+	GP_SDL_ContextFromSurface(target, &context);
 
-	GP_SDL_BufferInfoFromSurface(target, &buffer);
-	GP_SDL_ClipInfoFromSurface(target, &clip);
-
-	GP_PutPixel(&buffer, &clip, x, y, color);
+	GP_PutPixel(&context, x, y, color);
 }
-

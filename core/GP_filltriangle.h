@@ -26,10 +26,9 @@
 #ifndef GP_FILLTRIANGLE_H
 #define GP_FILLTRIANGLE_H
 
-#include "GP_bufferinfo.h"
-#include "GP_clipinfo.h"
+#include "GP_context.h"
 
-void GP_FillTriangle(struct GP_BufferInfo* buffer, struct GP_ClipInfo *clip,
+void GP_FillTriangle(GP_Context *context,
 	int x0, int y0, int x1, int y1, int x2, int y2, uint32_t color);
 
 #endif /* GP_FILLTRIANGLE_H */

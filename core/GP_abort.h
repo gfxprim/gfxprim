@@ -23,17 +23,16 @@
  *                                                                           *
  *****************************************************************************/
 
-#include "GP.h"
-#include "GP_SDL.h"
+#ifndef GP_ABORT_H
+#define GP_ABORT_H
 
-inline struct GP_BufferInfo *GP_SDL_BufferInfoFromSurface(SDL_Surface *surf,
-		struct GP_BufferInfo *buffer)
-{
-	buffer->pixels = surf->pixels;
-	buffer->bits_per_pixel = 8 * surf->format->BytesPerPixel;
-	buffer->bytes_per_row = surf->pitch;
-	buffer->columns = surf->w;
-	buffer->rows = surf->h;
-	buffer->rows_are_vertical = 0;
-	return buffer;
-}
+#include <stdio.h>
+#include <stdint.h>
+#include <stdlib.h>
+
+#define GP_ABORT(msg) do { \
+		fprintf(stderr, "%s: %s\n", __FUNCTION__, #msg); \
+		abort(); \
+	} while(0);
+
+#endif /* GP_ABORT_H */

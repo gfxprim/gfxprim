@@ -27,8 +27,8 @@
 
 #include <stdlib.h>
 
-void GP_Line(struct GP_BufferInfo *buffer, struct GP_ClipInfo *clip,
-		int x0, int y0, int x1, int y1, uint32_t color)
+void GP_Line(GP_Context *context, int x0, int y0, int x1, int y1,
+	uint32_t color)
 {
 	/* The steepness of the line */
 	int deltax = x1 - x0;
@@ -54,7 +54,7 @@ void GP_Line(struct GP_BufferInfo *buffer, struct GP_ClipInfo *clip,
 			if (deltay > 0) {	/* Y increases */
 
 				for (; x <= x1; x++) {
-					GP_PutPixel(buffer, clip, x, y, color);
+					GP_PutPixel(context, x, y, color);
 					error -= deltay;
 					if (error < 0) { 
 						y++;
@@ -64,7 +64,7 @@ void GP_Line(struct GP_BufferInfo *buffer, struct GP_ClipInfo *clip,
 			} else {		/* Y decreases */
 
 				for (; x <= x1; x++) {
-					GP_PutPixel(buffer, clip, x, y, color);
+					GP_PutPixel(context, x, y, color);
 					error -= -deltay;
 					if (error < 0) { 
 						y--;
@@ -79,7 +79,7 @@ void GP_Line(struct GP_BufferInfo *buffer, struct GP_ClipInfo *clip,
 			 * This ensures that the pixels plotted are exactly
 			 * the same as with the opposite direction.
 			 */
-			GP_Line(buffer, clip, x1, y1, x0, y0, color);
+			GP_Line(context, x1, y1, x0, y0, color);
 			return;
 		}
 	} else {				/* Y changes faster */
@@ -89,7 +89,7 @@ void GP_Line(struct GP_BufferInfo *buffer, struct GP_ClipInfo *clip,
 		if (deltay >= 0) {		/* Y increases */
 			if (deltax > 0) {	/* X increases */
 				for (; y <= y1; y++) {
-					GP_PutPixel(buffer, clip, x, y, color);
+					GP_PutPixel(context, x, y, color);
 					error -= deltax;
 					if (error < 0) {
 						x++;
@@ -99,7 +99,7 @@ void GP_Line(struct GP_BufferInfo *buffer, struct GP_ClipInfo *clip,
 			} else {		/* X decreases */
 
 				for (; y <= y1; y++) {
-					GP_PutPixel(buffer, clip, x, y, color);
+					GP_PutPixel(context, x, y, color);
 					error -= -deltax;
 					if (error < 0) {
 						x--;
@@ -114,9 +114,8 @@ void GP_Line(struct GP_BufferInfo *buffer, struct GP_ClipInfo *clip,
 			 * This ensures that the pixels plotted are exactly
 			 * the same as with the opposite direction.
 			 */
-			GP_Line(buffer, clip, x1, y1, x0, y0, color);
+			GP_Line(context, x1, y1, x0, y0, color);
 			return;
 		}
 	}
 }
-

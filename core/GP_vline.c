@@ -25,13 +25,12 @@
 
 #include "GP.h"
 
-void GP_VLine(struct GP_BufferInfo *buffer, struct GP_ClipInfo *clip,
-		int x, int y0, int y1, uint32_t value)
+void GP_VLine(GP_Context *context, int x, int y0, int y1, uint32_t color)
 {
-	if (buffer->rows_are_vertical) {
-		GP_FillRow(buffer, clip, x, y0, y1, value);
+	if (context->rows_are_vertical) {
+		GP_FillRow(context, x, y0, y1, color);
 	} else {
-		GP_FillColumn(buffer, clip, x, y0, y1, value);
+		GP_FillColumn(context, x, y0, y1, color);
 	}
 }
 

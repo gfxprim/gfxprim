@@ -46,24 +46,18 @@
 
 void GP_SDL_Line(SDL_Surface *target, long color, int x0, int y0, int x1, int y1)
 {
-	struct GP_BufferInfo buffer;
-	GP_SDL_BufferInfoFromSurface(target, &buffer);
+	GP_Context context;
+	GP_SDL_ContextFromSurface(target, &context);
 
-	struct GP_ClipInfo clip;
-	GP_SDL_ClipInfoFromSurface(target, &clip);
-
-	GP_Line(&buffer, &clip, x0, y0, x1, y1, color);
+	GP_Line(&context, x0, y0, x1, y1, color);
 }
 
 void GP_SDL_HLine(SDL_Surface *target, long color, int x0, int x1, int y)
 {
-	struct GP_BufferInfo buffer;
-	GP_SDL_BufferInfoFromSurface(target, &buffer);
+	GP_Context context;
+	GP_SDL_ContextFromSurface(target, &context);
 
-	struct GP_ClipInfo clip;
-	GP_SDL_ClipInfoFromSurface(target, &clip);
-
-	GP_HLine(&buffer, &clip, x0, x1, y, color);
+	GP_HLine(&context, x0, x1, y, color);
 }
 
 void GP_SDL_VLine(SDL_Surface *target, long color, int x, int y0, int y1)

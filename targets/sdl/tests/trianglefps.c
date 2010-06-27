@@ -36,8 +36,7 @@ int filled = 0;
 
 /* The surface used as a display (in fact it is a software surface). */
 SDL_Surface *display = NULL;
-struct GP_BufferInfo buffer;
-struct GP_ClipInfo clip;
+GP_Context context;
 
 /* Frames per second. */
 int fps = 0, fps_min = 1000000, fps_max = 0;
@@ -73,9 +72,9 @@ void draw_frame(void)
 	long color = SDL_MapRGB(display->format, random() % 255, random() % 255, random() % 255);
 
 	if (filled) {
-		GP_FillTriangle(&buffer, &clip, x0, y0, x1, y1, x2, y2, color);
+		GP_FillTriangle(&context, x0, y0, x1, y1, x2, y2, color);
 	} else {
-		GP_Triangle(&buffer, &clip, x0, y0, x1, y1, x2, y2, color);
+		GP_Triangle(&context, x0, y0, x1, y1, x2, y2, color);
 	}
 }
 
@@ -141,8 +140,6 @@ int main(int argc, char ** argv)
 		goto fail;
 	}
 
-	GP_SDL_BufferInfoFromSurface(display, &buffer);
-
 	/* Print basic information about the surface */
 	printf("Display surface properties:\n");
 	printf("    width: %4d, height: %4d, pitch: %4d\n",
@@ -161,7 +158,7 @@ int main(int argc, char ** argv)
 	SDL_Rect clip_rect = { 10, 10, 620, 460 };
 	SDL_SetClipRect(display, &clip_rect);
 
-	GP_SDL_ClipInfoFromSurface(display, &clip);
+	GP_SDL_ContextFromSurface(display, &context);
 
 	/* Set up the timer */
 	timer = SDL_AddTimer(1000, timer_callback, NULL);

@@ -32,8 +32,7 @@
 
 /* The surface used as a display (in fact it is a software surface). */
 SDL_Surface *display = NULL;
-struct GP_BufferInfo buffer;
-struct GP_ClipInfo clip;
+GP_Context context;
 
 /* Timer used for refreshing the display */
 SDL_TimerID timer;
@@ -114,11 +113,11 @@ void draw_testing_triangle(int x, int y, int xradius, int yradius)
 	}
 
 	if (fill) {
-		GP_FillTriangle(&buffer, &clip, x0, y0, x1, y1, x2, y2, red);
+		GP_FillTriangle(&context, x0, y0, x1, y1, x2, y2, red);
 	}
 
 	if (outline) {
-		GP_Triangle(&buffer, &clip, x0, y0, x1, y1, x2, y2, white);
+		GP_Triangle(&context, x0, y0, x1, y1, x2, y2, white);
 	}
 }
 
@@ -172,12 +171,12 @@ void redraw_screen(void)
 
 	/* axes */
 	if (show_axes) {
-		GP_HLine(&buffer, &clip, 0, 640, y, gray);
-		GP_HLine(&buffer, &clip, 0, 640, y-yradius, darkgray);
-		GP_HLine(&buffer, &clip, 0, 640, y+yradius, darkgray);
-		GP_VLine(&buffer, &clip, x, 0, 480, gray);
-		GP_VLine(&buffer, &clip, x-xradius, 0, 480, darkgray);
-		GP_VLine(&buffer, &clip, x+xradius, 0, 480, darkgray);
+		GP_HLine(&context, 0, 640, y, gray);
+		GP_HLine(&context, 0, 640, y-yradius, darkgray);
+		GP_HLine(&context, 0, 640, y+yradius, darkgray);
+		GP_VLine(&context, x, 0, 480, gray);
+		GP_VLine(&context, x-xradius, 0, 480, darkgray);
+		GP_VLine(&context, x+xradius, 0, 480, darkgray);
 	}
 
 	/* the shape */
@@ -373,8 +372,6 @@ int main(int argc, char ** argv)
 		goto fail;
 	}
 
-	GP_SDL_BufferInfoFromSurface(display, &buffer);
-
 	/* Find pixel representations of needed colors */
 	black = SDL_MapRGB(display->format, 0, 0, 0);
 	white = SDL_MapRGB(display->format, 255, 255, 255);
@@ -386,7 +383,7 @@ int main(int argc, char ** argv)
 	SDL_Rect clip_rect = {10, 10, 620, 460};
 	SDL_SetClipRect(display, &clip_rect);
 
-	GP_SDL_ClipInfoFromSurface(display, &clip);
+	GP_SDL_ContextFromSurface(display, &context);
 
 	/* Set up the refresh timer */
 	timer = SDL_AddTimer(60, timer_callback, NULL);

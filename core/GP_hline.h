@@ -23,10 +23,13 @@
  *                                                                           *
  *****************************************************************************/
 
-#include "GP_bufferinfo.h"
-#include "GP_clipinfo.h"
+#ifndef GP_HLINE_H
+#define GP_HLINE_H
+
+#include "GP_context.h"
 
 #include <stdint.h>
 
-void GP_HLine(struct GP_BufferInfo *buffer, struct GP_ClipInfo *clip,
-		int x0, int x1, int y, uint32_t value);
+void GP_HLine(GP_Context *context, int x0, int x1, int y, uint32_t color);
+
+#endif /* GP_HLINE_H */

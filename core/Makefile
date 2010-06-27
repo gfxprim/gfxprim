@@ -4,7 +4,6 @@ OBJECTS=GP_defaultfont.o \
 	GP_fillcolumn.o \
 	GP_fillrow.o \
 	GP_filltriangle.o \
-	GP_getcliplimits.o \
 	GP_hline.o \
 	GP_line.o \
 	GP_putpixel.o \
@@ -15,12 +14,13 @@ OBJECTS=GP_defaultfont.o \
 	GP_writepixel.o
 
 HEADERS=GP.h \
-	GP_bufferinfo.h \
+	GP_abort.h \
+	GP_check.h \
+	GP_context.h \
 	GP_fillcolumn.h \
 	GP_fillrow.h \
 	GP_filltriangle.h \
 	GP_font.h \
-	GP_getcliplimits.h \
 	GP_hline.h \
 	GP_line.h \
 	GP_putpixel.h \

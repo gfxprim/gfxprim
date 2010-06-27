@@ -23,7 +23,13 @@
  *                                                                           *
  *****************************************************************************/
 
-#include "GP.h"
+#ifndef GP_PUTPIXEL_H
+#define GP_PUTPIXEL_H
 
-void GP_PutPixel(struct GP_BufferInfo *buffer, struct GP_ClipInfo *clip,
-		int x, int y, uint32_t value);
+#include "GP_context.h"
+
+#include <stdint.h>
+
+void GP_PutPixel(GP_Context *context, int x, int y, uint32_t value);
+
+#endif /* GP_PUTPIXEL_H */

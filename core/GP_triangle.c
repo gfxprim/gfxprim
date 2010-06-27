@@ -25,10 +25,10 @@
 
 #include "GP.h"
 
-void GP_Triangle(struct GP_BufferInfo *buffer, struct GP_ClipInfo* clip,
+void GP_Triangle(GP_Context *context,
 	int x0, int y0, int x1, int y1, int x2, int y2, uint32_t color)
 {
-	GP_Line(buffer, clip, x0, y0, x1, y1, color);
-	GP_Line(buffer, clip, x0, y0, x2, y2, color);
-	GP_Line(buffer, clip, x1, y1, x2, y2, color);
+	GP_Line(context, x0, y0, x1, y1, color);
+	GP_Line(context, x0, y0, x2, y2, color);
+	GP_Line(context, x1, y1, x2, y2, color);
 }

@@ -23,10 +23,15 @@
  *                                                                           *
  *****************************************************************************/
 
-#include "GP_bufferinfo.h"
+#ifndef GP_FILLROW_H
+#define GP_FILLROW_H
+
+#include "GP_context.h"
 
 #include <stdint.h>
 #include <unistd.h>
 
-void GP_FillRow(struct GP_BufferInfo *buffer, struct GP_ClipInfo *clip,
+void GP_FillRow(GP_Context *context,
 		int row, int first_column, int last_column, uint32_t value);
+
+#endif /* GP_FILLROW_H */

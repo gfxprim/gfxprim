@@ -23,12 +23,22 @@
  *                                                                           *
  *****************************************************************************/
 
-#ifndef GP_SDL_CLIPINFO_H
-#define GP_SDL_CLIPINFO_H
+#ifndef GP_CHECK_H
+#define GP_CHECK_H
 
-#include "GP.h"
+#include "GP_abort.h"
 
-inline struct GP_ClipInfo *GP_SDL_ClipInfoFromSurface(SDL_Surface *surf,
-		struct GP_ClipInfo *buffer);
+#include <stdio.h>
+#include <stdint.h>
+#include <stdlib.h>
+#include <unistd.h>
 
-#endif /* GP_SDL_CLIPINFO_H */
+#define GP_CHECK(cond) do { \
+		if (!(cond)) { \
+			fprintf(stderr, "GP: check failed in %s: %s\n", \
+				__FUNCTION__, #cond); \
+			abort(); \
+		} \
+	} while(0);
+
+#endif /* GP_CHECK_H */

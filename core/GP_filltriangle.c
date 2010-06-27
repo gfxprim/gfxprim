@@ -27,9 +27,11 @@
 
 #include <stdlib.h>
 
-void GP_FillTriangle(struct GP_BufferInfo* buffer, struct GP_ClipInfo *clip,
+void GP_FillTriangle(GP_Context* context,
 	int x0, int y0, int x1, int y1, int x2, int y2, uint32_t color)
 {
+	GP_CHECK_CONTEXT(context);
+
 //	printf("GP_FillTriangle(): (%d, %d), (%d, %d), (%d, %d)\n", x0, y0, x1, y1, x2, y2);
 
 	/*
@@ -83,7 +85,7 @@ void GP_FillTriangle(struct GP_BufferInfo* buffer, struct GP_ClipInfo *clip,
 	if (ACdy == 0) {
 
 		/* All three vertices in one horizontal line. */
-		GP_HLine(buffer, clip,
+		GP_HLine(context,
 			GP_MIN(Ax, GP_MIN(Bx, Cx)),
 			GP_MAX(Ax, GP_MAX(Bx, Cx)),
 			Ay, color);
@@ -94,26 +96,6 @@ void GP_FillTriangle(struct GP_BufferInfo* buffer, struct GP_ClipInfo *clip,
 	int ABxstep = (ABdx < 0) ? -1 : 1;
 	int ACxstep = (ACdx < 0) ? -1 : 1;
 	int BCxstep = (BCdx < 0) ? -1 : 1;
-
-	/*
-	 * Decide whether the AC side is at the left side
-	 * (i.e. ACx < ABx and ACx < BCx). If not, it must be
-	 * on the right side (ACx > ABx and ACx > BCx).
-	 * This determines where we start drawing.
-	 * For ACx = f(y), we ask: is ACx(By) < Bx ?
-	 * So:
-	 *
-	 * ACx(By) = Ax + (By - Ay) * (Cx - Ax) / (Cy - Ay)     and so
-	 * ACx(By) = Ax + ABdy * ACdx / ACdy                    and so
-	 * ACx(By) * ACdy = Ax * ACdy + ABdy * ACdx
-	 *
-	 * Now:
-	 *
-	 * ACx(By) < Bx ?
-	 * ACx(By) * ACdy < Bx * ACdy ?
-	 * Ax * ACdy + ABdy * ACdx < Bx * ACdy ?
-	 */
-	int AC_is_left = (Ax*ACdy + ACdx*ABdy) < (Bx * ACdy);
 
 	/*
 	 * Draw the triangle in a top-down, line-per line manner.
@@ -149,12 +131,7 @@ void GP_FillTriangle(struct GP_BufferInfo* buffer, struct GP_ClipInfo *clip,
 	/* Top part of the triangle (from Ay to By). */
 	for (ABx = Ax, ACx = Ax, y = Ay, ABerr = abs(ABdy)/2, ACerr = abs(ACdy)/2; y < By; y++) {
 
-/*
-		GP_PutPixel(buffer, clip, ABx, y, color);
-		GP_PutPixel(buffer, clip, ACx, y, color);
-*/
-
-		GP_HLine(buffer, clip, ABx, ACx, y, color);
+		GP_HLine(context, ABx, ACx, y, color);
 
 		old_ABx = ABx;
 		old_ACx = ACx;
@@ -169,20 +146,6 @@ void GP_FillTriangle(struct GP_BufferInfo* buffer, struct GP_ClipInfo *clip,
 			ACerr += abs(ACdy);
 		}
 
-/*
-		if (AC_is_left) {
-			GP_HLine(buffer, clip,
-				ACxstep > 0 ? old_ACx : ACx,
-				ABxstep > 0 ? ABx : old_ABx,
-				y + 1, color);
-		} else {
-			GP_HLine(buffer, clip,
-				ABxstep > 0 ? old_ABx : ABx,
-				ACxstep > 0 ? ACx : old_ACx,
-				y + 1, color);
-		}
-*/
-
 		/*
 		 * The value of ABerr and ACerr for the next loop iteration.
 		 * (from the equation above, with y = y+1).
@@ -192,7 +155,7 @@ void GP_FillTriangle(struct GP_BufferInfo* buffer, struct GP_ClipInfo *clip,
 	}
 
 	if (BCdy == 0) {
-		GP_HLine(buffer, clip, Bx, Cx, y, color);
+		GP_HLine(context, Bx, Cx, y, color);
 		return;
 	}
 
@@ -201,12 +164,7 @@ void GP_FillTriangle(struct GP_BufferInfo* buffer, struct GP_ClipInfo *clip,
 		old_BCx = BCx;
 		old_ACx = ACx;
 
-/*
-		GP_PutPixel(buffer, clip, BCx, y, color);
-		GP_PutPixel(buffer, clip, ACx, y, color);
-*/
-
-		GP_HLine(buffer, clip, BCx, ACx, y, color);
+		GP_HLine(context, BCx, ACx, y, color);
 
 		while (BCerr < abs(BCdx) || BCdy == 0) {
 			BCx += BCxstep;
@@ -218,20 +176,6 @@ void GP_FillTriangle(struct GP_BufferInfo* buffer, struct GP_ClipInfo *clip,
 			ACerr += abs(ACdy);
 		}
 
-/*
-		if (AC_is_left) {
-			GP_HLine(buffer, clip,
-				ACxstep > 0 ? old_ACx : ACx,
-				BCxstep > 0 ? BCx : old_BCx,
-				y, color);
-		} else {
-			GP_HLine(buffer, clip,
-				BCxstep > 0 ? old_BCx : BCx,
-				ACxstep > 0 ? ACx : old_ACx,
-				y, color);
-		}
-*/
-
 		/*
 		 * The value of ACerr and BCerr for the next loop iteration.
 		 */
@@ -239,4 +183,3 @@ void GP_FillTriangle(struct GP_BufferInfo* buffer, struct GP_ClipInfo *clip,
 		BCerr -= abs(BCdx);
 	}
 }
-

@@ -31,8 +31,7 @@
 
 /* The surface used as a display (in fact it is a software surface). */
 SDL_Surface *display = NULL;
-struct GP_BufferInfo buffer;
-struct GP_ClipInfo clip;
+GP_Context context;
 
 /* Timer used for refreshing the display */
 SDL_TimerID timer;
@@ -122,11 +121,11 @@ void draw_random_triangle(long color)
 	random_point(display, &x2, &y2);
 
 	if (fill_flag) {
-		GP_FillTriangle(&buffer, &clip, x0, y0, x1, y1, x2, y2, color);
+		GP_FillTriangle(&context, x0, y0, x1, y1, x2, y2, color);
 	}
 
 	if (outline_flag) {
-		GP_Triangle(&buffer, &clip, x0, y0, x1, y1, x2, y2, white);
+		GP_Triangle(&context, x0, y0, x1, y1, x2, y2, white);
 	}
 }
 
@@ -279,8 +278,6 @@ int main(int argc, char ** argv)
 		goto fail;
 	}
 
-	GP_SDL_BufferInfoFromSurface(display, &buffer);
-
 	/* Load basic colors. */
 	white = SDL_MapRGB(display->format, 255, 255, 255);
 	black = SDL_MapRGB(display->format, 0, 0, 0);
@@ -289,7 +286,7 @@ int main(int argc, char ** argv)
 	SDL_Rect clip_rect = {10, 10, 620, 460};
 	SDL_SetClipRect(display, &clip_rect);
 
-	GP_SDL_ClipInfoFromSurface(display, &clip);
+	GP_SDL_ContextFromSurface(display, &context);
 
 	/* Set up the refresh timer */
 	timer = SDL_AddTimer(60, timer_callback, NULL);

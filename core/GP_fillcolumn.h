@@ -23,10 +23,14 @@
  *                                                                           *
  *****************************************************************************/
 
-#include "GP.h"
+#ifndef GP_FILLCOLUMN_H
+#define GP_FILLCOLUMN_H
+
+#include "GP_context.h"
 
 #include <stdio.h>
 
-void GP_FillColumn(struct GP_BufferInfo *buffer, struct GP_ClipInfo *clip,
+void GP_FillColumn(GP_Context *context,
 		int column, int first_row, int last_row, uint32_t value);
 
+#endif /* GP_FILLCOLUMN_H */

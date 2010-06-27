@@ -23,14 +23,43 @@
  *                                                                           *
  *****************************************************************************/
 
-#ifndef GP_GETCLIPLIMITS_H
-#define GP_GETCLIPLIMITS_H
+#ifndef GP_CONTEXT_H
+#define GP_CONTEXT_H
 
-#include "GP_bufferinfo.h"
-#include "GP_clipinfo.h"
+#include <stdint.h>
+#include <unistd.h>
 
-inline void GP_GetClipLimits(struct GP_BufferInfo *buffer,
-		struct GP_ClipInfo *clip,
-		int *min_row, int *max_row, int *min_column, int *max_column);
+#include "GP_check.h"
 
-#endif /* GP_GETCLIPLIMITS_H */
+/* This structure holds all information needed for drawing into an image. */
+typedef struct {
+	void *pixels;			/* pointer to image pixels */
+	uint8_t bits_per_pixel;		/* values: 8, 16, 24, 32 */
+	uint32_t bytes_per_row;
+	uint32_t rows;			/* total number of rows */
+	uint32_t columns;		/* total number of columns */
+	int rows_are_vertical:1;	/* image orientation */
+
+	/* clipping rectangle; drawing functions only affect the inside */
+	uint32_t clip_row_min;
+	uint32_t clip_row_max;
+	uint32_t clip_column_min;
+	uint32_t clip_column_max;
+} GP_Context;
+
+/* Determines the address of a pixel within the context's image. */
+#define GP_PIXEL_ADDRESS(context, row, column) ((uint8_t *) context->pixels \
+	+ row * context->bytes_per_row \
+	+ column * (context->bits_per_pixel / 8))
+
+/* Performs a series of sanity checks on context, aborting if any fails. */
+#define GP_CHECK_CONTEXT(context) do { \
+		GP_CHECK(context != NULL); \
+		GP_CHECK(context->rows > 0 && context->columns > 0); \
+		GP_CHECK(context->clip_row_min <= context->clip_row_max); \
+		GP_CHECK(context->clip_column_min <= context->clip_column_max); \
+		GP_CHECK(context->clip_row_max < context->rows); \
+		GP_CHECK(context->clip_column_max < context->columns); \
+	} while(0);
+
+#endif /* GP_CONTEXT_H */

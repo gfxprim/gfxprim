@@ -23,9 +23,12 @@
  *                                                                           *
  *****************************************************************************/
 
-#include "GP_bufferinfo.h"
-#include "GP_clipinfo.h"
+#ifndef GP_RECT_H
+#define GP_RECT_H
 
-void GP_Rect(struct GP_BufferInfo *buffer, struct GP_ClipInfo *clip,
-		int x0, int y0, int x1, int y1, uint32_t value);
+#include "GP_context.h"
 
+void GP_Rect(GP_Context *context, int x0, int y0, int x1, int y1,
+	uint32_t color);
+
+#endif /* GP_RECT_H */

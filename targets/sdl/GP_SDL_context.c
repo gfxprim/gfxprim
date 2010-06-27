@@ -24,39 +24,23 @@
  *****************************************************************************/
 
 #include "GP.h"
+#include "GP_SDL.h"
 
-inline void GP_GetClipLimits(struct GP_BufferInfo *buffer,
-		struct GP_ClipInfo *clip,
-		int *min_row, int *max_row, int *min_column, int *max_column)
+inline GP_Context *GP_SDL_ContextFromSurface(SDL_Surface *surf,
+		GP_Context *context)
 {
-	/* check for infinitely small buffer */
-	if (buffer->rows == 0 || buffer->columns == 0) {
-		*min_row = 0;
-		*max_row = 0;
-		*min_column = 0;
-		*max_column = 0;
-		return;
-	}
+	GP_CHECK(surf != NULL);
+	GP_CHECK(context != NULL);
 
-	/* set row and column limits to the buffer boundaries */
-	*min_row = 0;
-	*max_row = (int) buffer->rows - 1;
-	*min_column = 0;
-	*max_column = (int) buffer->columns - 1;
-
-	/* adjust them according to the clip rectangle, if specified */
-	if (clip) {
-
-		/* bail out if the clipping rectangle is nonsensical */
-		if (clip->min_row > clip->max_row
-			|| clip->min_column > clip->max_column) {
-			return;
-		}
-
-		/* limits can be only narrowed, not widened */
-		*min_row = GP_MAX(0, clip->min_row);
-		*max_row = GP_MIN(*max_row, clip->max_row);
-		*min_column = GP_MAX(0, clip->min_column);
-		*max_column = GP_MIN(*max_column, clip->max_column);
-	}
+	context->pixels = surf->pixels;
+	context->bits_per_pixel = 8 * surf->format->BytesPerPixel;
+	context->bytes_per_row = surf->pitch;
+	context->columns = surf->w;
+	context->rows = surf->h;
+	context->rows_are_vertical = 0;
+	context->clip_row_min = surf->clip_rect.y;
+	context->clip_row_max = surf->clip_rect.y + surf->clip_rect.h - 1;
+	context->clip_column_min = surf->clip_rect.x;
+	context->clip_column_max = surf->clip_rect.x + surf->clip_rect.w - 1;
+	return context;
 }

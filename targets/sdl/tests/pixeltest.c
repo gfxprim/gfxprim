@@ -32,8 +32,7 @@
 
 /* The surface used as a display (in fact it is a software surface). */
 SDL_Surface *display = NULL;
-struct GP_BufferInfo buffer;
-struct GP_ClipInfo clip;
+GP_Context context;
 
 /* Timer used for refreshing the display */
 SDL_TimerID timer;
@@ -64,12 +63,12 @@ void draw_pixels(void)
 	pixel = GP_SDL_GetPixel(display, x, y);
     
 	if (pixel) {
-		GP_PutPixel(&buffer, &clip, x, y, green);
+		GP_PutPixel(&context, x, y, green);
 	} else {
 		if (x < 160) {
-			GP_PutPixel(&buffer, &clip, x, y, blue);
+			GP_PutPixel(&context, x, y, blue);
 		} else {
-			GP_PutPixel(&buffer, &clip, x, y, red);
+			GP_PutPixel(&context, x, y, red);
 		}
 	}
 
@@ -121,7 +120,6 @@ int main(int argc, char **argv)
 		goto fail;
 	}
 
-	GP_SDL_BufferInfoFromSurface(display, &buffer);
 
 	/* Print basic information about the surface */
 	printf("Display surface properties:\n");
@@ -139,7 +137,7 @@ int main(int argc, char **argv)
 	SDL_Rect clip_rect = {10, 10, 300, 220};
 	SDL_SetClipRect(display, &clip_rect);
 
-	GP_SDL_ClipInfoFromSurface(display, &clip);
+	GP_SDL_ContextFromSurface(display, &context);
 
 	/* Set up the refresh timer */
 	timer = SDL_AddTimer(30, timer_callback, NULL);

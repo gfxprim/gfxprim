@@ -28,7 +28,7 @@
 
 #include "GP.h"
 
-inline struct GP_BufferInfo *GP_SDL_BufferInfoFromSurface(SDL_Surface *surf,
-		struct GP_BufferInfo *buffer);
+inline GP_Context *GP_SDL_ContextFromSurface(SDL_Surface *surf,
+		GP_Context *context);
 
 #endif /* GP_SDL_BUFFERINFO_H */
