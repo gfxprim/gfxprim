@@ -41,6 +41,8 @@
 #define sgn(x) ((x)>0 ? 1 : -1)
 
 SDL_Surface *display;
+GP_Context context;
+
 SDL_TimerID timer;
 
 int iter, l, way = 1;
@@ -51,7 +53,7 @@ static void sierpinsky(SDL_Surface *surf, long color, float x1, float y1, float 
 	float x2, y2, x3, y3, x5, y5;
 	
 	if (iter <= 0) {
-		GP_SDL_Line(surf, black, x1, y1, x4, y4);
+		GP_Line(&context, x1, y1, x4, y4, black);
 		return;
 	}
 
@@ -64,7 +66,7 @@ static void sierpinsky(SDL_Surface *surf, long color, float x1, float y1, float 
 	x5 = (x1+x4)/2 + (y2 - y3)*sqrt(3.00/4);
 	y5 = (y1+y4)/2 + (x3 - x2)*sqrt(3.00/4);
 
-	GP_SDL_FillTriangle(surf, color, x2, y2, x3, y3, x5, y5);
+	GP_FillTriangle(&context, x2, y2, x3, y3, x5, y5, color);
 
 	sierpinsky(surf, color, x1, y1, x2, y2, iter - 1);
 	sierpinsky(surf, color, x2, y2, x5, y5, iter - 1);
@@ -91,7 +93,8 @@ static void draw(SDL_Surface *surf, int x, int y, int l, int iter)
 
 	SDL_FillRect(surf, NULL, gray);
 
-	GP_SDL_FillTriangle(surf, blue, x1, y1, x2, y2, x3, y3);
+	GP_FillTriangle(&context, x1, y1, x2, y2, x3, y3, blue);
+
 	sierpinsky(surf, blue, x1, y1, x2, y2, iter/60%6);
 	sierpinsky(surf, blue, x2, y2, x3, y3, iter/60%6);
 	sierpinsky(surf, blue, x3, y3, x1, y1, iter/60%6);
@@ -128,6 +131,8 @@ int main(void)
 		SDL_Quit();
 		return -1;
 	}
+
+	GP_SDL_ContextFromSurface(display, &context);
 
 	black = SDL_MapRGB(display->format, 0, 0, 0);
 	gray = SDL_MapRGB(display->format, 127, 127, 127);

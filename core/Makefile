@@ -1,6 +1,8 @@
 LIBRARY=libGP_core
 
-OBJECTS=GP_defaultfont.o \
+OBJECTS=GP_circle.o \
+	GP_defaultfont.o \
+	GP_fillcircle.o \
 	GP_fillcolumn.o \
 	GP_fillrow.o \
 	GP_filltriangle.o \
@@ -16,7 +18,9 @@ OBJECTS=GP_defaultfont.o \
 HEADERS=GP.h \
 	GP_abort.h \
 	GP_check.h \
+	GP_circle.h \
 	GP_context.h \
+	GP_fillcircle.h \
 	GP_fillcolumn.h \
 	GP_fillrow.h \
 	GP_filltriangle.h \

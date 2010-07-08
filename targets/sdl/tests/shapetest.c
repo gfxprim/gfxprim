@@ -125,10 +125,10 @@ void draw_testing_circle(int x, int y, int xradius,
 			__attribute__((unused)) int yradius)
 {
 	if (fill) {
-		GP_SDL_FillCircle(display, red, x, y, xradius);
+		GP_FillCircle(&context, x, y, xradius, red);
 	}
 	if (outline) {
-		GP_SDL_Circle(display, white, x, y, xradius);
+		GP_Circle(&context, x, y, xradius, white);
 	}
 }
 

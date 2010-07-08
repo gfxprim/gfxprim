@@ -23,36 +23,32 @@
  *                                                                           *
  *****************************************************************************/
 
-#ifndef GP_H
-#define GP_H
+#include "GP.h"
 
 #include <stdint.h>
 
-/* basic definitions and structures */
-#include "GP_abort.h"
-#include "GP_check.h"
-#include "GP_minmax.h"
-#include "GP_context.h"
+void GP_FillCircle(GP_Context *context, int xcenter, int ycenter, int r,
+	uint32_t color)
+{
+	GP_CHECK_CONTEXT(context);
 
-/* semi-public, low-level drawing API */
-#include "GP_writepixel.h"
-#include "GP_fillcolumn.h"
-#include "GP_fillrow.h"
+	if (r < 0) { return; }
 
-/* public drawing API */
-#include "GP_putpixel.h"
-#include "GP_hline.h"
-#include "GP_vline.h"
-#include "GP_line.h"
-#include "GP_rect.h"
-#include "GP_triangle.h"
-#include "GP_filltriangle.h"
-#include "GP_circle.h"
-#include "GP_fillcircle.h"
+	/*
+	 * Draw the circle in top-down, line-per-line manner.
+	 * For each line, X is calculated and a horizontal line is drawn
+	 * between +X and -X, and reflected around the Y axis.
+	 * X is computed in the same way as for GP_Circle().
+	 */
+	int x, y, error;
+	for (x = 0, error = -r, y = r; y >= 0; y--) {
+		while (error < 0) {
+			error += 2*x + 1;
+			x++;
+		}
+		error += -2*y + 1;
 
-/* fonts */
-#include "GP_font.h"
-#include "GP_textstyle.h"
-#include "GP_textmetric.h"
-
-#endif /* GP_COMMON_H */
+		GP_HLine(context, xcenter-x+1, xcenter+x-1, ycenter-y, color);
+		GP_HLine(context, xcenter-x+1, xcenter+x-1, ycenter+y, color);
+	}
+}

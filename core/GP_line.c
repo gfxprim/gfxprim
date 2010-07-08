@@ -30,6 +30,8 @@
 void GP_Line(GP_Context *context, int x0, int y0, int x1, int y1,
 	uint32_t color)
 {
+	GP_CHECK_CONTEXT(context);
+
 	/* The steepness of the line */
 	int deltax = x1 - x0;
 	int deltay = y1 - y0;
