@@ -49,13 +49,13 @@ Uint32 timer_callback(__attribute__((unused)) Uint32 interval,
 }
 
 /* Basic colors in display-specific format. */
-uint32_t black, white, red, gray, darkgray;
+uint32_t black, white, yellow, red, gray, darkgray;
 
 /* Radius of the shape being drawn */
 static int xradius = 5;
 static int yradius = 5;
 
-/* Draw outline? */
+/* Draw outline? 0=none, 1=before filling, 2=after filling */
 static int outline = 0;
 
 /* Fill the shape? */
@@ -112,11 +112,15 @@ void draw_testing_triangle(int x, int y, int xradius, int yradius)
 		break;
 	}
 
+	if (outline == 1) {
+		GP_Triangle(&context, x0, y0, x1, y1, x2, y2, yellow);
+	}
+
 	if (fill) {
 		GP_FillTriangle(&context, x0, y0, x1, y1, x2, y2, red);
 	}
 
-	if (outline) {
+	if (outline == 2) {
 		GP_Triangle(&context, x0, y0, x1, y1, x2, y2, white);
 	}
 }
@@ -124,30 +128,39 @@ void draw_testing_triangle(int x, int y, int xradius, int yradius)
 void draw_testing_circle(int x, int y, int xradius,
 			__attribute__((unused)) int yradius)
 {
+	if (outline == 1) {
+		GP_Circle(&context, x, y, xradius, yellow);
+	}
 	if (fill) {
 		GP_FillCircle(&context, x, y, xradius, red);
 	}
-	if (outline) {
+	if (outline == 2) {
 		GP_Circle(&context, x, y, xradius, white);
 	}
 }
 
 void draw_testing_ellipse(int x, int y, int xradius, int yradius)
 {
+	if (outline == 1) {
+		GP_SDL_Ellipse(display, yellow, x, y, xradius, yradius);
+	}
 	if (fill) {
 		GP_SDL_FillEllipse(display, red, x, y, xradius, yradius);
 	}
-	if (outline) {
+	if (outline == 2) {
 		GP_SDL_Ellipse(display, white, x, y, xradius, yradius);
 	}
 }
 
 void draw_testing_rectangle(int x, int y, int xradius, int yradius)
 {
+	if (outline == 1) {
+		GP_SDL_Rect(display, yellow, x - xradius, y - yradius, x + xradius, y + yradius);
+	}
 	if (fill) {
 		GP_SDL_FillRect(display, red, x - xradius, y - yradius, x + xradius, y + yradius);
 	}
-	if (outline) {
+	if (outline == 2) {
 		GP_SDL_Rect(display, white, x - xradius, y - yradius, x + xradius, y + yradius);
 	}
 }
@@ -233,8 +246,9 @@ void event_loop(void)
 				break;
 
 			case SDLK_o:
-				outline = !outline;
-				if (!fill && !outline) {
+				outline++;
+				if (outline == 3) { outline = 0; }
+				if (!fill && outline == 0) {
 					fill = 1;
 				}
 				break;
@@ -335,7 +349,7 @@ void print_instructions(void)
 	printf("Use the following keys to control the test:\n");
 	printf("    Esc ......... exit\n");
 	printf("    Space ....... change shapes\n");
-	printf("    O ........... toggle outline drawing\n");
+	printf("    O ........... draw outlines (none/before/after fill)\n");
 	printf("    F ........... toggle filling\n");
 	printf("    X ........... show/hide axes\n");
 	printf("    left/right .. increase/decrease horizontal radius\n");
@@ -375,6 +389,7 @@ int main(int argc, char ** argv)
 	/* Find pixel representations of needed colors */
 	black = SDL_MapRGB(display->format, 0, 0, 0);
 	white = SDL_MapRGB(display->format, 255, 255, 255);
+	yellow = SDL_MapRGB(display->format, 255, 255, 0);
 	red = SDL_MapRGB(display->format, 255, 0, 0);
 	gray = SDL_MapRGB(display->format, 127, 127, 127);
 	darkgray = SDL_MapRGB(display->format, 63, 63, 63);
