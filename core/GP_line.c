@@ -121,3 +121,102 @@ void GP_Line(GP_Context *context, int x0, int y0, int x1, int y1,
 		}
 	}
 }
+
+size_t GP_CalcLinePoints(int x0, int y0, int x1, int y1,
+	int *points, size_t maxlen)
+{
+	GP_CHECK(points != NULL || maxlen == 0);
+	GP_CHECK(maxlen % 2 == 0);
+
+	size_t i = 0;
+
+	int deltax = x1 - x0;
+	int deltay = y1 - y0;
+
+	int x = x0, y = y0;
+	int error;
+	if (abs(deltax) > abs(deltay)) {	/* X changes faster */
+
+		error = abs(deltax) / 2;
+
+		if (deltax >= 0) {		/* X increases */
+			if (deltay > 0) {	/* Y increases */
+
+				for (; x <= x1; x++) {
+					if (i < maxlen) {
+						points[i++] = x;
+						points[i++] = y;
+					}
+
+					error -= deltay;
+					if (error < 0) { 
+						y++;
+						error += deltax;
+					}
+				}
+			} else {		/* Y decreases */
+
+				for (; x <= x1; x++) {
+					if (i < maxlen) {
+						points[i++] = x;
+						points[i++] = y;
+					}
+
+					error -= -deltay;
+					if (error < 0) { 
+						y--;
+						error += deltax;
+					}
+				}
+			}
+		} else {			/* X decreases */
+
+			/* Swap endpoints and draw with increasing X. */
+			return GP_CalcLinePoints(x1, y1, x0, y0,
+				points, maxlen);
+		}
+	} else {				/* Y changes faster */
+
+		error = abs(deltay) / 2;
+
+		if (deltay >= 0) {		/* Y increases */
+			if (deltax > 0) {	/* X increases */
+				for (; y <= y1; y++) {
+
+					if (i < maxlen) {
+						points[i++] = x;
+						points[i++] = y;
+					}
+
+					error -= deltax;
+					if (error < 0) {
+						x++;
+						error += deltay;
+					}
+				}
+			} else {		/* X decreases */
+
+				for (; y <= y1; y++) {
+
+					if (i < maxlen) {
+						points[i++] = x;
+						points[i++] = y;
+					}
+
+					error -= -deltax;
+					if (error < 0) {
+						x--;
+						error += deltay;
+					}
+				}
+			}
+		} else {			/* Y decreases */
+
+			/* Swap endpoints and draw with increasing Y. */
+			return GP_CalcLinePoints(x1, y1, x0, y0,
+				points, maxlen);
+		}
+	}
+
+	return i;
+}
