@@ -129,7 +129,9 @@ void GP_FillTriangle(GP_Context* context,
 	int y, ABx, ACx, BCx, old_ABx, old_ACx, old_BCx, ABerr, ACerr, BCerr;
 
 	/* Top part of the triangle (from Ay to By). */
-	for (ABx = Ax, ACx = Ax, y = Ay, ABerr = abs(ABdy)/2, ACerr = abs(ACdy)/2; y < By; y++) {
+	ABerr = abs(ABdy)/2;
+	ACerr = abs(ACdy)/2;
+	for (ABx = Ax, ACx = Ax, y = Ay; y < By; y++) {
 
 		GP_HLine(context, ABx, ACx, y, color);
 
@@ -182,4 +184,10 @@ void GP_FillTriangle(GP_Context* context,
 		ACerr -= abs(ACdx);
 		BCerr -= abs(BCdx);
 	}
+
+	/* FIXME: For triangle lines that have abs(dx) > abs(dy), there is
+	 * sometimes one pixel missing at the start/end (rounding error?).
+	 * Temporary fixed by explicitly drawing the triangle boundary.
+	 */
+	GP_Triangle(context, x0, y0, x1, y1, x2, y2, color);
 }
