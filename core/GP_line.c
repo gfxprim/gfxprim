@@ -27,6 +27,39 @@
 
 #include <stdlib.h>
 
+/* swaps endpoints of the line */
+#define SWAP_ENDPOINTS do { \
+	GP_SWAP(x0, x1); \
+	GP_SWAP(y0, y1); \
+	deltax = -deltax; \
+	deltay = -deltay; \
+} while(0);
+
+/* starts a loop that iterates over every X in the line */
+#define FOR_EACH_X for(x = x0, y = y0, error = deltax/2; x <= x1; x++)
+
+/* starts a loop that iterates over every Y in the line */
+#define FOR_EACH_Y for(x = x0, y = y0, error = deltay/2; y <= y1; y++)
+
+/* updates Y to reflect increasing X by 1; as the change in Y can be
+ * a fraction, a rounding error is maintained and if it overflows,
+ * Y is increased or decreased by 1. */
+#define NEXT_Y do { \
+	error -= abs(deltay); \
+	if (error < 0) { \
+		deltay > 0 ? y++ : y--; \
+		error += deltax; \
+	} \
+} while(0);
+
+#define NEXT_X do { \
+	error -= abs(deltax); \
+	if (error < 0) { \
+		deltax > 0 ? x++ : x--; \
+		error += deltay; \
+	} \
+} while(0); 
+
 void GP_Line(GP_Context *context, int x0, int y0, int x1, int y1,
 	uint32_t color)
 {
@@ -36,88 +69,38 @@ void GP_Line(GP_Context *context, int x0, int y0, int x1, int y1,
 	int deltax = x1 - x0;
 	int deltay = y1 - y0;
 
-	/*
-	 * Subdivide lines to octants according to two boolean factors:
-	 *
-	 * - whether Y is increasing/decreasing (delta Y is positive/negative)
-	 * - whether X or Y is changing faster.
-	 *
-	 * For each octant:
-	 * When drawing, the faster-changing coordinate is iterated one by one,
-	 * and the other (which changes slower) is calculated.
+	/* Current X and Y coordinate, and cummulative rounding error. */
+	int x, y, error;
+
+	/* If X changes faster than Y (i.e. the line is closer to horizontal
+	 * than to vertical), iterate X one by one and calculate Y;
+	 * in some points, multiple X will lead to the same value of Y.
 	 */
-	int x = x0, y = y0;
-	int error;
-	if (abs(deltax) > abs(deltay)) {	/* X changes faster */
+	if (abs(deltax) > abs(deltay)) {
 
-		error = abs(deltax) / 2;
-
-		if (deltax >= 0) {		/* X increases */
-			if (deltay > 0) {	/* Y increases */
-
-				for (; x <= x1; x++) {
-					GP_PutPixel(context, x, y, color);
-					error -= deltay;
-					if (error < 0) { 
-						y++;
-						error += deltax;
-					}
-				}
-			} else {		/* Y decreases */
-
-				for (; x <= x1; x++) {
-					GP_PutPixel(context, x, y, color);
-					error -= -deltay;
-					if (error < 0) { 
-						y--;
-						error += deltax;
-					}
-				}
-			}
-		} else {			/* X decreases */
-
-			/*
-			 * Swap endpoints and draw with increasing X.
-			 * This ensures that the pixels plotted are exactly
-			 * the same as with the opposite direction.
-			 */
-			GP_Line(context, x1, y1, x0, y0, color);
-			return;
+		/* always draw in the direction of increasing X */
+		if (deltax < 0) {
+			SWAP_ENDPOINTS;
 		}
-	} else {				/* Y changes faster */
 
-		error = abs(deltay) / 2;
+		FOR_EACH_X {
+			GP_PutPixel(context, x, y, color);
+			NEXT_Y;
+		}
 
-		if (deltay >= 0) {		/* Y increases */
-			if (deltax > 0) {	/* X increases */
-				for (; y <= y1; y++) {
-					GP_PutPixel(context, x, y, color);
-					error -= deltax;
-					if (error < 0) {
-						x++;
-						error += deltay;
-					}
-				}
-			} else {		/* X decreases */
+	/* If Y changes faster than X (the line is closer to vertical
+	 * than to horizontal), iterate Y and calculate X.
+	 */
+	} else {
 
-				for (; y <= y1; y++) {
-					GP_PutPixel(context, x, y, color);
-					error -= -deltax;
-					if (error < 0) {
-						x--;
-						error += deltay;
-					}
-				}
-			}
-		} else {			/* Y decreases */
+		/* always draw in the direction of increasing Y */
+		if (deltay < 0) {
+			SWAP_ENDPOINTS;
+		}
 
-			/*
-			 * Swap endpoints and draw the line with increasing Y.
-			 * This ensures that the pixels plotted are exactly
-			 * the same as with the opposite direction.
-			 */
-			GP_Line(context, x1, y1, x0, y0, color);
-			return;
+		FOR_EACH_Y {
+			GP_PutPixel(context, x, y, color);
+			NEXT_X;
 		}
 	}
 }
@@ -220,3 +203,4 @@ size_t GP_CalcLinePoints(int x0, int y0, int x1, int y1,
 
 	return i;
 }
+

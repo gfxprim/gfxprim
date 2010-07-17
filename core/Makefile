@@ -29,6 +29,7 @@ HEADERS=GP.h \
 	GP_line.h \
 	GP_putpixel.h \
 	GP_rect.h \
+	GP_swap.h \
 	GP_textstyle.h \
 	GP_textmetric.h \
 	GP_triangle.h \

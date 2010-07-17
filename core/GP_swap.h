@@ -23,20 +23,14 @@
  *                                                                           *
  *****************************************************************************/
 
-#ifndef GP_LINE_H
-#define GP_LINE_H
+#ifndef GP_SWAP_H
+#define GP_SWAP_H
 
-#include "GP_context.h"
+#define GP_SWAP(a, b) do { \
+		typeof(a) swap; \
+		swap = b; \
+		b = a; \
+		a = swap; \
+	} while(0);
 
-#include <stdint.h>
-
-void GP_Line(GP_Context *context, int x0, int y0, int x1, int y1,
-	uint32_t color);
-
-size_t GP_CalcLinePoints(int x0, int y0, int x1, int y1, int *points,
-	size_t maxlen);
-
-size_t GP_CalcLineX(int x0, int y0, int x1, int y1, int *values,
-	size_t maxlen);
-
-#endif /* GP_LINE_H */
+#endif /* GP_SWAP_H */

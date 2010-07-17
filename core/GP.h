@@ -32,6 +32,7 @@
 #include "GP_abort.h"
 #include "GP_check.h"
 #include "GP_minmax.h"
+#include "GP_swap.h"
 #include "GP_context.h"
 
 /* semi-public, low-level drawing API */
