@@ -32,7 +32,11 @@ void GP_FillTriangle(GP_Context* context,
 {
 	GP_CHECK_CONTEXT(context);
 
-//	printf("GP_FillTriangle(): (%d, %d), (%d, %d), (%d, %d)\n", x0, y0, x1, y1, x2, y2);
+	/* FIXME: For triangle lines that have abs(dx) > abs(dy), there is
+	 * sometimes one pixel missing at the start/end (rounding error?).
+	 * Temporary fixed by explicitly drawing the triangle boundary.
+	 */
+	GP_Triangle(context, x0, y0, x1, y1, x2, y2, color);
 
 	/*
 	 * Sort the three points according to the Y coordinate.
@@ -184,10 +188,4 @@ void GP_FillTriangle(GP_Context* context,
 		ACerr -= abs(ACdx);
 		BCerr -= abs(BCdx);
 	}
-
-	/* FIXME: For triangle lines that have abs(dx) > abs(dy), there is
-	 * sometimes one pixel missing at the start/end (rounding error?).
-	 * Temporary fixed by explicitly drawing the triangle boundary.
-	 */
-	GP_Triangle(context, x0, y0, x1, y1, x2, y2, color);
 }
