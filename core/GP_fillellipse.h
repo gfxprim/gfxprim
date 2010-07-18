@@ -23,39 +23,14 @@
  *                                                                           *
  *****************************************************************************/
 
-#ifndef GP_H
-#define GP_H
+#ifndef GP_FILLELLIPSE_H
+#define GP_FILLELLIPSE_H
+
+#include "GP_context.h"
 
 #include <stdint.h>
 
-/* basic definitions and structures */
-#include "GP_abort.h"
-#include "GP_check.h"
-#include "GP_minmax.h"
-#include "GP_swap.h"
-#include "GP_context.h"
+void GP_FillEllipse(GP_Context *context, int xcenter, int ycenter,
+	int a, int b, uint32_t color);
 
-/* semi-public, low-level drawing API */
-#include "GP_writepixel.h"
-#include "GP_fillcolumn.h"
-#include "GP_fillrow.h"
-
-/* public drawing API */
-#include "GP_putpixel.h"
-#include "GP_hline.h"
-#include "GP_vline.h"
-#include "GP_line.h"
-#include "GP_rect.h"
-#include "GP_triangle.h"
-#include "GP_filltriangle.h"
-#include "GP_circle.h"
-#include "GP_fillcircle.h"
-#include "GP_ellipse.h"
-#include "GP_fillellipse.h"
-
-/* fonts */
-#include "GP_font.h"
-#include "GP_textstyle.h"
-#include "GP_textmetric.h"
-
-#endif /* GP_COMMON_H */
+#endif /* GP_FILLELLIPSE_H */

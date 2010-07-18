@@ -89,11 +89,11 @@ void draw_random_circle(long color)
 	int r = random() % 50;
 
 	if (fill_flag) {
-		GP_SDL_FillCircle(display, color, x, y, r);
+		GP_FillCircle(&context, x, y, r, color);
 	}
 
 	if (outline_flag) {
-		GP_SDL_Circle(display, white, x, y, r);
+		GP_Circle(&context, x, y, r, white);
 	}
 }
 
@@ -105,11 +105,11 @@ void draw_random_ellipse(long color)
 	int ry = random() % 50;
 
 	if (fill_flag) {
-		GP_SDL_FillEllipse(display, color, x, y, rx, ry);
+		GP_FillEllipse(&context, x, y, rx, ry, color);
 	}
 
 	if (outline_flag) {
-		GP_SDL_Ellipse(display, white, x, y, rx, ry);
+		GP_Ellipse(&context, x, y, rx, ry, white);
 	}
 }
 
@@ -140,7 +140,7 @@ void draw_random_rectangle(long color)
 	}
 
 	if (outline_flag) {
-		GP_SDL_Rect(display, white, x0, y0, x1, y1);
+		GP_Rect(&context, x0, y0, x1, y1, white);
 	}
 }
 

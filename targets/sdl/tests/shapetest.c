@@ -142,26 +142,26 @@ void draw_testing_circle(int x, int y, int xradius,
 void draw_testing_ellipse(int x, int y, int xradius, int yradius)
 {
 	if (outline == 1) {
-		GP_SDL_Ellipse(display, yellow, x, y, xradius, yradius);
+		GP_Ellipse(&context, x, y, xradius, yradius, yellow);
 	}
 	if (fill) {
-		GP_SDL_FillEllipse(display, red, x, y, xradius, yradius);
+		GP_FillEllipse(&context, x, y, xradius, yradius, red);
 	}
 	if (outline == 2) {
-		GP_SDL_Ellipse(display, white, x, y, xradius, yradius);
+		GP_Ellipse(&context, x, y, xradius, yradius, white);
 	}
 }
 
 void draw_testing_rectangle(int x, int y, int xradius, int yradius)
 {
 	if (outline == 1) {
-		GP_SDL_Rect(display, yellow, x - xradius, y - yradius, x + xradius, y + yradius);
+		GP_Rect(&context, x - xradius, y - yradius, x + xradius, y + yradius, yellow);
 	}
 	if (fill) {
 		GP_SDL_FillRect(display, red, x - xradius, y - yradius, x + xradius, y + yradius);
 	}
 	if (outline == 2) {
-		GP_SDL_Rect(display, white, x - xradius, y - yradius, x + xradius, y + yradius);
+		GP_Rect(&context, x - xradius, y - yradius, x + xradius, y + yradius, white);
 	}
 }
 

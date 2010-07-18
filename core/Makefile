@@ -2,8 +2,10 @@ LIBRARY=libGP_core
 
 OBJECTS=GP_circle.o \
 	GP_defaultfont.o \
+	GP_ellipse.o \
 	GP_fillcircle.o \
 	GP_fillcolumn.o \
+	GP_fillellipse.o \
 	GP_fillrow.o \
 	GP_filltriangle.o \
 	GP_hline.o \
@@ -19,9 +21,11 @@ HEADERS=GP.h \
 	GP_abort.h \
 	GP_check.h \
 	GP_circle.h \
+	GP_ellipse.h \
 	GP_context.h \
 	GP_fillcircle.h \
 	GP_fillcolumn.h \
+	GP_fillellipse.h \
 	GP_fillrow.h \
 	GP_filltriangle.h \
 	GP_font.h \
@@ -36,7 +40,7 @@ HEADERS=GP.h \
 	GP_vline.h \
 	GP_writepixel.h
 
-CFLAGS=-ggdb -W -Wall -O2 -fPIC
+CFLAGS=-W -Wall -O2 -fPIC
 
 HEADER_LOC=/usr/include/
 LIB_LOC=/usr/lib/
