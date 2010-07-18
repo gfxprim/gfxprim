@@ -23,40 +23,12 @@
  *                                                                           *
  *****************************************************************************/
 
-#ifndef GP_H
-#define GP_H
+#ifndef GP_TEXT_H
+#define GP_TEXT_H
 
-#include <stdint.h>
-
-/* basic definitions and structures */
-#include "GP_abort.h"
-#include "GP_check.h"
-#include "GP_minmax.h"
-#include "GP_swap.h"
 #include "GP_context.h"
 
-/* semi-public, low-level drawing API */
-#include "GP_writepixel.h"
-#include "GP_fillcolumn.h"
-#include "GP_fillrow.h"
+void GP_Text(GP_Context *context, const struct GP_TextStyle *style,
+	int x, int y, const char *str, uint32_t color);
 
-/* public drawing API */
-#include "GP_putpixel.h"
-#include "GP_hline.h"
-#include "GP_vline.h"
-#include "GP_line.h"
-#include "GP_rect.h"
-#include "GP_triangle.h"
-#include "GP_filltriangle.h"
-#include "GP_circle.h"
-#include "GP_fillcircle.h"
-#include "GP_ellipse.h"
-#include "GP_fillellipse.h"
-
-/* fonts */
-#include "GP_font.h"
-#include "GP_textstyle.h"
-#include "GP_textmetric.h"
-#include "GP_text.h"
-
-#endif /* GP_COMMON_H */
+#endif /* GP_TEXT_H */

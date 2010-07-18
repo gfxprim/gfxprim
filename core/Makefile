@@ -12,6 +12,7 @@ OBJECTS=GP_circle.o \
 	GP_line.o \
 	GP_putpixel.o \
 	GP_rect.o \
+	GP_text.o \
 	GP_textmetric.o \
 	GP_triangle.o \
 	GP_vline.o \
@@ -34,6 +35,7 @@ HEADERS=GP.h \
 	GP_putpixel.h \
 	GP_rect.h \
 	GP_swap.h \
+	GP_text.h \
 	GP_textstyle.h \
 	GP_textmetric.h \
 	GP_triangle.h \

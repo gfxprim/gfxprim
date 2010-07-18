@@ -27,9 +27,11 @@
 #include <stdlib.h>
 #include <SDL/SDL.h>
 
+#include "GP.h"
 #include "GP_SDL.h"
 
 SDL_Surface *display = NULL;
+GP_Context context;
 
 static long white, gray, dark_gray, black, dark_red;
 
@@ -69,20 +71,20 @@ void redraw_screen(void)
 				16 + GP_TextWidth(&style, test_string),
 				100*i + 16 + style.font->height);
 
-		GP_SDL_Text(display, white, &style, 16, 100*i + 16, test_string);
+		GP_Text(&context, &style, 16, 100*i + 16, test_string, white);
 	
 		style.pixel_xmul = 2;
 		style.pixel_ymul = 2;
 		style.pixel_yspace = 1;
 
-		GP_SDL_Text(display, gray, &style, 34, 100*i + 34, test_string);
+		GP_Text(&context, &style, 34, 100*i + 34, test_string, gray);
 
 		style.pixel_xmul = 4;
 		style.pixel_ymul = 2;
 		style.pixel_xspace = 1;
 		style.pixel_yspace = 1;
 
-		GP_SDL_Text(display, dark_gray, &style, 64, 100*i + 64, test_string);
+		GP_Text(&context, &style, 64, 100*i + 64, test_string, dark_gray);
 	}
 
 	SDL_UnlockSurface(display);
@@ -142,6 +144,8 @@ int main(void)
 	/* Set up a clipping rectangle to test proper clipping of pixels */
 	SDL_Rect clip_rect = {10, 10, 620, 460};
 	SDL_SetClipRect(display, &clip_rect);
+
+	GP_SDL_ContextFromSurface(display, &context);
 
 	redraw_screen();
 	SDL_Flip(display);

@@ -23,40 +23,77 @@
  *                                                                           *
  *****************************************************************************/
 
-#ifndef GP_H
-#define GP_H
+#include "GP.h"
 
-#include <stdint.h>
+static int GP_PutChar(GP_Context *context,
+	const struct GP_TextStyle *style, int x0, int y0,
+	const uint8_t *char_data, uint32_t color)
+{
+	int xdelta = style->pixel_xmul + style->pixel_xspace;
 
-/* basic definitions and structures */
-#include "GP_abort.h"
-#include "GP_check.h"
-#include "GP_minmax.h"
-#include "GP_swap.h"
-#include "GP_context.h"
+	const uint8_t *src = char_data;
 
-/* semi-public, low-level drawing API */
-#include "GP_writepixel.h"
-#include "GP_fillcolumn.h"
-#include "GP_fillrow.h"
+	/* The first byte specifies width in pixels. */
+	const uint8_t char_width = *src;
+	src++;
 
-/* public drawing API */
-#include "GP_putpixel.h"
-#include "GP_hline.h"
-#include "GP_vline.h"
-#include "GP_line.h"
-#include "GP_rect.h"
-#include "GP_triangle.h"
-#include "GP_filltriangle.h"
-#include "GP_circle.h"
-#include "GP_fillcircle.h"
-#include "GP_ellipse.h"
-#include "GP_fillellipse.h"
+	/* Next byte specifies the left margin. */
+	const uint8_t lmargin = *src;
+	src++;
 
-/* fonts */
-#include "GP_font.h"
-#include "GP_textstyle.h"
-#include "GP_textmetric.h"
-#include "GP_text.h"
+	/* Final X for each character line. */
+	int x1 = x0 + char_width * xdelta;
 
-#endif /* GP_COMMON_H */
+	int line, linerep, i, x, y;
+	for (line = 0, y = y0; line < style->font->height; line++, y += style->pixel_yspace) {
+
+		/* repeat the line as specified by pixel_ymul */
+		for (linerep = 0; linerep < style->pixel_ymul; linerep++, y++) {
+			uint8_t const * linesrc = src + line * style->font->bytes_per_line;
+			uint8_t mask = 0x80;
+
+			/* skip left margin */
+			for (i = 0; i < lmargin; i++) {
+				mask >>= 1;
+				if (mask == 0) {
+					linesrc++;
+					mask = 0x80;
+				}
+			}
+
+			/* draw the line of the character */
+			for (x = x0; x < x1; x += xdelta) {
+				if (*linesrc & mask) {
+					GP_HLine(context,
+						x,
+						x + style->pixel_xmul - 1,
+						y,
+						color);
+				}
+				mask >>= 1;
+				if (mask == 0) {
+					linesrc++;
+					mask = 0x80;
+				}
+			}
+		}
+	}
+
+	return x + style->font->hspace * style->pixel_ymul;
+}
+
+void GP_Text(GP_Context *context, const struct GP_TextStyle *style,
+	int x, int y, const char *str, uint32_t color)
+{
+	int bytes_per_char = 2 + style->font->bytes_per_line * style->font->height;
+
+	const char *p;
+	for (p = str; *p != '\0'; p++) {
+		int char_index = ((int) *p) - 0x20;
+
+		const uint8_t *char_data = style->font->data
+				+ char_index * bytes_per_char;
+
+		x = GP_PutChar(context, style, x, y, char_data, color);
+	}
+}
