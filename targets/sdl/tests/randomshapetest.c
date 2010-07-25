@@ -136,7 +136,7 @@ void draw_random_rectangle(long color)
 	random_point(display, &x1, &y1);
 
 	if (fill_flag) {
-		GP_SDL_FillRect(display, color, x0, y0, x1, y1);
+		GP_FillRect(&context, x0, y0, x1, y1, color);
 	}
 
 	if (outline_flag) {

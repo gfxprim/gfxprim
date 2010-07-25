@@ -67,9 +67,11 @@ void redraw_screen(void)
 		style.pixel_xspace = 0;
 		style.pixel_yspace = 0;
 
-		GP_SDL_FillRect(display, dark_red, 16, 100*i + 16,
-				16 + GP_TextWidth(&style, test_string),
-				100*i + 16 + style.font->height);
+		GP_FillRect(&context,
+			16, 100*i + 16,
+			16 + GP_TextWidth(&style, test_string),
+			100*i + 16 + style.font->height,
+			dark_red);
 
 		GP_Text(&context, &style, 16, 100*i + 16, test_string, white);
 	

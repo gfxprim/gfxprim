@@ -6,6 +6,7 @@ OBJECTS=GP_circle.o \
 	GP_fillcircle.o \
 	GP_fillcolumn.o \
 	GP_fillellipse.o \
+	GP_fillrect.o \
 	GP_fillrow.o \
 	GP_filltriangle.o \
 	GP_hline.o \
@@ -27,6 +28,7 @@ HEADERS=GP.h \
 	GP_fillcircle.h \
 	GP_fillcolumn.h \
 	GP_fillellipse.h \
+	GP_fillrect.h \
 	GP_fillrow.h \
 	GP_filltriangle.h \
 	GP_font.h \
