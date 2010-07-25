@@ -26,11 +26,14 @@
 #include "GP.h"
 #include "GP_SDL.h"
 
-inline GP_Context *GP_SDL_ContextFromSurface(SDL_Surface *surf,
-		GP_Context *context)
+inline GP_Context *GP_SDL_ContextFromSurface(
+		GP_Context *context, SDL_Surface *surf)
 {
 	GP_CHECK(surf != NULL);
-	GP_CHECK(context != NULL);
+
+	if (context == NULL) {
+		context = (GP_Context *) malloc(sizeof(*context));
+	}
 
 	context->pixels = surf->pixels;
 	context->bits_per_pixel = 8 * surf->format->BytesPerPixel;
@@ -42,5 +45,6 @@ inline GP_Context *GP_SDL_ContextFromSurface(SDL_Surface *surf,
 	context->clip_row_max = surf->clip_rect.y + surf->clip_rect.h - 1;
 	context->clip_column_min = surf->clip_rect.x;
 	context->clip_column_max = surf->clip_rect.x + surf->clip_rect.w - 1;
+
 	return context;
 }

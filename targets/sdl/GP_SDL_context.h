@@ -28,7 +28,7 @@
 
 #include "GP.h"
 
-inline GP_Context *GP_SDL_ContextFromSurface(SDL_Surface *surf,
-		GP_Context *context);
+inline GP_Context *GP_SDL_ContextFromSurface(GP_Context *context,
+		SDL_Surface *surf);
 
 #endif /* GP_SDL_BUFFERINFO_H */

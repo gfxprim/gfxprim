@@ -132,7 +132,7 @@ int main(void)
 		return -1;
 	}
 
-	GP_SDL_ContextFromSurface(display, &context);
+	GP_SDL_ContextFromSurface(&context, display);
 
 	black = SDL_MapRGB(display->format, 0, 0, 0);
 	gray = SDL_MapRGB(display->format, 127, 127, 127);

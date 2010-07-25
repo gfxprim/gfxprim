@@ -286,7 +286,7 @@ int main(int argc, char ** argv)
 	SDL_Rect clip_rect = {10, 10, 620, 460};
 	SDL_SetClipRect(display, &clip_rect);
 
-	GP_SDL_ContextFromSurface(display, &context);
+	GP_SDL_ContextFromSurface(&context, display);
 
 	/* Set up the refresh timer */
 	timer = SDL_AddTimer(60, timer_callback, NULL);

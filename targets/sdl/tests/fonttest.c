@@ -147,7 +147,7 @@ int main(void)
 	SDL_Rect clip_rect = {10, 10, 620, 460};
 	SDL_SetClipRect(display, &clip_rect);
 
-	GP_SDL_ContextFromSurface(display, &context);
+	GP_SDL_ContextFromSurface(&context, display);
 
 	redraw_screen();
 	SDL_Flip(display);
