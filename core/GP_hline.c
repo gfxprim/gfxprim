@@ -37,7 +37,7 @@ void GP_HLine(GP_Context *context, int x0, int x1, int y, uint32_t color)
 		return;
 	}
 
-	if (context->rows_are_vertical) {
+	if (context->vertical_rows) {
 		GP_FillColumn(context, y, x0, x1, color);
 	} else {
 		GP_FillRow(context, y, x0, x1, color);

@@ -30,7 +30,7 @@ uint32_t GP_GetPixel(GP_Context *context, int x, int y)
 	GP_CHECK_CONTEXT(context);
 
 	uint8_t *p;
-	if (context->rows_are_vertical) {
+	if (context->vertical_rows) {
 		if (x < (int) context->clip_row_min
 			|| x > (int) context->clip_row_max
 			|| y < (int) context->clip_column_min

@@ -27,7 +27,7 @@
 
 void GP_VLine(GP_Context *context, int x, int y0, int y1, uint32_t color)
 {
-	if (context->rows_are_vertical) {
+	if (context->vertical_rows) {
 		GP_FillRow(context, x, y0, y1, color);
 	} else {
 		GP_FillColumn(context, x, y0, y1, color);

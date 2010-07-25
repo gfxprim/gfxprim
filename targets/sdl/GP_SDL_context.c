@@ -35,12 +35,19 @@ inline GP_Context *GP_SDL_ContextFromSurface(
 		context = (GP_Context *) malloc(sizeof(*context));
 	}
 
+	/* basic structure and size */
 	context->pixels = surf->pixels;
 	context->bits_per_pixel = 8 * surf->format->BytesPerPixel;
 	context->bytes_per_row = surf->pitch;
 	context->columns = surf->w;
 	context->rows = surf->h;
-	context->rows_are_vertical = 0;
+
+	/* orientation */
+	context->vertical_rows = 0;
+	context->right_to_left = 0;
+	context->bottom_to_top = 0;
+
+	/* clipping */
 	context->clip_row_min = surf->clip_rect.y;
 	context->clip_row_max = surf->clip_rect.y + surf->clip_rect.h - 1;
 	context->clip_column_min = surf->clip_rect.x;

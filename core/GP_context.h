@@ -38,7 +38,13 @@ typedef struct {
 	uint32_t bytes_per_row;
 	uint32_t rows;			/* total number of rows */
 	uint32_t columns;		/* total number of columns */
-	int rows_are_vertical:1;	/* image orientation */
+	
+	/* image orientation. Most common is landscape (0, 0, 0),
+	 * portrait with normal topleft corner is (1, 0, 0).
+	 */
+	int vertical_rows:1;		/* are rows in fact vertical? */
+	int right_to_left:1;		/* is zero at the right? */
+	int bottom_to_top:1;		/* is zero at the bottom? */
 
 	/* clipping rectangle; drawing functions only affect the inside */
 	uint32_t clip_row_min;
@@ -47,7 +53,10 @@ typedef struct {
 	uint32_t clip_column_max;
 } GP_Context;
 
-/* Determines the address of a pixel within the context's image. */
+/* Determines the address of a pixel within the context's image.
+ * Rows and columns are specified in the image's orientation
+ * (i.e. they might not be XY if the image is rotated).
+ */
 #define GP_PIXEL_ADDRESS(context, row, column) ((uint8_t *) context->pixels \
 	+ row * context->bytes_per_row \
 	+ column * (context->bits_per_pixel / 8))
