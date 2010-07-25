@@ -23,43 +23,47 @@
  *                                                                           *
  *****************************************************************************/
 
-#ifndef GP_H
-#define GP_H
+#include "GP.h"
 
-#include <stdint.h>
+uint32_t GP_GetPixel(GP_Context *context, int x, int y)
+{
+	GP_CHECK_CONTEXT(context);
 
-/* basic definitions and structures */
-#include "GP_abort.h"
-#include "GP_check.h"
-#include "GP_minmax.h"
-#include "GP_swap.h"
-#include "GP_context.h"
+	uint8_t *p;
+	if (context->rows_are_vertical) {
+		if (x < (int) context->clip_row_min
+			|| x > (int) context->clip_row_max
+			|| y < (int) context->clip_column_min
+			|| y > (int) context->clip_column_max) {
+			return 0;			/* clipped out */
+		}
+		p = GP_PIXEL_ADDRESS(context, x, y);
+	} else {
+		if (x < (int) context->clip_column_min
+			|| x > (int) context->clip_column_max
+			|| y < (int) context->clip_row_min
+			|| y > (int) context->clip_row_max) {
+			return 0;			/* clipped out */
+		}
+		p = GP_PIXEL_ADDRESS(context, y, x);
+	}
 
-/* semi-public, low-level drawing API */
-#include "GP_readpixel.h"
-#include "GP_writepixel.h"
-#include "GP_fillcolumn.h"
-#include "GP_fillrow.h"
+	switch (context->bits_per_pixel) {
+	case 32:
+		return GP_ReadPixel32bpp(p);
+	
+	case 24:
+		return GP_ReadPixel24bpp(p);
+	
+	case 16:
+		return GP_ReadPixel16bpp(p);
+	
+	case 8:
+		return GP_ReadPixel8bpp(p);
+	
+	default:
+		GP_ABORT("Unsupported value of context->bits_per_pixel");
+	}
 
-/* public drawing API */
-#include "GP_getpixel.h"
-#include "GP_putpixel.h"
-#include "GP_hline.h"
-#include "GP_vline.h"
-#include "GP_line.h"
-#include "GP_rect.h"
-#include "GP_fillrect.h"
-#include "GP_triangle.h"
-#include "GP_filltriangle.h"
-#include "GP_circle.h"
-#include "GP_fillcircle.h"
-#include "GP_ellipse.h"
-#include "GP_fillellipse.h"
-
-/* fonts */
-#include "GP_font.h"
-#include "GP_textstyle.h"
-#include "GP_textmetric.h"
-#include "GP_text.h"
-
-#endif /* GP_COMMON_H */
+	return 0; /* unreached */
+}

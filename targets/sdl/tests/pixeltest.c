@@ -41,9 +41,7 @@ SDL_TimerID timer;
 SDL_UserEvent timer_event;
 
 /* Values for color pixels in display format. */
-long red;
-long green;
-long blue;
+long red, green, blue, white;
 
 Uint32 timer_callback(__attribute__((unused)) Uint32 interval,
 			__attribute__((unused)) void *param)
@@ -53,23 +51,37 @@ Uint32 timer_callback(__attribute__((unused)) Uint32 interval,
 	return 30;
 }
 
-void draw_pixels(void)
+void draw_pixel(void)
 {
 	long pixel;
 	int x = random() % 320;
 	int y = random() % 240;
 
-	SDL_LockSurface(display);
-	pixel = GP_SDL_GetPixel(display, x, y);
+	pixel = GP_GetPixel(&context, x, y);
     
-	if (pixel) {
+	if (pixel == blue) {
 		GP_PutPixel(&context, x, y, green);
-	} else {
+	}
+	else if (pixel == red) {
+		GP_PutPixel(&context, x, y, white);
+	}
+	else {
 		if (x < 160) {
 			GP_PutPixel(&context, x, y, blue);
 		} else {
 			GP_PutPixel(&context, x, y, red);
 		}
+	}
+}
+
+void draw_pixels(void)
+{
+	SDL_LockSurface(display);
+
+	/* Draw some pixels (exact number is not important). */
+	int i;
+	for (i = 0; i < 30; i++) {
+		draw_pixel();
 	}
 
 	SDL_UnlockSurface(display);
@@ -132,6 +144,7 @@ int main(int argc, char **argv)
 	red = SDL_MapRGB(display->format, 255, 0, 0);
 	green = SDL_MapRGB(display->format, 0, 255, 0);
 	blue = SDL_MapRGB(display->format, 0, 0, 255);
+	white = SDL_MapRGB(display->format, 255, 255, 255);
 
 	/* Set up a clipping rectangle to test proper clipping of pixels */
 	SDL_Rect clip_rect = {10, 10, 300, 220};
@@ -157,4 +170,3 @@ fail:
 	SDL_Quit();
 	return 1;
 }
-

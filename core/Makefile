@@ -9,9 +9,11 @@ OBJECTS=GP_circle.o \
 	GP_fillrect.o \
 	GP_fillrow.o \
 	GP_filltriangle.o \
+	GP_getpixel.o \
 	GP_hline.o \
 	GP_line.o \
 	GP_putpixel.o \
+	GP_readpixel.o \
 	GP_rect.o \
 	GP_text.o \
 	GP_textmetric.o \
@@ -32,9 +34,11 @@ HEADERS=GP.h \
 	GP_fillrow.h \
 	GP_filltriangle.h \
 	GP_font.h \
+	GP_getpixel.h \
 	GP_hline.h \
 	GP_line.h \
 	GP_putpixel.h \
+	GP_readpixel.h \
 	GP_rect.h \
 	GP_swap.h \
 	GP_text.h \
