@@ -7,8 +7,7 @@ HEADERS=GP_SDL.h \
 
 EXTRA_DEPS=
 
-OBJECTS=GP_SDL_context.o \
-	GP_SDL_getpixel.o \
+OBJECTS=GP_SDL_context.o
 
 .PHONY: library tests clean tar install
 
