@@ -7,15 +7,8 @@ HEADERS=GP_SDL.h \
 
 EXTRA_DEPS=
 
-OBJECTS=GP_SDL_circle.o \
-	GP_SDL_context.o \
-	GP_SDL_ellipse.o \
+OBJECTS=GP_SDL_context.o \
 	GP_SDL_getpixel.o \
-	GP_SDL_line.o \
-	GP_SDL_rect.o \
-	GP_SDL_setpixel.o \
-	GP_SDL_text.o \
-	GP_SDL_triangle.o
 
 .PHONY: library tests clean tar install
 

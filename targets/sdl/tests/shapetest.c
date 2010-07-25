@@ -158,7 +158,7 @@ void draw_testing_rectangle(int x, int y, int xradius, int yradius)
 		GP_Rect(&context, x - xradius, y - yradius, x + xradius, y + yradius, yellow);
 	}
 	if (fill) {
-		GP_SDL_FillRect(display, red, x - xradius, y - yradius, x + xradius, y + yradius);
+		GP_FillRect(&context, x - xradius, y - yradius, x + xradius, y + yradius, red);
 	}
 	if (outline == 2) {
 		GP_Rect(&context, x - xradius, y - yradius, x + xradius, y + yradius, white);

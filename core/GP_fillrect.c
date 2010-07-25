@@ -38,7 +38,7 @@ void GP_FillRect(GP_Context *context, int x0, int y0, int x1, int y1,
 	}
 
 	int y;
-	for (y = y0; y < y1; y++) {
+	for (y = y0; y <= y1; y++) {
 		GP_HLine(context, x0, x1, y, color);
 	}
 }
