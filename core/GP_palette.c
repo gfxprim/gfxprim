@@ -26,7 +26,7 @@
 #include "GP_color.h"
 #include "GP_palette.h"
 
-enum GP_RetCode GP_PaleteColorToColor(GP_Color *color)
+enum GP_RetCode GP_PaletteColorToColor(GP_Color *color)
 {
         struct GP_Pal *pal;
 	GP_Palette *palette;
