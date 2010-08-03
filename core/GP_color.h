@@ -101,6 +101,7 @@ typedef enum GP_ColorName {
 
 typedef enum GP_ColorType {
 	GP_COLNAME,
+	GP_PALETTE,
 	GP_G1,
 	GP_G2,
 	GP_G4,
@@ -114,6 +115,12 @@ typedef enum GP_ColorType {
 struct GP_ColName {
 	enum GP_ColorType type;
 	enum GP_ColorName name;
+};
+
+struct GP_Pal {
+	enum GP_ColorType type;
+	uint16_t index;
+	union GP_Palette *palette;
 };
 
 struct GP_ColRGB888 {
@@ -161,6 +168,7 @@ struct GP_ColRGB555 {
 typedef union GP_Col {
 	enum GP_ColorType     type;
 	struct GP_ColName     colname;
+	struct GP_Pal         pal;
 	struct GP_ColG1       g1;
 	struct GP_ColG2       g2;
 	struct GP_ColG4       g4;
@@ -182,4 +190,4 @@ enum GP_RetCode {
  */
 enum GP_RetCode GP_ColorConvert(GP_Color *color, GP_ColorType type);
 
-#endif
+#endif /* GP_COLOR_H */

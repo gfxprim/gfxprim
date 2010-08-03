@@ -23,6 +23,7 @@
  *                                                                           *
  *****************************************************************************/
 
+#include "GP_palette.h"
 #include "GP_color.h"
 
 static uint8_t rgb888_colors[][3] = {
@@ -83,6 +84,7 @@ static enum GP_RetCode conv_from_name(GP_Color *color, GP_ColorType type)
 		break;
 		case GP_COLNAME:
 		case GP_COLMAX:
+		case GP_PALETTE:
 		break;
 	}
 
@@ -132,6 +134,7 @@ static enum GP_RetCode conv_from_g1(GP_Color *color, GP_ColorType type)
 		break;
 		case GP_COLMAX:
 		case GP_COLNAME:
+		case GP_PALETTE:
 		break;
 	}
 	
@@ -181,6 +184,7 @@ static enum GP_RetCode conv_from_g2(GP_Color *color, GP_ColorType type)
 		break;
 		case GP_COLMAX:
 		case GP_COLNAME:
+		case GP_PALETTE:
 		break;
 	}
 	
@@ -230,6 +234,7 @@ static enum GP_RetCode conv_from_g4(GP_Color *color, GP_ColorType type)
 		break;
 		case GP_COLMAX:
 		case GP_COLNAME:
+		case GP_PALETTE:
 		break;
 	}
 	
@@ -279,6 +284,7 @@ static enum GP_RetCode conv_from_g8(GP_Color *color, GP_ColorType type)
 		break;
 		case GP_COLMAX:
 		case GP_COLNAME:
+		case GP_PALETTE:
 		break;
 	}
 	
@@ -332,6 +338,7 @@ static enum GP_RetCode conv_from_rgb555(GP_Color *color, GP_ColorType type)
 		break;
 		case GP_COLMAX:
 		case GP_COLNAME:
+		case GP_PALETTE:
 		break;
 	}
 	
@@ -382,6 +389,7 @@ static enum GP_RetCode conv_from_rgb888(GP_Color *color, GP_ColorType type)
 		
 		case GP_COLMAX:
 		case GP_COLNAME:
+		case GP_PALETTE:
 		break;
 	}
 
@@ -434,6 +442,7 @@ static enum GP_RetCode conv_from_rgba8888(GP_Color *color, GP_ColorType type)
 		break;
 		case GP_COLMAX:
 		case GP_COLNAME:
+		case GP_PALETTE:
 		break;
 	}
 	
@@ -443,12 +452,8 @@ static enum GP_RetCode conv_from_rgba8888(GP_Color *color, GP_ColorType type)
 		return GP_ENOIMPL;
 }
 
-enum GP_RetCode GP_ColorConvert(GP_Color *color, GP_ColorType type)
+static enum GP_RetCode color_convert(GP_Color *color, GP_ColorType type)
 {
-	/* nothing to do */
-	if (color->type == type)
-		return GP_ESUCCESS;
-
 	switch (color->type) {
 		case GP_COLNAME:
 			return conv_from_name(color, type);
@@ -475,6 +480,7 @@ enum GP_RetCode GP_ColorConvert(GP_Color *color, GP_ColorType type)
 			return conv_from_rgb555(color, type);
 		break;
 		case GP_COLMAX:
+		case GP_PALETTE:
 		break;
 	}
 
@@ -482,4 +488,24 @@ enum GP_RetCode GP_ColorConvert(GP_Color *color, GP_ColorType type)
 		return GP_EINVAL;
 	else
 		return GP_ENOIMPL;
+}
+
+enum GP_RetCode GP_ColorConvert(GP_Color *color, GP_ColorType type)
+{
+	enum GP_RetCode ret;
+
+	/* nothing to do */
+	if (color->type == type)
+		return GP_ESUCCESS;
+	
+	/* convert palette color to color */
+	if (color->type == GP_PALETTE) {
+		ret = GP_PaletteColorToColor(color);
+
+		if (ret != GP_ESUCCESS)
+			return ret;
+	}
+
+	/* convert color */
+	return color_convert(color, type);
 }
