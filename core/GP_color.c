@@ -25,22 +25,18 @@
 
 #include "GP_color.h"
 
-/* WHITE, RED, BLUE, GREEN, BLACK */
-
 static uint8_t rgb888_cols[][3] = {
-	{0xff, 0xff, 0xff},
-	{0xff, 0x00, 0x00},
-	{0x00, 0xff, 0x00},
-	{0x00, 0x00, 0xff},
-	{0x00, 0x00, 0x00},
-};
-
-static uint8_t rgb555_cols[][3] = {
-	{0x1f, 0x1f, 0x1f},
-	{0x1f, 0x00, 0x00},
-	{0x00, 0x1f, 0x00},
-	{0x00, 0x00, 0x1f},
-	{0x00, 0x00, 0x00},
+	{0x00, 0x00, 0x00}, /* black  */
+	{0xff, 0x00, 0x00}, /* red    */
+	{0x00, 0xff, 0x00}, /* green  */
+	{0x00, 0x00, 0xff}, /* blue   */
+	{0xff, 0xff, 0x00}, /* yellow */
+	{0xa5, 0x2a, 0x2a}, /* brown  */
+	{0xff, 0xa5, 0x00}, /* orange */
+	{0xbe, 0xbe, 0xbe}, /* gray1  */
+	{0x7f, 0x7f, 0x7f}, /* gray2  */
+	{0xa0, 0x20, 0xf0}, /* purple */
+	{0xff, 0xff, 0xff}, /* white */
 };
 
 static enum GP_RetCode conv_from_name(GP_Color *color, GP_ColorType type)
@@ -63,8 +59,9 @@ static enum GP_RetCode conv_from_name(GP_Color *color, GP_ColorType type)
 			return GP_ESUCCESS;
 		break;
 		case GP_RGB555:
-			GP_RGB555_FILL(color, rgb555_cols[i][0], rgb555_cols[i][1],
-			                      rgb555_cols[i][2]);
+			GP_RGB555_FILL(color, rgb888_cols[i][0] / 8,
+			                      rgb888_cols[i][1] / 8,
+			                      rgb888_cols[i][2] / 8);
 			return GP_ESUCCESS;
 		break;
 		case GP_COLNAME:
