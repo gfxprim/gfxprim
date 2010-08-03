@@ -1,6 +1,7 @@
 LIBRARY=libGP_core
 
 OBJECTS=GP_circle.o \
+	GP_color.o \
 	GP_defaultfont.o \
 	GP_ellipse.o \
 	GP_fillcircle.o \
@@ -24,6 +25,7 @@ OBJECTS=GP_circle.o \
 HEADERS=GP.h \
 	GP_abort.h \
 	GP_check.h \
+	GP_color.h \
 	GP_circle.h \
 	GP_ellipse.h \
 	GP_context.h \
