@@ -25,7 +25,7 @@
 
 #include "GP_color.h"
 
-static uint8_t rgb888_cols[][3] = {
+static uint8_t rgb888_colors[][3] = {
 	{0x00, 0x00, 0x00}, /* black  */
 	{0xff, 0x00, 0x00}, /* red    */
 	{0x00, 0xff, 0x00}, /* green  */
@@ -47,21 +47,38 @@ static enum GP_RetCode conv_from_name(GP_Color *color, GP_ColorType type)
 		return GP_EINVAL;
 
 	switch (type) {
+		case GP_G1:
+		break;
+		case GP_G2:
+		break;
+		case GP_G4:
+			GP_G4_FILL(color, ((rgb888_colors[i][0] +
+			                    rgb888_colors[i][1] +
+			                    rgb888_colors[i][2])/3)>>4);
+			return GP_EUNPRECISE;
+		break;
+		case GP_G8:
+			GP_G8_FILL(color, (rgb888_colors[i][0] +
+			                   rgb888_colors[i][1] +
+			                   rgb888_colors[i][2])/3);
+			return GP_EUNPRECISE;
+		break;
+		case GP_RGB555:
+			GP_RGB555_FILL(color, rgb888_colors[i][0]>>3,
+			                      rgb888_colors[i][1]>>3,
+			                      rgb888_colors[i][2]>>3);
+			return GP_ESUCCESS;
+		break;
 		case GP_RGB888:
-			GP_RGB888_FILL(color, rgb888_cols[i][0],
-			               rgb888_cols[i][1], rgb888_cols[i][2]);
+			GP_RGB888_FILL(color, rgb888_colors[i][0],
+			                      rgb888_colors[i][1],
+			                      rgb888_colors[i][2]);
 			return GP_ESUCCESS;
 		break;
 		case GP_RGBA8888:
-			GP_RGBA8888_FILL(color, rgb888_cols[i][0],
-			                 rgb888_cols[i][1], rgb888_cols[i][2],
-					 0xff);
-			return GP_ESUCCESS;
-		break;
-		case GP_RGB555:
-			GP_RGB555_FILL(color, rgb888_cols[i][0] / 8,
-			                      rgb888_cols[i][1] / 8,
-			                      rgb888_cols[i][2] / 8);
+			GP_RGBA8888_FILL(color, rgb888_colors[i][0],
+			                        rgb888_colors[i][1],
+			                        rgb888_colors[i][2], 0xff);
 			return GP_ESUCCESS;
 		break;
 		case GP_COLNAME:
@@ -75,52 +92,193 @@ static enum GP_RetCode conv_from_name(GP_Color *color, GP_ColorType type)
 		return GP_ENOIMPL;
 }
 
-static enum GP_RetCode conv_from_rgb888(GP_Color *color, GP_ColorType type)
+static enum GP_RetCode conv_from_g1(GP_Color *color, GP_ColorType type)
 {
-	struct GP_ColRGB888 *col = &color->rgb888;
+	struct GP_ColG1 *col = &color->g1;
 
 	switch (type) {
-		case GP_RGBA8888:
-			GP_RGBA8888_FILL(color, col->red, col->green,
-			                 col->blue, 0xff);
+		case GP_G1:
+			return GP_ESUCCESS;
+		break;
+		case GP_G2:
+			GP_G2_FILL(color, col->gray * 0x03);
+			return GP_ESUCCESS;
+		break;
+		case GP_G4:
+			GP_G4_FILL(color, col->gray * 0x0f);
+			return GP_ESUCCESS;
+		break;
+		case GP_G8:
+			GP_G8_FILL(color, col->gray * 0xff);
 			return GP_ESUCCESS;
 		break;
 		case GP_RGB555:
-			GP_RGB555_FILL(color, col->red / 8, col->green / 8,
-			               col->blue / 8);
+			GP_RGB555_FILL(color, col->gray * 0x1f,
+			                      col->gray * 0x1f,
+			                      col->gray * 0x1f);
 			return GP_ESUCCESS;
 		break;
-		
+		case GP_RGB888:
+			GP_RGB888_FILL(color, col->gray * 0xff,
+			                      col->gray * 0xff,
+			                      col->gray * 0xff);
+			return GP_ESUCCESS;
+		break;
+		case GP_RGBA8888:
+			GP_RGBA8888_FILL(color, col->gray * 0xff,
+			                        col->gray * 0xff,
+			                        col->gray * 0xff, 0xff);
+			return GP_ESUCCESS;
+		break;
 		case GP_COLMAX:
 		case GP_COLNAME:
-		case GP_RGB888:
 		break;
 	}
-
+	
 	if (type >= GP_COLMAX)
 		return GP_EINVAL;
 	else
 		return GP_ENOIMPL;
 }
 
-static enum GP_RetCode conv_from_rgba8888(GP_Color *color, GP_ColorType type)
+static enum GP_RetCode conv_from_g2(GP_Color *color, GP_ColorType type)
 {
-	struct GP_ColRGBA8888 *col = &color->rgba8888;
+	struct GP_ColG2 *col = &color->g2;
 
 	switch (type) {
-		case GP_RGB555:
-			GP_RGB555_FILL(color, col->red / 8, col->green / 8,
-			               col->blue / 8);
+		case GP_G1:
+			GP_G1_FILL(color, col->gray>>2);
 			return GP_EUNPRECISE;
 		break;
+		case GP_G2:
+			return GP_ESUCCESS;
+		break;
+		case GP_G4:
+			GP_G4_FILL(color, col->gray * 0x0f / 0x03);
+			return GP_ESUCCESS;
+		break;
+		case GP_G8:
+			GP_G8_FILL(color, col->gray * 0xff / 0x03);
+			return GP_ESUCCESS;
+		break;
+		case GP_RGB555:
+			GP_RGB555_FILL(color, col->gray * 0x1f / 0x03,
+			                      col->gray * 0x1f / 0x03,
+			                      col->gray * 0x1f / 0x03);
+			return GP_ESUCCESS;
+		break;
 		case GP_RGB888:
-			GP_RGB888_FILL(color, col->red, col->green,
-			               col->blue);
-			return GP_EUNPRECISE;
+			GP_RGB888_FILL(color, col->gray * 0xff / 0x03, 
+			                      col->gray * 0xff / 0x03,
+			                      col->gray * 0xff / 0x03);
+			return GP_ESUCCESS;
+		break;
+		case GP_RGBA8888:
+			GP_RGBA8888_FILL(color, col->gray * 0xff / 0x03,
+			                        col->gray * 0xff / 0x03,
+			                        col->gray * 0xff / 0x03, 0xff);
+			return GP_ESUCCESS;
 		break;
 		case GP_COLMAX:
 		case GP_COLNAME:
+		break;
+	}
+	
+	if (type >= GP_COLMAX)
+		return GP_EINVAL;
+	else
+		return GP_ENOIMPL;
+}
+
+static enum GP_RetCode conv_from_g4(GP_Color *color, GP_ColorType type)
+{
+	struct GP_ColG4 *col = &color->g4;
+
+	switch (type) {
+		case GP_G1:
+			GP_G1_FILL(color, col->gray>>3);
+			return GP_EUNPRECISE;
+		break;
+		case GP_G2:
+			GP_G2_FILL(color, col->gray>>2);
+			return GP_EUNPRECISE;
+		break;
+		case GP_G4:
+			return GP_ESUCCESS;
+		break;
+		case GP_G8:
+			GP_G8_FILL(color, col->gray * 0xff / 0x0f);
+			return GP_ESUCCESS;
+		break;
+		case GP_RGB555:
+			GP_RGB555_FILL(color, col->gray * 0x1f / 0x0f,
+			                      col->gray * 0x1f / 0x0f,
+			                      col->gray * 0x1f / 0x0f);
+			return GP_ESUCCESS;
+		break;
+		case GP_RGB888:
+			GP_RGB888_FILL(color, col->gray * 0xff / 0x0f, 
+			                      col->gray * 0xff / 0x0f,
+			                      col->gray * 0xff / 0x0f);
+			return GP_ESUCCESS;
+		break;
 		case GP_RGBA8888:
+			GP_RGBA8888_FILL(color, col->gray * 0xff / 0x0f,
+			                        col->gray * 0xff / 0x0f,
+			                        col->gray * 0xff / 0x0f, 0xff);
+			return GP_ESUCCESS;
+		break;
+		case GP_COLMAX:
+		case GP_COLNAME:
+		break;
+	}
+	
+	if (type >= GP_COLMAX)
+		return GP_EINVAL;
+	else
+		return GP_ENOIMPL;
+}
+
+static enum GP_RetCode conv_from_g8(GP_Color *color, GP_ColorType type)
+{
+	struct GP_ColG8 *col = &color->g8;
+
+	switch (type) {
+		case GP_G1:
+			GP_G1_FILL(color, col->gray / 8);
+			return GP_EUNPRECISE;
+		break;
+		case GP_G2:
+			GP_G2_FILL(color, col->gray / 4);
+			return GP_EUNPRECISE;
+		break;
+		case GP_G4:
+			GP_G4_FILL(color, col->gray / 2);
+			return GP_EUNPRECISE;
+		break;
+		case GP_G8:
+			return GP_ESUCCESS;
+		break;
+		case GP_RGB555:
+			GP_RGB555_FILL(color, col->gray * 0x1f / 0xff,
+			                      col->gray * 0x1f / 0xff,
+			                      col->gray * 0x1f / 0xff);
+			return GP_ESUCCESS;
+		break;
+		case GP_RGB888:
+			GP_RGB888_FILL(color, col->gray, 
+			                      col->gray,
+			                      col->gray);
+			return GP_ESUCCESS;
+		break;
+		case GP_RGBA8888:
+			GP_RGBA8888_FILL(color, col->gray,
+			                        col->gray,
+			                        col->gray, 0xff);
+			return GP_ESUCCESS;
+		break;
+		case GP_COLMAX:
+		case GP_COLNAME:
 		break;
 	}
 	
@@ -133,21 +291,149 @@ static enum GP_RetCode conv_from_rgba8888(GP_Color *color, GP_ColorType type)
 static enum GP_RetCode conv_from_rgb555(GP_Color *color, GP_ColorType type)
 {
 	struct GP_ColRGB555 *col = &color->rgb555;
+	uint8_t val;
 
 	switch (type) {
+		case GP_G1:
+			val = ((col->red + col->green + col->blue) / 3)>>4;
+			GP_G1_FILL(color, val);
+			return GP_EUNPRECISE;
+		break;
+		case GP_G2:
+			val = ((col->red + col->green + col->blue) / 3)>>3;
+			GP_G2_FILL(color, val);
+			return GP_EUNPRECISE;
+		break;
+		case GP_G4:
+			val = ((col->red + col->green + col->blue) / 3)>>2;
+			GP_G4_FILL(color, val);
+			return GP_EUNPRECISE;
+		break;
+		case GP_G8:
+			val = (0xff * (col->red + col->green + col->blue)) /
+			      (3 * 0x1f);
+			GP_G8_FILL(color, val);
+			return GP_EUNPRECISE;
+		break;
+		case GP_RGB555:
+			return GP_ESUCCESS;
+		break;
 		case GP_RGB888:
-			GP_RGB888_FILL(color, col->red * 8, col->green * 8,
-			               col->blue * 8);
+			GP_RGB888_FILL(color, 0xff * col->red   / 0x1f,
+			                      0xff * col->green / 0x1f,
+			                      0xff * col->blue  / 0x1f);
 			return GP_ESUCCESS;
 		break;
 		case GP_RGBA8888:
-			GP_RGBA8888_FILL(color, col->red * 8, col->green * 8,
-			                 col->blue * 8, 0xff);
+			GP_RGBA8888_FILL(color, 0xff * col->red   / 0x1f,
+			                        0xff * col->green / 0x1f,
+			                        0xff * col->blue  / 0x1f, 0xff);
 			return GP_ESUCCESS;
 		break;
 		case GP_COLMAX:
 		case GP_COLNAME:
+		break;
+	}
+	
+	if (type >= GP_COLMAX)
+		return GP_EINVAL;
+	else
+		return GP_ENOIMPL;
+}
+
+static enum GP_RetCode conv_from_rgb888(GP_Color *color, GP_ColorType type)
+{
+	struct GP_ColRGB888 *col = &color->rgb888;
+	uint8_t val;
+
+	switch (type) {
+		case GP_G1:
+			val = ((col->red + col->green + col->blue)/3)>>7;
+			GP_G1_FILL(color, val);
+			return GP_EUNPRECISE;
+		break;
+		case GP_G2:
+			val = ((col->red + col->green + col->blue)/3)>>6;
+			GP_G2_FILL(color, val);
+			return GP_EUNPRECISE;
+		break;
+		case GP_G4:
+			val = ((col->red + col->green + col->blue)/3)>>4;
+			GP_G4_FILL(color, val);
+			return GP_EUNPRECISE;
+		break;
+		case GP_G8:
+
+		break;
 		case GP_RGB555:
+			GP_RGB555_FILL(color, col->red>>3,
+			                      col->green>>3,
+			                      col->blue>>3);
+			return GP_ESUCCESS;
+		break;
+		case GP_RGB888:
+			return GP_ESUCCESS;
+		break;
+		case GP_RGBA8888:
+			GP_RGBA8888_FILL(color, col->red, col->green,
+			                 col->blue, 0xff);
+			return GP_ESUCCESS;
+		break;
+		
+		case GP_COLMAX:
+		case GP_COLNAME:
+		break;
+	}
+
+	if (type >= GP_COLMAX)
+		return GP_EINVAL;
+	else
+		return GP_ENOIMPL;
+}
+
+static enum GP_RetCode conv_from_rgba8888(GP_Color *color, GP_ColorType type)
+{
+	struct GP_ColRGBA8888 *col = &color->rgba8888;
+	uint8_t val;
+
+	switch (type) {
+		case GP_G1:
+			val = ((col->red + col->green + col->blue)/3)>>7;
+			GP_G1_FILL(color, val);
+			return GP_EUNPRECISE;
+		break;
+		case GP_G2:
+			val = ((col->red + col->green + col->blue)/3)>>6;
+			GP_G2_FILL(color, val);
+			return GP_EUNPRECISE;
+		break;
+		case GP_G4:
+			val = ((col->red + col->green + col->blue)/3)>>4;
+			GP_G4_FILL(color, val);
+			return GP_EUNPRECISE;
+		break;
+		case GP_G8:
+			val = ((col->red + col->green + col->blue)/3);
+			GP_G4_FILL(color, val);
+			return GP_EUNPRECISE;
+		break;
+		case GP_RGB555:
+			GP_RGB555_FILL(color, col->red>>3,
+			                      col->green>>3,
+			                      col->blue>>3);
+			return GP_EUNPRECISE;
+		break;
+		case GP_RGB888:
+			GP_RGB888_FILL(color, col->red,
+			                      col->green,
+			                      col->blue);
+			return GP_EUNPRECISE;
+		break;
+		case GP_RGBA8888:
+			return GP_ESUCCESS;
+		break;
+		case GP_COLMAX:
+		case GP_COLNAME:
 		break;
 	}
 	
@@ -166,6 +452,18 @@ enum GP_RetCode GP_ColorConvert(GP_Color *color, GP_ColorType type)
 	switch (color->type) {
 		case GP_COLNAME:
 			return conv_from_name(color, type);
+		break;
+		case GP_G1:
+			return conv_from_g1(color, type);
+		break;
+		case GP_G2:
+			return conv_from_g2(color, type);
+		break;
+		case GP_G4:
+			return conv_from_g4(color, type);
+		break;
+		case GP_G8:
+			return conv_from_g8(color, type);
 		break;
 		case GP_RGB888:
 			return conv_from_rgb888(color, type);
