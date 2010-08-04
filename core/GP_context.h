@@ -69,6 +69,6 @@ typedef struct {
 		GP_CHECK(context->clip_column_min <= context->clip_column_max); \
 		GP_CHECK(context->clip_row_max < context->rows); \
 		GP_CHECK(context->clip_column_max < context->columns); \
-	} while(0);
+	} while(0)
 
 #endif /* GP_CONTEXT_H */
