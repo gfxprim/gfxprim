@@ -28,7 +28,9 @@
 
 #include <stdint.h>
 
-#define GP_COLNAME_PACK(n) {.colname = {GP_COLNAME, n}}
+#include "GP_retcode.h"
+
+#define GP_COLNAME_PACK(n) {.name = {GP_COLNAME, n}}
 #define GP_PALETTE_PACK(palette, index) {.pal = {GP_PALETTE, index, palette}}
 #define GP_G1_PACK(g) {.g1 = {GP_G1, g}}
 #define GP_G2_PACK(g) {.g2 = {GP_G2, g}}
@@ -184,13 +186,6 @@ typedef union GP_Color {
 	struct GP_ColRGB555   rgb555;
 	struct GP_ColRGBA8888 rgba8888;
 } GP_Color;
-
-enum GP_RetCode {
-	GP_ESUCCESS,
-	GP_EINVAL,
-	GP_ENOIMPL,
-	GP_EUNPRECISE,
-};
 
 /*
  * Convers color pointed by *color to type.
