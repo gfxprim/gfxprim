@@ -33,6 +33,7 @@
 
 struct GP_RGB888 palette_colors[] = {
 	{0xff, 0x00, 0xff},
+	{0x0a, 0xdf, 0xee},
 	{0x00, 0x00, 0x00},
 	{0xff, 0xff, 0xff},
 };
@@ -40,8 +41,34 @@ struct GP_RGB888 palette_colors[] = {
 int main(void)
 {
 	union GP_Palette palette = GP_PAL_RGB888_PACK(palette_colors);
+	union GP_Color color = GP_PALETTE_PACK(&palette, 1); 
 
-	GP_PalettePrint(&palette);
+	printf("Color #1\n");
+	GP_ColorPrint(&color);
+	
+	GP_ColorConvert(&color, GP_RGB888);
+	
+	printf("\nColor #2\n");
+	GP_ColorPrint(&color);
+	
+	GP_ColorConvert(&color, GP_RGBA8888);
+	
+	printf("\nColor #3\n");
+	GP_ColorPrint(&color);
+	
+	GP_ColorConvert(&color, GP_RGB555);
+	
+	printf("\nColor #4\n");
+	GP_ColorPrint(&color);
+	
+	GP_ColorConvert(&color, GP_G8);
+	
+	printf("\nColor #5\n");
+	GP_ColorPrint(&color);
+
+	printf("\nColor #6\n");
+	GP_COLNAME_FILL(&color, GP_COL_YELLOW);
+	GP_ColorPrint(&color);
 
 	return 0;
 }

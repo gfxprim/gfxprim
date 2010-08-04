@@ -30,7 +30,7 @@
 
 enum GP_RetCode GP_PaletteColorToColor(GP_Color *color)
 {
-        struct GP_Pal *pal;
+        struct GP_ColPal *pal;
 	GP_Palette *palette;
 	uint16_t index;
 
@@ -64,7 +64,7 @@ static void print_rgb888(struct GP_PalRGB888 *palette)
 	printf(" NR    R    G    B\n");
 
 	for (i = 0; i < palette->size; i++) {
-		printf("%04u: 0x%.2x 0x%.2x 0x%.2x\n", i + 1,
+		printf("%04u: 0x%.2x 0x%.2x 0x%.2x\n", i,
 		                                      palette->colors[i].red,
 		                                      palette->colors[i].green,
 		                                      palette->colors[i].blue);

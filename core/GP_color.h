@@ -29,6 +29,7 @@
 #include <stdint.h>
 
 #define GP_COLNAME_PACK(n) {.colname = {GP_COLNAME, n}}
+#define GP_PALETTE_PACK(palette, index) {.pal = {GP_PALETTE, index, palette}}
 #define GP_G1_PACK(g) {.g1 = {GP_G1, g}}
 #define GP_G2_PACK(g) {.g2 = {GP_G2, g}}
 #define GP_G4_PACK(g) {.g4 = {GP_G4, g}}
@@ -40,6 +41,12 @@
 #define GP_COLNAME_FILL(col, n) do {   \
 	(col)->name.type = GP_COLNAME; \
 	(col)->name.name = n;          \
+} while (0)
+
+#define GP_PALETTE_FILL(col, p, i) do {  \
+	(col)->pal.type    = GP_PALETTE; \
+	(col)->pal.index   = i;          \
+	(col)->pal.palette = p;          \
 } while (0)
 
 #define GP_G1_FILL(col, g) do { \
@@ -117,7 +124,7 @@ struct GP_ColName {
 	enum GP_ColorName name;
 };
 
-struct GP_Pal {
+struct GP_ColPal {
 	enum GP_ColorType type;
 	uint16_t index;
 	union GP_Palette *palette;
@@ -167,8 +174,8 @@ struct GP_ColRGB555 {
 
 typedef union GP_Color {
 	enum GP_ColorType     type;
-	struct GP_ColName     colname;
-	struct GP_Pal         pal;
+	struct GP_ColName     name;
+	struct GP_ColPal      pal;
 	struct GP_ColG1       g1;
 	struct GP_ColG2       g2;
 	struct GP_ColG4       g4;
@@ -189,5 +196,10 @@ enum GP_RetCode {
  * Convers color pointed by *color to type.
  */
 enum GP_RetCode GP_ColorConvert(GP_Color *color, GP_ColorType type);
+
+/*
+ * Print color into stdout in human-readable format.
+ */
+void GP_ColorPrint(GP_Color *color);
 
 #endif /* GP_COLOR_H */

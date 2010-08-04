@@ -23,8 +23,24 @@
  *                                                                           *
  *****************************************************************************/
 
+#include <stdio.h>
+
 #include "GP_palette.h"
 #include "GP_color.h"
+
+static char *color_names[] = {
+	"black ",
+	"red   ",
+	"green ",
+	"blue  ",
+	"yellow",
+	"brown ",
+	"orange",
+	"gray1 ",
+	"gray2 ",
+	"purple",
+	"white "
+};
 
 static uint8_t rgb888_colors[][3] = {
 	{0x00, 0x00, 0x00}, /* black  */
@@ -42,7 +58,7 @@ static uint8_t rgb888_colors[][3] = {
 
 static enum GP_RetCode conv_from_name(GP_Color *color, GP_ColorType type)
 {
-	enum GP_ColorName i = color->colname.name;
+	enum GP_ColorName i = color->name.name;
 
 	if (i >= GP_COL_MAX)
 		return GP_EINVAL;
@@ -370,7 +386,9 @@ static enum GP_RetCode conv_from_rgb888(GP_Color *color, GP_ColorType type)
 			return GP_EUNPRECISE;
 		break;
 		case GP_G8:
-
+			val = ((col->red + col->green + col->blue)/3);
+			GP_G8_FILL(color, val);
+			return GP_EUNPRECISE;
 		break;
 		case GP_RGB555:
 			GP_RGB555_FILL(color, col->red>>3,
@@ -422,7 +440,7 @@ static enum GP_RetCode conv_from_rgba8888(GP_Color *color, GP_ColorType type)
 		break;
 		case GP_G8:
 			val = ((col->red + col->green + col->blue)/3);
-			GP_G4_FILL(color, val);
+			GP_G8_FILL(color, val);
 			return GP_EUNPRECISE;
 		break;
 		case GP_RGB555:
@@ -508,4 +526,117 @@ enum GP_RetCode GP_ColorConvert(GP_Color *color, GP_ColorType type)
 
 	/* convert color */
 	return color_convert(color, type);
+}
+
+static void print_name(struct GP_ColName *color)
+{
+	printf(" TYPE    NAME\n");
+	
+	if (color->name > GP_COL_MAX) {
+		printf("COLNAME invalid\n");
+		return;
+	}
+
+	printf("COLNAME %s\n", color_names[color->name]);
+}
+
+static void print_palette(struct GP_ColPal *color)
+{
+	printf("Palette index %04u\n", color->index);
+	GP_PalettePrint(color->palette);
+}
+
+static void print_g1(struct GP_ColG1 *color)
+{
+	printf(" TYPE   G\n");
+	printf("  G1   0x%x\n", color->gray);
+}
+
+static void print_g2(struct GP_ColG2 *color)
+{
+	printf(" TYPE   G\n");
+	printf("  G2   0x%x\n", color->gray);
+}
+
+static void print_g4(struct GP_ColG4 *color)
+{
+	printf(" TYPE   G\n");
+	printf("  G4   0x%02x\n", color->gray);
+}
+
+static void print_g8(struct GP_ColG8 *color)
+{
+	printf(" TYPE   G\n");
+	printf("  G8   0x%02x\n", color->gray);
+}
+
+static void print_rgb555(struct GP_ColRGB555 *color)
+{
+	printf(" TYPE   R    G    B\n");
+	printf("RGB555 0x%02x 0x%02x 0x%02x\n", color->red,
+	                                        color->green,
+	                                        color->blue);
+}
+
+static void print_rgb888(struct GP_ColRGB888 *color)
+{
+	printf(" TYPE   R    G    B\n");
+	printf("RGB888 0x%02x 0x%02x 0x%02x\n", color->red,
+	                                        color->green,
+	                                        color->blue);
+}
+
+static void print_rgba8888(struct GP_ColRGBA8888 *color)
+{
+	printf(" TYPE     R    G    B    A\n");
+	printf("RGBA8888 0x%02x 0x%02x 0x%02x 0x%02x\n", color->red,
+	                                                 color->green,
+	                                                 color->blue,
+	                                                 color->alpha);
+}
+
+void GP_ColorPrint(GP_Color *color)
+{
+	switch (color->type) {
+		case GP_COLNAME:
+			print_name(&color->name);
+			return;
+		break;
+		case GP_PALETTE:
+			print_palette(&color->pal);
+			return;
+		break;
+		case GP_G1:
+			print_g1(&color->g1);
+			return;
+		break;
+		case GP_G2:
+			print_g2(&color->g2);
+			return;
+		break;
+		case GP_G4:
+			print_g4(&color->g4);
+			return;
+		break;
+		case GP_G8:
+			print_g8(&color->g8);
+			return;
+		break;
+		case GP_RGB555:
+			print_rgb555(&color->rgb555);
+			return;
+		break;
+		case GP_RGB888:
+			print_rgb888(&color->rgb888);
+			return;
+		break;
+		case GP_RGBA8888:
+			print_rgba8888(&color->rgba8888);
+			return;
+		break;
+		case GP_COLMAX:
+		break;
+	}
+
+	printf("Invalid color type (%u)\n", color->type);
 }
