@@ -29,10 +29,10 @@
 #include <stdint.h>
 
 #define GP_COLNAME_PACK(n) {.colname = {GP_COLNAME, n}}
-#define GP_G1_PACK(g) {.colname = {GP_G1, g}}
-#define GP_G2_PACK(g) {.colname = {GP_G2, g}}
-#define GP_G4_PACK(g) {.colname = {GP_G4, g}}
-#define GP_G8_PACK(g) {.colname = {GP_G8, g}}
+#define GP_G1_PACK(g) {.g1 = {GP_G1, g}}
+#define GP_G2_PACK(g) {.g2 = {GP_G2, g}}
+#define GP_G4_PACK(g) {.g4 = {GP_G4, g}}
+#define GP_G8_PACK(g) {.g8 = {GP_G8, g}}
 #define GP_RGB555_PACK(r, g, b) {.rgb555 = {GP_RGB555, r, g, b}}
 #define GP_RGB888_PACK(r, g, b) {.rgb888 = {GP_RGB888, r, g, b}}
 #define GP_RGBA8888_PACK(r, g, b, a) {.rgb888 = {GP_RGBA8888, r, g, b, a}}
@@ -165,7 +165,7 @@ struct GP_ColRGB555 {
 	uint16_t blue:5;
 };
 
-typedef union GP_Col {
+typedef union GP_Color {
 	enum GP_ColorType     type;
 	struct GP_ColName     colname;
 	struct GP_Pal         pal;
