@@ -41,6 +41,10 @@
 #include "GP_fillcolumn.h"
 #include "GP_fillrow.h"
 
+/* colors */
+#include "GP_color.h"
+#include "GP_palette.h"
+
 /* public drawing API */
 #include "GP_getpixel.h"
 #include "GP_putpixel.h"
