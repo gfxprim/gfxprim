@@ -36,10 +36,10 @@
 } while(0);
 
 /* starts a loop that iterates over every X in the line */
-#define FOR_EACH_X for(x = x0, y = y0, error = deltax/2; x <= x1; x++)
+#define FOR_EACH_X for (x = x0, y = y0, error = deltax/2; x <= x1; x++)
 
 /* starts a loop that iterates over every Y in the line */
-#define FOR_EACH_Y for(x = x0, y = y0, error = deltay/2; y <= y1; y++)
+#define FOR_EACH_Y for (x = x0, y = y0, error = deltay/2; y <= y1; y++)
 
 /* updates Y to reflect increasing X by 1; as the change in Y can be
  * a fraction, a rounding error is maintained and if it overflows,
@@ -125,7 +125,7 @@ size_t GP_CalcLinePoints(int x0, int y0, int x1, int y1,
 		}
 
 		FOR_EACH_X {
-			if (i > maxlen) {
+			if (i < maxlen) {
 				points[i++] = x;
 				points[i++] = y;
 			}
@@ -138,7 +138,7 @@ size_t GP_CalcLinePoints(int x0, int y0, int x1, int y1,
 		}
 
 		FOR_EACH_Y {
-			if (i > maxlen) {
+			if (i < maxlen) {
 				points[i++] = x;
 				points[i++] = y;
 			}
