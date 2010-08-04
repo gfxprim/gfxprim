@@ -23,6 +23,8 @@
  *                                                                           *
  *****************************************************************************/
 
+#include <stdio.h>
+
 #include "GP_color.h"
 #include "GP_palette.h"
 
@@ -54,3 +56,26 @@ enum GP_RetCode GP_PaletteColorToColor(GP_Color *color)
         }
 }
 
+static void print_rgb888(struct GP_PalRGB888 *palette)
+{
+	uint16_t i;
+
+	printf("palette format rgb888\nsize = %u\n", palette->size);
+
+	for (i = 0; i < palette->size; i++) {
+		printf("0x%.2x 0x%.2x 0x%.2x\n", palette->colors[i].red,
+		                                 palette->colors[i].green,
+		                                 palette->colors[i].blue);
+	}
+}
+
+void GP_PalettePrint(GP_Palette *palette)
+{
+	switch (palette->type) {
+		case GP_RGB888:
+			print_rgb888(&palette->rgb888);
+		break;
+		default:
+			break;
+	}
+}

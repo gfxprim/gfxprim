@@ -23,51 +23,25 @@
  *                                                                           *
  *****************************************************************************/
 
-#ifndef GP_PALETTE_H
-#define GP_PALETTE_H
+ /*
 
-#include <stdint.h>
-#include "GP_color.h"
+   Palette compile-time test.
 
-/*
- * Usage:
- *
- * struct GP_RGB888 pal_cols[] = {
- *	{0xff, 0x00, 0xff},
- *	...
- * };
- *
- * GP_Palette my_palette = GP_PAL_RGB888_PACK(pal_cols);
- */
-#define GP_PAL_RGB888_PACK(cols) {.rgb888 = {GP_RGB888,                     \
-                                  sizeof (cols) / sizeof (struct GP_RGB888),\
-                                  cols}}
+  */
 
-struct GP_RGB888 {
-	uint8_t red;
-	uint8_t green;
-	uint8_t blue;
+#include <GP.h>
+
+struct GP_RGB888 palette_colors[] = {
+	{0xff, 0x00, 0xff},
+	{0x00, 0x00, 0x00},
+	{0xff, 0xff, 0xff},
 };
 
-struct GP_PalRGB888 {
-	enum GP_ColorType type;
-	uint16_t size;
-	struct GP_RGB888 *colors;
-};
+int main(void)
+{
+	union GP_Palette palette = GP_PAL_RGB888_PACK(palette_colors);
 
-typedef union GP_Palette {
-	enum GP_ColorType type;
-	struct GP_PalRGB888 rgb888;
-} GP_Palette;
+	GP_PalettePrint(&palette);
 
-/*
- * Converts palette color to direct color.
- */
-enum GP_RetCode GP_PaletteColorToColor(GP_Color *color);
-
-/*
- * Print palette into stdout in human-readable format.
- */
-void GP_PalettePrint(GP_Palette *palette);
-
-#endif /* GP_PALETTE_H */
+	return 0;
+}
