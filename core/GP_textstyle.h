@@ -54,4 +54,4 @@ struct GP_TextStyle {
  */
 #define GP_DEFAULT_TEXT_STYLE { NULL, 0, 0, 1, 1 }
 
-#endif /* GP_TEXTSTYLE */
+#endif /* GP_TEXTSTYLE_H */

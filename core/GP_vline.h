@@ -32,4 +32,4 @@
 
 void GP_VLine(GP_Context *context, int x, int y0, int y1, uint32_t value);
 
-#endif
+#endif /* GP_VLINE_H */

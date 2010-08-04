@@ -33,4 +33,4 @@
  */
 int GP_TextWidth(const struct GP_TextStyle *style, const char *str);
 
-#endif
+#endif /* GP_TEXT_METRIC_H */

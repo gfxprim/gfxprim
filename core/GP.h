@@ -66,4 +66,4 @@
 #include "GP_textmetric.h"
 #include "GP_text.h"
 
-#endif /* GP_COMMON_H */
+#endif /* GP_H */

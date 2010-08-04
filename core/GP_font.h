@@ -71,4 +71,4 @@ struct GP_Font {
 extern struct GP_Font GP_default_console_font;
 extern struct GP_Font GP_default_proportional_font;
 
-#endif
+#endif /* GP_FONT_H */
