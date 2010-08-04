@@ -60,12 +60,14 @@ static void print_rgb888(struct GP_PalRGB888 *palette)
 {
 	uint16_t i;
 
-	printf("palette format rgb888\nsize = %u\n", palette->size);
+	printf("palette format rgb888 (size = %u)\n", palette->size);
+	printf(" NR    R    G    B\n");
 
 	for (i = 0; i < palette->size; i++) {
-		printf("0x%.2x 0x%.2x 0x%.2x\n", palette->colors[i].red,
-		                                 palette->colors[i].green,
-		                                 palette->colors[i].blue);
+		printf("%04u: 0x%.2x 0x%.2x 0x%.2x\n", i + 1,
+		                                      palette->colors[i].red,
+		                                      palette->colors[i].green,
+		                                      palette->colors[i].blue);
 	}
 }
 
