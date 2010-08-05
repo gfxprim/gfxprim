@@ -23,14 +23,36 @@
  *                                                                           *
  *****************************************************************************/
 
-#ifndef GP_RETCODE_H
-#define GP_RETCODE_H
+#include "GP_pixel.h"
 
-typedef enum GP_RetCode {
-	GP_ESUCCESS,
-	GP_EINVAL,
-	GP_ENOIMPL,
-	GP_EUNPRECISE,
-} GP_RetCode;
+static GP_ColorType pixel_to_color_mapping[] = {
+	GP_G1,
+	GP_G2,
+	GP_G4,
+	GP_G8,
+	GP_RGB555,
+	GP_RGB555,
+	GP_RGB888,
+	GP_RGB888,
+	GP_RGB888,
+	GP_RGB888,
+	GP_RGB888,
+	GP_RGB888,
+	GP_RGBA8888,
+	GP_RGBA8888,
+	GP_RGBA8888,
+	GP_RGBA8888,
+};
 
-#endif /* GP_RETCODE_H */
+GP_ColorType GP_PixelTypeToColorType(GP_PixelType type)
+{
+	if (type >= GP_PIXEL_MAX)
+		return GP_COLMAX;
+
+	return pixel_to_color_mapping[type];
+}
+
+GP_RetCode GP_ColorToPixel(GP_Color *color, GP_Pixel *pixel)
+{
+	return GP_ENOIMPL;
+}

@@ -1,6 +1,7 @@
 LIBRARY=libGP_core
 
-OBJECTS=GP_color.o \
+OBJECTS=GP_pixel.o \
+	GP_color.o \
 	GP_palette.o \
 	GP_circle.o \
 	GP_defaultfont.o \

@@ -28,10 +28,48 @@
 
 #include <stdint.h>
 
-typedef union GP_PixelValue {
+#include "GP_retcode.h"
+#include "GP_color.h"
+
+typedef union GP_Pixel {
 	uint8_t  v8;
 	uint16_t v16;
 	uint32_t v32;
-} GP_PixelValue;
+} GP_Pixel;
+
+typedef enum GP_PixelType {
+	/* Grayscale */
+	GP_PIXEL_G1,
+	GP_PIXEL_G2,
+	GP_PIXEL_G4,
+	GP_PIXEL_G8,
+	/* RGB 555*/
+	GP_PIXEL_RGB555,
+	GP_PIXEL_BGR555,
+	/* RGB */
+	GP_PIXEL_RGB888,
+	GP_PIXEL_BGR888,
+	/* RGB + padding */
+	GP_PIXEL_XRGB8888,
+	GP_PIXEL_RGBX8888,
+	GP_PIXEL_XBGR8888,
+	GP_PIXEL_BGRX8888,
+	/* RGB + alpha */
+	GP_PIXEL_ARGB8888,
+	GP_PIXEL_RGBA8888,
+	GP_PIXEL_ABGR8888,
+	GP_PIXEL_BGRA8888,
+	GP_PIXEL_MAX,
+} GP_PixelType;
+
+/*
+ * Convert pixel type to color type.
+ */
+GP_ColorType GP_PixelTypeToColorType(GP_PixelType type);
+
+/*
+ * Fills pixel accodingly to color.
+ */
+GP_RetCode GP_ColorToPixel(GP_Color *color, GP_Pixel *pixel);
 
 #endif /* GP_PIXEL_H */
