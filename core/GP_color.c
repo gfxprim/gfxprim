@@ -37,7 +37,7 @@ static char *color_names[] = {
 	"brown     ",
 	"orange    ",
 	"gray dark ",
-	"gray ligth",
+	"gray light",
 	"purple    ",
 	"white     "
 };

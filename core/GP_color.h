@@ -31,7 +31,7 @@
 #include "GP_retcode.h"
 
 #define GP_COLNAME_PACK(n) {.name = {GP_COLNAME, n}}
-#define GP_PALETTE_PACK(palette, index) {.pal = {GP_PALETTE, index, palette}}
+#define GP_PALINDEX_PACK(palette, index) {.pal = {GP_PALETTE, index, palette}}
 #define GP_G1_PACK(g) {.g1 = {GP_G1, g}}
 #define GP_G2_PACK(g) {.g2 = {GP_G2, g}}
 #define GP_G4_PACK(g) {.g4 = {GP_G4, g}}
@@ -45,7 +45,7 @@
 	(col)->name.name = n;          \
 } while (0)
 
-#define GP_PALETTE_FILL(col, p, i) do {  \
+#define GP_PALINDEX_FILL(col, p, i) do {  \
 	(col)->pal.type    = GP_PALETTE; \
 	(col)->pal.index   = i;          \
 	(col)->pal.palette = p;          \
