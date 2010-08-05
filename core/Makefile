@@ -60,6 +60,7 @@ LIB_LOC=/usr/lib/
 .PHONY: all clean tar $(LIBRARY) sdl
 
 all: $(LIBRARY)
+	cd tests && $(MAKE) all
 
 $(LIBRARY): $(LIBRARY).a $(LIBRARY).so
 
@@ -78,4 +79,5 @@ $(LIBRARY).so: $(OBJECTS)
 clean:
 	rm -f $(LIBRARY).a $(LIBRARY).so $(LIBRARY).so.0
 	rm -f *.o
+	cd tests && $(MAKE) clean
 
