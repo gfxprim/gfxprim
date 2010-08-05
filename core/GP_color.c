@@ -29,31 +29,31 @@
 #include "GP_color.h"
 
 static char *color_names[] = {
-	"black ",
-	"red   ",
-	"green ",
-	"blue  ",
-	"yellow",
-	"brown ",
-	"orange",
-	"gray1 ",
-	"gray2 ",
-	"purple",
-	"white "
+	"black     ",
+	"red       ",
+	"green     ",
+	"blue      ",
+	"yellow    ",
+	"brown     ",
+	"orange    ",
+	"gray dark ",
+	"gray ligth",
+	"purple    ",
+	"white     "
 };
 
 static uint8_t rgb888_colors[][3] = {
-	{0x00, 0x00, 0x00}, /* black  */
-	{0xff, 0x00, 0x00}, /* red    */
-	{0x00, 0xff, 0x00}, /* green  */
-	{0x00, 0x00, 0xff}, /* blue   */
-	{0xff, 0xff, 0x00}, /* yellow */
-	{0xa5, 0x2a, 0x2a}, /* brown  */
-	{0xff, 0xa5, 0x00}, /* orange */
-	{0xbe, 0xbe, 0xbe}, /* gray1  */
-	{0x7f, 0x7f, 0x7f}, /* gray2  */
-	{0xa0, 0x20, 0xf0}, /* purple */
-	{0xff, 0xff, 0xff}, /* white */
+	{0x00, 0x00, 0x00}, /* black      */
+	{0xff, 0x00, 0x00}, /* red        */
+	{0x00, 0xff, 0x00}, /* green      */
+	{0x00, 0x00, 0xff}, /* blue       */
+	{0xff, 0xff, 0x00}, /* yellow     */
+	{0xa5, 0x2a, 0x2a}, /* brown      */
+	{0xff, 0xa5, 0x00}, /* orange     */
+	{0x7f, 0x7f, 0x7f}, /* gray dark  */
+	{0xbe, 0xbe, 0xbe}, /* gray light */
+	{0xa0, 0x20, 0xf0}, /* purple     */
+	{0xff, 0xff, 0xff}, /* white      */
 };
 
 static enum GP_RetCode conv_from_name(GP_Color *color, GP_ColorType type)
