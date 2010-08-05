@@ -58,11 +58,66 @@ GP_RetCode GP_ColorToPixel(GP_Color color, GP_PixelType pixel_type,
 	GP_RetCode ret;
 
 	switch (pixel_type) {
+		case GP_PIXEL_RGB888:
 		case GP_PIXEL_XRGB8888:
 			ret = GP_ColorConvert(&color, GP_RGB888);
 			pixel->v32 = color.rgb888.red   << 0x10 |
 			             color.rgb888.green << 0x08 | 
 				     color.rgb888.blue;
+			return ret;
+		break;
+		case GP_PIXEL_BGR888:
+		case GP_PIXEL_XBGR8888:
+			ret = GP_ColorConvert(&color, GP_RGB888);
+			pixel->v32 = color.rgb888.red           |
+			             color.rgb888.green << 0x08 | 
+				     color.rgb888.blue  << 0x10;
+			return ret;
+		break;
+		case GP_PIXEL_RGBX8888:
+			ret = GP_ColorConvert(&color, GP_RGB888);
+			pixel->v32 = color.rgb888.red   << 0x18 |
+			             color.rgb888.green << 0x10 | 
+				     color.rgb888.blue  << 0x8;
+			return ret;
+		break;
+		case GP_PIXEL_BGRX8888:
+			ret = GP_ColorConvert(&color, GP_RGB888);
+			pixel->v32 = color.rgb888.red   << 0x08 |
+			             color.rgb888.green << 0x10 | 
+				     color.rgb888.blue  << 0x18;
+			return ret;
+		break;
+		case GP_PIXEL_ARGB8888:
+			ret = GP_ColorConvert(&color, GP_RGBA8888);
+			pixel->v32 = color.rgba8888.red   << 0x10 |
+			             color.rgba8888.green << 0x08 |
+				     color.rgba8888.blue          |
+				     color.rgba8888.alpha << 0x18;
+			return ret;
+		break;
+		case GP_PIXEL_RGBA8888:
+			ret = GP_ColorConvert(&color, GP_RGBA8888);
+			pixel->v32 = color.rgba8888.red   << 0x18 |
+			             color.rgba8888.green << 0x10 |
+				     color.rgba8888.blue  << 0x08 |
+				     color.rgba8888.alpha;
+			return ret;
+		break;
+		case GP_PIXEL_ABGR8888:
+			ret = GP_ColorConvert(&color, GP_RGBA8888);
+			pixel->v32 = color.rgba8888.red           |
+			             color.rgba8888.green << 0x08 |
+				     color.rgba8888.blue  << 0x10 |
+				     color.rgba8888.alpha << 0x18;
+			return ret;
+		break;
+		case GP_PIXEL_BGRA8888:
+			ret = GP_ColorConvert(&color, GP_RGBA8888);
+			pixel->v32 = color.rgba8888.red   << 0x08 |
+			             color.rgba8888.green << 0x10 |
+				     color.rgba8888.blue  << 0x18 |
+				     color.rgba8888.alpha;
 			return ret;
 		break;
 		case GP_PIXEL_MAX:
