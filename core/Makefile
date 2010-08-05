@@ -26,6 +26,7 @@ OBJECTS=GP_color.o \
 HEADERS=GP.h \
 	GP_abort.h \
 	GP_check.h \
+	GP_pixel.h \
 	GP_color.h \
 	GP_palette.h \
 	GP_circle.h \
