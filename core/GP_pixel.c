@@ -52,7 +52,25 @@ GP_ColorType GP_PixelTypeToColorType(GP_PixelType type)
 	return pixel_to_color_mapping[type];
 }
 
-GP_RetCode GP_ColorToPixel(GP_Color *color, GP_Pixel *pixel)
+GP_RetCode GP_ColorToPixel(GP_Color color, GP_PixelType pixel_type,
+                           GP_Pixel *pixel)
 {
-	return GP_ENOIMPL;
+	GP_RetCode ret;
+
+	switch (pixel_type) {
+		case GP_PIXEL_XRGB8888:
+			ret = GP_ColorConvert(&color, GP_RGB888);
+			pixel->v32 = color.rgb888.red   << 0x10 |
+			             color.rgb888.green << 0x08 | 
+				     color.rgb888.blue;
+			return ret;
+		break;
+		case GP_PIXEL_MAX:
+		break;
+	}
+
+	if (pixel_type >= GP_PIXEL_MAX)
+		return GP_EINVAL;
+	else
+		return GP_ENOIMPL;
 }

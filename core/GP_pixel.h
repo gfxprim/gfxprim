@@ -43,7 +43,7 @@ typedef enum GP_PixelType {
 	GP_PIXEL_G2,
 	GP_PIXEL_G4,
 	GP_PIXEL_G8,
-	/* RGB 555*/
+	/* RGB 555 */
 	GP_PIXEL_RGB555,
 	GP_PIXEL_BGR555,
 	/* RGB */
@@ -70,6 +70,7 @@ GP_ColorType GP_PixelTypeToColorType(GP_PixelType type);
 /*
  * Fills pixel accodingly to color.
  */
-GP_RetCode GP_ColorToPixel(GP_Color *color, GP_Pixel *pixel);
+GP_RetCode GP_ColorToPixel(GP_Color color, GP_PixelType pixel_type,
+                           GP_Pixel *pixel);
 
 #endif /* GP_PIXEL_H */

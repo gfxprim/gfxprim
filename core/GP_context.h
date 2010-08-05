@@ -30,6 +30,7 @@
 #include <unistd.h>
 
 #include "GP_check.h"
+#include "GP_pixel.h"
 
 /* This structure holds all information needed for drawing into an image. */
 typedef struct {
@@ -38,7 +39,9 @@ typedef struct {
 	uint32_t bytes_per_row;
 	uint32_t rows;			/* total number of rows */
 	uint32_t columns;		/* total number of columns */
-	
+
+	GP_PixelType pixel_type;        /* hardware pixel format */
+
 	/* image orientation. Most common is landscape (0, 0, 0),
 	 * portrait with normal topleft corner is (1, 0, 0).
 	 */
