@@ -26,16 +26,11 @@
 #ifndef GP_PIXEL_H
 #define GP_PIXEL_H
 
+#include <stdbool.h>
 #include <stdint.h>
 
 #include "GP_RetCode.h"
 #include "GP_Color.h"
-
-typedef union GP_Pixel {
-	uint8_t  v8;
-	uint16_t v16;
-	uint32_t v32;
-} GP_Pixel;
 
 typedef enum GP_PixelType {
 	/* Palete */
@@ -65,6 +60,11 @@ typedef enum GP_PixelType {
 	GP_PIXEL_MAX,
 } GP_PixelType;
 
+typedef struct GP_Pixel {
+	enum GP_PixelType type;
+	uint32_t val;
+} GP_Pixel;
+
 /*
  * Convert pixel type to name.
  */
@@ -76,14 +76,23 @@ const char *GP_PixelTypeName(GP_PixelType type);
 uint32_t GP_PixelSize(GP_PixelType type);
 
 /*
- * Convert pixel type to color type.
+ * Returns true for exaclty same pixels.
+ */
+bool GP_PixelCmp(GP_Pixel *pixel1, GP_Pixel *pixel2);
+
+/*
+ * Returns GP_PixelType to GP_ColorType mapping.
  */
 GP_ColorType GP_PixelTypeToColorType(GP_PixelType type);
 
 /*
- * Fills pixel accodingly to color.
+ * Fills pixel accodingly to color, pixel.type MUST be prefilled.
  */
-GP_RetCode GP_ColorToPixel(GP_Color color, GP_PixelType pixel_type,
-                           GP_Pixel *pixel);
+GP_RetCode GP_ColorToPixel(GP_Color color, GP_Pixel *pixel);
+
+/*
+ * Converts GP_Pixel to GP_Color.
+ */
+GP_RetCode GP_PixelToColor(GP_Pixel pixel, GP_Color *color);
 
 #endif /* GP_PIXEL_H */

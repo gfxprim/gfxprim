@@ -51,45 +51,31 @@
 
 struct test_data  {
 	GP_Color     color;
-	GP_PixelType type;
 	GP_Pixel     pixel;
 };
 
 struct test_data test_data[] = {
 	/* RGB555 */
-	{GP_RGB555_PACK(RED, GREEN, BLUE), GP_PIXEL_RGB555, {.v16 = RGB555}},
-	{GP_RGB555_PACK(RED, GREEN, BLUE), GP_PIXEL_BGR555, {.v16 = BGR555}},
+	{GP_RGB555_PACK(RED, GREEN, BLUE), {GP_PIXEL_RGB555, RGB555}},
+	{GP_RGB555_PACK(RED, GREEN, BLUE), {GP_PIXEL_BGR555, BGR555}},
 	/* RGB888 */
-	{GP_RGB888_PACK(RED, GREEN, BLUE), GP_PIXEL_RGB888, {.v32 = XRGB}},
-	{GP_RGB888_PACK(RED, GREEN, BLUE), GP_PIXEL_BGR888, {.v32 = XBGR}},
-	{GP_RGB888_PACK(RED, GREEN, BLUE), GP_PIXEL_XBGR8888, {.v32 = XBGR}},
-	{GP_RGB888_PACK(RED, GREEN, BLUE), GP_PIXEL_XRGB8888, {.v32 = XRGB}},
-	{GP_RGB888_PACK(RED, GREEN, BLUE), GP_PIXEL_RGBX8888, {.v32 = RGBX}},
-	{GP_RGB888_PACK(RED, GREEN, BLUE), GP_PIXEL_BGRX8888, {.v32 = BGRX}},
+	{GP_RGB888_PACK(RED, GREEN, BLUE), {GP_PIXEL_RGB888, XRGB}},
+	{GP_RGB888_PACK(RED, GREEN, BLUE), {GP_PIXEL_BGR888, XBGR}},
+	{GP_RGB888_PACK(RED, GREEN, BLUE), {GP_PIXEL_XBGR8888, XBGR}},
+	{GP_RGB888_PACK(RED, GREEN, BLUE), {GP_PIXEL_XRGB8888, XRGB}},
+	{GP_RGB888_PACK(RED, GREEN, BLUE), {GP_PIXEL_RGBX8888, RGBX}},
+	{GP_RGB888_PACK(RED, GREEN, BLUE), {GP_PIXEL_BGRX8888, BGRX}},
 	/* RGBA8888 */
-	{GP_RGBA8888_PACK(RED, GREEN, BLUE, ALPHA), GP_PIXEL_RGBA8888, {.v32 = RGBA}},
-	{GP_RGBA8888_PACK(RED, GREEN, BLUE, ALPHA), GP_PIXEL_ARGB8888, {.v32 = ARGB}},
-	{GP_RGBA8888_PACK(RED, GREEN, BLUE, ALPHA), GP_PIXEL_BGRA8888, {.v32 = BGRA}},
-	{GP_RGBA8888_PACK(RED, GREEN, BLUE, ALPHA), GP_PIXEL_ABGR8888, {.v32 = ABGR}},
+	{GP_RGBA8888_PACK(RED, GREEN, BLUE, ALPHA), {GP_PIXEL_RGBA8888, RGBA}},
+	{GP_RGBA8888_PACK(RED, GREEN, BLUE, ALPHA), {GP_PIXEL_ARGB8888, ARGB}},
+	{GP_RGBA8888_PACK(RED, GREEN, BLUE, ALPHA), {GP_PIXEL_BGRA8888, BGRA}},
+	{GP_RGBA8888_PACK(RED, GREEN, BLUE, ALPHA), {GP_PIXEL_ABGR8888, ABGR}},
 	/* RGBA -> RGB conversion */
-	{GP_RGBA8888_PACK(RED, GREEN, BLUE, ALPHA), GP_PIXEL_RGBX8888, {.v32 = RGBX}},
-	{GP_RGBA8888_PACK(RED, GREEN, BLUE, ALPHA), GP_PIXEL_XRGB8888, {.v32 = XRGB}},
-	{GP_RGBA8888_PACK(RED, GREEN, BLUE, ALPHA), GP_PIXEL_BGRX8888, {.v32 = BGRX}},
-	{GP_RGBA8888_PACK(RED, GREEN, BLUE, ALPHA), GP_PIXEL_XBGR8888, {.v32 = XBGR}},
+	{GP_RGBA8888_PACK(RED, GREEN, BLUE, ALPHA), {GP_PIXEL_RGBX8888, RGBX}},
+	{GP_RGBA8888_PACK(RED, GREEN, BLUE, ALPHA), {GP_PIXEL_XRGB8888, XRGB}},
+	{GP_RGBA8888_PACK(RED, GREEN, BLUE, ALPHA), {GP_PIXEL_BGRX8888, BGRX}},
+	{GP_RGBA8888_PACK(RED, GREEN, BLUE, ALPHA), {GP_PIXEL_XBGR8888, XBGR}},
 };
-
-static int pixel_compare(GP_Pixel *a, GP_Pixel *b, GP_PixelType type)
-{
-	uint32_t size = GP_PixelSize(type);
-
-	if (size <= 8)
-		return a->v8 == b->v8;
-	
-	if (size <= 16)
-		return a->v16 == b->v16;
-
-	return a->v32 == b->v32;
-}
 
 static void do_test(struct test_data data)
 {
@@ -97,9 +83,10 @@ static void do_test(struct test_data data)
 	GP_RetCode ret;
 
 	printf("Testing %s -> %s ... ", GP_ColorTypeName(data.color.type),
-	                                GP_PixelTypeName(data.type));
+	                                GP_PixelTypeName(data.pixel.type));
 
-	ret = GP_ColorToPixel(data.color, data.type, &pixel);
+	pixel.type = data.pixel.type;
+	ret = GP_ColorToPixel(data.color, &pixel);
 
 	switch (ret) {
 		case GP_ESUCCESS:
@@ -114,11 +101,11 @@ static void do_test(struct test_data data)
 			return;
 	}
 
-	if (pixel_compare(&pixel, &data.pixel, data.type))
+	if (GP_PixelCmp(&pixel, &data.pixel))
 		printf(" SUCCEEDED\n");
 	else
 		printf(" FAILED expected = 0x%04x have = 0x%04x\n",
-		       data.pixel.v32, pixel.v32);
+		       data.pixel.val, pixel.val);
 }
 
 int main(void)
