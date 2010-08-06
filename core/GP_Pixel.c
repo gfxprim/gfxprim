@@ -23,6 +23,7 @@
  *                                                                           *
  *****************************************************************************/
 
+#include "GP_Color.h"
 #include "GP_Pixel.h"
 
 static char *pixel_type_names[] = {
@@ -148,14 +149,31 @@ GP_RetCode GP_ColorToPixel(GP_Color color, GP_Pixel *pixel)
 			pixel->val = color.pal8.index;
 			return ret;
 		break;
-		case GP_PIXEL_RGB888:
-			ret = GP_ColorConvert(&color, GP_RGB888);
+		case GP_PIXEL_G1:
+			ret = GP_ColorConvert(&color, GP_G1);
 			CHECK_RET(ret);
-			pixel->val = color.rgb888.red   << 0x10 |
-			             color.rgb888.green << 0x08 | 
-				     color.rgb888.blue;
+			pixel->val = color.g1.gray;
 			return ret;
 		break;
+		case GP_PIXEL_G2:
+			ret = GP_ColorConvert(&color, GP_G2);
+			CHECK_RET(ret);
+			pixel->val = color.g2.gray;
+			return ret;
+		break;
+		case GP_PIXEL_G4:
+			ret = GP_ColorConvert(&color, GP_G4);
+			CHECK_RET(ret);
+			pixel->val = color.g4.gray;
+			return ret;
+		break;
+		case GP_PIXEL_G8:
+			ret = GP_ColorConvert(&color, GP_G8);
+			CHECK_RET(ret);
+			pixel->val = color.g8.gray;
+			return ret;
+		break;
+		case GP_PIXEL_RGB888:
 		case GP_PIXEL_XRGB8888:
 			ret = GP_ColorConvert(&color, GP_RGB888);
 			CHECK_RET(ret);
@@ -165,13 +183,6 @@ GP_RetCode GP_ColorToPixel(GP_Color color, GP_Pixel *pixel)
 			return ret;
 		break;
 		case GP_PIXEL_BGR888:
-			ret = GP_ColorConvert(&color, GP_RGB888);
-			CHECK_RET(ret);
-			pixel->val = color.rgb888.red           |
-			             color.rgb888.green << 0x08 | 
-				     color.rgb888.blue  << 0x10;
-			return ret;
-		break;
 		case GP_PIXEL_XBGR8888:
 			ret = GP_ColorConvert(&color, GP_RGB888);
 			CHECK_RET(ret);
@@ -220,7 +231,7 @@ GP_RetCode GP_ColorToPixel(GP_Color color, GP_Pixel *pixel)
 			pixel->val = color.rgba8888.red           |
 			             color.rgba8888.green << 0x08 |
 			             color.rgba8888.blue  << 0x10 |
-				         color.rgba8888.alpha << 0x18;
+				     color.rgba8888.alpha << 0x18;
 			return ret;
 		break;
 		case GP_PIXEL_BGRA8888:
@@ -245,7 +256,45 @@ GP_RetCode GP_ColorToPixel(GP_Color color, GP_Pixel *pixel)
 GP_RetCode GP_PixelToColor(GP_Pixel pixel, GP_Color *color)
 {
 	switch (pixel.type) {
-		//TODO:	
+		case GP_PIXEL_PAL4:
+			GP_PAL4_FILL(color, pixel.val);
+			return GP_ESUCCESS;
+		break;
+		case GP_PIXEL_PAL8:
+			GP_PAL8_FILL(color, pixel.val);
+			return GP_ESUCCESS;
+		break;
+		case GP_PIXEL_G1:
+			GP_G1_FILL(color, pixel.val);
+			return GP_ESUCCESS;
+		break;
+		case GP_PIXEL_G2:
+			GP_G2_FILL(color, pixel.val);
+			return GP_ESUCCESS;
+		break;
+		case GP_PIXEL_G4:
+			GP_G4_FILL(color, pixel.val);
+			return GP_ESUCCESS;
+		break;
+		case GP_PIXEL_G8:
+			GP_G8_FILL(color, pixel.val);
+			return GP_ESUCCESS;
+		break;
+		case GP_PIXEL_RGB888:
+		case GP_PIXEL_XRGB8888:
+			GP_RGB888_FILL(color, (pixel.val >> 0x10) & 0xff,
+			                      (pixel.val >> 0x08) & 0xff,
+			                      (pixel.val & 0xff));
+			return GP_ESUCCESS;
+		break;
+		case GP_PIXEL_BGR888:
+		case GP_PIXEL_XBGR8888:
+			GP_RGB888_FILL(color, (pixel.val & 0xff),
+			                      (pixel.val >> 0x08) & 0xff,
+			                      (pixel.val >> 0x10) & 0xff);
+			
+			return GP_ESUCCESS;
+		break;
 		case GP_PIXEL_MAX:
 		break;
 	}
