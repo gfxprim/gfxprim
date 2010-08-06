@@ -23,14 +23,12 @@
  *                                                                           *
  *****************************************************************************/
 
-#ifndef GP_TEXT_METRIC_H
-#define GP_TEXT_METRIC_H
+#ifndef GP_FILLTRIANGLE_H
+#define GP_FILLTRIANGLE_H
 
-#include "GP_textstyle.h"
+#include "GP_Context.h"
 
-/*
- * Calculates the width of the string drawn in the given style, in pixels.
- */
-int GP_TextWidth(const struct GP_TextStyle *style, const char *str);
+void GP_FillTriangle(GP_Context *context,
+	int x0, int y0, int x1, int y1, int x2, int y2, uint32_t color);
 
-#endif /* GP_TEXT_METRIC_H */
+#endif /* GP_FILLTRIANGLE_H */

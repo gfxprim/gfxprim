@@ -28,8 +28,8 @@
 
 #include <stdint.h>
 
-#include "GP_retcode.h"
-#include "GP_color.h"
+#include "GP_RetCode.h"
+#include "GP_Color.h"
 
 typedef union GP_Pixel {
 	uint8_t  v8;

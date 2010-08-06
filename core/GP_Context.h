@@ -23,42 +23,55 @@
  *                                                                           *
  *****************************************************************************/
 
-#include "GP_readpixel.h"
+#ifndef GP_CONTEXT_H
+#define GP_CONTEXT_H
 
-#include <endian.h>
 #include <stdint.h>
 #include <unistd.h>
 
-inline uint32_t GP_ReadPixel8bpp(void *ptr)
-{
-	return (uint32_t) *((uint8_t *) ptr);
-}
+#include "GP_Check.h"
+#include "GP_Pixel.h"
 
-inline uint32_t GP_ReadPixel16bpp(void *ptr)
-{
-	return (uint32_t) *((uint16_t *) ptr);
-}
+/* This structure holds all information needed for drawing into an image. */
+typedef struct {
+	void *pixels;			/* pointer to image pixels */
+	uint8_t bits_per_pixel;		/* values: 8, 16, 24, 32 */
+	uint32_t bytes_per_row;
+	uint32_t rows;			/* total number of rows */
+	uint32_t columns;		/* total number of columns */
 
-inline uint32_t GP_ReadPixel24bpp(void *ptr)
-{
-#if __BYTE_ORDER == __BIG_ENDIAN
+	GP_PixelType pixel_type;        /* hardware pixel format */
 
-	return ((uint32_t) ((uint8_t *) ptr)[0]) << 16
-		| ((uint32_t) ((uint8_t *) ptr)[1]) << 8
-		| ((uint32_t) ((uint8_t *) ptr)[2]);
+	/* image orientation. Most common is landscape (0, 0, 0),
+	 * portrait with normal topleft corner is (1, 0, 0).
+	 */
+	int vertical_rows:1;		/* are rows in fact vertical? */
+	int right_to_left:1;		/* is zero at the right? */
+	int bottom_to_top:1;		/* is zero at the bottom? */
 
-#elif __BYTE_ORDER == __LITTLE_ENDIAN
+	/* clipping rectangle; drawing functions only affect the inside */
+	uint32_t clip_row_min;
+	uint32_t clip_row_max;
+	uint32_t clip_column_min;
+	uint32_t clip_column_max;
+} GP_Context;
 
-	return ((uint32_t) ((uint8_t *) ptr)[0])
-		| ((uint32_t) ((uint8_t *) ptr)[1]) << 8
-		| ((uint32_t) ((uint8_t *) ptr)[2]) << 16;
+/* Determines the address of a pixel within the context's image.
+ * Rows and columns are specified in the image's orientation
+ * (i.e. they might not be XY if the image is rotated).
+ */
+#define GP_PIXEL_ADDRESS(context, row, column) ((uint8_t *) context->pixels \
+	+ row * context->bytes_per_row \
+	+ column * (context->bits_per_pixel / 8))
 
-#else
-#error "Could not detect machine endianity"
-#endif
-}
+/* Performs a series of sanity checks on context, aborting if any fails. */
+#define GP_CHECK_CONTEXT(context) do { \
+		GP_CHECK(context != NULL); \
+		GP_CHECK(context->rows > 0 && context->columns > 0); \
+		GP_CHECK(context->clip_row_min <= context->clip_row_max); \
+		GP_CHECK(context->clip_column_min <= context->clip_column_max); \
+		GP_CHECK(context->clip_row_max < context->rows); \
+		GP_CHECK(context->clip_column_max < context->columns); \
+	} while(0)
 
-inline uint32_t GP_ReadPixel32bpp(void *ptr)
-{
-	return *((uint32_t *) ptr);
-}
+#endif /* GP_CONTEXT_H */

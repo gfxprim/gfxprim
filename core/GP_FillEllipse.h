@@ -23,20 +23,14 @@
  *                                                                           *
  *****************************************************************************/
 
-#ifndef GP_LINE_H
-#define GP_LINE_H
+#ifndef GP_FILLELLIPSE_H
+#define GP_FILLELLIPSE_H
 
-#include "GP_context.h"
+#include "GP_Context.h"
 
 #include <stdint.h>
 
-void GP_Line(GP_Context *context, int x0, int y0, int x1, int y1,
-	uint32_t color);
+void GP_FillEllipse(GP_Context *context, int xcenter, int ycenter,
+	int a, int b, uint32_t color);
 
-size_t GP_CalcLinePoints(int x0, int y0, int x1, int y1, int *points,
-	size_t maxlen);
-
-size_t GP_CalcLineX(int x0, int y0, int x1, int y1, int *values,
-	size_t maxlen);
-
-#endif /* GP_LINE_H */
+#endif /* GP_FILLELLIPSE_H */

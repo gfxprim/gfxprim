@@ -23,14 +23,12 @@
  *                                                                           *
  *****************************************************************************/
 
-#ifndef GP_FILLCOLUMN_H
-#define GP_FILLCOLUMN_H
+#ifndef GP_RECT_H
+#define GP_RECT_H
 
-#include "GP_context.h"
+#include "GP_Context.h"
 
-#include <stdio.h>
+void GP_Rect(GP_Context *context, int x0, int y0, int x1, int y1,
+	uint32_t color);
 
-void GP_FillColumn(GP_Context *context,
-		int column, int first_row, int last_row, uint32_t value);
-
-#endif /* GP_FILLCOLUMN_H */
+#endif /* GP_RECT_H */

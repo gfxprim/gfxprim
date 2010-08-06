@@ -23,20 +23,30 @@
  *                                                                           *
  *****************************************************************************/
 
-#include "GP_retcode.h"
+#include "GP_TextStyle.h"
 
-static char *ret_code_names[] = {
-	"SUCCESS",
-	"INVALID VALUE",
-	"NOT IMPLEMENTED",
-	"NOT PRECISE",
-};
-
-
-const char *GP_RetCodeName(GP_RetCode code)
+static int GP_CharWidth(const struct GP_TextStyle *style, char c)
 {
-	if (code >= GP_EMAX)
-		return "Invalid return code";
+	int bytes_per_char = 2 + style->font->bytes_per_line * style->font->height;
 
-	return ret_code_names[code]; 
+	const uint8_t * char_data = style->font->data + ((int) c - 0x20) * bytes_per_char;
+
+	/* The first byte specifies width in pixels. */
+	const uint8_t char_width = *char_data;
+
+	return char_width * (style->pixel_xmul + style->pixel_xspace);
 }
+
+int GP_TextWidth(const struct GP_TextStyle *style, const char *str)
+{
+	int width = 0;
+
+	const char *p;
+	for (p = str; *p; p++) {
+		width += style->font->hspace * style->pixel_xmul;
+		width += GP_CharWidth(style, *p);
+	}
+
+	return width;
+}
+

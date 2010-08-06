@@ -23,7 +23,7 @@
  *                                                                           *
  *****************************************************************************/
 
-#include "GP_pixel.h"
+#include "GP_Pixel.h"
 
 static char *pixel_type_names[] = {
 	"Grayscale 1bit",

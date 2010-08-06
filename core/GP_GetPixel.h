@@ -23,12 +23,13 @@
  *                                                                           *
  *****************************************************************************/
 
-#ifndef GP_RECT_H
-#define GP_RECT_H
+#ifndef GP_GETPIXEL_H
+#define GP_GETPIXEL_H
 
-#include "GP_context.h"
+#include "GP_Context.h"
 
-void GP_Rect(GP_Context *context, int x0, int y0, int x1, int y1,
-	uint32_t color);
+#include <stdint.h>
 
-#endif /* GP_RECT_H */
+uint32_t GP_GetPixel(GP_Context *context, int x, int y);
+
+#endif /* GP_GETPIXEL_H */

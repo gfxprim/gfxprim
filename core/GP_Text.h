@@ -23,15 +23,12 @@
  *                                                                           *
  *****************************************************************************/
 
-#ifndef GP_FILLROW_H
-#define GP_FILLROW_H
+#ifndef GP_TEXT_H
+#define GP_TEXT_H
 
-#include "GP_context.h"
+#include "GP_Context.h"
 
-#include <stdint.h>
-#include <unistd.h>
+void GP_Text(GP_Context *context, const struct GP_TextStyle *style,
+	int x, int y, const char *str, uint32_t color);
 
-void GP_FillRow(GP_Context *context,
-		int row, int first_column, int last_column, uint32_t value);
-
-#endif /* GP_FILLROW_H */
+#endif /* GP_TEXT_H */

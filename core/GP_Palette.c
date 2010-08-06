@@ -23,14 +23,61 @@
  *                                                                           *
  *****************************************************************************/
 
-#ifndef GP_CIRCLE_H
-#define GP_CIRCLE_H
+#include <stdio.h>
 
-#include "GP_context.h"
+#include "GP_Color.h"
+#include "GP_Palette.h"
 
-#include <stdint.h>
+enum GP_RetCode GP_PaletteColorToColor(GP_Color *color)
+{
+        struct GP_ColPal *pal;
+	GP_Palette *palette;
+	uint16_t index;
 
-void GP_Circle(GP_Context *context, int xcenter, int ycenter, int r,
-	uint32_t color);
+	if (color->type != GP_PALETTE)
+		return GP_EINVAL;
+	
+	pal     = &color->pal;
+	palette = pal->palette;
+	index   = pal->index;
 
-#endif /* GP_CIRCLE_H */
+        switch (pal->palette->type) {
+                case GP_RGB888:
+                        if (index >= palette->rgb888.size)
+                                return GP_EINVAL;
+			
+			GP_RGB888_FILL(color, palette->rgb888.colors[index].red,
+			                      palette->rgb888.colors[index].green,
+			                      palette->rgb888.colors[index].blue);
+                        return GP_ESUCCESS;
+                break;
+                default:
+                        return GP_ENOIMPL;
+        }
+}
+
+static void print_rgb888(struct GP_PalRGB888 *palette)
+{
+	uint16_t i;
+
+	printf("palette format rgb888 (size = %u)\n", palette->size);
+	printf(" NR    R    G    B\n");
+
+	for (i = 0; i < palette->size; i++) {
+		printf("%04u: 0x%.2x 0x%.2x 0x%.2x\n", i,
+		                                      palette->colors[i].red,
+		                                      palette->colors[i].green,
+		                                      palette->colors[i].blue);
+	}
+}
+
+void GP_PalettePrint(GP_Palette *palette)
+{
+	switch (palette->type) {
+		case GP_RGB888:
+			print_rgb888(&palette->rgb888);
+		break;
+		default:
+			break;
+	}
+}

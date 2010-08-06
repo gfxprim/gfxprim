@@ -23,14 +23,22 @@
  *                                                                           *
  *****************************************************************************/
 
-#ifndef GP_ELLIPSE_H
-#define GP_ELLIPSE_H
+#ifndef GP_CHECK_H
+#define GP_CHECK_H
 
-#include "GP_context.h"
+#include "GP_Abort.h"
 
+#include <stdio.h>
 #include <stdint.h>
+#include <stdlib.h>
+#include <unistd.h>
 
-void GP_Ellipse(GP_Context *context, int xcenter, int ycenter, int a, int b,
-	uint32_t color);
+#define GP_CHECK(cond) do { \
+		if (!(cond)) { \
+			fprintf(stderr, "GP: check failed in %s: %s\n", \
+				__FUNCTION__, #cond); \
+			abort(); \
+		} \
+	} while(0);
 
-#endif /* GP_ELLIPSE_H */
+#endif /* GP_CHECK_H */

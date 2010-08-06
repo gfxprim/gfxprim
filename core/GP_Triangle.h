@@ -23,14 +23,12 @@
  *                                                                           *
  *****************************************************************************/
 
-#ifndef GP_FILLCIRCLE_H
-#define GP_FILLCIRCLE_H
+#ifndef GP_TRIANGLE_H
+#define GP_TRIANGLE_H
 
-#include "GP_context.h"
+#include "GP_Context.h"
 
-#include <stdint.h>
+void GP_Triangle(GP_Context *context, int x0, int y0, int x1, int y1,
+	int x2, int y2, uint32_t color);
 
-void GP_FillCircle(GP_Context *context, int xcenter, int ycenter, int r,
-	uint32_t color);
-
-#endif /* GP_FILLCIRCLE_H */
+#endif /* GP_TRIANGLE_H */

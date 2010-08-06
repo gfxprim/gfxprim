@@ -26,7 +26,7 @@
 #ifndef GP_PUTPIXEL_H
 #define GP_PUTPIXEL_H
 
-#include "GP_context.h"
+#include "GP_Context.h"
 
 #include <stdint.h>
 

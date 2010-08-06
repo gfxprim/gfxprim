@@ -26,7 +26,7 @@
 #ifndef GP_TEXTSTYLE_H
 #define GP_TEXTSTYLE_H
 
-#include "GP_font.h"
+#include "GP_Font.h"
 
 #include <stdint.h>
 

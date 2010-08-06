@@ -26,7 +26,7 @@
 #ifndef GP_HLINE_H
 #define GP_HLINE_H
 
-#include "GP_context.h"
+#include "GP_Context.h"
 
 #include <stdint.h>
 

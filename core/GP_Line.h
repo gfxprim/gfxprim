@@ -23,30 +23,20 @@
  *                                                                           *
  *****************************************************************************/
 
-#include "GP_textstyle.h"
+#ifndef GP_LINE_H
+#define GP_LINE_H
 
-static int GP_CharWidth(const struct GP_TextStyle *style, char c)
-{
-	int bytes_per_char = 2 + style->font->bytes_per_line * style->font->height;
+#include "GP_Context.h"
 
-	const uint8_t * char_data = style->font->data + ((int) c - 0x20) * bytes_per_char;
+#include <stdint.h>
 
-	/* The first byte specifies width in pixels. */
-	const uint8_t char_width = *char_data;
+void GP_Line(GP_Context *context, int x0, int y0, int x1, int y1,
+	uint32_t color);
 
-	return char_width * (style->pixel_xmul + style->pixel_xspace);
-}
+size_t GP_CalcLinePoints(int x0, int y0, int x1, int y1, int *points,
+	size_t maxlen);
 
-int GP_TextWidth(const struct GP_TextStyle *style, const char *str)
-{
-	int width = 0;
+size_t GP_CalcLineX(int x0, int y0, int x1, int y1, int *values,
+	size_t maxlen);
 
-	const char *p;
-	for (p = str; *p; p++) {
-		width += style->font->hspace * style->pixel_xmul;
-		width += GP_CharWidth(style, *p);
-	}
-
-	return width;
-}
-
+#endif /* GP_LINE_H */

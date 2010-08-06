@@ -23,22 +23,14 @@
  *                                                                           *
  *****************************************************************************/
 
-#ifndef GP_CHECK_H
-#define GP_CHECK_H
+#ifndef GP_FILLCIRCLE_H
+#define GP_FILLCIRCLE_H
 
-#include "GP_abort.h"
+#include "GP_Context.h"
 
-#include <stdio.h>
 #include <stdint.h>
-#include <stdlib.h>
-#include <unistd.h>
 
-#define GP_CHECK(cond) do { \
-		if (!(cond)) { \
-			fprintf(stderr, "GP: check failed in %s: %s\n", \
-				__FUNCTION__, #cond); \
-			abort(); \
-		} \
-	} while(0);
+void GP_FillCircle(GP_Context *context, int xcenter, int ycenter, int r,
+	uint32_t color);
 
-#endif /* GP_CHECK_H */
+#endif /* GP_FILLCIRCLE_H */

@@ -23,12 +23,42 @@
  *                                                                           *
  *****************************************************************************/
 
-#ifndef GP_FILLRECT_H
-#define GP_FILLRECT_H
+#include "GP_ReadPixel.h"
 
-#include "GP_context.h"
+#include <endian.h>
+#include <stdint.h>
+#include <unistd.h>
 
-void GP_FillRect(GP_Context *context, int x0, int y0, int x1, int y1,
-	uint32_t color);
+inline uint32_t GP_ReadPixel8bpp(void *ptr)
+{
+	return (uint32_t) *((uint8_t *) ptr);
+}
 
-#endif /* GP_FILLRECT_H */
+inline uint32_t GP_ReadPixel16bpp(void *ptr)
+{
+	return (uint32_t) *((uint16_t *) ptr);
+}
+
+inline uint32_t GP_ReadPixel24bpp(void *ptr)
+{
+#if __BYTE_ORDER == __BIG_ENDIAN
+
+	return ((uint32_t) ((uint8_t *) ptr)[0]) << 16
+		| ((uint32_t) ((uint8_t *) ptr)[1]) << 8
+		| ((uint32_t) ((uint8_t *) ptr)[2]);
+
+#elif __BYTE_ORDER == __LITTLE_ENDIAN
+
+	return ((uint32_t) ((uint8_t *) ptr)[0])
+		| ((uint32_t) ((uint8_t *) ptr)[1]) << 8
+		| ((uint32_t) ((uint8_t *) ptr)[2]) << 16;
+
+#else
+#error "Could not detect machine endianity"
+#endif
+}
+
+inline uint32_t GP_ReadPixel32bpp(void *ptr)
+{
+	return *((uint32_t *) ptr);
+}

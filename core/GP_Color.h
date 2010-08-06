@@ -28,7 +28,7 @@
 
 #include <stdint.h>
 
-#include "GP_retcode.h"
+#include "GP_RetCode.h"
 
 #define GP_COLNAME_PACK(n) {.name = {GP_COLNAME, n}}
 #define GP_PALINDEX_PACK(palette, index) {.pal = {GP_PALETTE, index, palette}}

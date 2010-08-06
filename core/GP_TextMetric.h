@@ -23,13 +23,14 @@
  *                                                                           *
  *****************************************************************************/
 
-#ifndef GP_GETPIXEL_H
-#define GP_GETPIXEL_H
+#ifndef GP_TEXT_METRIC_H
+#define GP_TEXT_METRIC_H
 
-#include "GP_context.h"
+#include "GP_TextStyle.h"
 
-#include <stdint.h>
+/*
+ * Calculates the width of the string drawn in the given style, in pixels.
+ */
+int GP_TextWidth(const struct GP_TextStyle *style, const char *str);
 
-uint32_t GP_GetPixel(GP_Context *context, int x, int y);
-
-#endif /* GP_GETPIXEL_H */
+#endif /* GP_TEXT_METRIC_H */

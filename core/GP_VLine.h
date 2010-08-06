@@ -23,14 +23,13 @@
  *                                                                           *
  *****************************************************************************/
 
-#ifndef GP_FILLELLIPSE_H
-#define GP_FILLELLIPSE_H
+#ifndef GP_VLINE_H
+#define GP_VLINE_H
 
-#include "GP_context.h"
+#include "GP_Context.h"
 
 #include <stdint.h>
 
-void GP_FillEllipse(GP_Context *context, int xcenter, int ycenter,
-	int a, int b, uint32_t color);
+void GP_VLine(GP_Context *context, int x, int y0, int y1, uint32_t value);
 
-#endif /* GP_FILLELLIPSE_H */
+#endif /* GP_VLINE_H */

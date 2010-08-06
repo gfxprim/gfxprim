@@ -25,8 +25,8 @@
 
 #include <stdio.h>
 
-#include "GP_palette.h"
-#include "GP_color.h"
+#include "GP_Palette.h"
+#include "GP_Color.h"
 
 static char *color_names[] = {
 	"black     ",

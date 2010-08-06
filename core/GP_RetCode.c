@@ -23,12 +23,20 @@
  *                                                                           *
  *****************************************************************************/
 
-#ifndef GP_TRIANGLE_H
-#define GP_TRIANGLE_H
+#include "GP_RetCode.h"
 
-#include "GP_context.h"
+static char *ret_code_names[] = {
+	"SUCCESS",
+	"INVALID VALUE",
+	"NOT IMPLEMENTED",
+	"NOT PRECISE",
+};
 
-void GP_Triangle(GP_Context *context, int x0, int y0, int x1, int y1,
-	int x2, int y2, uint32_t color);
 
-#endif /* GP_TRIANGLE_H */
+const char *GP_RetCodeName(GP_RetCode code)
+{
+	if (code >= GP_EMAX)
+		return "Invalid return code";
+
+	return ret_code_names[code]; 
+}

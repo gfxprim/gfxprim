@@ -29,41 +29,41 @@
 #include <stdint.h>
 
 /* basic definitions and structures */
-#include "GP_abort.h"
-#include "GP_check.h"
-#include "GP_minmax.h"
-#include "GP_swap.h"
-#include "GP_context.h"
+#include "GP_Abort.h"
+#include "GP_Check.h"
+#include "GP_MinMax.h"
+#include "GP_Swap.h"
+#include "GP_Context.h"
 
 /* semi-public, low-level drawing API */
-#include "GP_readpixel.h"
-#include "GP_writepixel.h"
-#include "GP_fillcolumn.h"
-#include "GP_fillrow.h"
+#include "GP_ReadPixel.h"
+#include "GP_WritePixel.h"
+#include "GP_FillColumn.h"
+#include "GP_FillRow.h"
 
 /* colors */
-#include "GP_color.h"
-#include "GP_palette.h"
+#include "GP_Color.h"
+#include "GP_Palette.h"
 
 /* public drawing API */
-#include "GP_getpixel.h"
-#include "GP_putpixel.h"
-#include "GP_hline.h"
-#include "GP_vline.h"
-#include "GP_line.h"
-#include "GP_rect.h"
-#include "GP_fillrect.h"
-#include "GP_triangle.h"
-#include "GP_filltriangle.h"
-#include "GP_circle.h"
-#include "GP_fillcircle.h"
-#include "GP_ellipse.h"
-#include "GP_fillellipse.h"
+#include "GP_GetPixel.h"
+#include "GP_PutPixel.h"
+#include "GP_HLine.h"
+#include "GP_VLine.h"
+#include "GP_Line.h"
+#include "GP_Rect.h"
+#include "GP_FillRect.h"
+#include "GP_Triangle.h"
+#include "GP_FillTriangle.h"
+#include "GP_Circle.h"
+#include "GP_FillCircle.h"
+#include "GP_Ellipse.h"
+#include "GP_FillEllipse.h"
 
 /* fonts */
-#include "GP_font.h"
-#include "GP_textstyle.h"
-#include "GP_textmetric.h"
-#include "GP_text.h"
+#include "GP_Font.h"
+#include "GP_TextStyle.h"
+#include "GP_TextMetric.h"
+#include "GP_Text.h"
 
 #endif /* GP_H */
