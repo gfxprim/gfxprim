@@ -32,6 +32,8 @@
 
 #define GP_COLNAME_PACK(n) {.name = {GP_COLNAME, n}}
 #define GP_PALINDEX_PACK(palette, index) {.pal = {GP_PALETTE, index, palette}}
+#define GP_PAL4_PACK(index) {.pal4 = {GP_PAL4, index}}
+#define GP_PAL8_PACK(index) {.pal8 = {GP_PAL8, index}}
 #define GP_G1_PACK(g) {.g1 = {GP_G1, g}}
 #define GP_G2_PACK(g) {.g2 = {GP_G2, g}}
 #define GP_G4_PACK(g) {.g4 = {GP_G4, g}}
@@ -45,10 +47,20 @@
 	(col)->name.name = n;          \
 } while (0)
 
-#define GP_PALINDEX_FILL(col, p, i) do {  \
+#define GP_PALINDEX_FILL(col, p, i) do { \
 	(col)->pal.type    = GP_PALETTE; \
 	(col)->pal.index   = i;          \
 	(col)->pal.palette = p;          \
+} while (0)
+
+#define GP_PAL4_FILL(col, i) do {      \
+	(col)->pal4.type    = GP_PAL4; \
+	(col)->pal4.index   = i;       \
+} while (0)
+
+#define GP_PAL8_FILL(col, i) do {      \
+	(col)->pal8.type    = GP_PAL4; \
+	(col)->pal8.index   = i;       \
 } while (0)
 
 #define GP_G1_FILL(col, g) do { \
@@ -111,6 +123,8 @@ typedef enum GP_ColorName {
 typedef enum GP_ColorType {
 	GP_COLNAME,
 	GP_PALETTE,
+	GP_PAL4,
+	GP_PAL8,
 	GP_G1,
 	GP_G2,
 	GP_G4,
@@ -130,6 +144,16 @@ struct GP_ColPal {
 	enum GP_ColorType type;
 	uint16_t index;
 	union GP_Palette *palette;
+};
+
+struct GP_ColPal4 {
+	enum GP_ColorType type;
+	uint8_t index:4;
+};
+
+struct GP_ColPal8 {
+	enum GP_ColorType type;
+	uint8_t index;
 };
 
 struct GP_ColRGB888 {
@@ -178,6 +202,8 @@ typedef union GP_Color {
 	enum GP_ColorType     type;
 	struct GP_ColName     name;
 	struct GP_ColPal      pal;
+	struct GP_ColPal4     pal4;
+	struct GP_ColPal8     pal8;
 	struct GP_ColG1       g1;
 	struct GP_ColG2       g2;
 	struct GP_ColG4       g4;

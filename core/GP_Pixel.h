@@ -38,6 +38,9 @@ typedef union GP_Pixel {
 } GP_Pixel;
 
 typedef enum GP_PixelType {
+	/* Palete */
+	GP_PIXEL_PAL4,
+	GP_PIXEL_PAL8,
 	/* Grayscale */
 	GP_PIXEL_G1,
 	GP_PIXEL_G2,

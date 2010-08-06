@@ -58,7 +58,9 @@ static uint8_t rgb888_colors[][3] = {
 
 static const char *color_type_names[] = {
 	"ColorName",
-	"Palette",
+	"Index to In Memory Palette",
+	"HW Palete 4bit",
+	"HW Palete 8bit",
 	"Grayscale 1bit",
 	"Grayscale 2bit",
 	"Grayscale 4bit",
@@ -76,6 +78,10 @@ static enum GP_RetCode conv_from_name(GP_Color *color, GP_ColorType type)
 		return GP_EINVAL;
 
 	switch (type) {
+		case GP_PAL4:
+		case GP_PAL8:
+			return GP_EINVAL;
+		break;
 		case GP_G1:
 		break;
 		case GP_G2:
@@ -135,6 +141,10 @@ static enum GP_RetCode conv_from_g1(GP_Color *color, GP_ColorType type)
 	struct GP_ColG1 *col = &color->g1;
 
 	switch (type) {
+		case GP_PAL4:
+		case GP_PAL8:
+			return GP_EINVAL;
+		break;
 		case GP_G1:
 			return GP_ESUCCESS;
 		break;
@@ -185,6 +195,10 @@ static enum GP_RetCode conv_from_g2(GP_Color *color, GP_ColorType type)
 	struct GP_ColG2 *col = &color->g2;
 
 	switch (type) {
+		case GP_PAL4:
+		case GP_PAL8:
+			return GP_EINVAL;
+		break;
 		case GP_G1:
 			GP_G1_FILL(color, col->gray>>2);
 			return GP_EUNPRECISE;
@@ -235,6 +249,10 @@ static enum GP_RetCode conv_from_g4(GP_Color *color, GP_ColorType type)
 	struct GP_ColG4 *col = &color->g4;
 
 	switch (type) {
+		case GP_PAL4:
+		case GP_PAL8:
+			return GP_EINVAL;
+		break;
 		case GP_G1:
 			GP_G1_FILL(color, col->gray>>3);
 			return GP_EUNPRECISE;
@@ -285,6 +303,10 @@ static enum GP_RetCode conv_from_g8(GP_Color *color, GP_ColorType type)
 	struct GP_ColG8 *col = &color->g8;
 
 	switch (type) {
+		case GP_PAL4:
+		case GP_PAL8:
+			return GP_EINVAL;
+		break;
 		case GP_G1:
 			GP_G1_FILL(color, col->gray / 8);
 			return GP_EUNPRECISE;
@@ -336,6 +358,10 @@ static enum GP_RetCode conv_from_rgb555(GP_Color *color, GP_ColorType type)
 	uint8_t val;
 
 	switch (type) {
+		case GP_PAL4:
+		case GP_PAL8:
+			return GP_EINVAL;
+		break;
 		case GP_G1:
 			val = ((col->red + col->green + col->blue) / 3)>>4;
 			GP_G1_FILL(color, val);
@@ -390,6 +416,10 @@ static enum GP_RetCode conv_from_rgb888(GP_Color *color, GP_ColorType type)
 	uint8_t val;
 
 	switch (type) {
+		case GP_PAL4:
+		case GP_PAL8:
+			return GP_EINVAL;
+		break;
 		case GP_G1:
 			val = ((col->red + col->green + col->blue)/3)>>7;
 			GP_G1_FILL(color, val);
@@ -443,6 +473,10 @@ static enum GP_RetCode conv_from_rgba8888(GP_Color *color, GP_ColorType type)
 	uint8_t val;
 
 	switch (type) {
+		case GP_PAL4:
+		case GP_PAL8:
+			return GP_EINVAL;
+		break;
 		case GP_G1:
 			val = ((col->red + col->green + col->blue)/3)>>7;
 			GP_G1_FILL(color, val);
@@ -493,6 +527,10 @@ static enum GP_RetCode conv_from_rgba8888(GP_Color *color, GP_ColorType type)
 static enum GP_RetCode color_convert(GP_Color *color, GP_ColorType type)
 {
 	switch (color->type) {
+		case GP_PAL4:
+		case GP_PAL8:
+			return GP_EINVAL;
+		break;
 		case GP_COLNAME:
 			return conv_from_name(color, type);
 		break;
@@ -566,6 +604,16 @@ static void print_palette(struct GP_ColPal *color)
 	GP_PalettePrint(color->palette);
 }
 
+static void print_pal4(struct GP_ColPal4 *color)
+{
+	printf("HW Palette index 0x%01u", color->index);
+}
+
+static void print_pal8(struct GP_ColPal8 *color)
+{
+	printf("HW Palette index 0x%02u", color->index);
+}
+
 static void print_g1(struct GP_ColG1 *color)
 {
 	printf(" TYPE   G\n");
@@ -625,6 +673,13 @@ void GP_ColorPrint(GP_Color *color)
 		case GP_PALETTE:
 			print_palette(&color->pal);
 			return;
+		break;
+		case GP_PAL4:
+			print_pal4(&color->pal4);
+			return;
+		break;
+		case GP_PAL8:
+			print_pal8(&color->pal8);
 		break;
 		case GP_G1:
 			print_g1(&color->g1);
