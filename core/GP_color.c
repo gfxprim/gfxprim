@@ -56,6 +56,18 @@ static uint8_t rgb888_colors[][3] = {
 	{0xff, 0xff, 0xff}, /* white      */
 };
 
+static const char *color_type_names[] = {
+	"ColorName",
+	"Palette",
+	"Grayscale 1bit",
+	"Grayscale 2bit",
+	"Grayscale 4bit",
+	"Grayscale 8bit",
+	"RGB 555",
+	"RGB 888",
+	"RGBA 8888",
+};
+
 static enum GP_RetCode conv_from_name(GP_Color *color, GP_ColorType type)
 {
 	enum GP_ColorName i = color->name.name;
@@ -108,6 +120,14 @@ static enum GP_RetCode conv_from_name(GP_Color *color, GP_ColorType type)
 		return GP_EINVAL;
 	else
 		return GP_ENOIMPL;
+}
+
+const char *GP_ColorTypeName(GP_ColorType type)
+{
+	if (type >= GP_COLMAX)
+		return "UNKNOWN";
+
+	return color_type_names[type];
 }
 
 static enum GP_RetCode conv_from_g1(GP_Color *color, GP_ColorType type)

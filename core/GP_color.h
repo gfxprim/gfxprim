@@ -38,7 +38,7 @@
 #define GP_G8_PACK(g) {.g8 = {GP_G8, g}}
 #define GP_RGB555_PACK(r, g, b) {.rgb555 = {GP_RGB555, r, g, b}}
 #define GP_RGB888_PACK(r, g, b) {.rgb888 = {GP_RGB888, r, g, b}}
-#define GP_RGBA8888_PACK(r, g, b, a) {.rgb888 = {GP_RGBA8888, r, g, b, a}}
+#define GP_RGBA8888_PACK(r, g, b, a) {.rgba8888 = {GP_RGBA8888, r, g, b, a}}
 
 #define GP_COLNAME_FILL(col, n) do {   \
 	(col)->name.type = GP_COLNAME; \
@@ -191,6 +191,11 @@ typedef union GP_Color {
  * Convers color pointed by *color to type.
  */
 enum GP_RetCode GP_ColorConvert(GP_Color *color, GP_ColorType type);
+
+/*
+ * Returns color type name.
+ */
+const char *GP_ColorTypeName(GP_ColorType type);
 
 /*
  * Print color into stdout in human-readable format.

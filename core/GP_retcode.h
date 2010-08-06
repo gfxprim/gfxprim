@@ -31,6 +31,9 @@ typedef enum GP_RetCode {
 	GP_EINVAL,
 	GP_ENOIMPL,
 	GP_EUNPRECISE,
+	GP_EMAX,
 } GP_RetCode;
+
+const char *GP_RetCodeName(GP_RetCode code);
 
 #endif /* GP_RETCODE_H */

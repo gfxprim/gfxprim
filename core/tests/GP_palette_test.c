@@ -40,8 +40,8 @@ struct GP_RGB888 palette_colors[] = {
 
 int main(void)
 {
-	union GP_Palette palette = GP_PAL_RGB888_PACK(palette_colors);
-	union GP_Color color = GP_PALINDEX_PACK(&palette, 1); 
+	GP_Palette palette = GP_PAL_RGB888_PACK(palette_colors);
+	GP_Color color = GP_PALINDEX_PACK(&palette, 1); 
 
 	printf("Color #1\n");
 	GP_ColorPrint(&color);

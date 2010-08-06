@@ -25,6 +25,25 @@
 
 #include "GP_pixel.h"
 
+static char *pixel_type_names[] = {
+	"Grayscale 1bit",
+	"Grayscale 2bits",
+	"Grayscale 4bits",
+	"Grayscale 8bit",
+	"RGB 555",
+	"BGR 555",
+	"RGB 888",
+	"BGR 888",
+	"XRGB 8888",
+	"RGBX 8888",
+	"XBGR 8888",
+	"BGRX 8888",
+	"ARGB 8888",
+	"RGBA 8888",
+	"ABGR 8888",
+	"BGRA 8888",
+};
+
 static GP_ColorType pixel_to_color_mapping[] = {
 	GP_G1,
 	GP_G2,
@@ -32,17 +51,58 @@ static GP_ColorType pixel_to_color_mapping[] = {
 	GP_G8,
 	GP_RGB555,
 	GP_RGB555,
+	/* RGB888 */
+	GP_RGB888,
+	GP_RGB888,
+	/* RGB888 + padding */
 	GP_RGB888,
 	GP_RGB888,
 	GP_RGB888,
 	GP_RGB888,
-	GP_RGB888,
-	GP_RGB888,
+	/* RGBA8888 */
 	GP_RGBA8888,
 	GP_RGBA8888,
 	GP_RGBA8888,
 	GP_RGBA8888,
 };
+
+static const uint32_t pixel_sizes[] = {
+	1,
+	2,
+	4,
+	8,
+	15,
+	15,
+	/* RGB888 */
+	24,
+	24,
+	/* RGB888 + padding */
+	32,
+	32,
+	32,
+	32,
+	/* RGBA8888 */
+	32,
+	32,
+	32,
+	32,
+};
+
+const char *GP_PixelTypeName(GP_PixelType type)
+{
+	if (type >= GP_PIXEL_MAX)
+		return "INVALID TYPE";
+
+	return pixel_type_names[type];
+}
+
+uint32_t GP_PixelSize(GP_PixelType type)
+{
+	if (type >= GP_PIXEL_MAX)
+		return 0;
+
+	return pixel_sizes[type];
+}
 
 GP_ColorType GP_PixelTypeToColorType(GP_PixelType type)
 {

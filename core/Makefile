@@ -1,6 +1,7 @@
 LIBRARY=libGP_core
 
-OBJECTS=GP_pixel.o \
+OBJECTS=GP_retcode.o \
+        GP_pixel.o \
 	GP_color.o \
 	GP_palette.o \
 	GP_circle.o \
@@ -27,6 +28,7 @@ OBJECTS=GP_pixel.o \
 HEADERS=GP.h \
 	GP_abort.h \
 	GP_check.h \
+	GP_retcode.h \
 	GP_pixel.h \
 	GP_color.h \
 	GP_palette.h \
