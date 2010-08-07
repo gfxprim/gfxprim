@@ -66,6 +66,8 @@ static const char *color_type_names[] = {
 	"Grayscale 4bit",
 	"Grayscale 8bit",
 	"RGB 555",
+	"RGB 565",
+	"RGB 666",
 	"RGB 888",
 	"RGBA 8888",
 };
@@ -102,6 +104,18 @@ static enum GP_RetCode conv_from_name(GP_Color *color, GP_ColorType type)
 			GP_RGB555_FILL(color, rgb888_colors[i][0]>>3,
 			                      rgb888_colors[i][1]>>3,
 			                      rgb888_colors[i][2]>>3);
+			return GP_ESUCCESS;
+		break;
+		case GP_RGB565:
+			GP_RGB565_FILL(color, rgb888_colors[i][0]>>3,
+			                      rgb888_colors[i][1]>>2,
+			                      rgb888_colors[i][2]>>3);
+			return GP_ESUCCESS;
+		break;
+		case GP_RGB666:
+			GP_RGB666_FILL(color, rgb888_colors[i][0]>>2,
+			                      rgb888_colors[i][1]>>2,
+			                      rgb888_colors[i][2]>>2);
 			return GP_ESUCCESS;
 		break;
 		case GP_RGB888:
@@ -166,6 +180,18 @@ static enum GP_RetCode conv_from_g1(GP_Color *color, GP_ColorType type)
 			                      col->gray * 0x1f);
 			return GP_ESUCCESS;
 		break;
+		case GP_RGB565:
+			GP_RGB565_FILL(color, col->gray * 0x1f,
+			                      col->gray * 0x3f,
+			                      col->gray * 0x1f);
+			return GP_ESUCCESS;
+		break;
+		case GP_RGB666:
+			GP_RGB666_FILL(color, col->gray * 0x3f,
+			                      col->gray * 0x3f,
+			                      col->gray * 0x3f);
+			return GP_ESUCCESS;
+		break;
 		case GP_RGB888:
 			GP_RGB888_FILL(color, col->gray * 0xff,
 			                      col->gray * 0xff,
@@ -218,6 +244,18 @@ static enum GP_RetCode conv_from_g2(GP_Color *color, GP_ColorType type)
 			GP_RGB555_FILL(color, col->gray * 0x1f / 0x03,
 			                      col->gray * 0x1f / 0x03,
 			                      col->gray * 0x1f / 0x03);
+			return GP_ESUCCESS;
+		break;
+		case GP_RGB565:
+			GP_RGB565_FILL(color, col->gray * 0x1f / 0x03,
+			                      col->gray * 0x3f / 0x03,
+			                      col->gray * 0x1f / 0x03);
+			return GP_ESUCCESS;
+		break;
+		case GP_RGB666:
+			GP_RGB666_FILL(color, col->gray * 0x3f / 0x03,
+			                      col->gray * 0x3f / 0x03,
+			                      col->gray * 0x3f / 0x03);
 			return GP_ESUCCESS;
 		break;
 		case GP_RGB888:
@@ -274,6 +312,18 @@ static enum GP_RetCode conv_from_g4(GP_Color *color, GP_ColorType type)
 			                      col->gray * 0x1f / 0x0f);
 			return GP_ESUCCESS;
 		break;
+		case GP_RGB565:
+			GP_RGB565_FILL(color, col->gray * 0x1f / 0x0f,
+			                      col->gray * 0x3f / 0x0f,
+			                      col->gray * 0x1f / 0x0f);
+			return GP_ESUCCESS;
+		break;
+		case GP_RGB666:
+			GP_RGB666_FILL(color, col->gray * 0x3f / 0x0f,
+			                      col->gray * 0x3f / 0x0f,
+			                      col->gray * 0x3f / 0x0f);
+			return GP_ESUCCESS;
+		break;
 		case GP_RGB888:
 			GP_RGB888_FILL(color, col->gray * 0xff / 0x0f, 
 			                      col->gray * 0xff / 0x0f,
@@ -326,6 +376,18 @@ static enum GP_RetCode conv_from_g8(GP_Color *color, GP_ColorType type)
 			GP_RGB555_FILL(color, col->gray * 0x1f / 0xff,
 			                      col->gray * 0x1f / 0xff,
 			                      col->gray * 0x1f / 0xff);
+			return GP_ESUCCESS;
+		break;
+		case GP_RGB565:
+			GP_RGB565_FILL(color, col->gray * 0x1f / 0xff,
+			                      col->gray * 0x3f / 0xff,
+			                      col->gray * 0x1f / 0xff);
+			return GP_ESUCCESS;
+		break;
+		case GP_RGB666:
+			GP_RGB666_FILL(color, col->gray * 0x3f / 0xff,
+			                      col->gray * 0x3f / 0xff,
+			                      col->gray * 0x3f / 0xff);
 			return GP_ESUCCESS;
 		break;
 		case GP_RGB888:
@@ -384,6 +446,12 @@ static enum GP_RetCode conv_from_rgb555(GP_Color *color, GP_ColorType type)
 			return GP_EUNPRECISE;
 		break;
 		case GP_RGB555:
+			return GP_ESUCCESS;
+		break;
+		case GP_RGB666:
+			GP_RGB666_FILL(color, 0x3f * col->red   / 0x1f,
+			                      0x3f * col->green / 0x1f,
+			                      0x3f * col->blue  / 0x1f);
 			return GP_ESUCCESS;
 		break;
 		case GP_RGB888:
@@ -646,6 +714,21 @@ static void print_rgb555(struct GP_ColRGB555 *color)
 	                                        color->blue);
 }
 
+static void print_rgb565(struct GP_ColRGB565 *color)
+{
+	printf(" TYPE   R    G    B\n");
+	printf("RGB565 0x%02x 0x%02x 0x%02x\n", color->red,
+	                                        color->green,
+	                                        color->blue);
+}
+
+static void print_rgb666(struct GP_ColRGB666 *color)
+{
+	printf(" TYPE   R    G    B\n");
+	printf("RGB666 0x%02x 0x%02x 0x%02x\n", color->red,
+	                                        color->green,
+	                                        color->blue);
+}
 static void print_rgb888(struct GP_ColRGB888 *color)
 {
 	printf(" TYPE   R    G    B\n");
@@ -699,6 +782,14 @@ void GP_ColorPrint(GP_Color *color)
 		break;
 		case GP_RGB555:
 			print_rgb555(&color->rgb555);
+			return;
+		break;
+		case GP_RGB565:
+			print_rgb565(&color->rgb565);
+			return;
+		break;
+		case GP_RGB666:
+			print_rgb666(&color->rgb666);
 			return;
 		break;
 		case GP_RGB888:

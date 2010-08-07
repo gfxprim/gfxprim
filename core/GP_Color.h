@@ -39,6 +39,8 @@
 #define GP_G4_PACK(g) {.g4 = {GP_G4, g}}
 #define GP_G8_PACK(g) {.g8 = {GP_G8, g}}
 #define GP_RGB555_PACK(r, g, b) {.rgb555 = {GP_RGB555, r, g, b}}
+#define GP_RGB565_PACK(r, g, b) {.rgb565 = {GP_RGB565, r, g, b}}
+#define GP_RGB666_PACK(r, g, b) {.rgb666 = {GP_RGB666, r, g, b}}
 #define GP_RGB888_PACK(r, g, b) {.rgb888 = {GP_RGB888, r, g, b}}
 #define GP_RGBA8888_PACK(r, g, b, a) {.rgba8888 = {GP_RGBA8888, r, g, b, a}}
 
@@ -90,6 +92,20 @@
 	(col)->rgb555.blue  = b;         \
 } while (0)
 
+#define GP_RGB565_FILL(col, r, g, b) do {\
+	(col)->rgb565.type  = GP_RGB565; \
+	(col)->rgb565.red   = r;         \
+	(col)->rgb565.green = g;         \
+	(col)->rgb565.blue  = b;         \
+} while (0)
+
+#define GP_RGB666_FILL(col, r, g, b) do {\
+	(col)->rgb666.type  = GP_RGB666; \
+	(col)->rgb666.red   = r;         \
+	(col)->rgb666.green = g;         \
+	(col)->rgb666.blue  = b;         \
+} while (0)
+
 #define GP_RGB888_FILL(col, r, g, b) do {\
 	(col)->rgb888.type  = GP_RGB888; \
 	(col)->rgb888.red   = r;         \
@@ -130,6 +146,8 @@ typedef enum GP_ColorType {
 	GP_G4,
 	GP_G8,
 	GP_RGB555,
+	GP_RGB565,
+	GP_RGB666,
 	GP_RGB888,
 	GP_RGBA8888,
 	GP_COLMAX,
@@ -198,6 +216,20 @@ struct GP_ColRGB555 {
 	uint16_t blue:5;
 };
 
+struct GP_ColRGB565 {
+	enum GP_ColorType type;
+	uint16_t red:5;
+	uint16_t green:6;
+	uint16_t blue:5;
+};
+
+struct GP_ColRGB666 {
+	enum GP_ColorType type;
+	uint32_t red:6;
+	uint32_t green:6;
+	uint32_t blue:6;
+};
+
 typedef union GP_Color {
 	enum GP_ColorType     type;
 	struct GP_ColName     name;
@@ -210,6 +242,8 @@ typedef union GP_Color {
 	struct GP_ColG8       g8;
 	struct GP_ColRGB888   rgb888;
 	struct GP_ColRGB555   rgb555;
+	struct GP_ColRGB565   rgb565;
+	struct GP_ColRGB666   rgb666;
 	struct GP_ColRGBA8888 rgba8888;
 } GP_Color;
 
