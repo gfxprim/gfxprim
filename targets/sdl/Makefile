@@ -1,11 +1,13 @@
 LIBRARY=libGP_SDL
 
 HEADERS=GP_SDL.h \
-	GP_SDL_Context.h
+	GP_SDL_Context.h \
+	GP_SDL_VideoInit.h
 
 EXTRA_DEPS=
 
-OBJECTS=GP_SDL_Context.o
+OBJECTS=GP_SDL_Context.o \
+	GP_SDL_VideoInit.o
 
 .PHONY: library tests clean tar install
 

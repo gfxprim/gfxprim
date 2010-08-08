@@ -110,49 +110,21 @@ void event_loop(void)
 	}
 }
 
-int main(void)
+int main(int argc, char **argv)
 {
-	/* Initialize SDL */
-	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) != 0) {
-		fprintf(stderr, "Could not initialize SDL: %s\n", SDL_GetError());
+	GP_RetCode retcode;
+	retcode = GP_SDL_VideoInit(&context, 640, 480, argc, argv);
+	if (retcode != GP_ESUCCESS) {
+		fprintf(stderr, "Video initialization failed: %s\n",
+			GP_RetCodeName(retcode));
 		return 1;
 	}
 
-	/* Create a window with a software back surface */
-	display = SDL_SetVideoMode(640, 480, 0, SDL_SWSURFACE);
-	if (display == NULL) {
-		fprintf(stderr, "Could not open display: %s\n", SDL_GetError());
-		goto fail;
-	}
-
-	/* Print basic information about the surface */
-	printf("Display surface properties:\n");
-	printf("    width: %4d, height: %4d, pitch: %4d\n",
-	       display->w, display->h, display->pitch);
-	printf("    bits per pixel: %2d, bytes per pixel: %2d\n",
-	       display->format->BitsPerPixel, display->format->BytesPerPixel);
-	printf("    bit shifts: R=%d, G=%d, B=%d, A=%d\n",
-		display->format->Rshift, display->format->Gshift,
-		display->format->Bshift, display->format->Ashift);
-	printf("    bit masks: R=%x, G=%x, B=%x, A=%x\n",
-		display->format->Rmask, display->format->Gmask,
-		display->format->Bmask, display->format->Amask);
+	display = SDL_GetVideoSurface();
 
 	/* Get colors */
 	black = SDL_MapRGB(display->format, 0, 0, 0);
 	white = SDL_MapRGB(display->format, 255, 255, 255);
-
-	/* Set up a clipping rectangle to test proper clipping of pixels */
-	SDL_Rect clip_rect = { 10, 10, 620, 460 };
-	SDL_SetClipRect(display, &clip_rect);
-
-	GP_RetCode retcode;
-	retcode = GP_SDL_ContextFromSurface(&context, display);
-	if (retcode != GP_ESUCCESS) {
-		fprintf(stderr, "Could not create GP context: %s\n",
-			GP_RetCodeName(retcode));
-		return 1;
-	}
 
 	/* Set up the refresh timer */
 	timer = SDL_AddTimer(30, timer_callback, NULL);

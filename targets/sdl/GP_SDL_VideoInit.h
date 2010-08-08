@@ -23,22 +23,12 @@
  *                                                                           *
  *****************************************************************************/
 
-#include "GP_RetCode.h"
+#ifndef GP_SDL_VIDEOINIT_H
+#define GP_SDL_VIDEOINIT_H
 
-static char *ret_code_names[] = {
-	"Success",
-	"Invalid operation",
-	"Not implemented",
-	"Imprecise result",
-	"Unexpected null pointer",
-	"Connection with backend lost"
-};
+#include "GP.h"
 
+GP_RetCode GP_SDL_VideoInit(GP_Context *context, int width, int height,
+	int argc, char **argv);
 
-const char *GP_RetCodeName(GP_RetCode code)
-{
-	if (code >= GP_EMAX)
-		return "Invalid return code";
-
-	return ret_code_names[code]; 
-}
+#endif /* GP_SDL_VIDEOINIT_H */

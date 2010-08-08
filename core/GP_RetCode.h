@@ -32,6 +32,7 @@ typedef enum GP_RetCode {
 	GP_ENOIMPL,
 	GP_EUNPRECISE,
 	GP_ENULLPTR,
+	GP_EBACKENDLOST,
 	GP_EMAX,
 } GP_RetCode;
 

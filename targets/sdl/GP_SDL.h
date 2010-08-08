@@ -30,6 +30,7 @@
 
 #include "GP.h"
 #include "GP_SDL_Context.h"
+#include "GP_SDL_VideoInit.h"
 
 #define GP_SDL_BYTES_PER_PIXEL(target) (target->format->BytesPerPixel)
 
