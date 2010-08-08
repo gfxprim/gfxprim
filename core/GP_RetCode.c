@@ -30,6 +30,7 @@ static char *ret_code_names[] = {
 	"INVALID VALUE",
 	"NOT IMPLEMENTED",
 	"NOT PRECISE",
+	"NULL POINTER"
 };
 
 

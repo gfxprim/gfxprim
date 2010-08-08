@@ -23,12 +23,12 @@
  *                                                                           *
  *****************************************************************************/
 
-#ifndef GP_SDL_BUFFERINFO_H
-#define GP_SDL_BUFFERINFO_H
+#ifndef GP_SDL_CONTEXT_H
+#define GP_SDL_CONTEXT_H
 
 #include "GP.h"
 
 inline GP_RetCode GP_SDL_ContextFromSurface(GP_Context *context,
 		SDL_Surface *surf);
 
-#endif /* GP_SDL_BUFFERINFO_H */
+#endif /* GP_SDL_CONTEXT_H */

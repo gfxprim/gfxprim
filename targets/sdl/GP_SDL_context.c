@@ -38,11 +38,16 @@ static int check_pixel_masks(SDL_Surface *surf, unsigned int rmask,
 		&& surf->format->Ashift == amask);
 }
 
+/* Detects the pixel type of the SDL surface.
+ * Returns the pixel type, or GP_PIXEL_UNKNOWN if the type was not recognized.
+ */
 static enum GP_PixelType find_surface_pixel_type(SDL_Surface *surf)
 {
 	switch (surf->format->BytesPerPixel) {
 		case 1:
-			return GP_PIXEL_PAL8;
+			if (check_pixel_masks(surf, 0, 0, 0, 0)) {
+				return GP_PIXEL_PAL8;
+			}
 			break;
 		case 2:
 			if (check_pixel_masks(surf, 0x7c00, 0x03e0, 0x001f, 0)) {
@@ -80,7 +85,7 @@ static enum GP_PixelType find_surface_pixel_type(SDL_Surface *surf)
 				return GP_PIXEL_ABGR8888;
 			}
 			if (check_pixel_masks(surf, 0xff000000, 0xff0000, 0xff00, 0xff)) {
-				return GP_PIXEL_RGBX8888;
+				return GP_PIXEL_RGBA8888;
 			}
 			if (check_pixel_masks(surf, 0xff00, 0xff0000, 0xff000000, 0xff)) {
 				return GP_PIXEL_BGRA8888;

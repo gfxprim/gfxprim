@@ -27,6 +27,7 @@
 #include "GP_Pixel.h"
 
 static char *pixel_type_names[] = {
+	"Unknown pixel type",
 	"Palette 4bit",
 	"Palette 8bit",
 	"Grayscale 1bit",
@@ -35,6 +36,8 @@ static char *pixel_type_names[] = {
 	"Grayscale 8bit",
 	"RGB 555",
 	"BGR 555",
+	"RGB 565",
+	"BGR 565",
 	"RGB 888",
 	"BGR 888",
 	"XRGB 8888",
