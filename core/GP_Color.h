@@ -137,6 +137,7 @@ typedef enum GP_ColorName {
 } GP_ColorName;
 
 typedef enum GP_ColorType {
+	GP_NOCOLOR = 0,
 	GP_COLNAME,
 	GP_PALETTE,
 	GP_PAL4,

@@ -26,76 +26,37 @@
 #include "GP_Color.h"
 #include "GP_Pixel.h"
 
-static char *pixel_type_names[] = {
-	"Unknown pixel type",
-	"Palette 4bit",
-	"Palette 8bit",
-	"Grayscale 1bit",
-	"Grayscale 2bits",
-	"Grayscale 4bits",
-	"Grayscale 8bit",
-	"RGB 555",
-	"BGR 555",
-	"RGB 565",
-	"BGR 565",
-	"RGB 888",
-	"BGR 888",
-	"XRGB 8888",
-	"RGBX 8888",
-	"XBGR 8888",
-	"BGRX 8888",
-	"ARGB 8888",
-	"RGBA 8888",
-	"ABGR 8888",
-	"BGRA 8888",
+struct PixelTypeInfo {
+	const char *type_name;		/* human-readable name */
+	GP_ColorType color_type;	/* color type used for this pixel type */
+	unsigned int bits;		/* how many bits the pixel occupies */
 };
 
-static GP_ColorType pixel_to_color_mapping[] = {
-	GP_PAL4,
-	GP_PAL8,
-	GP_G1,
-	GP_G2,
-	GP_G4,
-	GP_G8,
-	GP_RGB555,
-	GP_RGB555,
-	/* RGB888 */
-	GP_RGB888,
-	GP_RGB888,
-	/* RGB888 + padding */
-	GP_RGB888,
-	GP_RGB888,
-	GP_RGB888,
-	GP_RGB888,
-	/* RGBA8888 */
-	GP_RGBA8888,
-	GP_RGBA8888,
-	GP_RGBA8888,
-	GP_RGBA8888,
-};
-
-static const uint32_t pixel_sizes[] = {
-	4,
-	8,
-	1,
-	2,
-	4,
-	8,
-	15,
-	15,
-	/* RGB888 */
-	24,
-	24,
-	/* RGB888 + padding */
-	32,
-	32,
-	32,
-	32,
-	/* RGBA8888 */
-	32,
-	32,
-	32,
-	32,
+/* This table shows relations of pixel types to color types, their names
+ * and bits per pixel.
+ */
+static struct PixelTypeInfo pixel_type_infos[] = {
+	{ "Unknown pixel type", GP_NOCOLOR,	0 },
+	{ "Palette 4bit",	GP_PAL4,	4 },
+	{ "Palette 8bit",	GP_PAL8,	8 },
+	{ "Grayscale 1bit",	GP_G1,		1 },
+	{ "Grayscale 2bits",	GP_G2,		2 },
+	{ "Grayscale 4bits",	GP_G4,		4 },
+	{ "Grayscale 8bits",	GP_G8,		8 },
+	{ "RGB 555",		GP_RGB555,	16 },
+	{ "BGR 555",		GP_RGB555,	16 },
+	{ "RGB 565",		GP_RGB565,	16 },
+	{ "BGR 565",		GP_RGB565,	16 },
+	{ "RGB 888",		GP_RGB888,	24 },
+	{ "BGR 888",		GP_RGB888,	24 },
+	{ "XRGB 8888",		GP_RGB888,	32 },
+	{ "RGBX 8888",		GP_RGB888,	32 },
+	{ "XBGR 8888",		GP_RGB888,	32 },
+	{ "BGRX 8888",		GP_RGB888,	32 },
+	{ "ARGB 8888",		GP_RGBA8888,	32 },
+	{ "RGBA 8888",		GP_RGBA8888,	32 },
+	{ "ABGR 8888",		GP_RGBA8888,	32 },
+	{ "BGRA 8888",		GP_RGBA8888,	32 }
 };
 
 const char *GP_PixelTypeName(GP_PixelType type)
@@ -103,7 +64,7 @@ const char *GP_PixelTypeName(GP_PixelType type)
 	if (type >= GP_PIXEL_MAX)
 		return "INVALID TYPE";
 
-	return pixel_type_names[type];
+	return pixel_type_infos[type].type_name;
 }
 
 uint32_t GP_PixelSize(GP_PixelType type)
@@ -111,7 +72,7 @@ uint32_t GP_PixelSize(GP_PixelType type)
 	if (type >= GP_PIXEL_MAX)
 		return 0;
 
-	return pixel_sizes[type];
+	return pixel_type_infos[type].bits;
 }
 
 bool GP_PixelCmp(GP_Pixel *pixel1, GP_Pixel *pixel2)
@@ -130,7 +91,7 @@ GP_ColorType GP_PixelTypeToColorType(GP_PixelType type)
 	if (type >= GP_PIXEL_MAX)
 		return GP_COLMAX;
 
-	return pixel_to_color_mapping[type];
+	return pixel_type_infos[type].color_type;
 }
 
 #define CHECK_RET(ret) if (ret != GP_ESUCCESS && ret != GP_EUNPRECISE) return ret;
