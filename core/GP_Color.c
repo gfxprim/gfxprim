@@ -57,6 +57,7 @@ static uint8_t rgb888_colors[][3] = {
 };
 
 static const char *color_type_names[] = {
+	"Invalid color"
 	"ColorName",
 	"Index to In Memory Palette",
 	"HW Palete 4bit",
@@ -80,6 +81,9 @@ static enum GP_RetCode conv_from_name(GP_Color *color, GP_ColorType type)
 		return GP_EINVAL;
 
 	switch (type) {
+		case GP_NOCOLOR:
+			return GP_EINVAL;
+		break;
 		case GP_PAL4:
 		case GP_PAL8:
 			return GP_EINVAL;
@@ -155,6 +159,9 @@ static enum GP_RetCode conv_from_g1(GP_Color *color, GP_ColorType type)
 	struct GP_ColG1 *col = &color->g1;
 
 	switch (type) {
+		case GP_NOCOLOR:
+			return GP_EINVAL;
+		break;
 		case GP_PAL4:
 		case GP_PAL8:
 			return GP_EINVAL;
@@ -221,6 +228,9 @@ static enum GP_RetCode conv_from_g2(GP_Color *color, GP_ColorType type)
 	struct GP_ColG2 *col = &color->g2;
 
 	switch (type) {
+		case GP_NOCOLOR:
+			return GP_EINVAL;
+		break;
 		case GP_PAL4:
 		case GP_PAL8:
 			return GP_EINVAL;
@@ -287,6 +297,9 @@ static enum GP_RetCode conv_from_g4(GP_Color *color, GP_ColorType type)
 	struct GP_ColG4 *col = &color->g4;
 
 	switch (type) {
+		case GP_NOCOLOR:
+			return GP_EINVAL;
+		break;
 		case GP_PAL4:
 		case GP_PAL8:
 			return GP_EINVAL;
@@ -353,6 +366,9 @@ static enum GP_RetCode conv_from_g8(GP_Color *color, GP_ColorType type)
 	struct GP_ColG8 *col = &color->g8;
 
 	switch (type) {
+		case GP_NOCOLOR:
+			return GP_EINVAL;
+		break;
 		case GP_PAL4:
 		case GP_PAL8:
 			return GP_EINVAL;
@@ -420,6 +436,9 @@ static enum GP_RetCode conv_from_rgb555(GP_Color *color, GP_ColorType type)
 	uint8_t val;
 
 	switch (type) {
+		case GP_NOCOLOR:
+			return GP_EINVAL;
+		break;	
 		case GP_PAL4:
 		case GP_PAL8:
 			return GP_EINVAL;
@@ -484,6 +503,9 @@ static enum GP_RetCode conv_from_rgb888(GP_Color *color, GP_ColorType type)
 	uint8_t val;
 
 	switch (type) {
+		case GP_NOCOLOR:
+			return GP_EINVAL;
+		break;
 		case GP_PAL4:
 		case GP_PAL8:
 			return GP_EINVAL;
@@ -541,6 +563,9 @@ static enum GP_RetCode conv_from_rgba8888(GP_Color *color, GP_ColorType type)
 	uint8_t val;
 
 	switch (type) {
+		case GP_NOCOLOR:
+			return GP_EINVAL;
+		break;
 		case GP_PAL4:
 		case GP_PAL8:
 			return GP_EINVAL;
@@ -595,6 +620,9 @@ static enum GP_RetCode conv_from_rgba8888(GP_Color *color, GP_ColorType type)
 static enum GP_RetCode color_convert(GP_Color *color, GP_ColorType type)
 {
 	switch (color->type) {
+		case GP_NOCOLOR:
+			return GP_EINVAL;
+		break;
 		case GP_PAL4:
 		case GP_PAL8:
 			return GP_EINVAL;

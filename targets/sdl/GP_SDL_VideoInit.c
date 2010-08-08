@@ -100,6 +100,10 @@ GP_RetCode GP_SDL_VideoInit(GP_Context *context, int width, int height,
 	GP_RetCode retcode;
 	retcode = GP_SDL_ContextFromSurface(context, display);
 	if (retcode != GP_ESUCCESS) {
+		if (debug) {
+			fprintf(stderr, "Error: Could not create context: %s\n",
+				GP_RetCodeName(retcode));
+		}
 		SDL_Quit();
 		return retcode;
 	}
