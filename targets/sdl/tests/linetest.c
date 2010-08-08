@@ -131,6 +131,12 @@ int main(void)
 	       display->w, display->h, display->pitch);
 	printf("    bits per pixel: %2d, bytes per pixel: %2d\n",
 	       display->format->BitsPerPixel, display->format->BytesPerPixel);
+	printf("    bit shifts: R=%d, G=%d, B=%d, A=%d\n",
+		display->format->Rshift, display->format->Gshift,
+		display->format->Bshift, display->format->Ashift);
+	printf("    bit masks: R=%x, G=%x, B=%x, A=%x\n",
+		display->format->Rmask, display->format->Gmask,
+		display->format->Bmask, display->format->Amask);
 
 	/* Get colors */
 	black = SDL_MapRGB(display->format, 0, 0, 0);
@@ -140,7 +146,13 @@ int main(void)
 	SDL_Rect clip_rect = { 10, 10, 620, 460 };
 	SDL_SetClipRect(display, &clip_rect);
 
-	GP_SDL_ContextFromSurface(&context, display);
+	GP_RetCode retcode;
+	retcode = GP_SDL_ContextFromSurface(&context, display);
+	if (retcode != GP_ESUCCESS) {
+		fprintf(stderr, "Could not create GP context: %s\n",
+			GP_RetCodeName(retcode));
+		return 1;
+	}
 
 	/* Set up the refresh timer */
 	timer = SDL_AddTimer(30, timer_callback, NULL);

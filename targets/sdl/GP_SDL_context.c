@@ -26,18 +26,83 @@
 #include "GP.h"
 #include "GP_SDL.h"
 
-inline GP_Context *GP_SDL_ContextFromSurface(
+/* Checks whether pixel color component masks in the given surface are equal
+ * to specified. Returns nonzero if they match, zero otherwise.
+ */
+static int check_pixel_masks(SDL_Surface *surf, unsigned int rmask,
+	unsigned int gmask, unsigned int bmask, unsigned int amask)
+{
+	return (surf->format->Rmask == rmask
+		&& surf->format->Gmask == gmask
+		&& surf->format->Bmask == bmask
+		&& surf->format->Ashift == amask);
+}
+
+static enum GP_PixelType find_surface_pixel_type(SDL_Surface *surf)
+{
+	switch (surf->format->BytesPerPixel) {
+		case 1:
+			return GP_PIXEL_PAL8;
+			break;
+		case 2:
+			if (check_pixel_masks(surf, 0x7c00, 0x03e0, 0x001f, 0)) {
+				return GP_PIXEL_RGB555;
+			}
+			if (check_pixel_masks(surf, 0xf800, 0x07e0, 0x001f, 0)) {
+				return GP_PIXEL_RGB565;
+			}
+			break;
+		case 3:
+			if (check_pixel_masks(surf, 0xff0000, 0xff00, 0xff, 0)) {
+				return GP_PIXEL_RGB888;
+			}
+			if (check_pixel_masks(surf, 0xff, 0xff00, 0xff0000, 0)) {
+				return GP_PIXEL_BGR888;
+			}
+			break;
+		case 4:
+			if (check_pixel_masks(surf, 0xff0000, 0xff00, 0xff, 0)) {
+				return GP_PIXEL_XRGB8888;
+			}
+			if (check_pixel_masks(surf, 0xff, 0xff00, 0xff0000, 0)) {
+				return GP_PIXEL_XBGR8888;
+			}
+			if (check_pixel_masks(surf, 0xff000000, 0xff0000, 0xff00, 0)) {
+				return GP_PIXEL_RGBX8888;
+			}
+			if (check_pixel_masks(surf, 0xff00, 0xff0000, 0xff000000, 0)) {
+				return GP_PIXEL_BGRX8888;
+			}
+			if (check_pixel_masks(surf, 0xff0000, 0xff00, 0xff, 0xff000000)) {
+				return GP_PIXEL_ARGB8888;
+			}
+			if (check_pixel_masks(surf, 0xff, 0xff00, 0xff0000, 0xff000000)) {
+				return GP_PIXEL_ABGR8888;
+			}
+			if (check_pixel_masks(surf, 0xff000000, 0xff0000, 0xff00, 0xff)) {
+				return GP_PIXEL_RGBX8888;
+			}
+			if (check_pixel_masks(surf, 0xff00, 0xff0000, 0xff000000, 0xff)) {
+				return GP_PIXEL_BGRA8888;
+			}
+			break;
+
+	}
+	return GP_PIXEL_UNKNOWN;
+
+}
+
+inline GP_RetCode GP_SDL_ContextFromSurface(
 		GP_Context *context, SDL_Surface *surf)
 {
-	GP_CHECK(surf != NULL);
-
-	if (context == NULL) {
-		context = (GP_Context *) malloc(sizeof(*context));
+	if (surf == NULL || context == NULL) {
+		return GP_ENULLPTR;
 	}
 
 	/* basic structure and size */
 	context->pixels = surf->pixels;
 	context->bits_per_pixel = 8 * surf->format->BytesPerPixel;
+	context->pixel_type = find_surface_pixel_type(surf);
 	context->bytes_per_row = surf->pitch;
 	context->columns = surf->w;
 	context->rows = surf->h;
@@ -53,5 +118,9 @@ inline GP_Context *GP_SDL_ContextFromSurface(
 	context->clip_column_min = surf->clip_rect.x;
 	context->clip_column_max = surf->clip_rect.x + surf->clip_rect.w - 1;
 
-	return context;
+	if (context->pixel_type == GP_PIXEL_UNKNOWN) {
+		return GP_ENOIMPL;
+	}
+
+	return GP_ESUCCESS;
 }

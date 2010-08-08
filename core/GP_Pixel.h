@@ -33,30 +33,43 @@
 #include "GP_Color.h"
 
 typedef enum GP_PixelType {
+	/* Unknown pixel type */
+	GP_PIXEL_UNKNOWN = 0,
+
 	/* Palete */
 	GP_PIXEL_PAL4,
 	GP_PIXEL_PAL8,
+
 	/* Grayscale */
 	GP_PIXEL_G1,
 	GP_PIXEL_G2,
 	GP_PIXEL_G4,
 	GP_PIXEL_G8,
-	/* RGB 555 */
+
+	/* RGB 555 - 15 bits per pixel, 1 bit of padding */
 	GP_PIXEL_RGB555,
 	GP_PIXEL_BGR555,
-	/* RGB */
+
+	/* RGB 565 - 16 bits per pixel */
+	GP_PIXEL_RGB565,
+	GP_PIXEL_BGR565,
+
+	/* RGB - 24bits per pixel */
 	GP_PIXEL_RGB888,
 	GP_PIXEL_BGR888,
-	/* RGB + padding */
+
+	/* RGB + 32bits per pixel, 8 bits of padding */
 	GP_PIXEL_XRGB8888,
 	GP_PIXEL_RGBX8888,
 	GP_PIXEL_XBGR8888,
 	GP_PIXEL_BGRX8888,
+
 	/* RGB + alpha */
 	GP_PIXEL_ARGB8888,
 	GP_PIXEL_RGBA8888,
 	GP_PIXEL_ABGR8888,
 	GP_PIXEL_BGRA8888,
+
 	GP_PIXEL_MAX,
 } GP_PixelType;
 
