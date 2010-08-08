@@ -29,7 +29,7 @@
 #include <SDL/SDL.h>
 
 #include "GP.h"
-#include "GP_SDL_context.h"
+#include "GP_SDL_Context.h"
 
 #define GP_SDL_BYTES_PER_PIXEL(target) (target->format->BytesPerPixel)
 
@@ -43,28 +43,4 @@
 	+ x * GP_SDL_BYTES_PER_PIXEL(target) \
 )
 
-/* Most drawing functions have this form. */
-#define GP_DEF_DRAWING_FN(FN, ...) \
-void FN(SDL_Surface *target, long color, __VA_ARGS__); \
-
-/* The basic drawing functions: pixel, lines, simple shapes. */
-GP_DEF_DRAWING_FN(GP_SDL_SetPixel, int x, int y);
-GP_DEF_DRAWING_FN(GP_SDL_Line, int x0, int y0, int x1, int y1);
-GP_DEF_DRAWING_FN(GP_SDL_HLine, int x0, int x1, int y);
-GP_DEF_DRAWING_FN(GP_SDL_VLine, int x, int y0, int y1);
-GP_DEF_DRAWING_FN(GP_SDL_Circle, int x, int y, int r);
-GP_DEF_DRAWING_FN(GP_SDL_FillCircle, int x, int y, int r);
-GP_DEF_DRAWING_FN(GP_SDL_Ellipse, int x, int y, int a, int b);
-GP_DEF_DRAWING_FN(GP_SDL_FillEllipse, int x, int y, int a, int b);
-GP_DEF_DRAWING_FN(GP_SDL_Rect, int x0, int y0, int x1, int y1);
-GP_DEF_DRAWING_FN(GP_SDL_FillRect, int x0, int y0, int x1, int y1);
-GP_DEF_DRAWING_FN(GP_SDL_Triangle, int x0, int y0, int x1, int y1, int x2, int y2);
-GP_DEF_DRAWING_FN(GP_SDL_FillTriangle, int x0, int y0, int x1, int y1, int x2, int y2);
-
-/* A frequently used alias. */
-#define GP_SDL_PutPixel GP_SDL_SetPixel
-
-long GP_SDL_GetPixel(SDL_Surface *target, int x, int y);
-GP_DEF_DRAWING_FN(GP_SDL_Text, const struct GP_TextStyle *style, int x, int y, const char *str);
-
-#endif
+#endif /* GP_SDL_H */

@@ -1,13 +1,11 @@
 LIBRARY=libGP_SDL
 
 HEADERS=GP_SDL.h \
-	GP_SDL_backend.h \
-	GP_SDL_context.h \
-	GP_SDL_specific.h
+	GP_SDL_Context.h
 
 EXTRA_DEPS=
 
-OBJECTS=GP_SDL_context.o
+OBJECTS=GP_SDL_Context.o
 
 .PHONY: library tests clean tar install
 
@@ -21,30 +19,6 @@ tests:
 $(LIBRARY): $(LIBRARY).a $(LIBRARY).so
 
 $(OBJECTS): GP_SDL.h
-
-#############################################################################
-# Specific dependencies.
-#############################################################################
-
-GP_SDL_circle.o: GP_SDL_circle.c \
-		../../generic/circle_generic.c \
-		../../generic/fill_circle_generic.c
-
-GP_SDL_ellipse.o: GP_SDL_ellipse.c \
-		../../generic/ellipse_generic.c \
-		../../generic/fill_ellipse_generic.c
-
-GP_SDL_line.o: GP_SDL_line.c \
-		../../generic/line_generic.c \
-		../../generic/hline_generic.c \
-		../../generic/vline_generic.c
-
-GP_SDL_text.o: GP_SDL_text.c \
-		../../generic/text_generic.c
-
-GP_SDL_triangle.o: GP_SDL_triangle.c \
-		../../generic/triangle_generic.c \
-		../../generic/fill_triangle_generic.c
 
 #############################################################################
 # Building rules.
