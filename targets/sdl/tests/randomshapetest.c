@@ -148,7 +148,7 @@ void draw_random_rectangle(GP_Color color)
 void clear_screen(void)
 {
 	SDL_LockSurface(display);
-	GP_FillRect(&context, 0, 0, context.columns, context.rows, black);
+	GP_Fill(&context, black);
 	SDL_UnlockSurface(display);
 }
 

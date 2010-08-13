@@ -93,7 +93,7 @@ static void draw(SDL_Surface *surf, int x, int y, int l, int iter)
 	x3 = sin(1.00 * (iter+240)/57) * l + x;
 	y3 = cos(1.00 * (iter+240)/57) * l + y;
 
-	GP_FillRect(&context, 0, 0, context.columns, context.rows, gray);
+	GP_Fill(&context, gray);
 
 	GP_FillTriangle(&context, x1, y1, x2, y2, x3, y3, blue);
 

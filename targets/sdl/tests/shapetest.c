@@ -185,7 +185,7 @@ void redraw_screen(void)
 	};
 
 	SDL_LockSurface(display);
-	GP_FillRect(&context, 0, 0, context.columns, context.rows, black);
+	GP_Fill(&context, black);
 
 	/* axes */
 	if (show_axes) {

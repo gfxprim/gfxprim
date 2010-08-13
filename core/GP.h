@@ -46,6 +46,7 @@
 #include "GP_Palette.h"
 
 /* public drawing API */
+#include "GP_Fill.h"
 #include "GP_GetPixel.h"
 #include "GP_PutPixel.h"
 #include "GP_HLine.h"

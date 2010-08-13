@@ -109,7 +109,7 @@ inline GP_RetCode GP_SDL_ContextFromSurface(
 	context->bits_per_pixel = 8 * surf->format->BytesPerPixel;
 	context->pixel_type = find_surface_pixel_type(surf);
 	context->bytes_per_row = surf->pitch;
-	context->columns = surf->w;
+	context->cols = surf->w;
 	context->rows = surf->h;
 
 	/* orientation */

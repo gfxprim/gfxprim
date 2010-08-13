@@ -63,7 +63,7 @@ void redraw_screen(void)
 	int ycenter = display->h/2;
 
 	SDL_LockSurface(display);
-	GP_FillRect(&context, 0, 0, context.columns, context.rows, black);
+	GP_Fill(&context, black);
 
 	for (angle = 0.0; angle < 2*M_PI; angle += 0.1) {
 		x = (int) (display->w/2 * cos(start_angle + angle));
