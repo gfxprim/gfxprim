@@ -25,11 +25,13 @@
 
 #include "GP.h"
 
-void GP_PutPixel(GP_Context *context, int x, int y, uint32_t value)
+void GP_PutPixel(GP_Context *context, int x, int y, GP_Color color)
 {
 	GP_CHECK_CONTEXT(context);
+	int value = 0;
 
 	uint8_t *p;
+
 	if (context->vertical_rows) {
 		if (x < (int) context->clip_row_min
 			|| x > (int) context->clip_row_max

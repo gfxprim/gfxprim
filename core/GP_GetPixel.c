@@ -25,9 +25,10 @@
 
 #include "GP.h"
 
-uint32_t GP_GetPixel(GP_Context *context, int x, int y)
+GP_Color GP_GetPixel(GP_Context *context, int x, int y)
 {
 	GP_CHECK_CONTEXT(context);
+	GP_Color color = GP_COLNAME_PACK(GP_COL_GREEN);
 
 	uint8_t *p;
 	if (context->vertical_rows) {
@@ -35,7 +36,7 @@ uint32_t GP_GetPixel(GP_Context *context, int x, int y)
 			|| x > (int) context->clip_row_max
 			|| y < (int) context->clip_column_min
 			|| y > (int) context->clip_column_max) {
-			return 0;			/* clipped out */
+	//		return 0;			/* clipped out */
 		}
 		p = GP_PIXEL_ADDRESS(context, x, y);
 	} else {
@@ -43,11 +44,11 @@ uint32_t GP_GetPixel(GP_Context *context, int x, int y)
 			|| x > (int) context->clip_column_max
 			|| y < (int) context->clip_row_min
 			|| y > (int) context->clip_row_max) {
-			return 0;			/* clipped out */
+	//		return 0;			/* clipped out */
 		}
 		p = GP_PIXEL_ADDRESS(context, y, x);
 	}
-
+/*
 	switch (context->bits_per_pixel) {
 	case 32:
 		return GP_ReadPixel32bpp(p);
@@ -64,6 +65,7 @@ uint32_t GP_GetPixel(GP_Context *context, int x, int y)
 	default:
 		GP_ABORT("Unsupported value of context->bits_per_pixel");
 	}
+*/
 
-	return 0; /* unreached */
+	return color;
 }

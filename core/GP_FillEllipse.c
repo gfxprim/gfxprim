@@ -26,7 +26,7 @@
 #include "GP.h"
 
 void GP_FillEllipse(GP_Context *context, int xcenter, int ycenter,
-	int a, int b, uint32_t color)
+	int a, int b, GP_Color color)
 {
 	GP_CHECK_CONTEXT(context);
 

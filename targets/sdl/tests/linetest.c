@@ -42,8 +42,8 @@ SDL_TimerID timer;
 SDL_UserEvent timer_event;
 
 /* Values for color pixels in display format. */
-long black;
-long white;
+GP_Color black = GP_COLNAME_PACK(GP_COL_BLACK);
+GP_Color white = GP_COLNAME_PACK(GP_COL_WHITE);
 
 Uint32 timer_callback(__attribute__((unused)) Uint32 interval,
 			__attribute__((unused)) void * param)
@@ -63,16 +63,16 @@ void redraw_screen(void)
 	int ycenter = display->h/2;
 
 	SDL_LockSurface(display);
-	SDL_FillRect(display, NULL, black);
+	GP_FillRect(&context, 0, 0, context.rows, context.columns, black);
 
 	for (angle = 0.0; angle < 2*M_PI; angle += 0.1) {
 		x = (int) (display->w/2 * cos(start_angle + angle));
 		y = (int) (display->h/2 * sin(start_angle + angle));
 
 		Uint8 r = 127.0 + 127.0 * cos(start_angle + angle);
-		Uint8 g = 127.0 + 127.0 * sin(start_angle + angle);
+		Uint8 b = 127.0 + 127.0 * sin(start_angle + angle);
 		
-		Uint32 color = SDL_MapRGB(display->format, r, 0, g);
+		GP_Color color = GP_RGB888_PACK(r, 0, b);
 	
 		/*
 		 * Draw the line forth and back to detect any pixel change
@@ -121,10 +121,6 @@ int main(int argc, char **argv)
 	}
 
 	display = SDL_GetVideoSurface();
-
-	/* Get colors */
-	black = SDL_MapRGB(display->format, 0, 0, 0);
-	white = SDL_MapRGB(display->format, 255, 255, 255);
 
 	/* Set up the refresh timer */
 	timer = SDL_AddTimer(30, timer_callback, NULL);

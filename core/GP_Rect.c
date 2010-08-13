@@ -26,7 +26,7 @@
 #include "GP.h"
 
 void GP_Rect(GP_Context *context, int x0, int y0, int x1, int y1,
-	uint32_t color)
+	GP_Color color)
 {
 	GP_HLine(context, x0, x1, y0, color);
 	GP_HLine(context, x0, x1, y1, color);

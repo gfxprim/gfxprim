@@ -41,7 +41,10 @@ SDL_TimerID timer;
 SDL_UserEvent timer_event;
 
 /* Values for color pixels in display format. */
-long red, green, blue, white;
+GP_Color red   = GP_COLNAME_PACK(GP_COL_RED);
+GP_Color green = GP_COLNAME_PACK(GP_COL_GREEN);
+GP_Color blue  = GP_COLNAME_PACK(GP_COL_BLUE);
+GP_Color white = GP_COLNAME_PACK(GP_COL_WHITE);
 
 Uint32 timer_callback(__attribute__((unused)) Uint32 interval,
 			__attribute__((unused)) void *param)
@@ -53,12 +56,19 @@ Uint32 timer_callback(__attribute__((unused)) Uint32 interval,
 
 void draw_pixel(void)
 {
-	long pixel;
+	GP_Color pixel, conv;
 	int x = random() % 320;
 	int y = random() % 240;
 
 	pixel = GP_GetPixel(&context, x, y);
-    
+
+      /* TODO: we cannot switch like this
+	 we need either to convert blue
+	 and others into Context format
+	 at the very beginning, or make
+	 a copy to convert it and match
+	 agains what we get from GP_GetPixel
+
 	if (pixel == blue) {
 		GP_PutPixel(&context, x, y, green);
 	}
@@ -71,7 +81,7 @@ void draw_pixel(void)
 		} else {
 			GP_PutPixel(&context, x, y, red);
 		}
-	}
+	} */
 }
 
 void draw_pixels(void)
@@ -139,12 +149,6 @@ int main(int argc, char **argv)
 	       display->w, display->h, display->pitch);
 	printf("    bits per pixel: %2d, bytes per pixel: %2d\n",
 	       display->format->BitsPerPixel, display->format->BytesPerPixel);
-
-	/* Get colors */
-	red = SDL_MapRGB(display->format, 255, 0, 0);
-	green = SDL_MapRGB(display->format, 0, 255, 0);
-	blue = SDL_MapRGB(display->format, 0, 0, 255);
-	white = SDL_MapRGB(display->format, 255, 255, 255);
 
 	/* Set up a clipping rectangle to test proper clipping of pixels */
 	SDL_Rect clip_rect = {10, 10, 300, 220};

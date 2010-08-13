@@ -29,6 +29,6 @@
 #include "GP_Context.h"
 
 void GP_Rect(GP_Context *context, int x0, int y0, int x1, int y1,
-	uint32_t color);
+             GP_Color color);
 
 #endif /* GP_RECT_H */

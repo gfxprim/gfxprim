@@ -49,7 +49,12 @@ Uint32 timer_callback(__attribute__((unused)) Uint32 interval,
 }
 
 /* Basic colors in display-specific format. */
-uint32_t black, white, yellow, red, gray, darkgray;
+GP_Color black    = GP_COLNAME_PACK(GP_COL_BLACK);
+GP_Color white    = GP_COLNAME_PACK(GP_COL_WHITE);
+GP_Color yellow   = GP_COLNAME_PACK(GP_COL_YELLOW);
+GP_Color red      = GP_COLNAME_PACK(GP_COL_RED);
+GP_Color gray     = GP_COLNAME_PACK(GP_COL_GRAY_LIGHT);
+GP_Color darkgray = GP_COLNAME_PACK(GP_COL_GRAY_DARK);
 
 /* Radius of the shape being drawn */
 static int xradius = 5;
@@ -180,7 +185,7 @@ void redraw_screen(void)
 	};
 
 	SDL_LockSurface(display);
-	SDL_FillRect(display, NULL, black);
+	GP_FillRect(&context, 0, 0, context.rows, context.columns, black);
 
 	/* axes */
 	if (show_axes) {
@@ -385,14 +390,6 @@ int main(int argc, char ** argv)
 		fprintf(stderr, "Could not open display: %s\n", SDL_GetError());
 		goto fail;
 	}
-
-	/* Find pixel representations of needed colors */
-	black = SDL_MapRGB(display->format, 0, 0, 0);
-	white = SDL_MapRGB(display->format, 255, 255, 255);
-	yellow = SDL_MapRGB(display->format, 255, 255, 0);
-	red = SDL_MapRGB(display->format, 255, 0, 0);
-	gray = SDL_MapRGB(display->format, 127, 127, 127);
-	darkgray = SDL_MapRGB(display->format, 63, 63, 63);
 
 	/* Set up a clipping rectangle to exercise clipping */
 	SDL_Rect clip_rect = {10, 10, 620, 460};

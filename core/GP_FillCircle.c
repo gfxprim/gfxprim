@@ -28,7 +28,7 @@
 #include <stdint.h>
 
 void GP_FillCircle(GP_Context *context, int xcenter, int ycenter, int r,
-	uint32_t color)
+	GP_Color color)
 {
 	GP_CHECK_CONTEXT(context);
 

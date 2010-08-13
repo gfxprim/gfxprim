@@ -58,8 +58,8 @@ Uint32 timer_callback(__attribute__((unused)) Uint32 interval,
 	return 1000;
 }
 
-/* Basic colors in display format. */
-long black, white;
+GP_Color black = GP_COLNAME_PACK(GP_COL_BLACK);
+GP_Color white = GP_COLNAME_PACK(GP_COL_WHITE);
 
 void draw_frame(void)
 {
@@ -69,8 +69,8 @@ void draw_frame(void)
 	int y1 = random() % display->h;
 	int x2 = display->w/2;
 	int y2 = random() % display->h;
-	long color = SDL_MapRGB(display->format, random() % 255, random() % 255, random() % 255);
-
+	GP_Color color = GP_RGB888_PACK(random() % 255, random() % 255, random() % 255);
+	
 	if (filled) {
 		GP_FillTriangle(&context, x0, y0, x1, y1, x2, y2, color);
 	} else {
@@ -149,10 +149,6 @@ int main(int argc, char ** argv)
 	printf("Machine properties:\n");
 	printf("    sizeof(int) = %u, sizeof(long) = %u\n",
 	       (unsigned int)sizeof(int), (unsigned int)sizeof(long));
-
-	/* Get basic colors */
-	black = SDL_MapRGB(display->format, 0, 0, 0);
-	white = SDL_MapRGB(display->format, 255, 255, 255);
 
 	/* Set up a clipping rectangle to test proper clipping of pixels */
 	SDL_Rect clip_rect = { 10, 10, 620, 460 };

@@ -40,7 +40,8 @@ SDL_TimerID timer;
 SDL_UserEvent timer_event;
 
 /* Globally used colors. */
-static long white, black;
+static GP_Color white = GP_COLNAME_PACK(GP_COL_WHITE);
+static GP_Color black = GP_COLNAME_PACK(GP_COL_BLACK);
 
 /* Holding flag (pauses drawing). */
 static int pause_flag = 0;
@@ -82,7 +83,7 @@ void random_point(SDL_Surface *surf, int *x, int *y)
 	}
 }
 
-void draw_random_circle(long color)
+void draw_random_circle(GP_Color color)
 {
 	int x, y;
 	random_point(display, &x, &y);
@@ -97,7 +98,7 @@ void draw_random_circle(long color)
 	}
 }
 
-void draw_random_ellipse(long color)
+void draw_random_ellipse(GP_Color color)
 {
 	int x, y;
 	random_point(display, &x, &y);
@@ -113,7 +114,7 @@ void draw_random_ellipse(long color)
 	}
 }
 
-void draw_random_triangle(long color)
+void draw_random_triangle(GP_Color color)
 {
 	int x0, y0, x1, y1, x2, y2;
 	random_point(display, &x0, &y0);
@@ -129,7 +130,7 @@ void draw_random_triangle(long color)
 	}
 }
 
-void draw_random_rectangle(long color)
+void draw_random_rectangle(GP_Color color)
 {
 	int x0, y0, x1, y1;
 	random_point(display, &x0, &y0);
@@ -147,17 +148,16 @@ void draw_random_rectangle(long color)
 void clear_screen(void)
 {
 	SDL_LockSurface(display);
-	SDL_FillRect(display, NULL, black);
+	GP_FillRect(&context, 0, 0, context.rows, context.columns, black);
 	SDL_UnlockSurface(display);
 }
 
 void redraw_screen(void)
 {
 	/* Random color. */
-	long color = SDL_MapRGB(display->format,
-				random() % 256,
-				random() % 256,
-				random() % 256);
+	GP_Color color = GP_RGB888_PACK(random() % 256,
+	                                random() % 256,
+	                                random() % 256);
 
 	if (pause_flag)
 		return;
@@ -277,10 +277,6 @@ int main(int argc, char ** argv)
 		fprintf(stderr, "Could not open display: %s\n", SDL_GetError());
 		goto fail;
 	}
-
-	/* Load basic colors. */
-	white = SDL_MapRGB(display->format, 255, 255, 255);
-	black = SDL_MapRGB(display->format, 0, 0, 0);
 
 	/* Set up a clipping rectangle to test proper clipping of pixels */
 	SDL_Rect clip_rect = {10, 10, 620, 460};

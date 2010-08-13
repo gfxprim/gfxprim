@@ -27,7 +27,7 @@
 
 #include <stdio.h>
 
-void GP_HLine(GP_Context *context, int x0, int x1, int y, uint32_t color)
+void GP_HLine(GP_Context *context, int x0, int x1, int y, GP_Color color)
 {
 	GP_CHECK_CONTEXT(context);
 

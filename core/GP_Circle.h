@@ -31,6 +31,6 @@
 #include <stdint.h>
 
 void GP_Circle(GP_Context *context, int xcenter, int ycenter, int r,
-	uint32_t color);
+	GP_Color color);
 
 #endif /* GP_CIRCLE_H */

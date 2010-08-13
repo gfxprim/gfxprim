@@ -28,7 +28,7 @@
 #include <stdlib.h>
 
 void GP_FillTriangle(GP_Context* context,
-	int x0, int y0, int x1, int y1, int x2, int y2, uint32_t color)
+	int x0, int y0, int x1, int y1, int x2, int y2, GP_Color color)
 {
 	GP_CHECK_CONTEXT(context);
 

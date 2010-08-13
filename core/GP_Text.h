@@ -29,6 +29,6 @@
 #include "GP_Context.h"
 
 void GP_Text(GP_Context *context, const struct GP_TextStyle *style,
-	int x, int y, const char *str, uint32_t color);
+	int x, int y, const char *str, GP_Color color);
 
 #endif /* GP_TEXT_H */

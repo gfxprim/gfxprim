@@ -30,6 +30,6 @@
 
 #include <stdint.h>
 
-uint32_t GP_GetPixel(GP_Context *context, int x, int y);
+GP_Color GP_GetPixel(GP_Context *context, int x, int y);
 
 #endif /* GP_GETPIXEL_H */

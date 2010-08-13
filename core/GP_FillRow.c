@@ -27,14 +27,15 @@
 
 #include <stdio.h>
 
-void GP_FillRow(GP_Context *context,
-		int row, int first_column, int last_column, uint32_t value)
+void GP_FillRow(GP_Context *context, int row, int first_column, int last_column,
+                GP_Color color)
 {
 	GP_CHECK_CONTEXT(context);
+	int value = 0;
 
 	/* Handle swapped column indexes gracefully. */
 	if (first_column > last_column) {
-		GP_FillRow(context, row, last_column, first_column, value);
+		GP_FillRow(context, row, last_column, first_column, color);
 		return;
 	}
 

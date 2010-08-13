@@ -31,6 +31,6 @@
 #include <stdint.h>
 
 void GP_FillEllipse(GP_Context *context, int xcenter, int ycenter,
-	int a, int b, uint32_t color);
+	int a, int b, GP_Color color);
 
 #endif /* GP_FILLELLIPSE_H */

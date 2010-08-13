@@ -33,7 +33,11 @@
 SDL_Surface *display = NULL;
 GP_Context context;
 
-static long white, gray, dark_gray, black, dark_red;
+static GP_Color white     = GP_COLNAME_PACK(GP_COL_WHITE);
+static GP_Color gray      = GP_COLNAME_PACK(GP_COL_GRAY_LIGHT);
+static GP_Color dark_gray = GP_COLNAME_PACK(GP_COL_GRAY_DARK);
+static GP_Color black     = GP_COLNAME_PACK(GP_COL_BLACK);
+static GP_Color dark_red  = GP_COLNAME_PACK(GP_COL_RED);
 
 static const char *test_strings[] = {
 	" !\"#$%&\047()*+,-./0123456789:;<=>?@",
@@ -48,7 +52,7 @@ void redraw_screen(void)
 {
 	SDL_LockSurface(display);
 	
-	SDL_FillRect(display, NULL, black);
+	GP_FillRect(&context, 0, 0, context.rows, context.columns, black);
 
 	struct GP_TextStyle style = GP_DEFAULT_TEXT_STYLE;
 
@@ -135,13 +139,6 @@ int main(void)
 		fprintf(stderr, "Could not open display: %s\n", SDL_GetError());
 		goto fail;
 	}
-
-	/* Load a set of basic colors */
-	white = SDL_MapRGB(display->format, 255, 255, 255);
-	gray = SDL_MapRGB(display->format, 127, 127, 127);
-	dark_gray = SDL_MapRGB(display->format, 64, 64, 64);
-	black = SDL_MapRGB(display->format, 0, 0, 0);
-	dark_red = SDL_MapRGB(display->format, 64, 0, 0);
 
 	/* Set up a clipping rectangle to test proper clipping of pixels */
 	SDL_Rect clip_rect = {10, 10, 620, 460};

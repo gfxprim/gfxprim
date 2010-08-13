@@ -38,7 +38,7 @@ typedef struct {
 	uint8_t bits_per_pixel;		/* values: 8, 16, 24, 32 */
 	uint32_t bytes_per_row;
 	uint32_t rows;			/* total number of rows */
-	uint32_t columns;		/* total number of columns */
+	uint32_t columns;  		/* total number of columns */
 
 	GP_PixelType pixel_type;        /* hardware pixel format */
 

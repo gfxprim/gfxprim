@@ -31,7 +31,7 @@
 #include <stdint.h>
 
 void GP_Line(GP_Context *context, int x0, int y0, int x1, int y1,
-	uint32_t color);
+	GP_Color color);
 
 size_t GP_CalcLinePoints(int x0, int y0, int x1, int y1, int *points,
 	size_t maxlen);

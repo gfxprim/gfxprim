@@ -27,7 +27,7 @@
 
 static int GP_PutChar(GP_Context *context,
 	const struct GP_TextStyle *style, int x0, int y0,
-	const uint8_t *char_data, uint32_t color)
+	const uint8_t *char_data, GP_Color color)
 {
 	int xdelta = style->pixel_xmul + style->pixel_xspace;
 
@@ -83,7 +83,7 @@ static int GP_PutChar(GP_Context *context,
 }
 
 void GP_Text(GP_Context *context, const struct GP_TextStyle *style,
-	int x, int y, const char *str, uint32_t color)
+	int x, int y, const char *str, GP_Color color)
 {
 	int bytes_per_char = 2 + style->font->bytes_per_line * style->font->height;
 

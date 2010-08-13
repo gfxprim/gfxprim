@@ -46,9 +46,11 @@ GP_Context context;
 SDL_TimerID timer;
 
 int iter, l, way = 1;
-long black, blue, gray;
+GP_Color black = GP_COLNAME_PACK(GP_COL_BLACK);
+GP_Color blue  = GP_COLNAME_PACK(GP_COL_BLUE);
+GP_Color gray  = GP_COLNAME_PACK(GP_COL_GRAY_LIGHT);
 
-static void sierpinsky(SDL_Surface *surf, long color, float x1, float y1, float x4, float y4, int iter)
+static void sierpinsky(SDL_Surface *surf, GP_Color color, float x1, float y1, float x4, float y4, int iter)
 {
 	float x2, y2, x3, y3, x5, y5;
 	
@@ -91,7 +93,7 @@ static void draw(SDL_Surface *surf, int x, int y, int l, int iter)
 	x3 = sin(1.00 * (iter+240)/57) * l + x;
 	y3 = cos(1.00 * (iter+240)/57) * l + y;
 
-	SDL_FillRect(surf, NULL, gray);
+	GP_FillRect(&context, 0, 0, context.rows, context.columns, gray);
 
 	GP_FillTriangle(&context, x1, y1, x2, y2, x3, y3, blue);
 
@@ -133,10 +135,6 @@ int main(void)
 	}
 
 	GP_SDL_ContextFromSurface(&context, display);
-
-	black = SDL_MapRGB(display->format, 0, 0, 0);
-	gray = SDL_MapRGB(display->format, 127, 127, 127);
-	blue = SDL_MapRGB(display->format, 0, 0, 127);
 
 	iter = 0;
 	draw(display, display->w/2, display->h/2, l, iter);

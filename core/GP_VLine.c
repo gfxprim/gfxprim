@@ -25,7 +25,7 @@
 
 #include "GP.h"
 
-void GP_VLine(GP_Context *context, int x, int y0, int y1, uint32_t color)
+void GP_VLine(GP_Context *context, int x, int y0, int y1, GP_Color color)
 {
 	if (context->vertical_rows) {
 		GP_FillRow(context, x, y0, y1, color);
