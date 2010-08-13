@@ -31,7 +31,8 @@ void GP_FillColumn(GP_Context *context, int column, int first_row, int last_row,
                    GP_Color color)
 {
 	GP_CHECK_CONTEXT(context);
-	int value = 0;
+	GP_RetCode ret;
+	GP_Pixel pixel;
 
 	/* handle swapped coordinates gracefully */
 	if (first_row > last_row) {
@@ -46,7 +47,7 @@ void GP_FillColumn(GP_Context *context, int column, int first_row, int last_row,
 		|| last_row < (int) context->clip_row_min) {
 		return;
 	}
-
+	
 	/* clip the row value */
 	first_row = GP_MAX(first_row, (int) context->clip_row_min);
 	last_row = GP_MIN(last_row, (int) context->clip_row_max);
@@ -55,31 +56,31 @@ void GP_FillColumn(GP_Context *context, int column, int first_row, int last_row,
 
 	/* Calculate the address of the start of the filled block */
 	uint8_t *p = (uint8_t *) GP_PIXEL_ADDRESS(context, first_row, column);
+	
+	/* Calculate pixel value from color */
+	pixel.type = context->pixel_type;
+	ret        = GP_ColorToPixel(color, &pixel);
 
 	size_t i;
 	switch(context->bits_per_pixel) {
 	case 32:
-		for (i = 0; i < row_count; i++, p += context->bytes_per_row) {
-			GP_WritePixel32bpp(p, value);
-		}
+		for (i = 0; i < row_count; i++, p += context->bytes_per_row)
+			GP_WritePixel32bpp(p, pixel.val);
 		break;
 
 	case 24:
-		for (i = 0; i < row_count; i++, p += context->bytes_per_row) {
-			GP_WritePixel24bpp(p, value);
-		}
+		for (i = 0; i < row_count; i++, p += context->bytes_per_row)
+			GP_WritePixel24bpp(p, pixel.val);
 		break;
 
 	case 16:
-		for (i = 0; i < row_count; i++, p += context->bytes_per_row) {
-			GP_WritePixel16bpp(p, (uint16_t) value);
-		}
+		for (i = 0; i < row_count; i++, p += context->bytes_per_row)
+			GP_WritePixel16bpp(p, pixel.val);
 		break;
 
 	case 8:
-		for (i = 0; i < row_count; i++, p += context->bytes_per_row) {
-			GP_WritePixel8bpp(p, (uint8_t) value);
-		}
+		for (i = 0; i < row_count; i++, p += context->bytes_per_row)
+			GP_WritePixel8bpp(p, pixel.val);
 		break;
 
 	default:

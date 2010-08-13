@@ -31,7 +31,8 @@ void GP_FillRow(GP_Context *context, int row, int first_column, int last_column,
                 GP_Color color)
 {
 	GP_CHECK_CONTEXT(context);
-	int value = 0;
+	GP_RetCode ret;
+	GP_Pixel pixel;
 
 	/* Handle swapped column indexes gracefully. */
 	if (first_column > last_column) {
@@ -55,22 +56,26 @@ void GP_FillRow(GP_Context *context, int row, int first_column, int last_column,
 
 	/* Calculate the address of the start of the filled block */
 	void *start = GP_PIXEL_ADDRESS(context, row, first_column);
+	
+	/* Calculate pixel value from color */
+	pixel.type = context->pixel_type;
+	ret = GP_ColorToPixel(color, &pixel);
 
 	switch(context->bits_per_pixel) {
 	case 32:
-		GP_WritePixels32bpp(start, column_count, value);
+		GP_WritePixels32bpp(start, column_count, pixel.val);
 		break;
 	
 	case 24:
-		GP_WritePixels24bpp(start, column_count, value);
+		GP_WritePixels24bpp(start, column_count, pixel.val);
 		break;
 	
 	case 16:
-		GP_WritePixels16bpp(start, column_count, (uint16_t) value);
+		GP_WritePixels16bpp(start, column_count, pixel.val);
 		break;
 	
 	case 8:
-		GP_WritePixels8bpp(start, column_count, (uint8_t) value);
+		GP_WritePixels8bpp(start, column_count, pixel.val);
 		break;
 	
 	default:

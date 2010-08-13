@@ -28,8 +28,12 @@
 void GP_PutPixel(GP_Context *context, int x, int y, GP_Color color)
 {
 	GP_CHECK_CONTEXT(context);
-	int value = 0;
-
+	GP_RetCode ret;
+	GP_Pixel pixel;
+	
+	pixel.type = context->pixel_type;
+	ret = GP_ColorToPixel(color, &pixel);
+	
 	uint8_t *p;
 
 	if (context->vertical_rows) {
@@ -52,19 +56,18 @@ void GP_PutPixel(GP_Context *context, int x, int y, GP_Color color)
 
 	switch (context->bits_per_pixel) {
 	case 32:
-		GP_WritePixel32bpp(p, value);
+		GP_WritePixel32bpp(p, pixel.val);
 		break;
-	
 	case 24:
-		GP_WritePixel24bpp(p, value);
+		GP_WritePixel24bpp(p, pixel.val);
 		break;
 	
 	case 16:
-		GP_WritePixel16bpp(p, value);
+		GP_WritePixel16bpp(p, pixel.val);
 		break;
 	
 	case 8:
-		GP_WritePixel8bpp(p, value);
+		GP_WritePixel8bpp(p, pixel.val);
 		break;
 	
 	default:

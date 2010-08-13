@@ -52,7 +52,7 @@ void redraw_screen(void)
 {
 	SDL_LockSurface(display);
 	
-	GP_FillRect(&context, 0, 0, context.rows, context.columns, black);
+	GP_FillRect(&context, 0, 0, context.columns, context.rows, black);
 
 	struct GP_TextStyle style = GP_DEFAULT_TEXT_STYLE;
 
