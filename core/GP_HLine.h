@@ -30,6 +30,6 @@
 
 #include <stdint.h>
 
-void GP_HLine(GP_Context *context, int x0, int x1, int y, GP_Color color);
+GP_RetCode GP_HLine(GP_Context *context, int x0, int x1, int y, GP_Color color);
 
 #endif /* GP_HLINE_H */

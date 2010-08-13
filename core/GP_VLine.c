@@ -25,14 +25,14 @@
 
 #include "GP.h"
 
-void GP_VLine(GP_Context *context, int x, int y0, int y1, GP_Color color)
+GP_RetCode GP_VLine(GP_Context *context, int x, int y0, int y1, GP_Color color)
 {
 	if (y1 < y0)
 		GP_SWAP(y1, y0);
 
 	if (context->axes_swap)
-		GP_FillRow(context, x, y0, y1, color);
+		return GP_FillRow(context, x, y0, y1, color);
 	else
-		GP_FillColumn(context, x, y0, y1, color);
+		return GP_FillColumn(context, x, y0, y1, color);
 }
 

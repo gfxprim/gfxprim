@@ -25,11 +25,14 @@
 
 #include "GP.h"
 
-void GP_Rect(GP_Context *context, int x0, int y0, int x1, int y1,
-	GP_Color color)
+GP_RetCode GP_Rect(GP_Context *context, int x0, int y0, int x1, int y1,
+                   GP_Color color)
 {
 	GP_HLine(context, x0, x1, y0, color);
 	GP_HLine(context, x0, x1, y1, color);
 	GP_VLine(context, x0, y0, y1, color);
 	GP_VLine(context, x1, y0, y1, color);
+
+	//TODO: Correct return code
+	return GP_ESUCCESS;
 }

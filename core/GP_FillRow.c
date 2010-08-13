@@ -27,25 +27,23 @@
 
 #include <stdio.h>
 
-void GP_FillRow(GP_Context *context, int row, int first_column, int last_column,
-                GP_Color color)
+GP_RetCode GP_FillRow(GP_Context *context, int row, int first_column,
+                      int last_column, GP_Color color)
 {
 	GP_CHECK_CONTEXT(context);
 	GP_RetCode ret;
 	GP_Pixel pixel;
 
 	/* Handle swapped column indexes gracefully. */
-	if (first_column > last_column) {
-		GP_FillRow(context, row, last_column, first_column, color);
-		return;
-	}
+	if (first_column > last_column)
+		GP_SWAP(first_column, last_column);
 
 	/* check if we are not completely outside limits */
 	if (row < (int) context->clip_row_min
 		|| row > (int) context->clip_row_max
 		|| first_column > (int) context->clip_col_max
 		|| last_column < (int) context->clip_col_min) {
-		return;
+		return GP_EINVAL;
 	}
 
 	/* clip the column value */
@@ -80,5 +78,8 @@ void GP_FillRow(GP_Context *context, int row, int first_column, int last_column,
 	
 	default:
 		GP_ABORT("Unsupported value of context->bits_per_pixel");
+		return GP_ENOIMPL;
 	}
+
+	return ret;
 }

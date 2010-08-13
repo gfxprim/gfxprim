@@ -30,7 +30,7 @@
 
 #include <stdint.h>
 
-void GP_Circle(GP_Context *context, int xcenter, int ycenter, int r,
-	GP_Color color);
+GP_RetCode GP_Circle(GP_Context *context, int xcenter, int ycenter,
+                     unsigned int r, GP_Color color);
 
 #endif /* GP_CIRCLE_H */

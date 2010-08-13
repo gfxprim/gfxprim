@@ -28,7 +28,7 @@
 
 #include "GP_Context.h"
 
-void GP_FillRect(GP_Context *context, int x0, int y0, int x1, int y1,
-	GP_Color color);
+GP_RetCode GP_FillRect(GP_Context *context, int x0, int y0, int x1, int y1,
+                       GP_Color color);
 
 #endif /* GP_FILLRECT_H */

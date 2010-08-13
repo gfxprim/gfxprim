@@ -30,7 +30,7 @@
 
 #include <stdint.h>
 
-void GP_FillEllipse(GP_Context *context, int xcenter, int ycenter,
-	int a, int b, GP_Color color);
+GP_RetCode GP_FillEllipse(GP_Context *context, int xcenter, int ycenter,
+                          unsigned int a, unsigned int b, GP_Color color);
 
 #endif /* GP_FILLELLIPSE_H */

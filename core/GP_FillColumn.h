@@ -30,7 +30,7 @@
 
 #include <stdio.h>
 
-void GP_FillColumn(GP_Context *context, int column, int first_row, int last_row,
-                   GP_Color color);
+GP_RetCode GP_FillColumn(GP_Context *context, int column, int first_row,
+                         int last_row, GP_Color color);
 
 #endif /* GP_FILLCOLUMN_H */

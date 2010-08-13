@@ -28,9 +28,9 @@
 
 #include "GP.h"
 
-void GP_Fill(GP_Context *context, GP_Color color)
+GP_RetCode GP_Fill(GP_Context *context, GP_Color color)
 {
-	GP_FillRect(context, 0, 0, context->cols, context->rows, color);
+	return GP_FillRect(context, 0, 0, context->cols, context->rows, color);
 }
 
 #endif /* GP_FILL_H */

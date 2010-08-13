@@ -31,7 +31,7 @@
 #include <stdint.h>
 #include <unistd.h>
 
-void GP_FillRow(GP_Context *context, int row, int first_column, int last_column,
-                GP_Color color);
+GP_RetCode GP_FillRow(GP_Context *context, int row, int first_column,
+                      int last_column, GP_Color color);
 
 #endif /* GP_FILLROW_H */

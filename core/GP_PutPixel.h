@@ -28,8 +28,6 @@
 
 #include "GP_Context.h"
 
-#include <stdint.h>
-
-void GP_PutPixel(GP_Context *context, int x, int y, GP_Color color);
+GP_RetCode GP_PutPixel(GP_Context *context, int x, int y, GP_Color color);
 
 #endif /* GP_PUTPIXEL_H */

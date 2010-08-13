@@ -27,8 +27,8 @@
 
 #include <stdlib.h>
 
-void GP_FillTriangle(GP_Context* context,
-	int x0, int y0, int x1, int y1, int x2, int y2, GP_Color color)
+GP_RetCode GP_FillTriangle(GP_Context* context, int x0, int y0, int x1, int y1,
+                           int x2, int y2, GP_Color color)
 {
 	GP_CHECK_CONTEXT(context);
 
@@ -89,11 +89,10 @@ void GP_FillTriangle(GP_Context* context,
 	if (ACdy == 0) {
 
 		/* All three vertices in one horizontal line. */
-		GP_HLine(context,
-			GP_MIN(Ax, GP_MIN(Bx, Cx)),
-			GP_MAX(Ax, GP_MAX(Bx, Cx)),
-			Ay, color);
-		return;
+		return GP_HLine(context,
+		                GP_MIN(Ax, GP_MIN(Bx, Cx)),
+		                GP_MAX(Ax, GP_MAX(Bx, Cx)),
+		                Ay, color);
 	}
 
 	/* The direction of each side (whether X grows or decreases). */
@@ -160,10 +159,8 @@ void GP_FillTriangle(GP_Context* context,
 		ACerr -= abs(ACdx);
 	}
 
-	if (BCdy == 0) {
-		GP_HLine(context, Bx, Cx, y, color);
-		return;
-	}
+	if (BCdy == 0)
+		return GP_HLine(context, Bx, Cx, y, color);
 
 	/* Bottom part (from By to Cy). */
 	for (BCx = Bx, y = By, BCerr = abs(BCdy)/2; y <= Cy; y++) {
@@ -188,4 +185,7 @@ void GP_FillTriangle(GP_Context* context,
 		ACerr -= abs(ACdx);
 		BCerr -= abs(BCdx);
 	}
+
+	//TODO: See GP_Circle.c
+	return GP_ESUCCESS;
 }

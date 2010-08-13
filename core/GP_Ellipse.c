@@ -25,13 +25,10 @@
 
 #include "GP.h"
 
-void GP_Ellipse(GP_Context *context, int xcenter, int ycenter,
-	int a, int b, GP_Color color)
+GP_RetCode GP_Ellipse(GP_Context *context, int xcenter, int ycenter,
+                      unsigned int a, unsigned int b, GP_Color color)
 {
 	GP_CHECK_CONTEXT(context);
-
-	if (a <= 0 || b <= 0)
-		return;
 
 	/* Precompute quadratic terms. */
 	int a2 = a*a;
@@ -102,4 +99,7 @@ void GP_Ellipse(GP_Context *context, int xcenter, int ycenter,
 		GP_PutPixel(context, xcenter-x+1, ycenter+y, color);
 		GP_PutPixel(context, xcenter+x-1, ycenter+y, color);
 	}
+
+	//TODO: see GP_Circle.c
+	return GP_ESUCCESS;
 }

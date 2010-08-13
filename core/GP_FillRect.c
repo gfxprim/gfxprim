@@ -27,18 +27,19 @@
 
 #include <stdint.h>
 
-void GP_FillRect(GP_Context *context, int x0, int y0, int x1, int y1,
-	GP_Color color)
+GP_RetCode GP_FillRect(GP_Context *context, int x0, int y0, int x1, int y1,
+                       GP_Color color)
 {
+	int y;
 	GP_CHECK_CONTEXT(context);
 
-	if (y0 > y1) {
+	if (y0 > y1)
 		GP_SWAP(y0, y1);
-		GP_SWAP(x0, x1);
-	}
 
-	int y;
-	for (y = y0; y <= y1; y++) {
+	for (y = y0; y <= y1; y++)
 		GP_HLine(context, x0, x1, y, color);
-	}
+
+
+	//TODO: See GP_Circle.c
+	return GP_ESUCCESS;
 }

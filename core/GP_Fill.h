@@ -28,6 +28,6 @@
 
 #include "GP_Context.h"
 
-void GP_Fill(GP_Context *context, GP_Color color);
+GP_RetCode GP_Fill(GP_Context *context, GP_Color color);
 
 #endif /* GP_FILL_H */

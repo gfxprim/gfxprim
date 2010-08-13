@@ -27,12 +27,10 @@
 
 #include <stdint.h>
 
-void GP_FillCircle(GP_Context *context, int xcenter, int ycenter, int r,
-	GP_Color color)
+GP_RetCode GP_FillCircle(GP_Context *context, int xcenter, int ycenter,
+                         unsigned int r, GP_Color color)
 {
 	GP_CHECK_CONTEXT(context);
-
-	if (r < 0) { return; }
 
 	/*
 	 * Draw the circle in top-down, line-per-line manner.
@@ -51,4 +49,7 @@ void GP_FillCircle(GP_Context *context, int xcenter, int ycenter, int r,
 		GP_HLine(context, xcenter-x+1, xcenter+x-1, ycenter-y, color);
 		GP_HLine(context, xcenter-x+1, xcenter+x-1, ycenter+y, color);
 	}
+
+	//TODO: See GP_Circle.c
+	return GP_ESUCCESS;
 }

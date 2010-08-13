@@ -25,10 +25,13 @@
 
 #include "GP.h"
 
-void GP_Triangle(GP_Context *context,
-	int x0, int y0, int x1, int y1, int x2, int y2, GP_Color color)
+GP_RetCode GP_Triangle(GP_Context *context, int x0, int y0, int x1, int y1,
+                       int x2, int y2, GP_Color color)
 {
 	GP_Line(context, x0, y0, x1, y1, color);
 	GP_Line(context, x0, y0, x2, y2, color);
 	GP_Line(context, x1, y1, x2, y2, color);
+
+	//TODO: correct ret code
+	return GP_ESUCCESS;
 }

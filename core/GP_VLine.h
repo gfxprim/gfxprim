@@ -28,8 +28,6 @@
 
 #include "GP_Context.h"
 
-#include <stdint.h>
-
-void GP_VLine(GP_Context *context, int x, int y0, int y1, GP_Color color);
+GP_RetCode GP_VLine(GP_Context *context, int x, int y0, int y1, GP_Color color);
 
 #endif /* GP_VLINE_H */

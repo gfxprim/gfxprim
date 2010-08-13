@@ -25,13 +25,10 @@
 
 #include "GP.h"
 
-void GP_FillEllipse(GP_Context *context, int xcenter, int ycenter,
-	int a, int b, GP_Color color)
+GP_RetCode GP_FillEllipse(GP_Context *context, int xcenter, int ycenter,
+                          unsigned int a, unsigned int b, GP_Color color)
 {
 	GP_CHECK_CONTEXT(context);
-
-	if (a <= 0 || b <= 0)
-		return;
 
 	/* Precompute quadratic terms. */
 	int a2 = a*a;
@@ -55,4 +52,7 @@ void GP_FillEllipse(GP_Context *context, int xcenter, int ycenter,
 		GP_HLine(context, xcenter-x+1, xcenter+x-1, ycenter-y, color);
 		GP_HLine(context, xcenter-x+1, xcenter+x-1, ycenter+y, color);
 	}
+
+	//TODO: See GP_Circle.c
+	return GP_ESUCCESS;
 }

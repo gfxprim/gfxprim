@@ -60,8 +60,8 @@
 	} \
 } while(0); 
 
-void GP_Line(GP_Context *context, int x0, int y0, int x1, int y1,
-	GP_Color color)
+GP_RetCode GP_Line(GP_Context *context, int x0, int y0, int x1, int y1,
+                   GP_Color color)
 {
 	GP_CHECK_CONTEXT(context);
 
@@ -103,6 +103,9 @@ void GP_Line(GP_Context *context, int x0, int y0, int x1, int y1,
 			NEXT_X;
 		}
 	}
+
+	//TODO: see GP_Circle.c
+	return GP_ESUCCESS;
 }
 
 size_t GP_CalcLinePoints(int x0, int y0, int x1, int y1,

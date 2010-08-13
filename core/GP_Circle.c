@@ -25,13 +25,10 @@
 
 #include "GP.h"
 
-void GP_Circle(GP_Context *context, int xcenter, int ycenter, int r,
-	GP_Color color)
+GP_RetCode GP_Circle(GP_Context *context, int xcenter, int ycenter,
+                     unsigned int r, GP_Color color)
 {
 	GP_CHECK_CONTEXT(context);
-
-	if (r < 0)
-		return;
 
 	/*
 	 * Draw the circle in top-down order, line-per-line manner;
@@ -90,5 +87,10 @@ void GP_Circle(GP_Context *context, int xcenter, int ycenter, int r,
 		GP_PutPixel(context, xcenter-x+1, ycenter+y, color);
 		GP_PutPixel(context, xcenter+x-1, ycenter+y, color);
 	}
+
+	//TODO: we should not use GP_PutPixel here
+	//      we rather need GP_Circle for every bits_per_pixel
+	//      so we just throw parameteres to it.
+	return GP_ESUCCESS;
 }
 
