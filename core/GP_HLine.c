@@ -31,15 +31,11 @@ void GP_HLine(GP_Context *context, int x0, int x1, int y, GP_Color color)
 {
 	GP_CHECK_CONTEXT(context);
 
-	/* Handle swapped coordinates gracefully. */
-	if (x1 < x0) {
-		GP_HLine(context, x1, x0, y, color);
-		return;
-	}
+	if (x1 < x0)
+		GP_SWAP(x1, x0);
 
-	if (context->vertical_rows) {
+	if (context->axes_swap)
 		GP_FillColumn(context, y, x0, x1, color);
-	} else {
+	else
 		GP_FillRow(context, y, x0, x1, color);
-	}
 }

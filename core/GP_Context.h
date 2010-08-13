@@ -45,15 +45,15 @@ typedef struct {
 	/* image orientation. Most common is landscape (0, 0, 0),
 	 * portrait with normal topleft corner is (1, 0, 0).
 	 */
-	int vertical_rows:1;		/* are rows in fact vertical? */
-	int right_to_left:1;		/* is zero at the right? */
-	int bottom_to_top:1;		/* is zero at the bottom? */
+	int axes_swap:1;	        /* swap axes so that x is y and y is x */
+	int x_swap:1;		        /* swap direction on x  */
+	int y_swap:1;		        /* swap direction on y  */
 
 	/* clipping rectangle; drawing functions only affect the inside */
 	uint32_t clip_row_min;
 	uint32_t clip_row_max;
-	uint32_t clip_column_min;
-	uint32_t clip_column_max;
+	uint32_t clip_col_min;
+	uint32_t clip_col_max;
 } GP_Context;
 
 /* Determines the address of a pixel within the context's image.
@@ -69,9 +69,9 @@ typedef struct {
 		GP_CHECK(context != NULL); \
 		GP_CHECK(context->rows > 0 && context->cols > 0); \
 		GP_CHECK(context->clip_row_min <= context->clip_row_max); \
-		GP_CHECK(context->clip_column_min <= context->clip_column_max); \
+		GP_CHECK(context->clip_col_min <= context->clip_col_max); \
 		GP_CHECK(context->clip_row_max < context->rows); \
-		GP_CHECK(context->clip_column_max < context->cols); \
+		GP_CHECK(context->clip_col_max < context->cols); \
 	} while(0)
 
 #endif /* GP_CONTEXT_H */

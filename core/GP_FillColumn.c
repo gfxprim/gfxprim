@@ -41,8 +41,8 @@ void GP_FillColumn(GP_Context *context, int column, int first_row, int last_row,
 	}
 
 	/* check if we are not completely outside the clipping rectangle */
-	if (column < (int) context->clip_column_min
-		|| column > (int) context->clip_column_max
+	if (column < (int) context->clip_col_min
+		|| column > (int) context->clip_col_max
 		|| first_row > (int) context->clip_row_max
 		|| last_row < (int) context->clip_row_min) {
 		return;

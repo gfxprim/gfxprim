@@ -113,15 +113,15 @@ inline GP_RetCode GP_SDL_ContextFromSurface(
 	context->rows = surf->h;
 
 	/* orientation */
-	context->vertical_rows = 0;
-	context->right_to_left = 0;
-	context->bottom_to_top = 0;
+	context->axes_swap = 0;
+	context->x_swap = 0;
+	context->y_swap = 0;
 
 	/* clipping */
 	context->clip_row_min = surf->clip_rect.y;
 	context->clip_row_max = surf->clip_rect.y + surf->clip_rect.h - 1;
-	context->clip_column_min = surf->clip_rect.x;
-	context->clip_column_max = surf->clip_rect.x + surf->clip_rect.w - 1;
+	context->clip_col_min = surf->clip_rect.x;
+	context->clip_col_max = surf->clip_rect.x + surf->clip_rect.w - 1;
 
 	if (context->pixel_type == GP_PIXEL_UNKNOWN) {
 		return GP_ENOIMPL;

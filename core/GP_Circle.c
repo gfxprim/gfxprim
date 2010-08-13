@@ -30,7 +30,8 @@ void GP_Circle(GP_Context *context, int xcenter, int ycenter, int r,
 {
 	GP_CHECK_CONTEXT(context);
 
-	if (r < 0) { return; }
+	if (r < 0)
+		return;
 
 	/*
 	 * Draw the circle in top-down order, line-per-line manner;

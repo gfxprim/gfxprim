@@ -43,14 +43,14 @@ void GP_FillRow(GP_Context *context, int row, int first_column, int last_column,
 	/* check if we are not completely outside limits */
 	if (row < (int) context->clip_row_min
 		|| row > (int) context->clip_row_max
-		|| first_column > (int) context->clip_column_max
-		|| last_column < (int) context->clip_column_min) {
+		|| first_column > (int) context->clip_col_max
+		|| last_column < (int) context->clip_col_min) {
 		return;
 	}
 
 	/* clip the column value */
-	first_column = GP_MAX(first_column, (int) context->clip_column_min);
-	last_column = GP_MIN(last_column, (int) context->clip_column_max);
+	first_column = GP_MAX(first_column, (int) context->clip_col_min);
+	last_column = GP_MIN(last_column, (int) context->clip_col_max);
 
 	size_t column_count = 1 + last_column - first_column;
 

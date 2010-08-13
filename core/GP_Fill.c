@@ -26,7 +26,7 @@
 #ifndef GP_FILL_H
 #define GP_FILL_H
 
-#include "GP_Context.h"
+#include "GP.h"
 
 void GP_Fill(GP_Context *context, GP_Color color)
 {

@@ -44,4 +44,5 @@
 	_a > _b ? _a : _b; \
 })
 
-#endif /* GP_MINMAX_H */
+#endif
+
