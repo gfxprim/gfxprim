@@ -39,16 +39,16 @@ GP_RetCode GP_FillRow(GP_Context *context, int row, int first_column,
 		GP_SWAP(first_column, last_column);
 
 	/* check if we are not completely outside limits */
-	if (row < (int) context->clip_row_min
-		|| row > (int) context->clip_row_max
-		|| first_column > (int) context->clip_col_max
-		|| last_column < (int) context->clip_col_min) {
+	if (row < (int) context->clip_h_min
+		|| row > (int) context->clip_h_max
+		|| first_column > (int) context->clip_w_max
+		|| last_column < (int) context->clip_w_min) {
 		return GP_EINVAL;
 	}
 
 	/* clip the column value */
-	first_column = GP_MAX(first_column, (int) context->clip_col_min);
-	last_column = GP_MIN(last_column, (int) context->clip_col_max);
+	first_column = GP_MAX(first_column, (int) context->clip_w_min);
+	last_column = GP_MIN(last_column, (int) context->clip_w_max);
 
 	size_t column_count = 1 + last_column - first_column;
 

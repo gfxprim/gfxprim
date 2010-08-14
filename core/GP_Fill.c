@@ -30,7 +30,7 @@
 
 GP_RetCode GP_Fill(GP_Context *context, GP_Color color)
 {
-	return GP_FillRect(context, 0, 0, context->cols, context->rows, color);
+	return GP_FillRect(context, 0, 0, context->w, context->h, color);
 }
 
 #endif /* GP_FILL_H */

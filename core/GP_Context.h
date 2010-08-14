@@ -37,8 +37,8 @@ typedef struct {
 	void *pixels;			/* pointer to image pixels */
 	uint8_t bits_per_pixel;		/* values: 1, 2, 4, 8, 16, 24, 32 */
 	uint32_t bytes_per_row;
-	uint32_t rows;			/* total number of rows */
-	uint32_t cols;  		/* total number of columns */
+	uint32_t w;			/* width */
+	uint32_t h;      		/* heigth */
 
 	GP_PixelType pixel_type;        /* hardware pixel format */
 
@@ -50,28 +50,28 @@ typedef struct {
 	int y_swap:1;		        /* swap direction on y  */
 
 	/* clipping rectangle; drawing functions only affect the inside */
-	uint32_t clip_row_min;
-	uint32_t clip_row_max;
-	uint32_t clip_col_min;
-	uint32_t clip_col_max;
+	uint32_t clip_w_min;
+	uint32_t clip_w_max;
+	uint32_t clip_h_min;
+	uint32_t clip_h_max;
 } GP_Context;
 
 /* Determines the address of a pixel within the context's image.
  * Rows and columns are specified in the image's orientation
  * (i.e. they might not be XY if the image is rotated).
  */
-#define GP_PIXEL_ADDRESS(context, row, column) ((uint8_t *) context->pixels \
-	+ row * context->bytes_per_row \
-	+ column * (context->bits_per_pixel / 8))
+#define GP_PIXEL_ADDRESS(context, w, h) ((uint8_t *) context->pixels \
+	+ w * context->bytes_per_row \
+	+ h * (context->bits_per_pixel / 8))
 
 /* Performs a series of sanity checks on context, aborting if any fails. */
 #define GP_CHECK_CONTEXT(context) do { \
 		GP_CHECK(context != NULL); \
-		GP_CHECK(context->rows > 0 && context->cols > 0); \
-		GP_CHECK(context->clip_row_min <= context->clip_row_max); \
-		GP_CHECK(context->clip_col_min <= context->clip_col_max); \
-		GP_CHECK(context->clip_row_max < context->rows); \
-		GP_CHECK(context->clip_col_max < context->cols); \
+		GP_CHECK(context->w > 0 && context->h > 0); \
+		GP_CHECK(context->clip_w_min <= context->clip_w_max); \
+		GP_CHECK(context->clip_h_min <= context->clip_h_max); \
+		GP_CHECK(context->clip_w_max < context->w); \
+		GP_CHECK(context->clip_h_max < context->h); \
 	} while(0)
 
 #endif /* GP_CONTEXT_H */

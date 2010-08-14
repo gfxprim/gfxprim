@@ -109,8 +109,8 @@ inline GP_RetCode GP_SDL_ContextFromSurface(
 	context->bits_per_pixel = 8 * surf->format->BytesPerPixel;
 	context->pixel_type = find_surface_pixel_type(surf);
 	context->bytes_per_row = surf->pitch;
-	context->cols = surf->w;
-	context->rows = surf->h;
+	context->w = surf->w;
+	context->h = surf->h;
 
 	/* orientation */
 	context->axes_swap = 0;
@@ -118,10 +118,10 @@ inline GP_RetCode GP_SDL_ContextFromSurface(
 	context->y_swap = 0;
 
 	/* clipping */
-	context->clip_row_min = surf->clip_rect.y;
-	context->clip_row_max = surf->clip_rect.y + surf->clip_rect.h - 1;
-	context->clip_col_min = surf->clip_rect.x;
-	context->clip_col_max = surf->clip_rect.x + surf->clip_rect.w - 1;
+	context->clip_h_min = surf->clip_rect.y;
+	context->clip_h_max = surf->clip_rect.y + surf->clip_rect.h - 1;
+	context->clip_w_min = surf->clip_rect.x;
+	context->clip_w_max = surf->clip_rect.x + surf->clip_rect.w - 1;
 
 	if (context->pixel_type == GP_PIXEL_UNKNOWN) {
 		return GP_ENOIMPL;
