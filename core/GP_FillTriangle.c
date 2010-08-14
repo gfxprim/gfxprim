@@ -32,6 +32,13 @@ GP_RetCode GP_FillTriangle(GP_Context* context, int x0, int y0, int x1, int y1,
 {
 	GP_CHECK_CONTEXT(context);
 
+	GP_TRANSFORM_X(context, x0);
+	GP_TRANSFORM_Y(context, y0);
+	GP_TRANSFORM_X(context, x1);
+	GP_TRANSFORM_Y(context, y1);
+	GP_TRANSFORM_X(context, x2);
+	GP_TRANSFORM_Y(context, y2);
+	
 	/* FIXME: For triangle lines that have abs(dx) > abs(dy), there is
 	 * sometimes one pixel missing at the start/end (rounding error?).
 	 * Temporary fixed by explicitly drawing the triangle boundary.
@@ -89,10 +96,10 @@ GP_RetCode GP_FillTriangle(GP_Context* context, int x0, int y0, int x1, int y1,
 	if (ACdy == 0) {
 
 		/* All three vertices in one horizontal line. */
-		return GP_HLine(context,
-		                GP_MIN(Ax, GP_MIN(Bx, Cx)),
-		                GP_MAX(Ax, GP_MAX(Bx, Cx)),
-		                Ay, color);
+		return GP_HLineInternal(context,
+		                        GP_MIN(Ax, GP_MIN(Bx, Cx)),
+		                        GP_MAX(Ax, GP_MAX(Bx, Cx)),
+		                        Ay, color);
 	}
 
 	/* The direction of each side (whether X grows or decreases). */
@@ -136,7 +143,7 @@ GP_RetCode GP_FillTriangle(GP_Context* context, int x0, int y0, int x1, int y1,
 	ACerr = abs(ACdy)/2;
 	for (ABx = Ax, ACx = Ax, y = Ay; y < By; y++) {
 
-		GP_HLine(context, ABx, ACx, y, color);
+		GP_HLineInternal(context, ABx, ACx, y, color);
 
 		old_ABx = ABx;
 		old_ACx = ACx;
@@ -160,14 +167,14 @@ GP_RetCode GP_FillTriangle(GP_Context* context, int x0, int y0, int x1, int y1,
 	}
 
 	if (BCdy == 0)
-		return GP_HLine(context, Bx, Cx, y, color);
+		return GP_HLineInternal(context, Bx, Cx, y, color);
 
 	/* Bottom part (from By to Cy). */
 	for (BCx = Bx, y = By, BCerr = abs(BCdy)/2; y <= Cy; y++) {
 		old_BCx = BCx;
 		old_ACx = ACx;
 
-		GP_HLine(context, BCx, ACx, y, color);
+		GP_HLineInternal(context, BCx, ACx, y, color);
 
 		while (BCerr < abs(BCdx) || BCdy == 0) {
 			BCx += BCxstep;

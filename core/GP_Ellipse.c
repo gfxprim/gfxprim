@@ -30,6 +30,9 @@ GP_RetCode GP_Ellipse(GP_Context *context, int xcenter, int ycenter,
 {
 	GP_CHECK_CONTEXT(context);
 
+	GP_TRANSFORM_X(context, xcenter);
+	GP_TRANSFORM_Y(context, ycenter);
+
 	/* Precompute quadratic terms. */
 	int a2 = a*a;
 	int b2 = b*b;

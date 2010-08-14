@@ -23,49 +23,17 @@
  *                                                                           *
  *****************************************************************************/
 
-#ifndef GP_H
-#define GP_H
+#ifndef GP_TRANSFORM_H
+#define GP_TRANSFORM_H
 
-#include <stdint.h>
+#define GP_TRANSFORM_X(context, x) do { \
+	if (context->x_swap)            \
+		x = context->w - x;     \
+} while (0)
 
-/* basic definitions and structures */
-#include "GP_Abort.h"
-#include "GP_Check.h"
-#include "GP_MinMax.h"
-#include "GP_Swap.h"
-#include "GP_Transform.h"
-#include "GP_Context.h"
+#define GP_TRANSFORM_Y(context, y) do { \
+	if (context->y_swap)            \
+		y = context->h - y;     \
+} while (0)
 
-/* semi-public, low-level drawing API */
-#include "GP_ReadPixel.h"
-#include "GP_WritePixel.h"
-#include "GP_FillColumn.h"
-#include "GP_FillRow.h"
-
-/* colors */
-#include "GP_Color.h"
-#include "GP_Palette.h"
-
-/* public drawing API */
-#include "GP_Fill.h"
-#include "GP_GetPixel.h"
-#include "GP_PutPixel.h"
-#include "GP_HLine.h"
-#include "GP_VLine.h"
-#include "GP_Line.h"
-#include "GP_Rect.h"
-#include "GP_FillRect.h"
-#include "GP_Triangle.h"
-#include "GP_FillTriangle.h"
-#include "GP_Circle.h"
-#include "GP_FillCircle.h"
-#include "GP_Ellipse.h"
-#include "GP_FillEllipse.h"
-
-/* fonts */
-#include "GP_Font.h"
-#include "GP_TextStyle.h"
-#include "GP_TextMetric.h"
-#include "GP_Text.h"
-
-#endif /* GP_H */
+#endif /* GP_TRANSFORM_H */

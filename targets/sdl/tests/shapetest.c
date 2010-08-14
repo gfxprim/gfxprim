@@ -85,6 +85,10 @@ static int variant = 1;
 static int xradius_add = 0;
 static int yradius_add = 0;
 
+/* center of drawing */
+static int center_x = 320;
+static int center_y = 240;
+
 void draw_testing_triangle(int x, int y, int xradius, int yradius)
 {
 	int x0, y0, x1, y1, x2, y2;
@@ -172,8 +176,6 @@ void draw_testing_rectangle(int x, int y, int xradius, int yradius)
 
 void redraw_screen(void)
 {
-	int x = 320;
-	int y = 240;
 
 	/* text style for the label */
 	struct GP_TextStyle style = {
@@ -189,31 +191,31 @@ void redraw_screen(void)
 
 	/* axes */
 	if (show_axes) {
-		GP_HLine(&context, 0, 640, y, gray);
-		GP_HLine(&context, 0, 640, y-yradius, darkgray);
-		GP_HLine(&context, 0, 640, y+yradius, darkgray);
-		GP_VLine(&context, x, 0, 480, gray);
-		GP_VLine(&context, x-xradius, 0, 480, darkgray);
-		GP_VLine(&context, x+xradius, 0, 480, darkgray);
+		GP_HLine(&context, 0, 640, center_y, gray);
+		GP_HLine(&context, 0, 640, center_y-yradius, darkgray);
+		GP_HLine(&context, 0, 640, center_y+yradius, darkgray);
+		GP_VLine(&context, center_x, 0, 480, gray);
+		GP_VLine(&context, center_x-xradius, 0, 480, darkgray);
+		GP_VLine(&context, center_x+xradius, 0, 480, darkgray);
 	}
 
 	/* the shape */
 	const char *title = NULL;
 	switch (shape) {
 	case SHAPE_TRIANGLE:
-		draw_testing_triangle(x, y, xradius, yradius);
+		draw_testing_triangle(center_x, center_y, xradius, yradius);
 		title = "TRIANGLE";
 		break;
 	case SHAPE_CIRCLE:
-		draw_testing_circle(x, y, xradius, yradius);
+		draw_testing_circle(center_x, center_y, xradius, yradius);
 		title = "CIRCLE";
 		break;
 	case SHAPE_ELLIPSE:
-		draw_testing_ellipse(x, y, xradius, yradius);
+		draw_testing_ellipse(center_x, center_y, xradius, yradius);
 		title = "ELLIPSE";
 		break;
 	case SHAPE_RECTANGLE:
-		draw_testing_rectangle(x, y, xradius, yradius);
+		draw_testing_rectangle(center_x, center_y, xradius, yradius);
 		title = "RECTANGLE";
 		break;
 	}
@@ -224,6 +226,9 @@ void redraw_screen(void)
 
 void event_loop(void)
 {
+	static bool shift_pressed = false;
+	static int xcenter_add = 0;
+	static int ycenter_add = 0;
 	SDL_Event event;
 
 	while (SDL_WaitEvent(&event) > 0) {
@@ -233,16 +238,32 @@ void event_loop(void)
 
 			if (xradius + xradius_add > 1 && xradius + xradius_add < 400)
 				xradius += xradius_add;
+			
 			if (yradius + yradius_add > 1 && yradius + yradius_add < 400)
 				yradius += yradius_add;
 			
+			if (center_x + xcenter_add > 1 && center_x + xcenter_add < 320)
+				center_x += xcenter_add;
+			
+			if (center_y + ycenter_add > 1 && center_y + ycenter_add < 240)
+				center_y += ycenter_add;
+
 			redraw_screen();
 			SDL_Flip(display);
 			break;
 
 		case SDL_KEYDOWN:
 			switch (event.key.keysym.sym) {
-
+			case SDLK_LSHIFT:
+			case SDLK_RSHIFT:
+				shift_pressed = true;
+			break;
+			case SDLK_x:
+				context.x_swap = !context.x_swap;
+			break;
+			case SDLK_y:
+				context.y_swap = !context.y_swap;
+			break;
 			case SDLK_f:
 				fill = !fill;
 				if (!fill && !outline) {
@@ -258,7 +279,7 @@ void event_loop(void)
 				}
 				break;
 
-			case SDLK_x:
+			case SDLK_a:
 				show_axes = !show_axes;
 				break;
 
@@ -266,19 +287,31 @@ void event_loop(void)
 				return;
 
 			case SDLK_LEFT:
-				xradius_add = -1;
+				if (shift_pressed)
+					xcenter_add = -1;
+				else
+					xradius_add = -1;
 				break;
 
 			case SDLK_RIGHT:
-				xradius_add = 1;
+				if (shift_pressed)
+					xcenter_add = 1;
+				else
+					xradius_add = 1;
 				break;
 
 			case SDLK_UP:
-				yradius_add = 1;
+				if (shift_pressed)
+					ycenter_add = -1;
+				else
+					yradius_add = 1;
 				break;
 
 			case SDLK_DOWN:
-				yradius_add = -1;
+				if (shift_pressed)
+					ycenter_add = 1;
+				else
+					yradius_add = -1;
 				break;
 
 			case SDLK_PAGEUP:
@@ -322,15 +355,20 @@ void event_loop(void)
 			break;
 		case SDL_KEYUP:
 			switch (event.key.keysym.sym) {
-
+			case SDLK_LSHIFT:
+			case SDLK_RSHIFT:
+				shift_pressed = false;
+			break;
 			/* Stop incrementing as soon as the key is released. */
 			case SDLK_LEFT:
 			case SDLK_RIGHT:
 				xradius_add = 0;
+				xcenter_add = 0;
 				break;
 			case SDLK_UP:
 			case SDLK_DOWN:
 				yradius_add = 0;
+				ycenter_add = 0;
 				break;
 
 			case SDLK_PAGEUP:
@@ -352,16 +390,20 @@ void event_loop(void)
 void print_instructions(void)
 {
 	printf("Use the following keys to control the test:\n");
-	printf("    Esc ......... exit\n");
-	printf("    Space ....... change shapes\n");
-	printf("    O ........... draw outlines (none/before/after fill)\n");
-	printf("    F ........... toggle filling\n");
-	printf("    X ........... show/hide axes\n");
-	printf("    left/right .. increase/decrease horizontal radius\n");
-	printf("    up/down ..... increase/decrease vertical radius\n");
-	printf("    PgUp/PgDn ... increase/decrease both radii\n");
-	printf("    = ........... reset radii to the same value\n");
-	printf("    1/2/3 ....... choose shape variant (if applicable)\n");
+	printf("    Esc ................. exit\n");
+	printf("    Space ............... change shapes\n");
+	printf("    O ................... draw outlines (none/before/after fill)\n");
+	printf("    F ................... toggle filling\n");
+	printf("    A ................... show/hide axes\n");
+	printf("    X ................... mirror X\n");
+	printf("    Y ................... mirror Y\n");
+	printf("    left/right .......... increase/decrease horizontal radius\n");
+	printf("    up/down ............. increase/decrease vertical radius\n");
+	printf("    shift + left/right .. increase/decrease horizontal center\n");
+	printf("    shift + up/down ..... increase/decrease vertical center\n");
+	printf("    PgUp/PgDn ........... increase/decrease both radii\n");
+	printf("    = ................... reset radii to the same value\n");
+	printf("    1/2/3 ............... choose shape variant (if applicable)\n");
 }
 
 int main(int argc, char ** argv)

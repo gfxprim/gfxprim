@@ -27,6 +27,10 @@
 
 GP_RetCode GP_VLine(GP_Context *context, int x, int y0, int y1, GP_Color color)
 {
+	GP_TRANSFORM_X(context, x);
+	GP_TRANSFORM_Y(context, y0);
+	GP_TRANSFORM_Y(context, y1);
+	
 	if (y1 < y0)
 		GP_SWAP(y1, y0);
 

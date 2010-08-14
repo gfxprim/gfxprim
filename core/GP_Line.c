@@ -65,6 +65,11 @@ GP_RetCode GP_Line(GP_Context *context, int x0, int y0, int x1, int y1,
 {
 	GP_CHECK_CONTEXT(context);
 
+	GP_TRANSFORM_X(context, x0);
+	GP_TRANSFORM_Y(context, y0);
+	GP_TRANSFORM_X(context, x1);
+	GP_TRANSFORM_Y(context, y1);
+
 	/* The steepness of the line */
 	int deltax = x1 - x0;
 	int deltay = y1 - y0;
@@ -113,7 +118,7 @@ size_t GP_CalcLinePoints(int x0, int y0, int x1, int y1,
 {
 	GP_CHECK(points != NULL || maxlen == 0);
 	GP_CHECK(maxlen % 2 == 0);
-
+	
 	size_t i = 0;
 
 	int deltax = x1 - x0;

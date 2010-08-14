@@ -30,6 +30,9 @@ GP_RetCode GP_Circle(GP_Context *context, int xcenter, int ycenter,
 {
 	GP_CHECK_CONTEXT(context);
 
+	GP_TRANSFORM_X(context, xcenter);
+	GP_TRANSFORM_Y(context, ycenter);
+
 	/*
 	 * Draw the circle in top-down order, line-per-line manner;
 	 * Y is iterated from r to 0, the rest is mirrored.
