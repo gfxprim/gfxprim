@@ -36,23 +36,14 @@ GP_RetCode GP_PutPixel(GP_Context *context, int x, int y, GP_Color color)
 	
 	uint8_t *p;
 
-	if (context->axes_swap) {
-		if (x < (int) context->clip_h_min
-			|| x > (int) context->clip_h_max
-			|| y < (int) context->clip_w_min
-			|| y > (int) context->clip_w_max) {
-			return GP_EINVAL; /* clipped out */
-		}
-		p = GP_PIXEL_ADDRESS(context, x, y);
-	} else {
-		if (x < (int) context->clip_w_min
-			|| x > (int) context->clip_w_max
-			|| y < (int) context->clip_h_min
-			|| y > (int) context->clip_h_max) {
-			return GP_EINVAL; /* clipped out */
-		}
-		p = GP_PIXEL_ADDRESS(context, y, x);
+	if (x < (int) context->clip_w_min
+		|| x > (int) context->clip_w_max
+		|| y < (int) context->clip_h_min
+		|| y > (int) context->clip_h_max) {
+		return GP_EINVAL; /* clipped out */
 	}
+	
+	p = GP_PIXEL_ADDRESS(context, y, x);
 
 	switch (context->bits_per_pixel) {
 	case 32:
@@ -76,4 +67,10 @@ GP_RetCode GP_PutPixel(GP_Context *context, int x, int y, GP_Color color)
 	}
 
 	return ret;
+}
+
+GP_RetCode GP_TPutPixel(GP_Context *context, int x, int y, GP_Color color)
+{
+	GP_TRANSFORM_POINT(context, x, y);
+	return GP_PutPixel(context, x, y, color);
 }

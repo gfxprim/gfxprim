@@ -31,26 +31,20 @@ GP_RetCode GP_HLine(GP_Context *context, int x0, int x1, int y, GP_Color color)
 {
 	GP_CHECK_CONTEXT(context);
 
+	return GP_FillRow(context, y, x0, x1, color);
+}
+
+GP_RetCode GP_THLine(GP_Context *context, int x0, int x1, int y, GP_Color color)
+{
+	if (context->axes_swap) {
+		GP_TRANSFORM_Y(context, x0);
+		GP_TRANSFORM_Y(context, x1);
+		GP_TRANSFORM_X(context, y);
+		return GP_VLine(context, y, x0, x1, color);
+	}
+
 	GP_TRANSFORM_X(context, x0);
 	GP_TRANSFORM_X(context, x1);
 	GP_TRANSFORM_Y(context, y);
-
-	if (x1 < x0)
-		GP_SWAP(x1, x0);
-
-	if (context->axes_swap)
-		return GP_FillColumn(context, y, x0, x1, color);
-	else
-		return GP_FillRow(context, y, x0, x1, color);
-}
-
-GP_RetCode GP_HLineInternal(GP_Context *context, int x0, int x1, int y, GP_Color color)
-{
-	if (x1 < x0)
-		GP_SWAP(x1, x0);
-
-	if (context->axes_swap)
-		return GP_FillColumn(context, y, x0, x1, color);
-	else
-		return GP_FillRow(context, y, x0, x1, color);
+	return GP_HLine(context, x0, x1, y, color);
 }

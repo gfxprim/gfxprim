@@ -29,10 +29,6 @@ GP_RetCode GP_Circle(GP_Context *context, int xcenter, int ycenter,
                      unsigned int r, GP_Color color)
 {
 	GP_CHECK_CONTEXT(context);
-
-	GP_TRANSFORM_X(context, xcenter);
-	GP_TRANSFORM_Y(context, ycenter);
-
 	/*
 	 * Draw the circle in top-down order, line-per-line manner;
 	 * Y is iterated from r to 0, the rest is mirrored.
@@ -97,3 +93,11 @@ GP_RetCode GP_Circle(GP_Context *context, int xcenter, int ycenter,
 	return GP_ESUCCESS;
 }
 
+
+GP_RetCode GP_TCircle(GP_Context *context, int xcenter, int ycenter,
+                      unsigned int r, GP_Color color)
+{
+	/* Just recalculate center point */
+	GP_TRANSFORM_POINT(context, xcenter, ycenter);
+	return GP_Circle(context, xcenter, ycenter, r, color);
+}

@@ -27,16 +27,20 @@
 
 GP_RetCode GP_VLine(GP_Context *context, int x, int y0, int y1, GP_Color color)
 {
+	return GP_FillColumn(context, x, y0, y1, color);
+}
+
+GP_RetCode GP_TVLine(GP_Context *context, int x, int y0, int y1, GP_Color color)
+{
+	if (context->axes_swap) {
+		GP_TRANSFORM_Y(context, x);
+		GP_TRANSFORM_X(context, y0);
+		GP_TRANSFORM_X(context, y1);
+		return GP_HLine(context, y0, y1, x, color);
+	}
+
 	GP_TRANSFORM_X(context, x);
 	GP_TRANSFORM_Y(context, y0);
 	GP_TRANSFORM_Y(context, y1);
-	
-	if (y1 < y0)
-		GP_SWAP(y1, y0);
-
-	if (context->axes_swap)
-		return GP_FillRow(context, x, y0, y1, color);
-	else
-		return GP_FillColumn(context, x, y0, y1, color);
+	return GP_VLine(context, x, y0, y1, color);
 }
-

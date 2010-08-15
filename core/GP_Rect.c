@@ -36,3 +36,11 @@ GP_RetCode GP_Rect(GP_Context *context, int x0, int y0, int x1, int y1,
 	//TODO: Correct return code
 	return GP_ESUCCESS;
 }
+
+GP_RetCode GP_TRect(GP_Context *context, int x0, int y0, int x1, int y1,
+                    GP_Color color)
+{
+	GP_TRANSFORM_POINT(context, x0, y0);
+	GP_TRANSFORM_POINT(context, x1, y1);
+	return GP_Rect(context, x0, y0, x1, y1, color);
+}

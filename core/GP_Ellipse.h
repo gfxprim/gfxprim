@@ -31,4 +31,7 @@
 GP_RetCode GP_Ellipse(GP_Context *context, int xcenter, int ycenter,
                       unsigned int a, unsigned int b, GP_Color color);
 
+GP_RetCode GP_TEllipse(GP_Context *context, int xcenter, int ycenter,
+                       unsigned int a, unsigned int b, GP_Color color);
+
 #endif /* GP_ELLIPSE_H */

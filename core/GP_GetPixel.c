@@ -31,23 +31,15 @@ GP_Color GP_GetPixel(GP_Context *context, int x, int y)
 	GP_Color color = {.type = GP_NOCOLOR};
 
 	uint8_t *p;
-	if (context->axes_swap) {
-		if (x < (int) context->clip_h_min
-			|| x > (int) context->clip_h_max
-			|| y < (int) context->clip_w_min
-			|| y > (int) context->clip_w_max) {
-			return color; /* clipped out */
-		}
-		p = GP_PIXEL_ADDRESS(context, x, y);
-	} else {
-		if (x < (int) context->clip_w_min
-			|| x > (int) context->clip_w_max
-			|| y < (int) context->clip_h_min
-			|| y > (int) context->clip_h_max) {
-			return color; /* clipped out */
-		}
-		p = GP_PIXEL_ADDRESS(context, y, x);
+	
+	if (x < (int) context->clip_w_min
+		|| x > (int) context->clip_w_max
+		|| y < (int) context->clip_h_min
+		|| y > (int) context->clip_h_max) {
+		return color; /* clipped out */
 	}
+
+	p = GP_PIXEL_ADDRESS(context, x, y);
 /*
 	switch (context->bits_per_pixel) {
 	case 32:
@@ -68,4 +60,10 @@ GP_Color GP_GetPixel(GP_Context *context, int x, int y)
 */
 
 	return color;
+}
+
+GP_Color GP_TGetPixel(GP_Context *context, int x, int y)
+{
+	GP_TRANSFORM_POINT(context, x, y);
+	return GP_GetPixel(context, x, y);
 }

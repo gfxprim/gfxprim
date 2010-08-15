@@ -31,4 +31,7 @@
 GP_RetCode GP_Rect(GP_Context *context, int x0, int y0, int x1, int y1,
                    GP_Color color);
 
+GP_RetCode GP_TRect(GP_Context *context, int x0, int y0, int x1, int y1,
+                    GP_Color color);
+
 #endif /* GP_RECT_H */

@@ -33,18 +33,21 @@ GP_RetCode GP_FillRect(GP_Context *context, int x0, int y0, int x1, int y1,
 	int y;
 	GP_CHECK_CONTEXT(context);
 
-	GP_TRANSFORM_X(context, x0);
-	GP_TRANSFORM_Y(context, y0);
-	GP_TRANSFORM_X(context, x1);
-	GP_TRANSFORM_Y(context, y1);
-
 	if (y0 > y1)
 		GP_SWAP(y0, y1);
 
 	for (y = y0; y <= y1; y++)
-		GP_HLineInternal(context, x0, x1, y, color);
+		GP_HLine(context, x0, x1, y, color);
 
 
 	//TODO: See GP_Circle.c
 	return GP_ESUCCESS;
+}
+
+GP_RetCode GP_TFillRect(GP_Context *context, int x0, int y0, int x1, int y1,
+                        GP_Color color)
+{
+	GP_TRANSFORM_POINT(context, x0, y0);
+	GP_TRANSFORM_POINT(context, x1, y1);
+	return GP_FillRect(context, x0, y0, x1, y1, color);
 }

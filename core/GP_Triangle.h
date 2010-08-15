@@ -31,4 +31,7 @@
 GP_RetCode GP_Triangle(GP_Context *context, int x0, int y0, int x1, int y1,
                        int x2, int y2, GP_Color color);
 
+GP_RetCode GP_TTriangle(GP_Context *context, int x0, int y0, int x1, int y1,
+                        int x2, int y2, GP_Color color);
+
 #endif /* GP_TRIANGLE_H */

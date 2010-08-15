@@ -30,10 +30,7 @@
 
 GP_RetCode GP_Fill(GP_Context *context, GP_Color color)
 {
-	if (context->axes_swap)
-		return GP_FillRect(context, 0, 0, context->h, context->w, color);
-	else
-		return GP_FillRect(context, 0, 0, context->w, context->h, color);
+	return GP_FillRect(context, 0, 0, context->w, context->h, color);
 }
 
 #endif /* GP_FILL_H */

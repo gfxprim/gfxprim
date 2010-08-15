@@ -32,9 +32,6 @@ GP_RetCode GP_FillCircle(GP_Context *context, int xcenter, int ycenter,
 {
 	GP_CHECK_CONTEXT(context);
 
-	GP_TRANSFORM_X(context, xcenter);
-	GP_TRANSFORM_Y(context, ycenter);
-
 	/*
 	 * Draw the circle in top-down, line-per-line manner.
 	 * For each line, X is calculated and a horizontal line is drawn
@@ -49,10 +46,18 @@ GP_RetCode GP_FillCircle(GP_Context *context, int xcenter, int ycenter,
 		}
 		error += -2*y + 1;
 
-		GP_HLineInternal(context, xcenter-x+1, xcenter+x-1, ycenter-y, color);
-		GP_HLineInternal(context, xcenter-x+1, xcenter+x-1, ycenter+y, color);
+		GP_HLine(context, xcenter-x+1, xcenter+x-1, ycenter-y, color);
+		GP_HLine(context, xcenter-x+1, xcenter+x-1, ycenter+y, color);
 	}
 
 	//TODO: See GP_Circle.c
 	return GP_ESUCCESS;
+}
+
+
+GP_RetCode GP_TFillCircle(GP_Context *context, int xcenter, int ycenter,
+                          unsigned int r, GP_Color color)
+{
+	GP_TRANSFORM_POINT(context, xcenter, ycenter);
+	return GP_FillCircle(context, xcenter, ycenter, r, color);
 }

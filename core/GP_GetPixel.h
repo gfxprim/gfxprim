@@ -28,8 +28,8 @@
 
 #include "GP_Context.h"
 
-#include <stdint.h>
-
 GP_Color GP_GetPixel(GP_Context *context, int x, int y);
+
+GP_Color GP_TGetPixel(GP_Context *context, int x, int y);
 
 #endif /* GP_GETPIXEL_H */

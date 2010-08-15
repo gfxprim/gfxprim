@@ -30,9 +30,6 @@ GP_RetCode GP_Ellipse(GP_Context *context, int xcenter, int ycenter,
 {
 	GP_CHECK_CONTEXT(context);
 
-	GP_TRANSFORM_X(context, xcenter);
-	GP_TRANSFORM_Y(context, ycenter);
-
 	/* Precompute quadratic terms. */
 	int a2 = a*a;
 	int b2 = b*b;
@@ -105,4 +102,13 @@ GP_RetCode GP_Ellipse(GP_Context *context, int xcenter, int ycenter,
 
 	//TODO: see GP_Circle.c
 	return GP_ESUCCESS;
+}
+
+GP_RetCode GP_TEllipse(GP_Context *context, int xcenter, int ycenter,
+                       unsigned int a, unsigned int b, GP_Color color)
+{
+	/* recalculate center point and swap a and b when axes are swapped */
+	GP_TRANSFORM_POINT(context, xcenter, ycenter);
+	GP_TRANSFORM_SWAP(context, a, b);
+	return GP_Ellipse(context, xcenter, ycenter, a, b, color);
 }

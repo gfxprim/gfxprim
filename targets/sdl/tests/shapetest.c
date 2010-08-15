@@ -124,57 +124,51 @@ void draw_testing_triangle(int x, int y, int xradius, int yradius)
 		break;
 	}
 
-	if (outline == 1) {
-		GP_Triangle(&context, x0, y0, x1, y1, x2, y2, yellow);
-	}
+	if (outline == 1)
+		GP_TTriangle(&context, x0, y0, x1, y1, x2, y2, yellow);
 
-	if (fill) {
-		GP_FillTriangle(&context, x0, y0, x1, y1, x2, y2, red);
-	}
+	if (fill)
+		GP_TFillTriangle(&context, x0, y0, x1, y1, x2, y2, red);
 
-	if (outline == 2) {
-		GP_Triangle(&context, x0, y0, x1, y1, x2, y2, white);
-	}
+	if (outline == 2)
+		GP_TTriangle(&context, x0, y0, x1, y1, x2, y2, white);
 }
 
 void draw_testing_circle(int x, int y, int xradius,
 			__attribute__((unused)) int yradius)
 {
-	if (outline == 1) {
-		GP_Circle(&context, x, y, xradius, yellow);
-	}
-	if (fill) {
-		GP_FillCircle(&context, x, y, xradius, red);
-	}
-	if (outline == 2) {
-		GP_Circle(&context, x, y, xradius, white);
-	}
+	if (outline == 1)
+		GP_TCircle(&context, x, y, xradius, yellow);
+
+	if (fill)
+		GP_TFillCircle(&context, x, y, xradius, red);
+
+	if (outline == 2)
+		GP_TCircle(&context, x, y, xradius, white);
 }
 
 void draw_testing_ellipse(int x, int y, int xradius, int yradius)
 {
-	if (outline == 1) {
-		GP_Ellipse(&context, x, y, xradius, yradius, yellow);
-	}
-	if (fill) {
-		GP_FillEllipse(&context, x, y, xradius, yradius, red);
-	}
-	if (outline == 2) {
-		GP_Ellipse(&context, x, y, xradius, yradius, white);
-	}
+	if (outline == 1)
+		GP_TEllipse(&context, x, y, xradius, yradius, yellow);
+
+	if (fill)
+		GP_TFillEllipse(&context, x, y, xradius, yradius, red);
+
+	if (outline == 2)
+		GP_TEllipse(&context, x, y, xradius, yradius, white);
 }
 
 void draw_testing_rectangle(int x, int y, int xradius, int yradius)
 {
-	if (outline == 1) {
-		GP_Rect(&context, x - xradius, y - yradius, x + xradius, y + yradius, yellow);
-	}
-	if (fill) {
-		GP_FillRect(&context, x - xradius, y - yradius, x + xradius, y + yradius, red);
-	}
-	if (outline == 2) {
-		GP_Rect(&context, x - xradius, y - yradius, x + xradius, y + yradius, white);
-	}
+	if (outline == 1)
+		GP_TRect(&context, x - xradius, y - yradius, x + xradius, y + yradius, yellow);
+
+	if (fill)
+		GP_TFillRect(&context, x - xradius, y - yradius, x + xradius, y + yradius, red);
+
+	if (outline == 2)
+		GP_TRect(&context, x - xradius, y - yradius, x + xradius, y + yradius, white);
 }
 
 void redraw_screen(void)
@@ -194,12 +188,12 @@ void redraw_screen(void)
 
 	/* axes */
 	if (show_axes) {
-		GP_HLine(&context, 0, display_w, center_y, gray);
-		GP_HLine(&context, 0, display_w, center_y-yradius, darkgray);
-		GP_HLine(&context, 0, display_w, center_y+yradius, darkgray);
-		GP_VLine(&context, center_x, 0, display_h, gray);
-		GP_VLine(&context, center_x-xradius, 0, display_h, darkgray);
-		GP_VLine(&context, center_x+xradius, 0, display_h, darkgray);
+		GP_THLine(&context, 0, display_w, center_y, gray);
+		GP_THLine(&context, 0, display_w, center_y-yradius, darkgray);
+		GP_THLine(&context, 0, display_w, center_y+yradius, darkgray);
+		GP_TVLine(&context, center_x, 0, display_h, gray);
+		GP_TVLine(&context, center_x-xradius, 0, display_h, darkgray);
+		GP_TVLine(&context, center_x+xradius, 0, display_h, darkgray);
 	}
 
 	/* the shape */

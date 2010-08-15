@@ -30,9 +30,10 @@
 
 #include <stdint.h>
 
-GP_RetCode GP_HLine(GP_Context *context, int x0, int x1, int y, GP_Color color);
+GP_RetCode GP_HLine(GP_Context *context, int x0, int x1, int y,
+                    GP_Color color);
 
-GP_RetCode GP_HLineInternal(GP_Context *context, int x0, int x1, int y,
-                            GP_Color color);
+GP_RetCode GP_THLine(GP_Context *context, int x0, int x1, int y,
+                     GP_Color color);
 
 #endif /* GP_HLINE_H */

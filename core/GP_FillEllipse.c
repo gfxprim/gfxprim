@@ -30,9 +30,6 @@ GP_RetCode GP_FillEllipse(GP_Context *context, int xcenter, int ycenter,
 {
 	GP_CHECK_CONTEXT(context);
 
-	GP_TRANSFORM_X(context, xcenter);
-	GP_TRANSFORM_Y(context, ycenter);
-
 	/* Precompute quadratic terms. */
 	int a2 = a*a;
 	int b2 = b*b;
@@ -52,10 +49,18 @@ GP_RetCode GP_FillEllipse(GP_Context *context, int xcenter, int ycenter,
 		error += a2 * (-2*y + 1);
 
 		/* Draw two horizontal lines reflected across Y. */
-		GP_HLineInternal(context, xcenter-x+1, xcenter+x-1, ycenter-y, color);
-		GP_HLineInternal(context, xcenter-x+1, xcenter+x-1, ycenter+y, color);
+		GP_HLine(context, xcenter-x+1, xcenter+x-1, ycenter-y, color);
+		GP_HLine(context, xcenter-x+1, xcenter+x-1, ycenter+y, color);
 	}
 
 	//TODO: See GP_Circle.c
 	return GP_ESUCCESS;
+}
+
+GP_RetCode GP_TFillEllipse(GP_Context *context, int xcenter, int ycenter,
+                           unsigned int a, unsigned int b, GP_Color color)
+{
+	GP_TRANSFORM_POINT(context, xcenter, ycenter);
+	GP_TRANSFORM_SWAP(context, a, b);
+	return GP_FillEllipse(context, xcenter, ycenter, a, b, color);
 }

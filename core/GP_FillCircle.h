@@ -31,4 +31,7 @@
 GP_RetCode GP_FillCircle(GP_Context *context, int xcenter, int ycenter,
                          unsigned int r, GP_Color color);
 
+GP_RetCode GP_TFillCircle(GP_Context *context, int xcenter, int ycenter,
+                          unsigned int r, GP_Color color);
+
 #endif /* GP_FILLCIRCLE_H */

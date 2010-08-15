@@ -36,4 +36,16 @@
 		y = context->h - y;     \
 } while (0)
 
+#define GP_TRANSFORM_POINT(context, x, y) do { \
+	if (context->axes_swap)                \
+		GP_SWAP(x, y);                 \
+	GP_TRANSFORM_X(context, x);            \
+	GP_TRANSFORM_Y(context, y);            \
+} while (0)
+
+#define GP_TRANSFORM_SWAP(context, x, y) do { \
+	if (context->axes_swap)               \
+		GP_SWAP(x, y);                \
+} while (0)
+
 #endif /* GP_TRANSFORM_H */
