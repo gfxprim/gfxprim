@@ -1,11 +1,8 @@
-LIBRARY=libGP_core
+LIBRARY=libGP_drivers
 SOURCES=$(wildcard *.c)
 OBJECTS=$(SOURCES:.c=.o)
 HEADERS=$(wildcard *.h)
-CFLAGS=-W -Wall -O2 -fPIC
-
-HEADER_LOC=/usr/include/
-LIB_LOC=/usr/lib/
+CFLAGS=-I../core/ -W -Wall -O2 -fPIC
 
 .PHONY: all clean
 
@@ -30,4 +27,3 @@ clean:
 	rm -f $(LIBRARY).a $(LIBRARY).so $(LIBRARY).so.0
 	rm -f *.o
 	cd tests && $(MAKE) clean
-

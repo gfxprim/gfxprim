@@ -1,9 +1,12 @@
 HEADER_LOC=/usr/include/
 LIB_LOC=/usr/lib/
 
-.PHONY: all core sdl install clean tar
+.PHONY: all core sdl drivers install clean tar
 
-all: core sdl
+all: core sdl drivers
+
+drivers:
+	cd drivers && $(MAKE) all
 
 core:
 	cd core && $(MAKE) all
@@ -25,6 +28,7 @@ clean:
 	cd benchmark && $(MAKE) clean
 	cd core && $(MAKE) clean
 	cd targets/sdl && $(MAKE) clean
+	cd drivers && $(MAKE) clean
 
 tar: clean
 	cd .. && tar cjf gfxprim-`date +%Y-%b-%d-%HH%MM`.tar.bz2 gfxprim
