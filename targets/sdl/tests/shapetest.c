@@ -89,6 +89,9 @@ static int yradius_add = 0;
 static int center_x = 320;
 static int center_y = 240;
 
+static int display_w = 640;
+static int display_h = 480;
+
 void draw_testing_triangle(int x, int y, int xradius, int yradius)
 {
 	int x0, y0, x1, y1, x2, y2;
@@ -191,12 +194,12 @@ void redraw_screen(void)
 
 	/* axes */
 	if (show_axes) {
-		GP_HLine(&context, 0, 640, center_y, gray);
-		GP_HLine(&context, 0, 640, center_y-yradius, darkgray);
-		GP_HLine(&context, 0, 640, center_y+yradius, darkgray);
-		GP_VLine(&context, center_x, 0, 480, gray);
-		GP_VLine(&context, center_x-xradius, 0, 480, darkgray);
-		GP_VLine(&context, center_x+xradius, 0, 480, darkgray);
+		GP_HLine(&context, 0, display_w, center_y, gray);
+		GP_HLine(&context, 0, display_w, center_y-yradius, darkgray);
+		GP_HLine(&context, 0, display_w, center_y+yradius, darkgray);
+		GP_VLine(&context, center_x, 0, display_h, gray);
+		GP_VLine(&context, center_x-xradius, 0, display_h, darkgray);
+		GP_VLine(&context, center_x+xradius, 0, display_h, darkgray);
 	}
 
 	/* the shape */
@@ -263,6 +266,17 @@ void event_loop(void)
 			break;
 			case SDLK_y:
 				context.y_swap = !context.y_swap;
+			break;
+			case SDLK_r:
+				context.axes_swap = !context.axes_swap;
+
+				if (context.axes_swap) {
+					display_w = 480;
+					display_h = 640;
+				} else {
+					display_w = 640;
+					display_h = 480;
+				}
 			break;
 			case SDLK_f:
 				fill = !fill;
@@ -397,6 +411,7 @@ void print_instructions(void)
 	printf("    A ................... show/hide axes\n");
 	printf("    X ................... mirror X\n");
 	printf("    Y ................... mirror Y\n");
+	printf("    R ................... reverse X and Y\n");
 	printf("    left/right .......... increase/decrease horizontal radius\n");
 	printf("    up/down ............. increase/decrease vertical radius\n");
 	printf("    shift + left/right .. increase/decrease horizontal center\n");

@@ -42,7 +42,7 @@ GP_RetCode GP_FillRect(GP_Context *context, int x0, int y0, int x1, int y1,
 		GP_SWAP(y0, y1);
 
 	for (y = y0; y <= y1; y++)
-		GP_HLine(context, x0, x1, y, color);
+		GP_HLineInternal(context, x0, x1, y, color);
 
 
 	//TODO: See GP_Circle.c

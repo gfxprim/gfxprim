@@ -32,18 +32,18 @@ GP_RetCode GP_FillTriangle(GP_Context* context, int x0, int y0, int x1, int y1,
 {
 	GP_CHECK_CONTEXT(context);
 
+	/* FIXME: For triangle lines that have abs(dx) > abs(dy), there is
+	 * sometimes one pixel missing at the start/end (rounding error?).
+	 * Temporary fixed by explicitly drawing the triangle boundary.
+	 */
+	GP_Triangle(context, x0, y0, x1, y1, x2, y2, color);
+	
 	GP_TRANSFORM_X(context, x0);
 	GP_TRANSFORM_Y(context, y0);
 	GP_TRANSFORM_X(context, x1);
 	GP_TRANSFORM_Y(context, y1);
 	GP_TRANSFORM_X(context, x2);
 	GP_TRANSFORM_Y(context, y2);
-	
-	/* FIXME: For triangle lines that have abs(dx) > abs(dy), there is
-	 * sometimes one pixel missing at the start/end (rounding error?).
-	 * Temporary fixed by explicitly drawing the triangle boundary.
-	 */
-	GP_Triangle(context, x0, y0, x1, y1, x2, y2, color);
 
 	/*
 	 * Sort the three points according to the Y coordinate.

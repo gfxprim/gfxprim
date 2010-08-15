@@ -44,7 +44,7 @@ GP_RetCode GP_HLine(GP_Context *context, int x0, int x1, int y, GP_Color color)
 		return GP_FillRow(context, y, x0, x1, color);
 }
 
-void GP_HLineInternal(GP_Context *context, int x0, int x1, int y, GP_Color color)
+GP_RetCode GP_HLineInternal(GP_Context *context, int x0, int x1, int y, GP_Color color)
 {
 	if (x1 < x0)
 		GP_SWAP(x1, x0);
