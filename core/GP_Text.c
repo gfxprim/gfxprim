@@ -27,7 +27,7 @@
 
 static int GP_PutChar(GP_Context *context,
 	const struct GP_TextStyle *style, int x0, int y0,
-	const uint8_t *char_data, GP_Color color)
+	const uint8_t *char_data, GP_Color color, bool transform)
 {
 	int xdelta = style->pixel_xmul + style->pixel_xspace;
 
@@ -44,7 +44,7 @@ static int GP_PutChar(GP_Context *context,
 	/* Final X for each character line. */
 	int x1 = x0 + char_width * xdelta;
 
-	int line, linerep, i, x, y;
+	int line, linerep, i, x = 0, y;
 	for (line = 0, y = y0; line < style->font->height; line++, y += style->pixel_yspace) {
 
 		/* repeat the line as specified by pixel_ymul */
@@ -64,11 +64,19 @@ static int GP_PutChar(GP_Context *context,
 			/* draw the line of the character */
 			for (x = x0; x < x1; x += xdelta) {
 				if (*linesrc & mask) {
-					GP_HLine(context,
-						x,
-						x + style->pixel_xmul - 1,
-						y,
-						color);
+					if (transform) {
+						GP_THLine(context,
+						          x,
+						          x + style->pixel_xmul - 1,
+						          y,
+						          color);
+					} else {
+						GP_HLine(context,
+							 x,
+							 x + style->pixel_xmul - 1,
+							 y,
+							 color);
+					}
 				}
 				mask >>= 1;
 				if (mask == 0) {
@@ -82,8 +90,8 @@ static int GP_PutChar(GP_Context *context,
 	return x + style->font->hspace * style->pixel_ymul;
 }
 
-void GP_Text(GP_Context *context, const struct GP_TextStyle *style,
-	int x, int y, const char *str, GP_Color color)
+GP_RetCode GP_Text(GP_Context *context, const struct GP_TextStyle *style,
+                   int x, int y, const char *str, GP_Color color)
 {
 	int bytes_per_char = 2 + style->font->bytes_per_line * style->font->height;
 
@@ -94,6 +102,28 @@ void GP_Text(GP_Context *context, const struct GP_TextStyle *style,
 		const uint8_t *char_data = style->font->data
 				+ char_index * bytes_per_char;
 
-		x = GP_PutChar(context, style, x, y, char_data, color);
+		x = GP_PutChar(context, style, x, y, char_data, color, false);
 	}
+
+	//TODO
+	return GP_ESUCCESS;
+}
+
+GP_RetCode GP_TText(GP_Context *context, const struct GP_TextStyle *style,
+                    int x, int y, const char *str, GP_Color color)
+{
+	int bytes_per_char = 2 + style->font->bytes_per_line * style->font->height;
+
+	const char *p;
+	for (p = str; *p != '\0'; p++) {
+		int char_index = ((int) *p) - 0x20;
+
+		const uint8_t *char_data = style->font->data
+				+ char_index * bytes_per_char;
+
+		x = GP_PutChar(context, style, x, y, char_data, color, true);
+	}
+
+	//TODO
+	return GP_ESUCCESS;
 }

@@ -216,7 +216,7 @@ void redraw_screen(void)
 		title = "RECTANGLE";
 		break;
 	}
-	GP_Text(&context, &style, 16, 16, title, white);
+	GP_TText(&context, &style, 16, 16, title, white);
 
 	SDL_UnlockSurface(display);
 }
