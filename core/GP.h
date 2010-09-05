@@ -39,7 +39,6 @@
 /* semi-public, low-level drawing API */
 #include "GP_ReadPixel.h"
 #include "GP_WritePixel.h"
-#include "GP_FillColumn.h"
 
 /* colors */
 #include "GP_Color.h"

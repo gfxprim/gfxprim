@@ -27,7 +27,60 @@
 
 GP_RetCode GP_VLine(GP_Context *context, int x, int y0, int y1, GP_Color color)
 {
-	return GP_FillColumn(context, x, y0, y1, color);
+	GP_CHECK_CONTEXT(context);
+
+	/* handle swapped coordinates gracefully */
+	if (y0 > y1)
+		GP_SWAP(y0, y1);
+
+	/* check if we are not completely outside the clipping rectangle */
+	if (x < (int) context->clip_w_min
+		|| x > (int) context->clip_w_max
+		|| y0 > (int) context->clip_h_max
+		|| y1 < (int) context->clip_h_min) {
+		return GP_EINVAL;
+	}
+	
+	/* clip the row value */
+	y0 = GP_MAX(y0, (int) context->clip_h_min);
+	y1 = GP_MIN(y1, (int) context->clip_h_max);
+
+	/* Calculate the start address and height of the filled block */
+	size_t height = 1 + y1 - y0;
+	uint8_t *p = (uint8_t *) GP_PIXEL_ADDRESS(context, y0, x);
+	
+	/* Calculate pixel value from color */
+	GP_Pixel pixel;
+	pixel.type = context->pixel_type;
+	GP_RetCode ret = GP_ColorToPixel(color, &pixel);
+
+	size_t i;
+	switch(context->bits_per_pixel) {
+	case 32:
+		for (i = 0; i < height; i++, p += context->bytes_per_row)
+			GP_WritePixel32bpp(p, pixel.val);
+		break;
+
+	case 24:
+		for (i = 0; i < height; i++, p += context->bytes_per_row)
+			GP_WritePixel24bpp(p, pixel.val);
+		break;
+
+	case 16:
+		for (i = 0; i < height; i++, p += context->bytes_per_row)
+			GP_WritePixel16bpp(p, pixel.val);
+		break;
+
+	case 8:
+		for (i = 0; i < height; i++, p += context->bytes_per_row)
+			GP_WritePixel8bpp(p, pixel.val);
+		break;
+
+	default:
+		return GP_ENOIMPL;
+	}
+
+	return ret;
 }
 
 GP_RetCode GP_TVLine(GP_Context *context, int x, int y0, int y1, GP_Color color)
