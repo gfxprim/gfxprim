@@ -28,7 +28,7 @@
  * Following arguments must be #defined before including this:
  *
  *    CONTEXT_T - user-defined type for the drawing context
- *    COLOR_T   - user-defined type for the color value
+ *    PIXVAL_T  - user-defined type for the pixel value to be written
  *    PUTPIXEL  - user-defined pixel-drawing function f(context, x, y, color)
  *    FN_NAME   - how the function should be named
  */
@@ -67,7 +67,7 @@
 } while(0); 
 
 void FN_NAME(CONTEXT_T context, int x0, int y0, int x1, int y1,
-	COLOR_T color)
+	PIXVAL_T pixval)
 {
 	/* The steepness of the line */
 	int deltax = x1 - x0;
@@ -88,7 +88,7 @@ void FN_NAME(CONTEXT_T context, int x0, int y0, int x1, int y1,
 		}
 
 		FOR_EACH_X {
-			PUTPIXEL(context, x, y, color);
+			PUTPIXEL(context, x, y, pixval);
 			NEXT_Y;
 		}
 
@@ -103,7 +103,7 @@ void FN_NAME(CONTEXT_T context, int x0, int y0, int x1, int y1,
 		}
 
 		FOR_EACH_Y {
-			PUTPIXEL(context, x, y, color);
+			PUTPIXEL(context, x, y, pixval);
 			NEXT_X;
 		}
 	}

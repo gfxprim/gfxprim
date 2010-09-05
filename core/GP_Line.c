@@ -31,7 +31,7 @@
  * bit depths.
  */
 #define CONTEXT_T GP_Context *
-#define COLOR_T GP_Pixel
+#define PIXVAL_T GP_Pixel
 	#define PUTPIXEL GP_PutPixel8bpp
 	#define FN_NAME GP_Line8bpp
 		#include "algo/Line.algo.c"
