@@ -3,7 +3,7 @@ LDFLAGS=-L../ -L../../core/ -lGP_core -lGP_drivers
 INCLUDE=-I../ -I../../core/
 # Some warnings are triggered only with -O2
 # thuss added here
-CFLAGS=$(INCLUDE) -ggdb -W -Wall -O
+CFLAGS=$(INCLUDE) -ggdb -W -Wall -O2 -lm
 SOURCES=$(wildcard *.c)
 TESTS=$(SOURCES:.c=)
 
