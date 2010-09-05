@@ -34,22 +34,22 @@
 #define COLOR_T GP_Pixel
 	#define PUTPIXEL GP_PutPixel8bpp
 	#define FN_NAME GP_Line8bpp
-		#include "algo/line.algo.c"
+		#include "algo/Line.algo.c"
 	#undef PUTPIXEL
 	#undef FN_NAME
 	#define PUTPIXEL GP_PutPixel16bpp
 	#define FN_NAME GP_Line16bpp
-		#include "algo/line.algo.c"
+		#include "algo/Line.algo.c"
 	#undef PUTPIXEL
 	#undef FN_NAME
 	#define PUTPIXEL GP_PutPixel24bpp
 	#define FN_NAME GP_Line24bpp
-		#include "algo/line.algo.c"
+		#include "algo/Line.algo.c"
 	#undef PUTPIXEL
 	#undef FN_NAME
 	#define PUTPIXEL GP_PutPixel32bpp
 	#define FN_NAME GP_Line32bpp
-		#include "algo/line.algo.c"
+		#include "algo/Line.algo.c"
 	#undef PUTPIXEL
 	#undef FN_NAME
 #undef CONTEXT_T
