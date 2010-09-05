@@ -27,33 +27,59 @@
 
 #include <stdint.h>
 
+#define CONTEXT_T GP_Context *
+#define PIXVAL_T GP_Pixel
+	#define HLINE GP_HLine8bpp
+	#define FN_NAME GP_FillCircle8bpp
+		#include "algo/FillCircle.algo.c"
+	#undef FN_NAME
+	#undef HLINE
+	#define HLINE GP_HLine16bpp
+	#define FN_NAME GP_FillCircle16bpp
+		#include "algo/FillCircle.algo.c"
+	#undef FN_NAME
+	#undef HLINE
+	#define HLINE GP_HLine24bpp
+	#define FN_NAME GP_FillCircle24bpp
+		#include "algo/FillCircle.algo.c"
+	#undef FN_NAME
+	#undef HLINE
+	#define HLINE GP_HLine32bpp
+	#define FN_NAME GP_FillCircle32bpp
+		#include "algo/FillCircle.algo.c"
+	#undef FN_NAME
+	#undef HLINE
+#undef PIXVAL_T
+#undef CONTEXT_T
+
 GP_RetCode GP_FillCircle(GP_Context *context, int xcenter, int ycenter,
                          unsigned int r, GP_Color color)
 {
 	GP_CHECK_CONTEXT(context);
 
-	/*
-	 * Draw the circle in top-down, line-per-line manner.
-	 * For each line, X is calculated and a horizontal line is drawn
-	 * between +X and -X, and reflected around the Y axis.
-	 * X is computed in the same way as for GP_Circle().
-	 */
-	int x, y, error;
-	for (x = 0, error = -r, y = r; y >= 0; y--) {
-		while (error < 0) {
-			error += 2*x + 1;
-			x++;
-		}
-		error += -2*y + 1;
+	GP_Pixel pixel;
+	pixel.type = context->pixel_type;
+	GP_RetCode ret = GP_ColorToPixel(color, &pixel);
 
-		GP_HLine(context, xcenter-x+1, xcenter+x-1, ycenter-y, color);
-		GP_HLine(context, xcenter-x+1, xcenter+x-1, ycenter+y, color);
+	switch (context->bits_per_pixel) {
+	case 8:
+		GP_FillCircle8bpp(context, xcenter, ycenter, r, pixel);
+		break;
+	case 16:
+		GP_FillCircle16bpp(context, xcenter, ycenter, r, pixel);
+		break;
+	case 24:
+		GP_FillCircle24bpp(context, xcenter, ycenter, r, pixel);
+		break;
+	case 32:
+		GP_FillCircle32bpp(context, xcenter, ycenter, r, pixel);
+		break;
+	default:
+		return GP_ENOIMPL;
 	}
 
-	//TODO: See GP_Circle.c
-	return GP_ESUCCESS;
+	return ret;
 }
-
 
 GP_RetCode GP_TFillCircle(GP_Context *context, int xcenter, int ycenter,
                           unsigned int r, GP_Color color)

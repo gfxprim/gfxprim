@@ -25,49 +25,81 @@
 
 #include "GP.h"
 
-#include <stdio.h>
+/* Ensures that coordinates are in correct order, and clips them.
+ * Exits immediately if the line is completely clipped out.
+ */
+#define ORDER_AND_CLIP_COORDS do { \
+	if (x0 > x1) GP_SWAP(x0, x1); \
+	if (y < (int) context->clip_h_min \
+		|| y > (int) context->clip_h_max \
+		|| x0 > (int) context->clip_w_max \
+		|| x1 < (int) context->clip_w_min) { \
+		return; \
+	} \
+	x0 = GP_MAX(x0, (int) context->clip_w_min); \
+	x1 = GP_MIN(x1, (int) context->clip_w_max); \
+} while(0);
+
+void GP_HLine8bpp(GP_Context *context, int x0, int x1, int y, GP_Pixel pixel)
+{
+	ORDER_AND_CLIP_COORDS;
+
+	size_t length = 1 + x1 - x0;
+	void *start = GP_PIXEL_ADDRESS(context, y, x0);
+
+	GP_WritePixels8bpp(start, length, pixel.val);
+}
+
+void GP_HLine16bpp(GP_Context *context, int x0, int x1, int y, GP_Pixel pixel)
+{
+	ORDER_AND_CLIP_COORDS;
+
+	size_t length = 1 + x1 - x0;
+	void *start = GP_PIXEL_ADDRESS(context, y, x0);
+
+	GP_WritePixels16bpp(start, length, pixel.val);
+}
+
+void GP_HLine24bpp(GP_Context *context, int x0, int x1, int y, GP_Pixel pixel)
+{
+	ORDER_AND_CLIP_COORDS;
+
+	size_t length = 1 + x1 - x0;
+	void *start = GP_PIXEL_ADDRESS(context, y, x0);
+
+	GP_WritePixels24bpp(start, length, pixel.val);
+}
+
+void GP_HLine32bpp(GP_Context *context, int x0, int x1, int y, GP_Pixel pixel)
+{
+	ORDER_AND_CLIP_COORDS;
+
+	size_t length = 1 + x1 - x0;
+	void *start = GP_PIXEL_ADDRESS(context, y, x0);
+
+	GP_WritePixels32bpp(start, length, pixel.val);
+}
 
 GP_RetCode GP_HLine(GP_Context *context, int x0, int x1, int y, GP_Color color)
 {
 	GP_CHECK_CONTEXT(context);
 
-	/* Handle swapped coordinates gracefully. */
-	if (x0 > x1)
-		GP_SWAP(x0, x1);
-
-	/* check if we are not completely outside limits */
-	if (y < (int) context->clip_h_min
-		|| y > (int) context->clip_h_max
-		|| x0 > (int) context->clip_w_max
-		|| x1 < (int) context->clip_w_min) {
-		return GP_EINVAL;
-	}
-
-	/* clip the X value */
-	x0 = GP_MAX(x0, (int) context->clip_w_min);
-	x1 = GP_MIN(x1, (int) context->clip_w_max);
-
-	/* calculate the length and start of the filled block */
-	size_t length = 1 + x1 - x0;
-	void *start = GP_PIXEL_ADDRESS(context, y, x0);
-	
-	/* Calculate pixel value from color */
 	GP_Pixel pixel;
 	pixel.type = context->pixel_type;
 	GP_RetCode ret = GP_ColorToPixel(color, &pixel);
 
-	switch(context->bits_per_pixel) {
+	switch (context->bits_per_pixel) {
 	case 32:
-		GP_WritePixels32bpp(start, length, pixel.val);
+		GP_HLine32bpp(context, x0, x1, y, pixel);
 		break;
 	case 24:
-		GP_WritePixels24bpp(start, length, pixel.val);
+		GP_HLine24bpp(context, x0, x1, y, pixel);
 		break;
 	case 16:
-		GP_WritePixels16bpp(start, length, pixel.val);
+		GP_HLine16bpp(context, x0, x1, y, pixel);
 		break;
 	case 8:
-		GP_WritePixels8bpp(start, length, pixel.val);
+		GP_HLine8bpp(context, x0, x1, y, pixel);
 		break;
 	default:
 		return GP_ENOIMPL;

@@ -23,22 +23,35 @@
  *                                                                           *
  *****************************************************************************/
 
-#ifndef GP_HLINE_H
-#define GP_HLINE_H
+/*
+ * Function that implements the filled circle drawing algorithm.
+ * Following arguments must be #defined before including this:
+ *
+ *     CONTEXT_T - user-defined type of drawing context (passed to HLINE)
+ *     PIXVAL_T  - user-defined pixel value type (passed to HLINE)
+ *     HLINE     - user-defined horizontal line drawing function
+ *                 HLINE(context, x0, x1, y, pixval)
+ *     FN_NAME   - name of the function to be defined
+ */
 
-#include "GP_Context.h"
+void FN_NAME(CONTEXT_T context, int xcenter, int ycenter,
+	unsigned int r, PIXVAL_T pixval)
+{
+	/*
+	 * Draw the circle in top-down, line-per-line manner.
+	 * For each line, X is calculated and a horizontal line is drawn
+	 * between +X and -X, and reflected around the Y axis.
+	 * X is computed in the same way as for Circle().
+	 */
+	int x, y, error;
+	for (x = 0, error = -r, y = r; y >= 0; y--) {
+		while (error < 0) {
+			error += 2*x + 1;
+			x++;
+		}
+		error += -2*y + 1;
 
-#include <stdint.h>
-
-void GP_HLine8bpp(GP_Context *context, int x0, int x1, int y, GP_Pixel pixel);
-void GP_HLine16bpp(GP_Context *context, int x0, int x1, int y, GP_Pixel pixel);
-void GP_HLine24bpp(GP_Context *context, int x0, int x1, int y, GP_Pixel pixel);
-void GP_HLine32bpp(GP_Context *context, int x0, int x1, int y, GP_Pixel pixel);
-
-GP_RetCode GP_HLine(GP_Context *context, int x0, int x1, int y,
-                    GP_Color color);
-
-GP_RetCode GP_THLine(GP_Context *context, int x0, int x1, int y,
-                     GP_Color color);
-
-#endif /* GP_HLINE_H */
+		HLINE(context, xcenter-x+1, xcenter+x-1, ycenter-y, pixval);
+		HLINE(context, xcenter-x+1, xcenter+x-1, ycenter+y, pixval);
+	}
+}
