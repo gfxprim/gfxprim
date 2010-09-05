@@ -23,119 +23,89 @@
  *                                                                           *
  *****************************************************************************/
 
-#include "GP.h"
-
-#include <stdlib.h>
-
-/* Produce low-level definitions of GP_Line() optimized for various
- * bit depths.
+/*
+ * This function implements the Bresenham line-drawing algorithm.
+ * Following arguments must be #defined before including this:
+ *
+ *    CONTEXT_T - user-defined type for the drawing context
+ *    COLOR_T   - user-defined type for the color value
+ *    PUTPIXEL  - user-defined pixel-drawing function f(context, x, y, color)
+ *    FN_NAME   - how the function should be named
  */
-#define CONTEXT_T GP_Context *
-#define COLOR_T GP_Pixel
-	#define PUTPIXEL GP_PutPixel8bpp
-	#define FN_NAME GP_Line8bpp
-		#include "algo/line.algo.c"
-	#undef PUTPIXEL
-	#undef FN_NAME
-	#define PUTPIXEL GP_PutPixel16bpp
-	#define FN_NAME GP_Line16bpp
-		#include "algo/line.algo.c"
-	#undef PUTPIXEL
-	#undef FN_NAME
-	#define PUTPIXEL GP_PutPixel24bpp
-	#define FN_NAME GP_Line24bpp
-		#include "algo/line.algo.c"
-	#undef PUTPIXEL
-	#undef FN_NAME
-	#define PUTPIXEL GP_PutPixel32bpp
-	#define FN_NAME GP_Line32bpp
-		#include "algo/line.algo.c"
-	#undef PUTPIXEL
-	#undef FN_NAME
-#undef CONTEXT_T
-#undef COLOR_T
 
-GP_RetCode GP_Line(GP_Context *context, int x0, int y0, int x1, int y1,
-                   GP_Color color)
+/* swaps endpoints of the line */
+#define SWAP_ENDPOINTS do { \
+	GP_SWAP(x0, x1); \
+	GP_SWAP(y0, y1); \
+	deltax = -deltax; \
+	deltay = -deltay; \
+} while(0);
+
+/* starts a loop that iterates over every X in the line */
+#define FOR_EACH_X for (x = x0, y = y0, error = deltax/2; x <= x1; x++)
+
+/* starts a loop that iterates over every Y in the line */
+#define FOR_EACH_Y for (x = x0, y = y0, error = deltay/2; y <= y1; y++)
+
+/* updates Y to reflect increasing X by 1; as the change in Y can be
+ * a fraction, a rounding error is maintained and if it overflows,
+ * Y is increased or decreased by 1. */
+#define NEXT_Y do { \
+	error -= abs(deltay); \
+	if (error < 0) { \
+		deltay > 0 ? y++ : y--; \
+		error += deltax; \
+	} \
+} while(0);
+
+#define NEXT_X do { \
+	error -= abs(deltax); \
+	if (error < 0) { \
+		deltax > 0 ? x++ : x--; \
+		error += deltay; \
+	} \
+} while(0); 
+
+void FN_NAME(CONTEXT_T context, int x0, int y0, int x1, int y1,
+	COLOR_T color)
 {
-	GP_CHECK_CONTEXT(context);
-
-	GP_Pixel pixel;
-	pixel.type = context->pixel_type;
-	GP_ColorToPixel(color, &pixel);
-
-	switch (context->bits_per_pixel) {
-	case 8:
-		GP_Line8bpp(context, x0, y0, x1, y1, pixel);
-		break;
-
-	case 16:
-		GP_Line16bpp(context, x0, y0, x1, y1, pixel);
-		break;
-	
-	case 24:
-		GP_Line24bpp(context, x0, y0, x1, y1, pixel);
-		break;
-	
-	case 32:
-		GP_Line32bpp(context, x0, y0, x1, y1, pixel);
-		break;
-	
-	default:
-		return GP_ENOIMPL;
-	}
-
-	return GP_ESUCCESS;
-}
-
-GP_RetCode GP_TLine(GP_Context *context, int x0, int y0, int x1, int y1,
-                    GP_Color color)
-{
-	GP_TRANSFORM_POINT(context, x0, y0);
-	GP_TRANSFORM_POINT(context, x1, y1);
-	return GP_Line(context, x0, y0, x1, y1, color);
-}
-
-size_t GP_CalcLinePoints(int x0, int y0, int x1, int y1,
-	int *points, size_t maxlen)
-{
-	GP_CHECK(points != NULL || maxlen == 0);
-	GP_CHECK(maxlen % 2 == 0);
-	
-	size_t i = 0;
-
+	/* The steepness of the line */
 	int deltax = x1 - x0;
 	int deltay = y1 - y0;
 
+	/* Current X and Y coordinate, and cummulative rounding error. */
 	int x, y, error;
 
-	if (abs(deltax) > abs(deltay)) {	/* X changes faster */
+	/* If X changes faster than Y (i.e. the line is closer to horizontal
+	 * than to vertical), iterate X one by one and calculate Y;
+	 * in some points, multiple X will lead to the same value of Y.
+	 */
+	if (abs(deltax) > abs(deltay)) {
 
+		/* always draw in the direction of increasing X */
 		if (deltax < 0) {
 			SWAP_ENDPOINTS;
 		}
 
 		FOR_EACH_X {
-			if (i < maxlen) {
-				points[i++] = x;
-				points[i++] = y;
-			}
-			NEXT_X;
+			PUTPIXEL(context, x, y, color);
+			NEXT_Y;
 		}
-	} else {				/* Y changes faster */
 
+	/* If Y changes faster than X (the line is closer to vertical
+	 * than to horizontal), iterate Y and calculate X.
+	 */
+	} else {
+
+		/* always draw in the direction of increasing Y */
 		if (deltay < 0) {
 			SWAP_ENDPOINTS;
 		}
 
 		FOR_EACH_Y {
-			if (i < maxlen) {
-				points[i++] = x;
-				points[i++] = y;
-			}
-			NEXT_Y;
+			PUTPIXEL(context, x, y, color);
+			NEXT_X;
 		}
 	}
-
-	return i;
 }
+

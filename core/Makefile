@@ -2,7 +2,8 @@ LIBRARY=libGP_core
 SOURCES=$(wildcard *.c)
 OBJECTS=$(SOURCES:.c=.o)
 HEADERS=$(wildcard *.h)
-CFLAGS=-W -Wall -O2 -fPIC
+ALGORITHMS=$(wildcard ../algo/*.algo.c)
+CFLAGS=-W -Wall -O2 -fPIC -I../
 
 HEADER_LOC=/usr/include/
 LIB_LOC=/usr/lib/
@@ -14,7 +15,7 @@ all: $(LIBRARY)
 
 $(LIBRARY): $(LIBRARY).a $(LIBRARY).so
 
-$(OBJECTS): $(HEADERS)
+$(OBJECTS): $(HEADERS) $(ALGORITHMS)
 
 $(LIBRARY).a: $(OBJECTS) 
 	ar crus $@ $^

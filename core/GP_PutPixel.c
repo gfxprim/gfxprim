@@ -25,48 +25,98 @@
 
 #include "GP.h"
 
+/* Tests whether the coordinates are inside the clip rectangle;
+ * if not, immediately exits with GP_EINVAL.
+ */
+#define CLIP_PIXEL(context, x, y) do { \
+	if (x < (int) context->clip_w_min \
+		|| x > (int) context->clip_w_max \
+		|| y < (int) context->clip_h_min \
+		|| y > (int) context->clip_h_max) { \
+		return GP_EINVAL; /* clipped out */ \
+	} \
+} while(0);
+
+/*
+ * A set of PutPixel() calls used when we know the number of bits per pixel.
+ * The pixel value is passed directly instead of color, as we should
+ * already know what the pixel value is, and it would be redundant to
+ * calculate it over and over.
+ */
+
+GP_RetCode GP_PutPixel8bpp(GP_Context *context, int x, int y, GP_Pixel pixel)
+{
+	CLIP_PIXEL(context, x, y);
+
+	uint8_t *p = GP_PIXEL_ADDRESS(context, y, x);
+	GP_WritePixel8bpp(p, pixel.val);
+	return GP_ESUCCESS;
+}
+
+GP_RetCode GP_PutPixel16bpp(GP_Context *context, int x, int y, GP_Pixel pixel)
+{
+	CLIP_PIXEL(context, x, y);
+
+	uint8_t *p = GP_PIXEL_ADDRESS(context, y, x);
+	GP_WritePixel16bpp(p, pixel.val);
+	return GP_ESUCCESS;
+}
+
+GP_RetCode GP_PutPixel24bpp(GP_Context *context, int x, int y, GP_Pixel pixel)
+{
+	CLIP_PIXEL(context, x, y);
+
+	uint8_t *p = GP_PIXEL_ADDRESS(context, y, x);
+	GP_WritePixel24bpp(p, pixel.val);
+	return GP_ESUCCESS;
+}
+
+GP_RetCode GP_PutPixel32bpp(GP_Context *context, int x, int y, GP_Pixel pixel)
+{
+	CLIP_PIXEL(context, x, y);
+
+	uint8_t *p = GP_PIXEL_ADDRESS(context, y, x);
+	GP_WritePixel32bpp(p, pixel.val);
+	return GP_ESUCCESS;
+}
+
+/*
+ * A generic PutPixel call that automatically determines the number of
+ * bits per pixel and converts color to pixel value appropriately.
+ */
+
 GP_RetCode GP_PutPixel(GP_Context *context, int x, int y, GP_Color color)
 {
 	GP_CHECK_CONTEXT(context);
-	GP_RetCode ret;
-	GP_Pixel pixel;
-	
-	pixel.type = context->pixel_type;
-	ret = GP_ColorToPixel(color, &pixel);
-	
-	uint8_t *p;
 
-	if (x < (int) context->clip_w_min
-		|| x > (int) context->clip_w_max
-		|| y < (int) context->clip_h_min
-		|| y > (int) context->clip_h_max) {
-		return GP_EINVAL; /* clipped out */
+	GP_Pixel pixel;
+	pixel.type = context->pixel_type;
+	GP_RetCode ret = GP_ColorToPixel(color, &pixel);
+	if (ret != GP_ESUCCESS) {
+		return ret;
 	}
-	
-	p = GP_PIXEL_ADDRESS(context, y, x);
+
+	uint8_t * p = GP_PIXEL_ADDRESS(context, y, x);
 
 	switch (context->bits_per_pixel) {
 	case 32:
-		GP_WritePixel32bpp(p, pixel.val);
+//		GP_WritePixel32bpp(p, pixel.val);
+		GP_PutPixel32bpp(context, x, y, pixel);
 		break;
 	case 24:
-		GP_WritePixel24bpp(p, pixel.val);
+		GP_PutPixel24bpp(context, x, y, pixel);
 		break;
-	
 	case 16:
-		GP_WritePixel16bpp(p, pixel.val);
+		GP_PutPixel16bpp(context, x, y, pixel);
 		break;
-	
 	case 8:
-		GP_WritePixel8bpp(p, pixel.val);
+		GP_PutPixel8bpp(context, x, y, pixel);
 		break;
-	
 	default:
-		GP_ABORT("Unsupported value of context->bits_per_pixel");
 		return GP_ENOIMPL;
 	}
 
-	return ret;
+	return GP_ESUCCESS;
 }
 
 GP_RetCode GP_TPutPixel(GP_Context *context, int x, int y, GP_Color color)

@@ -60,7 +60,9 @@ void draw_pixel(void)
 	int x = random() % 320;
 	int y = random() % 240;
 
-	pixel = GP_GetPixel(&context, x, y);
+//	pixel = GP_GetPixel(&context, x, y);
+
+	GP_PutPixel(&context, x, y, green);
 
       /* TODO: we cannot switch like this
 	 we need either to convert blue
