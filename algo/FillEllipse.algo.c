@@ -23,66 +23,40 @@
  *                                                                           *
  *****************************************************************************/
 
-#include "GP.h"
+/*
+ * Function that implements the filled ellipse drawing algorithm.
+ * Following arguments must be #defined before including this:
+ *
+ *     CONTEXT_T - user-defined type of drawing context (passed to HLINE)
+ *     PIXVAL_T  - user-defined pixel value type (passed to HLINE)
+ *     HLINE     - user-defined horizontal line drawing function
+ *                 HLINE(context, x0, x1, y, pixval)
+ *     FN_NAME   - name of the function to be defined
+ */
 
-#define CONTEXT_T GP_Context *
-#define PIXVAL_T GP_Pixel
-	#define HLINE GP_HLine8bpp
-	#define FN_NAME GP_FillEllipse8bpp
-		#include "algo/FillEllipse.algo.c"
-	#undef FN_NAME
-	#undef HLINE
-	#define HLINE GP_HLine16bpp
-	#define FN_NAME GP_FillEllipse16bpp
-		#include "algo/FillEllipse.algo.c"
-	#undef FN_NAME
-	#undef HLINE
-	#define HLINE GP_HLine24bpp
-	#define FN_NAME GP_FillEllipse24bpp
-		#include "algo/FillEllipse.algo.c"
-	#undef FN_NAME
-	#undef HLINE
-	#define HLINE GP_HLine32bpp
-	#define FN_NAME GP_FillEllipse32bpp
-		#include "algo/FillEllipse.algo.c"
-	#undef FN_NAME
-	#undef HLINE
-#undef PIXVAL_T
-#undef CONTEXT_T
-
-GP_RetCode GP_FillEllipse(GP_Context *context, int xcenter, int ycenter,
-	unsigned int a, unsigned int b, GP_Color color)
+void FN_NAME(CONTEXT_T context, int xcenter, int ycenter,
+	unsigned int a, unsigned int b, PIXVAL_T pixval)
 {
-	GP_CHECK_CONTEXT(context);
+	/* Precompute quadratic terms. */
+	int a2 = a*a;
+	int b2 = b*b;
 
-	GP_Pixel pixel;
-	pixel.type = context->pixel_type;
-	GP_RetCode ret = GP_ColorToPixel(color, &pixel);
+	/*
+	 * Draw the ellipse. The algorithm is exactly the same
+	 * as with GP_Ellipse() except that we draw a line between
+	 * each two points at each side of the X axis.
+	 */
+	int x, y, error;
+	for (x = 0, error = -b2*a, y = b; y >= 0; y--) {
 
-	switch (context->bits_per_pixel) {
-	case 8:
-		GP_FillEllipse8bpp(context, xcenter, ycenter, a, b, pixel);
-		break;
-	case 16:
-		GP_FillEllipse16bpp(context, xcenter, ycenter, a, b, pixel);
-		break;
-	case 24:
-		GP_FillEllipse24bpp(context, xcenter, ycenter, a, b, pixel);
-		break;
-	case 32:
-		GP_FillEllipse32bpp(context, xcenter, ycenter, a, b, pixel);
-		break;
-	default:
-		return GP_ENOIMPL;
+		while (error < 0) {
+			error += b2 * (2*x + 1);
+			x++;
+		}
+		error += a2 * (-2*y + 1);
+
+		/* Draw two horizontal lines reflected across Y. */
+		HLINE(context, xcenter-x+1, xcenter+x-1, ycenter-y, pixval);
+		HLINE(context, xcenter-x+1, xcenter+x-1, ycenter+y, pixval);
 	}
-
-	return ret;
-}
-
-GP_RetCode GP_TFillEllipse(GP_Context *context, int xcenter, int ycenter,
-                           unsigned int a, unsigned int b, GP_Color color)
-{
-	GP_TRANSFORM_POINT(context, xcenter, ycenter);
-	GP_TRANSFORM_SWAP(context, a, b);
-	return GP_FillEllipse(context, xcenter, ycenter, a, b, color);
 }
