@@ -25,83 +25,58 @@
 
 #include "GP.h"
 
+#define CONTEXT_T GP_Context *
+#define PIXVAL_T GP_Pixel
+	#define PUTPIXEL GP_PutPixel8bpp
+	#define FN_NAME GP_Ellipse8bpp
+		#include "algo/Ellipse.algo.c"
+	#undef FN_NAME
+	#undef PUTPIXEL
+	#define PUTPIXEL GP_PutPixel16bpp
+	#define FN_NAME GP_Ellipse16bpp
+		#include "algo/Ellipse.algo.c"
+	#undef FN_NAME
+	#undef PUTPIXEL
+	#define PUTPIXEL GP_PutPixel24bpp
+	#define FN_NAME GP_Ellipse24bpp
+		#include "algo/Ellipse.algo.c"
+	#undef FN_NAME
+	#undef PUTPIXEL
+	#define PUTPIXEL GP_PutPixel32bpp
+	#define FN_NAME GP_Ellipse32bpp
+		#include "algo/Ellipse.algo.c"
+	#undef FN_NAME
+	#undef PUTPIXEL
+#undef PIXVAL_T
+#undef CONTEXT_T
+
 GP_RetCode GP_Ellipse(GP_Context *context, int xcenter, int ycenter,
                       unsigned int a, unsigned int b, GP_Color color)
 {
 	GP_CHECK_CONTEXT(context);
 
-	/* Precompute quadratic terms. */
-	int a2 = a*a;
-	int b2 = b*b;
+	GP_Pixel pixel;
+	pixel.type = context->pixel_type;
+	GP_RetCode ret = GP_ColorToPixel(color, &pixel);
 
-	/*
-	 * Draw the ellipse from top to down. The ellipse is
-	 * X- and Y-symmetrical so we only need to calculate
-	 * a 1/4 of points. In this case, we calculate the
-	 * top-right quadrant (Y in range <b, 0>, X in <0, a>).
-	 *
-	 * Because ellipses are not symmetrical diagonally
-	 * (differently from circles), we have to enumerate
-	 * points both along the Y and X axis, as each enumeration
-	 * gives us only half of the points.
-	 *
-	 * Algorithm:
-	 * From the canonical implicit equation of an ellipse:
-	 *
-	 * x^2/a^2 + y^2/b^2 = 1             and therefore
-	 * x^2*b^2 + y^2*a^2 - a^2*b^2 = 0
-	 *
-	 * which has an exact solution for a non-integer x.
-	 * For an integer approximation, we need to find
-	 * an integer x so that
-	 *
-	 * x^2*b^2 + y^2*a^2 - a^2*b^2 = error
-	 *
-	 * where error is as close to 0 as possible.
-	 *
-	 * Optimization:
-	 * We can save a significant amount of multiplications
-	 * by calculating next error values from the previous ones.
-	 * For error(x+1):
-	 *
-	 * error(x+1) = (x+1)^2*b^2 + y^2*a^2 + a^2*b^2
-	 *
-	 * which can be rewritten as (after expanding (x+1)^2):
-	 *
-	 * error(x+1) = x^2*b^2 + 2*x^2*b^2 + b^2 + y^2*a^2 + a^2*b^2
-	 *
-	 * and, after substituting error(x) which we already know:
-	 *
-	 * error(x+1) = error(x) + 2*x*b^2 + b^2
-	 *
-	 * The same applies to x-1, y+1 and y-1.
-	 */
-	
-	int x, y, error;
-	for (x = 0, error = -b2*a, y = b; y >= 0; y--) {
-		while (error < 0) {
-
-			/* Calculate error(x+1) from error(x). */
-			error += 2*x*b2 + b2;
-			x++;
-
-			GP_PutPixel(context, xcenter-x+1, ycenter-y, color);
-			GP_PutPixel(context, xcenter+x-1, ycenter-y, color);
-			GP_PutPixel(context, xcenter-x+1, ycenter+y, color);
-			GP_PutPixel(context, xcenter+x-1, ycenter+y, color);
-		}
-
-		/* Calculate error(y-1) from error(y). */
-		error += -2*y*a2 + a2;
-
-		GP_PutPixel(context, xcenter-x+1, ycenter-y, color);
-		GP_PutPixel(context, xcenter+x-1, ycenter-y, color);
-		GP_PutPixel(context, xcenter-x+1, ycenter+y, color);
-		GP_PutPixel(context, xcenter+x-1, ycenter+y, color);
+	switch (context->bits_per_pixel) {
+	case 8:
+		GP_Ellipse8bpp(context, xcenter, ycenter, a, b, pixel);
+		break;
+	case 16:
+		GP_Ellipse16bpp(context, xcenter, ycenter, a, b, pixel);
+		break;
+	case 24:
+		GP_Ellipse24bpp(context, xcenter, ycenter, a, b, pixel);
+		break;
+	case 32:
+		GP_Ellipse32bpp(context, xcenter, ycenter, a, b, pixel);
+		break;
+	default:
+		return GP_ENOIMPL;
 	}
 
-	//TODO: see GP_Circle.c
-	return GP_ESUCCESS;
+	return ret;
 }
 
 GP_RetCode GP_TEllipse(GP_Context *context, int xcenter, int ycenter,
