@@ -40,7 +40,6 @@
 #include "GP_ReadPixel.h"
 #include "GP_WritePixel.h"
 #include "GP_FillColumn.h"
-#include "GP_FillRow.h"
 
 /* colors */
 #include "GP_Color.h"

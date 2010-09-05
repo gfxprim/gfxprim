@@ -84,39 +84,29 @@ GP_RetCode GP_PutPixel32bpp(GP_Context *context, int x, int y, GP_Pixel pixel)
  * A generic PutPixel call that automatically determines the number of
  * bits per pixel and converts color to pixel value appropriately.
  */
-
 GP_RetCode GP_PutPixel(GP_Context *context, int x, int y, GP_Color color)
 {
 	GP_CHECK_CONTEXT(context);
 
 	GP_Pixel pixel;
+	GP_RetCode ret;
 	pixel.type = context->pixel_type;
-	GP_RetCode ret = GP_ColorToPixel(color, &pixel);
-	if (ret != GP_ESUCCESS) {
+	ret = GP_ColorToPixel(color, &pixel);
+	if (ret != GP_ESUCCESS)
 		return ret;
-	}
-
-	uint8_t * p = GP_PIXEL_ADDRESS(context, y, x);
 
 	switch (context->bits_per_pixel) {
 	case 32:
-//		GP_WritePixel32bpp(p, pixel.val);
-		GP_PutPixel32bpp(context, x, y, pixel);
-		break;
+		return GP_PutPixel32bpp(context, x, y, pixel);
 	case 24:
-		GP_PutPixel24bpp(context, x, y, pixel);
-		break;
+		return GP_PutPixel24bpp(context, x, y, pixel);
 	case 16:
-		GP_PutPixel16bpp(context, x, y, pixel);
-		break;
+		return GP_PutPixel16bpp(context, x, y, pixel);
 	case 8:
-		GP_PutPixel8bpp(context, x, y, pixel);
-		break;
-	default:
-		return GP_ENOIMPL;
+		return GP_PutPixel8bpp(context, x, y, pixel);
 	}
 
-	return GP_ESUCCESS;
+	return GP_ENOIMPL;
 }
 
 GP_RetCode GP_TPutPixel(GP_Context *context, int x, int y, GP_Color color)
