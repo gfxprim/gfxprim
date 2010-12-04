@@ -16,12 +16,15 @@ core:
 sdl: core
 	cd targets/sdl && $(MAKE) all
 
-#install:
-#	install -m 775 -d $(HEADER_LOC)GP/
-#	install -m 664 *.h $(HEADER_LOC)GP/
-#	install -m 775 -d $(HEADER_LOC)GP/backends/
-#	install -m 664 backends/*.h $(HEADER_LOC)GP/backends/
-#	install -m 664 *.so *.so.0 *.a $(LIB_LOC)
+install: all
+	# core library
+	install -m 775 -d $(HEADER_LOC)GP/
+	install -m 664 core/*.h $(HEADER_LOC)GP/
+	install -m 664 core/*.so core/*.so.0 core/*.a $(LIB_LOC)
+	# sdl target	
+	install -m 775 -d $(HEADER_LOC)GP/SDL/
+	install -m 664 targets/sdl/*.h $(HEADER_LOC)GP/SDL/
+	install -m 664 targets/sdl/*.so targets/sdl/*.so.0 targets/sdl/*.a $(LIB_LOC)
 
 clean:
 	rm -f *.o *.a *.so *.so.0
