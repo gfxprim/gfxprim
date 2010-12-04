@@ -33,4 +33,9 @@
  */
 int GP_TextWidth(const struct GP_TextStyle *style, const char *str);
 
+/*
+ * Returns maximal text height.
+ */
+int GP_TextHeight(const struct GP_TextStyle *style);
+
 #endif /* GP_TEXT_METRIC_H */
