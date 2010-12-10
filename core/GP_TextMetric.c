@@ -50,3 +50,7 @@ int GP_TextWidth(const struct GP_TextStyle *style, const char *str)
 	return width;
 }
 
+int GP_TextHeight(const struct GP_TextStyle *style)
+{
+	return style->font->height * style->pixel_ymul;
+}

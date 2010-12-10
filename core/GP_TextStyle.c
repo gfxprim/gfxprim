@@ -23,19 +23,15 @@
  *                                                                           *
  *****************************************************************************/
 
-#ifndef GP_TEXT_METRIC_H
-#define GP_TEXT_METRIC_H
-
 #include "GP_TextStyle.h"
 
-/*
- * Calculates the width of the string drawn in the given style, in pixels.
- */
-int GP_TextWidth(const struct GP_TextStyle *style, const char *str);
+#include <stddef.h>
 
-/*
- * Returns maximal text height.
- */
-int GP_TextHeight(const struct GP_TextStyle *style);
-
-#endif /* GP_TEXT_METRIC_H */
+void GP_DefaultTextStyle(struct GP_TextStyle *style)
+{
+	style->font = NULL;
+	style->pixel_xspace = 0;
+	style->pixel_yspace = 0;
+	style->pixel_xmul = 1;
+	style->pixel_ymul = 1;
+}
