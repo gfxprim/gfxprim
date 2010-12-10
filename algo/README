@@ -1,0 +1,6 @@
+This directory contains implementations of various drawing algorithms
+that can be #included to user code.
+
+Each .algo.c file needs a set of macros that must be #defined by the user code
+to provide functions for drawing pixels and lines, and provide other platform-
+and library-dependent data.
