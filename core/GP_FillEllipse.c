@@ -24,31 +24,13 @@
  *****************************************************************************/
 
 #include "GP.h"
+#include "GP_FnPerBpp.h"
+#include "algo/FillEllipse.algo.h"
 
-#define CONTEXT_T GP_Context *
-#define PIXVAL_T GP_Pixel
-	#define HLINE GP_HLine8bpp
-	#define FN_NAME GP_FillEllipse8bpp
-		#include "algo/FillEllipse.algo.c"
-	#undef FN_NAME
-	#undef HLINE
-	#define HLINE GP_HLine16bpp
-	#define FN_NAME GP_FillEllipse16bpp
-		#include "algo/FillEllipse.algo.c"
-	#undef FN_NAME
-	#undef HLINE
-	#define HLINE GP_HLine24bpp
-	#define FN_NAME GP_FillEllipse24bpp
-		#include "algo/FillEllipse.algo.c"
-	#undef FN_NAME
-	#undef HLINE
-	#define HLINE GP_HLine32bpp
-	#define FN_NAME GP_FillEllipse32bpp
-		#include "algo/FillEllipse.algo.c"
-	#undef FN_NAME
-	#undef HLINE
-#undef PIXVAL_T
-#undef CONTEXT_T
+DEF_FILLELLIPSE_FN(GP_FillEllipse8bpp, GP_Context *, GP_Pixel, GP_HLine8bpp)
+DEF_FILLELLIPSE_FN(GP_FillEllipse16bpp, GP_Context *, GP_Pixel, GP_HLine16bpp)
+DEF_FILLELLIPSE_FN(GP_FillEllipse24bpp, GP_Context *, GP_Pixel, GP_HLine24bpp)
+DEF_FILLELLIPSE_FN(GP_FillEllipse32bpp, GP_Context *, GP_Pixel, GP_HLine32bpp)
 
 GP_RetCode GP_FillEllipse(GP_Context *context, int xcenter, int ycenter,
 	unsigned int a, unsigned int b, GP_Color color)
@@ -59,22 +41,7 @@ GP_RetCode GP_FillEllipse(GP_Context *context, int xcenter, int ycenter,
 	pixel.type = context->pixel_type;
 	GP_RetCode ret = GP_ColorToPixel(color, &pixel);
 
-	switch (context->bits_per_pixel) {
-	case 8:
-		GP_FillEllipse8bpp(context, xcenter, ycenter, a, b, pixel);
-		break;
-	case 16:
-		GP_FillEllipse16bpp(context, xcenter, ycenter, a, b, pixel);
-		break;
-	case 24:
-		GP_FillEllipse24bpp(context, xcenter, ycenter, a, b, pixel);
-		break;
-	case 32:
-		GP_FillEllipse32bpp(context, xcenter, ycenter, a, b, pixel);
-		break;
-	default:
-		return GP_ENOIMPL;
-	}
+	GP_FN_PER_BPP(GP_FillEllipse, xcenter, ycenter, a, b, pixel);
 
 	return ret;
 }

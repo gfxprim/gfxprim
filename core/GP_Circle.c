@@ -24,32 +24,14 @@
  *****************************************************************************/
 
 #include "GP.h"
+#include "algo/Circle.algo.h"
+#include "GP_FnPerBpp.h"
 
 /* Generate drawing functions for various bit depths. */
-#define CONTEXT_T GP_Context *
-#define PIXVAL_T  GP_Pixel
-	#define FN_NAME GP_Circle8bpp
-	#define PUTPIXEL GP_PutPixel8bpp
-		#include "algo/Circle.algo.c"
-	#undef FN_NAME
-	#undef PUTPIXEL
-	#define FN_NAME GP_Circle16bpp
-	#define PUTPIXEL GP_PutPixel16bpp
-		#include "algo/Circle.algo.c"
-	#undef FN_NAME
-	#undef PUTPIXEL
-	#define FN_NAME GP_Circle24bpp
-	#define PUTPIXEL GP_PutPixel24bpp
-		#include "algo/Circle.algo.c"
-	#undef FN_NAME
-	#undef PUTPIXEL
-	#define FN_NAME GP_Circle32bpp
-	#define PUTPIXEL GP_PutPixel32bpp
-		#include "algo/Circle.algo.c"
-	#undef FN_NAME
-	#undef PUTPIXEL
-#undef CONTEXT_T
-#undef PIXVAL_T
+DEF_CIRCLE_FN(GP_Circle8bpp, GP_Context *, GP_Pixel, GP_PutPixel8bpp)
+DEF_CIRCLE_FN(GP_Circle16bpp, GP_Context *, GP_Pixel, GP_PutPixel16bpp)
+DEF_CIRCLE_FN(GP_Circle24bpp, GP_Context *, GP_Pixel, GP_PutPixel24bpp)
+DEF_CIRCLE_FN(GP_Circle32bpp, GP_Context *, GP_Pixel, GP_PutPixel32bpp)
 
 GP_RetCode GP_Circle(GP_Context *context, int xcenter, int ycenter,
                      unsigned int r, GP_Color color)
@@ -60,26 +42,10 @@ GP_RetCode GP_Circle(GP_Context *context, int xcenter, int ycenter,
 	pixel.type = context->pixel_type;
 	GP_RetCode ret = GP_ColorToPixel(color, &pixel);
 
-	switch (context->bits_per_pixel) {
-	case 8:
-		GP_Circle8bpp(context, xcenter, ycenter, r, pixel);
-		break;
-	case 16:
-		GP_Circle16bpp(context, xcenter, ycenter, r, pixel);
-		break;
-	case 24:
-		GP_Circle24bpp(context, xcenter, ycenter, r, pixel);
-		break;
-	case 32:
-		GP_Circle32bpp(context, xcenter, ycenter, r, pixel);
-		break;
-	default:
-		return GP_ENOIMPL;
-	}
+	GP_FN_PER_BPP(GP_Circle, xcenter, ycenter, r, pixel);
 
 	return ret;
 }
-
 
 GP_RetCode GP_TCircle(GP_Context *context, int xcenter, int ycenter,
                       unsigned int r, GP_Color color)

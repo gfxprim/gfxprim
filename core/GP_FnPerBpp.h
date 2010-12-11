@@ -24,36 +24,28 @@
  *****************************************************************************/
 
 #include "GP.h"
-#include "GP_FnPerBpp.h"
-#include "algo/FillTriangle.algo.h"
 
-#include <stdlib.h>
-
-/* Generate drawing functions for various bit depths. */
-DEF_FILLTRIANGLE_FN(GP_FillTriangle8bpp, GP_Context *, GP_Pixel, GP_Line8bpp, GP_HLine8bpp)
-DEF_FILLTRIANGLE_FN(GP_FillTriangle16bpp, GP_Context *, GP_Pixel, GP_Line16bpp, GP_HLine16bpp)
-DEF_FILLTRIANGLE_FN(GP_FillTriangle24bpp, GP_Context *, GP_Pixel, GP_Line24bpp, GP_HLine24bpp)
-DEF_FILLTRIANGLE_FN(GP_FillTriangle32bpp, GP_Context *, GP_Pixel, GP_Line32bpp, GP_HLine32bpp)
-
-GP_RetCode GP_FillTriangle(GP_Context * context, int x0, int y0, int x1, int y1,
-                           int x2, int y2, GP_Color color)
-{
-	GP_CHECK_CONTEXT(context);
-
-	GP_Pixel pixel;
-	pixel.type = context->pixel_type;
-	GP_RetCode ret = GP_ColorToPixel(color, &pixel);
-
-	GP_FN_PER_BPP(GP_FillTriangle, x0, y0, x1, y1, x2, y2, pixel);
-
-	return ret;
-}
-
-GP_RetCode GP_TFillTriangle(GP_Context* context, int x0, int y0, int x1, int y1,
-                            int x2, int y2, GP_Color color)
-{
-	GP_TRANSFORM_POINT(context, x0, y0);
-	GP_TRANSFORM_POINT(context, x1, y1);
-	GP_TRANSFORM_POINT(context, x2, y2);
-	return GP_FillTriangle(context, x0, y0, x1, y1, x2, y2, color);
-}
+/*
+ * Macro that generates a switch-case block that calls various variants
+ * of the specified function depending on the bit depth of the context.
+ * Extra arguments are arguments to be passed to the function.
+ * Returns GP_ENOIMPL if the bit depth is unknown.
+ */
+#define GP_FN_PER_BPP(FN_NAME, ...) \
+\
+	switch (context->bits_per_pixel) { \
+	case 8: \
+		FN_NAME##8bpp(context, __VA_ARGS__); \
+		break; \
+	case 16: \
+		FN_NAME##16bpp(context, __VA_ARGS__); \
+		break; \
+	case 24: \
+		FN_NAME##24bpp(context, __VA_ARGS__); \
+		break; \
+	case 32: \
+		FN_NAME##32bpp(context, __VA_ARGS__); \
+		break; \
+	default: \
+		return GP_ENOIMPL; \
+	} 

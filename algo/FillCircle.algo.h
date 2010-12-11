@@ -24,39 +24,35 @@
  *****************************************************************************/
 
 /*
- * Function that implements the filled ellipse drawing algorithm.
- * Following arguments must be #defined before including this:
+ * A filled circle drawing algorithm.
  *
- *     CONTEXT_T - user-defined type of drawing context (passed to HLINE)
- *     PIXVAL_T  - user-defined pixel value type (passed to HLINE)
- *     HLINE     - user-defined horizontal line drawing function
- *                 HLINE(context, x0, x1, y, pixval)
- *     FN_NAME   - name of the function to be defined
+ * A filled circle is drawn in the same way as an unfilled one,
+ * in a top-down, line per line manner, except that we don't need to draw
+ * four points in each X step. Instead, we just iterate X
+ * until we accumulate enough Y changes to reach the next line,
+ * and then draw the full line.
  */
 
-void FN_NAME(CONTEXT_T context, int xcenter, int ycenter,
-	unsigned int a, unsigned int b, PIXVAL_T pixval)
-{
-	/* Precompute quadratic terms. */
-	int a2 = a*a;
-	int b2 = b*b;
-
-	/*
-	 * Draw the ellipse. The algorithm is exactly the same
-	 * as with GP_Ellipse() except that we draw a line between
-	 * each two points at each side of the X axis.
-	 */
-	int x, y, error;
-	for (x = 0, error = -b2*a, y = b; y >= 0; y--) {
-
-		while (error < 0) {
-			error += b2 * (2*x + 1);
-			x++;
-		}
-		error += a2 * (-2*y + 1);
-
-		/* Draw two horizontal lines reflected across Y. */
-		HLINE(context, xcenter-x+1, xcenter+x-1, ycenter-y, pixval);
-		HLINE(context, xcenter-x+1, xcenter+x-1, ycenter+y, pixval);
-	}
+/*
+ * This macro defines a filled circle drawing function.
+ * Arguments:
+ *     CONTEXT_T - user-defined type of drawing context (passed to HLINE)
+ *     PIXVAL_T  - user-defined pixel value type (passed to HLINE)
+ *     HLINE     - horizontal line drawing function f(context, x0, x1, y, pixval)
+ *     FN_NAME   - name of the function to be defined
+ */
+#define DEF_FILLCIRCLE_FN(FN_NAME, CONTEXT_T, PIXVAL_T, HLINE) \
+void FN_NAME(CONTEXT_T context, int xcenter, int ycenter, \
+	unsigned int r, PIXVAL_T pixval) \
+{ \
+	int x, y, error; \
+	for (x = 0, error = -r, y = r; y >= 0; y--) { \
+		while (error < 0) { \
+			error += 2*x + 1; \
+			x++; \
+		} \
+		error += -2*y + 1; \
+		HLINE(context, xcenter-x+1, xcenter+x-1, ycenter-y, pixval); \
+		HLINE(context, xcenter-x+1, xcenter+x-1, ycenter+y, pixval); \
+	} \
 }

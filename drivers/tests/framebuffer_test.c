@@ -36,7 +36,7 @@
 #include <GP.h>
 #include <GP_Framebuffer.h>
 
-static struct GP_TextStyle style = {
+static GP_TextStyle style = {
 	.font = &GP_default_console_font,
 	.pixel_xmul = 2,
 	.pixel_ymul = 2,

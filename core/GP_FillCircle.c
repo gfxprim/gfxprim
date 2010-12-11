@@ -24,33 +24,13 @@
  *****************************************************************************/
 
 #include "GP.h"
+#include "GP_FnPerBpp.h"
+#include "algo/FillCircle.algo.h"
 
-#include <stdint.h>
-
-#define CONTEXT_T GP_Context *
-#define PIXVAL_T GP_Pixel
-	#define HLINE GP_HLine8bpp
-	#define FN_NAME GP_FillCircle8bpp
-		#include "algo/FillCircle.algo.c"
-	#undef FN_NAME
-	#undef HLINE
-	#define HLINE GP_HLine16bpp
-	#define FN_NAME GP_FillCircle16bpp
-		#include "algo/FillCircle.algo.c"
-	#undef FN_NAME
-	#undef HLINE
-	#define HLINE GP_HLine24bpp
-	#define FN_NAME GP_FillCircle24bpp
-		#include "algo/FillCircle.algo.c"
-	#undef FN_NAME
-	#undef HLINE
-	#define HLINE GP_HLine32bpp
-	#define FN_NAME GP_FillCircle32bpp
-		#include "algo/FillCircle.algo.c"
-	#undef FN_NAME
-	#undef HLINE
-#undef PIXVAL_T
-#undef CONTEXT_T
+DEF_FILLCIRCLE_FN(GP_FillCircle8bpp, GP_Context *, GP_Pixel, GP_HLine8bpp)
+DEF_FILLCIRCLE_FN(GP_FillCircle16bpp, GP_Context *, GP_Pixel, GP_HLine16bpp)
+DEF_FILLCIRCLE_FN(GP_FillCircle24bpp, GP_Context *, GP_Pixel, GP_HLine24bpp)
+DEF_FILLCIRCLE_FN(GP_FillCircle32bpp, GP_Context *, GP_Pixel, GP_HLine32bpp)
 
 GP_RetCode GP_FillCircle(GP_Context *context, int xcenter, int ycenter,
                          unsigned int r, GP_Color color)
@@ -61,22 +41,7 @@ GP_RetCode GP_FillCircle(GP_Context *context, int xcenter, int ycenter,
 	pixel.type = context->pixel_type;
 	GP_RetCode ret = GP_ColorToPixel(color, &pixel);
 
-	switch (context->bits_per_pixel) {
-	case 8:
-		GP_FillCircle8bpp(context, xcenter, ycenter, r, pixel);
-		break;
-	case 16:
-		GP_FillCircle16bpp(context, xcenter, ycenter, r, pixel);
-		break;
-	case 24:
-		GP_FillCircle24bpp(context, xcenter, ycenter, r, pixel);
-		break;
-	case 32:
-		GP_FillCircle32bpp(context, xcenter, ycenter, r, pixel);
-		break;
-	default:
-		return GP_ENOIMPL;
-	}
+	GP_FN_PER_BPP(GP_FillCircle, xcenter, ycenter, r, pixel);
 
 	return ret;
 }

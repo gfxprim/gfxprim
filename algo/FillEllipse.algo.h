@@ -24,34 +24,40 @@
  *****************************************************************************/
 
 /*
- * Function that implements the filled circle drawing algorithm.
- * Following arguments must be #defined before including this:
+ * A filled ellipse drawing algorithm.
  *
- *     CONTEXT_T - user-defined type of drawing context (passed to HLINE)
- *     PIXVAL_T  - user-defined pixel value type (passed to HLINE)
- *     HLINE     - user-defined horizontal line drawing function
- *                 HLINE(context, x0, x1, y, pixval)
- *     FN_NAME   - name of the function to be defined
+ * The algorithm is exactly the same as with GP_Ellipse() except that
+ * we draw a line between each two points at each side of the X axis;
+ * therefore, we don't need to draw any points during iterations of X,
+ * we just iterate X until Y reaches next line, and then draw the full line.
  */
 
-void FN_NAME(CONTEXT_T context, int xcenter, int ycenter,
-	unsigned int r, PIXVAL_T pixval)
-{
-	/*
-	 * Draw the circle in top-down, line-per-line manner.
-	 * For each line, X is calculated and a horizontal line is drawn
-	 * between +X and -X, and reflected around the Y axis.
-	 * X is computed in the same way as for Circle().
-	 */
-	int x, y, error;
-	for (x = 0, error = -r, y = r; y >= 0; y--) {
-		while (error < 0) {
-			error += 2*x + 1;
-			x++;
-		}
-		error += -2*y + 1;
-
-		HLINE(context, xcenter-x+1, xcenter+x-1, ycenter-y, pixval);
-		HLINE(context, xcenter-x+1, xcenter+x-1, ycenter+y, pixval);
-	}
+/*
+ * This macro defines a filled ellipse drawing function.
+ * Arguments:
+ *     CONTEXT_T - user-defined type of drawing context (passed to HLINE)
+ *     PIXVAL_T  - user-defined pixel value type (passed to HLINE)
+ *     HLINE     - horizontal line drawing function f(context, x0, x1, y, pixval)
+ *     FN_NAME   - name of the function to be defined
+ */
+#define DEF_FILLELLIPSE_FN(FN_NAME, CONTEXT_T, PIXVAL_T, HLINE) \
+void FN_NAME(CONTEXT_T context, int xcenter, int ycenter, \
+	unsigned int a, unsigned int b, PIXVAL_T pixval) \
+{ \
+	/* Precompute quadratic terms. */ \
+	int a2 = a*a; \
+	int b2 = b*b; \
+\
+	int x, y, error; \
+	for (x = 0, error = -b2*a, y = b; y >= 0; y--) { \
+		while (error < 0) { \
+			error += b2 * (2*x + 1); \
+			x++; \
+		} \
+		error += a2 * (-2*y + 1); \
+\
+		/* Draw two horizontal lines reflected across Y. */ \
+		HLINE(context, xcenter-x+1, xcenter+x-1, ycenter-y, pixval); \
+		HLINE(context, xcenter-x+1, xcenter+x-1, ycenter+y, pixval); \
+	} \
 }
