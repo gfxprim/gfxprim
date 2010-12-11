@@ -23,77 +23,41 @@
  *                                                                           *
  *****************************************************************************/
 
-#include "GP.h"
-#include "algo/Line.algo.h"
-#include "GP_FnPerBpp.h"
+/* A horizontal line drawing algorithm. */
 
-DEF_LINE_FN(GP_Line8bpp, GP_Context *, GP_Pixel, GP_PutPixel8bpp)
-DEF_LINE_FN(GP_Line16bpp, GP_Context *, GP_Pixel, GP_PutPixel16bpp)
-DEF_LINE_FN(GP_Line24bpp, GP_Context *, GP_Pixel, GP_PutPixel24bpp)
-DEF_LINE_FN(GP_Line32bpp, GP_Context *, GP_Pixel, GP_PutPixel32bpp)
+/* Ensures that coordinates are in correct order, and clips them.
+ * Exits immediately if the line is completely clipped out.
+ */
+#define ORDER_AND_CLIP_COORDS do { \
+	if (x0 > x1) GP_SWAP(x0, x1); \
+	if (y < (int) context->clip_h_min \
+		|| y > (int) context->clip_h_max \
+		|| x0 > (int) context->clip_w_max \
+		|| x1 < (int) context->clip_w_min) { \
+		return; \
+	} \
+	x0 = GP_MAX(x0, (int) context->clip_w_min); \
+	x1 = GP_MIN(x1, (int) context->clip_w_max); \
+} while(0);
 
-GP_RetCode GP_Line(GP_Context *context, int x0, int y0, int x1, int y1,
-                   GP_Color color)
-{
-	GP_CHECK_CONTEXT(context);
-
-	GP_Pixel pixel;
-	pixel.type = context->pixel_type;
-	GP_ColorToPixel(color, &pixel);
-
-	GP_FN_PER_BPP(GP_Line, x0, y0, x1, y1, pixel);
-
-	return GP_ESUCCESS;
-}
-
-GP_RetCode GP_TLine(GP_Context *context, int x0, int y0, int x1, int y1,
-                    GP_Color color)
-{
-	GP_TRANSFORM_POINT(context, x0, y0);
-	GP_TRANSFORM_POINT(context, x1, y1);
-	return GP_Line(context, x0, y0, x1, y1, color);
-}
-
-size_t GP_CalcLinePoints(int x0, int y0, int x1, int y1,
-	int *points, size_t maxlen)
-{
-	GP_CHECK(points != NULL || maxlen == 0);
-	GP_CHECK(maxlen % 2 == 0);
-	
-	size_t i = 0;
-
-	int deltax = x1 - x0;
-	int deltay = y1 - y0;
-
-	int x, y, error;
-
-	if (abs(deltax) > abs(deltay)) {	/* X changes faster */
-
-		if (deltax < 0) {
-			SWAP_ENDPOINTS;
-		}
-
-		FOR_EACH_X {
-			if (i < maxlen) {
-				points[i++] = x;
-				points[i++] = y;
-			}
-			NEXT_X;
-		}
-	} else {				/* Y changes faster */
-
-		if (deltay < 0) {
-			SWAP_ENDPOINTS;
-		}
-
-		FOR_EACH_Y {
-			if (i < maxlen) {
-				points[i++] = x;
-				points[i++] = y;
-			}
-			NEXT_Y;
-		}
-	}
-
-	return i;
+/*
+ * This macro defines a horizontal line drawing function.
+ * Arguments:
+ *     CONTEXT_T - user-defined type of drawing context (passed to PUTPIXEL)
+ *     PIXVAL_T  - user-defined pixel value type (passed to PUTPIXEL)
+ *     PIXEL_ADDRESS  - a function that returns a pointer to a pixel in memory,
+ *                      in form f(context, y, x)
+ *     WRITE_PIXELS   - a function that fills a linear block with pixel value,
+ *                      in form f(start, length, pixel)
+ *     FN_NAME   - name of the function to be defined
+ */
+#define DEF_HLINE_FN(FN_NAME, CONTEXT_T, PIXEL_T, PIXEL_ADDRESS, WRITE_PIXELS) \
+void FN_NAME(GP_Context *context, int x0, int x1, int y, GP_Pixel pixel) \
+{ \
+	ORDER_AND_CLIP_COORDS; \
+\
+	size_t length = 1 + x1 - x0; \
+	void *start = GP_PIXEL_ADDRESS(context, y, x0); \
+\
+	WRITE_PIXELS(start, length, pixel.val); \
 }

@@ -24,27 +24,27 @@
  *****************************************************************************/
 
 #include "GP.h"
+#include "algo/Text.algo.h"
+#include "GP_FnPerBpp.h"
 
-#define CONTEXT_T GP_Context *
-#define PIXVAL_T GP_Color
-	#define HLINE GP_HLine
-	#define FN_NAME GP_Text_internal
-		#include "algo/Text.algo.c"
-	#undef HLINE
-	#undef FN_NAME
-	#define HLINE GP_THLine
-	#define FN_NAME GP_TText_internal
-		#include "algo/Text.algo.c"
-	#undef FN_NAME
-	#undef HLINE
-#undef PIXVAL_T
-#undef CONTEXT_T
+DEF_TEXT_FN(GP_Text8bpp, GP_Context *, GP_Pixel, GP_HLine8bpp)
+DEF_TEXT_FN(GP_Text16bpp, GP_Context *, GP_Pixel, GP_HLine16bpp)
+DEF_TEXT_FN(GP_Text24bpp, GP_Context *, GP_Pixel, GP_HLine24bpp)
+DEF_TEXT_FN(GP_Text32bpp, GP_Context *, GP_Pixel, GP_HLine32bpp)
+DEF_TEXT_FN(GP_TText_internal, GP_Context *, GP_Color, GP_THLine)
 
 GP_RetCode GP_Text(GP_Context *context, const GP_TextStyle *style,
 	int x, int y, const char *str, GP_Color color)
 {
-	GP_Text_internal(context, style, x, y, str, color);
-	return GP_ESUCCESS;
+	GP_CHECK_CONTEXT(context);
+
+	GP_Pixel pixel;
+	pixel.type = context->pixel_type;
+	GP_RetCode ret = GP_ColorToPixel(color, &pixel);
+
+	GP_FN_PER_BPP(GP_Text, style, x, y, str, pixel);
+
+	return ret;
 }
 
 GP_RetCode GP_TText(GP_Context *context, const GP_TextStyle *style,
