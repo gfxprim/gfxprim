@@ -34,7 +34,7 @@
  * This structure describes how a text should be rendered.
  * It includes a font, and its various variants and transformations.
  */
-struct GP_TextStyle {
+typedef struct {
 
 	/* Font to use, or NULL to use the default font. */
 	struct GP_Font *font;
@@ -44,7 +44,8 @@ struct GP_TextStyle {
 
 	/* Multiplier of pixel width/height (1 is default). */
 	int pixel_xmul, pixel_ymul;
-};
+
+} GP_TextStyle;
 
 /*
  * Static initializer for initializing a GP_TextStyle structure to default
@@ -57,6 +58,6 @@ struct GP_TextStyle {
 /*
  * Initalize text style to the default values.
  */
-void GP_DefaultTextStyle(struct GP_TextStyle *style); 
+void GP_DefaultTextStyle(GP_TextStyle *style); 
 
 #endif /* GP_TEXTSTYLE_H */

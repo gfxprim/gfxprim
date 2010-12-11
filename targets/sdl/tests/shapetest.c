@@ -175,7 +175,7 @@ void redraw_screen(void)
 {
 
 	/* text style for the label */
-	struct GP_TextStyle style = {
+	GP_TextStyle style = {
 		.font = &GP_default_console_font,
 		.pixel_xmul = 2,
 		.pixel_ymul = 1,

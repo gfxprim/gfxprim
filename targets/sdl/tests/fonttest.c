@@ -54,7 +54,7 @@ void redraw_screen(void)
 	
 	GP_Fill(&context, black);
 
-	struct GP_TextStyle style = GP_DEFAULT_TEXT_STYLE;
+	GP_TextStyle style = GP_DEFAULT_TEXT_STYLE;
 
 	if (flag_proportional)
 		style.font = &GP_default_proportional_font;

@@ -31,11 +31,11 @@
 /*
  * Calculates the width of the string drawn in the given style, in pixels.
  */
-int GP_TextWidth(const struct GP_TextStyle *style, const char *str);
+int GP_TextWidth(const GP_TextStyle *style, const char *str);
 
 /*
  * Returns maximal text height.
  */
-int GP_TextHeight(const struct GP_TextStyle *style);
+int GP_TextHeight(const GP_TextStyle *style);
 
 #endif /* GP_TEXT_METRIC_H */

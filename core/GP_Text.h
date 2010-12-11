@@ -28,10 +28,10 @@
 
 #include "GP_Context.h"
 
-GP_RetCode GP_Text(GP_Context *context, const struct GP_TextStyle *style,
+GP_RetCode GP_Text(GP_Context *context, const GP_TextStyle *style,
                    int x, int y, const char *str, GP_Color color);
 
-GP_RetCode GP_TText(GP_Context *context, const struct GP_TextStyle *style,
+GP_RetCode GP_TText(GP_Context *context, const GP_TextStyle *style,
                     int x, int y, const char *str, GP_Color color);
 
 #endif /* GP_TEXT_H */

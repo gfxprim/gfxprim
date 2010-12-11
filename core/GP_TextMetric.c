@@ -25,32 +25,31 @@
 
 #include "GP_TextStyle.h"
 
-static int GP_CharWidth(const struct GP_TextStyle *style, char c)
+static int GP_CharWidth(const GP_TextStyle *style, char c)
 {
 	int bytes_per_char = 2 + style->font->bytes_per_line * style->font->height;
 
 	const uint8_t * char_data = style->font->data + ((int) c - 0x20) * bytes_per_char;
 
-	/* The first byte specifies width in pixels. */
+	/* The first byte of the font data is width in pixels. */
 	const uint8_t char_width = *char_data;
 
 	return char_width * (style->pixel_xmul + style->pixel_xspace);
 }
 
-int GP_TextWidth(const struct GP_TextStyle *style, const char *str)
+int GP_TextWidth(const GP_TextStyle *style, const char *str)
 {
 	int width = 0;
 
 	const char *p;
 	for (p = str; *p; p++) {
-		width += style->font->hspace * style->pixel_xmul;
-		width += GP_CharWidth(style, *p);
+		width += GP_CharWidth(style, *p) + style->font->hspace * style->pixel_xmul;
 	}
 
 	return width;
 }
 
-int GP_TextHeight(const struct GP_TextStyle *style)
+int GP_TextHeight(const GP_TextStyle *style)
 {
 	return style->font->height * style->pixel_ymul;
 }

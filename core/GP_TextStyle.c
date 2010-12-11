@@ -27,7 +27,7 @@
 
 #include <stddef.h>
 
-void GP_DefaultTextStyle(struct GP_TextStyle *style)
+void GP_DefaultTextStyle(GP_TextStyle *style)
 {
 	style->font = NULL;
 	style->pixel_xspace = 0;

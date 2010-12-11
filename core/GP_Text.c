@@ -25,105 +25,32 @@
 
 #include "GP.h"
 
-static int GP_PutChar(GP_Context *context,
-	const struct GP_TextStyle *style, int x0, int y0,
-	const uint8_t *char_data, GP_Color color, bool transform)
+#define CONTEXT_T GP_Context *
+#define PIXVAL_T GP_Color
+	#define HLINE GP_HLine
+	#define FN_NAME GP_Text_internal
+		#include "algo/Text.algo.c"
+	#undef HLINE
+	#undef FN_NAME
+	#define HLINE GP_THLine
+	#define FN_NAME GP_TText_internal
+		#include "algo/Text.algo.c"
+	#undef FN_NAME
+	#undef HLINE
+#undef PIXVAL_T
+#undef CONTEXT_T
+
+GP_RetCode GP_Text(GP_Context *context, const GP_TextStyle *style,
+	int x, int y, const char *str, GP_Color color)
 {
-	int xdelta = style->pixel_xmul + style->pixel_xspace;
-
-	const uint8_t *src = char_data;
-
-	/* The first byte specifies width in pixels. */
-	const uint8_t char_width = *src;
-	src++;
-
-	/* Next byte specifies the left margin. */
-	const uint8_t lmargin = *src;
-	src++;
-
-	/* Final X for each character line. */
-	int x1 = x0 + char_width * xdelta;
-
-	int line, linerep, i, x = 0, y;
-	for (line = 0, y = y0; line < style->font->height; line++, y += style->pixel_yspace) {
-
-		/* repeat the line as specified by pixel_ymul */
-		for (linerep = 0; linerep < style->pixel_ymul; linerep++, y++) {
-			uint8_t const * linesrc = src + line * style->font->bytes_per_line;
-			uint8_t mask = 0x80;
-
-			/* skip left margin */
-			for (i = 0; i < lmargin; i++) {
-				mask >>= 1;
-				if (mask == 0) {
-					linesrc++;
-					mask = 0x80;
-				}
-			}
-
-			/* draw the line of the character */
-			for (x = x0; x < x1; x += xdelta) {
-				if (*linesrc & mask) {
-					if (transform) {
-						GP_THLine(context,
-						          x,
-						          x + style->pixel_xmul - 1,
-						          y,
-						          color);
-					} else {
-						GP_HLine(context,
-							 x,
-							 x + style->pixel_xmul - 1,
-							 y,
-							 color);
-					}
-				}
-				mask >>= 1;
-				if (mask == 0) {
-					linesrc++;
-					mask = 0x80;
-				}
-			}
-		}
-	}
-
-	return x + style->font->hspace * style->pixel_ymul;
-}
-
-GP_RetCode GP_Text(GP_Context *context, const struct GP_TextStyle *style,
-                   int x, int y, const char *str, GP_Color color)
-{
-	int bytes_per_char = 2 + style->font->bytes_per_line * style->font->height;
-
-	const char *p;
-	for (p = str; *p != '\0'; p++) {
-		int char_index = ((int) *p) - 0x20;
-
-		const uint8_t *char_data = style->font->data
-				+ char_index * bytes_per_char;
-
-		x = GP_PutChar(context, style, x, y, char_data, color, false);
-	}
-
-	//TODO
+	GP_Text_internal(context, style, x, y, str, color);
 	return GP_ESUCCESS;
 }
 
-GP_RetCode GP_TText(GP_Context *context, const struct GP_TextStyle *style,
-                    int x, int y, const char *str, GP_Color color)
+GP_RetCode GP_TText(GP_Context *context, const GP_TextStyle *style,
+	int x, int y, const char *str, GP_Color color)
 {
-	int bytes_per_char = 2 + style->font->bytes_per_line * style->font->height;
-
-	const char *p;
-	for (p = str; *p != '\0'; p++) {
-		int char_index = ((int) *p) - 0x20;
-
-		const uint8_t *char_data = style->font->data
-				+ char_index * bytes_per_char;
-
-		x = GP_PutChar(context, style, x, y, char_data, color, true);
-	}
-
-	//TODO
+	GP_TText_internal(context, style, x, y, str, color);
 	return GP_ESUCCESS;
 }
+
