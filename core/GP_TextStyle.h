@@ -27,8 +27,7 @@
 #define GP_TEXTSTYLE_H
 
 #include "GP_Font.h"
-
-#include <stdint.h>
+#include "GP_RetCode.h"
 
 /*
  * This structure describes how a text should be rendered.
@@ -36,7 +35,7 @@
  */
 typedef struct {
 
-	/* Font to use, or NULL to use the default font. */
+	/* Font to use. */
 	struct GP_Font *font;
 
 	/* Spacing between pixels (0 is the default, no spacing). */
@@ -53,11 +52,11 @@ typedef struct {
  * Note that at least the colors should always be changed afterwards,
  * as there is no sensible default (they are initialized to 0).
  */
-#define GP_DEFAULT_TEXT_STYLE { NULL, 0, 0, 1, 1 }
+#define GP_DEFAULT_TEXT_STYLE { &GP_default_console_font, 0, 0, 1, 1 }
 
 /*
  * Initalize text style to the default values.
  */
-void GP_DefaultTextStyle(GP_TextStyle *style); 
+GP_RetCode GP_DefaultTextStyle(GP_TextStyle *style); 
 
 #endif /* GP_TEXTSTYLE_H */

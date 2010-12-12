@@ -64,6 +64,15 @@ typedef struct {
 	+ w * context->bytes_per_row \
 	+ h * (context->bits_per_pixel / 8))
 
+/* Evaluates to true if the context is valid (sane), false otherwise. */
+#define GP_IS_CONTEXT_VALID(context) ( \
+		context->w > 0 && context->h > 0 \
+		&& context->clip_w_min <= context->clip_w_max \
+		&& context->clip_w_max < context->w \
+		&& context->clip_h_min <= context->clip_h_max \
+		&& context->clip_h_max < context->h \
+	)
+
 /* Performs a series of sanity checks on context, aborting if any fails. */
 #define GP_CHECK_CONTEXT(context) do { \
 		GP_CHECK(context != NULL); \

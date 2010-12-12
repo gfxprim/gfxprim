@@ -27,7 +27,10 @@
 
 GP_RetCode GP_VLine(GP_Context *context, int x, int y0, int y1, GP_Color color)
 {
-	GP_CHECK_CONTEXT(context);
+	if (!context)
+		return GP_ENULLPTR;
+	if (!GP_IS_CONTEXT_VALID(context))
+		return GP_EBADCONTEXT;
 
 	/* handle swapped coordinates gracefully */
 	if (y0 > y1)
@@ -85,6 +88,11 @@ GP_RetCode GP_VLine(GP_Context *context, int x, int y0, int y1, GP_Color color)
 
 GP_RetCode GP_TVLine(GP_Context *context, int x, int y0, int y1, GP_Color color)
 {
+	if (!context)
+		return GP_ENULLPTR;
+	if (!GP_IS_CONTEXT_VALID(context))
+		return GP_EBADCONTEXT;
+
 	if (context->axes_swap) {
 		GP_TRANSFORM_Y(context, x);
 		GP_TRANSFORM_X(context, y0);

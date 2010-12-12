@@ -34,7 +34,10 @@ DEF_HLINE_FN(GP_HLine32bpp, GP_Context *, GP_Pixel, GP_PIXEL_ADDRESS, GP_WritePi
 
 GP_RetCode GP_HLine(GP_Context *context, int x0, int x1, int y, GP_Color color)
 {
-	GP_CHECK_CONTEXT(context);
+	if (!context)
+		return GP_ENULLPTR;
+	if (!GP_IS_CONTEXT_VALID(context))
+		return GP_EBADCONTEXT;
 
 	GP_Pixel pixel;
 	pixel.type = context->pixel_type;
@@ -47,6 +50,11 @@ GP_RetCode GP_HLine(GP_Context *context, int x0, int x1, int y, GP_Color color)
 
 GP_RetCode GP_THLine(GP_Context *context, int x0, int x1, int y, GP_Color color)
 {
+	if (!context)
+		return GP_ENULLPTR;
+	if (!GP_IS_CONTEXT_VALID(context))
+		return GP_EBADCONTEXT;
+
 	if (context->axes_swap) {
 		GP_TRANSFORM_Y(context, x0);
 		GP_TRANSFORM_Y(context, x1);

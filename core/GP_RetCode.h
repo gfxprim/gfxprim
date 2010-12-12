@@ -31,8 +31,9 @@ typedef enum GP_RetCode {
 	GP_EINVAL,
 	GP_ENOIMPL,
 	GP_EUNPRECISE,
-	GP_ENULLPTR,
+	GP_ENULLPTR,		/* some argument was unexpectedly NULL */
 	GP_EBACKENDLOST,
+	GP_EBADCONTEXT,		/* context contains invalid data */
 	GP_EMAX,
 } GP_RetCode;
 

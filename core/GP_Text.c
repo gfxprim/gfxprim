@@ -36,7 +36,10 @@ DEF_TEXT_FN(GP_TText_internal, GP_Context *, GP_Color, GP_THLine)
 GP_RetCode GP_Text(GP_Context *context, const GP_TextStyle *style,
 	int x, int y, const char *str, GP_Color color)
 {
-	GP_CHECK_CONTEXT(context);
+	if (!context || !style || !style->font || !str)
+		return GP_ENULLPTR;
+	if (!GP_IS_CONTEXT_VALID(context))
+		return GP_EBADCONTEXT;
 
 	GP_Pixel pixel;
 	pixel.type = context->pixel_type;
@@ -50,6 +53,11 @@ GP_RetCode GP_Text(GP_Context *context, const GP_TextStyle *style,
 GP_RetCode GP_TText(GP_Context *context, const GP_TextStyle *style,
 	int x, int y, const char *str, GP_Color color)
 {
+	if (!context || !style || !style->font || !str)
+		return GP_ENULLPTR;
+	if (!GP_IS_CONTEXT_VALID(context))
+		return GP_EBADCONTEXT;
+
 	GP_TText_internal(context, style, x, y, str, color);
 	return GP_ESUCCESS;
 }

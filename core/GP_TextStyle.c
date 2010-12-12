@@ -23,15 +23,17 @@
  *                                                                           *
  *****************************************************************************/
 
-#include "GP_TextStyle.h"
+#include "GP.h"
 
-#include <stddef.h>
-
-void GP_DefaultTextStyle(GP_TextStyle *style)
+GP_RetCode GP_DefaultTextStyle(GP_TextStyle *style)
 {
-	style->font = NULL;
+	if (!style)
+		return GP_ENULLPTR;
+
+	style->font = &GP_default_console_font;
 	style->pixel_xspace = 0;
 	style->pixel_yspace = 0;
 	style->pixel_xmul = 1;
 	style->pixel_ymul = 1;
+	return GP_ESUCCESS;
 }

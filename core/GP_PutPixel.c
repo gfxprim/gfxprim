@@ -86,7 +86,10 @@ GP_RetCode GP_PutPixel32bpp(GP_Context *context, int x, int y, GP_Pixel pixel)
  */
 GP_RetCode GP_PutPixel(GP_Context *context, int x, int y, GP_Color color)
 {
-	GP_CHECK_CONTEXT(context);
+	if (!context)
+		return GP_ENULLPTR;
+	if (!GP_IS_CONTEXT_VALID(context))
+		return GP_EBADCONTEXT;
 
 	GP_Pixel pixel;
 	GP_RetCode ret;
@@ -111,6 +114,11 @@ GP_RetCode GP_PutPixel(GP_Context *context, int x, int y, GP_Color color)
 
 GP_RetCode GP_TPutPixel(GP_Context *context, int x, int y, GP_Color color)
 {
+	if (!context)
+		return GP_ENULLPTR;
+	if (!GP_IS_CONTEXT_VALID(context))
+		return GP_EBADCONTEXT;
+
 	GP_TRANSFORM_POINT(context, x, y);
 	return GP_PutPixel(context, x, y, color);
 }

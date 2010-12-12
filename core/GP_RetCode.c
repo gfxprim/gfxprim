@@ -25,13 +25,15 @@
 
 #include "GP_RetCode.h"
 
+/* Names of return codes; must be in the same order as the codes */
 static char *ret_code_names[] = {
 	"Success",
 	"Invalid operation",
 	"Not implemented",
 	"Imprecise result",
 	"Unexpected null pointer",
-	"Connection with backend lost"
+	"Connection with backend lost",
+	"Bad context",
 };
 
 

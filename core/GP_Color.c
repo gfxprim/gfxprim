@@ -662,14 +662,17 @@ static enum GP_RetCode color_convert(GP_Color *color, GP_ColorType type)
 		return GP_ENOIMPL;
 }
 
-enum GP_RetCode GP_ColorConvert(GP_Color *color, GP_ColorType type)
+GP_RetCode GP_ColorConvert(GP_Color *color, GP_ColorType type)
 {
-	enum GP_RetCode ret;
-
+	if (!color)
+		return GP_ENULLPTR;
+	
 	/* nothing to do */
 	if (color->type == type)
 		return GP_ESUCCESS;
-	
+
+	GP_RetCode ret;
+
 	/* convert palette color to color */
 	if (color->type == GP_PALETTE) {
 		ret = GP_PaletteColorToColor(color);

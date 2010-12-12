@@ -35,7 +35,10 @@ DEF_ELLIPSE_FN(GP_Ellipse32bpp, GP_Context *, GP_Pixel, GP_PutPixel32bpp);
 GP_RetCode GP_Ellipse(GP_Context *context, int xcenter, int ycenter,
                       unsigned int a, unsigned int b, GP_Color color)
 {
-	GP_CHECK_CONTEXT(context);
+	if (!context)
+		return GP_ENULLPTR;
+	if (!GP_IS_CONTEXT_VALID(context))
+		return GP_EBADCONTEXT;
 
 	GP_Pixel pixel;
 	pixel.type = context->pixel_type;
@@ -49,6 +52,11 @@ GP_RetCode GP_Ellipse(GP_Context *context, int xcenter, int ycenter,
 GP_RetCode GP_TEllipse(GP_Context *context, int xcenter, int ycenter,
                        unsigned int a, unsigned int b, GP_Color color)
 {
+	if (!context)
+		return GP_ENULLPTR;
+	if (!GP_IS_CONTEXT_VALID(context))
+		return GP_EBADCONTEXT;
+
 	/* recalculate center point and swap a and b when axes are swapped */
 	GP_TRANSFORM_POINT(context, xcenter, ycenter);
 	GP_TRANSFORM_SWAP(context, a, b);
