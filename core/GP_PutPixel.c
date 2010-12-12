@@ -26,14 +26,14 @@
 #include "GP.h"
 
 /* Tests whether the coordinates are inside the clip rectangle;
- * if not, immediately exits with GP_EINVAL.
+ * if not, immediately exits with GP_ESUCCESS.
  */
 #define CLIP_PIXEL(context, x, y) do { \
 	if (x < (int) context->clip_w_min \
 		|| x > (int) context->clip_w_max \
 		|| y < (int) context->clip_h_min \
 		|| y > (int) context->clip_h_max) { \
-		return GP_EINVAL; /* clipped out */ \
+		return GP_ESUCCESS; /* clipped out */ \
 	} \
 } while(0);
 

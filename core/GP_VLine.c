@@ -41,7 +41,7 @@ GP_RetCode GP_VLine(GP_Context *context, int x, int y0, int y1, GP_Color color)
 		|| x > (int) context->clip_w_max
 		|| y0 > (int) context->clip_h_max
 		|| y1 < (int) context->clip_h_min) {
-		return GP_EINVAL;
+		return GP_ESUCCESS;
 	}
 	
 	/* clip the row value */
