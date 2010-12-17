@@ -51,5 +51,6 @@ int GP_TextWidth(const GP_TextStyle *style, const char *str)
 
 int GP_TextHeight(const GP_TextStyle *style)
 {
-	return style->font->height * style->pixel_ymul;
+	return style->font->height * style->pixel_ymul +
+	       (style->font->height - 1) * style->pixel_yspace;
 }
