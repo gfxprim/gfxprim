@@ -27,24 +27,24 @@
 #define GP_TRANSFORM_H
 
 #define GP_TRANSFORM_X(context, x) do { \
-	if (context->x_swap)            \
-		x = context->w - x;     \
+	if ((context)->x_swap)          \
+		x = (context)->w - x;   \
 } while (0)
 
 #define GP_TRANSFORM_Y(context, y) do { \
-	if (context->y_swap)            \
-		y = context->h - y;     \
+	if ((context)->y_swap)          \
+		y = (context)->h - y;   \
 } while (0)
 
 #define GP_TRANSFORM_POINT(context, x, y) do { \
-	if (context->axes_swap)                \
+	if ((context)->axes_swap)              \
 		GP_SWAP(x, y);                 \
 	GP_TRANSFORM_X(context, x);            \
 	GP_TRANSFORM_Y(context, y);            \
 } while (0)
 
 #define GP_TRANSFORM_SWAP(context, x, y) do { \
-	if (context->axes_swap)               \
+	if ((context)->axes_swap)             \
 		GP_SWAP(x, y);                \
 } while (0)
 
