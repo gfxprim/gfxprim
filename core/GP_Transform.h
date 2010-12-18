@@ -36,16 +36,25 @@
 		y = (context)->h - y;   \
 } while (0)
 
+#define GP_TRANSFORM_SWAP(context, x, y) do { \
+	if ((context)->axes_swap)             \
+		GP_SWAP(x, y);                \
+} while (0)
+
 #define GP_TRANSFORM_POINT(context, x, y) do { \
-	if ((context)->axes_swap)              \
-		GP_SWAP(x, y);                 \
+	GP_TRANSFORM_SWAP(context, x, y);      \
 	GP_TRANSFORM_X(context, x);            \
 	GP_TRANSFORM_Y(context, y);            \
 } while (0)
 
-#define GP_TRANSFORM_SWAP(context, x, y) do { \
-	if ((context)->axes_swap)             \
-		GP_SWAP(x, y);                \
+/*
+ * Inverse transformation. Use for translating mouse pointer coordinates to
+ * coordinates on context.
+ */
+#define GP_RETRANSFORM_POINT(context, x, y) do { \
+	GP_TRANSFORM_X(context, x);              \
+	GP_TRANSFORM_Y(context, y);              \
+	GP_TRANSFORM_SWAP(context, x, y);        \
 } while (0)
 
 #endif /* GP_TRANSFORM_H */

@@ -27,10 +27,9 @@
 #define GP_SWAP_H
 
 #define GP_SWAP(a, b) do { \
-		typeof(a) swap; \
-		swap = b; \
-		b = a; \
-		a = swap; \
-	} while(0);
+	typeof(a) tmp = b; \
+	b = a;             \
+	a = tmp;           \
+} while(0);
 
 #endif /* GP_SWAP_H */
