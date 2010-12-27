@@ -467,6 +467,11 @@ static enum GP_RetCode conv_from_rgb555(GP_Color *color, GP_ColorType type)
 		case GP_RGB555:
 			return GP_ESUCCESS;
 		break;
+		case GP_RGB565:
+			GP_RGB565_FILL(color, col->red, col->green << 1,
+				col->blue);
+			return GP_ESUCCESS;
+		break;
 		case GP_RGB666:
 			GP_RGB666_FILL(color, 0x3f * col->red   / 0x1f,
 			                      0x3f * col->green / 0x1f,
@@ -534,7 +539,17 @@ static enum GP_RetCode conv_from_rgb888(GP_Color *color, GP_ColorType type)
 			GP_RGB555_FILL(color, col->red>>3,
 			                      col->green>>3,
 			                      col->blue>>3);
-			return GP_ESUCCESS;
+			return GP_EUNPRECISE;
+		break;
+		case GP_RGB565:
+			GP_RGB565_FILL(color, col->red>>3, col->green>>2,
+				col->blue>>3);
+			return GP_EUNPRECISE;
+		break;
+		case GP_RGB666:
+			GP_RGB666_FILL(color, col->red>>2, col->green>>2,
+				col->blue>>2);
+			return GP_EUNPRECISE;
 		break;
 		case GP_RGB888:
 			return GP_ESUCCESS;
