@@ -100,14 +100,23 @@ static enum GP_PixelType find_surface_pixel_type(SDL_Surface *surf)
 inline GP_RetCode GP_SDL_ContextFromSurface(
 		GP_Context *context, SDL_Surface *surf)
 {
-	if (surf == NULL || context == NULL) {
+	if (surf == NULL || surf->pixels == NULL || context == NULL) {
 		return GP_ENULLPTR;
+	}
+
+	/* sanity checks on the SDL surface */
+	if (surf->format->BytesPerPixel == 0 || surf->format->BytesPerPixel > 4) {
+		return GP_ENOIMPL;
+	}
+	enum GP_PixelType pixeltype = find_surface_pixel_type(surf);
+	if (pixeltype == GP_PIXEL_UNKNOWN) {
+		return GP_ENOIMPL;
 	}
 
 	/* basic structure and size */
 	context->pixels = surf->pixels;
 	context->bits_per_pixel = 8 * surf->format->BytesPerPixel;
-	context->pixel_type = find_surface_pixel_type(surf);
+	context->pixel_type = pixeltype;
 	context->bytes_per_row = surf->pitch;
 	context->w = surf->w;
 	context->h = surf->h;
@@ -122,10 +131,6 @@ inline GP_RetCode GP_SDL_ContextFromSurface(
 	context->clip_h_max = surf->clip_rect.y + surf->clip_rect.h - 1;
 	context->clip_w_min = surf->clip_rect.x;
 	context->clip_w_max = surf->clip_rect.x + surf->clip_rect.w - 1;
-
-	if (context->pixel_type == GP_PIXEL_UNKNOWN) {
-		return GP_ENOIMPL;
-	}
 
 	return GP_ESUCCESS;
 }
