@@ -47,6 +47,8 @@ static GP_TextStyle style = {
 int main(void)
 {
 	GP_Framebuffer *fb = GP_FramebufferInit("/dev/fb0");
+	if (fb == NULL)
+		return 1;
 
 	GP_Pixel White, Gray, Gray2;
 	GP_ColorNameToPixel(fb->context.pixel_type, GP_COL_WHITE, &White);
@@ -54,9 +56,6 @@ int main(void)
 	GP_ColorNameToPixel(fb->context.pixel_type, GP_COL_GRAY_LIGHT, &Gray2);
 
 	const char *text = "Framebuffer test";
-
-	if (fb == NULL)
-		return 1;
 
 	GP_Fill(&fb->context, Gray);
 	GP_Line(&fb->context, 0, 0, fb->context.w, fb->context.h, White);
