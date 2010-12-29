@@ -41,11 +41,10 @@
 #define sgn(x) ((x)>0 ? 1 : -1)
 
 int iter, l, way = 1;
-GP_Color black = GP_COLNAME_PACK(GP_COL_BLACK);
-GP_Color blue  = GP_COLNAME_PACK(GP_COL_BLUE);
-GP_Color gray  = GP_COLNAME_PACK(GP_COL_GRAY_LIGHT);
 
-static void sierpinsky(GP_Context *context, GP_Color color, float x1, float y1, float x4, float y4, int iter)
+GP_Pixel black, blue, gray;
+
+static void sierpinsky(GP_Context *context, GP_Pixel pixel, float x1, float y1, float x4, float y4, int iter)
 {
 	float x2, y2, x3, y3, x5, y5;
 	
@@ -63,12 +62,12 @@ static void sierpinsky(GP_Context *context, GP_Color color, float x1, float y1, 
 	x5 = (x1+x4)/2 + (y2 - y3)*sqrt(3.00/4);
 	y5 = (y1+y4)/2 + (x3 - x2)*sqrt(3.00/4);
 
-	GP_FillTriangle(context, x2, y2, x3, y3, x5, y5, color);
+	GP_FillTriangle(context, x2, y2, x3, y3, x5, y5, pixel);
 
-	sierpinsky(context, color, x1, y1, x2, y2, iter - 1);
-	sierpinsky(context, color, x2, y2, x5, y5, iter - 1);
-	sierpinsky(context, color, x5, y5, x3, y3, iter - 1);
-	sierpinsky(context, color, x3, y3, x4, y4, iter - 1);
+	sierpinsky(context, pixel, x1, y1, x2, y2, iter - 1);
+	sierpinsky(context, pixel, x2, y2, x5, y5, iter - 1);
+	sierpinsky(context, pixel, x5, y5, x3, y3, iter - 1);
+	sierpinsky(context, pixel, x3, y3, x4, y4, iter - 1);
 }
 
 static void draw(GP_Context *context, int x, int y, int l, int iter)
@@ -121,6 +120,10 @@ int main(void)
 		return 1;
 
 	context = &fb->context;
+
+	GP_ColorNameToPixel(context->pixel_type, GP_COL_GRAY_LIGHT, &gray);
+	GP_ColorNameToPixel(context->pixel_type, GP_COL_BLUE, &blue);
+	GP_ColorNameToPixel(context->pixel_type, GP_COL_BLACK, &black);
 
 	iter = 0;
 	draw(context, context->w/2, context->h/2, l, iter);

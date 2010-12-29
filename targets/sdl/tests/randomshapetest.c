@@ -40,8 +40,7 @@ SDL_TimerID timer;
 SDL_UserEvent timer_event;
 
 /* Globally used colors. */
-static GP_Color white = GP_COLNAME_PACK(GP_COL_WHITE);
-static GP_Color black = GP_COLNAME_PACK(GP_COL_BLACK);
+GP_Pixel white, black;
 
 /* Holding flag (pauses drawing). */
 static int pause_flag = 0;
@@ -83,14 +82,14 @@ void random_point(SDL_Surface *surf, int *x, int *y)
 	}
 }
 
-void draw_random_circle(GP_Color color)
+void draw_random_circle(GP_Pixel pixel)
 {
 	int x, y;
 	random_point(display, &x, &y);
 	int r = random() % 50;
 
 	if (fill_flag) {
-		GP_FillCircle(&context, x, y, r, color);
+		GP_FillCircle(&context, x, y, r, pixel);
 	}
 
 	if (outline_flag) {
@@ -98,7 +97,7 @@ void draw_random_circle(GP_Color color)
 	}
 }
 
-void draw_random_ellipse(GP_Color color)
+void draw_random_ellipse(GP_Pixel pixel)
 {
 	int x, y;
 	random_point(display, &x, &y);
@@ -106,7 +105,7 @@ void draw_random_ellipse(GP_Color color)
 	int ry = random() % 50;
 
 	if (fill_flag) {
-		GP_FillEllipse(&context, x, y, rx, ry, color);
+		GP_FillEllipse(&context, x, y, rx, ry, pixel);
 	}
 
 	if (outline_flag) {
@@ -114,7 +113,7 @@ void draw_random_ellipse(GP_Color color)
 	}
 }
 
-void draw_random_triangle(GP_Color color)
+void draw_random_triangle(GP_Pixel pixel)
 {
 	int x0, y0, x1, y1, x2, y2;
 	random_point(display, &x0, &y0);
@@ -122,7 +121,7 @@ void draw_random_triangle(GP_Color color)
 	random_point(display, &x2, &y2);
 
 	if (fill_flag) {
-		GP_FillTriangle(&context, x0, y0, x1, y1, x2, y2, color);
+		GP_FillTriangle(&context, x0, y0, x1, y1, x2, y2, pixel);
 	}
 
 	if (outline_flag) {
@@ -130,14 +129,14 @@ void draw_random_triangle(GP_Color color)
 	}
 }
 
-void draw_random_rectangle(GP_Color color)
+void draw_random_rectangle(GP_Pixel pixel)
 {
 	int x0, y0, x1, y1;
 	random_point(display, &x0, &y0);
 	random_point(display, &x1, &y1);
 
 	if (fill_flag) {
-		GP_FillRect(&context, x0, y0, x1, y1, color);
+		GP_FillRect(&context, x0, y0, x1, y1, pixel);
 	}
 
 	if (outline_flag) {
@@ -164,21 +163,24 @@ void redraw_screen(void)
 
 	SDL_LockSurface(display);
 
+	GP_Pixel pixel;
+	GP_ColorToPixel(context.pixel_type, color, &pixel);
+
 	switch (shape) {
 	case SHAPE_CIRCLE:
-		draw_random_circle(color);
+		draw_random_circle(pixel);
 		break;
 	
 	case SHAPE_ELLIPSE:
-		draw_random_ellipse(color);
+		draw_random_ellipse(pixel);
 		break;
 	
 	case SHAPE_TRIANGLE:
-		draw_random_triangle(color);
+		draw_random_triangle(pixel);
 		break;
 	
 	case SHAPE_RECTANGLE:
-		draw_random_rectangle(color);
+		draw_random_rectangle(pixel);
 		break;
 	}
 
@@ -283,6 +285,9 @@ int main(int argc, char ** argv)
 	SDL_SetClipRect(display, &clip_rect);
 
 	GP_SDL_ContextFromSurface(&context, display);
+
+	GP_ColorNameToPixel(context.pixel_type, GP_COL_WHITE, &white);
+	GP_ColorNameToPixel(context.pixel_type, GP_COL_BLACK, &black);
 
 	/* Set up the refresh timer */
 	timer = SDL_AddTimer(60, timer_callback, NULL);

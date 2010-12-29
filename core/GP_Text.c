@@ -31,34 +31,30 @@ DEF_TEXT_FN(GP_Text8bpp, GP_Context *, GP_Pixel, GP_HLine8bpp)
 DEF_TEXT_FN(GP_Text16bpp, GP_Context *, GP_Pixel, GP_HLine16bpp)
 DEF_TEXT_FN(GP_Text24bpp, GP_Context *, GP_Pixel, GP_HLine24bpp)
 DEF_TEXT_FN(GP_Text32bpp, GP_Context *, GP_Pixel, GP_HLine32bpp)
-DEF_TEXT_FN(GP_TText_internal, GP_Context *, GP_Color, GP_THLine)
+DEF_TEXT_FN(GP_TText_internal, GP_Context *, GP_Pixel, GP_THLine)
 
 GP_RetCode GP_Text(GP_Context *context, const GP_TextStyle *style,
-	int x, int y, const char *str, GP_Color color)
+	int x, int y, const char *str, GP_Pixel pixel)
 {
 	if (!context || !style || !style->font || !str)
 		return GP_ENULLPTR;
 	if (!GP_IS_CONTEXT_VALID(context))
 		return GP_EBADCONTEXT;
-
-	GP_Pixel pixel;
-	pixel.type = context->pixel_type;
-	GP_RetCode ret = GP_ColorToPixel(color, &pixel);
 
 	GP_FN_PER_BPP(GP_Text, style, x, y, str, pixel);
 
-	return ret;
+	return GP_ESUCCESS;
 }
 
 GP_RetCode GP_TText(GP_Context *context, const GP_TextStyle *style,
-	int x, int y, const char *str, GP_Color color)
+	int x, int y, const char *str, GP_Pixel pixel)
 {
 	if (!context || !style || !style->font || !str)
 		return GP_ENULLPTR;
 	if (!GP_IS_CONTEXT_VALID(context))
 		return GP_EBADCONTEXT;
 
-	GP_TText_internal(context, style, x, y, str, color);
+	GP_TText_internal(context, style, x, y, str, pixel);
 	return GP_ESUCCESS;
 }
 

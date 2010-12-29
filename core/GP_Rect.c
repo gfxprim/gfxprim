@@ -26,21 +26,25 @@
 #include "GP.h"
 
 GP_RetCode GP_Rect(GP_Context *context, int x0, int y0, int x1, int y1,
-                   GP_Color color)
+                   GP_Pixel pixel)
 {
-	GP_HLine(context, x0, x1, y0, color);
-	GP_HLine(context, x0, x1, y1, color);
-	GP_VLine(context, x0, y0, y1, color);
-	GP_VLine(context, x1, y0, y1, color);
+	if (!context)
+		return GP_ENULLPTR;
+	if (!GP_IS_CONTEXT_VALID(context))
+		return GP_EBADCONTEXT;
 
-	//TODO: Correct return code
+	GP_HLine(context, x0, x1, y0, pixel);
+	GP_HLine(context, x0, x1, y1, pixel);
+	GP_VLine(context, x0, y0, y1, pixel);
+	GP_VLine(context, x1, y0, y1, pixel);
+
 	return GP_ESUCCESS;
 }
 
 GP_RetCode GP_TRect(GP_Context *context, int x0, int y0, int x1, int y1,
-                    GP_Color color)
+                    GP_Pixel pixel)
 {
 	GP_TRANSFORM_POINT(context, x0, y0);
 	GP_TRANSFORM_POINT(context, x1, y1);
-	return GP_Rect(context, x0, y0, x1, y1, color);
+	return GP_Rect(context, x0, y0, x1, y1, pixel);
 }

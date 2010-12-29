@@ -36,24 +36,20 @@ DEF_FILLTRIANGLE_FN(GP_FillTriangle24bpp, GP_Context *, GP_Pixel, GP_Line24bpp, 
 DEF_FILLTRIANGLE_FN(GP_FillTriangle32bpp, GP_Context *, GP_Pixel, GP_Line32bpp, GP_HLine32bpp)
 
 GP_RetCode GP_FillTriangle(GP_Context * context, int x0, int y0, int x1, int y1,
-                           int x2, int y2, GP_Color color)
+                           int x2, int y2, GP_Pixel pixel)
 {
 	if (!context)
 		return GP_ENULLPTR;
 	if (!GP_IS_CONTEXT_VALID(context))
 		return GP_EBADCONTEXT;
 
-	GP_Pixel pixel;
-	pixel.type = context->pixel_type;
-	GP_RetCode ret = GP_ColorToPixel(color, &pixel);
-
 	GP_FN_PER_BPP(GP_FillTriangle, x0, y0, x1, y1, x2, y2, pixel);
 
-	return ret;
+	return GP_ESUCCESS;
 }
 
 GP_RetCode GP_TFillTriangle(GP_Context* context, int x0, int y0, int x1, int y1,
-                            int x2, int y2, GP_Color color)
+                            int x2, int y2, GP_Pixel pixel)
 {
 	if (!context)
 		return GP_ENULLPTR;
@@ -63,5 +59,5 @@ GP_RetCode GP_TFillTriangle(GP_Context* context, int x0, int y0, int x1, int y1,
 	GP_TRANSFORM_POINT(context, x0, y0);
 	GP_TRANSFORM_POINT(context, x1, y1);
 	GP_TRANSFORM_POINT(context, x2, y2);
-	return GP_FillTriangle(context, x0, y0, x1, y1, x2, y2, color);
+	return GP_FillTriangle(context, x0, y0, x1, y1, x2, y2, pixel);
 }

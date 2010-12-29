@@ -23,8 +23,7 @@
  *                                                                           *
  *****************************************************************************/
 
-#include "GP_Color.h"
-#include "GP_Pixel.h"
+#include "GP.h"
 
 struct PixelTypeInfo {
 	const char *type_name;		/* human-readable name */
@@ -96,8 +95,13 @@ GP_ColorType GP_PixelTypeToColorType(GP_PixelType type)
 
 #define CHECK_RET(ret) if (ret != GP_ESUCCESS && ret != GP_EUNPRECISE) return ret;
 
-GP_RetCode GP_ColorToPixel(GP_Color color, GP_Pixel *pixel)
+GP_RetCode GP_ColorToPixel(GP_PixelType pixel_type, GP_Color color, GP_Pixel *pixel)
 {
+	if (pixel == NULL)
+		return GP_ENULLPTR;
+
+	pixel->type = pixel_type;
+
 	GP_RetCode ret;
 
 	switch (pixel->type) {
@@ -215,6 +219,15 @@ GP_RetCode GP_ColorToPixel(GP_Color color, GP_Pixel *pixel)
 		return GP_EINVAL;
 	else
 		return GP_ENOIMPL;
+}
+
+GP_RetCode GP_ColorNameToPixel(GP_PixelType pixel_type, GP_ColorName name, GP_Pixel *pixel)
+{
+	if (pixel == NULL)
+		return GP_ENULLPTR;
+
+	GP_Color color = GP_COLNAME_PACK(name);
+	return GP_ColorToPixel(pixel_type, color, pixel);
 }
 
 GP_RetCode GP_PixelToColor(GP_Pixel pixel, GP_Color *color)

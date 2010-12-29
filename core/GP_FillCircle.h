@@ -29,9 +29,9 @@
 #include "GP_Context.h"
 
 GP_RetCode GP_FillCircle(GP_Context *context, int xcenter, int ycenter,
-                         unsigned int r, GP_Color color);
+                         unsigned int r, GP_Pixel pixel);
 
 GP_RetCode GP_TFillCircle(GP_Context *context, int xcenter, int ycenter,
-                          unsigned int r, GP_Color color);
+                          unsigned int r, GP_Pixel pixel);
 
 #endif /* GP_FILLCIRCLE_H */

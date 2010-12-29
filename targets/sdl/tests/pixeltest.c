@@ -41,10 +41,7 @@ SDL_TimerID timer;
 SDL_UserEvent timer_event;
 
 /* Values for color pixels in display format. */
-GP_Color red   = GP_COLNAME_PACK(GP_COL_RED);
-GP_Color green = GP_COLNAME_PACK(GP_COL_GREEN);
-GP_Color blue  = GP_COLNAME_PACK(GP_COL_BLUE);
-GP_Color white = GP_COLNAME_PACK(GP_COL_WHITE);
+GP_Pixel red_pixel, green_pixel, blue_pixel, white_pixel;
 
 Uint32 timer_callback(__attribute__((unused)) Uint32 interval,
 			__attribute__((unused)) void *param)
@@ -62,7 +59,7 @@ void draw_pixel(void)
 
 //	pixel = GP_GetPixel(&context, x, y);
 
-	GP_PutPixel(&context, x, y, green);
+	GP_PutPixel(&context, x, y, green_pixel);
 
       /* TODO: we cannot switch like this
 	 we need either to convert blue
@@ -157,6 +154,12 @@ int main(int argc, char **argv)
 	SDL_SetClipRect(display, &clip_rect);
 
 	GP_SDL_ContextFromSurface(&context, display);
+
+	/* Load pixel values compatible with the display. */
+	GP_ColorNameToPixel(context.pixel_type, GP_COL_RED, &red_pixel);
+	GP_ColorNameToPixel(context.pixel_type, GP_COL_GREEN, &green_pixel);
+	GP_ColorNameToPixel(context.pixel_type, GP_COL_BLUE, &blue_pixel);
+	GP_ColorNameToPixel(context.pixel_type, GP_COL_WHITE, &white_pixel);
 
 	/* Set up the refresh timer */
 	timer = SDL_AddTimer(30, timer_callback, NULL);

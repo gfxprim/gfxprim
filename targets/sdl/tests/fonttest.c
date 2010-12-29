@@ -30,14 +30,13 @@
 #include "GP.h"
 #include "GP_SDL.h"
 
+/* the display */
 SDL_Surface *display = NULL;
 GP_Context context;
 
-static GP_Color white     = GP_COLNAME_PACK(GP_COL_WHITE);
-static GP_Color gray      = GP_COLNAME_PACK(GP_COL_GRAY_LIGHT);
-static GP_Color dark_gray = GP_COLNAME_PACK(GP_COL_GRAY_DARK);
-static GP_Color black     = GP_COLNAME_PACK(GP_COL_BLACK);
-static GP_Color dark_red  = GP_COLNAME_PACK(GP_COL_RED);
+/* precomputed color pixels in display format */
+static GP_Pixel white_pixel, gray_pixel, dark_gray_pixel, black_pixel,
+		red_pixel;
 
 static const char *test_strings[] = {
 	" !\"#$%&\047()*+,-./0123456789:;<=>?@",
@@ -46,13 +45,14 @@ static const char *test_strings[] = {
 	"Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor..."
 };
 
+/* draw using proportional font? */
 static int flag_proportional = 0;
 
 void redraw_screen(void)
 {
 	SDL_LockSurface(display);
 	
-	GP_Fill(&context, black);
+	GP_Fill(&context, black_pixel);
 
 	GP_TextStyle style = GP_DEFAULT_TEXT_STYLE;
 
@@ -75,22 +75,22 @@ void redraw_screen(void)
 			16, 100*i + 16,
 			16 + GP_TextWidth(&style, test_string),
 			100*i + 16 + style.font->height,
-			dark_red);
+			red_pixel);
 
-		GP_Text(&context, &style, 16, 100*i + 16, test_string, white);
+		GP_Text(&context, &style, 16, 100*i + 16, test_string, white_pixel);
 	
 		style.pixel_xmul = 2;
 		style.pixel_ymul = 2;
 		style.pixel_yspace = 1;
 
-		GP_Text(&context, &style, 34, 100*i + 34, test_string, gray);
+		GP_Text(&context, &style, 34, 100*i + 34, test_string, gray_pixel);
 
 		style.pixel_xmul = 4;
 		style.pixel_ymul = 2;
 		style.pixel_xspace = 1;
 		style.pixel_yspace = 1;
 
-		GP_Text(&context, &style, 64, 100*i + 64, test_string, dark_gray);
+		GP_Text(&context, &style, 64, 100*i + 64, test_string, dark_gray_pixel);
 	}
 
 	SDL_UnlockSurface(display);
@@ -144,7 +144,15 @@ int main(void)
 	SDL_Rect clip_rect = {10, 10, 620, 460};
 	SDL_SetClipRect(display, &clip_rect);
 
+	/* Initialize a GP context from the SDL display */
 	GP_SDL_ContextFromSurface(&context, display);
+
+	/* Load colors suitable for the display */
+	GP_ColorNameToPixel(context.pixel_type, GP_COL_WHITE, &white_pixel);
+	GP_ColorNameToPixel(context.pixel_type, GP_COL_GRAY_LIGHT, &gray_pixel);
+	GP_ColorNameToPixel(context.pixel_type, GP_COL_GRAY_DARK, &dark_gray_pixel);
+	GP_ColorNameToPixel(context.pixel_type, GP_COL_BLACK, &black_pixel);
+	GP_ColorNameToPixel(context.pixel_type, GP_COL_RED, &red_pixel);
 
 	redraw_screen();
 	SDL_Flip(display);

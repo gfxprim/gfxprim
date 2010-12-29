@@ -36,9 +36,9 @@ void GP_HLine24bpp(GP_Context *context, int x0, int x1, int y, GP_Pixel pixel);
 void GP_HLine32bpp(GP_Context *context, int x0, int x1, int y, GP_Pixel pixel);
 
 GP_RetCode GP_HLine(GP_Context *context, int x0, int x1, int y,
-                    GP_Color color);
+                    GP_Pixel pixel);
 
 GP_RetCode GP_THLine(GP_Context *context, int x0, int x1, int y,
-                     GP_Color color);
+                     GP_Pixel pixel);
 
 #endif /* GP_HLINE_H */

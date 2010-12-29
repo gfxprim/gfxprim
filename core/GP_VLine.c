@@ -25,7 +25,7 @@
 
 #include "GP.h"
 
-GP_RetCode GP_VLine(GP_Context *context, int x, int y0, int y1, GP_Color color)
+GP_RetCode GP_VLine(GP_Context *context, int x, int y0, int y1, GP_Pixel pixel)
 {
 	if (!context)
 		return GP_ENULLPTR;
@@ -52,11 +52,6 @@ GP_RetCode GP_VLine(GP_Context *context, int x, int y0, int y1, GP_Color color)
 	size_t height = 1 + y1 - y0;
 	uint8_t *p = (uint8_t *) GP_PIXEL_ADDRESS(context, y0, x);
 	
-	/* Calculate pixel value from color */
-	GP_Pixel pixel;
-	pixel.type = context->pixel_type;
-	GP_RetCode ret = GP_ColorToPixel(color, &pixel);
-
 	size_t i;
 	switch(context->bits_per_pixel) {
 	case 32:
@@ -83,10 +78,10 @@ GP_RetCode GP_VLine(GP_Context *context, int x, int y0, int y1, GP_Color color)
 		return GP_ENOIMPL;
 	}
 
-	return ret;
+	return GP_ESUCCESS;
 }
 
-GP_RetCode GP_TVLine(GP_Context *context, int x, int y0, int y1, GP_Color color)
+GP_RetCode GP_TVLine(GP_Context *context, int x, int y0, int y1, GP_Pixel pixel)
 {
 	if (!context)
 		return GP_ENULLPTR;
@@ -97,11 +92,11 @@ GP_RetCode GP_TVLine(GP_Context *context, int x, int y0, int y1, GP_Color color)
 		GP_TRANSFORM_Y(context, x);
 		GP_TRANSFORM_X(context, y0);
 		GP_TRANSFORM_X(context, y1);
-		return GP_HLine(context, y0, y1, x, color);
+		return GP_HLine(context, y0, y1, x, pixel);
 	}
 
 	GP_TRANSFORM_X(context, x);
 	GP_TRANSFORM_Y(context, y0);
 	GP_TRANSFORM_Y(context, y1);
-	return GP_VLine(context, x, y0, y1, color);
+	return GP_VLine(context, x, y0, y1, pixel);
 }

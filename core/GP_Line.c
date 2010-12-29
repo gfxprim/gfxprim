@@ -33,16 +33,12 @@ DEF_LINE_FN(GP_Line24bpp, GP_Context *, GP_Pixel, GP_PutPixel24bpp)
 DEF_LINE_FN(GP_Line32bpp, GP_Context *, GP_Pixel, GP_PutPixel32bpp)
 
 GP_RetCode GP_Line(GP_Context *context, int x0, int y0, int x1, int y1,
-                   GP_Color color)
+                   GP_Pixel pixel)
 {
 	if (!context)
 		return GP_ENULLPTR;
 	if (!GP_IS_CONTEXT_VALID(context))
 		return GP_EBADCONTEXT;
-
-	GP_Pixel pixel;
-	pixel.type = context->pixel_type;
-	GP_ColorToPixel(color, &pixel);
 
 	GP_FN_PER_BPP(GP_Line, x0, y0, x1, y1, pixel);
 
@@ -50,7 +46,7 @@ GP_RetCode GP_Line(GP_Context *context, int x0, int y0, int x1, int y1,
 }
 
 GP_RetCode GP_TLine(GP_Context *context, int x0, int y0, int x1, int y1,
-                    GP_Color color)
+                    GP_Pixel pixel)
 {
 	if (!context)
 		return GP_ENULLPTR;
@@ -59,7 +55,7 @@ GP_RetCode GP_TLine(GP_Context *context, int x0, int y0, int x1, int y1,
 
 	GP_TRANSFORM_POINT(context, x0, y0);
 	GP_TRANSFORM_POINT(context, x1, y1);
-	return GP_Line(context, x0, y0, x1, y1, color);
+	return GP_Line(context, x0, y0, x1, y1, pixel);
 }
 
 size_t GP_CalcLinePoints(int x0, int y0, int x1, int y1,

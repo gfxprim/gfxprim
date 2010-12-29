@@ -29,9 +29,9 @@
 #include "GP_Context.h"
 
 GP_RetCode GP_Rect(GP_Context *context, int x0, int y0, int x1, int y1,
-                   GP_Color color);
+                   GP_Pixel pixel);
 
 GP_RetCode GP_TRect(GP_Context *context, int x0, int y0, int x1, int y1,
-                    GP_Color color);
+                    GP_Pixel pixel);
 
 #endif /* GP_RECT_H */

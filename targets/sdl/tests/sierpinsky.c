@@ -46,11 +46,10 @@ GP_Context context;
 SDL_TimerID timer;
 
 int iter, l, way = 1;
-GP_Color black = GP_COLNAME_PACK(GP_COL_BLACK);
-GP_Color blue  = GP_COLNAME_PACK(GP_COL_BLUE);
-GP_Color gray  = GP_COLNAME_PACK(GP_COL_GRAY_LIGHT);
 
-static void sierpinsky(SDL_Surface *surf, GP_Color color, float x1, float y1, float x4, float y4, int iter)
+GP_Pixel black, blue, gray;
+
+static void sierpinsky(SDL_Surface *surf, GP_Pixel pixel, float x1, float y1, float x4, float y4, int iter)
 {
 	float x2, y2, x3, y3, x5, y5;
 	
@@ -68,12 +67,12 @@ static void sierpinsky(SDL_Surface *surf, GP_Color color, float x1, float y1, fl
 	x5 = (x1+x4)/2 + (y2 - y3)*sqrt(3.00/4);
 	y5 = (y1+y4)/2 + (x3 - x2)*sqrt(3.00/4);
 
-	GP_FillTriangle(&context, x2, y2, x3, y3, x5, y5, color);
+	GP_FillTriangle(&context, x2, y2, x3, y3, x5, y5, pixel);
 
-	sierpinsky(surf, color, x1, y1, x2, y2, iter - 1);
-	sierpinsky(surf, color, x2, y2, x5, y5, iter - 1);
-	sierpinsky(surf, color, x5, y5, x3, y3, iter - 1);
-	sierpinsky(surf, color, x3, y3, x4, y4, iter - 1);
+	sierpinsky(surf, pixel, x1, y1, x2, y2, iter - 1);
+	sierpinsky(surf, pixel, x2, y2, x5, y5, iter - 1);
+	sierpinsky(surf, pixel, x5, y5, x3, y3, iter - 1);
+	sierpinsky(surf, pixel, x3, y3, x4, y4, iter - 1);
 }
 
 static void draw(SDL_Surface *surf, int x, int y, int l, int iter)
@@ -135,6 +134,10 @@ int main(void)
 	}
 
 	GP_SDL_ContextFromSurface(&context, display);
+
+	GP_ColorNameToPixel(context.pixel_type, GP_COL_BLACK, &black);
+	GP_ColorNameToPixel(context.pixel_type, GP_COL_BLUE, &blue);
+	GP_ColorNameToPixel(context.pixel_type, GP_COL_GRAY_LIGHT, &gray);
 
 	iter = 0;
 	draw(display, display->w/2, display->h/2, l, iter);

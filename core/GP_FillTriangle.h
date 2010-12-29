@@ -29,9 +29,9 @@
 #include "GP_Context.h"
 
 GP_RetCode GP_FillTriangle(GP_Context *context, int x0, int y0, int x1,
-                           int y1, int x2, int y2, GP_Color color);
+                           int y1, int x2, int y2, GP_Pixel pixel);
 
 GP_RetCode GP_TFillTriangle(GP_Context *context, int x0, int y0, int x1,
-                            int y1, int x2, int y2, GP_Color color);
+                            int y1, int x2, int y2, GP_Pixel pixel);
 
 #endif /* GP_FILLTRIANGLE_H */

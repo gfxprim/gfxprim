@@ -41,6 +41,9 @@ GP_Context context;
 /* Frames per second. */
 int fps = 0, fps_min = 1000000, fps_max = 0;
 
+/* Color pixel values in display format. */
+GP_Pixel black, white;
+
 /*
  * Timer used for FPS measurement and key reactions.
  * SDL_USEREVENT is triggered each second.
@@ -58,8 +61,6 @@ Uint32 timer_callback(__attribute__((unused)) Uint32 interval,
 	return 1000;
 }
 
-GP_Color black = GP_COLNAME_PACK(GP_COL_BLACK);
-GP_Color white = GP_COLNAME_PACK(GP_COL_WHITE);
 
 void draw_frame(void)
 {
@@ -70,11 +71,14 @@ void draw_frame(void)
 	int x2 = display->w/2;
 	int y2 = random() % display->h;
 	GP_Color color = GP_RGB888_PACK(random() % 255, random() % 255, random() % 255);
+
+	GP_Pixel pixel;
+	GP_ColorToPixel(context.pixel_type, color, &pixel);
 	
 	if (filled) {
-		GP_FillTriangle(&context, x0, y0, x1, y1, x2, y2, color);
+		GP_FillTriangle(&context, x0, y0, x1, y1, x2, y2, pixel);
 	} else {
-		GP_Triangle(&context, x0, y0, x1, y1, x2, y2, color);
+		GP_Triangle(&context, x0, y0, x1, y1, x2, y2, pixel);
 	}
 }
 
@@ -155,6 +159,9 @@ int main(int argc, char ** argv)
 	SDL_SetClipRect(display, &clip_rect);
 
 	GP_SDL_ContextFromSurface(&context, display);
+
+	GP_ColorNameToPixel(context.pixel_type, GP_COL_WHITE, &white);
+	GP_ColorNameToPixel(context.pixel_type, GP_COL_BLACK, &black);
 
 	/* Set up the timer */
 	timer = SDL_AddTimer(1000, timer_callback, NULL);

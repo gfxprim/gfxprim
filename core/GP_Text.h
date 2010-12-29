@@ -29,9 +29,9 @@
 #include "GP_Context.h"
 
 GP_RetCode GP_Text(GP_Context *context, const GP_TextStyle *style,
-                   int x, int y, const char *str, GP_Color color);
+                   int x, int y, const char *str, GP_Pixel pixel);
 
 GP_RetCode GP_TText(GP_Context *context, const GP_TextStyle *style,
-                    int x, int y, const char *str, GP_Color color);
+                    int x, int y, const char *str, GP_Pixel pixel);
 
 #endif /* GP_TEXT_H */

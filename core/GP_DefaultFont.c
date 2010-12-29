@@ -129,6 +129,7 @@ struct GP_Font GP_default_console_font = {
 	.char_width = 8,
 	.hspace = 1,
 	.height = 11,
+	.baseline = 2,
 	.bytes_per_line = 1,
 };
 
@@ -236,6 +237,7 @@ struct GP_Font GP_default_proportional_font = {
 	.char_width = 8,
 	.hspace = 2,
 	.height = 11,
+	.baseline = 2,
 	.bytes_per_line = 1,
 };
 

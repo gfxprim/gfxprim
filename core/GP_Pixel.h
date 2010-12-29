@@ -32,6 +32,8 @@
 #include "GP_RetCode.h"
 #include "GP_Color.h"
 
+struct GP_Context;
+
 typedef enum GP_PixelType {
 	/* Unknown pixel type */
 	GP_PIXEL_UNKNOWN = 0,
@@ -99,9 +101,14 @@ bool GP_PixelCmp(GP_Pixel *pixel1, GP_Pixel *pixel2);
 GP_ColorType GP_PixelTypeToColorType(GP_PixelType type);
 
 /*
- * Fills pixel accodingly to color, pixel.type MUST be prefilled.
+ * Converts a color to the specified pixel type.
  */
-GP_RetCode GP_ColorToPixel(GP_Color color, GP_Pixel *pixel);
+GP_RetCode GP_ColorToPixel(GP_PixelType pixel_type, GP_Color color, GP_Pixel *pixel);
+
+/*
+ * Converts a color name to the specified pixel type.
+ */
+GP_RetCode GP_ColorNameToPixel(GP_PixelType pixel_type, GP_ColorName name, GP_Pixel *pixel);
 
 /*
  * Converts GP_Pixel to GP_Color.

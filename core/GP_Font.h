@@ -60,6 +60,9 @@ struct GP_Font {
 	/* Height of every character in pixels. */
 	uint8_t height;
 
+	/* Height of the baseline (number of pixels from the bottom). */
+	uint8_t baseline;
+
 	/*
 	 * Number of bytes for each pixel line in the character data
 	 * (typically 1/8 of char_width, rounded upwards).

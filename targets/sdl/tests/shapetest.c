@@ -49,12 +49,7 @@ Uint32 timer_callback(__attribute__((unused)) Uint32 interval,
 }
 
 /* Basic colors in display-specific format. */
-GP_Color black    = GP_COLNAME_PACK(GP_COL_BLACK);
-GP_Color white    = GP_COLNAME_PACK(GP_COL_WHITE);
-GP_Color yellow   = GP_COLNAME_PACK(GP_COL_YELLOW);
-GP_Color red      = GP_COLNAME_PACK(GP_COL_RED);
-GP_Color gray     = GP_COLNAME_PACK(GP_COL_GRAY_LIGHT);
-GP_Color darkgray = GP_COLNAME_PACK(GP_COL_GRAY_DARK);
+GP_Pixel black, white, yellow, red, gray, darkgray;
 
 /* Radius of the shape being drawn */
 static int xradius = 5;
@@ -447,6 +442,14 @@ int main(int argc, char ** argv)
 	SDL_SetClipRect(display, &clip_rect);
 
 	GP_SDL_ContextFromSurface(&context, display);
+
+	/* Load colors compatible with the display */
+	GP_ColorNameToPixel(context.pixel_type, GP_COL_BLACK, &black);
+	GP_ColorNameToPixel(context.pixel_type, GP_COL_WHITE, &white);
+	GP_ColorNameToPixel(context.pixel_type, GP_COL_YELLOW, &yellow);
+	GP_ColorNameToPixel(context.pixel_type, GP_COL_RED, &red);
+	GP_ColorNameToPixel(context.pixel_type, GP_COL_GRAY_LIGHT, &gray);
+	GP_ColorNameToPixel(context.pixel_type, GP_COL_GRAY_DARK, &darkgray);
 
 	/* Set up the refresh timer */
 	timer = SDL_AddTimer(60, timer_callback, NULL);

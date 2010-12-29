@@ -31,9 +31,9 @@
 #include <stdint.h>
 
 GP_RetCode GP_FillEllipse(GP_Context *context, int xcenter, int ycenter,
-                          unsigned int a, unsigned int b, GP_Color color);
+                          unsigned int a, unsigned int b, GP_Pixel pixel);
 
 GP_RetCode GP_TFillEllipse(GP_Context *context, int xcenter, int ycenter,
-                           unsigned int a, unsigned int b, GP_Color color);
+                           unsigned int a, unsigned int b, GP_Pixel pixel);
 
 #endif /* GP_FILLELLIPSE_H */

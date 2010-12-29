@@ -33,24 +33,20 @@ DEF_FILLCIRCLE_FN(GP_FillCircle24bpp, GP_Context *, GP_Pixel, GP_HLine24bpp)
 DEF_FILLCIRCLE_FN(GP_FillCircle32bpp, GP_Context *, GP_Pixel, GP_HLine32bpp)
 
 GP_RetCode GP_FillCircle(GP_Context *context, int xcenter, int ycenter,
-                         unsigned int r, GP_Color color)
+                         unsigned int r, GP_Pixel pixel)
 {
 	if (!context)
 		return GP_ENULLPTR;
 	if (!GP_IS_CONTEXT_VALID(context))
 		return GP_EBADCONTEXT;
 
-	GP_Pixel pixel;
-	pixel.type = context->pixel_type;
-	GP_RetCode ret = GP_ColorToPixel(color, &pixel);
-
 	GP_FN_PER_BPP(GP_FillCircle, xcenter, ycenter, r, pixel);
 
-	return ret;
+	return GP_ESUCCESS;
 }
 
 GP_RetCode GP_TFillCircle(GP_Context *context, int xcenter, int ycenter,
-                          unsigned int r, GP_Color color)
+                          unsigned int r, GP_Pixel pixel)
 {
 	if (!context)
 		return GP_ENULLPTR;
@@ -58,5 +54,5 @@ GP_RetCode GP_TFillCircle(GP_Context *context, int xcenter, int ycenter,
 		return GP_EBADCONTEXT;
 
 	GP_TRANSFORM_POINT(context, xcenter, ycenter);
-	return GP_FillCircle(context, xcenter, ycenter, r, color);
+	return GP_FillCircle(context, xcenter, ycenter, r, pixel);
 }

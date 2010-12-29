@@ -85,8 +85,7 @@ static void do_test(struct test_data data)
 	printf("Testing %s -> %s ... ", GP_ColorTypeName(data.color.type),
 	                                GP_PixelTypeName(data.pixel.type));
 
-	pixel.type = data.pixel.type;
-	ret = GP_ColorToPixel(data.color, &pixel);
+	ret = GP_ColorToPixel(data.pixel.type, data.color, &pixel);
 
 	switch (ret) {
 		case GP_ESUCCESS:

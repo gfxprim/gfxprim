@@ -31,9 +31,9 @@
 #include <stdint.h>
 
 GP_RetCode GP_Circle(GP_Context *context, int xcenter, int ycenter,
-                     unsigned int r, GP_Color color);
+                     unsigned int r, GP_Pixel pixel);
 
 GP_RetCode GP_TCircle(GP_Context *context, int xcenter, int ycenter,
-                      unsigned int r, GP_Color color);
+                      unsigned int r, GP_Pixel pixel);
 
 #endif /* GP_CIRCLE_H */

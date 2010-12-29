@@ -33,24 +33,20 @@ DEF_FILLELLIPSE_FN(GP_FillEllipse24bpp, GP_Context *, GP_Pixel, GP_HLine24bpp)
 DEF_FILLELLIPSE_FN(GP_FillEllipse32bpp, GP_Context *, GP_Pixel, GP_HLine32bpp)
 
 GP_RetCode GP_FillEllipse(GP_Context *context, int xcenter, int ycenter,
-	unsigned int a, unsigned int b, GP_Color color)
+	unsigned int a, unsigned int b, GP_Pixel pixel)
 {
 	if (!context)
 		return GP_ENULLPTR;
 	if (!GP_IS_CONTEXT_VALID(context))
 		return GP_EBADCONTEXT;
 
-	GP_Pixel pixel;
-	pixel.type = context->pixel_type;
-	GP_RetCode ret = GP_ColorToPixel(color, &pixel);
-
 	GP_FN_PER_BPP(GP_FillEllipse, xcenter, ycenter, a, b, pixel);
 
-	return ret;
+	return GP_ESUCCESS;
 }
 
 GP_RetCode GP_TFillEllipse(GP_Context *context, int xcenter, int ycenter,
-                           unsigned int a, unsigned int b, GP_Color color)
+                           unsigned int a, unsigned int b, GP_Pixel pixel)
 {
 	if (!context)
 		return GP_ENULLPTR;
@@ -59,5 +55,5 @@ GP_RetCode GP_TFillEllipse(GP_Context *context, int xcenter, int ycenter,
 
 	GP_TRANSFORM_POINT(context, xcenter, ycenter);
 	GP_TRANSFORM_SWAP(context, a, b);
-	return GP_FillEllipse(context, xcenter, ycenter, a, b, color);
+	return GP_FillEllipse(context, xcenter, ycenter, a, b, pixel);
 }

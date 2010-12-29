@@ -32,23 +32,19 @@ DEF_HLINE_FN(GP_HLine16bpp, GP_Context *, GP_Pixel, GP_PIXEL_ADDRESS, GP_WritePi
 DEF_HLINE_FN(GP_HLine24bpp, GP_Context *, GP_Pixel, GP_PIXEL_ADDRESS, GP_WritePixels24bpp)
 DEF_HLINE_FN(GP_HLine32bpp, GP_Context *, GP_Pixel, GP_PIXEL_ADDRESS, GP_WritePixels32bpp)
 
-GP_RetCode GP_HLine(GP_Context *context, int x0, int x1, int y, GP_Color color)
+GP_RetCode GP_HLine(GP_Context *context, int x0, int x1, int y, GP_Pixel pixel)
 {
 	if (!context)
 		return GP_ENULLPTR;
 	if (!GP_IS_CONTEXT_VALID(context))
 		return GP_EBADCONTEXT;
 
-	GP_Pixel pixel;
-	pixel.type = context->pixel_type;
-	GP_RetCode ret = GP_ColorToPixel(color, &pixel);
-
 	GP_FN_PER_BPP(GP_HLine, x0, x1, y, pixel);
 
-	return ret;
+	return GP_ESUCCESS;
 }
 
-GP_RetCode GP_THLine(GP_Context *context, int x0, int x1, int y, GP_Color color)
+GP_RetCode GP_THLine(GP_Context *context, int x0, int x1, int y, GP_Pixel pixel)
 {
 	if (!context)
 		return GP_ENULLPTR;
@@ -59,11 +55,11 @@ GP_RetCode GP_THLine(GP_Context *context, int x0, int x1, int y, GP_Color color)
 		GP_TRANSFORM_Y(context, x0);
 		GP_TRANSFORM_Y(context, x1);
 		GP_TRANSFORM_X(context, y);
-		return GP_VLine(context, y, x0, x1, color);
+		return GP_VLine(context, y, x0, x1, pixel);
 	}
 
 	GP_TRANSFORM_X(context, x0);
 	GP_TRANSFORM_X(context, x1);
 	GP_TRANSFORM_Y(context, y);
-	return GP_HLine(context, x0, x1, y, color);
+	return GP_HLine(context, x0, x1, y, pixel);
 }
