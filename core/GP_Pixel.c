@@ -95,7 +95,7 @@ GP_ColorType GP_PixelTypeToColorType(GP_PixelType type)
 
 #define CHECK_RET(ret) if (ret != GP_ESUCCESS && ret != GP_EUNPRECISE) return ret;
 
-GP_RetCode GP_ColorToPixel(GP_PixelType pixel_type, GP_Color color, GP_Pixel *pixel)
+GP_RetCode GP_ColorToPixelType(GP_PixelType pixel_type, GP_Color color, GP_Pixel *pixel)
 {
 	if (pixel == NULL)
 		return GP_ENULLPTR;
@@ -221,13 +221,30 @@ GP_RetCode GP_ColorToPixel(GP_PixelType pixel_type, GP_Color color, GP_Pixel *pi
 		return GP_ENOIMPL;
 }
 
-GP_RetCode GP_ColorNameToPixel(GP_PixelType pixel_type, GP_ColorName name, GP_Pixel *pixel)
+GP_RetCode GP_ColorToPixel(GP_Context *context, GP_Color color, GP_Pixel *pixel)
+{
+	if (context == NULL || pixel == NULL)
+		return GP_ENULLPTR;
+
+	return GP_ColorToPixelType(context->pixel_type, color, pixel);
+}
+
+GP_RetCode GP_ColorNameToPixelType(GP_PixelType pixel_type, GP_ColorName name, GP_Pixel *pixel)
 {
 	if (pixel == NULL)
 		return GP_ENULLPTR;
+	
+	GP_Color color = GP_COLNAME_PACK(name);
+	return GP_ColorToPixelType(pixel_type, color, pixel);
+}
+
+GP_RetCode GP_ColorNameToPixel(GP_Context *context, GP_ColorName name, GP_Pixel *pixel)
+{
+	if (context == NULL || pixel == NULL)
+		return GP_ENULLPTR;
 
 	GP_Color color = GP_COLNAME_PACK(name);
-	return GP_ColorToPixel(pixel_type, color, pixel);
+	return GP_ColorToPixelType(context->pixel_type, color, pixel);
 }
 
 GP_RetCode GP_PixelToColor(GP_Pixel pixel, GP_Color *color)

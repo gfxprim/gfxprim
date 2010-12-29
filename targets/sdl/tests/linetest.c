@@ -73,7 +73,7 @@ void redraw_screen(void)
 		
 		GP_Color color = GP_RGB888_PACK(r, 0, b);
 		GP_Pixel pixel;
-		GP_ColorToPixel(context.pixel_type, color, &pixel);
+		GP_ColorToPixel(&context, color, &pixel);
 	
 		/*
 		 * Draw the line forth and back to detect any pixel change
@@ -125,8 +125,8 @@ int main(int argc, char **argv)
 	GP_SDL_ContextFromSurface(&context, display);
 
 	/* Load colors in display format */
-	GP_ColorNameToPixel(context.pixel_type, GP_COL_BLACK, &black);
-	GP_ColorNameToPixel(context.pixel_type, GP_COL_WHITE, &white);
+	GP_ColorNameToPixel(&context, GP_COL_BLACK, &black);
+	GP_ColorNameToPixel(&context, GP_COL_WHITE, &white);
 
 	/* Set up the refresh timer */
 	timer = SDL_AddTimer(30, timer_callback, NULL);

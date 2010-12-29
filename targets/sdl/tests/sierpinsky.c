@@ -113,7 +113,6 @@ Uint32 timer_callback(Uint32 interval __attribute__ ((unused)), void *ptr __attr
 	if (iter < 2 * way)
 		way *= 1;
 		
-
 	draw(display, display->w/2, display->h/2, l, iter);
 
 	return TIMER_TICK;
@@ -135,9 +134,9 @@ int main(void)
 
 	GP_SDL_ContextFromSurface(&context, display);
 
-	GP_ColorNameToPixel(context.pixel_type, GP_COL_BLACK, &black);
-	GP_ColorNameToPixel(context.pixel_type, GP_COL_BLUE, &blue);
-	GP_ColorNameToPixel(context.pixel_type, GP_COL_GRAY_LIGHT, &gray);
+	GP_ColorNameToPixel(&context, GP_COL_BLACK, &black);
+	GP_ColorNameToPixel(&context, GP_COL_BLUE, &blue);
+	GP_ColorNameToPixel(&context, GP_COL_GRAY_LIGHT, &gray);
 
 	iter = 0;
 	draw(display, display->w/2, display->h/2, l, iter);

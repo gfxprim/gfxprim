@@ -164,7 +164,7 @@ void redraw_screen(void)
 	SDL_LockSurface(display);
 
 	GP_Pixel pixel;
-	GP_ColorToPixel(context.pixel_type, color, &pixel);
+	GP_ColorToPixel(&context, color, &pixel);
 
 	switch (shape) {
 	case SHAPE_CIRCLE:
@@ -286,8 +286,8 @@ int main(int argc, char ** argv)
 
 	GP_SDL_ContextFromSurface(&context, display);
 
-	GP_ColorNameToPixel(context.pixel_type, GP_COL_WHITE, &white);
-	GP_ColorNameToPixel(context.pixel_type, GP_COL_BLACK, &black);
+	GP_ColorNameToPixel(&context, GP_COL_WHITE, &white);
+	GP_ColorNameToPixel(&context, GP_COL_BLACK, &black);
 
 	/* Set up the refresh timer */
 	timer = SDL_AddTimer(60, timer_callback, NULL);

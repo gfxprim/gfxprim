@@ -121,9 +121,9 @@ int main(void)
 
 	context = &fb->context;
 
-	GP_ColorNameToPixel(context->pixel_type, GP_COL_GRAY_LIGHT, &gray);
-	GP_ColorNameToPixel(context->pixel_type, GP_COL_BLUE, &blue);
-	GP_ColorNameToPixel(context->pixel_type, GP_COL_BLACK, &black);
+	GP_ColorNameToPixel(context, GP_COL_GRAY_LIGHT, &gray);
+	GP_ColorNameToPixel(context, GP_COL_BLUE, &blue);
+	GP_ColorNameToPixel(context, GP_COL_BLACK, &black);
 
 	iter = 0;
 	draw(context, context->w/2, context->h/2, l, iter);

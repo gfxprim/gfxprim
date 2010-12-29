@@ -103,12 +103,22 @@ GP_ColorType GP_PixelTypeToColorType(GP_PixelType type);
 /*
  * Converts a color to the specified pixel type.
  */
-GP_RetCode GP_ColorToPixel(GP_PixelType pixel_type, GP_Color color, GP_Pixel *pixel);
+GP_RetCode GP_ColorToPixelType(GP_PixelType pixel_type, GP_Color color, GP_Pixel *pixel);
+
+/*
+ * Converts a color to a pixel value suitable for the specified context.
+ */
+GP_RetCode GP_ColorToPixel(struct GP_Context *context, GP_Color color, GP_Pixel *pixel);
 
 /*
  * Converts a color name to the specified pixel type.
  */
-GP_RetCode GP_ColorNameToPixel(GP_PixelType pixel_type, GP_ColorName name, GP_Pixel *pixel);
+GP_RetCode GP_ColorNameToPixelType(GP_PixelType pixel_type, GP_ColorName name, GP_Pixel *pixel);
+
+/*
+ * Converts a color name to a pixel value suitable for the specified context.
+ */
+GP_RetCode GP_ColorNameToPixel(struct GP_Context *context, GP_ColorName name, GP_Pixel *pixel);
 
 /*
  * Converts GP_Pixel to GP_Color.

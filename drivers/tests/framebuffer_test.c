@@ -51,9 +51,9 @@ int main(void)
 		return 1;
 
 	GP_Pixel White, Gray, Gray2;
-	GP_ColorNameToPixel(fb->context.pixel_type, GP_COL_WHITE, &White);
-	GP_ColorNameToPixel(fb->context.pixel_type, GP_COL_GRAY_DARK, &Gray);
-	GP_ColorNameToPixel(fb->context.pixel_type, GP_COL_GRAY_LIGHT, &Gray2);
+	GP_ColorNameToPixel(&fb->context, GP_COL_WHITE, &White);
+	GP_ColorNameToPixel(&fb->context, GP_COL_GRAY_DARK, &Gray);
+	GP_ColorNameToPixel(&fb->context, GP_COL_GRAY_LIGHT, &Gray2);
 
 	const char *text = "Framebuffer test";
 

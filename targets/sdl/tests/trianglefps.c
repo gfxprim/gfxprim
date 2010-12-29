@@ -73,7 +73,7 @@ void draw_frame(void)
 	GP_Color color = GP_RGB888_PACK(random() % 255, random() % 255, random() % 255);
 
 	GP_Pixel pixel;
-	GP_ColorToPixel(context.pixel_type, color, &pixel);
+	GP_ColorToPixel(&context, color, &pixel);
 	
 	if (filled) {
 		GP_FillTriangle(&context, x0, y0, x1, y1, x2, y2, pixel);
@@ -160,8 +160,8 @@ int main(int argc, char ** argv)
 
 	GP_SDL_ContextFromSurface(&context, display);
 
-	GP_ColorNameToPixel(context.pixel_type, GP_COL_WHITE, &white);
-	GP_ColorNameToPixel(context.pixel_type, GP_COL_BLACK, &black);
+	GP_ColorNameToPixel(&context, GP_COL_WHITE, &white);
+	GP_ColorNameToPixel(&context, GP_COL_BLACK, &black);
 
 	/* Set up the timer */
 	timer = SDL_AddTimer(1000, timer_callback, NULL);

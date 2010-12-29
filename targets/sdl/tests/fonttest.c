@@ -153,11 +153,11 @@ int main(void)
 	GP_SDL_ContextFromSurface(&context, display);
 
 	/* Load colors suitable for the display */
-	GP_ColorNameToPixel(context.pixel_type, GP_COL_WHITE, &white_pixel);
-	GP_ColorNameToPixel(context.pixel_type, GP_COL_GRAY_LIGHT, &gray_pixel);
-	GP_ColorNameToPixel(context.pixel_type, GP_COL_GRAY_DARK, &dark_gray_pixel);
-	GP_ColorNameToPixel(context.pixel_type, GP_COL_BLACK, &black_pixel);
-	GP_ColorNameToPixel(context.pixel_type, GP_COL_RED, &red_pixel);
+	GP_ColorNameToPixel(&context, GP_COL_WHITE, &white_pixel);
+	GP_ColorNameToPixel(&context, GP_COL_GRAY_LIGHT, &gray_pixel);
+	GP_ColorNameToPixel(&context, GP_COL_GRAY_DARK, &dark_gray_pixel);
+	GP_ColorNameToPixel(&context, GP_COL_BLACK, &black_pixel);
+	GP_ColorNameToPixel(&context, GP_COL_RED, &red_pixel);
 
 	redraw_screen();
 	SDL_Flip(display);
