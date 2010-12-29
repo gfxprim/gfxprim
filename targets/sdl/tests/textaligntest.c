@@ -41,6 +41,10 @@ static GP_Pixel black_pixel, red_pixel, yellow_pixel, green_pixel, blue_pixel,
 /* draw using proportional font? */
 static int flag_proportional = 0;
 
+/* center of the screen */
+static int xcenter = 320;
+static int ycenter = 240;
+
 void redraw_screen(void)
 {
 	SDL_LockSurface(display);
@@ -61,15 +65,20 @@ void redraw_screen(void)
 	style.pixel_xspace = 4;
 	style.pixel_yspace = 4;
 
-	GP_Text(&context, &style, 320, 240, GP_ALIGN_CENTER|GP_VALIGN_CENTER, "Hello world!", darkgray_pixel);
+	GP_TText(&context, &style, xcenter, ycenter, GP_ALIGN_CENTER|GP_VALIGN_CENTER,
+	         "Hello world!", darkgray_pixel);
 
 	style.pixel_xspace = 0;
 	style.pixel_yspace = 0;
 
-	GP_Text(&context, &style, 320, 240, GP_ALIGN_LEFT|GP_VALIGN_BELOW, "bottom left", yellow_pixel);
-	GP_Text(&context, &style, 320, 240, GP_ALIGN_RIGHT|GP_VALIGN_BELOW, "bottom right", red_pixel);
-	GP_Text(&context, &style, 320, 240, GP_ALIGN_RIGHT|GP_VALIGN_ABOVE, "top right", blue_pixel);
-	GP_Text(&context, &style, 320, 240, GP_ALIGN_LEFT|GP_VALIGN_ABOVE, "top left", green_pixel);
+	GP_TText(&context, &style, xcenter, ycenter, GP_ALIGN_LEFT|GP_VALIGN_BELOW,
+	         "bottom left", yellow_pixel);
+	GP_TText(&context, &style, xcenter, ycenter, GP_ALIGN_RIGHT|GP_VALIGN_BELOW,
+	         "bottom right", red_pixel);
+	GP_TText(&context, &style, xcenter, ycenter, GP_ALIGN_RIGHT|GP_VALIGN_ABOVE,
+	         "top right", blue_pixel);
+	GP_TText(&context, &style, xcenter, ycenter, GP_ALIGN_LEFT|GP_VALIGN_ABOVE,
+	         "top left", green_pixel);
 
 	SDL_UnlockSurface(display);
 }
@@ -84,23 +93,45 @@ void event_loop(void)
 		case SDL_VIDEOEXPOSE:
 			redraw_screen();
 			SDL_Flip(display);
-			break;
+		break;
 
 		case SDL_KEYDOWN:
-			if (event.key.keysym.sym == SDLK_SPACE) {
+			switch (event.key.keysym.sym) {
+			case SDLK_SPACE:
 				flag_proportional = !flag_proportional;
-				redraw_screen();
-				SDL_Flip(display);
-			}
-			else if (event.key.keysym.sym == SDLK_ESCAPE) {
+			break;
+			case SDLK_x:
+                                context.x_swap = !context.x_swap;
+                        break;
+			case SDLK_y:
+				context.y_swap = !context.y_swap;
+			break;
+			case SDLK_r:
+				context.axes_swap = !context.axes_swap;
+				GP_SWAP(xcenter, ycenter);
+			break;
+			default:
+			break;
+			case SDLK_ESCAPE:
 				return;
 			}
-			break;
+			redraw_screen();
+			SDL_Flip(display);
+		break;
 
 		case SDL_QUIT:
 			return;
 		}
 	}
+}
+
+void print_instructions(void)
+{
+	printf("Use the following keys to control the test:\n");
+	printf("    Space ............... toggle proportional/nonproportional font\n");
+	printf("    X ................... mirror X\n");
+	printf("    Y ................... mirror Y\n");
+	printf("    R ................... reverse X and Y\n");
 }
 
 int main(void)
@@ -117,6 +148,8 @@ int main(void)
 		fprintf(stderr, "Could not open display: %s\n", SDL_GetError());
 		goto fail;
 	}
+
+	print_instructions();
 
 	/* Set up a clipping rectangle to test proper clipping of pixels */
 	SDL_Rect clip_rect = {10, 10, 620, 460};
