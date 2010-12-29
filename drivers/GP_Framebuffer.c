@@ -48,20 +48,20 @@ GP_Framebuffer *GP_FramebufferInit(const char *path)
 	fd = open(path, O_RDWR);
 
 	if (fd < 0) {
-		perror("opening framebuffer failed: ");
+		perror("opening framebuffer failed");
 		free(fb);
 		return NULL;
 	}
 
 	if (ioctl(fd, FBIOGET_FSCREENINFO, &fscri) < 0) {
-		perror("ioctl FBIOGET_FSCREENINFO: ");
+		perror("ioctl FBIOGET_FSCREENINFO");
 		free(fb);
 		close(fd);
 		return NULL;
 	}
 	
 	if (ioctl(fd, FBIOGET_VSCREENINFO, &vscri) < 0) {
-		perror("ioctl FBIOGET_VSCREENINFO: ");
+		perror("ioctl FBIOGET_VSCREENINFO");
 		free(fb);
 		close(fd);
 		return NULL;
@@ -72,7 +72,7 @@ GP_Framebuffer *GP_FramebufferInit(const char *path)
 				  fd, 0);
 
 	if (fb->context.pixels == MAP_FAILED) {
-		perror("mmaping framebuffer failed: ");
+		perror("mmaping framebuffer failed");
 		free(fb);
 		close(fd);
 		return NULL;
