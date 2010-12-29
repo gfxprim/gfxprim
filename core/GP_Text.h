@@ -28,10 +28,21 @@
 
 #include "GP_Context.h"
 
+/* Where the text should be drawn relatively to the specified point */
+typedef enum GP_TextAlign {
+	GP_ALIGN_LEFT = 0x01,		/* to the left from the point */
+	GP_ALIGN_CENTER = 0x02,		/* centered on the point */
+	GP_ALIGN_RIGHT = 0x03,		/* to the right from the point */
+	GP_VALIGN_ABOVE = 0x10,		/* above the point */
+	GP_VALIGN_CENTER = 0x20,	/* centered on the point */
+	GP_VALIGN_BASELINE = 0x30,	/* baseline is on the point */
+	GP_VALIGN_BELOW = 0x40		/* below the point */
+} GP_TextAlign;
+
 GP_RetCode GP_Text(GP_Context *context, const GP_TextStyle *style,
-                   int x, int y, const char *str, GP_Pixel pixel);
+                   int x, int y, int align, const char *str, GP_Pixel pixel);
 
 GP_RetCode GP_TText(GP_Context *context, const GP_TextStyle *style,
-                    int x, int y, const char *str, GP_Pixel pixel);
+                    int x, int y, int align, const char *str, GP_Pixel pixel);
 
 #endif /* GP_TEXT_H */

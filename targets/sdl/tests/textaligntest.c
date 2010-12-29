@@ -35,15 +35,8 @@ SDL_Surface *display = NULL;
 GP_Context context;
 
 /* precomputed color pixels in display format */
-static GP_Pixel white_pixel, gray_pixel, dark_gray_pixel, black_pixel,
-		red_pixel;
-
-static const char *test_strings[] = {
-	" !\"#$%&\047()*+,-./0123456789:;<=>?@",
-	"ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`",
-	"abcdefghijklmnopqrstuvwxyz{|}~",
-	"Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor..."
-};
+static GP_Pixel black_pixel, red_pixel, yellow_pixel, green_pixel, blue_pixel,
+		darkgray_pixel;
 
 /* draw using proportional font? */
 static int flag_proportional = 0;
@@ -54,6 +47,10 @@ void redraw_screen(void)
 	
 	GP_Fill(&context, black_pixel);
 
+	/* draw axes intersecting in the middle, where text should be shown */
+	GP_HLine(&context, 0, 640, 240, darkgray_pixel);
+	GP_VLine(&context, 320, 0, 480, darkgray_pixel);
+
 	GP_TextStyle style = GP_DEFAULT_TEXT_STYLE;
 
 	if (flag_proportional)
@@ -61,42 +58,18 @@ void redraw_screen(void)
 	else
 		style.font = &GP_default_console_font;
 
-	/* Text alignment (we are always drawing to the right
-	 * and below the starting point).
-	 */
-	int align = GP_ALIGN_RIGHT|GP_VALIGN_BELOW;
+	style.pixel_xspace = 4;
+	style.pixel_yspace = 4;
 
-	const size_t TEST_STRING_COUNT = sizeof(test_strings)/sizeof(const char *);
-	size_t i;
-	for (i = 0; i < TEST_STRING_COUNT; i++) {
-		const char * test_string = test_strings[i];
+	GP_Text(&context, &style, 320, 240, GP_ALIGN_CENTER|GP_VALIGN_CENTER, "Hello world!", darkgray_pixel);
 
-		style.pixel_xmul = 1;
-		style.pixel_ymul = 1;
-		style.pixel_xspace = 0;
-		style.pixel_yspace = 0;
+	style.pixel_xspace = 0;
+	style.pixel_yspace = 0;
 
-		GP_FillRect(&context,
-			16, 100*i + 16,
-			16 + GP_TextWidth(&style, test_string),
-			100*i + 16 + style.font->height,
-			red_pixel);
-
-		GP_Text(&context, &style, 16, 100*i + 16, align, test_string, white_pixel);
-
-		style.pixel_xmul = 2;
-		style.pixel_ymul = 2;
-		style.pixel_yspace = 1;
-
-		GP_Text(&context, &style, 34, 100*i + 38, align, test_string, gray_pixel);
-
-		style.pixel_xmul = 4;
-		style.pixel_ymul = 2;
-		style.pixel_xspace = 1;
-		style.pixel_yspace = 1;
-
-		GP_Text(&context, &style, 64, 100*i + 72, align, test_string, dark_gray_pixel);
-	}
+	GP_Text(&context, &style, 320, 240, GP_ALIGN_LEFT|GP_VALIGN_BELOW, "bottom left", yellow_pixel);
+	GP_Text(&context, &style, 320, 240, GP_ALIGN_RIGHT|GP_VALIGN_BELOW, "bottom right", red_pixel);
+	GP_Text(&context, &style, 320, 240, GP_ALIGN_RIGHT|GP_VALIGN_ABOVE, "top right", blue_pixel);
+	GP_Text(&context, &style, 320, 240, GP_ALIGN_LEFT|GP_VALIGN_ABOVE, "top left", green_pixel);
 
 	SDL_UnlockSurface(display);
 }
@@ -153,11 +126,12 @@ int main(void)
 	GP_SDL_ContextFromSurface(&context, display);
 
 	/* Load colors suitable for the display */
-	GP_ColorNameToPixel(context.pixel_type, GP_COL_WHITE, &white_pixel);
-	GP_ColorNameToPixel(context.pixel_type, GP_COL_GRAY_LIGHT, &gray_pixel);
-	GP_ColorNameToPixel(context.pixel_type, GP_COL_GRAY_DARK, &dark_gray_pixel);
-	GP_ColorNameToPixel(context.pixel_type, GP_COL_BLACK, &black_pixel);
+	GP_ColorNameToPixel(context.pixel_type, GP_COL_YELLOW, &yellow_pixel);
+	GP_ColorNameToPixel(context.pixel_type, GP_COL_BLUE, &blue_pixel);
 	GP_ColorNameToPixel(context.pixel_type, GP_COL_RED, &red_pixel);
+	GP_ColorNameToPixel(context.pixel_type, GP_COL_GREEN, &green_pixel);
+	GP_ColorNameToPixel(context.pixel_type, GP_COL_BLACK, &black_pixel);
+	GP_ColorNameToPixel(context.pixel_type, GP_COL_GRAY_DARK, &darkgray_pixel);
 
 	redraw_screen();
 	SDL_Flip(display);

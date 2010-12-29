@@ -63,7 +63,7 @@ int main(void)
 	GP_Line(&fb->context, 0, fb->context.h, fb->context.w, 0, White);
 	GP_Text(&fb->context, &style,
 	        (fb->context.w - GP_TextWidth(&style, text))/2,
-		16, text, Gray2);
+		16, GP_ALIGN_RIGHT|GP_VALIGN_BELOW, text, Gray2);
 
 	sleep(10);
 

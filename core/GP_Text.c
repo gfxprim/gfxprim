@@ -34,27 +34,95 @@ DEF_TEXT_FN(GP_Text32bpp, GP_Context *, GP_Pixel, GP_HLine32bpp)
 DEF_TEXT_FN(GP_TText_internal, GP_Context *, GP_Pixel, GP_THLine)
 
 GP_RetCode GP_Text(GP_Context *context, const GP_TextStyle *style,
-	int x, int y, const char *str, GP_Pixel pixel)
+	int x, int y, int align, const char *str, GP_Pixel pixel)
 {
 	if (!context || !style || !style->font || !str)
 		return GP_ENULLPTR;
 	if (!GP_IS_CONTEXT_VALID(context))
 		return GP_EBADCONTEXT;
 
-	GP_FN_PER_BPP(GP_Text, style, x, y, str, pixel);
+	int width = GP_TextWidth(style, str);
+	int height = GP_TextHeight(style);
+
+	int topleft_x, topleft_y;
+	switch (align & 0x0f) {
+		case GP_ALIGN_LEFT:
+			topleft_x = x - width;
+			break;
+		case GP_ALIGN_RIGHT:
+			topleft_x = x;
+			break;
+		case GP_ALIGN_CENTER:
+			topleft_x = x - width/2;
+			break;
+		default:
+			return GP_EINVAL;
+	}
+	switch (align & 0xf0) {
+		case GP_VALIGN_ABOVE:
+			topleft_y = y - height;
+			break;
+		case GP_VALIGN_CENTER:
+			topleft_y = y - height/2;
+			break;
+		case GP_VALIGN_BASELINE:
+			topleft_y = y - height + style->font->baseline;
+			break;
+		case GP_VALIGN_BELOW:
+			topleft_y = y;
+			break;
+		default:
+			return GP_EINVAL;
+	}
+
+	GP_FN_PER_BPP(GP_Text, style, topleft_x, topleft_y, str, pixel);
 
 	return GP_ESUCCESS;
 }
 
 GP_RetCode GP_TText(GP_Context *context, const GP_TextStyle *style,
-	int x, int y, const char *str, GP_Pixel pixel)
+	int x, int y, int align, const char *str, GP_Pixel pixel)
 {
 	if (!context || !style || !style->font || !str)
 		return GP_ENULLPTR;
 	if (!GP_IS_CONTEXT_VALID(context))
 		return GP_EBADCONTEXT;
 
-	GP_TText_internal(context, style, x, y, str, pixel);
+	int width = GP_TextWidth(style, str);
+	int height = GP_TextHeight(style);
+
+	int topleft_x, topleft_y;
+	switch (align & 0x0f) {
+		case GP_ALIGN_LEFT:
+			topleft_x = x - width;
+			break;
+		case GP_ALIGN_RIGHT:
+			topleft_x = x;
+			break;
+		case GP_ALIGN_CENTER:
+			topleft_x = x - width/2;
+			break;
+		default:
+			return GP_EINVAL;
+	}
+	switch (align & 0xf0) {
+		case GP_VALIGN_ABOVE:
+			topleft_y = y - height;
+			break;
+		case GP_VALIGN_CENTER:
+			topleft_y = y - height/2;
+			break;
+		case GP_VALIGN_BASELINE:
+			topleft_y = y - height + style->font->baseline;
+			break;
+		case GP_VALIGN_BELOW:
+			topleft_y = y;
+			break;
+		default:
+			return GP_EINVAL;
+	}
+
+	GP_TText_internal(context, style, topleft_x, topleft_y, str, pixel);
 	return GP_ESUCCESS;
 }
 

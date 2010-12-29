@@ -40,7 +40,7 @@ uint8_t * GP_GetCharData(const GP_TextStyle *style, char c);
 int GP_TextWidth(const GP_TextStyle *style, const char *str);
 
 /*
- * Returns maximal text height.
+ * Returns maximal text height, in pixels.
  */
 int GP_TextHeight(const GP_TextStyle *style);
 
