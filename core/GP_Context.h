@@ -56,6 +56,9 @@ typedef struct GP_Context {
 	uint32_t clip_h_max;
 } GP_Context;
 
+/* Returns the pixel type used by the context. */
+inline GP_PixelType GP_GetContextPixelType(const GP_Context *context);
+
 /* Determines the address of a pixel within the context's image.
  * Rows and columns are specified in the image's orientation
  * (i.e. they might not be XY if the image is rotated).
