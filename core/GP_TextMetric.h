@@ -32,16 +32,26 @@
  * Calculates a pointer to the start of the character data
  * of the specified character.
  */
-uint8_t * GP_GetCharData(const GP_TextStyle *style, char c);
+const uint8_t * GP_GetCharData(const GP_TextStyle *style, char c);
 
 /*
  * Calculates the width of the string drawn in the given style, in pixels.
  */
-int GP_TextWidth(const GP_TextStyle *style, const char *str);
+unsigned int GP_TextWidth(const GP_TextStyle *style, const char *str);
 
 /*
  * Returns maximal text height, in pixels.
  */
-int GP_TextHeight(const GP_TextStyle *style);
+unsigned int GP_TextHeight(const GP_TextStyle *style);
+
+/* Returns the ascent (height from the baseline to the top of characters),
+ * for the given text style. (Result is in pixels.)
+ */
+unsigned int GP_TextAscent(const GP_TextStyle *style);
+
+/* Returns the descent (height from the baseline to the bottom of characters),
+ * for the given text style. (Result is in pixels.)
+ */
+unsigned int GP_TextDescent(const GP_TextStyle *style);
 
 #endif /* GP_TEXT_METRIC_H */

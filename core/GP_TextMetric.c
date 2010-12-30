@@ -23,10 +23,12 @@
  *                                                                           *
  *****************************************************************************/
 
-#include "GP_TextStyle.h"
+#include "GP.h"
 
 const uint8_t * GP_GetCharData(const GP_TextStyle *style, char c)
 {
+	GP_CHECK(style != NULL && style->font != NULL);
+
 	int bytes_per_char = 2 + style->font->bytes_per_line * style->font->height;
 
 	const uint8_t * char_data = style->font->data + ((int) c - 0x20) * bytes_per_char;
@@ -34,7 +36,7 @@ const uint8_t * GP_GetCharData(const GP_TextStyle *style, char c)
 	return char_data;
 }
 
-static int GP_CharWidth(const GP_TextStyle *style, char c)
+static unsigned int GP_CharWidth(const GP_TextStyle *style, char c)
 {
 	const uint8_t * char_data = GP_GetCharData(style, c);
 
@@ -44,8 +46,10 @@ static int GP_CharWidth(const GP_TextStyle *style, char c)
 	return char_width * (style->pixel_xmul + style->pixel_xspace);
 }
 
-int GP_TextWidth(const GP_TextStyle *style, const char *str)
+unsigned int GP_TextWidth(const GP_TextStyle *style, const char *str)
 {
+	GP_CHECK(style != NULL && style->font != NULL && str != NULL);
+
 	int width = 0;
 
 	const char *p;
@@ -56,8 +60,27 @@ int GP_TextWidth(const GP_TextStyle *style, const char *str)
 	return width;
 }
 
-int GP_TextHeight(const GP_TextStyle *style)
+unsigned int GP_TextHeight(const GP_TextStyle *style)
 {
+	GP_CHECK(style != NULL && style->font != NULL);
+
 	return style->font->height * style->pixel_ymul +
 	       (style->font->height - 1) * style->pixel_yspace;
 }
+
+unsigned int GP_TextAscent(const GP_TextStyle *style)
+{
+	GP_CHECK(style != NULL && style->font != NULL);
+
+	unsigned int h = style->font->height - style->font->baseline;
+	return h * style->pixel_ymul + (h - 1) * style->pixel_yspace;
+}
+
+unsigned int GP_TextDescent(const GP_TextStyle *style)
+{
+	GP_CHECK(style != NULL && style->font != NULL);
+
+	unsigned int h = style->font->baseline;
+	return h * style->pixel_ymul + (h - 1) * style->pixel_yspace;
+}
+
