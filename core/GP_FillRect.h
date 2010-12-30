@@ -28,10 +28,19 @@
 
 #include "GP_Context.h"
 
-GP_RetCode GP_FillRect(GP_Context *context, int x0, int y0, int x1, int y1,
-                       GP_Pixel pixel);
+GP_RetCode GP_FillRectXYXY(GP_Context *context, int x0, int y0, int x1, int y1,
+	GP_Pixel pixel);
 
-GP_RetCode GP_TFillRect(GP_Context *context, int x0, int y0, int x1, int y1,
-                        GP_Pixel pixel);
+GP_RetCode GP_FillRectXYWH(GP_Context *context, int x, int y,
+	unsigned int w, unsigned int h, GP_Pixel pixel);
+
+GP_RetCode GP_TFillRectXYXY(GP_Context *context, int x0, int y0, int x1, int y1,
+	GP_Pixel pixel);
+
+GP_RetCode GP_TFillRectXYWH(GP_Context *context, int x, int y,
+	unsigned int w, unsigned int h, GP_Pixel pixel);
+
+#define GP_FillRect GP_FillRectXYXY
+#define GP_TFillRect GP_TFillRectXYXY
 
 #endif /* GP_FILLRECT_H */

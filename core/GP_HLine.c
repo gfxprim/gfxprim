@@ -32,7 +32,7 @@ DEF_HLINE_FN(GP_HLine16bpp, GP_Context *, GP_Pixel, GP_PIXEL_ADDRESS, GP_WritePi
 DEF_HLINE_FN(GP_HLine24bpp, GP_Context *, GP_Pixel, GP_PIXEL_ADDRESS, GP_WritePixels24bpp)
 DEF_HLINE_FN(GP_HLine32bpp, GP_Context *, GP_Pixel, GP_PIXEL_ADDRESS, GP_WritePixels32bpp)
 
-GP_RetCode GP_HLine(GP_Context *context, int x0, int x1, int y, GP_Pixel pixel)
+GP_RetCode GP_HLineXXY(GP_Context *context, int x0, int x1, int y, GP_Pixel pixel)
 {
 	if (!context)
 		return GP_ENULLPTR;
@@ -44,7 +44,16 @@ GP_RetCode GP_HLine(GP_Context *context, int x0, int x1, int y, GP_Pixel pixel)
 	return GP_ESUCCESS;
 }
 
-GP_RetCode GP_THLine(GP_Context *context, int x0, int x1, int y, GP_Pixel pixel)
+GP_RetCode GP_HLineXYW(GP_Context *context, int x, int y, unsigned int w,
+	GP_Pixel pixel)
+{
+	if (w == 0)
+		return GP_ESUCCESS;	/* zero width: do not draw anything */
+
+	return GP_HLineXXY(context, x, y, x + w - 1, pixel);
+}
+
+GP_RetCode GP_THLineXXY(GP_Context *context, int x0, int x1, int y, GP_Pixel pixel)
 {
 	if (!context)
 		return GP_ENULLPTR;
@@ -62,4 +71,13 @@ GP_RetCode GP_THLine(GP_Context *context, int x0, int x1, int y, GP_Pixel pixel)
 	GP_TRANSFORM_X(context, x1);
 	GP_TRANSFORM_Y(context, y);
 	return GP_HLine(context, x0, x1, y, pixel);
+}
+
+GP_RetCode GP_THLineXYW(GP_Context *context, int x, int y, unsigned int w,
+	GP_Pixel pixel)
+{
+	if (w == 0)
+		return GP_ESUCCESS;	/* zero width: do not draw anything */
+
+	return GP_THLineXXY(context, x, y, x + w - 1, pixel);
 }

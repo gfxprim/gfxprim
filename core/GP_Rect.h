@@ -28,10 +28,20 @@
 
 #include "GP_Context.h"
 
-GP_RetCode GP_Rect(GP_Context *context, int x0, int y0, int x1, int y1,
-                   GP_Pixel pixel);
+GP_RetCode GP_RectXYXY(GP_Context *context, int x0, int y0, int x1, int y1,
+	GP_Pixel pixel);
 
-GP_RetCode GP_TRect(GP_Context *context, int x0, int y0, int x1, int y1,
-                    GP_Pixel pixel);
+GP_RetCode GP_RectXYWH(GP_Context *context, int x, int y,
+	unsigned int w, unsigned int h, GP_Pixel pixel);
+
+GP_RetCode GP_TRectXYXY(GP_Context *context, int x0, int y0, int x1, int y1,
+	GP_Pixel pixel);
+
+GP_RetCode GP_TRectXYWH(GP_Context *context, int x, int y,
+	unsigned int w, unsigned int h, GP_Pixel pixel);
+
+/* The XYXY argument set is the default */
+#define GP_Rect GP_RectXYXY
+#define GP_TRect GP_TRectXYXY
 
 #endif /* GP_RECT_H */
