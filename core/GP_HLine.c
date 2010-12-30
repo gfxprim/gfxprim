@@ -50,7 +50,7 @@ GP_RetCode GP_HLineXYW(GP_Context *context, int x, int y, unsigned int w,
 	if (w == 0)
 		return GP_ESUCCESS;	/* zero width: do not draw anything */
 
-	return GP_HLineXXY(context, x, y, x + w - 1, pixel);
+	return GP_HLineXXY(context, x, x + w - 1, y, pixel);
 }
 
 GP_RetCode GP_THLineXXY(GP_Context *context, int x0, int x1, int y, GP_Pixel pixel)

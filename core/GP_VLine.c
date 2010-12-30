@@ -25,7 +25,7 @@
 
 #include "GP.h"
 
-GP_RetCode GP_VLine(GP_Context *context, int x, int y0, int y1, GP_Pixel pixel)
+GP_RetCode GP_VLineXYY(GP_Context *context, int x, int y0, int y1, GP_Pixel pixel)
 {
 	if (!context)
 		return GP_ENULLPTR;
@@ -81,7 +81,16 @@ GP_RetCode GP_VLine(GP_Context *context, int x, int y0, int y1, GP_Pixel pixel)
 	return GP_ESUCCESS;
 }
 
-GP_RetCode GP_TVLine(GP_Context *context, int x, int y0, int y1, GP_Pixel pixel)
+GP_RetCode GP_VLineXYH(GP_Context *context, int x, int y, unsigned int height,
+	GP_Pixel pixel)
+{
+	if (height == 0)
+		return GP_ESUCCESS;	/* zero height: do not draw anything */
+
+	return GP_VLineXYY(context, x, y, y + height - 1, pixel);
+}
+
+GP_RetCode GP_TVLineXYY(GP_Context *context, int x, int y0, int y1, GP_Pixel pixel)
 {
 	if (!context)
 		return GP_ENULLPTR;
@@ -99,4 +108,13 @@ GP_RetCode GP_TVLine(GP_Context *context, int x, int y0, int y1, GP_Pixel pixel)
 	GP_TRANSFORM_Y(context, y0);
 	GP_TRANSFORM_Y(context, y1);
 	return GP_VLine(context, x, y0, y1, pixel);
+}
+
+GP_RetCode GP_TVLineXYH(GP_Context *context, int x, int y, unsigned int height,
+	GP_Pixel pixel)
+{
+	if (height == 0)
+		return GP_ESUCCESS;	/* zero height: do not draw anything */
+
+	return GP_TVLineXYY(context, x, y, y + height - 1, pixel);
 }

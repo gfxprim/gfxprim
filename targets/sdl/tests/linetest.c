@@ -84,8 +84,8 @@ void redraw_screen(void)
 	}
 
 	/* axes */
-	GP_HLine(&context, 0, display->w, ycenter, white);
-	GP_VLine(&context, xcenter, 0, display->h, white);
+	GP_HLineXYW(&context, 0, ycenter, display->w, white);
+	GP_VLineXYH(&context, xcenter, 0, display->h, white);
 
 	SDL_UnlockSurface(display);
 }
