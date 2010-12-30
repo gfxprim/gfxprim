@@ -32,7 +32,7 @@
  * Calculates a pointer to the start of the character data
  * of the specified character.
  */
-const uint8_t * GP_GetCharData(const GP_TextStyle *style, char c);
+const uint8_t *GP_GetCharData(const GP_TextStyle *style, char c);
 
 /*
  * Calculates the width of the string drawn in the given style, in pixels.

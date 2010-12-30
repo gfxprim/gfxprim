@@ -25,20 +25,20 @@
 
 #include "GP.h"
 
-const uint8_t * GP_GetCharData(const GP_TextStyle *style, char c)
+const uint8_t *GP_GetCharData(const GP_TextStyle *style, char c)
 {
 	GP_CHECK(style != NULL && style->font != NULL);
 
 	int bytes_per_char = 2 + style->font->bytes_per_line * style->font->height;
 
-	const uint8_t * char_data = style->font->data + ((int) c - 0x20) * bytes_per_char;
+	const uint8_t *char_data = style->font->data + ((int) c - 0x20) * bytes_per_char;
 
 	return char_data;
 }
 
 static unsigned int GP_CharWidth(const GP_TextStyle *style, char c)
 {
-	const uint8_t * char_data = GP_GetCharData(style, c);
+	const uint8_t *char_data = GP_GetCharData(style, c);
 
 	/* The first byte of the font data is width in pixels. */
 	const uint8_t char_width = *char_data;
