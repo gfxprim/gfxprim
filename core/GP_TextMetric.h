@@ -40,6 +40,11 @@ const uint8_t *GP_GetCharData(const GP_TextStyle *style, char c);
 unsigned int GP_TextWidth(const GP_TextStyle *style, const char *str);
 
 /*
+ * Maximal text width for string with len characters.
+ */
+unsigned int GP_TextMaxWidth(const GP_TextStyle *style, unsigned int len);
+
+/*
  * Returns maximal text height, in pixels.
  */
 unsigned int GP_TextHeight(const GP_TextStyle *style);

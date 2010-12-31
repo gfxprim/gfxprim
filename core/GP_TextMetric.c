@@ -36,7 +36,7 @@ const uint8_t *GP_GetCharData(const GP_TextStyle *style, char c)
 	return char_data;
 }
 
-static unsigned int GP_CharWidth(const GP_TextStyle *style, char c)
+static unsigned int CharWidth(const GP_TextStyle *style, char c)
 {
 	const uint8_t *char_data = GP_GetCharData(style, c);
 
@@ -46,21 +46,38 @@ static unsigned int GP_CharWidth(const GP_TextStyle *style, char c)
 	return char_width * (style->pixel_xmul + style->pixel_xspace);
 }
 
+static unsigned int SpaceWidth(const GP_TextStyle *style)
+{
+	//TODO: Does space change with pixel_yspace?
+	return style->font->hspace * style->pixel_xmul;
+}
+
 unsigned int GP_TextWidth(const GP_TextStyle *style, const char *str)
 {
 	GP_CHECK(style != NULL && style->font != NULL && str != NULL);
 	
 	unsigned int width = 0;
-	//TODO: Does space change with pixel_yspace?
-	unsigned int space = style->font->hspace * style->pixel_xmul;
+	unsigned int space = SpaceWidth(style);
 
 	for (; *str; str++)
-		width += GP_CharWidth(style, *str) + space; 
+		width += CharWidth(style, *str) + space; 
 
 	if (width == 0)
 		return 0;
 
 	return width - space;
+}
+
+unsigned int GP_TextMaxWidth(const GP_TextStyle *style, unsigned int len)
+{
+	unsigned int space_width = SpaceWidth(style);
+	//TODO: is style->font->char_width font character max width?
+	unsigned int char_width  = style->font->char_width;
+
+	if (len == 0)
+		return 0;
+
+	return len * char_width + (len - 1) * space_width; 
 }
 
 unsigned int GP_TextHeight(const GP_TextStyle *style)
