@@ -49,15 +49,18 @@ static unsigned int GP_CharWidth(const GP_TextStyle *style, char c)
 unsigned int GP_TextWidth(const GP_TextStyle *style, const char *str)
 {
 	GP_CHECK(style != NULL && style->font != NULL && str != NULL);
+	
+	unsigned int width = 0;
+	//TODO: Does space change with pixel_yspace?
+	unsigned int space = style->font->hspace * style->pixel_xmul;
 
-	int width = 0;
+	for (; *str; str++)
+		width += GP_CharWidth(style, *str) + space; 
 
-	const char *p;
-	for (p = str; *p; p++) {
-		width += GP_CharWidth(style, *p) + style->font->hspace * style->pixel_xmul;
-	}
+	if (width == 0)
+		return 0;
 
-	return width;
+	return width - space;
 }
 
 unsigned int GP_TextHeight(const GP_TextStyle *style)

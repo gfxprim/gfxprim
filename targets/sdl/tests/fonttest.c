@@ -69,7 +69,7 @@ void redraw_screen(void)
 	const size_t TEST_STRING_COUNT = sizeof(test_strings)/sizeof(const char *);
 	size_t i;
 	for (i = 0; i < TEST_STRING_COUNT; i++) {
-		const char * test_string = test_strings[i];
+		const char *test_string = test_strings[i];
 
 		style.pixel_xmul = 1;
 		style.pixel_ymul = 1;
