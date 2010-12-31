@@ -72,7 +72,8 @@ unsigned int GP_TextMaxWidth(const GP_TextStyle *style, unsigned int len)
 {
 	unsigned int space_width = SpaceWidth(style);
 	//TODO: is style->font->char_width font character max width?
-	unsigned int char_width  = style->font->char_width;
+	unsigned int char_width  = style->font->char_width *
+	                           (style->pixel_xmul + style->pixel_xspace);
 
 	if (len == 0)
 		return 0;
