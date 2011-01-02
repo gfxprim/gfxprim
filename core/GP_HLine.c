@@ -79,5 +79,5 @@ GP_RetCode GP_THLineXYW(GP_Context *context, int x, int y, unsigned int w,
 	if (w == 0)
 		return GP_ESUCCESS;	/* zero width: do not draw anything */
 
-	return GP_THLineXXY(context, x, y, x + w - 1, pixel);
+	return GP_THLineXXY(context, x, x + w - 1, y, pixel);
 }
