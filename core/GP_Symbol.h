@@ -23,15 +23,39 @@
  *                                                                           *
  *****************************************************************************/
 
-#ifndef GP_CIRCLE_H
-#define GP_CIRCLE_H
+ /*
+  * Draws a symbol into rectangle.
+  */
+
+#ifndef GP_SYMBOL_H
+#define GP_SYMBOL_H
 
 #include "GP_Context.h"
 
-GP_RetCode GP_Circle(GP_Context *context, int xcenter, int ycenter,
-                     unsigned int r, GP_Pixel pixel);
+#include <stdint.h>
 
-GP_RetCode GP_TCircle(GP_Context *context, int xcenter, int ycenter,
-                      unsigned int r, GP_Pixel pixel);
+typedef enum GP_SymbolType {
+	GP_SYM_TRIANGLE_UP,
+	GP_SYM_TRIANGLE_DOWN,
+	GP_SYM_TRIANGLE_LEFT,
+	GP_SYM_TRIANGLE_RIGHT,
+	GP_SYM_MAX,
+} GP_SymbolType;
 
-#endif /* GP_CIRCLE_H */
+GP_RetCode GP_Symbol(GP_Context *context, GP_SymbolType sym,
+                     int x, int y, int w, int h,
+                     GP_Pixel pixel);
+
+GP_RetCode GP_TSymbol(GP_Context *context, GP_SymbolType sym,
+                      int x, int y, int w, int h,
+                      GP_Pixel pixel);
+
+GP_RetCode GP_FillSymbol(GP_Context *context, GP_SymbolType sym,
+                         int x, int y, int w, int h,
+                         GP_Pixel pixel);
+
+GP_RetCode GP_TFillSymbol(GP_Context *context, GP_SymbolType sym,
+                          int x, int y, int w, int h,
+                          GP_Pixel pixel);
+
+#endif /* GP_SYMBOL_H */

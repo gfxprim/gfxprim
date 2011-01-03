@@ -59,6 +59,7 @@
 #include "GP_FillCircle.h"
 #include "GP_Ellipse.h"
 #include "GP_FillEllipse.h"
+#include "GP_Symbol.h"
 
 /* fonts */
 #include "GP_Font.h"

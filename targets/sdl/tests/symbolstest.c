@@ -42,8 +42,9 @@ SDL_UserEvent timer_event;
 /* Globally used colors. */
 GP_Pixel white, black;
 
-/* Holding flag (pauses drawing). */
 static int pause_flag = 0;
+
+static int fill_flag = 0;
 
 Uint32 timer_callback(__attribute__((unused)) Uint32 interval,
 			__attribute__((unused)) void *param)
@@ -53,95 +54,27 @@ Uint32 timer_callback(__attribute__((unused)) Uint32 interval,
 	return 60;
 }
 
-/* Shape to draw */
-#define SHAPE_FIRST	1
-#define SHAPE_CIRCLE	1
-#define SHAPE_ELLIPSE	2
-#define SHAPE_TRIANGLE	3
-#define SHAPE_RECTANGLE	4
-#define SHAPE_LAST	4
-static int shape = SHAPE_FIRST;
-
-/* Draw outlines? */
-static int outline_flag = 0;
-
-/* Draw filled shapes? */
-static int fill_flag = 1;
-
-/* Do a clipping test? */
-static int cliptest_flag = 0;
-
 void random_point(SDL_Surface *surf, int *x, int *y)
 {
-	if (cliptest_flag) {
-		*x = random() % (3*surf->w) - surf->w;
-		*y = random() % (3*surf->h) - surf->h;
-	} else {
-		*x = random() % surf->w;
-		*y = random() % surf->h;
-	}
+	*x = random() % surf->w;
+	*y = random() % surf->h;
 }
 
-void draw_random_circle(GP_Pixel pixel)
+void draw_random_symbol(GP_Pixel pixel)
 {
-	int x, y;
+	int x, y, w, h;
 	random_point(display, &x, &y);
-	int r = random() % 50;
 
-	if (fill_flag) {
-		GP_FillCircle(&context, x, y, r, pixel);
-	}
+	//TODO: so far symbols work only for even w and h
+	w = 2 * (random() % 10) + 2;
+	h = 2 * (random() % 10) + 2;
 
-	if (outline_flag) {
-		GP_Circle(&context, x, y, r, white);
-	}
-}
-
-void draw_random_ellipse(GP_Pixel pixel)
-{
-	int x, y;
-	random_point(display, &x, &y);
-	int rx = random() % 50;
-	int ry = random() % 50;
-
-	if (fill_flag) {
-		GP_FillEllipse(&context, x, y, rx, ry, pixel);
-	}
-
-	if (outline_flag) {
-		GP_Ellipse(&context, x, y, rx, ry, white);
-	}
-}
-
-void draw_random_triangle(GP_Pixel pixel)
-{
-	int x0, y0, x1, y1, x2, y2;
-	random_point(display, &x0, &y0);
-	random_point(display, &x1, &y1);
-	random_point(display, &x2, &y2);
-
-	if (fill_flag) {
-		GP_FillTriangle(&context, x0, y0, x1, y1, x2, y2, pixel);
-	}
-
-	if (outline_flag) {
-		GP_Triangle(&context, x0, y0, x1, y1, x2, y2, white);
-	}
-}
-
-void draw_random_rectangle(GP_Pixel pixel)
-{
-	int x0, y0, x1, y1;
-	random_point(display, &x0, &y0);
-	random_point(display, &x1, &y1);
-
-	if (fill_flag) {
-		GP_FillRect(&context, x0, y0, x1, y1, pixel);
-	}
-
-	if (outline_flag) {
-		GP_Rect(&context, x0, y0, x1, y1, white);
-	}
+	if (fill_flag)
+		GP_FillSymbol(&context, random() % GP_SYM_MAX, x, y, w, h,
+		              pixel);
+	else
+		GP_Symbol(&context, random() % GP_SYM_MAX, x, y, w, h,
+		          pixel);
 }
 
 void clear_screen(void)
@@ -166,23 +99,7 @@ void redraw_screen(void)
 	GP_Pixel pixel;
 	GP_ColorToPixel(&context, color, &pixel);
 
-	switch (shape) {
-	case SHAPE_CIRCLE:
-		draw_random_circle(pixel);
-		break;
-	
-	case SHAPE_ELLIPSE:
-		draw_random_ellipse(pixel);
-		break;
-	
-	case SHAPE_TRIANGLE:
-		draw_random_triangle(pixel);
-		break;
-	
-	case SHAPE_RECTANGLE:
-		draw_random_rectangle(pixel);
-		break;
-	}
+	draw_random_symbol(pixel);
 
 	SDL_UnlockSurface(display);
 }
@@ -202,38 +119,13 @@ void event_loop(void)
 
 		case SDL_KEYDOWN:
 			switch (event.key.keysym.sym) {
-
 			case SDLK_SPACE:
-				shape++;
-				if (shape > SHAPE_LAST)
-					shape = SHAPE_FIRST;
+				fill_flag = !fill_flag;
 				clear_screen();
-				SDL_Flip(display);
-				pause_flag = 0;
-				break;
-
+			break;
 			case SDLK_p:
 				pause_flag = !pause_flag;
-				break;
-
-			case SDLK_f:
-				fill_flag = !fill_flag;
-				if (!fill_flag && !outline_flag) {
-					outline_flag = 1;
-				}
-				break;
-
-			case SDLK_o:
-				outline_flag = !outline_flag;
-				if (!fill_flag && !outline_flag) {
-					fill_flag = 1;
-				}
-				break;
-
-			case SDLK_c:
-				cliptest_flag = !cliptest_flag;
-				break;
-
+			break;
 			case SDLK_ESCAPE:
 				return;
 
