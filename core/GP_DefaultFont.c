@@ -124,6 +124,10 @@ static uint8_t GP_default_console_font_data[] = {
 };
 
 struct GP_Font GP_default_console_font = {
+	.family = "gfxprim",
+	.name = "console",
+	.author = "gfxprim authors",
+	.license = "GPL2",
 	.charset = GP_CHARSET_7BIT,
 	.data = GP_default_console_font_data,
 	.char_width = 8,
@@ -232,6 +236,10 @@ static uint8_t GP_default_proportional_font_data[] = {
 };
 
 struct GP_Font GP_default_proportional_font = {
+	.family = "gfxprim",
+	.name = "proportional",
+	.author = "gfxprim authors",
+	.license = "GPL2",
 	.charset = GP_CHARSET_7BIT,
 	.data = GP_default_proportional_font_data,
 	.char_width = 8,

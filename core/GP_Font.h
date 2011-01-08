@@ -31,10 +31,30 @@
 /* The smallest charset, covering only the 7-bit ASCII (0x20 .. 0x7f). */
 #define GP_CHARSET_7BIT		1
 
+/* Maximum length of the font name, author, etc. (Note: these values are
+ * used by the on-disc font format.)
+ */
+#define FONT_FAMILY_MAX		63
+#define FONT_NAME_MAX		63
+#define FONT_AUTHOR_MAX		63
+#define FONT_LICENSE_MAX	15
+
 /*
  * Describes a font.
  */
 struct GP_Font {
+
+	/* Name of the font family. */
+	const char family[FONT_NAME_MAX + 1];
+
+	/* Font name. */
+	const char name[FONT_NAME_MAX + 1];
+
+	/* Name of the font author. */
+	const char author[FONT_AUTHOR_MAX + 1];
+
+	/* Font license (default is "GPL2"). */
+	const char license[FONT_LICENSE_MAX + 1];
 
 	/* The charset specifies which characters are defined by the font. */
 	uint8_t charset;
