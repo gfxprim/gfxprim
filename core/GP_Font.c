@@ -23,21 +23,56 @@
  *                                                                           *
  *****************************************************************************/
 
-#ifndef GP_RETCODE_H
-#define GP_RETCODE_H
+#include "GP.h"
 
-typedef enum GP_RetCode {
-	GP_ESUCCESS,
-	GP_EINVAL,
-	GP_ENOIMPL,
-	GP_EUNPRECISE,
-	GP_ENULLPTR,		/* some argument was unexpectedly NULL */
-	GP_EBACKENDLOST,
-	GP_EBADCONTEXT,		/* context contains invalid data */
-	GP_EBADFILE,		/* error while loading file */
-	GP_EMAX,
-} GP_RetCode;
+#include <stdio.h>
 
-const char *GP_RetCodeName(GP_RetCode code);
+GP_RetCode GP_FontSave(const struct GP_Font *font, const char *filename)
+{
+	if (font == NULL || filename == NULL)
+		return GP_ENULLPTR;
 
-#endif /* GP_RETCODE_H */
+	/* calculate the number of characters */
+	unsigned int char_count;
+	switch (font->charset) {
+		case GP_CHARSET_7BIT:
+			char_count = 96;
+			break;
+
+		default:
+			return GP_EINVAL;
+	}
+
+	FILE *f;
+
+	f = fopen(filename, "w");
+	if (f == NULL)
+		return GP_EBADFILE;
+
+	/* font file signature */
+	fputs("# gfxprim font v1\n", f);
+
+	/* font header */
+	fprintf(f, "%s\n", font->family);
+	fprintf(f, "%s\n", font->name);
+	fprintf(f, "%s\n", font->license);
+	fprintf(f, "%d %d %d %d %d\n", font->charset, font->hspace, font->height,
+		font->baseline, font->bytes_per_line);
+
+	/* check if no I/O errors occurred so far */
+	if (ferror(f))
+		goto io_error;
+
+	/* write character data */
+	unsigned int char_data_size = char_count * font->height
+					* font->bytes_per_line;
+	if (fwrite(font->data, char_data_size, 1, f) != 1)
+		goto io_error;
+
+	return GP_ESUCCESS;
+
+io_error:
+	fclose(f);
+	return GP_EBADFILE;
+}
+

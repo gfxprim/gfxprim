@@ -23,21 +23,20 @@
  *                                                                           *
  *****************************************************************************/
 
-#ifndef GP_RETCODE_H
-#define GP_RETCODE_H
+ /* Font saving test. */
 
-typedef enum GP_RetCode {
-	GP_ESUCCESS,
-	GP_EINVAL,
-	GP_ENOIMPL,
-	GP_EUNPRECISE,
-	GP_ENULLPTR,		/* some argument was unexpectedly NULL */
-	GP_EBACKENDLOST,
-	GP_EBADCONTEXT,		/* context contains invalid data */
-	GP_EBADFILE,		/* error while loading file */
-	GP_EMAX,
-} GP_RetCode;
+#include <GP.h>
+#include <stdio.h>
 
-const char *GP_RetCodeName(GP_RetCode code);
+int main(void)
+{
+	GP_RetCode retcode;
+	
+	retcode = GP_FontSave(&GP_default_console_font, "test_font.tmp");
+	if (retcode != GP_ESUCCESS) {
+		fprintf(stderr, "Error trying to save a font: %s\n",
+			GP_RetCodeName(retcode));
+	}
 
-#endif /* GP_RETCODE_H */
+	return 0;
+}

@@ -42,7 +42,7 @@
 /*
  * Describes a font.
  */
-struct GP_Font {
+typedef struct GP_Font {
 
 	/* Name of the font family. */
 	const char family[FONT_NAME_MAX + 1];
@@ -88,10 +88,15 @@ struct GP_Font {
 	 * (typically 1/8 of char_width, rounded upwards).
 	 */
 	uint8_t bytes_per_line;
-};
+} GP_Font;
 
 /* The default font, which is hardcoded and always available. */
 extern struct GP_Font GP_default_console_font;
 extern struct GP_Font GP_default_proportional_font;
+
+#include "GP_RetCode.h"
+
+GP_RetCode GP_FontLoad(GP_Font *font, const char *filename);
+GP_RetCode GP_FontSave(const GP_Font *font, const char *filename);
 
 #endif /* GP_FONT_H */
