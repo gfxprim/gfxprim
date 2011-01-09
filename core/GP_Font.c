@@ -49,8 +49,10 @@ GP_RetCode GP_FontSave(const struct GP_Font *font, const char *filename)
 	if (f == NULL)
 		return GP_EBADFILE;
 
-	/* font file signature */
-	fputs("# gfxprim font v1\n", f);
+	/* font file signature and version */
+	fputs("# gfxprim font\n", f);
+	fprintf(f, "%d.%d\n", GP_FONT_FORMAT_VMAJOR,
+		GP_FONT_FORMAT_VMINOR);
 
 	/* font header */
 	fprintf(f, "%s\n", font->family);
@@ -68,6 +70,9 @@ GP_RetCode GP_FontSave(const struct GP_Font *font, const char *filename)
 					* font->bytes_per_line;
 	if (fwrite(font->data, char_data_size, 1, f) != 1)
 		goto io_error;
+
+	if (fclose(f) != 0)
+		return GP_EBADFILE;
 
 	return GP_ESUCCESS;
 

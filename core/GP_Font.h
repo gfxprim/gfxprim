@@ -34,10 +34,14 @@
 /* Maximum length of the font name, author, etc. (Note: these values are
  * used by the on-disc font format.)
  */
-#define FONT_FAMILY_MAX		63
-#define FONT_NAME_MAX		63
-#define FONT_AUTHOR_MAX		63
-#define FONT_LICENSE_MAX	15
+#define GP_FONT_FAMILY_MAX	63
+#define GP_FONT_NAME_MAX	63
+#define GP_FONT_AUTHOR_MAX	63
+#define GP_FONT_LICENSE_MAX	15
+
+/* The current version of the on-disc font format. */
+#define GP_FONT_FORMAT_VMAJOR	1
+#define GP_FONT_FORMAT_VMINOR	0
 
 /*
  * Describes a font.
@@ -45,16 +49,16 @@
 typedef struct GP_Font {
 
 	/* Name of the font family. */
-	const char family[FONT_NAME_MAX + 1];
+	const char family[GP_FONT_NAME_MAX + 1];
 
 	/* Font name. */
-	const char name[FONT_NAME_MAX + 1];
+	const char name[GP_FONT_NAME_MAX + 1];
 
 	/* Name of the font author. */
-	const char author[FONT_AUTHOR_MAX + 1];
+	const char author[GP_FONT_AUTHOR_MAX + 1];
 
 	/* Font license (default is "GPL2"). */
-	const char license[FONT_LICENSE_MAX + 1];
+	const char license[GP_FONT_LICENSE_MAX + 1];
 
 	/* The charset specifies which characters are defined by the font. */
 	uint8_t charset;
