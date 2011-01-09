@@ -66,8 +66,8 @@ GP_RetCode GP_FontSave(const struct GP_Font *font, const char *filename)
 		goto io_error;
 
 	/* write character data */
-	unsigned int char_data_size = char_count * font->height
-					* font->bytes_per_line;
+	unsigned int char_data_size = char_count * (4 + font->height
+					* font->bytes_per_line);
 	if (fwrite(font->data, char_data_size, 1, f) != 1)
 		goto io_error;
 

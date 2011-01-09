@@ -31,7 +31,7 @@
 void FN_NAME(CONTEXT_T context, const GP_TextStyle *style, int x, int y, \
 	const char *str, PIXVAL_T pixval) \
 { \
-	int bytes_per_char = 2 + style->font->bytes_per_line * style->font->height; \
+	int bytes_per_char = 4 + style->font->bytes_per_line * style->font->height; \
 \
 	/* Remember the original starting height. */ \
 	int y0 = y; \
@@ -47,13 +47,13 @@ void FN_NAME(CONTEXT_T context, const GP_TextStyle *style, int x, int y, \
 		/* Character metadata: first byte is the width in pixels, \
 		 * second is the left margin. \
 		 */ \
-		const uint8_t char_width = *src; \
-		src++; \
-		const uint8_t lmargin = *src; \
-		src++; \
+		const uint8_t char_width = *src; src++; \
+		const uint8_t lmargin = *src; src++; \
+		const int8_t pre_offset = *src; src++; \
+		const int8_t post_offset = *src; src++; \
 \
 		/* Starting and final X for each character line. */ \
-		int x0 = x; \
+		int x0 = x + pre_offset * (style->pixel_xmul + style->pixel_xspace); \
 		int x1 = x0 + char_width * (style->pixel_xmul + style->pixel_xspace); \
 \
 		/* Draw the character line by line. */ \
@@ -91,7 +91,7 @@ void FN_NAME(CONTEXT_T context, const GP_TextStyle *style, int x, int y, \
 		} \
 \
 		/* Update the X position. */ \
-		x = x1; \
+		x = x0 + post_offset * (style->pixel_xmul + style->pixel_xspace);  \
 		x += style->font->hspace * style->pixel_xmul;	/* optional extra spacing */ \
 	} \
 }
