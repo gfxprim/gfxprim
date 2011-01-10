@@ -29,7 +29,7 @@ const uint8_t *GP_GetCharData(const GP_TextStyle *style, char c)
 {
 	GP_CHECK(style != NULL && style->font != NULL);
 
-	int bytes_per_char = 2 + style->font->bytes_per_line * style->font->height;
+	int bytes_per_char = 4 + style->font->bytes_per_line * style->font->height;
 
 	const uint8_t *char_data = style->font->data + ((int) c - 0x20) * bytes_per_char;
 
@@ -59,6 +59,8 @@ unsigned int GP_TextWidth(const GP_TextStyle *style, const char *str)
 	unsigned int width = 0;
 	unsigned int space = SpaceWidth(style);
 
+	// FIXME: This does not take into account pre_offset and post_offset;
+	// in fact, the width is not relevant if offsets are in use.
 	for (; *str; str++)
 		width += CharWidth(style, *str) + space; 
 

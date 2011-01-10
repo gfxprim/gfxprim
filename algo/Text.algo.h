@@ -31,7 +31,7 @@
 void FN_NAME(CONTEXT_T context, const GP_TextStyle *style, int x, int y, \
 	const char *str, PIXVAL_T pixval) \
 { \
-	int bytes_per_char = 4 + style->font->bytes_per_line * style->font->height; \
+	int bytes_per_char = GP_GetCharByteSize(style->font); \
 \
 	/* Remember the original starting height. */ \
 	int y0 = y; \

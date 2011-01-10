@@ -60,6 +60,11 @@ typedef struct GP_Font {
 	/* Font license (default is "GPL2"). */
 	const char license[GP_FONT_LICENSE_MAX + 1];
 
+	/* Font version (incremented by font author when modifying the font data,
+	 * do not confuse with format version).
+	 */
+	unsigned int version;
+
 	/* The charset specifies which characters are defined by the font. */
 	uint8_t charset;
 
@@ -69,6 +74,22 @@ typedef struct GP_Font {
 	 * Characters are stored sequentially. The first encoded character
 	 * is 0x20 (space). A font must, at a minimum, encode all characters
 	 * of the 7-bit ASCII set (0x20 .. 0x7F, inclusive).
+	 *
+	 * Each character has a 4-byte preamble:
+	 *
+	 *     uint8_t char_width
+	 *         width of the character in pixels
+	 *     uint8_t lmargin
+	 *         number of bits to skip at the start of every line
+	 *         of the character bitmap
+	 *     int8_t pre_offset
+	 *         X offset to be applied to the starting position
+	 *         before drawing the character
+	 *     int8_t post_offset
+	 *         X offset to be applied to the position of the next character
+	 *
+	 * After this, the character shape data immediately follow,
+	 * as a line-oriented, top-down bitmap (one bit is one pixel).
 	 */
 	uint8_t *data;
 
@@ -97,6 +118,12 @@ typedef struct GP_Font {
 /* The default font, which is hardcoded and always available. */
 extern struct GP_Font GP_default_console_font;
 extern struct GP_Font GP_default_proportional_font;
+
+/* Returns the number of bytes occupied by each character in the data area
+ * of the specified font. (Currently, all characters occupy the same space
+ * regardless of proportionality.)
+ */
+unsigned int GP_GetCharByteSize(const GP_Font *font);
 
 #include "GP_RetCode.h"
 

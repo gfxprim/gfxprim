@@ -27,6 +27,13 @@
 
 #include <stdio.h>
 
+unsigned int GP_GetCharByteSize(const GP_Font *font)
+{
+	GP_CHECK(font != NULL);
+
+	return 4 + font->bytes_per_line * font->height;
+}
+
 GP_RetCode GP_FontSave(const struct GP_Font *font, const char *filename)
 {
 	if (font == NULL || filename == NULL)
@@ -58,6 +65,7 @@ GP_RetCode GP_FontSave(const struct GP_Font *font, const char *filename)
 	fprintf(f, "%s\n", font->family);
 	fprintf(f, "%s\n", font->name);
 	fprintf(f, "%s\n", font->license);
+	fprintf(f, "%d\n", font->version);
 	fprintf(f, "%d %d %d %d %d\n", font->charset, font->hspace, font->height,
 		font->baseline, font->bytes_per_line);
 
@@ -66,8 +74,7 @@ GP_RetCode GP_FontSave(const struct GP_Font *font, const char *filename)
 		goto io_error;
 
 	/* write character data */
-	unsigned int char_data_size = char_count * (4 + font->height
-					* font->bytes_per_line);
+	unsigned int char_data_size = char_count * GP_GetCharByteSize(font);
 	if (fwrite(font->data, char_data_size, 1, f) != 1)
 		goto io_error;
 
