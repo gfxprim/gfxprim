@@ -69,27 +69,12 @@ typedef struct GP_Font {
 	uint8_t charset;
 
 	/*
-	 * Array of character bitmaps.
+	 * Array of GP_CharData structures, packed together sequentially
+	 * without padding.
 	 *
-	 * Characters are stored sequentially. The first encoded character
+	 * Characters are stored in encoding order. The first encoded character
 	 * is 0x20 (space). A font must, at a minimum, encode all characters
 	 * of the 7-bit ASCII set (0x20 .. 0x7F, inclusive).
-	 *
-	 * Each character has a 4-byte preamble:
-	 *
-	 *     uint8_t char_width
-	 *         width of the character in pixels
-	 *     uint8_t lmargin
-	 *         number of bits to skip at the start of every line
-	 *         of the character bitmap
-	 *     int8_t pre_offset
-	 *         X offset to be applied to the starting position
-	 *         before drawing the character
-	 *     int8_t post_offset
-	 *         X offset to be applied to the position of the next character
-	 *
-	 * After this, the character shape data immediately follow,
-	 * as a line-oriented, top-down bitmap (one bit is one pixel).
 	 */
 	uint8_t *data;
 
@@ -115,15 +100,46 @@ typedef struct GP_Font {
 	uint8_t bytes_per_line;
 } GP_Font;
 
+/* Data describing a single character. */
+typedef struct GP_CharData {
+
+	 /* Width of the character in pixels. */
+	uint8_t char_width;
+
+	/* Number of bits to skip at the start of every line
+	 * of the character bitmap.
+	 */
+	uint8_t lmargin;
+
+	/* X offset to be applied to the current position *before*
+	 * drawing the character.
+	 */
+	int8_t pre_offset;
+
+	/* X offset to be applied to the current position *after*
+	 * the character is drawn.
+	 */
+	int8_t post_offset;
+
+	/* Character bitmap (size depends on width and height). */
+	uint8_t bitmap[];
+
+} GP_CharData;
+
 /* The default font, which is hardcoded and always available. */
 extern struct GP_Font GP_default_console_font;
 extern struct GP_Font GP_default_proportional_font;
 
-/* Returns the number of bytes occupied by each character in the data area
- * of the specified font. (Currently, all characters occupy the same space
+/* Returns the number of bytes occupied by the GP_CharData structure
+ * for this font. (Currently, all characters occupy the same space
  * regardless of proportionality.)
  */
-unsigned int GP_GetCharByteSize(const GP_Font *font);
+unsigned int GP_GetCharDataSize(const GP_Font *font);
+
+/* Returns a pointer to the character data (which start by the header)
+ * of the specified character in the font data area.
+ */
+const GP_CharData *GP_GetCharData(const GP_Font *font, int c);
 
 #include "GP_RetCode.h"
 

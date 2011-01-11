@@ -35,7 +35,7 @@
 
 #define GP_CHECK(cond) do { \
 		if (!(cond)) { \
-			fprintf(stderr, "GP: check failed in %s: %s\n", \
+			fprintf(stderr, "*** gfxprim: runtime check failed: %s: %s\n", \
 				__FUNCTION__, #cond); \
 			abort(); \
 		} \

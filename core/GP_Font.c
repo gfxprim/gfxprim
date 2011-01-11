@@ -27,11 +27,26 @@
 
 #include <stdio.h>
 
-unsigned int GP_GetCharByteSize(const GP_Font *font)
+unsigned int GP_GetCharDataSize(const GP_Font *font)
 {
 	GP_CHECK(font != NULL);
 
 	return 4 + font->bytes_per_line * font->height;
+}
+
+const GP_CharData *GP_GetCharData(const GP_Font *font, int c)
+{
+	GP_CHECK(font != NULL && c >= ' ');
+
+	/* Characters before space are not encoded. */
+	int encoded_character = c - ' ';
+
+	/* NOTE: The character header is placed directly in the byte stream
+	 * of character data without any alignment. If this makes problems
+	 * on any machine, we will have to introduce appropriate padding.
+	 */
+	return (GP_CharData *)(font->data +
+		GP_GetCharDataSize(font) * encoded_character);
 }
 
 GP_RetCode GP_FontSave(const struct GP_Font *font, const char *filename)
@@ -74,7 +89,7 @@ GP_RetCode GP_FontSave(const struct GP_Font *font, const char *filename)
 		goto io_error;
 
 	/* write character data */
-	unsigned int char_data_size = char_count * GP_GetCharByteSize(font);
+	unsigned int char_data_size = char_count * GP_GetCharDataSize(font);
 	if (fwrite(font->data, char_data_size, 1, f) != 1)
 		goto io_error;
 

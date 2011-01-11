@@ -31,30 +31,19 @@
 void FN_NAME(CONTEXT_T context, const GP_TextStyle *style, int x, int y, \
 	const char *str, PIXVAL_T pixval) \
 { \
-	int bytes_per_char = GP_GetCharByteSize(style->font); \
-\
 	/* Remember the original starting height. */ \
 	int y0 = y; \
 \
 	const char *p; \
 	for (p = str; *p != '\0'; p++) { \
-		int char_index = ((int) *p) - 0x20; \
 \
 		/* Calculate the address of the character data. */ \
-		const uint8_t *src = style->font->data \
-				+ char_index * bytes_per_char; \
-\
-		/* Character metadata: first byte is the width in pixels, \
-		 * second is the left margin. \
-		 */ \
-		const uint8_t char_width = *src; src++; \
-		const uint8_t lmargin = *src; src++; \
-		const int8_t pre_offset = *src; src++; \
-		const int8_t post_offset = *src; src++; \
+		const GP_CharData *data = GP_GetCharData(style->font, (int) *p); \
+		const uint8_t *src = data->bitmap; \
 \
 		/* Starting and final X for each character line. */ \
-		int x0 = x + pre_offset * (style->pixel_xmul + style->pixel_xspace); \
-		int x1 = x0 + char_width * (style->pixel_xmul + style->pixel_xspace); \
+		int x0 = x + data->pre_offset * (style->pixel_xmul + style->pixel_xspace); \
+		int x1 = x0 + data->char_width * (style->pixel_xmul + style->pixel_xspace); \
 \
 		/* Draw the character line by line. */ \
 		int line, linerep, i; \
@@ -66,7 +55,7 @@ void FN_NAME(CONTEXT_T context, const GP_TextStyle *style, int x, int y, \
 				uint8_t mask = 0x80; \
 \
 				/* skip left margin */ \
-				for (i = 0; i < lmargin; i++) { \
+				for (i = 0; i < data->lmargin; i++) { \
 					mask >>= 1; \
 					if (mask == 0) { \
 						linesrc++; \
@@ -91,7 +80,7 @@ void FN_NAME(CONTEXT_T context, const GP_TextStyle *style, int x, int y, \
 		} \
 \
 		/* Update the X position. */ \
-		x = x0 + post_offset * (style->pixel_xmul + style->pixel_xspace);  \
+		x = x0 + data->post_offset * (style->pixel_xmul + style->pixel_xspace);  \
 		x += style->font->hspace * style->pixel_xmul;	/* optional extra spacing */ \
 	} \
 }

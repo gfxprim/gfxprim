@@ -31,7 +31,7 @@
 #include <stdlib.h>
 
 #define GP_ABORT(msg) do { \
-		fprintf(stderr, "%s: %s\n", __FUNCTION__, #msg); \
+		fprintf(stderr, "*** gfxprim: assertion failed: %s: %s\n", __FUNCTION__, #msg); \
 		abort(); \
 	} while(0);
 

@@ -25,27 +25,6 @@
 
 #include "GP.h"
 
-const uint8_t *GP_GetCharData(const GP_TextStyle *style, char c)
-{
-	GP_CHECK(style != NULL && style->font != NULL);
-
-	int bytes_per_char = 4 + style->font->bytes_per_line * style->font->height;
-
-	const uint8_t *char_data = style->font->data + ((int) c - 0x20) * bytes_per_char;
-
-	return char_data;
-}
-
-static unsigned int CharWidth(const GP_TextStyle *style, char c)
-{
-	const uint8_t *char_data = GP_GetCharData(style, c);
-
-	/* The first byte of the font data is width in pixels. */
-	const uint8_t char_width = *char_data;
-
-	return char_width * (style->pixel_xmul + style->pixel_xspace);
-}
-
 static unsigned int SpaceWidth(const GP_TextStyle *style)
 {
 	//TODO: Does space change with pixel_yspace?
@@ -56,18 +35,22 @@ unsigned int GP_TextWidth(const GP_TextStyle *style, const char *str)
 {
 	GP_CHECK(style != NULL && style->font != NULL && str != NULL);
 	
-	unsigned int width = 0;
+	unsigned int x = 0;
 	unsigned int space = SpaceWidth(style);
+	unsigned int pixel_multiplier = style->pixel_xmul + style->pixel_xspace;
 
-	// FIXME: This does not take into account pre_offset and post_offset;
-	// in fact, the width is not relevant if offsets are in use.
-	for (; *str; str++)
-		width += CharWidth(style, *str) + space; 
+	// FIXME: This is not quite right - due to offsets, characters
+	// can exceed their bounding box and then the reported width will be
+	// shorter than expected.
+	const char *p;
+	for (p = str; *p; p++) {
+		const GP_CharData *data = GP_GetCharData(style->font, *p);
+		x += data->pre_offset * pixel_multiplier
+			+ data->post_offset * pixel_multiplier
+			+ space;
+	}
 
-	if (width == 0)
-		return 0;
-
-	return width - space;
+	return x - space;
 }
 
 unsigned int GP_TextMaxWidth(const GP_TextStyle *style, unsigned int len)
