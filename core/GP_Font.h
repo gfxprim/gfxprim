@@ -81,12 +81,6 @@ typedef struct GP_Font {
 	/* Maximum width of a character, in pixels. */
 	uint8_t char_width;
 
-	/*
-	 * Additional horizontal space drawn between characters
-	 * (in pixels, can be 0).
-	 */
-	uint8_t hspace;
-
 	/* Height of every character in pixels. */
 	uint8_t height;
 

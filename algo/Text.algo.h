@@ -81,7 +81,7 @@ void FN_NAME(CONTEXT_T context, const GP_TextStyle *style, int x, int y, \
 \
 		/* Update the X position. */ \
 		x = x0 + data->post_offset * (style->pixel_xmul + style->pixel_xspace);  \
-		x += style->font->hspace * style->pixel_xmul;	/* optional extra spacing */ \
+		x += style->char_xspace * style->pixel_xmul;	/* optional extra spacing */ \
 	} \
 }
 

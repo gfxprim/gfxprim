@@ -35,5 +35,6 @@ GP_RetCode GP_DefaultTextStyle(GP_TextStyle *style)
 	style->pixel_yspace = 0;
 	style->pixel_xmul = 1;
 	style->pixel_ymul = 1;
+	style->char_xspace = 0;
 	return GP_ESUCCESS;
 }

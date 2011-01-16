@@ -44,6 +44,9 @@ typedef struct {
 	/* Multiplier of pixel width/height (1 is default). */
 	int pixel_xmul, pixel_ymul;
 
+	/* Extra spacing (in pixels) between characters. */
+	int char_xspace;
+
 } GP_TextStyle;
 
 /*
@@ -52,7 +55,7 @@ typedef struct {
  * Note that at least the colors should always be changed afterwards,
  * as there is no sensible default (they are initialized to 0).
  */
-#define GP_DEFAULT_TEXT_STYLE { &GP_default_console_font, 0, 0, 1, 1 }
+#define GP_DEFAULT_TEXT_STYLE { &GP_default_console_font, 0, 0, 1, 1, 0 }
 
 /*
  * Initalize text style to the default values.

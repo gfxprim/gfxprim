@@ -28,7 +28,7 @@
 static unsigned int SpaceWidth(const GP_TextStyle *style)
 {
 	//TODO: Does space change with pixel_yspace?
-	return style->font->hspace * style->pixel_xmul;
+	return style->char_xspace * style->pixel_xmul;
 }
 
 unsigned int GP_TextWidth(const GP_TextStyle *style, const char *str)

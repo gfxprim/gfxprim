@@ -31,7 +31,7 @@ unsigned int GP_GetCharDataSize(const GP_Font *font)
 {
 	GP_CHECK(font != NULL);
 
-	return 4 + font->bytes_per_line * font->height;
+	return sizeof(GP_CharData) + font->bytes_per_line * font->height;
 }
 
 const GP_CharData *GP_GetCharData(const GP_Font *font, int c)
@@ -81,7 +81,7 @@ GP_RetCode GP_FontSave(const struct GP_Font *font, const char *filename)
 	fprintf(f, "%s\n", font->name);
 	fprintf(f, "%s\n", font->license);
 	fprintf(f, "%d\n", font->version);
-	fprintf(f, "%d %d %d %d %d\n", font->charset, font->hspace, font->height,
+	fprintf(f, "%d %d %d %d\n", font->charset, font->height,
 		font->baseline, font->bytes_per_line);
 
 	/* check if no I/O errors occurred so far */
