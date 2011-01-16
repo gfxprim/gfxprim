@@ -47,6 +47,17 @@
 	GP_TRANSFORM_Y(context, y);            \
 } while (0)
 
+#define GP_TRANSFORM_RECT(context, x, y, rw, rh) do { \
+	GP_TRANSFORM_SWAP(context, x, y);             \
+	GP_TRANSFORM_SWAP(context, w, h);             \
+	if ((context)->x_swap) {                      \
+		x = (context)->w - x - rw;            \
+	}                                             \
+	if ((context)->y_swap) {                      \
+		y = (context)->h - y - rh;            \
+	}                                             \
+} while (0)
+
 /*
  * Inverse transformation. Use for translating mouse pointer coordinates to
  * coordinates on context.
