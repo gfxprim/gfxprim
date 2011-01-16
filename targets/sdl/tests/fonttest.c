@@ -47,7 +47,7 @@ static const char *test_strings[] = {
 
 /* draw using proportional font? */
 static int flag_proportional = 0;
-static int kerning = 0;
+static int tracking = 0;
 
 void redraw_screen(void)
 {
@@ -76,7 +76,7 @@ void redraw_screen(void)
 		style.pixel_ymul = 1;
 		style.pixel_xspace = 0;
 		style.pixel_yspace = 0;
-		style.char_xspace = kerning;
+		style.char_xspace = tracking;
 
 		GP_FillRectXYWH(&context,
 			16, 100*i + 16,
@@ -129,12 +129,12 @@ void event_loop(void)
 				SDL_Flip(display);
 			break;
 			case SDLK_UP:
-				kerning++;
+				tracking++;
 				redraw_screen();
 				SDL_Flip(display);
 			break;
 			case SDLK_DOWN:
-				kerning--;
+				tracking--;
 				redraw_screen();
 				SDL_Flip(display);
 			break;
@@ -156,7 +156,7 @@ void print_instructions(void)
 	printf("Use the following keys to control the test:\n");
 	printf("    Esc ................. exit\n");
 	printf("    Space ............... change font\n");
-	printf("    up/down ............. increase/decrease kerning\n");
+	printf("    up/down ............. increase/decrease tracking\n");
 }
 
 int main(void)
