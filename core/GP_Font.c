@@ -82,7 +82,7 @@ GP_RetCode GP_FontSave(const struct GP_Font *font, const char *filename)
 	fprintf(f, "%s\n", font->license);
 	fprintf(f, "%d\n", font->version);
 	fprintf(f, "%d %d %d %d\n", font->charset, font->height,
-		font->baseline, font->bytes_per_line);
+		font->baseline, font->bytes_per_line, font->max_bounding_width);
 
 	/* check if no I/O errors occurred so far */
 	if (ferror(f))

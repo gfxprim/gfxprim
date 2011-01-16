@@ -78,9 +78,6 @@ typedef struct GP_Font {
 	 */
 	uint8_t *data;
 
-	/* Maximum width of a character, in pixels. */
-	uint8_t char_width;
-
 	/* Height of every character in pixels. */
 	uint8_t height;
 
@@ -92,16 +89,24 @@ typedef struct GP_Font {
 	 * (typically 1/8 of char_width, rounded upwards).
 	 */
 	uint8_t bytes_per_line;
+
+	/* Maximum width of the character bounding box (including empty areas
+	 * that are not drawn but cause other characters to shift).
+	 */
+	uint8_t max_bounding_width;
 } GP_Font;
 
 /* Data describing a single character. */
 typedef struct GP_CharData {
 
-	 /* Width of the character in pixels. */
+	/* Width of the character in pixels. This is the area that is drawn
+	 * onto, but the real area occupied by the character can be different
+	 * and is defined by pre_offset and post_offset.
+	 */
 	uint8_t char_width;
 
 	/* Number of bits to skip at the start of every line
-	 * of the character bitmap.
+	 * of the character bitmap. (This value is included in char_width.)
 	 */
 	uint8_t lmargin;
 

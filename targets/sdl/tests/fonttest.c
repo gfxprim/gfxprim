@@ -36,7 +36,7 @@ GP_Context context;
 
 /* precomputed color pixels in display format */
 static GP_Pixel white_pixel, gray_pixel, dark_gray_pixel, black_pixel,
-		red_pixel;
+		red_pixel, blue_pixel;
 
 static const char *test_strings[] = {
 	" !\"#$%&\047()*+,-./0123456789:;<=>?@",
@@ -81,6 +81,12 @@ void redraw_screen(void)
 			GP_TextWidth(&style, test_string),
 			style.font->height,
 			red_pixel);
+
+		GP_RectXYWH(&context,
+			16, 100*i + 16,
+			GP_TextMaxWidth(&style, strlen(test_string)),
+			style.font->height,
+			blue_pixel);
 
 		GP_Text(&context, &style, 16, 100*i + 16, align, test_string, white_pixel);
 
@@ -158,6 +164,7 @@ int main(void)
 	GP_ColorNameToPixel(&context, GP_COL_GRAY_DARK, &dark_gray_pixel);
 	GP_ColorNameToPixel(&context, GP_COL_BLACK, &black_pixel);
 	GP_ColorNameToPixel(&context, GP_COL_RED, &red_pixel);
+	GP_ColorNameToPixel(&context, GP_COL_BLUE, &blue_pixel);
 
 	redraw_screen();
 	SDL_Flip(display);
