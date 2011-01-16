@@ -47,6 +47,7 @@ static const char *test_strings[] = {
 
 /* draw using proportional font? */
 static int flag_proportional = 0;
+static int kerning = 0;
 
 void redraw_screen(void)
 {
@@ -75,6 +76,7 @@ void redraw_screen(void)
 		style.pixel_ymul = 1;
 		style.pixel_xspace = 0;
 		style.pixel_yspace = 0;
+		style.char_xspace = kerning;
 
 		GP_FillRectXYWH(&context,
 			16, 100*i + 16,
@@ -117,18 +119,31 @@ void event_loop(void)
 		case SDL_VIDEOEXPOSE:
 			redraw_screen();
 			SDL_Flip(display);
-			break;
+		break;
 
 		case SDL_KEYDOWN:
-			if (event.key.keysym.sym == SDLK_SPACE) {
+			switch (event.key.keysym.sym) {
+			case SDLK_SPACE:
 				flag_proportional = !flag_proportional;
 				redraw_screen();
 				SDL_Flip(display);
-			}
-			else if (event.key.keysym.sym == SDLK_ESCAPE) {
-				return;
-			}
 			break;
+			case SDLK_UP:
+				kerning++;
+				redraw_screen();
+				SDL_Flip(display);
+			break;
+			case SDLK_DOWN:
+				kerning--;
+				redraw_screen();
+				SDL_Flip(display);
+			break;
+			case SDLK_ESCAPE:
+				return;
+			default:
+			break;
+			}
+		break;
 
 		case SDL_QUIT:
 			return;
@@ -136,8 +151,18 @@ void event_loop(void)
 	}
 }
 
+void print_instructions(void)
+{
+	printf("Use the following keys to control the test:\n");
+	printf("    Esc ................. exit\n");
+	printf("    Space ............... change font\n");
+	printf("    up/down ............. increase/decrease kerning\n");
+}
+
 int main(void)
 {
+	print_instructions();
+
 	/* Initialize SDL */
 	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) != 0) {
 		fprintf(stderr, "Could not initialize SDL: %s\n", SDL_GetError());
