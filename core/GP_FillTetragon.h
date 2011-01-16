@@ -23,50 +23,16 @@
  *                                                                           *
  *****************************************************************************/
 
-#ifndef GP_H
-#define GP_H
+#ifndef GP_FILLTETRAGON_H
+#define GP_FILLTETRAGON_H
 
-#include <stdint.h>
-
-/* basic definitions and structures */
-#include "GP_Abort.h"
-#include "GP_Check.h"
-#include "GP_MinMax.h"
-#include "GP_Swap.h"
-#include "GP_Transform.h"
 #include "GP_Context.h"
 
-/* semi-public, low-level drawing API */
-#include "GP_ReadPixel.h"
-#include "GP_WritePixel.h"
+GP_RetCode GP_FillTetragon(GP_Context *context, int x0, int y0, int x1, int y1,
+                           int x2, int y2, int x3, int y3, GP_Pixel pixel);
 
-/* colors */
-#include "GP_Color.h"
-#include "GP_Palette.h"
+GP_RetCode GP_TFillTetragon(GP_Context *context, int x0, int y0,
+                            int x1, int y1, int x2, int y2, int x3, int y3,
+			    GP_Pixel pixel);
 
-/* public drawing API */
-#include "GP_Fill.h"
-#include "GP_GetPixel.h"
-#include "GP_PutPixel.h"
-#include "GP_HLine.h"
-#include "GP_VLine.h"
-#include "GP_Line.h"
-#include "GP_Rect.h"
-#include "GP_FillRect.h"
-#include "GP_Triangle.h"
-#include "GP_FillTriangle.h"
-#include "GP_Tetragon.h"
-#include "GP_FillTetragon.h"
-#include "GP_Circle.h"
-#include "GP_FillCircle.h"
-#include "GP_Ellipse.h"
-#include "GP_FillEllipse.h"
-#include "GP_Symbol.h"
-
-/* fonts */
-#include "GP_Font.h"
-#include "GP_TextStyle.h"
-#include "GP_TextMetric.h"
-#include "GP_Text.h"
-
-#endif /* GP_H */
+#endif /* GP_FILLTETRAGON_H */

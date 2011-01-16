@@ -65,9 +65,8 @@ void draw_random_symbol(GP_Pixel pixel)
 	int x, y, w, h;
 	random_point(display, &x, &y);
 
-	//TODO: so far symbols work only for even w and h
-	w = 2 * (random() % 10) + 2;
-	h = 2 * (random() % 10) + 2;
+	w = (random() % 10) + 5;
+	h = (random() % 10) + 5;
 
 	if (fill_flag)
 		GP_FillSymbol(&context, random() % GP_SYM_MAX, x, y, w, h,

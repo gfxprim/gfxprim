@@ -23,50 +23,36 @@
  *                                                                           *
  *****************************************************************************/
 
-#ifndef GP_H
-#define GP_H
+#include "GP.h"
 
-#include <stdint.h>
+GP_RetCode GP_Tetragon(GP_Context *context, int x0, int y0, int x1, int y1,
+                       int x2, int y2, int x3, int y3, GP_Pixel pixel)
+{
+	if (!context)
+		return GP_ENULLPTR;
+	if (!GP_IS_CONTEXT_VALID(context))
+		return GP_EBADCONTEXT;
 
-/* basic definitions and structures */
-#include "GP_Abort.h"
-#include "GP_Check.h"
-#include "GP_MinMax.h"
-#include "GP_Swap.h"
-#include "GP_Transform.h"
-#include "GP_Context.h"
+	GP_Line(context, x0, y0, x1, y1, pixel);
+	GP_Line(context, x1, y1, x2, y2, pixel);
+	GP_Line(context, x2, y2, x3, y3, pixel);
+	GP_Line(context, x3, y3, x0, y0, pixel);
 
-/* semi-public, low-level drawing API */
-#include "GP_ReadPixel.h"
-#include "GP_WritePixel.h"
+	return GP_ESUCCESS;
+}
 
-/* colors */
-#include "GP_Color.h"
-#include "GP_Palette.h"
+GP_RetCode GP_TTetragon(GP_Context *context, int x0, int y0, int x1, int y1,
+                        int x2, int y2, int x3, int y3, GP_Pixel pixel)
+{
+	if (!context)
+		return GP_ENULLPTR;
+	if (!GP_IS_CONTEXT_VALID(context))
+		return GP_EBADCONTEXT;
 
-/* public drawing API */
-#include "GP_Fill.h"
-#include "GP_GetPixel.h"
-#include "GP_PutPixel.h"
-#include "GP_HLine.h"
-#include "GP_VLine.h"
-#include "GP_Line.h"
-#include "GP_Rect.h"
-#include "GP_FillRect.h"
-#include "GP_Triangle.h"
-#include "GP_FillTriangle.h"
-#include "GP_Tetragon.h"
-#include "GP_FillTetragon.h"
-#include "GP_Circle.h"
-#include "GP_FillCircle.h"
-#include "GP_Ellipse.h"
-#include "GP_FillEllipse.h"
-#include "GP_Symbol.h"
+	GP_TRANSFORM_POINT(context, x0, y0);
+	GP_TRANSFORM_POINT(context, x1, y1);
+	GP_TRANSFORM_POINT(context, x2, y2);
+	GP_TRANSFORM_POINT(context, x3, y3);
 
-/* fonts */
-#include "GP_Font.h"
-#include "GP_TextStyle.h"
-#include "GP_TextMetric.h"
-#include "GP_Text.h"
-
-#endif /* GP_H */
+	return GP_Tetragon(context, x0, y0, x1, y1, x2, y2, x3, y3, pixel);
+}
