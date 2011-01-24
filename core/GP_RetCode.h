@@ -34,7 +34,9 @@ typedef enum GP_RetCode {
 	GP_ENULLPTR,		/* some argument was unexpectedly NULL */
 	GP_EBACKENDLOST,
 	GP_EBADCONTEXT,		/* context contains invalid data */
-	GP_EBADFILE,		/* error while loading file */
+	GP_EBADFILE,		/* error in file, or bad file format */
+	GP_ENOENT,		/* no such file or another object */
+	GP_EBADALLOC,		/* unsuccessful allocation */
 	GP_EMAX,
 } GP_RetCode;
 

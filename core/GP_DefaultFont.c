@@ -130,11 +130,11 @@ struct GP_Font GP_default_console_font = {
 	.license = "GPL2",
 	.version = 1,
 	.charset = GP_CHARSET_7BIT,
-	.data = GP_default_console_font_data,
 	.height = 11,
 	.baseline = 2,
 	.bytes_per_line = 1,
 	.max_bounding_width = 9,
+	.data = GP_default_console_font_data,
 };
 
 static uint8_t GP_default_proportional_font_data[] = {
@@ -242,10 +242,10 @@ struct GP_Font GP_default_proportional_font = {
 	.license = "GPL2",
 	.version = 1,
 	.charset = GP_CHARSET_7BIT,
-	.data = GP_default_proportional_font_data,
 	.height = 11,
 	.baseline = 2,
 	.bytes_per_line = 1,
 	.max_bounding_width = 9,
+	.data = GP_default_proportional_font_data,
 };
 

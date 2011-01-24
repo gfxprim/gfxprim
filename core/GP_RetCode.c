@@ -34,6 +34,9 @@ static char *ret_code_names[] = {
 	"Unexpected null pointer",
 	"Connection with backend lost",
 	"Bad context",
+	"Bad file",
+	"Not found",
+	"Unsuccessful allocation"
 };
 
 

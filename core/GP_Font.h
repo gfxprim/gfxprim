@@ -43,8 +43,11 @@
 #define GP_FONT_FORMAT_VMAJOR	1
 #define GP_FONT_FORMAT_VMINOR	0
 
+/* Magic string starting the on-disc font file. */
+#define GP_FONT_MAGIC		"# gfxprim font file"
+
 /*
- * Describes a font.
+ * Contains font metadata.
  */
 typedef struct GP_Font {
 
@@ -68,15 +71,6 @@ typedef struct GP_Font {
 	/* The charset specifies which characters are defined by the font. */
 	uint8_t charset;
 
-	/*
-	 * Array of GP_CharData structures, packed together sequentially
-	 * without padding.
-	 *
-	 * Characters are stored in encoding order. The first encoded character
-	 * is 0x20 (space). A font must, at a minimum, encode all characters
-	 * of the 7-bit ASCII set (0x20 .. 0x7F, inclusive).
-	 */
-	uint8_t *data;
 
 	/* Height of every character in pixels. */
 	uint8_t height;
@@ -94,6 +88,16 @@ typedef struct GP_Font {
 	 * that are not drawn but cause other characters to shift).
 	 */
 	uint8_t max_bounding_width;
+
+	/*
+	 * Array of GP_CharData structures, packed together sequentially
+	 * without padding.
+	 *
+	 * Characters are stored in encoding order. The first encoded character
+	 * is 0x20 (space). A font must, at a minimum, encode all characters
+	 * of the 7-bit ASCII set (0x20 .. 0x7F, inclusive).
+	 */
+	uint8_t *data;
 } GP_Font;
 
 /* Data describing a single character. */
@@ -142,7 +146,7 @@ const GP_CharData *GP_GetCharData(const GP_Font *font, int c);
 
 #include "GP_RetCode.h"
 
-GP_RetCode GP_FontLoad(GP_Font *font, const char *filename);
+GP_RetCode GP_FontLoad(GP_Font **font, const char *filename);
 GP_RetCode GP_FontSave(const GP_Font *font, const char *filename);
 
 #endif /* GP_FONT_H */

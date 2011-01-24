@@ -36,6 +36,15 @@ int main(void)
 	if (retcode != GP_ESUCCESS) {
 		fprintf(stderr, "Error trying to save a font: %s\n",
 			GP_RetCodeName(retcode));
+		return 1;
+	}
+
+	GP_Font *loaded;
+	retcode = GP_FontLoad(&loaded, "test_font.tmp");
+	if (retcode != GP_ESUCCESS) {
+		fprintf(stderr, "Error trying to re-load a saved font: %s\n",
+			GP_RetCodeName(retcode));
+		return 1;
 	}
 
 	return 0;
