@@ -52,16 +52,16 @@
 typedef struct GP_Font {
 
 	/* Name of the font family. */
-	const char family[GP_FONT_NAME_MAX + 1];
+	char family[GP_FONT_NAME_MAX + 1];
 
 	/* Font name. */
-	const char name[GP_FONT_NAME_MAX + 1];
+	char name[GP_FONT_NAME_MAX + 1];
 
 	/* Name of the font author. */
-	const char author[GP_FONT_AUTHOR_MAX + 1];
+	char author[GP_FONT_AUTHOR_MAX + 1];
 
 	/* Font license (default is "GPL2"). */
-	const char license[GP_FONT_LICENSE_MAX + 1];
+	char license[GP_FONT_LICENSE_MAX + 1];
 
 	/* Font version (incremented by font author when modifying the font data,
 	 * do not confuse with format version).
@@ -143,6 +143,12 @@ unsigned int GP_GetCharDataSize(const GP_Font *font);
  * of the specified character in the font data area.
  */
 const GP_CharData *GP_GetCharData(const GP_Font *font, int c);
+
+/* Returns the overall size (in bytes) occupied by all characters
+ * of the font (the font metadata do not count into this value;
+ * add sizeof(GP_Font) to get the complete size of the font in memory.)
+ */
+unsigned int GP_GetFontDataSize(const GP_Font *font);
 
 #include "GP_RetCode.h"
 

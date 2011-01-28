@@ -27,6 +27,7 @@
 
 #include <GP.h>
 #include <stdio.h>
+#include <string.h>
 
 int main(void)
 {
@@ -46,6 +47,20 @@ int main(void)
 			GP_RetCodeName(retcode));
 		return 1;
 	}
+
+	int orig_data_size = GP_GetFontDataSize(&GP_default_console_font);
+	int loaded_data_size = GP_GetFontDataSize(loaded);
+	if (orig_data_size != loaded_data_size) {
+		fprintf(stderr, "Loaded font has not the same data size\n");
+		return 1;
+	}
+
+	if (memcmp(GP_default_console_font.data, loaded->data, orig_data_size) != 0) {
+		fprintf(stderr, "Loaded font data do not match the original\n");
+		return 1;
+	}
+
+	fprintf(stderr, "All okay\n");
 
 	return 0;
 }

@@ -36,7 +36,7 @@ static char *ret_code_names[] = {
 	"Bad context",
 	"Bad file",
 	"Not found",
-	"Unsuccessful allocation"
+	"Not enough memory"
 };
 
 

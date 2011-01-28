@@ -49,13 +49,21 @@ const GP_CharData *GP_GetCharData(const GP_Font *font, int c)
 		GP_GetCharDataSize(font) * encoded_character);
 }
 
-int GP_CalcCharCount(unsigned int charset)
+int GP_GetCharCount(unsigned int charset)
 {
 	switch (charset) {
 		case GP_CHARSET_7BIT:
 			return 96;
 	}
-	return -1;
+
+	GP_ABORT("Unrecognized font character set");
+}
+
+unsigned int GP_GetFontDataSize(const GP_Font *font)
+{
+	GP_CHECK(font);
+
+	return GP_GetCharCount(font->charset) * GP_GetCharDataSize(font);
 }
 
 GP_RetCode GP_FontSave(const struct GP_Font *font, const char *filename)
@@ -64,11 +72,6 @@ GP_RetCode GP_FontSave(const struct GP_Font *font, const char *filename)
 
 	if (font == NULL || filename == NULL)
 		return GP_ENULLPTR;
-
-	/* calculate the number of characters */
-	int char_count = GP_CalcCharCount(font->charset);
-	if (char_count < 0)
-		return GP_EINVAL;
 
 	FILE *f;
 
@@ -89,7 +92,7 @@ GP_RetCode GP_FontSave(const struct GP_Font *font, const char *filename)
 		goto io_error;
 
 	/* write character data */
-	unsigned int char_data_size = char_count * GP_GetCharDataSize(font);
+	unsigned int char_data_size = GP_GetFontDataSize(font);
 	retval = fwrite(font->data, char_data_size, 1, f);
 	if (retval != 1)
 		goto io_error;
@@ -116,7 +119,7 @@ GP_RetCode GP_FontLoad(GP_Font **pfont, const char *filename)
 	/* allocate the font metadata structure */
 	GP_Font *font = (GP_Font *) calloc(1, sizeof(*font));
 	if (font == NULL)
-		return GP_EBADALLOC;
+		return GP_ENOMEM;
 
 	/* open the font file */
 	FILE *f = fopen(filename, "r");
@@ -137,7 +140,7 @@ GP_RetCode GP_FontLoad(GP_Font **pfont, const char *filename)
 
 	/* read the header and fill the font metadata */
 	retval = fscanf(f, "FAMILY %63[a-zA-Z0-9_ ]\nNAME %63[a-zA-Z0-9_ ]\nAUTHOR %63[a-zA-Z0-9_ ]\n",
-		&font->family, &font->name, &font->author);
+		font->family, font->name, font->author);
 	if (retval != 3) {
 		fprintf(stderr, "gfxprim: error loading font: bad family, name, or author\n");
 		result = GP_EBADFILE;
@@ -145,7 +148,7 @@ GP_RetCode GP_FontLoad(GP_Font **pfont, const char *filename)
 	}
 
 	retval = fscanf(f, "LICENSE %15s\nVERSION %u\n",
-		&font->license, &font->version);
+		font->license, &font->version);
 	if (retval != 2) {
 		if (retval == 0)
 			fprintf(stderr, "gfxprim: error loading font: bad license string\n");
@@ -166,21 +169,13 @@ GP_RetCode GP_FontLoad(GP_Font **pfont, const char *filename)
 		goto bad;
 	}
 
-	/* calculate the number of characters */
-	int char_count = GP_CalcCharCount(font->charset);
-	if (char_count < 0) {
-		fprintf(stderr, "gfxprim: error loading font: unrecognized charset\n");
-		result = GP_EBADFILE;
-		goto bad;
-	}
-
 	/* allocate memory for character data */
-	unsigned int char_data_size = char_count * GP_GetCharDataSize(font);
+	unsigned int char_data_size = GP_GetFontDataSize(font);
 	font->data = malloc(char_data_size);
 	if (font->data == NULL) {
 		fprintf(stderr, "gfxprim: error loading font: cannot allocate %u bytes\n",
 			char_data_size);
-		result = GP_EBADALLOC;
+		result = GP_ENOMEM;
 		goto bad;
 	}
 
@@ -197,7 +192,8 @@ GP_RetCode GP_FontLoad(GP_Font **pfont, const char *filename)
 	return GP_ESUCCESS;
 
 bad:
-	if (f) fclose(f);
+	if (f)
+		fclose(f);
 	if (font) {
 		free(font->data);
 		free(font);
