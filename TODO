@@ -1,0 +1,23 @@
+What's not implemented (and should be)
+--------------------------------------
+
+* bitmaps and blitting
+  - create, destroy bitmap
+  - blit bitmaps (should respect rotation and pixel formats)
+  - bitmap rotation (in order to speed up rotated blits)
+  - loading bitmaps from image files (jpg, png, bmp, pnm ...)
+
+* backends
+  - finish framebuffer backend (SDL does not work on most of my framebuffers)
+  - other than SDL X backend (SDL does support only one window)
+  - some overall initialization routines
+
+Advanced features
+-----------------
+
+* bitmaps
+  - alpha channel
+
+* gfx primitives
+  - drawing with alpha channel
+  - anti aliasing
