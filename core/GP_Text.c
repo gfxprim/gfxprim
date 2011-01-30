@@ -27,6 +27,8 @@
 #include "algo/Text.algo.h"
 #include "GP_FnPerBpp.h"
 
+static GP_TextStyle DefaultStyle = GP_DEFAULT_TEXT_STYLE;
+
 DEF_TEXT_FN(GP_Text8bpp, GP_Context *, GP_Pixel, GP_HLine8bpp)
 DEF_TEXT_FN(GP_Text16bpp, GP_Context *, GP_Pixel, GP_HLine16bpp)
 DEF_TEXT_FN(GP_Text24bpp, GP_Context *, GP_Pixel, GP_HLine24bpp)
@@ -36,10 +38,15 @@ DEF_TEXT_FN(GP_TText_internal, GP_Context *, GP_Pixel, GP_THLine)
 GP_RetCode GP_Text(GP_Context *context, const GP_TextStyle *style,
 	int x, int y, int align, const char *str, GP_Pixel pixel)
 {
-	if (!context || !style || !style->font || !str)
+	if (style != NULL && style->font == NULL)
+		return GP_ENULLPTR;
+	if (!context || !str)
 		return GP_ENULLPTR;
 	if (!GP_IS_CONTEXT_VALID(context))
 		return GP_EBADCONTEXT;
+
+	if (style == NULL)
+		style = &DefaultStyle;
 
 	int width = GP_TextWidth(style, str);
 	int height = GP_TextHeight(style);
@@ -83,10 +90,15 @@ GP_RetCode GP_Text(GP_Context *context, const GP_TextStyle *style,
 GP_RetCode GP_TText(GP_Context *context, const GP_TextStyle *style,
 	int x, int y, int align, const char *str, GP_Pixel pixel)
 {
-	if (!context || !style || !style->font || !str)
+	if (style != NULL && style->font == NULL)
+		return GP_ENULLPTR;
+	if (!context || !str)
 		return GP_ENULLPTR;
 	if (!GP_IS_CONTEXT_VALID(context))
 		return GP_EBADCONTEXT;
+	
+	if (style == NULL)
+		style = &DefaultStyle;
 
 	int width = GP_TextWidth(style, str);
 	int height = GP_TextHeight(style);
