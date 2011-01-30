@@ -1,0 +1,399 @@
+Gfxprim API documentation
+=========================
+Cyril Hrubis <metan@ucw.cz>
+
+Gfxprim is simple bitmap graphics library with empasis on speed and
+correcness.
+
+General information
+-------------------
+
+Implemented features
+~~~~~~~~~~~~~~~~~~~~
+* basic graphics primitives (with and without fill)
+** line, circle, ellipse, trianle, tetragon
+* text drawing
+** supports both proportional and non proportional fonts
+** basic font is compiled in the library
+** font rendering could be altered by style attributes
+** font could be loaded from or stored in file
+** convertor from bdf is on the way
+* various bitmap formats to draw on
+* SDL drawing backend
+
+Work in progress
+~~~~~~~~~~~~~~~~
+
+* bitmaps and blitting
+** create, destroy bitmap
+** blit bitmaps (should respect rotation and pixel formats)
+** bitmap rotation (in order to speed up rotated blits)
+** loading bitmaps from image files (jpg, png, bmp, pnm ...)
+
+* backends
+** finish framebuffer backend (SDL does not work on most of my framebuffers)
+** other than SDL X backend (SDL does support only one window)
+** some overall initialization routines
+
+Advanced (and unimplemented) features
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+* bitmaps
+** alpha channel
+
+* gfx primitives
+** drawing with alpha channel
+** anti aliasing
+
+[[X1]]
+Basic types
+-----------
+Return Code
+~~~~~~~~~~~
+
+Basically each gfxprim function returns one of following return codes:
+
+[source,c]
+--------------------------------------------------------------------------------
+typedef enum GP_RetCode {
+        GP_ESUCCESS,
+        GP_EINVAL,
+        GP_ENOIMPL,
+        GP_EUNPRECISE,
+        GP_ENULLPTR,            /* some argument was unexpectedly NULL */
+        GP_EBACKENDLOST,
+        GP_EBADCONTEXT,         /* context contains invalid data */
+        GP_EBADFILE,            /* error in file, or bad file format */
+        GP_ENOENT,              /* no such file or another object */
+        GP_ENOMEM,              /* not enough memory */
+        GP_EMAX,
+} GP_RetCode;
+--------------------------------------------------------------------------------
+
+Return codes could be translated into an error messages.
+
+[source,c]
+--------------------------------------------------------------------------------
+const char *GP_RetCodeName(GP_RetCode code);
+--------------------------------------------------------------------------------
+
+Color and pixel types
+~~~~~~~~~~~~~~~~~~~~~
+
+The color, in gfxprim is abstract value that represents color in some format,
+while pixel is color in format of the target bitmap.
+
+The color and pixel types could be converted in between, but certain
+conversions do lose information.
+
+Color types are defined in 'core/GP_Color.h' and pixels in 'core/GP_Pixel.h'.
+The color is union of strucures so that is easy to manipulate with each color
+types, the pixel is basically sequence of bytes stored in long enough integer
+number.
+
+Before drawing a shape into a bitmap, color must be converted into pixel as
+all drawing functions takes pixel rather than color.
+
+The color types:
+
+[source,c]
+--------------------------------------------------------------------------------
+typedef enum GP_ColorType {
+        GP_NOCOLOR = 0,
+        GP_COLNAME,
+        GP_PALETTE,
+        GP_PAL4,
+        GP_PAL8,
+        GP_G1,
+        GP_G2,
+        GP_G4,
+        GP_G8,
+        GP_RGB555,
+        GP_RGB565,
+        GP_RGB666,
+        GP_RGB888,
+        GP_RGBA8888,
+        GP_COLMAX,
+} GP_ColorType;
+--------------------------------------------------------------------------------
+
+The color names:
+
+[source,c]
+--------------------------------------------------------------------------------
+typedef enum GP_ColorName {
+        GP_COL_BLACK,
+        GP_COL_RED,
+        GP_COL_GREEN,
+        GP_COL_BLUE,
+        GP_COL_YELLOW,
+        GP_COL_BROWN,
+        GP_COL_ORANGE,
+        GP_COL_GRAY_DARK,
+        GP_COL_GRAY_LIGHT,
+        GP_COL_PURPLE,
+        GP_COL_WHITE,
+        GP_COL_MAX,
+} GP_ColorName;
+--------------------------------------------------------------------------------
+
+To convert color to context pixel type use:
+
+[source,c]
+--------------------------------------------------------------------------------
+GP_RetCode GP_ColorToPixel(struct GP_Context *context, GP_Color color,
+                           GP_Pixel *pixel);
+
+GP_RetCode GP_ColorNameToPixel(struct GP_Context *context, GP_ColorName name,
+                               GP_Pixel *pixel);
+--------------------------------------------------------------------------------
+
+Context
+~~~~~~~
+
+Context is bitmap buffer along with it's metadata, which are pixel format for
+underlying bitmap, it's size, clipping rectangle and bitmap roation.
+
+The clipping rectangle is honored by all drawing functions.
+
+The rotation could mirror x, mirror y and/or swap x and y.
+
+The rotation is honored by functions with T prefix, so 'GP_THLine()' is
+rotation friendly version of 'GP_HLine()'.
+
+In 'core/GP_Transform.h' are usefull macros for rotating coordinates and sizes
+from/to context orientation, the most usefull are:
+
+* *GP_TRANSFORM_POINT(x, y)*
+* *GP_TRANSFORM_RECT(x, y, w, h)*
+* *GP_RETRANSFORM_POINT(x, y)*
+
+[[X2]]
+Drawing primitives
+------------------
+
+Fill
+~~~~
+
+[source,c]
+--------------------------------------------------------------------------------
+GP_RetCode GP_Fill(GP_Context *context, GP_Pixel pixel);
+--------------------------------------------------------------------------------
+
+Fill context, respecting the clipping rect. This has the same effect as
+calling 'GP_FillRect(context, 0, 0, context->w, context->h, pixel)'.
+
+This functions doesn't have rotate friendly variant.
+
+Lines
+~~~~~
+
+[source,c]
+--------------------------------------------------------------------------------
+GP_RetCode GP_HLineXXY(GP_Context *context, int x0, int x1, int y,
+                       GP_Pixel pixel);
+
+GP_RetCode GP_HLineXYW(GP_Context *context, int x, int y, unsigned int w,
+                       GP_Pixel pixel);
+
+GP_RetCode GP_HLine(GP_Context *context, int x0, int x1, int y,
+                    GP_Pixel pixel);
+--------------------------------------------------------------------------------
+
+Draws horizontal line, the 'GP_HLine()' funciton is an alias for 'GP_HLineXXY()'.
+
+[source,c]
+--------------------------------------------------------------------------------
+GP_RetCode GP_VLineXYY(GP_Context *context, int x, int y0, int y1,
+                       GP_Pixel pixel);
+
+GP_RetCode GP_VLineXYH(GP_Context *context, int x, int y,
+                       unsigned int height, GP_Pixel pixel);
+
+GP_RetCode GP_VLine(GP_Context *context, int x, int y0, int y1,
+                    GP_Pixel pixel);
+--------------------------------------------------------------------------------
+
+Draws vertical line, the 'GP_VLine()' function is an alias for 'GP_VLineXYY()'.
+
+[source,c]
+--------------------------------------------------------------------------------
+GP_RetCode GP_Line(GP_Context *context, int x0, int y0, int x1, int y1,
+                   GP_Pixel pixel);
+--------------------------------------------------------------------------------
+
+Draws a line.
+
+Circles
+~~~~~~~
+
+[source,c]
+--------------------------------------------------------------------------------
+GP_RetCode GP_Circle(GP_Context *context, int xcenter, int ycenter,
+                     unsigned int r, GP_Pixel pixel);
+--------------------------------------------------------------------------------
+
+Draws circle.
+
+[source,c]
+--------------------------------------------------------------------------------
+GP_RetCode GP_FillCircle(GP_Context *context, int xcenter, int ycenter,
+                         unsigned int r, GP_Pixel pixel);
+--------------------------------------------------------------------------------
+
+Draws filled circle.
+
+Ellipses
+~~~~~~~~
+
+[source,c]
+--------------------------------------------------------------------------------
+GP_RetCode GP_Ellipse(GP_Context *context, int xcenter, int ycenter,
+                      unsigned int a, unsigned int b, GP_Pixel pixel);
+--------------------------------------------------------------------------------
+
+Draws ellipse.
+
+[source,c]
+--------------------------------------------------------------------------------
+GP_RetCode GP_FillEllipse(GP_Context *context, int xcenter, int ycenter,
+                          unsigned int a, unsigned int b, GP_Pixel pixel);
+--------------------------------------------------------------------------------
+
+Draws filled ellipse.
+
+Triangles
+~~~~~~~~~
+
+[source,c]
+--------------------------------------------------------------------------------
+GP_RetCode GP_Triangle(GP_Context *context, int x0, int y0, int x1, int y1,
+                       int x2, int y2, GP_Pixel pixel);
+--------------------------------------------------------------------------------
+
+Draws triangle.
+
+[source,c]
+--------------------------------------------------------------------------------
+GP_RetCode GP_FillTriangle(GP_Context *context, int x0, int y0, int x1,
+                           int y1, int x2, int y2, GP_Pixel pixel);
+--------------------------------------------------------------------------------
+
+Draws filled triangle.
+
+Rects
+~~~~~
+
+[source,c]
+--------------------------------------------------------------------------------
+GP_RetCode GP_RectXYXY(GP_Context *context, int x0, int y0, int x1, int y1,
+                       GP_Pixel pixel);
+
+GP_RetCode GP_RectXYWH(GP_Context *context, int x, int y,
+                       unsigned int w, unsigned int h, GP_Pixel pixel);
+
+GP_RetCode GP_Rect(GP_Context *context, int x0, int y0, int x1, int y1,
+                   GP_Pixel pixel);
+--------------------------------------------------------------------------------
+
+Draws rect, the 'GP_Rect()' function is an alias for 'GP_RectXYXY()'.
+
+[source,c]
+--------------------------------------------------------------------------------
+GP_RetCode GP_FillRectXYXY(GP_Context *context, int x0, int y0, int x1, int y1,
+                           GP_Pixel pixel);
+
+GP_RetCode GP_FillRectXYWH(GP_Context *context, int x, int y,
+                           unsigned int w, unsigned int h, GP_Pixel pixel);
+
+GP_RetCode GP_FillRect(GP_Context *context, int x0, int y0, int x1, int y1,
+                       GP_Pixel pixel);
+--------------------------------------------------------------------------------
+
+Draws filled rect, the 'GP_FillRect()' functions is an alias for 'GP_FillRectXYXY()'.
+
+Tetragons
+~~~~~~~~~
+
+[source,c]
+--------------------------------------------------------------------------------
+GP_RetCode GP_Tetragon(GP_Context *context, int x0, int y0, int x1, int y1,
+                       int x2, int y2, int x3, int y3, GP_Pixel pixel);
+--------------------------------------------------------------------------------
+
+Draws tetragon.
+
+[source,c]
+--------------------------------------------------------------------------------
+GP_RetCode GP_FillTetragon(GP_Context *context, int x0, int y0, int x1, int y1,
+                           int x2, int y2, int x3, int y3, GP_Pixel pixel);
+--------------------------------------------------------------------------------
+
+Draws filled tetragon.
+
+Text
+~~~~
+
+The text drawing is done from 'GP_TextStyle' that is defined in
+'core/GP_TextStyle.h'. This structure carries the information about font,
+letter spacing and pixel multiplication and spacing. When style argument is
+NULL default style, small monospace font, is used.
+
+[source,c]
+--------------------------------------------------------------------------------
+/* Where the text should be drawn relatively to the specified point */
+typedef enum GP_TextAlign {
+        GP_ALIGN_LEFT = 0x01,           /* to the left from the point */
+        GP_ALIGN_CENTER = 0x02,         /* centered on the point */
+        GP_ALIGN_RIGHT = 0x03,          /* to the right from the point */
+        GP_VALIGN_ABOVE = 0x10,         /* above the point */
+        GP_VALIGN_CENTER = 0x20,        /* centered on the point */
+        GP_VALIGN_BASELINE = 0x30,      /* baseline is on the point */
+        GP_VALIGN_BELOW = 0x40          /* below the point */
+} GP_TextAlign;
+
+GP_RetCode GP_Text(GP_Context *context, const GP_TextStyle *style,
+                   int x, int y, int align, const char *str, GP_Pixel pixel);
+--------------------------------------------------------------------------------
+
+Draws text at the possition x and y, which is relative and defined by bitwise
+or of aligment flags.
+
+The text size can be computed by following functions:
+
+[source,c]
+--------------------------------------------------------------------------------
+unsigned int GP_TextWidth(const GP_TextStyle *style, const char *str);
+--------------------------------------------------------------------------------
+
+Returns text width in pixels.
+
+[source,c]
+--------------------------------------------------------------------------------
+unsigned int GP_TextMaxWidth(const GP_TextStyle *style, unsigned int len);
+--------------------------------------------------------------------------------
+
+Returns maximal text width, in pixels, for string with len letters. This call
+is usefull for variable letter size fonts.
+
+[source,c]
+--------------------------------------------------------------------------------
+unsigned int GP_TextAscent(const GP_TextStyle *style);
+--------------------------------------------------------------------------------
+
+The Ascent is size of the font, from the top to the baseline.
+
+[source,c]
+--------------------------------------------------------------------------------
+unsigned int GP_TextDescent(const GP_TextStyle *style);
+--------------------------------------------------------------------------------
+
+The Descent is size of the font, from baseline to the botton.
+
+[source,c]
+--------------------------------------------------------------------------------
+unsigned int GP_TextHeight(const GP_TextStyle *style);
+--------------------------------------------------------------------------------
+
+The Height is size of the font from top to the bottom, eg. equals exactly to
+the sum of ascent and descent.
