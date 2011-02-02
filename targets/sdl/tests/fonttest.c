@@ -46,8 +46,9 @@ static const char *test_strings[] = {
 };
 
 /* draw using proportional font? */
-static int flag_proportional = 0;
+static int font_flag = 0;
 static int tracking = 0;
+GP_Font *font;
 
 void redraw_screen(void)
 {
@@ -57,10 +58,17 @@ void redraw_screen(void)
 
 	GP_TextStyle style = GP_DEFAULT_TEXT_STYLE;
 
-	if (flag_proportional)
+	switch (font_flag) {
+	case 0:
 		style.font = &GP_default_proportional_font;
-	else
+	break;
+	case 1:
 		style.font = &GP_default_console_font;
+	break;
+	case 2:
+		style.font = font;
+	break;
+	}
 
 	/* Text alignment (we are always drawing to the right
 	 * and below the starting point).
@@ -124,7 +132,11 @@ void event_loop(void)
 		case SDL_KEYDOWN:
 			switch (event.key.keysym.sym) {
 			case SDLK_SPACE:
-				flag_proportional = !flag_proportional;
+				if (font)
+					font_flag = (font_flag + 1) % 3;
+				else
+					font_flag = (font_flag + 1) % 2;
+					
 				redraw_screen();
 				SDL_Flip(display);
 			break;
@@ -159,9 +171,20 @@ void print_instructions(void)
 	printf("    up/down ............. increase/decrease tracking\n");
 }
 
-int main(void)
+int main(int argc, char *argv[])
 {
 	print_instructions();
+	
+	if (argc > 1) {
+		GP_RetCode err;
+		fprintf(stderr, "\nLoading font '%s'\n", argv[1]);
+		err = GP_FontLoad(&font, argv[1]);
+
+		if (err) {
+			fprintf(stderr, "Error: %s\n", GP_RetCodeName(err));
+			return 1;
+		}
+	}
 
 	/* Initialize SDL */
 	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) != 0) {
