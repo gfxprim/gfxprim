@@ -2,8 +2,8 @@ Gfxprim API documentation
 =========================
 Cyril Hrubis <metan@ucw.cz>
 
-Gfxprim is simple bitmap graphics library with empasis on speed and
-correcness.
+Gfxprim is simple 2D bitmap graphics library with emphasis on speed and
+correctness.
 
 General information
 -------------------
@@ -11,7 +11,7 @@ General information
 Implemented features
 ~~~~~~~~~~~~~~~~~~~~
 * basic graphics primitives (with and without fill)
-** line, circle, ellipse, trianle, tetragon
+** line, circle, ellipse, triangle, tetragon
 * text drawing
 ** supports both proportional and non proportional fonts
 ** basic font is compiled in the library
@@ -31,7 +31,7 @@ Work in progress
 ** loading bitmaps from image files (jpg, png, bmp, pnm ...)
 
 * backends
-** finish framebuffer backend (SDL does not work on most of my framebuffers)
+** finish frame-buffer backend (SDL does not work on most of my frame-buffers)
 ** other than SDL X backend (SDL does support only one window)
 ** some overall initialization routines
 
@@ -87,7 +87,7 @@ The color and pixel types could be converted in between, but certain
 conversions do lose information.
 
 Color types are defined in 'core/GP_Color.h' and pixels in 'core/GP_Pixel.h'.
-The color is union of strucures so that is easy to manipulate with each color
+The color is union of structures so that is easy to manipulate with each color
 types, the pixel is basically sequence of bytes stored in long enough integer
 number.
 
@@ -152,7 +152,7 @@ Context
 ~~~~~~~
 
 Context is bitmap buffer along with it's metadata, which are pixel format for
-underlying bitmap, it's size, clipping rectangle and bitmap roation.
+underlying bitmap, it's size, clipping rectangle and bitmap rotation.
 
 The clipping rectangle is honored by all drawing functions.
 
@@ -161,8 +161,8 @@ The rotation could mirror x, mirror y and/or swap x and y.
 The rotation is honored by functions with T prefix, so 'GP_THLine()' is
 rotation friendly version of 'GP_HLine()'.
 
-In 'core/GP_Transform.h' are usefull macros for rotating coordinates and sizes
-from/to context orientation, the most usefull are:
+In 'core/GP_Transform.h' are useful macros for rotating coordinates and sizes
+from/to context orientation, the most usefully are:
 
 * *GP_TRANSFORM_POINT(x, y)*
 * *GP_TRANSFORM_RECT(x, y, w, h)*
@@ -200,7 +200,7 @@ GP_RetCode GP_HLine(GP_Context *context, int x0, int x1, int y,
                     GP_Pixel pixel);
 --------------------------------------------------------------------------------
 
-Draws horizontal line, the 'GP_HLine()' funciton is an alias for 'GP_HLineXXY()'.
+Draws horizontal line, the 'GP_HLine()' function is an alias for 'GP_HLineXXY()'.
 
 [source,c]
 --------------------------------------------------------------------------------
@@ -356,8 +356,8 @@ GP_RetCode GP_Text(GP_Context *context, const GP_TextStyle *style,
                    int x, int y, int align, const char *str, GP_Pixel pixel);
 --------------------------------------------------------------------------------
 
-Draws text at the possition x and y, which is relative and defined by bitwise
-or of aligment flags.
+Draws text at the position x and y, which is relative and defined by bitwise
+or of alignment flags.
 
 The text size can be computed by following functions:
 
@@ -374,7 +374,7 @@ unsigned int GP_TextMaxWidth(const GP_TextStyle *style, unsigned int len);
 --------------------------------------------------------------------------------
 
 Returns maximal text width, in pixels, for string with len letters. This call
-is usefull for variable letter size fonts.
+is useful for variable letter size fonts.
 
 [source,c]
 --------------------------------------------------------------------------------
@@ -388,7 +388,7 @@ The Ascent is size of the font, from the top to the baseline.
 unsigned int GP_TextDescent(const GP_TextStyle *style);
 --------------------------------------------------------------------------------
 
-The Descent is size of the font, from baseline to the botton.
+The Descent is size of the font, from baseline to the bottom.
 
 [source,c]
 --------------------------------------------------------------------------------
