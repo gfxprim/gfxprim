@@ -54,7 +54,7 @@ GP_RetCode GP_Text(GP_Context *context, const GP_TextStyle *style,
 	int topleft_x, topleft_y;
 	switch (align & 0x0f) {
 		case GP_ALIGN_LEFT:
-			topleft_x = x - width;
+			topleft_x = x - width + 1;
 			break;
 		case GP_ALIGN_RIGHT:
 			topleft_x = x;
@@ -67,7 +67,7 @@ GP_RetCode GP_Text(GP_Context *context, const GP_TextStyle *style,
 	}
 	switch (align & 0xf0) {
 		case GP_VALIGN_ABOVE:
-			topleft_y = y - height;
+			topleft_y = y - height + 1;
 			break;
 		case GP_VALIGN_CENTER:
 			topleft_y = y - height/2;
