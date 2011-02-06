@@ -109,11 +109,6 @@ typedef struct GP_CharData {
 	 */
 	uint8_t char_width;
 
-	/* Number of bits to skip at the start of every line
-	 * of the character bitmap. (This value is included in char_width.)
-	 */
-	uint8_t lmargin;
-
 	/* X offset to be applied to the current position *before*
 	 * drawing the character.
 	 */

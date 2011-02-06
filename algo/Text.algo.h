@@ -54,15 +54,6 @@ void FN_NAME(CONTEXT_T context, const GP_TextStyle *style, int x, int y, \
 				uint8_t const * linesrc = src + line * style->font->bytes_per_line; \
 				uint8_t mask = 0x80; \
 \
-				/* skip left margin */ \
-				for (i = 0; i < data->lmargin; i++) { \
-					mask >>= 1; \
-					if (mask == 0) { \
-						linesrc++; \
-						mask = 0x80; \
-					} \
-				} \
-\
 				/* draw the line of the character bitmap */ \
 				for (x = x0; x < x1; x += style->pixel_xmul + style->pixel_xspace) { \
 					if (*linesrc & mask) { \
