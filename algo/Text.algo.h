@@ -46,7 +46,7 @@ void FN_NAME(CONTEXT_T context, const GP_TextStyle *style, int x, int y, \
 		int x1 = x0 + data->char_width * (style->pixel_xmul + style->pixel_xspace); \
 \
 		/* Draw the character line by line. */ \
-		int line, linerep, i; \
+		int line, linerep; \
 		for (line = 0, y = y0; line < style->font->height; line++, y += style->pixel_yspace) { \
 \
 			/* repeat the line as specified by pixel_ymul */ \
