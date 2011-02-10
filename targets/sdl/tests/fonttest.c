@@ -93,9 +93,9 @@ void redraw_screen(void)
 			red_pixel);
 
 		GP_RectXYWH(&context,
-			16, 100*i + 16,
-			GP_TextMaxWidth(&style, strlen(test_string)),
-			style.font->height,
+			15, 100*i + 15,
+			GP_TextMaxWidth(&style, strlen(test_string)) + 1,
+			style.font->height + 1,
 			blue_pixel);
 
 		GP_Text(&context, &style, 16, 100*i + 16, align, test_string, white_pixel);
