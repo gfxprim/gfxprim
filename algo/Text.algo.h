@@ -38,14 +38,19 @@ void FN_NAME(CONTEXT_T context, const GP_TextStyle *style, int x, int y, \
 	for (p = str; *p != '\0'; p++) { \
 \
 		/* Calculate the address of the character data. */ \
-		const GP_CharData *data = GP_GetCharData(style->font, (int) *p); \
-		const uint8_t *src = data->bitmap; \
+		const GP_CharData *data = GP_GetCharData(style->font, *p); \
+		if (data == NULL) { \
+\
+			/* unencoded character */ \
+			data = GP_GetCharData(style->font, ' '); \
+		} \
 \
 		/* Starting and final X for each character line. */ \
 		int x0 = x + data->pre_offset * (style->pixel_xmul + style->pixel_xspace); \
 		int x1 = x0 + data->char_width * (style->pixel_xmul + style->pixel_xspace); \
 \
 		/* Draw the character line by line. */ \
+		const uint8_t *src = data->bitmap; \
 		int line, linerep; \
 		for (line = 0, y = y0; line < style->font->height; line++, y += style->pixel_yspace) { \
 \
