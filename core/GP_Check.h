@@ -39,6 +39,6 @@
 				__FUNCTION__, #cond); \
 			abort(); \
 		} \
-	} while(0);
+	} while (0)
 
 #endif /* GP_CHECK_H */

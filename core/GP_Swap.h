@@ -30,6 +30,6 @@
 	typeof(a) tmp = b; \
 	b = a;             \
 	a = tmp;           \
-} while(0);
+} while (0)
 
 #endif /* GP_SWAP_H */

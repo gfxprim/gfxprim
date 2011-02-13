@@ -35,7 +35,7 @@
 		|| y > (int) context->clip_h_max) { \
 		return GP_ESUCCESS; /* clipped out */ \
 	} \
-} while(0);
+} while (0)
 
 /*
  * A set of PutPixel() calls used when we know the number of bits per pixel.

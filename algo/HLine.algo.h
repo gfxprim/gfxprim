@@ -38,7 +38,7 @@
 	} \
 	x0 = GP_MAX(x0, (int) context->clip_w_min); \
 	x1 = GP_MIN(x1, (int) context->clip_w_max); \
-} while(0);
+} while (0)
 
 /*
  * This macro defines a horizontal line drawing function.

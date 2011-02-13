@@ -84,6 +84,6 @@ inline GP_PixelType GP_GetContextPixelType(const GP_Context *context);
 		GP_CHECK(context->clip_h_min <= context->clip_h_max); \
 		GP_CHECK(context->clip_w_max < context->w); \
 		GP_CHECK(context->clip_h_max < context->h); \
-	} while(0)
+	} while (0)
 
 #endif /* GP_CONTEXT_H */

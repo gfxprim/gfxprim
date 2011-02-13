@@ -33,6 +33,6 @@
 #define GP_ABORT(msg) do { \
 		fprintf(stderr, "*** gfxprim: aborted: %s: %s\n", __FUNCTION__, #msg); \
 		abort(); \
-	} while(0);
+	} while (0)
 
 #endif /* GP_ABORT_H */

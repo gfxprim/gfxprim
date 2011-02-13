@@ -33,7 +33,7 @@
 	GP_SWAP(y0, y1); \
 	deltax = -deltax; \
 	deltay = -deltay; \
-} while(0);
+} while (0)
 
 /* starts a loop that iterates over every X in the line */
 #define FOR_EACH_X for (x = x0, y = y0, error = deltax/2; x <= x1; x++)
@@ -50,7 +50,7 @@
 		deltay > 0 ? y++ : y--; \
 		error += deltax; \
 	} \
-} while(0);
+} while (0)
 
 #define NEXT_X do { \
 	error -= abs(deltax); \
@@ -58,7 +58,7 @@
 		deltax > 0 ? x++ : x--; \
 		error += deltay; \
 	} \
-} while(0); 
+} while (0) 
 
 /*
  * This macro defines a line drawing function.
