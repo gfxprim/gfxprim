@@ -59,7 +59,7 @@ void redraw_screen(void)
 {
 	SDL_LockSurface(display);
 	
-	GP_Fill(&context, black_pixel);
+	GP_Fill(&context, gray_pixel);
 
 	GP_TextStyle style = GP_DEFAULT_TEXT_STYLE;
 
@@ -92,7 +92,7 @@ void redraw_screen(void)
 		if (line == NULL)
 			break;
 		
-		GP_Text(&context, &style, 16, 16*i + 16, align, line->text, white_pixel);
+		GP_Text(&context, &style, 16, 16*i + 16, align, line->text, black_pixel);
 		line = line->next;
 	}
 
@@ -200,10 +200,6 @@ int main(int argc, char *argv[])
 		fprintf(stderr, "Could not open display: %s\n", SDL_GetError());
 		goto fail;
 	}
-
-	/* Set up a clipping rectangle to test proper clipping of pixels */
-	SDL_Rect clip_rect = {10, 10, 620, 460};
-	SDL_SetClipRect(display, &clip_rect);
 
 	/* Initialize a GP context from the SDL display */
 	GP_SDL_ContextFromSurface(&context, display);
