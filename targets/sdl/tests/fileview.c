@@ -87,9 +87,9 @@ void redraw_screen(void)
 	 */
 	int align = GP_ALIGN_RIGHT|GP_VALIGN_BELOW;
 
-	struct FileLine * line = first_line;
+	struct FileLine *line = first_line;
 	unsigned int i;
-	for (i = 0; i < 30; i++) {
+	for (i = 0; i < 30; i++) { 
 		if (line == NULL)
 			break;
 		
@@ -98,6 +98,26 @@ void redraw_screen(void)
 	}
 
 	SDL_UnlockSurface(display);
+}
+
+static void warp_up(int lines)
+{
+	while (lines-- > 0)
+		if (first_line->prev != NULL)
+			first_line = first_line->prev;
+	
+	redraw_screen();
+	SDL_Flip(display);
+}
+
+static void warp_down(int lines)
+{
+	while (lines-- > 0)
+		if (first_line->next != NULL)
+			first_line = first_line->next;
+	
+	redraw_screen();
+	SDL_Flip(display);
 }
 
 void event_loop(void)
@@ -135,20 +155,19 @@ void event_loop(void)
 			break;
 			case SDLK_ESCAPE:
 				return;
-			default:
 			case SDLK_UP:
-				if (first_line->next != NULL) {
-					first_line = first_line->next;
-					redraw_screen();
-					SDL_Flip(display);
-				}
+				warp_up(1);
+			break;
+			case SDLK_PAGEUP:
+				warp_up(29);
 			break;
 			case SDLK_DOWN:
-				if (first_line->prev != NULL) {
-					first_line = first_line->prev;
-					redraw_screen();
-					SDL_Flip(display);
-				}
+				warp_down(1);
+			break;
+			case SDLK_PAGEDOWN:
+				warp_down(29);
+			break;
+			default:
 			break;
 			}
 		break;
