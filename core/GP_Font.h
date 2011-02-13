@@ -29,7 +29,9 @@
 #include <stdint.h>
 
 /* The smallest charset, covering only the 7-bit ASCII (0x20 .. 0x7f). */
-#define GP_CHARSET_7BIT		1
+typedef enum GP_Charset {
+	GP_CHARSET_7BIT = 1,
+} GP_Charset;
 
 /* Maximum length of the font name, author, etc. (Note: these values are
  * used by the on-disc font format.)
