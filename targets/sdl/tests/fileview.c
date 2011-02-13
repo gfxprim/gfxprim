@@ -50,6 +50,7 @@ GP_Font *font;
 struct FileLine {
 	char *text;		/* null-terminated, malloc'd string */
 	struct FileLine *next;	/* next line or NULL for the last line */
+	struct FileLine *prev;
 };
 
 struct FileLine *first_line = NULL;
@@ -122,12 +123,12 @@ void event_loop(void)
 				redraw_screen();
 				SDL_Flip(display);
 			break;
-			case SDLK_UP:
+			case SDLK_RIGHT:
 				tracking++;
 				redraw_screen();
 				SDL_Flip(display);
 			break;
-			case SDLK_DOWN:
+			case SDLK_LEFT:
 				tracking--;
 				redraw_screen();
 				SDL_Flip(display);
@@ -135,6 +136,19 @@ void event_loop(void)
 			case SDLK_ESCAPE:
 				return;
 			default:
+			case SDLK_UP:
+				if (first_line->next != NULL) {
+					first_line = first_line->next;
+					redraw_screen();
+					SDL_Flip(display);
+				}
+			break;
+			case SDLK_DOWN:
+				if (first_line->prev != NULL) {
+					first_line = first_line->prev;
+					redraw_screen();
+					SDL_Flip(display);
+				}
 			break;
 			}
 		break;
@@ -164,11 +178,13 @@ static int read_file_head(const char *filename)
 		struct FileLine *line = malloc(sizeof(*line));
 		line->text = strdup(buf);
 		line->next = NULL;
+		line->prev = NULL;
 
 		if (first_line == NULL) {
 			first_line = line;
 			last_line = line;
 		} else {
+			line->prev = last_line;
 			last_line->next = line;
 			last_line = line;
 		}
