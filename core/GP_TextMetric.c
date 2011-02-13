@@ -45,6 +45,10 @@ unsigned int GP_TextWidth(const GP_TextStyle *style, const char *str)
 	const char *p;
 	for (p = str; *p; p++) {
 		const GP_CharData *data = GP_GetCharData(style->font, *p);
+
+		if (data == NULL)
+			data = GP_GetCharData(style->font, ' ');
+
 		x += data->pre_offset * pixel_multiplier
 			+ data->post_offset * pixel_multiplier
 			+ space;
