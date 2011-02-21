@@ -86,4 +86,8 @@ inline GP_PixelType GP_GetContextPixelType(const GP_Context *context);
 		GP_CHECK(context->clip_h_max < context->h); \
 	} while (0)
 
+GP_Context *GP_ContextAlloc(uint32_t w, uint32_t h, GP_PixelType type);
+
+void GP_ContextFree(GP_Context *context);
+
 #endif /* GP_CONTEXT_H */

@@ -29,3 +29,47 @@ inline GP_PixelType GP_GetContextPixelType(const GP_Context *context)
 {
 	return context->pixel_type;
 }
+
+GP_Context *GP_ContextAlloc(uint32_t w, uint32_t h, GP_PixelType type)
+{
+	GP_Context *context = malloc(sizeof(GP_Context));
+	uint32_t bpp = GP_PixelSize(type);
+	uint32_t bpr = (bpp * w) / 8 + !!((bpp * w) % 8);
+	void *pixels;
+
+	pixels = malloc(bpr * h);
+
+	if (pixels == NULL || context == NULL) {
+		free(pixels);
+		free(context);
+		return NULL;
+	}
+
+	context->pixels         = pixels;
+	context->bits_per_pixel = bpp;
+	context->bytes_per_row  = bpr;
+
+	context->w = w;
+	context->h = h;
+
+	context->pixel_type = type;
+	
+	/* rotation and mirroring */
+	context->axes_swap = 0;
+	context->y_swap    = 0;
+	context->x_swap    = 0;
+
+	/* clipping */
+	context->clip_w_min = 0;
+	context->clip_w_max = w - 1;
+	context->clip_h_min = 0;
+	context->clip_h_max = h - 1;
+
+	return context;
+}
+
+void GP_ContextFree(GP_Context *context)
+{
+	free(context->pixels);
+	free(context);
+}
