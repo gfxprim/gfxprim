@@ -59,5 +59,5 @@ void FN_NAME(GP_Context *context, int x0, int x1, int y, GP_Pixel pixel) \
 	size_t length = 1 + x1 - x0; \
 	void *start = GP_PIXEL_ADDRESS(context, y, x0); \
 \
-	WRITE_PIXELS(start, length, pixel.val); \
+	WRITE_PIXELS(start, length, pixel); \
 }

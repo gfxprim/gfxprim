@@ -29,8 +29,8 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#include "GP_RetCode.h"
 #include "GP_Color.h"
+#include "GP_RetCode.h"
 
 struct GP_Context;
 
@@ -75,10 +75,7 @@ typedef enum GP_PixelType {
 	GP_PIXEL_MAX,
 } GP_PixelType;
 
-typedef struct GP_Pixel {
-	enum GP_PixelType type;
-	uint32_t val;
-} GP_Pixel;
+typedef uint32_t GP_Pixel;
 
 /*
  * Convert pixel type to name.
@@ -89,11 +86,6 @@ const char *GP_PixelTypeName(GP_PixelType type);
  * Returns number of bits per pixel.
  */
 uint32_t GP_PixelSize(GP_PixelType type);
-
-/*
- * Returns true for exaclty same pixels.
- */
-bool GP_PixelCmp(GP_Pixel *pixel1, GP_Pixel *pixel2);
 
 /*
  * Returns GP_PixelType to GP_ColorType mapping.
@@ -111,18 +103,13 @@ GP_RetCode GP_ColorToPixelType(GP_PixelType pixel_type, GP_Color color, GP_Pixel
 GP_RetCode GP_ColorToPixel(struct GP_Context *context, GP_Color color, GP_Pixel *pixel);
 
 /*
- * Converts a color name to the specified pixel type.
- */
-GP_RetCode GP_ColorNameToPixelType(GP_PixelType pixel_type, GP_ColorName name, GP_Pixel *pixel);
-
-/*
- * Converts a color name to a pixel value suitable for the specified context.
+ *
  */
 GP_RetCode GP_ColorNameToPixel(struct GP_Context *context, GP_ColorName name, GP_Pixel *pixel);
 
 /*
- * Converts GP_Pixel to GP_Color.
+ * Converts a color name to the specified pixel type.
  */
-GP_RetCode GP_PixelToColor(GP_Pixel pixel, GP_Color *color);
+GP_RetCode GP_ColorNameToPixelType(GP_PixelType pixel_type, GP_ColorName name, GP_Pixel *pixel);
 
 #endif /* GP_PIXEL_H */

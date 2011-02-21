@@ -39,7 +39,7 @@ int main(void)
 		return 1;
 	}
 
-	GP_Pixel pix = {1, GP_PIXEL_G1};
+	GP_Pixel pix = 1;
 
 	if (GP_Line(context, 0, 0, 11, 13, pix)) {
 		fprintf(stderr, "GP_Line not implemented for G1\n");

@@ -56,22 +56,22 @@ GP_RetCode GP_VLineXYY(GP_Context *context, int x, int y0, int y1, GP_Pixel pixe
 	switch(context->bits_per_pixel) {
 	case 32:
 		for (i = 0; i < height; i++, p += context->bytes_per_row)
-			GP_WritePixel32bpp(p, pixel.val);
+			GP_WritePixel32bpp(p, pixel);
 		break;
 
 	case 24:
 		for (i = 0; i < height; i++, p += context->bytes_per_row)
-			GP_WritePixel24bpp(p, pixel.val);
+			GP_WritePixel24bpp(p, pixel);
 		break;
 
 	case 16:
 		for (i = 0; i < height; i++, p += context->bytes_per_row)
-			GP_WritePixel16bpp(p, pixel.val);
+			GP_WritePixel16bpp(p, pixel);
 		break;
 
 	case 8:
 		for (i = 0; i < height; i++, p += context->bytes_per_row)
-			GP_WritePixel8bpp(p, pixel.val);
+			GP_WritePixel8bpp(p, pixel);
 		break;
 
 	default:

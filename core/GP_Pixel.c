@@ -74,17 +74,6 @@ uint32_t GP_PixelSize(GP_PixelType type)
 	return pixel_type_infos[type].bits;
 }
 
-bool GP_PixelCmp(GP_Pixel *pixel1, GP_Pixel *pixel2)
-{
-	if (pixel1->type != pixel2->type)
-		return false;
-
-	if (pixel1->val == pixel2->val)
-		return true;
-
-	return false;
-}
-
 GP_ColorType GP_PixelTypeToColorType(GP_PixelType type)
 {
 	if (type >= GP_PIXEL_MAX)
@@ -100,122 +89,120 @@ GP_RetCode GP_ColorToPixelType(GP_PixelType pixel_type, GP_Color color, GP_Pixel
 	if (pixel == NULL)
 		return GP_ENULLPTR;
 
-	pixel->type = pixel_type;
-
 	GP_RetCode ret;
 
-	switch (pixel->type) {
+	switch (pixel_type) {
 		case GP_PIXEL_PAL4:
 			ret = GP_ColorConvert(&color, GP_PAL4);
 			CHECK_RET(ret);
-			pixel->val = color.pal4.index;
+			*pixel = color.pal4.index;
 			return ret;
 		break;
 		case GP_PIXEL_PAL8:
 			ret = GP_ColorConvert(&color, GP_PAL8);
 			CHECK_RET(ret);
-			pixel->val = color.pal8.index;
+			*pixel = color.pal8.index;
 			return ret;
 		break;
 		case GP_PIXEL_G1:
 			ret = GP_ColorConvert(&color, GP_G1);
 			CHECK_RET(ret);
-			pixel->val = color.g1.gray;
+			*pixel = color.g1.gray;
 			return ret;
 		break;
 		case GP_PIXEL_G2:
 			ret = GP_ColorConvert(&color, GP_G2);
 			CHECK_RET(ret);
-			pixel->val = color.g2.gray;
+			*pixel = color.g2.gray;
 			return ret;
 		break;
 		case GP_PIXEL_G4:
 			ret = GP_ColorConvert(&color, GP_G4);
 			CHECK_RET(ret);
-			pixel->val = color.g4.gray;
+			*pixel = color.g4.gray;
 			return ret;
 		break;
 		case GP_PIXEL_G8:
 			ret = GP_ColorConvert(&color, GP_G8);
 			CHECK_RET(ret);
-			pixel->val = color.g8.gray;
+			*pixel = color.g8.gray;
 			return ret;
 		break;
 		case GP_PIXEL_RGB888:
 		case GP_PIXEL_XRGB8888:
 			ret = GP_ColorConvert(&color, GP_RGB888);
 			CHECK_RET(ret);
-			pixel->val = color.rgb888.red   << 0x10 |
-			             color.rgb888.green << 0x08 | 
-				     color.rgb888.blue;
+			*pixel = color.rgb888.red   << 0x10 |
+			         color.rgb888.green << 0x08 | 
+			 	 color.rgb888.blue;
 			return ret;
 		break;
 		case GP_PIXEL_BGR888:
 		case GP_PIXEL_XBGR8888:
 			ret = GP_ColorConvert(&color, GP_RGB888);
 			CHECK_RET(ret);
-			pixel->val = color.rgb888.red           |
-			             color.rgb888.green << 0x08 | 
-				     color.rgb888.blue  << 0x10;
+			*pixel = color.rgb888.red           |
+			         color.rgb888.green << 0x08 | 
+				 color.rgb888.blue  << 0x10;
 			return ret;
 		break;
 		case GP_PIXEL_RGBX8888:
 			ret = GP_ColorConvert(&color, GP_RGB888);
 			CHECK_RET(ret);
-			pixel->val = color.rgb888.red   << 0x18 |
-			             color.rgb888.green << 0x10 | 
-			             color.rgb888.blue  << 0x8;
+			*pixel = color.rgb888.red   << 0x18 |
+			         color.rgb888.green << 0x10 | 
+			         color.rgb888.blue  << 0x8;
 			return ret;
 		break;
 		case GP_PIXEL_BGRX8888:
 			ret = GP_ColorConvert(&color, GP_RGB888);
 			CHECK_RET(ret);
-			pixel->val = color.rgb888.red   << 0x08 |
-			             color.rgb888.green << 0x10 | 
-				     color.rgb888.blue  << 0x18;
+			*pixel = color.rgb888.red   << 0x08 |
+			         color.rgb888.green << 0x10 | 
+				 color.rgb888.blue  << 0x18;
 			return ret;
 		break;
 		case GP_PIXEL_ARGB8888:
 			ret = GP_ColorConvert(&color, GP_RGBA8888);
 			CHECK_RET(ret);
-			pixel->val = color.rgba8888.red   << 0x10 |
-			             color.rgba8888.green << 0x08 |
-		                     color.rgba8888.blue          |
-			             color.rgba8888.alpha << 0x18;
+			*pixel = color.rgba8888.red   << 0x10 |
+			         color.rgba8888.green << 0x08 |
+		                 color.rgba8888.blue          |
+			         color.rgba8888.alpha << 0x18;
 			return ret;
 		break;
 		case GP_PIXEL_RGBA8888:
 			ret = GP_ColorConvert(&color, GP_RGBA8888);
 			CHECK_RET(ret);
-			pixel->val = color.rgba8888.red   << 0x18 |
-			             color.rgba8888.green << 0x10 |
-		                     color.rgba8888.blue  << 0x08 |
-			             color.rgba8888.alpha;
+			*pixel = color.rgba8888.red   << 0x18 |
+			         color.rgba8888.green << 0x10 |
+		                 color.rgba8888.blue  << 0x08 |
+			        color.rgba8888.alpha;
 			return ret;
 		break;
 		case GP_PIXEL_ABGR8888:
 			ret = GP_ColorConvert(&color, GP_RGBA8888);
 			CHECK_RET(ret);
-			pixel->val = color.rgba8888.red           |
-			             color.rgba8888.green << 0x08 |
-			             color.rgba8888.blue  << 0x10 |
-				     color.rgba8888.alpha << 0x18;
+			*pixel = color.rgba8888.red           |
+			         color.rgba8888.green << 0x08 |
+			         color.rgba8888.blue  << 0x10 |
+				 color.rgba8888.alpha << 0x18;
 			return ret;
 		break;
 		case GP_PIXEL_BGRA8888:
 			ret = GP_ColorConvert(&color, GP_RGBA8888);
 			CHECK_RET(ret);
-			pixel->val = color.rgba8888.red   << 0x08 |
-			             color.rgba8888.green << 0x10 |
-			             color.rgba8888.blue  << 0x18 |
-			             color.rgba8888.alpha;
+			*pixel = color.rgba8888.red   << 0x08 |
+			         color.rgba8888.green << 0x10 |
+			         color.rgba8888.blue  << 0x18 |
+			         color.rgba8888.alpha;
 			return ret;
 		break;
 		case GP_PIXEL_MAX:
 		break;
 	}
 
-	if (pixel->type >= GP_PIXEL_MAX)
+	if (pixel_type >= GP_PIXEL_MAX)
 		return GP_EINVAL;
 	else
 		return GP_ENOIMPL;
@@ -229,6 +216,15 @@ GP_RetCode GP_ColorToPixel(GP_Context *context, GP_Color color, GP_Pixel *pixel)
 	return GP_ColorToPixelType(context->pixel_type, color, pixel);
 }
 
+GP_RetCode GP_ColorNameToPixel(GP_Context *context, GP_ColorName name, GP_Pixel *pixel)
+{
+	if (context == NULL || pixel == NULL)
+		return GP_ENULLPTR;
+	
+	GP_Color color = GP_COLNAME_PACK(name);
+	return GP_ColorToPixelType(context->pixel_type, color, pixel);
+}
+
 GP_RetCode GP_ColorNameToPixelType(GP_PixelType pixel_type, GP_ColorName name, GP_Pixel *pixel)
 {
 	if (pixel == NULL)
@@ -236,65 +232,4 @@ GP_RetCode GP_ColorNameToPixelType(GP_PixelType pixel_type, GP_ColorName name, G
 	
 	GP_Color color = GP_COLNAME_PACK(name);
 	return GP_ColorToPixelType(pixel_type, color, pixel);
-}
-
-GP_RetCode GP_ColorNameToPixel(GP_Context *context, GP_ColorName name, GP_Pixel *pixel)
-{
-	if (context == NULL || pixel == NULL)
-		return GP_ENULLPTR;
-
-	GP_Color color = GP_COLNAME_PACK(name);
-	return GP_ColorToPixelType(context->pixel_type, color, pixel);
-}
-
-GP_RetCode GP_PixelToColor(GP_Pixel pixel, GP_Color *color)
-{
-	switch (pixel.type) {
-		case GP_PIXEL_PAL4:
-			GP_PAL4_FILL(color, pixel.val);
-			return GP_ESUCCESS;
-		break;
-		case GP_PIXEL_PAL8:
-			GP_PAL8_FILL(color, pixel.val);
-			return GP_ESUCCESS;
-		break;
-		case GP_PIXEL_G1:
-			GP_G1_FILL(color, pixel.val);
-			return GP_ESUCCESS;
-		break;
-		case GP_PIXEL_G2:
-			GP_G2_FILL(color, pixel.val);
-			return GP_ESUCCESS;
-		break;
-		case GP_PIXEL_G4:
-			GP_G4_FILL(color, pixel.val);
-			return GP_ESUCCESS;
-		break;
-		case GP_PIXEL_G8:
-			GP_G8_FILL(color, pixel.val);
-			return GP_ESUCCESS;
-		break;
-		case GP_PIXEL_RGB888:
-		case GP_PIXEL_XRGB8888:
-			GP_RGB888_FILL(color, (pixel.val >> 0x10) & 0xff,
-			                      (pixel.val >> 0x08) & 0xff,
-			                      (pixel.val & 0xff));
-			return GP_ESUCCESS;
-		break;
-		case GP_PIXEL_BGR888:
-		case GP_PIXEL_XBGR8888:
-			GP_RGB888_FILL(color, (pixel.val & 0xff),
-			                      (pixel.val >> 0x08) & 0xff,
-			                      (pixel.val >> 0x10) & 0xff);
-			
-			return GP_ESUCCESS;
-		break;
-		case GP_PIXEL_MAX:
-		break;
-	}
-	
-	if (pixel.type >= GP_PIXEL_MAX)
-		return GP_ENOIMPL;
-	else
-		return GP_EINVAL;
 }

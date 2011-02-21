@@ -49,7 +49,7 @@ GP_RetCode GP_PutPixel8bpp(GP_Context *context, int x, int y, GP_Pixel pixel)
 	CLIP_PIXEL(context, x, y);
 
 	uint8_t *p = GP_PIXEL_ADDRESS(context, y, x);
-	GP_WritePixel8bpp(p, pixel.val);
+	GP_WritePixel8bpp(p, pixel);
 	return GP_ESUCCESS;
 }
 
@@ -58,7 +58,7 @@ GP_RetCode GP_PutPixel16bpp(GP_Context *context, int x, int y, GP_Pixel pixel)
 	CLIP_PIXEL(context, x, y);
 
 	uint8_t *p = GP_PIXEL_ADDRESS(context, y, x);
-	GP_WritePixel16bpp(p, pixel.val);
+	GP_WritePixel16bpp(p, pixel);
 	return GP_ESUCCESS;
 }
 
@@ -67,7 +67,7 @@ GP_RetCode GP_PutPixel24bpp(GP_Context *context, int x, int y, GP_Pixel pixel)
 	CLIP_PIXEL(context, x, y);
 
 	uint8_t *p = GP_PIXEL_ADDRESS(context, y, x);
-	GP_WritePixel24bpp(p, pixel.val);
+	GP_WritePixel24bpp(p, pixel);
 	return GP_ESUCCESS;
 }
 
@@ -76,7 +76,7 @@ GP_RetCode GP_PutPixel32bpp(GP_Context *context, int x, int y, GP_Pixel pixel)
 	CLIP_PIXEL(context, x, y);
 
 	uint8_t *p = GP_PIXEL_ADDRESS(context, y, x);
-	GP_WritePixel32bpp(p, pixel.val);
+	GP_WritePixel32bpp(p, pixel);
 	return GP_ESUCCESS;
 }
 
