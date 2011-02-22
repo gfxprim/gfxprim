@@ -25,6 +25,8 @@
 
 #include "GP.h"
 
+#include "GP_FnPerBpp.h"
+
 /* Tests whether the coordinates are inside the clip rectangle;
  * if not, immediately exits with GP_ESUCCESS.
  */
@@ -43,6 +45,25 @@
  * already know what the pixel value is, and it would be redundant to
  * calculate it over and over.
  */
+
+static const uint8_t pixels_1bpp[8] = {
+	0x80, 0x40, 0x20, 0x10, 0x08, 0x04, 0x02, 0x01,
+};
+
+GP_RetCode GP_PutPixel1bpp(GP_Context *context, int x, int y, GP_Pixel pixel)
+{
+	CLIP_PIXEL(context, x, y);
+
+	uint8_t *p = GP_PIXEL_ADDRESS(context, y, x);
+	uint8_t off = x % 8; 
+
+	if (pixel)
+		*p |=  pixels_1bpp[off];
+	else
+		*p &= ~pixels_1bpp[off];
+
+	return GP_ESUCCESS;
+}
 
 GP_RetCode GP_PutPixel8bpp(GP_Context *context, int x, int y, GP_Pixel pixel)
 {
@@ -91,18 +112,7 @@ GP_RetCode GP_PutPixel(GP_Context *context, int x, int y, GP_Pixel pixel)
 	if (!GP_IS_CONTEXT_VALID(context))
 		return GP_EBADCONTEXT;
 
-	switch (context->bits_per_pixel) {
-	case 32:
-		return GP_PutPixel32bpp(context, x, y, pixel);
-	case 24:
-		return GP_PutPixel24bpp(context, x, y, pixel);
-	case 16:
-		return GP_PutPixel16bpp(context, x, y, pixel);
-	case 8:
-		return GP_PutPixel8bpp(context, x, y, pixel);
-	}
-
-	return GP_ENOIMPL;
+	GP_FN_PER_BPP(GP_PutPixel, x, y, pixel);
 }
 
 GP_RetCode GP_TPutPixel(GP_Context *context, int x, int y, GP_Pixel pixel)

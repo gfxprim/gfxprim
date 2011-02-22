@@ -45,9 +45,9 @@ err:
 	return GP_EBADFILE;
 }
 
-#define BITMASK(byte, bit) (((byte)>>bit)&0x01)
+#define BITMASK(byte, bit) (!!((byte)&(0x80>>(bit))))
 
-static GP_RetCode write_line(FILE *f, const char *data, GP_Context *src)
+static GP_RetCode write_line(FILE *f, const uint8_t *data, GP_Context *src)
 {
 	uint32_t x, max = src->bytes_per_row;
 	int ret;
@@ -56,6 +56,11 @@ static GP_RetCode write_line(FILE *f, const char *data, GP_Context *src)
 		max--;
 
 	for (x = 0; x < max; x++) {
+		
+		if (x != 0)
+			if (fprintf(f, " ") < 0)
+				return GP_EBADFILE;
+		
 		ret = fprintf(f, "%u %u %u %u %u %u %u %u",
 		                 BITMASK(data[x], 0),
 		                 BITMASK(data[x], 1),
@@ -101,7 +106,7 @@ GP_RetCode GP_SavePBM(const char *res, GP_Context *src)
 		goto err;
 
 	for (y = 0; y < src->h; y++) {
-		ret = write_line(f, src->pixels + src->bytes_per_row * y, src);
+		ret = write_line(f, (uint8_t*)src->pixels + src->bytes_per_row * y, src);
 
 		if (ret) {
 			fclose(f);

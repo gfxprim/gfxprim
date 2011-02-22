@@ -73,3 +73,20 @@ void GP_ContextFree(GP_Context *context)
 	free(context->pixels);
 	free(context);
 }
+
+GP_RetCode GP_ContextDump(GP_Context *context, const char *path)
+{
+	FILE *f = fopen(path, "w");
+	uint32_t x, y;
+
+	if (f == NULL)
+		return GP_EBADFILE;
+
+	for (y = 0; y < context->h; y++) {
+		for (x = 0; x < context->bytes_per_row; x++)
+			fprintf(f, "0x%02x ", ((uint8_t *)context->pixels)[y * context->bytes_per_row + x]);
+		fprintf(f, "\n");
+	}
+
+	fclose(f);
+}

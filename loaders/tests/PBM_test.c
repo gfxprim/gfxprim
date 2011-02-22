@@ -30,20 +30,23 @@
 #include <GP.h>
 #include <GP_PBM.h>
 
+#define W 91
+#define H 89
+
 int main(void)
 {
-	GP_Context *context = GP_ContextAlloc(11, 13, GP_PIXEL_G1);
+	GP_Context *context = GP_ContextAlloc(W, H, GP_PIXEL_G1);
 
 	if (context == NULL) {
 		fprintf(stderr, "Couldn't allocate context\n");
 		return 1;
 	}
 
-	GP_Pixel pix = 1;
-
-	if (GP_Line(context, 0, 0, 11, 13, pix)) {
-		fprintf(stderr, "GP_Line not implemented for G1\n");
-	}
+	GP_Line(context, 0, 0, W, H, 1);
+	GP_FillCircle(context, 20, 20, 9, 1);
+	GP_FillCircle(context, 20, 20, 7, 0);
+	GP_FillCircle(context, 20, 20, 4, 1);
+	GP_Text(context, NULL, 10, 40, GP_VALIGN_BELOW | GP_ALIGN_RIGHT, "Test  Test", 1);
 
 	if (GP_SavePBM("test.pbm", context)) {
 		fprintf(stderr, "Can't save context\n");

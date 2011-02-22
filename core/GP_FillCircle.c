@@ -27,6 +27,7 @@
 #include "GP_FnPerBpp.h"
 #include "algo/FillCircle.algo.h"
 
+DEF_FILLCIRCLE_FN(GP_FillCircle1bpp, GP_Context *, GP_Pixel, GP_HLine1bpp)
 DEF_FILLCIRCLE_FN(GP_FillCircle8bpp, GP_Context *, GP_Pixel, GP_HLine8bpp)
 DEF_FILLCIRCLE_FN(GP_FillCircle16bpp, GP_Context *, GP_Pixel, GP_HLine16bpp)
 DEF_FILLCIRCLE_FN(GP_FillCircle24bpp, GP_Context *, GP_Pixel, GP_HLine24bpp)

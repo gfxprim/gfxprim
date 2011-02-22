@@ -28,6 +28,7 @@
 #include "GP_FnPerBpp.h"
 
 /* Generate drawing functions for various bit depths. */
+DEF_CIRCLE_FN(GP_Circle1bpp, GP_Context *, GP_Pixel, GP_PutPixel1bpp)
 DEF_CIRCLE_FN(GP_Circle8bpp, GP_Context *, GP_Pixel, GP_PutPixel8bpp)
 DEF_CIRCLE_FN(GP_Circle16bpp, GP_Context *, GP_Pixel, GP_PutPixel16bpp)
 DEF_CIRCLE_FN(GP_Circle24bpp, GP_Context *, GP_Pixel, GP_PutPixel24bpp)

@@ -63,9 +63,9 @@ inline GP_PixelType GP_GetContextPixelType(const GP_Context *context);
  * Rows and columns are specified in the image's orientation
  * (i.e. they might not be XY if the image is rotated).
  */
-#define GP_PIXEL_ADDRESS(context, w, h) ((uint8_t *) context->pixels \
-	+ w * context->bytes_per_row \
-	+ h * (context->bits_per_pixel / 8))
+#define GP_PIXEL_ADDRESS(context, y, x) ((uint8_t *) (context->pixels \
+	+ y * context->bytes_per_row \
+	+ (x * context->bits_per_pixel) / 8))
 
 /* Evaluates to true if the context is valid (sane), false otherwise. */
 #define GP_IS_CONTEXT_VALID(context) ( \
@@ -86,8 +86,19 @@ inline GP_PixelType GP_GetContextPixelType(const GP_Context *context);
 		GP_CHECK(context->clip_h_max < context->h); \
 	} while (0)
 
+/*
+ * Allocate context.
+ */
 GP_Context *GP_ContextAlloc(uint32_t w, uint32_t h, GP_PixelType type);
 
+/*
+ * Free context.
+ */
 void GP_ContextFree(GP_Context *context);
+
+/*
+ * Dump context into file
+ */
+GP_RetCode GP_ContextDump(GP_Context *context, const char *path);
 
 #endif /* GP_CONTEXT_H */

@@ -29,6 +29,7 @@
 
 static GP_TextStyle DefaultStyle = GP_DEFAULT_TEXT_STYLE;
 
+DEF_TEXT_FN(GP_Text1bpp, GP_Context *, GP_Pixel, GP_HLine1bpp)
 DEF_TEXT_FN(GP_Text8bpp, GP_Context *, GP_Pixel, GP_HLine8bpp)
 DEF_TEXT_FN(GP_Text16bpp, GP_Context *, GP_Pixel, GP_HLine16bpp)
 DEF_TEXT_FN(GP_Text24bpp, GP_Context *, GP_Pixel, GP_HLine24bpp)

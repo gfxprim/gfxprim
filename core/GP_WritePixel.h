@@ -71,6 +71,13 @@
  * Calls for writing a linear block of pixels.
  */
 
+/*
+ * These calls are not byte aligned, thuss needs start offset.
+ */
+void GP_WritePixels1bpp(uint8_t *start, uint8_t off, size_t cnt, uint8_t val);
+void GP_WritePixels2bpp(uint8_t *start, uint8_t off, size_t cnt, uint8_t val);
+void GP_WritePixels4bpp(uint8_t *start, uint8_t off, size_t cnt, uint8_t val);
+
 void GP_WritePixels8bpp(void *start, size_t count, uint8_t value);
 void GP_WritePixels16bpp(void *start, size_t count, uint16_t value);
 void GP_WritePixels24bpp(void *start, size_t count, uint32_t value);

@@ -61,3 +61,17 @@ void FN_NAME(GP_Context *context, int x0, int x1, int y, GP_Pixel pixel) \
 \
 	WRITE_PIXELS(start, length, pixel); \
 }
+
+/*
+ * Not byte aligned pixels
+ */
+#define DEF_HLINE_BU_FN(FN_NAME, CONTEXT_T, PIXEL_T, PIXEL_ADDRESS, WRITE_PIXELS) \
+void FN_NAME(GP_Context *context, int x0, int x1, int y, GP_Pixel pixel) \
+{ \
+	ORDER_AND_CLIP_COORDS; \
+\
+	size_t length = 1 + x1 - x0; \
+	void *start = GP_PIXEL_ADDRESS(context, y, x0); \
+\
+	WRITE_PIXELS(start, x0 % 8, length, pixel); \
+}
