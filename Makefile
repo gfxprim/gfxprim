@@ -10,8 +10,6 @@ drivers:
 
 core:
 	cd core && $(MAKE) all
-	ln -sf core/libGP_core.so .
-	ln -sf core/libGP_core.so.0 .
 
 sdl: core
 	cd targets/sdl && $(MAKE) all
@@ -34,7 +32,6 @@ install: all
 	install -m 664 targets/sdl/*.so targets/sdl/*.so.0 targets/sdl/*.a $(LIB_LOC)
 
 clean:
-	rm -f *.o *.a *.so *.so.0
 	cd benchmark && $(MAKE) clean
 	cd core && $(MAKE) clean
 	cd targets/sdl && $(MAKE) clean
