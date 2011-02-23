@@ -34,7 +34,7 @@
 
 /* This structure holds all information needed for drawing into an image. */
 typedef struct GP_Context {
-	void *pixels;			/* pointer to image pixels */
+	uint8_t *pixels;		/* pointer to image pixels */
 	uint8_t bits_per_pixel;		/* values: 1, 2, 4, 8, 16, 24, 32 */
 	uint32_t bytes_per_row;
 	uint32_t w;			/* width */
