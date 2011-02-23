@@ -23,24 +23,105 @@
  *                                                                           *
  *****************************************************************************/
 
+/*
+
+  PBM portable bitmap loader/saver.
+
+  Format:
+  
+  a magick number value of 'P' and '1'
+  whitespace (blanks, TABs, CRs, LFs).
+  ascii width
+  whitespace
+  ascii height
+  whitespace
+  width * height symbols '1' or '0' ('1' == black, '0' == white)
+  
+  lines starting with '#' are comments to the end of line
+  
+ */
+
+#include <stdio.h>
+#include <stdint.h>
+#include <inttypes.h>
 #include "GP_PBM.h"
 
 GP_RetCode GP_LoadPBM(const char *src, GP_Context **res)
 {
 	FILE *f = fopen(src, "r");
 	char h1, h2;
+	uint32_t w, h, x, y;
 
 	if (f == NULL)
 		return GP_EBADFILE;
 
 	if (fscanf(f, "%c%c", &h1, &h2) < 2)
-		goto err;
+		goto err1;
 
 	if (h1 != 'P' || h2 != '1')
-		goto err;
-	
+		goto err1;
+
+	if (fscanf(f, "%"PRIu32"%"PRIu32, &w, &h) < 2)
+		goto err1;
+
+	*res = GP_ContextAlloc(w, h, GP_PIXEL_G1);
+
+	if (*res == NULL) {
+		fclose(f);
+		return GP_ENOMEM;
+	}
+
+	uint8_t *pixel = (*res)->pixels;
+
+	for (y = 0; y < h; y++) {
+		for (x = 0; x < w;) {
+			int run = 1;
+			
+			while (run) {
+				switch (fgetc(f)) {
+				case EOF:
+					goto err2;
+				case '#': {
+					int cmt = 1;
+					while (cmt) {
+						switch (fgetc(f)) {
+						case '\n':
+							cmt = 0;
+							break;
+						case EOF:
+							goto err2;
+						}
+					}
+					break;
+				}
+				case '0':
+					*pixel &= ~(0x80>>(x%8));
+					run = 0;
+					break;
+				case '1':
+					*pixel |= 0x80>>(x%8);
+					run = 0;
+					break;
+				default:
+					break;
+				}
+			}
+			
+			x++;
+			
+			if (x%8 == 0)
+				pixel++;
+		}
+
+		if (w%8)
+			pixel++;
+	}
+
+	fclose(f);
 	return GP_ESUCCESS;
-err:
+err2:
+	free(*res);
+err1:
 	fclose(f);
 	return GP_EBADFILE;
 }
