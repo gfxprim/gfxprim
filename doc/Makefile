@@ -1,7 +1,10 @@
-all: api.html
+all: api.html context.html
 
 api.html: api.txt
 	asciidoc -a toc api.txt
+
+context.html: context.txt
+	asciidoc -a context.txt
 
 api.pdf: api.txt
 	asciidoc -b docbook api.txt

@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 
 echo "Generating pbm file"
 ./runtest.sh PBM_test &> /dev/null

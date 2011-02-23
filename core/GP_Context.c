@@ -46,7 +46,7 @@ GP_Context *GP_ContextAlloc(uint32_t w, uint32_t h, GP_PixelType type)
 	}
 
 	context->pixels         = pixels;
-	context->bits_per_pixel = bpp;
+	context->bpp            = bpp;
 	context->bytes_per_row  = bpr;
 
 	context->w = w;

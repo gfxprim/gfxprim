@@ -35,7 +35,7 @@
 /* This structure holds all information needed for drawing into an image. */
 typedef struct GP_Context {
 	uint8_t *pixels;		/* pointer to image pixels */
-	uint8_t bits_per_pixel;		/* values: 1, 2, 4, 8, 16, 24, 32 */
+	uint8_t bpp;			/* values: 1, 2, 4, 8, 16, 24, 32 */
 	uint32_t bytes_per_row;
 	uint32_t w;			/* width */
 	uint32_t h;      		/* heigth */
@@ -65,7 +65,7 @@ inline GP_PixelType GP_GetContextPixelType(const GP_Context *context);
  */
 #define GP_PIXEL_ADDRESS(context, y, x) ((uint8_t *) (context->pixels \
 	+ y * context->bytes_per_row \
-	+ (x * context->bits_per_pixel) / 8))
+	+ (x * context->bpp) / 8))
 
 /* Evaluates to true if the context is valid (sane), false otherwise. */
 #define GP_IS_CONTEXT_VALID(context) ( \

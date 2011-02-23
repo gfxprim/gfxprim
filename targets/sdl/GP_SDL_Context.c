@@ -115,7 +115,7 @@ inline GP_RetCode GP_SDL_ContextFromSurface(
 
 	/* basic structure and size */
 	context->pixels = surf->pixels;
-	context->bits_per_pixel = 8 * surf->format->BytesPerPixel;
+	context->bpp = 8 * surf->format->BytesPerPixel;
 	context->pixel_type = pixeltype;
 	context->bytes_per_row = surf->pitch;
 	context->w = surf->w;
