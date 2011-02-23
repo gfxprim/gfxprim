@@ -1,0 +1,50 @@
+GFXprim internals documentation
+===============================
+Cyril Hrubis <metan@ucw.cz>
+
+GP_Context is data structure for storing 'in memory' bitmaps.
+
+Data Structure
+--------------
+
+[source,c]
+-------------------------------------------------------------------------------
+typedef struct GP_Context {
+	uint8_t *pixels;         /* Pointer to array of pixels              */
+	uint8_t  bpp;            /* Bits per pixel, always be power of two  */
+	uint32_t bytes_per_row;  /* Bytes per row, rows are padded to bytes */
+	uint32_t w;              /* Width in pixels                         */
+	uint32_t h;              /* Height in pixels                        */
+
+	GP_PixelType pixel_type; /* Enum, bitmap pixel type id              */
+
+	int axes_swap:1;         /* Context rotation and mirroring          */
+	int x_swap:1;
+	int y_swap:1;
+ 
+	uint32_t clip_w_min;     /* Clipping rectanle                       */
+	uint32_t clip_w_max;
+	uint32_t clip_h_min;
+	uint32_t clip_h_max;
+} GP_Context;
+-------------------------------------------------------------------------------
+
+The 'GP_Context' is structure to store metadata needed for bitmaps. The data
+itself are stored as bitmap lines (aligned to bytes) in one dimensional array.
+The addres of pixel could be determined by GP_PIXEL_ADDRESS(context, x, y)
+which returns byte aligned addres for the pixel.
+
+Rotation
+~~~~~~~~
+The rotation and mirroring is honored only by functions starting with extra T.
+So GP_TLine() is equal to GP_Line(), when all axes_sawp, x_swap and y_swap are
+set to zero.
+
+There are various macros for transforming coordinates and sizes in
+'core/GP_Transform.h'.
+
+Clipping rectangle
+~~~~~~~~~~~~~~~~~~
+All drawing functions honors the clipping rectangle, eg. no pixels are put,
+even when the coordinates are inside the bitmap, if they are outside of
+clipping rectangle.
