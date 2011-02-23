@@ -14,5 +14,4 @@ all: $(TESTS)
 
 clean:
 	rm -f *.o
-	rm -f $(TESTS) test.pbm
-
+	rm -f $(TESTS) test.pbm test.pgm
