@@ -29,14 +29,14 @@ typedef struct GP_Context {
 } GP_Context;
 -------------------------------------------------------------------------------
 
-The 'GP_Context' is structure to store metadata needed for bitmaps. The data
-itself are stored as bitmap lines (aligned to bytes) in one dimensional array.
+The 'GP_Context' holds metadata needed for bitmaps. The values of pixels
+are stored as bitmap lines (aligned to bytes) in one dimensional array.
 The addres of pixel could be determined by GP_PIXEL_ADDRESS(context, x, y)
 which returns byte aligned addres for the pixel.
 
 Rotation
 ~~~~~~~~
-The rotation and mirroring is honored only by functions starting with extra T.
+Rotation and mirroring is honored only by functions starting with extra T.
 So GP_TLine() is equal to GP_Line(), when all axes_sawp, x_swap and y_swap are
 set to zero.
 
@@ -45,6 +45,6 @@ There are various macros for transforming coordinates and sizes in
 
 Clipping rectangle
 ~~~~~~~~~~~~~~~~~~
-All drawing functions honors the clipping rectangle, eg. no pixels are put,
+All drawing functions honor the clipping rectangle, eg. no pixels are put,
 even when the coordinates are inside the bitmap, if they are outside of
 clipping rectangle.
