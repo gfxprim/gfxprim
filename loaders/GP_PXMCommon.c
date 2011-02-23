@@ -29,6 +29,18 @@
 
 #include "GP_PXMCommon.h"
 
+static int read_comment(FILE *f)
+{
+	for (;;) {
+		switch (fgetc(f)) {
+		case '\n':
+			return 0;
+		case EOF:
+			return 1;
+		}
+	}
+}
+
 GP_RetCode GP_PXMLoad1bpp(FILE *f, GP_Context *context)
 {
 	uint8_t *pixel = context->pixels;
@@ -42,19 +54,10 @@ GP_RetCode GP_PXMLoad1bpp(FILE *f, GP_Context *context)
 				switch (fgetc(f)) {
 				case EOF:
 					return GP_EBADFILE;
-				case '#': {
-					int cmt = 1;
-					while (cmt) {
-						switch (fgetc(f)) {
-						case '\n':
-							cmt = 0;
-							break;
-						case EOF:
-							return GP_EBADFILE;
-						}
-					}
+				case '#':
+					if (read_comment(f))
+						return GP_EBADFILE;
 					break;
-				}
 				case '0':
 					*pixel &= ~(0x80>>(x%8));
 					run = 0;
@@ -81,9 +84,62 @@ GP_RetCode GP_PXMLoad1bpp(FILE *f, GP_Context *context)
 	return GP_ESUCCESS;
 }
 
+GP_RetCode GP_PXMLoad2bpp(FILE *f, GP_Context *context)
+{
+	uint8_t *pixel = context->pixels;
+	uint32_t x, y;
+
+	for (y = 0; y < context->h; y++) {
+		for (x = 0; x < context->w;) {
+			int run = 1;
+			
+			while (run) {
+				switch (fgetc(f)) {
+				case EOF:
+					return GP_EBADFILE;
+				case '#':
+					if (read_comment(f))
+						return GP_EBADFILE;
+					break;
+				case '0':
+					*pixel &= ~(0xc0>>(2*(x%4)));
+					run = 0;
+					break;
+				case '1':
+					*pixel &= ~(0x80>>(2*(x%4)));
+					*pixel |= 0x40>>(2*(x%4));
+					run = 0;
+					break;
+				case '2':
+					*pixel |= 0x80>>(2*(x%4));
+					*pixel &= ~(0x40>>(2*(x%4)));
+					run = 0;
+					break;
+				case '3':
+					*pixel |= 0xc0>>(2*(x%4));
+					run = 0;
+					break;
+				default:
+					break;
+				}
+			}
+			
+			x++;
+			
+			if (x%4 == 0)
+				pixel++;
+		}
+
+		if (context->w%4)
+			pixel++;
+	}
+
+	return GP_ESUCCESS;
+}
+
 #define BITMASK(byte, bit) (!!((byte)&(0x80>>(bit))))
 
-static GP_RetCode write_line(FILE *f, const uint8_t *data, GP_Context *src)
+static GP_RetCode write_line_1bpp(FILE *f, const uint8_t *data, GP_Context *src)
 {
 	uint32_t x, max = src->bytes_per_row;
 	int ret;
@@ -129,7 +185,60 @@ GP_RetCode GP_PXMSave1bpp(FILE *f, GP_Context *context)
 	GP_RetCode ret;
 
 	for (y = 0; y < context->h; y++) {
-		ret = write_line(f, context->pixels + context->bytes_per_row * y, context);
+		ret = write_line_1bpp(f, context->pixels + context->bytes_per_row * y, context);
+
+		if (ret)
+			return ret;
+	}	
+
+	return GP_ESUCCESS;
+}
+
+#define MASK_2BPP(byte, pix) (0x03 & (byte>>((3 - pix)<<1)))
+
+static GP_RetCode write_line_2bpp(FILE *f, const uint8_t *data, GP_Context *src)
+{
+	uint32_t x, max = src->bytes_per_row;
+	int ret;
+
+	if (src->w % 4)
+		max--;
+
+	for (x = 0; x < max; x++) {
+		
+		if (x != 0)
+			if (fprintf(f, " ") < 0)
+				return GP_EBADFILE;
+		
+		ret = fprintf(f, "%u %u %u %u",
+		                 MASK_2BPP(data[x], 0),
+		                 MASK_2BPP(data[x], 1),
+		                 MASK_2BPP(data[x], 2),
+		                 MASK_2BPP(data[x], 3));
+		if (ret < 0)
+			return GP_EBADFILE;
+	}
+
+	for (x = 0; x < (src->w % 4); x++) {
+		ret = fprintf(f, " %u", MASK_2BPP(data[max], x));
+
+		if (ret < 0)
+			return GP_EBADFILE;
+	}
+
+	if (fprintf(f, "\n") < 0)
+		return GP_EBADFILE;
+
+	return GP_ESUCCESS;
+}
+
+GP_RetCode GP_PXMSave2bpp(FILE *f, GP_Context *context)
+{
+	uint32_t y;
+	GP_RetCode ret;
+
+	for (y = 0; y < context->h; y++) {
+		ret = write_line_2bpp(f, context->pixels + context->bytes_per_row * y, context);
 
 		if (ret)
 			return ret;

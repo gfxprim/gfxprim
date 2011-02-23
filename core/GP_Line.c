@@ -28,6 +28,7 @@
 #include "GP_FnPerBpp.h"
 
 DEF_LINE_FN(GP_Line1bpp, GP_Context *, GP_Pixel, GP_PutPixel1bpp)
+DEF_LINE_FN(GP_Line2bpp, GP_Context *, GP_Pixel, GP_PutPixel2bpp)
 DEF_LINE_FN(GP_Line8bpp, GP_Context *, GP_Pixel, GP_PutPixel8bpp)
 DEF_LINE_FN(GP_Line16bpp, GP_Context *, GP_Pixel, GP_PutPixel16bpp)
 DEF_LINE_FN(GP_Line24bpp, GP_Context *, GP_Pixel, GP_PutPixel24bpp)

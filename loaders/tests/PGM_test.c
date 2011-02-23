@@ -23,38 +23,59 @@
  *                                                                           *
  *****************************************************************************/
 
-#include "GP.h"
-#include "GP_FnPerBpp.h"
-#include "algo/FillCircle.algo.h"
+ /*
 
-DEF_FILLCIRCLE_FN(GP_FillCircle1bpp, GP_Context *, GP_Pixel, GP_HLine1bpp)
-DEF_FILLCIRCLE_FN(GP_FillCircle2bpp, GP_Context *, GP_Pixel, GP_HLine2bpp)
-DEF_FILLCIRCLE_FN(GP_FillCircle8bpp, GP_Context *, GP_Pixel, GP_HLine8bpp)
-DEF_FILLCIRCLE_FN(GP_FillCircle16bpp, GP_Context *, GP_Pixel, GP_HLine16bpp)
-DEF_FILLCIRCLE_FN(GP_FillCircle24bpp, GP_Context *, GP_Pixel, GP_HLine24bpp)
-DEF_FILLCIRCLE_FN(GP_FillCircle32bpp, GP_Context *, GP_Pixel, GP_HLine32bpp)
+  */
 
-GP_RetCode GP_FillCircle(GP_Context *context, int xcenter, int ycenter,
-                         unsigned int r, GP_Pixel pixel)
+#include <GP.h>
+#include <GP_PGM.h>
+
+#define W 221
+#define H 160
+
+int main(void)
 {
-	if (!context)
-		return GP_ENULLPTR;
-	if (!GP_IS_CONTEXT_VALID(context))
-		return GP_EBADCONTEXT;
+	int i;
 
-	GP_FN_PER_BPP(GP_FillCircle, xcenter, ycenter, r, pixel);
+	GP_Context *context = GP_ContextAlloc(W, H, GP_PIXEL_G2);
 
-	return GP_ESUCCESS;
-}
+	if (context == NULL) {
+		fprintf(stderr, "Couldn't allocate context\n");
+		return 1;
+	}
 
-GP_RetCode GP_TFillCircle(GP_Context *context, int xcenter, int ycenter,
-                          unsigned int r, GP_Pixel pixel)
-{
-	if (!context)
-		return GP_ENULLPTR;
-	if (!GP_IS_CONTEXT_VALID(context))
-		return GP_EBADCONTEXT;
+	for (i = 0; i < 20; i++)
+		GP_HLineXYW(context, 0, i, i, 3);
+	
+	for (i = 0; i < 20; i++)
+		GP_HLineXYW(context, 1, i + 20, i, 2);
+	
+	for (i = 0; i < 20; i++)
+		GP_HLineXYW(context, 2, i + 40, i, 1);
+	
+	for (i = 0; i < 20; i++)
+		GP_HLineXYW(context, 3, i + 60, i, 3);
+	
+	for (i = 0; i < 20; i++)
+		GP_HLineXYW(context, 4, i + 80, i, 2);
 
-	GP_TRANSFORM_POINT(context, xcenter, ycenter);
-	return GP_FillCircle(context, xcenter, ycenter, r, pixel);
+	GP_Line(context, 0, 0, W, H, 3);
+	GP_Line(context, 0, H, W, 0, 3);
+
+	GP_FillCircle(context, W/2, H/2, 19, 3);
+	GP_FillCircle(context, W/2, H/2, 7, 2);
+	GP_FillCircle(context, W/2, H/2, 5, 1);
+	GP_FillCircle(context, W/2, H/2, 2, 0);
+	GP_Text(context, NULL, 60, 10, GP_VALIGN_BELOW | GP_ALIGN_RIGHT, "Test", 3);
+	GP_Text(context, NULL, 60, 20, GP_VALIGN_BELOW | GP_ALIGN_RIGHT, "Test", 2);
+	GP_Text(context, NULL, 60, 30, GP_VALIGN_BELOW | GP_ALIGN_RIGHT, "Test", 1);
+
+	if (GP_SavePGM("test.pgm", context)) {
+		fprintf(stderr, "Can't save context\n");
+		return 1;
+	}
+
+	GP_ContextFree(context);
+
+	return 0;
 }

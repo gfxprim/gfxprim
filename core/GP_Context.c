@@ -89,4 +89,5 @@ GP_RetCode GP_ContextDump(GP_Context *context, const char *path)
 	}
 
 	fclose(f);
+	return GP_ESUCCESS;
 }

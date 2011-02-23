@@ -88,6 +88,10 @@ GP_RetCode GP_LoadPGM(const char *src, GP_Context **res)
 		if (GP_PXMLoad1bpp(f, *res))
 			goto err2;
 		break;
+	case 3:
+		if (GP_PXMLoad2bpp(f, *res))
+			goto err2;
+		break;
 	//TODO
 	}
 
@@ -133,9 +137,13 @@ GP_RetCode GP_SavePGM(const char *res, GP_Context *src)
 
 	switch (gray) {
 	case 1:
-	if (GP_PXMSave1bpp(f, src))
-		goto err;
-	break;
+		if (GP_PXMSave1bpp(f, src))
+			goto err;
+		break;
+	case 3:
+		if (GP_PXMSave2bpp(f, src))
+			goto err;
+		break;
 	//TODO
 	}
 

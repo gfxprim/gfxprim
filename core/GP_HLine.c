@@ -28,6 +28,7 @@
 #include "GP_FnPerBpp.h"
 
 DEF_HLINE_BU_FN(GP_HLine1bpp, GP_Context *, GP_Pixel, GP_PIXEL_ADDRESS, GP_WritePixels1bpp)
+DEF_HLINE_BU_FN(GP_HLine2bpp, GP_Context *, GP_Pixel, GP_PIXEL_ADDRESS, GP_WritePixels2bpp)
 DEF_HLINE_FN(GP_HLine8bpp, GP_Context *, GP_Pixel, GP_PIXEL_ADDRESS, GP_WritePixels8bpp)
 DEF_HLINE_FN(GP_HLine16bpp, GP_Context *, GP_Pixel, GP_PIXEL_ADDRESS, GP_WritePixels16bpp)
 DEF_HLINE_FN(GP_HLine24bpp, GP_Context *, GP_Pixel, GP_PIXEL_ADDRESS, GP_WritePixels24bpp)

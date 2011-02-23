@@ -35,7 +35,22 @@
 #include <stdio.h>
 #include "GP.h"
 
+/*
+ * Save context to ascii file.
+ *
+ * The pixel type is not checked here as these are internal funcitons.
+ */
 GP_RetCode GP_PXMSave1bpp(FILE *f, GP_Context *context);
+GP_RetCode GP_PXMSave2bpp(FILE *f, GP_Context *context);
+GP_RetCode GP_PXMSave4bpp(FILE *f, GP_Context *context);
+GP_RetCode GP_PXMSave8bpp(FILE *f, GP_Context *context);
+
+/*
+ * Load context from ascii file.
+ */
 GP_RetCode GP_PXMLoad1bpp(FILE *f, GP_Context *context);
+GP_RetCode GP_PXMLoad2bpp(FILE *f, GP_Context *context);
+GP_RetCode GP_PXMLoad4bpp(FILE *f, GP_Context *context);
+GP_RetCode GP_PXMLoad8bpp(FILE *f, GP_Context *context);
 
 #endif /* GP_PXM_COMMON_H */

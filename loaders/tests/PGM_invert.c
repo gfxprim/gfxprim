@@ -23,38 +23,35 @@
  *                                                                           *
  *****************************************************************************/
 
-#include "GP.h"
-#include "GP_FnPerBpp.h"
-#include "algo/FillCircle.algo.h"
+#include <GP.h>
+#include <GP_PGM.h>
 
-DEF_FILLCIRCLE_FN(GP_FillCircle1bpp, GP_Context *, GP_Pixel, GP_HLine1bpp)
-DEF_FILLCIRCLE_FN(GP_FillCircle2bpp, GP_Context *, GP_Pixel, GP_HLine2bpp)
-DEF_FILLCIRCLE_FN(GP_FillCircle8bpp, GP_Context *, GP_Pixel, GP_HLine8bpp)
-DEF_FILLCIRCLE_FN(GP_FillCircle16bpp, GP_Context *, GP_Pixel, GP_HLine16bpp)
-DEF_FILLCIRCLE_FN(GP_FillCircle24bpp, GP_Context *, GP_Pixel, GP_HLine24bpp)
-DEF_FILLCIRCLE_FN(GP_FillCircle32bpp, GP_Context *, GP_Pixel, GP_HLine32bpp)
-
-GP_RetCode GP_FillCircle(GP_Context *context, int xcenter, int ycenter,
-                         unsigned int r, GP_Pixel pixel)
+int main(int argc, char *argv[])
 {
-	if (!context)
-		return GP_ENULLPTR;
-	if (!GP_IS_CONTEXT_VALID(context))
-		return GP_EBADCONTEXT;
+	uint64_t i;
+	GP_Context *context;
 
-	GP_FN_PER_BPP(GP_FillCircle, xcenter, ycenter, r, pixel);
+	if (argc < 3) {
+		fprintf(stderr, "Usage: %s input.pbm output.pbm\n", argv[0]);
+		return 1;
+	}
 
-	return GP_ESUCCESS;
-}
+	printf("inverting %s -> %s\n", argv[1], argv[2]);
+	
+ 	if (GP_LoadPGM(argv[1], &context)) {
+		fprintf(stderr, "Couldn't load %s\n", argv[1]);
+		return 1;
+	}
 
-GP_RetCode GP_TFillCircle(GP_Context *context, int xcenter, int ycenter,
-                          unsigned int r, GP_Pixel pixel)
-{
-	if (!context)
-		return GP_ENULLPTR;
-	if (!GP_IS_CONTEXT_VALID(context))
-		return GP_EBADCONTEXT;
+	for (i = 0; i < context->h * context->bytes_per_row; i++)
+		context->pixels[i] = ~context->pixels[i];
 
-	GP_TRANSFORM_POINT(context, xcenter, ycenter);
-	return GP_FillCircle(context, xcenter, ycenter, r, pixel);
+	if (GP_SavePGM(argv[2], context)) {
+		fprintf(stderr, "Can't save %s\n", argv[2]);
+		return 1;
+	}
+
+	GP_ContextFree(context);
+
+	return 0;
 }
