@@ -52,7 +52,7 @@
  *     FN_NAME   - name of the function to be defined
  */
 #define DEF_HLINE_FN(FN_NAME, CONTEXT_T, PIXEL_T, PIXEL_ADDRESS, WRITE_PIXELS) \
-void FN_NAME(GP_Context *context, int x0, int x1, int y, GP_Pixel pixel) \
+void FN_NAME(CONTEXT_T *context, int x0, int x1, int y, PIXEL_T pixel) \
 { \
 	ORDER_AND_CLIP_COORDS; \
 \
@@ -66,7 +66,7 @@ void FN_NAME(GP_Context *context, int x0, int x1, int y, GP_Pixel pixel) \
  * Not byte aligned pixels. The number of bits per pixel must be power of two.
  */
 #define DEF_HLINE_BU_FN(FN_NAME, CONTEXT_T, PIXEL_T, PIXEL_ADDRESS, WRITE_PIXELS) \
-void FN_NAME(GP_Context *context, int x0, int x1, int y, GP_Pixel pixel) \
+void FN_NAME(CONTEXT_T *context, int x0, int x1, int y, PIXEL_T pixel) \
 { \
 	ORDER_AND_CLIP_COORDS; \
 \
