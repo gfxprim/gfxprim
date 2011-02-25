@@ -29,7 +29,8 @@
 
 #include <stdlib.h>
 
-/* Generate drawing functions for various bit depths. */
+DEF_FILLTRIANGLE_FN(GP_FillTriangle1bpp, GP_Context *, GP_Pixel, GP_Line8bpp, GP_HLine1bpp)
+DEF_FILLTRIANGLE_FN(GP_FillTriangle2bpp, GP_Context *, GP_Pixel, GP_Line8bpp, GP_HLine2bpp)
 DEF_FILLTRIANGLE_FN(GP_FillTriangle8bpp, GP_Context *, GP_Pixel, GP_Line8bpp, GP_HLine8bpp)
 DEF_FILLTRIANGLE_FN(GP_FillTriangle16bpp, GP_Context *, GP_Pixel, GP_Line16bpp, GP_HLine16bpp)
 DEF_FILLTRIANGLE_FN(GP_FillTriangle24bpp, GP_Context *, GP_Pixel, GP_Line24bpp, GP_HLine24bpp)

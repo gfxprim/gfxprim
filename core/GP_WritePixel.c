@@ -25,6 +25,99 @@
 
 #include "GP.h"
 
+static const uint8_t chunks_1bpp[8] = {
+	0x00, 0x80, 0xc0, 0xe0, 0xf0, 0xf8, 0xfc, 0xfe,
+};
+
+void GP_WritePixels1bpp(uint8_t *start, uint8_t off, size_t cnt, uint8_t val)
+{
+	uint8_t s_off = off % 8;
+	uint8_t e_off = (cnt + s_off) % 8;
+	uint32_t len  = (cnt + s_off) / 8;
+	uint8_t col   = val ? 0xff : 0x00;
+
+	/* handle special cases */
+	if (cnt < 8) {
+		uint8_t u_chunk = chunks_1bpp[cnt] >> off;
+		uint8_t l_chunk = chunks_1bpp[cnt] << (8 - off);
+
+		if (val) {
+			start[0] |= u_chunk;
+			start[1] |= l_chunk;
+		} else {
+			start[0] &= ~u_chunk;
+			start[1] &= ~l_chunk;
+		}
+
+		return;
+	}
+
+	/* write len - 2 bytes */
+	if (len > 1)
+		GP_WritePixels8bpp(start + 1, len - 2, col);
+
+	/* deal with the start and end */
+	if (val) {
+		start[0]   |= ~chunks_1bpp[s_off];
+		start[len] |=  chunks_1bpp[e_off];
+	} else {
+		start[0]   &=  chunks_1bpp[s_off];
+		start[len] &= ~chunks_1bpp[e_off];
+	}
+}
+
+static const uint8_t colors_2bpp[4] = {
+	0x00, 0x55, 0xaa, 0xff
+};
+
+#define PUT_PIXEL_2BPP(p, off, pix) *(p) = (*(p) & ~(0xc0>>(off))) | (pix<<(6 - off))
+
+void GP_WritePixels2bpp(uint8_t *start, uint8_t off, size_t cnt, uint8_t val)
+{
+	uint8_t s_off = off % 4;
+	uint8_t e_off = 2 * ((cnt + s_off) % 4);
+	uint8_t len   = (cnt + s_off) / 4;
+
+	s_off *= 2;
+	val   %= 4;
+
+	/* handle special cases  */
+	if (cnt < 4) {
+		uint8_t len = s_off + 2*cnt;
+		uint8_t max = GP_MIN(s_off + 2*cnt, 8u);
+
+		for (off = s_off; off < max; off+=2)
+			PUT_PIXEL_2BPP(start, off, val);
+		
+		if (len <= 8)
+			return;
+
+		for (off = 0; off < len%8; off+=2)
+			PUT_PIXEL_2BPP(start+1, off, val);
+
+		return;
+	}
+
+	/* write len - 2 bytes */
+	if (len > 1)
+		GP_WritePixels8bpp(start + 1, len - 2, colors_2bpp[val]);
+
+	/* handle start and end */
+	start[0]   = (start[0] & (0xff << (8 - s_off))) |
+	             (colors_2bpp[val] >> s_off);
+
+	start[len] = (start[len] & (0xff >> e_off)) |
+	             (colors_2bpp[val] << (8 - e_off));
+}
+
+void GP_WritePixels4bpp(uint8_t *start, uint8_t off, size_t cnt, uint8_t val)
+{
+	(void)start;
+	(void)off;
+	(void)cnt;
+	(void)val;
+}
+
 void GP_WritePixels8bpp(void *start, size_t count, uint8_t value)
 {
 	uint8_t *p = (uint8_t *) start;

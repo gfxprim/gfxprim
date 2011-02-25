@@ -36,9 +36,18 @@ unsigned int GP_GetCharDataSize(const GP_Font *font)
 
 const GP_CharData *GP_GetCharData(const GP_Font *font, int c)
 {
-	GP_CHECK(font != NULL && c >= ' ');
+	GP_CHECK(font != NULL); 
 
-	/* Characters before space are not encoded. */
+	/* characters before space are not encoded */
+	switch (font->charset) {
+	case GP_CHARSET_7BIT:
+		if (c < 0x20 || c > 0x7f)
+			return NULL;
+	break;
+	default:
+		return NULL;
+	}
+
 	int encoded_character = c - ' ';
 
 	/* NOTE: The character header is placed directly in the byte stream

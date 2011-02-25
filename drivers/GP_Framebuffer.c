@@ -94,7 +94,7 @@ GP_Framebuffer *GP_FramebufferInit(const char *path)
 	fb->context.clip_w_max = fb->context.w - 1;
 	fb->context.clip_h_max = fb->context.h - 1;
 
-	fb->context.bits_per_pixel = vscri.bits_per_pixel;
+	fb->context.bpp = vscri.bits_per_pixel;
 	fb->context.bytes_per_row  = fscri.line_length;
 
 	fb->context.pixel_type = GP_PIXEL_XRGB8888;

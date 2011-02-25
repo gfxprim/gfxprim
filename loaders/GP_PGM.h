@@ -23,64 +23,13 @@
  *                                                                           *
  *****************************************************************************/
 
-#ifndef GP_WRITEPIXEL_H
-#define GP_WRITEPIXEL_H
+#ifndef GP_PGM_H
+#define GP_PGM_H
 
-#include <endian.h>
-#include <stdint.h>
-#include <unistd.h>
+#include "GP_Context.h"
 
-/*
- * Macros for writing a single pixel value to the specified address,
- * provided that the target buffer has 8, 16, 24, or 32 bytes per pixel.
- */
+GP_RetCode GP_LoadPGM(const char *src, GP_Context **res);
 
-#define GP_WritePixel8bpp(ptr, pixel) { \
-	*((uint8_t *) ptr) = (uint8_t) pixel; \
-}
+GP_RetCode GP_SavePGM(const char *res, GP_Context *src);
 
-#define GP_WritePixel16bpp(ptr, pixel) { \
-	*((uint16_t *) ptr) = (uint16_t) pixel; \
-}
-
-#if __BYTE_ORDER == __BIG_ENDIAN
-
-#define GP_WritePixel24bpp(ptr, pixel) { \
-	((uint8_t *) ptr)[0] = (pixel >> 16) & 0xff; \
-	((uint8_t *) ptr)[1] = (pixel >> 8) & 0xff; \
-	((uint8_t *) ptr)[2] = pixel & 0xff; \
-}
-
-#elif __BYTE_ORDER == __LITTLE_ENDIAN
-
-#define GP_WritePixel24bpp(ptr, pixel) { \
-	((uint8_t *) ptr)[0] = pixel & 0xff; \
-	((uint8_t *) ptr)[1] = (pixel >> 8) & 0xff; \
-	((uint8_t *) ptr)[2] = (pixel >> 16) & 0xff; \
-}
-
-#else
-#error "Could not detect machine endianity"
-#endif
-
-#define GP_WritePixel32bpp(ptr, pixel) { \
-	*((uint32_t *) ptr) = (uint32_t) pixel; \
-}
-
-/*
- * Calls for writing a linear block of pixels.
- */
-
-/*
- * These calls are not byte aligned, thuss needs start offset.
- */
-void GP_WritePixels1bpp(uint8_t *start, uint8_t off, size_t cnt, uint8_t val);
-void GP_WritePixels2bpp(uint8_t *start, uint8_t off, size_t cnt, uint8_t val);
-void GP_WritePixels4bpp(uint8_t *start, uint8_t off, size_t cnt, uint8_t val);
-
-void GP_WritePixels8bpp(void *start, size_t count, uint8_t value);
-void GP_WritePixels16bpp(void *start, size_t count, uint16_t value);
-void GP_WritePixels24bpp(void *start, size_t count, uint32_t value);
-void GP_WritePixels32bpp(void *start, size_t count, uint32_t value);
-
-#endif /* GP_WRITEPIXEL_H */
+#endif /* GP_PGM_H */

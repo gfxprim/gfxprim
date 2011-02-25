@@ -15,8 +15,8 @@ Implemented features
 * text drawing
 ** supports both proportional and non proportional fonts
 ** basic font is compiled in the library
-** font rendering could be altered by style attributes
-** font could be loaded from or stored in file
+** font rendering can be altered by style attributes
+** font can be loaded from or stored in file
 ** convertor from bdf is on the way
 * various bitmap formats to draw on
 * SDL drawing backend
@@ -83,8 +83,8 @@ Color and pixel types
 The color, in gfxprim is abstract value that represents color in some format,
 while pixel is color in format of the target bitmap.
 
-The color and pixel types could be converted in between, but certain
-conversions do lose information.
+Color and pixel types could be converted between each other but certain
+conversions lose information.
 
 Color types are defined in 'core/GP_Color.h' and pixels in 'core/GP_Pixel.h'.
 The color is union of structures so that is easy to manipulate with each color
@@ -117,7 +117,7 @@ typedef enum GP_ColorType {
 } GP_ColorType;
 --------------------------------------------------------------------------------
 
-The color names:
+Predefined names are provided for the most basic colors:
 
 [source,c]
 --------------------------------------------------------------------------------
@@ -151,7 +151,7 @@ GP_RetCode GP_ColorNameToPixel(struct GP_Context *context, GP_ColorName name,
 Context
 ~~~~~~~
 
-Context is bitmap buffer along with it's metadata, which are pixel format for
+Context is a bitmap buffer along with its metadata, which are pixel format for
 underlying bitmap, it's size, clipping rectangle and bitmap rotation.
 
 The clipping rectangle is honored by all drawing functions.
@@ -180,8 +180,8 @@ Fill
 GP_RetCode GP_Fill(GP_Context *context, GP_Pixel pixel);
 --------------------------------------------------------------------------------
 
-Fill context, respecting the clipping rect. This has the same effect as
-calling 'GP_FillRect(context, 0, 0, context->w, context->h, pixel)'.
+Fills the context bitmap, respecting the clipping rect. This has the same effect
+as calling 'GP_FillRect(context, 0, 0, context->w, context->h, pixel)'.
 
 This functions doesn't have rotate friendly variant.
 
@@ -200,7 +200,7 @@ GP_RetCode GP_HLine(GP_Context *context, int x0, int x1, int y,
                     GP_Pixel pixel);
 --------------------------------------------------------------------------------
 
-Draws horizontal line, the 'GP_HLine()' function is an alias for 'GP_HLineXXY()'.
+Draws a horizontal line. The 'GP_HLine()' function is an alias for 'GP_HLineXXY()'.
 
 [source,c]
 --------------------------------------------------------------------------------
@@ -214,7 +214,7 @@ GP_RetCode GP_VLine(GP_Context *context, int x, int y0, int y1,
                     GP_Pixel pixel);
 --------------------------------------------------------------------------------
 
-Draws vertical line, the 'GP_VLine()' function is an alias for 'GP_VLineXYY()'.
+Draws a vertical line. The 'GP_VLine()' function is an alias for 'GP_VLineXYY()'.
 
 [source,c]
 --------------------------------------------------------------------------------
@@ -222,7 +222,7 @@ GP_RetCode GP_Line(GP_Context *context, int x0, int y0, int x1, int y1,
                    GP_Pixel pixel);
 --------------------------------------------------------------------------------
 
-Draws a line.
+Draws a line from (x0, y0) to (x1, y1), inclusive.
 
 Circles
 ~~~~~~~
@@ -233,7 +233,7 @@ GP_RetCode GP_Circle(GP_Context *context, int xcenter, int ycenter,
                      unsigned int r, GP_Pixel pixel);
 --------------------------------------------------------------------------------
 
-Draws circle.
+Draws a circle.
 
 [source,c]
 --------------------------------------------------------------------------------
@@ -241,7 +241,7 @@ GP_RetCode GP_FillCircle(GP_Context *context, int xcenter, int ycenter,
                          unsigned int r, GP_Pixel pixel);
 --------------------------------------------------------------------------------
 
-Draws filled circle.
+Draws a filled circle.
 
 Ellipses
 ~~~~~~~~
@@ -252,7 +252,7 @@ GP_RetCode GP_Ellipse(GP_Context *context, int xcenter, int ycenter,
                       unsigned int a, unsigned int b, GP_Pixel pixel);
 --------------------------------------------------------------------------------
 
-Draws ellipse.
+Draws an ellipse.
 
 [source,c]
 --------------------------------------------------------------------------------
@@ -260,7 +260,7 @@ GP_RetCode GP_FillEllipse(GP_Context *context, int xcenter, int ycenter,
                           unsigned int a, unsigned int b, GP_Pixel pixel);
 --------------------------------------------------------------------------------
 
-Draws filled ellipse.
+Draws a filled ellipse.
 
 Triangles
 ~~~~~~~~~
@@ -271,7 +271,7 @@ GP_RetCode GP_Triangle(GP_Context *context, int x0, int y0, int x1, int y1,
                        int x2, int y2, GP_Pixel pixel);
 --------------------------------------------------------------------------------
 
-Draws triangle.
+Draws a triangle.
 
 [source,c]
 --------------------------------------------------------------------------------
@@ -279,7 +279,7 @@ GP_RetCode GP_FillTriangle(GP_Context *context, int x0, int y0, int x1,
                            int y1, int x2, int y2, GP_Pixel pixel);
 --------------------------------------------------------------------------------
 
-Draws filled triangle.
+Draws a filled triangle.
 
 Rects
 ~~~~~
@@ -296,7 +296,10 @@ GP_RetCode GP_Rect(GP_Context *context, int x0, int y0, int x1, int y1,
                    GP_Pixel pixel);
 --------------------------------------------------------------------------------
 
-Draws rect, the 'GP_Rect()' function is an alias for 'GP_RectXYXY()'.
+Draws a rectangle.
+The 'GP_RectXYXY()' expects two corner points (x0, y0), and (x1, y1).
+The 'GP_RectXYWH()' expects a corner point (x0, y0), width and height.
+The 'GP_Rect()' function is an alias for 'GP_RectXYXY()'.
 
 [source,c]
 --------------------------------------------------------------------------------
@@ -310,7 +313,12 @@ GP_RetCode GP_FillRect(GP_Context *context, int x0, int y0, int x1, int y1,
                        GP_Pixel pixel);
 --------------------------------------------------------------------------------
 
-Draws filled rect, the 'GP_FillRect()' functions is an alias for 'GP_FillRectXYXY()'.
+Draws a filled rectangle.
+The 'GP_RectXYXY' fills an area between corner points (x0, y0) and (x1, y1),
+inclusive.
+The 'GP_RectXYWH' fills an area starting from (x0, y0) with specified width
+and height, i.e. from (x0, y0) to (x0 + w, x1 + y), NOT inclusive.
+The 'GP_FillRect()' functions is an alias for 'GP_FillRectXYXY()'.
 
 Tetragons
 ~~~~~~~~~
@@ -321,7 +329,7 @@ GP_RetCode GP_Tetragon(GP_Context *context, int x0, int y0, int x1, int y1,
                        int x2, int y2, int x3, int y3, GP_Pixel pixel);
 --------------------------------------------------------------------------------
 
-Draws tetragon.
+Draws a tetragon.
 
 [source,c]
 --------------------------------------------------------------------------------
@@ -329,15 +337,15 @@ GP_RetCode GP_FillTetragon(GP_Context *context, int x0, int y0, int x1, int y1,
                            int x2, int y2, int x3, int y3, GP_Pixel pixel);
 --------------------------------------------------------------------------------
 
-Draws filled tetragon.
+Draws a filled tetragon.
 
 Text
 ~~~~
 
-The text drawing is done from 'GP_TextStyle' that is defined in
+Text drawing is controlled by the 'GP_TextStyle' structure defined in
 'core/GP_TextStyle.h'. This structure carries the information about font,
-letter spacing and pixel multiplication and spacing. When style argument is
-NULL default style, small monospace font, is used.
+letter spacing and pixel multiplication and spacing. (If no font is specified,
+the default monospace font is used.)
 
 [source,c]
 --------------------------------------------------------------------------------
@@ -356,8 +364,9 @@ GP_RetCode GP_Text(GP_Context *context, const GP_TextStyle *style,
                    int x, int y, int align, const char *str, GP_Pixel pixel);
 --------------------------------------------------------------------------------
 
-Draws text at the position x and y, which is relative and defined by bitwise
-or of alignment flags.
+Draws text at the position x and y; the alignment of the text in relation
+to the point is specified by alignment flags.
+If the 'style' argument is NULL, a default style is used.
 
 The text size can be computed by following functions:
 
@@ -366,14 +375,15 @@ The text size can be computed by following functions:
 unsigned int GP_TextWidth(const GP_TextStyle *style, const char *str);
 --------------------------------------------------------------------------------
 
-Returns text width in pixels.
+Returns the width (in pixels) that would be occupied by the string if rendered
+using the specified style.
 
 [source,c]
 --------------------------------------------------------------------------------
 unsigned int GP_TextMaxWidth(const GP_TextStyle *style, unsigned int len);
 --------------------------------------------------------------------------------
 
-Returns maximal text width, in pixels, for string with len letters. This call
+Returns maximum text width, in pixels, for string with 'len' letters. This call
 is useful for variable letter size fonts.
 
 [source,c]
@@ -381,14 +391,14 @@ is useful for variable letter size fonts.
 unsigned int GP_TextAscent(const GP_TextStyle *style);
 --------------------------------------------------------------------------------
 
-The Ascent is size of the font, from the top to the baseline.
+The Ascent is the height in pixels from the top to the baseline.
 
 [source,c]
 --------------------------------------------------------------------------------
 unsigned int GP_TextDescent(const GP_TextStyle *style);
 --------------------------------------------------------------------------------
 
-The Descent is size of the font, from baseline to the bottom.
+The Descent is the height in pixels from baseline to the bottom.
 
 [source,c]
 --------------------------------------------------------------------------------

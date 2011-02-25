@@ -38,83 +38,86 @@ GP_Context context;
 static GP_Pixel white_pixel, gray_pixel, dark_gray_pixel, black_pixel,
 		red_pixel, blue_pixel;
 
-static const char *test_strings[] = {
-	" !\"#$%&\047()*+,-./0123456789:;<=>?@",
-	"ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`",
-	"abcdefghijklmnopqrstuvwxyz{|}~",
-	"Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor..."
-};
-
 /* draw using proportional font? */
 static int font_flag = 0;
+
+/* font tracking */
 static int tracking = 0;
+
+/* font to be used */
 GP_Font *font;
+
+struct FileLine {
+	char *text;		/* null-terminated, malloc'd string */
+	struct FileLine *next;	/* next line or NULL for the last line */
+	struct FileLine *prev;
+};
+
+struct FileLine *first_line = NULL;
+struct FileLine *last_line = NULL;
 
 void redraw_screen(void)
 {
 	SDL_LockSurface(display);
 	
-	GP_Fill(&context, black_pixel);
+	GP_Fill(&context, gray_pixel);
 
 	GP_TextStyle style = GP_DEFAULT_TEXT_STYLE;
 
 	switch (font_flag) {
 	case 0:
-		style.font = &GP_default_proportional_font;
+		style.font = &GP_default_console_font;
 	break;
 	case 1:
-		style.font = &GP_default_console_font;
+		style.font = &GP_default_proportional_font;
 	break;
 	case 2:
 		style.font = font;
 	break;
 	}
 
+	style.pixel_xmul = 1;
+	style.pixel_ymul = 1;
+	style.pixel_xspace = 0;
+	style.pixel_yspace = 0;
+	style.char_xspace = tracking;
+
 	/* Text alignment (we are always drawing to the right
 	 * and below the starting point).
 	 */
 	int align = GP_ALIGN_RIGHT|GP_VALIGN_BELOW;
 
-	const size_t TEST_STRING_COUNT = sizeof(test_strings)/sizeof(const char *);
-	size_t i;
-	for (i = 0; i < TEST_STRING_COUNT; i++) {
-		const char *test_string = test_strings[i];
-
-		style.pixel_xmul = 1;
-		style.pixel_ymul = 1;
-		style.pixel_xspace = 0;
-		style.pixel_yspace = 0;
-		style.char_xspace = tracking;
-
-		GP_FillRectXYWH(&context,
-			16, 100*i + 16,
-			GP_TextWidth(&style, test_string),
-			style.font->height,
-			red_pixel);
-
-		GP_RectXYWH(&context,
-			15, 100*i + 15,
-			GP_TextMaxWidth(&style, strlen(test_string)) + 1,
-			style.font->height + 1,
-			blue_pixel);
-
-		GP_Text(&context, &style, 16, 100*i + 16, align, test_string, white_pixel);
-
-		style.pixel_xmul = 2;
-		style.pixel_ymul = 2;
-		style.pixel_yspace = 1;
-
-		GP_Text(&context, &style, 34, 100*i + 38, align, test_string, gray_pixel);
-
-		style.pixel_xmul = 4;
-		style.pixel_ymul = 2;
-		style.pixel_xspace = 1;
-		style.pixel_yspace = 1;
-
-		GP_Text(&context, &style, 64, 100*i + 72, align, test_string, dark_gray_pixel);
+	struct FileLine *line = first_line;
+	unsigned int i;
+	for (i = 0; i < 30; i++) { 
+		if (line == NULL)
+			break;
+		
+		GP_Text(&context, &style, 16, 16*i + 16, align, line->text, black_pixel);
+		line = line->next;
 	}
 
 	SDL_UnlockSurface(display);
+}
+
+static void warp_up(int lines)
+{
+	while (lines-- > 0)
+		if (first_line->prev != NULL)
+			first_line = first_line->prev;
+	
+	redraw_screen();
+	SDL_Flip(display);
+}
+
+static void warp_down(int lines)
+{
+	while (lines-- > 0)
+		if (first_line->next != NULL)
+			first_line = first_line->next;
+	
+	redraw_screen();
+	SDL_Flip(display);
 }
 
 void event_loop(void)
@@ -140,18 +143,30 @@ void event_loop(void)
 				redraw_screen();
 				SDL_Flip(display);
 			break;
-			case SDLK_UP:
+			case SDLK_RIGHT:
 				tracking++;
 				redraw_screen();
 				SDL_Flip(display);
 			break;
-			case SDLK_DOWN:
+			case SDLK_LEFT:
 				tracking--;
 				redraw_screen();
 				SDL_Flip(display);
 			break;
 			case SDLK_ESCAPE:
 				return;
+			case SDLK_UP:
+				warp_up(1);
+			break;
+			case SDLK_PAGEUP:
+				warp_up(29);
+			break;
+			case SDLK_DOWN:
+				warp_down(1);
+			break;
+			case SDLK_PAGEDOWN:
+				warp_down(29);
+			break;
 			default:
 			break;
 			}
@@ -163,28 +178,50 @@ void event_loop(void)
 	}
 }
 
-void print_instructions(void)
+static int read_file_head(const char *filename)
 {
-	printf("Use the following keys to control the test:\n");
-	printf("    Esc ................. exit\n");
-	printf("    Space ............... change font\n");
-	printf("    up/down ............. increase/decrease tracking\n");
+	FILE *f = fopen(filename, "r");
+	if (f == NULL) {
+		fprintf(stderr, "Could not open file: %s\n", filename);
+		return 0;
+	}
+
+	char buf[512];
+	for (;;) {
+		int retval = fscanf(f, "%511[^\n]\n", buf);
+		if (retval != 1) {
+			break;
+		}
+		buf[511] = '\0';
+
+		struct FileLine *line = malloc(sizeof(*line));
+		line->text = strdup(buf);
+		line->next = NULL;
+		line->prev = NULL;
+
+		if (first_line == NULL) {
+			first_line = line;
+			last_line = line;
+		} else {
+			line->prev = last_line;
+			last_line->next = line;
+			last_line = line;
+		}
+	}
+
+	fclose(f);
+	return 1;
 }
 
 int main(int argc, char *argv[])
 {
-	print_instructions();
-	
-	if (argc > 1) {
-		GP_RetCode err;
-		fprintf(stderr, "\nLoading font '%s'\n", argv[1]);
-		err = GP_FontLoad(&font, argv[1]);
-
-		if (err) {
-			fprintf(stderr, "Error: %s\n", GP_RetCodeName(err));
-			return 1;
-		}
+	if (argc == 1) {
+		fprintf(stderr, "No file specified\n");
+		return 1;
 	}
+
+	if (!read_file_head(argv[1]))
+		return 1;
 
 	/* Initialize SDL */
 	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) != 0) {
@@ -198,10 +235,6 @@ int main(int argc, char *argv[])
 		fprintf(stderr, "Could not open display: %s\n", SDL_GetError());
 		goto fail;
 	}
-
-	/* Set up a clipping rectangle to test proper clipping of pixels */
-	SDL_Rect clip_rect = {10, 10, 620, 460};
-	SDL_SetClipRect(display, &clip_rect);
 
 	/* Initialize a GP context from the SDL display */
 	GP_SDL_ContextFromSurface(&context, display);

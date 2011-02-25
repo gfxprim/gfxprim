@@ -23,64 +23,40 @@
  *                                                                           *
  *****************************************************************************/
 
-#ifndef GP_WRITEPIXEL_H
-#define GP_WRITEPIXEL_H
+/* A vertical line drawing algorithm. */
 
-#include <endian.h>
-#include <stdint.h>
-#include <unistd.h>
+/* Ensures that coordinates are in correct order, and clips them.
+ * Exits immediately if the line is completely clipped out.
+ */
+#define ORDER_AND_CLIP_COORDS do { \
+	if (y0 > y1) GP_SWAP(y0, y1); \
+	if (x < (int) context->clip_w_min \
+	    || x > (int) context->clip_w_max \
+	    || y1 < (int) context->clip_h_min \
+	    || y0 > (int) context->clip_h_max) { \
+		return; \
+	} \
+	y0 = GP_MAX(y0, (int) context->clip_h_min); \
+	y1 = GP_MIN(y1, (int) context->clip_h_max); \
+} while (0)
 
 /*
- * Macros for writing a single pixel value to the specified address,
- * provided that the target buffer has 8, 16, 24, or 32 bytes per pixel.
+ * This macro defines a horizontal line drawing function.
+ * Arguments:
+ *     CONTEXT_T - user-defined type of drawing context (passed to PUTPIXEL)
+ *     PIXVAL_T  - user-defined pixel value type (passed to PUTPIXEL)
+ *     PIXEL_ADDRESS  - a function that returns a pointer to a pixel in memory,
+ *                      in form f(context, y, x)
+ *     WRITE_PIXELS   - a function that fills a linear block with pixel value,
+ *                      in form f(start, length, pixel)
+ *     FN_NAME   - name of the function to be defined
  */
-
-#define GP_WritePixel8bpp(ptr, pixel) { \
-	*((uint8_t *) ptr) = (uint8_t) pixel; \
+#define DEF_VLINE_FN(FN_NAME, CONTEXT_T, PIXEL_T, PUT_PIXEL) \
+void FN_NAME(CONTEXT_T context, int x, int y0, int y1, PIXEL_T pixel) \
+{ \
+	ORDER_AND_CLIP_COORDS; \
+	int y; \
+\
+	for (y = y0; y <= y1; y++) \
+		PUT_PIXEL(context, x, y, pixel); \
 }
-
-#define GP_WritePixel16bpp(ptr, pixel) { \
-	*((uint16_t *) ptr) = (uint16_t) pixel; \
-}
-
-#if __BYTE_ORDER == __BIG_ENDIAN
-
-#define GP_WritePixel24bpp(ptr, pixel) { \
-	((uint8_t *) ptr)[0] = (pixel >> 16) & 0xff; \
-	((uint8_t *) ptr)[1] = (pixel >> 8) & 0xff; \
-	((uint8_t *) ptr)[2] = pixel & 0xff; \
-}
-
-#elif __BYTE_ORDER == __LITTLE_ENDIAN
-
-#define GP_WritePixel24bpp(ptr, pixel) { \
-	((uint8_t *) ptr)[0] = pixel & 0xff; \
-	((uint8_t *) ptr)[1] = (pixel >> 8) & 0xff; \
-	((uint8_t *) ptr)[2] = (pixel >> 16) & 0xff; \
-}
-
-#else
-#error "Could not detect machine endianity"
-#endif
-
-#define GP_WritePixel32bpp(ptr, pixel) { \
-	*((uint32_t *) ptr) = (uint32_t) pixel; \
-}
-
-/*
- * Calls for writing a linear block of pixels.
- */
-
-/*
- * These calls are not byte aligned, thuss needs start offset.
- */
-void GP_WritePixels1bpp(uint8_t *start, uint8_t off, size_t cnt, uint8_t val);
-void GP_WritePixels2bpp(uint8_t *start, uint8_t off, size_t cnt, uint8_t val);
-void GP_WritePixels4bpp(uint8_t *start, uint8_t off, size_t cnt, uint8_t val);
-
-void GP_WritePixels8bpp(void *start, size_t count, uint8_t value);
-void GP_WritePixels16bpp(void *start, size_t count, uint16_t value);
-void GP_WritePixels24bpp(void *start, size_t count, uint32_t value);
-void GP_WritePixels32bpp(void *start, size_t count, uint32_t value);
-
-#endif /* GP_WRITEPIXEL_H */

@@ -38,7 +38,7 @@
 	} \
 	x0 = GP_MAX(x0, (int) context->clip_w_min); \
 	x1 = GP_MIN(x1, (int) context->clip_w_max); \
-} while(0);
+} while (0)
 
 /*
  * This macro defines a horizontal line drawing function.
@@ -52,12 +52,26 @@
  *     FN_NAME   - name of the function to be defined
  */
 #define DEF_HLINE_FN(FN_NAME, CONTEXT_T, PIXEL_T, PIXEL_ADDRESS, WRITE_PIXELS) \
-void FN_NAME(GP_Context *context, int x0, int x1, int y, GP_Pixel pixel) \
+void FN_NAME(CONTEXT_T context, int x0, int x1, int y, PIXEL_T pixel) \
 { \
 	ORDER_AND_CLIP_COORDS; \
 \
 	size_t length = 1 + x1 - x0; \
 	void *start = GP_PIXEL_ADDRESS(context, y, x0); \
 \
-	WRITE_PIXELS(start, length, pixel.val); \
+	WRITE_PIXELS(start, length, pixel); \
+}
+
+/*
+ * Not byte aligned pixels. The number of bits per pixel must be power of two.
+ */
+#define DEF_HLINE_BU_FN(FN_NAME, CONTEXT_T, PIXEL_T, PIXEL_ADDRESS, WRITE_PIXELS) \
+void FN_NAME(CONTEXT_T context, int x0, int x1, int y, PIXEL_T pixel) \
+{ \
+	ORDER_AND_CLIP_COORDS; \
+\
+	size_t length = 1 + x1 - x0; \
+	void *start = GP_PIXEL_ADDRESS(context, y, x0); \
+\
+	WRITE_PIXELS(start, x0 % (8 / context->bpp), length, pixel); \
 }

@@ -24,6 +24,15 @@
  *****************************************************************************/
 
 #include "GP.h"
+#include "algo/VLine.algo.h"
+#include "GP_FnPerBpp.h"
+
+DEF_VLINE_FN(GP_VLine1bpp,  GP_Context *, GP_Pixel, GP_PutPixel1bpp)
+DEF_VLINE_FN(GP_VLine2bpp,  GP_Context *, GP_Pixel, GP_PutPixel2bpp)
+DEF_VLINE_FN(GP_VLine8bpp,  GP_Context *, GP_Pixel, GP_PutPixel8bpp)
+DEF_VLINE_FN(GP_VLine16bpp, GP_Context *, GP_Pixel, GP_PutPixel16bpp)
+DEF_VLINE_FN(GP_VLine24bpp, GP_Context *, GP_Pixel, GP_PutPixel24bpp)
+DEF_VLINE_FN(GP_VLine32bpp, GP_Context *, GP_Pixel, GP_PutPixel32bpp)
 
 GP_RetCode GP_VLineXYY(GP_Context *context, int x, int y0, int y1, GP_Pixel pixel)
 {
@@ -32,51 +41,7 @@ GP_RetCode GP_VLineXYY(GP_Context *context, int x, int y0, int y1, GP_Pixel pixe
 	if (!GP_IS_CONTEXT_VALID(context))
 		return GP_EBADCONTEXT;
 
-	/* handle swapped coordinates gracefully */
-	if (y0 > y1)
-		GP_SWAP(y0, y1);
-
-	/* check if we are not completely outside the clipping rectangle */
-	if (x < (int) context->clip_w_min
-		|| x > (int) context->clip_w_max
-		|| y0 > (int) context->clip_h_max
-		|| y1 < (int) context->clip_h_min) {
-		return GP_ESUCCESS;
-	}
-	
-	/* clip the row value */
-	y0 = GP_MAX(y0, (int) context->clip_h_min);
-	y1 = GP_MIN(y1, (int) context->clip_h_max);
-
-	/* Calculate the start address and height of the filled block */
-	size_t height = 1 + y1 - y0;
-	uint8_t *p = (uint8_t *) GP_PIXEL_ADDRESS(context, y0, x);
-	
-	size_t i;
-	switch(context->bits_per_pixel) {
-	case 32:
-		for (i = 0; i < height; i++, p += context->bytes_per_row)
-			GP_WritePixel32bpp(p, pixel.val);
-		break;
-
-	case 24:
-		for (i = 0; i < height; i++, p += context->bytes_per_row)
-			GP_WritePixel24bpp(p, pixel.val);
-		break;
-
-	case 16:
-		for (i = 0; i < height; i++, p += context->bytes_per_row)
-			GP_WritePixel16bpp(p, pixel.val);
-		break;
-
-	case 8:
-		for (i = 0; i < height; i++, p += context->bytes_per_row)
-			GP_WritePixel8bpp(p, pixel.val);
-		break;
-
-	default:
-		return GP_ENOIMPL;
-	}
+	GP_FN_PER_BPP(GP_VLine, x, y0, y1, pixel);
 
 	return GP_ESUCCESS;
 }

@@ -27,6 +27,8 @@
 #include "algo/Ellipse.algo.h"
 #include "GP_FnPerBpp.h"
 
+DEF_ELLIPSE_FN(GP_Ellipse1bpp, GP_Context *, GP_Pixel, GP_PutPixel1bpp);
+DEF_ELLIPSE_FN(GP_Ellipse2bpp, GP_Context *, GP_Pixel, GP_PutPixel2bpp);
 DEF_ELLIPSE_FN(GP_Ellipse8bpp, GP_Context *, GP_Pixel, GP_PutPixel8bpp);
 DEF_ELLIPSE_FN(GP_Ellipse16bpp, GP_Context *, GP_Pixel, GP_PutPixel16bpp);
 DEF_ELLIPSE_FN(GP_Ellipse24bpp, GP_Context *, GP_Pixel, GP_PutPixel24bpp);

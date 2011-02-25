@@ -28,6 +28,9 @@
 
 #include "GP_Context.h"
 
+GP_RetCode GP_PutPixel1bpp(GP_Context *context, int x, int y, GP_Pixel pixel);
+GP_RetCode GP_PutPixel2bpp(GP_Context *context, int x, int y, GP_Pixel pixel);
+GP_RetCode GP_PutPixel4bpp(GP_Context *context, int x, int y, GP_Pixel pixel);
 GP_RetCode GP_PutPixel8bpp(GP_Context *context, int x, int y, GP_Pixel pixel);
 GP_RetCode GP_PutPixel16bpp(GP_Context *context, int x, int y, GP_Pixel pixel);
 GP_RetCode GP_PutPixel24bpp(GP_Context *context, int x, int y, GP_Pixel pixel);

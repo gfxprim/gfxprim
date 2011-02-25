@@ -33,7 +33,13 @@
  */
 #define GP_FN_PER_BPP(FN_NAME, ...) \
 \
-	switch (context->bits_per_pixel) { \
+	switch (context->bpp) { \
+	case 1: \
+		FN_NAME##1bpp(context, __VA_ARGS__); \
+		break; \
+	case 2: \
+		FN_NAME##2bpp(context, __VA_ARGS__); \
+		break; \
 	case 8: \
 		FN_NAME##8bpp(context, __VA_ARGS__); \
 		break; \
@@ -48,4 +54,4 @@
 		break; \
 	default: \
 		return GP_ENOIMPL; \
-	} 
+	}

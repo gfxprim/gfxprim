@@ -25,6 +25,8 @@
 
 #include "GP.h"
 
+#include "GP_FnPerBpp.h"
+
 /* Tests whether the coordinates are inside the clip rectangle;
  * if not, immediately exits with GP_ESUCCESS.
  */
@@ -35,7 +37,7 @@
 		|| y > (int) context->clip_h_max) { \
 		return GP_ESUCCESS; /* clipped out */ \
 	} \
-} while(0);
+} while (0)
 
 /*
  * A set of PutPixel() calls used when we know the number of bits per pixel.
@@ -44,12 +46,43 @@
  * calculate it over and over.
  */
 
+static const uint8_t pixels_1bpp[8] = {
+	0x80, 0x40, 0x20, 0x10, 0x08, 0x04, 0x02, 0x01,
+};
+
+GP_RetCode GP_PutPixel1bpp(GP_Context *context, int x, int y, GP_Pixel pixel)
+{
+	CLIP_PIXEL(context, x, y);
+
+	uint8_t *p = GP_PIXEL_ADDRESS(context, y, x);
+	uint8_t off = x % 8; 
+
+	if (pixel)
+		*p |=  pixels_1bpp[off];
+	else
+		*p &= ~pixels_1bpp[off];
+
+	return GP_ESUCCESS;
+}
+
+GP_RetCode GP_PutPixel2bpp(GP_Context *context, int x, int y, GP_Pixel pixel)
+{
+	CLIP_PIXEL(context, x, y);
+
+	uint8_t *p = GP_PIXEL_ADDRESS(context, y, x);
+	uint8_t off = 2 * (x % 4);
+
+	*p = (*p & ~(0xc0>>(off))) | (pixel<<(6 - off));
+
+	return GP_ESUCCESS;
+}
+
 GP_RetCode GP_PutPixel8bpp(GP_Context *context, int x, int y, GP_Pixel pixel)
 {
 	CLIP_PIXEL(context, x, y);
 
 	uint8_t *p = GP_PIXEL_ADDRESS(context, y, x);
-	GP_WritePixel8bpp(p, pixel.val);
+	GP_WritePixel8bpp(p, pixel);
 	return GP_ESUCCESS;
 }
 
@@ -58,7 +91,7 @@ GP_RetCode GP_PutPixel16bpp(GP_Context *context, int x, int y, GP_Pixel pixel)
 	CLIP_PIXEL(context, x, y);
 
 	uint8_t *p = GP_PIXEL_ADDRESS(context, y, x);
-	GP_WritePixel16bpp(p, pixel.val);
+	GP_WritePixel16bpp(p, pixel);
 	return GP_ESUCCESS;
 }
 
@@ -67,7 +100,7 @@ GP_RetCode GP_PutPixel24bpp(GP_Context *context, int x, int y, GP_Pixel pixel)
 	CLIP_PIXEL(context, x, y);
 
 	uint8_t *p = GP_PIXEL_ADDRESS(context, y, x);
-	GP_WritePixel24bpp(p, pixel.val);
+	GP_WritePixel24bpp(p, pixel);
 	return GP_ESUCCESS;
 }
 
@@ -76,7 +109,7 @@ GP_RetCode GP_PutPixel32bpp(GP_Context *context, int x, int y, GP_Pixel pixel)
 	CLIP_PIXEL(context, x, y);
 
 	uint8_t *p = GP_PIXEL_ADDRESS(context, y, x);
-	GP_WritePixel32bpp(p, pixel.val);
+	GP_WritePixel32bpp(p, pixel);
 	return GP_ESUCCESS;
 }
 
@@ -91,18 +124,9 @@ GP_RetCode GP_PutPixel(GP_Context *context, int x, int y, GP_Pixel pixel)
 	if (!GP_IS_CONTEXT_VALID(context))
 		return GP_EBADCONTEXT;
 
-	switch (context->bits_per_pixel) {
-	case 32:
-		return GP_PutPixel32bpp(context, x, y, pixel);
-	case 24:
-		return GP_PutPixel24bpp(context, x, y, pixel);
-	case 16:
-		return GP_PutPixel16bpp(context, x, y, pixel);
-	case 8:
-		return GP_PutPixel8bpp(context, x, y, pixel);
-	}
+	GP_FN_PER_BPP(GP_PutPixel, x, y, pixel);
 
-	return GP_ENOIMPL;
+	return GP_ESUCCESS;
 }
 
 GP_RetCode GP_TPutPixel(GP_Context *context, int x, int y, GP_Pixel pixel)

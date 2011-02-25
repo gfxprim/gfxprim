@@ -1,7 +1,10 @@
-all: api.html
+all: api.html context.html
 
 api.html: api.txt
 	asciidoc -a toc api.txt
+
+context.html: context.txt
+	asciidoc context.txt
 
 api.pdf: api.txt
 	asciidoc -b docbook api.txt
@@ -10,4 +13,4 @@ api.pdf: api.txt
 	
 
 clean:
-	rm -f api.html api.xml api.fo api.pdf
+	rm -f context.html api.html api.xml api.fo api.pdf

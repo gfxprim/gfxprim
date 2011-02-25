@@ -23,64 +23,37 @@
  *                                                                           *
  *****************************************************************************/
 
-#ifndef GP_WRITEPIXEL_H
-#define GP_WRITEPIXEL_H
+ /*
 
-#include <endian.h>
-#include <stdint.h>
-#include <unistd.h>
+  */
 
-/*
- * Macros for writing a single pixel value to the specified address,
- * provided that the target buffer has 8, 16, 24, or 32 bytes per pixel.
- */
+#include <GP.h>
+#include <GP_PBM.h>
 
-#define GP_WritePixel8bpp(ptr, pixel) { \
-	*((uint8_t *) ptr) = (uint8_t) pixel; \
+#define W 91
+#define H 89
+
+int main(void)
+{
+	GP_Context *context = GP_ContextAlloc(W, H, GP_PIXEL_G1);
+
+	if (context == NULL) {
+		fprintf(stderr, "Couldn't allocate context\n");
+		return 1;
+	}
+
+	GP_Line(context, 0, 0, W, H, 1);
+	GP_FillCircle(context, 20, 20, 9, 1);
+	GP_FillCircle(context, 20, 20, 7, 0);
+	GP_FillCircle(context, 20, 20, 4, 1);
+	GP_Text(context, NULL, 10, 40, GP_VALIGN_BELOW | GP_ALIGN_RIGHT, "Test  Test", 1);
+
+	if (GP_SavePBM("test.pbm", context)) {
+		fprintf(stderr, "Can't save context\n");
+		return 1;
+	}
+
+	GP_ContextFree(context);
+
+	return 0;
 }
-
-#define GP_WritePixel16bpp(ptr, pixel) { \
-	*((uint16_t *) ptr) = (uint16_t) pixel; \
-}
-
-#if __BYTE_ORDER == __BIG_ENDIAN
-
-#define GP_WritePixel24bpp(ptr, pixel) { \
-	((uint8_t *) ptr)[0] = (pixel >> 16) & 0xff; \
-	((uint8_t *) ptr)[1] = (pixel >> 8) & 0xff; \
-	((uint8_t *) ptr)[2] = pixel & 0xff; \
-}
-
-#elif __BYTE_ORDER == __LITTLE_ENDIAN
-
-#define GP_WritePixel24bpp(ptr, pixel) { \
-	((uint8_t *) ptr)[0] = pixel & 0xff; \
-	((uint8_t *) ptr)[1] = (pixel >> 8) & 0xff; \
-	((uint8_t *) ptr)[2] = (pixel >> 16) & 0xff; \
-}
-
-#else
-#error "Could not detect machine endianity"
-#endif
-
-#define GP_WritePixel32bpp(ptr, pixel) { \
-	*((uint32_t *) ptr) = (uint32_t) pixel; \
-}
-
-/*
- * Calls for writing a linear block of pixels.
- */
-
-/*
- * These calls are not byte aligned, thuss needs start offset.
- */
-void GP_WritePixels1bpp(uint8_t *start, uint8_t off, size_t cnt, uint8_t val);
-void GP_WritePixels2bpp(uint8_t *start, uint8_t off, size_t cnt, uint8_t val);
-void GP_WritePixels4bpp(uint8_t *start, uint8_t off, size_t cnt, uint8_t val);
-
-void GP_WritePixels8bpp(void *start, size_t count, uint8_t value);
-void GP_WritePixels16bpp(void *start, size_t count, uint16_t value);
-void GP_WritePixels24bpp(void *start, size_t count, uint32_t value);
-void GP_WritePixels32bpp(void *start, size_t count, uint32_t value);
-
-#endif /* GP_WRITEPIXEL_H */
