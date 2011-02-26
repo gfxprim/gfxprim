@@ -84,9 +84,7 @@ GP_RetCode GP_Text(GP_Context *context, const GP_TextStyle *style,
 			return GP_EINVAL;
 	}
 
-	GP_FN_PER_BPP(GP_Text, style, topleft_x, topleft_y, str, pixel);
-
-	return GP_ESUCCESS;
+	GP_FN_PER_BPP(GP_Text, context, style, topleft_x, topleft_y, str, pixel);
 }
 
 GP_RetCode GP_TText(GP_Context *context, const GP_TextStyle *style,

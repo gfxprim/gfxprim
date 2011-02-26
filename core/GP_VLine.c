@@ -41,9 +41,7 @@ GP_RetCode GP_VLineXYY(GP_Context *context, int x, int y0, int y1, GP_Pixel pixe
 	if (!GP_IS_CONTEXT_VALID(context))
 		return GP_EBADCONTEXT;
 
-	GP_FN_PER_BPP(GP_VLine, x, y0, y1, pixel);
-
-	return GP_ESUCCESS;
+	GP_FN_PER_BPP(GP_VLine, context, x, y0, y1, pixel);
 }
 
 GP_RetCode GP_VLineXYH(GP_Context *context, int x, int y, unsigned int height,

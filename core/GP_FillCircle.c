@@ -42,9 +42,7 @@ GP_RetCode GP_FillCircle(GP_Context *context, int xcenter, int ycenter,
 	if (!GP_IS_CONTEXT_VALID(context))
 		return GP_EBADCONTEXT;
 
-	GP_FN_PER_BPP(GP_FillCircle, xcenter, ycenter, r, pixel);
-
-	return GP_ESUCCESS;
+	GP_FN_PER_BPP(GP_FillCircle, context, xcenter, ycenter, r, pixel);
 }
 
 GP_RetCode GP_TFillCircle(GP_Context *context, int xcenter, int ycenter,

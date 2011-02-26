@@ -63,7 +63,7 @@ inline GP_PixelType GP_GetContextPixelType(const GP_Context *context);
  * Rows and columns are specified in the image's orientation
  * (i.e. they might not be XY if the image is rotated).
  */
-#define GP_PIXEL_ADDRESS(context, y, x) ((uint8_t *) (context->pixels \
+#define GP_PIXEL_ADDR(context, y, x) ((uint8_t *) (context->pixels \
 	+ y * context->bytes_per_row \
 	+ (x * context->bpp) / 8))
 
@@ -85,6 +85,15 @@ inline GP_PixelType GP_GetContextPixelType(const GP_Context *context);
 		GP_CHECK(context->clip_w_max < context->w); \
 		GP_CHECK(context->clip_h_max < context->h); \
 	} while (0)
+
+/*
+ * Is true, when pixel is clipped. 
+ */
+#define GP_PIXEL_IS_CLIPPED(context, x, y) \
+	(x < (int) context->clip_w_min \
+	|| x > (int) context->clip_w_max \
+	|| y < (int) context->clip_h_min \
+	|| y > (int) context->clip_h_max) \
 
 /*
  * Allocate context.

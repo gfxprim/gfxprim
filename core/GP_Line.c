@@ -42,9 +42,7 @@ GP_RetCode GP_Line(GP_Context *context, int x0, int y0, int x1, int y1,
 	if (!GP_IS_CONTEXT_VALID(context))
 		return GP_EBADCONTEXT;
 
-	GP_FN_PER_BPP(GP_Line, x0, y0, x1, y1, pixel);
-
-	return GP_ESUCCESS;
+	GP_FN_PER_BPP(GP_Line, context, x0, y0, x1, y1, pixel);
 }
 
 GP_RetCode GP_TLine(GP_Context *context, int x0, int y0, int x1, int y1,

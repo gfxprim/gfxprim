@@ -23,46 +23,36 @@
  *                                                                           *
  *****************************************************************************/
 
-#include "GP.h"
+#include "GP_GetPixel.h"
+#include "GP_FnPerBpp.h"
 
-GP_Color GP_GetPixel(GP_Context *context, int x, int y)
+#define DO_GETPIXEL(bits) \
+GP_RetCode GP_GetPixel##bits##bpp(GP_Context *context, int x, int y) \
+{ \
+	if (GP_PIXEL_IS_CLIPPED(context, x, y)) \
+		return 0; \
+\
+	return GP_GETPIXEL_##bits##BPP(context, x, y); \
+} \
+
+DO_GETPIXEL(1)
+DO_GETPIXEL(2)
+DO_GETPIXEL(4)
+DO_GETPIXEL(8)
+DO_GETPIXEL(16)
+DO_GETPIXEL(24)
+DO_GETPIXEL(32)
+
+GP_Pixel GP_GetPixel(GP_Context *context, int x, int y)
 {
 	GP_CHECK_CONTEXT(context);
-	GP_Color color = {.type = GP_NOCOLOR};
 
-	uint8_t *p;
-	
-	if (x < (int) context->clip_w_min
-		|| x > (int) context->clip_w_max
-		|| y < (int) context->clip_h_min
-		|| y > (int) context->clip_h_max) {
-		return color; /* clipped out */
-	}
+	GP_FN_RET_PER_BPP(GP_GetPixel, context, x, y);
 
-	p = GP_PIXEL_ADDRESS(context, x, y);
-/*
-	switch (context->bits_per_pixel) {
-	case 32:
-		return GP_ReadPixel32bpp(p);
-	
-	case 24:
-		return GP_ReadPixel24bpp(p);
-	
-	case 16:
-		return GP_ReadPixel16bpp(p);
-	
-	case 8:
-		return GP_ReadPixel8bpp(p);
-	
-	default:
-		GP_ABORT("Unsupported value of context->bits_per_pixel");
-	}
-*/
-
-	return color;
+	return 0;
 }
 
-GP_Color GP_TGetPixel(GP_Context *context, int x, int y)
+GP_Pixel GP_TGetPixel(GP_Context *context, int x, int y)
 {
 	GP_TRANSFORM_POINT(context, x, y);
 	return GP_GetPixel(context, x, y);

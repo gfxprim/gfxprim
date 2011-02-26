@@ -57,7 +57,7 @@ void FN_NAME(CONTEXT_T context, int x0, int x1, int y, PIXEL_T pixel) \
 	ORDER_AND_CLIP_COORDS; \
 \
 	size_t length = 1 + x1 - x0; \
-	void *start = GP_PIXEL_ADDRESS(context, y, x0); \
+	void *start = PIXEL_ADDRESS(context, y, x0); \
 \
 	WRITE_PIXELS(start, length, pixel); \
 }
@@ -71,7 +71,7 @@ void FN_NAME(CONTEXT_T context, int x0, int x1, int y, PIXEL_T pixel) \
 	ORDER_AND_CLIP_COORDS; \
 \
 	size_t length = 1 + x1 - x0; \
-	void *start = GP_PIXEL_ADDRESS(context, y, x0); \
+	void *start = PIXEL_ADDRESS(context, y, x0); \
 \
 	WRITE_PIXELS(start, x0 % (8 / context->bpp), length, pixel); \
 }

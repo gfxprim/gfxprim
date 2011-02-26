@@ -42,9 +42,7 @@ GP_RetCode GP_FillEllipse(GP_Context *context, int xcenter, int ycenter,
 	if (!GP_IS_CONTEXT_VALID(context))
 		return GP_EBADCONTEXT;
 
-	GP_FN_PER_BPP(GP_FillEllipse, xcenter, ycenter, a, b, pixel);
-
-	return GP_ESUCCESS;
+	GP_FN_PER_BPP(GP_FillEllipse, context, xcenter, ycenter, a, b, pixel);
 }
 
 GP_RetCode GP_TFillEllipse(GP_Context *context, int xcenter, int ycenter,

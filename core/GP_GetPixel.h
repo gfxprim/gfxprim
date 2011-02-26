@@ -28,8 +28,50 @@
 
 #include "GP_Context.h"
 
-GP_Color GP_GetPixel(GP_Context *context, int x, int y);
+#define GP_GETPIXEL_1BPP(context, x, y) ({ \
+	uint8_t *gp_pix_addr = GP_PIXEL_ADDR(context, x, y); \
+	(0x80>>(x%8) & *gp_pix_addr) ? 1 : 0; \
+})
 
-GP_Color GP_TGetPixel(GP_Context *context, int x, int y);
+#define GP_GETPIXEL_2BPP(context, x, y) ({ \
+	uint8_t *gp_pix_addr = GP_PIXEL_ADDR(context, x, y); \
+	(*gp_pix_addr & ~(0xc0 >> (2*(x%4)))) >> (2*(3 - x%4)); \
+})
+
+#define GP_GETPIXEL_4BPP(contex, x, y) ({ \
+	uint8_t *gp_pix_addr = GP_PIXEL_ADDR(context, x, y); \
+	(*gp_pix_addr & ~(0xf0 >> (4*(x%2)))) >> (4*(1 - x%2)); \
+})	
+
+#define GP_GETPIXEL_8BPP(contex, x, y) ({ \
+	*GP_PIXEL_ADDR(context, x, y); \
+})
+
+#define GP_GETPIXEL_16BPP(contex, x, y) ({ \
+	uint8_t *gp_pix_addr = GP_PIXEL_ADDR(context, x, y); \
+	gp_pix_addr[0]<<8 | gp_pix_addr[1]; \
+})
+
+#define GP_GETPIXEL_24BPP(contex, x, y) ({ \
+	uint8_t *gp_pix_addr = GP_PIXEL_ADDR(context, x, y); \
+	gp_pix_addr[0]<<16 | gp_pix_addr[1] << 8 | \
+	gp_pix_addr[2]; \
+})
+
+#define GP_GETPIXEL_32BPP(contex, x, y) ({ \
+	uint8_t *gp_pix_addr = GP_PIXEL_ADDR(context, x, y); \
+	gp_pix_addr[0]<<24 | gp_pix_addr[1] << 16 | \
+	gp_pix_addr[2] << 8 | gp_pix_addr[3]; \
+})
+
+/*
+ * General getpixel. 
+ */
+GP_Pixel GP_GetPixel(GP_Context *context, int x, int y);
+
+/*
+ * General rotated getpixel. 
+ */
+GP_Pixel GP_TGetPixel(GP_Context *context, int x, int y);
 
 #endif /* GP_GETPIXEL_H */

@@ -44,9 +44,7 @@ GP_RetCode GP_FillTriangle(GP_Context * context, int x0, int y0, int x1, int y1,
 	if (!GP_IS_CONTEXT_VALID(context))
 		return GP_EBADCONTEXT;
 
-	GP_FN_PER_BPP(GP_FillTriangle, x0, y0, x1, y1, x2, y2, pixel);
-
-	return GP_ESUCCESS;
+	GP_FN_PER_BPP(GP_FillTriangle, context, x0, y0, x1, y1, x2, y2, pixel);
 }
 
 GP_RetCode GP_TFillTriangle(GP_Context* context, int x0, int y0, int x1, int y1,
