@@ -63,7 +63,7 @@ inline GP_PixelType GP_GetContextPixelType(const GP_Context *context);
  * Rows and columns are specified in the image's orientation
  * (i.e. they might not be XY if the image is rotated).
  */
-#define GP_PIXEL_ADDR(context, y, x) ((uint8_t *) (context->pixels \
+#define GP_PIXEL_ADDR(context, x, y) ((uint8_t *) (context->pixels \
 	+ y * context->bytes_per_row \
 	+ (x * context->bpp) / 8))
 

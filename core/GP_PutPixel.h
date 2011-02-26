@@ -32,7 +32,7 @@
  * Putpixel macros.
  */
 #define GP_PUTPIXEL_1BPP(context, x, y, pixel) do { \
-	uint8_t *gp_pix_addr = GP_PIXEL_ADDR(context, y, x); \
+	uint8_t *gp_pix_addr = GP_PIXEL_ADDR(context, x, y); \
 \
 	if (pixel) \
 		*gp_pix_addr |=  (0x80>>(x%8)); \
@@ -41,7 +41,7 @@
 } while (0)
 
 #define GP_PUTPIXEL_2BPP(context, x, y, pixel) do { \
-	uint8_t *gp_pix_addr = GP_PIXEL_ADDR(context, y, x); \
+	uint8_t *gp_pix_addr = GP_PIXEL_ADDR(context, x, y); \
 \
 	*gp_pix_addr = (*gp_pix_addr & ~(0xc0 >> (2*(x%4)))) | \
 	               (pixel << (2*(3 - x%4))); \
@@ -49,27 +49,27 @@
 } while (0)
 
 #define GP_PUTPIXEL_4BPP(context, x, y, pixel) do { \
-	uint8_t *gp_pix_addr = GP_PIXEL_ADDR(context, y, x); \
+	uint8_t *gp_pix_addr = GP_PIXEL_ADDR(context, x, y); \
 \
 	*gp_pix_addr = (*gp_pix_addr & (0xf0 >> (4*(x%2)))) | \
 	               (pixel << (4*(1 - x%2))); \
 } while (0)
 
 #define GP_PUTPIXEL_8BPP(context, x, y, pixel) do { \
-	uint8_t *gp_pix_addr = GP_PIXEL_ADDR(context, y, x); \
+	uint8_t *gp_pix_addr = GP_PIXEL_ADDR(context, x, y); \
 \
 	*gp_pix_addr = pixel & 0xff; \
 } while (0)
 
 #define GP_PUTPIXEL_16BPP(context, x, y, pixel) do { \
-	uint8_t *gp_pix_addr = GP_PIXEL_ADDR(context, y, x); \
+	uint8_t *gp_pix_addr = GP_PIXEL_ADDR(context, x, y); \
 \
 	gp_pix_addr[0] = pixel      & 0xff; \
 	gp_pix_addr[1] = (pixel>>8) & 0xff; \
 } while (0)
 
 #define GP_PUTPIXEL_24BPP(context, x, y, pixel) do { \
-	uint8_t *gp_pix_addr = GP_PIXEL_ADDR(context, y, x); \
+	uint8_t *gp_pix_addr = GP_PIXEL_ADDR(context, x, y); \
 \
 	gp_pix_addr[0] = pixel       & 0xff; \
 	gp_pix_addr[1] = (pixel>>8)  & 0xff; \
@@ -77,7 +77,7 @@
 } while (0)
 
 #define GP_PUTPIXEL_32BPP(context, x, y, pixel) do { \
-	uint8_t *gp_pix_addr = GP_PIXEL_ADDR(context, y, x); \
+	uint8_t *gp_pix_addr = GP_PIXEL_ADDR(context, x, y); \
 \
 	gp_pix_addr[0] = pixel       & 0xff; \
 	gp_pix_addr[1] = (pixel>>8)  & 0xff; \

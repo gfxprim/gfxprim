@@ -29,17 +29,17 @@
 #include "GP_Context.h"
 
 #define GP_GETPIXEL_1BPP(context, x, y) ({ \
-	uint8_t *gp_pix_addr = GP_PIXEL_ADDR(context, y, x); \
+	uint8_t *gp_pix_addr = GP_PIXEL_ADDR(context, x, y); \
 	(0x80>>(x%8) & *gp_pix_addr) ? 1 : 0; \
 })
 
 #define GP_GETPIXEL_2BPP(context, x, y) ({ \
-	uint8_t *gp_pix_addr = GP_PIXEL_ADDR(context, y, x); \
+	uint8_t *gp_pix_addr = GP_PIXEL_ADDR(context, x, y); \
 	(*gp_pix_addr & (0xc0 >> (2*(x%4)))) >> (2*(3 - x%4)); \
 })
 
 #define GP_GETPIXEL_4BPP(contex, x, y) ({ \
-	uint8_t *gp_pix_addr = GP_PIXEL_ADDR(context, y, x); \
+	uint8_t *gp_pix_addr = GP_PIXEL_ADDR(context, x, y); \
 	(*gp_pix_addr & (0xf0 >> (4*(x%2)))) >> (4*(1 - x%2)); \
 })	
 
@@ -48,18 +48,18 @@
 })
 
 #define GP_GETPIXEL_16BPP(contex, x, y) ({ \
-	uint8_t *gp_pix_addr = GP_PIXEL_ADDR(context, y, x); \
+	uint8_t *gp_pix_addr = GP_PIXEL_ADDR(context, x, y); \
 	gp_pix_addr[0]<<8 | gp_pix_addr[1]; \
 })
 
 #define GP_GETPIXEL_24BPP(contex, x, y) ({ \
-	uint8_t *gp_pix_addr = GP_PIXEL_ADDR(context, y, x); \
+	uint8_t *gp_pix_addr = GP_PIXEL_ADDR(context, x, y); \
 	gp_pix_addr[0]<<16 | gp_pix_addr[1] << 8 | \
 	gp_pix_addr[2]; \
 })
 
 #define GP_GETPIXEL_32BPP(contex, x, y) ({ \
-	uint8_t *gp_pix_addr = GP_PIXEL_ADDR(context, y, x); \
+	uint8_t *gp_pix_addr = GP_PIXEL_ADDR(context, x, y); \
 	gp_pix_addr[0]<<24 | gp_pix_addr[1] << 16 | \
 	gp_pix_addr[2] << 8 | gp_pix_addr[3]; \
 })

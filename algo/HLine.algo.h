@@ -46,7 +46,7 @@
  *     CONTEXT_T - user-defined type of drawing context (passed to PUTPIXEL)
  *     PIXVAL_T  - user-defined pixel value type (passed to PUTPIXEL)
  *     PIXEL_ADDRESS  - a function that returns a pointer to a pixel in memory,
- *                      in form f(context, y, x)
+ *                      in form f(context, x, y)
  *     WRITE_PIXELS   - a function that fills a linear block with pixel value,
  *                      in form f(start, length, pixel)
  *     FN_NAME   - name of the function to be defined
@@ -57,7 +57,7 @@ void FN_NAME(CONTEXT_T context, int x0, int x1, int y, PIXEL_T pixel) \
 	ORDER_AND_CLIP_COORDS; \
 \
 	size_t length = 1 + x1 - x0; \
-	void *start = PIXEL_ADDRESS(context, y, x0); \
+	void *start = PIXEL_ADDRESS(context, x0, y); \
 \
 	WRITE_PIXELS(start, length, pixel); \
 }
@@ -71,7 +71,7 @@ void FN_NAME(CONTEXT_T context, int x0, int x1, int y, PIXEL_T pixel) \
 	ORDER_AND_CLIP_COORDS; \
 \
 	size_t length = 1 + x1 - x0; \
-	void *start = PIXEL_ADDRESS(context, y, x0); \
+	void *start = PIXEL_ADDRESS(context, x0, y); \
 \
 	WRITE_PIXELS(start, x0 % (8 / context->bpp), length, pixel); \
 }
