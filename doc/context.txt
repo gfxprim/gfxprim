@@ -1,11 +1,10 @@
-GFXprim internals documentation
-===============================
-Cyril Hrubis <metan@ucw.cz>
+Drawing Context
+---------------
 
 GP_Context is data structure for storing 'in memory' bitmaps.
 
 Data Structure
---------------
+~~~~~~~~~~~~~~
 
 [source,c]
 -------------------------------------------------------------------------------
@@ -35,7 +34,8 @@ The addres of pixel could be determined by GP_PIXEL_ADDRESS(context, x, y)
 which returns byte aligned addres for the pixel.
 
 Rotation
-~~~~~~~~
+^^^^^^^^
+
 Rotation and mirroring is honored only by functions starting with extra T.
 So GP_TLine() is equal to GP_Line(), when all axes_sawp, x_swap and y_swap are
 set to zero.
@@ -43,8 +43,37 @@ set to zero.
 There are various macros for transforming coordinates and sizes in
 'core/GP_Transform.h'.
 
+* *GP_TRANSFORM_POINT(x, y)*
+* *GP_TRANSFORM_RECT(x, y, w, h)*
+* *GP_RETRANSFORM_POINT(x, y)*
+
 Clipping rectangle
-~~~~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^^^
+
 All drawing functions honor the clipping rectangle, eg. no pixels are put,
 even when the coordinates are inside the bitmap, if they are outside of
 clipping rectangle.
+
+Functions
+~~~~~~~~~
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <GP.h>
+
+GP_Context *GP_ContextAlloc(uint32_t w, uint32_t h, GP_PixelType type);
+-------------------------------------------------------------------------------
+
+Allocates and initalizes the 'GP_Context' structure. The size for pixels is
+computed from width, height and pixel type. Moreover the rotation flags are
+set to zero and clipping rectangle is set to whole bitmap.
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <GP.h>
+
+void GP_ContextFree(GP_Context *context);
+-------------------------------------------------------------------------------
+
+Free the context allocated memory.
+

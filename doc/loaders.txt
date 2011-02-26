@@ -1,0 +1,84 @@
+Loaders are functions GP_Context from various file formats.
+
+Supported formats
+-----------------
+
+PBM
+~~~
+
+PBM -- portable bitmap file format.
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <GP_Loaders.h>
+
+GP_RetCode GP_LoadPBM(const char *src, GP_Context **res);
+-------------------------------------------------------------------------------
+
+This function allocates and loads a 'GP_Context' with 'GP_PIXEL_G1' pixels. If
+the return code is not zero ('GP_ESUCCESS') an error during loading the bitmap
+happend.
+
+The returned 'GP_Context' should be later freed with 'GP_ContextFree()'.
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <GP_Loaders.h>
+
+GP_RetCode GP_SavePBM(const char *res, GP_Context *src);
+-------------------------------------------------------------------------------
+
+Save 'GP_Context' into PBM file. The 'GP_Context' pixel type must be
+'GP_PIXEL_G1', otherwise 'GP_ENOIMPL' error is returned.
+
+PGM
+~~~
+PBM -- portable graymap file format.
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <GP_Loaders.h>
+
+GP_RetCode GP_LoadPGM(const char *src, GP_Context **res);
+-------------------------------------------------------------------------------
+
+While the format allows to have any integer bit depth, only following color
+depths are supported:
+
+* GP_PIXEL_1G
+* GP_PIXEL_2G
+* GP_PIXEL_4G
+* GP_PIXEL_8G
+
+This function allocates and loads a 'GP_Context'. If the return code is not
+zero ('GP_ESUCCESS') an error during loading the bitmap happend.
+
+The returned 'GP_Context' should be later freed with 'GP_ContextFree()'.
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <GP_Loaders.h>
+
+GP_RetCode GP_SavePGM(const char *res, GP_Context *src);
+-------------------------------------------------------------------------------
+
+Save 'GP_Context' into PGM file. The pixel type must be one of:
+
+* GP_PIXEL_1G
+* GP_PIXEL_2G
+* GP_PIXEL_4G
+* GP_PIXEL_8G
+
+Otherwise 'GP_ENOIMPL' is returned.
+
+PNM
+~~~
+
+To be implemented.
+
+PPM
+~~~
+
+To be implemented.
+
+
