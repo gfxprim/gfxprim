@@ -34,82 +34,108 @@
 
 struct GP_Context;
 
-typedef enum GP_PixelType {
-	/* Unknown pixel type */
-	GP_PIXEL_UNKNOWN = 0,
+/*
+ *  GP_PixelType  is typedef enum of PixelTypes, 
+ * 
+ * each named GP_PIXEL_<TYPENAME>, such as GP_PIXEL_GRB888
+ * see the beginning of GP_Pixel.gen.h for a complete list
+ *
+ * The type always contains GP_PIXEL_UNKNOWN = 0 and
+ * GP_PIXEL_MAX as the last value (also the number of valid types)
+ * The types are numbered to use the entire range 0 .. GP_PIXEL_MAX-1
+ */
 
-	/* Palete */
-	GP_PIXEL_PAL4,
-	GP_PIXEL_PAL8,
-
-	/* Grayscale */
-	GP_PIXEL_G1,
-	GP_PIXEL_G2,
-	GP_PIXEL_G4,
-	GP_PIXEL_G8,
-
-	/* RGB 555 - 15 bits per pixel, 1 bit of padding */
-	GP_PIXEL_RGB555,
-	GP_PIXEL_BGR555,
-
-	/* RGB 565 - 16 bits per pixel */
-	GP_PIXEL_RGB565,
-	GP_PIXEL_BGR565,
-
-	/* RGB - 24bits per pixel */
-	GP_PIXEL_RGB888,
-	GP_PIXEL_BGR888,
-
-	/* RGB + 32bits per pixel, 8 bits of padding */
-	GP_PIXEL_XRGB8888,
-	GP_PIXEL_RGBX8888,
-	GP_PIXEL_XBGR8888,
-	GP_PIXEL_BGRX8888,
-
-	/* RGB + alpha */
-	GP_PIXEL_ARGB8888,
-	GP_PIXEL_RGBA8888,
-	GP_PIXEL_ABGR8888,
-	GP_PIXEL_BGRA8888,
-
-	GP_PIXEL_MAX,
-} GP_PixelType;
+/*
+ * GP_Pixel is just uint32_t
+ */
 
 typedef uint32_t GP_Pixel;
+
+/* Generated header */
+#include "GP_Pixel.gen.h"
+
+/*
+ * Description of one channel
+ * Assumes all the channel names to be at most 7 chars long
+ *
+ * The common channel names are:
+ *  R, G, B  - as usual
+ *  V        - value, for grayscale
+ *  A        - opacity (0=transparent)
+ *  P        - palette (index)
+ */
+
+typedef struct {
+  char name[8];           /* Channel name */
+  int offset;             /* Offset in bits */
+  int size;               /* Bit-size */
+} GP_PixelTypeChannel;
+
+/*
+ * Description of one PixelType
+ * Assumes name with at most 15 chars
+ * Assumes at most 8 channels
+ */
+
+typedef struct {
+  GP_PixelType type;      /* Number of the type */
+  const char name[16];    /* Name */
+  int size;               /* Size in bits */
+  int numchannels;        /* Number of channels */
+  const char bitmap[36];  /* String describing the bit-representaton (as in "RRRRRGGGGGGBBBBB")*/
+  const GP_PixelTypeChannel channels[8]; /* Individual channels */
+} GP_PixelTypeDescription;
+
+/*
+ * Array of GP_PIXEL_MAX entries
+ */
+
+extern const GP_PixelTypeDescription const GP_PixelTypes[];
 
 /*
  * Convert pixel type to name.
  */
-const char *GP_PixelTypeName(GP_PixelType type);
+
+inline const char *GP_PixelTypeName(GP_PixelType type)
+{
+  return GP_PixelTypes[type].name;
+}
 
 /*
  * Returns number of bits per pixel.
  */
-uint32_t GP_PixelSize(GP_PixelType type);
+
+inline uint32_t GP_PixelSize(GP_PixelType type)
+{
+  return GP_PixelTypes[type].size;
+}
+
+
+/* Below -- TODO sync with new pixel type */
 
 /*
  * Returns GP_PixelType to GP_ColorType mapping.
  */
-GP_ColorType GP_PixelTypeToColorType(GP_PixelType type);
+//GP_ColorType GP_PixelTypeToColorType(GP_PixelType type);
 
 /*
  * Converts a color to the specified pixel type.
  */
-GP_RetCode GP_ColorToPixelType(GP_PixelType pixel_type, GP_Color color, GP_Pixel *pixel);
+//GP_RetCode GP_ColorToPixelType(GP_PixelType pixel_type, GP_Color color, GP_Pixel *pixel);
 
 /*
  * Converts a color to a pixel value suitable for the specified context.
  */
-GP_RetCode GP_ColorToPixel(struct GP_Context *context, GP_Color color, GP_Pixel *pixel);
+//GP_RetCode GP_ColorToPixel(struct GP_Context *context, GP_Color color, GP_Pixel *pixel);
 
 /*
  *
  */
-GP_RetCode GP_ColorNameToPixel(struct GP_Context *context, GP_ColorName name, GP_Pixel *pixel);
+//GP_RetCode GP_ColorNameToPixel(struct GP_Context *context, GP_ColorName name, GP_Pixel *pixel);
 
 /*
  * Converts a color name to the specified pixel type.
  */
-GP_RetCode GP_ColorNameToPixelType(GP_PixelType pixel_type, GP_ColorName name, GP_Pixel *pixel);
+//GP_RetCode GP_ColorNameToPixelType(GP_PixelType pixel_type, GP_ColorName name, GP_Pixel *pixel);
 
 #endif /* GP_PIXEL_H */

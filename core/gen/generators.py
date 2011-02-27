@@ -8,7 +8,7 @@ These should be later joined with "" or "\\n".
 """
 
 import jinja2
-import pixeltype
+from pixeltype import pixeltypes, channels
 
 
 def r(tmpl, **kw):
@@ -18,6 +18,12 @@ def r(tmpl, **kw):
 ## Helper returning hex mask for that many bits
 def hmask(bits): return hex((1<<bits)-1)
 
+
+def str_start(ptype):
+  "Return a visual separator starting `ptype`-related defs"
+  return ("\n"
+         "/*************************************************************\n"
+         " * Pixel type " + ptype.name + "\n */\n")
 
 def str_description(ptype):
   "Return a short C comment describing the PixelType"
@@ -30,6 +36,42 @@ def str_description(ptype):
     " *   {{ c[0] }}  offset:{{ c[1] }} size:{{ c[2] }}\n"
     "{% endfor %}"
     " */\n", f=ptype)
+
+def gen_GP_PixelType(header, code):
+  "Generates definition of GP_PixelType enum"
+  pt_by_num = sorted([(t.number, t) for t in pixeltypes.values()])
+  sorted_pts = [t[1] for t in pt_by_num]
+  pt_max = len(sorted_pts) 
+  header.append(r(
+    "/* List of all known pixel types */\n"
+    "typedef enum GP_PixelType {\n"
+    "{% for t in sorted_pts %}"
+    "  GP_PIXEL_{{ t.name }} = {{ t.number }},\n"
+    "{% endfor %}"
+    "  GP_PIXEL_MAX = {{ pt_max }},\n"
+    "} GP_PixelType;\n", sorted_pts=sorted_pts, pt_max=pt_max))
+
+def gen_GP_PixelTypes(header, code):
+  "Generate the const structure GP_PixelTypes describing all the PixelTypes"
+  pt_by_num = sorted([(t.number, t) for t in pixeltypes.values()])
+  sorted_pts = [t[1] for t in pt_by_num]
+  code.append(r(
+    "/* Description of all known pixel types */\n"
+    "const GP_PixelTypeDescription const GP_PixelTypes [] = {\n"
+    "{% for t in sorted_pts %}"
+    "  /* GP_PIXEL_{{ t.name }} */ {\n"
+    "    .type        = GP_PIXEL_{{ t.name }},\n"
+    '    .name        = "{{ t.name }}",\n'
+    '    .size        = {{ t.size }},\n'
+    '    .numchannels = {{ len(t.chanslist) }},\n'
+    '    .bitmap      = "{{ t.bits|join("") }}",\n'
+    '    .channels    = {\n'
+    '{% for c in t.chanslist %}'
+    '      { .name = "{{ c[0] }}", .offset = {{ c[1] }}, .size = {{ c[2] }} },\n'
+    '{% endfor %}'
+    '  } },\n'
+    '{% endfor %}'
+    '};\n', sorted_pts=sorted_pts, len=len))
 
 def gen_print(ptype, header, code):
   "Generate a GP_Pixel_print_<TYPE> function (source and header)"
