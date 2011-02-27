@@ -1,0 +1,239 @@
+Drawing primitives
+------------------
+
+Fill
+~~~~
+
+[source,c]
+--------------------------------------------------------------------------------
+GP_RetCode GP_Fill(GP_Context *context, GP_Pixel pixel);
+--------------------------------------------------------------------------------
+
+Fills the context bitmap, respecting the clipping rect. This has the same effect
+as calling 'GP_FillRect(context, 0, 0, context->w, context->h, pixel)'.
+
+This functions doesn't have rotate friendly variant.
+
+Lines
+~~~~~
+
+[source,c]
+--------------------------------------------------------------------------------
+GP_RetCode GP_HLineXXY(GP_Context *context, int x0, int x1, int y,
+                       GP_Pixel pixel);
+
+GP_RetCode GP_HLineXYW(GP_Context *context, int x, int y, unsigned int w,
+                       GP_Pixel pixel);
+
+GP_RetCode GP_HLine(GP_Context *context, int x0, int x1, int y,
+                    GP_Pixel pixel);
+--------------------------------------------------------------------------------
+
+Draws a horizontal line. The 'GP_HLine()' function is an alias for 'GP_HLineXXY()'.
+
+[source,c]
+--------------------------------------------------------------------------------
+GP_RetCode GP_VLineXYY(GP_Context *context, int x, int y0, int y1,
+                       GP_Pixel pixel);
+
+GP_RetCode GP_VLineXYH(GP_Context *context, int x, int y,
+                       unsigned int height, GP_Pixel pixel);
+
+GP_RetCode GP_VLine(GP_Context *context, int x, int y0, int y1,
+                    GP_Pixel pixel);
+--------------------------------------------------------------------------------
+
+Draws a vertical line. The 'GP_VLine()' function is an alias for 'GP_VLineXYY()'.
+
+[source,c]
+--------------------------------------------------------------------------------
+GP_RetCode GP_Line(GP_Context *context, int x0, int y0, int x1, int y1,
+                   GP_Pixel pixel);
+--------------------------------------------------------------------------------
+
+Draws a line from (x0, y0) to (x1, y1), inclusive.
+
+Circles
+~~~~~~~
+
+[source,c]
+--------------------------------------------------------------------------------
+GP_RetCode GP_Circle(GP_Context *context, int xcenter, int ycenter,
+                     unsigned int r, GP_Pixel pixel);
+--------------------------------------------------------------------------------
+
+Draws a circle.
+
+[source,c]
+--------------------------------------------------------------------------------
+GP_RetCode GP_FillCircle(GP_Context *context, int xcenter, int ycenter,
+                         unsigned int r, GP_Pixel pixel);
+--------------------------------------------------------------------------------
+
+Draws a filled circle.
+
+Ellipses
+~~~~~~~~
+
+[source,c]
+--------------------------------------------------------------------------------
+GP_RetCode GP_Ellipse(GP_Context *context, int xcenter, int ycenter,
+                      unsigned int a, unsigned int b, GP_Pixel pixel);
+--------------------------------------------------------------------------------
+
+Draws an ellipse.
+
+[source,c]
+--------------------------------------------------------------------------------
+GP_RetCode GP_FillEllipse(GP_Context *context, int xcenter, int ycenter,
+                          unsigned int a, unsigned int b, GP_Pixel pixel);
+--------------------------------------------------------------------------------
+
+Draws a filled ellipse.
+
+Triangles
+~~~~~~~~~
+
+[source,c]
+--------------------------------------------------------------------------------
+GP_RetCode GP_Triangle(GP_Context *context, int x0, int y0, int x1, int y1,
+                       int x2, int y2, GP_Pixel pixel);
+--------------------------------------------------------------------------------
+
+Draws a triangle.
+
+[source,c]
+--------------------------------------------------------------------------------
+GP_RetCode GP_FillTriangle(GP_Context *context, int x0, int y0, int x1,
+                           int y1, int x2, int y2, GP_Pixel pixel);
+--------------------------------------------------------------------------------
+
+Draws a filled triangle.
+
+Rects
+~~~~~
+
+[source,c]
+--------------------------------------------------------------------------------
+GP_RetCode GP_RectXYXY(GP_Context *context, int x0, int y0, int x1, int y1,
+                       GP_Pixel pixel);
+
+GP_RetCode GP_RectXYWH(GP_Context *context, int x, int y,
+                       unsigned int w, unsigned int h, GP_Pixel pixel);
+
+GP_RetCode GP_Rect(GP_Context *context, int x0, int y0, int x1, int y1,
+                   GP_Pixel pixel);
+--------------------------------------------------------------------------------
+
+Draws a rectangle.
+The 'GP_RectXYXY()' expects two corner points (x0, y0), and (x1, y1).
+The 'GP_RectXYWH()' expects a corner point (x0, y0), width and height.
+The 'GP_Rect()' function is an alias for 'GP_RectXYXY()'.
+
+[source,c]
+--------------------------------------------------------------------------------
+GP_RetCode GP_FillRectXYXY(GP_Context *context, int x0, int y0, int x1, int y1,
+                           GP_Pixel pixel);
+
+GP_RetCode GP_FillRectXYWH(GP_Context *context, int x, int y,
+                           unsigned int w, unsigned int h, GP_Pixel pixel);
+
+GP_RetCode GP_FillRect(GP_Context *context, int x0, int y0, int x1, int y1,
+                       GP_Pixel pixel);
+--------------------------------------------------------------------------------
+
+Draws a filled rectangle.
+The 'GP_RectXYXY' fills an area between corner points (x0, y0) and (x1, y1),
+inclusive.
+The 'GP_RectXYWH' fills an area starting from (x0, y0) with specified width
+and height, i.e. from (x0, y0) to (x0 + w, x1 + y), NOT inclusive.
+The 'GP_FillRect()' functions is an alias for 'GP_FillRectXYXY()'.
+
+Tetragons
+~~~~~~~~~
+
+[source,c]
+--------------------------------------------------------------------------------
+GP_RetCode GP_Tetragon(GP_Context *context, int x0, int y0, int x1, int y1,
+                       int x2, int y2, int x3, int y3, GP_Pixel pixel);
+--------------------------------------------------------------------------------
+
+Draws a tetragon.
+
+[source,c]
+--------------------------------------------------------------------------------
+GP_RetCode GP_FillTetragon(GP_Context *context, int x0, int y0, int x1, int y1,
+                           int x2, int y2, int x3, int y3, GP_Pixel pixel);
+--------------------------------------------------------------------------------
+
+Draws a filled tetragon.
+
+Text
+~~~~
+
+Text drawing is controlled by the 'GP_TextStyle' structure defined in
+'core/GP_TextStyle.h'. This structure carries the information about font,
+letter spacing and pixel multiplication and spacing. (If no font is specified,
+the default monospace font is used.)
+
+[source,c]
+--------------------------------------------------------------------------------
+/* Where the text should be drawn relatively to the specified point */
+typedef enum GP_TextAlign {
+        GP_ALIGN_LEFT = 0x01,           /* to the left from the point */
+        GP_ALIGN_CENTER = 0x02,         /* centered on the point */
+        GP_ALIGN_RIGHT = 0x03,          /* to the right from the point */
+        GP_VALIGN_ABOVE = 0x10,         /* above the point */
+        GP_VALIGN_CENTER = 0x20,        /* centered on the point */
+        GP_VALIGN_BASELINE = 0x30,      /* baseline is on the point */
+        GP_VALIGN_BELOW = 0x40          /* below the point */
+} GP_TextAlign;
+
+GP_RetCode GP_Text(GP_Context *context, const GP_TextStyle *style,
+                   int x, int y, int align, const char *str, GP_Pixel pixel);
+--------------------------------------------------------------------------------
+
+Draws text at the position x and y; the alignment of the text in relation
+to the point is specified by alignment flags.
+If the 'style' argument is NULL, a default style is used.
+
+The text size can be computed by following functions:
+
+[source,c]
+--------------------------------------------------------------------------------
+unsigned int GP_TextWidth(const GP_TextStyle *style, const char *str);
+--------------------------------------------------------------------------------
+
+Returns the width (in pixels) that would be occupied by the string if rendered
+using the specified style.
+
+[source,c]
+--------------------------------------------------------------------------------
+unsigned int GP_TextMaxWidth(const GP_TextStyle *style, unsigned int len);
+--------------------------------------------------------------------------------
+
+Returns maximum text width, in pixels, for string with 'len' letters. This call
+is useful for variable letter size fonts.
+
+[source,c]
+--------------------------------------------------------------------------------
+unsigned int GP_TextAscent(const GP_TextStyle *style);
+--------------------------------------------------------------------------------
+
+The Ascent is the height in pixels from the top to the baseline.
+
+[source,c]
+--------------------------------------------------------------------------------
+unsigned int GP_TextDescent(const GP_TextStyle *style);
+--------------------------------------------------------------------------------
+
+The Descent is the height in pixels from baseline to the bottom.
+
+[source,c]
+--------------------------------------------------------------------------------
+unsigned int GP_TextHeight(const GP_TextStyle *style);
+--------------------------------------------------------------------------------
+
+The Height is size of the font from top to the bottom, eg. equals exactly to
+the sum of ascent and descent.
+

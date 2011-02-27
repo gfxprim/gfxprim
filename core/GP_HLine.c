@@ -27,12 +27,12 @@
 #include "algo/HLine.algo.h"
 #include "GP_FnPerBpp.h"
 
-DEF_HLINE_BU_FN(GP_HLine1bpp, GP_Context *, GP_Pixel, GP_PIXEL_ADDRESS, GP_WritePixels1bpp)
-DEF_HLINE_BU_FN(GP_HLine2bpp, GP_Context *, GP_Pixel, GP_PIXEL_ADDRESS, GP_WritePixels2bpp)
-DEF_HLINE_FN(GP_HLine8bpp, GP_Context *, GP_Pixel, GP_PIXEL_ADDRESS, GP_WritePixels8bpp)
-DEF_HLINE_FN(GP_HLine16bpp, GP_Context *, GP_Pixel, GP_PIXEL_ADDRESS, GP_WritePixels16bpp)
-DEF_HLINE_FN(GP_HLine24bpp, GP_Context *, GP_Pixel, GP_PIXEL_ADDRESS, GP_WritePixels24bpp)
-DEF_HLINE_FN(GP_HLine32bpp, GP_Context *, GP_Pixel, GP_PIXEL_ADDRESS, GP_WritePixels32bpp)
+DEF_HLINE_BU_FN(GP_HLine1bpp, GP_Context *, GP_Pixel, GP_PIXEL_ADDR, GP_WritePixels1bpp)
+DEF_HLINE_BU_FN(GP_HLine2bpp, GP_Context *, GP_Pixel, GP_PIXEL_ADDR, GP_WritePixels2bpp)
+DEF_HLINE_FN(GP_HLine8bpp,  GP_Context *, GP_Pixel, GP_PIXEL_ADDR, GP_WritePixels8bpp)
+DEF_HLINE_FN(GP_HLine16bpp, GP_Context *, GP_Pixel, GP_PIXEL_ADDR, GP_WritePixels16bpp)
+DEF_HLINE_FN(GP_HLine24bpp, GP_Context *, GP_Pixel, GP_PIXEL_ADDR, GP_WritePixels24bpp)
+DEF_HLINE_FN(GP_HLine32bpp, GP_Context *, GP_Pixel, GP_PIXEL_ADDR, GP_WritePixels32bpp)
 
 GP_RetCode GP_HLineXXY(GP_Context *context, int x0, int x1, int y, GP_Pixel pixel)
 {
@@ -41,9 +41,7 @@ GP_RetCode GP_HLineXXY(GP_Context *context, int x0, int x1, int y, GP_Pixel pixe
 	if (!GP_IS_CONTEXT_VALID(context))
 		return GP_EBADCONTEXT;
 
-	GP_FN_PER_BPP(GP_HLine, x0, x1, y, pixel);
-
-	return GP_ESUCCESS;
+	GP_FN_PER_BPP(GP_HLine, context, x0, x1, y, pixel);
 }
 
 GP_RetCode GP_HLineXYW(GP_Context *context, int x, int y, unsigned int w,

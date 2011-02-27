@@ -1,0 +1,51 @@
+GFXprim documentation
+=====================
+Cyril Hrubis <metan@ucw.cz>
+
+Gfxprim is simple 2D bitmap graphics library with emphasis on speed and
+correctness.
+
+General information
+-------------------
+
+Implemented features
+~~~~~~~~~~~~~~~~~~~~
+* basic graphics primitives (with and without fill)
+** line, circle, ellipse, triangle, tetragon
+* text drawing
+** supports both proportional and non proportional fonts
+** basic font is compiled in the library
+** font rendering can be altered by style attributes
+** font can be loaded from or stored in file
+** convertor from bdf is on the way
+* various bitmap formats to draw on
+* SDL drawing backend
+
+Work in progress
+~~~~~~~~~~~~~~~~
+
+* bitmaps and blitting
+** create, destroy bitmap
+** blit bitmaps (should respect rotation and pixel formats)
+** bitmap rotation (in order to speed up rotated blits)
+** loading bitmaps from image files (jpg, png, bmp, pnm ...)
+
+* backends
+** finish frame-buffer backend (SDL does not work on most of my frame-buffers)
+** other than SDL X backend (SDL does support only one window)
+** some overall initialization routines
+
+Advanced (and unimplemented) features
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+* bitmaps
+** alpha channel
+
+* gfx primitives
+** drawing with alpha channel
+** anti aliasing
+
+Documentation
+-------------
+
+* link:api.html[GFXprim C api]

@@ -25,9 +25,57 @@
 
 #include "GP.h"
 
+#include <string.h>
+
 inline GP_PixelType GP_GetContextPixelType(const GP_Context *context)
 {
 	return context->pixel_type;
+}
+
+GP_Context *GP_ContextCopy(GP_Context *context, int flag)
+{
+	GP_Context *new;
+	uint8_t *pixels;
+
+	if (context == NULL)
+		return NULL;
+
+	new     = malloc(sizeof(GP_Context));
+	pixels  = malloc(context->bytes_per_row * context->h);
+
+	if (pixels == NULL || context == NULL) {
+		free(pixels);
+		free(context);
+		return NULL;
+	}
+
+	new->pixels = pixels;
+
+	if (flag)
+		memcpy(pixels, context->pixels,
+		       context->bytes_per_row * context->h);
+
+	new->bpp           = context->bpp;
+	new->bytes_per_row = context->bytes_per_row;
+
+	new->w = context->w;
+	new->h = context->h;
+
+	new->pixel_type = context->pixel_type;
+
+	/* rotation and mirroring */
+	new->axes_swap = context->axes_swap;
+	new->y_swap    = context->y_swap;
+	new->x_swap    = context->x_swap;
+
+	/* clipping */
+	new->clip_w_min = context->clip_w_min;
+	new->clip_w_max = context->clip_w_max;
+	new->clip_h_min = context->clip_h_min;
+	new->clip_h_max = context->clip_h_max;
+
+	return new;
+	
 }
 
 GP_Context *GP_ContextAlloc(uint32_t w, uint32_t h, GP_PixelType type)

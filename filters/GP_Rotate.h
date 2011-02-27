@@ -23,37 +23,36 @@
  *                                                                           *
  *****************************************************************************/
 
-#include "GP_GetPixel.h"
-#include "GP_FnPerBpp.h"
+/*
 
-#define DO_GETPIXEL(bits) \
-GP_RetCode GP_GetPixel##bits##bpp(GP_Context *context, int x, int y) \
-{ \
-	if (GP_PIXEL_IS_CLIPPED(context, x, y)) \
-		return 0; \
-\
-	return GP_GETPIXEL_##bits##BPP(context, x, y); \
-} \
+  GP_Context in place rotations.
 
-DO_GETPIXEL(1)
-DO_GETPIXEL(2)
-DO_GETPIXEL(4)
-DO_GETPIXEL(8)
-DO_GETPIXEL(16)
-DO_GETPIXEL(24)
-DO_GETPIXEL(32)
+ */
 
-GP_Pixel GP_GetPixel(GP_Context *context, int x, int y)
-{
-	GP_CHECK_CONTEXT(context);
+#ifndef GP_ROTATE_H
+#define GP_ROTATE_H
 
-	GP_FN_RET_PER_BPP(GP_GetPixel, context, x, y);
+#include "GP_Context.h"
 
-	return 0;
-}
+/*
+ * Mirror horizontally.
+ */
+GP_RetCode GP_MirrorH(GP_Context *context);
 
-GP_Pixel GP_TGetPixel(GP_Context *context, int x, int y)
-{
-	GP_TRANSFORM_POINT(context, x, y);
-	return GP_GetPixel(context, x, y);
-}
+/*
+ * Mirror vertically
+ */
+GP_RetCode GP_MirrorV(GP_Context *context);
+
+/*
+ * Rotate clockwise.
+ */
+GP_RetCode GP_RotateCW(GP_Context *context);
+
+/*
+ * Rotate counter clockwise.
+ */
+GP_RetCode GP_RotateCCW(GP_Context *context);
+
+
+#endif /* GP_ROTATE_H */

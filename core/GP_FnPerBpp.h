@@ -31,27 +31,48 @@
  * Extra arguments are arguments to be passed to the function.
  * Returns GP_ENOIMPL if the bit depth is unknown.
  */
-#define GP_FN_PER_BPP(FN_NAME, ...) \
+#define GP_FN_PER_BPP(FN_NAME, context, ...) \
 \
 	switch (context->bpp) { \
 	case 1: \
 		FN_NAME##1bpp(context, __VA_ARGS__); \
-		break; \
+	break; \
 	case 2: \
 		FN_NAME##2bpp(context, __VA_ARGS__); \
-		break; \
+	break; \
 	case 8: \
 		FN_NAME##8bpp(context, __VA_ARGS__); \
-		break; \
+	break; \
 	case 16: \
 		FN_NAME##16bpp(context, __VA_ARGS__); \
-		break; \
+	break; \
 	case 24: \
 		FN_NAME##24bpp(context, __VA_ARGS__); \
-		break; \
+	break; \
 	case 32: \
 		FN_NAME##32bpp(context, __VA_ARGS__); \
-		break; \
+	break; \
 	default: \
 		return GP_ENOIMPL; \
+	} \
+\
+	return GP_ESUCCESS;
+
+#define GP_FN_RET_PER_BPP(FN_NAME, context, ...) \
+\
+	switch (context->bpp) { \
+	case 1: \
+		return FN_NAME##1bpp(context, __VA_ARGS__); \
+	case 2: \
+		return FN_NAME##2bpp(context, __VA_ARGS__); \
+	case 4: \
+		return FN_NAME##4bpp(context, __VA_ARGS__); \
+	case 8: \
+		return FN_NAME##8bpp(context, __VA_ARGS__); \
+	case 16: \
+		return FN_NAME##16bpp(context, __VA_ARGS__); \
+	case 24: \
+		return FN_NAME##24bpp(context, __VA_ARGS__); \
+	case 32: \
+		return FN_NAME##32bpp(context, __VA_ARGS__); \
 	}

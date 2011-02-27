@@ -23,37 +23,10 @@
  *                                                                           *
  *****************************************************************************/
 
-#include "GP_GetPixel.h"
-#include "GP_FnPerBpp.h"
+#ifndef GP_LOADERS_H
+#define GP_LOADERS_H
 
-#define DO_GETPIXEL(bits) \
-GP_RetCode GP_GetPixel##bits##bpp(GP_Context *context, int x, int y) \
-{ \
-	if (GP_PIXEL_IS_CLIPPED(context, x, y)) \
-		return 0; \
-\
-	return GP_GETPIXEL_##bits##BPP(context, x, y); \
-} \
+#include "GP_PBM.h"
+#include "GP_PGM.h"
 
-DO_GETPIXEL(1)
-DO_GETPIXEL(2)
-DO_GETPIXEL(4)
-DO_GETPIXEL(8)
-DO_GETPIXEL(16)
-DO_GETPIXEL(24)
-DO_GETPIXEL(32)
-
-GP_Pixel GP_GetPixel(GP_Context *context, int x, int y)
-{
-	GP_CHECK_CONTEXT(context);
-
-	GP_FN_RET_PER_BPP(GP_GetPixel, context, x, y);
-
-	return 0;
-}
-
-GP_Pixel GP_TGetPixel(GP_Context *context, int x, int y)
-{
-	GP_TRANSFORM_POINT(context, x, y);
-	return GP_GetPixel(context, x, y);
-}
+#endif /* GP_LOADERS_H */

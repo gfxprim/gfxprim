@@ -63,9 +63,13 @@ inline GP_PixelType GP_GetContextPixelType(const GP_Context *context);
  * Rows and columns are specified in the image's orientation
  * (i.e. they might not be XY if the image is rotated).
  */
-#define GP_PIXEL_ADDRESS(context, y, x) ((uint8_t *) (context->pixels \
+#define GP_PIXEL_ADDR(context, x, y) ((uint8_t *) (context->pixels \
 	+ y * context->bytes_per_row \
 	+ (x * context->bpp) / 8))
+
+#define GP_CALC_ROW_SIZE(pixel_type, width) \
+	 ((GP_PixelSize(pixel_type) * width) / 8 + \
+	!!((GP_PixelSize(pixel_type) * width) % 8))
 
 /* Evaluates to true if the context is valid (sane), false otherwise. */
 #define GP_IS_CONTEXT_VALID(context) ( \
@@ -87,9 +91,29 @@ inline GP_PixelType GP_GetContextPixelType(const GP_Context *context);
 	} while (0)
 
 /*
+ * Is true, when pixel is clipped. 
+ */
+#define GP_PIXEL_IS_CLIPPED(context, x, y) \
+	(x < (int) context->clip_w_min \
+	|| x > (int) context->clip_w_max \
+	|| y < (int) context->clip_h_min \
+	|| y > (int) context->clip_h_max) \
+
+/*
  * Allocate context.
  */
 GP_Context *GP_ContextAlloc(uint32_t w, uint32_t h, GP_PixelType type);
+
+/*
+ * If passed the pixels are copied to newly created context, otherwise
+ * the pixels are allocated but uninitalized.
+ */
+#define GP_COPY_WITH_PIXELS 1
+
+/*
+ * Copy context.
+ */
+GP_Context *GP_ContextCopy(GP_Context *context, int flag);
 
 /*
  * Free context.
