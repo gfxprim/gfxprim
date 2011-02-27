@@ -1,0 +1,5 @@
+*.o
+*.pyc
+*.gen.c
+*.gen.h
+*.swp
