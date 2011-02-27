@@ -3,7 +3,7 @@ LIB_LOC=/usr/lib/
 
 .PHONY: all core sdl drivers loaders install clean tar
 
-all: core sdl drivers loaders
+all: core sdl drivers loaders filters
 
 drivers:
 	cd drivers && $(MAKE) all
@@ -16,6 +16,9 @@ sdl: core
 
 loaders:
 	cd loaders && $(MAKE) all
+
+filters:
+	cd filters && $(MAKE) all
 
 install: all
 	# core library
@@ -37,6 +40,7 @@ clean:
 	cd targets/sdl && $(MAKE) clean
 	cd drivers && $(MAKE) clean
 	cd loaders && $(MAKE) clean
+	cd filters && $(MAKE) clean
 
 tar: clean
 	cd .. && tar cjf gfxprim-`date +%Y-%b-%d-%HH%MM`.tar.bz2 gfxprim
