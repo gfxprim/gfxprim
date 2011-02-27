@@ -61,7 +61,7 @@
 } while (0)
 
 #define GP_PAL8_FILL(col, i) do {      \
-	(col)->pal8.type    = GP_PAL4; \
+	(col)->pal8.type    = GP_PAL8; \
 	(col)->pal8.index   = i;       \
 } while (0)
 
