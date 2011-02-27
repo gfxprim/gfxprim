@@ -1,0 +1,48 @@
+Context filters
+---------------
+
+Pixel filters for 'GP_Context'.
+
+Rotation
+~~~~~~~~
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <GP_Filters.h>
+
+GP_RetCode GP_MirrorH(GP_Context *context);
+-------------------------------------------------------------------------------
+
+Mirrors context pixels horizontaly and updates the context metadata (mirrors
+cliping rectangle too).
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <GP_Filters.h>
+
+GP_RetCode GP_MirrorV(GP_Context *context);
+-------------------------------------------------------------------------------
+
+Mirrors context pixels verticaly and updates the context metadata (mirrors
+cliping rectangle too).
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <GP_Filters.h>
+
+GP_RetCode GP_RotateCW(GP_Context *context);
+-------------------------------------------------------------------------------
+
+Rotates context clock wise and updates the context metadata (rotates cliping
+rectangle too).
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <GP_Filters.h>
+
+GP_RetCode GP_RotateCCW(GP_Context *context);
+-------------------------------------------------------------------------------
+
+Rotates context counter clock wise and updates the context metadata (rotates
+cliping rectangle too).
+

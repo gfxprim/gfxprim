@@ -1,7 +1,6 @@
+Context loaders
+---------------
 Loaders are functions GP_Context from various file formats.
-
-Supported formats
------------------
 
 PBM
 ~~~

@@ -68,6 +68,8 @@ Allocates and initalizes the 'GP_Context' structure. The size for pixels is
 computed from width, height and pixel type. Moreover the rotation flags are
 set to zero and clipping rectangle is set to whole bitmap.
 
+The newly allocated context should be later freed with 'GP_ContextFree()'.
+
 [source,c]
 -------------------------------------------------------------------------------
 #include <GP.h>
@@ -76,4 +78,17 @@ void GP_ContextFree(GP_Context *context);
 -------------------------------------------------------------------------------
 
 Free the context allocated memory.
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <GP.h>
+
+GP_Context *GP_ContextCopy(GP_Context *context, int flag);
+-------------------------------------------------------------------------------
+
+Copy a context. Allocates and initalizes a 'GP_Context'. If flag is set to
+GP_CONTEXT_WITH_PIXELS, the actuall bitmap is copied from contex to newly
+allocated context, otherwise only context metadata are copied.
+
+The newly created context should be later freed with 'GP_ContextFree()'.
 

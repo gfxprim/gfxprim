@@ -1,9 +1,6 @@
-all: api.html index.html
+all: api.html
 
-index.html: index.txt
-	asciidoc -a toc index.txt
-
-api.html: api.txt context.txt loaders.txt
+api.html: general.txt api.txt context.txt loaders.txt filters.txt
 	asciidoc -a toc api.txt
 
 api.pdf: api.txt
@@ -12,5 +9,5 @@ api.pdf: api.txt
 	fop api.fo -pdf api.pdf
 
 clean:
-	rm -f api.html index.html
+	rm -f api.html
 	rm -f api.xml api.fo api.pdf
