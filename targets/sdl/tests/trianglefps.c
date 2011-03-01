@@ -87,7 +87,7 @@ void event_loop(void)
 	SDL_Event event;
 
 	for (;;) {
-        	while (SDL_PollEvent(&event) > 0) {
+		while (SDL_PollEvent(&event) > 0) {
 			switch (event.type) {
 				case SDL_USEREVENT:
 					SDL_Flip(display);
@@ -100,7 +100,7 @@ void event_loop(void)
 					if (fps > fps_max)
 						fps_max = fps;
 					fps = 0;
-            				break;
+				break;
 				case SDL_KEYDOWN:
 				case SDL_QUIT:
 					return;

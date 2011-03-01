@@ -134,7 +134,7 @@ GP_RetCode GP_ColorToPixelType(GP_PixelType pixel_type, GP_Color color, GP_Pixel
 			CHECK_RET(ret);
 			*pixel = color.rgb888.red   << 0x10 |
 			         color.rgb888.green << 0x08 | 
-			 	 color.rgb888.blue;
+			         color.rgb888.blue;
 			return ret;
 		break;
 		case GP_PIXEL_BGR888:
@@ -143,7 +143,7 @@ GP_RetCode GP_ColorToPixelType(GP_PixelType pixel_type, GP_Color color, GP_Pixel
 			CHECK_RET(ret);
 			*pixel = color.rgb888.red           |
 			         color.rgb888.green << 0x08 | 
-				 color.rgb888.blue  << 0x10;
+			         color.rgb888.blue  << 0x10;
 			return ret;
 		break;
 		case GP_PIXEL_RGBX8888:
@@ -159,7 +159,7 @@ GP_RetCode GP_ColorToPixelType(GP_PixelType pixel_type, GP_Color color, GP_Pixel
 			CHECK_RET(ret);
 			*pixel = color.rgb888.red   << 0x08 |
 			         color.rgb888.green << 0x10 | 
-				 color.rgb888.blue  << 0x18;
+			         color.rgb888.blue  << 0x18;
 			return ret;
 		break;
 		case GP_PIXEL_ARGB8888:
@@ -167,7 +167,7 @@ GP_RetCode GP_ColorToPixelType(GP_PixelType pixel_type, GP_Color color, GP_Pixel
 			CHECK_RET(ret);
 			*pixel = color.rgba8888.red   << 0x10 |
 			         color.rgba8888.green << 0x08 |
-		                 color.rgba8888.blue          |
+			         color.rgba8888.blue          |
 			         color.rgba8888.alpha << 0x18;
 			return ret;
 		break;
@@ -176,7 +176,7 @@ GP_RetCode GP_ColorToPixelType(GP_PixelType pixel_type, GP_Color color, GP_Pixel
 			CHECK_RET(ret);
 			*pixel = color.rgba8888.red   << 0x18 |
 			         color.rgba8888.green << 0x10 |
-		                 color.rgba8888.blue  << 0x08 |
+			         color.rgba8888.blue  << 0x08 |
 			        color.rgba8888.alpha;
 			return ret;
 		break;
@@ -186,7 +186,7 @@ GP_RetCode GP_ColorToPixelType(GP_PixelType pixel_type, GP_Color color, GP_Pixel
 			*pixel = color.rgba8888.red           |
 			         color.rgba8888.green << 0x08 |
 			         color.rgba8888.blue  << 0x10 |
-				 color.rgba8888.alpha << 0x18;
+			         color.rgba8888.alpha << 0x18;
 			return ret;
 		break;
 		case GP_PIXEL_BGRA8888:

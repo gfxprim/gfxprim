@@ -30,30 +30,30 @@
 
 enum GP_RetCode GP_PaletteColorToColor(GP_Color *color)
 {
-        struct GP_ColPal *pal;
+	struct GP_ColPal *pal;
 	GP_Palette *palette;
 	uint16_t index;
 
 	if (color->type != GP_PALETTE)
 		return GP_EINVAL;
-	
+
 	pal     = &color->pal;
 	palette = pal->palette;
 	index   = pal->index;
 
-        switch (pal->palette->type) {
-                case GP_RGB888:
-                        if (index >= palette->rgb888.size)
-                                return GP_EINVAL;
+	switch (pal->palette->type) {
+	case GP_RGB888:
+		if (index >= palette->rgb888.size)
+			return GP_EINVAL;
 			
-			GP_RGB888_FILL(color, palette->rgb888.colors[index].red,
-			                      palette->rgb888.colors[index].green,
-			                      palette->rgb888.colors[index].blue);
-                        return GP_ESUCCESS;
-                break;
-                default:
-                        return GP_ENOIMPL;
-        }
+		GP_RGB888_FILL(color, palette->rgb888.colors[index].red,
+		               palette->rgb888.colors[index].green,
+		               palette->rgb888.colors[index].blue);
+		return GP_ESUCCESS;
+	break;
+	default:
+		return GP_ENOIMPL;
+	}
 }
 
 static void print_rgb888(struct GP_PalRGB888 *palette)

@@ -94,16 +94,16 @@ void event_loop(void)
 {
 	SDL_Event event;
 
-        while (SDL_WaitEvent(&event) > 0) {
+	while (SDL_WaitEvent(&event) > 0) {
 		switch (event.type) {
 			case SDL_USEREVENT:
-                		redraw_screen();
+				redraw_screen();
 				SDL_Flip(display);
 				start_angle += 0.01;
 				if (start_angle > 2*M_PI) {
 					start_angle = 0.0;
 				}
-            		break;
+			break;
 			case SDL_KEYDOWN:
 			case SDL_QUIT:
 				return;
