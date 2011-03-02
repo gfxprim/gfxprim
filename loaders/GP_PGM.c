@@ -60,23 +60,23 @@ GP_RetCode GP_LoadPGM(const char *src, GP_Context **res)
 
 	if (fgetc(f) != 'P' || fgetc(f) != '2')
 		goto err1;
-
+	
 	if (fscanf(f, "%"PRIu32"%"PRIu32"%"PRIu32, &w, &h, &gray) < 3)
 		goto err1;
-
+	
 	switch (gray) {
 	case 1:
 		type = GP_PIXEL_G1;
-		break;
+	break;
 	case 3:
 		type = GP_PIXEL_G2;
-		break;
+	break;
 	case 15:
 		type = GP_PIXEL_G4;
-		break;
+	break;
 	case 255:
 		type = GP_PIXEL_G8;
-		break;
+	break;
 	default:
 		goto err1;
 	}
@@ -87,12 +87,19 @@ GP_RetCode GP_LoadPGM(const char *src, GP_Context **res)
 	case 1:
 		if (GP_PXMLoad1bpp(f, *res))
 			goto err2;
-		break;
+	break;
 	case 3:
 		if (GP_PXMLoad2bpp(f, *res))
 			goto err2;
-		break;
-	//TODO
+	break;
+	case 15:
+		if (GP_PXMLoad4bpp(f, *res))
+			goto err2;
+	break;
+	case 255:
+		if (GP_PXMLoad8bpp(f, *res))
+			goto err2;
+	break;
 	}
 
 	fclose(f);
@@ -139,12 +146,18 @@ GP_RetCode GP_SavePGM(const char *res, GP_Context *src)
 	case 1:
 		if (GP_PXMSave1bpp(f, src))
 			goto err;
-		break;
+	break;
 	case 3:
 		if (GP_PXMSave2bpp(f, src))
 			goto err;
-		break;
+	break;
 	//TODO
+	case 255:
+		if (GP_PXMSave8bpp(f, src))
+			goto err;
+	break;
+	default:
+		return GP_ENOIMPL;
 	}
 
 	if (fclose(f))

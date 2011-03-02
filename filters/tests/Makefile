@@ -14,4 +14,4 @@ all: $(TESTS)
 
 clean:
 	rm -f *.o $(TESTS)
-	rm -f *.pgm
+	rm -f test-mv.pgm test-mh.pgm test-cw.pgm test-ccw.pgm
