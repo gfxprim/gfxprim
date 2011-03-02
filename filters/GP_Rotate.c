@@ -27,8 +27,10 @@
 
 #include "GP_GetPixel.h"
 #include "GP_PutPixel.h"
+#include "GP_FnPerBpp.h"
 
-#include "GP_Swap.h"
+#include "GP_MirrorV.algo.h"
+#include "GP_Rotate.algo.h"
 
 #include <string.h>
 
@@ -50,82 +52,66 @@ GP_RetCode GP_MirrorH(GP_Context *context)
 		memcpy(l2, buf, bpr);
 	}
 
-	//TODO clipping
+	GP_MIRROR_H_CLIP(context);
 
 	return GP_ESUCCESS;
 }
 
-//TODO: Use per bpp functions?
+DEF_MIRRORV_FN(GP_MirrorV1bpp, GP_Context *, GP_Pixel,
+               GP_PUTPIXEL_1BPP, GP_GETPIXEL_1BPP)
+DEF_MIRRORV_FN(GP_MirrorV2bpp, GP_Context *, GP_Pixel,
+               GP_PUTPIXEL_2BPP, GP_GETPIXEL_2BPP)
+DEF_MIRRORV_FN(GP_MirrorV4bpp, GP_Context *, GP_Pixel,
+               GP_PUTPIXEL_4BPP, GP_GETPIXEL_4BPP)
+DEF_MIRRORV_FN(GP_MirrorV8bpp, GP_Context *, GP_Pixel,
+               GP_PUTPIXEL_8BPP, GP_GETPIXEL_8BPP)
+DEF_MIRRORV_FN(GP_MirrorV16bpp, GP_Context *, GP_Pixel,
+               GP_PUTPIXEL_16BPP, GP_GETPIXEL_16BPP)
+DEF_MIRRORV_FN(GP_MirrorV24bpp, GP_Context *, GP_Pixel,
+               GP_PUTPIXEL_24BPP, GP_GETPIXEL_24BPP)
+DEF_MIRRORV_FN(GP_MirrorV32bpp, GP_Context *, GP_Pixel,
+               GP_PUTPIXEL_32BPP, GP_GETPIXEL_32BPP)
+
 GP_RetCode GP_MirrorV(GP_Context *context)
 {
-	uint32_t x, y;
-	GP_Pixel tmp;
-
 	if (context == NULL)
 		return GP_ENULLPTR;
 
-	for (x = 0; x < context->w/2; x++) {
-		uint8_t xm = context->w - x - 1;
-		for (y = 0; y < context->h; y++) {
-			tmp = GP_GetPixel(context, x, y);
-			
-			GP_PutPixel(context, x, y, GP_GetPixel(context, xm, y));
-			GP_PutPixel(context, xm, y, tmp);
-		}
-	}
-
-	//TODO: swap clipping
-
-	return GP_ESUCCESS;
+	GP_FN_PER_BPP(GP_MirrorV, context);
 }
 
-//TODO: Use per bpp functions?
-//TODO: in place rotation?
-static GP_RetCode rotate_c(struct GP_Context *context, int flag)
-{
-	uint32_t x, y;
-	GP_Context *tmp;
-
-	if (context == NULL)
-		return GP_ENULLPTR;
-
-	tmp = GP_ContextCopy(context, GP_COPY_WITH_PIXELS);
-
-	if (tmp == NULL)
-		return GP_ENOMEM;
-
-	/* rotate context metadata */
-	GP_SWAP(context->w, context->h);
-
-	GP_SWAP(context->clip_w_min, context->clip_h_min);
-	GP_SWAP(context->clip_w_max, context->clip_h_max);
-
-	context->bytes_per_row = GP_CALC_ROW_SIZE(context->pixel_type,
-	                                          context->w);
-	
-	for (x = 0; x < tmp->w; x++) {
-		for (y = 0; y < tmp->h; y++) {
-			if (flag)
-				GP_PutPixel(context, tmp->h - y - 1, x,
-				            GP_GetPixel(tmp, x, y));
-			else
-				GP_PutPixel(context, y, tmp->w - x - 1,
-				            GP_GetPixel(tmp, x, y));
-		}
-	}
-
-	GP_ContextFree(tmp);
-
-	return GP_ESUCCESS;
-}
-
+DEF_ROTATECW_FN(GP_RotateCW1bpp, GP_Context *, GP_PUTPIXEL_1BPP, GP_GETPIXEL_1BPP)
+DEF_ROTATECW_FN(GP_RotateCW2bpp, GP_Context *, GP_PUTPIXEL_2BPP, GP_GETPIXEL_2BPP)
+DEF_ROTATECW_FN(GP_RotateCW4bpp, GP_Context *, GP_PUTPIXEL_4BPP, GP_GETPIXEL_4BPP)
+DEF_ROTATECW_FN(GP_RotateCW8bpp, GP_Context *, GP_PUTPIXEL_8BPP, GP_GETPIXEL_8BPP)
+DEF_ROTATECW_FN(GP_RotateCW16bpp, GP_Context *, GP_PUTPIXEL_16BPP, GP_GETPIXEL_16BPP)
+DEF_ROTATECW_FN(GP_RotateCW24bpp, GP_Context *, GP_PUTPIXEL_24BPP, GP_GETPIXEL_24BPP)
+DEF_ROTATECW_FN(GP_RotateCW32bpp, GP_Context *, GP_PUTPIXEL_32BPP, GP_GETPIXEL_32BPP)
 
 GP_RetCode GP_RotateCW(GP_Context *context)
 {
-	return rotate_c(context, 1);
+	if (context == NULL)
+		return GP_ENULLPTR;
+
+	GP_FN_RET_PER_BPP(GP_RotateCW, context);
+
+	return GP_ENOIMPL;
 }
+
+DEF_ROTATECCW_FN(GP_RotateCCW1bpp, GP_Context *, GP_PUTPIXEL_1BPP, GP_GETPIXEL_1BPP)
+DEF_ROTATECCW_FN(GP_RotateCCW2bpp, GP_Context *, GP_PUTPIXEL_2BPP, GP_GETPIXEL_2BPP)
+DEF_ROTATECCW_FN(GP_RotateCCW4bpp, GP_Context *, GP_PUTPIXEL_4BPP, GP_GETPIXEL_4BPP)
+DEF_ROTATECCW_FN(GP_RotateCCW8bpp, GP_Context *, GP_PUTPIXEL_8BPP, GP_GETPIXEL_8BPP)
+DEF_ROTATECCW_FN(GP_RotateCCW16bpp, GP_Context *, GP_PUTPIXEL_16BPP, GP_GETPIXEL_16BPP)
+DEF_ROTATECCW_FN(GP_RotateCCW24bpp, GP_Context *, GP_PUTPIXEL_24BPP, GP_GETPIXEL_24BPP)
+DEF_ROTATECCW_FN(GP_RotateCCW32bpp, GP_Context *, GP_PUTPIXEL_32BPP, GP_GETPIXEL_32BPP)
 
 GP_RetCode GP_RotateCCW(GP_Context *context)
 {
-	return rotate_c(context, 0);
+	if (context == NULL)
+		return GP_ENULLPTR;
+
+	GP_FN_RET_PER_BPP(GP_RotateCCW, context);
+
+	return GP_ENOIMPL;
 }

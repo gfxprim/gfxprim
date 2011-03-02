@@ -23,61 +23,68 @@
  *                                                                           *
  *****************************************************************************/
 
-#include "GP.h"
+#include "GP_Clip.h"
+#include "GP_Swap.h"
+#include "GP_Context.h"
 
-/*
- * Macro that generates a switch-case block that calls various variants
- * of the specified function depending on the bit depth of the context.
- * Extra arguments are arguments to be passed to the function.
- * Returns GP_ENOIMPL if the bit depth is unknown.
- *
- * Note: Relying on existing context variable is ugly and broken, I know...
- *       But I hate doing just another GP_FN_PER_BPP macro for functions
- *       that takes context as it's only argument. Or passing the context
- *       twice or whatever else.
- */
-#define GP_FN_PER_BPP(FN_NAME, ...) \
+#define DEF_ROTATECW_FN(FN_NAME, CONTEXT_T, PUTPIXEL, GETPIXEL) \
+GP_RetCode FN_NAME(CONTEXT_T context) \
+{ \
+	uint32_t x, y; \
+	CONTEXT_T tmp; \
 \
-	switch (context->bpp) { \
-	case 1: \
-		FN_NAME##1bpp(__VA_ARGS__); \
-	break; \
-	case 2: \
-		FN_NAME##2bpp(__VA_ARGS__); \
-	break; \
-	case 8: \
-		FN_NAME##8bpp(__VA_ARGS__); \
-	break; \
-	case 16: \
-		FN_NAME##16bpp(__VA_ARGS__); \
-	break; \
-	case 24: \
-		FN_NAME##24bpp(__VA_ARGS__); \
-	break; \
-	case 32: \
-		FN_NAME##32bpp(__VA_ARGS__); \
-	break; \
-	default: \
-		return GP_ENOIMPL; \
+	tmp = GP_ContextCopy(context, GP_COPY_WITH_PIXELS); \
+\
+	if (tmp == NULL) \
+		return GP_ENOMEM; \
+\
+	GP_SWAP(context->w, context->h); \
+\
+	context->bytes_per_row = GP_CALC_ROW_SIZE(context->pixel_type, \
+	                                          context->w); \
+\
+	for (x = 0; x < tmp->w; x++) { \
+		for (y = 0; y < tmp->h; y++) { \
+			uint32_t yr = tmp->h - y - 1; \
+			PUTPIXEL(context, yr, x, GETPIXEL(tmp, x, y)); \
+		} \
 	} \
 \
-	return GP_ESUCCESS;
-
-#define GP_FN_RET_PER_BPP(FN_NAME, ...) \
+	GP_ContextFree(tmp); \
 \
-	switch (context->bpp) { \
-	case 1: \
-		return FN_NAME##1bpp(__VA_ARGS__); \
-	case 2: \
-		return FN_NAME##2bpp(__VA_ARGS__); \
-	case 4: \
-		return FN_NAME##4bpp(__VA_ARGS__); \
-	case 8: \
-		return FN_NAME##8bpp(__VA_ARGS__); \
-	case 16: \
-		return FN_NAME##16bpp(__VA_ARGS__); \
-	case 24: \
-		return FN_NAME##24bpp(__VA_ARGS__); \
-	case 32: \
-		return FN_NAME##32bpp(__VA_ARGS__); \
-	}
+	GP_SWAP_CLIPS(context); \
+	GP_MIRROR_H_CLIP(context); \
+\
+	return GP_ESUCCESS; \
+}
+
+#define DEF_ROTATECCW_FN(FN_NAME, CONTEXT_T, PUTPIXEL, GETPIXEL) \
+GP_RetCode FN_NAME(CONTEXT_T context) \
+{ \
+	uint32_t x, y; \
+	CONTEXT_T tmp; \
+\
+	tmp = GP_ContextCopy(context, GP_COPY_WITH_PIXELS); \
+\
+	if (tmp == NULL) \
+		return GP_ENOMEM; \
+\
+	GP_SWAP(context->w, context->h); \
+\
+	context->bytes_per_row = GP_CALC_ROW_SIZE(context->pixel_type, \
+	                                          context->w); \
+\
+	for (x = 0; x < tmp->w; x++) { \
+		for (y = 0; y < tmp->h; y++) { \
+				uint32_t xr = tmp->w - x - 1; \
+				PUTPIXEL(context, y, xr, GETPIXEL(tmp, x, y)); \
+		} \
+	} \
+\
+	GP_ContextFree(tmp); \
+\
+	GP_SWAP_CLIPS(context); \
+	GP_MIRROR_V_CLIP(context); \
+\
+	return GP_ESUCCESS; \
+}

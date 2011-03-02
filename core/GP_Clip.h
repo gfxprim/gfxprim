@@ -23,61 +23,29 @@
  *                                                                           *
  *****************************************************************************/
 
-#include "GP.h"
+#ifndef GP_CLIP_H
+#define GP_CLIP_H
 
 /*
- * Macro that generates a switch-case block that calls various variants
- * of the specified function depending on the bit depth of the context.
- * Extra arguments are arguments to be passed to the function.
- * Returns GP_ENOIMPL if the bit depth is unknown.
- *
- * Note: Relying on existing context variable is ugly and broken, I know...
- *       But I hate doing just another GP_FN_PER_BPP macro for functions
- *       that takes context as it's only argument. Or passing the context
- *       twice or whatever else.
+ * Clipping rectanle mirroring and rotations.
  */
-#define GP_FN_PER_BPP(FN_NAME, ...) \
-\
-	switch (context->bpp) { \
-	case 1: \
-		FN_NAME##1bpp(__VA_ARGS__); \
-	break; \
-	case 2: \
-		FN_NAME##2bpp(__VA_ARGS__); \
-	break; \
-	case 8: \
-		FN_NAME##8bpp(__VA_ARGS__); \
-	break; \
-	case 16: \
-		FN_NAME##16bpp(__VA_ARGS__); \
-	break; \
-	case 24: \
-		FN_NAME##24bpp(__VA_ARGS__); \
-	break; \
-	case 32: \
-		FN_NAME##32bpp(__VA_ARGS__); \
-	break; \
-	default: \
-		return GP_ENOIMPL; \
-	} \
-\
-	return GP_ESUCCESS;
+#define GP_MIRROR_V_CLIP(context) do {                                 \
+	typeof(context->clip_w_min) _clip_w_min = context->clip_w_min; \
+	                                                               \
+	context->clip_w_min = context->w - context->clip_w_max;        \
+	context->clip_w_max = context->w - _clip_w_min;                \
+} while (0)
 
-#define GP_FN_RET_PER_BPP(FN_NAME, ...) \
-\
-	switch (context->bpp) { \
-	case 1: \
-		return FN_NAME##1bpp(__VA_ARGS__); \
-	case 2: \
-		return FN_NAME##2bpp(__VA_ARGS__); \
-	case 4: \
-		return FN_NAME##4bpp(__VA_ARGS__); \
-	case 8: \
-		return FN_NAME##8bpp(__VA_ARGS__); \
-	case 16: \
-		return FN_NAME##16bpp(__VA_ARGS__); \
-	case 24: \
-		return FN_NAME##24bpp(__VA_ARGS__); \
-	case 32: \
-		return FN_NAME##32bpp(__VA_ARGS__); \
-	}
+#define GP_MIRROR_H_CLIP(context) do {                                 \
+	typeof(context->clip_h_min) _clip_h_min = context->clip_h_min; \
+	                                                               \
+	context->clip_h_min = context->h - context->clip_h_max;        \
+	context->clip_h_max = context->h - _clip_h_min;                \
+} while (0)
+
+#define GP_SWAP_CLIPS(context) do {                        \
+	GP_SWAP(context->clip_w_min, context->clip_h_min); \
+	GP_SWAP(context->clip_w_max, context->clip_h_max); \
+} while (0)
+
+#endif /* GP_CLIP_H */

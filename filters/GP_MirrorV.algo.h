@@ -23,61 +23,24 @@
  *                                                                           *
  *****************************************************************************/
 
-#include "GP.h"
 
-/*
- * Macro that generates a switch-case block that calls various variants
- * of the specified function depending on the bit depth of the context.
- * Extra arguments are arguments to be passed to the function.
- * Returns GP_ENOIMPL if the bit depth is unknown.
- *
- * Note: Relying on existing context variable is ugly and broken, I know...
- *       But I hate doing just another GP_FN_PER_BPP macro for functions
- *       that takes context as it's only argument. Or passing the context
- *       twice or whatever else.
- */
-#define GP_FN_PER_BPP(FN_NAME, ...) \
+#include "GP_Clip.h"
+
+#define DEF_MIRRORV_FN(FN_NAME, CONTEXT_T, PIXEL_T, PUTPIXEL, GETPIXEL) \
+void FN_NAME(CONTEXT_T context) \
+{ \
+	uint32_t x, y; \
+	PIXEL_T tmp; \
 \
-	switch (context->bpp) { \
-	case 1: \
-		FN_NAME##1bpp(__VA_ARGS__); \
-	break; \
-	case 2: \
-		FN_NAME##2bpp(__VA_ARGS__); \
-	break; \
-	case 8: \
-		FN_NAME##8bpp(__VA_ARGS__); \
-	break; \
-	case 16: \
-		FN_NAME##16bpp(__VA_ARGS__); \
-	break; \
-	case 24: \
-		FN_NAME##24bpp(__VA_ARGS__); \
-	break; \
-	case 32: \
-		FN_NAME##32bpp(__VA_ARGS__); \
-	break; \
-	default: \
-		return GP_ENOIMPL; \
+	for (x = 0; x < context->w/2; x++) { \
+		uint32_t xm = context->w - x - 1; \
+		for (y = 0; y < context->h; y++) { \
+			tmp = GETPIXEL(context, x, y); \
+\
+			PUTPIXEL(context, x, y, GETPIXEL(context, xm, y)); \
+			PUTPIXEL(context, xm, y, tmp); \
+		} \
 	} \
 \
-	return GP_ESUCCESS;
-
-#define GP_FN_RET_PER_BPP(FN_NAME, ...) \
-\
-	switch (context->bpp) { \
-	case 1: \
-		return FN_NAME##1bpp(__VA_ARGS__); \
-	case 2: \
-		return FN_NAME##2bpp(__VA_ARGS__); \
-	case 4: \
-		return FN_NAME##4bpp(__VA_ARGS__); \
-	case 8: \
-		return FN_NAME##8bpp(__VA_ARGS__); \
-	case 16: \
-		return FN_NAME##16bpp(__VA_ARGS__); \
-	case 24: \
-		return FN_NAME##24bpp(__VA_ARGS__); \
-	case 32: \
-		return FN_NAME##32bpp(__VA_ARGS__); \
-	}
+	GP_MIRROR_V_CLIP(context); \
+}
