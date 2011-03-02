@@ -1,7 +1,7 @@
 HEADER_LOC=/usr/include/
 LIB_LOC=/usr/lib/
 
-.PHONY: all core sdl drivers loaders install clean tar
+.PHONY: all core sdl drivers loaders install filters clean tar
 
 all: core sdl drivers loaders filters
 
