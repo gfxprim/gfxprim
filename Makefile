@@ -39,7 +39,6 @@ install: all
 	install -m 664 targets/sdl/*.so targets/sdl/*.so.0 targets/sdl/*.a $(LIB_LOC)
 
 clean:
-	cd benchmark && $(MAKE) clean
 	cd core && $(MAKE) clean
 	cd targets/sdl && $(MAKE) clean
 	cd drivers && $(MAKE) clean
