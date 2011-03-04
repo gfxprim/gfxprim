@@ -29,6 +29,10 @@ install: all
 	install -m 775 -d $(HEADER_LOC)GP/loaders/
 	install -m 664 loaders/*.h $(HEADER_LOC)GP/loaders/
 	install -m 664 loaders/*.so loaders/*.so.0 loaders/*.a $(LIB_LOC)
+	# context filters
+	install -m 775 -d $(HEADER_LOC)GP/filters/
+	install -m 664 filters/*.h $(HEADER_LOC)GP/filters/
+	install -m 664 filters/*.so filters/*.so.0 filters/*.a $(LIB_LOC)
 	# sdl target	
 	install -m 775 -d $(HEADER_LOC)GP/SDL/
 	install -m 664 targets/sdl/*.h $(HEADER_LOC)GP/SDL/
