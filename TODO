@@ -3,14 +3,18 @@ What's not implemented (and should be)
 
 * bitmaps and blitting
   - create, destroy bitmap
+  	* DONE - GP_ContextAlloc(), GP_ContextFree()
   - blit bitmaps (should respect rotation and pixel formats)
   - bitmap rotation (in order to speed up rotated blits)
+  	* DONE - see filters/
   - loading bitmaps from image files (jpg, png, bmp, pnm ...)
+  	* IN PROGRESS - some pnm formats are working see loaders/
 
 * backends
   - finish framebuffer backend (SDL does not work on most of my framebuffers)
   - other than SDL X backend (SDL does support only one window)
   - some overall initialization routines
+  - backed event handling
 
 Advanced features
 -----------------

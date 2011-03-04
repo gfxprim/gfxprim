@@ -15,14 +15,15 @@ Implemented features
 ** convertor from bdf is on the way
 * various bitmap formats to draw on
 * SDL drawing backend
+* bitmaps and blitting
+** create, destroy bitmap
+** bitmap rotation (in order to speed up rotated blits)
 
 Work in progress
 ~~~~~~~~~~~~~~~~
 
 * bitmaps and blitting
-** create, destroy bitmap
 ** blit bitmaps (should respect rotation and pixel formats)
-** bitmap rotation (in order to speed up rotated blits)
 ** loading bitmaps from image files (jpg, png, bmp, pnm ...)
 
 * backends
