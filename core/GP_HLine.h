@@ -33,6 +33,7 @@
 void GP_HLine1bpp(GP_Context *context, int x0, int x1, int y, GP_Pixel pixel);
 void GP_HLine2bpp(GP_Context *context, int x0, int x1, int y, GP_Pixel pixel);
 void GP_HLine8bpp(GP_Context *context, int x0, int x1, int y, GP_Pixel pixel);
+void GP_HLine4bpp(GP_Context *context, int x0, int x1, int y, GP_Pixel pixel);
 void GP_HLine16bpp(GP_Context *context, int x0, int x1, int y, GP_Pixel pixel);
 void GP_HLine24bpp(GP_Context *context, int x0, int x1, int y, GP_Pixel pixel);
 void GP_HLine32bpp(GP_Context *context, int x0, int x1, int y, GP_Pixel pixel);

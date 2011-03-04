@@ -27,8 +27,10 @@
 #include "algo/HLine.algo.h"
 #include "GP_FnPerBpp.h"
 
+/* Generate drawing functions for various bit depths. */
 DEF_HLINE_BU_FN(GP_HLine1bpp, GP_Context *, GP_Pixel, GP_PIXEL_ADDR, GP_WritePixels1bpp)
 DEF_HLINE_BU_FN(GP_HLine2bpp, GP_Context *, GP_Pixel, GP_PIXEL_ADDR, GP_WritePixels2bpp)
+DEF_HLINE_BU_FN(GP_HLine4bpp, GP_Context *, GP_Pixel, GP_PIXEL_ADDR, GP_WritePixels4bpp)
 DEF_HLINE_FN(GP_HLine8bpp,  GP_Context *, GP_Pixel, GP_PIXEL_ADDR, GP_WritePixels8bpp)
 DEF_HLINE_FN(GP_HLine16bpp, GP_Context *, GP_Pixel, GP_PIXEL_ADDR, GP_WritePixels16bpp)
 DEF_HLINE_FN(GP_HLine24bpp, GP_Context *, GP_Pixel, GP_PIXEL_ADDR, GP_WritePixels24bpp)

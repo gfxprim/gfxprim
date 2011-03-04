@@ -45,6 +45,9 @@
 	case 2: \
 		FN_NAME##2bpp(__VA_ARGS__); \
 	break; \
+	case 4: \
+		FN_NAME##4bpp(__VA_ARGS__); \
+	break; \
 	case 8: \
 		FN_NAME##8bpp(__VA_ARGS__); \
 	break; \

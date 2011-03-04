@@ -27,9 +27,11 @@
 #include "GP_FnPerBpp.h"
 #include "algo/FillCircle.algo.h"
 
-DEF_FILLCIRCLE_FN(GP_FillCircle1bpp, GP_Context *, GP_Pixel, GP_HLine1bpp)
-DEF_FILLCIRCLE_FN(GP_FillCircle2bpp, GP_Context *, GP_Pixel, GP_HLine2bpp)
-DEF_FILLCIRCLE_FN(GP_FillCircle8bpp, GP_Context *, GP_Pixel, GP_HLine8bpp)
+/* Generate drawing functions for various bit depths. */
+DEF_FILLCIRCLE_FN(GP_FillCircle1bpp,  GP_Context *, GP_Pixel, GP_HLine1bpp)
+DEF_FILLCIRCLE_FN(GP_FillCircle2bpp,  GP_Context *, GP_Pixel, GP_HLine2bpp)
+DEF_FILLCIRCLE_FN(GP_FillCircle4bpp,  GP_Context *, GP_Pixel, GP_HLine4bpp)
+DEF_FILLCIRCLE_FN(GP_FillCircle8bpp,  GP_Context *, GP_Pixel, GP_HLine8bpp)
 DEF_FILLCIRCLE_FN(GP_FillCircle16bpp, GP_Context *, GP_Pixel, GP_HLine16bpp)
 DEF_FILLCIRCLE_FN(GP_FillCircle24bpp, GP_Context *, GP_Pixel, GP_HLine24bpp)
 DEF_FILLCIRCLE_FN(GP_FillCircle32bpp, GP_Context *, GP_Pixel, GP_HLine32bpp)
