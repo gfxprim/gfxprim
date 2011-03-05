@@ -153,18 +153,14 @@ void clear_screen(void)
 
 void redraw_screen(void)
 {
-	/* Random color. */
-	GP_Color color = GP_RGB888_PACK(random() % 256,
-	                                random() % 256,
-	                                random() % 256);
-
 	if (pause_flag)
 		return;
 
 	SDL_LockSurface(display);
 
+	/* Pick a random color for drawing. */
 	GP_Pixel pixel;
-	GP_ColorToPixel(&context, color, &pixel);
+	GP_RGBToPixel(&context, random() % 256, random() % 256, random() % 256, &pixel);
 
 	switch (shape) {
 	case SHAPE_CIRCLE:

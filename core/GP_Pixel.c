@@ -233,3 +233,12 @@ GP_RetCode GP_ColorNameToPixelType(GP_PixelType pixel_type, GP_ColorName name, G
 	GP_Color color = GP_COLNAME_PACK(name);
 	return GP_ColorToPixelType(pixel_type, color, pixel);
 }
+
+GP_RetCode GP_RGBToPixel(GP_Context *context, uint8_t r, uint8_t g, uint8_t b, GP_Pixel *pixel)
+{
+	if (pixel == NULL)
+		return GP_ENULLPTR;
+
+	GP_Color color = GP_RGB888_PACK(r, g, b);
+	return GP_ColorToPixelType(context->pixel_type, color, pixel);
+}

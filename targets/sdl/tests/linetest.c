@@ -71,9 +71,8 @@ void redraw_screen(void)
 		Uint8 r = 127.0 + 127.0 * cos(start_angle + angle);
 		Uint8 b = 127.0 + 127.0 * sin(start_angle + angle);
 		
-		GP_Color color = GP_RGB888_PACK(r, 0, b);
 		GP_Pixel pixel;
-		GP_ColorToPixel(&context, color, &pixel);
+		GP_RGBToPixel(&context, r, 0, b, &pixel);
 	
 		/*
 		 * Draw the line forth and back to detect any pixel change

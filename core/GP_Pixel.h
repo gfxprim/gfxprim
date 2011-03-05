@@ -112,4 +112,10 @@ GP_RetCode GP_ColorNameToPixel(struct GP_Context *context, GP_ColorName name, GP
  */
 GP_RetCode GP_ColorNameToPixelType(GP_PixelType pixel_type, GP_ColorName name, GP_Pixel *pixel);
 
+/*
+ * Converts a color specified by its R, G, B components to a pixel value
+ * compatible with the specified context.
+ */
+GP_RetCode GP_RGBToPixel(struct GP_Context *context, uint8_t r, uint8_t g, uint8_t b, GP_Pixel *pixel);
+
 #endif /* GP_PIXEL_H */
