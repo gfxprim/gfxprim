@@ -230,6 +230,11 @@ void event_loop(void)
 				cliptest_flag = !cliptest_flag;
 				break;
 
+			case SDLK_x:
+				clear_screen();
+				SDL_Flip(display);
+				break;
+
 			case SDLK_ESCAPE:
 				return;
 

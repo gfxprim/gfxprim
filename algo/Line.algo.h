@@ -24,41 +24,10 @@
  *****************************************************************************/
 
 /*
- * A Bresenham line-drawing algorithm.
+ * The classical Bresenham line drawing algorithm.
+ * Please see http://en.wikipedia.org/wiki/Bresenham%27s_line_algorithm
+ * for a nice and understandable description.
  */
-
-/* swaps endpoints of the line */
-#define SWAP_ENDPOINTS do { \
-	GP_SWAP(x0, x1); \
-	GP_SWAP(y0, y1); \
-	deltax = -deltax; \
-	deltay = -deltay; \
-} while (0)
-
-/* starts a loop that iterates over every X in the line */
-#define FOR_EACH_X for (x = x0, y = y0, error = deltax/2; x <= x1; x++)
-
-/* starts a loop that iterates over every Y in the line */
-#define FOR_EACH_Y for (x = x0, y = y0, error = deltay/2; y <= y1; y++)
-
-/* updates Y to reflect increasing X by 1; as the change in Y can be
- * a fraction, a rounding error is maintained and if it overflows,
- * Y is increased or decreased by 1. */
-#define NEXT_Y do { \
-	error -= abs(deltay); \
-	if (error < 0) { \
-		deltay > 0 ? y++ : y--; \
-		error += deltax; \
-	} \
-} while (0)
-
-#define NEXT_X do { \
-	error -= abs(deltax); \
-	if (error < 0) { \
-		deltax > 0 ? x++ : x--; \
-		error += deltay; \
-	} \
-} while (0) 
 
 /*
  * This macro defines a line drawing function.
@@ -72,43 +41,40 @@
 void FN_NAME(CONTEXT_T context, int x0, int y0, int x1, int y1, \
 	PIXVAL_T pixval) \
 { \
-	/* The steepness of the line */ \
+	if (x0 == x1) { \
+		int y = y0; \
+		while (y != y1) { \
+			PUTPIXEL(context, x0, y, pixval); \
+			if (y0 > y1) y--; \
+			else y++; \
+		} \
+		return; \
+	} \
+\
+	int steep = abs(y1 - y0) / abs(x1 - x0); \
+	if (steep) { \
+		GP_SWAP(x0, y0); \
+		GP_SWAP(x1, y1); \
+	} \
+	if (x0 > x1) { \
+		GP_SWAP(x0, x1); \
+		GP_SWAP(y0, y1); \
+	} \
+\
 	int deltax = x1 - x0; \
-	int deltay = y1 - y0; \
+	int deltay = abs(y1 - y0); \
+	int error = deltax / 2; \
+	int y = y0, x; \
+	int ystep = (y0 < y1) ? 1 : -1; \
+	for (x = x0; x <= x1; x++) { \
 \
-	/* Current X and Y coordinate, and cummulative rounding error. */ \
-	int x, y, error; \
+		if (steep) PUTPIXEL(context, y, x, pixval); \
+		else PUTPIXEL(context, x, y, pixval); \
 \
-	/* If X changes faster than Y (i.e. the line is closer to horizontal \
-	 * than to vertical), iterate X one by one and calculate Y; \
-	 * in some points, multiple X will lead to the same value of Y. \
-	 */ \
-	if (abs(deltax) > abs(deltay)) { \
-\
-		/* always draw in the direction of increasing X */ \
-		if (deltax < 0) { \
-			SWAP_ENDPOINTS; \
-		} \
-\
-		FOR_EACH_X { \
-			PUTPIXEL(context, x, y, pixval); \
-			NEXT_Y; \
-		} \
-\
-	/* If Y changes faster than X (the line is closer to vertical \
-	 * than to horizontal), iterate Y and calculate X. \
-	 */ \
-	} else { \
-\
-		/* always draw in the direction of increasing Y */ \
-		if (deltay < 0) { \
-			SWAP_ENDPOINTS; \
-		} \
-\
-		FOR_EACH_Y { \
-			PUTPIXEL(context, x, y, pixval); \
-			NEXT_X; \
+		error = error - deltay; \
+		if (error < 0) { \
+			y = y + ystep; \
+			error = error + deltax; \
 		} \
 	} \
-}
-
+} \

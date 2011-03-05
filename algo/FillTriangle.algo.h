@@ -62,15 +62,6 @@
 void FN_NAME(CONTEXT_T context, int x0, int y0, int x1, int y1, \
 		int x2, int y2, PIXVAL_T pixval) \
 { \
-	/* \
-	 * FIXME: For some triangles (maybe when abs(dx) > abs(dy)?), \
-	 * there are 'missing' pixels around the boundary (at the start/end \
-	 * of every horizontal line). I really don't know why. Sorry. :( \
-	 * This hack "fixes" this by drawing three lines around the boundary. \
-	 */ \
-	LINE(context, x0, y0, x1, y1, pixval); \
-	LINE(context, x0, y0, x2, y2, pixval); \
-	LINE(context, x1, y1, x2, y2, pixval); \
 \
 	/* Sort the three points according to the Y coordinate. */ \
 	int Ax, Ay, Bx, By, Cx, Cy; \

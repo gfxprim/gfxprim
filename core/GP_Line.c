@@ -60,6 +60,7 @@ GP_RetCode GP_TLine(GP_Context *context, int x0, int y0, int x1, int y1,
 	return GP_Line(context, x0, y0, x1, y1, pixel);
 }
 
+#if 0
 size_t GP_CalcLinePoints(int x0, int y0, int x1, int y1,
 	int *points, size_t maxlen)
 {
@@ -103,3 +104,4 @@ size_t GP_CalcLinePoints(int x0, int y0, int x1, int y1,
 
 	return i;
 }
+#endif
