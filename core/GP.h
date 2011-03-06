@@ -51,7 +51,7 @@
 #include "GP_HLine.h"
 #include "GP_VLine.h"
 #include "GP_Line.h"
-#include "GP_RasterizeLine.h"
+#include "GP_LineTrack.h"
 #include "GP_Rect.h"
 #include "GP_FillRect.h"
 #include "GP_Triangle.h"

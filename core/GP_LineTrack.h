@@ -23,14 +23,25 @@
  *                                                                           *
  *****************************************************************************/
 
-#ifndef GP_RASTERIZE_LINE_H
-#define GP_RASTERIZE_LINE_H
+#ifndef GP_LINE_TRACK_H
+#define GP_LINE_TRACK_H
 
 #define GP_KEEP_FIRST 1
 #define GP_KEEP_XMIN 2
 #define GP_KEEP_XMAX 4
 
-GP_RetCode GP_RasterizeLine(int x0, int y0, int x1, int y1, int *buf,
-	int ymin, int ymax, int flags);
+struct GP_LineTrack {
+	int x0, y0;	/* starting point (inclusive) */
+	int x1, y1;	/* ending point (inclusive) */
+	int flags;	/* flags */
 
-#endif /* GP_LINE_H */
+	int x, y;	/* current X and Y position */
+	int err;	/* current error term (difference in Y coord from ideal line) */
+};
+
+inline void GP_LineTrackInit(struct GP_LineTrack *track, int x0, int y0,
+		int x1, int y1, int flags);
+
+inline int GP_LineTrackNext(struct GP_LineTrack *track);
+
+#endif /* GP_LINE_TRACK_H */

@@ -107,26 +107,26 @@ void FN_NAME(CONTEXT_T context, int x0, int y0, int x1, int y1, \
 		                Ay, pixval); \
 	} \
 \
-	int ABpoints[Cy-Ay+1], ACpoints[Cy-Ay+1], BCpoints[Cy-By+1]; \
-\
+	struct GP_LineTrack AB, AC, BC; \
 	if (Bx < Ax) { \
-		GP_RasterizeLine(Ax, Ay, Bx, By, ABpoints, Ay, Cy, GP_KEEP_XMIN); \
-		GP_RasterizeLine(Ax, Ay, Cx, Cy, ACpoints, Ay, Cy, GP_KEEP_XMAX); \
-		GP_RasterizeLine(Bx, By, Cx, Cy, BCpoints, By, Cy, GP_KEEP_XMIN); \
-	} else { \
-		GP_RasterizeLine(Ax, Ay, Bx, By, ABpoints, Ay, Cy, GP_KEEP_XMAX); \
-		GP_RasterizeLine(Ax, Ay, Cx, Cy, ACpoints, Ay, Cy, GP_KEEP_XMIN); \
-		GP_RasterizeLine(Bx, By, Cx, Cy, BCpoints, By, Cy, GP_KEEP_XMAX); \
+		GP_LineTrackInit(&AB, Ax, Ay, Bx, By, GP_KEEP_XMIN); \
+		GP_LineTrackInit(&AC, Ax, Ay, Cx, Cy, GP_KEEP_XMAX); \
+		GP_LineTrackInit(&BC, Bx, By, Cx, Cy, GP_KEEP_XMIN); \
+	} \
+	else { \
+		GP_LineTrackInit(&AB, Ax, Ay, Bx, By, GP_KEEP_XMAX); \
+		GP_LineTrackInit(&AC, Ax, Ay, Cx, Cy, GP_KEEP_XMIN); \
+		GP_LineTrackInit(&BC, Bx, By, Cx, Cy, GP_KEEP_XMAX); \
 	} \
 \
 	int y; \
 \
 	for (y = Ay; y < By; y++) { \
-		HLINE(context, ABpoints[y - Ay], ACpoints[y - Ay], y, pixval); \
+		HLINE(context, GP_LineTrackNext(&AB), GP_LineTrackNext(&AC), y, pixval); \
 	} \
 \
 	for (y = By; y <= Cy; y++) { \
-		HLINE(context, BCpoints[y - By], ACpoints[y - Ay], y, pixval); \
+		HLINE(context, GP_LineTrackNext(&BC), GP_LineTrackNext(&AC), y, pixval); \
 	} \
 }
 
