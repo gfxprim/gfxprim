@@ -30,13 +30,13 @@
 #include <stdlib.h>
 
 /* Generate drawing functions for various bit depths. */
-DEF_FILLTRIANGLE_FN(GP_FillTriangle1bpp,  GP_Context *, GP_Pixel, GP_Line8bpp, GP_HLine1bpp)
-DEF_FILLTRIANGLE_FN(GP_FillTriangle2bpp,  GP_Context *, GP_Pixel, GP_Line8bpp, GP_HLine2bpp)
-DEF_FILLTRIANGLE_FN(GP_FillTriangle8bpp,  GP_Context *, GP_Pixel, GP_Line8bpp, GP_HLine8bpp)
-DEF_FILLTRIANGLE_FN(GP_FillTriangle4bpp,  GP_Context *, GP_Pixel, GP_Line8bpp, GP_HLine8bpp)
-DEF_FILLTRIANGLE_FN(GP_FillTriangle16bpp, GP_Context *, GP_Pixel, GP_Line16bpp, GP_HLine16bpp)
-DEF_FILLTRIANGLE_FN(GP_FillTriangle24bpp, GP_Context *, GP_Pixel, GP_Line24bpp, GP_HLine24bpp)
-DEF_FILLTRIANGLE_FN(GP_FillTriangle32bpp, GP_Context *, GP_Pixel, GP_Line32bpp, GP_HLine32bpp)
+DEF_FILLTRIANGLE_FN(GP_FillTriangle1bpp,  GP_Context *, GP_Pixel, GP_HLine1bpp, GP_PutPixel1bpp)
+DEF_FILLTRIANGLE_FN(GP_FillTriangle2bpp,  GP_Context *, GP_Pixel, GP_HLine2bpp, GP_PutPixel2bpp)
+DEF_FILLTRIANGLE_FN(GP_FillTriangle4bpp,  GP_Context *, GP_Pixel, GP_HLine4bpp, GP_PutPixel4bpp)
+DEF_FILLTRIANGLE_FN(GP_FillTriangle8bpp,  GP_Context *, GP_Pixel, GP_HLine8bpp, GP_PutPixel8bpp)
+DEF_FILLTRIANGLE_FN(GP_FillTriangle16bpp, GP_Context *, GP_Pixel, GP_HLine16bpp, GP_PutPixel16bpp)
+DEF_FILLTRIANGLE_FN(GP_FillTriangle24bpp, GP_Context *, GP_Pixel, GP_HLine24bpp, GP_PutPixel24bpp)
+DEF_FILLTRIANGLE_FN(GP_FillTriangle32bpp, GP_Context *, GP_Pixel, GP_HLine32bpp, GP_PutPixel32bpp)
 
 GP_RetCode GP_FillTriangle(GP_Context * context, int x0, int y0, int x1, int y1,
                            int x2, int y2, GP_Pixel pixel)

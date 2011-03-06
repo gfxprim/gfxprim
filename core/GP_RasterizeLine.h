@@ -26,7 +26,11 @@
 #ifndef GP_RASTERIZE_LINE_H
 #define GP_RASTERIZE_LINE_H
 
+#define GP_KEEP_FIRST 1
+#define GP_KEEP_XMIN 2
+#define GP_KEEP_XMAX 4
+
 GP_RetCode GP_RasterizeLine(int x0, int y0, int x1, int y1, int *buf,
-	int ymin, int ymax);
+	int ymin, int ymax, int flags);
 
 #endif /* GP_LINE_H */

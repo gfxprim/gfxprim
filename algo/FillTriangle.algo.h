@@ -58,7 +58,7 @@
  * until the error term crosses the zero boundary.
  */
 
-#define DEF_FILLTRIANGLE_FN(FN_NAME, CONTEXT_T, PIXVAL_T, LINE, HLINE) \
+#define DEF_FILLTRIANGLE_FN(FN_NAME, CONTEXT_T, PIXVAL_T, HLINE, PUTPIXEL) \
 void FN_NAME(CONTEXT_T context, int x0, int y0, int x1, int y1, \
 		int x2, int y2, PIXVAL_T pixval) \
 { \
@@ -98,76 +98,35 @@ void FN_NAME(CONTEXT_T context, int x0, int y0, int x1, int y1, \
 			Cx = x0, Cy = y0; \
 		} \
 	} \
- \
-	/* Calculate delta X and delta Y per each side. */ \
-	int ABdx = Bx - Ax; \
-	int ABdy = By - Ay; \
-	int ACdx = Cx - Ax; \
-	int ACdy = Cy - Ay; \
-	int BCdx = Cx - Bx; \
-	int BCdy = Cy - By; \
 \
 	/* Special case: Ay = By = Cy, triangle degenerates to a line. */ \
-	if (ACdy == 0) { \
+	if (Ay == Cy) { \
 		return HLINE(context, \
 		                GP_MIN(Ax, GP_MIN(Bx, Cx)), \
 		                GP_MAX(Ax, GP_MAX(Bx, Cx)), \
 		                Ay, pixval); \
 	} \
 \
-	/* The direction of each side (whether X grows or decreases). */ \
-	int ABxstep = (ABdx < 0) ? -1 : 1; \
-	int ACxstep = (ACdx < 0) ? -1 : 1; \
-	int BCxstep = (BCdx < 0) ? -1 : 1; \
+	int ABpoints[Cy-Ay+1], ACpoints[Cy-Ay+1], BCpoints[Cy-By+1]; \
 \
-	/* Draw the triangle in a top-down, line-per line manner. */ \
-	int y, ABx, ACx, BCx, ABerr, ACerr, BCerr; \
-\
-	/* Top part of the triangle (from Ay to By). */ \
-	ABerr = abs(ABdy)/2; \
-	ACerr = abs(ACdy)/2; \
-	for (ABx = Ax, ACx = Ax, y = Ay; y < By; y++) { \
-\
-		HLINE(context, ABx, ACx, y, pixval); \
-\
-		while (ABerr < abs(ABdx) || ABdy == 0) { \
-			ABx += ABxstep; \
-			ABerr += abs(ABdy); \
-		} \
-\
-		while (ACerr < abs(ACdx) || ACdy == 0) { \
-			ACx += ACxstep; \
-			ACerr += abs(ACdy); \
-		} \
-\
-		/* Value of ABerr and ACerr for the next iteration. */ \
-		ABerr -= abs(ABdx); \
-		ACerr -= abs(ACdx); \
+	if (Bx < Ax) { \
+		GP_RasterizeLine(Ax, Ay, Bx, By, ABpoints, Ay, Cy, GP_KEEP_XMIN); \
+		GP_RasterizeLine(Ax, Ay, Cx, Cy, ACpoints, Ay, Cy, GP_KEEP_XMAX); \
+		GP_RasterizeLine(Bx, By, Cx, Cy, BCpoints, By, Cy, GP_KEEP_XMIN); \
+	} else { \
+		GP_RasterizeLine(Ax, Ay, Bx, By, ABpoints, Ay, Cy, GP_KEEP_XMAX); \
+		GP_RasterizeLine(Ax, Ay, Cx, Cy, ACpoints, Ay, Cy, GP_KEEP_XMIN); \
+		GP_RasterizeLine(Bx, By, Cx, Cy, BCpoints, By, Cy, GP_KEEP_XMAX); \
 	} \
 \
-	/* Special case: By == Cy, the triangle is flat at the bottom. */ \
-	if (BCdy == 0) { \
-		HLINE(context, Bx, Cx, y, pixval); \
-		return; \
+	int y; \
+\
+	for (y = Ay; y < By; y++) { \
+		HLINE(context, ABpoints[y - Ay], ACpoints[y - Ay], y, pixval); \
 	} \
 \
-	/* Bottom part (from By to Cy). */ \
-	for (BCx = Bx, y = By, BCerr = abs(BCdy)/2; y <= Cy; y++) { \
-		HLINE(context, BCx, ACx, y, pixval); \
-\
-		while (BCerr < abs(BCdx) || BCdy == 0) { \
-			BCx += BCxstep; \
-			BCerr += abs(BCdy); \
-		} \
-\
-		while (ACerr < abs(ACdx) || ACdy == 0) { \
-			ACx += ACxstep; \
-			ACerr += abs(ACdy); \
-		} \
-\
-		/* Value of ACerr and BCerr for the next iteration. */ \
-		ACerr -= abs(ACdx); \
-		BCerr -= abs(BCdx); \
+	for (y = By; y <= Cy; y++) { \
+		HLINE(context, BCpoints[y - By], ACpoints[y - Ay], y, pixval); \
 	} \
 }
 

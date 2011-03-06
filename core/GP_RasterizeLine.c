@@ -26,7 +26,7 @@
 #include "GP.h"
 
 GP_RetCode GP_RasterizeLine(int x0, int y0, int x1, int y1, int *buf,
-	int ymin, int ymax)
+	int ymin, int ymax, int flags)
 {
 	if (buf == NULL)
 		return GP_ENULLPTR;
@@ -37,10 +37,21 @@ GP_RetCode GP_RasterizeLine(int x0, int y0, int x1, int y1, int *buf,
 	const int ystep = (y0 < y1) ? 1 : -1;
 	int err = dx - dy;
 	int x = x0, y = y0;
+	int touched = 0;
 
 	for (;;) {
 		if (y >= ymin && y <= ymax) {
-			buf[y - ymin] = x;
+			if (touched) {
+				if (flags & GP_KEEP_XMIN)
+					buf[y - ymin] = GP_MIN(x, buf[y - ymin]);
+				else if (flags & GP_KEEP_XMAX)
+					buf[y - ymin] = GP_MAX(x, buf[y - ymin]);
+				else
+					buf[y - ymin] = x;
+			} else {
+				buf[y - ymin] = x;
+				touched = 1;
+			}
 		}
 
 		if (x == x1 && y == y1) break;
@@ -53,6 +64,7 @@ GP_RetCode GP_RasterizeLine(int x0, int y0, int x1, int y1, int *buf,
 		if (err2 < dx) {
 			err += dx;
 			y += ystep;
+			touched = 0;
 		}
 	}
 
