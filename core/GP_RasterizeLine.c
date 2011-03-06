@@ -23,26 +23,38 @@
  *                                                                           *
  *****************************************************************************/
 
-#ifndef GP_LINE_H
-#define GP_LINE_H
+#include "GP.h"
 
-#include "GP_Context.h"
+GP_RetCode GP_RasterizeLine(int x0, int y0, int x1, int y1, int *buf,
+	int ymin, int ymax)
+{
+	if (buf == NULL)
+		return GP_ENULLPTR;
 
-#include <stdint.h>
+	const int dx = abs(x1 - x0);
+	const int dy = abs(y1 - y0);
+	const int xstep = (x0 < x1) ? 1 : -1;
+	const int ystep = (y0 < y1) ? 1 : -1;
+	int err = dx - dy;
+	int x = x0, y = y0;
 
-void GP_Line8bpp(GP_Context *context, int x0, int y0, int x1, int y1,
-	GP_Pixel pixel);
-void GP_Line16bpp(GP_Context *context, int x0, int y0, int x1, int y1,
-	GP_Pixel pixel);
-void GP_Line24bpp(GP_Context *context, int x0, int y0, int x1, int y1,
-	GP_Pixel pixel);
-void GP_Line32bpp(GP_Context *context, int x0, int y0, int x1, int y1,
-	GP_Pixel pixel);
+	for (;;) {
+		if (y >= ymin && y <= ymax) {
+			buf[y - ymin] = x;
+		}
 
-GP_RetCode GP_Line(GP_Context *context, int x0, int y0, int x1, int y1,
-                   GP_Pixel pixel);
+		if (x == x1 && y == y1) break;
 
-GP_RetCode GP_TLine(GP_Context *context, int x0, int y0, int x1, int y1,
-                    GP_Pixel pixel);
+		int err2 = 2*err;
+		if (err2 > -dy) {
+			err -= dy;
+			x += xstep;
+		}
+		if (err2 < dx) {
+			err += dx;
+			y += ystep;
+		}
+	}
 
-#endif /* GP_LINE_H */
+	return GP_ESUCCESS;
+}
