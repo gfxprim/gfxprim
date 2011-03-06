@@ -77,4 +77,4 @@ void FN_NAME(CONTEXT_T context, int x0, int y0, int x1, int y1, \
 			error = error + deltax; \
 		} \
 	} \
-} \
+}

@@ -107,7 +107,7 @@ void FN_NAME(CONTEXT_T context, int x0, int y0, int x1, int y1, \
 	int BCdx = Cx - Bx; \
 	int BCdy = Cy - By; \
 \
-	/* Special case: A, B and C are at the same height. */ \
+	/* Special case: Ay = By = Cy, triangle degenerates to a line. */ \
 	if (ACdy == 0) { \
 		return HLINE(context, \
 		                GP_MIN(Ax, GP_MIN(Bx, Cx)), \
@@ -121,7 +121,7 @@ void FN_NAME(CONTEXT_T context, int x0, int y0, int x1, int y1, \
 	int BCxstep = (BCdx < 0) ? -1 : 1; \
 \
 	/* Draw the triangle in a top-down, line-per line manner. */ \
-	int y, ABx, ACx, BCx, old_ABx, old_ACx, old_BCx, ABerr, ACerr, BCerr; \
+	int y, ABx, ACx, BCx, ABerr, ACerr, BCerr; \
 \
 	/* Top part of the triangle (from Ay to By). */ \
 	ABerr = abs(ABdy)/2; \
@@ -129,9 +129,6 @@ void FN_NAME(CONTEXT_T context, int x0, int y0, int x1, int y1, \
 	for (ABx = Ax, ACx = Ax, y = Ay; y < By; y++) { \
 \
 		HLINE(context, ABx, ACx, y, pixval); \
-\
-		old_ABx = ABx; \
-		old_ACx = ACx; \
 \
 		while (ABerr < abs(ABdx) || ABdy == 0) { \
 			ABx += ABxstep; \
@@ -148,7 +145,7 @@ void FN_NAME(CONTEXT_T context, int x0, int y0, int x1, int y1, \
 		ACerr -= abs(ACdx); \
 	} \
 \
-	/* Special case: B and C are at the same height. */ \
+	/* Special case: By == Cy, the triangle is flat at the bottom. */ \
 	if (BCdy == 0) { \
 		HLINE(context, Bx, Cx, y, pixval); \
 		return; \
@@ -156,9 +153,6 @@ void FN_NAME(CONTEXT_T context, int x0, int y0, int x1, int y1, \
 \
 	/* Bottom part (from By to Cy). */ \
 	for (BCx = Bx, y = By, BCerr = abs(BCdy)/2; y <= Cy; y++) { \
-		old_BCx = BCx; \
-		old_ACx = ACx; \
-\
 		HLINE(context, BCx, ACx, y, pixval); \
 \
 		while (BCerr < abs(BCdx) || BCdy == 0) { \
