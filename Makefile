@@ -20,7 +20,7 @@ loaders:
 filters:
 	cd filters && $(MAKE) all
 
-install: all
+install:
 	# core library
 	install -m 775 -d $(HEADER_LOC)GP/
 	install -m 664 core/*.h $(HEADER_LOC)GP/
