@@ -48,21 +48,15 @@ inline int GP_LineTrackNext(struct GP_LineTrack *track)
 	int x = track->x,
 	    y = track->y,
 	    err = track->err;
-	int result;
-	int touched = 0;
+	int result = x;
 
 	for (;;) {
-		if (touched) {
-			if (track->flags & GP_KEEP_XMIN)
-				result = GP_MIN(x, result);
-			else if (track->flags & GP_KEEP_XMAX)
-				result = GP_MAX(x, result);
-			else
-				result = x;
-		} else {
+		if (track->flags & GP_KEEP_XMIN)
+			result = GP_MIN(x, result);
+		else if (track->flags & GP_KEEP_XMAX)
+			result = GP_MAX(x, result);
+		else
 			result = x;
-			touched = 1;
-		}
 
 		if (x == track->x1 && y == track->y1) break;
 
