@@ -35,27 +35,15 @@
  * from A to B (between AB and AC)
  * and from B to C (between BC and AC).
  *
- * For each line, the value of X is calculated for each side,
- * yielding a point on each side, and a horizontal line is drawn
- * between the points.
+ * Then, the lines AB, AC and BC are fictionally drawn using the Bresenham
+ * algorithm, tracking their starting/ending X value for each scanline.
+ * (See GP_LineTrack.h.)
  *
- * The value of X for each side is calculated from the line equation
- * of the side. For example, for AB we have:
- *
- * ABx = (y - Ay) * ABdx / ABdy + Ax            and thus
- * ABx * ABdy = (y - Ay) * ABdx + Ax * ABdy     and thus
- * (ABx - Ax) * ABdy - (y - Ay) * ABdx = 0
- *
- * For integer-only operation, the expression will not be exactly 0;
- * instead, we will have an error term we try to minimize:
- *
- * ABerr = (ABx - Ax) * ABdy - (y - Ay) * ABdx       and similarly
- * ACerr = (ACx - Ax) * ACdy - (y - Ay) * ACdx
- * BCerr = (BCx - Bx) * BCdy - (y - By) * BCdx
- *
- * In the drawing loop, we calculate each error term from the previous
- * value by increasing or decreasing X (according to the line direction)
- * until the error term crosses the zero boundary.
+ * NOTE: For correct drawing, we need to fill each scanline
+ * from its very first X point to its very last X point, so we need to
+ * remember which side is on the left (we take its first X point)
+ * and which is on the right (we take its last X point); this is easily
+ * determined by comparing Bx against Ax.
  */
 
 #define DEF_FILLTRIANGLE_FN(FN_NAME, CONTEXT_T, PIXVAL_T, HLINE, PUTPIXEL) \
@@ -108,25 +96,32 @@ void FN_NAME(CONTEXT_T context, int x0, int y0, int x1, int y1, \
 	} \
 \
 	struct GP_LineTrack AB, AC, BC; \
-	if (Bx < Ax) { \
-		GP_LineTrackInit(&AB, Ax, Ay, Bx, By, GP_KEEP_XMIN); \
-		GP_LineTrackInit(&AC, Ax, Ay, Cx, Cy, GP_KEEP_XMAX); \
-		GP_LineTrackInit(&BC, Bx, By, Cx, Cy, GP_KEEP_XMIN); \
-	} \
-	else { \
-		GP_LineTrackInit(&AB, Ax, Ay, Bx, By, GP_KEEP_XMAX); \
-		GP_LineTrackInit(&AC, Ax, Ay, Cx, Cy, GP_KEEP_XMIN); \
-		GP_LineTrackInit(&BC, Bx, By, Cx, Cy, GP_KEEP_XMAX); \
-	} \
+	GP_LineTrackInit(&AB, Ax, Ay, Bx, By); \
+	GP_LineTrackInit(&AC, Ax, Ay, Cx, Cy); \
+	GP_LineTrackInit(&BC, Bx, By, Cx, Cy); \
 \
 	int y; \
 \
+	/* Draw the top part (between AB and AC) */ \
 	for (y = Ay; y < By; y++) { \
-		HLINE(context, GP_LineTrackNext(&AB), GP_LineTrackNext(&AC), y, pixval); \
+		GP_LineTrackNext(&AB); \
+		GP_LineTrackNext(&AC); \
+		if (Bx < Ax) { \
+			HLINE(context, AB.xmin, AC.xmax, y, pixval); \
+		} else { \
+			HLINE(context, AC.xmin, AB.xmax, y, pixval); \
+		} \
 	} \
 \
+	/* Draw the bottom part (between BC and AC) */ \
 	for (y = By; y <= Cy; y++) { \
-		HLINE(context, GP_LineTrackNext(&BC), GP_LineTrackNext(&AC), y, pixval); \
+		GP_LineTrackNext(&BC); \
+		GP_LineTrackNext(&AC); \
+		if (Bx < Ax) { \
+			HLINE(context, BC.xmin, AC.xmax, y, pixval); \
+		} else { \
+			HLINE(context, AC.xmin, BC.xmax, y, pixval); \
+		} \
 	} \
 }
 
