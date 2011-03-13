@@ -13,10 +13,10 @@ c = []
 ## Headers
 
 gen_headers(h, c, 
-    descr = "pixel type definitions and functions", 
-    authors = ["2011 - Tomas Gavenciak <gavento@ucw.cz>"],
-    generator = __file__,
-    hdef = "GP_PIXEL_GEN_H")
+	descr = "pixel type definitions and functions", 
+	authors = ["2011 - Tomas Gavenciak <gavento@ucw.cz>"],
+	generator = __file__,
+	hdef = "GP_PIXEL_GEN_H")
 
 c.append('#include <stdio.h>\n')
 c.append('#include "GP_Pixel.h"\n')
@@ -32,14 +32,14 @@ gen_GP_PixelTypes(h, c)
 ## List of types
 
 for t in pixeltypes.values():
-  if t.number != 0:
-    h.append(str_start(t))
-    h.append(str_description(t))
-    c.append(str_start(t))
-    c.append(str_description(t))
+	if t.name != 'UNKNOWN':
+		h.append(str_start(t))
+		h.append(str_description(t))
+		c.append(str_start(t))
+		c.append(str_description(t))
 
-    gen_print(t, h, c)
-    gen_get_chs(t, h, c)
+		gen_print(t, h, c)
+		gen_get_chs(t, h, c)
 
 ## Conversion macros
 

@@ -32,3 +32,13 @@ clean:
 	rm -f *.o
 	cd tests && $(MAKE) clean
 
+
+GENERATORS=$(wildcard gen/*.py)
+
+GP_Pixel_Scale.gen.h: $(GENERATORS)
+	python gen/make_GP_Pixel_Scale.py GP_Pixel_Scale.gen.h 
+
+GP_Pixel.gen.c GP_Pixel.gen.h: $(GENERATORS)
+	python gen/make_GP_Pixel.py GP_Pixel.gen.h GP_Pixel.gen.c
+
+generated: GP_Pixel_Scale.gen.h GP_Pixel.gen.c GP_Pixel.gen.h

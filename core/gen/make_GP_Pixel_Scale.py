@@ -1,4 +1,23 @@
 
+#!/usr/bin/python
+# Script generating GP_Pixel.gen.c and GP_Pixel.gen.h
+# 2011 - Tomas Gavenciak <gavento@ucw.cz> 
+
+from pixeltype import *
+from generators import *
+from gen_helpers import *
+import defs
+
+h = []
+c = []
+
+## Headers
+
+gen_headers(h, c, 
+	descr = "fast value scaling macros", 
+	authors = ["2011 - Tomas Gavenciak <gavento@ucw.cz>"],
+	generator = __file__,
+	hdef = "GP_PIXEL_SCALEVAL")
 
 h.append(r(
   "/* helper macro to read bits */\n"
@@ -7,6 +26,13 @@ h.append(r(
   
   "/* helper macro to or-mask bits (set if zero beforehead), assuming val fits into bits */\n"
   "#define GP_OR_BITS(offset, or, val) ( (val) |= ((bits)<<(offset)) )\n\n"
+
+
+# TODO:
+#/* helper macro to set bits (clearing them first), size is bit-size of the type */
+#define GP_SET_BITS(size, offset, bits, val) ( (val) &= ( ((1<<(bits))-1) - ((1<<(bits))-1))   ( (val)>>(offset) ) & ( (1<<(bits)) - 1) )
+#"""]
+
   
   "/* helper macros to transfer s1-bit value to s2-bit value\n"
   " * NOTE: efficient and accurate for both up- and downscaling,\n"
@@ -23,8 +49,5 @@ h.append(r(
   "{% endfor %}{% endfor %}", multcoef = lambda s1,s2: hex(sum([1<<i*s1 for i in range(s2/s1)])) 
   ))
 
-# TODO:
-#/* helper macro to set bits (clearing them first), size is bit-size of the type */
-#define GP_SET_BITS(size, offset, bits, val) ( (val) &= ( ((1<<(bits))-1) - ((1<<(bits))-1))   ( (val)>>(offset) ) & ( (1<<(bits)) - 1) )
-#"""]
+main_write(h, None)
 
