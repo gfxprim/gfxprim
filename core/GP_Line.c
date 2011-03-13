@@ -27,9 +27,11 @@
 #include "algo/Line.algo.h"
 #include "GP_FnPerBpp.h"
 
-DEF_LINE_FN(GP_Line1bpp, GP_Context *, GP_Pixel, GP_PutPixel1bpp)
-DEF_LINE_FN(GP_Line2bpp, GP_Context *, GP_Pixel, GP_PutPixel2bpp)
-DEF_LINE_FN(GP_Line8bpp, GP_Context *, GP_Pixel, GP_PutPixel8bpp)
+/* Generate drawing functions for various bit depths. */
+DEF_LINE_FN(GP_Line1bpp,  GP_Context *, GP_Pixel, GP_PutPixel1bpp)
+DEF_LINE_FN(GP_Line2bpp,  GP_Context *, GP_Pixel, GP_PutPixel2bpp)
+DEF_LINE_FN(GP_Line4bpp,  GP_Context *, GP_Pixel, GP_PutPixel4bpp)
+DEF_LINE_FN(GP_Line8bpp,  GP_Context *, GP_Pixel, GP_PutPixel8bpp)
 DEF_LINE_FN(GP_Line16bpp, GP_Context *, GP_Pixel, GP_PutPixel16bpp)
 DEF_LINE_FN(GP_Line24bpp, GP_Context *, GP_Pixel, GP_PutPixel24bpp)
 DEF_LINE_FN(GP_Line32bpp, GP_Context *, GP_Pixel, GP_PutPixel32bpp)
@@ -56,48 +58,4 @@ GP_RetCode GP_TLine(GP_Context *context, int x0, int y0, int x1, int y1,
 	GP_TRANSFORM_POINT(context, x0, y0);
 	GP_TRANSFORM_POINT(context, x1, y1);
 	return GP_Line(context, x0, y0, x1, y1, pixel);
-}
-
-size_t GP_CalcLinePoints(int x0, int y0, int x1, int y1,
-	int *points, size_t maxlen)
-{
-	GP_CHECK(points != NULL || maxlen == 0);
-	GP_CHECK(maxlen % 2 == 0);
-	
-	size_t i = 0;
-
-	int deltax = x1 - x0;
-	int deltay = y1 - y0;
-
-	int x, y, error;
-
-	if (abs(deltax) > abs(deltay)) {	/* X changes faster */
-
-		if (deltax < 0) {
-			SWAP_ENDPOINTS;
-		}
-
-		FOR_EACH_X {
-			if (i < maxlen) {
-				points[i++] = x;
-				points[i++] = y;
-			}
-			NEXT_X;
-		}
-	} else {				/* Y changes faster */
-
-		if (deltay < 0) {
-			SWAP_ENDPOINTS;
-		}
-
-		FOR_EACH_Y {
-			if (i < maxlen) {
-				points[i++] = x;
-				points[i++] = y;
-			}
-			NEXT_Y;
-		}
-	}
-
-	return i;
 }

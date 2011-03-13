@@ -23,56 +23,67 @@
  *                                                                           *
  *****************************************************************************/
 
-#ifndef __TEST_UTILS_H__
-#define __TEST_UTILS_H__
+#ifndef GP_COMMON_H
+#define GP_COMMON_H
+
+#include <stdio.h>
+#include <stdint.h>
+#include <stdlib.h>
+#include <unistd.h>
 
 /*
- * Create these in your test.
+ * Returns a minimum of the two numbers.
  */
-extern const char *TST_TestName;
-extern const char *TST_TestDesc;
-extern const int   TST_TestCases;
-
-#define TST_OK   0x00 /* test was ok           */
-#define TST_FAIL 0x01 /* test has failed       */
-#define TST_EXIT 0x04 /* exit the test         */
-#define TST_STAT 0x08 /* print time statistics */
+#define GP_MIN(a, b) ({ \
+	typeof(a) _a = (a); \
+	typeof(b) _b = (b); \
+	_a < _b ? _a : _b; \
+})
 
 /*
- * Initalize the test.
+ * Returns a maximum of the two numbers.
  */
-void TST_Init(void);
+#define GP_MAX(a, b) ({ \
+	typeof(a) _a = (a); \
+	typeof(b) _b = (b); \
+	_a > _b ? _a : _b; \
+})
 
 /*
- * Starts test counters for operation.
+ * Abort and print abort location to stderr
  */
-void TST_Start(const char *CaseName);
+#define GP_ABORT(msg) do { \
+		fprintf(stderr, "*** gfxprim: aborted: %s: %s\n", __FUNCTION__, #msg); \
+		abort(); \
+	} while (0)
 
 /*
- * Stop test counters and print result.
+ * Perform a runtime check, on failure abort and print a message
  */
-void TST_Stop(int TST_flag, const char *format, ...) __attribute__ ((format (printf, 2, 3)));
+#define GP_CHECK(cond) do { \
+		if (!(cond)) { \
+			fprintf(stderr, "*** gfxprim: runtime check failed: %s: %s\n", \
+				__FUNCTION__, #cond); \
+			abort(); \
+		} \
+	} while (0)
 
 /*
- * Exit test suite.
+ * The standard likely() and unlikely() used in Kernel
+ * TODO: Define as no-op for non-GCC compilers
  */
-void TST_Exit(void) __attribute__ ((noreturn));
-
+#ifndef likely
+#define likely(x)       __builtin_expect((x),1)
+#define unlikely(x)     __builtin_expect((x),0)
+#endif
 
 /*
- * Do not use, for internal purposes only
+ * Swap a and b using an intermediate variable
  */
-struct timeval;
+#define GP_SWAP(a, b) do { \
+	typeof(a) tmp = b; \
+	b = a;             \
+	a = tmp;           \
+} while (0)
 
-struct TST_TestData {
-	struct timeval TestStartTime;
-	struct timeval Duration;
-	struct timeval StartTime;
-	int TestCases;
-
-	int fails;
-};
-
-extern struct TST_TestData TST_TestData;
-
-#endif /* __TEST_UTILS_H__ */
+#endif /* GP_COMMON_H */

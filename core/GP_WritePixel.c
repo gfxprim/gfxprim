@@ -245,10 +245,6 @@ void GP_WritePixels24bpp(void *start, size_t count, uint32_t value)
 	bytep = (uint8_t *) p;
 	switch (shift) {
 	case 0:
-		bytep[0] = a;
-		bytep[1] = b;
-		bytep[2] = c;
-		bytep += 3;
 		break;
 	case 1:
 		break;
@@ -263,7 +259,7 @@ void GP_WritePixels24bpp(void *start, size_t count, uint32_t value)
 		break;
 	}
 
-	while (i > 0) {
+	while (i >= 0) {
 		bytep[0] = a;
 		bytep[1] = b;
 		bytep[2] = c;

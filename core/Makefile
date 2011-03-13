@@ -2,7 +2,7 @@ LIBRARY=libGP_core
 SOURCES=$(wildcard *.c)
 OBJECTS=$(SOURCES:.c=.o)
 HEADERS=$(wildcard *.h)
-ALGORITHMS=$(wildcard ../algo/*.algo.c)
+ALGORITHMS=$(wildcard ../algo/*.algo.h)
 CFLAGS=-W -Wall -O2 -fPIC -I../
 
 HEADER_LOC=/usr/include/
@@ -24,7 +24,7 @@ $(LIBRARY).so: $(OBJECTS)
 	$(CC) -fPIC -dPIC --shared -Wl,-soname -Wl,$@.0 $(CFLAGS) $^ -o $@
 	ln -sf $@ $@.0
 
-%.o: %.c
+%.o: %.c $(ALGORITHMS)
 	$(CC) $(CFLAGS) $< -c -o $@ 
 
 clean:

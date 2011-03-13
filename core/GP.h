@@ -29,10 +29,7 @@
 #include <stdint.h>
 
 /* basic definitions and structures */
-#include "GP_Abort.h"
-#include "GP_Check.h"
-#include "GP_MinMax.h"
-#include "GP_Swap.h"
+#include "GP_Common.h"
 #include "GP_Transform.h"
 #include "GP_Context.h"
 
@@ -51,6 +48,7 @@
 #include "GP_HLine.h"
 #include "GP_VLine.h"
 #include "GP_Line.h"
+#include "GP_LineTrack.h"
 #include "GP_Rect.h"
 #include "GP_FillRect.h"
 #include "GP_Triangle.h"

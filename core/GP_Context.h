@@ -29,25 +29,25 @@
 #include <stdint.h>
 #include <unistd.h>
 
-#include "GP_Check.h"
+#include "GP_Common.h"
 #include "GP_Pixel.h"
 
 /* This structure holds all information needed for drawing into an image. */
 typedef struct GP_Context {
-	uint8_t *pixels;		/* pointer to image pixels */
-	uint8_t bpp;			/* values: 1, 2, 4, 8, 16, 24, 32 */
+	uint8_t *pixels;	 /* pointer to image pixels */
+	uint8_t bpp;		 /* values: 1, 2, 4, 8, 16, 24, 32 */
 	uint32_t bytes_per_row;
-	uint32_t w;			/* width */
-	uint32_t h;      		/* heigth */
+	uint32_t w;		 /* width */
+	uint32_t h;      	 /* heigth */
 
-	GP_PixelType pixel_type;        /* hardware pixel format */
+	GP_PixelType pixel_type; /* hardware pixel format */
 
 	/* image orientation. Most common is landscape (0, 0, 0),
 	 * portrait with normal topleft corner is (1, 0, 0).
 	 */
-	int axes_swap:1;	        /* swap axes so that x is y and y is x */
-	int x_swap:1;		        /* swap direction on x  */
-	int y_swap:1;		        /* swap direction on y  */
+	int axes_swap:1;	 /* swap axes so that x is y and y is x */
+	int x_swap:1;		 /* swap direction on x  */
+	int y_swap:1;		 /* swap direction on y  */
 
 	/* clipping rectangle; drawing functions only affect the inside */
 	uint32_t clip_w_min;
@@ -63,7 +63,7 @@ inline GP_PixelType GP_GetContextPixelType(const GP_Context *context);
  * Rows and columns are specified in the image's orientation
  * (i.e. they might not be XY if the image is rotated).
  */
-#define GP_PIXEL_ADDR(context, x, y) ((uint8_t *) (context->pixels \
+#define GP_PIXEL_ADDR(context, x, y) ((context->pixels \
 	+ y * context->bytes_per_row \
 	+ (x * context->bpp) / 8))
 

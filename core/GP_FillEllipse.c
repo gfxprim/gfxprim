@@ -27,8 +27,10 @@
 #include "GP_FnPerBpp.h"
 #include "algo/FillEllipse.algo.h"
 
+/* Generate drawing functions for various bit depths. */
 DEF_FILLELLIPSE_FN(GP_FillEllipse1bpp, GP_Context *, GP_Pixel, GP_HLine1bpp)
 DEF_FILLELLIPSE_FN(GP_FillEllipse2bpp, GP_Context *, GP_Pixel, GP_HLine2bpp)
+DEF_FILLELLIPSE_FN(GP_FillEllipse4bpp, GP_Context *, GP_Pixel, GP_HLine4bpp)
 DEF_FILLELLIPSE_FN(GP_FillEllipse8bpp, GP_Context *, GP_Pixel, GP_HLine8bpp)
 DEF_FILLELLIPSE_FN(GP_FillEllipse16bpp, GP_Context *, GP_Pixel, GP_HLine16bpp)
 DEF_FILLELLIPSE_FN(GP_FillEllipse24bpp, GP_Context *, GP_Pixel, GP_HLine24bpp)

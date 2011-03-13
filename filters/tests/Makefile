@@ -13,5 +13,5 @@ all: $(TESTS)
 	$(CC) $(CFLAGS) $(LDFLAGS) $(LIBRARY) $^ -o $@
 
 clean:
-	rm -f *.o
-	rm -f *.pgm
+	rm -f *.o $(TESTS)
+	rm -f test-mv.pgm test-mh.pgm test-cw.pgm test-ccw.pgm

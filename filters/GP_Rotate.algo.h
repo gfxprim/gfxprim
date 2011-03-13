@@ -23,22 +23,68 @@
  *                                                                           *
  *****************************************************************************/
 
-#ifndef GP_CHECK_H
-#define GP_CHECK_H
+#include "GP_Clip.h"
+#include "GP_Swap.h"
+#include "GP_Context.h"
 
-#include "GP_Abort.h"
-
-#include <stdio.h>
-#include <stdint.h>
-#include <stdlib.h>
-#include <unistd.h>
-
-#define GP_CHECK(cond) do { \
-		if (!(cond)) { \
-			fprintf(stderr, "*** gfxprim: runtime check failed: %s: %s\n", \
-				__FUNCTION__, #cond); \
-			abort(); \
+#define DEF_ROTATECW_FN(FN_NAME, CONTEXT_T, PUTPIXEL, GETPIXEL) \
+GP_RetCode FN_NAME(CONTEXT_T context) \
+{ \
+	uint32_t x, y; \
+	CONTEXT_T tmp; \
+\
+	tmp = GP_ContextCopy(context, GP_COPY_WITH_PIXELS); \
+\
+	if (tmp == NULL) \
+		return GP_ENOMEM; \
+\
+	GP_SWAP(context->w, context->h); \
+\
+	context->bytes_per_row = GP_CALC_ROW_SIZE(context->pixel_type, \
+	                                          context->w); \
+\
+	for (x = 0; x < tmp->w; x++) { \
+		for (y = 0; y < tmp->h; y++) { \
+			uint32_t yr = tmp->h - y - 1; \
+			PUTPIXEL(context, yr, x, GETPIXEL(tmp, x, y)); \
 		} \
-	} while (0)
+	} \
+\
+	GP_ContextFree(tmp); \
+\
+	GP_SWAP_CLIPS(context); \
+	GP_MIRROR_H_CLIP(context); \
+\
+	return GP_ESUCCESS; \
+}
 
-#endif /* GP_CHECK_H */
+#define DEF_ROTATECCW_FN(FN_NAME, CONTEXT_T, PUTPIXEL, GETPIXEL) \
+GP_RetCode FN_NAME(CONTEXT_T context) \
+{ \
+	uint32_t x, y; \
+	CONTEXT_T tmp; \
+\
+	tmp = GP_ContextCopy(context, GP_COPY_WITH_PIXELS); \
+\
+	if (tmp == NULL) \
+		return GP_ENOMEM; \
+\
+	GP_SWAP(context->w, context->h); \
+\
+	context->bytes_per_row = GP_CALC_ROW_SIZE(context->pixel_type, \
+	                                          context->w); \
+\
+	for (x = 0; x < tmp->w; x++) { \
+		for (y = 0; y < tmp->h; y++) { \
+				uint32_t xr = tmp->w - x - 1; \
+				PUTPIXEL(context, y, xr, GETPIXEL(tmp, x, y)); \
+		} \
+	} \
+\
+	GP_ContextFree(tmp); \
+\
+	GP_SWAP_CLIPS(context); \
+	GP_MIRROR_V_CLIP(context); \
+\
+	return GP_ESUCCESS; \
+}

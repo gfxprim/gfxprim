@@ -101,8 +101,8 @@ void event_loop(void)
 				flag_proportional = !flag_proportional;
 			break;
 			case SDLK_x:
-                                context.x_swap = !context.x_swap;
-                        break;
+				context.x_swap = !context.x_swap;
+			break;
 			case SDLK_y:
 				context.y_swap = !context.y_swap;
 			break;

@@ -23,61 +23,54 @@
  *                                                                           *
  *****************************************************************************/
 
-#include <stdio.h>
+#include "GP.h"
 
-#include "GP_Color.h"
-#include "GP_Palette.h"
-
-enum GP_RetCode GP_PaletteColorToColor(GP_Color *color)
+inline void GP_LineTrackInit(struct GP_LineTrack *track, int x0, int y0,
+		int x1, int y1)
 {
-	struct GP_ColPal *pal;
-	GP_Palette *palette;
-	uint16_t index;
+	track->x0 = x0;
+	track->y0 = y0;
+	track->x1 = x1;
+	track->y1 = y1;
 
-	if (color->type != GP_PALETTE)
-		return GP_EINVAL;
+	track->dx = abs(x1 - x0);
+	track->dy = abs(y1 - y0);
+	track->xstep = (x0 < x1) ? 1 : -1;
+	track->ystep = (y0 < y1) ? 1 : -1;
 
-	pal     = &color->pal;
-	palette = pal->palette;
-	index   = pal->index;
-
-	switch (pal->palette->type) {
-	case GP_RGB888:
-		if (index >= palette->rgb888.size)
-			return GP_EINVAL;
-			
-		GP_RGB888_FILL(color, palette->rgb888.colors[index].red,
-		               palette->rgb888.colors[index].green,
-		               palette->rgb888.colors[index].blue);
-		return GP_ESUCCESS;
-	break;
-	default:
-		return GP_ENOIMPL;
-	}
+	track->x = x0;
+	track->y = y0;
+	track->err = track->dx - track->dy;
+	track->xmin = x0;
+	track->xmax = x0;
 }
 
-static void print_rgb888(struct GP_PalRGB888 *palette)
+inline void GP_LineTrackNext(struct GP_LineTrack *track)
 {
-	uint16_t i;
+	int x = track->x;
+	int xmin = track->x;
+	int xmax = track->x;
 
-	printf("palette format rgb888 (size = %u)\n", palette->size);
-	printf(" NR    R    G    B\n");
+	for (;;) {
+		xmin = GP_MIN(x, xmin);
+		xmax = GP_MAX(x, xmax);
 
-	for (i = 0; i < palette->size; i++) {
-		printf("%04u: 0x%.2x 0x%.2x 0x%.2x\n", i,
-		                                      palette->colors[i].red,
-		                                      palette->colors[i].green,
-		                                      palette->colors[i].blue);
-	}
-}
-
-void GP_PalettePrint(GP_Palette *palette)
-{
-	switch (palette->type) {
-		case GP_RGB888:
-			print_rgb888(&palette->rgb888);
-		break;
-		default:
+		if (x == track->x1 && track->y == track->y1)
 			break;
+
+		int err2 = 2*track->err;
+		if (err2 > -track->dy) {
+			track->err -= track->dy;
+			x += track->xstep;
+		}
+		if (err2 < track->dx) {
+			track->err += track->dx;
+			track->y += track->ystep;
+			break;
+		}
 	}
+
+	track->x = x;
+	track->xmin = xmin;
+	track->xmax = xmax;
 }

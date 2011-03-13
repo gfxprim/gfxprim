@@ -49,7 +49,7 @@ Uint32 timer_callback(__attribute__((unused)) Uint32 interval,
 }
 
 /* Basic colors in display-specific format. */
-GP_Pixel black, white, yellow, red, gray, darkgray;
+GP_Pixel black, white, yellow, green, red, gray, darkgray;
 
 /* Radius of the shape being drawn */
 static int xradius = 5;
@@ -118,6 +118,13 @@ void draw_testing_triangle(int x, int y, int xradius, int yradius)
 		y2 = y + yradius;
 		break;
 	}
+
+	/* draw the three vertices green; they should never be visible
+	 * because the red triangle should cover them; if they are visible,
+	 * it means we don't draw to the end */
+	GP_PutPixel(&context, x0, y0, green);
+	GP_PutPixel(&context, x1, y1, green);
+	GP_PutPixel(&context, x2, y2, green);
 
 	if (outline == 1)
 		GP_TTriangle(&context, x0, y0, x1, y1, x2, y2, yellow);
@@ -447,6 +454,7 @@ int main(int argc, char ** argv)
 	GP_ColorNameToPixel(&context, GP_COL_BLACK, &black);
 	GP_ColorNameToPixel(&context, GP_COL_WHITE, &white);
 	GP_ColorNameToPixel(&context, GP_COL_YELLOW, &yellow);
+	GP_ColorNameToPixel(&context, GP_COL_GREEN, &green);
 	GP_ColorNameToPixel(&context, GP_COL_RED, &red);
 	GP_ColorNameToPixel(&context, GP_COL_GRAY_LIGHT, &gray);
 	GP_ColorNameToPixel(&context, GP_COL_GRAY_DARK, &darkgray);

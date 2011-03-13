@@ -58,7 +58,7 @@
 #define GP_PUTPIXEL_8BPP(context, x, y, pixel) do { \
 	uint8_t *gp_pix_addr = GP_PIXEL_ADDR(context, x, y); \
 \
-	*gp_pix_addr = pixel & 0xff; \
+	*gp_pix_addr = (pixel) & 0xff; \
 } while (0)
 
 #define GP_PUTPIXEL_16BPP(context, x, y, pixel) do { \

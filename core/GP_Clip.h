@@ -23,16 +23,29 @@
  *                                                                           *
  *****************************************************************************/
 
-#ifndef GP_ABORT_H
-#define GP_ABORT_H
+#ifndef GP_CLIP_H
+#define GP_CLIP_H
 
-#include <stdio.h>
-#include <stdint.h>
-#include <stdlib.h>
+/*
+ * Clipping rectanle mirroring and rotations.
+ */
+#define GP_MIRROR_V_CLIP(context) do {                                 \
+	typeof(context->clip_w_min) _clip_w_min = context->clip_w_min; \
+	                                                               \
+	context->clip_w_min = context->w - context->clip_w_max;        \
+	context->clip_w_max = context->w - _clip_w_min;                \
+} while (0)
 
-#define GP_ABORT(msg) do { \
-		fprintf(stderr, "*** gfxprim: aborted: %s: %s\n", __FUNCTION__, #msg); \
-		abort(); \
-	} while (0)
+#define GP_MIRROR_H_CLIP(context) do {                                 \
+	typeof(context->clip_h_min) _clip_h_min = context->clip_h_min; \
+	                                                               \
+	context->clip_h_min = context->h - context->clip_h_max;        \
+	context->clip_h_max = context->h - _clip_h_min;                \
+} while (0)
 
-#endif /* GP_ABORT_H */
+#define GP_SWAP_CLIPS(context) do {                        \
+	GP_SWAP(context->clip_w_min, context->clip_h_min); \
+	GP_SWAP(context->clip_w_max, context->clip_h_max); \
+} while (0)
+
+#endif /* GP_CLIP_H */

@@ -27,8 +27,10 @@
 #include "algo/VLine.algo.h"
 #include "GP_FnPerBpp.h"
 
+/* Generate drawing functions for various bit depths. */
 DEF_VLINE_FN(GP_VLine1bpp,  GP_Context *, GP_Pixel, GP_PutPixel1bpp)
 DEF_VLINE_FN(GP_VLine2bpp,  GP_Context *, GP_Pixel, GP_PutPixel2bpp)
+DEF_VLINE_FN(GP_VLine4bpp,  GP_Context *, GP_Pixel, GP_PutPixel4bpp)
 DEF_VLINE_FN(GP_VLine8bpp,  GP_Context *, GP_Pixel, GP_PutPixel8bpp)
 DEF_VLINE_FN(GP_VLine16bpp, GP_Context *, GP_Pixel, GP_PutPixel16bpp)
 DEF_VLINE_FN(GP_VLine24bpp, GP_Context *, GP_Pixel, GP_PutPixel24bpp)

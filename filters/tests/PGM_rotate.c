@@ -23,25 +23,65 @@
  *                                                                           *
  *****************************************************************************/
 
-#ifndef GP_MINMAX_H
-#define GP_MINMAX_H
+#include <GP.h>
+#include <GP_PGM.h>
+#include <GP_Rotate.h>
 
-/*
- * Returns a minimum of the two numbers.
- */
-#define GP_MIN(a, b) ({ \
-	typeof(a) _a = (a); \
-	typeof(b) _b = (b); \
-	_a < _b ? _a : _b; \
-})
+int main(int argc, char *argv[])
+{
+	GP_Context *context, *copy;
 
-/*
- * Returns a maximum of the two numbers.
- */
-#define GP_MAX(a, b) ({ \
-	typeof(a) _a = (a); \
-	typeof(b) _b = (b); \
-	_a > _b ? _a : _b; \
-})
+	if (argc < 2)
+		fprintf(stderr, "Takes one parameter, filename\n");
 
-#endif /* GP_MINMAX_H */
+	if (GP_LoadPGM(argv[1], &context)) {
+		fprintf(stderr, "Can't load context\n");
+		return 1;
+	}
+
+	printf("Loaded PGM %u bpp w %u h %u, bpr %u\n",
+	       context->bpp, context->w, context->h, context->bytes_per_row);
+
+	copy = GP_ContextCopy(context, GP_COPY_WITH_PIXELS);
+	GP_MirrorH(copy);
+	
+	if (GP_SavePGM("test-mh.pgm", copy)) {
+		fprintf(stderr, "Can't save context\n");
+		return 1;
+	}
+	
+	GP_ContextFree(copy);
+	copy = GP_ContextCopy(context, GP_COPY_WITH_PIXELS);
+
+	GP_MirrorV(copy);
+	
+	if (GP_SavePGM("test-mv.pgm", copy)) {
+		fprintf(stderr, "Can't save context\n");
+		return 1;
+	}
+	
+	GP_ContextFree(copy);
+	copy = GP_ContextCopy(context, GP_COPY_WITH_PIXELS);
+
+	GP_RotateCW(copy);
+	
+	if (GP_SavePGM("test-cw.pgm", copy)) {
+		fprintf(stderr, "Can't save context\n");
+		return 1;
+	}
+
+	GP_ContextFree(copy);
+	copy = GP_ContextCopy(context, GP_COPY_WITH_PIXELS);
+
+	GP_RotateCCW(copy);
+	
+	if (GP_SavePGM("test-ccw.pgm", copy)) {
+		fprintf(stderr, "Can't save context\n");
+		return 1;
+	}
+
+	GP_ContextFree(copy);
+	GP_ContextFree(context);
+
+	return 0;
+}

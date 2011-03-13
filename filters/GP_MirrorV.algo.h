@@ -23,78 +23,24 @@
  *                                                                           *
  *****************************************************************************/
 
-#include <math.h>
-#include <unistd.h>
-#include <SDL/SDL.h>
 
-#include "GP.h"
+#include "GP_Clip.h"
 
-#include "../engine/TestUtils.h"
-
-const char *TST_TestName  = "Triangle 01";
-const char *TST_TestDesc  = "Triangle drawing benchmark";
-const int   TST_TestCases = 2;
-
-SDL_Surface *display = NULL;
-
-static long colors[GP_BASIC_COLOR_COUNT];
-
-static void do_benchmark(void)
-{
-	float angle;
-	uint32_t w = display->w/2;
-	uint32_t h = display->h/2;
-	uint32_t l = display->h/3;
-
-	TST_Start("Drawing triangles");
-	
-	for (angle = 0.0; angle < M_PI; angle += 0.001) {
-		int x0, y0, x1, y1, x2, y2;
-
-		x0 = w + l * cos(angle);
-		y0 = h + l * sin(angle);
-		x1 = w + l * cos(angle + 2);
-		y1 = h + l * sin(angle + 2);
-		x2 = w + l * cos(angle + 4);
-		y2 = h + l * sin(angle + 4);
-
-		GP_FillTriangle(display, colors[GP_RED], x0, y0, x1, y1, x2, y2);
-	}
-	
-	TST_Stop(TST_OK | TST_STAT, NULL);
-	
-	SDL_UnlockSurface(display);
-	SDL_Flip(display);
-	sleep(1);
+#define DEF_MIRRORV_FN(FN_NAME, CONTEXT_T, PIXEL_T, PUTPIXEL, GETPIXEL) \
+void FN_NAME(CONTEXT_T context) \
+{ \
+	uint32_t x, y; \
+	PIXEL_T tmp; \
+\
+	for (x = 0; x < context->w/2; x++) { \
+		uint32_t xm = context->w - x - 1; \
+		for (y = 0; y < context->h; y++) { \
+			tmp = GETPIXEL(context, x, y); \
+\
+			PUTPIXEL(context, x, y, GETPIXEL(context, xm, y)); \
+			PUTPIXEL(context, xm, y, tmp); \
+		} \
+	} \
+\
+	GP_MIRROR_V_CLIP(context); \
 }
-
-int main(void)
-{
-	TST_Init();
-	
-	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) != 0) {
-		fprintf(stderr, "Could not initialize SDL: %s\n", SDL_GetError());
-		return 1;
-	}
-
-	display = SDL_SetVideoMode(640, 480, 0, SDL_SWSURFACE);
-	
-	if (display == NULL) {
-		fprintf(stderr, "Could not open display: %s\n", SDL_GetError());
-		goto fail;
-	}
-	
-
-	GP_LoadBasicColors(display, colors);
-	SDL_Rect clip_rect = { 10, 10, 620, 460 };
-	SDL_SetClipRect(display, &clip_rect);
-
-	do_benchmark();
-
-	SDL_Quit();
-	TST_Exit();
-fail:
-	SDL_Quit();
-	return 1;
-}
-
