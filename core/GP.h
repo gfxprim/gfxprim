@@ -29,10 +29,7 @@
 #include <stdint.h>
 
 /* basic definitions and structures */
-#include "GP_Abort.h"
-#include "GP_Check.h"
-#include "GP_MinMax.h"
-#include "GP_Swap.h"
+#include "GP_Common.h"
 #include "GP_Transform.h"
 #include "GP_Context.h"
 
