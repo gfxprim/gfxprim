@@ -3,3 +3,5 @@
 *.gen.c
 *.gen.h
 *.swp
+/libGP_core.so*
+
