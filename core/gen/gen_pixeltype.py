@@ -7,17 +7,8 @@ Such functions accept (and then extend) two list of strins.
 These should be later joined with "" or "\\n".
 """
 
-import jinja2
 from pixeltype import pixeltypes, channels
-
-
-def r(tmpl, **kw):
-  "Internal helper to render jinja2 templates (with StrictUndefined)"
-  t2 = tmpl.rstrip('\n') # Jinja strips the last '\n', so add these later
-  return jinja2.Template(t2, undefined=jinja2.StrictUndefined).render(**kw) + tmpl[len(t2):]
-
-## Helper returning hex mask for that many bits
-def hmask(bits): return hex((1<<bits)-1)
+from gen_utils import *
 
 
 def str_start(ptype):
@@ -147,5 +138,28 @@ def gen_convert_to(f1, f2, header, code):
     "/* a version without offsets */\n"
     "#define GP_Pixel_{{ f1.name }}_TO_{{ f2.name }}(p1, p2) "
       "(GP_Pixel_{{ f1.name }}_TO_{{ f2.name }}_OFFSET(p1, 0, p2, 0))\n",
-      f1=f1, f2=f2, hmask=hmask, set=set))
+    f1=f1, f2=f2, hmask=hmask, set=set))
+
+def gen_get_pixel_addr(ptype, header, code):
+  "Generate GP_PIXEL_ADDR_<TYPE> and _OFFSET_<TYPE> macros"
+  header.append(r(
+    "/* macro to get address of pixel {{ f.name }} in a context */\n"
+    "#define GP_PIXEL_ADDR_{{ f.name }}(context, x, y) GP_PIXEL_ADDR_{{ f.size }}bpp(context, x, y)\n"
+    "/* macro to get bit-offset of pixel {{ f.name }} */\n"
+    "#define GP_PIXEL_ADDR_OFFSET_{{ f.name }}(x) GP_PIXEL_ADDR_OFFSET_{{ f.size }}bpp(x)\n",
+    f=ptype))
+
+def gen_get_pixel_addr_bpp(size, header, code):
+  "Generate GP_PIXEL_ADDR_<SIZE>bpp and _OFFSET_<SIZE>bpp macros"
+  header.append(r(
+    "/* macro to get address of pixel in a {{ size }}bpp context */\n"
+    "#define GP_PIXEL_ADDR_{{ size }}bpp(context, x, y) \\\n"
+    "        ((context)->pixels + (context)->bytes_per_row * (y) + {{ size//8 }} * (x))\n"
+    "/* macro to get bit-offset of pixel in {{ size }}bpp context */\n"
+    "{% if size>=8 %}"
+    "#define GP_PIXEL_ADDR_OFFSET_{{ size }}bpp(x) (0)\n"
+    "{% else %}"
+    "#define GP_PIXEL_ADDR_OFFSET_{{ size }}bpp(x) ((x) % {{ 8//size }})\n"
+    "{% endif %}",
+    size=size))
 

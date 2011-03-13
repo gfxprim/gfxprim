@@ -31,9 +31,13 @@ clean:
 	rm -f $(LIBRARY).a $(LIBRARY).so $(LIBRARY).so.0
 	rm -f *.o
 	cd tests && $(MAKE) clean
+	rm -f $(GENERATED)
 
 
 GENERATORS=$(wildcard gen/*.py)
+GENERATED=GP_Pixel_Scale.gen.h \
+  GP_Pixel.gen.c GP_Pixel.gen.h \
+  GP_Blit.gen.h GP_Blit.gen.c
 
 GP_Pixel_Scale.gen.h: $(GENERATORS)
 	python gen/make_GP_Pixel_Scale.py GP_Pixel_Scale.gen.h 
@@ -41,4 +45,8 @@ GP_Pixel_Scale.gen.h: $(GENERATORS)
 GP_Pixel.gen.c GP_Pixel.gen.h: $(GENERATORS)
 	python gen/make_GP_Pixel.py GP_Pixel.gen.h GP_Pixel.gen.c
 
-generated: GP_Pixel_Scale.gen.h GP_Pixel.gen.c GP_Pixel.gen.h
+GP_Blit.gen.c GP_Blit.gen.h: $(GENERATORS)
+	python gen/make_GP_Blit.py GP_Blit.gen.h GP_Blit.gen.c
+
+generated: $(GENERATED)
+

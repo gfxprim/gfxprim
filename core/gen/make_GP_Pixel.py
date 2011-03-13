@@ -3,8 +3,8 @@
 # 2011 - Tomas Gavenciak <gavento@ucw.cz> 
 
 from pixeltype import *
-from generators import *
-from gen_helpers import *
+from gen_utils import *
+from gen_pixeltype import *
 import defs
 
 h = []
@@ -40,6 +40,11 @@ for t in pixeltypes.values():
 
 		gen_print(t, h, c)
 		gen_get_chs(t, h, c)
+		gen_get_pixel_addr(t, h, c)
+
+# Per-bpp macros
+for bpp in bitsizes:
+	gen_get_pixel_addr_bpp(bpp, h, c)
 
 ## Conversion macros
 

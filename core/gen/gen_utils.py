@@ -1,12 +1,25 @@
-# Module with helpers for writing C source and headers
+# Module with utils for writing C source and headers
 # 2011 - Tomas Gavenciak <gavento@ucw.cz> 
 
 import sys
-from generators import *
+import jinja2 
 
 def die(msg):
   sys.stderr.write(msg)
   sys.exit(1)
+
+
+def hmask(bits): 
+  "Helper returning hex mask for that many bits"
+  "WARN: may contain 'L'"
+  return hex((1<<bits)-1)
+
+
+def r(tmpl, **kw):
+  "Internal helper to render jinja2 templates (with StrictUndefined)"
+  t2 = tmpl.rstrip('\n') # Jinja strips the last '\n', so add these later
+  return jinja2.Template(t2, undefined=jinja2.StrictUndefined).render(**kw) + tmpl[len(t2):]
+
 
 def gen_headers(header, code, descr, authors, generator, hdef):
   "Generate header- and source-file headers"
@@ -34,11 +47,13 @@ def gen_headers(header, code, descr, authors, generator, hdef):
     " */\n\n", descr=descr, authors=authors, 
       generator=generator))
 
+
 def gen_footers(header, code):
   "Generate header-file footer"
   header.append("#endif /* Header file #include guard */\n")
 
-import pprint
+
+#import pprint
 def main_write(header, code):
   "Helper writing header to argv[1] and code to argv[2]"
   "Skips writing header resp. code if set to None"

@@ -1,0 +1,36 @@
+#!/usr/bin/python
+# Script generating GP_Pixel_Blit.gen.c and GP_Pixel_Blit.gen.h
+# 2011 - Tomas Gavenciak <gavento@ucw.cz> 
+
+from pixeltype import *
+from gen_blit import *
+from gen_utils import *
+import defs
+
+h = []
+c = []
+
+## Headers
+
+gen_headers(h, c, 
+	descr = "specialized blit functions and macros", 
+	authors = ["2011 - Tomas Gavenciak <gavento@ucw.cz>"],
+	generator = __file__,
+	hdef = "GP_PIXEL_BLIT_GEN_H")
+
+c.append('#include <stdio.h>\n')
+c.append('#include "GP_Pixel.h"\n')
+c.append('#include "GP_Context.h"\n')
+c.append('#include "GP_Blit.gen.h"\n')
+
+for bpp in bitsizes:
+	gen_blit_same_t(bpp, h, c)
+
+## Close the files
+
+gen_footers(h, c)
+
+## Write out!
+
+main_write(h, c)
+

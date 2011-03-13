@@ -19,6 +19,9 @@ pixeltypes = {}
 ## *Global* set of all encountered channel names  
 channels = set()
 
+## Allowed bit-sizes of pixels
+bitsizes = [1,2,4,8,16,24,32]
+
 class PixelType(object):
   """Representation of one GP_PixelType"""
   def __init__(self, name, size, chanslist, number=None):
@@ -35,7 +38,7 @@ class PixelType(object):
     self.chans = dict() # { chan_name: (offset, size) }
     # all types except UNKNOWN=0 must have one of these sizes
     if number is not 0:
-      assert(size in [1,2,4,8,16,24,32]) 
+      assert(size in bitsizes) 
     self.size = size
     # Numbering from 1 
     if number is not None:

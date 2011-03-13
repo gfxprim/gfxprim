@@ -4,9 +4,8 @@
 # 2011 - Tomas Gavenciak <gavento@ucw.cz> 
 
 from pixeltype import *
-from generators import *
-from gen_helpers import *
-import defs
+from gen_utils import *
+import defs 
 
 h = []
 c = []
