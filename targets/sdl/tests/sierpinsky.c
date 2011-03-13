@@ -103,8 +103,13 @@ static void draw(SDL_Surface *surf, int x, int y, int l, int iter)
 	SDL_UpdateRect(surf, 0, 0, surf->w, surf->h);
 }
 
+int paused = 0;
+
 Uint32 timer_callback(Uint32 interval __attribute__ ((unused)), void *ptr __attribute__ ((unused)))
 {
+	if (paused)
+		return TIMER_TICK;
+
 	iter += 2 * way;
 	
 	if (iter + 2 * way > 350)
@@ -151,6 +156,16 @@ int main(void)
 	while (SDL_WaitEvent(&ev) > 0) {
 		switch (ev.type) {
 			case SDL_KEYDOWN:
+				switch(ev.key.keysym.sym) {
+					case SDLK_p:
+						paused = !paused;
+					break;
+					default:
+						SDL_Quit();
+						return 0;
+					break;
+				}
+			break;
 			case SDL_QUIT:
 				SDL_Quit();
 				return 0;
