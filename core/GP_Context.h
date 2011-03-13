@@ -29,7 +29,7 @@
 #include <stdint.h>
 #include <unistd.h>
 
-#include "GP_Check.h"
+#include "GP_Common.h"
 #include "GP_Pixel.h"
 
 /* This structure holds all information needed for drawing into an image. */

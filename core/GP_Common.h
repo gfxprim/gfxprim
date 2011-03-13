@@ -23,13 +23,67 @@
  *                                                                           *
  *****************************************************************************/
 
-#ifndef GP_SWAP_H
-#define GP_SWAP_H
+#ifndef GP_COMMON_H
+#define GP_COMMON_H
 
+#include <stdio.h>
+#include <stdint.h>
+#include <stdlib.h>
+#include <unistd.h>
+
+/*
+ * Returns a minimum of the two numbers.
+ */
+#define GP_MIN(a, b) ({ \
+	typeof(a) _a = (a); \
+	typeof(b) _b = (b); \
+	_a < _b ? _a : _b; \
+})
+
+/*
+ * Returns a maximum of the two numbers.
+ */
+#define GP_MAX(a, b) ({ \
+	typeof(a) _a = (a); \
+	typeof(b) _b = (b); \
+	_a > _b ? _a : _b; \
+})
+
+/*
+ * Abort and print abort location to stderr
+ */
+#define GP_ABORT(msg) do { \
+		fprintf(stderr, "*** gfxprim: aborted: %s: %s\n", __FUNCTION__, #msg); \
+		abort(); \
+	} while (0)
+
+/*
+ * Perform a runtime check, on failure abort and print a message
+ */
+#define GP_CHECK(cond) do { \
+		if (!(cond)) { \
+			fprintf(stderr, "*** gfxprim: runtime check failed: %s: %s\n", \
+				__FUNCTION__, #cond); \
+			abort(); \
+		} \
+	} while (0)
+
+/*
+ * The standard likely() and unlikely() used in Kernel
+ * TODO: Define as no-op for non-GCC compilers
+ */
+#ifndef likely
+#define likely(x)       __builtin_expect((x),1)
+#define unlikely(x)     __builtin_expect((x),0)
+#endif
+
+/*
+ * Swap a and b using an intermediate variable
+ */
 #define GP_SWAP(a, b) do { \
 	typeof(a) tmp = b; \
 	b = a;             \
 	a = tmp;           \
 } while (0)
 
-#endif /* GP_SWAP_H */
+#endif /* GP_COMMON_H */
