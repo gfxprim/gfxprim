@@ -106,22 +106,14 @@ void FN_NAME(CONTEXT_T context, int x0, int y0, int x1, int y1, \
 	for (y = Ay; y < By; y++) { \
 		GP_LineTrackNext(&AB); \
 		GP_LineTrackNext(&AC); \
-		if (Bx < Ax) { \
-			HLINE(context, AB.xmin, AC.xmax, y, pixval); \
-		} else { \
-			HLINE(context, AC.xmin, AB.xmax, y, pixval); \
-		} \
+		HLINE(context, GP_MIN(AB.xmin, AC.xmin), GP_MAX(AC.xmax, AB.xmax), y, pixval); \
 	} \
 \
 	/* Draw the bottom part (between BC and AC) */ \
 	for (y = By; y <= Cy; y++) { \
 		GP_LineTrackNext(&BC); \
 		GP_LineTrackNext(&AC); \
-		if (Bx < Ax) { \
-			HLINE(context, BC.xmin, AC.xmax, y, pixval); \
-		} else { \
-			HLINE(context, AC.xmin, BC.xmax, y, pixval); \
-		} \
+		HLINE(context, GP_MIN(BC.xmin, AC.xmin), GP_MAX(BC.xmax, AC.xmax), y, pixval); \
 	} \
 }
 
