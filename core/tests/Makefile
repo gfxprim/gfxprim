@@ -4,16 +4,34 @@ LDFLAGS=-L../ -lGP_core
 INCLUDE=-I../
 # Some warnings are triggered only with -O2
 # thuss added here
-CFLAGS=$(INCLUDE) -ggdb -W -Wall -O
-SOURCES=$(wildcard *.c)
-TESTS=$(SOURCES:.c=)
+CFLAGS=$(INCLUDE) -ggdb -W -Wall -O -std=c99
 
-all: $(TESTS)
+# General stuff
 
-%: %.c
-	$(CC) $(CFLAGS) $(LDFLAGS) $^ $(LIBRARY) -o $@
+.PHONY: all clean run
+
+all: $(TESTS) core_tests
 
 clean:
 	rm -f *.o *.tmp
-	rm -f $(TESTS)
+	rm -f $(TESTS) core_tests
+
+
+# Non-check tests
+
+TESTS=GP_color_type_test GP_font_save GP_palette_test
+
+
+$(TESTS): %: %.c
+	$(CC) $(CFLAGS) $(LDFLAGS) $^ $(LIBRARY) -o $@
+
+
+# Check tests
+
+TEST_SRCS=$(wildcard *.test.c)
+TEST_OBJS=$(patsubst %.c,%.o,$(TEST_SRCS))
+
+core_tests: $(TEST_OBJS) core_tests.o
+	 $(CC) $(CFLAGS) $(LDFLAGS) $^ $(LIBRARY) -lcheck -o $@
+	
 
