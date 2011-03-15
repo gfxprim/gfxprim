@@ -4,6 +4,10 @@
 
 from gen_utils import *
 
+## all generated direct blits, for generating GP_Blit() and others
+generated_blits = []
+
+
 # WARN: assuming little-endian in sub-byte pixels order (probably)
 def gen_blit_same_t(size, header, code):
   "Generate a function blitting the same type of pixel"
@@ -31,7 +35,7 @@ def gen_blit_same_t(size, header, code):
     "		       c1->bytes_per_row * h);\n"
     "		return;\n"
     "	}\n\n"
-    "{% if size>=8 %}" # memcpy() per line
+    "{% if size>=8 %}"
     "	/* General case - memcpy() each horizontal line */\n"
     "	for (int i=0; i<h; i++)\n"
     "		memcpy(GP_PIXEL_ADDR_{{ size }}bpp(c2, x2, y2 + i), \n"
@@ -78,9 +82,8 @@ def gen_blit_same_t(size, header, code):
     "}\n", size=size, ppb=8/size))
 
 
-
 def gen_blit_t(f1, f2, header, code):
-  "Generate a macro blitting rectangle f1 to f2"
+  "Generate a macro GP_Blit_T1_T2 blitting a rectangle"
   "Does not (yet) convert between PAL formats and RGBVA"
   allowed_chansets = [ set(list(s)) for s in ['RGB', 'RGBA', 'V', 'VA'] ]
   if f1!=f2:
