@@ -40,25 +40,26 @@ END_TEST
 
 START_TEST(get_bits)
 {
-	fail_unless(GP_GET_BITS(15, 7, 0x12345678ULL) == 10);
+	fail_unless(GP_GET_BITS(15, 7, 0x12345678ULL) == 0x68);
 	fail_unless(GP_GET_BITS(0, 0, 0x12345678ULL) == 0);
 	fail_unless(GP_GET_BITS(16, 16, 0x1234) == 0);
-	fail_unless(GP_GET_BITS(1, 32, 0x12345678ULL) == 0x091A2B34ULL);
+	fail_unless(GP_GET_BITS(1, 32, 0x12345678ULL) == 0x091A2B3CULL);
 }
 END_TEST
 
 START_TEST(set_bits)
 {
 	uint32_t x = 0x89ABC;
-	uint16_t *y = x; 
-	GP_CLEAR_BITS(15, 4, x);
-	fail_unless(x == 0x818BC);
+	uint16_t *y = &x; 
+	GP_CLEAR_BITS(3, 4, x);
+	fail_unless(x == 0x89A84);
 	GP_SET_BITS_OR(10, x, 0x0000000); 
-	fail_unless(x == 0x818BC);
-	GP_SET_BITS(24, 18, x, 0x0F1);
-	fail_unless(x == 0x818BC00F);
-	GP_SET_BITS(1, 16, *y, 0x100F000);
-	fail_unless(x == 0x200ED00F);
+	fail_unless(x == 0x89A84);
+	GP_SET_BITS(24, 18, x, 0x42F1); 
+	fail_unless(x == 0xF1089A84);
+	/* Check that only uint16_t is affected */
+	GP_SET_BITS(0, 24, *y, 0x100F000); 
+	fail_unless(x == 0xF108F000);
 }
 END_TEST
 
