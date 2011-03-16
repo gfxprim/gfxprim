@@ -30,39 +30,41 @@
 
 START_TEST(min_max)
 {
-/*	fail_unless(GP_MIN(-1.5, 2) == -1.5, "");
-	fail_unless(GP_MAX(4294967295ULL, 1LL) == 4294967295ULL, "");
+	fail_unless(GP_MIN(-1.5, 2) == -1.5);
+	fail_unless(GP_MAX(4294967295ULL, 1LL) == 4294967295ULL);
 	int x=0, y=0;
-	fail_unless(GP_MAX(x++, ++y) == 1, "");
-	fail_unless(x == 1 && y == 1, "");
-*/}
+	fail_unless(GP_MAX(x++, ++y) == 1);
+	fail_unless(x == 1 && y == 1);
+}
 END_TEST
 
-start_test(get_bits)
+START_TEST(get_bits)
 {
-	fail_unless(GP_GET_BITS(15, 7, 0x12345678ULL) == 10, "");
-	fail_unless(GP_GET_BITS(0, 0, 0x12345678ULL) == 0, "");
-	fail_unless(GP_GET_BITS(16, 16, 0x1234) == 0, "");
-	fail_unless(GP_GET_BITS(1, 32, 0x12345678ULL) == 0x091A2B34ULL, "");
+	fail_unless(GP_GET_BITS(15, 7, 0x12345678ULL) == 10);
+	fail_unless(GP_GET_BITS(0, 0, 0x12345678ULL) == 0);
+	fail_unless(GP_GET_BITS(16, 16, 0x1234) == 0);
+	fail_unless(GP_GET_BITS(1, 32, 0x12345678ULL) == 0x091A2B34ULL);
 }
+END_TEST
 
-start_test(set_bits)
+START_TEST(set_bits)
 {
 	uint32_t x = 0x89ABC;
 	uint16_t *y = x; 
 	GP_CLEAR_BITS(15, 4, x);
-	fail_unless(x == 0x818BC, "");
+	fail_unless(x == 0x818BC);
 	GP_SET_BITS_OR(10, x, 0x0000000); 
-	fail_unless(x == 0x818BC, "");
+	fail_unless(x == 0x818BC);
 	GP_SET_BITS(24, 18, x, 0x0F1);
-	fail_unless(x == 0x818BC00F, "");
+	fail_unless(x == 0x818BC00F);
 	GP_SET_BITS(1, 16, *y, 0x100F000);
-	fail_unless(x == 0x200ED00F, "");
+	fail_unless(x == 0x200ED00F);
 }
+END_TEST
 
 Suite *TS_Common(void)
 {
-	Suite *s = create_suita("core-common");
+	Suite *s = suite_create("core-common");
 
 	TCase *tc = tcase_create("Common");
 	tcase_add_test(tc, min_max);

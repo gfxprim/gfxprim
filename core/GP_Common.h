@@ -92,7 +92,7 @@
  * Return (shifted) count bits at offset of value
  * Note: operates with value types same as val 
  */
-#define GP_GET_BITS(offset, count, val) ( ( (val)>>(offset) ) & ( (((typeof(val)1)<<(count)) - 1) ) )
+#define GP_GET_BITS(offset, count, val) ( ( (val)>>(offset) ) & ( ((((typeof(val))1)<<(count)) - 1) ) )
 
 /*
  * Set count bits of dest at ofset to val (shifted by offset)
@@ -110,7 +110,7 @@
 #define GP_SET_BITS_OR(offset, dest, val) ( (dest) |= ((val)<<(offset)) )
 
 #define GP_SET_BITS(offset, count, dest, val) (GP_CLEAR_BITS(offset, count, dest), \
-					       SET_BITS_OR(offset, dest, val) )
+					       GP_SET_BITS_OR(offset, dest, val) )
 
 
 #endif /* GP_COMMON_H */
