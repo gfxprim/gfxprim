@@ -6,7 +6,7 @@ INCLUDE=-I../
 # thuss added here
 CFLAGS=$(INCLUDE) -ggdb -W -Wall -O -std=gnu99
 
-GPTESTS=GP_color_type_test GP_font_save GP_palette_test
+GPTESTS=GP_font_save
 TESTS=$(GPTESTS) core_tests
 
 # General stuff
