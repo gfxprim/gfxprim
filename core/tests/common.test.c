@@ -31,7 +31,7 @@
 START_TEST(min_max)
 {
 	fail_unless(GP_MIN(-1.5, 2) == -1.5);
-	fail_unless(GP_MAX(4294967295ULL, 1LL) == 4294967295ULL);
+	fail_unless(GP_MAX(4294967295ULL, 1ULL) == 4294967295ULL);
 	int x=0, y=0;
 	fail_unless(GP_MAX(x++, ++y) == 1);
 	fail_unless(x == 1 && y == 1);
@@ -50,7 +50,7 @@ END_TEST
 START_TEST(set_bits)
 {
 	uint32_t x = 0x89ABC;
-	uint16_t *y = &x; 
+	uint16_t *y = (uint16_t*) &x; 
 	GP_CLEAR_BITS(3, 4, x);
 	fail_unless(x == 0x89A84);
 	GP_SET_BITS_OR(10, x, 0x0000000); 

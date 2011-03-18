@@ -33,16 +33,18 @@ typedef Suite* (SuiteFactory)(void);
  */
 
 Suite *TS_Common(void);
+Suite *TS_Font(void);
 
 SuiteFactory* suitas[] = {
 	TS_Common,
+	TS_Font,
 	NULL	/* Sentinel */
 };
 
 
 const char usage[] = "Usage:\n%s [-v] [-q]\n";
 
-int main(int argc, char **argv)
+int main(int argc, char *argv[])
 {
 	int verb = CK_NORMAL;
 
@@ -61,8 +63,8 @@ int main(int argc, char **argv)
 		}
 
 	SRunner *sr = srunner_create(NULL);
-	for (SuiteFactory **s = suitas; *s; s++)
-	{
+
+	for (SuiteFactory **s = suitas; *s; s++) {
 		srunner_add_suite(sr, (*s)());
 	}
 	

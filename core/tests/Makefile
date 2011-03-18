@@ -6,8 +6,7 @@ INCLUDE=-I../
 # thuss added here
 CFLAGS=$(INCLUDE) -ggdb -W -Wall -O -std=gnu99
 
-GPTESTS=GP_font_save
-TESTS=$(GPTESTS) core_tests
+TESTS=core_tests
 
 # General stuff
 
@@ -22,12 +21,6 @@ clean:
 run: $(TESTS)
 	for test in $(TESTS); do LD_LIBRARY_PATH=../ ./"$$test" ; done
 
-# Non-check tests
-
-$(GPTESTS): %: %.c
-	$(CC) $(CFLAGS) $(LDFLAGS) $^ $(LIBRARY) -o $@
-
-
 # Check tests
 
 TEST_SRCS=$(wildcard *.test.c)
@@ -35,5 +28,3 @@ TEST_OBJS=$(patsubst %.c,%.o,$(TEST_SRCS))
 
 core_tests: $(TEST_OBJS) core_tests.o
 	 $(CC) $(CFLAGS) $(LDFLAGS) $^ $(LIBRARY) -lcheck -o $@
-	
-
