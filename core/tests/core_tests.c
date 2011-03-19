@@ -16,49 +16,61 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2010 Jiri "BlueBear" Dluhos                            *
- *                         <jiri.bluebear.dluhos@gmail.com>                  *
- *                                                                           *
- * Copyright (C) 2009-2010 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2011 Tomas Gavenciak <gavento@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
-#include "GP_ReadPixel.h"
-
-#include <endian.h>
-#include <stdint.h>
 #include <unistd.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <getopt.h>
+#include <check.h>
 
-inline uint32_t GP_ReadPixel8bpp(void *ptr)
+typedef Suite* (SuiteFactory)(void);
+
+/* 
+ * Declare all the testcase-generating functions here:
+ */
+
+Suite *TS_Common(void);
+Suite *TS_Font(void);
+
+SuiteFactory* suitas[] = {
+	TS_Common,
+	TS_Font,
+	NULL	/* Sentinel */
+};
+
+
+const char usage[] = "Usage:\n%s [-v] [-q]\n";
+
+int main(int argc, char *argv[])
 {
-	return (uint32_t) *((uint8_t *) ptr);
-}
+	int verb = CK_NORMAL;
 
-inline uint32_t GP_ReadPixel16bpp(void *ptr)
-{
-	return (uint32_t) *((uint16_t *) ptr);
-}
+	int opt;	
+	while((opt = getopt(argc, argv, "vq")) >= 0) 
+		switch(opt) {
+			case 'v': 
+				verb = CK_VERBOSE;
+				break;
+			case 'q':
+				verb = CK_SILENT;
+				break;
+			default:
+				fprintf(stderr, usage, argv[0]);
+				return(EXIT_FAILURE);
+		}
 
-inline uint32_t GP_ReadPixel24bpp(void *ptr)
-{
-#if __BYTE_ORDER == __BIG_ENDIAN
+	SRunner *sr = srunner_create(NULL);
 
-	return ((uint32_t) ((uint8_t *) ptr)[0]) << 16
-		| ((uint32_t) ((uint8_t *) ptr)[1]) << 8
-		| ((uint32_t) ((uint8_t *) ptr)[2]);
-
-#elif __BYTE_ORDER == __LITTLE_ENDIAN
-
-	return ((uint32_t) ((uint8_t *) ptr)[0])
-		| ((uint32_t) ((uint8_t *) ptr)[1]) << 8
-		| ((uint32_t) ((uint8_t *) ptr)[2]) << 16;
-
-#else
-#error "Could not detect machine endianity"
-#endif
-}
-
-inline uint32_t GP_ReadPixel32bpp(void *ptr)
-{
-	return *((uint32_t *) ptr);
+	for (SuiteFactory **s = suitas; *s; s++) {
+		srunner_add_suite(sr, (*s)());
+	}
+	
+	srunner_run_all(sr, verb);
+	int number_failed = srunner_ntests_failed(sr);
+	srunner_free(sr);
+	
+	return (number_failed == 0) ? EXIT_SUCCESS : EXIT_FAILURE;
 }
