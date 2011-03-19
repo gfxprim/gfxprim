@@ -24,7 +24,7 @@
  *****************************************************************************/
 
 #include "GP_Clip.h"
-#include "GP_Swap.h"
+#include "GP_Common.h"
 #include "GP_Context.h"
 
 #define DEF_ROTATECW_FN(FN_NAME, CONTEXT_T, PUTPIXEL, GETPIXEL) \

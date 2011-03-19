@@ -95,33 +95,22 @@ void FN_NAME(CONTEXT_T context, int x0, int y0, int x1, int y1, \
 		                Ay, pixval); \
 	} \
 \
-	struct GP_LineTrack AB, AC, BC; \
-	GP_LineTrackInit(&AB, Ax, Ay, Bx, By); \
-	GP_LineTrackInit(&AC, Ax, Ay, Cx, Cy); \
-	GP_LineTrackInit(&BC, Bx, By, Cx, Cy); \
+	float ABstep = (float) (Bx - Ax)/(By - Ay); \
+	float ACstep = (float) (Cx - Ax)/(Cy - Ay); \
+	float BCstep = (float) (Cx - Bx)/(Cy - By); \
 \
-	int y; \
-\
-	/* Draw the top part (between AB and AC) */ \
-	for (y = Ay; y < By; y++) { \
-		GP_LineTrackNext(&AB); \
-		GP_LineTrackNext(&AC); \
-		if (Bx < Ax) { \
-			HLINE(context, AB.xmin, AC.xmax, y, pixval); \
+	int y = Ay; \
+	float ABx = Ax + ABstep; \
+	float ACx = Ax + ACstep; \
+	float BCx = Bx; \
+	for (; y < Cy; y++) { \
+		if (y < By) { \
+			HLINE(context, floorf(ABx), floorf(ACx), y, pixval); \
+			ABx += ABstep; \
 		} else { \
-			HLINE(context, AC.xmin, AB.xmax, y, pixval); \
+			HLINE(context, floorf(BCx), floorf(ACx), y, pixval); \
+			BCx += BCstep; \
 		} \
-	} \
-\
-	/* Draw the bottom part (between BC and AC) */ \
-	for (y = By; y <= Cy; y++) { \
-		GP_LineTrackNext(&BC); \
-		GP_LineTrackNext(&AC); \
-		if (Bx < Ax) { \
-			HLINE(context, BC.xmin, AC.xmax, y, pixval); \
-		} else { \
-			HLINE(context, AC.xmin, BC.xmax, y, pixval); \
-		} \
+		ACx += ACstep; \
 	} \
 }
-

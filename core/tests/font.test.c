@@ -16,21 +16,50 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2010 Jiri "BlueBear" Dluhos                            *
- *                         <jiri.bluebear.dluhos@gmail.com>                  *
- *                                                                           *
- * Copyright (C) 2009-2010 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2011 Tomas Gavenciak <gavento@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
-#ifndef GP_READPIXEL_H
-#define GP_READPIXEL_H
+/*
+ 
+  Font load/save tests.
 
-#include <stdint.h>
+ */
 
-inline uint32_t GP_ReadPixel8bpp(void *ptr);
-inline uint32_t GP_ReadPixel16bpp(void *ptr);
-inline uint32_t GP_ReadPixel24bpp(void *ptr);
-inline uint32_t GP_ReadPixel32bpp(void *ptr);
+#include <stdlib.h>
+#include <string.h>
+#include <check.h>
+#include <GP.h>
 
-#endif /* GP_READPIXEL_H */
+#define FONT_FILE "test_font.tmp"
+
+START_TEST(load_save)
+{
+	GP_Font *loaded;
+	int dd_size, ld_size;
+	
+	fail_unless(GP_FontSave(&GP_default_console_font, FONT_FILE) == GP_ESUCCESS);
+	fail_unless(GP_FontLoad(&loaded, FONT_FILE) == GP_ESUCCESS);
+	
+	dd_size = GP_GetFontDataSize(&GP_default_console_font);
+	ld_size = GP_GetFontDataSize(loaded);
+	
+	fail_unless(dd_size == ld_size);
+	
+	fail_unless(memcmp(GP_default_console_font.data, loaded->data, dd_size) == 0);
+
+	/* cleanup */
+	fail_unless(unlink(FONT_FILE) == 0);
+}
+END_TEST
+
+Suite *TS_Font(void)
+{
+	Suite *s = suite_create("font");
+
+	TCase *tc = tcase_create("Font-load/save");
+	tcase_add_test(tc, load_save);
+	suite_add_tcase(s, tc);
+
+	return s;
+}

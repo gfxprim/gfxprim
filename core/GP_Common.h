@@ -23,16 +23,43 @@
  *                                                                           *
  *****************************************************************************/
 
-#ifndef GP_CHECK_H
-#define GP_CHECK_H
-
-#include "GP_Abort.h"
+#ifndef GP_COMMON_H
+#define GP_COMMON_H
 
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <unistd.h>
 
+/*
+ * Returns a minimum of the two numbers.
+ */
+#define GP_MIN(a, b) ({ \
+	typeof(a) _a = (a); \
+	typeof(b) _b = (b); \
+	_a < _b ? _a : _b; \
+})
+
+/*
+ * Returns a maximum of the two numbers.
+ */
+#define GP_MAX(a, b) ({ \
+	typeof(a) _a = (a); \
+	typeof(b) _b = (b); \
+	_a > _b ? _a : _b; \
+})
+
+/*
+ * Abort and print abort location to stderr
+ */
+#define GP_ABORT(msg) do { \
+		fprintf(stderr, "*** gfxprim: aborted: %s: %s\n", __FUNCTION__, #msg); \
+		abort(); \
+	} while (0)
+
+/*
+ * Perform a runtime check, on failure abort and print a message
+ */
 #define GP_CHECK(cond) do { \
 		if (!(cond)) { \
 			fprintf(stderr, "*** gfxprim: runtime check failed: %s: %s\n", \
@@ -41,4 +68,49 @@
 		} \
 	} while (0)
 
-#endif /* GP_CHECK_H */
+/*
+ * The standard likely() and unlikely() used in Kernel
+ * TODO: Define as no-op for non-GCC compilers
+ */
+#ifndef likely
+#define likely(x)       __builtin_expect((x),1)
+#define unlikely(x)     __builtin_expect((x),0)
+#endif
+
+/*
+ * Swap a and b using an intermediate variable
+ */
+#define GP_SWAP(a, b) do { \
+	typeof(a) tmp = b; \
+	b = a;             \
+	a = tmp;           \
+} while (0)
+
+/*
+ * Helper macros to read/write parts of words 
+ *
+ * Return (shifted) count bits at offset of value
+ * Note: operates with value types same as val 
+ */
+#define GP_GET_BITS(offset, count, val) ( ( (val)>>(offset) ) & ( ((((typeof(val))1)<<(count)) - 1) ) )
+
+/*
+ * Set count bits of dest at ofset to val (shifted by offset)
+ * 
+ * Does not check val for overflow
+ * Operates on 8, 16, and 32 bit values, depending on the type of dest, 
+ * this should be unsigned
+ *
+ * GP_SET_BITS_OR anly sets (|=) the bits, assuming these are clear beforehand
+ * GP_CLEAR_BITS sets the target bits to zero
+ * GP_SET_BITS does both
+ */
+#define GP_CLEAR_BITS(offset, count, dest) ( (dest) &= ~(((((typeof(dest))1) << (count)) - 1) << (offset)) )
+
+#define GP_SET_BITS_OR(offset, dest, val) ( (dest) |= ((val)<<(offset)) )
+
+#define GP_SET_BITS(offset, count, dest, val) (GP_CLEAR_BITS(offset, count, dest), \
+					       GP_SET_BITS_OR(offset, dest, val) )
+
+
+#endif /* GP_COMMON_H */

@@ -27,6 +27,7 @@
 #include "GP_FnPerBpp.h"
 #include "algo/FillTriangle.algo.h"
 
+#include <math.h>
 #include <stdlib.h>
 
 /* Generate drawing functions for various bit depths. */

@@ -16,20 +16,61 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2010 Jiri "BlueBear" Dluhos                            *
- *                         <jiri.bluebear.dluhos@gmail.com>                  *
- *                                                                           *
- * Copyright (C) 2009-2010 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2011 Tomas Gavenciak <gavento@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
-#ifndef GP_SWAP_H
-#define GP_SWAP_H
+#include <unistd.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <getopt.h>
+#include <check.h>
 
-#define GP_SWAP(a, b) do { \
-	typeof(a) tmp = b; \
-	b = a;             \
-	a = tmp;           \
-} while (0)
+typedef Suite* (SuiteFactory)(void);
 
-#endif /* GP_SWAP_H */
+/* 
+ * Declare all the testcase-generating functions here:
+ */
+
+Suite *TS_Common(void);
+Suite *TS_Font(void);
+
+SuiteFactory* suitas[] = {
+	TS_Common,
+	TS_Font,
+	NULL	/* Sentinel */
+};
+
+
+const char usage[] = "Usage:\n%s [-v] [-q]\n";
+
+int main(int argc, char *argv[])
+{
+	int verb = CK_NORMAL;
+
+	int opt;	
+	while((opt = getopt(argc, argv, "vq")) >= 0) 
+		switch(opt) {
+			case 'v': 
+				verb = CK_VERBOSE;
+				break;
+			case 'q':
+				verb = CK_SILENT;
+				break;
+			default:
+				fprintf(stderr, usage, argv[0]);
+				return(EXIT_FAILURE);
+		}
+
+	SRunner *sr = srunner_create(NULL);
+
+	for (SuiteFactory **s = suitas; *s; s++) {
+		srunner_add_suite(sr, (*s)());
+	}
+	
+	srunner_run_all(sr, verb);
+	int number_failed = srunner_ntests_failed(sr);
+	srunner_free(sr);
+	
+	return (number_failed == 0) ? EXIT_SUCCESS : EXIT_FAILURE;
+}
