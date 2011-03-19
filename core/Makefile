@@ -21,7 +21,7 @@ $(LIBRARY).a: $(OBJECTS)
 	ar crus $@ $^
 
 $(LIBRARY).so: $(OBJECTS)
-	$(CC) -fPIC -dPIC --shared -Wl,-soname -Wl,$@.0 $(CFLAGS) $^ -o $@
+	$(CC) -fPIC -dPIC -lm --shared -Wl,-soname -Wl,$@.0 $(CFLAGS) $^ -o $@
 	ln -sf $@ $@.0
 
 %.o: %.c $(ALGORITHMS)
