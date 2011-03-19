@@ -92,7 +92,6 @@ void redraw_screen(void)
 	for (i = 0; i < 30; i++) { 
 		if (line == NULL)
 			break;
-		
 		GP_Text(&context, &style, 16, 16*i + 16, align, line->text, black_pixel);
 		line = line->next;
 	}
@@ -188,12 +187,10 @@ static int read_file_head(const char *filename)
 
 	char buf[512];
 	for (;;) {
-		int retval = fscanf(f, "%511[^\n]\n", buf);
-		if (retval != 1) {
-			break;
-		}
-		buf[511] = '\0';
 
+		if (fgets(buf, 511, f) == NULL)
+			break;
+		
 		struct FileLine *line = malloc(sizeof(*line));
 		line->text = strdup(buf);
 		line->next = NULL;
