@@ -8,9 +8,11 @@ CFLAGS=-W -Wall -O2 -fPIC -I../
 HEADER_LOC=/usr/include/
 LIB_LOC=/usr/lib/
 
-.PHONY: all clean
+.PHONY: all clean tests
 
 all: $(LIBRARY)
+
+tests: $(LIBRARY)
 	cd tests && $(MAKE) all
 
 $(LIBRARY): $(LIBRARY).a $(LIBRARY).so
