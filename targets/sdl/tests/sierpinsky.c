@@ -160,9 +160,11 @@ int main(void)
 					case SDLK_p:
 						paused = !paused;
 					break;
-					default:
+					case SDLK_ESCAPE:
 						SDL_Quit();
 						return 0;
+					break;
+					default:
 					break;
 				}
 			break;
