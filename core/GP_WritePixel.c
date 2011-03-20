@@ -130,10 +130,8 @@ void GP_WritePixels4bpp(uint8_t *start, uint8_t off, size_t cnt, uint8_t val)
 
 void GP_WritePixels8bpp(void *start, size_t count, uint8_t value)
 {
-	uint8_t *p = (uint8_t *) start;
-	uint8_t *end = p + count;
-	for (; p <= end; p++)
-		*p = value;
+	
+	memset(start, value, count);
 }
 
 void GP_WritePixels16bpp(void *start, size_t count, uint16_t value)
