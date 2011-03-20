@@ -227,7 +227,7 @@ int main(int argc, char *argv[])
 	}
 
 	/* Create a window with a software back surface */
-	display = SDL_SetVideoMode(640, 480, 0, SDL_SWSURFACE);
+	display = SDL_SetVideoMode(800, 480, 0, SDL_SWSURFACE);
 	if (display == NULL) {
 		fprintf(stderr, "Could not open display: %s\n", SDL_GetError());
 		goto fail;
