@@ -245,7 +245,7 @@ struct GP_Font GP_default_proportional_font = {
 	.height = 11,
 	.baseline = 2,
 	.bytes_per_line = 1,
-	.max_bounding_width = 8,
+	.max_bounding_width = 9,
 	.data = GP_default_proportional_font_data,
 };
 
