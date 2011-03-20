@@ -99,18 +99,101 @@ void FN_NAME(CONTEXT_T context, int x0, int y0, int x1, int y1, \
 	float ACstep = (float) (Cx - Ax)/(Cy - Ay); \
 	float BCstep = (float) (Cx - Bx)/(Cy - By); \
 \
-	int y = Ay; \
-	float ABx = Ax + ABstep; \
-	float ACx = Ax + ACstep; \
+	int y; \
+	float ABx = Ax; \
+	float ACx = Ax; \
 	float BCx = Bx; \
-	for (; y < Cy; y++) { \
-		if (y < By) { \
-			HLINE(context, floorf(ABx), floorf(ACx), y, pixval); \
-			ABx += ABstep; \
+\
+	if (Bx < Ax) { \
+\
+		/* AB goes left */ \
+		if (Cx < Ax) { \
+\
+			/* both AB and AC go left, A is rightmost */ \
+			if (Bx < Cx) { \
+\
+				/* from left to right: B, C, A */ \
+				for (y = Ay; y < By; y++) { \
+					HLINE(context, floorf(ABx + ABstep), floorf(ACx), y, pixval); \
+					ABx += ABstep; \
+					ACx += ACstep; \
+				} \
+				for (y = By; y < Cy; y++) { \
+					HLINE(context, floorf(BCx), floorf(ACx), y, pixval); \
+					BCx += BCstep; \
+					ACx += ACstep; \
+				} \
+			} else { \
+\
+				/* from left to right: C, B, A */ \
+				for (y = Ay; y < By; y++) { \
+					HLINE(context, floorf(ACx + ACstep), floorf(ABx), y, pixval); \
+					ABx += ABstep; \
+					ACx += ACstep; \
+				} \
+				for (y = By; y < Cy; y++) { \
+					HLINE(context, floorf(ACx + ACstep), floorf(BCx), y, pixval); \
+					BCx += BCstep; \
+					ACx += ACstep; \
+				} \
+			} \
 		} else { \
-			HLINE(context, floorf(BCx), floorf(ACx), y, pixval); \
-			BCx += BCstep; \
+			/* from left to right: B, A, C */ \
+			for (y = Ay; y < By; y++) { \
+				HLINE(context, floorf(ABx + ABstep), floorf(ACx + ACstep), y, pixval); \
+				ABx += ABstep; \
+				ACx += ACstep; \
+			} \
+			for (y = By; y < Cy; y++) { \
+				HLINE(context, floorf(BCx), floorf(ACx + ACstep), y, pixval); \
+				BCx += BCstep; \
+				ACx += ACstep; \
+			} \
 		} \
-		ACx += ACstep; \
+	} else { \
+\
+		/* AB goes right */ \
+		if (Cx > Ax) { \
+\
+			/* both AB and AC go right, A is leftmost */ \
+			if (Bx < Cx) { \
+\
+				/* from left to right: A, B, C */ \
+				for (y = Ay; y < By; y++) { \
+					HLINE(context, floorf(ABx), floorf(ACx + ACstep), y, pixval); \
+					ABx += ABstep; \
+					ACx += ACstep; \
+				} \
+				for (y = By; y < Cy; y++) { \
+					HLINE(context, floorf(BCx), floorf(ACx + ACstep), y, pixval); \
+					BCx += BCstep; \
+					ACx += ACstep; \
+				} \
+			} else { \
+				/* from left to right: A, C, B */ \
+				for (y = Ay; y < By; y++) { \
+					HLINE(context, floorf(ACx), floorf(ABx + ABstep), y, pixval); \
+					ABx += ABstep; \
+					ACx += ACstep; \
+				} \
+				for (y = By; y < Cy; y++) { \
+					HLINE(context, floorf(ACx), floorf(BCx), y, pixval); \
+					BCx += BCstep; \
+					ACx += ACstep; \
+				} \
+			} \
+		} else { \
+			/* from left to right: C, A, B */ \
+			for (y = Ay; y < By; y++) { \
+				HLINE(context, floorf(ACx + ACstep), floorf(ABx + ABstep), y, pixval); \
+				ABx += ABstep; \
+				ACx += ACstep; \
+			} \
+			for (y = By; y < Cy; y++) { \
+				HLINE(context, floorf(ACx + ACstep), floorf(BCx), y, pixval); \
+				BCx += BCstep; \
+				ACx += ACstep; \
+			} \
+		} \
 	} \
 }
