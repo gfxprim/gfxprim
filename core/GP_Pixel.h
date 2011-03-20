@@ -39,13 +39,17 @@ typedef enum GP_PixelType {
 	GP_PIXEL_UNKNOWN = 0,
 
 	/* Palete */
-	GP_PIXEL_PAL4,
+	GP_PIXEL_PAL4_LE,
+	GP_PIXEL_PAL4_BE,
 	GP_PIXEL_PAL8,
 
 	/* Grayscale */
-	GP_PIXEL_G1,
-	GP_PIXEL_G2,
-	GP_PIXEL_G4,
+	GP_PIXEL_G1_LE,
+	GP_PIXEL_G1_BE,
+	GP_PIXEL_G2_LE,
+	GP_PIXEL_G2_BE,
+	GP_PIXEL_G4_LE,
+	GP_PIXEL_G4_BE,
 	GP_PIXEL_G8,
 
 	/* RGB 555 - 15 bits per pixel, 1 bit of padding */
@@ -76,6 +80,15 @@ typedef enum GP_PixelType {
 } GP_PixelType;
 
 typedef uint32_t GP_Pixel;
+
+/* information about ordering of pixels in byte for 1, 2 and 4 bpp */
+/* used in a one bit variable in GP_Context */
+typedef enum { 	
+	/* less significant bits contain pixels with lower indices */ 
+	GP_BIT_ENDIAN_LE = 0,
+	/* more significant bits contain pixels with lower indices */ 
+	GP_BIT_ENDIAN_BE,     
+} GP_BIT_ENDIAN; 
 
 /*
  * Convert pixel type to name.

@@ -92,7 +92,8 @@ GP_RetCode GP_ColorToPixelType(GP_PixelType pixel_type, GP_Color color, GP_Pixel
 	GP_RetCode ret;
 
 	switch (pixel_type) {
-		case GP_PIXEL_PAL4:
+		case GP_PIXEL_PAL4_LE:
+		case GP_PIXEL_PAL4_BE:
 			ret = GP_ColorConvert(&color, GP_PAL4);
 			CHECK_RET(ret);
 			*pixel = color.pal4.index;
@@ -104,19 +105,22 @@ GP_RetCode GP_ColorToPixelType(GP_PixelType pixel_type, GP_Color color, GP_Pixel
 			*pixel = color.pal8.index;
 			return ret;
 		break;
-		case GP_PIXEL_G1:
+		case GP_PIXEL_G1_LE:
+		case GP_PIXEL_G1_BE:
 			ret = GP_ColorConvert(&color, GP_G1);
 			CHECK_RET(ret);
 			*pixel = color.g1.gray;
 			return ret;
 		break;
-		case GP_PIXEL_G2:
+		case GP_PIXEL_G2_LE:
+		case GP_PIXEL_G2_BE:
 			ret = GP_ColorConvert(&color, GP_G2);
 			CHECK_RET(ret);
 			*pixel = color.g2.gray;
 			return ret;
 		break;
-		case GP_PIXEL_G4:
+		case GP_PIXEL_G4_LE:
+		case GP_PIXEL_G4_BE:
 			ret = GP_ColorConvert(&color, GP_G4);
 			CHECK_RET(ret);
 			*pixel = color.g4.gray;
