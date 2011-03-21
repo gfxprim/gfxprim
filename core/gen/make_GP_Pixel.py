@@ -62,5 +62,6 @@ gen_footers(h, c)
 
 ## Write out!
 
-main_write(h, c)
+if __name__ == '__main__':
+    main_write(h, c)
 

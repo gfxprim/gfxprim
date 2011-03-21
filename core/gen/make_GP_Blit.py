@@ -13,10 +13,10 @@ c = []
 ## Headers
 
 gen_headers(h, c, 
-	descr = "specialized blit functions and macros", 
-	authors = ["2011 - Tomas Gavenciak <gavento@ucw.cz>"],
-	generator = __file__,
-	hdef = "GP_PIXEL_BLIT_GEN_H")
+  descr = "specialized blit functions and macros", 
+  authors = ["2011 - Tomas Gavenciak <gavento@ucw.cz>"],
+  generator = __file__,
+  hdef = "GP_PIXEL_BLIT_GEN_H")
 
 c.append('#include <stdio.h>\n')
 c.append('#include "GP_Pixel.h"\n')
@@ -24,7 +24,7 @@ c.append('#include "GP_Context.h"\n')
 c.append('#include "GP_Blit.gen.h"\n')
 
 for bpp in bitsizes:
-	gen_blit_same_t(bpp, h, c)
+  gen_blit_same_t(bpp, h, c)
 
 ## Close the files
 
@@ -32,5 +32,6 @@ gen_footers(h, c)
 
 ## Write out!
 
-main_write(h, c)
+if __name__ == '__main__':
+  main_write(h, c)
 
