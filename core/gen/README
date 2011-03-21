@@ -4,7 +4,7 @@ Generated code overview
 GP_Pixel.gen.[ch]
 ~~~~~~~~~~~~~~~~~
 
-PixelType enum:
+.PixelType enum:
 
 [source,c]
 --------------------------------------------------------------------------------
@@ -15,7 +15,7 @@ typedef enum GP_PixelType {
 } GP_PixelType;
 --------------------------------------------------------------------------------
 
-For each pixel type TYPE and each channel CHAN:
+.For each pixel type TYPE and each channel CHAN:
 
 [source,c]
 --------------------------------------------------------------------------------
@@ -24,7 +24,7 @@ void GP_Pixel_Print_<TYPE>(GP_Pixel p);
 #define GP_Pixel_GET_<CHAN>_<TYPE>(p) 
 --------------------------------------------------------------------------------
 
-For each pixel type TYPE, pixel adress and bit-offset:
+.For each pixel type TYPE, pixel adress and bit-offset:
 
 [source,c]
 --------------------------------------------------------------------------------
@@ -32,7 +32,7 @@ GP_PIXEL_ADDR_<TYPE>(context, x, y)
 GP_PIXEL_ADDR_OFFSET_<TYPE>(x)
 --------------------------------------------------------------------------------
 
-Pixel-type conversions (not every pair), with and without bit-offsets:
+.Pixel-type conversions (not every pair), with and without bit-offsets:
 
 [source,c]
 --------------------------------------------------------------------------------
@@ -40,7 +40,7 @@ Pixel-type conversions (not every pair), with and without bit-offsets:
 #define GP_Pixel_<TYPE1>_TO_<TYPE2>(p1, p2)
 --------------------------------------------------------------------------------
 
-Pixel type description structure:
+.Pixel type description structure:
 
 [source,c]
 --------------------------------------------------------------------------------
@@ -56,7 +56,8 @@ const GP_PixelTypeDescription const GP_PixelTypes [] = {
         } },
 --------------------------------------------------------------------------------
 
-Blits, not transforming coordinates
+.Blits, not transforming coordinates
+
 Assumes the contexts are of the proper pixel-types and also sizes
 
 [source,c]
@@ -68,15 +69,7 @@ inline void GP_Blit_Line_<TYPE1>_<TYPE2>(const GP_Context *c1, int x1, int y2, i
 GP_Pixel_Scale.gen.h
 ~~~~~~~~~~~~~~~~~~~~
 
-Macros to read, add (|=) and set bits.
-
-[source,c]
---------------------------------------------------------------------------------
-#define GP_GET_BITS(offset, bits, val) 
-#define GP_OR_BITS(offset, or, val) 
---------------------------------------------------------------------------------
-
-For all bit-sizes of values in (1, 2, 4, 8). Plus auxiliary macro.
+.For all bit-sizes of values in (1, 2, 4, 8). Plus auxiliary macro.
 
 [source,c]
 --------------------------------------------------------------------------------
@@ -84,16 +77,19 @@ For all bit-sizes of values in (1, 2, 4, 8). Plus auxiliary macro.
 #define GP_SCALE_VAL(s1, s2, val) ( GP_SCALE_VAL_##s1##_##s2(val) )
 --------------------------------------------------------------------------------
 
-GP_Pixel_Blit.gen.[ch]
+GP_Blit.gen.[ch]
 ~~~~~~~~~~~~~~~~~~~~~~
 
-Blitting magic
+TODO: Blitting magic 
 
-Blits for the same types (just bpp)
+.Blits within PixelTypes (defined only by bpp):
 
-NOTE: bit mis-aligned blits are treated by TYPE to TYPE conversion
-NOTE: <8bpp blits for small widths nonoptimal (checking only 8bits for safety, more via memcpy())
+NOTE: sub-byte-bpp blits that are bit-misaligned are treated by more generic TYPE to TYPE conversion
+NOTE: sub-byte-bpp blits for small widths are nonoptimal (checking only 8bits for safety, more via memcpy())
 
 [source,c]
 --------------------------------------------------------------------------------
-void GP_Blit_<SIZE>bpp(c1, x1, y1, w, h, c2, x2, y2);
+void GP_Blit_<SIZE>bpp(const GP_Context *c1, int x1, int y1, int w, int h,
+		       const GP_Context *c2, int x2, int y2);
+--------------------------------------------------------------------------------
+
