@@ -7,7 +7,7 @@ from gen_utils import *
 ## all generated direct blits, for generating GP_Blit() and others
 generated_blits = []
 
-
+# TODO: adapt for both bit-endianness
 # WARN: assuming little-endian in sub-byte pixels order (probably)
 def gen_blit_same_t(size, header, code):
   "Generate a function blitting the same type of pixel"

@@ -22,11 +22,16 @@ channels = set()
 ## Allowed bit-sizes of pixels
 bitsizes = [1,2,4,8,16,24,32]
 
+## bit_endian values
+bit_endians = ['LE', 'BE']
+
+
 class PixelType(object):
   """Representation of one GP_PixelType"""
-  def __init__(self, name, size, chanslist, number=None):
+  def __init__(self, name, size, chanslist, number=None, bit_endian=None):
     """`name` must be a valid C identifier
     `size` is in bits, allowed are 1, 2, 4, 8, 16, 24, 32
+    `bit_endian` is order of 1,2,4bpp pixels in a byte, either 'BE' or 'LE'
     `chanslist` is a list of triplets describing individual channels as 
      [ (`chan_name`, `bit_offset`, `bit_size`) ]
      `chan_name` is usually one of: R, G, B, V (value, used for grayscale), A (opacity) 
@@ -40,6 +45,13 @@ class PixelType(object):
     if number is not 0:
       assert(size in bitsizes) 
     self.size = size
+
+    # bit_endian matters only for 1,2,4bpp
+    if size>=8 and bit_endian is None:
+      bit_endian = bit_endians[0]
+    assert bit_endian in bit_endians
+    self.bit_endian = bit_endian
+
     # Numbering from 1 
     if number is not None:
       self.number = number
@@ -65,4 +77,4 @@ class PixelType(object):
     return "<PixelType " + self.name + ">"
 
 if 0 not in pixeltypes:
-  PixelType("UNKNOWN", 0, [], number=0)
+  PixelType("UNKNOWN", 0, [], bit_endian=bit_endians[0], number=0)

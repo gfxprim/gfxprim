@@ -13,10 +13,10 @@ c = []
 ## Headers
 
 gen_headers(h, c, 
-	descr = "pixel type definitions and functions", 
-	authors = ["2011 - Tomas Gavenciak <gavento@ucw.cz>"],
-	generator = __file__,
-	hdef = "GP_PIXEL_GEN_H")
+  descr = "pixel type definitions and functions", 
+  authors = ["2011 - Tomas Gavenciak <gavento@ucw.cz>"],
+  generator = __file__,
+  hdef = "GP_PIXEL_GEN_H")
 
 c.append('#include <stdio.h>\n')
 c.append('#include "GP_Pixel.h"\n')
@@ -32,19 +32,23 @@ gen_GP_PixelTypes(h, c)
 ## List of types
 
 for t in pixeltypes.values():
-	if t.name != 'UNKNOWN':
-		h.append(str_start(t))
-		h.append(str_description(t))
-		c.append(str_start(t))
-		c.append(str_description(t))
+  if t.name != 'UNKNOWN':
+    h.append(str_start(t))
+    h.append(str_description(t))
+    c.append(str_start(t))
+    c.append(str_description(t))
 
-		gen_print(t, h, c)
-		gen_get_chs(t, h, c)
-		gen_get_pixel_addr(t, h, c)
+    gen_print(t, h, c)
+    gen_get_chs(t, h, c)
+    gen_get_pixel_addr(t, h, c)
 
 # Per-bpp macros
 for bpp in bitsizes:
-	gen_get_pixel_addr_bpp(bpp, h, c)
+  if bpp>=8:
+    gen_get_pixel_addr_bpp(bpp, 'LE', h, c)
+  else: # bit_endian matters
+    for be in bit_endians:
+      gen_get_pixel_addr_bpp(bpp, be, h, c)
 
 ## Conversion macros
 
