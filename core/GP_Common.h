@@ -53,7 +53,8 @@
  * Abort and print abort location to stderr
  */
 #define GP_ABORT(msg) do { \
-		fprintf(stderr, "*** gfxprim: aborted: %s: %s\n", __FUNCTION__, #msg); \
+		fprintf(stderr, "*** gfxprim: aborted: %s:%d: in %s: %s\n", \
+				__FILE__, __LINE__, __FUNCTION__, #msg); \
 		abort(); \
 	} while (0)
 
@@ -62,8 +63,8 @@
  */
 #define GP_CHECK(cond) do { \
 		if (!(cond)) { \
-			fprintf(stderr, "*** gfxprim: runtime check failed: %s: %s\n", \
-				__FUNCTION__, #cond); \
+			fprintf(stderr, "*** gfxprim: check failed: %s:%d: in %s: %s\n", \
+				__FILE__, __LINE__, __FUNCTION__, #cond); \
 			abort(); \
 		} \
 	} while (0)
@@ -112,5 +113,13 @@
 #define GP_SET_BITS(offset, count, dest, val) (GP_CLEAR_BITS(offset, count, dest), \
 					       GP_SET_BITS_OR(offset, dest, val) )
 
+
+/* Determines the sign of the integer value; it is +1 if value is positive,
+ * -1 if negative, and 0 if it is zero.
+ */
+#define GP_SIGN(a) ({ \
+	typeof(a) _a = a; \
+	(_a > 0) ? 1 : ((_a < 0) ? -1 : 0); \
+})
 
 #endif /* GP_COMMON_H */
