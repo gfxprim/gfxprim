@@ -95,105 +95,74 @@ void FN_NAME(CONTEXT_T context, int x0, int y0, int x1, int y1, \
 		                Ay, pixval); \
 	} \
 \
-	float ABstep = (float) (Bx - Ax)/(By - Ay); \
-	float ACstep = (float) (Cx - Ax)/(Cy - Ay); \
-	float BCstep = (float) (Cx - Bx)/(Cy - By); \
-\
+	const int ABdx = abs(Bx - Ax); \
+	const int ABsx = GP_SIGN(Bx - Ax); \
+	const int ABdy = abs(By - Ay); \
+	const int ABsy = GP_SIGN(By - Ay); \
+	const int ACdx = abs(Cx - Ax); \
+	const int ACsx = GP_SIGN(Cx - Ax); \
+	const int ACdy = abs(Cy - Ay); \
+	const int ACsy = GP_SIGN(Cy - Ay); \
+	const int BCdx = abs(Cx - Bx); \
+	const int BCsx = GP_SIGN(Cx - Bx); \
+	const int BCdy = abs(Cy - By); \
+	const int BCsy = GP_SIGN(Cy - By); \
+	int ABerr = 0, ACerr = 0, BCerr = 0; \
+	int ABx = Ax, ACx = Ax, BCx = Bx; \
 	int y; \
-	float ABx = Ax; \
-	float ACx = Ax; \
-	float BCx = Bx; \
 \
-	if (Bx < Ax) { \
+	if (ABdy == 0) \
+		goto bottom_part; \
 \
-		/* AB goes left */ \
-		if (Cx < Ax) { \
-\
-			/* both AB and AC go left, A is rightmost */ \
-			if (Bx < Cx) { \
-\
-				/* from left to right: B, C, A */ \
-				for (y = Ay; y < By; y++) { \
-					HLINE(context, floorf(ABx + ABstep), floorf(ACx), y, pixval); \
-					ABx += ABstep; \
-					ACx += ACstep; \
-				} \
-				for (y = By; y < Cy; y++) { \
-					HLINE(context, floorf(BCx), floorf(ACx), y, pixval); \
-					BCx += BCstep; \
-					ACx += ACstep; \
-				} \
-			} else { \
-\
-				/* from left to right: C, B, A */ \
-				for (y = Ay; y < By; y++) { \
-					HLINE(context, floorf(ACx + ACstep), floorf(ABx), y, pixval); \
-					ABx += ABstep; \
-					ACx += ACstep; \
-				} \
-				for (y = By; y < Cy; y++) { \
-					HLINE(context, floorf(ACx + ACstep), floorf(BCx), y, pixval); \
-					BCx += BCstep; \
-					ACx += ACstep; \
-				} \
+	for (y = Ay; y < By; y++) { \
+		for (;;) { \
+			PUTPIXEL(context, ABx, y, pixval); \
+			if (ABerr >= ABdx) { \
+				ABerr -= ABdx; \
+				break; \
 			} \
-		} else { \
-			/* from left to right: B, A, C */ \
-			for (y = Ay; y < By; y++) { \
-				HLINE(context, floorf(ABx + ABstep), floorf(ACx + ACstep), y, pixval); \
-				ABx += ABstep; \
-				ACx += ACstep; \
-			} \
-			for (y = By; y < Cy; y++) { \
-				HLINE(context, floorf(BCx), floorf(ACx + ACstep), y, pixval); \
-				BCx += BCstep; \
-				ACx += ACstep; \
-			} \
+			ABx += ABsx; \
+			ABerr += ABdy; \
 		} \
-	} else { \
-\
-		/* AB goes right */ \
-		if (Cx > Ax) { \
-\
-			/* both AB and AC go right, A is leftmost */ \
-			if (Bx < Cx) { \
-\
-				/* from left to right: A, B, C */ \
-				for (y = Ay; y < By; y++) { \
-					HLINE(context, floorf(ABx), floorf(ACx + ACstep), y, pixval); \
-					ABx += ABstep; \
-					ACx += ACstep; \
-				} \
-				for (y = By; y < Cy; y++) { \
-					HLINE(context, floorf(BCx), floorf(ACx + ACstep), y, pixval); \
-					BCx += BCstep; \
-					ACx += ACstep; \
-				} \
-			} else { \
-				/* from left to right: A, C, B */ \
-				for (y = Ay; y < By; y++) { \
-					HLINE(context, floorf(ACx), floorf(ABx + ABstep), y, pixval); \
-					ABx += ABstep; \
-					ACx += ACstep; \
-				} \
-				for (y = By; y < Cy; y++) { \
-					HLINE(context, floorf(ACx), floorf(BCx), y, pixval); \
-					BCx += BCstep; \
-					ACx += ACstep; \
-				} \
+		for (;;) { \
+			PUTPIXEL(context, ACx, y, pixval); \
+			if (ACerr >= ACdx) { \
+				ACerr -= ACdx; \
+				break; \
 			} \
-		} else { \
-			/* from left to right: C, A, B */ \
-			for (y = Ay; y < By; y++) { \
-				HLINE(context, floorf(ACx + ACstep), floorf(ABx + ABstep), y, pixval); \
-				ABx += ABstep; \
-				ACx += ACstep; \
-			} \
-			for (y = By; y < Cy; y++) { \
-				HLINE(context, floorf(ACx + ACstep), floorf(BCx), y, pixval); \
-				BCx += BCstep; \
-				ACx += ACstep; \
-			} \
+			ACx += ACsx; \
+			ACerr += ACdy; \
 		} \
+		HLINE(context, ABx, ACx, y, pixval); \
 	} \
+\
+bottom_part: \
+\
+	if (BCdy == 0) \
+		goto end; \
+\
+	for (y = By; y < Cy; y++) { \
+		for (;;) { \
+			PUTPIXEL(context, BCx, y, pixval); \
+			if (BCerr >= BCdx) { \
+				BCerr -= BCdx; \
+				break; \
+			} \
+			BCx += BCsx; \
+			BCerr += BCdy; \
+		} \
+		for (;;) { \
+			PUTPIXEL(context, ACx, y, pixval); \
+			if (ACerr >= ACdx) { \
+				ACerr -= ACdx; \
+				break; \
+			} \
+			ACx += ACsx; \
+			ACerr += ACdy; \
+		} \
+		HLINE(context, BCx, ACx, y, pixval); \
+	} \
+\
+end: \
+	return; \
 }
