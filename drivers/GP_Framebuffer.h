@@ -31,7 +31,10 @@
 typedef struct GP_Framebuffer {
 	GP_Context context;
 	uint32_t bsize;
-	int fd;
+	int con_fd;
+	int con_nr;
+	int last_con_nr;
+	int fb_fd;
 	char path[];
 } GP_Framebuffer;
 

@@ -128,6 +128,12 @@ GP_RetCode GP_ColorToPixelType(GP_PixelType pixel_type, GP_Color color, GP_Pixel
 			*pixel = color.g8.gray;
 			return ret;
 		break;
+		case GP_PIXEL_RGB565:
+			ret = GP_ColorConvert(&color, GP_RGB565);
+			CHECK_RET(ret);
+			*pixel = color.rgb565.red   << 0x0b |
+			         color.rgb565.green << 0x05 |
+			         color.rgb565.blue;
 		case GP_PIXEL_RGB888:
 		case GP_PIXEL_XRGB8888:
 			ret = GP_ColorConvert(&color, GP_RGB888);
