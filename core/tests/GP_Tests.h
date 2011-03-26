@@ -20,59 +20,36 @@
  *                                                                           *
  *****************************************************************************/
 
-#include <unistd.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <getopt.h>
 #include <check.h>
 
-typedef Suite* (SuiteFactory)(void);
-
-/* 
- * Declare all the manualy created Suite-generating functions here:
+/*
+ * Helper macro to allow auto-generation of test-cases and suites.
+ * Searched for by find_tests.py.
+ *
+ * Use alone on a line as
+ *   GP_TEST(testname) 
+ * or
+ *   GP_TEST(testname, "foo=1, bar='baz'")
+ * The optional string is passed as parameters to Python dict() as parameters
+ * for the testcase-generator.
+ * Currently, the following parameters are recognized:
+ *  suite -- name of the suite
+ *
+ * Do NOT use parameters: name, fname, line
  */
 
-SuiteFactory* manual_suites[] = {
-	NULL	/* Sentinel */
-};
+#define GP_TEST(name, ...) static void name(int);\
+			   void GP_TEST_##name(int i) {name(i);} \
+			    START_TEST(name)
 
 /*
- * Generated function creating and adding all the suites
+ * Helper macro to allow auto-generation of suites. 
+ * Defines suite from this point until EOF or redefinition.
+ * Searched for by find_tests.py
+ *
+ * Use alone on a line as
+ *   GP_SUITE(suitename) 
  */
 
-void GP_AddSuitesToSRunner(SRunner *sr);
+#define GP_SUITE(name, ...)
 
-
-const char usage[] = "Usage:\n%s [-v] [-q]\n";
-
-int main(int argc, char *argv[])
-{
-	int verb = CK_NORMAL;
-
-	int opt;	
-	while((opt = getopt(argc, argv, "vq")) >= 0) 
-		switch(opt) {
-			case 'v': 
-				verb = CK_VERBOSE;
-				break;
-			case 'q':
-				verb = CK_SILENT;
-				break;
-			default:
-				fprintf(stderr, usage, argv[0]);
-				return(EXIT_FAILURE);
-		}
-
-	SRunner *sr = srunner_create(NULL);
-
-	for (SuiteFactory **s = manual_suites; *s; s++) {
-		srunner_add_suite(sr, (*s)());
-	}
-	GP_AddSuitesToSRunner(sr);
-	
-	srunner_run_all(sr, verb);
-	int number_failed = srunner_ntests_failed(sr);
-	srunner_free(sr);
-	
-	return (number_failed == 0) ? EXIT_SUCCESS : EXIT_FAILURE;
-}
