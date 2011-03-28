@@ -28,12 +28,15 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include <check.h>
 #include <GP.h>
+
+#include "GP_Tests.h"
 
 #define FONT_FILE "test_font.tmp"
 
-START_TEST(load_save)
+GP_SUITE(font)
+
+GP_TEST(load_save)
 {
 	GP_Font *loaded;
 	int dd_size, ld_size;
@@ -53,13 +56,3 @@ START_TEST(load_save)
 }
 END_TEST
 
-Suite *TS_Font(void)
-{
-	Suite *s = suite_create("font");
-
-	TCase *tc = tcase_create("Font-load/save");
-	tcase_add_test(tc, load_save);
-	suite_add_tcase(s, tc);
-
-	return s;
-}

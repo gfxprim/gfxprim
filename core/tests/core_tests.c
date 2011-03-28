@@ -29,17 +29,18 @@
 typedef Suite* (SuiteFactory)(void);
 
 /* 
- * Declare all the testcase-generating functions here:
+ * Declare all the manualy created Suite-generating functions here:
  */
 
-Suite *TS_Common(void);
-Suite *TS_Font(void);
-
-SuiteFactory* suitas[] = {
-	TS_Common,
-	TS_Font,
+SuiteFactory* manual_suites[] = {
 	NULL	/* Sentinel */
 };
+
+/*
+ * Generated function creating and adding all the suites
+ */
+
+void GP_AddSuitesToSRunner(SRunner *sr);
 
 
 const char usage[] = "Usage:\n%s [-v] [-q]\n";
@@ -64,9 +65,10 @@ int main(int argc, char *argv[])
 
 	SRunner *sr = srunner_create(NULL);
 
-	for (SuiteFactory **s = suitas; *s; s++) {
+	for (SuiteFactory **s = manual_suites; *s; s++) {
 		srunner_add_suite(sr, (*s)());
 	}
+	GP_AddSuitesToSRunner(sr);
 	
 	srunner_run_all(sr, verb);
 	int number_failed = srunner_ntests_failed(sr);

@@ -16,36 +16,40 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2010 Jiri "BlueBear" Dluhos                            *
- *                         <jiri.bluebear.dluhos@gmail.com>                  *
- *                                                                           *
- * Copyright (C) 2009-2010 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2011 Tomas Gavenciak <gavento@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
-#ifndef GP_FRAMEBUFFER_H
-#define GP_FRAMEBUFFER_H
-
-#include "GP_Context.h"
-
-typedef struct GP_Framebuffer {
-	GP_Context context;
-	uint32_t bsize;
-	int con_fd;
-	int con_nr;
-	int last_con_nr;
-	int fb_fd;
-	char path[];
-} GP_Framebuffer;
+#include <check.h>
 
 /*
- * Initalize framebuffer.
+ * Helper macro to allow auto-generation of test-cases and suites.
+ * Searched for by find_tests.py.
+ *
+ * Use alone on a line as
+ *   GP_TEST(testname) 
+ * or
+ *   GP_TEST(testname, "foo=1, bar='baz'")
+ * The optional string is passed as parameters to Python dict() as parameters
+ * for the testcase-generator.
+ * Currently, the following parameters are recognized:
+ *  suite -- name of the suite
+ *
+ * Do NOT use parameters: name, fname, line
  */
-GP_Framebuffer *GP_FramebufferInit(const char *path);
+
+#define GP_TEST(name, ...) static void name(int);\
+			   void GP_TEST_##name(int i) {name(i);} \
+			    START_TEST(name)
 
 /*
- * Deinitalize framebuffer.
+ * Helper macro to allow auto-generation of suites. 
+ * Defines suite from this point until EOF or redefinition.
+ * Searched for by find_tests.py
+ *
+ * Use alone on a line as
+ *   GP_SUITE(suitename) 
  */
-void GP_FramebufferExit(GP_Framebuffer *fb);
 
-#endif /* GP_FRAMEBUFFER_H */
+#define GP_SUITE(name, ...)
+

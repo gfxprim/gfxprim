@@ -20,15 +20,17 @@
  *                                                                           *
  *****************************************************************************/
 
-#include <stdlib.h>
-#include <check.h>
+#include "GP_Tests.h"
+
 #include <GP_Common.h>
 
 /*
- * Demo ("testing" ;-) tests
+ * Demo ("testing" ;-) tests for GP_Common.h
  */
 
-START_TEST(min_max)
+GP_SUITE(GP_Common) 
+
+GP_TEST(min_max)
 {
 	fail_unless(GP_MIN(-1.5, 2) == -1.5);
 	fail_unless(GP_MAX(4294967295ULL, 1ULL) == 4294967295ULL);
@@ -38,7 +40,7 @@ START_TEST(min_max)
 }
 END_TEST
 
-START_TEST(get_bits)
+GP_TEST(get_bits)
 {
 	fail_unless(GP_GET_BITS(15, 7, 0x12345678ULL) == 0x68);
 	fail_unless(GP_GET_BITS(0, 0, 0x12345678ULL) == 0);
@@ -47,7 +49,7 @@ START_TEST(get_bits)
 }
 END_TEST
 
-START_TEST(set_bits)
+GP_TEST(set_bits)
 {
 	uint32_t x = 0x89ABC;
 	uint16_t *y = (uint16_t*) &x; 
@@ -58,20 +60,7 @@ START_TEST(set_bits)
 	GP_SET_BITS(24, 18, x, 0x42F1); 
 	fail_unless(x == 0xF1089A84);
 	/* Check that only uint16_t is affected */
-	GP_SET_BITS(0, 24, *y, 0x100F000); 
+	GP_SET_BITS(0, 24, *y, 0x100F000LL); 
 	fail_unless(x == 0xF108F000);
 }
 END_TEST
-
-Suite *TS_Common(void)
-{
-	Suite *s = suite_create("core-common");
-
-	TCase *tc = tcase_create("Common");
-	tcase_add_test(tc, min_max);
-	tcase_add_test(tc, get_bits);
-	tcase_add_test(tc, set_bits);
-	suite_add_tcase(s, tc);
-
-	return s;
-}
