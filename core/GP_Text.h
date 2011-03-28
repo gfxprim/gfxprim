@@ -45,4 +45,12 @@ GP_RetCode GP_Text(GP_Context *context, const GP_TextStyle *style,
 GP_RetCode GP_TText(GP_Context *context, const GP_TextStyle *style,
                     int x, int y, int align, const char *str, GP_Pixel pixel);
 
+GP_RetCode GP_BoxCenteredText(GP_Context *context, const GP_TextStyle *style,
+			      int x, int y, int w, int h, const char *str,
+			      GP_Pixel pixel);
+
+GP_RetCode GP_TBoxCenteredText(GP_Context *context, const GP_TextStyle *style,
+			      int x, int y, int w, int h, const char *str,
+			      GP_Pixel pixel);
+
 #endif /* GP_TEXT_H */
