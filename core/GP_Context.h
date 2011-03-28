@@ -125,4 +125,33 @@ void GP_ContextFree(GP_Context *context);
  */
 GP_RetCode GP_ContextDump(GP_Context *context, const char *path);
 
+/*
+ * Returns context width and height. 
+ */
+static inline uint32_t GP_ContextW(GP_Context *context)
+{
+	return context->w;
+}
+
+static inline uint32_t GP_ContextH(GP_Context *context)
+{
+	return context->h;
+}
+
+static inline uint32_t GP_TContextW(GP_Context *context)
+{
+	if (context->axes_swap)
+		return context->h;
+	else
+		return context->w;
+}
+
+static inline uint32_t GP_TContextH(GP_Context *context)
+{
+	if (context->axes_swap)
+		return context->w;
+	else
+		return context->h;
+}
+
 #endif /* GP_CONTEXT_H */
