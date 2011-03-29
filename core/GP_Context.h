@@ -126,6 +126,12 @@ void GP_ContextFree(GP_Context *context);
 GP_RetCode GP_ContextDump(GP_Context *context, const char *path);
 
 /*
+ * Rotates context flags.
+ */
+void GP_ContextFlagsRotateCW(GP_Context *context);
+void GP_ContextFlagsRotateCCW(GP_Context *context);
+
+/*
  * Returns context width and height. 
  */
 static inline uint32_t GP_ContextW(GP_Context *context)

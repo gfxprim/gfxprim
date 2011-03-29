@@ -132,10 +132,78 @@ GP_RetCode GP_ContextDump(GP_Context *context, const char *path)
 
 	for (y = 0; y < context->h; y++) {
 		for (x = 0; x < context->bytes_per_row; x++)
-			fprintf(f, "0x%02x ", ((uint8_t *)context->pixels)[y * context->bytes_per_row + x]);
+			fprintf(f, "0x%02x ", ((uint8_t *)context->pixels)
+			                       [y * context->bytes_per_row + x]);
 		fprintf(f, "\n");
 	}
 
 	fclose(f);
 	return GP_ESUCCESS;
+}
+
+/*
+ * The context rotations consists of two cyclic permutation groups that are
+ * mirrored.
+ *
+ * The flags change as follows:
+ *
+ * One group:
+ *
+ * x_swap y_swap axes_swap
+ *      0      0         0
+ *      1      0         1
+ *      1      1         0
+ *      0      1         1
+ *
+ * And mirrored group:
+ *
+ * x_swap y_swap axes_swap
+ *      0      0         1
+ *      1      0         0
+ *      1      1         1
+ *      0      1         0
+ *
+ */
+void GP_ContextFlagsRotateCW(GP_Context *context)
+{
+	context->axes_swap = !context->axes_swap;
+
+	if (!context->x_swap && !context->y_swap) {
+		context->x_swap = 1;
+		return;
+	}
+	
+	if (context->x_swap && !context->y_swap) {
+		context->y_swap = 1;
+		return;
+	}
+	
+	if (context->x_swap && context->y_swap) {
+		context->x_swap = 0;
+		return;
+	}
+
+	context->y_swap  = 0;
+}
+
+void GP_ContextFlagsRotateCCW(GP_Context *context)
+{
+	context->axes_swap = !context->axes_swap;
+
+	if (!context->x_swap && !context->y_swap) {
+		context->y_swap = 1;
+		return;
+	}
+	
+	if (context->x_swap && !context->y_swap) {
+		context->x_swap = 0;
+		return;
+	}
+	
+	if (context->x_swap && context->y_swap) {
+		context->y_swap = 0;
+		return;
+	}
+
+	context->x_swap  = 1;
 }
