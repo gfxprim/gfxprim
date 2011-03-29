@@ -65,7 +65,7 @@ void redraw_screen(void)
 	style.pixel_xspace = 4;
 	style.pixel_yspace = 4;
 
-	GP_TText(&context, &style, xcenter, ycenter, GP_ALIGN_CENTER|GP_VALIGN_CENTER,
+	GP_TBoxCenteredText(&context, &style, 0, 0, 640, 480,
 	         "Hello world!", darkgray_pixel);
 
 	style.pixel_xspace = 0;

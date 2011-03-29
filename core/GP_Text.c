@@ -156,7 +156,7 @@ GP_RetCode GP_BoxCenteredText(GP_Context *context, const GP_TextStyle *style,
 
 	const int mid_x = x + w/2;
 	const int mid_y = y + h/2;
-	const int font_ascent = style->font->height - style->font->baseline;
+	const int font_ascent = GP_TextAscent(style);
 
 	return GP_Text(context, style, mid_x,
 		mid_y + font_ascent/2,
@@ -180,7 +180,7 @@ GP_RetCode GP_TBoxCenteredText(GP_Context *context, const GP_TextStyle *style,
 
 	const int mid_x = x + w/2;
 	const int mid_y = y + h/2;
-	const int font_ascent = style->font->height - style->font->baseline;
+	const int font_ascent = GP_TextAscent(style);
 
 	return GP_TText(context, style, mid_x,
 		mid_y + font_ascent/2,
