@@ -139,7 +139,7 @@ GP_RetCode GP_FontLoad(GP_Font **pfont, const char *filename)
 
 	/* check file magic and version */
 	int format_vmajor, format_vminor;
-	retval = fscanf(f, GP_FONT_MAGIC "\nFORMAT_VERSION %d.%d\n",
+	retval = fscanf(f, GP_FONT_MAGIC "\nFORMAT_VERSION %d.%d%*[\n]",
 		&format_vmajor, &format_vminor);
 	if (retval != 2) {
 		fprintf(stderr, "gfxprim: error loading font: bad magic or version\n");
@@ -148,16 +148,19 @@ GP_RetCode GP_FontLoad(GP_Font **pfont, const char *filename)
 	}
 
 	/* read the header and fill the font metadata */
-	retval = fscanf(f, "FAMILY %63[a-zA-Z0-9_ ]\nNAME %63[a-zA-Z0-9_ ]\nAUTHOR %63[a-zA-Z0-9_ ]\n",
-		font->family, font->name, font->author);
+	retval = fscanf(f, "FAMILY %63[a-zA-Z0-9_ ]%*[\n]"
+			"NAME %63[a-zA-Z0-9_ ]%*[\n]"
+			"AUTHOR %63[a-zA-Z0-9_ ]%*[\n]",
+			font->family, font->name, font->author);
 	if (retval != 3) {
 		fprintf(stderr, "gfxprim: error loading font: bad family, name, or author\n");
 		result = GP_EBADFILE;
 		goto bad;
 	}
 
-	retval = fscanf(f, "LICENSE %15s\nVERSION %u\n",
-		font->license, &font->version);
+	retval = fscanf(f, "LICENSE %15s%*[\n]"
+			"VERSION %u%*[\n]",
+			font->license, &font->version);
 	if (retval != 2) {
 		if (retval == 0)
 			fprintf(stderr, "gfxprim: error loading font: bad license string\n");
@@ -167,7 +170,7 @@ GP_RetCode GP_FontLoad(GP_Font **pfont, const char *filename)
 		goto bad;
 	}
 	
-	retval = fscanf(f, "GEOMETRY %hhu %hhu %hhu %hhu %hhu\n",
+	retval = fscanf(f, "GEOMETRY %hhu %hhu %hhu %hhu %hhu%*[\n]",
 		&font->charset, &font->height,
 		&font->baseline, &font->bytes_per_line,
 		&font->max_bounding_width);
