@@ -210,6 +210,5 @@ bad:
 		free(font->data);
 		free(font);
 	}
-	*pfont = NULL;
 	return result;
 }
