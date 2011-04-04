@@ -106,9 +106,16 @@ void draw_testing_triangle(int x, int y, int xradius, int yradius)
 		y1 = y;
 		x2 = x + xradius;
 		y2 = y + yradius;
-		break;
-	
+		break;	
 	case 3:
+		x0 = x - xradius;
+		y0 = y - yradius;
+		x1 = x + xradius;
+		y1 = y + yradius;
+		x2 = x - xradius + xradius/8;
+		y2 = y;
+		break;
+	case 4:
 	default:
 		x0 = x;
 		y0 = y - yradius;
@@ -344,6 +351,10 @@ void event_loop(void)
 
 			case SDLK_3:
 				variant = 3;
+				break;
+
+			case SDLK_4:
+				variant = 4;
 				break;
 
 			case SDLK_SPACE:

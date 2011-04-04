@@ -95,33 +95,74 @@ void FN_NAME(CONTEXT_T context, int x0, int y0, int x1, int y1, \
 		                Ay, pixval); \
 	} \
 \
-	struct GP_LineTrack AB, AC, BC; \
-	GP_LineTrackInit(&AB, Ax, Ay, Bx, By); \
-	GP_LineTrackInit(&AC, Ax, Ay, Cx, Cy); \
-	GP_LineTrackInit(&BC, Bx, By, Cx, Cy); \
-\
+	const int ABdx = abs(Bx - Ax); \
+	const int ABsx = GP_SIGN(Bx - Ax); \
+	const int ABdy = abs(By - Ay); \
+	const int ABsy = GP_SIGN(By - Ay); \
+	const int ACdx = abs(Cx - Ax); \
+	const int ACsx = GP_SIGN(Cx - Ax); \
+	const int ACdy = abs(Cy - Ay); \
+	const int ACsy = GP_SIGN(Cy - Ay); \
+	const int BCdx = abs(Cx - Bx); \
+	const int BCsx = GP_SIGN(Cx - Bx); \
+	const int BCdy = abs(Cy - By); \
+	const int BCsy = GP_SIGN(Cy - By); \
+	int ABerr = 0, ACerr = 0, BCerr = 0; \
+	int ABx = Ax, ACx = Ax, BCx = Bx; \
 	int y; \
 \
-	/* Draw the top part (between AB and AC) */ \
+	if (ABdy == 0) \
+		goto bottom_part; \
+\
 	for (y = Ay; y < By; y++) { \
-		GP_LineTrackNext(&AB); \
-		GP_LineTrackNext(&AC); \
-		if (Bx < Ax) { \
-			HLINE(context, AB.xmin, AC.xmax, y, pixval); \
-		} else { \
-			HLINE(context, AC.xmin, AB.xmax, y, pixval); \
+		for (;;) { \
+			PUTPIXEL(context, ABx, y, pixval); \
+			if (ABerr >= ABdx) { \
+				ABerr -= ABdx; \
+				break; \
+			} \
+			ABx += ABsx; \
+			ABerr += ABdy; \
 		} \
+		for (;;) { \
+			PUTPIXEL(context, ACx, y, pixval); \
+			if (ACerr >= ACdx) { \
+				ACerr -= ACdx; \
+				break; \
+			} \
+			ACx += ACsx; \
+			ACerr += ACdy; \
+		} \
+		HLINE(context, ABx, ACx, y, pixval); \
 	} \
 \
-	/* Draw the bottom part (between BC and AC) */ \
-	for (y = By; y <= Cy; y++) { \
-		GP_LineTrackNext(&BC); \
-		GP_LineTrackNext(&AC); \
-		if (Bx < Ax) { \
-			HLINE(context, BC.xmin, AC.xmax, y, pixval); \
-		} else { \
-			HLINE(context, AC.xmin, BC.xmax, y, pixval); \
+bottom_part: \
+\
+	if (BCdy == 0) \
+		goto end; \
+\
+	for (y = By; y < Cy; y++) { \
+		for (;;) { \
+			PUTPIXEL(context, BCx, y, pixval); \
+			if (BCerr >= BCdx) { \
+				BCerr -= BCdx; \
+				break; \
+			} \
+			BCx += BCsx; \
+			BCerr += BCdy; \
 		} \
+		for (;;) { \
+			PUTPIXEL(context, ACx, y, pixval); \
+			if (ACerr >= ACdx) { \
+				ACerr -= ACdx; \
+				break; \
+			} \
+			ACx += ACsx; \
+			ACerr += ACdy; \
+		} \
+		HLINE(context, BCx, ACx, y, pixval); \
 	} \
+\
+end: \
+	return; \
 }
-

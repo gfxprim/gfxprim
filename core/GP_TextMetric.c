@@ -31,30 +31,45 @@ static unsigned int SpaceWidth(const GP_TextStyle *style)
 	return style->char_xspace * style->pixel_xmul;
 }
 
+// FIXME: This is not quite right - due to offsets, characters
+// can exceed their bounding box and then the reported width will be
+// shorter than expected.
+static unsigned int CharWidth(const GP_TextStyle *style, char ch)
+{
+	unsigned int pixel_multiplier = style->pixel_xmul + style->pixel_xspace;
+	const GP_CharData *data = GP_GetCharData(style->font, ch);
+
+	if (data == NULL)
+		data = GP_GetCharData(style->font, ' ');
+
+	return data->pre_offset * pixel_multiplier
+	       + data->post_offset * pixel_multiplier;
+}
+
+static unsigned int MaxCharsWidth(const GP_TextStyle *style, const char *str)
+{
+	unsigned int max = 0, i;
+
+	for (i = 0; str[i] != '\0'; i++)
+		max = GP_MAX(max, CharWidth(style, str[i]));
+
+	return max;
+}
+
 unsigned int GP_TextWidth(const GP_TextStyle *style, const char *str)
 {
 	GP_CHECK(style != NULL && style->font != NULL && str != NULL);
 	
-	unsigned int x = 0;
+	unsigned int i, len = 0;
 	unsigned int space = SpaceWidth(style);
-	unsigned int pixel_multiplier = style->pixel_xmul + style->pixel_xspace;
 
-	// FIXME: This is not quite right - due to offsets, characters
-	// can exceed their bounding box and then the reported width will be
-	// shorter than expected.
-	const char *p;
-	for (p = str; *p; p++) {
-		const GP_CharData *data = GP_GetCharData(style->font, *p);
+	if (str[0] == '\0')
+		return 0;
 
-		if (data == NULL)
-			data = GP_GetCharData(style->font, ' ');
+	for (i = 0; str[i] != '\0'; i++)
+		len += CharWidth(style, str[i]);
 
-		x += data->pre_offset * pixel_multiplier
-			+ data->post_offset * pixel_multiplier
-			+ space;
-	}
-
-	return x - space;
+	return len + (i - 1) * space;
 }
 
 unsigned int GP_TextMaxWidth(const GP_TextStyle *style, unsigned int len)
@@ -67,6 +82,20 @@ unsigned int GP_TextMaxWidth(const GP_TextStyle *style, unsigned int len)
 		return 0;
 
 	return len * char_width + (len - 1) * space_width; 
+}
+
+unsigned int GP_TextMaxStrWidth(const GP_TextStyle *style, const char *str,
+                                unsigned int len)
+{
+	unsigned int space_width = SpaceWidth(style);
+	unsigned int char_width;
+	
+	if (len == 0)
+		return 0;
+
+	char_width = MaxCharsWidth(style, str);
+
+	return len * char_width + (len - 1) * space_width;
 }
 
 unsigned int GP_TextHeight(const GP_TextStyle *style)

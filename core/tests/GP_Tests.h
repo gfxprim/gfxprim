@@ -16,49 +16,40 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2010 Jiri "BlueBear" Dluhos                            *
- *                         <jiri.bluebear.dluhos@gmail.com>                  *
- *                                                                           *
- * Copyright (C) 2009-2010 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2011 Tomas Gavenciak <gavento@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
-#include "GP_ReadPixel.h"
+#include <check.h>
 
-#include <endian.h>
-#include <stdint.h>
-#include <unistd.h>
+/*
+ * Helper macro to allow auto-generation of test-cases and suites.
+ * Searched for by find_tests.py.
+ *
+ * Use alone on a line as
+ *   GP_TEST(testname) 
+ * or
+ *   GP_TEST(testname, "foo=1, bar='baz'")
+ * The optional string is passed as parameters to Python dict() as parameters
+ * for the testcase-generator.
+ * Currently, the following parameters are recognized:
+ *  suite -- name of the suite
+ *
+ * Do NOT use parameters: name, fname, line
+ */
 
-inline uint32_t GP_ReadPixel8bpp(void *ptr)
-{
-	return (uint32_t) *((uint8_t *) ptr);
-}
+#define GP_TEST(name, ...) static void name(int);\
+			   void GP_TEST_##name(int i) {name(i);} \
+			    START_TEST(name)
 
-inline uint32_t GP_ReadPixel16bpp(void *ptr)
-{
-	return (uint32_t) *((uint16_t *) ptr);
-}
+/*
+ * Helper macro to allow auto-generation of suites. 
+ * Defines suite from this point until EOF or redefinition.
+ * Searched for by find_tests.py
+ *
+ * Use alone on a line as
+ *   GP_SUITE(suitename) 
+ */
 
-inline uint32_t GP_ReadPixel24bpp(void *ptr)
-{
-#if __BYTE_ORDER == __BIG_ENDIAN
+#define GP_SUITE(name, ...)
 
-	return ((uint32_t) ((uint8_t *) ptr)[0]) << 16
-		| ((uint32_t) ((uint8_t *) ptr)[1]) << 8
-		| ((uint32_t) ((uint8_t *) ptr)[2]);
-
-#elif __BYTE_ORDER == __LITTLE_ENDIAN
-
-	return ((uint32_t) ((uint8_t *) ptr)[0])
-		| ((uint32_t) ((uint8_t *) ptr)[1]) << 8
-		| ((uint32_t) ((uint8_t *) ptr)[2]) << 16;
-
-#else
-#error "Could not detect machine endianity"
-#endif
-}
-
-inline uint32_t GP_ReadPixel32bpp(void *ptr)
-{
-	return *((uint32_t *) ptr);
-}

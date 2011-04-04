@@ -171,6 +171,20 @@ void print_instructions(void)
 	printf("    up/down ............. increase/decrease tracking\n");
 }
 
+void print_character_metadata(const GP_Font *font, int c)
+{
+	const GP_CharData *adata = GP_GetCharData(font, c);
+	fprintf(stderr, "Properties of the character '%c':\n", c);
+
+	if (adata) {
+		fprintf(stderr, "    pre_offset: %d, post_offset: %d\n",
+				adata->pre_offset, adata->post_offset);
+		fprintf(stderr, "    width: %d\n", adata->char_width);
+	} else {
+		fprintf(stderr, "(null)\n");
+	}
+}
+
 int main(int argc, char *argv[])
 {
 	print_instructions();
@@ -184,6 +198,16 @@ int main(int argc, char *argv[])
 			fprintf(stderr, "Error: %s\n", GP_RetCodeName(err));
 			return 1;
 		}
+
+		fprintf(stderr, "Font properties:\n");
+		fprintf(stderr, "    Height: total: %d total, baseline: %d\n",
+				font->height, font->baseline);
+		fprintf(stderr, "    Bytes per line: %d\n", font->bytes_per_line);
+		fprintf(stderr, "    Max bounding width: %d\n", font->max_bounding_width);
+
+		print_character_metadata(font, 'a');
+		print_character_metadata(font, 'm');
+		print_character_metadata(font, '0');
 	}
 
 	/* Initialize SDL */

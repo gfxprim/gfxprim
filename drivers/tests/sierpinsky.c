@@ -128,9 +128,9 @@ int main(void)
 	iter = 0;
 	draw(context, context->w/2, context->h/2, l, iter);
 
-	for (i = 0; i < 100; i++) {
+	for (i = 0; i < 300; i++) {
 		redraw(context);
-		usleep(100000);
+		usleep(10000);
 	}
 
 	GP_FramebufferExit(fb);

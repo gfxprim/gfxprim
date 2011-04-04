@@ -27,6 +27,7 @@
 #define GP_FILLTRIANGLE_H
 
 #include "GP_Context.h"
+#include "GP_Common.h"
 
 GP_RetCode GP_FillTriangle(GP_Context *context, int x0, int y0, int x1,
                            int y1, int x2, int y2, GP_Pixel pixel);

@@ -29,42 +29,108 @@
 #include <sys/mman.h>
 #include <fcntl.h>
 #include <string.h>
+
 #include <linux/fb.h>
+#include <linux/kd.h>
+#include <linux/vt.h>
 
 #include "GP_Pixel.h"
 
 #include "GP_Framebuffer.h"
 
+/*
+ * Allocates and switches to newly allocated console.
+ */
+static int allocate_console(struct GP_Framebuffer *fb)
+{
+	struct vt_stat vts;
+	int fd, nr;
+	char buf[255];
+
+	/* allocate and switch to new console */
+	fd = open("/dev/tty1", O_WRONLY);
+
+	if (fd < 0) {
+		perror("opening console failed");
+		return -1;
+	}
+	
+	if (ioctl(fd, VT_OPENQRY, &nr) < 0) {
+		perror("ioctl VT_OPENQRY");
+		close(fd);
+		return -1;
+	}
+
+	close(fd);
+
+	snprintf(buf, sizeof(buf), "/dev/tty%i", nr);
+	fd = open(buf, O_RDWR);
+
+	if (fd < 0) {
+		perror("opening console failed");
+		close(fd);
+		return -1;
+	}
+	
+	if (ioctl(fd, VT_GETSTATE, &vts) == 0)
+		fb->last_con_nr = vts.v_active;
+	else	
+		fb->last_con_nr = -1;
+
+	if (ioctl(fd, VT_ACTIVATE, nr) < 0) {
+		perror("ioctl VT_ACTIVATE");
+		close(fd);
+		return -1;
+	}
+
+	if (ioctl(fd, VT_WAITACTIVE, nr) < 0) {
+		perror("ioctl VT_WAITACTIVE");
+		close(fd);
+		return -1;
+	}
+	
+	/* turn off blinking cursor */
+	if (ioctl(fd, KDSETMODE, KD_GRAPHICS) < 0) {
+		perror("ioctl KDSETMODE");
+		close(fd);
+	}
+	
+	fb->con_nr = nr;
+	fb->con_fd = fd;
+
+	return 0;
+}
+
 GP_Framebuffer *GP_FramebufferInit(const char *path)
 {
 	GP_Framebuffer *fb = malloc(sizeof (GP_Framebuffer) + strlen(path) + 1);
-	int fd;
 	struct fb_fix_screeninfo fscri;
 	struct fb_var_screeninfo vscri;
+	int fd;
 
 	if (fb == NULL)
 		return NULL;
 
-	fd = open(path, O_RDWR);
+	if (allocate_console(fb))
+		goto err1;
 
+
+	/* open and mmap framebuffer */
+	fd = open(path, O_RDWR);
+	
 	if (fd < 0) {
 		perror("opening framebuffer failed");
-		free(fb);
-		return NULL;
+		goto err2;
 	}
 
 	if (ioctl(fd, FBIOGET_FSCREENINFO, &fscri) < 0) {
 		perror("ioctl FBIOGET_FSCREENINFO");
-		free(fb);
-		close(fd);
-		return NULL;
+		goto err3;
 	}
 	
 	if (ioctl(fd, FBIOGET_VSCREENINFO, &vscri) < 0) {
 		perror("ioctl FBIOGET_VSCREENINFO");
-		free(fb);
-		close(fd);
-		return NULL;
+		goto err3;
 	}
 
 	fb->context.pixels = mmap(NULL, fscri.smem_len,
@@ -73,13 +139,11 @@ GP_Framebuffer *GP_FramebufferInit(const char *path)
 
 	if (fb->context.pixels == MAP_FAILED) {
 		perror("mmaping framebuffer failed");
-		free(fb);
-		close(fd);
-		return NULL;
+		goto err3;
 	}
 
-	fb->fd    = fd;
-	fb->bsize = fscri.smem_len;
+	fb->fb_fd = fd;
+	fb->bsize  = fscri.smem_len;
 	strcpy(fb->path, path);
 
 	fb->context.w = vscri.xres;
@@ -97,14 +161,31 @@ GP_Framebuffer *GP_FramebufferInit(const char *path)
 	fb->context.bpp = vscri.bits_per_pixel;
 	fb->context.bytes_per_row  = fscri.line_length;
 
-	fb->context.pixel_type = GP_PIXEL_XRGB8888;
+	fb->context.pixel_type = GP_PIXEL_RGB565;
 
 	return fb;
+err3:
+	close(fd);
+err2:
+	close(fb->con_fd);
+err1:
+	free(fb);
+	return NULL;
 }
 
 void GP_FramebufferExit(GP_Framebuffer *fb)
 {
+	/* unmap framebuffer */
 	munmap(fb->context.pixels, fb->bsize);
-	close(fb->fd);
+	close(fb->fb_fd);
+	
+	/* reset keyboard */
+	ioctl(fb->con_fd, KDSETMODE, KD_TEXT);
+	
+	/* switch back console */
+	if (fb->last_con_nr != -1)
+		ioctl(fb->con_fd, VT_ACTIVATE, fb->last_con_nr);
+	
+	close(fb->con_fd);
 	free(fb);
 }

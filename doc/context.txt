@@ -61,6 +61,30 @@ Functions
 -------------------------------------------------------------------------------
 #include <GP.h>
 
+uint32_t GP_ContextW(struct GP_Context *context);
+uint32_t GP_ContextH(struct GP_Context *context);
+uint32_t GP_TContextW(struct GP_Context *context);
+uint32_t GP_TContextH(struct GP_Context *context);
+-------------------------------------------------------------------------------
+
+Functions to get context width and height. Functions with 'T' prefix do honour
+rotation flags (swaps W and H if axes_swap is set).
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <GP.h>
+
+void GP_ContextFlagsRotateCW(struct GP_Context *context);
+void GP_ContextFlagsRotateCCW(struct GP_Context *context);
+-------------------------------------------------------------------------------
+
+Rotate context flags (x_swap, y_swap and axes_swap) clock wise, respectively
+counter clock wise.
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <GP.h>
+
 GP_Context *GP_ContextAlloc(uint32_t w, uint32_t h, GP_PixelType type);
 -------------------------------------------------------------------------------
 

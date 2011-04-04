@@ -140,3 +140,50 @@ GP_RetCode GP_TText(GP_Context *context, const GP_TextStyle *style,
 	return GP_ESUCCESS;
 }
 
+GP_RetCode GP_BoxCenteredText(GP_Context *context, const GP_TextStyle *style,
+	int x, int y, int w, int h, const char *str, GP_Pixel pixel)
+{
+
+	if (style != NULL && style->font == NULL)
+		return GP_ENULLPTR;
+	if (!context || !str)
+		return GP_ENULLPTR;
+	if (!GP_IS_CONTEXT_VALID(context))
+		return GP_EBADCONTEXT;
+
+	if (style == NULL)
+		style = &DefaultStyle;
+
+	const int mid_x = x + w/2;
+	const int mid_y = y + h/2;
+	const int font_ascent = GP_TextAscent(style);
+
+	return GP_Text(context, style, mid_x,
+		mid_y + font_ascent/2,
+		GP_ALIGN_CENTER | GP_VALIGN_BASELINE,
+		str, pixel);
+}
+
+GP_RetCode GP_TBoxCenteredText(GP_Context *context, const GP_TextStyle *style,
+	int x, int y, int w, int h, const char *str, GP_Pixel pixel)
+{
+
+	if (style != NULL && style->font == NULL)
+		return GP_ENULLPTR;
+	if (!context || !str)
+		return GP_ENULLPTR;
+	if (!GP_IS_CONTEXT_VALID(context))
+		return GP_EBADCONTEXT;
+
+	if (style == NULL)
+		style = &DefaultStyle;
+
+	const int mid_x = x + w/2;
+	const int mid_y = y + h/2;
+	const int font_ascent = GP_TextAscent(style);
+
+	return GP_TText(context, style, mid_x,
+		mid_y + font_ascent/2,
+		GP_ALIGN_CENTER | GP_VALIGN_BASELINE,
+		str, pixel);
+}

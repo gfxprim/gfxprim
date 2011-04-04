@@ -34,7 +34,6 @@
 #include "GP_Context.h"
 
 /* semi-public, low-level drawing API */
-#include "GP_ReadPixel.h"
 #include "GP_WritePixel.h"
 
 /* colors */

@@ -16,46 +16,51 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2010 Jiri "BlueBear" Dluhos                            *
- *                         <jiri.bluebear.dluhos@gmail.com>                  *
- *                                                                           *
- * Copyright (C) 2009-2010 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2011 Tomas Gavenciak <gavento@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
- /*
+#include "GP_Tests.h"
 
-   Ensure that we got the color we asked for.
+#include <GP_Common.h>
 
-  */
+/*
+ * Demo ("testing" ;-) tests for GP_Common.h
+ */
 
-#include <GP.h>
+GP_SUITE(GP_Common) 
 
-int main(void)
+GP_TEST(min_max)
 {
-	GP_ColorType i, j;
-	GP_Color col;
-	GP_RetCode ret;
-
-	for (i = 0; i < GP_COLMAX; i++)
-		for (j = 0; j < GP_COLMAX; j++) {
-			col.type = i;
-			ret = GP_ColorConvert(&col, j);
-
-			printf("%s -> %s: %s ...... ", GP_ColorTypeName(i),
-			                               GP_ColorTypeName(j),
-					               GP_RetCodeName(ret));
-
-			if (ret == GP_ESUCCESS || ret == GP_EUNPRECISE) {
-				if (col.type != j) {
-					printf("got %s ERROR\n",
-					       GP_ColorTypeName(col.type));
-					continue;
-				}
-			}
-
-			printf("OK\n");
-		}
-
-	return 0;
+	fail_unless(GP_MIN(-1.5, 2) == -1.5);
+	fail_unless(GP_MAX(4294967295ULL, 1ULL) == 4294967295ULL);
+	int x=0, y=0;
+	fail_unless(GP_MAX(x++, ++y) == 1);
+	fail_unless(x == 1 && y == 1);
 }
+END_TEST
+
+GP_TEST(get_bits)
+{
+	fail_unless(GP_GET_BITS(15, 7, 0x12345678ULL) == 0x68);
+	fail_unless(GP_GET_BITS(0, 0, 0x12345678ULL) == 0);
+	fail_unless(GP_GET_BITS(16, 16, 0x1234) == 0);
+	fail_unless(GP_GET_BITS(1, 32, 0x12345678ULL) == 0x091A2B3CULL);
+}
+END_TEST
+
+GP_TEST(set_bits)
+{
+	uint32_t x = 0x89ABC;
+	uint16_t *y = (uint16_t*) &x; 
+	GP_CLEAR_BITS(3, 4, x);
+	fail_unless(x == 0x89A84);
+	GP_SET_BITS_OR(10, x, 0x0000000); 
+	fail_unless(x == 0x89A84);
+	GP_SET_BITS(24, 18, x, 0x42F1); 
+	fail_unless(x == 0xF1089A84);
+	/* Check that only uint16_t is affected */
+	GP_SET_BITS(0, 24, *y, 0x100F000LL); 
+	fail_unless(x == 0xF108F000);
+}
+END_TEST

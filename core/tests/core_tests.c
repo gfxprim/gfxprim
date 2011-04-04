@@ -16,21 +16,63 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2010 Jiri "BlueBear" Dluhos                            *
- *                         <jiri.bluebear.dluhos@gmail.com>                  *
- *                                                                           *
- * Copyright (C) 2009-2010 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2011 Tomas Gavenciak <gavento@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
-#ifndef GP_READPIXEL_H
-#define GP_READPIXEL_H
+#include <unistd.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <getopt.h>
+#include <check.h>
 
-#include <stdint.h>
+typedef Suite* (SuiteFactory)(void);
 
-inline uint32_t GP_ReadPixel8bpp(void *ptr);
-inline uint32_t GP_ReadPixel16bpp(void *ptr);
-inline uint32_t GP_ReadPixel24bpp(void *ptr);
-inline uint32_t GP_ReadPixel32bpp(void *ptr);
+/* 
+ * Declare all the manualy created Suite-generating functions here:
+ */
 
-#endif /* GP_READPIXEL_H */
+SuiteFactory* manual_suites[] = {
+	NULL	/* Sentinel */
+};
+
+/*
+ * Generated function creating and adding all the suites
+ */
+
+void GP_AddSuitesToSRunner(SRunner *sr);
+
+
+const char usage[] = "Usage:\n%s [-v] [-q]\n";
+
+int main(int argc, char *argv[])
+{
+	int verb = CK_NORMAL;
+
+	int opt;	
+	while((opt = getopt(argc, argv, "vq")) >= 0) 
+		switch(opt) {
+			case 'v': 
+				verb = CK_VERBOSE;
+				break;
+			case 'q':
+				verb = CK_SILENT;
+				break;
+			default:
+				fprintf(stderr, usage, argv[0]);
+				return(EXIT_FAILURE);
+		}
+
+	SRunner *sr = srunner_create(NULL);
+
+	for (SuiteFactory **s = manual_suites; *s; s++) {
+		srunner_add_suite(sr, (*s)());
+	}
+	GP_AddSuitesToSRunner(sr);
+	
+	srunner_run_all(sr, verb);
+	int number_failed = srunner_ntests_failed(sr);
+	srunner_free(sr);
+	
+	return (number_failed == 0) ? EXIT_SUCCESS : EXIT_FAILURE;
+}

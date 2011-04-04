@@ -21,7 +21,7 @@
  *                                                                           *
  * Copyright (C) 2009-2010 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
- *****************************************************************************/
+ ****************************************************************************/
 
 #ifndef GP_TEXT_METRIC_H
 #define GP_TEXT_METRIC_H
@@ -37,6 +37,12 @@ unsigned int GP_TextWidth(const GP_TextStyle *style, const char *str);
  * Maximal text width for string with len characters.
  */
 unsigned int GP_TextMaxWidth(const GP_TextStyle *style, unsigned int len);
+
+/*
+ * Returns maximal width for text written with len characters from str.
+ */
+unsigned int GP_TextMaxStrWidth(const GP_TextStyle *style, const char *str,
+                                unsigned int len);
 
 /*
  * Returns maximal text height, in pixels.
