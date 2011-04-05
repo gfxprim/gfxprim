@@ -20,6 +20,9 @@
  *                                                                           *
  *****************************************************************************/
 
+#ifndef GP_COUNTER_H
+#define GP_COUNTER_H
+
 /* 
  * Simple global named 64-bit counters.
  *
@@ -52,7 +55,7 @@ typedef GP_Counter_t *GP_Counter;
  * Increase a counter by 1.
  */
 
-inline void GP_IncCounter(GP_Counter counter) 
+static inline void GP_IncCounter(GP_Counter counter) 
 {
 #ifdef	GP_IMPLEMENT_COUNTERS
 	if (!counter) return;
@@ -65,11 +68,23 @@ inline void GP_IncCounter(GP_Counter counter)
  * No checks for underflow.
  */
 
-inline void GP_AddCounter(GP_Counter counter, GP_Counter_t delta) 
+static inline void GP_AddCounter(GP_Counter counter, GP_Counter_t delta) 
 {
 #ifdef	GP_IMPLEMENT_COUNTERS
 	if (!counter) return;
 	(*counter) += delta;
+#endif	/* GP_IMPLEMENT_COUNTERS */
+}
+
+/*
+ * Set counter to given value.
+ */
+
+static inline void GP_SetCounter(GP_Counter counter, GP_Counter_t value) 
+{
+#ifdef	GP_IMPLEMENT_COUNTERS
+	if (!counter) return;
+	(*counter) = value;
 #endif	/* GP_IMPLEMENT_COUNTERS */
 }
 
@@ -92,7 +107,8 @@ inline GP_Counter_t GP_CounterVal(GP_Counter counter)
  * Includes info about counter-list overflow
  */
 
-void GP_PrintCounters(FILE *f);
+struct FILE;
+void GP_PrintCounters(struct FILE *f);
 
 /*
  * Lookup a counter by name, possibly creating a new one.
@@ -106,3 +122,4 @@ void GP_PrintCounters(FILE *f);
 
 GP_Counter GP_GetCounter(const char *name);
 
+#endif	/* GP_COUNTER_H */

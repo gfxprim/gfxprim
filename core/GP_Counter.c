@@ -21,6 +21,7 @@
  *****************************************************************************/
 
 #include <string.h>
+#include <stdio.h>
 #include "GP_Common.h"
 #include "GP_Counter.h"
 
@@ -47,10 +48,11 @@ static GP_Counter_t GP_counter_list_overflow = 0;
 
 #endif	/* GP_IMPLEMENT_COUNTERS */
 
-void GP_PrintCounters(FILE *f)
+void GP_PrintCounters(struct FILE *f)
 {
 #ifdef	GP_IMPLEMENT_COUNTERS
 	int i;
+	GP_CHECK(f != NULL);
 	if (GP_used_counters == 0)
 		fprintf(f, "[ no counters defined ]\n");
 	for (i = 0; i < GP_used_counters; i++) 
@@ -73,7 +75,7 @@ GP_Counter GP_GetCounter(const char *name)
 
 	/* Bisect GP_counter_list to find either the counter or a place for it 
 	 * interval [l, r) (not incl. r) */
-	while(r > l + 1) {
+	while(r > l) {
 		int med = (r + l) / 2; /* Here never equal to r, might be l */
 		int cmp = strcmp(GP_counter_list[med].name, name);
 		if (cmp == 0)
@@ -94,7 +96,7 @@ GP_Counter GP_GetCounter(const char *name)
 	}
 
 	/* Move the counter records up and initialize a new one */
-	memmove(GP_counter_list + l, GP_counter_list + l + 1, 
+	memmove(GP_counter_list + l + 1, GP_counter_list + l, 
 		sizeof(struct GP_CounterRecord) * GP_used_counters - l);
 	strcpy(GP_counter_list[l].name, name);
 	GP_counter_list[l].counter = GP_counters + GP_used_counters;
