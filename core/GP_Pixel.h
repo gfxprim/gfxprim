@@ -81,6 +81,7 @@ typedef struct {
   GP_PixelType type;      /* Number of the type */
   const char name[16];    /* Name */
   int size;               /* Size in bits */
+  int bit_endian;	  /* Order of pixels in a byte */ /**TODO : add proper type !! */
   int numchannels;        /* Number of channels */
   const char bitmap[36];  /* String describing the bit-representaton (as in "RRRRRGGGGGGBBBBB")*/
   const GP_PixelTypeChannel channels[8]; /* Individual channels */
@@ -110,6 +111,7 @@ typedef enum {
 
 static inline const char *GP_PixelTypeName(GP_PixelType type)
 {
+  GP_CHECK(type < GP_PIXEL_MAX);
   return GP_PixelTypes[type].name;
 }
 
@@ -119,6 +121,7 @@ static inline const char *GP_PixelTypeName(GP_PixelType type)
 
 static inline uint32_t GP_PixelSize(GP_PixelType type)
 {
+  GP_CHECK(type < GP_PIXEL_MAX);
   return GP_PixelTypes[type].size;
 }
 
