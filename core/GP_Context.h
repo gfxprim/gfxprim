@@ -45,9 +45,10 @@ typedef struct GP_Context {
 	/* image orientation. Most common is landscape (0, 0, 0),
 	 * portrait with normal topleft corner is (1, 0, 0).
 	 */
-	int axes_swap:1;	 /* swap axes so that x is y and y is x */
-	int x_swap:1;		 /* swap direction on x  */
-	int y_swap:1;		 /* swap direction on y  */
+	uint8_t axes_swap:1;	 	/* swap axes so that x is y and y is x */
+	uint8_t x_swap:1;		/* swap direction on x  */
+	uint8_t y_swap:1;		/* swap direction on y  */
+	uint8_t bit_endian:1;		/* GP_BIT_ENDIAN */
 
 	/* clipping rectangle; drawing functions only affect the inside */
 	uint32_t clip_w_min;

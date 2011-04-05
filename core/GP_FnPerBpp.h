@@ -40,13 +40,28 @@
 \
 	switch (context->bpp) { \
 	case 1: \
-		FN_NAME##1bpp(__VA_ARGS__); \
+		{\
+		if (context->bit_endian==GP_BIT_ENDIAN_LE)\
+			FN_NAME##1bpp_LE(__VA_ARGS__);\
+		else \
+			FN_NAME##1bpp_BE(__VA_ARGS__);\
+		} \
 	break; \
 	case 2: \
-		FN_NAME##2bpp(__VA_ARGS__); \
+		{\
+		if (context->bit_endian==GP_BIT_ENDIAN_LE)\
+			FN_NAME##2bpp_LE(__VA_ARGS__);\
+		else \
+			FN_NAME##2bpp_BE(__VA_ARGS__);\
+		} \
 	break; \
 	case 4: \
-		FN_NAME##4bpp(__VA_ARGS__); \
+		{\
+		if (context->bit_endian==GP_BIT_ENDIAN_LE)\
+			FN_NAME##4bpp_LE(__VA_ARGS__);\
+		else \
+			FN_NAME##4bpp_BE(__VA_ARGS__);\
+		} \
 	break; \
 	case 8: \
 		FN_NAME##8bpp(__VA_ARGS__); \
@@ -70,11 +85,26 @@
 \
 	switch (context->bpp) { \
 	case 1: \
-		return FN_NAME##1bpp(__VA_ARGS__); \
+		{\
+		if (context->bit_endian==GP_BIT_ENDIAN_LE)\
+			return FN_NAME##1bpp_LE(__VA_ARGS__);\
+		else \
+			return FN_NAME##1bpp_BE(__VA_ARGS__);\
+		} \
 	case 2: \
-		return FN_NAME##2bpp(__VA_ARGS__); \
+		{\
+		if (context->bit_endian==GP_BIT_ENDIAN_LE)\
+			return FN_NAME##2bpp_LE(__VA_ARGS__);\
+		else \
+			return FN_NAME##2bpp_BE(__VA_ARGS__);\
+		} \
 	case 4: \
-		return FN_NAME##4bpp(__VA_ARGS__); \
+		{\
+		if (context->bit_endian==GP_BIT_ENDIAN_LE)\
+			return FN_NAME##4bpp_LE(__VA_ARGS__);\
+		else \
+			return FN_NAME##4bpp_BE(__VA_ARGS__);\
+		} \
 	case 8: \
 		return FN_NAME##8bpp(__VA_ARGS__); \
 	case 16: \

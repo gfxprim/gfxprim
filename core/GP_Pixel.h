@@ -93,10 +93,22 @@ typedef struct {
 extern const GP_PixelTypeDescription const GP_PixelTypes[];
 
 /*
+ * Information about ordering of pixels in byte for 1, 2 and 4 bpp 
+ * used in a one bit variable in GP_Context 
+ */
+
+typedef enum { 	
+	/* less significant bits contain pixels with lower indices */ 
+	GP_BIT_ENDIAN_LE = 0,
+	/* more significant bits contain pixels with lower indices */ 
+	GP_BIT_ENDIAN_BE,     
+} GP_BIT_ENDIAN; 
+
+/*
  * Convert pixel type to name.
  */
 
-inline const char *GP_PixelTypeName(GP_PixelType type)
+static inline const char *GP_PixelTypeName(GP_PixelType type)
 {
   return GP_PixelTypes[type].name;
 }
@@ -105,7 +117,7 @@ inline const char *GP_PixelTypeName(GP_PixelType type)
  * Returns number of bits per pixel.
  */
 
-inline uint32_t GP_PixelSize(GP_PixelType type)
+static inline uint32_t GP_PixelSize(GP_PixelType type)
 {
   return GP_PixelTypes[type].size;
 }

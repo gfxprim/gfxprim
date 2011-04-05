@@ -28,9 +28,12 @@
 #include "GP_FnPerBpp.h"
 
 /* Generate drawing functions for various bit depths. */
-DEF_LINE_FN(GP_Line1bpp,  GP_Context *, GP_Pixel, GP_PutPixel1bpp)
-DEF_LINE_FN(GP_Line2bpp,  GP_Context *, GP_Pixel, GP_PutPixel2bpp)
-DEF_LINE_FN(GP_Line4bpp,  GP_Context *, GP_Pixel, GP_PutPixel4bpp)
+DEF_LINE_FN(GP_Line1bpp_LE,  GP_Context *, GP_Pixel, GP_PutPixel1bpp_LE)
+DEF_LINE_FN(GP_Line2bpp_LE,  GP_Context *, GP_Pixel, GP_PutPixel2bpp_LE)
+DEF_LINE_FN(GP_Line4bpp_LE,  GP_Context *, GP_Pixel, GP_PutPixel4bpp_LE)
+DEF_LINE_FN(GP_Line1bpp_BE,  GP_Context *, GP_Pixel, GP_PutPixel1bpp_BE)
+DEF_LINE_FN(GP_Line2bpp_BE,  GP_Context *, GP_Pixel, GP_PutPixel2bpp_BE)
+DEF_LINE_FN(GP_Line4bpp_BE,  GP_Context *, GP_Pixel, GP_PutPixel4bpp_BE)
 DEF_LINE_FN(GP_Line8bpp,  GP_Context *, GP_Pixel, GP_PutPixel8bpp)
 DEF_LINE_FN(GP_Line16bpp, GP_Context *, GP_Pixel, GP_PutPixel16bpp)
 DEF_LINE_FN(GP_Line24bpp, GP_Context *, GP_Pixel, GP_PutPixel24bpp)

@@ -110,20 +110,28 @@ void GP_WritePixels2bpp(uint8_t *start, uint8_t off, size_t cnt, uint8_t val)
 	             (colors_2bpp[val] << (8 - e_off));
 }
 
+
 void GP_WritePixels4bpp(uint8_t *start, uint8_t off, size_t cnt, uint8_t val)
 {
-	(void)start;
-	(void)off;
-	(void)cnt;
-	(void)val;
+	uint8_t s_off = off % 2;
+	uint8_t e_off = (cnt + s_off) % 2;
+	uint32_t len  = (cnt - s_off - e_off) / 2;
+
+	val %= 16;
+	uint8_t col   = (val << 4)& val;
+
+	if (len > 0)
+		GP_WritePixels8bpp(start + s_off, len, val);
+
+	/* handle start and end */
+	if (s_off) GP_SET_BITS(4, 4, start[0], col);
+	if (e_off) GP_SET_BITS(0, 4, start[len+s_off], val);
 }
 
 void GP_WritePixels8bpp(void *start, size_t count, uint8_t value)
 {
-	uint8_t *p = (uint8_t *) start;
-	uint8_t *end = p + count;
-	for (; p <= end; p++)
-		*p = value;
+	
+	memset(start, value, count);
 }
 
 void GP_WritePixels16bpp(void *start, size_t count, uint16_t value)
