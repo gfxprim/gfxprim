@@ -98,40 +98,43 @@ void FN_NAME(CONTEXT_T context, int x0, int y0, int x1, int y1, \
 	const int ABdx = abs(Bx - Ax); \
 	const int ABsx = GP_SIGN(Bx - Ax); \
 	const int ABdy = abs(By - Ay); \
-	const int ABsy = GP_SIGN(By - Ay); \
 	const int ACdx = abs(Cx - Ax); \
 	const int ACsx = GP_SIGN(Cx - Ax); \
 	const int ACdy = abs(Cy - Ay); \
-	const int ACsy = GP_SIGN(Cy - Ay); \
 	const int BCdx = abs(Cx - Bx); \
 	const int BCsx = GP_SIGN(Cx - Bx); \
 	const int BCdy = abs(Cy - By); \
-	const int BCsy = GP_SIGN(Cy - By); \
-	int ABerr = 0, ACerr = 0, BCerr = 0; \
+	int ABerr = ABdx, ACerr = ACdx, BCerr = BCdx; \
 	int ABx = Ax, ACx = Ax, BCx = Bx; \
 	int y; \
 \
 	if (ABdy == 0) \
 		goto bottom_part; \
 \
-	for (y = Ay; y < By; y++) { \
+	/* Where the break between the top and bottom part occurs;
+	 * this is normally right above the By, but there is a special case:
+	 * when By == Cy, we need to draw everything.
+	 */ \
+	const int ybreak = (By == Cy) ? By : By - 1; \
+\
+	for (y = Ay; y <= ybreak; y++) { \
 		for (;;) { \
 			PUTPIXEL(context, ABx, y, pixval); \
 			if (ABerr >= ABdx) { \
-				ABerr -= ABdx; \
+				ABerr -= 2*ABdx; \
 				break; \
 			} \
 			ABx += ABsx; \
-			ABerr += ABdy; \
+			ABerr += 2*ABdy; \
 		} \
 		for (;;) { \
 			PUTPIXEL(context, ACx, y, pixval); \
 			if (ACerr >= ACdx) { \
-				ACerr -= ACdx; \
+				ACerr -= 2*ACdx; \
 				break; \
 			} \
 			ACx += ACsx; \
-			ACerr += ACdy; \
+			ACerr += 2*ACdy; \
 		} \
 		HLINE(context, ABx, ACx, y, pixval); \
 	} \
@@ -141,24 +144,24 @@ bottom_part: \
 	if (BCdy == 0) \
 		goto end; \
 \
-	for (y = By; y < Cy; y++) { \
+	for (y = By; y <= Cy; y++) { \
 		for (;;) { \
 			PUTPIXEL(context, BCx, y, pixval); \
 			if (BCerr >= BCdx) { \
-				BCerr -= BCdx; \
+				BCerr -= 2*BCdx; \
 				break; \
 			} \
 			BCx += BCsx; \
-			BCerr += BCdy; \
+			BCerr += 2*BCdy; \
 		} \
 		for (;;) { \
 			PUTPIXEL(context, ACx, y, pixval); \
 			if (ACerr >= ACdx) { \
-				ACerr -= ACdx; \
+				ACerr -= 2*ACdx; \
 				break; \
 			} \
 			ACx += ACsx; \
-			ACerr += ACdy; \
+			ACerr += 2*ACdy; \
 		} \
 		HLINE(context, BCx, ACx, y, pixval); \
 	} \
