@@ -106,7 +106,7 @@ void FN_NAME(CONTEXT_T context, int x0, int y0, int x1, int y1, \
 	const int BCdy = abs(Cy - By); \
 	int ABerr = ABdx, ACerr = ACdx, BCerr = BCdx; \
 	int ABx = Ax, ACx = Ax, BCx = Bx; \
-	int y; \
+	int y, xstart, xend; \
 \
 	if (ABdy == 0) \
 		goto bottom_part; \
@@ -118,8 +118,9 @@ void FN_NAME(CONTEXT_T context, int x0, int y0, int x1, int y1, \
 	const int ybreak = (By == Cy) ? By : By - 1; \
 \
 	for (y = Ay; y <= ybreak; y++) { \
+		xstart = GP_MIN(ABx, ACx); \
+		xend = GP_MAX(ABx, ACx); \
 		for (;;) { \
-			PUTPIXEL(context, ABx, y, pixval); \
 			if (ABerr >= ABdx) { \
 				ABerr -= 2*ABdx; \
 				break; \
@@ -127,8 +128,9 @@ void FN_NAME(CONTEXT_T context, int x0, int y0, int x1, int y1, \
 			ABx += ABsx; \
 			ABerr += 2*ABdy; \
 		} \
+		xstart = GP_MIN(ABx, xstart); \
+		xend = GP_MAX(ABx, xend); \
 		for (;;) { \
-			PUTPIXEL(context, ACx, y, pixval); \
 			if (ACerr >= ACdx) { \
 				ACerr -= 2*ACdx; \
 				break; \
@@ -136,7 +138,9 @@ void FN_NAME(CONTEXT_T context, int x0, int y0, int x1, int y1, \
 			ACx += ACsx; \
 			ACerr += 2*ACdy; \
 		} \
-		HLINE(context, ABx, ACx, y, pixval); \
+		xstart = GP_MIN(ACx, xstart); \
+		xend = GP_MAX(ACx, xend); \
+		HLINE(context, xstart, xend, y, pixval); \
 	} \
 \
 bottom_part: \
@@ -145,8 +149,9 @@ bottom_part: \
 		goto end; \
 \
 	for (y = By; y <= Cy; y++) { \
+		xstart = GP_MIN(BCx, ACx); \
+		xend = GP_MAX(BCx, ACx); \
 		for (;;) { \
-			PUTPIXEL(context, BCx, y, pixval); \
 			if (BCerr >= BCdx) { \
 				BCerr -= 2*BCdx; \
 				break; \
@@ -154,8 +159,9 @@ bottom_part: \
 			BCx += BCsx; \
 			BCerr += 2*BCdy; \
 		} \
+		xstart = GP_MIN(xstart, BCx); \
+		xend = GP_MAX(xend, BCx); \
 		for (;;) { \
-			PUTPIXEL(context, ACx, y, pixval); \
 			if (ACerr >= ACdx) { \
 				ACerr -= 2*ACdx; \
 				break; \
@@ -163,7 +169,9 @@ bottom_part: \
 			ACx += ACsx; \
 			ACerr += 2*ACdy; \
 		} \
-		HLINE(context, BCx, ACx, y, pixval); \
+		xstart = GP_MIN(xstart, ACx); \
+		xend = GP_MAX(xend, ACx); \
+		HLINE(context, xstart, xend, y, pixval); \
 	} \
 \
 end: \
