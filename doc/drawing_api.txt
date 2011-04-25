@@ -6,7 +6,7 @@ Fill
 
 [source,c]
 --------------------------------------------------------------------------------
-GP_RetCode GP_Fill(GP_Context *context, GP_Pixel pixel);
+void GP_Fill(GP_Context *context, GP_Pixel pixel);
 --------------------------------------------------------------------------------
 
 Fills the context bitmap, respecting the clipping rect. This has the same effect
@@ -19,36 +19,32 @@ Lines
 
 [source,c]
 --------------------------------------------------------------------------------
-GP_RetCode GP_HLineXXY(GP_Context *context, int x0, int x1, int y,
-                       GP_Pixel pixel);
+void GP_HLineXXY(GP_Context *context, int x0, int x1, int y, GP_Pixel pixel);
 
-GP_RetCode GP_HLineXYW(GP_Context *context, int x, int y, unsigned int w,
-                       GP_Pixel pixel);
+void GP_HLineXYW(GP_Context *context, int x, int y, unsigned int w,
+                 GP_Pixel pixel);
 
-GP_RetCode GP_HLine(GP_Context *context, int x0, int x1, int y,
-                    GP_Pixel pixel);
+void GP_HLine(GP_Context *context, int x0, int x1, int y, GP_Pixel pixel);
 --------------------------------------------------------------------------------
 
 Draws a horizontal line. The 'GP_HLine()' function is an alias for 'GP_HLineXXY()'.
 
 [source,c]
 --------------------------------------------------------------------------------
-GP_RetCode GP_VLineXYY(GP_Context *context, int x, int y0, int y1,
-                       GP_Pixel pixel);
+void GP_VLineXYY(GP_Context *context, int x, int y0, int y1, GP_Pixel pixel);
 
-GP_RetCode GP_VLineXYH(GP_Context *context, int x, int y,
-                       unsigned int height, GP_Pixel pixel);
+void GP_VLineXYH(GP_Context *context, int x, int y,
+                 unsigned int height, GP_Pixel pixel);
 
-GP_RetCode GP_VLine(GP_Context *context, int x, int y0, int y1,
-                    GP_Pixel pixel);
+void GP_VLine(GP_Context *context, int x, int y0, int y1, GP_Pixel pixel);
 --------------------------------------------------------------------------------
 
 Draws a vertical line. The 'GP_VLine()' function is an alias for 'GP_VLineXYY()'.
 
 [source,c]
 --------------------------------------------------------------------------------
-GP_RetCode GP_Line(GP_Context *context, int x0, int y0, int x1, int y1,
-                   GP_Pixel pixel);
+void GP_Line(GP_Context *context, int x0, int y0, int x1, int y1,
+             GP_Pixel pixel);
 --------------------------------------------------------------------------------
 
 Draws a line from (x0, y0) to (x1, y1), inclusive.
@@ -58,16 +54,16 @@ Circles
 
 [source,c]
 --------------------------------------------------------------------------------
-GP_RetCode GP_Circle(GP_Context *context, int xcenter, int ycenter,
-                     unsigned int r, GP_Pixel pixel);
+void GP_Circle(GP_Context *context, int xcenter, int ycenter,
+               unsigned int r, GP_Pixel pixel);
 --------------------------------------------------------------------------------
 
 Draws a circle.
 
 [source,c]
 --------------------------------------------------------------------------------
-GP_RetCode GP_FillCircle(GP_Context *context, int xcenter, int ycenter,
-                         unsigned int r, GP_Pixel pixel);
+void GP_FillCircle(GP_Context *context, int xcenter, int ycenter,
+                   unsigned int r, GP_Pixel pixel);
 --------------------------------------------------------------------------------
 
 Draws a filled circle.
@@ -77,16 +73,16 @@ Ellipses
 
 [source,c]
 --------------------------------------------------------------------------------
-GP_RetCode GP_Ellipse(GP_Context *context, int xcenter, int ycenter,
-                      unsigned int a, unsigned int b, GP_Pixel pixel);
+void GP_Ellipse(GP_Context *context, int xcenter, int ycenter,
+                unsigned int a, unsigned int b, GP_Pixel pixel);
 --------------------------------------------------------------------------------
 
 Draws an ellipse.
 
 [source,c]
 --------------------------------------------------------------------------------
-GP_RetCode GP_FillEllipse(GP_Context *context, int xcenter, int ycenter,
-                          unsigned int a, unsigned int b, GP_Pixel pixel);
+void GP_FillEllipse(GP_Context *context, int xcenter, int ycenter,
+                    unsigned int a, unsigned int b, GP_Pixel pixel);
 --------------------------------------------------------------------------------
 
 Draws a filled ellipse.
@@ -96,16 +92,16 @@ Triangles
 
 [source,c]
 --------------------------------------------------------------------------------
-GP_RetCode GP_Triangle(GP_Context *context, int x0, int y0, int x1, int y1,
-                       int x2, int y2, GP_Pixel pixel);
+void GP_Triangle(GP_Context *context, int x0, int y0, int x1, int y1,
+                 int x2, int y2, GP_Pixel pixel);
 --------------------------------------------------------------------------------
 
 Draws a triangle.
 
 [source,c]
 --------------------------------------------------------------------------------
-GP_RetCode GP_FillTriangle(GP_Context *context, int x0, int y0, int x1,
-                           int y1, int x2, int y2, GP_Pixel pixel);
+void GP_FillTriangle(GP_Context *context, int x0, int y0, int x1, int y1,
+                     int x2, int y2, GP_Pixel pixel);
 --------------------------------------------------------------------------------
 
 Draws a filled triangle.
@@ -115,14 +111,14 @@ Rects
 
 [source,c]
 --------------------------------------------------------------------------------
-GP_RetCode GP_RectXYXY(GP_Context *context, int x0, int y0, int x1, int y1,
-                       GP_Pixel pixel);
+void GP_RectXYXY(GP_Context *context, int x0, int y0, int x1, int y1,
+                 GP_Pixel pixel);
 
-GP_RetCode GP_RectXYWH(GP_Context *context, int x, int y,
-                       unsigned int w, unsigned int h, GP_Pixel pixel);
+void GP_RectXYWH(GP_Context *context, int x, int y,
+                 unsigned int w, unsigned int h, GP_Pixel pixel);
 
-GP_RetCode GP_Rect(GP_Context *context, int x0, int y0, int x1, int y1,
-                   GP_Pixel pixel);
+void GP_Rect(GP_Context *context, int x0, int y0, int x1, int y1,
+             GP_Pixel pixel);
 --------------------------------------------------------------------------------
 
 Draws a rectangle.
@@ -132,14 +128,14 @@ The 'GP_Rect()' function is an alias for 'GP_RectXYXY()'.
 
 [source,c]
 --------------------------------------------------------------------------------
-GP_RetCode GP_FillRectXYXY(GP_Context *context, int x0, int y0, int x1, int y1,
-                           GP_Pixel pixel);
+void GP_FillRectXYXY(GP_Context *context, int x0, int y0, int x1, int y1,
+                     GP_Pixel pixel);
 
-GP_RetCode GP_FillRectXYWH(GP_Context *context, int x, int y,
-                           unsigned int w, unsigned int h, GP_Pixel pixel);
+void GP_FillRectXYWH(GP_Context *context, int x, int y,
+                     unsigned int w, unsigned int h, GP_Pixel pixel);
 
-GP_RetCode GP_FillRect(GP_Context *context, int x0, int y0, int x1, int y1,
-                       GP_Pixel pixel);
+void GP_FillRect(GP_Context *context, int x0, int y0, int x1, int y1,
+                 GP_Pixel pixel);
 --------------------------------------------------------------------------------
 
 Draws a filled rectangle.
@@ -154,16 +150,16 @@ Tetragons
 
 [source,c]
 --------------------------------------------------------------------------------
-GP_RetCode GP_Tetragon(GP_Context *context, int x0, int y0, int x1, int y1,
-                       int x2, int y2, int x3, int y3, GP_Pixel pixel);
+void GP_Tetragon(GP_Context *context, int x0, int y0, int x1, int y1,
+                 int x2, int y2, int x3, int y3, GP_Pixel pixel);
 --------------------------------------------------------------------------------
 
 Draws a tetragon.
 
 [source,c]
 --------------------------------------------------------------------------------
-GP_RetCode GP_FillTetragon(GP_Context *context, int x0, int y0, int x1, int y1,
-                           int x2, int y2, int x3, int y3, GP_Pixel pixel);
+void GP_FillTetragon(GP_Context *context, int x0, int y0, int x1, int y1,
+                     int x2, int y2, int x3, int y3, GP_Pixel pixel);
 --------------------------------------------------------------------------------
 
 Draws a filled tetragon.
