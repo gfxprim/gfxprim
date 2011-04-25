@@ -36,27 +36,22 @@ DEF_ELLIPSE_FN(GP_Ellipse16bpp, GP_Context *, GP_Pixel, GP_PutPixel16bpp);
 DEF_ELLIPSE_FN(GP_Ellipse24bpp, GP_Context *, GP_Pixel, GP_PutPixel24bpp);
 DEF_ELLIPSE_FN(GP_Ellipse32bpp, GP_Context *, GP_Pixel, GP_PutPixel32bpp);
 
-GP_RetCode GP_Ellipse(GP_Context *context, int xcenter, int ycenter,
-                      unsigned int a, unsigned int b, GP_Pixel pixel)
+void GP_Ellipse(GP_Context *context, int xcenter, int ycenter,
+                unsigned int a, unsigned int b, GP_Pixel pixel)
 {
-	if (!context)
-		return GP_ENULLPTR;
-	if (!GP_IS_CONTEXT_VALID(context))
-		return GP_EBADCONTEXT;
+	GP_CHECK_CONTEXT(context);
 
 	GP_FN_PER_BPP(GP_Ellipse, context, xcenter, ycenter, a, b, pixel);
 }
 
-GP_RetCode GP_TEllipse(GP_Context *context, int xcenter, int ycenter,
-                       unsigned int a, unsigned int b, GP_Pixel pixel)
+void GP_TEllipse(GP_Context *context, int xcenter, int ycenter,
+                 unsigned int a, unsigned int b, GP_Pixel pixel)
 {
-	if (!context)
-		return GP_ENULLPTR;
-	if (!GP_IS_CONTEXT_VALID(context))
-		return GP_EBADCONTEXT;
-
+	GP_CHECK_CONTEXT(context);
+	
 	/* recalculate center point and swap a and b when axes are swapped */
 	GP_TRANSFORM_POINT(context, xcenter, ycenter);
 	GP_TRANSFORM_SWAP(context, a, b);
-	return GP_Ellipse(context, xcenter, ycenter, a, b, pixel);
+	
+	GP_Ellipse(context, xcenter, ycenter, a, b, pixel);
 }

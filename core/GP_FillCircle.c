@@ -36,25 +36,20 @@ DEF_FILLCIRCLE_FN(GP_FillCircle16bpp, GP_Context *, GP_Pixel, GP_HLine16bpp)
 DEF_FILLCIRCLE_FN(GP_FillCircle24bpp, GP_Context *, GP_Pixel, GP_HLine24bpp)
 DEF_FILLCIRCLE_FN(GP_FillCircle32bpp, GP_Context *, GP_Pixel, GP_HLine32bpp)
 
-GP_RetCode GP_FillCircle(GP_Context *context, int xcenter, int ycenter,
-                         unsigned int r, GP_Pixel pixel)
+void GP_FillCircle(GP_Context *context, int xcenter, int ycenter,
+                   unsigned int r, GP_Pixel pixel)
 {
-	if (!context)
-		return GP_ENULLPTR;
-	if (!GP_IS_CONTEXT_VALID(context))
-		return GP_EBADCONTEXT;
+	GP_CHECK_CONTEXT(context);
 
 	GP_FN_PER_BPP(GP_FillCircle, context, xcenter, ycenter, r, pixel);
 }
 
-GP_RetCode GP_TFillCircle(GP_Context *context, int xcenter, int ycenter,
-                          unsigned int r, GP_Pixel pixel)
+void GP_TFillCircle(GP_Context *context, int xcenter, int ycenter,
+                    unsigned int r, GP_Pixel pixel)
 {
-	if (!context)
-		return GP_ENULLPTR;
-	if (!GP_IS_CONTEXT_VALID(context))
-		return GP_EBADCONTEXT;
-
+	GP_CHECK_CONTEXT(context);
+	
 	GP_TRANSFORM_POINT(context, xcenter, ycenter);
-	return GP_FillCircle(context, xcenter, ycenter, r, pixel);
+	
+	GP_FillCircle(context, xcenter, ycenter, r, pixel);
 }

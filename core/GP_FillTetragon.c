@@ -25,33 +25,25 @@
 
 #include "GP.h"
 
-GP_RetCode GP_FillTetragon(GP_Context * context, int x0, int y0, int x1, int y1,
-                           int x2, int y2, int x3, int y3, GP_Pixel pixel)
+void GP_FillTetragon(GP_Context * context, int x0, int y0, int x1, int y1,
+                     int x2, int y2, int x3, int y3, GP_Pixel pixel)
 {
-	if (!context)
-		return GP_ENULLPTR;
-	if (!GP_IS_CONTEXT_VALID(context))
-		return GP_EBADCONTEXT;
+	GP_CHECK_CONTEXT(context);
 
 	//TODO: fix this!
 	GP_FillTriangle(context, x0, y0, x1, y1, x2, y2, pixel);
 	GP_FillTriangle(context, x3, y3, x1, y1, x2, y2, pixel);
-
-	return GP_ESUCCESS;
 }
 
-GP_RetCode GP_TFillTetragon(GP_Context* context, int x0, int y0, int x1, int y1,
-                            int x2, int y2, int x3, int y3, GP_Pixel pixel)
+void GP_TFillTetragon(GP_Context* context, int x0, int y0, int x1, int y1,
+                      int x2, int y2, int x3, int y3, GP_Pixel pixel)
 {
-	if (!context)
-		return GP_ENULLPTR;
-	if (!GP_IS_CONTEXT_VALID(context))
-		return GP_EBADCONTEXT;
-
+	GP_CHECK_CONTEXT(context);
+	
 	GP_TRANSFORM_POINT(context, x0, y0);
 	GP_TRANSFORM_POINT(context, x1, y1);
 	GP_TRANSFORM_POINT(context, x2, y2);
 	GP_TRANSFORM_POINT(context, x3, y3);
 
-	return GP_FillTetragon(context, x0, y0, x1, y1, x2, y2, x3, y3, pixel);
+	GP_FillTetragon(context, x0, y0, x1, y1, x2, y2, x3, y3, pixel);
 }

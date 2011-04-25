@@ -36,50 +36,46 @@ DEF_HLINE_FN(GP_HLine16bpp, GP_Context *, GP_Pixel, GP_PIXEL_ADDR, GP_WritePixel
 DEF_HLINE_FN(GP_HLine24bpp, GP_Context *, GP_Pixel, GP_PIXEL_ADDR, GP_WritePixels24bpp)
 DEF_HLINE_FN(GP_HLine32bpp, GP_Context *, GP_Pixel, GP_PIXEL_ADDR, GP_WritePixels32bpp)
 
-GP_RetCode GP_HLineXXY(GP_Context *context, int x0, int x1, int y, GP_Pixel pixel)
+void GP_HLineXXY(GP_Context *context, int x0, int x1, int y, GP_Pixel pixel)
 {
-	if (!context)
-		return GP_ENULLPTR;
-	if (!GP_IS_CONTEXT_VALID(context))
-		return GP_EBADCONTEXT;
-
+	GP_CHECK_CONTEXT(context);
+	
 	GP_FN_PER_BPP(GP_HLine, context, x0, x1, y, pixel);
 }
 
-GP_RetCode GP_HLineXYW(GP_Context *context, int x, int y, unsigned int w,
-	GP_Pixel pixel)
+void GP_HLineXYW(GP_Context *context, int x, int y, unsigned int w,
+                 GP_Pixel pixel)
 {
+	/* zero width: do not draw anything */
 	if (w == 0)
-		return GP_ESUCCESS;	/* zero width: do not draw anything */
+		return;
 
-	return GP_HLineXXY(context, x, x + w - 1, y, pixel);
+	GP_HLineXXY(context, x, x + w - 1, y, pixel);
 }
 
-GP_RetCode GP_THLineXXY(GP_Context *context, int x0, int x1, int y, GP_Pixel pixel)
+void GP_THLineXXY(GP_Context *context, int x0, int x1, int y, GP_Pixel pixel)
 {
-	if (!context)
-		return GP_ENULLPTR;
-	if (!GP_IS_CONTEXT_VALID(context))
-		return GP_EBADCONTEXT;
-
+	GP_CHECK_CONTEXT(context);
+	
 	if (context->axes_swap) {
 		GP_TRANSFORM_Y(context, x0);
 		GP_TRANSFORM_Y(context, x1);
 		GP_TRANSFORM_X(context, y);
-		return GP_VLine(context, y, x0, x1, pixel);
+		GP_VLine(context, y, x0, x1, pixel);
+	} else {
+		GP_TRANSFORM_X(context, x0);
+		GP_TRANSFORM_X(context, x1);
+		GP_TRANSFORM_Y(context, y);
+		GP_HLine(context, x0, x1, y, pixel);
 	}
-
-	GP_TRANSFORM_X(context, x0);
-	GP_TRANSFORM_X(context, x1);
-	GP_TRANSFORM_Y(context, y);
-	return GP_HLine(context, x0, x1, y, pixel);
 }
 
-GP_RetCode GP_THLineXYW(GP_Context *context, int x, int y, unsigned int w,
-	GP_Pixel pixel)
+void GP_THLineXYW(GP_Context *context, int x, int y, unsigned int w,
+                  GP_Pixel pixel)
 {
+	/* zero width: do not draw anything */
 	if (w == 0)
-		return GP_ESUCCESS;	/* zero width: do not draw anything */
+		return;
 
-	return GP_THLineXXY(context, x, x + w - 1, y, pixel);
+	GP_THLineXXY(context, x, x + w - 1, y, pixel);
 }

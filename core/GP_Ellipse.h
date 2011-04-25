@@ -28,10 +28,10 @@
 
 #include "GP_Context.h"
 
-GP_RetCode GP_Ellipse(GP_Context *context, int xcenter, int ycenter,
-                      unsigned int a, unsigned int b, GP_Pixel pixel);
+void GP_Ellipse(GP_Context *context, int xcenter, int ycenter,
+                unsigned int a, unsigned int b, GP_Pixel pixel);
 
-GP_RetCode GP_TEllipse(GP_Context *context, int xcenter, int ycenter,
-                       unsigned int a, unsigned int b, GP_Pixel pixel);
+void GP_TEllipse(GP_Context *context, int xcenter, int ycenter,
+                 unsigned int a, unsigned int b, GP_Pixel pixel);
 
 #endif /* GP_ELLIPSE_H */

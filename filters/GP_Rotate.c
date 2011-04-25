@@ -78,6 +78,8 @@ GP_RetCode GP_MirrorV(GP_Context *context)
 		return GP_ENULLPTR;
 
 	GP_FN_PER_BPP(GP_MirrorV, context);
+
+	return GP_ESUCCESS;
 }
 
 DEF_ROTATECW_FN(GP_RotateCW1bpp, GP_Context *, GP_PUTPIXEL_1BPP, GP_GETPIXEL_1BPP)
