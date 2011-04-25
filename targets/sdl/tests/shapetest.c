@@ -129,9 +129,9 @@ void draw_testing_triangle(int x, int y, int xradius, int yradius)
 	/* draw the three vertices green; they should never be visible
 	 * because the red triangle should cover them; if they are visible,
 	 * it means we don't draw to the end */
-	GP_PutPixel(&context, x0, y0, green);
-	GP_PutPixel(&context, x1, y1, green);
-	GP_PutPixel(&context, x2, y2, green);
+	GP_TPutPixel(&context, x0, y0, green);
+	GP_TPutPixel(&context, x1, y1, green);
+	GP_TPutPixel(&context, x2, y2, green);
 
 	if (outline == 1)
 		GP_TTriangle(&context, x0, y0, x1, y1, x2, y2, yellow);
