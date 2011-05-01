@@ -39,27 +39,22 @@ DEF_FILLTRIANGLE_FN(GP_FillTriangle16bpp, GP_Context *, GP_Pixel, GP_HLine16bpp,
 DEF_FILLTRIANGLE_FN(GP_FillTriangle24bpp, GP_Context *, GP_Pixel, GP_HLine24bpp, GP_PutPixel24bpp)
 DEF_FILLTRIANGLE_FN(GP_FillTriangle32bpp, GP_Context *, GP_Pixel, GP_HLine32bpp, GP_PutPixel32bpp)
 
-GP_RetCode GP_FillTriangle(GP_Context * context, int x0, int y0, int x1, int y1,
-                           int x2, int y2, GP_Pixel pixel)
+void GP_FillTriangle(GP_Context * context, int x0, int y0, int x1, int y1,
+                     int x2, int y2, GP_Pixel pixel)
 {
-	if (!context)
-		return GP_ENULLPTR;
-	if (!GP_IS_CONTEXT_VALID(context))
-		return GP_EBADCONTEXT;
+	GP_CHECK_CONTEXT(context);
 
 	GP_FN_PER_BPP(GP_FillTriangle, context, x0, y0, x1, y1, x2, y2, pixel);
 }
 
-GP_RetCode GP_TFillTriangle(GP_Context* context, int x0, int y0, int x1, int y1,
-                            int x2, int y2, GP_Pixel pixel)
+void GP_TFillTriangle(GP_Context* context, int x0, int y0, int x1, int y1,
+                      int x2, int y2, GP_Pixel pixel)
 {
-	if (!context)
-		return GP_ENULLPTR;
-	if (!GP_IS_CONTEXT_VALID(context))
-		return GP_EBADCONTEXT;
-
+	GP_CHECK_CONTEXT(context);
+	
 	GP_TRANSFORM_POINT(context, x0, y0);
 	GP_TRANSFORM_POINT(context, x1, y1);
 	GP_TRANSFORM_POINT(context, x2, y2);
-	return GP_FillTriangle(context, x0, y0, x1, y1, x2, y2, pixel);
+	
+	GP_FillTriangle(context, x0, y0, x1, y1, x2, y2, pixel);
 }

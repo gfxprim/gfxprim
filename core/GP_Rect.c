@@ -25,51 +25,41 @@
 
 #include "GP.h"
 
-GP_RetCode GP_RectXYXY(GP_Context *context, int x0, int y0, int x1, int y1,
-                   GP_Pixel pixel)
+void GP_RectXYXY(GP_Context *context, int x0, int y0, int x1, int y1,
+                 GP_Pixel pixel)
 {
-	if (!context)
-		return GP_ENULLPTR;
-	if (!GP_IS_CONTEXT_VALID(context))
-		return GP_EBADCONTEXT;
+	GP_CHECK_CONTEXT(context);
 
 	GP_HLine(context, x0, x1, y0, pixel);
 	GP_HLine(context, x0, x1, y1, pixel);
 	GP_VLine(context, x0, y0, y1, pixel);
 	GP_VLine(context, x1, y0, y1, pixel);
-
-	return GP_ESUCCESS;
 }
 
-GP_RetCode GP_RectXYWH(GP_Context *context, int x, int y,
-	unsigned int w, unsigned int h, GP_Pixel pixel)
+void GP_RectXYWH(GP_Context *context, int x, int y,
+	         unsigned int w, unsigned int h, GP_Pixel pixel)
 {
-	if (!context)
-		return GP_ENULLPTR;
-	if (!GP_IS_CONTEXT_VALID(context))
-		return GP_EBADCONTEXT;
+	GP_CHECK_CONTEXT(context);
 
 	GP_HLine(context, x, x + w, y, pixel);
 	GP_HLine(context, x, x + w, y + h, pixel);
 	GP_VLine(context, x, y, y + h, pixel);
 	GP_VLine(context, x + w, y, y + h, pixel);
-
-	return GP_ESUCCESS;
 }
 
-GP_RetCode GP_TRectXYXY(GP_Context *context, int x0, int y0, int x1, int y1,
-                    GP_Pixel pixel)
+void GP_TRectXYXY(GP_Context *context, int x0, int y0, int x1, int y1,
+                  GP_Pixel pixel)
 {
+	GP_CHECK_CONTEXT(context);
+	
 	GP_TRANSFORM_POINT(context, x0, y0);
 	GP_TRANSFORM_POINT(context, x1, y1);
-	return GP_Rect(context, x0, y0, x1, y1, pixel);
+
+	GP_RectXYXY(context, x0, y0, x1, y1, pixel);
 }
 
-GP_RetCode GP_TRectXYWH(GP_Context *context, int x, int y,
-	unsigned int w, unsigned int h, GP_Pixel pixel)
+void GP_TRectXYWH(GP_Context *context, int x, int y,
+	          unsigned int w, unsigned int h, GP_Pixel pixel)
 {
-	int x1 = x + w;
-	int y1 = y + h;
-	return GP_TRect(context, x, y, x1, y1, pixel);
+	GP_TRectXYXY(context, x, y, x + w, y + h, pixel);
 }
-

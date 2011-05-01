@@ -61,10 +61,8 @@
 		FN_NAME##32bpp(__VA_ARGS__); \
 	break; \
 	default: \
-		return GP_ENOIMPL; \
+	break; \
 	} \
-\
-	return GP_ESUCCESS;
 
 #define GP_FN_RET_PER_BPP(FN_NAME, ...) \
 \

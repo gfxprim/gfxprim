@@ -31,43 +31,6 @@
 #include <unistd.h>
 
 /*
- * Macros for writing a single pixel value to the specified address,
- * provided that the target buffer has 8, 16, 24, or 32 bytes per pixel.
- */
-
-#define GP_WritePixel8bpp(ptr, pixel) { \
-	*((uint8_t *) ptr) = (uint8_t) pixel; \
-}
-
-#define GP_WritePixel16bpp(ptr, pixel) { \
-	*((uint16_t *) ptr) = (uint16_t) pixel; \
-}
-
-#if __BYTE_ORDER == __BIG_ENDIAN
-
-#define GP_WritePixel24bpp(ptr, pixel) { \
-	((uint8_t *) ptr)[0] = (pixel >> 16) & 0xff; \
-	((uint8_t *) ptr)[1] = (pixel >> 8) & 0xff; \
-	((uint8_t *) ptr)[2] = pixel & 0xff; \
-}
-
-#elif __BYTE_ORDER == __LITTLE_ENDIAN
-
-#define GP_WritePixel24bpp(ptr, pixel) { \
-	((uint8_t *) ptr)[0] = pixel & 0xff; \
-	((uint8_t *) ptr)[1] = (pixel >> 8) & 0xff; \
-	((uint8_t *) ptr)[2] = (pixel >> 16) & 0xff; \
-}
-
-#else
-#error "Could not detect machine endianity"
-#endif
-
-#define GP_WritePixel32bpp(ptr, pixel) { \
-	*((uint32_t *) ptr) = (uint32_t) pixel; \
-}
-
-/*
  * Calls for writing a linear block of pixels.
  */
 

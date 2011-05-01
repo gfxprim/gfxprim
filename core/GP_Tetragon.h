@@ -28,10 +28,10 @@
 
 #include "GP_Context.h"
 
-GP_RetCode GP_Tetragon(GP_Context *context, int x0, int y0, int x1, int y1,
-                       int x2, int y2, int x3, int y3, GP_Pixel pixel);
+void GP_Tetragon(GP_Context *context, int x0, int y0, int x1, int y1,
+                 int x2, int y2, int x3, int y3, GP_Pixel pixel);
 
-GP_RetCode GP_TTetragon(GP_Context *context, int x0, int y0, int x1, int y1,
-                        int x2, int y2, int x3, int y3, GP_Pixel pixel);
+void GP_TTetragon(GP_Context *context, int x0, int y0, int x1, int y1,
+                  int x2, int y2, int x3, int y3, GP_Pixel pixel);
 
 #endif /* GP_TETRAGON_H */

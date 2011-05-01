@@ -28,9 +28,11 @@
 
 #include "GP.h"
 
-GP_RetCode GP_Fill(GP_Context *context, GP_Pixel pixel)
+void GP_Fill(GP_Context *context, GP_Pixel pixel)
 {
-	return GP_FillRect(context, 0, 0, context->w, context->h, pixel);
+	GP_CHECK_CONTEXT(context);
+	
+	GP_FillRect(context, 0, 0, context->w, context->h, pixel);
 }
 
 #endif /* GP_FILL_H */

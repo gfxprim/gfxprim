@@ -28,6 +28,6 @@
 
 #include "GP_Context.h"
 
-GP_RetCode GP_Fill(GP_Context *context, GP_Pixel pixel);
+void GP_Fill(GP_Context *context, GP_Pixel pixel);
 
 #endif /* GP_FILL_H */

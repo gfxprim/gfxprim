@@ -36,50 +36,46 @@ DEF_VLINE_FN(GP_VLine16bpp, GP_Context *, GP_Pixel, GP_PutPixel16bpp)
 DEF_VLINE_FN(GP_VLine24bpp, GP_Context *, GP_Pixel, GP_PutPixel24bpp)
 DEF_VLINE_FN(GP_VLine32bpp, GP_Context *, GP_Pixel, GP_PutPixel32bpp)
 
-GP_RetCode GP_VLineXYY(GP_Context *context, int x, int y0, int y1, GP_Pixel pixel)
+void GP_VLineXYY(GP_Context *context, int x, int y0, int y1, GP_Pixel pixel)
 {
-	if (!context)
-		return GP_ENULLPTR;
-	if (!GP_IS_CONTEXT_VALID(context))
-		return GP_EBADCONTEXT;
+	GP_CHECK_CONTEXT(context);
 
 	GP_FN_PER_BPP(GP_VLine, context, x, y0, y1, pixel);
 }
 
-GP_RetCode GP_VLineXYH(GP_Context *context, int x, int y, unsigned int height,
-	GP_Pixel pixel)
+void GP_VLineXYH(GP_Context *context, int x, int y, unsigned int height,
+                 GP_Pixel pixel)
 {
+	/* zero height: do not draw anything */
 	if (height == 0)
-		return GP_ESUCCESS;	/* zero height: do not draw anything */
+		return;
 
-	return GP_VLineXYY(context, x, y, y + height - 1, pixel);
+	GP_VLineXYY(context, x, y, y + height - 1, pixel);
 }
 
-GP_RetCode GP_TVLineXYY(GP_Context *context, int x, int y0, int y1, GP_Pixel pixel)
+void GP_TVLineXYY(GP_Context *context, int x, int y0, int y1, GP_Pixel pixel)
 {
-	if (!context)
-		return GP_ENULLPTR;
-	if (!GP_IS_CONTEXT_VALID(context))
-		return GP_EBADCONTEXT;
-
+	GP_CHECK_CONTEXT(context);
+	
 	if (context->axes_swap) {
 		GP_TRANSFORM_Y(context, x);
 		GP_TRANSFORM_X(context, y0);
 		GP_TRANSFORM_X(context, y1);
-		return GP_HLine(context, y0, y1, x, pixel);
+		GP_HLine(context, y0, y1, x, pixel);
+	} else {
+		GP_TRANSFORM_X(context, x);
+		GP_TRANSFORM_Y(context, y0);
+		GP_TRANSFORM_Y(context, y1);
+		GP_VLine(context, x, y0, y1, pixel);
 	}
-
-	GP_TRANSFORM_X(context, x);
-	GP_TRANSFORM_Y(context, y0);
-	GP_TRANSFORM_Y(context, y1);
-	return GP_VLine(context, x, y0, y1, pixel);
 }
 
-GP_RetCode GP_TVLineXYH(GP_Context *context, int x, int y, unsigned int height,
-	GP_Pixel pixel)
+void GP_TVLineXYH(GP_Context *context, int x, int y, unsigned int height,
+                  GP_Pixel pixel)
 {
+	/* zero height: do not draw anything */
 	if (height == 0)
-		return GP_ESUCCESS;	/* zero height: do not draw anything */
+		return;
 
-	return GP_TVLineXYY(context, x, y, y + height - 1, pixel);
+	GP_TVLineXYY(context, x, y, y + height - 1, pixel);
 }

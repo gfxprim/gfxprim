@@ -29,10 +29,10 @@
 #include "GP_Context.h"
 #include "GP_Common.h"
 
-GP_RetCode GP_FillTriangle(GP_Context *context, int x0, int y0, int x1,
-                           int y1, int x2, int y2, GP_Pixel pixel);
+void GP_FillTriangle(GP_Context *context, int x0, int y0, int x1, int y1,
+                     int x2, int y2, GP_Pixel pixel);
 
-GP_RetCode GP_TFillTriangle(GP_Context *context, int x0, int y0, int x1,
-                            int y1, int x2, int y2, GP_Pixel pixel);
+void GP_TFillTriangle(GP_Context *context, int x0, int y0, int x1, int y1,
+                      int x2, int y2, GP_Pixel pixel);
 
 #endif /* GP_FILLTRIANGLE_H */

@@ -38,17 +38,15 @@ void GP_HLine16bpp(GP_Context *context, int x0, int x1, int y, GP_Pixel pixel);
 void GP_HLine24bpp(GP_Context *context, int x0, int x1, int y, GP_Pixel pixel);
 void GP_HLine32bpp(GP_Context *context, int x0, int x1, int y, GP_Pixel pixel);
 
-GP_RetCode GP_HLineXXY(GP_Context *context, int x0, int x1, int y,
-	GP_Pixel pixel);
+void GP_HLineXXY(GP_Context *context, int x0, int x1, int y, GP_Pixel pixel);
 
-GP_RetCode GP_HLineXYW(GP_Context *context, int x, int y, unsigned int w,
-	GP_Pixel pixel);
+void GP_HLineXYW(GP_Context *context, int x, int y, unsigned int w,
+                 GP_Pixel pixel);
 
-GP_RetCode GP_THLineXXY(GP_Context *context, int x0, int x1, int y,
-	GP_Pixel pixel);
+void GP_THLineXXY(GP_Context *context, int x0, int x1, int y, GP_Pixel pixel);
 
-GP_RetCode GP_THLineXYW(GP_Context *context, int x, int y, unsigned int w,
-	GP_Pixel pixel);
+void GP_THLineXYW(GP_Context *context, int x, int y, unsigned int w,
+                  GP_Pixel pixel);
 
 /* default argument set is XXY */
 #define GP_HLine GP_HLineXXY
