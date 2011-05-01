@@ -23,48 +23,11 @@
  *                                                                           *
  *****************************************************************************/
 
-#ifndef GP_H
-#define GP_H
+#ifndef GP_FILL_POLYGON_H
+#define GP_FILL_POLYGON_H
 
-#include <stdint.h>
-
-/* basic definitions and structures */
-#include "GP_Common.h"
-#include "GP_Transform.h"
 #include "GP_Context.h"
 
-/* semi-public, low-level drawing API */
-#include "GP_WritePixel.h"
+void GP_FillPolygon(GP_Context *context, int vertex_count, int *xy, GP_Pixel pixel);
 
-/* colors */
-#include "GP_Color.h"
-#include "GP_Palette.h"
-
-/* public drawing API */
-#include "GP_Fill.h"
-#include "GP_GetPixel.h"
-#include "GP_PutPixel.h"
-#include "GP_HLine.h"
-#include "GP_VLine.h"
-#include "GP_Line.h"
-#include "GP_LineTrack.h"
-#include "GP_Rect.h"
-#include "GP_FillRect.h"
-#include "GP_Triangle.h"
-#include "GP_FillTriangle.h"
-#include "GP_Tetragon.h"
-#include "GP_FillTetragon.h"
-#include "GP_Circle.h"
-#include "GP_FillCircle.h"
-#include "GP_Ellipse.h"
-#include "GP_FillEllipse.h"
-#include "GP_Polygon.h"
-#include "GP_Symbol.h"
-
-/* fonts */
-#include "GP_Font.h"
-#include "GP_TextStyle.h"
-#include "GP_TextMetric.h"
-#include "GP_Text.h"
-
-#endif /* GP_H */
+#endif /* GP_RECT_H */
