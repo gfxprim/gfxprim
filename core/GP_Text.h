@@ -28,15 +28,27 @@
 
 #include "GP_Context.h"
 
-/* Where the text should be drawn relatively to the specified point */
+/* How the rendered text should be aligned.
+ * For GP_Text(), the alignment is relative to the specified point:
+ *
+ *   - GP_ALIGN_LEFT draws the text to the left of the point,
+ *   - GP_ALIGN_CENTER centers it at the point horizontally,
+ *   - GP_ALIGN_RIGHT draws the text to the right of the point
+ *   - GP_VALIGN_ABOVE (or TOP) draws the text above the point
+ *   - GP_VALIGN_CENTER centers the text vertically at the point
+ *   - GP_VALIGN_BASELINE places the text baseline at the point
+ *   - GP_VALIGN_BELOW (or BOTTOM) draws the text below the point
+ */
 typedef enum GP_TextAlign {
-	GP_ALIGN_LEFT = 0x01,		/* to the left from the point */
-	GP_ALIGN_CENTER = 0x02,		/* centered on the point */
-	GP_ALIGN_RIGHT = 0x03,		/* to the right from the point */
-	GP_VALIGN_ABOVE = 0x10,		/* above the point */
-	GP_VALIGN_CENTER = 0x20,	/* centered on the point */
-	GP_VALIGN_BASELINE = 0x30,	/* baseline is on the point */
-	GP_VALIGN_BELOW = 0x40		/* below the point */
+	GP_ALIGN_LEFT = 0x01,
+	GP_ALIGN_CENTER = 0x02,
+	GP_ALIGN_RIGHT = 0x03,
+	GP_VALIGN_ABOVE = 0x10,
+	GP_VALIGN_TOP = GP_VALIGN_ABOVE,
+	GP_VALIGN_CENTER = 0x20,
+	GP_VALIGN_BASELINE = 0x30,
+	GP_VALIGN_BELOW = 0x40,
+	GP_VALIGN_BOTTOM = GP_VALIGN_BELOW,
 } GP_TextAlign;
 
 GP_RetCode GP_Text(GP_Context *context, const GP_TextStyle *style,
