@@ -28,6 +28,7 @@
 
 #include "GP_Context.h"
 
-void GP_FillPolygon(GP_Context *context, int vertex_count, int *xy, GP_Pixel pixel);
+void GP_FillPolygon(GP_Context *context, int vertex_count, const int *xy,
+		GP_Pixel pixel);
 
 #endif /* GP_RECT_H */

@@ -26,22 +26,30 @@
 #include "GP.h"
 
 #include <limits.h>
+#include <stdlib.h>
 
 struct GP_PolygonEdge {
 	int startx, starty;
 	int endx, endy;
 	int dx, dy, sx;
-	struct GP_PolygonEdge *next;
 };
 
 struct GP_Polygon {
 	struct GP_PolygonEdge *edges;
+	int edge_count;
 	int ymin, ymax;
 };
 
-static struct GP_PolygonEdge *GP_NewEdge(int x1, int y1, int x2, int y2)
+#define GP_POLYGON_INITIALIZER { \
+	.edges = NULL, \
+	.edge_count = 0, \
+	.ymin = INT_MAX, \
+	.ymax = 0 \
+}
+
+static void GP_InitEdge(struct GP_PolygonEdge *edge,
+		int x1, int y1, int x2, int y2)
 {
-	struct GP_PolygonEdge *edge = malloc(sizeof(*edge));
 	if (y1 < y2) {			/* coords are top-down, correct */
 		edge->startx = x1;
 		edge->starty = y1;
@@ -57,105 +65,107 @@ static struct GP_PolygonEdge *GP_NewEdge(int x1, int y1, int x2, int y2)
 	edge->dx = abs(edge->endx - edge->startx);
 	edge->dy = edge->endy - edge->starty;
 	edge->sx = (edge->endx >= edge->startx) ? 1 : -1;
-
-	return edge;
 }
 
-static void GP_InsertEdge(struct GP_Polygon *poly, struct GP_PolygonEdge *new_edge)
+static void GP_AddEdge(struct GP_Polygon *poly, int x1, int y1, int x2, int y2)
 {
-	struct GP_PolygonEdge *cur_edge = poly->edges;
+	struct GP_PolygonEdge *edge = poly->edges + poly->edge_count;
+	
+	poly->edge_count++;
 
-	poly->ymin = GP_MIN(poly->ymin, new_edge->starty);
-	poly->ymax = GP_MAX(poly->ymax, new_edge->endy);
+	GP_InitEdge(edge, x1, y1, x2, y2);
 
-	if (cur_edge == NULL || cur_edge->starty > new_edge->starty) {
-		new_edge->next = cur_edge;
-		poly->edges = new_edge;
-		return;
-	}
-
-	for (;;) {
-		if (cur_edge->next == NULL || cur_edge->next->starty > new_edge->starty) {
-			new_edge->next = cur_edge->next;
-			cur_edge->next = new_edge;
-			return;
-		}
-		cur_edge = cur_edge->next;
-	}
+	poly->ymin = GP_MIN(poly->ymin, edge->starty);
+	poly->ymax = GP_MAX(poly->ymax, edge->endy);
 }
 
-static struct GP_Polygon *GP_NewPolygon(void)
+static int GP_CompareEdgeStartY(const void *edge1, const void *edge2)
 {
-	struct GP_Polygon *poly = malloc(sizeof(struct GP_Polygon));
-	poly->edges = NULL;
-	poly->ymin = INT_MAX;
-	poly->ymax = 0;
-	return poly;
+	int y1 = ((struct GP_PolygonEdge *) edge1)->starty;
+	int y2 = ((struct GP_PolygonEdge *) edge2)->starty;
+	if (y1 > y2)
+		return 1;
+	else if (y1 == y2)
+		return 0;
+	else
+		return -1;
 }
 
-static void GP_LoadPolygon(struct GP_Polygon *poly, int vertex_count, int *xy)
+static void GP_LoadPolygon(struct GP_Polygon *poly, int vertex_count,
+		const int *xy)
 {
+	poly->edge_count = 0;
+	poly->edges = calloc(sizeof(struct GP_PolygonEdge),
+			vertex_count);
+
 	int i;
 	int coord_count = 2*vertex_count - 2;
-	for (i = 0; i < coord_count; i+=2) {
+	for (i = 0; i < coord_count; i+=2) { 
 
-
-		if (xy[i+1] == xy[i+3]) {
-			continue;	/* skip horizontal edges */
+		/* add the edge, unless it is horizontal */
+		if (xy[i+1] != xy[i+3]) {
+			GP_AddEdge(poly, xy[i], xy[i+1], xy[i+2], xy[i+3]);
 		}
-
-		struct GP_PolygonEdge *edge = GP_NewEdge(xy[i],
-				xy[i+1], xy[i+2], xy[i+3]);
-		
-		GP_InsertEdge(poly, edge);
 	}
 
-	/* add the closing edge */
+	/* add the closing edge, unless it is horizontal */
 	if (xy[1] != xy[i+1]) {
-		struct GP_PolygonEdge *edge = GP_NewEdge(xy[i], xy[i+1],
-			xy[0], xy[1]);
-		GP_InsertEdge(poly, edge);
+		GP_AddEdge(poly, xy[i], xy[i+1], xy[0], xy[1]);
 	}
+
+	/* sort edges by their starting Y coordinate */
+	qsort(poly->edges, poly->edge_count, sizeof(struct GP_PolygonEdge),
+		GP_CompareEdgeStartY);
 }
 
-static void GP_FreePolygon(struct GP_Polygon *poly)
+static void GP_ResetPolygon(struct GP_Polygon *poly)
 {
-	struct GP_PolygonEdge *edge = poly->edges;
-	for (;;) {
-		struct GP_PolygonEdge *next_edge = edge->next;
-		free(edge);
-		if (next_edge == NULL)
-			break;
-		edge = next_edge;
-	}
-	free(poly);
+	free(poly->edges);
+	poly->edges = NULL;
+	poly->edge_count = 0;
+	poly->ymin = INT_MAX;
+	poly->ymax = 0;
 }
 
-void GP_FillPolygon(GP_Context *context, int vertex_count, int *xy, GP_Pixel pixel)
+/* Finds an X coordinate of an intersection of the edge
+ * with the given Y line.
+ */
+static inline int GP_FindIntersection(int y, const struct GP_PolygonEdge *edge)
 {
-	struct GP_Polygon *poly = GP_NewPolygon();
-	GP_LoadPolygon(poly, vertex_count, xy);
+	int edge_y = y - edge->starty;
+	int edge_x;
+	for (edge_x = edge->sx > 0 ? edge->startx : edge->endx;
+		edge->startx*edge->dy + edge->sx*edge_y*edge->dx - edge_x*edge->dy > 0;
+		edge_x++);
+	return edge_x;
+}
+
+void GP_FillPolygon(GP_Context *context, int vertex_count, const int *xy,
+		GP_Pixel pixel)
+{
+	struct GP_Polygon poly = GP_POLYGON_INITIALIZER;
+
+	GP_LoadPolygon(&poly, vertex_count, xy);
 
 	int y;
-	for (y = poly->ymin; y <= poly->ymax; y++) {
+	for (y = poly.ymin; y <= poly.ymax; y++) {
 		int startx = INT_MAX;
 		int endx = 0;
 
-		struct GP_PolygonEdge *edge;
-		for (edge = poly->edges; edge; edge = edge->next) {
-			if (y >= edge->starty && y <= edge->endy) {
-				int edge_y = y - edge->starty;
-				int edge_x;
-				for (edge_x = edge->sx > 0 ? edge->startx: edge->endx;
-					edge->startx*edge->dy + edge->sx*edge_y*edge->dx - edge_x*edge->dy > 0;
-					edge_x++);
-				startx = GP_MIN(startx, edge_x);
-				endx = GP_MAX(endx, edge_x);
-			}
+		int i;
+		for (i = 0; i < poly.edge_count; i++) {
+			struct GP_PolygonEdge *edge = poly.edges + i;
+
+			if (y < edge->starty || y > edge->endy)
+				continue;
+
+			int edge_x = GP_FindIntersection(y, edge);
+			startx = GP_MIN(startx, edge_x);
+			endx = GP_MAX(endx, edge_x);
 		}
 
 		GP_HLine(context, startx, endx, y, pixel);
 	}
 
-	GP_FreePolygon(poly);
+	GP_ResetPolygon(&poly);
 }
