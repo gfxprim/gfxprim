@@ -50,6 +50,18 @@
 })
 
 /*
+ * Checks the condition and aborts immediately if it is true,
+ * printing the condition and location in the source.
+ */
+#define GP_BUG_ON(test) do { \
+		if ((test)) { \
+			fprintf(stderr, "*** gfxprim: BUG: %s:%d: in %s: %s\n", \
+				__FILE__, __LINE__, __FUNCTION__, #test); \
+			abort(); \
+		} \
+	} while (0)
+
+/*
  * Abort and print abort location to stderr
  */
 #define GP_ABORT(msg) do { \
