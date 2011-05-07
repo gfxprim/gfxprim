@@ -31,7 +31,7 @@
 struct GP_PolygonEdge {
 	int startx, starty;
 	int endx, endy;
-	int dx, dy, sx;
+	int dx, dy;
 };
 
 struct GP_Polygon {
@@ -62,9 +62,8 @@ static void GP_InitEdge(struct GP_PolygonEdge *edge,
 		edge->endy = y1;
 	}
 
-	edge->dx = abs(edge->endx - edge->startx);
+	edge->dx = edge->endx - edge->startx;
 	edge->dy = edge->endy - edge->starty;
-	edge->sx = (edge->endx >= edge->startx) ? 1 : -1;
 }
 
 static void GP_AddEdge(struct GP_Polygon *poly, int x1, int y1, int x2, int y2)
@@ -79,16 +78,22 @@ static void GP_AddEdge(struct GP_Polygon *poly, int x1, int y1, int x2, int y2)
 	poly->ymax = GP_MAX(poly->ymax, edge->endy);
 }
 
-static int GP_CompareEdgeStartY(const void *edge1, const void *edge2)
+static int GP_CompareEdges(const void *edge1, const void *edge2)
 {
-	int y1 = ((struct GP_PolygonEdge *) edge1)->starty;
-	int y2 = ((struct GP_PolygonEdge *) edge2)->starty;
-	if (y1 > y2)
+	struct GP_PolygonEdge *e1 = (struct GP_PolygonEdge *) edge1;
+	struct GP_PolygonEdge *e2 = (struct GP_PolygonEdge *) edge2;
+
+	if (e1->starty > e2->starty)
 		return 1;
-	else if (y1 == y2)
-		return 0;
-	else
+	if (e1->starty > e2->starty)
 		return -1;
+
+	if (e1->startx > e2->startx)
+		return 1;
+	if (e1->startx < e2->startx)
+		return -1;
+
+	return 0;
 }
 
 static void GP_LoadPolygon(struct GP_Polygon *poly, int vertex_count,
@@ -113,9 +118,9 @@ static void GP_LoadPolygon(struct GP_Polygon *poly, int vertex_count,
 		GP_AddEdge(poly, xy[i], xy[i+1], xy[0], xy[1]);
 	}
 
-	/* sort edges by their starting Y coordinate */
+	/* sort edges */
 	qsort(poly->edges, poly->edge_count, sizeof(struct GP_PolygonEdge),
-		GP_CompareEdgeStartY);
+		GP_CompareEdges);
 }
 
 static void GP_ResetPolygon(struct GP_Polygon *poly)
@@ -127,17 +132,24 @@ static void GP_ResetPolygon(struct GP_Polygon *poly)
 	poly->ymax = 0;
 }
 
-/* Finds an X coordinate of an intersection of the edge
+/*
+ * Finds an X coordinate of an intersection of the edge
  * with the given Y line.
  */
 static inline int GP_FindIntersection(int y, const struct GP_PolygonEdge *edge)
 {
-	int edge_y = y - edge->starty;
-	int edge_x;
-	for (edge_x = edge->sx > 0 ? edge->startx : edge->endx;
-		edge->startx*edge->dy + edge->sx*edge_y*edge->dx - edge_x*edge->dy > 0;
-		edge_x++);
-	return edge_x;
+	int edge_y = y - edge->starty;		/* Y relative to the edge */
+	int x = edge->startx;
+
+	if (edge->dx > 0) {
+		while (edge->startx*edge->dy + edge_y*edge->dx > x*edge->dy)
+			x++;
+	} else {
+		while (edge->startx*edge->dy + edge_y*edge->dx < x*edge->dy)
+			x--;
+	}
+
+	return x;
 }
 
 void GP_FillPolygon(GP_Context *context, int vertex_count, const int *xy,
@@ -147,10 +159,13 @@ void GP_FillPolygon(GP_Context *context, int vertex_count, const int *xy,
 
 	GP_LoadPolygon(&poly, vertex_count, xy);
 
-	int y;
+	int y, startx, endx;
+	int startx_prev = -INT_MAX;
+	int endx_prev = INT_MAX;
+
 	for (y = poly.ymin; y <= poly.ymax; y++) {
-		int startx = INT_MAX;
-		int endx = 0;
+		startx = INT_MAX;
+		endx = 0;
 
 		int i;
 		for (i = 0; i < poly.edge_count; i++) {
@@ -159,12 +174,22 @@ void GP_FillPolygon(GP_Context *context, int vertex_count, const int *xy,
 			if (y < edge->starty || y > edge->endy)
 				continue;
 
-			int edge_x = GP_FindIntersection(y, edge);
-			startx = GP_MIN(startx, edge_x);
-			endx = GP_MAX(endx, edge_x);
+			int inter = GP_FindIntersection(y, edge);
+
+			startx = GP_MIN(startx, inter);
+			endx = GP_MAX(endx, inter);
+
+			if (y != edge->endy) {
+				inter = GP_FindIntersection(y + 1, edge);
+				startx = GP_MIN(startx, inter);
+				endx = GP_MAX(endx, inter);
+			}
 		}
 
 		GP_HLine(context, startx, endx, y, pixel);
+
+		startx_prev = startx;
+		endx_prev = endx;
 	}
 
 	GP_ResetPolygon(&poly);
