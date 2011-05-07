@@ -62,4 +62,9 @@ typedef struct {
  */
 void GP_DefaultTextStyle(GP_TextStyle *style); 
 
+#define GP_CHECK_TEXT_STYLE(style) do { \
+	GP_CHECK(style, "NULL style specified"); \
+	GP_CHECK(style->font, "NULL font specified in style"); \
+} while(0)
+
 #endif /* GP_TEXTSTYLE_H */

@@ -38,7 +38,7 @@ typedef struct GP_Context {
 	uint8_t bpp;		 /* values: 1, 2, 4, 8, 16, 24, 32 */
 	uint32_t bytes_per_row;
 	uint32_t w;		 /* width */
-	uint32_t h;      	 /* heigth */
+	uint32_t h;      	 /* height */
 
 	GP_PixelType pixel_type; /* hardware pixel format */
 
@@ -73,12 +73,20 @@ inline GP_PixelType GP_GetContextPixelType(const GP_Context *context);
 
 /* Performs a series of sanity checks on context, aborting if any fails. */
 #define GP_CHECK_CONTEXT(context) do { \
-		GP_CHECK(context != NULL); \
-		GP_CHECK(context->w > 0 && context->h > 0); \
-		GP_CHECK(context->clip_w_min <= context->clip_w_max); \
-		GP_CHECK(context->clip_h_min <= context->clip_h_max); \
-		GP_CHECK(context->clip_w_max < context->w); \
-		GP_CHECK(context->clip_h_max < context->h); \
+		GP_CHECK(context, \
+				"NULL passed as context"); \
+		GP_CHECK(context->pixels, \
+				"invalid context: NULL image pointer"); \
+		GP_CHECK(context->bpp <= 32, \
+				"invalid context: unsupported bits-per-pixel count"); \
+		GP_CHECK(context->w > 0 && context->h > 0, \
+				"invalid context: invalid image size"); \
+		GP_CHECK(context->clip_w_min <= context->clip_w_max \
+				&& context->clip_h_min <= context->clip_h_max, \
+				"invalid context: invalid clipping rectangle"); \
+		GP_CHECK(context->clip_w_max < context->w \
+				&& context->clip_h_max < context->h, \
+				"invalid context: clipping rectangle larger than image"); \
 	} while (0)
 
 /*

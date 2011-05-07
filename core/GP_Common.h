@@ -50,13 +50,15 @@
 })
 
 /*
- * Checks the condition and aborts immediately if it is true,
+ * Checks the condition and aborts immediately if it is not satisfied,
  * printing the condition and location in the source.
+ * (Intended for checking for bugs within the library itself.
+ * GP_CHECK is used for reporting user errors, like invalid arguments.)
  */
-#define GP_BUG_ON(test) do { \
-		if ((test)) { \
-			fprintf(stderr, "*** gfxprim: BUG: %s:%d: in %s: %s\n", \
-				__FILE__, __LINE__, __FUNCTION__, #test); \
+#define GP_ASSERT(cond) do { \
+		if ((cond)) { \
+			fprintf(stderr, "*** gfxprim: %s:%d: in %s: BUG - assertion failed: %s\n", \
+				__FILE__, __LINE__, __FUNCTION__, #cond); \
 			abort(); \
 		} \
 	} while (0)
@@ -71,12 +73,15 @@
 	} while (0)
 
 /*
- * Perform a runtime check, on failure abort and print a message
+ * Perform a runtime check, on failure abort and print a message.
+ * (This macro is intended for checks for user-caused errors,
+ * like invalid arguments, leaving the library in improper state etc.
+ * For internal sanity checks, use GP_ASSERT.)
  */
-#define GP_CHECK(cond) do { \
+#define GP_CHECK(cond, msg) do { \
 		if (!(cond)) { \
-			fprintf(stderr, "*** gfxprim: check failed: %s:%d: in %s: %s\n", \
-				__FILE__, __LINE__, __FUNCTION__, #cond); \
+			fprintf(stderr, "*** gfxprim: %s:%d: in %s: %s\n", \
+				__FILE__, __LINE__, __FUNCTION__, #msg); \
 			abort(); \
 		} \
 	} while (0)

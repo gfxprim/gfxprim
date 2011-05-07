@@ -29,14 +29,14 @@
 
 unsigned int GP_GetCharDataSize(const GP_Font *font)
 {
-	GP_CHECK(font != NULL);
+	GP_CHECK(font, "NULL font specified");
 
 	return sizeof(GP_CharData) + font->bytes_per_line * font->height;
 }
 
 const GP_CharData *GP_GetCharData(const GP_Font *font, int c)
 {
-	GP_CHECK(font != NULL); 
+	GP_CHECK(font, "NULL font specified"); 
 
 	/* characters before space are not encoded */
 	switch (font->charset) {
@@ -70,7 +70,7 @@ int GP_GetCharCount(unsigned int charset)
 
 unsigned int GP_GetFontDataSize(const GP_Font *font)
 {
-	GP_CHECK(font);
+	GP_CHECK(font, "NULL font specified");
 
 	return GP_GetCharCount(font->charset) * GP_GetCharDataSize(font);
 }
