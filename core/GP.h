@@ -51,7 +51,6 @@
 #include "GP_Rect.h"
 #include "GP_FillRect.h"
 #include "GP_Triangle.h"
-#include "GP_FillTriangle.h"
 #include "GP_Tetragon.h"
 #include "GP_FillTetragon.h"
 #include "GP_Circle.h"
