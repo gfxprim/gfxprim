@@ -136,8 +136,9 @@ void draw_testing_triangle(int x, int y, int xradius, int yradius)
 	if (outline == 1)
 		GP_TTriangle(&context, x0, y0, x1, y1, x2, y2, yellow);
 
-	if (fill)
+	if (fill) {
 		GP_TFillTriangle(&context, x0, y0, x1, y1, x2, y2, red);
+	}
 
 	if (outline == 2)
 		GP_TTriangle(&context, x0, y0, x1, y1, x2, y2, white);

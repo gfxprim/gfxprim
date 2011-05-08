@@ -59,7 +59,8 @@ Uint32 timer_callback(__attribute__((unused)) Uint32 interval,
 #define SHAPE_ELLIPSE	2
 #define SHAPE_TRIANGLE	3
 #define SHAPE_RECTANGLE	4
-#define SHAPE_LAST	4
+#define SHAPE_TETRAGON  5
+#define SHAPE_LAST	5
 static int shape = SHAPE_FIRST;
 
 /* Draw outlines? */
@@ -144,6 +145,23 @@ void draw_random_rectangle(GP_Pixel pixel)
 	}
 }
 
+void draw_random_tetragon(GP_Pixel pixel)
+{
+	int x0, y0, x1, y1, x2, y2, x3, y3;
+	random_point(display, &x0, &y0);
+	random_point(display, &x1, &y1);
+	random_point(display, &x2, &y2);
+	random_point(display, &x3, &y3);
+
+	if (fill_flag) {
+		GP_FillTetragon(&context, x0, y0, x1, y1, x2, y2, x3, y3, pixel);
+	}
+
+	if (outline_flag) {
+		GP_Tetragon(&context, x0, y0, x1, y1, x2, y2, x3, y3, pixel);
+	}
+}
+
 void clear_screen(void)
 {
 	SDL_LockSurface(display);
@@ -177,6 +195,10 @@ void redraw_screen(void)
 	
 	case SHAPE_RECTANGLE:
 		draw_random_rectangle(pixel);
+		break;
+	
+	case SHAPE_TETRAGON:
+		draw_random_tetragon(pixel);
 		break;
 	}
 
