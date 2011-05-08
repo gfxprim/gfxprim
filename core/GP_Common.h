@@ -50,27 +50,41 @@
 })
 
 /*
+ * The standard likely() and unlikely() used in Kernel
+ */
+#ifndef likely
+	#ifdef __GNUC__
+		#define likely(x)       __builtin_expect(!!(x),1)
+		#define unlikely(x)     __builtin_expect(!!(x),0)
+	#else
+		#define likely(x)	x
+		#define unlikely(x)	x
+	#endif
+#endif
+
+/*
+ * Aborts and prints the message along with the location in code
+ * to stderr. Used for fatal errors.
+ */
+#define GP_ABORT(msg) do { \
+		fprintf(stderr, "*** gfxprim: aborted: %s:%d: in %s: %s\n", \
+				__FILE__, __LINE__, __FUNCTION__, msg); \
+		abort(); \
+	} while (0)
+
+/*
  * Checks the condition and aborts immediately if it is not satisfied,
  * printing the condition and location in the source.
  * (Intended for checking for bugs within the library itself.
  * GP_CHECK is used for reporting user errors, like invalid arguments.)
  */
 #define GP_ASSERT(cond) do { \
-		if ((cond)) { \
-			fprintf(stderr, "*** gfxprim: %s:%d: in %s: BUG - assertion failed: %s\n", \
-				__FILE__, __LINE__, __FUNCTION__, #cond); \
-			abort(); \
-		} \
-	} while (0)
-
-/*
- * Abort and print abort location to stderr
- */
-#define GP_ABORT(msg) do { \
-		fprintf(stderr, "*** gfxprim: aborted: %s:%d: in %s: %s\n", \
-				__FILE__, __LINE__, __FUNCTION__, #msg); \
+	if (unlikely(!(cond))) { \
+		fprintf(stderr, "*** gfxprim: %s:%d: in %s: BUG: assertion failed: %s\n", \
+			__FILE__, __LINE__, __FUNCTION__, #cond); \
 		abort(); \
-	} while (0)
+	} \
+} while (0)
 
 /*
  * Perform a runtime check, on failure abort and print a message.
@@ -79,21 +93,12 @@
  * For internal sanity checks, use GP_ASSERT.)
  */
 #define GP_CHECK(cond, msg) do { \
-		if (!(cond)) { \
-			fprintf(stderr, "*** gfxprim: %s:%d: in %s: %s\n", \
-				__FILE__, __LINE__, __FUNCTION__, #msg); \
-			abort(); \
-		} \
-	} while (0)
-
-/*
- * The standard likely() and unlikely() used in Kernel
- * TODO: Define as no-op for non-GCC compilers
- */
-#ifndef likely
-#define likely(x)       __builtin_expect((x),1)
-#define unlikely(x)     __builtin_expect((x),0)
-#endif
+	if (unlikely(!(cond))) { \
+		fprintf(stderr, "*** gfxprim: %s:%d: in %s: %s\n", \
+			__FILE__, __LINE__, __FUNCTION__, msg); \
+		abort(); \
+	} \
+} while (0)
 
 /*
  * Swap a and b using an intermediate variable
