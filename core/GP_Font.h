@@ -102,6 +102,13 @@ typedef struct GP_Font {
 	uint8_t *data;
 } GP_Font;
 
+#define GP_CHECK_FONT(font) do { \
+	GP_CHECK(font->data, "invalid font: NULL font data"); \
+	GP_CHECK(font->height > 0, "invalid font: height == 0"); \
+	GP_CHECK(font->baseline <= font->height, "invalid font: baseline exceeds height"); \
+	GP_CHECK(font->bytes_per_line > 0, "invalid font: bytes_per_line == 0"); \
+} while(0)
+
 /* Data describing a single character. */
 typedef struct GP_CharData {
 
