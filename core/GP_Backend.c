@@ -23,49 +23,56 @@
  *                                                                           *
  *****************************************************************************/
 
-#ifndef GP_H
-#define GP_H
+#include "GP.h"
+#include "config.h"
 
-#include <stdint.h>
+#include <string.h>
 
-/* basic definitions and structures */
-#include "GP_Common.h"
-#include "GP_Transform.h"
-#include "GP_Context.h"
+/* The current backend. */
+static struct GP_Backend *current_backend = NULL;
 
-/* semi-public, low-level drawing API */
-#include "GP_WritePixel.h"
+#ifdef GP_HAVE_SDL
 
-/* colors */
-#include "GP_Color.h"
-#include "GP_Palette.h"
+extern struct GP_Backend GP_SDL_backend;
 
-/* public drawing API */
-#include "GP_Fill.h"
-#include "GP_GetPixel.h"
-#include "GP_PutPixel.h"
-#include "GP_HLine.h"
-#include "GP_VLine.h"
-#include "GP_Line.h"
-#include "GP_LineTrack.h"
-#include "GP_Rect.h"
-#include "GP_FillRect.h"
-#include "GP_Triangle.h"
-#include "GP_Tetragon.h"
-#include "GP_Circle.h"
-#include "GP_FillCircle.h"
-#include "GP_Ellipse.h"
-#include "GP_FillEllipse.h"
-#include "GP_Polygon.h"
-#include "GP_Symbol.h"
+#endif
 
-/* fonts */
-#include "GP_Font.h"
-#include "GP_TextStyle.h"
-#include "GP_TextMetric.h"
-#include "GP_Text.h"
+struct GP_Backend *GP_InitBackend(const char *name)
+{
+	if (current_backend)
+		return current_backend;
 
-/* backends */
-#include "GP_Backend.h"
+#ifdef GP_HAVE_SDL
 
-#endif /* GP_H */
+	if (!name || strcasecmp(name, "sdl") == 0) {
+		current_backend = GP_SDL_backend.init_fn();
+		return current_backend;
+	}
+
+#endif
+
+	return NULL;
+}
+
+struct GP_Backend *GP_GetCurrentBackend(void)
+{
+	return current_backend;
+}
+
+GP_Context *GP_OpenBackendVideo(int w, int h, int flags)
+{
+	GP_CHECK(current_backend, "no current backend");
+	return current_backend->open_video_fn(w, h, flags);
+}
+
+struct GP_Context *GP_GetBackendVideoContext(void)
+{
+	GP_CHECK(current_backend, "no current backend");
+	return current_backend->video_context_fn();
+}
+
+void GP_UpdateBackendVideo(void)
+{
+	GP_CHECK(current_backend, "no current backend");
+	return current_backend->update_video_fn();
+}

@@ -23,49 +23,46 @@
  *                                                                           *
  *****************************************************************************/
 
-#ifndef GP_H
-#define GP_H
+#ifndef GP_BACKEND_H
+#define GP_BACKEND_H
 
-#include <stdint.h>
-
-/* basic definitions and structures */
-#include "GP_Common.h"
-#include "GP_Transform.h"
 #include "GP_Context.h"
 
-/* semi-public, low-level drawing API */
-#include "GP_WritePixel.h"
+struct GP_Backend {
+	const char *name;
+	struct GP_Backend *(*init_fn)(void);
+	void (*shutdown_fn)(void);
+	GP_Context *(*open_video_fn)(int w, int h, int flags);
+	GP_Context *(*video_context_fn)(void);
+	void (*update_video_fn)(void);
+};
 
-/* colors */
-#include "GP_Color.h"
-#include "GP_Palette.h"
+/*
+ * Attempts to initialize a backend.
+ * 
+ * If name is specified, only that backend is tried; if name is NULL,
+ * all known backends are tried and the first usable is picked.
+ *
+ * Returns the backend structure, or NULL on failure.
+ */
+struct GP_Backend *GP_InitBackend(const char *name);
 
-/* public drawing API */
-#include "GP_Fill.h"
-#include "GP_GetPixel.h"
-#include "GP_PutPixel.h"
-#include "GP_HLine.h"
-#include "GP_VLine.h"
-#include "GP_Line.h"
-#include "GP_LineTrack.h"
-#include "GP_Rect.h"
-#include "GP_FillRect.h"
-#include "GP_Triangle.h"
-#include "GP_Tetragon.h"
-#include "GP_Circle.h"
-#include "GP_FillCircle.h"
-#include "GP_Ellipse.h"
-#include "GP_FillEllipse.h"
-#include "GP_Polygon.h"
-#include "GP_Symbol.h"
+/*
+ * Opens the backend video and returns its context.
+ */
+GP_Context *GP_OpenBackendVideo(int w, int h, int flags);
 
-/* fonts */
-#include "GP_Font.h"
-#include "GP_TextStyle.h"
-#include "GP_TextMetric.h"
-#include "GP_Text.h"
+/*
+ * Returns a pointer to context that represents the backend's video.
+ */
+GP_Context *GP_GetBackendVideoContext(void);
 
-/* backends */
-#include "GP_Backend.h"
+/*
+ * Calls the backend to update its video to reflect new changes.
+ * If the backend uses double buffering, this causes a buffer flip.
+ * If the backend uses direct-to-screen drawing, this call
+ * has no effect.
+ */
+void GP_UpdateBackendVideo(void);
 
-#endif /* GP_H */
+#endif
