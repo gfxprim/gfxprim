@@ -1,9 +1,10 @@
+COREDIR=`pwd`
 LIBRARY=libGP_core
-SOURCES=$(wildcard *.c)
+SOURCES=$(wildcard *.c) $(wildcard ../backends/*.c)
 OBJECTS=$(SOURCES:.c=.o)
-HEADERS=$(wildcard *.h)
+HEADERS=$(wildcard *.h) $(wildcard ../backends/*.h)
 ALGORITHMS=$(wildcard ../algo/*.algo.h)
-CFLAGS=-W -Wall -O2 -fPIC -I../
+CFLAGS=-W -Wall -O2 -fPIC -I$(COREDIR) -I$(COREDIR)/../
 
 HEADER_LOC=/usr/include/
 LIB_LOC=/usr/lib/
@@ -32,5 +33,6 @@ $(LIBRARY).so: $(OBJECTS)
 clean:
 	rm -f $(LIBRARY).a $(LIBRARY).so $(LIBRARY).so.0
 	rm -f *.o
+	rm -f ../backends/*.o
 	cd tests && $(MAKE) clean
 
