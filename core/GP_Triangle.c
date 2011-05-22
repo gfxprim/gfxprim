@@ -53,7 +53,7 @@ void GP_FillTriangle(GP_Context * context, int x0, int y0, int x1, int y1,
 	GP_CHECK_CONTEXT(context);
 
 	int coords[6] = { x0, y0, x1, y1, x2, y2 };
-	GP_FillPolygon(context, 3, &coords, pixel);
+	GP_FillPolygon(context, 3, coords, pixel);
 }
 
 void GP_TFillTriangle(GP_Context* context, int x0, int y0, int x1, int y1,
@@ -66,5 +66,5 @@ void GP_TFillTriangle(GP_Context* context, int x0, int y0, int x1, int y1,
 	GP_TRANSFORM_POINT(context, x2, y2);
 	
 	int coords[6] = { x0, y0, x1, y1, x2, y2 };
-	GP_FillPolygon(context, 3, &coords, pixel);
+	GP_FillPolygon(context, 3, coords, pixel);
 }
