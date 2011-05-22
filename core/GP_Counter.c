@@ -54,12 +54,12 @@ void GP_PrintCounters(struct FILE *f)
 	int i;
 	GP_CHECK(f != NULL);
 	if (GP_used_counters == 0)
-		fprintf(f, "[ no counters defined ]\n");
+		fprintf((FILE *) f, "[ no counters defined ]\n");
 	for (i = 0; i < GP_used_counters; i++) 
-		fprintf(f, "%*s : %lld\n", -GP_COUNTER_NAME_LEN, GP_counter_list[i].name,
-			*(GP_counter_list[i].counter));
+		fprintf((FILE *) f, "%*s : %lld\n", -GP_COUNTER_NAME_LEN, 
+			GP_counter_list[i].name, *(GP_counter_list[i].counter));
 	if (GP_counter_list_overflow > 0)
-		fprintf(f, "[ unable to allocate new counter %lld times ]\n", 
+		fprintf((FILE *) f, "[ unable to allocate new counter %lld times ]\n",
 			GP_counter_list_overflow);
 #endif	/* GP_IMPLEMENT_COUNTERS */
 }
