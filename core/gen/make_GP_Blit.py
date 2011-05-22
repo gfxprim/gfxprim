@@ -19,12 +19,15 @@ gen_headers(h, c,
   hdef = "GP_PIXEL_BLIT_GEN_H")
 
 c.append('#include <stdio.h>\n')
+c.append('#include <string.h>\n')
 c.append('#include "GP_Pixel.h"\n')
 c.append('#include "GP_Context.h"\n')
 c.append('#include "GP_Blit.gen.h"\n')
 
 for bpp in bitsizes:
-  gen_blit_same_t(bpp, h, c)
+  for bit_endian in bit_endians:
+    if (bpp < 8) or (bit_endian == bit_endians[0]):
+      gen_blit_same_t(bpp, get_size_suffix(bpp, bit_endian), h, c)
 
 ## Close the files
 

@@ -19,6 +19,7 @@ gen_headers(h, c,
   hdef = "GP_PIXEL_GEN_H")
 
 c.append('#include <stdio.h>\n')
+c.append('#include <GP.h>\n')
 c.append('#include "GP_Pixel.h"\n')
 
 ## Enum of types
@@ -44,11 +45,9 @@ for t in pixeltypes.values():
 
 # Per-bpp macros
 for bpp in bitsizes:
-  if bpp>=8:
-    gen_get_pixel_addr_bpp(bpp, 'LE', h, c)
-  else: # bit_endian matters
-    for be in bit_endians:
-      gen_get_pixel_addr_bpp(bpp, be, h, c)
+  for bit_endian in bit_endians:
+    if (bpp < 8) or (bit_endian == bit_endians[0]):
+      gen_get_pixel_addr_bpp(bpp, get_size_suffix(bpp, bit_endian), h, c)
 
 ## Conversion macros
 

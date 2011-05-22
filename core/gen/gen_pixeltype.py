@@ -21,7 +21,7 @@ def str_description(ptype):
   return r(
     "/* Automatically generated code for pixel type {{ f.name }}\n"
     " *\n"
-    " * Size (bpp): {{ f.size }}\n"
+    " * Size (bpp): {{ f.size }} ({{ f.size_suffix }})\n"
     "{% if f.size<8 %} * Bit endian: {{ f.bit_endian }}\n{% endif %}"
     " * Pixel structure: {{ ''.join(f.bits) }}\n"
     " * Channels: \n"
@@ -148,35 +148,31 @@ def gen_get_pixel_addr(ptype, header, code):
   "Generate GP_PIXEL_ADDR_<TYPE> and _OFFSET_<TYPE> macros"
   header.append(r(
     "/* macro to get address of pixel {{ f.name }} in a context */\n"
-    "#define GP_PIXEL_ADDR_{{ f.name }}(context, x, y) GP_PIXEL_ADDR_{{ f.size }}bpp(context, x, y)\n"
+    "#define GP_PIXEL_ADDR_{{ f.name }}(context, x, y) GP_PIXEL_ADDR_{{ f.size_suffix }}(context, x, y)\n"
     "/* macro to get bit-offset of pixel {{ f.name }} */\n"
-    "{% if f.size<8 %}" 
-      "#define GP_PIXEL_ADDR_OFFSET_{{ f.name }}(x) \\\n"
-      "	GP_PIXEL_ADDR_OFFSET_{{ f.size }}bpp(x)\n"
-    "{% else %}" # bit_endian matters
-      "#define GP_PIXEL_ADDR_OFFSET_{{ f.name }}(x) \\\n"
-      "	GP_PIXEL_ADDR_OFFSET_{{ f.size }}bpp_{{ f.bit_endian }}(x)\n"
-    "{% endif %}",
+    "#define GP_PIXEL_ADDR_OFFSET_{{ f.name }}(x) \\\n"
+    "	GP_PIXEL_ADDR_OFFSET_{{ f.size_suffix }}(x)\n",
     f=ptype))
 
-def gen_get_pixel_addr_bpp(size, bit_endian, header, code):
-  "Generate GP_PIXEL_ADDR_<SIZE>bpp and _OFFSET_<SIZE>bpp macros"
-  assert bit_endian in ['BE','LE']
+def gen_get_pixel_addr_bpp(size, size_suffix, header, code):
+  "Generate GP_PIXEL_ADDR_<size_suffix> and _OFFSET_<size_suffix> macros"
+  bit_endian = size_suffix[-2:]
+  if size < 8:
+    assert bit_endian in ['LE', 'BE']
   header.append(r(
-    "/* macro to get address of pixel in a {{ size }}bpp context */\n"
-    "#define GP_PIXEL_ADDR_{{ size }}bpp(context, x, y) \\\n"
+    "/* macro to get address of pixel in a {{ size_suffix }} context */\n"
+    "#define GP_PIXEL_ADDR_{{ size_suffix }}(context, x, y) \\\n"
     "        ((context)->pixels + (context)->bytes_per_row * (y) + {{ size//8 }} * (x))\n"
-    "/* macro to get bit-offset of pixel in {{ size }}bpp context */\n"
-    "{% if size>=8 %}"
-      "#define GP_PIXEL_ADDR_OFFSET_{{ size }}bpp(x) (0)\n"
+    "/* macro to get bit-offset of pixel in {{ size_suffix }} context */\n"
+    "{% if size >= 8 %}"
+      "#define GP_PIXEL_ADDR_OFFSET_{{ size_suffix }}(x) (0)\n"
     "{% else %}" # bit_endian matters
       "{% if bit_endian=='LE' %}"
-        "#define GP_PIXEL_ADDR_OFFSET_{{ size }}bpp(x) \\\n"
+        "#define GP_PIXEL_ADDR_OFFSET_{{ size_suffix }}(x) \\\n"
 	"	(((x) % {{ 8//size }}) * {{ size }})\n"
       "{% else %}"
-        "#define GP_PIXEL_ADDR_OFFSET_{{ size }}bpp(x) \\\n"
+        "#define GP_PIXEL_ADDR_OFFSET_{{ size_suffix }}(x) \\\n"
 	"	({{ 8-size }} - ((x) % {{ 8//size }}) * {{ size }})\n"
       "{% endif %}"
     "{% endif %}",
-    size=size, bit_endian=bit_endian))
-
+    size=size, size_suffix=size_suffix, bit_endian=bit_endian))

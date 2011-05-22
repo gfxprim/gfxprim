@@ -25,13 +25,22 @@ bitsizes = [1,2,4,8,16,24,32]
 ## bit_endian values
 bit_endians = ['LE', 'BE']
 
+## Create pixel-size suffix (16BPP or 4BPP_LE)
+def get_size_suffix(bpp, bit_endian):
+  assert bpp in bitsizes
+  assert bit_endian in bit_endians
+  size_suffix = '%dBPP' % (bpp)
+  if bpp < 8:
+    size_suffix += '_' + bit_endian
+  return size_suffix
+
 
 class PixelType(object):
   """Representation of one GP_PixelType"""
   def __init__(self, name, size, chanslist, number=None, bit_endian=None):
     """`name` must be a valid C identifier
     `size` is in bits, allowed are 1, 2, 4, 8, 16, 24, 32
-    `bit_endian` is order of 1,2,4bpp pixels in a byte, either 'BE' or 'LE'
+    `bit_endian` is order of 1,2,4BPP pixels in a byte, either 'BE' or 'LE'
     `chanslist` is a list of triplets describing individual channels as 
      [ (`chan_name`, `bit_offset`, `bit_size`) ]
      `chan_name` is usually one of: R, G, B, V (value, used for grayscale), A (opacity) 
@@ -51,6 +60,11 @@ class PixelType(object):
       bit_endian = bit_endians[0]
     assert bit_endian in bit_endians
     self.bit_endian = bit_endian
+
+    if self.size == 0:
+      self.size_suffix = "INVALID"
+    else:
+      self.size_suffix = get_size_suffix(self.size, self.bit_endian)
 
     # Numbering from 1 
     if number is not None:
