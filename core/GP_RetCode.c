@@ -32,6 +32,7 @@ static char *ret_code_names[] = {
 	"Not implemented",
 	"Imprecise result",
 	"Unexpected null pointer",
+	"No backend available",
 	"Connection with backend lost",
 	"Bad context",
 	"Bad file",

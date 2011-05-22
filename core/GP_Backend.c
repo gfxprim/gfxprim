@@ -24,34 +24,63 @@
  *****************************************************************************/
 
 #include "GP.h"
+#include "config.h"
 
-GP_RetCode GP_FillTetragon(GP_Context * context, int x0, int y0, int x1, int y1,
-                           int x2, int y2, int x3, int y3, GP_Pixel pixel)
+#include <string.h>
+
+/*
+ * The currently active backend (NULL if none).
+ */
+static struct GP_Backend *current_backend = NULL;
+
+#ifdef GP_HAVE_SDL
+
+extern struct GP_Backend GP_SDL_backend;
+
+#endif
+
+struct GP_Backend *GP_InitBackend(const char *name)
 {
-	if (!context)
-		return GP_ENULLPTR;
-	if (!GP_IS_CONTEXT_VALID(context))
-		return GP_EBADCONTEXT;
+	if (current_backend)
+		return current_backend;
 
-	//TODO: fix this!
-	GP_FillTriangle(context, x0, y0, x1, y1, x2, y2, pixel);
-	GP_FillTriangle(context, x3, y3, x1, y1, x2, y2, pixel);
+#ifdef GP_HAVE_SDL
 
-	return GP_ESUCCESS;
+	if (!name || strcasecmp(name, "sdl") == 0) {
+		current_backend = GP_SDL_backend.init_fn();
+		return current_backend;
+	}
+
+#endif
+
+	return NULL;
 }
 
-GP_RetCode GP_TFillTetragon(GP_Context* context, int x0, int y0, int x1, int y1,
-                            int x2, int y2, int x3, int y3, GP_Pixel pixel)
+struct GP_Backend *GP_GetCurrentBackend(void)
 {
-	if (!context)
-		return GP_ENULLPTR;
-	if (!GP_IS_CONTEXT_VALID(context))
-		return GP_EBADCONTEXT;
+	return current_backend;
+}
 
-	GP_TRANSFORM_POINT(context, x0, y0);
-	GP_TRANSFORM_POINT(context, x1, y1);
-	GP_TRANSFORM_POINT(context, x2, y2);
-	GP_TRANSFORM_POINT(context, x3, y3);
+GP_Context *GP_OpenBackendVideo(int w, int h, int flags)
+{
+	GP_CHECK(current_backend, "no current backend");
+	return current_backend->open_video_fn(w, h, flags);
+}
 
-	return GP_FillTetragon(context, x0, y0, x1, y1, x2, y2, x3, y3, pixel);
+struct GP_Context *GP_GetBackendVideoContext(void)
+{
+	GP_CHECK(current_backend, "no current backend");
+	return current_backend->video_context_fn();
+}
+
+void GP_UpdateBackendVideo(void)
+{
+	GP_CHECK(current_backend, "no current backend");
+	return current_backend->update_video_fn();
+}
+
+int GP_GetBackendEvent(struct GP_BackendEvent *event)
+{
+	GP_CHECK(current_backend, "no current backend");
+	return current_backend->get_event_fn(event);
 }

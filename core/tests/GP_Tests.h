@@ -33,9 +33,13 @@
  * The optional string is passed as parameters to Python dict() as parameters
  * for the testcase-generator.
  * Currently, the following parameters are recognized:
- *  suite -- name of the suite
+ *  suite         -- name of the suite
+ *  loop_start    -- test will be repeated as with:
+ *  loop_end         for (int _i = loop_start; _i < loop_end; i++) { ... }
+ *  expect_exit   -- expect the function to exit with given exitcode
+ *  expect_signal -- expect the function to exit with given exitcode
  *
- * Do NOT use parameters: name, fname, line
+ * Parameters name, fname, line are used internally, do not use them
  */
 
 #define GP_TEST(name, ...) static void name(int);\

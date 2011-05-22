@@ -88,22 +88,22 @@
 /*
  * Safe functions, that checks clipping.
  */
-GP_RetCode GP_PutPixel1bpp(GP_Context *context, int x, int y, GP_Pixel pixel);
-GP_RetCode GP_PutPixel2bpp(GP_Context *context, int x, int y, GP_Pixel pixel);
-GP_RetCode GP_PutPixel4bpp(GP_Context *context, int x, int y, GP_Pixel pixel);
-GP_RetCode GP_PutPixel8bpp(GP_Context *context, int x, int y, GP_Pixel pixel);
-GP_RetCode GP_PutPixel16bpp(GP_Context *context, int x, int y, GP_Pixel pixel);
-GP_RetCode GP_PutPixel24bpp(GP_Context *context, int x, int y, GP_Pixel pixel);
-GP_RetCode GP_PutPixel32bpp(GP_Context *context, int x, int y, GP_Pixel pixel);
+void GP_PutPixel1bpp(GP_Context *context, int x, int y, GP_Pixel pixel);
+void GP_PutPixel2bpp(GP_Context *context, int x, int y, GP_Pixel pixel);
+void GP_PutPixel4bpp(GP_Context *context, int x, int y, GP_Pixel pixel);
+void GP_PutPixel8bpp(GP_Context *context, int x, int y, GP_Pixel pixel);
+void GP_PutPixel16bpp(GP_Context *context, int x, int y, GP_Pixel pixel);
+void GP_PutPixel24bpp(GP_Context *context, int x, int y, GP_Pixel pixel);
+void GP_PutPixel32bpp(GP_Context *context, int x, int y, GP_Pixel pixel);
 
 /*
  * General putpixel.
  */
-GP_RetCode GP_PutPixel(GP_Context *context, int x, int y, GP_Pixel pixel);
+void GP_PutPixel(GP_Context *context, int x, int y, GP_Pixel pixel);
 
 /*
  * General rotated putpixel.
  */
-GP_RetCode GP_TPutPixel(GP_Context *context, int x, int y, GP_Pixel pixel);
+void GP_TPutPixel(GP_Context *context, int x, int y, GP_Pixel pixel);
 
 #endif /* GP_PUTPIXEL_H */

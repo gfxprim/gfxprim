@@ -42,20 +42,16 @@ typedef enum GP_SymbolType {
 	GP_SYM_MAX,
 } GP_SymbolType;
 
-GP_RetCode GP_Symbol(GP_Context *context, GP_SymbolType sym,
-                     int x, int y, int w, int h,
-                     GP_Pixel pixel);
+void GP_Symbol(GP_Context *context, GP_SymbolType sym,
+               int x, int y, int w, int h, GP_Pixel pixel);
 
-GP_RetCode GP_TSymbol(GP_Context *context, GP_SymbolType sym,
-                      int x, int y, int w, int h,
-                      GP_Pixel pixel);
+void GP_TSymbol(GP_Context *context, GP_SymbolType sym,
+                int x, int y, int w, int h, GP_Pixel pixel);
 
-GP_RetCode GP_FillSymbol(GP_Context *context, GP_SymbolType sym,
-                         int x, int y, int w, int h,
-                         GP_Pixel pixel);
+void GP_FillSymbol(GP_Context *context, GP_SymbolType sym,
+                   int x, int y, int w, int h, GP_Pixel pixel);
 
-GP_RetCode GP_TFillSymbol(GP_Context *context, GP_SymbolType sym,
-                          int x, int y, int w, int h,
-                          GP_Pixel pixel);
+void GP_TFillSymbol(GP_Context *context, GP_SymbolType sym,
+                    int x, int y, int w, int h, GP_Pixel pixel);
 
 #endif /* GP_SYMBOL_H */

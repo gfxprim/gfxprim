@@ -28,14 +28,12 @@
 #include "GP_FnPerBpp.h"
 
 #define DO_PUTPIXEL(bits) \
-GP_RetCode GP_PutPixel##bits##bpp(GP_Context *context, int x, int y, GP_Pixel pixel) \
+void GP_PutPixel##bits##bpp(GP_Context *context, int x, int y, GP_Pixel pixel) \
 { \
 	if (GP_PIXEL_IS_CLIPPED(context, x, y)) \
-		return GP_ESUCCESS; \
+		return; \
 \
 	GP_PUTPIXEL_##bits##BPP(context, x, y, pixel); \
-\
-	return GP_ESUCCESS; \
 } \
 
 DO_PUTPIXEL(1)
@@ -50,23 +48,18 @@ DO_PUTPIXEL(32)
  * A generic PutPixel call that automatically determines the number of
  * bits per pixel.
  */
-GP_RetCode GP_PutPixel(GP_Context *context, int x, int y, GP_Pixel pixel)
+void GP_PutPixel(GP_Context *context, int x, int y, GP_Pixel pixel)
 {
-	if (!context)
-		return GP_ENULLPTR;
-	if (!GP_IS_CONTEXT_VALID(context))
-		return GP_EBADCONTEXT;
+	GP_CHECK_CONTEXT(context);
 
-	GP_FN_PER_BPP(GP_PutPixel, context, x, y, pixel);
+	GP_FN_PER_BPP(GP_PutPixel, context->bpp, context, x, y, pixel);
 }
 
-GP_RetCode GP_TPutPixel(GP_Context *context, int x, int y, GP_Pixel pixel)
+void GP_TPutPixel(GP_Context *context, int x, int y, GP_Pixel pixel)
 {
-	if (!context)
-		return GP_ENULLPTR;
-	if (!GP_IS_CONTEXT_VALID(context))
-		return GP_EBADCONTEXT;
+	GP_CHECK_CONTEXT(context);
 
 	GP_TRANSFORM_POINT(context, x, y);
-	return GP_PutPixel(context, x, y, pixel);
+
+	GP_PutPixel(context, x, y, pixel);
 }

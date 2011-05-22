@@ -42,12 +42,12 @@ DEF_TEXT_FN(GP_TText_internal, GP_Context *, GP_Pixel, GP_THLine)
 GP_RetCode GP_Text(GP_Context *context, const GP_TextStyle *style,
 	int x, int y, int align, const char *str, GP_Pixel pixel)
 {
-	if (style != NULL && style->font == NULL)
+	GP_CHECK_CONTEXT(context);
+	GP_CHECK_TEXT_STYLE(style);
+
+	if (str == NULL)
 		return GP_ENULLPTR;
-	if (!context || !str)
-		return GP_ENULLPTR;
-	if (!GP_IS_CONTEXT_VALID(context))
-		return GP_EBADCONTEXT;
+
 
 	if (style == NULL)
 		style = &DefaultStyle;
@@ -86,19 +86,21 @@ GP_RetCode GP_Text(GP_Context *context, const GP_TextStyle *style,
 			return GP_EINVAL;
 	}
 
-	GP_FN_PER_BPP(GP_Text, context, style, topleft_x, topleft_y, str, pixel);
+	GP_FN_PER_BPP(GP_Text, context->bpp, context,
+	              style, topleft_x, topleft_y, str, pixel);
+
+	return GP_ESUCCESS;
 }
 
 GP_RetCode GP_TText(GP_Context *context, const GP_TextStyle *style,
 	int x, int y, int align, const char *str, GP_Pixel pixel)
 {
-	if (style != NULL && style->font == NULL)
-		return GP_ENULLPTR;
-	if (!context || !str)
-		return GP_ENULLPTR;
-	if (!GP_IS_CONTEXT_VALID(context))
-		return GP_EBADCONTEXT;
+	GP_CHECK_CONTEXT(context);
+	GP_CHECK_TEXT_STYLE(style);
 	
+	if (str == NULL)
+		return GP_ENULLPTR;
+
 	if (style == NULL)
 		style = &DefaultStyle;
 
@@ -143,13 +145,11 @@ GP_RetCode GP_TText(GP_Context *context, const GP_TextStyle *style,
 GP_RetCode GP_BoxCenteredText(GP_Context *context, const GP_TextStyle *style,
 	int x, int y, int w, int h, const char *str, GP_Pixel pixel)
 {
+	GP_CHECK_CONTEXT(context);
+	GP_CHECK_TEXT_STYLE(style);
 
-	if (style != NULL && style->font == NULL)
+	if (str == NULL)
 		return GP_ENULLPTR;
-	if (!context || !str)
-		return GP_ENULLPTR;
-	if (!GP_IS_CONTEXT_VALID(context))
-		return GP_EBADCONTEXT;
 
 	if (style == NULL)
 		style = &DefaultStyle;
@@ -167,13 +167,11 @@ GP_RetCode GP_BoxCenteredText(GP_Context *context, const GP_TextStyle *style,
 GP_RetCode GP_TBoxCenteredText(GP_Context *context, const GP_TextStyle *style,
 	int x, int y, int w, int h, const char *str, GP_Pixel pixel)
 {
+	GP_CHECK_CONTEXT(context);
+	GP_CHECK_TEXT_STYLE(style);
 
-	if (style != NULL && style->font == NULL)
+	if (str == NULL)
 		return GP_ENULLPTR;
-	if (!context || !str)
-		return GP_ENULLPTR;
-	if (!GP_IS_CONTEXT_VALID(context))
-		return GP_EBADCONTEXT;
 
 	if (style == NULL)
 		style = &DefaultStyle;

@@ -30,15 +30,10 @@
  * of the specified function depending on the bit depth of the context.
  * Extra arguments are arguments to be passed to the function.
  * Returns GP_ENOIMPL if the bit depth is unknown.
- *
- * Note: Relying on existing context variable is ugly and broken, I know...
- *       But I hate doing just another GP_FN_PER_BPP macro for functions
- *       that takes context as it's only argument. Or passing the context
- *       twice or whatever else.
  */
-#define GP_FN_PER_BPP(FN_NAME, ...) \
+#define GP_FN_PER_BPP(FN_NAME, bpp, ...) \
 \
-	switch (context->bpp) { \
+	switch (bpp) { \
 	case 1: \
 		{\
 		if (context->bit_endian==GP_BIT_ENDIAN_LE)\
@@ -76,14 +71,12 @@
 		FN_NAME##32bpp(__VA_ARGS__); \
 	break; \
 	default: \
-		return GP_ENOIMPL; \
+	break; \
 	} \
-\
-	return GP_ESUCCESS;
 
-#define GP_FN_RET_PER_BPP(FN_NAME, ...) \
+#define GP_FN_RET_PER_BPP(FN_NAME, bpp, ...) \
 \
-	switch (context->bpp) { \
+	switch (bpp) { \
 	case 1: \
 		{\
 		if (context->bit_endian==GP_BIT_ENDIAN_LE)\

@@ -28,17 +28,15 @@
 
 #include "GP_Context.h"
 
-GP_RetCode GP_VLineXYY(GP_Context *context, int x, int y0, int y1,
-	GP_Pixel pixel);
+void GP_VLineXYY(GP_Context *context, int x, int y0, int y1, GP_Pixel pixel);
 
-GP_RetCode GP_VLineXYH(GP_Context *context, int x, int y,
-	unsigned int height, GP_Pixel pixel);
+void GP_VLineXYH(GP_Context *context, int x, int y,
+                 unsigned int height, GP_Pixel pixel);
 
-GP_RetCode GP_TVLineXYY(GP_Context *context, int x, int y0, int y1,
-                     GP_Pixel pixel);
+void GP_TVLineXYY(GP_Context *context, int x, int y0, int y1, GP_Pixel pixel);
 
-GP_RetCode GP_TVLineXYH(GP_Context *context, int x, int y,
-	unsigned int height, GP_Pixel pixel);
+void GP_TVLineXYH(GP_Context *context, int x, int y,
+                  unsigned int height, GP_Pixel pixel);
 
 /* default argument set is XYY */
 #define GP_VLine GP_VLineXYY

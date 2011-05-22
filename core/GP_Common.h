@@ -34,7 +34,6 @@
 /*
  * Returns a minimum of the two numbers.
  */
-
 #define GP_MIN(a, b) ({ \
 	typeof(a) _a = (a); \
 	typeof(b) _b = (b); \
@@ -44,7 +43,6 @@
 /*
  * Returns a maximum of the two numbers.
  */
-
 #define GP_MAX(a, b) ({ \
 	typeof(a) _a = (a); \
 	typeof(b) _b = (b); \
@@ -52,41 +50,73 @@
 })
 
 /*
- * Abort and print abort location to stderr
+ * The standard likely() and unlikely() used in Kernel
  */
+#ifndef likely
+	#ifdef __GNUC__
+		#define likely(x)       __builtin_expect(!!(x),1)
+		#define unlikely(x)     __builtin_expect(!!(x),0)
+	#else
+		#define likely(x)	x
+		#define unlikely(x)	x
+	#endif
+#endif
 
-#define GP_ABORT(msg) do { \
-		fprintf(stderr, "*** gfxprim: aborted: %s:%d: in %s: %s\n", \
-				__FILE__, __LINE__, __FUNCTION__, #msg); \
+/*
+ * Aborts and prints the message along with the location in code
+ * to stderr. Used for fatal errors.
+ *
+ * Use as either GP_ABORT(), GP_ABORT(msg) or GP_ABORT(format, params...) where
+ * msg and format must be string constants.
+ */
+#define GP_ABORT(...) do { \
+		fprintf(stderr, "*** gfxprim: %s:%d: in %s: ", \
+				__FILE__, __LINE__, __FUNCTION__); \
+		fprintf(stderr, "" __VA_ARGS__); \
+		if (! (#__VA_ARGS__ [0])) \
+			fprintf(stderr, "abort()"); \
+		fprintf(stderr, "\n"); \
 		abort(); \
 	} while (0)
 
 /*
- * Perform a runtime check, on failure abort and print a message
+ * Internal macro with common code for GP_ASSERT and GP_CHECK.
  */
-
-#define GP_CHECK(cond) do { \
-		if (!(cond)) { \
-			fprintf(stderr, "*** gfxprim: check failed: %s:%d: in %s: %s\n", \
-				__FILE__, __LINE__, __FUNCTION__, #cond); \
-			abort(); \
-		} \
-	} while (0)
+#define GP_GENERAL_CHECK(check_cond_, check_message_, ...) do { \
+	if (unlikely(!(check_cond_))) { \
+		if (#__VA_ARGS__ [0]) \
+			GP_ABORT(check_message_ #check_cond_ "\n" __VA_ARGS__); \
+		else \
+			GP_ABORT(check_message_ #check_cond_); \
+	} \
+} while (0)
 
 /*
- * The standard likely() and unlikely() used in Kernel
- * TODO: Define as no-op for non-GCC compilers
+ * Checks the condition and aborts immediately if it is not satisfied,
+ * printing the condition and location in the source.
+ * (Intended for checking for bugs within the library itself.)
+ *
+ * Use as either GP_ASSERT(cond), GP_ASSERT(cond, msg) or 
+ * GP_ASSERT(cond, format, params...) where msg and format must be string 
+ * constants.
  */
+#define GP_ASSERT(check_cond_, ...) \
+	GP_GENERAL_CHECK(check_cond_, "asserion failed: ", ##__VA_ARGS__);
 
-#ifndef likely
-#define likely(x)       __builtin_expect((x),1)
-#define unlikely(x)     __builtin_expect((x),0)
-#endif
+/*
+ * Perform a runtime check, on failure abort and print a message.
+ * (Intended for user-caused errors like invalid arguments.)
+ *
+ * Use as either GP_CHECK(cond), GP_CHECK(cond, msg) or 
+ * GP_CHECK(cond, format, params...) where msg and format must be string 
+ * constants.
+ */
+#define GP_CHECK(check_cond_, ...) \
+	GP_GENERAL_CHECK(check_cond_, "check failed: ", ##__VA_ARGS__);
 
 /*
  * Swap a and b using an intermediate variable
  */
-
 #define GP_SWAP(a, b) do { \
 	typeof(a) tmp = b; \
 	b = a;             \
@@ -99,7 +129,6 @@
  * Return (shifted) count bits at offset of value
  * Note: operates with value types same as val 
  */
-
 #define GP_GET_BITS(offset, count, val) ( ( (val)>>(offset) ) & ( ((((typeof(val))1)<<(count)) - 1) ) )
 
 /*
@@ -113,7 +142,6 @@
  * GP_CLEAR_BITS sets the target bits to zero
  * GP_SET_BITS does both
  */
-
 #define GP_CLEAR_BITS(offset, count, dest) ( (dest) &= ~(((((typeof(dest))1) << (count)) - 1) << (offset)) )
 
 #define GP_SET_BITS_OR(offset, dest, val) ( (dest) |= ((val)<<(offset)) )
@@ -122,11 +150,9 @@
 					       GP_SET_BITS_OR(offset, dest, val) )
 
 
-/* 
- * Determines the sign of the integer value; it is +1 if value is positive,
+/* Determines the sign of the integer value; it is +1 if value is positive,
  * -1 if negative, and 0 if it is zero.
  */
-
 #define GP_SIGN(a) ({ \
 	typeof(a) _a = a; \
 	(_a > 0) ? 1 : ((_a < 0) ? -1 : 0); \

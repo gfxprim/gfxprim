@@ -23,16 +23,12 @@
  *                                                                           *
  *****************************************************************************/
 
-#ifndef GP_FILLTRIANGLE_H
-#define GP_FILLTRIANGLE_H
+#ifndef GP_FILL_POLYGON_H
+#define GP_FILL_POLYGON_H
 
 #include "GP_Context.h"
-#include "GP_Common.h"
 
-GP_RetCode GP_FillTriangle(GP_Context *context, int x0, int y0, int x1,
-                           int y1, int x2, int y2, GP_Pixel pixel);
+void GP_FillPolygon(GP_Context *context, int vertex_count, const int *xy,
+		GP_Pixel pixel);
 
-GP_RetCode GP_TFillTriangle(GP_Context *context, int x0, int y0, int x1,
-                            int y1, int x2, int y2, GP_Pixel pixel);
-
-#endif /* GP_FILLTRIANGLE_H */
+#endif /* GP_RECT_H */

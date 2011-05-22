@@ -60,6 +60,12 @@ typedef struct {
 /*
  * Initalize text style to the default values.
  */
-GP_RetCode GP_DefaultTextStyle(GP_TextStyle *style); 
+void GP_DefaultTextStyle(GP_TextStyle *style); 
+
+#define GP_CHECK_TEXT_STYLE(style) do { \
+	GP_CHECK(style, "NULL style specified"); \
+	GP_CHECK(style->font, "invalid text style: font is NULL"); \
+	GP_CHECK_FONT(style->font); \
+} while(0)
 
 #endif /* GP_TEXTSTYLE_H */

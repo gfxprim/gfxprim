@@ -39,10 +39,10 @@ void GP_Line24bpp(GP_Context *context, int x0, int y0, int x1, int y1,
 void GP_Line32bpp(GP_Context *context, int x0, int y0, int x1, int y1,
 	GP_Pixel pixel);
 
-GP_RetCode GP_Line(GP_Context *context, int x0, int y0, int x1, int y1,
-                   GP_Pixel pixel);
+void GP_Line(GP_Context *context, int x0, int y0, int x1, int y1,
+             GP_Pixel pixel);
 
-GP_RetCode GP_TLine(GP_Context *context, int x0, int y0, int x1, int y1,
-                    GP_Pixel pixel);
+void GP_TLine(GP_Context *context, int x0, int y0, int x1, int y1,
+              GP_Pixel pixel);
 
 #endif /* GP_LINE_H */

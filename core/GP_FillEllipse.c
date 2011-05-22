@@ -36,26 +36,22 @@ DEF_FILLELLIPSE_FN(GP_FillEllipse16bpp, GP_Context *, GP_Pixel, GP_HLine16bpp)
 DEF_FILLELLIPSE_FN(GP_FillEllipse24bpp, GP_Context *, GP_Pixel, GP_HLine24bpp)
 DEF_FILLELLIPSE_FN(GP_FillEllipse32bpp, GP_Context *, GP_Pixel, GP_HLine32bpp)
 
-GP_RetCode GP_FillEllipse(GP_Context *context, int xcenter, int ycenter,
-	unsigned int a, unsigned int b, GP_Pixel pixel)
+void GP_FillEllipse(GP_Context *context, int xcenter, int ycenter,
+	            unsigned int a, unsigned int b, GP_Pixel pixel)
 {
-	if (!context)
-		return GP_ENULLPTR;
-	if (!GP_IS_CONTEXT_VALID(context))
-		return GP_EBADCONTEXT;
+	GP_CHECK_CONTEXT(context);
 
-	GP_FN_PER_BPP(GP_FillEllipse, context, xcenter, ycenter, a, b, pixel);
+	GP_FN_PER_BPP(GP_FillEllipse, context->bpp, context,
+	              xcenter, ycenter, a, b, pixel);
 }
 
-GP_RetCode GP_TFillEllipse(GP_Context *context, int xcenter, int ycenter,
-                           unsigned int a, unsigned int b, GP_Pixel pixel)
+void GP_TFillEllipse(GP_Context *context, int xcenter, int ycenter,
+                     unsigned int a, unsigned int b, GP_Pixel pixel)
 {
-	if (!context)
-		return GP_ENULLPTR;
-	if (!GP_IS_CONTEXT_VALID(context))
-		return GP_EBADCONTEXT;
-
+	GP_CHECK_CONTEXT(context);
+	
 	GP_TRANSFORM_POINT(context, xcenter, ycenter);
 	GP_TRANSFORM_SWAP(context, a, b);
-	return GP_FillEllipse(context, xcenter, ycenter, a, b, pixel);
+	
+	GP_FillEllipse(context, xcenter, ycenter, a, b, pixel);
 }

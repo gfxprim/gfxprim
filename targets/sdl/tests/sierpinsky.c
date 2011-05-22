@@ -41,20 +41,25 @@
 #define sgn(x) ((x)>0 ? 1 : -1)
 
 SDL_Surface *display;
-GP_Context context;
+GP_Context *context;
 
 SDL_TimerID timer;
 
 int iter, l, way = 1;
 
-GP_Pixel black, blue, gray;
+GP_Pixel black, blue, gray, red;
 
-static void sierpinsky(SDL_Surface *surf, GP_Pixel pixel, float x1, float y1, float x4, float y4, int iter)
+int draw_edge = 1;
+
+static void sierpinsky(double x1, double y1, double x4, double y4, int iter)
 {
-	float x2, y2, x3, y3, x5, y5;
+	double x2, y2, x3, y3, x5, y5;
+	GP_Pixel pixel;
+	GP_RGBToPixel(context, 0, 0, 255-16*iter, &pixel);
 	
 	if (iter <= 0) {
-		GP_Line(&context, x1, y1, x4, y4, black);
+		if (draw_edge)
+			GP_Line(context, x1, y1, x4, y4, black);
 		return;
 	}
 
@@ -67,19 +72,23 @@ static void sierpinsky(SDL_Surface *surf, GP_Pixel pixel, float x1, float y1, fl
 	x5 = (x1+x4)/2 + (y2 - y3)*sqrt(3.00/4);
 	y5 = (y1+y4)/2 + (x3 - x2)*sqrt(3.00/4);
 
-	GP_FillTriangle(&context, x2, y2, x3, y3, x5, y5, pixel);
+	GP_FillTriangle(context, x2, y2, x3, y3, x5, y5, pixel);
 
-	sierpinsky(surf, pixel, x1, y1, x2, y2, iter - 1);
-	sierpinsky(surf, pixel, x2, y2, x5, y5, iter - 1);
-	sierpinsky(surf, pixel, x5, y5, x3, y3, iter - 1);
-	sierpinsky(surf, pixel, x3, y3, x4, y4, iter - 1);
+	GP_PutPixel(context, x2, y2, red);
+	GP_PutPixel(context, x3, y3, red);
+	GP_PutPixel(context, x5, y5, red);
+
+	sierpinsky(x1, y1, x2, y2, iter - 1);
+	sierpinsky(x2, y2, x5, y5, iter - 1);
+	sierpinsky(x5, y5, x3, y3, iter - 1);
+	sierpinsky(x3, y3, x4, y4, iter - 1);
 }
 
-static void draw(SDL_Surface *surf, int x, int y, int l, int iter)
+static void draw(int x, int y, int l, int iter)
 {
-	float x1, y1, x2, y2, x3, y3;
-	int w = surf->w;
-	int h = surf->h;
+	double x1, y1, x2, y2, x3, y3;
+	int w = context->w;
+	int h = context->h;
 
 	l = ((w < h ? w : h) - 20)/(5 - 1.00*iter/120);
 	
@@ -92,15 +101,15 @@ static void draw(SDL_Surface *surf, int x, int y, int l, int iter)
 	x3 = sin(1.00 * (iter+240)/57) * l + x;
 	y3 = cos(1.00 * (iter+240)/57) * l + y;
 
-	GP_Fill(&context, gray);
+	GP_Fill(context, gray);
 
-	GP_FillTriangle(&context, x1, y1, x2, y2, x3, y3, blue);
+	GP_FillTriangle(context, x1, y1, x2, y2, x3, y3, blue);
 
-	sierpinsky(surf, blue, x1, y1, x2, y2, iter/60%6);
-	sierpinsky(surf, blue, x2, y2, x3, y3, iter/60%6);
-	sierpinsky(surf, blue, x3, y3, x1, y1, iter/60%6);
-	
-	SDL_UpdateRect(surf, 0, 0, surf->w, surf->h);
+	sierpinsky(x1, y1, x2, y2, iter/60%6);
+	sierpinsky(x2, y2, x3, y3, iter/60%6);
+	sierpinsky(x3, y3, x1, y1, iter/60%6);
+
+	GP_UpdateBackendVideo();
 }
 
 int paused = 0;
@@ -118,7 +127,7 @@ Uint32 timer_callback(Uint32 interval __attribute__ ((unused)), void *ptr __attr
 	if (iter < 2 * way)
 		way *= 1;
 		
-	draw(display, display->w/2, display->h/2, l, iter);
+	draw(display->w/2, display->h/2, l, iter);
 
 	return TIMER_TICK;
 }
@@ -127,6 +136,16 @@ int main(void)
 {
 	SDL_Event ev;
 
+	if (!GP_InitBackend("SDL")) {
+		fprintf(stderr, "error: could not initialize backend\n");
+		return 2;
+	}
+	if (!GP_OpenBackendVideo(DISPLAY_W, DISPLAY_H, 0)) {
+		fprintf(stderr, "error: could not open video\n");
+		return 2;
+	}
+
+/*
 	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) != 0)
 		return -1;
 
@@ -138,13 +157,18 @@ int main(void)
 	}
 
 	GP_SDL_ContextFromSurface(&context, display);
+*/
 
-	GP_ColorNameToPixel(&context, GP_COL_BLACK, &black);
-	GP_ColorNameToPixel(&context, GP_COL_BLUE, &blue);
-	GP_ColorNameToPixel(&context, GP_COL_GRAY_LIGHT, &gray);
+	display = SDL_GetVideoSurface();
+	context = GP_GetBackendVideoContext();
+
+	GP_ColorNameToPixel(context, GP_COL_BLACK, &black);
+	GP_ColorNameToPixel(context, GP_COL_BLUE, &blue);
+	GP_ColorNameToPixel(context, GP_COL_GRAY_LIGHT, &gray);
+	GP_ColorNameToPixel(context, GP_COL_RED, &red);
 
 	iter = 0;
-	draw(display, display->w/2, display->h/2, l, iter);
+	draw(display->w/2, display->h/2, l, iter);
 
 	timer = SDL_AddTimer(0, timer_callback, NULL);
 
@@ -159,6 +183,9 @@ int main(void)
 				switch(ev.key.keysym.sym) {
 					case SDLK_p:
 						paused = !paused;
+					break;
+					case SDLK_e:
+						draw_edge = !draw_edge;
 					break;
 					case SDLK_ESCAPE:
 						SDL_Quit();

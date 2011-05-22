@@ -32,7 +32,8 @@ typedef enum GP_RetCode {
 	GP_ENOIMPL,
 	GP_EUNPRECISE,
 	GP_ENULLPTR,		/* some argument was unexpectedly NULL */
-	GP_EBACKENDLOST,
+	GP_ENOBACKEND,		/* no backend available */
+	GP_EBACKENDLOST,	/* lost connection to the backend */
 	GP_EBADCONTEXT,		/* context contains invalid data */
 	GP_EBADFILE,		/* error in file, or bad file format */
 	GP_ENOENT,		/* no such file or another object */

@@ -25,16 +25,12 @@
 
 #include "GP.h"
 
-GP_RetCode GP_DefaultTextStyle(GP_TextStyle *style)
+void GP_DefaultTextStyle(GP_TextStyle *style)
 {
-	if (!style)
-		return GP_ENULLPTR;
-
 	style->font = &GP_default_console_font;
 	style->pixel_xspace = 0;
 	style->pixel_yspace = 0;
 	style->pixel_xmul = 1;
 	style->pixel_ymul = 1;
 	style->char_xspace = 0;
-	return GP_ESUCCESS;
 }

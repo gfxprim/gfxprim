@@ -23,43 +23,70 @@
  *                                                                           *
  *****************************************************************************/
 
-#include "GP.h"
-#include "GP_FnPerBpp.h"
-#include "algo/FillTriangle.algo.h"
+#ifndef GP_BACKEND_H
+#define GP_BACKEND_H
 
-#include <math.h>
-#include <stdlib.h>
+#include "GP_Context.h"
 
-/* Generate drawing functions for various bit depths. */
-DEF_FILLTRIANGLE_FN(GP_FillTriangle1bpp,  GP_Context *, GP_Pixel, GP_HLine1bpp, GP_PutPixel1bpp)
-DEF_FILLTRIANGLE_FN(GP_FillTriangle2bpp,  GP_Context *, GP_Pixel, GP_HLine2bpp, GP_PutPixel2bpp)
-DEF_FILLTRIANGLE_FN(GP_FillTriangle4bpp,  GP_Context *, GP_Pixel, GP_HLine4bpp, GP_PutPixel4bpp)
-DEF_FILLTRIANGLE_FN(GP_FillTriangle8bpp,  GP_Context *, GP_Pixel, GP_HLine8bpp, GP_PutPixel8bpp)
-DEF_FILLTRIANGLE_FN(GP_FillTriangle16bpp, GP_Context *, GP_Pixel, GP_HLine16bpp, GP_PutPixel16bpp)
-DEF_FILLTRIANGLE_FN(GP_FillTriangle24bpp, GP_Context *, GP_Pixel, GP_HLine24bpp, GP_PutPixel24bpp)
-DEF_FILLTRIANGLE_FN(GP_FillTriangle32bpp, GP_Context *, GP_Pixel, GP_HLine32bpp, GP_PutPixel32bpp)
+/*
+ * Types of events provided by the backend.
+ */
+enum GP_BackendEventType {
+	GP_BACKEND_EVENT_NONE = 0,
+	GP_BACKEND_EVENT_UPDATE_VIDEO = 1,	/* video redraw is needed */
+	GP_BACKEND_EVENT_QUIT_REQUEST = 2,	/* user requests quitting */
+};
 
-GP_RetCode GP_FillTriangle(GP_Context * context, int x0, int y0, int x1, int y1,
-                           int x2, int y2, GP_Pixel pixel)
-{
-	if (!context)
-		return GP_ENULLPTR;
-	if (!GP_IS_CONTEXT_VALID(context))
-		return GP_EBADCONTEXT;
+/*
+ * Structure describing an event reported by a backend.
+ */
+struct GP_BackendEvent {
+	enum GP_BackendEventType type;
+};
 
-	GP_FN_PER_BPP(GP_FillTriangle, context, x0, y0, x1, y1, x2, y2, pixel);
-}
+/* Describes a backend and holds all its API functions. */
+struct GP_Backend {
+	const char *name;
+	struct GP_Backend *(*init_fn)(void);
+	void (*shutdown_fn)(void);
+	GP_Context *(*open_video_fn)(int w, int h, int flags);
+	GP_Context *(*video_context_fn)(void);
+	void (*update_video_fn)(void);
+	int (*get_event_fn)(struct GP_BackendEvent *event);
+};
 
-GP_RetCode GP_TFillTriangle(GP_Context* context, int x0, int y0, int x1, int y1,
-                            int x2, int y2, GP_Pixel pixel)
-{
-	if (!context)
-		return GP_ENULLPTR;
-	if (!GP_IS_CONTEXT_VALID(context))
-		return GP_EBADCONTEXT;
+/*
+ * Attempts to initialize a backend.
+ * 
+ * If name is specified, only that backend is tried; if name is NULL,
+ * all known backends are tried and the first usable one is picked.
+ *
+ * Returns the backend structure, or NULL on failure.
+ */
+struct GP_Backend *GP_InitBackend(const char *name);
 
-	GP_TRANSFORM_POINT(context, x0, y0);
-	GP_TRANSFORM_POINT(context, x1, y1);
-	GP_TRANSFORM_POINT(context, x2, y2);
-	return GP_FillTriangle(context, x0, y0, x1, y1, x2, y2, pixel);
-}
+/*
+ * Opens the backend video and returns its context.
+ */
+GP_Context *GP_OpenBackendVideo(int w, int h, int flags);
+
+/*
+ * Returns a pointer to context that represents the backend's video.
+ */
+GP_Context *GP_GetBackendVideoContext(void);
+
+/*
+ * Calls the backend to update its video to reflect new changes.
+ * If the backend uses double buffering, this causes a buffer flip.
+ * If the backend uses direct-to-screen drawing, this call
+ * has no effect.
+ */
+void GP_UpdateBackendVideo(void);
+
+/*
+ * Reads the first pending backend event.
+ * Returns 0 if no events were pending, 1 on success.
+ */
+int GP_GetBackendEvent(struct GP_BackendEvent *event);
+
+#endif

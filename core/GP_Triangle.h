@@ -28,10 +28,16 @@
 
 #include "GP_Context.h"
 
-GP_RetCode GP_Triangle(GP_Context *context, int x0, int y0, int x1, int y1,
-                       int x2, int y2, GP_Pixel pixel);
+void GP_Triangle(GP_Context *context, int x0, int y0, int x1, int y1,
+                 int x2, int y2, GP_Pixel pixel);
 
-GP_RetCode GP_TTriangle(GP_Context *context, int x0, int y0, int x1, int y1,
-                        int x2, int y2, GP_Pixel pixel);
+void GP_TTriangle(GP_Context *context, int x0, int y0, int x1, int y1,
+                  int x2, int y2, GP_Pixel pixel);
+
+void GP_FillTriangle(GP_Context *context, int x0, int y0, int x1, int y1,
+                     int x2, int y2, GP_Pixel pixel);
+
+void GP_TFillTriangle(GP_Context *context, int x0, int y0, int x1, int y1,
+                      int x2, int y2, GP_Pixel pixel);
 
 #endif /* GP_TRIANGLE_H */

@@ -51,13 +51,12 @@
 #include "GP_Rect.h"
 #include "GP_FillRect.h"
 #include "GP_Triangle.h"
-#include "GP_FillTriangle.h"
 #include "GP_Tetragon.h"
-#include "GP_FillTetragon.h"
 #include "GP_Circle.h"
 #include "GP_FillCircle.h"
 #include "GP_Ellipse.h"
 #include "GP_FillEllipse.h"
+#include "GP_Polygon.h"
 #include "GP_Symbol.h"
 
 /* fonts */
@@ -65,5 +64,8 @@
 #include "GP_TextStyle.h"
 #include "GP_TextMetric.h"
 #include "GP_Text.h"
+
+/* backends */
+#include "GP_Backend.h"
 
 #endif /* GP_H */

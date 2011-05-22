@@ -91,19 +91,25 @@ def gen_tests(f):
 	      " * Test %s/%s defined in %s:%d\n"
 	      " */\n\n" % (suite, t['name'], t['fname'], t['line']))
       f.write("void GP_TEST_%s(int);\n\n"
-	      "TCase *GP_TC_%s()\n"
+	      "TCase *GP_TC_%s_%s()\n"
 	      "{\n"
-	      "	TCase *tc = tcase_create(\"%s\");\n"
-	      "	tcase_add_test(tc, GP_TEST_%s);\n"
-	      "	return tc;\n"
-	      "}\n\n" % (t['name'], t['name'], t['name'], t['name']))
+	      "	TCase *tc = tcase_create(\"%s\");\n" %
+	      (t['name'], suite, t['name'], t['name']))
+      signal = t.get('expect_signal', 0)
+      exitval = t.get('expect_exit', 0)
+      assert ('loop_start' in t) == ('loop_end' in t)
+      loop_start = t.get('loop_start', 0)
+      loop_end = t.get('loop_end', 1)
+      f.write("	_tcase_add_test(tc, GP_TEST_%s, \"%s\", %d, %d, %d, %d);\n" % \
+	      (t['name'], t['name'], signal, exitval, loop_start, loop_end))
+      f.write("	return tc;\n}\n\n")
       # TODO: Handle special test requirements (timing, fixture, ...)
 
     f.write("Suite *GP_TS_%s()\n"
 	    "{\n"
 	    "	Suite *s = suite_create(\"%s\");\n" % (suite, suite))
     for t in tests:
-      f.write("	suite_add_tcase(s, GP_TC_%s());\n" % (t['name']))
+      f.write("	suite_add_tcase(s, GP_TC_%s_%s());\n" % (suite, t['name']))
     f.write("	return s;\n"
 	    "}\n\n")
 

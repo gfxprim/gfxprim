@@ -25,15 +25,10 @@
 
 #include "GP.h"
 
-#include <stdint.h>
-
-GP_RetCode GP_FillRectXYXY(GP_Context *context, int x0, int y0, int x1, int y1,
-	GP_Pixel pixel)
+void GP_FillRectXYXY(GP_Context *context, int x0, int y0, int x1, int y1,
+                     GP_Pixel pixel)
 {
-	if (!context)
-		return GP_ENULLPTR;
-	if (!GP_IS_CONTEXT_VALID(context))
-		return GP_EBADCONTEXT;
+	GP_CHECK_CONTEXT(context);
 
 	if (y0 > y1)
 		GP_SWAP(y0, y1);
@@ -41,37 +36,35 @@ GP_RetCode GP_FillRectXYXY(GP_Context *context, int x0, int y0, int x1, int y1,
 	int y;
 	for (y = y0; y <= y1; y++)
 		GP_HLine(context, x0, x1, y, pixel);
-
-	return GP_ESUCCESS;
 }
 
-GP_RetCode GP_FillRectXYWH(GP_Context *context, int x, int y,
-	unsigned int w, unsigned int h, GP_Pixel pixel)
+void GP_FillRectXYWH(GP_Context *context, int x, int y,
+                     unsigned int w, unsigned int h, GP_Pixel pixel)
 {
+	/* zero width/height: draw nothing */
 	if (w == 0 || h == 0)
-		return GP_ESUCCESS;	/* zero width/height: draw nothing */
+		return;
 
 	return GP_FillRectXYXY(context, x, y, x + w - 1, y + h - 1, pixel);
 }
 
-GP_RetCode GP_TFillRectXYXY(GP_Context *context, int x0, int y0,
-	int x1, int y1, GP_Pixel pixel)
+void GP_TFillRectXYXY(GP_Context *context, int x0, int y0,
+                      int x1, int y1, GP_Pixel pixel)
 {
-	if (!context)
-		return GP_ENULLPTR;
-	if (!GP_IS_CONTEXT_VALID(context))
-		return GP_EBADCONTEXT;
-
+	GP_CHECK_CONTEXT(context);
+	
 	GP_TRANSFORM_POINT(context, x0, y0);
 	GP_TRANSFORM_POINT(context, x1, y1);
-	return GP_FillRect(context, x0, y0, x1, y1, pixel);
+
+	GP_FillRect(context, x0, y0, x1, y1, pixel);
 }
 
-GP_RetCode GP_TFillRectXYWH(GP_Context *context, int x, int y,
-	unsigned int w, unsigned int h, GP_Pixel pixel)
+void GP_TFillRectXYWH(GP_Context *context, int x, int y,
+	              unsigned int w, unsigned int h, GP_Pixel pixel)
 {
+	/* zero width/height: draw nothing */
 	if (w == 0 || h == 0)
-		return GP_ESUCCESS;	/* zero width/height: draw nothing */
+		return;
 
-	return GP_TFillRectXYXY(context, x, y, x + w - 1, y + h - 1, pixel);
+	GP_TFillRectXYXY(context, x, y, x + w - 1, y + h - 1, pixel);
 }
