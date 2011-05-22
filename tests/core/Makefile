@@ -14,11 +14,11 @@ include $(TOPDIR)/app.mk
 
 TEST_SRCS=$(wildcard *.test.c)
 TEST_OBJS=$(patsubst %.c,%.o,$(TEST_SRCS))
-
+TESTS=core_tests
 CLEAN+=core_tests.gen.c
 
 run: $(TESTS)
-	for test in $(TESTS); do LD_LIBRARY_PATH=../ ./"$$test" -v ; done
+	for test in $(TESTS); do LD_LIBRARY_PATH=../../build ./"$$test" -v ; done
 
 core_tests.gen.c: $(TEST_SRCS) find_tests.py
 ifdef VERBOSE

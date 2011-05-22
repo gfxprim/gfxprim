@@ -23,6 +23,7 @@
 #include "GP_Tests.h"
 
 #include <GP_Common.h>
+#include <unistd.h>
 
 /*
  * Demo ("testing" ;-) tests for GP_Common.h
@@ -52,7 +53,7 @@ GP_ENDTEST
 GP_TEST(set_bits)
 {
 	uint32_t x = 0x89ABC;
-	uint16_t *y = (uint16_t*) &x; 
+	uint16_t *y = (uint16_t*) &x;
 	GP_CLEAR_BITS(3, 4, x);
 	fail_unless(x == 0x89A84);
 	GP_SET_BITS_OR(10, x, 0x0000000); 
@@ -61,12 +62,21 @@ GP_TEST(set_bits)
 	fail_unless(x == 0xF1089A84);
 	/* Check that only uint16_t is affected */
 	GP_SET_BITS(0, 24, *y, 0x100F000LL); 
+#	if __BYTE_ORDER == __BIG_ENDIAN
 	fail_unless(x == 0xF108F000);
+#	else
+	fail_unless(x == 0x100F9A84);
+#	endif
 }
 GP_ENDTEST
 
-GP_TEST(abort_check_assert, "loop_start=0, loop_end=9, expect_exit=1")
+GP_TEST(abort_check_assert, "loop_start=0, loop_end=9, expect_signal=6")
 {
+	/* Prevent output during testing */
+#	ifdef stderr
+#		undef stderr
+#	endif
+#	define stderr stdin
 	if (_i==0) GP_ABORT();
 	if (_i==1) GP_ABORT("MSG");
 	if (_i==2) GP_ABORT("FORMAT %d", _i);
