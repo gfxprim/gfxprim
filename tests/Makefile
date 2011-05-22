@@ -1,3 +1,3 @@
 TOPDIR=..
-SUBDIRS=loaders filters #core
+SUBDIRS=loaders filters core
 include $(TOPDIR)/include.mk
