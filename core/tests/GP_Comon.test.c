@@ -38,7 +38,7 @@ GP_TEST(min_max)
 	fail_unless(GP_MAX(x++, ++y) == 1);
 	fail_unless(x == 1 && y == 1);
 }
-END_TEST
+GP_ENDTEST
 
 GP_TEST(get_bits)
 {
@@ -47,7 +47,7 @@ GP_TEST(get_bits)
 	fail_unless(GP_GET_BITS(16, 16, 0x1234) == 0);
 	fail_unless(GP_GET_BITS(1, 32, 0x12345678ULL) == 0x091A2B3CULL);
 }
-END_TEST
+GP_ENDTEST
 
 GP_TEST(set_bits)
 {
@@ -63,7 +63,7 @@ GP_TEST(set_bits)
 	GP_SET_BITS(0, 24, *y, 0x100F000LL); 
 	fail_unless(x == 0xF108F000);
 }
-END_TEST
+GP_ENDTEST
 
 GP_TEST(abort_check_assert, "loop_start=0, loop_end=9, expect_exit=1")
 {
@@ -86,4 +86,4 @@ GP_TEST(assert_check_nop)
 	GP_CHECK(1);
 	GP_CHECK(1, "MSG");
 }
-END_TEST
+GP_ENDTEST

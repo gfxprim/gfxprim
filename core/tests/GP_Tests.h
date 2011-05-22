@@ -20,6 +20,26 @@
  *                                                                           *
  *****************************************************************************/
 
+/*
+ * Wrappers around check.h unit-test library
+ *
+ * Create a .test.c file with (example):
+ *
+ * GP_SUITE(suite_name)
+ *
+ * GP_TEST(test1)
+ * {
+ *	  fail_unless(1 == 1);
+ *	  fail_if(1 < 0, "Impossible!");
+ *	  int i = 3;
+ *	  if (1 + 1 == i) fail("Arrgh, 1 + 1 is %d", i);
+ * }
+ * GP_ENDTEST
+ *
+ * The tests are collected automatically by find_tests.py. 
+ * See below for more options.
+ */
+
 #include <check.h>
 
 /*
@@ -45,6 +65,8 @@
 #define GP_TEST(name, ...) static void name(int);\
 			   void GP_TEST_##name(int i) {name(i);} \
 			    START_TEST(name)
+
+#define GP_ENDTEST END_TEST
 
 /*
  * Helper macro to allow auto-generation of suites. 

@@ -54,5 +54,5 @@ GP_TEST(load_save)
 	/* cleanup */
 	fail_unless(unlink(FONT_FILE) == 0);
 }
-END_TEST
+GP_ENDTEST
 
