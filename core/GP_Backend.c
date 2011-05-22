@@ -28,7 +28,9 @@
 
 #include <string.h>
 
-/* The current backend. */
+/*
+ * The currently active backend (NULL if none).
+ */
 static struct GP_Backend *current_backend = NULL;
 
 #ifdef GP_HAVE_SDL
@@ -75,4 +77,10 @@ void GP_UpdateBackendVideo(void)
 {
 	GP_CHECK(current_backend, "no current backend");
 	return current_backend->update_video_fn();
+}
+
+int GP_GetBackendEvent(struct GP_BackendEvent *event)
+{
+	GP_CHECK(current_backend, "no current backend");
+	return current_backend->get_event_fn(event);
 }

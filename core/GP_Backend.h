@@ -28,6 +28,23 @@
 
 #include "GP_Context.h"
 
+/*
+ * Types of events provided by the backend.
+ */
+enum GP_BackendEventType {
+	GP_BACKEND_EVENT_NONE = 0,
+	GP_BACKEND_EVENT_UPDATE_VIDEO = 1,	/* video redraw is needed */
+	GP_BACKEND_EVENT_QUIT_REQUEST = 2,	/* user requests quitting */
+};
+
+/*
+ * Structure describing an event reported by a backend.
+ */
+struct GP_BackendEvent {
+	enum GP_BackendEventType type;
+};
+
+/* Describes a backend and holds all its API functions. */
 struct GP_Backend {
 	const char *name;
 	struct GP_Backend *(*init_fn)(void);
@@ -35,13 +52,14 @@ struct GP_Backend {
 	GP_Context *(*open_video_fn)(int w, int h, int flags);
 	GP_Context *(*video_context_fn)(void);
 	void (*update_video_fn)(void);
+	int (*get_event_fn)(struct GP_BackendEvent *event);
 };
 
 /*
  * Attempts to initialize a backend.
  * 
  * If name is specified, only that backend is tried; if name is NULL,
- * all known backends are tried and the first usable is picked.
+ * all known backends are tried and the first usable one is picked.
  *
  * Returns the backend structure, or NULL on failure.
  */
@@ -64,5 +82,11 @@ GP_Context *GP_GetBackendVideoContext(void);
  * has no effect.
  */
 void GP_UpdateBackendVideo(void);
+
+/*
+ * Reads the first pending backend event.
+ * Returns 0 if no events were pending, 1 on success.
+ */
+int GP_GetBackendEvent(struct GP_BackendEvent *event);
 
 #endif

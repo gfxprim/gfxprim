@@ -32,6 +32,18 @@
 #include <SDL/SDL.h>
 
 struct GP_Backend GP_SDL_backend;
+static SDL_Surface *GP_SDL_display = NULL;
+static GP_Context GP_SDL_context;
+
+/* Functions from the SDL library, dynamically loaded in GP_SDL_InitFn(). */
+static void (*dyn_SDL_Quit)(void);
+static int (*dyn_SDL_Init)(int);
+static SDL_Surface *(*dyn_SDL_SetVideoMode)(int, int, int, uint32_t);
+static void (*dyn_SDL_UpdateRect)(SDL_Surface *, int, int, int, int);
+static int (*dyn_SDL_WaitEvent)(SDL_Event *);
+
+/* User callbacks. */
+static void (*GP_SDL_update_video_callback)(void) = NULL;
 
 /* 
  * Checks whether pixel color component masks in the given surface are equal
@@ -142,14 +154,6 @@ inline GP_RetCode GP_SDL_ContextFromSurface(
 	return GP_ESUCCESS;
 }
 
-static SDL_Surface *GP_SDL_display = NULL;
-static GP_Context GP_SDL_context;
-
-static void (*dyn_SDL_Quit)(void);
-static int (*dyn_SDL_Init)(int);
-static SDL_Surface *(*dyn_SDL_SetVideoMode)(int, int, int, uint32_t);
-static void (*dyn_SDL_UpdateRect)(SDL_Surface *, int, int, int, int);
-
 static void GP_SDL_ShutdownFn(void)
 {
 	dyn_SDL_Quit();
@@ -165,6 +169,7 @@ static struct GP_Backend *GP_SDL_InitFn(void)
 	dyn_SDL_Quit = dlsym(library, "SDL_Quit");
 	dyn_SDL_UpdateRect = dlsym(library, "SDL_UpdateRect");
 	dyn_SDL_SetVideoMode = dlsym(library, "SDL_SetVideoMode");
+	dyn_SDL_WaitEvent = dlsym(library, "SDL_WaitEvent");
 
 	if (dyn_SDL_Init(SDL_INIT_VIDEO|SDL_INIT_TIMER) != 0)
 		return NULL;
@@ -199,13 +204,34 @@ static void GP_SDL_UpdateVideoFn(void)
 			GP_SDL_display->w, GP_SDL_display->h);
 }
 
+static int GP_SDL_GetEventFn(struct GP_BackendEvent *event)
+{
+	SDL_Event sdl_event;
+
+	if (dyn_SDL_WaitEvent(&sdl_event) == 0)
+		return 0;
+
+	switch (sdl_event.type) {
+		case SDL_VIDEOEXPOSE:
+			event->type = GP_BACKEND_EVENT_UPDATE_VIDEO;
+			return 1;
+		case SDL_QUIT:
+			event->type = GP_BACKEND_EVENT_QUIT_REQUEST;
+			return 1;
+	}
+
+	/* for the time being, unknown events are simply ignored */
+	return 0;
+}
+
 struct GP_Backend GP_SDL_backend = {
-	"SDL",
-	GP_SDL_InitFn,
-	GP_SDL_ShutdownFn,
-	GP_SDL_OpenVideoFn,
-	GP_SDL_VideoContextFn,
-	GP_SDL_UpdateVideoFn
+	.name = "SDL",
+	.init_fn = GP_SDL_InitFn,
+	.shutdown_fn = GP_SDL_ShutdownFn,
+	.open_video_fn = GP_SDL_OpenVideoFn,
+	.video_context_fn = GP_SDL_VideoContextFn,
+	.update_video_fn = GP_SDL_UpdateVideoFn,
+	.get_event_fn = GP_SDL_GetEventFn,
 };
 
 #endif /* GP_HAVE_SDL */
