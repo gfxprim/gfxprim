@@ -41,7 +41,7 @@ void GP_Line(GP_Context *context, int x0, int y0, int x1, int y1,
 {
 	GP_CHECK_CONTEXT(context);
 
-	GP_FN_PER_BPP(GP_Line, context, x0, y0, x1, y1, pixel);
+	GP_FN_PER_BPP(GP_Line, context->bpp, context, x0, y0, x1, y1, pixel);
 }
 
 void GP_TLine(GP_Context *context, int x0, int y0, int x1, int y1,

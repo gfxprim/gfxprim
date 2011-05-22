@@ -41,7 +41,8 @@ void GP_Circle(GP_Context *context, int xcenter, int ycenter,
 {
 	GP_CHECK_CONTEXT(context);
 
-	GP_FN_PER_BPP(GP_Circle, context, xcenter, ycenter, r, pixel);
+	GP_FN_PER_BPP(GP_Circle, context->bpp, context,
+	              xcenter, ycenter, r, pixel);
 }
 
 void GP_TCircle(GP_Context *context, int xcenter, int ycenter,

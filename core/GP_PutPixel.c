@@ -52,7 +52,7 @@ void GP_PutPixel(GP_Context *context, int x, int y, GP_Pixel pixel)
 {
 	GP_CHECK_CONTEXT(context);
 
-	GP_FN_PER_BPP(GP_PutPixel, context, x, y, pixel);
+	GP_FN_PER_BPP(GP_PutPixel, context->bpp, context, x, y, pixel);
 }
 
 void GP_TPutPixel(GP_Context *context, int x, int y, GP_Pixel pixel)

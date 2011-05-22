@@ -47,7 +47,7 @@ GP_Pixel GP_GetPixel(GP_Context *context, int x, int y)
 {
 	GP_CHECK_CONTEXT(context);
 
-	GP_FN_RET_PER_BPP(GP_GetPixel, context, x, y);
+	GP_FN_RET_PER_BPP(GP_GetPixel, context->bpp, context, x, y);
 
 	return 0;
 }

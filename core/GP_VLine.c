@@ -40,7 +40,7 @@ void GP_VLineXYY(GP_Context *context, int x, int y0, int y1, GP_Pixel pixel)
 {
 	GP_CHECK_CONTEXT(context);
 
-	GP_FN_PER_BPP(GP_VLine, context, x, y0, y1, pixel);
+	GP_FN_PER_BPP(GP_VLine, context->bpp, context, x, y0, y1, pixel);
 }
 
 void GP_VLineXYH(GP_Context *context, int x, int y, unsigned int height,

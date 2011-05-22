@@ -77,7 +77,7 @@ GP_RetCode GP_MirrorV(GP_Context *context)
 	if (context == NULL)
 		return GP_ENULLPTR;
 
-	GP_FN_PER_BPP(GP_MirrorV, context);
+	GP_FN_PER_BPP(GP_MirrorV, context->bpp, context);
 
 	return GP_ESUCCESS;
 }
@@ -95,7 +95,7 @@ GP_RetCode GP_RotateCW(GP_Context *context)
 	if (context == NULL)
 		return GP_ENULLPTR;
 
-	GP_FN_RET_PER_BPP(GP_RotateCW, context);
+	GP_FN_RET_PER_BPP(GP_RotateCW, context->bpp, context);
 
 	return GP_ENOIMPL;
 }
@@ -113,7 +113,7 @@ GP_RetCode GP_RotateCCW(GP_Context *context)
 	if (context == NULL)
 		return GP_ENULLPTR;
 
-	GP_FN_RET_PER_BPP(GP_RotateCCW, context);
+	GP_FN_RET_PER_BPP(GP_RotateCCW, context->bpp, context);
 
 	return GP_ENOIMPL;
 }
