@@ -14,14 +14,14 @@ get_objects()
 	done
 }
 
-if [ "$1" == "libGP.a" ]; then
-	OBJECTS=$(get_objects)
+if [ "$1" = "libGP.a" ]; then
+	OBJECTS=`get_objects`
 
 	ar rcs libGP.a $OBJECTS
 fi
 
-if [ "$1" == "libGP.so" ]; then
-	OBJECTS=$(get_objects)
+if [ "$1" = "libGP.so" ]; then
+	OBJECTS=`get_objects`
 
 	gcc -fPIC -dPIC --shared -Wl,-soname -Wl,libGP.so.0 $OBJECTS -o libGP.so
 fi
