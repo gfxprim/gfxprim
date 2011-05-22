@@ -65,40 +65,53 @@
 /*
  * Aborts and prints the message along with the location in code
  * to stderr. Used for fatal errors.
+ *
+ * Use as either GP_ABORT(), GP_ABORT(msg) or GP_ABORT(format, params...) where
+ * msg and format must be string constants.
  */
-#define GP_ABORT(msg) do { \
-		fprintf(stderr, "*** gfxprim: aborted: %s:%d: in %s: %s\n", \
-				__FILE__, __LINE__, __FUNCTION__, msg); \
+#define GP_ABORT(...) do { \
+		fprintf(stderr, "*** gfxprim: %s:%d: in %s: ", \
+				__FILE__, __LINE__, __FUNCTION__); \
+		fprintf(stderr, "" __VA_ARGS__); \
+		if (! (#__VA_ARGS__ [0])) \
+			fprintf(stderr, "abort()"); \
+		fprintf(stderr, "\n"); \
 		abort(); \
 	} while (0)
 
 /*
- * Checks the condition and aborts immediately if it is not satisfied,
- * printing the condition and location in the source.
- * (Intended for checking for bugs within the library itself.
- * GP_CHECK is used for reporting user errors, like invalid arguments.)
+ * Internal macro with common code for GP_ASSERT and GP_CHECK.
  */
-#define GP_ASSERT(cond) do { \
-	if (unlikely(!(cond))) { \
-		fprintf(stderr, "*** gfxprim: %s:%d: in %s: BUG: assertion failed: %s\n", \
-			__FILE__, __LINE__, __FUNCTION__, #cond); \
-		abort(); \
-	} \
+#define GP_GENERAL_CHECK(check_cond_, check_message_, ...) do { \
+	if (unlikely(!(check_cond_))) \
+		if (#__VA_ARGS__ [0]) \
+			GP_ABORT(check_message_ #check_cond_ "\n" __VA_ARGS__); \
+		else \
+			GP_ABORT(check_message_ #check_cond_); \
 } while (0)
 
 /*
- * Perform a runtime check, on failure abort and print a message.
- * (This macro is intended for checks for user-caused errors,
- * like invalid arguments, leaving the library in improper state etc.
- * For internal sanity checks, use GP_ASSERT.)
+ * Checks the condition and aborts immediately if it is not satisfied,
+ * printing the condition and location in the source.
+ * (Intended for checking for bugs within the library itself.)
+ *
+ * Use as either GP_ASSERT(cond), GP_ASSERT(cond, msg) or 
+ * GP_ASSERT(cond, format, params...) where msg and format must be string 
+ * constants.
  */
-#define GP_CHECK(cond, msg) do { \
-	if (unlikely(!(cond))) { \
-		fprintf(stderr, "*** gfxprim: %s:%d: in %s: %s\n", \
-			__FILE__, __LINE__, __FUNCTION__, msg); \
-		abort(); \
-	} \
-} while (0)
+#define GP_ASSERT(check_cond_, ...) \
+	GP_GENERAL_CHECK(check_cond_, "asserion failed: ", ##__VA_ARGS__);
+
+/*
+ * Perform a runtime check, on failure abort and print a message.
+ * (Intended for user-caused errors like invalid arguments.)
+ *
+ * Use as either GP_CHECK(cond), GP_CHECK(cond, msg) or 
+ * GP_CHECK(cond, format, params...) where msg and format must be string 
+ * constants.
+ */
+#define GP_CHECK(check_cond_, ...) \
+	GP_GENERAL_CHECK(check_cond_, "check failed: ", ##__VA_ARGS__);
 
 /*
  * Swap a and b using an intermediate variable
