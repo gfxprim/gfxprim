@@ -41,7 +41,8 @@ void GP_FillEllipse(GP_Context *context, int xcenter, int ycenter,
 {
 	GP_CHECK_CONTEXT(context);
 
-	GP_FN_PER_BPP(GP_FillEllipse, context, xcenter, ycenter, a, b, pixel);
+	GP_FN_PER_BPP(GP_FillEllipse, context->bpp, context,
+	              xcenter, ycenter, a, b, pixel);
 }
 
 void GP_TFillEllipse(GP_Context *context, int xcenter, int ycenter,

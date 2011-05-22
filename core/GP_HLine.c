@@ -40,7 +40,7 @@ void GP_HLineXXY(GP_Context *context, int x0, int x1, int y, GP_Pixel pixel)
 {
 	GP_CHECK_CONTEXT(context);
 	
-	GP_FN_PER_BPP(GP_HLine, context, x0, x1, y, pixel);
+	GP_FN_PER_BPP(GP_HLine, context->bpp, context, x0, x1, y, pixel);
 }
 
 void GP_HLineXYW(GP_Context *context, int x, int y, unsigned int w,
