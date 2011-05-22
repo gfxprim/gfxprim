@@ -64,3 +64,26 @@ GP_TEST(set_bits)
 	fail_unless(x == 0xF108F000);
 }
 END_TEST
+
+GP_TEST(abort_check_assert, "loop_start=0, loop_end=9, expect_exit=1")
+{
+	if (_i==0) GP_ABORT();
+	if (_i==1) GP_ABORT("MSG");
+	if (_i==2) GP_ABORT("FORMAT %d", _i);
+	if (_i==3) GP_ASSERT(1==0);
+	if (_i==4) GP_ASSERT(1==0, "MSG");
+	if (_i==5) GP_ASSERT(1==0, "FORMAT %d", _i);
+	if (_i==6) GP_CHECK(1==0);
+	if (_i==7) GP_CHECK(1==0, "MSG");
+	if (_i==8) GP_CHECK(1==0, "FORMAT %d", _i);
+}
+END_TEST
+
+GP_TEST(assert_check_nop)
+{
+	GP_ASSERT(1);
+	GP_ASSERT(1, "MSG");
+	GP_CHECK(1);
+	GP_CHECK(1, "MSG");
+}
+END_TEST

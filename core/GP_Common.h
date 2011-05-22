@@ -83,11 +83,12 @@
  * Internal macro with common code for GP_ASSERT and GP_CHECK.
  */
 #define GP_GENERAL_CHECK(check_cond_, check_message_, ...) do { \
-	if (unlikely(!(check_cond_))) \
+	if (unlikely(!(check_cond_))) { \
 		if (#__VA_ARGS__ [0]) \
 			GP_ABORT(check_message_ #check_cond_ "\n" __VA_ARGS__); \
 		else \
 			GP_ABORT(check_message_ #check_cond_); \
+	} \
 } while (0)
 
 /*
