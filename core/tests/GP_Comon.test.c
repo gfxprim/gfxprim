@@ -77,13 +77,14 @@ GP_TEST(abort_check_assert, "loop_start=0, loop_end=9, expect_exit=1")
 	if (_i==7) GP_CHECK(1==0, "MSG");
 	if (_i==8) GP_CHECK(1==0, "FORMAT %d", _i);
 }
-END_TEST
+GP_ENDTEST
 
 GP_TEST(assert_check_nop)
 {
-	GP_ASSERT(1);
-	GP_ASSERT(1, "MSG");
-	GP_CHECK(1);
-	GP_CHECK(1, "MSG");
+	/* Also tests % in conditon */
+	GP_ASSERT(7 % 3 == 1);
+	GP_ASSERT(7 % 3 == 1, "MSG");
+	GP_CHECK(7 % 3 == 1);
+	GP_CHECK(7 % 3 == 1, "MSG");
 }
 GP_ENDTEST

@@ -63,33 +63,42 @@
 #endif
 
 /*
+ * Internal macros with common code for GP_ABORT, GP_ASSERT and GP_CHECK.
+ * GP_INTERNAL_ABORT takes a message that may contain % (e.g. assert condition)
+ * and prints: 
+ * "*** gfxprim: __FILE__:__LINE__: in __FUNCTION__: str_abort_msg_" format(__VA_ARGS__) "\n"
+ *
+ * GP_GENERAL_CHECK is a check with specified message prefix (for assert and check)
+ */
+
+#define GP_INTERNAL_ABORT(str_abort_msg_, ...) do { \
+		fprintf(stderr, "*** gfxprim: %s:%d: in %s: %s", \
+				__FILE__, __LINE__, __FUNCTION__, str_abort_msg_); \
+		if (! (#__VA_ARGS__ [0])) \
+			fprintf(stderr, "abort()"); \
+		else \
+			fprintf(stderr, " " __VA_ARGS__); \
+		fprintf(stderr, "\n"); \
+		abort(); \
+	} while (0)
+
+#define GP_GENERAL_CHECK(check_cond_, check_message_, ...) do { \
+		if (unlikely(!(check_cond_))) { \
+			if (#__VA_ARGS__ [0]) \
+				GP_INTERNAL_ABORT(check_message_ #check_cond_, "\n" __VA_ARGS__); \
+			else \
+				GP_INTERNAL_ABORT(check_message_ #check_cond_, " "); \
+		} \
+	} while (0)
+
+/*
  * Aborts and prints the message along with the location in code
  * to stderr. Used for fatal errors.
  *
  * Use as either GP_ABORT(), GP_ABORT(msg) or GP_ABORT(format, params...) where
  * msg and format must be string constants.
  */
-#define GP_ABORT(...) do { \
-		fprintf(stderr, "*** gfxprim: %s:%d: in %s: ", \
-				__FILE__, __LINE__, __FUNCTION__); \
-		fprintf(stderr, "" __VA_ARGS__); \
-		if (! (#__VA_ARGS__ [0])) \
-			fprintf(stderr, "abort()"); \
-		fprintf(stderr, "\n"); \
-		abort(); \
-	} while (0)
-
-/*
- * Internal macro with common code for GP_ASSERT and GP_CHECK.
- */
-#define GP_GENERAL_CHECK(check_cond_, check_message_, ...) do { \
-	if (unlikely(!(check_cond_))) { \
-		if (#__VA_ARGS__ [0]) \
-			GP_ABORT(check_message_ #check_cond_ "\n" __VA_ARGS__); \
-		else \
-			GP_ABORT(check_message_ #check_cond_); \
-	} \
-} while (0)
+#define GP_ABORT(...) GP_INTERNAL_ABORT("", ##__VA_ARGS__)
 
 /*
  * Checks the condition and aborts immediately if it is not satisfied,
