@@ -1,0 +1,8 @@
+*.o
+*.pyc
+*.gen.c
+*.gen.h
+*.swp
+libGP_core.so*
+libGP_core.a
+
