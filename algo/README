@@ -1,7 +1,0 @@
-This directory contains implementations of various drawing algorithms
-in form of macros. Each macro generates a function that draws a shape
-using lower-level primitives that are specified by the user.
-
-This allows for having multiple drawing functions customized for various
-conditions, typically various bit depths.
-
