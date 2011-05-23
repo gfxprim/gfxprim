@@ -27,11 +27,6 @@
 
 #include <string.h>
 
-inline GP_PixelType GP_GetContextPixelType(const GP_Context *context)
-{
-	return context->pixel_type;
-}
-
 GP_Context *GP_ContextCopy(GP_Context *context, int flag)
 {
 	GP_Context *new;

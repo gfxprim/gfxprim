@@ -30,6 +30,7 @@
 #include <stdint.h>
 
 #include "GP_Color.h"
+#include "GP_Common.h"
 #include "GP_RetCode.h"
 
 struct GP_Context;

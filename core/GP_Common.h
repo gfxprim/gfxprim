@@ -146,8 +146,10 @@
 
 #define GP_SET_BITS_OR(offset, dest, val) ( (dest) |= ((val)<<(offset)) )
 
-#define GP_SET_BITS(offset, count, dest, val) (GP_CLEAR_BITS(offset, count, dest), \
-					       GP_SET_BITS_OR(offset, dest, val) )
+#define GP_SET_BITS(offset, count, dest, val) do { \
+		GP_CLEAR_BITS(offset, count, dest); \
+		GP_SET_BITS_OR(offset, dest, val); \
+	} while (0)
 
 
 /* Determines the sign of the integer value; it is +1 if value is positive,

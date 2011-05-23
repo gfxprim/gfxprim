@@ -32,6 +32,10 @@
 #include "GP_Common.h"
 #include "GP_Pixel.h"
 
+/* Integer type for coordinates: x, y, width, height, ... 
+ * Should be signed to hold negative values as well. */
+typedef int GP_Coord;
+
 /* This structure holds all information needed for drawing into an image. */
 typedef struct GP_Context {
 	uint8_t *pixels;	 /* pointer to image pixels */
@@ -58,7 +62,10 @@ typedef struct GP_Context {
 } GP_Context;
 
 /* Returns the pixel type used by the context. */
-inline GP_PixelType GP_GetContextPixelType(const GP_Context *context);
+static inline GP_PixelType GP_GetContextPixelType(const GP_Context *context)
+{
+          return context->pixel_type;
+}
 
 /* Determines the address of a pixel within the context's image.
  * Rows and columns are specified in the image's orientation
@@ -136,23 +143,13 @@ void GP_ContextFlagsRotateCCW(GP_Context *context);
  */
 static inline uint32_t GP_ContextW(GP_Context *context)
 {
-	return context->w;
-}
-
-static inline uint32_t GP_ContextH(GP_Context *context)
-{
-	return context->h;
-}
-
-static inline uint32_t GP_TContextW(GP_Context *context)
-{
 	if (context->axes_swap)
 		return context->h;
 	else
 		return context->w;
 }
 
-static inline uint32_t GP_TContextH(GP_Context *context)
+static inline uint32_t GP_ContextH(GP_Context *context)
 {
 	if (context->axes_swap)
 		return context->w;
