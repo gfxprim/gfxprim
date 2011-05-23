@@ -21,32 +21,49 @@
  *                                                                           *
  * Copyright (C) 2009-2010 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
+ * Copyright (C) 2011      Tomas Gavenciak <gavento@ucw.cz>                  *
+ *                                                                           *
  *****************************************************************************/
 
 #ifndef GP_TRANSFORM_H
 #define GP_TRANSFORM_H
 
+/* 
+ * Flip a coordinate within context according to context transformation. 
+ */
 #define GP_TRANSFORM_X(context, x) do { \
 	if ((context)->x_swap)          \
-		x = (context)->w - x;   \
+		x = (context)->w - x - 1;   \
 } while (0)
 
 #define GP_TRANSFORM_Y(context, y) do { \
 	if ((context)->y_swap)          \
-		y = (context)->h - y;   \
+		y = (context)->h - y - 1;   \
 } while (0)
 
+/* 
+ * Swap coordinates (axes) according to context transformation. 
+ */
 #define GP_TRANSFORM_SWAP(context, x, y) do { \
 	if ((context)->axes_swap)             \
 		GP_SWAP(x, y);                \
 } while (0)
 
+/* 
+ * Transform "user"-coordinates to "real"-coordinates according to context 
+ * transformation. 
+ */
 #define GP_TRANSFORM_POINT(context, x, y) do { \
 	GP_TRANSFORM_SWAP(context, x, y);      \
 	GP_TRANSFORM_X(context, x);            \
 	GP_TRANSFORM_Y(context, y);            \
 } while (0)
 
+/* 
+ * Transform "user"-coordinates to "real"-coordinates of a rectangle corner
+ * according to context transformation. Corner with min-coordinates is 
+ * transformed to (different) corner with min-coordinates etc. 
+ */
 #define GP_TRANSFORM_RECT(context, x, y, rw, rh) do { \
 	GP_TRANSFORM_SWAP(context, x, y);             \
 	GP_TRANSFORM_SWAP(context, w, h);             \
@@ -59,8 +76,8 @@
 } while (0)
 
 /*
- * Inverse transformation. Use for translating mouse pointer coordinates to
- * coordinates on context.
+ * Inverse transformation to GP_TRANSFORM_POINT. 
+ * Use for translating mouse pointer coordinates to coordinates on context.
  */
 #define GP_RETRANSFORM_POINT(context, x, y) do { \
 	GP_TRANSFORM_X(context, x);              \
