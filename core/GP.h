@@ -68,4 +68,6 @@
 /* backends */
 #include "GP_Backend.h"
 
+#define typeof __typeof__
+
 #endif /* GP_H */
