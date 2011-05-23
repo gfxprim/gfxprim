@@ -56,6 +56,18 @@ typedef uint32_t GP_Pixel;
 #include "GP_Pixel.gen.h"
 
 /*
+ * Information about ordering of pixels in byte for 1, 2 and 4 bpp 
+ * used in a one bit variable in GP_Context 
+ */
+
+typedef enum { 	
+	/* less significant bits contain pixels with lower indices */ 
+	GP_BIT_ENDIAN_LE = 0,
+	/* more significant bits contain pixels with lower indices */ 
+	GP_BIT_ENDIAN_BE,     
+} GP_BIT_ENDIAN; 
+
+/*
  * Description of one channel
  * Assumes all the channel names to be at most 7 chars long
  *
@@ -68,9 +80,15 @@ typedef uint32_t GP_Pixel;
 
 typedef struct {
   char name[8];           /* Channel name */
-  int offset;             /* Offset in bits */
-  int size;               /* Bit-size */
+  uint8_t offset;             /* Offset in bits */
+  uint8_t size;               /* Bit-size */
 } GP_PixelTypeChannel;
+
+/*
+ * Maximum number of channels in a PixelType
+ */
+
+#define GP_PIXELTYPE_MAX_CHANNELS 8
 
 /*
  * Description of one PixelType
@@ -79,32 +97,22 @@ typedef struct {
  */
 
 typedef struct {
-  GP_PixelType type;      /* Number of the type */
-  const char name[16];    /* Name */
-  int size;               /* Size in bits */
-  int bit_endian;	  /* Order of pixels in a byte */ /**TODO : add proper type !! */
-  int numchannels;        /* Number of channels */
-  const char bitmap[36];  /* String describing the bit-representaton (as in "RRRRRGGGGGGBBBBB")*/
-  const GP_PixelTypeChannel channels[8]; /* Individual channels */
+  GP_PixelType type;        /* Number of the type */
+  const char name[16];      /* Name */
+  uint8_t size;	            /* Size in bits */
+  GP_BIT_ENDIAN bit_endian; /* Order of pixels in a byte */
+  uint8_t numchannels;      /* Number of channels */
+  /* String describing the bit-representaton (as in "RRRRRGGGGGGBBBBB")*/
+  const char bitmap[sizeof(GP_Pixel) * 8 + 1];  
+  /* Individual channels */
+  const GP_PixelTypeChannel channels[GP_PIXELTYPE_MAX_CHANNELS]; 
 } GP_PixelTypeDescription;
 
 /*
- * Array of GP_PIXEL_MAX entries
+ * Array of size GP_PIXEL_MAX describing known pixel types
  */
 
 extern const GP_PixelTypeDescription const GP_PixelTypes[];
-
-/*
- * Information about ordering of pixels in byte for 1, 2 and 4 bpp 
- * used in a one bit variable in GP_Context 
- */
-
-typedef enum { 	
-	/* less significant bits contain pixels with lower indices */ 
-	GP_BIT_ENDIAN_LE = 0,
-	/* more significant bits contain pixels with lower indices */ 
-	GP_BIT_ENDIAN_BE,     
-} GP_BIT_ENDIAN; 
 
 /*
  * Convert pixel type to name.
