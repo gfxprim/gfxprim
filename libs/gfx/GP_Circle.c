@@ -45,6 +45,16 @@ void GP_Circle(GP_Context *context, int xcenter, int ycenter,
 	              xcenter, ycenter, r, pixel);
 }
 
+void GP_TCircle(GP_Context *context, int xcenter, int ycenter,
+               unsigned int r, GP_Pixel pixel)
+{
+	GP_CHECK_CONTEXT(context);
+	
+	GP_TRANSFORM_POINT(context, xcenter, ycenter);
+	
+	GP_Circle(context, xcenter, ycenter, r, pixel);
+}
+
 #include "algo/FillCircle.algo.h"
 
 /* Generate drawing functions for various bit depths. */

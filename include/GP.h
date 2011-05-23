@@ -35,4 +35,7 @@
 /* fonts and text drawing */
 #include "text/GP_Text.h"
 
+/* backends */
+#include "backends/GP_Backend.h"
+
 #endif /* GP_H */

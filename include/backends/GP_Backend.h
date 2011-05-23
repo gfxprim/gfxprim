@@ -89,4 +89,4 @@ void GP_UpdateBackendVideo(void);
  */
 int GP_GetBackendEvent(struct GP_BackendEvent *event);
 
-#endif
+#endif /* GP_BACKEND_H */
