@@ -61,7 +61,7 @@ def gen_blit_same_t(size, size_suffix, header, code):
     "			if (al1 != 0)\n"
     "				GP_SET_BITS(al1, 8-al1, *p2, GP_GET_BITS(al1, 8-al1, *p1));\n"
     "			memcpy(p2+(al1!=0), p1+(al1!=0), copy_size);\n"
-    "			if (end_al != 0) {\n"
+    "			if (end_al != 0)\n"
     "				GP_SET_BITS(0, end_al, *end_p2, GP_GET_BITS(0, end_al, *end_p1));\n"
     "			p1 += c1->bytes_per_row;\n"
     "			end_p1 += c1->bytes_per_row;\n"

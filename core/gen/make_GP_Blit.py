@@ -21,6 +21,7 @@ gen_headers(h, c,
 c.append('#include <stdio.h>\n')
 c.append('#include <string.h>\n')
 c.append('#include "GP_Pixel.h"\n')
+c.append('#include "GP.h"\n')
 c.append('#include "GP_Context.h"\n')
 c.append('#include "GP_Blit.gen.h"\n')
 
