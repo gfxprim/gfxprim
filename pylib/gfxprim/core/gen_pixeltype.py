@@ -7,8 +7,9 @@ Such functions accept (and then extend) two list of strins.
 These should be later joined with "" or "\\n".
 """
 
-from pixeltype import pixeltypes, channels
-from gen_utils import *
+from gfxprim.pixeltype import pixeltypes, channels
+from gfxprim.genutils import *
+from gfxprim.genutils import j2render as r
 
 
 def str_start(ptype):

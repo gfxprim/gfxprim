@@ -10,8 +10,9 @@
 #   bitwidth
 #   name
 
-import re
-
+import re, os, sys
+import gfxprim
+from gfxprim import die
 
 ## *Global* dictionary of all pixeltypes { name : PixelType }
 pixeltypes = {}
@@ -90,5 +91,28 @@ class PixelType(object):
   def __str__(self):
     return "<PixelType " + self.name + ">"
 
-if 0 not in pixeltypes:
-  PixelType("UNKNOWN", 0, [], bit_endian=bit_endians[0], number=0)
+def load_pixeltypes(defs_file = None):
+  "Initialize pixeltypes by loading the defs file.\n"
+  "Looks for the file by parameter, env['PIXELTYPE_DEFS'] and "
+  "in dir(__file__)/../../pixeltypes.py, in that order.\n"
+  "PixelType UNKNOWN is not defined here."
+  if not defs_file:
+    defs_file = os.environ.get('PIXELTYPE_DEFS', None)
+  if not defs_file:
+    path = os.path.dirname(os.path.abspath(__file__))
+    defs_file = os.path.join(path, '..', 'pixeltypes.py')
+  sys.stderr.write("Opening PixelType defs file '" + defs_file + "'\n")
+  l1 = len(pixeltypes)
+  execfile(defs_file)
+  l2 = len(pixeltypes)
+  sys.stderr.write("Read %d PixelTypes, now %d total\n" % (l2 - l1, l2))
+
+def __init__():
+  "Initialize PixelType UNKNOWN.\n"
+  "Currently also reads PIXELTYPE_DEFS, but that may change!"
+  if 0 not in pixeltypes:
+    PixelType("UNKNOWN", 0, [], bit_endian=bit_endians[0], number=0)
+  load_pixeltypes()
+
+__init__()
+  

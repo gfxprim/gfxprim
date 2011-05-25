@@ -2,7 +2,7 @@
 # - submodule for blit and friends
 # 2011 - Tomas Gavenciak <gavento@ucw.cz> 
 
-from gen_utils import *
+from gfxprim.gen_utils import *
 
 ## all generated direct blits, for generating GP_Blit() and others
 generated_blits = []

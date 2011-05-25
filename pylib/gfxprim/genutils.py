@@ -3,11 +3,8 @@
 
 import sys
 import jinja2 
-
-def die(msg):
-  sys.stderr.write(msg)
-  sys.exit(1)
-
+import gfxprim
+from gfxprim import die
 
 def hmask(bits): 
   "Helper returning hex mask for that many bits"
@@ -15,7 +12,7 @@ def hmask(bits):
   return hex((1<<bits)-1)
 
 
-def r(tmpl, **kw):
+def j2render(tmpl, **kw):
   "Internal helper to render jinja2 templates (with StrictUndefined)"
   t2 = tmpl.rstrip('\n') # Jinja strips the last '\n', so add these later
   return jinja2.Template(t2, undefined=jinja2.StrictUndefined).render(**kw) + tmpl[len(t2):]
@@ -24,7 +21,7 @@ def r(tmpl, **kw):
 def gen_headers(header, code, descr, authors, generator, hdef):
   "Generate header- and source-file headers"
   "TODO - add license"
-  header.append(r(
+  header.append(j2render(
     "/* GENERATED header -- {{ descr }}\n"
     " * DO NOT MODIFY THIS FILE DIRECTLY! *\n"
     " *\n"
@@ -36,7 +33,7 @@ def gen_headers(header, code, descr, authors, generator, hdef):
     "#ifndef {{ hdef }}\n"
     "#define {{ hdef }}\n\n", descr=descr, authors=authors, 
       generator=generator, hdef=hdef))
-  code.append(r(
+  code.append(j2render(
     "/* GENERATED header -- {{ descr }}\n"
     " * DO NOT MODIFY THIS FILE DIRECTLY! *\n"
     " *\n"
@@ -53,21 +50,17 @@ def gen_footers(header, code):
   header.append("#endif /* Header file #include guard */\n")
 
 
-#import pprint
-def main_write(header, code):
-  "Helper writing header to argv[1] and code to argv[2]"
+def main_write(*files):
+  "Helper writing files to argv[1:], "
+  "usually header to argv[1] and code to argv[2].\n"
   "Skips writing header resp. code if set to None"
   "Expects as many argv params as not-None arguments"
-
-  # Some after-midnight functional crazines:
-  proc = [a for a in [header, code] if a is not None]
-  if len(sys.argv) != len(proc) + 1:
-    die("Generator expects %d parameters (output file names).\n" % len(proc))
-  for i in range(len(proc)):
-    p = proc[i]
+  if len(sys.argv) != len(files) + 1:
+    die("Generator expects %d parameters (output file names).\n" % len(files))
+  for i in range(len(files)):
+    p = files[i]
     fname = sys.argv[i+1]
-    sys.stderr.write("Writing GP_Pixel generated " + ("header" if p==header else "source") + 
-	" to " + fname + "\n")
+    sys.stderr.write("Writing generated source to " + fname + "\n")
     f = open(fname, "wt")
     f.write('\n'.join(p))
     f.close()

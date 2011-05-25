@@ -1,11 +1,14 @@
 #!/usr/bin/python
+#
 # Script generating GP_Pixel.gen.c and GP_Pixel.gen.h
+#
 # 2011 - Tomas Gavenciak <gavento@ucw.cz> 
+#
 
-from pixeltype import *
-from gen_utils import *
-from gen_pixeltype import *
-import defs
+from gfxprim.genutils import *
+from gfxprim.pixeltype import *
+from gfxprim.genutils import j2render as r
+from gfxprim.core.gen_pixeltype import *
 
 h = []
 c = []

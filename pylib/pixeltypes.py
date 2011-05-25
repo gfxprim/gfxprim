@@ -1,9 +1,18 @@
-# Module defining known PixelTypes
+#
+#  pixeltypes.py - module defining known PixelTypes
+# 
+
+#
 # 2011 - Tomas Gavenciak <gavento@ucw.cz>
-
-# NOTE: order defines numbering
-
-from pixeltype import PixelType
+#
+# Every call to PixelType defines one new GP_PixelType, order defines 
+# the numbering. Undefined type is defined automatically.
+# No other functionality than PixelType() should be defined here.
+# 
+# This file is sourced by all the generating scripts. 
+# Moreover, the generated files are sourced by almost all Gfxprim sources,
+# a complete recompilation is required after any change. 
+#
 
 
 PixelType(name='RGBx8888', size=32, chanslist=[

@@ -6,6 +6,12 @@ $(error LIBNAME not defined, fix your library Makefile)
 endif
 
 #
+# All potential dependencies for generated files
+#
+GENERATORS=$(shell find ${PYLIBSDIR} -name *.py)
+CLEAN+=$(patsubst, %.py, %.pyc, ${GENERATORS})
+
+#
 # Headers goes into include/core/
 #
 INCLUDE_PREFIX=$(TOPDIR)/include/$(LIBNAME)/
