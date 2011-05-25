@@ -28,7 +28,6 @@
 
 #include "GP.h"
 
-inline GP_RetCode GP_SDL_ContextFromSurface(GP_Context *context,
-		SDL_Surface *surf);
+GP_RetCode GP_SDL_ContextFromSurface(GP_Context *context, SDL_Surface *surf);
 
 #endif /* GP_SDL_CONTEXT_H */

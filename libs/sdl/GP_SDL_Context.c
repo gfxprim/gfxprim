@@ -97,8 +97,7 @@ static enum GP_PixelType find_surface_pixel_type(SDL_Surface *surf)
 
 }
 
-inline GP_RetCode GP_SDL_ContextFromSurface(
-		GP_Context *context, SDL_Surface *surf)
+GP_RetCode GP_SDL_ContextFromSurface(GP_Context *context, SDL_Surface *surf)
 {
 	if (surf == NULL || surf->pixels == NULL || context == NULL) {
 		return GP_ENULLPTR;
