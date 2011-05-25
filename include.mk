@@ -32,6 +32,13 @@ COMPILE=yes
 endif
 
 #
+# Potential python dependencies for generated files and scripts
+# Add .pyc files to CLEAN list
+#
+PYTHON_FILES=$(shell find "${PYLIBSDIR}" -name *.py)
+CLEAN+=$(patsubst, %.py, %.pyc, ${})
+
+#
 # 1. Generate and include dependencies for all C sources
 # 2. Generate OBJECTS list from CSOURCES list
 # 3. Adds OBJECTS to CLEAN list

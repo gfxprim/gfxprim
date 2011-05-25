@@ -6,12 +6,6 @@ $(error LIBNAME not defined, fix your library Makefile)
 endif
 
 #
-# All potential dependencies for generated files
-#
-GENERATORS=$(shell find ${PYLIBSDIR} -name *.py)
-CLEAN+=$(patsubst, %.py, %.pyc, ${GENERATORS})
-
-#
 # Headers goes into include/core/
 #
 INCLUDE_PREFIX=$(TOPDIR)/include/$(LIBNAME)/
@@ -23,7 +17,7 @@ RGENHEADERS=$(addprefix $(INCLUDE_PREFIX),$(GENHEADERS))
 CSOURCES+=$(GENSOURCES)
 
 #
-# Make the targets build actually
+# Make the genrated headers actually build
 #
 all: $(RGENHEADERS)
 
@@ -31,3 +25,13 @@ all: $(RGENHEADERS)
 # And clean them
 #
 CLEAN+=$(GENSOURCES) $(RGENHEADERS)
+
+#
+# Currently, just depend on all python files
+#
+GENERATORS=$(PYTHON_FILES)
+
+#
+# Generated files depend on python generators and libs
+#
+%.gen.c %.gen.h: $(GENERATORS)
