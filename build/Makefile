@@ -1,41 +1,39 @@
-all: print libs
+LIB_OBJECTS=$(shell ./get_objs.sh)
 
-print:
-ifndef VERBOSE
-	@echo "GEN (linker) libGP.a libGP.so"
-endif
-
-libs: print libGP.a libGP.so
-
-#
-# Do NOT remove this
-#
-.PHONY: libGP.a libGP.so
+all: libGP.a libGP.so libGP.so.0
 
 clean:
 ifdef VERBOSE
-	rm -f libGP.a libGP.so
+	rm -f libGP.a libGP.so libGP.so.0
 else
-	@echo "RM  libGP.a libGP.so"
-	@rm -f libGP.a libGP.so
+	@echo "RM  libGP.a libGP.so libGP.so.0"
+	@rm -f libGP.a libGP.so libGP.so.0
 endif
 
-libGP.a:
+libGP.a: $(LIB_OBJECTS)
 	@. ./liblock.sh; spinlock .
 ifdef VERBOSE
-	./link.sh libGP.a
+	$(AR) rcs libGP.a $(LIB_OBJECTS)
 else
 	@echo "AR  libGP.a"
-	@./link.sh libGP.a
+	@$(AR) rcs libGP.a $(LIB_OBJECTS)
 endif
 	@. ./liblock.sh; spinunlock .
 
-libGP.so:
+libGP.so: $(LIB_OBJECTS)
 	@. ./liblock.sh; spinlock .
 ifdef VERBOSE
-	./link.sh libGP.so
+	$(CC) -fPIC -dPIC --shared -Wl,-soname -Wl,libGP.so.0 $(LIB_OBJECTS) -o libGP.so
 else
 	@echo "LD  libGP.so"
-	@./link.sh libGP.so
+	@$(CC) -fPIC -dPIC --shared -Wl,-soname -Wl,libGP.so.0 $(LIB_OBJECTS) -o libGP.so
 endif
 	@. ./liblock.sh; spinunlock .
+
+libGP.so.0: libGP.so
+ifdef VERBOSE
+	ln -s libGP.so libGP.so.0
+else
+	@echo "LN  libGP.so.0"
+	@ln -s libGP.so libGP.so.0
+endif

@@ -2,7 +2,18 @@ TOPDIR=.
 SUBDIRS=libs tests
 include include.mk
 
-tests: libs
+#
+# Make sure tests are build after library and 
+# rebuild library before entering test just
+# to be extra safe.
+#
+.PHONY: build
+
+tests: build libs
+
+build:
+	@$(MAKE) --no-print-directory -C build clean
+	@$(MAKE) --no-print-directory -C build
 
 clean:
 ifdef VERBOSE
@@ -15,7 +26,7 @@ endif
 HEADER_LOC=/usr/include/
 LIB_LOC=/usr/lib/
 
-#install:
+install:
 	# core library
 #	install -m 775 -d $(HEADER_LOC)GP/
 #	install -m 664 core/*.h $(HEADER_LOC)GP/
@@ -33,5 +44,5 @@ LIB_LOC=/usr/lib/
 #	install -m 664 targets/sdl/*.h $(HEADER_LOC)GP/SDL/
 #	install -m 664 targets/sdl/*.so targets/sdl/*.so.0 targets/sdl/*.a $(LIB_LOC)
 
-tar: clean
+tar:
 	cd .. && tar cjf gfxprim-`date +%Y-%b-%d-%HH%MM`.tar.bz2 gfxprim
