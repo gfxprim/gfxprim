@@ -100,7 +100,7 @@ def load_pixeltypes(defs_file = None):
     defs_file = os.environ.get('PIXELTYPE_DEFS', None)
   if not defs_file:
     path = os.path.dirname(os.path.abspath(__file__))
-    defs_file = os.path.join(path, '..', 'pixeltypes.py')
+    defs_file = os.path.join(path, '..', '..', 'pixeltypes.py')
   sys.stderr.write("Opening PixelType defs file '" + defs_file + "'\n")
   l1 = len(pixeltypes)
   execfile(defs_file)

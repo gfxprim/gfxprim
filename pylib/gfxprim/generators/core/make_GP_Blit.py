@@ -1,44 +1,31 @@
 #!/usr/bin/python
 #
-# Script generating GP_Pixel_Blit.gen.c and GP_Pixel_Blit.gen.h
+# Generators for GP_Pixel_Blit.gen.c and GP_Pixel_Blit.gen.h
 #
 # 2011 - Tomas Gavenciak <gavento@ucw.cz> 
 #
 
-from gfxprim.genutils import *
-from gfxprim.pixeltype import *
-from gfxprim.genutils import j2render as r
-from gfxprim.core.gen_pixeltype import *
+from gfxprim.generators.generator import *
+from gfxprim.generators.pixeltype import *
+from gfxprim.generators.core.gen_pixeltype import *
+from gfxprim.generators.core.gen_blit import *
 
-h = []
-c = []
+@generator(CHeaderGenerator(name='GP_Blit.gen.h'),
+           CSourceGenerator(name='GP_Blit.gen.c'),
+	   descr = 'specialized blit functions and macros',
+	   authors = ["2011 - Tomas Gavenciak <gavento@ucw.cz>"])
+def core_GP_Blit_gen(h, c):
+  c.rhead(
+    '#include <stdio.h>\n'
+    '#include <string.h>\n'
+    '#include "GP_Pixel.h"\n'
+    '#include "GP.h"\n'
+    '#include "GP_Context.h"\n'
+    '#include "GP_Blit.gen.h"\n'
+    )
 
-## Headers
-
-gen_headers(h, c, 
-  descr = "specialized blit functions and macros", 
-  authors = ["2011 - Tomas Gavenciak <gavento@ucw.cz>"],
-  generator = __file__,
-  hdef = "GP_PIXEL_BLIT_GEN_H")
-
-c.append('#include <stdio.h>\n')
-c.append('#include <string.h>\n')
-c.append('#include "GP_Pixel.h"\n')
-c.append('#include "GP.h"\n')
-c.append('#include "GP_Context.h"\n')
-c.append('#include "GP_Blit.gen.h"\n')
-
-for bpp in bitsizes:
-  for bit_endian in bit_endians:
-    if (bpp < 8) or (bit_endian == bit_endians[0]):
-      gen_blit_same_t(bpp, get_size_suffix(bpp, bit_endian), h, c)
-
-## Close the files
-
-gen_footers(h, c)
-
-## Write out!
-
-if __name__ == '__main__':
-  main_write(h, c)
+  for bpp in bitsizes:
+    for bit_endian in bit_endians:
+      if (bpp < 8) or (bit_endian == bit_endians[0]):
+	gen_blit_same_t(bpp, get_size_suffix(bpp, bit_endian), h, c)
 

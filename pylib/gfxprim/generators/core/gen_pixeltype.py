@@ -7,9 +7,8 @@ Such functions accept (and then extend) two list of strins.
 These should be later joined with "" or "\\n".
 """
 
-from gfxprim.pixeltype import pixeltypes, channels
-from gfxprim.genutils import *
-from gfxprim.genutils import j2render as r
+from gfxprim.generators.pixeltype import pixeltypes, channels
+from gfxprim.generators.utils import j2render as r, hmask
 
 
 def str_start(ptype):
@@ -36,20 +35,20 @@ def gen_GP_PixelType(header, code):
   pt_by_num = sorted([(t.number, t) for t in pixeltypes.values()])
   sorted_pts = [t[1] for t in pt_by_num]
   pt_max = len(sorted_pts) 
-  header.append(r(
+  header.rbody(
     "/* List of all known pixel types */\n"
     "typedef enum GP_PixelType {\n"
     "{% for t in sorted_pts %}"
     "	GP_PIXEL_{{ t.name }} = {{ t.number }},\n"
     "{% endfor %}"
     "	GP_PIXEL_MAX = {{ pt_max }},\n"
-    "} GP_PixelType;\n", sorted_pts=sorted_pts, pt_max=pt_max))
+    "} GP_PixelType;\n", sorted_pts=sorted_pts, pt_max=pt_max)
 
 def gen_GP_PixelTypes(header, code):
   "Generate the const structure GP_PixelTypes describing all the PixelTypes"
   pt_by_num = sorted([(t.number, t) for t in pixeltypes.values()])
   sorted_pts = [t[1] for t in pt_by_num]
-  code.append(r(
+  code.rbody(
     "/* Description of all known pixel types */\n"
     "const GP_PixelTypeDescription const GP_PixelTypes [] = {\n"
     "{% for t in sorted_pts %}"
@@ -67,14 +66,14 @@ def gen_GP_PixelTypes(header, code):
     '{% endfor %}'
     '	} },\n'
     '{% endfor %}'
-    '};\n', sorted_pts=sorted_pts, len=len))
+    '};\n', sorted_pts=sorted_pts, len=len)
 
 def gen_print(ptype, header, code):
   "Generate a GP_Pixel_Print_<TYPE> function (source and header)"
-  header.append(r(
+  header.rbody(
     "/* print formatted value of pixel type {{ f.name }} */\n"
-    "void GP_Pixel_Print_{{ f.name }}(GP_Pixel p);\n", f=ptype))
-  code.append(r(
+    "void GP_Pixel_Print_{{ f.name }}(GP_Pixel p);\n", f=ptype)
+  code.rbody(
     "/* print formatted value of pixel type {{f.name}} */\n"
     "void GP_Pixel_Print_{{ f.name }}(GP_Pixel p)\n"
     "{\n"
@@ -83,15 +82,15 @@ def gen_print(ptype, header, code):
     "{% for c in f.chanslist %}"
       ",\n		GP_GET_BITS({{ c[1] }}, {{ c[2] }}, p)"
     "{% endfor %});\n"
-    "}\n", f=ptype))
+    "}\n", f=ptype)
 
 def gen_get_chs(ptype, header, code):
   "Generate GP_Pixel_GET_<CHAN>_<TYPE> macros"
-  header.append(r(
+  header.rbody(
   "/* macros to get channels of pixel type {{ f.name }} */\n"
   "{% for c in f.chanslist %}"
   "#define GP_Pixel_GET_{{ c[0] }}_{{ f.name }}(p) (GP_GET_BITS({{ c[1] }}, {{ c[2] }}, (p)))\n"
-  "{% endfor %}", f=ptype))
+  "{% endfor %}", f=ptype)
 
 def gen_convert_to(f1, f2, header, code):
   "Generate a macro converting from f1 to f2"
@@ -100,7 +99,7 @@ def gen_convert_to(f1, f2, header, code):
   assert(set(f1.chans.keys()) in allowed_chansets)
   assert(set(f2.chans.keys()) in allowed_chansets)
 
-  header.append(r(
+  header.rbody(
     "\n/*** {{ f1.name }} -> {{ f2.name }} ***\n"
     " * macro storing p1 ({{ f1.name }} at bit-offset o1) in p2 ({{ f2.name }} at bit-offset o2),\n"
     " * the relevant part of p2 is assumed to be clear (zero) */\n\n"
@@ -143,24 +142,24 @@ def gen_convert_to(f1, f2, header, code):
     "/* a version without offsets */\n"
     "#define GP_Pixel_{{ f1.name }}_TO_{{ f2.name }}(p1, p2) "
       "(GP_Pixel_{{ f1.name }}_TO_{{ f2.name }}_OFFSET(p1, 0, p2, 0))\n",
-    f1=f1, f2=f2, hmask=hmask, set=set))
+    f1=f1, f2=f2, hmask=hmask, set=set)
 
 def gen_get_pixel_addr(ptype, header, code):
   "Generate GP_PIXEL_ADDR_<TYPE> and _OFFSET_<TYPE> macros"
-  header.append(r(
+  header.rbody(
     "/* macro to get address of pixel {{ f.name }} in a context */\n"
     "#define GP_PIXEL_ADDR_{{ f.name }}(context, x, y) GP_PIXEL_ADDR_{{ f.size_suffix }}(context, x, y)\n"
     "/* macro to get bit-offset of pixel {{ f.name }} */\n"
     "#define GP_PIXEL_ADDR_OFFSET_{{ f.name }}(x) \\\n"
     "	GP_PIXEL_ADDR_OFFSET_{{ f.size_suffix }}(x)\n",
-    f=ptype))
+    f=ptype)
 
 def gen_get_pixel_addr_bpp(size, size_suffix, header, code):
   "Generate GP_PIXEL_ADDR_<size_suffix> and _OFFSET_<size_suffix> macros"
   bit_endian = size_suffix[-2:]
   if size < 8:
     assert bit_endian in ['LE', 'BE']
-  header.append(r(
+  header.rbody(
     "/* macro to get address of pixel in a {{ size_suffix }} context */\n"
     "#define GP_PIXEL_ADDR_{{ size_suffix }}(context, x, y) \\\n"
     "        ((context)->pixels + (context)->bytes_per_row * (y) + {{ size//8 }} * (x))\n"
@@ -176,4 +175,4 @@ def gen_get_pixel_addr_bpp(size, size_suffix, header, code):
 	"	({{ 8-size }} - ((x) % {{ 8//size }}) * {{ size }})\n"
       "{% endif %}"
     "{% endif %}",
-    size=size, size_suffix=size_suffix, bit_endian=bit_endian))
+    size=size, size_suffix=size_suffix, bit_endian=bit_endian)

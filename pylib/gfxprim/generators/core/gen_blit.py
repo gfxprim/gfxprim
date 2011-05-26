@@ -2,7 +2,7 @@
 # - submodule for blit and friends
 # 2011 - Tomas Gavenciak <gavento@ucw.cz> 
 
-from gfxprim.gen_utils import *
+from gfxprim.generators.utils import *
 
 ## all generated direct blits, for generating GP_Blit() and others
 generated_blits = []
@@ -14,15 +14,15 @@ def gen_blit_same_t(size, size_suffix, header, code):
   "Only depends on bpp (bit size), size_suffix must be"
   "of form 8BPP, 2BPP_LE and the like."
 
-  header.append(r(
+  header.rbody(
     "\n/*** Blit preserving type, variant for {{ size_suffix }} ***\n"
     " * Assumes the contexts to be of the right types and sizes\n"
     " * Ignores transformations and clipping */\n\n"
     "void GP_Blit_{{ size_suffix }}(const GP_Context *c1, int x1, int y1, int w, int h,\n"
     "			GP_Context *c2, int x2, int y2);\n",
-    size=size, size_suffix=size_suffix))
+    size=size, size_suffix=size_suffix)
 
-  code.append(r(
+  code.rbody(
     "\n/*** Blit preservimg type, variant for {{ size_suffix }} ***/\n"
     "void GP_Blit_{{ size_suffix }}(const GP_Context *c1, int x1, int y1, int w, int h,\n"
     "			GP_Context *c2, int x2, int y2)\n"
@@ -71,7 +71,7 @@ def gen_blit_same_t(size, size_suffix, header, code):
     "	} else /* Different bit-alignment, can't use memcpy() */\n"
     "		GP_Blit_Naive(c1, x1, y1, w, h, c2, x2, y2);\n"
     "{% endif %}"
-    "}\n", size=size, size_suffix=size_suffix))
+    "}\n", size=size, size_suffix=size_suffix)
 
 
 def gen_blit_t(f1, f2, header, code):
@@ -82,10 +82,10 @@ def gen_blit_t(f1, f2, header, code):
     assert(set(f1.chans.keys()) in allowed_chansets)
     assert(set(f2.chans.keys()) in allowed_chansets)
 
-  header.append(r(
+  header.rbody(
     "\n/*** Blit line {{ f1.name }} -> {{ f2.name }} ***\n"
     " * Assumes the contexts to be of the right types and sizes */\n\n"
     "void GP_Blit_{{ f1.name }}_{{ f2.name }}(const GP_Context *c1, int x1, int y2, int w, int h,\n"
     "							GP_Context *c2, int x2, int y2);\n",
-      f1=f1, f2=f2))
+      f1=f1, f2=f2)
 

@@ -16,7 +16,8 @@ def j2render(tmpl, **kw):
 def load_generators():
   "Load all modules containig generators to allow them to register"
   # TODO: write proper discovery
-  import gfxprim.generators.core.make_GP_Pixel_Scale
+  import gfxprim.generators.core.make_GP_Pixel
+  import gfxprim.generators.core.make_GP_Blit
   pass
 
 def generate_file(fname):
@@ -34,4 +35,6 @@ def generate_file(fname):
   with open(fname, "wt") as f:
     f.write(s)
 
-
+def hmask(bits): 
+  "Helper returning hex mask for that many bits"
+  return hex((1<<bits)-1).rstrip('L')
