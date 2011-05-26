@@ -7,16 +7,19 @@
 #
 
 import sys
-from gfxprim import generators.utils, die
+from gfxprim.generators import utils
+from gfxprim import die
 
 usage = """Usage: %s [files_to_generate...]
 The files are matched only based on path suffixes, but written to given paths.
 """
 
-def __main__():
-  generators.utils.load_generators()
+def main():
+  utils.load_generators()
   if len(sys.argv) <= 1:
     die(usage)
   for f in sys.argv[1:]:
-    generators.utils.generate_file(f)
+    utils.generate_file(f)
 
+if __name__ == '__main__':
+  main()

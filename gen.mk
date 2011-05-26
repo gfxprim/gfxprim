@@ -35,3 +35,10 @@ GENERATORS=$(PYTHON_FILES)
 # Generated files depend on python generators and libs
 #
 %.gen.c %.gen.h: $(GENERATORS)
+ifdef VERBOSE
+	${PYTHON} ${TOPDIR}/pylib/bin/generate_file.py "$@"
+else
+	@echo "GEN  $@"
+	@${PYTHON} ${TOPDIR}/pylib/bin/generate_file.py "$@"
+endif
+

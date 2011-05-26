@@ -6,14 +6,21 @@
 
 import sys, os, time
 import jinja2 
-from gfxprim.generators.generator import known_generators
+from gfxprim import die
+
+def j2render(tmpl, **kw):
+  "Internal helper to render jinja2 templates (with StrictUndefined)"
+  t2 = tmpl.rstrip('\n') # Jinja strips the last '\n', so add these later
+  return jinja2.Template(t2, undefined=jinja2.StrictUndefined).render(**kw) + tmpl[len(t2):]
 
 def load_generators():
   "Load all modules containig generators to allow them to register"
-  # TODO: write
+  # TODO: write proper discovery
+  import gfxprim.generators.core.make_GP_Pixel_Scale
   pass
 
 def generate_file(fname):
+  from gfxprim.generators.generator import known_generators
   "Function trying to generate file `fname` using matching known generator."
   matches = []
   for k in known_generators:
@@ -27,8 +34,4 @@ def generate_file(fname):
   with open(fname, "wt") as f:
     f.write(s)
 
-def j2render(tmpl, **kw):
-  "Internal helper to render jinja2 templates (with StrictUndefined)"
-  t2 = tmpl.rstrip('\n') # Jinja strips the last '\n', so add these later
-  return jinja2.Template(t2, undefined=jinja2.StrictUndefined).render(**kw) + tmpl[len(t2):]
 
