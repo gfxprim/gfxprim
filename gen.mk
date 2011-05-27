@@ -21,6 +21,8 @@ CSOURCES+=$(GENSOURCES)
 #
 all: $(RGENHEADERS)
 
+$(CSOURCES): $(RGENHEADERS)
+
 #
 # And clean them
 #
