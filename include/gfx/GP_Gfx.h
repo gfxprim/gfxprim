@@ -55,13 +55,3 @@
 #include "GP_Symbol.h"
 
 #endif /* GP_GFX_H */
-
-/* backends */
-#include "GP_Backend.h"
-
-#define typeof __typeof__
-
-#endif /* GP_H */
-=======
-#endif /* GP_GFX_H */
->>>>>>> master:include/gfx/GP_Gfx.h
