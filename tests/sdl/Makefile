@@ -3,14 +3,10 @@ TOPDIR=../..
 CSOURCES=$(shell echo *.c)
 
 INCLUDE=core gfx sdl backends
-LDLIBS+=-lGP -L$(TOPDIR)/build/ -lSDL
+LDLIBS+=-lGP -L$(TOPDIR)/build/ -lGP_SDL -lSDL
 
 APPS=pixeltest fileview fonttest linetest randomshapetest shapetest sierpinsky\
-     symboltest textaligntest trianglefps
+     symbolstest textaligntest trianglefps
 
 include $(TOPDIR)/include.mk
 include $(TOPDIR)/app.mk
-
-
-$(APPS): $(TOPDIR)/libs/sdl/*.o
-
