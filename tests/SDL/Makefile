@@ -2,8 +2,8 @@ TOPDIR=../..
 
 CSOURCES=$(shell echo *.c)
 
-INCLUDE=core gfx sdl backends
-LDLIBS+=-lGP -L$(TOPDIR)/build/ -lGP_sdl -lSDL
+INCLUDE=core gfx SDL backends
+LDLIBS+=-lGP -L$(TOPDIR)/build/ -lGP_SDL -lSDL
 
 APPS=pixeltest fileview fonttest linetest randomshapetest shapetest sierpinsky\
      symbolstest textaligntest trianglefps
