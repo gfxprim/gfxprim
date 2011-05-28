@@ -28,9 +28,9 @@ LIB_LOC=/usr/lib/
 
 install:
 ifdef VERBOSE
-	./install.sh "/tmp/"
+	./install.sh ""
 else
-	@./install.sh "/tmp/"
+	@./install.sh ""
 endif
 
 tar:

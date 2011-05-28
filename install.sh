@@ -7,7 +7,7 @@ LIB_LOC="$INSTALL_PREFIX/usr/lib/"
 
 # Headers
 echo "INSTALL headers"
-install -m 775 -d "$HEADER_LOC"
+install -m 775 -d "${HEADER_LOC}GP"
 for i in `ls include/`; do
 	if [ -d "include/$i" ]; then
 		echo " $i"
