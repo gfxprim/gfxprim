@@ -33,10 +33,8 @@ endif
 
 #
 # Potential python dependencies for generated files and scripts
-# Add .pyc files to CLEAN list
 #
-PYTHON_FILES=$(shell find "${PYLIBSDIR}" -name *.py)
-CLEAN+=$(patsubst %.py, %.pyc, ${PYTHON_FILES})
+PYTHON_FILES=$(shell find "${PYLIBSDIR}" -name '*.py')
 
 #
 # 1. Generate and include dependencies for all C sources

@@ -1,5 +1,5 @@
 TOPDIR=.
-SUBDIRS=libs tests
+SUBDIRS=libs tests pylib
 include include.mk
 
 #
