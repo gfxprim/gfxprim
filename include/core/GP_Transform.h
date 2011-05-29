@@ -63,16 +63,29 @@
  * Transform "user"-coordinates to "real"-coordinates of a rectangle corner
  * according to context transformation. Corner with min-coordinates is 
  * transformed to (different) corner with min-coordinates etc. 
+ * Arguments x, y, w, h are modified.
  */
-#define GP_TRANSFORM_RECT(context, x, y, rw, rh) do { \
-	GP_TRANSFORM_SWAP(context, x, y);             \
-	GP_TRANSFORM_SWAP(context, w, h);             \
-	if ((context)->x_swap) {                      \
-		x = (context)->w - x - rw;            \
-	}                                             \
-	if ((context)->y_swap) {                      \
-		y = (context)->h - y - rh;            \
-	}                                             \
+#define GP_TRANSFORM_RECT(context, x, y, w, h) do { \
+	GP_TRANSFORM_SWAP(context, x, y);           \
+	GP_TRANSFORM_SWAP(context, w, h);           \
+	if ((context)->x_swap) {                    \
+		x = (context)->w - x - w;           \
+	}                                           \
+	if ((context)->y_swap) {                    \
+		y = (context)->h - y - h;           \
+	}                                           \
+} while (0)
+
+/* 
+ * Transform "user"-coordinates to "real"-coordinates for a blit
+ * called as GP_Blit(c1, x1, y1, w, h, c2, x2, y2).
+ * All x1, y1, x2, y2, w, h are adjusted.
+ */
+#define GP_TRANSFORM_BLIT(c1, x1, y1, w, h, c2, x2, y2) do { \
+	GP_TRANSFORM_RECT(c1, x1, y1, w, h);            \
+	int w2 = w, h2 = h;                             \
+	GP_TRANSFORM_SWAP(c2, w2, h2);                  \
+	GP_TRANSFORM_RECT(c2, x2, y2, w2, h2);          \
 } while (0)
 
 /*
