@@ -21,6 +21,8 @@
  *****************************************************************************/
 
 #include "GP_Pixel.h"
+#include "GP_Pixel_Access.h"
+#include "GP_Context.h"
 
 /*
 void GP_Blit(const GP_Context *c1, int x1, int y1, int w, int h,
