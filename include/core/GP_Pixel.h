@@ -52,8 +52,9 @@ struct GP_Context;
 
 typedef uint32_t GP_Pixel;
 
-/* Generated header */
+/* Generated headers */
 #include "GP_Pixel.gen.h"
+#include "GP_Pixel_Scale.gen.h"
 
 /*
  * Information about ordering of pixels in byte for 1, 2 and 4 bpp 
