@@ -41,8 +41,10 @@
 /* ... and it's trasformations */
 #include "core/GP_Transform.h"
 
-/* Pixels */
-#include "GP_GetPixel.h"
-#include "GP_PutPixel.h"
+/* Pixeltypes */
+#include "core/GP_Pixel.h"
+
+/* Individual pixel access */
+#include "core/GP_Pixel_Access.h"
 
 #endif /* GP_CORE_H */

@@ -1,6 +1,10 @@
 #!/usr/bin/python
 #
-# Script generating GP_Pixel.gen.c and GP_Pixel.gen.h
+# Script generating:
+#
+#  GP_Pixel.gen.c, GP_Pixel.gen.h
+#  GP_Pixel_Scale.gen.h
+#  GP_Pixel_Access.gen.h
 #
 # 2011 - Tomas Gavenciak <gavento@ucw.cz> 
 #
@@ -8,9 +12,10 @@
 from gfxprim.generators.generator import *
 from gfxprim.generators.pixeltype import *
 from gfxprim.generators.core.gen_pixeltype import *
+from gfxprim.generators.core.gen_pixel_access import *
 
 @generator(CHeaderGenerator(name = 'GP_Pixel_Scale.gen.h'),
-           descr = 'fast value scaling macros',
+           descr = 'Fast value scaling macros\nDo not include directly, use GP_Pixel.h',
            authors = ["2011 - Tomas Gavenciak <gavento@ucw.cz>"])
 def core_GP_Pixel_Scale_gen(h):
   h.rhead(
@@ -31,13 +36,12 @@ def core_GP_Pixel_Scale_gen(h):
 
 @generator(CHeaderGenerator(name='GP_Pixel.gen.h'),
            CSourceGenerator(name='GP_Pixel.gen.c'),
-	   descr = 'pixel type definitions and functions',
+	   descr = 'Pixel type definitions and functions\nDo not include directly, use GP_Pixel.h',
 	   authors = ["2011 - Tomas Gavenciak <gavento@ucw.cz>"])
 def core_GP_Pixel_gen(h, c):
   c.rhead(
     '#include <stdio.h>\n'
-    '#include <GP.h>\n'
-    '#include "GP_Pixel.h"\n')
+    '#include "GP_Pixel.h"\n\n')
 
   ## Enum of types
   gen_GP_PixelType(h, c)
@@ -57,14 +61,28 @@ def core_GP_Pixel_gen(h, c):
       gen_get_chs(t, h, c)
       gen_get_pixel_addr(t, h, c)
 
-  # Per-bpp macros
-  for bpp in bitsizes:
-    for bit_endian in bit_endians:
-      if (bpp < 8) or (bit_endian == bit_endians[0]):
-	gen_get_pixel_addr_bpp(bpp, get_size_suffix(bpp, bit_endian), h, c)
-
   ## Conversion macros
   gen_convert_to(pixeltypes['RGB565'], pixeltypes['RGBA8888'], h, c)
   gen_convert_to(pixeltypes['RGBA8888'], pixeltypes['V2'], h, c)
   gen_convert_to(pixeltypes['VA12'], pixeltypes['RGBA8888'], h, c)
+
+
+@generator(CHeaderGenerator(name = 'GP_Pixel_Access.gen.h'),
+           descr = 'Access pixel bytes, Put and GetPixel\nDo not include directly, use GP_Pixel.h',
+           authors = ["2011 - Tomas Gavenciak <gavento@ucw.cz>"])
+def core_GP_Pixel_Scale_gen(h):
+  h.rhead('#include "GP_Common.h"\n\n');
+  h.rhead('struct GP_Context;\n\n');
+  # Per-bpp adress/offset macros
+  for bpp in bitsizes:
+    for bit_endian in bit_endians:
+      if (bpp < 8) or (bit_endian == bit_endians[0]):
+	gen_get_pixel_addr_bpp(bpp, get_size_suffix(bpp, bit_endian), h)
+  
+  # Per-bpp adress/offset macros
+  for bpp in bitsizes:
+    for bit_endian in bit_endians:
+      if (bpp < 8) or (bit_endian == bit_endians[0]):
+	gen_getpixel_bpp(bpp, get_size_suffix(bpp, bit_endian), h)
+	gen_putpixel_bpp(bpp, get_size_suffix(bpp, bit_endian), h)
 

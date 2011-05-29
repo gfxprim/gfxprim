@@ -16,50 +16,50 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2010 Jiri "BlueBear" Dluhos                            *
- *                         <jiri.bluebear.dluhos@gmail.com>                  *
- *                                                                           *
- * Copyright (C) 2009-2010 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2011      Tomas Gavenciak <gavento@ucw.cz>                  *
  *                                                                           *
  *****************************************************************************/
 
-#include "GP_Core.h"
+#ifndef GP_PIXEL_ACCESS_H
+#define GP_PIXEL_ACCESS_H
 
+#include "GP_Context.h"
 #include "GP_FnPerBpp.h"
+#include "GP_Pixel.h"
 
-#define DO_PUTPIXEL(bits) \
-void GP_PutPixel##bits##bpp(GP_Context *context, int x, int y, GP_Pixel pixel) \
-{ \
-	if (GP_PIXEL_IS_CLIPPED(context, x, y)) \
-		return; \
-\
-	GP_PUTPIXEL_##bits##BPP(context, x, y, pixel); \
-} \
-
-DO_PUTPIXEL(1)
-DO_PUTPIXEL(2)
-DO_PUTPIXEL(4)
-DO_PUTPIXEL(8)
-DO_PUTPIXEL(16)
-DO_PUTPIXEL(24)
-DO_PUTPIXEL(32)
+/* 
+ * Generated header
+ */
+#include "GP_Pixel_Access.gen.h"
 
 /*
- * A generic PutPixel call that automatically determines the number of
- * bits per pixel.
+ * GetPixel with context transformations and clipping.
+ * Returns 0 for clipped pixels or pixels outside bitmap.
  */
-void GP_PutPixel(GP_Context *context, int x, int y, GP_Pixel pixel)
-{
-	GP_CHECK_CONTEXT(context);
+GP_Pixel GP_GetPixel_(GP_Context *context, int x, int y);
 
-	GP_FN_PER_BPP(GP_PutPixel, context->bpp, context, x, y, pixel);
+/*
+ * Version of GetPixel without transformations nor border checking.
+ */
+static inline GP_Pixel GP_GetPixel_Raw(GP_Context *context, int x, int y)
+{
+	GP_FN_RET_PER_BPP(GP_GetPixel_Raw, context->bpp, context->bit_endian, 
+		context, x, y);
 }
 
-void GP_TPutPixel(GP_Context *context, int x, int y, GP_Pixel pixel)
+/*
+ * PutPixel with context transformations and clipping.
+ * NOP for clipped pixels or pixels outside bitmap.
+ */
+void GP_PutPixel_(GP_Context *context, int x, int y, GP_Pixel p);
+
+/*
+ * Version of PutPixel without transformations nor border checking.
+ */
+static inline void GP_PutPixel_Raw(GP_Context *context, int x, int y, GP_Pixel p)
 {
-	GP_CHECK_CONTEXT(context);
-
-	GP_TRANSFORM_POINT(context, x, y);
-
-	GP_PutPixel(context, x, y, pixel);
+	GP_FN_PER_BPP(GP_PutPixel_Raw, context->bpp, context->bit_endian, 
+		context, x, y, p);
 }
+
+#endif /* GP_PIXEL_ACCESS_H */
