@@ -36,7 +36,7 @@
  * GetPixel with context transformations and clipping.
  * Returns 0 for clipped pixels or pixels outside bitmap.
  */
-GP_Pixel GP_GetPixel_(GP_Context *context, int x, int y);
+GP_Pixel GP_GetPixel(GP_Context *context, int x, int y);
 
 /*
  * Version of GetPixel without transformations nor border checking.
@@ -51,7 +51,7 @@ static inline GP_Pixel GP_GetPixel_Raw(GP_Context *context, int x, int y)
  * PutPixel with context transformations and clipping.
  * NOP for clipped pixels or pixels outside bitmap.
  */
-void GP_PutPixel_(GP_Context *context, int x, int y, GP_Pixel p);
+void GP_PutPixel(GP_Context *context, int x, int y, GP_Pixel p);
 
 /*
  * Version of PutPixel without transformations nor border checking.

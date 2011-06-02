@@ -23,7 +23,7 @@
 #include "GP_Pixel_Access.h"
 #include "GP_Transform.h"
 
-GP_Pixel GP_GetPixel_(GP_Context *context, int x, int y)
+GP_Pixel GP_GetPixel(GP_Context *context, int x, int y)
 {
 	GP_TRANSFORM_POINT(context, x, y);
 	if (GP_PIXEL_IS_CLIPPED(context, x, y)) 
@@ -31,7 +31,7 @@ GP_Pixel GP_GetPixel_(GP_Context *context, int x, int y)
 	return GP_GetPixel_Raw(context, x, y);
 }
 
-void GP_PutPixel_(GP_Context *context, int x, int y, GP_Pixel p)
+void GP_PutPixel(GP_Context *context, int x, int y, GP_Pixel p)
 {
 	GP_TRANSFORM_POINT(context, x, y);
 	if (! GP_PIXEL_IS_CLIPPED(context, x, y)) 
