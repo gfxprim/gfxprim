@@ -5,6 +5,14 @@ ifndef LIBNAME
 $(error LIBNAME not defined, fix your library Makefile)
 endif
 
+ifndef GENHEADERS
+GENHEADERS=
+endif
+
+ifndef GENSOURCES
+GENSOURCES=
+endif
+
 #
 # Headers goes into include/core/
 #

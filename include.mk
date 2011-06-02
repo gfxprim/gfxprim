@@ -1,3 +1,10 @@
+#
+# Make no subdirs by default
+#
+ifndef SUBDIRS
+SUBDIRS=
+endif
+
 .PHONY: $(SUBDIRS) all clean help
 
 all: $(SUBDIRS)

@@ -16,6 +16,7 @@ def j2render(tmpl, **kw):
 def load_generators():
   "Load all modules containig generators to allow them to register"
   # TODO: write proper discovery
+  import gfxprim.generators.make_collected_tests
   import gfxprim.generators.core.make_GP_Pixel
   import gfxprim.generators.core.make_GP_Blit
   pass
