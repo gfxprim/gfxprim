@@ -31,9 +31,13 @@ endif
 	@. ./liblock.sh; spinunlock .
 
 libGP.so.0: libGP.so
+	@. ./liblock.sh; spinlock .
 ifdef VERBOSE
+	rm -f libGP.so.0
 	ln -s libGP.so libGP.so.0
 else
 	@echo "LN  libGP.so.0"
+	@rm -f libGP.so.0
 	@ln -s libGP.so libGP.so.0
 endif
+	@. ./liblock.sh; spinunlock .
