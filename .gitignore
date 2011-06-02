@@ -1,8 +1,9 @@
 *.o
+*.dep
 *.pyc
 *.gen.c
 *.gen.h
 *.swp
-libGP_core.so*
-libGP_core.a
+libGP.so*
+libGP.a
 
