@@ -71,6 +71,6 @@ void GP_Blit_Naive(const GP_Context *c1, int x1, int y1, int w, int h,
 	for (int i = 0; i < w; i++)
 		for (int j = 0; j < h; j++) {
 			GP_Pixel p = GP_GetPixel(c1, x1 + i, y1 + j);
-			GP_PutPixel(c2, x2 + i, y2 + j);
+			GP_PutPixel(c2, x2 + i, y2 + j, p);
 		}
 }
