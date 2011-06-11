@@ -104,11 +104,7 @@ def load_pixeltypes(defs_file = None):
   if not defs_file:
     path = os.path.dirname(os.path.abspath(__file__))
     defs_file = os.path.join(path, '..', '..', 'pixeltypes.py')
-  sys.stderr.write("Opening PixelType defs file '" + defs_file + "'\n")
-  l1 = len(pixeltypes)
   execfile(defs_file)
-  l2 = len(pixeltypes)
-  sys.stderr.write("Read %d PixelTypes, now %d total\n" % (l2 - l1, l2))
 
 def __init__():
   "Initialize PixelType UNKNOWN.\n"
@@ -116,6 +112,9 @@ def __init__():
   if 0 not in pixeltypes:
     PixelType("UNKNOWN", 0, [], bit_endian=bit_endians[0], number=0)
   load_pixeltypes()
+  # check if some types were loaded
+  if len(pixeltypes) <= 1:
+    sys.stderr.write("WARNING: no PixelTypes were loaded.")
 
 __init__()
   
