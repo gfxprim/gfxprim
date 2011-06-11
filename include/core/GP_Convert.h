@@ -26,8 +26,9 @@
 #include "GP_Common.h"
 #include "GP_Context.h"
 
-/* Generated header */
+/* Generated headers */
 #include "GP_Convert.gen.h"
+#include "GP_Convert_Scale.gen.h"
 
 /*
  * Generated function to convert RGB888 to any type.
