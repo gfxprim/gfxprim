@@ -12,7 +12,7 @@
 from gfxprim.generators.generator import *
 from gfxprim.generators.pixeltype import *
 from gfxprim.generators.core.gen_pixeltype import *
-from gfxprim.generators.core.gen_pixel_access import *
+from gfxprim.generators.core.gen_getputpixel import *
 
 @generator(CHeaderGenerator(name = 'GP_Pixel_Scale.gen.h'),
            descr = 'Fast value scaling macros\nDo not include directly, use GP_Pixel.h',
