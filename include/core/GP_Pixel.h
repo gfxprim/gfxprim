@@ -21,6 +21,8 @@
  *                                                                           *
  * Copyright (C) 2009-2010 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
+ * Copyright (C) 2011      Tomas Gavenciak <gavento@ucw.cz>                  *
+ *                                                                           *
  *****************************************************************************/
 
 #ifndef GP_PIXEL_H
@@ -134,39 +136,5 @@ static inline uint32_t GP_PixelSize(GP_PixelType type)
   GP_CHECK(type < GP_PIXEL_MAX);
   return GP_PixelTypes[type].size;
 }
-
-
-/* Below -- TODO sync with new pixel type */
-
-/*
- * Returns GP_PixelType to GP_ColorType mapping.
- */
-//GP_ColorType GP_PixelTypeToColorType(GP_PixelType type);
-
-/*
- * Converts a color to the specified pixel type.
- */
-//GP_RetCode GP_ColorToPixelType(GP_PixelType pixel_type, GP_Color color, GP_Pixel *pixel);
-
-/*
- * Converts a color to a pixel value suitable for the specified context.
- */
-//GP_RetCode GP_ColorToPixel(struct GP_Context *context, GP_Color color, GP_Pixel *pixel);
-
-/*
- *
- */
-//GP_RetCode GP_ColorNameToPixel(struct GP_Context *context, GP_ColorName name, GP_Pixel *pixel);
-
-/*
- * Converts a color name to the specified pixel type.
- */
-//GP_RetCode GP_ColorNameToPixelType(GP_PixelType pixel_type, GP_ColorName name, GP_Pixel *pixel);
-
-/*
- * Converts a color specified by its R, G, B components to a pixel value
- * compatible with the specified context.
- */
-GP_RetCode GP_RGBToPixel(struct GP_Context *context, uint8_t r, uint8_t g, uint8_t b, GP_Pixel *pixel);
 
 #endif /* GP_PIXEL_H */

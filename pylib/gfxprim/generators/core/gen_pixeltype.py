@@ -1,12 +1,6 @@
 # Module generating C source and headers for various PixelTypes
 # 2011 - Tomas Gavenciak <gavento@ucw.cz> 
 
-"""
-The functions gen_* generate both source and header.
-Such functions accept (and then extend) two list of strins.
-These should be later joined with "" or "\\n".
-"""
-
 from gfxprim.generators.pixeltype import pixeltypes, channels
 from gfxprim.generators.utils import j2render as r, hmask
 
@@ -89,60 +83,19 @@ def gen_get_chs(ptype, header, code):
   header.rbody(
   "/* macros to get channels of pixel type {{ f.name }} */\n"
   "{% for c in f.chanslist %}"
-  "#define GP_Pixel_GET_{{ c[0] }}_{{ f.name }}(p) (GP_GET_BITS({{ c[1] }}, {{ c[2] }}, (p)))\n"
+    "#define GP_Pixel_GET_{{ c[0] }}_{{ f.name }}(p) (GP_GET_BITS({{ c[1] }}, {{ c[2] }}, (p)))\n"
   "{% endfor %}", f=ptype)
 
-def gen_convert_to(f1, f2, header, code):
-  "Generate a macro converting from f1 to f2"
-  "This function supports only RGBVA types (no palettes"
-  allowed_chansets = [ set(list(s)) for s in ['RGB', 'RGBA', 'V', 'VA'] ]
-  assert(set(f1.chans.keys()) in allowed_chansets)
-  assert(set(f2.chans.keys()) in allowed_chansets)
-
+def gen_create(ptype, header, code):
+  "Generate GP_Pixel_CREATE_<TYPE> macros"
   header.rbody(
-    "\n/*** {{ f1.name }} -> {{ f2.name }} ***\n"
-    " * macro storing p1 ({{ f1.name }} at bit-offset o1) in p2 ({{ f2.name }} at bit-offset o2),\n"
-    " * the relevant part of p2 is assumed to be clear (zero) */\n\n"
-    "#define GP_Pixel_{{ f1.name }}_TO_{{ f2.name }}_OFFSET(p1, o1, p2, o2) do {\\\n"
-    
-  ## set each of <TARGET> channels
-    "{% for c2 in f2.chanslist %}"
-    
-    # case 1: just copy a channel 
-    "{%- if c2[0] in f1.chans.keys() %}{% set c1 = f1.chans[c2[0]] %}"
-    "	/* {{ c2[0] }}:={{ c1[0] }} */ GP_SET_BITS({{c2[1]}}+o2, \\\n"
-    "		GP_SCALE_VAL_{{c1[2]}}_{{c2[2]}}(GP_GET_BITS({{c1[1]}}+o1, {{c1[2]}}, p1)), p2); \\\n"
-    
-    # case 2: set A to full opacity (not present in source)
-    "{% elif c2[0]=='A' %}"
-    "	/* A:={{ hmask(c2[2]) }} */GP_SET_BITS({{c2[1]}}+o2, {{ hmask(c2[2]) }}, p2); \\\n"
-    
-    # case 3: calculate V as average of RGB 
-    "{% elif c2[0]=='V' and set('RGB').issubset(set(f1.chans.keys())) %}"
-    "	/* V:=RGB_avg */ GP_SET_BITS({{c2[1]}}+o2, ( \\\n"
-    "{% for c1 in [f1.chans['R'], f1.chans['G'], f1.chans['B']] %}"
-    "		/* {{c1[0]}} */ GP_SCALE_VAL_{{c1[2]}}_{{c2[2]}}(GP_GET_BITS({{c1[1]}}+o1, {{c1[2]}}, p1), p2) + \\\n"
-    "{% endfor %}"
-    "	0)/3);\\\n"
-    
-    #- case 4: set each RGB to V 
-    "{% elif c2[0] in 'RGB' and 'V' in f1.chans.keys() %}{% set c1 = f1.chans['V'] %}"
-    "	/* {{ c2[0] }}:=V */ GP_SET_BITS({{c2[1]}}+o2, \\\n"
-    "		GP_SCALE_VAL_{{c1[2]}}_{{c2[2]}}(GP_GET_BITS({{c1[1]}}+o1, {{c1[2]}}, p1)), p2); \\\n"
-    
-    # invalid mapping (there should be none, but who knows ...) 
-    "{% else %} {{ raise(Error('channel conversion' +f1.name+ ' to ' +f2.name+ ' not supported')) }}"
-    
-    # end of the loop
-    "{% endif %}"
-    "{% endfor %}"
-    "} while (0)\n\n"
-    
-    # add version without offsets
-    "/* a version without offsets */\n"
-    "#define GP_Pixel_{{ f1.name }}_TO_{{ f2.name }}(p1, p2) "
-      "(GP_Pixel_{{ f1.name }}_TO_{{ f2.name }}_OFFSET(p1, 0, p2, 0))\n",
-    f1=f1, f2=f2, hmask=hmask, set=set)
+  "/* macros to create GP_Pixel of pixel type {{ f.name }} directly from given values.\n"
+  " * The values are NOT clipped to actual value ranges.*/\n"
+  "#define GP_Pixel_CREATE_{{ f.name }}({{ args }}) (0\\\n"
+  "{% for c in f.chanslist %}"
+    "	+ (({{ c[0] }}) << {{ c[1] }}) \\\n"
+  "{% endfor %}"
+  "	)\n", f=ptype, args=', '.join([c[0] for c in ptype.chanslist]))
 
 def gen_get_pixel_addr(ptype, header, code):
   "Generate GP_PIXEL_ADDR_<TYPE> and _OFFSET_<TYPE> macros"

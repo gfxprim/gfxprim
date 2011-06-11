@@ -19,6 +19,7 @@ def load_generators():
   import gfxprim.generators.make_collected_tests
   import gfxprim.generators.core.make_GP_Pixel
   import gfxprim.generators.core.make_GP_Blit
+  import gfxprim.generators.core.make_GP_Convert
   pass
 
 def generate_file(fname):

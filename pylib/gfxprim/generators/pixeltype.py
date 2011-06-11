@@ -91,6 +91,9 @@ class PixelType(object):
   def __str__(self):
     return "<PixelType " + self.name + ">"
 
+  def is_palette(self):
+    return ('P' in self.chans)
+
 def load_pixeltypes(defs_file = None):
   "Initialize pixeltypes by loading the defs file.\n"
   "Looks for the file by parameter, env['PIXELTYPE_DEFS'] and "

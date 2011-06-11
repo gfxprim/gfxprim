@@ -60,11 +60,7 @@ def core_GP_Pixel_gen(h, c):
       gen_print(t, h, c)
       gen_get_chs(t, h, c)
       gen_get_pixel_addr(t, h, c)
-
-  ## Conversion macros
-  gen_convert_to(pixeltypes['RGB565'], pixeltypes['RGBA8888'], h, c)
-  gen_convert_to(pixeltypes['RGBA8888'], pixeltypes['V2'], h, c)
-  gen_convert_to(pixeltypes['VA12'], pixeltypes['RGBA8888'], h, c)
+      gen_create(t, h, c)
 
 
 @generator(CHeaderGenerator(name = 'GP_GetPutPixel.gen.h'),
