@@ -14,6 +14,9 @@
 # a complete recompilation is required after any change. 
 #
 
+#
+# Standard RGB types
+#
 
 PixelType(name='RGBx8888', size=32, chanslist=[
     ('R', 0, 8),
@@ -28,19 +31,55 @@ PixelType(name='RGBA8888', size=32, chanslist=[
     ('A', 24, 8)])
 
 
+PixelType(name='RGB888', size=24, chanslist=[
+    ('R', 0, 8),
+    ('G', 8, 8),
+    ('B', 16, 8)])
+
+
 PixelType(name='RGB565', size=16, chanslist=[
     ('R', 0, 5),
     ('G', 5, 6),
     ('B', 11, 5)])
 
+#
+# Palette types
+#
 
-PixelType(name='V8', size=8, chanslist=[
-    ('V', 0, 8)])
+PixelType(name='P2', size=2, bit_endian='LE', chanslist=[
+    ('P', 0, 2)])
+
+
+PixelType(name='P4', size=4, bit_endian='LE', chanslist=[
+    ('P', 0, 4)])
+
+
+PixelType(name='P8', size=8, bit_endian='LE', chanslist=[
+    ('P', 0, 8)])
+
+#
+# Gray-only pixel types
+#
+
+PixelType(name='V1', size=1, bit_endian='LE', chanslist=[
+    ('V', 0, 1)])
 
 
 PixelType(name='V2', size=2, bit_endian='LE', chanslist=[
     ('V', 0, 2)])
 
+
+PixelType(name='V4', size=4, bit_endian='LE', chanslist=[
+    ('V', 0, 4)])
+
+
+PixelType(name='V8', size=8, bit_endian='LE', chanslist=[
+    ('V', 0, 8)])
+
+
+#
+# Experiments
+#
 
 PixelType(name='VA12', size=4, bit_endian='BE', chanslist=[
     ('A', 1, 2),
