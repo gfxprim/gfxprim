@@ -18,14 +18,14 @@ def gen_blit_same_t(size, size_suffix, header, code):
     "\n/*** Blit preserving type, variant for {{ size_suffix }} ***\n"
     " * Assumes the contexts to be of the right types and sizes\n"
     " * Ignores transformations and clipping */\n\n"
-    "void GP_Blit_{{ size_suffix }}(const GP_Context *c1, int x1, int y1, int w, int h,\n"
-    "			GP_Context *c2, int x2, int y2);\n",
+    "void GP_Blit_{{ size_suffix }}(const GP_Context *c1, GP_Coord x1, GP_Coord y1, GP_Size w, GP_Size h,\n"
+    "			GP_Context *c2, GP_Coord x2, GP_Coord y2);\n",
     size=size, size_suffix=size_suffix)
 
   code.rbody(
     "\n/*** Blit preservimg type, variant for {{ size_suffix }} ***/\n"
-    "void GP_Blit_{{ size_suffix }}(const GP_Context *c1, int x1, int y1, int w, int h,\n"
-    "			GP_Context *c2, int x2, int y2)\n"
+    "void GP_Blit_{{ size_suffix }}(const GP_Context *c1, GP_Coord x1, GP_Coord y1, GP_Size w, GP_Size h,\n"
+    "			GP_Context *c2, GP_Coord x2, GP_Coord y2)\n"
     "{\n"
     "	if (unlikely(w == 0 || h == 0)) return;\n\n"
     "	/* Special case - copy whole line-block with one memcpy() */\n"
@@ -38,7 +38,7 @@ def gen_blit_same_t(size, size_suffix, header, code):
     "	}\n\n"
     "{% if size>=8 %}"
     "	/* General case - memcpy() each horizontal line */\n"
-    "	for (int i=0; i<h; i++)\n"
+    "	for (GP_Size i = 0; i < h; i++)\n"
     "		memcpy(GP_PIXEL_ADDR_{{ size_suffix }}(c2, x2, y2 + i), \n"
     "		       GP_PIXEL_ADDR_{{ size_suffix }}(c1, x2, y2 + i),\n"
     "		       {{ size/8 }} * w);\n"
@@ -57,7 +57,7 @@ def gen_blit_same_t(size, size_suffix, header, code):
     "		uint8_t *p2 = GP_PIXEL_ADDR_{{ size_suffix }}(c2, x2, y2);\n"
     "		uint8_t *end_p1 = GP_PIXEL_ADDR_{{ size_suffix }}(c1, x1 + w - 1, y1);\n"
     "		uint8_t *end_p2 = GP_PIXEL_ADDR_{{ size_suffix }}(c2, x2 + w - 1, y2);\n"
-    "		for (int i = 0; i < h; i++) {\n"
+    "		for (GP_Size i = 0; i < h; i++) {\n"
     "			if (al1 != 0)\n"
     "				GP_SET_BITS(al1, 8-al1, *p2, GP_GET_BITS(al1, 8-al1, *p1));\n"
     "			memcpy(p2+(al1!=0), p1+(al1!=0), copy_size);\n"
@@ -72,20 +72,4 @@ def gen_blit_same_t(size, size_suffix, header, code):
     "		GP_Blit_Naive(c1, x1, y1, w, h, c2, x2, y2);\n"
     "{% endif %}"
     "}\n", size=size, size_suffix=size_suffix)
-
-
-def gen_blit_t(f1, f2, header, code):
-  "Generate a macro GP_Blit_T1_T2 blitting a rectangle"
-  "Does not (yet) convert between PAL formats and RGBVA"
-  allowed_chansets = [ set(list(s)) for s in ['RGB', 'RGBA', 'V', 'VA'] ]
-  if f1!=f2:
-    assert(set(f1.chans.keys()) in allowed_chansets)
-    assert(set(f2.chans.keys()) in allowed_chansets)
-
-  header.rbody(
-    "\n/*** Blit line {{ f1.name }} -> {{ f2.name }} ***\n"
-    " * Assumes the contexts to be of the right types and sizes */\n\n"
-    "void GP_Blit_{{ f1.name }}_{{ f2.name }}(const GP_Context *c1, int x1, int y2, int w, int h,\n"
-    "							GP_Context *c2, int x2, int y2);\n",
-      f1=f1, f2=f2)
 

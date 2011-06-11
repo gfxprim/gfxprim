@@ -21,8 +21,9 @@
  *****************************************************************************/
 
 #include "GP_Pixel.h"
-#include "GP_Pixel_Access.h"
+#include "GP_GetPutPixel.h"
 #include "GP_Context.h"
+#include "GP_Blit.h"
 
 /*
 void GP_Blit(const GP_Context *c1, int x1, int y1, int w, int h,
@@ -50,12 +51,8 @@ void GP_Blit_Naive(const GP_Context *c1, int x1, int y1, int w, int h,
 }
 */
 
-/*
- * Very naive blit, no optimalizations whatsoever - keep it that way.
- * Used as a reference for testing and such. Aaand ultimate fallback.
- */
-void GP_Blit_Naive(const GP_Context *c1, int x1, int y1, int w, int h,
-                   GP_Context *c2, int x2, int y2)
+void GP_Blit_Naive(const GP_Context *c1, GP_Coord x1, GP_Coord y1, GP_Size w, GP_Size h, 
+                   GP_Context *c2, GP_Coord x2, GP_Coord y2)
 {
 	GP_CHECK(x1 >= 0);
 	GP_CHECK(y1 >= 0);
@@ -71,6 +68,8 @@ void GP_Blit_Naive(const GP_Context *c1, int x1, int y1, int w, int h,
 	for (int i = 0; i < w; i++)
 		for (int j = 0; j < h; j++) {
 			GP_Pixel p = GP_GetPixel(c1, x1 + i, y1 + j);
+			if (c1->pixel_type != c2->pixel_type) 
+				p = GP_GP_ConvertContextPixel(p, c1, c2);
 			GP_PutPixel(c2, x2 + i, y2 + j, p);
 		}
 }

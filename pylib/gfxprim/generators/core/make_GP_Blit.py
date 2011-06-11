@@ -21,7 +21,7 @@ def core_GP_Blit_gen(h, c):
     '#include "GP_Pixel.h"\n'
     '#include "GP.h"\n'
     '#include "GP_Context.h"\n'
-    '#include "GP_Blit.gen.h"\n'
+    '#include "GP_Blit.h"\n'
     )
 
   for bpp in bitsizes:
