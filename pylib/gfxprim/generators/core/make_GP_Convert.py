@@ -22,8 +22,7 @@ def core_GP_Convert_gen_h(h, c):
   h.rhead('#include "GP_Context.h"\n');
   h.rhead('#include "GP_Pixel.h"\n\n');
   
-  h.rhead('#include "GP_Common.h"\n');
-  c.rhead('#include "GP_Pixel.h"\n\n');
+  c.rhead('#include "GP_Convert.h"\n\n');
 
   ## two base types for conversions
   for bt in [pixeltypes['RGB888'], pixeltypes['RGBA8888']]:

@@ -28,10 +28,10 @@ def gen_fixedtype_to_type(fixedtype, header, code):
     "{% endif %}"
     "{% endfor %}"
     "		default:\n"
-    "			GP_ABORT(\"Unknown PixelType %ld\", type);\n"
+    "			GP_ABORT(\"Unknown PixelType %ud\", type);\n"
     "	}\n"
     "	return p;\n"
-    "}\n", f=fixedtype, types=pixeltypes.values())
+    "}\n\n", f=fixedtype, types=pixeltypes.values())
 
 def gen_type_to_fixedtype(fixedtype, header, code):
   "Generate functions converting to a fixed PixelType from any other"
@@ -57,10 +57,10 @@ def gen_type_to_fixedtype(fixedtype, header, code):
     "{% endif %}"
     "{% endfor %}"
     "		default:\n"
-    "			GP_ABORT(\"Unknown PixelType %ld\", type);\n"
+    "			GP_ABORT(\"Unknown PixelType %u\", type);\n"
     "	}\n"
     "	return p;\n"
-    "}\n", f=fixedtype, types=pixeltypes.values())
+    "}\n\n", f=fixedtype, types=pixeltypes.values())
 
 def gen_convert_to(f1, f2, header, code):
   "Generate a macro converting from f1 to f2"
@@ -80,25 +80,25 @@ def gen_convert_to(f1, f2, header, code):
     
     # case 1: just copy a channel 
     "{%- if c2[0] in f1.chans.keys() %}{% set c1 = f1.chans[c2[0]] %}"
-    "	/* {{ c2[0] }}:={{ c1[0] }} */ GP_SET_BITS({{c2[1]}}+o2, \\\n"
-    "		GP_SCALE_VAL_{{c1[2]}}_{{c2[2]}}(GP_GET_BITS({{c1[1]}}+o1, {{c1[2]}}, p1)), p2); \\\n"
+    "	/* {{ c2[0] }}:={{ c1[0] }} */ GP_SET_BITS({{c2[1]}}+o2, {{c2[2]}}, p2,\\\n"
+    "		GP_SCALE_VAL_{{c1[2]}}_{{c2[2]}}(GP_GET_BITS({{c1[1]}}+o1, {{c1[2]}}, p1))); \\\n"
     
     # case 2: set A to full opacity (not present in source)
     "{% elif c2[0]=='A' %}"
-    "	/* A:={{ hmask(c2[2]) }} */GP_SET_BITS({{c2[1]}}+o2, {{ hmask(c2[2]) }}, p2); \\\n"
+    "	/* A:={{ hmask(c2[2]) }} */GP_SET_BITS({{c2[1]}}+o2, {{c2[2]}}, p2, {{ hmask(c2[2]) }}); \\\n"
     
     # case 3: calculate V as average of RGB 
     "{% elif c2[0]=='V' and set('RGB').issubset(set(f1.chans.keys())) %}"
-    "	/* V:=RGB_avg */ GP_SET_BITS({{c2[1]}}+o2, ( \\\n"
+    "	/* V:=RGB_avg */ GP_SET_BITS({{c2[1]}}+o2, {{c2[2]}}, p2, ( \\\n"
     "{% for c1 in [f1.chans['R'], f1.chans['G'], f1.chans['B']] %}"
-    "		/* {{c1[0]}} */ GP_SCALE_VAL_{{c1[2]}}_{{c2[2]}}(GP_GET_BITS({{c1[1]}}+o1, {{c1[2]}}, p1), p2) + \\\n"
+    "		/* {{c1[0]}} */ GP_SCALE_VAL_{{c1[2]}}_{{c2[2]}}(GP_GET_BITS({{c1[1]}}+o1, {{c1[2]}}, p1)) + \\\n"
     "{% endfor %}"
     "	0)/3);\\\n"
     
     #- case 4: set each RGB to V 
     "{% elif c2[0] in 'RGB' and 'V' in f1.chans.keys() %}{% set c1 = f1.chans['V'] %}"
-    "	/* {{ c2[0] }}:=V */ GP_SET_BITS({{c2[1]}}+o2, \\\n"
-    "		GP_SCALE_VAL_{{c1[2]}}_{{c2[2]}}(GP_GET_BITS({{c1[1]}}+o1, {{c1[2]}}, p1)), p2); \\\n"
+    "	/* {{ c2[0] }}:=V */ GP_SET_BITS({{c2[1]}}+o2, {{c2[2]}}, p2,\\\n"
+    "		GP_SCALE_VAL_{{c1[2]}}_{{c2[2]}}(GP_GET_BITS({{c1[1]}}+o1, {{c1[2]}}, p1))); \\\n"
     
     # invalid mapping (there should be none, but who knows ...) 
     "{% else %} {{ raise(Error('channel conversion' +f1.name+ ' to ' +f2.name+ ' not supported')) }}"
@@ -111,6 +111,6 @@ def gen_convert_to(f1, f2, header, code):
     # add version without offsets
     "/* a version without offsets */\n"
     "#define GP_Pixel_{{ f1.name }}_TO_{{ f2.name }}(p1, p2) "
-      "(GP_Pixel_{{ f1.name }}_TO_{{ f2.name }}_OFFSET(p1, 0, p2, 0))\n",
+      "GP_Pixel_{{ f1.name }}_TO_{{ f2.name }}_OFFSET(p1, 0, p2, 0)\n",
     f1=f1, f2=f2, hmask=hmask, set=set)
 
