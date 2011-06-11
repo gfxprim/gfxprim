@@ -35,6 +35,7 @@
 /* Integer type for coordinates: x, y, width, height, ... 
  * Should be signed to hold negative values as well. */
 typedef int GP_Coord;
+typedef unsigned int GP_Size;
 
 /* This structure holds all information needed for drawing into an image. */
 typedef struct GP_Context {
