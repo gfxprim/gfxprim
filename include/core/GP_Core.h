@@ -45,6 +45,6 @@
 #include "core/GP_Pixel.h"
 
 /* Individual pixel access */
-#include "core/GP_Pixel_Access.h"
+#include "core/GP_GetPutPixel.h"
 
 #endif /* GP_CORE_H */

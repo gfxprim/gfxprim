@@ -67,8 +67,8 @@ def core_GP_Pixel_gen(h, c):
   gen_convert_to(pixeltypes['VA12'], pixeltypes['RGBA8888'], h, c)
 
 
-@generator(CHeaderGenerator(name = 'GP_Pixel_Access.gen.h'),
-           descr = 'Access pixel bytes, Put and GetPixel\nDo not include directly, use GP_Pixel.h',
+@generator(CHeaderGenerator(name = 'GP_GetPutPixel.gen.h'),
+           descr = 'Access pixel bytes, Get and PutPixel\nDo not include directly, use GP_Pixel.h',
            authors = ["2011 - Tomas Gavenciak <gavento@ucw.cz>"])
 def core_GP_Pixel_Scale_gen(h):
   h.rhead('#include "GP_Common.h"\n\n');

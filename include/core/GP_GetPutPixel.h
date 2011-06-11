@@ -20,8 +20,8 @@
  *                                                                           *
  *****************************************************************************/
 
-#ifndef GP_PIXEL_ACCESS_H
-#define GP_PIXEL_ACCESS_H
+#ifndef CORE_GP_GETPUTPIXEL_H
+#define CORE_GP_GETPUTPIXEL_H
 
 #include "GP_Context.h"
 #include "GP_FnPerBpp.h"
@@ -30,7 +30,7 @@
 /* 
  * Generated header
  */
-#include "GP_Pixel_Access.gen.h"
+#include "GP_GetPutPixel.gen.h"
 
 /*
  * GetPixel with context transformations and clipping.
@@ -62,4 +62,4 @@ static inline void GP_PutPixel_Raw(GP_Context *context, int x, int y, GP_Pixel p
 		context, x, y, p);
 }
 
-#endif /* GP_PIXEL_ACCESS_H */
+#endif /* CORE_GP_GETPUTPIXEL_H */

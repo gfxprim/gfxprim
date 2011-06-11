@@ -20,7 +20,7 @@
  *                                                                           *
  *****************************************************************************/
 
-#include "GP_Pixel_Access.h"
+#include "GP_GetPutPixel.h"
 #include "GP_Transform.h"
 
 GP_Pixel GP_GetPixel(GP_Context *context, int x, int y)

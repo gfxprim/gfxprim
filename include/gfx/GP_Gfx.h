@@ -37,7 +37,7 @@
 #include "core/GP_Transform.h"
 #include "core/GP_Context.h"
 #include "core/GP_WritePixel.h"
-#include "core/GP_Pixel_Access.h"
+#include "core/GP_GetPutPixel.h"
 #include "core/GP_Color.h"
 
 /* public drawing API */
