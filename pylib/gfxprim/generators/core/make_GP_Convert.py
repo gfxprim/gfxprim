@@ -23,7 +23,7 @@ def core_GP_Pixel_Scale_gen(h):
     " */\n"
     "#define GP_SCALE_VAL(s1, s2, val) ( GP_SCALE_VAL_##s1##_##s2(val) )\n\n"
 
-    "{% for s1 in [1, 2, 4, 8] %}{% for s2 in [1, 2, 4, 8] %}"
+    "{% for s1 in range(1,9) %}{% for s2 in range(1,9) %}"
       "{% if s2>s1 %}"
 	"#define GP_SCALE_VAL_{{s1}}_{{s2}}(val) ((val) * {{ multcoef(s1, s2) }})\n"
       "{% else %}"
