@@ -23,6 +23,7 @@
 #include "GP_Pixel.h"
 #include "GP_GetPutPixel.h"
 #include "GP_Context.h"
+#include "GP_Convert.h"
 #include "GP_Blit.h"
 
 /*
@@ -69,7 +70,7 @@ void GP_Blit_Naive(const GP_Context *c1, GP_Coord x1, GP_Coord y1, GP_Size w, GP
 		for (int j = 0; j < h; j++) {
 			GP_Pixel p = GP_GetPixel(c1, x1 + i, y1 + j);
 			if (c1->pixel_type != c2->pixel_type) 
-				p = GP_GP_ConvertContextPixel(p, c1, c2);
+				p = GP_ConvertContextPixel(p, c1, c2);
 			GP_PutPixel(c2, x2 + i, y2 + j, p);
 		}
 }
