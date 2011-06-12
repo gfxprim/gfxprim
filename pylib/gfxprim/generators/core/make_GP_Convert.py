@@ -57,3 +57,12 @@ def core_GP_Convert_gen_h(h, c):
   gen_convert_to(pixeltypes['RGB565'], pixeltypes['RGBA8888'], h, c)
   gen_convert_to(pixeltypes['RGBA8888'], pixeltypes['V2'], h, c)
   gen_convert_to(pixeltypes['VA12'], pixeltypes['RGBA8888'], h, c)
+
+@generator(CSourceGenerator(name = 'GP_Convert.test.gen.c'),
+           descr = 'GP_Convert tests',
+           authors = ["2011 - Tomas Gavenciak <gavento@ucw.cz>"])
+def core_GP_Convert_gen_h(c):
+  c.rhead('#include "GP_Tests.h"\n')
+  c.rhead('#include "GP_Convert.h"\n\n')
+  c.rhead('GP_SUITE(GP_Convert)\n\n')
+  c.rbody('GP_TEST(triv)\n{}\nGP_ENDTEST\n')

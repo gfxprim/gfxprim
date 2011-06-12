@@ -21,7 +21,9 @@ CSOURCES+=${GP_TESTLIB_SRCS}
 TESTSUITE_GEN=collected_tests.gen.c # also fixed in the code generator
 GENSOURCES+=${TESTSUITE_GEN}
 
-TESTSUITE_SRCS=$(wildcard *.test.c) ${TESTSUITE_GEN} ${GP_TESTLIB_SRCS}
+${TESTSUITE_GEN}: $(filter-out ${TESTSUITE_GEN},${GENSOURCES}) ${GENHEADERS}
+
+TESTSUITE_SRCS=$(wildcard *.test.c) ${GENSOURCES} ${GENHEADERS} ${GP_TESTLIB_SRCS}
 INCLUDE+=../tests/common
 TESTSUITE_OBJS=$(patsubst %.c,%.o,$(TESTSUITE_SRCS))
 CLEAN+=${TESTSUITE}

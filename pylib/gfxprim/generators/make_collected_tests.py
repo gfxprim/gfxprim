@@ -27,7 +27,7 @@ def msg(prefix, msg_s, fname=None, line=None):
   s += '] '
   sys.stderr.write(s + msg_s + '\n')
 
-testfile_pattern = '*.test.c'
+testfile_patterns = ['*.test.c', '*.test.gen.c']
 
 suites = {} # {"suitename":["testname":{test_parameters}]}
 
@@ -39,8 +39,9 @@ test_re = re.compile("\A\\s*GP_TEST\\((.*)\\)\\s*\Z")
 	           'from .test.c files',
            authors = ["2011 - Tomas Gavenciak <gavento@ucw.cz>"])
 def tests_collected_tests(c):
-  fnames = glob.fnmatch.filter(os.listdir(c.fdir or '.'), testfile_pattern)
-  print fnames
+  fnames = []
+  for pat in testfile_patterns:
+    fnames += glob.fnmatch.filter(os.listdir(c.fdir or '.'), pat)
   for fn in fnames:
     dirfn = os.path.join(c.fdir, fn)
     with open(dirfn, 'rt') as f:
