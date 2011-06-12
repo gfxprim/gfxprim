@@ -14,7 +14,7 @@ endif
 
 ifdef TESTSUITE
 # a bit crude way to link with test minilibrary 
-GP_TESTLIB_SRCS=${TOPDIR}/tests/common/GP_Tests.c
+GP_TESTLIB_SRCS=$(wildcard ${TOPDIR}/tests/common/*.c)
 CSOURCES+=${GP_TESTLIB_SRCS}
 
 # generated suite creation code

@@ -41,6 +41,7 @@
  */
 
 #include <check.h>
+#include "GP_TestingRandom.h"
 
 /*
  * Helper macro to allow auto-generation of test-cases and suites.
@@ -62,9 +63,9 @@
  * Parameters name, fname, line are used internally, do not use them
  */
 
-#define GP_TEST(name, ...) static void name(int);\
-			   void GP_TEST_##name(int i) {name(i);} \
-			    START_TEST(name)
+#define GP_TEST(name, ...) static void name(int); void GP_TEST_##name(int i) {\
+		GP_InitTestingRandom( #name, i); name(i); } \
+	START_TEST(name)
 
 #define GP_ENDTEST END_TEST
 

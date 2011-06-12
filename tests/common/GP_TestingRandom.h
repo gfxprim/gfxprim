@@ -28,8 +28,10 @@
  * on random() called in the tested routines or other tests.
  */
 
-#ifndef CORE_GP_TESTING_RANDOM_H
-#define CORE_GP_TESTING_RANDOM_H
+#ifndef GP_TESTING_RANDOM_H
+#define GP_TESTING_RANDOM_H
+
+#include <stdint.h>
 
 /* 
  * Return next random value from the testing random generator
@@ -44,4 +46,4 @@ long int GP_TestingRandom(void);
  */
 void GP_InitTestingRandom(const char *text, uint64_t seed);
 
-#endif /* CORE_GP_TESTING_RANDOM_H */
+#endif /* GP_TESTING_RANDOM_H */
