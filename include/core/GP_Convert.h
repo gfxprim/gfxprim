@@ -96,7 +96,7 @@ static inline GP_Pixel GP_RGBAToContextPixel(uint8_t r, uint8_t g, uint8_t b, ui
  */
 static inline GP_Pixel GP_ConvertPixel(GP_Pixel pixel, GP_PixelType from, GP_PixelType to)
 {
-	return GP_RGBA8888ToPixel(GP_PixelToRGBA8888(from, pixel), to);
+	return GP_RGBA8888ToPixel(GP_PixelToRGBA8888(pixel, from), to);
 }
  
 /*
