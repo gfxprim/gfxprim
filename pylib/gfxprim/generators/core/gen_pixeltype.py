@@ -63,15 +63,15 @@ def gen_GP_PixelTypes(header, code):
     '};\n', sorted_pts=sorted_pts, len=len)
 
 def gen_print(ptype, header, code):
-  "Generate a GP_Pixel_Print_<TYPE> function (source and header)"
+  "Generate a GP_PixelSNPrint_<TYPE> function (source and header)"
   header.rbody(
-    "/* print formatted value of pixel type {{ f.name }} */\n"
-    "void GP_PixelPrint_{{ f.name }}(GP_Pixel p);\n", f=ptype)
+    "/* snprintf a human readable value of pixel type {{ f.name }} */\n"
+    "void GP_PixelSNPrint_{{ f.name }}(char *buf, size_t len, GP_Pixel p);\n", f=ptype)
   code.rbody(
-    "/* print formatted value of pixel type {{f.name}} */\n"
-    "void GP_PixelPrint_{{ f.name }}(GP_Pixel p)\n"
+    "/* snprintf a human readable value of pixel type {{f.name}} */\n"
+    "void GP_PixelSNPrint_{{ f.name }}(char *buf, size_t len, GP_Pixel p)\n"
     "{\n"
-    '	printf("<{{ f.name }} %0{{ (f.size+3)//4 }}x{% for c in f.chanslist %} {{ c[0] }}=%d{% endfor %}>",\n'
+    '	snprintf(buf, len, "<{{ f.name }} 0x%0{{ (f.size+3)//4 }}x{% for c in f.chanslist %} {{ c[0] }}=%d{% endfor %}>",\n'
     "		GP_GET_BITS(0, {{ f.size }}, p)"
     "{% for c in f.chanslist %}"
       ",\n		GP_GET_BITS({{ c[1] }}, {{ c[2] }}, p)"

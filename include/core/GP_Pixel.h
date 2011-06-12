@@ -34,6 +34,7 @@
 #include "GP_Color.h"
 #include "GP_Common.h"
 #include "GP_RetCode.h"
+#include "GP_FnPerBpp.h"
 
 struct GP_Context;
 
@@ -134,6 +135,25 @@ static inline uint32_t GP_PixelSize(GP_PixelType type)
 {
   GP_CHECK(type < GP_PIXEL_MAX);
   return GP_PixelTypes[type].size;
+}
+
+/*
+ * Print a human-readable representation of a pixel value to a string.
+ * Arguments as for snprintf().
+ */
+static inline void GP_PixelSNPrint(char *buf, size_t len, GP_Pixel pixel, GP_PixelType type)
+{
+	GP_FN_PER_PIXELTYPE(GP_PixelSNPrint, type, buf, len, pixel);
+}
+
+/*
+ * "printf" out a human-readable representation of pixel value.
+ */
+static inline void GP_PixelPrint(GP_Pixel pixel, GP_PixelType type)
+{
+	char buf[256];
+	GP_PixelSNPrint(buf, 256, pixel, type);
+	printf("%s", buf);
 }
 
 #endif /* GP_PIXEL_H */
