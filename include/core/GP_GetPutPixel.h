@@ -36,7 +36,7 @@
  * GetPixel with context transformations and clipping.
  * Returns 0 for clipped pixels or pixels outside bitmap.
  */
-GP_Pixel GP_GetPixel(GP_Context *context, int x, int y);
+GP_Pixel GP_GetPixel(const GP_Context *context, int x, int y);
 
 /*
  * Version of GetPixel without transformations nor border checking.
