@@ -45,6 +45,17 @@ void GP_RandomizeRect(GP_Context *context, GP_Coord x, GP_Coord y, GP_Size w, GP
 int GP_EqualColors(GP_Pixel p1, GP_PixelType t1, GP_Pixel p2, GP_PixelType t2);
 
 /*
+ * Macro version with GP_CHECK
+ */
+#define GP_CHECK_EqualColors(p1, t1, p2, t2) do { \
+	if (!GP_EqualColors(p1, t1, p2, t2)) { \
+		char b1[256], b2[256]; \
+		GP_PixelSNPrint(b1, 256, p1, t1); \
+		GP_PixelSNPrint(b2, 256, p2, t2); \
+	GP_CHECK("Pixel colors %s and %s are not the same color.", b1, b2); \
+	} while (0);
+
+/*
  * Compare two rectangles in two contexts. Return 1 on equal.
  * The colors are cmpared by first converting them to RGBA8888.
  * Somewhat inefficient.
