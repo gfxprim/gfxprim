@@ -26,11 +26,11 @@ def core_GP_Pixel_Scale_gen(h):
 
     "{% for s1 in range(1,9) %}{% for s2 in range(1,9) %}"
       "{% if s2>s1 %}"
-	"#define GP_SCALE_VAL_{{s1}}_{{s2}}(val) ((val) * {{ multcoef(s1, s2) }})\n"
+	"#define GP_SCALE_VAL_{{s1}}_{{s2}}(val) (((val) * {{ multcoef(s1, s2) }}) >> {{ (-s2) % s1 }})\n"
       "{% else %}"
 	"#define GP_SCALE_VAL_{{s1}}_{{s2}}(val) ((val) >> {{ s1 - s2 }})\n"
       "{% endif %}"
-    "{% endfor %}{% endfor %}", multcoef = lambda s1,s2: hex(sum([1<<i*s1 for i in range(s2/s1)]))
+    "{% endfor %}{% endfor %}", multcoef = lambda s1,s2: hex(sum([1<<(i*s1) for i in range((s2+s1-1)/s1)]))
     )
 
 
