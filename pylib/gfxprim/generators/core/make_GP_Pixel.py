@@ -41,6 +41,19 @@ def core_GP_Pixel_gen(h, c):
       gen_get_pixel_addr(t, h, c)
       gen_create(t, h, c)
 
+  ## FnPerPixelType and FnRetPerPixelType
+  for r in ['', 'return ']:
+    h.rbody(
+      '\n/* Macro for branching on PixelType (similar to GP_FnPerBpp macros) */\n'
+      '#define GP_FN_{% if r %}RET_{% endif %}PER_PIXELTYPE(FN_NAME, type, ...)\\\n'
+      '	switch (type) { \\\n'
+      '{% for t in types %}{% if t.number != 0 %}'
+      '		case GP_PIXEL_{{ t.name }}:\\\n'
+      '			{{ r }}FN_NAME##_{{ t.name }}(__VA_ARGS__);\\\n'
+      '			break;\\\n'
+      '{% endif %}{% endfor %}'
+      '		default: GP_ABORT("Invalid PixelType %d", type);\\\n'
+      '	}\n\n', types=pixeltypes.values(), r=r)
 
 @generator(CHeaderGenerator(name = 'GP_GetPutPixel.gen.h'),
            descr = 'Access pixel bytes, Get and PutPixel\nDo not include directly, use GP_Pixel.h',
