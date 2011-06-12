@@ -44,13 +44,13 @@
 /*
  * Branch on GP_Context argument. 
  */
-#define GP_FN_PER_CONTEXT(FN_NAME, context, ...) \
+#define GP_FN_PER_BPP_CONTEXT(FN_NAME, context, ...) \
 	GP_FN_PER_BPP(FN_NAME, (context)->bpp, (context)->bit_endian, __VA_ARGS__)
 
 /*
  * Branch on GP_PixelType argument. 
  */
-#define GP_FN_PER_PIXELTYPE(FN_NAME, type, ...) \
+#define GP_FN_PER_BPP_PIXELTYPE(FN_NAME, type, ...) \
 	GP_FN_PER_BPP(FN_NAME, GP_PixelTypes[type].size, GP_PixelTypes[type].bit_endian, __VA_ARGS__)
 
 /*
@@ -102,13 +102,13 @@
 /*
  * Branch on GP_Context argument. 
  */
-#define GP_FN_RET_PER_CONTEXT(FN_NAME, context, ...) \
+#define GP_FN_RET_PER_BPP_CONTEXT(FN_NAME, context, ...) \
 	GP_FN_RET_PER_BPP(FN_NAME, (context)->bpp, (context)->bit_endian, __VA_ARGS__)
 
 /*
  * Branch on GP_PixelType argument. 
  */
-#define GP_FN_RET_PER_PIXELTYPE(FN_NAME, type, ...) \
+#define GP_FN_RET_PER_BPP_PIXELTYPE(FN_NAME, type, ...) \
 	GP_FN_RET_PER_BPP(FN_NAME, GP_PixelTypes[type].size, GP_PixelTypes[type].bit_endian, __VA_ARGS__)
 
 /*
