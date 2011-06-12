@@ -66,10 +66,10 @@ def gen_print(ptype, header, code):
   "Generate a GP_Pixel_Print_<TYPE> function (source and header)"
   header.rbody(
     "/* print formatted value of pixel type {{ f.name }} */\n"
-    "void GP_Pixel_Print_{{ f.name }}(GP_Pixel p);\n", f=ptype)
+    "void GP_PixelPrint_{{ f.name }}(GP_Pixel p);\n", f=ptype)
   code.rbody(
     "/* print formatted value of pixel type {{f.name}} */\n"
-    "void GP_Pixel_Print_{{ f.name }}(GP_Pixel p)\n"
+    "void GP_PixelPrint_{{ f.name }}(GP_Pixel p)\n"
     "{\n"
     '	printf("<{{ f.name }} %0{{ (f.size+3)//4 }}x{% for c in f.chanslist %} {{ c[0] }}=%d{% endfor %}>",\n'
     "		GP_GET_BITS(0, {{ f.size }}, p)"
