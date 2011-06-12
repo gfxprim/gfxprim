@@ -12,6 +12,7 @@ from gfxprim.generators.generator import *
 from gfxprim.generators.pixeltype import *
 from gfxprim.generators.core.gen_convert import *
 
+
 @generator(CHeaderGenerator(name = 'GP_Convert_Scale.gen.h'),
            descr = 'Fast value scaling macros',
            authors = ["2011 - Tomas Gavenciak <gavento@ucw.cz>"])
@@ -31,6 +32,7 @@ def core_GP_Pixel_Scale_gen(h):
       "{% endif %}"
     "{% endfor %}{% endfor %}", multcoef = lambda s1,s2: hex(sum([1<<i*s1 for i in range(s2/s1)]))
     )
+
 
 @generator(CHeaderGenerator(name = 'GP_Convert.gen.h'),
            CSourceGenerator(name = 'GP_Convert.gen.c'),
@@ -58,11 +60,24 @@ def core_GP_Convert_gen_h(h, c):
   gen_convert_to(pixeltypes['RGBA8888'], pixeltypes['V2'], h, c)
   gen_convert_to(pixeltypes['VA12'], pixeltypes['RGBA8888'], h, c)
 
+
 @generator(CSourceGenerator(name = 'GP_Convert.test.gen.c'),
            descr = 'GP_Convert tests',
            authors = ["2011 - Tomas Gavenciak <gavento@ucw.cz>"])
 def core_GP_Convert_gen_h(c):
   c.rhead('#include "GP_Tests.h"\n')
-  c.rhead('#include "GP_Convert.h"\n\n')
+  c.rhead('#include "GP_Convert.h"\n')
+  c.rhead('#include "GP_TestingCore.h"\n\n')
   c.rhead('GP_SUITE(GP_Convert)\n\n')
-  c.rbody('GP_TEST(triv)\n{}\nGP_ENDTEST\n')
+  for t in pixeltypes.values():
+    if not t.is_palette() and t.number != 0:
+      c.rbody(
+	  'GP_TEST(GP_ConvertPixel_for_{{ t.name }}, "loop_start=0, loop_end=4")\n'
+	  '{\n'
+	  '	GP_Pixel p1 = GP_RandomColor(GP_PIXEL_{{ t.name }});\n'
+	  '	GP_Pixel p2 = GP_ConvertPixel(p1, GP_PIXEL_{{ t.name }}, GP_PIXEL_RGBA8888);\n'
+	  '	GP_Pixel p3 = GP_ConvertPixel(p1, GP_PIXEL_RGBA8888, GP_PIXEL_{{ t.name }});\n'
+	  '	fail_unless(GP_EqualColors(p1, GP_PIXEL_{{ t.name }}, p3, GP_PIXEL_{{ t.name }}));\n'
+	  '	fail_unless(GP_EqualColors(p1, GP_PIXEL_{{ t.name }}, p2, GP_PIXEL_{{ t.name }}));\n'
+	  '}\n\n'
+	  'GP_ENDTEST\n', t=t)
