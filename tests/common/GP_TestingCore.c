@@ -43,11 +43,27 @@ void GP_RandomizeRect(GP_Context *context, GP_Coord x, GP_Coord y, GP_Size w, GP
 			GP_PutPixel(context, i + x, j + y, GP_RandomColor(context->pixel_type));
 }
 
+/* TODO: Proper equality definition (currently almost ad-hoc */
 int GP_EqualColors(GP_Pixel p1, GP_PixelType t1, GP_Pixel p2, GP_PixelType t2)
 {
-	GP_Pixel col1 = GP_PixelToRGBA8888(p1, t1);
-	GP_Pixel col2 = GP_PixelToRGBA8888(p2, t2);
-	return (col1 & 0xffffffff) == (col2 & 0xffffffff);
+	int size1 = GP_PixelTypes[t1].size;
+	int size2 = GP_PixelTypes[t2].size;
+
+	// Same type
+	if (t1 == t2)
+		return GP_GET_BITS(0, size1, p1) == GP_GET_BITS(0, size1, p2);
+	
+	// t1 -> RGBA8888 -> t2
+	GP_Pixel conv1 = GP_RGBA8888ToPixel(GP_PixelToRGBA8888(p1, t1), t2);
+	if (GP_GET_BITS(0, size2, conv1) == GP_GET_BITS(0, size2, p2))
+		return 1;
+	
+	// t2 -> RGBA8888 -> t1
+	GP_Pixel conv2 = GP_RGBA8888ToPixel(GP_PixelToRGBA8888(p2, t2), t1);
+	if (GP_GET_BITS(0, size1, conv2) == GP_GET_BITS(0, size1, p1))
+		return 1;
+
+	return 0;
 }
 
 int GP_EqualRects(const GP_Context *c1, GP_Coord x1, GP_Coord y1, GP_Size w, GP_Size h,

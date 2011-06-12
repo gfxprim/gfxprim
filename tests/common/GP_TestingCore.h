@@ -52,8 +52,8 @@ int GP_EqualColors(GP_Pixel p1, GP_PixelType t1, GP_Pixel p2, GP_PixelType t2);
 		char b1[256], b2[256]; \
 		GP_PixelSNPrint(b1, 256, p1, t1); \
 		GP_PixelSNPrint(b2, 256, p2, t2); \
-	GP_CHECK("Pixel colors %s and %s are not the same color.", b1, b2); \
-	} while (0);
+		GP_ABORT("Pixels %s and %s are not the same color.", b1, b2); \
+	} } while (0);
 
 /*
  * Compare two rectangles in two contexts. Return 1 on equal.
