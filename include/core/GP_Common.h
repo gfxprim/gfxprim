@@ -141,6 +141,12 @@
 #define GP_GET_BITS(offset, count, val) ( ( (val)>>(offset) ) & ( ((((typeof(val))1)<<(count)) - 1) ) )
 
 /*
+ * Debugging version, evaluates args twice.
+ */
+#define GP_GET_BITS_DBG(offset, count, val) ( printf("GET_BITS(%d, %d, 0x%x)=%d", offset, count, val, \
+	GP_GET_BITS(offset, count, val)), GP_GET_BITS(offset, count, val))
+
+/*
  * Set count bits of dest at ofset to val (shifted by offset)
  * 
  * Does not check val for overflow
@@ -158,6 +164,14 @@
 #define GP_SET_BITS(offset, count, dest, val) do { \
 		GP_CLEAR_BITS(offset, count, dest); \
 		GP_SET_BITS_OR(offset, dest, val); \
+	} while (0)
+
+/* 
+ * Debugging version, evaluates args twice.
+ */
+#define GP_SET_BITS_DBG(offset, count, dest, val) do { \
+		GP_SET_BITS(offset, count, dest, val); \
+		printf("SET_BITS(%d, %d, p, %d)\n", offset, count, val); \
 	} while (0)
 
 
