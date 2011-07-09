@@ -41,7 +41,7 @@ struct GP_Context;
 /*
  *  GP_PixelType  is typedef enum of PixelTypes, 
  * 
- * each named GP_PIXEL_<TYPENAME>, such as GP_PIXEL_GRB888
+ * each named GP_PIXEL_<TYPENAME>, such as GP_PIXEL_RGB888
  * see the beginning of GP_Pixel.gen.h for a complete list
  *
  * The type always contains GP_PIXEL_UNKNOWN = 0 and
@@ -52,8 +52,8 @@ struct GP_Context;
 /*
  * GP_Pixel is just uint32_t
  */
-
 typedef uint32_t GP_Pixel;
+#define GP_PIXEL_BITS 32
 
 /* Generated header */
 #include "GP_Pixel.gen.h"
@@ -123,8 +123,8 @@ extern const GP_PixelTypeDescription const GP_PixelTypes[];
 
 static inline const char *GP_PixelTypeName(GP_PixelType type)
 {
-  GP_CHECK(type < GP_PIXEL_MAX);
-  return GP_PixelTypes[type].name;
+	GP_CHECK(type < GP_PIXEL_MAX);
+	return GP_PixelTypes[type].name;
 }
 
 /*
@@ -133,15 +133,16 @@ static inline const char *GP_PixelTypeName(GP_PixelType type)
 
 static inline uint32_t GP_PixelSize(GP_PixelType type)
 {
-  GP_CHECK(type < GP_PIXEL_MAX);
-  return GP_PixelTypes[type].size;
+	GP_CHECK(type < GP_PIXEL_MAX);
+	return GP_PixelTypes[type].size;
 }
 
 /*
  * Print a human-readable representation of a pixel value to a string.
  * Arguments as for snprintf().
  */
-static inline void GP_PixelSNPrint(char *buf, size_t len, GP_Pixel pixel, GP_PixelType type)
+static inline void GP_PixelSNPrint(char *buf, size_t len, GP_Pixel pixel,
+                                   GP_PixelType type)
 {
 	GP_FN_PER_PIXELTYPE(GP_PixelSNPrint, type, buf, len, pixel);
 }
@@ -155,5 +156,14 @@ static inline void GP_PixelPrint(GP_Pixel pixel, GP_PixelType type)
 	GP_PixelSNPrint(buf, 256, pixel, type);
 	printf("%s", buf);
 }
+
+/*
+ * Match pixel type to known pixel types.
+ *
+ * Returns either valid PixelType or GP_PIXEL_UNKNOWN 
+ */
+GP_PixelType GP_PixelRGBMatch(GP_Pixel rmask, GP_Pixel gmask,
+                              GP_Pixel bmask, GP_Pixel amask);
+
 
 #endif /* GP_PIXEL_H */

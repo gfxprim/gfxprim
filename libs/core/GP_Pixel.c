@@ -23,44 +23,56 @@
  *                                                                           *
  *****************************************************************************/
 
-#include "GP.h"
-#include "GP_SDL.h"
+#include <string.h>
 
-GP_RetCode GP_SDL_ContextFromSurface(GP_Context *context, SDL_Surface *surf)
+#include "GP_Pixel.h" 
+
+static const GP_PixelTypeChannel *get_channel(const GP_PixelTypeDescription *desc,
+                                              const char *name)
 {
-	if (surf == NULL || surf->pixels == NULL || context == NULL)
-		return GP_ENULLPTR;
+	unsigned int i;
 
-	/* sanity checks on the SDL surface */
-	if (surf->format->BytesPerPixel == 0 || surf->format->BytesPerPixel > 4)
-		return GP_ENOIMPL;
+	for (i = 0; i < desc->numchannels; i++)
+		if (!strcmp(desc->channels[i].name, name))
+			return &desc->channels[i];
+
+	return NULL;
+}
+
+static int match(const GP_PixelTypeChannel *channel, GP_Pixel mask)
+{
+	if (channel == NULL)
+		return !mask;
+
+	GP_Pixel chmask = ~0;
+
+	chmask >>= (GP_PIXEL_BITS - channel->size);
+	chmask <<= channel->offset;
+
+	return (chmask == mask);
+}
+
+GP_PixelType GP_PixelRGBMatch(GP_Pixel rmask, GP_Pixel gmask,
+                              GP_Pixel bmask, GP_Pixel amask)
+{
+	unsigned int i;
+
+	for (i = 0; i < GP_PIXEL_MAX; i++) {
+		int res;
+
+		const GP_PixelTypeChannel *r, *g, *b, *a;
+
+		r = get_channel(&GP_PixelTypes[i], "R");
+		g = get_channel(&GP_PixelTypes[i], "G");
+		b = get_channel(&GP_PixelTypes[i], "B");
+		a = get_channel(&GP_PixelTypes[i], "A");
 	
-	enum GP_PixelType pixeltype = GP_PixelRGBMatch(surf->format->Rmask,
-	                                               surf->format->Gmask,
-						       surf->format->Bmask,
-						       surf->format->Ashift);
+		res = match(r, rmask) && match(g, gmask) &&
+		      match(b, bmask) && match(a, amask);
 
-	if (pixeltype == GP_PIXEL_UNKNOWN)
-		return GP_ENOIMPL;
+		if (res)
+			return GP_PixelTypes[i].type;
+	}
 
-	/* basic structure and size */
-	context->pixels = surf->pixels;
-	context->bpp = 8 * surf->format->BytesPerPixel;
-	context->pixel_type = pixeltype;
-	context->bytes_per_row = surf->pitch;
-	context->w = surf->w;
-	context->h = surf->h;
-
-	/* orientation */
-	context->axes_swap = 0;
-	context->x_swap = 0;
-	context->y_swap = 0;
-
-	/* clipping */
-	context->clip_h_min = surf->clip_rect.y;
-	context->clip_h_max = surf->clip_rect.y + surf->clip_rect.h - 1;
-	context->clip_w_min = surf->clip_rect.x;
-	context->clip_w_max = surf->clip_rect.x + surf->clip_rect.w - 1;
-
-	return GP_ESUCCESS;
+	return GP_PIXEL_UNKNOWN;
 }

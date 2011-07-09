@@ -20,7 +20,7 @@ def core_GP_Pixel_Scale_gen(h):
   h.rhead(
     "/* helper macros to transfer s1-bit value to s2-bit value\n"
     " * NOTE: efficient and accurate for both up- and downscaling,\n"
-    " * WARNING: GP_SCALE_VAL requires constants numebrs as first two parameters\n"
+    " * WARNING: GP_SCALE_VAL requires constants numbers as first two parameters\n"
     " */\n"
     "#define GP_SCALE_VAL(s1, s2, val) ( GP_SCALE_VAL_##s1##_##s2(val) )\n\n"
 

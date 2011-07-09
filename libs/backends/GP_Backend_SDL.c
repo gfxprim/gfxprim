@@ -45,78 +45,6 @@ static int (*dyn_SDL_WaitEvent)(SDL_Event *);
 /* User callbacks. */
 static void (*GP_SDL_update_video_callback)(void) = NULL;
 
-/* 
- * Checks whether pixel color component masks in the given surface are equal
- * to specified. Returns nonzero if they match, zero otherwise.
- */
-static int GP_SDL_CheckPixelMasks(SDL_Surface *surf, unsigned int rmask,
-	unsigned int gmask, unsigned int bmask, unsigned int amask)
-{
-	return (surf->format->Rmask == rmask
-		&& surf->format->Gmask == gmask
-		&& surf->format->Bmask == bmask
-		&& surf->format->Ashift == amask);
-}
-
-/* 
- * Detects the pixel type of the SDL surface.
- * Returns the pixel type, or GP_PIXEL_UNKNOWN if the type was not recognized.
- */
-static enum GP_PixelType GP_SDL_FindSurfacePixelType(SDL_Surface *surf)
-{
-	switch (surf->format->BytesPerPixel) {
-		case 1:
-			if (GP_SDL_CheckPixelMasks(surf, 0, 0, 0, 0)) {
-				return GP_PIXEL_PAL8;
-			}
-			break;
-		case 2:
-			if (GP_SDL_CheckPixelMasks(surf, 0x7c00, 0x03e0, 0x001f, 0)) {
-				return GP_PIXEL_RGB555;
-			}
-			if (GP_SDL_CheckPixelMasks(surf, 0xf800, 0x07e0, 0x001f, 0)) {
-				return GP_PIXEL_RGB565;
-			}
-			break;
-		case 3:
-			if (GP_SDL_CheckPixelMasks(surf, 0xff0000, 0xff00, 0xff, 0)) {
-				return GP_PIXEL_RGB888;
-			}
-			if (GP_SDL_CheckPixelMasks(surf, 0xff, 0xff00, 0xff0000, 0)) {
-				return GP_PIXEL_BGR888;
-			}
-			break;
-		case 4:
-			if (GP_SDL_CheckPixelMasks(surf, 0xff0000, 0xff00, 0xff, 0)) {
-				return GP_PIXEL_XRGB8888;
-			}
-			if (GP_SDL_CheckPixelMasks(surf, 0xff, 0xff00, 0xff0000, 0)) {
-				return GP_PIXEL_XBGR8888;
-			}
-			if (GP_SDL_CheckPixelMasks(surf, 0xff000000, 0xff0000, 0xff00, 0)) {
-				return GP_PIXEL_RGBX8888;
-			}
-			if (GP_SDL_CheckPixelMasks(surf, 0xff00, 0xff0000, 0xff000000, 0)) {
-				return GP_PIXEL_BGRX8888;
-			}
-			if (GP_SDL_CheckPixelMasks(surf, 0xff0000, 0xff00, 0xff, 0xff000000)) {
-				return GP_PIXEL_ARGB8888;
-			}
-			if (GP_SDL_CheckPixelMasks(surf, 0xff, 0xff00, 0xff0000, 0xff000000)) {
-				return GP_PIXEL_ABGR8888;
-			}
-			if (GP_SDL_CheckPixelMasks(surf, 0xff000000, 0xff0000, 0xff00, 0xff)) {
-				return GP_PIXEL_RGBA8888;
-			}
-			if (GP_SDL_CheckPixelMasks(surf, 0xff00, 0xff0000, 0xff000000, 0xff)) {
-				return GP_PIXEL_BGRA8888;
-			}
-			break;
-
-	}
-	return GP_PIXEL_UNKNOWN;
-}
-
 inline GP_RetCode GP_SDL_ContextFromSurface(
 		GP_Context *context, SDL_Surface *surf)
 {
@@ -124,13 +52,16 @@ inline GP_RetCode GP_SDL_ContextFromSurface(
 	GP_CHECK(surf, "surface is NULL");
 
 	/* sanity checks on the SDL surface */
-	if (surf->format->BytesPerPixel == 0 || surf->format->BytesPerPixel > 4) {
+	if (surf->format->BytesPerPixel == 0 || surf->format->BytesPerPixel > 4)
 		return GP_ENOIMPL;
-	}
-	enum GP_PixelType pixeltype = GP_SDL_FindSurfacePixelType(surf);
-	if (pixeltype == GP_PIXEL_UNKNOWN) {
+	
+	enum GP_PixelType pixeltype = GP_PixelRGBMatch(surf->format->Rmask,
+	                                               surf->format->Gmask,
+						       surf->format->Bmask,
+						       surf->format->Ashift);
+
+	if (pixeltype == GP_PIXEL_UNKNOWN)
 		return GP_ENOIMPL;
-	}
 
 	/* basic structure and size */
 	context->pixels = surf->pixels;
