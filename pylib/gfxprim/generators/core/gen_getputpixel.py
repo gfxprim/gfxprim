@@ -1,5 +1,6 @@
 # Module generating C source and headers for get/putpixel
 # 2011 - Tomas Gavenciak <gavento@ucw.cz> 
+# 2011 - Cyril Hrubis <metan@ucw.cz> 
 
 from gfxprim.generators.utils import *
 
@@ -32,9 +33,9 @@ def gen_getpixel_bpp(size, size_suffix, header):
   "of form 8BPP, 2BPP_LE and the like."
   header.rbody(
     "\n/*** GP_GetPixel for {{ size_suffix }} ***/\n"
-    "static inline GP_Pixel GP_GetPixel_Raw_{{ size_suffix }}(GP_Context *c, int x, int y)\n"
+    "static inline GP_Pixel GP_GetPixel_Raw_{{ size_suffix }}(const GP_Context *c, int x, int y)\n"
     "{\n"
-    "	return GP_GET_BITS(GP_PIXEL_ADDR_OFFSET_{{ size_suffix }}(x) , {{ size }},\n"
+    "	return GP_GET_BITS(GP_PIXEL_ADDR_OFFSET_{{ size_suffix }}(x), {{ size }},\n"
     "		*(GP_PIXEL_ADDR_{{ size_suffix}}(c, x, y)));\n"
     "}\n\n", size=size, size_suffix=size_suffix)
 

@@ -17,6 +17,7 @@
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
  * Copyright (C) 2011      Tomas Gavenciak <gavento@ucw.cz>                  *
+ * Copyright (C) 2011      Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
@@ -41,10 +42,12 @@ GP_Pixel GP_GetPixel(const GP_Context *context, int x, int y);
 /*
  * Version of GetPixel without transformations nor border checking.
  */
-static inline GP_Pixel GP_GetPixel_Raw(GP_Context *context, int x, int y)
+static inline GP_Pixel GP_GetPixel_Raw(const GP_Context *context, int x, int y)
 {
 	GP_FN_RET_PER_BPP(GP_GetPixel_Raw, context->bpp, context->bit_endian, 
 		context, x, y);
+	
+	GP_ABORT("Invalid context pixel type");
 }
 
 /*
@@ -56,7 +59,8 @@ void GP_PutPixel(GP_Context *context, int x, int y, GP_Pixel p);
 /*
  * Version of PutPixel without transformations nor border checking.
  */
-static inline void GP_PutPixel_Raw(GP_Context *context, int x, int y, GP_Pixel p)
+static inline void GP_PutPixel_Raw(GP_Context *context, int x, int y,
+                                   GP_Pixel p)
 {
 	GP_FN_PER_BPP(GP_PutPixel_Raw, context->bpp, context->bit_endian, 
 		context, x, y, p);

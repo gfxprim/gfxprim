@@ -23,6 +23,8 @@
  *                                                                           *
  *****************************************************************************/
 
+#include <string.h>
+
 #include "GP_Core.h"
 #include "GP_WritePixel.h"
 
