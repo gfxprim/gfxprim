@@ -159,8 +159,8 @@ int main(int argc, char ** argv)
 
 	GP_SDL_ContextFromSurface(&context, display);
 
-	white = GP_ColorNameToPixel(&context, GP_COL_WHITE);
-	black = GP_ColorNameToPixel(&context, GP_COL_BLACK);
+	white = GP_ColorToPixel(&context, GP_COL_WHITE);
+	black = GP_ColorToPixel(&context, GP_COL_BLACK);
 
 	/* Set up the timer */
 	timer = SDL_AddTimer(1000, timer_callback, NULL);

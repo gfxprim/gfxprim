@@ -172,7 +172,7 @@ int main(int argc, char *argv[])
 
 	GP_SDL_ContextFromSurface(&context, display);
 
-	black = GP_ColorNameToPixel(&context, GP_COL_BLACK);
+	black = GP_ColorToPixel(&context, GP_COL_BLACK);
 	
 	/* Set up the refresh timer */
 	timer = SDL_AddTimer(60, timer_callback, NULL);

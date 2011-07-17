@@ -89,13 +89,11 @@ void draw_random_circle(GP_Pixel pixel)
 	random_point(display, &x, &y);
 	int r = random() % 50;
 
-	if (fill_flag) {
+	if (fill_flag)
 		GP_FillCircle(&context, x, y, r, pixel);
-	}
 
-	if (outline_flag) {
+	if (outline_flag)
 		GP_Circle(&context, x, y, r, white);
-	}
 }
 
 void draw_random_ellipse(GP_Pixel pixel)
@@ -105,13 +103,11 @@ void draw_random_ellipse(GP_Pixel pixel)
 	int rx = random() % 50;
 	int ry = random() % 50;
 
-	if (fill_flag) {
+	if (fill_flag)
 		GP_FillEllipse(&context, x, y, rx, ry, pixel);
-	}
 
-	if (outline_flag) {
+	if (outline_flag)
 		GP_Ellipse(&context, x, y, rx, ry, white);
-	}
 }
 
 void draw_random_triangle(GP_Pixel pixel)
@@ -121,13 +117,11 @@ void draw_random_triangle(GP_Pixel pixel)
 	random_point(display, &x1, &y1);
 	random_point(display, &x2, &y2);
 
-	if (fill_flag) {
+	if (fill_flag)
 		GP_FillTriangle(&context, x0, y0, x1, y1, x2, y2, pixel);
-	}
 
-	if (outline_flag) {
+	if (outline_flag)
 		GP_Triangle(&context, x0, y0, x1, y1, x2, y2, white);
-	}
 }
 
 void draw_random_rectangle(GP_Pixel pixel)
@@ -136,13 +130,11 @@ void draw_random_rectangle(GP_Pixel pixel)
 	random_point(display, &x0, &y0);
 	random_point(display, &x1, &y1);
 
-	if (fill_flag) {
+	if (fill_flag)
 		GP_FillRect(&context, x0, y0, x1, y1, pixel);
-	}
 
-	if (outline_flag) {
+	if (outline_flag)
 		GP_Rect(&context, x0, y0, x1, y1, white);
-	}
 }
 
 void draw_random_tetragon(GP_Pixel pixel)
@@ -153,13 +145,11 @@ void draw_random_tetragon(GP_Pixel pixel)
 	random_point(display, &x2, &y2);
 	random_point(display, &x3, &y3);
 
-	if (fill_flag) {
+	if (fill_flag)
 		GP_FillTetragon(&context, x0, y0, x1, y1, x2, y2, x3, y3, pixel);
-	}
 
-	if (outline_flag) {
+	if (outline_flag)
 		GP_Tetragon(&context, x0, y0, x1, y1, x2, y2, x3, y3, pixel);
-	}
 }
 
 void clear_screen(void)
@@ -178,7 +168,8 @@ void redraw_screen(void)
 
 	/* Pick a random color for drawing. */
 	GP_Pixel pixel;
-	pixel = GP_RGBToPixel(&context, random() % 256, random() % 256, random() % 256);
+	pixel = GP_RGBToPixel(random() % 256, random() % 256,
+	                      random() % 256, context.pixel_type);
 
 	switch (shape) {
 	case SHAPE_CIRCLE:
@@ -309,8 +300,8 @@ int main(int argc, char *argv[])
 
 	GP_SDL_ContextFromSurface(&context, display);
 
-	white = GP_ColorNameToPixel(&context, GP_COL_WHITE);
-	black = GP_ColorNameToPixel(&context, GP_COL_BLACK);
+	white = GP_ColorToPixel(&context, GP_COL_WHITE);
+	black = GP_ColorToPixel(&context, GP_COL_BLACK);
 
 	/* Set up the refresh timer */
 	timer = SDL_AddTimer(60, timer_callback, NULL);

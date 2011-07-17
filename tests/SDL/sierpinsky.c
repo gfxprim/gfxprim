@@ -55,7 +55,7 @@ static void sierpinsky(double x1, double y1, double x4, double y4, int iter)
 {
 	double x2, y2, x3, y3, x5, y5;
 	GP_Pixel pixel;
-	pixel = GP_RGBToPixel(context, 0, 0, 255-16*iter);
+	pixel = GP_RGBToPixel(0, 0, 255-16*iter, context->pixel_type);
 	
 	if (iter <= 0) {
 		if (draw_edge)
@@ -162,10 +162,10 @@ int main(void)
 	display = SDL_GetVideoSurface();
 	context = GP_GetBackendVideoContext();
 
-	black = GP_ColorNameToPixel(context, GP_COL_BLACK);
-	blue  = GP_ColorNameToPixel(context, GP_COL_BLUE);
-	gray  = GP_ColorNameToPixel(context, GP_COL_GRAY_LIGHT);
-	red   = GP_ColorNameToPixel(context, GP_COL_RED);
+	black = GP_ColorToPixel(context, GP_COL_BLACK);
+	blue  = GP_ColorToPixel(context, GP_COL_BLUE);
+	gray  = GP_ColorToPixel(context, GP_COL_GRAY_LIGHT);
+	red   = GP_ColorToPixel(context, GP_COL_RED);
 
 	iter = 0;
 	draw(display->w/2, display->h/2, l, iter);

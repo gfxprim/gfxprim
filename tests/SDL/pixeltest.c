@@ -156,10 +156,10 @@ int main(int argc, char **argv)
 	GP_SDL_ContextFromSurface(&context, display);
 
 	/* Load pixel values compatible with the display. */
-	red_pixel = GP_ColorNameToPixel(&context, GP_COL_RED);
-	green_pixel = GP_ColorNameToPixel(&context, GP_COL_GREEN);
-	blue_pixel = GP_ColorNameToPixel(&context, GP_COL_BLUE);
-	white_pixel = GP_ColorNameToPixel(&context, GP_COL_WHITE);
+	red_pixel   = GP_ColorToPixel(&context, GP_COL_RED);
+	green_pixel = GP_ColorToPixel(&context, GP_COL_GREEN);
+	blue_pixel  = GP_ColorToPixel(&context, GP_COL_BLUE);
+	white_pixel = GP_ColorToPixel(&context, GP_COL_WHITE);
 
 	/* Set up the refresh timer */
 	timer = SDL_AddTimer(30, timer_callback, NULL);

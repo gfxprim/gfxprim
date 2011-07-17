@@ -124,8 +124,8 @@ int main(int argc, char **argv)
 	GP_SDL_ContextFromSurface(&context, display);
 
 	/* Load colors in display format */
-	black = GP_ColorNameToPixel(&context, GP_COL_BLACK);
-	white = GP_ColorNameToPixel(&context, GP_COL_WHITE);
+	black = GP_ColorToPixel(&context, GP_COL_BLACK);
+	white = GP_ColorToPixel(&context, GP_COL_WHITE);
 
 	/* Set up the refresh timer */
 	timer = SDL_AddTimer(30, timer_callback, NULL);

@@ -159,9 +159,9 @@ int main(void)
 	GP_SDL_ContextFromSurface(&context, display);
 
 	/* Load colors suitable for the display */
-	black_pixel     = GP_ColorNameToPixel(&context, GP_COL_BLACK);
-	red_pixel       = GP_ColorNameToPixel(&context, GP_COL_RED);
-	blue_pixel      = GP_ColorNameToPixel(&context, GP_COL_BLUE);
+	black_pixel     = GP_ColorToPixel(&context, GP_COL_BLACK);
+	red_pixel       = GP_ColorToPixel(&context, GP_COL_RED);
+	blue_pixel      = GP_ColorToPixel(&context, GP_COL_BLUE);
 
 	redraw_screen();
 	SDL_Flip(display);

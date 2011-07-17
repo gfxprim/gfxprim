@@ -136,9 +136,8 @@ void draw_testing_triangle(int x, int y, int xradius, int yradius)
 	if (outline == 1)
 		GP_TTriangle(&context, x0, y0, x1, y1, x2, y2, yellow);
 
-	if (fill) {
+	if (fill)
 		GP_TFillTriangle(&context, x0, y0, x1, y1, x2, y2, red);
-	}
 
 	if (outline == 2)
 		GP_TTriangle(&context, x0, y0, x1, y1, x2, y2, white);
@@ -284,17 +283,16 @@ void event_loop(void)
 			break;
 			case SDLK_f:
 				fill = !fill;
-				if (!fill && !outline) {
+				if (!fill && !outline)
 					outline = 1;
-				}
 				break;
 
 			case SDLK_o:
 				outline++;
-				if (outline == 3) { outline = 0; }
-				if (!fill && outline == 0) {
+				if (outline == 3)
+					outline = 0;
+				if (!fill && outline == 0)
 					fill = 1;
-				}
 				break;
 
 			case SDLK_a:
@@ -463,13 +461,13 @@ int main(int argc, char ** argv)
 	GP_SDL_ContextFromSurface(&context, display);
 
 	/* Load colors compatible with the display */
-	black    = GP_ColorNameToPixel(&context, GP_COL_BLACK);
-	white    = GP_ColorNameToPixel(&context, GP_COL_WHITE);
-	yellow   = GP_ColorNameToPixel(&context, GP_COL_YELLOW);
-	green    = GP_ColorNameToPixel(&context, GP_COL_GREEN);
-	red      = GP_ColorNameToPixel(&context, GP_COL_RED);
-	gray     = GP_ColorNameToPixel(&context, GP_COL_GRAY_LIGHT);
-	darkgray = GP_ColorNameToPixel(&context, GP_COL_GRAY_DARK);
+	black    = GP_ColorToPixel(&context, GP_COL_BLACK);
+	white    = GP_ColorToPixel(&context, GP_COL_WHITE);
+	yellow   = GP_ColorToPixel(&context, GP_COL_YELLOW);
+	green    = GP_ColorToPixel(&context, GP_COL_GREEN);
+	red      = GP_ColorToPixel(&context, GP_COL_RED);
+	gray     = GP_ColorToPixel(&context, GP_COL_GRAY_LIGHT);
+	darkgray = GP_ColorToPixel(&context, GP_COL_GRAY_DARK);
 
 	/* Set up the refresh timer */
 	timer = SDL_AddTimer(60, timer_callback, NULL);

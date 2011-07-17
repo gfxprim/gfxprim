@@ -23,13 +23,20 @@
  *                                                                           *
  *****************************************************************************/
 
+ /*
+
+   Color. 
+
+  */
+
 #ifndef GP_COLOR_H
 #define GP_COLOR_H
 
 #include "GP_Context.h"
 #include "GP_Pixel.h"
 
-typedef enum GP_ColorName {
+typedef enum GP_Color {
+	GP_COL_INVALID = -1,
 	GP_COL_BLACK,
 	GP_COL_RED,
 	GP_COL_GREEN,
@@ -42,8 +49,23 @@ typedef enum GP_ColorName {
 	GP_COL_PURPLE,
 	GP_COL_WHITE,
 	GP_COL_MAX,
-} GP_ColorName;
+} GP_Color;
 
-GP_Pixel GP_ColorNameToPixel(GP_Context *context, GP_ColorName name); 
+/*
+ * Converts Color to Pixel
+ */
+GP_Pixel GP_ColorToPixel(GP_Context *context, GP_Color col);
+
+/*
+ * Converts Color name to Color.
+ */
+GP_Color GP_ColorNameToColor(const char *color_name);
+
+const char *GP_ColorToColorName(GP_Color col);
+
+/*
+ * Converts Color name to Pixel.
+ */
+GP_Pixel GP_ColorNameToPixel(GP_Context *context, const char *color_name);
 
 #endif /* GP_COLOR_H */
