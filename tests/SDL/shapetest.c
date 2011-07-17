@@ -68,9 +68,10 @@ static int show_axes = 1;
 #define SHAPE_FIRST	1
 #define SHAPE_TRIANGLE	1
 #define SHAPE_CIRCLE    2
-#define SHAPE_ELLIPSE	3
-#define SHAPE_RECTANGLE	4
-#define SHAPE_LAST	4
+#define SHAPE_RING	3
+#define SHAPE_ELLIPSE	4
+#define SHAPE_RECTANGLE	5
+#define SHAPE_LAST	5
 static int shape = SHAPE_FIRST;
 
 /* Variants in coordinates, if applicable */
@@ -156,6 +157,25 @@ void draw_testing_circle(int x, int y, int xradius,
 		GP_TCircle(&context, x, y, xradius, white);
 }
 
+void draw_testing_ring(int x, int y, int xradius,
+			__attribute__((unused)) int yradius)
+{
+	if (outline == 1)
+		GP_TCircle(&context, x, y, xradius, yellow);
+
+	if (fill) {
+		if (xradius == yradius) {
+			GP_TFillRing(&context, x, y, xradius, xradius/2, red);
+		} else {
+			GP_TFillRing(&context, x, y, GP_MAX(xradius, yradius),
+				GP_MIN(xradius, yradius), red);
+		}
+	}
+
+	if (outline == 2)
+		GP_TCircle(&context, x, y, xradius, white);
+}
+
 void draw_testing_ellipse(int x, int y, int xradius, int yradius)
 {
 	if (outline == 1)
@@ -215,6 +235,10 @@ void redraw_screen(void)
 	case SHAPE_CIRCLE:
 		draw_testing_circle(center_x, center_y, xradius, yradius);
 		title = "CIRCLE";
+		break;
+	case SHAPE_RING:
+		draw_testing_ring(center_x, center_y, xradius, yradius);
+		title = "RING";
 		break;
 	case SHAPE_ELLIPSE:
 		draw_testing_ellipse(center_x, center_y, xradius, yradius);

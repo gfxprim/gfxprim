@@ -23,27 +23,51 @@
  *                                                                           *
  *****************************************************************************/
 
-#ifndef GP_CIRCLE_H
-#define GP_CIRCLE_H
+/*
+ * A filled ring drawing algorithm.
+ */
 
-#include "core/GP_Context.h"
-
-void GP_Circle(GP_Context *context, GP_Coord xcenter, GP_Coord ycenter,
-               GP_Size r, GP_Pixel pixel);
-
-void GP_TCircle(GP_Context *context, GP_Coord xcenter, GP_Coord ycenter,
-                GP_Size r, GP_Pixel pixel);
-
-void GP_FillCircle(GP_Context *context, GP_Coord xcenter, GP_Coord ycenter,
-                   GP_Size r, GP_Pixel pixel);
-
-void GP_TFillCircle(GP_Context *context, GP_Coord xcenter, GP_Coord ycenter,
-                    GP_Size r, GP_Pixel pixel);
-
-void GP_FillRing(GP_Context *context, int xcenter, int ycenter,
-                   unsigned int outer_r, unsigned int inner_r, GP_Pixel pixel);
-
-void GP_TFillRing(GP_Context *context, int xcenter, int ycenter,
-                    unsigned int outer_r, unsigned int inner_r, GP_Pixel pixel);
-
-#endif /* GP_CIRCLE_H */
+/*
+ * This macro defines a filled circle drawing function.
+ * Arguments:
+ *     CONTEXT_T - user-defined type of drawing context (passed to HLINE)
+ *     PIXVAL_T  - user-defined pixel value type (passed to HLINE)
+ *     HLINE     - horizontal line drawing function f(context, x0, x1, y, pixval)
+ *     FN_NAME   - name of the function to be defined
+ */
+#define DEF_FILLRING_FN(FN_NAME, CONTEXT_T, PIXVAL_T, HLINE) \
+void FN_NAME(CONTEXT_T context, int xcenter, int ycenter, \
+	unsigned int outer_r, unsigned int inner_r, PIXVAL_T pixval) \
+{ \
+	if (inner_r >= outer_r) return; \
+\
+	int outer_x = 0; \
+	int inner_x = 0; \
+	int y; \
+	int outer_error = -outer_r; \
+	int inner_error = -inner_r; \
+	for (y = outer_r; y >= 0; y--) { \
+\
+		while (outer_error < 0) { \
+			outer_error += 2*outer_x + 1; \
+			outer_x++; \
+		} \
+		outer_error += -2*y + 1; \
+\
+		if (y < (int) inner_r && y > -((int) inner_r)) { \
+			while (inner_error < 0) { \
+				inner_error += 2*inner_x + 1; \
+				inner_x++; \
+			} \
+			inner_error += -2*y + 1; \
+\
+			HLINE(context, xcenter - outer_x + 1, xcenter - inner_x - 1, ycenter - y, pixval); \
+			HLINE(context, xcenter + inner_x + 1, xcenter + outer_x - 1, ycenter - y, pixval); \
+			HLINE(context, xcenter - outer_x + 1, xcenter - inner_x - 1, ycenter + y, pixval); \
+			HLINE(context, xcenter + inner_x + 1, xcenter + outer_x - 1, ycenter + y, pixval); \
+		} else { \
+			HLINE(context, xcenter - outer_x + 1, xcenter + outer_x - 1, ycenter-y, pixval); \
+			HLINE(context, xcenter - outer_x + 1, xcenter + outer_x - 1, ycenter+y, pixval); \
+		} \
+	} \
+}

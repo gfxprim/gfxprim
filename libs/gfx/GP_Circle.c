@@ -74,3 +74,33 @@ void GP_TFillCircle(GP_Context *context, GP_Coord xcenter, GP_Coord ycenter,
 	
 	GP_FillCircle(context, xcenter, ycenter, r, pixel);
 }
+
+#include "algo/FillRing.algo.h"
+
+/* Generate drawing functions for various bit depths. */
+DEF_FILLRING_FN(GP_FillRing1bpp,  GP_Context *, GP_Pixel, GP_HLine1bpp)
+DEF_FILLRING_FN(GP_FillRing2bpp,  GP_Context *, GP_Pixel, GP_HLine2bpp)
+DEF_FILLRING_FN(GP_FillRing4bpp,  GP_Context *, GP_Pixel, GP_HLine4bpp)
+DEF_FILLRING_FN(GP_FillRing8bpp,  GP_Context *, GP_Pixel, GP_HLine8bpp)
+DEF_FILLRING_FN(GP_FillRing16bpp, GP_Context *, GP_Pixel, GP_HLine16bpp)
+DEF_FILLRING_FN(GP_FillRing24bpp, GP_Context *, GP_Pixel, GP_HLine24bpp)
+DEF_FILLRING_FN(GP_FillRing32bpp, GP_Context *, GP_Pixel, GP_HLine32bpp)
+
+void GP_FillRing(GP_Context *context, int xcenter, int ycenter,
+                   unsigned int outer_r, unsigned int inner_r, GP_Pixel pixel)
+{
+	GP_CHECK_CONTEXT(context);
+
+	GP_FN_PER_BPP(GP_FillRing, context->bpp, context,
+	              xcenter, ycenter, outer_r, inner_r, pixel);
+}
+
+void GP_TFillRing(GP_Context *context, int xcenter, int ycenter,
+                    unsigned int outer_r, unsigned int inner_r, GP_Pixel pixel)
+{
+	GP_CHECK_CONTEXT(context);
+	
+	GP_TRANSFORM_POINT(context, xcenter, ycenter);
+	
+	GP_FillRing(context, xcenter, ycenter, outer_r, inner_r, pixel);
+}
