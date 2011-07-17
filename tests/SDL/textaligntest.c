@@ -162,6 +162,9 @@ int main(void)
 	black_pixel     = GP_ColorToPixel(&context, GP_COL_BLACK);
 	red_pixel       = GP_ColorToPixel(&context, GP_COL_RED);
 	blue_pixel      = GP_ColorToPixel(&context, GP_COL_BLUE);
+	green_pixel     = GP_ColorToPixel(&context, GP_COL_GREEN);
+	yellow_pixel    = GP_ColorToPixel(&context, GP_COL_YELLOW);
+	darkgray_pixel  = GP_ColorToPixel(&context, GP_COL_GRAY_DARK);
 
 	redraw_screen();
 	SDL_Flip(display);
