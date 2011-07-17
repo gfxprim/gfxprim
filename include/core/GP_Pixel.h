@@ -31,7 +31,6 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#include "GP_Color.h"
 #include "GP_Common.h"
 #include "GP_RetCode.h"
 #include "GP_FnPerBpp.h"
@@ -158,12 +157,13 @@ static inline void GP_PixelPrint(GP_Pixel pixel, GP_PixelType type)
 }
 
 /*
- * Match pixel type to known pixel types.
+ * Match pixel type to known pixel types, pixel_size is in bits.
  *
  * Returns either valid PixelType or GP_PIXEL_UNKNOWN 
  */
 GP_PixelType GP_PixelRGBMatch(GP_Pixel rmask, GP_Pixel gmask,
-                              GP_Pixel bmask, GP_Pixel amask);
+                              GP_Pixel bmask, GP_Pixel amask,
+			      uint8_t pixel_size);
 
 
 #endif /* GP_PIXEL_H */

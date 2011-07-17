@@ -25,6 +25,7 @@
 #define CORE_GP_GETPUTPIXEL_H
 
 #include "GP_Context.h"
+#include "GP_Transform.h"
 #include "GP_FnPerBpp.h"
 #include "GP_Pixel.h"
 
@@ -55,6 +56,14 @@ static inline GP_Pixel GP_GetPixel_Raw(const GP_Context *context, int x, int y)
  * NOP for clipped pixels or pixels outside bitmap.
  */
 void GP_PutPixel(GP_Context *context, int x, int y, GP_Pixel p);
+
+static inline void GP_TPutPixel(GP_Context *context, GP_Coord x, GP_Coord y,
+                                GP_Pixel p)
+{
+	GP_TRANSFORM_POINT(context, x, y);
+
+	GP_PutPixel(context, x, y, p);
+}
 
 /*
  * Version of PutPixel without transformations nor border checking.

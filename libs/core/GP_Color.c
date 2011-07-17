@@ -23,6 +23,10 @@
  *                                                                           *
  *****************************************************************************/
 
+#include "GP_Convert.h"
+
+#include "GP_Color.h"
+
 #include <stdint.h>
 
 static char *color_names[] = {
@@ -53,3 +57,11 @@ static uint8_t rgb888_colors[][3] = {
 	{0xff, 0xff, 0xff}, /* white      */
 };
 
+GP_Pixel GP_ColorNameToPixel(GP_Context *context, GP_ColorName name)
+{
+	GP_ASSERT(name < GP_COL_MAX);
+
+	return GP_RGBToPixel(rgb888_colors[name][0],
+	                     rgb888_colors[name][1],
+			     rgb888_colors[name][2], context->pixel_type);
+}

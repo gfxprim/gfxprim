@@ -178,7 +178,7 @@ void redraw_screen(void)
 
 	/* Pick a random color for drawing. */
 	GP_Pixel pixel;
-	GP_RGBToPixel(&context, random() % 256, random() % 256, random() % 256, &pixel);
+	pixel = GP_RGBToPixel(&context, random() % 256, random() % 256, random() % 256);
 
 	switch (shape) {
 	case SHAPE_CIRCLE:
@@ -309,8 +309,8 @@ int main(int argc, char *argv[])
 
 	GP_SDL_ContextFromSurface(&context, display);
 
-	GP_ColorNameToPixel(&context, GP_COL_WHITE, &white);
-	GP_ColorNameToPixel(&context, GP_COL_BLACK, &black);
+	white = GP_ColorNameToPixel(&context, GP_COL_WHITE);
+	black = GP_ColorNameToPixel(&context, GP_COL_BLACK);
 
 	/* Set up the refresh timer */
 	timer = SDL_AddTimer(60, timer_callback, NULL);

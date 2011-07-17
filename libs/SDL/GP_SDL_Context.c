@@ -38,7 +38,8 @@ GP_RetCode GP_SDL_ContextFromSurface(GP_Context *context, SDL_Surface *surf)
 	enum GP_PixelType pixeltype = GP_PixelRGBMatch(surf->format->Rmask,
 	                                               surf->format->Gmask,
 						       surf->format->Bmask,
-						       surf->format->Ashift);
+						       surf->format->Ashift,
+						       surf->format->BitsPerPixel);
 
 	if (pixeltype == GP_PIXEL_UNKNOWN)
 		return GP_ENOIMPL;

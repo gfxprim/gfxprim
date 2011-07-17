@@ -19,12 +19,15 @@
  * Copyright (C) 2009-2010 Jiri "BlueBear" Dluhos                            *
  *                         <jiri.bluebear.dluhos@gmail.com>                  *
  *                                                                           *
- * Copyright (C) 2009-2010 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2011 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
 #ifndef GP_COLOR_H
 #define GP_COLOR_H
+
+#include "GP_Context.h"
+#include "GP_Pixel.h"
 
 typedef enum GP_ColorName {
 	GP_COL_BLACK,
@@ -40,5 +43,7 @@ typedef enum GP_ColorName {
 	GP_COL_WHITE,
 	GP_COL_MAX,
 } GP_ColorName;
+
+GP_Pixel GP_ColorNameToPixel(GP_Context *context, GP_ColorName name); 
 
 #endif /* GP_COLOR_H */

@@ -44,6 +44,9 @@
 /* Pixeltypes */
 #include "core/GP_Pixel.h"
 
+/* Pixel conversions */
+#include "core/GP_Convert.h"
+
 /* Individual pixel access */
 #include "core/GP_GetPutPixel.h"
 

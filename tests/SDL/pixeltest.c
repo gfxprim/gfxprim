@@ -53,7 +53,7 @@ Uint32 timer_callback(__attribute__((unused)) Uint32 interval,
 
 void draw_pixel(void)
 {
-	GP_Color pixel, conv;
+//	GP_Color pixel, conv;
 	int x = random() % 320;
 	int y = random() % 240;
 
@@ -156,10 +156,10 @@ int main(int argc, char **argv)
 	GP_SDL_ContextFromSurface(&context, display);
 
 	/* Load pixel values compatible with the display. */
-	GP_ColorNameToPixel(&context, GP_COL_RED, &red_pixel);
-	GP_ColorNameToPixel(&context, GP_COL_GREEN, &green_pixel);
-	GP_ColorNameToPixel(&context, GP_COL_BLUE, &blue_pixel);
-	GP_ColorNameToPixel(&context, GP_COL_WHITE, &white_pixel);
+	red_pixel = GP_ColorNameToPixel(&context, GP_COL_RED);
+	green_pixel = GP_ColorNameToPixel(&context, GP_COL_GREEN);
+	blue_pixel = GP_ColorNameToPixel(&context, GP_COL_BLUE);
+	white_pixel = GP_ColorNameToPixel(&context, GP_COL_WHITE);
 
 	/* Set up the refresh timer */
 	timer = SDL_AddTimer(30, timer_callback, NULL);

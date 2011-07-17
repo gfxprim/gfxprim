@@ -41,19 +41,24 @@ static const GP_PixelTypeChannel *get_channel(const GP_PixelTypeDescription *des
 
 static int match(const GP_PixelTypeChannel *channel, GP_Pixel mask)
 {
-	if (channel == NULL)
+	if (channel == NULL) {
+		printf("%s gen %08x pass %08x\n", channel->name, 0, mask);
 		return !mask;
+	}
 
 	GP_Pixel chmask = ~0;
 
 	chmask >>= (GP_PIXEL_BITS - channel->size);
 	chmask <<= channel->offset;
+	
+	printf("%s gen %08x pass %08x\n", channel->name, chmask, mask);
 
 	return (chmask == mask);
 }
 
 GP_PixelType GP_PixelRGBMatch(GP_Pixel rmask, GP_Pixel gmask,
-                              GP_Pixel bmask, GP_Pixel amask)
+                              GP_Pixel bmask, GP_Pixel amask,
+			      uint8_t pixel_size)
 {
 	unsigned int i;
 
@@ -62,10 +67,27 @@ GP_PixelType GP_PixelRGBMatch(GP_Pixel rmask, GP_Pixel gmask,
 
 		const GP_PixelTypeChannel *r, *g, *b, *a;
 
+		if (GP_PixelTypes[i].size != pixel_size)
+			continue;
+
 		r = get_channel(&GP_PixelTypes[i], "R");
 		g = get_channel(&GP_PixelTypes[i], "G");
 		b = get_channel(&GP_PixelTypes[i], "B");
 		a = get_channel(&GP_PixelTypes[i], "A");
+
+		printf("------------------------ %s %u\n", GP_PixelTypes[i].name, pixel_size);
+
+		if (r)
+			printf("Matching R %i %i\n", r->size, r->offset);
+		
+		if (g)
+			printf("Matching G %i %i\n", g->size, g->offset);
+		
+		if (b)
+			printf("Matching B %i %i\n", b->size, b->offset);
+		
+		if (a)
+			printf("Matching A %i %i\n", a->size, a->offset);
 	
 		res = match(r, rmask) && match(g, gmask) &&
 		      match(b, bmask) && match(a, amask);

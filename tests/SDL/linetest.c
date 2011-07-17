@@ -72,7 +72,7 @@ void redraw_screen(void)
 		Uint8 b = 127.0 + 127.0 * sin(start_angle + angle);
 		
 		GP_Pixel pixel;
-		GP_RGBToPixel(&context, r, 0, b, &pixel);
+		pixel = GP_RGBToPixel(r, 0, b, context.pixel_type);
 	
 		/*
 		 * Draw the line forth and back to detect any pixel change
@@ -124,8 +124,8 @@ int main(int argc, char **argv)
 	GP_SDL_ContextFromSurface(&context, display);
 
 	/* Load colors in display format */
-	GP_ColorNameToPixel(&context, GP_COL_BLACK, &black);
-	GP_ColorNameToPixel(&context, GP_COL_WHITE, &white);
+	black = GP_ColorNameToPixel(&context, GP_COL_BLACK);
+	white = GP_ColorNameToPixel(&context, GP_COL_WHITE);
 
 	/* Set up the refresh timer */
 	timer = SDL_AddTimer(30, timer_callback, NULL);

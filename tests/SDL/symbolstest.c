@@ -29,6 +29,8 @@
 
 #include "GP_SDL.h"
 
+static GP_Pixel black;
+
 /* The surface used as a display (in fact it is a software surface). */
 SDL_Surface *display = NULL;
 GP_Context context;
@@ -38,9 +40,6 @@ SDL_TimerID timer;
 
 /* An event used for signaling that the timer was triggered. */
 SDL_UserEvent timer_event;
-
-/* Globally used colors. */
-GP_Pixel white, black;
 
 static int pause_flag = 0;
 
@@ -85,18 +84,14 @@ void clear_screen(void)
 
 void redraw_screen(void)
 {
-	/* Random color. */
-	GP_Color color = GP_RGB888_PACK(random() % 256,
-	                                random() % 256,
-	                                random() % 256);
-
 	if (pause_flag)
 		return;
 
 	SDL_LockSurface(display);
 
 	GP_Pixel pixel;
-	GP_ColorToPixel(&context, color, &pixel);
+	pixel = GP_RGBToPixel(random() % 256, random() % 256,
+	                      random() % 256, context.pixel_type);
 
 	draw_random_symbol(pixel);
 
@@ -177,9 +172,8 @@ int main(int argc, char *argv[])
 
 	GP_SDL_ContextFromSurface(&context, display);
 
-	GP_ColorNameToPixel(&context, GP_COL_WHITE, &white);
-	GP_ColorNameToPixel(&context, GP_COL_BLACK, &black);
-
+	black = GP_ColorNameToPixel(&context, GP_COL_BLACK);
+	
 	/* Set up the refresh timer */
 	timer = SDL_AddTimer(60, timer_callback, NULL);
 	if (timer == 0) {
