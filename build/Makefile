@@ -10,7 +10,7 @@ else
 	@rm -f libGP.a libGP.so libGP.so.0
 endif
 
-libGP.a: $(LIB_OBJECTS)
+libGP.a:
 	@. ./liblock.sh; spinlock .
 ifdef VERBOSE
 	$(AR) rcs libGP.a $(LIB_OBJECTS)
@@ -20,7 +20,7 @@ else
 endif
 	@. ./liblock.sh; spinunlock .
 
-libGP.so: $(LIB_OBJECTS)
+libGP.so:
 	@. ./liblock.sh; spinlock .
 ifdef VERBOSE
 	$(CC) -fPIC -dPIC --shared -Wl,-soname -Wl,libGP.so.0 $(LIB_OBJECTS) -o libGP.so
