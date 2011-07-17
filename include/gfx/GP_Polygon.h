@@ -23,12 +23,12 @@
  *                                                                           *
  *****************************************************************************/
 
-#ifndef GP_FILL_POLYGON_H
-#define GP_FILL_POLYGON_H
+#ifndef GP_POLYGON_H
+#define GP_POLYGON_H
 
 #include "core/GP_Context.h"
 
-void GP_FillPolygon(GP_Context *context, int vertex_count, const int *xy,
-		GP_Pixel pixel);
+void GP_FillPolygon(GP_Context *context, int vertex_count, const GP_Coord *xy,
+                    GP_Pixel pixel);
 
-#endif /* GP_FILL_POLYGON_H */
+#endif /* GP_POLYGON_H */

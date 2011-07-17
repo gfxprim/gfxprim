@@ -34,6 +34,7 @@
 
 /* basic definitions and structures */
 #include "core/GP_Common.h"
+#include "core/GP_Types.h"
 #include "core/GP_Transform.h"
 #include "core/GP_Context.h"
 #include "core/GP_WritePixel.h"

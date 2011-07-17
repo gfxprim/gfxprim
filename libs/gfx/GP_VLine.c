@@ -24,27 +24,24 @@
  *****************************************************************************/
 
 #include "GP_Gfx.h"
-#include "algo/VLine.algo.h"
 #include "core/GP_FnPerBpp.h"
+#include "core/GP_DefFnPerBpp.h"
+
+#include "algo/VLine.algo.h"
 
 /* Generate drawing functions for various bit depths. */
-DEF_VLINE_FN(GP_VLine1bpp,  GP_Context *, GP_Pixel, GP_PutPixel1bpp)
-DEF_VLINE_FN(GP_VLine2bpp,  GP_Context *, GP_Pixel, GP_PutPixel2bpp)
-DEF_VLINE_FN(GP_VLine4bpp,  GP_Context *, GP_Pixel, GP_PutPixel4bpp)
-DEF_VLINE_FN(GP_VLine8bpp,  GP_Context *, GP_Pixel, GP_PutPixel8bpp)
-DEF_VLINE_FN(GP_VLine16bpp, GP_Context *, GP_Pixel, GP_PutPixel16bpp)
-DEF_VLINE_FN(GP_VLine24bpp, GP_Context *, GP_Pixel, GP_PutPixel24bpp)
-DEF_VLINE_FN(GP_VLine32bpp, GP_Context *, GP_Pixel, GP_PutPixel32bpp)
+GP_DEF_DRAW_FN_PER_BPP(GP_VLine, DEF_VLINE_FN)
 
-void GP_VLineXYY(GP_Context *context, int x, int y0, int y1, GP_Pixel pixel)
+void GP_VLineXYY(GP_Context *context, GP_Coord x, GP_Coord y0,
+                 GP_Coord y1, GP_Pixel pixel)
 {
 	GP_CHECK_CONTEXT(context);
 
-	GP_FN_PER_BPP(GP_VLine, context->bpp, context, x, y0, y1, pixel);
+	GP_FN_PER_BPP_CONTEXT(GP_VLine, context, context, x, y0, y1, pixel);
 }
 
-void GP_VLineXYH(GP_Context *context, int x, int y, unsigned int height,
-                 GP_Pixel pixel)
+void GP_VLineXYH(GP_Context *context, GP_Coord x, GP_Coord y,
+                 GP_Size height, GP_Pixel pixel)
 {
 	/* zero height: do not draw anything */
 	if (height == 0)
@@ -53,7 +50,8 @@ void GP_VLineXYH(GP_Context *context, int x, int y, unsigned int height,
 	GP_VLineXYY(context, x, y, y + height - 1, pixel);
 }
 
-void GP_TVLineXYY(GP_Context *context, int x, int y0, int y1, GP_Pixel pixel)
+void GP_TVLineXYY(GP_Context *context, GP_Coord x, GP_Coord y0,
+                  GP_Coord y1, GP_Pixel pixel)
 {
 	GP_CHECK_CONTEXT(context);
 	
@@ -70,8 +68,8 @@ void GP_TVLineXYY(GP_Context *context, int x, int y0, int y1, GP_Pixel pixel)
 	}
 }
 
-void GP_TVLineXYH(GP_Context *context, int x, int y, unsigned int height,
-                  GP_Pixel pixel)
+void GP_TVLineXYH(GP_Context *context, GP_Coord x, GP_Coord y,
+                  GP_Size height, GP_Pixel pixel)
 {
 	/* zero height: do not draw anything */
 	if (height == 0)

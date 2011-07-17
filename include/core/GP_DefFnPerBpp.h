@@ -16,32 +16,39 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2010 Jiri "BlueBear" Dluhos                            *
- *                         <jiri.bluebear.dluhos@gmail.com>                  *
- *                                                                           *
- * Copyright (C) 2009-2010 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2011 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
-#ifndef GP_VLINE_H
-#define GP_VLINE_H
+/*
+ * Macros that gets MACRO template for drawing function and generates drawing
+ * functions for each BPP.
+ *
+ * This functions are later used by GP_FN_PER_BPP_CONTEXT() to generate one
+ * drawing function for all BPP Yay!
+ */
+#ifndef GP_DEF_FN_PER_BPP_H
+#define GP_DEF_FN_PER_BPP_H
 
-#include "core/GP_Context.h"
+#define GP_DEF_DRAW_FN_PER_BPP(fname, MACRO_NAME) \
+	GP_DEF_FN_PER_BPP(fname, MACRO_NAME, GP_PutPixel_Raw_)
 
-void GP_VLineXYY(GP_Context *context, GP_Coord x, GP_Coord y0,
-                 GP_Coord y1, GP_Pixel pixel);
+#define GP_DEF_FILL_FN_PER_BPP(fname, MACRO_NAME) \
+	GP_DEF_FN_PER_BPP(fname, MACRO_NAME, GP_HLine_)
 
-void GP_VLineXYH(GP_Context *context, GP_Coord x, GP_Coord y,
-                 GP_Size height, GP_Pixel pixel);
+#define GP_DEF_FN_FOR_BPP(fname, MACRO_NAME, fdraw, bpp) \
+	MACRO_NAME(fname##_##bpp, GP_Context *, GP_Pixel, fdraw##bpp)
 
-void GP_TVLineXYY(GP_Context *context, GP_Coord x, GP_Coord y0,
-                  GP_Coord y1, GP_Pixel pixel);
+#define GP_DEF_FN_PER_BPP(fname, MACRO_NAME, fdraw) \
+	GP_DEF_FN_FOR_BPP(fname, MACRO_NAME, fdraw, 1BPP_LE) \
+	GP_DEF_FN_FOR_BPP(fname, MACRO_NAME, fdraw, 1BPP_BE) \
+	GP_DEF_FN_FOR_BPP(fname, MACRO_NAME, fdraw, 2BPP_LE) \
+	GP_DEF_FN_FOR_BPP(fname, MACRO_NAME, fdraw, 2BPP_BE) \
+	GP_DEF_FN_FOR_BPP(fname, MACRO_NAME, fdraw, 4BPP_LE) \
+	GP_DEF_FN_FOR_BPP(fname, MACRO_NAME, fdraw, 4BPP_BE) \
+	GP_DEF_FN_FOR_BPP(fname, MACRO_NAME, fdraw, 8BPP)    \
+	GP_DEF_FN_FOR_BPP(fname, MACRO_NAME, fdraw, 16BPP)   \
+	GP_DEF_FN_FOR_BPP(fname, MACRO_NAME, fdraw, 24BPP)   \
+	GP_DEF_FN_FOR_BPP(fname, MACRO_NAME, fdraw, 32BPP)   \
 
-void GP_TVLineXYH(GP_Context *context, GP_Coord x, GP_Coord y,
-                  GP_Size height, GP_Pixel pixel);
-
-/* default argument set is XYY */
-#define GP_VLine GP_VLineXYY
-#define GP_TVLine GP_TVLineXYY
-
-#endif /* GP_VLINE_H */
+#endif /* GP_DEF_FN_PER_BPP_H */

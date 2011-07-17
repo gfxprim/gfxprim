@@ -24,31 +24,24 @@
  *****************************************************************************/
 
 #include "GP_Gfx.h"
-#include "algo/Line.algo.h"
 #include "core/GP_FnPerBpp.h"
+#include "core/GP_DefFnPerBpp.h"
+
+#include "algo/Line.algo.h"
 
 /* Generate drawing functions for various bit depths. */
-DEF_LINE_FN(GP_Line1bpp_LE,  GP_Context *, GP_Pixel, GP_PutPixel1bpp_LE)
-DEF_LINE_FN(GP_Line2bpp_LE,  GP_Context *, GP_Pixel, GP_PutPixel2bpp_LE)
-DEF_LINE_FN(GP_Line4bpp_LE,  GP_Context *, GP_Pixel, GP_PutPixel4bpp_LE)
-DEF_LINE_FN(GP_Line1bpp_BE,  GP_Context *, GP_Pixel, GP_PutPixel1bpp_BE)
-DEF_LINE_FN(GP_Line2bpp_BE,  GP_Context *, GP_Pixel, GP_PutPixel2bpp_BE)
-DEF_LINE_FN(GP_Line4bpp_BE,  GP_Context *, GP_Pixel, GP_PutPixel4bpp_BE)
-DEF_LINE_FN(GP_Line8bpp,  GP_Context *, GP_Pixel, GP_PutPixel8bpp)
-DEF_LINE_FN(GP_Line16bpp, GP_Context *, GP_Pixel, GP_PutPixel16bpp)
-DEF_LINE_FN(GP_Line24bpp, GP_Context *, GP_Pixel, GP_PutPixel24bpp)
-DEF_LINE_FN(GP_Line32bpp, GP_Context *, GP_Pixel, GP_PutPixel32bpp)
+GP_DEF_DRAW_FN_PER_BPP(GP_Line, DEF_LINE_FN)
 
-void GP_Line(GP_Context *context, int x0, int y0, int x1, int y1,
-             GP_Pixel pixel)
+void GP_Line(GP_Context *context, GP_Coord x0, GP_Coord y0,
+             GP_Coord x1, GP_Coord y1, GP_Pixel pixel)
 {
 	GP_CHECK_CONTEXT(context);
 
-	GP_FN_PER_BPP(GP_Line, context->bpp, context, x0, y0, x1, y1, pixel);
+	GP_FN_PER_BPP_CONTEXT(GP_Line, context, context, x0, y0, x1, y1, pixel);
 }
 
-void GP_TLine(GP_Context *context, int x0, int y0, int x1, int y1,
-              GP_Pixel pixel)
+void GP_TLine(GP_Context *context, GP_Coord x0, GP_Coord y0,
+              GP_Coord x1, GP_Coord y1, GP_Pixel pixel)
 {
 	GP_CHECK_CONTEXT(context);
 	

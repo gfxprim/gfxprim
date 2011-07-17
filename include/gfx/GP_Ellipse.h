@@ -28,17 +28,17 @@
 
 #include "core/GP_Context.h"
 
-void GP_Ellipse(GP_Context *context, int xcenter, int ycenter,
-                unsigned int a, unsigned int b, GP_Pixel pixel);
+void GP_Ellipse(GP_Context *context, GP_Coord xcenter, GP_Coord ycenter,
+                GP_Size a, GP_Size b, GP_Pixel pixel);
 
-void GP_TEllipse(GP_Context *context, int xcenter, int ycenter,
-                 unsigned int a, unsigned int b, GP_Pixel pixel);
+void GP_TEllipse(GP_Context *context, GP_Coord xcenter, GP_Coord ycenter,
+                 GP_Size a, GP_Size b, GP_Pixel pixel);
 
-void GP_FillEllipse(GP_Context *context, int xcenter, int ycenter,
-                    unsigned int a, unsigned int b, GP_Pixel pixel);
+void GP_FillEllipse(GP_Context *context, GP_Coord xcenter, GP_Coord ycenter,
+                    GP_Size a, GP_Size b, GP_Pixel pixel);
 
-void GP_TFillEllipse(GP_Context *context, int xcenter, int ycenter,
-                     unsigned int a, unsigned int b, GP_Pixel pixel);
+void GP_TFillEllipse(GP_Context *context, GP_Coord xcenter, GP_Coord ycenter,
+                     GP_Size a, GP_Size b, GP_Pixel pixel);
 
 
 #endif /* GP_ELLIPSE_H */

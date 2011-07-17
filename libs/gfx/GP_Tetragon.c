@@ -25,8 +25,9 @@
 
 #include "GP_Gfx.h"
 
-void GP_Tetragon(GP_Context *context, int x0, int y0, int x1, int y1,
-                 int x2, int y2, int x3, int y3, GP_Pixel pixel)
+void GP_Tetragon(GP_Context *context, GP_Coord x0, GP_Coord y0,
+                 GP_Coord x1, GP_Coord y1, GP_Coord x2, GP_Coord y2,
+		 GP_Coord x3, GP_Coord y3, GP_Pixel pixel)
 {
 	GP_CHECK_CONTEXT(context);
 
@@ -36,8 +37,9 @@ void GP_Tetragon(GP_Context *context, int x0, int y0, int x1, int y1,
 	GP_Line(context, x3, y3, x0, y0, pixel);
 }
 
-void GP_TTetragon(GP_Context *context, int x0, int y0, int x1, int y1,
-                  int x2, int y2, int x3, int y3, GP_Pixel pixel)
+void GP_TTetragon(GP_Context *context, GP_Coord x0, GP_Coord y0,
+                  GP_Coord x1, GP_Coord y1, GP_Coord x2, GP_Coord y2,
+		  GP_Coord x3, GP_Coord y3, GP_Pixel pixel)
 {
 	GP_CHECK_CONTEXT(context);
 	
@@ -49,17 +51,19 @@ void GP_TTetragon(GP_Context *context, int x0, int y0, int x1, int y1,
 	GP_Tetragon(context, x0, y0, x1, y1, x2, y2, x3, y3, pixel);
 }
 
-void GP_FillTetragon(GP_Context *context, int x0, int y0, int x1, int y1,
-                     int x2, int y2, int x3, int y3, GP_Pixel pixel)
+void GP_FillTetragon(GP_Context *context, GP_Coord x0, GP_Coord y0,
+                     GP_Coord x1, GP_Coord y1, GP_Coord x2, GP_Coord y2,
+		     GP_Coord x3, GP_Coord y3, GP_Pixel pixel)
 {
 	GP_CHECK_CONTEXT(context);
 
-	int xy[8] = { x0, y0, x1, y1, x2, y2, x3, y3 };
-	GP_FillPolygon(context, 4, (const int *) xy, pixel);
+	const GP_Coord xy[8] = { x0, y0, x1, y1, x2, y2, x3, y3 };
+	GP_FillPolygon(context, 4, xy, pixel);
 }
 
-void GP_TFillTetragon(GP_Context* context, int x0, int y0, int x1, int y1,
-                      int x2, int y2, int x3, int y3, GP_Pixel pixel)
+void GP_TFillTetragon(GP_Context* context, GP_Coord x0, GP_Coord y0,
+                      GP_Coord x1, GP_Coord y1, GP_Coord x2, GP_Coord y2,
+		      GP_Coord x3, GP_Coord y3, GP_Pixel pixel)
 {
 	GP_CHECK_CONTEXT(context);
 	
@@ -68,6 +72,6 @@ void GP_TFillTetragon(GP_Context* context, int x0, int y0, int x1, int y1,
 	GP_TRANSFORM_POINT(context, x2, y2);
 	GP_TRANSFORM_POINT(context, x3, y3);
 
-	int xy[8] = { x0, y0, x1, y1, x2, y2, x3, y3 };
-	GP_FillPolygon(context, 4, (const int *) xy, pixel);
+	const GP_Coord xy[8] = { x0, y0, x1, y1, x2, y2, x3, y3 };
+	GP_FillPolygon(context, 4, xy, pixel);
 }

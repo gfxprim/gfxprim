@@ -28,16 +28,16 @@
 
 #include "core/GP_Context.h"
 
-void GP_Circle(GP_Context *context, int xcenter, int ycenter,
-               unsigned int r, GP_Pixel pixel);
+void GP_Circle(GP_Context *context, GP_Coord xcenter, GP_Coord ycenter,
+               GP_Size r, GP_Pixel pixel);
 
-void GP_TCircle(GP_Context *context, int xcenter, int ycenter,
-                unsigned int r, GP_Pixel pixel);
+void GP_TCircle(GP_Context *context, GP_Coord xcenter, GP_Coord ycenter,
+                GP_Size r, GP_Pixel pixel);
 
-void GP_FillCircle(GP_Context *context, int xcenter, int ycenter,
-                   unsigned int r, GP_Pixel pixel);
+void GP_FillCircle(GP_Context *context, GP_Coord xcenter, GP_Coord ycenter,
+                   GP_Size r, GP_Pixel pixel);
 
-void GP_TFillCircle(GP_Context *context, int xcenter, int ycenter,
-                    unsigned int r, GP_Pixel pixel);
+void GP_TFillCircle(GP_Context *context, GP_Coord xcenter, GP_Coord ycenter,
+                    GP_Size r, GP_Pixel pixel);
 
 #endif /* GP_CIRCLE_H */

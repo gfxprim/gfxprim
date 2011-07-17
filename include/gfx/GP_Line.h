@@ -28,19 +28,22 @@
 
 #include "core/GP_Context.h"
 
-void GP_Line8bpp(GP_Context *context, int x0, int y0, int x1, int y1,
-	GP_Pixel pixel);
-void GP_Line16bpp(GP_Context *context, int x0, int y0, int x1, int y1,
-	GP_Pixel pixel);
-void GP_Line24bpp(GP_Context *context, int x0, int y0, int x1, int y1,
-	GP_Pixel pixel);
-void GP_Line32bpp(GP_Context *context, int x0, int y0, int x1, int y1,
-	GP_Pixel pixel);
+void GP_Line8bpp(GP_Context *context, GP_Coord x0, GP_Coord y0,
+                 GP_Coord x1, GP_Coord y1, GP_Pixel pixel);
 
-void GP_Line(GP_Context *context, int x0, int y0, int x1, int y1,
-             GP_Pixel pixel);
+void GP_Line16bpp(GP_Context *context, GP_Coord x0, GP_Coord y0,
+                  GP_Coord x1, GP_Coord y1, GP_Pixel pixel);
 
-void GP_TLine(GP_Context *context, int x0, int y0, int x1, int y1,
-              GP_Pixel pixel);
+void GP_Line24bpp(GP_Context *context, GP_Coord x0, GP_Coord y0,
+                  GP_Coord x1, GP_Coord y1, GP_Pixel pixel);
+
+void GP_Line32bpp(GP_Context *context, GP_Coord x0, GP_Coord y0,
+                  GP_Coord x1, GP_Coord y1, GP_Pixel pixel);
+
+void GP_Line(GP_Context *context, GP_Coord x0, GP_Coord y0,
+             GP_Coord x1, GP_Coord y1, GP_Pixel pixel);
+
+void GP_TLine(GP_Context *context, GP_Coord x0, GP_Coord y0,
+              GP_Coord x1, GP_Coord y1, GP_Pixel pixel);
 
 #endif /* GP_LINE_H */

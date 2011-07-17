@@ -16,32 +16,20 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2010 Jiri "BlueBear" Dluhos                            *
- *                         <jiri.bluebear.dluhos@gmail.com>                  *
- *                                                                           *
- * Copyright (C) 2009-2010 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2011 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
-#ifndef GP_VLINE_H
-#define GP_VLINE_H
+#ifndef GP_TYPES_H
+#define GP_TYPES_H
 
-#include "core/GP_Context.h"
+#include <stdint.h>
 
-void GP_VLineXYY(GP_Context *context, GP_Coord x, GP_Coord y0,
-                 GP_Coord y1, GP_Pixel pixel);
+/* 
+ * Integer type for coordinates: x, y, width, height, ... 
+ * Should be signed to hold negative values as well.
+ */
+typedef int GP_Coord;
+typedef unsigned int GP_Size;
 
-void GP_VLineXYH(GP_Context *context, GP_Coord x, GP_Coord y,
-                 GP_Size height, GP_Pixel pixel);
-
-void GP_TVLineXYY(GP_Context *context, GP_Coord x, GP_Coord y0,
-                  GP_Coord y1, GP_Pixel pixel);
-
-void GP_TVLineXYH(GP_Context *context, GP_Coord x, GP_Coord y,
-                  GP_Size height, GP_Pixel pixel);
-
-/* default argument set is XYY */
-#define GP_VLine GP_VLineXYY
-#define GP_TVLine GP_TVLineXYY
-
-#endif /* GP_VLINE_H */
+#endif /* GP_TYPES_H */

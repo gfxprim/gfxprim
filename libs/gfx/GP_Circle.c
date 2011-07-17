@@ -24,32 +24,28 @@
  *****************************************************************************/
 
 #include "GP_Gfx.h"
-#include "algo/Circle.algo.h"
 #include "core/GP_FnPerBpp.h"
+#include "core/GP_DefFnPerBpp.h"
+
+#include "algo/Circle.algo.h"
 
 /* Generate drawing functions for various bit depths. */
-DEF_CIRCLE_FN(GP_Circle1bpp,  GP_Context *, GP_Pixel, GP_PutPixel1bpp)
-DEF_CIRCLE_FN(GP_Circle2bpp,  GP_Context *, GP_Pixel, GP_PutPixel2bpp)
-DEF_CIRCLE_FN(GP_Circle4bpp,  GP_Context *, GP_Pixel, GP_PutPixel4bpp)
-DEF_CIRCLE_FN(GP_Circle8bpp,  GP_Context *, GP_Pixel, GP_PutPixel8bpp)
-DEF_CIRCLE_FN(GP_Circle16bpp, GP_Context *, GP_Pixel, GP_PutPixel16bpp)
-DEF_CIRCLE_FN(GP_Circle24bpp, GP_Context *, GP_Pixel, GP_PutPixel24bpp)
-DEF_CIRCLE_FN(GP_Circle32bpp, GP_Context *, GP_Pixel, GP_PutPixel32bpp)
+GP_DEF_DRAW_FN_PER_BPP(GP_Circle, DEF_CIRCLE_FN)
 
-void GP_Circle(GP_Context *context, int xcenter, int ycenter,
-               unsigned int r, GP_Pixel pixel)
+void GP_Circle(GP_Context *context, GP_Coord xcenter, GP_Coord ycenter,
+               GP_Size r, GP_Pixel pixel)
 {
 	GP_CHECK_CONTEXT(context);
 
-	GP_FN_PER_BPP(GP_Circle, context->bpp, context,
-	              xcenter, ycenter, r, pixel);
+	GP_FN_PER_BPP_CONTEXT(GP_Circle, context, context,
+	                      xcenter, ycenter, r, pixel);
 }
 
-void GP_TCircle(GP_Context *context, int xcenter, int ycenter,
-               unsigned int r, GP_Pixel pixel)
+void GP_TCircle(GP_Context *context, GP_Coord xcenter, GP_Coord ycenter,
+                GP_Size r, GP_Pixel pixel)
 {
 	GP_CHECK_CONTEXT(context);
-	
+
 	GP_TRANSFORM_POINT(context, xcenter, ycenter);
 	
 	GP_Circle(context, xcenter, ycenter, r, pixel);
@@ -58,25 +54,19 @@ void GP_TCircle(GP_Context *context, int xcenter, int ycenter,
 #include "algo/FillCircle.algo.h"
 
 /* Generate drawing functions for various bit depths. */
-DEF_FILLCIRCLE_FN(GP_FillCircle1bpp,  GP_Context *, GP_Pixel, GP_HLine1bpp)
-DEF_FILLCIRCLE_FN(GP_FillCircle2bpp,  GP_Context *, GP_Pixel, GP_HLine2bpp)
-DEF_FILLCIRCLE_FN(GP_FillCircle4bpp,  GP_Context *, GP_Pixel, GP_HLine4bpp)
-DEF_FILLCIRCLE_FN(GP_FillCircle8bpp,  GP_Context *, GP_Pixel, GP_HLine8bpp)
-DEF_FILLCIRCLE_FN(GP_FillCircle16bpp, GP_Context *, GP_Pixel, GP_HLine16bpp)
-DEF_FILLCIRCLE_FN(GP_FillCircle24bpp, GP_Context *, GP_Pixel, GP_HLine24bpp)
-DEF_FILLCIRCLE_FN(GP_FillCircle32bpp, GP_Context *, GP_Pixel, GP_HLine32bpp)
+GP_DEF_FILL_FN_PER_BPP(GP_FillCircle, DEF_FILLCIRCLE_FN)
 
-void GP_FillCircle(GP_Context *context, int xcenter, int ycenter,
-                   unsigned int r, GP_Pixel pixel)
+void GP_FillCircle(GP_Context *context, GP_Coord xcenter, GP_Coord ycenter,
+                   GP_Size r, GP_Pixel pixel)
 {
 	GP_CHECK_CONTEXT(context);
 
-	GP_FN_PER_BPP(GP_FillCircle, context->bpp, context,
-	              xcenter, ycenter, r, pixel);
+	GP_FN_PER_BPP_CONTEXT(GP_FillCircle, context, context,
+	                      xcenter, ycenter, r, pixel);
 }
 
-void GP_TFillCircle(GP_Context *context, int xcenter, int ycenter,
-                    unsigned int r, GP_Pixel pixel)
+void GP_TFillCircle(GP_Context *context, GP_Coord xcenter, GP_Coord ycenter,
+                    GP_Size r, GP_Pixel pixel)
 {
 	GP_CHECK_CONTEXT(context);
 	

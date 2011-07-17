@@ -30,7 +30,7 @@
 #ifndef GP_SYMBOL_H
 #define GP_SYMBOL_H
 
-#include "core/GP_Context.h"
+#include "core/GP_Types.h"
 
 typedef enum GP_SymbolType {
 	GP_SYM_TRIANGLE_UP,
@@ -41,15 +41,19 @@ typedef enum GP_SymbolType {
 } GP_SymbolType;
 
 void GP_Symbol(GP_Context *context, GP_SymbolType sym,
-               int x, int y, int w, int h, GP_Pixel pixel);
+               GP_Coord x, GP_Coord y,
+	       GP_Size w, GP_Size h, GP_Pixel pixel);
 
 void GP_TSymbol(GP_Context *context, GP_SymbolType sym,
-                int x, int y, int w, int h, GP_Pixel pixel);
+                GP_Coord x, GP_Coord y,
+		GP_Size w, GP_Size h, GP_Pixel pixel);
 
 void GP_FillSymbol(GP_Context *context, GP_SymbolType sym,
-                   int x, int y, int w, int h, GP_Pixel pixel);
+                   GP_Coord x, GP_Coord y,
+		   GP_Size w, GP_Size h, GP_Pixel pixel);
 
 void GP_TFillSymbol(GP_Context *context, GP_SymbolType sym,
-                    int x, int y, int w, int h, GP_Pixel pixel);
+                    GP_Coord x, GP_Coord y,
+		    GP_Size w, GP_Size h, GP_Pixel pixel);
 
 #endif /* GP_SYMBOL_H */

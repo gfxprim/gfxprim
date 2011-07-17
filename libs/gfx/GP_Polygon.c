@@ -29,15 +29,15 @@
 #include <stdlib.h>
 
 struct GP_PolygonEdge {
-	int startx, starty;
-	int endx, endy;
-	int dx, dy;
+	GP_Coord startx, starty;
+	GP_Coord endx, endy;
+	GP_Coord dx, dy;
 };
 
 struct GP_Polygon {
 	struct GP_PolygonEdge *edges;
-	int edge_count;
-	int ymin, ymax;
+	GP_Coord edge_count;
+	GP_Coord ymin, ymax;
 };
 
 #define GP_POLYGON_INITIALIZER { \
@@ -48,7 +48,7 @@ struct GP_Polygon {
 }
 
 static void GP_InitEdge(struct GP_PolygonEdge *edge,
-		int x1, int y1, int x2, int y2)
+		GP_Coord x1, GP_Coord y1, GP_Coord x2, GP_Coord y2)
 {
 	if (y1 < y2) {			/* coords are top-down, correct */
 		edge->startx = x1;
@@ -66,7 +66,8 @@ static void GP_InitEdge(struct GP_PolygonEdge *edge,
 	edge->dy = edge->endy - edge->starty;
 }
 
-static void GP_AddEdge(struct GP_Polygon *poly, int x1, int y1, int x2, int y2)
+static void GP_AddEdge(struct GP_Polygon *poly, GP_Coord x1, GP_Coord y1,
+                       GP_Coord x2, GP_Coord y2)
 {
 	struct GP_PolygonEdge *edge = poly->edges + poly->edge_count;
 	
@@ -78,7 +79,7 @@ static void GP_AddEdge(struct GP_Polygon *poly, int x1, int y1, int x2, int y2)
 	poly->ymax = GP_MAX(poly->ymax, edge->endy);
 }
 
-static int GP_CompareEdges(const void *edge1, const void *edge2)
+static GP_Coord GP_CompareEdges(const void *edge1, const void *edge2)
 {
 	struct GP_PolygonEdge *e1 = (struct GP_PolygonEdge *) edge1;
 	struct GP_PolygonEdge *e2 = (struct GP_PolygonEdge *) edge2;
@@ -96,15 +97,15 @@ static int GP_CompareEdges(const void *edge1, const void *edge2)
 	return 0;
 }
 
-static void GP_LoadPolygon(struct GP_Polygon *poly, int vertex_count,
-		const int *xy)
+static void GP_LoadPolygon(struct GP_Polygon *poly, GP_Coord vertex_count,
+		const GP_Coord *xy)
 {
 	poly->edge_count = 0;
 	poly->edges = calloc(sizeof(struct GP_PolygonEdge),
 			vertex_count);
 
-	int i;
-	int coord_count = 2*vertex_count - 2;
+	GP_Coord i;
+	GP_Coord coord_count = 2*vertex_count - 2;
 	for (i = 0; i < coord_count; i+=2) { 
 
 		/* add the edge, unless it is horizontal */
@@ -133,13 +134,13 @@ static void GP_ResetPolygon(struct GP_Polygon *poly)
 }
 
 /*
- * Finds an X coordinate of an intersection of the edge
+ * Finds an X coordinate of an GP_Coordersection of the edge
  * with the given Y line.
  */
-static inline int GP_FindIntersection(int y, const struct GP_PolygonEdge *edge)
+static inline GP_Coord GP_FindIntersection(GP_Coord y, const struct GP_PolygonEdge *edge)
 {
-	int edge_y = y - edge->starty;		/* Y relative to the edge */
-	int x = edge->startx;
+	GP_Coord edge_y = y - edge->starty;		/* Y relative to the edge */
+	GP_Coord x = edge->startx;
 
 	if (edge->dx > 0) {
 		while (edge->startx*edge->dy + edge_y*edge->dx > x*edge->dy)
@@ -152,37 +153,37 @@ static inline int GP_FindIntersection(int y, const struct GP_PolygonEdge *edge)
 	return x;
 }
 
-void GP_FillPolygon(GP_Context *context, int vertex_count, const int *xy,
+void GP_FillPolygon(GP_Context *context, GP_Coord vertex_count, const GP_Coord *xy,
 		GP_Pixel pixel)
 {
 	struct GP_Polygon poly = GP_POLYGON_INITIALIZER;
 
 	GP_LoadPolygon(&poly, vertex_count, xy);
 
-	int y, startx, endx;
-	int startx_prev = -INT_MAX;
-	int endx_prev = INT_MAX;
+	GP_Coord y, startx, endx;
+	GP_Coord startx_prev = -INT_MAX;
+	GP_Coord endx_prev = INT_MAX;
 
 	for (y = poly.ymin; y <= poly.ymax; y++) {
 		startx = INT_MAX;
 		endx = 0;
 
-		int i;
+		GP_Coord i;
 		for (i = 0; i < poly.edge_count; i++) {
 			struct GP_PolygonEdge *edge = poly.edges + i;
 
 			if (y < edge->starty || y > edge->endy)
 				continue;
 
-			int inter = GP_FindIntersection(y, edge);
+			GP_Coord GP_Coorder = GP_FindIntersection(y, edge);
 
-			startx = GP_MIN(startx, inter);
-			endx = GP_MAX(endx, inter);
+			startx = GP_MIN(startx, GP_Coorder);
+			endx = GP_MAX(endx, GP_Coorder);
 
 			if (y != edge->endy) {
-				inter = GP_FindIntersection(y + 1, edge);
-				startx = GP_MIN(startx, inter);
-				endx = GP_MAX(endx, inter);
+				GP_Coorder = GP_FindIntersection(y + 1, edge);
+				startx = GP_MIN(startx, GP_Coorder);
+				endx = GP_MAX(endx, GP_Coorder);
 			}
 		}
 

@@ -24,33 +24,29 @@
  *****************************************************************************/
 
 #include "GP_Gfx.h"
-#include "algo/Ellipse.algo.h"
 #include "core/GP_FnPerBpp.h"
+#include "core/GP_DefFnPerBpp.h"
+
+#include "algo/Ellipse.algo.h"
 
 /* Generate drawing functions for various bit depths. */
-DEF_ELLIPSE_FN(GP_Ellipse1bpp,  GP_Context *, GP_Pixel, GP_PutPixel1bpp);
-DEF_ELLIPSE_FN(GP_Ellipse2bpp,  GP_Context *, GP_Pixel, GP_PutPixel2bpp);
-DEF_ELLIPSE_FN(GP_Ellipse4bpp,  GP_Context *, GP_Pixel, GP_PutPixel4bpp);
-DEF_ELLIPSE_FN(GP_Ellipse8bpp,  GP_Context *, GP_Pixel, GP_PutPixel8bpp);
-DEF_ELLIPSE_FN(GP_Ellipse16bpp, GP_Context *, GP_Pixel, GP_PutPixel16bpp);
-DEF_ELLIPSE_FN(GP_Ellipse24bpp, GP_Context *, GP_Pixel, GP_PutPixel24bpp);
-DEF_ELLIPSE_FN(GP_Ellipse32bpp, GP_Context *, GP_Pixel, GP_PutPixel32bpp);
+GP_DEF_DRAW_FN_PER_BPP(GP_Ellipse, DEF_ELLIPSE_FN)
 
-void GP_Ellipse(GP_Context *context, int xcenter, int ycenter,
-                unsigned int a, unsigned int b, GP_Pixel pixel)
+void GP_Ellipse(GP_Context *context, GP_Coord xcenter, GP_Coord ycenter,
+                GP_Size a, GP_Size b, GP_Pixel pixel)
 {
 	GP_CHECK_CONTEXT(context);
 
-	GP_FN_PER_BPP(GP_Ellipse, context->bpp, context,
-	              xcenter, ycenter, a, b, pixel);
+	GP_FN_PER_BPP_CONTEXT(GP_Ellipse, context, context,
+	                      xcenter, ycenter, a, b, pixel);
 }
 
-void GP_TEllipse(GP_Context *context, int xcenter, int ycenter,
-                 unsigned int a, unsigned int b, GP_Pixel pixel)
+void GP_TEllipse(GP_Context *context, GP_Coord xcenter, GP_Coord ycenter,
+                 GP_Size a, GP_Size b, GP_Pixel pixel)
 {
 	GP_CHECK_CONTEXT(context);
 	
-	/* recalculate center point and swap a and b when axes are swapped */
+	/* recalculate center poGP_Coord and swap a and b when axes are swapped */
 	GP_TRANSFORM_POINT(context, xcenter, ycenter);
 	GP_TRANSFORM_SWAP(context, a, b);
 	
@@ -60,25 +56,19 @@ void GP_TEllipse(GP_Context *context, int xcenter, int ycenter,
 #include "algo/FillEllipse.algo.h"
 
 /* Generate drawing functions for various bit depths. */
-DEF_FILLELLIPSE_FN(GP_FillEllipse1bpp, GP_Context *, GP_Pixel, GP_HLine1bpp)
-DEF_FILLELLIPSE_FN(GP_FillEllipse2bpp, GP_Context *, GP_Pixel, GP_HLine2bpp)
-DEF_FILLELLIPSE_FN(GP_FillEllipse4bpp, GP_Context *, GP_Pixel, GP_HLine4bpp)
-DEF_FILLELLIPSE_FN(GP_FillEllipse8bpp, GP_Context *, GP_Pixel, GP_HLine8bpp)
-DEF_FILLELLIPSE_FN(GP_FillEllipse16bpp, GP_Context *, GP_Pixel, GP_HLine16bpp)
-DEF_FILLELLIPSE_FN(GP_FillEllipse24bpp, GP_Context *, GP_Pixel, GP_HLine24bpp)
-DEF_FILLELLIPSE_FN(GP_FillEllipse32bpp, GP_Context *, GP_Pixel, GP_HLine32bpp)
+GP_DEF_FILL_FN_PER_BPP(GP_FillEllipse, DEF_FILLELLIPSE_FN)
 
-void GP_FillEllipse(GP_Context *context, int xcenter, int ycenter,
-	            unsigned int a, unsigned int b, GP_Pixel pixel)
+void GP_FillEllipse(GP_Context *context, GP_Coord xcenter, GP_Coord ycenter,
+	            GP_Size a, GP_Size b, GP_Pixel pixel)
 {
 	GP_CHECK_CONTEXT(context);
 
-	GP_FN_PER_BPP(GP_FillEllipse, context->bpp, context,
-	              xcenter, ycenter, a, b, pixel);
+	GP_FN_PER_BPP_CONTEXT(GP_FillEllipse, context, context,
+	                      xcenter, ycenter, a, b, pixel);
 }
 
-void GP_TFillEllipse(GP_Context *context, int xcenter, int ycenter,
-                     unsigned int a, unsigned int b, GP_Pixel pixel)
+void GP_TFillEllipse(GP_Context *context, GP_Coord xcenter, GP_Coord ycenter,
+                     GP_Size a, GP_Size b, GP_Pixel pixel)
 {
 	GP_CHECK_CONTEXT(context);
 	

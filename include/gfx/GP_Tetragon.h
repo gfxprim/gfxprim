@@ -28,16 +28,20 @@
 
 #include "core/GP_Context.h"
 
-void GP_Tetragon(GP_Context *context, int x0, int y0, int x1, int y1,
-                 int x2, int y2, int x3, int y3, GP_Pixel pixel);
+void GP_Tetragon(GP_Context *context, GP_Coord x0, GP_Coord y0,
+                 GP_Coord x1, GP_Coord y1, GP_Coord x2, GP_Coord y2,
+		 GP_Coord x3, GP_Coord y3, GP_Pixel pixel);
 
-void GP_TTetragon(GP_Context *context, int x0, int y0, int x1, int y1,
-                  int x2, int y2, int x3, int y3, GP_Pixel pixel);
+void GP_TTetragon(GP_Context *context, GP_Coord x0, GP_Coord y0,
+                  GP_Coord x1, GP_Coord y1, GP_Coord x2, GP_Coord y2,
+		  GP_Coord x3, GP_Coord y3, GP_Pixel pixel);
 
-void GP_FillTetragon(GP_Context *context, int x0, int y0, int x1, int y1,
-                     int x2, int y2, int x3, int y3, GP_Pixel pixel);
+void GP_FillTetragon(GP_Context *context, GP_Coord x0, GP_Coord y0,
+                     GP_Coord x1, GP_Coord y1, GP_Coord x2, GP_Coord y2,
+		     GP_Coord x3, GP_Coord y3, GP_Pixel pixel);
 
-void GP_TFillTetragon(GP_Context *context, int x0, int y0, int x1, int y1,
-                      int x2, int y2, int x3, int y3, GP_Pixel pixel);
+void GP_TFillTetragon(GP_Context *context, GP_Coord x0, GP_Coord y0,
+                      GP_Coord x1, GP_Coord y1, GP_Coord x2, GP_Coord y2,
+		      GP_Coord x3, GP_Coord y3, GP_Pixel pixel);
 
 #endif /* GP_TETRAGON_H */

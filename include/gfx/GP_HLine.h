@@ -28,26 +28,59 @@
 
 #include "core/GP_Context.h"
 
-void GP_HLine1bpp(GP_Context *context, int x0, int x1, int y, GP_Pixel pixel);
-void GP_HLine2bpp(GP_Context *context, int x0, int x1, int y, GP_Pixel pixel);
-void GP_HLine8bpp(GP_Context *context, int x0, int x1, int y, GP_Pixel pixel);
-void GP_HLine4bpp(GP_Context *context, int x0, int x1, int y, GP_Pixel pixel);
-void GP_HLine16bpp(GP_Context *context, int x0, int x1, int y, GP_Pixel pixel);
-void GP_HLine24bpp(GP_Context *context, int x0, int x1, int y, GP_Pixel pixel);
-void GP_HLine32bpp(GP_Context *context, int x0, int x1, int y, GP_Pixel pixel);
+void GP_HLine_1BPP_LE(GP_Context *context, GP_Coord x0, GP_Coord x1,
+                      GP_Coord y, GP_Pixel pixel);
 
-void GP_HLineXXY(GP_Context *context, int x0, int x1, int y, GP_Pixel pixel);
+void GP_HLine_1BPP_BE(GP_Context *context, GP_Coord x0, GP_Coord x1,
+                      GP_Coord y, GP_Pixel pixel);
 
-void GP_HLineXYW(GP_Context *context, int x, int y, unsigned int w,
+void GP_HLine_2BPP_LE(GP_Context *context, GP_Coord x0, GP_Coord x1,
+                      GP_Coord y, GP_Pixel pixel);
+
+void GP_HLine_2BPP_BE(GP_Context *context, GP_Coord x0, GP_Coord x1,
+                      GP_Coord y, GP_Pixel pixel);
+
+void GP_HLine_4BPP_LE(GP_Context *context, GP_Coord x0, GP_Coord x1,
+                      GP_Coord y, GP_Pixel pixel);
+
+void GP_HLine_4BPP_BE(GP_Context *context, GP_Coord x0, GP_Coord x1,
+                      GP_Coord y, GP_Pixel pixel);
+
+void GP_HLine_8BPP(GP_Context *context, GP_Coord x0, GP_Coord x1,
+                   GP_Coord y, GP_Pixel pixel);
+
+void GP_HLine_16BPP(GP_Context *context, GP_Coord x0, GP_Coord x1,
+                    GP_Coord y, GP_Pixel pixel);
+
+void GP_HLine_24BPP(GP_Context *context, GP_Coord x0, GP_Coord x1,
+                    GP_Coord y, GP_Pixel pixel);
+
+void GP_HLine_32BPP(GP_Context *context, GP_Coord x0, GP_Coord x1,
+                    GP_Coord y, GP_Pixel pixel);
+
+void GP_HLineXXY(GP_Context *context, GP_Coord x0, GP_Coord x1,
+                 GP_Coord y, GP_Pixel pixel);
+
+void GP_HLineXYW(GP_Context *context, GP_Coord x, GP_Coord y, GP_Size w,
                  GP_Pixel pixel);
 
-void GP_THLineXXY(GP_Context *context, int x0, int x1, int y, GP_Pixel pixel);
+void GP_THLineXXY(GP_Context *context, GP_Coord x0, GP_Coord x1,
+                  GP_Coord y, GP_Pixel pixel);
 
-void GP_THLineXYW(GP_Context *context, int x, int y, unsigned int w,
+void GP_THLineXYW(GP_Context *context, GP_Coord x, GP_Coord y, GP_Size w,
                   GP_Pixel pixel);
 
 /* default argument set is XXY */
-#define GP_HLine GP_HLineXXY
-#define GP_THLine GP_THLineXXY
+static inline void GP_HLine(GP_Context *context, GP_Coord x0, GP_Coord x1,
+                            GP_Coord y, GP_Pixel p)
+{
+	GP_HLineXXY(context, x0, x1, y, p);
+}
+
+static inline void GP_THLine(GP_Context *context, GP_Coord x0, GP_Coord x1,
+                             GP_Coord y, GP_Pixel p)
+{
+	GP_THLineXXY(context, x0, x1, y, p);
+}
 
 #endif /* GP_HLINE_H */

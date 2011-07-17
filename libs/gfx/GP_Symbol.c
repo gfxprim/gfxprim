@@ -69,7 +69,7 @@
 } while (0)
 
 void GP_Symbol(GP_Context *context, GP_SymbolType sym,
-               int x, int y, int w, int h, GP_Pixel pixel)
+               GP_Coord x, GP_Coord y, GP_Size w, GP_Size h, GP_Pixel pixel)
 {
 	DO_DECREMENT(w);
 	DO_DECREMENT(h);
@@ -97,7 +97,7 @@ void GP_Symbol(GP_Context *context, GP_SymbolType sym,
 }
 
 void GP_FillSymbol(GP_Context *context, GP_SymbolType sym,
-                   int x, int y, int w, int h, GP_Pixel pixel)
+                   GP_Coord x, GP_Coord y, GP_Size w, GP_Size h, GP_Pixel pixel)
 {
 	DO_DECREMENT(w);
 	DO_DECREMENT(h);
@@ -125,7 +125,7 @@ void GP_FillSymbol(GP_Context *context, GP_SymbolType sym,
 }
 
 void GP_TSymbol(GP_Context *context, GP_SymbolType sym,
-                int x, int y, int w, int h, GP_Pixel pixel)
+                GP_Coord x, GP_Coord y, GP_Size w, GP_Size h, GP_Pixel pixel)
 {
 	DO_DECREMENT(w);
 	DO_DECREMENT(h);
@@ -153,7 +153,8 @@ void GP_TSymbol(GP_Context *context, GP_SymbolType sym,
 }
 
 void GP_TFillSymbol(GP_Context *context, GP_SymbolType sym,
-                    int x, int y, int w, int h, GP_Pixel pixel)
+                    GP_Coord x, GP_Coord y,
+		    GP_Size w, GP_Size h, GP_Pixel pixel)
 {
 	DO_DECREMENT(w);
 	DO_DECREMENT(h);

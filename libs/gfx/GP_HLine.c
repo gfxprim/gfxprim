@@ -28,22 +28,29 @@
 #include "core/GP_FnPerBpp.h"
 
 /* Generate drawing functions for various bit depths. */
-DEF_HLINE_BU_FN(GP_HLine1bpp, GP_Context *, GP_Pixel, GP_PIXEL_ADDR, GP_WritePixels1bpp)
-DEF_HLINE_BU_FN(GP_HLine2bpp, GP_Context *, GP_Pixel, GP_PIXEL_ADDR, GP_WritePixels2bpp)
-DEF_HLINE_BU_FN(GP_HLine4bpp, GP_Context *, GP_Pixel, GP_PIXEL_ADDR, GP_WritePixels4bpp)
-DEF_HLINE_FN(GP_HLine8bpp,  GP_Context *, GP_Pixel, GP_PIXEL_ADDR, GP_WritePixels8bpp)
-DEF_HLINE_FN(GP_HLine16bpp, GP_Context *, GP_Pixel, GP_PIXEL_ADDR, GP_WritePixels16bpp)
-DEF_HLINE_FN(GP_HLine24bpp, GP_Context *, GP_Pixel, GP_PIXEL_ADDR, GP_WritePixels24bpp)
-DEF_HLINE_FN(GP_HLine32bpp, GP_Context *, GP_Pixel, GP_PIXEL_ADDR, GP_WritePixels32bpp)
 
-void GP_HLineXXY(GP_Context *context, int x0, int x1, int y, GP_Pixel pixel)
+//TODO: BIT ENDIANESS
+DEF_HLINE_BU_FN(GP_HLine_1BPP_LE, GP_Context *, GP_Pixel, GP_PIXEL_ADDR, GP_WritePixels1bpp)
+DEF_HLINE_BU_FN(GP_HLine_1BPP_BE, GP_Context *, GP_Pixel, GP_PIXEL_ADDR, GP_WritePixels1bpp)
+DEF_HLINE_BU_FN(GP_HLine_2BPP_LE, GP_Context *, GP_Pixel, GP_PIXEL_ADDR, GP_WritePixels2bpp)
+DEF_HLINE_BU_FN(GP_HLine_2BPP_BE, GP_Context *, GP_Pixel, GP_PIXEL_ADDR, GP_WritePixels2bpp)
+DEF_HLINE_BU_FN(GP_HLine_4BPP_LE, GP_Context *, GP_Pixel, GP_PIXEL_ADDR, GP_WritePixels2bpp)
+DEF_HLINE_BU_FN(GP_HLine_4BPP_BE, GP_Context *, GP_Pixel, GP_PIXEL_ADDR, GP_WritePixels2bpp)
+
+DEF_HLINE_FN(GP_HLine_8BPP,  GP_Context *, GP_Pixel, GP_PIXEL_ADDR, GP_WritePixels8bpp)
+DEF_HLINE_FN(GP_HLine_16BPP, GP_Context *, GP_Pixel, GP_PIXEL_ADDR, GP_WritePixels16bpp)
+DEF_HLINE_FN(GP_HLine_24BPP, GP_Context *, GP_Pixel, GP_PIXEL_ADDR, GP_WritePixels24bpp)
+DEF_HLINE_FN(GP_HLine_32BPP, GP_Context *, GP_Pixel, GP_PIXEL_ADDR, GP_WritePixels32bpp)
+
+void GP_HLineXXY(GP_Context *context, GP_Coord x0, GP_Coord x1,
+                 GP_Coord y, GP_Pixel pixel)
 {
 	GP_CHECK_CONTEXT(context);
 	
-	GP_FN_PER_BPP(GP_HLine, context->bpp, context, x0, x1, y, pixel);
+	GP_FN_PER_BPP_CONTEXT(GP_HLine, context, context, x0, x1, y, pixel);
 }
 
-void GP_HLineXYW(GP_Context *context, int x, int y, unsigned int w,
+void GP_HLineXYW(GP_Context *context, GP_Coord x, GP_Coord y, GP_Size w,
                  GP_Pixel pixel)
 {
 	/* zero width: do not draw anything */
@@ -53,7 +60,8 @@ void GP_HLineXYW(GP_Context *context, int x, int y, unsigned int w,
 	GP_HLineXXY(context, x, x + w - 1, y, pixel);
 }
 
-void GP_THLineXXY(GP_Context *context, int x0, int x1, int y, GP_Pixel pixel)
+void GP_THLineXXY(GP_Context *context, GP_Coord x0, GP_Coord x1,
+                  GP_Coord y, GP_Pixel pixel)
 {
 	GP_CHECK_CONTEXT(context);
 	
@@ -70,7 +78,7 @@ void GP_THLineXXY(GP_Context *context, int x0, int x1, int y, GP_Pixel pixel)
 	}
 }
 
-void GP_THLineXYW(GP_Context *context, int x, int y, unsigned int w,
+void GP_THLineXYW(GP_Context *context, GP_Coord x, GP_Coord y, GP_Size w,
                   GP_Pixel pixel)
 {
 	/* zero width: do not draw anything */

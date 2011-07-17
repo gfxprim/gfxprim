@@ -28,16 +28,20 @@
 
 #include "core/GP_Context.h"
 
-void GP_Triangle(GP_Context *context, int x0, int y0, int x1, int y1,
-                 int x2, int y2, GP_Pixel pixel);
+void GP_Triangle(GP_Context *context, GP_Coord x0, GP_Coord y0,
+                 GP_Coord x1, GP_Coord y1,
+		 GP_Coord x2, GP_Coord y2, GP_Pixel pixel);
 
-void GP_TTriangle(GP_Context *context, int x0, int y0, int x1, int y1,
-                  int x2, int y2, GP_Pixel pixel);
+void GP_TTriangle(GP_Context *context, GP_Coord x0, GP_Coord y0,
+                  GP_Coord x1, GP_Coord y1,
+                  GP_Coord x2, GP_Coord y2, GP_Pixel pixel);
 
-void GP_FillTriangle(GP_Context *context, int x0, int y0, int x1, int y1,
-                     int x2, int y2, GP_Pixel pixel);
+void GP_FillTriangle(GP_Context *context, GP_Coord x0, GP_Coord y0,
+                     GP_Coord x1, GP_Coord y1,
+                     GP_Coord x2, GP_Coord y2, GP_Pixel pixel);
 
-void GP_TFillTriangle(GP_Context *context, int x0, int y0, int x1, int y1,
-                      int x2, int y2, GP_Pixel pixel);
+void GP_TFillTriangle(GP_Context *context, GP_Coord x0, GP_Coord y0,
+                      GP_Coord x1, GP_Coord y1,
+                      GP_Coord x2, GP_Coord y2, GP_Pixel pixel);
 
 #endif /* GP_TRIANGLE_H */

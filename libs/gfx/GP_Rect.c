@@ -25,8 +25,8 @@
 
 #include "GP_Gfx.h"
 
-void GP_RectXYXY(GP_Context *context, int x0, int y0, int x1, int y1,
-                 GP_Pixel pixel)
+void GP_RectXYXY(GP_Context *context, GP_Coord x0, GP_Coord y0,
+                 GP_Coord x1, GP_Coord y1, GP_Pixel pixel)
 {
 	GP_CHECK_CONTEXT(context);
 
@@ -36,8 +36,8 @@ void GP_RectXYXY(GP_Context *context, int x0, int y0, int x1, int y1,
 	GP_VLine(context, x1, y0, y1, pixel);
 }
 
-void GP_RectXYWH(GP_Context *context, int x, int y,
-	         unsigned int w, unsigned int h, GP_Pixel pixel)
+void GP_RectXYWH(GP_Context *context, GP_Coord x, GP_Coord y,
+	         GP_Size w, GP_Size h, GP_Pixel pixel)
 {
 	GP_CHECK_CONTEXT(context);
 
@@ -47,8 +47,8 @@ void GP_RectXYWH(GP_Context *context, int x, int y,
 	GP_VLine(context, x + w, y, y + h, pixel);
 }
 
-void GP_TRectXYXY(GP_Context *context, int x0, int y0, int x1, int y1,
-                  GP_Pixel pixel)
+void GP_TRectXYXY(GP_Context *context, GP_Coord x0, GP_Coord y0,
+                  GP_Coord x1, GP_Coord y1, GP_Pixel pixel)
 {
 	GP_CHECK_CONTEXT(context);
 	
@@ -58,27 +58,27 @@ void GP_TRectXYXY(GP_Context *context, int x0, int y0, int x1, int y1,
 	GP_RectXYXY(context, x0, y0, x1, y1, pixel);
 }
 
-void GP_TRectXYWH(GP_Context *context, int x, int y,
-	          unsigned int w, unsigned int h, GP_Pixel pixel)
+void GP_TRectXYWH(GP_Context *context, GP_Coord x, GP_Coord y,
+	          GP_Size w, GP_Size h, GP_Pixel pixel)
 {
 	GP_TRectXYXY(context, x, y, x + w, y + h, pixel);
 }
 
-void GP_FillRectXYXY(GP_Context *context, int x0, int y0, int x1, int y1,
-                     GP_Pixel pixel)
+void GP_FillRectXYXY(GP_Context *context, GP_Coord x0, GP_Coord y0,
+                     GP_Coord x1, GP_Coord y1, GP_Pixel pixel)
 {
 	GP_CHECK_CONTEXT(context);
 
 	if (y0 > y1)
 		GP_SWAP(y0, y1);
 
-	int y;
+	GP_Coord y;
 	for (y = y0; y <= y1; y++)
 		GP_HLine(context, x0, x1, y, pixel);
 }
 
-void GP_FillRectXYWH(GP_Context *context, int x, int y,
-                     unsigned int w, unsigned int h, GP_Pixel pixel)
+void GP_FillRectXYWH(GP_Context *context, GP_Coord x, GP_Coord y,
+                     GP_Size w, GP_Size h, GP_Pixel pixel)
 {
 	/* zero width/height: draw nothing */
 	if (w == 0 || h == 0)
@@ -87,8 +87,8 @@ void GP_FillRectXYWH(GP_Context *context, int x, int y,
 	return GP_FillRectXYXY(context, x, y, x + w - 1, y + h - 1, pixel);
 }
 
-void GP_TFillRectXYXY(GP_Context *context, int x0, int y0,
-                      int x1, int y1, GP_Pixel pixel)
+void GP_TFillRectXYXY(GP_Context *context, GP_Coord x0, GP_Coord y0,
+                      GP_Coord x1, GP_Coord y1, GP_Pixel pixel)
 {
 	GP_CHECK_CONTEXT(context);
 	
@@ -98,8 +98,8 @@ void GP_TFillRectXYXY(GP_Context *context, int x0, int y0,
 	GP_FillRect(context, x0, y0, x1, y1, pixel);
 }
 
-void GP_TFillRectXYWH(GP_Context *context, int x, int y,
-	              unsigned int w, unsigned int h, GP_Pixel pixel)
+void GP_TFillRectXYWH(GP_Context *context, GP_Coord x, GP_Coord y,
+	              GP_Size w, GP_Size h, GP_Pixel pixel)
 {
 	/* zero width/height: draw nothing */
 	if (w == 0 || h == 0)
