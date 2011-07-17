@@ -4,6 +4,7 @@
 
 #
 # 2011 - Tomas Gavenciak <gavento@ucw.cz>
+# 2011 - Cyril Hrubis <metan@ucw.cz>
 #
 # Every call to PixelType defines one new GP_PixelType, order defines 
 # the numbering. Undefined type is defined automatically.
@@ -19,28 +20,28 @@
 #
 
 PixelType(name='RGBx8888', size=32, chanslist=[
-    ('R', 0, 8),
+    ('R', 16, 8),
     ('G', 8, 8),
-    ('B', 16, 8)])
+    ('B', 0, 8)])
 
 
 PixelType(name='RGBA8888', size=32, chanslist=[
-    ('R', 0, 8),
-    ('G', 8, 8),
-    ('B', 16, 8),
-    ('A', 24, 8)])
+    ('R', 24, 8),
+    ('G', 16, 8),
+    ('B', 8, 8),
+    ('A', 0, 8)])
 
 
 PixelType(name='RGB888', size=24, chanslist=[
-    ('R', 0, 8),
+    ('R', 16, 8),
     ('G', 8, 8),
-    ('B', 16, 8)])
+    ('B', 0, 8)])
 
 
 PixelType(name='RGB565', size=16, chanslist=[
-    ('R', 0, 5),
+    ('R', 11, 5),
     ('G', 5, 6),
-    ('B', 11, 5)])
+    ('B', 0, 5)])
 
 #
 # Palette types
