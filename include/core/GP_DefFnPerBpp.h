@@ -51,4 +51,25 @@
 	GP_DEF_FN_FOR_BPP(fname, MACRO_NAME, fdraw, 24BPP)   \
 	GP_DEF_FN_FOR_BPP(fname, MACRO_NAME, fdraw, 32BPP)   \
 
+/*
+ * Dtto for filters.
+ *
+ * Filter is functions that works on Context per pixel.
+ */
+#define GP_DEF_FFN_FOR_BPP(fname, MACRO_NAME, bpp) \
+	MACRO_NAME(fname##_##bpp, GP_Context *, GP_Pixel, \
+	           GP_PutPixel_Raw_##bpp, GP_GetPixel_Raw_##bpp)
+
+#define GP_DEF_FFN_PER_BPP(fname, MACRO_NAME) \
+	GP_DEF_FFN_FOR_BPP(fname, MACRO_NAME, 1BPP_LE) \
+	GP_DEF_FFN_FOR_BPP(fname, MACRO_NAME, 1BPP_BE) \
+	GP_DEF_FFN_FOR_BPP(fname, MACRO_NAME, 2BPP_LE) \
+	GP_DEF_FFN_FOR_BPP(fname, MACRO_NAME, 2BPP_BE) \
+	GP_DEF_FFN_FOR_BPP(fname, MACRO_NAME, 4BPP_LE) \
+	GP_DEF_FFN_FOR_BPP(fname, MACRO_NAME, 4BPP_BE) \
+	GP_DEF_FFN_FOR_BPP(fname, MACRO_NAME, 8BPP)    \
+	GP_DEF_FFN_FOR_BPP(fname, MACRO_NAME, 16BPP)   \
+	GP_DEF_FFN_FOR_BPP(fname, MACRO_NAME, 24BPP)   \
+	GP_DEF_FFN_FOR_BPP(fname, MACRO_NAME, 32BPP)   \
+
 #endif /* GP_DEF_FN_PER_BPP_H */

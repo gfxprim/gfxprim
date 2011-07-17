@@ -1,3 +1,3 @@
 TOPDIR=..
-SUBDIRS=loaders filters core SDL
+SUBDIRS=filters core SDL #loaders
 include $(TOPDIR)/include.mk

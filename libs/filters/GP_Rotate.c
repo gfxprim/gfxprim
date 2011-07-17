@@ -25,13 +25,13 @@
 
 #include "core/GP_Core.h"
 #include "core/GP_FnPerBpp.h"
+#include "core/GP_DefFnPerBpp.h"
 
 #include "GP_Rotate.h"
 
-#include "algo/GP_MirrorV.algo.h"
-#include "algo/GP_Rotate.algo.h"
-
 #include <string.h>
+
+#include "algo/GP_MirrorV.algo.h"
 
 GP_RetCode GP_MirrorH(GP_Context *context)
 {
@@ -56,63 +56,43 @@ GP_RetCode GP_MirrorH(GP_Context *context)
 	return GP_ESUCCESS;
 }
 
-DEF_MIRRORV_FN(GP_MirrorV1bpp, GP_Context *, GP_Pixel,
-               GP_PUTPIXEL_1BPP, GP_GETPIXEL_1BPP)
-DEF_MIRRORV_FN(GP_MirrorV2bpp, GP_Context *, GP_Pixel,
-               GP_PUTPIXEL_2BPP, GP_GETPIXEL_2BPP)
-DEF_MIRRORV_FN(GP_MirrorV4bpp, GP_Context *, GP_Pixel,
-               GP_PUTPIXEL_4BPP, GP_GETPIXEL_4BPP)
-DEF_MIRRORV_FN(GP_MirrorV8bpp, GP_Context *, GP_Pixel,
-               GP_PUTPIXEL_8BPP, GP_GETPIXEL_8BPP)
-DEF_MIRRORV_FN(GP_MirrorV16bpp, GP_Context *, GP_Pixel,
-               GP_PUTPIXEL_16BPP, GP_GETPIXEL_16BPP)
-DEF_MIRRORV_FN(GP_MirrorV24bpp, GP_Context *, GP_Pixel,
-               GP_PUTPIXEL_24BPP, GP_GETPIXEL_24BPP)
-DEF_MIRRORV_FN(GP_MirrorV32bpp, GP_Context *, GP_Pixel,
-               GP_PUTPIXEL_32BPP, GP_GETPIXEL_32BPP)
+/* Generate mirror functions per BPP */
+GP_DEF_FFN_PER_BPP(GP_MirrorV, DEF_MIRRORV_FN)
 
 GP_RetCode GP_MirrorV(GP_Context *context)
 {
 	if (context == NULL)
 		return GP_ENULLPTR;
 
-	GP_FN_PER_BPP(GP_MirrorV, context->bpp, context);
+	GP_FN_PER_BPP_CONTEXT(GP_MirrorV, context, context);
 
 	return GP_ESUCCESS;
 }
 
-DEF_ROTATECW_FN(GP_RotateCW1bpp, GP_Context *, GP_PUTPIXEL_1BPP, GP_GETPIXEL_1BPP)
-DEF_ROTATECW_FN(GP_RotateCW2bpp, GP_Context *, GP_PUTPIXEL_2BPP, GP_GETPIXEL_2BPP)
-DEF_ROTATECW_FN(GP_RotateCW4bpp, GP_Context *, GP_PUTPIXEL_4BPP, GP_GETPIXEL_4BPP)
-DEF_ROTATECW_FN(GP_RotateCW8bpp, GP_Context *, GP_PUTPIXEL_8BPP, GP_GETPIXEL_8BPP)
-DEF_ROTATECW_FN(GP_RotateCW16bpp, GP_Context *, GP_PUTPIXEL_16BPP, GP_GETPIXEL_16BPP)
-DEF_ROTATECW_FN(GP_RotateCW24bpp, GP_Context *, GP_PUTPIXEL_24BPP, GP_GETPIXEL_24BPP)
-DEF_ROTATECW_FN(GP_RotateCW32bpp, GP_Context *, GP_PUTPIXEL_32BPP, GP_GETPIXEL_32BPP)
+#include "algo/GP_Rotate.algo.h"
+
+/* Generate Rotate functions per BPP */
+GP_DEF_FFN_PER_BPP(GP_RotateCW, DEF_ROTATECW_FN)
 
 GP_RetCode GP_RotateCW(GP_Context *context)
 {
 	if (context == NULL)
 		return GP_ENULLPTR;
 
-	GP_FN_RET_PER_BPP(GP_RotateCW, context->bpp, context);
+	GP_FN_RET_PER_BPP_CONTEXT(GP_RotateCW, context, context);
 
 	return GP_ENOIMPL;
 }
 
-DEF_ROTATECCW_FN(GP_RotateCCW1bpp, GP_Context *, GP_PUTPIXEL_1BPP, GP_GETPIXEL_1BPP)
-DEF_ROTATECCW_FN(GP_RotateCCW2bpp, GP_Context *, GP_PUTPIXEL_2BPP, GP_GETPIXEL_2BPP)
-DEF_ROTATECCW_FN(GP_RotateCCW4bpp, GP_Context *, GP_PUTPIXEL_4BPP, GP_GETPIXEL_4BPP)
-DEF_ROTATECCW_FN(GP_RotateCCW8bpp, GP_Context *, GP_PUTPIXEL_8BPP, GP_GETPIXEL_8BPP)
-DEF_ROTATECCW_FN(GP_RotateCCW16bpp, GP_Context *, GP_PUTPIXEL_16BPP, GP_GETPIXEL_16BPP)
-DEF_ROTATECCW_FN(GP_RotateCCW24bpp, GP_Context *, GP_PUTPIXEL_24BPP, GP_GETPIXEL_24BPP)
-DEF_ROTATECCW_FN(GP_RotateCCW32bpp, GP_Context *, GP_PUTPIXEL_32BPP, GP_GETPIXEL_32BPP)
+/* Generate Rotate functions per BPP */
+GP_DEF_FFN_PER_BPP(GP_RotateCCW, DEF_ROTATECCW_FN)
 
 GP_RetCode GP_RotateCCW(GP_Context *context)
 {
 	if (context == NULL)
 		return GP_ENULLPTR;
 
-	GP_FN_RET_PER_BPP(GP_RotateCCW, context->bpp, context);
+	GP_FN_RET_PER_BPP_CONTEXT(GP_RotateCCW, context, context);
 
 	return GP_ENOIMPL;
 }

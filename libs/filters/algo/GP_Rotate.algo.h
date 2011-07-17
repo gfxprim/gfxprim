@@ -27,7 +27,7 @@
 #include "core/GP_Common.h"
 #include "core/GP_Context.h"
 
-#define DEF_ROTATECW_FN(FN_NAME, CONTEXT_T, PUTPIXEL, GETPIXEL) \
+#define DEF_ROTATECW_FN(FN_NAME, CONTEXT_T, PIXEL_T, PUTPIXEL, GETPIXEL) \
 GP_RetCode FN_NAME(CONTEXT_T context) \
 { \
 	uint32_t x, y; \
@@ -58,7 +58,7 @@ GP_RetCode FN_NAME(CONTEXT_T context) \
 	return GP_ESUCCESS; \
 }
 
-#define DEF_ROTATECCW_FN(FN_NAME, CONTEXT_T, PUTPIXEL, GETPIXEL) \
+#define DEF_ROTATECCW_FN(FN_NAME, CONTEXT_T, PIXEL_T, PUTPIXEL, GETPIXEL) \
 GP_RetCode FN_NAME(CONTEXT_T context) \
 { \
 	uint32_t x, y; \
