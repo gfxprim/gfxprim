@@ -81,20 +81,20 @@ void GP_TFillCircle(GP_Context *context, GP_Coord xcenter, GP_Coord ycenter,
 GP_DEF_FILL_FN_PER_BPP(GP_FillRing, DEF_FILLRING_FN)
 
 void GP_FillRing(GP_Context *context, GP_Coord xcenter, GP_Coord ycenter,
-                   GP_Size outer_r, GP_Size inner_r, GP_Pixel pixel)
+                   GP_Size r1, GP_Size r2, GP_Pixel pixel)
 {
 	GP_CHECK_CONTEXT(context);
 
 	GP_FN_PER_BPP_CONTEXT(GP_FillRing, context, context,
-	                      xcenter, ycenter, outer_r, inner_r, pixel);
+	                      xcenter, ycenter, r1, r2, pixel);
 }
 
 void GP_TFillRing(GP_Context *context, GP_Coord xcenter, GP_Coord ycenter,
-                    GP_Size outer_r, GP_Size inner_r, GP_Pixel pixel)
+                    GP_Size r1, GP_Size r2, GP_Pixel pixel)
 {
 	GP_CHECK_CONTEXT(context);
 	
 	GP_TRANSFORM_POINT(context, xcenter, ycenter);
 	
-	GP_FillRing(context, xcenter, ycenter, outer_r, inner_r, pixel);
+	GP_FillRing(context, xcenter, ycenter, r1, r2, pixel);
 }
