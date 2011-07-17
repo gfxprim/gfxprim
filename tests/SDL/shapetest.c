@@ -164,12 +164,11 @@ void draw_testing_ring(int x, int y, int xradius,
 		GP_TCircle(&context, x, y, xradius, yellow);
 
 	if (fill) {
-		if (xradius == yradius) {
+		if (xradius == yradius)
 			GP_TFillRing(&context, x, y, xradius, xradius/2, red);
-		} else {
+		else
 			GP_TFillRing(&context, x, y, GP_MAX(xradius, yradius),
 				GP_MIN(xradius, yradius), red);
-		}
 	}
 
 	if (outline == 2)

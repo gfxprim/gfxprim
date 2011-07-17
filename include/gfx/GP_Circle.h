@@ -40,10 +40,10 @@ void GP_FillCircle(GP_Context *context, GP_Coord xcenter, GP_Coord ycenter,
 void GP_TFillCircle(GP_Context *context, GP_Coord xcenter, GP_Coord ycenter,
                     GP_Size r, GP_Pixel pixel);
 
-void GP_FillRing(GP_Context *context, int xcenter, int ycenter,
-                   unsigned int outer_r, unsigned int inner_r, GP_Pixel pixel);
+void GP_FillRing(GP_Context *context, GP_Coord xcenter, GP_Coord ycenter,
+                   GP_Size outer_r, GP_Size inner_r, GP_Pixel pixel);
 
-void GP_TFillRing(GP_Context *context, int xcenter, int ycenter,
-                    unsigned int outer_r, unsigned int inner_r, GP_Pixel pixel);
+void GP_TFillRing(GP_Context *context, GP_Coord xcenter, GP_Coord ycenter,
+                    GP_Size outer_r, GP_Size inner_r, GP_Pixel pixel);
 
 #endif /* GP_CIRCLE_H */
