@@ -97,20 +97,20 @@ DEF_FILLRING_FN(GP_FillRing24bpp, GP_Context *, GP_Pixel, GP_HLine24bpp)
 DEF_FILLRING_FN(GP_FillRing32bpp, GP_Context *, GP_Pixel, GP_HLine32bpp)
 
 void GP_FillRing(GP_Context *context, int xcenter, int ycenter,
-                   unsigned int outer_r, unsigned int inner_r, GP_Pixel pixel)
+                   unsigned int r1, unsigned int r2, GP_Pixel pixel)
 {
 	GP_CHECK_CONTEXT(context);
 
 	GP_FN_PER_BPP(GP_FillRing, context->bpp, context,
-	              xcenter, ycenter, outer_r, inner_r, pixel);
+	              xcenter, ycenter, r1, r2, pixel);
 }
 
 void GP_TFillRing(GP_Context *context, int xcenter, int ycenter,
-                    unsigned int outer_r, unsigned int inner_r, GP_Pixel pixel)
+                    unsigned int r1, unsigned int r2, GP_Pixel pixel)
 {
 	GP_CHECK_CONTEXT(context);
 	
 	GP_TRANSFORM_POINT(context, xcenter, ycenter);
 	
-	GP_FillRing(context, xcenter, ycenter, outer_r, inner_r, pixel);
+	GP_FillRing(context, xcenter, ycenter, r1, r2, pixel);
 }

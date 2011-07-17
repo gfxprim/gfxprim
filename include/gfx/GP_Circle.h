@@ -41,9 +41,9 @@ void GP_TFillCircle(GP_Context *context, int xcenter, int ycenter,
                     unsigned int r, GP_Pixel pixel);
 
 void GP_FillRing(GP_Context *context, int xcenter, int ycenter,
-                   unsigned int outer_r, unsigned int inner_r, GP_Pixel pixel);
+                   unsigned int r1, unsigned int r2, GP_Pixel pixel);
 
 void GP_TFillRing(GP_Context *context, int xcenter, int ycenter,
-                    unsigned int outer_r, unsigned int inner_r, GP_Pixel pixel);
+                    unsigned int r1, unsigned int r2, GP_Pixel pixel);
 
 #endif /* GP_CIRCLE_H */

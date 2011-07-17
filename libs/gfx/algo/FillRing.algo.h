@@ -37,10 +37,10 @@
  */
 #define DEF_FILLRING_FN(FN_NAME, CONTEXT_T, PIXVAL_T, HLINE) \
 void FN_NAME(CONTEXT_T context, int xcenter, int ycenter, \
-	unsigned int outer_r, unsigned int inner_r, PIXVAL_T pixval) \
+	unsigned int r1, unsigned int r2, PIXVAL_T pixval) \
 { \
-	if (inner_r >= outer_r) return; \
-\
+	int outer_r = (int) GP_MAX(r1, r2); \
+	int inner_r = (int) GP_MIN(r1, r2); \
 	int outer_x = 0; \
 	int inner_x = 0; \
 	int y; \
@@ -54,17 +54,17 @@ void FN_NAME(CONTEXT_T context, int xcenter, int ycenter, \
 		} \
 		outer_error += -2*y + 1; \
 \
-		if (y < (int) inner_r && y > -((int) inner_r)) { \
+		if (y <= (int) inner_r && y >= -((int) inner_r)) { \
 			while (inner_error < 0) { \
 				inner_error += 2*inner_x + 1; \
 				inner_x++; \
 			} \
 			inner_error += -2*y + 1; \
 \
-			HLINE(context, xcenter - outer_x + 1, xcenter - inner_x - 1, ycenter - y, pixval); \
-			HLINE(context, xcenter + inner_x + 1, xcenter + outer_x - 1, ycenter - y, pixval); \
-			HLINE(context, xcenter - outer_x + 1, xcenter - inner_x - 1, ycenter + y, pixval); \
-			HLINE(context, xcenter + inner_x + 1, xcenter + outer_x - 1, ycenter + y, pixval); \
+			HLINE(context, xcenter - outer_x + 1, xcenter - inner_x + 1, ycenter - y, pixval); \
+			HLINE(context, xcenter + inner_x - 1, xcenter + outer_x - 1, ycenter - y, pixval); \
+			HLINE(context, xcenter - outer_x + 1, xcenter - inner_x + 1, ycenter + y, pixval); \
+			HLINE(context, xcenter + inner_x - 1, xcenter + outer_x - 1, ycenter + y, pixval); \
 		} else { \
 			HLINE(context, xcenter - outer_x + 1, xcenter + outer_x - 1, ycenter-y, pixval); \
 			HLINE(context, xcenter - outer_x + 1, xcenter + outer_x - 1, ycenter+y, pixval); \
