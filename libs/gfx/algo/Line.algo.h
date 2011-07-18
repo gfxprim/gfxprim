@@ -66,10 +66,12 @@ void FN_NAME(CONTEXT_T context, int x0, int y0, int x1, int y1, \
 	int error = deltax / 2; \
 	int y = y0, x; \
 	int ystep = (y0 < y1) ? 1 : -1; \
-	for (x = x0; x <= x1; x++) { \
+	for (x = x0; x < x1; x++) { \
 \
-		if (steep) PUTPIXEL(context, y, x, pixval); \
-		else PUTPIXEL(context, x, y, pixval); \
+		if (steep) \
+			PUTPIXEL(context, y, x, pixval); \
+		else \
+			PUTPIXEL(context, x, y, pixval); \
 \
 		error = error - deltay; \
 		if (error < 0) { \
