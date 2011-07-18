@@ -19,7 +19,7 @@
  * Copyright (C) 2009-2010 Jiri "BlueBear" Dluhos                            *
  *                         <jiri.bluebear.dluhos@gmail.com>                  *
  *                                                                           *
- * Copyright (C) 2009-2010 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2011 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  * Copyright (C) 2011      Tomas Gavenciak <gavento@ucw.cz>                  *
  *                                                                           *
@@ -52,7 +52,7 @@ struct GP_Context;
  * GP_Pixel is just uint32_t
  */
 typedef uint32_t GP_Pixel;
-#define GP_PIXEL_BITS 32
+#define GP_PIXEL_BITS (sizeof(GP_Pixel) * 8)
 
 /* Generated header */
 #include "GP_Pixel.gen.h"
@@ -81,9 +81,9 @@ typedef enum {
  */
 
 typedef struct {
-  char name[8];           /* Channel name */
-  uint8_t offset;             /* Offset in bits */
-  uint8_t size;               /* Bit-size */
+	char name[8];    /* Channel name */
+	uint8_t offset;  /* Offset in bits */
+	uint8_t size;    /* Bit-size */
 } GP_PixelTypeChannel;
 
 /*
@@ -99,15 +99,15 @@ typedef struct {
  */
 
 typedef struct {
-  GP_PixelType type;        /* Number of the type */
-  const char name[16];      /* Name */
-  uint8_t size;	            /* Size in bits */
-  GP_BIT_ENDIAN bit_endian; /* Order of pixels in a byte */
-  uint8_t numchannels;      /* Number of channels */
-  /* String describing the bit-representaton (as in "RRRRRGGGGGGBBBBB")*/
-  const char bitmap[sizeof(GP_Pixel) * 8 + 1];  
-  /* Individual channels */
-  const GP_PixelTypeChannel channels[GP_PIXELTYPE_MAX_CHANNELS]; 
+	GP_PixelType type;        /* Number of the type */
+	const char name[16];      /* Name */
+	uint8_t size;	          /* Size in bits */
+	GP_BIT_ENDIAN bit_endian; /* Order of pixels in a byte */
+	uint8_t numchannels;      /* Number of channels */
+	/* String describing the bit-representaton (as in "RRRRRGGGGGGBBBBB")*/
+	const char bitmap[sizeof(GP_Pixel) * 8 + 1];  
+	/* Individual channels */
+	const GP_PixelTypeChannel channels[GP_PIXELTYPE_MAX_CHANNELS]; 
 } GP_PixelTypeDescription;
 
 /*

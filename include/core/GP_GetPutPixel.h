@@ -57,11 +57,10 @@ static inline GP_Pixel GP_GetPixel_Raw(const GP_Context *context, int x, int y)
  */
 void GP_PutPixel(GP_Context *context, int x, int y, GP_Pixel p);
 
+//TODO: This is the same as GP_PutPixel
 static inline void GP_TPutPixel(GP_Context *context, GP_Coord x, GP_Coord y,
                                 GP_Pixel p)
 {
-	GP_TRANSFORM_POINT(context, x, y);
-
 	GP_PutPixel(context, x, y, p);
 }
 

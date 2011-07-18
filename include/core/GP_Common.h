@@ -164,7 +164,7 @@
 #define GP_SET_BITS(offset, count, dest, val) do { \
 		GP_CLEAR_BITS(offset, count, dest); \
 		GP_SET_BITS_OR(offset, dest, val); \
-	} while (0)
+} while (0)
 
 /* 
  * Debugging version, evaluates args twice.
@@ -172,7 +172,7 @@
 #define GP_SET_BITS_DBG(offset, count, dest, val) do { \
 		GP_SET_BITS(offset, count, dest, val); \
 		printf("SET_BITS(%d, %d, p, %d)\n", offset, count, val); \
-	} while (0)
+} while (0)
 
 
 /* Determines the sign of the integer value; it is +1 if value is positive,
