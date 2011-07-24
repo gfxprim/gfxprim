@@ -16,10 +16,10 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2010 Jiri "BlueBear" Dluhos                            *
+ * Copyright (C) 2009-2011 Jiri "BlueBear" Dluhos                            *
  *                         <jiri.bluebear.dluhos@gmail.com>                  *
  *                                                                           *
- * Copyright (C) 2009-2010 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2011 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
@@ -28,22 +28,10 @@
 
 #include "core/GP_Context.h"
 
-void GP_Line8bpp(GP_Context *context, GP_Coord x0, GP_Coord y0,
-                 GP_Coord x1, GP_Coord y1, GP_Pixel pixel);
-
-void GP_Line16bpp(GP_Context *context, GP_Coord x0, GP_Coord y0,
-                  GP_Coord x1, GP_Coord y1, GP_Pixel pixel);
-
-void GP_Line24bpp(GP_Context *context, GP_Coord x0, GP_Coord y0,
-                  GP_Coord x1, GP_Coord y1, GP_Pixel pixel);
-
-void GP_Line32bpp(GP_Context *context, GP_Coord x0, GP_Coord y0,
-                  GP_Coord x1, GP_Coord y1, GP_Pixel pixel);
-
 void GP_Line(GP_Context *context, GP_Coord x0, GP_Coord y0,
-             GP_Coord x1, GP_Coord y1, GP_Pixel pixel);
-
-void GP_TLine(GP_Context *context, GP_Coord x0, GP_Coord y0,
               GP_Coord x1, GP_Coord y1, GP_Pixel pixel);
+
+void GP_Line_Raw(GP_Context *context, GP_Coord x0, GP_Coord y0,
+                 GP_Coord x1, GP_Coord y1, GP_Pixel pixel);
 
 #endif /* GP_LINE_H */

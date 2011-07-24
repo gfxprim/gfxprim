@@ -89,9 +89,8 @@ void draw_pixels(void)
 
 	/* Draw some pixels (exact number is not important). */
 	int i;
-	for (i = 0; i < 30; i++) {
+	for (i = 0; i < 30; i++)
 		draw_pixel();
-	}
 
 	SDL_UnlockSurface(display);
 }
@@ -101,15 +100,14 @@ void event_loop(void)
 	SDL_Event event;
 
 	while (SDL_WaitEvent(&event) > 0) {
-
 		switch (event.type) {
-			case SDL_USEREVENT:
-				draw_pixels();
-				SDL_Flip(display);
-			break;
-			case SDL_KEYDOWN:
-			case SDL_QUIT:
-				return;
+		case SDL_USEREVENT:
+			draw_pixels();
+			SDL_Flip(display);
+		break;
+		case SDL_KEYDOWN:
+		case SDL_QUIT:
+			return;
 		}
 	}
 }
@@ -122,8 +120,7 @@ int main(int argc, char **argv)
 	for (i = 1; i < argc; i++) {
 		if (strcmp(argv[i], "-16") == 0) {
 			display_bpp = 16;
-		}
-		else if (strcmp(argv[i], "-24") == 0) {
+		} else if (strcmp(argv[i], "-24") == 0) {
 			display_bpp = 24;
 		}
 	}

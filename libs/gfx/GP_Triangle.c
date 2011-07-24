@@ -16,29 +16,27 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2010 Jiri "BlueBear" Dluhos                            *
+ * Copyright (C) 2009-2011 Jiri "BlueBear" Dluhos                            *
  *                         <jiri.bluebear.dluhos@gmail.com>                  *
  *                                                                           *
- * Copyright (C) 2009-2010 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2011 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
 #include "GP_Gfx.h"
 
-void GP_Triangle(GP_Context *context, GP_Coord x0, GP_Coord y0,
-                 GP_Coord x1, GP_Coord y1,
-		 GP_Coord x2, GP_Coord y2, GP_Pixel pixel)
+void GP_Triangle_Raw(GP_Context *context, GP_Coord x0, GP_Coord y0,
+                     GP_Coord x1, GP_Coord y1,
+                     GP_Coord x2, GP_Coord y2, GP_Pixel pixel)
 {
-	GP_CHECK_CONTEXT(context);
-
-	GP_Line(context, x0, y0, x1, y1, pixel);
-	GP_Line(context, x0, y0, x2, y2, pixel);
-	GP_Line(context, x1, y1, x2, y2, pixel);
+	GP_Line_Raw(context, x0, y0, x1, y1, pixel);
+	GP_Line_Raw(context, x0, y0, x2, y2, pixel);
+	GP_Line_Raw(context, x1, y1, x2, y2, pixel);
 }
 
-void GP_TTriangle(GP_Context *context, GP_Coord x0, GP_Coord y0,
-                  GP_Coord x1, GP_Coord y1,
-                  GP_Coord x2, GP_Coord y2, GP_Pixel pixel)
+void GP_Triangle(GP_Context *context, GP_Coord x0, GP_Coord y0,
+                 GP_Coord x1, GP_Coord y1,
+                 GP_Coord x2, GP_Coord y2, GP_Pixel pixel)
 {
 	GP_CHECK_CONTEXT(context);
 	
@@ -46,29 +44,27 @@ void GP_TTriangle(GP_Context *context, GP_Coord x0, GP_Coord y0,
 	GP_TRANSFORM_POINT(context, x1, y1);
 	GP_TRANSFORM_POINT(context, x2, y2);
 
-	GP_Triangle(context, x0, y0, x1, y1, x2, y2, pixel);
+	GP_Triangle_Raw(context, x0, y0, x1, y1, x2, y2, pixel);
 }
 
-void GP_FillTriangle(GP_Context *context, GP_Coord x0, GP_Coord y0,
+void GP_FillTriangle_Raw(GP_Context *context, GP_Coord x0, GP_Coord y0,
+                         GP_Coord x1, GP_Coord y1,
+                         GP_Coord x2, GP_Coord y2, GP_Pixel pixel)
+{
+	const GP_Coord coords[6] = {x0, y0, x1, y1, x2, y2};
+
+	GP_FillPolygon_Raw(context, 3, coords, pixel);
+}
+
+void GP_FillTriangle(GP_Context* context, GP_Coord x0, GP_Coord y0,
                      GP_Coord x1, GP_Coord y1,
                      GP_Coord x2, GP_Coord y2, GP_Pixel pixel)
 {
 	GP_CHECK_CONTEXT(context);
 
-	const GP_Coord coords[6] = { x0, y0, x1, y1, x2, y2 };
-	GP_FillPolygon(context, 3, coords, pixel);
-}
-
-void GP_TFillTriangle(GP_Context* context, GP_Coord x0, GP_Coord y0,
-                      GP_Coord x1, GP_Coord y1,
-                      GP_Coord x2, GP_Coord y2, GP_Pixel pixel)
-{
-	GP_CHECK_CONTEXT(context);
-	
 	GP_TRANSFORM_POINT(context, x0, y0);
 	GP_TRANSFORM_POINT(context, x1, y1);
 	GP_TRANSFORM_POINT(context, x2, y2);
-	
-	const GP_Coord coords[6] = { x0, y0, x1, y1, x2, y2 };
-	GP_FillPolygon(context, 3, coords, pixel);
+
+	GP_FillTriangle_Raw(context, x0, y0, x1, y1, x2, y2, pixel);
 }

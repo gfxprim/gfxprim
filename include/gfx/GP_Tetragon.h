@@ -16,10 +16,10 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2010 Jiri "BlueBear" Dluhos                            *
+ * Copyright (C) 2009-2011 Jiri "BlueBear" Dluhos                            *
  *                         <jiri.bluebear.dluhos@gmail.com>                  *
  *                                                                           *
- * Copyright (C) 2009-2010 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2011 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
@@ -28,20 +28,24 @@
 
 #include "core/GP_Context.h"
 
+/* Tetragon */
+
 void GP_Tetragon(GP_Context *context, GP_Coord x0, GP_Coord y0,
                  GP_Coord x1, GP_Coord y1, GP_Coord x2, GP_Coord y2,
-		 GP_Coord x3, GP_Coord y3, GP_Pixel pixel);
+                 GP_Coord x3, GP_Coord y3, GP_Pixel pixel);
 
-void GP_TTetragon(GP_Context *context, GP_Coord x0, GP_Coord y0,
-                  GP_Coord x1, GP_Coord y1, GP_Coord x2, GP_Coord y2,
-		  GP_Coord x3, GP_Coord y3, GP_Pixel pixel);
+void GP_Tetragon_Raw(GP_Context *context, GP_Coord x0, GP_Coord y0,
+                     GP_Coord x1, GP_Coord y1, GP_Coord x2, GP_Coord y2,
+                     GP_Coord x3, GP_Coord y3, GP_Pixel pixel);
+
+/* Filled Tetragon */
 
 void GP_FillTetragon(GP_Context *context, GP_Coord x0, GP_Coord y0,
                      GP_Coord x1, GP_Coord y1, GP_Coord x2, GP_Coord y2,
 		     GP_Coord x3, GP_Coord y3, GP_Pixel pixel);
 
-void GP_TFillTetragon(GP_Context *context, GP_Coord x0, GP_Coord y0,
-                      GP_Coord x1, GP_Coord y1, GP_Coord x2, GP_Coord y2,
-		      GP_Coord x3, GP_Coord y3, GP_Pixel pixel);
+void GP_FillTetragon_Raw(GP_Context *context, GP_Coord x0, GP_Coord y0,
+                         GP_Coord x1, GP_Coord y1, GP_Coord x2, GP_Coord y2,
+                         GP_Coord x3, GP_Coord y3, GP_Pixel pixel);
 
 #endif /* GP_TETRAGON_H */

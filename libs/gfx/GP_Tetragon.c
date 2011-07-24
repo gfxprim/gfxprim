@@ -16,30 +16,30 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2010 Jiri "BlueBear" Dluhos                            *
+ * Copyright (C) 2009-2011 Jiri "BlueBear" Dluhos                            *
  *                         <jiri.bluebear.dluhos@gmail.com>                  *
  *                                                                           *
- * Copyright (C) 2009-2010 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2011 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
 #include "GP_Gfx.h"
 
+void GP_Tetragon_Raw(GP_Context *context, GP_Coord x0, GP_Coord y0,
+                     GP_Coord x1, GP_Coord y1, GP_Coord x2, GP_Coord y2,
+                     GP_Coord x3, GP_Coord y3, GP_Pixel pixel)
+{
+	GP_CHECK_CONTEXT(context);
+
+	GP_Line_Raw(context, x0, y0, x1, y1, pixel);
+	GP_Line_Raw(context, x1, y1, x2, y2, pixel);
+	GP_Line_Raw(context, x2, y2, x3, y3, pixel);
+	GP_Line_Raw(context, x3, y3, x0, y0, pixel);
+}
+
 void GP_Tetragon(GP_Context *context, GP_Coord x0, GP_Coord y0,
                  GP_Coord x1, GP_Coord y1, GP_Coord x2, GP_Coord y2,
-		 GP_Coord x3, GP_Coord y3, GP_Pixel pixel)
-{
-	GP_CHECK_CONTEXT(context);
-
-	GP_Line(context, x0, y0, x1, y1, pixel);
-	GP_Line(context, x1, y1, x2, y2, pixel);
-	GP_Line(context, x2, y2, x3, y3, pixel);
-	GP_Line(context, x3, y3, x0, y0, pixel);
-}
-
-void GP_TTetragon(GP_Context *context, GP_Coord x0, GP_Coord y0,
-                  GP_Coord x1, GP_Coord y1, GP_Coord x2, GP_Coord y2,
-		  GP_Coord x3, GP_Coord y3, GP_Pixel pixel)
+                 GP_Coord x3, GP_Coord y3, GP_Pixel pixel)
 {
 	GP_CHECK_CONTEXT(context);
 	
@@ -48,22 +48,21 @@ void GP_TTetragon(GP_Context *context, GP_Coord x0, GP_Coord y0,
 	GP_TRANSFORM_POINT(context, x2, y2);
 	GP_TRANSFORM_POINT(context, x3, y3);
 
-	GP_Tetragon(context, x0, y0, x1, y1, x2, y2, x3, y3, pixel);
+	GP_Tetragon_Raw(context, x0, y0, x1, y1, x2, y2, x3, y3, pixel);
 }
 
-void GP_FillTetragon(GP_Context *context, GP_Coord x0, GP_Coord y0,
+void GP_FillTetragon_Raw(GP_Context *context, GP_Coord x0, GP_Coord y0,
+                         GP_Coord x1, GP_Coord y1, GP_Coord x2, GP_Coord y2,
+                         GP_Coord x3, GP_Coord y3, GP_Pixel pixel)
+{
+	const GP_Coord xy[8] = {x0, y0, x1, y1, x2, y2, x3, y3};
+	
+	GP_FillPolygon_Raw(context, 4, xy, pixel);
+}
+
+void GP_FillTetragon(GP_Context* context, GP_Coord x0, GP_Coord y0,
                      GP_Coord x1, GP_Coord y1, GP_Coord x2, GP_Coord y2,
-		     GP_Coord x3, GP_Coord y3, GP_Pixel pixel)
-{
-	GP_CHECK_CONTEXT(context);
-
-	const GP_Coord xy[8] = { x0, y0, x1, y1, x2, y2, x3, y3 };
-	GP_FillPolygon(context, 4, xy, pixel);
-}
-
-void GP_TFillTetragon(GP_Context* context, GP_Coord x0, GP_Coord y0,
-                      GP_Coord x1, GP_Coord y1, GP_Coord x2, GP_Coord y2,
-		      GP_Coord x3, GP_Coord y3, GP_Pixel pixel)
+                     GP_Coord x3, GP_Coord y3, GP_Pixel pixel)
 {
 	GP_CHECK_CONTEXT(context);
 	
@@ -72,6 +71,7 @@ void GP_TFillTetragon(GP_Context* context, GP_Coord x0, GP_Coord y0,
 	GP_TRANSFORM_POINT(context, x2, y2);
 	GP_TRANSFORM_POINT(context, x3, y3);
 
-	const GP_Coord xy[8] = { x0, y0, x1, y1, x2, y2, x3, y3 };
-	GP_FillPolygon(context, 4, xy, pixel);
+	const GP_Coord xy[8] = {x0, y0, x1, y1, x2, y2, x3, y3};
+
+	GP_FillPolygon_Raw(context, 4, xy, pixel);
 }

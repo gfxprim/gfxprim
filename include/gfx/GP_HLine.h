@@ -16,10 +16,10 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2010 Jiri "BlueBear" Dluhos                            *
+ * Copyright (C) 2009-2011 Jiri "BlueBear" Dluhos                            *
  *                         <jiri.bluebear.dluhos@gmail.com>                  *
  *                                                                           *
- * Copyright (C) 2009-2010 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2011 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
@@ -28,59 +28,63 @@
 
 #include "core/GP_Context.h"
 
-void GP_HLine_1BPP_LE(GP_Context *context, GP_Coord x0, GP_Coord x1,
-                      GP_Coord y, GP_Pixel pixel);
+/* Raw per BPP HLines */
 
-void GP_HLine_1BPP_BE(GP_Context *context, GP_Coord x0, GP_Coord x1,
-                      GP_Coord y, GP_Pixel pixel);
+void GP_HLine_Raw_1BPP_LE(GP_Context *context, GP_Coord x0, GP_Coord x1,
+                          GP_Coord y, GP_Pixel pixel);
 
-void GP_HLine_2BPP_LE(GP_Context *context, GP_Coord x0, GP_Coord x1,
-                      GP_Coord y, GP_Pixel pixel);
+void GP_HLine_Raw_1BPP_BE(GP_Context *context, GP_Coord x0, GP_Coord x1,
+                          GP_Coord y, GP_Pixel pixel);
 
-void GP_HLine_2BPP_BE(GP_Context *context, GP_Coord x0, GP_Coord x1,
-                      GP_Coord y, GP_Pixel pixel);
+void GP_HLine_Raw_2BPP_LE(GP_Context *context, GP_Coord x0, GP_Coord x1,
+                          GP_Coord y, GP_Pixel pixel);
 
-void GP_HLine_4BPP_LE(GP_Context *context, GP_Coord x0, GP_Coord x1,
-                      GP_Coord y, GP_Pixel pixel);
+void GP_HLine_Raw_2BPP_BE(GP_Context *context, GP_Coord x0, GP_Coord x1,
+                          GP_Coord y, GP_Pixel pixel);
 
-void GP_HLine_4BPP_BE(GP_Context *context, GP_Coord x0, GP_Coord x1,
-                      GP_Coord y, GP_Pixel pixel);
+void GP_HLine_Raw_4BPP_LE(GP_Context *context, GP_Coord x0, GP_Coord x1,
+                          GP_Coord y, GP_Pixel pixel);
 
-void GP_HLine_8BPP(GP_Context *context, GP_Coord x0, GP_Coord x1,
-                   GP_Coord y, GP_Pixel pixel);
+void GP_HLine_Raw_4BPP_BE(GP_Context *context, GP_Coord x0, GP_Coord x1,
+                          GP_Coord y, GP_Pixel pixel);
 
-void GP_HLine_16BPP(GP_Context *context, GP_Coord x0, GP_Coord x1,
-                    GP_Coord y, GP_Pixel pixel);
+void GP_HLine_Raw_8BPP(GP_Context *context, GP_Coord x0, GP_Coord x1,
+                       GP_Coord y, GP_Pixel pixel);
 
-void GP_HLine_24BPP(GP_Context *context, GP_Coord x0, GP_Coord x1,
-                    GP_Coord y, GP_Pixel pixel);
+void GP_HLine_Raw_16BPP(GP_Context *context, GP_Coord x0, GP_Coord x1,
+                        GP_Coord y, GP_Pixel pixel);
 
-void GP_HLine_32BPP(GP_Context *context, GP_Coord x0, GP_Coord x1,
-                    GP_Coord y, GP_Pixel pixel);
+void GP_HLine_Raw_24BPP(GP_Context *context, GP_Coord x0, GP_Coord x1,
+                        GP_Coord y, GP_Pixel pixel);
 
-void GP_HLineXXY(GP_Context *context, GP_Coord x0, GP_Coord x1,
-                 GP_Coord y, GP_Pixel pixel);
+void GP_HLine_Raw_32BPP(GP_Context *context, GP_Coord x0, GP_Coord x1,
+                        GP_Coord y, GP_Pixel pixel);
+
+/* Generic HLines */
+
+void GP_HLineXXY(GP_Context *context, GP_Coord x0, GP_Coord x1, GP_Coord y,
+                 GP_Pixel pixel);
+
+void GP_HLineXXY_Raw(GP_Context *context, GP_Coord x0, GP_Coord x1,
+                     GP_Coord y, GP_Pixel pixel);
 
 void GP_HLineXYW(GP_Context *context, GP_Coord x, GP_Coord y, GP_Size w,
                  GP_Pixel pixel);
 
-void GP_THLineXXY(GP_Context *context, GP_Coord x0, GP_Coord x1,
-                  GP_Coord y, GP_Pixel pixel);
-
-void GP_THLineXYW(GP_Context *context, GP_Coord x, GP_Coord y, GP_Size w,
-                  GP_Pixel pixel);
+void GP_HLineXYW_Raw(GP_Context *context, GP_Coord x, GP_Coord y, GP_Size w,
+                     GP_Pixel pixel);
 
 /* default argument set is XXY */
+static inline void GP_HLine_Raw(GP_Context *context, GP_Coord x0, GP_Coord x1,
+                                GP_Coord y, GP_Pixel p)
+{
+	GP_HLineXXY_Raw(context, x0, x1, y, p);
+}
+
 static inline void GP_HLine(GP_Context *context, GP_Coord x0, GP_Coord x1,
                             GP_Coord y, GP_Pixel p)
 {
 	GP_HLineXXY(context, x0, x1, y, p);
-}
-
-static inline void GP_THLine(GP_Context *context, GP_Coord x0, GP_Coord x1,
-                             GP_Coord y, GP_Pixel p)
-{
-	GP_THLineXXY(context, x0, x1, y, p);
 }
 
 #endif /* GP_HLINE_H */

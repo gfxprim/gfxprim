@@ -16,10 +16,10 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2010 Jiri "BlueBear" Dluhos                            *
+ * Copyright (C) 2009-2011 Jiri "BlueBear" Dluhos                            *
  *                         <jiri.bluebear.dluhos@gmail.com>                  *
  *                                                                           *
- * Copyright (C) 2009-2010 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2011 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
@@ -28,17 +28,20 @@
 
 #include "core/GP_Context.h"
 
+/* Ellipse */
+
 void GP_Ellipse(GP_Context *context, GP_Coord xcenter, GP_Coord ycenter,
                 GP_Size a, GP_Size b, GP_Pixel pixel);
 
-void GP_TEllipse(GP_Context *context, GP_Coord xcenter, GP_Coord ycenter,
-                 GP_Size a, GP_Size b, GP_Pixel pixel);
+void GP_Ellipse_Raw(GP_Context *context, GP_Coord xcenter, GP_Coord ycenter,
+                    GP_Size a, GP_Size b, GP_Pixel pixel);
+
+/* Filled Ellipse */
 
 void GP_FillEllipse(GP_Context *context, GP_Coord xcenter, GP_Coord ycenter,
                     GP_Size a, GP_Size b, GP_Pixel pixel);
 
-void GP_TFillEllipse(GP_Context *context, GP_Coord xcenter, GP_Coord ycenter,
-                     GP_Size a, GP_Size b, GP_Pixel pixel);
-
+void GP_FillEllipse_Raw(GP_Context *context, GP_Coord xcenter, GP_Coord ycenter,
+                        GP_Size a, GP_Size b, GP_Pixel pixel);
 
 #endif /* GP_ELLIPSE_H */

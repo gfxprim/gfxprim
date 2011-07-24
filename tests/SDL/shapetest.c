@@ -49,7 +49,7 @@ Uint32 timer_callback(__attribute__((unused)) Uint32 interval,
 }
 
 /* Basic colors in display-specific format. */
-GP_Pixel black, white, yellow, green, red, gray, darkgray;
+static GP_Pixel black, white, yellow, green, red, gray, darkgray;
 
 /* Radius of the shape being drawn */
 static int xradius = 5;
@@ -71,7 +71,8 @@ static int show_axes = 1;
 #define SHAPE_RING	3
 #define SHAPE_ELLIPSE	4
 #define SHAPE_RECTANGLE	5
-#define SHAPE_LAST	5
+#define SHAPE_TETRAGON  6
+#define SHAPE_LAST	6
 static int shape = SHAPE_FIRST;
 
 /* Variants in coordinates, if applicable */
@@ -81,12 +82,15 @@ static int variant = 1;
 static int xradius_add = 0;
 static int yradius_add = 0;
 
-/* center of drawing */
-static int center_x = 320;
-static int center_y = 240;
+#define DISPLAY_W 640
+#define DISPLAY_H 480
 
-static int display_w = 640;
-static int display_h = 480;
+static int display_w = DISPLAY_W;
+static int display_h = DISPLAY_H;
+
+/* center of drawing */
+static int center_x = DISPLAY_W/2;
+static int center_y = DISPLAY_H/2;
 
 void draw_testing_triangle(int x, int y, int xradius, int yradius)
 {
@@ -130,68 +134,88 @@ void draw_testing_triangle(int x, int y, int xradius, int yradius)
 	/* draw the three vertices green; they should never be visible
 	 * because the red triangle should cover them; if they are visible,
 	 * it means we don't draw to the end */
-	GP_TPutPixel(&context, x0, y0, green);
-	GP_TPutPixel(&context, x1, y1, green);
-	GP_TPutPixel(&context, x2, y2, green);
+	GP_PutPixel(&context, x0, y0, green);
+	GP_PutPixel(&context, x1, y1, green);
+	GP_PutPixel(&context, x2, y2, green);
 
 	if (outline == 1)
-		GP_TTriangle(&context, x0, y0, x1, y1, x2, y2, yellow);
+		GP_Triangle(&context, x0, y0, x1, y1, x2, y2, yellow);
 
 	if (fill)
-		GP_TFillTriangle(&context, x0, y0, x1, y1, x2, y2, red);
+		GP_FillTriangle(&context, x0, y0, x1, y1, x2, y2, red);
 
 	if (outline == 2)
-		GP_TTriangle(&context, x0, y0, x1, y1, x2, y2, white);
+		GP_Triangle(&context, x0, y0, x1, y1, x2, y2, white);
 }
 
 void draw_testing_circle(int x, int y, int xradius,
 			__attribute__((unused)) int yradius)
 {
 	if (outline == 1)
-		GP_TCircle(&context, x, y, xradius, yellow);
+		GP_Circle(&context, x, y, xradius, yellow);
 
 	if (fill)
-		GP_TFillCircle(&context, x, y, xradius, red);
+		GP_FillCircle(&context, x, y, xradius, red);
 
 	if (outline == 2)
-		GP_TCircle(&context, x, y, xradius, white);
+		GP_Circle(&context, x, y, xradius, white);
 }
 
 void draw_testing_ring(int x, int y, int xradius,
 			__attribute__((unused)) int yradius)
 {
 	if (outline == 1)
-		GP_TCircle(&context, x, y, xradius, yellow);
+		GP_Ring(&context, x, y, xradius, yradius, yellow);
 
 	if (fill)
-		GP_TFillRing(&context, x, y, xradius, yradius, red);
+		GP_FillRing(&context, x, y, xradius, yradius, red);
 
 	if (outline == 2)
-		GP_TCircle(&context, x, y, xradius, white);
+		GP_Ring(&context, x, y, xradius, yradius, white);
 }
 
 void draw_testing_ellipse(int x, int y, int xradius, int yradius)
 {
 	if (outline == 1)
-		GP_TEllipse(&context, x, y, xradius, yradius, yellow);
+		GP_Ellipse(&context, x, y, xradius, yradius, yellow);
 
 	if (fill)
-		GP_TFillEllipse(&context, x, y, xradius, yradius, red);
+		GP_FillEllipse(&context, x, y, xradius, yradius, red);
 
 	if (outline == 2)
-		GP_TEllipse(&context, x, y, xradius, yradius, white);
+		GP_Ellipse(&context, x, y, xradius, yradius, white);
 }
 
 void draw_testing_rectangle(int x, int y, int xradius, int yradius)
 {
+	int x0 = x - xradius, y0 = y - yradius;
+	int x1 = x + xradius, y1 = y + yradius;
+	
 	if (outline == 1)
-		GP_TRect(&context, x - xradius, y - yradius, x + xradius, y + yradius, yellow);
+		GP_Rect(&context, x0, y0, x1, y1, yellow);
 
 	if (fill)
-		GP_TFillRect(&context, x - xradius, y - yradius, x + xradius, y + yradius, red);
+		GP_FillRect(&context, x0, y0, x1, y1, red);
 
 	if (outline == 2)
-		GP_TRect(&context, x - xradius, y - yradius, x + xradius, y + yradius, white);
+		GP_Rect(&context, x0, y0, x1, y1, white);
+}
+
+void draw_testing_tetragon(int x, int y, int xradius, int yradius)
+{
+	int x0 = x - xradius, y0 = y - yradius;
+	int x1 = x + xradius, y1 = y;
+	int x2 = x + xradius, y2 = y + yradius/2;
+	int x3 = x,           y3 = y + yradius;
+
+	if (outline == 1)
+		GP_Tetragon(&context, x0, y0, x1, y1, x2, y2, x3, y3, yellow);
+	
+	if (fill)
+		GP_FillTetragon(&context, x0, y0, x1, y1, x2, y2, x3, y3, red);
+
+	if (outline == 2)
+		GP_Tetragon(&context, x0, y0, x1, y1, x2, y2, x3, y3, white);
 }
 
 void redraw_screen(void)
@@ -211,12 +235,12 @@ void redraw_screen(void)
 
 	/* axes */
 	if (show_axes) {
-		GP_THLine(&context, 0, display_w, center_y, gray);
-		GP_THLine(&context, 0, display_w, center_y-yradius, darkgray);
-		GP_THLine(&context, 0, display_w, center_y+yradius, darkgray);
-		GP_TVLine(&context, center_x, 0, display_h, gray);
-		GP_TVLine(&context, center_x-xradius, 0, display_h, darkgray);
-		GP_TVLine(&context, center_x+xradius, 0, display_h, darkgray);
+		GP_HLine(&context, 0, display_w, center_y, gray);
+		GP_HLine(&context, 0, display_w, center_y-yradius, darkgray);
+		GP_HLine(&context, 0, display_w, center_y+yradius, darkgray);
+		GP_VLine(&context, center_x, 0, display_h, gray);
+		GP_VLine(&context, center_x-xradius, 0, display_h, darkgray);
+		GP_VLine(&context, center_x+xradius, 0, display_h, darkgray);
 	}
 
 	/* the shape */
@@ -242,8 +266,14 @@ void redraw_screen(void)
 		draw_testing_rectangle(center_x, center_y, xradius, yradius);
 		title = "RECTANGLE";
 		break;
+	case SHAPE_TETRAGON:
+		draw_testing_tetragon(center_x, center_y, xradius, yradius);
+		title = "TETRAGON";
+		break;
 	}
-	GP_TText(&context, &style, 16, 16, GP_ALIGN_RIGHT|GP_VALIGN_BELOW, title, white);
+
+	GP_Text(&context, &style, 16, 16, GP_ALIGN_RIGHT|GP_VALIGN_BELOW,
+	        title, white);
 
 	SDL_UnlockSurface(display);
 }
@@ -260,16 +290,20 @@ void event_loop(void)
 		switch (event.type) {
 		case SDL_USEREVENT:
 
-			if (xradius + xradius_add > 1 && xradius + xradius_add < 400)
+			if (xradius + xradius_add > 1 &&
+			    xradius + xradius_add < display_w)
 				xradius += xradius_add;
 			
-			if (yradius + yradius_add > 1 && yradius + yradius_add < 400)
+			if (yradius + yradius_add > 1 &&
+			    yradius + yradius_add < display_h)
 				yradius += yradius_add;
 			
-			if (center_x + xcenter_add > 1 && center_x + xcenter_add < 320)
+			if (center_x + xcenter_add > 1 &&
+			    center_x + xcenter_add < display_w/2)
 				center_x += xcenter_add;
 			
-			if (center_y + ycenter_add > 1 && center_y + ycenter_add < 240)
+			if (center_y + ycenter_add > 1 &&
+			    center_y + ycenter_add < display_h/2)
 				center_y += ycenter_add;
 
 			redraw_screen();
@@ -290,14 +324,7 @@ void event_loop(void)
 			break;
 			case SDLK_r:
 				context.axes_swap = !context.axes_swap;
-
-				if (context.axes_swap) {
-					display_w = 480;
-					display_h = 640;
-				} else {
-					display_w = 640;
-					display_h = 480;
-				}
+				GP_SWAP(display_w, display_h);
 			break;
 			case SDLK_f:
 				fill = !fill;
@@ -453,8 +480,7 @@ int main(int argc, char ** argv)
 	for (i = 1; i < argc; i++) {
 		if (strcmp(argv[i], "-16") == 0) {
 			display_bpp = 16;
-		}
-		else if (strcmp(argv[i], "-24") == 0) {
+		} else if (strcmp(argv[i], "-24") == 0) {
 			display_bpp = 24;
 		}
 	}
@@ -466,14 +492,14 @@ int main(int argc, char ** argv)
 	}
 
 	/* Create a window with a software back surface */
-	display = SDL_SetVideoMode(640, 480, display_bpp, SDL_SWSURFACE);
+	display = SDL_SetVideoMode(display_w, display_h, display_bpp, SDL_SWSURFACE);
 	if (display == NULL) {
 		fprintf(stderr, "Could not open display: %s\n", SDL_GetError());
 		goto fail;
 	}
 
 	/* Set up a clipping rectangle to exercise clipping */
-	SDL_Rect clip_rect = {10, 10, 620, 460};
+	SDL_Rect clip_rect = {10, 10, display_w - 10, display_h - 10};
 	SDL_SetClipRect(display, &clip_rect);
 
 	GP_SDL_ContextFromSurface(&context, display);
@@ -494,13 +520,9 @@ int main(int argc, char ** argv)
 		goto fail;
 	}
 
-	/* Print a short info how to use this test. */
 	print_instructions();
 
-	/* Enter the event loop */
 	event_loop();
-
-	/* We're done */
 	SDL_Quit();
 	return 0;
 

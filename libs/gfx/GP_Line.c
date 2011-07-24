@@ -30,23 +30,24 @@
 #include "algo/Line.algo.h"
 
 /* Generate drawing functions for various bit depths. */
-GP_DEF_DRAW_FN_PER_BPP(GP_Line, DEF_LINE_FN)
+GP_DEF_DRAW_FN_PER_BPP(GP_Line_Raw, DEF_LINE_FN)
 
-void GP_Line(GP_Context *context, GP_Coord x0, GP_Coord y0,
-             GP_Coord x1, GP_Coord y1, GP_Pixel pixel)
+void GP_Line_Raw(GP_Context *context, GP_Coord x0, GP_Coord y0,
+                 GP_Coord x1, GP_Coord y1, GP_Pixel pixel)
 {
 	GP_CHECK_CONTEXT(context);
 
-	GP_FN_PER_BPP_CONTEXT(GP_Line, context, context, x0, y0, x1, y1, pixel);
+	GP_FN_PER_BPP_CONTEXT(GP_Line_Raw, context, context, x0, y0, x1, y1,
+	                      pixel);
 }
 
-void GP_TLine(GP_Context *context, GP_Coord x0, GP_Coord y0,
-              GP_Coord x1, GP_Coord y1, GP_Pixel pixel)
+void GP_Line(GP_Context *context, GP_Coord x0, GP_Coord y0,
+             GP_Coord x1, GP_Coord y1, GP_Pixel pixel)
 {
 	GP_CHECK_CONTEXT(context);
 	
 	GP_TRANSFORM_POINT(context, x0, y0);
 	GP_TRANSFORM_POINT(context, x1, y1);
 	
-	GP_Line(context, x0, y0, x1, y1, pixel);
+	GP_Line_Raw(context, x0, y0, x1, y1, pixel);
 }

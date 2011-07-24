@@ -180,12 +180,13 @@ void event_loop(void)
 static int read_file_head(const char *filename)
 {
 	FILE *f = fopen(filename, "r");
+	char buf[512];
+	
 	if (f == NULL) {
 		fprintf(stderr, "Could not open file: %s\n", filename);
 		return 0;
 	}
 
-	char buf[512];
 	for (;;) {
 
 		if (fgets(buf, 511, f) == NULL)

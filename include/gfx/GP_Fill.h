@@ -16,18 +16,21 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2010 Jiri "BlueBear" Dluhos                            *
+ * Copyright (C) 2009-2011 Jiri "BlueBear" Dluhos                            *
  *                         <jiri.bluebear.dluhos@gmail.com>                  *
  *                                                                           *
- * Copyright (C) 2009-2010 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2011 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
 #ifndef GP_FILL_H
 #define GP_FILL_H
 
-#include "core/GP_Context.h"
+#include "GP_Rect.h"
 
-void GP_Fill(GP_Context *context, GP_Pixel pixel);
+static inline void GP_Fill(GP_Context *context, GP_Pixel pixel)
+{
+	GP_FillRect_Raw(context, 0, 0, context->w, context->h, pixel);
+}
 
 #endif /* GP_FILL_H */

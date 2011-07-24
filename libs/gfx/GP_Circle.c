@@ -16,10 +16,10 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2010 Jiri "BlueBear" Dluhos                            *
+ * Copyright (C) 2009-2011 Jiri "BlueBear" Dluhos                            *
  *                         <jiri.bluebear.dluhos@gmail.com>                  *
  *                                                                           *
- * Copyright (C) 2009-2010 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2011 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
@@ -30,71 +30,88 @@
 #include "algo/Circle.algo.h"
 
 /* Generate drawing functions for various bit depths. */
-GP_DEF_DRAW_FN_PER_BPP(GP_Circle, DEF_CIRCLE_FN)
+GP_DEF_DRAW_FN_PER_BPP(GP_Circle_Raw, DEF_CIRCLE_FN)
+
+void GP_Circle_Raw(GP_Context *context, GP_Coord xcenter, GP_Coord ycenter,
+                   GP_Size r, GP_Pixel pixel)
+{
+	GP_CHECK_CONTEXT(context);
+
+	GP_FN_PER_BPP_CONTEXT(GP_Circle_Raw, context, context,
+	                      xcenter, ycenter, r, pixel);
+}
 
 void GP_Circle(GP_Context *context, GP_Coord xcenter, GP_Coord ycenter,
                GP_Size r, GP_Pixel pixel)
 {
 	GP_CHECK_CONTEXT(context);
 
-	GP_FN_PER_BPP_CONTEXT(GP_Circle, context, context,
-	                      xcenter, ycenter, r, pixel);
-}
-
-void GP_TCircle(GP_Context *context, GP_Coord xcenter, GP_Coord ycenter,
-                GP_Size r, GP_Pixel pixel)
-{
-	GP_CHECK_CONTEXT(context);
-
 	GP_TRANSFORM_POINT(context, xcenter, ycenter);
 	
-	GP_Circle(context, xcenter, ycenter, r, pixel);
+	GP_Circle_Raw(context, xcenter, ycenter, r, pixel);
 }
 
 #include "algo/FillCircle.algo.h"
 
 /* Generate drawing functions for various bit depths. */
-GP_DEF_FILL_FN_PER_BPP(GP_FillCircle, DEF_FILLCIRCLE_FN)
+GP_DEF_FILL_FN_PER_BPP(GP_FillCircle_Raw, DEF_FILLCIRCLE_FN)
+
+void GP_FillCircle_Raw(GP_Context *context, GP_Coord xcenter, GP_Coord ycenter,
+                       GP_Size r, GP_Pixel pixel)
+{
+	GP_CHECK_CONTEXT(context);
+
+	GP_FN_PER_BPP_CONTEXT(GP_FillCircle_Raw, context, context,
+	                      xcenter, ycenter, r, pixel);
+}
 
 void GP_FillCircle(GP_Context *context, GP_Coord xcenter, GP_Coord ycenter,
                    GP_Size r, GP_Pixel pixel)
 {
 	GP_CHECK_CONTEXT(context);
-
-	GP_FN_PER_BPP_CONTEXT(GP_FillCircle, context, context,
-	                      xcenter, ycenter, r, pixel);
+	
+	GP_TRANSFORM_POINT(context, xcenter, ycenter);
+	
+	GP_FillCircle_Raw(context, xcenter, ycenter, r, pixel);
 }
 
-void GP_TFillCircle(GP_Context *context, GP_Coord xcenter, GP_Coord ycenter,
-                    GP_Size r, GP_Pixel pixel)
+void GP_Ring_Raw(GP_Context *context, GP_Coord xcenter, GP_Coord ycenter,
+                 GP_Size r1, GP_Size r2, GP_Pixel pixel)
+{
+	GP_Circle_Raw(context, xcenter, ycenter, r1, pixel); 
+	GP_Circle_Raw(context, xcenter, ycenter, r2, pixel); 
+}
+
+void GP_Ring(GP_Context *context, GP_Coord xcenter, GP_Coord ycenter,
+             GP_Size r1, GP_Size r2, GP_Pixel pixel)
 {
 	GP_CHECK_CONTEXT(context);
 	
 	GP_TRANSFORM_POINT(context, xcenter, ycenter);
-	
-	GP_FillCircle(context, xcenter, ycenter, r, pixel);
+
+	GP_Ring_Raw(context, xcenter, ycenter, r1, r2, pixel);	
 }
 
 #include "algo/FillRing.algo.h"
 
 /* Generate drawing functions for various bit depths. */
-GP_DEF_FILL_FN_PER_BPP(GP_FillRing, DEF_FILLRING_FN)
+GP_DEF_FILL_FN_PER_BPP(GP_FillRing_Raw, DEF_FILLRING_FN)
 
-void GP_FillRing(GP_Context *context, GP_Coord xcenter, GP_Coord ycenter,
-                   GP_Size r1, GP_Size r2, GP_Pixel pixel)
+void GP_FillRing_Raw(GP_Context *context, GP_Coord xcenter, GP_Coord ycenter,
+                     GP_Size r1, GP_Size r2, GP_Pixel pixel)
 {
 	GP_CHECK_CONTEXT(context);
 
-	GP_FN_PER_BPP_CONTEXT(GP_FillRing, context, context,
+	GP_FN_PER_BPP_CONTEXT(GP_FillRing_Raw, context, context,
 	                      xcenter, ycenter, r1, r2, pixel);
 }
 
-void GP_TFillRing(GP_Context *context, GP_Coord xcenter, GP_Coord ycenter,
-                    GP_Size r1, GP_Size r2, GP_Pixel pixel)
+void GP_FillRing(GP_Context *context, GP_Coord xcenter, GP_Coord ycenter,
+                 GP_Size r1, GP_Size r2, GP_Pixel pixel)
 {
 	GP_CHECK_CONTEXT(context);
 	
 	GP_TRANSFORM_POINT(context, xcenter, ycenter);
 	
-	GP_FillRing(context, xcenter, ycenter, r1, r2, pixel);
+	GP_FillRing_Raw(context, xcenter, ycenter, r1, r2, pixel);
 }

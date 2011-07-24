@@ -16,10 +16,10 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2010 Jiri "BlueBear" Dluhos                            *
+ * Copyright (C) 2009-2011 Jiri "BlueBear" Dluhos                            *
  *                         <jiri.bluebear.dluhos@gmail.com>                  *
  *                                                                           *
- * Copyright (C) 2009-2010 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2011 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
@@ -31,17 +31,26 @@
 void GP_VLineXYY(GP_Context *context, GP_Coord x, GP_Coord y0,
                  GP_Coord y1, GP_Pixel pixel);
 
+void GP_VLineXYY_Raw(GP_Context *context, GP_Coord x, GP_Coord y0,
+                     GP_Coord y1, GP_Pixel pixel);
+
 void GP_VLineXYH(GP_Context *context, GP_Coord x, GP_Coord y,
                  GP_Size height, GP_Pixel pixel);
 
-void GP_TVLineXYY(GP_Context *context, GP_Coord x, GP_Coord y0,
-                  GP_Coord y1, GP_Pixel pixel);
-
-void GP_TVLineXYH(GP_Context *context, GP_Coord x, GP_Coord y,
-                  GP_Size height, GP_Pixel pixel);
+void GP_VLineXYH_Raw(GP_Context *context, GP_Coord x, GP_Coord y,
+                     GP_Size height, GP_Pixel pixel);
 
 /* default argument set is XYY */
-#define GP_VLine GP_VLineXYY
-#define GP_TVLine GP_TVLineXYY
+static inline void GP_VLine(GP_Context *context, GP_Coord x,
+                            GP_Coord y0, GP_Coord y1, GP_Pixel pixel)
+{
+	GP_VLineXYY(context, x, y0, y1, pixel);
+}
+
+static inline void GP_VLine_Raw(GP_Context *context, GP_Coord x,
+                                GP_Coord y0, GP_Coord y1, GP_Pixel pixel)
+{
+	GP_VLineXYY_Raw(context, x, y0, y1, pixel);
+}
 
 #endif /* GP_VLINE_H */

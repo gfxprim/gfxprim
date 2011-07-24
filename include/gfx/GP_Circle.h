@@ -16,10 +16,10 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2010 Jiri "BlueBear" Dluhos                            *
+ * Copyright (C) 2009-2011 Jiri "BlueBear" Dluhos                            *
  *                         <jiri.bluebear.dluhos@gmail.com>                  *
  *                                                                           *
- * Copyright (C) 2009-2010 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2011 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
@@ -28,22 +28,36 @@
 
 #include "core/GP_Context.h"
 
+/* Circle */
+
 void GP_Circle(GP_Context *context, GP_Coord xcenter, GP_Coord ycenter,
                GP_Size r, GP_Pixel pixel);
 
-void GP_TCircle(GP_Context *context, GP_Coord xcenter, GP_Coord ycenter,
-                GP_Size r, GP_Pixel pixel);
+void GP_Circle_Raw(GP_Context *context, GP_Coord xcenter, GP_Coord ycenter,
+                   GP_Size r, GP_Pixel pixel);
+
+/* Filled Circle */
 
 void GP_FillCircle(GP_Context *context, GP_Coord xcenter, GP_Coord ycenter,
                    GP_Size r, GP_Pixel pixel);
 
-void GP_TFillCircle(GP_Context *context, GP_Coord xcenter, GP_Coord ycenter,
-                    GP_Size r, GP_Pixel pixel);
+void GP_FillCircle_Raw(GP_Context *context, GP_Coord xcenter, GP_Coord ycenter,
+                       GP_Size r, GP_Pixel pixel);
+
+/* Ring */
+
+void GP_Ring(GP_Context *context, GP_Coord xcenter, GP_Coord ycenter,
+             GP_Size r1, GP_Size r2, GP_Pixel pixel);
+
+void GP_Ring_Raw(GP_Context *context, GP_Coord xcenter, GP_Coord ycenter,
+                 GP_Size r1, GP_Size r2, GP_Pixel pixel);
+
+/* Filled Ring */
 
 void GP_FillRing(GP_Context *context, GP_Coord xcenter, GP_Coord ycenter,
-                   GP_Size r1, GP_Size r2, GP_Pixel pixel);
+                 GP_Size r1, GP_Size r2, GP_Pixel pixel);
 
-void GP_TFillRing(GP_Context *context, GP_Coord xcenter, GP_Coord ycenter,
-                    GP_Size r1, GP_Size r2, GP_Pixel pixel);
+void GP_FillRing_Raw(GP_Context *context, GP_Coord xcenter, GP_Coord ycenter,
+                     GP_Size r1, GP_Size r2, GP_Pixel pixel);
 
 #endif /* GP_CIRCLE_H */

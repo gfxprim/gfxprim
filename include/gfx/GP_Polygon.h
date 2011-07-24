@@ -16,10 +16,10 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2010 Jiri "BlueBear" Dluhos                            *
+ * Copyright (C) 2009-2011 Jiri "BlueBear" Dluhos                            *
  *                         <jiri.bluebear.dluhos@gmail.com>                  *
  *                                                                           *
- * Copyright (C) 2009-2010 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2011 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
@@ -28,7 +28,7 @@
 
 #include "core/GP_Context.h"
 
-void GP_FillPolygon(GP_Context *context, int vertex_count, const GP_Coord *xy,
-                    GP_Pixel pixel);
+void GP_FillPolygon_Raw(GP_Context *context, int vertex_count,
+                        const GP_Coord *xy, GP_Pixel pixel);
 
 #endif /* GP_POLYGON_H */

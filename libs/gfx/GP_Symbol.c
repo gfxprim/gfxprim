@@ -68,12 +68,79 @@
 		fn_pref##Triangle(context, TRIANGLE_PARAMS(x, y, w, h), pixel);\
 } while (0)
 
-void GP_Symbol(GP_Context *context, GP_SymbolType sym,
-               GP_Coord x, GP_Coord y, GP_Size w, GP_Size h, GP_Pixel pixel)
+#define TRIANGLE_RAW(context, base, x, y, w, h, fn_pref,                           \
+                     TRIANGLE_PARAMS, TETRAGON_PARAMS, pixel) do {                 \
+	if (base % 2)                                                              \
+		fn_pref##Tetragon_Raw(context, TETRAGON_PARAMS(x, y, w, h), pixel);\
+	else                                                                       \
+		fn_pref##Triangle_Raw(context, TRIANGLE_PARAMS(x, y, w, h), pixel);\
+} while (0)
+
+void GP_Symbol_Raw(GP_Context *context, GP_SymbolType sym,
+                   GP_Coord x, GP_Coord y, GP_Size w, GP_Size h,
+                   GP_Pixel pixel)
 {
 	DO_DECREMENT(w);
 	DO_DECREMENT(h);
 
+	switch (sym) {
+	case GP_SYM_TRIANGLE_UP:
+		TRIANGLE_RAW(context, w, x, y, w, h, GP_,
+		             DO_TRIANGLE_UP, DO_TETRAGON_UP, pixel);
+	break;
+	case GP_SYM_TRIANGLE_DOWN:
+		TRIANGLE_RAW(context, w, x, y, w, h, GP_,
+		             DO_TRIANGLE_DOWN, DO_TETRAGON_DOWN, pixel);
+	break;
+	case GP_SYM_TRIANGLE_LEFT:
+		TRIANGLE_RAW(context, h, x, y, w, h, GP_,
+		             DO_TRIANGLE_LEFT, DO_TETRAGON_LEFT, pixel);
+	break;
+	case GP_SYM_TRIANGLE_RIGHT:
+		TRIANGLE_RAW(context, h, x, y, w, h, GP_,
+		             DO_TRIANGLE_RIGHT, DO_TETRAGON_RIGHT, pixel);
+	break;
+	default:
+	break;
+	}
+}
+
+void GP_FillSymbol_Raw(GP_Context *context, GP_SymbolType sym,
+                       GP_Coord x, GP_Coord y, GP_Size w, GP_Size h,
+                       GP_Pixel pixel)
+{
+	DO_DECREMENT(w);
+	DO_DECREMENT(h);
+	
+	switch (sym) {
+	case GP_SYM_TRIANGLE_UP:
+		TRIANGLE_RAW(context, w, x, y, w, h, GP_Fill,
+		             DO_TRIANGLE_UP, DO_TETRAGON_UP, pixel);
+	break;
+	case GP_SYM_TRIANGLE_DOWN:
+		TRIANGLE_RAW(context, w, x, y, w, h, GP_Fill,
+		             DO_TRIANGLE_DOWN, DO_TETRAGON_DOWN, pixel);
+	break;
+	case GP_SYM_TRIANGLE_LEFT:
+		TRIANGLE_RAW(context, h, x, y, w, h, GP_Fill,
+		             DO_TRIANGLE_LEFT, DO_TETRAGON_LEFT, pixel);
+	break;
+	case GP_SYM_TRIANGLE_RIGHT:
+		TRIANGLE_RAW(context, h, x, y, w, h, GP_Fill,
+		             DO_TRIANGLE_RIGHT, DO_TETRAGON_RIGHT, pixel);
+	break;
+	default:
+	break;
+	}
+}
+
+void GP_Symbol(GP_Context *context, GP_SymbolType sym,
+               GP_Coord x, GP_Coord y, GP_Size w, GP_Size h,
+               GP_Pixel pixel)
+{
+	DO_DECREMENT(w);
+	DO_DECREMENT(h);
+	
 	switch (sym) {
 	case GP_SYM_TRIANGLE_UP:
 		TRIANGLE(context, w, x, y, w, h, GP_,
@@ -97,7 +164,8 @@ void GP_Symbol(GP_Context *context, GP_SymbolType sym,
 }
 
 void GP_FillSymbol(GP_Context *context, GP_SymbolType sym,
-                   GP_Coord x, GP_Coord y, GP_Size w, GP_Size h, GP_Pixel pixel)
+                   GP_Coord x, GP_Coord y,
+                   GP_Size w, GP_Size h, GP_Pixel pixel)
 {
 	DO_DECREMENT(w);
 	DO_DECREMENT(h);
@@ -117,63 +185,6 @@ void GP_FillSymbol(GP_Context *context, GP_SymbolType sym,
 	break;
 	case GP_SYM_TRIANGLE_RIGHT:
 		TRIANGLE(context, h, x, y, w, h, GP_Fill,
-		         DO_TRIANGLE_RIGHT, DO_TETRAGON_RIGHT, pixel);
-	break;
-	default:
-	break;
-	}
-}
-
-void GP_TSymbol(GP_Context *context, GP_SymbolType sym,
-                GP_Coord x, GP_Coord y, GP_Size w, GP_Size h, GP_Pixel pixel)
-{
-	DO_DECREMENT(w);
-	DO_DECREMENT(h);
-	
-	switch (sym) {
-	case GP_SYM_TRIANGLE_UP:
-		TRIANGLE(context, w, x, y, w, h, GP_T,
-		         DO_TRIANGLE_UP, DO_TETRAGON_UP, pixel);
-	break;
-	case GP_SYM_TRIANGLE_DOWN:
-		TRIANGLE(context, w, x, y, w, h, GP_T,
-		         DO_TRIANGLE_DOWN, DO_TETRAGON_DOWN, pixel);
-	break;
-	case GP_SYM_TRIANGLE_LEFT:
-		TRIANGLE(context, h, x, y, w, h, GP_T,
-		         DO_TRIANGLE_LEFT, DO_TETRAGON_LEFT, pixel);
-	break;
-	case GP_SYM_TRIANGLE_RIGHT:
-		TRIANGLE(context, h, x, y, w, h, GP_T,
-		         DO_TRIANGLE_RIGHT, DO_TETRAGON_RIGHT, pixel);
-	break;
-	default:
-	break;
-	}
-}
-
-void GP_TFillSymbol(GP_Context *context, GP_SymbolType sym,
-                    GP_Coord x, GP_Coord y,
-		    GP_Size w, GP_Size h, GP_Pixel pixel)
-{
-	DO_DECREMENT(w);
-	DO_DECREMENT(h);
-	
-	switch (sym) {
-	case GP_SYM_TRIANGLE_UP:
-		TRIANGLE(context, w, x, y, w, h, GP_TFill,
-		         DO_TRIANGLE_UP, DO_TETRAGON_UP, pixel);
-	break;
-	case GP_SYM_TRIANGLE_DOWN:
-		TRIANGLE(context, w, x, y, w, h, GP_TFill,
-		         DO_TRIANGLE_DOWN, DO_TETRAGON_DOWN, pixel);
-	break;
-	case GP_SYM_TRIANGLE_LEFT:
-		TRIANGLE(context, h, x, y, w, h, GP_TFill,
-		         DO_TRIANGLE_LEFT, DO_TETRAGON_LEFT, pixel);
-	break;
-	case GP_SYM_TRIANGLE_RIGHT:
-		TRIANGLE(context, h, x, y, w, h, GP_TFill,
 		         DO_TRIANGLE_RIGHT, DO_TETRAGON_RIGHT, pixel);
 	break;
 	default:

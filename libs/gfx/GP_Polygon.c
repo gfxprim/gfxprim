@@ -16,10 +16,10 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2010 Jiri "BlueBear" Dluhos                            *
+ * Copyright (C) 2009-2011 Jiri "BlueBear" Dluhos                            *
  *                         <jiri.bluebear.dluhos@gmail.com>                  *
  *                                                                           *
- * Copyright (C) 2009-2010 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2011 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
@@ -79,7 +79,7 @@ static void GP_AddEdge(struct GP_Polygon *poly, GP_Coord x1, GP_Coord y1,
 	poly->ymax = GP_MAX(poly->ymax, edge->endy);
 }
 
-static GP_Coord GP_CompareEdges(const void *edge1, const void *edge2)
+static int GP_CompareEdges(const void *edge1, const void *edge2)
 {
 	struct GP_PolygonEdge *e1 = (struct GP_PolygonEdge *) edge1;
 	struct GP_PolygonEdge *e2 = (struct GP_PolygonEdge *) edge2;
@@ -153,8 +153,8 @@ static inline GP_Coord GP_FindIntersection(GP_Coord y, const struct GP_PolygonEd
 	return x;
 }
 
-void GP_FillPolygon(GP_Context *context, GP_Coord vertex_count, const GP_Coord *xy,
-		GP_Pixel pixel)
+void GP_FillPolygon_Raw(GP_Context *context, GP_Coord vertex_count,
+                        const GP_Coord *xy, GP_Pixel pixel)
 {
 	struct GP_Polygon poly = GP_POLYGON_INITIALIZER;
 
@@ -187,7 +187,7 @@ void GP_FillPolygon(GP_Context *context, GP_Coord vertex_count, const GP_Coord *
 			}
 		}
 
-		GP_HLine(context, startx, endx, y, pixel);
+		GP_HLine_Raw(context, startx, endx, y, pixel);
 
 		startx_prev = startx;
 		endx_prev = endx;

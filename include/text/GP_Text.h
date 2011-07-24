@@ -16,10 +16,10 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2010 Jiri "BlueBear" Dluhos                            *
+ * Copyright (C) 2009-2011 Jiri "BlueBear" Dluhos                            *
  *                         <jiri.bluebear.dluhos@gmail.com>                  *
  *                                                                           *
- * Copyright (C) 2009-2010 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2011 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
@@ -54,18 +54,20 @@ typedef enum GP_TextAlign {
 	GP_VALIGN_BOTTOM = GP_VALIGN_BELOW,
 } GP_TextAlign;
 
-GP_RetCode GP_Text(GP_Context *context, const GP_TextStyle *style,
-                   int x, int y, int align, const char *str, GP_Pixel pixel);
+GP_RetCode GP_Text_Raw(GP_Context *context, const GP_TextStyle *style,
+                       GP_Coord x, GP_Coord y, int align,
+		       const char *str, GP_Pixel pixel);
 
-GP_RetCode GP_TText(GP_Context *context, const GP_TextStyle *style,
-                    int x, int y, int align, const char *str, GP_Pixel pixel);
+GP_RetCode GP_Text(GP_Context *context, const GP_TextStyle *style,
+                   GP_Coord x, GP_Coord y, int align,
+		   const char *str, GP_Pixel pixel);
+
+GP_RetCode GP_BoxCenteredText_Raw(GP_Context *context, const GP_TextStyle *style,
+                                  GP_Coord x, GP_Coord y, GP_Size w, GP_Size h,
+                                  const char *str, GP_Pixel pixel);
 
 GP_RetCode GP_BoxCenteredText(GP_Context *context, const GP_TextStyle *style,
-			      int x, int y, int w, int h, const char *str,
-			      GP_Pixel pixel);
-
-GP_RetCode GP_TBoxCenteredText(GP_Context *context, const GP_TextStyle *style,
-			      int x, int y, int w, int h, const char *str,
-			      GP_Pixel pixel);
+                              GP_Coord x, GP_Coord y, GP_Size w, GP_Size h,
+                              const char *str, GP_Pixel pixel);
 
 #endif /* GP_TEXT_H */

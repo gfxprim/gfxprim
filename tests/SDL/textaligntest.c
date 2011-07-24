@@ -42,8 +42,8 @@ static GP_Pixel black_pixel, red_pixel, yellow_pixel, green_pixel, blue_pixel,
 static int flag_proportional = 0;
 
 /* center of the screen */
-static int xcenter = 320;
-static int ycenter = 240;
+static int X = 640;
+static int Y = 480;
 
 void redraw_screen(void)
 {
@@ -52,8 +52,8 @@ void redraw_screen(void)
 	GP_Fill(&context, black_pixel);
 
 	/* draw axes intersecting in the middle, where text should be shown */
-	GP_HLine(&context, 0, 640, 240, darkgray_pixel);
-	GP_VLine(&context, 320, 0, 480, darkgray_pixel);
+	GP_HLine(&context, 0, X, Y/2, darkgray_pixel);
+	GP_VLine(&context, X/2, 0, Y, darkgray_pixel);
 
 	GP_TextStyle style = GP_DEFAULT_TEXT_STYLE;
 
@@ -65,20 +65,20 @@ void redraw_screen(void)
 	style.pixel_xspace = 4;
 	style.pixel_yspace = 4;
 
-	GP_TBoxCenteredText(&context, &style, 0, 0, 640, 480,
-	         "Hello world!", darkgray_pixel);
+	GP_BoxCenteredText(&context, &style, 0, 0, X, Y,
+	                   "Hello world!", darkgray_pixel);
 
 	style.pixel_xspace = 0;
 	style.pixel_yspace = 0;
 
-	GP_TText(&context, &style, xcenter, ycenter, GP_ALIGN_LEFT|GP_VALIGN_BELOW,
-	         "bottom left", yellow_pixel);
-	GP_TText(&context, &style, xcenter, ycenter, GP_ALIGN_RIGHT|GP_VALIGN_BELOW,
-	         "bottom right", red_pixel);
-	GP_TText(&context, &style, xcenter, ycenter, GP_ALIGN_RIGHT|GP_VALIGN_ABOVE,
-	         "top right", blue_pixel);
-	GP_TText(&context, &style, xcenter, ycenter, GP_ALIGN_LEFT|GP_VALIGN_ABOVE,
-	         "top left", green_pixel);
+	GP_Text(&context, &style, X/2, Y/2, GP_ALIGN_LEFT|GP_VALIGN_BELOW,
+	        "bottom left", yellow_pixel);
+	GP_Text(&context, &style, X/2, Y/2, GP_ALIGN_RIGHT|GP_VALIGN_BELOW,
+	        "bottom right", red_pixel);
+	GP_Text(&context, &style, X/2, Y/2, GP_ALIGN_RIGHT|GP_VALIGN_ABOVE,
+	        "top right", blue_pixel);
+	GP_Text(&context, &style, X/2, Y/2, GP_ALIGN_LEFT|GP_VALIGN_ABOVE,
+	        "top left", green_pixel);
 
 	SDL_UnlockSurface(display);
 }
@@ -108,7 +108,7 @@ void event_loop(void)
 			break;
 			case SDLK_r:
 				context.axes_swap = !context.axes_swap;
-				GP_SWAP(xcenter, ycenter);
+				GP_SWAP(X, Y);
 			break;
 			default:
 			break;
@@ -143,7 +143,7 @@ int main(void)
 	}
 
 	/* Create a window with a software back surface */
-	display = SDL_SetVideoMode(640, 480, 0, SDL_SWSURFACE);
+	display = SDL_SetVideoMode(X, Y, 0, SDL_SWSURFACE);
 	if (display == NULL) {
 		fprintf(stderr, "Could not open display: %s\n", SDL_GetError());
 		goto fail;
@@ -152,7 +152,7 @@ int main(void)
 	print_instructions();
 
 	/* Set up a clipping rectangle to test proper clipping of pixels */
-	SDL_Rect clip_rect = {10, 10, 620, 460};
+	SDL_Rect clip_rect = {10, 10, X-10, Y-10};
 	SDL_SetClipRect(display, &clip_rect);
 
 	/* Initialize a GP context from the SDL display */
