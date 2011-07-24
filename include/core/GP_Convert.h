@@ -58,7 +58,8 @@ GP_Pixel GP_PixelToRGBA8888(GP_Pixel pixel, GP_PixelType type);
 /*
  * Converts a color specified by its R, G, B components to a specified type.
  */
-static inline GP_Pixel GP_RGBToPixel(uint8_t r, uint8_t g, uint8_t b, GP_PixelType type)
+static inline GP_Pixel GP_RGBToPixel(uint8_t r, uint8_t g, uint8_t b,
+                                     GP_PixelType type)
 {
 	GP_Pixel p = GP_Pixel_CREATE_RGB888(r, g, b);
 	return GP_RGB888ToPixel(p, type);
@@ -67,7 +68,8 @@ static inline GP_Pixel GP_RGBToPixel(uint8_t r, uint8_t g, uint8_t b, GP_PixelTy
 /*
  * Converts a color specified by its R, G, B, A components to a specified type.
  */
-static inline GP_Pixel GP_RGBAToPixel(uint8_t r, uint8_t g, uint8_t b, uint8_t a, GP_PixelType type)
+static inline GP_Pixel GP_RGBAToPixel(uint8_t r, uint8_t g, uint8_t b,
+                                      uint8_t a, GP_PixelType type)
 {
 	GP_Pixel p = GP_Pixel_CREATE_RGBA8888(r, g, b, a);
 	return GP_RGBA8888ToPixel(p, type);
@@ -87,7 +89,9 @@ static inline GP_Pixel GP_RGBToContextPixel(uint8_t r, uint8_t g, uint8_t b,
  * Converts a color specified by its R, G, B, A components to a pixel value
  * compatible with the specified context.
  */
-static inline GP_Pixel GP_RGBAToContextPixel(uint8_t r, uint8_t g, uint8_t b, uint8_t a, const GP_Context *context)
+static inline GP_Pixel GP_RGBAToContextPixel(uint8_t r, uint8_t g, 
+                                             uint8_t b, uint8_t a,
+					     const GP_Context *context)
 {
 	return GP_RGBAToPixel(r, g, b, a, context->pixel_type);
 }
@@ -95,18 +99,22 @@ static inline GP_Pixel GP_RGBAToContextPixel(uint8_t r, uint8_t g, uint8_t b, ui
 /*
  * Convert between any pixel types (excl. palette types) via RGBA8888
  */
-static inline GP_Pixel GP_ConvertPixel(GP_Pixel pixel, GP_PixelType from, GP_PixelType to)
+static inline GP_Pixel GP_ConvertPixel(GP_Pixel pixel, GP_PixelType from,
+                                       GP_PixelType to)
 {
 	return GP_RGBA8888ToPixel(GP_PixelToRGBA8888(pixel, from), to);
 }
  
 /*
- * Convert between pixel types of given contexts (excl. palette types) via RGBA8888.
- * 
+ * Convert between pixel types of given contexts (excl. palette types) via
+ * RGBA8888.
  */
-static inline GP_Pixel GP_ConvertContextPixel(GP_Pixel pixel, const GP_Context *from, const GP_Context *to)
+static inline GP_Pixel GP_ConvertContextPixel(GP_Pixel pixel,
+                                              const GP_Context *from,
+					      const GP_Context *to)
 {
-	return GP_RGBA8888ToPixel(GP_PixelToRGBA8888(from->pixel_type, pixel), to->pixel_type);
+	return GP_RGBA8888ToPixel(GP_PixelToRGBA8888(from->pixel_type, pixel),
+	                          to->pixel_type);
 }
 
 #endif /* CORE_GP_CONVERT_H */

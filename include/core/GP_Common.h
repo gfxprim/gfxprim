@@ -65,31 +65,31 @@
 /*
  * Internal macros with common code for GP_ABORT, GP_ASSERT and GP_CHECK.
  * GP_INTERNAL_ABORT takes a message that may contain % (e.g. assert condition)
- * and prints: 
- * "*** gfxprim: __FILE__:__LINE__: in __FUNCTION__: str_abort_msg_" format(__VA_ARGS__) "\n"
- *
- * GP_GENERAL_CHECK is a check with specified message prefix (for assert and check)
+ * and prints message and calls abort(). 
+ * GP_GENERAL_CHECK is a check with specified message prefix
+ * (for assert and check)
  */
 
 #define GP_INTERNAL_ABORT(str_abort_msg_, ...) do { \
-		fprintf(stderr, "*** gfxprim: %s:%d: in %s: %s", \
-				__FILE__, __LINE__, __FUNCTION__, str_abort_msg_); \
-		if (! (#__VA_ARGS__ [0])) \
-			fprintf(stderr, "abort()"); \
-		else \
-			fprintf(stderr, " " __VA_ARGS__); \
-		fprintf(stderr, "\n"); \
-		abort(); \
-	} while (0)
+	fprintf(stderr, "*** gfxprim: %s:%d: in %s: %s", \
+			__FILE__, __LINE__, __FUNCTION__, str_abort_msg_); \
+	if (! (#__VA_ARGS__ [0])) \
+		fprintf(stderr, "abort()"); \
+	else \
+		fprintf(stderr, " " __VA_ARGS__); \
+	fprintf(stderr, "\n"); \
+	abort(); \
+} while (0)
 
 #define GP_GENERAL_CHECK(check_cond_, check_message_, ...) do { \
-		if (unlikely(!(check_cond_))) { \
-			if (#__VA_ARGS__ [0]) \
-				GP_INTERNAL_ABORT(check_message_ #check_cond_, "\n" __VA_ARGS__); \
-			else \
-				GP_INTERNAL_ABORT(check_message_ #check_cond_, " "); \
-		} \
-	} while (0)
+	if (unlikely(!(check_cond_))) { \
+		if (#__VA_ARGS__ [0]) \
+			GP_INTERNAL_ABORT(check_message_ #check_cond_, \
+			                  "\n" __VA_ARGS__); \
+		else \
+			GP_INTERNAL_ABORT(check_message_ #check_cond_, " "); \
+	} \
+} while (0)
 
 /*
  * Aborts and prints the message along with the location in code
@@ -138,12 +138,14 @@
  * Return (shifted) count bits at offset of value
  * Note: operates with value types same as val 
  */
-#define GP_GET_BITS(offset, count, val) ( ( (val)>>(offset) ) & ( ((((typeof(val))1)<<(count)) - 1) ) )
+#define GP_GET_BITS(offset, count, val) \
+	( ( (val)>>(offset) ) & ( ((((typeof(val))1)<<(count)) - 1) ) )
 
 /*
  * Debugging version, evaluates args twice.
  */
-#define GP_GET_BITS_DBG(offset, count, val) ( printf("GET_BITS(%d, %d, 0x%x)=%d", offset, count, val, \
+#define GP_GET_BITS_DBG(offset, count, val) \
+	( printf("GET_BITS(%d, %d, 0x%x)=%d", offset, count, val, \
 	GP_GET_BITS(offset, count, val)), GP_GET_BITS(offset, count, val))
 
 /*
@@ -157,7 +159,8 @@
  * GP_CLEAR_BITS sets the target bits to zero
  * GP_SET_BITS does both
  */
-#define GP_CLEAR_BITS(offset, count, dest) ( (dest) &= ~(((((typeof(dest))1) << (count)) - 1) << (offset)) )
+#define GP_CLEAR_BITS(offset, count, dest) \
+	( (dest) &= ~(((((typeof(dest))1) << (count)) - 1) << (offset)) )
 
 #define GP_SET_BITS_OR(offset, dest, val) ( (dest) |= ((val)<<(offset)) )
 
@@ -170,8 +173,8 @@
  * Debugging version, evaluates args twice.
  */
 #define GP_SET_BITS_DBG(offset, count, dest, val) do { \
-		GP_SET_BITS(offset, count, dest, val); \
-		printf("SET_BITS(%d, %d, p, %d)\n", offset, count, val); \
+	GP_SET_BITS(offset, count, dest, val); \
+	printf("SET_BITS(%d, %d, p, %d)\n", offset, count, val); \
 } while (0)
 
 
