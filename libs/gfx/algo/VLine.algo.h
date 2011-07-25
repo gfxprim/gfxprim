@@ -16,10 +16,10 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2010 Jiri "BlueBear" Dluhos                            *
+ * Copyright (C) 2009-2011 Jiri "BlueBear" Dluhos                            *
  *                         <jiri.bluebear.dluhos@gmail.com>                  *
  *                                                                           *
- * Copyright (C) 2009-2010 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2011 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
@@ -28,16 +28,14 @@
 /* Ensures that coordinates are in correct order, and clips them.
  * Exits immediately if the line is completely clipped out.
  */
-#define ORDER_AND_CLIP_COORDS do { \
-	if (y0 > y1) GP_SWAP(y0, y1); \
-	if (x < (int) context->clip_w_min \
-	    || x > (int) context->clip_w_max \
-	    || y1 < (int) context->clip_h_min \
-	    || y0 > (int) context->clip_h_max) { \
-		return; \
-	} \
-	y0 = GP_MAX(y0, (int) context->clip_h_min); \
-	y1 = GP_MIN(y1, (int) context->clip_h_max); \
+#define ORDER_AND_CLIP_COORDS do {             \
+	if (y0 > y1)                           \
+		GP_SWAP(y0, y1);               \
+	if (x < 0 || x >= (int) context->w ||  \
+	    y1 < 0 || y0 >= (int) context->h)  \
+		return;                        \
+	y0 = GP_MAX(y0, 0);                    \
+	y1 = GP_MIN(y1, (int) context->h - 1); \
 } while (0)
 
 /*

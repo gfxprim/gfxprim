@@ -16,15 +16,13 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2010 Jiri "BlueBear" Dluhos                            *
+ * Copyright (C) 2009-2011 Jiri "BlueBear" Dluhos                            *
  *                         <jiri.bluebear.dluhos@gmail.com>                  *
  *                                                                           *
- * Copyright (C) 2009-2010 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2011 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
-
-#include "core/GP_Clip.h"
 
 #define DEF_MIRRORV_FN(FN_NAME, CONTEXT_T, PIXEL_T, PUTPIXEL, GETPIXEL) \
 void FN_NAME(CONTEXT_T context) \
@@ -41,6 +39,4 @@ void FN_NAME(CONTEXT_T context) \
 			PUTPIXEL(context, xm, y, tmp); \
 		} \
 	} \
-\
-	GP_MIRROR_V_CLIP(context); \
 }

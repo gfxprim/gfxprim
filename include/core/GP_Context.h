@@ -16,10 +16,10 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2010 Jiri "BlueBear" Dluhos                            *
+ * Copyright (C) 2009-2011 Jiri "BlueBear" Dluhos                            *
  *                         <jiri.bluebear.dluhos@gmail.com>                  *
  *                                                                           *
- * Copyright (C) 2009-2010 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2011 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
@@ -38,8 +38,8 @@ typedef struct GP_Context {
 	uint8_t *pixels;	 /* pointer to image pixels */
 	uint8_t bpp;		 /* values: 1, 2, 4, 8, 16, 24, 32 */
 	uint32_t bytes_per_row;
-	uint32_t w;		 /* width */
-	uint32_t h;      	 /* height */
+	uint32_t w;		 /* width in pixels */
+	uint32_t h;      	 /* height in pixels */
 
 	GP_PixelType pixel_type; /* hardware pixel format */
 
@@ -50,12 +50,6 @@ typedef struct GP_Context {
 	uint8_t x_swap:1;		/* swap direction on x  */
 	uint8_t y_swap:1;		/* swap direction on y  */
 	uint8_t bit_endian:1;		/* GP_BIT_ENDIAN */
-
-	/* clipping rectangle; drawing functions only affect the inside */
-	uint32_t clip_w_min;
-	uint32_t clip_w_max;
-	uint32_t clip_h_min;
-	uint32_t clip_h_max;
 } GP_Context;
 
 /* Returns the pixel type used by the context. */
@@ -82,22 +76,14 @@ static inline GP_PixelType GP_GetContextPixelType(const GP_Context *context)
 	GP_CHECK(context->pixels, "invalid context: NULL image pointer"); \
 	GP_CHECK(context->bpp <= 32, "invalid context: unsupported bits-per-pixel count"); \
 	GP_CHECK(context->w > 0 && context->h > 0, "invalid context: invalid image size"); \
-	GP_CHECK(context->clip_w_min <= context->clip_w_max \
-	         && context->clip_h_min <= context->clip_h_max, \
-	         "invalid context: invalid clipping rectangle"); \
-	GP_CHECK(context->clip_w_max < context->w \
-	         && context->clip_h_max < context->h, \
-	         "invalid context: clipping rectangle larger than image"); \
 } while (0)
 
 /*
- * Is true, when pixel is clipped. 
+ * Is true, when pixel is clipped out of context.
  */
 #define GP_PIXEL_IS_CLIPPED(context, x, y) \
-	(x < (int) context->clip_w_min \
-	|| x > (int) context->clip_w_max \
-	|| y < (int) context->clip_h_min \
-	|| y > (int) context->clip_h_max) \
+	((x) < 0 || x >= (int) context->w \
+	|| (y) < 0 || y >= (int) context->h) \
 
 /*
  * Allocate context.

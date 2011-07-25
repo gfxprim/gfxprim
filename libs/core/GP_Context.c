@@ -16,10 +16,10 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2010 Jiri "BlueBear" Dluhos                            *
+ * Copyright (C) 2009-2011 Jiri "BlueBear" Dluhos                            *
  *                         <jiri.bluebear.dluhos@gmail.com>                  *
  *                                                                           *
- * Copyright (C) 2009-2010 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2011 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
@@ -63,12 +63,6 @@ GP_Context *GP_ContextCopy(GP_Context *context, int flag)
 	new->y_swap    = context->y_swap;
 	new->x_swap    = context->x_swap;
 
-	/* clipping */
-	new->clip_w_min = context->clip_w_min;
-	new->clip_w_max = context->clip_w_max;
-	new->clip_h_min = context->clip_h_min;
-	new->clip_h_max = context->clip_h_max;
-
 	return new;
 	
 }
@@ -101,12 +95,6 @@ GP_Context *GP_ContextAlloc(uint32_t w, uint32_t h, GP_PixelType type)
 	context->axes_swap = 0;
 	context->y_swap    = 0;
 	context->x_swap    = 0;
-
-	/* clipping */
-	context->clip_w_min = 0;
-	context->clip_w_max = w - 1;
-	context->clip_h_min = 0;
-	context->clip_h_max = h - 1;
 
 	return context;
 }

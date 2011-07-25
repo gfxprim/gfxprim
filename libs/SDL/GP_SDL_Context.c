@@ -57,11 +57,5 @@ GP_RetCode GP_SDL_ContextFromSurface(GP_Context *context, SDL_Surface *surf)
 	context->x_swap = 0;
 	context->y_swap = 0;
 
-	/* clipping */
-	context->clip_h_min = surf->clip_rect.y;
-	context->clip_h_max = surf->clip_rect.y + surf->clip_rect.h - 1;
-	context->clip_w_min = surf->clip_rect.x;
-	context->clip_w_max = surf->clip_rect.x + surf->clip_rect.w - 1;
-
 	return GP_ESUCCESS;
 }

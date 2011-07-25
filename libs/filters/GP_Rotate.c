@@ -51,8 +51,6 @@ GP_RetCode GP_MirrorH(GP_Context *context)
 		memcpy(l2, buf, bpr);
 	}
 
-	GP_MIRROR_H_CLIP(context);
-
 	return GP_ESUCCESS;
 }
 

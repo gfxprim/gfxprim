@@ -16,14 +16,13 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2010 Jiri "BlueBear" Dluhos                            *
+ * Copyright (C) 2009-2011 Jiri "BlueBear" Dluhos                            *
  *                         <jiri.bluebear.dluhos@gmail.com>                  *
  *                                                                           *
- * Copyright (C) 2009-2010 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2011 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
-#include "core/GP_Clip.h"
 #include "core/GP_Common.h"
 #include "core/GP_Context.h"
 
@@ -52,9 +51,6 @@ GP_RetCode FN_NAME(CONTEXT_T context) \
 \
 	GP_ContextFree(tmp); \
 \
-	GP_SWAP_CLIPS(context); \
-	GP_MIRROR_H_CLIP(context); \
-\
 	return GP_ESUCCESS; \
 }
 
@@ -82,9 +78,6 @@ GP_RetCode FN_NAME(CONTEXT_T context) \
 	} \
 \
 	GP_ContextFree(tmp); \
-\
-	GP_SWAP_CLIPS(context); \
-	GP_MIRROR_V_CLIP(context); \
 \
 	return GP_ESUCCESS; \
 }
