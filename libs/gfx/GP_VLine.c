@@ -40,14 +40,14 @@ void GP_VLineXYY_Raw(GP_Context *context, GP_Coord x, GP_Coord y0,
 	GP_FN_PER_BPP_CONTEXT(GP_VLine, context, context, x, y0, y1, pixel);
 }
 
-void GP_VLineXYH_Raw(GP_Context *context, GP_Coord x, GP_Coord y,
-                     GP_Size height, GP_Pixel pixel)
+void GP_VLineXYH_Raw(GP_Context *context, GP_Coord x, GP_Coord y, GP_Size h,
+                     GP_Pixel pixel)
 {
 	/* zero height: do not draw anything */
-	if (height == 0)
+	if (h == 0)
 		return;
 
-	GP_VLineXYY(context, x, y, y + height - 1, pixel);
+	GP_VLineXYY(context, x, y, y + h - 1, pixel);
 }
 
 void GP_VLineXYY(GP_Context *context, GP_Coord x, GP_Coord y0,
@@ -68,12 +68,12 @@ void GP_VLineXYY(GP_Context *context, GP_Coord x, GP_Coord y0,
 	}
 }
 
-void GP_VLineXYH(GP_Context *context, GP_Coord x, GP_Coord y,
-                  GP_Size height, GP_Pixel pixel)
+void GP_VLineXYH(GP_Context *context, GP_Coord x, GP_Coord y, GP_Size h,
+                 GP_Pixel pixel)
 {
 	/* zero height: do not draw anything */
-	if (height == 0)
+	if (h == 0)
 		return;
 
-	GP_VLineXYY(context, x, y, y + height - 1, pixel);
+	GP_VLineXYY(context, x, y, y + h - 1, pixel);
 }

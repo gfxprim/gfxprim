@@ -34,11 +34,11 @@ void GP_VLineXYY(GP_Context *context, GP_Coord x, GP_Coord y0,
 void GP_VLineXYY_Raw(GP_Context *context, GP_Coord x, GP_Coord y0,
                      GP_Coord y1, GP_Pixel pixel);
 
-void GP_VLineXYH(GP_Context *context, GP_Coord x, GP_Coord y,
-                 GP_Size height, GP_Pixel pixel);
+void GP_VLineXYH(GP_Context *context, GP_Coord x, GP_Coord y, GP_Size h,
+                 GP_Pixel pixel);
 
-void GP_VLineXYH_Raw(GP_Context *context, GP_Coord x, GP_Coord y,
-                     GP_Size height, GP_Pixel pixel);
+void GP_VLineXYH_Raw(GP_Context *context, GP_Coord x, GP_Coord y, GP_Size h,
+                     GP_Pixel pixel);
 
 /* default argument set is XYY */
 static inline void GP_VLine(GP_Context *context, GP_Coord x,

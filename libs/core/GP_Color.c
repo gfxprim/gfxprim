@@ -87,12 +87,15 @@ const char *GP_ColorToColorName(GP_Color col)
 	return color_names[col];
 }
 
-GP_Pixel GP_ColorNameToPixel(GP_Context *context, const char *color_name)
+bool GP_ColorNameToPixel(GP_Context *context, const char *color_name,
+                         GP_Pixel *pixel)
 {
 	GP_Color col = GP_ColorNameToColor(color_name);
 
-	if (col < 0)
-		return 0;
+	if (col == GP_COL_INVALID)
+		return false;
 
-	return GP_ColorToPixel(context, col);
+	*pixel = GP_ColorToPixel(context, col);
+
+	return true;
 }
