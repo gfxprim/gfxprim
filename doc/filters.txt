@@ -1,7 +1,7 @@
 Context filters
 ---------------
 
-Pixel filters for 'GP_Context'.
+Pixel filters for 'GP_Context'. The context filter is basially an function that modifies context somehow (may even allocate new context to store result).
 
 Rotation
 ~~~~~~~~
@@ -13,8 +13,7 @@ Rotation
 GP_RetCode GP_MirrorH(GP_Context *context);
 -------------------------------------------------------------------------------
 
-Mirrors context pixels horizontaly and updates the context metadata (mirrors
-cliping rectangle too).
+Mirrors context pixels horizontaly and updates the context metadata.
 
 [source,c]
 -------------------------------------------------------------------------------
@@ -23,8 +22,7 @@ cliping rectangle too).
 GP_RetCode GP_MirrorV(GP_Context *context);
 -------------------------------------------------------------------------------
 
-Mirrors context pixels verticaly and updates the context metadata (mirrors
-cliping rectangle too).
+Mirrors context pixels verticaly and updates the context metadata.
 
 [source,c]
 -------------------------------------------------------------------------------
@@ -33,8 +31,7 @@ cliping rectangle too).
 GP_RetCode GP_RotateCW(GP_Context *context);
 -------------------------------------------------------------------------------
 
-Rotates context clock wise and updates the context metadata (rotates cliping
-rectangle too).
+Rotates context clock wise and updates the context metadata.
 
 [source,c]
 -------------------------------------------------------------------------------
@@ -43,6 +40,5 @@ rectangle too).
 GP_RetCode GP_RotateCCW(GP_Context *context);
 -------------------------------------------------------------------------------
 
-Rotates context counter clock wise and updates the context metadata (rotates
-cliping rectangle too).
+Rotates context counter clock wise and updates the context metadata.
 

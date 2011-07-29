@@ -3,7 +3,8 @@ Basic types
 Return Code
 ~~~~~~~~~~~
 
-Basically each gfxprim function returns one of following return codes:
+Some gfxprim function returns one of following return codes (may be removed in
+future):
 
 [source,c]
 --------------------------------------------------------------------------------
@@ -29,74 +30,51 @@ Return codes could be translated into an error messages.
 const char *GP_RetCodeName(GP_RetCode code);
 --------------------------------------------------------------------------------
 
+Coord and Size
+~~~~~~~~~~~~~~
+For drawing API there are two integer types defined the 'GP_Coord' for
+coordinates and 'GP_Size' for size, length or so.
+
+
 Color and pixel types
 ~~~~~~~~~~~~~~~~~~~~~
 
-The color, in gfxprim is abstract value that represents color in some format,
-while pixel is color in format of the target bitmap.
+The color, in gfxprim is enumeration of symbolic color names while pixel is
+integer value or you may say color in format of the target bitmap.
 
-Color and pixel types could be converted between each other but certain
-conversions lose information.
+Color could be converted into given pixel type which will result in integer
+value suitable for usage with drawing functions. The color could be also
+converted to color name (C string in English language) and C string may be
+matched against table of color names.
 
-Color types are defined in 'core/GP_Color.h' and pixels in 'core/GP_Pixel.h'.
-The color is union of structures so that is easy to manipulate with each color
-types, the pixel is basically sequence of bytes stored in long enough integer
-number.
+As all drawing functions works with pixel rather than color the color must be
+converted before using function to draw a shape into a bitmap.
 
-Before drawing a shape into a bitmap, color must be converted into pixel as
-all drawing functions takes pixel rather than color.
-
-The color types:
+The color is defined as follows:
 
 [source,c]
 --------------------------------------------------------------------------------
-typedef enum GP_ColorType {
-        GP_NOCOLOR = 0,
-        GP_COLNAME,
-        GP_PALETTE,
-        GP_PAL4,
-        GP_PAL8,
-        GP_G1,
-        GP_G2,
-        GP_G4,
-        GP_G8,
-        GP_RGB555,
-        GP_RGB565,
-        GP_RGB666,
-        GP_RGB888,
-        GP_RGBA8888,
-        GP_COLMAX,
-} GP_ColorType;
---------------------------------------------------------------------------------
-
-Predefined names are provided for the most basic colors:
-
-[source,c]
---------------------------------------------------------------------------------
-typedef enum GP_ColorName {
+typedef enum GP_Color {
+        GP_COL_INVALID = -1,
         GP_COL_BLACK,
-        GP_COL_RED,
-        GP_COL_GREEN,
-        GP_COL_BLUE,
-        GP_COL_YELLOW,
-        GP_COL_BROWN,
-        GP_COL_ORANGE,
-        GP_COL_GRAY_DARK,
-        GP_COL_GRAY_LIGHT,
-        GP_COL_PURPLE,
-        GP_COL_WHITE,
-        GP_COL_MAX,
-} GP_ColorName;
+	...
+} GP_Color;
 --------------------------------------------------------------------------------
 
-To convert color to context pixel type use:
+Color and Pixel conversion functions, the last one returns 'true' in case of
+successful match and conversion and false otherwise.
 
 [source,c]
 --------------------------------------------------------------------------------
-GP_RetCode GP_ColorToPixel(struct GP_Context *context, GP_Color color,
-                           GP_Pixel *pixel);
+#include <core/GP_Color.h>
 
-GP_RetCode GP_ColorNameToPixel(struct GP_Context *context, GP_ColorName name,
-                               GP_Pixel *pixel);
+GP_Pixel GP_ColorToPixel(GP_Context *context, GP_Color color);
+
+GP_Color GP_ColorNameToColor(const char *color_name);
+
+const char *GP_ColorToColorName(GP_Color color);
+
+bool GP_ColorNameToPixel(GP_Context *context, const char *color_name,
+                         GP_Pixel *pixel);
 --------------------------------------------------------------------------------
 

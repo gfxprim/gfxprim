@@ -20,25 +20,21 @@ typedef struct GP_Context {
 	int axes_swap:1;         /* Context rotation and mirroring          */
 	int x_swap:1;
 	int y_swap:1;
- 
-	uint32_t clip_w_min;     /* Clipping rectanle                       */
-	uint32_t clip_w_max;
-	uint32_t clip_h_min;
-	uint32_t clip_h_max;
 } GP_Context;
 -------------------------------------------------------------------------------
 
-The 'GP_Context' holds metadata needed for bitmaps. The values of pixels
+The 'GP_Context' holds meta-data needed for bitmaps. The values of pixels
 are stored as bitmap lines (aligned to bytes) in one dimensional array.
-The addres of pixel could be determined by GP_PIXEL_ADDRESS(context, x, y)
-which returns byte aligned addres for the pixel.
+The address of pixel could be determined by GP_PIXEL_ADDRESS(context, x, y)
+which returns byte aligned address for the pixel.
 
 Rotation
 ^^^^^^^^
+All gfx functions does honor rotation and mirroring. If you really need drawing
+primitives without it use variants with _Raw suffix. 
 
-Rotation and mirroring is honored only by functions starting with extra T.
-So GP_TLine() is equal to GP_Line(), when all axes_sawp, x_swap and y_swap are
-set to zero.
+So GP_Line() is equal to GP_Line_Raw(), when all axes_swap, x_swap and y_swap
+are set to zero.
 
 There are various macros for transforming coordinates and sizes in
 'core/GP_Transform.h'.
@@ -46,13 +42,6 @@ There are various macros for transforming coordinates and sizes in
 * *GP_TRANSFORM_POINT(x, y)*
 * *GP_TRANSFORM_RECT(x, y, w, h)*
 * *GP_RETRANSFORM_POINT(x, y)*
-
-Clipping rectangle
-^^^^^^^^^^^^^^^^^^
-
-All drawing functions honor the clipping rectangle, eg. no pixels are put,
-even when the coordinates are inside the bitmap, if they are outside of
-clipping rectangle.
 
 Functions
 ~~~~~~~~~
@@ -63,12 +52,10 @@ Functions
 
 uint32_t GP_ContextW(struct GP_Context *context);
 uint32_t GP_ContextH(struct GP_Context *context);
-uint32_t GP_TContextW(struct GP_Context *context);
-uint32_t GP_TContextH(struct GP_Context *context);
 -------------------------------------------------------------------------------
 
-Functions to get context width and height. Functions with 'T' prefix do honour
-rotation flags (swaps W and H if axes_swap is set).
+Functions to get context width and height that do honor rotation flags (swaps
+W and H if axes_swap is set).
 
 [source,c]
 -------------------------------------------------------------------------------
@@ -88,7 +75,7 @@ counter clock wise.
 GP_Context *GP_ContextAlloc(uint32_t w, uint32_t h, GP_PixelType type);
 -------------------------------------------------------------------------------
 
-Allocates and initalizes the 'GP_Context' structure. The size for pixels is
+Allocates and initializes the 'GP_Context' structure. The size for pixels is
 computed from width, height and pixel type. Moreover the rotation flags are
 set to zero and clipping rectangle is set to whole bitmap.
 
@@ -110,9 +97,9 @@ Free the context allocated memory.
 GP_Context *GP_ContextCopy(GP_Context *context, int flag);
 -------------------------------------------------------------------------------
 
-Copy a context. Allocates and initalizes a 'GP_Context'. If flag is set to
-GP_CONTEXT_WITH_PIXELS, the actuall bitmap is copied from contex to newly
-allocated context, otherwise only context metadata are copied.
+Copy a context. Allocates and initializes a 'GP_Context'. If flag is set to
+GP_CONTEXT_WITH_PIXELS, the actual bitmap is copied from context to newly
+allocated context, otherwise only context meta-data are copied.
 
 The newly created context should be later freed with 'GP_ContextFree()'.
 

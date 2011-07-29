@@ -1,6 +1,7 @@
 all: api.html
 
-api.html: general.txt api.txt context.txt loaders.txt filters.txt
+api.html: general.txt api.txt context.txt loaders.txt filters.txt \
+          basic_types.txt drawing_api.txt
 	asciidoc -a toc api.txt
 
 api.pdf: api.txt
