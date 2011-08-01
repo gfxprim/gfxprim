@@ -1,35 +1,21 @@
-# Module with PixelType descrition class
+#
+#  gfxprim.pixeltype - Module with PixelType descrition class
+#
 # 2011 - Tomas Gavenciak <gavento@ucw.cz>
+#
 
-# pixel format:
-#   type
-#   - PAL
-#   - HSVRGBA
-#   per chan
-#     name, pos, size
-#   bitwidth
-#   name
-
-import re, os, sys
+import re
+import os
+import sys
 import gfxprim
 from gfxprim import die
 
-## *Global* dictionary of all pixeltypes { name : PixelType }
-pixeltypes = {}
 
-## *Global* set of all encountered channel names  
-channels = set()
+def get_size_suffix(self.bpp, bit_endian):
+  "Create pixel-size suffix (like 16BPP or 4BPP_LE)"
 
-## Allowed bit-sizes of pixels
-bitsizes = [1,2,4,8,16,24,32]
-
-## bit_endian values
-bit_endians = ['LE', 'BE']
-
-## Create pixel-size suffix (16BPP or 4BPP_LE)
-def get_size_suffix(bpp, bit_endian):
-  assert bpp in bitsizes
-  assert bit_endian in bit_endians
+  assert bpp in self.sizes
+  assert bit_endian in self.bit_endians
   size_suffix = '%dBPP' % (bpp)
   if bpp < 8:
     size_suffix += '_' + bit_endian
@@ -38,28 +24,22 @@ def get_size_suffix(bpp, bit_endian):
 
 class PixelType(object):
   """Representation of one GP_PixelType"""
-  def __init__(self, name, size, chanslist, number=None, bit_endian=None):
+
+  def __init__(self, name, size, chanslist, bit_endian=None):
     """`name` must be a valid C identifier
-    `size` is in bits, allowed are 1, 2, 4, 8, 16, 24, 32
-    `bit_endian` is order of 1,2,4BPP pixels in a byte, either 'BE' or 'LE'
+    `size` is type bit-width
+    `bit_endian` is required in 1,2,4 BPP types to determine the order of
+       pixels in a byte, either 'BE' or 'LE'
     `chanslist` is a list of triplets describing individual channels as 
-     [ (`chan_name`, `bit_offset`, `bit_size`) ]
-     `chan_name` is usually one of: R, G, B, V (value, used for grayscale), A (opacity) 
-     `number` is auto-assigned (internal use only)
+      [ (`chan_name`, `bit_offset`, `bit_size`) ]
+      where `chan_name` is usually one of: R, G, B,
+      V (value, used for grayscale), A (opacity)
     """
     assert re.match('\A[A-Za-z][A-Za-z0-9_]*\Z', name)
     self.name = name 
     self.chanslist = chanslist 
     self.chans = dict() # { chan_name: (offset, size) }
-    # all types except UNKNOWN=0 must have one of these sizes
-    if number is not 0:
-      assert(size in bitsizes) 
     self.size = size
-
-    # bit_endian matters only for 1,2,4bpp
-    if size>=8 and bit_endian is None:
-      bit_endian = bit_endians[0]
-    assert bit_endian in bit_endians
     self.bit_endian = bit_endian
 
     if self.size == 0:
@@ -67,12 +47,6 @@ class PixelType(object):
     else:
       self.size_suffix = get_size_suffix(self.size, self.bit_endian)
 
-    # Numbering from 1 
-    if number is not None:
-      self.number = number
-    else:
-      self.number = max([ptype.number for ptype in pixeltypes.values()] + [0]) + 1
-  
     # Verify channel bits for overlaps
     # also builds a bit-map of the PixelType
     self.bits = ['x']*size 
@@ -84,9 +58,16 @@ class PixelType(object):
 	assert(self.bits[i]=='x')
 	self.bits[i] = c[0]
 
-    assert self.name not in pixeltypes.keys()
-    pixeltypes[self.name] = self
-    channels.update(set(self.chans.keys()))
+  def valid_for_config(self, config):
+    "Check PixelType compatibility with given GfxPrimConfig."
+
+    # all types except UNKNOWN=0 must have one of these sizes
+    if self.name != "UNKNOWN":
+      assert(self.size in config.sizes)
+
+    # bit_endian matters only for non-multiple-of-8 bpp
+    if size % 8 != 0 or bit_endian is not None:
+      assert bit_endian in config.bit_endians
 
   def __str__(self):
     return "<PixelType " + self.name + ">"
@@ -94,27 +75,3 @@ class PixelType(object):
   def is_palette(self):
     return ('P' in self.chans)
 
-def load_pixeltypes(defs_file = None):
-  "Initialize pixeltypes by loading the defs file.\n"
-  "Looks for the file by parameter, env['PIXELTYPE_DEFS'] and "
-  "in dir(__file__)/../../pixeltypes.py, in that order.\n"
-  "PixelType UNKNOWN is not defined here."
-  if not defs_file:
-    defs_file = os.environ.get('PIXELTYPE_DEFS', None)
-  if not defs_file:
-    path = os.path.dirname(os.path.abspath(__file__))
-    defs_file = os.path.join(path, '..', '..', 'pixeltypes.py')
-  execfile(defs_file)
-
-def __init__():
-  "Initialize PixelType UNKNOWN.\n"
-  "Currently also reads PIXELTYPE_DEFS, but that may change!"
-  if 0 not in pixeltypes:
-    PixelType("UNKNOWN", 0, [], bit_endian=bit_endians[0], number=0)
-  load_pixeltypes()
-  # check if some types were loaded
-  if len(pixeltypes) <= 1:
-    sys.stderr.write("WARNING: no PixelTypes were loaded.")
-
-__init__()
-  
