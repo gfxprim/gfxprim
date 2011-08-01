@@ -2,7 +2,7 @@
 #
 # Generators for GP_Pixel_Blit.gen.c and GP_Pixel_Blit.gen.h
 #
-# 2011 - Tomas Gavenciak <gavento@ucw.cz> 
+# 2011 - Tomas Gavenciak <gavento@ucw.cz>
 #
 
 from gfxprim.generators.generator import *

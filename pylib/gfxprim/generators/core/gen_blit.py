@@ -1,18 +1,21 @@
 # Module generating C source and headers for various PixelTypes
 # - submodule for blit and friends
-# 2011 - Tomas Gavenciak <gavento@ucw.cz> 
+# 2011 - Tomas Gavenciak <gavento@ucw.cz>
 
 from gfxprim.generators.utils import *
+
 
 ## all generated direct blits, for generating GP_Blit() and others
 generated_blits = []
 
+
 # TODO: adapt for both bit-endianness (in-byte prefix and suffix)
 # WARN: assuming little-endian in sub-byte pixels order (probably)
 def gen_blit_same_t(size, size_suffix, header, code):
-  "Generate a function blitting the same type of pixel."
-  "Only depends on bpp (bit size), size_suffix must be"
-  "of form 8BPP, 2BPP_LE and the like."
+  """Generate a function blitting the same type of pixel.
+  Only depends on bpp (bit size), size_suffix must be
+  of form 8BPP, 2BPP_LE and the like.
+  """
 
   header.rbody(
     "\n/*** Blit preserving type, variant for {{ size_suffix }} ***\n"

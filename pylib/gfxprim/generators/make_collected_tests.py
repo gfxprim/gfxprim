@@ -2,37 +2,41 @@
 #
 # Script generating collected_tests.gen.c
 #
-# Scrapes the target directory for .test.c files, looks for 
-# GP_TEST and GP_SUITE macros and generates code creating all the 
+# Scrapes the target directory for .test.c files, looks for
+# GP_TEST and GP_SUITE macros and generates code creating all the
 # tests and the suite
 #
-# 2011 - Tomas Gavenciak <gavento@ucw.cz> 
+# 2011 - Tomas Gavenciak <gavento@ucw.cz>
 #
+
 
 # Also fixed in tests.mk
 collected_tests_file = 'collected_tests.gen.c'
 
-import os, re, glob
+import os
+import re
+import glob
+import logging as log
 from gfxprim.generators.generator import *
 
-def warn(msg_s, fname=None, line=None):
-  msg('W', msg_s, fname, line)
 
-def msg(prefix, msg_s, fname=None, line=None):
-  s = '[' + prefix
-  if fname:
-    s += ' ' + fname
-    if line:
-      s += ':%d'%line
-  s += '] '
-  sys.stderr.write(s + msg_s + '\n')
+def warn(msg, fname=None, line=None):
+  "Warning including file and line info"
+  assert fname
+  loc = "[%s] " % fname
+  if line:
+    loc = "[%s:%d] " % (fname, line)
+  log.warning(loc + msg)
+
 
 testfile_patterns = ['*.test.c', '*.test.gen.c']
 
-suites = {} # {"suitename":["testname":{test_parameters}]}
+# {"suitename":["testname":{test_parameters}]}
+suites = {}
 
 suite_re = re.compile("\A\\s*GP_SUITE\\((.*)\\)\\s*\Z")
 test_re = re.compile("\A\\s*GP_TEST\\((.*)\\)\\s*\Z")
+
 
 @generator(CHeaderGenerator(name = collected_tests_file),
            descr = 'Code creating the tests and suites for tests collected '
@@ -50,7 +54,7 @@ def tests_collected_tests(c):
     warn('No .test.c files found in "%s".' % c.fdir)
   if not suites:
     warn('No suites found, generating empty testsuite.')
-  
+
   c.rhead("#include <check.h>\n\n")
 
   for suite, tests in suites.iteritems():
@@ -92,6 +96,7 @@ def tests_collected_tests(c):
 	"{% endfor %}"
 	"}\n\n", suites=suites)
 
+
 def find_GP_directive(name, regexp, l, fname='unknown', line=0):
   "Looks for a given GP_* directive, parses args if any, "
   "retuns (name, dict_of_args) or (None, None) if not found."
@@ -107,9 +112,10 @@ def find_GP_directive(name, regexp, l, fname='unknown', line=0):
 	  s = 'dict( ' + d[1].strip(" \t\n\"") + ' )'
 	  args = eval(s)
 	except:
-	  die("error parsing arguments: %r" % s, fname, line)
+	  log.fatal("error parsing arguments: %r" % s, fname, line)
       return d[0].strip(), args
   return None, None
+
 
 def find_tests(f, fname):
   "Finds all tests in a file."

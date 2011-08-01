@@ -21,7 +21,7 @@ typedef enum GP_PixelType {
 --------------------------------------------------------------------------------
 void GP_Pixel_Print_<TYPE>(GP_Pixel p);
 
-#define GP_Pixel_GET_<CHAN>_<TYPE>(p) 
+#define GP_Pixel_GET_<CHAN>_<TYPE>(p)
 --------------------------------------------------------------------------------
 
 .For each pixel type TYPE, pixel adress and bit-offset:
@@ -80,7 +80,7 @@ GP_Pixel_Scale.gen.h
 GP_Blit.gen.[ch]
 ~~~~~~~~~~~~~~~~~~~~~~
 
-TODO: Blitting magic 
+TODO: Blitting magic
 
 .Blits within PixelTypes (defined only by bpp):
 

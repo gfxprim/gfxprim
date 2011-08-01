@@ -1,6 +1,6 @@
 # Module generating C source and headers for get/putpixel
-# 2011 - Tomas Gavenciak <gavento@ucw.cz> 
-# 2011 - Cyril Hrubis <metan@ucw.cz> 
+# 2011 - Tomas Gavenciak <gavento@ucw.cz>
+# 2011 - Cyril Hrubis <metan@ucw.cz>
 
 from gfxprim.generators.utils import *
 

@@ -1,5 +1,5 @@
 # Module generating C source and headers for various PixelTypes
-# 2011 - Tomas Gavenciak <gavento@ucw.cz> 
+# 2011 - Tomas Gavenciak <gavento@ucw.cz>
 
 from gfxprim.generators.pixeltype import pixeltypes, channels
 from gfxprim.generators.utils import j2render as r, hmask
@@ -28,7 +28,7 @@ def gen_GP_PixelType(header, code):
   "Generates definition of GP_PixelType enum"
   pt_by_num = sorted([(t.number, t) for t in pixeltypes.values()])
   sorted_pts = [t[1] for t in pt_by_num]
-  pt_max = len(sorted_pts) 
+  pt_max = len(sorted_pts)
   header.rbody(
     "/* List of all known pixel types */\n"
     "typedef enum GP_PixelType {\n"

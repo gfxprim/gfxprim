@@ -5,7 +5,7 @@
 #  GP_Convert.gen.c, GP_Convert.gen.h
 #  GP_Convert_Scale.gen.h
 #
-# 2011 - Tomas Gavenciak <gavento@ucw.cz> 
+# 2011 - Tomas Gavenciak <gavento@ucw.cz>
 #
 
 from gfxprim.generators.generator import *
@@ -42,7 +42,7 @@ def core_GP_Convert_gen_h(h, c):
   h.rhead('#include "GP_Common.h"\n');
   h.rhead('#include "GP_Context.h"\n');
   h.rhead('#include "GP_Pixel.h"\n\n');
-  
+
   c.rhead('#include "GP_Convert.h"\n\n');
 
   ## two base types for conversions
@@ -54,7 +54,7 @@ def core_GP_Convert_gen_h(h, c):
       if not t.is_palette() and t.number != 0:
 	gen_convert_to(t, bt, h, c)
 	gen_convert_to(bt, t, h, c)
-  
+
   ## Just experimental conversion macros
   gen_convert_to(pixeltypes['RGB565'], pixeltypes['RGBA8888'], h, c)
   gen_convert_to(pixeltypes['RGBA8888'], pixeltypes['V2'], h, c)

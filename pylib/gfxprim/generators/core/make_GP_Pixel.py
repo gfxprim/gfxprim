@@ -5,7 +5,7 @@
 #  GP_Pixel.gen.c, GP_Pixel.gen.h
 #  GP_Pixel_Access.gen.h
 #
-# 2011 - Tomas Gavenciak <gavento@ucw.cz> 
+# 2011 - Tomas Gavenciak <gavento@ucw.cz>
 #
 
 from gfxprim.generators.generator import *
@@ -66,7 +66,7 @@ def core_GP_Pixel_Scale_gen(h):
     for bit_endian in bit_endians:
       if (bpp < 8) or (bit_endian == bit_endians[0]):
 	gen_get_pixel_addr_bpp(bpp, get_size_suffix(bpp, bit_endian), h)
-  
+
   # Per-bpp adress/offset macros
   for bpp in bitsizes:
     for bit_endian in bit_endians:

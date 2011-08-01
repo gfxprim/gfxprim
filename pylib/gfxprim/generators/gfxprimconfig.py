@@ -1,13 +1,15 @@
 #
-#  gfxprimconfig.py - Class for (global) GfxPrim configuration
+#  gfxprim.generators.gfxprimconfig - Class for (global) GfxPrim configuration
 #
 # 2011 - Tomas Gavenciak <gavento@ucw.cz>
 
-import re, os, sys
-  
+import os
+import logging as log
+from gfxprim.generators.pixeltype import PixelType
+
 class GfxPrimConfig(object):
   def __init__(self, pixel_type = None, pixel_size=None, sizes=None,
-	       bit_endians=None, types=[]):
+	       bit_endians=None, types=None):
 
     self.pixel_type = pixel_type
     assert self.pixel_type
@@ -37,10 +39,11 @@ class GfxPrimConfig(object):
     self.types_dict = {}
     # List of all PixelTypes in order. "Unknown" must be first.
     self.types = []
-  
+
     self.add_pixeltype(PixelType("UNKNOWN", 0, [], bit_endian=bit_endians[0]))
-    for t in types:
-      self.add_pixeltype(t)
+    if types:
+      for t in types:
+        self.add_pixeltype(t)
 
   def add_pixeltype(self, pixeltype):
     "Add a PixelType and check its against the config"
@@ -53,5 +56,5 @@ class GfxPrimConfig(object):
     try:
       pixeltype.check_config(self)
     except AssertionError:
-      sys.stderr.write("Error checking PixelType %s\n" % pixeltype.name)
+      log.error("Error checking PixelType %s\n" % pixeltype.name)
 

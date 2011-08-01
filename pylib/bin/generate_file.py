@@ -3,7 +3,7 @@
 # Main source file generating script
 # Collects all known file generators from the generators/ directory
 #
-# 2011 - Tomas Gavenciak <gavento@ucw.cz> 
+# 2011 - Tomas Gavenciak <gavento@ucw.cz>
 #
 
 import sys
