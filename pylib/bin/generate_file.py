@@ -6,20 +6,28 @@
 # 2011 - Tomas Gavenciak <gavento@ucw.cz>
 #
 
-import sys
-from gfxprim.generators import utils
-from gfxprim import die
+from gfxprim import render_utils
+import jinja2
+import logging as log
+from optparse import OptionParser
 
-usage = """Usage: %s [files_to_generate...]
-The files are matched only based on path suffixes, but written to given paths.
-"""
 
-def main():
-  utils.load_generators()
-  if len(sys.argv) <= 1:
-    die(usage)
-  for f in sys.argv[1:]:
-    utils.generate_file(f)
+parser = OptionParser(usage="usage: %prog [options] <template> <output>")
+parser.add_option("-t", "--templates", dest="templates",
+                  help="Directory with templates.", default=".")
+parser.add_option("-c", "--config", dest="config",
+                  help="GfxPrim config file.", default=None)
+
+def main(options, args):
+  config = render_utils.load_gfxprimconfig(options.config)
+  assert config
+  log.info("Rendering template %s to %s", args[0], args[1])
+  render_utils.render_file(args[0], args[1], config, options.templates)
+
 
 if __name__ == '__main__':
-  main()
+  log.debug("Jinja version %s", jinja2.__version__)
+  (options, args) = parser.parse_args()
+  if len(args) != 2:
+    parser.error()
+  main(options, args)
