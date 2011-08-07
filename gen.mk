@@ -49,7 +49,7 @@ CLEAN+=$(ALL_GENERATED)
 #
 # Generated files depend on python generators and the template
 #
-$(GENSOURCES) $(GENHEADERS): %: %.t $(PYTHON_FILES)
+$(GENSOURCES) $(RGENHEADERS): %: %.t $(PYTHON_FILES)
 ifdef VERBOSE
 	${PYTHON} ${TOPDIR}/pylib/bin/generate_file.py -t $(TEMPLATE_DIR) "$@.t" "$@"
 else
