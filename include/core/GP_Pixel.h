@@ -62,12 +62,13 @@ typedef uint32_t GP_Pixel;
  * used in a one bit variable in GP_Context 
  */
 
-typedef enum { 	
-	/* less significant bits contain pixels with lower indices */ 
+typedef enum {
+	/* less significant bits contain pixels with lower indices */
+	/* also used for irrelevant bit-endian */
 	GP_BIT_ENDIAN_LE = 0,
-	/* more significant bits contain pixels with lower indices */ 
-	GP_BIT_ENDIAN_BE,     
-} GP_BIT_ENDIAN; 
+	/* more significant bits contain pixels with lower indices */
+	GP_BIT_ENDIAN_BE,
+} GP_BIT_ENDIAN;
 
 /*
  * Description of one channel
