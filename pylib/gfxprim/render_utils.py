@@ -8,15 +8,26 @@ import os
 import time
 import re
 
+def template_error(s, *args):
+  raise Exception(s, *args)
+
 def create_environment(config, template_dir):
   env = jinja2.Environment(
       line_statement_prefix = "%%",
+      line_comment_prefix = "##",
       undefined = jinja2.StrictUndefined,
       loader = jinja2.FileSystemLoader(template_dir))
   env.globals['undefined'] = jinja2.StrictUndefined()
   env.globals['pixelsizes'] = config.pixelsizes
   env.globals['pixeltypes'] = config.pixeltypes
+  env.globals['pixeltypes_dict'] = config.pixeltypes_dict
   env.globals['gfxprim_config'] = config
+  from gfxprim.pixelsize import LE, BE
+  env.globals['LE'] = LE
+  env.globals['BE'] = BE
+  env.globals['len'] = len
+  env.globals['error'] = template_error
+  env.globals['hex'] = lambda(x): hex(x).rstrip('L')
   return env
 
 

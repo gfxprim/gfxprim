@@ -15,6 +15,7 @@ class PixelSize(object):
     self.bit_endian = bit_endian
     assert self.bit_endian in [None, LE, BE]
     assert (bit_endian is not None) == self.needs_bit_endian()
+    self.bit_endian_const = "GP_BIT_ENDIAN_" + (self.bit_endian or LE)
 
     self.suffix = suffix
     if not self.suffix:

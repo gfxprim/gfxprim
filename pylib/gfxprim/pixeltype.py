@@ -39,7 +39,7 @@ class PixelType(object):
     "Check PixelType compatibility with given GfxPrimConfig."
 
     # all types except UNKNOWN must have one of these sizes
-    if self.name != "UNKNOWN":
+    if not self.is_unknown():
       assert(self.pixelsize in config.pixelsizes)
 
   def __str__(self):
@@ -47,3 +47,16 @@ class PixelType(object):
 
   def is_palette(self):
     return ('P' in self.chans)
+
+  def is_unknown(self):
+    return (self.name == "UNKNOWN")
+
+  def is_rgb(self):
+    return all((i in self.chans for i in 'RGB'))
+
+  def is_gray(self):
+    return ('V' in self.chans)
+
+  def is_alpha(self):
+    return ('A' in self.chans)
+

@@ -1,4 +1,4 @@
-%% extends "body.c.h"
+%% extends "base.c.t"
 
 %% block pre_body_guard
 #ifndef {{ header_guard }}
