@@ -37,14 +37,15 @@ TEMPLATE_DIR=$(TOPDIR)/pylib/templates/
 
 #
 # ALL templates and potential generated files (not generated automatically)
-#
+# NOTE: Currently unused
+# 
 ALL_TEMPLATES=$(shell find $(TOPDIR) -name '*.t')
 ALL_GENERATED=$(basename $(ALL_TEMPLATES))
 
 #
 # And clean them
 #
-CLEAN+=$(ALL_GENERATED)
+CLEAN+=$(GENSOURCES) $(RGENHEADERS)
 
 #
 # Generated files depend on python generators and the template

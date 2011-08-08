@@ -22,7 +22,8 @@ def main(options, args):
   config = render_utils.load_gfxprimconfig(options.config)
   assert config
   log.info("Rendering template %s to %s", args[0], args[1])
-  render_utils.render_file(args[0], args[1], config, options.templates)
+  env = render_utils.create_environment(config, options.templates)
+  render_utils.render_file(env, args[0], args[1])
 
 
 if __name__ == '__main__':

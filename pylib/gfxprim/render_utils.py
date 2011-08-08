@@ -31,8 +31,7 @@ def create_environment(config, template_dir):
   return env
 
 
-def render_file(source, result, config, template_dir):
-  env = create_environment(config, template_dir)
+def render_file(env, source, result):
   with open(source) as source_file:
     source_text = source_file.read()
   # Hack to preserve empty lines before %% line_statement
