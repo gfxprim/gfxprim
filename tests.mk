@@ -19,11 +19,18 @@ CSOURCES+=${GP_TESTLIB_SRCS}
 
 # generated suite creation code
 TESTSUITE_GEN=collected_tests.gen.c # also fixed in the code generator
-GENSOURCES+=${TESTSUITE_GEN}
+CLEAN+=${TESTSUITE_GEN}
 
 ${TESTSUITE_GEN}: $(filter-out ${TESTSUITE_GEN},${GENSOURCES}) ${GENHEADERS}
+ifdef VERBOSE
+	${PYTHON} ${TOPDIR}/pylib/bin/generate_collected_tests.py -t $(TEMPLATE_DIR) "." "$@"
+else
+	@echo "TSTS $@"
+	@${PYTHON} ${TOPDIR}/pylib/bin/generate_collected_tests.py -t $(TEMPLATE_DIR) "." "$@"
+endif
 
-TESTSUITE_SRCS=$(wildcard *.test.c) ${GENSOURCES} ${GENHEADERS} ${GP_TESTLIB_SRCS}
+
+TESTSUITE_SRCS=$(wildcard *.test.c) ${GENSOURCES} ${GENHEADERS} ${GP_TESTLIB_SRCS} ${TESTSUITE_GEN}
 INCLUDE+=../tests/common
 TESTSUITE_OBJS=$(patsubst %.c,%.o,$(TESTSUITE_SRCS))
 CLEAN+=${TESTSUITE} ${TESTSUITE_OBJS}
