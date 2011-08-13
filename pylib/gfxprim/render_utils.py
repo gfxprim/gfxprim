@@ -36,7 +36,7 @@ def render_file(env, source, result):
   try:
     source_text = source_file.read()
   finally:
-    source_text.close()
+    source_file.close()
   # Hack to preserve empty lines before %% line_statement
   source_text = re.sub("\n\n[ \t]*%%", "\n{{''}}\n%%", source_text)
 
@@ -53,7 +53,7 @@ def render_file(env, source, result):
   try:
     result_file.write(result_text)
   finally:
-    resulf_file.close()
+    result_file.close()
 
 
 def load_gfxprimconfig(config_file = None):
