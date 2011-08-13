@@ -32,7 +32,8 @@ class GfxPrimConfig(object):
     self.pixelsizes = pixelsizes
     assert isinstance(self.pixelsizes, list)
     assert self.pixel_size in [i.size for i in self.pixelsizes]
-    assert all((i.size <= self.pixel_size for i in self.pixelsizes))
+    for i in self.pixelsizes:
+      assert i.size <= self.pixel_size
 
     # Set of all encountered channel names
     self.channels = set()

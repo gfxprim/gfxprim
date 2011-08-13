@@ -52,7 +52,9 @@ class PixelType(object):
     return (self.name == "UNKNOWN")
 
   def is_rgb(self):
-    return all((i in self.chans for i in 'RGB'))
+    for i in 'RGB':
+      if i not in self.chans: return False
+    return True
 
   def is_gray(self):
     return ('V' in self.chans)
