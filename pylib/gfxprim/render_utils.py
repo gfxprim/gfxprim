@@ -32,8 +32,11 @@ def create_environment(config, template_dir):
 
 
 def render_file(env, source, result):
-  with open(source) as source_file:
+  source_file = open(source)
+  try:
     source_text = source_file.read()
+  finally:
+    source_text.close()
   # Hack to preserve empty lines before %% line_statement
   source_text = re.sub("\n\n[ \t]*%%", "\n{{''}}\n%%", source_text)
 
@@ -46,8 +49,11 @@ def render_file(env, source, result):
       header_guard = \
         os.path.split(result)[1].upper().replace('.', '_').replace('-', '_'),
       )
-  with open(result, "w") as result_file:
+  result_file = open(result, "w")
+  try:
     result_file.write(result_text)
+  finally:
+    resulf_file.close()
 
 
 def load_gfxprimconfig(config_file = None):
