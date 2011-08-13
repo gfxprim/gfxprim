@@ -6,4 +6,4 @@ LDLIBS+=-ldl
 PYLIBSDIR=$(TOPDIR)/pylib
 
 # Command to run Python with pylib/ modules
-PYTHON=PYTHONPATH=$$PYTHONPATH:${PYLIBSDIR} python
+PYTHON=PYTHONPATH=$$PYTHONPATH:${PYLIBSDIR} python -Werror
