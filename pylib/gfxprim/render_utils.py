@@ -21,7 +21,7 @@ def create_environment(config, template_dir):
   env.globals['pixelsizes'] = config.pixelsizes
   env.globals['pixeltypes'] = config.pixeltypes
   env.globals['pixeltypes_dict'] = config.pixeltypes_dict
-  env.globals['gfxprim_config'] = config
+  env.globals['config'] = config
   from gfxprim.pixelsize import LE, BE
   env.globals['LE'] = LE
   env.globals['BE'] = BE
@@ -38,6 +38,7 @@ def render_file(env, source, result):
   source_text = re.sub("\n\n[ \t]*%%", "\n{{''}}\n%%", source_text)
 
   tmpl = env.from_string(source_text)
+  tmpl.filename = source
   result_text = tmpl.render(
       date = time.ctime(),
       target = result,
