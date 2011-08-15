@@ -16,7 +16,7 @@ struct GP_Context;
  * macro to get address of pixel in a {{ ps.suffix }} context
  */
 #define GP_PIXEL_ADDR_{{ ps.suffix }}(context, x, y) \
-	((context)->pixels + (context)->bytes_per_row * (y) + {{ ps.size // 8 }} * (x))
+	((GP_Pixel*)(((void*)((context)->pixels)) + (context)->bytes_per_row * (y) + ({{ ps.size }} * (x)) / 8))
 
 /*
  * macro to get bit-offset of pixel in {{ ps.suffix }} context
@@ -29,7 +29,7 @@ struct GP_Context;
 %% if ps.size < 8
 	(((x) % {{ 8 // ps.size }}) * {{ ps.size }})
 %% else
-	(((x) * {{ ps.size }}) / 8)
+	(({{ ps.size }} * (x)) % 8)
 %% endif
 %% else
 %% if ps.size < 8
