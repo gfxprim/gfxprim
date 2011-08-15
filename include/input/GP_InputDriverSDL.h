@@ -16,29 +16,24 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2011 Jiri "BlueBear" Dluhos                            *
- *                         <jiri.bluebear.dluhos@gmail.com>                  *
- *                                                                           *
  * Copyright (C) 2009-2011 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
-#ifndef GP_H
-#define GP_H
+/*
 
-/* library core */
-#include "core/GP_Core.h"
 
-/* public drawing API */
-#include "gfx/GP_Gfx.h"
+ */
 
-/* fonts and text drawing */
-#include "text/GP_Text.h"
+#ifndef GP_INPUT_DRIVER_SDL_H
+#define GP_INPUT_DRIVER_SDL_H
 
-/* backends */
-#include "backends/GP_Backend.h"
+#include <stdint.h>
+#include <SDL/SDL.h>
 
-/* input and events */
-#include "input/GP_Event.h"
+/*
+ * Converts SDL event to GFXprim evevt and puts it into the queue.
+ */
+void GP_InputDriverSDLEventPut(SDL_Event *ev);
 
-#endif /* GP_H */
+#endif /* GP_INPUT_DRIVER_SDL_H */
