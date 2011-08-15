@@ -106,9 +106,9 @@ typedef struct {
 	GP_BIT_ENDIAN bit_endian; /* Order of pixels in a byte */
 	uint8_t numchannels;      /* Number of channels */
 	/* String describing the bit-representaton (as in "RRRRRGGGGGGBBBBB")*/
-	const char bitmap[sizeof(GP_Pixel) * 8 + 1];  
+	const char bitmap[GP_PIXEL_BITS + 1];
 	/* Individual channels */
-	const GP_PixelTypeChannel channels[GP_PIXELTYPE_MAX_CHANNELS]; 
+	const GP_PixelTypeChannel channels[GP_PIXELTYPE_MAX_CHANNELS];
 } GP_PixelTypeDescription;
 
 /*
