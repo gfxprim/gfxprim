@@ -50,6 +50,14 @@
 })
 
 /*
+ * Returns absolute value.
+ */
+#define GP_ABS(a) ({ \
+	typeof(a) _a = a; \
+	_a > 0 ? _a : -_a; \
+})
+
+/*
  * The standard likely() and unlikely() used in Kernel
  */
 #ifndef likely
