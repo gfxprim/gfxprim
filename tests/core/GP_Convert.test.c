@@ -16,7 +16,7 @@ GP_TEST(BasicPixelConversions)
 	p1 = GP_RGBAToPixel(0, 0, 0, 0, GP_PIXEL_RGBA8888);
 	fail_unless(p1 == 0x0);
 	p1 = GP_RGBToPixel(0x12, 0x34, 0x56, GP_PIXEL_RGB888);
-	fail_unless(p1 == 0x563412);
+	fail_unless(p1 == 0x123456);
 	GP_CHECK_EqualColors(p1, GP_PIXEL_RGB888, p1, GP_PIXEL_RGB888);
 	
 	p1 = GP_RGB888ToPixel(GP_RGBToPixel(0x12, 0x34, 0x56, GP_PIXEL_RGB888), GP_PIXEL_V4);
