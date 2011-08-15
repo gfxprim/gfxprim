@@ -49,7 +49,7 @@ endif # TESTSUITE
 tests: $(TESTS)
 
 runtests: tests
-	for test in $(TESTS); do LD_LIBRARY_PATH=../../build ./"$$test" -v ; done
+	for test in $(TESTS); do LD_LIBRARY_PATH=../../build ./"$$test"; done
 
 # WARN: avoid double includion?
 include $(TOPDIR)/gen.mk
