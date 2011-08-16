@@ -45,8 +45,13 @@ struct GP_Context;
  */
 static inline GP_Pixel GP_GetPixel_Raw_{{ ps.suffix }}(const GP_Context *c, int x, int y)
 {
+{# Special case to prevent some of the "overflow" warnings -#}
+%% if ps.size == config.pixel_size
+	return *(GP_PIXEL_ADDR_{{ ps.suffix}}(c, x, y));
+%% else
 	return GP_GET_BITS(GP_PIXEL_ADDR_OFFSET_{{ ps.suffix }}(x), {{ ps.size }},
 		*(GP_PIXEL_ADDR_{{ ps.suffix}}(c, x, y)));
+%% endif
 }
 
 /*
@@ -54,8 +59,13 @@ static inline GP_Pixel GP_GetPixel_Raw_{{ ps.suffix }}(const GP_Context *c, int 
  */
 static inline void GP_PutPixel_Raw_{{ ps.suffix }}(GP_Context *c, int x, int y, GP_Pixel p)
 {
+{# Special case to prevent some of the "overflow" warnings -#}
+%% if ps.size == config.pixel_size
+	*(GP_PIXEL_ADDR_{{ ps.suffix}}(c, x, y)) = p;
+%% else
 	GP_SET_BITS(GP_PIXEL_ADDR_OFFSET_{{ ps.suffix }}(x), {{ ps.size }},
 		*(GP_PIXEL_ADDR_{{ ps.suffix}}(c, x, y)), p);
+%% endif
 }
 
 %% endfor
