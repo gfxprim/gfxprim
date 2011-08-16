@@ -44,10 +44,10 @@ void GP_Blit_{{ ps.suffix }}(const GP_Context *c1, GP_Coord x1, GP_Coord y1, GP_
 		GP_ASSERT(({{ ps.size }} * w - al1 - end_al) % 8 == 0);
 		int copy_size = ({{ ps.size }} * w - al1 - end_al) / 8;
 		/* First and last byte incident to the line */
-		uint8_t *p1 = GP_PIXEL_ADDR_{{ ps.suffix }}(c1, x1, y1);
-		uint8_t *p2 = GP_PIXEL_ADDR_{{ ps.suffix }}(c2, x2, y2);
-		uint8_t *end_p1 = GP_PIXEL_ADDR_{{ ps.suffix }}(c1, x1 + w - 1, y1);
-		uint8_t *end_p2 = GP_PIXEL_ADDR_{{ ps.suffix }}(c2, x2 + w - 1, y2);
+		uint8_t *p1 = (uint8_t *) GP_PIXEL_ADDR_{{ ps.suffix }}(c1, x1, y1);
+		uint8_t *p2 = (uint8_t *) GP_PIXEL_ADDR_{{ ps.suffix }}(c2, x2, y2);
+		uint8_t *end_p1 = (uint8_t *) GP_PIXEL_ADDR_{{ ps.suffix }}(c1, x1 + w - 1, y1);
+		uint8_t *end_p2 = (uint8_t *) GP_PIXEL_ADDR_{{ ps.suffix }}(c2, x2 + w - 1, y2);
 		for (GP_Size i = 0; i < h; i++) {
 			if (al1 != 0)
 				GP_SET_BITS(al1, 8-al1, *p2, GP_GET_BITS(al1, 8-al1, *p1));
