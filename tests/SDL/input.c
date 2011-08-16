@@ -66,8 +66,8 @@ void draw_event(GP_Event *ev)
 	if (ev->type != GP_EV_KEY)
 		return;
 
-	GP_FillRect(&context, 0, 0, 200, 20, black_pixel);
-	GP_Text(&context, NULL, 0, 0, GP_ALIGN_RIGHT|GP_VALIGN_BOTTOM,
+	GP_FillRect(&context, 0, 0, 150, 35, black_pixel);
+	GP_Text(&context, NULL, 20, 20, GP_ALIGN_RIGHT|GP_VALIGN_BOTTOM,
 	        GP_EventKeyName(ev->val.key.key), white_pixel);
 	SDL_Flip(display);
 }
