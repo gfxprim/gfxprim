@@ -108,9 +108,32 @@ void event_loop(void)
 			GP_EventGet(&ev);
 			GP_EventDump(&ev);
 
-			if (ev.type == GP_EV_KEY &&
-			    ev.val.key.key == GP_KEY_ESC)
-				exit(0);
+			switch (ev.type) {
+			case GP_EV_KEY:
+				switch (ev.val.key.key) {
+				case GP_KEY_ESC:
+					exit(0);
+				case GP_BTN_LEFT:
+					GP_PutPixel(&context, ev.cursor_x,
+					            ev.cursor_y, red_pixel);
+					SDL_Flip(display);
+				break;
+				default:
+				break;
+				}
+			break;
+			case GP_EV_REL:
+				switch (ev.code) {
+				case GP_EV_REL_POS:
+					if (GP_EventGetKey(&ev, GP_BTN_LEFT)) {
+						GP_PutPixel(&context, ev.cursor_x,
+					        	    ev.cursor_y, green_pixel);
+						SDL_Flip(display);
+					}
+				break;
+				}
+			break;
+			}
 		}
 	}
 }

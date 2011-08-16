@@ -127,7 +127,7 @@ const char *GP_EventKeyName(enum GP_EventKeyValue key)
 
 static void dump_rel(struct GP_Event *ev)
 {
-	printf("EVENT REL ");
+	printf("REL ");
 
 	switch (ev->code) {
 	case GP_EV_REL_POS:
@@ -146,13 +146,15 @@ static void dump_key(struct GP_Event *ev)
 	if (ev->val.key.key < key_names_size)
 		name = key_names[ev->val.key.key];
 
-	printf("EVENT KEY %i (Key%s) %s\n",
+	printf("KEY %i (Key%s) %s\n",
 	       ev->val.key.key, name, ev->code ? "down" : "up");
 
 }
 
 void GP_EventDump(struct GP_Event *ev)
 {
+	printf("EVENT (%u) ", (unsigned int)ev->time.tv_sec % 10000);
+
 	switch (ev->type) {
 	case GP_EV_KEY:
 		dump_key(ev);

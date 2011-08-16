@@ -334,13 +334,13 @@ static inline void GP_EventSetKey(struct GP_Event *ev,
 static inline int GP_EventGetKey(struct GP_Event *ev,
                                  uint32_t key)
 {
-	return !!(ev->keys_pressed[(key)/8] & ~(1<<((key)%8)));
+	return !!(ev->keys_pressed[(key)/8] & (1<<((key)%8)));
 }
 
 static inline void GP_EventResetKey(struct GP_Event *ev,
                                     uint32_t key)
 {
-	ev->keys_pressed[(key)/8] |= 1<<((key)%8);
+	ev->keys_pressed[(key)/8] &= ~(1<<((key)%8));
 }
 
 #endif /* GP_EVENT_H */

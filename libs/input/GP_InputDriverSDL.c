@@ -126,8 +126,6 @@ void GP_InputDriverSDLEventPut(SDL_Event *ev)
 			return;
 		}
 		
-		printf("*** KEYSYM %u KEY %u\n", keysym, key);
-		
 		GP_EventPushKey(key, ev->key.state, NULL);
 	break;
 	case SDL_VIDEORESIZE:
