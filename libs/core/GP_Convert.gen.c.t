@@ -6,9 +6,9 @@
 
 #include "GP_Convert.h"
 
-##
-## Loop around "central" pixel types
-##
+{#
+ # Loop around pixel types central for the conversion.
+-#}
 %% for pt in [pixeltypes_dict['RGB888'], pixeltypes_dict['RGBA8888']]
 
 GP_Pixel GP_{{ pt.name }}ToPixel(GP_Pixel pixel, GP_PixelType type)
@@ -62,9 +62,6 @@ GP_Pixel GP_PixelTo{{ pt.name }}(GP_Pixel pixel, GP_PixelType type)
 	return p;
 }
 
-##
-## Loop arpund "central" pixel types
-##
 %% endfor
 
 %% endblock body

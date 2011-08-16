@@ -14,7 +14,6 @@ def template_error(s, *args):
 def create_environment(config, template_dir):
   env = jinja2.Environment(
       line_statement_prefix = "%%",
-      line_comment_prefix = "##",
       undefined = jinja2.StrictUndefined,
       loader = jinja2.FileSystemLoader(template_dir))
   env.globals['undefined'] = jinja2.StrictUndefined()
