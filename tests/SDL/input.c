@@ -41,7 +41,7 @@ SDL_TimerID timer;
 SDL_UserEvent timer_event;
 
 /* Values for color pixels in display format. */
-GP_Pixel red_pixel, green_pixel, blue_pixel, white_pixel;
+GP_Pixel black_pixel, red_pixel, green_pixel, blue_pixel, white_pixel;
 
 Uint32 timer_callback(__attribute__((unused)) Uint32 interval,
 			__attribute__((unused)) void *param)
@@ -57,30 +57,19 @@ void draw_pixel(void)
 	int x = random() % 320;
 	int y = random() % 240;
 
-//	pixel = GP_GetPixel(&context, x, y);
 
 	GP_PutPixel(&context, x, y, green_pixel);
+}
 
-      /* TODO: we cannot switch like this
-	 we need either to convert blue
-	 and others into Context format
-	 at the very beginning, or make
-	 a copy to convert it and match
-	 agains what we get from GP_GetPixel
+void draw_event(GP_Event *ev)
+{
+	if (ev->type != GP_EV_KEY)
+		return;
 
-	if (pixel == blue) {
-		GP_PutPixel(&context, x, y, green);
-	}
-	else if (pixel == red) {
-		GP_PutPixel(&context, x, y, white);
-	}
-	else {
-		if (x < 160) {
-			GP_PutPixel(&context, x, y, blue);
-		} else {
-			GP_PutPixel(&context, x, y, red);
-		}
-	} */
+	GP_FillRect(&context, 0, 0, 200, 20, black_pixel);
+	GP_Text(&context, NULL, 0, 0, GP_ALIGN_RIGHT|GP_VALIGN_BOTTOM,
+	        GP_EventKeyName(ev->val.key.key), white_pixel);
+	SDL_Flip(display);
 }
 
 void draw_pixels(void)
@@ -110,9 +99,13 @@ void event_loop(void)
 
 			switch (ev.type) {
 			case GP_EV_KEY:
+				draw_event(&ev);
+
 				switch (ev.val.key.key) {
 				case GP_KEY_ESC:
+					SDL_Quit();
 					exit(0);
+				break;
 				case GP_BTN_LEFT:
 					GP_PutPixel(&context, ev.cursor_x,
 					            ev.cursor_y, red_pixel);
@@ -158,13 +151,13 @@ int main(int argc, char **argv)
 	}
 
 	/* Create a window with a software back surface */
-	display = SDL_SetVideoMode(320, 240, display_bpp, SDL_SWSURFACE);
+	display = SDL_SetVideoMode(480, 640, display_bpp, SDL_SWSURFACE);
 	if (display == NULL) {
 		fprintf(stderr, "Could not open display: %s\n", SDL_GetError());
 		goto fail;
 	}
 
-	GP_EventSetScreenSize(320, 240);
+	GP_EventSetScreenSize(480, 640);
 
 	/* Print basic information about the surface */
 	printf("Display surface properties:\n");
@@ -184,6 +177,7 @@ int main(int argc, char **argv)
 	green_pixel = GP_ColorToPixel(&context, GP_COL_GREEN);
 	blue_pixel  = GP_ColorToPixel(&context, GP_COL_BLUE);
 	white_pixel = GP_ColorToPixel(&context, GP_COL_WHITE);
+	black_pixel = GP_ColorToPixel(&context, GP_COL_BLACK);
 
 	/* Set up the refresh timer */
 	timer = SDL_AddTimer(30, timer_callback, NULL);
