@@ -39,13 +39,14 @@ GP_RetCode GP_Text_Raw(GP_Context *context, const GP_TextStyle *style,
                        const char *str, GP_Pixel pixel)
 {
 	GP_CHECK_CONTEXT(context);
-	GP_CHECK_TEXT_STYLE(style);
 
 	if (str == NULL)
 		return GP_ENULLPTR;
 
 	if (style == NULL)
 		style = &DefaultStyle;
+	
+	GP_CHECK_TEXT_STYLE(style);
 
 	int width = GP_TextWidth(style, str);
 	int height = GP_TextHeight(style);
@@ -94,13 +95,14 @@ GP_RetCode GP_Text(GP_Context *context, const GP_TextStyle *style,
                    const char *str, GP_Pixel pixel)
 {
 	GP_CHECK_CONTEXT(context);
-	GP_CHECK_TEXT_STYLE(style);
 	
 	if (str == NULL)
 		return GP_ENULLPTR;
 
 	if (style == NULL)
 		style = &DefaultStyle;
+	
+	GP_CHECK_TEXT_STYLE(style);
 
 	int width = GP_TextWidth(style, str);
 	int height = GP_TextHeight(style);
@@ -145,13 +147,14 @@ GP_RetCode GP_BoxCenteredText_Raw(GP_Context *context, const GP_TextStyle *style
 				  const char *str, GP_Pixel pixel)
 {
 	GP_CHECK_CONTEXT(context);
-	GP_CHECK_TEXT_STYLE(style);
 
 	if (str == NULL)
 		return GP_ENULLPTR;
 
 	if (style == NULL)
 		style = &DefaultStyle;
+	
+	GP_CHECK_TEXT_STYLE(style);
 
 	const int mid_x = x + w/2;
 	const int mid_y = y + h/2;
@@ -168,13 +171,14 @@ GP_RetCode GP_BoxCenteredText(GP_Context *context, const GP_TextStyle *style,
                               const char *str, GP_Pixel pixel)
 {
 	GP_CHECK_CONTEXT(context);
-	GP_CHECK_TEXT_STYLE(style);
 
 	if (str == NULL)
 		return GP_ENULLPTR;
 
 	if (style == NULL)
 		style = &DefaultStyle;
+	
+	GP_CHECK_TEXT_STYLE(style);
 
 	const int mid_x = x + w/2;
 	const int mid_y = y + h/2;
