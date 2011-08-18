@@ -76,11 +76,7 @@ void GP_FillRectXYXY_Raw(GP_Context *context, GP_Coord x0, GP_Coord y0,
 void GP_FillRectXYWH_Raw(GP_Context *context, GP_Coord x, GP_Coord y,
                          GP_Size w, GP_Size h, GP_Pixel pixel)
 {
-	/* zero width/height: draw nothing */
-	if (w == 0 || h == 0)
-		return;
-
-	GP_FillRectXYXY_Raw(context, x, y, x + w - 1, y + h - 1, pixel);
+	GP_FillRectXYXY_Raw(context, x, y, x + w, y + h, pixel);
 }
 
 void GP_FillRectXYXY(GP_Context *context, GP_Coord x0, GP_Coord y0,
@@ -97,9 +93,5 @@ void GP_FillRectXYXY(GP_Context *context, GP_Coord x0, GP_Coord y0,
 void GP_FillRectXYWH(GP_Context *context, GP_Coord x, GP_Coord y,
                      GP_Size w, GP_Size h, GP_Pixel pixel)
 {
-	/* zero width/height: draw nothing */
-	if (w == 0 || h == 0)
-		return;
-
-	GP_FillRectXYXY(context, x, y, x + w - 1, y + h - 1, pixel);
+	GP_FillRectXYXY(context, x, y, x + w, y + h, pixel);
 }
