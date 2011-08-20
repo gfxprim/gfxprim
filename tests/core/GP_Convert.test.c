@@ -19,9 +19,9 @@ GP_TEST(BasicPixelConversions)
 	fail_unless(p1 == 0x123456);
 	GP_CHECK_EqualColors(p1, GP_PIXEL_RGB888, p1, GP_PIXEL_RGB888);
 	
-	p1 = GP_RGB888ToPixel(GP_RGBToPixel(0x12, 0x34, 0x56, GP_PIXEL_RGB888), GP_PIXEL_V4);
-	p2 = GP_RGBAToPixel(0x12, 0x34, 0x56, 0x78, GP_PIXEL_V2);
-	GP_CHECK_EqualColors(p1, GP_PIXEL_V4, p2, GP_PIXEL_V2);
+	p1 = GP_RGB888ToPixel(GP_RGBToPixel(0x12, 0x34, 0x56, GP_PIXEL_RGB888), GP_PIXEL_G4);
+	p2 = GP_RGBAToPixel(0x12, 0x34, 0x56, 0x78, GP_PIXEL_G2);
+	GP_CHECK_EqualColors(p1, GP_PIXEL_G4, p2, GP_PIXEL_G2);
 }
 GP_ENDTEST
 

@@ -21,7 +21,7 @@ Code creating the tests and suites for tests collected from .test.c files.
 
 void GP_TEST_{{ t['name'] }}(int);
 
-## TODO: Handle special test requirements (timing, fixture, ...)
+// TODO: Handle special test requirements (timing, fixture, ...)
 TCase *GP_TC_{{ suite }}_{{ t['name'] }}()
 {
 	TCase *tc = tcase_create("{{ t['name'] }}");
