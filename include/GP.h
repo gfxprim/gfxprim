@@ -41,4 +41,7 @@
 /* input and events */
 #include "input/GP_Event.h"
 
+/* bitmap loaders */
+#include "loaders/GP_Loaders.h"
+
 #endif /* GP_H */
