@@ -14,7 +14,7 @@
 GP_Pixel GP_{{ pt.name }}ToPixel(GP_Pixel pixel, GP_PixelType type)
 {
 	GP_Pixel p = 0;
-	switch(type) {
+	switch (type) {
 %% for tf in pixeltypes
 %% if tf.is_unknown()
 		case GP_PIXEL_UNKNOWN:
@@ -40,7 +40,7 @@ GP_Pixel GP_{{ pt.name }}ToPixel(GP_Pixel pixel, GP_PixelType type)
 GP_Pixel GP_PixelTo{{ pt.name }}(GP_Pixel pixel, GP_PixelType type)
 {
 	GP_Pixel p = 0;
-	switch(type) {
+	switch (type) {
 %% for sf in pixeltypes
 %% if sf.is_unknown()
 		case GP_PIXEL_UNKNOWN:
