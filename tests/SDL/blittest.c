@@ -27,13 +27,15 @@
 #include <stdlib.h>
 #include <SDL/SDL.h>
 
+#include "GP.h"
 #include "GP_SDL.h"
 
 static GP_Pixel black;
+static GP_Pixel white;
 
 SDL_Surface *display = NULL;
 GP_Context context;
-GP_Context *bitmap;
+GP_Context *bitmap, *bitmap_raw, *bitmap_conv;
 
 SDL_TimerID timer;
 
@@ -51,6 +53,7 @@ Uint32 timer_callback(__attribute__((unused)) Uint32 interval,
 	return 10;
 }
 
+static char text_buf[255];
 
 void redraw_screen(void)
 {
@@ -82,11 +85,27 @@ void redraw_screen(void)
 
 	SDL_LockSurface(display);
 
+	GP_Text(&context, NULL, 20, 20, GP_ALIGN_RIGHT|GP_VALIGN_BOTTOM, text_buf, white);
 	GP_Blit_Naive(bitmap, 0, 0, bitmap->w, bitmap->h, &context, bitmap_x, bitmap_y);
 
 	SDL_UpdateRect(display, bitmap_x, bitmap_y, bitmap->w, bitmap->h);
+	SDL_UpdateRect(display, 20, 20, 300, 50);
 
 	SDL_UnlockSurface(display);
+}
+
+static void change_bitmap(void)
+{
+	if (bitmap == bitmap_raw)
+		bitmap = bitmap_conv;
+	else
+		bitmap = bitmap_raw;
+	
+	snprintf(text_buf, sizeof(text_buf), "Blitting '%s' -> '%s'",
+	         GP_PixelTypes[bitmap->pixel_type].name,
+		 GP_PixelTypes[context.pixel_type].name);
+
+	GP_FillRectXYWH(&context, 20, 20, 300, 50, black);
 }
 
 void event_loop(void)
@@ -100,11 +119,13 @@ void event_loop(void)
 		case SDL_USEREVENT:
 			redraw_screen();
 			break;
-
 		case SDL_KEYDOWN:
 			switch (event.key.keysym.sym) {
 			case SDLK_p:
 				pause_flag = !pause_flag;
+			break;
+			case SDLK_SPACE:
+				change_bitmap();
 			break;
 			case SDLK_ESCAPE:
 				return;
@@ -143,11 +164,11 @@ int main(int argc, char *argv[])
 
 	GP_RetCode ret;
 
-	if (ret = GP_LoadPGM("ball.pgm", &bitmap)) {
-		fprintf(stderr, "Failed to load fractal: %s\n", GP_RetCodeName(ret));
+	if ((ret = GP_LoadPGM("ball.pgm", &bitmap_raw))) {
+		fprintf(stderr, "Failed to load bitmap: %s\n", GP_RetCodeName(ret));
 		return 1;
 	}
-
+	
 	/* Initialize SDL */
 	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) != 0) {
 		fprintf(stderr, "Could not initialize SDL: %s\n", SDL_GetError());
@@ -162,8 +183,12 @@ int main(int argc, char *argv[])
 	}
 
 	GP_SDL_ContextFromSurface(&context, display);
+	
+	bitmap_conv = GP_ContextConvert(bitmap_raw, context.pixel_type);
+	change_bitmap();
 
 	black = GP_ColorToPixel(&context, GP_COL_BLACK);
+	white = GP_ColorToPixel(&context, GP_COL_WHITE);
 
 	/* Set up the refresh timer */
 	timer = SDL_AddTimer(60, timer_callback, NULL);
