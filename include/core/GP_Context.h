@@ -102,6 +102,14 @@ GP_Context *GP_ContextAlloc(uint32_t w, uint32_t h, GP_PixelType type);
 GP_Context *GP_ContextCopy(GP_Context *context, int flag);
 
 /*
+ * Converts context to different pixel type.
+ *
+ * This is naive implementation that doesn't do any ditherings or error
+ * diffusions.
+ */
+GP_Context *GP_ContextConvert(const GP_Context *context, GP_PixelType res_type);
+
+/*
  * Free context.
  */
 void GP_ContextFree(GP_Context *context);

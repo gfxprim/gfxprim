@@ -24,6 +24,7 @@
  *****************************************************************************/
 
 #include "GP_Core.h"
+#include "GP_Blit.h"
 
 #include <string.h>
 
@@ -97,6 +98,18 @@ GP_Context *GP_ContextAlloc(uint32_t w, uint32_t h, GP_PixelType type)
 	context->x_swap    = 0;
 
 	return context;
+}
+
+GP_Context *GP_ContextConvert(const GP_Context *context, GP_PixelType res_type)
+{
+	GP_Context *ret = GP_ContextAlloc(context->w, context->h, res_type);
+
+	if (ret == NULL)
+		return NULL;
+
+	GP_Blit_Naive(context, 0, 0, context->w, context->h, ret, 0, 0);
+
+	return ret;
 }
 
 void GP_ContextFree(GP_Context *context)
