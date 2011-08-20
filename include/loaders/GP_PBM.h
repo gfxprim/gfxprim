@@ -19,7 +19,7 @@
  * Copyright (C) 2009-2010 Jiri "BlueBear" Dluhos                            *
  *                         <jiri.bluebear.dluhos@gmail.com>                  *
  *                                                                           *
- * Copyright (C) 2009-2010 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2011 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
@@ -28,8 +28,8 @@
 
 #include "core/GP_Context.h"
 
-GP_RetCode GP_LoadPBM(const char *src, GP_Context **res);
+GP_RetCode GP_LoadPBM(const char *src_path, GP_Context **res);
 
-GP_RetCode GP_SavePBM(const char *res, GP_Context *src);
+GP_RetCode GP_SavePBM(const char *res_path, GP_Context *src);
 
 #endif /* GP_PBM_H */

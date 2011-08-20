@@ -48,9 +48,9 @@
 #include "GP_PXMCommon.h"
 #include "GP_PBM.h"
 
-GP_RetCode GP_LoadPBM(const char *src, GP_Context **res)
+GP_RetCode GP_LoadPBM(const char *src_path, GP_Context **res)
 {
-	FILE *f = fopen(src, "r");
+	FILE *f = fopen(src_path, "r");
 	uint32_t w, h;
 
 	if (f == NULL)
@@ -62,7 +62,7 @@ GP_RetCode GP_LoadPBM(const char *src, GP_Context **res)
 	if (fscanf(f, "%"PRIu32"%"PRIu32, &w, &h) < 2)
 		goto err1;
 
-	*res = GP_ContextAlloc(w, h, GP_PIXEL_G1);
+	*res = GP_ContextAlloc(w, h, GP_PIXEL_V1);
 
 	if (*res == NULL) {
 		fclose(f);
@@ -81,14 +81,14 @@ err1:
 	return GP_EBADFILE;
 }
 
-GP_RetCode GP_SavePBM(const char *res, GP_Context *src)
+GP_RetCode GP_SavePBM(const char *res_path, GP_Context *src)
 {
 	FILE *f;
 
-	if (src->pixel_type != GP_PIXEL_G1)
+	if (src->pixel_type != GP_PIXEL_V1)
 		return GP_ENOIMPL;
 	
-	f = fopen(res, "w");
+	f = fopen(res_path, "w");
 
 	if (f == NULL)
 		return GP_EBADFILE;

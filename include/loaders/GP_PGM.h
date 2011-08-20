@@ -28,8 +28,8 @@
 
 #include "core/GP_Context.h"
 
-GP_RetCode GP_LoadPGM(const char *src, GP_Context **res);
+GP_RetCode GP_LoadPGM(const char *src_path, GP_Context **res);
 
-GP_RetCode GP_SavePGM(const char *res, GP_Context *src);
+GP_RetCode GP_SavePGM(const char *res_path, GP_Context *src);
 
 #endif /* GP_PGM_H */

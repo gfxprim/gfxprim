@@ -19,7 +19,7 @@
  * Copyright (C) 2009-2010 Jiri "BlueBear" Dluhos                            *
  *                         <jiri.bluebear.dluhos@gmail.com>                  *
  *                                                                           *
- * Copyright (C) 2009-2010 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2011 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
@@ -34,5 +34,7 @@
 
 #include "GP_PBM.h"
 #include "GP_PGM.h"
+
+struct GP_Context *GP_Load(const char *src_path);
 
 #endif /* GP_LOADERS_H */
