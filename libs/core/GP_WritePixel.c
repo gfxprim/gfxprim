@@ -236,6 +236,7 @@ void GP_WritePixels24bpp(void *start, size_t count, uint32_t value)
 		block[1] = bcab;
 		block[2] = cabc;
 		p = (uint32_t *)(bytep + 3);
+		i--;
 		break;
 	}
 
@@ -262,11 +263,13 @@ void GP_WritePixels24bpp(void *start, size_t count, uint32_t value)
 	case 2:
 		bytep[0] = c;
 		bytep++;
+		i--;
 		break;
 	case 3:
 		bytep[0] = b;
 		bytep[1] = c;
 		bytep += 2;
+		i--;
 		break;
 	}
 
