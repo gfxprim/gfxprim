@@ -62,7 +62,7 @@ GP_RetCode GP_LoadPBM(const char *src_path, GP_Context **res)
 	if (fscanf(f, "%"PRIu32"%"PRIu32, &w, &h) < 2)
 		goto err1;
 
-	*res = GP_ContextAlloc(w, h, GP_PIXEL_V1);
+	*res = GP_ContextAlloc(w, h, GP_PIXEL_G1);
 
 	if (*res == NULL) {
 		fclose(f);
@@ -85,7 +85,7 @@ GP_RetCode GP_SavePBM(const char *res_path, GP_Context *src)
 {
 	FILE *f;
 
-	if (src->pixel_type != GP_PIXEL_V1)
+	if (src->pixel_type != GP_PIXEL_G1)
 		return GP_ENOIMPL;
 	
 	f = fopen(res_path, "w");

@@ -85,16 +85,16 @@ config = GfxPrimConfig(
       # Gray-only pixel types
       #
 
-      PixelType(name='V1', pixelsize=PS_1BPP_LE, chanslist=[
+      PixelType(name='G1', pixelsize=PS_1BPP_LE, chanslist=[
 	  ('V', 0, 1)]),
 
-      PixelType(name='V2', pixelsize=PS_2BPP_LE, chanslist=[
+      PixelType(name='G2', pixelsize=PS_2BPP_LE, chanslist=[
 	  ('V', 0, 2)]),
 
-      PixelType(name='V4', pixelsize=PS_4BPP_LE, chanslist=[
+      PixelType(name='G4', pixelsize=PS_4BPP_LE, chanslist=[
 	  ('V', 0, 4)]),
 
-      PixelType(name='V8', pixelsize=PS_8BPP, chanslist=[
+      PixelType(name='G8', pixelsize=PS_8BPP, chanslist=[
 	  ('V', 0, 8)]),
 
       #

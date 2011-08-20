@@ -117,16 +117,16 @@ GP_RetCode GP_LoadPGM(const char *src_path, GP_Context **res)
 	
 	switch (gray) {
 	case 1:
-		type = GP_PIXEL_V1;
+		type = GP_PIXEL_G1;
 	break;
 	case 3:
-		type = GP_PIXEL_V2;
+		type = GP_PIXEL_G2;
 	break;
 	case 15:
-		type = GP_PIXEL_V4;
+		type = GP_PIXEL_G4;
 	break;
 	case 255:
-		type = GP_PIXEL_V8;
+		type = GP_PIXEL_G8;
 	break;
 	default:
 		goto err1;
@@ -171,16 +171,16 @@ GP_RetCode GP_SavePGM(const char *res_path, GP_Context *src)
 	uint32_t gray;
 
 	switch (src->pixel_type) {
-	case GP_PIXEL_V1:
+	case GP_PIXEL_G1:
 		gray = 1;
 	break;
-	case GP_PIXEL_V2:
+	case GP_PIXEL_G2:
 		gray = 3;
 	break;
-	case GP_PIXEL_V4:
+	case GP_PIXEL_G4:
 		gray = 15;
 	break;
-	case GP_PIXEL_V8:
+	case GP_PIXEL_G8:
 		gray = 255;
 	break;
 	default:

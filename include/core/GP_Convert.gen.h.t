@@ -80,7 +80,7 @@ GP_Pixel GP_PixelTo{{ pt.name }}(GP_Pixel pixel, GP_PixelType type);
 
 /* Experimental macros testing generated scripts */
 {{ GP_Pixel_TYPE_TO_TYPE(pixeltypes_dict['RGB565'], pixeltypes_dict['RGBA8888']) }}
-{{ GP_Pixel_TYPE_TO_TYPE(pixeltypes_dict['RGBA8888'], pixeltypes_dict['V2']) }}
+{{ GP_Pixel_TYPE_TO_TYPE(pixeltypes_dict['RGBA8888'], pixeltypes_dict['G2']) }}
 {{ GP_Pixel_TYPE_TO_TYPE(pixeltypes_dict['VA12'], pixeltypes_dict['RGBA8888']) }}
 
 %% endblock body
