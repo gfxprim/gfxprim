@@ -113,7 +113,7 @@ static inline GP_Pixel GP_ConvertContextPixel(GP_Pixel pixel,
                                               const GP_Context *from,
 					      const GP_Context *to)
 {
-	return GP_RGBA8888ToPixel(GP_PixelToRGBA8888(from->pixel_type, pixel),
+	return GP_RGBA8888ToPixel(GP_PixelToRGBA8888(pixel, from->pixel_type),
 	                          to->pixel_type);
 }
 
