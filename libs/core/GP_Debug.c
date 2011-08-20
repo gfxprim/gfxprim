@@ -16,41 +16,20 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2010 Jiri "BlueBear" Dluhos                            *
- *                         <jiri.bluebear.dluhos@gmail.com>                  *
- *                                                                           *
- * Copyright (C) 2009-2010 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2011 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
-/*
+#include "GP_Debug.h"
 
-  This is header file for public core API.
+static unsigned int GP_debug_level = GP_DEFAULT_DEBUG_LEVEL;
 
- */
+void GP_SetDebugLevel(unsigned int level)
+{
+	GP_debug_level = level;
+}
 
-#ifndef GP_CORE_H
-#define GP_CORE_H
-
-/* Common building blocks */
-#include "core/GP_Common.h"
-
-/* Context ... */
-#include "core/GP_Context.h"
-
-/* ... and it's trasformations */
-#include "core/GP_Transform.h"
-
-/* Pixeltypes */
-#include "core/GP_Pixel.h"
-
-/* Pixel conversions */
-#include "core/GP_Convert.h"
-
-/* Individual pixel access */
-#include "core/GP_GetPutPixel.h"
-
-/* Debug and debug level */
-#include "core/GP_Debug.h"
-
-#endif /* GP_CORE_H */
+unsigned int GP_GetDebugLevel(void)
+{
+	return GP_debug_level;
+}
