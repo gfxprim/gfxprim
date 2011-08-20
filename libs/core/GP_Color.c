@@ -58,10 +58,28 @@ static uint8_t rgb888_colors[][3] = {
 	{0xff, 0xff, 0xff}, /* White      */
 };
 
+/* 8-8-4 RGB palette */
+static uint8_t p8_colors[] = {
+	0x00, /* Black     */
+	0xe0, /* Red       */
+	0x1c, /* Green     */
+	0x03, /* Blue      */
+        0xfc, /* Yellow    */
+	0x88, /* Brown     */
+	0xf0, /* Orange    */
+	0x49, /* DarkGray  */
+	0x92, /* LightGray */
+	0x8a, /* Purple    */
+	0xff, /* White     */
+};
+
 GP_Pixel GP_ColorToPixel(GP_Context *context, GP_Color col)
 {
 	GP_ASSERT(col < GP_COL_MAX);
 	GP_ASSERT(col >= 0);
+
+	if (context->pixel_type == GP_PIXEL_P8)
+		return p8_colors[col];
 
 	return GP_RGBToPixel(rgb888_colors[col][0],
 	                     rgb888_colors[col][1],
