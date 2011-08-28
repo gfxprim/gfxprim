@@ -63,12 +63,14 @@ GP_Context *GP_ContextCopy(GP_Context *context, int flag)
 	new->axes_swap = context->axes_swap;
 	new->y_swap    = context->y_swap;
 	new->x_swap    = context->x_swap;
+	
+	new->free_pixels = 1;
 
 	return new;
 	
 }
 
-GP_Context *GP_ContextAlloc(uint32_t w, uint32_t h, GP_PixelType type)
+GP_Context *GP_ContextAlloc(GP_Size w, GP_Size h, GP_PixelType type)
 {
 	GP_Context *context = malloc(sizeof(GP_Context));
 	uint32_t bpp = GP_PixelSize(type);
@@ -96,6 +98,8 @@ GP_Context *GP_ContextAlloc(uint32_t w, uint32_t h, GP_PixelType type)
 	context->axes_swap = 0;
 	context->y_swap    = 0;
 	context->x_swap    = 0;
+	
+	context->free_pixels = 1;
 
 	return context;
 }
@@ -114,8 +118,45 @@ GP_Context *GP_ContextConvert(const GP_Context *context, GP_PixelType res_type)
 
 void GP_ContextFree(GP_Context *context)
 {
-	free(context->pixels);
+	if (context == NULL)
+		return;
+
+	if (context->free_pixels)
+		free(context->pixels);
+
 	free(context);
+}
+
+GP_Context *GP_ContextSubContext(GP_Context *context, GP_Coord x, GP_Coord y,
+                                 GP_Size w, GP_Size h)
+{
+	GP_CHECK(context, "NULL context");
+	GP_CHECK(context->w >= x + w, "Subcontext w out of original context.");
+	GP_CHECK(context->h >= y + h, "Subcontext h out of original context.");
+
+	GP_Context *ret = malloc(sizeof(GP_Context));
+
+	if (ret == NULL)
+		return NULL;
+
+	ret->bpp           = context->bpp;
+	ret->bytes_per_row = context->bytes_per_row;
+
+	ret->w = w;
+	ret->h = h;
+
+	ret->pixel_type = context->pixel_type;
+
+	/* rotation and mirroring */
+	ret->axes_swap = context->axes_swap;
+	ret->y_swap    = context->y_swap;
+	ret->x_swap    = context->x_swap;
+
+	ret->pixels = GP_PIXEL_ADDR(context, x, y);
+
+	ret->free_pixels = 0;
+
+	return ret;
 }
 
 GP_RetCode GP_ContextDump(GP_Context *context, const char *path)

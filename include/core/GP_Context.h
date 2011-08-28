@@ -50,6 +50,7 @@ typedef struct GP_Context {
 	uint8_t x_swap:1;	/* swap direction on x  */
 	uint8_t y_swap:1;	/* swap direction on y  */
 	uint8_t bit_endian:1;	/* GP_BIT_ENDIAN */
+	uint8_t free_pixels:1;  /* If set pixels are freed on GP_ContextFree */
 } GP_Context;
 
 /* Returns the pixel type used by the context. */
@@ -88,7 +89,7 @@ static inline GP_PixelType GP_GetContextPixelType(const GP_Context *context)
 /*
  * Allocate context.
  */
-GP_Context *GP_ContextAlloc(uint32_t w, uint32_t h, GP_PixelType type);
+GP_Context *GP_ContextAlloc(GP_Size w, GP_Size h, GP_PixelType type);
 
 /*
  * If passed the pixels are copied to newly created context, otherwise
@@ -100,6 +101,12 @@ GP_Context *GP_ContextAlloc(uint32_t w, uint32_t h, GP_PixelType type);
  * Copy context.
  */
 GP_Context *GP_ContextCopy(GP_Context *context, int flag);
+
+/*
+ * Create subcontext.
+ */
+GP_Context *GP_ContextSubContext(GP_Context *context, GP_Coord x, GP_Coord y,
+                                 GP_Size w, GP_Size h);
 
 /*
  * Converts context to different pixel type.
