@@ -8,8 +8,7 @@ Do not include directly, use GP_Pixel.h
 %% block body
 
 #include "GP_Common.h"
-
-struct GP_Context;
+#include "GP_Context.h"
 
 %% for ps in pixelsizes
 /* 
@@ -66,6 +65,14 @@ static inline void GP_PutPixel_Raw_{{ ps.suffix }}(GP_Context *c, int x, int y, 
 	GP_SET_BITS(GP_PIXEL_ADDR_OFFSET_{{ ps.suffix }}(x), {{ ps.size }},
 		*(GP_PIXEL_ADDR_{{ ps.suffix}}(c, x, y)), p);
 %% endif
+}
+
+static inline void GP_PutPixel_Raw_Clipped_{{ ps.suffix }}(GP_Context *c, GP_Coord x, GP_Coord y, GP_Pixel p)
+{
+	if (GP_PIXEL_IS_CLIPPED(c, x, y))
+		return;
+
+	GP_PutPixel_Raw_{{ ps.suffix }}(c, x, y, p);
 }
 
 %% endfor

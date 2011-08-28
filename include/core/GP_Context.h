@@ -83,8 +83,8 @@ static inline GP_PixelType GP_GetContextPixelType(const GP_Context *context)
  * Is true, when pixel is clipped out of context.
  */
 #define GP_PIXEL_IS_CLIPPED(context, x, y) \
-	((x) < 0 || x >= (int) context->w \
-	|| (y) < 0 || y >= (int) context->h) \
+	((x) < 0 || x >= (typeof(x)) context->w \
+	|| (y) < 0 || y >= (typeof(y)) context->h) \
 
 /*
  * Allocate context.

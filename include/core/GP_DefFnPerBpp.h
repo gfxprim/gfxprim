@@ -31,7 +31,7 @@
 #define GP_DEF_FN_PER_BPP_H
 
 #define GP_DEF_DRAW_FN_PER_BPP(fname, MACRO_NAME) \
-	GP_DEF_FN_PER_BPP(fname, MACRO_NAME, GP_PutPixel_Raw_)
+	GP_DEF_FN_PER_BPP(fname, MACRO_NAME, GP_PutPixel_Raw_Clipped_)
 
 #define GP_DEF_FILL_FN_PER_BPP(fname, MACRO_NAME) \
 	GP_DEF_FN_PER_BPP(fname, MACRO_NAME, GP_HLine_Raw_)

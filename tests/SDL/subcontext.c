@@ -48,7 +48,7 @@ Uint32 timer_callback(__attribute__((unused)) Uint32 interval,
 {
 	timer_event.type = SDL_USEREVENT;
 	SDL_PushEvent((SDL_Event *) &timer_event);
-	return 10;
+	return 30;
 }
 
 static void draw_line(GP_Context *dest, GP_Coord x, GP_Coord y,
