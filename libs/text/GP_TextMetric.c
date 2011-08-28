@@ -19,12 +19,14 @@
  * Copyright (C) 2009-2010 Jiri "BlueBear" Dluhos                            *
  *                         <jiri.bluebear.dluhos@gmail.com>                  *
  *                                                                           *
- * Copyright (C) 2009-2010 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2011 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
 #include "core/GP_Common.h"
 #include "GP_TextMetric.h"
+
+extern GP_TextStyle GP_DefaultStyle;
 
 static unsigned int SpaceWidth(const GP_TextStyle *style)
 {
@@ -59,11 +61,15 @@ static unsigned int MaxCharsWidth(const GP_TextStyle *style, const char *str)
 
 unsigned int GP_TextWidth(const GP_TextStyle *style, const char *str)
 {
-	GP_CHECK_TEXT_STYLE(style);
 	GP_CHECK(str, "NULL string specified");
 	
 	unsigned int i, len = 0;
-	unsigned int space = SpaceWidth(style);
+	unsigned int space;
+
+	if (style == NULL)
+		style = &GP_DefaultStyle;
+
+	space = SpaceWidth(style);
 
 	if (str[0] == '\0')
 		return 0;
@@ -76,11 +82,14 @@ unsigned int GP_TextWidth(const GP_TextStyle *style, const char *str)
 
 unsigned int GP_TextMaxWidth(const GP_TextStyle *style, unsigned int len)
 {
-	GP_CHECK_TEXT_STYLE(style);
-
 	unsigned int space_width = SpaceWidth(style);
-	unsigned int char_width  = style->font->max_bounding_width
-		                   * (style->pixel_xmul + style->pixel_xspace);
+	unsigned int char_width;
+	
+	if (style == NULL)
+		style = &GP_DefaultStyle;
+
+	char_width = style->font->max_bounding_width
+		     * (style->pixel_xmul + style->pixel_xspace);
 
 	if (len == 0)
 		return 0;
@@ -91,11 +100,15 @@ unsigned int GP_TextMaxWidth(const GP_TextStyle *style, unsigned int len)
 unsigned int GP_TextMaxStrWidth(const GP_TextStyle *style, const char *str,
                                 unsigned int len)
 {
-	GP_CHECK_TEXT_STYLE(style);
 	GP_CHECK(str, "NULL string specified");
 
-	unsigned int space_width = SpaceWidth(style);
+	unsigned int space_width;
 	unsigned int char_width;
+	
+	if (style == NULL)
+		style = &GP_DefaultStyle;
+	
+	space_width = SpaceWidth(style);
 	
 	if (len == 0)
 		return 0;
@@ -107,7 +120,8 @@ unsigned int GP_TextMaxStrWidth(const GP_TextStyle *style, const char *str,
 
 unsigned int GP_TextHeight(const GP_TextStyle *style)
 {
-	GP_CHECK_TEXT_STYLE(style);
+	if (style == NULL)
+		style = &GP_DefaultStyle;
 
 	return style->font->height * style->pixel_ymul +
 	       (style->font->height - 1) * style->pixel_yspace;
@@ -115,17 +129,25 @@ unsigned int GP_TextHeight(const GP_TextStyle *style)
 
 unsigned int GP_TextAscent(const GP_TextStyle *style)
 {
-	GP_CHECK_TEXT_STYLE(style);
+	unsigned int h;
 
-	unsigned int h = style->font->height - style->font->baseline;
+	if (style == NULL)
+		style = &GP_DefaultStyle;
+
+	h = style->font->height - style->font->baseline;
+	
 	return h * style->pixel_ymul + (h - 1) * style->pixel_yspace;
 }
 
 unsigned int GP_TextDescent(const GP_TextStyle *style)
 {
-	GP_CHECK_TEXT_STYLE(style);
+	unsigned int h;
+	
+	if (style == NULL)
+		style = &GP_DefaultStyle;
 
-	unsigned int h = style->font->baseline;
+	h = style->font->baseline;
+	
 	return h * style->pixel_ymul + (h - 1) * style->pixel_yspace;
 }
 

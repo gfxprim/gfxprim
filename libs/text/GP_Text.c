@@ -29,7 +29,7 @@
 #include "core/GP_DefFnPerBpp.h"
 #include "GP_Text.h"
 
-static GP_TextStyle DefaultStyle = GP_DEFAULT_TEXT_STYLE;
+GP_TextStyle GP_DefaultStyle = GP_DEFAULT_TEXT_STYLE;
 
 /* Generate drawing functions for various bit depths. */
 GP_DEF_FILL_FN_PER_BPP(GP_Text_Raw, DEF_TEXT_FN)
@@ -44,7 +44,7 @@ GP_RetCode GP_Text_Raw(GP_Context *context, const GP_TextStyle *style,
 		return GP_ENULLPTR;
 
 	if (style == NULL)
-		style = &DefaultStyle;
+		style = &GP_DefaultStyle;
 	
 	GP_CHECK_TEXT_STYLE(style);
 
@@ -100,7 +100,7 @@ GP_RetCode GP_Text(GP_Context *context, const GP_TextStyle *style,
 		return GP_ENULLPTR;
 
 	if (style == NULL)
-		style = &DefaultStyle;
+		style = &GP_DefaultStyle;
 	
 	GP_CHECK_TEXT_STYLE(style);
 
@@ -152,7 +152,7 @@ GP_RetCode GP_BoxCenteredText_Raw(GP_Context *context, const GP_TextStyle *style
 		return GP_ENULLPTR;
 
 	if (style == NULL)
-		style = &DefaultStyle;
+		style = &GP_DefaultStyle;
 	
 	GP_CHECK_TEXT_STYLE(style);
 
@@ -176,7 +176,7 @@ GP_RetCode GP_BoxCenteredText(GP_Context *context, const GP_TextStyle *style,
 		return GP_ENULLPTR;
 
 	if (style == NULL)
-		style = &DefaultStyle;
+		style = &GP_DefaultStyle;
 	
 	GP_CHECK_TEXT_STYLE(style);
 
