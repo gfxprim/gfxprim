@@ -38,14 +38,14 @@
 
 #include "GP_PNM.h"
 
-int load_binary_ppm(FILE *f, uint32_t w, uint32_t h, uint32_t depth __attribute__((unused)),
+int load_binary_ppm(FILE *f, uint32_t depth __attribute__((unused)),
                     GP_Context *res)
 {
 	uint32_t x, y;
 	int r, g, b;
 
-	for (x = 0; x < w; x++)
-		for (y = 0; y < h; y++) {
+	for (y = 0; y < res->h; y++)
+		for (x = 0; x < res->w; x++) {
 			r = fgetc(f);
 			g = fgetc(f);
 			b = fgetc(f);
@@ -96,7 +96,7 @@ GP_RetCode GP_LoadPPM(const char *src_path, GP_Context **res)
 		free(res);
 		return GP_ENOIMPL;
 	case '6':
-		if (load_binary_ppm(f, w, h, depth, *res))
+		if (load_binary_ppm(f, depth, *res))
 			goto err2;
 	break;
 	}
