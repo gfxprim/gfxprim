@@ -20,28 +20,35 @@
  *                                                                           *
  *****************************************************************************/
 
-#include <stdio.h>
-#include <stdlib.h>
+#include <GP_Context.h>
+#include <GP_GetPutPixel.h>
 
-#include "GP.h"
+#include <GP_Debug.h>
 
-int main(int argc, char *argv[])
+#include <GP_Resize.h>
+
+GP_Context *GP_ScaleDown(GP_Context *src)
 {
-	GP_Context *bitmap;
-	GP_SetDebugLevel(10);
-	GP_RetCode ret;
+	uint32_t w, h, x, y;
+	GP_Context *dst;
 
-	if ((ret = GP_LoadPPM(argv[1], &bitmap))) {
-		fprintf(stderr, "Failed to load bitmap: %s\n", GP_RetCodeName(ret));
-		return 1;
-	}
+	if (src->pixel_type != GP_PIXEL_RGB888)
+		return NULL;
 
-	bitmap = GP_ScaleDown(bitmap);
+	w = src->w/2;
+	h = src->h/2;
 
-	if ((ret = GP_SavePPM("out.ppm", bitmap, "b"))) {
-		fprintf(stderr, "Failed to load bitmap: %s\n", GP_RetCodeName(ret));
-		return 1;
-	}
+	dst = GP_ContextAlloc(w, h, GP_PIXEL_RGB888);
 
-	return 0;
+	if (dst == NULL)
+		return NULL;
+
+	for (y = 0; y < h; y++)
+		for (x = 0; x < w; x++) {
+			GP_Pixel pix = GP_GetPixel_Raw_24BPP(src, 2*x, 2*y);
+
+			GP_PutPixel_Raw_24BPP(dst, x, y, pix);
+		}
+
+	return dst;
 }

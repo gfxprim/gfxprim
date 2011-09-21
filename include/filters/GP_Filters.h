@@ -19,7 +19,7 @@
  * Copyright (C) 2009-2010 Jiri "BlueBear" Dluhos                            *
  *                         <jiri.bluebear.dluhos@gmail.com>                  *
  *                                                                           *
- * Copyright (C) 2009-2010 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2011 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
@@ -32,6 +32,8 @@
 #ifndef GP_FILTERS_H
 #define GP_FILTERS_H
 
+
 #include "GP_Rotate.h"
+#include "GP_Resize.h"
 
 #endif /* GP_FILTERS_H */

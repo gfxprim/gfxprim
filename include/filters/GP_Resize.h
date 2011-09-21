@@ -20,28 +20,17 @@
  *                                                                           *
  *****************************************************************************/
 
-#include <stdio.h>
-#include <stdlib.h>
+/*
 
-#include "GP.h"
+  GP_Context resize.
 
-int main(int argc, char *argv[])
-{
-	GP_Context *bitmap;
-	GP_SetDebugLevel(10);
-	GP_RetCode ret;
+ */
 
-	if ((ret = GP_LoadPPM(argv[1], &bitmap))) {
-		fprintf(stderr, "Failed to load bitmap: %s\n", GP_RetCodeName(ret));
-		return 1;
-	}
+#ifndef GP_RESIZE_H
+#define GP_RESIZE_H
 
-	bitmap = GP_ScaleDown(bitmap);
+#include "core/GP_Context.h"
 
-	if ((ret = GP_SavePPM("out.ppm", bitmap, "b"))) {
-		fprintf(stderr, "Failed to load bitmap: %s\n", GP_RetCodeName(ret));
-		return 1;
-	}
+GP_Context *GP_ScaleDown(GP_Context *src);
 
-	return 0;
-}
+#endif /* GP_RESIZE_H */
