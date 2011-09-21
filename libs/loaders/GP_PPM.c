@@ -16,48 +16,93 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2010 Jiri "BlueBear" Dluhos                            *
- *                         <jiri.bluebear.dluhos@gmail.com>                  *
- *                                                                           *
- * Copyright (C) 2009-2010 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2011 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
 /*
 
- Common bytes to ascci and ascii to bytes functions.
-
+  PPM portable bitmap loader/saver.
+  
  */
 
-#ifndef GP_PXM_COMMON_H
-#define GP_PXM_COMMON_H
+#include <stdint.h>
 
-#include <stdio.h>
-#include "core/GP_Core.h"
+#include <GP_Debug.h>
+#include <GP_Context.h>
+#include <GP_Pixel.h>
+#include <GP_GetPutPixel.h>
 
-/*
- * Save context to ascii file.
- *
- * The pixel type is not checked here as these are internal funcitons.
- */
-GP_RetCode GP_PXMSave1bpp(FILE *f, GP_Context *context);
-GP_RetCode GP_PXMSave2bpp(FILE *f, GP_Context *context);
-GP_RetCode GP_PXMSave4bpp(FILE *f, GP_Context *context);
-GP_RetCode GP_PXMSave8bpp(FILE *f, GP_Context *context);
+#include "GP_PXMCommon.h"
 
-/*
- * Load context from ascii file.
- */
-GP_RetCode GP_PXMLoad1bpp(FILE *f, GP_Context *context);
-GP_RetCode GP_PXMLoad2bpp(FILE *f, GP_Context *context);
-GP_RetCode GP_PXMLoad4bpp(FILE *f, GP_Context *context);
-GP_RetCode GP_PXMLoad8bpp(FILE *f, GP_Context *context);
+int load_binary_ppm(FILE *f, uint32_t w, uint32_t h, uint32_t depth,
+                    GP_Context *res)
+{
+	uint32_t x, y;
+	int r, g, b;
 
-/*
- * Loads image header, returns pointer to FILE* on success, fills image
- * metadata into arguments.
- */
-FILE *GP_OpenPNM(const char *src_path, char *fmt, uint32_t *w, uint32_t *h,
-                 uint32_t *depth);
+	for (x = 0; x < w; x++)
+		for (y = 0; y < h; y++) {
+			r = fgetc(f);
+			g = fgetc(f);
+			b = fgetc(f);
+		
+			if (r == EOF || g == EOF || b == EOF) {
+				GP_DEBUG(1, "Unexpected end of PBM file");
+				return 1;
+			}
+			
+			//TODO depth
+			GP_Pixel pix = GP_Pixel_CREATE_RGB888(r, g, b);
+			GP_PutPixel_Raw_24BPP(res, x, y, pix);
+		}
 
-#endif /* GP_PXM_COMMON_H */
+	return 0;
+}
+
+GP_RetCode GP_LoadPPM(const char *src_path, GP_Context **res)
+{
+	uint32_t w, h, depth;
+	char fmt;
+	FILE *f;
+
+	f = GP_OpenPNM(src_path, &fmt, &w, &h, &depth);
+
+	if (f == NULL)
+		return GP_EBADFILE;
+
+	if (fmt != '3' && fmt != '6') {
+		GP_DEBUG(1, "Asked to load PPM but header is 'P%c'", fmt);
+		goto err1;
+	}
+
+	*res = GP_ContextAlloc(w, h, GP_PIXEL_RGB888);
+
+	if (res == NULL)
+		goto err1;
+
+	switch (fmt) {
+	case '3':
+		//TODO
+		fclose(f);
+		free(res);
+		return GP_ENOIMPL;
+	case '6':
+		if (load_binary_ppm(f, w, h, depth, *res))
+			goto err2;
+	break;
+	}
+
+	fclose(f);
+	return GP_ESUCCESS;
+err2:
+	free(*res);
+err1:
+	fclose(f);
+	return GP_EBADFILE;
+}
+
+GP_RetCode GP_SavePPM(const char *res_path, GP_Context *src)
+{
+	return GP_ENOIMPL;
+}

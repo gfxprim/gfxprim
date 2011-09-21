@@ -164,7 +164,7 @@ int main(int argc, char *argv[])
 
 	GP_RetCode ret;
 
-	if ((ret = GP_LoadPGM("ball.pgm", &bitmap_raw))) {
+	if ((ret = GP_LoadPPM("ball.ppm", &bitmap_raw))) {
 		fprintf(stderr, "Failed to load bitmap: %s\n", GP_RetCodeName(ret));
 		return 1;
 	}

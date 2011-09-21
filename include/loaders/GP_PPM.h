@@ -16,48 +16,17 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2010 Jiri "BlueBear" Dluhos                            *
- *                         <jiri.bluebear.dluhos@gmail.com>                  *
- *                                                                           *
- * Copyright (C) 2009-2010 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2011 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
-/*
+#ifndef GP_PPM_H
+#define GP_PPM_H
 
- Common bytes to ascci and ascii to bytes functions.
+#include "core/GP_Context.h"
 
- */
+GP_RetCode GP_LoadPPM(const char *src_path, GP_Context **res);
 
-#ifndef GP_PXM_COMMON_H
-#define GP_PXM_COMMON_H
+GP_RetCode GP_SavePPM(const char *res_path, GP_Context *src);
 
-#include <stdio.h>
-#include "core/GP_Core.h"
-
-/*
- * Save context to ascii file.
- *
- * The pixel type is not checked here as these are internal funcitons.
- */
-GP_RetCode GP_PXMSave1bpp(FILE *f, GP_Context *context);
-GP_RetCode GP_PXMSave2bpp(FILE *f, GP_Context *context);
-GP_RetCode GP_PXMSave4bpp(FILE *f, GP_Context *context);
-GP_RetCode GP_PXMSave8bpp(FILE *f, GP_Context *context);
-
-/*
- * Load context from ascii file.
- */
-GP_RetCode GP_PXMLoad1bpp(FILE *f, GP_Context *context);
-GP_RetCode GP_PXMLoad2bpp(FILE *f, GP_Context *context);
-GP_RetCode GP_PXMLoad4bpp(FILE *f, GP_Context *context);
-GP_RetCode GP_PXMLoad8bpp(FILE *f, GP_Context *context);
-
-/*
- * Loads image header, returns pointer to FILE* on success, fills image
- * metadata into arguments.
- */
-FILE *GP_OpenPNM(const char *src_path, char *fmt, uint32_t *w, uint32_t *h,
-                 uint32_t *depth);
-
-#endif /* GP_PXM_COMMON_H */
+#endif /* GP_PPM_H */

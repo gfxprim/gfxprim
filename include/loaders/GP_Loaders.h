@@ -34,7 +34,6 @@
 
 #include "GP_PBM.h"
 #include "GP_PGM.h"
-
-struct GP_Context *GP_Load(const char *src_path);
+#include "GP_PPM.h"
 
 #endif /* GP_LOADERS_H */
