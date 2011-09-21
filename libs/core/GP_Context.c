@@ -28,41 +28,40 @@
 
 #include <string.h>
 
-GP_Context *GP_ContextCopy(GP_Context *context, int flag)
+GP_Context *GP_ContextCopy(const GP_Context *src, int flag)
 {
 	GP_Context *new;
 	uint8_t *pixels;
 
-	if (context == NULL)
+	if (src == NULL)
 		return NULL;
 
 	new     = malloc(sizeof(GP_Context));
-	pixels  = malloc(context->bytes_per_row * context->h);
+	pixels  = malloc(src->bytes_per_row * src->h);
 
-	if (pixels == NULL || context == NULL) {
+	if (pixels == NULL || new == NULL) {
 		free(pixels);
-		free(context);
+		free(new);
 		return NULL;
 	}
 
 	new->pixels = pixels;
 
 	if (flag)
-		memcpy(pixels, context->pixels,
-		       context->bytes_per_row * context->h);
+		memcpy(pixels, src->pixels, src->bytes_per_row * src->h);
 
-	new->bpp           = context->bpp;
-	new->bytes_per_row = context->bytes_per_row;
+	new->bpp           = src->bpp;
+	new->bytes_per_row = src->bytes_per_row;
 
-	new->w = context->w;
-	new->h = context->h;
+	new->w = src->w;
+	new->h = src->h;
 
-	new->pixel_type = context->pixel_type;
+	new->pixel_type = src->pixel_type;
 
 	/* rotation and mirroring */
-	new->axes_swap = context->axes_swap;
-	new->y_swap    = context->y_swap;
-	new->x_swap    = context->x_swap;
+	new->axes_swap = src->axes_swap;
+	new->y_swap    = src->y_swap;
+	new->x_swap    = src->x_swap;
 	
 	new->free_pixels = 1;
 

@@ -100,7 +100,7 @@ GP_Context *GP_ContextAlloc(GP_Size w, GP_Size h, GP_PixelType type);
 /*
  * Copy context.
  */
-GP_Context *GP_ContextCopy(GP_Context *context, int flag);
+GP_Context *GP_ContextCopy(const GP_Context *src, int flag);
 
 /*
  * Create subcontext.
