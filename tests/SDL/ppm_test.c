@@ -16,52 +16,30 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2010 Jiri "BlueBear" Dluhos                            *
- *                         <jiri.bluebear.dluhos@gmail.com>                  *
- *                                                                           *
- * Copyright (C) 2009-2010 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2011 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
-/*
-
- Common bytes to ascci and ascii to bytes functions.
-
- */
-
-#ifndef GP_PXM_COMMON_H
-#define GP_PXM_COMMON_H
-
 #include <stdio.h>
-#include "core/GP_Core.h"
+#include <stdlib.h>
 
-/*
- * Save context to ascii file.
- *
- * The pixel type is not checked here as these are internal funcitons.
- */
-GP_RetCode GP_PXMSave1bpp(FILE *f, GP_Context *context);
-GP_RetCode GP_PXMSave2bpp(FILE *f, GP_Context *context);
-GP_RetCode GP_PXMSave4bpp(FILE *f, GP_Context *context);
-GP_RetCode GP_PXMSave8bpp(FILE *f, GP_Context *context);
+#include "GP.h"
 
-/*
- * Load context from ascii file.
- */
-GP_RetCode GP_PXMLoad1bpp(FILE *f, GP_Context *context);
-GP_RetCode GP_PXMLoad2bpp(FILE *f, GP_Context *context);
-GP_RetCode GP_PXMLoad4bpp(FILE *f, GP_Context *context);
-GP_RetCode GP_PXMLoad8bpp(FILE *f, GP_Context *context);
+int main(int argc, char *argv[])
+{
+	GP_Context *bitmap;
+	GP_SetDebugLevel(10);
+	GP_RetCode ret;
 
-/*
- * Loads image header, returns pointer to FILE* on success, fills image
- * metadata into arguments.
- */
-FILE *GP_ReadHeaderPNM(const char *src_path, char *fmt,
-                       uint32_t *w, uint32_t *h, uint32_t *depth);
+	if ((ret = GP_LoadPPM("ball.ppm", &bitmap))) {
+		fprintf(stderr, "Failed to load bitmap: %s\n", GP_RetCodeName(ret));
+		return 1;
+	}
 
-FILE *GP_WriteHeaderPNM(const char *dst_path, char *fmt,
-                        uint32_t w, uint32_t h, uint32_t depth);
-                        
+	if ((ret = GP_SavePPM("ball2.ppm", bitmap, "b"))) {
+		fprintf(stderr, "Failed to load bitmap: %s\n", GP_RetCodeName(ret));
+		return 1;
+	}
 
-#endif /* GP_PXM_COMMON_H */
+	return 0;
+}

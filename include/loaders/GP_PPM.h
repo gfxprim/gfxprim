@@ -27,6 +27,9 @@
 
 GP_RetCode GP_LoadPPM(const char *src_path, GP_Context **res);
 
-GP_RetCode GP_SavePPM(const char *res_path, GP_Context *src);
+/*
+ * The fmt may be either "a" for ASCII or "b" for BINARY.
+ */
+GP_RetCode GP_SavePPM(const char *res_path, GP_Context *src, char *fmt);
 
 #endif /* GP_PPM_H */

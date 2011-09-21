@@ -27,15 +27,18 @@
  */
 
 #include <stdint.h>
+#include <inttypes.h>
+#include <errno.h>
+#include <string.h>
 
 #include <GP_Debug.h>
 #include <GP_Context.h>
 #include <GP_Pixel.h>
 #include <GP_GetPutPixel.h>
 
-#include "GP_PXMCommon.h"
+#include "GP_PNM.h"
 
-int load_binary_ppm(FILE *f, uint32_t w, uint32_t h, uint32_t depth,
+int load_binary_ppm(FILE *f, uint32_t w, uint32_t h, uint32_t depth __attribute__((unused)),
                     GP_Context *res)
 {
 	uint32_t x, y;
@@ -66,13 +69,18 @@ GP_RetCode GP_LoadPPM(const char *src_path, GP_Context **res)
 	char fmt;
 	FILE *f;
 
-	f = GP_OpenPNM(src_path, &fmt, &w, &h, &depth);
+	f = GP_ReadPNM(src_path, &fmt, &w, &h, &depth);
 
 	if (f == NULL)
 		return GP_EBADFILE;
 
 	if (fmt != '3' && fmt != '6') {
 		GP_DEBUG(1, "Asked to load PPM but header is 'P%c'", fmt);
+		goto err1;
+	}
+
+	if (depth != 255) {
+		GP_DEBUG(1, "Unsupported depth %"PRIu32, depth);
 		goto err1;
 	}
 
@@ -102,7 +110,58 @@ err1:
 	return GP_EBADFILE;
 }
 
-GP_RetCode GP_SavePPM(const char *res_path, GP_Context *src)
+static int write_binary_ppm(FILE *f, GP_Context *src)
 {
-	return GP_ENOIMPL;
+	uint32_t x, y;
+
+	for (y = 0; y < src->h; y++)
+		for (x = 0; x < src->w; x++) {
+			GP_Pixel pix = GP_GetPixel_Raw_24BPP(src, x, y);
+			//TODO endianess?
+			
+			GP_SWAP(((uint8_t*)&pix)[0], ((uint8_t*)&pix)[2]);
+
+			if (fwrite(&pix, 3, 1, f) < 1)
+				return 1;
+		}
+
+	return 0;
+}
+
+GP_RetCode GP_SavePPM(const char *res_path, GP_Context *src, char *fmt)
+{
+	char hfmt;
+	FILE *f;
+
+	if (src->pixel_type != GP_PIXEL_RGB888)
+		return GP_ENOIMPL;
+
+	switch (*fmt) {
+	/* ASCII */
+	case 'a':
+		return GP_ENOIMPL;
+	break;
+	/* binary */
+	case 'b':
+		hfmt = '6';
+	break;
+	default:
+		return GP_ENOIMPL;
+	}
+	
+	f = GP_WritePNM(res_path, hfmt, src->w, src->h, 255);
+	
+	if (write_binary_ppm(f, src)) {
+		GP_DEBUG(1, "Failed to write buffer");
+		fclose(f);
+		return GP_EBADFILE;
+	}
+
+	if (fclose(f) < 0) {
+		GP_DEBUG(1, "Failed to close file '%s' : %s",
+		            res_path, strerror(errno));
+		return GP_EBADFILE;
+	}
+
+	return GP_ESUCCESS;
 }
