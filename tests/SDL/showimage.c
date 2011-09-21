@@ -30,9 +30,12 @@
 SDL_Surface *display = NULL;
 GP_Context context, *bitmap;
 
+int brightness = 0;
+
 void event_loop(void)
 {
 	SDL_Event event;
+	GP_Context *res;
 
 	while (SDL_WaitEvent(&event) > 0) {
 
@@ -42,6 +45,19 @@ void event_loop(void)
 			switch (event.key.keysym.sym) {
 			case SDLK_ESCAPE:
 				return;
+			case SDLK_UP:
+				brightness+=2;
+			case SDLK_DOWN:
+				brightness-=1;
+
+				res = GP_FilterBrightness(bitmap, brightness);
+				
+				printf("brightness = %i %ux%u\n", brightness, res->w, res->h);
+
+				GP_Blit_Naive(res, 0, 0, res->w, res->h, &context, 0, 0);
+				SDL_Flip(display);
+				GP_ContextFree(res);
+			break;
 			default:
 				break;
 			}

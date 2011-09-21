@@ -139,7 +139,11 @@ void redraw_screen(void)
 	SDL_LockSurface(display);
 
 	uint8_t v = random() % 128 + 50;
-	GP_Color col = GP_RGBToContextPixel(v, v, 255, sub_context); 
+	GP_Color col;
+	if (sub_context->pixel_type == GP_PIXEL_P8)
+		col = random() % 256;
+	else
+		col = GP_RGBToContextPixel(v, v, 255, sub_context); 
 	
 	/* frame around subcontext */
 	GP_Rect(&context, 99, 99,  context.w - 100, context.h - 100, white);
@@ -224,7 +228,9 @@ int main(int argc, char *argv[])
 
 	int i;
 	for (i = 1; i < argc; i++) {
-		if (strcmp(argv[i], "-16") == 0) {
+		if (strcmp(argv[i], "-8") == 0) {
+			display_bpp = 8;
+		} else if (strcmp(argv[i], "-16") == 0) {
 			display_bpp = 16;
 		}
 		else if (strcmp(argv[i], "-24") == 0) {
