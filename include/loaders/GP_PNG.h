@@ -16,26 +16,36 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2010 Jiri "BlueBear" Dluhos                            *
- *                         <jiri.bluebear.dluhos@gmail.com>                  *
- *                                                                           *
  * Copyright (C) 2009-2011 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
  /*
-
-   Core include file for loaders API.
+   
+   PNG support using libpng library.
 
   */
 
-#ifndef GP_LOADERS_H
-#define GP_LOADERS_H
+#ifndef GP_PNG_H
+#define GP_PNG_H
 
-#include "GP_PBM.h"
-#include "GP_PGM.h"
-#include "GP_PPM.h"
+#include "core/GP_Context.h"
 
-#include "GP_PNG.h"
+/*
+ * Opens up file and checks signature. Upon successful return the file
+ * possition would be set to eight bytes (exactly after the PNG signature).
+ */
+GP_RetCode GP_OpenPNG(const char *src_path, FILE **f);
 
-#endif /* GP_LOADERS_H */
+/*
+ * Reads PNG from an open FILE. Expects the file possition set after the eight
+ * bytes PNG signature.
+ */
+GP_RetCode GP_ReadPNG(FILE *f, GP_Context **res);
+
+/*
+ * Loads a PNG file into GP_Context. The Context is newly allocated.
+ */
+GP_RetCode GP_LoadPNG(const char *src_path, GP_Context **res);
+
+#endif /* GP_PNG_H */
