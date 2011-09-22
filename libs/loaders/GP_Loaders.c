@@ -16,33 +16,65 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2010 Jiri "BlueBear" Dluhos                            *
- *                         <jiri.bluebear.dluhos@gmail.com>                  *
- *                                                                           *
  * Copyright (C) 2009-2011 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
- /*
-
-   Core include file for loaders API.
-
-  */
-
-#ifndef GP_LOADERS_H
-#define GP_LOADERS_H
-
-#include "core/GP_Context.h"
-
-#include "GP_PBM.h"
-#include "GP_PGM.h"
-#include "GP_PPM.h"
-
-#include "GP_PNG.h"
-
 /*
- * Tries to load image accordingly to extension.
- */
-GP_RetCode GP_LoadImage(const char *src_path, GP_Context **res);
 
-#endif /* GP_LOADERS_H */
+  General functions for loading bitmaps.
+  
+ */
+
+#include <string.h>
+
+#include "GP_Loaders.h"
+
+GP_RetCode GP_LoadImage(const char *src_path, GP_Context **res)
+{
+	int len = strlen(src_path);
+	GP_RetCode ret = GP_ENOIMPL;
+
+	switch (src_path[len - 1]) {
+	/* PNG, JPG, JPEG */
+	case 'g':
+	case 'G':
+		switch (src_path[len - 2]) {
+		case 'n':
+		case 'N':
+			if (src_path[len - 3] == 'p' ||
+			    src_path[len - 3] == 'P')
+				ret = GP_LoadPNG(src_path, res);
+		break;
+		}
+	break;
+	/* PPM, PGM, PBM, PNM */
+	case 'm':
+	case 'M':
+		switch (src_path[len - 2]) {
+		case 'b':
+		case 'B':
+			if (src_path[len - 3] == 'p' ||
+			    src_path[len - 3] == 'P')
+				ret = GP_LoadPBM(src_path, res);
+		break;
+		case 'g':
+		case 'G':
+			if (src_path[len - 3] == 'p' ||
+			    src_path[len - 3] == 'P')
+				ret = GP_LoadPGM(src_path, res);
+		break;
+		case 'p':
+		case 'P':
+			if (src_path[len - 3] == 'p' ||
+			    src_path[len - 3] == 'P')
+				ret = GP_LoadPPM(src_path, res);
+		break;
+		}
+	break;
+	}
+
+	//TODO file signature based check
+
+	return ret;
+}
