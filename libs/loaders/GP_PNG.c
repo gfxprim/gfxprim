@@ -108,7 +108,8 @@ GP_RetCode GP_ReadPNG(FILE *f, GP_Context **res)
 	png_get_IHDR(png, png_info, &w, &h, &depth,
 	             &color_type, NULL, NULL, NULL);
 
-	GP_DEBUG(2, "Have %s PNG%s size %ux%u depth %i",
+	GP_DEBUG(2, "Have %s%s PNG%s size %ux%u depth %i",
+	         color_type & PNG_COLOR_MASK_PALETTE ? "pallete " : "",
 	         color_type & PNG_COLOR_MASK_COLOR ? "color" : "gray",
 		 color_type & PNG_COLOR_MASK_ALPHA ? " with alpha channel" : "",
 		 w, h, depth);
@@ -138,6 +139,17 @@ GP_RetCode GP_ReadPNG(FILE *f, GP_Context **res)
 		case 8:
 			pixel_type = GP_PIXEL_RGB888;
 		break;
+		}
+	break;
+	case PNG_COLOR_TYPE_PALETTE:
+		/* Grayscale with BPP < 8 is usually saved as palette */
+		if (png_get_channels(png, png_info) == 1) {
+			switch (depth) {
+			case 1:
+				png_set_packswap(png);
+				pixel_type = GP_PIXEL_G1;
+			break;
+			}
 		}
 	break;
 	}
