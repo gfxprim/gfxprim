@@ -30,13 +30,22 @@ int main(int argc, char *argv[])
 	GP_Context *bitmap;
 	GP_SetDebugLevel(10);
 	GP_RetCode ret;
+	GP_Size w, h;
 
-	if ((ret = GP_LoadPPM(argv[1], &bitmap))) {
+	if (argc < 4) {
+		fprintf(stderr, "Usage: image w h\n");
+		return 1;
+	}
+
+	if ((ret = GP_LoadImage(argv[1], &bitmap))) {
 		fprintf(stderr, "Failed to load bitmap: %s\n", GP_RetCodeName(ret));
 		return 1;
 	}
 
-	bitmap = GP_ScaleDown(bitmap);
+	w = atoi(argv[2]);
+	h = atoi(argv[3]);
+
+	bitmap = GP_Scale(bitmap, w, h);
 
 	if ((ret = GP_SavePPM("out.ppm", bitmap, "b"))) {
 		fprintf(stderr, "Failed to load bitmap: %s\n", GP_RetCodeName(ret));
