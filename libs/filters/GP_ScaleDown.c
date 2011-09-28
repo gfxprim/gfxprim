@@ -97,17 +97,17 @@ GP_Context *GP_Scale(GP_Context *src, GP_Size w, GP_Size h)
 		float x = (1.00 * i / w) * src->w + 0.5;
 		v4f cvx;
 		int xi = x - 1;
-				
-		if (xi < 0)
-			xi = 0;
-
-		if (xi > (int)src->w - 4)
-			xi = src->w - 4;
 		
 		cvx.f[0] = cubic(x - xi);
 		cvx.f[1] = cubic(x - xi - 1);
 		cvx.f[2] = cubic(x - xi - 2);
 		cvx.f[3] = cubic(x - xi - 3);
+		
+		if (xi < 0)
+			xi = 0;
+
+		if (xi > (int)src->w - 4)
+			xi = src->w - 4;
 	
 		/* Generate interpolated column */
 		for (j = 0; j < src->h; j++) {
@@ -149,6 +149,11 @@ GP_Context *GP_Scale(GP_Context *src, GP_Size w, GP_Size h)
 			v4f cvy, rv, gv, bv;
 			float r, g, b;
 			int yi = y - 1;
+			
+			cvy.f[0] = cubic(y - yi);
+			cvy.f[1] = cubic(y - yi - 1);
+			cvy.f[2] = cubic(y - yi - 2);
+			cvy.f[3] = cubic(y - yi - 3);
 				
 			if (yi < 0)
 				yi = 0;
@@ -171,11 +176,6 @@ GP_Context *GP_Scale(GP_Context *src, GP_Size w, GP_Size h)
 			bv.f[2] = col_b[yi + 2];
 			bv.f[3] = col_b[yi + 3];
 			
-			cvy.f[0] = cubic(y - yi);
-			cvy.f[1] = cubic(y - yi - 1);
-			cvy.f[2] = cubic(y - yi - 2);
-			cvy.f[3] = cubic(y - yi - 3);
-
 			rv = MUL_V4SF(rv, cvy);
 			gv = MUL_V4SF(gv, cvy);
 			bv = MUL_V4SF(bv, cvy);
