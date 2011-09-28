@@ -144,6 +144,8 @@ GP_RetCode GP_SavePPM(const char *res_path, GP_Context *src, char *fmt)
 	/* binary */
 	case 'b':
 		hfmt = '6';
+		GP_DEBUG(1, "Writing binary PPM %ux%u '%s'",
+		            src->w, src->h, res_path);
 	break;
 	default:
 		return GP_ENOIMPL;

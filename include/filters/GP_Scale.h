@@ -26,13 +26,27 @@
 
  */
 
-#ifndef GP_RESIZE_H
-#define GP_RESIZE_H
+#ifndef GP_SCALE_H
+#define GP_SCALE_H
 
 #include "core/GP_Context.h"
 
-GP_Context *GP_ScaleDown(GP_Context *src);
+/*
+ * Nearest neighbour
+ * 
+ * Faster than others, but produces pixelated images. Works however well for
+ * images with sharp edges mostly consisting of big once color parts (eg
+ * doesn't blurr the result on upscaling).
+ */
+GP_Context *GP_Scale_NN(GP_Context *src, GP_Size w, GP_Size h);
 
-GP_Context *GP_Scale(GP_Context *src, GP_Size w, GP_Size h);
+/*
+ * Bicubic Scaling
+ *
+ * Works well for upscaling. Not so good for downscaling big images to small
+ * ones (looses too much information).
+ */
+GP_Context *GP_Scale_BiCubic(GP_Context *src, GP_Size w, GP_Size h);
 
-#endif /* GP_RESIZE_H */
+
+#endif /* GP_SCALE_H */

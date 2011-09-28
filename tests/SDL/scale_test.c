@@ -45,7 +45,7 @@ int main(int argc, char *argv[])
 	w = atoi(argv[2]);
 	h = atoi(argv[3]);
 
-	bitmap = GP_Scale(bitmap, w, h);
+	bitmap = GP_Scale_BiCubic(bitmap, w, h);
 
 	if ((ret = GP_SavePPM("out.ppm", bitmap, "b"))) {
 		fprintf(stderr, "Failed to load bitmap: %s\n", GP_RetCodeName(ret));

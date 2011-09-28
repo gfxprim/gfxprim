@@ -25,27 +25,33 @@
 
 #include <GP_Debug.h>
 
-#include <GP_Resize.h>
+#include <GP_Scale.h>
 
-GP_Context *GP_ScaleDown(GP_Context *src)
+
+GP_Context *GP_Scale_NN(GP_Context *src, GP_Size w, GP_Size h)
 {
-	uint32_t w, h, x, y;
 	GP_Context *dst;
 
 	if (src->pixel_type != GP_PIXEL_RGB888)
 		return NULL;
-
-	w = src->w/2;
-	h = src->h/2;
 
 	dst = GP_ContextAlloc(w, h, GP_PIXEL_RGB888);
 
 	if (dst == NULL)
 		return NULL;
 
-	for (y = 0; y < h; y++)
-		for (x = 0; x < w; x++) {
-			GP_Pixel pix = GP_GetPixel_Raw_24BPP(src, 2*x, 2*y);
+	GP_DEBUG(1, "Scaling image %ux%u -> %ux%u %2.2f %2.2f",
+	            src->w, src->h, w, h,
+		    1.00 * w / src->w, 1.00 * h / src->h);
+
+	GP_Coord x, y;
+
+	for (y = 0; y < (int)h; y++)
+		for (x = 0; x < (int)w; x++) {
+			GP_Coord xi = (1.00 * x / w) * src->w;
+			GP_Coord yi = (1.00 * y / h) * src->h;
+			
+			GP_Pixel pix = GP_GetPixel_Raw_24BPP(src, xi, yi);
 
 			GP_PutPixel_Raw_24BPP(dst, x, y, pix);
 		}
@@ -79,7 +85,7 @@ typedef union v4f {
 #define MUL_V4SF(a, b) ((union v4f)((a).v * (b).v))
 #define SUM_V4SF(a)    ((a).f[0] + (a).f[1] + (a).f[2] + (a).f[3])
 
-GP_Context *GP_Scale(GP_Context *src, GP_Size w, GP_Size h)
+GP_Context *GP_Scale_BiCubic(GP_Context *src, GP_Size w, GP_Size h)
 {
 	GP_Context *dst;
 	float col_r[src->h], col_g[src->h], col_b[src->h];
@@ -92,6 +98,10 @@ GP_Context *GP_Scale(GP_Context *src, GP_Size w, GP_Size h)
 	
 	if (dst == NULL)
 		return NULL;
+
+	GP_DEBUG(1, "Scaling image %ux%u -> %ux%u %2.2f %2.2f",
+	            src->w, src->h, w, h,
+		    1.00 * w / src->w, 1.00 * h / src->h);
 
 	for (i = 0; i < w; i++) {
 		float x = (1.00 * i / w) * src->w + 0.5;

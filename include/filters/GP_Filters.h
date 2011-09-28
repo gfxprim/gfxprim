@@ -32,8 +32,12 @@
 #ifndef GP_FILTERS_H
 #define GP_FILTERS_H
 
-#include "GP_Rotate.h"
-#include "GP_Linear.h"
-#include "GP_Resize.h"
+/* Image rotations (90 180 270 grads) and mirroring */
+#include "filters/GP_Rotate.h"
+
+#include "filters/GP_Linear.h"
+
+/* Image down and up scaling */
+#include "filters/GP_Scale.h"
 
 #endif /* GP_FILTERS_H */
