@@ -33,4 +33,6 @@
 
 GP_Context *GP_ScaleDown(GP_Context *src);
 
+GP_Context *GP_Scale(GP_Context *src, GP_Size w, GP_Size h);
+
 #endif /* GP_RESIZE_H */

@@ -54,7 +54,7 @@ void event_loop(void)
 				
 				printf("brightness = %i %ux%u\n", brightness, res->w, res->h);
 
-				GP_Blit_Naive(res, 0, 0, res->w, res->h, &context, 0, 0);
+				GP_Blit(res, 0, 0, res->w, res->h, &context, 0, 0);
 				SDL_Flip(display);
 				GP_ContextFree(res);
 			break;
@@ -112,7 +112,7 @@ int main(int argc, char *argv[])
 
 	GP_SDL_ContextFromSurface(&context, display);
 
-	GP_Blit_Naive(bitmap, 0, 0, bitmap->w, bitmap->h, &context, 0, 0);
+	GP_Blit(bitmap, 0, 0, bitmap->w, bitmap->h, &context, 0, 0);
 	SDL_Flip(display);
 
 	event_loop();

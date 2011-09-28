@@ -50,6 +50,9 @@
 /* Individual pixel access */
 #include "core/GP_GetPutPixel.h"
 
+/* blitting */
+#include "core/GP_Blit.h"
+
 /* Debug and debug level */
 #include "core/GP_Debug.h"
 

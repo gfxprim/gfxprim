@@ -32,8 +32,8 @@
 #ifndef GP_FILTERS_H
 #define GP_FILTERS_H
 
-
 #include "GP_Rotate.h"
+#include "GP_Linear.h"
 #include "GP_Resize.h"
 
 #endif /* GP_FILTERS_H */

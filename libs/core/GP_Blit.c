@@ -17,6 +17,7 @@
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
  * Copyright (C) 2011      Tomas Gavenciak <gavento@ucw.cz>                  *
+ * Copyright (C) 2011      Cyril Hrubis    <metan@ucw.cz>                    *
  *                                                                           *
  *****************************************************************************/
 
@@ -26,14 +27,12 @@
 #include "GP_Convert.h"
 #include "GP_Blit.h"
 
-/*
-void GP_Blit(const GP_Context *c1, int x1, int y1, int w, int h,
-             GP_Context *c2, int x2, int y2)
+void GP_Blit(const GP_Context *c1, GP_Coord x1, GP_Coord y1,
+             GP_Size w, GP_Size h, GP_Context *c2, GP_Coord x2, GP_Coord y2)
 {
       // Ultimate TODO: effective processing 
       GP_Blit_Naive(c1, x1, y1, w, h, c2, x2, y2);
 }
-*/
 
 // TODO(gavento, czech) Plan:
 // GP_Blit_Naive - Zadne rotovani a tak, jen Get/PutPixel a konverze A->RGBA8888->B

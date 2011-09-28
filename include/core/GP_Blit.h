@@ -17,6 +17,7 @@
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
  * Copyright (C) 2011      Tomas Gavenciak <gavento@ucw.cz>                  *
+ * Copyright (C) 2011      Cyril Hrubis    <metan@ucw.cz>                    *
  *                                                                           *
  *****************************************************************************/
 
@@ -26,8 +27,9 @@
 /* Generated header */
 #include "GP_Blit.gen.h"
 
-void GP_Blit(const GP_Context *c1, int x1, int y1, int w, int h,
-             GP_Context *c2, int x2, int y2);
+void GP_Blit(const GP_Context *c1, GP_Coord x1, GP_Coord y1,
+             GP_Size w, GP_Size h, GP_Context *c2, GP_Coord x2, GP_Coord y2);
+
 
 /*
  * Very naive blit, no optimalizations whatsoever - keep it that way.

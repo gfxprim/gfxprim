@@ -86,7 +86,7 @@ void redraw_screen(void)
 	SDL_LockSurface(display);
 
 	GP_Text(&context, NULL, 20, 20, GP_ALIGN_RIGHT|GP_VALIGN_BOTTOM, text_buf, white);
-	GP_Blit_Naive(bitmap, 0, 0, bitmap->w, bitmap->h, &context, bitmap_x, bitmap_y);
+	GP_Blit(bitmap, 0, 0, bitmap->w, bitmap->h, &context, bitmap_x, bitmap_y);
 
 	SDL_UpdateRect(display, bitmap_x, bitmap_y, bitmap->w, bitmap->h);
 	SDL_UpdateRect(display, 20, 20, 300, 50);

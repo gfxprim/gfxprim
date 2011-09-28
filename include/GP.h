@@ -44,4 +44,7 @@
 /* bitmap loaders */
 #include "loaders/GP_Loaders.h"
 
+/* bitmap filters */
+#include "filters/GP_Filters.h"
+
 #endif /* GP_H */
