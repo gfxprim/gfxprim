@@ -39,6 +39,9 @@ struct param {
 	int (*check)(const struct param *self, void *val);
 };
 
-int param_parse(const char *params, const struct param *param_desc, ...);
+const char *param_type_name(enum param_type type);
+
+int param_parse(const char *params, const struct param *param_desc, void *priv, 
+               int (*err)(const struct param *self, const char *val, void *priv), ...);
 
 #endif /* PARAMS_H */

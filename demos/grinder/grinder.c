@@ -29,6 +29,33 @@
 
 #include "params.h"
 
+static int param_err(const struct param *self, const char *val, void *priv)
+{
+	fprintf(stderr, "ERROR: %s: invalid %s parameter %s = '%s'",
+	        (char *)priv, param_type_name(self->type), self->name, val);
+	
+	if (self->type == PARAM_ENUM) {
+		unsigned int i;
+
+		fprintf(stderr, " is not in [");
+
+		for (i = 0; self->enum_table[i] != NULL; i++)
+			if (self->enum_table[i+1] == NULL)
+				fprintf(stderr, "'%s']", self->enum_table[i]);
+			else
+				fprintf(stderr, "'%s' | ", self->enum_table[i]);
+	}
+
+	fprintf(stderr, "\n");
+
+	return 1;
+}
+
+static void print_error(const char *error)
+{
+	fprintf(stderr, "ERROR: %s\n", error);
+}
+
 /* resize filter */
 
 static const char *resize_algs[] = {
@@ -37,10 +64,21 @@ static const char *resize_algs[] = {
 	NULL
 };
 
+static int resize_check_ratio(const struct param *self __attribute__((unused)),
+                              void *val)
+{
+	float f = *((float*)val);
+
+	if (f <= 0)
+		return -1;
+	
+	return 0;
+}
+
 static struct param resize_params[] = {
 	{"alg",   PARAM_ENUM,  resize_algs, NULL},
-	{"ratio", PARAM_FLOAT, NULL,       NULL},
-	{NULL,    0,           NULL,       NULL}
+	{"ratio", PARAM_FLOAT, NULL,        resize_check_ratio},
+	{NULL,    0,           NULL,        NULL}
 };
 
 static GP_RetCode resize(GP_Context **c, const char *params)
@@ -48,10 +86,14 @@ static GP_RetCode resize(GP_Context **c, const char *params)
 	int alg = 1;
 	float ratio = -1;
 
-	param_parse(params, resize_params, &alg, &ratio);
-
-	if (ratio == -1)
+	if (param_parse(params, resize_params, "resize", param_err,
+	                &alg, &ratio))
 		return GP_EINVAL;
+
+	if (ratio == -1) {
+		print_error("resize: ratio parameter is missing");
+		return GP_EINVAL;
+	}
 
 	GP_Size w = ratio * (*c)->w;
 	GP_Size h = ratio * (*c)->h;
@@ -107,10 +149,14 @@ static GP_RetCode scale(GP_Context **c, const char *params)
 	int w = -1;
 	int h = -1;
 
-	param_parse(params, scale_params, &alg, &w, &h);
-
-	if (w == -1 || h == -1)
+	if (param_parse(params, scale_params, "scale", param_err,
+	                &alg, &w, &h))
 		return GP_EINVAL;
+
+	if (w == -1 || h == -1) {
+		print_error("scale: w and/or h missing");
+		return GP_EINVAL;
+	}
 
 	GP_Context *res = NULL;
 
@@ -149,10 +195,13 @@ static GP_RetCode rotate(GP_Context **c, const char *params)
 {
 	int rot = -1;
 
-	param_parse(params, rotate_params, &rot);
-
-	if (rot == -1)
+	if (param_parse(params, rotate_params, "rotate", param_err, &rot))
 		return GP_EINVAL;
+
+	if (rot == -1) {
+		print_error("rotate: rot parameter is missing");
+		return GP_EINVAL;
+	}
 
 	switch (rot) {
 	case 0:
@@ -160,6 +209,7 @@ static GP_RetCode rotate(GP_Context **c, const char *params)
 	break;
 	case 1:
 		GP_MirrorV(*c);
+		GP_MirrorH(*c);
 	break;
 	case 2:
 		GP_RotateCCW(*c);
@@ -180,7 +230,13 @@ static GP_RetCode bright(GP_Context **c, const char *params)
 {
 	int bright = 0;
 
-	param_parse(params, bright_params, &bright);
+	if (param_parse(params, bright_params, "bright", param_err, &bright))
+		return GP_EINVAL;
+
+	if (bright == 0) {
+		print_error("bright: bright parameter is zero or missing");
+		return GP_EINVAL;
+	}
 
 	GP_Context *res = GP_FilterBrightness(*c, bright);
 

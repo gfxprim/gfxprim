@@ -25,8 +25,25 @@
 #include <ctype.h>
 #include <stdlib.h>
 #include <stdarg.h>
+#include <errno.h>
 
 #include "params.h"
+
+static const char *param_type_names[] = {
+	"bool",
+	"integer",
+	"float",
+	"string",
+	"enum",
+};
+
+const char *param_type_name(enum param_type type)
+{
+	if (type > PARAM_ENUM)
+		return NULL;
+
+	return param_type_names[type];
+}
 
 static unsigned int count_params(const char *params)
 {
@@ -97,16 +114,38 @@ int param_pos(char *names[], const char *name, unsigned int start, unsigned int 
 
 int set_int(int *res, char *val)
 {
-	//TODO: error checks
-	*res = atoi(val);
+	long l;
+	char *end;
+
+	errno = 0;
+	l = strtol(val, &end, 0);
+
+	if (*end != '\0')
+		return 1;
+
+	if (errno != 0)
+		return 1;
+
+	*res = l;
 
 	return 0;
 }
 
 int set_float(float *res, char *val)
 {
-	//TODO: error checks
-	*res = atof(val);
+	char *end;
+	float f;
+
+	errno = 0;
+	f = strtof(val, &end);
+
+	if (*end != '\0')
+		return 1;
+
+	if (errno != 0)
+		return 1;
+
+	*res = f;
 
 	return 0;
 }
@@ -124,11 +163,23 @@ int set_enum(int *res, char *val, const char *enums[])
 	return 1;
 }
 
-int param_parse(const char *params, const struct param *param_desc, ...)
+#define CALL_ERR_CALLBACK(error, p, value, private) do { \
+	if (error != NULL)                               \
+		error(p, value, private);                \
+} while (0)
+
+int param_parse(const char *params, const struct param *param_desc, void *priv,
+                int (*err)(const struct param *self, const char *val, void *priv), ...)
 {
-	char *par = strdup(params);
+	char *par;
 	unsigned int n, i;
 	va_list va;
+	int ret;
+
+	if (params == NULL || *params == '\0')
+		return 0;
+	
+	par = strdup(params);
 
 	if (par == NULL) {
 		fprintf(stderr, "Malloc failed :(\n");
@@ -143,43 +194,63 @@ int param_parse(const char *params, const struct param *param_desc, ...)
 	split_params(par, names);
 	split_values(names, values, n);
 	
-	va_start(va, param_desc);
+	va_start(va, err);
 
 	for (i = 0; param_desc[i].name != NULL; i++) {
 		void *arg = va_arg(va, void*);
-		int pos = 0, ret;
+		int pos = 0;
 
 		while ((pos = param_pos(names, param_desc[i].name, pos, n)) >= 0) {
+			
+			if (values[pos] == NULL || *values[pos] == '\0') {
+				CALL_ERR_CALLBACK(err, &param_desc[i], "", priv);
+				goto err;
+			}
+			
 			switch (param_desc[i].type) {
 			case PARAM_BOOL:
 				
 			break;
 			case PARAM_INT:
-				if ((ret = set_int(arg, values[pos])))
-					return ret;
+				if ((ret = set_int(arg, values[pos]))) {
+					CALL_ERR_CALLBACK(err, &param_desc[i],
+					                  values[pos], priv);
+					goto err;
+				}
 			break;
 			case PARAM_FLOAT:
-				if ((ret = set_float(arg, values[pos])))
-					return ret;
+				if ((ret = set_float(arg, values[pos]))) {
+					CALL_ERR_CALLBACK(err, &param_desc[i],
+					                  values[pos], priv);
+					goto err;
+				}
 			break;
 			case PARAM_STR:
 				
 			break;
 			case PARAM_ENUM:
 				if ((ret = set_enum(arg, values[pos],
-				     param_desc[i].enum_table)))
-					return ret;
+				     param_desc[i].enum_table))) {
+					CALL_ERR_CALLBACK(err, &param_desc[i],
+					                  values[pos], priv);
+					goto err;
+				}
 			break;
 			}
 
 			if (param_desc[i].check != NULL)
-				param_desc[i].check(&param_desc[i], arg);
+				if ((ret = param_desc[i].check(&param_desc[i], arg))) {
+					CALL_ERR_CALLBACK(err, &param_desc[i],
+					                  values[pos], priv);
+					goto err;
+				}
 			pos++;
 		}
 	}
 
+	ret = 0;
+err:
 	va_end(va);
 	free(par);
-
-	return 0;
+	return ret;
 }
