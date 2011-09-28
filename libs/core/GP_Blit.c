@@ -64,8 +64,10 @@ void GP_Blit_Naive(const GP_Context *c1, GP_Coord x1, GP_Coord y1, GP_Size w, GP
 	GP_CHECK(x2 + w <= GP_ContextW(c2));
 	GP_CHECK(y2 + h <= GP_ContextH(c2));
 
-	for (GP_Size i = 0; i < w; i++)
-		for (GP_Size j = 0; j < h; j++) {
+	GP_Size i, j;
+
+	for (i = 0; i < w; i++)
+		for (j = 0; j < h; j++) {
 			GP_Pixel p = GP_GetPixel(c1, x1 + i, y1 + j);
 			if (c1->pixel_type != c2->pixel_type) 
 				p = GP_ConvertContextPixel(p, c1, c2);

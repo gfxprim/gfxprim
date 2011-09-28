@@ -55,7 +55,7 @@ GP_Context *GP_ScaleDown(GP_Context *src)
 
 #define A 0.5
 
-float cubic(float x)
+static float cubic(float x)
 {
 	if (x < 0)
 		x = -x;
