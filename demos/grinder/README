@@ -1,0 +1,12 @@
+BITMAP GRINDER
+~~~~~~~~~~~~~~
+
+Simple utility to load image, apply gfxprim filters and save result.
+
+The usage is:
+
+grinder -f filter_name:filter_params... -f filter_name:filter_params... -f filter_name:filter_params... image1 image2 ...
+
+Which will apply pipeline of filters to each image and store results to out_X.ppm
+
+see grinder -h for list of filters and options
