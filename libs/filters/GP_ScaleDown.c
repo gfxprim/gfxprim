@@ -84,7 +84,6 @@ GP_Context *GP_Scale(GP_Context *src, GP_Size w, GP_Size h)
 	GP_Context *dst;
 	float col_r[src->h], col_g[src->h], col_b[src->h];
 	uint32_t i, j;
-	int idx;
 
 	if (src->pixel_type != GP_PIXEL_RGB888)
 		return NULL;
@@ -96,24 +95,29 @@ GP_Context *GP_Scale(GP_Context *src, GP_Size w, GP_Size h)
 
 	for (i = 0; i < w; i++) {
 		float x = (1.00 * i / w) * src->w + 0.5;
+		v4f cvx;
+		int xi = x - 1;
+				
+		if (xi < 0)
+			xi = 0;
+
+		if (xi > (int)src->w - 4)
+			xi = src->w - 4;
+		
+		cvx.f[0] = cubic(x - xi);
+		cvx.f[1] = cubic(x - xi - 1);
+		cvx.f[2] = cubic(x - xi - 2);
+		cvx.f[3] = cubic(x - xi - 3);
 	
 		/* Generate interpolated column */
 		for (j = 0; j < src->h; j++) {
-			v4f cv, rv, gv, bv;
+			v4f rv, gv, bv;
 			GP_Pixel pix[4];
 
-			idx = x - 1;
-				
-			if (idx < 0)
-				idx = 0;
-
-			if (idx > (int)src->w - 4)
-				idx = src->w - 4;
-
-			pix[0] = GP_GetPixel_Raw_24BPP(src, idx, j);
-			pix[1] = GP_GetPixel_Raw_24BPP(src, idx + 1, j);
-			pix[2] = GP_GetPixel_Raw_24BPP(src, idx + 2, j);
-			pix[3] = GP_GetPixel_Raw_24BPP(src, idx + 3, j);
+			pix[0] = GP_GetPixel_Raw_24BPP(src, xi, j);
+			pix[1] = GP_GetPixel_Raw_24BPP(src, xi + 1, j);
+			pix[2] = GP_GetPixel_Raw_24BPP(src, xi + 2, j);
+			pix[3] = GP_GetPixel_Raw_24BPP(src, xi + 3, j);
 				
 			rv.f[0] = GP_Pixel_GET_R_RGB888(pix[0]);
 			rv.f[1] = GP_Pixel_GET_R_RGB888(pix[1]);
@@ -130,14 +134,9 @@ GP_Context *GP_Scale(GP_Context *src, GP_Size w, GP_Size h)
 			bv.f[2] = GP_Pixel_GET_B_RGB888(pix[2]);
 			bv.f[3] = GP_Pixel_GET_B_RGB888(pix[3]);
 
-			cv.f[0] = cubic(x - idx);
-			cv.f[1] = cubic(x - idx - 1);
-			cv.f[2] = cubic(x - idx - 2);
-			cv.f[3] = cubic(x - idx - 3);
-			
-			rv = MUL_V4SF(rv, cv);
-			gv = MUL_V4SF(gv, cv);
-			bv = MUL_V4SF(bv, cv);
+			rv = MUL_V4SF(rv, cvx);
+			gv = MUL_V4SF(gv, cvx);
+			bv = MUL_V4SF(bv, cvx);
 			
 			col_r[j] = SUM_V4SF(rv);
 			col_g[j] = SUM_V4SF(gv);
@@ -147,40 +146,39 @@ GP_Context *GP_Scale(GP_Context *src, GP_Size w, GP_Size h)
 		/* now interpolate column for new image */
 		for (j = 0; j < h; j++) {
 			float y = (1.00 * j / h) * src->h + 0.5;
-			v4f cv, rv, gv, bv;
+			v4f cvy, rv, gv, bv;
 			float r, g, b;
-
-			idx = y - 1;
+			int yi = y - 1;
 				
-			if (idx < 0)
-				idx = 0;
+			if (yi < 0)
+				yi = 0;
 
-			if (idx > (int)src->h - 4)
-				idx = src->h - 4;
+			if (yi > (int)src->h - 4)
+				yi = src->h - 4;
 			
-			rv.f[0] = col_r[idx];
-			rv.f[1] = col_r[idx + 1];
-			rv.f[2] = col_r[idx + 2];
-			rv.f[3] = col_r[idx + 3];
+			rv.f[0] = col_r[yi];
+			rv.f[1] = col_r[yi + 1];
+			rv.f[2] = col_r[yi + 2];
+			rv.f[3] = col_r[yi + 3];
 			
-			gv.f[0] = col_g[idx];
-			gv.f[1] = col_g[idx + 1];
-			gv.f[2] = col_g[idx + 2];
-			gv.f[3] = col_g[idx + 3];
+			gv.f[0] = col_g[yi];
+			gv.f[1] = col_g[yi + 1];
+			gv.f[2] = col_g[yi + 2];
+			gv.f[3] = col_g[yi + 3];
 			
-			bv.f[0] = col_b[idx];
-			bv.f[1] = col_b[idx + 1];
-			bv.f[2] = col_b[idx + 2];
-			bv.f[3] = col_b[idx + 3];
+			bv.f[0] = col_b[yi];
+			bv.f[1] = col_b[yi + 1];
+			bv.f[2] = col_b[yi + 2];
+			bv.f[3] = col_b[yi + 3];
 			
-			cv.f[0] = cubic(y - idx);
-			cv.f[1] = cubic(y - idx - 1);
-			cv.f[2] = cubic(y - idx - 2);
-			cv.f[3] = cubic(y - idx - 3);
+			cvy.f[0] = cubic(y - yi);
+			cvy.f[1] = cubic(y - yi - 1);
+			cvy.f[2] = cubic(y - yi - 2);
+			cvy.f[3] = cubic(y - yi - 3);
 
-			rv = MUL_V4SF(rv, cv);
-			gv = MUL_V4SF(gv, cv);
-			bv = MUL_V4SF(bv, cv);
+			rv = MUL_V4SF(rv, cvy);
+			gv = MUL_V4SF(gv, cvy);
+			bv = MUL_V4SF(bv, cvy);
 
 			r = SUM_V4SF(rv);
 			g = SUM_V4SF(gv);
