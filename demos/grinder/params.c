@@ -45,6 +45,58 @@ const char *param_type_name(enum param_type type)
 	return param_type_names[type];
 }
 
+static const char *param_type_names_padd[] = {
+	"bool   ",
+	"integer",
+	"float  ",
+	"string ",
+	"enum   ",
+};
+
+static void padd(unsigned int n)
+{
+	while (n--)
+		putchar(' ');
+}
+
+
+static void print_enum(const char *enum_table[])
+{
+	unsigned int i;
+
+	printf(" = [");
+
+	for (i = 0; enum_table[i] != NULL; i++)
+		if (enum_table[i+1] == NULL)
+			printf("%s]", enum_table[i]);
+		else
+			printf("%s | ", enum_table[i]);
+}
+
+void param_describe(const struct param *param_desc, const char *prefix)
+{
+	unsigned int i, len = 0, l;
+
+	for (i = 0; param_desc[i].name != NULL; i++) {
+		l = strlen(param_desc[i].name);
+
+		if (l > len)
+			len = l;
+	}
+
+	for (i = 0; param_desc[i].name != NULL; i++) {
+		printf("%s%s", prefix, param_desc[i].name);
+		padd(len - strlen(param_desc[i].name));
+		printf(" : %s", param_type_names_padd[param_desc[i].type]);
+		printf(" - %s", param_desc[i].desc);
+
+		if (param_desc[i].type == PARAM_ENUM)
+			print_enum(param_desc[i].enum_table);
+
+		printf("\n");
+	}
+}
+
 static unsigned int count_params(const char *params)
 {
 	unsigned int ret = 1, i;

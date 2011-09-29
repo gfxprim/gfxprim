@@ -76,9 +76,9 @@ static int resize_check_ratio(const struct param *self __attribute__((unused)),
 }
 
 static struct param resize_params[] = {
-	{"alg",   PARAM_ENUM,  resize_algs, NULL},
-	{"ratio", PARAM_FLOAT, NULL,        resize_check_ratio},
-	{NULL,    0,           NULL,        NULL}
+	{"alg",   PARAM_ENUM,  "algorithm to be used", resize_algs, NULL},
+	{"ratio", PARAM_FLOAT, "scale ratio", NULL, resize_check_ratio},
+	{NULL,    0,           NULL,          NULL, NULL}
 };
 
 static GP_RetCode resize(GP_Context **c, const char *params)
@@ -137,10 +137,10 @@ static int scale_check_size(const struct param *self __attribute__((unused)),
 }
 
 static struct param scale_params[] = {
-	{"alg", PARAM_ENUM,  scale_algs, NULL},
-	{"w",   PARAM_INT,   NULL,       scale_check_size},
-	{"h",   PARAM_INT,   NULL,       scale_check_size},
-	{NULL,  0,           NULL,       NULL}
+	{"alg", PARAM_ENUM, "algorithm to be used", scale_algs, NULL},
+	{"w",   PARAM_INT,  "new width",  NULL, scale_check_size},
+	{"h",   PARAM_INT,  "new height", NULL, scale_check_size},
+	{NULL,  0,           NULL,        NULL, NULL}
 };
 
 static GP_RetCode scale(GP_Context **c, const char *params)
@@ -187,8 +187,8 @@ static const char *rotate_rots[] = {
 };
 
 static struct param rotate_params[] = {
-	{"rot", PARAM_ENUM,  rotate_rots, NULL},
-	{NULL,     0,           NULL,       NULL}
+	{"rot", PARAM_ENUM,  "image rotation", rotate_rots, NULL},
+	{NULL,  0,           NULL,        NULL,             NULL}
 };
 
 static GP_RetCode rotate(GP_Context **c, const char *params)
@@ -222,8 +222,8 @@ static GP_RetCode rotate(GP_Context **c, const char *params)
 /* brightness filter */
 
 static struct param bright_params[] = {
-	{"val", PARAM_INT, NULL, NULL},
-	{NULL,  0,         NULL, NULL}
+	{"val", PARAM_INT, "brightness increment", NULL, NULL},
+	{NULL,  0,         NULL,                   NULL, NULL}
 };
 
 static GP_RetCode bright(GP_Context **c, const char *params)
@@ -252,17 +252,18 @@ static GP_RetCode bright(GP_Context **c, const char *params)
 /* filters */
 
 struct filter {
-	char *name;
-	char *param_help;
+	const char *name;
+	const char *desc;
+	struct param *param_desc;
 	GP_RetCode (*apply)(GP_Context **c, const char *params);
 };
 
 static struct filter filter_table[] = {
-	{"resize", "alg=nn|cubic:ratio=float", resize},
-	{"scale",  "alg=nn|cubic:w=int:h=int", scale},
-	{"rotate", "rot=90|180|270",           rotate},
-	{"bright", "val=int",                  bright},
-	{NULL, NULL, NULL}
+	{"resize", "resize image by given ratio", resize_params, resize},
+	{"scale",  "scale image to given width and height", scale_params,  scale},
+	{"rotate", "rotate image", rotate_params, rotate},
+	{"bright", "alter image brightness", bright_params, bright},
+	{NULL, NULL, NULL, NULL}
 };
 
 static struct filter *get_filter(const char *name)
@@ -277,13 +278,24 @@ static struct filter *get_filter(const char *name)
 	return NULL;
 }
 
-static void print_filter_help(const char *prefix)
+static void print_filter_help(void)
 {
-	unsigned int i;
+	unsigned int i, j;
 
 	for (i = 0; filter_table[i].name != NULL; i++) {
-		printf("%s%s : %s\n", prefix, filter_table[i].name,
-		       filter_table[i].param_help);
+		printf("%s\n", filter_table[i].name);
+
+		j = strlen(filter_table[i].name);
+		
+		while (j--)
+			putchar('-');
+		putchar('\n');
+
+		printf("* %s\n", filter_table[i].desc);
+		putchar('\n');
+
+		param_describe(filter_table[i].param_desc, " ");
+		putchar('\n');
 	}
 }
 
@@ -328,19 +340,31 @@ static void apply_filters(GP_Context **src)
 }
 
 static const char *app_help = {
-	"              <-  Bitmap Grinder  ->                  \n"
 	"                                                      \n"
-	"-h        : prints this help                          \n"
-	"-v int    : sets gfxprim verbosity level              \n"
-	"-f params : apply filter, multiple filters may be used\n"
+	"            <-=  Bitmap  Grinder  =->                 \n"
+	"                                                      \n"
+	"                +-+-----+                             \n"
+	"               /  |  +-+| .11.                        \n"
+	"            +-{  D|  |010101011.                      \n"
+	"            |  \\  |  +-.0100101.                      \n"
+	"          O=+   +-+-----+ .10110101.                  \n"
+	"                            .010101.                  \n"
+	"                              .1.                     \n"
+	"                 Program options                      \n"
+	"                 ===============                      \n"
+	"                                                      \n"
+	"-h        - prints this help                          \n"
+	"-v int    - sets gfxprim verbosity level              \n"
+	"-f params - apply filter, multiple filters may be used\n"
 	"                                                      \n"
 	"                 List of filters                      \n"
+	"                 ===============                      \n"
 };
 
 static void print_help(void)
 {
 	puts(app_help);
-	print_filter_help("  ");
+	print_filter_help();
 }
 
 int main(int argc, char *argv[])

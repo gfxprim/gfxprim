@@ -34,12 +34,15 @@ enum param_type {
 struct param {
 	const char *name;
 	enum param_type type;
+	const char *desc;
 	const char **enum_table;
 
 	int (*check)(const struct param *self, void *val);
 };
 
 const char *param_type_name(enum param_type type);
+
+void param_describe(const struct param *param_desc, const char *prefix);
 
 int param_parse(const char *params, const struct param *param_desc, void *priv, 
                int (*err)(const struct param *self, const char *val, void *priv), ...);
