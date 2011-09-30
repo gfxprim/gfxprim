@@ -104,10 +104,10 @@ GP_Context *GP_Scale_BiCubic(GP_Context *src, GP_Size w, GP_Size h)
 		    1.00 * w / src->w, 1.00 * h / src->h);
 
 	for (i = 0; i < w; i++) {
-		float x = (1.00 * i / w) * src->w + 0.5;
+		float x = (1.00 * i / w) * (src->w - 4.5) + 2.5;
 		v4f cvx;
 		int xi = x - 1;
-		
+
 		cvx.f[0] = cubic(x - xi);
 		cvx.f[1] = cubic(x - xi - 1);
 		cvx.f[2] = cubic(x - xi - 2);
@@ -155,7 +155,7 @@ GP_Context *GP_Scale_BiCubic(GP_Context *src, GP_Size w, GP_Size h)
 
 		/* now interpolate column for new image */
 		for (j = 0; j < h; j++) {
-			float y = (1.00 * j / h) * src->h + 0.5;
+			float y = (1.00 * j / h) * (src->h - 4.5) + 2.5;
 			v4f cvy, rv, gv, bv;
 			float r, g, b;
 			int yi = y - 1;
