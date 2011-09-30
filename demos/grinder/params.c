@@ -215,9 +215,12 @@ int set_enum(int *res, char *val, const char *enums[])
 	return 1;
 }
 
-#define CALL_ERR_CALLBACK(error, p, value, private) do { \
-	if (error != NULL)                               \
-		error(p, value, private);                \
+#define CALL_ERR_CALLBACK(error, p, value, private) do {    \
+	int error_ret;                                      \
+	                                                    \
+	if (error != NULL)                                  \
+		if ((error_ret = error(p, value, private))) \
+			return error_ret;                   \
 } while (0)
 
 int param_parse(const char *params, const struct param *param_desc, void *priv,
@@ -242,6 +245,9 @@ int param_parse(const char *params, const struct param *param_desc, void *priv,
 
 	char *names[n];
 	char *values[n];
+	int flags[n];
+
+	memset(flags, 0, sizeof(flags));
 
 	split_params(par, names);
 	split_values(names, values, n);
@@ -258,7 +264,9 @@ int param_parse(const char *params, const struct param *param_desc, void *priv,
 				CALL_ERR_CALLBACK(err, &param_desc[i], "", priv);
 				goto err;
 			}
-			
+		
+			flags[pos]++;
+
 			switch (param_desc[i].type) {
 			case PARAM_BOOL:
 				
@@ -291,12 +299,26 @@ int param_parse(const char *params, const struct param *param_desc, void *priv,
 			}
 
 			if (param_desc[i].check != NULL)
-				if ((ret = param_desc[i].check(&param_desc[i], arg))) {
+				if ((ret = param_desc[i].check(&param_desc[i], arg, flags[i]))) {
 					CALL_ERR_CALLBACK(err, &param_desc[i],
 					                  values[pos], priv);
 					goto err;
 				}
 			pos++;
+		}
+	}
+
+	for (i = 0; i < n; i++) {
+		switch (flags[i]) {
+		/* unknown parameter passed */
+		case 0:
+			CALL_ERR_CALLBACK(err, NULL, names[i], priv);
+		break;
+		case 1:
+		break;
+		/* parameter redefined */
+		default:
+		break;
 		}
 	}
 

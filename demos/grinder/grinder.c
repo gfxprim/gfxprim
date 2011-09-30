@@ -31,6 +31,14 @@
 
 static int param_err(const struct param *self, const char *val, void *priv)
 {
+	/* invalid parameter name */
+	if (self == NULL) {
+		fprintf(stderr, "ERROR: %s: invalid parameter '%s'\n",
+		                (char*)priv, val);
+		return 1;
+	}
+	
+	/* just regular error */
 	fprintf(stderr, "ERROR: %s: invalid %s parameter %s = '%s'",
 	        (char *)priv, param_type_name(self->type), self->name, val);
 	
@@ -65,7 +73,7 @@ static const char *resize_algs[] = {
 };
 
 static int resize_check_ratio(const struct param *self __attribute__((unused)),
-                              void *val)
+                              void *val, int count __attribute__((unused)))
 {
 	float f = *((float*)val);
 
@@ -126,7 +134,7 @@ static const char *scale_algs[] = {
 };
 
 static int scale_check_size(const struct param *self __attribute__((unused)),
-                            void *val)
+                            void *val, int count __attribute__((unused)))
 {
 	int i = *((int*)val);
 
@@ -222,7 +230,7 @@ static GP_RetCode rotate(GP_Context **c, const char *params)
 /* brightness filter */
 
 static struct param bright_params[] = {
-	{"val", PARAM_INT, "brightness increment", NULL, NULL},
+	{"inc", PARAM_INT, "brightness increment", NULL, NULL},
 	{NULL,  0,         NULL,                   NULL, NULL}
 };
 
@@ -249,6 +257,35 @@ static GP_RetCode bright(GP_Context **c, const char *params)
 	return GP_ESUCCESS;
 }
 
+/* contrast */
+
+static struct param contrast_params[] = {
+	{"mul", PARAM_FLOAT, "contrast (1.5 = +50%, 0.5 = -50%)", NULL, NULL},
+	{NULL,  0,           NULL,                    NULL, NULL}
+};
+
+static GP_RetCode contrast(GP_Context **c, const char *params)
+{
+	float mul = 0;
+
+	if (param_parse(params, contrast_params, "contrast", param_err, &mul))
+		return GP_EINVAL;
+
+	if (mul <= 0) {
+		print_error("contrast: mul parameter must be >= 0");
+		return GP_EINVAL;
+	}
+
+	GP_Context *res = GP_FilterContrast(*c, mul);
+
+	if (res == NULL)
+		return GP_EINVAL;
+
+	GP_ContextFree(*c);
+	*c = res;
+	
+	return GP_ESUCCESS;
+}
 /* filters */
 
 struct filter {
@@ -259,10 +296,11 @@ struct filter {
 };
 
 static struct filter filter_table[] = {
-	{"resize", "resize image by given ratio", resize_params, resize},
-	{"scale",  "scale image to given width and height", scale_params,  scale},
-	{"rotate", "rotate image", rotate_params, rotate},
-	{"bright", "alter image brightness", bright_params, bright},
+	{"resize",   "resize image by given ratio", resize_params, resize},
+	{"scale",    "scale image to given width and height", scale_params,  scale},
+	{"rotate",   "rotate image", rotate_params, rotate},
+	{"bright",   "alter image brightness", bright_params, bright},
+	{"contrast", "alter image contrast", contrast_params, contrast},
 	{NULL, NULL, NULL, NULL}
 };
 
@@ -341,7 +379,7 @@ static void apply_filters(GP_Context **src)
 
 static const char *app_help = {
 	"                                                      \n"
-	"            <-=  Bitmap  Grinder  =->                 \n"
+	"     <<<<<<<<<<  Bitmap  Grinder  >>>>>>>>>>>         \n"
 	"                                                      \n"
 	"                +-+-----+                             \n"
 	"               /  |  +-+| .11.                        \n"
@@ -350,12 +388,23 @@ static const char *app_help = {
 	"          O=+   +-+-----+ .10110101.                  \n"
 	"                            .010101.                  \n"
 	"                              .1.                     \n"
+	"                                                      \n"
 	"                 Program options                      \n"
 	"                 ===============                      \n"
 	"                                                      \n"
 	"-h        - prints this help                          \n"
 	"-v int    - sets gfxprim verbosity level              \n"
 	"-f params - apply filter, multiple filters may be used\n"
+	"                                                      \n"
+	"                  Example usage                       \n"
+	"                  =============                       \n"
+	"                                                      \n"
+	" grider -f resize:ratio=1.5 -f contrast:mul=1.2 in.png\n"
+	"                                                      \n"
+	" * will resize image 1.5 times and increases contrast \n"
+	"   by 20%. The result is, just for now, saved to      \n"
+	"   out_X.ppm where X is number which is increased for \n"
+	"   each image given as parameter.                     \n"
 	"                                                      \n"
 	"                 List of filters                      \n"
 	"                 ===============                      \n"

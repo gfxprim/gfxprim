@@ -37,7 +37,8 @@ struct param {
 	const char *desc;
 	const char **enum_table;
 
-	int (*check)(const struct param *self, void *val);
+	/* called after parameter is set */
+	int (*check)(const struct param *self, void *val, int count);
 };
 
 const char *param_type_name(enum param_type type);
