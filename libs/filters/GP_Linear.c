@@ -27,16 +27,34 @@
 
 #include "GP_Linear.h"
 
-void GP_FilterBrightness_Raw(const GP_Context *src, GP_Context *res, int32_t inc);
-
 GP_Context *GP_FilterBrightness(const GP_Context *src, int32_t inc)
 {
-	GP_Context *res = GP_ContextCopy(src, 0);
+	GP_Context *res;
+
+	GP_DEBUG(1, "Running Brightness filter with inc=%i", (int)inc);
+	
+	res = GP_ContextCopy(src, 0);
 
 	if (res == NULL)
 		return NULL;
 
 	GP_FilterBrightness_Raw(src, res, inc);
+
+	return res;
+}
+
+GP_Context *GP_FilterContrast(const GP_Context *src, float mul)
+{
+	GP_Context *res;
+
+	GP_DEBUG(1, "Running Contrast filter with mul=%2.2f", mul);
+	
+	res = GP_ContextCopy(src, 0);
+
+	if (res == NULL)
+		return NULL;
+
+	GP_FilterContrast_Raw(src, res, mul);
 
 	return res;
 }

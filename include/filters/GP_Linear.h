@@ -22,6 +22,7 @@
 
 /*
 
+  Standart point and linear filters.
 
  */
 
@@ -30,6 +31,20 @@
 
 #include <GP_Context.h>
 
+/*
+ * Brightness (point) filter.
+ */
+void GP_FilterBrightness_Raw(const GP_Context *src, GP_Context *res,
+                             int32_t inc);
+
 GP_Context *GP_FilterBrightness(const GP_Context *src, int32_t inc);
+
+/*
+ * Contrast (point) filter.
+ */
+GP_Context *GP_FilterContrast_Raw(const GP_Context *src, GP_Context *res,
+                                  float mul);
+
+GP_Context *GP_FilterContrast(const GP_Context *src, float mul);
 
 #endif /* GP_LINEAR_H */
