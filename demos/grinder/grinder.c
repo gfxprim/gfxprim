@@ -246,14 +246,8 @@ static GP_RetCode bright(GP_Context **c, const char *params)
 		return GP_EINVAL;
 	}
 
-	GP_Context *res = GP_FilterBrightness(*c, bright);
+	GP_FilterBrightness_Raw(*c, *c, bright);
 
-	if (res == NULL)
-		return GP_EINVAL;
-
-	GP_ContextFree(*c);
-	*c = res;
-	
 	return GP_ESUCCESS;
 }
 
@@ -276,16 +270,27 @@ static GP_RetCode contrast(GP_Context **c, const char *params)
 		return GP_EINVAL;
 	}
 
-	GP_Context *res = GP_FilterContrast(*c, mul);
+	GP_FilterContrast_Raw(*c, *c, mul);
 
-	if (res == NULL)
-		return GP_EINVAL;
-
-	GP_ContextFree(*c);
-	*c = res;
-	
 	return GP_ESUCCESS;
 }
+
+/* invert */
+
+static struct param invert_params[] = {
+	{NULL,  0, NULL, NULL, NULL}
+};
+
+static GP_RetCode invert(GP_Context **c, const char *params)
+{
+	if (param_parse(params, invert_params, "invert", param_err))
+		return GP_EINVAL;
+
+	GP_FilterInvert_Raw(*c, *c);
+
+	return GP_ESUCCESS;
+}
+
 /* filters */
 
 struct filter {
@@ -301,6 +306,7 @@ static struct filter filter_table[] = {
 	{"rotate",   "rotate image", rotate_params, rotate},
 	{"bright",   "alter image brightness", bright_params, bright},
 	{"contrast", "alter image contrast", contrast_params, contrast},
+	{"invert",   "inverts image", invert_params, invert},
 	{NULL, NULL, NULL, NULL}
 };
 
