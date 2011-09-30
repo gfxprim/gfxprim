@@ -35,7 +35,7 @@
 /* Image rotations (90 180 270 grads) and mirroring */
 #include "filters/GP_Rotate.h"
 
-#include "filters/GP_Linear.h"
+#include "filters/GP_Point.h"
 
 /* Image down and up scaling */
 #include "filters/GP_Scale.h"

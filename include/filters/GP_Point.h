@@ -22,17 +22,17 @@
 
 /*
 
-  Standart point and linear filters.
+  Point filters, these works on individual pixels.
 
  */
 
-#ifndef GP_LINEAR_H
-#define GP_LINEAR_H
+#ifndef GP_POINT_H
+#define GP_POINT_H
 
 #include <GP_Context.h>
 
 /*
- * Brightness (point) filter.
+ * Brightness filter.
  */
 void GP_FilterBrightness_Raw(const GP_Context *src, GP_Context *res,
                              int32_t inc);
@@ -40,11 +40,18 @@ void GP_FilterBrightness_Raw(const GP_Context *src, GP_Context *res,
 GP_Context *GP_FilterBrightness(const GP_Context *src, int32_t inc);
 
 /*
- * Contrast (point) filter.
+ * Contrast filter.
  */
 GP_Context *GP_FilterContrast_Raw(const GP_Context *src, GP_Context *res,
                                   float mul);
 
 GP_Context *GP_FilterContrast(const GP_Context *src, float mul);
 
-#endif /* GP_LINEAR_H */
+/*
+ * Invert filter.
+ */
+GP_Context *GP_FilterInvert_Raw(const GP_Context *src, GP_Context *res);
+
+GP_Context *GP_FilterInvert(const GP_Context *src);
+
+#endif /* GP_POINT_H */
