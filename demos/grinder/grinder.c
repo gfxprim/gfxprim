@@ -292,17 +292,25 @@ static GP_RetCode invert(GP_Context **c, const char *params)
 }
 
 static struct param blur_params[] = {
+	{"sigma", PARAM_FLOAT, "sigma parameter (eg. radii of blur)", NULL, NULL},
 	{NULL,  0, NULL, NULL, NULL}
 };
 
 static GP_RetCode blur(GP_Context **c, const char *params)
 {
-	if (param_parse(params, blur_params, "blur", param_err))
+	float sigma = 0;
+
+	if (param_parse(params, blur_params, "blur", param_err, &sigma))
 		return GP_EINVAL;
 
+	if (sigma <= 0) {
+		print_error("blur: sigma parameter must be >= 0");
+		return GP_EINVAL;
+	}
+	
 	GP_Context *res = NULL;
 
-	res = GP_FilterBlur(*c);
+	res = GP_FilterGaussianBlur(*c, sigma);
 
 	if (res == NULL)
 		return GP_EINVAL;

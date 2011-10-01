@@ -31,6 +31,6 @@
 
 #include <GP_Context.h>
 
-GP_Context *GP_FilterBlur(GP_Context *src);
+GP_Context *GP_FilterGaussianBlur(GP_Context *src, float sigma);
 
 #endif /* GP_LINEAR_H */
