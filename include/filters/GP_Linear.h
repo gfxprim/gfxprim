@@ -16,29 +16,21 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2010 Jiri "BlueBear" Dluhos                            *
- *                         <jiri.bluebear.dluhos@gmail.com>                  *
- *                                                                           *
  * Copyright (C) 2009-2011 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
 /*
 
-  GP_Context filters.
+   Linear filters.
 
  */
 
-#ifndef GP_FILTERS_H
-#define GP_FILTERS_H
+#ifndef GP_LINEAR_H
+#define GP_LINEAR_H
 
-/* Image rotations (90 180 270 grads) and mirroring */
-#include "filters/GP_Rotate.h"
+#include <GP_Context.h>
 
-#include "filters/GP_Point.h"
-#include "filters/GP_Linear.h"
+GP_Context *GP_FilterBlur(GP_Context *src);
 
-/* Image down and up scaling */
-#include "filters/GP_Scale.h"
-
-#endif /* GP_FILTERS_H */
+#endif /* GP_LINEAR_H */

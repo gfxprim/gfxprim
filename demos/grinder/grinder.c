@@ -291,6 +291,28 @@ static GP_RetCode invert(GP_Context **c, const char *params)
 	return GP_ESUCCESS;
 }
 
+static struct param blur_params[] = {
+	{NULL,  0, NULL, NULL, NULL}
+};
+
+static GP_RetCode blur(GP_Context **c, const char *params)
+{
+	if (param_parse(params, blur_params, "blur", param_err))
+		return GP_EINVAL;
+
+	GP_Context *res = NULL;
+
+	res = GP_FilterBlur(*c);
+
+	if (res == NULL)
+		return GP_EINVAL;
+
+	GP_ContextFree(*c);
+	*c = res;
+
+	return GP_ESUCCESS;
+}
+
 /* filters */
 
 struct filter {
@@ -307,6 +329,7 @@ static struct filter filter_table[] = {
 	{"bright",   "alter image brightness", bright_params, bright},
 	{"contrast", "alter image contrast", contrast_params, contrast},
 	{"invert",   "inverts image", invert_params, invert},
+	{"blur",     "gaussian blur", blur_params, blur},
 	{NULL, NULL, NULL, NULL}
 };
 
