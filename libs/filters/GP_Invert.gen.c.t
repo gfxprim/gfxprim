@@ -5,9 +5,8 @@ Invert filters -- Invert image
 %% endblock
 
 %% block body
-#include <GP_Context.h>
-#include <GP_Pixel.h>
-#include <GP_GetPutPixel.h>
+
+{{ filter_include() }}
 
 %% call(ps) filter_per_pixel_size('Invert')
 pix = {{ 2 ** ps.size - 1 }} - pix;

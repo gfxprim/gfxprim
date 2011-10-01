@@ -1,9 +1,12 @@
 %% extends "base.c.t"
 
-%% macro maybe_opts(opts)
-%% if opts
-,{{ opts }}
-%% endif
+{% macro maybe_opts(opts) %}{% if opts %}, {{ opts }}{% endif %}{% endmacro %}
+
+%% macro filter_include()
+#include <GP_Context.h>
+#include <GP_Pixel.h>
+#include <GP_GetPutPixel.h>
+#include <GP_Debug.h>
 %% endmacro
 
 /*
@@ -54,6 +57,7 @@ void GP_Filter{{ name }}_{{ pt.name }}(const GP_Context *src, GP_Context *res{{ 
 			GP_PutPixel_Raw_{{ pt.pixelsize.suffix }}(res, x, y, pix);
 		}
 }
+
 %% endif
 %% endfor
 %% endmacro
@@ -72,9 +76,11 @@ void GP_Filter{{ name }}_{{ pt.name }}(const GP_Context *src, GP_Context *res{{ 
 /*
  * Switch per pixel sizes or pixel types.
  */
-%% macro filter_functions(name, opts="", params="")
+%% macro filter_functions(name, opts="", params="", fmt="")
 void GP_Filter{{ name }}_Raw(const GP_Context *src, GP_Context *res{{ maybe_opts(opts) }})
 {
+	GP_DEBUG(1, "Running filter {{ name }} {{ fmt }}"{{ maybe_opts(params) }});
+
 	switch (src->pixel_type) {
 	%% for pt in pixeltypes
 	case GP_PIXEL_{{ pt.name }}:
