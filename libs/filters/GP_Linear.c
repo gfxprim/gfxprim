@@ -101,7 +101,7 @@ static void GP_FilterLinearConvolution(const GP_Context *src, GP_Context *dst,
 				
 				if (cy >= (int)src->h)
 					cy = src->h - 1;
-
+				
 				pix = GP_GetPixel_Raw_24BPP(src, cx, cy);
 
 				R[i][j] = GP_Pixel_GET_R_RGB888(pix);
@@ -117,14 +117,18 @@ static void GP_FilterLinearConvolution(const GP_Context *src, GP_Context *dst,
 
 			for (j = 0; j < kh; j++) {
 				int cy = y + j - kh/2;
-				
+				int cx = x + kw/2;
+
 				if (cy < 0)
 					cy = 0;
-				
+
 				if (cy >= (int)src->h)
 					cy = src->h - 1;
 
-				pix = GP_GetPixel_Raw_24BPP(src, x, cy);
+				if (cx >= (int)src->w)
+					cx = src->w - 1;
+
+				pix = GP_GetPixel_Raw_24BPP(src, cx, cy);
 
 				R[idx][j] = GP_Pixel_GET_R_RGB888(pix);
 				G[idx][j] = GP_Pixel_GET_G_RGB888(pix);
@@ -133,10 +137,12 @@ static void GP_FilterLinearConvolution(const GP_Context *src, GP_Context *dst,
 			
 			/* count the pixel value from neighbours weighted by kernel */
 			for (i = 0; i < kw; i++) {
-				int k = i - idx;
-				
-				if (k < 0)
-					k += kw;
+				int k;
+
+				if ((int)i < idx + 1)
+					k = kw - idx - 1 + i;
+				else
+					k = i - idx - 1;
 
 				for (j = 0; j < kh; j++) {
 					r += R[i][j] * kernel[k + j * kw];
