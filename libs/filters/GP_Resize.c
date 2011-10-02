@@ -25,38 +25,27 @@
 
 #include <GP_Debug.h>
 
-#include <GP_Scale.h>
+#include <GP_Resize.h>
 
-
-GP_Context *GP_Scale_NN(GP_Context *src, GP_Size w, GP_Size h)
+void GP_FilterInterpolate_NN(GP_Context *src, GP_Context *res,
+                             GP_ProgressCallback callback)
 {
-	GP_Context *dst;
-
-	if (src->pixel_type != GP_PIXEL_RGB888)
-		return NULL;
-
-	dst = GP_ContextAlloc(w, h, GP_PIXEL_RGB888);
-
-	if (dst == NULL)
-		return NULL;
-
-	GP_DEBUG(1, "Scaling image %ux%u -> %ux%u %2.2f %2.2f",
-	            src->w, src->h, w, h,
-		    1.00 * w / src->w, 1.00 * h / src->h);
-
 	GP_Coord x, y;
+	
+	GP_DEBUG(1, "Scaling image %ux%u -> %ux%u %2.2f %2.2f",
+	            src->w, src->h, res->w, res->h,
+		    1.00 * res->w / src->w, 1.00 * res->h / src->h);
 
-	for (y = 0; y < (int)h; y++)
-		for (x = 0; x < (int)w; x++) {
-			GP_Coord xi = (1.00 * x / w) * src->w;
-			GP_Coord yi = (1.00 * y / h) * src->h;
+	for (y = 0; y < (GP_Coord)res->h; y++) {
+		for (x = 0; x < (GP_Coord)res->w; x++) {
+			GP_Coord xi = (1.00 * x / res->w) * src->w;
+			GP_Coord yi = (1.00 * y / res->h) * src->h;
 			
 			GP_Pixel pix = GP_GetPixel_Raw_24BPP(src, xi, yi);
 
-			GP_PutPixel_Raw_24BPP(dst, x, y, pix);
+			GP_PutPixel_Raw_24BPP(res, x, y, pix);
 		}
-
-	return dst;
+	}
 }
 
 #define A 0.5
@@ -85,26 +74,18 @@ typedef union v4f {
 #define MUL_V4SF(a, b) ((union v4f)((a).v * (b).v))
 #define SUM_V4SF(a)    ((a).f[0] + (a).f[1] + (a).f[2] + (a).f[3])
 
-GP_Context *GP_Scale_BiCubic(GP_Context *src, GP_Size w, GP_Size h)
+void GP_FilterInterpolate_Cubic(GP_Context *src, GP_Context *res,
+                                GP_ProgressCallback callback)
 {
-	GP_Context *dst;
 	float col_r[src->h], col_g[src->h], col_b[src->h];
 	uint32_t i, j;
 
-	if (src->pixel_type != GP_PIXEL_RGB888)
-		return NULL;
-	
-	dst = GP_ContextAlloc(w, h, GP_PIXEL_RGB888);
-	
-	if (dst == NULL)
-		return NULL;
-
 	GP_DEBUG(1, "Scaling image %ux%u -> %ux%u %2.2f %2.2f",
-	            src->w, src->h, w, h,
-		    1.00 * w / src->w, 1.00 * h / src->h);
+	            src->w, src->h, res->w, res->h,
+		    1.00 * res->w / src->w, 1.00 * res->h / src->h);
 
-	for (i = 0; i < w; i++) {
-		float x = (1.00 * i / w) * (src->w - 4.5) + 2.5;
+	for (i = 0; i < res->w; i++) {
+		float x = (1.00 * i / res->w) * (src->w - 4.5) + 2.5;
 		v4f cvx;
 		int xi = x - 1;
 
@@ -154,8 +135,8 @@ GP_Context *GP_Scale_BiCubic(GP_Context *src, GP_Size w, GP_Size h)
 		}
 
 		/* now interpolate column for new image */
-		for (j = 0; j < h; j++) {
-			float y = (1.00 * j / h) * (src->h - 4.5) + 2.5;
+		for (j = 0; j < res->h; j++) {
+			float y = (1.00 * j / res->h) * (src->h - 4.5) + 2.5;
 			v4f cvy, rv, gv, bv;
 			float r, g, b;
 			int yi = y - 1;
@@ -213,9 +194,41 @@ GP_Context *GP_Scale_BiCubic(GP_Context *src, GP_Size w, GP_Size h)
 				b = 0;
 			
 			GP_Pixel pix = GP_Pixel_CREATE_RGB888((uint8_t)r, (uint8_t)g, (uint8_t)b);
-			GP_PutPixel_Raw_24BPP(dst, i, j, pix);
+			GP_PutPixel_Raw_24BPP(res, i, j, pix);
 		}
 	}
+}
 
-	return dst;
+void GP_FilterResize_Raw(GP_Context *src, GP_Context *res,
+                         GP_ProgressCallback callback,
+                         GP_InterpolationType type)
+{
+	switch (type) {
+	case GP_INTER_NN:
+		GP_FilterInterpolate_NN(src, res, callback);
+	break;
+	case GP_INTER_CUBIC:
+		GP_FilterInterpolate_Cubic(src, res, callback);
+	break;
+	}
+}
+
+GP_Context *GP_FilterResize(GP_Context *src, GP_ProgressCallback callback,
+                            GP_InterpolationType type, GP_Size w, GP_Size h)
+{
+	GP_Context *res;
+	
+	if (src->pixel_type != GP_PIXEL_RGB888)
+		return NULL;
+	
+	res = GP_ContextAlloc(w, h, GP_PIXEL_RGB888);
+	
+	if (res == NULL) {
+		GP_DEBUG(1, "Malloc failed :(");
+		return NULL;
+	}
+
+	GP_FilterResize_Raw(src, res, callback, type);
+
+	return res;
 }

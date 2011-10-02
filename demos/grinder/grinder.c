@@ -107,15 +107,8 @@ static GP_RetCode resize(GP_Context **c, const char *params)
 	GP_Size h = ratio * (*c)->h;
 	GP_Context *res = NULL;
 
-	switch (alg) {
-	case 0:
-		res = GP_Scale_NN(*c, w, h);
-	break;
-	case 1:
-		res = GP_Scale_BiCubic(*c, w, h);
-	break;
-	}
-
+	res = GP_FilterResize(*c, NULL, alg, w, h);
+	
 	if (res == NULL)
 		return GP_EINVAL;
 
@@ -168,14 +161,7 @@ static GP_RetCode scale(GP_Context **c, const char *params)
 
 	GP_Context *res = NULL;
 
-	switch (alg) {
-	case 0:
-		res = GP_Scale_NN(*c, w, h);
-	break;
-	case 1:
-		res = GP_Scale_BiCubic(*c, w, h);
-	break;
-	}
+	res = GP_FilterResize(*c, NULL, alg, w, h);
 
 	if (res == NULL)
 		return GP_EINVAL;

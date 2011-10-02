@@ -35,10 +35,13 @@
 /* Image rotations (90 180 270 grads) and mirroring */
 #include "filters/GP_Rotate.h"
 
+/* Point filters, brightness, contrast ... */
 #include "filters/GP_Point.h"
+
+/* Linear convolution base filters (mostly blurs) */
 #include "filters/GP_Linear.h"
 
-/* Image down and up scaling */
-#include "filters/GP_Scale.h"
+/* Image scaling */
+#include "filters/GP_Resize.h"
 
 #endif /* GP_FILTERS_H */
