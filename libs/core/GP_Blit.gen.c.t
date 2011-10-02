@@ -6,7 +6,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "GP_Pixel.h"
-#include "GP.h"
+#include "GP_GetPutPixel.h"
 #include "GP_Context.h"
 #include "GP_Blit.h"
 
