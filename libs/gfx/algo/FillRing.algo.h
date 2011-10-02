@@ -54,17 +54,17 @@ void FN_NAME(CONTEXT_T context, int xcenter, int ycenter, \
 		} \
 		outer_error += -2*y + 1; \
 \
-		if (y <= (int) inner_r && y >= -((int) inner_r)) { \
+		if (y < inner_r && y > -inner_r) { \
 			while (inner_error < 0) { \
 				inner_error += 2*inner_x + 1; \
 				inner_x++; \
 			} \
 			inner_error += -2*y + 1; \
 \
-			HLINE(context, xcenter - outer_x + 1, xcenter - inner_x + 1, ycenter - y, pixval); \
-			HLINE(context, xcenter + inner_x - 1, xcenter + outer_x - 1, ycenter - y, pixval); \
-			HLINE(context, xcenter - outer_x + 1, xcenter - inner_x + 1, ycenter + y, pixval); \
-			HLINE(context, xcenter + inner_x - 1, xcenter + outer_x - 1, ycenter + y, pixval); \
+			HLINE(context, xcenter - outer_x + 1, xcenter - inner_x,     ycenter - y, pixval); \
+			HLINE(context, xcenter + inner_x,     xcenter + outer_x - 1, ycenter - y, pixval); \
+			HLINE(context, xcenter - outer_x + 1, xcenter - inner_x,     ycenter + y, pixval); \
+			HLINE(context, xcenter + inner_x,     xcenter + outer_x - 1, ycenter + y, pixval); \
 		} else { \
 			HLINE(context, xcenter - outer_x + 1, xcenter + outer_x - 1, ycenter-y, pixval); \
 			HLINE(context, xcenter - outer_x + 1, xcenter + outer_x - 1, ycenter+y, pixval); \
