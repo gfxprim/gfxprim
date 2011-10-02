@@ -314,8 +314,8 @@ static GP_RetCode blur(GP_Context **c, const char *params)
 		sigma_y = sigma;
 	}
 
-	if (sigma_x <= 0 || sigma_y <= 0) {
-		print_error("blur: sigma_x and sigma_y parameter must be >= 0");
+	if (sigma_x <= 0 && sigma_y <= 0) {
+		print_error("blur: at least one of sigma_x and sigma_y must be >= 0");
 		return GP_EINVAL;
 	}
 
