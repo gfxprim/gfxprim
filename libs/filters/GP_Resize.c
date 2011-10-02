@@ -28,7 +28,7 @@
 #include <GP_Resize.h>
 
 void GP_FilterInterpolate_NN(GP_Context *src, GP_Context *res,
-                             GP_ProgressCallback callback)
+                             GP_ProgressCallback *callback)
 {
 	GP_Coord x, y;
 	
@@ -45,7 +45,12 @@ void GP_FilterInterpolate_NN(GP_Context *src, GP_Context *res,
 
 			GP_PutPixel_Raw_24BPP(res, x, y, pix);
 		}
+	
+		if (callback != NULL && y % 100 == 0)
+			GP_ProgressCallbackReport(callback, 100.00 * y/res->h);
 	}
+
+	GP_ProgressCallbackDone(callback);
 }
 
 #define A 0.5
@@ -75,7 +80,7 @@ typedef union v4f {
 #define SUM_V4SF(a)    ((a).f[0] + (a).f[1] + (a).f[2] + (a).f[3])
 
 void GP_FilterInterpolate_Cubic(GP_Context *src, GP_Context *res,
-                                GP_ProgressCallback callback)
+                                GP_ProgressCallback *callback)
 {
 	float col_r[src->h], col_g[src->h], col_b[src->h];
 	uint32_t i, j;
@@ -196,11 +201,16 @@ void GP_FilterInterpolate_Cubic(GP_Context *src, GP_Context *res,
 			GP_Pixel pix = GP_Pixel_CREATE_RGB888((uint8_t)r, (uint8_t)g, (uint8_t)b);
 			GP_PutPixel_Raw_24BPP(res, i, j, pix);
 		}
+		
+		if (callback != NULL && i % 100 == 0)
+			GP_ProgressCallbackReport(callback, 100.00 * i/res->w);
 	}
+
+	GP_ProgressCallbackDone(callback);
 }
 
 void GP_FilterResize_Raw(GP_Context *src, GP_Context *res,
-                         GP_ProgressCallback callback,
+                         GP_ProgressCallback *callback,
                          GP_InterpolationType type)
 {
 	switch (type) {
@@ -213,7 +223,7 @@ void GP_FilterResize_Raw(GP_Context *src, GP_Context *res,
 	}
 }
 
-GP_Context *GP_FilterResize(GP_Context *src, GP_ProgressCallback callback,
+GP_Context *GP_FilterResize(GP_Context *src, GP_ProgressCallback *callback,
                             GP_InterpolationType type, GP_Size w, GP_Size h)
 {
 	GP_Context *res;

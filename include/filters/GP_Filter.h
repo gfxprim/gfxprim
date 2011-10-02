@@ -22,40 +22,37 @@
 
 /*
 
-  GP_Context interpolations.
-
-  Nearest Neighbour
-  ~~~~~~~~~~~~~~~~~
-
-  Fast, but produces pixelated images. Works however well for images with sharp
-  edges mostly consisting of big one color regions (eg doesn't blur the
-  result on upscaling).
-
-
-  Bicubic
-  ~~~~~~~
-  
-  Works well for upscaling as is. To get decent result on downscaling,
-  low-pass filter (for example gaussian blur) must be used on original image
-  before scaling is done.
+  Common filters typedefs and includes.
 
  */
 
-#ifndef GP_RESIZE_H
-#define GP_RESIZE_H
+#ifndef GP_FILTER_H
+#define GP_FILTER_H
 
-#include "GP_Filter.h"
+#include "core/GP_Context.h"
 
-typedef enum GP_InterpolationType {
-	GP_INTER_NN,    /* Nearest Neighbour */
-	GP_INTER_CUBIC, /* Bicubic           */
-} GP_InterpolationType;
+/*
+ * Progress callback
+ */
+typedef struct GP_ProgressCallback {
+	float percentage;
+	void (*callback)(struct GP_ProgressCallback *self);
+	void *priv;
+} GP_ProgressCallback;
 
-void GP_FilterResize_Raw(GP_Context *src, GP_Context *res,
-                         GP_ProgressCallback *callback,
-		         GP_InterpolationType type);
+static inline void GP_ProgressCallbackReport(GP_ProgressCallback *callback,
+                                             float percentage)
+{
+	if (callback == NULL)
+		return;
 
-GP_Context *GP_FilterResize(GP_Context *src, GP_ProgressCallback *callback,
-                            GP_InterpolationType type, GP_Size w, GP_Size h);
+	callback->percentage = percentage;
+	callback->callback(callback);
+}
 
-#endif /* GP_RESIZE_H */
+static inline void GP_ProgressCallbackDone(GP_ProgressCallback *callback)
+{
+	GP_ProgressCallbackReport(callback, 100);
+}
+
+#endif /* GP_FILTER_H */

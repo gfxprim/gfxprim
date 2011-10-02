@@ -29,6 +29,16 @@
 
 #include "params.h"
 
+static GP_ProgressCallback *progress_callback = NULL;
+
+static const char *progress_prefix = NULL;
+
+static void show_progress(GP_ProgressCallback *self)
+{
+	fprintf(stderr, "\rFilter %s %3.2f%%",
+	        progress_prefix, self->percentage);
+}
+
 static int param_err(const struct param *self, const char *val, void *priv)
 {
 	/* invalid parameter name */
@@ -107,7 +117,7 @@ static GP_RetCode resize(GP_Context **c, const char *params)
 	GP_Size h = ratio * (*c)->h;
 	GP_Context *res = NULL;
 
-	res = GP_FilterResize(*c, NULL, alg, w, h);
+	res = GP_FilterResize(*c, progress_callback, alg, w, h);
 	
 	if (res == NULL)
 		return GP_EINVAL;
@@ -161,7 +171,7 @@ static GP_RetCode scale(GP_Context **c, const char *params)
 
 	GP_Context *res = NULL;
 
-	res = GP_FilterResize(*c, NULL, alg, w, h);
+	res = GP_FilterResize(*c, progress_callback, alg, w, h);
 
 	if (res == NULL)
 		return GP_EINVAL;
@@ -296,7 +306,7 @@ static GP_RetCode blur(GP_Context **c, const char *params)
 	
 	GP_Context *res = NULL;
 
-	res = GP_FilterGaussianBlur(*c, sigma);
+	res = GP_FilterGaussianBlur(*c, progress_callback, sigma, sigma);
 
 	if (res == NULL)
 		return GP_EINVAL;
@@ -393,11 +403,18 @@ static void apply_filters(GP_Context **src)
 	unsigned int i;
 	GP_RetCode ret;
 
-	for (i = 0; i < filter_cnt; i++)
+	for (i = 0; i < filter_cnt; i++) {
+		
+		progress_prefix = filters[i]->name;
+
 		if ((ret = filters[i]->apply(src, filter_params[i]))) {
 			fprintf(stderr, "Error: %s\n", GP_RetCodeName(ret));
 			exit(1);
 		}
+		
+		if (progress_callback != NULL)
+			fprintf(stderr, " done\n");
+	}
 }
 
 static const char *app_help = {
@@ -416,6 +433,7 @@ static const char *app_help = {
 	"                 ===============                      \n"
 	"                                                      \n"
 	"-h        - prints this help                          \n"
+	"-p        - show filter progress                      \n"
 	"-v int    - sets gfxprim verbosity level              \n"
 	"-f params - apply filter, multiple filters may be used\n"
 	"                                                      \n"
@@ -445,7 +463,11 @@ int main(int argc, char *argv[])
 	GP_RetCode ret;
 	int opt, i;
 
-	while ((opt = getopt(argc, argv, "f:hv:")) != -1) {
+	GP_ProgressCallback callback = {
+		.callback = show_progress,
+	};
+
+	while ((opt = getopt(argc, argv, "f:hpv:")) != -1) {
 		switch (opt) {
 		case 'h':
 			print_help();
@@ -456,6 +478,9 @@ int main(int argc, char *argv[])
 		break;
 		case 'f':
 			add_filter(optarg);
+		break;
+		case 'p':
+			progress_callback = &callback;
 		break;
 		default:
 			print_help();

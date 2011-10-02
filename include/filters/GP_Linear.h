@@ -29,8 +29,24 @@
 #ifndef GP_LINEAR_H
 #define GP_LINEAR_H
 
-#include <GP_Context.h>
+#include "GP_Filter.h"
 
-GP_Context *GP_FilterGaussianBlur(GP_Context *src, float sigma);
+/*
+ * Gaussian blur
+ *
+ * The sigma parameters defines the blur radii in horizontal and vertical
+ * direction.
+ * 
+ * This variant could work in-place so it's perectly okay to call
+ *
+ * GP_FilterGaussianBlur_Raw(context, context, ...);
+ */
+void GP_FilterGaussianBlur_Raw(GP_Context *src, GP_Context *res,
+                               GP_ProgressCallback *callback,
+			       float sigma_x, float sigma_y);
+
+GP_Context *GP_FilterGaussianBlur(GP_Context *src,
+                                  GP_ProgressCallback *callback,
+                                  float sigma_x, float sigma_y);
 
 #endif /* GP_LINEAR_H */
