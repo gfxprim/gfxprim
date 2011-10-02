@@ -164,10 +164,16 @@ static GP_RetCode scale(GP_Context **c, const char *params)
 	                &alg, &w, &h))
 		return GP_EINVAL;
 
-	if (w == -1 || h == -1) {
+	if (w == -1 && h == -1) {
 		print_error("scale: w and/or h missing");
 		return GP_EINVAL;
 	}
+
+	if (w == -1)
+		w = (*c)->w * (1.00 * h/(*c)->h) + 0.5;
+	
+	if (h == -1)
+		h = (*c)->h * (1.00 * w/(*c)->w) + 0.5;
 
 	GP_Context *res = NULL;
 
@@ -304,15 +310,8 @@ static GP_RetCode blur(GP_Context **c, const char *params)
 		return GP_EINVAL;
 	}
 	
-	GP_Context *res = NULL;
+	GP_FilterGaussianBlur_Raw(*c, *c, progress_callback, sigma, sigma);
 
-	res = GP_FilterGaussianBlur(*c, progress_callback, sigma, sigma);
-
-	if (res == NULL)
-		return GP_EINVAL;
-
-	GP_ContextFree(*c);
-	*c = res;
 
 	return GP_ESUCCESS;
 }
