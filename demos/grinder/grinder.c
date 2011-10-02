@@ -149,8 +149,8 @@ static int scale_check_size(const struct param *self __attribute__((unused)),
 
 static struct param scale_params[] = {
 	{"alg", PARAM_ENUM, "algorithm to be used", scale_algs, NULL},
-	{"w",   PARAM_INT,  "new width",  NULL, scale_check_size},
-	{"h",   PARAM_INT,  "new height", NULL, scale_check_size},
+	{"w", PARAM_INT, "new width (only width may be passed)",  NULL, scale_check_size},
+	{"h", PARAM_INT, "new height (only height may be passed)", NULL, scale_check_size},
 	{NULL,  0,           NULL,        NULL, NULL}
 };
 
@@ -294,24 +294,32 @@ static GP_RetCode invert(GP_Context **c, const char *params)
 }
 
 static struct param blur_params[] = {
-	{"sigma", PARAM_FLOAT, "sigma parameter (eg. radii of blur)", NULL, NULL},
+	{"sigma", PARAM_FLOAT, "sigma parameter, radii of blur (sets both)", NULL, NULL},
+	{"sigma_x", PARAM_FLOAT, "sigma parameter for horizontal direction", NULL, NULL},
+	{"sigma_y", PARAM_FLOAT, "sigma parameter for vertical direction", NULL, NULL},
 	{NULL,  0, NULL, NULL, NULL}
 };
 
 static GP_RetCode blur(GP_Context **c, const char *params)
 {
 	float sigma = 0;
+	float sigma_x = 0;
+	float sigma_y = 0;
 
-	if (param_parse(params, blur_params, "blur", param_err, &sigma))
+	if (param_parse(params, blur_params, "blur", param_err, &sigma, &sigma_x, &sigma_y))
 		return GP_EINVAL;
 
-	if (sigma <= 0) {
-		print_error("blur: sigma parameter must be >= 0");
+	if (sigma > 0) {
+		sigma_x = sigma;
+		sigma_y = sigma;
+	}
+
+	if (sigma_x <= 0 || sigma_y <= 0) {
+		print_error("blur: sigma_x and sigma_y parameter must be >= 0");
 		return GP_EINVAL;
 	}
-	
-	GP_FilterGaussianBlur_Raw(*c, *c, progress_callback, sigma, sigma);
 
+	GP_FilterGaussianBlur_Raw(*c, *c, progress_callback, sigma_x, sigma_y);
 
 	return GP_ESUCCESS;
 }
