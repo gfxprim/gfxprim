@@ -84,22 +84,23 @@ void GP_FilterGaussianBlur_Raw(GP_Context *src, GP_Context *res,
 		new_callback = &gaussian_callback;
 
 	/* compute kernel and apply on horizontal direction */
-	float kernel_x[size_x];
-	gaussian_kernel_init(sigma_x, kernel_x);
-	GP_FilterLinearConvolution(src, res, new_callback, kernel_x, size_x, 1);
-
+	if (sigma_x > 0) {
+		float kernel_x[size_x];
+		gaussian_kernel_init(sigma_x, kernel_x);
+		GP_FilterLinearConvolution(src, res, new_callback, kernel_x, size_x, 1);
+	}
+	
 	if (new_callback != NULL)
 		new_callback->callback = gaussian_callback_2;
 
 	/* compute kernel and apply on vertical direction */
-	float kernel_y[size_y];
-	gaussian_kernel_init(sigma_y, kernel_y);
-	GP_FilterLinearConvolution(res, res, new_callback, kernel_y, 1, size_y);
-	
-	if (callback != NULL) {
-		callback->percentage = 100;
-		callback->callback(callback);
+	if (sigma_y > 0) {
+		float kernel_y[size_y];
+		gaussian_kernel_init(sigma_y, kernel_y);
+		GP_FilterLinearConvolution(res, res, new_callback, kernel_y, 1, size_y);
 	}
+
+	GP_ProgressCallbackDone(callback);
 }
 
 GP_Context *GP_FilterGaussianBlur(GP_Context *src,
