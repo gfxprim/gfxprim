@@ -6,8 +6,7 @@ INCLUDE=core gfx SDL backends
 LDLIBS+=-lGP -L$(TOPDIR)/build/ -lGP_SDL -lSDL -lpng
 
 APPS=pixeltest fileview fonttest linetest randomshapetest shapetest sierpinsky\
-     symbolstest textaligntest trianglefps input blittest subcontext scale_test\
-     showimage
+     symbolstest textaligntest trianglefps input blittest subcontext showimage
 
 include $(TOPDIR)/include.mk
 include $(TOPDIR)/app.mk
