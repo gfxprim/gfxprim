@@ -10,3 +10,35 @@ grinder -f filter_name:filter_params... -f filter_name:filter_params... -f filte
 Which will apply pipeline of filters to each image and store results to out_X.ppm
 
 see grinder -h for list of filters and options
+
+
+COOL EFECTS
+~~~~~~~~~~~
+
+Pixelize yourself
+-----------------
+
+This filter creates pixelated image of the input (for example photograph of your head).
+
+grinder -p -f resize:ratio=0.2 -f blur:sigma=4 -f resize:ratio=0.1 -f resize:alg=nn:ratio=4 head.png
+
+And now, what it does:
+
+* The first resize just resizes down the image as the images that gets out a
+  digital camera are usually too big and too noisy. This only prepares the
+  image so it has reasonable size. Ideally there should be a low-pass filter
+  (eg. gaussian blur) before each downscaling but as we are scaling the image
+  further, we don't care now.
+
+* The blur does low-pass filter (cuts off all high frequencies). If you are not
+  familiar with digital signal processing, think of this just as smoothing the
+  image after the interpolation (which works only on a few neighbour pixels so
+  on downscaling some of the pixels may not be used for the interpolation at
+  all).
+
+* The second resize resizes the image to be really small (and the result is
+  quite good looking as we used low-pass filter beforhand).
+
+* The last resize scales the image up, but this time we used nearest neighbour
+  interpolation, which just picks up one pixel which is nearest to the
+  interpolated value. This actually creates the 'pixel' effect.
