@@ -428,11 +428,11 @@ static const char *app_help = {
 	"                                                      \n"
 	"     <<<<<<<<<<  Bitmap  Grinder  >>>>>>>>>>>         \n"
 	"                                                      \n"
-	"                +-+-----+                             \n"
-	"               /  |  +-+| .11.                        \n"
+	"                +~+-----+                             \n"
+	"               /| |  +-+| .11.                        \n"
 	"            +-{  D|  |010101011.                      \n"
-	"            |  \\  |  +-.0100101.                      \n"
-	"          O=+   +-+-----+ .10110101.                  \n"
+	"            |  \\| |  +-.0100101.                      \n"
+	"          O=+   +~+-----+ .10110101.                  \n"
 	"                            .010101.                  \n"
 	"                              .1.                     \n"
 	"                                                      \n"
@@ -481,7 +481,16 @@ int main(int argc, char *argv[])
 			return 0;
 		break;
 		case 'v':
-			GP_SetDebugLevel(atoi(optarg));
+			i = atoi(optarg);
+
+			if (i == 0) {
+				fprintf(stderr, "ERROR: invalid debug level "
+				                "'%s', expected number > 0\n",
+						optarg);
+				return 1;
+			}
+
+			GP_SetDebugLevel(i);
 		break;
 		case 'f':
 			add_filter(optarg);
@@ -496,8 +505,7 @@ int main(int argc, char *argv[])
 	}
 
 	if (optind >= argc) {
-		fprintf(stderr, "Expected bitmap filenames\n");
-		print_help();
+		fprintf(stderr, "ERROR: Expected bitmap filenames\n");
 		return 1;
 	}
 	
