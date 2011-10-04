@@ -36,7 +36,10 @@
  *
  * The sigma parameters defines the blur radii in horizontal and vertical
  * direction.
- * 
+ *
+ * Internaly this is implemented as separable linear filter (calls vertical and
+ * horizontal convolution with generated gaussian kernel).
+ *
  * This variant could work in-place so it's perectly okay to call
  *
  * GP_FilterGaussianBlur_Raw(context, context, ...);
@@ -48,5 +51,42 @@ void GP_FilterGaussianBlur_Raw(GP_Context *src, GP_Context *res,
 GP_Context *GP_FilterGaussianBlur(GP_Context *src,
                                   GP_ProgressCallback *callback,
                                   float sigma_x, float sigma_y);
+
+/*
+ * Linear convolution.
+ *
+ * The kernel is array of kw * kh floats and is indexed as two directional array.
+ *
+ * To define 3x3 average filter
+ *
+ * kernel[] = {
+ *	1, 1, 1,
+ *	1, 1, 1,
+ *	1, 1, 1,
+ * };
+ *
+ * kw = kh = 3
+ *
+ * This function works also in-place.
+ */
+void GP_FilterLinearConvolution_Raw(const GP_Context *src, GP_Context *res,
+                                    GP_ProgressCallback *callback,
+                                    float kernel[], uint32_t kw, uint32_t kh);
+
+/*
+ * Special cases for convolution only in horizontal/vertical direction.
+ *
+ * These are about 10-30% faster than the generic implementation (depending on
+ * the kernel size, bigger kernel == more savings).
+ * 
+ * Both works also in-place.
+ */
+void GP_FilterHLinearConvolution_Raw(const GP_Context *src, GP_Context *res,
+                                     GP_ProgressCallback *callback,
+                                     float kernel[], uint32_t kw);
+
+void GP_FilterVLinearConvolution_Raw(const GP_Context *src, GP_Context *res,
+                                     GP_ProgressCallback *callback,
+                                     float kernel[], uint32_t kh);
 
 #endif /* GP_LINEAR_H */
