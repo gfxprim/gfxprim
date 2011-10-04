@@ -27,6 +27,10 @@
  */
 
 #include <string.h>
+#include <unistd.h>
+#include <errno.h>
+
+#include <GP_Debug.h>
 
 #include "GP_Loaders.h"
 
@@ -34,6 +38,12 @@ GP_RetCode GP_LoadImage(const char *src_path, GP_Context **res)
 {
 	int len = strlen(src_path);
 	GP_RetCode ret = GP_ENOIMPL;
+
+	if (access(src_path, R_OK)) {
+		GP_DEBUG(1, "Failed to access file '%s' : %s",
+		            src_path, strerror(errno));
+		return GP_EBADFILE;
+	}
 
 	switch (src_path[len - 1]) {
 	/* PNG, JPG, JPEG */
