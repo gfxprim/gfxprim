@@ -45,7 +45,7 @@
 
 
 %% block body
-#include "GP_Common.h"
+#include "GP_GetSetBits.h"
 #include "GP_Context.h"
 #include "GP_Pixel.h"
 

@@ -485,6 +485,8 @@ int main(int argc, char ** argv)
 		}
 	}
 
+	GP_SetDebugLevel(10);
+
 	/* Initialize SDL */
 	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) != 0) {
 		fprintf(stderr, "Could not initialize SDL: %s\n", SDL_GetError());

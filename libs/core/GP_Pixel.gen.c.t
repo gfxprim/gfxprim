@@ -8,6 +8,7 @@ Do not include directly, use GP_Pixel.h
 %% block body
 #include <stdio.h>
 #include "GP_Pixel.h"
+#include "GP_GetSetBits.h"
 
 /* 
  * Description of all known pixel types 
@@ -28,6 +29,8 @@ const GP_PixelTypeDescription const GP_PixelTypes [] = {
 	} },
 %% endfor
 };
+
+#warning FIXME: do generic get set bit for pixel printing
 
 %% for pt in pixeltypes
 %% if not pt.is_unknown()

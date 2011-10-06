@@ -140,51 +140,6 @@
 	a = tmp;           \
 } while (0)
 
-/*
- * Helper macros to read/write parts of words 
- *
- * Return (shifted) count bits at offset of value
- * Note: operates with value types same as val 
- */
-#define GP_GET_BITS(offset, count, val) \
-	( ( (val)>>(offset) ) & ( ((((typeof(val))1)<<(count)) - 1) ) )
-
-/*
- * Debugging version, evaluates args twice.
- */
-#define GP_GET_BITS_DBG(offset, count, val) \
-	( printf("GET_BITS(%d, %d, 0x%x)=%d", offset, count, val, \
-	GP_GET_BITS(offset, count, val)), GP_GET_BITS(offset, count, val))
-
-/*
- * Set count bits of dest at ofset to val (shifted by offset)
- * 
- * Does not check val for overflow
- * Operates on 8, 16, and 32 bit values, depending on the type of dest, 
- * this should be unsigned
- *
- * GP_SET_BITS_OR anly sets (|=) the bits, assuming these are clear beforehand
- * GP_CLEAR_BITS sets the target bits to zero
- * GP_SET_BITS does both
- */
-#define GP_CLEAR_BITS(offset, count, dest) \
-	( (dest) &= ~(((((typeof(dest))1) << (count)) - 1) << (offset)) )
-
-#define GP_SET_BITS_OR(offset, dest, val) ( (dest) |= ((val)<<(offset)) )
-
-#define GP_SET_BITS(offset, count, dest, val) do { \
-		GP_CLEAR_BITS(offset, count, dest); \
-		GP_SET_BITS_OR(offset, dest, val); \
-} while (0)
-
-/* 
- * Debugging version, evaluates args twice.
- */
-#define GP_SET_BITS_DBG(offset, count, dest, val) do { \
-	GP_SET_BITS(offset, count, dest, val); \
-	printf("SET_BITS(%d, %d, p, %d)\n", offset, count, val); \
-} while (0)
-
 
 /* Determines the sign of the integer value; it is +1 if value is positive,
  * -1 if negative, and 0 if it is zero.
