@@ -13,15 +13,15 @@ Do not include directly, use GP_Pixel.h
    Note about byte aligment
    ~~~~~~~~~~~~~~~~~~~~~~~~
 
-   Unaligned acces happens when instruction that works with multiple byte value
-   gets an address that is not divideable by the size of the value. Eg. if 32
-   bit integer instruction gets an address that is not a multiple of 4. On
-   intel cpus this type of acces works and is supported however the C standard
-   defines this as undefined behavior. This fails to work ARM and most of the
-   non intel cpus. So some more trickery must be done in order to write
-   unaligned multibyte values. First of all we must compute offset and number of
-   bytes to be accessed (which is cruicial for speed as we are going to read the
-   pixel value byte by byte.
+   Unaligned access happens when instruction that works with multiple byte
+   value gets an address that is not divideable by the size of the value. Eg.
+   if 32 bit integer instruction gets an address that is not a multiple of 4.
+   On intel cpus this type of access works and is supported however the C
+   standard defines this as undefined behavior. This fails to work ARM and most
+   of the non intel cpus. So some more trickery must be done in order to write
+   unaligned multibyte values. First of all we must compute offset and number
+   of bytes to be accessed (which is cruicial for speed as we are going to read
+   the pixel value byte by byte).
 
    The offsets (starting with the first one eg. pixel_size mod 8) forms subgroup
    in the mod 8 cyclic group. The maximal count of bits, from the start of the
@@ -30,7 +30,7 @@ Do not include directly, use GP_Pixel.h
 
    For example the offsets of 16 BPP forms subgroup only with {0} so we only
    need 2 bytes to write it. As a matter of fact the 16 and 32 BPP are special
-   cases that are always aligned and together with the 8 BPP (which is aligned
+   cases that are always aligned together with the 8 BPP (which is aligned
    trivially). These three are coded as special cases which yields to faster
    operations in case of 16 and 32 BPP. The 24 BPP is not aligned as there are
    no instruction to operate 3 byte long numbers.
@@ -38,10 +38,10 @@ Do not include directly, use GP_Pixel.h
    For second example take offsets of 20 BPP that forms subgroup {4, 0}
    so the max + pixel_size = 24 and indeed we fit into 3 bytes.
 
-   If pixel_size is coprime to 8, the offsets generates whole group and so
-   the max + pixel_size = 7 + pixel_size. The 17 BPP fits into 24 bits and
-   so also 3 bytes are needed. The 19 BPP fits into 26 bits and because of
-   that 4 bytes are needed. 
+   If pixel_size is coprime to 8, the offsets generates whole group and so the
+   max + pixel_size = 7 + pixel_size. The 17 BPP fits into 24 bits and so 3
+   bytes are needed. The 19 BPP fits into 26 bits and because of that 4 bytes
+   are needed. 
 
    Once we figure maximal number of bytes and the offset all that is to be done
    is to fetch first and last byte to combine it together with given pixel value
