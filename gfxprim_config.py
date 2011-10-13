@@ -24,8 +24,7 @@ PS_16BPP = PixelSize(16)
 PS_24BPP = PixelSize(24)
 PS_32BPP = PixelSize(32)
 # Experimental:
-PS_19BPP_LE = PixelSize(19, bit_endian=LE)
-
+PS_18BPP_LE = PixelSize(18, bit_endian=LE)
 
 config = GfxPrimConfig(
 
@@ -35,8 +34,8 @@ config = GfxPrimConfig(
 
     # List of pixel sizes (bpp), explicit on purpose
     pixelsizes = [PS_1BPP_LE, PS_1BPP_BE, PS_2BPP_LE, PS_2BPP_BE, PS_4BPP_LE, PS_4BPP_BE,
-		  PS_8BPP, PS_16BPP, PS_24BPP, PS_32BPP,
-		  PS_19BPP_LE,
+                  PS_8BPP, PS_16BPP, PS_24BPP, PS_32BPP,
+                  PS_18BPP_LE,
                  ],
 
     # List of PixelTypes, order defines the numbering. 
@@ -68,6 +67,10 @@ config = GfxPrimConfig(
 	  ('G', 5, 6),
 	  ('B', 0, 5)]),
 
+      PixelType(name='RGB666', pixelsize=PS_18BPP_LE, chanslist=[
+	  ('R', 12, 6),
+	  ('G', 6, 6),
+	  ('B', 0, 6)]),
       #
       # Palette types
       #
