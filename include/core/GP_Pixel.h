@@ -158,13 +158,23 @@ static inline void GP_PixelPrint(GP_Pixel pixel, GP_PixelType type)
 }
 
 /*
- * Match pixel type to known pixel types, pixel_size is in bits.
+ * Match pixel type to known pixel types.
  *
  * Returns either valid PixelType or GP_PIXEL_UNKNOWN 
  */
 GP_PixelType GP_PixelRGBMatch(GP_Pixel rmask, GP_Pixel gmask,
                               GP_Pixel bmask, GP_Pixel amask,
-			      uint8_t pixel_size);
+			      uint8_t bits_per_pixel);
 
+/*
+ * Similar to GP_PixelRGBMatch but works with offsets and sizes
+ *
+ * Returns either valid PixelType or GP_PIXEL_UNKNOWN 
+ */
+GP_PixelType GP_PixelRGBLookup(uint32_t rsize, uint32_t roff,
+                               uint32_t gsize, uint32_t goff,
+			       uint32_t bsize, uint32_t boff,
+			       uint32_t asize, uint32_t aoff,
+			       uint8_t bits_per_pixel);
 
 #endif /* GP_PIXEL_H */
