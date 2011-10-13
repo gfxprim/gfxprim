@@ -18,6 +18,7 @@ def create_environment(config, template_dir):
       loader = jinja2.FileSystemLoader(template_dir))
   env.globals['undefined'] = jinja2.StrictUndefined()
   env.globals['pixelsizes'] = config.pixelsizes
+  env.globals['pixelsizes_by_bpp'] = config.pixelsizes_by_bpp
   env.globals['pixeltypes'] = config.pixeltypes
   env.globals['pixeltypes_dict'] = config.pixeltypes_dict
   env.globals['config'] = config

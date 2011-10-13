@@ -2,6 +2,7 @@
 #  gfxprim.generators.gfxprimconfig - Class for (global) GfxPrim configuration
 #
 # 2011 - Tomas Gavenciak <gavento@ucw.cz>
+# 2011 - Cyril Hrubis <metan@ucw.cz>
 
 import os
 import logging as log
@@ -16,6 +17,7 @@ class GfxPrimConfig(object):
     pixel_type: name of C type for a pixel value
     pixel_size: number of bits of pixel_type
     pixelsizes: list of generated and allowed PixelSizes
+    pixelsizes_by_bpp: dictionary of bitendians by BPP 
     pixeltypes: list of generated PixelTypes, not incl. UNKNOWN
     """
 
@@ -34,6 +36,14 @@ class GfxPrimConfig(object):
     assert self.pixel_size in [i.size for i in self.pixelsizes]
     for i in self.pixelsizes:
       assert i.size <= self.pixel_size
+
+    # Dictionary of all pixelsizes by BPP { bpp : list of BE, LE }
+    self.pixelsizes_by_bpp = dict()
+    for i in self.pixelsizes:
+    	if i.size not in self.pixelsizes_by_bpp:
+		self.pixelsizes_by_bpp[i.size] = [i.bit_endian]
+	else:
+		self.pixelsizes_by_bpp[i.size].append(i.bit_endian)
 
     # Set of all encountered channel names
     self.channels = set()

@@ -19,7 +19,7 @@
  * Copyright (C) 2009-2010 Jiri "BlueBear" Dluhos                            *
  *                         <jiri.bluebear.dluhos@gmail.com>                  *
  *                                                                           *
- * Copyright (C) 2009-2010 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2011 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
@@ -41,6 +41,11 @@
  * The GP_FN_RET_PER_* variants "return"s the value returned by the function.
  */
 
+#ifndef GP_FN_PER_BPP_H
+#define GP_FN_PER_BPP_H
+
+#include "GP_FnPerBpp.gen.h"
+
 /*
  * Branch on GP_Context argument. 
  */
@@ -52,53 +57,6 @@
  */
 #define GP_FN_PER_BPP_PIXELTYPE(FN_NAME, type, ...) \
 	GP_FN_PER_BPP(FN_NAME, GP_PixelTypes[type].size, GP_PixelTypes[type].bit_endian, __VA_ARGS__)
-
-/*
- * Branch on bpp and bit_endian. 
- */
-#define GP_FN_PER_BPP(FN_NAME, bpp, bit_endian, ...) \
-\
-	switch (bpp) { \
-	case 1: \
-		{\
-		if (bit_endian == GP_BIT_ENDIAN_LE)\
-			FN_NAME##_1BPP_LE(__VA_ARGS__);\
-		else \
-			FN_NAME##_1BPP_BE(__VA_ARGS__);\
-		} \
-	break; \
-	case 2: \
-		{\
-		if (bit_endian == GP_BIT_ENDIAN_LE)\
-			FN_NAME##_2BPP_LE(__VA_ARGS__);\
-		else \
-			FN_NAME##_2BPP_BE(__VA_ARGS__);\
-		} \
-	break; \
-	case 4: \
-		{\
-		if (bit_endian == GP_BIT_ENDIAN_LE)\
-			FN_NAME##_4BPP_LE(__VA_ARGS__);\
-		else \
-			FN_NAME##_4BPP_BE(__VA_ARGS__);\
-		} \
-	break; \
-	case 8: \
-		FN_NAME##_8BPP(__VA_ARGS__); \
-	break; \
-	case 16: \
-		FN_NAME##_16BPP(__VA_ARGS__); \
-	break; \
-	case 24: \
-		FN_NAME##_24BPP(__VA_ARGS__); \
-	break; \
-	case 32: \
-		FN_NAME##_32BPP(__VA_ARGS__); \
-	break; \
-	default: \
-	break; \
-	} \
-
 /*
  * Branch on GP_Context argument. 
  */
@@ -112,38 +70,28 @@
 	GP_FN_RET_PER_BPP(FN_NAME, GP_PixelTypes[type].size, GP_PixelTypes[type].bit_endian, __VA_ARGS__)
 
 /*
- * Branch on bpp and bit_endian. 
+ * Macros that gets MACRO template for drawing function and generates drawing
+ * functions for each BPP.
+ *
+ * This functions are later used by GP_FN_PER_BPP_CONTEXT() to generate one
+ * drawing function for all BPP Yay!
  */
-#define GP_FN_RET_PER_BPP(FN_NAME, bpp, bit_endian, ...) \
-\
-	switch (bpp) { \
-	case 1: \
-		{\
-		if (bit_endian == GP_BIT_ENDIAN_LE)\
-			return FN_NAME##_1BPP_LE(__VA_ARGS__);\
-		else \
-			return FN_NAME##_1BPP_BE(__VA_ARGS__);\
-		} \
-	case 2: \
-		{\
-		if (bit_endian == GP_BIT_ENDIAN_LE)\
-			return FN_NAME##_2BPP_LE(__VA_ARGS__);\
-		else \
-			return FN_NAME##_2BPP_BE(__VA_ARGS__);\
-		} \
-	case 4: \
-		{\
-		if (bit_endian == GP_BIT_ENDIAN_LE)\
-			return FN_NAME##_4BPP_LE(__VA_ARGS__);\
-		else \
-			return FN_NAME##_4BPP_BE(__VA_ARGS__);\
-		} \
-	case 8: \
-		return FN_NAME##_8BPP(__VA_ARGS__); \
-	case 16: \
-		return FN_NAME##_16BPP(__VA_ARGS__); \
-	case 24: \
-		return FN_NAME##_24BPP(__VA_ARGS__); \
-	case 32: \
-		return FN_NAME##_32BPP(__VA_ARGS__); \
-	}
+#define GP_DEF_DRAW_FN_PER_BPP(fname, MACRO_NAME) \
+	GP_DEF_FN_PER_BPP(fname, MACRO_NAME, GP_PutPixel_Raw_Clipped_)
+
+#define GP_DEF_FILL_FN_PER_BPP(fname, MACRO_NAME) \
+	GP_DEF_FN_PER_BPP(fname, MACRO_NAME, GP_HLine_Raw_)
+
+#define GP_DEF_FN_FOR_BPP(fname, MACRO_NAME, fdraw, bpp) \
+	MACRO_NAME(fname##_##bpp, GP_Context *, GP_Pixel, fdraw##bpp)
+
+/*
+ * Dtto for filters.
+ *
+ * Filter is functions that works on Context per pixel.
+ */
+#define GP_DEF_FFN_FOR_BPP(fname, MACRO_NAME, bpp) \
+	MACRO_NAME(fname##_##bpp, GP_Context *, GP_Pixel, \
+	           GP_PutPixel_Raw_##bpp, GP_GetPixel_Raw_##bpp)
+
+#endif /* GP_FN_PER_BPP_H */

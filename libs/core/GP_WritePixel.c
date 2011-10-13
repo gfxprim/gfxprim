@@ -162,6 +162,11 @@ void GP_WritePixels16bpp(void *start, size_t count, uint16_t value)
 	}
 }
 
+void GP_WritePixels18bpp(void *start, size_t count, uint32_t value)
+{
+	#warning TODO
+}
+
 void GP_WritePixels24bpp(void *start, size_t count, uint32_t value)
 {
 	uint8_t *bytep = (uint8_t *) start;

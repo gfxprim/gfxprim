@@ -26,7 +26,6 @@
 #include "algo/Text.algo.h"
 #include "gfx/GP_Gfx.h"
 #include "core/GP_FnPerBpp.h"
-#include "core/GP_DefFnPerBpp.h"
 #include "GP_Text.h"
 
 GP_TextStyle GP_DefaultStyle = GP_DEFAULT_TEXT_STYLE;

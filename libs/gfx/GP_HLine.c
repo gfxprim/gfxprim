@@ -39,6 +39,7 @@ DEF_HLINE_BU_FN(GP_HLine_Raw_4BPP_BE, GP_Context*, GP_Pixel, GP_PIXEL_ADDR, GP_W
 
 DEF_HLINE_FN(GP_HLine_Raw_8BPP,  GP_Context *, GP_Pixel, GP_PIXEL_ADDR, GP_WritePixels8bpp)
 DEF_HLINE_FN(GP_HLine_Raw_16BPP, GP_Context *, GP_Pixel, GP_PIXEL_ADDR, GP_WritePixels16bpp)
+DEF_HLINE_FN(GP_HLine_Raw_18BPP_LE, GP_Context *, GP_Pixel, GP_PIXEL_ADDR, GP_WritePixels18bpp)
 DEF_HLINE_FN(GP_HLine_Raw_24BPP, GP_Context *, GP_Pixel, GP_PIXEL_ADDR, GP_WritePixels24bpp)
 DEF_HLINE_FN(GP_HLine_Raw_32BPP, GP_Context *, GP_Pixel, GP_PIXEL_ADDR, GP_WritePixels32bpp)
 

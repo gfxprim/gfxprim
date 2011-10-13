@@ -19,13 +19,12 @@
  * Copyright (C) 2009-2010 Jiri "BlueBear" Dluhos                            *
  *                         <jiri.bluebear.dluhos@gmail.com>                  *
  *                                                                           *
- * Copyright (C) 2009-2010 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2011 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
 #include "GP_Gfx.h"
 #include "core/GP_FnPerBpp.h"
-#include "core/GP_DefFnPerBpp.h"
 
 #include "algo/Line.algo.h"
 

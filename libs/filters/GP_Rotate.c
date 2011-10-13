@@ -25,7 +25,6 @@
 
 #include "core/GP_Core.h"
 #include "core/GP_FnPerBpp.h"
-#include "core/GP_DefFnPerBpp.h"
 
 #include "GP_Rotate.h"
 

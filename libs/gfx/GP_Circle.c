@@ -25,7 +25,6 @@
 
 #include "GP_Gfx.h"
 #include "core/GP_FnPerBpp.h"
-#include "core/GP_DefFnPerBpp.h"
 
 #include "algo/Circle.algo.h"
 

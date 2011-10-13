@@ -51,6 +51,9 @@ void GP_HLine_Raw_4BPP_BE(GP_Context *context, GP_Coord x0, GP_Coord x1,
 void GP_HLine_Raw_8BPP(GP_Context *context, GP_Coord x0, GP_Coord x1,
                        GP_Coord y, GP_Pixel pixel);
 
+void GP_HLine_Raw_18BPP_LE(GP_Context *context, GP_Coord x0, GP_Coord x1,
+                           GP_Coord y, GP_Pixel pixel);
+
 void GP_HLine_Raw_16BPP(GP_Context *context, GP_Coord x0, GP_Coord x1,
                         GP_Coord y, GP_Pixel pixel);
 
