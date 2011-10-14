@@ -112,7 +112,7 @@ GP_RetCode GP_ReadPNG(FILE *f, GP_Context **res)
 	         color_type & PNG_COLOR_MASK_PALETTE ? "pallete " : "",
 	         color_type & PNG_COLOR_MASK_COLOR ? "color" : "gray",
 		 color_type & PNG_COLOR_MASK_ALPHA ? " with alpha channel" : "",
-		 w, h, depth);
+		 (unsigned int)w, (unsigned int)h, depth);
 
 	switch (color_type) {
 	case PNG_COLOR_TYPE_GRAY:
