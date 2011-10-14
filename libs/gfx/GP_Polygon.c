@@ -161,8 +161,6 @@ void GP_FillPolygon_Raw(GP_Context *context, GP_Coord vertex_count,
 	GP_LoadPolygon(&poly, vertex_count, xy);
 
 	GP_Coord y, startx, endx;
-	GP_Coord startx_prev = -INT_MAX;
-	GP_Coord endx_prev = INT_MAX;
 
 	for (y = poly.ymin; y <= poly.ymax; y++) {
 		startx = INT_MAX;
@@ -188,9 +186,6 @@ void GP_FillPolygon_Raw(GP_Context *context, GP_Coord vertex_count,
 		}
 
 		GP_HLine_Raw(context, startx, endx, y, pixel);
-
-		startx_prev = startx;
-		endx_prev = endx;
 	}
 
 	GP_ResetPolygon(&poly);
