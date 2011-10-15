@@ -56,4 +56,7 @@
 /* Debug and debug level */
 #include "core/GP_Debug.h"
 
+/* Color */
+#include "core/GP_Color.h"
+
 #endif /* GP_CORE_H */

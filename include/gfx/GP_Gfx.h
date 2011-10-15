@@ -19,7 +19,7 @@
  * Copyright (C) 2009-2010 Jiri "BlueBear" Dluhos                            *
  *                         <jiri.bluebear.dluhos@gmail.com>                  *
  *                                                                           *
- * Copyright (C) 2009-2010 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2011 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
@@ -33,13 +33,9 @@
 #define GP_GFX_H
 
 /* basic definitions and structures */
-#include "core/GP_Common.h"
-#include "core/GP_Types.h"
-#include "core/GP_Transform.h"
 #include "core/GP_Context.h"
-#include "core/GP_WritePixel.h"
 #include "core/GP_GetPutPixel.h"
-#include "core/GP_Color.h"
+#include "core/GP_WritePixel.h"
 
 /* public drawing API */
 #include "GP_Fill.h"
