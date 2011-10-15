@@ -29,7 +29,7 @@
 #ifndef GP_POINT_H
 #define GP_POINT_H
 
-#include <GP_Context.h>
+#include "core/GP_Context.h"
 
 /*
  * Brightness filter.
