@@ -31,7 +31,7 @@
 #include "GP.h"
 #include "GP_SDL.h"
 
-static GP_Pixel black, white, gray, red, green;
+static GP_Pixel black, white, gray;
 
 SDL_Surface *display = NULL;
 GP_Context context, *sub_context;
@@ -256,11 +256,9 @@ int main(int argc, char *argv[])
 
 	GP_SDL_ContextFromSurface(&context, display);
 	
-	black = GP_ColorToPixel(&context, GP_COL_BLACK);
-	white = GP_ColorToPixel(&context, GP_COL_WHITE);
-	gray  = GP_ColorToPixel(&context, GP_COL_GRAY_DARK);
-	red   = GP_ColorToPixel(&context, GP_COL_RED);
-	green = GP_ColorToPixel(&context, GP_COL_GREEN);
+	black = GP_ColorToContextPixel(GP_COL_BLACK, &context);
+	white = GP_ColorToContextPixel(GP_COL_WHITE, &context);
+	gray  = GP_ColorToContextPixel(GP_COL_GRAY_DARK, &context);
 
 	sub_context = GP_ContextSubContext(&context, 100, 100, 440, 280);
 	GP_Fill(sub_context, gray);

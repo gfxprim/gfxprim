@@ -19,7 +19,7 @@
  * Copyright (C) 2009-2010 Jiri "BlueBear" Dluhos                            *
  *                         <jiri.bluebear.dluhos@gmail.com>                  *
  *                                                                           *
- * Copyright (C) 2009-2010 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2011 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
@@ -114,7 +114,8 @@ static void draw(int x, int y, int l, int iter)
 
 int paused = 0;
 
-Uint32 timer_callback(Uint32 interval __attribute__ ((unused)), void *ptr __attribute__ ((unused)))
+Uint32 timer_callback(Uint32 interval __attribute__ ((unused)),
+                      void *ptr __attribute__ ((unused)))
 {
 	if (paused)
 		return TIMER_TICK;
@@ -162,10 +163,10 @@ int main(void)
 	display = SDL_GetVideoSurface();
 	context = GP_GetBackendVideoContext();
 
-	black = GP_ColorToPixel(context, GP_COL_BLACK);
-	blue  = GP_ColorToPixel(context, GP_COL_BLUE);
-	gray  = GP_ColorToPixel(context, GP_COL_GRAY_LIGHT);
-	red   = GP_ColorToPixel(context, GP_COL_RED);
+	black = GP_ColorToContextPixel(GP_COL_BLACK, context);
+	blue  = GP_ColorToContextPixel(GP_COL_BLUE, context);
+	gray  = GP_ColorToContextPixel(GP_COL_GRAY_LIGHT, context);
+	red   = GP_ColorToContextPixel(GP_COL_RED, context);
 
 	iter = 0;
 	draw(display->w/2, display->h/2, l, iter);

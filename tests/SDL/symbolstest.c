@@ -19,7 +19,7 @@
  * Copyright (C) 2009-2010 Jiri "BlueBear" Dluhos                            *
  *                         <jiri.bluebear.dluhos@gmail.com>                  *
  *                                                                           *
- * Copyright (C) 2009-2010 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2011 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
@@ -172,7 +172,7 @@ int main(int argc, char *argv[])
 
 	GP_SDL_ContextFromSurface(&context, display);
 
-	black = GP_ColorToPixel(&context, GP_COL_BLACK);
+	black = GP_ColorToContextPixel(GP_COL_BLACK, &context);
 	
 	/* Set up the refresh timer */
 	timer = SDL_AddTimer(60, timer_callback, NULL);

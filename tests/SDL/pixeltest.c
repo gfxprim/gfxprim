@@ -19,7 +19,7 @@
  * Copyright (C) 2009-2010 Jiri "BlueBear" Dluhos                            *
  *                         <jiri.bluebear.dluhos@gmail.com>                  *
  *                                                                           *
- * Copyright (C) 2009-2010 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2011 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
@@ -53,34 +53,25 @@ Uint32 timer_callback(__attribute__((unused)) Uint32 interval,
 
 void draw_pixel(void)
 {
-//	GP_Color pixel, conv;
+	GP_Pixel pixel;
 	int x = random() % 320;
 	int y = random() % 240;
 
-//	pixel = GP_GetPixel(&context, x, y);
+	pixel = GP_GetPixel(&context, x, y);
 
-	GP_PutPixel(&context, x, y, green_pixel);
-
-      /* TODO: we cannot switch like this
-	 we need either to convert blue
-	 and others into Context format
-	 at the very beginning, or make
-	 a copy to convert it and match
-	 agains what we get from GP_GetPixel
-
-	if (pixel == blue) {
-		GP_PutPixel(&context, x, y, green);
+	if (pixel == blue_pixel) {
+		GP_PutPixel(&context, x, y, green_pixel);
 	}
-	else if (pixel == red) {
-		GP_PutPixel(&context, x, y, white);
+	else if (pixel == red_pixel) {
+		GP_PutPixel(&context, x, y, white_pixel);
 	}
 	else {
 		if (x < 160) {
-			GP_PutPixel(&context, x, y, blue);
+			GP_PutPixel(&context, x, y, blue_pixel);
 		} else {
-			GP_PutPixel(&context, x, y, red);
+			GP_PutPixel(&context, x, y, red_pixel);
 		}
-	} */
+	}
 }
 
 void draw_pixels(void)
@@ -153,10 +144,10 @@ int main(int argc, char **argv)
 	GP_SDL_ContextFromSurface(&context, display);
 
 	/* Load pixel values compatible with the display. */
-	red_pixel   = GP_ColorToPixel(&context, GP_COL_RED);
-	green_pixel = GP_ColorToPixel(&context, GP_COL_GREEN);
-	blue_pixel  = GP_ColorToPixel(&context, GP_COL_BLUE);
-	white_pixel = GP_ColorToPixel(&context, GP_COL_WHITE);
+	red_pixel   = GP_ColorToContextPixel(GP_COL_RED, &context);
+	green_pixel = GP_ColorToContextPixel(GP_COL_GREEN, &context);
+	blue_pixel  = GP_ColorToContextPixel(GP_COL_BLUE, &context);
+	white_pixel = GP_ColorToContextPixel(GP_COL_WHITE, &context);
 
 	/* Set up the refresh timer */
 	timer = SDL_AddTimer(30, timer_callback, NULL);

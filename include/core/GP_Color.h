@@ -36,6 +36,9 @@
 #include "GP_Context.h"
 #include "GP_Pixel.h"
 
+/*
+ * Enumeration of color constants.
+ */
 typedef enum GP_Color {
 	GP_COL_INVALID = -1,
 	GP_COL_BLACK,
@@ -53,21 +56,67 @@ typedef enum GP_Color {
 } GP_Color;
 
 /*
- * Converts Color to Pixel
+ * Converts GP_Color to GP_Pixel.
  */
-GP_Pixel GP_ColorToPixel(GP_Context *context, GP_Color color);
+GP_Pixel GP_ColorToPixel(GP_Color color, GP_PixelType pixel_type);
 
 /*
- * Converts Color name to Color.
+ * Converts GP_Color to GP_Pixel. 
+ */
+static inline GP_Pixel GP_ColorToContextPixel(GP_Color color,
+                                              GP_Context *context)
+{
+	return GP_ColorToPixel(color, context->pixel_type);
+}
+
+/*
+ * Converts Color name (eg. string) to GP_Color.
  */
 GP_Color GP_ColorNameToColor(const char *color_name);
 
+/*
+ * Converts GP_Color to color name.
+ *
+ * If color is not valid NULL is returned.
+ */
 const char *GP_ColorToColorName(GP_Color color);
 
 /*
  * Converts Color name to Pixel.
+ *
+ * Returns true if conversion was successful false otherwise.
  */
-bool GP_ColorNameToPixel(GP_Context *context, const char *color_name,
+bool GP_ColorNameToPixel(const char *color_name, GP_PixelType pixel_type,
                          GP_Pixel *pixel);
+
+/*
+ * Converts Color name to Pixel.
+ * 
+ * Returns true if conversion was successful false otherwise.
+ */
+static inline bool GP_ColorNameContextToPixel(const char *color_name,
+                                               GP_PixelType pixel_type,
+                                               GP_Pixel *pixel)
+{
+	return GP_ColorNameToPixel(color_name, pixel_type, pixel);
+}
+
+/*
+ * Loads all colors into array of GP_Pixel of size GP_COL_MAX.
+ *
+ * The colors are then used as pixels[GP_COL_XXX];
+ */
+void GP_ColorLoadPixels(GP_Pixel pixels[], GP_PixelType pixel_type);
+
+/*
+ * Loads all colors into array of GP_Pixel of size GP_COL_MAX.
+ *
+ * The colors are then used as pixels[GP_COL_XXX];
+ */
+static inline void GP_ColorLoadContextPixels(GP_Pixel pixels[],
+                                             GP_Context *context)
+{
+	GP_ColorLoadPixels(pixels, context->pixel_type);
+}
 
 #endif /* GP_COLOR_H */

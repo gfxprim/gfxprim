@@ -19,7 +19,7 @@
  * Copyright (C) 2009-2010 Jiri "BlueBear" Dluhos                            *
  *                         <jiri.bluebear.dluhos@gmail.com>                  *
  *                                                                           *
- * Copyright (C) 2009-2010 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2011 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
@@ -507,13 +507,13 @@ int main(int argc, char ** argv)
 	GP_SDL_ContextFromSurface(&context, display);
 
 	/* Load colors compatible with the display */
-	black    = GP_ColorToPixel(&context, GP_COL_BLACK);
-	white    = GP_ColorToPixel(&context, GP_COL_WHITE);
-	yellow   = GP_ColorToPixel(&context, GP_COL_YELLOW);
-	green    = GP_ColorToPixel(&context, GP_COL_GREEN);
-	red      = GP_ColorToPixel(&context, GP_COL_RED);
-	gray     = GP_ColorToPixel(&context, GP_COL_GRAY_LIGHT);
-	darkgray = GP_ColorToPixel(&context, GP_COL_GRAY_DARK);
+	black    = GP_ColorToContextPixel(GP_COL_BLACK, &context);
+	white    = GP_ColorToContextPixel(GP_COL_WHITE, &context);
+	yellow   = GP_ColorToContextPixel(GP_COL_YELLOW, &context);
+	green    = GP_ColorToContextPixel(GP_COL_GREEN, &context);
+	red      = GP_ColorToContextPixel(GP_COL_RED, &context);
+	gray     = GP_ColorToContextPixel(GP_COL_GRAY_LIGHT, &context);
+	darkgray = GP_ColorToContextPixel(GP_COL_GRAY_DARK, &context);
 
 	/* Set up the refresh timer */
 	timer = SDL_AddTimer(60, timer_callback, NULL);

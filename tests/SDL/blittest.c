@@ -187,8 +187,8 @@ int main(int argc, char *argv[])
 	bitmap_conv = GP_ContextConvert(bitmap_raw, context.pixel_type);
 	change_bitmap();
 
-	black = GP_ColorToPixel(&context, GP_COL_BLACK);
-	white = GP_ColorToPixel(&context, GP_COL_WHITE);
+	black = GP_ColorToContextPixel(GP_COL_BLACK, &context);
+	white = GP_ColorToContextPixel(GP_COL_WHITE, &context);
 
 	/* Set up the refresh timer */
 	timer = SDL_AddTimer(60, timer_callback, NULL);

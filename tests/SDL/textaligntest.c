@@ -19,7 +19,7 @@
  * Copyright (C) 2009-2010 Jiri "BlueBear" Dluhos                            *
  *                         <jiri.bluebear.dluhos@gmail.com>                  *
  *                                                                           *
- * Copyright (C) 2009-2010 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2011 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
@@ -159,12 +159,12 @@ int main(void)
 	GP_SDL_ContextFromSurface(&context, display);
 
 	/* Load colors suitable for the display */
-	black_pixel     = GP_ColorToPixel(&context, GP_COL_BLACK);
-	red_pixel       = GP_ColorToPixel(&context, GP_COL_RED);
-	blue_pixel      = GP_ColorToPixel(&context, GP_COL_BLUE);
-	green_pixel     = GP_ColorToPixel(&context, GP_COL_GREEN);
-	yellow_pixel    = GP_ColorToPixel(&context, GP_COL_YELLOW);
-	darkgray_pixel  = GP_ColorToPixel(&context, GP_COL_GRAY_DARK);
+	black_pixel     = GP_ColorToContextPixel(GP_COL_BLACK, &context);
+	red_pixel       = GP_ColorToContextPixel(GP_COL_RED, &context);
+	blue_pixel      = GP_ColorToContextPixel(GP_COL_BLUE, &context);
+	green_pixel     = GP_ColorToContextPixel(GP_COL_GREEN, &context);
+	yellow_pixel    = GP_ColorToContextPixel(GP_COL_YELLOW, &context);
+	darkgray_pixel  = GP_ColorToContextPixel(GP_COL_GRAY_DARK, &context);
 
 	redraw_screen();
 	SDL_Flip(display);

@@ -19,16 +19,17 @@
  * Copyright (C) 2009-2010 Jiri "BlueBear" Dluhos                            *
  *                         <jiri.bluebear.dluhos@gmail.com>                  *
  *                                                                           *
- * Copyright (C) 2009-2010 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2011 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
+
+#include <stdint.h>
+#include <string.h>
 
 #include "GP_Convert.h"
 
 #include "GP_Color.h"
 
-#include <stdint.h>
-#include <string.h>
 
 static char *color_names[] = {
 	"Black",
@@ -73,17 +74,18 @@ static uint8_t p8_colors[] = {
 	0xff, /* White     */
 };
 
-GP_Pixel GP_ColorToPixel(GP_Context *context, GP_Color col)
+GP_Pixel GP_ColorToPixel(GP_Color color, GP_PixelType pixel_type)
 {
-	GP_ASSERT(col < GP_COL_MAX);
-	GP_ASSERT(col >= 0);
+	GP_ASSERT(color < GP_COL_MAX);
+	GP_ASSERT(color >= 0);
 
-	if (context->pixel_type == GP_PIXEL_P8)
-		return p8_colors[col];
+	if (pixel_type == GP_PIXEL_P8)
+		return p8_colors[color];
 
-	return GP_RGBToPixel(rgb888_colors[col][0],
-	                     rgb888_colors[col][1],
-			     rgb888_colors[col][2], context->pixel_type);
+	return GP_RGBToPixel(rgb888_colors[color][0],
+	                     rgb888_colors[color][1],
+			     rgb888_colors[color][2],
+			     pixel_type);
 }
 
 GP_Color GP_ColorNameToColor(const char *color_name)
@@ -97,23 +99,31 @@ GP_Color GP_ColorNameToColor(const char *color_name)
 	return -1;
 }
 
-const char *GP_ColorToColorName(GP_Color col)
+const char *GP_ColorToColorName(GP_Color color)
 {
-	if (col < 0 || col >= GP_COL_MAX)
+	if (color < 0 || color >= GP_COL_MAX)
 		return NULL;
 
-	return color_names[col];
+	return color_names[color];
 }
 
-bool GP_ColorNameToPixel(GP_Context *context, const char *color_name,
+bool GP_ColorNameToPixel(const char *color_name, GP_PixelType pixel_type,
                          GP_Pixel *pixel)
 {
-	GP_Color col = GP_ColorNameToColor(color_name);
+	GP_Color color = GP_ColorNameToColor(color_name);
 
-	if (col == GP_COL_INVALID)
+	if (color == GP_COL_INVALID)
 		return false;
 
-	*pixel = GP_ColorToPixel(context, col);
+	*pixel = GP_ColorToPixel(pixel_type, color);
 
 	return true;
+}
+
+void GP_ColorLoadPixels(GP_Pixel pixels[], GP_PixelType pixel_type)
+{
+	unsigned int i;
+
+	for (i = 0; i < GP_COL_MAX; i++)
+		pixels[i] = GP_ColorToPixel(i, pixel_type);
 }

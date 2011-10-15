@@ -19,7 +19,7 @@
  * Copyright (C) 2009-2010 Jiri "BlueBear" Dluhos                            *
  *                         <jiri.bluebear.dluhos@gmail.com>                  *
  *                                                                           *
- * Copyright (C) 2009-2010 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2011 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
@@ -30,18 +30,13 @@
 #include "GP.h"
 #include "GP_SDL.h"
 
-/* The surface used as a display (in fact it is a software surface). */
 SDL_Surface *display = NULL;
 GP_Context context;
 
-/* Timer used for refreshing the display */
 SDL_TimerID timer;
-
-/* An event used for signaling that the timer was triggered. */
 SDL_UserEvent timer_event;
 
-/* Values for color pixels in display format. */
-GP_Pixel black_pixel, red_pixel, green_pixel, blue_pixel, white_pixel;
+GP_Pixel black_pixel, red_pixel, green_pixel, white_pixel;
 
 Uint32 timer_callback(__attribute__((unused)) Uint32 interval,
 			__attribute__((unused)) void *param)
@@ -51,17 +46,7 @@ Uint32 timer_callback(__attribute__((unused)) Uint32 interval,
 	return 30;
 }
 
-void draw_pixel(void)
-{
-//	GP_Color pixel, conv;
-	int x = random() % 320;
-	int y = random() % 240;
-
-
-	GP_PutPixel(&context, x, y, green_pixel);
-}
-
-void draw_event(GP_Event *ev)
+static void draw_event(GP_Event *ev)
 {
 	if (ev->type != GP_EV_KEY)
 		return;
@@ -72,19 +57,7 @@ void draw_event(GP_Event *ev)
 	SDL_Flip(display);
 }
 
-void draw_pixels(void)
-{
-	SDL_LockSurface(display);
-
-	/* Draw some pixels (exact number is not important). */
-	int i;
-	for (i = 0; i < 30; i++)
-		draw_pixel();
-
-	SDL_UnlockSurface(display);
-}
-
-void event_loop(void)
+static void event_loop(void)
 {
 	SDL_Event event;
 
@@ -107,8 +80,12 @@ void event_loop(void)
 					exit(0);
 				break;
 				case GP_BTN_LEFT:
-					GP_PutPixel(&context, ev.cursor_x,
-					            ev.cursor_y, red_pixel);
+					GP_HLineXXY(&context, ev.cursor_x - 3,
+					            ev.cursor_x + 3,
+						    ev.cursor_y, red_pixel);
+					GP_VLineXYY(&context, ev.cursor_x,
+					            ev.cursor_y - 3,
+						    ev.cursor_y + 3, red_pixel);
 					SDL_Flip(display);
 				break;
 				default:
@@ -131,7 +108,7 @@ void event_loop(void)
 	}
 }
 
-int main(int argc, char **argv)
+int main(int argc, char *argv[])
 {
 	int display_bpp = 0;
 
@@ -150,7 +127,6 @@ int main(int argc, char **argv)
 		return 1;
 	}
 
-	/* Create a window with a software back surface */
 	display = SDL_SetVideoMode(480, 640, display_bpp, SDL_SWSURFACE);
 	if (display == NULL) {
 		fprintf(stderr, "Could not open display: %s\n", SDL_GetError());
@@ -159,37 +135,20 @@ int main(int argc, char **argv)
 
 	GP_EventSetScreenSize(480, 640);
 
-	/* Print basic information about the surface */
-	printf("Display surface properties:\n");
-	printf("    width: %4d, height: %4d, pitch: %4d\n",
-	       display->w, display->h, display->pitch);
-	printf("    bits per pixel: %2d, bytes per pixel: %2d\n",
-	       display->format->BitsPerPixel, display->format->BytesPerPixel);
-
-	/* Set up a clipping rectangle to test proper clipping of pixels */
-	SDL_Rect clip_rect = {10, 10, 300, 220};
-	SDL_SetClipRect(display, &clip_rect);
-
 	GP_SDL_ContextFromSurface(&context, display);
 
-	/* Load pixel values compatible with the display. */
-	red_pixel   = GP_ColorToPixel(&context, GP_COL_RED);
-	green_pixel = GP_ColorToPixel(&context, GP_COL_GREEN);
-	blue_pixel  = GP_ColorToPixel(&context, GP_COL_BLUE);
-	white_pixel = GP_ColorToPixel(&context, GP_COL_WHITE);
-	black_pixel = GP_ColorToPixel(&context, GP_COL_BLACK);
+	red_pixel   = GP_ColorToContextPixel(GP_COL_RED, &context);
+	green_pixel = GP_ColorToContextPixel(GP_COL_GREEN, &context);
+	white_pixel = GP_ColorToContextPixel(GP_COL_WHITE, &context);
+	black_pixel = GP_ColorToContextPixel(GP_COL_BLACK, &context);
 
-	/* Set up the refresh timer */
 	timer = SDL_AddTimer(30, timer_callback, NULL);
 	if (timer == 0) {
 		fprintf(stderr, "Could not set up timer: %s\n", SDL_GetError());
 		goto fail;
 	}
 
-	/* Enter the event loop */
 	event_loop();
-
-	/* We're done */
 	SDL_Quit();
 	return 0;
 
