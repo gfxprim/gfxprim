@@ -42,7 +42,10 @@ void GP_VLineXYY_Raw(GP_Context *context, GP_Coord x, GP_Coord y0,
 void GP_VLineXYH_Raw(GP_Context *context, GP_Coord x, GP_Coord y, GP_Size h,
                      GP_Pixel pixel)
 {
-	GP_VLineXYY(context, x, y, y + h, pixel);
+	if (h == 0)
+		return;
+
+	GP_VLineXYY(context, x, y, y + h - 1, pixel);
 }
 
 void GP_VLineXYY(GP_Context *context, GP_Coord x, GP_Coord y0,
@@ -66,5 +69,8 @@ void GP_VLineXYY(GP_Context *context, GP_Coord x, GP_Coord y0,
 void GP_VLineXYH(GP_Context *context, GP_Coord x, GP_Coord y, GP_Size h,
                  GP_Pixel pixel)
 {
-	GP_VLineXYY(context, x, y, y + h, pixel);
+	if (h == 0)
+		return;
+
+	GP_VLineXYY(context, x, y, y + h - 1, pixel);
 }

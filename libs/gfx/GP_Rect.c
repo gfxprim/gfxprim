@@ -37,10 +37,10 @@ void GP_RectXYXY_Raw(GP_Context *context, GP_Coord x0, GP_Coord y0,
 void GP_RectXYWH_Raw(GP_Context *context, GP_Coord x, GP_Coord y,
 	             GP_Size w, GP_Size h, GP_Pixel pixel)
 {
-	GP_HLine_Raw(context, x, x + w, y, pixel);
-	GP_HLine_Raw(context, x, x + w, y + h, pixel);
-	GP_VLine_Raw(context, x, y, y + h, pixel);
-	GP_VLine_Raw(context, x + w, y, y + h, pixel);
+	if (w == 0 || h == 0)
+		return;
+	
+	GP_RectXYXY_Raw(context, x, y, x + w - 1, y + h - 1, pixel);
 }
 
 void GP_RectXYXY(GP_Context *context, GP_Coord x0, GP_Coord y0,
@@ -57,7 +57,10 @@ void GP_RectXYXY(GP_Context *context, GP_Coord x0, GP_Coord y0,
 void GP_RectXYWH(GP_Context *context, GP_Coord x, GP_Coord y,
                  GP_Size w, GP_Size h, GP_Pixel pixel)
 {
-	GP_RectXYXY(context, x, y, x + w, y + h, pixel);
+	if (w == 0 || h == 0)
+		return;
+	
+	GP_RectXYXY(context, x, y, x + w - 1, y + h - 1, pixel);
 }
 
 void GP_FillRectXYXY_Raw(GP_Context *context, GP_Coord x0, GP_Coord y0,
@@ -76,7 +79,10 @@ void GP_FillRectXYXY_Raw(GP_Context *context, GP_Coord x0, GP_Coord y0,
 void GP_FillRectXYWH_Raw(GP_Context *context, GP_Coord x, GP_Coord y,
                          GP_Size w, GP_Size h, GP_Pixel pixel)
 {
-	GP_FillRectXYXY_Raw(context, x, y, x + w, y + h, pixel);
+	if (w == 0 || h == 0)
+		return;
+
+	GP_FillRectXYXY_Raw(context, x, y, x + w - 1, y + h - 1, pixel);
 }
 
 void GP_FillRectXYXY(GP_Context *context, GP_Coord x0, GP_Coord y0,
@@ -93,5 +99,8 @@ void GP_FillRectXYXY(GP_Context *context, GP_Coord x0, GP_Coord y0,
 void GP_FillRectXYWH(GP_Context *context, GP_Coord x, GP_Coord y,
                      GP_Size w, GP_Size h, GP_Pixel pixel)
 {
-	GP_FillRectXYXY(context, x, y, x + w, y + h, pixel);
+	if (w == 0 || h == 0)
+		return;
+
+	GP_FillRectXYXY(context, x, y, x + w - 1, y + h - 1, pixel);
 }

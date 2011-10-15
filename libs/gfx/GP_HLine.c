@@ -34,8 +34,8 @@ DEF_HLINE_BU_FN(GP_HLine_Raw_1BPP_LE, GP_Context*, GP_Pixel, GP_PIXEL_ADDR, GP_W
 DEF_HLINE_BU_FN(GP_HLine_Raw_1BPP_BE, GP_Context*, GP_Pixel, GP_PIXEL_ADDR, GP_WritePixels1bpp)
 DEF_HLINE_BU_FN(GP_HLine_Raw_2BPP_LE, GP_Context*, GP_Pixel, GP_PIXEL_ADDR, GP_WritePixels2bpp)
 DEF_HLINE_BU_FN(GP_HLine_Raw_2BPP_BE, GP_Context*, GP_Pixel, GP_PIXEL_ADDR, GP_WritePixels2bpp)
-DEF_HLINE_BU_FN(GP_HLine_Raw_4BPP_LE, GP_Context*, GP_Pixel, GP_PIXEL_ADDR, GP_WritePixels4bpp)
-DEF_HLINE_BU_FN(GP_HLine_Raw_4BPP_BE, GP_Context*, GP_Pixel, GP_PIXEL_ADDR, GP_WritePixels4bpp)
+DEF_HLINE_BU_FN(GP_HLine_Raw_4BPP_LE, GP_Context*, GP_Pixel, GP_PIXEL_ADDR, GP_WritePixels2bpp)
+DEF_HLINE_BU_FN(GP_HLine_Raw_4BPP_BE, GP_Context*, GP_Pixel, GP_PIXEL_ADDR, GP_WritePixels2bpp)
 
 DEF_HLINE_FN(GP_HLine_Raw_8BPP,  GP_Context *, GP_Pixel, GP_PIXEL_ADDR, GP_WritePixels8bpp)
 DEF_HLINE_FN(GP_HLine_Raw_16BPP, GP_Context *, GP_Pixel, GP_PIXEL_ADDR, GP_WritePixels16bpp)
@@ -55,7 +55,10 @@ void GP_HLineXXY_Raw(GP_Context *context, GP_Coord x0, GP_Coord x1,
 void GP_HLineXYW_Raw(GP_Context *context, GP_Coord x, GP_Coord y, GP_Size w,
                      GP_Pixel pixel)
 {
-	GP_HLineXXY_Raw(context, x, x + w, y, pixel);
+	if (w == 0)
+		return;
+
+	GP_HLineXXY_Raw(context, x, x + w - 1, y, pixel);
 }
 
 void GP_HLineXXY(GP_Context *context, GP_Coord x0, GP_Coord x1, GP_Coord y,
@@ -79,5 +82,8 @@ void GP_HLineXXY(GP_Context *context, GP_Coord x0, GP_Coord x1, GP_Coord y,
 void GP_HLineXYW(GP_Context *context, GP_Coord x, GP_Coord y, GP_Size w,
                  GP_Pixel pixel)
 {
-	GP_HLineXXY(context, x, x + w, y, pixel);
+	if (w == 0)
+		return;
+
+	GP_HLineXXY(context, x, x + w - 1, y, pixel);
 }
