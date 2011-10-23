@@ -16,21 +16,18 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2010 Jiri "BlueBear" Dluhos                            *
- *                         <jiri.bluebear.dluhos@gmail.com>                  *
- *                                                                           *
- * Copyright (C) 2009-2010 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2011 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
 /*
-  
+
   Simple test for triangle drawing runtime.
 
  */
 
-#include "GP.h"
-#include "GP_Framebuffer.h"
+#include <GP.h>
+#include <backends/GP_Framebuffer.h>
 
 #include <math.h>
 
@@ -112,18 +109,24 @@ static void redraw(GP_Context *context)
 
 int main(void)
 {
-	GP_Framebuffer *fb = GP_FramebufferInit("/dev/fb0");
+	GP_Framebuffer *fb;
 	GP_Context *context;
 	int i;
 
-	if (fb == NULL)
+	GP_SetDebugLevel(10);
+
+	fb = GP_FramebufferInit("/dev/fb0");
+
+	if (fb == NULL) {
+		fprintf(stderr, "failed to initalize framebuffer\n");
 		return 1;
+	}
 
 	context = &fb->context;
 
-	GP_ColorNameToPixel(context, GP_COL_GRAY_LIGHT, &gray);
-	GP_ColorNameToPixel(context, GP_COL_BLUE, &blue);
-	GP_ColorNameToPixel(context, GP_COL_BLACK, &black);
+	gray  = GP_ColorToContextPixel(GP_COL_GRAY_LIGHT, context);
+	blue  = GP_ColorToContextPixel(GP_COL_BLUE, context);
+	black = GP_ColorToContextPixel(GP_COL_BLACK, context);
 
 	iter = 0;
 	draw(context, context->w/2, context->h/2, l, iter);

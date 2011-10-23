@@ -16,16 +16,13 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2010 Jiri "BlueBear" Dluhos                            *
- *                         <jiri.bluebear.dluhos@gmail.com>                  *
- *                                                                           *
- * Copyright (C) 2009-2010 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2011 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
  /*
 
-   Framebuffer test. 
+   Framebuffer test.
    
    1. Draw to the framebuffer
    2. Sleep
@@ -36,7 +33,7 @@
 #include <math.h>
 
 #include <GP.h>
-#include <GP_Framebuffer.h>
+#include <backends/GP_Framebuffer.h>
 
 static void draw(GP_Context *context, int x, int y, int l)
 {
@@ -44,27 +41,33 @@ static void draw(GP_Context *context, int x, int y, int l)
 
 	GP_Pixel red, blue, green;
 	
-	GP_RGBToPixel(context, 255,   0,   0, &red);
-	GP_RGBToPixel(context,   0,   0, 255, &blue);
-	GP_RGBToPixel(context,   0, 255,   0, &green);
+	red = GP_RGBToContextPixel(255,   0,   0, context);
+	blue = GP_RGBToContextPixel(0,   0, 255, context);
+	green = GP_RGBToContextPixel(0, 255,   0, context);
 
 	x2 = x + l/2;
 	y2 = y + sqrt(2)/2 * l;
 	x3 = x - l/2;
 	y3 = y2;
 
-	GP_FillTriangle(context,  x,  y, x2, y2, x + l, y, red); 
-	GP_FillTriangle(context,  x,  y, x3, y3, x - l, y, green); 
-	GP_FillTriangle(context, x2, y2, x3, y3, x, y + sqrt(2) * l, blue); 
+	GP_FillTriangle(context,  x,  y, x2, y2, x + l, y, red);
+	GP_FillTriangle(context,  x,  y, x3, y3, x - l, y, green);
+	GP_FillTriangle(context, x2, y2, x3, y3, x, y + sqrt(2) * l, blue);
 }
 
 int main(void)
 {
-	GP_Framebuffer *fb = GP_FramebufferInit("/dev/fb0");
+	GP_Framebuffer *fb;
 	GP_TextStyle style;
 
-	if (fb == NULL)
+	GP_SetDebugLevel(10);
+
+	fb = GP_FramebufferInit("/dev/fb0");
+	
+	if (fb == NULL) {
+		fprintf(stderr, "Failed to initalize framebuffer\n");
 		return 1;
+	}
 	
 	GP_DefaultTextStyle(&style);
 
@@ -73,8 +76,8 @@ int main(void)
 
 	GP_Pixel gray, black;
 
-	GP_RGBToPixel(&fb->context, 200, 200, 200, &gray);
-	GP_RGBToPixel(&fb->context,   0,   0,   0, &black);
+	gray = GP_RGBToContextPixel(200, 200, 200, &fb->context);
+	black = GP_RGBToContextPixel(  0,   0,   0, &fb->context);
 	
 	const char *text = "Framebuffer test";
 
