@@ -24,8 +24,6 @@
 
   */
 
-#include <math.h>
-
 #include <GP.h>
 #include <input/GP_InputDriverLinux.h>
 
@@ -33,7 +31,7 @@ int main(int argc, char *argv[])
 {
 	struct GP_InputDriverLinux *drv;
 
-	GP_SetDebugLevel(10);
+	GP_SetDebugLevel(2);
 
 	if (argc != 2) {
 		printf("Usage: %s /dev/input/eventX\n", argv[0]);
@@ -50,14 +48,12 @@ int main(int argc, char *argv[])
 	GP_EventSetScreenSize(640, 480);
 
 	for (;;) {
-		GP_InputDriverLinuxRead(drv);
+		while (GP_InputDriverLinuxRead(drv) >= 1);
 		
-		while (GP_EventQueued()) {
-			GP_Event ev;
+		GP_Event ev;
 
-			GP_EventGet(&ev);
+		while (GP_EventGet(&ev))
 			GP_EventDump(&ev);
-		}
 
 		usleep(1000);
 	}

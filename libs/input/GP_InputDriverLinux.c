@@ -144,7 +144,7 @@ struct GP_InputDriverLinux *GP_InputDriverLinuxOpen(const char *path)
 
 static void input_rel(struct GP_InputDriverLinux *self, struct input_event *ev)
 {
-	GP_DEBUG(3, "Relative event");
+	GP_DEBUG(4, "Relative event");
 
 	switch (ev->code) {
 	case REL_X:
@@ -162,7 +162,7 @@ static void input_rel(struct GP_InputDriverLinux *self, struct input_event *ev)
 
 static void input_abs(struct GP_InputDriverLinux *self, struct input_event *ev)
 {
-	GP_DEBUG(3, "Absolute event");
+	GP_DEBUG(4, "Absolute event");
 	
 	switch (ev->code) {
 	case ABS_X:
@@ -184,7 +184,7 @@ static void input_abs(struct GP_InputDriverLinux *self, struct input_event *ev)
 
 static void input_key(struct GP_InputDriverLinux *self, struct input_event *ev)
 {
-	GP_DEBUG(3, "Key event");
+	GP_DEBUG(4, "Key event");
 	
 	(void) self;
 
@@ -213,7 +213,7 @@ static void do_sync(struct GP_InputDriverLinux *self)
 
 static void input_syn(struct GP_InputDriverLinux *self, struct input_event *ev)
 {
-	GP_DEBUG(3, "Sync event");
+	GP_DEBUG(4, "Sync event");
 	
 	switch (ev->code) {
 	case 0:
@@ -229,27 +229,30 @@ int GP_InputDriverLinuxRead(struct GP_InputDriverLinux *self)
 	struct input_event ev;
 	int ret;
 
-	while ((ret = read(self->fd, &ev, sizeof(ev))) != -1) {
-		switch (ev.type) {
-		case EV_REL:
-			input_rel(self, &ev);
-		break;
-		case EV_ABS:
-			input_abs(self, &ev);
-		break;
-		case EV_KEY:
-			input_key(self, &ev);
-		break;
-		case EV_SYN:
-			input_syn(self, &ev);
-		break;
-		default:
-			GP_DEBUG(3, "Unhandled type %i", ev.type);
-		}
-	}
+	ret = read(self->fd, &ev, sizeof(ev));
 
 	if (ret == -1 && errno == EAGAIN)
 		return 0;
+
+	if (ret < 1)
+		return -1;
+
+	switch (ev.type) {
+	case EV_REL:
+		input_rel(self, &ev);
+	break;
+	case EV_ABS:
+		input_abs(self, &ev);
+	break;
+	case EV_KEY:
+		input_key(self, &ev);
+	break;
+	case EV_SYN:
+		input_syn(self, &ev);
+	break;
+	default:
+		GP_DEBUG(3, "Unhandled type %i", ev.type);
+	}
 
 	return 1;
 }

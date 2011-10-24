@@ -119,6 +119,8 @@ const char *GP_EventKeyName(enum GP_EventKeyValue key)
 		return "RightButton";
 	case GP_BTN_MIDDLE:
 		return "MiddleButton";
+	case GP_BTN_PEN:
+		return "Pen";
 	default:
 		return "Unknown";
 	};
@@ -151,6 +153,16 @@ static void dump_key(struct GP_Event *ev)
 
 }
 
+static void dump_abs(struct GP_Event *ev)
+{
+	switch (ev->code) {
+	case GP_EV_ABS_POS:
+		printf("POSSITION %u %u %u\n",
+		       ev->cursor_x, ev->cursor_y, ev->val.abs.pressure);
+	break;
+	}
+}
+
 void GP_EventDump(struct GP_Event *ev)
 {
 	printf("EVENT (%u) ", (unsigned int)ev->time.tv_sec % 10000);
@@ -163,8 +175,10 @@ void GP_EventDump(struct GP_Event *ev)
 		dump_rel(ev);
 	break;
 	case GP_EV_ABS:
-		printf("EVENT ABS\n");
+		dump_abs(ev);
 	break;
+	default:
+		printf("Unknown %u\n", ev->type);
 	}
 }
 
@@ -229,7 +243,7 @@ void GP_EventPushAbs(uint32_t x, uint32_t y, uint32_t pressure,
 {
 	/* event header */
 	cur_state.type  = GP_EV_ABS;
-	cur_state.code  = GP_EV_REL_POS;
+	cur_state.code  = GP_EV_ABS_POS;
 	cur_state.val.abs.x = x; 
 	cur_state.val.abs.y = y;
 	cur_state.val.abs.pressure = pressure;
@@ -239,9 +253,11 @@ void GP_EventPushAbs(uint32_t x, uint32_t y, uint32_t pressure,
 	
 	set_time(time);
 
-	/* set global cursor */
-	cur_state.cursor_x = x * screen_w / x_max;
-	cur_state.cursor_y = y * screen_h / y_max;
+	/* set global cursor, pressure == 0 is penup */
+	if (pressure != 0) {
+		cur_state.cursor_x = x * screen_w / x_max;
+		cur_state.cursor_y = y * screen_h / y_max;
+	}
 
 	/* put it into queue */
 	event_put(&cur_state);
