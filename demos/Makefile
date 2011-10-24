@@ -1,3 +1,3 @@
 TOPDIR=..
-SUBDIRS=grinder
+SUBDIRS=grinder fbshow
 include $(TOPDIR)/include.mk
