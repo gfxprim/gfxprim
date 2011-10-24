@@ -39,6 +39,8 @@
 
 #define GP_EVENT_QUEUE_SIZE 32
 
+#define GP_EVENT_KEYMAP_BYTES 36
+
 enum GP_EventType {
 	GP_EV_KEY = 1, /* key/button press event */
 	GP_EV_REL = 2, /* relative event */
@@ -204,6 +206,9 @@ enum GP_EventKeyValue {
 	GP_BTN_FORWARD        = 0x115,
 	GP_BTN_BACK           = 0x116,
 	GP_BTN_TASK           = 0x117,
+
+	/* Touchscreen pen */
+	GP_BTN_PEN            = 0x14a,
 };
 
 enum GP_EventRelCode {
@@ -264,7 +269,7 @@ typedef struct GP_Event {
 	 * Bitmap of pressed keys including mouse buttons
 	 * accumulated for all input devices.
 	 */
-	uint8_t keys_pressed[36];
+	uint8_t keys_pressed[GP_EVENT_KEYMAP_BYTES];
 } GP_Event;
 
 /*
@@ -328,18 +333,27 @@ void GP_EventPush(uint16_t type, uint32_t code, int32_t value,
 static inline void GP_EventSetKey(struct GP_Event *ev,
                                   uint32_t key)
 {
+	if (key >= GP_EVENT_KEYMAP_BYTES * 8)
+		return;
+
 	ev->keys_pressed[(key)/8] |= 1<<((key)%8);
 }
 
 static inline int GP_EventGetKey(struct GP_Event *ev,
                                  uint32_t key)
 {
+	if (key >= GP_EVENT_KEYMAP_BYTES * 8)
+		return 0;
+
 	return !!(ev->keys_pressed[(key)/8] & (1<<((key)%8)));
 }
 
 static inline void GP_EventResetKey(struct GP_Event *ev,
                                     uint32_t key)
 {
+	if (key >= GP_EVENT_KEYMAP_BYTES * 8)
+		return;
+
 	ev->keys_pressed[(key)/8] &= ~(1<<((key)%8));
 }
 
