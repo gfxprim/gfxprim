@@ -31,7 +31,7 @@
 
 #include <stdint.h>
 
-struct GP_InputDriverLinux {
+typedef struct GP_InputDriverLinux {
 	/* fd */
 	int fd;
 	
@@ -51,9 +51,17 @@ struct GP_InputDriverLinux {
 	int abs_press_max;
 
 	uint8_t abs_flag;
-};
+} GP_InputDriverLinux;
 
+/*
+ * Initalize and allocate input driver.
+ */
 struct GP_InputDriverLinux *GP_InputDriverLinuxOpen(const char *path);
+
+/*
+ * Close the fd, free memory.
+ */
+void GP_InputDriverLinuxClose(struct GP_InputDriverLinux *self);
 
 /*
  * Called when there are data ready on input device.

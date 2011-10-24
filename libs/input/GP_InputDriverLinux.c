@@ -142,6 +142,15 @@ struct GP_InputDriverLinux *GP_InputDriverLinuxOpen(const char *path)
 	return ret;
 }
 
+void GP_InputDriverLinuxClose(struct GP_InputDriverLinux *self)
+{
+	GP_DEBUG(1, "Closing input device");
+	print_name(self->fd);
+
+	close(self->fd);
+	free(self);
+}
+
 static void input_rel(struct GP_InputDriverLinux *self, struct input_event *ev)
 {
 	GP_DEBUG(4, "Relative event");
