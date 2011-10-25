@@ -143,13 +143,16 @@ int main(int argc, char *argv[])
 	FD_ZERO(&rfds);
 	FD_SET(drv->fd, &rfds);
 	struct timeval tv = {.tv_sec = sleep_sec, .tv_usec = 0};
+	struct timeval *tvp = sleep_sec ? &tv : NULL;
 
 	for (;;) {
 		int ret;
 
 		if (drv != NULL) {
-			ret = select(drv->fd + 1, &rfds, NULL, NULL, &tv);
-			
+			ret = select(drv->fd + 1, &rfds, NULL, NULL, tvp);
+		
+			tv.tv_sec = sleep_sec;
+	
 			switch (ret) {
 			case -1:
 				GP_FramebufferExit(fb);
