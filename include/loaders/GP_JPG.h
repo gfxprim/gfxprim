@@ -20,85 +20,32 @@
  *                                                                           *
  *****************************************************************************/
 
+ /*
+   
+   JPG support using jpeg library.
+
+  */
+
+#ifndef GP_JPG_H
+#define GP_JPG_H
+
+#include "core/GP_Context.h"
+
 /*
-
-  General functions for loading bitmaps.
-  
+ * Opens up file and checks signature. Upon successful return the file
+ * possition would be set to eight bytes (exactly after the PNG signature).
  */
+GP_RetCode GP_OpenJPG(const char *src_path, FILE **f);
 
-#include <string.h>
-#include <unistd.h>
-#include <errno.h>
+/*
+ * Reads PNG from an open FILE. Expects the file possition set after the eight
+ * bytes PNG signature.
+ */
+GP_RetCode GP_ReadJPG(FILE *f, GP_Context **res);
 
-#include <GP_Debug.h>
+/*
+ * Loads a PNG file into GP_Context. The Context is newly allocated.
+ */
+GP_RetCode GP_LoadJPG(const char *src_path, GP_Context **res);
 
-#include "GP_Loaders.h"
-
-GP_RetCode GP_LoadImage(const char *src_path, GP_Context **res)
-{
-	int len = strlen(src_path);
-	GP_RetCode ret = GP_ENOIMPL;
-
-	if (access(src_path, R_OK)) {
-		GP_DEBUG(1, "Failed to access file '%s' : %s",
-		            src_path, strerror(errno));
-		return GP_EBADFILE;
-	}
-
-	switch (src_path[len - 1]) {
-	/* PNG, JPG, JPEG */
-	case 'g':
-	case 'G':
-		switch (src_path[len - 2]) {
-		case 'n':
-		case 'N':
-			if (src_path[len - 3] == 'p' ||
-			    src_path[len - 3] == 'P')
-				ret = GP_LoadPNG(src_path, res);
-		break;
-		case 'p':
-		case 'P':
-			if (src_path[len - 3] == 'j' ||
-			    src_path[len - 3] == 'J')
-				ret = GP_LoadJPG(src_path, res);
-		break;
-		case 'e':
-		case 'E':
-			if ((src_path[len - 3] == 'p' ||
-			     src_path[len - 3] == 'P') &&
-			    (src_path[len - 4] == 'j' ||
-			     src_path[len - 4] == 'J'))
-				ret = GP_LoadJPG(src_path, res);
-		break;
-		}
-	break;
-	/* PPM, PGM, PBM, PNM */
-	case 'm':
-	case 'M':
-		switch (src_path[len - 2]) {
-		case 'b':
-		case 'B':
-			if (src_path[len - 3] == 'p' ||
-			    src_path[len - 3] == 'P')
-				ret = GP_LoadPBM(src_path, res);
-		break;
-		case 'g':
-		case 'G':
-			if (src_path[len - 3] == 'p' ||
-			    src_path[len - 3] == 'P')
-				ret = GP_LoadPGM(src_path, res);
-		break;
-		case 'p':
-		case 'P':
-			if (src_path[len - 3] == 'p' ||
-			    src_path[len - 3] == 'P')
-				ret = GP_LoadPPM(src_path, res);
-		break;
-		}
-	break;
-	}
-
-	//TODO file signature based check
-
-	return ret;
-}
+#endif /* GP_JPG_H */

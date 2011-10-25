@@ -40,6 +40,8 @@
 
 #include "GP_PNG.h"
 
+#include "GP_JPG.h"
+
 /*
  * Tries to load image accordingly to extension.
  */

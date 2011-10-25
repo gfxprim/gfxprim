@@ -2,6 +2,8 @@ ifndef APPS
 $(error APPS not defined, fix your library Makefile)
 endif
 
+LDFLAGS+=-lpng -ljpeg
+
 all: $(APPS)
 
 CLEAN+=$(APPS)
