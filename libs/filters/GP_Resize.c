@@ -214,10 +214,10 @@ void GP_FilterResize_Raw(GP_Context *src, GP_Context *res,
                          GP_InterpolationType type)
 {
 	switch (type) {
-	case GP_INTER_NN:
+	case GP_INTERP_NN:
 		GP_FilterInterpolate_NN(src, res, callback);
 	break;
-	case GP_INTER_CUBIC:
+	case GP_INTERP_CUBIC:
 		GP_FilterInterpolate_Cubic(src, res, callback);
 	break;
 	}
