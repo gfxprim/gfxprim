@@ -67,4 +67,9 @@ static inline void GP_PutPixel_Raw(GP_Context *context, int x, int y,
 		context, x, y, p);
 }
 
+/*
+ * Returns pixel offset.
+ */
+uint8_t GP_PixelAddrOffset(GP_Coord x, GP_PixelType pixel_type);
+
 #endif /* CORE_GP_GETPUTPIXEL_H */

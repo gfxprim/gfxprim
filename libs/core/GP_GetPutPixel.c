@@ -37,3 +37,10 @@ void GP_PutPixel(GP_Context *context, int x, int y, GP_Pixel p)
 	if (!GP_PIXEL_IS_CLIPPED(context, x, y)) 
 		GP_PutPixel_Raw(context, x, y, p);
 }
+
+uint8_t GP_PixelAddrOffset(GP_Coord x, GP_PixelType pixel_type)
+{
+	GP_FN_RET_PER_BPP_PIXELTYPE(GP_PIXEL_ADDR_OFFSET, pixel_type, x);
+
+	return 0;
+}

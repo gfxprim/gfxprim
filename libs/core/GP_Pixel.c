@@ -28,8 +28,8 @@
 #include "GP_Debug.h"
 #include "GP_Pixel.h" 
 
-static const GP_PixelTypeChannel *get_channel(const GP_PixelTypeDescription *desc,
-                                              const char *name)
+static const GP_PixelTypeChannel *
+get_channel(const GP_PixelTypeDescription *desc, const char *name)
 {
 	unsigned int i;
 
@@ -115,8 +115,9 @@ GP_PixelType GP_PixelRGBLookup(uint32_t rsize, uint32_t roff,
 {
 	unsigned int i;
 	
-	GP_DEBUG(1, "Looking up Pixel R %08x %08x G %08x %08x B %08x %08x size %u",
-	            rsize, roff, gsize, goff, bsize, boff, bits_per_pixel);
+	GP_DEBUG(1, "Looking up Pixel R %08x %08x G %08x %08x B %08x %08x "
+	            "size %u", rsize, roff, gsize, goff, bsize, boff,
+	             bits_per_pixel);
 
 	for (i = 0; i < GP_PIXEL_MAX; i++) {
 		const GP_PixelTypeChannel *r, *g, *b, *a;

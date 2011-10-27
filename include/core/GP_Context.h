@@ -36,10 +36,16 @@
 /* This structure holds all information needed for drawing into an image. */
 typedef struct GP_Context {
 	uint8_t *pixels;	 /* pointer to image pixels */
-	uint8_t bpp;		 /* values: 1, 2, 4, 8, 16, 24, 32 */
+	uint8_t bpp;		 /* pixel length in bits */
 	uint32_t bytes_per_row;
 	uint32_t w;		 /* width in pixels */
 	uint32_t h;      	 /* height in pixels */
+	/* 
+	 * Row bit offset. The offset is ignored for byte aligned pixels.
+	 * Basically it's used for non aligned pixels with combination
+	 * with subcontextes.
+	 */
+	uint8_t offset;          
 
 	GP_PixelType pixel_type; /* hardware pixel format */
 

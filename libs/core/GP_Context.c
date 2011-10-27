@@ -52,6 +52,7 @@ GP_Context *GP_ContextCopy(const GP_Context *src, int flag)
 
 	new->bpp           = src->bpp;
 	new->bytes_per_row = src->bytes_per_row;
+	new->offset        = 0;
 
 	new->w = src->w;
 	new->h = src->h;
@@ -66,7 +67,6 @@ GP_Context *GP_ContextCopy(const GP_Context *src, int flag)
 	new->free_pixels = 1;
 
 	return new;
-	
 }
 
 GP_Context *GP_ContextAlloc(GP_Size w, GP_Size h, GP_PixelType type)
@@ -87,6 +87,7 @@ GP_Context *GP_ContextAlloc(GP_Size w, GP_Size h, GP_PixelType type)
 	context->pixels         = pixels;
 	context->bpp            = bpp;
 	context->bytes_per_row  = bpr;
+	context->offset         = 0;
 
 	context->w = w;
 	context->h = h;
@@ -140,6 +141,8 @@ GP_Context *GP_ContextSubContext(GP_Context *context, GP_Coord x, GP_Coord y,
 
 	ret->bpp           = context->bpp;
 	ret->bytes_per_row = context->bytes_per_row;
+	ret->offset        = (context->offset +
+	                      GP_PixelAddrOffset(x, context->pixel_type)) % 8;
 
 	ret->w = w;
 	ret->h = h;
@@ -169,7 +172,7 @@ GP_RetCode GP_ContextDump(GP_Context *context, const char *path)
 	for (y = 0; y < context->h; y++) {
 		for (x = 0; x < context->bytes_per_row; x++)
 			fprintf(f, "0x%02x ", ((uint8_t *)context->pixels)
-			                       [y * context->bytes_per_row + x]);
+			                      [y * context->bytes_per_row + x]);
 		fprintf(f, "\n");
 	}
 
