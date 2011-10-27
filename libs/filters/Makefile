@@ -1,5 +1,6 @@
 TOPDIR=../..
-GENSOURCES=GP_Brightness.gen.c GP_Contrast.gen.c GP_Invert.gen.c
+GENSOURCES=GP_Brightness.gen.c GP_Contrast.gen.c GP_Invert.gen.c\
+           GP_MirrorV.gen.c GP_Rotate.gen.c
 GENHEADERS=
 CSOURCES=$(filter-out $(wildcard *.gen.c),$(wildcard *.c))
 LIBNAME=filters

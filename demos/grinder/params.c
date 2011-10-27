@@ -183,6 +183,39 @@ int set_int(int *res, char *val)
 	return 0;
 }
 
+static char *bool_false[] = {
+	"No",
+	"False",
+	"Off",
+	NULL
+};
+
+static char *bool_true[] = {
+	"Yes",
+	"True",
+	"On",
+	NULL
+};
+
+int set_bool(int *res, char *val)
+{
+	unsigned int i;
+
+	for (i = 0; bool_false[i] != NULL; i++)
+		if (!strcasecmp(val, bool_false[i])) {
+			*res = 0;
+			return 0;
+		}
+	
+	for (i = 0; bool_true[i] != NULL; i++)
+		if (!strcasecmp(val, bool_true[i])) {
+			*res = 1;
+			return 0;
+		}
+
+	return 1;
+}
+
 int set_float(float *res, char *val)
 {
 	char *end;
@@ -269,7 +302,11 @@ int param_parse(const char *params, const struct param *param_desc, void *priv,
 
 			switch (param_desc[i].type) {
 			case PARAM_BOOL:
-				
+				if ((ret = set_bool(arg, values[pos]))) {
+					CALL_ERR_CALLBACK(err, &param_desc[i],
+					                  values[pos], priv);
+					goto err;
+				}
 			break;
 			case PARAM_INT:
 				if ((ret = set_int(arg, values[pos]))) {

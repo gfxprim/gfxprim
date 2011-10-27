@@ -213,18 +213,49 @@ static GP_RetCode rotate(GP_Context **c, const char *params)
 		return GP_EINVAL;
 	}
 
+	GP_Context *res = NULL;
+
 	switch (rot) {
 	case 0:
-		GP_RotateCW(*c);
+		res = GP_FilterRotate90(*c, progress_callback);
 	break;
 	case 1:
-		GP_MirrorV(*c);
-		GP_MirrorH(*c);
+		res = GP_FilterRotate180(*c, progress_callback);
 	break;
 	case 2:
-		GP_RotateCCW(*c);
+		res = GP_FilterRotate270(*c, progress_callback);
 	break;
 	}
+		
+	if (res == NULL)
+		return GP_ENOMEM;
+		
+	GP_ContextFree(*c);
+	*c = res;
+
+	return GP_ESUCCESS;
+}
+
+/* mirror filter */
+
+static struct param mirror_params[] = {
+	{"vert",  PARAM_BOOL,  "mirror vertically",   NULL, NULL},
+	{"horiz", PARAM_BOOL,  "mirror horizontally", NULL, NULL},
+	{NULL,    0,           NULL,                  NULL, NULL}
+};
+
+static GP_RetCode mirror(GP_Context **c, const char *params)
+{
+	int vert = 0, horiz = 0;
+
+	if (param_parse(params, mirror_params, "mirror", param_err, &vert, &horiz))
+		return GP_EINVAL;
+
+	if (vert)
+		GP_FilterMirrorV_Raw(*c, *c, progress_callback);
+	
+	if (horiz)
+		GP_FilterMirrorH_Raw(*c, *c, progress_callback);
 
 	return GP_ESUCCESS;
 }
@@ -334,9 +365,10 @@ struct filter {
 };
 
 static struct filter filter_table[] = {
-	{"resize",   "resize image by given ratio", resize_params, resize},
-	{"scale",    "scale image to given width and height", scale_params,  scale},
 	{"rotate",   "rotate image", rotate_params, rotate},
+	{"mirror",   "mirror vertically/horizontally", mirror_params, mirror},
+	{"scale",    "scale image to given width and height", scale_params,  scale},
+	{"resize",   "resize image by given ratio", resize_params, resize},
 	{"bright",   "alter image brightness", bright_params, bright},
 	{"contrast", "alter image contrast", contrast_params, contrast},
 	{"invert",   "inverts image", invert_params, invert},
