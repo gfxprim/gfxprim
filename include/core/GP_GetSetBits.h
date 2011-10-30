@@ -27,8 +27,8 @@
   
   */
 
-#ifndef GP_GET_SET_BITS_H
-#define GP_GET_SET_BITS_H
+#ifndef CORE_GP_GET_SET_BITS_H
+#define CORE_GP_GET_SET_BITS_H
 
 /*
  * Helper macros to read/write parts of words 
@@ -122,6 +122,7 @@
 #define GP_SET_BITS3_ALIGNED(offset, len, dest, val) do { \
 	uint32_t v;                                       \
 	v  = ((uint8_t *)dest)[0];                        \
+	v |= ((uint8_t *)dest)[1]<<8;                     \
 	v |= ((uint8_t *)dest)[2]<<16;                    \
 	                                                  \
 	GP_SET_BITS(offset, len, v, val);                 \
@@ -134,6 +135,7 @@
 #define GP_SET_BITS4_ALIGNED(offset, len, dest, val) do { \
 	uint32_t v;                                       \
 	v  = ((uint8_t *)dest)[0];                        \
+	v |= ((uint8_t *)dest)[2]<<16;                    \
 	v |= ((uint8_t *)dest)[3]<<24;                    \
 	                                                  \
 	GP_SET_BITS(offset, len, v, val);                 \
@@ -145,4 +147,4 @@
 } while (0)
 
 
-#endif /* GP_GET_SET_BITS_H */
+#endif /* CORE_GP_GET_SET_BITS_H */
