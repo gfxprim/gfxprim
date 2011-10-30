@@ -40,7 +40,14 @@
 void GP_FilterMirrorH_Raw(const GP_Context *src, GP_Context *dst,
                           GP_ProgressCallback *callback);
 
-GP_Context *GP_FilterMirrorH(const GP_Context *src,
+/*
+ * Mirrors bitmap horizontally.
+ *
+ * If dst is NULL, new bitmap is allocated.
+ *
+ * Returns pointer to destination bitmap or NULL if allocation failed.
+ */
+GP_Context *GP_FilterMirrorH(const GP_Context *src, GP_Context *dst,
                              GP_ProgressCallback *callback);
 
 /*
@@ -51,14 +58,21 @@ GP_Context *GP_FilterMirrorH(const GP_Context *src,
 void GP_FilterMirrorV_Raw(const GP_Context *src, GP_Context *dst,
                           GP_ProgressCallback *callback);
 
-GP_Context *GP_FilterMirrorV(const GP_Context *src,
+/*
+ * Mirrors bitmap vertically.
+ *
+ * If dst is NULL, new bitmap is allocated.
+ *
+ * Returns pointer to destination bitmap or NULL if allocation failed.
+ */
+GP_Context *GP_FilterMirrorV(const GP_Context *src, GP_Context *dst,
                              GP_ProgressCallback *callback);
 
 /*
  * Rotate context by 90, 180 and 270.
  *
  * Doesn't work 'in place'. The contexts must have equal pixel_type size must 
- * match the rotated size size (is equal for 180 and swapped for 90 and 270).
+ * match the rotated size (is equal for 180 and swapped for 90 and 270).
  */
 void GP_FilterRotate90_Raw(const GP_Context *src, GP_Context *dst,
                            GP_ProgressCallback *callback);
@@ -69,7 +83,30 @@ void GP_FilterRotate180_Raw(const GP_Context *src, GP_Context *dst,
 void GP_FilterRotate270_Raw(const GP_Context *src, GP_Context *dst,
                             GP_ProgressCallback *callback);
 
-typedef enum GP_FilterRotation {
+/*
+ * Rotate the context by 90, 180, 270.
+ *
+ * If dst is NULL, new bitmap is allocated.
+ *
+ * Returns pointer to destination bitmap or NULL if allocation failed.
+ */
+GP_Context *GP_FilterRotate90(const GP_Context *src, GP_Context *dst,
+                              GP_ProgressCallback *callback);
+
+GP_Context *GP_FilterRotate180(const GP_Context *src, GP_Context *dst,
+                               GP_ProgressCallback *callback);
+
+GP_Context *GP_FilterRotate270(const GP_Context *src, GP_Context *dst,
+                               GP_ProgressCallback *callback);
+
+/*
+ * Calls a symmetry filter on bitmap. 
+ *
+ * If dst is NULL, new bitmap is allocated.
+ *
+ * Returns pointer to destination bitmap or NULL if allocation failed.
+ */
+typedef enum GP_FilterSymmetries {
 	GP_ROTATE_90,
 	GP_ROTATE_CW = GP_ROTATE_90,
 	GP_ROTATE_180,
@@ -77,32 +114,10 @@ typedef enum GP_FilterRotation {
 	GP_ROTATE_CCW = GP_ROTATE_270,
 	GP_MIRROR_H,
 	GP_MIRROR_V,
-} GP_FilterRotation;
+} GP_FilterSymmetries;
 
-void GP_FilterRotate_Raw(const GP_Context *src, GP_Context *dst,
-                         GP_FilterRotation rotation,
-                         GP_ProgressCallback *callback);
-
-GP_Context *GP_FilterRotate(const GP_Context *context,
-                            GP_FilterRotation rotation,
-                            GP_ProgressCallback *callback);
-
-static inline GP_Context *GP_FilterRotate90(const GP_Context *src,
-                                            GP_ProgressCallback *callback)
-{
-	return GP_FilterRotate(src, GP_ROTATE_90, callback);
-}
-
-static inline GP_Context *GP_FilterRotate180(const GP_Context *src,
-                                             GP_ProgressCallback *callback)
-{
-	return GP_FilterRotate(src, GP_ROTATE_180, callback);
-}
-
-static inline GP_Context *GP_FilterRotate270(const GP_Context *src,
-                                             GP_ProgressCallback *callback)
-{
-	return GP_FilterRotate(src, GP_ROTATE_270, callback);
-}
+GP_Context *GP_FilterSymmetry(const GP_Context *src, GP_Context *dst,
+                              GP_FilterSymmetries symmetry,
+                              GP_ProgressCallback *callback);
 
 #endif /* FILTERS_GP_ROTATE_H */
