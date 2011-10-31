@@ -23,8 +23,8 @@
  *                                                                           *
  *****************************************************************************/
 
-#ifndef GP_CONTEXT_H
-#define GP_CONTEXT_H
+#ifndef CORE_GP_CONTEXT_H
+#define CORE_GP_CONTEXT_H
 
 #include <stdint.h>
 #include <unistd.h>
@@ -58,12 +58,6 @@ typedef struct GP_Context {
 	uint8_t bit_endian:1;	/* GP_BIT_ENDIAN */
 	uint8_t free_pixels:1;  /* If set pixels are freed on GP_ContextFree */
 } GP_Context;
-
-/* Returns the pixel type used by the context. */
-static inline GP_PixelType GP_GetContextPixelType(const GP_Context *context)
-{
-	return context->pixel_type;
-}
 
 /* Determines the address of a pixel within the context's image.
  * Rows and columns are specified in the image's orientation
@@ -157,4 +151,4 @@ static inline uint32_t GP_ContextH(const GP_Context *context)
 		return context->h;
 }
 
-#endif /* GP_CONTEXT_H */
+#endif /* CORE_GP_CONTEXT_H */
