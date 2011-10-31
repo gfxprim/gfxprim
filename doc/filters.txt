@@ -84,8 +84,47 @@ void GP_FilterFoo_Raw(const GP_Context *src, GP_Context *dst,
                       GP_ProgressCallback *callback);
 -------------------------------------------------------------------------------
 
-Rotation and Symmetries
+Point operation filters
 ~~~~~~~~~~~~~~~~~~~~~~~
+
+Point operations are filters that works with pixels as with independent values
+(the value of destination pixel depends only on the pixel on the same
+coodrdinates in source image). All of these filters works 'in-place' and the
+result has always the same size as the source.
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <GP_Filters.h>
+
+GP_Context *GP_FilterBrightness(const GP_Context *src, GP_Context *dst,
+                                int32_t inc, GP_ProgressCallback *callback);
+-------------------------------------------------------------------------------
+
+Brightness filter, increments all pixel channels by a fixed value.
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <GP_Filters.h>
+
+GP_Context *GP_FilterContrast(const GP_Context *src, GP_Context *dst, 
+                              float mul, GP_ProgressCallback *callback);
+-------------------------------------------------------------------------------
+
+Constrast filter, multiplies all pixel channels by a fixed value.
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <GP_Filters.h>
+
+GP_Context *GP_FilterInvert(const GP_Context *src, GP_Context *dst,
+                            GP_ProgressCallback *callback);
+-------------------------------------------------------------------------------
+
+Inverts the image, for each channel the result value is computed as "chan_max
+- val".
+
+Rotation and Symmetry filters
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 [source,c]
 -------------------------------------------------------------------------------
@@ -199,4 +238,50 @@ Gaussian blur filter.
 Works 'in-place'.
 
 'TODO:' this filter is implemented for RGB888 only.
+
+
+Interpolation filters
+~~~~~~~~~~~~~~~~~~~~~
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <GP_Filters.h>
+
+typedef enum GP_InterpolationType {
+        GP_INTERP_NN,    /* Nearest Neighbour */
+        GP_INTERP_CUBIC, /* Bicubic           */
+} GP_InterpolationType;
+
+GP_Context *GP_FilterResize(const GP_Context *src, GP_Context *dst,
+                            GP_InterpolationType type,
+                            GP_Size w, GP_Size h,
+                            GP_ProgressCallback *callback);
+-------------------------------------------------------------------------------
+
+Interpolate (resize) the context.
+
+Doesn't work 'in-place' (this is quite impossible as the size of the bitmap is
+changed by the filter).
+
+If the filter destination is non 'NULL' and the 'w' and 'h' is smaller than the
+destination size the source image is interpolated into subcontext of
+destination defined by 'w' and 'h'.
+
+'TODO:' this filter is implemented for RGB888 only.
+
+Nearest Neighbour Interpolation
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Fast, but produces "pixelated" images may however work better for images with
+sharp edges mostly consisting of big one colour regions (eg. doesn't blur the
+result on upscaling).
+
+Bicubic Interpolation
+^^^^^^^^^^^^^^^^^^^^^
+
+Works well as is on image upscaling. To get decent result on downscaling
+low-pass filter (gaussian blur) must be used on original image before actuall
+downscaling. To do this reasonably fast we could cheat a little first resize
+big images a little without the low-past filter, then apply low-pass filter and
+finally downscale it to desired size.
 
