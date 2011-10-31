@@ -26,32 +26,42 @@
 
  */
 
-#ifndef GP_POINT_H
-#define GP_POINT_H
+#ifndef FILTERS_GP_POINT_H
+#define FILTERS_GP_POINT_H
 
-#include "core/GP_Context.h"
+#include "GP_Filter.h"
 
 /*
  * Brightness filter.
+ *
+ * Increments each pixel channel by a given value.
  */
-void GP_FilterBrightness_Raw(const GP_Context *src, GP_Context *res,
-                             int32_t inc);
+void GP_FilterBrightness_Raw(const GP_Context *src, GP_Context *dst,
+                             int32_t inc, GP_ProgressCallback *callback);
 
-GP_Context *GP_FilterBrightness(const GP_Context *src, int32_t inc);
+GP_Context *GP_FilterBrightness(const GP_Context *src, GP_Context *dst,
+                                int32_t inc, GP_ProgressCallback *callback);
 
 /*
  * Contrast filter.
+ *
+ * Multiplies each pixel channel by a given value.
  */
-GP_Context *GP_FilterContrast_Raw(const GP_Context *src, GP_Context *res,
-                                  float mul);
+GP_Context *GP_FilterContrast_Raw(const GP_Context *src, GP_Context *dst,
+                                  float mul, GP_ProgressCallback *callback);
 
-GP_Context *GP_FilterContrast(const GP_Context *src, float mul);
+GP_Context *GP_FilterContrast(const GP_Context *src, GP_Context *dst, 
+                              float mul, GP_ProgressCallback *callback);
 
 /*
  * Invert filter.
+ *
+ * Inverts each pixel channel (eg. val = max - val)
  */
-GP_Context *GP_FilterInvert_Raw(const GP_Context *src, GP_Context *res);
+GP_Context *GP_FilterInvert_Raw(const GP_Context *src, GP_Context *dst,
+                                GP_ProgressCallback *callback);
 
-GP_Context *GP_FilterInvert(const GP_Context *src);
+GP_Context *GP_FilterInvert(const GP_Context *src, GP_Context *dst,
+                            GP_ProgressCallback *callback);
 
-#endif /* GP_POINT_H */
+#endif /* FILTERS_GP_POINT_H */

@@ -26,8 +26,8 @@
 
  */
 
-#ifndef GP_FILTER_H
-#define GP_FILTER_H
+#ifndef GP_FILTERS_FILTER_H
+#define GP_FILTERS_FILTER_H
 
 #include "core/GP_Context.h"
 
@@ -55,4 +55,4 @@ static inline void GP_ProgressCallbackDone(GP_ProgressCallback *callback)
 	GP_ProgressCallbackReport(callback, 100);
 }
 
-#endif /* GP_FILTER_H */
+#endif /* FILTERS_GP_FILTER_H */

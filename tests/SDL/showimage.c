@@ -50,7 +50,7 @@ void event_loop(void)
 			case SDLK_DOWN:
 				brightness-=1;
 
-				res = GP_FilterBrightness(bitmap, brightness);
+				res = GP_FilterBrightness(bitmap, NULL, brightness, NULL);
 				
 				printf("brightness = %i %ux%u\n", brightness, res->w, res->h);
 

@@ -279,7 +279,7 @@ static GP_RetCode bright(GP_Context **c, const char *params)
 		return GP_EINVAL;
 	}
 
-	GP_FilterBrightness_Raw(*c, *c, bright);
+	GP_FilterBrightness(*c, *c, bright, progress_callback);
 
 	return GP_ESUCCESS;
 }
@@ -303,7 +303,7 @@ static GP_RetCode contrast(GP_Context **c, const char *params)
 		return GP_EINVAL;
 	}
 
-	GP_FilterContrast_Raw(*c, *c, mul);
+	GP_FilterContrast(*c, *c, mul, progress_callback);
 
 	return GP_ESUCCESS;
 }
@@ -319,7 +319,7 @@ static GP_RetCode invert(GP_Context **c, const char *params)
 	if (param_parse(params, invert_params, "invert", param_err))
 		return GP_EINVAL;
 
-	GP_FilterInvert_Raw(*c, *c);
+	GP_FilterInvert(*c, *c, progress_callback);
 
 	return GP_ESUCCESS;
 }
