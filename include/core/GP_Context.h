@@ -133,15 +133,19 @@ void GP_ContextFree(GP_Context *context);
 GP_RetCode GP_ContextDump(GP_Context *context, const char *path);
 
 /*
- * Rotates context flags.
+ * Rotates context flags clock wise.
  */
 void GP_ContextFlagsRotateCW(GP_Context *context);
+
+/*
+ * Rotates context flags counter clock wise.
+ */
 void GP_ContextFlagsRotateCCW(GP_Context *context);
 
 /*
- * Returns context width and height. 
+ * Returns context width and height taking the rotation flags into a account. 
  */
-static inline uint32_t GP_ContextW(const GP_Context *context)
+static inline GP_Size GP_ContextW(const GP_Context *context)
 {
 	if (context->axes_swap)
 		return context->h;
@@ -149,7 +153,7 @@ static inline uint32_t GP_ContextW(const GP_Context *context)
 		return context->w;
 }
 
-static inline uint32_t GP_ContextH(const GP_Context *context)
+static inline GP_Size GP_ContextH(const GP_Context *context)
 {
 	if (context->axes_swap)
 		return context->w;

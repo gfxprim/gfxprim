@@ -9,97 +9,130 @@ Data Structure
 [source,c]
 -------------------------------------------------------------------------------
 typedef struct GP_Context {
-	uint8_t *pixels;         /* Pointer to array of pixels              */
-	uint8_t  bpp;            /* Bits per pixel, always be power of two  */
-	uint32_t bytes_per_row;  /* Bytes per row, rows are padded to bytes */
-	uint32_t w;              /* Width in pixels                         */
-	uint32_t h;              /* Height in pixels                        */
+	uint8_t *pixels;         /* pointer to image pixels */
+	uint8_t  bpp;            /* pixel length in bits */
+	uint32_t bytes_per_row;
+	uint32_t w;              /* width in pixels */
+	uint32_t h;              /* height in pixels */
+	/* 
+         * Row bit offset. The offset is ignored for byte aligned pixels.
+         * Basically it's used for non aligned pixels with combination
+         * with subcontextes.
+         */
+        uint8_t offset;
 
-	GP_PixelType pixel_type; /* Enum, bitmap pixel type id              */
+	GP_PixelType pixel_type; /* pixel format enum */
 
-	int axes_swap:1;         /* Context rotation and mirroring          */
-	int x_swap:1;
-	int y_swap:1;
+	uint8_t axes_swap:1;         /* swap axes */
+	uint8_t x_swap:1;            /* mirror x */
+	uint8_t y_swap:1;            /* mirror y */
+	uint8_t free_pixels:1;       /* if set GP_ContextFree() calls free on context->pixels */
 } GP_Context;
 -------------------------------------------------------------------------------
 
-The 'GP_Context' holds meta-data needed for bitmaps. The values of pixels
-are stored as bitmap lines (aligned to bytes) in one dimensional array.
-The address of pixel could be determined by GP_PIXEL_ADDRESS(context, x, y)
-which returns byte aligned address for the pixel.
+The 'GP_Context' holds meta-data needed for bitmap drawing. The bitmap is
+stored in one dimensional array in byte-aligned lines.
 
 Rotation
 ^^^^^^^^
-All gfx functions does honor rotation and mirroring. If you really need drawing
-primitives without it use variants with _Raw suffix. 
 
-So GP_Line() is equal to GP_Line_Raw(), when all axes_swap, x_swap and y_swap
-are set to zero.
+The orientation flags affects the gfx and text drawing functions. If some of
+the flags is changed the origin and direction of the drawing is changed. Note
+that the image pixels are not affected by this at all only the coordinates
+passed to drawing functions are transformed accordingly.
 
-There are various macros for transforming coordinates and sizes in
-'core/GP_Transform.h'.
+If you don't need this functionality just don't touch these flags the as
+overhead of these transformations is not measurable.
 
-* *GP_TRANSFORM_POINT(x, y)*
-* *GP_TRANSFORM_RECT(x, y, w, h)*
-* *GP_RETRANSFORM_POINT(x, y)*
+If you really need drawing primitives that do not use the orientation flags,
+you could use variants with _Raw suffix (altghoug this is not recommended).
 
-Functions
-~~~~~~~~~
+There are various helper macros for transforming coordinates and sizes in
+'core/GP_Transform.h'. And helper functions to "rotate" the context flags
+clock wise and counter clock wise as well as functions to get the context size
+when taking into the accout the widht and height.
+
+[source,c]
+-------------------------------------------------------------------------------
+/* Transforms point user coordinates to bitmap coordinates */
+GP_TRANSFORM_POINT(context, x, y)
+
+/* Transforms rectangular area coordinates and size */
+GP_TRANSFORM_RECT(context, x, y, w, h)
+
+/* Inverse transformation, bitmap coordinates to user coordinates */
+GP_RETRANSFORM_POINT(context, x, y) 
+-------------------------------------------------------------------------------
+
+[source,c]
+-------------------------------------------------------------------------------
+/*
+ * Rotate context flags clock wise. 
+ */
+void GP_ContextFlagsRotateCW(GP_Context *context);
+
+/*
+ * Rotate context flags counter clock wise.
+ */
+void GP_ContextFlagsRotateCCW(GP_Context *context);
+
+/*
+ * Returns context W and H taking the rotation flags into the account.
+ */
+GP_Size GP_ContextW(const GP_Context *context);
+GP_Size GP_ContextH(const GP_Context *context);
+-------------------------------------------------------------------------------
+
+Context base functions
+~~~~~~~~~~~~~~~~~~~~~~
 
 [source,c]
 -------------------------------------------------------------------------------
 #include <GP.h>
 
-uint32_t GP_ContextW(struct GP_Context *context);
-uint32_t GP_ContextH(struct GP_Context *context);
--------------------------------------------------------------------------------
+GP_Context *GP_ContextAlloc(GP_Size w, GP_Size h, GP_PixelType type);
 
-Functions to get context width and height that do honor rotation flags (swaps
-W and H if axes_swap is set).
-
-[source,c]
--------------------------------------------------------------------------------
-#include <GP.h>
-
-void GP_ContextFlagsRotateCW(struct GP_Context *context);
-void GP_ContextFlagsRotateCCW(struct GP_Context *context);
--------------------------------------------------------------------------------
-
-Rotate context flags (x_swap, y_swap and axes_swap) clock wise, respectively
-counter clock wise.
-
-[source,c]
--------------------------------------------------------------------------------
-#include <GP.h>
-
-GP_Context *GP_ContextAlloc(uint32_t w, uint32_t h, GP_PixelType type);
--------------------------------------------------------------------------------
-
-Allocates and initializes the 'GP_Context' structure. The size for pixels is
-computed from width, height and pixel type. Moreover the rotation flags are
-set to zero and clipping rectangle is set to whole bitmap.
-
-The newly allocated context should be later freed with 'GP_ContextFree()'.
-
-[source,c]
--------------------------------------------------------------------------------
-#include <GP.h>
+GP_Context *GP_ContextCopy(const GP_Context *src, int flag);
 
 void GP_ContextFree(GP_Context *context);
 -------------------------------------------------------------------------------
 
-Free the context allocated memory.
+The 'GP_ContextAlloc()' allocates context and initalizes the context
+structure. The orientation flags are all set to 0 and the rest of the metadata
+are calculated accordingly to width, height and pixel_type.  The bitmap
+(context->pixels) is not initalized.
+
+The 'GP_ContextCopy()' allocates and initalizes a copy of the context passed
+as argument. If 'flag' is not zero, the bitmap (context->pixels) is copied
+otherwise it's left uninitalized.
+
+In both cases the resulting context should later be freed with
+'GP_ContextFree()'.
+
+Subcontext
+~~~~~~~~~~
+
+Given a rectangular area inside of any context subcontext could be created.
+The resulting context could be used for all context operations (including
+subcontext creation). The only difference between allocated context and
+subcontext of such context is that the 'GP_ContextFree()' doesn't call
+'free()' on subcontext pixels (which as a matter of a fact is a pointer that
+points somewhere into to allocated area).
 
 [source,c]
 -------------------------------------------------------------------------------
 #include <GP.h>
 
-GP_Context *GP_ContextCopy(GP_Context *context, int flag);
+GP_Context *GP_ContextSubContext(GP_Context *context, GP_Context *subcontext,
+                                 GP_Coord x, GP_Coord y, GP_Size w, GP_Size h);
 -------------------------------------------------------------------------------
 
-Copy a context. Allocates and initializes a 'GP_Context'. If flag is set to
-GP_CONTEXT_WITH_PIXELS, the actual bitmap is copied from context to newly
-allocated context, otherwise only context meta-data are copied.
+Creates subcontext of a context. The rectangular area must fit into the context.
 
-The newly created context should be later freed with 'GP_ContextFree()'.
+If subcontext pointer is 'NULL' the context structure is allocated otherwise
+the metadata are filled into the context structure pointed by subcontext
+pointer.
+
+In both cases pointer to subcontext or NULL (in case of 'malloc(2)' failure) is
+returned.
 
