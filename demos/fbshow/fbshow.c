@@ -208,13 +208,13 @@ int main(int argc, char *argv[])
 					continue;
 
 				switch (ev.val.key.key) {
+				case GP_KEY_ESC:
 				case GP_KEY_ENTER:
+				case GP_KEY_Q:
 					GP_FramebufferExit(fb);
 					return 0;
 				break;
-				case GP_KEY_ESC:
 				case GP_KEY_SPACE:
-				case GP_KEY_Q:
 					argn++;
 					if (argn >= argc)
 						argn = argf;
