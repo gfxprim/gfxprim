@@ -48,7 +48,7 @@ static GP_Context *image_to_display(GP_Context *img, uint32_t w, uint32_t h)
 {
 	float rat = calc_img_size(img->w, img->h, w, h);
 
-	return GP_FilterResize(img, NULL, GP_INTERP_CUBIC, img->w * rat, img->h * rat);
+	return GP_FilterResize(img, NULL, GP_INTERP_CUBIC, img->w * rat, img->h * rat, NULL);
 }
 
 static int show_image(GP_Framebuffer *fb, const char *img_path, int clear)

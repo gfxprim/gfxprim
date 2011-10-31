@@ -41,8 +41,8 @@
 
  */
 
-#ifndef GP_RESIZE_H
-#define GP_RESIZE_H
+#ifndef FILTERS_GP_RESIZE_H
+#define FILTERS_GP_RESIZE_H
 
 #include "GP_Filter.h"
 
@@ -51,11 +51,26 @@ typedef enum GP_InterpolationType {
 	GP_INTERP_CUBIC, /* Bicubic           */
 } GP_InterpolationType;
 
-void GP_FilterResize_Raw(GP_Context *src, GP_Context *res,
-                         GP_ProgressCallback *callback,
-		         GP_InterpolationType type);
+/*
+ * Just interpolate the source context into destination context.
+ */
+void GP_FilterResize_Raw(const GP_Context *src, GP_Context *dst,
+                         GP_InterpolationType type,
+                         GP_ProgressCallback *callback);
 
-GP_Context *GP_FilterResize(GP_Context *src, GP_ProgressCallback *callback,
-                            GP_InterpolationType type, GP_Size w, GP_Size h);
+/*
+ * If destination is non NULL, the w and h are used to create subcontext from
+ * destination which is then used to interpolate the image to.
+ * 
+ * Otherwise if destination is NULL, the context of size w and h is allocated
+ * and returned.
+ *
+ * In both cases the pointer to destination or NULL in case of failure is
+ * returned.
+ */
+GP_Context *GP_FilterResize(const GP_Context *src, GP_Context *dst,
+                            GP_InterpolationType type,
+                            GP_Size w, GP_Size h,
+                            GP_ProgressCallback *callback);
 
-#endif /* GP_RESIZE_H */
+#endif /* FILTERS_GP_RESIZE_H */

@@ -38,10 +38,10 @@
 /* Point filters, brightness, contrast ... */
 #include "filters/GP_Point.h"
 
-/* Linear convolution base filters (mostly blurs) */
+/* Linear convolution based filters (mostly blurs) */
 #include "filters/GP_Linear.h"
 
-/* Image scaling */
+/* Image scaling (resampling) */
 #include "filters/GP_Resize.h"
 
 #endif /* GP_FILTERS_H */

@@ -27,27 +27,27 @@
 
 #include <GP_Resize.h>
 
-void GP_FilterInterpolate_NN(GP_Context *src, GP_Context *res,
+void GP_FilterInterpolate_NN(const GP_Context *src, GP_Context *dst,
                              GP_ProgressCallback *callback)
 {
 	GP_Coord x, y;
 	
 	GP_DEBUG(1, "Scaling image %ux%u -> %ux%u %2.2f %2.2f",
-	            src->w, src->h, res->w, res->h,
-		    1.00 * res->w / src->w, 1.00 * res->h / src->h);
+	            src->w, src->h, dst->w, dst->h,
+		    1.00 * dst->w / src->w, 1.00 * dst->h / src->h);
 
-	for (y = 0; y < (GP_Coord)res->h; y++) {
-		for (x = 0; x < (GP_Coord)res->w; x++) {
-			GP_Coord xi = (1.00 * x / res->w) * src->w;
-			GP_Coord yi = (1.00 * y / res->h) * src->h;
+	for (y = 0; y < (GP_Coord)dst->h; y++) {
+		for (x = 0; x < (GP_Coord)dst->w; x++) {
+			GP_Coord xi = (1.00 * x / dst->w) * src->w;
+			GP_Coord yi = (1.00 * y / dst->h) * src->h;
 			
 			GP_Pixel pix = GP_GetPixel_Raw_24BPP(src, xi, yi);
 
-			GP_PutPixel_Raw_24BPP(res, x, y, pix);
+			GP_PutPixel_Raw_24BPP(dst, x, y, pix);
 		}
 	
 		if (callback != NULL && y % 100 == 0)
-			GP_ProgressCallbackReport(callback, 100.00 * y/res->h);
+			GP_ProgressCallbackReport(callback, 100.00 * y/dst->h);
 	}
 
 	GP_ProgressCallbackDone(callback);
@@ -79,18 +79,18 @@ typedef union v4f {
 #define MUL_V4SF(a, b) ((union v4f)((a).v * (b).v))
 #define SUM_V4SF(a)    ((a).f[0] + (a).f[1] + (a).f[2] + (a).f[3])
 
-void GP_FilterInterpolate_Cubic(GP_Context *src, GP_Context *res,
+void GP_FilterInterpolate_Cubic(const GP_Context *src, GP_Context *dst,
                                 GP_ProgressCallback *callback)
 {
 	float col_r[src->h], col_g[src->h], col_b[src->h];
 	uint32_t i, j;
 
 	GP_DEBUG(1, "Scaling image %ux%u -> %ux%u %2.2f %2.2f",
-	            src->w, src->h, res->w, res->h,
-		    1.00 * res->w / src->w, 1.00 * res->h / src->h);
+	            src->w, src->h, dst->w, dst->h,
+		    1.00 * dst->w / src->w, 1.00 * dst->h / src->h);
 
-	for (i = 0; i < res->w; i++) {
-		float x = (1.00 * i / res->w) * (src->w - 4.5) + 2.5;
+	for (i = 0; i < dst->w; i++) {
+		float x = (1.00 * i / dst->w) * (src->w - 4.5) + 2.5;
 		v4f cvx;
 		int xi = x - 1;
 
@@ -140,8 +140,8 @@ void GP_FilterInterpolate_Cubic(GP_Context *src, GP_Context *res,
 		}
 
 		/* now interpolate column for new image */
-		for (j = 0; j < res->h; j++) {
-			float y = (1.00 * j / res->h) * (src->h - 4.5) + 2.5;
+		for (j = 0; j < dst->h; j++) {
+			float y = (1.00 * j / dst->h) * (src->h - 4.5) + 2.5;
 			v4f cvy, rv, gv, bv;
 			float r, g, b;
 			int yi = y - 1;
@@ -199,46 +199,58 @@ void GP_FilterInterpolate_Cubic(GP_Context *src, GP_Context *res,
 				b = 0;
 			
 			GP_Pixel pix = GP_Pixel_CREATE_RGB888((uint8_t)r, (uint8_t)g, (uint8_t)b);
-			GP_PutPixel_Raw_24BPP(res, i, j, pix);
+			GP_PutPixel_Raw_24BPP(dst, i, j, pix);
 		}
 		
 		if (callback != NULL && i % 100 == 0)
-			GP_ProgressCallbackReport(callback, 100.00 * i/res->w);
+			GP_ProgressCallbackReport(callback, 100.00 * i/dst->w);
 	}
 
 	GP_ProgressCallbackDone(callback);
 }
 
-void GP_FilterResize_Raw(GP_Context *src, GP_Context *res,
-                         GP_ProgressCallback *callback,
-                         GP_InterpolationType type)
+void GP_FilterResize_Raw(const GP_Context *src, GP_Context *dst,
+                         GP_InterpolationType type,
+                         GP_ProgressCallback *callback)
 {
 	switch (type) {
 	case GP_INTERP_NN:
-		GP_FilterInterpolate_NN(src, res, callback);
+		GP_FilterInterpolate_NN(src, dst, callback);
 	break;
 	case GP_INTERP_CUBIC:
-		GP_FilterInterpolate_Cubic(src, res, callback);
+		GP_FilterInterpolate_Cubic(src, dst, callback);
 	break;
 	}
 }
 
-GP_Context *GP_FilterResize(GP_Context *src, GP_ProgressCallback *callback,
-                            GP_InterpolationType type, GP_Size w, GP_Size h)
+GP_Context *GP_FilterResize(const GP_Context *src, GP_Context *dst,
+                            GP_InterpolationType type,
+                            GP_Size w, GP_Size h,
+                            GP_ProgressCallback *callback)
 {
-	GP_Context *res;
-	
+	GP_Context sub, *res;
+
+	/* TODO: Templatize */
 	if (src->pixel_type != GP_PIXEL_RGB888)
 		return NULL;
-	
-	res = GP_ContextAlloc(w, h, GP_PIXEL_RGB888);
-	
-	if (res == NULL) {
-		GP_DEBUG(1, "Malloc failed :(");
-		return NULL;
+
+	if (dst == NULL) {
+		dst = GP_ContextAlloc(w, h, src->pixel_type);
+
+		if (dst == NULL)
+			return NULL;
+
+		res = dst;
+	} else {
+		GP_ASSERT(src->pixel_type == dst->pixel_type,
+		          "The src and dst pixel types must match");
+		/*
+		 * The size of w and h is asserted in subcontext initalization
+		 */	
+		res = GP_ContextSubContext(dst, &sub, 0, 0, w, h);
 	}
 
-	GP_FilterResize_Raw(src, res, callback, type);
+	GP_FilterResize_Raw(src, res, type, callback);
 
-	return res;
+	return dst;
 }

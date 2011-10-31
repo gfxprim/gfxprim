@@ -63,7 +63,8 @@ GP_Context *GP_FilterGaussianBlur(const GP_Context *src, GP_Context *dst,
 /*
  * Linear convolution.
  *
- * The kernel is array of kw * kh floats and is indexed as two directional array.
+ * The kernel is array of kw * kh floats and is indexed as two directional
+ * array.
  *
  * To define 3x3 average filter
  *
