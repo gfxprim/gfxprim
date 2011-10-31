@@ -72,7 +72,7 @@ config = GfxPrimConfig(
 	  ('G', 6, 6),
 	  ('B', 0, 6)]),
       
-      PixelType(name='xRGB4666', pixelsize=PS_32BPP, chanslist=[
+      PixelType(name='xRGB14666', pixelsize=PS_32BPP, chanslist=[
 	  ('R', 12, 6),
 	  ('G', 6, 6),
 	  ('B', 0, 6)]),
