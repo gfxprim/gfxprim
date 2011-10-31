@@ -350,7 +350,7 @@ static GP_RetCode blur(GP_Context **c, const char *params)
 		return GP_EINVAL;
 	}
 
-	GP_FilterGaussianBlur_Raw(*c, *c, progress_callback, sigma_x, sigma_y);
+	GP_FilterGaussianBlur_Raw(*c, *c, sigma_x, sigma_y, progress_callback);
 
 	return GP_ESUCCESS;
 }

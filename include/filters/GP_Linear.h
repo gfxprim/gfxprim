@@ -26,8 +26,8 @@
 
  */
 
-#ifndef GP_LINEAR_H
-#define GP_LINEAR_H
+#ifndef FILTERS_GP_LINEAR_H
+#define FILTERS_GP_LINEAR_H
 
 #include "GP_Filter.h"
 
@@ -44,13 +44,21 @@
  *
  * GP_FilterGaussianBlur_Raw(context, context, ...);
  */
-void GP_FilterGaussianBlur_Raw(GP_Context *src, GP_Context *res,
-                               GP_ProgressCallback *callback,
-			       float sigma_x, float sigma_y);
-
-GP_Context *GP_FilterGaussianBlur(GP_Context *src,
-                                  GP_ProgressCallback *callback,
-                                  float sigma_x, float sigma_y);
+void GP_FilterGaussianBlur_Raw(const GP_Context *src, GP_Context *dst,
+			       float sigma_x, float sigma_y,
+                               GP_ProgressCallback *callback);
+/*
+ * Gaussian blur.
+ *
+ * If dst is NULL, new bitmap is allocated.
+ *
+ * This variant could work in-place.
+ *
+ * Returns pointer to destination bitmap or NULL if allocation failed.
+ */
+GP_Context *GP_FilterGaussianBlur(const GP_Context *src, GP_Context *dst,
+                                  float sigma_x, float sigma_y,
+                                  GP_ProgressCallback *callback);
 
 /*
  * Linear convolution.
@@ -69,24 +77,26 @@ GP_Context *GP_FilterGaussianBlur(GP_Context *src,
  *
  * This function works also in-place.
  */
-void GP_FilterLinearConvolution_Raw(const GP_Context *src, GP_Context *res,
-                                    GP_ProgressCallback *callback,
-                                    float kernel[], uint32_t kw, uint32_t kh);
+void GP_FilterLinearConvolution_Raw(const GP_Context *src, GP_Context *dst,
+                                    float kernel[], uint32_t kw, uint32_t kh,
+                                    GP_ProgressCallback *callback);
 
 /*
  * Special cases for convolution only in horizontal/vertical direction.
  *
  * These are about 10-30% faster than the generic implementation (depending on
  * the kernel size, bigger kernel == more savings).
- * 
+ *
+ * These are two are a base for bilinear filters.
+ *
  * Both works also in-place.
  */
-void GP_FilterHLinearConvolution_Raw(const GP_Context *src, GP_Context *res,
-                                     GP_ProgressCallback *callback,
-                                     float kernel[], uint32_t kw);
+void GP_FilterHLinearConvolution_Raw(const GP_Context *src, GP_Context *dst,
+                                     float kernel[], uint32_t kw,
+                                     GP_ProgressCallback *callback);
 
-void GP_FilterVLinearConvolution_Raw(const GP_Context *src, GP_Context *res,
-                                     GP_ProgressCallback *callback,
-                                     float kernel[], uint32_t kh);
+void GP_FilterVLinearConvolution_Raw(const GP_Context *src, GP_Context *dst,
+                                     float kernel[], uint32_t kh,
+                                     GP_ProgressCallback *callback);
 
-#endif /* GP_LINEAR_H */
+#endif /* FILTERS_GP_LINEAR_H */
