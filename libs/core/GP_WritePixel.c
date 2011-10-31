@@ -162,7 +162,7 @@ void GP_WritePixels16bpp(void *start, size_t count, uint16_t value)
 	}
 }
 
-void GP_WritePixels18bpp(void *start, size_t count, uint32_t value)
+void GP_WritePixels18bpp(void *start, uint8_t off, size_t count, uint32_t value)
 {
 	#warning TODO
 }
