@@ -28,6 +28,7 @@
 
 #include <signal.h>
 #include <unistd.h>
+#include <string.h>
 
 #include <GP.h>
 #include <backends/GP_Framebuffer.h>
@@ -36,8 +37,10 @@
 static GP_Pixel black_pixel;
 static GP_Pixel white_pixel;
 
-
 static GP_Framebuffer *fb = NULL;
+
+static int rotate = 0;
+
 
 static void sighandler(int signo __attribute__((unused)))
 {
@@ -56,27 +59,6 @@ static float calc_img_size(uint32_t img_w, uint32_t img_h,
 	return GP_MIN(w_rat, h_rat);
 }
 
-static GP_Context *image_to_display(GP_Context *img, uint32_t w, uint32_t h)
-{
-	float rat = calc_img_size(img->w, img->h, w, h);
-
-//	GP_FilterGaussianBlur(img, img, 1, 1, NULL);
-	
-	/* Workaround */
-	if (img->pixel_type != GP_PIXEL_RGB888) {
-		GP_Context *tmp;
-		tmp = GP_ContextConvert(img, GP_PIXEL_RGB888);
-		
-		GP_ContextFree(img);
-		img = tmp;
-		
-		if (img == NULL)
-			return NULL;
-	}
-
-	return GP_FilterResize(img, NULL, GP_INTERP_CUBIC, img->w * rat, img->h * rat, NULL);
-}
-
 static int show_image(GP_Framebuffer *fb, const char *img_path, int clear)
 {
 	GP_Context *img;
@@ -92,23 +74,70 @@ static int show_image(GP_Framebuffer *fb, const char *img_path, int clear)
                                    buf, white_pixel);
 	}
 
-	if (GP_LoadImage(img_path, &img) == 0) {
-		GP_Context *img2 = image_to_display(img, fb->context.w, fb->context.h);
+	if (GP_LoadImage(img_path, &img) != 0)
+		return 1;
 
-		GP_ContextFree(img);
+	GP_Size w, h;
 
-		if (img2 == NULL)
-			return 1;
-		
-		uint32_t cx = (fb->context.w - img2->w)/2;
-		uint32_t cy = (fb->context.h - img2->h)/2;
-
-		GP_Fill(&fb->context, black_pixel);
-
-		GP_Blit(img2, 0, 0, img2->w, img2->h, &fb->context, cx, cy);
-
-		GP_ContextFree(img2);
+	switch (rotate) {
+	case 0:
+	case 180:
+	default:
+		w = fb->context.w;
+		h = fb->context.h;
+	break;
+	case 90:
+	case 270:
+		w = fb->context.h;
+		h = fb->context.w;
+	break;
 	}
+
+	float rat = calc_img_size(img->w, img->h, w, h);
+	
+	/* Workaround */
+	if (img->pixel_type != GP_PIXEL_RGB888) {
+		GP_Context *tmp = GP_ContextConvert(img, GP_PIXEL_RGB888);
+		GP_ContextFree(img);
+		img = tmp;
+	}
+	
+	GP_Context *ret;
+
+//	GP_FilterGaussianBlur(img, img, 0.7, 0.7, NULL);
+	ret = GP_FilterResize(img, NULL, GP_INTERP_CUBIC, img->w * rat, img->h * rat, NULL);
+	GP_ContextFree(img);
+
+	switch (rotate) {
+	case 0:
+	break;
+	case 90:
+		img = GP_FilterRotate90(ret, NULL, NULL);
+	break;
+	case 180:
+		img = GP_FilterRotate180(ret, NULL, NULL);
+	break;
+	case 270:
+		img = GP_FilterRotate270(ret, NULL, NULL);
+	break;
+	}
+
+	if (rotate) {
+		GP_ContextFree(ret);
+		ret = img;
+	}
+
+	uint32_t cx = (fb->context.w - ret->w)/2;
+	uint32_t cy = (fb->context.h - ret->h)/2;
+
+	GP_Blit(ret, 0, 0, ret->w, ret->h, &fb->context, cx, cy);
+	GP_ContextFree(ret);
+
+	/* clean up the rest of the display */
+	GP_FillRectXYWH(&fb->context, 0, 0, cx, fb->context.h, black_pixel);
+	GP_FillRectXYWH(&fb->context, 0, 0, fb->context.w, cy, black_pixel);
+	GP_FillRectXYWH(&fb->context, ret->w+cx, 0, cx, fb->context.h, black_pixel);
+	GP_FillRectXYWH(&fb->context, 0, ret->h+cy, fb->context.w, cy, black_pixel);
 
 	return 0;
 }
@@ -117,11 +146,11 @@ int main(int argc, char *argv[])
 {
 	GP_InputDriverLinux *drv = NULL;
 	char *input_dev = NULL;
-	int sleep_sec = 0;
+	int sleep_sec = -1;
 
 	int opt;
 
-	while ((opt = getopt(argc, argv, "i:s:")) != -1) {
+	while ((opt = getopt(argc, argv, "i:s:r:")) != -1) {
 		switch (opt) {
 		case 'i':
 			input_dev = optarg;
@@ -129,6 +158,13 @@ int main(int argc, char *argv[])
 		case 's':
 			sleep_sec = atoi(optarg);
 		break;
+		case 'r':
+			if (!strcmp(optarg, "90"))
+				rotate = 90;
+			else if (!strcmp(optarg, "180"))
+				rotate = 180;
+			else if (!strcmp(optarg, "270"))
+				rotate = 270;
 		default:
 			fprintf(stderr, "Invalid paramter '%c'\n", opt);
 		}
@@ -143,7 +179,7 @@ int main(int argc, char *argv[])
 	
 		if (drv == NULL) {
 			fprintf(stderr, "Failed to initalize input device '%s'\n",
-                	                input_dev);
+			                input_dev);
 			return 1;
 		}
 	}
@@ -175,7 +211,7 @@ int main(int argc, char *argv[])
 	FD_ZERO(&rfds);
 	FD_SET(drv->fd, &rfds);
 	struct timeval tv = {.tv_sec = sleep_sec, .tv_usec = 0};
-	struct timeval *tvp = sleep_sec ? &tv : NULL;
+	struct timeval *tvp = sleep_sec != -1 ? &tv : NULL;
 
 	for (;;) {
 		int ret;
@@ -225,6 +261,12 @@ int main(int argc, char *argv[])
 					continue;
 
 				switch (ev.val.key.key) {
+				case GP_KEY_R:
+					rotate += 90;
+					if (rotate > 270)
+						rotate = 0;
+					show_image(fb, argv[argn], 1);
+				break;
 				case GP_KEY_ESC:
 				case GP_KEY_ENTER:
 				case GP_KEY_Q:
