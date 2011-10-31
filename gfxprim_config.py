@@ -46,7 +46,7 @@ config = GfxPrimConfig(
       # Standard RGB types
       #
 
-      PixelType(name='RGBx8888', pixelsize=PS_32BPP, chanslist=[
+      PixelType(name='xRGB8888', pixelsize=PS_32BPP, chanslist=[
 	('R', 16, 8),
 	('G', 8, 8),
 	('B', 0, 8)]),
@@ -71,10 +71,14 @@ config = GfxPrimConfig(
 	  ('R', 12, 6),
 	  ('G', 6, 6),
 	  ('B', 0, 6)]),
+      
+      PixelType(name='xRGB4666', pixelsize=PS_32BPP, chanslist=[
+	  ('R', 12, 6),
+	  ('G', 6, 6),
+	  ('B', 0, 6)]),
       #
       # Palette types
       #
-
       PixelType(name='P2', pixelsize=PS_2BPP_LE, chanslist=[
 	  ('P', 0, 2)]),
 
@@ -87,7 +91,6 @@ config = GfxPrimConfig(
       #
       # Gray-only pixel types
       #
-
       PixelType(name='G1', pixelsize=PS_1BPP_LE, chanslist=[
 	  ('V', 0, 1)]),
 
