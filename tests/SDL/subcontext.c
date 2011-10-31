@@ -260,7 +260,7 @@ int main(int argc, char *argv[])
 	white = GP_ColorToContextPixel(GP_COL_WHITE, &context);
 	gray  = GP_ColorToContextPixel(GP_COL_GRAY_DARK, &context);
 
-	sub_context = GP_ContextSubContext(&context, 100, 100, 440, 280);
+	sub_context = GP_ContextSubContext(&context, NULL, 100, 100, 440, 280);
 	GP_Fill(sub_context, gray);
 
 	timer = SDL_AddTimer(60, timer_callback, NULL);

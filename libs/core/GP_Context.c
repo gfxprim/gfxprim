@@ -127,17 +127,21 @@ void GP_ContextFree(GP_Context *context)
 	free(context);
 }
 
-GP_Context *GP_ContextSubContext(GP_Context *context, GP_Coord x, GP_Coord y,
-                                 GP_Size w, GP_Size h)
+GP_Context *GP_ContextSubContext(GP_Context *context, GP_Context *subcontext,
+                                 GP_Coord x, GP_Coord y, GP_Size w, GP_Size h)
 {
 	GP_CHECK(context, "NULL context");
 	GP_CHECK(context->w >= x + w, "Subcontext w out of original context.");
 	GP_CHECK(context->h >= y + h, "Subcontext h out of original context.");
+	
+	GP_Context *ret = subcontext;
 
-	GP_Context *ret = malloc(sizeof(GP_Context));
+	if (ret == NULL) {
+		GP_Context *ret = malloc(sizeof(GP_Context));
 
-	if (ret == NULL)
-		return NULL;
+		if (ret == NULL)
+			return NULL;
+	}
 
 	ret->bpp           = context->bpp;
 	ret->bytes_per_row = context->bytes_per_row;

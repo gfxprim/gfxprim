@@ -104,9 +104,15 @@ GP_Context *GP_ContextCopy(const GP_Context *src, int flag);
 
 /*
  * Create subcontext.
+ *
+ * If pointer to subcontext is NULL, new context is allocated
+ * otherwise context pointed by subcontext pointer is initalized.
+ * 
+ * The free_pixels flag is set to 0 upon subcontext initalization so the
+ * GP_ContextFree() would not call free() upon the subcontext->pixels pointer.
  */
-GP_Context *GP_ContextSubContext(GP_Context *context, GP_Coord x, GP_Coord y,
-                                 GP_Size w, GP_Size h);
+GP_Context *GP_ContextSubContext(GP_Context *context, GP_Context *subcontext,
+                                 GP_Coord x, GP_Coord y, GP_Size w, GP_Size h);
 
 /*
  * Converts context to different pixel type.
