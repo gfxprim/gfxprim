@@ -135,6 +135,8 @@ int main(int argc, char *argv[])
 	}
 
 	signal(SIGINT, sighandler);
+	signal(SIGSEGV, sighandler);
+	signal(SIGBUS, sighandler);
 
 	fb = GP_FramebufferInit("/dev/fb0");
 
