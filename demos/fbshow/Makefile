@@ -3,7 +3,7 @@ TOPDIR=../..
 CSOURCES=$(shell echo *.c)
 
 INCLUDE=
-LDLIBS+=-lGP -L$(TOPDIR)/build/ -lpng
+LDLIBS+=-lGP -L$(TOPDIR)/build/
 
 APPS=fbshow
 
