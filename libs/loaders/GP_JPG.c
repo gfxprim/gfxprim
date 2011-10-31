@@ -152,6 +152,9 @@ GP_RetCode GP_ReadJPG(FILE *f, GP_Context **res)
 		JSAMPROW addr = (void*)GP_PIXEL_ADDR(ret, 0, y);
 		jpeg_read_scanlines(&cinfo, &addr, 1);
 
+		if (pixel_type != GP_PIXEL_RGB888)
+			continue;
+		
 		//TODO: fixme bigendian?
 		/* fix the pixel, as we want in fact BGR */
 		uint32_t i;
