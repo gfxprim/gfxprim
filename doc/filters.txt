@@ -1,44 +1,202 @@
 Context filters
 ---------------
 
-Pixel filters for 'GP_Context'. The context filter is basially an function that modifies context somehow (may even allocate new context to store result).
+Pixel filters for 'GP_Context'.
 
-Rotation
-~~~~~~~~
+The context filter is basially an function that operates on context pixels.
+The result may be stored into a new bitmap or placed to bitmap passed as
+argument or, in some cases, the filter could be used 'in place' so the result
+is stored into the same context as the one passed as filter source.
+
+Progress Callback
+~~~~~~~~~~~~~~~~~
+
+Progress callback is a structure that stores user-defined callback function,
+pointer to store location of user data and percentage.
+
+[source,c]
+-------------------------------------------------------------------------------
+typdedef struct GP_ProgressCallback {
+	float percentage;
+	void (*callback)(struct GP_ProgressCallback *self);
+	void *priv;
+} GP_ProgressCallback;
+-------------------------------------------------------------------------------
+
+If non 'NULL' progress callback structure is passed to a filter function, the
+callback function is periodically called and the percentage is updated.
+
+The callback is, if supported, the last parameter of the filter function.
+
+Common filter API
+~~~~~~~~~~~~~~~~~
+
+The filters have, for your convinience unified API.
+
+* Each filter returns pointer to destination context or 'NULL' on failure
+* The first two arguments are source and destination
+* The last argument is progress callback
+
+Each filter function could be used in two modes.
+
+By passing non 'NULL' argument as filter destination user requests result to
+be stored into the destination context. The context must have correct pixel
+type and the context size must be big enough to store the result.
+
+For filters that works 'in-place' (which is explicitly said for each filter)
+the source and the destination could be the same context. Note that this is
+not expected to work if you do several overlaping subcontextes and pass these
+as arguments.
+
+When 'NULL' is passed as destination new context for storing the result is
+allocated and returned. 
+
+The return value is either pointer to destination context or 'NULL' either
+when malloc(2) has failed or if the filter is not implemented for such
+pixel_type, parameters, etc...
+
+[source,c]
+-------------------------------------------------------------------------------
+/*
+ * Filter common api.
+ */
+GP_Context *GP_FilterFoo(const GP_Context *src, GP_Context *dst,
+                         foo params ...,
+                         GP_ProgressCallback *callback);
+-------------------------------------------------------------------------------
+
+
+Filters also exists in _Raw variant (that just takes source context,
+destination context, filters parameters and progress callback). These filter
+APIs are used for internal implementation and shouldn't be called by user as
+the destination is expected to be crafted exactly for storing the filter
+result and there are 'NO' sanity checks in place.
+
+'You could use these at your own risk'
+
+[source,c]
+-------------------------------------------------------------------------------
+/*
+ * Raw filter common api.
+ */
+void GP_FilterFoo_Raw(const GP_Context *src, GP_Context *dst,
+                      foo params ...,
+                      GP_ProgressCallback *callback);
+-------------------------------------------------------------------------------
+
+Rotation and Symmetries
+~~~~~~~~~~~~~~~~~~~~~~~
 
 [source,c]
 -------------------------------------------------------------------------------
 #include <GP_Filters.h>
 
-GP_RetCode GP_MirrorH(GP_Context *context);
+GP_Context *GP_FilterMirrorH(const GP_Context *src, GP_Context *dst,
+                             GP_ProgressCallback *callback);
 -------------------------------------------------------------------------------
 
-Mirrors context pixels horizontaly and updates the context metadata.
+Mirrors context horizontally.
+
+Works 'in-place'.
+
+The destination has to have the same pixel type and the destination size must
+be at least as big as source.
 
 [source,c]
 -------------------------------------------------------------------------------
 #include <GP_Filters.h>
 
-GP_RetCode GP_MirrorV(GP_Context *context);
+GP_Context *GP_FilterMirrorV(const GP_Context *src, GP_Context *dst,
+                             GP_ProgressCallback *callback);
 -------------------------------------------------------------------------------
 
-Mirrors context pixels verticaly and updates the context metadata.
+Mirrors context vertically.
+
+Works 'in-place'.
+
+the destination has to have the same pixel type and the destination size must
+be at least as big as source.
 
 [source,c]
 -------------------------------------------------------------------------------
 #include <GP_Filters.h>
 
-GP_RetCode GP_RotateCW(GP_Context *context);
+GP_Context *GP_FilterRotate90(const GP_Context *src, GP_Context *dst,
+                              GP_ProgressCallback *callback);
 -------------------------------------------------------------------------------
 
-Rotates context clock wise and updates the context metadata.
+Rotate context by 90 degrees.
+
+Doesn't work 'in-place' (yet).
+
+The destinatoin has to have the same pixel type and destination size must be
+big enough to fit rotated context (eg. W and H are swapped).
 
 [source,c]
 -------------------------------------------------------------------------------
 #include <GP_Filters.h>
 
-GP_RetCode GP_RotateCCW(GP_Context *context);
+GP_Context *GP_FilterRotate180(const GP_Context *src, GP_Context *dst,
+                               GP_ProgressCallback *callback);
 -------------------------------------------------------------------------------
 
-Rotates context counter clock wise and updates the context metadata.
+Rotate context by 180 degrees.
+
+Doesn't work 'in-place' (yet).
+
+the destination has to have the same pixel type and the destination size must
+be at least as big as source.
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <GP_Filters.h>
+
+GP_Context *GP_FilterRotate270(const GP_Context *src, GP_Context *dst,
+                               GP_ProgressCallback *callback);
+-------------------------------------------------------------------------------
+
+Rotate context by 270 degrees.
+
+Doesn't work 'in-place' (yet).
+
+The destinatoin has to have the same pixel type and destination size must be
+big enough to fit rotated context (eg. W and H are swapped).
+
+[source,c]
+-------------------------------------------------------------------------------
+typedef enum GP_FilterSymmetries {
+        GP_ROTATE_90,
+        GP_ROTATE_CW = GP_ROTATE_90,
+        GP_ROTATE_180,
+        GP_ROTATE_270,
+        GP_ROTATE_CCW = GP_ROTATE_270,
+        GP_MIRROR_H,
+        GP_MIRROR_V,
+} GP_FilterSymmetries;
+
+GP_Context *GP_FilterSymmetry(const GP_Context *src, GP_Context *dst,
+                              GP_FilterSymmetries symmetry,
+                              GP_ProgressCallback *callback);
+-------------------------------------------------------------------------------
+
+Catch all function for symmetry filters.
+
+
+Linear filters
+~~~~~~~~~~~~~~
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <GP_Filters.h>
+
+GP_Context *GP_FilterGaussianBlur(const GP_Context *src, GP_Context *dst,
+                                  float sigma_x, float sigma_y,
+                                  GP_ProgressCallback *callback);
+-------------------------------------------------------------------------------
+
+Gaussian blur filter.
+
+Works 'in-place'.
+
+'TODO:' this filter is implemented for RGB888 only.
 
