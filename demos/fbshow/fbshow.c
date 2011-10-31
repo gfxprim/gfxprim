@@ -69,6 +69,8 @@ static int show_image(GP_Framebuffer *fb, const char *img_path, int clear)
 {
 	GP_Context *img;
 
+	fprintf(stderr, "Loading '%s'\n", img_path);
+
 	if (clear) {
 		char buf[100];
 		snprintf(buf, sizeof(buf), "Loading '%s'", img_path);
@@ -137,6 +139,7 @@ int main(int argc, char *argv[])
 	signal(SIGINT, sighandler);
 	signal(SIGSEGV, sighandler);
 	signal(SIGBUS, sighandler);
+	signal(SIGABRT, sighandler);
 
 	fb = GP_FramebufferInit("/dev/fb0");
 
