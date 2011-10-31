@@ -61,6 +61,18 @@ static GP_Context *image_to_display(GP_Context *img, uint32_t w, uint32_t h)
 	float rat = calc_img_size(img->w, img->h, w, h);
 
 //	GP_FilterGaussianBlur(img, img, 1, 1, NULL);
+	
+	/* Workaround */
+	if (img->pixel_type != GP_PIXEL_RGB888) {
+		GP_Context *tmp;
+		tmp = GP_ContextConvert(img, GP_PIXEL_RGB888);
+		
+		GP_ContextFree(img);
+		img = tmp;
+		
+		if (img == NULL)
+			return NULL;
+	}
 
 	return GP_FilterResize(img, NULL, GP_INTERP_CUBIC, img->w * rat, img->h * rat, NULL);
 }
