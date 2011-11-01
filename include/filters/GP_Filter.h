@@ -33,26 +33,37 @@
 
 /*
  * Progress callback
+ *
+ * Non zero return value from callback will abort current operation
+ * free memory and return NULL from filter.
  */
 typedef struct GP_ProgressCallback {
 	float percentage;
-	void (*callback)(struct GP_ProgressCallback *self);
+	int (*callback)(struct GP_ProgressCallback *self);
 	void *priv;
 } GP_ProgressCallback;
 
-static inline void GP_ProgressCallbackReport(GP_ProgressCallback *callback,
-                                             float percentage)
+static inline int GP_ProgressCallbackReport(GP_ProgressCallback *callback,
+                                            unsigned int val, unsigned int max,
+					    unsigned int mul __attribute__((unused)))
 {
 	if (callback == NULL)
-		return;
+		return 0;
 
-	callback->percentage = percentage;
-	callback->callback(callback);
+	if (val % 100)
+		return 0;
+
+	callback->percentage = 100.00 * val / max;
+	return callback->callback(callback);
 }
 
 static inline void GP_ProgressCallbackDone(GP_ProgressCallback *callback)
 {
-	GP_ProgressCallbackReport(callback, 100);
+	if (callback == NULL)
+		return;
+	
+	callback->percentage = 100;
+	callback->callback(callback);
 }
 
 #endif /* FILTERS_GP_FILTER_H */

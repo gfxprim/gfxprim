@@ -54,9 +54,9 @@ typedef enum GP_InterpolationType {
 /*
  * Just interpolate the source context into destination context.
  */
-void GP_FilterResize_Raw(const GP_Context *src, GP_Context *dst,
-                         GP_InterpolationType type,
-                         GP_ProgressCallback *callback);
+int GP_FilterResize_Raw(const GP_Context *src, GP_Context *dst,
+                        GP_InterpolationType type,
+                        GP_ProgressCallback *callback);
 
 /*
  * If destination is non NULL, the w and h are used to create subcontext from

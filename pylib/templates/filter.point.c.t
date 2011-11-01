@@ -16,7 +16,7 @@
 %% macro filter_per_pixel_size(name, opts="")
 %% for ps in pixelsizes
 %% if ps.size <= 8 and ps.size > 1
-void GP_Filter{{ name }}_{{ ps.suffix }}(const GP_Context *src, GP_Context *dst{{ maybe_opts(opts) }},
+int GP_Filter{{ name }}_{{ ps.suffix }}(const GP_Context *src, GP_Context *dst{{ maybe_opts(opts) }},
 	GP_ProgressCallback *callback)
 {
 	uint32_t x, y;
@@ -28,11 +28,12 @@ void GP_Filter{{ name }}_{{ ps.suffix }}(const GP_Context *src, GP_Context *dst{
 			GP_PutPixel_Raw_{{ ps.suffix }}(dst, x, y, pix);
 		}
 		
-		if (callback != NULL && y % 100 == 0)
-			GP_ProgressCallbackReport(callback, 100.00 * y/src->h);
+		if (GP_ProgressCallbackReport(callback, y, src->h, src->w))
+			return 1;
 	}
 
 	GP_ProgressCallbackDone(callback);
+	return 0;
 }
 %% endif
 %% endfor
@@ -44,7 +45,7 @@ void GP_Filter{{ name }}_{{ ps.suffix }}(const GP_Context *src, GP_Context *dst{
 %% macro filter_per_pixel_type(name, opts="")
 %% for pt in pixeltypes
 %% if not pt.is_unknown() and len(pt.chanslist) > 1
-void GP_Filter{{ name }}_{{ pt.name }}(const GP_Context *src, GP_Context *dst{{ maybe_opts(opts) }},
+int GP_Filter{{ name }}_{{ pt.name }}(const GP_Context *src, GP_Context *dst{{ maybe_opts(opts) }},
 	GP_ProgressCallback *callback)
 {
 	uint32_t x, y;
@@ -65,11 +66,12 @@ void GP_Filter{{ name }}_{{ pt.name }}(const GP_Context *src, GP_Context *dst{{ 
 			GP_PutPixel_Raw_{{ pt.pixelsize.suffix }}(dst, x, y, pix);
 		}
 		
-		if (callback != NULL && y % 100 == 0)
-			GP_ProgressCallbackReport(callback, 100.00 * y/src->h);
+		if (GP_ProgressCallbackReport(callback, y, src->h, src->w))
+			return 1;
 	}
 
 	GP_ProgressCallbackDone(callback);
+	return 0;
 }
 
 %% endif
@@ -91,7 +93,7 @@ void GP_Filter{{ name }}_{{ pt.name }}(const GP_Context *src, GP_Context *dst{{ 
  * Switch per pixel sizes or pixel types.
  */
 %% macro filter_functions(name, opts="", params="", fmt="")
-void GP_Filter{{ name }}_Raw(const GP_Context *src, GP_Context *dst{{ maybe_opts(opts) }},
+int GP_Filter{{ name }}_Raw(const GP_Context *src, GP_Context *dst{{ maybe_opts(opts) }},
 	GP_ProgressCallback *callback)
 {
 	GP_DEBUG(1, "Running filter {{ name }} {{ fmt }}"{{ maybe_opts(params) }});
@@ -100,27 +102,29 @@ void GP_Filter{{ name }}_Raw(const GP_Context *src, GP_Context *dst{{ maybe_opts
 	%% for pt in pixeltypes
 	case GP_PIXEL_{{ pt.name }}:
 		%% if pt.is_unknown() or pt.pixelsize.size < 2
-		return;
+		return 1;
 		%% elif len(pt.chanslist) == 1:
-		GP_Filter{{ name }}_{{ pt.pixelsize.suffix }}(src, dst{{ maybe_opts(params) }}, callback);
+		return GP_Filter{{ name }}_{{ pt.pixelsize.suffix }}(src, dst{{ maybe_opts(params) }}, callback);
 		%% else
-		GP_Filter{{ name }}_{{ pt.name }}(src, dst{{ maybe_opts(params) }}, callback);
+		return GP_Filter{{ name }}_{{ pt.name }}(src, dst{{ maybe_opts(params) }}, callback);
 		%% endif
-	break;
 	%% endfor
 	default:
 	break;
 	}
+
+	return 1;
 }
 
 GP_Context *GP_Filter{{ name }}(const GP_Context *src, GP_Context *dst{{ maybe_opts(opts) }},
 	GP_ProgressCallback *callback)
 {
+	GP_Context *res = dst;
 
-	if (dst == NULL) {
-		dst = GP_ContextCopy(src, 0);
+	if (res == NULL) {
+		res = GP_ContextCopy(src, 0);
 
-		if (dst == NULL)
+		if (res == NULL)
 			return NULL;
 	} else {
 		GP_ASSERT(src->pixel_type == dst->pixel_type,
@@ -129,9 +133,16 @@ GP_Context *GP_Filter{{ name }}(const GP_Context *src, GP_Context *dst{{ maybe_o
 		          "Destination is not big enough");
 	}
 
-	GP_Filter{{ name }}_Raw(src, dst{{ maybe_opts(params) }}, callback);
+	if (GP_Filter{{ name }}_Raw(src, dst{{ maybe_opts(params) }}, callback)) {
+		GP_DEBUG(1, "Operation aborted");
 
-	return dst;
+		if (dst == NULL)
+			GP_ContextFree(res);
+	
+		return NULL;
+	}
+
+	return res;
 }
 %% endmacro
 

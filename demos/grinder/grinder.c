@@ -33,10 +33,12 @@ static GP_ProgressCallback *progress_callback = NULL;
 
 static const char *progress_prefix = NULL;
 
-static void show_progress(GP_ProgressCallback *self)
+static int show_progress(GP_ProgressCallback *self)
 {
 	fprintf(stderr, "\rFilter %s %3.2f%%",
 	        progress_prefix, self->percentage);
+	
+	return 0;
 }
 
 static int param_err(const struct param *self, const char *val, void *priv)

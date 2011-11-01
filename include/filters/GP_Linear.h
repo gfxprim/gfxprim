@@ -44,9 +44,9 @@
  *
  * GP_FilterGaussianBlur_Raw(context, context, ...);
  */
-void GP_FilterGaussianBlur_Raw(const GP_Context *src, GP_Context *dst,
-			       float sigma_x, float sigma_y,
-                               GP_ProgressCallback *callback);
+int GP_FilterGaussianBlur_Raw(const GP_Context *src, GP_Context *dst,
+                              float sigma_x, float sigma_y,
+                              GP_ProgressCallback *callback);
 /*
  * Gaussian blur.
  *
@@ -78,9 +78,9 @@ GP_Context *GP_FilterGaussianBlur(const GP_Context *src, GP_Context *dst,
  *
  * This function works also in-place.
  */
-void GP_FilterLinearConvolution_Raw(const GP_Context *src, GP_Context *dst,
-                                    float kernel[], uint32_t kw, uint32_t kh,
-                                    GP_ProgressCallback *callback);
+int GP_FilterLinearConvolution_Raw(const GP_Context *src, GP_Context *dst,
+                                   float kernel[], uint32_t kw, uint32_t kh,
+                                   GP_ProgressCallback *callback);
 
 /*
  * Special cases for convolution only in horizontal/vertical direction.
@@ -92,12 +92,12 @@ void GP_FilterLinearConvolution_Raw(const GP_Context *src, GP_Context *dst,
  *
  * Both works also in-place.
  */
-void GP_FilterHLinearConvolution_Raw(const GP_Context *src, GP_Context *dst,
-                                     float kernel[], uint32_t kw,
-                                     GP_ProgressCallback *callback);
+int GP_FilterHLinearConvolution_Raw(const GP_Context *src, GP_Context *dst,
+                                    float kernel[], uint32_t kw,
+                                    GP_ProgressCallback *callback);
 
-void GP_FilterVLinearConvolution_Raw(const GP_Context *src, GP_Context *dst,
-                                     float kernel[], uint32_t kh,
-                                     GP_ProgressCallback *callback);
+int GP_FilterVLinearConvolution_Raw(const GP_Context *src, GP_Context *dst,
+                                    float kernel[], uint32_t kh,
+                                    GP_ProgressCallback *callback);
 
 #endif /* FILTERS_GP_LINEAR_H */

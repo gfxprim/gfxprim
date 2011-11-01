@@ -11,8 +11,8 @@ Vertical Mirror alogorithm
 #include "GP_Rotate.h"
 
 %% for ps in pixelsizes
-void GP_FilterRotate90_Raw_{{ ps.suffix }}(const GP_Context *src, GP_Context *dst,
-                                           GP_ProgressCallback *callback)
+int GP_FilterRotate90_Raw_{{ ps.suffix }}(const GP_Context *src, GP_Context *dst,
+                                          GP_ProgressCallback *callback)
 {
 	uint32_t x, y;
 	
@@ -24,23 +24,25 @@ void GP_FilterRotate90_Raw_{{ ps.suffix }}(const GP_Context *src, GP_Context *ds
 			GP_PutPixel_Raw_{{ ps.suffix }}(dst, yr, x, GP_GetPixel_Raw_{{ ps.suffix }}(src, x, y));
 		}
 		
-		if (callback != NULL && x % 100 == 0)
-			GP_ProgressCallbackReport(callback, 100.00 * x / src->w);
+		if (GP_ProgressCallbackReport(callback, x, src->w, src->h))
+			return 1;
 	}
 	
 	GP_ProgressCallbackDone(callback);
+	return 0;
 }
 
 %% endfor
 
-void GP_FilterRotate90_Raw(const GP_Context *src, GP_Context *dst,
-                            GP_ProgressCallback *callback)
+int GP_FilterRotate90_Raw(const GP_Context *src, GP_Context *dst,
+                          GP_ProgressCallback *callback)
 {
-	GP_FN_PER_BPP_CONTEXT(GP_FilterRotate90_Raw, src, src, dst, callback);
+	GP_FN_RET_PER_BPP_CONTEXT(GP_FilterRotate90_Raw, src, src, dst, callback);
+	return 1;
 }
 
 %% for ps in pixelsizes
-void GP_FilterRotate270_Raw_{{ ps.suffix }}(const GP_Context *src, GP_Context *dst,
+int GP_FilterRotate270_Raw_{{ ps.suffix }}(const GP_Context *src, GP_Context *dst,
                                            GP_ProgressCallback *callback)
 {
 	uint32_t x, y;
@@ -53,19 +55,21 @@ void GP_FilterRotate270_Raw_{{ ps.suffix }}(const GP_Context *src, GP_Context *d
 				GP_PutPixel_Raw_{{ ps.suffix }}(dst, y, xr, GP_GetPixel_Raw_{{ ps.suffix }}(src, x, y));
 		}
 
-		if (callback != NULL && x % 100 == 0)
-			GP_ProgressCallbackReport(callback, 100.00 * x / src->w);
+		if (GP_ProgressCallbackReport(callback, x, src->w, src->h))
+			return 1;
 	}
 	
 	GP_ProgressCallbackDone(callback);
+	return 0;
 }
 
 %% endfor
 
-void GP_FilterRotate270_Raw(const GP_Context *src, GP_Context *dst,
-                            GP_ProgressCallback *callback)
+int GP_FilterRotate270_Raw(const GP_Context *src, GP_Context *dst,
+                           GP_ProgressCallback *callback)
 {
-	GP_FN_PER_BPP_CONTEXT(GP_FilterRotate270_Raw, src, src, dst, callback);
+	GP_FN_RET_PER_BPP_CONTEXT(GP_FilterRotate270_Raw, src, src, dst, callback);
+	return 1;
 }
 
 %% endblock body

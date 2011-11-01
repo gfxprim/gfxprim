@@ -37,8 +37,8 @@
  * 
  * Works 'in place'. The contexts must have equal pixel_type and size.
  */
-void GP_FilterMirrorH_Raw(const GP_Context *src, GP_Context *dst,
-                          GP_ProgressCallback *callback);
+int GP_FilterMirrorH_Raw(const GP_Context *src, GP_Context *dst,
+                         GP_ProgressCallback *callback);
 
 /*
  * Mirrors bitmap horizontally.
@@ -55,8 +55,8 @@ GP_Context *GP_FilterMirrorH(const GP_Context *src, GP_Context *dst,
  *
  * Works 'in place'. The contexts must have equal pixel_type and size.
  */
-void GP_FilterMirrorV_Raw(const GP_Context *src, GP_Context *dst,
-                          GP_ProgressCallback *callback);
+int GP_FilterMirrorV_Raw(const GP_Context *src, GP_Context *dst,
+                         GP_ProgressCallback *callback);
 
 /*
  * Mirrors bitmap vertically.
@@ -74,14 +74,14 @@ GP_Context *GP_FilterMirrorV(const GP_Context *src, GP_Context *dst,
  * Doesn't work 'in place'. The contexts must have equal pixel_type size must 
  * match the rotated size (is equal for 180 and swapped for 90 and 270).
  */
-void GP_FilterRotate90_Raw(const GP_Context *src, GP_Context *dst,
+int GP_FilterRotate90_Raw(const GP_Context *src, GP_Context *dst,
+                          GP_ProgressCallback *callback);
+
+int GP_FilterRotate180_Raw(const GP_Context *src, GP_Context *dst,
                            GP_ProgressCallback *callback);
 
-void GP_FilterRotate180_Raw(const GP_Context *src, GP_Context *dst,
-                            GP_ProgressCallback *callback);
-
-void GP_FilterRotate270_Raw(const GP_Context *src, GP_Context *dst,
-                            GP_ProgressCallback *callback);
+int GP_FilterRotate270_Raw(const GP_Context *src, GP_Context *dst,
+                           GP_ProgressCallback *callback);
 
 /*
  * Rotate the context by 90, 180, 270.

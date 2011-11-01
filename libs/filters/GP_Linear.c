@@ -49,19 +49,25 @@ static inline void gaussian_kernel_init(float sigma, float *kernel)
 	}
 }
 
-static void gaussian_callback_1(GP_ProgressCallback *self)
+static int gaussian_callback_horiz(GP_ProgressCallback *self)
 {
-	GP_ProgressCallbackReport(self->priv, self->percentage/2);
+	GP_ProgressCallback *callback = self->priv;
+
+	callback->percentage = self->percentage / 2;
+	return callback->callback(callback);
 }
 
-static void gaussian_callback_2(GP_ProgressCallback *self)
+static int gaussian_callback_vert(GP_ProgressCallback *self)
 {
-	GP_ProgressCallbackReport(self->priv, self->percentage/2 + 50);
+	GP_ProgressCallback *callback = self->priv;
+
+	callback->percentage = self->percentage / 2 + 50;
+	return callback->callback(callback);
 }
 
-void GP_FilterGaussianBlur_Raw(const GP_Context *src, GP_Context *dst,
-                               float sigma_x, float sigma_y,
-                               GP_ProgressCallback *callback)
+int GP_FilterGaussianBlur_Raw(const GP_Context *src, GP_Context *dst,
+                              float sigma_x, float sigma_y,
+                              GP_ProgressCallback *callback)
 {
 	unsigned int size_x = gaussian_kernel_size(sigma_x);
 	unsigned int size_y = gaussian_kernel_size(sigma_y);
@@ -72,7 +78,7 @@ void GP_FilterGaussianBlur_Raw(const GP_Context *src, GP_Context *dst,
 	GP_ProgressCallback *new_callback = NULL;
 
 	GP_ProgressCallback gaussian_callback = {
-		.callback = gaussian_callback_1,
+		.callback = gaussian_callback_horiz,
 		.priv = callback
 	};
 
@@ -84,23 +90,26 @@ void GP_FilterGaussianBlur_Raw(const GP_Context *src, GP_Context *dst,
 		float kernel_x[size_x];
 		gaussian_kernel_init(sigma_x, kernel_x);
 		
-		GP_FilterHLinearConvolution_Raw(src, dst, kernel_x, size_x,
-		                                new_callback);
+		if (GP_FilterHLinearConvolution_Raw(src, dst, kernel_x, size_x,
+		                                new_callback))
+			return 1;
 	}
 	
 	if (new_callback != NULL)
-		new_callback->callback = gaussian_callback_2;
+		new_callback->callback = gaussian_callback_vert;
 
 	/* compute kernel and apply in vertical direction */
 	if (sigma_y > 0) {
 		float kernel_y[size_y];
 		gaussian_kernel_init(sigma_y, kernel_y);
 		
-		GP_FilterVLinearConvolution_Raw(dst, dst, kernel_y, size_y,
-		                                new_callback);
+		if (GP_FilterVLinearConvolution_Raw(dst, dst, kernel_y, size_y,
+		                                new_callback))
+			return 1;
 	}
 
 	GP_ProgressCallbackDone(callback);
+	return 0;
 }
 
 GP_Context *GP_FilterGaussianBlur(const GP_Context *src, GP_Context *dst,
@@ -128,9 +137,9 @@ GP_Context *GP_FilterGaussianBlur(const GP_Context *src, GP_Context *dst,
 	return dst;
 }
 
-void GP_FilterHLinearConvolution_Raw(const GP_Context *src, GP_Context *dst,
-                                     float kernel[], uint32_t kw,
-                                     GP_ProgressCallback *callback)
+int GP_FilterHLinearConvolution_Raw(const GP_Context *src, GP_Context *dst,
+                                    float kernel[], uint32_t kw,
+                                    GP_ProgressCallback *callback)
 {
 	float kernel_sum = 0;
 	GP_Coord x, y;
@@ -221,11 +230,12 @@ void GP_FilterHLinearConvolution_Raw(const GP_Context *src, GP_Context *dst,
 				idx = 0;
 		}
 		
-		if (callback != NULL && y % 100 == 0)
-			GP_ProgressCallbackReport(callback, 100.00 * y/dst->h);
+		if (GP_ProgressCallbackReport(callback, y, dst->h, dst->w))
+			return 1;
 	}
 
 	GP_ProgressCallbackDone(callback);
+	return 0;
 }
 
 /*
@@ -233,9 +243,9 @@ void GP_FilterHLinearConvolution_Raw(const GP_Context *src, GP_Context *dst,
  *
  * Can be used in-place.
  */
-void GP_FilterVLinearConvolution_Raw(const GP_Context *src, GP_Context *dst,
-                                     float kernel[], uint32_t kh,
-                                     GP_ProgressCallback *callback)
+int GP_FilterVLinearConvolution_Raw(const GP_Context *src, GP_Context *dst,
+                                    float kernel[], uint32_t kh,
+                                    GP_ProgressCallback *callback)
 {
 	float kernel_sum = 0;
 	GP_Coord x, y;
@@ -326,11 +336,12 @@ void GP_FilterVLinearConvolution_Raw(const GP_Context *src, GP_Context *dst,
 				idx = 0;
 		}
 		
-		if (callback != NULL && x % 100 == 0)
-			GP_ProgressCallbackReport(callback, 100.00 * x/dst->w);
+		if (GP_ProgressCallbackReport(callback, x, dst->w, dst->h))
+			return 1;
 	}
 
 	GP_ProgressCallbackDone(callback);
+	return 0;
 }
 
 
@@ -339,9 +350,9 @@ void GP_FilterVLinearConvolution_Raw(const GP_Context *src, GP_Context *dst,
  *
  * Can be used in-place.
  */
-void GP_FilterLinearConvolution_Raw(const GP_Context *src, GP_Context *dst,
-                                    float kernel[], uint32_t kw, uint32_t kh,
-                                    GP_ProgressCallback *callback)
+int GP_FilterLinearConvolution_Raw(const GP_Context *src, GP_Context *dst,
+                                   float kernel[], uint32_t kw, uint32_t kh,
+                                   GP_ProgressCallback *callback)
 {
 	float kernel_sum = 0;
 	GP_Coord x, y;
@@ -452,9 +463,10 @@ void GP_FilterLinearConvolution_Raw(const GP_Context *src, GP_Context *dst,
 				idx = 0;
 		}
 		
-		if (callback != NULL && y % 100 == 0)
-			GP_ProgressCallbackReport(callback, 100.00 * y/dst->h);
+		if (GP_ProgressCallbackReport(callback, y, dst->h, dst->w))
+			return 1;
 	}
 
 	GP_ProgressCallbackDone(callback);
+	return 0;
 }

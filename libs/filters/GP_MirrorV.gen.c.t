@@ -11,7 +11,7 @@ Vertical Mirror alogorithm
 #include "GP_Rotate.h"
 
 %% for ps in pixelsizes
-void GP_MirrorV_Raw_{{ ps.suffix }}(const GP_Context *src, GP_Context *dst,
+int GP_MirrorV_Raw_{{ ps.suffix }}(const GP_Context *src, GP_Context *dst,
                                     GP_ProgressCallback *callback)
 {
 	uint32_t x, y;
@@ -27,18 +27,20 @@ void GP_MirrorV_Raw_{{ ps.suffix }}(const GP_Context *src, GP_Context *dst,
 			GP_PutPixel_Raw_{{ ps.suffix }}(dst, xm, y, tmp);
 		}
 
-		if (callback != NULL && x % 100 == 0)
-			GP_ProgressCallbackReport(callback, 200.00 * x / src->w);
+		if (GP_ProgressCallbackReport(callback, 2 * x, src->w, src->h))
+			return 1;
 	}
 	
 	GP_ProgressCallbackDone(callback);
+	return 0;
 }
 
 %% endfor
 
-void GP_FilterMirrorV_Raw(const GP_Context *src, GP_Context *dst,
+int GP_FilterMirrorV_Raw(const GP_Context *src, GP_Context *dst,
                           GP_ProgressCallback *callback)
 {
-	GP_FN_PER_BPP_CONTEXT(GP_MirrorV_Raw, src, src, dst, callback);
+	GP_FN_RET_PER_BPP_CONTEXT(GP_MirrorV_Raw, src, src, dst, callback);
+	return 1;
 }
 %% endblock body

@@ -27,8 +27,8 @@
 
 #include <GP_Resize.h>
 
-void GP_FilterInterpolate_NN(const GP_Context *src, GP_Context *dst,
-                             GP_ProgressCallback *callback)
+int GP_FilterInterpolate_NN(const GP_Context *src, GP_Context *dst,
+                            GP_ProgressCallback *callback)
 {
 	GP_Coord x, y;
 	
@@ -46,11 +46,12 @@ void GP_FilterInterpolate_NN(const GP_Context *src, GP_Context *dst,
 			GP_PutPixel_Raw_24BPP(dst, x, y, pix);
 		}
 	
-		if (callback != NULL && y % 100 == 0)
-			GP_ProgressCallbackReport(callback, 100.00 * y/dst->h);
+		if (GP_ProgressCallbackReport(callback, y, dst->h, dst->w))
+			return 1;
 	}
 
 	GP_ProgressCallbackDone(callback);
+	return 0;
 }
 
 #define A 0.5
@@ -79,8 +80,8 @@ typedef union v4f {
 #define MUL_V4SF(a, b) ((union v4f)((a).v * (b).v))
 #define SUM_V4SF(a)    ((a).f[0] + (a).f[1] + (a).f[2] + (a).f[3])
 
-void GP_FilterInterpolate_Cubic(const GP_Context *src, GP_Context *dst,
-                                GP_ProgressCallback *callback)
+int GP_FilterInterpolate_Cubic(const GP_Context *src, GP_Context *dst,
+                               GP_ProgressCallback *callback)
 {
 	float col_r[src->h], col_g[src->h], col_b[src->h];
 	uint32_t i, j;
@@ -202,25 +203,26 @@ void GP_FilterInterpolate_Cubic(const GP_Context *src, GP_Context *dst,
 			GP_PutPixel_Raw_24BPP(dst, i, j, pix);
 		}
 		
-		if (callback != NULL && i % 100 == 0)
-			GP_ProgressCallbackReport(callback, 100.00 * i/dst->w);
+		if (GP_ProgressCallbackReport(callback, i, dst->w, dst->h))
+			return 1;
 	}
 
 	GP_ProgressCallbackDone(callback);
+	return 0;
 }
 
-void GP_FilterResize_Raw(const GP_Context *src, GP_Context *dst,
-                         GP_InterpolationType type,
-                         GP_ProgressCallback *callback)
+int GP_FilterResize_Raw(const GP_Context *src, GP_Context *dst,
+                        GP_InterpolationType type,
+                        GP_ProgressCallback *callback)
 {
 	switch (type) {
 	case GP_INTERP_NN:
-		GP_FilterInterpolate_NN(src, dst, callback);
-	break;
+		return GP_FilterInterpolate_NN(src, dst, callback);
 	case GP_INTERP_CUBIC:
-		GP_FilterInterpolate_Cubic(src, dst, callback);
-	break;
+		return GP_FilterInterpolate_Cubic(src, dst, callback);
 	}
+
+	return 1;
 }
 
 GP_Context *GP_FilterResize(const GP_Context *src, GP_Context *dst,
@@ -235,12 +237,10 @@ GP_Context *GP_FilterResize(const GP_Context *src, GP_Context *dst,
 		return NULL;
 
 	if (dst == NULL) {
-		dst = GP_ContextAlloc(w, h, src->pixel_type);
+		res = GP_ContextAlloc(w, h, src->pixel_type);
 
-		if (dst == NULL)
+		if (res == NULL)
 			return NULL;
-
-		res = dst;
 	} else {
 		GP_ASSERT(src->pixel_type == dst->pixel_type,
 		          "The src and dst pixel types must match");
@@ -250,7 +250,19 @@ GP_Context *GP_FilterResize(const GP_Context *src, GP_Context *dst,
 		res = GP_ContextSubContext(dst, &sub, 0, 0, w, h);
 	}
 
-	GP_FilterResize_Raw(src, res, type, callback);
+	/*
+	 * Operation was aborted by progress callback.
+	 * 
+	 * Free any alloacted data and exit.
+	 */
+	if (GP_FilterResize_Raw(src, res, type, callback)) {
+		GP_DEBUG(1, "Operation aborted");
+		
+		if (dst == NULL)
+			GP_ContextFree(dst);
 
-	return dst;
+		return NULL;
+	}
+
+	return dst == NULL ? res : dst;
 }
