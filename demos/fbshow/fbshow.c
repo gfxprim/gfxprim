@@ -29,6 +29,7 @@
 #include <signal.h>
 #include <unistd.h>
 #include <string.h>
+#include <pthread.h>
 
 #include <GP.h>
 #include <backends/GP_Framebuffer.h>
@@ -39,16 +40,22 @@ static GP_Pixel white_pixel;
 
 static GP_Framebuffer *fb = NULL;
 
+/* image loader thread */
+static int abort_flag = 0;
 static int rotate = 0;
 
-
-static void sighandler(int signo __attribute__((unused)))
+static int image_loader_callback(GP_ProgressCallback *self)
 {
-	if (fb != NULL)
-		GP_FramebufferExit(fb);
-
-	exit(1);
+	if (abort_flag)
+		return 1;
+	
+	return 0;
 }
+
+struct loader_params {
+	const char *img_path;
+	int clear;
+};
 
 static float calc_img_size(uint32_t img_w, uint32_t img_h,
                            uint32_t src_w, uint32_t src_h)
@@ -59,23 +66,29 @@ static float calc_img_size(uint32_t img_w, uint32_t img_h,
 	return GP_MIN(w_rat, h_rat);
 }
 
-static int show_image(GP_Framebuffer *fb, const char *img_path, int clear)
+static void *image_loader(void *ptr)
 {
-	GP_Context *img;
+	struct loader_params *params = ptr;
 
-	fprintf(stderr, "Loading '%s'\n", img_path);
+	fprintf(stderr, "Loading '%s'\n", params->img_path);
 
-	if (clear) {
+	if (params->clear) {
 		char buf[100];
-		snprintf(buf, sizeof(buf), "Loading '%s'", img_path);
+		snprintf(buf, sizeof(buf), "Loading '%s'", params->img_path);
 		GP_Fill(&fb->context, black_pixel);
 		GP_BoxCenteredText(&fb->context, NULL, 0, 0,
                                    fb->context.w, fb->context.h,
                                    buf, white_pixel);
 	}
 
-	if (GP_LoadImage(img_path, &img) != 0)
-		return 1;
+	GP_Context *img = NULL;
+
+	if (GP_LoadImage(params->img_path, &img) != 0) {
+		GP_BoxCenteredText(&fb->context, NULL, 0, 0,
+                                   fb->context.w, fb->context.h,
+                                   "Failed to load image", white_pixel);
+		return NULL;
+	}
 
 	GP_Size w, h;
 
@@ -94,7 +107,7 @@ static int show_image(GP_Framebuffer *fb, const char *img_path, int clear)
 	}
 
 	float rat = calc_img_size(img->w, img->h, w, h);
-	
+
 	/* Workaround */
 	if (img->pixel_type != GP_PIXEL_RGB888) {
 		GP_Context *tmp = GP_ContextConvert(img, GP_PIXEL_RGB888);
@@ -102,23 +115,29 @@ static int show_image(GP_Framebuffer *fb, const char *img_path, int clear)
 		img = tmp;
 	}
 	
+	GP_ProgressCallback callback = {.callback = image_loader_callback};
+	
 	GP_Context *ret;
 
-//	GP_FilterGaussianBlur(img, img, 0.7, 0.7, NULL);
-	ret = GP_FilterResize(img, NULL, GP_INTERP_CUBIC, img->w * rat, img->h * rat, NULL);
+//	if (GP_FilterGaussianBlur(img, img, 0.7, 0.7, &callback))
+//		return NULL;
+	ret = GP_FilterResize(img, NULL, GP_INTERP_CUBIC, img->w * rat, img->h * rat, &callback);
 	GP_ContextFree(img);
+
+	if (ret == NULL)
+		return NULL;
 
 	switch (rotate) {
 	case 0:
 	break;
 	case 90:
-		img = GP_FilterRotate90(ret, NULL, NULL);
+		img = GP_FilterRotate90(ret, NULL, &callback);
 	break;
 	case 180:
-		img = GP_FilterRotate180(ret, NULL, NULL);
+		img = GP_FilterRotate180(ret, NULL, &callback);
 	break;
 	case 270:
-		img = GP_FilterRotate270(ret, NULL, NULL);
+		img = GP_FilterRotate270(ret, NULL, &callback);
 	break;
 	}
 
@@ -126,6 +145,9 @@ static int show_image(GP_Framebuffer *fb, const char *img_path, int clear)
 		GP_ContextFree(ret);
 		ret = img;
 	}
+
+	if (img == NULL)
+		return NULL;
 
 	uint32_t cx = (fb->context.w - ret->w)/2;
 	uint32_t cy = (fb->context.h - ret->h)/2;
@@ -139,7 +161,42 @@ static int show_image(GP_Framebuffer *fb, const char *img_path, int clear)
 	GP_FillRectXYWH(&fb->context, ret->w+cx, 0, cx, fb->context.h, black_pixel);
 	GP_FillRectXYWH(&fb->context, 0, ret->h+cy, fb->context.w, cy, black_pixel);
 
-	return 0;
+	return NULL;
+}
+
+static pthread_t loader_thread = (pthread_t)0;
+static struct loader_params params;
+
+static void show_image(const char *img_path, int clear)
+{
+	int ret;
+	
+	params.img_path = img_path;
+	params.clear = clear;
+
+	/* stop previous loader thread */
+	if (loader_thread) {
+		abort_flag = 1;
+		pthread_join(loader_thread, NULL);
+		loader_thread = (pthread_t)0;
+		abort_flag = 0;
+	}
+
+	ret = pthread_create(&loader_thread, NULL, image_loader, (void*)&params);
+
+	if (ret) {
+		fprintf(stderr, "Failed to start thread: %s\n", strerror(ret));
+		GP_FramebufferExit(fb);
+		exit(1);
+	}
+}
+
+static void sighandler(int signo __attribute__((unused)))
+{
+	if (fb != NULL)
+		GP_FramebufferExit(fb);
+
+	exit(1);
 }
 
 int main(int argc, char *argv[])
@@ -204,7 +261,7 @@ int main(int argc, char *argv[])
 	int argf = optind;
 	int argn = argf;
 
-	show_image(fb, argv[argf], 1);
+	show_image(argv[argf], 1);
 
 	/* Initalize select */
 	fd_set rfds;
@@ -231,7 +288,7 @@ int main(int argc, char *argv[])
 				if (argn >= argc)
 					argn = argf;
 			
-				show_image(fb, argv[argn], 0);
+				show_image(argv[argn], 0);
 			break;
 			default:
 				while (GP_InputDriverLinuxRead(drv));
@@ -245,7 +302,7 @@ int main(int argc, char *argv[])
 			if (argn >= argc)
 				argn = argf;
 			
-			show_image(fb, argv[argn], 0);
+			show_image(argv[argn], 0);
 		}
 
 		/* Read and parse events */
@@ -265,7 +322,7 @@ int main(int argc, char *argv[])
 					rotate += 90;
 					if (rotate > 270)
 						rotate = 0;
-					show_image(fb, argv[argn], 1);
+					show_image(argv[argn], 1);
 				break;
 				case GP_KEY_ESC:
 				case GP_KEY_ENTER:
@@ -273,11 +330,20 @@ int main(int argc, char *argv[])
 					GP_FramebufferExit(fb);
 					return 0;
 				break;
+				case GP_KEY_UP:
 				case GP_KEY_SPACE:
 					argn++;
 					if (argn >= argc)
 						argn = argf;
-					show_image(fb, argv[argn], 1);
+					show_image(argv[argn], 1);
+				break;
+				case GP_KEY_DOWN:
+					argn--;
+
+					if (argn < argf)
+						argn = argc - 1;
+
+					show_image(argv[argn], 1);
 				break;
 				}
 			break;
