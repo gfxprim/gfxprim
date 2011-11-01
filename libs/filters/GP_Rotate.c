@@ -37,17 +37,30 @@ int GP_FilterMirrorH_Raw(const GP_Context *src, GP_Context *dst,
 	GP_DEBUG(1, "Mirroring image horizontally %ux%u", src->w, src->h);
 
 	#warning FIXME: non byte aligned pixels
-
+	
+	/* Note that this should work both for src != dst and src == dst */
 	for (y = 0; y < src->h/2; y++) {
-		uint8_t *l1 = dst->pixels + bpr * y;
-		uint8_t *l2 = dst->pixels + bpr * (src->h - y - 1);
+		uint8_t *sl1 = src->pixels + bpr * y;
+		uint8_t *sl2 = src->pixels + bpr * (src->h - y - 1);
+		uint8_t *dl1 = dst->pixels + bpr * y;
+		uint8_t *dl2 = dst->pixels + bpr * (src->h - y - 1);
 
-		memcpy(buf, l1, bpr);
-		memcpy(l1, l2, bpr);
-		memcpy(l2, buf, bpr);
+		memcpy(buf, sl1, bpr);
+		memcpy(dl1, sl2, bpr);
+		memcpy(dl2, buf, bpr);
 		
 		if (GP_ProgressCallbackReport(callback, 2 * y, src->h, src->w))
 			return 1;
+	}
+
+	/* Copy the middle odd line */
+	if (src != dst && src->h % 2) {
+		y = src->h / 2;
+
+		uint8_t *sl = src->pixels + bpr * y;
+		uint8_t *dl = dst->pixels + bpr * y;
+		
+		memcpy(dl, sl, bpr);
 	}
 
 	GP_ProgressCallbackDone(callback);

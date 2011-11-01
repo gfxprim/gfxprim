@@ -30,7 +30,14 @@ int GP_MirrorV_Raw_{{ ps.suffix }}(const GP_Context *src, GP_Context *dst,
 		if (GP_ProgressCallbackReport(callback, 2 * x, src->w, src->h))
 			return 1;
 	}
-	
+
+	/* Copy the middle odd line */
+	if (src != dst && src->w % 2) {
+		x = src->w / 2;
+		for (y = 0; y < src->h; y++)
+			GP_PutPixel_Raw_{{ ps.suffix }}(dst, x, y, GP_GetPixel_Raw_{{ ps.suffix }}(src, x, y));
+	}
+
 	GP_ProgressCallbackDone(callback);
 	return 0;
 }
