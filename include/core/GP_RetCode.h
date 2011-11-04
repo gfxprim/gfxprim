@@ -19,12 +19,12 @@
  * Copyright (C) 2009-2010 Jiri "BlueBear" Dluhos                            *
  *                         <jiri.bluebear.dluhos@gmail.com>                  *
  *                                                                           *
- * Copyright (C) 2009-2010 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2011 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
-#ifndef GP_RETCODE_H
-#define GP_RETCODE_H
+#ifndef CORE_GP_RETCODE_H
+#define CORE_GP_RETCODE_H
 
 typedef enum GP_RetCode {
 	GP_ESUCCESS,
@@ -38,9 +38,10 @@ typedef enum GP_RetCode {
 	GP_EBADFILE,		/* error in file, or bad file format */
 	GP_ENOENT,		/* no such file or another object */
 	GP_ENOMEM,		/* not enough memory */
+	GP_EINTR,               /* operation interrupted by user */
 	GP_EMAX,
 } GP_RetCode;
 
 const char *GP_RetCodeName(GP_RetCode code);
 
-#endif /* GP_RETCODE_H */
+#endif /* CORE_GP_RETCODE_H */

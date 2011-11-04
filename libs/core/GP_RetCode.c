@@ -19,7 +19,7 @@
  * Copyright (C) 2009-2010 Jiri "BlueBear" Dluhos                            *
  *                         <jiri.bluebear.dluhos@gmail.com>                  *
  *                                                                           *
- * Copyright (C) 2009-2010 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2011 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
@@ -37,9 +37,9 @@ static char *ret_code_names[] = {
 	"Bad context",
 	"Bad file",
 	"Not found",
-	"Not enough memory"
+	"Not enough memory",
+	"Operation interrupted"
 };
-
 
 const char *GP_RetCodeName(GP_RetCode code)
 {
