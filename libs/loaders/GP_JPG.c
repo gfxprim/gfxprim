@@ -64,7 +64,7 @@ static void my_error_exit(j_common_ptr cinfo)
 {
 	struct my_jpg_err *my_err = (struct my_jpg_err*) cinfo->err;
 
-	GP_DEBUG(1, "ERROR reading jpeg file");
+	GP_DEBUG(1, "ERROR reading/writing jpeg file");
 
 	longjmp(my_err->setjmp_buf, 1);
 }
@@ -193,4 +193,94 @@ GP_RetCode GP_LoadJPG(const char *src_path, GP_Context **res,
 		return ret;
 
 	return GP_ReadJPG(f, res, callback);
+}
+
+GP_RetCode GP_SaveJPG(const char *dst_path, const GP_Context *src,
+                      GP_ProgressCallback *callback)
+{
+	FILE *f;
+	GP_RetCode ret;
+	struct jpeg_compress_struct cinfo;
+	struct my_jpg_err my_err;
+
+	if (src->pixel_type != GP_PIXEL_RGB888 &&
+	    src->pixel_type != GP_PIXEL_G8) {
+		GP_DEBUG(1, "Can't save png with pixel type %s",
+		         GP_PixelTypeName(src->pixel_type));
+		return GP_ENOIMPL;
+	}
+
+	f = fopen(dst_path, "wb");
+
+	if (f == NULL) {
+		GP_DEBUG(1, "Failed to open '%s' for writing: %s",
+		         dst_path, strerror(errno));
+		return GP_EBADFILE;
+	}
+	
+	if (setjmp(my_err.setjmp_buf)) {
+		ret = GP_EBADFILE;;
+		goto err1;
+	}
+
+	cinfo.err = jpeg_std_error(&my_err.error_mgr);
+	my_err.error_mgr.error_exit = my_error_exit;
+	
+	jpeg_create_compress(&cinfo);
+
+	jpeg_stdio_dest(&cinfo, f);
+
+	cinfo.image_width  = src->w;
+	cinfo.image_height = src->h;
+	cinfo.input_components = src->pixel_type == GP_PIXEL_RGB888 ? 3 : 1;
+	cinfo.in_color_space = JCS_RGB;
+
+	jpeg_set_defaults(&cinfo);
+
+	jpeg_start_compress(&cinfo, TRUE);
+
+	while (cinfo.next_scanline < cinfo.image_height) {
+		uint32_t y = cinfo.next_scanline;
+
+		if (src->pixel_type == GP_PIXEL_RGB888) {
+			uint32_t i;
+			uint8_t tmp[3 * src->w];
+
+			memcpy(tmp, GP_PIXEL_ADDR(src, 0, y), 3 * src->w);
+
+			/* fix the pixels as we want in fact BGR */
+			for (i = 0; i < src->w; i++) {
+				uint8_t *pix = tmp + 3 * i; 
+				GP_SWAP(pix[0], pix[2]);
+			}
+
+			JSAMPROW row = (void*)tmp;
+			jpeg_write_scanlines(&cinfo, &row, 1);
+		} else {
+			JSAMPROW row = (void*)GP_PIXEL_ADDR(src, 0, y);
+			jpeg_write_scanlines(&cinfo, &row, 1);
+		}
+	
+		if (GP_ProgressCallbackReport(callback, y, src->h, src->w)) {
+			GP_DEBUG(1, "Operation aborted");
+			ret = GP_EINTR;
+			goto err1;
+		}
+	}
+
+	jpeg_finish_compress(&cinfo);
+
+	if (fclose(f)) {
+		GP_DEBUG(1, "Failed to close file '%s': %s",
+		         dst_path, strerror(errno));
+		return GP_EBADFILE;
+	}
+
+	return GP_ESUCCESS;
+//TODO: is cinfo allocated?
+err1:
+	jpeg_destroy_compress(&cinfo);
+	fclose(f);
+	unlink(dst_path);
+	return ret;
 }

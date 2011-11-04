@@ -33,22 +33,28 @@
 #include "core/GP_ProgressCallback.h"
 
 /*
- * Opens up file and checks signature. Upon successful return the file
- * possition would be set to eight bytes (exactly after the PNG signature).
+ * Opens up file and checks signature.
  */
 GP_RetCode GP_OpenJPG(const char *src_path, FILE **f);
 
 /*
- * Reads PNG from an open FILE. Expects the file possition set after the eight
- * bytes PNG signature.
+ * Reads JPG from an open FILE. Expects the file possition set after the eight
+ * bytes JPG signature.
  */
 GP_RetCode GP_ReadJPG(FILE *f, GP_Context **res,
                       GP_ProgressCallback *callback);
 
 /*
- * Loads a PNG file into GP_Context. The Context is newly allocated.
+ * Loads a JPG file into GP_Context. The Context is newly allocated.
  */
 GP_RetCode GP_LoadJPG(const char *src_path, GP_Context **res,
                       GP_ProgressCallback *callback);
+
+/*
+ * Saves JPG to a file.
+ */
+GP_RetCode GP_SaveJPG(const char *dst_path, const GP_Context *src,
+                      GP_ProgressCallback *callback);
+
 
 #endif /* LOADERS_GP_JPG_H */
