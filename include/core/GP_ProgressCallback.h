@@ -22,14 +22,51 @@
 
 /*
 
-  Common filters typedefs and includes.
+  Progress callback implementation.
+
+  Progress callbacks serves two purposes
+
+  - ability to visibly show algorithm progress
+  - ability to correctly abort operation in the middle of processing
 
  */
 
-#ifndef FILTERS_GP_FILTER_H
-#define FILTERS_GP_FILTER_H
+#ifndef CORE_GP_PROGRESSCALLBACK_H
+#define CORE_GP_PROGRESSCALLBACK_H
 
-#include "core/GP_Context.h"
-#include "core/GP_ProgressCallback.h"
+/*
+ * Progress callback
+ *
+ * Non zero return value from callback will abort current operation
+ * free memory and return NULL from filter/loader...
+ */
+typedef struct GP_ProgressCallback {
+	float percentage;
+	int (*callback)(struct GP_ProgressCallback *self);
+	void *priv;
+} GP_ProgressCallback;
 
-#endif /* FILTERS_GP_FILTER_H */
+static inline int GP_ProgressCallbackReport(GP_ProgressCallback *callback,
+                                            unsigned int val, unsigned int max,
+					    unsigned int mul __attribute__((unused)))
+{
+	if (callback == NULL)
+		return 0;
+
+	if (val % 100)
+		return 0;
+
+	callback->percentage = 100.00 * val / max;
+	return callback->callback(callback);
+}
+
+static inline void GP_ProgressCallbackDone(GP_ProgressCallback *callback)
+{
+	if (callback == NULL)
+		return;
+	
+	callback->percentage = 100;
+	callback->callback(callback);
+}
+
+#endif /* CORE_GP_PROGRESSCALBACK_H */
