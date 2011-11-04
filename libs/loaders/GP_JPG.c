@@ -36,8 +36,8 @@
 
 #include <jpeglib.h>
 
-#include <GP_Context.h>
-#include <GP_Debug.h>
+#include "GP_JPG.h"
+#include "core/GP_Debug.h"
 
 GP_RetCode GP_OpenJPG(const char *src_path, FILE **f)
 {
@@ -87,7 +87,8 @@ static const char *get_colorspace(J_COLOR_SPACE color_space)
 	};
 }
 
-GP_RetCode GP_ReadJPG(FILE *f, GP_Context **res)
+GP_RetCode GP_ReadJPG(FILE *f, GP_Context **res,
+                      GP_ProgressCallback *callback)
 {
 	struct jpeg_decompress_struct cinfo;
 	struct my_jpg_err my_err;
@@ -163,17 +164,27 @@ GP_RetCode GP_ReadJPG(FILE *f, GP_Context **res)
 			uint8_t *pix = GP_PIXEL_ADDR(ret, i, y);
 			GP_SWAP(pix[0], pix[2]);
 		}
+	
+		if (GP_ProgressCallbackReport(callback, y, ret->h, ret->w)) {
+			GP_DEBUG(1, "Operation aborted");
+			jpeg_destroy_decompress(&cinfo);
+			fclose(f);
+			GP_ContextFree(ret);
+			return GP_EINTR;
+		}
 	}
 
 	jpeg_finish_decompress(&cinfo);
 	jpeg_destroy_decompress(&cinfo);
 	fclose(f);
 	*res = ret;
-	
+
+	GP_ProgressCallbackDone(callback);
 	return GP_ESUCCESS;
 }
 
-GP_RetCode GP_LoadJPG(const char *src_path, GP_Context **res)
+GP_RetCode GP_LoadJPG(const char *src_path, GP_Context **res,
+                      GP_ProgressCallback *callback)
 {
 	FILE *f;
 	GP_RetCode ret;
@@ -181,5 +192,5 @@ GP_RetCode GP_LoadJPG(const char *src_path, GP_Context **res)
 	if ((ret = GP_OpenJPG(src_path, &f)))
 		return ret;
 
-	return GP_ReadJPG(f, res);
+	return GP_ReadJPG(f, res, callback);
 }

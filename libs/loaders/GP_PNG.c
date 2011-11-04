@@ -34,8 +34,8 @@
 
 #include <png.h>
 
-#include <GP_Context.h>
-#include <GP_Debug.h>
+#include "GP_PNG.h"
+#include "core/GP_Debug.h"
 
 GP_RetCode GP_OpenPNG(const char *src_path, FILE **f)
 {
@@ -70,7 +70,8 @@ err:
 	return GP_EBADFILE;
 }
 
-GP_RetCode GP_ReadPNG(FILE *f, GP_Context **res)
+GP_RetCode GP_ReadPNG(FILE *f, GP_Context **res,
+                      GP_ProgressCallback *callback)
 {
 	png_structp png;
 	png_infop   png_info = NULL;
@@ -171,7 +172,18 @@ GP_RetCode GP_ReadPNG(FILE *f, GP_Context **res)
 	for (y = 0; y < h; y++) {
 		png_bytep addr = GP_PIXEL_ADDR(*res, 0, y);
 		png_read_rows(png, &addr, NULL, 1);
+
+		if (GP_ProgressCallbackReport(callback, y, h, w)) {
+			GP_DEBUG(1, "Operation aborted");
+			png_destroy_read_struct(&png, &png_info, NULL);
+			fclose(f);
+			GP_ContextFree(*res);
+			return GP_EINTR;
+		}
+			
 	}
+
+	GP_ProgressCallbackDone(callback);
 
 	ret = GP_ESUCCESS;
 err2:
@@ -181,7 +193,8 @@ err1:
 	return ret;
 }
 
-GP_RetCode GP_LoadPNG(const char *src_path, GP_Context **res)
+GP_RetCode GP_LoadPNG(const char *src_path, GP_Context **res,
+                      GP_ProgressCallback *callback)
 {
 	FILE *f;
 	GP_RetCode ret;
@@ -189,5 +202,5 @@ GP_RetCode GP_LoadPNG(const char *src_path, GP_Context **res)
 	if ((ret = GP_OpenPNG(src_path, &f)))
 		return ret;
 
-	return GP_ReadPNG(f, res);
+	return GP_ReadPNG(f, res, callback);
 }

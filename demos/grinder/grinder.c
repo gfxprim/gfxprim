@@ -549,7 +549,7 @@ int main(int argc, char *argv[])
 		snprintf(buf, sizeof(buf), "out_%i.ppm", i - optind + 1);
 		fprintf(stderr, "Processing '%s' -> '%s'\n", argv[i], buf);
 
-		if ((ret = GP_LoadImage(argv[i], &bitmap))) {
+		if ((ret = GP_LoadImage(argv[i], &bitmap, NULL))) {
 			fprintf(stderr, "Failed to load bitmap: %s\n",
 			                GP_RetCodeName(ret));
 			return 1;

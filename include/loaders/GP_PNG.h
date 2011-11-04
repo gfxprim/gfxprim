@@ -26,9 +26,10 @@
 
   */
 
-#ifndef GP_PNG_H
-#define GP_PNG_H
+#ifndef LOADERS_GP_PNG_H
+#define LOADERS_GP_PNG_H
 
+#include "core/GP_ProgressCallback.h"
 #include "core/GP_Context.h"
 
 /*
@@ -41,11 +42,13 @@ GP_RetCode GP_OpenPNG(const char *src_path, FILE **f);
  * Reads PNG from an open FILE. Expects the file possition set after the eight
  * bytes PNG signature.
  */
-GP_RetCode GP_ReadPNG(FILE *f, GP_Context **res);
+GP_RetCode GP_ReadPNG(FILE *f, GP_Context **res,
+                      GP_ProgressCallback *callback);
 
 /*
  * Loads a PNG file into GP_Context. The Context is newly allocated.
  */
-GP_RetCode GP_LoadPNG(const char *src_path, GP_Context **res);
+GP_RetCode GP_LoadPNG(const char *src_path, GP_Context **res,
+                      GP_ProgressCallback *callback);
 
 #endif /* GP_PNG_H */

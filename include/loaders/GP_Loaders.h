@@ -29,10 +29,11 @@
 
   */
 
-#ifndef GP_LOADERS_H
-#define GP_LOADERS_H
+#ifndef LOADERS_GP_LOADERS_H
+#define LOADERS_GP_LOADERS_H
 
 #include "core/GP_Context.h"
+#include "core/GP_ProgressCallback.h"
 
 #include "GP_PBM.h"
 #include "GP_PGM.h"
@@ -45,6 +46,7 @@
 /*
  * Tries to load image accordingly to extension.
  */
-GP_RetCode GP_LoadImage(const char *src_path, GP_Context **res);
+GP_RetCode GP_LoadImage(const char *src_path, GP_Context **res,
+                        GP_ProgressCallback *callback);
 
-#endif /* GP_LOADERS_H */
+#endif /* LOADERS_GP_LOADERS_H */

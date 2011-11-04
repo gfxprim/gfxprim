@@ -92,7 +92,7 @@ int main(int argc, char *argv[])
 
 	GP_RetCode ret;
 
-	if ((ret = GP_LoadImage(argv[1], &bitmap))) {
+	if ((ret = GP_LoadImage(argv[1], &bitmap, NULL))) {
 		fprintf(stderr, "Failed to load bitmap: %s\n", GP_RetCodeName(ret));
 		return 1;
 	}

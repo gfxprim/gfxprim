@@ -69,6 +69,7 @@ static float calc_img_size(uint32_t img_w, uint32_t img_h,
 static void *image_loader(void *ptr)
 {
 	struct loader_params *params = ptr;
+	GP_ProgressCallback callback = {.callback = image_loader_callback};
 
 	fprintf(stderr, "Loading '%s'\n", params->img_path);
 
@@ -83,7 +84,7 @@ static void *image_loader(void *ptr)
 
 	GP_Context *img = NULL;
 
-	if (GP_LoadImage(params->img_path, &img) != 0) {
+	if (GP_LoadImage(params->img_path, &img, &callback) != 0) {
 		GP_BoxCenteredText(&fb->context, NULL, 0, 0,
                                    fb->context.w, fb->context.h,
                                    "Failed to load image", white_pixel);
@@ -115,7 +116,6 @@ static void *image_loader(void *ptr)
 		img = tmp;
 	}
 	
-	GP_ProgressCallback callback = {.callback = image_loader_callback};
 	
 	GP_Context *ret;
 

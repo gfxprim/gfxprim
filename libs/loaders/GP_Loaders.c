@@ -30,11 +30,12 @@
 #include <unistd.h>
 #include <errno.h>
 
-#include <GP_Debug.h>
+#include "core/GP_Debug.h"
 
 #include "GP_Loaders.h"
 
-GP_RetCode GP_LoadImage(const char *src_path, GP_Context **res)
+GP_RetCode GP_LoadImage(const char *src_path, GP_Context **res,
+                        GP_ProgressCallback *callback)
 {
 	int len = strlen(src_path);
 	GP_RetCode ret = GP_ENOIMPL;
@@ -54,13 +55,13 @@ GP_RetCode GP_LoadImage(const char *src_path, GP_Context **res)
 		case 'N':
 			if (src_path[len - 3] == 'p' ||
 			    src_path[len - 3] == 'P')
-				ret = GP_LoadPNG(src_path, res);
+				ret = GP_LoadPNG(src_path, res, callback);
 		break;
 		case 'p':
 		case 'P':
 			if (src_path[len - 3] == 'j' ||
 			    src_path[len - 3] == 'J')
-				ret = GP_LoadJPG(src_path, res);
+				ret = GP_LoadJPG(src_path, res, callback);
 		break;
 		case 'e':
 		case 'E':
@@ -68,7 +69,7 @@ GP_RetCode GP_LoadImage(const char *src_path, GP_Context **res)
 			     src_path[len - 3] == 'P') &&
 			    (src_path[len - 4] == 'j' ||
 			     src_path[len - 4] == 'J'))
-				ret = GP_LoadJPG(src_path, res);
+				ret = GP_LoadJPG(src_path, res, callback);
 		break;
 		}
 	break;
