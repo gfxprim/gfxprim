@@ -51,4 +51,10 @@ GP_RetCode GP_ReadPNG(FILE *f, GP_Context **res,
 GP_RetCode GP_LoadPNG(const char *src_path, GP_Context **res,
                       GP_ProgressCallback *callback);
 
-#endif /* GP_PNG_H */
+/*
+ * Saves PNG to a file.
+ */
+GP_RetCode GP_SavePNG(const char *dst_path, const GP_Context *src,
+                      GP_ProgressCallback *callback);
+
+#endif /* LOADERS_GP_PNG_H */
