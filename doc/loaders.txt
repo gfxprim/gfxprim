@@ -36,7 +36,7 @@ Opens file and checks for 'PNG' signature upon successful return (file could
 be opened, signature matches), the opened file is returned and the file
 possition points right after the end of the 'PNG' signature.
 
-This function is semi-internal, you should rather use functions listed bellow.
+This function is semi-internal, you should rather use functions listed below.
 
 [source,c]
 -------------------------------------------------------------------------------
@@ -71,7 +71,7 @@ GP_RetCode GP_SavePNG(const char *dst_path, GP_Context *src,
 -------------------------------------------------------------------------------
 
 Writes a Context into a 'PNG' image. If aborted by a callback, the opened file
-is closed and unliked before the call returns 'GP_EINTR'.
+is closed and removed before the call returns 'GP_EINTR'.
 
 Currently only 'RGB888' format is supported, you should convert the GP_Context
 to 'RGB888' before calling this function otherwise 'GP_ENOIMPL' will be
@@ -93,7 +93,7 @@ Opens file and checks for 'JPG' signature upon successful return (file could
 be opened, signature matches), the opened file is returned and the file
 possition points right after the end of the 'JPG' signature.
 
-This function is semi-internal, you should rather use functions listed bellow.
+This function is semi-internal, you should rather use functions listed below.
 
 'TODO:' This is not finished yet, currently this just opens and returns the
 file and the 'GP_ReadJPG()' reads the signature instead.
@@ -120,7 +120,7 @@ GP_RetCode GP_LoadJPG(const char *src_path, GP_Context **res,
 -------------------------------------------------------------------------------
 
 Same as abowe but takes path to the file as a parameter and check for the
-signature. Basically this combines both of the calls abowe.
+signature. Basically this combines both of the calls above.
 
 [source,c]
 -------------------------------------------------------------------------------
@@ -131,7 +131,7 @@ GP_RetCode GP_SaveJPG(const char *dst_path, GP_Context *src,
 -------------------------------------------------------------------------------
 
 Writes a Context into a 'JPG' image. If aborted by a callback, the opened file
-is closed and unliked before the call returns 'GP_EINTR'.
+is closed and removed before the call returns 'GP_EINTR'.
 
 The 'JPG' format could store either 'G8' or 'RGB888' pixeltypes and you must
 convert the context into one of them before this fucntions is called.

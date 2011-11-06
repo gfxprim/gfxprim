@@ -3,7 +3,7 @@ Context filters
 
 Pixel filters for 'GP_Context'.
 
-The context filter is basially an function that operates on context pixels.
+The context filter is basically a function that operates on context pixels.
 The result may be stored into a new bitmap or placed to bitmap passed as
 argument or, in some cases, the filter could be used 'in place' so the result
 is stored into the same context as the one passed as filter source.
@@ -11,7 +11,7 @@ is stored into the same context as the one passed as filter source.
 Common filter API
 ~~~~~~~~~~~~~~~~~
 
-The filters have, for your convinience unified API.
+For convenience, the filters API is unified:
 
 * Each filter returns pointer to destination context or 'NULL' on failure
 * The first two arguments are source and destination
@@ -19,13 +19,13 @@ The filters have, for your convinience unified API.
 
 Each filter function could be used in two modes.
 
-By passing non 'NULL' argument as filter destination user requests result to
+By passing non-'NULL' argument as filter destination user requests result to
 be stored into the destination context. The context must have correct pixel
 type and the context size must be big enough to store the result.
 
-For filters that works 'in-place' (which is explicitly said for each filter)
+For filters that work 'in-place' (which is explicitly said for each filter)
 the source and the destination could be the same context. Note that this is
-not expected to work if you do several overlaping subcontextes and pass these
+not expected to work if you do several overlaping subcontexts and pass these
 as arguments.
 
 When 'NULL' is passed as destination new context for storing the result is
@@ -148,7 +148,7 @@ Rotate context by 90 degrees.
 
 Doesn't work 'in-place' (yet).
 
-The destinatoin has to have the same pixel type and destination size must be
+The destination has to have the same pixel type and destination size must be
 big enough to fit rotated context (eg. W and H are swapped).
 
 [source,c]
@@ -252,8 +252,8 @@ destination defined by 'w' and 'h'.
 Nearest Neighbour Interpolation
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Fast, but produces "pixelated" images may however work better for images with
-sharp edges mostly consisting of big one colour regions (eg. doesn't blur the
+Fast, but produces "pixelated" images. May however work better for images with
+sharp edges mostly consisting of big one colour regions (it doesn't blur the
 result on upscaling).
 
 Bicubic Interpolation
@@ -261,7 +261,7 @@ Bicubic Interpolation
 
 Works well as is on image upscaling. To get decent result on downscaling
 low-pass filter (gaussian blur) must be used on original image before actuall
-downscaling. To do this reasonably fast we could cheat a little first resize
-big images a little without the low-past filter, then apply low-pass filter and
+downscaling. To do this reasonably fast we could cheat a little: first resize
+big images a little without the low-pass filter, then apply low-pass filter and
 finally downscale it to desired size.
 
