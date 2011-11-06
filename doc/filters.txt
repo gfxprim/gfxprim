@@ -8,31 +8,6 @@ The result may be stored into a new bitmap or placed to bitmap passed as
 argument or, in some cases, the filter could be used 'in place' so the result
 is stored into the same context as the one passed as filter source.
 
-Progress Callback
-~~~~~~~~~~~~~~~~~
-
-Progress callback is a structure that stores user-defined callback function,
-pointer to store location of user data and percentage.
-
-[source,c]
--------------------------------------------------------------------------------
-typdedef struct GP_ProgressCallback {
-	float percentage;
-	int (*callback)(struct GP_ProgressCallback *self);
-	void *priv;
-} GP_ProgressCallback;
--------------------------------------------------------------------------------
-
-If non 'NULL' progress callback structure is passed to a filter function, the
-callback function is periodically called and the percentage is updated.
-
-The return value from callback could abort the filter execution. If non zero
-value is returned the filter is aborted, all memory freed etc. and the filter
-either returns 'NULL' if pointer is returned or 'GP_EINTR' in case filter
-returns 'GP_RetCode'.
-
-The callback, if supported, is the last parameter of the filter function.
-
 Common filter API
 ~~~~~~~~~~~~~~~~~
 

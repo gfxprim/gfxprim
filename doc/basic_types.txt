@@ -19,7 +19,8 @@ typedef enum GP_RetCode {
         GP_EBADFILE,            /* error in file, or bad file format */
         GP_ENOENT,              /* no such file or another object */
         GP_ENOMEM,              /* not enough memory */
-        GP_EMAX,
+        GP_EINTR,               /* interrupted by a callback */
+	GP_EMAX,
 } GP_RetCode;
 --------------------------------------------------------------------------------
 
@@ -34,7 +35,6 @@ Coord and Size
 ~~~~~~~~~~~~~~
 For drawing API there are two integer types defined the 'GP_Coord' for
 coordinates and 'GP_Size' for size, length or so.
-
 
 Color and pixel types
 ~~~~~~~~~~~~~~~~~~~~~
@@ -58,6 +58,7 @@ typedef enum GP_Color {
         GP_COL_INVALID = -1,
         GP_COL_BLACK,
 	...
+	GP_COL_MAX,
 } GP_Color;
 --------------------------------------------------------------------------------
 
@@ -66,15 +67,62 @@ successful match and conversion and false otherwise.
 
 [source,c]
 --------------------------------------------------------------------------------
-#include <core/GP_Color.h>
+#include <GP_Color.h>
 
-GP_Pixel GP_ColorToPixel(GP_Context *context, GP_Color color);
+GP_Pixel GP_ColorToPixel(GP_Color color, GP_PixelType pixel_type);
+GP_Pixel GP_ColorToContextPixel(GP_Color color, GP_Context *context);
 
 GP_Color GP_ColorNameToColor(const char *color_name);
-
 const char *GP_ColorToColorName(GP_Color color);
 
-bool GP_ColorNameToPixel(GP_Context *context, const char *color_name,
+bool GP_ColorNameToPixel(const char *color_name, GP_PixelType pixel_type,
                          GP_Pixel *pixel);
+bool GP_ColorNameToContextPixel(const char *color_name, GP_Context *context,
+                                GP_Pixel *pixel);
 --------------------------------------------------------------------------------
+
+Functions to convert color to pixel and color to context pixel. The last two
+returns true if color with such name was found.
+
+[source,c]
+--------------------------------------------------------------------------------
+#include <GP_Color.h>
+
+void GP_ColorLoadPixels(GP_Pixel pixels[], GP_PixelType pixel_type);
+void GP_ColorLoadContextPixels(GP_Pixel pixels[], GP_Context *context);
+--------------------------------------------------------------------------------
+
+Loads array of 'GP_Pixel' of size 'GP_COL_MAX', the array is then used with
+the GP_Color enum as 'pixels[GP_COL_BLACK]'.
+
+Progress Callback
+~~~~~~~~~~~~~~~~~
+
+Progress callback is a structure that stores user-defined callback function,
+pointer to store location of user data and percentage.
+
+It is passed as last parameter to functions that could take some time to
+complete and adds capability to track the operation progress as well as to
+abort the operation.
+
+Currently it's used for filters and loaders.
+
+[source,c]
+-------------------------------------------------------------------------------
+typdedef struct GP_ProgressCallback {
+	float percentage;
+	int (*callback)(struct GP_ProgressCallback *self);
+	void *priv;
+} GP_ProgressCallback;
+-------------------------------------------------------------------------------
+
+If non 'NULL' progress callback structure is passed to a function, the
+callback function is periodically called and the percentage is updated.
+
+The return value from callback could abort the function execution. If non zero
+value is returned the filter is aborted, all memory freed etc. and the
+function either returns 'NULL' if pointer is returned or 'GP_EINTR' in case
+filter returns 'GP_RetCode'.
+
+The callback, if supported, is the last parameter of a function.
 
