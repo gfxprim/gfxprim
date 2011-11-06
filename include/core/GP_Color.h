@@ -94,11 +94,11 @@ bool GP_ColorNameToPixel(const char *color_name, GP_PixelType pixel_type,
  * 
  * Returns true if conversion was successful false otherwise.
  */
-static inline bool GP_ColorNameContextToPixel(const char *color_name,
-                                               GP_PixelType pixel_type,
-                                               GP_Pixel *pixel)
+static inline bool GP_ColorNameToContextPixel(const char *color_name,
+                                              GP_Context *context,
+                                              GP_Pixel *pixel)
 {
-	return GP_ColorNameToPixel(color_name, pixel_type, pixel);
+	return GP_ColorNameToPixel(color_name, context->pixel_type, pixel);
 }
 
 /*
