@@ -117,6 +117,11 @@ GP_Context *GP_ContextConvert(const GP_Context *src, GP_Context *dst,
 
 		if (ret == NULL)
 			return NULL;
+	} else {
+		GP_ASSERT(dst->pixel_type == dst_pixel_type,
+			  "Destination pixel type doesn't match");
+		GP_ASSERT(src->w <= dst->w && src->h <= dst->h,
+			  "Destination is not big enough");
 	}
 
 	GP_Blit_Naive(src, 0, 0, src->w, src->h, ret, 0, 0);
