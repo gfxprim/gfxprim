@@ -361,16 +361,48 @@ static GP_RetCode blur(GP_Context **c, const char *params)
 
 /* dithering */
 
+//TODO: this should be generated
+static const char *dither_formats[] = {
+	"g1",
+	"g2",
+	"g4",
+	"g8",
+	"rgb333",
+	"rgb565",
+	"rgb666",
+};
+
+static const GP_PixelType dither_pixel_types[] = {
+	GP_PIXEL_G1,
+	GP_PIXEL_G2,
+	GP_PIXEL_G4,
+	GP_PIXEL_G8,
+	GP_PIXEL_xRGB7333,
+	GP_PIXEL_RGB565,
+	GP_PIXEL_RGB666,
+};
+
 static struct param dither_params[] = {
+	{"format", PARAM_ENUM, "pixel type to be used", dither_formats, NULL},
 	{NULL,  0, NULL, NULL, NULL}
 };
 
 static GP_RetCode dither(GP_Context **c, const char *params)
 {
-	if (param_parse(params, dither_params, "dither", param_err))
-		return GP_EINVAL;
+	int fmt = -1;
 
-	GP_Context *bw = GP_FilterFloydSteinberg(*c, NULL, progress_callback);
+	if (param_parse(params, dither_params, "dither", param_err, &fmt))
+		return GP_EINVAL;
+	
+	if (fmt == -1) {
+		print_error("dither: invalid format or format param missing");
+		return GP_EINVAL;
+	}
+
+	GP_Context *bw;
+	bw = GP_FilterFloydSteinberg_from_RGB888(*c, NULL,
+	                                         dither_pixel_types[fmt],
+						 progress_callback);
 
 	//TODO: so far we convert the context back to RGB888
 	//(so we can do further work with it)

@@ -76,6 +76,14 @@ config = GfxPrimConfig(
 	  ('R', 12, 6),
 	  ('G', 6, 6),
 	  ('B', 0, 6)]),
+     
+      #
+      # Added for dithering tests
+      #
+      PixelType(name='xRGB7333', pixelsize=PS_16BPP, chanslist=[
+	  ('R', 6, 3),
+	  ('G', 3, 3),
+	  ('B', 0, 3)]),
       #
       # Palette types
       #

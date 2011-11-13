@@ -32,9 +32,31 @@
 #include "GP_Filter.h"
 
 /*
- * Experimental Floyd Steinberg that coverts any pixel type to G1
+ * Floyd Steinberg
  */
-GP_Context *GP_FilterFloydSteinberg(const GP_Context *src, GP_Context *dst,
-                                    GP_ProgressCallback *callback);
+GP_Context *GP_FilterFloydSteinberg_to_G1(const GP_Context *src, GP_Context *dst,
+                                          GP_ProgressCallback *callback);
+
+/*
+ * Floyd Steinberg
+ */
+GP_Context *GP_FilterFloydSteinberg_from_RGB888(const GP_Context *src, GP_Context *dst,
+                                                GP_PixelType pixel_type,
+						GP_ProgressCallback *callback);
+
+/*
+ * Converts RGB888 to RGB or Grayscale bitmap. 
+ */
+int GP_FilterFloydSteinberg_RGB888_to_XXX_Raw(const GP_Context *src,
+                                              GP_Context *dst,
+                                              GP_ProgressCallback *callback);
+
+/*
+ * Converts any bitmap to 1-bit Grayscale.
+ */
+int GP_FilterFloydSteinberg_XXX_to_G1_Raw(const GP_Context *src,
+                                          GP_Context *dst,
+                                          GP_ProgressCallback *callback);
+
 
 #endif /* FILTERS_GP_DITHER_H */
