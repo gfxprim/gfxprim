@@ -94,7 +94,7 @@ GP_Context *GP_ContextAlloc(GP_Size w, GP_Size h, GP_PixelType type)
 	context->h = h;
 
 	context->pixel_type = type;
-	#warning Hmm, bit endianity..., Why isn't this settled by different pixel types?
+	#warning Hmm, bit endianity... Why isn't this settled by different pixel types?
 	context->bit_endian = 0;
 	
 	/* rotation and mirroring */
@@ -107,14 +107,19 @@ GP_Context *GP_ContextAlloc(GP_Size w, GP_Size h, GP_PixelType type)
 	return context;
 }
 
-GP_Context *GP_ContextConvert(const GP_Context *context, GP_PixelType res_type)
+GP_Context *GP_ContextConvert(const GP_Context *src, GP_Context *dst,
+                              GP_PixelType dst_pixel_type)
 {
-	GP_Context *ret = GP_ContextAlloc(context->w, context->h, res_type);
+	GP_Context *ret = dst;
+	
+	if (ret == NULL) {
+		ret = GP_ContextAlloc(src->w, src->h, dst_pixel_type);
 
-	if (ret == NULL)
-		return NULL;
+		if (ret == NULL)
+			return NULL;
+	}
 
-	GP_Blit_Naive(context, 0, 0, context->w, context->h, ret, 0, 0);
+	GP_Blit_Naive(src, 0, 0, src->w, src->h, ret, 0, 0);
 
 	return ret;
 }

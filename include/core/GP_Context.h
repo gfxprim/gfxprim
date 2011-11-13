@@ -120,7 +120,8 @@ GP_Context *GP_ContextSubContext(GP_Context *context, GP_Context *subcontext,
  * This is naive implementation that doesn't do any ditherings or error
  * diffusions.
  */
-GP_Context *GP_ContextConvert(const GP_Context *context, GP_PixelType res_type);
+GP_Context *GP_ContextConvert(const GP_Context *src, GP_Context *dst,
+                              GP_PixelType dst_pixel_type);
 
 /*
  * Free context.

@@ -326,6 +326,8 @@ static GP_RetCode invert(GP_Context **c, const char *params)
 	return GP_ESUCCESS;
 }
 
+/* blur */
+
 static struct param blur_params[] = {
 	{"sigma", PARAM_FLOAT, "sigma parameter, radii of blur (sets both)", NULL, NULL},
 	{"sigma_x", PARAM_FLOAT, "sigma parameter for horizontal direction", NULL, NULL},
