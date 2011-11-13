@@ -35,7 +35,7 @@ static const char *progress_prefix = NULL;
 
 static int show_progress(GP_ProgressCallback *self)
 {
-	fprintf(stderr, "\rFilter %s %3.2f%%",
+	fprintf(stderr, "\r%s %3.2f%%",
 	        progress_prefix, self->percentage);
 	
 	return 0;
@@ -502,8 +502,11 @@ static void apply_filters(GP_Context **src)
 	GP_RetCode ret;
 
 	for (i = 0; i < filter_cnt; i++) {
-		
-		progress_prefix = filters[i]->name;
+		char buf[255];
+
+		snprintf(buf, sizeof(buf), "Filter %s", filters[i]->name);
+
+		progress_prefix = buf;
 
 		if ((ret = filters[i]->apply(src, filter_params[i]))) {
 			fprintf(stderr, "Error: %s\n", GP_RetCodeName(ret));
@@ -606,11 +609,16 @@ int main(int argc, char *argv[])
 		snprintf(buf, sizeof(buf), "out_%i.ppm", i - optind + 1);
 		fprintf(stderr, "Processing '%s' -> '%s'\n", argv[i], buf);
 
-		if ((ret = GP_LoadImage(argv[i], &bitmap, NULL))) {
+		progress_prefix = "Loading image";
+
+		if ((ret = GP_LoadImage(argv[i], &bitmap, progress_callback))) {
 			fprintf(stderr, "Failed to load bitmap: %s\n",
 			                GP_RetCodeName(ret));
 			return 1;
 		}
+		
+		if (progress_callback != NULL)
+			fprintf(stderr, " done\n");
 
 		apply_filters(&bitmap);
 
