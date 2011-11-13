@@ -58,6 +58,7 @@ GP_Context *GP_ContextCopy(const GP_Context *src, int flag)
 	new->h = src->h;
 
 	new->pixel_type = src->pixel_type;
+	new->bit_endian = src->bit_endian;
 
 	/* rotation and mirroring */
 	new->axes_swap = src->axes_swap;
@@ -93,6 +94,8 @@ GP_Context *GP_ContextAlloc(GP_Size w, GP_Size h, GP_PixelType type)
 	context->h = h;
 
 	context->pixel_type = type;
+	#warning Hmm, bit endianity..., Why isn't this settled by different pixel types?
+	context->bit_endian = 0;
 	
 	/* rotation and mirroring */
 	context->axes_swap = 0;
@@ -152,6 +155,7 @@ GP_Context *GP_ContextSubContext(GP_Context *context, GP_Context *subcontext,
 	ret->h = h;
 
 	ret->pixel_type = context->pixel_type;
+	ret->bit_endian = context->bit_endian;
 
 	/* rotation and mirroring */
 	ret->axes_swap = context->axes_swap;
