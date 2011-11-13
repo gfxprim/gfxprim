@@ -359,6 +359,28 @@ static GP_RetCode blur(GP_Context **c, const char *params)
 	return GP_ESUCCESS;
 }
 
+/* dithering */
+
+static struct param dither_params[] = {
+	{NULL,  0, NULL, NULL, NULL}
+};
+
+static GP_RetCode dither(GP_Context **c, const char *params)
+{
+	if (param_parse(params, dither_params, "dither", param_err))
+		return GP_EINVAL;
+
+	GP_Context *bw = GP_FilterFloydSteinberg(*c, NULL, progress_callback);
+
+	//TODO: so far we convert the context back to RGB888
+	//(so we can do further work with it)
+	GP_ContextConvert(bw, *c, (*c)->pixel_type);
+
+	GP_ContextFree(bw);
+
+	return GP_ESUCCESS;
+}
+
 /* filters */
 
 struct filter {
@@ -377,6 +399,7 @@ static struct filter filter_table[] = {
 	{"contrast", "alter image contrast", contrast_params, contrast},
 	{"invert",   "inverts image", invert_params, invert},
 	{"blur",     "gaussian blur", blur_params, blur},
+	{"dither",   "dithers bitmap", dither_params, dither},
 	{NULL, NULL, NULL, NULL}
 };
 

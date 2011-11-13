@@ -16,35 +16,25 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2010 Jiri "BlueBear" Dluhos                            *
- *                         <jiri.bluebear.dluhos@gmail.com>                  *
- *                                                                           *
  * Copyright (C) 2009-2011 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
 /*
 
-  GP_Context filters.
+  Dithering algorithms.
 
  */
 
-#ifndef GP_FILTERS_H
-#define GP_FILTERS_H
+#ifndef FILTERS_GP_DITHER_H
+#define FILTERS_GP_DITHER_H
 
-/* Image rotations (90 180 270 grads) and mirroring */
-#include "filters/GP_Rotate.h"
+#include "GP_Filter.h"
 
-/* Point filters, brightness, contrast ... */
-#include "filters/GP_Point.h"
+/*
+ * Experimental Floyd Steinberg that coverts any pixel type to G1
+ */
+GP_Context *GP_FilterFloydSteinberg(const GP_Context *src, GP_Context *dst,
+                                    GP_ProgressCallback *callback);
 
-/* Linear convolution based filters (mostly blurs) */
-#include "filters/GP_Linear.h"
-
-/* Image scaling (resampling) */
-#include "filters/GP_Resize.h"
-
-/* Bitmap dithering */
-#include "filters/GP_Dither.h"
-
-#endif /* GP_FILTERS_H */
+#endif /* FILTERS_GP_DITHER_H */
