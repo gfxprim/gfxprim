@@ -24,9 +24,9 @@
  *****************************************************************************/
 
 #include "GP_Backend.h"
-#include "config.h"
+#include "../../config.h"
 
-#ifdef GP_HAVE_SDL
+#ifdef HAVE_LIBSDL
 
 #include <dlfcn.h>
 #include <SDL/SDL.h>
@@ -160,4 +160,4 @@ struct GP_Backend GP_SDL_backend = {
 	.get_event_fn = GP_SDL_GetEventFn,
 };
 
-#endif /* GP_HAVE_SDL */
+#endif /* HAVE_LIBSDL */

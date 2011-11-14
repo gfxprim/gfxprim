@@ -25,7 +25,7 @@
 
 #include "core/GP_Core.h"
 #include "GP_Backend.h"
-#include "config.h"
+#include "../../config.h"
 
 #include <string.h>
 
@@ -34,7 +34,7 @@
  */
 static struct GP_Backend *current_backend = NULL;
 
-#ifdef GP_HAVE_SDL
+#ifdef HAVE_LIBSDL
 
 extern struct GP_Backend GP_SDL_backend;
 
@@ -45,7 +45,7 @@ struct GP_Backend *GP_InitBackend(const char *name)
 	if (current_backend)
 		return current_backend;
 
-#ifdef GP_HAVE_SDL
+#ifdef HAVE_LIBSDL
 
 	if (!name || strcasecmp(name, "sdl") == 0) {
 		current_backend = GP_SDL_backend.init_fn();

@@ -148,6 +148,9 @@ if __name__ ==  '__main__':
 	l = libraries([["libpng", 
                         "Portable Network Graphics Library",
 	                [header_exists, "png.h"]],
+                       ["libsdl",
+	                "Simple Direct Media Layer",
+	                [header_exists, "SDL/SDL.h"]],
                        ["jpeg",
 	                "Library to load, handle and manipulate images in the JPEG format",
 	                [header_exists, "jpeglib.h"]]], cfg)
