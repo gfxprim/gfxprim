@@ -23,7 +23,7 @@ def header_exists(cfg, filename):
 def c_try_compile(cfg, code, msg):
 	sys.stderr.write(msg)
 
-	ret = os.system("echo '{0}' | {1} -x c -o /dev/null - &>/dev/null".format(code, cfg["CC"][0]))
+	ret = os.system("echo '{0}' | {1} -x c -o /dev/null - > /dev/null 2>&1".format(code, cfg["CC"][0]))
 	
 	if ret:
 		sys.stderr.write("No\n")
@@ -39,7 +39,7 @@ def c_compiler_exists(cfg):
 def python_module_installed(cfg, module):
 	sys.stderr.write("Checking for python module {0} ... ".format(module))
 
-	ret = os.system("echo 'import {0}' | {1}".format(module, cfg['PYTHON_BIN'][0]))
+	ret = os.system("echo 'import {0}' | {1} > /dev/null 2>&1".format(module, cfg['PYTHON_BIN'][0]))
 
 	if ret:
 		sys.stderr.write('No\n')
