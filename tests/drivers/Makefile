@@ -1,17 +1,10 @@
-LDFLAGS=-L../../build/ -lGP -lpng -ldl -ljpeg -lm
-INCLUDE=-I../../include
-# Some warnings are triggered only with -O2
-# thuss added here
-CFLAGS=$(INCLUDE) -ggdb -W -Wall -O2
-SOURCES=$(wildcard *.c)
-TESTS=$(SOURCES:.c=)
+TOPDIR=../..
 
-all: $(TESTS)
+CSOURCES=$(shell echo *.c)
 
-%: %.c
-	$(CC) $(CFLAGS) $(LDFLAGS) $(LIBRARY) $^ -o $@
+LDLIBS+=-lGP -lGP_SDL -lSDL -L$(TOPDIR)/build/
 
-clean:
-	rm -f *.o
-	rm -f $(TESTS)
+APPS=$(CSOURCES:.c=)
 
+include $(TOPDIR)/include.mk
+include $(TOPDIR)/app.mk
