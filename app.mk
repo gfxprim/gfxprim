@@ -2,7 +2,7 @@ ifndef APPS
 $(error APPS not defined, fix your library Makefile)
 endif
 
-LDFLAGS+=-lpng -ljpeg
+LDLIBS+=-lpng -ljpeg -lm -ldl
 
 all: $(APPS)
 

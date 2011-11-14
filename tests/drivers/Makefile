@@ -1,4 +1,4 @@
-LDFLAGS=-L../../build/ -lGP -lpng -ldl -ljpeg
+LDFLAGS=-L../../build/ -lGP -lpng -ldl -ljpeg -lm
 INCLUDE=-I../../include
 # Some warnings are triggered only with -O2
 # thuss added here
