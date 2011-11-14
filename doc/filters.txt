@@ -265,3 +265,71 @@ downscaling. To do this reasonably fast we could cheat a little: first resize
 big images a little without the low-pass filter, then apply low-pass filter and
 finally downscale it to desired size.
 
+Dithering
+~~~~~~~~~
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <GP_Filters.h>
+
+GP_Context *GP_FilterFloydSteinberg_from_RGB888(const GP_Context *src,
+                                                GP_Context *dst,
+                                                GP_PixelType dst_pixel_type,
+                                                GP_ProgressCallback *callback);
+-------------------------------------------------------------------------------
+
+Floyd-Steinberg dithering the source context must be RGB888 and the
+dst_pixel_type may either be RGB or Grayscale.
+
+Doesn't work 'in-place' as the result has different pixel type.
+
+The error is distributed to neighbour pixels as follows:
+
+[width="10%"]
+|===================
+|      |   X  | 7/16
+| 3/16 | 5/16 | 1/16
+|===================
+
+And is throwed away at the image borders.
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <GP_Filters.h>
+
+GP_Context *GP_FilterFloydSteinberg_to_G1(const GP_Context *src,
+                                          GP_Context *dst,
+                                          GP_ProgressCallback *callback);
+-------------------------------------------------------------------------------
+
+Same as above but the source is any pixel type and the result is stored into
+1-bit Grayscale.
+
+Example Images
+^^^^^^^^^^^^^^
+All following images were generated using 'grinder'.
+(Click for bigger size)
+
+.Original Image; 1-bit, 2-bit, 4-bit Grayscale; 1-bit, 2-bit, 3-bit RGB
+image:images/dither/lenna_small.png[
+	"Original Image", 
+	link="images/dither/lenna.png"]
+image:images/dither/lenna_G1_small.png[
+	"1-bit Grayscale",
+	link="images/dither/lenna_G1.png"]
+image:images/dither/lenna_G2_small.png[
+	"2-bit Grayscale",
+	link="images/dither/lenna_G2.png"]
+image:images/dither/lenna_G4_small.png[
+	"4-bit Grayscale",
+	link="images/dither/lenna_G4.png"]
+image:images/dither/lenna_RGB111_small.png[
+	"1-bit RGB",
+	link="images/dither/lenna_RGB111.png"]
+image:images/dither/lenna_RGB222_small.png[
+	"2-bit RGB",
+	link="images/dither/lenna_RGB222.png"]
+image:images/dither/lenna_RGB333_small.png[
+	"3-bit RGB",
+	link="images/dither/lenna_RGB333.png"]
+
