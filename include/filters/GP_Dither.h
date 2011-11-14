@@ -34,14 +34,16 @@
 /*
  * Floyd Steinberg
  */
-GP_Context *GP_FilterFloydSteinberg_to_G1(const GP_Context *src, GP_Context *dst,
+GP_Context *GP_FilterFloydSteinberg_to_G1(const GP_Context *src,
+                                          GP_Context *dst,
                                           GP_ProgressCallback *callback);
 
 /*
  * Floyd Steinberg
  */
-GP_Context *GP_FilterFloydSteinberg_from_RGB888(const GP_Context *src, GP_Context *dst,
-                                                GP_PixelType pixel_type,
+GP_Context *GP_FilterFloydSteinberg_from_RGB888(const GP_Context *src,
+                                                GP_Context *dst,
+                                                GP_PixelType dst_pixel_type,
 						GP_ProgressCallback *callback);
 
 /*

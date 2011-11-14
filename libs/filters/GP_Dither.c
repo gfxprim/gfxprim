@@ -48,7 +48,8 @@ int GP_FilterFloydSteinberg_to_G1_Raw(const GP_Context *src, GP_Context *dst,
 	for (y = 0; y < (GP_Coord)src->h; y++) {
 		for (x = 0; x < (GP_Coord)src->w; x++) { 
 			GP_Pixel pix = GP_GetPixel(src, x, y);
-			float val = GP_ConvertPixel(pix, src->pixel_type, GP_PIXEL_G8);
+			float val = GP_ConvertPixel(pix, src->pixel_type,
+			                            GP_PIXEL_G8);
 
 			val += errors[y%2][x];
 			
@@ -84,7 +85,8 @@ int GP_FilterFloydSteinberg_to_G1_Raw(const GP_Context *src, GP_Context *dst,
 	return 0;
 }
 
-GP_Context *GP_FilterFloydSteinberg_to_G1(const GP_Context *src, GP_Context *dst,
+GP_Context *GP_FilterFloydSteinberg_to_G1(const GP_Context *src,
+                                          GP_Context *dst,
                                           GP_ProgressCallback *callback)
 {
 	GP_Context *ret = dst;
@@ -107,7 +109,8 @@ GP_Context *GP_FilterFloydSteinberg_to_G1(const GP_Context *src, GP_Context *dst
 	return ret;
 }
 
-GP_Context *GP_FilterFloydSteinberg_from_RGB888(const GP_Context *src, GP_Context *dst,
+GP_Context *GP_FilterFloydSteinberg_from_RGB888(const GP_Context *src,
+                                                GP_Context *dst,
                                                 GP_PixelType pixel_type,
                                                 GP_ProgressCallback *callback)
 {
