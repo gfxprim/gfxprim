@@ -1,12 +1,9 @@
-CFLAGS+=-W -Wall -Wextra -fPIC -O2
+include $(TOPDIR)/config.gen.mk
 CFLAGS+=-I$(TOPDIR)/include/
-LDLIBS+=-ldl
 
 # path to local module directory
 PYLIBSDIR=$(TOPDIR)/pylib
 
-# Python binary/version
-PYTHON_BIN=python
 # To test with other python versions (example):
 #PYTHON_BIN=${TOPDIR}/virtualpy2.4/bin/python
 

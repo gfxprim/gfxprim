@@ -17,8 +17,10 @@ build:
 
 clean:
 ifdef VERBOSE
+	rm config.h config.gen.mk 
 	$(MAKE) -C build clean
 else
+	@rm config.h config.gen.mk 
 	@echo "/build"
 	@$(MAKE) --no-print-directory -C build clean
 endif

@@ -1,0 +1,190 @@
+#!/usr/bin/env python
+#
+# This is simple script to detect libraries and configure
+# standard features.
+#
+import os
+import sys
+from optparse import OptionParser
+
+def header_exists(cfg, filename):
+	fpath = cfg['include_path'][0] + '/' + filename
+	
+	sys.stderr.write("Checking for '{0}' ... ".format(fpath))
+	
+	try:
+		st = os.stat(fpath)
+		sys.stderr.write("Yes\n")
+		return True
+	except os.error:
+		sys.stderr.write("No\n")
+		return False
+
+def c_try_compile(cfg, code, msg):
+	sys.stderr.write(msg)
+
+	ret = os.system("echo '{0}' | {1} -x c -o /dev/null - &>/dev/null".format(code, cfg["CC"][0]))
+	
+	if ret:
+		sys.stderr.write("No\n")
+		return False
+	else:
+		sys.stderr.write("Yes\n")
+		return True
+
+def c_compiler_exists(cfg):
+	return c_try_compile(cfg, "int main(void) { return 0; }",
+	                     "Checking for working compiler ({0}) ... ".format(cfg["CC"][0]))
+
+def python_module_installed(cfg, module):
+	sys.stderr.write("Checking for python module {0} ... ".format(module))
+
+	ret = os.system("echo 'import {0}' | {1}".format(module, cfg['PYTHON_BIN'][0]))
+
+	if ret:
+		sys.stderr.write('No\n')
+		return False
+	else:
+		sys.stderr.write('Yes\n')
+		return True
+
+#
+# Library checking api
+#
+class libraries:
+	def __init__(self, libraries, cfg):
+		self.libraries = libraries
+		self.cfg = cfg;
+		# Create dictionary for check results
+		self.results = dict()
+	#
+	# Print summary
+	#
+	def print_summary(self):
+		sys.stderr.write("Libraries to link against\n")
+		sys.stderr.write("-------------------------\n")
+		
+		for i in self.libraries:
+			sys.stderr.write("{0:10}".format(i[0]))
+
+			if (self.results[i[0]]):
+				sys.stderr.write(" : Enabled\n")
+			else:
+				sys.stderr.write(" : Disabled\n")
+
+			sys.stderr.write("            - {0}\n\n".format(i[1]))
+	#
+	# Enable/Disable library
+	#
+	def set(self, name, val):
+		if name not in map(lambda s: s[0], self.libraries):
+			sys.stderr.write("ERROR: Invalid library '{0}'\n".format(name))
+			exit(1)
+		else:
+			self.results[name] = val
+	#
+	# Calls a function on arguments, all is stored in array if
+	# not set previously
+	# (I know this smells like a lisp, but I can't help myself)
+	#
+	def check(self):
+		sys.stderr.write("Checking for libraries\n")
+		sys.stderr.write("----------------------\n")
+		for i in self.libraries:
+			if i[0] not in self.results:
+				self.results[i[0]] = i[2][0](self.cfg, *i[2][1:])
+		sys.stderr.write("\n")
+	#
+	# Writes '#define HAVE_XXX_H' into passed file
+	#
+	def write(self, f):
+		for i in self.libraries:
+			f.write("/*\n * {0}\n */\n".format(i[1]))
+			if self.results[i[0]]:
+				f.write("#define HAVE_{0}\n".format(i[0].upper()))
+			else:
+				f.write("//#define HAVE_{0}\n".format(i[0].upper()))
+			f.write("\n")
+
+def basic_checks(cfg):
+	sys.stderr.write("Basic checks\n")
+	sys.stderr.write("------------\n")
+	if not c_compiler_exists(cfg):
+		exit(1)
+	if not python_module_installed(cfg, 'jinja2'):
+		exit(1)
+	sys.stderr.write("\n")
+
+#
+# Write configuration files
+#
+def write_config_h(cfg, libs):
+	f = open("config.h", "w")
+	f.write("#ifndef CONFIG_H\n#define CONFIG_H\n\n")
+	libs.write(f);
+	f.write("#endif /* CONFIG_H */\n");
+	sys.stderr.write("Config 'config.h' written\n")
+	f.close()
+
+def write_config_mk(cfg, libs):
+	f = open('config.gen.mk', 'w')
+	for i in cfg:
+		f.write("#{0}\n{1}={2}\n".format(cfg[i][1], i, cfg[i][0]))
+	f.close()
+	sys.stderr.write("Config 'config.gen.mk' written\n")
+
+if __name__ ==  '__main__':
+	#
+	# Dictionary for default configuration parameters
+	#
+	cfg = {'CC'          : ['gcc', 'Path/name of the C compiler'],
+	       'CFLAGS'      : ['-W -Wall -Wextra -fPIC -O2', 'C compiler flags'],
+	       'PYTHON_BIN'  : ['python', 'Path/name of python interpreter'],
+	       'include_path': ['/usr/include', 'Path to the system headers']}
+
+	#
+	# Library detection/enable disable
+	#
+	l = libraries([["libpng", 
+                        "Portable Network Graphics Library",
+	                [header_exists, "png.h"]],
+                       ["jpeg",
+	                "Library to load, handle and manipulate images in the JPEG format",
+	                [header_exists, "jpeglib.h"]]], cfg)
+	
+	parser = OptionParser();
+	
+	# Enable disable libraries for linking
+	parser.add_option("-e", "--enable", dest="enable", action="append",
+	                  help="force enable library linking", metavar="libfoo")
+	parser.add_option("-d", "--disable", dest="disable", action="append",
+	                  help="disable library linking", metavar="libfoo")
+
+	# Add cfg config options
+	for i in cfg:
+		parser.add_option("", "--"+i, dest=i, metavar=cfg[i][0], help=cfg[i][1])
+
+	(options, args) = parser.parse_args();
+
+	# 
+	# Enable/Disable libraries as user requested
+	# These are not checked later
+	# 
+	if options.enable:
+		for i in options.enable:
+			l.set(i, True);
+	if options.disable:
+		for i in options.disable:
+			l.set(i, False);
+
+	for i in cfg:
+		if getattr(options, i):
+			cfg[i][0] = getattr(options, i)
+
+	basic_checks(cfg);
+	
+	l.check()
+	l.print_summary()
+
+	write_config_h(cfg, l);
+	write_config_mk(cfg, l);
