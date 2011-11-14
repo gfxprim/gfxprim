@@ -17,12 +17,19 @@ build:
 
 clean:
 ifdef VERBOSE
-	rm config.h config.gen.mk 
 	$(MAKE) -C build clean
 else
-	@rm config.h config.gen.mk 
 	@echo "/build"
 	@$(MAKE) --no-print-directory -C build clean
+endif
+
+distclean:
+ifdef VERBOSE
+	rm config.h config.gen.mk
+	$(MAKE) clean
+else
+	@$(MAKE) clean
+	@rm config.h config.gen.mk 
 endif
 
 HEADER_LOC=/usr/include/
