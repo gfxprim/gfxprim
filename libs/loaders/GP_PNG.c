@@ -296,6 +296,7 @@ GP_RetCode GP_SavePNG(const char *dst_path, const GP_Context *src,
 		return GP_EBADFILE;
 	}
 
+	GP_ProgressCallbackDone(callback);
 	return GP_ESUCCESS;
 err2:
 	png_destroy_write_struct(&png, png_info == NULL ? NULL : &png_info);

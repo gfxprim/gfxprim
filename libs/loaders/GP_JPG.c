@@ -276,6 +276,7 @@ GP_RetCode GP_SaveJPG(const char *dst_path, const GP_Context *src,
 		return GP_EBADFILE;
 	}
 
+	GP_ProgressCallbackDone(callback);
 	return GP_ESUCCESS;
 //TODO: is cinfo allocated?
 err1:
