@@ -248,6 +248,12 @@ int set_enum(int *res, char *val, const char *enums[])
 	return 1;
 }
 
+int set_str(char **res, char *val)
+{
+	*res = val;
+	return 0;
+}
+
 #define CALL_ERR_CALLBACK(error, p, value, private) do {    \
 	int error_ret;                                      \
 	                                                    \
@@ -323,7 +329,11 @@ int param_parse(const char *params, const struct param *param_desc, void *priv,
 				}
 			break;
 			case PARAM_STR:
-				
+				if ((ret = set_str(arg, values[pos]))) {
+					CALL_ERR_CALLBACK(err, &param_desc[i],
+					                  values[pos], priv);
+					goto err;
+				}
 			break;
 			case PARAM_ENUM:
 				if ((ret = set_enum(arg, values[pos],

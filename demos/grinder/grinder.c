@@ -370,6 +370,7 @@ static const char *dither_formats[] = {
 	"rgb333",
 	"rgb565",
 	"rgb666",
+	NULL,
 };
 
 static const GP_PixelType dither_pixel_types[] = {
@@ -413,6 +414,54 @@ static GP_RetCode dither(GP_Context **c, const char *params)
 	return GP_ESUCCESS;
 }
 
+/* jpg save filter */
+
+static struct param save_jpg_params[] = {
+	{"file", PARAM_STR, "Filename to save the result", NULL, NULL},
+	{NULL,  0, NULL, NULL, NULL}
+};
+
+static GP_RetCode save_jpg(GP_Context **c, const char *params)
+{
+	char *file = NULL;
+
+	if (param_parse(params, save_jpg_params, "jpg", param_err, &file))
+		return GP_EINVAL;
+	
+	if (file == NULL) {
+		print_error("jpg: filename missing");
+		return GP_EINVAL;
+	}
+
+	GP_SaveJPG(file, *c, progress_callback);
+
+	return GP_ESUCCESS;
+}
+
+/* png save filter */
+
+static struct param save_png_params[] = {
+	{"file", PARAM_STR, "Filename to save the result", NULL, NULL},
+	{NULL,  0, NULL, NULL, NULL}
+};
+
+static GP_RetCode save_png(GP_Context **c, const char *params)
+{
+	char *file = NULL;
+
+	if (param_parse(params, save_png_params, "png", param_err, &file))
+		return GP_EINVAL;
+	
+	if (file == NULL) {
+		print_error("png: filename missing");
+		return GP_EINVAL;
+	}
+
+	GP_SavePNG(file, *c, progress_callback);
+
+	return GP_ESUCCESS;
+}
+
 /* filters */
 
 struct filter {
@@ -432,6 +481,8 @@ static struct filter filter_table[] = {
 	{"invert",   "inverts image", invert_params, invert},
 	{"blur",     "gaussian blur", blur_params, blur},
 	{"dither",   "dithers bitmap", dither_params, dither},
+	{"jpg",      "save jpg image", save_jpg_params, save_jpg},
+	{"png",      "save png image", save_png_params, save_png},
 	{NULL, NULL, NULL, NULL}
 };
 
