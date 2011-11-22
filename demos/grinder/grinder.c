@@ -265,15 +265,17 @@ static GP_RetCode mirror(GP_Context **c, const char *params)
 /* brightness filter */
 
 static struct param bright_params[] = {
-	{"inc", PARAM_INT, "brightness increment", NULL, NULL},
-	{NULL,  0,         NULL,                   NULL, NULL}
+	{"inc", PARAM_INT, "brightness increment",                NULL, NULL},
+	{"chann", PARAM_STR, "channel name {R, G, B, A, V, ...}", NULL, NULL},
+	{NULL,  0,         NULL,                                  NULL, NULL}
 };
 
 static GP_RetCode bright(GP_Context **c, const char *params)
 {
 	int bright = 0;
+	char *chann = NULL;
 
-	if (param_parse(params, bright_params, "bright", param_err, &bright))
+	if (param_parse(params, bright_params, "bright", param_err, &bright, &chann))
 		return GP_EINVAL;
 
 	if (bright == 0) {
@@ -282,7 +284,20 @@ static GP_RetCode bright(GP_Context **c, const char *params)
 	}
 
 	GP_FILTER_PARAMS((*c)->pixel_type, filter_params);
-	GP_FilterParamSetIntAll(filter_params, bright);
+	
+	if (chann == NULL) {
+		GP_FilterParamSetIntAll(filter_params, bright);
+	} else {
+		GP_FilterParam *param = GP_FilterParamChannel(filter_params, chann);
+	
+		if (param == NULL) {
+			print_error("bright: invalid channel name");
+			return GP_EINVAL;
+		}
+
+		GP_FilterParamSetIntAll(filter_params, 0);
+		param->val.i = bright;
+	}
 
 	GP_FilterBrightness(*c, *c, filter_params, progress_callback);
 
@@ -293,14 +308,16 @@ static GP_RetCode bright(GP_Context **c, const char *params)
 
 static struct param contrast_params[] = {
 	{"mul", PARAM_FLOAT, "contrast (1.5 = +50%, 0.5 = -50%)", NULL, NULL},
+	{"chann", PARAM_STR, "channel name {R, G, B, A, V, ...}", NULL, NULL},
 	{NULL,  0,           NULL,                    NULL, NULL}
 };
 
 static GP_RetCode contrast(GP_Context **c, const char *params)
 {
 	float mul = 0;
+	char *chann = NULL;
 
-	if (param_parse(params, contrast_params, "contrast", param_err, &mul))
+	if (param_parse(params, contrast_params, "contrast", param_err, &mul, &chann))
 		return GP_EINVAL;
 
 	if (mul <= 0) {
@@ -309,7 +326,20 @@ static GP_RetCode contrast(GP_Context **c, const char *params)
 	}
 	
 	GP_FILTER_PARAMS((*c)->pixel_type, filter_params);
-	GP_FilterParamSetFloatAll(filter_params, mul);
+	
+	if (chann == NULL) {
+		GP_FilterParamSetFloatAll(filter_params, mul);
+	} else {
+		GP_FilterParam *param = GP_FilterParamChannel(filter_params, chann);
+	
+		if (param == NULL) {
+			print_error("contrast: invalid channel name");
+			return GP_EINVAL;
+		}
+
+		GP_FilterParamSetFloatAll(filter_params, 1);
+		param->val.f = mul;
+	}
 
 	GP_FilterContrast(*c, *c, filter_params, progress_callback);
 
