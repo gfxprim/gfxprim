@@ -38,8 +38,9 @@ GP_Pixel GP_RandomColor(GP_PixelType type)
 void GP_RandomizeRect(GP_Context *context, GP_Coord x, GP_Coord y, GP_Size w, GP_Size h)
 {
 	GP_CHECK(context);
-	for (GP_Size i = 0; i < w; i++)
-		for (GP_Size j = 0; j < h; j++)
+	GP_Size i, j;
+	for (i = 0; i < w; i++)
+		for (j = 0; j < h; j++)
 			GP_PutPixel(context, i + x, j + y, GP_RandomColor(context->pixel_type));
 }
 
@@ -71,8 +72,9 @@ int GP_EqualRects(const GP_Context *c1, GP_Coord x1, GP_Coord y1, GP_Size w, GP_
 {
 	GP_CHECK(c1);
 	GP_CHECK(c2);
-	for (GP_Size i = 0; i < w; i++)
-		for (GP_Size j = 0; j < h; j++) {
+	GP_Size i, j;
+	for (i = 0; i < w; i++)
+		for (j = 0; j < h; j++) {
 			if (!GP_EqualColors(GP_GetPixel(c1, x1 + i, y1 + j), c1->pixel_type,
 			                    GP_GetPixel(c2, x2 + i, y2 + j), c2->pixel_type))
 				return 0;
