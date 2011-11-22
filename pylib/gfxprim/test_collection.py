@@ -40,7 +40,7 @@ def find_tests(fname, suites):
     name, args = find_GP_directive("GP_SUITE", suite_re, l, fname=fname, line=i)
     if name:
       if args:
-	log.warn("suite should have no arguments other than name.", fname, i)
+	log.warning("%s:%s: Suite should have no arguments other than name.", fname, i)
       suites.setdefault(name, [])
       suite = name
     # Look for test declaration
@@ -51,7 +51,7 @@ def find_tests(fname, suites):
 	test_suite = args['suite']
       if not test_suite:
 	test_suite = 'default'
-	log.warn("No suite defined before test %s, using %r." % (name, test_suite), fname, i)
+	log.warning("%s:%s: No suite defined before test %s, using %r.", fname, i, name, test_suite)
       args['name'] = name
       args['fname'] = fname
       args['line'] = i
@@ -68,9 +68,9 @@ def collect_suites(fdir):
   for fn in fnames:
     find_tests(os.path.join(fdir, fn), suites)
   if not fnames:
-    log.warn('No .test.c files found in "%s".', fdir)
+    log.warning('No .test.c files found in "%s".', fdir)
   if not suites:
-    log.warn('No suites found, generating an empty testsuite.')
+    log.warning('No suites found, generating an empty testsuite.')
   return suites
 
 
@@ -89,7 +89,7 @@ def find_GP_directive(name, regexp, l, fname='unknown', line=0):
 	  s = 'dict( ' + d[1].strip(" \t\n\"") + ' )'
 	  args = eval(s)
 	except:
-	  log.fatal("error parsing arguments: %r" % s, fname, line)
+	  log.fatal("%s:%s: error parsing arguments: %r", fname, line, s)
       return d[0].strip(), args
   return None, None
 

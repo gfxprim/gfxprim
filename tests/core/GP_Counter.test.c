@@ -28,7 +28,7 @@
 
 GP_SUITE(GP_Counter)
 
-GP_TEST(Smoke) 
+GP_TEST(Smoke)
 {
 	fail_unless(GP_CounterVal(NULL) == 0);
 	GP_IncCounter(NULL);
@@ -70,7 +70,8 @@ END_TEST
 GP_TEST(Overflow)
 {
 	char buf[8];
-	for (int i = 0; i < GP_COUNTER_MAX; i++) {
+	int i;
+	for (i = 0; i < GP_COUNTER_MAX; i++) {
 		sprintf(buf, "%d", i);
 		fail_if(GP_GetCounter(buf) == NULL);
 	}

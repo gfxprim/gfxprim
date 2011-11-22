@@ -65,7 +65,8 @@ int main(int argc, char *argv[])
 
 	SRunner *sr = srunner_create(NULL);
 
-	for (SuiteFactory **s = manual_suites; *s; s++) {
+	SuiteFactory **s;
+	for (s = manual_suites; *s; s++) {
 		srunner_add_suite(sr, (*s)());
 	}
 	GP_AddSuitesToSRunner(sr);
