@@ -49,7 +49,7 @@ static void dump_buffer(const char *name, char *buf, unsigned int buf_len)
 %% for offset in range(0, 4)
 %% for len    in range(0, 6)
 %% for aligment in [0, 1]
-GP_TEST(GP_WritePixel{{ "%i_%i_%i_%i"|format(pixelsize, offset, len, aligment) }}, {{ "\"offset=%i len=%i aligment=%i\""|format(offset, len, aligment) }})
+GP_TEST(GP_WritePixel{{ "%i_%i_%i_%i"|format(pixelsize, offset, len, aligment) }}, {{ "\"offset=%i, len=%i, aligment=%i,\""|format(offset, len, aligment) }})
 {
 	char write_buf[{{ 25 * pixelsize//8 }}] = {};
 	char gen_buf[{{ 25 * pixelsize//8 }}] = {};
