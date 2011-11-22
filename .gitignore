@@ -6,4 +6,5 @@
 *.swp
 libGP.so*
 libGP.a
-
+config.h
+config.gen.mk
