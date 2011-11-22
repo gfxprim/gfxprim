@@ -281,7 +281,10 @@ static GP_RetCode bright(GP_Context **c, const char *params)
 		return GP_EINVAL;
 	}
 
-	GP_FilterBrightness(*c, *c, bright, progress_callback);
+	GP_FILTER_PARAMS((*c)->pixel_type, filter_params);
+	GP_FilterParamSetIntAll(filter_params, bright);
+
+	GP_FilterBrightness(*c, *c, filter_params, progress_callback);
 
 	return GP_ESUCCESS;
 }
@@ -304,8 +307,11 @@ static GP_RetCode contrast(GP_Context **c, const char *params)
 		print_error("contrast: mul parameter must be >= 0");
 		return GP_EINVAL;
 	}
+	
+	GP_FILTER_PARAMS((*c)->pixel_type, filter_params);
+	GP_FilterParamSetFloatAll(filter_params, mul);
 
-	GP_FilterContrast(*c, *c, mul, progress_callback);
+	GP_FilterContrast(*c, *c, filter_params, progress_callback);
 
 	return GP_ESUCCESS;
 }

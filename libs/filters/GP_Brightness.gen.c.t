@@ -1,23 +1,32 @@
 %% extends "filter.point.c.t"
 
 %% block descr
-Brightness filters -- Increments all color channels by a fixed value.
+Brightness filters -- Increments color channel(s) by a fixed value.
 %% endblock
 
 %% block body
 
 {{ filter_include() }}
 
-%% call(ps) filter_per_pixel_size('Brightness', 'int32_t inc')
-pix = pix + inc;
-{{ filter_clamp_val('pix', ps.size) }}
+%% macro filter_op(chann_name, chann_size)
+{{ chann_name }} = {{ chann_name }} + {{ chann_name }}_i;
+{{ filter_clamp_val(chann_name, chann_size) }}
+%% endmacro
+
+/*
+ * Generated brightness filters.
+ */
+%% call(pt) filter_point_per_channel('Brightness', 'GP_FilterParam params[]', filter_op)
+{{ filter_params(pt, 'params', 'int32_t', 'i') }}
 %% endcall
 
-%% call(chan) filter_per_pixel_type('Brightness', 'int32_t inc')
-{{ chan[0] }} = {{ chan[0] }} + inc;
-{{ filter_clamp_val(chan[0], chan[2]) }} 
+/*
+ * Generated constrast filters for pixels with one channel.
+ */
+%% call(ps) filter_point_per_bpp('Brightness', 'GP_FilterParam params[]', filter_op)
+{{ filter_param(ps, 'params', 'int32_t', 'i') }}
 %% endcall
 
-{{ filter_functions('Brightness', 'int32_t inc', 'inc', "inc=%i") }}
+{{ filter_functions('Brightness', 'GP_FilterParam params[]', 'params') }}
 
 %% endblock body

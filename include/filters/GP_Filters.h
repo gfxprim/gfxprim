@@ -32,6 +32,9 @@
 #ifndef GP_FILTERS_H
 #define GP_FILTERS_H
 
+/* Filter per channel parameter passing interface */
+#include "filters/GP_FilterParam.h"
+
 /* Image rotations (90 180 270 grads) and mirroring */
 #include "filters/GP_Rotate.h"
 

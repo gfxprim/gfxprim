@@ -2,52 +2,50 @@
 
 {% macro maybe_opts(opts) %}{% if opts %}, {{ opts }}{% endif %}{% endmacro %}
 
+{% macro maybe_opts2(opts) %}{% if opts %}{{ opts }}, {% endif %}{% endmacro %}
+
 %% macro filter_include()
 #include "core/GP_Context.h"
 #include "core/GP_Pixel.h"
 #include "core/GP_GetPutPixel.h"
 #include "core/GP_Debug.h"
+#include "GP_Point.h"
 #include "GP_Filter.h"
 %% endmacro
 
 /*
- * Filter per pixel size, used for one channel images.
+ * Value clamping macro
  */
-%% macro filter_per_pixel_size(name, opts="")
-%% for ps in pixelsizes
-%% if ps.size <= 8 and ps.size > 1
-int GP_Filter{{ name }}_{{ ps.suffix }}(const GP_Context *src, GP_Context *dst{{ maybe_opts(opts) }},
-	GP_ProgressCallback *callback)
-{
-	uint32_t x, y;
+%% macro filter_clamp_val(var, size)
+			if ({{ var }} < 0)
+				{{ var }} = 0;
 
-	for (y = 0; y < src->h; y++) {
-		for (x = 0; x < src->w; x++) {
-			int32_t pix = GP_GetPixel_Raw_{{ ps.suffix }}(src, x, y);
-			{{ caller(ps) }}
-			GP_PutPixel_Raw_{{ ps.suffix }}(dst, x, y, pix);
-		}
-		
-		if (GP_ProgressCallbackReport(callback, y, src->h, src->w))
-			return 1;
-	}
+			if ({{ var }} > {{ 2 ** size - 1}})
+				{{ var }} = {{ 2 ** size - 1}};
+%% endmacro 
 
-	GP_ProgressCallbackDone(callback);
-	return 0;
-}
-%% endif
-%% endfor
+/*
+ * Load parameters from params structure into variables
+ */
+%% macro filter_params(pt, params, c_type, id)
+	GP_ASSERT(GP_FilterParamCheckPixelType({{ params }}, GP_PIXEL_{{ pt.name }}) == 0,
+	          "Invalid params channels for context pixel type");
+	
+	%% for chann in pt.chanslist
+	{{ c_type }} {{ chann[0] }}_{{ id }} = (GP_FilterParamChannel({{ params }}, "{{ chann[0] }}"))->val.{{ id }};
+	%% endfor
 %% endmacro
 
 /*
  * Filter per pixel type, used for images with more than one channel per pixel
  */
-%% macro filter_per_pixel_type(name, opts="")
+%% macro filter_point_per_channel(name, opts="", filter_op)
 %% for pt in pixeltypes
 %% if not pt.is_unknown() and len(pt.chanslist) > 1
-int GP_Filter{{ name }}_{{ pt.name }}(const GP_Context *src, GP_Context *dst{{ maybe_opts(opts) }},
-	GP_ProgressCallback *callback)
+int GP_Filter{{ name }}_{{ pt.name }}(const GP_Context *src, GP_Context *dst,
+	{{ maybe_opts2(opts) }}GP_ProgressCallback *callback)
 {
+{{ caller(pt) }}
 	uint32_t x, y;
 
 	for (y = 0; y < src->h; y++) {
@@ -58,11 +56,11 @@ int GP_Filter{{ name }}_{{ pt.name }}(const GP_Context *src, GP_Context *dst{{ m
 			%% endfor
 
 			%% for c in pt.chanslist
-			{{ caller(c) }}
+			{{ filter_op(c[0], c[2]) }}
 			%% endfor
 
 			pix = GP_Pixel_CREATE_{{ pt.name }}({{ pt.chanslist[0][0] }}{% for c in pt.chanslist[1:] %}, {{ c[0] }}{% endfor %});
-		
+
 			GP_PutPixel_Raw_{{ pt.pixelsize.suffix }}(dst, x, y, pix);
 		}
 		
@@ -79,15 +77,45 @@ int GP_Filter{{ name }}_{{ pt.name }}(const GP_Context *src, GP_Context *dst{{ m
 %% endmacro
 
 /*
- * Value clamping macro
+ * Load parameters from params structure into variable
  */
-%% macro filter_clamp_val(var, size)
-			if ({{ var }} < 0)
-				{{ var }} = 0;
+%% macro filter_param(ps, params, c_type, val)
+	GP_ASSERT(GP_FilterParamChannels({{ params }}) != 1,
+	          "Expected only one channel");
 
-			if ({{ var }} > {{ 2 ** size - 1}})
-				{{ var }} = {{ 2 ** size - 1}};
-%% endmacro 
+	{{ c_type }} pix_{{ val }} = params[0].val.{{ val }};
+%% endmacro
+
+/*
+ * Point filter per bpp (used for 1 channel pixels to save space).
+ */
+%% macro filter_point_per_bpp(name, opts="", filter_op)
+%% for ps in pixelsizes
+%% if ps.size <= 8 and ps.size > 1
+int GP_Filter{{ name }}_{{ ps.suffix }}(const GP_Context *src, GP_Context *dst,
+	{{ maybe_opts2(opts) }}GP_ProgressCallback *callback)
+{
+{{ caller(ps) }}
+	uint32_t x, y;
+
+	for (y = 0; y < src->h; y++) {
+		for (x = 0; x < src->w; x++) {
+			int32_t pix = GP_GetPixel_Raw_{{ ps.suffix }}(src, x, y);
+			{{ filter_op('pix', ps.size) }}
+			GP_PutPixel_Raw_{{ ps.suffix }}(dst, x, y, pix);
+		}
+		
+		if (GP_ProgressCallbackReport(callback, y, src->h, src->w))
+			return 1;
+	}
+
+	GP_ProgressCallbackDone(callback);
+	return 0;
+}
+
+%% endif
+%% endfor
+%% endmacro
 
 /*
  * Switch per pixel sizes or pixel types.
@@ -96,7 +124,7 @@ int GP_Filter{{ name }}_{{ pt.name }}(const GP_Context *src, GP_Context *dst{{ m
 int GP_Filter{{ name }}_Raw(const GP_Context *src, GP_Context *dst{{ maybe_opts(opts) }},
 	GP_ProgressCallback *callback)
 {
-	GP_DEBUG(1, "Running filter {{ name }} {{ fmt }}"{{ maybe_opts(params) }});
+	GP_DEBUG(1, "Running filter {{ name }}");
 
 	switch (src->pixel_type) {
 	%% for pt in pixeltypes
@@ -145,4 +173,3 @@ GP_Context *GP_Filter{{ name }}(const GP_Context *src, GP_Context *dst{{ maybe_o
 	return res;
 }
 %% endmacro
-
