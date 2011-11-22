@@ -23,6 +23,7 @@
 #include "GP_Tests.h"
 
 #include <GP_Common.h>
+#include <GP_GetSetBits.h>
 #include <unistd.h>
 
 /*
