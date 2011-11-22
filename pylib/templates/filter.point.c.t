@@ -27,12 +27,21 @@
 /*
  * Load parameters from params structure into variables
  */
-%% macro filter_params(pt, params, c_type, id)
+%% macro filter_params(pt, params, c_type, suffix, id)
 	GP_ASSERT(GP_FilterParamCheckPixelType({{ params }}, GP_PIXEL_{{ pt.name }}) == 0,
 	          "Invalid params channels for context pixel type");
 	
 	%% for chann in pt.chanslist
-	{{ c_type }} {{ chann[0] }}_{{ id }} = (GP_FilterParamChannel({{ params }}, "{{ chann[0] }}"))->val.{{ id }};
+	{{ c_type }}{{ chann[0] }}{{ suffix }} = (GP_FilterParamChannel({{ params }}, "{{ chann[0] }}"))->val.{{ id }};
+	%% endfor
+%% endmacro
+
+%% macro filter_params_raw(pt, params, suffix)
+	GP_ASSERT(GP_FilterParamCheckPixelType({{ params }}, GP_PIXEL_{{ pt.name }}) == 0,
+	          "Invalid params channels for context pixel type");
+	
+	%% for chann in pt.chanslist
+	GP_FilterParam *{{ chann[0] }}{{ suffix }} = GP_FilterParamChannel({{ params }}, "{{ chann[0] }}");
 	%% endfor
 %% endmacro
 
@@ -42,7 +51,7 @@
 %% macro filter_point_per_channel(name, opts="", filter_op)
 %% for pt in pixeltypes
 %% if not pt.is_unknown() and len(pt.chanslist) > 1
-int GP_Filter{{ name }}_{{ pt.name }}(const GP_Context *src, GP_Context *dst,
+static int GP_Filter{{ name }}_{{ pt.name }}(const GP_Context *src, GP_Context *dst,
 	{{ maybe_opts2(opts) }}GP_ProgressCallback *callback)
 {
 {{ caller(pt) }}
@@ -79,11 +88,18 @@ int GP_Filter{{ name }}_{{ pt.name }}(const GP_Context *src, GP_Context *dst,
 /*
  * Load parameters from params structure into variable
  */
-%% macro filter_param(ps, params, c_type, val)
+%% macro filter_param(ps, params, c_type, suffix, id)
 	GP_ASSERT(GP_FilterParamChannels({{ params }}) != 1,
 	          "Expected only one channel");
 
-	{{ c_type }} pix_{{ val }} = params[0].val.{{ val }};
+	{{ c_type }}pix{{ suffix }} = {{ params }}[0].val.{{ id }};
+%% endmacro
+
+%% macro filter_param_raw(ps, params, suffix)
+	GP_ASSERT(GP_FilterParamChannels({{ params }}) != 1,
+	          "Expected only one channel");
+
+	GP_FilterParam *pix{{ suffix }} = &{{ params }}[0];
 %% endmacro
 
 /*
@@ -92,7 +108,7 @@ int GP_Filter{{ name }}_{{ pt.name }}(const GP_Context *src, GP_Context *dst,
 %% macro filter_point_per_bpp(name, opts="", filter_op)
 %% for ps in pixelsizes
 %% if ps.size <= 8 and ps.size > 1
-int GP_Filter{{ name }}_{{ ps.suffix }}(const GP_Context *src, GP_Context *dst,
+static int GP_Filter{{ name }}_{{ ps.suffix }}(const GP_Context *src, GP_Context *dst,
 	{{ maybe_opts2(opts) }}GP_ProgressCallback *callback)
 {
 {{ caller(ps) }}
@@ -132,6 +148,7 @@ int GP_Filter{{ name }}_Raw(const GP_Context *src, GP_Context *dst{{ maybe_opts(
 		%% if pt.is_unknown() or pt.pixelsize.size < 2
 		return 1;
 		%% elif len(pt.chanslist) == 1:
+		//TODO: BITENDIAN
 		return GP_Filter{{ name }}_{{ pt.pixelsize.suffix }}(src, dst{{ maybe_opts(params) }}, callback);
 		%% else
 		return GP_Filter{{ name }}_{{ pt.name }}(src, dst{{ maybe_opts(params) }}, callback);

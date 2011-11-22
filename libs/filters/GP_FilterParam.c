@@ -123,3 +123,21 @@ void GP_FilterParamSetFloatAll(GP_FilterParam params[],
 	for (i = 0; params[i].channel_name[0] != '\0'; i++)
 		params[i].val.f = val;
 }
+
+void GP_FilterParamSetUIntAll(GP_FilterParam params[],
+                              uint32_t val)
+{
+	unsigned int i;
+
+	for (i = 0; params[i].channel_name[0] != '\0'; i++)
+		params[i].val.ui = val;
+}
+
+void GP_FilterParamSetPtrAll(GP_FilterParam params[],
+                             void *ptr)
+{
+	unsigned int i;
+
+	for (i = 0; params[i].channel_name[0] != '\0'; i++)
+		params[i].val.ptr = ptr;
+}

@@ -71,4 +71,17 @@ int GP_FilterInvert_Raw(const GP_Context *src, GP_Context *dst,
 GP_Context *GP_FilterInvert(const GP_Context *src, GP_Context *dst,
                             GP_ProgressCallback *callback);
 
+/*
+ * Generic slow point filter.
+ *
+ * The filter_callback[] is expected to be filled with pointers
+ * to functions of type uint32_t (*func)(uint32_t chan_val, uint8_t chan_size, GP_FilterParam *priv)
+ *
+ * The priv[] is free for your use and corresponding
+ */
+GP_Context *GP_FilterPoint(const GP_Context *src, GP_Context *dst,
+                           GP_FilterParam filter_callback[],
+			   GP_FilterParam priv[],
+			   GP_ProgressCallback *callback);
+
 #endif /* FILTERS_GP_POINT_H */

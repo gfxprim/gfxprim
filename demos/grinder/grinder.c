@@ -266,7 +266,7 @@ static GP_RetCode mirror(GP_Context **c, const char *params)
 
 static struct param bright_params[] = {
 	{"inc", PARAM_INT, "brightness increment",                NULL, NULL},
-	{"chann", PARAM_STR, "channel name {R, G, B, A, V, ...}", NULL, NULL},
+	{"chann", PARAM_STR, "Channel name {R, G, B, A, V, ...}", NULL, NULL},
 	{NULL,  0,         NULL,                                  NULL, NULL}
 };
 
@@ -291,7 +291,7 @@ static GP_RetCode bright(GP_Context **c, const char *params)
 		GP_FilterParam *param = GP_FilterParamChannel(filter_params, chann);
 	
 		if (param == NULL) {
-			print_error("bright: invalid channel name");
+			print_error("bright: Invalid channel name");
 			return GP_EINVAL;
 		}
 
@@ -308,7 +308,7 @@ static GP_RetCode bright(GP_Context **c, const char *params)
 
 static struct param contrast_params[] = {
 	{"mul", PARAM_FLOAT, "contrast (1.5 = +50%, 0.5 = -50%)", NULL, NULL},
-	{"chann", PARAM_STR, "channel name {R, G, B, A, V, ...}", NULL, NULL},
+	{"chann", PARAM_STR, "Channel name {R, G, B, A, V, ...}", NULL, NULL},
 	{NULL,  0,           NULL,                    NULL, NULL}
 };
 
@@ -333,7 +333,7 @@ static GP_RetCode contrast(GP_Context **c, const char *params)
 		GP_FilterParam *param = GP_FilterParamChannel(filter_params, chann);
 	
 		if (param == NULL) {
-			print_error("contrast: invalid channel name");
+			print_error("contrast: Invalid channel name");
 			return GP_EINVAL;
 		}
 
@@ -498,6 +498,68 @@ static GP_RetCode save_png(GP_Context **c, const char *params)
 	return GP_ESUCCESS;
 }
 
+static struct param add_noise_params[] = {
+	{"percents", PARAM_FLOAT, "Percents of noise to add", NULL, NULL},
+	{"chann",    PARAM_STR,   "Channel name {R, G, B, A, V, ...}", NULL, NULL},
+	{NULL,  0, NULL, NULL, NULL}
+};
+
+static uint32_t add_noise_op(uint32_t val, uint8_t bits, GP_FilterParam *param)
+{
+	float perc;
+	int max = (1<<bits) - 1;
+	int ret;
+
+	perc = param->val.f;
+
+	ret = val * (1 - perc) + (random() % max) * perc;
+
+	if (ret < 0)
+		ret = 0;
+
+	if (ret > max)
+		ret = max;
+
+	return ret;
+}
+
+static uint32_t no_op(uint32_t val)
+{
+	return val;
+}
+
+static GP_RetCode add_noise(GP_Context **c, const char *params)
+{
+	float percents = 0;
+	char *chann = NULL;
+
+	if (param_parse(params, add_noise_params, "add_noise", param_err, &percents, &chann))
+		return GP_EINVAL;
+	
+	GP_FILTER_PARAMS((*c)->pixel_type, priv);
+	GP_FilterParamSetFloatAll(priv, percents/100);
+	GP_FILTER_PARAMS((*c)->pixel_type, op_callbacks);
+	
+	if (chann == NULL) {
+		GP_FilterParamSetPtrAll(op_callbacks, add_noise_op);
+	} else {
+		GP_FilterParam *param = GP_FilterParamChannel(op_callbacks, chann);
+	
+		if (param == NULL) {
+			print_error("add_noise: Invalid channel name");
+			return GP_EINVAL;
+		}
+
+		
+		GP_FilterParamSetPtrAll(op_callbacks, no_op);
+		param->val.ptr = add_noise_op;
+	}
+
+	GP_FilterPoint(*c, *c, op_callbacks, priv, progress_callback);
+
+	return GP_ESUCCESS;
+}
+
 /* filters */
 
 struct filter {
@@ -508,18 +570,19 @@ struct filter {
 };
 
 static struct filter filter_table[] = {
-	{"rotate",   "rotate image", rotate_params, rotate},
-	{"mirror",   "mirror vertically/horizontally", mirror_params, mirror},
-	{"scale",    "scale image to given width and height", scale_params,  scale},
-	{"resize",   "resize image by given ratio", resize_params, resize},
-	{"bright",   "alter image brightness", bright_params, bright},
-	{"contrast", "alter image contrast", contrast_params, contrast},
-	{"invert",   "inverts image", invert_params, invert},
-	{"blur",     "gaussian blur", blur_params, blur},
-	{"dither",   "dithers bitmap", dither_params, dither},
-	{"jpg",      "save jpg image", save_jpg_params, save_jpg},
-	{"png",      "save png image", save_png_params, save_png},
-	{NULL, NULL, NULL, NULL}
+	{"rotate",    "rotate image", rotate_params, rotate},
+	{"mirror",    "mirror vertically/horizontally", mirror_params, mirror},
+	{"scale",     "scale image to given width and height", scale_params,  scale},
+	{"resize",    "resize image by given ratio", resize_params, resize},
+	{"bright",    "alter image brightness", bright_params, bright},
+	{"contrast",  "alter image contrast", contrast_params, contrast},
+	{"invert",    "inverts image", invert_params, invert},
+	{"add_noise", "adds noise", add_noise_params, add_noise},
+	{"blur",      "gaussian blur", blur_params, blur},
+	{"dither",    "dithers bitmap", dither_params, dither},
+	{"jpg",       "save jpg image", save_jpg_params, save_jpg},
+	{"png",       "save png image", save_png_params, save_png},
+	{NULL, NULL,  NULL, NULL}
 };
 
 static struct filter *get_filter(const char *name)

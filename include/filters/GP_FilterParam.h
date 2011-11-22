@@ -104,4 +104,16 @@ void GP_FilterParamSetIntAll(GP_FilterParam params[],
 void GP_FilterParamSetFloatAll(GP_FilterParam params[],
                                float val);
 
+/*
+ * Sets all values to unsigned integer value.
+ */
+void GP_FilterParamSetUIntAll(GP_FilterParam params[],
+                              uint32_t val);
+
+/*
+ * Sets all values to pointer value.
+ */
+void GP_FilterParamSetPtrAll(GP_FilterParam params[],
+                             void *ptr);
+
 #endif /* FILTERS_GP_FILTER_PARAM_H */
