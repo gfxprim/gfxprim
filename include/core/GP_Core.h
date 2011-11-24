@@ -59,4 +59,10 @@
 /* Color */
 #include "core/GP_Color.h"
 
+/* Progress callback */
+#include "core/GP_ProgressCallback.h"
+
+/* Debug counters */
+#include "core/GP_Counter.h"
+
 #endif /* GP_CORE_H */
