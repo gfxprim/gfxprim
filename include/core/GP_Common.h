@@ -76,16 +76,25 @@
  * and prints message and calls abort(). 
  * GP_GENERAL_CHECK is a check with specified message prefix
  * (for assert and check)
+ *
+ * SWIG_exception is a dummy no-op that is used to raise an exception when wrapped.
  */
 
+void SWIG_exception(const char *msg);
+
+#define GP_INTERNAL_ABORT_BUFSIZE 24
 #define GP_INTERNAL_ABORT(str_abort_msg_, ...) do { \
-	fprintf(stderr, "*** gfxprim: %s:%d: in %s: %s", \
+	char bufstart[GP_INTERNAL_ABORT_BUFSIZE], *buf = bufstart; \
+	char *bufend = buf + GP_INTERNAL_ABORT_BUFSIZE; \
+	buf += snprintf(buf, bufend - buf, "*** gfxprim: %s:%d: in %s: %s", \
 			__FILE__, __LINE__, __FUNCTION__, str_abort_msg_); \
+	if (buf > bufend) buf = bufend; \
 	if (! (#__VA_ARGS__ [0])) \
-		fprintf(stderr, "abort()"); \
+		buf += snprintf(buf, bufend - buf, "abort()"); \
 	else \
-		fprintf(stderr, " " __VA_ARGS__); \
-	fprintf(stderr, "\n"); \
+		buf += snprintf(buf, bufend - buf, " " __VA_ARGS__); \
+	SWIG_exception(bufstart); \
+	fprintf(stderr, "%s\n", bufstart); \
 	abort(); \
 } while (0)
 
