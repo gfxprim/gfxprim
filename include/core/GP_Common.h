@@ -78,6 +78,7 @@
  * (for assert and check)
  *
  * SWIG_exception is a dummy no-op that is used to raise an exception when wrapped.
+ * NOTE: Currently totally useless. Hrmmppff.
  */
 
 void SWIG_exception(const char *msg);

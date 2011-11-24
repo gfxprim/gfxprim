@@ -1,7 +1,7 @@
 %module gfxprim_core
 
 %{
-#include "GP_Core.h"
+#include "core/GP_Core.h"
 %}
 
 #define __attribute__(X) 
@@ -19,6 +19,7 @@
 %include "GP_GetSetBits.h"
 %include "GP_Transform.h"
 %include "GP_ProgressCallback.h"
+%include "GP_RetCode.h"
 
 /* Color and pixel types */
 
