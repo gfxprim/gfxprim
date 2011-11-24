@@ -55,7 +55,7 @@ typedef GP_Counter_t *GP_Counter;
  * Increase a counter by 1.
  */
 
-static inline void GP_IncCounter(GP_Counter counter) 
+static inline void GP_IncCounter(GP_Counter counter)
 {
 #ifdef	GP_IMPLEMENT_COUNTERS
 	if (!counter) return;
@@ -68,7 +68,7 @@ static inline void GP_IncCounter(GP_Counter counter)
  * No checks for underflow.
  */
 
-static inline void GP_AddCounter(GP_Counter counter, GP_Counter_t delta) 
+static inline void GP_AddCounter(GP_Counter counter, GP_Counter_t delta)
 {
 #ifdef	GP_IMPLEMENT_COUNTERS
 	if (!counter) return;
@@ -80,7 +80,7 @@ static inline void GP_AddCounter(GP_Counter counter, GP_Counter_t delta)
  * Set counter to given value.
  */
 
-static inline void GP_SetCounter(GP_Counter counter, GP_Counter_t value) 
+static inline void GP_SetCounter(GP_Counter counter, GP_Counter_t value)
 {
 #ifdef	GP_IMPLEMENT_COUNTERS
 	if (!counter) return;
@@ -92,7 +92,7 @@ static inline void GP_SetCounter(GP_Counter counter, GP_Counter_t value)
  * Return counter value
  */
 
-inline GP_Counter_t GP_CounterVal(GP_Counter counter)
+static inline GP_Counter_t GP_CounterVal(GP_Counter counter)
 {
 #ifdef	GP_IMPLEMENT_COUNTERS
 	if (!counter) return 0;
