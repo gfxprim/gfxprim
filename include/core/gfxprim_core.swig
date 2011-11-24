@@ -1,4 +1,4 @@
-%module gfxprim_core
+%module gfxprim_core_c
 
 %{
 #include "core/GP_Core.h"
@@ -7,6 +7,8 @@
 #define __attribute__(X) 
 
 %include <stdint.i>
+
+%nodefaultctor;
 
 /* Basic types and common methods */
 

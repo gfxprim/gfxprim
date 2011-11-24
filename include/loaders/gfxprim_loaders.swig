@@ -1,4 +1,4 @@
-%module gfxprim_loaders
+%module gfxprim_loaders_c
 
 %{
 #include "core/GP_Core.h"
@@ -10,6 +10,8 @@
 %import ../core/gfxprim_core.swig
 
 %include <stdint.i>
+
+%nodefaultctor;
 
 %include "GP_Loaders.h"
 %include "GP_JPG.h"
