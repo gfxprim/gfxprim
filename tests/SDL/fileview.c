@@ -92,7 +92,8 @@ void redraw_screen(void)
 	for (i = 0; i < 30; i++) { 
 		if (line == NULL)
 			break;
-		GP_Text(&context, &style, 16, 16*i + 16, align, line->text, black_pixel);
+		GP_Text(&context, &style, 16, 16*i + 16, align,
+		        black_pixel, black_pixel, line->text);
 		line = line->next;
 	}
 

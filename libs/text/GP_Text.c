@@ -23,168 +23,153 @@
  *                                                                           *
  *****************************************************************************/
 
+#include <stdarg.h>
 #include "algo/Text.algo.h"
 #include "gfx/GP_Gfx.h"
 #include "core/GP_FnPerBpp.h"
+#include "core/GP_Debug.h"
 #include "GP_Text.h"
 
 GP_TextStyle GP_DefaultStyle = GP_DEFAULT_TEXT_STYLE;
 
+static int do_align(GP_Coord *topleft_x, GP_Coord *topleft_y, int align,
+                    GP_Coord x, GP_Coord y, const GP_TextStyle *style,
+                    GP_Size width)
+{
+	int height = GP_TextHeight(style);
+	
+	switch (align & 0x0f) {
+	case GP_ALIGN_LEFT:
+		*topleft_x = x - width + 1;
+		break;
+	case GP_ALIGN_RIGHT:
+		*topleft_x = x;
+		break;
+	case GP_ALIGN_CENTER:
+		*topleft_x = x - width/2;
+		break;
+	default:
+		GP_DEBUG(1, "ALIGN 0x%0x\n", align);
+		return 1;
+	}
+
+	switch (align & 0xf0) {
+	case GP_VALIGN_ABOVE:
+		*topleft_y = y - height + 1;
+		break;
+	case GP_VALIGN_CENTER:
+		*topleft_y = y - height/2;
+		break;
+	case GP_VALIGN_BASELINE:
+		*topleft_y = y - height + style->font->baseline;
+		break;
+	case GP_VALIGN_BELOW:
+		*topleft_y = y;
+		break;
+	default:
+		GP_DEBUG(1, "VALIGN 0x%0x\n", align);
+		return 1;
+	}
+
+	return 0;
+}
+
 /* Generate drawing functions for various bit depths. */
 GP_DEF_FILL_FN_PER_BPP(GP_Text_Raw, DEF_TEXT_FN)
 
-GP_RetCode GP_Text_Raw(GP_Context *context, const GP_TextStyle *style,
-                       GP_Coord x, GP_Coord y, int align,
-                       const char *str, GP_Pixel pixel)
+void GP_Text_Raw(GP_Context *context, const GP_TextStyle *style,
+                 GP_Coord x, GP_Coord y, int align,
+                 GP_Pixel fg_color, GP_Pixel bg_color, const char *str)
 {
+	(void) bg_color;
+
 	GP_CHECK_CONTEXT(context);
 
 	if (str == NULL)
-		return GP_ENULLPTR;
+		return;
 
 	if (style == NULL)
 		style = &GP_DefaultStyle;
 	
 	GP_CHECK_TEXT_STYLE(style);
 
-	int width = GP_TextWidth(style, str);
-	int height = GP_TextHeight(style);
+	GP_Coord topleft_x, topleft_y;
+	GP_Size w = GP_TextWidth(style, str);
 
-	int topleft_x, topleft_y;
-	switch (align & 0x0f) {
-		case GP_ALIGN_LEFT:
-			topleft_x = x - width + 1;
-			break;
-		case GP_ALIGN_RIGHT:
-			topleft_x = x;
-			break;
-		case GP_ALIGN_CENTER:
-			topleft_x = x - width/2;
-			break;
-		default:
-			return GP_EINVAL;
-	}
-	switch (align & 0xf0) {
-		case GP_VALIGN_ABOVE:
-			topleft_y = y - height + 1;
-			break;
-		case GP_VALIGN_CENTER:
-			topleft_y = y - height/2;
-			break;
-		case GP_VALIGN_BASELINE:
-			topleft_y = y - height + style->font->baseline;
-			break;
-		case GP_VALIGN_BELOW:
-			topleft_y = y;
-			break;
-		default:
-			return GP_EINVAL;
-	}
+	GP_ASSERT(do_align(&topleft_x, &topleft_y, align, x, y, style, w) == 0,
+	         "Invalid aligment flags");
 
 	GP_FN_PER_BPP_CONTEXT(GP_Text_Raw, context, context, style,
-	                      topleft_x, topleft_y, str, pixel);
-
-	return GP_ESUCCESS;
+	                      topleft_x, topleft_y, str, fg_color);
 }
 
 DEF_TEXT_FN(GP_Text_internal, GP_Context *, GP_Pixel, GP_HLine)
 
-GP_RetCode GP_Text(GP_Context *context, const GP_TextStyle *style,
-                   GP_Coord x, GP_Coord y, int align,
-                   const char *str, GP_Pixel pixel)
+void GP_Text(GP_Context *context, const GP_TextStyle *style,
+             GP_Coord x, GP_Coord y, int align,
+	     GP_Pixel fg_color, GP_Pixel bg_color,
+             const char *str)
 {
+	(void) bg_color;
+
 	GP_CHECK_CONTEXT(context);
-	
+
 	if (str == NULL)
-		return GP_ENULLPTR;
+		return;
 
 	if (style == NULL)
 		style = &GP_DefaultStyle;
 	
 	GP_CHECK_TEXT_STYLE(style);
+	
+	GP_Coord topleft_x, topleft_y;
+	GP_Size w = GP_TextWidth(style, str);
 
-	int width = GP_TextWidth(style, str);
-	int height = GP_TextHeight(style);
+	GP_ASSERT(do_align(&topleft_x, &topleft_y, align, x, y, style, w) == 0,
+	         "Invalid aligment flags");
 
-	int topleft_x, topleft_y;
-	switch (align & 0x0f) {
-		case GP_ALIGN_LEFT:
-			topleft_x = x - width;
-			break;
-		case GP_ALIGN_RIGHT:
-			topleft_x = x;
-			break;
-		case GP_ALIGN_CENTER:
-			topleft_x = x - width/2;
-			break;
-		default:
-			return GP_EINVAL;
-	}
-	switch (align & 0xf0) {
-		case GP_VALIGN_ABOVE:
-			topleft_y = y - height;
-			break;
-		case GP_VALIGN_CENTER:
-			topleft_y = y - height/2;
-			break;
-		case GP_VALIGN_BASELINE:
-			topleft_y = y - height + style->font->baseline;
-			break;
-		case GP_VALIGN_BELOW:
-			topleft_y = y;
-			break;
-		default:
-			return GP_EINVAL;
-	}
-
-	GP_Text_internal(context, style, topleft_x, topleft_y, str, pixel);
-	return GP_ESUCCESS;
+	GP_Text_internal(context, style, topleft_x, topleft_y, str, fg_color);
 }
 
-GP_RetCode GP_BoxCenteredText_Raw(GP_Context *context, const GP_TextStyle *style,
-                                  GP_Coord x, GP_Coord y, GP_Size w, GP_Size h,
-				  const char *str, GP_Pixel pixel)
+
+GP_Size GP_Print(GP_Context *context, const GP_TextStyle *style,
+                 GP_Coord x, GP_Coord y, int align,
+                 GP_Pixel fg_color, GP_Pixel bg_color, const char *fmt, ...)
 {
-	GP_CHECK_CONTEXT(context);
+	va_list va, vac;
+	int size;
 
-	if (str == NULL)
-		return GP_ENULLPTR;
+	va_start(va, fmt);
+	va_copy(vac, va);
+	size = vsnprintf(NULL, 0, fmt, va);
+	va_end(va);
+	char buf[size+1];
+	vsnprintf(buf, sizeof(buf), fmt, vac);
+	va_end(vac);
 
-	if (style == NULL)
-		style = &GP_DefaultStyle;
-	
-	GP_CHECK_TEXT_STYLE(style);
+	GP_Text(context, style, x, y, align, fg_color, bg_color, buf);
 
-	const int mid_x = x + w/2;
-	const int mid_y = y + h/2;
-	const int font_ascent = GP_TextAscent(style);
-
-	return GP_Text_Raw(context, style, mid_x,
-		mid_y + font_ascent/2,
-		GP_ALIGN_CENTER | GP_VALIGN_BASELINE,
-		str, pixel);
+	return GP_TextWidth(style, buf);
 }
 
-GP_RetCode GP_BoxCenteredText(GP_Context *context, const GP_TextStyle *style,
-                              GP_Coord x, GP_Coord y, GP_Size w, GP_Size h,
-                              const char *str, GP_Pixel pixel)
+
+void GP_TextClear(GP_Context *context, const GP_TextStyle *style,
+                  GP_Coord x, GP_Coord y, int align,
+		  GP_Pixel bg_color, GP_Size size)
+{	
+	GP_Coord topleft_x, topleft_y;
+
+	GP_ASSERT(do_align(&topleft_x, &topleft_y, align, x, y, style, size) == 0,
+	         "Invalid aligment flags");
+
+	GP_FillRectXYWH(context, topleft_x, topleft_y,
+	                size, GP_TextHeight(style), bg_color);
+}
+
+void GP_TextClearStr(GP_Context *context, const GP_TextStyle *style,
+                     GP_Coord x, GP_Coord y, int align,
+		     GP_Pixel bg_color, const char *str)
 {
-	GP_CHECK_CONTEXT(context);
-
-	if (str == NULL)
-		return GP_ENULLPTR;
-
-	if (style == NULL)
-		style = &GP_DefaultStyle;
-	
-	GP_CHECK_TEXT_STYLE(style);
-
-	const int mid_x = x + w/2;
-	const int mid_y = y + h/2;
-	const int font_ascent = GP_TextAscent(style);
-
-	return GP_Text(context, style, mid_x,
-		mid_y + font_ascent/2,
-		GP_ALIGN_CENTER | GP_VALIGN_BASELINE,
-		str, pixel);
+	GP_TextClear(context, style, x, y, align,
+	             bg_color, GP_TextWidth(style, str));
 }

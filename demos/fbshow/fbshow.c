@@ -77,17 +77,17 @@ static void *image_loader(void *ptr)
 		char buf[100];
 		snprintf(buf, sizeof(buf), "Loading '%s'", params->img_path);
 		GP_Fill(&fb->context, black_pixel);
-		GP_BoxCenteredText(&fb->context, NULL, 0, 0,
-                                   fb->context.w, fb->context.h,
-                                   buf, white_pixel);
+		//GP_BoxCenteredText(&fb->context, NULL, 0, 0,
+                //                   fb->context.w, fb->context.h,
+                //                   buf, white_pixel);
 	}
 
 	GP_Context *img = NULL;
 
 	if (GP_LoadImage(params->img_path, &img, &callback) != 0) {
-		GP_BoxCenteredText(&fb->context, NULL, 0, 0,
-                                   fb->context.w, fb->context.h,
-                                   "Failed to load image", white_pixel);
+	//	GP_BoxCenteredText(&fb->context, NULL, 0, 0,
+        //                          fb->context.w, fb->context.h,
+        //                          "Failed to load image", white_pixel);
 		return NULL;
 	}
 

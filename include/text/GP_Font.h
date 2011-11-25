@@ -19,12 +19,12 @@
  * Copyright (C) 2009-2010 Jiri "BlueBear" Dluhos                            *
  *                         <jiri.bluebear.dluhos@gmail.com>                  *
  *                                                                           *
- * Copyright (C) 2009-2010 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2011 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
-#ifndef GP_FONT_H
-#define GP_FONT_H
+#ifndef TEXT_GP_FONT_H
+#define TEXT_GP_FONT_H
 
 #include <stdint.h>
 
@@ -159,4 +159,4 @@ unsigned int GP_GetFontDataSize(const GP_Font *font);
 GP_RetCode GP_FontLoad(GP_Font **font, const char *filename);
 GP_RetCode GP_FontSave(const GP_Font *font, const char *filename);
 
-#endif /* GP_FONT_H */
+#endif /* TEXT_GP_FONT_H */

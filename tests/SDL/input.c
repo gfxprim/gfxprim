@@ -48,12 +48,17 @@ Uint32 timer_callback(__attribute__((unused)) Uint32 interval,
 
 static void draw_event(GP_Event *ev)
 {
+	static GP_Size size = 0;
+
 	if (ev->type != GP_EV_KEY)
 		return;
+	
+	int align = GP_ALIGN_RIGHT|GP_VALIGN_BOTTOM;
 
-	GP_FillRect(&context, 0, 0, 150, 35, black_pixel);
-	GP_Text(&context, NULL, 20, 20, GP_ALIGN_RIGHT|GP_VALIGN_BOTTOM,
-	        GP_EventKeyName(ev->val.key.key), white_pixel);
+	GP_TextClear(&context, NULL, 20, 20, align, black_pixel, size);
+	size = GP_Print(&context, NULL, 20, 20, align,
+	                white_pixel, black_pixel, "Key=%s",
+			GP_EventKeyName(ev->val.key.key));
 	SDL_Flip(display);
 }
 
@@ -94,12 +99,21 @@ static void event_loop(void)
 			break;
 			case GP_EV_REL:
 				switch (ev.code) {
+				static int size = 0;
 				case GP_EV_REL_POS:
 					if (GP_EventGetKey(&ev, GP_BTN_LEFT)) {
 						GP_PutPixel(&context, ev.cursor_x,
 					        	    ev.cursor_y, green_pixel);
 						SDL_Flip(display);
 					}
+					int align = GP_ALIGN_RIGHT|GP_VALIGN_BOTTOM;
+
+					GP_TextClear(&context, NULL, 20, 40, align,
+					             black_pixel, size);
+					size = GP_Print(&context, NULL, 20, 40, align,
+					                white_pixel, black_pixel, "X=%3u Y=%3u",
+						        ev.cursor_x, ev.cursor_y);
+					SDL_Flip(display);
 				break;
 				}
 			break;

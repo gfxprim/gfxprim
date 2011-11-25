@@ -273,7 +273,7 @@ void redraw_screen(void)
 	}
 
 	GP_Text(&context, &style, 16, 16, GP_ALIGN_RIGHT|GP_VALIGN_BELOW,
-	        title, white);
+	        white, black, title);
 
 	SDL_UnlockSurface(display);
 }
