@@ -47,17 +47,18 @@ void event_loop(void)
 				return;
 			case SDLK_UP:
 				brightness+=2;
-			case SDLK_DOWN:
+			case SDLK_DOWN: {
 				brightness-=1;
 
-				res = GP_FilterBrightness(bitmap, NULL, brightness, NULL);
+				GP_FILTER_PARAMS_INT(bitmap->pixel_type, param, brightness);
+				res = GP_FilterBrightness(bitmap, NULL, param, NULL);
 				
 				printf("brightness = %i %ux%u\n", brightness, res->w, res->h);
 
 				GP_Blit(res, 0, 0, res->w, res->h, &context, 0, 0);
 				SDL_Flip(display);
 				GP_ContextFree(res);
-			break;
+			} break;
 			default:
 				break;
 			}
