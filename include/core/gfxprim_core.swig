@@ -80,8 +80,6 @@ GP_Context memory allocation is handled by gfxprim, deallocation by GP_ContextFr
 The wrapper can be used without owning the GP_Context struct by setting self.this
 and self.thisown.") GP_Context;
 
-%include "GP_Context.h"
-
 %extend GP_Context {
   ~GP_Context() {
     GP_DEBUG(2, "[wrapper] GP_ContextFree (%dx%d raw, %dbpp, free_pixels:%d)",
@@ -89,6 +87,14 @@ and self.thisown.") GP_Context;
     GP_ContextFree($self);
   }
 };
+
+/* Indicate new wrapper-owned GP_Context */
+%newobject GP_ContextAlloc;
+%newobject GP_ContextCopy;
+%newobject GP_ContextSubContext;
+%newobject GP_ContextConvert;
+
+%include "GP_Context.h"
 
 
 /*

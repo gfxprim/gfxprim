@@ -56,7 +56,6 @@ def extend_context_class(_context_class = core.Context):
   def subcontext(self, x, y, w, h):
     "Create a subcontext (rectangular view)."
     c = core.GP_ContextSubContext(self, None, x, y, w, h)
-    c.thisown = True # GP_Context IS owned (but not the pixel data)
     c.parent = self
     return c
 
@@ -93,7 +92,6 @@ def extend_context_class(_context_class = core.Context):
     pixeltype_no = pixeltype if isinstance(pixeltype, int) else 0 # !!!
     # TODO: actually accept a PixelType
     c = core.GP_ContextAlloc(w, h, pixeltype_no)
-    c.thisown = True
     return c
 
   @extend(_context_class, name='load')
@@ -101,7 +99,6 @@ def extend_context_class(_context_class = core.Context):
   def load(filename):
     "Load image from given file, guess type."
     c = loaders.GP_LoadImage_SWIG(filename)
-    c.thisown = True
     return c
 
 
