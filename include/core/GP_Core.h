@@ -50,7 +50,10 @@
 /* Individual pixel access */
 #include "core/GP_GetPutPixel.h"
 
-/* blitting */
+/* Writing pixel blocks */
+#include "GP_WritePixel.h"
+
+/* Blitting */
 #include "core/GP_Blit.h"
 
 /* Debug and debug level */
