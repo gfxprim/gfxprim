@@ -84,6 +84,23 @@ int GP_FilterParamCheckChannels(GP_FilterParam params[],
 #define GP_FILTER_PARAMS(pixel_type, name) \
 	GP_FilterParam name[GP_PixelTypes[pixel_type].numchannels + 1]; \
 	GP_FilterParamInitChannels(name, pixel_type);
+
+#define GP_FILTER_PARAMS_INT(pixel_type, name, val) \
+	GP_FILTER_PARAMS(pixel_type, name) \
+	GP_FilterParamSetIntAll(name, val);
+
+#define GP_FILTER_PARAMS_UINT(pixel_type, name, val) \
+	GP_FILTER_PARAMS(pixel_type, name) \
+	GP_FilterParamSetUIntAll(name, val);
+
+#define GP_FILTER_PARAMS_FLOAT(pixel_type, name, val) \
+	GP_FILTER_PARAMS(pixel_type, name) \
+	GP_FilterParamSetFloatAll(name, val);
+
+#define GP_FILTER_PARAMS_PTR(pixel_type, name, ptr) \
+	GP_FILTER_PARAMS(pixel_type, name) \
+	GP_FilterParamSetPtrAll(name, ptr);
+
 /*
  * Initalize param names and terminator.
  *
@@ -115,5 +132,13 @@ void GP_FilterParamSetUIntAll(GP_FilterParam params[],
  */
 void GP_FilterParamSetPtrAll(GP_FilterParam params[],
                              void *ptr);
+
+/*
+ * Functions to print the array.
+ */
+void GP_FilterParamPrintInt(GP_FilterParam params[]);
+void GP_FilterParamPrintUInt(GP_FilterParam params[]);
+void GP_FilterParamPrintFloat(GP_FilterParam params[]);
+void GP_FilterParamPrintPtr(GP_FilterParam params[]);
 
 #endif /* FILTERS_GP_FILTER_PARAM_H */

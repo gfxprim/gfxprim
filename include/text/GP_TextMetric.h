@@ -19,44 +19,47 @@
  * Copyright (C) 2009-2010 Jiri "BlueBear" Dluhos                            *
  *                         <jiri.bluebear.dluhos@gmail.com>                  *
  *                                                                           *
- * Copyright (C) 2009-2010 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2011 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  ****************************************************************************/
 
-#ifndef GP_TEXT_METRIC_H
-#define GP_TEXT_METRIC_H
+#ifndef TEXT_GP_TEXT_METRIC_H
+#define TEXT_GP_TEXT_METRIC_H
 
+#include "core/GP_Types.h"
 #include "GP_TextStyle.h"
 
 /*
  * Calculates the width of the string drawn in the given style, in pixels.
  */
-unsigned int GP_TextWidth(const GP_TextStyle *style, const char *str);
+GP_Size GP_TextWidth(const GP_TextStyle *style, const char *str);
 
 /*
  * Maximal text width for string with len characters.
  */
-unsigned int GP_TextMaxWidth(const GP_TextStyle *style, unsigned int len);
+GP_Size GP_TextMaxWidth(const GP_TextStyle *style, unsigned int len);
 
 /*
  * Returns maximal width for text written with len characters from str.
  */
-unsigned int GP_TextMaxStrWidth(const GP_TextStyle *style, const char *str,
-                                unsigned int len);
+GP_Size GP_TextMaxStrWidth(const GP_TextStyle *style, const char *str,
+                           unsigned int len);
 
 /*
  * Returns maximal text height, in pixels.
  */
-unsigned int GP_TextHeight(const GP_TextStyle *style);
+GP_Size GP_TextHeight(const GP_TextStyle *style);
 
-/* Returns the ascent (height from the baseline to the top of characters),
+/* 
+ * Returns the ascent (height from the baseline to the top of characters),
  * for the given text style. (Result is in pixels.)
  */
-unsigned int GP_TextAscent(const GP_TextStyle *style);
+GP_Size GP_TextAscent(const GP_TextStyle *style);
 
-/* Returns the descent (height from the baseline to the bottom of characters),
+/* 
+ * Returns the descent (height from the baseline to the bottom of characters),
  * for the given text style. (Result is in pixels.)
  */
-unsigned int GP_TextDescent(const GP_TextStyle *style);
+GP_Size GP_TextDescent(const GP_TextStyle *style);
 
-#endif /* GP_TEXT_METRIC_H */
+#endif /* TEXT_GP_TEXT_METRIC_H */

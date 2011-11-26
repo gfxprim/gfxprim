@@ -65,20 +65,20 @@ void redraw_screen(void)
 	style.pixel_xspace = 4;
 	style.pixel_yspace = 4;
 
-	GP_BoxCenteredText(&context, &style, 0, 0, X, Y,
-	                   "Hello world!", darkgray_pixel);
+	//GP_BoxCenteredText(&context, &style, 0, 0, X, Y,
+	//                 "Hello world!", darkgray_pixel);
 
 	style.pixel_xspace = 0;
 	style.pixel_yspace = 0;
 
 	GP_Text(&context, &style, X/2, Y/2, GP_ALIGN_LEFT|GP_VALIGN_BELOW,
-	        "bottom left", yellow_pixel);
+	        yellow_pixel, black_pixel, "bottom left");
 	GP_Text(&context, &style, X/2, Y/2, GP_ALIGN_RIGHT|GP_VALIGN_BELOW,
-	        "bottom right", red_pixel);
+	        red_pixel, black_pixel, "bottom right");
 	GP_Text(&context, &style, X/2, Y/2, GP_ALIGN_RIGHT|GP_VALIGN_ABOVE,
-	        "top right", blue_pixel);
+	        blue_pixel, black_pixel, "top right");
 	GP_Text(&context, &style, X/2, Y/2, GP_ALIGN_LEFT|GP_VALIGN_ABOVE,
-	        "top left", green_pixel);
+	        green_pixel, black_pixel, "top left");
 
 	SDL_UnlockSurface(display);
 }

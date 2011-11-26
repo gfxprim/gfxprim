@@ -128,7 +128,7 @@ static void draw_text(GP_Context *dest, GP_Coord x, GP_Coord y,
 	x1 = random() % (w - tw) + x;
 	y1 = random() % (h - th) + y;
 
-	GP_Text(dest, NULL, x1, y1, GP_ALIGN_RIGHT|GP_VALIGN_BOTTOM, TEXT, col);
+	GP_Text(dest, NULL, x1, y1, GP_ALIGN_RIGHT|GP_VALIGN_BOTTOM, col, black, TEXT);
 }
 
 void redraw_screen(void)
