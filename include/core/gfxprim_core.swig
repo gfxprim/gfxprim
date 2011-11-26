@@ -8,6 +8,8 @@
 
 %include <stdint.i>
 
+%feature("autodoc");
+
 %nodefaultctor;
 
 /*
@@ -45,7 +47,32 @@
  * Context manipulation
  */
 
+/* Rename accestors to GP_Context attributes to _attribute */
+/* would work in swig 2.0:
+ * %rename("_%s", regexmatch$name="^GP_Context::") ""; */
+%rename("_%s") "GP_Context::pixels";
+%rename("_%s") "GP_Context::bpp";
+%rename("_%s") "GP_Context::bytes_per_row";
+%rename("_%s") "GP_Context::w";
+%rename("_%s") "GP_Context::h";
+%rename("_%s") "GP_Context::offset";
+%rename("_%s") "GP_Context::pixel_type";
+%rename("_%s") "GP_Context::axes_swap";
+%rename("_%s") "GP_Context::x_swap";
+%rename("_%s") "GP_Context::y_swap";
+%rename("_%s") "GP_Context::bit_endian";
+%rename("_%s") "GP_Context::free_pixels";
+%rename("Context") "GP_Context";
+
 %include "GP_Context.h"
+
+%extend GP_Context {
+  ~GP_Context() {
+    GP_DEBUG(2, "[wrapper] GP_ContextFree (%dx%d raw, %dbpp, free_pixels:%d)",
+      $self->w, $self->h, $self->bpp, $self->free_pixels);
+    GP_ContextFree($self);
+  }
+};
 
 %include "GP_GetPutPixel.h"
 %import "GP_GetPutPixel.gen.h"
