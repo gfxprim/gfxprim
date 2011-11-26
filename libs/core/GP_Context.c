@@ -110,11 +110,13 @@ GP_Context *GP_ContextAlloc(GP_Size w, GP_Size h, GP_PixelType type)
 GP_Context *GP_ContextConvert(const GP_Context *src,
                               GP_PixelType dst_pixel_type)
 {
-	GP_Context *ret = GP_ContextAlloc(src->w, src->h, dst_pixel_type);
+	int w = GP_ContextW(src);
+	int h = GP_ContextH(src);
+	GP_Context *ret = GP_ContextAlloc(w, h, dst_pixel_type);
 	if (ret == NULL)
 		return NULL;
 
-	GP_Blit_Naive(src, 0, 0, src->w, src->h, ret, 0, 0);
+	GP_Blit(src, 0, 0, w, h, ret, 0, 0);
 	return ret;
 }
 
