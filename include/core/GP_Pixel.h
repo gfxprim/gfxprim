@@ -117,13 +117,16 @@ typedef struct {
 
 extern const GP_PixelTypeDescription const GP_PixelTypes[];
 
+#define GP_CHECK_VALID_PIXELTYPE(type) \
+  GP_CHECK(((type) > 0) && ((type) < GP_PIXEL_MAX), "Invalid PixelType %d", (type))
+
 /*
  * Convert pixel type to name.
  */
 
 static inline const char *GP_PixelTypeName(GP_PixelType type)
 {
-	GP_CHECK(type < GP_PIXEL_MAX);
+	GP_CHECK_VALID_PIXELTYPE(type);
 	return GP_PixelTypes[type].name;
 }
 
@@ -133,7 +136,7 @@ static inline const char *GP_PixelTypeName(GP_PixelType type)
 
 static inline uint32_t GP_PixelSize(GP_PixelType type)
 {
-	GP_CHECK(type < GP_PIXEL_MAX);
+	GP_CHECK_VALID_PIXELTYPE(type);
 	return GP_PixelTypes[type].size;
 }
 

@@ -72,6 +72,7 @@ GP_Context *GP_ContextCopy(const GP_Context *src, int flag)
 
 GP_Context *GP_ContextAlloc(GP_Size w, GP_Size h, GP_PixelType type)
 {
+	GP_CHECK_VALID_PIXELTYPE(type);
 	GP_Context *context = malloc(sizeof(GP_Context));
 	uint32_t bpp = GP_PixelSize(type);
 	uint32_t bpr = (bpp * w) / 8 + !!((bpp * w) % 8);
