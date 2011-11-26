@@ -83,7 +83,7 @@
 
 void SWIG_exception(const char *msg);
 
-#define GP_INTERNAL_ABORT_BUFSIZE 24
+#define GP_INTERNAL_ABORT_BUFSIZE 1024
 #define GP_INTERNAL_ABORT(str_abort_msg_, ...) do { \
 	char bufstart[GP_INTERNAL_ABORT_BUFSIZE], *buf = bufstart; \
 	char *bufend = buf + GP_INTERNAL_ABORT_BUFSIZE; \
