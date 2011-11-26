@@ -70,10 +70,7 @@ def extend_context_class(_context_class = core.Context):
     """Converts context to a different pixel type, allocates new context.
     See GP_ContextConvert() for details."""
     pixeltype_no = target_type ## TODO also accept PixelType
-    print "A1"
-    c = core.GP_ContextConvert(self, pixeltype_no)
-    print "A2"
-    return c
+    return core.GP_ContextConvert(self, pixeltype_no)
 
 
   @extend(_context_class)
