@@ -155,9 +155,9 @@ static void *image_loader(void *ptr)
 	
 	GP_Context *ret;
 
-	//callback.priv = "Blurring Image";
-	//if (GP_FilterGaussianBlur(img, img, 0.25/rat, 0.25/rat, &callback) == NULL)
-	//	return NULL;
+	callback.priv = "Blurring Image";
+	if (GP_FilterGaussianBlur(img, img, 0.3/rat, 0.3/rat, &callback) == NULL)
+		return NULL;
 	
 	callback.priv = "Resampling Image";
 	ret = GP_FilterResize(img, NULL, GP_INTERP_CUBIC, img->w * rat, img->h * rat, &callback);

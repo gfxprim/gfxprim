@@ -81,6 +81,7 @@ static void print_error(const char *error)
 static const char *resize_algs[] = {
 	"nn",
 	"cubic",
+	"cubic-int",
 	NULL
 };
 
@@ -135,6 +136,7 @@ static GP_RetCode resize(GP_Context **c, const char *params)
 static const char *scale_algs[] = {
 	"nn",
 	"cubic",
+	"cubic-int",
 	NULL
 };
 
