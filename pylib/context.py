@@ -60,6 +60,23 @@ def extend_context_class(_context_class = core.Context):
     return c
 
   @extend(_context_class)
+  def copy(self, withdata):
+    "Copy the context to a new context. Pixel data are copie optionally."
+    flags = core.GP_COPY_WITH_PIXELS if withdata else 0
+    return core.GP_ContextCopy(self, flags)
+
+  @extend(_context_class)
+  def convert(self, target_type):
+    """Converts context to a different pixel type, allocates new context.
+    See GP_ContextConvert() for details."""
+    pixeltype_no = target_type ## TODO also accept PixelType
+    print "A1"
+    c = core.GP_ContextConvert(self, pixeltype_no)
+    print "A2"
+    return c
+
+
+  @extend(_context_class)
   def save(self, filename, format=None):
     """Save the image in given format (or guess it from the extension)
 
