@@ -33,23 +33,7 @@ def extend_context_class(_context_class = core.Context):
   Called on module inicialization.
   """
 
-  type.__setattr__(_context_class, "__doc_2__",
-    """Proxy of C GP_Context struct
-
-    You can pass this class to wrapped GP_DrawSomething(...) as GP_Context.
-    All attributes of GP_Context are accessible directly as "_attribute"
-    (self._w etc.), but it is reccomended to use redefined properties:
-
-     self.w: Context width (transformed)
-     self.h: Context width (transformed)
-
-    Some context methods are provided as class members for convenience.
-
-    GP_Context memory allocation is handled completely by gfxprim.
-    You shoud NEVER even think about self.this - this pointer will point to
-    free memory after self.__del__ is called (in case of owned GP_Context).
-    """)
-
+  # Add "parent" attribute
   extend(_context_class, name='parent')(None)
 
   @extend(_context_class, name='__str__')

@@ -44,12 +44,10 @@
 
 
 /*
- * Context manipulation
+ * GP_Context wrapping
  */
 
-/* Rename accestors to GP_Context attributes to _attribute */
-/* would work in swig 2.0:
- * %rename("_%s", regexmatch$name="^GP_Context::") ""; */
+/* Rename accesors to GP_Context attributes to "_attribute" */
 %rename("_%s") "GP_Context::pixels";
 %rename("_%s") "GP_Context::bpp";
 %rename("_%s") "GP_Context::bytes_per_row";
@@ -62,7 +60,25 @@
 %rename("_%s") "GP_Context::y_swap";
 %rename("_%s") "GP_Context::bit_endian";
 %rename("_%s") "GP_Context::free_pixels";
+/* This nice batch would work in swig 2.0, sigh:
+ * %rename("_%s", regexmatch$name="^GP_Context::") ""; */
+
 %rename("Context") "GP_Context";
+
+%feature("autodoc", "Proxy of C GP_Context struct
+
+You can pass this class to wrapped GP_DrawSomething(...) as GP_Context.
+All attributes of GP_Context are accessible directly as _attribute
+(self._w etc.), but it is reccomended to use redefined properties:
+
+self.w: Context width (transformed)
+self.h: Context width (transformed)
+
+Some context-related methods are provided as class members for convenience.
+
+GP_Context memory allocation is handled by gfxprim, deallocation by GP_ContextFree().
+The wrapper can be used without owning the GP_Context struct by setting self.this
+and self.thisown.") GP_Context;
 
 %include "GP_Context.h"
 
@@ -73,6 +89,11 @@
     GP_ContextFree($self);
   }
 };
+
+
+/*
+ * Context manipulation
+ */
 
 %include "GP_GetPutPixel.h"
 %import "GP_GetPutPixel.gen.h"
