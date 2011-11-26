@@ -47,8 +47,9 @@
 #include "GP_Filter.h"
 
 typedef enum GP_InterpolationType {
-	GP_INTERP_NN,    /* Nearest Neighbour */
-	GP_INTERP_CUBIC, /* Bicubic           */
+	GP_INTERP_NN,        /* Nearest Neighbour             */
+	GP_INTERP_CUBIC,     /* Bicubic                       */
+	GP_INTERP_CUBIC_INT, /* Bicubic - integer arithmetics */
 } GP_InterpolationType;
 
 /*

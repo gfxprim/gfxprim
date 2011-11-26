@@ -178,7 +178,7 @@ GP_Context *GP_Filter{{ name }}(const GP_Context *src, GP_Context *dst{{ maybe_o
 		          "Destination is not big enough");
 	}
 
-	if (GP_Filter{{ name }}_Raw(src, dst{{ maybe_opts(params) }}, callback)) {
+	if (GP_Filter{{ name }}_Raw(src, res{{ maybe_opts(params) }}, callback)) {
 		GP_DEBUG(1, "Operation aborted");
 
 		if (dst == NULL)

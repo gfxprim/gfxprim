@@ -77,7 +77,7 @@ int main(void)
 	GP_Pixel gray, black;
 
 	gray = GP_RGBToContextPixel(200, 200, 200, &fb->context);
-	black = GP_RGBToContextPixel(  0,   0,   0, &fb->context);
+	black = GP_RGBToContextPixel(0, 0, 0, &fb->context);
 	
 	const char *text = "Framebuffer test";
 
@@ -86,7 +86,7 @@ int main(void)
 	GP_Line(&fb->context, 0, fb->context.h, fb->context.w, 0, black);
 	GP_Text(&fb->context, &style,
 	        (fb->context.w - GP_TextWidth(&style, text))/2,
-		16, GP_ALIGN_RIGHT|GP_VALIGN_BELOW, text, black);
+		16, GP_ALIGN_RIGHT|GP_VALIGN_BELOW, black, gray, text);
 
 
 	draw(&fb->context, fb->context.w / 2, 2.00 * fb->context.h / 3, 60);

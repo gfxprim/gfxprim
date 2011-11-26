@@ -23,8 +23,8 @@
  *                                                                           *
  *****************************************************************************/
 
-#ifndef GP_TEXT_H
-#define GP_TEXT_H
+#ifndef TEXT_GP_TEXT_H
+#define TEXT_GP_TEXT_H
 
 #include "core/GP_Context.h"
 
@@ -42,7 +42,7 @@
  *   - GP_VALIGN_BASELINE places the text baseline at the point
  *   - GP_VALIGN_BELOW (or BOTTOM) draws the text below the point
  */
-typedef enum GP_TextAlign {
+typedef enum GP_TextAttr {
 	GP_ALIGN_LEFT = 0x01,
 	GP_ALIGN_CENTER = 0x02,
 	GP_ALIGN_RIGHT = 0x03,
@@ -52,22 +52,44 @@ typedef enum GP_TextAlign {
 	GP_VALIGN_BASELINE = 0x30,
 	GP_VALIGN_BELOW = 0x40,
 	GP_VALIGN_BOTTOM = GP_VALIGN_BELOW,
-} GP_TextAlign;
+} GP_TextAttr;
 
-GP_RetCode GP_Text_Raw(GP_Context *context, const GP_TextStyle *style,
-                       GP_Coord x, GP_Coord y, int align,
-		       const char *str, GP_Pixel pixel);
+void GP_Text_Raw(GP_Context *context, const GP_TextStyle *style,
+                 GP_Coord x, GP_Coord y, int align,
+                 GP_Pixel fg_color, GP_Pixel bg_color, const char *str);
 
-GP_RetCode GP_Text(GP_Context *context, const GP_TextStyle *style,
-                   GP_Coord x, GP_Coord y, int align,
-		   const char *str, GP_Pixel pixel);
+/*
+ * Draws a string.
+ * 
+ * The string is rendered to context (horizontally) with defined text style.
+ * The x and y coordinates determines point defined by aligment flags.
+ *
+ * The background color is ignored for 1bpp font formats.
+ */
+void GP_Text(GP_Context *context, const GP_TextStyle *style,
+             GP_Coord x, GP_Coord y, int align,
+             GP_Pixel fg_color, GP_Pixel bg_color, const char *str);
 
-GP_RetCode GP_BoxCenteredText_Raw(GP_Context *context, const GP_TextStyle *style,
-                                  GP_Coord x, GP_Coord y, GP_Size w, GP_Size h,
-                                  const char *str, GP_Pixel pixel);
+/*
+ * Same as above, but printf like and returns text width in pixels.
+ */
+GP_Size GP_Print(GP_Context *context, const GP_TextStyle *style,
+                 GP_Coord x, GP_Coord y, int align,
+	         GP_Pixel fg_color, GP_Pixel bg_color, const char *fmt, ...)
+	         __attribute__ ((format (printf, 8, 9)));
 
-GP_RetCode GP_BoxCenteredText(GP_Context *context, const GP_TextStyle *style,
-                              GP_Coord x, GP_Coord y, GP_Size w, GP_Size h,
-                              const char *str, GP_Pixel pixel);
+/*
+ * Clears rectangle that would be used to draw text of size pixels.
+ */
+void GP_TextClear(GP_Context *context, const GP_TextStyle *style,
+                  GP_Coord x, GP_Coord y, int align,
+		  GP_Pixel bg_color, GP_Size size);
 
-#endif /* GP_TEXT_H */
+/*
+ * Dtto, but with string.
+ */
+void GP_TextClearStr(GP_Context *context, const GP_TextStyle *style,
+                     GP_Coord x, GP_Coord y, int align,
+		     GP_Pixel bg_color, const char *str);
+
+#endif /* TEXT_GP_TEXT_H */

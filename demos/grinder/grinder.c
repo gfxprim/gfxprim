@@ -81,6 +81,7 @@ static void print_error(const char *error)
 static const char *resize_algs[] = {
 	"nn",
 	"cubic",
+	"cubic-int",
 	NULL
 };
 
@@ -135,6 +136,7 @@ static GP_RetCode resize(GP_Context **c, const char *params)
 static const char *scale_algs[] = {
 	"nn",
 	"cubic",
+	"cubic-int",
 	NULL
 };
 
@@ -443,7 +445,7 @@ static GP_RetCode dither(GP_Context **c, const char *params)
 
 	//TODO: so far we convert the context back to RGB888
 	//(so we can do further work with it)
-	GP_ContextConvert(bw, *c, (*c)->pixel_type);
+	GP_Blit(bw, 0, 0, GP_ContextW(bw), GP_ContextH(bw), *c, 0, 0);
 
 	GP_ContextFree(bw);
 

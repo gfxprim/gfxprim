@@ -115,16 +115,19 @@ GP_Context *GP_ContextSubContext(GP_Context *context, GP_Context *subcontext,
                                  GP_Coord x, GP_Coord y, GP_Size w, GP_Size h);
 
 /*
- * Converts context to different pixel type.
+ * Converts context to a different pixel type.
+ * Returns a newly allocated context.
  *
  * This is naive implementation that doesn't do any ditherings or error
  * diffusions.
  */
-GP_Context *GP_ContextConvert(const GP_Context *src, GP_Context *dst,
+GP_Context *GP_ContextConvert(const GP_Context *src,
                               GP_PixelType dst_pixel_type);
 
 /*
  * Free context.
+ *
+ * If context->free_pixels, also free pixel data.
  */
 void GP_ContextFree(GP_Context *context);
 

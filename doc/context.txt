@@ -147,8 +147,8 @@ GP_Context *GP_ContextConvert(const GP_Context *src, GP_Context *dst,
                               GP_PixelType dst_pixel_type); 
 -------------------------------------------------------------------------------
 
-This provides basic context conversion functionality. If 'NULL' is passed as
-dst, the context for result is allocated and returned.
+Provides basic context conversion functionality.
+A newly allocated context is returned.
 
 This fuction does no error distribution but only integer
 division/multiplication for each pixel channel.

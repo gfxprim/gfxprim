@@ -23,8 +23,8 @@
  *                                                                           *
  *****************************************************************************/
 
-#ifndef GP_TEXTSTYLE_H
-#define GP_TEXTSTYLE_H
+#ifndef TEXT_GP_TEXTSTYLE_H
+#define TEXT_GP_TEXTSTYLE_H
 
 #include "GP_Font.h"
 #include "core/GP_RetCode.h"
@@ -68,4 +68,4 @@ void GP_DefaultTextStyle(GP_TextStyle *style);
 	GP_CHECK_FONT(style->font); \
 } while(0)
 
-#endif /* GP_TEXTSTYLE_H */
+#endif /* TEXT_GP_TEXTSTYLE_H */

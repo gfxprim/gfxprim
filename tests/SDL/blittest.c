@@ -85,7 +85,8 @@ void redraw_screen(void)
 
 	SDL_LockSurface(display);
 
-	GP_Text(&context, NULL, 20, 20, GP_ALIGN_RIGHT|GP_VALIGN_BOTTOM, text_buf, white);
+	GP_Text(&context, NULL, 20, 20, GP_ALIGN_RIGHT|GP_VALIGN_BOTTOM,
+	        white, black, text_buf);
 	GP_Blit(bitmap, 0, 0, bitmap->w, bitmap->h, &context, bitmap_x, bitmap_y);
 
 	SDL_UpdateRect(display, bitmap_x, bitmap_y, bitmap->w, bitmap->h);
@@ -184,7 +185,7 @@ int main(int argc, char *argv[])
 
 	GP_SDL_ContextFromSurface(&context, display);
 	
-	bitmap_conv = GP_ContextConvert(bitmap_raw, NULL, context.pixel_type);
+	bitmap_conv = GP_ContextConvert(bitmap_raw, context.pixel_type);
 	change_bitmap();
 
 	black = GP_ColorToContextPixel(GP_COL_BLACK, &context);

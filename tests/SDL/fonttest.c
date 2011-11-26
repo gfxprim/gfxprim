@@ -98,20 +98,23 @@ void redraw_screen(void)
 			style.font->height + 1,
 			blue_pixel);
 
-		GP_Text(&context, &style, 16, 100*i + 16, align, test_string, white_pixel);
+		GP_Text(&context, &style, 16, 100*i + 16, align,
+		        white_pixel, black_pixel, test_string);
 
 		style.pixel_xmul = 2;
 		style.pixel_ymul = 2;
 		style.pixel_yspace = 1;
 
-		GP_Text(&context, &style, 34, 100*i + 38, align, test_string, gray_pixel);
+		GP_Text(&context, &style, 34, 100*i + 38, align,
+		        white_pixel, black_pixel, test_string);
 
 		style.pixel_xmul = 4;
 		style.pixel_ymul = 2;
 		style.pixel_xspace = 1;
 		style.pixel_yspace = 1;
 
-		GP_Text(&context, &style, 64, 100*i + 72, align, test_string, dark_gray_pixel);
+		GP_Text(&context, &style, 64, 100*i + 72, align,
+		        dark_gray_pixel, black_pixel, test_string);
 	}
 
 	SDL_UnlockSurface(display);
@@ -188,7 +191,9 @@ void print_character_metadata(const GP_Font *font, int c)
 int main(int argc, char *argv[])
 {
 	print_instructions();
-	
+
+	GP_SetDebugLevel(10);
+
 	if (argc > 1) {
 		GP_RetCode err;
 		fprintf(stderr, "\nLoading font '%s'\n", argv[1]);
