@@ -111,7 +111,7 @@ static void *image_loader(void *ptr)
 
 	/* Workaround */
 	if (img->pixel_type != GP_PIXEL_RGB888) {
-		GP_Context *tmp = GP_ContextConvert(img, NULL, GP_PIXEL_RGB888);
+		GP_Context *tmp = GP_ContextConvert(img, GP_PIXEL_RGB888);
 		GP_ContextFree(img);
 		img = tmp;
 	}

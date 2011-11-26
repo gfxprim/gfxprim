@@ -107,25 +107,14 @@ GP_Context *GP_ContextAlloc(GP_Size w, GP_Size h, GP_PixelType type)
 	return context;
 }
 
-GP_Context *GP_ContextConvert(const GP_Context *src, GP_Context *dst,
+GP_Context *GP_ContextConvert(const GP_Context *src,
                               GP_PixelType dst_pixel_type)
 {
-	GP_Context *ret = dst;
-	
-	if (ret == NULL) {
-		ret = GP_ContextAlloc(src->w, src->h, dst_pixel_type);
-
-		if (ret == NULL)
-			return NULL;
-	} else {
-		GP_ASSERT(dst->pixel_type == dst_pixel_type,
-			  "Destination pixel type doesn't match");
-		GP_ASSERT(src->w <= dst->w && src->h <= dst->h,
-			  "Destination is not big enough");
-	}
+	GP_Context *ret = GP_ContextAlloc(src->w, src->h, dst_pixel_type);
+	if (ret == NULL)
+		return NULL;
 
 	GP_Blit_Naive(src, 0, 0, src->w, src->h, ret, 0, 0);
-
 	return ret;
 }
 
