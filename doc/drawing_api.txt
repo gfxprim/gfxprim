@@ -9,8 +9,8 @@ Fill
 void GP_Fill(GP_Context *context, GP_Pixel pixel);
 --------------------------------------------------------------------------------
 
-Fills the context bitmap. This has the same effect as calling
-'GP_FillRect(context, 0, 0, context->w, context->h, pixel)'.
+Fills the whole context bitmap with the specified pixel value. This has the
+same effect as calling 'GP_FillRect(context, 0, 0, context->w, context->h, pixel)'.
 
 Lines
 ~~~~~
@@ -20,30 +20,45 @@ Lines
 void GP_HLineXXY(GP_Context *context, GP_Coord x0, GP_Coord x1, GP_Coord y,
                  GP_Pixel pixel);
 
-void GP_HLineXYW(GP_Context *context, GP_Coord x, GP_Coord y, GP_Size w,
-                 GP_Pixel pixel);
-
 void GP_HLine(GP_Context *context, GP_Coord x0, GP_Coord x1, GP_Coord y,
               GP_Pixel pixel);
 --------------------------------------------------------------------------------
 
-Draws a horizontal line. The 'GP_HLine()' function is an alias for
-'GP_HLineXXY()'.
+Draws a horizontal line from (x0, y) to (x1, y), inclusive. The coordinates
+x0, x1 can be specified in any order.
+
+'GP_HLine()' is an alias for 'GP_HLineXXY()'.
+
+[source,c]
+--------------------------------------------------------------------------------
+void GP_HLineXYW(GP_Context *context, GP_Coord x, GP_Coord y, GP_Size w,
+                 GP_Pixel pixel);
+--------------------------------------------------------------------------------
+
+Draws a horizontal line from (x, y) to (x+w-1, y), inclusive.
+
 
 [source,c]
 --------------------------------------------------------------------------------
 void GP_VLineXYY(GP_Context *context, GP_Coord x, GP_Coord y0, GP_Coord y1,
                  GP_Pixel pixel);
 
-void GP_VLineXYH(GP_Context *context, GP_Coord x, GP_Coord y, GP_Size h,
-                 GP_Pixel pixel);
-
 void GP_VLine(GP_Context *context, GP_Coord x, GP_Coord y0, GP_Coord y1,
               GP_Pixel pixel);
 --------------------------------------------------------------------------------
 
-Draws a vertical line. The 'GP_VLine()' function is an alias for
-'GP_VLineXYY()'.
+Draws a vertical line from (x, y0) to (x, y1), inclusive. The coordinates
+y0, y1 can be specified in any order.
+
+'GP_VLine()' is an alias for 'GP_VLineXYY()'.
+
+--------------------------------------------------------------------------------
+void GP_VLineXYH(GP_Context *context, GP_Coord x, GP_Coord y, GP_Size h,
+                 GP_Pixel pixel);
+
+--------------------------------------------------------------------------------
+
+Draws a vertical line from (x, y) to (x, y+h-1), inclusive.
 
 [source,c]
 --------------------------------------------------------------------------------
@@ -51,7 +66,9 @@ void GP_Line(GP_Context *context, GP_Coord x0, GP_Coord y0,
              GP_Coord x1, GP_Coord y1, GP_Pixel pixel);
 --------------------------------------------------------------------------------
 
-Draws a line from (x0, y0) to (x1, y1), inclusive.
+Draws a line from (x0, y0) to (x1, y1), inclusive. The starting and ending
+point can be specified in any order (the implementation guarantees that
+exactly the same set of pixels will be drawn in both cases).
 
 Circles
 ~~~~~~~
