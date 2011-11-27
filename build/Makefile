@@ -1,6 +1,7 @@
 LIB_OBJECTS=$(shell ./get_objs.sh)
 
 all: libGP.a libGP.so libGP.so.0
+.PHONY: libGP.a libGP.so libGP.so.0
 
 clean:
 ifdef VERBOSE
