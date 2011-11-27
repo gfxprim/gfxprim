@@ -79,7 +79,10 @@ void GP_Circle(GP_Context *context, GP_Coord xcenter, GP_Coord ycenter,
                GP_Size r, GP_Pixel pixel);
 --------------------------------------------------------------------------------
 
-Draws a circle.
+Draws a circle centered at (xcenter, ycenter) with radius 'r' (in pixels).
+
+The circle is drawn so that all affected pixels will fit into a square
+specified by points (xcenter-r, ycenter-r, xcenter+r, ycenter+r), inclusive.
 
 [source,c]
 --------------------------------------------------------------------------------
@@ -89,6 +92,10 @@ void GP_FillCircle(GP_Context *context, GP_Coord xcenter, GP_Coord ycenter,
 
 Draws a filled circle.
 
+The set of pixels affected by 'GP_FillCircle()' is exactly the same as if
+drawing the circle boundary using GP_Circle() and then filling all pixels
+within the boundary with the same color.
+
 Rings
 ~~~~~
 [source,c]
@@ -97,7 +104,10 @@ void GP_Ring(GP_Context *context, GP_Coord xcenter, GP_Coord ycenter,
              GP_Size r1, GP_Size r2, GP_Pixel pixel);
 --------------------------------------------------------------------------------
 
-Draws a ring.
+Draws a ring (two circles centered at (xcenter, ycenter) with radii 'r1' and 'r2').
+
+The result is exactly the same as calling 'GP_Circle()' with the same center
+and appropriate radii.
 
 [source,c]
 --------------------------------------------------------------------------------
@@ -119,7 +129,10 @@ void GP_Ellipse(GP_Context *context, GP_Coord xcenter, GP_Coord ycenter,
                 GP_Size a, GP_Size b, GP_Pixel pixel);
 --------------------------------------------------------------------------------
 
-Draws an ellipse.
+Draws an axis-aligned ellipse.
+
+The ellipse is drawn so that all affected pixels will fit into a rectangle
+specified by points (xcenter-a, ycenter-b, xcenter+a, ycenter+b), inclusive.
 
 [source,c]
 --------------------------------------------------------------------------------
@@ -127,7 +140,7 @@ void GP_FillEllipse(GP_Context *context, GP_Coord xcenter, GP_Coord ycenter,
                     GP_Size a, GP_Size b, GP_Pixel pixel);
 --------------------------------------------------------------------------------
 
-Draws a filled ellipse.
+Draws a filled axis-aligned ellipse.
 
 Triangles
 ~~~~~~~~~
