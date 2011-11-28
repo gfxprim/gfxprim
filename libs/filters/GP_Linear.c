@@ -90,7 +90,7 @@ int GP_FilterGaussianBlur_Raw(const GP_Context *src, GP_Context *dst,
 		float kernel_x[size_x];
 		gaussian_kernel_init(sigma_x, kernel_x);
 		
-		if (GP_FilterHLinearConvolution_Raw(src, dst, kernel_x, size_x,
+		if (GP_FilterHLinearConvolutionInt_Raw(src, dst, kernel_x, size_x,
 		                                new_callback))
 			return 1;
 	}
@@ -103,7 +103,7 @@ int GP_FilterGaussianBlur_Raw(const GP_Context *src, GP_Context *dst,
 		float kernel_y[size_y];
 		gaussian_kernel_init(sigma_y, kernel_y);
 		
-		if (GP_FilterVLinearConvolution_Raw(dst, dst, kernel_y, size_y,
+		if (GP_FilterVLinearConvolutionInt_Raw(dst, dst, kernel_y, size_y,
 		                                new_callback))
 			return 1;
 	}
@@ -305,6 +305,218 @@ int GP_FilterVLinearConvolution_Raw(const GP_Context *src, GP_Context *dst,
 				r += R[i] * kernel[k];
 				g += G[i] * kernel[k];
 				b += B[i] * kernel[k];
+			}
+
+			/* normalize the result */
+			r /= kernel_sum;
+			g /= kernel_sum;
+			b /= kernel_sum;
+			
+			/* and clamp just to be extra sure */
+			if (r > 255)
+				r = 255;
+			if (r < 0)
+				r = 0;
+			if (g > 255)
+				g = 255;
+			if (g < 0)
+				g = 0;
+			if (b > 255)
+				b = 255;
+			if (b < 0)
+				b = 0;
+
+			pix = GP_Pixel_CREATE_RGB888((uint32_t)r, (uint32_t)g, (uint32_t)b);
+
+			GP_PutPixel_Raw_24BPP(dst, x, y, pix);
+		
+			idx++;
+
+			if (idx >= (int)kh)
+				idx = 0;
+		}
+		
+		if (GP_ProgressCallbackReport(callback, x, dst->w, dst->h))
+			return 1;
+	}
+
+	GP_ProgressCallbackDone(callback);
+	return 0;
+}
+
+#define MUL 1024
+
+int GP_FilterHLinearConvolutionInt_Raw(const GP_Context *src, GP_Context *dst,
+                                       float kernel[], uint32_t kw,
+                                       GP_ProgressCallback *callback)
+{
+	int32_t kernel_sum = 0;
+	GP_Coord x, y;
+	uint32_t i;
+	int ikernel[kw];
+	
+	for (i = 0; i < kw; i++)
+		ikernel[i] = kernel[i] * MUL + 0.5;
+
+	GP_DEBUG(1, "Horizontal linear convolution kernel width %i image %ux%u",
+	            kw, src->w, src->h);
+
+	/* count kernel sum for normalization */
+	for (i = 0; i < kw; i++)
+		kernel_sum += ikernel[i];
+
+	/* do linear convolution */	
+	for (y = 0; y < (GP_Coord)dst->h; y++) {
+		GP_Pixel pix;
+		uint32_t R[kw], G[kw], B[kw];
+
+		/* prefill the buffer on the start */
+		for (i = 0; i < kw - 1; i++) {
+			int cx = i - kw/2;
+
+			if (cx < 0)
+				cx = 0;
+			
+			pix = GP_GetPixel_Raw_24BPP(src, cx, y);
+
+			R[i] = GP_Pixel_GET_R_RGB888(pix);
+			G[i] = GP_Pixel_GET_G_RGB888(pix);
+			B[i] = GP_Pixel_GET_B_RGB888(pix);
+		}
+
+		int idx = kw - 1;
+
+		for (x = 0; x < (GP_Coord)dst->w; x++) {
+			float r = 0, g = 0, b = 0;
+
+			int cx = x + kw/2;
+
+			if (cx >= (int)src->w)
+				cx = src->w - 1;
+
+			pix = GP_GetPixel_Raw_24BPP(src, cx, y);
+
+			R[idx] = GP_Pixel_GET_R_RGB888(pix);
+			G[idx] = GP_Pixel_GET_G_RGB888(pix);
+			B[idx] = GP_Pixel_GET_B_RGB888(pix);
+			
+			/* count the pixel value from neighbours weighted by kernel */
+			for (i = 0; i < kw; i++) {
+				int k;
+
+				if ((int)i < idx + 1)
+					k = kw - idx - 1 + i;
+				else
+					k = i - idx - 1;
+
+				r += R[i] * ikernel[k];
+				g += G[i] * ikernel[k];
+				b += B[i] * ikernel[k];
+			}
+
+			/* normalize the result */
+			r /= kernel_sum;
+			g /= kernel_sum;
+			b /= kernel_sum;
+			
+			/* and clamp just to be extra sure */
+			if (r > 255)
+				r = 255;
+			if (r < 0)
+				r = 0;
+			if (g > 255)
+				g = 255;
+			if (g < 0)
+				g = 0;
+			if (b > 255)
+				b = 255;
+			if (b < 0)
+				b = 0;
+
+			pix = GP_Pixel_CREATE_RGB888((uint32_t)r, (uint32_t)g, (uint32_t)b);
+
+			GP_PutPixel_Raw_24BPP(dst, x, y, pix);
+		
+			idx++;
+
+			if (idx >= (int)kw)
+				idx = 0;
+		}
+		
+		if (GP_ProgressCallbackReport(callback, y, dst->h, dst->w))
+			return 1;
+	}
+
+	GP_ProgressCallbackDone(callback);
+	return 0;
+}
+
+int GP_FilterVLinearConvolutionInt_Raw(const GP_Context *src, GP_Context *dst,
+                                      float kernel[], uint32_t kh,
+                                      GP_ProgressCallback *callback)
+{
+	int32_t kernel_sum = 0;
+	GP_Coord x, y;
+	uint32_t i;
+	int32_t ikernel[kh];
+
+	for (i = 0; i < kh; i++)
+		ikernel[i] = kernel[i] * MUL + 0.5;
+
+	GP_DEBUG(1, "Vertical linear convolution kernel width %i image %ux%u",
+	            kh, src->w, src->h);
+
+	/* count kernel sum for normalization */
+	for (i = 0; i < kh; i++)
+		kernel_sum += ikernel[i];
+
+	/* do linear convolution */	
+	for (x = 0; x < (GP_Coord)dst->w; x++) {
+		GP_Pixel pix;
+		uint32_t R[kh], G[kh], B[kh];
+
+		/* prefill the buffer on the start */
+		for (i = 0; i < kh - 1; i++) {
+			int cy = i - kh/2;
+
+			if (cy < 0)
+				cy = 0;
+			
+			pix = GP_GetPixel_Raw_24BPP(src, x, cy);
+
+			R[i] = GP_Pixel_GET_R_RGB888(pix);
+			G[i] = GP_Pixel_GET_G_RGB888(pix);
+			B[i] = GP_Pixel_GET_B_RGB888(pix);
+		}
+
+		int idx = kh - 1;
+
+		for (y = 0; y < (GP_Coord)dst->h; y++) {
+			int32_t r = 0, g = 0, b = 0;
+
+			int cy = y + kh/2;
+
+			if (cy >= (int)src->h)
+				cy = src->h - 1;
+
+			pix = GP_GetPixel_Raw_24BPP(src, x, cy);
+
+			R[idx] = GP_Pixel_GET_R_RGB888(pix);
+			G[idx] = GP_Pixel_GET_G_RGB888(pix);
+			B[idx] = GP_Pixel_GET_B_RGB888(pix);
+			
+			/* count the pixel value from neighbours weighted by kernel */
+			for (i = 0; i < kh; i++) {
+				int k;
+
+				if ((int)i < idx + 1)
+					k = kh - idx - 1 + i;
+				else
+					k = i - idx - 1;
+
+				r += R[i] * ikernel[k];
+				g += G[i] * ikernel[k];
+				b += B[i] * ikernel[k];
 			}
 
 			/* normalize the result */

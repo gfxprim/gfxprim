@@ -27,8 +27,7 @@ CSOURCES+=$(GENSOURCES)
 #
 # Make the genrated headers actually build
 #
-all: $(RGENHEADERS)
-$(CSOURCES): $(RGENHEADERS)
+all: $(GENHEADERS)
 
 #
 # Base common templates location
@@ -45,12 +44,12 @@ ALL_GENERATED=$(basename $(ALL_TEMPLATES))
 #
 # And clean them
 #
-CLEAN+=$(GENSOURCES) $(RGENHEADERS)
+CLEAN+=$(GENSOURCES) $(GENHEADERS)
 
 #
 # Generated files depend on python generators and the template
 #
-$(GENSOURCES) $(RGENHEADERS): %: %.t $(PYTHON_FILES)
+$(GENSOURCES) $(GENHEADERS): %: %.t $(PYTHON_FILES)
 ifdef VERBOSE
 	${PYTHON} ${TOPDIR}/pylib/bin/generate_file.py -t $(TEMPLATE_DIR) "$@.t" "$@"
 else

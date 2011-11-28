@@ -1,5 +1,5 @@
 TOPDIR=.
-SUBDIRS=libs tests pylib demos
+SUBDIRS=include libs tests pylib demos
 include include.mk
 
 #
@@ -9,7 +9,10 @@ include include.mk
 #
 .PHONY: build
 
-tests: build libs
+libs: include
+
+tests: libs
+demos: libs
 
 build:
 	@$(MAKE) --no-print-directory -C build clean
