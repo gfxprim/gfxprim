@@ -29,22 +29,15 @@ all: $(GENHEADERS) $(GENSOURCES)
 TEMPLATE_DIR=$(TOPDIR)/pylib/templates/
 
 #
-# ALL templates and potential generated files (not generated automatically)
-# NOTE: Currently unused
-# 
-ALL_TEMPLATES=$(shell find $(TOPDIR) -name '*.t')
-ALL_GENERATED=$(basename $(ALL_TEMPLATES))
-
-#
 # And clean them
 #
 CLEAN+=$(GENSOURCES) $(GENHEADERS)
 
 #
-# Add templates as dependencies
+# Some base dependencies
 #
-PYTHON_FILES=$(shell find $(TEMPLATE_DIR) -name '*.t')
-$(GENSOURCES) $(GENHEADERS): $(PYTHON_FILES)
+$(GENSOURCES): $(TEMPLATE_DIR)/base.c.t
+$(GENHEADERS): $(TEMPLATE_DIR)/base.h.t
 
 #
 # Generated files depend on python generators and the template
