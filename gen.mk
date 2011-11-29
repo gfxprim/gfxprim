@@ -36,7 +36,7 @@ CLEAN+=$(GENSOURCES) $(GENHEADERS)
 #
 # Some base dependencies
 #
-$(GENSOURCES): $(TEMPLATE_DIR)/base.c.t
+$(GENSOURCES): $(TEMPLATE_DIR)/base.c.t $(TEMPLATE_DIR)/common.c.t
 $(GENHEADERS): $(TEMPLATE_DIR)/base.h.t
 
 #

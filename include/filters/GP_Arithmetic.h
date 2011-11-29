@@ -16,41 +16,65 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2010 Jiri "BlueBear" Dluhos                            *
- *                         <jiri.bluebear.dluhos@gmail.com>                  *
- *                                                                           *
  * Copyright (C) 2009-2011 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
 /*
 
-  GP_Context filters.
+  Arithmetic filters - compute products of two bitmaps.
 
  */
 
-#ifndef GP_FILTERS_H
-#define GP_FILTERS_H
+#ifndef FILTERS_GP_ARITHMETIC_H
+#define FILTERS_GP_ARITHMETIC_H
 
-/* Filter per channel parameter passing interface */
-#include "filters/GP_FilterParam.h"
+#include "GP_Filter.h"
 
-/* Image rotations (90 180 270 grads) and mirroring */
-#include "filters/GP_Rotate.h"
+/*
+ * Addition filter.
+ *
+ * Produces clamped addtion.
+ */
+GP_Context *GP_FilterAddition(const GP_Context *src_a,
+                              const GP_Context *src_b,
+                              GP_Context *dst,
+                              GP_ProgressCallback *callback);
+/*
+ * Multiply filter.
+ *
+ * Produces clamped multiplication.
+ */
+GP_Context *GP_FilterMultiply(const GP_Context *src_a,
+                              const GP_Context *src_b,
+                              GP_Context *dst,
+                              GP_ProgressCallback *callback);
 
-/* Point filters, brightness, contrast ... */
-#include "filters/GP_Point.h"
+/*
+ * Difference filter.
+ *
+ * Produces symetric difference.
+ * eg. dst = abs(src_a - src_b)
+ */
+GP_Context *GP_FilterDifference(const GP_Context *src_a,
+                                const GP_Context *src_b,
+                                GP_Context *dst,
+                                GP_ProgressCallback *callback);
 
-/* Addition, difference, min, max ... */
-#include "filters/GP_Arithmetic.h"
+/*
+ * Maximum filter.
+ */
+GP_Context *GP_FilterMax(const GP_Context *src_a,
+                         const GP_Context *src_b,
+			 GP_Context *dst,
+			 GP_ProgressCallback *callback);
 
-/* Linear convolution based filters (mostly blurs) */
-#include "filters/GP_Linear.h"
+/*
+ * Minimum filter.
+ */
+GP_Context *GP_FilterMin(const GP_Context *src_a,
+                         const GP_Context *src_b,
+			 GP_Context *dst,
+			 GP_ProgressCallback *callback);
 
-/* Image scaling (resampling) */
-#include "filters/GP_Resize.h"
-
-/* Bitmap dithering */
-#include "filters/GP_Dither.h"
-
-#endif /* GP_FILTERS_H */
+#endif /* FILTERS_GP_ARITHMETIC_H */
