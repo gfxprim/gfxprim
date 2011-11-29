@@ -140,6 +140,7 @@ if __name__ ==  '__main__':
 	cfg = {'CC'          : ['gcc', 'Path/name of the C compiler'],
 	       'CFLAGS'      : ['-W -Wall -Wextra -fPIC -O2', 'C compiler flags'],
 	       'PYTHON_BIN'  : ['python', 'Path/name of python interpreter'],
+	       'SWIG'        : ['swig', 'Simplified Wrapper and Interface Generator'],
 	       'include_path': ['/usr/include', 'Path to the system headers']}
 
 	#

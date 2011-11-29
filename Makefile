@@ -1,5 +1,5 @@
 TOPDIR=.
-SUBDIRS=include libs tests pylib demos
+SUBDIRS=include libs tests pylib demos pywrap
 include include.mk
 
 #
