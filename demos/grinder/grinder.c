@@ -28,6 +28,7 @@
 #include "GP.h"
 
 #include "params.h"
+#include "histogram.h"
 
 static GP_ProgressCallback *progress_callback = NULL;
 
@@ -629,6 +630,29 @@ static GP_RetCode arithmetic(GP_Context **c, const char *params)
 	return GP_ESUCCESS;
 }
 
+/* histogram */
+
+static struct param histogram_params[] = {
+	{"file", PARAM_STR, "Filename of image to use.", NULL, NULL},
+	{NULL,  0, NULL, NULL, NULL}
+};
+
+static GP_RetCode histogram(GP_Context **c, const char *params)
+{
+	char *file = "histogram.png";
+
+	if (param_parse(params, histogram_params, "histogram", param_err, &file))
+		return GP_EINVAL;
+	
+	if (file == NULL) {
+		print_error("histogram: Filename missing");
+		return GP_EINVAL;
+	}
+
+	histogram_to_png(*c, file);
+	return GP_ESUCCESS;
+}
+
 /* filters */
 
 struct filter {
@@ -650,6 +674,7 @@ static struct filter filter_table[] = {
 	{"blur",       "gaussian blur", blur_params, blur},
 	{"dither",     "dithers bitmap", dither_params, dither},
 	{"arithmetic", "arithmetic operation", arithmetic_params, arithmetic},
+	{"histogram",  "save histogram into image file", histogram_params, histogram},
 	{"jpg",        "save jpg image", save_jpg_params, save_jpg},
 	{"png",        "save png image", save_png_params, save_png},
 	{NULL, NULL,   NULL, NULL}

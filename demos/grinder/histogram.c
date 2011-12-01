@@ -16,44 +16,66 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2010 Jiri "BlueBear" Dluhos                            *
- *                         <jiri.bluebear.dluhos@gmail.com>                  *
- *                                                                           *
  * Copyright (C) 2009-2011 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
-/*
+#include "histogram.h"
 
-  GP_Context filters.
+void histogram_to_png(const GP_Context *src, const char *filename)
+{
+	GP_FILTER_PARAMS(src->pixel_type, params);
+	
+	GP_FilterHistogramAlloc(src->pixel_type, params);
+	GP_FilterHistogram(src, params, NULL);
 
- */
+	unsigned int i, j;
 
-#ifndef GP_FILTERS_H
-#define GP_FILTERS_H
+	GP_Context *res = GP_ContextAlloc(257*4, 256, GP_PIXEL_RGB888);
+	
+	GP_Fill(res, 0xffffff);
 
-/* Filter per channel parameter passing interface */
-#include "filters/GP_FilterParam.h"
+	GP_Histogram *hist_r;
+	hist_r = (GP_FilterParamChannel(params, "R"))->val.ptr;
+	
+	for (i = 0; i < hist_r->len; i++)
+		GP_VLineXYH(res, i, 256, -255.00 * hist_r->hist[i] / hist_r->max + 0.5 , 0xff0000);
+	
+	GP_Histogram *hist_g;
+	hist_g = (GP_FilterParamChannel(params, "G"))->val.ptr;
+	
+	for (i = 0; i < hist_g->len; i++)
+		GP_VLineXYH(res, i+257, 256, -255.00 * hist_g->hist[i] / hist_g->max + 0.5 , 0x00ff00);
+	
+	GP_Histogram *hist_b;
+	hist_b = (GP_FilterParamChannel(params, "B"))->val.ptr;
+	
+	for (i = 0; i < hist_b->len; i++)
+		GP_VLineXYH(res, i+514, 256, -255.00 * hist_b->hist[i] / hist_b->max + 0.5 , 0x0000ff);
 
-/* Point filters, brightness, contrast ... */
-#include "filters/GP_Point.h"
+	uint32_t max = GP_MAX(hist_r->max, hist_g->max);
 
-/* Addition, difference, min, max ... */
-#include "filters/GP_Arithmetic.h"
+	max = GP_MAX(max, hist_b->max);
 
-/* Histograms, ... */
-#include "filters/GP_Stats.h"
+	for (i = 0; i < hist_r->len; i++) {
+		for (j = 0; j < hist_r->len; j++) {
+			GP_Pixel pix = 0;
+			
+			if (255 * hist_r->hist[i] / max + 0.5 > j)
+				pix |= 0xff0000;
+			
+			if (255 * hist_g->hist[i] / max + 0.5 > j)
+				pix |= 0x00ff00;
 
-/* Image rotations (90 180 270 grads) and mirroring */
-#include "filters/GP_Rotate.h"
+			if (255 * hist_b->hist[i] / max + 0.5 > j)
+				pix |= 0x0000ff;
 
-/* Linear convolution based filters (mostly blurs) */
-#include "filters/GP_Linear.h"
+			GP_PutPixel(res, i+771, 256-j, pix);
+		}
+	}
 
-/* Image scaling (resampling) */
-#include "filters/GP_Resize.h"
+	GP_SavePNG(filename, res, NULL);
 
-/* Bitmap dithering */
-#include "filters/GP_Dither.h"
-
-#endif /* GP_FILTERS_H */
+	GP_ContextFree(res);
+	GP_FilterHistogramFree(params);
+}

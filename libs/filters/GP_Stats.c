@@ -16,44 +16,72 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2010 Jiri "BlueBear" Dluhos                            *
- *                         <jiri.bluebear.dluhos@gmail.com>                  *
- *                                                                           *
  * Copyright (C) 2009-2011 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
-/*
+#include <string.h>
 
-  GP_Context filters.
+#include <GP_Debug.h>
 
- */
+#include "GP_Stats.h"
 
-#ifndef GP_FILTERS_H
-#define GP_FILTERS_H
+int GP_FilterHistogram_Raw(const GP_Context *src, GP_FilterParam histogram[],
+                           GP_ProgressCallback *callback);
 
-/* Filter per channel parameter passing interface */
-#include "filters/GP_FilterParam.h"
+int GP_FilterHistogram(const GP_Context *src, GP_FilterParam histogram[],
+                       GP_ProgressCallback *callback)
+{
+	int ret;
 
-/* Point filters, brightness, contrast ... */
-#include "filters/GP_Point.h"
+	ret = GP_FilterHistogram_Raw(src, histogram, callback);
 
-/* Addition, difference, min, max ... */
-#include "filters/GP_Arithmetic.h"
+	if (ret)
+		return ret;
 
-/* Histograms, ... */
-#include "filters/GP_Stats.h"
+	unsigned int i;
 
-/* Image rotations (90 180 270 grads) and mirroring */
-#include "filters/GP_Rotate.h"
+	for (i = 0; histogram[i].channel_name[0] != '\0'; i++) {
+		unsigned int j;
+		GP_Histogram *hist = histogram[i].val.ptr;
+	
+		hist->max = hist->hist[0];
+		hist->min = hist->hist[0];
 
-/* Linear convolution based filters (mostly blurs) */
-#include "filters/GP_Linear.h"
+		for (j = 1; j < hist->len; j++) {
+			if (hist->hist[j] > hist->max)
+				hist->max = hist->hist[j];
 
-/* Image scaling (resampling) */
-#include "filters/GP_Resize.h"
+			if (hist->hist[j] < hist->min)
+				hist->min = hist->hist[j];
+		}
+	}
 
-/* Bitmap dithering */
-#include "filters/GP_Dither.h"
+	return 0;
+}
 
-#endif /* GP_FILTERS_H */
+void GP_FilterHistogramAlloc(GP_PixelType type, GP_FilterParam params[])
+{
+	uint32_t i;
+
+	GP_FilterParamSetPtrAll(params, NULL);
+	
+	const GP_PixelTypeChannel *channels = GP_PixelTypes[type].channels;
+
+	for (i = 0; i < GP_PixelTypes[type].numchannels; i++) {
+		size_t chan_size = 1<<channels[i].size;
+
+		GP_Histogram *hist = malloc(sizeof(struct GP_Histogram) +
+		                            sizeof(uint32_t) * chan_size);
+	
+		if (hist == NULL) {
+			GP_FilterHistogramFree(params);
+			return;
+		}
+		
+		hist->len = chan_size;
+		memset(hist->hist, 0, sizeof(uint32_t) * chan_size);
+
+		(GP_FilterParamChannel(params, channels[i].name))->val.ptr = hist;
+	}
+}

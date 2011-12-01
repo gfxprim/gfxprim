@@ -142,6 +142,14 @@ void GP_FilterParamSetPtrAll(GP_FilterParam params[],
 		params[i].val.ptr = ptr;
 }
 
+void GP_FilterParamFreePtrAll(GP_FilterParam params[])
+{
+	unsigned int i;
+	
+	for (i = 0; params[i].channel_name[0] != '\0'; i++)
+		free(params[i].val.ptr);
+}
+
 void GP_FilterParamPrintInt(GP_FilterParam params[])
 {
 	unsigned int i;

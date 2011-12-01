@@ -16,44 +16,49 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2010 Jiri "BlueBear" Dluhos                            *
- *                         <jiri.bluebear.dluhos@gmail.com>                  *
- *                                                                           *
  * Copyright (C) 2009-2011 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
 /*
 
-  GP_Context filters.
+  Statistic filters.
 
  */
 
-#ifndef GP_FILTERS_H
-#define GP_FILTERS_H
+#ifndef FILTERS_GP_STATS_H
+#define FILTERS_GP_STATS_H
 
-/* Filter per channel parameter passing interface */
-#include "filters/GP_FilterParam.h"
+#include "GP_Filter.h"
 
-/* Point filters, brightness, contrast ... */
-#include "filters/GP_Point.h"
+typedef struct GP_Histogram {
+	uint32_t min;
+	uint32_t max;
+	uint32_t len;
+	uint32_t hist[];
+} GP_Histogram;
 
-/* Addition, difference, min, max ... */
-#include "filters/GP_Arithmetic.h"
+/*
+ * Histogram filter.
+ *
+ * The filter param is expected to hold pointers to struct GP_Histogram
+ */
+int GP_FilterHistogram(const GP_Context *src, GP_FilterParam histogram[],
+                       GP_ProgressCallback *callback);
 
-/* Histograms, ... */
-#include "filters/GP_Stats.h"
+/*
+ * Allocate and initalize struct GP_Histogram for each channel and stores the
+ * pointer to filter params array. The pixel type must match the params[]
+ * channels.
+ */
+void GP_FilterHistogramAlloc(GP_PixelType type, GP_FilterParam params[]);
 
-/* Image rotations (90 180 270 grads) and mirroring */
-#include "filters/GP_Rotate.h"
+/*
+ * Free the histogram arrays.
+ */
+static inline void GP_FilterHistogramFree(GP_FilterParam params[])
+{
+	GP_FilterParamFreePtrAll(params);
+}
 
-/* Linear convolution based filters (mostly blurs) */
-#include "filters/GP_Linear.h"
-
-/* Image scaling (resampling) */
-#include "filters/GP_Resize.h"
-
-/* Bitmap dithering */
-#include "filters/GP_Dither.h"
-
-#endif /* GP_FILTERS_H */
+#endif /* FILTERS_GP_STATS_H */

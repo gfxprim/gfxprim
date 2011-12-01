@@ -16,44 +16,15 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2010 Jiri "BlueBear" Dluhos                            *
- *                         <jiri.bluebear.dluhos@gmail.com>                  *
- *                                                                           *
  * Copyright (C) 2009-2011 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
-/*
+#ifndef HISTOGRAM_H
+#define HISTOGRAM_H
 
-  GP_Context filters.
+#include <GP.h>
 
- */
+void histogram_to_png(const GP_Context *src, const char *filename);
 
-#ifndef GP_FILTERS_H
-#define GP_FILTERS_H
-
-/* Filter per channel parameter passing interface */
-#include "filters/GP_FilterParam.h"
-
-/* Point filters, brightness, contrast ... */
-#include "filters/GP_Point.h"
-
-/* Addition, difference, min, max ... */
-#include "filters/GP_Arithmetic.h"
-
-/* Histograms, ... */
-#include "filters/GP_Stats.h"
-
-/* Image rotations (90 180 270 grads) and mirroring */
-#include "filters/GP_Rotate.h"
-
-/* Linear convolution based filters (mostly blurs) */
-#include "filters/GP_Linear.h"
-
-/* Image scaling (resampling) */
-#include "filters/GP_Resize.h"
-
-/* Bitmap dithering */
-#include "filters/GP_Dither.h"
-
-#endif /* GP_FILTERS_H */
+#endif /* HISTOGRAM_H */
