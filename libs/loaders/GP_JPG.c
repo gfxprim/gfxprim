@@ -34,10 +34,14 @@
 #include <stdio.h>
 #include <setjmp.h>
 
-#include <jpeglib.h>
+#include "../../config.h"
+#include "core/GP_Debug.h"
 
 #include "GP_JPG.h"
-#include "core/GP_Debug.h"
+
+#ifdef HAVE_JPEG
+
+#include <jpeglib.h>
 
 GP_RetCode GP_OpenJPG(const char *src_path, FILE **f)
 {
@@ -285,3 +289,34 @@ err1:
 	unlink(dst_path);
 	return ret;
 }
+
+#else
+
+GP_RetCode GP_OpenJPG(const char GP_UNUSED(*src_path),
+                      FILE GP_UNUSED(**f))
+{
+	return GP_ENOIMPL;
+}
+
+GP_RetCode GP_ReadJPG(FILE GP_UNUSED(*f),
+                      GP_Context GP_UNUSED(**res),
+                      GP_ProgressCallback GP_UNUSED(*callback))
+{
+	return GP_ENOIMPL;
+}
+
+GP_RetCode GP_LoadJPG(const char GP_UNUSED(*src_path),
+                      GP_Context GP_UNUSED(**res),
+                      GP_ProgressCallback GP_UNUSED(*callback))
+{
+	return GP_ENOIMPL;
+}
+
+GP_RetCode GP_SaveJPG(const char GP_UNUSED(*dst_path),
+                      const GP_Context GP_UNUSED(*src),
+                      GP_ProgressCallback GP_UNUSED(*callback))
+{
+	return GP_ENOIMPL;
+}
+
+#endif /* HAVE_JPEG */

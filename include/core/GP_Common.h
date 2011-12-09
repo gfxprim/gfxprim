@@ -19,12 +19,12 @@
  * Copyright (C) 2009-2010 Jiri "BlueBear" Dluhos                            *
  *                         <jiri.bluebear.dluhos@gmail.com>                  *
  *                                                                           *
- * Copyright (C) 2009-2010 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2011 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
-#ifndef GP_COMMON_H
-#define GP_COMMON_H
+#ifndef CORE_GP_COMMON_H
+#define CORE_GP_COMMON_H
 
 #include <stdio.h>
 #include <stdint.h>
@@ -69,6 +69,8 @@
 		#define unlikely(x)	x
 	#endif
 #endif
+
+#define GP_UNUSED(x) (x)__attribute__ ((unused))
 
 /*
  * Internal macros with common code for GP_ABORT, GP_ASSERT and GP_CHECK.
@@ -149,4 +151,4 @@
 	(_a > 0) ? 1 : ((_a < 0) ? -1 : 0); \
 })
 
-#endif /* GP_COMMON_H */
+#endif /* CORE_GP_COMMON_H */

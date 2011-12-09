@@ -32,10 +32,14 @@
 #include <errno.h>
 #include <string.h>
 
-#include <png.h>
+#include "../../config.h"
+#include "core/GP_Debug.h"
 
 #include "GP_PNG.h"
-#include "core/GP_Debug.h"
+
+#ifdef HAVE_LIBPNG
+
+#include <png.h>
 
 GP_RetCode GP_OpenPNG(const char *src_path, FILE **f)
 {
@@ -305,3 +309,34 @@ err1:
 	unlink(dst_path);
 	return ret;
 }
+
+#else
+
+GP_RetCode GP_OpenPNG(const char GP_UNUSED(*src_path),
+                      FILE GP_UNUSED(**f))
+{
+	return GP_ENOIMPL;
+}
+
+GP_RetCode GP_ReadPNG(FILE GP_UNUSED(*f),
+                      GP_Context GP_UNUSED(**res),
+                      GP_ProgressCallback GP_UNUSED(*callback))
+{
+	return GP_ENOIMPL;
+}
+
+GP_RetCode GP_LoadPNG(const char GP_UNUSED(*src_path),
+                      GP_Context GP_UNUSED(**res),
+                      GP_ProgressCallback GP_UNUSED(*callback))
+{
+	return GP_ENOIMPL;
+}
+
+GP_RetCode GP_SavePNG(const char GP_UNUSED(*dst_path),
+                      const GP_Context GP_UNUSED(*src),
+                      GP_ProgressCallback GP_UNUSED(*callback))
+{
+	return GP_ENOIMPL;
+}
+
+#endif /* HAVE_LIBPNG */
