@@ -97,7 +97,7 @@ class libraries:
 	#
 	# Writes '#define HAVE_XXX_H' into passed file
 	#
-	def write(self, f):
+	def write_config_h(self, f):
 		for i in self.libraries:
 			f.write("/*\n * {0}\n */\n".format(i[1]))
 			if self.results[i[0]]:
@@ -105,6 +105,14 @@ class libraries:
 			else:
 				f.write("//#define HAVE_{0}\n".format(i[0].upper()))
 			f.write("\n")
+
+	#
+	# Writes LDFLAGS and CFLAGS into passed file
+	#
+	def write_config_mk(self, f):
+		for i in self.libraries:
+			if self.results[i[0]]:
+				f.write("# {0}\nCFLAGS+={1}\nLDFLAGS+={2}\n".format(i[0], i[3], i[4]))
 
 def basic_checks(cfg):
 	sys.stderr.write("Basic checks\n")
@@ -121,7 +129,7 @@ def basic_checks(cfg):
 def write_config_h(cfg, libs):
 	f = open("config.h", "w")
 	f.write("#ifndef CONFIG_H\n#define CONFIG_H\n\n")
-	libs.write(f);
+	libs.write_config_h(f);
 	f.write("#endif /* CONFIG_H */\n");
 	sys.stderr.write("Config 'config.h' written\n")
 	f.close()
@@ -129,7 +137,8 @@ def write_config_h(cfg, libs):
 def write_config_mk(cfg, libs):
 	f = open('config.gen.mk', 'w')
 	for i in cfg:
-		f.write("#{0}\n{1}={2}\n".format(cfg[i][1], i, cfg[i][0]))
+		f.write("# {0}\n{1}={2}\n".format(cfg[i][1], i, cfg[i][0]))
+	libs.write_config_mk(f);
 	f.close()
 	sys.stderr.write("Config 'config.gen.mk' written\n")
 
@@ -145,15 +154,20 @@ if __name__ ==  '__main__':
 	#
 	# Library detection/enable disable
 	#
+	# name, description, [detection], cflags, ldflags
+	#
 	l = libraries([["libpng", 
                         "Portable Network Graphics Library",
-	                [header_exists, "png.h"]],
+	                [header_exists, "png.h"], "", "-lpng"],
                        ["libsdl",
 	                "Simple Direct Media Layer",
-	                [header_exists, "SDL/SDL.h"]],
+	                [header_exists, "SDL/SDL.h"], "", ""],
                        ["jpeg",
 	                "Library to load, handle and manipulate images in the JPEG format",
-	                [header_exists, "jpeglib.h"]]], cfg)
+	                [header_exists, "jpeglib.h"], "", "-ljpeg"],
+	               ["freetype",
+		        "A high-quality and portable font engine",
+			[header_exists, "ft2build.h"], "", ""]], cfg)
 	
 	parser = OptionParser();
 	
