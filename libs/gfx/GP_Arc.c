@@ -32,20 +32,19 @@
 GP_DEF_DRAW_FN_PER_BPP(GP_ArcSegment_Raw, DEF_ARCSEGMENT_FN)
 
 void GP_ArcSegment_Raw(GP_Context *context, GP_Coord xcenter, GP_Coord ycenter,
-		GP_Size a, GP_Size b, int quadrant_mask,
+		GP_Size a, GP_Size b, int direction,
 		double start, double end,
 		GP_Pixel pixel)
 {
 	GP_CHECK_CONTEXT(context);
 
 	GP_FN_PER_BPP_CONTEXT(GP_ArcSegment_Raw, context, context,
-	                      xcenter, ycenter, a, b, quadrant_mask,
-	                      start, end,
-	                      pixel);
+	                      xcenter, ycenter, a, b, direction,
+	                      start, end, pixel);
 }
 
 void GP_ArcSegment(GP_Context *context, GP_Coord xcenter, GP_Coord ycenter,
-		GP_Size a, GP_Size b, int quadrant_mask,
+		GP_Size a, GP_Size b, int direction,
 		double start, double end,
 		GP_Pixel pixel)
 {
@@ -55,7 +54,6 @@ void GP_ArcSegment(GP_Context *context, GP_Coord xcenter, GP_Coord ycenter,
 	GP_TRANSFORM_POINT(context, xcenter, ycenter);
 	GP_TRANSFORM_SWAP(context, a, b);
 	
-	GP_ArcSegment_Raw(context, xcenter, ycenter, a, b, quadrant_mask,
-			start, end,
-			pixel);
+	GP_ArcSegment_Raw(context, xcenter, ycenter, a, b, direction,
+			start, end, pixel);
 }
