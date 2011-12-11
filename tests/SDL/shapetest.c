@@ -72,7 +72,8 @@ static int show_axes = 1;
 #define SHAPE_ELLIPSE	4
 #define SHAPE_RECTANGLE	5
 #define SHAPE_TETRAGON  6
-#define SHAPE_LAST	6
+#define SHAPE_ARC	7
+#define SHAPE_LAST	7
 static int shape = SHAPE_FIRST;
 
 /* Variants in coordinates, if applicable */
@@ -186,6 +187,12 @@ void draw_testing_ellipse(int x, int y, int xradius, int yradius)
 		GP_Ellipse(&context, x, y, xradius, yradius, white);
 }
 
+void draw_testing_arc(int x, int y, int xradius, int yradius)
+{
+	GP_ArcSegment(&context, x, y, xradius, yradius, GP_QUADRANT_ALL,
+			M_PI/3, 0, red);
+}
+
 void draw_testing_rectangle(int x, int y, int xradius, int yradius)
 {
 	int x0 = x - xradius, y0 = y - yradius;
@@ -269,6 +276,10 @@ void redraw_screen(void)
 	case SHAPE_TETRAGON:
 		draw_testing_tetragon(center_x, center_y, xradius, yradius);
 		title = "TETRAGON";
+		break;
+	case SHAPE_ARC:
+		draw_testing_arc(center_x, center_y, xradius, yradius);
+		title = "ARC";
 		break;
 	}
 

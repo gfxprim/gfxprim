@@ -29,26 +29,24 @@
 #include "algo/Arc.algo.h"
 
 /* Generate drawing functions for various bit depths. */
-GP_DEF_DRAW_FN_PER_BPP(GP_Arc_Raw, DEF_ARC_FN)
+GP_DEF_DRAW_FN_PER_BPP(GP_ArcSegment_Raw, DEF_ARCSEGMENT_FN)
 
-void GP_Arc_Raw(GP_Context *context, GP_Coord xcenter, GP_Coord ycenter,
+void GP_ArcSegment_Raw(GP_Context *context, GP_Coord xcenter, GP_Coord ycenter,
 		GP_Size a, GP_Size b, int quadrant_mask,
-		int low_dx, int low_dy,
-		int high_dx, int high_dy,
+		double start, double end,
 		GP_Pixel pixel)
 {
 	GP_CHECK_CONTEXT(context);
 
-	GP_FN_PER_BPP_CONTEXT(GP_Arc_Raw, context, context,
+	GP_FN_PER_BPP_CONTEXT(GP_ArcSegment_Raw, context, context,
 	                      xcenter, ycenter, a, b, quadrant_mask,
-	                      low_dx, low_dy, high_dx, high_dy,
+	                      start, end,
 	                      pixel);
 }
 
-void GP_Arc(GP_Context *context, GP_Coord xcenter, GP_Coord ycenter,
+void GP_ArcSegment(GP_Context *context, GP_Coord xcenter, GP_Coord ycenter,
 		GP_Size a, GP_Size b, int quadrant_mask,
-		int low_dx, int low_dy,
-		int high_dx, int high_dy,
+		double start, double end,
 		GP_Pixel pixel)
 {
 	GP_CHECK_CONTEXT(context);
@@ -57,7 +55,7 @@ void GP_Arc(GP_Context *context, GP_Coord xcenter, GP_Coord ycenter,
 	GP_TRANSFORM_POINT(context, xcenter, ycenter);
 	GP_TRANSFORM_SWAP(context, a, b);
 	
-	GP_Arc_Raw(context, xcenter, ycenter, a, b, quadrant_mask,
-			low_dx, low_dy, high_dx, high_dy,
+	GP_ArcSegment_Raw(context, xcenter, ycenter, a, b, quadrant_mask,
+			start, end,
 			pixel);
 }

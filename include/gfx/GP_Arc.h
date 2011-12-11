@@ -28,21 +28,32 @@
 
 #include "core/GP_Context.h"
 
-#define GP_QUADRANT_MINUSMINUS	1
-#define GP_QUADRANT_PLUSMINUS	2
-#define GP_QUADRANT_MINUSPLUS	4
-#define GP_QUADRANT_PLUSPLUS	8
+#include <math.h>
 
-void GP_Arc(GP_Context *context, GP_Coord xcenter, GP_Coord ycenter,
+/*
+ * Bits for quadrant mask used with GP_ArcSegment().
+ * Quadrants are ordered using the standard mathematical order, i.e.
+ * the top right quadrant (where x > 0 and y < 0) is the first (#0),
+ * then the top left, then the bottom left, and then the bottom right.
+ */
+#define GP_QUADRANT_0		1
+#define GP_QUADRANT_1		2
+#define GP_QUADRANT_2		4
+#define GP_QUADRANT_3		8
+#define GP_QUADRANT_MINUSMINUS	GP_QUADRANT_2
+#define GP_QUADRANT_PLUSMINUS	GP_QUADRANT_0
+#define GP_QUADRANT_MINUSPLUS	GP_QUADRANT_1
+#define GP_QUADRANT_PLUSPLUS	GP_QUADRANT_3
+#define GP_QUADRANT_ALL		15
+
+void GP_ArcSegment(GP_Context *context, GP_Coord xcenter, GP_Coord ycenter,
 		GP_Size a, GP_Size b, int quadrant_mask,
-		int low_dx, int low_dy,
-		int high_dx, int high_dy,
+		double start, double end,
 		GP_Pixel pixel);
 
-void GP_Arc_Raw(GP_Context *context, GP_Coord xcenter, GP_Coord ycenter,
+void GP_ArcSegment_Raw(GP_Context *context, GP_Coord xcenter, GP_Coord ycenter,
 		GP_Size a, GP_Size b, int quadrant_mask,
-		int low_dx, int low_dy,
-		int high_dx, int high_dy,
+		double start, double end,
 		GP_Pixel pixel);
 
 #endif /* GP_ARC_H */
