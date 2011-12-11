@@ -2,7 +2,7 @@ TOPDIR=../..
 
 LIBNAME=core
 TESTSUITE=core_suite
-LDLIBS+=-lGP -L$(TOPDIR)/build/ -lcheck -lpng -ljpeg -lm -ldl
+LDLIBS+=-lGP -L$(TOPDIR)/build/ -lcheck -lm -ldl
 GENSOURCES+=GP_Convert.test.gen.c GP_WritePixel.test.gen.c
 
 all: $(TESTSUITE)
