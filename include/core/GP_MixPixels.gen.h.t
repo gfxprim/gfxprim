@@ -20,8 +20,8 @@ Macros to mix two pixels accordingly to percentage.
 %% for c in pt.chanslist
 	GP_Pixel {{ c[0] }}; \
 \
-	{{ c[0] }}  = GP_Pixel_GET_{{ c[0] }}_{{ pt.name }}(pix1) * perc; \
-	{{ c[0] }} += GP_Pixel_GET_{{ c[0] }}_{{ pt.name }}(pix2) * (255 - perc); \
+	{{ c[0] }}  = GP_Pixel_GET_{{ c[0] }}_{{ pt.name }}(pix1) * (perc); \
+	{{ c[0] }} += GP_Pixel_GET_{{ c[0] }}_{{ pt.name }}(pix2) * (255 - (perc)); \
 	{{ c[0] }} = ({{ c[0] }} + 128) / 255; \
 \
 %% endfor
