@@ -46,6 +46,7 @@
 #include "GP_Triangle.h"
 #include "GP_Tetragon.h"
 #include "GP_Circle.h"
+#include "GP_Arc.h"
 #include "GP_Ellipse.h"
 #include "GP_Arc.h"
 #include "GP_Polygon.h"
