@@ -197,9 +197,9 @@ int main(int argc, char *argv[])
 	if (argc > 1) {
 		GP_RetCode err;
 		fprintf(stderr, "\nLoading font '%s'\n", argv[1]);
-		err = GP_FontLoad(&font, argv[1]);
+		font = GP_FontFreeTypeLoad(argv[1], 17, 20);
 
-		if (err) {
+		if (font == NULL) {
 			fprintf(stderr, "Error: %s\n", GP_RetCodeName(err));
 			return 1;
 		}

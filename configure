@@ -167,7 +167,7 @@ if __name__ ==  '__main__':
 	                [header_exists, "jpeglib.h"], "", "-ljpeg"],
 	               ["freetype",
 		        "A high-quality and portable font engine",
-			[header_exists, "ft2build.h"], "", ""]], cfg)
+			[header_exists, "ft2build.h"], "", "`freetype-config --libs`"]], cfg)
 	
 	parser = OptionParser();
 	

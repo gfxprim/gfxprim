@@ -126,13 +126,12 @@ GP_RetCode GP_FontLoad(GP_Font **pfont, const char *filename)
 	if (pfont == NULL || filename == NULL)
 		return GP_ENULLPTR;
 
-	/* allocate the font metadata structure */
-	GP_Font *font = (GP_Font *) calloc(1, sizeof(*font));
+	GP_Font *font = malloc(sizeof(*font));
 	if (font == NULL)
 		return GP_ENOMEM;
 
-	/* open the font file */
 	FILE *f = fopen(filename, "r");
+	
 	if (f == NULL) {
 		result = GP_ENOENT;
 		goto bad;
