@@ -189,8 +189,8 @@ void draw_testing_ellipse(int x, int y, int xradius, int yradius)
 
 void draw_testing_arc(int x, int y, int xradius, int yradius)
 {
-	GP_ArcSegment(&context, x, y, xradius, yradius, GP_QUADRANT_ALL,
-			M_PI/3, 0, red);
+	GP_ArcSegment(&context, x, y, xradius, yradius, -1,
+			M_PI - M_PI/8.0, M_PI/4.0, red);
 }
 
 void draw_testing_rectangle(int x, int y, int xradius, int yradius)

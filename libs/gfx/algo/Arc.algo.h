@@ -30,8 +30,13 @@
  */
 
 /*
- * This macro defines a function that draws a single-quadrant
- * (optionally mirrored) segment of an arc.
+ * This macro defines a function that draws a segment of an arc within
+ * two horizontal quadrants. For a larger arc, two calls are needed.
+ *
+ * The 'direction' parameter specifies which two quadrants to work in:
+ * if <0, the top two quadrants (y < 0) are used, if >0, the bottom two
+ * (y > 0) are used.
+ *
  * Arguments:
  *     CONTEXT_T - user-defined type of drawing context (passed to PUTPIXEL)
  *     PIXVAL_T  - user-defined pixel value type (passed to PUTPIXEL)
@@ -40,19 +45,18 @@
  */
 #define DEF_ARCSEGMENT_FN(FN_NAME, CONTEXT_T, PIXVAL_T, PUTPIXEL) \
 void FN_NAME(CONTEXT_T context, int xcenter, int ycenter, \
-	unsigned int a, unsigned int b, int quadrant_mask, \
+	unsigned int a, unsigned int b, int direction, \
 	double start, double end, PIXVAL_T pixval) \
 { \
 	/* Precompute quadratic terms. */ \
 	int a2 = a*a; \
 	int b2 = b*b; \
 \
-	double phi_min = GP_MIN(start, end); \
-	double phi_max = GP_MAX(start, end); \
-	int xmin = (int)(cos(start)*a); \
-	int ymin = (int)(sin(start)*b); \
-	int xmax = (int)(cos(end)*a); \
-	int ymax = (int)(sin(end)*b); \
+	/* Compute minimum and maximum value of X from the angles. */ \
+	int x1 = (int)(cos(start)*a); \
+	int x2 = (int)(cos(end)*a); \
+	int xmin = GP_MIN(x1, x2); \
+	int xmax = GP_MAX(x1, x2); \
 \
 	int x, y, error; \
 	for (x = 0, error = -b2*a, y = b; y >= 0; y--) { \
@@ -62,42 +66,42 @@ void FN_NAME(CONTEXT_T context, int xcenter, int ycenter, \
 			error += 2*x*b2 + b2; \
 			x++; \
 \
-			if (quadrant_mask & GP_QUADRANT_MINUSMINUS && \
-					(-x+1) >= xmin && (-x+1) <= xmax) { \
-				PUTPIXEL(context, xcenter-x+1, ycenter-y, pixval); \
+			if (direction < 0) { \
+				if ((-x+1) >= xmin && (-x+1) <= xmax) { \
+					PUTPIXEL(context, xcenter-x+1, ycenter-y, pixval); \
+				} \
+				if ((x-1) >= xmin && (x-1) <= xmax) { \
+					PUTPIXEL(context, xcenter+x-1, ycenter-y, pixval); \
+				} \
 			} \
-			if (quadrant_mask & GP_QUADRANT_PLUSMINUS && \
-					(x-1) >= xmin && (x-1) <= xmax) { \
-				PUTPIXEL(context, xcenter+x-1, ycenter-y, pixval); \
-			} \
-			if (quadrant_mask & GP_QUADRANT_MINUSPLUS && \
-					(-x+1) >= xmin && (-x+1) <= xmax) { \
-				PUTPIXEL(context, xcenter-x+1, ycenter+y, pixval); \
-			} \
-			if (quadrant_mask & GP_QUADRANT_PLUSPLUS && \
-					(x-1) >= xmin && (x-1) <= xmax) { \
-				PUTPIXEL(context, xcenter+x-1, ycenter+y, pixval); \
+			if (direction > 0) { \
+				if ((-x+1) >= xmin && (-x+1) <= xmax) { \
+					PUTPIXEL(context, xcenter-x+1, ycenter+y, pixval); \
+				} \
+				if ((x-1) >= xmin && (x-1) <= xmax) { \
+					PUTPIXEL(context, xcenter+x-1, ycenter+y, pixval); \
+				} \
 			} \
 		} \
 \
 		/* Calculate error(y-1) from error(y). */ \
 		error += -2*y*a2 + a2; \
 \
-		if (quadrant_mask & GP_QUADRANT_MINUSMINUS && \
-				(-x+1) >= xmin && (-x+1) <= xmax) { \
-			PUTPIXEL(context, xcenter-x+1, ycenter-y, pixval); \
+		if (direction < 0) { \
+			if ((-x+1) >= xmin && (-x+1) <= xmax) { \
+				PUTPIXEL(context, xcenter-x+1, ycenter-y, pixval); \
+			} \
+			if ((x-1) >= xmin && (x-1) <= xmax) { \
+				PUTPIXEL(context, xcenter+x-1, ycenter-y, pixval); \
+			} \
 		} \
-		if (quadrant_mask & GP_QUADRANT_PLUSMINUS && \
-				(x-1) >= xmin && (x-1) <= xmax) { \
-			PUTPIXEL(context, xcenter+x-1, ycenter-y, pixval); \
-		} \
-		if (quadrant_mask & GP_QUADRANT_MINUSPLUS && \
-				(-x+1) >= xmin && (-x+1) <= xmax) { \
-			PUTPIXEL(context, xcenter-x+1, ycenter+y, pixval); \
-		} \
-		if (quadrant_mask & GP_QUADRANT_PLUSPLUS && \
-				(x-1) >= xmin && (x-1) <= xmax) { \
-			PUTPIXEL(context, xcenter+x-1, ycenter+y, pixval); \
+		if (direction > 0) { \
+			if ((-x+1) >= xmin && (-x+1) <= xmax) { \
+				PUTPIXEL(context, xcenter-x+1, ycenter+y, pixval); \
+			} \
+			if ((x-1) >= xmin && (x-1) <= xmax) { \
+				PUTPIXEL(context, xcenter+x-1, ycenter+y, pixval); \
+			} \
 		} \
 	} \
 }
