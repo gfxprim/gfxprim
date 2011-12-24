@@ -44,10 +44,12 @@ static void text_draw_1BPP_{{ pt.name }}(GP_Context *context, GP_TextStyle *styl
 		
 				unsigned int x_start = x + (i + glyph->bearing_x) * x_mul;
 
-				if (bit)
-					for (k = 0; k < style->pixel_ymul; k++)
-						GP_HLine(context, x_start, x_start + style->pixel_xmul - 1,
-						            y - (glyph->bearing_y - style->font->ascend) * y_mul, fg);
+				if (!bit)
+					continue;
+				
+				for (k = 0; k < style->pixel_ymul; k++)
+					GP_HLine(context, x_start, x_start + style->pixel_xmul - 1,
+					         y - (glyph->bearing_y - style->font->ascend) * y_mul, fg);
 			}
 
 			y += style->pixel_ymul + style->pixel_yspace;
@@ -105,6 +107,9 @@ static void text_draw_8BPP_{{ pt.name }}(GP_Context *context, GP_TextStyle *styl
 				uint8_t gray = glyph->bitmap[i + j * glyph->width];
 		
 				unsigned int x_start = x + (i + glyph->bearing_x) * x_mul;
+				
+				if (!gray)
+					continue;
 
 				for (k = 0; k < style->pixel_ymul; k++)
 					GP_HLine(context, x_start, x_start + style->pixel_xmul - 1,

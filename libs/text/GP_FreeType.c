@@ -85,8 +85,6 @@ GP_FontFace *GP_FontFaceLoad(const char *path, uint32_t width, uint32_t height)
 
 	font->glyph_bitmap_format = GP_FONT_BITMAP_8BPP;
 	font->charset = GP_CHARSET_7BIT;
-	font->ascend  = face->ascender>>6;
-	font->descend = -(face->descender>>6);
 
 	/* Count glyph data size */
 	unsigned int i;
@@ -134,6 +132,8 @@ GP_FontFace *GP_FontFaceLoad(const char *path, uint32_t width, uint32_t height)
 	
 	font->max_glyph_width = 0;
 	font->max_glyph_advance = 0;
+	font->ascend  = 0;
+	font->descend = 0;
 
 	for (i = 0x20; i < 0x7f; i++) {
 		FT_UInt glyph_idx = FT_Get_Char_Index(face, i);
@@ -163,11 +163,21 @@ GP_FontFace *GP_FontFaceLoad(const char *path, uint32_t width, uint32_t height)
 		glyph_bitmap->bearing_y = glyph->bitmap_top;
 		glyph_bitmap->advance_x = (glyph->advance.x + 32)>>6;
 
+		int16_t width = glyph_bitmap->bearing_x + glyph_bitmap->width;
+		int16_t ascend = glyph_bitmap->bearing_y;
+		int16_t descend = glyph_bitmap->height - ascend;
+
+		if (font->ascend < ascend)
+			font->ascend = ascend;
+		
+		if (font->descend < descend)
+			font->descend = descend;
+
 		if (font->max_glyph_advance < glyph_bitmap->advance_x)
 			font->max_glyph_advance = glyph_bitmap->advance_x;
 
-		if (font->max_glyph_width < glyph_bitmap->bearing_x + glyph_bitmap->width)
-			font->max_glyph_width = glyph_bitmap->bearing_x + glyph_bitmap->width;
+		if (font->max_glyph_width < width)
+			font->max_glyph_width = width;
 
 		int x, y;
 	

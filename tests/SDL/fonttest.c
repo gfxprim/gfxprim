@@ -137,7 +137,7 @@ void redraw_screen(void)
 			16, SPACING*i + 16,
 			GP_TextWidth(&style, test_string),
 			GP_FontHeight(style.font),
-			red_pixel);
+			dark_gray_pixel);
 
 		GP_RectXYWH(&context,
 			15, SPACING*i + 15,
@@ -146,7 +146,7 @@ void redraw_screen(void)
 			blue_pixel);
 
 		GP_Text(&context, &style, 16, SPACING*i + 16, align,
-		        white_pixel, red_pixel, test_string);
+		        white_pixel, dark_gray_pixel, test_string);
 		
 		style.pixel_xmul = 2;
 		style.pixel_ymul = 2;
@@ -229,7 +229,7 @@ int main(int argc, char *argv[])
 
 	if (argc > 1) {
 		fprintf(stderr, "\nLoading font '%s'\n", argv[1]);
-		font = GP_FontFaceLoad(argv[1], 13, 19);
+		font = GP_FontFaceLoad(argv[1], 12, 16);
 	}
 
 	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) != 0) {

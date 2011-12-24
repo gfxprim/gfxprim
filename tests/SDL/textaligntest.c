@@ -30,20 +30,18 @@
 #include "GP.h"
 #include "GP_SDL.h"
 
-/* the display */
 SDL_Surface *display = NULL;
 GP_Context context;
 
-/* precomputed color pixels in display format */
 static GP_Pixel black_pixel, red_pixel, yellow_pixel, green_pixel, blue_pixel,
 		darkgray_pixel;
 
-/* draw using proportional font? */
-static int flag_proportional = 0;
+static int font_flag = 0;
 
-/* center of the screen */
 static int X = 640;
 static int Y = 480;
+
+GP_FontFace *font = NULL;
 
 void redraw_screen(void)
 {
@@ -57,19 +55,17 @@ void redraw_screen(void)
 
 	GP_TextStyle style = GP_DEFAULT_TEXT_STYLE;
 
-	if (flag_proportional)
+	switch (font_flag) {
+	case 0:
 		style.font = &GP_DefaultProportionalFont;
-	else
+	break;
+	case 1:
 		style.font = &GP_DefaultConsoleFont;
-
-	style.pixel_xspace = 4;
-	style.pixel_yspace = 4;
-
-	//GP_BoxCenteredText(&context, &style, 0, 0, X, Y,
-	//                 "Hello world!", darkgray_pixel);
-
-	style.pixel_xspace = 0;
-	style.pixel_yspace = 0;
+	break;
+	case 2:
+		style.font = font;
+	break;
+	}
 
 	GP_Text(&context, &style, X/2, Y/2, GP_ALIGN_LEFT|GP_VALIGN_BELOW,
 	        yellow_pixel, black_pixel, "bottom left");
@@ -98,7 +94,15 @@ void event_loop(void)
 		case SDL_KEYDOWN:
 			switch (event.key.keysym.sym) {
 			case SDLK_SPACE:
-				flag_proportional = !flag_proportional;
+				font_flag += 1;
+
+				if (font) {
+					if (font_flag >= 3)
+						font_flag = 0;
+				} else {
+					if (font_flag >= 2)
+						font_flag = 0;
+				}
 			break;
 			case SDLK_x:
 				context.x_swap = !context.x_swap;
@@ -134,15 +138,18 @@ void print_instructions(void)
 	printf("    R ................... reverse X and Y\n");
 }
 
-int main(void)
+int main(int argc, char *argv[])
 {
-	/* Initialize SDL */
+	GP_SetDebugLevel(10);
+
+	if (argc > 1)
+		font = GP_FontFaceLoad(argv[1], 12, 16);
+	
 	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) != 0) {
 		fprintf(stderr, "Could not initialize SDL: %s\n", SDL_GetError());
 		return 1;
 	}
 
-	/* Create a window with a software back surface */
 	display = SDL_SetVideoMode(X, Y, 0, SDL_SWSURFACE);
 	if (display == NULL) {
 		fprintf(stderr, "Could not open display: %s\n", SDL_GetError());
@@ -151,14 +158,11 @@ int main(void)
 
 	print_instructions();
 
-	/* Set up a clipping rectangle to test proper clipping of pixels */
 	SDL_Rect clip_rect = {10, 10, X-10, Y-10};
 	SDL_SetClipRect(display, &clip_rect);
 
-	/* Initialize a GP context from the SDL display */
 	GP_SDL_ContextFromSurface(&context, display);
 
-	/* Load colors suitable for the display */
 	black_pixel     = GP_ColorToContextPixel(GP_COL_BLACK, &context);
 	red_pixel       = GP_ColorToContextPixel(GP_COL_RED, &context);
 	blue_pixel      = GP_ColorToContextPixel(GP_COL_BLUE, &context);

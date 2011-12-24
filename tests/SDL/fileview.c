@@ -215,7 +215,7 @@ int main(int argc, char *argv[])
 	
 
 	if (argc > 2)
-		font = GP_FontFaceLoad(argv[2], 17, 23);
+		font = GP_FontFaceLoad(argv[2], 12, 17);
 
 	if (!read_file_head(argv[1]))
 		return 1;
