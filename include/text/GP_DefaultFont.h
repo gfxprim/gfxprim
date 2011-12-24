@@ -20,11 +20,13 @@
  *                                                                           *
  *****************************************************************************/
 
-#ifndef TEXT_GP_FREE_TYPE_H
-#define TEXT_GP_FREE_TYPE_H
+#ifndef TEXT_GP_DEFAULT_FONT_H
+#define TEXT_GP_DEFAULT_FONT_H
 
-#include "GP_TextStyle.h"
-#include "GP_TextMetric.h"
+#include "GP_Font.h"
 
+extern const GP_FontFace GP_DefaultConsoleFont;
 
-#endif /* TEXT_GP_FREE_TYPE_H */
+extern const GP_FontFace GP_DefaultProportionalFont;
+
+#endif /* TEXT_GP_DEFAULT_FONT_H */

@@ -24,14 +24,13 @@
 #include FT_FREETYPE_H
 
 #include "core/GP_Debug.h"
-#include "GP_FreeType.h"
+#include "GP_Font.h"
 
-GP_Font *GP_FontFreeTypeLoad(const char *path, uint32_t width, uint32_t height)
+GP_FontFace *GP_FontFaceLoad(const char *path, uint32_t width, uint32_t height)
 {
-	int err;
-
 	FT_Library library;
 	FT_Face face;
+	int err;
 
 	err = FT_Init_FreeType(&library);
 
@@ -63,33 +62,37 @@ GP_Font *GP_FontFreeTypeLoad(const char *path, uint32_t width, uint32_t height)
 		return NULL;
 	}
 
-	GP_Font *font = malloc(sizeof(GP_Font));
+	/* Allocate font face structure */
+	unsigned int font_face_size;
 
+	font_face_size = sizeof(GP_FontFace) +
+	                 sizeof(uint16_t) * GP_GetGlyphCount(GP_CHARSET_7BIT);
+	
+	GP_FontFace *font = malloc(font_face_size);
+	
 	if (font == NULL) {
 		GP_DEBUG(1, "Malloc failed :(");
 		goto err1;
 	}
-
-	strncpy(font->family, face->family_name, sizeof(font->family));
-	font->family[GP_FONT_NAME_MAX] = '\0';
-	strncpy(font->name, face->style_name, sizeof(font->name));
-	font->name[GP_FONT_NAME_MAX] = '\0';
-	strcpy(font->author, "Unknown");
-	strcpy(font->license, "Unknown");
-
-	font->charset = GP_CHARSET_7BIT;
-	font->version = 0;
-
-	unsigned int i;
 	
-	font->height = 0;
-	font->bytes_per_line = 0;
-	font->max_bounding_width = 0;
-	font->baseline = 0;
+	/* Copy font metadata */
+	strncpy(font->family_name, face->family_name,
+	        sizeof(font->family_name));
+	font->family_name[GP_FONT_NAME_MAX - 1] = '\0';
+	strncpy(font->style_name, face->style_name,
+	        sizeof(font->style_name));
+	font->style_name[GP_FONT_NAME_MAX - 1] = '\0';
 
-	int32_t baseline = 0;
+	font->glyph_bitmap_format = GP_FONT_BITMAP_8BPP;
+	font->charset = GP_CHARSET_7BIT;
+	font->ascend  = face->ascender>>6;
+	font->descend = -(face->descender>>6);
 
-	for (i = 0x21; i < 0x7f; i++) {
+	/* Count glyph data size */
+	unsigned int i;
+	unsigned int glyph_table_size = 0;
+
+	for (i = 0x20; i < 0x7f; i++) {
 		FT_UInt glyph_idx = FT_Get_Char_Index(face, i);
 	
 		err = FT_Load_Glyph(face, glyph_idx, FT_LOAD_DEFAULT);
@@ -99,7 +102,7 @@ GP_Font *GP_FontFreeTypeLoad(const char *path, uint32_t width, uint32_t height)
 			goto err2;
 		}
 		
-		err = FT_Render_Glyph(face->glyph, FT_RENDER_MODE_MONO);
+		err = FT_Render_Glyph(face->glyph, FT_RENDER_MODE_NORMAL);
 
 		if (err) {
 			GP_DEBUG(1, "Failed to render glyph '%c'", i);
@@ -114,74 +117,72 @@ GP_Font *GP_FontFreeTypeLoad(const char *path, uint32_t width, uint32_t height)
 		GP_DEBUG(2, " bitmap top=%i left=%i",
 			 face->glyph->bitmap_top, face->glyph->bitmap_left);
 
-		width = (face->glyph->metrics.width>>6);
-
-		if (font->max_bounding_width < width)
-			font->max_bounding_width = width;
-
-		if (font->bytes_per_line < bitmap->pitch)
-			font->bytes_per_line = bitmap->pitch;
-
-		height = face->glyph->metrics.height>>6;
-
-		if (font->height < height)
-			font->height = height;
-	
-		baseline = bitmap->rows - face->glyph->bitmap_top; 
-
-		if (font->baseline < baseline)
-			font->baseline = baseline;
+		/* count glyph table size and fill offset table */
+		font->glyph_offsets[i - 0x20] = glyph_table_size;
+		glyph_table_size += sizeof(GP_GlyphBitmap) +
+		                    bitmap->rows * bitmap->pitch;
 	}
 
-	size_t font_data_size = GP_GetFontDataSize(font);
-	font->data = malloc(font_data_size);
+	GP_DEBUG(2, "Glyph table size %u bytes", glyph_table_size);
 
-	if (font->data == NULL) {
+	font->glyphs = malloc(glyph_table_size);
+
+	if (font->glyphs == NULL) {
 		GP_DEBUG(1, "Malloc failed :(");
 		goto err2;
 	}
-
-	memset(font->data, 0, font_data_size);
 	
-	for (i = 0x21; i < 0x7f; i++) {
+	font->max_glyph_width = 0;
+	font->max_glyph_advance = 0;
+
+	for (i = 0x20; i < 0x7f; i++) {
 		FT_UInt glyph_idx = FT_Get_Char_Index(face, i);
 	
 		err = FT_Load_Glyph(face, glyph_idx, FT_LOAD_DEFAULT);
+		
+		GP_DEBUG(2, "Loading and rendering glyph '%c'", i);
 
 		if (err) {
 			GP_DEBUG(1, "Failed to load glyph '%c'", i);
-			goto err2;
+			goto err3;
 		}
 		
-		err = FT_Render_Glyph(face->glyph, FT_RENDER_MODE_MONO);
+		err = FT_Render_Glyph(face->glyph, FT_RENDER_MODE_NORMAL);
 
 		if (err) {
 			GP_DEBUG(1, "Failed to render glyph '%c'", i);
-			goto err2;
+			goto err3;
 		}
 
-		FT_Bitmap *bitmap = &face->glyph->bitmap;
+		GP_GlyphBitmap *glyph_bitmap = GP_GetGlyphBitmap(font, i);
+		FT_GlyphSlot glyph = face->glyph;
 
-		GP_CharData *char_data = (GP_CharData*)GP_GetCharData(font, i);
-	
-		char_data->pre_offset  = face->glyph->bitmap_left;
-		char_data->post_offset = face->glyph->advance.x>>6;
-		
-		char_data->char_width = bitmap->width;
-	
+		glyph_bitmap->width     = glyph->bitmap.width;
+		glyph_bitmap->height    = glyph->bitmap.rows;
+		glyph_bitmap->bearing_x = glyph->bitmap_left;
+		glyph_bitmap->bearing_y = glyph->bitmap_top;
+		glyph_bitmap->advance_x = (glyph->advance.x + 32)>>6;
+
+		if (font->max_glyph_advance < glyph_bitmap->advance_x)
+			font->max_glyph_advance = glyph_bitmap->advance_x;
+
+		if (font->max_glyph_width < glyph_bitmap->bearing_x + glyph_bitmap->width)
+			font->max_glyph_width = glyph_bitmap->bearing_x + glyph_bitmap->width;
+
 		int x, y;
 	
-		for (y = 0; y < bitmap->rows; y++) {
-			for (x = 0; x < bitmap->pitch; x++) {
-				uint8_t trans_y = y + font->height - font->baseline - face->glyph->bitmap_top;
-				uint8_t addr = font->bytes_per_line * trans_y + x;
+		for (y = 0; y < glyph_bitmap->height; y++) {
+			for (x = 0; x < glyph_bitmap->width; x++) {
+				uint8_t addr = glyph_bitmap->width * y + x;
 
-				char_data->bitmap[addr] = bitmap->buffer[y*bitmap->pitch + x];
+				glyph_bitmap->bitmap[addr] = glyph->bitmap.buffer[y * glyph->bitmap.pitch + x];
 			}
 		}
 	}
 
 	return font;
+err3:
+	free(font->glyphs);
 err2:
 	free(font);
 err1:

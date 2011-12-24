@@ -28,126 +28,155 @@
 
 extern GP_TextStyle GP_DefaultStyle;
 
-static unsigned int SpaceWidth(const GP_TextStyle *style)
-{
-	//TODO: Does space change with pixel_yspace?
-	return style->char_xspace * style->pixel_xmul;
-}
-
-// FIXME: This is not quite right - due to offsets, characters
-// can exceed their bounding box and then the reported width will be
-// shorter than expected.
-static unsigned int CharWidth(const GP_TextStyle *style, char ch)
+/*
+ * Returns glyph width from the basepoint to the end of the glyph bitmap.
+ */
+static unsigned int glyph_width(const GP_TextStyle *style, char ch)
 {
 	unsigned int pixel_multiplier = style->pixel_xmul + style->pixel_xspace;
-	const GP_CharData *data = GP_GetCharData(style->font, ch);
+	const GP_GlyphBitmap *glyph = GP_GetGlyphBitmap(style->font, ch);
 
-	if (data == NULL)
-		data = GP_GetCharData(style->font, ' ');
+	if (glyph == NULL)
+		glyph = GP_GetGlyphBitmap(style->font, ' ');
 
-	return data->pre_offset * pixel_multiplier
-	       + data->post_offset * pixel_multiplier;
+	return (glyph->width + glyph->bearing_x) * pixel_multiplier;
 }
 
-static unsigned int MaxCharsWidth(const GP_TextStyle *style, const char *str)
+/*
+ * Returns space that is added after the glyph.
+ *
+ * Eg. the advance minus glyph width.
+ *
+ * TODO: kerning
+ */
+static unsigned int glyph_space(const GP_TextStyle *style, char ch)
+{
+	unsigned int pixel_multiplier = style->pixel_xmul + style->pixel_xspace;
+	const GP_GlyphBitmap *glyph = GP_GetGlyphBitmap(style->font, ch);
+	
+	if (glyph == NULL)
+		glyph = GP_GetGlyphBitmap(style->font, ' ');
+	
+	return (glyph->advance_x - glyph->width - glyph->bearing_x)
+	       * pixel_multiplier + style->char_xspace;
+}
+
+/*
+ * Returns maximal character width for a given string.
+ */
+static unsigned int max_glyph_width(const GP_TextStyle *style, const char *str)
 {
 	unsigned int max = 0, i;
 
 	for (i = 0; str[i] != '\0'; i++)
-		max = GP_MAX(max, CharWidth(style, str[i]));
+		max = GP_MAX(max, glyph_width(style, str[i]));
+
+	return max;
+}
+
+/*
+ * Return maximal character space after an glyph.
+ */
+static unsigned int max_glyph_space(const GP_TextStyle *style, const char *str)
+{
+	unsigned int max = 0, i;
+
+	for (i = 0; str[i] != '\0'; i++)
+		max = GP_MAX(max, glyph_space(style, str[i]));
 
 	return max;
 }
 
 unsigned int GP_TextWidth(const GP_TextStyle *style, const char *str)
 {
-	GP_CHECK(str, "NULL string specified");
-	
 	unsigned int i, len = 0;
-	unsigned int space;
 
 	if (style == NULL)
 		style = &GP_DefaultStyle;
 
-	space = SpaceWidth(style);
-
-	if (str[0] == '\0')
+	if (str == NULL || str[0] == '\0')
 		return 0;
 
-	for (i = 0; str[i] != '\0'; i++)
-		len += CharWidth(style, str[i]);
+	for (i = 0; str[i] != '\0'; i++) {
+		len += glyph_width(style, str[i]);
 
-	return len + (i - 1) * space;
+		if (str[i+1] != '\0')
+			len += glyph_space(style, str[i]);
+	}
+
+	return len;
 }
 
-unsigned int GP_TextMaxWidth(const GP_TextStyle *style, unsigned int len)
+GP_Size GP_TextMaxWidth(const GP_TextStyle *style, unsigned int len)
 {
-	unsigned int space_width = SpaceWidth(style);
-	unsigned int char_width;
-	
+	unsigned int glyph_width;
+	//TODO: !
+	unsigned int space_width = style->char_xspace;
+
 	if (style == NULL)
 		style = &GP_DefaultStyle;
 
-	char_width = style->font->max_bounding_width
-		     * (style->pixel_xmul + style->pixel_xspace);
+	glyph_width = style->font->max_glyph_width
+	              * (style->pixel_xmul + style->pixel_xspace);
 
 	if (len == 0)
 		return 0;
 
-	return len * char_width + (len - 1) * space_width; 
+	return len * glyph_width + (len - 1) * space_width; 
 }
 
-unsigned int GP_TextMaxStrWidth(const GP_TextStyle *style, const char *str,
-                                unsigned int len)
+GP_Size GP_TextMaxStrWidth(const GP_TextStyle *style, const char *str,
+                           unsigned int len)
 {
-	GP_CHECK(str, "NULL string specified");
-
 	unsigned int space_width;
-	unsigned int char_width;
+	unsigned int glyph_width;
 	
 	if (style == NULL)
 		style = &GP_DefaultStyle;
 	
-	space_width = SpaceWidth(style);
+	space_width = max_glyph_space(style, str);
 	
-	if (len == 0)
+	if (len == 0 || str == NULL)
 		return 0;
 
-	char_width = MaxCharsWidth(style, str);
+	glyph_width = max_glyph_width(style, str);
 
-	return len * char_width + (len - 1) * space_width;
+	return len * glyph_width + (len - 1) * space_width;
 }
 
-unsigned int GP_TextHeight(const GP_TextStyle *style)
-{
-	if (style == NULL)
-		style = &GP_DefaultStyle;
-
-	return style->font->height * style->pixel_ymul +
-	       (style->font->height - 1) * style->pixel_yspace;
-}
-
-unsigned int GP_TextAscent(const GP_TextStyle *style)
-{
-	unsigned int h;
-
-	if (style == NULL)
-		style = &GP_DefaultStyle;
-
-	h = style->font->height - style->font->baseline;
-	
-	return h * style->pixel_ymul + (h - 1) * style->pixel_yspace;
-}
-
-unsigned int GP_TextDescent(const GP_TextStyle *style)
+GP_Size GP_TextHeight(const GP_TextStyle *style)
 {
 	unsigned int h;
 	
 	if (style == NULL)
 		style = &GP_DefaultStyle;
 
-	h = style->font->baseline;
+	h = style->font->ascend + style->font->descend;
+
+	return h * style->pixel_ymul +
+	       (h - 1) * style->pixel_yspace;
+}
+
+GP_Size GP_TextAscent(const GP_TextStyle *style)
+{
+	unsigned int h;
+
+	if (style == NULL)
+		style = &GP_DefaultStyle;
+
+	h = style->font->ascend;
 	
 	return h * style->pixel_ymul + (h - 1) * style->pixel_yspace;
 }
 
+GP_Size GP_TextDescent(const GP_TextStyle *style)
+{
+	unsigned int h;
+	
+	if (style == NULL)
+		style = &GP_DefaultStyle;
+
+	h = style->font->descend;
+	
+	return h * style->pixel_ymul + (h - 1) * style->pixel_yspace;
+}

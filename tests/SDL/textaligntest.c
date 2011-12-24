@@ -58,9 +58,9 @@ void redraw_screen(void)
 	GP_TextStyle style = GP_DEFAULT_TEXT_STYLE;
 
 	if (flag_proportional)
-		style.font = &GP_default_proportional_font;
+		style.font = &GP_DefaultProportionalFont;
 	else
-		style.font = &GP_default_console_font;
+		style.font = &GP_DefaultConsoleFont;
 
 	style.pixel_xspace = 4;
 	style.pixel_yspace = 4;

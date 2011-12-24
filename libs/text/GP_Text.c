@@ -24,7 +24,6 @@
  *****************************************************************************/
 
 #include <stdarg.h>
-#include "algo/Text.algo.h"
 #include "gfx/GP_Gfx.h"
 #include "core/GP_FnPerBpp.h"
 #include "core/GP_Debug.h"
@@ -61,7 +60,7 @@ static int do_align(GP_Coord *topleft_x, GP_Coord *topleft_y, int align,
 		*topleft_y = y - height/2;
 		break;
 	case GP_VALIGN_BASELINE:
-		*topleft_y = y - height + style->font->baseline;
+	//	*topleft_y = y - height + style->font->baseline;
 		break;
 	case GP_VALIGN_BELOW:
 		*topleft_y = y;
@@ -74,44 +73,11 @@ static int do_align(GP_Coord *topleft_x, GP_Coord *topleft_y, int align,
 	return 0;
 }
 
-/* Generate drawing functions for various bit depths. */
-GP_DEF_FILL_FN_PER_BPP(GP_Text_Raw, DEF_TEXT_FN)
-
-void GP_Text_Raw(GP_Context *context, const GP_TextStyle *style,
-                 GP_Coord x, GP_Coord y, int align,
-                 GP_Pixel fg_color, GP_Pixel bg_color, const char *str)
-{
-	(void) bg_color;
-
-	GP_CHECK_CONTEXT(context);
-
-	if (str == NULL)
-		return;
-
-	if (style == NULL)
-		style = &GP_DefaultStyle;
-	
-	GP_CHECK_TEXT_STYLE(style);
-
-	GP_Coord topleft_x, topleft_y;
-	GP_Size w = GP_TextWidth(style, str);
-
-	GP_ASSERT(do_align(&topleft_x, &topleft_y, align, x, y, style, w) == 0,
-	         "Invalid aligment flags");
-
-	GP_FN_PER_BPP_CONTEXT(GP_Text_Raw, context, context, style,
-	                      topleft_x, topleft_y, str, fg_color);
-}
-
-DEF_TEXT_FN(GP_Text_internal, GP_Context *, GP_Pixel, GP_HLine)
-
 void GP_Text(GP_Context *context, const GP_TextStyle *style,
              GP_Coord x, GP_Coord y, int align,
 	     GP_Pixel fg_color, GP_Pixel bg_color,
              const char *str)
 {
-	(void) bg_color;
-
 	GP_CHECK_CONTEXT(context);
 
 	if (str == NULL)
@@ -120,15 +86,14 @@ void GP_Text(GP_Context *context, const GP_TextStyle *style,
 	if (style == NULL)
 		style = &GP_DefaultStyle;
 	
-	GP_CHECK_TEXT_STYLE(style);
-	
 	GP_Coord topleft_x, topleft_y;
 	GP_Size w = GP_TextWidth(style, str);
 
 	GP_ASSERT(do_align(&topleft_x, &topleft_y, align, x, y, style, w) == 0,
 	         "Invalid aligment flags");
 
-	GP_Text_internal(context, style, topleft_x, topleft_y, str, fg_color);
+	GP_Text_Raw(context, style, topleft_x, topleft_y,
+	            fg_color, bg_color, str);
 }
 
 

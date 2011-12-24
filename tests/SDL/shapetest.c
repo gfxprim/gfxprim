@@ -230,7 +230,7 @@ void redraw_screen(void)
 
 	/* text style for the label */
 	GP_TextStyle style = {
-		.font = &GP_default_console_font,
+		.font = &GP_DefaultConsoleFont,
 		.pixel_xmul = 2,
 		.pixel_ymul = 1,
 		.pixel_xspace = 0,

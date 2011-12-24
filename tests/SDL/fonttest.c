@@ -30,11 +30,9 @@
 #include "GP.h"
 #include "GP_SDL.h"
 
-/* the display */
 SDL_Surface *display = NULL;
 GP_Context context;
 
-/* precomputed color pixels in display format */
 static GP_Pixel white_pixel, gray_pixel, dark_gray_pixel, black_pixel,
 		red_pixel, blue_pixel;
 
@@ -45,10 +43,57 @@ static const char *test_strings[] = {
 	"Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor..."
 };
 
-/* draw using proportional font? */
 static int font_flag = 0;
 static int tracking = 0;
-GP_Font *font;
+GP_FontFace *font = NULL;
+
+static const char *glyph_bitmap_format_name(const GP_FontBitmapFormat format)
+{
+	switch (format) {
+	case GP_FONT_BITMAP_1BPP:
+		return "1BPP";
+	break;
+	case GP_FONT_BITMAP_8BPP:
+		return "8BPP";
+	break;
+	default:
+		return "Unknown";
+	}
+}
+
+static void print_character_metadata(const GP_FontFace *font, int c)
+{
+	const GP_GlyphBitmap *glyph = GP_GetGlyphBitmap(font, c);
+	fprintf(stderr, "Properties of the character '%c':\n", c);
+
+	if (glyph) {
+		fprintf(stderr, "   bitmap width: %d, height: %d\n",
+				glyph->width, glyph->height);
+		fprintf(stderr, "          bearing_x: %d bearing_y %d\n",
+		                glyph->bearing_x, glyph->bearing_y);
+		fprintf(stderr, "          advance_x: %d\n",
+		                glyph->advance_x);
+	} else {
+		fprintf(stderr, "(null)\n");
+	}
+}
+
+static void print_font_properties(const GP_FontFace *font)
+{
+	fprintf(stderr, "Font properties:\n");
+	fprintf(stderr, "    Height: ascend: %d, descend: %d\n",
+			GP_FontAscend(font), GP_FontDescend(font));
+	fprintf(stderr, "    Glyph bitmap format: %s\n", 
+	                glyph_bitmap_format_name(font->glyph_bitmap_format));
+	fprintf(stderr, "    Bounding box width: %d, heigth: %d\n",
+	                GP_FontMaxWidth(font), GP_FontHeight(font));
+
+	print_character_metadata(font, 'a');
+	print_character_metadata(font, 'm');
+	print_character_metadata(font, '0');
+}
+
+#define SPACING 120
 
 void redraw_screen(void)
 {
@@ -60,15 +105,17 @@ void redraw_screen(void)
 
 	switch (font_flag) {
 	case 0:
-		style.font = &GP_default_proportional_font;
+		style.font = &GP_DefaultProportionalFont;
 	break;
 	case 1:
-		style.font = &GP_default_console_font;
+		style.font = &GP_DefaultConsoleFont;
 	break;
 	case 2:
 		style.font = font;
 	break;
 	}
+
+	print_font_properties(style.font);
 
 	/* Text alignment (we are always drawing to the right
 	 * and below the starting point).
@@ -87,25 +134,25 @@ void redraw_screen(void)
 		style.char_xspace = tracking;
 
 		GP_FillRectXYWH(&context,
-			16, 100*i + 16,
+			16, SPACING*i + 16,
 			GP_TextWidth(&style, test_string),
-			style.font->height,
+			GP_FontHeight(style.font),
 			red_pixel);
 
 		GP_RectXYWH(&context,
-			15, 100*i + 15,
+			15, SPACING*i + 15,
 			GP_TextMaxWidth(&style, strlen(test_string)) + 1,
-			style.font->height + 1,
+			GP_FontHeight(style.font) + 1,
 			blue_pixel);
 
-		GP_Text(&context, &style, 16, 100*i + 16, align,
-		        white_pixel, black_pixel, test_string);
-
+		GP_Text(&context, &style, 16, SPACING*i + 16, align,
+		        white_pixel, red_pixel, test_string);
+		
 		style.pixel_xmul = 2;
 		style.pixel_ymul = 2;
 		style.pixel_yspace = 1;
 
-		GP_Text(&context, &style, 34, 100*i + 38, align,
+		GP_Text(&context, &style, 34, SPACING*i + 44, align,
 		        white_pixel, black_pixel, test_string);
 
 		style.pixel_xmul = 4;
@@ -113,7 +160,7 @@ void redraw_screen(void)
 		style.pixel_xspace = 1;
 		style.pixel_yspace = 1;
 
-		GP_Text(&context, &style, 64, 100*i + 72, align,
+		GP_Text(&context, &style, 64, SPACING*i + 88, align,
 		        dark_gray_pixel, black_pixel, test_string);
 	}
 
@@ -174,20 +221,6 @@ void print_instructions(void)
 	printf("    up/down ............. increase/decrease tracking\n");
 }
 
-void print_character_metadata(const GP_Font *font, int c)
-{
-	const GP_CharData *adata = GP_GetCharData(font, c);
-	fprintf(stderr, "Properties of the character '%c':\n", c);
-
-	if (adata) {
-		fprintf(stderr, "    pre_offset: %d, post_offset: %d\n",
-				adata->pre_offset, adata->post_offset);
-		fprintf(stderr, "    width: %d\n", adata->char_width);
-	} else {
-		fprintf(stderr, "(null)\n");
-	}
-}
-
 int main(int argc, char *argv[])
 {
 	print_instructions();
@@ -195,47 +228,23 @@ int main(int argc, char *argv[])
 	GP_SetDebugLevel(10);
 
 	if (argc > 1) {
-		GP_RetCode err;
 		fprintf(stderr, "\nLoading font '%s'\n", argv[1]);
-		font = GP_FontFreeTypeLoad(argv[1], 17, 20);
-
-		if (font == NULL) {
-			fprintf(stderr, "Error: %s\n", GP_RetCodeName(err));
-			return 1;
-		}
-
-		fprintf(stderr, "Font properties:\n");
-		fprintf(stderr, "    Height: total: %d total, baseline: %d\n",
-				font->height, font->baseline);
-		fprintf(stderr, "    Bytes per line: %d\n", font->bytes_per_line);
-		fprintf(stderr, "    Max bounding width: %d\n", font->max_bounding_width);
-
-		print_character_metadata(font, 'a');
-		print_character_metadata(font, 'm');
-		print_character_metadata(font, '0');
+		font = GP_FontFaceLoad(argv[1], 13, 19);
 	}
 
-	/* Initialize SDL */
 	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) != 0) {
 		fprintf(stderr, "Could not initialize SDL: %s\n", SDL_GetError());
 		return 1;
 	}
 
-	/* Create a window with a software back surface */
-	display = SDL_SetVideoMode(640, 480, 0, SDL_SWSURFACE);
+	display = SDL_SetVideoMode(640, 500, 0, SDL_SWSURFACE);
 	if (display == NULL) {
 		fprintf(stderr, "Could not open display: %s\n", SDL_GetError());
 		goto fail;
 	}
 
-	/* Set up a clipping rectangle to test proper clipping of pixels */
-	SDL_Rect clip_rect = {10, 10, 620, 460};
-	SDL_SetClipRect(display, &clip_rect);
-
-	/* Initialize a GP context from the SDL display */
 	GP_SDL_ContextFromSurface(&context, display);
 
-	/* Load colors suitable for the display */
 	white_pixel     = GP_ColorToContextPixel(GP_COL_WHITE, &context);
 	gray_pixel      = GP_ColorToContextPixel(GP_COL_GRAY_LIGHT, &context);
 	dark_gray_pixel = GP_ColorToContextPixel(GP_COL_GRAY_DARK, &context);

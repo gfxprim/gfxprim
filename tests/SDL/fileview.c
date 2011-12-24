@@ -30,26 +30,20 @@
 #include "GP.h"
 #include "GP_SDL.h"
 
-/* the display */
 SDL_Surface *display = NULL;
 GP_Context context;
 
-/* precomputed color pixels in display format */
 static GP_Pixel white_pixel, gray_pixel, dark_gray_pixel, black_pixel,
 		red_pixel, blue_pixel;
 
-/* draw using proportional font? */
 static int font_flag = 0;
-
-/* font tracking */
 static int tracking = 0;
 
-/* font to be used */
-GP_Font *font;
+static GP_FontFace *font;
 
 struct FileLine {
-	char *text;		/* null-terminated, malloc'd string */
-	struct FileLine *next;	/* next line or NULL for the last line */
+	char *text;
+	struct FileLine *next;
 	struct FileLine *prev;
 };
 
@@ -66,10 +60,10 @@ void redraw_screen(void)
 
 	switch (font_flag) {
 	case 0:
-		style.font = &GP_default_console_font;
+		style.font = &GP_DefaultConsoleFont;
 	break;
 	case 1:
-		style.font = &GP_default_proportional_font;
+		style.font = &GP_DefaultProportionalFont;
 	break;
 	case 2:
 		style.font = font;
@@ -89,11 +83,11 @@ void redraw_screen(void)
 
 	struct FileLine *line = first_line;
 	unsigned int i;
-	for (i = 0; i < 30; i++) { 
+	for (i = 0; i < context.h/GP_TextHeight(&style); i++) { 
 		if (line == NULL)
 			break;
-		GP_Text(&context, &style, 16, 16*i + 16, align,
-		        black_pixel, black_pixel, line->text);
+		GP_Text(&context, &style, 16, 16 + (1.0 * GP_TextHeight(&style))*i,
+		        align, black_pixel, gray_pixel, line->text);
 		line = line->next;
 	}
 
@@ -218,6 +212,10 @@ int main(int argc, char *argv[])
 		fprintf(stderr, "No file specified\n");
 		return 1;
 	}
+	
+
+	if (argc > 2)
+		font = GP_FontFaceLoad(argv[2], 17, 23);
 
 	if (!read_file_head(argv[1]))
 		return 1;

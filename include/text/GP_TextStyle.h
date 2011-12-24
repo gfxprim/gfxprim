@@ -19,7 +19,7 @@
  * Copyright (C) 2009-2010 Jiri "BlueBear" Dluhos                            *
  *                         <jiri.bluebear.dluhos@gmail.com>                  *
  *                                                                           *
- * Copyright (C) 2009-2010 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2011 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
@@ -27,16 +27,14 @@
 #define TEXT_GP_TEXTSTYLE_H
 
 #include "GP_Font.h"
-#include "core/GP_RetCode.h"
+#include "GP_DefaultFont.h"
 
 /*
  * This structure describes how a text should be rendered.
  * It includes a font, and its various variants and transformations.
  */
-typedef struct {
-
-	/* Font to use. */
-	struct GP_Font *font;
+typedef struct GP_TextStyle {
+	const struct GP_FontFace *font;
 
 	/* Spacing between pixels (0 is the default, no spacing). */
 	int pixel_xspace, pixel_yspace;
@@ -49,23 +47,13 @@ typedef struct {
 
 } GP_TextStyle;
 
-/*
- * Static initializer for initializing a GP_TextStyle structure to default
- * values.
- * Note that at least the colors should always be changed afterwards,
- * as there is no sensible default (they are initialized to 0).
- */
-#define GP_DEFAULT_TEXT_STYLE { &GP_default_console_font, 0, 0, 1, 1, 0 }
-
-/*
- * Initalize text style to the default values.
- */
-void GP_DefaultTextStyle(GP_TextStyle *style); 
-
-#define GP_CHECK_TEXT_STYLE(style) do { \
-	GP_CHECK(style, "NULL style specified"); \
-	GP_CHECK(style->font, "invalid text style: font is NULL"); \
-	GP_CHECK_FONT(style->font); \
-} while(0)
+#define GP_DEFAULT_TEXT_STYLE { \
+	.font = &GP_DefaultConsoleFont, \
+	.pixel_xspace = 0, \
+	.pixel_yspace = 0, \
+	.pixel_xmul = 1, \
+	.pixel_ymul = 1, \
+	.char_xspace = 0 \
+}
 
 #endif /* TEXT_GP_TEXTSTYLE_H */
