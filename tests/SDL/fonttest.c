@@ -33,6 +33,9 @@
 SDL_Surface *display = NULL;
 GP_Context context;
 
+static const char *font_path = NULL;
+static unsigned int font_h = 16;
+
 static GP_Pixel white_pixel, gray_pixel, dark_gray_pixel, black_pixel,
 		red_pixel, blue_pixel;
 
@@ -200,6 +203,24 @@ void event_loop(void)
 				redraw_screen();
 				SDL_Flip(display);
 			break;
+			case SDLK_b:
+				font_h++;
+				if (font_path) {
+					GP_FontFaceFree(font);
+					font = GP_FontFaceLoad(font_path, 0, font_h);
+					redraw_screen();
+					SDL_Flip(display);
+				}
+			break;
+			case SDLK_s:
+				font_h--;
+				if (font_path) {
+					GP_FontFaceFree(font);
+					font = GP_FontFaceLoad(font_path, 0, font_h);
+					redraw_screen();
+					SDL_Flip(display);
+				}
+			break;
 			case SDLK_ESCAPE:
 				return;
 			default:
@@ -219,6 +240,7 @@ void print_instructions(void)
 	printf("    Esc ................. exit\n");
 	printf("    Space ............... change font\n");
 	printf("    up/down ............. increase/decrease tracking\n");
+	printf("    b/s ................. change font size (freetype only)\n");
 }
 
 int main(int argc, char *argv[])
@@ -228,8 +250,9 @@ int main(int argc, char *argv[])
 	GP_SetDebugLevel(10);
 
 	if (argc > 1) {
+		font_path = argv[1];
 		fprintf(stderr, "\nLoading font '%s'\n", argv[1]);
-		font = GP_FontFaceLoad(argv[1], 0, 16);
+		font = GP_FontFaceLoad(argv[1], 0, font_h);
 	}
 
 	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) != 0) {
