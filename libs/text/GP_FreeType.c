@@ -16,7 +16,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2011 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
@@ -66,7 +66,7 @@ GP_FontFace *GP_FontFaceLoad(const char *path, uint32_t width, uint32_t height)
 	unsigned int font_face_size;
 
 	font_face_size = sizeof(GP_FontFace) +
-	                 sizeof(uint16_t) * GP_GetGlyphCount(GP_CHARSET_7BIT);
+	                 sizeof(uint32_t) * GP_GetGlyphCount(GP_CHARSET_7BIT);
 	
 	GP_FontFace *font = malloc(font_face_size);
 	
@@ -183,7 +183,7 @@ GP_FontFace *GP_FontFaceLoad(const char *path, uint32_t width, uint32_t height)
 	
 		for (y = 0; y < glyph_bitmap->height; y++) {
 			for (x = 0; x < glyph_bitmap->width; x++) {
-				uint8_t addr = glyph_bitmap->width * y + x;
+				unsigned int addr = glyph_bitmap->width * y + x;
 
 				glyph_bitmap->bitmap[addr] = glyph->bitmap.buffer[y * glyph->bitmap.pitch + x];
 			}
