@@ -16,7 +16,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2011 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
@@ -187,5 +187,10 @@ GP_GlyphBitmap *GP_GetGlyphBitmap(const GP_FontFace *font, int c);
  * Loads font face from file.
  */
 GP_FontFace *GP_FontFaceLoad(const char *path, uint32_t width, uint32_t height);
+
+/*
+ * Free the font face memory.
+ */
+void GP_FontFaceFree(GP_FontFace *self);
 
 #endif /* TEXT_GP_FONT_H */

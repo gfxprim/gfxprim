@@ -19,7 +19,7 @@
  * Copyright (C) 2009-2010 Jiri "BlueBear" Dluhos                            *
  *                         <jiri.bluebear.dluhos@gmail.com>                  *
  *                                                                           *
- * Copyright (C) 2009-2011 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
@@ -28,18 +28,47 @@
 
 extern GP_TextStyle GP_DefaultStyle;
 
-/*
- * Returns glyph width from the basepoint to the end of the glyph bitmap.
- */
-static unsigned int glyph_width(const GP_TextStyle *style, char ch)
+static const GP_GlyphBitmap *get_glyph(const GP_TextStyle *style, int c)
 {
-	unsigned int pixel_multiplier = style->pixel_xmul + style->pixel_xspace;
-	const GP_GlyphBitmap *glyph = GP_GetGlyphBitmap(style->font, ch);
+	const GP_GlyphBitmap *glyph = GP_GetGlyphBitmap(style->font, c);
 
 	if (glyph == NULL)
 		glyph = GP_GetGlyphBitmap(style->font, ' ');
+	
+	return glyph;
+}
+
+static unsigned int get_pixel_multiplier(const GP_TextStyle *style)
+{
+	return style->pixel_xmul + style->pixel_xspace;
+}
+
+/*
+ * Returns glyph width from the basepoint to the end of the glyph bitmap.
+ */
+static unsigned int glyph_width(const GP_TextStyle *style, int c)
+{
+	unsigned int pixel_multiplier = get_pixel_multiplier(style); 
+	const GP_GlyphBitmap *glyph = get_glyph(style, c);
 
 	return (glyph->width + glyph->bearing_x) * pixel_multiplier;
+}
+
+/*
+ * Returns size of the glyph but doesn't count bearing.
+ *
+ * Note that the bearing may be negative (typical case is letter 'j' or most of
+ * the italic glyphs). So in order not to draw out of the text bouding box,
+ * first glyph ignores bearing_x and draws beginning of the glyph bitmap on the
+ * starting basepoint.
+ *
+ */
+static unsigned int first_glyph_width(const GP_TextStyle *style, int c)
+{
+	unsigned int pixel_multiplier = get_pixel_multiplier(style);
+	const GP_GlyphBitmap *glyph = get_glyph(style, c);
+
+	return glyph->width * pixel_multiplier;
 }
 
 /*
@@ -51,11 +80,8 @@ static unsigned int glyph_width(const GP_TextStyle *style, char ch)
  */
 static unsigned int glyph_space(const GP_TextStyle *style, char ch)
 {
-	unsigned int pixel_multiplier = style->pixel_xmul + style->pixel_xspace;
-	const GP_GlyphBitmap *glyph = GP_GetGlyphBitmap(style->font, ch);
-	
-	if (glyph == NULL)
-		glyph = GP_GetGlyphBitmap(style->font, ' ');
+	unsigned int pixel_multiplier = get_pixel_multiplier(style);
+	const GP_GlyphBitmap *glyph = get_glyph(style, ch);
 	
 	return (glyph->advance_x - glyph->width - glyph->bearing_x)
 	       * pixel_multiplier + style->char_xspace;
@@ -97,7 +123,14 @@ unsigned int GP_TextWidth(const GP_TextStyle *style, const char *str)
 	if (str == NULL || str[0] == '\0')
 		return 0;
 
-	for (i = 0; str[i] != '\0'; i++) {
+	len += first_glyph_width(style, str[0]);
+	
+	if (str[1] == '\0')
+		return len;
+
+	len += glyph_space(style, str[0]);
+
+	for (i = 1; str[i] != '\0'; i++) {
 		len += glyph_width(style, str[i]);
 
 		if (str[i+1] != '\0')

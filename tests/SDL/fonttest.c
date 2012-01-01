@@ -19,7 +19,7 @@
  * Copyright (C) 2009-2010 Jiri "BlueBear" Dluhos                            *
  *                         <jiri.bluebear.dluhos@gmail.com>                  *
  *                                                                           *
- * Copyright (C) 2009-2011 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
@@ -229,7 +229,7 @@ int main(int argc, char *argv[])
 
 	if (argc > 1) {
 		fprintf(stderr, "\nLoading font '%s'\n", argv[1]);
-		font = GP_FontFaceLoad(argv[1], 12, 16);
+		font = GP_FontFaceLoad(argv[1], 0, 16);
 	}
 
 	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) != 0) {

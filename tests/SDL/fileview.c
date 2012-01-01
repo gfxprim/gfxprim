@@ -19,7 +19,7 @@
  * Copyright (C) 2009-2010 Jiri "BlueBear" Dluhos                            *
  *                         <jiri.bluebear.dluhos@gmail.com>                  *
  *                                                                           *
- * Copyright (C) 2009-2011 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
@@ -215,7 +215,7 @@ int main(int argc, char *argv[])
 	
 
 	if (argc > 2)
-		font = GP_FontFaceLoad(argv[2], 12, 17);
+		font = GP_FontFaceLoad(argv[2], 0, 16);
 
 	if (!read_file_head(argv[1]))
 		return 1;

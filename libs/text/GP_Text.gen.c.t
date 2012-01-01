@@ -41,8 +41,11 @@ static void text_draw_1BPP_{{ pt.name }}(GP_Context *context, GP_TextStyle *styl
 		for (j = 0; j < glyph->height; j++) {
 			for (i = 0; i < glyph->width; i++) {
 				uint8_t bit = (glyph->bitmap[i/8 + j * bpp]) & (0x80>>(i%8));
-		
+				
 				unsigned int x_start = x + (i + glyph->bearing_x) * x_mul;
+				
+				if (p == str)
+					x_start -= glyph->bearing_x * x_mul;
 
 				if (!bit)
 					continue;
@@ -56,6 +59,9 @@ static void text_draw_1BPP_{{ pt.name }}(GP_Context *context, GP_TextStyle *styl
 		}
 	
 		x += glyph->advance_x * x_mul + style->char_xspace;
+		
+		if (p == str)
+			x -= glyph->bearing_x * x_mul;
 	}
 }
 
@@ -108,6 +114,9 @@ static void text_draw_8BPP_{{ pt.name }}(GP_Context *context, GP_TextStyle *styl
 		
 				unsigned int x_start = x + (i + glyph->bearing_x) * x_mul;
 				
+				if (p == str)
+					x_start -= glyph->bearing_x * x_mul;
+				
 				if (!gray)
 					continue;
 
@@ -119,8 +128,11 @@ static void text_draw_8BPP_{{ pt.name }}(GP_Context *context, GP_TextStyle *styl
 
 			y += style->pixel_ymul + style->pixel_yspace;
 		}
-	
+
 		x += glyph->advance_x * x_mul + style->char_xspace;
+		
+		if (p == str)
+			x -= glyph->bearing_x * x_mul;
 	}
 }
 
