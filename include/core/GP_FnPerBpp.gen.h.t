@@ -12,11 +12,6 @@
 	GP_DEF_FN_FOR_BPP(fname, MACRO_NAME, fdraw, {{ ps.suffix }}) \
 {% endfor %}
 
-#define GP_DEF_FFN_PER_BPP(fname, MACRO_NAME) \
-%% for ps in pixelsizes
-	GP_DEF_FFN_FOR_BPP(fname, MACRO_NAME, {{ ps.suffix }}) \
-{% endfor %}
-
 {% macro bpp_suffix(suffix) %}{% if suffix == "LE" or suffix == "BE" %}_{{ suffix }}{% endif %}{% endmacro %}
 
 /*
