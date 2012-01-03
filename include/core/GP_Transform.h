@@ -28,6 +28,7 @@
 #ifndef CORE_GP_TRANSFORM_H
 #define CORE_GP_TRANSFORM_H
 
+#include "GP_Common.h"
 #include "GP_FixedPoint.h"
 
 /* 

@@ -17,13 +17,14 @@
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
  * Copyright (C) 2011      Tomas Gavenciak <gavento@ucw.cz>                  *
+ * Copyright (C) 2012      Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
 #include "GP_GetPutPixel.h"
 #include "GP_Transform.h"
 
-GP_Pixel GP_GetPixel(const GP_Context *context, int x, int y)
+GP_Pixel GP_GetPixel(const GP_Context *context, GP_Coord x, GP_Coord y)
 {
 	GP_TRANSFORM_POINT(context, x, y);
 	if (GP_PIXEL_IS_CLIPPED(context, x, y)) 
@@ -31,7 +32,7 @@ GP_Pixel GP_GetPixel(const GP_Context *context, int x, int y)
 	return GP_GetPixel_Raw(context, x, y);
 }
 
-void GP_PutPixel(GP_Context *context, int x, int y, GP_Pixel p)
+void GP_PutPixel(GP_Context *context, GP_Coord x, GP_Coord y, GP_Pixel p)
 {
 	GP_TRANSFORM_POINT(context, x, y);
 	if (!GP_PIXEL_IS_CLIPPED(context, x, y)) 
