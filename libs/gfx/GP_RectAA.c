@@ -23,6 +23,7 @@
 #include "core/GP_Transform.h"
 #include "core/GP_GetPutPixel.h"
 #include "core/GP_MixPixels.h"
+#include "core/GP_FixedPoint.h"
 #include "core/GP_GammaCorrection.h"
 #include "GP_Rect.h"
 #include "GP_RectAA.h"
@@ -38,62 +39,79 @@ void GP_FillRectXYXY_AA_Raw(GP_Context *context, GP_Coord x0, GP_Coord y0,
 	if (y0 > y1)
 		GP_SWAP(y0, y1);
 
-	/* Draw the full part of the rect */
-	GP_FillRect(context, x0>>8, y0>>8, x1>>8, y1>>8, pixel);
+	GP_Size w = x1 - x0;
+	GP_Size h = y1 - y0;
+
+	printf("W = %f, H = %f, X = %f, Y = %f\n", 
+	       GP_FP_TO_FLOAT(w), GP_FP_TO_FLOAT(h),
+	       GP_FP_TO_FLOAT(x0), GP_FP_TO_FLOAT(y0));
+
+	/* This are integer coordinates of the "inner" rectangle */
+	GP_Coord xi0 = GP_FP_CEIL(x0);
+	GP_Coord yi0 = GP_FP_CEIL(y0);
+	GP_Coord xi1 = GP_FP_FLOOR(x1);
+	GP_Coord yi1 = GP_FP_FLOOR(y1);
+
+	if (xi1 >= xi0 && yi1 >= yi0)
+		GP_FillRect(context, xi0, yi0, xi1, yi1, pixel);
 	
+	printf("%i %i %i %i\n", xi0, yi0, yi1, yi1);
+
 	/* Draw the "frame" around */
 	GP_Coord i;
 
 	uint8_t u_perc;
 	uint8_t d_perc;
 	
-	d_perc = GP_GammaToLinear(x0%8);
-	u_perc = GP_GammaToLinear(x1%8);
+	u_perc = GP_GammaToLinear(GP_FP_1 - GP_FP_FRAC(y0));
+	d_perc = GP_GammaToLinear(GP_FP_FRAC(y1));
 
-	for (i = x0>>8; i <= x1>>8; i++) {
-		GP_Pixel u = GP_GetPixel(context, i, (y0>>8) - 1);
-		GP_Pixel d = GP_GetPixel(context, i, (y1>>8) + 1);
+	for (i = GP_FP_CEIL(x0); i <= GP_FP_FLOOR(x1); i++) {
+		GP_Pixel u = GP_GetPixel(context, i, GP_FP_FLOOR(y0));
+		GP_Pixel d = GP_GetPixel(context, i, GP_FP_CEIL(y1));
 		
 		u = GP_MixPixels(pixel, u, u_perc, context->pixel_type);
 		d = GP_MixPixels(pixel, d, d_perc, context->pixel_type);
 		
-		GP_PutPixel(context, i, (y0>>8) - 1, u);
-		GP_PutPixel(context, i, (y1>>8) + 1, d);
+		GP_PutPixel(context, i, GP_FP_FLOOR(y0), u);
+		GP_PutPixel(context, i, GP_FP_CEIL(y1), d);
 	}
+
+	u_perc = GP_GammaToLinear(GP_FP_1 - GP_FP_FRAC(x0));
+	d_perc = GP_GammaToLinear(GP_FP_FRAC(x1));
 	
-	d_perc = GP_GammaToLinear(y0%8);
-	u_perc = GP_GammaToLinear(y1%8);
-	
-	for (i = y0>>8; i <= y1>>8; i++) {
-		GP_Pixel u = GP_GetPixel(context, (x0>>8) - 1, i);
-		GP_Pixel d = GP_GetPixel(context, (x1>>8) + 1, i);
+	for (i = GP_FP_CEIL(y0); i <= GP_FP_FLOOR(y1); i++) {
+		GP_Pixel u = GP_GetPixel(context, GP_FP_FLOOR(x0), i);
+		GP_Pixel d = GP_GetPixel(context, GP_FP_CEIL(x1), i);
 		
 		u = GP_MixPixels(pixel, u, u_perc, context->pixel_type);
 		d = GP_MixPixels(pixel, d, d_perc, context->pixel_type);
 		
-		GP_PutPixel(context, (x0>>8) - 1, i, u);
-		GP_PutPixel(context, (x1>>8) + 1, i, d);
+		GP_PutPixel(context, GP_FP_FLOOR(x0), i, u);
+		GP_PutPixel(context, GP_FP_CEIL(x1), i, d);
 	}
+
+	return;
 
 	uint8_t perc;
 	GP_Pixel p;
 
-	perc = GP_GammaToLinear((x0%8+y0%8)/2);
-	p = GP_GetPixel(context, (x0>>8) - 1, (y0>>8) - 1);
+	perc = GP_GammaToLinear((GP_FP_FRAC(x0) + GP_FP_FRAC(y0) + 1)/2);
+	p = GP_GetPixel(context, GP_FP_FLOOR(x0), GP_FP_FLOOR(y0));
 	p = GP_MixPixels(pixel, p, perc, context->pixel_type);
-	GP_PutPixel(context, (x0>>8) - 1, (y0>>8) - 1, p);
+	GP_PutPixel(context, GP_FP_FLOOR(x0), GP_FP_FLOOR(y0), p);
 
-	perc = GP_GammaToLinear((x1%8+y0%8)/2);
+	perc = GP_GammaToLinear((GP_FP_FRAC(x1) + GP_FP_FRAC(y0) + 1)/2);
 	p = GP_GetPixel(context, (x1>>8) + 1, (y0>>8) - 1);
 	p = GP_MixPixels(pixel, p, perc, context->pixel_type);
 	GP_PutPixel(context, (x1>>8) + 1, (y0>>8) - 1, p);
 
-	perc = GP_GammaToLinear((x0%8+y1%8)/2);
+	perc = GP_GammaToLinear((GP_FP_FRAC(x0) + GP_FP_FRAC(y1) + 1)/2);
 	p = GP_GetPixel(context, (x0>>8) - 1, (y1>>8) + 1);
 	p = GP_MixPixels(pixel, p, perc, context->pixel_type);
 	GP_PutPixel(context, (x0>>8) - 1, (y1>>8) + 1, p);
 	
-	perc = GP_GammaToLinear((x1%8+y1%8)/2);
+	perc = GP_GammaToLinear((GP_FP_FRAC(x1) + GP_FP_FRAC(y1) + 1)/2);
 	p = GP_GetPixel(context, (x1>>8) + 1, (y1>>8) + 1);
 	p = GP_MixPixels(pixel, p, perc, context->pixel_type);
 	GP_PutPixel(context, (x1>>8) + 1, (y1>>8) + 1, p);
@@ -105,7 +123,8 @@ void GP_FillRectXYWH_AA_Raw(GP_Context *context, GP_Coord x, GP_Coord y,
 	if (w == 0 || h == 0)
 		return;
 
-	GP_FillRectXYXY_AA_Raw(context, x, y, x + w - 1, y + h - 1, pixel);
+	GP_FillRectXYXY_AA_Raw(context, x, y,
+	                       x + w - GP_FP_1, y + h - GP_FP_1, pixel);
 }
 
 void GP_FillRectXYXY_AA(GP_Context *context, GP_Coord x0, GP_Coord y0,
@@ -113,8 +132,8 @@ void GP_FillRectXYXY_AA(GP_Context *context, GP_Coord x0, GP_Coord y0,
 {
 	GP_CHECK_CONTEXT(context);
 	
-	GP_TRANSFORM_POINT(context, x0, y0);
-	GP_TRANSFORM_POINT(context, x1, y1);
+	GP_TRANSFORM_POINT_FP(context, x0, y0);
+	GP_TRANSFORM_POINT_FP(context, x1, y1);
 
 	GP_FillRect_AA_Raw(context, x0, y0, x1, y1, pixel);
 }
@@ -125,5 +144,6 @@ void GP_FillRectXYWH_AA(GP_Context *context, GP_Coord x, GP_Coord y,
 	if (w == 0 || h == 0)
 		return;
 
-	GP_FillRectXYXY_AA(context, x, y, x + w - 1, y + h - 1, pixel);
+	GP_FillRectXYXY_AA(context, x, y,
+	                   x + w - GP_FP_1, y + h - GP_FP_1, pixel);
 }
