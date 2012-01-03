@@ -16,41 +16,32 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2010 Jiri "BlueBear" Dluhos                            *
- *                         <jiri.bluebear.dluhos@gmail.com>                  *
- *                                                                           *
- * Copyright (C) 2009-2011 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
 /*
 
-  This is a main header for gfx part.
+  Gamma correction.
 
  */
 
-#ifndef GP_GFX_H
-#define GP_GFX_H
+#ifndef CORE_GP_GAMMA_CORRECTION_H
+#define CORE_GP_GAMMA_CORRECTION_H
 
-/* basic definitions and structures */
-#include "core/GP_Context.h"
-#include "core/GP_GetPutPixel.h"
-#include "core/GP_WritePixel.h"
+#include <stdint.h>
+#include <math.h>
 
-/* public drawing API */
-#include "GP_Fill.h"
-#include "GP_HLine.h"
-#include "GP_VLine.h"
-#include "GP_Line.h"
-#include "GP_Rect.h"
-#include "GP_Triangle.h"
-#include "GP_Tetragon.h"
-#include "GP_Circle.h"
-#include "GP_Ellipse.h"
-#include "GP_Arc.h"
-#include "GP_Polygon.h"
-#include "GP_Symbol.h"
+#define GP_GAMMA 2.2
 
-#include "GP_RectAA.h"
+/*
+ * Coverts linear 0 255 value into 0 255 gama value.
+ *
+ * (this is used for Anti Aliased gfx primitives.
+ */
+static inline uint8_t GP_GammaToLinear(uint8_t val)
+{
+	return pow(1.00 * val/255, 1/GP_GAMMA) * 255 + 0.5;
+}
 
-#endif /* GP_GFX_H */
+#endif /* CORE_GP_GAMMA_CORRECTION_H */

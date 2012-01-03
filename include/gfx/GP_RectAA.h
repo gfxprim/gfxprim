@@ -16,41 +16,41 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2010 Jiri "BlueBear" Dluhos                            *
- *                         <jiri.bluebear.dluhos@gmail.com>                  *
- *                                                                           *
- * Copyright (C) 2009-2011 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
-/*
+#ifndef GFX_GP_RECT_AA_H
+#define GFX_GP_RECT_AA_H
 
-  This is a main header for gfx part.
-
- */
-
-#ifndef GP_GFX_H
-#define GP_GFX_H
-
-/* basic definitions and structures */
 #include "core/GP_Context.h"
-#include "core/GP_GetPutPixel.h"
-#include "core/GP_WritePixel.h"
 
-/* public drawing API */
-#include "GP_Fill.h"
-#include "GP_HLine.h"
-#include "GP_VLine.h"
-#include "GP_Line.h"
-#include "GP_Rect.h"
-#include "GP_Triangle.h"
-#include "GP_Tetragon.h"
-#include "GP_Circle.h"
-#include "GP_Ellipse.h"
-#include "GP_Arc.h"
-#include "GP_Polygon.h"
-#include "GP_Symbol.h"
+/* Filled Rectangle */
 
-#include "GP_RectAA.h"
+void GP_FillRectXYXY_AA(GP_Context *context, GP_Coord x0, GP_Coord y0,
+                        GP_Coord x1, GP_Coord y1, GP_Pixel pixel);
 
-#endif /* GP_GFX_H */
+void GP_FillRectXYXY_AA_Raw(GP_Context *context, GP_Coord x0, GP_Coord y0,
+                            GP_Coord x1, GP_Coord y1, GP_Pixel pixel);
+
+void GP_FillRectXYWH_AA(GP_Context *context, GP_Coord x, GP_Coord y,
+                        GP_Size w, GP_Size h, GP_Pixel pixel);
+
+void GP_FillRectXYWH_AA_Raw(GP_Context *context, GP_Coord x, GP_Coord y,
+	                    GP_Size w, GP_Size h, GP_Pixel pixel);
+
+/* The XYXY argument set is the default */
+static inline void GP_FillRect_AA(GP_Context *context, GP_Coord x0, GP_Coord y0,
+                                  GP_Coord x1, GP_Coord y1, GP_Pixel pixel)
+{
+	GP_FillRectXYXY_AA(context, x0, y0, x1, y1, pixel);
+}
+
+static inline void GP_FillRect_AA_Raw(GP_Context *context,
+                                      GP_Coord x0, GP_Coord y0,
+                                      GP_Coord x1, GP_Coord y1, GP_Pixel pixel)
+{
+	GP_FillRectXYXY_AA_Raw(context, x0, y0, x1, y1, pixel);
+}
+
+#endif /* GFX_GP_RECT_AA_H */
