@@ -99,11 +99,12 @@ void GP_FillRectXYXY_AA_Raw(GP_Context *context, GP_Coord x0, GP_Coord y0,
 	 * Note that if out_x0 == in_x1 is 2px wide and both lines has less than
 	 * 100% intensity. The same goes for out_y0 == in_y1.
 	 */
-	if (in_x1 >= in_x0 && out_x0 != in_x1 && in_y1 >= in_y0 && out_y0 != in_y1)
+	if (in_x1 >= in_x0 && (out_x0 != in_x1 || out_x1 != in_x0) 
+	    && in_y1 >= in_y0 && (out_y0 != in_y1 || out_y1 != in_y0))
 		GP_FillRectXYXY_Raw(context, in_x0, in_y0, in_x1, in_y1, pixel);
 
 	/* if the outer and innter coordinates doesn't match, draw blurred edge */
-	if (in_y0 != out_y0 && out_x0 != in_x1) {
+	if (in_y0 != out_y0) {
 		uint8_t mix = GP_GammaToLinear(GP_FP_FROM_INT(in_y0) + GP_FP_1_2 - y0);
 		GP_Coord i;
 	
@@ -114,7 +115,7 @@ void GP_FillRectXYXY_AA_Raw(GP_Context *context, GP_Coord x0, GP_Coord y0,
 		}
 	}
 	
-	if (in_y1 != out_y1 && out_x0 != in_x1) {
+	if (in_y1 != out_y1) {
 		uint8_t mix = GP_GammaToLinear(y1 - GP_FP_FROM_INT(in_y0) - GP_FP_1_2);
 		GP_Coord i;
 	
@@ -125,7 +126,7 @@ void GP_FillRectXYXY_AA_Raw(GP_Context *context, GP_Coord x0, GP_Coord y0,
 		}
 	}
 
-	if (in_x0 != out_x0 && out_y0 != in_y1) {
+	if (in_x0 != out_x0) {
 		uint8_t mix = GP_GammaToLinear(GP_FP_FROM_INT(in_x0) + GP_FP_1_2 - x0);
 		GP_Coord i;
 	
@@ -136,7 +137,7 @@ void GP_FillRectXYXY_AA_Raw(GP_Context *context, GP_Coord x0, GP_Coord y0,
 		}
 	}
 
-	if (in_x1 != out_x1 && out_y0 != in_y1) {
+	if (in_x1 != out_x1) {
 		uint8_t mix = GP_GammaToLinear(x1 - GP_FP_FROM_INT(in_x1) - GP_FP_1_2);
 		GP_Coord i;
 	
