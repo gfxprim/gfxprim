@@ -33,8 +33,8 @@
 SDL_Surface *display = NULL;
 GP_Context context;
 
-static GP_Coord x = 10<<8;
-static GP_Coord y = 10<<8;
+static GP_Coord x = 10 * GP_FP_1 + GP_FP_1_2;
+static GP_Coord y = 10 * GP_FP_1 + GP_FP_1_2;
 
 SDL_UserEvent timer_event;
 
@@ -49,6 +49,9 @@ static void draw(void)
 	GP_Coord i;
 
 	for (i = 0; i < 24; i++) {
+	//	GP_FillRect(ctx, (x>>8),      (y + (10*i<<8) - 128)>>8,
+	//	                 (x>>8) + 60, (y + ((10*i)<<8) + 64*i + 64 + 128)>>8, green_pixel);
+		
 		GP_FillRect_AA(ctx, x, y + ((10*i)<<8),
 		                    x + (60<<8), y + ((10*i)<<8) + 64*i + 64, 0);
 		
@@ -60,7 +63,7 @@ static void draw(void)
 		
 		GP_FillRect_AA(ctx, x + (240<<8), y + ((10*i)<<8) + 192,
 		                    x + (300<<8), y + ((10*i)<<8) + 64*i + 256, 0);
-		printf("--------------------------------------------------------\n");	
+		printf("%i --------------------------------------------------------\n", i);	
 	}
 
 	SDL_Flip(display);
@@ -133,7 +136,7 @@ int main(int argc, char **argv)
 		return 1;
 	}
 
-	display = SDL_SetVideoMode(320, 240, display_bpp, SDL_SWSURFACE);
+	display = SDL_SetVideoMode(320, 320, display_bpp, SDL_SWSURFACE);
 	if (display == NULL) {
 		fprintf(stderr, "Could not open display: %s\n", SDL_GetError());
 		goto fail;

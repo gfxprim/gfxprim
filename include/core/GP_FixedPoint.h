@@ -49,12 +49,17 @@ typedef uint8_t GP_FP_Frac;
 /*
  * One Half
  */
-#define GP_FP_1_2 ((1<<(GP_FP_FRAC_BITS - 1))
+#define GP_FP_1_2 (1<<(GP_FP_FRAC_BITS - 1))
 
 /*
  * Fraction part bitmask.
  */
 #define GP_FP_FRAC_MASK ((1<<GP_FP_FRAC_BITS)-1)
+
+/*
+ * Integer part bitmask.
+ */
+#define GP_FP_INT_MASK (~GP_FP_FRAC_MASK)
 
 /*
  * Addition.
@@ -69,22 +74,27 @@ typedef uint8_t GP_FP_Frac;
 /*
  * Floor.
  */
-#define GP_FP_FLOOR(a) ((a)>>GP_FP_FRAC_BITS)
+#define GP_FP_FLOOR(a) ((a) & GP_FP_INT_MASK)
 
 /*
- * Ceilling.
+ * Floor with conversion to integer.
  */
-#define GP_FP_CEIL(a) (((a)>>GP_FP_FRAC_BITS) + !!(GP_FP_FRAC(a)))
+#define GP_FP_FLOOR_TO_INT(a) ((a)>>GP_FP_FRAC_BITS)
 
 /*
- * Rounding.
+ * Ceiling.
  */
-#define GP_FP_ROUND(a) (((a) + GP_FP_1_2))>>GP_FP_FRAC_BITS
+#define GP_FP_CEIL(a) (((a) & GP_FP_INT_MASK) + ((a) & GP_FP_FRAC_MASK) ? GP_FP_1 : 0)
 
 /*
- * Integer part.
+ * Ceilling with conversion to integer.
  */
-#define GP_FP_INT(a) GP_FP_FLOOR(a)
+#define GP_FP_CEIL_TO_INT(a) (((a)>>GP_FP_FRAC_BITS) + !!(GP_FP_FRAC(a)))
+
+/*
+ * Rounding wiht conversion to integer.
+ */
+#define GP_FP_ROUND_TO_INT(a) (((a) + GP_FP_1_2))>>GP_FP_FRAC_BITS
 
 /*
  * Fractional part.
