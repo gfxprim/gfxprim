@@ -16,7 +16,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2010 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2011 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
@@ -127,7 +127,7 @@ GP_RetCode GP_ReadPNG(FILE *f, GP_Context **res,
 
 	GP_DEBUG(2, "Have %s%s interlace %s PNG%s size %ux%u depth %i",
 	         interlace_type_name(interlace_type),
-	         color_type & PNG_COLOR_MASK_PALETTE ? "pallete " : "",
+	         color_type & PNG_COLOR_MASK_PALETTE ? " pallete " : "",
 	         color_type & PNG_COLOR_MASK_COLOR ? "color" : "gray",
 		 color_type & PNG_COLOR_MASK_ALPHA ? " with alpha channel" : "",
 		 (unsigned int)w, (unsigned int)h, depth);
@@ -169,6 +169,12 @@ GP_RetCode GP_ReadPNG(FILE *f, GP_Context **res,
 			break;
 			}
 		}
+		
+		/* Convert everything else to RGB888 */
+		//TODO: add palette matching to G2 G4 and G8
+		png_set_palette_to_rgb(png);
+		png_set_bgr(png);
+		pixel_type = GP_PIXEL_RGB888;
 	break;
 	}
 
