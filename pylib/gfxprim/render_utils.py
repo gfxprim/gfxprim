@@ -28,6 +28,10 @@ def create_environment(config, template_dir):
   env.globals['len'] = len
   env.globals['error'] = template_error
   env.globals['hex'] = lambda(x): hex(x).rstrip('L')
+  # Propagate some python buildins
+  env.globals['int'] = int;
+  env.globals['float'] = float;
+  env.globals['round'] = round;
   return env
 
 
