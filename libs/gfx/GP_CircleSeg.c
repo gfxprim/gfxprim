@@ -39,7 +39,7 @@ static uint8_t transform_segments(GP_Context *context, uint8_t seg_flags)
 	uint8_t seg4 = seg_flags & GP_CIRCLE_SEG4;
 
 	if (context->axes_swap)
-		GP_SWAP(seg2, seg4);
+		GP_SWAP(seg1, seg3);
 
 	if (context->x_swap) {
 		GP_SWAP(seg1, seg2);

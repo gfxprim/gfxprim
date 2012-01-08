@@ -84,25 +84,25 @@ void FN_NAME(CONTEXT_T context, int xcenter, int ycenter, unsigned int r, \
 		while (error < 0) { \
 			error += 2*x + 1; \
 			x++; \
-			if (seg_flags & GP_CIRCLE_SEG3) \
-				PUTPIXEL(context, xcenter-x+1, ycenter-y, pixval); \
-			if (seg_flags & GP_CIRCLE_SEG4) \
-				PUTPIXEL(context, xcenter+x-1, ycenter-y, pixval); \
 			if (seg_flags & GP_CIRCLE_SEG2) \
-				PUTPIXEL(context, xcenter-x+1, ycenter+y, pixval); \
+				PUTPIXEL(context, xcenter-x+1, ycenter-y, pixval); \
 			if (seg_flags & GP_CIRCLE_SEG1) \
+				PUTPIXEL(context, xcenter+x-1, ycenter-y, pixval); \
+			if (seg_flags & GP_CIRCLE_SEG3) \
+				PUTPIXEL(context, xcenter-x+1, ycenter+y, pixval); \
+			if (seg_flags & GP_CIRCLE_SEG4) \
 				PUTPIXEL(context, xcenter+x-1, ycenter+y, pixval); \
 		} \
 \
 		/* Enough changes accumulated, go to next line. */ \
 		error += -2*y + 1; \
-		if (seg_flags & GP_CIRCLE_SEG3) \
-			PUTPIXEL(context, xcenter-x+1, ycenter-y, pixval); \
-		if (seg_flags & GP_CIRCLE_SEG4) \
-			PUTPIXEL(context, xcenter+x-1, ycenter-y, pixval); \
 		if (seg_flags & GP_CIRCLE_SEG2) \
-			PUTPIXEL(context, xcenter-x+1, ycenter+y, pixval); \
+			PUTPIXEL(context, xcenter-x+1, ycenter-y, pixval); \
 		if (seg_flags & GP_CIRCLE_SEG1) \
+			PUTPIXEL(context, xcenter+x-1, ycenter-y, pixval); \
+		if (seg_flags & GP_CIRCLE_SEG3) \
+			PUTPIXEL(context, xcenter-x+1, ycenter+y, pixval); \
+		if (seg_flags & GP_CIRCLE_SEG4) \
 			PUTPIXEL(context, xcenter+x-1, ycenter+y, pixval); \
 	} \
 }
