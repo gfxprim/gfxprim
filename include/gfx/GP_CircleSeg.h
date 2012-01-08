@@ -16,42 +16,52 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2010 Jiri "BlueBear" Dluhos                            *
+ * Copyright (C) 2009-2011 Jiri "BlueBear" Dluhos                            *
  *                         <jiri.bluebear.dluhos@gmail.com>                  *
  *                                                                           *
- * Copyright (C) 2009-2011 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
-/*
+#ifndef GFX_GP_CIRCLE_H
+#define GFX_GP_CIRCLE_H
 
-  This is a main header for gfx part.
-
- */
-
-#ifndef GP_GFX_H
-#define GP_GFX_H
-
-/* basic definitions and structures */
 #include "core/GP_Context.h"
-#include "core/GP_GetPutPixel.h"
-#include "core/GP_WritePixel.h"
 
-/* public drawing API */
-#include "GP_Fill.h"
-#include "GP_HLine.h"
-#include "GP_VLine.h"
-#include "GP_Line.h"
-#include "GP_Rect.h"
-#include "GP_Triangle.h"
-#include "GP_Tetragon.h"
-#include "GP_Circle.h"
-#include "GP_CircleSeg.h"
-#include "GP_Ellipse.h"
-#include "GP_Arc.h"
-#include "GP_Polygon.h"
-#include "GP_Symbol.h"
+/*
+ * Quadrants in cartesian space the center is set in the middle of the circle.
+ *
+ * First segment is where both x and y are possitive, second is where only y is
+ * possitive, third is for both x and y negative and the last one for only y
+ * negative.
+ * 
+ * Note that on computer screen (and in in-memory bitmaps) cordinates for y
+ * grows in the opposite direction to the standard cartesian plane.
+ * 
+ * So first segment is actually down right, second is down left, third is up
+ * left, and fourth is up right.
+ */
+enum GP_CircleSegments {
+	GP_CIRCLE_SEG1 = 0x01, /* First Quadrant  */
+	GP_CIRCLE_SEG2 = 0x02, /* Second Quadrant */
+	GP_CIRCLE_SEG3 = 0x04, /* Third Quadrant  */
+	GP_CIRCLE_SEG4 = 0x08, /* Fourth Quadrant */
+};
 
-#include "GP_RectAA.h"
+/* Circle Segment */
 
-#endif /* GP_GFX_H */
+void GP_CircleSeg(GP_Context *context, GP_Coord xcenter, GP_Coord ycenter,
+                  GP_Size r, uint8_t seg_flag, GP_Pixel pixel);
+
+void GP_CircleSeg_Raw(GP_Context *context, GP_Coord xcenter, GP_Coord ycenter,
+                      GP_Size r, uint8_t seg_flag, GP_Pixel pixel);
+
+/* Filled Circle Segment */
+
+void GP_FillCircleSeg(GP_Context *context, GP_Coord xcenter, GP_Coord ycenter,
+                      GP_Size r, uint8_t seg_flag, GP_Pixel pixel);
+
+void GP_FillCircleSeg_Raw(GP_Context *context, GP_Coord xcenter, GP_Coord ycenter,
+                          GP_Size r, uint8_t seg_flag, GP_Pixel pixel);
+
+#endif /* GFX_GP_CIRCLE_H */
