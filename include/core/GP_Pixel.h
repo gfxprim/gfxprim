@@ -56,6 +56,7 @@ typedef uint32_t GP_Pixel;
 
 /* Generated header */
 #include "GP_Pixel.gen.h"
+#include "GP_GetSetBits.h"
 
 /*
  * Information about ordering of pixels in byte for 1, 2 and 4 bpp 
