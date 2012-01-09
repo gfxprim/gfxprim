@@ -42,6 +42,13 @@
 #define BMP_HEADER_OFFSET 0x0e        /* info header offset */
 #define BMP_PIXELS_OFFSET_OFFSET 0x0a /* offset to offset to pixel data */
 
+#define BUF_TO_4(buf, off) \
+	(buf[off] + (buf[off+1]<<8) + (buf[off+2]<<16) + (buf[off+3]<<24))
+
+#define BUF_TO_2(buf, off) \
+	(buf[off] + (buf[off+1]<<8))
+	
+
 struct bitmap_info_header {
 	int32_t w;
 	int32_t h;
@@ -129,7 +136,7 @@ static GP_RetCode read_bitmap_info_header(FILE *f,
 		return GP_EBADFILE;
 	}
 
-	header_size = buf[0] + (buf[1]<<8) + (buf[2]<<16) + (buf[3]<<24);
+	header_size = BUF_TO_4(buf, 0);
 
 	GP_DEBUG(2, "BMP header type '%s'",
 	            bitmap_info_header_size_name(header_size));
@@ -148,16 +155,13 @@ static GP_RetCode read_bitmap_info_header(FILE *f,
 		return 1;
 	}
 
-	header->w = buf[0] + (buf[1]<<8) + (buf[2]<<16) + (buf[3]<<24);
-	header->h = buf[4] + (buf[5]<<8) + (buf[6]<<16) + (buf[7]<<24);
-	
-	header->bpp = buf[10] + (buf[11]<<8);
-	
-	header->compress_type = buf[12] + (buf[13]<<8) +
-	                       (buf[14]<<16) + (buf[15]<<24);
-	
-	header->palette_colors = buf[32] + (buf[33]<<8) +
-	                        (buf[34]<<16) + (buf[35]<<24);
+	header->w              = BUF_TO_4(buf, 0);
+	header->h              = BUF_TO_4(buf, 4);
+	header->bpp            = BUF_TO_2(buf, 10);
+	header->compress_type  = BUF_TO_4(buf, 12);
+	header->palette_colors = BUF_TO_4(buf, 32);
+
+	//TODO: assert that bitmap planes are set to 1
 
 	GP_DEBUG(2, "Have BMP bitmap size %"PRId32"x%"PRId32" %"PRIu16" "
 	            "bpp, %"PRIu32" pallete colors, '%s' compression",
@@ -183,7 +187,7 @@ GP_RetCode read_pixels_offset(FILE *f, uint32_t *offset)
 		return GP_EBADFILE;
 	}
 
-	*offset = buf[0] + (buf[1]<<8) + (buf[2]<<16) + (buf[3]<<24);
+	*offset = BUF_TO_4(buf, 0);
 
 	return GP_ESUCCESS;
 }
@@ -209,6 +213,7 @@ GP_RetCode read_g1(FILE *f, struct bitmap_info_header *header,
 
 	context->bit_endian = 1;
 
+	//TODO: if header->h < 0, the bitmap is top down
 	for (y = header->h - 1; y >= 0; y--) {
 		uint8_t *row = GP_PIXEL_ADDR(context, 0, y);
 
@@ -244,6 +249,7 @@ GP_RetCode read_rgb888(FILE *f, struct bitmap_info_header *header,
 	int32_t y;
 	uint32_t row_size = 3 * header->w;
 
+	//TODO: if header->h < 0, the bitmap is top down
 	for (y = header->h - 1; y >= 0; y--) {
 		uint8_t *row = GP_PIXEL_ADDR(context, 0, y);
 
@@ -363,7 +369,9 @@ GP_RetCode GP_ReadBMP(FILE *f, GP_Context **res,
 		goto err;
 	}
 
-	GP_Context *context = GP_ContextAlloc(header.w, header.h, pixel_type);
+	GP_Context *context;
+	
+	context = GP_ContextAlloc(header.w, GP_ABS(header.h), pixel_type);
 
 	if (context == NULL) {
 		ret = GP_ENOMEM;
