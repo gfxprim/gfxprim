@@ -148,8 +148,8 @@ static GP_RetCode read_bitmap_info_header(FILE *f,
 		return 1;
 	}
 
-	header->h = buf[0] + (buf[1]<<8) + (buf[2]<<16) + (buf[3]<<24);
-	header->w = buf[4] + (buf[5]<<8) + (buf[6]<<16) + (buf[7]<<24);
+	header->w = buf[0] + (buf[1]<<8) + (buf[2]<<16) + (buf[3]<<24);
+	header->h = buf[4] + (buf[5]<<8) + (buf[6]<<16) + (buf[7]<<24);
 	
 	header->bpp = buf[10] + (buf[11]<<8);
 	
@@ -191,11 +191,51 @@ GP_RetCode read_pixels_offset(FILE *f, uint32_t *offset)
 GP_PixelType match_pixel_type(struct bitmap_info_header *header)
 {
 	switch (header->bpp) {
+	case 1:
+		/* context->bitendian = 1 */
+		return GP_PIXEL_G1;
 	case 24:
 		return GP_PIXEL_RGB888;
 	}
 
 	return GP_PIXEL_UNKNOWN;
+}
+
+GP_RetCode read_g1(FILE *f, struct bitmap_info_header *header,
+                   GP_Context *context, GP_ProgressCallback *callback)
+{
+	int32_t y;
+	uint32_t row_size = header->w / 8 + !!(header->w%8);
+
+	context->bit_endian = 1;
+
+	for (y = header->h - 1; y >= 0; y--) {
+		uint8_t *row = GP_PIXEL_ADDR(context, 0, y);
+
+		if (fread(row, 1, row_size, f) != row_size)
+			return GP_EBADFILE;
+	
+		/* Rows are four byte aligned */
+		switch (row_size % 4) {
+		case 1:
+			fgetc(f);
+		case 2:
+			fgetc(f);
+		case 3:
+			fgetc(f);
+		case 0:
+		break;
+		}
+		
+		if (GP_ProgressCallbackReport(callback, header->h - y -1,
+		                              context->h, context->w)) {
+			GP_DEBUG(1, "Operation aborted");
+			return GP_EINTR;
+		}
+	}
+	
+	GP_ProgressCallbackDone(callback);
+	return GP_ESUCCESS;
 }
 
 GP_RetCode read_rgb888(FILE *f, struct bitmap_info_header *header,
@@ -212,11 +252,11 @@ GP_RetCode read_rgb888(FILE *f, struct bitmap_info_header *header,
 	
 		/* Rows are four byte aligned */
 		switch (row_size % 4) {
-		case 3:
+		case 1:
 			fgetc(f);
 		case 2:
 			fgetc(f);
-		case 1:
+		case 3:
 			fgetc(f);
 		case 0:
 		break;
@@ -252,6 +292,8 @@ GP_RetCode read_bitmap_pixels(FILE *f, struct bitmap_info_header *header,
 	}
 
 	switch (header->bpp) {
+	case 1:
+		return read_g1(f, header, context, callback);
 	case 24:
 		return read_rgb888(f, header, context, callback);
 	}
@@ -352,4 +394,3 @@ GP_RetCode GP_LoadBMP(const char *src_path, GP_Context **res,
 
 	return GP_ReadBMP(f, res, callback);
 }
-
