@@ -46,6 +46,9 @@ GP_RetCode GP_LoadImage(const char *src_path, GP_Context **res,
 		return GP_EBADFILE;
 	}
 
+	if (len < 3)
+		goto skip_filename_check;
+
 	switch (src_path[len - 1]) {
 	/* PNG, JPG, JPEG */
 	case 'g':
@@ -97,7 +100,21 @@ GP_RetCode GP_LoadImage(const char *src_path, GP_Context **res,
 		break;
 		}
 	break;
+	/* BMP */
+	case 'P':
+	case 'p':
+		switch (src_path[len - 2]) {
+		case 'M':
+		case 'm':
+			if (src_path[len - 3] == 'B' ||
+			    src_path[len - 3] == 'b')
+			    	ret = GP_LoadBMP(src_path, res, callback);
+		break;
+		}
+	break;
 	}
+
+skip_filename_check:
 
 	//TODO file signature based check
 

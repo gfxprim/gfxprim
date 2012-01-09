@@ -16,37 +16,39 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2010 Jiri "BlueBear" Dluhos                            *
- *                         <jiri.bluebear.dluhos@gmail.com>                  *
- *                                                                           *
  * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
- /*
-
-   Core include file for loaders API.
-
-  */
-
-#ifndef LOADERS_GP_LOADERS_H
-#define LOADERS_GP_LOADERS_H
+#ifndef LOADERS_GP_BMP_H
+#define LOADERS_GP_BMP_H
 
 #include "core/GP_Context.h"
 #include "core/GP_ProgressCallback.h"
 
-#include "GP_PBM.h"
-#include "GP_PGM.h"
-#include "GP_PPM.h"
-
-#include "GP_BMP.h"
-#include "GP_PNG.h"
-#include "GP_JPG.h"
+/*
+ * Opens up a bmp file, checks signature, parses metadata.
+ *
+ * The width and height and pixel type are filled upon succcessful return.
+ */
+GP_RetCode GP_OpenBMP(const char *src_path, FILE **f,
+                      GP_Size *w, GP_Size *h, GP_PixelType *pixel_type);
 
 /*
- * Tries to load image accordingly to extension.
+ * Reads a BMP from a opened file.
+ * 
+ * Upon successful return context to store bitmap is allocated and image is
+ * loaded.
+ *
  */
-GP_RetCode GP_LoadImage(const char *src_path, GP_Context **res,
-                        GP_ProgressCallback *callback);
+GP_RetCode GP_ReadBMP(FILE *f, GP_Context **res,
+                      GP_ProgressCallback *callback);
 
-#endif /* LOADERS_GP_LOADERS_H */
+/*
+ * Does both GP_OpenBMP and GP_ReadBMP.
+ */
+GP_RetCode GP_LoadBMP(const char *src_path, GP_Context **res,
+                      GP_ProgressCallback *callback);
+
+
+#endif /* LOADERS_GP_BMP_H */
