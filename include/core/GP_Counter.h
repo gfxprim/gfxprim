@@ -17,11 +17,12 @@
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
  * Copyright (C) 2011      Tomas Gavenciak <gavento@ucw.cz>                  *
+ * Copyright (C) 2012      Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
-#ifndef GP_COUNTER_H
-#define GP_COUNTER_H
+#ifndef CORE_GP_COUNTER_H
+#define CORE_GP_COUNTER_H
 
 /* 
  * Simple global named 64-bit counters.
@@ -32,14 +33,12 @@
  * If GP_IMPLEMENT_COUNTERS is undefined, all operations are NOP and
  * no memory is allocated.
  */
-
 #define GP_IMPLEMENT_COUNTERS
 
 /*
  * Maximum length of counter name,
  * maximum number of counters (~40 bytes each) 
  */
-
 #define GP_COUNTER_NAME_LEN 24
 #define GP_COUNTER_MAX 256
 
@@ -47,19 +46,18 @@
  * Basic types. 
  * Only use GP_Counter in your programs. 
  */
-
 typedef int64_t GP_Counter_t;
 typedef GP_Counter_t *GP_Counter;
 
 /* 
  * Increase a counter by 1.
  */
-
 static inline void GP_IncCounter(GP_Counter counter) 
 {
 #ifdef	GP_IMPLEMENT_COUNTERS
-	if (!counter) return;
-	(*counter) ++;
+	if (!counter)
+		return;
+	(*counter)++;
 #endif	/* GP_IMPLEMENT_COUNTERS */
 }
 
@@ -67,11 +65,11 @@ static inline void GP_IncCounter(GP_Counter counter)
  * Increase a counter by delta (may be negative).
  * No checks for underflow.
  */
-
 static inline void GP_AddCounter(GP_Counter counter, GP_Counter_t delta) 
 {
 #ifdef	GP_IMPLEMENT_COUNTERS
-	if (!counter) return;
+	if (!counter)
+		return;
 	(*counter) += delta;
 #endif	/* GP_IMPLEMENT_COUNTERS */
 }
@@ -79,11 +77,11 @@ static inline void GP_AddCounter(GP_Counter counter, GP_Counter_t delta)
 /*
  * Set counter to given value.
  */
-
 static inline void GP_SetCounter(GP_Counter counter, GP_Counter_t value) 
 {
 #ifdef	GP_IMPLEMENT_COUNTERS
-	if (!counter) return;
+	if (!counter)
+		return;
 	(*counter) = value;
 #endif	/* GP_IMPLEMENT_COUNTERS */
 }
@@ -91,11 +89,11 @@ static inline void GP_SetCounter(GP_Counter counter, GP_Counter_t value)
 /*
  * Return counter value
  */
-
-inline GP_Counter_t GP_CounterVal(GP_Counter counter)
+static inline GP_Counter_t GP_CounterVal(GP_Counter counter)
 {
 #ifdef	GP_IMPLEMENT_COUNTERS
-	if (!counter) return 0;
+	if (!counter)
+		return 0;
 	return *counter;
 #else	/* GP_IMPLEMENT_COUNTERS */
 	return 0;
@@ -106,9 +104,8 @@ inline GP_Counter_t GP_CounterVal(GP_Counter counter)
  * Pretty-printing of all counters and their values to f
  * Includes info about counter-list overflow
  */
-
-struct FILE;
-void GP_PrintCounters(struct FILE *f);
+#include <stdio.h>
+void GP_PrintCounters(FILE *f);
 
 /*
  * Lookup a counter by name, possibly creating a new one.
@@ -119,7 +116,6 @@ void GP_PrintCounters(struct FILE *f);
  * NOTE: Current implementation has very slow adds (O(current_counters)),
  *	 but the lookup is reasonably fast (bisection)
  */
-
 GP_Counter GP_GetCounter(const char *name);
 
-#endif	/* GP_COUNTER_H */
+#endif	/* CORE_GP_COUNTER_H */

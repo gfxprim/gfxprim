@@ -17,28 +17,25 @@
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
  * Copyright (C) 2011      Tomas Gavenciak <gavento@ucw.cz>                  *
+ * Copyright (C) 2012      Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
 #include <string.h>
-#include <stdio.h>
 #include "GP_Common.h"
 #include "GP_Counter.h"
 
 /*
  * Internal struct used in counter list
  */
-
 struct GP_CounterRecord {
 	char name[GP_COUNTER_NAME_LEN];
 	GP_Counter counter;
 };
 
-
 /* 
  * variables local to module (static) 
  */
-
 #ifdef	GP_IMPLEMENT_COUNTERS
 
 static GP_Counter_t GP_counters[GP_COUNTER_MAX];
@@ -48,19 +45,20 @@ static GP_Counter_t GP_counter_list_overflow = 0;
 
 #endif	/* GP_IMPLEMENT_COUNTERS */
 
-void GP_PrintCounters(struct FILE *f)
+void GP_PrintCounters(FILE *f)
 {
 #ifdef	GP_IMPLEMENT_COUNTERS
 	int i;
 	GP_CHECK(f != NULL);
 	if (GP_used_counters == 0)
-		fprintf((FILE *) f, "[ no counters defined ]\n");
+		fprintf(f, "[ no counters defined ]\n");
 	for (i = 0; i < GP_used_counters; i++) 
-		fprintf((FILE *) f, "%*s : %lld\n", -GP_COUNTER_NAME_LEN, 
-			GP_counter_list[i].name, *(GP_counter_list[i].counter));
+		fprintf(f, "%*s : %llu\n", -GP_COUNTER_NAME_LEN, 
+			GP_counter_list[i].name,
+			(long long unsigned int)*(GP_counter_list[i].counter));
 	if (GP_counter_list_overflow > 0)
-		fprintf((FILE *) f, "[ unable to allocate new counter %lld times ]\n",
-			GP_counter_list_overflow);
+		fprintf(f, "[ unable to allocate new counter %llu times ]\n",
+			(long long unsigned int)GP_counter_list_overflow);
 #endif	/* GP_IMPLEMENT_COUNTERS */
 }
 
@@ -73,9 +71,11 @@ GP_Counter GP_GetCounter(const char *name)
 	GP_CHECK(name != NULL);
 	GP_CHECK(strlen(name) + 1 <= GP_COUNTER_NAME_LEN);
 
-	/* Bisect GP_counter_list to find either the counter or a place for it 
-	 * interval [l, r) (not incl. r) */
-	while(r > l) {
+	/* 
+	 * Bisect GP_counter_list to find either the counter or a place for it 
+	 * interval [l, r) (not incl. r)
+	 */
+	while (r > l) {
 		int med = (r + l) / 2; /* Here never equal to r, might be l */
 		int cmp = strcmp(GP_counter_list[med].name, name);
 		if (cmp == 0)
@@ -91,7 +91,7 @@ GP_Counter GP_GetCounter(const char *name)
 
 	/* Add a new counter */
 	if (GP_used_counters >= GP_COUNTER_MAX) {
-		GP_counter_list_overflow ++;
+		GP_counter_list_overflow++;
 		return NULL;
 	}
 
@@ -101,7 +101,7 @@ GP_Counter GP_GetCounter(const char *name)
 	strcpy(GP_counter_list[l].name, name);
 	GP_counter_list[l].counter = GP_counters + GP_used_counters;
 	
-	GP_used_counters ++;
+	GP_used_counters++;
 	return GP_counter_list[l].counter;
 #else	/* GP_IMPLEMENT_COUNTERS */
 	return NULL;
