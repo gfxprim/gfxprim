@@ -24,7 +24,7 @@
 
   Gfxprim event layer.
   
-  Events are lowlever interfaace to input devices (human interface).
+  Events are lowlevel interface to input devices (human interface).
 
   - Events are notifications that something has changed, eg. button pressed
   - Each event carries some information about global state
