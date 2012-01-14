@@ -41,9 +41,7 @@
 #include "core/GP_GetPutPixel.h"
 #include "GP_BMP.h"
 
-#define BMP_HEADER_OFFSET 0x0e        /* info header offset */
-#define BMP_PIXELS_OFFSET_OFFSET 0x0a /* offset to offset to pixel data */
-#define BMP_PALETTE_OFFSET 54         /* offset to the palette */
+#define BMP_HEADER_OFFSET  0x0a       /* info header offset - 4 bytes */
 
 #define BUF_TO_4(buf, off) \
 	(buf[off] + (buf[off+1]<<8) + (buf[off+2]<<16) + (buf[off+3]<<24))
@@ -53,11 +51,23 @@
 	
 
 struct bitmap_info_header {
-	int32_t w;
-	/* 
-	 * If negative imge is top-down (bottom-up is default)
+	/*
+	 * Offset to image data.
 	 */
+	uint32_t pixel_offset;
+
+	/*
+	 * Header size (palette is on offset header_size + 14)
+	 */
+	uint32_t header_size;
+
+	/* 
+	 * Image size in pixels.
+	 * If h is negative image is top-down (bottom-up is default)
+	 */
+	int32_t w;
 	int32_t h;               
+	
 	uint16_t bpp;
 	uint32_t compress_type;
 	/* 
@@ -105,7 +115,7 @@ enum bitmap_info_header_sizes {
 	BITMAPINFOHEADER5 = 124, /* adds ICC color profiles win 98+       */
 };
 
-static const char *bitmap_info_header_size_name(uint32_t size)
+static const char *bitmap_header_size_name(uint32_t size)
 {
 	switch (size) {
 	case BITMAPCOREHEADER:
@@ -139,44 +149,11 @@ static uint32_t get_palette_size(struct bitmap_info_header *header)
 static GP_RetCode read_bitmap_info_header(FILE *f,
                                           struct bitmap_info_header *header)
 {
-	if (fseek(f, BMP_HEADER_OFFSET, SEEK_SET)) {
-		GP_DEBUG(1, "fseek(f, 0x%02x) failed: '%s'",
-		            BMP_HEADER_OFFSET, strerror(errno));
-		return GP_EBADFILE;
-	}
-	
-	char buf[32];
-	uint32_t header_size;
-
-	/* Read info header size, header size determines header type */
-	if (fread(buf, 1, 4, f) != 4) {
-		GP_DEBUG(1, "Failed to read info header size");
-		return GP_EBADFILE;
-	}
-
-	header_size = BUF_TO_4(buf, 0);
-
-	GP_DEBUG(2, "BMP header type '%s'",
-	            bitmap_info_header_size_name(header_size));
-
-	switch (header_size) {
-	case BITMAPCOREHEADER:
-	case BITMAPCOREHEADER2:
-		return GP_ENOIMPL;
-	/* The bitmap core header only adds filelds to the end of the header */
-	case BITMAPINFOHEADER:
-	case BITMAPINFOHEADER2:
-	case BITMAPINFOHEADER3:
-	case BITMAPINFOHEADER4:
-	break;
-	default:
-		GP_DEBUG(1, "Unknown header type, continuing anyway");
-	break;
-	};
+	uint8_t buf[36];
 
 	if (fread(buf, 1, sizeof(buf), f) != sizeof(buf)) {
 		GP_DEBUG(1, "Failed to read bitmap info header");
-		return 1;
+		return GP_EBADFILE;
 	}
 
 	header->w              = BUF_TO_4(buf, 0);
@@ -192,14 +169,88 @@ static GP_RetCode read_bitmap_info_header(FILE *f,
 		GP_DEBUG(1, "Number of planes is %"PRId16" should be 1",
 		            nr_planes);
 
-
 	GP_DEBUG(2, "Have BMP bitmap size %"PRId32"x%"PRId32" %"PRIu16" "
 	            "bpp, %"PRIu32" pallete colors, '%s' compression",
 		    header->w, header->h, header->bpp,
 	            get_palette_size(header),
 	            bitmap_compress_name(header->compress_type));
 
-	return 0;
+	return GP_ESUCCESS;
+}
+
+static GP_RetCode read_bitmap_core_header(FILE *f,
+                                          struct bitmap_info_header *header)
+{
+	uint8_t buf[12];
+
+	if (fread(buf, 1, sizeof(buf), f) != sizeof(buf)) {
+		GP_DEBUG(1, "Failed to read bitmap core header");
+		return GP_EBADFILE;
+	}
+	
+	header->w = BUF_TO_2(buf, 0);
+	header->h = BUF_TO_2(buf, 2);
+	header->bpp = BUF_TO_2(buf, 6);
+	header->compress_type = COMPRESS_RGB;
+	header->palette_colors = 0;
+
+	uint16_t nr_planes = BUF_TO_2(buf, 4);
+
+	/* This must be 1 according to specs */
+	if (nr_planes != 1)
+		GP_DEBUG(1, "Number of planes is %"PRId16" should be 1",
+		            nr_planes);
+
+	GP_DEBUG(2, "Have BMP bitmap size %"PRId32"x%"PRId32" %"PRIu16" bpp",
+	            header->h, header->w, header->bpp);
+
+	return GP_ESUCCESS;
+}
+
+static GP_RetCode read_bitmap_header(FILE *f,
+                                     struct bitmap_info_header *header)
+{
+	uint8_t buf[8];
+	GP_RetCode ret;
+	
+	if (fseek(f, BMP_HEADER_OFFSET, SEEK_SET)) {
+		GP_DEBUG(1, "fseek(f, 0x%02x) failed: '%s'",
+		            BMP_HEADER_OFFSET, strerror(errno));
+		return GP_EBADFILE;
+	}
+
+	/* Read info header size, header size determines header type */
+	if (fread(buf, 1, sizeof(buf), f) != sizeof(buf)) {
+		GP_DEBUG(1, "Failed to read info header size");
+		return GP_EBADFILE;
+	}
+
+	header->pixel_offset = BUF_TO_4(buf, 0);
+	header->header_size = BUF_TO_4(buf, 4);
+
+	GP_DEBUG(2, "BMP header type '%s'",
+	            bitmap_header_size_name(header->header_size));
+
+	switch (header->header_size) {
+	case BITMAPCOREHEADER:
+		ret = read_bitmap_core_header(f, header);
+	break;
+	case BITMAPCOREHEADER2:
+		return GP_ENOIMPL;
+	/* The bitmap core header only adds filelds to the end of the header */
+	case BITMAPINFOHEADER:
+	case BITMAPINFOHEADER2:
+	case BITMAPINFOHEADER3:
+	case BITMAPINFOHEADER4:
+		ret = read_bitmap_info_header(f, header);
+	break;
+	default:
+		GP_DEBUG(1, "Unknown header type, continuing anyway");
+		ret = read_bitmap_info_header(f, header);
+	break;
+	};
+	
+	return ret;
 }
 
 /*
@@ -210,8 +261,23 @@ GP_RetCode read_bitmap_palette(FILE *f, struct bitmap_info_header *header,
 {
 	uint32_t i;
 	uint32_t palette_colors = get_palette_size(header);
+	uint32_t palette_offset = header->header_size + 14;
+	uint8_t pixel_size;
 
-	if (fseek(f, BMP_PALETTE_OFFSET, SEEK_SET)) {
+	switch (header->header_size) {
+	case BITMAPCOREHEADER:
+		pixel_size = 3;
+	break;
+	default:
+		pixel_size = 4;
+	break;
+	}
+
+	GP_DEBUG(2, "Offset to BMP palette is 0x%x (%ubytes) "
+	            "pixel size %"PRIu8"bytes",
+		    palette_offset, palette_offset, pixel_size);
+
+	if (fseek(f, palette_offset, SEEK_SET)) {
 		GP_DEBUG(1, "fseek(f, 0x%02x) failed: '%s'",
 		            BMP_HEADER_OFFSET, strerror(errno));
 		return GP_EBADFILE;
@@ -220,7 +286,7 @@ GP_RetCode read_bitmap_palette(FILE *f, struct bitmap_info_header *header,
 	for (i = 0; i < palette_colors; i++) {
 		uint8_t buf[4];
 
-		if (fread(buf, 1, 4, f) != 4) {
+		if (fread(buf, 1, pixel_size, f) != pixel_size) {
 			GP_DEBUG(1, "Failed to read palette %"PRIu32, i);
 			return GP_EBADFILE;
 		}
@@ -236,31 +302,15 @@ GP_RetCode read_bitmap_palette(FILE *f, struct bitmap_info_header *header,
 	return GP_ESUCCESS;
 }
 
-GP_RetCode seek_pixels_offset(FILE *f)
+GP_RetCode seek_pixels_offset(struct bitmap_info_header *header,
+                              FILE *f)
 {
-	uint32_t offset;
-
-	if (fseek(f, BMP_PIXELS_OFFSET_OFFSET, SEEK_SET)) {
-		GP_DEBUG(1, "fseek(f, 0x%02x) failed: '%s'",
-		            BMP_HEADER_OFFSET, strerror(errno));
-		return GP_EBADFILE;
-	}
-
-	uint8_t buf[4];
-
-	if (fread(buf, 1, 4, f) != 4) {
-		GP_DEBUG(1, "Failed to read pixel offset size");
-		return GP_EBADFILE;
-	}
-
-	offset = BUF_TO_4(buf, 0);
-	
 	GP_DEBUG(2, "Offset to BMP pixels is 0x%x (%ubytes)",
-	            offset, offset);
+	            header->pixel_offset, header->pixel_offset);
 
-	if (fseek(f, offset, SEEK_SET)) {
+	if (fseek(f, header->pixel_offset, SEEK_SET)) {
 		GP_DEBUG(1, "fseek(f, 0x%02x) failed: '%s'",
-		            offset, strerror(errno));
+		            header->pixel_offset, strerror(errno));
 		return GP_EBADFILE;
 	}
 
@@ -271,6 +321,7 @@ GP_PixelType match_pixel_type(struct bitmap_info_header *header)
 {
 	switch (header->bpp) {
 	case 1:
+	case 2:
 	case 4:
 	case 8:
 	case 24:
@@ -349,7 +400,7 @@ GP_RetCode read_palette(FILE *f, struct bitmap_info_header *header,
 	if ((ret = read_bitmap_palette(f, header, palette)))
 		return ret;
 	
-	if ((ret = seek_pixels_offset(f)))
+	if ((ret = seek_pixels_offset(header, f)))
 		return ret;
 	
 	uint32_t row_size = bitmap_row_size(header);
@@ -403,7 +454,7 @@ GP_RetCode read_rgb888(FILE *f, struct bitmap_info_header *header,
 	uint32_t row_size = 3 * header->w;
 	int32_t y;
 	
-	if ((ret = seek_pixels_offset(f)))
+	if ((ret = seek_pixels_offset(header, f)))
 		return ret;
 
 	for (y = 0; y < GP_ABS(header->h); y++) {
@@ -485,7 +536,7 @@ GP_RetCode GP_OpenBMP(const char *src_path, FILE **f,
 	if (w != NULL || h != NULL || pixel_type != NULL) {
 		struct bitmap_info_header header;
 	
-		if ((ret = read_bitmap_info_header(*f, &header)))
+		if ((ret = read_bitmap_header(*f, &header)))
 			goto err;
 
 		if (w != NULL)
@@ -508,7 +559,7 @@ GP_RetCode GP_ReadBMP(FILE *f, GP_Context **res,
 	GP_RetCode ret;
 	GP_PixelType pixel_type;
 
-	if ((ret = read_bitmap_info_header(f, &header)))
+	if ((ret = read_bitmap_header(f, &header)))
 		goto err;
 
 	if (header.compress_type != COMPRESS_RGB) {
