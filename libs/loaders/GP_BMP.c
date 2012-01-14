@@ -202,7 +202,9 @@ static GP_RetCode read_bitmap_info_header(FILE *f,
 	return 0;
 }
 
-
+/*
+ * Reads palette, the format is R G B X, each one byte.
+ */
 GP_RetCode read_bitmap_palette(FILE *f, struct bitmap_info_header *header,
                                GP_Pixel *palette)
 {
@@ -216,18 +218,20 @@ GP_RetCode read_bitmap_palette(FILE *f, struct bitmap_info_header *header,
 	}
 
 	for (i = 0; i < palette_colors; i++) {
-		char buf[4];
+		uint8_t buf[4];
 
-		if (fread(buf, 1, 4, f) != 4)
+		if (fread(buf, 1, 4, f) != 4) {
+			GP_DEBUG(1, "Failed to read palette %"PRIu32, i);
 			return GP_EBADFILE;
-
+		}
+		
 		palette[i] = GP_Pixel_CREATE_RGB888(buf[2], buf[1], buf[0]);
+	
+		GP_DEBUG(3, "Palette[%"PRIu32"] = [0x%02x, 0x%02x, 0x%02x]", i,
+	        	    GP_Pixel_GET_R_RGB888(palette[i]),
+	        	    GP_Pixel_GET_G_RGB888(palette[i]),
+	        	    GP_Pixel_GET_B_RGB888(palette[i]));
 	}
-
-	GP_DEBUG(2, "Palette [0x%02x, 0x%02x, 0x%02x], ...",
-	            GP_Pixel_GET_R_RGB888(palette[0]),
-	            GP_Pixel_GET_G_RGB888(palette[0]),
-	            GP_Pixel_GET_B_RGB888(palette[0]));
 
 	return GP_ESUCCESS;
 }
@@ -242,11 +246,10 @@ GP_RetCode seek_pixels_offset(FILE *f)
 		return GP_EBADFILE;
 	}
 
-	char buf[4];
+	uint8_t buf[4];
 
-	/* Read info header size, header size determines header type */
 	if (fread(buf, 1, 4, f) != 4) {
-		GP_DEBUG(1, "Failed to read info header size");
+		GP_DEBUG(1, "Failed to read pixel offset size");
 		return GP_EBADFILE;
 	}
 
@@ -268,6 +271,8 @@ GP_PixelType match_pixel_type(struct bitmap_info_header *header)
 {
 	switch (header->bpp) {
 	case 1:
+	case 4:
+	case 8:
 	case 24:
 		return GP_PIXEL_RGB888;
 	}
@@ -275,28 +280,92 @@ GP_PixelType match_pixel_type(struct bitmap_info_header *header)
 	return GP_PIXEL_UNKNOWN;
 }
 
-GP_RetCode read_p1(FILE *f, struct bitmap_info_header *header,
-                   GP_Context *context, GP_ProgressCallback *callback)
+/*
+ * Returns four byte aligned row size for palette formats.
+ */
+static uint32_t bitmap_row_size(struct bitmap_info_header *header)
+{
+	uint32_t row_size = 0;
+	
+	/* align width to whole bytes */
+	switch (header->bpp) {
+	case 1:
+		row_size = header->w / 8 + !!(header->w%8);
+	break;
+	case 2:
+		row_size = header->w / 4 + !!(header->w%4);
+	break;
+	case 4:
+		row_size = header->w / 2 + !!(header->w%2);
+	break;
+	case 8:
+		row_size = header->w;
+	break;
+	}
+
+	/* align row_size to four byte boundary */
+	switch (row_size % 4) {
+	case 1:
+		row_size++;
+	case 2:
+		row_size++;
+	case 3:
+		row_size++;
+	case 0:
+	break;
+	}
+
+	GP_DEBUG(2, "bpp = %"PRIu16", width = %"PRId32", row_size = %"PRIu32,
+	            header->bpp, header->w, row_size);
+	
+	return row_size;
+}
+
+static uint8_t get_idx(struct bitmap_info_header *header,
+                       uint8_t row[], int32_t x)
+{
+	switch (header->bpp) {
+	case 1:
+		return !!(row[x/8] & (1<<(7 - x%8))); 
+	case 2:
+		return (row[x/4] >> (2*(3 - x%4))) & 0x03;
+	case 4:
+		return (row[x/2] >> (4*(!(x%2)))) & 0x0f;
+	break;
+	case 8:
+		return row[x];
+	}
+
+	return 0;
+}
+
+GP_RetCode read_palette(FILE *f, struct bitmap_info_header *header,
+                        GP_Context *context, GP_ProgressCallback *callback)
 {
 	GP_RetCode ret;
 	uint32_t palette_size = get_palette_size(header);
 	GP_Pixel palette[get_palette_size(header)];
-	uint32_t row_size = header->w / 8 + !!(header->w%8);
-	int32_t y;
 
 	if ((ret = read_bitmap_palette(f, header, palette)))
 		return ret;
+	
+	if ((ret = seek_pixels_offset(f)))
+		return ret;
+	
+	uint32_t row_size = bitmap_row_size(header);
+	int32_t y;
 
-	//TODO: if header->h < 0, the bitmap is top down
-	for (y = header->h - 1; y >= 0; y--) {
+	for (y = 0; y < GP_ABS(header->h); y++) {
 		int32_t x;
 		uint8_t row[row_size];
 
-		if (fread(row, 1, row_size, f) != row_size)
+		if (fread(row, 1, row_size, f) != row_size) {
+			GP_DEBUG(1, "Failed to read row %"PRId32, y);
 			return GP_EBADFILE;
+		}
 	
 		for (x = 0; x < header->w; x++) {
-			uint8_t idx = !!(row[x/8] & (1<<(7 - x%8))); 
+			uint8_t idx = get_idx(header, row, x);
 			GP_Pixel p;
 
 			if (idx >= palette_size) {
@@ -305,20 +374,15 @@ GP_RetCode read_p1(FILE *f, struct bitmap_info_header *header,
 			} else {
 				p = palette[idx];
 			}
+			
+			int32_t ry;
 
-			GP_PutPixel_Raw_24BPP(context, x, y, p);
-		}
+			if (header->h < 0)
+				ry = y;
+			else
+				ry = GP_ABS(header->h) - 1 - y;
 
-		/* Rows are four byte aligned */
-		switch (row_size % 4) {
-		case 1:
-			fgetc(f);
-		case 2:
-			fgetc(f);
-		case 3:
-			fgetc(f);
-		case 0:
-		break;
+			GP_PutPixel_Raw_24BPP(context, x, ry, p);
 		}
 		
 		if (GP_ProgressCallbackReport(callback, header->h - y -1,
@@ -342,9 +406,15 @@ GP_RetCode read_rgb888(FILE *f, struct bitmap_info_header *header,
 	if ((ret = seek_pixels_offset(f)))
 		return ret;
 
-	//TODO: if header->h < 0, the bitmap is top down
-	for (y = header->h - 1; y >= 0; y--) {
-		uint8_t *row = GP_PIXEL_ADDR(context, 0, y);
+	for (y = 0; y < GP_ABS(header->h); y++) {
+		int32_t ry;
+
+		if (header->h < 0)
+			ry = y;
+		else
+			ry = GP_ABS(header->h) - 1 - y;
+		
+		uint8_t *row = GP_PIXEL_ADDR(context, 0, ry);
 
 		if (fread(row, 1, row_size, f) != row_size)
 			return GP_EBADFILE;
@@ -377,7 +447,11 @@ GP_RetCode read_bitmap_pixels(FILE *f, struct bitmap_info_header *header,
 {
 	switch (header->bpp) {
 	case 1:
-		return read_p1(f, header, context, callback);
+	/* I haven't been able to locate 2bpp palette bmp file => not tested */
+	case 2:
+	case 4:
+	case 8:
+		return read_palette(f, header, context, callback);
 	case 24:
 		return read_rgb888(f, header, context, callback);
 	}
