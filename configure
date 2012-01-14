@@ -10,7 +10,7 @@ from optparse import OptionParser
 def header_exists(cfg, filename):
 	fpath = cfg['include_path'][0] + '/' + filename
 	
-	sys.stderr.write("Checking for '{0}' ... ".format(fpath))
+	sys.stderr.write("Checking for '%s' ... " % fpath)
 	
 	try:
 		st = os.stat(fpath)
@@ -23,7 +23,7 @@ def header_exists(cfg, filename):
 def c_try_compile(cfg, code, msg):
 	sys.stderr.write(msg)
 
-	ret = os.system("echo '{0}' | {1} -x c -o /dev/null - > /dev/null 2>&1".format(code, cfg["CC"][0]))
+	ret = os.system("echo '%s' | %s -x c -o /dev/null - > /dev/null 2>&1" % (code, cfg["CC"][0]))
 	
 	if ret:
 		sys.stderr.write("No\n")
@@ -34,12 +34,12 @@ def c_try_compile(cfg, code, msg):
 
 def c_compiler_exists(cfg):
 	return c_try_compile(cfg, "int main(void) { return 0; }",
-	                     "Checking for working compiler ({0}) ... ".format(cfg["CC"][0]))
+	                     "Checking for working compiler (%s) ... " % cfg["CC"][0])
 
 def python_module_installed(cfg, module):
-	sys.stderr.write("Checking for python module {0} ... ".format(module))
+	sys.stderr.write("Checking for python module %s ... " % module)
 
-	ret = os.system("echo 'import {0}' | {1} > /dev/null 2>&1".format(module, cfg['PYTHON_BIN'][0]))
+	ret = os.system("echo 'import %s' | %s > /dev/null 2>&1" % (module, cfg['PYTHON_BIN'][0]))
 
 	if ret:
 		sys.stderr.write('No\n')
@@ -65,20 +65,20 @@ class libraries:
 		sys.stderr.write("-------------------------\n")
 		
 		for i in self.libraries:
-			sys.stderr.write("{0:10}".format(i[0]))
+			sys.stderr.write("%10s" % i[0])
 
 			if (self.results[i[0]]):
 				sys.stderr.write(" : Enabled\n")
 			else:
 				sys.stderr.write(" : Disabled\n")
 
-			sys.stderr.write("            - {0}\n\n".format(i[1]))
+			sys.stderr.write("            - %s\n\n" % i[1])
 	#
 	# Enable/Disable library
 	#
 	def set(self, name, val):
 		if name not in map(lambda s: s[0], self.libraries):
-			sys.stderr.write("ERROR: Invalid library '{0}'\n".format(name))
+			sys.stderr.write("ERROR: Invalid library '%s'\n" % name)
 			exit(1)
 		else:
 			self.results[name] = val
@@ -99,11 +99,11 @@ class libraries:
 	#
 	def write_config_h(self, f):
 		for i in self.libraries:
-			f.write("/*\n * {0}\n */\n".format(i[1]))
+			f.write("/*\n * %s\n */\n" % i[1])
 			if self.results[i[0]]:
-				f.write("#define HAVE_{0}\n".format(i[0].upper()))
+				f.write("#define HAVE_%s\n" % i[0].upper())
 			else:
-				f.write("//#define HAVE_{0}\n".format(i[0].upper()))
+				f.write("//#define HAVE_%s\n" % i[0].upper())
 			f.write("\n")
 
 	#
@@ -112,7 +112,7 @@ class libraries:
 	def write_config_mk(self, f):
 		for i in self.libraries:
 			if self.results[i[0]]:
-				f.write("# {0}\nCFLAGS+={1}\nLDFLAGS+={2}\n".format(i[0], i[3], i[4]))
+				f.write("# %s\nCFLAGS+=%s\nLDFLAGS+=%s\n" % (i[0], i[3], i[4]))
 
 def basic_checks(cfg):
 	sys.stderr.write("Basic checks\n")
@@ -137,7 +137,7 @@ def write_config_h(cfg, libs):
 def write_config_mk(cfg, libs):
 	f = open('config.gen.mk', 'w')
 	for i in cfg:
-		f.write("# {0}\n{1}={2}\n".format(cfg[i][1], i, cfg[i][0]))
+		f.write("# %s\n%s=%s\n" % (cfg[i][1], i, cfg[i][0]))
 	libs.write_config_mk(f);
 	f.close()
 	sys.stderr.write("Config 'config.gen.mk' written\n")
