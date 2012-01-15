@@ -31,6 +31,6 @@
  *
  * Upon failure, or if SDL wasn't compiled in, NULL is returned.
  */
-GP_Backend *GP_BackendSDLInit(GP_Size w, GP_Size h, uint16_t bpp);
+GP_Backend *GP_BackendSDLInit(GP_Size w, GP_Size h, uint8_t bpp);
 
 #endif /* BACKENDS_GP_SDL_H */
