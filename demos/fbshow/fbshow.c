@@ -16,7 +16,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2011 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
@@ -32,13 +32,14 @@
 #include <pthread.h>
 
 #include <GP.h>
-#include <backends/GP_Framebuffer.h>
+#include <backends/GP_Backends.h>
 #include <input/GP_InputDriverLinux.h>
 
 static GP_Pixel black_pixel;
 static GP_Pixel white_pixel;
 
-static GP_Framebuffer *fb = NULL;
+static GP_Backend *backend;
+static GP_Context *context;
 
 /* image loader thread */
 static int abort_flag = 0;
@@ -60,7 +61,7 @@ static int image_loader_callback(GP_ProgressCallback *self)
 	snprintf(buf, sizeof(buf), "%s ... %-3.1f%%",
 	         (const char*)self->priv, self->percentage);
 
-	GP_Context *c = &fb->context;
+	GP_Context *c = context;
 
 	int align = GP_ALIGN_CENTER|GP_VALIGN_ABOVE;
 
@@ -118,8 +119,8 @@ static void *image_loader(void *ptr)
 	callback.priv = "Loading image";
 	
 	if (GP_LoadImage(params->img_path, &img, &callback) != 0) {
-		GP_Fill(&fb->context, black_pixel);
-		GP_Text(&fb->context, NULL, fb->context.w/2, fb->context.h/2,
+		GP_Fill(context, black_pixel);
+		GP_Text(context, NULL, context->w/2, context->h/2,
 		        GP_ALIGN_CENTER|GP_VALIGN_CENTER, black_pixel, white_pixel,
 			"Failed to load image :(");
 		return NULL;
@@ -131,13 +132,13 @@ static void *image_loader(void *ptr)
 	case 0:
 	case 180:
 	default:
-		w = fb->context.w;
-		h = fb->context.h;
+		w = context->w;
+		h = context->h;
 	break;
 	case 90:
 	case 270:
-		w = fb->context.h;
-		h = fb->context.w;
+		w = context->h;
+		h = context->w;
 	break;
 	}
 
@@ -155,9 +156,9 @@ static void *image_loader(void *ptr)
 	
 	GP_Context *ret;
 
-//	callback.priv = "Blurring Image";
-//	if (GP_FilterGaussianBlur(img, img, 0.3/rat, 0.3/rat, &callback) == NULL)
-//		return NULL;
+	callback.priv = "Blurring Image";
+	if (GP_FilterGaussianBlur(img, img, 0.5/rat, 0.5/rat, &callback) == NULL)
+		return NULL;
 	
 	callback.priv = "Resampling Image";
 	ret = GP_FilterResize(img, NULL, GP_INTERP_CUBIC_INT, img->w * rat, img->h * rat, &callback);
@@ -191,39 +192,39 @@ static void *image_loader(void *ptr)
 	if (img == NULL)
 		return NULL;
 
-	uint32_t cx = (fb->context.w - ret->w)/2;
-	uint32_t cy = (fb->context.h - ret->h)/2;
+	uint32_t cx = (context->w - ret->w)/2;
+	uint32_t cy = (context->h - ret->h)/2;
 
-	GP_Blit(ret, 0, 0, ret->w, ret->h, &fb->context, cx, cy);
+	GP_Blit(ret, 0, 0, ret->w, ret->h, context, cx, cy);
 	GP_ContextFree(ret);
 
 	/* clean up the rest of the display */
-	GP_FillRectXYWH(&fb->context, 0, 0, cx, fb->context.h, black_pixel);
-	GP_FillRectXYWH(&fb->context, 0, 0, fb->context.w, cy, black_pixel);
-	GP_FillRectXYWH(&fb->context, ret->w+cx, 0, cx, fb->context.h, black_pixel);
-	GP_FillRectXYWH(&fb->context, 0, ret->h+cy, fb->context.w, cy, black_pixel);
+	GP_FillRectXYWH(context, 0, 0, cx, context->h, black_pixel);
+	GP_FillRectXYWH(context, 0, 0, context->w, cy, black_pixel);
+	GP_FillRectXYWH(context, ret->w+cx, 0, cx, context->h, black_pixel);
+	GP_FillRectXYWH(context, 0, ret->h+cy, context->w, cy, black_pixel);
 
 	if (!params->show_info)
 		return NULL;
 
 	GP_Size th = GP_TextHeight(NULL);
 	
-	GP_Print(&fb->context, NULL, 11, 11, GP_ALIGN_RIGHT|GP_VALIGN_BOTTOM,
+	GP_Print(context, NULL, 11, 11, GP_ALIGN_RIGHT|GP_VALIGN_BOTTOM,
 	         black_pixel, white_pixel, "%ux%u", w, h);
 	
-	GP_Print(&fb->context, NULL, 10, 10, GP_ALIGN_RIGHT|GP_VALIGN_BOTTOM,
+	GP_Print(context, NULL, 10, 10, GP_ALIGN_RIGHT|GP_VALIGN_BOTTOM,
 	         white_pixel, black_pixel, "%ux%u", w, h);
 	
-	GP_Print(&fb->context, NULL, 11, 13 + th, GP_ALIGN_RIGHT|GP_VALIGN_BOTTOM,
+	GP_Print(context, NULL, 11, 13 + th, GP_ALIGN_RIGHT|GP_VALIGN_BOTTOM,
 	         black_pixel, white_pixel, "1:%3.3f", rat);
 	
-	GP_Print(&fb->context, NULL, 10, 12 + th, GP_ALIGN_RIGHT|GP_VALIGN_BOTTOM,
+	GP_Print(context, NULL, 10, 12 + th, GP_ALIGN_RIGHT|GP_VALIGN_BOTTOM,
 	         white_pixel, black_pixel, "1:%3.3f", rat);
 	
-	GP_Print(&fb->context, NULL, 11, 15 + 2 * th, GP_ALIGN_RIGHT|GP_VALIGN_BOTTOM,
+	GP_Print(context, NULL, 11, 15 + 2 * th, GP_ALIGN_RIGHT|GP_VALIGN_BOTTOM,
 	         black_pixel, white_pixel, "%s", img_name(params->img_path));
 	
-	GP_Print(&fb->context, NULL, 10, 14 + 2 * th, GP_ALIGN_RIGHT|GP_VALIGN_BOTTOM,
+	GP_Print(context, NULL, 10, 14 + 2 * th, GP_ALIGN_RIGHT|GP_VALIGN_BOTTOM,
 	         white_pixel, black_pixel, "%s", img_name(params->img_path));
 
 	return NULL;
@@ -247,15 +248,15 @@ static void show_image(struct loader_params *params)
 
 	if (ret) {
 		fprintf(stderr, "Failed to start thread: %s\n", strerror(ret));
-		GP_FramebufferExit(fb);
+		GP_BackendExit(backend);
 		exit(1);
 	}
 }
 
 static void sighandler(int signo __attribute__((unused)))
 {
-	if (fb != NULL)
-		GP_FramebufferExit(fb);
+	if (backend != NULL)
+		GP_BackendExit(backend);
 
 	exit(1);
 }
@@ -313,19 +314,21 @@ int main(int argc, char *argv[])
 	signal(SIGBUS, sighandler);
 	signal(SIGABRT, sighandler);
 
-	fb = GP_FramebufferInit("/dev/fb0");
+	backend = GP_BackendLinuxFBInit("/dev/fb0");
 
-	if (fb == NULL) {
+	if (backend == NULL) {
 		fprintf(stderr, "Failed to initalize framebuffer\n");
 		return 1;
 	}
-	
-	GP_EventSetScreenSize(fb->context.w, fb->context.h);
-	
-	black_pixel = GP_ColorToContextPixel(GP_COL_BLACK, &fb->context);
-	white_pixel = GP_ColorToContextPixel(GP_COL_WHITE, &fb->context);
 
-	GP_Fill(&fb->context, black_pixel);
+	context = backend->context;
+
+	GP_EventSetScreenSize(context->w, context->h);
+	
+	black_pixel = GP_ColorToContextPixel(GP_COL_BLACK, context);
+	white_pixel = GP_ColorToContextPixel(GP_COL_WHITE, context);
+
+	GP_Fill(context, black_pixel);
 
 	int argf = optind;
 	int argn = argf;
@@ -351,7 +354,7 @@ int main(int argc, char *argv[])
 	
 			switch (ret) {
 			case -1:
-				GP_FramebufferExit(fb);
+				GP_BackendExit(backend);
 				return 0;
 			break;
 			case 0:
@@ -411,7 +414,7 @@ int main(int argc, char *argv[])
 				case GP_KEY_ESC:
 				case GP_KEY_ENTER:
 				case GP_KEY_Q:
-					GP_FramebufferExit(fb);
+					GP_BackendExit(backend);
 					return 0;
 				break;
 				case GP_KEY_RIGHT:
@@ -443,7 +446,7 @@ int main(int argc, char *argv[])
 		}
 	}
 
-	GP_FramebufferExit(fb);
+	GP_BackendExit(backend);
 
 	return 0;
 }

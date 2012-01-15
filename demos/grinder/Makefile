@@ -2,7 +2,7 @@ TOPDIR=../..
 
 CSOURCES=$(shell echo *.c)
 
-INCLUDE=core gfx SDL backends
+INCLUDE=core gfx SDL
 LDLIBS+=-lGP -L$(TOPDIR)/build/
 
 APPS=grinder

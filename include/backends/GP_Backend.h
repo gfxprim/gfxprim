@@ -19,74 +19,134 @@
  * Copyright (C) 2009-2010 Jiri "BlueBear" Dluhos                            *
  *                         <jiri.bluebear.dluhos@gmail.com>                  *
  *                                                                           *
- * Copyright (C) 2009-2010 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
-#ifndef GP_BACKEND_H
-#define GP_BACKEND_H
+/*
+
+  The GP_Backend is overall structure for API for managing
+  connection/mmaped memory/... to xserver window/framebuffer/... .
+
+  In contrast to other graphics libraries we do not try to create overall
+  initalization interface that would match specialities for every possible
+  backend. Rather than that we are trying to create API that is the same
+  for all backends, once initalization is done.
+
+  So once you initalize, for example, framebuffer driver, the GP_Backend
+  structure is returned, which then could be used with generic code for
+  backend drawing.
+
+ */
+
+#ifndef BACKENDS_GP_BACKEND_H
+#define BACKENDS_GP_BACKEND_H
 
 #include "core/GP_Context.h"
 
-/*
- * Types of events provided by the backend.
- */
-enum GP_BackendEventType {
-	GP_BACKEND_EVENT_NONE = 0,
-	GP_BACKEND_EVENT_UPDATE_VIDEO = 1,	/* video redraw is needed */
-	GP_BACKEND_EVENT_QUIT_REQUEST = 2,	/* user requests quitting */
-};
+struct GP_Backend;
 
 /*
- * Structure describing an event reported by a backend.
+ * Linked list of file descriptors with callbacks. 
  */
-struct GP_BackendEvent {
-	enum GP_BackendEventType type;
-};
+typedef struct GP_BackendFD {
+	int fd;
+	void (*Callback)(struct GP_BackendFD *self, struct GP_Backend *backend);
+	struct GP_BackendFD *next;
+} GP_BackendFD;
 
-/* Describes a backend and holds all its API functions. */
-struct GP_Backend {
+typedef struct GP_Backend {
+	/*
+	 * Backend name.
+	 */
 	const char *name;
-	struct GP_Backend *(*init_fn)(void);
-	void (*shutdown_fn)(void);
-	GP_Context *(*open_video_fn)(int w, int h, int flags);
-	GP_Context *(*video_context_fn)(void);
-	void (*update_video_fn)(void);
-	int (*get_event_fn)(struct GP_BackendEvent *event);
-};
+
+	/* 
+	 * Pointer to context app should draw to.
+	 *
+	 * This MAY change upon a flip operation.
+	 */
+	GP_Context *context;
+
+	/*
+	 * If display is buffered, this copies content
+	 * of context onto display.
+	 *
+	 * If display is not buffered, this is no-op.
+	 */
+	void (*Flip)(struct GP_Backend *self);
+
+	/*
+	 * Updates display rectangle.
+	 *
+	 * In contrast to flip operation, the context
+	 * must not change (this is intended for updating very small areas).
+	 *
+	 * If display is not buffered, this is no-op.
+	 */
+	void (*UpdateRect)(struct GP_Backend *self,
+	                   GP_Coord x1, GP_Coord y1,
+	                   GP_Coord x2, GP_Coord y2);
+
+	/*
+	 * Exits the backend.
+	 */
+	void (*Exit)(struct GP_Backend *self);
+
+	/* 
+	 * Linked List of file descriptors with callbacks to poll.
+	 *
+	 * May be NULL.
+	 */
+	GP_BackendFD *fd_list;
+
+	/*
+	 * Some of the backends doesn't expose file descriptor
+	 * (for example SDL is broken that way).
+	 *
+	 * In that case the fd_list is NULL and this function
+	 * is non NULL.
+	 */
+	void (*Poll)(struct GP_Backend *self);
+
+	/* Backed private data */
+	char priv[];
+} GP_Backend;
+
+#define GP_BACKEND_PRIV(backend) ((void*)(backend)->priv)
 
 /*
- * Attempts to initialize a backend.
- * 
- * If name is specified, only that backend is tried; if name is NULL,
- * all known backends are tried and the first usable one is picked.
- *
- * Returns the backend structure, or NULL on failure.
+ * Calls backend->Flip().
  */
-struct GP_Backend *GP_InitBackend(const char *name);
+static inline void GP_BackendFlip(GP_Backend *backend)
+{
+	backend->Flip(backend);
+}
 
 /*
- * Opens the backend video and returns its context.
+ * Calls backend->UpdateRect().
  */
-GP_Context *GP_OpenBackendVideo(int w, int h, int flags);
+static inline void GP_BackendUpdateRect(GP_Backend *backend,
+                                        GP_Coord x1, GP_Coord y1,
+					GP_Coord x2, GP_Coord y2)
+{
+	backend->UpdateRect(backend, x1, y1, x2, y2);
+}
 
 /*
- * Returns a pointer to context that represents the backend's video.
+ * Calls backend->Exit().
  */
-GP_Context *GP_GetBackendVideoContext(void);
+static inline void GP_BackendExit(GP_Backend *backend)
+{
+	backend->Exit(backend);
+}
 
 /*
- * Calls the backend to update its video to reflect new changes.
- * If the backend uses double buffering, this causes a buffer flip.
- * If the backend uses direct-to-screen drawing, this call
- * has no effect.
+ * Polls backend, the events are filled into event queue.
  */
-void GP_UpdateBackendVideo(void);
+static inline void GP_BackendPoll(GP_Backend *backend)
+{
+	backend->Poll(backend);
+}
 
-/*
- * Reads the first pending backend event.
- * Returns 0 if no events were pending, 1 on success.
- */
-int GP_GetBackendEvent(struct GP_BackendEvent *event);
-
-#endif /* GP_BACKEND_H */
+#endif /* BACKENDS_GP_BACKEND_H */

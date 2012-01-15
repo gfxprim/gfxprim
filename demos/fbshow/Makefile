@@ -5,7 +5,7 @@ CSOURCES=$(shell echo *.c)
 INCLUDE=
 CFLAGS+=-pthread
 LDFLAGS+=-pthread
-LDLIBS+=-lGP -L$(TOPDIR)/build/
+LDLIBS+=-lGP -lGP_backends -lSDL -L$(TOPDIR)/build/
 
 APPS=fbshow
 

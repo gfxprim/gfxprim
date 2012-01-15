@@ -16,33 +16,26 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2011 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
-#ifndef GP_FRAMEBUFFER_H
-#define GP_FRAMEBUFFER_H
+#ifndef BACKENDS_GP_FRAMEBUFFER_H
+#define BACKENDS_GP_FRAMEBUFFER_H
 
-#include "core/GP_Context.h"
-
-typedef struct GP_Framebuffer {
-	GP_Context context;
-	uint32_t bsize;
-	int con_fd;
-	int con_nr;
-	int last_con_nr;
-	int fb_fd;
-	char path[];
-} GP_Framebuffer;
+#include "GP_Backend.h"
 
 /*
  * Initalize framebuffer.
+ *
+ * The path should point to framebuffer device eg. "/dev/fb0" for first
+ * framebuffer device.
+ *
+ * The GP_Backend structure is allocated and returned, the resources are
+ * deinitalized and the structure is freed by backed->Exit(backend); call.
+ *
+ * Upon failure NULL is returned.
  */
-GP_Framebuffer *GP_FramebufferInit(const char *path);
+GP_Backend *GP_BackendLinuxFBInit(const char *path);
 
-/*
- * Deinitalize framebuffer.
- */
-void GP_FramebufferExit(GP_Framebuffer *fb);
-
-#endif /* GP_FRAMEBUFFER_H */
+#endif /* BACKENDS_GP_FRAMEBUFFER_H */
