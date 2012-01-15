@@ -38,8 +38,8 @@
 static GP_Pixel black_pixel;
 static GP_Pixel white_pixel;
 
-static GP_Backend *backend;
-static GP_Context *context;
+static GP_Backend *backend = NULL;
+static GP_Context *context = NULL;
 
 /* image loader thread */
 static int abort_flag = 0;
@@ -72,6 +72,8 @@ static int image_loader_callback(GP_ProgressCallback *self)
 	        white_pixel, black_pixel, buf);
 
 	size = GP_TextWidth(NULL, buf);
+
+	GP_BackendFlip(backend);
 
 	return 0;
 }
@@ -204,8 +206,10 @@ static void *image_loader(void *ptr)
 	GP_FillRectXYWH(context, ret->w+cx, 0, cx, context->h, black_pixel);
 	GP_FillRectXYWH(context, 0, ret->h+cy, context->w, cy, black_pixel);
 
-	if (!params->show_info)
+	if (!params->show_info) {
+		GP_BackendFlip(backend);
 		return NULL;
+	}
 
 	GP_Size th = GP_TextHeight(NULL);
 	
@@ -226,6 +230,8 @@ static void *image_loader(void *ptr)
 	
 	GP_Print(context, NULL, 10, 14 + 2 * th, GP_ALIGN_RIGHT|GP_VALIGN_BOTTOM,
 	         white_pixel, black_pixel, "%s", img_name(params->img_path));
+
+	GP_BackendFlip(backend);
 
 	return NULL;
 }
@@ -253,23 +259,44 @@ static void show_image(struct loader_params *params)
 	}
 }
 
-static void sighandler(int signo __attribute__((unused)))
+static void sighandler(int signo)
 {
 	if (backend != NULL)
 		GP_BackendExit(backend);
+	
+	fprintf(stderr, "Got signal %i\n", signo);
 
 	exit(1);
+}
+
+static void init_backend(const char *backend_opts)
+{
+	if (!strcmp(backend_opts, "fb")) {
+		fprintf(stderr, "Initalizing framebuffer backend\n");
+		backend = GP_BackendLinuxFBInit("/dev/fb0");
+	}
+	
+	if (!strcmp(backend_opts, "SDL")) {
+		fprintf(stderr, "Initalizing SDL backend\n");
+		backend = GP_BackendSDLInit(800, 600, 0);
+	}
+
+	if (backend == NULL) {
+		fprintf(stderr, "Failed to initalize backend '%s'\n", backend_opts);
+		exit(1);
+	}
 }
 
 int main(int argc, char *argv[])
 {
 	GP_InputDriverLinux *drv = NULL;
-	char *input_dev = NULL;
+	const char *input_dev = NULL;
+	const char *backend_opts = "fb";
 	int sleep_sec = -1;
 	struct loader_params params = {NULL, 0, 0, 0};
 	int opt;
 
-	while ((opt = getopt(argc, argv, "Ii:Ps:r:")) != -1) {
+	while ((opt = getopt(argc, argv, "b:Ii:Ps:r:")) != -1) {
 		switch (opt) {
 		case 'I':
 			params.show_info = 1;
@@ -290,6 +317,9 @@ int main(int argc, char *argv[])
 				rotate = 180;
 			else if (!strcmp(optarg, "270"))
 				rotate = 270;
+		case 'b':
+			backend_opts = optarg;
+		break;
 		default:
 			fprintf(stderr, "Invalid paramter '%c'\n", opt);
 		}
@@ -297,9 +327,7 @@ int main(int argc, char *argv[])
 	
 	GP_SetDebugLevel(10);
 
-	if (input_dev == NULL) {
-		sleep_sec = 1;
-	} else {
+	if (input_dev != NULL) {
 		drv = GP_InputDriverLinuxOpen(input_dev);
 	
 		if (drv == NULL) {
@@ -314,12 +342,7 @@ int main(int argc, char *argv[])
 	signal(SIGBUS, sighandler);
 	signal(SIGABRT, sighandler);
 
-	backend = GP_BackendLinuxFBInit("/dev/fb0");
-
-	if (backend == NULL) {
-		fprintf(stderr, "Failed to initalize framebuffer\n");
-		return 1;
-	}
+	init_backend(backend_opts);
 
 	context = backend->context;
 
@@ -329,25 +352,26 @@ int main(int argc, char *argv[])
 	white_pixel = GP_ColorToContextPixel(GP_COL_WHITE, context);
 
 	GP_Fill(context, black_pixel);
+	GP_BackendFlip(backend);
 
 	int argf = optind;
 	int argn = argf;
-
+		
 	params.show_progress_once = 1;
 	params.img_path = argv[argf];
 	show_image(&params);
-
-	/* Initalize select */
-	fd_set rfds;
-	FD_ZERO(&rfds);
-	FD_SET(drv->fd, &rfds);
-	struct timeval tv = {.tv_sec = sleep_sec, .tv_usec = 0};
-	struct timeval *tvp = sleep_sec != -1 ? &tv : NULL;
 
 	for (;;) {
 		int ret;
 
 		if (drv != NULL) {
+			/* Initalize select */
+			fd_set rfds;
+			FD_ZERO(&rfds);
+			FD_SET(drv->fd, &rfds);
+			struct timeval tv = {.tv_sec = sleep_sec, .tv_usec = 0};
+			struct timeval *tvp = sleep_sec != -1 ? &tv : NULL;
+			
 			ret = select(drv->fd + 1, &rfds, NULL, NULL, tvp);
 		
 			tv.tv_sec = sleep_sec;
@@ -371,15 +395,22 @@ int main(int argc, char *argv[])
 
 			FD_SET(drv->fd, &rfds);
 		} else {
-			sleep(sleep_sec);
+			if (sleep_sec != -1) {
+				sleep(sleep_sec);
+		
+				argn++;
+				if (argn >= argc)
+					argn = argf;
 			
-			argn++;
-			if (argn >= argc)
-				argn = argf;
-			
-			params.img_path = argv[argn];
-			show_image(&params);
+				params.img_path = argv[argn];
+				show_image(&params);
+			}
 		}
+
+		if (backend->Poll)
+			GP_BackendPoll(backend);
+
+		usleep(1000);
 
 		/* Read and parse events */
 		GP_Event ev;
