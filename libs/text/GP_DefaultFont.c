@@ -219,8 +219,8 @@ static int8_t default_console_glyphs[] = {
 };
 
 struct GP_FontFace GP_DefaultConsoleFont = {
-	.family_name = "gfxprim",
-	.style_name = "mono",
+	.family_name = "Gfxprim",
+	.style_name = "Mono",
 	.charset = GP_CHARSET_7BIT,
 	.ascend  = 9,
 	.descend = 2,
@@ -425,8 +425,8 @@ static uint8_t default_proportional_glyphs[] = {
 };
 
 struct GP_FontFace GP_DefaultProportionalFont = {
-	.family_name = "gfxprim",
-	.style_name = "proportional",
+	.family_name = "Gfxprim",
+	.style_name = "Proportional",
 	.charset = GP_CHARSET_7BIT,
 	.ascend  = 9,
 	.descend = 2,

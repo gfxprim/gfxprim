@@ -83,9 +83,12 @@ static void print_character_metadata(const GP_FontFace *font, int c)
 
 static void print_font_properties(const GP_FontFace *font)
 {
-	fprintf(stderr, "Font properties:\n");
+	fprintf(stderr, "Font '%s %s' properties:\n",
+	                GP_FontFamily(font), GP_FontStyle(font));
 	fprintf(stderr, "    Height: ascend: %d, descend: %d\n",
 			GP_FontAscend(font), GP_FontDescend(font));
+	fprintf(stderr, "    Max advance_x: %u\n",
+	                GP_FontMaxAdvanceX(font));
 	fprintf(stderr, "    Glyph bitmap format: %s\n", 
 	                glyph_bitmap_format_name(font->glyph_bitmap_format));
 	fprintf(stderr, "    Bounding box width: %d, heigth: %d\n",
@@ -155,8 +158,12 @@ void redraw_screen(void)
 		style.pixel_ymul = 2;
 		style.pixel_yspace = 1;
 
-		GP_Text(&context, &style, 34, SPACING*i + 44, align,
+		GP_Text(&context, &style, 34, SPACING * i + 44, align,
 		        white_pixel, black_pixel, test_string);
+
+		GP_RectXYWH(&context, 33, SPACING * i + 43,
+		            GP_TextWidth(&style, test_string) + 1,
+			    GP_TextHeight(&style) + 1, dark_gray_pixel);
 
 		style.pixel_xmul = 4;
 		style.pixel_ymul = 2;

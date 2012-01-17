@@ -173,6 +173,21 @@ static inline unsigned int GP_FontMaxWidth(const GP_FontFace *font)
 	return font->max_glyph_width;
 }
 
+static inline unsigned int GP_FontMaxAdvanceX(const GP_FontFace *font)
+{
+	return font->max_glyph_advance;
+}
+
+static inline const char *GP_FontFamily(const GP_FontFace *font)
+{
+	return font->family_name;
+}
+
+static inline const char *GP_FontStyle(const GP_FontFace *font)
+{
+	return font->style_name;
+}
+
 /*
  * Returns glyph count for charset.
  */
