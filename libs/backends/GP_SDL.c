@@ -32,39 +32,53 @@
 #ifdef HAVE_LIBSDL
 
 #include <SDL/SDL.h>
+#include <SDL/SDL_mutex.h>
 
 static SDL_Surface *sdl_surface;
+static SDL_mutex *mutex;
 static GP_Context context;
 
 /* Backend API funcitons */
 
 static void sdl_flip(struct GP_Backend *self __attribute__((unused)))
 {
-	SDL_LockSurface(sdl_surface);
+	SDL_mutexP(mutex);
+
 	SDL_Flip(sdl_surface);
 	context.pixels = sdl_surface->pixels;
-	SDL_UnlockSurface(sdl_surface);
+
+	SDL_mutexV(mutex);
 }
 
 static void sdl_update_rect(struct GP_Backend *self __attribute__((unused)),
                             GP_Coord x1, GP_Coord y1, GP_Coord x2, GP_Coord y2)
 {
-	SDL_LockSurface(sdl_surface);
+	SDL_mutexP(mutex);
+	
 	SDL_UpdateRect(sdl_surface, x1, y1, x2, y2);
-	SDL_UnlockSurface(sdl_surface);
+	
+	SDL_mutexV(mutex);
 }
 
 static void sdl_exit(struct GP_Backend *self __attribute__((unused)))
 {
+	SDL_mutexP(mutex);
+	
 	SDL_Quit();
+	
+	SDL_DestroyMutex(mutex);
 }
 
 static void sdl_poll(struct GP_Backend *self __attribute__((unused)))
 {
 	SDL_Event ev;
 
+	SDL_mutexP(mutex);
+	
 	while (SDL_PollEvent(&ev))
 		GP_InputDriverSDLEventPut(&ev);
+	
+	SDL_mutexV(mutex);
 }
 
 static struct GP_Backend backend = {
@@ -131,6 +145,8 @@ GP_Backend *GP_BackendSDLInit(GP_Size w, GP_Size h, uint8_t bpp)
 			SDL_Quit();
 			return NULL;
 		}
+
+		mutex = SDL_CreateMutex();
 
 		if (context_from_surface(&context, sdl_surface)) {
 			GP_DEBUG(1, "ERROR: Failed to match pixel_type");
