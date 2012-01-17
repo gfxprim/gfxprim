@@ -278,7 +278,12 @@ static void init_backend(const char *backend_opts)
 	
 	if (!strcmp(backend_opts, "SDL")) {
 		fprintf(stderr, "Initalizing SDL backend\n");
-		backend = GP_BackendSDLInit(800, 600, 0);
+		backend = GP_BackendSDLInit(800, 600, 0, 0);
+	}
+
+	if (!strcmp(backend_opts, "SDL:FS")) {
+		fprintf(stderr, "Initalizing SDL fullscreen\n");
+		backend = GP_BackendSDLInit(0, 0, 0, GP_SDL_FULLSCREEN);
 	}
 
 	if (backend == NULL) {

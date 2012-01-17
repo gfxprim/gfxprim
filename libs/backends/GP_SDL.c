@@ -28,6 +28,7 @@
 #include "core/GP_Debug.h"
 #include "input/GP_InputDriverSDL.h"
 #include "GP_Backend.h"
+#include "GP_SDL.h"
 
 #ifdef HAVE_LIBSDL
 
@@ -60,15 +61,6 @@ static void sdl_update_rect(struct GP_Backend *self __attribute__((unused)),
 	SDL_mutexV(mutex);
 }
 
-static void sdl_exit(struct GP_Backend *self __attribute__((unused)))
-{
-	SDL_mutexP(mutex);
-	
-	SDL_Quit();
-	
-	SDL_DestroyMutex(mutex);
-}
-
 static void sdl_poll(struct GP_Backend *self __attribute__((unused)))
 {
 	SDL_Event ev;
@@ -81,6 +73,8 @@ static void sdl_poll(struct GP_Backend *self __attribute__((unused)))
 	SDL_mutexV(mutex);
 }
 
+static void sdl_exit(struct GP_Backend *self __attribute__((unused)));
+
 static struct GP_Backend backend = {
 	.name       = "SDL",
 	.context    = NULL,
@@ -90,6 +84,17 @@ static struct GP_Backend backend = {
 	.fd_list    = NULL,
 	.Poll       = sdl_poll,
 };
+
+static void sdl_exit(struct GP_Backend *self __attribute__((unused)))
+{
+	SDL_mutexP(mutex);
+	
+	SDL_Quit();
+	
+	SDL_DestroyMutex(mutex);
+
+	backend.context = NULL;
+}
 
 int context_from_surface(GP_Context *context, SDL_Surface *surf)
 {
@@ -129,7 +134,7 @@ int context_from_surface(GP_Context *context, SDL_Surface *surf)
 	return 0;
 }
 
-GP_Backend *GP_BackendSDLInit(GP_Size w, GP_Size h, uint8_t bpp)
+GP_Backend *GP_BackendSDLInit(GP_Size w, GP_Size h, uint8_t bpp, uint8_t flags)
 {
 	/* SDL not yet initalized */
 	if (backend.context == NULL) {
@@ -138,7 +143,15 @@ GP_Backend *GP_BackendSDLInit(GP_Size w, GP_Size h, uint8_t bpp)
 			return NULL;
 		}
 
-		sdl_surface = SDL_SetVideoMode(w, h, bpp, SDL_SWSURFACE|SDL_DOUBLEBUF);
+		uint32_t sdl_flags = SDL_SWSURFACE;
+
+		if (flags & GP_SDL_FULLSCREEN)
+			sdl_flags |= SDL_FULLSCREEN;
+
+		if (flags & GP_SDL_RESIZABLE)
+			sdl_flags |= SDL_RESIZABLE;
+
+		sdl_surface = SDL_SetVideoMode(w, h, bpp, sdl_flags);
 	
 		if (sdl_surface == NULL) {
 			GP_DEBUG(1, "ERROR: SDL_SetVideoMode: %s", SDL_GetError());
