@@ -22,10 +22,10 @@
 
 #include <math.h>
 
-#include <GP_Context.h>
-#include <GP_GetPutPixel.h>
+#include <core/GP_Context.h>
+#include <core/GP_GetPutPixel.h>
 
-#include <GP_Debug.h>
+#include <core/GP_Debug.h>
 
 #include <GP_Linear.h>
 
