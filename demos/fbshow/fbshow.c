@@ -35,6 +35,8 @@
 #include <backends/GP_Backends.h>
 #include <input/GP_InputDriverLinux.h>
 
+#include "cpu_timer.h"
+
 static GP_Pixel black_pixel;
 static GP_Pixel white_pixel;
 
@@ -106,40 +108,14 @@ static const char *img_name(const char *img_path)
 	return NULL;
 }
 
-#include <time.h>
-
-static struct timespec t_start;
-static struct timespec t_stop;
-static const char *t_name;
-
-static void timer_start(const char *name)
-{
-	t_name = name;
-	clock_gettime(CLOCK_THREAD_CPUTIME_ID, &t_start);
-}
-
-static void timer_stop(void)
-{
-	clock_gettime(CLOCK_THREAD_CPUTIME_ID, &t_stop);
-
-	int sec;
-	int nsec;
-
-	if (t_stop.tv_nsec < t_start.tv_nsec) {
-		sec  = t_stop.tv_sec - t_start.tv_sec - 1;
-		nsec = t_stop.tv_nsec + 1000000000 - t_start.tv_nsec;
-	} else {
-		sec  = t_stop.tv_sec  - t_start.tv_sec;
-		nsec = t_stop.tv_nsec - t_start.tv_nsec;
-	}
-
-	printf("TIMER '%s' %i.%09i sec\n", t_name, sec, nsec);
-}
-
 static void *image_loader(void *ptr)
 {
 	struct loader_params *params = ptr;
 	GP_ProgressCallback callback = {.callback = image_loader_callback};
+	struct cpu_timer timer;
+	struct cpu_timer sum_timer;
+
+	cpu_timer_start(&sum_timer, "sum");
 
 	show_progress = params->show_progress || params->show_progress_once;
 	params->show_progress_once = 0;
@@ -149,7 +125,8 @@ static void *image_loader(void *ptr)
 	GP_Context *img = NULL;
 
 	callback.priv = "Loading image";
-	
+
+	cpu_timer_start(&timer, "Loading");
 	if (GP_LoadImage(params->img_path, &img, &callback) != 0) {
 		GP_Fill(context, black_pixel);
 		GP_Text(context, NULL, context->w/2, context->h/2,
@@ -157,7 +134,8 @@ static void *image_loader(void *ptr)
 			"Failed to load image :(");
 		return NULL;
 	}
-	
+	cpu_timer_stop(&timer);
+
 	GP_Size w, h;
 
 	switch (rotate) {
@@ -189,16 +167,18 @@ static void *image_loader(void *ptr)
 	GP_Context *ret;
 
 	if (rat < 1) {
-		timer_start("blur");
+		cpu_timer_start(&timer, "Blur");
 		callback.priv = "Blurring Image";
 		if (GP_FilterGaussianBlur(img, img, 0.5/rat, 0.5/rat, &callback) == NULL)
 			return NULL;
-		timer_stop();
+		cpu_timer_stop(&timer);
 	}
 
+	cpu_timer_start(&timer, "Resampling");
 	callback.priv = "Resampling Image";
 	ret = GP_FilterResize(img, NULL, GP_INTERP_CUBIC_INT, img->w * rat, img->h * rat, &callback);
 	GP_ContextFree(img);
+	cpu_timer_stop(&timer);
 
 	if (ret == NULL)
 		return NULL;
@@ -239,6 +219,8 @@ static void *image_loader(void *ptr)
 	GP_FillRectXYWH(context, 0, 0, context->w, cy, black_pixel);
 	GP_FillRectXYWH(context, ret->w+cx, 0, cx, context->h, black_pixel);
 	GP_FillRectXYWH(context, 0, ret->h+cy, context->w, cy, black_pixel);
+
+	cpu_timer_stop(&sum_timer);
 
 	if (!params->show_info) {
 		GP_BackendFlip(backend);
