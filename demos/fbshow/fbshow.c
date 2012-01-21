@@ -106,6 +106,36 @@ static const char *img_name(const char *img_path)
 	return NULL;
 }
 
+#include <time.h>
+
+static struct timespec t_start;
+static struct timespec t_stop;
+static const char *t_name;
+
+static void timer_start(const char *name)
+{
+	t_name = name;
+	clock_gettime(CLOCK_THREAD_CPUTIME_ID, &t_start);
+}
+
+static void timer_stop(void)
+{
+	clock_gettime(CLOCK_THREAD_CPUTIME_ID, &t_stop);
+
+	int sec;
+	int nsec;
+
+	if (t_stop.tv_nsec < t_start.tv_nsec) {
+		sec  = t_stop.tv_sec - t_start.tv_sec - 1;
+		nsec = t_stop.tv_nsec + 1000000000 - t_start.tv_nsec;
+	} else {
+		sec  = t_stop.tv_sec  - t_start.tv_sec;
+		nsec = t_stop.tv_nsec - t_start.tv_nsec;
+	}
+
+	printf("TIMER '%s' %i.%09i sec\n", t_name, sec, nsec);
+}
+
 static void *image_loader(void *ptr)
 {
 	struct loader_params *params = ptr;
@@ -158,10 +188,12 @@ static void *image_loader(void *ptr)
 	
 	GP_Context *ret;
 
+	timer_start("blur");
 	callback.priv = "Blurring Image";
 	if (GP_FilterGaussianBlur(img, img, 0.5/rat, 0.5/rat, &callback) == NULL)
 		return NULL;
-	
+	timer_stop();
+
 	callback.priv = "Resampling Image";
 	ret = GP_FilterResize(img, NULL, GP_INTERP_CUBIC_INT, img->w * rat, img->h * rat, &callback);
 	GP_ContextFree(img);
