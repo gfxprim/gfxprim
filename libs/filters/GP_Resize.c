@@ -113,10 +113,10 @@ int GP_FilterInterpolate_Cubic(const GP_Context *src, GP_Context *dst,
 		if (xi > (int)src->w - 4)
 			xi = src->w - 4;
 		
-		cvx.f[0] = cubic(x - xi);
-		cvx.f[1] = cubic(x - xi - 1);
-		cvx.f[2] = cubic(x - xi - 2);
-		cvx.f[3] = cubic(x - xi - 3);
+		cvx.f[0] = cubic(xi - x);
+		cvx.f[1] = cubic(xi + 1 - x);
+		cvx.f[2] = cubic(xi + 2 - x);
+		cvx.f[3] = cubic(xi + 3 - x);
 		
 		/* Generate interpolated column */
 		for (j = 0; j < src->h; j++) {
@@ -157,7 +157,7 @@ int GP_FilterInterpolate_Cubic(const GP_Context *src, GP_Context *dst,
 			float y = (1.00 * j / dst->h) * src->h;
 			v4f cvy, rv, gv, bv;
 			float r, g, b;
-			int yi = y;
+			int yi = y - 1;
 			
 			if (yi < 0)
 				yi = 0;
@@ -165,10 +165,10 @@ int GP_FilterInterpolate_Cubic(const GP_Context *src, GP_Context *dst,
 			if (yi > (int)src->h - 4)
 				yi = src->h - 4;
 			
-			cvy.f[0] = cubic(y - yi);
-			cvy.f[1] = cubic(y - yi - 1);
-			cvy.f[2] = cubic(y - yi - 2);
-			cvy.f[3] = cubic(y - yi - 3);
+			cvy.f[0] = cubic(yi - y);
+			cvy.f[1] = cubic(yi + 1 - y);
+			cvy.f[2] = cubic(yi + 2 - y);
+			cvy.f[3] = cubic(yi + 3 - y);
 				
 			rv.f[0] = col_r[yi];
 			rv.f[1] = col_r[yi + 1];
@@ -255,11 +255,11 @@ int GP_FilterInterpolate_CubicInt(const GP_Context *src, GP_Context *dst,
 
 		if (xi > (int)src->w - 4)
 			xi = src->w - 4;
-
-		cvx[0] = cubic(x - xi) * MUL + 0.5;
-		cvx[1] = cubic(x - xi - 1) * MUL + 0.5;
-		cvx[2] = cubic(x - xi - 2) * MUL + 0.5;
-		cvx[3] = cubic(x - xi - 3) * MUL + 0.5;
+		
+		cvx[0] = cubic(xi - x) * MUL + 0.5;
+		cvx[1] = cubic(xi + 1 - x) * MUL + 0.5;
+		cvx[2] = cubic(xi + 2 - x) * MUL + 0.5;
+		cvx[3] = cubic(xi + 3 - x) * MUL + 0.5;
 		
 		/* Generate interpolated column */
 		for (j = 0; j < src->h; j++) {
@@ -308,11 +308,11 @@ int GP_FilterInterpolate_CubicInt(const GP_Context *src, GP_Context *dst,
 			if (yi > (int)src->h - 4)
 				yi = src->h - 4;
 			
-			cvy[0] = cubic(y - yi) * MUL + 0.5;
-			cvy[1] = cubic(y - yi - 1) * MUL + 0.5;
-			cvy[2] = cubic(y - yi - 2) * MUL + 0.5;
-			cvy[3] = cubic(y - yi - 3) * MUL + 0.5;
-				
+			cvy[0] = cubic(yi - y) * MUL + 0.5;
+			cvy[1] = cubic(yi + 1 - y) * MUL + 0.5;
+			cvy[2] = cubic(yi + 2 - y) * MUL + 0.5;
+			cvy[3] = cubic(yi + 3 - y) * MUL + 0.5;
+			
 			rv[0] = col_r[yi];
 			rv[1] = col_r[yi + 1];
 			rv[2] = col_r[yi + 2];
