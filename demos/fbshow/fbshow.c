@@ -166,17 +166,17 @@ static void *image_loader(void *ptr)
 	
 	GP_Context *ret;
 
-	if (rat < 1) {
+/*	if (rat < 1) {
 		cpu_timer_start(&timer, "Blur");
 		callback.priv = "Blurring Image";
 		if (GP_FilterGaussianBlur(img, img, 0.5/rat, 0.5/rat, &callback) == NULL)
 			return NULL;
 		cpu_timer_stop(&timer);
-	}
+	} */
 
 	cpu_timer_start(&timer, "Resampling");
 	callback.priv = "Resampling Image";
-	ret = GP_FilterResize(img, NULL, GP_INTERP_CUBIC_INT, img->w * rat, img->h * rat, &callback);
+	ret = GP_FilterResize(img, NULL, GP_INTERP_LINEAR_LF_INT, img->w * rat, img->h * rat, &callback);
 	GP_ContextFree(img);
 	cpu_timer_stop(&timer);
 
