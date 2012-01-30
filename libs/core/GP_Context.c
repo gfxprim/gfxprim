@@ -107,6 +107,31 @@ GP_Context *GP_ContextAlloc(GP_Size w, GP_Size h, GP_PixelType type)
 	return context;
 }
 
+void GP_ContextInit(GP_Context *context, GP_Size w, GP_Size h,
+                    GP_PixelType type, void *pixels)
+{
+	uint32_t bpp = GP_PixelSize(type);
+	uint32_t bpr = (bpp * w) / 8 + !!((bpp * w) % 8);
+
+	context->pixels        = pixels;
+	context->bpp           = bpp;
+	context->bytes_per_row = bpr;
+	context->offset        = 0;
+
+	context->w = w;
+	context->h = h;
+
+	context->pixel_type = type;
+	context->bit_endian = 0;
+
+	/* rotation and mirroring */
+	context->axes_swap = 0;
+	context->y_swap    = 0;
+	context->x_swap    = 0;
+	
+	context->free_pixels = 0;
+}
+
 GP_Context *GP_ContextConvert(const GP_Context *src,
                               GP_PixelType dst_pixel_type)
 {

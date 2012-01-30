@@ -92,6 +92,12 @@ typedef struct GP_Context {
 GP_Context *GP_ContextAlloc(GP_Size w, GP_Size h, GP_PixelType type);
 
 /*
+ * Initalize context.
+ */
+void GP_ContextInit(GP_Context *context, GP_Size w, GP_Size h,
+                    GP_PixelType type, void *pixels);
+
+/*
  * If passed the pixels are copied to newly created context, otherwise
  * the pixels are allocated but uninitalized.
  */
