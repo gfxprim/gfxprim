@@ -51,8 +51,8 @@ void GP_Blit_Naive(const GP_Context *c1, int x1, int y1, int w, int h,
 }
 */
 
-void GP_Blit_Naive(const GP_Context *c1, GP_Coord x1, GP_Coord y1, GP_Size w, GP_Size h, 
-                   GP_Context *c2, GP_Coord x2, GP_Coord y2)
+void GP_Blit_Naive_Raw(const GP_Context *c1, GP_Coord x1, GP_Coord y1, GP_Size w, GP_Size h, 
+                       GP_Context *c2, GP_Coord x2, GP_Coord y2)
 {
 	GP_CHECK(x1 >= 0);
 	GP_CHECK(y1 >= 0);
@@ -71,5 +71,35 @@ void GP_Blit_Naive(const GP_Context *c1, GP_Coord x1, GP_Coord y1, GP_Size w, GP
 			if (c1->pixel_type != c2->pixel_type) 
 				p = GP_ConvertContextPixel(p, c1, c2);
 			GP_PutPixel_Raw(c2, x2 + i, y2 + j, p);
+		}
+}
+
+void GP_Blit_Raw(const GP_Context *c1, GP_Coord x1, GP_Coord y1,
+                 GP_Size w, GP_Size h, GP_Context *c2, GP_Coord x2, GP_Coord y2)
+{
+      // Ultimate TODO: effective processing 
+      GP_Blit_Naive_Raw(c1, x1, y1, w, h, c2, x2, y2);
+}
+
+void GP_Blit_Naive(const GP_Context *c1, GP_Coord x1, GP_Coord y1, GP_Size w, GP_Size h, 
+                   GP_Context *c2, GP_Coord x2, GP_Coord y2)
+{
+	GP_CHECK(x1 >= 0);
+	GP_CHECK(y1 >= 0);
+	GP_CHECK(x1 + w <= GP_ContextW(c1));
+	GP_CHECK(y1 + h <= GP_ContextH(c1));
+	GP_CHECK(x2 >= 0);
+	GP_CHECK(y2 >= 0);
+	GP_CHECK(x2 + w <= GP_ContextW(c2));
+	GP_CHECK(y2 + h <= GP_ContextH(c2));
+
+	GP_Size i, j;
+
+	for (i = 0; i < w; i++)
+		for (j = 0; j < h; j++) {
+			GP_Pixel p = GP_GetPixel(c1, x1 + i, y1 + j);
+			if (c1->pixel_type != c2->pixel_type) 
+				p = GP_ConvertContextPixel(p, c1, c2);
+			GP_PutPixel(c2, x2 + i, y2 + j, p);
 		}
 }

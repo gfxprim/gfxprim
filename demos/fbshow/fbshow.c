@@ -211,7 +211,7 @@ static void *image_loader(void *ptr)
 	uint32_t cx = (context->w - ret->w)/2;
 	uint32_t cy = (context->h - ret->h)/2;
 
-	GP_Blit(ret, 0, 0, ret->w, ret->h, context, cx, cy);
+	GP_Blit_Raw(ret, 0, 0, ret->w, ret->h, context, cx, cy);
 	GP_ContextFree(ret);
 
 	/* clean up the rest of the display */

@@ -17,7 +17,7 @@
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
  * Copyright (C) 2011      Tomas Gavenciak <gavento@ucw.cz>                  *
- * Copyright (C) 2011      Cyril Hrubis    <metan@ucw.cz>                    *
+ * Copyright (C) 2011,2012 Cyril Hrubis    <metan@ucw.cz>                    *
  *                                                                           *
  *****************************************************************************/
 
@@ -29,6 +29,12 @@
 
 void GP_Blit(const GP_Context *c1, GP_Coord x1, GP_Coord y1,
              GP_Size w, GP_Size h, GP_Context *c2, GP_Coord x2, GP_Coord y2);
+
+/*
+ * Doesn't respect rotations. Most of the time faster.
+ */
+void GP_Blit_Raw(const GP_Context *c1, GP_Coord x1, GP_Coord y1,
+                 GP_Size w, GP_Size h, GP_Context *c2, GP_Coord x2, GP_Coord y2);
 
 
 /*
