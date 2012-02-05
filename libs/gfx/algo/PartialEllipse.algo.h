@@ -66,3 +66,4 @@ void FN_NAME(CONTEXT_T context, int xcenter, int ycenter, int a, int b, \
 		} \
 	} \
 }
+
