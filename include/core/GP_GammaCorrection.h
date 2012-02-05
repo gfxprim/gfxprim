@@ -60,19 +60,7 @@
 #define CORE_GP_GAMMA_CORRECTION_H
 
 #include <stdint.h>
-#include <math.h>
 
-extern uint8_t *GP_LinearToGamma_8bit;
-
-/*
- * Coverts linear 0 255 value into 0 255 gama value.
- *
- * (this is used for Anti Aliased gfx primitives.)
- */
-static inline uint8_t GP_LinearToGamma(uint8_t val)
-{
-	
-	return GP_LinearToGamma_8bit[val];
-}
+#include "core/GP_GammaCorrection.gen.h"
 
 #endif /* CORE_GP_GAMMA_CORRECTION_H */

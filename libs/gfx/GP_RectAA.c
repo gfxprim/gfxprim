@@ -53,7 +53,7 @@ void GP_FillRectXYXY_AA_Raw(GP_Context *context, GP_Coord x0, GP_Coord y0,
 
 	/* Special case, vertical 1px line */
 	if (out_x0 == out_x1) {
-		uint8_t mix = GP_LinearToGamma(w);
+		uint8_t mix = w;
 		GP_Coord i;
 
 		/* Special case 1px 100% width line */
@@ -71,7 +71,7 @@ void GP_FillRectXYXY_AA_Raw(GP_Context *context, GP_Coord x0, GP_Coord y0,
 
 	/* Special case, horizontal 1px line */
 	if (out_y0 == out_y1) {
-		uint8_t mix = GP_LinearToGamma(h);
+		uint8_t mix = w;
 		GP_Coord i;
 		
 		/* Special case 1px 100% height line */
@@ -105,7 +105,7 @@ void GP_FillRectXYXY_AA_Raw(GP_Context *context, GP_Coord x0, GP_Coord y0,
 
 	/* if the outer and innter coordinates doesn't match, draw blurred edge */
 	if (in_y0 != out_y0) {
-		uint8_t mix = GP_LinearToGamma(GP_FP_FROM_INT(in_y0) + GP_FP_1_2 - y0);
+		uint8_t mix = GP_FP_FROM_INT(in_y0) + GP_FP_1_2 - y0;
 		GP_Coord i;
 	
 		for (i = out_x0; i <= out_x1; i++) {
@@ -116,7 +116,7 @@ void GP_FillRectXYXY_AA_Raw(GP_Context *context, GP_Coord x0, GP_Coord y0,
 	}
 	
 	if (in_y1 != out_y1) {
-		uint8_t mix = GP_LinearToGamma(y1 - GP_FP_FROM_INT(in_y0) - GP_FP_1_2);
+		uint8_t mix = y1 - GP_FP_FROM_INT(in_y0) - GP_FP_1_2;
 		GP_Coord i;
 	
 		for (i = out_x0; i <= out_x1; i++) {
@@ -127,7 +127,7 @@ void GP_FillRectXYXY_AA_Raw(GP_Context *context, GP_Coord x0, GP_Coord y0,
 	}
 
 	if (in_x0 != out_x0) {
-		uint8_t mix = GP_LinearToGamma(GP_FP_FROM_INT(in_x0) + GP_FP_1_2 - x0);
+		uint8_t mix = GP_FP_FROM_INT(in_x0) + GP_FP_1_2 - x0;
 		GP_Coord i;
 	
 		for (i = out_y0; i <= out_y1; i++) {
@@ -138,7 +138,7 @@ void GP_FillRectXYXY_AA_Raw(GP_Context *context, GP_Coord x0, GP_Coord y0,
 	}
 
 	if (in_x1 != out_x1) {
-		uint8_t mix = GP_LinearToGamma(x1 - GP_FP_FROM_INT(in_x1) - GP_FP_1_2);
+		uint8_t mix = x1 - GP_FP_FROM_INT(in_x1) - GP_FP_1_2;
 		GP_Coord i;
 	
 		for (i = out_y0; i <= out_y1; i++) {
