@@ -72,6 +72,16 @@ typedef uint8_t GP_FP_Frac;
 #define GP_FP_SUB(a, b) ((a)-(b))
 
 /*
+ * Multiplication, may overflow.
+ */
+#define GP_FP_MUL(a, b) ((((a) * (b)) + GP_FP_1_2)>>GP_FP_FRAC_BITS)
+
+/*
+ * Division, may overflow
+ */
+#define GP_FP_DIV(a, b) ((((a)<<GP_FP_FRAC_BITS) + GP_FP_1_2) / (b))
+
+/*
  * Floor.
  */
 #define GP_FP_FLOOR(a) ((a) & GP_FP_INT_MASK)
@@ -79,7 +89,8 @@ typedef uint8_t GP_FP_Frac;
 /*
  * Floor with conversion to integer.
  */
-#define GP_FP_FLOOR_TO_INT(a) ((a)>>GP_FP_FRAC_BITS)
+#define GP_FP_TO_INT(a) ((a)>>GP_FP_FRAC_BITS)
+#define GP_FP_FLOOR_TO_INT(a) GP_FP_TO_INT(a)
 
 /*
  * Ceiling.
@@ -92,14 +103,24 @@ typedef uint8_t GP_FP_Frac;
 #define GP_FP_CEIL_TO_INT(a) (((a)>>GP_FP_FRAC_BITS) + !!(GP_FP_FRAC(a)))
 
 /*
- * Rounding wiht conversion to integer.
+ * Rounding.
  */
-#define GP_FP_ROUND_TO_INT(a) (((a) + GP_FP_1_2))>>GP_FP_FRAC_BITS
+#define GP_FP_ROUND(a) GP_FP_FLOOR((a) + GP_FP_1_2)
+
+/*
+ * Rounding with conversion to integer.
+ */
+#define GP_FP_ROUND_TO_INT(a) ((((a) + GP_FP_1_2))>>GP_FP_FRAC_BITS)
 
 /*
  * Fractional part.
  */
 #define GP_FP_FRAC(a) ((a) & GP_FP_FRAC_MASK)
+
+/*
+ * Reverse fractional part 1 - frac(x)
+ */
+#define GP_FP_RFRAC(a) (GP_FP_1 - GP_FP_FRAC(a))
 
 /*
  * Returns an float.
