@@ -19,11 +19,15 @@
  * Copyright (C) 2009-2011 Jiri "BlueBear" Dluhos                            *
  *                         <jiri.bluebear.dluhos@gmail.com>                  *
  *                                                                           *
- * Copyright (C) 2009-2011 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
-#include "GP_Gfx.h"
+#include "core/GP_Transform.h"
+
+#include "gfx/GP_Line.h"
+#include "gfx/GP_Polygon.h"
+#include "gfx/GP_Triangle.h"
 
 void GP_Triangle_Raw(GP_Context *context, GP_Coord x0, GP_Coord y0,
                      GP_Coord x1, GP_Coord y1,

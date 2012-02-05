@@ -23,8 +23,10 @@
  *                                                                           *
  *****************************************************************************/
 
-#include "GP_Gfx.h"
+#include "core/GP_GetPutPixel.h"
 #include "core/GP_FnPerBpp.h"
+
+#include "gfx/GP_Ellipse.h"
 
 #include "algo/PartialEllipse.algo.h"
 

@@ -23,11 +23,11 @@
  *                                                                           *
  *****************************************************************************/
 
-#include "GP_CircleSeg.h"
-#include "GP_HLine.h"
-
 #include "core/GP_GetPutPixel.h"
 #include "core/GP_FnPerBpp.h"
+
+#include "gfx/GP_CircleSeg.h"
+#include "gfx/GP_HLine.h"
 
 #include "algo/CircleSeg.algo.h"
 
