@@ -83,7 +83,7 @@ static inline void GP_MixPixel_Raw_{{ pt.name }}(GP_Context *context,
 			GP_Coord x, GP_Coord y, GP_Pixel pixel, uint8_t perc)
 {
 	GP_Pixel pix = GP_GetPixel_Raw_{{ pt.pixelsize.suffix }}(context, x, y);
-	GP_MIX_PIXELS_{{ pt.name }}(pixel, pix, perc);
+	pix = GP_MIX_PIXELS_{{ pt.name }}(pixel, pix, perc);
 	GP_PutPixel_Raw_{{ pt.pixelsize.suffix }}(context, x, y, pix);
 }
 
