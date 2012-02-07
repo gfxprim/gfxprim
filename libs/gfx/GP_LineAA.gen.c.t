@@ -14,72 +14,71 @@
 
 #define FP_TO_PERC(a) (GP_FP_ROUND_TO_INT((a) * 255))
 
-void GP_LineAA(GP_Context *context, GP_Coord x1, GP_Coord y1,
-               GP_Coord x2, GP_Coord y2, GP_Pixel pixel)
+void GP_LineAA_Raw(GP_Context *context, GP_Coord x0, GP_Coord y0,
+                   GP_Coord x1, GP_Coord y1, GP_Pixel pixel)
 {
-	GP_Coord dx = x2 - x1;
-	GP_Coord dy = y2 - y1;
+	int64_t dx = x1 - x0;
+	int64_t dy = y1 - y0;
 
 	if (dy == 0) {
 		//TODO!!!
-		//GP_HLine_Raw(context, GP_FP_ROUND_TO_INT(x1), GP_FP_ROUND_TO_INT(x2),
-		//                      GP_FP_ROUND_TO_INT(y1), pixel);
+		//GP_HLine_Raw(context, GP_FP_ROUND_TO_INT(x0), GP_FP_ROUND_TO_INT(x1),
+		//                      GP_FP_ROUND_TO_INT(y0), pixel);
 		return;
 	}
 
 	if (dx == 0) {
 		//TODO!!!
-		//GP_VLine(context, GP_FP_ROUND_TO_INT(x1), GP_FP_ROUND_TO_INT(y1),
-		//                  GP_FP_ROUND_TO_INT(y2), pixel);
+		//GP_VLine(context, GP_FP_ROUND_TO_INT(x0), GP_FP_ROUND_TO_INT(y0),
+		//                  GP_FP_ROUND_TO_INT(y1), pixel);
 		return;
 	}
 
 	if (GP_ABS(dx) < GP_ABS(dy)) {
-		GP_SWAP(x1, y1);
-		GP_SWAP(x2, y2);
-		GP_SWAP(dx, dy);
 		//TODO
 		return;
 	}
 	
-	if (x2 < x1) {
-		GP_SWAP(x1, x2);
-		GP_SWAP(y1, y2);
+	if (x1 < x0) {
+		GP_SWAP(x0, x1);
+		GP_SWAP(y0, y1);
 	}
 
-	GP_Coord grad = GP_FP_DIV(dy, dx);
+	GP_Coord xend, yend, xgap, xpx0, ypx0, xpx1, ypx1, ddd;
+	uint8_t perc;
 
-	GP_Coord xend, yend, xgap, xpx1, ypx1, xpx2, ypx2;
+	xend = GP_FP_ROUND(x0);
+	yend = y0 + GP_FP_DIV(GP_FP_MUL(dy, xend - x0), dx);
+	xgap = GP_FP_RFRAC(x0 + GP_FP_1_2);
+	xpx0 = GP_FP_TO_INT(xend);
+	ypx0 = GP_FP_TO_INT(yend);
+
+	perc = FP_TO_PERC(GP_FP_MUL(GP_FP_RFRAC(yend), xgap));
+	GP_MixPixel_Raw_Clipped(context, xpx0, ypx0, pixel, perc);
+	perc = FP_TO_PERC(GP_FP_MUL(GP_FP_FRAC(yend), xgap));
+	GP_MixPixel_Raw_Clipped(context, xpx0, ypx0+1, pixel, perc);
+
+	ddd = yend;
 
 	xend = GP_FP_ROUND(x1);
-	yend = y1 + GP_FP_MUL(grad, xend - x1);
-	xgap = GP_FP_RFRAC(x1 + GP_FP_1_2);
+	yend = y1 + GP_FP_DIV(GP_FP_MUL(dy, xend - x1), dx);
+	xgap = GP_FP_FRAC(x1 + GP_FP_1_2);
 	xpx1 = GP_FP_TO_INT(xend);
 	ypx1 = GP_FP_TO_INT(yend);
 
-	GP_MixPixel_Raw_Clipped(context, xpx1, ypx1, pixel, FP_TO_PERC(GP_FP_MUL(GP_FP_RFRAC(yend), xgap)));
-	GP_MixPixel_Raw_Clipped(context, xpx1, ypx1 + 1, pixel, FP_TO_PERC(GP_FP_MUL(GP_FP_FRAC(yend), xgap)));
-
-	GP_Coord intery = yend + grad;
-
-	xend = GP_FP_ROUND(x2);
-	yend = y2 + GP_FP_MUL(grad, xend - x2);
-	xgap = GP_FP_FRAC(x2 + GP_FP_1_2);
-	xpx2 = GP_FP_TO_INT(xend);
-	ypx2 = GP_FP_TO_INT(yend);
-
-	GP_MixPixel_Raw_Clipped(context, xpx2, ypx2, pixel, FP_TO_PERC(GP_FP_MUL(GP_FP_RFRAC(yend), xgap)));
-	GP_MixPixel_Raw_Clipped(context, xpx2, ypx2 + 1, pixel, FP_TO_PERC(GP_FP_MUL(GP_FP_RFRAC(yend), xgap)));
+	perc = FP_TO_PERC(GP_FP_MUL(GP_FP_RFRAC(yend), xgap));
+	GP_MixPixel_Raw_Clipped(context, xpx1, ypx1, pixel, perc);
+	perc = FP_TO_PERC(GP_FP_MUL(GP_FP_RFRAC(yend), xgap));
+	GP_MixPixel_Raw_Clipped(context, xpx1, ypx1+1, pixel, perc);
 
 	GP_Coord x;
+	GP_Coord intery;
 
-	for (x = xpx1 + 1; x < xpx2; x++) {
+	for (x = xpx0 + 1; x < xpx1; x++) {
+		intery = ddd + GP_FP_DIV((x - xpx0) * dy, dx);
 		GP_MixPixel_Raw_Clipped(context, x, GP_FP_TO_INT(intery), pixel, FP_TO_PERC(GP_FP_RFRAC(intery)));
 		GP_MixPixel_Raw_Clipped(context, x, GP_FP_TO_INT(intery) + 1, pixel, FP_TO_PERC(GP_FP_FRAC(intery)));
-
-		intery += grad;
 	}
 }
-
 
 %% endblock body
