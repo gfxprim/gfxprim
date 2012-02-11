@@ -64,8 +64,8 @@ void GP_Blit_{{ ps.suffix }}(const GP_Context *c1, GP_Coord x1, GP_Coord y1, GP_
 			p2 += c2->bytes_per_row;
 			end_p2 += c2->bytes_per_row;
 		}
-	} else /* Different bit-alignment, can't use memcpy() */
-		GP_Blit_Naive(c1, x1, y1, w, h, c2, x2, y2);
+	}// else /* Different bit-alignment, can't use memcpy() */
+	//	GP_Blit_Naive(c1, x1, y1, w, h, c2, x2, y2);
 %% endif
 }
 

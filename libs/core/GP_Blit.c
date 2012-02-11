@@ -17,7 +17,7 @@
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
  * Copyright (C) 2011      Tomas Gavenciak <gavento@ucw.cz>                  *
- * Copyright (C) 2011      Cyril Hrubis    <metan@ucw.cz>                    *
+ * Copyright (C) 2011,2012 Cyril Hrubis    <metan@ucw.cz>                    *
  *                                                                           *
  *****************************************************************************/
 
@@ -27,79 +27,106 @@
 #include "GP_Convert.h"
 #include "GP_Blit.h"
 
-void GP_Blit(const GP_Context *c1, GP_Coord x1, GP_Coord y1,
-             GP_Size w, GP_Size h, GP_Context *c2, GP_Coord x2, GP_Coord y2)
+void GP_BlitXYXY_Naive(const GP_Context *src,
+                       GP_Coord x0, GP_Coord y0, GP_Coord x1, GP_Coord y1,
+                       GP_Context *dst, GP_Coord x2, GP_Coord y2)
 {
-      // Ultimate TODO: effective processing 
-      GP_Blit_Naive(c1, x1, y1, w, h, c2, x2, y2);
-}
+	/* Normalize source rectangle */
+	if (x1 < x0)
+		GP_SWAP(x0, x1);
 
-// TODO(gavento, czech) Plan:
-// GP_Blit_Naive - Zadne rotovani a tak, jen Get/PutPixel a konverze A->RGBA8888->B
-// GP_Blit_Simple - S rotovanim, makrovy Get/PutPixel, mozna optimalizace na radky, chytrejsi konverze (ale porad univ.)
-// GP_Blit_Simple_xBPP - S rotovanim, makrovy Get/PutPixel
-// GP_Blit_xBPP - Optimalizovane, muze volat GP_Blit_Simple_xBPP pro divne pripady
-// GP_Blit - Vola GP_Blit_xBPP (stejny typ) nebo GP_Blit_Simple (jine typy), pripadne optimalizovat
+	if (y1 < y0)
+		GP_SWAP(y0, y1);
 
-/*
-void GP_Blit_Naive(const GP_Context *c1, int x1, int y1, int w, int h,
-                   GP_Context *c2, int x2, int y2)
-{
-	GP_TRANSFORM_BLIT(c1, x1, y1, w, h, c2, x2, y2);
-	// TODO: Cipping?
-	GP_Blit_Naive_Raw(c1, x1, y1, w, h, c2, x2, y2);
-}
-*/
+	/* All coordinates are inside of src the context */
+	GP_CHECK(x0 < (GP_Coord)GP_ContextW(src));
+	GP_CHECK(y0 < (GP_Coord)GP_ContextH(src));
+	GP_CHECK(x1 < (GP_Coord)GP_ContextW(src));
+	GP_CHECK(y1 < (GP_Coord)GP_ContextH(src));
 
-void GP_Blit_Naive_Raw(const GP_Context *c1, GP_Coord x1, GP_Coord y1, GP_Size w, GP_Size h, 
-                       GP_Context *c2, GP_Coord x2, GP_Coord y2)
-{
-	GP_CHECK(x1 >= 0);
-	GP_CHECK(y1 >= 0);
-	GP_CHECK(x1 + w <= GP_ContextW(c1));
-	GP_CHECK(y1 + h <= GP_ContextH(c1));
-	GP_CHECK(x2 >= 0);
-	GP_CHECK(y2 >= 0);
-	GP_CHECK(x2 + w <= GP_ContextW(c2));
-	GP_CHECK(y2 + h <= GP_ContextH(c2));
+	/* Destination is big enough */
+	GP_CHECK(x2 + (x1 - x0) < (GP_Coord)GP_ContextW(dst));
+	GP_CHECK(y2 + (y1 - y0) < (GP_Coord)GP_ContextH(dst));
 
-	GP_Size i, j;
+	GP_Coord x, y;
 
-	for (i = 0; i < w; i++)
-		for (j = 0; j < h; j++) {
-			GP_Pixel p = GP_GetPixel_Raw(c1, x1 + i, y1 + j);
-			if (c1->pixel_type != c2->pixel_type) 
-				p = GP_ConvertContextPixel(p, c1, c2);
-			GP_PutPixel_Raw(c2, x2 + i, y2 + j, p);
+	for (y = y0; y <= y1; y++)
+		for (x = x0; x <= x1; x++) {
+			GP_Pixel p = GP_GetPixel(src, x, y);
+
+			if (src->pixel_type != dst->pixel_type) 
+				p = GP_ConvertContextPixel(p, src, dst);
+
+			GP_PutPixel(dst, x2 + (x - x0), y2 + (y - y0), p);
 		}
 }
 
-void GP_Blit_Raw(const GP_Context *c1, GP_Coord x1, GP_Coord y1,
-                 GP_Size w, GP_Size h, GP_Context *c2, GP_Coord x2, GP_Coord y2)
+void GP_BlitXYXY(const GP_Context *src,
+                 GP_Coord x0, GP_Coord y0, GP_Coord x1, GP_Coord y1,
+                 GP_Context *dst, GP_Coord x2, GP_Coord y2)
 {
-      // Ultimate TODO: effective processing 
-      GP_Blit_Naive_Raw(c1, x1, y1, w, h, c2, x2, y2);
+	//TODO
+	GP_BlitXYXY_Naive(src, x0, y0, x1, y1, dst, x2, y2);
 }
 
-void GP_Blit_Naive(const GP_Context *c1, GP_Coord x1, GP_Coord y1, GP_Size w, GP_Size h, 
-                   GP_Context *c2, GP_Coord x2, GP_Coord y2)
+void GP_BlitXYWH(const GP_Context *src,
+                 GP_Coord x0, GP_Coord y0, GP_Size w0, GP_Size h0,
+                 GP_Context *dst, GP_Coord x1, GP_Coord y1)
 {
-	GP_CHECK(x1 >= 0);
-	GP_CHECK(y1 >= 0);
-	GP_CHECK(x1 + w <= GP_ContextW(c1));
-	GP_CHECK(y1 + h <= GP_ContextH(c1));
-	GP_CHECK(x2 >= 0);
-	GP_CHECK(y2 >= 0);
-	GP_CHECK(x2 + w <= GP_ContextW(c2));
-	GP_CHECK(y2 + h <= GP_ContextH(c2));
+	if (w0 == 0 || h0 == 0)
+		return;
 
-	GP_Size i, j;
+	GP_BlitXYXY(src, x0, y0, x0 + w0 - 1, y0 + h0 - 1, dst, x1, y1);
+}
 
-	for (i = 0; i < w; i++)
-		for (j = 0; j < h; j++) {
-			GP_Pixel p = GP_GetPixel(c1, x1 + i, y1 + j);
-			if (c1->pixel_type != c2->pixel_type) 
-				p = GP_ConvertContextPixel(p, c1, c2);
-			GP_PutPixel(c2, x2 + i, y2 + j, p);
+
+void GP_BlitXYXY_Naive_Raw(const GP_Context *src,
+                           GP_Coord x0, GP_Coord y0, GP_Coord x1, GP_Coord y1,
+                           GP_Context *dst, GP_Coord x2, GP_Coord y2)
+{
+	/* Normalize source rectangle */
+	if (x1 < x0)
+		GP_SWAP(x0, x1);
+
+	if (y1 < y0)
+		GP_SWAP(y0, y1);
+
+	/* All coordinates are inside of src the context */
+	GP_CHECK(x0 < (GP_Coord)src->w);
+	GP_CHECK(y0 < (GP_Coord)src->h);
+	GP_CHECK(x1 < (GP_Coord)src->w);
+	GP_CHECK(y1 < (GP_Coord)src->h);
+
+	/* Destination is big enough */
+	GP_CHECK(x2 + (x1 - x0) < (GP_Coord)dst->w);
+	GP_CHECK(y2 + (y1 - y0) < (GP_Coord)dst->h);
+
+	GP_Coord x, y;
+
+	for (y = y0; y <= y1; y++)
+		for (x = x0; x <= x1; x++) {
+			GP_Pixel p = GP_GetPixel_Raw(src, x, y);
+
+			if (src->pixel_type != dst->pixel_type) 
+				p = GP_ConvertContextPixel(p, src, dst);
+
+			GP_PutPixel_Raw(dst, x2 + (x - x0), y2 + (y - y0), p);
 		}
+}
+
+void GP_BlitXYXY_Raw(const GP_Context *src,
+                     GP_Coord x0, GP_Coord y0, GP_Coord x1, GP_Coord y1,
+                     GP_Context *dst, GP_Coord x2, GP_Coord y2)
+{
+	GP_BlitXYXY_Naive_Raw(src, x0, y0, x1, y1, dst, x2, y2);
+}
+
+void GP_BlitXYWH_Raw(const GP_Context *src,
+                     GP_Coord x0, GP_Coord y0, GP_Size w0, GP_Size h0,
+                     GP_Context *dst, GP_Coord x2, GP_Coord y2)
+{
+	if (w0 == 0 || h0 == 0)
+		return;
+
+	GP_BlitXYXY_Raw(src, x0, y0, x0 + w0 - 1, y0 + h0 - 1, dst, x2, y2);
 }

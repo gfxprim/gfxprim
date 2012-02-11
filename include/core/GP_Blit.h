@@ -21,36 +21,75 @@
  *                                                                           *
  *****************************************************************************/
 
+/*
+   
+   These blits automatically converts pixel types, that's good (and fast), but
+   there is a catch. This works rather well when the number of colors per
+   pixel/color channel is increased (the gamma correction is still on TODO).
+   However when the number of colors is decreased it's generally better to use
+   dithering, which will yield into far better (you can use Floyd Steinberg
+   filter for that).
+   
+   Also variants without the _Raw suffix do honor the rotation flags, that may
+   get a little tricky as the flags for rotation are put together but don't
+   worry althouth there is some algebra involved the result is quite intuitive.
+
+ */
+
 #ifndef CORE_GP_BLIT_H
 #define CORE_GP_BLIT_H
 
 /* Generated header */
 #include "GP_Blit.gen.h"
 
-void GP_Blit(const GP_Context *c1, GP_Coord x1, GP_Coord y1,
-             GP_Size w, GP_Size h, GP_Context *c2, GP_Coord x2, GP_Coord y2);
+/*
+ * Blits rectangle from src defined by x0, y0, x1, y1 (x1, y1 included) to dst
+ * starting on x2, y2.
+ */
+void GP_BlitXYXY(const GP_Context *src,
+                 GP_Coord x0, GP_Coord y0, GP_Coord x1, GP_Coord y1,
+                 GP_Context *dst, GP_Coord x2, GP_Coord y2);
 
 /*
- * Doesn't respect rotations. Most of the time faster.
+ * Blits rectangle from src defined by x0, y0, w0, h0 (uses w0 x h0 pixels) to
+ * dst starting on x2, y2.
  */
-void GP_Blit_Raw(const GP_Context *c1, GP_Coord x1, GP_Coord y1,
-                 GP_Size w, GP_Size h, GP_Context *c2, GP_Coord x2, GP_Coord y2);
+void GP_BlitXYWH(const GP_Context *src,
+                 GP_Coord x0, GP_Coord y0, GP_Size w0, GP_Size h0,
+                 GP_Context *dst, GP_Coord x1, GP_Coord y1);
 
+/* The default is XYWH now, will be changed */
+static inline void GP_Blit(const GP_Context *src,
+                           GP_Coord x0, GP_Coord y0,
+                           GP_Size w0, GP_Size h0,
+                           GP_Context *dst, GP_Coord x1, GP_Coord y1)
+{
+	GP_BlitXYWH(src, x0, y0, w0, h0, dst, x1, y1);
+}
 
 /*
- * Very naive blit, no optimalizations whatsoever - keep it that way.
- * Used as a reference for testing and such. Aaand ultimate fallback.
- * GP_CHECKS for clipping and size (for testing)
+ * Same as GP_BlitXYXY but doesn't respect rotations. Faster (for now).
  */
-void GP_Blit_Naive(const GP_Context *c1, GP_Coord x1, GP_Coord y1, GP_Size w, GP_Size h,
-                   GP_Context *c2, GP_Coord x2, GP_Coord y2);
+void GP_BlitXYXY_Raw(const GP_Context *src,
+                     GP_Coord x0, GP_Coord y0, GP_Coord x1, GP_Coord y1,
+		     GP_Context *dst, GP_Coord x2, GP_Coord y2);
 
-/* 
- * Similar in purpose to GP_Blit_Naive, but operates on raw coordinates.
- * Does no range checking.
- */
 /*
-void GP_Blit_Naive_Raw(const GP_Context *c1, int x1, int y1, int w, int h,
-                   GP_Context *c2, int x2, int y2);
-*/
-#endif // CORE_GP_BLIT_H
+ * Same as GP_BlitXYWH but doesn't respect rotations. Faster (for now).
+ */
+void GP_BlitXYWH_Raw(const GP_Context *src,
+                     GP_Coord x0, GP_Coord y0, GP_Size w0, GP_Size h0,
+		     GP_Context *dst, GP_Coord x2, GP_Coord y2);
+
+/*
+ * Same as GP_Blit but doesn't respect rotations. Faster (for now).
+ */
+static inline void GP_Blit_Raw(const GP_Context *src,
+                               GP_Coord x0, GP_Coord y0,
+                               GP_Size w0, GP_Size h0,
+                               GP_Context *dst, GP_Coord x1, GP_Coord y1)
+{
+	GP_BlitXYWH_Raw(src, x0, y0, w0, h0, dst, x1, y1);
+}
+
+#endif /* CORE_GP_BLIT_H */
