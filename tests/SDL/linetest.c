@@ -55,6 +55,7 @@ Uint32 timer_callback(__attribute__((unused)) Uint32 interval,
 double start_angle = 0.0;
 
 static int aa_flag = 0;
+static int pause_flag = 0;
 
 void redraw_screen(void)
 {
@@ -101,6 +102,10 @@ void event_loop(void)
 		case SDL_USEREVENT:
 			redraw_screen();
 			SDL_Flip(display);
+			
+			if (pause_flag)
+				continue;
+			
 			start_angle += 0.01;
 			if (start_angle > 2*M_PI) {
 				start_angle = 0.0;
@@ -110,6 +115,9 @@ void event_loop(void)
 			switch (event.key.keysym.sym) {
 			case SDLK_a:
 				aa_flag = !aa_flag;
+			break;
+			case SDLK_p:
+				pause_flag = !pause_flag;
 			break;
 			default:
 				return;
