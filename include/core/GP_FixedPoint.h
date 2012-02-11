@@ -34,8 +34,6 @@
 
 #include <stdint.h>
 
-typedef uint8_t GP_FP_Frac;
-
 /*
  * Number of bits used for fractional part.
  */
