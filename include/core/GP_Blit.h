@@ -39,9 +39,6 @@
 #ifndef CORE_GP_BLIT_H
 #define CORE_GP_BLIT_H
 
-/* Generated header */
-#include "GP_Blit.gen.h"
-
 /*
  * Blits rectangle from src defined by x0, y0, x1, y1 (x1, y1 included) to dst
  * starting on x2, y2.
@@ -75,6 +72,13 @@ void GP_BlitXYXY_Raw(const GP_Context *src,
 		     GP_Context *dst, GP_Coord x2, GP_Coord y2);
 
 /*
+ * Naive get/put pixel implementation, used when everything else fails.
+ */
+void GP_BlitXYXY_Naive_Raw(const GP_Context *src,
+                           GP_Coord x0, GP_Coord y0, GP_Coord x1, GP_Coord y1,
+		           GP_Context *dst, GP_Coord x2, GP_Coord y2);
+
+/*
  * Same as GP_BlitXYWH but doesn't respect rotations. Faster (for now).
  */
 void GP_BlitXYWH_Raw(const GP_Context *src,
@@ -91,5 +95,7 @@ static inline void GP_Blit_Raw(const GP_Context *src,
 {
 	GP_BlitXYWH_Raw(src, x0, y0, w0, h0, dst, x1, y1);
 }
+
+
 
 #endif /* CORE_GP_BLIT_H */

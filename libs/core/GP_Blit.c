@@ -26,10 +26,34 @@
 #include "GP_Context.h"
 #include "GP_Convert.h"
 #include "GP_Blit.h"
+#include "GP_FnPerBpp.h"
+
+/* Generated function */
+void GP_BlitXYXY_Raw_Fast(const GP_Context *src,
+                          GP_Coord x0, GP_Coord y0, GP_Coord x1, GP_Coord y1,
+			  GP_Context *dst, GP_Coord x2, GP_Coord y2);
+
 
 void GP_BlitXYXY_Naive(const GP_Context *src,
                        GP_Coord x0, GP_Coord y0, GP_Coord x1, GP_Coord y1,
                        GP_Context *dst, GP_Coord x2, GP_Coord y2)
+{
+	GP_Coord x, y;
+
+	for (y = y0; y <= y1; y++)
+		for (x = x0; x <= x1; x++) {
+			GP_Pixel p = GP_GetPixel(src, x, y);
+
+			if (src->pixel_type != dst->pixel_type) 
+				p = GP_ConvertContextPixel(p, src, dst);
+
+			GP_PutPixel(dst, x2 + (x - x0), y2 + (y - y0), p);
+		}
+}
+
+void GP_BlitXYXY(const GP_Context *src,
+                 GP_Coord x0, GP_Coord y0, GP_Coord x1, GP_Coord y1,
+                 GP_Context *dst, GP_Coord x2, GP_Coord y2)
 {
 	/* Normalize source rectangle */
 	if (x1 < x0)
@@ -48,24 +72,11 @@ void GP_BlitXYXY_Naive(const GP_Context *src,
 	GP_CHECK(x2 + (x1 - x0) < (GP_Coord)GP_ContextW(dst));
 	GP_CHECK(y2 + (y1 - y0) < (GP_Coord)GP_ContextH(dst));
 
-	GP_Coord x, y;
-
-	for (y = y0; y <= y1; y++)
-		for (x = x0; x <= x1; x++) {
-			GP_Pixel p = GP_GetPixel(src, x, y);
-
-			if (src->pixel_type != dst->pixel_type) 
-				p = GP_ConvertContextPixel(p, src, dst);
-
-			GP_PutPixel(dst, x2 + (x - x0), y2 + (y - y0), p);
-		}
-}
-
-void GP_BlitXYXY(const GP_Context *src,
-                 GP_Coord x0, GP_Coord y0, GP_Coord x1, GP_Coord y1,
-                 GP_Context *dst, GP_Coord x2, GP_Coord y2)
-{
-	//TODO
+	if (GP_CONTEXT_ROTATION_EQUAL(src, dst)) {
+		GP_BlitXYXY_Raw_Fast(src, x0, y0, x1, y1, dst, x2, y2);
+		return;
+	}
+	
 	GP_BlitXYXY_Naive(src, x0, y0, x1, y1, dst, x2, y2);
 }
 
@@ -79,10 +90,9 @@ void GP_BlitXYWH(const GP_Context *src,
 	GP_BlitXYXY(src, x0, y0, x0 + w0 - 1, y0 + h0 - 1, dst, x1, y1);
 }
 
-
-void GP_BlitXYXY_Naive_Raw(const GP_Context *src,
-                           GP_Coord x0, GP_Coord y0, GP_Coord x1, GP_Coord y1,
-                           GP_Context *dst, GP_Coord x2, GP_Coord y2)
+void GP_BlitXYXY_Raw(const GP_Context *src,
+                     GP_Coord x0, GP_Coord y0, GP_Coord x1, GP_Coord y1,
+                     GP_Context *dst, GP_Coord x2, GP_Coord y2)
 {
 	/* Normalize source rectangle */
 	if (x1 < x0)
@@ -101,24 +111,7 @@ void GP_BlitXYXY_Naive_Raw(const GP_Context *src,
 	GP_CHECK(x2 + (x1 - x0) < (GP_Coord)dst->w);
 	GP_CHECK(y2 + (y1 - y0) < (GP_Coord)dst->h);
 
-	GP_Coord x, y;
-
-	for (y = y0; y <= y1; y++)
-		for (x = x0; x <= x1; x++) {
-			GP_Pixel p = GP_GetPixel_Raw(src, x, y);
-
-			if (src->pixel_type != dst->pixel_type) 
-				p = GP_ConvertContextPixel(p, src, dst);
-
-			GP_PutPixel_Raw(dst, x2 + (x - x0), y2 + (y - y0), p);
-		}
-}
-
-void GP_BlitXYXY_Raw(const GP_Context *src,
-                     GP_Coord x0, GP_Coord y0, GP_Coord x1, GP_Coord y1,
-                     GP_Context *dst, GP_Coord x2, GP_Coord y2)
-{
-	GP_BlitXYXY_Naive_Raw(src, x0, y0, x1, y1, dst, x2, y2);
+	GP_BlitXYXY_Raw_Fast(src, x0, y0, x1, y1, dst, x2, y2);
 }
 
 void GP_BlitXYWH_Raw(const GP_Context *src,
