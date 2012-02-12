@@ -59,4 +59,7 @@
 /* Color */
 #include "core/GP_Color.h"
 
+/* Mix Pixel */
+#include "core/GP_MixPixels.h"
+
 #endif /* GP_CORE_H */
