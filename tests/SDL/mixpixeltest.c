@@ -50,9 +50,9 @@ Uint32 timer_callback(__attribute__((unused)) Uint32 interval,
 
 void draw_pixels(void)
 {
-	unsigned int i;
+	unsigned int i, j, k;
 
-	GP_FillRect(&context, 0, 0, context.w, 50, white_pixel);
+	GP_FillRect(&context, 0, 0, context.w, 120, white_pixel);
 
 	unsigned int y = 20;
 
@@ -62,25 +62,44 @@ void draw_pixels(void)
 		GP_MixPixel_Raw(&context, i + 20, y + 2, 0, i);
 		GP_MixPixel_Raw(&context, i + 20, y + 3, 0, i);
 		GP_MixPixel_Raw(&context, i + 20, y + 4, 0, i);
+		
+		GP_MixPixel_Raw(&context, i + 20, y + 5, red_pixel, i);
+		GP_MixPixel_Raw(&context, i + 20, y + 6, red_pixel, i);
+		GP_MixPixel_Raw(&context, i + 20, y + 7, red_pixel, i);
+		
+		GP_MixPixel_Raw(&context, i + 20, y + 8, green_pixel, i);
+		GP_MixPixel_Raw(&context, i + 20, y + 9, green_pixel, i);
+		GP_MixPixel_Raw(&context, i + 20, y + 10, green_pixel, i);
+		
+		GP_MixPixel_Raw(&context, i + 20, y + 11, blue_pixel, i);
+		GP_MixPixel_Raw(&context, i + 20, y + 12, blue_pixel, i);
+		GP_MixPixel_Raw(&context, i + 20, y + 13, blue_pixel, i);
+		
 
 		if (i % 16 == 0)
-			GP_PutPixel(&context, i + 20, y + 5, 0);
+			GP_PutPixel(&context, i + 20, y + 14, 0);
 		
 		if (i % 32 == 0)
-			GP_PutPixel(&context, i + 20, y + 6, 0);
+			GP_PutPixel(&context, i + 20, y + 15, 0);
 		
 		if (i % 64 == 0) {
-			GP_PutPixel(&context, i + 20, y + 7, 0);
-			GP_Print(&context, NULL, i + 20, y + 12,
+			GP_PutPixel(&context, i + 20, y + 16, 0);
+			GP_Print(&context, NULL, i + 20, y + 20,
 			         GP_ALIGN_CENTER | GP_VALIGN_BELOW,
 				 0, 0, "%u", i);
 		}
 		
 		if (i % 128 == 0)
-			GP_PutPixel(&context, i + 20, y + 8, 0);
+			GP_PutPixel(&context, i + 20, y + 17, 0);
 	}
-	
-	y = 60;
+
+	for (i = 0; i < 7; i++)
+		for (j = 0; j < 32; j++)
+			for (k = 0; k < 32; k++)
+				GP_MixPixel_Raw(&context, (225 * i) / 6 + j + 20,
+				                y + k + 40, 0, (255 * i) / 6);
+
+	y = 140;
 
 	for (i = 0; i <= 256; i++) {
 		GP_MixPixel_Raw(&context, i + 20, y + 0, white_pixel, i);
@@ -88,24 +107,41 @@ void draw_pixels(void)
 		GP_MixPixel_Raw(&context, i + 20, y + 2, white_pixel, i);
 		GP_MixPixel_Raw(&context, i + 20, y + 3, white_pixel, i);
 		GP_MixPixel_Raw(&context, i + 20, y + 4, white_pixel, i);
+		
+		GP_MixPixel_Raw(&context, i + 20, y + 5, red_pixel, i);
+		GP_MixPixel_Raw(&context, i + 20, y + 6, red_pixel, i);
+		GP_MixPixel_Raw(&context, i + 20, y + 7, red_pixel, i);
+		
+		GP_MixPixel_Raw(&context, i + 20, y + 8, green_pixel, i);
+		GP_MixPixel_Raw(&context, i + 20, y + 9, green_pixel, i);
+		GP_MixPixel_Raw(&context, i + 20, y + 10, green_pixel, i);
+		
+		GP_MixPixel_Raw(&context, i + 20, y + 11, blue_pixel, i);
+		GP_MixPixel_Raw(&context, i + 20, y + 12, blue_pixel, i);
+		GP_MixPixel_Raw(&context, i + 20, y + 13, blue_pixel, i);
 
 		if (i % 16 == 0)
-			GP_PutPixel(&context, i + 20, y + 5, white_pixel);
+			GP_PutPixel(&context, i + 20, y + 14, white_pixel);
 		
 		if (i % 32 == 0)
-			GP_PutPixel(&context, i + 20, y + 6, white_pixel);
+			GP_PutPixel(&context, i + 20, y + 15, white_pixel);
 		
 		if (i % 64 == 0) {
-			GP_PutPixel(&context, i + 20, y + 7, white_pixel);
-			GP_Print(&context, NULL, i + 20, y + 12,
+			GP_PutPixel(&context, i + 20, y + 16, white_pixel);
+			GP_Print(&context, NULL, i + 20, y + 20,
 			         GP_ALIGN_CENTER | GP_VALIGN_BELOW,
 				 white_pixel, 0, "%u", i);
 		}
 
 		if (i % 128 == 0)
-			GP_PutPixel(&context, i + 20, y + 8, white_pixel);
+			GP_PutPixel(&context, i + 20, y + 17, white_pixel);
 	}
-
+	
+	for (i = 0; i < 7; i++)
+		for (j = 0; j < 32; j++)
+			for (k = 0; k < 32; k++)
+				GP_MixPixel_Raw(&context, (225 * i) / 6 + j + 20,
+				                y + k + 40, white_pixel, (255 * i) / 6);
 
 }
 
