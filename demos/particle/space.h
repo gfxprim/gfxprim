@@ -16,43 +16,46 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2010 Jiri "BlueBear" Dluhos                            *
- *                         <jiri.bluebear.dluhos@gmail.com>                  *
- *                                                                           *
- * Copyright (C) 2009-2011 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
-/*
+ /*
 
-  This is a main header for gfx part.
+   Particle demo.
 
- */
+  */
 
-#ifndef GP_GFX_H
-#define GP_GFX_H
+#ifndef PARTICLE_H
+#define PARTICLE_H
 
-/* basic definitions and structures */
-#include "core/GP_Context.h"
-#include "core/GP_GetPutPixel.h"
-#include "core/GP_WritePixel.h"
+#include <GP.h>
 
-/* public drawing API */
-#include "GP_Fill.h"
-#include "GP_HLine.h"
-#include "GP_VLine.h"
-#include "GP_Line.h"
-#include "GP_Rect.h"
-#include "GP_Triangle.h"
-#include "GP_Tetragon.h"
-#include "GP_Circle.h"
-#include "GP_CircleSeg.h"
-#include "GP_Ellipse.h"
-#include "GP_Arc.h"
-#include "GP_Polygon.h"
-#include "GP_Symbol.h"
+struct particle {
+	/* fixed point coordinates */
+	int x;
+	int y;
 
-#include "GP_RectAA.h"
-#include "GP_PutPixelAA.h"
+	/* fixed point speed */
+	int vx;
+	int vy;
+};
 
-#endif /* GP_GFX_H */
+struct space {
+	unsigned int particle_count;
+
+	int w;
+	int h;
+
+	struct particle particles[];
+};
+
+struct space *space_create(unsigned int particle_count, int w, int h);
+
+void space_destroy(struct space *space);
+
+void space_draw_particles(GP_Context *context, struct space *space);
+
+void space_time_tick(struct space *space, int time);
+
+#endif /* PARTICLE_H */
