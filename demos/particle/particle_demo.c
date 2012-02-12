@@ -106,7 +106,7 @@ int main(int argc, char *argv[])
 	GP_BackendFlip(backend);
 
 	struct space *space;
-	space = space_create(200, 10<<8, 10<<8, (context->w - 10)<<8, (context->h - 10)<<8);
+	space = space_create(300, 10<<8, 10<<8, (context->w - 10)<<8, (context->h - 10)<<8);
 
 	for (;;) {
 		if (backend->Poll)
@@ -148,7 +148,7 @@ int main(int argc, char *argv[])
 		}
 	
 		if (!pause_flag) {
-			space_time_tick(space, 2);
+			space_time_tick(space, 3);
 			space_draw_particles(context, space);
 			GP_BackendFlip(backend);
 		}

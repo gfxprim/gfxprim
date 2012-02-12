@@ -45,6 +45,8 @@ struct space *space_create(unsigned int particle_count, int min_w, int min_h,
 
 	unsigned int i;
 
+	srandom(time(NULL));
+
 	for (i = 0; i < particle_count; i++) {
 		new->particles[i].x = random() % (max_w - min_w) + min_w;
 		new->particles[i].y = random() % (max_h - min_h) + min_h;
@@ -100,7 +102,7 @@ static void gravity_forces(struct space *space, int time)
 			int dist_x = DIST_X(space, i, j);
 			int dist_y = DIST_Y(space, i, j);
 
-			int dist_squared = (SQUARE(dist_x>>8) + SQUARE(dist_y>>8)) + (1<<8);
+			int dist_squared = (SQUARE((dist_x + (1<<7))>>8) + SQUARE((dist_y + (1<<7))>>8)) + (1<<8);
 			int dist = ((int)sqrt(dist_squared))<<4;
 
 			if (dist < (1<<9))
