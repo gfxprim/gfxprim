@@ -17,7 +17,7 @@
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
  * Copyright (C) 2011      Tomas Gavenciak <gavento@ucw.cz>                  *
- * Copyright (C) 2011,2012 Cyril Hrubis    <metan@ucw.cz>                    *
+ * Copyright (C) 2011-2012 Cyril Hrubis    <metan@ucw.cz>                    *
  *                                                                           *
  *****************************************************************************/
 
@@ -26,12 +26,15 @@
 #include "GP_Context.h"
 #include "GP_Convert.h"
 #include "GP_Blit.h"
-#include "GP_FnPerBpp.h"
 
-/* Generated function */
+/* Generated functions */
 void GP_BlitXYXY_Raw_Fast(const GP_Context *src,
                           GP_Coord x0, GP_Coord y0, GP_Coord x1, GP_Coord y1,
-			  GP_Context *dst, GP_Coord x2, GP_Coord y2);
+                          GP_Context *dst, GP_Coord x2, GP_Coord y2);
+
+void GP_BlitXYXY_Fast(const GP_Context *src,
+                      GP_Coord x0, GP_Coord y0, GP_Coord x1, GP_Coord y1,
+                      GP_Context *dst, GP_Coord x2, GP_Coord y2);
 
 
 void GP_BlitXYXY_Naive(const GP_Context *src,
@@ -77,7 +80,7 @@ void GP_BlitXYXY(const GP_Context *src,
 		return;
 	}
 	
-	GP_BlitXYXY_Naive(src, x0, y0, x1, y1, dst, x2, y2);
+	GP_BlitXYXY_Fast(src, x0, y0, x1, y1, dst, x2, y2);
 }
 
 void GP_BlitXYWH(const GP_Context *src,

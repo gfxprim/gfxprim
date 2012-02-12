@@ -72,13 +72,6 @@ void GP_BlitXYXY_Raw(const GP_Context *src,
 		     GP_Context *dst, GP_Coord x2, GP_Coord y2);
 
 /*
- * Naive get/put pixel implementation, used when everything else fails.
- */
-void GP_BlitXYXY_Naive_Raw(const GP_Context *src,
-                           GP_Coord x0, GP_Coord y0, GP_Coord x1, GP_Coord y1,
-		           GP_Context *dst, GP_Coord x2, GP_Coord y2);
-
-/*
  * Same as GP_BlitXYWH but doesn't respect rotations. Faster (for now).
  */
 void GP_BlitXYWH_Raw(const GP_Context *src,

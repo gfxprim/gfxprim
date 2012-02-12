@@ -40,7 +40,7 @@ void blitXYXY_Naive_Raw(const GP_Context *src,
 /*
  * Blit for equal pixel types {{ ps.suffix }}
  */
-void GP_BlitXYXY_Raw_{{ ps.suffix }}(const GP_Context *src,
+void blitXYXY_Raw_{{ ps.suffix }}(const GP_Context *src,
 	GP_Coord x0, GP_Coord y0, GP_Coord x1, GP_Coord y1,
 	GP_Context *dst, GP_Coord x2, GP_Coord y2)
 {
@@ -103,7 +103,7 @@ void GP_BlitXYXY_Raw_{{ ps.suffix }}(const GP_Context *src,
 %% endfor
 
 /*
- * Generate Naive Blits, I know this is n^2 variants but the gain is in speed is
+ * Generate Blits, I know this is n^2 variants but the gain is in speed is
  * more than 50% and the size footprint for two for cycles is really small.
  */
 %% for src in pixeltypes
@@ -114,7 +114,7 @@ void GP_BlitXYXY_Raw_{{ ps.suffix }}(const GP_Context *src,
 /*
  * Blits {{ src.name }} to {{ dst.name }}
  */
-static void blitXYXY_Naive_Raw_{{ src.name }}_{{ dst.name }}(const GP_Context *src,
+static void blitXYXY_Raw_{{ src.name }}_{{ dst.name }}(const GP_Context *src,
 	GP_Coord x0, GP_Coord y0, GP_Coord x1, GP_Coord y1,
 	GP_Context *dst, GP_Coord x2, GP_Coord y2)
 {
@@ -138,16 +138,16 @@ static void blitXYXY_Naive_Raw_{{ src.name }}_{{ dst.name }}(const GP_Context *s
 
 void GP_BlitXYXY_Raw_Fast(const GP_Context *src,
                           GP_Coord x0, GP_Coord y0, GP_Coord x1, GP_Coord y1,
-		          GP_Context *dst, GP_Coord x2, GP_Coord y2)
+                          GP_Context *dst, GP_Coord x2, GP_Coord y2)
 {
 	/* Same pixel type, could be (mostly) optimized to memcpy() */
 	if (src->pixel_type == dst->pixel_type) {
-		GP_FN_PER_BPP(GP_BlitXYXY_Raw, src->bpp, src->bit_endian,
+		GP_FN_PER_BPP(blitXYXY_Raw, src->bpp, src->bit_endian,
 		              src, x0, y0, x1, y1, dst, x2, y2);
 		return;
 	}
 
-	/* Specialized naive functions */
+	/* Specialized functions */
 	switch (src->pixel_type) {
 %% for src in pixeltypes
 %% if not src.is_unknown() and not src.is_palette()
@@ -157,9 +157,111 @@ void GP_BlitXYXY_Raw_Fast(const GP_Context *src,
 %% if not dst.is_unknown() and not dst.is_palette()
 %% if dst.name != src.name
 		case GP_PIXEL_{{ dst.name }}:
-			blitXYXY_Naive_Raw_{{ src.name }}_{{ dst.name }}(src, x0, y0,
-			                                                 x1, y1,
-			                                                 dst, x2, y2);
+			blitXYXY_Raw_{{ src.name }}_{{ dst.name }}(src, x0, y0, x1, y1, dst, x2, y2);
+		break;
+%% endif
+%% endif
+%% endfor
+		default:
+			GP_ABORT("Invalid destination pixel %s",
+			         GP_PixelTypeName(dst->pixel_type));
+		}
+	break;
+%% endif
+%% endfor
+	default:
+		GP_ABORT("Invalid source pixel %s",
+		         GP_PixelTypeName(src->pixel_type));
+	}
+}
+
+/*
+ * And the same for non-raw variants.
+ */
+%% for src in pixeltypes
+%% if not src.is_unknown() and not src.is_palette()
+%% for dst in pixeltypes
+%% if not dst.is_unknown() and not dst.is_palette()
+%% if dst.name != src.name
+/*
+ * Blits {{ src.name }} to {{ dst.name }}
+ */
+static void blitXYXY_{{ src.name }}_{{ dst.name }}(const GP_Context *src,
+	GP_Coord x0, GP_Coord y0, GP_Coord x1, GP_Coord y1,
+	GP_Context *dst, GP_Coord x2, GP_Coord y2)
+{
+	GP_Coord x, y, xt, yt;
+
+	for (y = y0; y <= y1; y++)
+		for (x = x0; x <= x1; x++) {
+			GP_Pixel p1, p2 = 0;
+			xt = x; yt = y;
+			GP_TRANSFORM_POINT(src, xt, yt);
+			p1 = GP_GetPixel_Raw_{{ src.pixelsize.suffix }}(src, xt, yt);
+			GP_Pixel_{{ src.name }}_TO_RGB888(p1, p2);
+			GP_Pixel_RGB888_TO_{{ dst.name }}(p2, p1);
+			xt = x2 + (x - x0);
+			yt = y2 + (y - y0);
+			GP_TRANSFORM_POINT(dst, xt, yt);
+			GP_PutPixel_Raw_{{ dst.pixelsize.suffix }}(dst, xt, yt, p1);
+		}
+}
+
+%% endif
+%% endif
+%% endfor
+%% endif
+%% endfor
+
+/*
+ * Same pixel type but with rotation.
+ */
+%% for ps in pixelsizes
+/*
+ * Blits for same pixel type and bpp {{ ps.suffix }}
+ */
+static void blitXYXY_{{ ps.suffix }}(const GP_Context *src,
+	GP_Coord x0, GP_Coord y0, GP_Coord x1, GP_Coord y1,
+	GP_Context *dst, GP_Coord x2, GP_Coord y2)
+{
+	GP_Coord x, y, xt, yt;
+
+	for (y = y0; y <= y1; y++)
+		for (x = x0; x <= x1; x++) {
+			GP_Pixel p;
+			xt = x; yt = y;
+			GP_TRANSFORM_POINT(src, xt, yt);
+			p = GP_GetPixel_Raw_{{ ps.suffix }}(src, xt, yt);
+			xt = x2 + (x - x0);
+			yt = y2 + (y - y0);
+			GP_TRANSFORM_POINT(dst, xt, yt);
+			GP_PutPixel_Raw_{{ ps.suffix }}(dst, xt, yt, p);
+		}
+}
+%% endfor
+
+void GP_BlitXYXY_Fast(const GP_Context *src,
+                      GP_Coord x0, GP_Coord y0, GP_Coord x1, GP_Coord y1,
+                      GP_Context *dst, GP_Coord x2, GP_Coord y2)
+{
+	/* Same pixel type */
+	if (src->pixel_type == dst->pixel_type) {
+		GP_FN_PER_BPP(blitXYXY, src->bpp, src->bit_endian,
+		              src, x0, y0, x1, y1, dst, x2, y2);
+		return;
+	}
+	
+	/* Specialized functions */
+	switch (src->pixel_type) {
+%% for src in pixeltypes
+%% if not src.is_unknown() and not src.is_palette()
+	case GP_PIXEL_{{ src.name }}:
+		switch (dst->pixel_type) {
+%% for dst in pixeltypes
+%% if not dst.is_unknown() and not dst.is_palette()
+%% if dst.name != src.name
+		case GP_PIXEL_{{ dst.name }}:
+			blitXYXY_{{ src.name }}_{{ dst.name }}(src, x0, y0, x1, y1, dst, x2, y2);
 		break;
 %% endif
 %% endif
