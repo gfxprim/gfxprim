@@ -41,6 +41,7 @@ struct space *space_create(unsigned int particle_count, int min_w, int min_h,
 	new->gay = 0;
 	
 	new->elasticity = (1<<8) - (1<<6);
+	new->mass_kappa = 1<<1;
 
 	unsigned int i;
 
@@ -49,6 +50,8 @@ struct space *space_create(unsigned int particle_count, int min_w, int min_h,
 		new->particles[i].y = random() % (max_h - min_h) + min_h;
 		new->particles[i].vx = random() % 40 - 20;
 		new->particles[i].vy = random() % 40 - 20;
+//		new->particles[i].vx = 0;
+//		new->particles[i].vy = 0;
 	}
 
 	return new;
@@ -59,17 +62,22 @@ void space_destroy(struct space *space)
 	free(space);
 }
 
+#define SQUARE(x) ((x) * (x))
+
 void space_draw_particles(GP_Context *context, struct space *space)
 {
 	unsigned int i;
 	
-	GP_Fill(context, 0);
+	GP_Fill(context, 0x000000);
 
-	for (i = 0; i < space->particle_count; i++)
-		GP_PutPixelAA(context, space->particles[i].x, space->particles[i].y, 0xffffff);
+	for (i = 0; i < space->particle_count; i++) {
+		GP_Pixel color = GP_RGBToContextPixel(0xff, 0xff, 0xff, context);
+		
+		GP_PutPixelAA(context, space->particles[i].x, space->particles[i].y, color);
+	}
 }
 
-static void modify_speeds(struct space *space, int time)
+static void central_gravity(struct space *space, int time)
 {
 	unsigned int i;
 
@@ -79,11 +87,38 @@ static void modify_speeds(struct space *space, int time)
 	}
 }
 
+#define DIST_X(space, i, j) ((space)->particles[i].x - (space)->particles[j].x)
+#define DIST_Y(space, i, j) ((space)->particles[i].y - (space)->particles[j].y)
+#define SIGN(x) ((x) < 0 ? -1 : 1)
+
+static void gravity_forces(struct space *space, int time)
+{
+	unsigned int i, j;
+
+	for (i = 0; i < space->particle_count; i++)
+		for (j = 0; j < space->particle_count; j++) {
+			int dist_x = DIST_X(space, i, j);
+			int dist_y = DIST_Y(space, i, j);
+
+			int dist_squared = (SQUARE(dist_x>>8) + SQUARE(dist_y>>8)) + (1<<8);
+			int dist = ((int)sqrt(dist_squared))<<4;
+
+			if (dist < (1<<9))
+				dist = -dist;
+
+			int a = GP_FP_DIV(space->mass_kappa, dist_squared) * time;
+
+			space->particles[i].vx -= (a * dist_x) / dist;
+			space->particles[i].vy -= (a * dist_y) / dist; 
+		}
+}
+
 void space_time_tick(struct space *space, int time)
 {
 	unsigned int i;
 
-	modify_speeds(space, time);
+	central_gravity(space, time);
+	gravity_forces(space, time);
 
 	for (i = 0; i < space->particle_count; i++) {
 

@@ -58,6 +58,9 @@ struct space {
 	/* elasticity at the boudaries */
 	int elasticity;
 
+	/* particle mass */
+	int mass_kappa;
+
 	struct particle particles[];
 };
 

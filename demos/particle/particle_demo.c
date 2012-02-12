@@ -106,13 +106,13 @@ int main(int argc, char *argv[])
 	GP_BackendFlip(backend);
 
 	struct space *space;
-	space = space_create(1000, 10<<8, 10<<8, (context->w - 10)<<8, (context->h - 10)<<8);
+	space = space_create(200, 10<<8, 10<<8, (context->w - 10)<<8, (context->h - 10)<<8);
 
 	for (;;) {
 		if (backend->Poll)
 			GP_BackendPoll(backend);
 
-		usleep(5000);
+		usleep(1000);
 
 		/* Read and parse events */
 		GP_Event ev;
