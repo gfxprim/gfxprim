@@ -115,13 +115,11 @@ typedef struct {
 /*
  * Array of size GP_PIXEL_MAX describing known pixel types
  */
-
 extern const GP_PixelTypeDescription const GP_PixelTypes[];
 
 /*
  * Convert pixel type to name.
  */
-
 static inline const char *GP_PixelTypeName(GP_PixelType type)
 {
 	GP_CHECK(type < GP_PIXEL_MAX);
@@ -131,7 +129,6 @@ static inline const char *GP_PixelTypeName(GP_PixelType type)
 /*
  * Returns number of bits per pixel.
  */
-
 static inline uint32_t GP_PixelSize(GP_PixelType type)
 {
 	GP_CHECK(type < GP_PIXEL_MAX);
