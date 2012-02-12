@@ -76,7 +76,7 @@ int main(int argc, char *argv[])
 {
 	const char *backend_opts = "fb";
 	int opt;
-	int pause_flag = 1;
+	int pause_flag = 0;
 
 	while ((opt = getopt(argc, argv, "b:Ii:Ps:r:")) != -1) {
 		switch (opt) {
@@ -105,7 +105,8 @@ int main(int argc, char *argv[])
 	GP_Fill(context, black_pixel);
 	GP_BackendFlip(backend);
 
-	struct space *space = space_create(1000, context->w<<8, context->h<<8);
+	struct space *space;
+	space = space_create(1000, 10<<8, 10<<8, (context->w - 10)<<8, (context->h - 10)<<8);
 
 	for (;;) {
 		if (backend->Poll)
@@ -134,6 +135,12 @@ int main(int argc, char *argv[])
 				break;
 				case GP_KEY_P:
 					pause_flag = !pause_flag;
+				break;
+				case GP_KEY_G:
+					space->gay = 1;
+				break;
+				case GP_KEY_T:
+					space->gay = 0;
 				break;
 				}
 			break;

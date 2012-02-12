@@ -44,13 +44,25 @@ struct particle {
 struct space {
 	unsigned int particle_count;
 
-	int w;
-	int h;
+	/* space is an rectanle */
+	int min_w;
+	int min_h;
+	
+	int max_w;
+	int max_h;
+
+	/* gravitation vector */
+	int gax;
+	int gay;
+
+	/* elasticity at the boudaries */
+	int elasticity;
 
 	struct particle particles[];
 };
 
-struct space *space_create(unsigned int particle_count, int w, int h);
+struct space *space_create(unsigned int particle_count, int min_w, int min_h,
+                           int max_w, int max_h);
 
 void space_destroy(struct space *space);
 

@@ -1,3 +1,3 @@
 TOPDIR=..
-SUBDIRS=grinder fbshow
+SUBDIRS=grinder fbshow particle
 include $(TOPDIR)/include.mk

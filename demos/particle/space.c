@@ -22,7 +22,8 @@
 
 #include "space.h"
 
-struct space *space_create(unsigned int particle_count, int w, int h)
+struct space *space_create(unsigned int particle_count, int min_w, int min_h,
+                           int max_w, int max_h)
 {
 	struct space *new = malloc(sizeof(struct space) +
 	                           sizeof(struct particle) * particle_count);
@@ -31,14 +32,21 @@ struct space *space_create(unsigned int particle_count, int w, int h)
 		return NULL;
 
 	new->particle_count = particle_count;
-	new->w = w;
-	new->h = h;
+	new->min_w = min_w;
+	new->min_h = min_h;
+	new->max_w = max_w;
+	new->max_h = max_h;
+
+	new->gax = 0;
+	new->gay = 0;
+	
+	new->elasticity = (1<<8) - (1<<6);
 
 	unsigned int i;
 
 	for (i = 0; i < particle_count; i++) {
-		new->particles[i].x = random() % w;
-		new->particles[i].y = random() % h;
+		new->particles[i].x = random() % (max_w - min_w) + min_w;
+		new->particles[i].y = random() % (max_h - min_h) + min_h;
 		new->particles[i].vx = random() % 40 - 20;
 		new->particles[i].vy = random() % 40 - 20;
 	}
@@ -63,12 +71,12 @@ void space_draw_particles(GP_Context *context, struct space *space)
 
 static void modify_speeds(struct space *space, int time)
 {
-	unsigned int i, j;
+	unsigned int i;
 
 	for (i = 0; i < space->particle_count; i++) { 
-//			space->particles[i].vx +=  * time;
-			space->particles[i].vy += time; 
-		}
+		space->particles[i].vy += space->gax * time; 
+		space->particles[i].vy += space->gay * time; 
+	}
 }
 
 void space_time_tick(struct space *space, int time)
@@ -78,11 +86,14 @@ void space_time_tick(struct space *space, int time)
 	modify_speeds(space, time);
 
 	for (i = 0; i < space->particle_count; i++) {
-		if (space->particles[i].x <= 2 || space->particles[i].x >= space->w - 2)
-			space->particles[i].vx *= -0.9;
+
+		if ((space->particles[i].x < space->min_w && space->particles[i].vx < 0) ||
+		    (space->particles[i].x >= space->max_w && space->particles[i].vx > 0))
+			space->particles[i].vx = GP_FP_MUL(space->particles[i].vx, -space->elasticity);
 		
-		if (space->particles[i].y <= 2 || space->particles[i].y >= space->h - 2)
-			space->particles[i].vy *= -0.9;
+		if ((space->particles[i].y < space->min_h && space->particles[i].vy < 0) ||
+		    (space->particles[i].y >= space->max_h && space->particles[i].vy > 0))
+			space->particles[i].vy = GP_FP_MUL(space->particles[i].vy, -space->elasticity);
 		
 		space->particles[i].x += space->particles[i].vx * time;
 		space->particles[i].y += space->particles[i].vy * time;
