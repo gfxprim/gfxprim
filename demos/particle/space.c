@@ -20,6 +20,7 @@
  *                                                                           *
  *****************************************************************************/
 
+#include <time.h>
 #include "space.h"
 
 struct space *space_create(unsigned int particle_count, int min_w, int min_h,
@@ -73,9 +74,55 @@ void space_draw_particles(GP_Context *context, struct space *space)
 	GP_Fill(context, 0x000000);
 
 	for (i = 0; i < space->particle_count; i++) {
-		GP_Pixel color = GP_RGBToContextPixel(0xff, 0xff, 0xff, context);
+		GP_Pixel color;
 		
-		GP_PutPixelAA(context, space->particles[i].x, space->particles[i].y, color);
+		GP_Coord x = space->particles[i].x;
+		GP_Coord y = space->particles[i].y;
+		GP_Coord a1 = GP_FP_1 * 4;
+		GP_Coord a2 = GP_FP_1_2 * 2;
+
+/*
+		if (i == 0) {
+			x = GP_FP_1 * 10 + GP_FP_1_2;
+			y = GP_FP_1 * 10 + GP_FP_1_2;
+		}
+*/
+
+		color = GP_RGBToContextPixel(0xee, 0xee, 0xee, context);
+		
+		GP_PutPixelAA(context, x, y, color);
+
+		int val = SQUARE(space->particles[i].vx) + SQUARE(space->particles[i].vy);
+
+		val = sqrt(val) + 0x40;
+
+		if (val > 255)
+			val = 255;
+
+		color = GP_RGBToContextPixel(val, val, 0x40, context);
+
+		/* Hexagons */
+		GP_LineAA(context, x - a2, y - a1, x + a2, y - a1, color);
+	//	GP_LineAA(context, x + a2, y - a1, x + a1, y - a2, color);
+		GP_LineAA(context, x + a1, y - a2, x + a1, y + a2, color);
+	//	GP_LineAA(context, x + a1, y + a2, x + a2, y + a1, color);
+		GP_LineAA(context, x + a2, y + a1, x - a2, y + a1, color);
+	//	GP_LineAA(context, x - a2, y + a1, x - a1, y + a2, color);
+		GP_LineAA(context, x - a1, y + a2, x - a1, y - a2, color);
+	//	GP_LineAA(context, x - a1, y - a2, x - a2, y - a1, color);
+/*	
+		GP_PutPixelAA(context, x + a2, y - a1, 0xffffff);
+		GP_PutPixelAA(context, x + a1, y - a2, 0xffffff);
+
+		GP_PutPixelAA(context, x + a1, y + a2, 0xffffff);
+		GP_PutPixelAA(context, x + a2, y + a1, 0xffffff);
+		
+		GP_PutPixelAA(context, x - a2, y + a1, 0xffffff);
+		GP_PutPixelAA(context, x - a1, y + a2, 0xffffff);
+		
+		GP_PutPixelAA(context, x - a1, y - a2, 0xffffff);
+		GP_PutPixelAA(context, x - a2, y - a1, 0xffffff);
+*/	
 	}
 }
 
@@ -105,8 +152,11 @@ static void gravity_forces(struct space *space, int time)
 			int dist_squared = (SQUARE((dist_x + (1<<7))>>8) + SQUARE((dist_y + (1<<7))>>8)) + (1<<8);
 			int dist = ((int)sqrt(dist_squared))<<4;
 
-			if (dist < (1<<9))
-				dist = -dist;
+			if (dist < (2<<8))
+				dist = -(dist>>1);
+			else if (dist < (8<<8))
+				dist = dist>>1;
+
 
 			int a = GP_FP_DIV(space->mass_kappa, dist_squared) * time;
 
