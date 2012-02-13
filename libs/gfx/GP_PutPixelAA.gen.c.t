@@ -17,6 +17,8 @@
 void GP_PutPixelAA_Raw(GP_Context *context, GP_Coord x, GP_Coord y,
                        GP_Pixel pixel)
 {
+	x -= GP_FP_1_2;
+	y -= GP_FP_1_2;
 	GP_Coord int_x = GP_FP_TO_INT(x);
 	GP_Coord int_y = GP_FP_TO_INT(y);
 	GP_Coord frac_x = GP_FP_FRAC(x);

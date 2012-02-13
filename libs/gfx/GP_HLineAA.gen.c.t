@@ -17,6 +17,10 @@ void GP_HLineAA_Raw(GP_Context *context, GP_Coord x0, GP_Coord x1,
 	if (x1 < x0)
 		GP_SWAP(x1, x0);
 	
+	x0 -= GP_FP_1_2;
+	x1 += GP_FP_1_2;
+	y  -= GP_FP_1_2;
+
 	GP_Coord int_x0 = GP_FP_TO_INT(x0);
 	GP_Coord int_x1 = GP_FP_TO_INT(x1);
 	GP_Coord int_y  = GP_FP_TO_INT(y);

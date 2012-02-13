@@ -16,7 +16,11 @@ void GP_VLineAA_Raw(GP_Context *context, GP_Coord x, GP_Coord y0,
 {
 	if (y1 < y0)
 		GP_SWAP(y1, y0);
-	
+
+	y0 -= GP_FP_1_2;
+	y1 += GP_FP_1_2;
+	x  -= GP_FP_1_2;
+
 	GP_Coord int_y0 = GP_FP_TO_INT(y0);
 	GP_Coord int_y1 = GP_FP_TO_INT(y1);
 	GP_Coord int_x  = GP_FP_TO_INT(x);
