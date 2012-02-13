@@ -16,46 +16,37 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2010 Jiri "BlueBear" Dluhos                            *
- *                         <jiri.bluebear.dluhos@gmail.com>                  *
- *                                                                           *
- * Copyright (C) 2009-2011 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
 /*
+   
+   Anti Aliased Vertical line.
 
-  This is a main header for gfx part.
+   The coordinates are in XX.8 fixed point format, see core/GP_FixedPoint.h
+   for helper macros.
+   
+   For RGB contexts gamma correction tables are used to generate correct
+   intensity for pixels.
 
  */
 
-#ifndef GP_GFX_H
-#define GP_GFX_H
+#ifndef GFX_GP_VLINE_AA_H
+#define GFX_GP_VLINE_AA_H
 
-/* basic definitions and structures */
 #include "core/GP_Context.h"
-#include "core/GP_GetPutPixel.h"
-#include "core/GP_WritePixel.h"
 
-/* public drawing API */
-#include "GP_Fill.h"
-#include "GP_HLine.h"
-#include "GP_VLine.h"
-#include "GP_Line.h"
-#include "GP_Rect.h"
-#include "GP_Triangle.h"
-#include "GP_Tetragon.h"
-#include "GP_Circle.h"
-#include "GP_CircleSeg.h"
-#include "GP_Ellipse.h"
-#include "GP_Arc.h"
-#include "GP_Polygon.h"
-#include "GP_Symbol.h"
+/*
+ * Anti Aliased Horizontal Line respecting context rotation flags and with clipping.
+ */
+void GP_VLineAA(GP_Context *context, GP_Coord x, GP_Coord y0, GP_Coord y1,
+                GP_Pixel pixel);
 
-#include "GP_PutPixelAA.h"
-#include "GP_VLineAA.h"
-#include "GP_HLineAA.h"
-#include "GP_LineAA.h"
-#include "GP_RectAA.h"
+/*
+ * Horizontal Line without contect rotation flags.
+ */
+void GP_VLineAA_Raw(GP_Context *context, GP_Coord x,
+                    GP_Coord y0, GP_Coord y1, GP_Pixel pixel);
 
-#endif /* GP_GFX_H */
+#endif /* GFX_GP_VLINE_AA_H */

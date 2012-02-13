@@ -16,46 +16,40 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2010 Jiri "BlueBear" Dluhos                            *
- *                         <jiri.bluebear.dluhos@gmail.com>                  *
- *                                                                           *
- * Copyright (C) 2009-2011 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
-/*
-
-  This is a main header for gfx part.
-
- */
-
-#ifndef GP_GFX_H
-#define GP_GFX_H
-
-/* basic definitions and structures */
-#include "core/GP_Context.h"
 #include "core/GP_GetPutPixel.h"
-#include "core/GP_WritePixel.h"
+#include "core/GP_FnPerBpp.h"
 
-/* public drawing API */
-#include "GP_Fill.h"
-#include "GP_HLine.h"
-#include "GP_VLine.h"
-#include "GP_Line.h"
-#include "GP_Rect.h"
-#include "GP_Triangle.h"
-#include "GP_Tetragon.h"
-#include "GP_Circle.h"
-#include "GP_CircleSeg.h"
-#include "GP_Ellipse.h"
-#include "GP_Arc.h"
-#include "GP_Polygon.h"
-#include "GP_Symbol.h"
+#include "gfx/GP_VLineAA.h"
+#include "gfx/GP_HLineAA.h"
 
-#include "GP_PutPixelAA.h"
-#include "GP_VLineAA.h"
-#include "GP_HLineAA.h"
-#include "GP_LineAA.h"
-#include "GP_RectAA.h"
+/*
+void GP_VLineXYY_Raw(GP_Context *context, GP_Coord x, GP_Coord y0,
+                     GP_Coord y1, GP_Pixel pixel)
+{
+	GP_CHECK_CONTEXT(context);
 
-#endif /* GP_GFX_H */
+	GP_FN_PER_BPP_CONTEXT(GP_VLine, context, context, x, y0, y1, pixel);
+}
+*/
+
+void GP_VLineAA(GP_Context *context, GP_Coord x, GP_Coord y0,
+                GP_Coord y1, GP_Pixel pixel)
+{
+	GP_CHECK_CONTEXT(context);
+	
+	if (context->axes_swap) {
+		GP_TRANSFORM_Y_FP(context, x);
+		GP_TRANSFORM_X_FP(context, y0);
+		GP_TRANSFORM_X_FP(context, y1);
+		GP_HLineAA_Raw(context, y0, y1, x, pixel);
+	} else {
+		GP_TRANSFORM_X_FP(context, x);
+		GP_TRANSFORM_Y_FP(context, y0);
+		GP_TRANSFORM_Y_FP(context, y1);
+		GP_VLineAA_Raw(context, x, y0, y1, pixel);
+	}
+}

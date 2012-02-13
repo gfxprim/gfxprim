@@ -9,8 +9,8 @@
 #include "core/GP_FixedPoint.h"
 #include "core/GP_GammaCorrection.h"
 
-#include "gfx/GP_HLine.h"
-#include "gfx/GP_VLine.h"
+#include "gfx/GP_HLineAA.h"
+#include "gfx/GP_VLineAA.h"
 
 #define FP_TO_PERC(a) (GP_FP_ROUND_TO_INT((a) * 255))
 
@@ -121,16 +121,12 @@ void GP_LineAA_Raw(GP_Context *context, GP_Coord x0, GP_Coord y0,
 	int64_t dy = y1 - y0;
 
 	if (dy == 0) {
-		//TODO!!!
-		GP_HLine_Raw(context, GP_FP_ROUND_TO_INT(x0), GP_FP_ROUND_TO_INT(x1),
-		                      GP_FP_ROUND_TO_INT(y0), pixel);
+		GP_HLineAA_Raw(context, x0, x1, y0, pixel);
 		return;
 	}
 
 	if (dx == 0) {
-		//TODO!!!
-		GP_VLine(context, GP_FP_ROUND_TO_INT(x0), GP_FP_ROUND_TO_INT(y0),
-		                  GP_FP_ROUND_TO_INT(y1), pixel);
+		GP_VLineAA_Raw(context, x0, y0, y1, pixel);
 		return;
 	}
 
