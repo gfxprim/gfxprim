@@ -16,35 +16,22 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2011 Jiri "BlueBear" Dluhos                            *
- *                         <jiri.bluebear.dluhos@gmail.com>                  *
- *                                                                           *
  * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
-#ifndef GP_H
-#define GP_H
+#ifndef INPUT_GP_INPUT_H
+#define INPUT_GP_INPUT_H
 
-/* library core */
-#include "core/GP_Core.h"
+/*
+ * Base GP_Event definitions.
+ */
+#include "input/GP_Event.h"
 
-/* public drawing API */
-#include "gfx/GP_Gfx.h"
+/*
+ * Input drivers (semi internal).
+ */
+#include "input/GP_InputDriverSDL.h"
+#include "input/GP_InputDriverLinux.h"
 
-/* fonts and text drawing */
-#include "text/GP_Text.h"
-
-/* backends */
-#include "backends/GP_Backend.h"
-
-/* input and events */
-#include "input/GP_Input.h"
-
-/* bitmap loaders */
-#include "loaders/GP_Loaders.h"
-
-/* bitmap filters */
-#include "filters/GP_Filters.h"
-
-#endif /* GP_H */
+#endif /* INPUT_GP_INPUT_H */
