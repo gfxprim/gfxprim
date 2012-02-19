@@ -172,7 +172,7 @@ static void *image_loader(void *ptr)
 		if (rat < 1) {
 			cpu_timer_start(&timer, "Blur");
 			callback.priv = "Blurring Image";
-			if (GP_FilterGaussianBlur(img, img, 0.5/rat, 0.5/rat, &callback) == NULL)
+			if (GP_FilterGaussianBlur(img, img, 0.3/rat, 0.3/rat, &callback) == NULL)
 				return NULL;
 			cpu_timer_stop(&timer);
 		}
@@ -293,7 +293,7 @@ static void sighandler(int signo)
 
 static void init_backend(const char *backend_opts)
 {
-	backend = GP_BackendInit(backend_opts, stderr); 
+	backend = GP_BackendInit(backend_opts, "FBshow", stderr); 
 	
 	if (backend == NULL) {
 		fprintf(stderr, "Failed to initalize backend '%s'\n", backend_opts);

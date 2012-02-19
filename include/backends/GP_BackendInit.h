@@ -39,12 +39,16 @@
  * "backend_name:backend_params"
  *
  * For example "SDL:FS" is string for fullscreen SDL backend.
+ *
+ * The caption parameter may, or may not be used. For example in windowed
+ * enviroment caption will become caption of a window. When running on
+ * framebuffer it may be ignored completly.
  * 
  * Returns initalized backend or NULL in case of failure.
  * 
  * If initialization has failed or params is NULL and help is not NULL, help
  * text is printed to a given file.
  */
-GP_Backend *GP_BackendInit(const char *params, FILE *help);
+GP_Backend *GP_BackendInit(const char *params, const char *caption, FILE *help);
 
 #endif /* BACKENDS_GP_BACKEND_INIT_H */

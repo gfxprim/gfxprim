@@ -24,7 +24,7 @@
 #define BACKENDS_GP_SDL_H
 
 #include <stdint.h>
-#include "GP_Backend.h"
+#include "backends/GP_Backend.h"
 
 enum GP_BackendSDLFlags {
 	GP_SDL_FULLSCREEN = 0x01,
@@ -57,6 +57,7 @@ enum GP_BackendSDLFlags {
  * Upon failure, or if SDL wasn't compiled in, NULL is returned.
  */
 GP_Backend *GP_BackendSDLInit(GP_Size w, GP_Size h,
-                              uint8_t bpp, uint8_t flags);
+                              uint8_t bpp, uint8_t flags,
+			      const char *caption);
 
 #endif /* BACKENDS_GP_SDL_H */

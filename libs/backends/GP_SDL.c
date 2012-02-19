@@ -134,7 +134,8 @@ int context_from_surface(GP_Context *context, SDL_Surface *surf)
 	return 0;
 }
 
-GP_Backend *GP_BackendSDLInit(GP_Size w, GP_Size h, uint8_t bpp, uint8_t flags)
+GP_Backend *GP_BackendSDLInit(GP_Size w, GP_Size h, uint8_t bpp, uint8_t flags,
+                              const char *caption)
 {
 	/* SDL not yet initalized */
 	if (backend.context == NULL) {
@@ -152,7 +153,10 @@ GP_Backend *GP_BackendSDLInit(GP_Size w, GP_Size h, uint8_t bpp, uint8_t flags)
 			sdl_flags |= SDL_RESIZABLE;
 
 		sdl_surface = SDL_SetVideoMode(w, h, bpp, sdl_flags);
-	
+
+		if (caption != NULL)
+			SDL_WM_SetCaption(caption, caption);
+
 		if (sdl_surface == NULL) {
 			GP_DEBUG(1, "ERROR: SDL_SetVideoMode: %s", SDL_GetError());
 			SDL_Quit();
@@ -175,7 +179,8 @@ GP_Backend *GP_BackendSDLInit(GP_Size w, GP_Size h, uint8_t bpp, uint8_t flags)
 
 #else
 
-GP_Backend *GP_BackendSDLInit(void)
+GP_Backend *GP_BackendSDLInit(GP_Size w, GP_Size h, uint8_t bpp, uint8_t flags,
+                              const char *caption)
 {
 	return NULL;
 }
