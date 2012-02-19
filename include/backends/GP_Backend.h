@@ -42,6 +42,7 @@
 #ifndef BACKENDS_GP_BACKEND_H
 #define BACKENDS_GP_BACKEND_H
 
+#include "core/GP_Transform.h"
 #include "core/GP_Context.h"
 
 struct GP_Backend;
@@ -127,10 +128,12 @@ static inline void GP_BackendFlip(GP_Backend *backend)
  * Calls backend->UpdateRect().
  */
 static inline void GP_BackendUpdateRect(GP_Backend *backend,
-                                        GP_Coord x1, GP_Coord y1,
-					GP_Coord x2, GP_Coord y2)
+                                        GP_Coord x0, GP_Coord y0,
+					GP_Coord x1, GP_Coord y1)
 {
-	backend->UpdateRect(backend, x1, y1, x2, y2);
+	GP_TRANSFORM_POINT(backend->context, x0, y0);
+	GP_TRANSFORM_POINT(backend->context, x1, y1);
+	backend->UpdateRect(backend, x0, y0, x1, y1);
 }
 
 /*
