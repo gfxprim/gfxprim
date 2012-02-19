@@ -901,7 +901,7 @@ int main(int argc, char *argv[])
 	for (i = optind; i < argc; i++) {
 		char buf[255];
 		
-		snprintf(buf, sizeof(buf), "out_%i.%s", i - optind + 1, out_fmt);
+		snprintf(buf, sizeof(buf), "out_%03i.%s", i - optind + 1, out_fmt);
 		fprintf(stderr, "Processing '%s' -> '%s'\n", argv[i], buf);
 
 		progress_prefix = "Loading image";
