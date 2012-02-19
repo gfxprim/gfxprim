@@ -28,7 +28,7 @@
   The GP_Backend is overall structure for API for managing
   connection/mmaped memory/... to xserver window/framebuffer/... .
 
-  In contrast to other graphics libraries we do not try to create overall
+  In contrast to other graphics libraries we do not try to create unified
   initalization interface that would match specialities for every possible
   backend. Rather than that we are trying to create API that is the same
   for all backends, once initalization is done.

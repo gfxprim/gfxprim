@@ -22,27 +22,29 @@
 
 /*
 
-  Catch all header for backends.
+  Simplified backend initalization interface good enough for most of the cases.
 
  */
 
-#ifndef BACKENDS_GP_BACKENDS_H
-#define BACKENDS_GP_BACKENDS_H
+#ifndef BACKENDS_GP_BACKEND_INIT_H
+#define BACKENDS_GP_BACKEND_INIT_H
 
-/*
- * Base backend definitions.
- */
 #include "backends/GP_Backend.h"
 
 /*
- * Backends.
+ * Initalize backend by a string.
+ *
+ * The format is:
+ *
+ * "backend_name:backend_params"
+ *
+ * For example "SDL:FS" is string for fullscreen SDL backend.
+ * 
+ * Returns initalized backend or NULL in case of failure.
+ * 
+ * If initialization has failed or params is NULL and help is not NULL, help
+ * text is printed to a given file.
  */
-#include "backends/GP_LinuxFB.h"
-#include "backends/GP_SDL.h"
+GP_Backend *GP_BackendInit(const char *params, FILE *help);
 
-/*
- * Simplified backend initalization.
- */
-#include "backends/GP_BackendInit.h"
-
-#endif /* BACKENDS_GP_BACKENDS_H */
+#endif /* BACKENDS_GP_BACKEND_INIT_H */
