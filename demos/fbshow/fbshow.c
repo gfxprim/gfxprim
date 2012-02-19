@@ -22,7 +22,7 @@
 
  /*
 
-   Simple framebuffer image viewer.
+   Simple image viewer.
 
   */
 
@@ -47,6 +47,7 @@ static GP_Context *context = NULL;
 static int abort_flag = 0;
 static int rotate = 0;
 static int show_progress = 0;
+static int resampling_method = GP_INTERP_LINEAR_LF_INT;
 
 static int image_loader_callback(GP_ProgressCallback *self)
 {
@@ -166,17 +167,20 @@ static void *image_loader(void *ptr)
 	
 	GP_Context *ret;
 
-/*	if (rat < 1) {
-		cpu_timer_start(&timer, "Blur");
-		callback.priv = "Blurring Image";
-		if (GP_FilterGaussianBlur(img, img, 0.5/rat, 0.5/rat, &callback) == NULL)
-			return NULL;
-		cpu_timer_stop(&timer);
-	} */
+	/* Do low pass filter */
+	if (resampling_method != GP_INTERP_LINEAR_LF_INT) {
+		if (rat < 1) {
+			cpu_timer_start(&timer, "Blur");
+			callback.priv = "Blurring Image";
+			if (GP_FilterGaussianBlur(img, img, 0.5/rat, 0.5/rat, &callback) == NULL)
+				return NULL;
+			cpu_timer_stop(&timer);
+		}
+	}
 
 	cpu_timer_start(&timer, "Resampling");
 	callback.priv = "Resampling Image";
-	ret = GP_FilterResize(img, NULL, GP_INTERP_LINEAR_LF_INT, img->w * rat, img->h * rat, &callback);
+	ret = GP_FilterResize(img, NULL, resampling_method, img->w * rat, img->h * rat, &callback);
 	GP_ContextFree(img);
 	cpu_timer_stop(&timer);
 
@@ -314,12 +318,12 @@ int main(int argc, char *argv[])
 {
 	GP_InputDriverLinux *drv = NULL;
 	const char *input_dev = NULL;
-	const char *backend_opts = "fb";
+	const char *backend_opts = "SDL";
 	int sleep_sec = -1;
 	struct loader_params params = {NULL, 0, 0, 0};
 	int opt;
 
-	while ((opt = getopt(argc, argv, "b:Ii:Ps:r:")) != -1) {
+	while ((opt = getopt(argc, argv, "b:cIi:Ps:r:")) != -1) {
 		switch (opt) {
 		case 'I':
 			params.show_info = 1;
@@ -332,6 +336,9 @@ int main(int argc, char *argv[])
 		break;
 		case 's':
 			sleep_sec = atoi(optarg);
+		break;
+		case 'c':
+			resampling_method = GP_INTERP_CUBIC_INT;
 		break;
 		case 'r':
 			if (!strcmp(optarg, "90"))
