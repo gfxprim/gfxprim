@@ -86,8 +86,8 @@ typedef struct GP_Backend {
 	 * If display is not buffered, this is no-op.
 	 */
 	void (*UpdateRect)(struct GP_Backend *self,
-	                   GP_Coord x1, GP_Coord y1,
-	                   GP_Coord x2, GP_Coord y2);
+	                   GP_Coord x0, GP_Coord y0,
+	                   GP_Coord x1, GP_Coord y1);
 
 	/*
 	 * Exits the backend.
@@ -133,6 +133,7 @@ static inline void GP_BackendUpdateRect(GP_Backend *backend,
 {
 	GP_TRANSFORM_POINT(backend->context, x0, y0);
 	GP_TRANSFORM_POINT(backend->context, x1, y1);
+	
 	backend->UpdateRect(backend, x0, y0, x1, y1);
 }
 

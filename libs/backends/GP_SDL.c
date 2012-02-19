@@ -52,11 +52,17 @@ static void sdl_flip(struct GP_Backend *self __attribute__((unused)))
 }
 
 static void sdl_update_rect(struct GP_Backend *self __attribute__((unused)),
-                            GP_Coord x1, GP_Coord y1, GP_Coord x2, GP_Coord y2)
+                            GP_Coord x0, GP_Coord y0, GP_Coord x1, GP_Coord y1)
 {
 	SDL_mutexP(mutex);
-	
-	SDL_UpdateRect(sdl_surface, x1, y1, x2, y2);
+
+	/*
+	 * SDL_UpdateRect() with all x0, y0, x1 and y1 zero updates whole
+	 * screen we avoid such behavior as it will break other backends.
+	 */
+	if (x1 != 0 && y1 != 0)
+		SDL_UpdateRect(sdl_surface, x0, y0,
+		               GP_ABS(x1 - x0) + 1, GP_ABS(y1 - y0) + 1);
 	
 	SDL_mutexV(mutex);
 }
