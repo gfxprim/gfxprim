@@ -38,20 +38,59 @@ static void backend_sdl_help(FILE *help, const char *err)
 
 	fprintf(help, "libSDL backend\n"
 	              "--------------\n"
-	              "SDL:[FS]\n");
+	              "SDL:[FS]:[WxH]\n"
+		      " FS  - Full Screen mode\n"
+		      " WxH - Display Size\n");
+}
+
+static int sdl_params_to_flags(const char *param, GP_Size *w, GP_Size *h,
+                               uint8_t *flags, FILE *help)
+{
+	if (!strcasecmp(param, "FS")) {
+		*flags |= GP_SDL_FULLSCREEN;
+		return 0;
+	}
+	
+	/*
+	 * Accepts only string with format "intxint" or "intXint"
+	 */
+	int sw, sh;
+	unsigned int n;
+
+	if (sscanf(param, "%i%*[xX]%i%n", &sw, &sh, &n) == 2 && n == strlen(param)) {
+		*w = sw;
+		*h = sh;
+		return 0;
+	}
+
+	backend_sdl_help(help, "SDL: Invalid parameters");
+	return 1;
 }
 
 static GP_Backend *backend_sdl_init(const char *params, FILE *help)
 {
 	if (params == NULL)
 		return GP_BackendSDLInit(0, 0, 0, 0);
+	
+	GP_Size w = 0, h = 0;
+	uint8_t flags = 0;
+	
+	const char *s = params;
 
-	if (!strcasecmp(params, "FS"))
-		return GP_BackendSDLInit(0, 0, 0, GP_SDL_FULLSCREEN);
+	do {
+		switch (*s) {
+		case ':':
+			s = '\0';
+		case '\0':
+			if (sdl_params_to_flags(params, &w, &h, &flags, help))
+				return NULL;
+			s++;
+			params = s;
+		break;
+		}
+	} while (*(s++) != '\0');
 
-	backend_sdl_help(help, "SDL: Invalid parameters");
-
-	return NULL;
+	return GP_BackendSDLInit(w, h, 0, flags);
 }
 
 static void backend_fb_help(FILE *help, const char *err)
