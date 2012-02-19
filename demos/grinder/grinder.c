@@ -81,6 +81,8 @@ static void print_error(const char *error)
 
 static const char *resize_algs[] = {
 	"nn",
+	"linear-int",
+	"linear-lf-int",
 	"cubic",
 	"cubic-int",
 	NULL
@@ -136,6 +138,8 @@ static GP_RetCode resize(GP_Context **c, const char *params)
 
 static const char *scale_algs[] = {
 	"nn",
+	"linear-int",
+	"linear-lf-int",
 	"cubic",
 	"cubic-int",
 	NULL
@@ -781,6 +785,7 @@ static const char *app_help = {
 	"-h        - prints this help                          \n"
 	"-p        - show filter progress                      \n"
 	"-v int    - sets gfxprim verbosity level              \n"
+	"-o fmt    - output format, ppm, jpg, png              \n"
 	"-f params - apply filter, multiple filters may be used\n"
 	"                                                      \n"
 	"                  Example usage                       \n"
@@ -803,17 +808,58 @@ static void print_help(void)
 	print_filter_help();
 }
 
+static const char *out_fmts[] = {
+	"ppm",
+	"jpg",
+	"png",
+	NULL
+};
+
+static void check_fmt(const char *fmt)
+{
+	unsigned int i;
+
+	for (i = 0; out_fmts[i] != NULL; i++)
+		if (!strcmp(out_fmts[i], fmt))
+			break;
+
+	fprintf(stderr, "Invalid output format '%s'\n", fmt);
+}
+
+static void save_by_fmt(struct GP_Context *bitmap, const char *name, const char *fmt)
+{
+	GP_RetCode ret;
+
+	progress_prefix = "Saving Image";
+
+	if (!strcmp(fmt, "ppm"))
+		ret = GP_SavePPM(name, bitmap, "b");
+	else if (!strcmp(fmt, "jpg"))
+		ret = GP_SaveJPG(name, bitmap, progress_callback);
+	else if (!strcmp(fmt, "png"))
+		ret = GP_SavePNG(name, bitmap, progress_callback);
+	
+	if (ret) {
+		fprintf(stderr, "Failed to save bitmap: %s\n", GP_RetCodeName(ret));
+		exit(1);
+	}
+		
+	if (progress_callback != NULL)
+		fprintf(stderr, " done\n");
+}
+
 int main(int argc, char *argv[])
 {
 	GP_Context *bitmap;
 	GP_RetCode ret;
 	int opt, i;
+	const char *out_fmt = "ppm";
 
 	GP_ProgressCallback callback = {
 		.callback = show_progress,
 	};
 
-	while ((opt = getopt(argc, argv, "f:hpv:")) != -1) {
+	while ((opt = getopt(argc, argv, "f:ho:pv:")) != -1) {
 		switch (opt) {
 		case 'h':
 			print_help();
@@ -831,6 +877,10 @@ int main(int argc, char *argv[])
 
 			GP_SetDebugLevel(i);
 		break;
+		case 'o':
+			out_fmt = optarg;
+			check_fmt(out_fmt);
+		break;
 		case 'f':
 			add_filter(optarg);
 		break;
@@ -847,11 +897,11 @@ int main(int argc, char *argv[])
 		fprintf(stderr, "ERROR: Expected bitmap filenames\n");
 		return 1;
 	}
-	
+
 	for (i = optind; i < argc; i++) {
 		char buf[255];
 		
-		snprintf(buf, sizeof(buf), "out_%i.ppm", i - optind + 1);
+		snprintf(buf, sizeof(buf), "out_%i.%s", i - optind + 1, out_fmt);
 		fprintf(stderr, "Processing '%s' -> '%s'\n", argv[i], buf);
 
 		progress_prefix = "Loading image";
@@ -867,12 +917,7 @@ int main(int argc, char *argv[])
 
 		apply_filters(&bitmap);
 
-
-		if ((ret = GP_SavePPM(buf, bitmap, "b"))) {
-			fprintf(stderr, "Failed to load bitmap: %s\n", GP_RetCodeName(ret));
-			return 1;
-		}
-		
+		save_by_fmt(bitmap, buf, out_fmt);
 	}
 	
 	return 0;
