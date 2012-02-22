@@ -104,6 +104,4 @@ and self.thisown.") GP_Context;
 %include "GP_GetPutPixel.h"
 %import "GP_GetPutPixel.gen.h"
 %include "GP_WritePixel.h"
-
 %include "GP_Blit.h"
-%import "GP_Blit.gen.h"
