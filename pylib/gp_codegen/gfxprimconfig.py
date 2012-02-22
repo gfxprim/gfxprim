@@ -1,13 +1,13 @@
 #
-#  gfxprim.generators.gfxprimconfig - Class for (global) GfxPrim configuration
+#  gfxprimconfig - Class for (global) GfxPrim configuration
 #
 # 2011 - Tomas Gavenciak <gavento@ucw.cz>
 # 2011 - Cyril Hrubis <metan@ucw.cz>
 
 import os
 import logging as log
-from gfxprim.pixeltype import PixelType
-from gfxprim.pixelsize import PixelSize
+from .pixeltype import PixelType
+from .pixelsize import PixelSize
 
 class GfxPrimConfig(object):
   def __init__(self, pixel_type = None, pixel_size=None, pixelsizes=None,

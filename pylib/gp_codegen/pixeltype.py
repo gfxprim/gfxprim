@@ -5,7 +5,7 @@
 #
 
 import re
-from gfxprim.pixelsize import PixelSize
+from .pixelsize import PixelSize
 
 class PixelType(object):
   """Representation of one GP_PixelType"""

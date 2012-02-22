@@ -6,7 +6,7 @@
 # 2011 - Tomas Gavenciak <gavento@ucw.cz>
 #
 
-from gfxprim import render_utils
+from gp_codegen import render_utils
 import jinja2
 import logging as log
 from optparse import OptionParser

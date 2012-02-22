@@ -2,11 +2,15 @@
 # gfxprim.render_utils
 #
 
-import jinja2
 import logging as log
 import os
 import time
 import re
+
+try:
+  import jinja2
+except:
+  log.fatal("Jinja 2 is required to compile gfxprim.")
 
 def template_error(s, *args):
   raise Exception(s, *args)
@@ -22,7 +26,7 @@ def create_environment(config, template_dir):
   env.globals['pixeltypes'] = config.pixeltypes
   env.globals['pixeltypes_dict'] = config.pixeltypes_dict
   env.globals['config'] = config
-  from gfxprim.pixelsize import LE, BE
+  from .pixelsize import LE, BE
   env.globals['LE'] = LE
   env.globals['BE'] = BE
   env.globals['len'] = len
@@ -79,9 +83,9 @@ def load_gfxprimconfig(config_file = None):
         config_file)
     return None
 
-  from gfxprim.pixeltype import PixelType
-  from gfxprim.pixelsize import PixelSize, LE, BE
-  from gfxprim.gfxprimconfig import GfxPrimConfig
+  from .pixeltype import PixelType
+  from .pixelsize import PixelSize, LE, BE
+  from .gfxprimconfig import GfxPrimConfig
   l = {"PixelType": PixelType,
        "PixelSize": PixelSize,
        "LE": LE,

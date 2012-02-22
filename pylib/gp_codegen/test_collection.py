@@ -10,7 +10,7 @@ import os
 import re
 import glob
 import logging as log
-from gfxprim.render_utils import create_environment, render_file
+from .render_utils import create_environment, render_file
 
 testfile_patterns = ['*.test.c', '*.test.gen.c']
 
