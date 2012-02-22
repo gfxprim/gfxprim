@@ -19,26 +19,42 @@
  * Copyright (C) 2009-2010 Jiri "BlueBear" Dluhos                            *
  *                         <jiri.bluebear.dluhos@gmail.com>                  *
  *                                                                           *
- * Copyright (C) 2009-2010 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  * Copyright (C) 2011      Tomas Gavenciak <gavento@ucw.cz>                  *
  *                                                                           *
  *****************************************************************************/
 
-#ifndef GP_TRANSFORM_H
-#define GP_TRANSFORM_H
+#ifndef CORE_GP_TRANSFORM_H
+#define CORE_GP_TRANSFORM_H
+
+#include "GP_Common.h"
+#include "GP_FixedPoint.h"
 
 /* 
  * Flip a coordinate within context according to context transformation. 
  */
-#define GP_TRANSFORM_X(context, x) do { \
-	if ((context)->x_swap)          \
-		x = (context)->w - x - 1;   \
+#define GP_TRANSFORM_X(context, x) do {   \
+	if ((context)->x_swap)            \
+		x = (context)->w - x - 1; \
 } while (0)
 
-#define GP_TRANSFORM_Y(context, y) do { \
-	if ((context)->y_swap)          \
-		y = (context)->h - y - 1;   \
+#define GP_TRANSFORM_Y(context, y) do {   \
+	if ((context)->y_swap)            \
+		y = (context)->h - y - 1; \
+} while (0)
+
+/*
+ * Fixed point variants.
+ */
+#define GP_TRANSFORM_X_FP(context, x) do {                \
+	if ((context)->x_swap)                            \
+		x = GP_FP_FROM_INT((context)->w - 1) - x; \
+} while (0)
+
+#define GP_TRANSFORM_Y_FP(context, y) do {                \
+	if ((context)->y_swap)                            \
+		y = GP_FP_FROM_INT((context)->h - 1) - y; \
 } while (0)
 
 /* 
@@ -59,6 +75,12 @@
 	GP_TRANSFORM_Y(context, y);            \
 } while (0)
 
+#define GP_TRANSFORM_POINT_FP(context, x, y) do { \
+	GP_TRANSFORM_SWAP(context, x, y);         \
+	GP_TRANSFORM_X_FP(context, x);            \
+	GP_TRANSFORM_Y_FP(context, y);            \
+} while (0)
+
 /* 
  * Transform "user"-coordinates to "real"-coordinates of a rectangle corner
  * according to context transformation. Corner with min-coordinates is 
@@ -68,12 +90,23 @@
 #define GP_TRANSFORM_RECT(context, x, y, w, h) do { \
 	GP_TRANSFORM_SWAP(context, x, y);           \
 	GP_TRANSFORM_SWAP(context, w, h);           \
-	if ((context)->x_swap) {                    \
+	                                            \
+	if ((context)->x_swap)                      \
 		x = (context)->w - x - w;           \
-	}                                           \
-	if ((context)->y_swap) {                    \
+	                                            \
+	if ((context)->y_swap)                      \
 		y = (context)->h - y - h;           \
-	}                                           \
+} while (0)
+
+#define GP_TRANSFORM_RECT_FP(context, x, y, w, h) do {    \
+	GP_TRANSFORM_SWAP(context, x, y);                 \
+	GP_TRANSFORM_SWAP(context, w, h);                 \
+	                                                  \
+	if ((context)->x_swap)                            \
+		x = GP_FP_FROM_INT((context)->w) - x - w; \
+	                                                  \
+	if ((context)->y_swap)                            \
+		y = GP_FP_FROM_INT((context)->h) - y - h; \
 } while (0)
 
 /* 
@@ -98,4 +131,4 @@
 	GP_TRANSFORM_SWAP(context, x, y);        \
 } while (0)
 
-#endif /* GP_TRANSFORM_H */
+#endif /* CORE_GP_TRANSFORM_H */

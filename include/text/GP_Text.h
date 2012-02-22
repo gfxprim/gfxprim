@@ -30,6 +30,7 @@
 
 #include "GP_TextStyle.h"
 #include "GP_TextMetric.h"
+#include "GP_DefaultFont.h"
 
 /* How the rendered text should be aligned.
  * For GP_Text(), the alignment is relative to the specified point:
@@ -54,9 +55,13 @@ typedef enum GP_TextAttr {
 	GP_VALIGN_BOTTOM = GP_VALIGN_BELOW,
 } GP_TextAttr;
 
+/*
+ * Raw version, doesn't use Text aligment.
+ */
 void GP_Text_Raw(GP_Context *context, const GP_TextStyle *style,
-                 GP_Coord x, GP_Coord y, int align,
-                 GP_Pixel fg_color, GP_Pixel bg_color, const char *str);
+                 GP_Coord x, GP_Coord y,
+                 GP_Pixel fg_color, GP_Pixel bg_color,
+		 const char *str);
 
 /*
  * Draws a string.

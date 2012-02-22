@@ -41,7 +41,7 @@
 #define sgn(x) ((x)>0 ? 1 : -1)
 
 SDL_Surface *display;
-GP_Context *context;
+GP_Context *context, ctx;
 
 SDL_TimerID timer;
 
@@ -109,7 +109,7 @@ static void draw(int x, int y, int l, int iter)
 	sierpinsky(x2, y2, x3, y3, iter/60%6);
 	sierpinsky(x3, y3, x1, y1, iter/60%6);
 
-	GP_UpdateBackendVideo();
+	SDL_Flip(display);
 }
 
 int paused = 0;
@@ -137,16 +137,6 @@ int main(void)
 {
 	SDL_Event ev;
 
-	if (!GP_InitBackend("SDL")) {
-		fprintf(stderr, "error: could not initialize backend\n");
-		return 2;
-	}
-	if (!GP_OpenBackendVideo(DISPLAY_W, DISPLAY_H, 0)) {
-		fprintf(stderr, "error: could not open video\n");
-		return 2;
-	}
-
-/*
 	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) != 0)
 		return -1;
 
@@ -157,11 +147,9 @@ int main(void)
 		return -1;
 	}
 
-	GP_SDL_ContextFromSurface(&context, display);
-*/
+	GP_SDL_ContextFromSurface(&ctx, display);
 
-	display = SDL_GetVideoSurface();
-	context = GP_GetBackendVideoContext();
+	context = &ctx;
 
 	black = GP_ColorToContextPixel(GP_COL_BLACK, context);
 	blue  = GP_ColorToContextPixel(GP_COL_BLUE, context);

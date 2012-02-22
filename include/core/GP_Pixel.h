@@ -56,6 +56,7 @@ typedef uint32_t GP_Pixel;
 
 /* Generated header */
 #include "GP_Pixel.gen.h"
+#include "GP_GetSetBits.h"
 
 /*
  * Information about ordering of pixels in byte for 1, 2 and 4 bpp 
@@ -114,7 +115,6 @@ typedef struct {
 /*
  * Array of size GP_PIXEL_MAX describing known pixel types
  */
-
 extern const GP_PixelTypeDescription const GP_PixelTypes[];
 
 #define GP_CHECK_VALID_PIXELTYPE(type) \
@@ -123,7 +123,6 @@ extern const GP_PixelTypeDescription const GP_PixelTypes[];
 /*
  * Convert pixel type to name.
  */
-
 static inline const char *GP_PixelTypeName(GP_PixelType type)
 {
 	GP_CHECK_VALID_PIXELTYPE(type);
@@ -133,7 +132,6 @@ static inline const char *GP_PixelTypeName(GP_PixelType type)
 /*
  * Returns number of bits per pixel.
  */
-
 static inline uint32_t GP_PixelSize(GP_PixelType type)
 {
 	GP_CHECK_VALID_PIXELTYPE(type);

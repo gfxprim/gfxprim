@@ -6,7 +6,7 @@ Invert filters -- Invert image
 
 %% block body
 
-{{ filter_include() }}
+{{ filter_point_include() }}
 
 %% macro filter_op(chann_name, chann_size)
 {{ chann_name }} = {{ 2 ** chann_size - 1 }} - {{ chann_name }};

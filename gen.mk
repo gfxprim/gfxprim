@@ -14,12 +14,6 @@ GENSOURCES=
 endif
 
 #
-# Headers go into include/core/
-#
-INCLUDE_PREFIX=$(TOPDIR)/include/$(LIBNAME)/
-RGENHEADERS=$(addprefix $(INCLUDE_PREFIX),$(GENHEADERS))
-
-#
 # Generate genfiles for generated sources
 #
 CSOURCES+=$(GENSOURCES)
@@ -27,8 +21,7 @@ CSOURCES+=$(GENSOURCES)
 #
 # Make the genrated headers actually build
 #
-all: $(RGENHEADERS)
-$(CSOURCES): $(RGENHEADERS)
+all: $(GENHEADERS) $(GENSOURCES)
 
 #
 # Base common templates location
@@ -36,21 +29,20 @@ $(CSOURCES): $(RGENHEADERS)
 TEMPLATE_DIR=$(TOPDIR)/pylib/templates/
 
 #
-# ALL templates and potential generated files (not generated automatically)
-# NOTE: Currently unused
-# 
-ALL_TEMPLATES=$(shell find $(TOPDIR) -name '*.t')
-ALL_GENERATED=$(basename $(ALL_TEMPLATES))
-
-#
 # And clean them
 #
-CLEAN+=$(GENSOURCES) $(RGENHEADERS)
+CLEAN+=$(GENSOURCES) $(GENHEADERS)
+
+#
+# Some base dependencies
+#
+$(GENSOURCES): $(TEMPLATE_DIR)/base.c.t $(TEMPLATE_DIR)/common.c.t
+$(GENHEADERS): $(TEMPLATE_DIR)/base.h.t
 
 #
 # Generated files depend on python generators and the template
 #
-$(GENSOURCES) $(RGENHEADERS): %: %.t $(PYTHON_FILES)
+$(GENSOURCES) $(GENHEADERS): %: %.t
 ifdef VERBOSE
 	${PYTHON} ${TOPDIR}/pylib/bin/generate_file.py -t $(TEMPLATE_DIR) "$@.t" "$@"
 else

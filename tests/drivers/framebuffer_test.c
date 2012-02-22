@@ -16,15 +16,15 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2011 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
  /*
 
-   Framebuffer test.
-   
-   1. Draw to the framebuffer
+   Backend test.
+
+   1. Draw to the backend
    2. Sleep
    3. Exit
 
@@ -33,7 +33,7 @@
 #include <math.h>
 
 #include <GP.h>
-#include <backends/GP_Framebuffer.h>
+#include <backends/GP_Backends.h>
 
 static void draw(GP_Context *context, int x, int y, int l)
 {
@@ -57,17 +57,20 @@ static void draw(GP_Context *context, int x, int y, int l)
 
 int main(void)
 {
-	GP_Framebuffer *fb;
+	GP_Backend *backend;
+	GP_Context *context;
 	GP_TextStyle style;
 
 	GP_SetDebugLevel(10);
 
-	fb = GP_FramebufferInit("/dev/fb0");
+	backend = GP_BackendLinuxFBInit("/dev/fb0");
 	
-	if (fb == NULL) {
+	if (backend == NULL) {
 		fprintf(stderr, "Failed to initalize framebuffer\n");
 		return 1;
 	}
+	
+	context = backend->context;
 	
 	GP_DefaultTextStyle(&style);
 
@@ -76,24 +79,26 @@ int main(void)
 
 	GP_Pixel gray, black;
 
-	gray = GP_RGBToContextPixel(200, 200, 200, &fb->context);
-	black = GP_RGBToContextPixel(0, 0, 0, &fb->context);
+	gray = GP_RGBToContextPixel(200, 200, 200, context);
+	black = GP_RGBToContextPixel(0, 0, 0, context);
 	
 	const char *text = "Framebuffer test";
 
-	GP_Fill(&fb->context, gray);
-	GP_Line(&fb->context, 0, 0, fb->context.w, fb->context.h, black);
-	GP_Line(&fb->context, 0, fb->context.h, fb->context.w, 0, black);
-	GP_Text(&fb->context, &style,
-	        (fb->context.w - GP_TextWidth(&style, text))/2,
+	GP_Fill(context, gray);
+	GP_Line(context, 0, 0, context->w, context->h, black);
+	GP_Line(context, 0, context->h, context->w, 0, black);
+	GP_Text(context, &style,
+	        (context->w - GP_TextWidth(&style, text))/2,
 		16, GP_ALIGN_RIGHT|GP_VALIGN_BELOW, black, gray, text);
 
 
-	draw(&fb->context, fb->context.w / 2, 2.00 * fb->context.h / 3, 60);
+	draw(context, context->w / 2, 2.00 * context->h / 3, 60);
+
+	GP_BackendFlip(backend);
 
 	sleep(10);
 
-	GP_FramebufferExit(fb);
+	GP_BackendExit(backend);
 
 	return 0;
 }

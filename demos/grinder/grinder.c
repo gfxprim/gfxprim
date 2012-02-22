@@ -28,6 +28,7 @@
 #include "GP.h"
 
 #include "params.h"
+#include "histogram.h"
 
 static GP_ProgressCallback *progress_callback = NULL;
 
@@ -500,6 +501,8 @@ static GP_RetCode save_png(GP_Context **c, const char *params)
 	return GP_ESUCCESS;
 }
 
+/* noise filter */
+
 static struct param add_noise_params[] = {
 	{"percents", PARAM_FLOAT, "Percents of noise to add", NULL, NULL},
 	{"chann",    PARAM_STR,   "Channel name {R, G, B, A, V, ...}", NULL, NULL},
@@ -562,6 +565,94 @@ static GP_RetCode add_noise(GP_Context **c, const char *params)
 	return GP_ESUCCESS;
 }
 
+/* arithmetics */
+
+static const char *arithmetic_ops[] = {
+	"difference",
+	"addition",
+	"multiply",
+	"min",
+	"max",
+	NULL
+};
+
+static struct param arithmetic_params[] = {
+	{"file", PARAM_STR, "Filename of image to use.", NULL, NULL},
+	{"op",  PARAM_ENUM, "Arithmetic peration", arithmetic_ops, NULL},
+	{NULL,  0, NULL, NULL, NULL}
+};
+
+static GP_RetCode arithmetic(GP_Context **c, const char *params)
+{
+	char *file = NULL;
+	int op = -1;
+
+	if (param_parse(params, arithmetic_params, "arithmetic", param_err, &file, &op))
+		return GP_EINVAL;
+	
+	if (file == NULL) {
+		print_error("arithmetic: Filename missing");
+		return GP_EINVAL;
+	}
+
+	GP_Context *img, *res = NULL;
+
+	if (GP_LoadImage(file, &img, progress_callback)) {
+		print_error("arithmetic: Invalid image.");
+		return GP_EINVAL;
+	}
+
+	switch (op) {
+	case 0:
+		res = GP_FilterDifference(*c, img, NULL, progress_callback);
+	break;
+	case 1:
+		res = GP_FilterAddition(*c, img, NULL, progress_callback);
+	break;
+	case 2:
+		res = GP_FilterMultiply(*c, img, NULL, progress_callback);
+	break;
+	case 3:
+		res = GP_FilterMin(*c, img, NULL, progress_callback);
+	break;
+	case 4:
+		res = GP_FilterMax(*c, img, NULL, progress_callback);
+	break;
+	}
+
+	if (res == NULL)
+		return GP_EINVAL;
+
+	GP_ContextFree(*c);
+
+	*c = res;
+
+	return GP_ESUCCESS;
+}
+
+/* histogram */
+
+static struct param histogram_params[] = {
+	{"file", PARAM_STR, "Filename of image to use.", NULL, NULL},
+	{NULL,  0, NULL, NULL, NULL}
+};
+
+static GP_RetCode histogram(GP_Context **c, const char *params)
+{
+	char *file = "histogram.png";
+
+	if (param_parse(params, histogram_params, "histogram", param_err, &file))
+		return GP_EINVAL;
+	
+	if (file == NULL) {
+		print_error("histogram: Filename missing");
+		return GP_EINVAL;
+	}
+
+	histogram_to_png(*c, file);
+	return GP_ESUCCESS;
+}
+
 /* filters */
 
 struct filter {
@@ -572,19 +663,21 @@ struct filter {
 };
 
 static struct filter filter_table[] = {
-	{"rotate",    "rotate image", rotate_params, rotate},
-	{"mirror",    "mirror vertically/horizontally", mirror_params, mirror},
-	{"scale",     "scale image to given width and height", scale_params,  scale},
-	{"resize",    "resize image by given ratio", resize_params, resize},
-	{"bright",    "alter image brightness", bright_params, bright},
-	{"contrast",  "alter image contrast", contrast_params, contrast},
-	{"invert",    "inverts image", invert_params, invert},
-	{"add_noise", "adds noise", add_noise_params, add_noise},
-	{"blur",      "gaussian blur", blur_params, blur},
-	{"dither",    "dithers bitmap", dither_params, dither},
-	{"jpg",       "save jpg image", save_jpg_params, save_jpg},
-	{"png",       "save png image", save_png_params, save_png},
-	{NULL, NULL,  NULL, NULL}
+	{"rotate",     "rotate image", rotate_params, rotate},
+	{"mirror",     "mirror vertically/horizontally", mirror_params, mirror},
+	{"scale",      "scale image to given width and height", scale_params,  scale},
+	{"resize",     "resize image by given ratio", resize_params, resize},
+	{"bright",     "alter image brightness", bright_params, bright},
+	{"contrast",   "alter image contrast", contrast_params, contrast},
+	{"invert",     "inverts image", invert_params, invert},
+	{"add_noise",  "adds noise", add_noise_params, add_noise},
+	{"blur",       "gaussian blur", blur_params, blur},
+	{"dither",     "dithers bitmap", dither_params, dither},
+	{"arithmetic", "arithmetic operation", arithmetic_params, arithmetic},
+	{"histogram",  "save histogram into image file", histogram_params, histogram},
+	{"jpg",        "save jpg image", save_jpg_params, save_jpg},
+	{"png",        "save png image", save_png_params, save_png},
+	{NULL, NULL,   NULL, NULL}
 };
 
 static struct filter *get_filter(const char *name)

@@ -16,72 +16,35 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2010 Jiri "BlueBear" Dluhos                            *
- *                         <jiri.bluebear.dluhos@gmail.com>                  *
- *                                                                           *
- * Copyright (C) 2009-2010 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
-#include "core/GP_Core.h"
-#include "GP_Backend.h"
-#include "../../config.h"
+ /*
 
-#include <string.h>
+   Simple timers to count cpu time.
+
+  */
+
+#ifndef __CPU_TIMER_H__
+#define __CPU_TIMER_H__
+
+#include <time.h>
+
+struct cpu_timer {
+	struct timespec t_start;
+	struct timespec t_stop;
+	const char *name;
+};
 
 /*
- * The currently active backend (NULL if none).
+ * Inialize cpu timer.
  */
-static struct GP_Backend *current_backend = NULL;
+void cpu_timer_start(struct cpu_timer *self, const char *name);
 
-#ifdef HAVE_LIBSDL
+/*
+ * Stops cpu timer and prints result.
+ */
+void cpu_timer_stop(struct cpu_timer *self);
 
-extern struct GP_Backend GP_SDL_backend;
-
-#endif
-
-struct GP_Backend *GP_InitBackend(const char *name)
-{
-	if (current_backend)
-		return current_backend;
-
-#ifdef HAVE_LIBSDL
-
-	if (!name || strcasecmp(name, "sdl") == 0) {
-		current_backend = GP_SDL_backend.init_fn();
-		return current_backend;
-	}
-
-#endif
-
-	return NULL;
-}
-
-struct GP_Backend *GP_GetCurrentBackend(void)
-{
-	return current_backend;
-}
-
-GP_Context *GP_OpenBackendVideo(int w, int h, int flags)
-{
-	GP_CHECK(current_backend, "no current backend");
-	return current_backend->open_video_fn(w, h, flags);
-}
-
-struct GP_Context *GP_GetBackendVideoContext(void)
-{
-	GP_CHECK(current_backend, "no current backend");
-	return current_backend->video_context_fn();
-}
-
-void GP_UpdateBackendVideo(void)
-{
-	GP_CHECK(current_backend, "no current backend");
-	return current_backend->update_video_fn();
-}
-
-int GP_GetBackendEvent(struct GP_BackendEvent *event)
-{
-	GP_CHECK(current_backend, "no current backend");
-	return current_backend->get_event_fn(event);
-}
+#endif /* __CPU_TIMER_H__ */

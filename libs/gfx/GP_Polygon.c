@@ -19,11 +19,12 @@
  * Copyright (C) 2009-2011 Jiri "BlueBear" Dluhos                            *
  *                         <jiri.bluebear.dluhos@gmail.com>                  *
  *                                                                           *
- * Copyright (C) 2009-2011 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
-#include "GP_Gfx.h"
+#include "gfx/GP_Polygon.h"
+#include "gfx/GP_HLine.h"
 
 #include <limits.h>
 #include <stdlib.h>

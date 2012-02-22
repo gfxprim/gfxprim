@@ -54,6 +54,9 @@ Uint32 timer_callback(__attribute__((unused)) Uint32 interval,
 
 double start_angle = 0.0;
 
+static int aa_flag = 0;
+static int pause_flag = 0;
+
 void redraw_screen(void)
 {
 	double angle;
@@ -74,17 +77,18 @@ void redraw_screen(void)
 		GP_Pixel pixel;
 		pixel = GP_RGBToPixel(r, 0, b, context.pixel_type);
 	
-		/*
-		 * Draw the line forth and back to detect any pixel change
-		 * between one direction and the other.
-		 */
-		GP_Line(&context, xcenter, ycenter, xcenter + x, ycenter + y, pixel);
-		GP_Line(&context, xcenter + x, ycenter + y, xcenter, ycenter, pixel);
+		if (aa_flag) {
+			GP_LineAA_Raw(&context, GP_FP_FROM_INT(xcenter), GP_FP_FROM_INT(ycenter), 
+				GP_FP_FROM_INT(xcenter + x), GP_FP_FROM_INT(ycenter + y), pixel);
+		} else {
+			GP_Line(&context, xcenter + x, ycenter + y, xcenter, ycenter, pixel);
+			GP_Line(&context, xcenter, ycenter, xcenter + x, ycenter + y, pixel);
+		}
 	}
 
 	/* axes */
-	GP_HLineXYW(&context, 0, ycenter, display->w, white);
-	GP_VLineXYH(&context, xcenter, 0, display->h, white);
+//	GP_HLineXYW(&context, 0, ycenter, display->w, white);
+//	GP_VLineXYH(&context, xcenter, 0, display->h, white);
 
 	SDL_UnlockSurface(display);
 }
@@ -95,17 +99,32 @@ void event_loop(void)
 
 	while (SDL_WaitEvent(&event) > 0) {
 		switch (event.type) {
-			case SDL_USEREVENT:
-				redraw_screen();
-				SDL_Flip(display);
-				start_angle += 0.01;
-				if (start_angle > 2*M_PI) {
-					start_angle = 0.0;
-				}
+		case SDL_USEREVENT:
+			redraw_screen();
+			SDL_Flip(display);
+			
+			if (pause_flag)
+				continue;
+			
+			start_angle += 0.01;
+			if (start_angle > 2*M_PI) {
+				start_angle = 0.0;
+			}
+		break;
+		case SDL_KEYDOWN:
+			switch (event.key.keysym.sym) {
+			case SDLK_a:
+				aa_flag = !aa_flag;
 			break;
-			case SDL_KEYDOWN:
-			case SDL_QUIT:
+			case SDLK_p:
+				pause_flag = !pause_flag;
+			break;
+			default:
 				return;
+			}
+		break;
+		case SDL_QUIT:
+			return;
 		}
 	}
 }

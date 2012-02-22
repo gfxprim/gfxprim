@@ -16,10 +16,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2010 Jiri "BlueBear" Dluhos                            *
- *                         <jiri.bluebear.dluhos@gmail.com>                  *
- *                                                                           *
- * Copyright (C) 2009-2011 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
@@ -28,135 +25,187 @@
 
 #include <stdint.h>
 
-/* The smallest charset, covering only the 7-bit ASCII (0x20 .. 0x7f). */
-typedef enum GP_Charset {
-	GP_CHARSET_7BIT = 1,
-} GP_Charset;
+#define GP_FONT_NAME_MAX 64
 
-/* Maximum length of the font name, author, etc. (Note: these values are
- * used by the on-disc font format.)
+/* 
+ * Data describing single Glyph.
+ * 
+ * Note that glyph do not necessarily correspond to one character (for example
+ * ligature is a glyph but corresponds to at least two characters).
+ *
+ * The glyphs are rendered to horizontal baseline, vertical rendering is not
+ * supported.
+ *
+ * The structure could contain glyphs of different BPP and information about
+ * the bitmap format is stored in the font structure. The bitmap lines are byte
+ * aligned.
  */
-#define GP_FONT_FAMILY_MAX	63
-#define GP_FONT_NAME_MAX	63
-#define GP_FONT_AUTHOR_MAX	63
-#define GP_FONT_LICENSE_MAX	15
-
-/* The current version of the on-disc font format. */
-#define GP_FONT_FORMAT_VMAJOR	1
-#define GP_FONT_FORMAT_VMINOR	0
-
-/* Magic string starting the on-disc font file. */
-#define GP_FONT_MAGIC		"# gfxprim font file"
-
-/*
- * Contains font metadata.
- */
-typedef struct GP_Font {
-
-	/* Name of the font family. */
-	char family[GP_FONT_NAME_MAX + 1];
-
-	/* Font name. */
-	char name[GP_FONT_NAME_MAX + 1];
-
-	/* Name of the font author. */
-	char author[GP_FONT_AUTHOR_MAX + 1];
-
-	/* Font license (default is "GPL2"). */
-	char license[GP_FONT_LICENSE_MAX + 1];
-
-	/* Font version (incremented by font author when modifying the font data,
-	 * do not confuse with format version).
+typedef struct GP_GlyphBitmap {
+	/*
+	 * Bitmap width in pixels.
 	 */
-	unsigned int version;
+	uint8_t width;
 
-	/* The charset specifies which characters are defined by the font. */
-	uint8_t charset;
-
-
-	/* Height of every character in pixels. */
+	/*
+	 * Bitmap heigth in pixels.
+	 */
 	uint8_t height;
 
-	/* Height of the baseline (number of pixels from the bottom). */
-	uint8_t baseline;
+	/*
+	 * X offset to be applied before we start drawing.
+	 */
+	int8_t bearing_x;
 
 	/*
-	 * Number of bytes for each pixel line in the character data
-	 * (typically 1/8 of char_width, rounded upwards).
+	 * Y offset from baseline to the top of the bitmap.
 	 */
-	uint8_t bytes_per_line;
-
-	/* Maximum width of the character bounding box (including empty areas
-	 * that are not drawn but cause other characters to shift).
-	 */
-	uint8_t max_bounding_width;
+	int8_t bearing_y;
 
 	/*
-	 * Array of GP_CharData structures, packed together sequentially
-	 * without padding.
-	 *
-	 * Characters are stored in encoding order. The first encoded character
-	 * is 0x20 (space). A font must, at a minimum, encode all characters
-	 * of the 7-bit ASCII set (0x20 .. 0x7F, inclusive).
+	 * Offset to be applied after drawing, defines
+	 * basepoint for next glyph.
 	 */
-	uint8_t *data;
-} GP_Font;
+	uint8_t advance_x;
 
-#define GP_CHECK_FONT(font) do { \
-	GP_CHECK(font->data, "invalid font: NULL font data"); \
-	GP_CHECK(font->height > 0, "invalid font: height == 0"); \
-	GP_CHECK(font->baseline <= font->height, "invalid font: baseline exceeds height"); \
-	GP_CHECK(font->bytes_per_line > 0, "invalid font: bytes_per_line == 0"); \
-} while(0)
-
-/* Data describing a single character. */
-typedef struct GP_CharData {
-
-	/* Width of the character in pixels. This is the area that is drawn
-	 * onto, but the real area occupied by the character can be different
-	 * and is defined by pre_offset and post_offset.
+	/* 
+	 * Character bitmap, byte aligned bitmap.
 	 */
-	uint8_t char_width;
-
-	/* X offset to be applied to the current position *before*
-	 * drawing the character.
-	 */
-	int8_t pre_offset;
-
-	/* X offset to be applied to the current position *after*
-	 * the character is drawn.
-	 */
-	int8_t post_offset;
-
-	/* Character bitmap (size depends on width and height). */
 	uint8_t bitmap[];
+} GP_GlyphBitmap;
 
-} GP_CharData;
+typedef enum GP_CharSet {
+	GP_CHARSET_7BIT,
+} GP_CharSet;
 
-/* The default font, which is hardcoded and always available. */
-extern struct GP_Font GP_default_console_font;
-extern struct GP_Font GP_default_proportional_font;
-
-/* Returns the number of bytes occupied by the GP_CharData structure
- * for this font. (Currently, all characters occupy the same space
- * regardless of proportionality.)
+/*
+ * Glyph bitmap data format.
+ * 
+ * The bitmap is byte aligned and for 1BPP the number of bytes per row is
+ * rounted to bytes.
+ *
  */
-unsigned int GP_GetCharDataSize(const GP_Font *font);
+typedef enum GP_FontBitmapFormat {
+	GP_FONT_BITMAP_1BPP,
+	GP_FONT_BITMAP_8BPP,
+} GP_FontBitmapFormat;
 
-/* Returns a pointer to the character data (which start by the header)
- * of the specified character in the font data area.
+/*
+ * Font face 
  */
-const GP_CharData *GP_GetCharData(const GP_Font *font, int c);
+typedef struct GP_FontFace {
+	/*
+	 * Font family name - eg. Sans, Serif ...
+	 */
+	char family_name[GP_FONT_NAME_MAX];
 
-/* Returns the overall size (in bytes) occupied by all characters
- * of the font (the font metadata do not count into this value;
- * add sizeof(GP_Font) to get the complete size of the font in memory.)
+	/*
+	 * Font style name - Medium, Bold, Italic ...
+	 */
+	char style_name[GP_FONT_NAME_MAX];
+
+	/*
+	 * Enum for supported charsets.
+	 */
+	uint8_t charset;
+
+	/*
+	 * Maximal height of font glyph from baseline to the top.
+	 */
+	uint16_t ascend;
+	
+	/*
+	 * Maximal length of font glyph from baseline to the bottom.
+	 */
+	uint16_t descend;
+
+	/*
+	 * Maximal width of font glyph.
+	 * 
+	 * (basically max from glyph->width + glyph->bearing_x)
+	 */
+	uint16_t max_glyph_width;
+
+	/*
+	 * Maximal glyph advance.
+	 */
+	uint16_t max_glyph_advance;
+
+	/*
+	 * Bitmap format for all glyphs
+	 */
+	GP_FontBitmapFormat glyph_bitmap_format;
+
+	/*
+	 * Pointer to glyph bitmap buffer. 
+	 */
+	void *glyphs;
+
+	/*
+	 * Offsets to the glyph data.
+	 *
+	 * If glyph_offset[0] == 0, the table glyph_offsets holds
+	 * offsets for all characters in glyphs. Otherwise the
+	 * glyph_offset[0] defines step in the glyph table.
+	 */
+	uint32_t glyph_offsets[];
+} GP_FontFace;
+
+/*
+ * Returns font height eg. ascend + descend
  */
-unsigned int GP_GetFontDataSize(const GP_Font *font);
+static inline unsigned int GP_FontHeight(const GP_FontFace *font)
+{
+	return font->ascend + font->descend;
+}
 
-#include "core/GP_RetCode.h"
+static inline unsigned int GP_FontAscend(const GP_FontFace *font)
+{
+	return font->ascend;
+}
 
-GP_RetCode GP_FontLoad(GP_Font **font, const char *filename);
-GP_RetCode GP_FontSave(const GP_Font *font, const char *filename);
+static inline unsigned int GP_FontDescend(const GP_FontFace *font)
+{
+	return font->descend;
+}
+
+static inline unsigned int GP_FontMaxWidth(const GP_FontFace *font)
+{
+	return font->max_glyph_width;
+}
+
+static inline unsigned int GP_FontMaxAdvanceX(const GP_FontFace *font)
+{
+	return font->max_glyph_advance;
+}
+
+static inline const char *GP_FontFamily(const GP_FontFace *font)
+{
+	return font->family_name;
+}
+
+static inline const char *GP_FontStyle(const GP_FontFace *font)
+{
+	return font->style_name;
+}
+
+/*
+ * Returns glyph count for charset.
+ */
+uint32_t GP_GetGlyphCount(GP_CharSet charset);
+
+/*
+ * Returns glyph mapping
+ */
+GP_GlyphBitmap *GP_GetGlyphBitmap(const GP_FontFace *font, int c);
+
+/*
+ * Loads font face from file.
+ */
+GP_FontFace *GP_FontFaceLoad(const char *path, uint32_t width, uint32_t height);
+
+/*
+ * Free the font face memory.
+ */
+void GP_FontFaceFree(GP_FontFace *self);
 
 #endif /* TEXT_GP_FONT_H */

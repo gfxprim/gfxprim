@@ -31,6 +31,16 @@
   edges mostly consisting of big one color regions (eg doesn't blur the
   result on upscaling).
 
+  Bilinear
+  ~~~~~~~~
+
+  Faster than Bicubic, but less precise.
+
+  Bilinear LF
+  ~~~~~~~~~~~
+
+  Bilinear with low-pass filter on downscaling, this is the best choice for
+  fast up and downscaling.
 
   Bicubic
   ~~~~~~~
@@ -47,9 +57,11 @@
 #include "GP_Filter.h"
 
 typedef enum GP_InterpolationType {
-	GP_INTERP_NN,        /* Nearest Neighbour             */
-	GP_INTERP_CUBIC,     /* Bicubic                       */
-	GP_INTERP_CUBIC_INT, /* Bicubic - integer arithmetics */
+	GP_INTERP_NN,            /* Nearest Neighbour                         */
+	GP_INTERP_LINEAR_INT,    /* Bilinear - fixed point arithmetics        */
+	GP_INTERP_LINEAR_LF_INT, /* Bilinear + low pass filter on downscaling */
+	GP_INTERP_CUBIC,         /* Bicubic                                   */
+	GP_INTERP_CUBIC_INT,     /* Bicubic - fixed point arithmetics         */
 } GP_InterpolationType;
 
 /*

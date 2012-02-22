@@ -35,11 +35,17 @@
 /* Filter per channel parameter passing interface */
 #include "filters/GP_FilterParam.h"
 
-/* Image rotations (90 180 270 grads) and mirroring */
-#include "filters/GP_Rotate.h"
-
 /* Point filters, brightness, contrast ... */
 #include "filters/GP_Point.h"
+
+/* Addition, difference, min, max ... */
+#include "filters/GP_Arithmetic.h"
+
+/* Histograms, ... */
+#include "filters/GP_Stats.h"
+
+/* Image rotations (90 180 270 grads) and mirroring */
+#include "filters/GP_Rotate.h"
 
 /* Linear convolution based filters (mostly blurs) */
 #include "filters/GP_Linear.h"

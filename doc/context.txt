@@ -99,8 +99,9 @@ void GP_ContextFree(GP_Context *context);
 
 The 'GP_ContextAlloc()' allocates context and initalizes the context
 structure. The orientation flags are all set to 0 and the rest of the metadata
-are calculated accordingly to width, height and pixel_type.  The bitmap
-(context->pixels) is not initalized.
+are calculated accordingly to width, height and pixel_type.  A bitmap with
+appropriate size is allocated and stored in context->pixels; the initial
+contents of the bitmap are undefined.
 
 The 'GP_ContextCopy()' allocates and initalizes a copy of the context passed
 as argument. If 'flag' is not zero, the bitmap (context->pixels) is copied
@@ -112,12 +113,12 @@ In both cases the resulting context should later be freed with
 Subcontext
 ~~~~~~~~~~
 
-Given a rectangular area inside of any context subcontext could be created.
-The resulting context could be used for all context operations (including
-subcontext creation). The only difference between allocated context and
-subcontext of such context is that the 'GP_ContextFree()' doesn't call
-'free()' on subcontext pixels (which as a matter of a fact is a pointer that
-points somewhere into to allocated area).
+A subcontext is a context that refers to a rectangular area within another
+context. Subcontexts can be used as any other context (including creating
+another subcontexts).
+
+Calling GP_ContextFree() on a subcontext is safe; the bitmap is not freed as
+it belongs to another context; it will be freed with the hosting context.
 
 [source,c]
 -------------------------------------------------------------------------------
@@ -129,12 +130,12 @@ GP_Context *GP_ContextSubContext(GP_Context *context, GP_Context *subcontext,
 
 Creates subcontext of a context. The rectangular area must fit into the context.
 
-If subcontext pointer is 'NULL' the context structure is allocated otherwise
+If subcontext pointer is 'NULL', the context structure is allocated; otherwise
 the metadata are filled into the context structure pointed by subcontext
 pointer.
 
-In both cases pointer to subcontext or NULL (in case of 'malloc(2)' failure) is
-returned.
+In both cases, the call returns either a pointer to the new subcontext,
+or NULL on failure (when there is not enough memory).
 
 Conversions
 ~~~~~~~~~~~

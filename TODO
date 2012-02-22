@@ -13,8 +13,6 @@ What's not implemented (and should be)
   - some overall initialization routines
   - backed event handling
 
-* Fix contrast - pass GP_Pixel so each channel could have different increment
-
 * Meditate about bit endians and why these aren't separate pixel types
   (which would make our lives a bit easier)
 

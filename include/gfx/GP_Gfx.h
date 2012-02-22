@@ -46,8 +46,16 @@
 #include "GP_Triangle.h"
 #include "GP_Tetragon.h"
 #include "GP_Circle.h"
+#include "GP_CircleSeg.h"
 #include "GP_Ellipse.h"
+#include "GP_Arc.h"
 #include "GP_Polygon.h"
 #include "GP_Symbol.h"
+
+#include "GP_PutPixelAA.h"
+#include "GP_VLineAA.h"
+#include "GP_HLineAA.h"
+#include "GP_LineAA.h"
+#include "GP_RectAA.h"
 
 #endif /* GP_GFX_H */

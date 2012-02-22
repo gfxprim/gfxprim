@@ -6,7 +6,7 @@ Point filters -- General point filter.
 
 %% block body
 
-{{ filter_include() }}
+{{ filter_point_include() }}
 
 typedef uint32_t (*func)(uint32_t, uint8_t, GP_FilterParam *priv);
 

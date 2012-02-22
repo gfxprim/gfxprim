@@ -16,7 +16,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2011 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
@@ -33,12 +33,22 @@
 #include <linux/vt.h>
 
 #include "core/GP_Debug.h"
-#include "GP_Framebuffer.h"
+#include "GP_LinuxFB.h"
+
+struct fb_priv {
+	GP_Context context;
+	uint32_t bsize;
+	int con_fd;
+	int con_nr;
+	int last_con_nr;
+	int fb_fd;
+	char path[];
+};
 
 /*
  * Allocates and switches to newly allocated console.
  */
-static int allocate_console(struct GP_Framebuffer *fb)
+static int allocate_console(struct fb_priv *fb)
 {
 	struct vt_stat vts;
 	int fd, nr;
@@ -104,15 +114,56 @@ static int allocate_console(struct GP_Framebuffer *fb)
 	return 0;
 }
 
-GP_Framebuffer *GP_FramebufferInit(const char *path)
+/* Backend API callbacks */
+
+static void fb_flip_noop(GP_Backend *self __attribute__((unused)))
 {
-	GP_Framebuffer *fb = malloc(sizeof (GP_Framebuffer) + strlen(path) + 1);
+
+}
+
+static void fb_update_rect_noop(GP_Backend *self __attribute__((unused)),
+                                GP_Coord x1 __attribute__((unused)),
+                                GP_Coord y1 __attribute__((unused)),
+                                GP_Coord x2 __attribute__((unused)),
+                                GP_Coord y2 __attribute__((unused)))
+{
+
+}
+
+static void fb_exit(GP_Backend *self)
+{
+	struct fb_priv *fb = GP_BACKEND_PRIV(self); 
+
+	/* unmap framebuffer */
+	munmap(fb->context.pixels, fb->bsize);
+	close(fb->fb_fd);
+	
+	/* reset keyboard */
+	ioctl(fb->con_fd, KDSETMODE, KD_TEXT);
+	
+	/* switch back console */
+	if (fb->last_con_nr != -1)
+		ioctl(fb->con_fd, VT_ACTIVATE, fb->last_con_nr);
+	
+	close(fb->con_fd);
+	free(self);
+}
+
+GP_Backend *GP_BackendLinuxFBInit(const char *path)
+{
+	GP_Backend *backend;
+	struct fb_priv *fb;
 	struct fb_fix_screeninfo fscri;
 	struct fb_var_screeninfo vscri;
 	int fd;
+	
+	backend = malloc(sizeof(GP_Backend) +
+	                 sizeof(struct fb_priv) + strlen(path) + 1);
 
-	if (fb == NULL)
+	if (backend == NULL)
 		return NULL;
+
+	fb = GP_BACKEND_PRIV(backend);
 
 	if (allocate_console(fb))
 		goto err1;
@@ -181,7 +232,16 @@ GP_Framebuffer *GP_FramebufferInit(const char *path)
 	fb->context.bytes_per_row  = fscri.line_length;
 	fb->context.pixel_type = pixel_type;
 
-	return fb;
+	/* update API */
+	backend->name       = "Linux FB";
+	backend->context    = &fb->context;
+	backend->Flip       = fb_flip_noop;
+	backend->UpdateRect = fb_update_rect_noop;
+	backend->Exit       = fb_exit;
+	backend->fd_list    = NULL;
+	backend->Poll       = NULL;
+
+	return backend;
 err3:
 	close(fd);
 err2:
@@ -194,23 +254,6 @@ err2:
 	if (fb->last_con_nr != -1)
 		ioctl(fb->con_fd, VT_ACTIVATE, fb->last_con_nr);
 err1:
-	free(fb);
+	free(backend);
 	return NULL;
-}
-
-void GP_FramebufferExit(GP_Framebuffer *fb)
-{
-	/* unmap framebuffer */
-	munmap(fb->context.pixels, fb->bsize);
-	close(fb->fb_fd);
-	
-	/* reset keyboard */
-	ioctl(fb->con_fd, KDSETMODE, KD_TEXT);
-	
-	/* switch back console */
-	if (fb->last_con_nr != -1)
-		ioctl(fb->con_fd, VT_ACTIVATE, fb->last_con_nr);
-	
-	close(fb->con_fd);
-	free(fb);
 }

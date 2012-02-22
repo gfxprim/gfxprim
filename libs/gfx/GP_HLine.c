@@ -19,13 +19,18 @@
  * Copyright (C) 2009-2011 Jiri "BlueBear" Dluhos                            *
  *                         <jiri.bluebear.dluhos@gmail.com>                  *
  *                                                                           *
- * Copyright (C) 2009-2011 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
-#include "GP_Gfx.h"
-#include "algo/HLine.algo.h"
 #include "core/GP_FnPerBpp.h"
+#include "core/GP_WritePixel.h"
+#include "core/GP_Transform.h"
+
+#include "algo/HLine.algo.h"
+
+#include "gfx/GP_HLine.h"
+#include "gfx/GP_VLine.h"
 
 /* Generate drawing functions for various bit depths. */
 

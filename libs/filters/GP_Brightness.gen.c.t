@@ -6,7 +6,7 @@ Brightness filters -- Increments color channel(s) by a fixed value.
 
 %% block body
 
-{{ filter_include() }}
+{{ filter_point_include() }}
 
 %% macro filter_op(chann_name, chann_size)
 {{ chann_name }} = {{ chann_name }} + {{ chann_name }}_inc;

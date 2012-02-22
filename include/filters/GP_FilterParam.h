@@ -132,6 +132,10 @@ void GP_FilterParamSetUIntAll(GP_FilterParam params[],
  */
 void GP_FilterParamSetPtrAll(GP_FilterParam params[],
                              void *ptr);
+/*
+ * Call free on all pointer values.
+ */
+void GP_FilterParamFreePtrAll(GP_FilterParam params[]);
 
 /*
  * Functions to print the array.

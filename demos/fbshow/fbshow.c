@@ -16,7 +16,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2011 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
@@ -32,13 +32,16 @@
 #include <pthread.h>
 
 #include <GP.h>
-#include <backends/GP_Framebuffer.h>
+#include <backends/GP_Backends.h>
 #include <input/GP_InputDriverLinux.h>
+
+#include "cpu_timer.h"
 
 static GP_Pixel black_pixel;
 static GP_Pixel white_pixel;
 
-static GP_Framebuffer *fb = NULL;
+static GP_Backend *backend = NULL;
+static GP_Context *context = NULL;
 
 /* image loader thread */
 static int abort_flag = 0;
@@ -60,7 +63,7 @@ static int image_loader_callback(GP_ProgressCallback *self)
 	snprintf(buf, sizeof(buf), "%s ... %-3.1f%%",
 	         (const char*)self->priv, self->percentage);
 
-	GP_Context *c = &fb->context;
+	GP_Context *c = context;
 
 	int align = GP_ALIGN_CENTER|GP_VALIGN_ABOVE;
 
@@ -71,6 +74,8 @@ static int image_loader_callback(GP_ProgressCallback *self)
 	        white_pixel, black_pixel, buf);
 
 	size = GP_TextWidth(NULL, buf);
+
+	GP_BackendFlip(backend);
 
 	return 0;
 }
@@ -107,6 +112,10 @@ static void *image_loader(void *ptr)
 {
 	struct loader_params *params = ptr;
 	GP_ProgressCallback callback = {.callback = image_loader_callback};
+	struct cpu_timer timer;
+	struct cpu_timer sum_timer;
+
+	cpu_timer_start(&sum_timer, "sum");
 
 	show_progress = params->show_progress || params->show_progress_once;
 	params->show_progress_once = 0;
@@ -116,28 +125,30 @@ static void *image_loader(void *ptr)
 	GP_Context *img = NULL;
 
 	callback.priv = "Loading image";
-	
+
+	cpu_timer_start(&timer, "Loading");
 	if (GP_LoadImage(params->img_path, &img, &callback) != 0) {
-		GP_Fill(&fb->context, black_pixel);
-		GP_Text(&fb->context, NULL, fb->context.w/2, fb->context.h/2,
+		GP_Fill(context, black_pixel);
+		GP_Text(context, NULL, context->w/2, context->h/2,
 		        GP_ALIGN_CENTER|GP_VALIGN_CENTER, black_pixel, white_pixel,
 			"Failed to load image :(");
 		return NULL;
 	}
-	
+	cpu_timer_stop(&timer);
+
 	GP_Size w, h;
 
 	switch (rotate) {
 	case 0:
 	case 180:
 	default:
-		w = fb->context.w;
-		h = fb->context.h;
+		w = context->w;
+		h = context->h;
 	break;
 	case 90:
 	case 270:
-		w = fb->context.h;
-		h = fb->context.w;
+		w = context->h;
+		h = context->w;
 	break;
 	}
 
@@ -155,13 +166,19 @@ static void *image_loader(void *ptr)
 	
 	GP_Context *ret;
 
-	callback.priv = "Blurring Image";
-	if (GP_FilterGaussianBlur(img, img, 0.3/rat, 0.3/rat, &callback) == NULL)
-		return NULL;
-	
+/*	if (rat < 1) {
+		cpu_timer_start(&timer, "Blur");
+		callback.priv = "Blurring Image";
+		if (GP_FilterGaussianBlur(img, img, 0.5/rat, 0.5/rat, &callback) == NULL)
+			return NULL;
+		cpu_timer_stop(&timer);
+	} */
+
+	cpu_timer_start(&timer, "Resampling");
 	callback.priv = "Resampling Image";
-	ret = GP_FilterResize(img, NULL, GP_INTERP_CUBIC, img->w * rat, img->h * rat, &callback);
+	ret = GP_FilterResize(img, NULL, GP_INTERP_LINEAR_LF_INT, img->w * rat, img->h * rat, &callback);
 	GP_ContextFree(img);
+	cpu_timer_stop(&timer);
 
 	if (ret == NULL)
 		return NULL;
@@ -191,40 +208,48 @@ static void *image_loader(void *ptr)
 	if (img == NULL)
 		return NULL;
 
-	uint32_t cx = (fb->context.w - ret->w)/2;
-	uint32_t cy = (fb->context.h - ret->h)/2;
+	uint32_t cx = (context->w - ret->w)/2;
+	uint32_t cy = (context->h - ret->h)/2;
 
-	GP_Blit(ret, 0, 0, ret->w, ret->h, &fb->context, cx, cy);
+	cpu_timer_start(&timer, "Blitting");
+	GP_Blit_Raw(ret, 0, 0, ret->w, ret->h, context, cx, cy);
+	cpu_timer_stop(&timer);
 	GP_ContextFree(ret);
 
 	/* clean up the rest of the display */
-	GP_FillRectXYWH(&fb->context, 0, 0, cx, fb->context.h, black_pixel);
-	GP_FillRectXYWH(&fb->context, 0, 0, fb->context.w, cy, black_pixel);
-	GP_FillRectXYWH(&fb->context, ret->w+cx, 0, cx, fb->context.h, black_pixel);
-	GP_FillRectXYWH(&fb->context, 0, ret->h+cy, fb->context.w, cy, black_pixel);
+	GP_FillRectXYWH(context, 0, 0, cx, context->h, black_pixel);
+	GP_FillRectXYWH(context, 0, 0, context->w, cy, black_pixel);
+	GP_FillRectXYWH(context, ret->w+cx, 0, cx, context->h, black_pixel);
+	GP_FillRectXYWH(context, 0, ret->h+cy, context->w, cy, black_pixel);
 
-	if (!params->show_info)
+	cpu_timer_stop(&sum_timer);
+
+	if (!params->show_info) {
+		GP_BackendFlip(backend);
 		return NULL;
+	}
 
 	GP_Size th = GP_TextHeight(NULL);
 	
-	GP_Print(&fb->context, NULL, 11, 11, GP_ALIGN_RIGHT|GP_VALIGN_BOTTOM,
+	GP_Print(context, NULL, 11, 11, GP_ALIGN_RIGHT|GP_VALIGN_BOTTOM,
 	         black_pixel, white_pixel, "%ux%u", w, h);
 	
-	GP_Print(&fb->context, NULL, 10, 10, GP_ALIGN_RIGHT|GP_VALIGN_BOTTOM,
+	GP_Print(context, NULL, 10, 10, GP_ALIGN_RIGHT|GP_VALIGN_BOTTOM,
 	         white_pixel, black_pixel, "%ux%u", w, h);
 	
-	GP_Print(&fb->context, NULL, 11, 13 + th, GP_ALIGN_RIGHT|GP_VALIGN_BOTTOM,
+	GP_Print(context, NULL, 11, 13 + th, GP_ALIGN_RIGHT|GP_VALIGN_BOTTOM,
 	         black_pixel, white_pixel, "1:%3.3f", rat);
 	
-	GP_Print(&fb->context, NULL, 10, 12 + th, GP_ALIGN_RIGHT|GP_VALIGN_BOTTOM,
+	GP_Print(context, NULL, 10, 12 + th, GP_ALIGN_RIGHT|GP_VALIGN_BOTTOM,
 	         white_pixel, black_pixel, "1:%3.3f", rat);
 	
-	GP_Print(&fb->context, NULL, 11, 15 + 2 * th, GP_ALIGN_RIGHT|GP_VALIGN_BOTTOM,
+	GP_Print(context, NULL, 11, 15 + 2 * th, GP_ALIGN_RIGHT|GP_VALIGN_BOTTOM,
 	         black_pixel, white_pixel, "%s", img_name(params->img_path));
 	
-	GP_Print(&fb->context, NULL, 10, 14 + 2 * th, GP_ALIGN_RIGHT|GP_VALIGN_BOTTOM,
+	GP_Print(context, NULL, 10, 14 + 2 * th, GP_ALIGN_RIGHT|GP_VALIGN_BOTTOM,
 	         white_pixel, black_pixel, "%s", img_name(params->img_path));
+
+	GP_BackendFlip(backend);
 
 	return NULL;
 }
@@ -247,28 +272,54 @@ static void show_image(struct loader_params *params)
 
 	if (ret) {
 		fprintf(stderr, "Failed to start thread: %s\n", strerror(ret));
-		GP_FramebufferExit(fb);
+		GP_BackendExit(backend);
 		exit(1);
 	}
 }
 
-static void sighandler(int signo __attribute__((unused)))
+static void sighandler(int signo)
 {
-	if (fb != NULL)
-		GP_FramebufferExit(fb);
+	if (backend != NULL)
+		GP_BackendExit(backend);
+	
+	fprintf(stderr, "Got signal %i\n", signo);
 
 	exit(1);
+}
+
+static void init_backend(const char *backend_opts)
+{
+	if (!strcmp(backend_opts, "fb")) {
+		fprintf(stderr, "Initalizing framebuffer backend\n");
+		backend = GP_BackendLinuxFBInit("/dev/fb0");
+	}
+	
+	if (!strcmp(backend_opts, "SDL")) {
+		fprintf(stderr, "Initalizing SDL backend\n");
+		backend = GP_BackendSDLInit(800, 600, 0, 0);
+	}
+
+	if (!strcmp(backend_opts, "SDL:FS")) {
+		fprintf(stderr, "Initalizing SDL fullscreen\n");
+		backend = GP_BackendSDLInit(0, 0, 0, GP_SDL_FULLSCREEN);
+	}
+
+	if (backend == NULL) {
+		fprintf(stderr, "Failed to initalize backend '%s'\n", backend_opts);
+		exit(1);
+	}
 }
 
 int main(int argc, char *argv[])
 {
 	GP_InputDriverLinux *drv = NULL;
-	char *input_dev = NULL;
+	const char *input_dev = NULL;
+	const char *backend_opts = "fb";
 	int sleep_sec = -1;
 	struct loader_params params = {NULL, 0, 0, 0};
 	int opt;
 
-	while ((opt = getopt(argc, argv, "Ii:Ps:r:")) != -1) {
+	while ((opt = getopt(argc, argv, "b:Ii:Ps:r:")) != -1) {
 		switch (opt) {
 		case 'I':
 			params.show_info = 1;
@@ -289,6 +340,9 @@ int main(int argc, char *argv[])
 				rotate = 180;
 			else if (!strcmp(optarg, "270"))
 				rotate = 270;
+		case 'b':
+			backend_opts = optarg;
+		break;
 		default:
 			fprintf(stderr, "Invalid paramter '%c'\n", opt);
 		}
@@ -296,9 +350,7 @@ int main(int argc, char *argv[])
 	
 	GP_SetDebugLevel(10);
 
-	if (input_dev == NULL) {
-		sleep_sec = 1;
-	} else {
+	if (input_dev != NULL) {
 		drv = GP_InputDriverLinuxOpen(input_dev);
 	
 		if (drv == NULL) {
@@ -313,45 +365,43 @@ int main(int argc, char *argv[])
 	signal(SIGBUS, sighandler);
 	signal(SIGABRT, sighandler);
 
-	fb = GP_FramebufferInit("/dev/fb0");
+	init_backend(backend_opts);
 
-	if (fb == NULL) {
-		fprintf(stderr, "Failed to initalize framebuffer\n");
-		return 1;
-	}
-	
-	GP_EventSetScreenSize(fb->context.w, fb->context.h);
-	
-	black_pixel = GP_ColorToContextPixel(GP_COL_BLACK, &fb->context);
-	white_pixel = GP_ColorToContextPixel(GP_COL_WHITE, &fb->context);
+	context = backend->context;
 
-	GP_Fill(&fb->context, black_pixel);
+	GP_EventSetScreenSize(context->w, context->h);
+	
+	black_pixel = GP_ColorToContextPixel(GP_COL_BLACK, context);
+	white_pixel = GP_ColorToContextPixel(GP_COL_WHITE, context);
+
+	GP_Fill(context, black_pixel);
+	GP_BackendFlip(backend);
 
 	int argf = optind;
 	int argn = argf;
-
+		
 	params.show_progress_once = 1;
 	params.img_path = argv[argf];
 	show_image(&params);
-
-	/* Initalize select */
-	fd_set rfds;
-	FD_ZERO(&rfds);
-	FD_SET(drv->fd, &rfds);
-	struct timeval tv = {.tv_sec = sleep_sec, .tv_usec = 0};
-	struct timeval *tvp = sleep_sec != -1 ? &tv : NULL;
 
 	for (;;) {
 		int ret;
 
 		if (drv != NULL) {
+			/* Initalize select */
+			fd_set rfds;
+			FD_ZERO(&rfds);
+			FD_SET(drv->fd, &rfds);
+			struct timeval tv = {.tv_sec = sleep_sec, .tv_usec = 0};
+			struct timeval *tvp = sleep_sec != -1 ? &tv : NULL;
+			
 			ret = select(drv->fd + 1, &rfds, NULL, NULL, tvp);
 		
 			tv.tv_sec = sleep_sec;
 	
 			switch (ret) {
 			case -1:
-				GP_FramebufferExit(fb);
+				GP_BackendExit(backend);
 				return 0;
 			break;
 			case 0:
@@ -368,15 +418,22 @@ int main(int argc, char *argv[])
 
 			FD_SET(drv->fd, &rfds);
 		} else {
-			sleep(sleep_sec);
+			if (sleep_sec != -1) {
+				sleep(sleep_sec);
+		
+				argn++;
+				if (argn >= argc)
+					argn = argf;
 			
-			argn++;
-			if (argn >= argc)
-				argn = argf;
-			
-			params.img_path = argv[argn];
-			show_image(&params);
+				params.img_path = argv[argn];
+				show_image(&params);
+			}
 		}
+
+		if (backend->Poll)
+			GP_BackendPoll(backend);
+
+		usleep(1000);
 
 		/* Read and parse events */
 		GP_Event ev;
@@ -411,7 +468,7 @@ int main(int argc, char *argv[])
 				case GP_KEY_ESC:
 				case GP_KEY_ENTER:
 				case GP_KEY_Q:
-					GP_FramebufferExit(fb);
+					GP_BackendExit(backend);
 					return 0;
 				break;
 				case GP_KEY_RIGHT:
@@ -443,7 +500,7 @@ int main(int argc, char *argv[])
 		}
 	}
 
-	GP_FramebufferExit(fb);
+	GP_BackendExit(backend);
 
 	return 0;
 }

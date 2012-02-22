@@ -19,7 +19,7 @@
  * Copyright (C) 2009-2011 Jiri "BlueBear" Dluhos                            *
  *                         <jiri.bluebear.dluhos@gmail.com>                  *
  *                                                                           *
- * Copyright (C) 2009-2011 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
@@ -87,9 +87,23 @@ typedef struct GP_Context {
 	|| (y) < 0 || y >= (typeof(y)) context->h) \
 
 /*
+ * Check for exactly same rotation flags.
+ */
+#define GP_CONTEXT_ROTATION_EQUAL(c1, c2) \
+	((c1)->axes_swap == (c2)->axes_swap && \
+	 (c1)->x_swap    == (c2)->x_swap && \
+	 (c1)->y_swap    == (c2)->y_swap)
+
+/*
  * Allocate context.
  */
 GP_Context *GP_ContextAlloc(GP_Size w, GP_Size h, GP_PixelType type);
+
+/*
+ * Initalize context.
+ */
+void GP_ContextInit(GP_Context *context, GP_Size w, GP_Size h,
+                    GP_PixelType type, void *pixels);
 
 /*
  * If passed the pixels are copied to newly created context, otherwise

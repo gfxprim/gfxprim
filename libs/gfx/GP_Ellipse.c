@@ -19,12 +19,15 @@
  * Copyright (C) 2009-2011 Jiri "BlueBear" Dluhos                            *
  *                         <jiri.bluebear.dluhos@gmail.com>                  *
  *                                                                           *
- * Copyright (C) 2009-2011 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
-#include "GP_Gfx.h"
+#include "core/GP_GetPutPixel.h"
 #include "core/GP_FnPerBpp.h"
+
+#include "gfx/GP_Ellipse.h"
+#include "gfx/GP_HLine.h"
 
 #include "algo/Ellipse.algo.h"
 

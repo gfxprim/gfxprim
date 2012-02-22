@@ -60,7 +60,8 @@ Uint32 timer_callback(__attribute__((unused)) Uint32 interval,
 #define SHAPE_TRIANGLE	3
 #define SHAPE_RECTANGLE	4
 #define SHAPE_TETRAGON  5
-#define SHAPE_LAST	5
+#define SHAPE_RECTANGLE_AA 6
+#define SHAPE_LAST	6
 static int shape = SHAPE_FIRST;
 
 /* Draw outlines? */
@@ -81,6 +82,12 @@ void random_point(SDL_Surface *surf, int *x, int *y)
 		*x = random() % surf->w;
 		*y = random() % surf->h;
 	}
+}
+
+void random_point_AA(SDL_Surface *surf, int *x, int *y)
+{
+	*x = random() % (surf->w<<8);
+	*y = random() % (surf->h<<8);
 }
 
 void draw_random_circle(GP_Pixel pixel)
@@ -152,6 +159,20 @@ void draw_random_tetragon(GP_Pixel pixel)
 		GP_Tetragon(&context, x0, y0, x1, y1, x2, y2, x3, y3, pixel);
 }
 
+void draw_random_rectangle_AA(GP_Pixel pixel)
+{
+	int x0, y0, x1, y1;
+	random_point_AA(display, &x0, &y0);
+	random_point_AA(display, &x1, &y1);
+
+//	if (fill_flag)
+		GP_FillRect_AA(&context, x0, y0, x1, y1, pixel);
+
+//	if (outline_flag)
+//		GP_Rect(&context, x0, y0, x1, y1, white);
+}
+
+
 void clear_screen(void)
 {
 	SDL_LockSurface(display);
@@ -174,23 +195,22 @@ void redraw_screen(void)
 	switch (shape) {
 	case SHAPE_CIRCLE:
 		draw_random_circle(pixel);
-		break;
-	
+	break;
 	case SHAPE_ELLIPSE:
 		draw_random_ellipse(pixel);
-		break;
-	
+	break;
 	case SHAPE_TRIANGLE:
 		draw_random_triangle(pixel);
-		break;
-	
+	break;
 	case SHAPE_RECTANGLE:
 		draw_random_rectangle(pixel);
-		break;
-	
+	break;
 	case SHAPE_TETRAGON:
 		draw_random_tetragon(pixel);
-		break;
+	break;
+	case SHAPE_RECTANGLE_AA:
+		draw_random_rectangle_AA(pixel);
+	break;
 	}
 
 	SDL_UnlockSurface(display);

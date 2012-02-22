@@ -85,13 +85,4 @@
 #define GP_DEF_FN_FOR_BPP(fname, MACRO_NAME, fdraw, bpp) \
 	MACRO_NAME(fname##_##bpp, GP_Context *, GP_Pixel, fdraw##bpp)
 
-/*
- * Dtto for filters.
- *
- * Filter is functions that works on Context per pixel.
- */
-#define GP_DEF_FFN_FOR_BPP(fname, MACRO_NAME, bpp) \
-	MACRO_NAME(fname##_##bpp, GP_Context *, GP_Pixel, \
-	           GP_PutPixel_Raw_##bpp, GP_GetPixel_Raw_##bpp)
-
 #endif /* GP_FN_PER_BPP_H */

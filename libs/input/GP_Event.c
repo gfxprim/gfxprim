@@ -263,6 +263,47 @@ void GP_EventPushAbs(uint32_t x, uint32_t y, uint32_t pressure,
 	event_put(&cur_state);
 }
 
+static char keys_to_ascii[] = {
+	   0x00, 0x1b,  '1',  '2',  '3',  '4',  '5',  '6',  '7',  '8',
+	    '9',  '0',  '-',  '=', 0x08, '\t',  'q',  'w',  'e',  'r',
+	    't',  'y',  'u',  'i',  'o',  'p',  '[',  ']', '\n', 0x00,
+	    'a',  's',  'd',  'f',  'g',  'h',  'j',  'k',  'l',  ';',
+	   '\'',  '`', 0x00, '\\',  'z',  'x',  'c',  'v',  'b',  'n',
+	    'm',  ',',  '.',  '/', 0x00,  '*', 0x00,  ' ', 0x00, 0x00,
+	   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+	   0x00,  '7',  '8',  '9',  '-',  '4',  '5',  '6',  '+',  '1',
+	    '2',  '3',  '0',  '.'
+};
+
+static char keys_to_ascii_s[] = {
+	   0x00, 0x1b,  '!',  '@',  '#',  '$',  '%',  '^',  '&',  '*',
+	    '(',  ')',  '_',  '+', 0x08, '\t',  'Q',  'W',  'E',  'R',
+	    'T',  'Y',  'U',  'I',  'O',  'P',  '{',  '}', '\n', 0x00,
+	    'A',  'S',  'D',  'F',  'G',  'H',  'J',  'K',  'L',  ':',
+	    '"',  '~', 0x00,  '|',  'Z',  'X',  'C',  'V',  'B',  'N',
+	    'M',  '<',  '>',  '?', 0x00,  '*', 0x00,  ' ', 0x00, 0x00,
+	   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+	   0x00,  '7',  '8',  '9',  '-',  '4',  '5',  '6',  '+',  '1',
+	    '2',  '3',  '0',  '.'
+};
+
+/*
+ * Fills key ascii value accordingly to keys pressed.
+ */
+static void key_to_ascii(GP_Event *ev)
+{
+	ev->val.key.ascii = 0;
+	
+	if (GP_EventGetKey(ev, GP_KEY_LEFT_SHIFT) ||
+	    GP_EventGetKey(ev, GP_KEY_RIGHT_SHIFT)) {
+		if (ev->val.key.key < sizeof(keys_to_ascii_s))
+			ev->val.key.ascii = keys_to_ascii_s[ev->val.key.key];
+	} else {
+		if (ev->val.key.key < sizeof(keys_to_ascii))
+			ev->val.key.ascii = keys_to_ascii[ev->val.key.key];
+	}
+}
+
 void GP_EventPushKey(uint32_t key, uint8_t code, struct timeval *time)
 {
 	switch (code) {
@@ -283,7 +324,7 @@ void GP_EventPushKey(uint32_t key, uint8_t code, struct timeval *time)
 	cur_state.type  = GP_EV_KEY;
 	cur_state.code  = code;
 	cur_state.val.key.key = key;
-	//TODO cur_state.val.key.ascii
+	key_to_ascii(&cur_state);
 	
 	set_time(time);
 

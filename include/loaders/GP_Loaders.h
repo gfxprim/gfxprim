@@ -19,7 +19,7 @@
  * Copyright (C) 2009-2010 Jiri "BlueBear" Dluhos                            *
  *                         <jiri.bluebear.dluhos@gmail.com>                  *
  *                                                                           *
- * Copyright (C) 2009-2011 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
@@ -39,8 +39,8 @@
 #include "GP_PGM.h"
 #include "GP_PPM.h"
 
+#include "GP_BMP.h"
 #include "GP_PNG.h"
-
 #include "GP_JPG.h"
 
 /*

@@ -16,7 +16,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2010 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2011 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
@@ -32,10 +32,14 @@
 #include <errno.h>
 #include <string.h>
 
-#include <png.h>
+#include "../../config.h"
+#include "core/GP_Debug.h"
 
 #include "GP_PNG.h"
-#include "core/GP_Debug.h"
+
+#ifdef HAVE_LIBPNG
+
+#include <png.h>
 
 GP_RetCode GP_OpenPNG(const char *src_path, FILE **f)
 {
@@ -123,7 +127,7 @@ GP_RetCode GP_ReadPNG(FILE *f, GP_Context **res,
 
 	GP_DEBUG(2, "Have %s%s interlace %s PNG%s size %ux%u depth %i",
 	         interlace_type_name(interlace_type),
-	         color_type & PNG_COLOR_MASK_PALETTE ? "pallete " : "",
+	         color_type & PNG_COLOR_MASK_PALETTE ? " pallete " : "",
 	         color_type & PNG_COLOR_MASK_COLOR ? "color" : "gray",
 		 color_type & PNG_COLOR_MASK_ALPHA ? " with alpha channel" : "",
 		 (unsigned int)w, (unsigned int)h, depth);
@@ -165,6 +169,12 @@ GP_RetCode GP_ReadPNG(FILE *f, GP_Context **res,
 			break;
 			}
 		}
+		
+		/* Convert everything else to RGB888 */
+		//TODO: add palette matching to G2 G4 and G8
+		png_set_palette_to_rgb(png);
+		png_set_bgr(png);
+		pixel_type = GP_PIXEL_RGB888;
 	break;
 	}
 
@@ -305,3 +315,34 @@ err1:
 	unlink(dst_path);
 	return ret;
 }
+
+#else
+
+GP_RetCode GP_OpenPNG(const char GP_UNUSED(*src_path),
+                      FILE GP_UNUSED(**f))
+{
+	return GP_ENOIMPL;
+}
+
+GP_RetCode GP_ReadPNG(FILE GP_UNUSED(*f),
+                      GP_Context GP_UNUSED(**res),
+                      GP_ProgressCallback GP_UNUSED(*callback))
+{
+	return GP_ENOIMPL;
+}
+
+GP_RetCode GP_LoadPNG(const char GP_UNUSED(*src_path),
+                      GP_Context GP_UNUSED(**res),
+                      GP_ProgressCallback GP_UNUSED(*callback))
+{
+	return GP_ENOIMPL;
+}
+
+GP_RetCode GP_SavePNG(const char GP_UNUSED(*dst_path),
+                      const GP_Context GP_UNUSED(*src),
+                      GP_ProgressCallback GP_UNUSED(*callback))
+{
+	return GP_ENOIMPL;
+}
+
+#endif /* HAVE_LIBPNG */

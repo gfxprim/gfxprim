@@ -16,33 +16,41 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2011 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
-#ifndef GP_FRAMEBUFFER_H
-#define GP_FRAMEBUFFER_H
+#include "core/GP_FnPerBpp.h"
+#include "core/GP_Transform.h"
 
-#include "core/GP_Context.h"
-
-typedef struct GP_Framebuffer {
-	GP_Context context;
-	uint32_t bsize;
-	int con_fd;
-	int con_nr;
-	int last_con_nr;
-	int fb_fd;
-	char path[];
-} GP_Framebuffer;
+#include "gfx/GP_HLineAA.h"
+#include "gfx/GP_VLineAA.h"
 
 /*
- * Initalize framebuffer.
- */
-GP_Framebuffer *GP_FramebufferInit(const char *path);
+void GP_HLineXXYAA_Raw(GP_Context *context, GP_Coord x0, GP_Coord x1,
+                       GP_Coord y, GP_Pixel pixel)
+{
+	GP_CHECK_CONTEXT(context);
+	
+	GP_FN_PER_BPP_CONTEXT(GP_HLine_Raw, context, context, x0, x1, y,
+	                      pixel);
+}
+*/
 
-/*
- * Deinitalize framebuffer.
- */
-void GP_FramebufferExit(GP_Framebuffer *fb);
-
-#endif /* GP_FRAMEBUFFER_H */
+void GP_HLineAA(GP_Context *context, GP_Coord x0, GP_Coord x1,
+                GP_Coord y, GP_Pixel pixel)
+{
+	GP_CHECK_CONTEXT(context);
+	
+	if (context->axes_swap) {
+		GP_TRANSFORM_Y_FP(context, x0);
+		GP_TRANSFORM_Y_FP(context, x1);
+		GP_TRANSFORM_X_FP(context, y);
+		GP_VLineAA_Raw(context, y, x0, x1, pixel);
+	} else {
+		GP_TRANSFORM_X_FP(context, x0);
+		GP_TRANSFORM_X_FP(context, x1);
+		GP_TRANSFORM_Y_FP(context, y);
+		GP_HLineAA_Raw(context, x0, x1, y, pixel);
+	}
+}

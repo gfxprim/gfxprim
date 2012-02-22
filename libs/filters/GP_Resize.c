@@ -16,9 +16,11 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2011 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
+
+#include <math.h>
 
 #include <GP_Context.h>
 #include <GP_GetPutPixel.h>
@@ -30,18 +32,30 @@
 int GP_FilterInterpolate_NN(const GP_Context *src, GP_Context *dst,
                             GP_ProgressCallback *callback)
 {
+	uint32_t xmap[dst->w];
+	uint32_t ymap[dst->h];
+	uint32_t i;
 	GP_Coord x, y;
 	
 	GP_DEBUG(1, "Scaling image %ux%u -> %ux%u %2.2f %2.2f",
 	            src->w, src->h, dst->w, dst->h,
 		    1.00 * dst->w / src->w, 1.00 * dst->h / src->h);
 
+	/* Pre-compute mapping for interpolation */
+	uint32_t xstep = (src->w << 16) / dst->w;
+
+	for (i = 0; i < dst->w + 1; i++)
+		xmap[i] = ((i * xstep) + (1<<15)) >> 16;
+	
+	uint32_t ystep = (src->h << 16) / dst->h;
+
+	for (i = 0; i < dst->h + 1; i++)
+		ymap[i] = ((i * ystep) + (1<<15)) >> 16;
+
+	/* Interpolate */
 	for (y = 0; y < (GP_Coord)dst->h; y++) {
 		for (x = 0; x < (GP_Coord)dst->w; x++) {
-			GP_Coord xi = (1.00 * x / dst->w) * src->w;
-			GP_Coord yi = (1.00 * y / dst->h) * src->h;
-			
-			GP_Pixel pix = GP_GetPixel_Raw_24BPP(src, xi, yi);
+			GP_Pixel pix = GP_GetPixel_Raw_24BPP(src, xmap[x], ymap[y]);
 
 			GP_PutPixel_Raw_24BPP(dst, x, y, pix);
 		}
@@ -92,6 +106,13 @@ typedef union v4f {
 
 #define SUM_V4SF(a)    ((a).f[0] + (a).f[1] + (a).f[2] + (a).f[3])
 
+#define CLAMP(val) do {    \
+	if (val < 0)       \
+		val = 0;   \
+	if (val > 255)     \
+		val = 255; \
+} while (0)
+
 int GP_FilterInterpolate_Cubic(const GP_Context *src, GP_Context *dst,
                                GP_ProgressCallback *callback)
 {
@@ -105,28 +126,36 @@ int GP_FilterInterpolate_Cubic(const GP_Context *src, GP_Context *dst,
 	for (i = 0; i < dst->w; i++) {
 		float x = (1.00 * i / dst->w) * src->w;
 		v4f cvx;
-		int xi = x - 1;
+		int xi[4];
 		
-		if (xi < 0)
-			xi = 0;
+		xi[0] = floor(x - 1);
+		xi[1] = x;
+		xi[2] = x + 1;
+		xi[3] = x + 2;
+		
+		cvx.f[0] = cubic(xi[0] - x);
+		cvx.f[1] = cubic(xi[1] - x);
+		cvx.f[2] = cubic(xi[2] - x);
+		cvx.f[3] = cubic(xi[3] - x);
+		
+		if (xi[0] < 0)
+			xi[0] = 0;
 
-		if (xi > (int)src->w - 4)
-			xi = src->w - 4;
+		if (xi[2] >= (int)src->w)
+			xi[2] = src->w - 1;
 		
-		cvx.f[0] = cubic(x - xi);
-		cvx.f[1] = cubic(x - xi - 1);
-		cvx.f[2] = cubic(x - xi - 2);
-		cvx.f[3] = cubic(x - xi - 3);
+		if (xi[3] >= (int)src->w)
+			xi[3] = src->w - 1;
 		
 		/* Generate interpolated column */
 		for (j = 0; j < src->h; j++) {
 			v4f rv, gv, bv;
 			GP_Pixel pix[4];
 
-			pix[0] = GP_GetPixel_Raw_24BPP(src, xi, j);
-			pix[1] = GP_GetPixel_Raw_24BPP(src, xi + 1, j);
-			pix[2] = GP_GetPixel_Raw_24BPP(src, xi + 2, j);
-			pix[3] = GP_GetPixel_Raw_24BPP(src, xi + 3, j);
+			pix[0] = GP_GetPixel_Raw_24BPP(src, xi[0], j);
+			pix[1] = GP_GetPixel_Raw_24BPP(src, xi[1], j);
+			pix[2] = GP_GetPixel_Raw_24BPP(src, xi[2], j);
+			pix[3] = GP_GetPixel_Raw_24BPP(src, xi[3], j);
 				
 			rv.f[0] = GP_Pixel_GET_R_RGB888(pix[0]);
 			rv.f[1] = GP_Pixel_GET_R_RGB888(pix[1]);
@@ -157,33 +186,41 @@ int GP_FilterInterpolate_Cubic(const GP_Context *src, GP_Context *dst,
 			float y = (1.00 * j / dst->h) * src->h;
 			v4f cvy, rv, gv, bv;
 			float r, g, b;
-			int yi = y;
+			int yi[4];
+		
+			yi[0] = floor(y - 1);
+			yi[1] = y;
+			yi[2] = y + 1;
+			yi[3] = y + 2;
 			
-			if (yi < 0)
-				yi = 0;
-
-			if (yi > (int)src->h - 4)
-				yi = src->h - 4;
+			cvy.f[0] = cubic(yi[0] - y);
+			cvy.f[1] = cubic(yi[1] - y);
+			cvy.f[2] = cubic(yi[2] - y);
+			cvy.f[3] = cubic(yi[3] - y);
+		
+			if (yi[0] < 0)
+				yi[0] = 0;
+		
+			if (yi[2] >= (int)src->h)
+				yi[2] = src->h - 1;
+		
+			if (yi[3] >= (int)src->h)
+				yi[3] = src->h - 1;
 			
-			cvy.f[0] = cubic(y - yi);
-			cvy.f[1] = cubic(y - yi - 1);
-			cvy.f[2] = cubic(y - yi - 2);
-			cvy.f[3] = cubic(y - yi - 3);
-				
-			rv.f[0] = col_r[yi];
-			rv.f[1] = col_r[yi + 1];
-			rv.f[2] = col_r[yi + 2];
-			rv.f[3] = col_r[yi + 3];
+			rv.f[0] = col_r[yi[0]];
+			rv.f[1] = col_r[yi[1]];
+			rv.f[2] = col_r[yi[2]];
+			rv.f[3] = col_r[yi[3]];
 			
-			gv.f[0] = col_g[yi];
-			gv.f[1] = col_g[yi + 1];
-			gv.f[2] = col_g[yi + 2];
-			gv.f[3] = col_g[yi + 3];
+			gv.f[0] = col_g[yi[0]];
+			gv.f[1] = col_g[yi[1]];
+			gv.f[2] = col_g[yi[2]];
+			gv.f[3] = col_g[yi[3]];
 			
-			bv.f[0] = col_b[yi];
-			bv.f[1] = col_b[yi + 1];
-			bv.f[2] = col_b[yi + 2];
-			bv.f[3] = col_b[yi + 3];
+			bv.f[0] = col_b[yi[0]];
+			bv.f[1] = col_b[yi[1]];
+			bv.f[2] = col_b[yi[2]];
+			bv.f[3] = col_b[yi[3]];
 			
 			rv = MUL_V4SF(rv, cvy);
 			gv = MUL_V4SF(gv, cvy);
@@ -193,24 +230,10 @@ int GP_FilterInterpolate_Cubic(const GP_Context *src, GP_Context *dst,
 			g = SUM_V4SF(gv);
 			b = SUM_V4SF(bv);
 
-			if (r > 255)
-				r = 255;
-			
-			if (r < 0)
-				r = 0;
-			
-			if (g > 255)
-				g = 255;
-			
-			if (g < 0)
-				g = 0;
-			
-			if (b > 255)
-				b = 255;
-			
-			if (b < 0)
-				b = 0;
-			
+			CLAMP(r);
+			CLAMP(g);
+			CLAMP(b);
+
 			GP_Pixel pix = GP_Pixel_CREATE_RGB888((uint8_t)r, (uint8_t)g, (uint8_t)b);
 			GP_PutPixel_Raw_24BPP(dst, i, j, pix);
 		}
@@ -238,38 +261,46 @@ int GP_FilterInterpolate_Cubic(const GP_Context *src, GP_Context *dst,
 int GP_FilterInterpolate_CubicInt(const GP_Context *src, GP_Context *dst,
                                   GP_ProgressCallback *callback)
 {
-	int32_t col_r[src->h], col_g[src->h], col_b[src->h];
+	int32_t col_r[src->w], col_g[src->w], col_b[src->w];
 	uint32_t i, j;
 
 	GP_DEBUG(1, "Scaling image %ux%u -> %ux%u %2.2f %2.2f",
 	            src->w, src->h, dst->w, dst->h,
 		    1.00 * dst->w / src->w, 1.00 * dst->h / src->h);
 
-	for (i = 0; i < dst->w; i++) {
-		float x = (1.00 * i / dst->w) * src->w;
-		int32_t cvx[4];
-		int xi = x - 1;
+	for (i = 0; i < dst->h; i++) {
+		float y = (1.00 * i / dst->h) * src->h;
+		int32_t cvy[4];
+		int yi[4];
 		
-		if (xi < 0)
-			xi = 0;
-
-		if (xi > (int)src->w - 4)
-			xi = src->w - 4;
-
-		cvx[0] = cubic(x - xi) * MUL + 0.5;
-		cvx[1] = cubic(x - xi - 1) * MUL + 0.5;
-		cvx[2] = cubic(x - xi - 2) * MUL + 0.5;
-		cvx[3] = cubic(x - xi - 3) * MUL + 0.5;
+		yi[0] = floor(y - 1);
+		yi[1] = y;
+		yi[2] = y + 1;
+		yi[3] = y + 2;
 		
-		/* Generate interpolated column */
-		for (j = 0; j < src->h; j++) {
+		cvy[0] = cubic(yi[0] - y) * MUL + 0.5;
+		cvy[1] = cubic(yi[1] - y) * MUL + 0.5;
+		cvy[2] = cubic(yi[2] - y) * MUL + 0.5;
+		cvy[3] = cubic(yi[3] - y) * MUL + 0.5;
+		
+		if (yi[0] < 0)
+			yi[0] = 0;
+		
+		if (yi[2] >= (int)src->h)
+			yi[2] = src->h - 1;
+		
+		if (yi[3] >= (int)src->h)
+			yi[3] = src->h - 1;
+
+		/* Generate interpolated row */
+		for (j = 0; j < src->w; j++) {
 			int32_t rv[4], gv[4], bv[4];
 			GP_Pixel pix[4];
 
-			pix[0] = GP_GetPixel_Raw_24BPP(src, xi, j);
-			pix[1] = GP_GetPixel_Raw_24BPP(src, xi + 1, j);
-			pix[2] = GP_GetPixel_Raw_24BPP(src, xi + 2, j);
-			pix[3] = GP_GetPixel_Raw_24BPP(src, xi + 3, j);
+			pix[0] = GP_GetPixel_Raw_24BPP(src, j, yi[0]);
+			pix[1] = GP_GetPixel_Raw_24BPP(src, j, yi[1]);
+			pix[2] = GP_GetPixel_Raw_24BPP(src, j, yi[2]);
+			pix[3] = GP_GetPixel_Raw_24BPP(src, j, yi[3]);
 				
 			rv[0] = GP_Pixel_GET_R_RGB888(pix[0]);
 			rv[1] = GP_Pixel_GET_R_RGB888(pix[1]);
@@ -285,10 +316,10 @@ int GP_FilterInterpolate_CubicInt(const GP_Context *src, GP_Context *dst,
 			bv[1] = GP_Pixel_GET_B_RGB888(pix[1]);
 			bv[2] = GP_Pixel_GET_B_RGB888(pix[2]);
 			bv[3] = GP_Pixel_GET_B_RGB888(pix[3]);
-			
-			MUL_I(rv, cvx);
-			MUL_I(gv, cvx);
-			MUL_I(bv, cvx);
+
+			MUL_I(rv, cvy);
+			MUL_I(gv, cvy);
+			MUL_I(bv, cvy);
 
 			col_r[j] = SUM_I(rv);
 			col_g[j] = SUM_I(gv);
@@ -296,69 +327,63 @@ int GP_FilterInterpolate_CubicInt(const GP_Context *src, GP_Context *dst,
 		}
 
 		/* now interpolate column for new image */
-		for (j = 0; j < dst->h; j++) {
-			float y = (1.00 * j / dst->h) * src->h;
-			int32_t cvy[4], rv[4], gv[4], bv[4];
+		for (j = 0; j < dst->w; j++) {
+			float x = (1.00 * j / dst->w) * src->w;
+			int32_t cvx[4], rv[4], gv[4], bv[4];
 			int32_t r, g, b;
-			int yi = y - 1;
+			int xi[4];
+		
+			xi[0] = floor(x - 1);
+			xi[1] = x;
+			xi[2] = x + 1;
+			xi[3] = x + 2;
 			
-			if (yi < 0)
-				yi = 0;
+			cvx[0] = cubic(xi[0] - x) * MUL + 0.5;
+			cvx[1] = cubic(xi[1] - x) * MUL + 0.5;
+			cvx[2] = cubic(xi[2] - x) * MUL + 0.5;
+			cvx[3] = cubic(xi[3] - x) * MUL + 0.5;
+			
+			if (xi[0] < 0)
+				xi[0] = 0;
 
-			if (yi > (int)src->h - 4)
-				yi = src->h - 4;
+			if (xi[2] >= (int)src->w)
+				xi[2] = src->w - 1;
 			
-			cvy[0] = cubic(y - yi) * MUL + 0.5;
-			cvy[1] = cubic(y - yi - 1) * MUL + 0.5;
-			cvy[2] = cubic(y - yi - 2) * MUL + 0.5;
-			cvy[3] = cubic(y - yi - 3) * MUL + 0.5;
-				
-			rv[0] = col_r[yi];
-			rv[1] = col_r[yi + 1];
-			rv[2] = col_r[yi + 2];
-			rv[3] = col_r[yi + 3];
+			if (xi[3] >= (int)src->w)
+				xi[3] = src->w - 1;
+
+			rv[0] = col_r[xi[0]];
+			rv[1] = col_r[xi[1]];
+			rv[2] = col_r[xi[2]];
+			rv[3] = col_r[xi[3]];
 			
-			gv[0] = col_g[yi];
-			gv[1] = col_g[yi + 1];
-			gv[2] = col_g[yi + 2];
-			gv[3] = col_g[yi + 3];
+			gv[0] = col_g[xi[0]];
+			gv[1] = col_g[xi[1]];
+			gv[2] = col_g[xi[2]];
+			gv[3] = col_g[xi[3]];
 			
-			bv[0] = col_b[yi];
-			bv[1] = col_b[yi + 1];
-			bv[2] = col_b[yi + 2];
-			bv[3] = col_b[yi + 3];
+			bv[0] = col_b[xi[0]];
+			bv[1] = col_b[xi[1]];
+			bv[2] = col_b[xi[2]];
+			bv[3] = col_b[xi[3]];
 			
-			MUL_I(rv, cvy);
-			MUL_I(gv, cvy);
-			MUL_I(bv, cvy);
+			MUL_I(rv, cvx);
+			MUL_I(gv, cvx);
+			MUL_I(bv, cvx);
 
 			r = (SUM_I(rv) + MUL*MUL/2) / MUL / MUL;
 			g = (SUM_I(gv) + MUL*MUL/2) / MUL / MUL;
 			b = (SUM_I(bv) + MUL*MUL/2) / MUL / MUL;
 
-			if (r > 255)
-				r = 255;
-		
-			if (r < 0)
-				r = 0;
-
-			if (g > 255)
-				g = 255;
-			
-			if (g < 0)
-				g = 0;
-			
-			if (b > 255)
-				b = 255;
-			
-			if (b < 0)
-				b = 0;
+			CLAMP(r);
+			CLAMP(g);
+			CLAMP(b);
 			
 			GP_Pixel pix = GP_Pixel_CREATE_RGB888((uint8_t)r, (uint8_t)g, (uint8_t)b);
-			GP_PutPixel_Raw_24BPP(dst, i, j, pix);
+			GP_PutPixel_Raw_24BPP(dst, j, i, pix);
 		}
 		
-		if (GP_ProgressCallbackReport(callback, i, dst->w, dst->h))
+		if (GP_ProgressCallbackReport(callback, i, dst->h, dst->w))
 			return 1;
 	}
 
@@ -366,6 +391,274 @@ int GP_FilterInterpolate_CubicInt(const GP_Context *src, GP_Context *dst,
 	return 0;
 }
 
+/*
+ * Sample row.
+ *
+ * The x and y are starting coordinates in source image.
+ *
+ * The xpix_dist is distance of two sampled pixels in source image coordinates.
+ *
+ * The xoff is offset of the first pixel.
+ *
+ * The r, g, b are used to store resulting values.
+ */
+static inline void linear_lp_sample_x(const GP_Context *src,
+                                      uint32_t x, uint32_t y,
+                                      uint32_t xpix_dist, uint32_t xoff,
+                                      uint32_t *r, uint32_t *g, uint32_t *b)
+{
+	GP_Pixel pix;
+	uint32_t i;
+
+	pix = GP_GetPixel_Raw_24BPP(src, x, y);
+
+	*r = (GP_Pixel_GET_R_RGB888(pix) * xoff) >> 9;
+	*g = (GP_Pixel_GET_G_RGB888(pix) * xoff) >> 9;
+	*b = (GP_Pixel_GET_B_RGB888(pix) * xoff) >> 9;
+
+	for (i = (1<<14) - xoff; i > xpix_dist; i -= xpix_dist) {
+		if (x < src->w - 1)
+			x++;
+		
+		pix = GP_GetPixel_Raw_24BPP(src, x, y);
+
+		*r += (GP_Pixel_GET_R_RGB888(pix) * xpix_dist) >> 9;
+		*g += (GP_Pixel_GET_G_RGB888(pix) * xpix_dist) >> 9;
+		*b += (GP_Pixel_GET_B_RGB888(pix) * xpix_dist) >> 9;
+	}
+
+	if (i > 0) {
+		if (x < src->w - 1)
+			x++;
+			
+		pix = GP_GetPixel_Raw_24BPP(src, x, y);
+
+		*r += (GP_Pixel_GET_R_RGB888(pix) * i) >> 9;
+		*g += (GP_Pixel_GET_G_RGB888(pix) * i) >> 9;
+		*b += (GP_Pixel_GET_B_RGB888(pix) * i) >> 9;
+	}
+}
+
+/*
+ * Linear interpolation with low-pass filtering, used for fast downscaling
+ * on both x and y.
+ *
+ * Basically we do weighted arithmetic mean of the pixels:
+ *
+ * [x, y],    [x + 1, y], [x + 2, y] ... [x + k, y]
+ * [x, y + 1]
+ * [x, y + 2]                            .
+ * .                      .              .
+ * .                          .          .
+ * .                              .
+ * [x, y + l]        ....                [x + k, y + l]
+ *
+ *
+ * The parameter k respectively l is determined by the distance between
+ * sampled coordinates on x respectively y.
+ *
+ * The pixels are weighted by how much they are 'hit' by the rectangle defined
+ * by the sampled pixel.
+ * 
+ * The implementation is inspired by imlib2 downscaling algorithm.
+ */
+static int interpolate_linear_lp_xy(const GP_Context *src, GP_Context *dst,
+                                    GP_ProgressCallback *callback)
+{
+	uint32_t xmap[dst->w + 1];
+	uint32_t ymap[dst->h + 1];
+	uint16_t xoff[dst->w + 1];
+	uint16_t yoff[dst->h + 1];
+	uint32_t x, y;
+	uint32_t i, j;
+	
+	/* Pre-compute mapping for interpolation */
+	uint32_t xstep = (src->w << 16) / dst->w;
+	uint32_t xpix_dist = (dst->w << 14) / src->w;
+
+	for (i = 0; i < dst->w + 1; i++) {
+		uint32_t val = i * xstep;
+		xmap[i] = val >> 16;
+		xoff[i] = ((255 - ((val >> 8) & 0xff)) * xpix_dist)>>8;
+	}
+
+	uint32_t ystep = (src->h << 16) / dst->h;
+	uint32_t ypix_dist = (dst->h << 14) / src->h;
+
+	for (i = 0; i < dst->h + 1; i++) {
+		uint32_t val = i * ystep;
+		ymap[i] = val >> 16;
+		yoff[i] = ((255 - ((val >> 8) & 0xff)) * ypix_dist)>>8;
+	}
+
+	/* Interpolate */
+	for (y = 0; y < dst->h; y++) {
+		for (x = 0; x < dst->w; x++) {
+			uint32_t r, g, b;
+			uint32_t r1, g1, b1;
+			uint32_t x0, y0;
+
+			x0 = xmap[x];
+			y0 = ymap[y];
+
+			linear_lp_sample_x(src, x0, y0,
+			                   xpix_dist, xoff[x],
+			                   &r, &g, &b);
+
+			r = (r * yoff[y]) >> 14;
+			g = (g * yoff[y]) >> 14;
+			b = (b * yoff[y]) >> 14;
+			
+			for (j = (1<<14) - yoff[y]; j > ypix_dist; j -= ypix_dist) {
+				
+				x0 = xmap[x];
+				
+				if (y0 < src->h - 1)
+					y0++;
+			
+				linear_lp_sample_x(src, x0, y0,
+				                   xpix_dist, xoff[x],
+			                           &r1, &g1, &b1);
+
+				r += (r1 * ypix_dist) >> 14;
+				g += (g1 * ypix_dist) >> 14;
+				b += (b1 * ypix_dist) >> 14;
+			}
+
+			if (j > 0) {
+				x0 = xmap[x];
+				
+				if (y0 < src->h - 1)
+					y0++;
+				
+				linear_lp_sample_x(src, x0, y0,
+				                   xpix_dist, xoff[x],
+			                           &r1, &g1, &b1);
+			
+				r += (r1 * j) >> 14;
+				g += (g1 * j) >> 14;
+				b += (b1 * j) >> 14;
+			}
+
+			r = (r + (1<<4))>>5;
+			g = (g + (1<<4))>>5;
+			b = (b + (1<<4))>>5;
+
+			GP_PutPixel_Raw_24BPP(dst, x, y,
+			                      GP_Pixel_CREATE_RGB888(r, g, b));
+		}
+		
+		if (GP_ProgressCallbackReport(callback, y, dst->h, dst->w))
+			return 1;
+	}
+
+	GP_ProgressCallbackDone(callback);
+	return 0;
+}
+
+int GP_FilterInterpolate_LinearInt(const GP_Context *src, GP_Context *dst,
+                                   GP_ProgressCallback *callback)
+{
+	uint32_t xmap[dst->w + 1];
+	uint32_t ymap[dst->h + 1];
+	uint8_t  xoff[dst->w + 1];
+	uint8_t  yoff[dst->h + 1];
+	uint32_t x, y, i;
+	
+	GP_DEBUG(1, "Scaling image %ux%u -> %ux%u %2.2f %2.2f",
+	            src->w, src->h, dst->w, dst->h,
+		    1.00 * dst->w / src->w, 1.00 * dst->h / src->h);
+
+	/* Pre-compute mapping for interpolation */
+	uint32_t xstep = (src->w << 16) / dst->w;
+
+	for (i = 0; i < dst->w + 1; i++) {
+		uint32_t val = i * xstep;
+		xmap[i] = val >> 16;
+		xoff[i] = (val >> 8) & 0xff;
+	}
+
+	uint32_t ystep = (src->h << 16) / dst->h;
+
+	for (i = 0; i < dst->h + 1; i++) {
+		uint32_t val = i * ystep;
+		ymap[i] = val >> 16;
+		yoff[i] = (val >> 8) & 0xff; 
+	}
+
+	/* Interpolate */
+	for (y = 0; y < dst->h; y++) {
+		for (x = 0; x < dst->w; x++) {
+			GP_Pixel pix00, pix01, pix10, pix11;
+			uint32_t r0, r1, g0, g1, b0, b1;
+			GP_Coord x0, x1, y0, y1;
+			
+			x0 = xmap[x];
+			x1 = xmap[x] + 1;
+
+			if (x1 >= (GP_Coord)src->w)
+				x1 = src->w - 1;
+		
+			y0 = ymap[y];
+			y1 = ymap[y] + 1;
+
+			if (y1 >= (GP_Coord)src->h)
+				y1 = src->h - 1;
+
+			pix00 = GP_GetPixel_Raw_24BPP(src, x0, y0);
+			pix10 = GP_GetPixel_Raw_24BPP(src, x1, y0);
+			pix01 = GP_GetPixel_Raw_24BPP(src, x0, y1);
+			pix11 = GP_GetPixel_Raw_24BPP(src, x1, y1);
+
+			r0 = GP_Pixel_GET_R_RGB888(pix00) * (255 - xoff[x]);
+			g0 = GP_Pixel_GET_G_RGB888(pix00) * (255 - xoff[x]);
+			b0 = GP_Pixel_GET_B_RGB888(pix00) * (255 - xoff[x]);
+		
+			r0 += GP_Pixel_GET_R_RGB888(pix10) * xoff[x];
+			g0 += GP_Pixel_GET_G_RGB888(pix10) * xoff[x];
+			b0 += GP_Pixel_GET_B_RGB888(pix10) * xoff[x];
+			
+			r1 = GP_Pixel_GET_R_RGB888(pix01) * (255 - xoff[x]);
+			g1 = GP_Pixel_GET_G_RGB888(pix01) * (255 - xoff[x]);
+			b1 = GP_Pixel_GET_B_RGB888(pix01) * (255 - xoff[x]);
+		
+			r1 += GP_Pixel_GET_R_RGB888(pix11) * xoff[x];
+			g1 += GP_Pixel_GET_G_RGB888(pix11) * xoff[x];
+			b1 += GP_Pixel_GET_B_RGB888(pix11) * xoff[x];
+		
+			r0 = (r1 * yoff[y] + r0 * (255 - yoff[y]) + (1<<15)) >> 16;
+			g0 = (g1 * yoff[y] + g0 * (255 - yoff[y]) + (1<<15)) >> 16;
+			b0 = (b1 * yoff[y] + b0 * (255 - yoff[y]) + (1<<15)) >> 16;
+
+			GP_PutPixel_Raw_24BPP(dst, x, y,
+			                      GP_Pixel_CREATE_RGB888(r0, g0, b0));
+		}
+		
+		if (GP_ProgressCallbackReport(callback, y, dst->h, dst->w))
+			return 1;
+	}
+
+	GP_ProgressCallbackDone(callback);
+	return 0;
+}
+
+int GP_FilterInterpolate_LinearLFInt(const GP_Context *src, GP_Context *dst,
+                                     GP_ProgressCallback *callback)
+{
+	float x_rat = 1.00 * dst->w / src->w;
+	float y_rat = 1.00 * dst->h / src->h;
+
+	if (x_rat < 1.00 && y_rat < 1.00) {
+		GP_DEBUG(1, "Downscaling image %ux%u -> %ux%u %2.2f %2.2f",
+	                     src->w, src->h, dst->w, dst->h, x_rat, y_rat);
+		return interpolate_linear_lp_xy(src, dst, callback);
+	}
+
+	//TODO: x_rat > 1.00 && y_rat < 1.00
+	//TODO: x_rat < 1.00 && y_rat > 1.00
+
+	return GP_FilterInterpolate_LinearInt(src, dst, callback);
+}
 
 int GP_FilterResize_Raw(const GP_Context *src, GP_Context *dst,
                         GP_InterpolationType type,
@@ -374,6 +667,10 @@ int GP_FilterResize_Raw(const GP_Context *src, GP_Context *dst,
 	switch (type) {
 	case GP_INTERP_NN:
 		return GP_FilterInterpolate_NN(src, dst, callback);
+	case GP_INTERP_LINEAR_INT:
+		return GP_FilterInterpolate_LinearInt(src, dst, callback);
+	case GP_INTERP_LINEAR_LF_INT:
+		return GP_FilterInterpolate_LinearLFInt(src, dst, callback);
 	case GP_INTERP_CUBIC:
 		return GP_FilterInterpolate_Cubic(src, dst, callback);
 	case GP_INTERP_CUBIC_INT:

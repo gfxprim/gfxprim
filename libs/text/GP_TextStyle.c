@@ -19,7 +19,7 @@
  * Copyright (C) 2009-2010 Jiri "BlueBear" Dluhos                            *
  *                         <jiri.bluebear.dluhos@gmail.com>                  *
  *                                                                           *
- * Copyright (C) 2009-2010 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2011 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
@@ -27,7 +27,7 @@
 
 void GP_DefaultTextStyle(GP_TextStyle *style)
 {
-	style->font = &GP_default_console_font;
+	style->font = &GP_DefaultConsoleFont;
 	style->pixel_xspace = 0;
 	style->pixel_yspace = 0;
 	style->pixel_xmul = 1;

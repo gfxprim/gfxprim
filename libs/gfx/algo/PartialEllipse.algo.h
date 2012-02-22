@@ -23,61 +23,47 @@
  *                                                                           *
  *****************************************************************************/
 
-/*
- * A bitmap text drawing algorithm.
- */
+#include "core/GP_AngleUtils.h"
 
-#define DEF_TEXT_FN(FN_NAME, CONTEXT_T, PIXVAL_T, HLINE) \
-void FN_NAME(CONTEXT_T context, const GP_TextStyle *style, int x, int y, \
-	const char *str, PIXVAL_T pixval) \
+#include <math.h>
+
+/*
+ * This macro defines a partial ellipse drawing function.
+ * Arguments:
+ *     CONTEXT_T - user-defined type of drawing context (passed to PUTPIXEL)
+ *     PIXVAL_T  - user-defined pixel value type (passed to PUTPIXEL)
+ *     PUTPIXEL  - a pixel drawing function f(context, x, y, pixval)
+ *     FN_NAME   - name of the function to be defined
+ */
+#define DEF_PARTIAL_ELLIPSE_FN(FN_NAME, CONTEXT_T, PIXVAL_T, PUTPIXEL) \
+void FN_NAME(CONTEXT_T context, int xcenter, int ycenter, int a, int b, \
+	int start, int end, PIXVAL_T pixval) \
 { \
-	/* Remember the original starting height. */ \
-	int y0 = y; \
+	double startAngle = GP_NormalizeAngle(2*M_PI*(start / 360000.0)); \
+	double endAngle = GP_NormalizeAngle(2*M_PI*(end / 360000.0)); \
 \
-	const char *p; \
-	for (p = str; *p != '\0'; p++) { \
-\
-		/* Calculate the address of the character data. */ \
-		const GP_CharData *data = GP_GetCharData(style->font, *p); \
-		if (data == NULL) { \
-\
-			/* unencoded character */ \
-			data = GP_GetCharData(style->font, ' '); \
+	int x; \
+	for (x = -a; x <= a; x++) { \
+		double angle = acos(((double) x) / a); \
+		double y = floor(b*sin(angle)); \
+		if (GP_AngleInRange(angle, startAngle, endAngle)) { \
+			PUTPIXEL(context, xcenter+x, ycenter-y, pixval); \
 		} \
-\
-		/* Starting and final X for each character line. */ \
-		int x0 = x + data->pre_offset * (style->pixel_xmul + style->pixel_xspace); \
-		int x1 = x0 + data->char_width * (style->pixel_xmul + style->pixel_xspace); \
-\
-		/* Draw the character line by line. */ \
-		const uint8_t *src = data->bitmap; \
-		int line, linerep; \
-		for (line = 0, y = y0; line < style->font->height; line++, y += style->pixel_yspace) { \
-\
-			/* repeat the line as specified by pixel_ymul */ \
-			for (linerep = 0; linerep < style->pixel_ymul; linerep++, y++) { \
-				uint8_t const * linesrc = src + line * style->font->bytes_per_line; \
-				uint8_t mask = 0x80; \
-\
-				/* draw the line of the character bitmap */ \
-				for (x = x0; x < x1; x += style->pixel_xmul + style->pixel_xspace) { \
-					if (*linesrc & mask) { \
-						HLINE(context, \
-							x, x + style->pixel_xmul - 1, \
-							y, pixval); \
-					} \
-					mask >>= 1; \
-					if (mask == 0) { \
-						linesrc++; \
-						mask = 0x80; \
-					} \
-				} \
-			} \
+		if (GP_AngleInRange(2*M_PI - angle, startAngle, endAngle)) { \
+			PUTPIXEL(context, xcenter+x, ycenter+y, pixval); \
 		} \
+	} \
 \
-		/* Update the X position. */ \
-		x = x0 + data->post_offset * (style->pixel_xmul + style->pixel_xspace);  \
-		x += style->char_xspace * style->pixel_xmul;	/* optional extra spacing */ \
+	int y; \
+	for (y = -b; y <= b; y++) { \
+		double angle = asin(((double) y) / b); \
+		double x = floor(a*cos(angle)); \
+		if (GP_AngleInRange(angle, startAngle, endAngle)) { \
+			PUTPIXEL(context, xcenter+x, ycenter-y, pixval); \
+		} \
+		if (GP_AngleInRange(M_PI - angle, startAngle, endAngle)) { \
+			PUTPIXEL(context, xcenter-x, ycenter-y, pixval); \
+		} \
 	} \
 }
 

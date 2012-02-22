@@ -6,7 +6,7 @@ Contrast filters -- Multiply color channel(s) by a fixed float value.
 
 %% block body
 
-{{ filter_include() }}
+{{ filter_point_include() }}
 
 %% macro filter_op(chan_name, chan_size)
 {{ chan_name }} = {{ chan_name }} * {{ chan_name }}_mul + 0.5;
