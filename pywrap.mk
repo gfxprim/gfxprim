@@ -12,18 +12,18 @@ all: _gfxprim_$(LIBNAME)_c.so gfxprim_$(LIBNAME)_c.py
 
 gfxprim_$(LIBNAME)_wrap.c gfxprim_$(LIBNAME)_c.py: gfxprim_$(LIBNAME).swig
 ifdef VERBOSE
-	$(SWIG) -python -Wall -I/usr/include/ $(INCLUDES) $<
+	$(SWIG) $(SWIGOPTS) -python $(INCLUDES) $<
 else # VERBOSE
 	@echo "SWIG $(LIBNAME)"
-	@$(SWIG) -python -Wall -I/usr/include/ $(INCLUDES) $<
+	@$(SWIG) $(SWIGOPTS) -python $(INCLUDES) $<
 endif # VERBOSE
 
 _gfxprim_$(LIBNAME)_c.so: gfxprim_$(LIBNAME)_wrap.c
 ifdef VERBOSE
-	$(CC) gfxprim_$(LIBNAME)_wrap.c $(CFLAGS) $(LDFLAGS) -I$(PYTHON_INCLUDE) -dPIC --shared -lGP -L$(TOPDIR)/build/ -o _gfxprim_$(LIBNAME)_c.so
+	$(CC) gfxprim_$(LIBNAME)_wrap.c $(CFLAGS) $(LDFLAGS) -I$(PYTHON_INCLUDE) --shared -lGP -L$(TOPDIR)/build/ -o _gfxprim_$(LIBNAME)_c.so
 else # VERBOSE
 	@echo "LD  $@"
-	@$(CC) gfxprim_$(LIBNAME)_wrap.c $(CFLAGS) $(LDFLAGS) -I$(PYTHON_INCLUDE) -dPIC --shared -lGP -L$(TOPDIR)/build/ -o _gfxprim_$(LIBNAME)_c.so
+	@$(CC) gfxprim_$(LIBNAME)_wrap.c $(CFLAGS) $(LDFLAGS) -I$(PYTHON_INCLUDE) --shared -lGP -L$(TOPDIR)/build/ -o _gfxprim_$(LIBNAME)_c.so
 endif # VERBOSE
 
 endif # ifneq ($(SWIG),)

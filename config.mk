@@ -11,3 +11,5 @@ PYTHON_INCLUDE=/usr/include/python2.6
 
 # Command to run Python with pylib/ modules
 PYTHON=PYTHONPATH=$$PYTHONPATH:${PYLIBSDIR} ${PYTHON_BIN} -Werror
+
+SWIGOPTS=-Wextra -w322,314 -I/usr/include/
