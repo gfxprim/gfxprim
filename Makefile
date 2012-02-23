@@ -22,7 +22,7 @@ clean:
 ifdef VERBOSE
 	$(MAKE) -C build clean
 else
-	@echo "/build"
+	@echo "DIR /build"
 	@$(MAKE) --no-print-directory -C build clean
 endif
 
@@ -32,7 +32,7 @@ ifdef VERBOSE
 	$(MAKE) clean
 else
 	@$(MAKE) clean
-	@rm config.h config.gen.mk 
+	@rm config.h config.gen.mk
 endif
 
 HEADER_LOC=/usr/include/
