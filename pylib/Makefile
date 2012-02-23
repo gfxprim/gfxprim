@@ -1,4 +1,5 @@
 TOPDIR=..
+SUBDIRS=gfxprim
 
 #
 # Add .pyc files to CLEAN list
@@ -9,3 +10,4 @@ include $(TOPDIR)/include.mk
 
 all:
 	@true
+

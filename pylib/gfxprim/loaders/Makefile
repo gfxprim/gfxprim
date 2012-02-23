@@ -1,4 +1,4 @@
-TOPDIR=../..
+TOPDIR=../../..
 LIBNAME=loaders
 INCLUDE=core
 include $(TOPDIR)/pywrap.mk

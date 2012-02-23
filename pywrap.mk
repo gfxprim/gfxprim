@@ -8,27 +8,23 @@ ifneq ($(SWIG),)
 
 INCLUDES+=$(addprefix -I$(TOPDIR)/include/, $(INCLUDE))
 
-all: _gfxprim_$(LIBNAME)_c.so
+all: _gfxprim_$(LIBNAME)_c.so gfxprim_$(LIBNAME)_c.py
 
-gfxprim_$(LIBNAME).c: gfxprim_$(LIBNAME).swig
-
-gfxprim_$(LIBNAME).c: %.c: %.swig
+gfxprim_$(LIBNAME)_wrap.c gfxprim_$(LIBNAME)_c.py: gfxprim_$(LIBNAME).swig
 ifdef VERBOSE
 	$(SWIG) -python -Wall -I/usr/include/ $(INCLUDES) $<
-	cp gfxprim_$(LIBNAME)_c.py ../../pylib/
 else
 	@echo "SWIG $(LIBNAME)"
 	@$(SWIG) -python -Wall -I/usr/include/ $(INCLUDES) $<
-	@cp gfxprim_$(LIBNAME)_c.py ../../pylib/
 endif
 
-_gfxprim_$(LIBNAME)_c.so: gfxprim_$(LIBNAME).c
+_gfxprim_$(LIBNAME)_c.so: gfxprim_$(LIBNAME)_wrap.c
 ifdef VERBOSE
-	$(CC) -fPIC -dPIC --shared -Wall -lGP -lpng -ljpeg -lm -ldl -o _gfxprim_$(LIBNAME)_c.so
+	$(CC) gfxprim_$(LIBNAME)_wrap.c $(CFLAGS) $(LDFLAGS) -I$(PYTHON_INCLUDE) -dPIC --shared -lGP -L$(TOPDIR)/build/ -o _gfxprim_$(LIBNAME)_c.so
 else
 	@echo "LD  $@"
-	@$(CC) -fPIC -dPIC --shared -Wall -lGP -lpng -ljpeg -lm -ldl -o _gfxprim_$(LIBNAME)_c.so
+	@$(CC) gfxprim_$(LIBNAME)_wrap.c $(CFLAGS) $(LDFLAGS) -I$(PYTHON_INCLUDE) -dPIC --shared -lGP -L$(TOPDIR)/build/ -o _gfxprim_$(LIBNAME)_c.so
 endif
 
-CLEAN+=gfxprim_$(LIBNAME).c gfxprim_$(LIBNAME)_c.py gfxprim_$(LIBNAME)_wrap.c _gfxprim_$(LIBNAME)_c.so
+CLEAN+=gfxprim_$(LIBNAME)_wrap.c gfxprim_$(LIBNAME)_c.py _gfxprim_$(LIBNAME)_c.so
 endif
