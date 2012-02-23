@@ -1,5 +1,5 @@
 from ..utils import extend, add_swig_getmethod, add_swig_setmethod
-from . import gfxprim_loaders_c as loaders_c
+from . import loaders_c
 
 def extend_context_class(_context_class):
   """
@@ -11,7 +11,7 @@ def extend_context_class(_context_class):
   @staticmethod
   def load(filename):
     "Load image from given file, guess type."
-    c = loaders_c.GP_LoadImage_SWIG(filename)
+    c = loaders_c.GP_LoadImage_Wrap(filename)
     return c
 
   @extend(_context_class)
