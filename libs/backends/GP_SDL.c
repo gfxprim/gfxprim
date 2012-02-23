@@ -52,11 +52,17 @@ static void sdl_flip(struct GP_Backend *self __attribute__((unused)))
 }
 
 static void sdl_update_rect(struct GP_Backend *self __attribute__((unused)),
-                            GP_Coord x1, GP_Coord y1, GP_Coord x2, GP_Coord y2)
+                            GP_Coord x0, GP_Coord y0, GP_Coord x1, GP_Coord y1)
 {
 	SDL_mutexP(mutex);
-	
-	SDL_UpdateRect(sdl_surface, x1, y1, x2, y2);
+
+	/*
+	 * SDL_UpdateRect() with all x0, y0, x1 and y1 zero updates whole
+	 * screen we avoid such behavior as it will break other backends.
+	 */
+	if (x1 != 0 && y1 != 0)
+		SDL_UpdateRect(sdl_surface, x0, y0,
+		               GP_ABS(x1 - x0) + 1, GP_ABS(y1 - y0) + 1);
 	
 	SDL_mutexV(mutex);
 }
@@ -134,7 +140,8 @@ int context_from_surface(GP_Context *context, SDL_Surface *surf)
 	return 0;
 }
 
-GP_Backend *GP_BackendSDLInit(GP_Size w, GP_Size h, uint8_t bpp, uint8_t flags)
+GP_Backend *GP_BackendSDLInit(GP_Size w, GP_Size h, uint8_t bpp, uint8_t flags,
+                              const char *caption)
 {
 	/* SDL not yet initalized */
 	if (backend.context == NULL) {
@@ -152,7 +159,10 @@ GP_Backend *GP_BackendSDLInit(GP_Size w, GP_Size h, uint8_t bpp, uint8_t flags)
 			sdl_flags |= SDL_RESIZABLE;
 
 		sdl_surface = SDL_SetVideoMode(w, h, bpp, sdl_flags);
-	
+
+		if (caption != NULL)
+			SDL_WM_SetCaption(caption, caption);
+
 		if (sdl_surface == NULL) {
 			GP_DEBUG(1, "ERROR: SDL_SetVideoMode: %s", SDL_GetError());
 			SDL_Quit();
@@ -175,7 +185,8 @@ GP_Backend *GP_BackendSDLInit(GP_Size w, GP_Size h, uint8_t bpp, uint8_t flags)
 
 #else
 
-GP_Backend *GP_BackendSDLInit(void)
+GP_Backend *GP_BackendSDLInit(GP_Size w, GP_Size h, uint8_t bpp, uint8_t flags,
+                              const char *caption)
 {
 	return NULL;
 }

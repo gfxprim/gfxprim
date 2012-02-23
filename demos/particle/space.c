@@ -131,7 +131,7 @@ static void central_gravity(struct space *space, int time)
 	unsigned int i;
 
 	for (i = 0; i < space->particle_count; i++) { 
-		space->particles[i].vy += space->gax * time; 
+		space->particles[i].vx += space->gax * time; 
 		space->particles[i].vy += space->gay * time; 
 	}
 }

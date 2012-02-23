@@ -19,7 +19,7 @@
  * Copyright (C) 2009-2011 Jiri "BlueBear" Dluhos                            *
  *                         <jiri.bluebear.dluhos@gmail.com>                  *
  *                                                                           *
- * Copyright (C) 2009-2011 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
@@ -39,7 +39,7 @@
 #include "backends/GP_Backend.h"
 
 /* input and events */
-#include "input/GP_Event.h"
+#include "input/GP_Input.h"
 
 /* bitmap loaders */
 #include "loaders/GP_Loaders.h"

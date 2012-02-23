@@ -28,7 +28,7 @@
   The GP_Backend is overall structure for API for managing
   connection/mmaped memory/... to xserver window/framebuffer/... .
 
-  In contrast to other graphics libraries we do not try to create overall
+  In contrast to other graphics libraries we do not try to create unified
   initalization interface that would match specialities for every possible
   backend. Rather than that we are trying to create API that is the same
   for all backends, once initalization is done.
@@ -85,8 +85,8 @@ typedef struct GP_Backend {
 	 * If display is not buffered, this is no-op.
 	 */
 	void (*UpdateRect)(struct GP_Backend *self,
-	                   GP_Coord x1, GP_Coord y1,
-	                   GP_Coord x2, GP_Coord y2);
+	                   GP_Coord x0, GP_Coord y0,
+	                   GP_Coord x1, GP_Coord y1);
 
 	/*
 	 * Exits the backend.
@@ -126,12 +126,9 @@ static inline void GP_BackendFlip(GP_Backend *backend)
 /*
  * Calls backend->UpdateRect().
  */
-static inline void GP_BackendUpdateRect(GP_Backend *backend,
-                                        GP_Coord x1, GP_Coord y1,
-					GP_Coord x2, GP_Coord y2)
-{
-	backend->UpdateRect(backend, x1, y1, x2, y2);
-}
+void GP_BackendUpdateRect(GP_Backend *backend,
+                          GP_Coord x0, GP_Coord y0,
+                          GP_Coord x1, GP_Coord y1);
 
 /*
  * Calls backend->Exit().

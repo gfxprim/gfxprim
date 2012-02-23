@@ -51,20 +51,7 @@ static void sighandler(int signo)
 
 static void init_backend(const char *backend_opts)
 {
-	if (!strcmp(backend_opts, "fb")) {
-		fprintf(stderr, "Initalizing framebuffer backend\n");
-		backend = GP_BackendLinuxFBInit("/dev/fb0");
-	}
-	
-	if (!strcmp(backend_opts, "SDL")) {
-		fprintf(stderr, "Initalizing SDL backend\n");
-		backend = GP_BackendSDLInit(800, 600, 0, 0);
-	}
-
-	if (!strcmp(backend_opts, "SDL:FS")) {
-		fprintf(stderr, "Initalizing SDL fullscreen\n");
-		backend = GP_BackendSDLInit(0, 0, 0, GP_SDL_FULLSCREEN);
-	}
+	backend = GP_BackendInit(backend_opts, "Particles", stderr);
 
 	if (backend == NULL) {
 		fprintf(stderr, "Failed to initalize backend '%s'\n", backend_opts);
@@ -74,7 +61,7 @@ static void init_backend(const char *backend_opts)
 
 int main(int argc, char *argv[])
 {
-	const char *backend_opts = "fb";
+	const char *backend_opts = "SDL";
 	int opt;
 	int pause_flag = 0;
 
