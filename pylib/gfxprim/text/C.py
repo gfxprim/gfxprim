@@ -1,0 +1,3 @@
+"""
+Submodule for constants
+"""
