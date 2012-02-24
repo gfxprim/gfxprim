@@ -4,7 +4,8 @@
 *.gen.c
 *.gen.h
 *.swp
-libGP.so*
-libGP.a
+*.so.*
+*.so
+*.a
 config.h
 config.gen.mk
