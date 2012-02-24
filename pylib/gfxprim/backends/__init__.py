@@ -39,6 +39,7 @@ def _init(module):
   import_members(backends_c, module, sub=strip_GP,
     exclude=const_regexes + [
       '^GP_Backend$',
+      '^gfxprim$',
       '^\w+_swigregister$',
       '^_\w+$'])
 

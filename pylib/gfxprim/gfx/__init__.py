@@ -12,9 +12,7 @@ def _init(module):
 
   # Import constants from the SWIG module
   from ..utils import import_members
-  const_regexes = [
-      '^GP_[A-Z0-9_]*$',
-      '^GP_PIXEL_x[A-Z0-9_]*$']
+  const_regexes = ['^GP_[A-Z0-9_]*$']
   import_members(gfx_c, C, include=const_regexes, sub=strip_GP)
 
   # Import functions from the SWIG module
@@ -22,7 +20,7 @@ def _init(module):
     exclude=const_regexes + [
       '.*_Raw',
       '^\w+_swigregister$',
-      '^core_c$',
+      '^gfxprim$',
       '^_\w+$'])
 
 _init(locals())

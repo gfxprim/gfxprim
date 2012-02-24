@@ -17,7 +17,7 @@ def _init(module):
   import_members(loaders_c, module, sub=strip_GP,
     exclude=[
       '^\w+_swigregister$',
-      '^core_c$',
+      '^gfxprim$',
       '^_\w+$'])
 
 _init(locals())
