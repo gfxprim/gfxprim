@@ -13,3 +13,5 @@ PYTHON_INCLUDE=/usr/include/python2.6
 PYTHON=PYTHONPATH=$$PYTHONPATH:${PYLIBSDIR} ${PYTHON_BIN} -Werror
 
 SWIGOPTS=-Wextra -w322,314 -I/usr/include/
+
+SWIG=swig
