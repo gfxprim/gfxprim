@@ -7,16 +7,16 @@ from . import extend_context
 extend_context.extend_context_class(Context)
 del extend_context
 
+from . import C
+
 # Import some members from the SWIG module
 def import_helper(module):
   from ..utils import import_members
 
-  # Constants (TODO consider a separate module)
+  # Constants
   const_regexes = [
       '^GP_[A-Z0-9_]*$',
       '^GP_PIXEL_x[A-Z0-9_]*$']
-  C = {}
-  module['C'] = C
   import_members(core_c, C, include=const_regexes)
 
   # Functions
