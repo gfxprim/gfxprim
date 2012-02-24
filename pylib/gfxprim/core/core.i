@@ -4,7 +4,7 @@
 #include "core/GP_Core.h"
 %}
 
-#define __attribute__(X) 
+#define __attribute__(X)
 
 %include <stdint.i>
 
@@ -47,21 +47,20 @@
  * GP_Context wrapping
  */
 
-/* Rename accesors to GP_Context attributes to "_attribute" */
+/* Make some members RO */
+%immutable GP_Context::w;
+%immutable GP_Context::h;
+%immutable GP_Context::pixel_type;
+%immutable GP_Context::bpp;
+%immutable GP_Context::bytes_per_row;
+/* Rename "internal" GP_Context */
 %rename("_%s") "GP_Context::pixels";
-%rename("_%s") "GP_Context::bpp";
-%rename("_%s") "GP_Context::bytes_per_row";
-%rename("_%s") "GP_Context::w";
-%rename("_%s") "GP_Context::h";
 %rename("_%s") "GP_Context::offset";
-%rename("_%s") "GP_Context::pixel_type";
 %rename("_%s") "GP_Context::axes_swap";
 %rename("_%s") "GP_Context::x_swap";
 %rename("_%s") "GP_Context::y_swap";
 %rename("_%s") "GP_Context::bit_endian";
 %rename("_%s") "GP_Context::free_pixels";
-/* This nice batch would work in swig 2.0, sigh:
- * %rename("_%s", regexmatch$name="^GP_Context::") ""; */
 
 
 %feature("autodoc", "Proxy of C GP_Context struct

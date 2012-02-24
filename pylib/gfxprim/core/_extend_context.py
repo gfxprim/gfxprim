@@ -15,21 +15,9 @@ def extend_context(_context):
   @extend(_context, name='__repr__')
   def context_str(self):
     return "<Context %dx%d, %dbpp, GP_Context %sowned, %s parent>" % (
-      self.w, self.h, self._bpp,
+      self.w, self.h, self.bpp,
       "" if self.thisown else "not ",
       "with" if self.parent else "no")
-
-  @add_swig_getmethod(_context)
-  def w(self):
-    return core_c.GP_ContextW(self)
-
-  @add_swig_getmethod(_context)
-  def h(self):
-    return core_c.GP_ContextH(self)
-
-  @add_swig_getmethod(_context)
-  def pixel_type(self):
-    return self._pixel_type
 
   @extend(_context)
   def Subcontext(self, x, y, w, h):
