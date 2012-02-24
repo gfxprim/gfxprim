@@ -1,4 +1,4 @@
-%module backends_c
+%module(package="gfxprim.backends") backends_c
 
 %{
 #include "GP_Backend.h"
