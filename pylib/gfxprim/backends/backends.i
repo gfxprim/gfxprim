@@ -10,7 +10,7 @@
 
 %feature("autodoc");
 
-%import ../core/core.swig
+%import ../core/core.i
 
 
 /*

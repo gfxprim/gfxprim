@@ -7,7 +7,7 @@
 
 #define __attribute__(X) 
 
-%import ../core/core.swig
+%import ../core/core.i
 
 %include <stdint.i>
 
