@@ -2,15 +2,20 @@ ifndef LIBNAME
 $(error LIBNAME not defined, fix your library Makefile)
 endif
 
+SWIG_SRC=$(LIBNAME).swig
+SWIG_PY=$(LIBNAME)_c.py
+SWIG_C=$(LIBNAME)_wrap.c
+SWIG_LIB=_$(LIBNAME)_c.so
+
 include $(TOPDIR)/config.gen.mk
 
 ifneq ($(SWIG),)
 
 INCLUDES+=$(addprefix -I$(TOPDIR)/include/, $(INCLUDE))
 
-all: _gfxprim_$(LIBNAME)_c.so gfxprim_$(LIBNAME)_c.py
+all: $(SWIG_LIB) $(SWIG_PY)
 
-gfxprim_$(LIBNAME)_wrap.c gfxprim_$(LIBNAME)_c.py: gfxprim_$(LIBNAME).swig
+$(SWIG_C) $(SWIG_PY): $(SWIG_SRC)
 ifdef VERBOSE
 	$(SWIG) $(SWIGOPTS) -python $(INCLUDES) $<
 else # VERBOSE
@@ -18,14 +23,14 @@ else # VERBOSE
 	@$(SWIG) $(SWIGOPTS) -python $(INCLUDES) $<
 endif # VERBOSE
 
-_gfxprim_$(LIBNAME)_c.so: gfxprim_$(LIBNAME)_wrap.c
+$(SWIG_LIB): $(SWIG_C)
 ifdef VERBOSE
-	$(CC) gfxprim_$(LIBNAME)_wrap.c $(CFLAGS) $(LDFLAGS) -I$(PYTHON_INCLUDE) --shared -lGP -L$(TOPDIR)/build/ -o _gfxprim_$(LIBNAME)_c.so
+	$(CC) $< $(CFLAGS) $(LDFLAGS) -I$(PYTHON_INCLUDE) --shared -lGP -L$(TOPDIR)/build/ -o $@
 else # VERBOSE
 	@echo "LD  $@"
-	@$(CC) gfxprim_$(LIBNAME)_wrap.c $(CFLAGS) $(LDFLAGS) -I$(PYTHON_INCLUDE) --shared -lGP -L$(TOPDIR)/build/ -o _gfxprim_$(LIBNAME)_c.so
+	@$(CC) $< $(CFLAGS) $(LDFLAGS) -I$(PYTHON_INCLUDE) --shared -lGP -L$(TOPDIR)/build/ -o $@
 endif # VERBOSE
 
 endif # ifneq ($(SWIG),)
 
-CLEAN+=gfxprim_$(LIBNAME)_wrap.c gfxprim_$(LIBNAME)_c.py _gfxprim_$(LIBNAME)_c.so
+CLEAN+=$(SWIG_C) $(SWIG_PY) $(SWIG_LIB)

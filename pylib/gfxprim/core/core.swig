@@ -1,4 +1,4 @@
-%module gfxprim_core_c
+%module core_c
 
 %{
 #include "core/GP_Core.h"
