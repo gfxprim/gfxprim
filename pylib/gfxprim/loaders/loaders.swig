@@ -1,4 +1,4 @@
-%module loaders_c
+%module(package="gfxprim.loaders") loaders_c
 
 %{
 #include "core/GP_Core.h"

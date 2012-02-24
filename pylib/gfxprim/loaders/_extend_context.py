@@ -1,20 +1,20 @@
 from ..utils import extend, add_swig_getmethod, add_swig_setmethod
 from . import loaders_c
 
-def extend_context_class(_context_class):
+def extend_context(_context):
   """
-  Extends _context_class class with loader module methods for calling convenience.
+  Extends _context class with loader module methods for calling convenience.
   Called once on loaders module inicialization.
   """
 
-  @extend(_context_class, name='load')
+  @extend(_context, name='load')
   @staticmethod
   def Load(filename):
     "Load image from given file, guess type."
     c = loaders_c.GP_LoadImage_Wrap(filename)
     return c
 
-  @extend(_context_class)
+  @extend(_context)
   def Save(self, filename, format=None):
     """Save the image in given format (or guess it from the extension)
 
