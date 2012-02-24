@@ -14,17 +14,17 @@ def extend_backend_class(_backend_class):
       self.name, "" if self.thisown else "not ")
 
   @extend(_backend_class)
-  def flip(self):
+  def Flip(self):
     "If display is buffered, this copies content of context onto display."
     return backends_c.GP_BackendFlip(self)
 
   @extend(_backend_class)
-  def update_rect(self, rect):
+  def UpdateRect(self, rect):
     "Update a rectangle on a buffered backend."
     return backends_c.GP_BackendUpdateRect(self, rect[0], rect[1], rect[2], rect[3])
 
   @extend(_backend_class)
-  def poll(self):
+  def Poll(self):
     "Poll the backend for events."
     return backends_c.GP_BackendPoll(self)
 

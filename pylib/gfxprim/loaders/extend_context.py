@@ -9,13 +9,13 @@ def extend_context_class(_context_class):
 
   @extend(_context_class, name='load')
   @staticmethod
-  def load(filename):
+  def Load(filename):
     "Load image from given file, guess type."
     c = loaders_c.GP_LoadImage_Wrap(filename)
     return c
 
   @extend(_context_class)
-  def save(self, filename, format=None):
+  def Save(self, filename, format=None):
     """Save the image in given format (or guess it from the extension)
 
     Currently, JPG, PNG and P[BGP]M are supported, but not for all 

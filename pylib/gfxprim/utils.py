@@ -30,7 +30,7 @@ def add_swig_setmethod(cls, name=None):
     cls.__swig_setmethods__[propname] = method
   return decf
 
-def import_members(from_, to, include=[], exclude=[]):
+def import_members(from_, to, include=[], exclude=[], sub=None):
   """Import members of `from_` to `to`. By default take all. If `exclude` is provided,
   use as a filter. If `include` is provided, ONLY include those.
   `include` and `exclude` are lists of regexes to match (include ^ and $)."""
@@ -56,8 +56,9 @@ def import_members(from_, to, include=[], exclude=[]):
           ok = False
 
     if ok:
+      newname = name if sub == None else sub(name)
       try:
-        to[name] = o
+        to[newname] = o
       except TypeError:
-        to.__setattr__(name, o)
+        to.__setattr__(newname, o)
 
