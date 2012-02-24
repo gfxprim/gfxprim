@@ -64,7 +64,7 @@ def extend_context(_context):
   @extend(_context)
   def RGBToPixel(self, r, g, b):
     "Convert RGB888 (values 0-255) to context pixel type."
-    return GP_RGBToPixel(r, g, b, self.pixel_type)
+    return core_c.GP_RGBToPixel(int(r), int(g), int(b), self.pixel_type)
 
   @extend(_context)
   def RGBAToPixel(self, r, g, b):
