@@ -39,7 +39,7 @@ def extend_context(_context):
     pixeltype_no = target_type ## TODO also accept PixelType
     return core_c.GP_ContextConvert(self, pixeltype_no)
 
-  @extend(_context, name='create')
+  @extend(_context, name='Create')
   @staticmethod
   def Create(w, h, pixeltype):
     "Allocate a new w*h bitmap of given type."
