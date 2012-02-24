@@ -59,5 +59,5 @@ def import_members(from_, to, include=[], exclude=[]):
       try:
         to[name] = o
       except TypeError:
-        to.__setattribute__(name, o)
+        to.__setattr__(name, o)
 
