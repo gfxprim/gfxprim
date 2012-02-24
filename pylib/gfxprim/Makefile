@@ -1,3 +1,3 @@
 TOPDIR=../..
-SUBDIRS=core loaders
+SUBDIRS=core loaders backends gfx filters text
 include $(TOPDIR)/include.mk
