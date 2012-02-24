@@ -2,7 +2,7 @@ ifndef LIBNAME
 $(error LIBNAME not defined, fix your library Makefile)
 endif
 
-SWIG_SRC=$(LIBNAME).swig
+SWIG_SRC=$(LIBNAME).i
 SWIG_PY=$(LIBNAME)_c.py
 SWIG_C=$(LIBNAME)_wrap.c
 SWIG_LIB=_$(LIBNAME)_c.so
