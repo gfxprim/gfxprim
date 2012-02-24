@@ -5,7 +5,7 @@
 #include "GP_Backends.h"
 %}
 
-#define __attribute__(X) 
+#define __attribute__(X)
 %include <stdint.i>
 
 %feature("autodoc");
@@ -27,6 +27,7 @@
 
 %ignore GP_Backend::priv;
 %ignore GP_Backend::fd_list;
+%immutable GP_Backend::name;
 %ignore GP_BackendFD;
 
 %include "GP_Backend.h"
