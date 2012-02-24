@@ -1,4 +1,4 @@
-%module core_c
+%module(package="gfxprim.core") core_c
 
 %{
 #include "core/GP_Core.h"
@@ -63,7 +63,6 @@
 /* This nice batch would work in swig 2.0, sigh:
  * %rename("_%s", regexmatch$name="^GP_Context::") ""; */
 
-%rename("Context") "GP_Context";
 
 %feature("autodoc", "Proxy of C GP_Context struct
 
@@ -72,7 +71,8 @@ All attributes of GP_Context are accessible directly as _attribute
 (self._w etc.), but it is reccomended to use redefined properties:
 
 self.w: Context width (transformed)
-self.h: Context width (transformed)
+self.h: Context height (transformed)
+self.pixel_type: Context pixel type (number)
 
 Some context-related methods are provided as class members for convenience.
 

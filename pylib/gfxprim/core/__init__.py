@@ -1,16 +1,17 @@
 from . import core_c
 
-Context = core_c.Context
+Context = core_c.GP_Context
 
-# Extend Context with convenience methods
-from . import extend_context
-extend_context.extend_context_class(Context)
-del extend_context
-
+# Constants
 from . import C
 
-# Import some members from the SWIG module
-def import_helper(module):
+def _init(module):
+
+  # Extend Context with convenience methods
+  from ._extend_context import extend_context
+  extend_context(Context)
+
+  # Import some members from the SWIG module
   import re
   from ..utils import import_members
 
@@ -33,5 +34,6 @@ def import_helper(module):
       '^\w+_swigregister$',
       '^cvar$',
       '^_\w+$'])
-import_helper(locals())
-del import_helper
+
+_init(locals())
+del _init
