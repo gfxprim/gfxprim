@@ -3,6 +3,8 @@ LIB_OBJECTS=$(shell ./get_objs.sh)
 all: libGP.a libGP.so libGP.so.0
 .PHONY: libGP.a libGP.so libGP.so.0
 
+rebuild: all
+
 clean:
 ifdef VERBOSE
 	rm -f libGP.a libGP.so libGP.so.0

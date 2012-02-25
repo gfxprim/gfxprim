@@ -3,9 +3,10 @@ SUBDIRS=include libs tests pylib demos build
 include post.mk
 
 libs: include
-
-tests: libs
-demos: libs
+build: libs
+tests: build
+pylib: build
+demos: build
 
 distclean:
 ifdef VERBOSE

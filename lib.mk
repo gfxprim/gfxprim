@@ -43,10 +43,12 @@ endif
 
 else
 # BUILDLIB = no
+include $(TOPDIR)/config.mk
 
+ifeq ($(REBUILD_LIBGP),yes)
 ALL+=rebuild_lib
 
 rebuild_lib:
 	@$(MAKE) --no-print-directory -C $(TOPDIR)/build/
-
+endif
 endif
