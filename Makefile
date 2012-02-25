@@ -1,30 +1,11 @@
 TOPDIR=.
-SUBDIRS=include libs tests pylib demos
+SUBDIRS=include libs tests pylib demos build
 include post.mk
-
-#
-# Make sure tests are build after library and 
-# rebuild library before entering test just
-# to be extra safe.
-#
-.PHONY: build
 
 libs: include
 
 tests: libs
 demos: libs
-
-build:
-	@$(MAKE) --no-print-directory -C build clean
-	@$(MAKE) --no-print-directory -C build
-
-clean:
-ifdef VERBOSE
-	$(MAKE) -C build clean
-else
-	@echo "DIR /build"
-	@$(MAKE) --no-print-directory -C build clean
-endif
 
 distclean:
 ifdef VERBOSE
