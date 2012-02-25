@@ -45,12 +45,13 @@ typedef struct GP_InputDriverLinux {
 	int abs_x;
 	int abs_y;
 	int abs_press;
-
+	
 	int abs_x_max;
 	int abs_y_max;
 	int abs_press_max;
 
-	uint8_t abs_flag;
+	uint8_t abs_flag:1;
+	uint8_t abs_pen_flag:1;
 } GP_InputDriverLinux;
 
 /*

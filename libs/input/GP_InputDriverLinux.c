@@ -82,17 +82,20 @@ void try_load_callibration(struct GP_InputDriverLinux *self)
 	}
 
 	if (!ioctl(self->fd, EVIOCGABS(ABS_X), abs)) {
-		GP_DEBUG(3, "ABS X = <%i,%i>", abs[1], abs[2]);
+		GP_DEBUG(3, "ABS X = <%i,%i> Fuzz %i Flat %i",
+                            abs[1], abs[2], abs[3], abs[4]);
 		self->abs_x_max = abs[2];
 	}
 	
 	if (!ioctl(self->fd, EVIOCGABS(ABS_Y), abs)) {
-		GP_DEBUG(3, "ABS Y = <%i,%i>", abs[1], abs[2]);
+		GP_DEBUG(3, "ABS Y = <%i,%i> Fuzz %i Flat %i",
+                            abs[1], abs[2], abs[3], abs[4]);
 		self->abs_y_max = abs[2];
 	}
 	
 	if (!ioctl(self->fd, EVIOCGABS(ABS_PRESSURE), abs)) {
-		GP_DEBUG(3, "ABS P = <%i,%i>", abs[1], abs[2]);
+		GP_DEBUG(3, "ABS P = <%i,%i> Fuzz %i Flat %i",
+                            abs[1], abs[2], abs[3], abs[4]);
 		self->abs_press_max = abs[2];
 	}
 }
@@ -136,6 +139,7 @@ struct GP_InputDriverLinux *GP_InputDriverLinuxOpen(const char *path)
 	ret->abs_y = 0;
 	ret->abs_press = 0;
 	ret->abs_flag = 0;
+	ret->abs_pen_flag = 0;
 
 	try_load_callibration(ret);
 
@@ -177,10 +181,12 @@ static void input_abs(struct GP_InputDriverLinux *self, struct input_event *ev)
 	case ABS_X:
 		self->abs_x = ev->value;
 		self->abs_flag = 1;
+		GP_DEBUG(4, "ABS X %i", ev->value);
 	break;
 	case ABS_Y:
 		self->abs_y = ev->value;
 		self->abs_flag = 1;
+		GP_DEBUG(4, "ABS Y %i", ev->value);
 	break;
 	case ABS_PRESSURE:
 		self->abs_press = ev->value;
@@ -194,8 +200,17 @@ static void input_abs(struct GP_InputDriverLinux *self, struct input_event *ev)
 static void input_key(struct GP_InputDriverLinux *self, struct input_event *ev)
 {
 	GP_DEBUG(4, "Key event");
-	
-	(void) self;
+
+	/*
+	 * We need to postpone btn touch down until
+	 * we read new coordinates for cursor.
+         */
+	if (ev->code == BTN_TOUCH) {
+		if (ev->value == 0)
+			self->abs_pen_flag = 1;
+		else
+			return;
+	}
 
 	GP_EventPushKey(ev->code, ev->value, NULL);
 }
@@ -211,12 +226,30 @@ static void do_sync(struct GP_InputDriverLinux *self)
 
 	if (self->abs_flag) {
 		self->abs_flag = 0;
+		
+		if (self->abs_x > self->abs_x_max)
+			self->abs_x = self->abs_x_max;
+		
+		if (self->abs_y > self->abs_y_max)
+			self->abs_y = self->abs_y_max;
+		
+		if (self->abs_x < 0)
+			self->abs_x = 0;
+		
+		if (self->abs_y < 0)
+			self->abs_y = 0;
+
 		GP_EventPushAbs(self->abs_x, self->abs_y, self->abs_press,
 		                self->abs_x_max, self->abs_y_max,
 				self->abs_press_max, NULL);
 		self->abs_x = 0;
 		self->abs_y = 0;
 		self->abs_press = 0;
+
+		if (self->abs_pen_flag) {
+			GP_EventPushKey(BTN_TOUCH, 1, NULL);
+			self->abs_pen_flag = 0;
+		}
 	}
 }
 
