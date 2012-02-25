@@ -67,7 +67,7 @@ static int sdl_params_to_flags(const char *param, GP_Size *w, GP_Size *h,
 	return 1;
 }
 
-static GP_Backend *backend_sdl_init(const char *params, const char *caption,
+static GP_Backend *backend_sdl_init(char *params, const char *caption,
                                     FILE *help)
 {
 	if (params == NULL)
@@ -76,22 +76,26 @@ static GP_Backend *backend_sdl_init(const char *params, const char *caption,
 	GP_Size w = 0, h = 0;
 	uint8_t flags = 0;
 	
-	const char *s = params;
+	char *s = params;
 
-	do {
+	for (;;) {
 		switch (*s) {
 		case ':':
-			s = '\0';
-		case '\0':
+			(*s) = '\0';
 			if (sdl_params_to_flags(params, &w, &h, &flags, help))
 				return NULL;
 			s++;
 			params = s;
 		break;
+		case '\0':
+			if (sdl_params_to_flags(params, &w, &h, &flags, help))
+				return NULL;
+			
+			return GP_BackendSDLInit(w, h, 0, flags, caption);
+		break;
 		}
-	} while (*(s++) != '\0');
-
-	return GP_BackendSDLInit(w, h, 0, flags, caption);
+		s++;
+	}
 }
 
 static void backend_fb_help(FILE *help, const char *err)
@@ -107,7 +111,7 @@ static void backend_fb_help(FILE *help, const char *err)
 	              "FB:[/dev/fbX]\n");
 }
 
-static GP_Backend *backend_fb_init(const char *params, const char *caption,
+static GP_Backend *backend_fb_init(char *params, const char *caption,
                                    FILE *help)
 {
 	const char *fb = "/dev/fb0";
@@ -127,7 +131,7 @@ static const char *backend_names[] = {
 	NULL,
 };
 
-static GP_Backend *(*backend_inits[])(const char *, const char *, FILE *) = {
+static GP_Backend *(*backend_inits[])(char *, const char *, FILE *) = {
 	backend_sdl_init,
 	backend_fb_init,
 	NULL,
@@ -171,7 +175,7 @@ static int get_backend(const char *name)
 	return -1;
 }
 
-static GP_Backend *init_backend(const char *name, const char *params,
+static GP_Backend *init_backend(const char *name, char *params,
                                 const char *caption, FILE *help)
 {
 	int i = get_backend(name);
@@ -206,7 +210,7 @@ GP_Backend *GP_BackendInit(const char *params, const char *caption, FILE *help)
 		}
 	}
 
-	GP_DEBUG(1, "Have backend name '%s'", buf);
+	GP_DEBUG(1, "Have backend name '%s' params '%s'", buf, backend_params);
 
 	return init_backend(buf, backend_params, caption, help);
 }
