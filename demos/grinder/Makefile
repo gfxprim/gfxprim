@@ -9,5 +9,6 @@ APPS=grinder
 
 grinder: params.o histogram.o
 
-include $(TOPDIR)/include.mk
+include $(TOPDIR)/pre.mk
 include $(TOPDIR)/app.mk
+include $(TOPDIR)/post.mk

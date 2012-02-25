@@ -1,6 +1,6 @@
 TOPDIR=.
 SUBDIRS=include libs tests pylib demos
-include include.mk
+include post.mk
 
 #
 # Make sure tests are build after library and 

@@ -1,3 +1,3 @@
 TOPDIR=..
 SUBDIRS=core
-include $(TOPDIR)/include.mk
+include $(TOPDIR)/post.mk

@@ -1,5 +1,5 @@
 #
-# This is makefile rule for generating C sources from python generators
+# This is makefile rule for generating C sources from python templates
 #
 ifndef LIBNAME
 $(error LIBNAME not defined, fix your library Makefile)
@@ -14,14 +14,14 @@ GENSOURCES=
 endif
 
 #
-# Generate genfiles for generated sources
+# We add these to CSOURCES which is handled in post.mk
 #
 CSOURCES+=$(GENSOURCES)
 
 #
 # Make the genrated headers actually build
 #
-all: $(GENHEADERS) $(GENSOURCES)
+ALL+=$(GENHEADERS) $(GENSOURCES)
 
 #
 # Base common templates location
@@ -49,4 +49,3 @@ else
 	@echo "GEN  $@"
 	@${PYTHON} ${TOPDIR}/pylib/bin/generate_file.py -t $(TEMPLATE_DIR) "$@.t" "$@"
 endif
-

@@ -15,9 +15,10 @@ CSOURCES=$(filter-out $(wildcard *.gen.c),$(wildcard *.c))
 LIBNAME=filters
 INCLUDE=core
 
+include $(TOPDIR)/pre.mk
 include $(TOPDIR)/gen.mk
-include $(TOPDIR)/include.mk
 include $(TOPDIR)/lib.mk
+include $(TOPDIR)/post.mk
 
 $(POINT_FILTERS) $(ARITHMETIC_FILTERS) $(STATS_FILTERS): $(TEMPLATE_DIR)/filter.c.t
 $(STATS_FILTERS): $(TEMPLATE_DIR)/filter.stats.c.t

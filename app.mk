@@ -4,8 +4,7 @@ endif
 
 LDLIBS+=-lm -ldl
 
-all: $(APPS)
-
+ALL+=$(APPS)
 CLEAN+=$(APPS)
 
 %: %.o

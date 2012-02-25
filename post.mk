@@ -5,19 +5,22 @@ ifndef SUBDIRS
 SUBDIRS=
 endif
 
-.PHONY: $(SUBDIRS) all clean help
+.PHONY: $(SUBDIRS) all clean rebuild help
 
 all: $(SUBDIRS)
 clean: $(SUBDIRS)
+rebuild: $(SUBDIRS)
 
 help:
 	@echo "***      Available targets      ***"
 	@echo ""
-	@echo "help: prints this help"
+	@echo "help:    prints this help"
 	@echo ""
-	@echo "clean: cleans current directory and all subdirectories"
+	@echo "clean:   cleans current directory and all subdirectories"
 	@echo ""
-	@echo "all:   make current directory and all subdirectories"
+	@echo "all:     make current directory and all subdirectories"
+	@echo ""
+	@echo "rebuild: does clean and all"
 	@echo ""
 	@echo "The default silent output could be turned off by defining"
 	@echo "'VERBOSE' shell variable as 'VERBOSE=1 make'"
@@ -38,10 +41,9 @@ ifeq ($(MAKECMDGOALS),)
 COMPILE=yes
 endif
 
-#
-# Potential python dependencies for generated files and scripts
-#
-PYTHON_FILES=$(shell find "${PYLIBSDIR}" -name '*.py')
+ifeq ($(MAKECMDGOALS),rebuild)
+COMPILE=yes
+endif
 
 #
 # 1. Generate and include dependencies for all C sources
@@ -54,7 +56,7 @@ ifeq ($(COMPILE),yes)
 -include $(DEPFILES)
 endif
 CLEAN+=$(subst .c,.dep,$(CSOURCES))
-OBJECTS=$(CSOURCES:.c=.o)
+OBJECTS+=$(CSOURCES:.c=.o)
 CLEAN+=$(OBJECTS)
 endif
 
@@ -111,3 +113,8 @@ else
 	@rm -f $(CLEAN)
 endif
 endif
+
+compile: $(DEPFILES) $(OBJECTS) $(ALL)
+
+rebuild: clean
+	@$(MAKE) --no-print-directory all
