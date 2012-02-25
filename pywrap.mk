@@ -33,4 +33,4 @@ endif # VERBOSE
 
 endif # ifneq ($(SWIG),)
 
-CLEAN+=$(SWIG_C) $(SWIG_PY) $(SWIG_LIB)
+CLEAN+=$(SWIG_C) $(SWIG_PY) $(SWIG_LIB) *.pyc
