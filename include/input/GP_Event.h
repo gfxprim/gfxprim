@@ -250,7 +250,7 @@ typedef struct GP_Event {
 	/* event */
 	uint16_t type;
 	uint32_t code;
-	union GP_EventValue val;	
+	union GP_EventValue val;
 
 	/* input device id */
 	uint32_t dev_id;

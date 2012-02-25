@@ -1,31 +1,27 @@
+#
+# Most of the libraries just generate object files that
+# are later linked in build into the libGP.so
+#
 ifndef LIBNAME
 $(error LIBNAME not defined, fix your library Makefile)
 endif
 
+#
+# Rules for single library, applied only when objects
+# are not linked to the libGP.so. This generates libGP_$(LIBNAME).
+#
+ifeq ($(BUILDLIB),yes)
+# BUILDLIB = yes
+
 LIB=libGP_$(LIBNAME)
 LIBP=$(TOPDIR)/build/
 
-#
-# If set to yes, builds single library for directory
-#
-ifeq ($(BUILDLIB),yes)
-all: $(LIBP)$(LIB).so $(LIBP)$(LIB).a
-endif
-
-ifeq ($(BUILDLIB),yes)
+ALL+=$(LIBP)$(LIB).so $(LIBP)$(LIB).a
 CLEAN+=$(LIBP)$(LIB).so $(LIBP)$(LIB).so.0 $(LIBP)$(LIB).a
-endif
+OBJS=$(CSOURCES:.c=.o)
 
-#
-# Trigger libGP.XX library rebuild
-#
-all: $(OBJECTS)
-	@$(MAKE) --no-print-directory -C $(TOPDIR)/build/
 
-#
-# Rules for single library
-#
-$(LIBP)$(LIB).so: $(OBJECTS)
+$(LIBP)$(LIB).so: $(OBJS)
 ifdef VERBOSE
 	rm -f $(LIBP)$(LIB).so.0
 	cd $(LIBP) && ln -s $(LIB).so $(LIB).so.0
@@ -37,7 +33,7 @@ else
 	@$(CC) -fPIC -dPIC --shared -Wl,-soname -Wl,$(LIB).so.0 $(OBJECTS) -o $@
 endif
 
-$(LIBP)$(LIB).a: $(OBJECTS)
+$(LIBP)$(LIB).a: $(OBJS)
 ifdef VERBOSE
 	$(AR) rcs $@ $(OBJECTS)
 else
@@ -45,4 +41,12 @@ else
 	@$(AR) rcs $@ $(OBJECTS)
 endif
 
-CLEAN+=$(OBJECTS)
+else
+# BUILDLIB = no
+
+ALL+=rebuild_lib
+
+rebuild_lib:
+	@$(MAKE) --no-print-directory -C $(TOPDIR)/build/
+
+endif

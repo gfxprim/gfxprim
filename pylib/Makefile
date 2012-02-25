@@ -4,10 +4,7 @@ SUBDIRS=gfxprim
 #
 # Add .pyc files to CLEAN list
 #
+PYTHON_FILES=$(shell find "${PYLIBSDIR}" -name '*.py')
 CLEAN+=$(patsubst %.py, %.pyc, ${PYTHON_FILES})
 
-include $(TOPDIR)/include.mk
-
-all:
-	@true
-
+include $(TOPDIR)/post.mk

@@ -20,29 +20,23 @@
  *                                                                           *
  *****************************************************************************/
 
-/*
+#include "core/GP_Common.h"
+#include "core/GP_Transform.h"
 
-  Catch all header for backends.
-
- */
-
-#ifndef BACKENDS_GP_BACKENDS_H
-#define BACKENDS_GP_BACKENDS_H
-
-/*
- * Base backend definitions.
- */
 #include "backends/GP_Backend.h"
 
-/*
- * Backends.
- */
-#include "backends/GP_LinuxFB.h"
-#include "backends/GP_SDL.h"
+void GP_BackendUpdateRect(GP_Backend *backend,
+                          GP_Coord x0, GP_Coord y0,
+                          GP_Coord x1, GP_Coord y1)
+{
+	GP_TRANSFORM_POINT(backend->context, x0, y0);
+	GP_TRANSFORM_POINT(backend->context, x1, y1);
 
-/*
- * Simplified backend initalization.
- */
-#include "backends/GP_BackendInit.h"
+	if (x1 < x0)
+		GP_SWAP(x0, x1);
+	
+	if (y1 < y0)
+		GP_SWAP(y0, y1);
 
-#endif /* BACKENDS_GP_BACKENDS_H */
+	backend->UpdateRect(backend, x0, y0, x1, y1);
+}

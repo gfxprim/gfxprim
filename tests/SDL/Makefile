@@ -9,5 +9,6 @@ APPS=pixeltest fileview fonttest linetest randomshapetest shapetest sierpinsky\
      symbolstest textaligntest trianglefps input blittest subcontext showimage\
      aatest mixpixeltest
 
-include $(TOPDIR)/include.mk
+include $(TOPDIR)/pre.mk
 include $(TOPDIR)/app.mk
+include $(TOPDIR)/post.mk

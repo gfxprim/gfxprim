@@ -1,3 +1,3 @@
 TOPDIR=..
 SUBDIRS=core SDL drivers
-include $(TOPDIR)/include.mk
+include $(TOPDIR)/post.mk

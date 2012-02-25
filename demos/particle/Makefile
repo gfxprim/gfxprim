@@ -9,5 +9,6 @@ APPS=particle_demo
 
 $(APPS): space.o
 
-include $(TOPDIR)/include.mk
+include $(TOPDIR)/pre.mk
 include $(TOPDIR)/app.mk
+include $(TOPDIR)/post.mk

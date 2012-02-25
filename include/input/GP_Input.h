@@ -20,29 +20,18 @@
  *                                                                           *
  *****************************************************************************/
 
-/*
-
-  Catch all header for backends.
-
- */
-
-#ifndef BACKENDS_GP_BACKENDS_H
-#define BACKENDS_GP_BACKENDS_H
+#ifndef INPUT_GP_INPUT_H
+#define INPUT_GP_INPUT_H
 
 /*
- * Base backend definitions.
+ * Base GP_Event definitions.
  */
-#include "backends/GP_Backend.h"
+#include "input/GP_Event.h"
 
 /*
- * Backends.
+ * Input drivers (semi internal).
  */
-#include "backends/GP_LinuxFB.h"
-#include "backends/GP_SDL.h"
+#include "input/GP_InputDriverSDL.h"
+#include "input/GP_InputDriverLinux.h"
 
-/*
- * Simplified backend initalization.
- */
-#include "backends/GP_BackendInit.h"
-
-#endif /* BACKENDS_GP_BACKENDS_H */
+#endif /* INPUT_GP_INPUT_H */
