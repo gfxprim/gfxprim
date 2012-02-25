@@ -67,7 +67,7 @@ class elem(object):
 
 
 def main():
-  bk = backends.BackendSDLInit(W, H, BPP, 0)
+  bk = backends.BackendSDLInit(W, H, BPP, 0, "Gravplots AA")
   assert bk
   print bk
   print "Modify source for parameters,"

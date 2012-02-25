@@ -29,7 +29,7 @@ class plotter(object):
 
 
 def main():
-  bk = backends.BackendSDLInit(W, H, 16, 0)
+  bk = backends.BackendSDLInit(W, H, 16, 0, "Sinplots AA")
   assert bk
   print bk
   print "Modify source for parameters,"
