@@ -3,6 +3,7 @@
 %{
 #include "GP_Backend.h"
 #include "GP_Backends.h"
+#include "core/GP_Debug.h"
 %}
 
 #define __attribute__(X)
