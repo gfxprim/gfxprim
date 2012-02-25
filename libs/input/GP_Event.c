@@ -255,8 +255,8 @@ void GP_EventPushAbs(uint32_t x, uint32_t y, uint32_t pressure,
 
 	/* set global cursor, pressure == 0 is penup */
 	if (pressure != 0) {
-		cur_state.cursor_x = x * screen_w / x_max;
-		cur_state.cursor_y = y * screen_h / y_max;
+		cur_state.cursor_x = x * (screen_w - 1) / x_max;
+		cur_state.cursor_y = y * (screen_h - 1) / y_max;
 	}
 
 	/* put it into queue */
