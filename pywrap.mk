@@ -13,7 +13,7 @@ ifneq ($(SWIG),)
 
 INCLUDES+=$(addprefix -I$(TOPDIR)/include/, $(INCLUDE))
 
-all: $(SWIG_LIB) $(SWIG_PY)
+ALL+=$(SWIG_LIB) $(SWIG_PY)
 
 $(SWIG_C) $(SWIG_PY): $(SWIG_SRC)
 ifdef VERBOSE

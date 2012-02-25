@@ -1,4 +1,6 @@
 TOPDIR=../../..
 LIBNAME=core
+
+include $(TOPDIR)/pre.mk
 include $(TOPDIR)/pywrap.mk
-include $(TOPDIR)/include.mk
+include $(TOPDIR)/post.mk
