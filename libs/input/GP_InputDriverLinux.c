@@ -138,8 +138,9 @@ struct GP_InputDriverLinux *GP_InputDriverLinuxOpen(const char *path)
 	ret->abs_x = 0;
 	ret->abs_y = 0;
 	ret->abs_press = 0;
-	ret->abs_flag = 0;
-	ret->abs_pen_flag = 0;
+	ret->abs_flag_x = 0;
+	ret->abs_flag_y = 0;
+	ret->abs_pen_flag = 1;
 
 	try_load_callibration(ret);
 
@@ -180,17 +181,16 @@ static void input_abs(struct GP_InputDriverLinux *self, struct input_event *ev)
 	switch (ev->code) {
 	case ABS_X:
 		self->abs_x = ev->value;
-		self->abs_flag = 1;
+		self->abs_flag_x = 1;
 		GP_DEBUG(4, "ABS X %i", ev->value);
 	break;
 	case ABS_Y:
 		self->abs_y = ev->value;
-		self->abs_flag = 1;
+		self->abs_flag_y = 1;
 		GP_DEBUG(4, "ABS Y %i", ev->value);
 	break;
 	case ABS_PRESSURE:
 		self->abs_press = ev->value;
-		self->abs_flag = 1;
 	break;
 	default:
 		GP_DEBUG(3, "Unhandled code %i", ev->code);
@@ -224,26 +224,40 @@ static void do_sync(struct GP_InputDriverLinux *self)
 		self->rel_y = 0;
 	}
 
-	if (self->abs_flag) {
-		self->abs_flag = 0;
-		
-		if (self->abs_x > self->abs_x_max)
-			self->abs_x = self->abs_x_max;
-		
-		if (self->abs_y > self->abs_y_max)
-			self->abs_y = self->abs_y_max;
-		
-		if (self->abs_x < 0)
-			self->abs_x = 0;
-		
-		if (self->abs_y < 0)
-			self->abs_y = 0;
+	if (self->abs_flag_x || self->abs_flag_y) {
+		uint32_t x = 0, y = 0, x_max = 0, y_max = 0;
 
-		GP_EventPushAbs(self->abs_x, self->abs_y, self->abs_press,
-		                self->abs_x_max, self->abs_y_max,
+		if (self->abs_flag_x) {
+			/* clipping */
+			if (self->abs_x > self->abs_x_max)
+				self->abs_x = self->abs_x_max;
+		
+			if (self->abs_x < 0)
+				self->abs_x = 0;
+			
+			x     = self->abs_x;
+			x_max = self->abs_x_max;		
+
+			self->abs_flag_x = 0;
+		}
+
+		if (self->abs_flag_y) {
+			/* clipping */
+			if (self->abs_y > self->abs_y_max)
+				self->abs_y = self->abs_y_max;
+		
+			if (self->abs_y < 0)
+				self->abs_y = 0;
+			
+			y     = self->abs_y;
+			y_max = self->abs_y_max;		
+
+			self->abs_flag_y = 0;
+		}
+
+		GP_EventPushAbs(x, y, self->abs_press, x_max, y_max,
 				self->abs_press_max, NULL);
-		self->abs_x = 0;
-		self->abs_y = 0;
+		
 		self->abs_press = 0;
 
 		if (self->abs_pen_flag) {

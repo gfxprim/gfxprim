@@ -253,11 +253,16 @@ void GP_EventPushAbs(uint32_t x, uint32_t y, uint32_t pressure,
 	
 	set_time(time);
 
-	/* set global cursor, pressure == 0 is penup */
-	if (pressure != 0) {
+	/* 
+	 * Set global cursor, the packet could be partial, eg. update only x or
+	 * only y. In such case x_max or y_max is zero.
+	 */
+
+	if (x_max != 0)	
 		cur_state.cursor_x = x * (screen_w - 1) / x_max;
+	
+	if (y_max != 0)
 		cur_state.cursor_y = y * (screen_h - 1) / y_max;
-	}
 
 	/* put it into queue */
 	event_put(&cur_state);
