@@ -100,7 +100,8 @@ typedef struct GP_Context {
 GP_Context *GP_ContextAlloc(GP_Size w, GP_Size h, GP_PixelType type);
 
 /*
- * Initalize context.
+ * Initalize context, pixels pointer is not dereferenced so it's safe to pass
+ * NULL there and allocate it later with size context->bpr * context->h.
  */
 void GP_ContextInit(GP_Context *context, GP_Size w, GP_Size h,
                     GP_PixelType type, void *pixels);
