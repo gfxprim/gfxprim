@@ -48,6 +48,17 @@ def python_module_installed(cfg, module):
 		sys.stderr.write('Yes\n')
 		return True
 
+def check_for_swig(cfg):
+	sys.stderr.write("Checking for working swig ... ")
+
+	ret = os.system("%s -version &> /dev/null" % cfg['SWIG'][0])
+
+	if ret:
+		sys.stderr.write('No\n')
+		cfg['SWIG'][0] = ''
+	else:
+		sys.stderr.write("Yes\n")
+
 #
 # Library checking api
 #
@@ -121,6 +132,7 @@ def basic_checks(cfg):
 		exit(1)
 	if not python_module_installed(cfg, 'jinja2'):
 		exit(1)
+	check_for_swig(cfg)
 	sys.stderr.write("\n")
 
 #
