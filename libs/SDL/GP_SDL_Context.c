@@ -19,11 +19,16 @@
  * Copyright (C) 2009-2010 Jiri "BlueBear" Dluhos                            *
  *                         <jiri.bluebear.dluhos@gmail.com>                  *
  *                                                                           *
- * Copyright (C) 2009-2010 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
 #include "GP_Core.h"
+
+#include "../../config.h"
+
+#ifdef HAVE_LIBSDL
+
 #include "GP_SDL.h"
 
 GP_RetCode GP_SDL_ContextFromSurface(GP_Context *context, SDL_Surface *surf)
@@ -59,3 +64,5 @@ GP_RetCode GP_SDL_ContextFromSurface(GP_Context *context, SDL_Surface *surf)
 
 	return GP_ESUCCESS;
 }
+
+#endif /* HAVE_LIBSDL */

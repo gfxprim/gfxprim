@@ -25,12 +25,12 @@
 
 #include "../../config.h"
 
+#ifdef HAVE_LIBSDL
+
 #include "core/GP_Debug.h"
 #include "input/GP_InputDriverSDL.h"
 #include "GP_Backend.h"
 #include "GP_SDL.h"
-
-#ifdef HAVE_LIBSDL
 
 #include <SDL/SDL.h>
 #include <SDL/SDL_mutex.h>
@@ -185,8 +185,13 @@ GP_Backend *GP_BackendSDLInit(GP_Size w, GP_Size h, uint8_t bpp, uint8_t flags,
 
 #else
 
-GP_Backend *GP_BackendSDLInit(GP_Size w, GP_Size h, uint8_t bpp, uint8_t flags,
-                              const char *caption)
+#include "GP_Backend.h"
+
+GP_Backend *GP_BackendSDLInit(GP_Size w __attribute__((unused)),
+                              GP_Size h __attribute__((unused)),
+			      uint8_t bpp __attribute__((unused)),
+			      uint8_t flags __attribute__((unused)),
+                              const char *caption __attribute__((unused)))
 {
 	return NULL;
 }
