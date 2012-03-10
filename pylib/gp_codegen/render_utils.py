@@ -31,7 +31,7 @@ def create_environment(config, template_dir):
   env.globals['BE'] = BE
   env.globals['len'] = len
   env.globals['error'] = template_error
-  env.globals['hex'] = lambda(x): hex(x).rstrip('L')
+  env.globals['hex'] = lambda x: hex(x).rstrip('L')
   # Propagate some python buildins
   env.globals['int'] = int;
   env.globals['float'] = float;
@@ -92,7 +92,10 @@ def load_gfxprimconfig(config_file = None):
        "BE": BE,
        "GfxPrimConfig": GfxPrimConfig
        }
-  execfile(config_file, globals(), l)
+  # python 3.2 doesn't have execfile, curse you python devs
+  # execfile(config_file, globals(), l)
+  exec(compile(open(config_file).read(), config_file, 'exec'), globals(), l)
+  
   config = l["config"]
   return config
 

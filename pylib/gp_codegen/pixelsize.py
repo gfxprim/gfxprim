@@ -20,12 +20,12 @@ class PixelSize(object):
     self.suffix = suffix
     if not self.suffix:
       if self.size == 0:
-	self.suffix = "INVALID"
+        self.suffix = "INVALID"
       else:
-	if bit_endian:
-	  self.suffix = '%dBPP_%s' % (size, bit_endian)
-	else:
-	  self.suffix = '%dBPP' % (size,)
+        if bit_endian:
+          self.suffix = '%dBPP_%s' % (size, bit_endian)
+        else:
+          self.suffix = '%dBPP' % (size,)
 
   def needs_bit_endian(self):
     return (self.size % 8) != 0
@@ -33,7 +33,7 @@ class PixelSize(object):
   def description(self):
     if self.bit_endian:
       return "pixel size %d, bit endian %s, suffix %s" % (self.size,
-	  self.bit_endian, self.suffix)
+        self.bit_endian, self.suffix)
     else:
       return "pixel size %d, suffix %s" % (self.size, self.suffix)
 
