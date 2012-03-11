@@ -1,3 +1,3 @@
 TOPDIR=..
-SUBDIRS=grinder fbshow particle
+SUBDIRS=grinder spiv particle
 include $(TOPDIR)/post.mk
