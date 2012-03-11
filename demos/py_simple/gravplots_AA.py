@@ -69,35 +69,35 @@ class elem(object):
 def main():
   bk = backends.BackendSDLInit(W, H, BPP, 0, "Gravplots AA")
   assert bk
-  print bk
-  print "Modify source for parameters,"
-  print "Kill to terminate ;-)"
+  print(bk)
+  print("Modify source for parameters,")
+  print("Kill to terminate ;-)")
   black = bk.context.RGBToPixel(0, 0, 0)
 
   es = [elem() for i in range(N)]
   while True:
     for e in es:
       for e2 in es:
-	if not (e is e2):
-	  e.grav(e2, 1.0)
+        if not (e is e2):
+          e.grav(e2, 1.0)
     for e in es:
       e.move(1.0)
       if AA:
-	x = int((e.x % W) * 0x100)
-	y = int(e.y * 0x100)
-	if e.vx > 0.2:
-	  gfx.VLineAA(bk.context, x + 0x100, y - 0x300, y + 0x300, black)
-	if e.vx < -0.2:
-	  gfx.VLineAA(bk.context, x - 0x100, y - 0x300, y + 0x300, black)
-	gfx.PutPixelAA(bk.context, x, y, bk.context.RGBToPixel(e.r, e.g, e.b))
+        x = int((e.x % W) * 0x100)
+        y = int(e.y * 0x100)
+        if e.vx > 0.2:
+          gfx.VLineAA(bk.context, x + 0x100, y - 0x300, y + 0x300, black)
+        if e.vx < -0.2:
+          gfx.VLineAA(bk.context, x - 0x100, y - 0x300, y + 0x300, black)
+        gfx.PutPixelAA(bk.context, x, y, bk.context.RGBToPixel(e.r, e.g, e.b))
       else:
-	x = int(e.x % W)
-	y = int(e.y)
-	if e.vx > 0.2:
-	  gfx.VLine(bk.context, x + 1, y - 2, y + 2, black)
-	if e.vx < -0.2:
-	  gfx.VLine(bk.context, x - 1, y - 2, y + 2, black)
-	core.PutPixel(bk.context, x, y, bk.context.RGBToPixel(e.r, e.g, e.b))
+        x = int(e.x % W)
+        y = int(e.y)
+        if e.vx > 0.2:
+          gfx.VLine(bk.context, x + 1, y - 2, y + 2, black)
+        if e.vx < -0.2:
+          gfx.VLine(bk.context, x - 1, y - 2, y + 2, black)
+          core.PutPixel(bk.context, x, y, bk.context.RGBToPixel(e.r, e.g, e.b))
     bk.Flip()
     global TIMEOUT
     if TIMEOUT > 0:

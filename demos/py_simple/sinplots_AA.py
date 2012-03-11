@@ -31,9 +31,9 @@ class plotter(object):
 def main():
   bk = backends.BackendSDLInit(W, H, 16, 0, "Sinplots AA")
   assert bk
-  print bk
-  print "Modify source for parameters,"
-  print "Kill to terminate ;-)"
+  print(bk)
+  print("Modify source for parameters,")
+  print("Kill to terminate ;-)")
   black = bk.context.RGBToPixel(0, 0, 0)
 
   ps = [plotter() for i in range(N)]
@@ -44,15 +44,15 @@ def main():
       (x, y) = p.pos(t)
       (r, g, b) = p.color(t)
       if AA:
-	x = int(x * 0x100)
-	y = int(y * 0x100)
-	gfx.VLineAA(bk.context, x + 0x100, y - 0x200, y + 0x200, black)
-	gfx.PutPixelAA(bk.context, x, y, bk.context.RGBToPixel(int(r), int(g), int(b)))
+        x = int(x * 0x100)
+        y = int(y * 0x100)
+        gfx.VLineAA(bk.context, x + 0x100, y - 0x200, y + 0x200, black)
+        gfx.PutPixelAA(bk.context, x, y, bk.context.RGBToPixel(int(r), int(g), int(b)))
       else:
-	x = int(x)
-	y = int(y)
-	gfx.VLine(bk.context, x + 1, y - 2, y + 2, black)
-	core.PutPixel(bk.context, x, y, bk.context.RGBToPixel(int(r), int(g), int(b)))
+        x = int(x)
+        y = int(y)
+        gfx.VLine(bk.context, x + 1, y - 2, y + 2, black)
+        core.PutPixel(bk.context, x, y, bk.context.RGBToPixel(int(r), int(g), int(b)))
     bk.Flip()
 
 if __name__ == '__main__':
