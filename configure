@@ -51,7 +51,7 @@ def python_module_installed(cfg, module):
 def check_for_swig(cfg):
 	sys.stderr.write("Checking for working swig ... ")
 
-	ret = os.system("%s -version &> /dev/null" % cfg['SWIG'][0])
+	ret = os.system("%s -version > /dev/null 2>&1" % cfg['SWIG'][0])
 
 	if ret:
 		sys.stderr.write('No\n')
