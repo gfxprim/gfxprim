@@ -123,8 +123,13 @@ static void text_draw_1BPP(GP_Context *context, GP_TextStyle *style, int x, int 
 %% else
 					unsigned int l;
 					
-					for (l = x_start; l < x_start + style->pixel_xmul; l++)
-						GP_MixPixel_Raw_Clipped_{{ pt.name }}(context, l, cur_y, fg, gray);
+					for (l = x_start; l < x_start + style->pixel_xmul; l++) {
+						unsigned int px = l;
+						unsigned int py = cur_y;
+						//TODO: optimize this
+						GP_TRANSFORM_POINT(context, px, py);
+						GP_MixPixel_Raw_Clipped_{{ pt.name }}(context, px, py, fg, gray);
+					}
 %% endif
 				}
 			}
