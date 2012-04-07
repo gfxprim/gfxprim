@@ -26,8 +26,6 @@ help:
 	@echo "'VERBOSE' shell variable as 'VERBOSE=1 make'"
 	@echo ""
 
-include $(TOPDIR)/config.mk
-
 #
 # Determine mode (eg do not generate anything if not in compile mode
 #
