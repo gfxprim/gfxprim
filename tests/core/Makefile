@@ -1,5 +1,7 @@
 TOPDIR=../..
 
+include $(TOPDIR)/pre.mk
+
 LIBNAME=core
 TESTSUITE=core_suite
 LDLIBS+=-lGP -L$(TOPDIR)/build/ -lcheck -lm -lSDL
