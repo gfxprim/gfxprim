@@ -7,10 +7,10 @@ rebuild: all
 
 clean:
 ifdef VERBOSE
-	rm -f libGP.a libGP.so libGP.so.0
+	rm -rf libGP.a libGP.so libGP.so.0 .lock
 else
-	@echo "RM  libGP.a libGP.so libGP.so.0"
-	@rm -f libGP.a libGP.so libGP.so.0
+	@echo "RM  libGP.a libGP.so libGP.so.0 .lock"
+	@rm -rf libGP.a libGP.so libGP.so.0 .lock
 endif
 
 libGP.a:
