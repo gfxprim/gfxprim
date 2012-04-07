@@ -94,8 +94,10 @@ def load_gfxprimconfig(config_file = None):
        }
   # python 3.2 doesn't have execfile, curse you python devs
   # execfile(config_file, globals(), l)
-  exec(compile(open(config_file).read(), config_file, 'exec'), globals(), l)
-  
+  cf = open(config_file)
+  exec(compile(cf.read(), config_file, 'exec'), globals(), l)
+  cf.close()
+
   config = l["config"]
   return config
 
