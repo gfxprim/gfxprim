@@ -3,7 +3,7 @@ from . import loaders_c
 def _init(module):
 
   # Extend Context with convenience methods
-  from _extend_context import extend_context
+  from ._extend_context import extend_context
   from ..core import Context
   extend_context(Context)
 
