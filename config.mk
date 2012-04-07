@@ -14,8 +14,6 @@ PYTHON=PYTHONPATH=$$PYTHONPATH:${PYLIBSDIR} ${PYTHON_BIN} -Werror
 
 SWIGOPTS=-Wextra -w322,314 -I/usr/include/
 
-SWIG=swig
-
 #
 # If set to yes, rebuilds libGP* after typing make
 # in any of the libs/*/ directories that are linked
