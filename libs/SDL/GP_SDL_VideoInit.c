@@ -19,9 +19,13 @@
  * Copyright (C) 2009-2010 Jiri "BlueBear" Dluhos                            *
  *                         <jiri.bluebear.dluhos@gmail.com>                  *
  *                                                                           *
- * Copyright (C) 2009-2010 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
+
+#include "../../config.h"
+
+#ifdef HAVE_LIBSDL
 
 #include "GP.h"
 #include "GP_SDL.h"
@@ -30,11 +34,10 @@
 #include <string.h>
 
 GP_RetCode GP_SDL_VideoInit(GP_Context *context, int width, int height,
-	int argc, char **argv)
+                            int argc, char **argv)
 {
-	if (context == NULL) {
+	if (context == NULL)
 		return GP_ENULLPTR;
-	}
 
 	/* switches that can be set on the command line */
 	int display_bpp = 0;
@@ -42,28 +45,22 @@ GP_RetCode GP_SDL_VideoInit(GP_Context *context, int width, int height,
 
 	if (argc > 0) {
 
-		if (argv == NULL) {
+		if (argv == NULL)
 			return GP_ENULLPTR;
-		}
 
 		/* extract settings from the command line */
 		int i;
 		for (i = 1; i < argc; i++) {
-			if (strcmp(argv[i], "--8bpp") == 0) {
+			if (strcmp(argv[i], "--8bpp") == 0)
 				display_bpp = 8;
-			}
-			else if (strcmp(argv[i], "--16bpp") == 0) {
+			else if (strcmp(argv[i], "--16bpp") == 0)
 				display_bpp = 16;
-			}
-			else if (strcmp(argv[i], "--24bpp") == 0) {
+			else if (strcmp(argv[i], "--24bpp") == 0)
 				display_bpp = 24;
-			}
-			else if (strcmp(argv[i], "--32bpp") == 0) {
+			else if (strcmp(argv[i], "--32bpp") == 0)
 				display_bpp = 32;
-			}
-			else if (strcmp(argv[i], "--debug") == 0) {
+			else if (strcmp(argv[i], "--debug") == 0)
 				debug = 1;
-			}
 		}
 	}
 
@@ -110,3 +107,5 @@ GP_RetCode GP_SDL_VideoInit(GP_Context *context, int width, int height,
 
 	return GP_ESUCCESS;
 }
+
+#endif /* HAVE_LIBSDL */

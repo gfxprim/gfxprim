@@ -16,10 +16,13 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2011 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
+#include "../../config.h"
+
+#ifdef HAVE_LIBSDL
 
 #include "GP_Event.h"
 #include "GP_InputDriverSDL.h"
@@ -134,3 +137,5 @@ void GP_InputDriverSDLEventPut(SDL_Event *ev)
 	break;
 	}
 }
+
+#endif /* HAVE_LIBSDL */

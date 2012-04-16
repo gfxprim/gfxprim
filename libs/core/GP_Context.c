@@ -161,6 +161,9 @@ GP_Context *GP_ContextSubContext(GP_Context *context, GP_Context *subcontext,
                                  GP_Coord x, GP_Coord y, GP_Size w, GP_Size h)
 {
 	GP_CHECK(context, "NULL context");
+
+	GP_TRANSFORM_RECT(context, x, y, w, h);
+
 	GP_CHECK(context->w >= x + w, "Subcontext w out of original context.");
 	GP_CHECK(context->h >= y + h, "Subcontext h out of original context.");
 	

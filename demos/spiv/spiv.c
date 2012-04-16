@@ -22,7 +22,7 @@
 
  /*
 
-   Simple image viewer.
+   SPIV -- Simple but Powerfull Image Viewer.
 
   */
 

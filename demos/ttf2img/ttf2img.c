@@ -16,53 +16,81 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2010 Jiri "BlueBear" Dluhos                            *
- *                         <jiri.bluebear.dluhos@gmail.com>                  *
- *                                                                           *
  * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
-#include "GP_Core.h"
+ /*
 
-#include "../../config.h"
+   Uses gfxprim to render small image with defined string.
 
-#ifdef HAVE_LIBSDL
+  */
 
-#include "GP_SDL.h"
+#include <GP.h>
 
-GP_RetCode GP_SDL_ContextFromSurface(GP_Context *context, SDL_Surface *surf)
+static const char help[] = {
+	"usage: ttf2img -f font.ttf -i file.png -s string [-d debug_level]\n",
+};
+
+static void print_help(int i)
 {
-	if (surf == NULL || surf->pixels == NULL || context == NULL)
-		return GP_ENULLPTR;
-
-	/* sanity checks on the SDL surface */
-	if (surf->format->BytesPerPixel == 0 || surf->format->BytesPerPixel > 4)
-		return GP_ENOIMPL;
-	
-	enum GP_PixelType pixeltype = GP_PixelRGBMatch(surf->format->Rmask,
-	                                               surf->format->Gmask,
-						       surf->format->Bmask,
-						       surf->format->Ashift,
-						       surf->format->BitsPerPixel);
-
-	if (pixeltype == GP_PIXEL_UNKNOWN)
-		return GP_ENOIMPL;
-
-	/* basic structure and size */
-	context->pixels = surf->pixels;
-	context->bpp = 8 * surf->format->BytesPerPixel;
-	context->pixel_type = pixeltype;
-	context->bytes_per_row = surf->pitch;
-	context->w = surf->w;
-	context->h = surf->h;
-
-	/* orientation */
-	context->axes_swap = 0;
-	context->x_swap = 0;
-	context->y_swap = 0;
-
-	return GP_ESUCCESS;
+	fputs(help, stderr);
+	exit(i);
 }
 
-#endif /* HAVE_LIBSDL */
+int main(int argc, char *argv[])
+{
+	const char *font_path = NULL;
+	const char *img_path = NULL;
+	const char *string   = "Foo Bar!";
+	int opt, debug_level = 0;
+	int img_w = 400, img_h = 100;
+
+	while ((opt = getopt(argc, argv, "d:f:i:s:")) != -1) {
+		switch (opt) {
+		case 'f':
+			font_path = optarg;
+		break;
+		case 'i':
+			img_path = optarg;
+		break;
+		case 'd':
+			debug_level = atoi(optarg);
+		break;
+		case 'h':
+			print_help(0);
+		break;
+		case 's':
+			string = optarg;
+		break;
+		default:
+			fprintf(stderr, "Invalid paramter '%c'\n", opt);
+			print_help(1);
+		}
+	}
+
+	if (font_path == NULL || img_path == NULL)
+		print_help(1);
+
+	GP_SetDebugLevel(debug_level);
+	
+	GP_Context *context = GP_ContextAlloc(img_w, img_h, GP_PIXEL_RGB888);
+
+	GP_Pixel black_pixel = GP_ColorToContextPixel(GP_COL_BLACK, context);
+	GP_Pixel white_pixel = GP_ColorToContextPixel(GP_COL_WHITE, context);
+
+	GP_Fill(context, white_pixel);
+
+	GP_TextStyle style = GP_DEFAULT_TEXT_STYLE;
+
+	style.font = GP_FontFaceLoad(font_path, 27, 0);
+
+	GP_Text(context, &style, img_w/2, img_h/2, GP_ALIGN_CENTER|GP_VALIGN_CENTER,
+	        black_pixel, white_pixel, string);
+
+	GP_SavePNG(img_path, context, NULL);
+	
+	GP_ContextFree(context);
+
+	return 0;
+}

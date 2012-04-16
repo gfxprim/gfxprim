@@ -22,7 +22,7 @@ def _init(module):
   extend_context(Context)
 
   # Extend GP_Backend with convenience methods
-  from _extend_backend import extend_backend
+  from ._extend_backend import extend_backend
   extend_backend(Backend)
 
   # Import some members from the SWIG module

@@ -52,7 +52,7 @@ static int do_align(GP_Coord *topleft_x, GP_Coord *topleft_y, int align,
 		return 1;
 	}
 
-	switch (align & 0xf0) {
+	switch (align & 0x70) {
 	case GP_VALIGN_ABOVE:
 		*topleft_y = y - height + 1;
 		break;
@@ -93,7 +93,7 @@ void GP_Text(GP_Context *context, const GP_TextStyle *style,
 	         "Invalid aligment flags");
 
 	GP_Text_Raw(context, style, topleft_x, topleft_y,
-	            fg_color, bg_color, str);
+	            align & GP_TEXT_NOBG, fg_color, bg_color, str);
 }
 
 

@@ -42,6 +42,9 @@
  *   - GP_VALIGN_CENTER centers the text vertically at the point
  *   - GP_VALIGN_BASELINE places the text baseline at the point
  *   - GP_VALIGN_BELOW (or BOTTOM) draws the text below the point
+ *   - GP_TEXT_NOBG mix the alpha pixels with data read from the context
+ *                  rather than mixing them with bg_color
+ *                  (which is slightly slower)
  */
 typedef enum GP_TextAttr {
 	GP_ALIGN_LEFT = 0x01,
@@ -53,13 +56,17 @@ typedef enum GP_TextAttr {
 	GP_VALIGN_BASELINE = 0x30,
 	GP_VALIGN_BELOW = 0x40,
 	GP_VALIGN_BOTTOM = GP_VALIGN_BELOW,
+	GP_TEXT_NOBG = 0x80,
 } GP_TextAttr;
 
 /*
  * Raw version, doesn't use Text aligment.
+ *
+ * If flags are set to GP_TEXT_NOBG the the bg_color is ignored and
+ * the context pixels are used for alpha mixing.
  */
 void GP_Text_Raw(GP_Context *context, const GP_TextStyle *style,
-                 GP_Coord x, GP_Coord y,
+                 GP_Coord x, GP_Coord y, uint8_t flags,
                  GP_Pixel fg_color, GP_Pixel bg_color,
 		 const char *str);
 

@@ -7,8 +7,6 @@ SWIG_PY=$(LIBNAME)_c.py
 SWIG_C=$(LIBNAME)_wrap.c
 SWIG_LIB=_$(LIBNAME)_c.so
 
-include $(TOPDIR)/config.gen.mk
-
 ifneq ($(SWIG),)
 
 INCLUDES+=$(addprefix -I$(TOPDIR)/include/, $(INCLUDE))

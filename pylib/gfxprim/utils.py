@@ -36,8 +36,8 @@ def import_members(from_, to, include=[], exclude=[], sub=None):
   `include` and `exclude` are lists of regexes to match (include ^ and $)."""
   assert not (include and exclude)
   import re
-  il = map(re.compile, include)
-  el = map(re.compile, exclude)
+  il = [re.compile(i) for i in include]
+  el = [re.compile(i) for i in exclude]
   for name in dir(from_):
     try:
       o = from_[name]

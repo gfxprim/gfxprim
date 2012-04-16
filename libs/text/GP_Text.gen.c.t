@@ -84,13 +84,7 @@ static void text_draw_1BPP(GP_Context *context, GP_TextStyle *style, int x, int 
 	}
 }
 
-%% for pt in pixeltypes
-%% if not pt.is_unknown()
-
-static void text_draw_8BPP_{{ pt.name }}(GP_Context *context, GP_TextStyle *style,
-                                         GP_Coord x, GP_Coord y,
-				         GP_Pixel fg, GP_Pixel bg, const char *str)
-{
+%% macro text_8BPP(pt, use_bg)
 	const char *p;
 
 	GP_Coord y0 = y;
@@ -120,10 +114,24 @@ static void text_draw_8BPP_{{ pt.name }}(GP_Context *context, GP_TextStyle *styl
 				if (!gray)
 					continue;
 
-				for (k = 0; k < style->pixel_ymul; k++)
-					GP_HLine(context, x_start, x_start + style->pixel_xmul - 1,
-					            y - (glyph->bearing_y - style->font->ascend) * y_mul,
+				int cur_y = y - (glyph->bearing_y - style->font->ascend) * y_mul;
+
+				for (k = 0; k < style->pixel_ymul; k++) {
+%% if use_bg
+					GP_HLine(context, x_start, x_start + style->pixel_xmul - 1, cur_y,
 				          	GP_MIX_PIXELS_{{ pt.name }}(fg, bg, gray));
+%% else
+					unsigned int l;
+					
+					for (l = x_start; l < x_start + style->pixel_xmul; l++) {
+						unsigned int px = l;
+						unsigned int py = cur_y;
+						//TODO: optimize this
+						GP_TRANSFORM_POINT(context, px, py);
+						GP_MixPixel_Raw_Clipped_{{ pt.name }}(context, px, py, fg, gray);
+					}
+%% endif
+				}
 			}
 
 			y += style->pixel_ymul + style->pixel_yspace;
@@ -134,20 +142,37 @@ static void text_draw_8BPP_{{ pt.name }}(GP_Context *context, GP_TextStyle *styl
 		if (p == str)
 			x -= glyph->bearing_x * x_mul;
 	}
+%% endmacro
+
+%% for pt in pixeltypes
+%% if not pt.is_unknown()
+
+static void text_8BPP_bg_{{ pt.name }}(GP_Context *context, GP_TextStyle *style,
+                                       GP_Coord x, GP_Coord y,
+				       GP_Pixel fg, GP_Pixel bg, const char *str)
+{
+{{ text_8BPP(pt, True) }}
+}
+
+static void text_8BPP_{{ pt.name }}(GP_Context *context, GP_TextStyle *style,
+                                    GP_Coord x, GP_Coord y,
+				    GP_Pixel fg, const char *str)
+{
+{{ text_8BPP(pt, False) }}
 }
 
 %% endif
 %% endfor
 
-static void text_draw_8BPP(GP_Context *context, GP_TextStyle *style,
-                           GP_Coord x, GP_Coord y,
-                           GP_Pixel fg, GP_Pixel bg, const char *str)
+static void text_8BPP_bg(GP_Context *context, GP_TextStyle *style,
+                         GP_Coord x, GP_Coord y,
+                         GP_Pixel fg, GP_Pixel bg, const char *str)
 {
 	switch (context->pixel_type) {
 %% for pt in pixeltypes
 %% if not pt.is_unknown()
 	case GP_PIXEL_{{ pt.name }}:
-		text_draw_8BPP_{{ pt.name }}(context, style, x, y, fg, bg, str);
+		text_8BPP_bg_{{ pt.name }}(context, style, x, y, fg, bg, str);
 	break;
 %% endif
 %% endfor
@@ -156,9 +181,25 @@ static void text_draw_8BPP(GP_Context *context, GP_TextStyle *style,
 	}
 }
 
+static void text_8BPP(GP_Context *context, GP_TextStyle *style,
+                      GP_Coord x, GP_Coord y,
+                      GP_Pixel fg, const char *str)
+{
+	switch (context->pixel_type) {
+%% for pt in pixeltypes
+%% if not pt.is_unknown()
+	case GP_PIXEL_{{ pt.name }}:
+		text_8BPP_{{ pt.name }}(context, style, x, y, fg, str);
+	break;
+%% endif
+%% endfor
+	default:
+		GP_ABORT("Invalid context->pixel_type");
+	}
+}
 
 void GP_Text_Raw(GP_Context *context, GP_TextStyle *style,
-                 GP_Coord x, GP_Coord y,
+                 GP_Coord x, GP_Coord y, uint8_t flags,
                  GP_Pixel fg, GP_Pixel bg, const char *str)
 {
 	switch (style->font->glyph_bitmap_format) {
@@ -166,7 +207,10 @@ void GP_Text_Raw(GP_Context *context, GP_TextStyle *style,
 		text_draw_1BPP(context, style, x, y, fg, str);
 	break;
 	case GP_FONT_BITMAP_8BPP:
-		text_draw_8BPP(context, style, x, y, fg, bg, str);
+		if (flags)
+			text_8BPP(context, style, x, y, fg, str);
+		else
+			text_8BPP_bg(context, style, x, y, fg, bg, str);
 	break;
 	default:
 		GP_ABORT("Invalid font glyph bitmap format");

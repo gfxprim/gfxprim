@@ -7,9 +7,9 @@ CFLAGS+=-pthread
 LDFLAGS+=-pthread -lrt
 LDLIBS+=-lGP -lGP_backends -lSDL -L$(TOPDIR)/build/
 
-APPS=fbshow
+APPS=spiv
 
-fbshow: cpu_timer.o
+spiv: cpu_timer.o
 
 include $(TOPDIR)/pre.mk
 include $(TOPDIR)/app.mk

@@ -40,10 +40,10 @@ class GfxPrimConfig(object):
     # Dictionary of all pixelsizes by BPP { bpp : list of BE, LE }
     self.pixelsizes_by_bpp = dict()
     for i in self.pixelsizes:
-    	if i.size not in self.pixelsizes_by_bpp:
-		self.pixelsizes_by_bpp[i.size] = [i.bit_endian]
-	else:
-		self.pixelsizes_by_bpp[i.size].append(i.bit_endian)
+        if i.size not in self.pixelsizes_by_bpp:
+                self.pixelsizes_by_bpp[i.size] = [i.bit_endian]
+        else:
+                self.pixelsizes_by_bpp[i.size].append(i.bit_endian)
 
     # Set of all encountered channel names
     self.channels = set()
