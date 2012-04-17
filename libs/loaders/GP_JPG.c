@@ -16,7 +16,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2011 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
@@ -43,24 +43,27 @@
 
 #include <jpeglib.h>
 
-GP_RetCode GP_OpenJPG(const char *src_path, FILE **f)
+int GP_OpenJPG(const char *src_path, FILE **f)
 {
+	int err;
+	
 	*f = fopen(src_path, "rb");
 
 	if (*f == NULL) {
+		err = errno;
 		GP_DEBUG(1, "Failed to open '%s' : %s",
 		            src_path, strerror(errno));
-		return GP_EBADFILE;
+		errno = err;
+		return 1;
 	}
 
 	//TODO: check signature and rewind the stream
 	
-	return GP_ESUCCESS;
+	return 0;
 }
 
 struct my_jpg_err {
 	struct jpeg_error_mgr error_mgr;
-
 	jmp_buf setjmp_buf;
 };
 
@@ -91,21 +94,19 @@ static const char *get_colorspace(J_COLOR_SPACE color_space)
 	};
 }
 
-GP_RetCode GP_ReadJPG(FILE *f, GP_Context **res,
-                      GP_ProgressCallback *callback)
+GP_Context *GP_ReadJPG(FILE *f, GP_ProgressCallback *callback)
 {
 	struct jpeg_decompress_struct cinfo;
 	struct my_jpg_err my_err;
 	GP_Context *ret = NULL;
+	int err;
 
 	cinfo.err = jpeg_std_error(&my_err.error_mgr);
 	my_err.error_mgr.error_exit = my_error_exit;
 
 	if (setjmp(my_err.setjmp_buf)) {
-		jpeg_destroy_decompress(&cinfo);
-		GP_ContextFree(ret);
-		fclose(f);
-		return GP_EBADFILE;
+		err = EIO;
+		goto err2;
 	}
 
 	jpeg_create_decompress(&cinfo);
@@ -134,9 +135,8 @@ GP_RetCode GP_ReadJPG(FILE *f, GP_Context **res,
 	if (pixel_type == GP_PIXEL_UNKNOWN) {
 		GP_DEBUG(1, "Can't handle %s JPEG output format",
 		            get_colorspace(cinfo.out_color_space));
-		jpeg_destroy_decompress(&cinfo);
-		fclose(f);
-		return GP_EBADFILE;
+		err = ENOSYS;
+		goto err1;
 	}
 
 	ret = GP_ContextAlloc(cinfo.image_width, cinfo.image_height,
@@ -144,9 +144,8 @@ GP_RetCode GP_ReadJPG(FILE *f, GP_Context **res,
 
 	if (ret == NULL) {
 		GP_DEBUG(1, "Malloc failed :(");
-		jpeg_destroy_decompress(&cinfo);
-		fclose(f);
-		return GP_ENOMEM;
+		err = ENOMEM;
+		goto err1;
 	}
 
 	jpeg_start_decompress(&cinfo);
@@ -171,60 +170,65 @@ GP_RetCode GP_ReadJPG(FILE *f, GP_Context **res,
 	
 		if (GP_ProgressCallbackReport(callback, y, ret->h, ret->w)) {
 			GP_DEBUG(1, "Operation aborted");
-			jpeg_destroy_decompress(&cinfo);
-			fclose(f);
-			GP_ContextFree(ret);
-			return GP_EINTR;
+			err = ECANCELED;
+			goto err2;
 		}
 	}
 
 	jpeg_finish_decompress(&cinfo);
 	jpeg_destroy_decompress(&cinfo);
 	fclose(f);
-	*res = ret;
 
 	GP_ProgressCallbackDone(callback);
-	return GP_ESUCCESS;
+	
+	return ret;
+err2:
+	GP_ContextFree(ret);
+err1:
+	jpeg_destroy_decompress(&cinfo);
+	fclose(f);
+	errno = err;
+	return NULL;
 }
 
-GP_RetCode GP_LoadJPG(const char *src_path, GP_Context **res,
-                      GP_ProgressCallback *callback)
+GP_Context *GP_LoadJPG(const char *src_path, GP_ProgressCallback *callback)
 {
 	FILE *f;
-	GP_RetCode ret;
 
-	if ((ret = GP_OpenJPG(src_path, &f)))
-		return ret;
+	if (GP_OpenJPG(src_path, &f))
+		return NULL;
 
-	return GP_ReadJPG(f, res, callback);
+	return GP_ReadJPG(f, callback);
 }
 
-GP_RetCode GP_SaveJPG(const char *dst_path, const GP_Context *src,
-                      GP_ProgressCallback *callback)
+int GP_SaveJPG(const char *dst_path, const GP_Context *src,
+               GP_ProgressCallback *callback)
 {
 	FILE *f;
-	GP_RetCode ret;
 	struct jpeg_compress_struct cinfo;
 	struct my_jpg_err my_err;
+	int err;
 
 	if (src->pixel_type != GP_PIXEL_RGB888 &&
 	    src->pixel_type != GP_PIXEL_G8) {
 		GP_DEBUG(1, "Can't save png with pixel type %s",
 		         GP_PixelTypeName(src->pixel_type));
-		return GP_ENOIMPL;
+		errno = ENOSYS;
+		return 1;
 	}
 
 	f = fopen(dst_path, "wb");
 
 	if (f == NULL) {
+		err = errno;
 		GP_DEBUG(1, "Failed to open '%s' for writing: %s",
 		         dst_path, strerror(errno));
-		return GP_EBADFILE;
+		goto err0;
 	}
 	
 	if (setjmp(my_err.setjmp_buf)) {
-		ret = GP_EBADFILE;;
-		goto err1;
+		err = EIO;
+		goto err2;
 	}
 
 	cinfo.err = jpeg_std_error(&my_err.error_mgr);
@@ -267,56 +271,61 @@ GP_RetCode GP_SaveJPG(const char *dst_path, const GP_Context *src,
 	
 		if (GP_ProgressCallbackReport(callback, y, src->h, src->w)) {
 			GP_DEBUG(1, "Operation aborted");
-			ret = GP_EINTR;
-			goto err1;
+			err = ECANCELED;
+			goto err2;
 		}
 	}
 
 	jpeg_finish_compress(&cinfo);
 
 	if (fclose(f)) {
+		err = errno;
 		GP_DEBUG(1, "Failed to close file '%s': %s",
 		         dst_path, strerror(errno));
-		return GP_EBADFILE;
+		goto err1;
 	}
 
 	GP_ProgressCallbackDone(callback);
-	return GP_ESUCCESS;
+	return 0;
 //TODO: is cinfo allocated?
-err1:
+err2:
 	jpeg_destroy_compress(&cinfo);
 	fclose(f);
+err1:
 	unlink(dst_path);
-	return ret;
+err0:
+	errno = err;
+	return 1;
 }
 
 #else
 
-GP_RetCode GP_OpenJPG(const char GP_UNUSED(*src_path),
-                      FILE GP_UNUSED(**f))
+int GP_OpenJPG(const char GP_UNUSED(*src_path), FILE GP_UNUSED(**f))
 {
-	return GP_ENOIMPL;
+	errno = ENOSYS;
+	return 1;
 }
 
-GP_RetCode GP_ReadJPG(FILE GP_UNUSED(*f),
-                      GP_Context GP_UNUSED(**res),
+GP_Context *GP_ReadJPG(FILE GP_UNUSED(*f),
                       GP_ProgressCallback GP_UNUSED(*callback))
 {
-	return GP_ENOIMPL;
+	errno = ENOSYS;
+	return NULL;
 }
 
-GP_RetCode GP_LoadJPG(const char GP_UNUSED(*src_path),
-                      GP_Context GP_UNUSED(**res),
-                      GP_ProgressCallback GP_UNUSED(*callback))
+GP_Context *GP_LoadJPG(const char GP_UNUSED(*src_path),
+                       GP_ProgressCallback GP_UNUSED(*callback))
 {
-	return GP_ENOIMPL;
+	errno = ENOSYS;
+	return NULL;
 }
 
-GP_RetCode GP_SaveJPG(const char GP_UNUSED(*dst_path),
-                      const GP_Context GP_UNUSED(*src),
-                      GP_ProgressCallback GP_UNUSED(*callback))
+int GP_SaveJPG(const char GP_UNUSED(*dst_path),
+               const GP_Context GP_UNUSED(*src),
+               GP_ProgressCallback GP_UNUSED(*callback))
 {
-	return GP_ENOIMPL;
+	errno = ENOSYS;
+	return 1;
 }
 
 #endif /* HAVE_JPEG */

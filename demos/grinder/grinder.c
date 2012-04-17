@@ -24,6 +24,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
+#include <errno.h>
 
 #include "GP.h"
 
@@ -601,7 +602,7 @@ static GP_RetCode arithmetic(GP_Context **c, const char *params)
 
 	GP_Context *img, *res = NULL;
 
-	if (GP_LoadImage(file, &img, progress_callback)) {
+	if ((img = GP_LoadImage(file, progress_callback)) == NULL) {
 		print_error("arithmetic: Invalid image.");
 		return GP_EINVAL;
 	}
@@ -851,7 +852,6 @@ static void save_by_fmt(struct GP_Context *bitmap, const char *name, const char 
 int main(int argc, char *argv[])
 {
 	GP_Context *bitmap;
-	GP_RetCode ret;
 	int opt, i;
 	const char *out_fmt = "ppm";
 
@@ -906,9 +906,8 @@ int main(int argc, char *argv[])
 
 		progress_prefix = "Loading image";
 
-		if ((ret = GP_LoadImage(argv[i], &bitmap, progress_callback))) {
-			fprintf(stderr, "Failed to load bitmap: %s\n",
-			                GP_RetCodeName(ret));
+		if ((bitmap = GP_LoadImage(argv[i], progress_callback)) == NULL) {
+			fprintf(stderr, "Failed to load bitmap: %s\n", strerror(errno));
 			return 1;
 		}
 		

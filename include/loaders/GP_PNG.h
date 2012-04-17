@@ -16,7 +16,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2011 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
@@ -33,28 +33,42 @@
 #include "core/GP_Context.h"
 
 /*
- * Opens up file and checks signature. Upon successful return the file
- * possition would be set to eight bytes (exactly after the PNG signature).
+ * The possible errno values:
+ *
+ * - Anything FILE operation may return (fopen(), fclose(), fseek(), ...).
+ * - EIO for png_read()/png_write() failure
+ * - ENOSYS for not implemented bitmap format
+ * - ENOMEM from malloc()
+ * - EILSEQ for wrong image signature/data
+ * - ECANCELED when call was aborted from callback
  */
-GP_RetCode GP_OpenPNG(const char *src_path, FILE **f);
+
+/*
+ * Opens up file and checks signature. Upon successful return (zero is
+ * returned) the file possition would be set to eight bytes (exactly after the
+ * PNG signature).
+ */
+int GP_OpenPNG(const char *src_path, FILE **f);
 
 /*
  * Reads PNG from an open FILE. Expects the file possition set after the eight
  * bytes PNG signature.
+ * 
+ * Upon succesfull return pointer to newly allocated context is returned.
+ * Otherwise NULL is returned and errno is filled.
  */
-GP_RetCode GP_ReadPNG(FILE *f, GP_Context **res,
-                      GP_ProgressCallback *callback);
+GP_Context *GP_ReadPNG(FILE *f, GP_ProgressCallback *callback);
 
 /*
- * Loads a PNG file into GP_Context. The Context is newly allocated.
+ * Does both GP_OpenPNG and GP_ReadPNG at once.
  */
-GP_RetCode GP_LoadPNG(const char *src_path, GP_Context **res,
-                      GP_ProgressCallback *callback);
+GP_Context *GP_LoadPNG(const char *src_path, GP_ProgressCallback *callback);
 
 /*
- * Saves PNG to a file.
+ * Saves PNG to a file. Zero is returned on succes. Upon failure non-zero is
+ * returned and errno is filled accordingly.
  */
-GP_RetCode GP_SavePNG(const char *dst_path, const GP_Context *src,
-                      GP_ProgressCallback *callback);
+int GP_SavePNG(const char *dst_path, const GP_Context *src,
+               GP_ProgressCallback *callback);
 
 #endif /* LOADERS_GP_PNG_H */

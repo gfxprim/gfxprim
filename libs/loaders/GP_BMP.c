@@ -146,14 +146,13 @@ static uint32_t get_palette_size(struct bitmap_info_header *header)
 	return (1 << header->bpp);
 }
 
-static GP_RetCode read_bitmap_info_header(FILE *f,
-                                          struct bitmap_info_header *header)
+static int read_bitmap_info_header(FILE *f, struct bitmap_info_header *header)
 {
 	uint8_t buf[36];
 
 	if (fread(buf, 1, sizeof(buf), f) != sizeof(buf)) {
 		GP_DEBUG(1, "Failed to read bitmap info header");
-		return GP_EBADFILE;
+		return EIO;
 	}
 
 	header->w              = BUF_TO_4(buf, 0);
@@ -175,17 +174,16 @@ static GP_RetCode read_bitmap_info_header(FILE *f,
 	            get_palette_size(header),
 	            bitmap_compress_name(header->compress_type));
 
-	return GP_ESUCCESS;
+	return 0;
 }
 
-static GP_RetCode read_bitmap_core_header(FILE *f,
-                                          struct bitmap_info_header *header)
+static int read_bitmap_core_header(FILE *f, struct bitmap_info_header *header)
 {
 	uint8_t buf[12];
 
 	if (fread(buf, 1, sizeof(buf), f) != sizeof(buf)) {
 		GP_DEBUG(1, "Failed to read bitmap core header");
-		return GP_EBADFILE;
+		return EIO;
 	}
 	
 	header->w = BUF_TO_2(buf, 0);
@@ -204,25 +202,25 @@ static GP_RetCode read_bitmap_core_header(FILE *f,
 	GP_DEBUG(2, "Have BMP bitmap size %"PRId32"x%"PRId32" %"PRIu16" bpp",
 	            header->h, header->w, header->bpp);
 
-	return GP_ESUCCESS;
+	return 0;
 }
 
-static GP_RetCode read_bitmap_header(FILE *f,
-                                     struct bitmap_info_header *header)
+static int read_bitmap_header(FILE *f, struct bitmap_info_header *header)
 {
 	uint8_t buf[8];
-	GP_RetCode ret;
-	
+	int err;
+
 	if (fseek(f, BMP_HEADER_OFFSET, SEEK_SET)) {
+		err = errno;
 		GP_DEBUG(1, "fseek(f, 0x%02x) failed: '%s'",
 		            BMP_HEADER_OFFSET, strerror(errno));
-		return GP_EBADFILE;
+		return err;
 	}
 
 	/* Read info header size, header size determines header type */
 	if (fread(buf, 1, sizeof(buf), f) != sizeof(buf)) {
 		GP_DEBUG(1, "Failed to read info header size");
-		return GP_EBADFILE;
+		return EIO;
 	}
 
 	header->pixel_offset = BUF_TO_4(buf, 0);
@@ -233,36 +231,37 @@ static GP_RetCode read_bitmap_header(FILE *f,
 
 	switch (header->header_size) {
 	case BITMAPCOREHEADER:
-		ret = read_bitmap_core_header(f, header);
+		err = read_bitmap_core_header(f, header);
 	break;
 	case BITMAPCOREHEADER2:
-		return GP_ENOIMPL;
+		return ENOSYS;
 	/* The bitmap core header only adds filelds to the end of the header */
 	case BITMAPINFOHEADER:
 	case BITMAPINFOHEADER2:
 	case BITMAPINFOHEADER3:
 	case BITMAPINFOHEADER4:
-		ret = read_bitmap_info_header(f, header);
+		err = read_bitmap_info_header(f, header);
 	break;
 	default:
 		GP_DEBUG(1, "Unknown header type, continuing anyway");
-		ret = read_bitmap_info_header(f, header);
+		err = read_bitmap_info_header(f, header);
 	break;
 	};
 	
-	return ret;
+	return err;
 }
 
 /*
  * Reads palette, the format is R G B X, each one byte.
  */
-GP_RetCode read_bitmap_palette(FILE *f, struct bitmap_info_header *header,
+static int read_bitmap_palette(FILE *f, struct bitmap_info_header *header,
                                GP_Pixel *palette)
 {
-	uint32_t i;
 	uint32_t palette_colors = get_palette_size(header);
 	uint32_t palette_offset = header->header_size + 14;
 	uint8_t pixel_size;
+	uint32_t i;
+	int err;
 
 	switch (header->header_size) {
 	case BITMAPCOREHEADER:
@@ -278,9 +277,10 @@ GP_RetCode read_bitmap_palette(FILE *f, struct bitmap_info_header *header,
 		    palette_offset, palette_offset, pixel_size);
 
 	if (fseek(f, palette_offset, SEEK_SET)) {
+		err = errno;
 		GP_DEBUG(1, "fseek(f, 0x%02x) failed: '%s'",
 		            BMP_HEADER_OFFSET, strerror(errno));
-		return GP_EBADFILE;
+		return err;
 	}
 
 	for (i = 0; i < palette_colors; i++) {
@@ -288,7 +288,7 @@ GP_RetCode read_bitmap_palette(FILE *f, struct bitmap_info_header *header,
 
 		if (fread(buf, 1, pixel_size, f) != pixel_size) {
 			GP_DEBUG(1, "Failed to read palette %"PRIu32, i);
-			return GP_EBADFILE;
+			return EIO;
 		}
 		
 		palette[i] = GP_Pixel_CREATE_RGB888(buf[2], buf[1], buf[0]);
@@ -299,25 +299,27 @@ GP_RetCode read_bitmap_palette(FILE *f, struct bitmap_info_header *header,
 	        	    GP_Pixel_GET_B_RGB888(palette[i]));
 	}
 
-	return GP_ESUCCESS;
+	return 0;
 }
 
-GP_RetCode seek_pixels_offset(struct bitmap_info_header *header,
-                              FILE *f)
+static int seek_pixels_offset(struct bitmap_info_header *header, FILE *f)
 {
+	int err;
+
 	GP_DEBUG(2, "Offset to BMP pixels is 0x%x (%ubytes)",
 	            header->pixel_offset, header->pixel_offset);
 
 	if (fseek(f, header->pixel_offset, SEEK_SET)) {
+		err = errno;
 		GP_DEBUG(1, "fseek(f, 0x%02x) failed: '%s'",
 		            header->pixel_offset, strerror(errno));
-		return GP_EBADFILE;
+		return err;
 	}
 
-	return GP_ESUCCESS;
+	return 0;
 }
 
-GP_PixelType match_pixel_type(struct bitmap_info_header *header)
+static GP_PixelType match_pixel_type(struct bitmap_info_header *header)
 {
 	switch (header->bpp) {
 	case 1:
@@ -390,18 +392,18 @@ static uint8_t get_idx(struct bitmap_info_header *header,
 	return 0;
 }
 
-GP_RetCode read_palette(FILE *f, struct bitmap_info_header *header,
+static int read_palette(FILE *f, struct bitmap_info_header *header,
                         GP_Context *context, GP_ProgressCallback *callback)
 {
-	GP_RetCode ret;
 	uint32_t palette_size = get_palette_size(header);
 	GP_Pixel palette[get_palette_size(header)];
+	int err;
 
-	if ((ret = read_bitmap_palette(f, header, palette)))
-		return ret;
+	if ((err = read_bitmap_palette(f, header, palette)))
+		return err;
 	
-	if ((ret = seek_pixels_offset(header, f)))
-		return ret;
+	if ((err = seek_pixels_offset(header, f)))
+		return err;
 	
 	uint32_t row_size = bitmap_row_size(header);
 	int32_t y;
@@ -412,7 +414,7 @@ GP_RetCode read_palette(FILE *f, struct bitmap_info_header *header,
 
 		if (fread(row, 1, row_size, f) != row_size) {
 			GP_DEBUG(1, "Failed to read row %"PRId32, y);
-			return GP_EBADFILE;
+			return EIO;
 		}
 	
 		for (x = 0; x < header->w; x++) {
@@ -439,23 +441,23 @@ GP_RetCode read_palette(FILE *f, struct bitmap_info_header *header,
 		if (GP_ProgressCallbackReport(callback, header->h - y -1,
 		                              context->h, context->w)) {
 			GP_DEBUG(1, "Operation aborted");
-			return GP_EINTR;
+			return ECANCELED;
 		}
 	}
 	
 	GP_ProgressCallbackDone(callback);
-	return GP_ESUCCESS;
+	return 0;
 }
 
-GP_RetCode read_rgb888(FILE *f, struct bitmap_info_header *header,
+static int read_rgb888(FILE *f, struct bitmap_info_header *header,
                        GP_Context *context, GP_ProgressCallback *callback)
 {
-	GP_RetCode ret;
 	uint32_t row_size = 3 * header->w;
 	int32_t y;
+	int err;
 	
-	if ((ret = seek_pixels_offset(header, f)))
-		return ret;
+	if ((err = seek_pixels_offset(header, f)))
+		return err;
 
 	for (y = 0; y < GP_ABS(header->h); y++) {
 		int32_t ry;
@@ -467,9 +469,11 @@ GP_RetCode read_rgb888(FILE *f, struct bitmap_info_header *header,
 		
 		uint8_t *row = GP_PIXEL_ADDR(context, 0, ry);
 
-		if (fread(row, 1, row_size, f) != row_size)
-			return GP_EBADFILE;
-	
+		if (fread(row, 1, row_size, f) != row_size) {
+			GP_DEBUG(1, "Failed to read row %"PRId32, y);
+			return EIO;
+		}
+
 		/* Rows are four byte aligned */
 		switch (row_size % 4) {
 		case 1:
@@ -485,15 +489,15 @@ GP_RetCode read_rgb888(FILE *f, struct bitmap_info_header *header,
 		if (GP_ProgressCallbackReport(callback, header->h - y -1,
 		                              context->h, context->w)) {
 			GP_DEBUG(1, "Operation aborted");
-			return GP_EINTR;
+			return ECANCELED;
 		}
 	}
 
 	GP_ProgressCallbackDone(callback);
-	return GP_ESUCCESS;
+	return 0;
 }
 
-GP_RetCode read_bitmap_pixels(FILE *f, struct bitmap_info_header *header,
+static int read_bitmap_pixels(FILE *f, struct bitmap_info_header *header,
                               GP_Context *context, GP_ProgressCallback *callback)
 {
 	switch (header->bpp) {
@@ -507,20 +511,21 @@ GP_RetCode read_bitmap_pixels(FILE *f, struct bitmap_info_header *header,
 		return read_rgb888(f, header, context, callback);
 	}
 
-	return GP_ENOIMPL;
+	return ENOSYS;
 }
 
-GP_RetCode GP_OpenBMP(const char *src_path, FILE **f,
-                      GP_Size *w, GP_Size *h, GP_PixelType *pixel_type)
+int GP_OpenBMP(const char *src_path, FILE **f,
+               GP_Size *w, GP_Size *h, GP_PixelType *pixel_type)
 {
-	GP_RetCode ret = GP_EBADFILE;
-	
+	int err;
+
 	*f = fopen(src_path, "rb");
 
 	if (*f == NULL) {
+		err = errno;
 		GP_DEBUG(1, "Failed to open '%s' : %s",
 		            src_path, strerror(errno));
-		return GP_EBADFILE;
+		goto err2;
 	}
 
 	int ch1 = fgetc(*f);
@@ -530,78 +535,81 @@ GP_RetCode GP_OpenBMP(const char *src_path, FILE **f,
 		GP_DEBUG(1, "Unexpected bitmap header 0x%02x (%c) 0x%02x (%c)",
 		            ch1, isascii(ch1) ? ch1 : ' ',
 			    ch2, isascii(ch2) ? ch2 : ' ');
-		goto err;
+		err = EILSEQ;
+		goto err1;
 	}
 	
 	if (w != NULL || h != NULL || pixel_type != NULL) {
 		struct bitmap_info_header header;
 	
-		if ((ret = read_bitmap_header(*f, &header)))
-			goto err;
+		if ((err = read_bitmap_header(*f, &header)))
+			goto err1;
 
 		if (w != NULL)
 			*w = header.w;
 	
 		if (h != NULL)
 			*h = header.h;
+	
+		if (pixel_type != NULL)
+			*pixel_type = match_pixel_type(&header); 
 	}
 
-	return GP_ESUCCESS;
-err:
+	return 0;
+err1:
 	fclose(*f);
-	return GP_EBADFILE;
+err2:
+	errno = err;
+	return 1;
 }
 
-GP_RetCode GP_ReadBMP(FILE *f, GP_Context **res,
-                      GP_ProgressCallback *callback)
+GP_Context *GP_ReadBMP(FILE *f, GP_ProgressCallback *callback)
 {
 	struct bitmap_info_header header;
-	GP_RetCode ret;
 	GP_PixelType pixel_type;
+	GP_Context *context;
+	int err;
 
-	if ((ret = read_bitmap_header(f, &header)))
-		goto err;
+	if ((err = read_bitmap_header(f, &header)))
+		goto err1;
 
 	if (header.compress_type != COMPRESS_RGB) {
-		ret = GP_ENOIMPL;
-		goto err;
+		GP_DEBUG(2, "Unknown compression type");
+		err = ENOSYS;
+		goto err1;
 	}
 
 	if ((pixel_type = match_pixel_type(&header)) == GP_PIXEL_UNKNOWN) {
-		ret = GP_ENOIMPL;
-		goto err;
+		GP_DEBUG(2, "Unknown pixel type");
+		err = ENOSYS;
+		goto err1;
 	}
-
-	GP_Context *context;
 	
 	context = GP_ContextAlloc(header.w, GP_ABS(header.h), pixel_type);
 
 	if (context == NULL) {
-		ret = GP_ENOMEM;
-		goto err;
+		err = ENOMEM;
+		goto err1;
 	}
 
-	if ((ret = read_bitmap_pixels(f, &header, context, callback)))
-		goto err1;
+	if ((err = read_bitmap_pixels(f, &header, context, callback)))
+		goto err2;
 
-	*res = context;
-
-	return GP_ESUCCESS;
-err1:
+	return context;
+err2:
 	GP_ContextFree(context);
-err:
+err1:
 	fclose(f);
-	return ret;
+	errno = err;
+	return NULL;
 }
 
-GP_RetCode GP_LoadBMP(const char *src_path, GP_Context **res,
-                      GP_ProgressCallback *callback)
+GP_Context *GP_LoadBMP(const char *src_path, GP_ProgressCallback *callback)
 {
 	FILE *f;
-	GP_RetCode ret;
 
-	if ((ret = GP_OpenBMP(src_path, &f, NULL, NULL, NULL)))
-		return ret;
+	if (GP_OpenBMP(src_path, &f, NULL, NULL, NULL))
+		return NULL;
 
-	return GP_ReadBMP(f, res, callback);
+	return GP_ReadBMP(f, callback);
 }

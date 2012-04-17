@@ -16,7 +16,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2011 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
@@ -41,37 +41,42 @@
 
 #include <png.h>
 
-GP_RetCode GP_OpenPNG(const char *src_path, FILE **f)
+int GP_OpenPNG(const char *src_path, FILE **f)
 {
 	uint8_t sig[8];
+	int err;
 
 	*f = fopen(src_path, "r");
 
 	if (*f == NULL) {
+		err = errno;
 		GP_DEBUG(1, "Failed to open '%s' : %s",
 		            src_path, strerror(errno));
-		return GP_EBADFILE;
+		goto err1;
 	}
 
 	if (fread(sig, 1, 8, *f) <= 0) {
+		err = errno;
 		GP_DEBUG(1, "Failed to read '%s' : %s",
 		            src_path, strerror(errno));
-		goto err;
+		goto err2;
 	}
 
 	if (png_sig_cmp(sig, 0, 8)) {
 		GP_DEBUG(1, "Invalid file header, '%s' not a PNG image?",
 		            src_path);
-		goto err;	
+		err = EILSEQ;
+		goto err2;	
 	}
 
 	GP_DEBUG(1, "Found PNG signature in '%s'", src_path);
 
-	return GP_ESUCCESS;
-err:
+	return 0;
+err2:
 	fclose(*f);
-	*f = NULL;
-	return GP_EBADFILE;
+err1:
+	errno = err;
+	return 1;
 }
 
 static const char *interlace_type_name(int interlace)
@@ -86,21 +91,21 @@ static const char *interlace_type_name(int interlace)
 	}
 }
 
-GP_RetCode GP_ReadPNG(FILE *f, GP_Context **res,
-                      GP_ProgressCallback *callback)
+GP_Context *GP_ReadPNG(FILE *f, GP_ProgressCallback *callback)
 {
 	png_structp png;
 	png_infop   png_info = NULL;
 	png_uint_32 w, h;
 	int depth, color_type, interlace_type;
 	GP_PixelType pixel_type = GP_PIXEL_UNKNOWN;
-	GP_RetCode ret;
+	GP_Context *res;
+	int err;
 
 	png = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
 
 	if (png == NULL) {
 		GP_DEBUG(1, "Failed to allocate PNG read buffer");
-		ret = GP_ENOMEM;
+		err = ENOMEM;
 		goto err1;
 	}
 
@@ -108,13 +113,14 @@ GP_RetCode GP_ReadPNG(FILE *f, GP_Context **res,
 
 	if (png_info == NULL) {
 		GP_DEBUG(1, "Failed to allocate PNG info buffer");
-		ret = GP_ENOMEM;
+		err = ENOMEM;
 		goto err2;
 	}
 
 	if (setjmp(png_jmpbuf(png))) {
 		GP_DEBUG(1, "Failed to read PNG file :(");
-		ret = GP_EBADFILE;
+		//TODO: should we get better error description from libpng?
+		err = EIO;
 		goto err2;
 	}
 
@@ -180,14 +186,14 @@ GP_RetCode GP_ReadPNG(FILE *f, GP_Context **res,
 
 	if (pixel_type == GP_PIXEL_UNKNOWN) {
 		GP_DEBUG(1, "Unimplemented png format");
-		ret = GP_ENOIMPL;
+		err = ENOSYS;
 		goto err2;
 	}
 
-	*res = GP_ContextAlloc(w, h, pixel_type);
+	res = GP_ContextAlloc(w, h, pixel_type);
 
-	if (*res == NULL) {
-		ret = GP_ENOMEM;
+	if (res == NULL) {
+		err = ENOMEM;
 		goto err2;
 	}
 
@@ -195,83 +201,84 @@ GP_RetCode GP_ReadPNG(FILE *f, GP_Context **res,
 	
 	/* start the actuall reading */
 	for (y = 0; y < h; y++) {
-		png_bytep row = GP_PIXEL_ADDR(*res, 0, y);
+		png_bytep row = GP_PIXEL_ADDR(res, 0, y);
 		png_read_rows(png, &row, NULL, 1);
 
 		if (GP_ProgressCallbackReport(callback, y, h, w)) {
 			GP_DEBUG(1, "Operation aborted");
-			png_destroy_read_struct(&png, &png_info, NULL);
-			fclose(f);
-			GP_ContextFree(*res);
-			return GP_EINTR;
+			err= ECANCELED;
+			goto err3;
 		}
 			
 	}
 
 	GP_ProgressCallbackDone(callback);
 
-	ret = GP_ESUCCESS;
+	return res;
+err3:
+	GP_ContextFree(res);
 err2:
 	png_destroy_read_struct(&png, png_info ? &png_info : NULL, NULL);
 err1:
 	fclose(f);
-	return ret;
+	errno = err;
+	return NULL;
 }
 
-GP_RetCode GP_LoadPNG(const char *src_path, GP_Context **res,
-                      GP_ProgressCallback *callback)
+GP_Context *GP_LoadPNG(const char *src_path, GP_ProgressCallback *callback)
 {
 	FILE *f;
-	GP_RetCode ret;
 
-	if ((ret = GP_OpenPNG(src_path, &f)))
-		return ret;
+	if (GP_OpenPNG(src_path, &f))
+		return NULL;
 
-	return GP_ReadPNG(f, res, callback);
+	return GP_ReadPNG(f, callback);
 }
 
-GP_RetCode GP_SavePNG(const char *dst_path, const GP_Context *src,
-                      GP_ProgressCallback *callback)
+int GP_SavePNG(const char *dst_path, const GP_Context *src,
+               GP_ProgressCallback *callback)
 {
 	FILE *f;
-	GP_RetCode ret;
 	png_structp png;
 	png_infop png_info = NULL;
+	int err;
 
 	if (src->pixel_type != GP_PIXEL_RGB888) {
 		GP_DEBUG(1, "Can't save png with pixel type %s",
 		         GP_PixelTypeName(src->pixel_type));
-		return GP_ENOIMPL;
+		return ENOSYS;
 	}
 
 	f = fopen(dst_path, "wb");
 
 	if (f == NULL) {
+		err = errno;
 		GP_DEBUG(1, "Failed to open '%s' for writing: %s",
 		         dst_path, strerror(errno));
-		return GP_EBADFILE;
+		goto err0;
 	}
 
 	png = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
 
 	if (png == NULL) {
 		GP_DEBUG(1, "Failed to allocate PNG write buffer");
-		ret = GP_ENOMEM;
-		goto err1;
+		err = ENOMEM;
+		goto err2;
 	}
 
 	png_info = png_create_info_struct(png);
 
 	if (png_info == NULL) {
 		GP_DEBUG(1, "Failed to allocate PNG info buffer");
-		ret = GP_ENOMEM;
-		goto err2;
+		err = ENOMEM;
+		goto err3;
 	}
 
 	if (setjmp(png_jmpbuf(png))) {
 		GP_DEBUG(1, "Failed to write PNG file :(");
-		ret = GP_EBADFILE;
-		goto err2;
+		//TODO: should we get better error description from libpng?
+		err = EIO;
+		goto err3;
 	}
 
 	png_init_io(png, f);
@@ -291,8 +298,8 @@ GP_RetCode GP_SavePNG(const char *dst_path, const GP_Context *src,
 
 		if (GP_ProgressCallbackReport(callback, y, src->h, src->w)) {
 			GP_DEBUG(1, "Operation aborted");
-			ret = GP_EINTR;
-			goto err2;
+			err = ECANCELED;
+			goto err3;
 		}
 			
 	}
@@ -301,48 +308,55 @@ GP_RetCode GP_SavePNG(const char *dst_path, const GP_Context *src,
 	png_destroy_write_struct(&png, &png_info);
 
 	if (fclose(f)) {
+		err = errno;
 		GP_DEBUG(1, "Failed to close file '%s': %s",
 		         dst_path, strerror(errno));
-		return GP_EBADFILE;
+		goto err1;
 	}
 
 	GP_ProgressCallbackDone(callback);
-	return GP_ESUCCESS;
-err2:
+	
+	return 0;
+err3:
 	png_destroy_write_struct(&png, png_info == NULL ? NULL : &png_info);
-err1:
+err2:
 	fclose(f);
+err1:
 	unlink(dst_path);
-	return ret;
+err0:
+	errno = err;
+	return 1;
 }
 
 #else
 
-GP_RetCode GP_OpenPNG(const char GP_UNUSED(*src_path),
-                      FILE GP_UNUSED(**f))
+int GP_OpenPNG(const char GP_UNUSED(*src_path),
+               FILE GP_UNUSED(**f))
 {
-	return GP_ENOIMPL;
+	errno = ENOSYS;
+	return 1;
 }
 
-GP_RetCode GP_ReadPNG(FILE GP_UNUSED(*f),
-                      GP_Context GP_UNUSED(**res),
-                      GP_ProgressCallback GP_UNUSED(*callback))
+GP_Context *GP_ReadPNG(FILE GP_UNUSED(*f),
+                       GP_ProgressCallback GP_UNUSED(*callback))
 {
-	return GP_ENOIMPL;
+	errno = ENOSYS;
+	return NULL;
 }
 
-GP_RetCode GP_LoadPNG(const char GP_UNUSED(*src_path),
-                      GP_Context GP_UNUSED(**res),
-                      GP_ProgressCallback GP_UNUSED(*callback))
+GP_Context *GP_LoadPNG(const char GP_UNUSED(*src_path),
+                       GP_ProgressCallback GP_UNUSED(*callback))
 {
-	return GP_ENOIMPL;
+	errno = ENOSYS;
+	return NULL;
 }
 
-GP_RetCode GP_SavePNG(const char GP_UNUSED(*dst_path),
-                      const GP_Context GP_UNUSED(*src),
-                      GP_ProgressCallback GP_UNUSED(*callback))
+int GP_SavePNG(const char GP_UNUSED(*dst_path),
+               const GP_Context GP_UNUSED(*src),
+               GP_ProgressCallback GP_UNUSED(*callback))
 {
-	return GP_ENOIMPL;
+	errno = ENOSYS;
+	return 1;
 }
 
 #endif /* HAVE_LIBPNG */

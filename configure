@@ -184,7 +184,10 @@ if __name__ ==  '__main__':
                    ["jpeg",
                     "Library to load, handle and manipulate images in the JPEG format",
                     [header_exists, "jpeglib.h"], "", "-ljpeg"],
-                   ["freetype",
+                   ["giflib",
+		    "Library to handle, display and manipulate GIF images",
+		    [header_exists, "gif_lib.h"], "", "-lgif"],
+		   ["freetype",
                     "A high-quality and portable font engine",
                     [header_exists, "ft2build.h"], "", "`freetype-config --libs`"]], cfg)
     

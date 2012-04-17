@@ -16,39 +16,46 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2010 Jiri "BlueBear" Dluhos                            *
- *                         <jiri.bluebear.dluhos@gmail.com>                  *
- *                                                                           *
  * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
  /*
-
-   Core include file for loaders API.
+   
+   GIF support using giflib library.
 
   */
 
-#ifndef LOADERS_GP_LOADERS_H
-#define LOADERS_GP_LOADERS_H
+#ifndef LOADERS_GP_GIF_H
+#define LOADERS_GP_GIF_H
 
-#include "core/GP_Context.h"
 #include "core/GP_ProgressCallback.h"
-
-#include "GP_PBM.h"
-#include "GP_PGM.h"
-#include "GP_PPM.h"
-
-#include "GP_BMP.h"
-#include "GP_PNG.h"
-#include "GP_JPG.h"
-#include "GP_GIF.h"
+#include "core/GP_Context.h"
 
 /*
- * Tries to load image accordingly to the file extension.
+ * The possible errno values:
  *
- * If operation fails NULL is returned and errno is filled.
+ * - EIO for read/write failure
+ * - ENOSYS for not implemented bitmap format
+ * - ENOMEM from malloc()
+ * - EILSEQ for wrong image signature/data
+ * - ECANCELED when call was aborted from callback
  */
-GP_Context *GP_LoadImage(const char *src_path, GP_ProgressCallback *callback);
 
-#endif /* LOADERS_GP_LOADERS_H */
+/*
+ * Opens up the Gif image and checks signature.
+ * Returns zero on success.
+ */
+int GP_OpenGIF(const char *src_path, void **f);
+
+/*
+ * Reads first image found in GIF container.
+ */
+GP_Context *GP_ReadGIF(void *f, GP_ProgressCallback *callback);
+
+/*
+ * Does both GP_OpenGIF and GP_ReadGIF at once.
+ */
+GP_Context *GP_LoadPNG(const char *src_path, GP_ProgressCallback *callback);
+
+#endif /* LOADERS_GP_GIF_H */

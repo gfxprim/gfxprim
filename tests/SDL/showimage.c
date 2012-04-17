@@ -20,8 +20,9 @@
  *                                                                           *
  *****************************************************************************/
 
-#include <stdio.h>
 #include <stdlib.h>
+#include <stdio.h>
+#include <errno.h>
 #include <SDL/SDL.h>
 
 #include "GP.h"
@@ -91,10 +92,8 @@ int main(int argc, char *argv[])
 
 	GP_SetDebugLevel(10);
 
-	GP_RetCode ret;
-
-	if ((ret = GP_LoadImage(argv[1], &bitmap, NULL))) {
-		fprintf(stderr, "Failed to load bitmap: %s\n", GP_RetCodeName(ret));
+	if ((bitmap = GP_LoadImage(argv[1], NULL)) == NULL) {
+		fprintf(stderr, "Failed to load bitmap: %s\n", strerror(errno));
 		return 1;
 	}
 	

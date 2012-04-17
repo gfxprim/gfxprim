@@ -16,7 +16,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2011 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
@@ -35,26 +35,23 @@
 /*
  * Opens up file and checks signature.
  */
-GP_RetCode GP_OpenJPG(const char *src_path, FILE **f);
+int GP_OpenJPG(const char *src_path, FILE **f);
 
 /*
  * Reads JPG from an open FILE. Expects the file possition set after the eight
  * bytes JPG signature.
  */
-GP_RetCode GP_ReadJPG(FILE *f, GP_Context **res,
-                      GP_ProgressCallback *callback);
+GP_Context *GP_ReadJPG(FILE *f, GP_ProgressCallback *callback);
 
 /*
  * Loads a JPG file into GP_Context. The Context is newly allocated.
  */
-GP_RetCode GP_LoadJPG(const char *src_path, GP_Context **res,
-                      GP_ProgressCallback *callback);
+GP_Context *GP_LoadJPG(const char *src_path, GP_ProgressCallback *callback);
 
 /*
  * Saves JPG to a file.
  */
-GP_RetCode GP_SaveJPG(const char *dst_path, const GP_Context *src,
-                      GP_ProgressCallback *callback);
-
+int GP_SaveJPG(const char *dst_path, const GP_Context *src,
+               GP_ProgressCallback *callback);
 
 #endif /* LOADERS_GP_JPG_H */
