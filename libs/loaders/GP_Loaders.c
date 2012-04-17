@@ -71,7 +71,7 @@ GP_Context *GP_LoadImage(const char *src_path, GP_ProgressCallback *callback)
 		case 'P':
 			if (src_path[len - 3] == 'j' ||
 			    src_path[len - 3] == 'J')
-				GP_LoadJPG(src_path, &res, callback);
+				res = GP_LoadJPG(src_path, callback);
 		break;
 		case 'e':
 		case 'E':
@@ -79,7 +79,7 @@ GP_Context *GP_LoadImage(const char *src_path, GP_ProgressCallback *callback)
 			     src_path[len - 3] == 'P') &&
 			    (src_path[len - 4] == 'j' ||
 			     src_path[len - 4] == 'J'))
-				GP_LoadJPG(src_path, &res, callback);
+				res = GP_LoadJPG(src_path, callback);
 		break;
 		}
 	break;
