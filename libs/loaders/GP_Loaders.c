@@ -119,11 +119,22 @@ GP_Context *GP_LoadImage(const char *src_path, GP_ProgressCallback *callback)
 		break;
 		}
 	break;
+	/* GIF */
+	case 'F':
+	case 'f':
+		switch (src_path[len - 2]) {
+		case 'I':
+		case 'i':
+			if (src_path[len - 3] == 'G' ||
+			    src_path[len - 3] == 'g')
+				res = GP_LoadGIF(src_path, callback);
+		break;
+		}
+	break;
 	}
 
 skip_filename_check:
 
 	//TODO file signature based check
-
 	return res;
 }
