@@ -56,6 +56,6 @@ GP_Context *GP_ReadGIF(void *f, GP_ProgressCallback *callback);
 /*
  * Does both GP_OpenGIF and GP_ReadGIF at once.
  */
-GP_Context *GP_LoadPNG(const char *src_path, GP_ProgressCallback *callback);
+GP_Context *GP_LoadGIF(const char *src_path, GP_ProgressCallback *callback);
 
 #endif /* LOADERS_GP_GIF_H */
