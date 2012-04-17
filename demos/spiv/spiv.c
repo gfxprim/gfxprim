@@ -26,8 +26,9 @@
 
   */
 
-#include <signal.h>
 #include <unistd.h>
+#include <errno.h>
+#include <signal.h>
 #include <string.h>
 #include <pthread.h>
 
@@ -129,9 +130,9 @@ static void *image_loader(void *ptr)
 	cpu_timer_start(&timer, "Loading");
 	if ((img = GP_LoadImage(params->img_path, &callback)) == NULL) {
 		GP_Fill(context, black_pixel);
-		GP_Text(context, NULL, context->w/2, context->h/2,
-		        GP_ALIGN_CENTER|GP_VALIGN_CENTER, white_pixel, black_pixel,
-			"Failed to load image :(");
+		GP_Print(context, NULL, context->w/2, context->h/2,
+		         GP_ALIGN_CENTER|GP_VALIGN_CENTER, white_pixel, black_pixel,
+			 "Failed to load image :( (%s)", strerror(errno));
 		GP_BackendFlip(backend);
 		return NULL;
 	}
