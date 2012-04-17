@@ -115,7 +115,7 @@ GP_Context *GP_LoadImage(const char *src_path, GP_ProgressCallback *callback)
 		case 'm':
 			if (src_path[len - 3] == 'B' ||
 			    src_path[len - 3] == 'b')
-				GP_LoadBMP(src_path, &res, callback);
+				res = GP_LoadBMP(src_path, callback);
 		break;
 		}
 	break;

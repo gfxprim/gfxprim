@@ -27,28 +27,39 @@
 #include "core/GP_ProgressCallback.h"
 
 /*
+ * The possible errno values:
+ *
+ * - Anything FILE operation may return (fopen(), fclose(), fseek(), ...).
+ * - EIO for fread()/fwrite() failure
+ * - ENOSYS for not implemented bitmap format
+ * - ENOMEM from malloc()
+ * - EILSEQ for wrong image signature/data
+ * - ECANCELED when call was aborted from callback
+ */
+
+/*
  * Opens up a bmp file, checks signature, parses metadata.
  *
- * The width and height and pixel type are filled upon succcessful return.
+ * The file, width, height and pixel type are filled upon succcessful return.
+ *
+ * Upon failure, non zero return value is returned and errno is filled.
  */
-GP_RetCode GP_OpenBMP(const char *src_path, FILE **f,
-                      GP_Size *w, GP_Size *h, GP_PixelType *pixel_type);
+int GP_OpenBMP(const char *src_path, FILE **f,
+               GP_Size *w, GP_Size *h, GP_PixelType *pixel_type);
 
 /*
  * Reads a BMP from a opened file.
  * 
- * Upon successful return context to store bitmap is allocated and image is
+ * Upon successful return, context to store bitmap is allocated and image is
  * loaded.
  *
+ * Upon failure NULL is returned and errno is filled.
  */
-GP_RetCode GP_ReadBMP(FILE *f, GP_Context **res,
-                      GP_ProgressCallback *callback);
+GP_Context *GP_ReadBMP(FILE *f, GP_ProgressCallback *callback);
 
 /*
  * Does both GP_OpenBMP and GP_ReadBMP.
  */
-GP_RetCode GP_LoadBMP(const char *src_path, GP_Context **res,
-                      GP_ProgressCallback *callback);
-
+GP_Context *GP_LoadBMP(const char *src_path, GP_ProgressCallback *callback);
 
 #endif /* LOADERS_GP_BMP_H */
