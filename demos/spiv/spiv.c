@@ -115,6 +115,7 @@ static void *image_loader(void *ptr)
 	GP_ProgressCallback callback = {.callback = image_loader_callback};
 	struct cpu_timer timer;
 	struct cpu_timer sum_timer;
+	GP_Context *img;
 
 	cpu_timer_start(&sum_timer, "sum");
 
@@ -123,16 +124,15 @@ static void *image_loader(void *ptr)
 
 	fprintf(stderr, "Loading '%s'\n", params->img_path);
 
-	GP_Context *img = NULL;
-
 	callback.priv = "Loading image";
 
 	cpu_timer_start(&timer, "Loading");
-	if (GP_LoadImage(params->img_path, &img, &callback) != 0) {
+	if ((img = GP_LoadImage(params->img_path, &callback)) == NULL) {
 		GP_Fill(context, black_pixel);
 		GP_Text(context, NULL, context->w/2, context->h/2,
-		        GP_ALIGN_CENTER|GP_VALIGN_CENTER, black_pixel, white_pixel,
+		        GP_ALIGN_CENTER|GP_VALIGN_CENTER, white_pixel, black_pixel,
 			"Failed to load image :(");
+		GP_BackendFlip(backend);
 		return NULL;
 	}
 	cpu_timer_stop(&timer);

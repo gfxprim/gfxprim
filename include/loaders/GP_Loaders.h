@@ -44,9 +44,10 @@
 #include "GP_JPG.h"
 
 /*
- * Tries to load image accordingly to extension.
+ * Tries to load image accordingly to the file extension.
+ *
+ * If operation fails NULL is returned and errno is filled.
  */
-GP_RetCode GP_LoadImage(const char *src_path, GP_Context **res,
-                        GP_ProgressCallback *callback);
+GP_Context *GP_LoadImage(const char *src_path, GP_ProgressCallback *callback);
 
 #endif /* LOADERS_GP_LOADERS_H */

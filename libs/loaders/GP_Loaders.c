@@ -34,17 +34,24 @@
 
 #include "GP_Loaders.h"
 
-GP_RetCode GP_LoadImage(const char *src_path, GP_Context **res,
-                        GP_ProgressCallback *callback)
+GP_Context *GP_LoadImage(const char *src_path, GP_ProgressCallback *callback)
 {
-	int len = strlen(src_path);
-	GP_RetCode ret = GP_ENOIMPL;
-
+	int len, saved_errno;
+	GP_Context *res = NULL;
+	
 	if (access(src_path, R_OK)) {
+		
+		saved_errno = errno;
+
 		GP_DEBUG(1, "Failed to access file '%s' : %s",
 		            src_path, strerror(errno));
-		return GP_EBADFILE;
+		
+		errno = saved_errno;
+		
+		return NULL;
 	}
+	
+	len = strlen(src_path);
 
 	if (len < 3)
 		goto skip_filename_check;
@@ -58,13 +65,13 @@ GP_RetCode GP_LoadImage(const char *src_path, GP_Context **res,
 		case 'N':
 			if (src_path[len - 3] == 'p' ||
 			    src_path[len - 3] == 'P')
-				ret = GP_LoadPNG(src_path, res, callback);
+				GP_LoadPNG(src_path, &res, callback);
 		break;
 		case 'p':
 		case 'P':
 			if (src_path[len - 3] == 'j' ||
 			    src_path[len - 3] == 'J')
-				ret = GP_LoadJPG(src_path, res, callback);
+				GP_LoadJPG(src_path, &res, callback);
 		break;
 		case 'e':
 		case 'E':
@@ -72,7 +79,7 @@ GP_RetCode GP_LoadImage(const char *src_path, GP_Context **res,
 			     src_path[len - 3] == 'P') &&
 			    (src_path[len - 4] == 'j' ||
 			     src_path[len - 4] == 'J'))
-				ret = GP_LoadJPG(src_path, res, callback);
+				GP_LoadJPG(src_path, &res, callback);
 		break;
 		}
 	break;
@@ -84,19 +91,19 @@ GP_RetCode GP_LoadImage(const char *src_path, GP_Context **res,
 		case 'B':
 			if (src_path[len - 3] == 'p' ||
 			    src_path[len - 3] == 'P')
-				ret = GP_LoadPBM(src_path, res);
+				GP_LoadPBM(src_path, &res);
 		break;
 		case 'g':
 		case 'G':
 			if (src_path[len - 3] == 'p' ||
 			    src_path[len - 3] == 'P')
-				ret = GP_LoadPGM(src_path, res);
+				GP_LoadPGM(src_path, &res);
 		break;
 		case 'p':
 		case 'P':
 			if (src_path[len - 3] == 'p' ||
 			    src_path[len - 3] == 'P')
-				ret = GP_LoadPPM(src_path, res);
+				GP_LoadPPM(src_path, &res);
 		break;
 		}
 	break;
@@ -108,7 +115,7 @@ GP_RetCode GP_LoadImage(const char *src_path, GP_Context **res,
 		case 'm':
 			if (src_path[len - 3] == 'B' ||
 			    src_path[len - 3] == 'b')
-			    	ret = GP_LoadBMP(src_path, res, callback);
+				GP_LoadBMP(src_path, &res, callback);
 		break;
 		}
 	break;
@@ -118,5 +125,5 @@ skip_filename_check:
 
 	//TODO file signature based check
 
-	return ret;
+	return res;
 }
