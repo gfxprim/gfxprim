@@ -61,6 +61,11 @@ config = GfxPrimConfig(
 	  ('R', 16, 8),
 	  ('G', 8, 8),
 	  ('B', 0, 8)]),
+      
+      PixelType(name='BGR888', pixelsize=PS_24BPP, chanslist=[
+	  ('B', 16, 8),
+	  ('G', 8, 8),
+	  ('R', 0, 8)]),
 
       PixelType(name='RGB565', pixelsize=PS_16BPP, chanslist=[
 	  ('R', 11, 5),
