@@ -12,7 +12,7 @@ PYTHON_INCLUDE=`python-config --include`
 # Command to run Python with pylib/ modules
 PYTHON=PYTHONPATH=$$PYTHONPATH:${PYLIBSDIR} ${PYTHON_BIN} -Werror
 
-SWIGOPTS=-Wextra -w322,314 -I/usr/include/
+SWIGOPTS=-w322,314 -I/usr/include/
 
 #
 # If set to yes, rebuilds libGP* after typing make
