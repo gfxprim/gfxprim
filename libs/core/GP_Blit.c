@@ -25,6 +25,7 @@
 #include "GP_GetPutPixel.h"
 #include "GP_Context.h"
 #include "GP_Convert.h"
+#include "GP_Debug.h"
 #include "GP_Blit.h"
 
 /* Generated functions */
@@ -83,6 +84,51 @@ void GP_BlitXYXY(const GP_Context *src,
 	GP_BlitXYXY_Fast(src, x0, y0, x1, y1, dst, x2, y2);
 }
 
+void GP_BlitXYXY_Clipped(const GP_Context *src,
+                         GP_Coord x0, GP_Coord y0, GP_Coord x1, GP_Coord y1,
+                         GP_Context *dst, GP_Coord x2, GP_Coord y2)
+{
+	/* Normalize source rectangle */
+	if (x1 < x0)
+		GP_SWAP(x0, x1);
+
+	if (y1 < y0)
+		GP_SWAP(y0, y1);
+	
+	/* All coordinates are inside of src and dst context */
+	GP_CHECK(x0 < (GP_Coord)GP_ContextW(src));
+	GP_CHECK(y0 < (GP_Coord)GP_ContextH(src));
+	GP_CHECK(x1 < (GP_Coord)GP_ContextW(src));
+	GP_CHECK(y1 < (GP_Coord)GP_ContextH(src));
+	GP_CHECK(x2 < (GP_Coord)GP_ContextW(dst));
+	GP_CHECK(y2 < (GP_Coord)GP_ContextH(dst));
+
+	GP_Coord src_w = x1 - x0;
+	GP_Coord src_h = y1 - y0;
+
+	GP_Coord dst_w = GP_ContextW(dst) - x2;
+	GP_Coord dst_h = GP_ContextH(dst) - y2;
+
+	GP_DEBUG(2, "Blitting %ix%i, available %ix%i",
+	         src_w, src_h, dst_w, dst_h);
+
+	if (src_w > dst_w)
+		x1 -= src_w - dst_w + 1;
+
+	if (src_h > dst_h)
+		y1 -= src_h - dst_h + 1;
+
+	GP_DEBUG(2, "Blitting %ix%i->%ix%i in %ux%u",
+	         x0, y0, x1, y1, GP_ContextW(src), GP_ContextH(src));
+
+	if (GP_CONTEXT_ROTATION_EQUAL(src, dst)) {
+		GP_BlitXYXY_Raw_Fast(src, x0, y0, x1, y1, dst, x2, y2);
+		return;
+	}
+	
+	GP_BlitXYXY_Fast(src, x0, y0, x1, y1, dst, x2, y2);
+}
+
 void GP_BlitXYWH(const GP_Context *src,
                  GP_Coord x0, GP_Coord y0, GP_Size w0, GP_Size h0,
                  GP_Context *dst, GP_Coord x1, GP_Coord y1)
@@ -91,6 +137,16 @@ void GP_BlitXYWH(const GP_Context *src,
 		return;
 
 	GP_BlitXYXY(src, x0, y0, x0 + w0 - 1, y0 + h0 - 1, dst, x1, y1);
+}
+
+void GP_BlitXYWH_Clipped(const GP_Context *src,
+                         GP_Coord x0, GP_Coord y0, GP_Size w0, GP_Size h0,
+                         GP_Context *dst, GP_Coord x1, GP_Coord y1)
+{
+	if (w0 == 0 || h0 == 0)
+		return;
+
+	GP_BlitXYXY_Clipped(src, x0, y0, x0 + w0 - 1, y0 + h0 - 1, dst, x1, y1);
 }
 
 void GP_BlitXYXY_Raw(const GP_Context *src,

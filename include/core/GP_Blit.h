@@ -48,6 +48,15 @@ void GP_BlitXYXY(const GP_Context *src,
                  GP_Context *dst, GP_Coord x2, GP_Coord y2);
 
 /*
+ * Clipped variant, if destination context size (from x2, y2 to the end of the
+ * context) is not big enough the source rectangle is clipped, eg. only initial
+ * part of the source (starting on x0, y0) will be blitted.
+ */
+void GP_BlitXYXY_Clipped(const GP_Context *src,
+                         GP_Coord x0, GP_Coord y0, GP_Coord x1, GP_Coord y1,
+                         GP_Context *dst, GP_Coord x2, GP_Coord y2);
+
+/*
  * Blits rectangle from src defined by x0, y0, w0, h0 (uses w0 x h0 pixels) to
  * dst starting on x2, y2.
  */
@@ -55,13 +64,30 @@ void GP_BlitXYWH(const GP_Context *src,
                  GP_Coord x0, GP_Coord y0, GP_Size w0, GP_Size h0,
                  GP_Context *dst, GP_Coord x1, GP_Coord y1);
 
-/* The default is XYWH now, will be changed */
+/*
+ * Clipped variant, if destination context size (from x1, y1 to the end of the
+ * context) is not big enough the source rectangle is clipped, eg. only initial
+ * part of the source (starting on x0, y0) will be blitted.
+ */
+void GP_BlitXYWH_Clipped(const GP_Context *src,
+                         GP_Coord x0, GP_Coord y0, GP_Size w0, GP_Size h0,
+                         GP_Context *dst, GP_Coord x1, GP_Coord y1);
+
+/* The default is XYWH */
 static inline void GP_Blit(const GP_Context *src,
                            GP_Coord x0, GP_Coord y0,
                            GP_Size w0, GP_Size h0,
                            GP_Context *dst, GP_Coord x1, GP_Coord y1)
 {
 	GP_BlitXYWH(src, x0, y0, w0, h0, dst, x1, y1);
+}
+
+static inline void GP_Blit_Clipped(const GP_Context *src,
+                                   GP_Coord x0, GP_Coord y0,
+                                   GP_Size w0, GP_Size h0,
+                                   GP_Context *dst, GP_Coord x1, GP_Coord y1)
+{
+	GP_BlitXYWH_Clipped(src, x0, y0, w0, h0, dst, x1, y1);
 }
 
 /*
