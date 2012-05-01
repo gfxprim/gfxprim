@@ -48,9 +48,9 @@ void GP_BlitXYXY(const GP_Context *src,
                  GP_Context *dst, GP_Coord x2, GP_Coord y2);
 
 /*
- * Clipped variant, if destination context size (from x2, y2 to the end of the
- * context) is not big enough the source rectangle is clipped, eg. only initial
- * part of the source (starting on x0, y0) will be blitted.
+ * Clipped variant. Could handle destination coordinates outside of the
+ * destination rectangle (both possitive and negative). Source larger than
+ * destination and so.
  */
 void GP_BlitXYXY_Clipped(const GP_Context *src,
                          GP_Coord x0, GP_Coord y0, GP_Coord x1, GP_Coord y1,
@@ -65,9 +65,9 @@ void GP_BlitXYWH(const GP_Context *src,
                  GP_Context *dst, GP_Coord x1, GP_Coord y1);
 
 /*
- * Clipped variant, if destination context size (from x1, y1 to the end of the
- * context) is not big enough the source rectangle is clipped, eg. only initial
- * part of the source (starting on x0, y0) will be blitted.
+ * Clipped variant. Could handle destination coordinates outside of the
+ * destination rectangle (both possitive and negative). Source larger than
+ * destination and so.
  */
 void GP_BlitXYWH_Clipped(const GP_Context *src,
                          GP_Coord x0, GP_Coord y0, GP_Size w0, GP_Size h0,

@@ -76,12 +76,10 @@ void GP_BlitXYXY(const GP_Context *src,
 	GP_CHECK(x2 + (x1 - x0) < (GP_Coord)GP_ContextW(dst));
 	GP_CHECK(y2 + (y1 - y0) < (GP_Coord)GP_ContextH(dst));
 
-	if (GP_CONTEXT_ROTATION_EQUAL(src, dst)) {
+	if (GP_CONTEXT_ROTATION_EQUAL(src, dst))
 		GP_BlitXYXY_Raw_Fast(src, x0, y0, x1, y1, dst, x2, y2);
-		return;
-	}
-	
-	GP_BlitXYXY_Fast(src, x0, y0, x1, y1, dst, x2, y2);
+	else
+		GP_BlitXYXY_Fast(src, x0, y0, x1, y1, dst, x2, y2);
 }
 
 void GP_BlitXYXY_Clipped(const GP_Context *src,
@@ -95,14 +93,31 @@ void GP_BlitXYXY_Clipped(const GP_Context *src,
 	if (y1 < y0)
 		GP_SWAP(y0, y1);
 	
-	/* All coordinates are inside of src and dst context */
-	GP_CHECK(x0 < (GP_Coord)GP_ContextW(src));
-	GP_CHECK(y0 < (GP_Coord)GP_ContextH(src));
-	GP_CHECK(x1 < (GP_Coord)GP_ContextW(src));
-	GP_CHECK(y1 < (GP_Coord)GP_ContextH(src));
-	GP_CHECK(x2 < (GP_Coord)GP_ContextW(dst));
-	GP_CHECK(y2 < (GP_Coord)GP_ContextH(dst));
+	/* Noting to blit return now */
+	if (x2 >= (GP_Coord)GP_ContextW(dst) ||
+	    y2 >= (GP_Coord)GP_ContextH(dst))
+	    	return;
 
+	/* We need to shift source rectangle */
+	if (x2 < 0) {
+		x0 -= x2;
+		x1 -= x2;
+		x2 = 0;
+	}
+
+	if (y2 < 0) {
+		y0 -= y2;
+		y1 -= y2;
+		y2 = 0;
+	}
+
+	/* Make sure souce coordinates are inside of the src */
+	x0 = GP_MAX(x0, 0);
+	y0 = GP_MAX(y0, 0);
+	x1 = GP_MIN(x1, (GP_Coord)GP_ContextW(src) - 1);
+	y1 = GP_MIN(y1, (GP_Coord)GP_ContextH(src) - 1);
+
+	/* And source rectangle fits inside of the destination */
 	GP_Coord src_w = x1 - x0;
 	GP_Coord src_h = y1 - y0;
 
@@ -118,15 +133,14 @@ void GP_BlitXYXY_Clipped(const GP_Context *src,
 	if (src_h > dst_h)
 		y1 -= src_h - dst_h + 1;
 
-	GP_DEBUG(2, "Blitting %ix%i->%ix%i in %ux%u",
-	         x0, y0, x1, y1, GP_ContextW(src), GP_ContextH(src));
+	GP_DEBUG(2, "Blitting %ix%i->%ix%i in %ux%u to %ix%i in %ux%u",
+	         x0, y0, x1, y1, GP_ContextW(src), GP_ContextH(src),
+		 x2, y2, GP_ContextW(dst), GP_ContextH(dst));
 
-	if (GP_CONTEXT_ROTATION_EQUAL(src, dst)) {
+	if (GP_CONTEXT_ROTATION_EQUAL(src, dst))
 		GP_BlitXYXY_Raw_Fast(src, x0, y0, x1, y1, dst, x2, y2);
-		return;
-	}
-	
-	GP_BlitXYXY_Fast(src, x0, y0, x1, y1, dst, x2, y2);
+	else 
+		GP_BlitXYXY_Fast(src, x0, y0, x1, y1, dst, x2, y2);
 }
 
 void GP_BlitXYWH(const GP_Context *src,
