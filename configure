@@ -187,10 +187,13 @@ if __name__ ==  '__main__':
                    ["giflib",
 		    "Library to handle, display and manipulate GIF images",
 		    [header_exists, "gif_lib.h"], "", "-lgif"],
+                   ["libX11",
+		    "X11 library",
+		    [header_exists, "X11/Xlib.h"], "", "-lX11"],
 		   ["freetype",
                     "A high-quality and portable font engine",
                     [header_exists, "ft2build.h"], "", "`freetype-config --libs`"]], cfg)
-    
+
     parser = OptionParser();
     
     # Enable disable libraries for linking

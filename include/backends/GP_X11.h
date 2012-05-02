@@ -20,30 +20,21 @@
  *                                                                           *
  *****************************************************************************/
 
-/*
+#ifndef BACKENDS_GP_X11_H
+#define BACKENDS_GP_X11_H
 
-  Catch all header for backends.
-
- */
-
-#ifndef BACKENDS_GP_BACKENDS_H
-#define BACKENDS_GP_BACKENDS_H
+#include "GP_Backend.h"
 
 /*
- * Base backend definitions.
+ * Initalize X11 backend.
+ *
+ * The display may be NULL default display. The coordinates are position and
+ * geometry for newly created window.
+ * 
+ * Upon failure NULL is returned.
  */
-#include "backends/GP_Backend.h"
+GP_Backend *GP_BackendX11Init(const char *display, int x, int y,
+                              unsigned int w, unsigned int h,
+			      const char *caption);
 
-/*
- * Backends.
- */
-#include "backends/GP_LinuxFB.h"
-#include "backends/GP_SDL.h"
-#include "backends/GP_X11.h"
-
-/*
- * Simplified backend initalization.
- */
-#include "backends/GP_BackendInit.h"
-
-#endif /* BACKENDS_GP_BACKENDS_H */
+#endif /* BACKENDS_GP_X11_H */
