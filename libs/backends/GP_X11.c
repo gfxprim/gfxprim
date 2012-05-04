@@ -20,11 +20,16 @@
  *                                                                           *
  *****************************************************************************/
 
+#include "../../config.h"
+
+#ifdef HAVE_LIBX11
+
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 
-#include "GP_X11.h"
 #include "core/GP_Debug.h"
+#include "input/GP_InputDriverX11.h"
+#include "GP_X11.h"
 
 struct x11_priv {
 	Display *dpy;	
@@ -50,13 +55,29 @@ static void x11_exit(GP_Backend *self)
 	free(self);
 }
 
+static void x11_update_rect(GP_Backend *self, GP_Coord x0, GP_Coord y0,
+                            GP_Coord x1, GP_Coord y1)
+{
+	struct x11_priv *x11 = GP_BACKEND_PRIV(self); 
+	
+	GP_DEBUG(4, "Updating rect %ix%i-%ix%i", x0, y0, x1, y1);
+
+	XLockDisplay(x11->dpy);
+
+	XPutImage(x11->dpy, x11->win, DefaultGC(x11->dpy, x11->scr),
+	          x11->img, x0, y0, x0, y0, x1-x0, y1-y0);
+	XFlush(x11->dpy);
+
+	XUnlockDisplay(x11->dpy);
+}
+
 static void x11_flip(GP_Backend *self)
 {
 	struct x11_priv *x11 = GP_BACKEND_PRIV(self); 
 	unsigned int w = x11->context->w;
 	unsigned int h = x11->context->h;
 
-	GP_DEBUG(3, "Flipping context");
+	GP_DEBUG(4, "Flipping context");
 
 	XLockDisplay(x11->dpy);
 
@@ -79,10 +100,20 @@ static void x11_poll(GP_Backend *self)
 
 		switch (ev.type) {
 		case Expose:
-			x11_flip(self);
+			GP_DEBUG(4, "Expose %ix%i-%ix%i %i",
+			         ev.xexpose.x, ev.xexpose.y,
+			         ev.xexpose.width, ev.xexpose.height,
+			         ev.xexpose.count);
+			x11_update_rect(self, ev.xexpose.x, ev.xexpose.y,
+			                ev.xexpose.x + ev.xexpose.width,
+					ev.xexpose.y + ev.xexpose.height);
 		break;
 		case MapNotify:
 			GP_DEBUG(1, "Shown");
+		break;
+		case KeyPress:
+		case KeyRelease:
+			GP_InputDriverX11EventPut(&ev);
 		break;
 		}
 	}
@@ -142,7 +173,8 @@ GP_Backend *GP_BackendX11Init(const char *display, int x, int y,
 	}
 
 	/* Select events */
-	XSelectInput(x11->dpy, x11->win, StructureNotifyMask|ExposureMask);
+	XSelectInput(x11->dpy, x11->win, StructureNotifyMask | ExposureMask |
+	                                 KeyPressMask | KeyReleaseMask);
 
 	/* Set window caption */
 	XmbSetWMProperties(x11->dpy, x11->win, caption, caption,
@@ -153,7 +185,6 @@ GP_Backend *GP_BackendX11Init(const char *display, int x, int y,
 	XFlush(x11->dpy);
 
 /*
-
 	enum GP_PixelType pixel_type;
 	pixel_type = GP_PixelRGBLookup(vscri.red.length,    vscri.red.offset,
 	                               vscri.green.length,  vscri.green.offset,
@@ -172,7 +203,7 @@ GP_Backend *GP_BackendX11Init(const char *display, int x, int y,
 	backend->name       = "X11";
 	backend->context    = x11->context;
 	backend->Flip       = x11_flip;
-	backend->UpdateRect = NULL;
+	backend->UpdateRect = x11_update_rect;
 	backend->Exit       = x11_exit;
 	backend->fd_list    = NULL;
 	backend->Poll       = x11_poll;
@@ -188,3 +219,16 @@ err0:
 	free(backend);
 	return NULL;
 }
+
+#else
+
+#include "GP_Backend.h"
+
+GP_Backend *GP_BackendX11Init(const char *display, int x, int y,
+                              unsigned int w, unsigned int h,
+			      const char *caption)
+{
+	return NULL;
+}
+
+#endif /* HAVE_LIBX11 */
