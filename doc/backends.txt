@@ -1,0 +1,130 @@
+Drawing Backends
+----------------
+
+Drawing backends provide means to draw into computer screen or into an window
+inside of running operating system. Instead of having one unified
+initalization interface each backend has it's specific function and sematics
+but once backend is initalized the backend structure provides unified API for 
+controling the drawing.
+
+So far there are three backends implemented, linux mmaped framebuffer, libSDL
+and X11 backend.
+
+Initalization functions
+~~~~~~~~~~~~~~~~~~~~~~~
+
+[source,c]
+-------------------------------------------------------------------------------
+GP_Backend *GP_BackendLinuxFBInit(const char *path);
+-------------------------------------------------------------------------------
+
+Initalizes mmaped framebuffer backend. The path is path to the framebuffer
+device ie. '/dev/fbX'. This backend is not buffered, everything you draw
+appears on the screen right away (an swich may be added for that purpose).
+
+Also note that this backend doesn't initalize any input driver. You need to
+initalize input driver in order to get keystrokes and/or pointer events.
+
+
+[source,c]
+-------------------------------------------------------------------------------
+enum GP_BackendSDLFlags {
+        GP_SDL_FULLSCREEN = 0x01,
+        GP_SDL_RESIZABLE  = 0x02,
+};
+
+GP_Backend *GP_BackendSDLInit(GP_Size w, GP_Size h,
+                              uint8_t bpp, uint8_t flags,
+                              const char *caption);
+-------------------------------------------------------------------------------
+
+Initalize SDL as an backend driver. The backend is thread safe as all the
+operations are guarded by locks. You can't initalize more than one backend at a
+time, that is inherited SDL limiation. If you call the initalizaiton for a
+second time, you will get a pointer to allready running backend. This driver
+feeds input events into global input event queue (see input docs for details).
+If w, h and/or bpp are zero SDL tries to do a guess, most of the time wrong for
+w and h though. The caption is window caption and may be ignored for some of
+the backends. And finally flags may change the SDL to go to fullscreen mode or
+make the window resizeable.
+
+[source,c]
+-------------------------------------------------------------------------------
+GP_Backend *GP_BackendX11Init(const char *display, int x, int y,
+                              unsigned int w, unsigned int h,
+                              const char *caption);
+-------------------------------------------------------------------------------
+
+Returns pointer to backend. When display is NULL default display is used
+(which is what you want most of the time). This backend feeds key events into
+global input queue (pointer events not implemented yet). Note this is
+experimental version of X11 backend and will be changed to support more
+windows at a time.
+
+
+Overall init function
+~~~~~~~~~~~~~~~~~~~~~
+
+Althoug there is no unified backend initalization, there is something close to
+it.
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <GP.h>
+
+GP_Backend *GP_BackendInit(const char *params, const char *caption, FILE *help);
+-------------------------------------------------------------------------------
+
+This function takes a params string as an parameter which is used for
+determining backend-dependend parametrs. The format is
+'backend_name:backend_parameters' where backend parameters may be size (either
+'WxH' or 'FS' in case of SDL backend). The caption is window caption (which is
+ignored in most of the cases) and the FILE is file, where an error is printed
+in case of failure, you should mostly use 'stderr' for that purpose. If params
+is set to NULL the the call only prints help into the passed help FILE. If
+intitalizaton was succesfull pointer to allocated and initalized backend is
+returned otherwise NULL is returned and some helpful infomation should be
+printed into the passed help FILE.
+
+
+Drawing Backend API
+~~~~~~~~~~~~~~~~~~~
+
+The drawing backend API consist of structure with callbacks. Every backend
+initalization yields pointer to this structure. Although is possible to call
+these pointers directly it's not recomended and everbody should rather use
+backend inline functions instead.
+
+The backend API consist of several functions:
+
+[source,c]
+-------------------------------------------------------------------------------
+void GP_BackendExit(GP_Backend *backend);
+-------------------------------------------------------------------------------
+
+Calls an backend exit callback.
+
+[source,c]
+-------------------------------------------------------------------------------
+GP_BackendFlip(GP_Backend *backend);
+-------------------------------------------------------------------------------
+
+Flips a screen. Updates rect for a buffered backends.
+
+[source,c]
+-------------------------------------------------------------------------------
+void GP_BackendUpdateRect(GP_Backend *backend,
+                          GP_Coord x0, GP_Coord y0,
+                          GP_Coord x1, GP_Coord y1);
+-------------------------------------------------------------------------------
+
+Updates particular rectangle for a buffered backends.
+
+[source,c]
+-------------------------------------------------------------------------------
+void GP_BackendPoll(GP_Backend *backend);
+-------------------------------------------------------------------------------
+
+Polls for backend events. For backends that do not expose file descriptor
+(namely SDL) this should be called repeatedly. For other backend it may be
+called either repeatedly or when data are ready on filedescriptor.
