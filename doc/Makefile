@@ -13,5 +13,5 @@ api.pdf: api.txt
 	fop api.fo -pdf api.pdf
 
 clean:
-	rm -f api.html
+	rm -f api.html examples.html
 	rm -f api.xml api.fo api.pdf
