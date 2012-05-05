@@ -19,3 +19,17 @@ Loads an image and saves it into 'out.png' png image.
 include::../demos/simple/loaders_example.c[]
 ------------------------------------------------------------------
 
+And the same in python
+
+[source,python]
+------------------------------------------------------------------
+include::../demos/py_simple/loaders_example.py[]
+------------------------------------------------------------------
+
+GFXprim + PyGTK
+---------------
+
+[source,python]
+------------------------------------------------------------------
+include::../demos/py_simple/pygtk_example.py[]
+------------------------------------------------------------------

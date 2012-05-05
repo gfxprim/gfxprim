@@ -4,7 +4,7 @@ api.html: general.txt api.txt context.txt loaders.txt filters.txt \
           basic_types.txt drawing_api.txt
 	asciidoc -a toc api.txt
 
-examples.html: examples.txt ../demos/simple/*.c
+examples.html: examples.txt ../demos/simple/*.c ../demos/py_simple/*.py
 	asciidoc -a toc examples.txt
 
 api.pdf: api.txt
