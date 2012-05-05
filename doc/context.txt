@@ -26,7 +26,7 @@ typedef struct GP_Context {
 	uint8_t axes_swap:1;         /* swap axes */
 	uint8_t x_swap:1;            /* mirror x */
 	uint8_t y_swap:1;            /* mirror y */
-	uint8_t bit_endian:1;   /* GP_BIT_ENDIAN */
+	uint8_t bit_endian:1;        /* GP_BIT_ENDIAN */
 	uint8_t free_pixels:1;       /* if set GP_ContextFree() calls free on context->pixels */
 } GP_Context;
 -------------------------------------------------------------------------------
@@ -49,7 +49,7 @@ If you really need drawing primitives that do not use the orientation flags,
 you could use variants with _Raw suffix (altghoug this is not recommended).
 
 There are various helper macros for transforming coordinates and sizes in
-'core/GP_Transform.h'. And helper functions to "rotate" the context flags
+'core/GP_Transform.h'. And context helper functions to "rotate" the flags
 clock wise and counter clock wise as well as functions to get the context size
 when taking into the accout the widht and height.
 
@@ -108,7 +108,7 @@ void GP_ContextInit(GP_Context *context, GP_Size w, GP_Size h,
 Initalize given context accordingly to parameters, the rest of context
 parameters are set to the default values. Eg. rotation flags are all set to
 zero as well as the free_pixels flag. The bpp and bytes_per_row are computed
-from the given pixel type and size. The pixels pointer may be NULL and could
+from the given pixel type and size. The pixels pointer may be 'NULL' and could
 be changed later manually.
 
 [source,c]
@@ -120,7 +120,7 @@ be changed later manually.
 GP_Context *GP_ContextAlloc(GP_Size w, GP_Size h, GP_PixelType type);
 -------------------------------------------------------------------------------
 
-The 'GP_ContextAlloc()' allocates context and initalizes a context.
+The 'GP_ContextAlloc()' allocates and initalizes a context.
 
 The orientation flags are all set to zero, the free_pixels flag is set and the
 rest of the metadata are calculated accordingly to width, height and
@@ -149,7 +149,7 @@ otherwise it's left uninitalized.
 void GP_ContextFree(GP_Context *context);
 -------------------------------------------------------------------------------
 
-Frees the context memory. If free_pixels flag is set, the pixels datada are
+Frees the context memory. If free_pixels flag is set, the pixels buffer is
 freed too.
 
 Subcontext
@@ -197,6 +197,6 @@ GP_Context *GP_ContextConvert(const GP_Context *src, GP_Context *dst,
 Provides basic context conversion functionality. A newly allocated context is
 returned.
 
-This fuction does no error distribution but only multiply or rounds the pixel
+This fuction does no error distribution it only multiplies or rounds the pixel
 values. If you need something better use Floyd Steinberg dithering instead.
 

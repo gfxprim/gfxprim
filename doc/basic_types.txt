@@ -28,7 +28,7 @@ Color could be converted for a given 'GP_PixelType' which will result into
 also converted to color name (C string in English language) and C string may
 be matched against table of color names.
 
-The 'GP_Color' enmum is defined as follows:
+The 'GP_Color' enum is defined as follows:
 
 [source,c]
 --------------------------------------------------------------------------------
@@ -92,7 +92,7 @@ Progress Callback
 The 'GP_ProgressCallback' is a structure that stores user-defined callback
 function and user-defined pointer and percentage.
 
-It is passed as last parameter to functions that could take some time to
+It is passed as last parameter to functions that would take some time to
 complete and adds capability to track the operation progress as well as to
 abort the operation.
 
@@ -111,7 +111,7 @@ If non 'NULL' progress callback structure is passed to a function, the
 callback function is periodically called and the percentage is updated.
 
 The return value from callback could abort the function execution. If non zero
-value is returned the filter is aborted, all memory freed etc. and in case of
+value is returned operation is aborted, all memory freed etc. and in case of
 bitmap loaders 'errno' is set to 'ECANCELED'.
 
 The callback, if supported, is the last parameter of a function.

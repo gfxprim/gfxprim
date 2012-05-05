@@ -267,5 +267,5 @@ PBM, PGM, PPM
 ~~~~~~~~~~~~~
 
 There is a code do load and write 'PBM', 'PGM' and 'PPM' images too. However
-it's not finished and it's API is outdated. Use at your own risk.
+it's not finished and its API is outdated. Use at your own risk.
 

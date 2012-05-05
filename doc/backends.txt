@@ -77,14 +77,14 @@ GP_Backend *GP_BackendInit(const char *params, const char *caption, FILE *help);
 
 This function takes a params string as an parameter which is used for
 determining backend-dependend parametrs. The format is
-'backend_name:backend_parameters' where backend parameters may be size (either
-'WxH' or 'FS' in case of SDL backend). The caption is window caption (which is
-ignored in most of the cases) and the FILE is file, where an error is printed
-in case of failure, you should mostly use 'stderr' for that purpose. If params
-is set to NULL the the call only prints help into the passed help FILE. If
-intitalizaton was succesfull pointer to allocated and initalized backend is
-returned otherwise NULL is returned and some helpful infomation should be
-printed into the passed help FILE.
+'backend_name:backend_parameters' where backend parameters may be window size
+(either 'WxH' or 'FS' in case of SDL backend). The caption is window caption
+(which is ignored in some of the cases) and the 'FILE' is file, where an error
+is printed in case of failure, you should mostly use 'stderr' for that
+purpose. If params is set to 'NULL' the the call only prints help into the
+passed help 'FILE'. If intitalizaton was succesfull pointer to allocated and
+initalized backend is returned otherwise 'NULL' is returned and some helpful
+infomation should be printed into the passed help 'FILE'.
 
 
 Drawing Backend API
