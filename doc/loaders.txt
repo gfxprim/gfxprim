@@ -19,6 +19,8 @@ Common Loader
 
 [source,c]
 -------------------------------------------------------------------------------
+#include <loaders/GP_Loaders.h>
+/* or */
 #include <GP.h>
 
 GP_Context *GP_LoadImage(const char *src_path, GP_ProgressCallback *callback);
@@ -36,6 +38,8 @@ are not supported yet.
 
 [source,c]
 -------------------------------------------------------------------------------
+#include <loaders/GP_PNG.h>
+/* or */
 #include <GP.h>
 
 int GP_OpenPNG(const char *src_path, FILE **f);
@@ -51,6 +55,8 @@ This function is semi-internal, you should rather use functions listed below.
 
 [source,c]
 -------------------------------------------------------------------------------
+#include <loaders/GP_PNG.h>
+/* or */
 #include <GP.h>
 
 GP_Context *GP_ReadPNG(FILE *f, GP_ProgressCallback *callback);
@@ -63,6 +69,8 @@ callback, in such case all memory is freed.
 
 [source,c]
 -------------------------------------------------------------------------------
+#include <loaders/GP_PNG.h>
+/* or */
 #include <GP.h>
 
 GP_Context *GP_LoadPNG(const char *src_path, GP_ProgressCallback *callback);
@@ -73,6 +81,8 @@ signature. Basically this combines both of the calls above.
 
 [source,c]
 -------------------------------------------------------------------------------
+#include <loaders/GP_PNG.h>
+/* or */
 #include <GP.h>
 
 int GP_SavePNG(const char *dst_path, const GP_Context *src,
@@ -87,12 +97,14 @@ Currently only 'RGB888' format is supported, you should convert the GP_Context
 to 'RGB888' before calling this function otherwise non-zero is returned and
 errno is set to ENOSYS. 
 
-JPG
-~~~
-The 'PNG' loading support is optionaly implemented by jpeg library.
+JPEG
+~~~~
+The 'JPEG' loading support is optionaly implemented by jpeg library.
 
 [source,c]
 -------------------------------------------------------------------------------
+#include <loaders/GP_JPG.h>
+/* or */
 #include <GP.h>
 
 int GP_OpenJPG(const char *src_path, FILE **f);
@@ -109,6 +121,8 @@ file and the 'GP_ReadJPG()' reads the signature instead.
 
 [source,c]
 -------------------------------------------------------------------------------
+#include <loaders/GP_JPG.h>
+/* or */
 #include <GP.h>
 
 GP_Context *GP_ReadJPG(FILE *f, GP_ProgressCallback *callback);
@@ -122,6 +136,8 @@ is set to ECANCELED.
 
 [source,c]
 -------------------------------------------------------------------------------
+#include <loaders/GP_JPG.h>
+/* or */
 #include <GP.h>
 
 GP_Context *GP_LoadJPG(const char *src_path, GP_ProgressCallback *callback);
@@ -132,6 +148,8 @@ signature. Basically this combines both of the calls above.
 
 [source,c]
 -------------------------------------------------------------------------------
+#include <loaders/GP_JPG.h>
+/* or */
 #include <GP.h>
 
 int GP_SaveJPG(const char *dst_path, const GP_Context *src,
@@ -152,6 +170,8 @@ The 'GIF' format is supported optionaly by giflib library.
 
 [source,c]
 -------------------------------------------------------------------------------
+#include <loaders/GP_GIF.h>
+/* or */
 #include <GP.h>
 
 int GP_OpenGIF(const char *src_path, void **f);
@@ -165,6 +185,8 @@ This function is semi-internal, you should rather use functions listed below.
 
 [source,c]
 -------------------------------------------------------------------------------
+#include <loaders/GP_GIF.h>
+/* or */
 #include <GP.h>
 
 GP_Context *GP_ReadGIF(void *f, GP_ProgressCallback *callback);
@@ -179,6 +201,8 @@ Currently this function loads only first image from the gif container.
 
 [source,c]
 -------------------------------------------------------------------------------
+#include <loaders/GP_GIF.h>
+/* or */
 #include <GP.h>
 
 GP_Context *GP_LoadGIF(const char *src_path, GP_ProgressCallback *callback);
@@ -195,6 +219,8 @@ be fancy RGB compressions and RLE support.
 
 [source,c]
 -------------------------------------------------------------------------------
+#include <loaders/GP_BMP.h>
+/* or */
 #include <GP.h>
 
 int GP_OpenBMP(const char *src_path, FILE **f,
@@ -209,6 +235,8 @@ This function is semi-internal, you should rather use functions listed below.
 
 [source,c]
 -------------------------------------------------------------------------------
+#include <loaders/GP_BMP.h>
+/* or */
 #include <GP.h>
 
 GP_Context *GP_ReadBMP(FILE *f, GP_ProgressCallback *callback);
@@ -223,6 +251,8 @@ Currently this function loads only first image from the 'GIF' container.
 
 [source,c]
 -------------------------------------------------------------------------------
+#include <loaders/GP_BMP.h>
+/* or */
 #include <GP.h>
 
 GP_Context *GP_LoadBMP(const char *src_path, GP_ProgressCallback *callback);
