@@ -1,63 +1,50 @@
 Basic types
 -----------
-Return Code
-~~~~~~~~~~~
+Coordinates and Size/Length
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Some gfxprim function returns one of following return codes (may be removed in
-future):
+Most of the drawing functions use typedefed 'GP_Coord' and 'GP_Size' integer
+types for parameters.
 
-[source,c]
---------------------------------------------------------------------------------
-typedef enum GP_RetCode {
-        GP_ESUCCESS,
-        GP_EINVAL,
-        GP_ENOIMPL,
-        GP_EUNPRECISE,
-        GP_ENULLPTR,            /* some argument was unexpectedly NULL */
-        GP_EBACKENDLOST,
-        GP_EBADCONTEXT,         /* context contains invalid data */
-        GP_EBADFILE,            /* error in file, or bad file format */
-        GP_ENOENT,              /* no such file or another object */
-        GP_ENOMEM,              /* not enough memory */
-        GP_EINTR,               /* interrupted by a callback */
-	GP_EMAX,
-} GP_RetCode;
---------------------------------------------------------------------------------
+The 'GP_Coord' is signed integer which is used for coordinates and the
+'GP_Size' is unsigned integer type used for object size, length and so.
 
-Return codes could be translated into an error messages.
+Pixel
+~~~~~
 
-[source,c]
---------------------------------------------------------------------------------
-const char *GP_RetCodeName(GP_RetCode code);
---------------------------------------------------------------------------------
+Pixel value in 'GFXprim' is an integer big enough to hold the actual pixel
+values. The default typedef for 'GP_Pixel' is set to 32 bit integer, which may
+be changed at compile time to support colors with more than 10 bits per
+channel. The 'GP_Pixel' is thus used as opaque value big enough to hold any
+supported pixel value.
 
-Coord and Size
-~~~~~~~~~~~~~~
-For drawing API there are two integer types defined the 'GP_Coord' for
-coordinates and 'GP_Size' for size, length or so.
+Color
+~~~~~
 
-Color and pixel types
-~~~~~~~~~~~~~~~~~~~~~
+The 'GP_Color', in gfxprim is enumeration of symbolic color names.
 
-The color, in gfxprim is enumeration of symbolic color names while pixel is
-integer value or you may say color in format of the target bitmap.
+Color could be converted for a given 'GP_PixelType' which will result into
+'GP_Pixel' value suitable for usage with drawing functions. The color could be
+also converted to color name (C string in English language) and C string may
+be matched against table of color names.
 
-Color could be converted into given pixel type which will result in integer
-value suitable for usage with drawing functions. The color could be also
-converted to color name (C string in English language) and C string may be
-matched against table of color names.
-
-As all drawing functions works with pixel rather than color the color must be
-converted before using function to draw a shape into a bitmap.
-
-The color is defined as follows:
+The 'GP_Color' enmum is defined as follows:
 
 [source,c]
 --------------------------------------------------------------------------------
 typedef enum GP_Color {
         GP_COL_INVALID = -1,
         GP_COL_BLACK,
-	...
+        GP_COL_RED,
+        GP_COL_GREEN,
+        GP_COL_BLUE,
+        GP_COL_YELLOW,
+        GP_COL_BROWN,
+        GP_COL_ORANGE,
+        GP_COL_GRAY_DARK,
+        GP_COL_GRAY_LIGHT,
+        GP_COL_PURPLE,
+        GP_COL_WHITE,
 	GP_COL_MAX,
 } GP_Color;
 --------------------------------------------------------------------------------
@@ -68,6 +55,8 @@ successful match and conversion and false otherwise.
 [source,c]
 --------------------------------------------------------------------------------
 #include <GP_Color.h>
+/* or */
+#include <GP.h>
 
 GP_Pixel GP_ColorToPixel(GP_Color color, GP_PixelType pixel_type);
 GP_Pixel GP_ColorToContextPixel(GP_Color color, GP_Context *context);
@@ -87,6 +76,8 @@ returns true if color with such name was found.
 [source,c]
 --------------------------------------------------------------------------------
 #include <GP_Color.h>
+/* or */
+#include <GP.h>
 
 void GP_ColorLoadPixels(GP_Pixel pixels[], GP_PixelType pixel_type);
 void GP_ColorLoadContextPixels(GP_Pixel pixels[], GP_Context *context);
@@ -98,8 +89,8 @@ the GP_Color enum as 'pixels[GP_COL_BLACK]'.
 Progress Callback
 ~~~~~~~~~~~~~~~~~
 
-Progress callback is a structure that stores user-defined callback function,
-pointer to store location of user data and percentage.
+The 'GP_ProgressCallback' is a structure that stores user-defined callback
+function and user-defined pointer and percentage.
 
 It is passed as last parameter to functions that could take some time to
 complete and adds capability to track the operation progress as well as to
@@ -120,9 +111,7 @@ If non 'NULL' progress callback structure is passed to a function, the
 callback function is periodically called and the percentage is updated.
 
 The return value from callback could abort the function execution. If non zero
-value is returned the filter is aborted, all memory freed etc. and the
-function either returns 'NULL' if pointer is returned or 'GP_EINTR' in case
-filter returns 'GP_RetCode'.
+value is returned the filter is aborted, all memory freed etc.
 
 The callback, if supported, is the last parameter of a function.
 
