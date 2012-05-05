@@ -111,7 +111,8 @@ If non 'NULL' progress callback structure is passed to a function, the
 callback function is periodically called and the percentage is updated.
 
 The return value from callback could abort the function execution. If non zero
-value is returned the filter is aborted, all memory freed etc.
+value is returned the filter is aborted, all memory freed etc. and in case of
+bitmap loaders 'errno' is set to 'ECANCELED'.
 
 The callback, if supported, is the last parameter of a function.
 

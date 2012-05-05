@@ -4,15 +4,15 @@ This part of gfxprim library aims to create API to load/save images from/to
 common image file formats.
 
 All loading functions returns a pointer to allocated and loaded image or upon
-a failure NULL is returned and errno is set.
+a failure 'NULL' is returned and 'errno' is set.
 
 The possible errno values are:
 
 * anything returned by fopen(), fclose(), fseek(), ...
-* ENOSYS if library wasn't compiled with particual library support
-* ENOMEM as returned by malloc()
-* EIO/EILSEQ invalid image data
-* ECANCELED loading canceled from callback
+* 'ENOSYS' if library wasn't compiled with particual library support
+* 'ENOMEM' as returned by malloc()
+* 'EIO'/'EILSEQ' invalid image data
+* 'ECANCELED' loading canceled from callback
 
 Common Loader
 ~~~~~~~~~~~~~
@@ -49,7 +49,7 @@ Opens file and checks for 'PNG' signature.  Returns zero on success (file
 could be opened, signature matches), the opened file is returned and the file
 possition points right after the end of the 'PNG' signature.
 
-Upon failure errno is filled.
+Upon failure 'errno' is filled.
 
 This function is semi-internal, you should rather use functions listed below.
 
@@ -90,12 +90,12 @@ int GP_SavePNG(const char *dst_path, const GP_Context *src,
 -------------------------------------------------------------------------------
 
 Writes a Context into a 'PNG' image. If aborted by a callback, the opened file
-is closed and removed before the call returns non-zero and errno is set to
-ECANCELED.
+is closed and removed before the call returns non-zero and 'errno' is set to
+'ECANCELED'.
 
-Currently only 'RGB888' format is supported, you should convert the GP_Context
-to 'RGB888' before calling this function otherwise non-zero is returned and
-errno is set to ENOSYS. 
+Currently only 'RGB888' format is supported, you should convert the
+'GP_Context' to 'RGB888' before calling this function otherwise non-zero is
+returned and 'errno' is set to 'ENOSYS'. 
 
 JPEG
 ~~~~
@@ -131,8 +131,8 @@ GP_Context *GP_ReadJPG(FILE *f, GP_ProgressCallback *callback);
 Loads 'JPG' file into context the file pointer must point to the start of the
 'JPG' data stream (eg. should point right after the signature). The context,
 to store the image to, is allocated. The loading process could by aborted by a
-callback, in such case all memory is freed and the call returns NULL and errno
-is set to ECANCELED.
+callback, in such case all memory is freed and the call returns 'NULL' and
+'errno' is set to 'ECANCELED'.
 
 [source,c]
 -------------------------------------------------------------------------------
@@ -157,8 +157,8 @@ int GP_SaveJPG(const char *dst_path, const GP_Context *src,
 -------------------------------------------------------------------------------
 
 Writes a Context into a 'JPG' image. If aborted by a callback, the opened file
-is closed and removed before the call returns non-zero and errno is set to
-ECANCELED.
+is closed and removed before the call returns non-zero and 'errno' is set to
+'ECANCELED'.
 
 The 'JPG' format could store either 'G8' or 'RGB888' pixeltypes and you must
 convert the context into one of them before this fucntions is called.
@@ -179,7 +179,7 @@ int GP_OpenGIF(const char *src_path, void **f);
 
 Opens file and checks for 'GIF' signature upon successful return (file could
 be opened, signature matches) zero is returned and gif handle f is set
-otherwise non-zero is returned and errno is set.
+otherwise non-zero is returned and 'errno' is set.
 
 This function is semi-internal, you should rather use functions listed below.
 
@@ -195,7 +195,8 @@ GP_Context *GP_ReadGIF(void *f, GP_ProgressCallback *callback);
 Loads 'GIF' file into context. The pointer must point to the 'GIF' handle as
 returned by 'GP_OpenGIF()' function. The context, to store the image to, is
 allocated. The loading process could by aborted by a callback, in such case
-all memory is freed and the call returns NULL and errno is set to ECANCELED.
+all memory is freed and the call returns 'NULL' and 'errno' is set to
+'ECANCELED'.
 
 Currently this function loads only first image from the gif container.
 
@@ -228,8 +229,9 @@ int GP_OpenBMP(const char *src_path, FILE **f,
 -------------------------------------------------------------------------------
 
 Opens file and checks for 'BMP' signature upon successful return (file could
-be opened, signature matches) zero is returned and the parameters, if not
-NULL, are initalized. Upon failure non-zero is returned and errno is set.
+be opened, signature matches) zero is returned and the parameters, if
+non-'NULL', are initalized. Upon failure non-zero is returned and 'errno' is
+set.
 
 This function is semi-internal, you should rather use functions listed below.
 
@@ -242,10 +244,10 @@ This function is semi-internal, you should rather use functions listed below.
 GP_Context *GP_ReadBMP(FILE *f, GP_ProgressCallback *callback);
 -------------------------------------------------------------------------------
 
-Loads 'BMP' file into context. The FILE pointer must point to opened 'BMP'
+Loads 'BMP' file into context. The 'FILE' pointer must point to opened 'BMP'
 file. The context, to store the image to, is allocated. The loading process
 could by aborted by a callback, in such case all memory is freed and the call
-returns NULL and errno is set to ECANCELED.
+returns 'NULL' and 'errno' is set to 'ECANCELED'.
 
 Currently this function loads only first image from the 'GIF' container.
 
@@ -264,6 +266,6 @@ signature. Basically this combines both of the calls above.
 PBM, PGM, PPM
 ~~~~~~~~~~~~~
 
-There is a code do load and write PBM, PGM and PPM images too. However it's
-not finished and it's API is outdated. Use at your own risk.
+There is a code do load and write 'PBM', 'PGM' and 'PPM' images too. However
+it's not finished and it's API is outdated. Use at your own risk.
 
