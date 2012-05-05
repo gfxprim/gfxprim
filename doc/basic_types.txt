@@ -54,7 +54,7 @@ successful match and conversion and false otherwise.
 
 [source,c]
 --------------------------------------------------------------------------------
-#include <GP_Color.h>
+#include <core/GP_Color.h>
 /* or */
 #include <GP.h>
 
@@ -75,7 +75,7 @@ returns true if color with such name was found.
 
 [source,c]
 --------------------------------------------------------------------------------
-#include <GP_Color.h>
+#include <core/GP_Color.h>
 /* or */
 #include <GP.h>
 
