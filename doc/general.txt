@@ -23,7 +23,7 @@ Graphics Rendering
 ** Lines
 ** Circles
 ** Elipses
-** Polygon
+** Polygons
 
 * Text Drawing
 ** Supports both proportional and non proportional fonts
@@ -36,6 +36,17 @@ Graphics Rendering
 ** Create, Destroy bitmap
 ** Subcontext, rectangular region in one context could be used as a context
 ** Fast specialized blits (with 90, 180 and 270 degree rotation)
+
+* Image loading/saving
+** Read and Write support for PNG
+** Read and Write support for JPEG
+** Read support for BMP
+** Read support for GIF
+
+* Graphic backed input event handling
+** Linux Framebuffer
+** SDL support
+** Experimental X11 support
 
 Bitmap Filters
 ^^^^^^^^^^^^^^
