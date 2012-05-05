@@ -1,43 +1,81 @@
 General information
 -------------------
-Gfxprim is simple 2D bitmap graphics library with emphasis on speed and
-correctness.
+Gfxprim is simple modular 2D bitmap graphics library with emphasis on speed
+and correctness.
+
+One of the key points of the library is code generation. Most of the graphics
+operations are written using 'jinja' templating engine which is used to
+generate specialized C code. So, for an example, once  you add pixel
+definition into configuration file, creating specialized filters, loaders and
+conversions to other pixel formats is just a matter of typing "make && make
+clean".
+
+The library also includes, fairly optimized, fixed-point image filters, namely
+various resampling algorithms used to resize images, low pass filters, etc...
 
 Implemented features
 ~~~~~~~~~~~~~~~~~~~~
-* basic graphics primitives (with and without fill)
-** line, circle, ellipse, triangle, tetragon
-* text drawing
-** supports both proportional and non proportional fonts
-** basic font is compiled in the library
-** font rendering can be altered by style attributes
-** font can be loaded from or stored in file
-** convertor from bdf is on the way
-* various bitmap formats to draw on
-* SDL drawing backend
-* bitmaps and blitting
-** create, destroy bitmap
-** bitmap rotation (in order to speed up rotated blits)
+
+Graphics Rendering
+^^^^^^^^^^^^^^^^^^
+* Basic Graphics Primitives (with and without fill)
+** PutPixel/GetPixel
+** Lines
+** Circles
+** Elipses
+** Polygon
+
+* Text Drawing
+** Supports both proportional and non proportional fonts
+** Basic fonts are compiled in the library
+** Font rendering can be altered by style attributes
+** Supports, for example, pixel multiplication and tracking
+** Includes basic suppport for freetype
+
+* Bitmaps and Blitting
+** Create, Destroy bitmap
+** Subcontext, rectangular region in one context could be used as a context
+** Fast specialized blits (with 90, 180 and 270 degree rotation)
+
+Bitmap Filters
+^^^^^^^^^^^^^^
+* Point filters
+** Brightness
+** Contrast
+** General Point filter
+
+* Linear filters
+** Specialized Gaussian blur
+** Separable Convolution
+** General Convolution
+
+* Arihtmetics filters
+** Addition
+** Multiplication
+** Difference
+** Maximum, Minimum
+
+* Floyd Steinberg dithering
+
+* Bitmap resampling algorithms
+** Nearest Neighbour
+** Bilinear
+** Cubic
+
+* Bitmap rotation and mirroring
+** 90 180 and 170 degree rotation
+
+* Histogram generator
 
 Work in progress
 ~~~~~~~~~~~~~~~~
 
-* bitmaps and blitting
-** blit bitmaps (should respect rotation and pixel formats)
-** loading bitmaps from image files (jpg, png, bmp, pnm ...)
+* Python bindings
+** basic support works now
+** could be combined with PyGTK for GUI drawing (experimental)
 
-* backends
-** finish frame-buffer backend (SDL does not work on most of my frame-buffers)
-** other than SDL X backend (SDL does support only one window)
-** some overall initialization routines
+* Anti Aliased drawing
+** Line and PutPixel are finished
 
-Advanced (and unimplemented) features
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-* bitmaps
-** alpha channel
-
-* gfx primitives
-** drawing with alpha channel
-** anti aliasing
+* Gamma correction and color profiles
 
