@@ -1,0 +1,21 @@
+Simple backend example
+----------------------
+
+Basic backend code example. Initalizes backends, draws a cross and dumps
+events.
+
+[source,c]
+------------------------------------------------------------------
+include::../demos/simple/backend_example.c[]
+------------------------------------------------------------------
+
+Simple loaders example
+----------------------
+
+Loads an image and saves it into 'out.png' png image.
+
+[source,c]
+------------------------------------------------------------------
+include::../demos/simple/loaders_example.c[]
+------------------------------------------------------------------
+

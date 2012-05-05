@@ -1,8 +1,11 @@
-all: api.html
+all: api.html examples.html
 
 api.html: general.txt api.txt context.txt loaders.txt filters.txt \
           basic_types.txt drawing_api.txt
 	asciidoc -a toc api.txt
+
+examples.html: examples.txt ../demos/simple/*.c
+	asciidoc -a toc examples.txt
 
 api.pdf: api.txt
 	asciidoc -b docbook api.txt
