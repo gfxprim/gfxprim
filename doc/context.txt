@@ -1,7 +1,8 @@
 Drawing Context
 ---------------
 
-The 'GP_Context' is data structure for storing 'in memory' bitmaps.
+The 'GP_Context' structure describes a bitmap in memory. It contains all
+metadata needed for drawing into a bitmap.
 
 Data Structure
 ~~~~~~~~~~~~~~
@@ -31,8 +32,8 @@ typedef struct GP_Context {
 } GP_Context;
 -------------------------------------------------------------------------------
 
-The 'GP_Context' holds meta-data needed for bitmap drawing. The bitmap is
-stored in one dimensional array in byte-aligned lines.
+The 'pixels' field points to the image data, stored as a one-dimensional
+array of byte-aligned lines.
 
 Rotation
 ^^^^^^^^
@@ -92,8 +93,8 @@ GP_Size GP_ContextW(const GP_Context *context);
 GP_Size GP_ContextH(const GP_Context *context);
 -------------------------------------------------------------------------------
 
-Context base functions
-~~~~~~~~~~~~~~~~~~~~~~
+Basic context functions
+~~~~~~~~~~~~~~~~~~~~~~~
 
 [source,c]
 -------------------------------------------------------------------------------
@@ -106,10 +107,12 @@ void GP_ContextInit(GP_Context *context, GP_Size w, GP_Size h,
 -------------------------------------------------------------------------------
 
 Initalize given context accordingly to parameters, the rest of context
-parameters are set to the default values. Eg. rotation flags are all set to
-zero as well as the free_pixels flag. The bpp and bytes_per_row are computed
-from the given pixel type and size. The pixels pointer may be 'NULL' and could
-be changed later manually.
+parameters are set to the default values (i.e. rotation flags are all set to
+zero, 'free_pixels' flag is not set). Number of bits per pixel and
+bytes per row are computed from the given pixel type and size.
+
+The 'pixels' pointer can be 'NULL' and can be changed later manually (the call
+will *not* try to allocate the pixel memory automatically).
 
 [source,c]
 -------------------------------------------------------------------------------
@@ -122,9 +125,9 @@ GP_Context *GP_ContextAlloc(GP_Size w, GP_Size h, GP_PixelType type);
 
 The 'GP_ContextAlloc()' allocates and initalizes a context.
 
-The orientation flags are all set to zero, the free_pixels flag is set and the
+The orientation flags are all set to zero, the 'free_pixels' flag is set and the
 rest of the metadata are calculated accordingly to width, height and
-pixel_type.The contxt->pixels pointer points to newly allocated bitmap with
+pixel_type.The 'pixels' pointer will point to a newly allocated bitmap with
 appropriate size; the initial contents of the bitmap are undefined.
 
 [source,c]
@@ -137,8 +140,9 @@ GP_Context *GP_ContextCopy(const GP_Context *src, int flag);
 -------------------------------------------------------------------------------
 
 The 'GP_ContextCopy()' allocates and initalizes a copy of the context passed
-as argument. If 'flag' is not zero, the bitmap (context->pixels) is copied
-otherwise it's left uninitalized.
+as argument. If 'flag' is set, the bitmap contents ('src->pixels')
+are also copied; otherwise the copy will have the same dimensions but
+undefined contents.
 
 [source,c]
 -------------------------------------------------------------------------------
