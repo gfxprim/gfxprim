@@ -191,14 +191,18 @@ def write_gfxprim_config(cfg, libs):
     # General switches cflags and ldflags
     f.write('\t--help) echo "$USAGE"; exit 0;;\n')
     f.write('\t--list-modules) echo "%s"; exit 0;;\n' % ' '.join(modules))
-    f.write('\t--cflags) echo -n "-I/usr/include/GP/";;\n')
-    f.write('\t--libs) echo -n "-lGP";;\n')
+    f.write('\t--cflags) echo -n "-I/usr/include/GP/ ";;\n')
+    f.write('\t--libs) echo -n "-lGP ";;\n')
    
 
     # ldflags for specific modules
     for i in modules:
-        f.write('\t--libs-%s) echo -n "%s";;\n' %
-                (i, libs.get_linker_flags(i)))
+        ldflags = ''
+        if i == 'backends':
+            ldflags += '-lGP_backends '
+        ldflags += libs.get_linker_flags(i)
+        f.write('\t--libs-%s) echo -n "%s ";;\n' % (i, ldflags))
+                
 
     f.write('\tesac\n\tshift\ndone\necho\n')
     f.close()
