@@ -192,7 +192,7 @@ def write_gfxprim_config(cfg, libs):
     f.write('\t--help) echo "$USAGE"; exit 0;;\n')
     f.write('\t--list-modules) echo "%s"; exit 0;;\n' % ' '.join(modules))
     f.write('\t--cflags) echo -n "-I/usr/include/GP/ ";;\n')
-    f.write('\t--libs) echo -n "-lGP ";;\n')
+    f.write('\t--libs) echo -n "-lGP %s ";;\n' % libs.get_linker_flags('core'))
    
 
     # ldflags for specific modules
@@ -240,7 +240,7 @@ if __name__ ==  '__main__':
 		    [header_exists, "X11/Xlib.h"], "", "-lX11", {"backends"}],
 		   ["freetype",
                     "A high-quality and portable font engine",
-                    [header_exists, "ft2build.h"], "", "`freetype-config --libs`", {"text"}]], cfg)
+                    [header_exists, "ft2build.h"], "", "`freetype-config --libs`", {"core"}]], cfg)
 
     parser = OptionParser();
     
