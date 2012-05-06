@@ -21,12 +21,10 @@ supported pixel value.
 Color
 ~~~~~
 
-The 'GP_Color', in gfxprim is enumeration of symbolic color names.
+The 'GP_Color' enumeration holds symbolic constants for basic colors.
 
-Color could be converted for a given 'GP_PixelType' which will result into
-'GP_Pixel' value suitable for usage with drawing functions. The color could be
-also converted to color name (C string in English language) and C string may
-be matched against table of color names.
+A 'GP_Color' can be converted into a 'GP_Pixel' for a given 'GP_PixelType'.
+Symbolic values can also be converted to/from strings (color name in English).
 
 The 'GP_Color' enum is defined as follows:
 
@@ -49,9 +47,6 @@ typedef enum GP_Color {
 } GP_Color;
 --------------------------------------------------------------------------------
 
-Color and Pixel conversion functions, the last one returns 'true' in case of
-successful match and conversion and false otherwise.
-
 [source,c]
 --------------------------------------------------------------------------------
 #include <core/GP_Color.h>
@@ -70,7 +65,7 @@ bool GP_ColorNameToContextPixel(const char *color_name, GP_Context *context,
                                 GP_Pixel *pixel);
 --------------------------------------------------------------------------------
 
-Functions to convert color to pixel and color to context pixel. The last two
+Functions for conversion between colors, pixels and color names. The last two
 returns true if color with such name was found.
 
 [source,c]
