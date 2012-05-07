@@ -94,7 +94,7 @@ void GP_FillCircle(GP_Context *context, GP_Coord xcenter, GP_Coord ycenter,
 Draws a filled circle.
 
 The set of pixels affected by 'GP_FillCircle()' is exactly the same as if
-drawing the circle boundary using GP_Circle() and then filling all pixels
+drawing the circle boundary using 'GP_Circle()' and then filling all pixels
 within the boundary with the same color.
 
 Rings

@@ -33,7 +33,9 @@ typedef struct GP_Context {
 -------------------------------------------------------------------------------
 
 The 'pixels' field points to the image data, stored as a one-dimensional
-array of byte-aligned lines.
+array of byte-aligned lines. (There can be some unused space at the end of
+each line; this is reflected by the 'bytes_per_row' value being greater
+than what would be needed for that pixel format).
 
 Rotation
 ^^^^^^^^
@@ -47,7 +49,7 @@ If you don't need this functionality just don't touch the flags the as
 overhead of these transformations is not measurable.
 
 If you really need drawing primitives that do not use the orientation flags,
-you could use variants with _Raw suffix (altghoug this is not recommended).
+you could use variants with _Raw suffix (although this is not recommended).
 
 There are various helper macros for transforming coordinates and sizes in
 'core/GP_Transform.h'. And context helper functions to "rotate" the flags
@@ -87,7 +89,7 @@ void GP_ContextFlagsRotateCW(GP_Context *context);
 void GP_ContextFlagsRotateCCW(GP_Context *context);
 
 /*
- * Returns context W and H taking the rotation flags into the account.
+ * Returns context width and height taking the rotation flags into the account.
  */
 GP_Size GP_ContextW(const GP_Context *context);
 GP_Size GP_ContextH(const GP_Context *context);
@@ -153,7 +155,7 @@ undefined contents.
 void GP_ContextFree(GP_Context *context);
 -------------------------------------------------------------------------------
 
-Frees the context memory. If free_pixels flag is set, the pixels buffer is
+Frees the context memory. If 'free_pixels' flag is set, the pixels buffer is
 freed too.
 
 Subcontext
@@ -163,7 +165,7 @@ A subcontext is a context that refers to a rectangular area within another
 context. Subcontexts can be used as any other context (including creating
 another subcontexts).
 
-Calling GP_ContextFree() on a subcontext is safe; the bitmap is not freed as
+Calling 'GP_ContextFree()' on a subcontext is safe; the bitmap is not freed as
 it belongs to another context; it will be freed with the hosting context.
 
 [source,c]
@@ -201,6 +203,6 @@ GP_Context *GP_ContextConvert(const GP_Context *src, GP_Context *dst,
 Provides basic context conversion functionality. A newly allocated context is
 returned.
 
-This fuction does no error distribution it only multiplies or rounds the pixel
+This fuction does no error distribution, it only multiplies or rounds the pixel
 values. If you need something better use Floyd Steinberg dithering instead.
 
