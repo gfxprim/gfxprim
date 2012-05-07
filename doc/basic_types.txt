@@ -32,17 +32,24 @@ The 'GP_Color' enum is defined as follows:
 --------------------------------------------------------------------------------
 typedef enum GP_Color {
         GP_COL_INVALID = -1,
+
+	/* full-intensity RGB and CMYK */
         GP_COL_BLACK,
         GP_COL_RED,
         GP_COL_GREEN,
         GP_COL_BLUE,
         GP_COL_YELLOW,
+	GP_COL_CYAN,
+	GP_COL_MAGENTA,
+
+	/* various common mixes */
         GP_COL_BROWN,
         GP_COL_ORANGE,
-        GP_COL_GRAY_DARK,
+        GP_COL_GRAY_DARK,	/* exactly half RGB values of white */
         GP_COL_GRAY_LIGHT,
         GP_COL_PURPLE,
-        GP_COL_WHITE,
+
+        GP_COL_WHITE,		/* full-intensity white */
 	GP_COL_MAX,
 } GP_Color;
 --------------------------------------------------------------------------------
