@@ -5,7 +5,7 @@ ifndef SUBDIRS
 SUBDIRS=
 endif
 
-.PHONY: $(SUBDIRS) all clean rebuild help
+.PHONY: $(SUBDIRS) all clean rebuild help doc
 
 all: $(SUBDIRS)
 clean: $(SUBDIRS)
@@ -16,6 +16,8 @@ help:
 	@echo ""
 	@echo "help:    prints this help"
 	@echo ""
+	@echo "doc:     builds (only) the documentation"
+	@echo ""
 	@echo "clean:   cleans current directory and all subdirectories"
 	@echo ""
 	@echo "all:     make current directory and all subdirectories"
@@ -25,6 +27,9 @@ help:
 	@echo "The default silent output could be turned off by defining"
 	@echo "'VERBOSE' shell variable as 'VERBOSE=1 make'"
 	@echo ""
+
+doc:
+	cd doc && make
 
 #
 # Determine mode (eg do not generate anything if not in compile mode
