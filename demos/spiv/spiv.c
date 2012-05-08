@@ -246,8 +246,8 @@ static void *image_loader(void *ptr)
 	/* clean up the rest of the display */
 	GP_FillRectXYWH(context, 0, 0, cx, context->h, black_pixel);
 	GP_FillRectXYWH(context, 0, 0, context->w, cy, black_pixel);
-	GP_FillRectXYWH(context, ret->w+cx, 0, cx, context->h, black_pixel);
-	GP_FillRectXYWH(context, 0, ret->h+cy, context->w, cy, black_pixel);
+	GP_FillRectXYWH(context, ret->w+cx, 0, context->w - ret->w - cx, context->h, black_pixel);
+	GP_FillRectXYWH(context, 0, ret->h+cy, context->w, context->h - ret->h - cy, black_pixel);
 
 	cpu_timer_stop(&sum_timer);
 
