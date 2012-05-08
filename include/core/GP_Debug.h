@@ -45,12 +45,13 @@
 
 #define GP_DEFAULT_DEBUG_LEVEL 0
 
-#define GP_DEBUG(level, ...) do {                                               \
-	if (level <= GP_GetDebugLevel()) {                                      \
-		fprintf(stderr, "%s:%s():%u: ", __FILE__, __FUNCTION__, __LINE__); \
-		fprintf(stderr, __VA_ARGS__);                                   \
-		fputc('\n', stderr);                                            \
-	}                                                                       \
+#define GP_DEBUG(level, ...) do {                                    \
+	if (level <= GP_GetDebugLevel()) {                           \
+		fprintf(stderr, "%u: %s:%s():%u: ", level, __FILE__, \
+		        __FUNCTION__, __LINE__);                     \
+		fprintf(stderr, __VA_ARGS__);                        \
+		fputc('\n', stderr);                                 \
+	}                                                            \
 } while (0)
 
 void GP_SetDebugLevel(unsigned int level);
