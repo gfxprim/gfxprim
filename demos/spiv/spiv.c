@@ -520,6 +520,8 @@ int main(int argc, char *argv[])
 				switch (ev.code) {
 				case GP_EV_SYS_RESIZE:
 					GP_BackendResize(backend, ev.val.sys.w, ev.val.sys.h);
+					GP_Fill(backend->context, 0);
+					params.show_progress_once = 1;
 					show_image(&params);
 				break;
 				case GP_EV_SYS_QUIT:
