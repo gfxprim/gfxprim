@@ -108,7 +108,16 @@ static const char *img_name(const char *img_path)
 			return &img_path[i+1];
 	}
 
-	return NULL;
+	return img_path;
+}
+
+static void set_caption(const char *path, float rat)
+{
+	char buf[256];
+
+	snprintf(buf, sizeof(buf), "Spiv ~ %s 1:%3.3f", img_name(path), rat);
+
+	GP_BackendSetCaption(backend, buf);
 }
 
 static void *image_loader(void *ptr)
@@ -154,6 +163,19 @@ static void *image_loader(void *ptr)
 		h = context->w;
 	break;
 	}
+
+	/* Try to resize window */
+	/*
+	if (!GP_BackendResize(backend, img->w, img->h)) {
+		context = backend->context;
+		
+		GP_Blit_Raw(img, 0, 0, img->w, img->h, context, 0, 0);
+		GP_BackendFlip(backend);
+		set_caption(params->img_path, 1); 
+
+		return NULL;
+	}
+	*/
 
 	float rat = calc_img_size(img->w, img->h, w, h);
 
@@ -230,6 +252,8 @@ static void *image_loader(void *ptr)
 	GP_FillRectXYWH(context, 0, ret->h+cy, context->w, cy, black_pixel);
 
 	cpu_timer_stop(&sum_timer);
+
+	set_caption(params->img_path, rat); 
 
 	if (!params->show_info) {
 		GP_BackendFlip(backend);
