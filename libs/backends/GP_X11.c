@@ -138,7 +138,6 @@ static int x11_set_attributes(struct GP_Backend *self,
 	}
 
 	if (w != 0 || h != 0) {
-		GP_Context *context;
 		XImage *img;
 
 		if (w == 0)
@@ -154,20 +153,17 @@ static int x11_set_attributes(struct GP_Backend *self,
 	                           w, h, 32, 0);
 
 		/* Allocate new context */
-		context = GP_ContextAlloc(w, h, GP_PIXEL_xRGB8888);
 	
-		if (context == NULL) {
+		if (GP_ContextResize(self->context, w, h)) {
 			XDestroyImage(img);
 			return 1;
 		}
 
-		/* Free old image and context */
-		GP_ContextFree(self->context);
+		/* Free old image */
 		x11->img->data = NULL;
 		XDestroyImage(x11->img);
 
 		/* Swap the pointers */
-		self->context = context;
 		img->data = (char*)self->context->pixels;
 		x11->img = img;
 

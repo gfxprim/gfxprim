@@ -111,11 +111,6 @@ int context_from_surface(GP_Context *context, SDL_Surface *surf)
 	context->w = surf->w;
 	context->h = surf->h;
 
-	/* orientation */
-	context->axes_swap = 0;
-	context->x_swap = 0;
-	context->y_swap = 0;
-
 	return 0;
 }
 
@@ -196,7 +191,7 @@ GP_Backend *GP_BackendSDLInit(GP_Size w, GP_Size h, uint8_t bpp, uint8_t flags,
 			SDL_Quit();
 			return NULL;
 		}
-
+	
 		backend.context = &context;
 	}
 
