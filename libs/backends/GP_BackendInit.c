@@ -73,7 +73,7 @@ static GP_Backend *backend_sdl_init(char *params, const char *caption,
 		return GP_BackendSDLInit(0, 0, 0, 0, caption);
 	
 	GP_Size w = 0, h = 0;
-	uint8_t flags = 0;
+	uint8_t flags = GP_SDL_RESIZABLE;
 	
 	char *s = params;
 

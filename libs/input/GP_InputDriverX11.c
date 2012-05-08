@@ -90,6 +90,11 @@ void GP_InputDriverX11EventPut(XEvent *ev)
 
 		GP_EventPush(GP_EV_KEY, key, press, NULL);
 	break;
+	case ConfigureNotify:
+		GP_EventPushResize(ev->xconfigure.width,
+		                   ev->xconfigure.height, NULL);
+	break;
+	break;
 	case MotionNotify:
 		GP_EventPushRelTo(ev->xmotion.x, ev->xmotion.y, NULL);
 	break;
@@ -108,6 +113,8 @@ void GP_InputDriverX11EventPut(XEvent *ev)
 		
 		GP_EventPushKey(key, press, NULL);
 	break;
+	default:
+		GP_DEBUG(0, "Unhandled X11 event type %u", ev->type);
 	}
 }
 

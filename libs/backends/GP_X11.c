@@ -110,9 +110,10 @@ static void x11_poll(GP_Backend *self)
 			                ev.xexpose.x + ev.xexpose.width,
 					ev.xexpose.y + ev.xexpose.height);
 		break;
-		case MapNotify:
-			GP_DEBUG(1, "Shown");
-		break;
+		case ConfigureNotify:
+			if (ev.xconfigure.width == (int)self->context->w &&
+			    ev.xconfigure.height == (int)self->context->h)
+			    	break;
 		default:
 			GP_InputDriverX11EventPut(&ev);
 		break;
@@ -130,9 +131,11 @@ static int x11_set_attributes(struct GP_Backend *self,
 	
 	XLockDisplay(x11->dpy);
 	
-	if (caption != NULL)
+	if (caption != NULL) {
+		GP_DEBUG(3, "Setting window caption to '%s'", caption);
 		XmbSetWMProperties(x11->dpy, x11->win, caption, caption,
 	                           NULL, 0, NULL, NULL, NULL);
+	}
 
 	if (w != 0 || h != 0) {
 		GP_Context *context;
@@ -143,6 +146,8 @@ static int x11_set_attributes(struct GP_Backend *self,
 	
 		if (h == 0)
 			h = self->context->h;
+		
+		GP_DEBUG(3, "Setting window size to %ux%u", w, h);
 
 		/* Create new X image */
 		img = XCreateImage(x11->dpy, x11->vis, 24, ZPixmap, 0, NULL,
@@ -228,7 +233,7 @@ GP_Backend *GP_BackendX11Init(const char *display, int x, int y,
 	}
 
 	/* Select events */
-	XSelectInput(x11->dpy, x11->win, StructureNotifyMask | ExposureMask |
+	XSelectInput(x11->dpy, x11->win, ExposureMask | StructureNotifyMask |
 	                                 KeyPressMask | KeyReleaseMask |
 					 ButtonPressMask | ButtonReleaseMask |
 					 PointerMotionMask);
