@@ -310,6 +310,11 @@ int GP_EventGet(struct GP_Event *ev);
 void GP_EventPushRel(int32_t rx, int32_t ry, struct timeval *time);
 
 /*
+ * Produces relative event that moves to the point x, y
+ */
+void GP_EventPushRelTo(uint32_t x, uint32_t y, struct timeval *time);
+
+/*
  * Inject absolute event.
  */
 void GP_EventPushAbs(uint32_t x, uint32_t y, uint32_t pressure,

@@ -67,13 +67,10 @@ void GP_InputDriverX11EventPut(XEvent *ev)
 	int key = 0, keycode, press = 0;
 
 	switch (ev->type) {
-	/*
-	case SDL_MOUSEMOTION:
-		GP_EventPushRel(ev->motion.xrel, ev->motion.yrel, NULL);
-	break;
-	case SDL_MOUSEBUTTONDOWN:
-	case SDL_MOUSEBUTTONUP:
-		switch (ev->button.button) {
+	case ButtonPress:
+		press = 1;
+	case ButtonRelease:
+		switch (ev->xbutton.button) {
 		case 1:
 			key = GP_BTN_LEFT;
 		break;
@@ -83,13 +80,19 @@ void GP_InputDriverX11EventPut(XEvent *ev)
 		case 3:
 			key = GP_BTN_RIGHT;
 		break;
-		default:
+		}
+
+		if (key == 0) {
+			GP_DEBUG(0, "Unmapped X11 button %02x",
+			         ev->xbutton.button);
 			return;
 		}
 
-		GP_EventPush(GP_EV_KEY, key, ev->button.state, NULL);
+		GP_EventPush(GP_EV_KEY, key, press, NULL);
 	break;
-	*/
+	case MotionNotify:
+		GP_EventPushRelTo(ev->xmotion.x, ev->xmotion.y, NULL);
+	break;
 	case KeyPress:
 		press = 1;
 	case KeyRelease:
@@ -103,7 +106,6 @@ void GP_InputDriverX11EventPut(XEvent *ev)
 			return;
 		}
 		
-		GP_DEBUG(0, "Mapped X11 keycode %02x", keycode);
 		GP_EventPushKey(key, press, NULL);
 	break;
 	}

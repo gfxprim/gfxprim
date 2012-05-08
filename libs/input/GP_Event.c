@@ -129,14 +129,14 @@ const char *GP_EventKeyName(enum GP_EventKeyValue key)
 
 static void dump_rel(struct GP_Event *ev)
 {
-	printf("REL ");
+	printf("Rel ");
 
 	switch (ev->code) {
 	case GP_EV_REL_POS:
-		printf("POSSITION %u %u\n", ev->cursor_x, ev->cursor_y);
+		printf("Position %u %u\n", ev->cursor_x, ev->cursor_y);
 	break;
 	case GP_EV_REL_WHEEL:
-		printf("WHEEL %i\n", ev->val.val);
+		printf("Wheel %i\n", ev->val.val);
 	break;
 	}
 }
@@ -148,7 +148,7 @@ static void dump_key(struct GP_Event *ev)
 	if (ev->val.key.key < key_names_size)
 		name = key_names[ev->val.key.key];
 
-	printf("KEY %i (Key%s) %s\n",
+	printf("Key %i (Key%s) %s\n",
 	       ev->val.key.key, name, ev->code ? "down" : "up");
 
 }
@@ -157,7 +157,7 @@ static void dump_abs(struct GP_Event *ev)
 {
 	switch (ev->code) {
 	case GP_EV_ABS_POS:
-		printf("POSSITION %u %u %u\n",
+		printf("Position %u %u %u\n",
 		       ev->cursor_x, ev->cursor_y, ev->val.abs.pressure);
 	break;
 	}
@@ -165,7 +165,7 @@ static void dump_abs(struct GP_Event *ev)
 
 void GP_EventDump(struct GP_Event *ev)
 {
-	printf("EVENT (%u) ", (unsigned int)ev->time.tv_sec % 10000);
+	printf("Event (%u) ", (unsigned int)ev->time.tv_sec % 10000);
 
 	switch (ev->type) {
 	case GP_EV_KEY:
@@ -216,6 +216,14 @@ static uint32_t clip_rel(uint32_t val, uint32_t max, int32_t rel)
 		return max - 1;
 
 	return val + rel;
+}
+
+void GP_EventPushRelTo(uint32_t x, uint32_t y, struct timeval *time)
+{
+	int32_t rx = x - cur_state.cursor_x;
+	int32_t ry = y - cur_state.cursor_y;
+
+	GP_EventPushRel(rx, ry, time);
 }
 
 void GP_EventPushRel(int32_t rx, int32_t ry, struct timeval *time)

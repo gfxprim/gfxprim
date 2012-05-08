@@ -111,8 +111,7 @@ static void x11_poll(GP_Backend *self)
 		case MapNotify:
 			GP_DEBUG(1, "Shown");
 		break;
-		case KeyPress:
-		case KeyRelease:
+		default:
 			GP_InputDriverX11EventPut(&ev);
 		break;
 		}
@@ -174,7 +173,9 @@ GP_Backend *GP_BackendX11Init(const char *display, int x, int y,
 
 	/* Select events */
 	XSelectInput(x11->dpy, x11->win, StructureNotifyMask | ExposureMask |
-	                                 KeyPressMask | KeyReleaseMask);
+	                                 KeyPressMask | KeyReleaseMask |
+					 ButtonPressMask | ButtonReleaseMask |
+					 PointerMotionMask);
 
 	/* Set window caption */
 	XmbSetWMProperties(x11->dpy, x11->win, caption, caption,
