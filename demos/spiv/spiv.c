@@ -42,7 +42,6 @@ static GP_Pixel black_pixel;
 static GP_Pixel white_pixel;
 
 static GP_Backend *backend = NULL;
-static GP_Context *context = NULL;
 
 /* image loader thread */
 static int abort_flag = 0;
@@ -53,6 +52,7 @@ static int resampling_method = GP_INTERP_LINEAR_LF_INT;
 static int image_loader_callback(GP_ProgressCallback *self)
 {
 	static GP_Size size = 0;
+	GP_Context *c = backend->context;
 
 	if (abort_flag)
 		return 1;
@@ -64,8 +64,6 @@ static int image_loader_callback(GP_ProgressCallback *self)
 
 	snprintf(buf, sizeof(buf), "%s ... %-3.1f%%",
 	         (const char*)self->priv, self->percentage);
-
-	GP_Context *c = context;
 
 	int align = GP_ALIGN_CENTER|GP_VALIGN_ABOVE;
 
@@ -126,7 +124,7 @@ static void *image_loader(void *ptr)
 	GP_ProgressCallback callback = {.callback = image_loader_callback};
 	struct cpu_timer timer;
 	struct cpu_timer sum_timer;
-	GP_Context *img;
+	GP_Context *img, *context = backend->context;
 
 	cpu_timer_start(&sum_timer, "sum");
 
@@ -331,6 +329,7 @@ static void init_backend(const char *backend_opts)
 int main(int argc, char *argv[])
 {
 	GP_InputDriverLinux *drv = NULL;
+	GP_Context *context = NULL;
 	const char *input_dev = NULL;
 	const char *backend_opts = "SDL";
 	int sleep_sec = -1;
@@ -514,6 +513,18 @@ int main(int argc, char *argv[])
 					params.show_progress_once = 1;
 					params.img_path = argv[argn];
 					show_image(&params);
+				break;
+				}
+			break;
+			case GP_EV_SYS:
+				switch (ev.code) {
+				case GP_EV_SYS_RESIZE:
+					GP_BackendResize(backend, ev.val.sys.w, ev.val.sys.h);
+					show_image(&params);
+				break;
+				case GP_EV_SYS_QUIT:
+					GP_BackendExit(backend);
+					return 0;
 				break;
 				}
 			break;
