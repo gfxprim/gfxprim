@@ -37,6 +37,8 @@ struct x11_priv {
 	Window win;
 	Visual *vis;
 	XImage *img;
+
+	int resized_flag;
 };
 
 static void x11_exit(GP_Backend *self)
@@ -70,6 +72,8 @@ static void x11_update_rect(GP_Backend *self, GP_Coord x0, GP_Coord y0,
 	          x11->img, x0, y0, x0, y0, x1-x0, y1-y0);
 	XFlush(x11->dpy);
 
+	x11->resized_flag = 0;
+
 	XUnlockDisplay(x11->dpy);
 }
 
@@ -86,6 +90,8 @@ static void x11_flip(GP_Backend *self)
 	XPutImage(x11->dpy, x11->win, DefaultGC(x11->dpy, x11->scr),
 	          x11->img, 0, 0, 0, 0, w, h);
 	XFlush(x11->dpy);
+	
+	x11->resized_flag = 0;
 
 	XUnlockDisplay(x11->dpy);
 }
@@ -106,6 +112,10 @@ static void x11_poll(GP_Backend *self)
 			         ev.xexpose.x, ev.xexpose.y,
 			         ev.xexpose.width, ev.xexpose.height,
 			         ev.xexpose.count);
+		
+			if (x11->resized_flag)
+				break;
+
 			x11_update_rect(self, ev.xexpose.x, ev.xexpose.y,
 			                ev.xexpose.x + ev.xexpose.width,
 					ev.xexpose.y + ev.xexpose.height);
@@ -170,6 +180,8 @@ static int x11_set_attributes(struct GP_Backend *self,
 		/* Resize X11 window */
 		XResizeWindow(x11->dpy, x11->win, w, h);
 		XFlush(x11->dpy);
+	
+		x11->resized_flag = 1;
 	}
 	
 	XUnlockDisplay(x11->dpy);
@@ -227,7 +239,7 @@ GP_Backend *GP_BackendX11Init(const char *display, int x, int y,
 		GP_DEBUG(1, "Failed to create window");
 		goto err2;
 	}
-
+	
 	/* Select events */
 	XSelectInput(x11->dpy, x11->win, ExposureMask | StructureNotifyMask |
 	                                 KeyPressMask | KeyReleaseMask |
@@ -241,6 +253,9 @@ GP_Backend *GP_BackendX11Init(const char *display, int x, int y,
 	/* Show window */
 	XMapWindow(x11->dpy, x11->win);
 	XFlush(x11->dpy);
+	
+	x11->resized_flag  = 0;
+
 
 /*
 	enum GP_PixelType pixel_type;
@@ -265,6 +280,7 @@ GP_Backend *GP_BackendX11Init(const char *display, int x, int y,
 	backend->fd_list       = NULL;
 	backend->Poll          = x11_poll;
 	backend->SetAttributes = x11_set_attributes;
+
 
 	return backend;
 //err3:
