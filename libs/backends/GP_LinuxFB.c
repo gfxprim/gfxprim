@@ -233,13 +233,14 @@ GP_Backend *GP_BackendLinuxFBInit(const char *path)
 	fb->context.pixel_type = pixel_type;
 
 	/* update API */
-	backend->name       = "Linux FB";
-	backend->context    = &fb->context;
-	backend->Flip       = fb_flip_noop;
-	backend->UpdateRect = fb_update_rect_noop;
-	backend->Exit       = fb_exit;
-	backend->fd_list    = NULL;
-	backend->Poll       = NULL;
+	backend->name          = "Linux FB";
+	backend->context       = &fb->context;
+	backend->Flip          = fb_flip_noop;
+	backend->UpdateRect    = fb_update_rect_noop;
+	backend->Exit          = fb_exit;
+	backend->SetAttributes = NULL;
+	backend->fd_list       = NULL;
+	backend->Poll          = NULL;
 
 	return backend;
 err3:

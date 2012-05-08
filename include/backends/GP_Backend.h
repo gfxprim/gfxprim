@@ -72,7 +72,7 @@ typedef struct GP_Backend {
 	 * If display is buffered, this copies content
 	 * of context onto display.
 	 *
-	 * If display is not buffered, this is no-op.
+	 * If display is not buffered, this is no-op (set to NULL).
 	 */
 	void (*Flip)(struct GP_Backend *self);
 
@@ -82,11 +82,24 @@ typedef struct GP_Backend {
 	 * In contrast to flip operation, the context
 	 * must not change (this is intended for updating very small areas).
 	 *
-	 * If display is not buffered, this is no-op.
+	 * If display is not buffered, this is no-op (set to NULL).
 	 */
 	void (*UpdateRect)(struct GP_Backend *self,
 	                   GP_Coord x0, GP_Coord y0,
 	                   GP_Coord x1, GP_Coord y1);
+
+	/*
+	 * Callback to change attributes.
+	 *
+	 * If w and h are zero, only caption is changed.
+	 *
+	 * If caption is NULL only w and h are changed.
+	 *
+	 * Use the inline wrappers instead.
+	 */
+	int (*SetAttributes)(struct GP_Backend *self,
+	                     uint32_t w, uint32_t h,
+	                     const char *caption);
 
 	/*
 	 * Exits the backend.
@@ -145,5 +158,31 @@ static inline void GP_BackendPoll(GP_Backend *backend)
 {
 	backend->Poll(backend);
 }
+
+/*
+ * Sets backend caption, if supported.
+ *
+ * When setting caption is not possible/implemented non zero is returned.
+ */
+static inline int GP_BackendSetCaption(GP_Backend *backend,
+                                       const char *caption)
+{
+	if (backend->SetAttributes == NULL)
+		return 1;
+
+	return backend->SetAttributes(backend, 0, 0, caption);
+}
+
+/*
+ * Resize backend, if supported.
+ *
+ * When resizing is not possible/implemented non zero is returned.
+ *
+ * When the backend size matches the passed width and height,
+ * no action is done.
+ *
+ * Note that after calling this, the backend->context pointer may change.
+ */
+int GP_BackendResize(GP_Backend *backend, uint32_t w, uint32_t h);
 
 #endif /* BACKENDS_GP_BACKEND_H */

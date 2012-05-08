@@ -37,20 +37,22 @@ struct x11_priv {
 	Window win;
 	Visual *vis;
 	XImage *img;
-
-	GP_Context *context;
 };
 
 static void x11_exit(GP_Backend *self)
 {
 	struct x11_priv *x11 = GP_BACKEND_PRIV(self); 
+	
+	XLockDisplay(x11->dpy);
+	
+	GP_ContextFree(self->context);
 
 	x11->img->data = NULL;
 	XDestroyImage(x11->img);
 	XDestroyWindow(x11->dpy, x11->win);
+	/* I wonder if this is right sequence... */
+	XUnlockDisplay(x11->dpy);
 	XCloseDisplay(x11->dpy);
-
-	GP_ContextFree(x11->context);
 
 	free(self);
 }
@@ -74,8 +76,8 @@ static void x11_update_rect(GP_Backend *self, GP_Coord x0, GP_Coord y0,
 static void x11_flip(GP_Backend *self)
 {
 	struct x11_priv *x11 = GP_BACKEND_PRIV(self); 
-	unsigned int w = x11->context->w;
-	unsigned int h = x11->context->h;
+	unsigned int w = self->context->w;
+	unsigned int h = self->context->h;
 
 	GP_DEBUG(4, "Flipping context");
 
@@ -120,6 +122,60 @@ static void x11_poll(GP_Backend *self)
 	XUnlockDisplay(x11->dpy);
 }
 
+static int x11_set_attributes(struct GP_Backend *self,
+                              uint32_t w, uint32_t h,
+                              const char *caption)
+{
+	struct x11_priv *x11 = GP_BACKEND_PRIV(self); 
+	
+	XLockDisplay(x11->dpy);
+	
+	if (caption != NULL)
+		XmbSetWMProperties(x11->dpy, x11->win, caption, caption,
+	                           NULL, 0, NULL, NULL, NULL);
+
+	if (w != 0 || h != 0) {
+		GP_Context *context;
+		XImage *img;
+
+		if (w == 0)
+			w = self->context->w;
+	
+		if (h == 0)
+			h = self->context->h;
+
+		/* Create new X image */
+		img = XCreateImage(x11->dpy, x11->vis, 24, ZPixmap, 0, NULL,
+	                           w, h, 32, 0);
+
+		/* Allocate new context */
+		context = GP_ContextAlloc(w, h, GP_PIXEL_xRGB8888);
+	
+		if (context == NULL) {
+			XDestroyImage(img);
+			return 1;
+		}
+
+		/* Free old image and context */
+		GP_ContextFree(self->context);
+		x11->img->data = NULL;
+		XDestroyImage(x11->img);
+
+		/* Swap the pointers */
+		self->context = context;
+		img->data = (char*)self->context->pixels;
+		x11->img = img;
+
+		/* Resize X11 window */
+		XResizeWindow(x11->dpy, x11->win, w, h);
+		XFlush(x11->dpy);
+	}
+	
+	XUnlockDisplay(x11->dpy);
+
+	return 0;
+}
+
 GP_Backend *GP_BackendX11Init(const char *display, int x, int y,
                               unsigned int w, unsigned int h,
 			      const char *caption)
@@ -137,9 +193,9 @@ GP_Backend *GP_BackendX11Init(const char *display, int x, int y,
 
 	x11 = GP_BACKEND_PRIV(backend);
 
-	x11->context = GP_ContextAlloc(w, h, GP_PIXEL_xRGB8888);
+	backend->context = GP_ContextAlloc(w, h, GP_PIXEL_xRGB8888);
 
-	if (x11->context == NULL)
+	if (backend->context == NULL)
 		goto err0;
 	
 	//TODO: Error checking
@@ -159,7 +215,7 @@ GP_Backend *GP_BackendX11Init(const char *display, int x, int y,
 	x11->img = XCreateImage(x11->dpy, x11->vis, 24, ZPixmap, 0, NULL,
 	                        w, h, 32, 0);
 
-	x11->img->data = (char*)x11->context->pixels;
+	x11->img->data = (char*)backend->context->pixels;
 
 	x11->win = XCreateWindow(x11->dpy, DefaultRootWindow(x11->dpy),
 	                         x, y, w, h, 0, CopyFromParent,
@@ -201,13 +257,13 @@ GP_Backend *GP_BackendX11Init(const char *display, int x, int y,
 
 */
 
-	backend->name       = "X11";
-	backend->context    = x11->context;
-	backend->Flip       = x11_flip;
-	backend->UpdateRect = x11_update_rect;
-	backend->Exit       = x11_exit;
-	backend->fd_list    = NULL;
-	backend->Poll       = x11_poll;
+	backend->name          = "X11";
+	backend->Flip          = x11_flip;
+	backend->UpdateRect    = x11_update_rect;
+	backend->Exit          = x11_exit;
+	backend->fd_list       = NULL;
+	backend->Poll          = x11_poll;
+	backend->SetAttributes = x11_set_attributes;
 
 	return backend;
 //err3:
@@ -215,7 +271,7 @@ GP_Backend *GP_BackendX11Init(const char *display, int x, int y,
 err2:
 	XCloseDisplay(x11->dpy);
 err1:
-	GP_ContextFree(x11->context);
+	GP_ContextFree(backend->context);
 err0:
 	free(backend);
 	return NULL;
