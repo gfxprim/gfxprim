@@ -77,7 +77,8 @@ static int image_loader_callback(GP_ProgressCallback *self)
 
 	size = GP_TextWidth(NULL, buf);
 
-	GP_BackendFlip(backend);
+	GP_BackendUpdateRect(backend, c->w/2 - size/2 - 1, c->h - 4,
+	                     c->w/2 + size/2 + 1, c->h - 4 - GP_TextHeight(NULL));
 
 	return 0;
 }
@@ -173,7 +174,8 @@ static void *image_loader(void *ptr)
 		if (rat < 1) {
 			cpu_timer_start(&timer, "Blur");
 			callback.priv = "Blurring Image";
-			if (GP_FilterGaussianBlur(img, img, 0.3/rat, 0.3/rat, &callback) == NULL)
+			if (GP_FilterGaussianBlur(img, img, 0.4/rat, 0.4/rat,
+			                          &callback) == NULL)
 				return NULL;
 			cpu_timer_stop(&timer);
 		}
@@ -294,7 +296,7 @@ static void sighandler(int signo)
 
 static void init_backend(const char *backend_opts)
 {
-	backend = GP_BackendInit(backend_opts, "FBshow", stderr); 
+	backend = GP_BackendInit(backend_opts, "Spiv", stderr); 
 	
 	if (backend == NULL) {
 		fprintf(stderr, "Failed to initalize backend '%s'\n", backend_opts);
