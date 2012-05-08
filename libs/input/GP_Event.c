@@ -16,7 +16,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2011 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
@@ -163,6 +163,18 @@ static void dump_abs(struct GP_Event *ev)
 	}
 }
 
+static void dump_sys(struct GP_Event *ev)
+{
+	switch (ev->code) {
+	case GP_EV_SYS_QUIT:
+		printf("Sys Quit\n");
+	break;
+	case GP_EV_SYS_RESIZE:
+		printf("Sys Resize %ux%u\n", ev->val.sys.w, ev->val.sys.h);
+	break;
+	}
+}
+
 void GP_EventDump(struct GP_Event *ev)
 {
 	printf("Event (%u) ", (unsigned int)ev->time.tv_sec % 10000);
@@ -176,6 +188,9 @@ void GP_EventDump(struct GP_Event *ev)
 	break;
 	case GP_EV_ABS:
 		dump_abs(ev);
+	break;
+	case GP_EV_SYS:
+		dump_sys(ev);
 	break;
 	default:
 		printf("Unknown %u\n", ev->type);
@@ -271,6 +286,21 @@ void GP_EventPushAbs(uint32_t x, uint32_t y, uint32_t pressure,
 	
 	if (y_max != 0)
 		cur_state.cursor_y = y * (screen_h - 1) / y_max;
+
+	/* put it into queue */
+	event_put(&cur_state);
+}
+
+void GP_EventPushResize(uint32_t w, uint32_t h, struct timeval *time)
+{
+	/* event header */
+	cur_state.type  = GP_EV_SYS;
+	cur_state.code  = GP_EV_SYS_RESIZE;
+
+	cur_state.val.sys.w = w;
+	cur_state.val.sys.h = h;
+
+ 	set_time(time);
 
 	/* put it into queue */
 	event_put(&cur_state);
