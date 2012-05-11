@@ -74,7 +74,7 @@ int GP_FilterMirrorH(const GP_Context *src, GP_Context *dst,
 		  "The src and dst pixel types must match");
 	
 	GP_ASSERT(src->w <= dst->w && src->h <= dst->h,
-	          "Destination is not big enough");
+	          "Destination is not large enough");
 
 	if (GP_FilterMirrorH_Raw(src, dst, callback)) {
 		GP_DEBUG(1, "Operation aborted");
@@ -108,7 +108,7 @@ int GP_FilterMirrorV(const GP_Context *src, GP_Context *dst,
 	GP_ASSERT(src->pixel_type == dst->pixel_type,
 	          "The src and dst pixel types must match");
 	GP_ASSERT(src->w <= dst->w && src->h <= dst->h,
-	          "Destination is not big enough");
+	          "Destination is not large enough");
 
 	if (GP_FilterMirrorV_Raw(src, dst, callback)) {
 		GP_DEBUG(1, "Operation aborted");
@@ -147,87 +147,105 @@ int GP_FilterRotate180_Raw(const GP_Context *src, GP_Context *dst,
 	return 0;
 }
 
-GP_Context *GP_FilterRotate90(const GP_Context *src, GP_Context *dst,
-                              GP_ProgressCallback *callback)
+int GP_FilterRotate90(const GP_Context *src, GP_Context *dst,
+                      GP_ProgressCallback *callback)
 {
-	GP_Context *res = dst;
-	
-	if (res == NULL) {
-		res = GP_ContextAlloc(src->h, src->w, src->pixel_type);
-		
-		if (res == NULL)
-			return NULL;
-	} else {
-		GP_ASSERT(src->pixel_type == dst->pixel_type,
-		          "The src and dst pixel types must match");
-		GP_ASSERT(src->w <= dst->h && src->h <= dst->w,
-		          "Destination is not big enough");
+	GP_ASSERT(src->pixel_type == dst->pixel_type,
+	          "The src and dst pixel types must match");
+	GP_ASSERT(src->w <= dst->h && src->h <= dst->w,
+	          "Destination is not large enough");
+
+	if (GP_FilterRotate90_Raw(src, dst, callback)) {
+		GP_DEBUG(1, "Operation aborted");
+		return 1;
 	}
+
+	return 0;
+}
+
+GP_Context *GP_FilterRotate90Alloc(const GP_Context *src,
+                                   GP_ProgressCallback *callback)
+{
+	GP_Context *res;
+		
+	res = GP_ContextAlloc(src->h, src->w, src->pixel_type);
+	
+	if (res == NULL)
+		return NULL;
 
 	if (GP_FilterRotate90_Raw(src, res, callback)) {
 		GP_DEBUG(1, "Operation aborted");
-
-		if (dst == NULL)
-			GP_ContextFree(res);
-
+		GP_ContextFree(res);
 		return NULL;
 	}
 
 	return res;
 }
 
-GP_Context *GP_FilterRotate180(const GP_Context *src, GP_Context *dst,
-                               GP_ProgressCallback *callback)
+int GP_FilterRotate180(const GP_Context *src, GP_Context *dst,
+                       GP_ProgressCallback *callback)
 {
-	GP_Context *res = dst;
-	
-	if (res == NULL) {
-		res = GP_ContextCopy(src, 0);
-		
-		if (res == NULL)
-			return NULL;
-	} else {
-		GP_ASSERT(src->pixel_type == dst->pixel_type,
-		          "The src and dst pixel types must match");
-		GP_ASSERT(src->w <= dst->w && src->h <= dst->h,
-		          "Destination is not big enough");
+	GP_ASSERT(src->pixel_type == dst->pixel_type,
+	          "The src and dst pixel types must match");
+	GP_ASSERT(src->w <= dst->w && src->h <= dst->h,
+	          "Destination is not large enough");
+
+	if (GP_FilterRotate180_Raw(src, dst, callback)) {
+		GP_DEBUG(1, "Operation aborted");
+		return 1;
 	}
+
+	return 0;
+}
+
+GP_Context *GP_FilterRotate180Alloc(const GP_Context *src,
+                                    GP_ProgressCallback *callback)
+{
+	GP_Context *res;
+		
+	res = GP_ContextCopy(src, 0);
+	
+	if (res == NULL)
+		return NULL;
 
 	if (GP_FilterRotate180_Raw(src, res, callback)) {
 		GP_DEBUG(1, "Operation aborted");
-
-		if (dst == NULL)
-			GP_ContextFree(res);
-
+		GP_ContextFree(res);
 		return NULL;
 	}
 
 	return res;
 }
 
-GP_Context *GP_FilterRotate270(const GP_Context *src, GP_Context *dst,
-                               GP_ProgressCallback *callback)
+int GP_FilterRotate270(const GP_Context *src, GP_Context *dst,
+                      GP_ProgressCallback *callback)
 {
-	GP_Context *res = dst;
-	
-	if (res == NULL) {
-		res = GP_ContextAlloc(src->h, src->w, src->pixel_type);
-		
-		if (res == NULL)
-			return NULL;
-	} else {
-		GP_ASSERT(src->pixel_type == dst->pixel_type,
-		          "The src and dst pixel types must match");
-		GP_ASSERT(src->w <= dst->h && src->h <= dst->w,
-		          "Destination is not big enough");
+	GP_ASSERT(src->pixel_type == dst->pixel_type,
+	          "The src and dst pixel types must match");
+	GP_ASSERT(src->w <= dst->h && src->h <= dst->w,
+	          "Destination is not large enough");
+
+	if (GP_FilterRotate270_Raw(src, dst, callback)) {
+		GP_DEBUG(1, "Operation aborted");
+		return 1;
 	}
+
+	return 0;
+}
+
+GP_Context *GP_FilterRotate270Alloc(const GP_Context *src,
+                                    GP_ProgressCallback *callback)
+{
+	GP_Context *res;
+		
+	res = GP_ContextAlloc(src->h, src->w, src->pixel_type);
+	
+	if (res == NULL)
+		return NULL;
 
 	if (GP_FilterRotate270_Raw(src, res, callback)) {
 		GP_DEBUG(1, "Operation aborted");
-
-		if (dst == NULL)
-			GP_ContextFree(res);
-
+		GP_ContextFree(res);
 		return NULL;
 	}
 
@@ -262,11 +280,11 @@ GP_Context *GP_FilterSymmetryAlloc(const GP_Context *src,
 {
 	switch (symmetry) {
 	case GP_ROTATE_90:
-		return GP_FilterRotate90(src, NULL, callback);
+		return GP_FilterRotate90Alloc(src, callback);
 	case GP_ROTATE_180:
-		return GP_FilterRotate180(src, NULL, callback);
+		return GP_FilterRotate180Alloc(src, callback);
 	case GP_ROTATE_270:
-		return GP_FilterRotate270(src, NULL, callback);
+		return GP_FilterRotate270Alloc(src, callback);
 	case GP_MIRROR_H:
 		return GP_FilterMirrorHAlloc(src, callback);
 	case GP_MIRROR_V:
@@ -274,5 +292,26 @@ GP_Context *GP_FilterSymmetryAlloc(const GP_Context *src,
 	default:
 		GP_DEBUG(1, "Invalid symmetry %i", (int) symmetry);
 		return NULL;
+	}
+}
+
+int GP_FilterSymmetry(const GP_Context *src, GP_Context *dst,
+                      GP_FilterSymmetries symmetry,
+                      GP_ProgressCallback *callback)
+{
+	switch (symmetry) {
+	case GP_ROTATE_90:
+		return GP_FilterRotate90(src, dst, callback);
+	case GP_ROTATE_180:
+		return GP_FilterRotate180(src, dst, callback);
+	case GP_ROTATE_270:
+		return GP_FilterRotate270(src, dst, callback);
+	case GP_MIRROR_H:
+		return GP_FilterMirrorH(src, dst, callback);
+	case GP_MIRROR_V:
+		return GP_FilterMirrorV(src, dst, callback);
+	default:
+		GP_DEBUG(1, "Invalid symmetry %i", (int) symmetry);
+		return 1;
 	}
 }

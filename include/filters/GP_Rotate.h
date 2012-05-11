@@ -118,18 +118,25 @@ int GP_FilterRotate270_Raw(const GP_Context *src, GP_Context *dst,
 /*
  * Rotate the context by 90, 180, 270.
  *
- * If dst is NULL, new bitmap is allocated.
- *
  * Returns pointer to destination bitmap or NULL if allocation failed.
  */
-GP_Context *GP_FilterRotate90(const GP_Context *src, GP_Context *dst,
-                              GP_ProgressCallback *callback);
+int GP_FilterRotate90(const GP_Context *src, GP_Context *dst,
+                      GP_ProgressCallback *callback);
 
-GP_Context *GP_FilterRotate180(const GP_Context *src, GP_Context *dst,
-                               GP_ProgressCallback *callback);
+GP_Context *GP_FilterRotate90Alloc(const GP_Context *src,
+                                   GP_ProgressCallback *callback);
 
-GP_Context *GP_FilterRotate270(const GP_Context *src, GP_Context *dst,
-                               GP_ProgressCallback *callback);
+int GP_FilterRotate180(const GP_Context *src, GP_Context *dst,
+                       GP_ProgressCallback *callback);
+
+GP_Context *GP_FilterRotate180Alloc(const GP_Context *src,
+                                    GP_ProgressCallback *callback);
+
+int GP_FilterRotate270(const GP_Context *src, GP_Context *dst,
+                       GP_ProgressCallback *callback);
+
+GP_Context *GP_FilterRotate270Alloc(const GP_Context *src,
+                                    GP_ProgressCallback *callback);
 
 /*
  * Calls a symmetry filter on bitmap. 
@@ -164,5 +171,9 @@ int GP_FilterSymmetryByName(const char *symmetry);
 GP_Context *GP_FilterSymmetryAlloc(const GP_Context *src,
                                    GP_FilterSymmetries symmetry,
                                    GP_ProgressCallback *callback);
+
+int GP_FilterSymmetry(const GP_Context *src, GP_Context *dst,
+                      GP_FilterSymmetries symmetry,
+		      GP_ProgressCallback *callback);
 
 #endif /* FILTERS_GP_ROTATE_H */

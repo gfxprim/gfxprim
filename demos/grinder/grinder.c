@@ -227,13 +227,13 @@ static GP_RetCode rotate(GP_Context **c, const char *params)
 
 	switch (rot) {
 	case 0:
-		res = GP_FilterRotate90(*c, NULL, progress_callback);
+		res = GP_FilterRotate90Alloc(*c, progress_callback);
 	break;
 	case 1:
-		res = GP_FilterRotate180(*c, NULL, progress_callback);
+		res = GP_FilterRotate180Alloc(*c, progress_callback);
 	break;
 	case 2:
-		res = GP_FilterRotate270(*c, NULL, progress_callback);
+		res = GP_FilterRotate270Alloc(*c, progress_callback);
 	break;
 	}
 		
@@ -262,10 +262,10 @@ static GP_RetCode mirror(GP_Context **c, const char *params)
 		return GP_EINVAL;
 
 	if (vert)
-		GP_FilterMirrorV_Raw(*c, *c, progress_callback);
+		GP_FilterMirrorV(*c, *c, progress_callback);
 	
 	if (horiz)
-		GP_FilterMirrorH_Raw(*c, *c, progress_callback);
+		GP_FilterMirrorH(*c, *c, progress_callback);
 
 	return GP_ESUCCESS;
 }
