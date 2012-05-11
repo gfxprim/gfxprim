@@ -24,3 +24,11 @@
 %include "GP_Linear.h"
 %include "GP_Resize.h"
 /* %include "GP_Dither.h"  -- missing symbols */
+
+/* Functions returning new allocated context */
+%newobject GP_FilterMirrorHAlloc;
+%newobject GP_FilterMirrorVAlloc;
+%newobject GP_FilterRotate90Alloc;
+%newobject GP_FilterRotate180Alloc;
+%newobject GP_FilterRotate270Alloc;
+%newobject GP_FilterSymmetryAlloc;
