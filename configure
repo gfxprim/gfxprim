@@ -233,26 +233,26 @@ if __name__ ==  '__main__':
     #
     # Library detection/enable disable
     #
-    # name, description, [detection], cflags, ldflags, dict of modules library is needed for
+    # name, description, [detection], cflags, ldflags, list of modules library is needed for
     #
     l = libraries([["libpng", 
                     "Portable Network Graphics Library",
-                    [header_exists, "png.h"], "", "-lpng", {"loaders"}],
+                    [header_exists, "png.h"], "", "-lpng", ["loaders"]],
                    ["libsdl",
                     "Simple Direct Media Layer",
-                    [header_exists, "SDL/SDL.h"], "", "`sdl-config --libs`", {"backends"}],
+                    [header_exists, "SDL/SDL.h"], "", "`sdl-config --libs`", ["backends"]],
                    ["jpeg",
                     "Library to load, handle and manipulate images in the JPEG format",
-                    [header_exists, "jpeglib.h"], "", "-ljpeg", {"loaders"}],
+                    [header_exists, "jpeglib.h"], "", "-ljpeg", ["loaders"]],
                    ["giflib",
 		    "Library to handle, display and manipulate GIF images",
-		    [header_exists, "gif_lib.h"], "", "-lgif", {"loaders"}],
+		    [header_exists, "gif_lib.h"], "", "-lgif", ["loaders"]],
                    ["libX11",
 		    "X11 library",
-		    [header_exists, "X11/Xlib.h"], "", "-lX11", {"backends"}],
+		    [header_exists, "X11/Xlib.h"], "", "-lX11", ["backends"]],
 		   ["freetype",
                     "A high-quality and portable font engine",
-                    [header_exists, "ft2build.h"], "", "`freetype-config --libs`", {"core"}]], cfg)
+                    [header_exists, "ft2build.h"], "", "`freetype-config --libs`", ["core"]]], cfg)
 
     parser = OptionParser();
     
