@@ -65,13 +65,13 @@ GP_Context *GP_LoadImage(const char *src_path, GP_ProgressCallback *callback)
 		case 'N':
 			if (src_path[len - 3] == 'p' ||
 			    src_path[len - 3] == 'P')
-				res = GP_LoadPNG(src_path, callback);
+				return GP_LoadPNG(src_path, callback);
 		break;
 		case 'p':
 		case 'P':
 			if (src_path[len - 3] == 'j' ||
 			    src_path[len - 3] == 'J')
-				res = GP_LoadJPG(src_path, callback);
+				return GP_LoadJPG(src_path, callback);
 		break;
 		case 'e':
 		case 'E':
@@ -79,7 +79,7 @@ GP_Context *GP_LoadImage(const char *src_path, GP_ProgressCallback *callback)
 			     src_path[len - 3] == 'P') &&
 			    (src_path[len - 4] == 'j' ||
 			     src_path[len - 4] == 'J'))
-				res = GP_LoadJPG(src_path, callback);
+				return GP_LoadJPG(src_path, callback);
 		break;
 		}
 	break;
@@ -89,21 +89,29 @@ GP_Context *GP_LoadImage(const char *src_path, GP_ProgressCallback *callback)
 		switch (src_path[len - 2]) {
 		case 'b':
 		case 'B':
+			//TODO: Fix this!!!
 			if (src_path[len - 3] == 'p' ||
-			    src_path[len - 3] == 'P')
+			    src_path[len - 3] == 'P') {
 				GP_LoadPBM(src_path, &res);
+				return res;
+			}
 		break;
 		case 'g':
 		case 'G':
+			//TODO: Fix this!!!
 			if (src_path[len - 3] == 'p' ||
-			    src_path[len - 3] == 'P')
+			    src_path[len - 3] == 'P') {
 				GP_LoadPGM(src_path, &res);
+				return res;
+			}
 		break;
 		case 'p':
 		case 'P':
 			if (src_path[len - 3] == 'p' ||
-			    src_path[len - 3] == 'P')
+			    src_path[len - 3] == 'P') {
 				GP_LoadPPM(src_path, &res);
+				return res;
+			}
 		break;
 		}
 	break;
@@ -115,7 +123,7 @@ GP_Context *GP_LoadImage(const char *src_path, GP_ProgressCallback *callback)
 		case 'm':
 			if (src_path[len - 3] == 'B' ||
 			    src_path[len - 3] == 'b')
-				res = GP_LoadBMP(src_path, callback);
+				return GP_LoadBMP(src_path, callback);
 		break;
 		}
 	break;
@@ -127,7 +135,7 @@ GP_Context *GP_LoadImage(const char *src_path, GP_ProgressCallback *callback)
 		case 'i':
 			if (src_path[len - 3] == 'G' ||
 			    src_path[len - 3] == 'g')
-				res = GP_LoadGIF(src_path, callback);
+				return GP_LoadGIF(src_path, callback);
 		break;
 		}
 	break;
@@ -136,7 +144,8 @@ GP_Context *GP_LoadImage(const char *src_path, GP_ProgressCallback *callback)
 skip_filename_check:
 
 	//TODO file signature based check
-	return res;
+	errno = ENOSYS;
+	return NULL;
 }
 
 int GP_SaveImage(const GP_Context *src, const char *dst_path,
