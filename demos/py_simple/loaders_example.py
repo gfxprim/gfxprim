@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+
 import sys
 
 import gfxprim.core as core
@@ -12,7 +13,7 @@ def main():
     # Load Image
     img = loaders.LoadImage(sys.argv[1], None)
     # Save result
-    loaders.SavePNG("out.png", img, None)
+    img.Save("out.png");
 
 if __name__ == '__main__':
     main()
