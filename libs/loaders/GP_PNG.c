@@ -243,6 +243,8 @@ int GP_SavePNG(const GP_Context *src, const char *dst_path,
 	png_infop png_info = NULL;
 	int err;
 
+	GP_DEBUG(1, "Saving PNG Image '%s'", dst_path);
+
 	if (src->pixel_type != GP_PIXEL_RGB888) {
 		GP_DEBUG(1, "Can't save png with pixel type %s",
 		         GP_PixelTypeName(src->pixel_type));
