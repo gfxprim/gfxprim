@@ -214,7 +214,8 @@ def write_gfxprim_config(cfg, libs):
             ldflags += '-lGP_backends '
         ldflags += libs.get_linker_flags(i)
         f.write('\t--libs-%s) echo -n "%s ";;\n' % (i, ldflags))
-                
+
+    f.write('\t*) echo "Invalid option \'$1\'"; echo $USAGE; exit 1;;\n')
 
     f.write('\tesac\n\tshift\ndone\necho\n')
     f.close()
