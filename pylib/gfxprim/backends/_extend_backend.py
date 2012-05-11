@@ -28,3 +28,12 @@ def extend_backend(_backend):
     "Poll the backend for events."
     return backends_c.GP_BackendPoll(self)
 
+  @extend(_backend)
+  def SetCaption(self, caption):
+    "Set backend window caption (if possible)"
+    return backends_c.GP_BackendSetCaption(self, caption)
+
+  @extend(_backend)
+  def Resize(self, w, h):
+    "Resize backend window (if possible)"
+    return backends_c.GP_BackendResize(self, w, h)
