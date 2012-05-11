@@ -142,13 +142,26 @@ class libraries:
                 res += " " + i[4]
         return res
 
+def die_screaming(msg):
+    sys.stderr.write("\n************************************\n")
+    sys.stderr.write("ERROR: ")
+    sys.stderr.write(msg)
+    sys.stderr.write("\n************************************\n")
+    exit(1)
+
+#
+# Check for basic compiling tools
+#
 def basic_checks(cfg):
     sys.stderr.write("Basic checks\n")
     sys.stderr.write("------------\n")
+    
     if not c_compiler_exists(cfg):
-        exit(1)
+        die_screaming("No C compiler found")
+    
     if not python_module_installed(cfg, 'jinja2'):
-        exit(1)
+        die_screaming("No jinja2 python module found")
+    
     check_for_swig(cfg)
     sys.stderr.write("\n")
 
@@ -194,7 +207,6 @@ def write_gfxprim_config(cfg, libs):
     f.write('\t--cflags) echo -n "-I/usr/include/GP/ ";;\n')
     f.write('\t--libs) echo -n "-lGP %s ";;\n' % libs.get_linker_flags('core'))
    
-
     # ldflags for specific modules
     for i in modules:
         ldflags = ''
