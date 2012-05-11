@@ -16,13 +16,13 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2011 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
 /*
 
-  General functions for loading bitmaps.
+  General functions for loading and saving bitmaps.
   
  */
 
@@ -137,4 +137,49 @@ skip_filename_check:
 
 	//TODO file signature based check
 	return res;
+}
+
+int GP_SaveImage(const GP_Context *src, const char *dst_path,
+                 GP_ProgressCallback *callback)
+{
+	int len;
+	
+	len = strlen(dst_path);
+
+	if (len < 3) {
+		errno = ENOSYS;
+		return 1;
+	}
+
+	switch (dst_path[len - 1]) {
+	/* PNG, JPG, JPEG */
+	case 'g':
+	case 'G':
+		switch (dst_path[len - 2]) {
+		case 'n':
+		case 'N':
+			if (dst_path[len - 3] == 'p' ||
+			    dst_path[len - 3] == 'P')
+				return GP_SavePNG(dst_path, src, callback);
+		break;
+		case 'p':
+		case 'P':
+			if (dst_path[len - 3] == 'j' ||
+			    dst_path[len - 3] == 'J')
+				return GP_SaveJPG(dst_path, src, callback);
+		break;
+		case 'e':
+		case 'E':
+			if ((dst_path[len - 3] == 'p' ||
+			     dst_path[len - 3] == 'P') &&
+			    (dst_path[len - 4] == 'j' ||
+			     dst_path[len - 4] == 'J'))
+				return GP_SaveJPG(dst_path, src, callback);
+		break;
+		}
+	break;
+	}
+
+	errno = ENOSYS;
+	return 1;
 }

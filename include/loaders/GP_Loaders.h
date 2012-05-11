@@ -51,4 +51,21 @@
  */
 GP_Context *GP_LoadImage(const char *src_path, GP_ProgressCallback *callback);
 
+/*
+ * Simple saving function, the image format is matched by file extension.
+ *
+ * Retruns zero on succes.
+ * 
+ * On failure non-zero is returned.
+ *
+ * When file type wasn't recognized by extension or if support for requested
+ * image format wasn't compiled in non-zero is returned and errno is set to
+ * ENOSYS.
+ * 
+ * The resulting errno may also be set to any possible error from fopen(3), open(3),
+ * write(3), fwrite(3), seek(3), etc..
+ */
+int GP_SaveImage(const GP_Context *src, const char *dst_path,
+                 GP_ProgressCallback *callback);
+
 #endif /* LOADERS_GP_LOADERS_H */
