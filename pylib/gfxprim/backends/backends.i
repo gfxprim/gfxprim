@@ -33,12 +33,12 @@
 
 %include "GP_Backend.h"
 
-
 /*
  * Particular backends. We need to list every header separately.
  */
-
-%include "GP_Backends.h"
+/* Overall backend init header */
+%newobject GP_BackendInit;
+%include "GP_BackendInit.h"
 
 %newobject GP_BackendLinuxFBInit;
 %include "GP_LinuxFB.h"
@@ -46,3 +46,5 @@
 %newobject GP_BackendSDLInit;
 %include "GP_SDL.h"
 
+%newobject GP_BackendX11Init;
+%include "GP_X11.h"
