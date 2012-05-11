@@ -169,13 +169,13 @@ int GP_SaveImage(const GP_Context *src, const char *dst_path,
 		case 'N':
 			if (dst_path[len - 3] == 'p' ||
 			    dst_path[len - 3] == 'P')
-				return GP_SavePNG(dst_path, src, callback);
+				return GP_SavePNG(src, dst_path, callback);
 		break;
 		case 'p':
 		case 'P':
 			if (dst_path[len - 3] == 'j' ||
 			    dst_path[len - 3] == 'J')
-				return GP_SaveJPG(dst_path, src, callback);
+				return GP_SaveJPG(src, dst_path, callback);
 		break;
 		case 'e':
 		case 'E':
@@ -183,7 +183,7 @@ int GP_SaveImage(const GP_Context *src, const char *dst_path,
 			     dst_path[len - 3] == 'P') &&
 			    (dst_path[len - 4] == 'j' ||
 			     dst_path[len - 4] == 'J'))
-				return GP_SaveJPG(dst_path, src, callback);
+				return GP_SaveJPG(src, dst_path, callback);
 		break;
 		}
 	break;

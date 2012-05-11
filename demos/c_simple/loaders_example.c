@@ -52,7 +52,7 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 
-	if (GP_SavePNG("out.png", img, NULL)) {
+	if (GP_SavePNG(img, "out.png", NULL)) {
 		fprintf(stderr, "Failed to save image %s", strerror(errno));
 		return 1;
 	}

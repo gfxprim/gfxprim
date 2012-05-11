@@ -88,7 +88,7 @@ int main(int argc, char *argv[])
 	GP_Text(context, &style, img_w/2, img_h/2, GP_ALIGN_CENTER|GP_VALIGN_CENTER,
 	        black_pixel, white_pixel, string);
 
-	GP_SavePNG(img_path, context, NULL);
+	GP_SavePNG(context, img_path, NULL);
 	
 	GP_ContextFree(context);
 

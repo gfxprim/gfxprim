@@ -80,7 +80,7 @@ int main(int argc, char *argv[])
 	priv.op   = "Saving";
 	priv.name = "out.png";
 
-	if (GP_SavePNG("out.png", img, &callback)) {
+	if (GP_SavePNG(img, "out.png", &callback)) {
 		fprintf(stderr, "Failed to save image %s", strerror(errno));
 		return 1;
 	}

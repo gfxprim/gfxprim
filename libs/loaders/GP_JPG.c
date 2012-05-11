@@ -201,7 +201,7 @@ GP_Context *GP_LoadJPG(const char *src_path, GP_ProgressCallback *callback)
 	return GP_ReadJPG(f, callback);
 }
 
-int GP_SaveJPG(const char *dst_path, const GP_Context *src,
+int GP_SaveJPG(const GP_Context *src, const char *dst_path,
                GP_ProgressCallback *callback)
 {
 	FILE *f;
@@ -320,8 +320,8 @@ GP_Context *GP_LoadJPG(const char GP_UNUSED(*src_path),
 	return NULL;
 }
 
-int GP_SaveJPG(const char GP_UNUSED(*dst_path),
-               const GP_Context GP_UNUSED(*src),
+int GP_SaveJPG(const GP_Context GP_UNUSED(*src),
+               const char GP_UNUSED(*dst_path),
                GP_ProgressCallback GP_UNUSED(*callback))
 {
 	errno = ENOSYS;
