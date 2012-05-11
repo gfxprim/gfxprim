@@ -31,6 +31,20 @@ Example in Python
 include::../demos/py_simple/loaders_example.py[]
 ------------------------------------------------------------------
 
+Filters
+-------
+
+Symmetry filters (Rotation, Mirroring)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Example in C
+^^^^^^^^^^^^
+
+[source,c]
+------------------------------------------------------------------
+include::../demos/c_simple/filters_symmetry.c[]
+------------------------------------------------------------------
+
 Simple backend example
 ----------------------
 
