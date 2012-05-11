@@ -3,7 +3,6 @@ import sys
 
 import gfxprim.core as core
 import gfxprim.loaders as loaders
-import gfxprim.filters as filters
 
 def main():
     if len(sys.argv) != 2:
@@ -11,7 +10,7 @@ def main():
         sys.exit(1)
 
     # Load Image
-    img = loaders.LoadImage(sys.argv[2], None)
+    img = loaders.LoadImage(sys.argv[1], None)
     # Save result
     loaders.SavePNG("out.png", img, None)
 
