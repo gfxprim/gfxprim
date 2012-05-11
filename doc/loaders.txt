@@ -29,6 +29,24 @@ GP_Context *GP_LoadImage(const char *src_path, GP_ProgressCallback *callback);
 Loads image from a file. The format is now matched by an image file extension.
 File sinature loading method is on the TODO.
 
+[source,c]
+-------------------------------------------------------------------------------
+#include <loaders/GP_Loaders.h>
+/* or */
+#include <GP.h>
+
+int GP_SaveImage(GP_Context *src, const char *dst_path,
+                 GP_ProgressCallback *callback);
+-------------------------------------------------------------------------------
+
+Saves a context into a file. The file format is matched accordingly to the
+file extension, if extension is invalid or if support for request image format
+wasn't compiled in, non-zero is returned and 'errno' is set to 'ENOSYS'.
+
+Returns zero on succes and non-zero on failure and 'errno' is set. The
+possible errno values are 'ENOSYS' for unknown format and anything that could
+be returned by 'fopen()', 'open()', 'fwrite()', 'write()', 'seek()', etc...
+
 PNG
 ~~~
 The 'PNG' loading support is optionaly implemented by libpng.
@@ -85,7 +103,7 @@ signature. Basically this combines both of the calls above.
 /* or */
 #include <GP.h>
 
-int GP_SavePNG(const char *dst_path, const GP_Context *src,
+int GP_SavePNG(const GP_Context *src, const char *dst_path,
                GP_ProgressCallback *callback);
 -------------------------------------------------------------------------------
 
@@ -152,7 +170,7 @@ signature. Basically this combines both of the calls above.
 /* or */
 #include <GP.h>
 
-int GP_SaveJPG(const char *dst_path, const GP_Context *src,
+int GP_SaveJPG(const GP_Context *src, const char *dst_path,
                GP_ProgressCallback *callback);
 -------------------------------------------------------------------------------
 
