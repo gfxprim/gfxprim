@@ -121,7 +121,7 @@ static GP_Backend *backend_fb_init(char *params, const char *caption,
 	if (params != NULL)
 		fb = params;
 
-	return GP_BackendLinuxFBInit(fb);
+	return GP_BackendLinuxFBInit(fb, 1);
 }
 
 static void backend_x11_help(FILE *help, const char *err)

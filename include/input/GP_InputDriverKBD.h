@@ -20,24 +20,17 @@
  *                                                                           *
  *****************************************************************************/
 
-#ifndef BACKENDS_GP_FRAMEBUFFER_H
-#define BACKENDS_GP_FRAMEBUFFER_H
+/*
 
-#include "GP_Backend.h"
+
+ */
+
+#ifndef GP_INPUT_DRIVER_KBD_H
+#define GP_INPUT_DRIVER_KBD_H
 
 /*
- * Initalize framebuffer.
- *
- * The path should point to framebuffer device eg. "/dev/fb0" for first
- * framebuffer device.
- *
- * The GP_Backend structure is allocated and returned, the resources are
- * deinitalized and the structure is freed by backed->Exit(backend); call.
- *
- * Upon failure NULL is returned.
- *
- * If flag is set, the konsole kbd is used to push events into event queue.
+ * Converts KBD event to GFXprim event and puts it into the queue.
  */
-GP_Backend *GP_BackendLinuxFBInit(const char *path, int flag);
+void GP_InputDriverKBDEventPut(unsigned char ev);
 
-#endif /* BACKENDS_GP_FRAMEBUFFER_H */
+#endif /* GP_INPUT_DRIVER_KBD_H */
