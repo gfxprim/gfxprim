@@ -41,9 +41,15 @@
 struct fb_priv {
 	GP_Context context;
 	uint32_t bsize;
+
+	int flag;
+
+	/* console fd, nr and saved data */
 	int con_fd;
 	int con_nr;
 	int last_con_nr;
+	int saved_kb_mode;
+	
 	int fb_fd;
 	char path[];
 };
@@ -91,7 +97,7 @@ static int allocate_console(struct fb_priv *fb, int flag)
 	
 	if (ioctl(fd, VT_GETSTATE, &vts) == 0)
 		fb->last_con_nr = vts.v_active;
-	else	
+	else
 		fb->last_con_nr = -1;
 
 	if (ioctl(fd, VT_ACTIVATE, nr) < 0) {
@@ -130,6 +136,16 @@ static int allocate_console(struct fb_priv *fb, int flag)
 			return -1;
 		}
 	
+		if (ioctl(fd, KDGKBMODE, &fb->saved_kb_mode)) {
+			GP_DEBUG(1, "Failed to ioctl KDGKBMODE %s: %s",
+                                 buf, strerror(errno));
+			close(fd);
+			return -1;
+		}
+
+		GP_DEBUG(2, "Previous keyboard mode was '%i'",
+                         fb->saved_kb_mode);
+
 		if (ioctl(fd, KDSKBMODE, K_MEDIUMRAW) < 0) {
 			GP_DEBUG(1, "Failed to ioctl KDSKBMODE %s: %s",
 			         buf, strerror(errno));
@@ -182,6 +198,14 @@ static void fb_exit(GP_Backend *self)
 	
 	/* reset keyboard */
 	ioctl(fb->con_fd, KDSETMODE, KD_TEXT);
+	
+	/* restore keyboard mode */
+	if (fb->flag) {
+		if (ioctl(fb->con_fd, KDSKBMODE, fb->saved_kb_mode) < 0) {
+			GP_DEBUG(1, "Failed to ioctl KDSKBMODE (restore KBMODE)"
+                                 " /dev/tty%i: %s", fb->con_nr, strerror(errno));
+		}
+	}
 	
 	/* switch back console */
 	if (fb->last_con_nr != -1)
@@ -267,6 +291,7 @@ GP_Backend *GP_BackendLinuxFBInit(const char *path, int flag)
 	fb->fb_fd = fd;
 	fb->bsize  = fscri.smem_len;
 	strcpy(fb->path, path);
+	fb->flag = flag;
 
 	fb->context.w = vscri.xres;
 	fb->context.h = vscri.yres;
