@@ -60,7 +60,7 @@ int main(int argc, char *argv[])
 
 	if (argc != 2) {
 		fprintf(stderr, "Takes an image as an parameter\n");
-		return 0;
+		return 1;
 	}
 
 	priv.op   = "Loading";
