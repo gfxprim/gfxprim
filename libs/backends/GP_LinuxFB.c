@@ -58,25 +58,29 @@ static int allocate_console(struct fb_priv *fb, int flag)
 	char buf[255];
 
 	/* allocate and switch to new console */
-	fd = open("/dev/tty0", O_WRONLY);
+	GP_DEBUG(1, "Allocating new console");
+
+	fd = open("/dev/tty1", O_WRONLY);
 
 	if (fd < 0) {
-		GP_DEBUG(1, "Opening console /dev/tty0 failed: %s",
+		GP_DEBUG(1, "Opening console /dev/tty1 failed: %s",
 		            strerror(errno));
 		return -1;
 	}
 	
 	if (ioctl(fd, VT_OPENQRY, &nr) < 0) {
-		GP_DEBUG(1, "Failed to ioctl VT_OPENQRY /dev/tty0: %s",
+		GP_DEBUG(1, "Failed to ioctl VT_OPENQRY /dev/tty1: %s",
 		            strerror(errno));
 		close(fd);
 		return -1;
 	}
 
+	GP_DEBUG(1, "Has been granted tty%i", nr);
+
 	close(fd);
 
 	snprintf(buf, sizeof(buf), "/dev/tty%i", nr);
-	fd = open(buf, O_RDWR);
+	fd = open(buf, O_RDWR | O_NONBLOCK);
 
 	if (fd < 0) {
 		GP_DEBUG(1, "Opening console %s failed: %s",
@@ -96,6 +100,8 @@ static int allocate_console(struct fb_priv *fb, int flag)
 		close(fd);
 		return -1;
 	}
+
+	GP_DEBUG(1, "Waiting for tty%i to activate", nr);
 
 	if (ioctl(fd, VT_WAITACTIVE, nr) < 0) {
 		GP_DEBUG(1, "Failed to ioctl VT_WAITACTIVE %s: %s",
@@ -205,6 +211,8 @@ GP_Backend *GP_BackendLinuxFBInit(const char *path, int flag)
 		goto err1;
 
 	/* open and mmap framebuffer */
+	GP_DEBUG(1, "Opening framebuffer '%s'", path);
+
 	fd = open(path, O_RDWR);
 	
 	if (fd < 0) {
@@ -223,6 +231,9 @@ GP_Backend *GP_BackendLinuxFBInit(const char *path, int flag)
 		            strerror(errno));
 		goto err3;
 	}
+
+	GP_DEBUG(1, "Have framebufer %ix%i %s %ibpp", vscri.xres, vscri.yres,
+                 vscri.grayscale ? "Gray" : "RGB", vscri.bits_per_pixel);
 
 	/*
 	 * Framebuffer is grayscale.
