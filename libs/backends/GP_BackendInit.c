@@ -140,9 +140,13 @@ static void backend_x11_help(FILE *help, const char *err)
 static GP_Backend *backend_x11_init(char *params, const char *caption,
                                     FILE *help)
 {
-	unsigned int w, h, n;
+	unsigned int n, w = 640, h = 480;
 
-	if (sscanf(params, "%u%*[xX]%u%n", &w, &h, &n) == 2 && n == strlen(params))
+	if (params == NULL)
+		return GP_BackendX11Init(NULL, 0, 0, w, h, caption);	
+
+	if (sscanf(params, "%u%*[xX]%u%n", &w, &h, &n) == 2 &&
+	    n == strlen(params))
 		return GP_BackendX11Init(NULL, 0, 0, w, h, caption);
 
 	backend_x11_help(help, "X11: Invalid parameters");
