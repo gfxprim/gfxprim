@@ -2,10 +2,10 @@ Supported pixel sizes
 ---------------------
 
 The default maximum size of a single pixel is 32 bits. The limitations would
-be analoguous for other settings (8, 16 and 64).
+be analogous for other settings (8, 16 and 64).
 
 Pixel sizes 8, 16 and 32 are supported on all systems and generally very efficient
-(assigment is used for all operations). 24 bpp is supported, but the operations may be
+(assignment is used for all operations). 24 bpp is supported, but the operations may be
 slightly slower.
 
 Pixel sizes 1, 2 and 4 depend on bit-endian setting and are supported on all systems.
@@ -19,7 +19,7 @@ to decode/encode.
 Pixel sizes between 25 and 31 are not supported at all, as these pixels might not fit
 into a 32-bit byte-aligned window.
 
-The pixel sizes to be supported must be explicitely listed in the configuration file,
+The pixel sizes to be supported must be explicitly listed in the configuration file,
 each including the bit-endian if required (see below).
 
 Supported pixel types

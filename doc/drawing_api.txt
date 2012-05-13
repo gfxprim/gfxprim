@@ -292,6 +292,6 @@ The Descent is the height in pixels from baseline to the bottom.
 unsigned int GP_TextHeight(const GP_TextStyle *style);
 --------------------------------------------------------------------------------
 
-The Height is size of the font from top to the bottom, eg. equals exactly to
+The Height is size of the font from top to the bottom, i.e. equals exactly to
 the sum of ascent and descent.
 

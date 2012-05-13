@@ -22,7 +22,7 @@ Graphics Rendering
 ** PutPixel/GetPixel
 ** Lines
 ** Circles
-** Elipses
+** Ellipses
 ** Polygons
 
 * Text Drawing
@@ -30,7 +30,7 @@ Graphics Rendering
 ** Basic fonts are compiled in the library
 ** Font rendering can be altered by style attributes
 ** Supports, for example, pixel multiplication and tracking
-** Includes basic suppport for freetype
+** Includes basic support for freetype
 
 * Bitmaps and Blitting
 ** Create, Destroy bitmap
@@ -44,7 +44,7 @@ Graphics Rendering
 ** Read support for GIF
 
 * Graphic backed input event handling
-** Linux Framebuffer
+** Linux Frame-buffer
 ** SDL support
 ** Experimental X11 support
 
@@ -60,7 +60,7 @@ Bitmap Filters
 ** Separable Convolution
 ** General Convolution
 
-* Arihtmetics filters
+* Arithmetics filters
 ** Addition
 ** Multiplication
 ** Difference
