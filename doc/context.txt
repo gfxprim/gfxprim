@@ -203,6 +203,6 @@ GP_Context *GP_ContextConvert(const GP_Context *src, GP_Context *dst,
 Provides basic context conversion functionality. A newly allocated context is
 returned.
 
-This fuction does no error distribution, it only multiplies or rounds the pixel
+This function does no error distribution, it only multiplies or rounds the pixel
 values. If you need something better use Floyd Steinberg dithering instead.
 
