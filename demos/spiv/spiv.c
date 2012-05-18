@@ -34,6 +34,7 @@
 
 #include <GP.h>
 #include <backends/GP_Backends.h>
+#include <backends/GP_BackendVirtual.h>
 #include <input/GP_InputDriverLinux.h>
 
 #include "cpu_timer.h"
@@ -382,8 +383,9 @@ int main(int argc, char *argv[])
 	int sleep_sec = -1;
 	struct loader_params params = {NULL, 0, 0, 0, .img = NULL};
 	int opt, debug_level = 0;
+	GP_PixelType emul_type = GP_PIXEL_UNKNOWN;
 
-	while ((opt = getopt(argc, argv, "b:cd:Ii:Ps:r:")) != -1) {
+	while ((opt = getopt(argc, argv, "b:cd:e:Ii:Ps:r:")) != -1) {
 		switch (opt) {
 		case 'I':
 			params.show_info = 1;
@@ -402,6 +404,14 @@ int main(int argc, char *argv[])
 		break;
 		case 'd':
 			debug_level = atoi(optarg);
+		break;
+		case 'e':
+			emul_type = GP_PixelTypeByName(optarg);
+
+			if (emul_type == GP_PIXEL_UNKNOWN) {
+				fprintf(stderr, "Invalid pixel type '%s'\n", optarg);
+				return 1;
+			}
 		break;
 		case 'r':
 			if (!strcmp(optarg, "90"))
@@ -436,6 +446,9 @@ int main(int argc, char *argv[])
 	signal(SIGABRT, sighandler);
 
 	init_backend(backend_opts);
+
+	if (emul_type != GP_PIXEL_UNKNOWN)
+		backend = GP_BackendVirtualInit(backend, emul_type, GP_BACKEND_CALL_EXIT);
 
 	context = backend->context;
 
