@@ -34,23 +34,28 @@
 struct x11_priv {
 	Display *dpy;	
 	int scr;
+	Screen *scr_ptr;
+	int scr_depth;
 	Window win;
 	Visual *vis;
+
 	XImage *img;
 
 	int resized_flag;
 };
+
+static void destroy_ximage(GP_Backend *self);
+
+static int resize_ximage(GP_Backend *self, int w, int h);
 
 static void x11_exit(GP_Backend *self)
 {
 	struct x11_priv *x11 = GP_BACKEND_PRIV(self); 
 	
 	XLockDisplay(x11->dpy);
-	
-	GP_ContextFree(self->context);
 
-	x11->img->data = NULL;
-	XDestroyImage(x11->img);
+	destroy_ximage(self);
+
 	XDestroyWindow(x11->dpy, x11->win);
 	/* I wonder if this is right sequence... */
 	XUnlockDisplay(x11->dpy);
@@ -148,8 +153,6 @@ static int x11_set_attributes(struct GP_Backend *self,
 	}
 
 	if (w != 0 || h != 0) {
-		XImage *img;
-
 		if (w == 0)
 			w = self->context->w;
 	
@@ -157,34 +160,102 @@ static int x11_set_attributes(struct GP_Backend *self,
 			h = self->context->h;
 		
 		GP_DEBUG(3, "Setting window size to %ux%u", w, h);
-
-		/* Create new X image */
-		img = XCreateImage(x11->dpy, x11->vis, 24, ZPixmap, 0, NULL,
-	                           w, h, 32, 0);
-
-		/* Allocate new context */
-	
-		if (GP_ContextResize(self->context, w, h)) {
-			XDestroyImage(img);
+		
+		if (resize_ximage(self, w, h))
 			return 1;
-		}
-
-		/* Free old image */
-		x11->img->data = NULL;
-		XDestroyImage(x11->img);
-
-		/* Swap the pointers */
-		img->data = (char*)self->context->pixels;
-		x11->img = img;
 
 		/* Resize X11 window */
 		XResizeWindow(x11->dpy, x11->win, w, h);
 		XFlush(x11->dpy);
-	
+
 		x11->resized_flag = 1;
 	}
 	
 	XUnlockDisplay(x11->dpy);
+
+	return 0;
+}
+
+static int create_ximage(GP_Backend *self, GP_Size w, GP_Size h)
+{
+	struct x11_priv *x11 = GP_BACKEND_PRIV(self); 
+	int depth;
+	enum GP_PixelType pixel_type;
+
+	/*
+	 * Eh, the XImage supports either 8, 16 or 32 bit pixels
+	 *
+	 * Do best effor on selecting appropriate pixel type
+	 */
+	for (depth = 8; depth <= 32; depth<<=1) {
+		pixel_type = GP_PixelRGBMatch(x11->vis->red_mask,
+		                              x11->vis->green_mask,
+	                                      x11->vis->blue_mask,
+					      0x0, depth);
+	
+		if (pixel_type != GP_PIXEL_UNKNOWN)
+			break;
+	}
+
+	if (pixel_type == GP_PIXEL_UNKNOWN) {
+		GP_DEBUG(1, "Unknown pixel type");
+		return 1;
+	}
+
+	self->context = GP_ContextAlloc(w, h, pixel_type);
+
+	if (self->context == NULL)
+		return 1;
+
+	x11->img = XCreateImage(x11->dpy, x11->vis, x11->scr_depth, ZPixmap, 0,
+	                       NULL, w, h, depth, 0);
+
+	if (x11->img == NULL) {
+		GP_DEBUG(1, "Failed to create XImage");
+		GP_ContextFree(self->context);
+		return 1;
+	}
+
+	x11->img->data = (char*)self->context->pixels;
+	return 0;
+}
+
+static void destroy_ximage(GP_Backend *self)
+{
+	struct x11_priv *x11 = GP_BACKEND_PRIV(self); 
+	
+	GP_ContextFree(self->context);
+	x11->img->data = NULL;
+	XDestroyImage(x11->img);
+}
+
+static int resize_ximage(GP_Backend *self, int w, int h)
+{
+	struct x11_priv *x11 = GP_BACKEND_PRIV(self); 
+	XImage *img;
+
+	/* Create new X image */
+	img = XCreateImage(x11->dpy, x11->vis, x11->scr_depth, ZPixmap, 0, NULL,
+	                   w, h, x11->img->bitmap_pad, 0);
+
+	if (img == NULL) {
+		GP_DEBUG(2, "XCreateImage failed");
+		return 1;
+	}
+
+	/* Resize context */
+	if (GP_ContextResize(self->context, w, h)) {
+			XDestroyImage(img);
+		return 1;
+	}
+
+	/* Free old image */
+	x11->img->data = NULL;
+	XDestroyImage(x11->img);
+
+	/* Swap the pointers */
+	img->data = (char*)self->context->pixels;
+	x11->img = img;
 
 	return 0;
 }
@@ -197,6 +268,11 @@ GP_Backend *GP_BackendX11Init(const char *display, int x, int y,
 	struct x11_priv *x11;
 
 	GP_DEBUG(1, "Initalizing X11 display '%s'", display);
+	
+	if (!XInitThreads()) {
+		GP_DEBUG(2, "XInitThreads failed");
+		return NULL;
+	}
 
 	backend = malloc(sizeof(GP_Backend) +
 	                 sizeof(struct x11_priv));
@@ -206,30 +282,24 @@ GP_Backend *GP_BackendX11Init(const char *display, int x, int y,
 
 	x11 = GP_BACKEND_PRIV(backend);
 
-	backend->context = GP_ContextAlloc(w, h, GP_PIXEL_xRGB8888);
-
-	if (backend->context == NULL)
-		goto err0;
-	
-	//TODO: Error checking
-	XInitThreads();
-
 	x11->dpy = XOpenDisplay(display);
 
 	if (x11->dpy == NULL)
-		goto err1;
+		goto err0;
 
 	x11->scr = DefaultScreen(x11->dpy);
 	x11->vis = DefaultVisual(x11->dpy, x11->scr);
+	x11->scr_ptr = DefaultScreenOfDisplay(x11->dpy);
+	x11->scr_depth = DefaultDepthOfScreen(x11->scr_ptr);
+
+	GP_DEBUG(2, "Have Visual id %i, depth %u", (int)x11->vis->visualid, x11->scr_depth);
+
+	if (create_ximage(backend, w, h))
+		goto err1;
 	
 	GP_DEBUG(2, "Opening window '%s' %ix%i-%ux%u",
 	         caption, x, y, w, h);
 	
-	x11->img = XCreateImage(x11->dpy, x11->vis, 24, ZPixmap, 0, NULL,
-	                        w, h, 32, 0);
-
-	x11->img->data = (char*)backend->context->pixels;
-
 	x11->win = XCreateWindow(x11->dpy, DefaultRootWindow(x11->dpy),
 	                         x, y, w, h, 0, CopyFromParent,
 	                         InputOutput, CopyFromParent, 0, NULL);
@@ -257,22 +327,6 @@ GP_Backend *GP_BackendX11Init(const char *display, int x, int y,
 	x11->resized_flag  = 0;
 
 
-/*
-	enum GP_PixelType pixel_type;
-	pixel_type = GP_PixelRGBLookup(vscri.red.length,    vscri.red.offset,
-	                               vscri.green.length,  vscri.green.offset,
-	                               vscri.blue.length,   vscri.blue.offset,
-	                               vscri.transp.length, vscri.transp.offset,
-	                               vscri.bits_per_pixel);
-
-	if (pixel_type == GP_PIXEL_UNKNOWN) {
-		GP_DEBUG(1, "Unknown pixel type\n");
-		goto err3;
-	}
-
-
-*/
-
 	backend->name          = "X11";
 	backend->Flip          = x11_flip;
 	backend->UpdateRect    = x11_update_rect;
@@ -281,14 +335,11 @@ GP_Backend *GP_BackendX11Init(const char *display, int x, int y,
 	backend->Poll          = x11_poll;
 	backend->SetAttributes = x11_set_attributes;
 
-
 	return backend;
-//err3:
-//	XDestroyWindow(x11->dpy, x11->win);
 err2:
-	XCloseDisplay(x11->dpy);
+	destroy_ximage(backend);
 err1:
-	GP_ContextFree(backend->context);
+	XCloseDisplay(x11->dpy);
 err0:
 	free(backend);
 	return NULL;
