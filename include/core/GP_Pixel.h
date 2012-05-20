@@ -19,7 +19,7 @@
  * Copyright (C) 2009-2010 Jiri "BlueBear" Dluhos                            *
  *                         <jiri.bluebear.dluhos@gmail.com>                  *
  *                                                                           *
- * Copyright (C) 2009-2011 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  * Copyright (C) 2011      Tomas Gavenciak <gavento@ucw.cz>                  *
  *                                                                           *
@@ -157,6 +157,11 @@ static inline void GP_PixelPrint(GP_Pixel pixel, GP_PixelType type)
 	GP_PixelSNPrint(buf, 256, pixel, type);
 	printf("%s", buf);
 }
+
+/*
+ * Returns pixel type for passed human-readable name (e.g. RGB888).
+ */
+GP_PixelType GP_PixelTypeByName(const char *name);
 
 /*
  * Match pixel type to known pixel types.

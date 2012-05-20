@@ -25,7 +25,7 @@ type and the context size must be big enough to store the result.
 
 For filters that work 'in-place' (which is explicitly said for each filter)
 the source and the destination could be the same context. Note that this is
-not expected to work if you do several overlaping subcontexts and pass these
+not expected to work if you do several overlapping subcontexts and pass these
 as arguments.
 
 When 'NULL' is passed as destination new context for storing the result is
@@ -38,7 +38,7 @@ pixel_type, parameters, etc...
 [source,c]
 -------------------------------------------------------------------------------
 /*
- * Filter common api.
+ * Filter common API.
  */
 GP_Context *GP_FilterFoo(const GP_Context *src, GP_Context *dst,
                          foo params ...,
@@ -69,7 +69,7 @@ Point operation filters
 
 Point operations are filters that works with pixels as with independent values
 (the value of destination pixel depends only on the pixel on the same
-coodrdinates in source image). All of these filters works 'in-place' and the
+coordinates in source image). All of these filters works 'in-place' and the
 result has always the same size as the source.
 
 [source,c]
@@ -90,7 +90,7 @@ GP_Context *GP_FilterContrast(const GP_Context *src, GP_Context *dst,
                               float mul, GP_ProgressCallback *callback);
 -------------------------------------------------------------------------------
 
-Constrast filter, multiplies all pixel channels by a fixed value.
+Contrast filter, multiplies all pixel channels by a fixed value.
 
 [source,c]
 -------------------------------------------------------------------------------
@@ -149,7 +149,7 @@ Rotate context by 90 degrees.
 Doesn't work 'in-place' (yet).
 
 The destination has to have the same pixel type and destination size must be
-big enough to fit rotated context (eg. W and H are swapped).
+big enough to fit rotated context (i.e. W and H are swapped).
 
 [source,c]
 -------------------------------------------------------------------------------
@@ -178,7 +178,7 @@ Rotate context by 270 degrees.
 
 Doesn't work 'in-place' (yet).
 
-The destinatoin has to have the same pixel type and destination size must be
+The destination has to have the same pixel type and destination size must be
 big enough to fit rotated context (eg. W and H are swapped).
 
 [source,c]
@@ -253,14 +253,14 @@ Nearest Neighbour Interpolation
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Fast, but produces "pixelated" images. May however work better for images with
-sharp edges mostly consisting of big one colour regions (it doesn't blur the
+sharp edges mostly consisting of big one color regions (it doesn't blur the
 result on upscaling).
 
 Bicubic Interpolation
 ^^^^^^^^^^^^^^^^^^^^^
 
 Works well as is on image upscaling. To get decent result on downscaling
-low-pass filter (gaussian blur) must be used on original image before actuall
+low-pass filter (Gaussian blur) must be used on original image before actual
 downscaling. To do this reasonably fast we could cheat a little: first resize
 big images a little without the low-pass filter, then apply low-pass filter and
 finally downscale it to desired size.

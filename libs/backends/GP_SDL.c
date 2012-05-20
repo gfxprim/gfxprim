@@ -39,6 +39,8 @@ static SDL_Surface *sdl_surface;
 static SDL_mutex *mutex;
 static GP_Context context;
 
+static uint32_t sdl_flags = SDL_SWSURFACE;
+
 /* Backend API funcitons */
 
 static void sdl_flip(struct GP_Backend *self __attribute__((unused)))
@@ -79,29 +81,6 @@ static void sdl_poll(struct GP_Backend *self __attribute__((unused)))
 	SDL_mutexV(mutex);
 }
 
-static void sdl_exit(struct GP_Backend *self __attribute__((unused)));
-
-static struct GP_Backend backend = {
-	.name       = "SDL",
-	.context    = NULL,
-	.Flip       = sdl_flip,
-	.UpdateRect = sdl_update_rect,
-	.Exit       = sdl_exit,
-	.fd_list    = NULL,
-	.Poll       = sdl_poll,
-};
-
-static void sdl_exit(struct GP_Backend *self __attribute__((unused)))
-{
-	SDL_mutexP(mutex);
-	
-	SDL_Quit();
-	
-	SDL_DestroyMutex(mutex);
-
-	backend.context = NULL;
-}
-
 int context_from_surface(GP_Context *context, SDL_Surface *surf)
 {
 	/* sanity checks on the SDL surface */
@@ -132,12 +111,50 @@ int context_from_surface(GP_Context *context, SDL_Surface *surf)
 	context->w = surf->w;
 	context->h = surf->h;
 
-	/* orientation */
-	context->axes_swap = 0;
-	context->x_swap = 0;
-	context->y_swap = 0;
+	return 0;
+}
+
+static int sdl_set_attributes(struct GP_Backend *self __attribute__((unused)),
+                              uint32_t w, uint32_t h,
+                              const char *caption)
+{
+	SDL_mutexP(mutex);
+
+	if (caption != NULL)		
+		SDL_WM_SetCaption(caption, caption);
+
+	if (w != 0 && h != 0) {
+		sdl_surface = SDL_SetVideoMode(w, h, 0, sdl_flags);
+		context_from_surface(&context, sdl_surface);
+	}
+
+	SDL_mutexV(mutex);
 
 	return 0;
+}
+
+static void sdl_exit(struct GP_Backend *self __attribute__((unused)));
+
+static struct GP_Backend backend = {
+	.name          = "SDL",
+	.context       = NULL,
+	.Flip          = sdl_flip,
+	.UpdateRect    = sdl_update_rect,
+	.SetAttributes = sdl_set_attributes,
+	.Exit          = sdl_exit,
+	.fd_list       = NULL,
+	.Poll          = sdl_poll,
+};
+
+static void sdl_exit(struct GP_Backend *self __attribute__((unused)))
+{
+	SDL_mutexP(mutex);
+	
+	SDL_Quit();
+	
+	SDL_DestroyMutex(mutex);
+
+	backend.context = NULL;
 }
 
 GP_Backend *GP_BackendSDLInit(GP_Size w, GP_Size h, uint8_t bpp, uint8_t flags,
@@ -149,8 +166,6 @@ GP_Backend *GP_BackendSDLInit(GP_Size w, GP_Size h, uint8_t bpp, uint8_t flags,
 			GP_DEBUG(1, "ERROR: SDL_Init: %s", SDL_GetError());
 			return NULL;
 		}
-
-		uint32_t sdl_flags = SDL_SWSURFACE;
 
 		if (flags & GP_SDL_FULLSCREEN)
 			sdl_flags |= SDL_FULLSCREEN;
@@ -176,7 +191,7 @@ GP_Backend *GP_BackendSDLInit(GP_Size w, GP_Size h, uint8_t bpp, uint8_t flags,
 			SDL_Quit();
 			return NULL;
 		}
-
+	
 		backend.context = &context;
 	}
 

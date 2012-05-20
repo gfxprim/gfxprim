@@ -35,7 +35,9 @@
  * deinitalized and the structure is freed by backed->Exit(backend); call.
  *
  * Upon failure NULL is returned.
+ *
+ * If flag is set, the konsole kbd is used to push events into event queue.
  */
-GP_Backend *GP_BackendLinuxFBInit(const char *path);
+GP_Backend *GP_BackendLinuxFBInit(const char *path, int flag);
 
 #endif /* BACKENDS_GP_FRAMEBUFFER_H */

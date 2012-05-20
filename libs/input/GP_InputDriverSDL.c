@@ -132,8 +132,10 @@ void GP_InputDriverSDLEventPut(SDL_Event *ev)
 		GP_EventPushKey(key, ev->key.state, NULL);
 	break;
 	case SDL_VIDEORESIZE:
+		GP_EventPushResize(ev->resize.w, ev->resize.h, NULL);
 	break;
 	case SDL_QUIT:
+		GP_EventPush(GP_EV_SYS, GP_EV_SYS_QUIT, 0, NULL);
 	break;
 	}
 }

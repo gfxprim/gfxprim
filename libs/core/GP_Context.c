@@ -70,12 +70,17 @@ GP_Context *GP_ContextCopy(const GP_Context *src, int flag)
 	return new;
 }
 
+static uint32_t get_bpr(uint32_t bpp, uint32_t w)
+{
+	return (bpp * w) / 8 + !!((bpp * w) % 8);
+}
+
 GP_Context *GP_ContextAlloc(GP_Size w, GP_Size h, GP_PixelType type)
 {
 	GP_CHECK_VALID_PIXELTYPE(type);
 	GP_Context *context = malloc(sizeof(GP_Context));
 	uint32_t bpp = GP_PixelSize(type);
-	uint32_t bpr = (bpp * w) / 8 + !!((bpp * w) % 8);
+	uint32_t bpr = get_bpr(bpp, w);
 	void *pixels;
 
 	pixels = malloc(bpr * h);
@@ -108,11 +113,29 @@ GP_Context *GP_ContextAlloc(GP_Size w, GP_Size h, GP_PixelType type)
 	return context;
 }
 
+int GP_ContextResize(GP_Context *context, GP_Size w, GP_Size h)
+{
+	uint32_t bpr = get_bpr(context->bpp, w);
+	void *pixels;
+
+	pixels = realloc(context->pixels, bpr * h);
+
+	if (pixels == NULL)
+		return 1;
+
+	context->w = w;
+	context->h = h;
+	context->bytes_per_row = bpr;
+	context->pixels = pixels;
+
+	return 0;
+}
+
 void GP_ContextInit(GP_Context *context, GP_Size w, GP_Size h,
                     GP_PixelType type, void *pixels)
 {
 	uint32_t bpp = GP_PixelSize(type);
-	uint32_t bpr = (bpp * w) / 8 + !!((bpp * w) % 8);
+	uint32_t bpr = get_bpr(bpp, w);
 
 	context->pixels        = pixels;
 	context->bpp           = bpp;

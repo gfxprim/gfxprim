@@ -61,4 +61,12 @@ int GP_FilterFloydSteinberg_XXX_to_G1_Raw(const GP_Context *src,
                                           GP_ProgressCallback *callback);
 
 
+/*
+ * Hilbert-peano space filling curve based dithering.
+ */
+int GP_FilterHilbertPeano_from_RGB888(const GP_Context *src,
+                                       GP_Context *dst,
+				       GP_ProgressCallback *callback);
+
+
 #endif /* FILTERS_GP_DITHER_H */

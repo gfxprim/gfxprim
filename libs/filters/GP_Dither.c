@@ -133,3 +133,14 @@ GP_Context *GP_FilterFloydSteinberg_from_RGB888(const GP_Context *src,
 
 	return ret;
 }
+
+int GP_FilterHilbertPeano_RGB888_to_XXX_Raw(const GP_Context *src,
+                                            GP_Context *dst,
+                                            GP_ProgressCallback *callback);
+
+int GP_FilterHilbertPeano_from_RGB888(const GP_Context *src,
+                                      GP_Context *dst,
+                                      GP_ProgressCallback *callback)
+{
+	return GP_FilterHilbertPeano_RGB888_to_XXX_Raw(src, dst, callback);
+}

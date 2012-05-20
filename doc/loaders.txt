@@ -1,97 +1,137 @@
 Context loaders
 ---------------
 This part of gfxprim library aims to create API to load/save images from/to
-common image fileformats.
+common image file formats.
+
+All loading functions returns a pointer to allocated and loaded image or upon
+a failure 'NULL' is returned and 'errno' is set.
+
+The possible errno values are:
+
+* anything returned by fopen(), fclose(), fseek(), ...
+* 'ENOSYS' if library wasn't compiled with particular library support
+* 'ENOMEM' as returned by malloc()
+* 'EIO'/'EILSEQ' invalid image data
+* 'ECANCELED' loading canceled from callback
 
 Common Loader
 ~~~~~~~~~~~~~
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <GP_Loaders.h>
+#include <loaders/GP_Loaders.h>
+/* or */
+#include <GP.h>
 
-GP_RetCode GP_LoadImage(const char *src_path, GP_Context **res,
-                        GP_ProgressCallback *callback);
+GP_Context *GP_LoadImage(const char *src_path, GP_ProgressCallback *callback);
 -------------------------------------------------------------------------------
 
-Loads image from a file. The image format is now recognized by the file
-filename extension. Format detection using file signature is planned.
-
-The loading process could be aborted by process callback.
-
-PNG
-~~~
-
-Just now, the 'PNG' support is not fully finished, the Alpha channel as well
-as palletes doesn't work well or at all, we are working on that.
+Loads image from a file. The format is now matched by an image file extension.
+File signature loading method is on the TODO.
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <GP_Loaders.h>
+#include <loaders/GP_Loaders.h>
+/* or */
+#include <GP.h>
 
-GP_RetCode GP_OpenPNG(const char *src, FILE **f);
+int GP_SaveImage(GP_Context *src, const char *dst_path,
+                 GP_ProgressCallback *callback);
 -------------------------------------------------------------------------------
 
-Opens file and checks for 'PNG' signature upon successful return (file could
-be opened, signature matches), the opened file is returned and the file
-possition points right after the end of the 'PNG' signature.
+Saves a context into a file. The file format is matched accordingly to the
+file extension, if extension is invalid or if support for requested image
+format wasn't compiled in, non-zero is returned and 'errno' is set to
+'ENOSYS'.
+
+Returns zero on success and non-zero on failure and 'errno' is set. The
+possible errno values are 'ENOSYS' for unknown format and anything that could
+be returned by 'fopen()', 'open()', 'fwrite()', 'write()', 'seek()', etc...
+
+PNG
+~~~
+The 'PNG' loading support is optionally implemented by libpng.
+
+Just now, the 'PNG' support is not fully finished. Images with alpha channel
+are not supported yet.
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <loaders/GP_PNG.h>
+/* or */
+#include <GP.h>
+
+int GP_OpenPNG(const char *src_path, FILE **f);
+-------------------------------------------------------------------------------
+
+Opens file and checks for 'PNG' signature.  Returns zero on success (file
+could be opened, signature matches), the opened file is returned and the file
+position points right after the end of the 'PNG' signature.
+
+Upon failure 'errno' is filled.
 
 This function is semi-internal, you should rather use functions listed below.
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <GP_Loaders.h>
+#include <loaders/GP_PNG.h>
+/* or */
+#include <GP.h>
 
-GP_RetCode GP_ReadPNG(FILE *f, GP_Context **res,
-                      GP_ProgressCallback *callback);
+GP_Context *GP_ReadPNG(FILE *f, GP_ProgressCallback *callback);
 -------------------------------------------------------------------------------
 
 Loads 'PNG' file into context the file pointer must point to the start of the
-'PNG' data stream (eg. should point right after the signature). The context,
+'PNG' data stream (i.e. should point right after the signature). The context,
 to store the image to, is allocated. The loading process could by aborted by a
-callback, in such case all memory is freed and the call returns 'GP_EINTR'.
+callback, in such case all memory is freed.
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <GP_Loaders.h>
+#include <loaders/GP_PNG.h>
+/* or */
+#include <GP.h>
 
-GP_RetCode GP_LoadPNG(const char *src_path, GP_Context **res,
-                      GP_ProgressCallback *callback);
+GP_Context *GP_LoadPNG(const char *src_path, GP_ProgressCallback *callback);
 -------------------------------------------------------------------------------
 
-Same as abowe but takes path to the file as a parameter and check for the
-signature. Basically this combines both of the calls abowe.
+Same as above but takes path to the file as a parameter and check for the
+signature. Basically this combines both of the calls above.
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <GP_Loaders.h>
+#include <loaders/GP_PNG.h>
+/* or */
+#include <GP.h>
 
-GP_RetCode GP_SavePNG(const char *dst_path, GP_Context *src,
-                      GP_ProgressCallback *callback);
+int GP_SavePNG(const GP_Context *src, const char *dst_path,
+               GP_ProgressCallback *callback);
 -------------------------------------------------------------------------------
 
 Writes a Context into a 'PNG' image. If aborted by a callback, the opened file
-is closed and removed before the call returns 'GP_EINTR'.
+is closed and removed before the call returns non-zero and 'errno' is set to
+'ECANCELED'.
 
-Currently only 'RGB888' format is supported, you should convert the GP_Context
-to 'RGB888' before calling this function otherwise 'GP_ENOIMPL' will be
-returned.
+Currently only 'RGB888' format is supported, you should convert the
+'GP_Context' to 'RGB888' before calling this function otherwise non-zero is
+returned and 'errno' is set to 'ENOSYS'. 
 
-JPG
-~~~
-
-The 'JPG' format is supported for both 'G8' as well as 'RGB888' pixel formats.
+JPEG
+~~~~
+The 'JPEG' loading support is optionally implemented by jpeg library.
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <GP_Loaders.h>
+#include <loaders/GP_JPG.h>
+/* or */
+#include <GP.h>
 
-GP_RetCode GP_OpenJPG(const char *src, FILE **f);
+int GP_OpenJPG(const char *src_path, FILE **f);
 -------------------------------------------------------------------------------
 
 Opens file and checks for 'JPG' signature upon successful return (file could
 be opened, signature matches), the opened file is returned and the file
-possition points right after the end of the 'JPG' signature.
+position points right after the end of the 'JPG' signature.
 
 This function is semi-internal, you should rather use functions listed below.
 
@@ -100,120 +140,151 @@ file and the 'GP_ReadJPG()' reads the signature instead.
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <GP_Loaders.h>
+#include <loaders/GP_JPG.h>
+/* or */
+#include <GP.h>
 
-GP_RetCode GP_ReadJPG(FILE *f, GP_Context **res,
-                      GP_ProgressCallback *callback);
+GP_Context *GP_ReadJPG(FILE *f, GP_ProgressCallback *callback);
 -------------------------------------------------------------------------------
 
 Loads 'JPG' file into context the file pointer must point to the start of the
-'JPG' data stream (eg. should point right after the signature). The context, to
-store the image to, is allocated. The loading process could by aborted by a
-callback, in such case all memory is freed and the call returns 'GP_EINTR'.
+'JPG' data stream (i.e. should point right after the signature). The context,
+to store the image to, is allocated. The loading process could by aborted by a
+callback, in such case all memory is freed and the call returns 'NULL' and
+'errno' is set to 'ECANCELED'.
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <GP_Loaders.h>
+#include <loaders/GP_JPG.h>
+/* or */
+#include <GP.h>
 
-GP_RetCode GP_LoadJPG(const char *src_path, GP_Context **res,
-                      GP_ProgressCallback *callback);
+GP_Context *GP_LoadJPG(const char *src_path, GP_ProgressCallback *callback);
 -------------------------------------------------------------------------------
 
-Same as abowe but takes path to the file as a parameter and check for the
+Same as above but takes path to the file as a parameter and check for the
 signature. Basically this combines both of the calls above.
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <GP_Loaders.h>
+#include <loaders/GP_JPG.h>
+/* or */
+#include <GP.h>
 
-GP_RetCode GP_SaveJPG(const char *dst_path, GP_Context *src,
-                      GP_ProgressCallback *callback);
+int GP_SaveJPG(const GP_Context *src, const char *dst_path,
+               GP_ProgressCallback *callback);
 -------------------------------------------------------------------------------
 
 Writes a Context into a 'JPG' image. If aborted by a callback, the opened file
-is closed and removed before the call returns 'GP_EINTR'.
+is closed and removed before the call returns non-zero and 'errno' is set to
+'ECANCELED'.
 
 The 'JPG' format could store either 'G8' or 'RGB888' pixeltypes and you must
-convert the context into one of them before this fucntions is called.
+convert the context into one of them before this functions is called.
 
-'TODO:' add parameters to change the encoding settings.
-
-PBM
+GIF
 ~~~
 
-PBM -- portable bitmap file format.
+The 'GIF' format is supported optionally by giflib library.
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <GP_Loaders.h>
+#include <loaders/GP_GIF.h>
+/* or */
+#include <GP.h>
 
-GP_RetCode GP_LoadPBM(const char *src, GP_Context **res);
+int GP_OpenGIF(const char *src_path, void **f);
 -------------------------------------------------------------------------------
 
-This function allocates and loads a 'GP_Context' with 'GP_PIXEL_G1' pixels. If
-the return code is not zero ('GP_ESUCCESS') an error during loading the bitmap
-happend.
+Opens file and checks for 'GIF' signature upon successful return (file could
+be opened, signature matches) zero is returned and gif handle f is set
+otherwise non-zero is returned and 'errno' is set.
 
-The returned 'GP_Context' should be later freed with 'GP_ContextFree()'.
+This function is semi-internal, you should rather use functions listed below.
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <GP_Loaders.h>
+#include <loaders/GP_GIF.h>
+/* or */
+#include <GP.h>
 
-GP_RetCode GP_SavePBM(const char *res, GP_Context *src);
+GP_Context *GP_ReadGIF(void *f, GP_ProgressCallback *callback);
 -------------------------------------------------------------------------------
 
-Save 'GP_Context' into PBM file. The 'GP_Context' pixel type must be
-'GP_PIXEL_G1', otherwise 'GP_ENOIMPL' error is returned.
+Loads 'GIF' file into context. The pointer must point to the 'GIF' handle as
+returned by 'GP_OpenGIF()' function. The context, to store the image to, is
+allocated. The loading process could by aborted by a callback, in such case
+all memory is freed and the call returns 'NULL' and 'errno' is set to
+'ECANCELED'.
 
-PGM
-~~~
-PBM -- portable graymap file format.
+Currently this function loads only first image from the gif container.
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <GP_Loaders.h>
+#include <loaders/GP_GIF.h>
+/* or */
+#include <GP.h>
 
-GP_RetCode GP_LoadPGM(const char *src, GP_Context **res);
+GP_Context *GP_LoadGIF(const char *src_path, GP_ProgressCallback *callback);
 -------------------------------------------------------------------------------
 
-While the format allows to have any integer bit depth, only following color
-depths are supported:
+Same as above but takes path to the file as a parameter and check for the
+signature. Basically this combines both of the calls above.
 
-* GP_PIXEL_1G
-* GP_PIXEL_2G
-* GP_PIXEL_4G
-* GP_PIXEL_8G
+BMP
+~~~
 
-This function allocates and loads a 'GP_Context'. If the return code is not
-zero ('GP_ESUCCESS') an error during loading the bitmap happend.
-
-The returned 'GP_Context' should be later freed with 'GP_ContextFree()'.
+The 'BMP' loading support is nearly complete the only missing features should
+be fancy RGB compressions and RLE support.
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <GP_Loaders.h>
+#include <loaders/GP_BMP.h>
+/* or */
+#include <GP.h>
 
-GP_RetCode GP_SavePGM(const char *res, GP_Context *src);
+int GP_OpenBMP(const char *src_path, FILE **f,
+               GP_Size *w, GP_Size *h, GP_PixelType *pixel_type);
 -------------------------------------------------------------------------------
 
-Save 'GP_Context' into PGM file. The pixel type must be one of:
+Opens file and checks for 'BMP' signature upon successful return (file could
+be opened, signature matches) zero is returned and the parameters, if
+non-'NULL', are initialized. Upon failure non-zero is returned and 'errno' is
+set.
 
-* GP_PIXEL_1G
-* GP_PIXEL_2G
-* GP_PIXEL_4G
-* GP_PIXEL_8G
+This function is semi-internal, you should rather use functions listed below.
 
-Otherwise 'GP_ENOIMPL' is returned.
+[source,c]
+-------------------------------------------------------------------------------
+#include <loaders/GP_BMP.h>
+/* or */
+#include <GP.h>
 
-PNM
-~~~
+GP_Context *GP_ReadBMP(FILE *f, GP_ProgressCallback *callback);
+-------------------------------------------------------------------------------
 
-To be implemented.
+Loads 'BMP' file into context. The 'FILE' pointer must point to opened 'BMP'
+file. The context, to store the image to, is allocated. The loading process
+could by aborted by a callback, in such case all memory is freed and the call
+returns 'NULL' and 'errno' is set to 'ECANCELED'.
 
-PPM
-~~~
+Currently this function loads only first image from the 'GIF' container.
 
-To be implemented.
+[source,c]
+-------------------------------------------------------------------------------
+#include <loaders/GP_BMP.h>
+/* or */
+#include <GP.h>
 
+GP_Context *GP_LoadBMP(const char *src_path, GP_ProgressCallback *callback);
+-------------------------------------------------------------------------------
+
+Same as above but takes path to the file as a parameter and check for the
+signature. Basically this combines both of the calls above.
+
+PBM, PGM, PPM
+~~~~~~~~~~~~~
+
+There is a code do load and write 'PBM', 'PGM' and 'PPM' images too. However
+it's not finished and its API is outdated. Use at your own risk.
 

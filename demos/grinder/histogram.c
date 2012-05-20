@@ -74,7 +74,7 @@ void histogram_to_png(const GP_Context *src, const char *filename)
 		}
 	}
 
-	GP_SavePNG(filename, res, NULL);
+	GP_SavePNG(res, filename, NULL);
 
 	GP_ContextFree(res);
 	GP_FilterHistogramFree(params);

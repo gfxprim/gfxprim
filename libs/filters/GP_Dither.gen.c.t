@@ -1,9 +1,7 @@
 
 %% extends "base.c.t"
 
-%% block descr
-Floyd Steinberg dithering RGB888 -> any pixel
-%% endblock
+{% block descr %}Floyd Steinberg dithering RGB888 -> any pixel{% endblock %}
 
 %% block body
 
@@ -52,7 +50,7 @@ int GP_FilterFloydSteinberg_RGB888_to_{{ pt.name }}_Raw(const GP_Context *src, G
 
 	for (y = 0; y < (GP_Coord)src->h; y++) {
 		for (x = 0; x < (GP_Coord)src->w; x++) { 
-			GP_Pixel pix = GP_GetPixel(src, x, y);
+			GP_Pixel pix = GP_GetPixel_Raw_24BPP(src, x, y);
 			
 %% for c in pt.chanslist
 %% if pt.is_gray()

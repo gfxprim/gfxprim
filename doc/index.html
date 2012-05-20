@@ -1,0 +1,94 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+ <head>
+  <meta http-equiv="content-type" content="text/html; charset=iso-8859-2">
+  <link rel="icon" type="image/png" href="favicon.png">
+  <title>GFXprim</title>
+  <style type="text/css" title="currentStyle" media="screen">
+   @import "style.css";
+  </style>
+ </head>
+ <body>
+  <div id="body">
+   <div id="logo">
+    <h1>
+     <div id="logo_picture">
+      <img src="gfxprim_logo.png" alt="GFXprim">
+     </div>
+     <div id="logo_picture_prim">
+      <img src="gfxprim_logo_prim.png" alt="">
+     </div>
+     <div id="clever_line">
+      <div style="display: block; text-align: right;">
+       <img src="asteroids-corner.png" alt="asteroids" style="position: relative; right: 1em;">
+      </div>
+      What would you like to draw today...&nbsp;
+     </div>
+    </h1>
+   </div>
+   <div id="menu">
+    <ul class="menu-tree">
+     <li class="menu-tree-item"><a href="index.html">Home</a></li>
+     <li class="menu-tree-item"><a href="api.html">API</a></li>
+     <li class="menu-tree-item"><a href="examples.html">Code Examples</a></li>
+     <li class="menu-tree-item"><a href="http://repo.or.cz/w/gfxprim.git">GIT</a></li>
+    </ul>
+   </div>
+   <div id="content">
+    <h2>GFXprim</h2>
+     <p>
+      <i>GFXprim</i> is Open-source modular 2D bitmap graphics library
+      with emphasis on speed and correctness.
+     </p>
+     <h3>License</h3>
+     <p>
+      The code is licenced under LGPL 2.1 or (at your opinion) any later.
+     </p>
+     <h3>About</h3>
+     <p>
+      Once upon the time <i>GFXprim</i> had started as an simple attempt to
+      replace SDL_gfx which was unusable at the time we started. Soon it outgrew
+      the initial purpose and yielded into library that could be used as
+      replacement for SDL library. In constrast with SDL <i>GFXprim</i> is
+      not aiming for abstracting the operating system interface. Instead of
+      that <i>GFXprim</i> provides means for keeping the system dependend
+      parts in well defined and isolated parts.
+     </p>
+     <p>
+      One of the key points of the library is code generation. Most of the
+      graphics operations are written using <a href="http://jinja.pocoo.org/">jinja</a>
+      templating engine which is used to generate specialized C code. So,
+      for an example, once you add pixel definition into configuration file,
+      creating specialized filters, loaders and conversions to other pixel
+      formats is just a matter of typing "make && make clean".
+     </p>
+     <p>
+      The code is stored in <a href="http://repo.or.cz/w/gfxprim.git">git</a>
+      and although we haven't done release yet; first alpha release may be done
+      later this year once rest of the API stabilizes (the core code has been
+      stable for quite some time).
+     </p>
+     <h3>Contact</h3>
+     <p>
+      We do have a <a href="http://www.ucw.cz/mailman/listinfo/gfxprim">mailing list</a>
+      and although there not much of discussion there now, we are there and listeing.
+     </p>
+     <h3>Documentation</h3>
+     <p>
+      For more information about internal structure and features look at the
+      <a href="api.html">API Description</a>.
+     </p>
+     <p>
+      There are also some nice C and Python
+      <a href="examples.html">Code Examples</a>.
+     </p>
+   </div>
+   <div id="cleaner">&nbsp;</div>
+   <div id="footer">
+    <a href="http://repo.or.cz/w/gfxprim.git">git</a> |
+    <a href="http://atrey.karlin.mff.cuni.cz/~gavento/GfxPrimWiki/">wiki</a> |
+    <a href="http://www.ucw.cz/mailman/listinfo/gfxprim">mailing list</a>
+   </div>
+  </div>
+ </body>
+</html>

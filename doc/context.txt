@@ -1,7 +1,8 @@
 Drawing Context
 ---------------
 
-GP_Context is data structure for storing 'in memory' bitmaps.
+The 'GP_Context' structure describes a bitmap in memory. It contains all
+metadata needed for drawing into a bitmap.
 
 Data Structure
 ~~~~~~~~~~~~~~
@@ -26,34 +27,41 @@ typedef struct GP_Context {
 	uint8_t axes_swap:1;         /* swap axes */
 	uint8_t x_swap:1;            /* mirror x */
 	uint8_t y_swap:1;            /* mirror y */
+	uint8_t bit_endian:1;        /* GP_BIT_ENDIAN */
 	uint8_t free_pixels:1;       /* if set GP_ContextFree() calls free on context->pixels */
 } GP_Context;
 -------------------------------------------------------------------------------
 
-The 'GP_Context' holds meta-data needed for bitmap drawing. The bitmap is
-stored in one dimensional array in byte-aligned lines.
+The 'pixels' field points to the image data, stored as a one-dimensional
+array of byte-aligned lines. (There can be some unused space at the end of
+each line; this is reflected by the 'bytes_per_row' value being greater
+than what would be needed for that pixel format).
 
 Rotation
 ^^^^^^^^
 
-The orientation flags affects the gfx and text drawing functions. If some of
-the flags is changed the origin and direction of the drawing is changed. Note
-that the image pixels are not affected by this at all only the coordinates
-passed to drawing functions are transformed accordingly.
+The orientation flags affects the gfx and text drawing functions and blits. If
+some of the flags is changed the origin and direction of the drawing is
+changed. Note that the image pixels are not affected by this at all only the
+coordinates passed to drawing functions are transformed accordingly.
 
-If you don't need this functionality just don't touch these flags the as
+If you don't need this functionality just don't touch the flags the as
 overhead of these transformations is not measurable.
 
 If you really need drawing primitives that do not use the orientation flags,
-you could use variants with _Raw suffix (altghoug this is not recommended).
+you could use variants with _Raw suffix (although this is not recommended).
 
 There are various helper macros for transforming coordinates and sizes in
-'core/GP_Transform.h'. And helper functions to "rotate" the context flags
+'core/GP_Transform.h'. And context helper functions to "rotate" the flags
 clock wise and counter clock wise as well as functions to get the context size
-when taking into the accout the widht and height.
+when taking into the account the width and height.
 
 [source,c]
 -------------------------------------------------------------------------------
+#include <core/GP_Transform.h>
+/* or */
+#include <GP.h>
+
 /* Transforms point user coordinates to bitmap coordinates */
 GP_TRANSFORM_POINT(context, x, y)
 
@@ -65,7 +73,11 @@ GP_RETRANSFORM_POINT(context, x, y)
 -------------------------------------------------------------------------------
 
 [source,c]
--------------------------------------------------------------------------------
+------------------------------------------------------------------------------
+#include <core/GP_Context.h>
+/* or */
+#include <GP.h>
+
 /*
  * Rotate context flags clock wise. 
  */
@@ -77,38 +89,74 @@ void GP_ContextFlagsRotateCW(GP_Context *context);
 void GP_ContextFlagsRotateCCW(GP_Context *context);
 
 /*
- * Returns context W and H taking the rotation flags into the account.
+ * Returns context width and height taking the rotation flags into the account.
  */
 GP_Size GP_ContextW(const GP_Context *context);
 GP_Size GP_ContextH(const GP_Context *context);
 -------------------------------------------------------------------------------
 
-Context base functions
-~~~~~~~~~~~~~~~~~~~~~~
+Basic context functions
+~~~~~~~~~~~~~~~~~~~~~~~
 
 [source,c]
 -------------------------------------------------------------------------------
+#include <core/GP_Context.h>
+/* or */
+#include <GP.h>
+
+void GP_ContextInit(GP_Context *context, GP_Size w, GP_Size h,
+                    GP_PixelType type, void *pixels);
+-------------------------------------------------------------------------------
+
+Initialize given context accordingly to parameters, the rest of context
+parameters are set to the default values (i.e. rotation flags are all set to
+zero, 'free_pixels' flag is not set). Number of bits per pixel and
+bytes per row are computed from the given pixel type and size.
+
+The 'pixels' pointer can be 'NULL' and can be changed later manually (the call
+will *not* try to allocate the pixel memory automatically).
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <core/GP_Context.h>
+/* or */
 #include <GP.h>
 
 GP_Context *GP_ContextAlloc(GP_Size w, GP_Size h, GP_PixelType type);
+-------------------------------------------------------------------------------
+
+The 'GP_ContextAlloc()' allocates and initializes a context.
+
+The orientation flags are all set to zero, the 'free_pixels' flag is set and the
+rest of the metadata are calculated accordingly to width, height and
+pixel_type.The 'pixels' pointer will point to a newly allocated bitmap with
+appropriate size; the initial contents of the bitmap are undefined.
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <core/GP_Context.h>
+/* or */
+#include <GP.h>
 
 GP_Context *GP_ContextCopy(const GP_Context *src, int flag);
+-------------------------------------------------------------------------------
+
+The 'GP_ContextCopy()' allocates and initializes a copy of the context passed
+as argument. If 'flag' is set, the bitmap contents ('src->pixels')
+are also copied; otherwise the copy will have the same dimensions but
+undefined contents.
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <core/GP_Context.h>
+/* or */
+#include <GP.h>
 
 void GP_ContextFree(GP_Context *context);
 -------------------------------------------------------------------------------
 
-The 'GP_ContextAlloc()' allocates context and initalizes the context
-structure. The orientation flags are all set to 0 and the rest of the metadata
-are calculated accordingly to width, height and pixel_type.  A bitmap with
-appropriate size is allocated and stored in context->pixels; the initial
-contents of the bitmap are undefined.
-
-The 'GP_ContextCopy()' allocates and initalizes a copy of the context passed
-as argument. If 'flag' is not zero, the bitmap (context->pixels) is copied
-otherwise it's left uninitalized.
-
-In both cases the resulting context should later be freed with
-'GP_ContextFree()'.
+Frees the context memory. If 'free_pixels' flag is set, the pixels buffer is
+freed too.
 
 Subcontext
 ~~~~~~~~~~
@@ -117,11 +165,13 @@ A subcontext is a context that refers to a rectangular area within another
 context. Subcontexts can be used as any other context (including creating
 another subcontexts).
 
-Calling GP_ContextFree() on a subcontext is safe; the bitmap is not freed as
+Calling 'GP_ContextFree()' on a subcontext is safe; the bitmap is not freed as
 it belongs to another context; it will be freed with the hosting context.
 
 [source,c]
 -------------------------------------------------------------------------------
+#include <core/GP_Context.h>
+/* or */
 #include <GP.h>
 
 GP_Context *GP_ContextSubContext(GP_Context *context, GP_Context *subcontext,
@@ -142,15 +192,17 @@ Conversions
 
 [source,c]
 -------------------------------------------------------------------------------
+#include <core/GP_Context.h>
+/* or */
 #include <GP.h>
 
 GP_Context *GP_ContextConvert(const GP_Context *src, GP_Context *dst,
                               GP_PixelType dst_pixel_type); 
 -------------------------------------------------------------------------------
 
-Provides basic context conversion functionality.
-A newly allocated context is returned.
+Provides basic context conversion functionality. A newly allocated context is
+returned.
 
-This fuction does no error distribution but only integer
-division/multiplication for each pixel channel.
+This function does no error distribution, it only multiplies or rounds the pixel
+values. If you need something better use Floyd Steinberg dithering instead.
 

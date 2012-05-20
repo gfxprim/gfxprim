@@ -68,7 +68,7 @@ GP_Context *GP_LoadPNG(const char *src_path, GP_ProgressCallback *callback);
  * Saves PNG to a file. Zero is returned on succes. Upon failure non-zero is
  * returned and errno is filled accordingly.
  */
-int GP_SavePNG(const char *dst_path, const GP_Context *src,
+int GP_SavePNG(const GP_Context *src, const char *dst_path,
                GP_ProgressCallback *callback);
 
 #endif /* LOADERS_GP_PNG_H */

@@ -59,7 +59,7 @@ void blitXYXY_Raw_{{ ps.suffix }}(const GP_Context *src,
 	/* General case - memcpy() each horizontal line */
 	GP_Coord y;
 
-	for (y = y0; y <= y1; y++)
+	for (y = 0; y <= (y1 - y0); y++)
 		memcpy(GP_PIXEL_ADDR_{{ ps.suffix }}(dst, x2, y2 + y),
 		       GP_PIXEL_ADDR_{{ ps.suffix }}(src, x0, y0 + y),
 		       {{ int(ps.size/8) }} * (x1 - x0 + 1));

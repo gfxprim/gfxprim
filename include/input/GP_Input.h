@@ -28,10 +28,4 @@
  */
 #include "input/GP_Event.h"
 
-/*
- * Input drivers (semi internal).
- */
-#include "input/GP_InputDriverSDL.h"
-#include "input/GP_InputDriverLinux.h"
-
 #endif /* INPUT_GP_INPUT_H */

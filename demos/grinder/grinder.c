@@ -227,13 +227,13 @@ static GP_RetCode rotate(GP_Context **c, const char *params)
 
 	switch (rot) {
 	case 0:
-		res = GP_FilterRotate90(*c, NULL, progress_callback);
+		res = GP_FilterRotate90Alloc(*c, progress_callback);
 	break;
 	case 1:
-		res = GP_FilterRotate180(*c, NULL, progress_callback);
+		res = GP_FilterRotate180Alloc(*c, progress_callback);
 	break;
 	case 2:
-		res = GP_FilterRotate270(*c, NULL, progress_callback);
+		res = GP_FilterRotate270Alloc(*c, progress_callback);
 	break;
 	}
 		
@@ -262,10 +262,10 @@ static GP_RetCode mirror(GP_Context **c, const char *params)
 		return GP_EINVAL;
 
 	if (vert)
-		GP_FilterMirrorV_Raw(*c, *c, progress_callback);
+		GP_FilterMirrorV(*c, *c, progress_callback);
 	
 	if (horiz)
-		GP_FilterMirrorH_Raw(*c, *c, progress_callback);
+		GP_FilterMirrorH(*c, *c, progress_callback);
 
 	return GP_ESUCCESS;
 }
@@ -477,7 +477,7 @@ static GP_RetCode save_jpg(GP_Context **c, const char *params)
 		return GP_EINVAL;
 	}
 
-	GP_SaveJPG(file, *c, progress_callback);
+	GP_SaveJPG(*c, file, progress_callback);
 
 	return GP_ESUCCESS;
 }
@@ -501,7 +501,7 @@ static GP_RetCode save_png(GP_Context **c, const char *params)
 		return GP_EINVAL;
 	}
 
-	GP_SavePNG(file, *c, progress_callback);
+	GP_SavePNG(*c, file, progress_callback);
 
 	return GP_ESUCCESS;
 }
@@ -836,9 +836,9 @@ static void save_by_fmt(struct GP_Context *bitmap, const char *name, const char 
 	if (!strcmp(fmt, "ppm"))
 		ret = GP_SavePPM(name, bitmap, "b");
 	else if (!strcmp(fmt, "jpg"))
-		ret = GP_SaveJPG(name, bitmap, progress_callback);
+		ret = GP_SaveJPG(bitmap, name, progress_callback);
 	else if (!strcmp(fmt, "png"))
-		ret = GP_SavePNG(name, bitmap, progress_callback);
+		ret = GP_SavePNG(bitmap, name, progress_callback);
 	
 	if (ret) {
 		fprintf(stderr, "Failed to save bitmap: %s\n", GP_RetCodeName(ret));

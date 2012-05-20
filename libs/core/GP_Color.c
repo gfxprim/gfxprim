@@ -37,6 +37,8 @@ static char *color_names[] = {
 	"Green",
 	"Blue",
 	"Yellow",
+	"Cyan",
+	"Magenta",
 	"Brown",
 	"Orange",
 	"DarkGray",
@@ -51,21 +53,25 @@ static uint8_t rgb888_colors[][3] = {
 	{0x00, 0xff, 0x00}, /* Green      */
 	{0x00, 0x00, 0xff}, /* Blue       */
 	{0xff, 0xff, 0x00}, /* Yellow     */
+	{0x00, 0xff, 0xff}, /* Cyan       */
+	{0xff, 0x00, 0xff}, /* Magenta    */
 	{0xa5, 0x2a, 0x2a}, /* Brown      */
 	{0xff, 0xa5, 0x00}, /* Orange     */
 	{0x7f, 0x7f, 0x7f}, /* DarkGray   */
-	{0xbe, 0xbe, 0xbe}, /* LigthGray  */
+	{0xbe, 0xbe, 0xbe}, /* LightGray  */
 	{0xa0, 0x20, 0xf0}, /* Purple     */
 	{0xff, 0xff, 0xff}, /* White      */
 };
 
-/* 8-8-4 RGB palette */
+/* 3-2-3 RGB palette */
 static uint8_t p8_colors[] = {
 	0x00, /* Black     */
 	0xe0, /* Red       */
 	0x1c, /* Green     */
 	0x03, /* Blue      */
         0xfc, /* Yellow    */
+	0x1f, /* Cyan      */
+	0xe7, /* Magenta   */
 	0x88, /* Brown     */
 	0xf0, /* Orange    */
 	0x49, /* DarkGray  */

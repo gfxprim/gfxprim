@@ -40,3 +40,15 @@ void GP_BackendUpdateRect(GP_Backend *backend,
 
 	backend->UpdateRect(backend, x0, y0, x1, y1);
 }
+
+
+int GP_BackendResize(GP_Backend *backend, uint32_t w, uint32_t h)
+{
+	if (backend->SetAttributes == NULL)
+		return 1;
+
+	if (backend->context->w == w && backend->context->h == h)
+		return 0;
+
+	return backend->SetAttributes(backend, w, h, NULL);
+}

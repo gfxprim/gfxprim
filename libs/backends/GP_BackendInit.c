@@ -24,9 +24,8 @@
 
 #include "core/GP_Debug.h"
 
-#include "backends/GP_LinuxFB.h"
-#include "backends/GP_SDL.h"
-#include "backends/GP_BackendInit.h"
+#include "GP_Backends.h"
+#include "GP_BackendInit.h"
 
 static void backend_sdl_help(FILE *help, const char *err)
 {
@@ -74,7 +73,7 @@ static GP_Backend *backend_sdl_init(char *params, const char *caption,
 		return GP_BackendSDLInit(0, 0, 0, 0, caption);
 	
 	GP_Size w = 0, h = 0;
-	uint8_t flags = 0;
+	uint8_t flags = GP_SDL_RESIZABLE;
 	
 	char *s = params;
 
@@ -122,24 +121,56 @@ static GP_Backend *backend_fb_init(char *params, const char *caption,
 	if (params != NULL)
 		fb = params;
 
-	return GP_BackendLinuxFBInit(fb);
+	return GP_BackendLinuxFBInit(fb, 1);
+}
+
+static void backend_x11_help(FILE *help, const char *err)
+{
+	if (help == NULL)
+		return;
+
+	if (err != NULL)
+		fprintf(help, "ERROR: %s\n", err);
+
+	fprintf(help, "X11 backend\n"
+	              "-----------\n"
+	              "X11:WxH\n");
+}
+
+static GP_Backend *backend_x11_init(char *params, const char *caption,
+                                    FILE *help)
+{
+	unsigned int n, w = 640, h = 480;
+
+	if (params == NULL)
+		return GP_BackendX11Init(NULL, 0, 0, w, h, caption);	
+
+	if (sscanf(params, "%u%*[xX]%u%n", &w, &h, &n) == 2 &&
+	    n == strlen(params))
+		return GP_BackendX11Init(NULL, 0, 0, w, h, caption);
+
+	backend_x11_help(help, "X11: Invalid parameters");
+	return NULL;
 }
 
 static const char *backend_names[] = {
 	"SDL", /* libSDL            */
 	"FB",  /* Linux Framebuffer */
+	"X11", /* X11 window system */
 	NULL,
 };
 
 static GP_Backend *(*backend_inits[])(char *, const char *, FILE *) = {
 	backend_sdl_init,
 	backend_fb_init,
+	backend_x11_init,
 	NULL,
 };
 
 static void (*backend_helps[])(FILE *help, const char *err) = {
 	backend_sdl_help,
 	backend_fb_help,
+	backend_x11_help,
 	NULL,
 };
 

@@ -16,9 +16,24 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2010 Jiri "BlueBear" Dluhos                            *
- *                         <jiri.bluebear.dluhos@gmail.com>                  *
- *                                                                           *
- * Copyright (C) 2009-2010 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
+
+/*
+
+
+ */
+
+#ifndef GP_INPUT_DRIVER_X11_H
+#define GP_INPUT_DRIVER_X11_H
+
+#include <stdint.h>
+#include <X11/Xlib.h>
+
+/*
+ * Converts X11 event to GFXprim event and puts it into the queue.
+ */
+void GP_InputDriverX11EventPut(XEvent *ev);
+
+#endif /* GP_INPUT_DRIVER_X11_H */

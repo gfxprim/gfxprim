@@ -34,6 +34,7 @@
 
 #include <GP.h>
 #include <backends/GP_Backends.h>
+#include <backends/GP_BackendVirtual.h>
 #include <input/GP_InputDriverLinux.h>
 
 #include "cpu_timer.h"
@@ -42,17 +43,18 @@ static GP_Pixel black_pixel;
 static GP_Pixel white_pixel;
 
 static GP_Backend *backend = NULL;
-static GP_Context *context = NULL;
 
 /* image loader thread */
 static int abort_flag = 0;
 static int rotate = 0;
 static int show_progress = 0;
 static int resampling_method = GP_INTERP_LINEAR_LF_INT;
+static int dithering = 0;
 
 static int image_loader_callback(GP_ProgressCallback *self)
 {
 	static GP_Size size = 0;
+	GP_Context *c = backend->context;
 
 	if (abort_flag)
 		return 1;
@@ -65,8 +67,6 @@ static int image_loader_callback(GP_ProgressCallback *self)
 	snprintf(buf, sizeof(buf), "%s ... %-3.1f%%",
 	         (const char*)self->priv, self->percentage);
 
-	GP_Context *c = context;
-
 	int align = GP_ALIGN_CENTER|GP_VALIGN_ABOVE;
 
 	GP_TextClear(c, NULL, c->w/2, c->h - 4, align,
@@ -77,7 +77,8 @@ static int image_loader_callback(GP_ProgressCallback *self)
 
 	size = GP_TextWidth(NULL, buf);
 
-	GP_BackendFlip(backend);
+	GP_BackendUpdateRect(backend, c->w/2 - size/2 - 1, c->h - 4,
+	                     c->w/2 + size/2 + 1, c->h - 4 - GP_TextHeight(NULL));
 
 	return 0;
 }
@@ -87,6 +88,9 @@ struct loader_params {
 	int show_progress;
 	int show_progress_once;
 	int show_info;
+
+	/* cached loaded image */
+	GP_Context *img;
 };
 
 static float calc_img_size(uint32_t img_w, uint32_t img_h,
@@ -107,25 +111,38 @@ static const char *img_name(const char *img_path)
 			return &img_path[i+1];
 	}
 
-	return NULL;
+	return img_path;
 }
 
-static void *image_loader(void *ptr)
+static void set_caption(const char *path, float rat)
 {
-	struct loader_params *params = ptr;
-	GP_ProgressCallback callback = {.callback = image_loader_callback};
+	char buf[256];
+
+	snprintf(buf, sizeof(buf), "Spiv ~ %s 1:%3.3f", img_name(path), rat);
+
+	GP_BackendSetCaption(backend, buf);
+}
+
+/*
+ * Loads image
+ */
+int load_image(struct loader_params *params)
+{
 	struct cpu_timer timer;
-	struct cpu_timer sum_timer;
-	GP_Context *img;
+	GP_Context *img, *context = backend->context;
 
-	cpu_timer_start(&sum_timer, "sum");
-
+	if (params->img != NULL) {
+		fprintf(stderr, "Image cached!\n");
+		return 0;
+	}
+	
+	GP_ProgressCallback callback = {.callback = image_loader_callback,
+	                                .priv = "Loading image"};
+	
 	show_progress = params->show_progress || params->show_progress_once;
 	params->show_progress_once = 0;
 
 	fprintf(stderr, "Loading '%s'\n", params->img_path);
-
-	callback.priv = "Loading image";
 
 	cpu_timer_start(&timer, "Loading");
 	if ((img = GP_LoadImage(params->img_path, &callback)) == NULL) {
@@ -134,10 +151,56 @@ static void *image_loader(void *ptr)
 		         GP_ALIGN_CENTER|GP_VALIGN_CENTER, white_pixel, black_pixel,
 			 "Failed to load image :( (%s)", strerror(errno));
 		GP_BackendFlip(backend);
-		return NULL;
+		return 1;
 	}
 	cpu_timer_stop(&timer);
 
+	params->img = img;
+
+	return 0; 
+}
+
+/*
+ * This function tries to resize spiv window
+ * and if succedes blits the image directly to the screen.
+ */
+static int resize_backend_and_blit(GP_Context *img,
+                                   struct loader_params *params)
+{
+	if (GP_BackendResize(backend, img->w, img->h))
+		return 1;
+
+	GP_Blit_Raw(img, 0, 0, img->w, img->h, backend->context, 0, 0);
+	GP_BackendFlip(backend);
+	set_caption(params->img_path, 1); 
+
+	return 0;
+}
+
+static void *image_loader(void *ptr)
+{
+	struct loader_params *params = ptr;
+	struct cpu_timer timer;
+	struct cpu_timer sum_timer;
+	GP_Context *img, *context = backend->context;
+	GP_ProgressCallback callback = {.callback = image_loader_callback};
+
+	cpu_timer_start(&sum_timer, "sum");
+
+	/* Load Image */
+	if (load_image(params))
+		return NULL;
+
+	img = params->img;
+
+	/*
+	if (img->w < 320 && img->h < 240) {
+		if (!resize_backend_and_blit(img, params))
+			return NULL;
+	}
+        */
+
+	/* Figure out rotation */
 	GP_Size w, h;
 
 	switch (rotate) {
@@ -173,7 +236,8 @@ static void *image_loader(void *ptr)
 		if (rat < 1) {
 			cpu_timer_start(&timer, "Blur");
 			callback.priv = "Blurring Image";
-			if (GP_FilterGaussianBlur(img, img, 0.3/rat, 0.3/rat, &callback) == NULL)
+			if (GP_FilterGaussianBlur(img, img, 0.4/rat, 0.4/rat,
+			                          &callback) == NULL)
 				return NULL;
 			cpu_timer_stop(&timer);
 		}
@@ -182,7 +246,6 @@ static void *image_loader(void *ptr)
 	cpu_timer_start(&timer, "Resampling");
 	callback.priv = "Resampling Image";
 	ret = GP_FilterResize(img, NULL, resampling_method, img->w * rat, img->h * rat, &callback);
-	GP_ContextFree(img);
 	cpu_timer_stop(&timer);
 
 	if (ret == NULL)
@@ -193,15 +256,15 @@ static void *image_loader(void *ptr)
 	break;
 	case 90:
 		callback.priv = "Rotating image (90)";
-		img = GP_FilterRotate90(ret, NULL, &callback);
+		img = GP_FilterRotate90Alloc(ret, &callback);
 	break;
 	case 180:
 		callback.priv = "Rotating image (180)";
-		img = GP_FilterRotate180(ret, NULL, &callback);
+		img = GP_FilterRotate180Alloc(ret, &callback);
 	break;
 	case 270:
 		callback.priv = "Rotating image (270)";
-		img = GP_FilterRotate270(ret, NULL, &callback);
+		img = GP_FilterRotate270Alloc(ret, &callback);
 	break;
 	}
 
@@ -216,18 +279,31 @@ static void *image_loader(void *ptr)
 	uint32_t cx = (context->w - ret->w)/2;
 	uint32_t cy = (context->h - ret->h)/2;
 
+	GP_Context sub_display;
+
 	cpu_timer_start(&timer, "Blitting");
-	GP_Blit_Raw(ret, 0, 0, ret->w, ret->h, context, cx, cy);
+	
+	if (dithering) {
+		callback.priv = "Dithering";
+		GP_ContextSubContext(context, &sub_display, cx, cy, ret->w, ret->h);
+	//	GP_FilterFloydSteinberg_from_RGB888(ret, &sub_display, 0, NULL);
+		GP_FilterHilbertPeano_from_RGB888(ret, &sub_display, NULL);
+	} else {
+		GP_Blit_Raw(ret, 0, 0, ret->w, ret->h, context, cx, cy);
+	}
+	
 	cpu_timer_stop(&timer);
 	GP_ContextFree(ret);
 
 	/* clean up the rest of the display */
 	GP_FillRectXYWH(context, 0, 0, cx, context->h, black_pixel);
 	GP_FillRectXYWH(context, 0, 0, context->w, cy, black_pixel);
-	GP_FillRectXYWH(context, ret->w+cx, 0, cx, context->h, black_pixel);
-	GP_FillRectXYWH(context, 0, ret->h+cy, context->w, cy, black_pixel);
+	GP_FillRectXYWH(context, ret->w+cx, 0, context->w - ret->w - cx, context->h, black_pixel);
+	GP_FillRectXYWH(context, 0, ret->h+cy, context->w, context->h - ret->h - cy, black_pixel);
 
 	cpu_timer_stop(&sum_timer);
+
+	set_caption(params->img_path, rat); 
 
 	if (!params->show_info) {
 		GP_BackendFlip(backend);
@@ -261,16 +337,24 @@ static void *image_loader(void *ptr)
 
 static pthread_t loader_thread = (pthread_t)0;
 
-static void show_image(struct loader_params *params)
+static void show_image(struct loader_params *params, const char *path)
 {
 	int ret;
-	
+
 	/* stop previous loader thread */
 	if (loader_thread) {
 		abort_flag = 1;
 		pthread_join(loader_thread, NULL);
 		loader_thread = (pthread_t)0;
 		abort_flag = 0;
+	}
+	
+	/* invalidate cached image if path has changed */
+	if (params->img_path == NULL ||
+	    (path != NULL && strcmp(params->img_path, path))) {
+		GP_ContextFree(params->img);
+		params->img = NULL;
+		params->img_path = path;
 	}
 
 	ret = pthread_create(&loader_thread, NULL, image_loader, (void*)params);
@@ -294,7 +378,7 @@ static void sighandler(int signo)
 
 static void init_backend(const char *backend_opts)
 {
-	backend = GP_BackendInit(backend_opts, "FBshow", stderr); 
+	backend = GP_BackendInit(backend_opts, "Spiv", stderr); 
 	
 	if (backend == NULL) {
 		fprintf(stderr, "Failed to initalize backend '%s'\n", backend_opts);
@@ -305,13 +389,15 @@ static void init_backend(const char *backend_opts)
 int main(int argc, char *argv[])
 {
 	GP_InputDriverLinux *drv = NULL;
+	GP_Context *context = NULL;
 	const char *input_dev = NULL;
-	const char *backend_opts = "SDL";
+	const char *backend_opts = "X11";
 	int sleep_sec = -1;
-	struct loader_params params = {NULL, 0, 0, 0};
-	int opt;
+	struct loader_params params = {NULL, 0, 0, 0, .img = NULL};
+	int opt, debug_level = 0;
+	GP_PixelType emul_type = GP_PIXEL_UNKNOWN;
 
-	while ((opt = getopt(argc, argv, "b:cIi:Ps:r:")) != -1) {
+	while ((opt = getopt(argc, argv, "b:cd:e:fIi:Ps:r:")) != -1) {
 		switch (opt) {
 		case 'I':
 			params.show_info = 1;
@@ -322,11 +408,25 @@ int main(int argc, char *argv[])
 		case 'i':
 			input_dev = optarg;
 		break;
+		case 'f':
+			dithering = 1;
+		break;
 		case 's':
 			sleep_sec = atoi(optarg);
 		break;
 		case 'c':
 			resampling_method = GP_INTERP_CUBIC_INT;
+		break;
+		case 'd':
+			debug_level = atoi(optarg);
+		break;
+		case 'e':
+			emul_type = GP_PixelTypeByName(optarg);
+
+			if (emul_type == GP_PIXEL_UNKNOWN) {
+				fprintf(stderr, "Invalid pixel type '%s'\n", optarg);
+				return 1;
+			}
 		break;
 		case 'r':
 			if (!strcmp(optarg, "90"))
@@ -343,7 +443,7 @@ int main(int argc, char *argv[])
 		}
 	}
 	
-	GP_SetDebugLevel(10);
+	GP_SetDebugLevel(debug_level);
 
 	if (input_dev != NULL) {
 		drv = GP_InputDriverLinuxOpen(input_dev);
@@ -362,6 +462,9 @@ int main(int argc, char *argv[])
 
 	init_backend(backend_opts);
 
+	if (emul_type != GP_PIXEL_UNKNOWN)
+		backend = GP_BackendVirtualInit(backend, emul_type, GP_BACKEND_CALL_EXIT);
+
 	context = backend->context;
 
 	GP_EventSetScreenSize(context->w, context->h);
@@ -374,10 +477,9 @@ int main(int argc, char *argv[])
 
 	int argf = optind;
 	int argn = argf;
-		
+
 	params.show_progress_once = 1;
-	params.img_path = argv[argf];
-	show_image(&params);
+	show_image(&params, argv[argf]);
 
 	for (;;) {
 		int ret;
@@ -404,8 +506,7 @@ int main(int argc, char *argv[])
 				if (argn >= argc)
 					argn = argf;
 			
-				params.img_path = argv[argn];
-				show_image(&params);
+				show_image(&params, argv[argn]);
 			break;
 			default:
 				while (GP_InputDriverLinuxRead(drv));
@@ -420,8 +521,7 @@ int main(int argc, char *argv[])
 				if (argn >= argc)
 					argn = argf;
 			
-				params.img_path = argv[argn];
-				show_image(&params);
+				show_image(&params, argv[argn]);
 			}
 		}
 
@@ -447,7 +547,7 @@ int main(int argc, char *argv[])
 					params.show_info = !params.show_info;
 					
 					params.show_progress_once = 1;
-					show_image(&params);
+					show_image(&params, NULL);
 				break;
 				case GP_KEY_P:
 					params.show_progress = !params.show_progress;
@@ -458,7 +558,7 @@ int main(int argc, char *argv[])
 						rotate = 0;
 					
 					params.show_progress_once = 1;
-					show_image(&params);
+					show_image(&params, NULL);
 				break;
 				case GP_KEY_ESC:
 				case GP_KEY_ENTER:
@@ -474,8 +574,7 @@ int main(int argc, char *argv[])
 						argn = argf;
 					
 					params.show_progress_once = 1;
-					params.img_path = argv[argn];
-					show_image(&params);
+					show_image(&params, argv[argn]);
 				break;
 				case GP_KEY_BACKSPACE:
 				case GP_KEY_LEFT:
@@ -486,8 +585,21 @@ int main(int argc, char *argv[])
 						argn = argc - 1;
 
 					params.show_progress_once = 1;
-					params.img_path = argv[argn];
-					show_image(&params);
+					show_image(&params, argv[argn]);
+				break;
+				}
+			break;
+			case GP_EV_SYS:
+				switch (ev.code) {
+				case GP_EV_SYS_RESIZE:
+					GP_BackendResize(backend, ev.val.sys.w, ev.val.sys.h);
+					GP_Fill(backend->context, 0);
+					params.show_progress_once = 1;
+					show_image(&params, NULL);
+				break;
+				case GP_EV_SYS_QUIT:
+					GP_BackendExit(backend);
+					return 0;
 				break;
 				}
 			break;

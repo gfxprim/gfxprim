@@ -63,7 +63,7 @@ int main(void)
 
 	GP_SetDebugLevel(10);
 
-	backend = GP_BackendLinuxFBInit("/dev/fb0");
+	backend = GP_BackendLinuxFBInit("/dev/fb0", 0);
 	
 	if (backend == NULL) {
 		fprintf(stderr, "Failed to initalize framebuffer\n");

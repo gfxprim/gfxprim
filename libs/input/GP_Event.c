@@ -16,7 +16,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2011 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
@@ -129,14 +129,14 @@ const char *GP_EventKeyName(enum GP_EventKeyValue key)
 
 static void dump_rel(struct GP_Event *ev)
 {
-	printf("REL ");
+	printf("Rel ");
 
 	switch (ev->code) {
 	case GP_EV_REL_POS:
-		printf("POSSITION %u %u\n", ev->cursor_x, ev->cursor_y);
+		printf("Position %u %u\n", ev->cursor_x, ev->cursor_y);
 	break;
 	case GP_EV_REL_WHEEL:
-		printf("WHEEL %i\n", ev->val.val);
+		printf("Wheel %i\n", ev->val.val);
 	break;
 	}
 }
@@ -148,7 +148,7 @@ static void dump_key(struct GP_Event *ev)
 	if (ev->val.key.key < key_names_size)
 		name = key_names[ev->val.key.key];
 
-	printf("KEY %i (Key%s) %s\n",
+	printf("Key %i (Key%s) %s\n",
 	       ev->val.key.key, name, ev->code ? "down" : "up");
 
 }
@@ -157,15 +157,27 @@ static void dump_abs(struct GP_Event *ev)
 {
 	switch (ev->code) {
 	case GP_EV_ABS_POS:
-		printf("POSSITION %u %u %u\n",
+		printf("Position %u %u %u\n",
 		       ev->cursor_x, ev->cursor_y, ev->val.abs.pressure);
+	break;
+	}
+}
+
+static void dump_sys(struct GP_Event *ev)
+{
+	switch (ev->code) {
+	case GP_EV_SYS_QUIT:
+		printf("Sys Quit\n");
+	break;
+	case GP_EV_SYS_RESIZE:
+		printf("Sys Resize %ux%u\n", ev->val.sys.w, ev->val.sys.h);
 	break;
 	}
 }
 
 void GP_EventDump(struct GP_Event *ev)
 {
-	printf("EVENT (%u) ", (unsigned int)ev->time.tv_sec % 10000);
+	printf("Event (%u) ", (unsigned int)ev->time.tv_sec % 10000);
 
 	switch (ev->type) {
 	case GP_EV_KEY:
@@ -176,6 +188,9 @@ void GP_EventDump(struct GP_Event *ev)
 	break;
 	case GP_EV_ABS:
 		dump_abs(ev);
+	break;
+	case GP_EV_SYS:
+		dump_sys(ev);
 	break;
 	default:
 		printf("Unknown %u\n", ev->type);
@@ -216,6 +231,14 @@ static uint32_t clip_rel(uint32_t val, uint32_t max, int32_t rel)
 		return max - 1;
 
 	return val + rel;
+}
+
+void GP_EventPushRelTo(uint32_t x, uint32_t y, struct timeval *time)
+{
+	int32_t rx = x - cur_state.cursor_x;
+	int32_t ry = y - cur_state.cursor_y;
+
+	GP_EventPushRel(rx, ry, time);
 }
 
 void GP_EventPushRel(int32_t rx, int32_t ry, struct timeval *time)
@@ -263,6 +286,21 @@ void GP_EventPushAbs(uint32_t x, uint32_t y, uint32_t pressure,
 	
 	if (y_max != 0)
 		cur_state.cursor_y = y * (screen_h - 1) / y_max;
+
+	/* put it into queue */
+	event_put(&cur_state);
+}
+
+void GP_EventPushResize(uint32_t w, uint32_t h, struct timeval *time)
+{
+	/* event header */
+	cur_state.type  = GP_EV_SYS;
+	cur_state.code  = GP_EV_SYS_RESIZE;
+
+	cur_state.val.sys.w = w;
+	cur_state.val.sys.h = h;
+
+ 	set_time(time);
 
 	/* put it into queue */
 	event_put(&cur_state);

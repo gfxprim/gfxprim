@@ -19,7 +19,7 @@
  * Copyright (C) 2009-2010 Jiri "BlueBear" Dluhos                            *
  *                         <jiri.bluebear.dluhos@gmail.com>                  *
  *                                                                           *
- * Copyright (C) 2009-2011 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
@@ -54,6 +54,17 @@ static int match(const GP_PixelTypeChannel *channel, GP_Pixel mask)
 	GP_DEBUG(3, "%s gen %08x pass %08x", channel->name, chmask, mask);
 
 	return (chmask == mask);
+}
+
+GP_PixelType GP_PixelTypeByName(const char *name)
+{
+	unsigned int i;
+
+	for (i = 0; i < GP_PIXEL_MAX; i++)
+		if (!strcasecmp(name, GP_PixelTypes[i].name))
+			return i;
+
+	return GP_PIXEL_UNKNOWN;
 }
 
 GP_PixelType GP_PixelRGBMatch(GP_Pixel rmask, GP_Pixel gmask,

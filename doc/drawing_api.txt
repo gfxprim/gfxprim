@@ -52,6 +52,7 @@ y0, y1 can be specified in any order.
 
 'GP_VLine()' is an alias for 'GP_VLineXYY()'.
 
+[source,c]
 --------------------------------------------------------------------------------
 void GP_VLineXYH(GP_Context *context, GP_Coord x, GP_Coord y, GP_Size h,
                  GP_Pixel pixel);
@@ -93,7 +94,7 @@ void GP_FillCircle(GP_Context *context, GP_Coord xcenter, GP_Coord ycenter,
 Draws a filled circle.
 
 The set of pixels affected by 'GP_FillCircle()' is exactly the same as if
-drawing the circle boundary using GP_Circle() and then filling all pixels
+drawing the circle boundary using 'GP_Circle()' and then filling all pixels
 within the boundary with the same color.
 
 Rings
@@ -291,6 +292,6 @@ The Descent is the height in pixels from baseline to the bottom.
 unsigned int GP_TextHeight(const GP_TextStyle *style);
 --------------------------------------------------------------------------------
 
-The Height is size of the font from top to the bottom, eg. equals exactly to
+The Height is size of the font from top to the bottom, i.e. equals exactly to
 the sum of ascent and descent.
 

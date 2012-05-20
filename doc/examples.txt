@@ -1,0 +1,90 @@
+GFXprim Code Examples
+=====================
+Cyril Hrubis <metan@ucw.cz>
+
+Image loaders examples
+----------------------
+
+Loads an image and saves it into 'out.png' png image.
+
+Example in C
+~~~~~~~~~~~~
+
+[source,c]
+------------------------------------------------------------------
+include::../demos/c_simple/loaders_example.c[]
+------------------------------------------------------------------
+
+Example in C utilizing progress callback
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+[source,c]
+------------------------------------------------------------------
+include::../demos/c_simple/loaders.c[]
+------------------------------------------------------------------
+
+Example in Python
+~~~~~~~~~~~~~~~~~
+
+[source,python]
+------------------------------------------------------------------
+include::../demos/py_simple/loaders_example.py[]
+------------------------------------------------------------------
+
+GFX Examples
+------------
+
+Drawing Lines
+~~~~~~~~~~~~~
+
+Example in C
+^^^^^^^^^^^^
+
+[source,c]
+------------------------------------------------------------------
+include::../demos/c_simple/gfx_koch.c[]
+------------------------------------------------------------------
+
+Filters
+-------
+
+Symmetry filters (Rotation, Mirroring)
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Example in C
+^^^^^^^^^^^^
+
+[source,c]
+------------------------------------------------------------------
+include::../demos/c_simple/filters_symmetry.c[]
+------------------------------------------------------------------
+
+Example in Python
+^^^^^^^^^^^^^^^^^
+
+[source,python]
+------------------------------------------------------------------
+include::../demos/py_simple/rotate90.py[]
+------------------------------------------------------------------
+
+Simple backend example
+----------------------
+
+Basic backend code example. Initalizes backends, draws a cross and dumps
+events.
+
+Example in C
+~~~~~~~~~~~~
+
+[source,c]
+------------------------------------------------------------------
+include::../demos/c_simple/backend_example.c[]
+------------------------------------------------------------------
+
+GFXprim + PyGTK
+---------------
+
+[source,python]
+------------------------------------------------------------------
+include::../demos/py_simple/pygtk_example.py[]
+------------------------------------------------------------------

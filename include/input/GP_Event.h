@@ -45,7 +45,8 @@ enum GP_EventType {
 	GP_EV_KEY = 1, /* key/button press event */
 	GP_EV_REL = 2, /* relative event */
 	GP_EV_ABS = 3, /* absolute event */
-	GP_EV_MAX = 3, /* maximum, greater values are free */
+	GP_EV_SYS = 4, /* system events window close, resize... */
+	GP_EV_MAX = 4, /* maximum, greater values are free */
 };
 
 enum GP_EventKeyCode {
@@ -220,6 +221,11 @@ enum GP_EventAbsCode {
 	GP_EV_ABS_POS = 0,
 };
 
+enum GP_EventSysCode {
+	GP_EV_SYS_QUIT = 0,
+	GP_EV_SYS_RESIZE = 1,
+};
+
 struct GP_EventPosRel {
 	int32_t rx;
 	int32_t ry;
@@ -236,14 +242,20 @@ struct GP_EventKey {
 	char ascii;
 };
 
+struct GP_EventSys {
+	uint32_t w, h;
+};
+
 union GP_EventValue {
 	/* generic one integer value */
 	int32_t val;
 	/* key */
 	struct GP_EventKey key;
-	/* possition */
+	/* position */
 	struct GP_EventPosRel rel;
 	struct GP_EventPosAbs abs;
+	/* system event */
+	struct GP_EventSys sys;
 };
 
 typedef struct GP_Event {
@@ -310,6 +322,11 @@ int GP_EventGet(struct GP_Event *ev);
 void GP_EventPushRel(int32_t rx, int32_t ry, struct timeval *time);
 
 /*
+ * Produces relative event that moves to the point x, y
+ */
+void GP_EventPushRelTo(uint32_t x, uint32_t y, struct timeval *time);
+
+/*
  * Inject absolute event.
  */
 void GP_EventPushAbs(uint32_t x, uint32_t y, uint32_t pressure,
@@ -320,6 +337,11 @@ void GP_EventPushAbs(uint32_t x, uint32_t y, uint32_t pressure,
  * Inject event that changes key state.
  */
 void GP_EventPushKey(uint32_t key, uint8_t code, struct timeval *time);
+
+/*
+ * Inject window resize event
+ */
+void GP_EventPushResize(uint32_t w, uint32_t h, struct timeval *time);
 
 /*
  * Inject common event.

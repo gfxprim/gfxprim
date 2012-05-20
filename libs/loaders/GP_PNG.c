@@ -235,13 +235,15 @@ GP_Context *GP_LoadPNG(const char *src_path, GP_ProgressCallback *callback)
 	return GP_ReadPNG(f, callback);
 }
 
-int GP_SavePNG(const char *dst_path, const GP_Context *src,
+int GP_SavePNG(const GP_Context *src, const char *dst_path,
                GP_ProgressCallback *callback)
 {
 	FILE *f;
 	png_structp png;
 	png_infop png_info = NULL;
 	int err;
+
+	GP_DEBUG(1, "Saving PNG Image '%s'", dst_path);
 
 	if (src->pixel_type != GP_PIXEL_RGB888) {
 		GP_DEBUG(1, "Can't save png with pixel type %s",
@@ -351,8 +353,8 @@ GP_Context *GP_LoadPNG(const char GP_UNUSED(*src_path),
 	return NULL;
 }
 
-int GP_SavePNG(const char GP_UNUSED(*dst_path),
-               const GP_Context GP_UNUSED(*src),
+int GP_SavePNG(const GP_Context GP_UNUSED(*src),
+               const char GP_UNUSED(*dst_path),
                GP_ProgressCallback GP_UNUSED(*callback))
 {
 	errno = ENOSYS;

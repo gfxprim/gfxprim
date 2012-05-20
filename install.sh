@@ -2,8 +2,13 @@
 
 INSTALL_PREFIX="$1"
 
-HEADER_LOC="$INSTALL_PREFIX/usr/include/"
-LIB_LOC="$INSTALL_PREFIX/usr/lib/"
+if test -z "$INSTALL_PREFIX"; then
+	INSTALL_PREFIX="/usr/"
+fi
+
+HEADER_LOC="$INSTALL_PREFIX/include/"
+LIB_LOC="$INSTALL_PREFIX/lib/"
+BIN_LOC="$INSTALL_PREFIX/bin/"
 
 # Headers
 echo "INSTALL headers"
@@ -22,3 +27,7 @@ done
 echo "INSTALL libraries"
 install -m 775 -d "$LIB_LOC" 
 install -m 664 build/*.so build/*.so.0 build/*.a "$LIB_LOC"
+
+# Binaries
+echo "INSTALL binaries"
+install -m 755 gfxprim-config "$BIN_LOC"

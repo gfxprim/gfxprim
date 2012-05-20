@@ -1,21 +1,8 @@
 What's not implemented (and should be)
 --------------------------------------
 
-* bitmaps and blitting
-  - blit bitmaps (should respect rotation and pixel formats)
-        * IN PROGRESS
-  - loading bitmaps from image files (jpg, png, bmp, pnm ...)
-  	* IN NEARLY FINISHED
-
-* backends
-  - finish framebuffer backend (SDL does not work on most of my framebuffers)
-  - other than SDL X backend (SDL does support only one window)
-  - some overall initialization routines
-  - backed event handling
-
 * Meditate about bit endians and why these aren't separate pixel types
   (which would make our lives a bit easier)
-
 
 Advanced features
 -----------------
@@ -26,5 +13,3 @@ Advanced features
 * gfx primitives
   - drawing with alpha channel
   - anti aliasing
-
-* freetype support

@@ -51,7 +51,7 @@ GP_Context *GP_LoadJPG(const char *src_path, GP_ProgressCallback *callback);
 /*
  * Saves JPG to a file.
  */
-int GP_SaveJPG(const char *dst_path, const GP_Context *src,
+int GP_SaveJPG(const GP_Context *src, const char *dst_path,
                GP_ProgressCallback *callback);
 
 #endif /* LOADERS_GP_JPG_H */

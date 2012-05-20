@@ -1,0 +1,151 @@
+body {
+ background-color: #aaa;
+ margin: 10pt;
+ padding-left: 8%;
+ padding-right: 8%;
+}
+
+h1 {
+ background-color: transparent;
+ border-top: 1px solid #bc8517;
+ border-bottom: 1px solid #bc8517;
+}
+
+h2 {
+ color: #bc6217;
+ padding-bottom: .2em;
+ border-bottom: 1px solid #db7521;
+ font-weight: bolder;
+}
+
+h3 {
+ color: Black;
+ padding-top: 1em;
+}
+
+a, a:visited {
+ color: #333;
+ font-style: oblique;
+ font-weight: bolder; 
+ text-decoration: none;
+}
+
+a:hover {
+ color: #aaa;
+ font-style: oblique;
+ font-weight: bolder; 
+ text-decoration: none;
+}
+
+li {
+ list-style-type: disc;
+ margin-bottom: 4px;
+}
+
+pre {
+ padding: .5em .5em .5em .5em;
+ border: 1px solid Black;
+ border-style: dashed;
+ background-color: #bbc;
+ display: inline-block;
+}
+
+/* main div */
+#body {
+ color: Black;
+ background-color: #ffffc7;
+}
+
+#logo_picture {
+ position: relative;
+ top: 0.1em;
+ left: 0.5em;
+ display: inline;
+}
+
+#logo_picture_prim {
+ position: relative;
+ display: inline;
+ left: 0.2em;
+ top: 30px;
+}
+
+#logo {
+ background-color: #f7e177;
+}
+
+#clever_line {
+ font-size: 40%;
+ color: #bc6217;
+ float: right;
+ position: relative;
+ top: 10px;
+}
+
+#content {
+ padding: 0 2em 1em 12em;
+}
+
+#menu {
+ float: left;
+ color: #eee;
+ width: 10em;
+ margin: 0em 0em 1em 1em;
+ padding: 0;
+ border: 1px solid #bc6217;
+ background-color: #f7e177;
+}
+
+#cleaner {
+ clear: both;
+}
+
+#footer {
+ background-color: #f7e177;
+ text-align: center;
+ padding-top: .3em;
+ padding-bottom: .3em;
+ color: #bc6217;
+ border-top: 1px solid #bc6217; 
+ border-bottom: 1px solid #bc6217;
+}
+
+/* text markers */
+#term {
+	font-variant: small-caps;
+}
+
+#path {
+	font-style: italic;
+}
+
+#command {
+	font-style: oblique;
+}
+
+/* right menu basic style */
+.menu-tree {
+ line-height: 2em;
+ margin: 0 0 0 1em;
+ padding: 0;
+}
+
+.menu-tree-item {
+ font-size: 89%;
+ display: block;
+ margin: 0;
+ padding: 0;
+}
+
+.menu-tree-item a {
+ font-variant: small-caps;
+ text-decoration: none;
+ font-style: normal;
+ padding-top: 0.2em;
+ padding-bottom: 0.25em;
+ color: #db7521;
+}
+
+.menu-tree-item a:hover {
+ color: #eee;
+}
