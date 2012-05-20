@@ -21,6 +21,8 @@ static unsigned int count_bits(unsigned int n)
 		i++;
 	} while (n);
 
+	i--;
+
 	return (i + (s != (1U<<i)));
 }
 
