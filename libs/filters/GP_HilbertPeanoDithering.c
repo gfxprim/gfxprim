@@ -16,57 +16,82 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2011 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
-/*
+#include "core/GP_Debug.h"
+#include "core/GP_GetPutPixel.h"
+#include "core/GP_Core.h"
 
-  Dithering algorithms.
-
- */
-
-#ifndef FILTERS_GP_DITHER_H
-#define FILTERS_GP_DITHER_H
-
-#include "GP_Filter.h"
+#include "GP_HilbertCurve.h"
+#include "GP_Dither.h"
 
 /*
- * Floyd Steinberg
+ * Returns closest greater square of two, used to determine the curve size.
  */
-GP_Context *GP_FilterFloydSteinberg_to_G1(const GP_Context *src,
-                                          GP_Context *dst,
-                                          GP_ProgressCallback *callback);
+static unsigned int count_bits(unsigned int n)
+{
+	unsigned int i = 0, s = n;
 
-/*
- * Floyd Steinberg
- */
-GP_Context *GP_FilterFloydSteinberg_from_RGB888(const GP_Context *src,
-                                                GP_Context *dst,
-                                                GP_PixelType dst_pixel_type,
-						GP_ProgressCallback *callback);
+	do {
+		n>>=1;
+		i++;
+	} while (n);
 
-/*
- * Converts RGB888 to RGB or Grayscale bitmap. 
- */
-int GP_FilterFloydSteinberg_RGB888_to_XXX_Raw(const GP_Context *src,
-                                              GP_Context *dst,
-                                              GP_ProgressCallback *callback);
+	return (i + (s != (1<<i)));
+}
 
-/*
- * Converts any bitmap to 1-bit Grayscale.
- */
-int GP_FilterFloydSteinberg_XXX_to_G1_Raw(const GP_Context *src,
-                                          GP_Context *dst,
-                                          GP_ProgressCallback *callback);
-
-
-/*
- * Hilbert-peano space filling curve based dithering.
- */
 int GP_FilterHilbertPeano_from_RGB888(const GP_Context *src,
-                                       GP_Context *dst,
-				       GP_ProgressCallback *callback);
+                                      GP_Context *dst,
+                                      GP_ProgressCallback *callback)
+{
+	struct GP_CurveState state;
 
+	unsigned int n = GP_MAX(count_bits(src->w), count_bits(src->h));
 
-#endif /* FILTERS_GP_DITHER_H */
+	GP_DEBUG(1, "Hilbert Peano dithering %ux%u -> n = %u", src->w, src->h, n);
+
+	GP_HilbertCurveInit(&state, n);
+	
+	int err = 0, cnt = 0;
+
+	while (GP_HilbertCurveContinues(&state)) {
+		
+		if (state.x < src->w && state.y < src->h) {
+			int pix = GP_GetPixel_Raw(src, state.x, state.y);
+			
+			pix = GP_ConvertPixel(pix, src->pixel_type, GP_PIXEL_G8);
+
+			pix += err;
+
+			if (pix > 127) {
+				err = pix - 255;
+				pix = 1;
+			} else {
+				err = pix;
+				pix = 0;
+			}
+
+			GP_PutPixel_Raw_1BPP_LE(dst, state.x, state.y, pix);
+
+			cnt++;
+
+			if (GP_ProgressCallbackReport(callback, cnt/src->h, src->w, src->h))
+				return 1;
+
+			/* We are done, exit */
+			if (cnt == src->w * src->h - 1) {
+				GP_ProgressCallbackDone(callback);
+				return 0;
+			}
+		} else {
+			err = 0;
+		}
+
+		GP_HilbertCurveNext(&state);
+	}
+
+	GP_ProgressCallbackDone(callback);
+	return 0;
+}

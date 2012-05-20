@@ -16,57 +16,84 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2011 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
 /*
 
-  Dithering algorithms.
+  Hilbert curve implementation.
 
  */
 
-#ifndef FILTERS_GP_DITHER_H
-#define FILTERS_GP_DITHER_H
+#ifndef FILTERS_GP_HILBERT_CURVE_H
+#define FILTERS_GP_HILBERT_CURVE_H
 
-#include "GP_Filter.h"
+struct GP_CurveState {
+	/* half of the number of bits of curve size */
+	unsigned int n;
+	/* coordinates */
+	unsigned int x, y;
+	/* current curve lenght */
+	unsigned int s;
+};
 
 /*
- * Floyd Steinberg
+ * Resets curve to initial state i.e. x = 0, y = 0, (length) s = 0.
  */
-GP_Context *GP_FilterFloydSteinberg_to_G1(const GP_Context *src,
-                                          GP_Context *dst,
-                                          GP_ProgressCallback *callback);
+static inline void GP_HilbertCurveInit(struct GP_CurveState *state, int n)
+{
+	state->n = n;
+	state->s = 0;
+	state->x = 0;
+	state->y = 0;
+}
 
 /*
- * Floyd Steinberg
+ * Variant of Lam and Shapiro
  */
-GP_Context *GP_FilterFloydSteinberg_from_RGB888(const GP_Context *src,
-                                                GP_Context *dst,
-                                                GP_PixelType dst_pixel_type,
-						GP_ProgressCallback *callback);
+static inline void GP_HilbertCurveGetXY(struct GP_CurveState *state)
+{
+	int sa, sb;
+	unsigned int i, temp, x, y;
+
+	for (i = 0; i < 2 * state->n; i += 2) {
+		sa = (state->s >> (i+1)) & 0x01;
+		sb = (state->s >> i)     & 0x01;
+
+		if ((sa ^ sb) == 0) {
+			temp = x;
+			x = y ^ (-sa);
+			y = temp ^ (-sa);
+		}
+	
+		x = (x >> 1) | (sa << 31);
+		y = (y >> 1) | ((sa ^ sb) << 31);
+	}
+
+	state->x = x >> (32 - state->n);
+	state->y = y >> (32 - state->n);
+}
+
 
 /*
- * Converts RGB888 to RGB or Grayscale bitmap. 
+ * Finds next X and Y
  */
-int GP_FilterFloydSteinberg_RGB888_to_XXX_Raw(const GP_Context *src,
-                                              GP_Context *dst,
-                                              GP_ProgressCallback *callback);
+static inline void GP_HilbertCurveNext(struct GP_CurveState *state)
+{
+
+	/* increment length */
+	state->s++;
+	/* get X and Y */
+	GP_HilbertCurveGetXY(state);
+}
 
 /*
- * Converts any bitmap to 1-bit Grayscale.
+ * Returns true if we are not at curve endpoint
  */
-int GP_FilterFloydSteinberg_XXX_to_G1_Raw(const GP_Context *src,
-                                          GP_Context *dst,
-                                          GP_ProgressCallback *callback);
+static inline int GP_HilbertCurveContinues(struct GP_CurveState *state)
+{
+	return state->s < (1U<<(2*state->n));
+}
 
-
-/*
- * Hilbert-peano space filling curve based dithering.
- */
-int GP_FilterHilbertPeano_from_RGB888(const GP_Context *src,
-                                       GP_Context *dst,
-				       GP_ProgressCallback *callback);
-
-
-#endif /* FILTERS_GP_DITHER_H */
+#endif /* FILTERS_GP_HILBERT_CURVE_H */
