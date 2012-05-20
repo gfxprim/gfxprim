@@ -49,6 +49,7 @@ static int abort_flag = 0;
 static int rotate = 0;
 static int show_progress = 0;
 static int resampling_method = GP_INTERP_LINEAR_LF_INT;
+static int dithering = 0;
 
 static int image_loader_callback(GP_ProgressCallback *self)
 {
@@ -278,8 +279,19 @@ static void *image_loader(void *ptr)
 	uint32_t cx = (context->w - ret->w)/2;
 	uint32_t cy = (context->h - ret->h)/2;
 
+	GP_Context sub_display;
+
 	cpu_timer_start(&timer, "Blitting");
-	GP_Blit_Raw(ret, 0, 0, ret->w, ret->h, context, cx, cy);
+	
+	if (dithering) {
+		callback.priv = "Dithering";
+		GP_ContextSubContext(context, &sub_display, cx, cy, ret->w, ret->h);
+	//	GP_FilterFloydSteinberg_from_RGB888(ret, &sub_display, 0, NULL);
+		GP_FilterHilbertPeano_from_RGB888(ret, &sub_display, NULL);
+	} else {
+		GP_Blit_Raw(ret, 0, 0, ret->w, ret->h, context, cx, cy);
+	}
+	
 	cpu_timer_stop(&timer);
 	GP_ContextFree(ret);
 
@@ -385,7 +397,7 @@ int main(int argc, char *argv[])
 	int opt, debug_level = 0;
 	GP_PixelType emul_type = GP_PIXEL_UNKNOWN;
 
-	while ((opt = getopt(argc, argv, "b:cd:e:Ii:Ps:r:")) != -1) {
+	while ((opt = getopt(argc, argv, "b:cd:e:fIi:Ps:r:")) != -1) {
 		switch (opt) {
 		case 'I':
 			params.show_info = 1;
@@ -395,6 +407,9 @@ int main(int argc, char *argv[])
 		break;
 		case 'i':
 			input_dev = optarg;
+		break;
+		case 'f':
+			dithering = 1;
 		break;
 		case 's':
 			sleep_sec = atoi(optarg);
