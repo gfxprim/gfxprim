@@ -30,7 +30,24 @@
 #include <stdint.h>
 #include <unistd.h>
 
+/*
+ * Writes cnt pixels starting at offset off.
+ */
 void GP_WritePixels_1BPP_LE(uint8_t *start, uint8_t off,
+                            size_t cnt, uint8_t val);
+
+/*
+ * Writes cnt pixels starting at offset off (offset is in pixel sizes not in
+ * bits).
+ */
+void GP_WritePixels_2BPP_LE(uint8_t *start, uint8_t off,
+                            size_t cnt, uint8_t val);
+
+/*
+ * Writes cnt pixels starting at offset off (offset is in pixel sizes not in
+ * bits i.e. offset could be either 0 or 1).
+ */
+void GP_WritePixels_4BPP_LE(uint8_t *start, uint8_t off,
                             size_t cnt, uint8_t val);
 
 /*

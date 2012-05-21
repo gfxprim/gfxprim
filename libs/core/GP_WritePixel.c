@@ -104,6 +104,91 @@ void GP_WritePixels_1BPP_LE(uint8_t *start, uint8_t off,
 	}
 }
 
+static const uint8_t bytes_2BPP[] = {0x00, 0x55, 0xaa, 0xff};
+
+void GP_WritePixels_2BPP_LE(uint8_t *start, uint8_t off,
+                            size_t cnt, uint8_t val)
+{
+	int len = cnt;
+
+	/* Write start of the line */
+	switch (off) {
+	case 0:
+	break;
+	case 1:
+		GP_SET_BITS1_ALIGNED(2, 2, start, val);
+		
+		if (--len == 0)
+			return;
+	case 2:
+		GP_SET_BITS1_ALIGNED(4, 2, start, val);
+		
+		if (--len == 0)
+			return;
+	case 3:
+		GP_SET_BITS1_ALIGNED(6, 2, start, val);
+		
+		if (--len == 0)
+			return;
+		
+		start++;
+	break;	
+	}
+	
+	/* Write as many bytes as possible */
+	memset(start, bytes_2BPP[val & 0x03], len/4);
+	
+	start+=len/4;
+
+	/* And the rest */
+	switch (len%4) {
+	case 3:
+		GP_SET_BITS1_ALIGNED(4, 2, start, val);
+	case 2:
+		GP_SET_BITS1_ALIGNED(2, 2, start, val);
+	case 1:
+		GP_SET_BITS1_ALIGNED(0, 2, start, val);
+	break;
+	}
+}
+
+static const uint8_t bytes_4BPP[] = {
+	0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77,
+	0x88, 0x99, 0xaa, 0xbb, 0xcc, 0xdd, 0xee, 0xff
+};
+
+void GP_WritePixels_4BPP_LE(uint8_t *start, uint8_t off,
+                            size_t cnt, uint8_t val)
+{
+	int len = cnt;
+
+	/* Write start of the line */
+	switch (off) {
+	case 0:
+	break;
+	case 1:
+		GP_SET_BITS1_ALIGNED(4, 4, start, val);
+		
+		if (--len == 0)
+			return;
+		
+		start++;
+	break;	
+	}
+
+	/* Write as many bytes as possible */
+	memset(start, bytes_4BPP[val & 0x0f], len/2);
+	
+	start+=len/2;
+
+	/* And the rest */
+	switch (len%2) {
+	case 1:
+		GP_SET_BITS1_ALIGNED(0, 4, start, val);
+	break;
+	}
+}
+
 static const uint8_t chunks_1bpp[8] = {
 	0x00, 0x80, 0xc0, 0xe0, 0xf0, 0xf8, 0xfc, 0xfe,
 };

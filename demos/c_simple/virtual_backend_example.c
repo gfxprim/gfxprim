@@ -25,7 +25,7 @@
    Simple virtual backend test.
 
    Virtual backned allows you to test interactively pixel types that your
-   hardware/xserverd doesn't support.
+   hardware/xserver doesn't support.
 
   */
 

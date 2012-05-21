@@ -37,7 +37,7 @@ void GP_BlitXYXY_Fast(const GP_Context *src,
                       GP_Coord x0, GP_Coord y0, GP_Coord x1, GP_Coord y1,
                       GP_Context *dst, GP_Coord x2, GP_Coord y2);
 
-
+/*
 void GP_BlitXYXY_Naive(const GP_Context *src,
                        GP_Coord x0, GP_Coord y0, GP_Coord x1, GP_Coord y1,
                        GP_Context *dst, GP_Coord x2, GP_Coord y2)
@@ -54,6 +54,7 @@ void GP_BlitXYXY_Naive(const GP_Context *src,
 			GP_PutPixel(dst, x2 + (x - x0), y2 + (y - y0), p);
 		}
 }
+*/
 
 void GP_BlitXYXY(const GP_Context *src,
                  GP_Coord x0, GP_Coord y0, GP_Coord x1, GP_Coord y1,
