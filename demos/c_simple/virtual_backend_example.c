@@ -36,8 +36,8 @@ int main(int argc, char *argv[])
 {
 	GP_Backend *backend;
 	GP_Context *context;
-	GP_Pixel white_pixel, black_pixel;
-	const char *backend_opts = "X11:400x400";
+	GP_Pixel white_pixel, black_pixel, red_pixel, blue_pixel, green_pixel;
+	const char *backend_opts = "X11:350x350";
 	int opt;
 	GP_PixelType emul_type = GP_PIXEL_UNKNOWN;
 
@@ -95,18 +95,18 @@ int main(int argc, char *argv[])
 
 	GP_EventSetScreenSize(context->w, context->h);
 	
+	/* Now draw some testing patters */
 	black_pixel = GP_ColorToContextPixel(GP_COL_BLACK, context);
 	white_pixel = GP_ColorToContextPixel(GP_COL_WHITE, context);
+	red_pixel   = GP_ColorToContextPixel(GP_COL_RED, context);
+	blue_pixel  = GP_ColorToContextPixel(GP_COL_BLUE, context);
+	green_pixel = GP_ColorToContextPixel(GP_COL_GREEN, context);
 
 	GP_Fill(context, white_pixel);
-
-	/* Now draw some testing patters */
-	unsigned int i;
+	
+	unsigned int i, j;
 	for (i = 0; i < 40; i++) {
 		GP_HLineXYW(context, 0, i, i, black_pixel);
-		
-		GP_HLineXYW(context, 40 + i, i, i, black_pixel);
-		
 		GP_HLineXYW(context, 1, i + 40, i, black_pixel);
 		GP_HLineXYW(context, 2, i + 80, i, black_pixel);
 		GP_HLineXYW(context, 3, i + 120, i, black_pixel);
@@ -116,6 +116,27 @@ int main(int argc, char *argv[])
 		GP_HLineXYW(context, 7, i + 280, i, black_pixel);
 	}
 
+	for (i = 0; i < 256; i++) {
+		for (j = 0; j < 256; j++) {
+			uint8_t val = 1.00 * sqrt(i*i + j*j)/sqrt(2) + 0.5;
+
+			GP_Pixel pix = GP_RGBToContextPixel(i, j, val, context);
+			GP_PutPixel(context, i + 60, j + 10, pix);
+		}
+	}
+
+	GP_Text(context, NULL, 60, 270, GP_VALIGN_BELOW|GP_ALIGN_RIGHT,
+	        black_pixel, white_pixel, "Lorem Ipsum dolor sit...");
+	
+	GP_Text(context, NULL, 60, 290, GP_VALIGN_BELOW|GP_ALIGN_RIGHT,
+	        red_pixel, white_pixel, "Lorem Ipsum dolor sit...");
+	
+	GP_Text(context, NULL, 60, 310, GP_VALIGN_BELOW|GP_ALIGN_RIGHT,
+	        green_pixel, white_pixel, "Lorem Ipsum dolor sit...");
+
+	GP_Text(context, NULL, 60, 330, GP_VALIGN_BELOW|GP_ALIGN_RIGHT,
+	        blue_pixel, white_pixel, "Lorem Ipsum dolor sit...");
+	
 	/* Update the backend screen */
 	GP_BackendFlip(backend);
 
