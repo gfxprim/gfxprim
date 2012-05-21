@@ -34,7 +34,6 @@
 
 #include <GP.h>
 #include <backends/GP_Backends.h>
-#include <backends/GP_BackendVirtual.h>
 #include <input/GP_InputDriverLinux.h>
 
 #include "cpu_timer.h"
