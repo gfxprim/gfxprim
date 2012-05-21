@@ -89,6 +89,12 @@ config = GfxPrimConfig(
 	  ('R', 6, 3),
 	  ('G', 3, 3),
 	  ('B', 0, 3)]),
+      
+      PixelType(name='xRGB2222', pixelsize=PS_8BPP, chanslist=[
+	  ('R', 4, 2),
+	  ('G', 2, 2),
+	  ('B', 0, 2)]),
+      
       #
       # Palette types
       #
