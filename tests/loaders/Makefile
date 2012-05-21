@@ -1,4 +1,5 @@
 TOPDIR=../..
+include $(TOPDIR)/pre.mk
 
 CSOURCES=$(shell echo *.c)
 
@@ -7,5 +8,5 @@ LDLIBS+=-lGP -L$(TOPDIR)/build/
 
 APPS=PBM_invert PBM_test PGM_invert PGM_test
 
-include $(TOPDIR)/include.mk
 include $(TOPDIR)/app.mk
+include $(TOPDIR)/post.mk
