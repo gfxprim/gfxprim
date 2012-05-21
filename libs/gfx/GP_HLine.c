@@ -35,7 +35,7 @@
 /* Generate drawing functions for various bit depths. */
 
 //TODO: BIT ENDIANESS
-DEF_HLINE_BU_FN(GP_HLine_Raw_1BPP_LE, GP_Context*, GP_Pixel, GP_PIXEL_ADDR, GP_WritePixels1bpp)
+DEF_HLINE_BU_FN(GP_HLine_Raw_1BPP_LE, GP_Context*, GP_Pixel, GP_PIXEL_ADDR, GP_WritePixels_1BPP_LE)
 DEF_HLINE_BU_FN(GP_HLine_Raw_1BPP_BE, GP_Context*, GP_Pixel, GP_PIXEL_ADDR, GP_WritePixels1bpp)
 DEF_HLINE_BU_FN(GP_HLine_Raw_2BPP_LE, GP_Context*, GP_Pixel, GP_PIXEL_ADDR, GP_WritePixels2bpp)
 DEF_HLINE_BU_FN(GP_HLine_Raw_2BPP_BE, GP_Context*, GP_Pixel, GP_PIXEL_ADDR, GP_WritePixels2bpp)

@@ -19,7 +19,7 @@
  * Copyright (C) 2009-2010 Jiri "BlueBear" Dluhos                            *
  *                         <jiri.bluebear.dluhos@gmail.com>                  *
  *                                                                           *
- * Copyright (C) 2009-2010 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
@@ -27,6 +27,82 @@
 
 #include "GP_Core.h"
 #include "GP_WritePixel.h"
+
+static const uint8_t bytes_1BPP[] = {0x00, 0xff};
+
+void GP_WritePixels_1BPP_LE(uint8_t *start, uint8_t off,
+                            size_t cnt, uint8_t val)
+{
+	int len = cnt;
+
+	/* Write start of the line */
+	switch (off) {
+	case 0:
+	break;
+	case 1:
+		GP_SET_BITS1_ALIGNED(1, 1, start, val);
+		
+		if (--len == 0)
+			return;
+	case 2:
+		GP_SET_BITS1_ALIGNED(2, 1, start, val);
+		
+		if (--len == 0)
+			return;
+	case 3:
+		GP_SET_BITS1_ALIGNED(3, 1, start, val);
+		
+		if (--len == 0)
+			return;
+	case 4:
+		GP_SET_BITS1_ALIGNED(4, 1, start, val);
+		
+		if (--len == 0)
+			return;
+	case 5:
+		GP_SET_BITS1_ALIGNED(5, 1, start, val);
+		
+		if (--len == 0)
+			return;
+	case 6:
+		GP_SET_BITS1_ALIGNED(6, 1, start, val);
+		
+		if (--len == 0)
+			return;
+	case 7:
+		GP_SET_BITS1_ALIGNED(7, 1, start, val);
+		
+		if (--len == 0)
+			return;
+	
+		start++;
+	break;
+	}
+
+	/* Write as many bytes as possible */
+	memset(start, bytes_1BPP[val & 0x01], len/8);
+
+	start+=len/8;
+
+	/* And the rest */
+	switch (len%8) {
+	case 7:
+		GP_SET_BITS1_ALIGNED(6, 1, start, val);
+	case 6:
+		GP_SET_BITS1_ALIGNED(5, 1, start, val);
+	case 5:
+		GP_SET_BITS1_ALIGNED(4, 1, start, val);
+	case 4:
+		GP_SET_BITS1_ALIGNED(3, 1, start, val);
+	case 3:
+		GP_SET_BITS1_ALIGNED(2, 1, start, val);
+	case 2:
+		GP_SET_BITS1_ALIGNED(1, 1, start, val);
+	case 1:
+		GP_SET_BITS1_ALIGNED(0, 1, start, val);
+	break;
+	}
+}
 
 static const uint8_t chunks_1bpp[8] = {
 	0x00, 0x80, 0xc0, 0xe0, 0xf0, 0xf8, 0xfc, 0xfe,

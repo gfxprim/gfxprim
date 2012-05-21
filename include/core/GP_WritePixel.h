@@ -19,7 +19,7 @@
  * Copyright (C) 2009-2010 Jiri "BlueBear" Dluhos                            *
  *                         <jiri.bluebear.dluhos@gmail.com>                  *
  *                                                                           *
- * Copyright (C) 2009-2010 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
@@ -30,9 +30,8 @@
 #include <stdint.h>
 #include <unistd.h>
 
-/*
- * Calls for writing a linear block of pixels.
- */
+void GP_WritePixels_1BPP_LE(uint8_t *start, uint8_t off,
+                            size_t cnt, uint8_t val);
 
 /*
  * These calls are not byte aligned, thuss needs start offset.
