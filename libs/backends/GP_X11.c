@@ -359,9 +359,9 @@ GP_Backend *GP_BackendX11Init(const char *display, int x, int y,
 	backend->Flip          = x11_flip;
 	backend->UpdateRect    = x11_update_rect;
 	backend->Exit          = x11_exit;
-	backend->fd_list       = NULL;
 	backend->Poll          = x11_poll;
 	backend->SetAttributes = x11_set_attributes;
+	backend->fd            = XConnectionNumber(x11->dpy);
 
 	return backend;
 err1:

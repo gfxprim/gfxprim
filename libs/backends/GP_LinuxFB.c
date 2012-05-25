@@ -311,8 +311,8 @@ GP_Backend *GP_BackendLinuxFBInit(const char *path, int flag)
 	backend->UpdateRect    = fb_update_rect_noop;
 	backend->Exit          = fb_exit;
 	backend->SetAttributes = NULL;
-	backend->fd_list       = NULL;
 	backend->Poll          = flag ? fb_poll : NULL;
+	backend->fd            = fb->con_fd;
 
 	return backend;
 err3:

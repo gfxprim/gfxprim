@@ -142,7 +142,7 @@ static struct GP_Backend backend = {
 	.UpdateRect    = sdl_update_rect,
 	.SetAttributes = sdl_set_attributes,
 	.Exit          = sdl_exit,
-	.fd_list       = NULL,
+	.fd            = -1,
 	.Poll          = sdl_poll,
 };
 
