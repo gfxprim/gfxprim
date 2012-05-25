@@ -133,24 +133,66 @@ static void backend_x11_help(FILE *help, const char *err)
 		fprintf(help, "ERROR: %s\n", err);
 
 	fprintf(help, "X11 backend\n"
-	              "-----------\n"
-	              "X11:WxH\n");
+	              "--------------\n"
+	              "X11:WxH:[ROOT_WIN]\n\n"
+		      "ROOT_WIN - starts the backend in the root window\n"
+		      "           (w and h, if set, are ignored)\n");
 }
+
+static int x11_params_to_flags(const char *param, GP_Size *w, GP_Size *h,
+                               enum GP_BackendX11Flags *flags, FILE *help)
+{
+	if (!strcasecmp(param, "ROOT_WIN")) {
+		*flags |= GP_X11_USE_ROOT_WIN;
+		return 0;
+	}
+	
+	/*
+	 * Accepts only string with format "intxint" or "intXint"
+	 */
+	int sw, sh;
+	unsigned int n;
+
+	if (sscanf(param, "%i%*[xX]%i%n", &sw, &sh, &n) == 2 && n == strlen(param)) {
+		*w = sw;
+		*h = sh;
+		return 0;
+	}
+
+	backend_sdl_help(help, "X11: Invalid parameters");
+	return 1;
+}
+
 
 static GP_Backend *backend_x11_init(char *params, const char *caption,
                                     FILE *help)
 {
-	unsigned int n, w = 640, h = 480;
-
+	GP_Size w = 640, h = 480;
+	enum GP_BackendX11Flags flags = 0;
+	
 	if (params == NULL)
-		return GP_BackendX11Init(NULL, 0, 0, w, h, caption);	
+		return GP_BackendX11Init(NULL, 0, 0, w, h, caption, 0);
 
-	if (sscanf(params, "%u%*[xX]%u%n", &w, &h, &n) == 2 &&
-	    n == strlen(params))
-		return GP_BackendX11Init(NULL, 0, 0, w, h, caption);
+	char *s = params;
 
-	backend_x11_help(help, "X11: Invalid parameters");
-	return NULL;
+	for (;;) {
+		switch (*s) {
+		case ':':
+			(*s) = '\0';
+			if (x11_params_to_flags(params, &w, &h, &flags, help))
+				return NULL;
+			s++;
+			params = s;
+		break;
+		case '\0':
+			if (x11_params_to_flags(params, &w, &h, &flags, help))
+				return NULL;
+			
+			return GP_BackendX11Init(NULL, 0, 0, w, h, caption, flags);
+		break;
+		}
+		s++;
+	}
 }
 
 static const char *backend_names[] = {

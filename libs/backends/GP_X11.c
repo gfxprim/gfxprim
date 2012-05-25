@@ -254,9 +254,60 @@ static int resize_ximage(GP_Backend *self, int w, int h)
 	return 0;
 }
 
+void create_window(struct x11_priv *x11, int x, int y,
+                   unsigned int *w, unsigned int *h,
+		   const char *caption, enum GP_BackendX11Flags flags)
+{
+	XSetWindowAttributes attrs;
+	unsigned long attr_mask = 0;
+	
+	/* Set event mask */
+	attrs.event_mask = ExposureMask | StructureNotifyMask |KeyPressMask |
+	                   KeyReleaseMask | PointerMotionMask;
+	attr_mask |= CWEventMask;
+	
+	/* 
+	 * If root window was selected, resize w and h and set x11->win to root
+	 * window.
+	 */
+	if (flags & GP_X11_USE_ROOT_WIN) {
+		x11->win = DefaultRootWindow(x11->dpy);
+		*w = DisplayWidth(x11->dpy, x11->scr);
+		*h = DisplayHeight(x11->dpy, x11->scr);
+		
+		GP_DEBUG(2, "Using root window, owerriding size to %ux%u",
+		         *w, *h);
+
+		XChangeWindowAttributes(x11->dpy, x11->win, attr_mask, &attrs);
+
+		return;
+	}
+	
+	GP_DEBUG(2, "Opening window '%s' %ix%i-%ux%u",
+	         caption, x, y, *w, *h);
+
+	/* 
+	 * For some reason reading mouse button clicks on root win are not
+	 * allowed...
+	 */
+	attrs.event_mask |= ButtonPressMask | ButtonReleaseMask ;
+
+	x11->win = XCreateWindow(x11->dpy, DefaultRootWindow(x11->dpy),
+	                         x, y, *w, *h, 0, CopyFromParent,
+	                         InputOutput, CopyFromParent, attr_mask, &attrs);
+	
+	/* Set window caption */
+	XmbSetWMProperties(x11->dpy, x11->win, caption, caption,
+	                   NULL, 0, NULL, NULL, NULL);
+	
+	/* Show window */
+	XMapWindow(x11->dpy, x11->win);
+}
+
 GP_Backend *GP_BackendX11Init(const char *display, int x, int y,
                               unsigned int w, unsigned int h,
-			      const char *caption)
+			      const char *caption,
+			      enum GP_BackendX11Flags flags)
 {
 	GP_Backend *backend;
 	struct x11_priv *x11;
@@ -288,38 +339,21 @@ GP_Backend *GP_BackendX11Init(const char *display, int x, int y,
 
 	GP_DEBUG(2, "Have Visual id %i, depth %u", (int)x11->vis->visualid, x11->scr_depth);
 
-	if (create_ximage(backend, w, h))
-		goto err1;
-	
-	GP_DEBUG(2, "Opening window '%s' %ix%i-%ux%u",
-	         caption, x, y, w, h);
-	
-	x11->win = XCreateWindow(x11->dpy, DefaultRootWindow(x11->dpy),
-	                         x, y, w, h, 0, CopyFromParent,
-	                         InputOutput, CopyFromParent, 0, NULL);
-	
+	create_window(x11, x, y, &w, &h, caption, flags);
+
 	if (x11->win == None) {
 		//TODO: Error message?
 		GP_DEBUG(1, "Failed to create window");
-		goto err2;
+		goto err1;
 	}
 	
-	/* Select events */
-	XSelectInput(x11->dpy, x11->win, ExposureMask | StructureNotifyMask |
-	                                 KeyPressMask | KeyReleaseMask |
-					 ButtonPressMask | ButtonReleaseMask |
-					 PointerMotionMask);
+	if (create_ximage(backend, w, h))
+		goto err1;
 
-	/* Set window caption */
-	XmbSetWMProperties(x11->dpy, x11->win, caption, caption,
-	                   NULL, 0, NULL, NULL, NULL);
-	
-	/* Show window */
-	XMapWindow(x11->dpy, x11->win);
+
 	XFlush(x11->dpy);
 	
 	x11->resized_flag  = 0;
-
 
 	backend->name          = "X11";
 	backend->Flip          = x11_flip;
@@ -330,8 +364,6 @@ GP_Backend *GP_BackendX11Init(const char *display, int x, int y,
 	backend->SetAttributes = x11_set_attributes;
 
 	return backend;
-err2:
-	destroy_ximage(backend);
 err1:
 	XCloseDisplay(x11->dpy);
 err0:
