@@ -28,8 +28,10 @@
 /*
  * Initalize X11 backend.
  *
- * The display may be NULL default display. The coordinates are position and
- * geometry for newly created window.
+ * The display may be NULL for default display ($DISPLAY shell variable will
+ * be used).
+ * 
+ * The coordinates are position and geometry for newly created window.
  * 
  * Upon failure NULL is returned.
  */

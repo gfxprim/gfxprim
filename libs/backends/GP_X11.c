@@ -152,13 +152,7 @@ static int x11_set_attributes(struct GP_Backend *self,
 	                           NULL, 0, NULL, NULL, NULL);
 	}
 
-	if (w != 0 || h != 0) {
-		if (w == 0)
-			w = self->context->w;
-	
-		if (h == 0)
-			h = self->context->h;
-		
+	if (w != 0 && h != 0) {
 		GP_DEBUG(3, "Setting window size to %ux%u", w, h);
 		
 		if (resize_ximage(self, w, h))

@@ -93,6 +93,8 @@ typedef struct GP_Backend {
 	 *
 	 * If w and h are zero, only caption is changed.
 	 *
+	 * If w is set and h is zero, only w is changed and vice versa.
+	 *
 	 * If caption is NULL only w and h are changed.
 	 *
 	 * Use the inline wrappers instead.
