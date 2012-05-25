@@ -121,7 +121,7 @@ bool GP_ColorNameToPixel(const char *color_name, GP_PixelType pixel_type,
 	if (color == GP_COL_INVALID)
 		return false;
 
-	*pixel = GP_ColorToPixel(pixel_type, color);
+	*pixel = GP_ColorToPixel(color, pixel_type);
 
 	return true;
 }
