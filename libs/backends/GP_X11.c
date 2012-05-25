@@ -159,7 +159,7 @@ static int x11_set_attributes(struct GP_Backend *self,
 			return 1;
 
 		/* Resize X11 window */
-		XResizeWindow(x11->dpy, x11->win, w, h);
+	//	XResizeWindow(x11->dpy, x11->win, w, h);
 		XFlush(x11->dpy);
 
 		x11->resized_flag = 1;
