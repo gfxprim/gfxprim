@@ -22,12 +22,14 @@
 
 #include "../../config.h"
 
+#include "core/GP_Debug.h"
+#include "core/GP_Common.h"
+
 #ifdef HAVE_LIBX11
 
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
 
-#include "core/GP_Debug.h"
 #include "input/GP_InputDriverX11.h"
 #include "GP_X11.h"
 
@@ -375,10 +377,13 @@ err0:
 
 #include "GP_Backend.h"
 
-GP_Backend *GP_BackendX11Init(const char *display, int x, int y,
-                              unsigned int w, unsigned int h,
-			      const char *caption)
+GP_Backend *GP_BackendX11Init(const char *GP_UNUSED(display),
+                              int GP_UNUSED(x), int GP_UNUSED(y),
+                              unsigned int GP_UNUSED(w),
+			      unsigned int GP_UNUSED(h),
+			      const char *GP_UNUSED(caption))
 {
+	GP_DEBUG(0, "FATAL: X11 support not compiled in");
 	return NULL;
 }
 
