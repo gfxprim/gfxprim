@@ -24,6 +24,8 @@
 %include "GP_Resize.h"
 
 /* Functions returning new allocated context */
+%immutable GP_FilterSymmetryNames;
+
 %include "GP_Rotate.h"
 
 %newobject GP_FilterMirrorH_Alloc;
