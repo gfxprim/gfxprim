@@ -110,68 +110,83 @@ Rotation and Symmetry filters
 -------------------------------------------------------------------------------
 #include <GP_Filters.h>
 
-GP_Context *GP_FilterMirrorH(const GP_Context *src, GP_Context *dst,
-                             GP_ProgressCallback *callback);
+int GP_FilterMirrorH(const GP_Context *src, GP_Context *dst,
+                     GP_ProgressCallback *callback);
+
+GP_Context *GP_FilterMirrorH_Alloc(const GP_Context *src,
+                                   GP_ProgressCallback *callback);
 -------------------------------------------------------------------------------
 
 Mirrors context horizontally.
 
 Works 'in-place'.
 
-The destination has to have the same pixel type and the destination size must
-be at least as big as source.
+The destination has to have the same pixel type and the size must be at least
+as large as source.
 
 [source,c]
 -------------------------------------------------------------------------------
 #include <GP_Filters.h>
 
-GP_Context *GP_FilterMirrorV(const GP_Context *src, GP_Context *dst,
-                             GP_ProgressCallback *callback);
+int GP_FilterMirrorV(const GP_Context *src, GP_Context *dst,
+                     GP_ProgressCallback *callback);
+
+GP_Context *GP_FilterMirrorV_Alloc(const GP_Context *src,
+                                   GP_ProgressCallback *callback);
 -------------------------------------------------------------------------------
 
 Mirrors context vertically.
 
 Works 'in-place'.
 
-the destination has to have the same pixel type and the destination size must
-be at least as big as source.
+The destination has to have the same pixel type and the size must be at least
+as large as source.
 
 [source,c]
 -------------------------------------------------------------------------------
 #include <GP_Filters.h>
 
-GP_Context *GP_FilterRotate90(const GP_Context *src, GP_Context *dst,
-                              GP_ProgressCallback *callback);
+int GP_FilterRotate90(const GP_Context *src, GP_Context *dst,
+                      GP_ProgressCallback *callback);
+
+GP_Context *GP_FilterRotate90_Alloc(const GP_Context *src,
+                                    GP_ProgressCallback *callback);
 -------------------------------------------------------------------------------
 
 Rotate context by 90 degrees.
 
 Doesn't work 'in-place' (yet).
 
-The destination has to have the same pixel type and destination size must be
-big enough to fit rotated context (i.e. W and H are swapped).
+The destination has to have the same pixel type and size must be large enough to
+fit rotated context (i.e. W and H are swapped).
 
 [source,c]
 -------------------------------------------------------------------------------
 #include <GP_Filters.h>
 
-GP_Context *GP_FilterRotate180(const GP_Context *src, GP_Context *dst,
-                               GP_ProgressCallback *callback);
+int GP_FilterRotate180(const GP_Context *src, GP_Context *dst,
+                       GP_ProgressCallback *callback);
+
+GP_Context *GP_FilterRotate180_Alloc(const GP_Context *src,
+                                     GP_ProgressCallback *callback);
 -------------------------------------------------------------------------------
 
 Rotate context by 180 degrees.
 
 Doesn't work 'in-place' (yet).
 
-the destination has to have the same pixel type and the destination size must
-be at least as big as source.
+The destination has to have the same pixel type and the size must be at least
+as large as source.
 
 [source,c]
 -------------------------------------------------------------------------------
 #include <GP_Filters.h>
 
-GP_Context *GP_FilterRotate270(const GP_Context *src, GP_Context *dst,
-                               GP_ProgressCallback *callback);
+int GP_FilterRotate270(const GP_Context *src, GP_Context *dst,
+                       GP_ProgressCallback *callback);
+
+GP_Context *GP_FilterRotate270_Alloc(const GP_Context *src,
+                                     GP_ProgressCallback *callback);
 -------------------------------------------------------------------------------
 
 Rotate context by 270 degrees.
@@ -179,7 +194,7 @@ Rotate context by 270 degrees.
 Doesn't work 'in-place' (yet).
 
 The destination has to have the same pixel type and destination size must be
-big enough to fit rotated context (eg. W and H are swapped).
+large enough to fit rotated context (eg. W and H are swapped).
 
 [source,c]
 -------------------------------------------------------------------------------
@@ -193,9 +208,13 @@ typedef enum GP_FilterSymmetries {
         GP_MIRROR_V,
 } GP_FilterSymmetries;
 
-GP_Context *GP_FilterSymmetry(const GP_Context *src, GP_Context *dst,
+GP_Context *GP_FilterSymmetry(const GP_Context *src,
                               GP_FilterSymmetries symmetry,
                               GP_ProgressCallback *callback);
+
+int GP_FilterSymmetry(const GP_Context *src, GP_Context *dst,
+                      GP_FilterSymmetries symmetry,
+                      GP_ProgressCallback *callback);
 -------------------------------------------------------------------------------
 
 Catch all function for symmetry filters.
