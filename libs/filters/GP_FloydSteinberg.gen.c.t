@@ -1,4 +1,3 @@
-
 %% extends "base.c.t"
 
 {% block descr %}Floyd Steinberg dithering RGB888 -> any pixel{% endblock %}
@@ -99,7 +98,7 @@ int GP_FilterFloydSteinberg_RGB888_to_{{ pt.name }}_Raw(const GP_Context *src, G
 %% endif
 %% endfor
 
-int GP_FilterFloydSteinberg_RGB888_to_XXX_Raw(const GP_Context *src,
+int GP_FilterFloydSteinberg_RGB888_Raw(const GP_Context *src,
                                               GP_Context *dst,
                                               GP_ProgressCallback *callback)
 {

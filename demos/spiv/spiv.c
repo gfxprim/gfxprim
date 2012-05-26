@@ -285,8 +285,8 @@ static void *image_loader(void *ptr)
 	if (dithering) {
 		callback.priv = "Dithering";
 		GP_ContextSubContext(context, &sub_display, cx, cy, ret->w, ret->h);
-	//	GP_FilterFloydSteinberg_from_RGB888(ret, &sub_display, 0, NULL);
-		GP_FilterHilbertPeano_from_RGB888(ret, &sub_display, NULL);
+	//	GP_FilterFloydSteinberg_RGB888(ret, &sub_display, NULL);
+		GP_FilterHilbertPeano_RGB888(ret, &sub_display, NULL);
 	} else {
 		GP_Blit_Raw(ret, 0, 0, ret->w, ret->h, context, cx, cy);
 	}
