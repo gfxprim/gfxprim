@@ -255,15 +255,15 @@ static void *image_loader(void *ptr)
 	break;
 	case 90:
 		callback.priv = "Rotating image (90)";
-		img = GP_FilterRotate90Alloc(ret, &callback);
+		img = GP_FilterRotate90_Alloc(ret, &callback);
 	break;
 	case 180:
 		callback.priv = "Rotating image (180)";
-		img = GP_FilterRotate180Alloc(ret, &callback);
+		img = GP_FilterRotate180_Alloc(ret, &callback);
 	break;
 	case 270:
 		callback.priv = "Rotating image (270)";
-		img = GP_FilterRotate270Alloc(ret, &callback);
+		img = GP_FilterRotate270_Alloc(ret, &callback);
 	break;
 	}
 

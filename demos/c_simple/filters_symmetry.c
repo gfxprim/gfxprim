@@ -99,7 +99,7 @@ int main(int argc, char *argv[])
 	}
 
 	/* Apply a symmetry filter */
-	res = GP_FilterSymmetryAlloc(src, sym, NULL);
+	res = GP_FilterSymmetry_Alloc(src, sym, NULL);
 
 	/* Save Image */
 	if (GP_SaveImage(res, argv[optind+1], NULL)) {

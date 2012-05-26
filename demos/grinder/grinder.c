@@ -227,13 +227,13 @@ static GP_RetCode rotate(GP_Context **c, const char *params)
 
 	switch (rot) {
 	case 0:
-		res = GP_FilterRotate90Alloc(*c, progress_callback);
+		res = GP_FilterRotate90_Alloc(*c, progress_callback);
 	break;
 	case 1:
-		res = GP_FilterRotate180Alloc(*c, progress_callback);
+		res = GP_FilterRotate180_Alloc(*c, progress_callback);
 	break;
 	case 2:
-		res = GP_FilterRotate270Alloc(*c, progress_callback);
+		res = GP_FilterRotate270_Alloc(*c, progress_callback);
 	break;
 	}
 		

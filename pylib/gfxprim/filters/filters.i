@@ -26,15 +26,13 @@
 /* Functions returning new allocated context */
 %include "GP_Rotate.h"
 
-%newobject GP_FilterMirrorHAlloc;
-%newobject GP_FilterMirrorVAlloc;
-%newobject GP_FilterRotate90Alloc;
-%newobject GP_FilterRotate180Alloc;
-%newobject GP_FilterRotate270Alloc;
-%newobject GP_FilterSymmetryAlloc;
+%newobject GP_FilterMirrorH_Alloc;
+%newobject GP_FilterMirrorV_Alloc;
+%newobject GP_FilterRotate90_Alloc;
+%newobject GP_FilterRotate180_Alloc;
+%newobject GP_FilterRotate270_Alloc;
+%newobject GP_FilterSymmetry_Alloc;
 
-
-/* Dithering */
 %include "GP_Dither.h"
 
 %newobject GP_FilterFloydSteinberg_RGB888_Alloc;
