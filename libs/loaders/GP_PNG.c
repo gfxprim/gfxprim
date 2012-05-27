@@ -270,12 +270,40 @@ static void load_meta_data(png_structp png, png_infop png_info, GP_MetaData *dat
 		GP_MetaDataCreateString(data, "res_unit", unit_name, 0);
 	}
 
+	png_timep mod_time;
+
+	if (png_get_tIME(png, png_info, &mod_time)) {
+		GP_MetaDataCreateInt(data, "mod_sec", mod_time->second);
+		GP_MetaDataCreateInt(data, "mod_min", mod_time->minute);
+		GP_MetaDataCreateInt(data, "mod_hour", mod_time->hour);
+		GP_MetaDataCreateInt(data, "mod_day", mod_time->day);
+		GP_MetaDataCreateInt(data, "mod_mon", mod_time->month);
+		GP_MetaDataCreateInt(data, "mod_year", mod_time->year);
+	}
+
 	double width, height;
 
 	if (png_get_sCAL(png, png_info, &unit, &width, &height)) {
 		GP_MetaDataCreateInt(data, "width", width * 1000);
 		GP_MetaDataCreateInt(data, "height", height * 1000);
 		GP_MetaDataCreateInt(data, "unit", unit);
+	}
+
+	png_textp text_ptr;
+	int text_cnt;
+
+	if (png_get_text(png, png_info, &text_ptr, &text_cnt)) {
+		int i;
+		
+		for (i = 0; i < text_cnt; i++) {
+
+			if (text_ptr[i].compression != PNG_TEXT_COMPRESSION_NONE)
+				continue;
+			
+			char buf[GP_META_RECORD_ID_MAX];
+			snprintf(buf, GP_META_RECORD_ID_MAX, "text:%s", text_ptr[i].key);
+			GP_MetaDataCreateString(data, buf, text_ptr[i].text, 1);
+		}
 	}
 }
 
