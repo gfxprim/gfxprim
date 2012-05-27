@@ -41,6 +41,8 @@
 
 #include <png.h>
 
+#include "core/GP_BitSwap.h"
+
 int GP_OpenPNG(const char *src_path, FILE **f)
 {
 	uint8_t sig[8];
@@ -235,6 +237,128 @@ GP_Context *GP_LoadPNG(const char *src_path, GP_ProgressCallback *callback)
 	return GP_ReadPNG(f, callback);
 }
 
+/*
+ * Maps gfxprim Pixel Type to the PNG format
+ */
+static int prepare_png_header(const GP_Context *src, png_structp png,
+                              png_infop png_info, int *bit_endian_flag)
+{
+	int bit_depth, color_type;
+
+	switch (src->pixel_type) {
+	case GP_PIXEL_BGR888:
+	case GP_PIXEL_RGB888:
+		bit_depth = 8;
+		color_type = PNG_COLOR_TYPE_RGB;
+	break;
+	case GP_PIXEL_G1:
+		bit_depth = 1;
+		color_type = PNG_COLOR_TYPE_GRAY;
+	break;
+	case GP_PIXEL_G2:
+		bit_depth = 2;
+		color_type = PNG_COLOR_TYPE_GRAY;
+	break;
+	case GP_PIXEL_G4:
+		bit_depth = 4;
+		color_type = PNG_COLOR_TYPE_GRAY;
+	break;
+	case GP_PIXEL_G8:
+		bit_depth = 8;
+		color_type = PNG_COLOR_TYPE_GRAY;
+	break;
+	default:
+		return 1;
+	break;
+	}
+
+	/* If pointers weren't passed, just return it is okay */
+	if (png == NULL || png_info == NULL)
+		return 0;
+
+	png_set_IHDR(png, png_info, src->w, src->h, bit_depth, color_type,
+	             PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_DEFAULT,
+		     PNG_FILTER_TYPE_DEFAULT);
+	
+	/* start the actuall writing */
+	png_write_info(png, png_info);
+	
+	//png_set_packing(png);
+
+	/* prepare for format conversion */
+	switch (src->pixel_type) {
+	case GP_PIXEL_RGB888:
+		png_set_bgr(png);
+	break;
+	case GP_PIXEL_G1:
+	case GP_PIXEL_G2:
+	case GP_PIXEL_G4:
+		*bit_endian_flag = !src->bit_endian;
+	break;
+	default:
+	break;
+	}
+
+	return 0;
+}
+
+static int write_png_data_g_swap(const GP_Context *src, png_structp png,
+                                 GP_ProgressCallback *callback)
+{
+	unsigned int y;
+	uint8_t row[src->bytes_per_row];
+
+	for (y = 0; y < src->h; y++) {
+		memcpy(row, GP_PIXEL_ADDR(src, 0, y), src->bytes_per_row);
+		
+		switch (src->pixel_type) {
+		case GP_PIXEL_G1:
+			GP_BitSwapRow_B1(row, src->bytes_per_row);
+		break;
+		case GP_PIXEL_G2:
+			GP_BitSwapRow_B4(row, src->bytes_per_row);
+		break;
+		case GP_PIXEL_G4:
+			GP_BitSwapRow_B4(row, src->bytes_per_row);
+		break;
+		default:
+			return ENOSYS;
+		break;
+		}
+
+		png_write_row(png, row);
+
+		if (GP_ProgressCallbackReport(callback, y, src->h, src->w)) {
+			GP_DEBUG(1, "Operation aborted");
+			return ECANCELED;
+		}
+	}
+
+	return 0;
+}
+
+static int write_png_data(const GP_Context *src, png_structp png,
+                          GP_ProgressCallback *callback, int bit_endian_flag)
+{
+	/* Look if we need to swap data when writing */
+	if (bit_endian_flag)
+		return write_png_data_g_swap(src, png, callback);
+
+	unsigned int y;
+
+	for (y = 0; y < src->h; y++) {
+		png_bytep row = GP_PIXEL_ADDR(src, 0, y);
+		png_write_row(png, row);
+
+		if (GP_ProgressCallbackReport(callback, y, src->h, src->w)) {
+			GP_DEBUG(1, "Operation aborted");
+			return ECANCELED;
+		}
+	}
+
+	return 0;
+}
+
 int GP_SavePNG(const GP_Context *src, const char *dst_path,
                GP_ProgressCallback *callback)
 {
@@ -245,8 +369,8 @@ int GP_SavePNG(const GP_Context *src, const char *dst_path,
 
 	GP_DEBUG(1, "Saving PNG Image '%s'", dst_path);
 
-	if (src->pixel_type != GP_PIXEL_RGB888) {
-		GP_DEBUG(1, "Can't save png with pixel type %s",
+	if (prepare_png_header(src, NULL, NULL, NULL)) {
+		GP_DEBUG(1, "Can't save png with %s pixel type",
 		         GP_PixelTypeName(src->pixel_type));
 		return ENOSYS;
 	}
@@ -284,27 +408,14 @@ int GP_SavePNG(const GP_Context *src, const char *dst_path,
 	}
 
 	png_init_io(png, f);
-	png_set_IHDR(png, png_info, src->w, src->h, 8, PNG_COLOR_TYPE_RGB,
-	             PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_DEFAULT,
-		     PNG_FILTER_TYPE_DEFAULT);
+	
+	int bit_endian_flag = 0;
+	/* Fill png header and prepare for data */
+	prepare_png_header(src, png, png_info, &bit_endian_flag);
 
-	/* start the actuall writing */
-	png_write_info(png, png_info);
-	png_set_bgr(png);
-
-	uint32_t y;
-
-	for (y = 0; y < src->h; y++) {
-		png_bytep row = GP_PIXEL_ADDR(src, 0, y);
-		png_write_row(png, row);
-
-		if (GP_ProgressCallbackReport(callback, y, src->h, src->w)) {
-			GP_DEBUG(1, "Operation aborted");
-			err = ECANCELED;
-			goto err3;
-		}
-			
-	}
+	/* Write bitmap buffer */
+	if ((err = write_png_data(src, png, callback, bit_endian_flag)))
+		goto err3;
 
 	png_write_end(png, png_info);
 	png_destroy_write_struct(&png, &png_info);
