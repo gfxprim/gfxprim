@@ -152,6 +152,14 @@ int load_image(struct loader_params *params)
 		GP_BackendFlip(backend);
 		return 1;
 	}
+	
+	/* Workaround */
+	if (img->pixel_type != GP_PIXEL_RGB888) {
+		GP_Context *tmp = GP_ContextConvert(img, GP_PIXEL_RGB888);
+		GP_ContextFree(img);
+		img = tmp;
+	}
+	
 	cpu_timer_stop(&timer);
 
 	params->img = img;
@@ -221,13 +229,6 @@ static void *image_loader(void *ptr)
 	w = img->w;
 	h = img->h;
 
-	/* Workaround */
-	if (img->pixel_type != GP_PIXEL_RGB888) {
-		GP_Context *tmp = GP_ContextConvert(img, GP_PIXEL_RGB888);
-		GP_ContextFree(img);
-		img = tmp;
-	}
-	
 	GP_Context *ret;
 
 	/* Do low pass filter */
