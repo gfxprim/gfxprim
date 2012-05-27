@@ -200,7 +200,7 @@ GP_Context *GP_ReadPNG(FILE *f, GP_ProgressCallback *callback)
 	}
 
 	if (color_type == PNG_COLOR_TYPE_GRAY)
-		res->bit_endian = 1;
+		png_set_packswap(png);
 
 	uint32_t y;
 	
@@ -305,47 +305,22 @@ static int prepare_png_header(const GP_Context *src, png_structp png,
 	return 0;
 }
 
-static int write_png_data_g_swap(const GP_Context *src, png_structp png,
-                                 GP_ProgressCallback *callback)
+static int write_png_data(const GP_Context *src, png_structp png,
+                          GP_ProgressCallback *callback, int bit_endian_flag)
 {
-	unsigned int y;
-	uint8_t row[src->bytes_per_row];
-
-	for (y = 0; y < src->h; y++) {
-		memcpy(row, GP_PIXEL_ADDR(src, 0, y), src->bytes_per_row);
-		
+	/* Look if we need to swap data when writing */
+	if (bit_endian_flag) {
 		switch (src->pixel_type) {
 		case GP_PIXEL_G1:
-			GP_BitSwapRow_B1(row, src->bytes_per_row);
-		break;
 		case GP_PIXEL_G2:
-			GP_BitSwapRow_B4(row, src->bytes_per_row);
-		break;
 		case GP_PIXEL_G4:
-			GP_BitSwapRow_B4(row, src->bytes_per_row);
+			png_set_packswap(png);
 		break;
 		default:
 			return ENOSYS;
 		break;
 		}
-
-		png_write_row(png, row);
-
-		if (GP_ProgressCallbackReport(callback, y, src->h, src->w)) {
-			GP_DEBUG(1, "Operation aborted");
-			return ECANCELED;
-		}
 	}
-
-	return 0;
-}
-
-static int write_png_data(const GP_Context *src, png_structp png,
-                          GP_ProgressCallback *callback, int bit_endian_flag)
-{
-	/* Look if we need to swap data when writing */
-	if (bit_endian_flag)
-		return write_png_data_g_swap(src, png, callback);
 
 	unsigned int y;
 
