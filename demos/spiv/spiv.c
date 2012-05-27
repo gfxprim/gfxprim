@@ -171,9 +171,10 @@ int load_image(struct loader_params *params)
  * This function tries to resize spiv window
  * and if succedes blits the image directly to the screen.
  */
-static int resize_backend_and_blit(GP_Context *img,
-                                   struct loader_params *params)
+static int resize_backend_and_blit(struct loader_params *params)
 {
+	GP_Context *img = params->img;
+	
 	if (GP_BackendResize(backend, img->w, img->h))
 		return 1;
 
@@ -236,6 +237,7 @@ static void *image_loader(void *ptr)
 		if (rat < 1) {
 			cpu_timer_start(&timer, "Blur");
 			callback.priv = "Blurring Image";
+			//TODO: We can't blur saved image!
 			if (GP_FilterGaussianBlur(img, img, 0.4/rat, 0.4/rat,
 			                          &callback) == NULL)
 				return NULL;
@@ -586,6 +588,9 @@ int main(int argc, char *argv[])
 
 					params.show_progress_once = 1;
 					show_image(&params, argv[argn]);
+				break;
+				case GP_KEY_1:
+					resize_backend_and_blit(&params);
 				break;
 				}
 			break;
