@@ -44,6 +44,8 @@
 #include "GP_JPG.h"
 #include "GP_GIF.h"
 
+#include "GP_MetaData.h"
+
 /*
  * Tries to load image accordingly to the file extension.
  *
