@@ -199,6 +199,9 @@ GP_Context *GP_ReadPNG(FILE *f, GP_ProgressCallback *callback)
 		goto err2;
 	}
 
+	if (color_type == PNG_COLOR_TYPE_GRAY)
+		res->bit_endian = 1;
+
 	uint32_t y;
 	
 	/* start the actuall reading */
