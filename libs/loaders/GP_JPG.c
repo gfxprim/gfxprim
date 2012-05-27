@@ -177,7 +177,6 @@ GP_Context *GP_ReadJPG(FILE *f, GP_ProgressCallback *callback)
 
 	jpeg_finish_decompress(&cinfo);
 	jpeg_destroy_decompress(&cinfo);
-	fclose(f);
 
 	GP_ProgressCallbackDone(callback);
 	
@@ -186,7 +185,6 @@ err2:
 	GP_ContextFree(ret);
 err1:
 	jpeg_destroy_decompress(&cinfo);
-	fclose(f);
 	errno = err;
 	return NULL;
 }
@@ -194,11 +192,17 @@ err1:
 GP_Context *GP_LoadJPG(const char *src_path, GP_ProgressCallback *callback)
 {
 	FILE *f;
+	GP_Context *res;
 
 	if (GP_OpenJPG(src_path, &f))
 		return NULL;
+	
 
-	return GP_ReadJPG(f, callback);
+	res = GP_ReadJPG(f, callback);
+	
+	fclose(f);
+
+	return res;
 }
 
 int GP_SaveJPG(const GP_Context *src, const char *dst_path,
