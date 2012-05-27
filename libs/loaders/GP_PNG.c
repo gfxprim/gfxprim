@@ -246,6 +246,97 @@ GP_Context *GP_LoadPNG(const char *src_path, GP_ProgressCallback *callback)
 	return res;
 }
 
+static void load_meta_data(png_structp png, png_infop png_info, GP_MetaData *data)
+{
+	double gamma;
+
+	if (png_get_gAMA(png, png_info, &gamma)) 
+		GP_MetaDataCreateInt(data, "gamma", gamma * 100000);
+
+	png_uint_32 res_x, res_y;
+	int unit;
+
+	if (png_get_pHYs(png, png_info, &res_x, &res_y, &unit)) {
+		GP_MetaDataCreateInt(data, "res_x", res_x);
+		GP_MetaDataCreateInt(data, "res_y", res_y);
+		
+		const char *unit_name;
+		
+		if (unit == PNG_RESOLUTION_METER)
+			unit_name = "meter";
+		else
+			unit_name = "unknown";
+		
+		GP_MetaDataCreateString(data, "res_unit", unit_name, 0);
+	}
+
+	double width, height;
+
+	if (png_get_sCAL(png, png_info, &unit, &width, &height)) {
+		GP_MetaDataCreateInt(data, "width", width * 1000);
+		GP_MetaDataCreateInt(data, "height", height * 1000);
+		GP_MetaDataCreateInt(data, "unit", unit);
+	}
+}
+
+int GP_ReadPNGMetaData(FILE *f, GP_MetaData *data)
+{
+	png_structp png;
+	png_infop png_info = NULL;
+	int err;
+
+	png = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
+
+	if (png == NULL) {
+		GP_DEBUG(1, "Failed to allocate PNG read buffer");
+		err = ENOMEM;
+		goto err1;
+	}
+	
+	png_info = png_create_info_struct(png);
+
+	if (png_info == NULL) {
+		GP_DEBUG(1, "Failed to allocate PNG info buffer");
+		err = ENOMEM;
+		goto err2;
+	}
+
+	if (setjmp(png_jmpbuf(png))) {
+		GP_DEBUG(1, "Failed to read PNG file :(");
+		//TODO: should we get better error description from libpng?
+		err = EIO;
+		goto err2;
+	}
+
+	png_init_io(png, f);
+	png_set_sig_bytes(png, 8);
+	png_read_info(png, png_info);
+
+	load_meta_data(png, png_info, data);
+
+	return 0;
+err2:
+	png_destroy_read_struct(&png, png_info ? &png_info : NULL, NULL);
+err1:
+	errno = err;
+	return 1;
+}
+
+int GP_LoadPNGMetaData(const char *src_path, GP_MetaData *data)
+{
+	FILE *f;
+	int ret;
+
+	if (GP_OpenPNG(src_path, &f))
+		return 1;
+
+	ret = GP_ReadPNGMetaData(f, data);
+
+	fclose(f);
+
+	return ret;
+}
+
 /*
  * Maps gfxprim Pixel Type to the PNG format
  */
@@ -443,6 +534,18 @@ GP_Context *GP_ReadPNG(FILE GP_UNUSED(*f),
 
 GP_Context *GP_LoadPNG(const char GP_UNUSED(*src_path),
                        GP_ProgressCallback GP_UNUSED(*callback))
+{
+	errno = ENOSYS;
+	return NULL;
+}
+
+int GP_ReadPNGMetaData(FILE GP_UNUSED(*f), GP_MetaData GP_UNUSED(*data))
+{
+	errno = ENOSYS;
+	return NULL;
+}
+
+int GP_LoadPNGMetaData(const char GP_UNUSED(*src_path), GP_MetaData GP_UNUSED(*data))
 {
 	errno = ENOSYS;
 	return NULL;

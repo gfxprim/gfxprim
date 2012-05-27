@@ -32,6 +32,8 @@
 #include "core/GP_ProgressCallback.h"
 #include "core/GP_Context.h"
 
+#include "GP_MetaData.h"
+
 /*
  * The possible errno values:
  *
@@ -63,6 +65,12 @@ GP_Context *GP_ReadPNG(FILE *f, GP_ProgressCallback *callback);
  * Does both GP_OpenPNG and GP_ReadPNG at once.
  */
 GP_Context *GP_LoadPNG(const char *src_path, GP_ProgressCallback *callback);
+
+/*
+ * Loads png meta-data.
+ */
+int GP_ReadPNGMetaData(FILE *f, GP_MetaData *data);
+int GP_LoadPNGMetaData(const char *src_path, GP_MetaData *data);
 
 /*
  * Saves PNG to a file. Zero is returned on succes. Upon failure non-zero is
