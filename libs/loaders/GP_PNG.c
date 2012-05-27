@@ -96,7 +96,7 @@ static const char *interlace_type_name(int interlace)
 GP_Context *GP_ReadPNG(FILE *f, GP_ProgressCallback *callback)
 {
 	png_structp png;
-	png_infop   png_info = NULL;
+	png_infop png_info = NULL;
 	png_uint_32 w, h;
 	int depth, color_type, interlace_type;
 	GP_PixelType pixel_type = GP_PIXEL_UNKNOWN;
@@ -211,21 +211,22 @@ GP_Context *GP_ReadPNG(FILE *f, GP_ProgressCallback *callback)
 
 		if (GP_ProgressCallbackReport(callback, y, h, w)) {
 			GP_DEBUG(1, "Operation aborted");
-			err= ECANCELED;
+			err = ECANCELED;
 			goto err3;
 		}
 			
 	}
+	
+	png_destroy_read_struct(&png, &png_info, NULL);
 
 	GP_ProgressCallbackDone(callback);
-
+	
 	return res;
 err3:
 	GP_ContextFree(res);
 err2:
 	png_destroy_read_struct(&png, png_info ? &png_info : NULL, NULL);
 err1:
-	fclose(f);
 	errno = err;
 	return NULL;
 }
@@ -233,11 +234,16 @@ err1:
 GP_Context *GP_LoadPNG(const char *src_path, GP_ProgressCallback *callback)
 {
 	FILE *f;
+	GP_Context *res;
 
 	if (GP_OpenPNG(src_path, &f))
 		return NULL;
 
-	return GP_ReadPNG(f, callback);
+	res = GP_ReadPNG(f, callback);
+	
+	fclose(f);
+
+	return res;
 }
 
 /*
