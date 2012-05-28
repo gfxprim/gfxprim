@@ -284,8 +284,8 @@ static void load_meta_data(png_structp png, png_infop png_info, GP_MetaData *dat
 	double width, height;
 
 	if (png_get_sCAL(png, png_info, &unit, &width, &height)) {
-		GP_MetaDataCreateInt(data, "width", width * 1000);
-		GP_MetaDataCreateInt(data, "height", height * 1000);
+		GP_MetaDataCreateDouble(data, "width", width);
+		GP_MetaDataCreateDouble(data, "height", height);
 		GP_MetaDataCreateInt(data, "unit", unit);
 	}
 
