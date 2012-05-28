@@ -32,24 +32,36 @@
 
 #include <GP.h>
 
+#define SEP \
+"-----------------------------------------------------------------------------"
+
 int main(int argc, char *argv[])
 {
-	GP_MetaData *data = GP_MetaDataCreate(10);
+	GP_MetaData *data = GP_MetaDataCreate(20);
+	int i;
 
-	if (argc != 2) {
-		fprintf(stderr, "Takes an image as an parameter\n");
+	if (argc < 2) {
+		fprintf(stderr, "Takes an image(s) as parameter(s)\n");
 		return 1;
 	}
 	
 	//GP_SetDebugLevel(10);
 
-	if (GP_LoadPNGMetaData(argv[1], data)) {
-		fprintf(stderr, "Failed to read '%s' meta-data: %s\n",
-		        argv[1], strerror(errno));
-		return 1;
+	for (i = 1; i < argc; i++) {
+		puts(SEP);
+		printf("Opening '%s'\n", argv[i]);
+		
+		GP_MetaDataClear(data);
+		
+		if (GP_LoadPNGMetaData(argv[i], data)) {
+			fprintf(stderr, "Failed to read '%s' meta-data: %s\n",
+			        argv[1], strerror(errno));
+		} else {
+			GP_MetaDataPrint(data);
+		}
 	}
-
-	GP_MetaDataPrint(data);
+	
+	puts(SEP);
 
 	return 0;
 }
