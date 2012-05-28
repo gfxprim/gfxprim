@@ -40,6 +40,7 @@
 #include "backends/GP_LinuxFB.h"
 #include "backends/GP_SDL.h"
 #include "backends/GP_X11.h"
+#include "backends/GP_BackendVirtual.h"
 
 /*
  * Simplified backend initalization.

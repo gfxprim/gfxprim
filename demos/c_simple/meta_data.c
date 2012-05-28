@@ -16,51 +16,69 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2010 Jiri "BlueBear" Dluhos                            *
- *                         <jiri.bluebear.dluhos@gmail.com>                  *
- *                                                                           *
  * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
-#ifndef GP_WRITEPIXEL_H
-#define GP_WRITEPIXEL_H
+ /*
 
-#include <endian.h>
-#include <stdint.h>
-#include <unistd.h>
+   Meta-data storage operations example.
 
-/*
- * Writes cnt pixels starting at offset off.
- */
-void GP_WritePixels_1BPP_LE(uint8_t *start, uint8_t off,
-                            size_t cnt, uint8_t val);
+   Meta-data storage is used to store image meta-data (if present) such as
+   physical size, creation date, etc...
 
-/*
- * Writes cnt pixels starting at offset off (offset is in pixel sizes not in
- * bits).
- */
-void GP_WritePixels_2BPP_LE(uint8_t *start, uint8_t off,
-                            size_t cnt, uint8_t val);
+   Meta-data storage is basically an typed dictionary.
 
-/*
- * Writes cnt pixels starting at offset off (offset is in pixel sizes not in
- * bits i.e. offset could be either 0 or 1).
- */
-void GP_WritePixels_4BPP_LE(uint8_t *start, uint8_t off,
-                            size_t cnt, uint8_t val);
+   This example shows low-level interface to GP_MetaData structure.
 
-/*
- * These calls are not byte aligned, thuss needs start offset.
- */
-void GP_WritePixels1bpp(uint8_t *start, uint8_t off, size_t cnt, uint8_t val);
-void GP_WritePixels2bpp(uint8_t *start, uint8_t off, size_t cnt, uint8_t val);
-void GP_WritePixels4bpp(uint8_t *start, uint8_t off, size_t cnt, uint8_t val);
-void GP_WritePixels18bpp(void *start, uint8_t off, size_t count, uint32_t value);
+  */
 
-void GP_WritePixels8bpp(void *start, size_t count, uint8_t value);
-void GP_WritePixels16bpp(void *start, size_t count, uint16_t value);
-void GP_WritePixels24bpp(void *start, size_t count, uint32_t value);
-void GP_WritePixels32bpp(void *start, size_t count, uint32_t value);
+#include <stdio.h>
 
-#endif /* GP_WRITEPIXEL_H */
+#include <GP.h>
+
+int main(void)
+{
+	GP_MetaData *data = GP_MetaDataCreate(10);
+
+	//GP_SetDebugLevel(10);
+
+	if (data == NULL)
+		return 1;
+
+	/* 
+	 * Create integer
+	 *
+	 * May fail, if there is allready record with id 'dpi' or
+	 * if there is no space left.
+	 */
+	GP_MetaDataCreateInt(data, "dpi", 300);
+
+	/*
+	 * Create an string.
+	 *
+	 * The last parameter says, if the string should be duplicated
+	 * in the metadata storage.
+	 */
+	GP_MetaDataCreateString(data, "author", "Foo Bar <foo@bar.net>", 1);
+	GP_MetaDataCreateString(data, "comment", "Created in hurry.", 1);
+	GP_MetaDataCreateDouble(data, "pi", 3.141592);
+
+	const char *ret;
+
+	ret = GP_MetaDataGetString(data, "comment");
+
+	if (ret != NULL)
+		printf("Found string 'comment' = '%s'\n", ret);
+	else
+		printf("ERROR: cannot cound string 'comment'\n");
+
+	printf("\n");
+
+	/*
+	 * Print all meta-data
+	 */
+	GP_MetaDataPrint(data);
+
+	return 0;
+}

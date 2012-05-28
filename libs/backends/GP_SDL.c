@@ -25,9 +25,10 @@
 
 #include "../../config.h"
 
+#include "core/GP_Debug.h"
+
 #ifdef HAVE_LIBSDL
 
-#include "core/GP_Debug.h"
 #include "input/GP_InputDriverSDL.h"
 #include "GP_Backend.h"
 #include "GP_SDL.h"
@@ -142,7 +143,7 @@ static struct GP_Backend backend = {
 	.UpdateRect    = sdl_update_rect,
 	.SetAttributes = sdl_set_attributes,
 	.Exit          = sdl_exit,
-	.fd_list       = NULL,
+	.fd            = -1,
 	.Poll          = sdl_poll,
 };
 
@@ -208,6 +209,7 @@ GP_Backend *GP_BackendSDLInit(GP_Size w __attribute__((unused)),
 			      uint8_t flags __attribute__((unused)),
                               const char *caption __attribute__((unused)))
 {
+	GP_DEBUG(0, "FATAL: SDL support not compiled in.");
 	return NULL;
 }
 

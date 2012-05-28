@@ -46,7 +46,7 @@ int main(void)
 	GP_FillCircle(context, 20, 20, 9, 1);
 	GP_FillCircle(context, 20, 20, 7, 0);
 	GP_FillCircle(context, 20, 20, 4, 1);
-	GP_Text(context, NULL, 10, 40, GP_VALIGN_BELOW | GP_ALIGN_RIGHT, "Test  Test", 1);
+	GP_Text(context, NULL, 10, 40, GP_VALIGN_BELOW | GP_ALIGN_RIGHT, 0, 1, "Test  Test");
 
 	if (GP_SavePBM("test.pbm", context)) {
 		fprintf(stderr, "Can't save context\n");

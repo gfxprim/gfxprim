@@ -177,7 +177,6 @@ GP_Context *GP_ReadJPG(FILE *f, GP_ProgressCallback *callback)
 
 	jpeg_finish_decompress(&cinfo);
 	jpeg_destroy_decompress(&cinfo);
-	fclose(f);
 
 	GP_ProgressCallbackDone(callback);
 	
@@ -186,7 +185,6 @@ err2:
 	GP_ContextFree(ret);
 err1:
 	jpeg_destroy_decompress(&cinfo);
-	fclose(f);
 	errno = err;
 	return NULL;
 }
@@ -194,11 +192,114 @@ err1:
 GP_Context *GP_LoadJPG(const char *src_path, GP_ProgressCallback *callback)
 {
 	FILE *f;
+	GP_Context *res;
 
 	if (GP_OpenJPG(src_path, &f))
 		return NULL;
+	
 
-	return GP_ReadJPG(f, callback);
+	res = GP_ReadJPG(f, callback);
+	
+	fclose(f);
+
+	return res;
+}
+
+#define JPEG_COM_MAX 128
+
+static void read_jpg_metadata(struct jpeg_decompress_struct *cinfo,
+                              GP_MetaData *data)
+{
+	jpeg_saved_marker_ptr marker;
+
+	for (marker = cinfo->marker_list; marker != NULL; marker = marker->next) {
+		switch (marker->marker) {
+		case JPEG_COM: {
+			char buf[JPEG_COM_MAX+1];
+			
+			memcpy(buf, marker->data, marker->data_length);
+			buf[marker->data_length] = 0;
+
+			/* Strip newline at the end of the commment */
+			if (buf[marker->data_length-1] == '\n')
+				buf[marker->data_length-1] = 0;
+
+			GP_MetaDataCreateString(data, "comment", buf, 1);
+		}
+		break;
+		case JPEG_APP0:
+			GP_DEBUG(0, "TODO: JFIF");
+		break;
+		case JPEG_APP0 + 1:
+			GP_DEBUG(0, "TODO: EXIF");
+		break;
+		}
+	}
+}
+
+static void save_jpg_markers(struct jpeg_decompress_struct *cinfo)
+{
+	/* Comment marker */
+	jpeg_save_markers(cinfo, JPEG_COM, JPEG_COM_MAX);
+	
+	/* APP0 marker = JFIF data */
+	jpeg_save_markers(cinfo, JPEG_APP0 + 1, 0xffff);
+	
+	/* APP1 marker = Exif data */
+	jpeg_save_markers(cinfo, JPEG_APP0 + 1, 0xffff);
+}
+
+int GP_ReadJPGMetaData(FILE *f, GP_MetaData *data)
+{
+	struct jpeg_decompress_struct cinfo;
+	struct my_jpg_err my_err;
+	int err;
+
+	cinfo.err = jpeg_std_error(&my_err.error_mgr);
+	my_err.error_mgr.error_exit = my_error_exit;
+
+	if (setjmp(my_err.setjmp_buf)) {
+		err = EIO;
+		goto err1;
+	}
+
+	jpeg_create_decompress(&cinfo);
+	jpeg_stdio_src(&cinfo, f);
+
+	save_jpg_markers(&cinfo);
+
+	jpeg_read_header(&cinfo, TRUE);
+
+	GP_DEBUG(1, "Have %s JPEG size %ux%u %i channels",
+	            get_colorspace(cinfo.jpeg_color_space),
+	            cinfo.image_width, cinfo.image_height,
+		    cinfo.num_components);
+	
+	read_jpg_metadata(&cinfo, data);
+	
+//	jpeg_finish_decompress(&cinfo);
+	jpeg_destroy_decompress(&cinfo);
+
+	return 0;
+err1:
+	jpeg_destroy_decompress(&cinfo);
+	errno = err;
+	return 1;
+}
+
+int GP_LoadJPGMetaData(const char *src_path, GP_MetaData *data)
+{
+	FILE *f;
+	int ret;
+
+	if (GP_OpenJPG(src_path, &f))
+		return 1;
+
+	ret = GP_ReadJPGMetaData(f, data);
+
+	fclose(f);
+
+	return ret;
 }
 
 int GP_SaveJPG(const GP_Context *src, const char *dst_path,
@@ -317,6 +418,19 @@ GP_Context *GP_ReadJPG(FILE GP_UNUSED(*f),
 
 GP_Context *GP_LoadJPG(const char GP_UNUSED(*src_path),
                        GP_ProgressCallback GP_UNUSED(*callback))
+{
+	errno = ENOSYS;
+	return NULL;
+}
+
+int GP_ReadJPGMetaData(FILE GP_UNUSED(*f), GP_MetaData GP_UNUSED(*data))
+{
+	errno = ENOSYS;
+	return NULL;
+}
+
+int GP_LoadJPGMetaData(const char GP_UNUSED(*src_path),
+                       GP_MetaData GP_UNUSED(*data))
 {
 	errno = ENOSYS;
 	return NULL;

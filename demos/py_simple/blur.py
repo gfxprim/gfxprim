@@ -17,7 +17,7 @@ def main():
     # Do in-place gaussian blur
     filters.FilterGaussianBlur(img, img, radii, radii, None)
     # Save result
-    loaders.SaveJPG("out.jpg", img, None)
+    loaders.SaveJPG(img, "out.jpg", None)
 
 if __name__ == '__main__':
     main()

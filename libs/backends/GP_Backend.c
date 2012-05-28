@@ -46,6 +46,12 @@ int GP_BackendResize(GP_Backend *backend, uint32_t w, uint32_t h)
 {
 	if (backend->SetAttributes == NULL)
 		return 1;
+	
+	if (w == 0)
+		w = backend->context->w;
+
+	if (h == 0)
+		h = backend->context->h;
 
 	if (backend->context->w == w && backend->context->h == h)
 		return 0;

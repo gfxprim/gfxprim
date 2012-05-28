@@ -25,16 +25,27 @@
 
 #include "GP_Backend.h"
 
+enum GP_BackendX11Flags {
+	/* 
+	 * When set, w and h is ignored and root window is used
+	 */
+	GP_X11_USE_ROOT_WIN = 0x01,
+};
+
+
 /*
  * Initalize X11 backend.
  *
- * The display may be NULL default display. The coordinates are position and
- * geometry for newly created window.
+ * The display may be NULL for default display ($DISPLAY shell variable will
+ * be used).
+ * 
+ * The coordinates are position and geometry for newly created window.
  * 
  * Upon failure NULL is returned.
  */
 GP_Backend *GP_BackendX11Init(const char *display, int x, int y,
                               unsigned int w, unsigned int h,
-			      const char *caption);
+			      const char *caption,
+			      enum GP_BackendX11Flags flags);
 
 #endif /* BACKENDS_GP_X11_H */

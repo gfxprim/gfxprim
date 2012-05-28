@@ -16,88 +16,82 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2012      Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
  /*
-
-   Simple backend example.
+  
+   Inline functions for swapping bits inside of the byte
 
   */
 
-#include <GP.h>
-#include <backends/GP_Backends.h>
+#ifndef CORE_GP_BIT_SWAP_H
+#define CORE_GP_BIT_SWAP_H
 
-int main(int argc, char *argv[])
+/*
+ * Reverse 1 bit blocks in the byte.
+ *
+ * Example:
+ *
+ * IN  10101110
+ * OUT 01110101
+ */
+static inline uint8_t GP_BIT_SWAP_B1(uint8_t byte)
 {
-	GP_Backend *backend;
-	GP_Context *context;
-	GP_Pixel white_pixel, black_pixel;
-	const char *backend_opts = "X11:100x100";
-	int opt;
-
-	while ((opt = getopt(argc, argv, "b:h")) != -1) {
-		switch (opt) {
-		case 'b':
-			backend_opts = optarg;
-		break;
-		case 'h':
-			GP_BackendInit(NULL, NULL, stderr);
-			return 0;
-		break;
-		default:
-			fprintf(stderr, "Invalid paramter '%c'\n", opt);
-			return 1;
-		}
-	}
-
-	/* Turn on debug messages */
-	GP_SetDebugLevel(10);
-
-	backend = GP_BackendInit(backend_opts, "Backend Example", stderr);
-
-	context = backend->context;
-
-	GP_EventSetScreenSize(context->w, context->h);
-	
-	black_pixel = GP_ColorToContextPixel(GP_COL_BLACK, context);
-	white_pixel = GP_ColorToContextPixel(GP_COL_WHITE, context);
-
-	GP_Fill(context, black_pixel);
-	GP_Line(context, 0, 0, context->w - 1, context->h - 1, white_pixel);
-	GP_Line(context, 0, context->h - 1, context->w - 1, 0, white_pixel);
-
-	/* Update the backend screen */
-	GP_BackendFlip(backend);
-
-	for (;;) {
-		if (backend->Poll)
-			GP_BackendPoll(backend);
-
-		usleep(1000);
-
-		/* Read and parse events */
-		GP_Event ev;
-
-		while (GP_EventGet(&ev)) {
-
-			GP_EventDump(&ev);
-			
-			switch (ev.type) {
-			case GP_EV_KEY:
-				switch (ev.val.key.key) {
-				case GP_KEY_ESC:
-				case GP_KEY_Q:
-					GP_BackendExit(backend);
-					return 0;
-				break;
-				}
-			}
-		}
-	}
-
-	GP_BackendExit(backend);
-
-	return 0;
+	return ((byte * 0x0802LU & 0x22110LU) |
+                (byte * 0x8020LU & 0x88440LU)) * 0x10101LU >> 16;
 }
+
+static inline void GP_BitSwapRow_B1(uint8_t *row, unsigned int len)
+{
+	unsigned int i;
+
+	for (i = 0; i < len; i++)
+		row[i] = GP_BIT_SWAP_B1(row[i]);
+}
+
+/*
+ * Reverse 2 bit blocks in the byte.
+ *
+ * Example:
+ *
+ * IN  10 11 01 00
+ * OUT 00 01 11 10
+ */
+static inline uint8_t GP_BIT_SWAP_B2(uint8_t byte)
+{
+	return ((byte & 0xC0) >> 6) | ((byte & 0x30) >> 2) |
+	       ((byte & 0x0C) << 2) | ((byte & 0x03) << 6);
+}
+
+static inline void GP_BitSwapRow_B2(uint8_t *row, unsigned int len)
+{
+	unsigned int i;
+
+	for (i = 0; i < len; i++)
+		row[i] = GP_BIT_SWAP_B2(row[i]);
+}
+
+/*
+ * Reverse 4 bit blocks in the byte.
+ *
+ * Example:
+ *
+ * IN  1011 0100
+ * OUT 0100 1011
+ */
+static inline uint8_t GP_BIT_SWAP_B4(uint8_t byte)
+{
+	return ((byte & 0xf0) >> 4) | ((byte & 0x0f) << 4);
+}
+
+static inline void GP_BitSwapRow_B4(uint8_t *row, unsigned int len)
+{
+	unsigned int i;
+
+	for (i = 0; i < len; i++)
+		row[i] = GP_BIT_SWAP_B4(row[i]);
+}
+
+#endif /* CORE_GP_BIT_SWAP_H */

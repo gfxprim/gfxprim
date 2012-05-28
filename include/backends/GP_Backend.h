@@ -46,15 +46,6 @@
 
 struct GP_Backend;
 
-/*
- * Linked list of file descriptors with callbacks. 
- */
-typedef struct GP_BackendFD {
-	int fd;
-	void (*Callback)(struct GP_BackendFD *self, struct GP_Backend *backend);
-	struct GP_BackendFD *next;
-} GP_BackendFD;
-
 typedef struct GP_Backend {
 	/*
 	 * Backend name.
@@ -93,6 +84,8 @@ typedef struct GP_Backend {
 	 *
 	 * If w and h are zero, only caption is changed.
 	 *
+	 * If w is set and h is zero, only w is changed and vice versa.
+	 *
 	 * If caption is NULL only w and h are changed.
 	 *
 	 * Use the inline wrappers instead.
@@ -107,11 +100,9 @@ typedef struct GP_Backend {
 	void (*Exit)(struct GP_Backend *self);
 
 	/* 
-	 * Linked List of file descriptors with callbacks to poll.
-	 *
-	 * May be NULL.
+	 * Connection fd. Set to -1 if not available 
 	 */
-	GP_BackendFD *fd_list;
+	int fd;
 
 	/*
 	 * Some of the backends doesn't expose file descriptor

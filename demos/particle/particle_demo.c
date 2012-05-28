@@ -61,7 +61,7 @@ static void init_backend(const char *backend_opts)
 
 int main(int argc, char *argv[])
 {
-	const char *backend_opts = "SDL";
+	const char *backend_opts = "X11";
 	int opt;
 	int pause_flag = 0;
 
@@ -75,7 +75,7 @@ int main(int argc, char *argv[])
 		}
 	}
 	
-	GP_SetDebugLevel(10);
+//	GP_SetDebugLevel(10);
 
 	signal(SIGINT, sighandler);
 	signal(SIGSEGV, sighandler);

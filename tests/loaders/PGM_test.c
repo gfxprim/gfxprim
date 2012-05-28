@@ -66,9 +66,9 @@ int main(void)
 	GP_FillCircle(context, W/2, H/2, 7, 2);
 	GP_FillCircle(context, W/2, H/2, 5, 1);
 	GP_FillCircle(context, W/2, H/2, 2, 0);
-	GP_Text(context, NULL, 60, 10, GP_VALIGN_BELOW | GP_ALIGN_RIGHT, "Test", 3);
-	GP_Text(context, NULL, 60, 20, GP_VALIGN_BELOW | GP_ALIGN_RIGHT, "Test", 2);
-	GP_Text(context, NULL, 60, 30, GP_VALIGN_BELOW | GP_ALIGN_RIGHT, "Test", 1);
+	GP_Text(context, NULL, 60, 10, GP_VALIGN_BELOW | GP_ALIGN_RIGHT, 0, 3, "Test");
+	GP_Text(context, NULL, 60, 20, GP_VALIGN_BELOW | GP_ALIGN_RIGHT, 0, 2, "Test");
+	GP_Text(context, NULL, 60, 30, GP_VALIGN_BELOW | GP_ALIGN_RIGHT, 0, 1, "Test");
 
 	if (GP_SavePGM("test.pgm", context)) {
 		fprintf(stderr, "Can't save context\n");

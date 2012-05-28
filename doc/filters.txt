@@ -57,7 +57,7 @@ result and there are 'NO' sanity checks in place.
 [source,c]
 -------------------------------------------------------------------------------
 /*
- * Raw filter common api.
+ * Raw filter common API.
  */
 void GP_FilterFoo_Raw(const GP_Context *src, GP_Context *dst,
                       foo params ...,
@@ -110,68 +110,83 @@ Rotation and Symmetry filters
 -------------------------------------------------------------------------------
 #include <GP_Filters.h>
 
-GP_Context *GP_FilterMirrorH(const GP_Context *src, GP_Context *dst,
-                             GP_ProgressCallback *callback);
+int GP_FilterMirrorH(const GP_Context *src, GP_Context *dst,
+                     GP_ProgressCallback *callback);
+
+GP_Context *GP_FilterMirrorH_Alloc(const GP_Context *src,
+                                   GP_ProgressCallback *callback);
 -------------------------------------------------------------------------------
 
 Mirrors context horizontally.
 
 Works 'in-place'.
 
-The destination has to have the same pixel type and the destination size must
-be at least as big as source.
+The destination has to have the same pixel type and the size must be at least
+as large as source.
 
 [source,c]
 -------------------------------------------------------------------------------
 #include <GP_Filters.h>
 
-GP_Context *GP_FilterMirrorV(const GP_Context *src, GP_Context *dst,
-                             GP_ProgressCallback *callback);
+int GP_FilterMirrorV(const GP_Context *src, GP_Context *dst,
+                     GP_ProgressCallback *callback);
+
+GP_Context *GP_FilterMirrorV_Alloc(const GP_Context *src,
+                                   GP_ProgressCallback *callback);
 -------------------------------------------------------------------------------
 
 Mirrors context vertically.
 
 Works 'in-place'.
 
-the destination has to have the same pixel type and the destination size must
-be at least as big as source.
+The destination has to have the same pixel type and the size must be at least
+as large as source.
 
 [source,c]
 -------------------------------------------------------------------------------
 #include <GP_Filters.h>
 
-GP_Context *GP_FilterRotate90(const GP_Context *src, GP_Context *dst,
-                              GP_ProgressCallback *callback);
+int GP_FilterRotate90(const GP_Context *src, GP_Context *dst,
+                      GP_ProgressCallback *callback);
+
+GP_Context *GP_FilterRotate90_Alloc(const GP_Context *src,
+                                    GP_ProgressCallback *callback);
 -------------------------------------------------------------------------------
 
 Rotate context by 90 degrees.
 
 Doesn't work 'in-place' (yet).
 
-The destination has to have the same pixel type and destination size must be
-big enough to fit rotated context (i.e. W and H are swapped).
+The destination has to have the same pixel type and size must be large enough to
+fit rotated context (i.e. W and H are swapped).
 
 [source,c]
 -------------------------------------------------------------------------------
 #include <GP_Filters.h>
 
-GP_Context *GP_FilterRotate180(const GP_Context *src, GP_Context *dst,
-                               GP_ProgressCallback *callback);
+int GP_FilterRotate180(const GP_Context *src, GP_Context *dst,
+                       GP_ProgressCallback *callback);
+
+GP_Context *GP_FilterRotate180_Alloc(const GP_Context *src,
+                                     GP_ProgressCallback *callback);
 -------------------------------------------------------------------------------
 
 Rotate context by 180 degrees.
 
 Doesn't work 'in-place' (yet).
 
-the destination has to have the same pixel type and the destination size must
-be at least as big as source.
+The destination has to have the same pixel type and the size must be at least
+as large as source.
 
 [source,c]
 -------------------------------------------------------------------------------
 #include <GP_Filters.h>
 
-GP_Context *GP_FilterRotate270(const GP_Context *src, GP_Context *dst,
-                               GP_ProgressCallback *callback);
+int GP_FilterRotate270(const GP_Context *src, GP_Context *dst,
+                       GP_ProgressCallback *callback);
+
+GP_Context *GP_FilterRotate270_Alloc(const GP_Context *src,
+                                     GP_ProgressCallback *callback);
 -------------------------------------------------------------------------------
 
 Rotate context by 270 degrees.
@@ -179,7 +194,7 @@ Rotate context by 270 degrees.
 Doesn't work 'in-place' (yet).
 
 The destination has to have the same pixel type and destination size must be
-big enough to fit rotated context (eg. W and H are swapped).
+large enough to fit rotated context (eg. W and H are swapped).
 
 [source,c]
 -------------------------------------------------------------------------------
@@ -193,9 +208,13 @@ typedef enum GP_FilterSymmetries {
         GP_MIRROR_V,
 } GP_FilterSymmetries;
 
-GP_Context *GP_FilterSymmetry(const GP_Context *src, GP_Context *dst,
+GP_Context *GP_FilterSymmetry(const GP_Context *src,
                               GP_FilterSymmetries symmetry,
                               GP_ProgressCallback *callback);
+
+int GP_FilterSymmetry(const GP_Context *src, GP_Context *dst,
+                      GP_FilterSymmetries symmetry,
+                      GP_ProgressCallback *callback);
 -------------------------------------------------------------------------------
 
 Catch all function for symmetry filters.
@@ -268,22 +287,17 @@ finally downscale it to desired size.
 Dithering
 ~~~~~~~~~
 
-[source,c]
--------------------------------------------------------------------------------
-#include <GP_Filters.h>
+Currently there are two dithering algorithms implemented. Both takes an RGB888
+24bit image as input and are able to produce any RGB or Grayscale image.
+This filters doesn't work 'in-place' as the result has different pixel type.
 
-GP_Context *GP_FilterFloydSteinberg_from_RGB888(const GP_Context *src,
-                                                GP_Context *dst,
-                                                GP_PixelType dst_pixel_type,
-                                                GP_ProgressCallback *callback);
--------------------------------------------------------------------------------
+Floyd-Steinberg
+^^^^^^^^^^^^^^^
 
-Floyd-Steinberg dithering the source context must be RGB888 and the
-dst_pixel_type may either be RGB or Grayscale.
+Classical Floyd-Steinberg. Produces good results and is a little faster than
+the Hilbert-Peano dithering.
 
-Doesn't work 'in-place' as the result has different pixel type.
-
-The error is distributed to neighbour pixels as follows:
+The error is distributed to neighbor pixels as follows:
 
 [width="10%"]
 |===================
@@ -297,39 +311,118 @@ And is throwed away at the image borders.
 -------------------------------------------------------------------------------
 #include <GP_Filters.h>
 
-GP_Context *GP_FilterFloydSteinberg_to_G1(const GP_Context *src,
-                                          GP_Context *dst,
-                                          GP_ProgressCallback *callback);
+int GP_FilterFloydSteinberg_RGB888(const GP_Context *src,
+                                   GP_Context *dst,
+                                   GP_ProgressCallback *callback);
 -------------------------------------------------------------------------------
 
-Same as above but the source is any pixel type and the result is stored into
-1-bit Grayscale.
+Renders Floyd Steinberg dithering directly into passed context. The
+destination must be at least as large as source. 
+
+If operation was aborted by a callback, non-zero is returned.
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <GP_Filters.h>
+
+GP_Context *GP_FilterFloydSteinberg_RGB888_Alloc(const GP_Context *src,
+                                                 GP_PixelType pixel_type,
+                                                 GP_ProgressCallback *callback);
+-------------------------------------------------------------------------------
+
+Returns pointer to allocated context of given pixel_type.
+
+If malloc(2) has failed, or operation was aborted by a callback 'NULL' is
+returned.
+
+Hilbert-Peano
+^^^^^^^^^^^^^
+
+Hilbert-Peano space filling curve based dithering.
+ 
+The error value is distributed around the Hilbert curve.
+
+The result is a little more noisy, but doesn't create repeating patterns like
+Floyd-Steinberg which looks generally better to human eye. On the other hand
+edges tend to be less sharp.
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <GP_Filters.h>
+
+int GP_FilterHilbertPeano_RGB888(const GP_Context *src,
+                                 GP_Context *dst,
+                                 GP_ProgressCallback *callback);
+-------------------------------------------------------------------------------
+
+Renders Hilbert Peano dithering directly into passed context. The
+destination must be at least as large as source. 
+
+If operation was aborted by a callback, non-zero is returned.
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <GP_Filters.h>
+
+GP_Context *GP_FilterHilbertPeano_RGB888_Alloc(const GP_Context *src,
+                                               GP_PixelType pixel_type,
+                                               GP_ProgressCallback *callback);
+-------------------------------------------------------------------------------
+
+Returns pointer to allocated context of given pixel_type.
+
+If malloc(2) has failed, or operation was aborted by a callback 'NULL' is
+returned.
 
 Example Images
 ^^^^^^^^^^^^^^
 All following images were generated using 'grinder'.
 (Click for bigger size)
 
-.Original Image; 1-bit, 2-bit, 4-bit Grayscale; 1-bit, 2-bit, 3-bit RGB
+.Original Image; Floyd-Steinberg, Hilbert-Peano: 1-bit, 2-bit, 4-bit, 8-bit Grayscale; 1-bit, 2-bit, 3-bit (per channel) RGB
 image:images/dither/lenna_small.png[
 	"Original Image", 
 	link="images/dither/lenna.png"]
-image:images/dither/lenna_G1_small.png[
-	"1-bit Grayscale",
-	link="images/dither/lenna_G1.png"]
-image:images/dither/lenna_G2_small.png[
-	"2-bit Grayscale",
-	link="images/dither/lenna_G2.png"]
-image:images/dither/lenna_G4_small.png[
-	"4-bit Grayscale",
-	link="images/dither/lenna_G4.png"]
-image:images/dither/lenna_RGB111_small.png[
-	"1-bit RGB",
-	link="images/dither/lenna_RGB111.png"]
-image:images/dither/lenna_RGB222_small.png[
-	"2-bit RGB",
-	link="images/dither/lenna_RGB222.png"]
-image:images/dither/lenna_RGB333_small.png[
-	"3-bit RGB",
-	link="images/dither/lenna_RGB333.png"]
+image:images/dither/lenna_G1_FS_small.png[
+	"1-bit Grayscale Floyd-Steinberg",
+	link="images/dither/lenna_G1_FS.png"]
+image:images/dither/lenna_G1_HP_small.png[
+	"1-bit Grayscale Hilbert-Peano",
+	link="images/dither/lenna_G1_HP.png"]
+image:images/dither/lenna_G2_FS_small.png[
+	"2-bit Grayscale Floyd-Steinberg",
+	link="images/dither/lenna_G2_FS.png"]
+image:images/dither/lenna_G2_HP_small.png[
+	"2-bit Grayscale Hilbert-Peano",
+	link="images/dither/lenna_G2_HP.png"]
+image:images/dither/lenna_G4_FS_small.png[
+	"4-bit Grayscale Floyd-Steinberg",
+	link="images/dither/lenna_G4_FS.png"]
+image:images/dither/lenna_G4_HP_small.png[
+	"4-bit Grayscale Hilbert-Peano",
+	link="images/dither/lenna_G4_HP.png"]
+image:images/dither/lenna_G8_FS_small.png[
+	"8-bit Grayscale Floyd-Steinberg",
+	link="images/dither/lenna_G8_FS.png"]
+image:images/dither/lenna_G8_HP_small.png[
+	"7-bit Grayscale Hilbert-Peano",
+	link="images/dither/lenna_G8_HP.png"]
+image:images/dither/lenna_RGB111_FS_small.png[
+	"1-bit RGB Floyd-Steinberg",
+	link="images/dither/lenna_RGB111_FS.png"]
+image:images/dither/lenna_RGB111_HP_small.png[
+	"1-bit RGB Hilbert-Peano",
+	link="images/dither/lenna_RGB111_HP.png"]
+image:images/dither/lenna_RGB222_FS_small.png[
+	"2-bit RGB Floyd-Steinberg",
+	link="images/dither/lenna_RGB222_FS.png"]
+image:images/dither/lenna_RGB222_HP_small.png[
+	"2-bit RGB Hilbert-Peano",
+	link="images/dither/lenna_RGB222_HP.png"]
+image:images/dither/lenna_RGB333_FS_small.png[
+	"3-bit RGB Floyd-Steinberg",
+	link="images/dither/lenna_RGB333_FS.png"]
+image:images/dither/lenna_RGB333_HP_small.png[
+	"3-bit RGB Hilbert-Peano",
+	link="images/dither/lenna_RGB333_HP.png"]
 

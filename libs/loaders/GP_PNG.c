@@ -41,6 +41,8 @@
 
 #include <png.h>
 
+#include "core/GP_BitSwap.h"
+
 int GP_OpenPNG(const char *src_path, FILE **f)
 {
 	uint8_t sig[8];
@@ -94,7 +96,7 @@ static const char *interlace_type_name(int interlace)
 GP_Context *GP_ReadPNG(FILE *f, GP_ProgressCallback *callback)
 {
 	png_structp png;
-	png_infop   png_info = NULL;
+	png_infop png_info = NULL;
 	png_uint_32 w, h;
 	int depth, color_type, interlace_type;
 	GP_PixelType pixel_type = GP_PIXEL_UNKNOWN;
@@ -197,6 +199,9 @@ GP_Context *GP_ReadPNG(FILE *f, GP_ProgressCallback *callback)
 		goto err2;
 	}
 
+	if (color_type == PNG_COLOR_TYPE_GRAY)
+		png_set_packswap(png);
+
 	uint32_t y;
 	
 	/* start the actuall reading */
@@ -206,21 +211,22 @@ GP_Context *GP_ReadPNG(FILE *f, GP_ProgressCallback *callback)
 
 		if (GP_ProgressCallbackReport(callback, y, h, w)) {
 			GP_DEBUG(1, "Operation aborted");
-			err= ECANCELED;
+			err = ECANCELED;
 			goto err3;
 		}
 			
 	}
+	
+	png_destroy_read_struct(&png, &png_info, NULL);
 
 	GP_ProgressCallbackDone(callback);
-
+	
 	return res;
 err3:
 	GP_ContextFree(res);
 err2:
 	png_destroy_read_struct(&png, png_info ? &png_info : NULL, NULL);
 err1:
-	fclose(f);
 	errno = err;
 	return NULL;
 }
@@ -228,11 +234,232 @@ err1:
 GP_Context *GP_LoadPNG(const char *src_path, GP_ProgressCallback *callback)
 {
 	FILE *f;
+	GP_Context *res;
 
 	if (GP_OpenPNG(src_path, &f))
 		return NULL;
 
-	return GP_ReadPNG(f, callback);
+	res = GP_ReadPNG(f, callback);
+	
+	fclose(f);
+
+	return res;
+}
+
+static void load_meta_data(png_structp png, png_infop png_info, GP_MetaData *data)
+{
+	double gamma;
+
+	if (png_get_gAMA(png, png_info, &gamma)) 
+		GP_MetaDataCreateInt(data, "gamma", gamma * 100000);
+
+	png_uint_32 res_x, res_y;
+	int unit;
+
+	if (png_get_pHYs(png, png_info, &res_x, &res_y, &unit)) {
+		GP_MetaDataCreateInt(data, "res_x", res_x);
+		GP_MetaDataCreateInt(data, "res_y", res_y);
+		
+		const char *unit_name;
+		
+		if (unit == PNG_RESOLUTION_METER)
+			unit_name = "meter";
+		else
+			unit_name = "unknown";
+		
+		GP_MetaDataCreateString(data, "res_unit", unit_name, 0);
+	}
+
+	png_timep mod_time;
+
+	if (png_get_tIME(png, png_info, &mod_time)) {
+		GP_MetaDataCreateInt(data, "mod_sec", mod_time->second);
+		GP_MetaDataCreateInt(data, "mod_min", mod_time->minute);
+		GP_MetaDataCreateInt(data, "mod_hour", mod_time->hour);
+		GP_MetaDataCreateInt(data, "mod_day", mod_time->day);
+		GP_MetaDataCreateInt(data, "mod_mon", mod_time->month);
+		GP_MetaDataCreateInt(data, "mod_year", mod_time->year);
+	}
+
+	double width, height;
+
+	if (png_get_sCAL(png, png_info, &unit, &width, &height)) {
+		GP_MetaDataCreateDouble(data, "width", width);
+		GP_MetaDataCreateDouble(data, "height", height);
+		GP_MetaDataCreateInt(data, "unit", unit);
+	}
+
+	png_textp text_ptr;
+	int text_cnt;
+
+	if (png_get_text(png, png_info, &text_ptr, &text_cnt)) {
+		int i;
+		
+		for (i = 0; i < text_cnt; i++) {
+
+			if (text_ptr[i].compression != PNG_TEXT_COMPRESSION_NONE)
+				continue;
+			
+			char buf[GP_META_RECORD_ID_MAX];
+			snprintf(buf, GP_META_RECORD_ID_MAX, "text:%s", text_ptr[i].key);
+			GP_MetaDataCreateString(data, buf, text_ptr[i].text, 1);
+		}
+	}
+}
+
+int GP_ReadPNGMetaData(FILE *f, GP_MetaData *data)
+{
+	png_structp png;
+	png_infop png_info = NULL;
+	int err;
+
+	png = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
+
+	if (png == NULL) {
+		GP_DEBUG(1, "Failed to allocate PNG read buffer");
+		err = ENOMEM;
+		goto err1;
+	}
+	
+	png_info = png_create_info_struct(png);
+
+	if (png_info == NULL) {
+		GP_DEBUG(1, "Failed to allocate PNG info buffer");
+		err = ENOMEM;
+		goto err2;
+	}
+
+	if (setjmp(png_jmpbuf(png))) {
+		GP_DEBUG(1, "Failed to read PNG file :(");
+		//TODO: should we get better error description from libpng?
+		err = EIO;
+		goto err2;
+	}
+
+	png_init_io(png, f);
+	png_set_sig_bytes(png, 8);
+	png_read_info(png, png_info);
+
+	load_meta_data(png, png_info, data);
+
+	return 0;
+err2:
+	png_destroy_read_struct(&png, png_info ? &png_info : NULL, NULL);
+err1:
+	errno = err;
+	return 1;
+}
+
+int GP_LoadPNGMetaData(const char *src_path, GP_MetaData *data)
+{
+	FILE *f;
+	int ret;
+
+	if (GP_OpenPNG(src_path, &f))
+		return 1;
+
+	ret = GP_ReadPNGMetaData(f, data);
+
+	fclose(f);
+
+	return ret;
+}
+
+/*
+ * Maps gfxprim Pixel Type to the PNG format
+ */
+static int prepare_png_header(const GP_Context *src, png_structp png,
+                              png_infop png_info, int *bit_endian_flag)
+{
+	int bit_depth, color_type;
+
+	switch (src->pixel_type) {
+	case GP_PIXEL_BGR888:
+	case GP_PIXEL_RGB888:
+		bit_depth = 8;
+		color_type = PNG_COLOR_TYPE_RGB;
+	break;
+	case GP_PIXEL_G1:
+		bit_depth = 1;
+		color_type = PNG_COLOR_TYPE_GRAY;
+	break;
+	case GP_PIXEL_G2:
+		bit_depth = 2;
+		color_type = PNG_COLOR_TYPE_GRAY;
+	break;
+	case GP_PIXEL_G4:
+		bit_depth = 4;
+		color_type = PNG_COLOR_TYPE_GRAY;
+	break;
+	case GP_PIXEL_G8:
+		bit_depth = 8;
+		color_type = PNG_COLOR_TYPE_GRAY;
+	break;
+	default:
+		return 1;
+	break;
+	}
+
+	/* If pointers weren't passed, just return it is okay */
+	if (png == NULL || png_info == NULL)
+		return 0;
+
+	png_set_IHDR(png, png_info, src->w, src->h, bit_depth, color_type,
+	             PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_DEFAULT,
+		     PNG_FILTER_TYPE_DEFAULT);
+	
+	/* start the actuall writing */
+	png_write_info(png, png_info);
+	
+	//png_set_packing(png);
+
+	/* prepare for format conversion */
+	switch (src->pixel_type) {
+	case GP_PIXEL_RGB888:
+		png_set_bgr(png);
+	break;
+	case GP_PIXEL_G1:
+	case GP_PIXEL_G2:
+	case GP_PIXEL_G4:
+		*bit_endian_flag = !src->bit_endian;
+	break;
+	default:
+	break;
+	}
+
+	return 0;
+}
+
+static int write_png_data(const GP_Context *src, png_structp png,
+                          GP_ProgressCallback *callback, int bit_endian_flag)
+{
+	/* Look if we need to swap data when writing */
+	if (bit_endian_flag) {
+		switch (src->pixel_type) {
+		case GP_PIXEL_G1:
+		case GP_PIXEL_G2:
+		case GP_PIXEL_G4:
+			png_set_packswap(png);
+		break;
+		default:
+			return ENOSYS;
+		break;
+		}
+	}
+
+	unsigned int y;
+
+	for (y = 0; y < src->h; y++) {
+		png_bytep row = GP_PIXEL_ADDR(src, 0, y);
+		png_write_row(png, row);
+
+		if (GP_ProgressCallbackReport(callback, y, src->h, src->w)) {
+			GP_DEBUG(1, "Operation aborted");
+			return ECANCELED;
+		}
+	}
+
+	return 0;
 }
 
 int GP_SavePNG(const GP_Context *src, const char *dst_path,
@@ -245,8 +472,8 @@ int GP_SavePNG(const GP_Context *src, const char *dst_path,
 
 	GP_DEBUG(1, "Saving PNG Image '%s'", dst_path);
 
-	if (src->pixel_type != GP_PIXEL_RGB888) {
-		GP_DEBUG(1, "Can't save png with pixel type %s",
+	if (prepare_png_header(src, NULL, NULL, NULL)) {
+		GP_DEBUG(1, "Can't save png with %s pixel type",
 		         GP_PixelTypeName(src->pixel_type));
 		return ENOSYS;
 	}
@@ -284,27 +511,14 @@ int GP_SavePNG(const GP_Context *src, const char *dst_path,
 	}
 
 	png_init_io(png, f);
-	png_set_IHDR(png, png_info, src->w, src->h, 8, PNG_COLOR_TYPE_RGB,
-	             PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_DEFAULT,
-		     PNG_FILTER_TYPE_DEFAULT);
+	
+	int bit_endian_flag = 0;
+	/* Fill png header and prepare for data */
+	prepare_png_header(src, png, png_info, &bit_endian_flag);
 
-	/* start the actuall writing */
-	png_write_info(png, png_info);
-	png_set_bgr(png);
-
-	uint32_t y;
-
-	for (y = 0; y < src->h; y++) {
-		png_bytep row = GP_PIXEL_ADDR(src, 0, y);
-		png_write_row(png, row);
-
-		if (GP_ProgressCallbackReport(callback, y, src->h, src->w)) {
-			GP_DEBUG(1, "Operation aborted");
-			err = ECANCELED;
-			goto err3;
-		}
-			
-	}
+	/* Write bitmap buffer */
+	if ((err = write_png_data(src, png, callback, bit_endian_flag)))
+		goto err3;
 
 	png_write_end(png, png_info);
 	png_destroy_write_struct(&png, &png_info);
@@ -348,6 +562,18 @@ GP_Context *GP_ReadPNG(FILE GP_UNUSED(*f),
 
 GP_Context *GP_LoadPNG(const char GP_UNUSED(*src_path),
                        GP_ProgressCallback GP_UNUSED(*callback))
+{
+	errno = ENOSYS;
+	return NULL;
+}
+
+int GP_ReadPNGMetaData(FILE GP_UNUSED(*f), GP_MetaData GP_UNUSED(*data))
+{
+	errno = ENOSYS;
+	return NULL;
+}
+
+int GP_LoadPNGMetaData(const char GP_UNUSED(*src_path), GP_MetaData GP_UNUSED(*data))
 {
 	errno = ENOSYS;
 	return NULL;

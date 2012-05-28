@@ -84,8 +84,8 @@ int GP_FilterMirrorH(const GP_Context *src, GP_Context *dst,
 	return 0;
 }
 
-GP_Context *GP_FilterMirrorHAlloc(const GP_Context *src,
-                                  GP_ProgressCallback *callback)
+GP_Context *GP_FilterMirrorH_Alloc(const GP_Context *src,
+                                   GP_ProgressCallback *callback)
 {
 	GP_Context *res;
 	
@@ -118,8 +118,8 @@ int GP_FilterMirrorV(const GP_Context *src, GP_Context *dst,
 	return 0;
 }
 
-GP_Context *GP_FilterMirrorVAlloc(const GP_Context *src,
-                                  GP_ProgressCallback *callback)
+GP_Context *GP_FilterMirrorV_Alloc(const GP_Context *src,
+                                   GP_ProgressCallback *callback)
 {
 	GP_Context *res;
 	
@@ -163,8 +163,8 @@ int GP_FilterRotate90(const GP_Context *src, GP_Context *dst,
 	return 0;
 }
 
-GP_Context *GP_FilterRotate90Alloc(const GP_Context *src,
-                                   GP_ProgressCallback *callback)
+GP_Context *GP_FilterRotate90_Alloc(const GP_Context *src,
+                                    GP_ProgressCallback *callback)
 {
 	GP_Context *res;
 		
@@ -198,8 +198,8 @@ int GP_FilterRotate180(const GP_Context *src, GP_Context *dst,
 	return 0;
 }
 
-GP_Context *GP_FilterRotate180Alloc(const GP_Context *src,
-                                    GP_ProgressCallback *callback)
+GP_Context *GP_FilterRotate180_Alloc(const GP_Context *src,
+                                     GP_ProgressCallback *callback)
 {
 	GP_Context *res;
 		
@@ -233,8 +233,8 @@ int GP_FilterRotate270(const GP_Context *src, GP_Context *dst,
 	return 0;
 }
 
-GP_Context *GP_FilterRotate270Alloc(const GP_Context *src,
-                                    GP_ProgressCallback *callback)
+GP_Context *GP_FilterRotate270_Alloc(const GP_Context *src,
+                                     GP_ProgressCallback *callback)
 {
 	GP_Context *res;
 		
@@ -274,21 +274,21 @@ int GP_FilterSymmetryByName(const char *symmetry)
 	return -1;
 }
 
-GP_Context *GP_FilterSymmetryAlloc(const GP_Context *src,
-                                   GP_FilterSymmetries symmetry,
-			           GP_ProgressCallback *callback)
+GP_Context *GP_FilterSymmetry_Alloc(const GP_Context *src,
+                                    GP_FilterSymmetries symmetry,
+			            GP_ProgressCallback *callback)
 {
 	switch (symmetry) {
 	case GP_ROTATE_90:
-		return GP_FilterRotate90Alloc(src, callback);
+		return GP_FilterRotate90_Alloc(src, callback);
 	case GP_ROTATE_180:
-		return GP_FilterRotate180Alloc(src, callback);
+		return GP_FilterRotate180_Alloc(src, callback);
 	case GP_ROTATE_270:
-		return GP_FilterRotate270Alloc(src, callback);
+		return GP_FilterRotate270_Alloc(src, callback);
 	case GP_MIRROR_H:
-		return GP_FilterMirrorHAlloc(src, callback);
+		return GP_FilterMirrorH_Alloc(src, callback);
 	case GP_MIRROR_V:
-		return GP_FilterMirrorVAlloc(src, callback);
+		return GP_FilterMirrorV_Alloc(src, callback);
 	default:
 		GP_DEBUG(1, "Invalid symmetry %i", (int) symmetry);
 		return NULL;

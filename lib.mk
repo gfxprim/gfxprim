@@ -25,12 +25,12 @@ $(LIBP)$(LIB).so: $(OBJS)
 ifdef VERBOSE
 	rm -f $(LIBP)$(LIB).so.0
 	cd $(LIBP) && ln -s $(LIB).so $(LIB).so.0
-	$(CC) -fPIC -dPIC --shared -Wl,-soname -Wl,$(LIB).so.0 $(OBJECTS) -o $@
+	$(CC) -fPIC --shared -Wl,-soname -Wl,$(LIB).so.0 $(OBJECTS) -o $@
 else
 	@rm -f $(LIBP)$(LIB).so.0
 	@cd $(LIBP) && ln -s $(LIB).so $(LIB).so.0
 	@echo "LD  $@"
-	@$(CC) -fPIC -dPIC --shared -Wl,-soname -Wl,$(LIB).so.0 $(OBJECTS) -o $@
+	@$(CC) -fPIC --shared -Wl,-soname -Wl,$(LIB).so.0 $(OBJECTS) -o $@
 endif
 
 $(LIBP)$(LIB).a: $(OBJS)

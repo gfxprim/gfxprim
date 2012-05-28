@@ -32,6 +32,8 @@
 #include "core/GP_Context.h"
 #include "core/GP_ProgressCallback.h"
 
+#include "GP_MetaData.h"
+
 /*
  * Opens up file and checks signature.
  */
@@ -47,6 +49,12 @@ GP_Context *GP_ReadJPG(FILE *f, GP_ProgressCallback *callback);
  * Loads a JPG file into GP_Context. The Context is newly allocated.
  */
 GP_Context *GP_LoadJPG(const char *src_path, GP_ProgressCallback *callback);
+
+/*
+ * Loads JPEG meta-data, called markers in JPEG terminology.
+ */
+int GP_ReadJPGMetaData(FILE *f, GP_MetaData *data);
+int GP_LoadJPGMetaData(const char *src_path, GP_MetaData *data);
 
 /*
  * Saves JPG to a file.
