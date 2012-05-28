@@ -1,4 +1,4 @@
-%% extends "base.c.t"
+%% extends "common.c.t"
 
 {% block descr %}Floyd Steinberg dithering RGB888 -> any pixel{% endblock %}
 
@@ -62,7 +62,6 @@ int GP_FilterFloydSteinberg_RGB888_to_{{ pt.name }}_Raw(const GP_Context *src, G
 			val_{{ c[0] }} += errors_{{ c[0] }}[y%2][x];
 			
 			float err_{{ c[0] }} = val_{{ c[0] }};
-		
 %% if pt.is_gray()
 			GP_Pixel res_{{ c[0] }} = {{ 2 ** c[2] - 1}} * val_{{ c[0] }} / (3 * 255);
 			err_{{ c[0] }} -= res_{{ c[0] }} * (3 * 255) / {{ 2 ** c[2] - 1}};
@@ -72,6 +71,8 @@ int GP_FilterFloydSteinberg_RGB888_to_{{ pt.name }}_Raw(const GP_Context *src, G
 %% endif
 
 {{ distribute_error("errors_%s"|format(c[0]), 'x', 'y', '(GP_Coord)src->w', 'err_%s'|format(c[0])) }}
+
+			{{ clamp_val("res_%s"|format(c[0]), c[2]) }}
 %% endfor
 		
 %% if pt.is_gray()

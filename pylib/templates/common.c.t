@@ -14,3 +14,10 @@
  * Converts channels to params
  */
 {% macro expand_chanslist(chlist) %} {{ chlist[0][0] }}{% for i in chlist %}, {{ i[0] }}{% endfor %}{% endmacro %}
+
+/*
+ * Clamps n-bits value
+ */
+%%macro clamp_val(val, bits)
+if ({{ val }} > {{ 2 ** bits - 1 }}) {{ val }} = {{ 2 ** bits - 1}};
+%% endmacro
