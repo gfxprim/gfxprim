@@ -70,6 +70,16 @@ GP_MetaData *GP_MetaDataCreate(unsigned int expected_records)
 	return data;
 }
 
+void GP_MetaDataClear(GP_MetaData *self)
+{
+	GP_DEBUG(1, "Clearing MetaData %p with %u records",
+	         self, self->rec_count);
+	
+	self->root = NULL;
+	self->rec_count = 0;
+	self->free = self->size;
+}
+
 void GP_MetaDataDestroy(GP_MetaData *self)
 {
 	GP_DEBUG(1, "Destroying MetaData %p", self);
@@ -91,6 +101,9 @@ void GP_MetaDataPrint(GP_MetaData *self)
 		break;
 		case GP_META_STRING:
 			printf("'%s'\n", rec->val.str);
+		break;
+		case GP_META_DOUBLE:
+			printf("%lf\n", rec->val.d);
 		break;
 		}
 	}
@@ -185,6 +198,31 @@ int GP_MetaDataGetInt(GP_MetaData *self, const char *id, int *res)
 	return 0;
 }
 
+int GP_MetaDataGetDouble(GP_MetaData *self, const char *id, double *res)
+{
+	GP_MetaRecord *rec;
+	
+	GP_DEBUG(2, "Looking for GP_META_DOUBLE id '%s'", id);
+	
+	rec = record_lookup(self, id, do_hash(id));
+
+	if (rec == NULL) {
+		GP_DEBUG(3, "Record id '%s' not found", id);
+		return 1;
+	}
+
+	if (rec->type != GP_META_DOUBLE) {
+		GP_DEBUG(3, "Record id '%s' has wrong type", id);
+		return 1;
+	}
+
+	*res = rec->val.d;
+
+	GP_DEBUG(3, "Found GP_META_DOUBLE id '%s' = %lf", id, *res);
+
+	return 0;
+}
+
 const char *GP_MetaDataGetString(GP_MetaData *self, const char *id)
 {
 	GP_MetaRecord *rec;
@@ -221,6 +259,24 @@ GP_MetaRecord *GP_MetaDataCreateInt(GP_MetaData *self, const char *id, int val)
 	
 	rec->type = GP_META_INT;
 	rec->val.i = val;
+
+	return rec;
+}
+
+GP_MetaRecord *GP_MetaDataCreateDouble(GP_MetaData *self, const char *id,
+                                       double val)
+{
+	GP_MetaRecord *rec;
+
+	GP_DEBUG(2, "Creating GP_META_DOUBLE id '%s' = %lf", id, val);
+	
+	rec = GP_MetaDataCreateRecord(self, id);
+
+	if (rec == NULL)
+		return NULL;
+	
+	rec->type = GP_META_DOUBLE;
+	rec->val.d = val;
 
 	return rec;
 }

@@ -28,10 +28,12 @@
 enum GP_MetaType {
 	GP_META_INT,
 	GP_META_STRING,
+	GP_META_DOUBLE,
 };
 
 union GP_MetaValue {
 	int i;
+	double d;
 	const char *str;
 };
 
@@ -51,6 +53,11 @@ typedef struct GP_MetaData GP_MetaData;
  * Returns NULL if allocation has failed.
  */
 GP_MetaData *GP_MetaDataCreate(unsigned int expected_records);
+
+/*
+ * Clears meta-data storage.
+ */
+void GP_MetaDataClear(GP_MetaData *self);
 
 /*
  * Destroys metadata (frees all alocated memory).
@@ -90,6 +97,12 @@ GP_MetaRecord *GP_MetaDataCreateRecord(GP_MetaData *self, const char *id);
  * Creates an integer record and returns pointer to it.
  */
 GP_MetaRecord *GP_MetaDataCreateInt(GP_MetaData *self, const char *id, int val);
+
+/*
+ * Creates an double record and returns pointer to it.
+ */
+GP_MetaRecord *GP_MetaDataCreateDouble(GP_MetaData *self, const char *id,
+                                       double val);
 
 /*
  * Creates an string record and returns pointer to it.
