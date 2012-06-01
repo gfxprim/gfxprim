@@ -159,6 +159,7 @@ static GP_MetaRecord *record_create(GP_MetaData *self, const char *id,
 
 	strcpy(rec->id, id);
 	rec->hash = hash;
+	rec->next = NULL;
 	
 	if (self->root == NULL) {
 		self->root = rec;
@@ -166,7 +167,6 @@ static GP_MetaRecord *record_create(GP_MetaData *self, const char *id,
 	} else {
 		self->last->next = rec;
 		self->last = rec;
-		rec->next = NULL;
 	}
 	
 	self->rec_count++;
@@ -335,9 +335,9 @@ GP_MetaRecord *GP_MetaDataCreateString(GP_MetaData *self, const char *id,
 		char *s;
 		
 		if (len == 0)
-			size = strlen(str) + 1;
-		else
-			size = len + 1;
+			len = strlen(str);
+		
+		size = len + 1;
 
 		/* Play safe with aligment */
 		if (size % 8)
@@ -345,8 +345,8 @@ GP_MetaRecord *GP_MetaDataCreateString(GP_MetaData *self, const char *id,
 
 		//TODO: allocation error
 		s = do_alloc(self, size);
-		strncpy(s, str, size - 1);
-		s[size - 1] = '\0';
+		memcpy(s, str, len);
+		s[len] = '\0';
 		str = s;
 	}
 
