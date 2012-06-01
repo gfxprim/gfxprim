@@ -388,27 +388,94 @@ static void init_backend(const char *backend_opts)
 	}
 }
 
+static int alarm_fired = 0;
+
+static void alarm_handler(int signo)
+{
+	alarm_fired = 1;
+}
+
+static int wait_for_event(int sleep_msec)
+{
+	static int sleep_msec_count = 0;
+	static int alarm_set = 0;
+
+	if (sleep_msec < 0) {
+		GP_BackendPoll(backend);
+		return 0;
+	}
+
+	/* We can't sleep on backend fd, because the backend doesn't export it. */
+	if (backend->fd < 0) {
+		GP_BackendPoll(backend);
+		usleep(10000);
+
+		sleep_msec_count += 10;
+
+		if (sleep_msec_count >= sleep_msec) {
+			sleep_msec_count = 0;
+			return 1;
+		}
+
+		return 0;
+	}
+
+	/* Initalize select */
+	fd_set rfds;
+	FD_ZERO(&rfds);
+	
+	FD_SET(backend->fd, &rfds);
+
+	if (!alarm_set) {
+		signal(SIGALRM, alarm_handler);
+		alarm(sleep_msec / 1000);
+		alarm_fired = 0;
+		alarm_set = 1;
+	}
+
+	struct timeval tv = {.tv_sec = sleep_msec / 1000,
+	                     .tv_usec = (sleep_msec % 1000) * 1000};
+	
+	int ret = select(backend->fd + 1, &rfds, NULL, NULL, &tv);
+	
+	switch (ret) {
+	case -1:
+		if (errno == EINTR)
+			return 1;
+		
+		GP_BackendExit(backend);
+		exit(1);
+	break;
+	case 0:
+		if (alarm_fired) {
+			alarm_set = 0;
+			return 1;
+		}
+
+		return 0;
+	break;
+	default:
+		GP_BackendPoll(backend);
+		return 0;
+	}
+}
+
 int main(int argc, char *argv[])
 {
-	GP_InputDriverLinux *drv = NULL;
 	GP_Context *context = NULL;
-	const char *input_dev = NULL;
 	const char *backend_opts = "X11";
 	int sleep_sec = -1;
 	struct loader_params params = {NULL, 0, 0, 0, .img = NULL};
 	int opt, debug_level = 0;
 	GP_PixelType emul_type = GP_PIXEL_UNKNOWN;
 
-	while ((opt = getopt(argc, argv, "b:cd:e:fIi:Ps:r:")) != -1) {
+	while ((opt = getopt(argc, argv, "b:cd:e:fIPs:r:")) != -1) {
 		switch (opt) {
 		case 'I':
 			params.show_info = 1;
 		break;
 		case 'P':
 			params.show_progress = 1;
-		break;
-		case 'i':
-			input_dev = optarg;
 		break;
 		case 'f':
 			dithering = 1;
@@ -447,16 +514,6 @@ int main(int argc, char *argv[])
 	
 	GP_SetDebugLevel(debug_level);
 
-	if (input_dev != NULL) {
-		drv = GP_InputDriverLinuxOpen(input_dev);
-	
-		if (drv == NULL) {
-			fprintf(stderr, "Failed to initalize input device '%s'\n",
-			                input_dev);
-			return 1;
-		}
-	}
-
 	signal(SIGINT, sighandler);
 	signal(SIGSEGV, sighandler);
 	signal(SIGBUS, sighandler);
@@ -482,55 +539,16 @@ int main(int argc, char *argv[])
 
 	params.show_progress_once = 1;
 	show_image(&params, argv[argf]);
-
+		
 	for (;;) {
-		int ret;
-
-		if (drv != NULL) {
-			/* Initalize select */
-			fd_set rfds;
-			FD_ZERO(&rfds);
-			FD_SET(drv->fd, &rfds);
-			struct timeval tv = {.tv_sec = sleep_sec, .tv_usec = 0};
-			struct timeval *tvp = sleep_sec != -1 ? &tv : NULL;
-			
-			ret = select(drv->fd + 1, &rfds, NULL, NULL, tvp);
-		
-			tv.tv_sec = sleep_sec;
-	
-			switch (ret) {
-			case -1:
-				GP_BackendExit(backend);
-				return 0;
-			break;
-			case 0:
-				argn++;
-				if (argn >= argc)
-					argn = argf;
-			
-				show_image(&params, argv[argn]);
-			break;
-			default:
-				while (GP_InputDriverLinuxRead(drv));
-			}
-
-			FD_SET(drv->fd, &rfds);
-		} else {
-			if (sleep_sec != -1) {
-				sleep(sleep_sec);
-		
-				argn++;
-				if (argn >= argc)
-					argn = argf;
-			
-				show_image(&params, argv[argn]);
-			}
+		/* wait for event or a timeout */
+		if (wait_for_event(sleep_sec * 1000)) {
+			argn++;
+			if (argn >= argc)
+				argn = argf;
+					
+			show_image(&params, argv[argn]);
 		}
-
-		if (backend->Poll)
-			GP_BackendPoll(backend);
-
-		usleep(1000);
 
 		/* Read and parse events */
 		GP_Event ev;
