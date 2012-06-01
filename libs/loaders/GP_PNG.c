@@ -267,7 +267,7 @@ static void load_meta_data(png_structp png, png_infop png_info, GP_MetaData *dat
 		else
 			unit_name = "unknown";
 		
-		GP_MetaDataCreateString(data, "res_unit", unit_name, 0);
+		GP_MetaDataCreateString(data, "res_unit", unit_name, 0, 0);
 	}
 
 	png_timep mod_time;
@@ -302,7 +302,7 @@ static void load_meta_data(png_structp png, png_infop png_info, GP_MetaData *dat
 			
 			char buf[GP_META_RECORD_ID_MAX];
 			snprintf(buf, GP_META_RECORD_ID_MAX, "text:%s", text_ptr[i].key);
-			GP_MetaDataCreateString(data, buf, text_ptr[i].text, 1);
+			GP_MetaDataCreateString(data, buf, text_ptr[i].text, 0, 1);
 		}
 	}
 }
