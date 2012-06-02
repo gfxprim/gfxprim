@@ -103,7 +103,8 @@ void GP_MetaDataPrint(GP_MetaData *self)
 			printf("%i\n", rec->val.i);
 		break;
 		case GP_META_RATIONAL:
-			printf("%i/%i\n", rec->val.r.num, rec->val.r.den);
+			printf("%i/%i (%.4f)\n", rec->val.r.num, rec->val.r.den,
+			       (float)rec->val.r.num / rec->val.r.den);
 		break;
 		case GP_META_STRING:
 			printf("'%s'\n", rec->val.str);
