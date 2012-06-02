@@ -71,38 +71,39 @@ static const char *IFD_format_names[] = {
 };
 
 enum IFD_tags {
-	/* image description */
+	/* ASCII text no multibyte encoding */
 	IFD_IMAGE_DESCRIPTION = 0x010e,
-	/* camera manufacturer */
+	/* Device (camer, scanner, ...) manufacturer */
 	IFD_MAKE = 0x010f,
-	/* camera model */
+	/* Device model */
 	IFD_MODEL = 0x0110,
-	/* 1 = upper left, 3 = lower right, 6 = upper right, *
-	 * 8 = lower left, 9 = undefined                     */
+	/* Image orientation                           *
+	 * 1 upper left, 3 lower right, 6 upper right, *
+	 * 8 lower left, other reserved                */
 	IFD_ORIENTATION = 0x0112,
-	/* x resolution */
+	/* X resolution 72 DPI is default */
 	IFD_X_RESOLUTION = 0x011a,
-	/* y resolution */
+	/* Y resolution 72 DPI is default */
 	IFD_Y_RESOLUTION = 0x011b,
-	/* 1 = no unit, 2 = inch, 3 = centimeter */
+	/* 1 = no unit, 2 = inch (default), 3 = centimeter */
 	IFD_RESOLUTION_UNIT = 0x0128,
-	/* software */
+	/* Software string. */
 	IFD_SOFTWARE = 0x0131,
-	/* date time */	
+	/* YYYY:MM:DD HH:MM:SS in 24 hours format */	
 	IFD_DATE_TIME = 0x0132,
-	/* white point */
+	/* White Point */
 	IFD_WHITE_POINT = 0x013e,
-	/* primary chromaticies */
+	/* Primary Chromaticies */
 	IFD_PRIMARY_CHROMATICIES = 0x013f,
-	/* YCbCr coefficients */
+	/* YCbCr Coefficients */
 	IFD_Y_CB_CR_COEFFICIENTS = 0x0211,
-	/* YCbCr positioning */
+	/* YCbCr Positioning */
 	IFD_Y_CB_CR_POSITIONING = 0x0213,
-	/* reference black white */
+	/* Reference Black White */
 	IFD_REFERENCE_BLACK_WHITE = 0x0214,
-	/* copyright */
+	/* Copyright */
 	IFD_COPYRIGHT = 0x8298,
-	/* exif offset */
+	/* Exif SubIFD Offset */
 	IFD_EXIF_OFFSET = 0x8769,
 
 	/* TAGs from Exif SubIFD */
@@ -150,6 +151,18 @@ enum IFD_tags {
 	IFD_MAKER_NOTE = 0x927c,
 	/* Comment */
 	IFD_USER_COMMENT = 0x9286,
+
+	/* Stores FlashPix version, undefined, may be four ASCII numbers */
+	IFD_FLASH_PIX_VERSION = 0xa000,
+	/* Unknown may be 1 */
+	IFD_COLOR_SPACE = 0xa001,
+	/* Exif Image Width and Height */
+	IFD_EXIF_IMAGE_WIDTH = 0xa002,
+	IFD_EXIF_IMAGE_HEIGHT = 0xa003,
+	/* May store related audio filename */
+	IFD_RELATED_SOUND_FILE = 0xa004,
+	/* */
+
 };
 
 struct IFD_tag {
@@ -164,8 +177,8 @@ struct IFD_tag {
 static const struct IFD_tag IFD_tags[] = {
 	/* TAGs from IFD0 */
 	{IFD_IMAGE_DESCRIPTION, "Image Description", IFD_ASCII_STRING, 0},
-	{IFD_MAKE, "Camera Manufacturer", IFD_ASCII_STRING, 0},
-	{IFD_MODEL, "Camera Model", IFD_ASCII_STRING, 0},
+	{IFD_MAKE, "Make", IFD_ASCII_STRING, 0},
+	{IFD_MODEL, "Model", IFD_ASCII_STRING, 0},
 	{IFD_ORIENTATION, "Orientation", IFD_UNSIGNED_SHORT, 1},
 	{IFD_X_RESOLUTION, "X Resolution", IFD_UNSIGNED_RATIONAL, 1},
 	{IFD_Y_RESOLUTION, "Y Resolution", IFD_UNSIGNED_RATIONAL, 1},
@@ -206,6 +219,12 @@ static const struct IFD_tag IFD_tags[] = {
 	{IFD_FOCAL_LENGTH, "Focal Length", IFD_UNSIGNED_RATIONAL, 1},
 	{IFD_MAKER_NOTE, "Maker Note", IFD_UNDEFINED, 0},
 	{IFD_USER_COMMENT, "User Comment", IFD_UNDEFINED, 0},
+	{IFD_FLASH_PIX_VERSION, "Flash Pix Version", IFD_UNDEFINED, 4},
+	{IFD_COLOR_SPACE, "Color Space", IFD_UNSIGNED_SHORT, 1},
+	/* these two may be short in some cases */
+	{IFD_EXIF_IMAGE_WIDTH, "Exif Image Width", IFD_UNSIGNED_LONG, 1},	
+	{IFD_EXIF_IMAGE_HEIGHT, "Exif Image Height", IFD_UNSIGNED_LONG, 1},	
+	{IFD_RELATED_SOUND_FILE, "Related Soundfile", IFD_ASCII_STRING, 0},
 };
 
 static const char *IFD_format_name(uint16_t format)
@@ -357,10 +376,12 @@ static void load_tag(GP_MetaData *self, void *buf, size_t buf_len, int swap,
 		GP_DEBUG(1, "Unexpected tag '%s' num_components %u expected %u",
 		            res->name, num_comp, res->num_components);
 	}
+	
+	const char *addr;
 
 	switch (format) {
 	case IFD_ASCII_STRING: {
-		const char *addr = get_string(buf, buf_len, num_comp, &val);
+		addr = get_string(buf, buf_len, num_comp, &val);
 
 		if (addr == NULL)
 			return;
@@ -382,9 +403,24 @@ static void load_tag(GP_MetaData *self, void *buf, size_t buf_len, int swap,
 		else
 			goto unused;
 	break;
+	case IFD_UNDEFINED:
+		switch (res->tag) {
+		case IFD_EXIF_VERSION:
+		case IFD_FLASH_PIX_VERSION:
+			addr = get_string(buf, buf_len, num_comp, &val);
+		
+			if (addr == NULL)
+				return;
+
+			GP_MetaDataCreateString(self, res->name, addr, num_comp, 1);
+		break;
+		default:
+			goto unused;
+		}
+	break;
 	unused:
 	default:
-		GP_DEBUG(1, "Unused record '%s' format '%s' (0x%02x)", res->name,
+		GP_DEBUG(0, "Unused record '%s' format '%s' (0x%02x)", res->name,
 			    IFD_format_name(format), format);
 	}
 }
