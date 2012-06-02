@@ -148,6 +148,50 @@ skip_filename_check:
 	return NULL;
 }
 
+int GP_LoadMetaData(const char *src_path, GP_MetaData *data)
+{
+	int len;
+	
+	len = strlen(src_path);
+
+	if (len < 3) {
+		errno = ENOSYS;
+		return 1;
+	}
+
+	switch (src_path[len - 1]) {
+	/* PNG, JPG, JPEG */
+	case 'g':
+	case 'G':
+		switch (src_path[len - 2]) {
+		case 'n':
+		case 'N':
+			if (src_path[len - 3] == 'p' ||
+			    src_path[len - 3] == 'P')
+				return GP_LoadPNGMetaData(src_path, data); 
+		break;
+		case 'p':
+		case 'P':
+			if (src_path[len - 3] == 'j' ||
+			    src_path[len - 3] == 'J')
+				return GP_LoadJPGMetaData(src_path, data); 
+		break;
+		case 'e':
+		case 'E':
+			if ((src_path[len - 3] == 'p' ||
+			     src_path[len - 3] == 'P') &&
+			    (src_path[len - 4] == 'j' ||
+			     src_path[len - 4] == 'J'))
+				return GP_LoadJPGMetaData(src_path, data); 
+		break;
+		}
+	break;
+	}
+
+	errno = ENOSYS;
+	return 1;
+}
+
 int GP_SaveImage(const GP_Context *src, const char *dst_path,
                  GP_ProgressCallback *callback)
 {

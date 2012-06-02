@@ -54,6 +54,11 @@
 GP_Context *GP_LoadImage(const char *src_path, GP_ProgressCallback *callback);
 
 /*
+ * Loads image Meta Data (if possible).
+ */
+int GP_LoadMetaData(const char *src_path, GP_MetaData *data);
+
+/*
  * Simple saving function, the image format is matched by file extension.
  *
  * Retruns zero on succes.

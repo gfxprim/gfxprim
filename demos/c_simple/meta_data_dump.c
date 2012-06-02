@@ -22,7 +22,7 @@
 
  /*
 
-   Read png meta-data and print them into stdout.
+   Read image meta-data and print them into stdout.
 
   */
 
@@ -37,7 +37,7 @@
 
 int main(int argc, char *argv[])
 {
-	GP_MetaData *data = GP_MetaDataCreate(20);
+	GP_MetaData *data = GP_MetaDataCreate(80);
 	int i;
 
 	if (argc < 2) {
@@ -53,7 +53,7 @@ int main(int argc, char *argv[])
 		
 		GP_MetaDataClear(data);
 		
-		if (GP_LoadPNGMetaData(argv[i], data)) {
+		if (GP_LoadMetaData(argv[i], data)) {
 			fprintf(stderr, "Failed to read '%s' meta-data: %s\n",
 			        argv[1], strerror(errno));
 		} else {
