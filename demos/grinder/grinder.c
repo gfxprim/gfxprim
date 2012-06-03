@@ -608,19 +608,19 @@ static GP_RetCode arithmetic(GP_Context **c, const char *params)
 
 	switch (op) {
 	case 0:
-		res = GP_FilterDifference(*c, img, NULL, progress_callback);
+		res = GP_FilterDifferenceAlloc(*c, img, progress_callback);
 	break;
 	case 1:
-		res = GP_FilterAddition(*c, img, NULL, progress_callback);
+		res = GP_FilterAdditionAlloc(*c, img, progress_callback);
 	break;
 	case 2:
-		res = GP_FilterMultiply(*c, img, NULL, progress_callback);
+		res = GP_FilterMultiplyAlloc(*c, img, progress_callback);
 	break;
 	case 3:
-		res = GP_FilterMin(*c, img, NULL, progress_callback);
+		res = GP_FilterMinAlloc(*c, img, progress_callback);
 	break;
 	case 4:
-		res = GP_FilterMax(*c, img, NULL, progress_callback);
+		res = GP_FilterMaxAlloc(*c, img, progress_callback);
 	break;
 	}
 

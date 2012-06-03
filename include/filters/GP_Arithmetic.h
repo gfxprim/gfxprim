@@ -16,7 +16,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2011 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
@@ -34,21 +34,30 @@
 /*
  * Addition filter.
  *
- * Produces clamped addtion.
+ * Produces saturated (clamped) addtion.
  */
-GP_Context *GP_FilterAddition(const GP_Context *src_a,
-                              const GP_Context *src_b,
-                              GP_Context *dst,
-                              GP_ProgressCallback *callback);
+int GP_FilterAddition(const GP_Context *src_a,
+                      const GP_Context *src_b,
+                      GP_Context *dst,
+                      GP_ProgressCallback *callback);
+
+GP_Context *GP_FilterAdditionAlloc(const GP_Context *src_a,
+                                   const GP_Context *src_b,
+                                   GP_ProgressCallback *callback);
+
 /*
  * Multiply filter.
  *
- * Produces clamped multiplication.
+ * Produces saturated (clamped) multiplication.
  */
-GP_Context *GP_FilterMultiply(const GP_Context *src_a,
-                              const GP_Context *src_b,
-                              GP_Context *dst,
-                              GP_ProgressCallback *callback);
+int GP_FilterMultiply(const GP_Context *src_a,
+                      const GP_Context *src_b,
+                      GP_Context *dst,
+                      GP_ProgressCallback *callback);
+
+GP_Context *GP_FilterMultiplyAlloc(const GP_Context *src_a,
+                                   const GP_Context *src_b,
+                                   GP_ProgressCallback *callback);
 
 /*
  * Difference filter.
@@ -56,25 +65,37 @@ GP_Context *GP_FilterMultiply(const GP_Context *src_a,
  * Produces symetric difference.
  * eg. dst = abs(src_a - src_b)
  */
-GP_Context *GP_FilterDifference(const GP_Context *src_a,
-                                const GP_Context *src_b,
-                                GP_Context *dst,
-                                GP_ProgressCallback *callback);
+int GP_FilterDifference(const GP_Context *src_a,
+                        const GP_Context *src_b,
+                        GP_Context *dst,
+                        GP_ProgressCallback *callback);
+
+GP_Context *GP_FilterDifferenceAlloc(const GP_Context *src_a,
+                                     const GP_Context *src_b,
+                                     GP_ProgressCallback *callback);
 
 /*
  * Maximum filter.
  */
-GP_Context *GP_FilterMax(const GP_Context *src_a,
-                         const GP_Context *src_b,
-			 GP_Context *dst,
-			 GP_ProgressCallback *callback);
+int GP_FilterMax(const GP_Context *src_a,
+                 const GP_Context *src_b,
+                 GP_Context *dst,
+                 GP_ProgressCallback *callback);
+
+GP_Context *GP_FilterMaxAlloc(const GP_Context *src_a,
+                              const GP_Context *src_b,
+                              GP_ProgressCallback *callback);
 
 /*
  * Minimum filter.
  */
-GP_Context *GP_FilterMin(const GP_Context *src_a,
-                         const GP_Context *src_b,
-			 GP_Context *dst,
-			 GP_ProgressCallback *callback);
+int GP_FilterMin(const GP_Context *src_a,
+                 const GP_Context *src_b,
+                 GP_Context *dst,
+                 GP_ProgressCallback *callback);
+
+GP_Context *GP_FilterMinAlloc(const GP_Context *src_a,
+                              const GP_Context *src_b,
+                              GP_ProgressCallback *callback);
 
 #endif /* FILTERS_GP_ARITHMETIC_H */
