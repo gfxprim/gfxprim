@@ -16,15 +16,37 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2011 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
 #include <string.h>
 
-#include <GP_Debug.h>
+#include "core/GP_Debug.h"
 
 #include "GP_FilterParam.h"
+
+GP_FilterParam *GP_FilterParamCreate(GP_PixelType pixel_type)
+{
+	GP_FilterParam *ret; 
+	
+	ret = malloc((GP_PixelTypes[pixel_type].numchannels + 1)
+	             * sizeof(GP_FilterParam));
+
+	if (ret == NULL) {
+		GP_WARN("Malloc Failed");
+		return NULL;
+	}
+
+	GP_FilterParamInitChannels(ret, pixel_type);
+
+	return ret;
+}
+
+void GP_FilterParamDestroy(GP_FilterParam *self)
+{
+	free(self);
+}
 
 static unsigned int count_channels(GP_FilterParam params[])
 {
@@ -115,6 +137,19 @@ void GP_FilterParamSetIntAll(GP_FilterParam params[],
 		params[i].val.i = val;
 }
 
+int GP_FilterParamSetInt(GP_FilterParam params[], const char *channel_name,
+                         int32_t val)
+{
+	GP_FilterParam *param;
+	param = GP_FilterParamChannel(params, channel_name);
+
+	if (param == NULL)
+		return 1;
+
+	param->val.i = val;
+	return 0;
+}
+
 void GP_FilterParamSetFloatAll(GP_FilterParam params[],
                                float val)
 {
@@ -122,6 +157,19 @@ void GP_FilterParamSetFloatAll(GP_FilterParam params[],
 
 	for (i = 0; params[i].channel_name[0] != '\0'; i++)
 		params[i].val.f = val;
+}
+
+int GP_FilterParamSetFloat(GP_FilterParam params[], const char *channel_name,
+                         float val)
+{
+	GP_FilterParam *param;
+	param = GP_FilterParamChannel(params, channel_name);
+
+	if (param == NULL)
+		return 1;
+
+	param->val.f = val;
+	return 0;
 }
 
 void GP_FilterParamSetUIntAll(GP_FilterParam params[],
@@ -133,6 +181,19 @@ void GP_FilterParamSetUIntAll(GP_FilterParam params[],
 		params[i].val.ui = val;
 }
 
+int GP_FilterParamSetUInt(GP_FilterParam params[], const char *channel_name,
+                          uint32_t val)
+{
+	GP_FilterParam *param;
+	param = GP_FilterParamChannel(params, channel_name);
+
+	if (param == NULL)
+		return 1;
+
+	param->val.ui = val;
+	return 0;
+}
+
 void GP_FilterParamSetPtrAll(GP_FilterParam params[],
                              void *ptr)
 {
@@ -140,6 +201,19 @@ void GP_FilterParamSetPtrAll(GP_FilterParam params[],
 
 	for (i = 0; params[i].channel_name[0] != '\0'; i++)
 		params[i].val.ptr = ptr;
+}
+
+int GP_FilterParamSetPtr(GP_FilterParam params[], const char *channel_name,
+                         void *ptr)
+{
+	GP_FilterParam *param;
+	param = GP_FilterParamChannel(params, channel_name);
+
+	if (param == NULL)
+		return 1;
+
+	param->val.ptr = ptr;
+	return 0;
 }
 
 void GP_FilterParamFreePtrAll(GP_FilterParam params[])
