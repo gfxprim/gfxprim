@@ -41,17 +41,21 @@ as arguments.
 /*
  * Filter common API.
  */
-GP_Context *GP_FilterFoo(const GP_Context *src, GP_Context *dst,
-                         foo params ...,
-                         GP_ProgressCallback *callback);
+int GP_FilterFoo(const GP_Context *src, GP_Context *dst,
+                 foo params ...,
+                 GP_ProgressCallback *callback);
+
+GP_Context *GP_FilterFooAlloc(const GP_Context *src,
+                              foo params ...,
+                              GP_ProgressCallback *callback);
 -------------------------------------------------------------------------------
 
 
-Filters also exists in _Raw variant (that just takes source context,
-destination context, filters parameters and progress callback). These filter
-APIs are used for internal implementation and shouldn't be called by user as
-the destination is expected to be crafted exactly for storing the filter
-result and there are 'NO' sanity checks in place.
+Filters also exists in _Raw variant whose interface is similar to the first
+type of filter function. These filter APIs are used for internal
+implementation and shouldn't be called by user as the destination is expected
+to be crafted exactly for storing the filter result and there are 'NO' sanity
+checks in place.
 
 'You could use these at your own risk'
 
@@ -60,9 +64,9 @@ result and there are 'NO' sanity checks in place.
 /*
  * Raw filter common API.
  */
-void GP_FilterFoo_Raw(const GP_Context *src, GP_Context *dst,
-                      foo params ...,
-                      GP_ProgressCallback *callback);
+int GP_FilterFoo_Raw(const GP_Context *src, GP_Context *dst,
+                     foo params ...,
+                     GP_ProgressCallback *callback);
 -------------------------------------------------------------------------------
 
 Point operation filters
