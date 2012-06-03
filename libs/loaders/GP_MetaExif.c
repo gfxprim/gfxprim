@@ -201,7 +201,7 @@ static const struct IFD_tag IFD_tags[] = {
 
 	/* TAGs from Exif SubIFD */
 	{IFD_EXPOSURE_PROGRAM, "Exposure Program", IFD_UNSIGNED_SHORT, 1},
-	{IFD_ISO_SPEED_RATINGS, "ISO Speed Ratings", IFD_UNSIGNED_SHORT, 2},
+	{IFD_ISO_SPEED_RATINGS, "ISO Speed Ratings", IFD_UNSIGNED_SHORT, 1},
 	{IFD_EXIF_VERSION, "Exif Version", IFD_UNDEFINED, 4},
 	{IFD_DATE_TIME_ORIGINAL, "Date Time Original", IFD_ASCII_STRING, 20},
 	{IFD_DATE_TIME_DIGITIZED, "Date Time Digitized", IFD_ASCII_STRING, 20},
@@ -360,21 +360,21 @@ static void load_tag(GP_MetaData *self, void *buf, size_t buf_len, int swap,
 	const struct IFD_tag *res = IFD_tag_get(tag);
 
 	if (res == NULL) {
-		GP_DEBUG(1, "Skipping unknown IFD tag 0x%02x", tag);
+		GP_TODO("Skipping unknown IFD tag 0x%02x", tag);
 		return;
 	}
 
 	if (res->format != format) {
-		GP_DEBUG(1, "Unexpected tag '%s' format '%s' (0x%02x) "
-		            "expected '%s'", res->name,
-			    IFD_format_name(format), format,
-			    IFD_format_name(res->format));
+		GP_WARN("Unexpected tag '%s' format '%s' (0x%02x) "
+		        "expected '%s'", res->name,
+		        IFD_format_name(format), format,
+		        IFD_format_name(res->format));
 	}
 
 	if ((res->num_components != 0) &&
 	    (res->num_components != num_comp)) {
-		GP_DEBUG(1, "Unexpected tag '%s' num_components %u expected %u",
-		            res->name, num_comp, res->num_components);
+		GP_WARN("Unexpected tag '%s' num_components %u expected %u",
+		        res->name, num_comp, res->num_components);
 	}
 	
 	const char *addr;
@@ -420,8 +420,8 @@ static void load_tag(GP_MetaData *self, void *buf, size_t buf_len, int swap,
 	break;
 	unused:
 	default:
-		GP_DEBUG(0, "Unused record '%s' format '%s' (0x%02x)", res->name,
-			    IFD_format_name(format), format);
+		GP_TODO("Unused record '%s' format '%s' (0x%02x)", res->name,
+			IFD_format_name(format), format);
 	}
 }
 
@@ -483,16 +483,15 @@ int GP_MetaDataFromExif(GP_MetaData *self, void *buf, size_t buf_len)
 	    buf_char(buf, 3, buf_len) != 'f' || 
 	    buf_char(buf, 4, buf_len) != 0 || 
 	    buf_char(buf, 5, buf_len) != 0) {
-		GP_DEBUG(1, "Missing ASCII 'Exif\\0\\0' string at "
-		            "the start of the buffer");
+		GP_WARN("Missing ASCII 'Exif\\0\\0' string at "
+		        "the start of the buffer");
 		return 1;
 	}
 
 	if (((c1 = buf_char(buf, 6, buf_len)) != 
 	    (c2 = buf_char(buf, 7, buf_len)))
 	    || (c1 != 'I' && c1 != 'M')) {
-		GP_DEBUG(1, "Expected II or MM got %x%x, corrupt header?",
-		            c1, c2);
+		GP_WARN("Expected II or MM got %x%x, corrupt header?", c1, c2);
 		return 1;
 	}
 
@@ -505,7 +504,7 @@ int GP_MetaDataFromExif(GP_MetaData *self, void *buf, size_t buf_len)
 	GET_16(tag, buf, 8, buf_len, swap);
 
 	if (tag != 0x002a) {
-		GP_DEBUG(1, "Expected TIFF TAG '0x002a' got '0x%04x'", tag);
+		GP_WARN("Expected TIFF TAG '0x002a' got '0x%04x'", tag);
 		return 1;
 	}
 

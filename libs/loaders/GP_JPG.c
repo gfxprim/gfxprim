@@ -219,7 +219,7 @@ static void read_jpg_metadata(struct jpeg_decompress_struct *cinfo,
 			                        marker->data_length, 1);
 		break;
 		case JPEG_APP0:
-			GP_DEBUG(0, "TODO: JFIF");
+			GP_TODO("JFIF");
 		break;
 		case JPEG_APP0 + 1:
 			GP_MetaDataFromExif(data, marker->data, marker->data_length);
