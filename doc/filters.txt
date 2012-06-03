@@ -69,6 +69,148 @@ int GP_FilterFoo_Raw(const GP_Context *src, GP_Context *dst,
                      GP_ProgressCallback *callback);
 -------------------------------------------------------------------------------
 
+Filter Parameters
+~~~~~~~~~~~~~~~~~
+
+In order to pass, per-channel, filter parameters to a filter, structure called
+GP_FilterParams was created.
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <GP.h>
+/* or */
+#include <filters/GP_FilterParam.h>
+
+typedef union GP_FilterParamVal {
+        float f;
+        uint32_t ui;
+        int32_t i;
+        void *ptr;
+} GP_FilterParamVal;
+
+typedef struct GP_FilterParam {
+	char channel_name[2];
+	union GP_FilterParamVal val;
+} GP_FilterParam;
+-------------------------------------------------------------------------------
+
+Some filters do take an empty channel_name terminated (empty channel_name is
+empty string i.e. "\0") array of GP_FilterParam, which is used to describe
+per-channel parameters.
+
+
+There are two methods how to construct GP_FilterParam structure. First one is
+to use macro that expands to a code which declares and initializes the array on
+the stack second uses memory allocated by a malloc(). In both cases the
+structure is has initialized channel names and terminator.
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <GP.h>
+/* or */
+#include <filters/GP_FilterParam.h>
+
+#define GP_FILTER_PARAMS(pixel_type, name) \
+        GP_FilterParam name[GP_PixelTypes[pixel_type].numchannels + 1]; \
+        GP_FilterParamInitChannels(name, pixel_type);
+-------------------------------------------------------------------------------
+
+Macro that declares and initializes GP_FilterParam structure for a given
+pixel_type.
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <GP.h>
+/* or */
+#include <filters/GP_FilterParam.h>
+
+GP_FilterParam *GP_FilterParamCreate(GP_PixelType pixel_type);
+
+void GP_FilterParamDestroy(GP_FilterParam *self);
+-------------------------------------------------------------------------------
+
+Second possible way allocates memory using malloc().
+
+Functions for manipulating and querying existing GP_FilterParam follows.
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <GP.h>
+/* or */
+#include <filters/GP_FilterParam.h>
+
+void GP_FilterParamInitChannels(GP_FilterParam params[],
+                                GP_PixelType pixel_type);
+-------------------------------------------------------------------------------
+
+Initializes filter param array channel names (accordingly to pixel type) and
+terminator. The params array must be large enough to hold number of pixel type
+channels plus one.
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <GP.h>
+/* or */
+#include <filters/GP_FilterParam.h>
+
+GP_FilterParam *GP_FilterParamChannel(GP_FilterParam params[],
+                                      const char *channel_name);
+-------------------------------------------------------------------------------
+
+Does lookup for a given channel name and returns, if found, corresponding
+GP_FilterParam, otherwise 'NULL' is returned.
+
+This function is primary used in filters, where filter, at the start, resolves
+all it's parameters.
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <GP.h>
+/* or */
+#include <filters/GP_FilterParam.h>
+
+int GP_FilterParamCheckPixelType(GP_FilterParam params[],
+                                 GP_PixelType pixel_type);
+-------------------------------------------------------------------------------
+
+Matches param structure against pixel_type. Returns zero if params describes
+exactly same channels like pixel_type, non-zero otherwise.
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <GP.h>
+/* or */
+#include <filters/GP_FilterParam.h>
+
+void GP_FilterParamSetIntAll(GP_FilterParam params[], int32_t val);
+
+int GP_FilterParamSetInt(GP_FilterParam params[], const char *channel_name,
+                         int32_t val);
+
+void GP_FilterParamSetFloatAll(GP_FilterParam params[], float val);
+
+int GP_FilterParamSetFloat(GP_FilterParam params[], const char *channel_name,
+                           float val);
+
+void GP_FilterParamSetUIntAll(GP_FilterParam params[], uint32_t val);
+
+int GP_FilterParamSetUInt(GP_FilterParam params[], const char *channel_name,
+                          uint32_t val);
+
+void GP_FilterParamSetPtrAll(GP_FilterParam params[], void *ptr);
+
+int GP_FilterParamSetPtr(GP_FilterParam params[], const char *channel_name,
+                         void *ptr);
+
+void GP_FilterParamFreePtrAll(GP_FilterParam params[]);
+-------------------------------------------------------------------------------
+
+Parameter setters. Those that sets individual value returns zero on success
+(i.e. channel was found) and non-zero otherwise.
+
+The last one calls free() on all param pointers, which is used to free
+allocate memory.
+
 Point operation filters
 ~~~~~~~~~~~~~~~~~~~~~~~
 
