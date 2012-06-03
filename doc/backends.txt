@@ -15,16 +15,16 @@ Initialization functions
 
 [source,c]
 -------------------------------------------------------------------------------
-GP_Backend *GP_BackendLinuxFBInit(const char *path);
+GP_Backend *GP_BackendLinuxFBInit(const char *path, int flag);
 -------------------------------------------------------------------------------
 
 Initializes mmaped frame-buffer backend. The path is path to the frame-buffer
 device i.e. '/dev/fbX'. This backend is not buffered, everything you draw
 appears on the screen right away (an switch may be added for that purpose).
 
-Also note that this backend doesn't initialize any input driver. You need to
-initialize input driver in order to get keystrokes and/or pointer events.
-
+If flag is set console KBD driver is used to feed keystrokes into the event
+queue, otherwise no events are generated and you are expected to initialize
+input event driver in order to get keystrokes and/or pointer events.
 
 [source,c]
 -------------------------------------------------------------------------------
@@ -39,28 +39,47 @@ GP_Backend *GP_BackendSDLInit(GP_Size w, GP_Size h,
 -------------------------------------------------------------------------------
 
 Initialize SDL as an backend driver. The backend is thread safe as all the
-operations are guarded by locks. You can't initialize more than one backend at a
-time, that is inherited SDL limitation. If you call the initialization for a
-second time, you will get a pointer to already running backend. This driver
-feeds input events into global input event queue (see input docs for details).
-If w, h and/or bpp are zero SDL tries to do a guess, most of the time wrong for
-w and h though. The caption is window caption and may be ignored for some of
-the backends. And finally flags may change the SDL to go to full-screen mode or
-make the window resizable.
+operations are guarded by locks.
+
+You can't initialize more than one backend at a time, which is inherited SDL
+limitation. If you call the initialization for a second time, you will get a
+pointer to already running backend.
+
+This driver feeds input events into global input event queue (see input docs
+for details). 
+
+If w, h and/or bpp are zero SDL tries to do a guess, most of the time wrong
+for w and h though.
+
+The caption is window caption.
+
+And finally flags may change the SDL to go to full-screen mode or make the
+window resizable.
 
 [source,c]
 -------------------------------------------------------------------------------
+enum GP_BackendX11Flags {
+        /* 
+         * When set, w and h is ignored and root window is used
+         */
+        GP_X11_USE_ROOT_WIN = 0x01,
+};
+
 GP_Backend *GP_BackendX11Init(const char *display, int x, int y,
                               unsigned int w, unsigned int h,
-                              const char *caption);
+                              const char *caption,
+                              enum GP_BackendX11Flags flags);
 -------------------------------------------------------------------------------
 
-Returns pointer to backend. When display is NULL default display is used
-(which is what you want most of the time). This backend feeds key events into
-global input queue (pointer events not implemented yet). Note this is
-experimental version of X11 backend and will be changed to support more
-windows at a time.
+Returns pointer to initialized X11 backend or in case of failure NULL.
 
+When display is NULL default display is used (which is what you want most of the
+time).
+
+This backend feeds key events into global input queue.
+
+Note this is experimental version of X11 backend and will be changed to support
+more windows at a time.
 
 Overall init function
 ~~~~~~~~~~~~~~~~~~~~~
@@ -95,7 +114,29 @@ initialization yields pointer to this structure. Although is possible to call
 these pointers directly it's not recommended and everybody should rather use
 backend inline functions instead.
 
-The backend API consist of several functions:
+The backend API consist GP_Backend structure and of several functions:
+
+[source,c]
+-------------------------------------------------------------------------------
+typdef struct GP_Backend {
+        /*
+         * Backend name.
+         */
+        const char *name;
+
+        /* 
+         * Pointer to context app should draw to.
+         */
+        GP_Context *context;
+
+	...
+
+	/* 
+         * Connection fd. Set to -1 if not available 
+         */
+        int fd;
+};
+-------------------------------------------------------------------------------
 
 [source,c]
 -------------------------------------------------------------------------------
@@ -128,3 +169,23 @@ void GP_BackendPoll(GP_Backend *backend);
 Polls for backend events. For backends that do not expose file descriptor
 (namely SDL) this should be called repeatedly. For other backend it may be
 called either repeatedly or when data are ready on file-descriptor.
+
+[source,c]
+-------------------------------------------------------------------------------
+int GP_BackendSetCaption(GP_Backend *backend, const char *caption)
+-------------------------------------------------------------------------------
+
+Sets backend caption. On success zero is returned. On failure (backend doesn't
+support caption, operation failed) non zero is returned.
+
+[source,c]
+-------------------------------------------------------------------------------
+int GP_BackendResize(GP_Backend *backend, uint32_t w, uint32_t h);
+-------------------------------------------------------------------------------
+
+Resize backend, if supported. On success zero is returned and backend is
+resized, otherwise (if resize failed, or is not supported) non-zero is
+returned. If backend size already matches w and h, nothing is done.
+
+Note that backend->context pointer may change upon calling this function and
+at least backend->context->pixels pointer will change.
