@@ -30,6 +30,10 @@ enum GP_BackendX11Flags {
 	 * When set, w and h is ignored and root window is used
 	 */
 	GP_X11_USE_ROOT_WIN = 0x01,
+	/*
+	 * Create new borderless window above the root window.
+	 */
+	GP_X11_CREATE_ROOT_WIN = 0x02,
 };
 
 
