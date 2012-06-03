@@ -15,12 +15,21 @@
 %include "GP_Filters.h"
 
 /* Listed in GP_Filters.h: */
-%include "GP_FilterParam.h"
 %include "GP_Point.h"
 %ignore GP_Histogram::hist;
 %include "GP_Stats.h"
 %include "GP_Linear.h"
 %include "GP_Resize.h"
+
+%extend GP_FilterParam {
+  ~GP_FilterParam() {
+    GP_DEBUG(2, "[wrapper] GP_FilterParamFree");
+    GP_FilterParamDestroy($self);
+  }
+}
+
+%newobject GP_FilterParamCreate;
+%include "GP_FilterParam.h"
 
 /* Functions returning new allocated context */
 %immutable GP_FilterSymmetryNames;
