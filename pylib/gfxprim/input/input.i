@@ -1,3 +1,4 @@
+%include "../common.i"
 %module(package="gfxprim.input") input_c
 
 %{

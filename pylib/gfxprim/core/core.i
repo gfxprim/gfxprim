@@ -1,16 +1,9 @@
+%include "../common.i"
 %module(package="gfxprim.core") core_c
 
 %{
 #include "core/GP_Core.h"
 %}
-
-#define __attribute__(X)
-
-%include <stdint.i>
-
-%feature("autodoc");
-
-%nodefaultctor;
 
 /*
  * Basic types and common methods
@@ -41,7 +34,6 @@
 
 %import "GP_FnPerBpp.h"
 %import "GP_FnPerBpp.gen.h"
-
 
 /*
  * GP_Context wrapping
@@ -99,7 +91,6 @@ and self.thisown.") GP_Context;
 
 %include "GP_Context.h"
 
-
 /*
  * Context manipulation
  */
@@ -108,3 +99,4 @@ and self.thisown.") GP_Context;
 %import "GP_GetPutPixel.gen.h"
 %include "GP_WritePixel.h"
 %include "GP_Blit.h"
+

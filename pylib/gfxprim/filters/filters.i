@@ -1,16 +1,11 @@
+%include "../common.i"
 %module(package="gfxprim.filters") filters_c
 
 %{
 #include "filters/GP_Filters.h"
 %}
 
-#define __attribute__(X)
-
 %import ../core/core.i
-
-%include <stdint.i>
-
-%nodefaultctor;
 
 %include "GP_Filters.h"
 

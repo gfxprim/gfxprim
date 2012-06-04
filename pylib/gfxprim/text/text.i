@@ -1,3 +1,4 @@
+%include "../common.i"
 %module(package="gfxprim.text") text_c
 
 %{
@@ -5,13 +6,7 @@
 #include "text/GP_Font.h"
 %}
 
-#define __attribute__(X)
-
 %import ../core/core.i
-
-%include <stdint.i>
-
-%nodefaultctor;
 
 %ignore GP_GlyphBitmap::bitmap;
 %ignore GP_FontFace::glyph_offsets;

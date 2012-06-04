@@ -1,3 +1,4 @@
+%include "../common.i"
 %module(package="gfxprim.loaders") loaders_c
 
 %{
@@ -5,13 +6,7 @@
 #include "loaders/GP_Loaders.h"
 %}
 
-#define __attribute__(X) 
-
 %import ../core/core.i
-
-%include <stdint.i>
-
-%nodefaultctor;
 
 %include "GP_Loaders.h"
 

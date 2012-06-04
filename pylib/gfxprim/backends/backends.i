@@ -1,3 +1,4 @@
+%include "../common.i"
 %module(package="gfxprim.backends") backends_c
 
 %{
@@ -5,11 +6,6 @@
 #include "GP_Backends.h"
 #include "core/GP_Debug.h"
 %}
-
-#define __attribute__(X)
-%include <stdint.i>
-
-%feature("autodoc");
 
 %import ../core/core.i
 
