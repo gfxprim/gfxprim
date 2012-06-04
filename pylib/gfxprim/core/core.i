@@ -9,6 +9,8 @@
  * Basic types and common methods
  */
 
+ERROR_ON_NULL(GP_GetCounter);
+
 %include "GP_Common.h"
 %include "GP_Core.h"
 %include "GP_Debug.h"
@@ -24,6 +26,8 @@
 /*
  * Color and pixel types
  */
+
+ERROR_ON_NULL(GP_ColorToColorName);
 
 %include "GP_Color.h"
 %include "GP_Pixel.h"
@@ -82,6 +86,13 @@ and self.thisown.") GP_Context;
     return PyBuffer_FromMemory($self->pixels, $self->bytes_per_row * $self->h);
   }
 };
+
+/* Error handling */
+ERROR_ON_NONZERO(GP_ContextResize);
+ERROR_ON_NULL(GP_ContextAlloc);
+ERROR_ON_NULL(GP_ContextCopy);
+ERROR_ON_NULL(GP_ContextSubContext);
+ERROR_ON_NULL(GP_ContextConvert);
 
 /* Indicate new wrapper-owned GP_Context */
 %newobject GP_ContextAlloc;
