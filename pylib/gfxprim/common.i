@@ -23,11 +23,9 @@
 %exception funcname {
   $action
   if (result == NULL) {
-    int errno0 = errno;
-    const int errbuf_len = 128;
-    char errbuf[errbuf_len];
-    strerror_r(errno0, errbuf, errbuf_len);
-    PyErr_Format(PyExc_RuntimeError, "Error in function %s: %s", "$name", errbuf);
+    char errbuf[128];
+    char *errmsg = strerror_r(errno, errbuf, sizeof(errbuf));
+    PyErr_Format(PyExc_RuntimeError, "Error in function %s: %s", "$name", errmsg);
     return NULL;
   }
 }
@@ -42,11 +40,9 @@
 %exception funcname {
   $action
   if (result != 0) {
-    int errno0 = errno;
-    const int errbuf_len = 128;
-    char errbuf[errbuf_len];
-    strerror_r(errno0, errbuf, errbuf_len);
-    PyErr_Format(PyExc_RuntimeError, "Error in function %s: %s", "$name", errbuf);
+    char errbuf[128];
+    char *errmsg = strerror_r(errno, errbuf, sizeof(errbuf));
+    PyErr_Format(PyExc_RuntimeError, "Error in function %s: %s", "$name", errmsg);
     return NULL;
   }
 }
