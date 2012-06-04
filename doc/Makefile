@@ -1,7 +1,7 @@
 all: api.html examples.html
 
 api.html: general.txt api.txt context.txt loaders.txt filters.txt \
-          basic_types.txt drawing_api.txt
+          basic_types.txt drawing_api.txt backends.txt
 	asciidoc -a toc api.txt
 
 examples.html: examples.txt ../demos/c_simple/*.c ../demos/py_simple/*.py

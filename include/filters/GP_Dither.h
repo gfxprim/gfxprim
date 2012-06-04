@@ -16,7 +16,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2011 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
@@ -32,41 +32,87 @@
 #include "GP_Filter.h"
 
 /*
- * Floyd Steinberg
+ * Classical Floyd-Steinberg. Produces good results and is a little faster than
+ * the Hilbert-Peano dithering.
+ *
+ * The error is distributed to the neighbor pixels as follows:
+ * (X denotes current position)
+ *
+ *
+ *          |       |
+ *          |   X   |  7/16
+ *          |       |
+ *   -----------------------
+ *          |       |
+ *     3/16 |  5/16 |  1/16
+ *          |       |
+ *
  */
-GP_Context *GP_FilterFloydSteinberg_to_G1(const GP_Context *src,
-                                          GP_Context *dst,
-                                          GP_ProgressCallback *callback);
 
 /*
- * Floyd Steinberg
+ * Semi internal raw version, use at your own risk.
  */
-GP_Context *GP_FilterFloydSteinberg_from_RGB888(const GP_Context *src,
-                                                GP_Context *dst,
-                                                GP_PixelType dst_pixel_type,
-						GP_ProgressCallback *callback);
+int GP_FilterFloydSteinberg_RGB888_Raw(const GP_Context *src,
+                                            GP_Context *dst,
+                                            GP_ProgressCallback *callback);
 
 /*
- * Converts RGB888 to RGB or Grayscale bitmap. 
+ * Converts RGB888 24bit image to any RGB or Grayscale bitmap.
+ *
+ * The source pixel_type MUST BE GP_PIXEL_RGB888.
+ *
+ * The destination must be at least as large as source.
+ *
+ * If operation was aborted from within a callback, non-zero is returned.
  */
-int GP_FilterFloydSteinberg_RGB888_to_XXX_Raw(const GP_Context *src,
-                                              GP_Context *dst,
-                                              GP_ProgressCallback *callback);
+int GP_FilterFloydSteinberg_RGB888(const GP_Context *src,
+                                   GP_Context *dst,
+                                   GP_ProgressCallback *callback);
 
 /*
- * Converts any bitmap to 1-bit Grayscale.
+ * If malloc() has failed, or operation was aborted by a callback, NULL is
+ * returned.
  */
-int GP_FilterFloydSteinberg_XXX_to_G1_Raw(const GP_Context *src,
-                                          GP_Context *dst,
-                                          GP_ProgressCallback *callback);
-
+GP_Context *GP_FilterFloydSteinberg_RGB888_Alloc(const GP_Context *src,
+                                                 GP_PixelType pixel_type,
+						 GP_ProgressCallback *callback);
 
 /*
- * Hilbert-peano space filling curve based dithering.
+ * Hilbert-Peano space filling curve based dithering.
+ *
+ * The error value is distributed around the Hilbert curve.
+ *
+ * This dithering introduces a little more noisy result but doesn't create
+ * repeating patterns like Floyd-Steinberg which looks generally better to
+ * human eye. On the other hand edges tend to be less sharp.
  */
-int GP_FilterHilbertPeano_from_RGB888(const GP_Context *src,
-                                       GP_Context *dst,
-				       GP_ProgressCallback *callback);
 
+/*
+ * Semi internal raw version, use at your own risk.
+ */
+int GP_FilterHilbertPeano_RGB888_Raw(const GP_Context *src,
+                                     GP_Context *dst,
+                                     GP_ProgressCallback *callback);
+
+/*
+ * Converts RGB888 24bit image to any RGB or Grayscale bitmap.
+ *
+ * The source pixel_type MUST BE GP_PIXEL_RGB888.
+ *
+ * The destination must be at least as large as source.
+ *
+ * If the operation was aborted from within a callback, non-zero is returned.
+ */
+int GP_FilterHilbertPeano_RGB888(const GP_Context *src,
+                                 GP_Context *dst,
+                                 GP_ProgressCallback *callback);
+
+/*
+ * If malloc() has failed, or operation was aborted by a callback, NULL is
+ * returned.
+ */
+GP_Context *GP_FilterHilbertPeano_RGB888_Alloc(const GP_Context *src,
+                                               GP_PixelType pixel_type,
+                                               GP_ProgressCallback *callback);
 
 #endif /* FILTERS_GP_DITHER_H */

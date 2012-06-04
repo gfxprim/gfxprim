@@ -227,13 +227,13 @@ static GP_RetCode rotate(GP_Context **c, const char *params)
 
 	switch (rot) {
 	case 0:
-		res = GP_FilterRotate90Alloc(*c, progress_callback);
+		res = GP_FilterRotate90_Alloc(*c, progress_callback);
 	break;
 	case 1:
-		res = GP_FilterRotate180Alloc(*c, progress_callback);
+		res = GP_FilterRotate180_Alloc(*c, progress_callback);
 	break;
 	case 2:
-		res = GP_FilterRotate270Alloc(*c, progress_callback);
+		res = GP_FilterRotate270_Alloc(*c, progress_callback);
 	break;
 	}
 		
@@ -445,9 +445,8 @@ static GP_RetCode dither(GP_Context **c, const char *params)
 	}
 
 	GP_Context *bw;
-	bw = GP_FilterFloydSteinberg_from_RGB888(*c, NULL,
-	                                         dither_pixel_types[fmt],
-						 progress_callback);
+	bw = GP_FilterFloydSteinberg_RGB888_Alloc(*c, dither_pixel_types[fmt],
+	                                          progress_callback);
 
 	//TODO: so far we convert the context back to RGB888
 	//(so we can do further work with it)
@@ -609,19 +608,19 @@ static GP_RetCode arithmetic(GP_Context **c, const char *params)
 
 	switch (op) {
 	case 0:
-		res = GP_FilterDifference(*c, img, NULL, progress_callback);
+		res = GP_FilterDifferenceAlloc(*c, img, progress_callback);
 	break;
 	case 1:
-		res = GP_FilterAddition(*c, img, NULL, progress_callback);
+		res = GP_FilterAdditionAlloc(*c, img, progress_callback);
 	break;
 	case 2:
-		res = GP_FilterMultiply(*c, img, NULL, progress_callback);
+		res = GP_FilterMultiplyAlloc(*c, img, progress_callback);
 	break;
 	case 3:
-		res = GP_FilterMin(*c, img, NULL, progress_callback);
+		res = GP_FilterMinAlloc(*c, img, progress_callback);
 	break;
 	case 4:
-		res = GP_FilterMax(*c, img, NULL, progress_callback);
+		res = GP_FilterMaxAlloc(*c, img, progress_callback);
 	break;
 	}
 

@@ -21,62 +21,47 @@
  *****************************************************************************/
 
  /*
-   
-   PNG support using libpng library.
+
+   Read image meta-data and print them into stdout.
 
   */
 
-#ifndef LOADERS_GP_PNG_H
-#define LOADERS_GP_PNG_H
+#include <stdio.h>
+#include <string.h>
+#include <errno.h>
 
-#include "core/GP_ProgressCallback.h"
-#include "core/GP_Context.h"
+#include <GP.h>
 
-#include "GP_MetaData.h"
+#define SEP \
+"-----------------------------------------------------------------------------"
 
-/*
- * The possible errno values:
- *
- * - Anything FILE operation may return (fopen(), fclose(), fseek(), ...).
- * - EIO for png_read()/png_write() failure
- * - ENOSYS for not implemented bitmap format
- * - ENOMEM from malloc()
- * - EILSEQ for wrong image signature/data
- * - ECANCELED when call was aborted from callback
- */
+int main(int argc, char *argv[])
+{
+	GP_MetaData *data = GP_MetaDataCreate(80);
+	int i;
 
-/*
- * Opens up file and checks signature. Upon successful return (zero is
- * returned) the file possition would be set to eight bytes (exactly after the
- * PNG signature).
- */
-int GP_OpenPNG(const char *src_path, FILE **f);
+	if (argc < 2) {
+		fprintf(stderr, "Takes an image(s) as parameter(s)\n");
+		return 1;
+	}
+	
+	//GP_SetDebugLevel(10);
 
-/*
- * Reads PNG from an open FILE. Expects the file possition set after the eight
- * bytes PNG signature.
- * 
- * Upon succesfull return pointer to newly allocated context is returned.
- * Otherwise NULL is returned and errno is filled.
- */
-GP_Context *GP_ReadPNG(FILE *f, GP_ProgressCallback *callback);
+	for (i = 1; i < argc; i++) {
+		puts(SEP);
+		printf("Opening '%s'\n", argv[i]);
+		
+		GP_MetaDataClear(data);
+		
+		if (GP_LoadMetaData(argv[i], data)) {
+			fprintf(stderr, "Failed to read '%s' meta-data: %s\n",
+			        argv[1], strerror(errno));
+		} else {
+			GP_MetaDataPrint(data);
+		}
+	}
+	
+	puts(SEP);
 
-/*
- * Does both GP_OpenPNG and GP_ReadPNG at once.
- */
-GP_Context *GP_LoadPNG(const char *src_path, GP_ProgressCallback *callback);
-
-/*
- * Loads png meta-data.
- */
-int GP_ReadPNGMetaData(FILE *f, GP_MetaData *data);
-int GP_LoadPNGMetaData(const char *src_path, GP_MetaData *data);
-
-/*
- * Saves PNG to a file. Zero is returned on succes. Upon failure non-zero is
- * returned and errno is filled accordingly.
- */
-int GP_SavePNG(const GP_Context *src, const char *dst_path,
-               GP_ProgressCallback *callback);
-
-#endif /* LOADERS_GP_PNG_H */
+	return 0;
+}

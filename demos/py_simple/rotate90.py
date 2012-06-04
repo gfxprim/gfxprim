@@ -16,7 +16,7 @@ def main():
     # Load Image
     src = loaders.LoadImage(sys.argv[1], None)
     # Rotate by 90 degrees
-    res = filters.FilterRotate90Alloc(src, None)
+    res = filters.FilterRotate90_Alloc(src, None)
     # Save Image
     res.Save(sys.argv[2])
 

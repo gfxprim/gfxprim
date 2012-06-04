@@ -109,9 +109,9 @@ int GP_FilterHilbertPeano_RGB888_to_{{ pt.name }}_Raw(const GP_Context *src,
 %% endif
 %% endfor
 
-int GP_FilterHilbertPeano_RGB888_to_XXX_Raw(const GP_Context *src,
-                                            GP_Context *dst,
-                                            GP_ProgressCallback *callback)
+int GP_FilterHilbertPeano_RGB888_Raw(const GP_Context *src,
+                                     GP_Context *dst,
+                                     GP_ProgressCallback *callback)
 {
 	switch (dst->pixel_type) {
 %% for pt in pixeltypes

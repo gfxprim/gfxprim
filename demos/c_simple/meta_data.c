@@ -21,62 +21,64 @@
  *****************************************************************************/
 
  /*
-   
-   PNG support using libpng library.
+
+   Meta-data storage operations example.
+
+   Meta-data storage is used to store image meta-data (if present) such as
+   physical size, creation date, etc...
+
+   Meta-data storage is basically an typed dictionary.
+
+   This example shows low-level interface to GP_MetaData structure.
 
   */
 
-#ifndef LOADERS_GP_PNG_H
-#define LOADERS_GP_PNG_H
+#include <stdio.h>
 
-#include "core/GP_ProgressCallback.h"
-#include "core/GP_Context.h"
+#include <GP.h>
 
-#include "GP_MetaData.h"
+int main(void)
+{
+	GP_MetaData *data = GP_MetaDataCreate(10);
 
-/*
- * The possible errno values:
- *
- * - Anything FILE operation may return (fopen(), fclose(), fseek(), ...).
- * - EIO for png_read()/png_write() failure
- * - ENOSYS for not implemented bitmap format
- * - ENOMEM from malloc()
- * - EILSEQ for wrong image signature/data
- * - ECANCELED when call was aborted from callback
- */
+	//GP_SetDebugLevel(10);
 
-/*
- * Opens up file and checks signature. Upon successful return (zero is
- * returned) the file possition would be set to eight bytes (exactly after the
- * PNG signature).
- */
-int GP_OpenPNG(const char *src_path, FILE **f);
+	if (data == NULL)
+		return 1;
 
-/*
- * Reads PNG from an open FILE. Expects the file possition set after the eight
- * bytes PNG signature.
- * 
- * Upon succesfull return pointer to newly allocated context is returned.
- * Otherwise NULL is returned and errno is filled.
- */
-GP_Context *GP_ReadPNG(FILE *f, GP_ProgressCallback *callback);
+	/* 
+	 * Create integer
+	 *
+	 * May fail, if there is allready record with id 'dpi' or
+	 * if there is no space left.
+	 */
+	GP_MetaDataCreateInt(data, "dpi", 300);
 
-/*
- * Does both GP_OpenPNG and GP_ReadPNG at once.
- */
-GP_Context *GP_LoadPNG(const char *src_path, GP_ProgressCallback *callback);
+	/*
+	 * Create an string.
+	 *
+	 * The last parameter says, if the string should be duplicated
+	 * in the metadata storage.
+	 */
+	GP_MetaDataCreateString(data, "author", "Foo Bar <foo@bar.net>", 0, 1);
+	GP_MetaDataCreateString(data, "comment", "Created in hurry.", 0, 1);
+	GP_MetaDataCreateDouble(data, "pi", 3.141592);
 
-/*
- * Loads png meta-data.
- */
-int GP_ReadPNGMetaData(FILE *f, GP_MetaData *data);
-int GP_LoadPNGMetaData(const char *src_path, GP_MetaData *data);
+	const char *ret;
 
-/*
- * Saves PNG to a file. Zero is returned on succes. Upon failure non-zero is
- * returned and errno is filled accordingly.
- */
-int GP_SavePNG(const GP_Context *src, const char *dst_path,
-               GP_ProgressCallback *callback);
+	ret = GP_MetaDataGetString(data, "comment");
 
-#endif /* LOADERS_GP_PNG_H */
+	if (ret != NULL)
+		printf("Found string 'comment' = '%s'\n", ret);
+	else
+		printf("ERROR: cannot cound string 'comment'\n");
+
+	printf("\n");
+
+	/*
+	 * Print all meta-data
+	 */
+	GP_MetaDataPrint(data);
+
+	return 0;
+}

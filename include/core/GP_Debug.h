@@ -16,7 +16,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2011 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
@@ -33,6 +33,10 @@
    Debug level > 1 is intended for more verbose reporting, like inner cycles
    or loop debugging.
 
+   Debug levels with negative level are special. Debug level -1 means TODO,
+   level -2 says WARNING while -2 means BUG (i.e. library get into unconsistent
+   state).
+
   */
 
 #ifndef GP_DEBUG_H
@@ -45,17 +49,23 @@
 
 #define GP_DEFAULT_DEBUG_LEVEL 0
 
-#define GP_DEBUG(level, ...) do {                                    \
-	if (level <= GP_GetDebugLevel()) {                           \
-		fprintf(stderr, "%u: %s:%s():%u: ", level, __FILE__, \
-		        __FUNCTION__, __LINE__);                     \
-		fprintf(stderr, __VA_ARGS__);                        \
-		fputc('\n', stderr);                                 \
-	}                                                            \
-} while (0)
+#define GP_DEBUG(level, ...) \
+	GP_DebugPrint(level, __FILE__, __FUNCTION__, __LINE__, __VA_ARGS__)
+
+#define GP_TODO(...) \
+	GP_DebugPrint(-1, __FILE__, __FUNCTION__, __LINE__, __VA_ARGS__)
+
+#define GP_WARN(...) \
+	GP_DebugPrint(-2, __FILE__, __FUNCTION__, __LINE__, __VA_ARGS__)
+
+#define GP_BUG(...) \
+	GP_DebugPrint(-3, __FILE__, __FUNCTION__, __LINE__, __VA_ARGS__)
 
 void GP_SetDebugLevel(unsigned int level);
 
 unsigned int GP_GetDebugLevel(void);
+
+void GP_DebugPrint(int level, const char *file, const char *function, int line,
+                   const char *fmt, ...) __attribute__ ((format (printf, 5, 6)));
 
 #endif /* GP_DEBUG_H */

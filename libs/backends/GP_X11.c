@@ -22,12 +22,16 @@
 
 #include "../../config.h"
 
+#include "core/GP_Debug.h"
+#include "core/GP_Common.h"
+
 #ifdef HAVE_LIBX11
 
 #include <X11/Xlib.h>
 #include <X11/Xutil.h>
+#include <X11/Xatom.h>
+#include <X11/Xmd.h>
 
-#include "core/GP_Debug.h"
 #include "input/GP_InputDriverX11.h"
 #include "GP_X11.h"
 
@@ -262,7 +266,7 @@ void create_window(struct x11_priv *x11, int x, int y,
 	unsigned long attr_mask = 0;
 	
 	/* Set event mask */
-	attrs.event_mask = ExposureMask | StructureNotifyMask |KeyPressMask |
+	attrs.event_mask = ExposureMask | StructureNotifyMask | KeyPressMask |
 	                   KeyReleaseMask | PointerMotionMask;
 	attr_mask |= CWEventMask;
 	
@@ -279,18 +283,149 @@ void create_window(struct x11_priv *x11, int x, int y,
 		         *w, *h);
 
 		XChangeWindowAttributes(x11->dpy, x11->win, attr_mask, &attrs);
+		
+		return;
+	}
+	
+	/* 
+	 * For some reason reading mouse button clicks on root win are not
+	 * allowed...
+	 */
+	attrs.event_mask |= ButtonPressMask | ButtonReleaseMask;
+	
+	/*
+	 * Create undecoreated root window on background
+	 */
+	if (flags & GP_X11_CREATE_ROOT_WIN) {
+		Atom xa;
+		
+		*w = DisplayWidth(x11->dpy, x11->scr);
+		*h = DisplayHeight(x11->dpy, x11->scr);
+		
+		GP_DEBUG(2, "Creating a window above root, owerriding size to %ux%u",
+		         *w, *h);
 
+		x11->win = XCreateWindow(x11->dpy, DefaultRootWindow(x11->dpy),
+		                         0, 0, *w, *h, 0, CopyFromParent,
+					 InputOutput, CopyFromParent, attr_mask, &attrs);
+		
+		/* Set empty WM_PROTOCOLS */
+		GP_DEBUG(2, "Setting empty MW_PROTOCOLS");
+		XSetWMProtocols(x11->dpy, x11->win, NULL, 0);
+
+		/* Set window type to desktop */
+		xa = XInternAtom(x11->dpy, "_NET_WM_WINDOW_TYPE", False);
+		
+		if (xa != None) {
+			GP_DEBUG(2, "Setting Atom _NET_WM_WINDOW_TYPE to _NET_WM_WINDOW_TYPE_DESKTOP");
+		
+			Atom xa_prop = XInternAtom(x11->dpy, "_NET_WM_WINDOW_TYPE_DESKTOP", False);
+		
+			XChangeProperty(x11->dpy, x11->win, xa, XA_ATOM, 32,
+			                PropModeReplace, (unsigned char *) &xa_prop, 1);
+		}
+		
+		/* Turn off window decoration */
+		xa = XInternAtom(x11->dpy, "_MOTIF_WM_HINTS", False);
+		
+		if (xa != None) {
+			GP_DEBUG(2, "Setting Atom _MOTIF_WM_HINTS to 2, 0, 0, 0, 0");
+			
+			long prop[5] = {2, 0, 0, 0, 0};
+
+			XChangeProperty(x11->dpy, x11->win, xa, xa, 32,
+                                        PropModeReplace, (unsigned char *) prop, 5);
+		}
+		
+		/* Set below other windows */
+		xa = XInternAtom(x11->dpy, "_WIN_LAYER", False);
+
+		if (xa != None) {
+			GP_DEBUG(2, "Setting Atom _WIN_LAYER to 6");
+
+			long prop = 6;
+
+			XChangeProperty(x11->dpy, x11->win, xa, XA_CARDINAL, 32,
+			                PropModeAppend, (unsigned char *) &prop, 1);
+		}
+		
+		xa = XInternAtom(x11->dpy, "_NET_WM_STATE", False);
+
+		if (xa != None) {
+			GP_DEBUG(2, "Setting Atom _NET_WM_STATE to _NET_WM_STATE_BELOW");
+			
+			Atom xa_prop = XInternAtom(x11->dpy, "_NET_WM_STATE_BELOW", False);
+
+			XChangeProperty(x11->dpy, x11->win, xa, XA_ATOM, 32,
+			                PropModeAppend, (unsigned char *) &xa_prop, 1);
+		}
+		
+		/* Set sticky */
+		xa = XInternAtom(x11->dpy, "_NET_WM_DESKTOP", False);
+		
+		if (xa != None) {
+			GP_DEBUG(2, "Setting Atom _NET_WM_DESKTOP to 0xffffffff");
+
+			CARD32 xa_prop = 0xffffffff;
+			
+			XChangeProperty(x11->dpy, x11->win, xa, XA_CARDINAL, 32,
+			                PropModeAppend, (unsigned char *) &xa_prop, 1);
+		}
+
+		xa = XInternAtom(x11->dpy, "_NET_WM_STATE", False);
+
+		if (xa != None) {
+			GP_DEBUG(2, "Appending to Atom _NET_WM_STATE atom _NET_WM_STATE_STICKY");
+
+			Atom xa_prop = XInternAtom(x11->dpy, "_NET_WM_STATE_STICKY", False);
+
+			XChangeProperty(x11->dpy, x11->win, xa, XA_ATOM, 32,
+			                 PropModeAppend, (unsigned char *) &xa_prop, 1);
+		}
+		
+		/* Skip taskbar */
+		xa = XInternAtom(x11->dpy, "_NET_WM_STATE", False);
+		
+		if (xa != None) {
+			GP_DEBUG(2, "Appending to Atom _NET_WM_STATE atom _NET_STATE_SKIP_TASKBAR");
+
+			Atom xa_prop = XInternAtom(x11->dpy, "_NET_WM_STATE_SKIP_TASKBAR", False);
+
+			XChangeProperty(x11->dpy, x11->win, xa, XA_ATOM, 32,
+			                 PropModeAppend, (unsigned char *) &xa_prop, 1);
+		}
+		
+		/* Skip pager */
+		xa = XInternAtom(x11->dpy, "_NET_WM_STATE", False);
+		
+		if (xa != None) {
+			GP_DEBUG(2, "Appending to Atom _NET_WM_STATE atom _NET_STATE_SKIP_PAGER");
+
+			Atom xa_prop = XInternAtom(x11->dpy, "_NET_WM_STATE_SKIP_PAGER", False);
+
+			 XChangeProperty(x11->dpy, x11->win, xa, XA_ATOM, 32,
+			                 PropModeAppend, (unsigned char *) &xa_prop, 1);
+		}
+	
+		/* Set 100% opacity */
+		xa = XInternAtom(x11->dpy, "_NET_WM_WINDOW_OPACITY", False);
+
+		if (xa != None) {
+			GP_DEBUG(2, "Setting Atom _NET_WM_WINDOW_OPACITY to 0xffffffff");
+
+			long prop = 0xffffffff;
+
+			XChangeProperty(x11->dpy, x11->win, xa, XA_CARDINAL, 32,
+			                PropModeAppend, (unsigned char *) &prop, 1);
+		}
+
+		/* Show window */
+		XMapWindow(x11->dpy, x11->win);
 		return;
 	}
 	
 	GP_DEBUG(2, "Opening window '%s' %ix%i-%ux%u",
 	         caption, x, y, *w, *h);
-
-	/* 
-	 * For some reason reading mouse button clicks on root win are not
-	 * allowed...
-	 */
-	attrs.event_mask |= ButtonPressMask | ButtonReleaseMask ;
 
 	x11->win = XCreateWindow(x11->dpy, DefaultRootWindow(x11->dpy),
 	                         x, y, *w, *h, 0, CopyFromParent,
@@ -359,9 +494,9 @@ GP_Backend *GP_BackendX11Init(const char *display, int x, int y,
 	backend->Flip          = x11_flip;
 	backend->UpdateRect    = x11_update_rect;
 	backend->Exit          = x11_exit;
-	backend->fd_list       = NULL;
 	backend->Poll          = x11_poll;
 	backend->SetAttributes = x11_set_attributes;
+	backend->fd            = XConnectionNumber(x11->dpy);
 
 	return backend;
 err1:
@@ -375,10 +510,13 @@ err0:
 
 #include "GP_Backend.h"
 
-GP_Backend *GP_BackendX11Init(const char *display, int x, int y,
-                              unsigned int w, unsigned int h,
-			      const char *caption)
+GP_Backend *GP_BackendX11Init(const char *GP_UNUSED(display),
+                              int GP_UNUSED(x), int GP_UNUSED(y),
+                              unsigned int GP_UNUSED(w),
+			      unsigned int GP_UNUSED(h),
+			      const char *GP_UNUSED(caption))
 {
+	GP_DEBUG(0, "FATAL: X11 support not compiled in");
 	return NULL;
 }
 

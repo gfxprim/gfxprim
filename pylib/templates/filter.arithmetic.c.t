@@ -116,10 +116,30 @@ int GP_Filter{{ name }}_Raw(const GP_Context *src_a, const GP_Context *src_b,
 	return 1;
 }
 
-GP_Context *GP_Filter{{ name }}(const GP_Context *src_a, const GP_Context *src_b,
-	GP_Context *dst{{ maybe_opts_l(opts) }}, GP_ProgressCallback *callback)
+int GP_Filter{{ name }}(const GP_Context *src_a, const GP_Context *src_b,
+	                GP_Context *dst{{ maybe_opts_l(opts) }},
+                        GP_ProgressCallback *callback)
 {
-	GP_Context *res = dst;
+	GP_Size w = GP_MIN(src_a->w, src_b->w);
+	GP_Size h = GP_MIN(src_a->h, src_b->h);
+	
+	GP_ASSERT(src_a->pixel_type == dst->pixel_type,
+	          "The src and dst pixel types must match");
+	GP_ASSERT(w <= dst->w && h <= dst->h,
+	          "Destination is not big enough");
+
+	if (GP_Filter{{ name }}_Raw(src_a, src_b, dst{{ maybe_opts_l(params) }}, callback)) {
+		GP_DEBUG(1, "Operation aborted");
+		return 1;
+	}
+
+	return 0;
+}
+
+GP_Context *GP_Filter{{ name }}Alloc(const GP_Context *src_a, const GP_Context *src_b,
+	                            {{ maybe_opts_r(opts) }}GP_ProgressCallback *callback)
+{
+	GP_Context *res;
 
 	GP_ASSERT(src_a->pixel_type == src_b->pixel_type,
 	          "Pixel types for sources must match.");
@@ -127,24 +147,15 @@ GP_Context *GP_Filter{{ name }}(const GP_Context *src_a, const GP_Context *src_b
 	GP_Size w = GP_MIN(src_a->w, src_b->w);
 	GP_Size h = GP_MIN(src_a->h, src_b->h);
 	
-	if (res == NULL) {
-		
-		res = GP_ContextAlloc(w, h, src_a->pixel_type);
+	res = GP_ContextAlloc(w, h, src_a->pixel_type);
 
-		if (res == NULL)
-			return NULL;
-	} else {
-		GP_ASSERT(src_a->pixel_type == dst->pixel_type,
-		          "The src and dst pixel types must match");
-		GP_ASSERT(w <= dst->w && h <= dst->h,
-		          "Destination is not big enough");
-	}
+	if (res == NULL)
+		return NULL;
 
 	if (GP_Filter{{ name }}_Raw(src_a, src_b, res{{ maybe_opts_l(params) }}, callback)) {
 		GP_DEBUG(1, "Operation aborted");
 
-		if (dst == NULL)
-			GP_ContextFree(res);
+		GP_ContextFree(res);
 	
 		return NULL;
 	}

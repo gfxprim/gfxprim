@@ -13,56 +13,203 @@ Common filter API
 
 For convenience, the filters API is unified:
 
-* Each filter returns pointer to destination context or 'NULL' on failure
-* The first two arguments are source and destination
-* The last argument is progress callback
+* There are two functions for each filter
+  - first one takes destination as an argument
+  - second one allocates the destination and returns pointer to it
+* First argument(s) are always source(s)
+* Then, in case of second variant, destination
+* Other parameters follow
+* And the last argument is progress callback
 
-Each filter function could be used in two modes.
+When using allocating version of the filter, pointer to the newly allocated
+context is returned, or in case of failure 'NULL' is returned. If filter has
+been interrupted by a callback, all allocated memory is freed and 'NULL' is
+returned.
 
-By passing non-'NULL' argument as filter destination user requests result to
-be stored into the destination context. The context must have correct pixel
-type and the context size must be big enough to store the result.
+When using non-allocating variant of the filter, the destination context must
+have correct pixel type and the context size must be big enough to store the
+result. The return value from such filter is either zero, in case of success,
+or non-zero when filter was interrupted by a callback.
 
 For filters that work 'in-place' (which is explicitly said for each filter)
 the source and the destination could be the same context. Note that this is
-not expected to work if you do several overlapping subcontexts and pass these
+not expected to work if you do several overlapping sub-contexts and pass these
 as arguments.
-
-When 'NULL' is passed as destination new context for storing the result is
-allocated and returned. 
-
-The return value is either pointer to destination context or 'NULL' either
-when malloc(2) has failed or if the filter is not implemented for such
-pixel_type, parameters, etc...
 
 [source,c]
 -------------------------------------------------------------------------------
 /*
  * Filter common API.
  */
-GP_Context *GP_FilterFoo(const GP_Context *src, GP_Context *dst,
-                         foo params ...,
-                         GP_ProgressCallback *callback);
+int GP_FilterFoo(const GP_Context *src, GP_Context *dst,
+                 foo params ...,
+                 GP_ProgressCallback *callback);
+
+GP_Context *GP_FilterFooAlloc(const GP_Context *src,
+                              foo params ...,
+                              GP_ProgressCallback *callback);
 -------------------------------------------------------------------------------
 
 
-Filters also exists in _Raw variant (that just takes source context,
-destination context, filters parameters and progress callback). These filter
-APIs are used for internal implementation and shouldn't be called by user as
-the destination is expected to be crafted exactly for storing the filter
-result and there are 'NO' sanity checks in place.
+Filters also exists in _Raw variant whose interface is similar to the first
+type of filter function. These filter APIs are used for internal
+implementation and shouldn't be called by user as the destination is expected
+to be crafted exactly for storing the filter result and there are 'NO' sanity
+checks in place.
 
 'You could use these at your own risk'
 
 [source,c]
 -------------------------------------------------------------------------------
 /*
- * Raw filter common api.
+ * Raw filter common API.
  */
-void GP_FilterFoo_Raw(const GP_Context *src, GP_Context *dst,
-                      foo params ...,
-                      GP_ProgressCallback *callback);
+int GP_FilterFoo_Raw(const GP_Context *src, GP_Context *dst,
+                     foo params ...,
+                     GP_ProgressCallback *callback);
 -------------------------------------------------------------------------------
+
+Filter Parameters
+~~~~~~~~~~~~~~~~~
+
+In order to pass, per-channel, filter parameters to a filter, structure called
+GP_FilterParams was created.
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <GP.h>
+/* or */
+#include <filters/GP_FilterParam.h>
+
+typedef union GP_FilterParamVal {
+        float f;
+        uint32_t ui;
+        int32_t i;
+        void *ptr;
+} GP_FilterParamVal;
+
+typedef struct GP_FilterParam {
+	char channel_name[2];
+	union GP_FilterParamVal val;
+} GP_FilterParam;
+-------------------------------------------------------------------------------
+
+Some filters do take an empty channel_name terminated (empty channel_name is
+empty string i.e. "\0") array of GP_FilterParam, which is used to describe
+per-channel parameters.
+
+
+There are two methods how to construct GP_FilterParam structure. First one is
+to use macro that expands to a code which declares and initializes the array on
+the stack second uses memory allocated by a malloc(). In both cases the
+structure is has initialized channel names and terminator.
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <GP.h>
+/* or */
+#include <filters/GP_FilterParam.h>
+
+#define GP_FILTER_PARAMS(pixel_type, name) \
+        GP_FilterParam name[GP_PixelTypes[pixel_type].numchannels + 1]; \
+        GP_FilterParamInitChannels(name, pixel_type);
+-------------------------------------------------------------------------------
+
+Macro that declares and initializes GP_FilterParam structure for a given
+pixel_type.
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <GP.h>
+/* or */
+#include <filters/GP_FilterParam.h>
+
+GP_FilterParam *GP_FilterParamCreate(GP_PixelType pixel_type);
+
+void GP_FilterParamDestroy(GP_FilterParam *self);
+-------------------------------------------------------------------------------
+
+Second possible way allocates memory using malloc().
+
+Functions for manipulating and querying existing GP_FilterParam follows.
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <GP.h>
+/* or */
+#include <filters/GP_FilterParam.h>
+
+void GP_FilterParamInitChannels(GP_FilterParam params[],
+                                GP_PixelType pixel_type);
+-------------------------------------------------------------------------------
+
+Initializes filter param array channel names (accordingly to pixel type) and
+terminator. The params array must be large enough to hold number of pixel type
+channels plus one.
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <GP.h>
+/* or */
+#include <filters/GP_FilterParam.h>
+
+GP_FilterParam *GP_FilterParamChannel(GP_FilterParam params[],
+                                      const char *channel_name);
+-------------------------------------------------------------------------------
+
+Does lookup for a given channel name and returns, if found, corresponding
+GP_FilterParam, otherwise 'NULL' is returned.
+
+This function is primary used in filters, where filter, at the start, resolves
+all it's parameters.
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <GP.h>
+/* or */
+#include <filters/GP_FilterParam.h>
+
+int GP_FilterParamCheckPixelType(GP_FilterParam params[],
+                                 GP_PixelType pixel_type);
+-------------------------------------------------------------------------------
+
+Matches param structure against pixel_type. Returns zero if params describes
+exactly same channels like pixel_type, non-zero otherwise.
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <GP.h>
+/* or */
+#include <filters/GP_FilterParam.h>
+
+void GP_FilterParamSetIntAll(GP_FilterParam params[], int32_t val);
+
+int GP_FilterParamSetInt(GP_FilterParam params[], const char *channel_name,
+                         int32_t val);
+
+void GP_FilterParamSetFloatAll(GP_FilterParam params[], float val);
+
+int GP_FilterParamSetFloat(GP_FilterParam params[], const char *channel_name,
+                           float val);
+
+void GP_FilterParamSetUIntAll(GP_FilterParam params[], uint32_t val);
+
+int GP_FilterParamSetUInt(GP_FilterParam params[], const char *channel_name,
+                          uint32_t val);
+
+void GP_FilterParamSetPtrAll(GP_FilterParam params[], void *ptr);
+
+int GP_FilterParamSetPtr(GP_FilterParam params[], const char *channel_name,
+                         void *ptr);
+
+void GP_FilterParamFreePtrAll(GP_FilterParam params[]);
+-------------------------------------------------------------------------------
+
+Parameter setters. Those that sets individual value returns zero on success
+(i.e. channel was found) and non-zero otherwise.
+
+The last one calls free() on all param pointers, which is used to free
+allocate memory.
 
 Point operation filters
 ~~~~~~~~~~~~~~~~~~~~~~~
@@ -103,75 +250,192 @@ GP_Context *GP_FilterInvert(const GP_Context *src, GP_Context *dst,
 Inverts the image, for each channel the result value is computed as "chan_max
 - val".
 
+Arithmetic filters
+~~~~~~~~~~~~~~~~~~
+
+Arithmetic filters do take two contexts as an input and combines them into one
+output context.
+
+The pixel type of both input contexts must match.
+
+If size of the input contexts differs, minimum is used.
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <filters/GP_Arithmetic.h>
+/* or */
+#include <GP.h>
+
+int GP_FilterAddition(const GP_Context *src_a,
+                      const GP_Context *src_b,
+                      GP_Context *dst,
+                      GP_ProgressCallback *callback);
+
+GP_Context *GP_FilterAdditionAlloc(const GP_Context *src_a,
+                                   const GP_Context *src_b,
+                                   GP_ProgressCallback *callback);
+-------------------------------------------------------------------------------
+
+Produces saturated (clamped) addition of two contexts.
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <filters/GP_Arithmetic.h>
+/* or */
+#include <GP.h>
+
+int GP_FilterMultiply(const GP_Context *src_a,
+                      const GP_Context *src_b,
+                      GP_Context *dst,
+                      GP_ProgressCallback *callback);
+
+GP_Context *GP_FilterMultiplyAlloc(const GP_Context *src_a,
+                                   const GP_Context *src_b,
+                                   GP_ProgressCallback *callback);
+-------------------------------------------------------------------------------
+
+Produces saturated (clamped) multiplication of two contexts.
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <filters/GP_Arigthmetic.h>
+/* or */
+#include <GP.h>
+
+int GP_FilterDifference(const GP_Context *src_a,
+                        const GP_Context *src_b,
+                        GP_Context *dst,
+                        GP_ProgressCallback *callback);
+
+GP_Context *GP_FilterDifferenceAlloc(const GP_Context *src_a,
+                                     const GP_Context *src_b,
+                                     GP_ProgressCallback *callback);
+
+-------------------------------------------------------------------------------
+
+Produces symmetric difference (i.e. abs(a - b)).
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <filters/GP_Arigthmetic.h>
+/* or */
+#include <GP.h>
+
+int GP_FilterMax(const GP_Context *src_a,
+                 const GP_Context *src_b,
+                 GP_Context *dst,
+                 GP_ProgressCallback *callback);
+
+GP_Context *GP_FilterMaxAlloc(const GP_Context *src_a,
+                              const GP_Context *src_b,
+                              GP_ProgressCallback *callback);
+
+int GP_FilterMin(const GP_Context *src_a,
+                 const GP_Context *src_b,
+                 GP_Context *dst,
+                 GP_ProgressCallback *callback);
+
+GP_Context *GP_FilterMinAlloc(const GP_Context *src_a,
+                              const GP_Context *src_b,
+                              GP_ProgressCallback *callback);
+-------------------------------------------------------------------------------
+
+Maximum and minimum filter.
+
 Rotation and Symmetry filters
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <GP_Filters.h>
+#include <filters/GP_Rotate.h>
+/* or */
+#include <GP.h>
 
-GP_Context *GP_FilterMirrorH(const GP_Context *src, GP_Context *dst,
-                             GP_ProgressCallback *callback);
+int GP_FilterMirrorH(const GP_Context *src, GP_Context *dst,
+                     GP_ProgressCallback *callback);
+
+GP_Context *GP_FilterMirrorH_Alloc(const GP_Context *src,
+                                   GP_ProgressCallback *callback);
 -------------------------------------------------------------------------------
 
 Mirrors context horizontally.
 
 Works 'in-place'.
 
-The destination has to have the same pixel type and the destination size must
-be at least as big as source.
+The destination has to have the same pixel type and the size must be at least
+as large as source.
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <GP_Filters.h>
+#include <filters/GP_Rotate.h>
+/* or */
+#include <GP.h>
 
-GP_Context *GP_FilterMirrorV(const GP_Context *src, GP_Context *dst,
-                             GP_ProgressCallback *callback);
+int GP_FilterMirrorV(const GP_Context *src, GP_Context *dst,
+                     GP_ProgressCallback *callback);
+
+GP_Context *GP_FilterMirrorV_Alloc(const GP_Context *src,
+                                   GP_ProgressCallback *callback);
 -------------------------------------------------------------------------------
 
 Mirrors context vertically.
 
 Works 'in-place'.
 
-the destination has to have the same pixel type and the destination size must
-be at least as big as source.
+The destination has to have the same pixel type and the size must be at least
+as large as source.
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <GP_Filters.h>
+#include <filters/GP_Rotate.h>
+/* or */
+#include <GP.h>
 
-GP_Context *GP_FilterRotate90(const GP_Context *src, GP_Context *dst,
-                              GP_ProgressCallback *callback);
+int GP_FilterRotate90(const GP_Context *src, GP_Context *dst,
+                      GP_ProgressCallback *callback);
+
+GP_Context *GP_FilterRotate90_Alloc(const GP_Context *src,
+                                    GP_ProgressCallback *callback);
 -------------------------------------------------------------------------------
 
 Rotate context by 90 degrees.
 
 Doesn't work 'in-place' (yet).
 
-The destination has to have the same pixel type and destination size must be
-big enough to fit rotated context (i.e. W and H are swapped).
+The destination has to have the same pixel type and size must be large enough to
+fit rotated context (i.e. W and H are swapped).
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <GP_Filters.h>
+#include <filters/GP_Rotate.h>
+/* or */
+#include <GP.h>
 
-GP_Context *GP_FilterRotate180(const GP_Context *src, GP_Context *dst,
-                               GP_ProgressCallback *callback);
+int GP_FilterRotate180(const GP_Context *src, GP_Context *dst,
+                       GP_ProgressCallback *callback);
+
+GP_Context *GP_FilterRotate180_Alloc(const GP_Context *src,
+                                     GP_ProgressCallback *callback);
 -------------------------------------------------------------------------------
 
 Rotate context by 180 degrees.
 
 Doesn't work 'in-place' (yet).
 
-the destination has to have the same pixel type and the destination size must
-be at least as big as source.
+The destination has to have the same pixel type and the size must be at least
+as large as source.
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <GP_Filters.h>
+#include <filters/GP_Rotate.h>
+/* or */
+#include <GP.h>
 
-GP_Context *GP_FilterRotate270(const GP_Context *src, GP_Context *dst,
-                               GP_ProgressCallback *callback);
+int GP_FilterRotate270(const GP_Context *src, GP_Context *dst,
+                       GP_ProgressCallback *callback);
+
+GP_Context *GP_FilterRotate270_Alloc(const GP_Context *src,
+                                     GP_ProgressCallback *callback);
 -------------------------------------------------------------------------------
 
 Rotate context by 270 degrees.
@@ -179,10 +443,14 @@ Rotate context by 270 degrees.
 Doesn't work 'in-place' (yet).
 
 The destination has to have the same pixel type and destination size must be
-big enough to fit rotated context (eg. W and H are swapped).
+large enough to fit rotated context (i.e. W and H are swapped).
 
 [source,c]
 -------------------------------------------------------------------------------
+#include <filters/GP_Rotate.h>
+/* or */
+#include <GP.h>
+
 typedef enum GP_FilterSymmetries {
         GP_ROTATE_90,
         GP_ROTATE_CW = GP_ROTATE_90,
@@ -193,9 +461,13 @@ typedef enum GP_FilterSymmetries {
         GP_MIRROR_V,
 } GP_FilterSymmetries;
 
-GP_Context *GP_FilterSymmetry(const GP_Context *src, GP_Context *dst,
+GP_Context *GP_FilterSymmetry(const GP_Context *src,
                               GP_FilterSymmetries symmetry,
                               GP_ProgressCallback *callback);
+
+int GP_FilterSymmetry(const GP_Context *src, GP_Context *dst,
+                      GP_FilterSymmetries symmetry,
+                      GP_ProgressCallback *callback);
 -------------------------------------------------------------------------------
 
 Catch all function for symmetry filters.
@@ -244,7 +516,7 @@ Doesn't work 'in-place' (this is quite impossible as the size of the bitmap is
 changed by the filter).
 
 If the filter destination is non 'NULL' and the 'w' and 'h' is smaller than the
-destination size the source image is interpolated into subcontext of
+destination size the source image is interpolated into sub-context of
 destination defined by 'w' and 'h'.
 
 'TODO:' this filter is implemented for RGB888 only.
@@ -268,22 +540,17 @@ finally downscale it to desired size.
 Dithering
 ~~~~~~~~~
 
-[source,c]
--------------------------------------------------------------------------------
-#include <GP_Filters.h>
+Currently there are two dithering algorithms implemented. Both takes an RGB888
+24bit image as input and are able to produce any RGB or Grayscale image.
+This filters doesn't work 'in-place' as the result has different pixel type.
 
-GP_Context *GP_FilterFloydSteinberg_from_RGB888(const GP_Context *src,
-                                                GP_Context *dst,
-                                                GP_PixelType dst_pixel_type,
-                                                GP_ProgressCallback *callback);
--------------------------------------------------------------------------------
+Floyd-Steinberg
+^^^^^^^^^^^^^^^
 
-Floyd-Steinberg dithering the source context must be RGB888 and the
-dst_pixel_type may either be RGB or Grayscale.
+Classical Floyd-Steinberg. Produces good results and is a little faster than
+the Hilbert-Peano dithering.
 
-Doesn't work 'in-place' as the result has different pixel type.
-
-The error is distributed to neighbour pixels as follows:
+The error is distributed to neighbor pixels as follows:
 
 [width="10%"]
 |===================
@@ -297,39 +564,118 @@ And is throwed away at the image borders.
 -------------------------------------------------------------------------------
 #include <GP_Filters.h>
 
-GP_Context *GP_FilterFloydSteinberg_to_G1(const GP_Context *src,
-                                          GP_Context *dst,
-                                          GP_ProgressCallback *callback);
+int GP_FilterFloydSteinberg_RGB888(const GP_Context *src,
+                                   GP_Context *dst,
+                                   GP_ProgressCallback *callback);
 -------------------------------------------------------------------------------
 
-Same as above but the source is any pixel type and the result is stored into
-1-bit Grayscale.
+Renders Floyd Steinberg dithering directly into passed context. The
+destination must be at least as large as source. 
+
+If operation was aborted by a callback, non-zero is returned.
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <GP_Filters.h>
+
+GP_Context *GP_FilterFloydSteinberg_RGB888_Alloc(const GP_Context *src,
+                                                 GP_PixelType pixel_type,
+                                                 GP_ProgressCallback *callback);
+-------------------------------------------------------------------------------
+
+Returns pointer to allocated context of given pixel_type.
+
+If malloc(2) has failed, or operation was aborted by a callback 'NULL' is
+returned.
+
+Hilbert-Peano
+^^^^^^^^^^^^^
+
+Hilbert-Peano space filling curve based dithering.
+ 
+The error value is distributed around the Hilbert curve.
+
+The result is a little more noisy, but doesn't create repeating patterns like
+Floyd-Steinberg which looks generally better to human eye. On the other hand
+edges tend to be less sharp.
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <GP_Filters.h>
+
+int GP_FilterHilbertPeano_RGB888(const GP_Context *src,
+                                 GP_Context *dst,
+                                 GP_ProgressCallback *callback);
+-------------------------------------------------------------------------------
+
+Renders Hilbert Peano dithering directly into passed context. The
+destination must be at least as large as source. 
+
+If operation was aborted by a callback, non-zero is returned.
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <GP_Filters.h>
+
+GP_Context *GP_FilterHilbertPeano_RGB888_Alloc(const GP_Context *src,
+                                               GP_PixelType pixel_type,
+                                               GP_ProgressCallback *callback);
+-------------------------------------------------------------------------------
+
+Returns pointer to allocated context of given pixel_type.
+
+If malloc(2) has failed, or operation was aborted by a callback 'NULL' is
+returned.
 
 Example Images
 ^^^^^^^^^^^^^^
 All following images were generated using 'grinder'.
 (Click for bigger size)
 
-.Original Image; 1-bit, 2-bit, 4-bit Grayscale; 1-bit, 2-bit, 3-bit RGB
+.Original Image; Floyd-Steinberg, Hilbert-Peano: 1-bit, 2-bit, 4-bit, 8-bit Grayscale; 1-bit, 2-bit, 3-bit (per channel) RGB
 image:images/dither/lenna_small.png[
 	"Original Image", 
 	link="images/dither/lenna.png"]
-image:images/dither/lenna_G1_small.png[
-	"1-bit Grayscale",
-	link="images/dither/lenna_G1.png"]
-image:images/dither/lenna_G2_small.png[
-	"2-bit Grayscale",
-	link="images/dither/lenna_G2.png"]
-image:images/dither/lenna_G4_small.png[
-	"4-bit Grayscale",
-	link="images/dither/lenna_G4.png"]
-image:images/dither/lenna_RGB111_small.png[
-	"1-bit RGB",
-	link="images/dither/lenna_RGB111.png"]
-image:images/dither/lenna_RGB222_small.png[
-	"2-bit RGB",
-	link="images/dither/lenna_RGB222.png"]
-image:images/dither/lenna_RGB333_small.png[
-	"3-bit RGB",
-	link="images/dither/lenna_RGB333.png"]
+image:images/dither/lenna_G1_FS_small.png[
+	"1-bit Grayscale Floyd-Steinberg",
+	link="images/dither/lenna_G1_FS.png"]
+image:images/dither/lenna_G1_HP_small.png[
+	"1-bit Grayscale Hilbert-Peano",
+	link="images/dither/lenna_G1_HP.png"]
+image:images/dither/lenna_G2_FS_small.png[
+	"2-bit Grayscale Floyd-Steinberg",
+	link="images/dither/lenna_G2_FS.png"]
+image:images/dither/lenna_G2_HP_small.png[
+	"2-bit Grayscale Hilbert-Peano",
+	link="images/dither/lenna_G2_HP.png"]
+image:images/dither/lenna_G4_FS_small.png[
+	"4-bit Grayscale Floyd-Steinberg",
+	link="images/dither/lenna_G4_FS.png"]
+image:images/dither/lenna_G4_HP_small.png[
+	"4-bit Grayscale Hilbert-Peano",
+	link="images/dither/lenna_G4_HP.png"]
+image:images/dither/lenna_G8_FS_small.png[
+	"8-bit Grayscale Floyd-Steinberg",
+	link="images/dither/lenna_G8_FS.png"]
+image:images/dither/lenna_G8_HP_small.png[
+	"7-bit Grayscale Hilbert-Peano",
+	link="images/dither/lenna_G8_HP.png"]
+image:images/dither/lenna_RGB111_FS_small.png[
+	"1-bit RGB Floyd-Steinberg",
+	link="images/dither/lenna_RGB111_FS.png"]
+image:images/dither/lenna_RGB111_HP_small.png[
+	"1-bit RGB Hilbert-Peano",
+	link="images/dither/lenna_RGB111_HP.png"]
+image:images/dither/lenna_RGB222_FS_small.png[
+	"2-bit RGB Floyd-Steinberg",
+	link="images/dither/lenna_RGB222_FS.png"]
+image:images/dither/lenna_RGB222_HP_small.png[
+	"2-bit RGB Hilbert-Peano",
+	link="images/dither/lenna_RGB222_HP.png"]
+image:images/dither/lenna_RGB333_FS_small.png[
+	"3-bit RGB Floyd-Steinberg",
+	link="images/dither/lenna_RGB333_FS.png"]
+image:images/dither/lenna_RGB333_HP_small.png[
+	"3-bit RGB Hilbert-Peano",
+	link="images/dither/lenna_RGB333_HP.png"]
 

@@ -44,12 +44,19 @@
 #include "GP_JPG.h"
 #include "GP_GIF.h"
 
+#include "GP_MetaData.h"
+
 /*
  * Tries to load image accordingly to the file extension.
  *
  * If operation fails NULL is returned and errno is filled.
  */
 GP_Context *GP_LoadImage(const char *src_path, GP_ProgressCallback *callback);
+
+/*
+ * Loads image Meta Data (if possible).
+ */
+int GP_LoadMetaData(const char *src_path, GP_MetaData *data);
 
 /*
  * Simple saving function, the image format is matched by file extension.
