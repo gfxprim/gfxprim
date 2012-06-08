@@ -148,8 +148,8 @@ static void add_img(struct image_cache *self, struct image *img, size_t size)
 		self->end = img;
 }
 
-GP_Context *image_cache_get(struct image_cache *self,
-                            const char *path, long cookie1, long cookie2)
+GP_Context *image_cache_get(struct image_cache *self, const char *path,
+                            long cookie1, long cookie2, int elevate)
 {
 	struct image *i;
 
@@ -164,12 +164,15 @@ GP_Context *image_cache_get(struct image_cache *self,
 		return NULL;
 
 	/* Push the image to the root of the list */
-	size_t size = image_size(i);
+	if (elevate) {
+		size_t size = image_size(i);
 
-	GP_DEBUG(2, "Refreshing image '%s:%10li:%10li", path, cookie1, cookie2);
+		GP_DEBUG(2, "Refreshing image '%s:%10li:%10li",
+		         path, cookie1, cookie2);
 	
-	remove_img(self, i, size);
-	add_img(self, i, size);
+		remove_img(self, i, size);
+		add_img(self, i, size);
+	}
 
 	return i->ctx;
 }

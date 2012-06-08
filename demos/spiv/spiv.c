@@ -126,7 +126,7 @@ static void set_caption(const char *path, float rat)
 /*
  * Loads image
  */
-GP_Context *load_image(struct loader_params *params)
+GP_Context *load_image(struct loader_params *params, int elevate)
 {
 	struct cpu_timer timer;
 	GP_Context *img, *context = backend->context;
@@ -134,7 +134,7 @@ GP_Context *load_image(struct loader_params *params)
 	GP_ProgressCallback callback = {.callback = image_loader_callback,
 	                                .priv = "Loading image"};
 
-	img = image_cache_get(params->image_cache, params->img_path, 0, 0);
+	img = image_cache_get(params->image_cache, params->img_path, 0, 0, elevate);
 
 	/* Image not cached, load it */
 	if (img == NULL) {
@@ -176,13 +176,13 @@ GP_Context *load_resized_image(struct loader_params *params, GP_Size w, GP_Size 
 	GP_ProgressCallback callback = {.callback = image_loader_callback};
 
 	/* Try to get resized cached image */
-	img = image_cache_get(params->image_cache, params->img_path, cookie, resampling_method);
+	img = image_cache_get(params->image_cache, params->img_path, cookie, resampling_method, 1);
 
 	if (img != NULL)
 		return img;
 	
 	/* Otherwise load image and resize it */
-	if ((img = load_image(params)) == NULL)
+	if ((img = load_image(params, 1)) == NULL)
 		return NULL;
 
 	/* Do low pass filter */
@@ -222,7 +222,7 @@ GP_Context *load_resized_image(struct loader_params *params, GP_Size w, GP_Size 
  */
 static int resize_backend_and_blit(struct loader_params *params)
 {
-	GP_Context *img = load_image(params);
+	GP_Context *img = load_image(params, 1);
 	
 	if (GP_BackendResize(backend, img->w, img->h))
 		return 1;
@@ -260,7 +260,7 @@ static void *image_loader(void *ptr)
 	break;
 	}
 
-	if ((img = load_image(params)) == NULL)
+	if ((img = load_image(params, 0)) == NULL)
 		return NULL;
 
 	float rat = calc_img_size(img->w, img->h, w, h);

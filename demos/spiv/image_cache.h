@@ -42,11 +42,11 @@ struct image_cache *image_cache_create(unsigned int max_size);
 /*
  * Returns cached image, or NULL.
  * 
- * Also image, if found, is rotated to the top, so recently touched images have
- * lesser chance of being freed.
+ * If elevate set and image is found, the image is elevated to the top so
+ * it has lesser chance of being freed.
  */
-GP_Context *image_cache_get(struct image_cache *self,
-                            const char *path, long cookie1, long cookie2);
+GP_Context *image_cache_get(struct image_cache *self, const char *path,
+                            long cookie1, long cookie2, int elevate);
 
 /*
  * Puts an image into a cache.
