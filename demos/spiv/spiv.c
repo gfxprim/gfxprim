@@ -168,6 +168,51 @@ GP_Context *load_image(struct loader_params *params)
 	return img; 
 }
 
+GP_Context *load_resized_image(struct loader_params *params, GP_Size w, GP_Size h, float rat)
+{
+	long cookie = (w & 0xffff) | (h & 0xffff)<<16;
+	GP_Context *img;
+	struct cpu_timer timer;
+	GP_ProgressCallback callback = {.callback = image_loader_callback};
+
+	/* Try to get resized cached image */
+	img = image_cache_get(params->image_cache, params->img_path, cookie);
+
+	if (img != NULL)
+		return img;
+	
+	/* Otherwise load image and resize it */
+	img = load_image(params);
+
+	if (img == NULL)
+		return NULL;
+
+	/* Do low pass filter */
+	if (resampling_method != GP_INTERP_LINEAR_LF_INT) {
+		if (rat < 1) {
+			cpu_timer_start(&timer, "Blur");
+			callback.priv = "Blurring Image";
+			//TODO: We can't blur saved image!
+			if (GP_FilterGaussianBlur(img, img, 0.4/rat, 0.4/rat,
+			                          &callback) == NULL)
+				return NULL;
+			cpu_timer_stop(&timer);
+		}
+	}
+
+	cpu_timer_start(&timer, "Resampling");
+	callback.priv = "Resampling Image";
+	img = GP_FilterResize(img, NULL, resampling_method, w, h, &callback);
+	cpu_timer_stop(&timer);
+
+	if (img == NULL)
+		return NULL;
+
+	image_cache_put(params->image_cache, img, params->img_path, cookie);
+
+	return img;
+}
+
 /*
  * This function tries to resize spiv window
  * and if succedes blits the image directly to the screen.
@@ -189,25 +234,11 @@ static int resize_backend_and_blit(struct loader_params *params)
 static void *image_loader(void *ptr)
 {
 	struct loader_params *params = ptr;
-	struct cpu_timer timer;
-	struct cpu_timer sum_timer;
+	struct cpu_timer timer, sum_timer;
 	GP_Context *img, *context = backend->context;
 	GP_ProgressCallback callback = {.callback = image_loader_callback};
 
 	cpu_timer_start(&sum_timer, "sum");
-
-	/* Load Image */
-	img = load_image(params);
-
-	if (img == NULL)
-		return NULL;
-
-	/*
-	if (img->w < 320 && img->h < 240) {
-		if (!resize_backend_and_blit(img, params))
-			return NULL;
-	}
-        */
 
 	/* Figure out rotation */
 	GP_Size w, h;
@@ -226,32 +257,17 @@ static void *image_loader(void *ptr)
 	break;
 	}
 
+	if ((img = load_image(params)) == NULL)
+		return NULL;
+
 	float rat = calc_img_size(img->w, img->h, w, h);
 
 	w = img->w;
 	h = img->h;
 
-	GP_Context *ret;
+	img = load_resized_image(params, img->w * rat + 0.5, img->h * rat + 0.5, rat);
 
-	/* Do low pass filter */
-	if (resampling_method != GP_INTERP_LINEAR_LF_INT) {
-		if (rat < 1) {
-			cpu_timer_start(&timer, "Blur");
-			callback.priv = "Blurring Image";
-			//TODO: We can't blur saved image!
-			if (GP_FilterGaussianBlur(img, img, 0.4/rat, 0.4/rat,
-			                          &callback) == NULL)
-				return NULL;
-			cpu_timer_stop(&timer);
-		}
-	}
-
-	cpu_timer_start(&timer, "Resampling");
-	callback.priv = "Resampling Image";
-	ret = GP_FilterResize(img, NULL, resampling_method, img->w * rat, img->h * rat, &callback);
-	cpu_timer_stop(&timer);
-
-	if (ret == NULL)
+	if (img == NULL)
 		return NULL;
 
 	switch (rotate) {
@@ -259,28 +275,23 @@ static void *image_loader(void *ptr)
 	break;
 	case 90:
 		callback.priv = "Rotating image (90)";
-		img = GP_FilterRotate90_Alloc(ret, &callback);
+		img = GP_FilterRotate90_Alloc(img, &callback);
 	break;
 	case 180:
 		callback.priv = "Rotating image (180)";
-		img = GP_FilterRotate180_Alloc(ret, &callback);
+		img = GP_FilterRotate180_Alloc(img, &callback);
 	break;
 	case 270:
 		callback.priv = "Rotating image (270)";
-		img = GP_FilterRotate270_Alloc(ret, &callback);
+		img = GP_FilterRotate270_Alloc(img, &callback);
 	break;
 	}
-
-	if (rotate) {
-		GP_ContextFree(ret);
-		ret = img;
-	}
-
+	
 	if (img == NULL)
 		return NULL;
 
-	uint32_t cx = (context->w - ret->w)/2;
-	uint32_t cy = (context->h - ret->h)/2;
+	uint32_t cx = (context->w - img->w)/2;
+	uint32_t cy = (context->h - img->h)/2;
 
 	GP_Context sub_display;
 
@@ -288,21 +299,23 @@ static void *image_loader(void *ptr)
 	
 	if (dithering) {
 		callback.priv = "Dithering";
-		GP_ContextSubContext(context, &sub_display, cx, cy, ret->w, ret->h);
+		GP_ContextSubContext(context, &sub_display, cx, cy, img->w, img->h);
 	//	GP_FilterFloydSteinberg_RGB888(ret, &sub_display, NULL);
-		GP_FilterHilbertPeano_RGB888(ret, &sub_display, NULL);
+		GP_FilterHilbertPeano_RGB888(img, &sub_display, NULL);
 	} else {
-		GP_Blit_Raw(ret, 0, 0, ret->w, ret->h, context, cx, cy);
+		GP_Blit_Raw(img, 0, 0, img->w, img->h, context, cx, cy);
 	}
 	
 	cpu_timer_stop(&timer);
-	GP_ContextFree(ret);
+	
+	if (rotate)
+		GP_ContextFree(img);
 
 	/* clean up the rest of the display */
 	GP_FillRectXYWH(context, 0, 0, cx, context->h, black_pixel);
 	GP_FillRectXYWH(context, 0, 0, context->w, cy, black_pixel);
-	GP_FillRectXYWH(context, ret->w+cx, 0, context->w - ret->w - cx, context->h, black_pixel);
-	GP_FillRectXYWH(context, 0, ret->h+cy, context->w, context->h - ret->h - cy, black_pixel);
+	GP_FillRectXYWH(context, img->w + cx, 0, context->w - img->w - cx, context->h, black_pixel);
+	GP_FillRectXYWH(context, 0, img->h + cy, context->w, context->h - img->h - cy, black_pixel);
 
 	cpu_timer_stop(&sum_timer);
 
