@@ -72,6 +72,12 @@ GP_Context *GP_FilterInvert(const GP_Context *src, GP_Context *dst,
                             GP_ProgressCallback *callback);
 
 /*
+ * Noise filter.
+ */
+GP_Context *GP_FilterNoise(const GP_Context *src, GP_Context *dst,
+                           GP_FilterParam ratio[], GP_ProgressCallback *callback);
+
+/*
  * Generic slow point filter.
  *
  * The filter_callback[] is expected to be filled with pointers

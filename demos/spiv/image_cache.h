@@ -22,46 +22,53 @@
 
  /*
 
-   Read png meta-data and print them into stdout.
+   Image loader chache.
 
   */
 
-#include <stdio.h>
-#include <string.h>
-#include <errno.h>
+#ifndef __IMAGE_CACHE_H__
+#define __IMAGE_CACHE_H__
 
-#include <GP.h>
+struct image_cache;
 
-#define SEP \
-"-----------------------------------------------------------------------------"
+/*
+ * Returns size of the ram in kbytes.
+ */
+size_t image_cache_get_ram_size(void);
 
-int main(int argc, char *argv[])
-{
-	GP_MetaData *data = GP_MetaDataCreate(20);
-	int i;
+/*
+ * Creates an image cache with maximal memory size.
+ */
+struct image_cache *image_cache_create(unsigned int max_size_bytes);
 
-	if (argc < 2) {
-		fprintf(stderr, "Takes an image(s) as parameter(s)\n");
-		return 1;
-	}
-	
-	//GP_SetDebugLevel(10);
+/*
+ * Returns cached image, or NULL.
+ * 
+ * If elevate set and image is found, the image is elevated to the top so
+ * it has lesser chance of being freed.
+ */
+GP_Context *image_cache_get(struct image_cache *self, const char *path,
+                            long cookie1, long cookie2, int elevate);
 
-	for (i = 1; i < argc; i++) {
-		puts(SEP);
-		printf("Opening '%s'\n", argv[i]);
-		
-		GP_MetaDataClear(data);
-		
-		if (GP_LoadPNGMetaData(argv[i], data)) {
-			fprintf(stderr, "Failed to read '%s' meta-data: %s\n",
-			        argv[1], strerror(errno));
-		} else {
-			GP_MetaDataPrint(data);
-		}
-	}
-	
-	puts(SEP);
+/*
+ * Puts an image into a cache.
+ */
+int image_cache_put(struct image_cache *self, GP_Context *img,
+                    const char *path, long cookie1, long cookie2); 
 
-	return 0;
-}
+/*
+ * Drop all image in cache.
+ */
+void image_cache_drop(struct image_cache *self);
+
+/*
+ * Destroys image cache and all it's images.
+ */
+void image_cache_destroy(struct image_cache *self);
+
+/*
+ * Print the image cache content.
+ */
+void image_cache_print(struct image_cache *self);
+
+#endif /* __IMAGE_CACHE_H__ */

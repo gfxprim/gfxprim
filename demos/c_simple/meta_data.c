@@ -60,8 +60,8 @@ int main(void)
 	 * The last parameter says, if the string should be duplicated
 	 * in the metadata storage.
 	 */
-	GP_MetaDataCreateString(data, "author", "Foo Bar <foo@bar.net>", 1);
-	GP_MetaDataCreateString(data, "comment", "Created in hurry.", 1);
+	GP_MetaDataCreateString(data, "author", "Foo Bar <foo@bar.net>", 0, 1);
+	GP_MetaDataCreateString(data, "comment", "Created in hurry.", 0, 1);
 	GP_MetaDataCreateDouble(data, "pi", 3.141592);
 
 	const char *ret;

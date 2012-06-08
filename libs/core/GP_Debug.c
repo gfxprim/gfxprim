@@ -16,20 +16,57 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2011 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
+#include <stdarg.h>
+
 #include "GP_Debug.h"
 
-static unsigned int GP_debug_level = GP_DEFAULT_DEBUG_LEVEL;
+static unsigned int debug_level = GP_DEFAULT_DEBUG_LEVEL;
 
 void GP_SetDebugLevel(unsigned int level)
 {
-	GP_debug_level = level;
+	debug_level = level;
 }
 
 unsigned int GP_GetDebugLevel(void)
 {
-	return GP_debug_level;
+	return debug_level;
+}
+
+void GP_DebugPrint(int level, const char *file, const char *function, int line,
+                   const char *fmt, ...)
+{
+	int i;
+	
+	if (level > (int)debug_level)
+		return;
+
+	for (i = 1; i < level; i++)
+		fputc(' ', stderr);
+
+	switch (level) {
+	case -3:
+		fprintf(stderr, "*** BUG: %s:%s():%u: ", file, function, line);
+	break;
+	case -2:
+		fprintf(stderr, "*** WARNING: %s:%s():%u: ", file, function, line);
+	break;
+	case -1:
+		fprintf(stderr, "*** TODO: %s:%s():%u: ", file, function, line);
+	break;
+	default:
+		fprintf(stderr, "%u: %s:%s():%u: ",
+		        level, file, function, line);
+	break;
+	}
+
+        va_list va;
+	va_start(va, fmt);
+	vfprintf(stderr, fmt, va);
+	va_end(va);
+        
+	fputc('\n', stderr);
 }

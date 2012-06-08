@@ -1,20 +1,15 @@
+%include "../common.i"
 %module(package="gfxprim.core") core_c
 
 %{
 #include "core/GP_Core.h"
 %}
 
-#define __attribute__(X)
-
-%include <stdint.i>
-
-%feature("autodoc");
-
-%nodefaultctor;
-
 /*
  * Basic types and common methods
  */
+
+ERROR_ON_NULL(GP_GetCounter);
 
 %include "GP_Common.h"
 %include "GP_Core.h"
@@ -32,6 +27,8 @@
  * Color and pixel types
  */
 
+ERROR_ON_NULL(GP_ColorToColorName);
+
 %include "GP_Color.h"
 %include "GP_Pixel.h"
 %include "GP_Pixel.gen.h" /* Includes enum GP_PixelType definition */
@@ -41,7 +38,6 @@
 
 %import "GP_FnPerBpp.h"
 %import "GP_FnPerBpp.gen.h"
-
 
 /*
  * GP_Context wrapping
@@ -91,6 +87,13 @@ and self.thisown.") GP_Context;
   }
 };
 
+/* Error handling */
+ERROR_ON_NONZERO(GP_ContextResize);
+ERROR_ON_NULL(GP_ContextAlloc);
+ERROR_ON_NULL(GP_ContextCopy);
+ERROR_ON_NULL(GP_ContextSubContext);
+ERROR_ON_NULL(GP_ContextConvert);
+
 /* Indicate new wrapper-owned GP_Context */
 %newobject GP_ContextAlloc;
 %newobject GP_ContextCopy;
@@ -98,7 +101,6 @@ and self.thisown.") GP_Context;
 %newobject GP_ContextConvert;
 
 %include "GP_Context.h"
-
 
 /*
  * Context manipulation
@@ -108,3 +110,4 @@ and self.thisown.") GP_Context;
 %import "GP_GetPutPixel.gen.h"
 %include "GP_WritePixel.h"
 %include "GP_Blit.h"
+

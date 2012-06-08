@@ -23,10 +23,10 @@ endif # VERBOSE
 
 $(SWIG_LIB): $(SWIG_C)
 ifdef VERBOSE
-	$(CC) $< $(CFLAGS) $(LDFLAGS) -I$(PYTHON_INCLUDE) --shared -lGP $(LDLIBS) -L$(TOPDIR)/build/ -o $@
+	$(CC) $< $(CFLAGS) -D_GNU_SOURCE=1 $(LDFLAGS) -I$(PYTHON_INCLUDE) --shared -lGP $(LDLIBS) -L$(TOPDIR)/build/ -o $@
 else # VERBOSE
 	@echo "LD  $@"
-	@$(CC) $< $(CFLAGS) $(LDFLAGS) -I$(PYTHON_INCLUDE) --shared -lGP $(LDLIBS) -L$(TOPDIR)/build/ -o $@
+	@$(CC) $< $(CFLAGS) -D_GNU_SOURCE=1 $(LDFLAGS) -I$(PYTHON_INCLUDE) --shared -lGP $(LDLIBS) -L$(TOPDIR)/build/ -o $@
 endif # VERBOSE
 
 endif # ifneq ($(SWIG),)

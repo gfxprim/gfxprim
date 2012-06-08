@@ -16,7 +16,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2011 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
@@ -46,14 +46,27 @@ typedef union GP_FilterParamVal {
  * Filter takes, empty channel name terminated, arrray of these as parameter.
  */
 typedef struct GP_FilterParam {
-	//TODO: this must be >= for maximal channel name (now it's 2)
+	//TODO: this must be > than maximal channel name (now it's 2)
 	char channel_name[2];
 	union GP_FilterParamVal val;
 } GP_FilterParam;
 
 /*
- * Takes array of filter parameters and returns channel.
+ * Creates filter param structure large enough for given pixel_type.
  *
+ * The returned structure has initalized channel_names and terminator.
+ */
+GP_FilterParam *GP_FilterParamCreate(GP_PixelType pixel_type);
+
+/*
+ * Destroys filter param structure.
+ */
+void GP_FilterParamDestroy(GP_FilterParam *self);
+
+/*
+ * Takes array of filter parameters and returns filter parameter by a channel
+ * name.
+ * 
  * Returns NULL if channel wasn't found.
  */
 GP_FilterParam *GP_FilterParamChannel(GP_FilterParam params[],
@@ -69,7 +82,7 @@ uint32_t GP_FilterParamChannels(GP_FilterParam params[]);
  * match.
  */
 int GP_FilterParamCheckPixelType(GP_FilterParam params[],
-                                 GP_PixelType type);
+                                 GP_PixelType pixel_type);
 
 /*
  * Returns zero only if params have exactly same channels as array of
@@ -85,53 +98,59 @@ int GP_FilterParamCheckChannels(GP_FilterParam params[],
 	GP_FilterParam name[GP_PixelTypes[pixel_type].numchannels + 1]; \
 	GP_FilterParamInitChannels(name, pixel_type);
 
-#define GP_FILTER_PARAMS_INT(pixel_type, name, val) \
-	GP_FILTER_PARAMS(pixel_type, name) \
-	GP_FilterParamSetIntAll(name, val);
-
-#define GP_FILTER_PARAMS_UINT(pixel_type, name, val) \
-	GP_FILTER_PARAMS(pixel_type, name) \
-	GP_FilterParamSetUIntAll(name, val);
-
-#define GP_FILTER_PARAMS_FLOAT(pixel_type, name, val) \
-	GP_FILTER_PARAMS(pixel_type, name) \
-	GP_FilterParamSetFloatAll(name, val);
-
-#define GP_FILTER_PARAMS_PTR(pixel_type, name, ptr) \
-	GP_FILTER_PARAMS(pixel_type, name) \
-	GP_FilterParamSetPtrAll(name, ptr);
-
 /*
  * Initalize param names and terminator.
  *
  * Sets all values to 0.
  */
 void GP_FilterParamInitChannels(GP_FilterParam params[],
-                                GP_PixelType type);
+                                GP_PixelType pixel_type);
 
 /*
  * Sets all values to integer value.
  */
-void GP_FilterParamSetIntAll(GP_FilterParam params[],
-                             int32_t val);
+void GP_FilterParamSetIntAll(GP_FilterParam params[], int32_t val);
+
+/*
+ * Sets integer value. Returns 0 if such value was found, non-zero otherwise.
+ */
+int GP_FilterParamSetInt(GP_FilterParam params[], const char *channel_name,
+                         int32_t val);
 
 /*
  * Sets all values to float value.
  */
-void GP_FilterParamSetFloatAll(GP_FilterParam params[],
-                               float val);
+void GP_FilterParamSetFloatAll(GP_FilterParam params[], float val);
+
+/*
+ * Sets float value. Returns 0 if such value was found, non-zero otherwise.
+ */
+int GP_FilterParamSetFloat(GP_FilterParam params[], const char *channel_name,
+                           float val);
 
 /*
  * Sets all values to unsigned integer value.
  */
-void GP_FilterParamSetUIntAll(GP_FilterParam params[],
-                              uint32_t val);
+void GP_FilterParamSetUIntAll(GP_FilterParam params[], uint32_t val);
+
+/*
+ * Sets unsigned integer value. Returns 0 if such value was found, non-zero
+ * otherwise.
+ */
+int GP_FilterParamSetUInt(GP_FilterParam params[], const char *channel_name,
+                          uint32_t val);
 
 /*
  * Sets all values to pointer value.
  */
-void GP_FilterParamSetPtrAll(GP_FilterParam params[],
-                             void *ptr);
+void GP_FilterParamSetPtrAll(GP_FilterParam params[], void *ptr);
+
+/*
+ * Sets pointer value. Returns 0 if such value was found, non-zero otherwise.
+ */
+int GP_FilterParamSetPtr(GP_FilterParam params[], const char *channel_name,
+                         void *ptr);
+
 /*
  * Call free on all pointer values.
  */

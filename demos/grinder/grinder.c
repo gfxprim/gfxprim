@@ -16,7 +16,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2011 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
@@ -354,6 +354,28 @@ static GP_RetCode contrast(GP_Context **c, const char *params)
 	return GP_ESUCCESS;
 }
 
+/* noise */
+static struct param noise_params[] = {
+	{"ratio", PARAM_FLOAT, "noise", NULL, NULL},
+	{NULL,  0,            NULL,    NULL, NULL}
+};
+
+static GP_RetCode noise(GP_Context **c, const char *params)
+{
+	float rat;
+
+	if (param_parse(params, noise_params, "noise", param_err, &rat))
+		return GP_EINVAL;
+
+	GP_FILTER_PARAMS((*c)->pixel_type, filter_params);
+	
+	GP_FilterParamSetFloatAll(filter_params, rat);
+
+	GP_FilterNoise(*c, *c, filter_params, progress_callback);
+
+	return GP_ESUCCESS;
+}
+
 /* invert */
 
 static struct param invert_params[] = {
@@ -608,19 +630,19 @@ static GP_RetCode arithmetic(GP_Context **c, const char *params)
 
 	switch (op) {
 	case 0:
-		res = GP_FilterDifference(*c, img, NULL, progress_callback);
+		res = GP_FilterDifferenceAlloc(*c, img, progress_callback);
 	break;
 	case 1:
-		res = GP_FilterAddition(*c, img, NULL, progress_callback);
+		res = GP_FilterAdditionAlloc(*c, img, progress_callback);
 	break;
 	case 2:
-		res = GP_FilterMultiply(*c, img, NULL, progress_callback);
+		res = GP_FilterMultiplyAlloc(*c, img, progress_callback);
 	break;
 	case 3:
-		res = GP_FilterMin(*c, img, NULL, progress_callback);
+		res = GP_FilterMinAlloc(*c, img, progress_callback);
 	break;
 	case 4:
-		res = GP_FilterMax(*c, img, NULL, progress_callback);
+		res = GP_FilterMaxAlloc(*c, img, progress_callback);
 	break;
 	}
 
@@ -675,6 +697,7 @@ static struct filter filter_table[] = {
 	{"contrast",   "alter image contrast", contrast_params, contrast},
 	{"invert",     "inverts image", invert_params, invert},
 	{"add_noise",  "adds noise", add_noise_params, add_noise},
+	{"noise",      "adds noise",  noise_params, noise},
 	{"blur",       "gaussian blur", blur_params, blur},
 	{"dither",     "dithers bitmap", dither_params, dither},
 	{"arithmetic", "arithmetic operation", arithmetic_params, arithmetic},

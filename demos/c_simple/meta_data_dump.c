@@ -20,36 +20,48 @@
  *                                                                           *
  *****************************************************************************/
 
-#ifndef BACKENDS_GP_X11_H
-#define BACKENDS_GP_X11_H
+ /*
 
-#include "GP_Backend.h"
+   Read image meta-data and print them into stdout.
 
-enum GP_BackendX11Flags {
-	/* 
-	 * When set, w and h is ignored and root window is used
-	 */
-	GP_X11_USE_ROOT_WIN = 0x01,
-	/*
-	 * Create new borderless window above the root window.
-	 */
-	GP_X11_CREATE_ROOT_WIN = 0x02,
-};
+  */
 
+#include <stdio.h>
+#include <string.h>
+#include <errno.h>
 
-/*
- * Initalize X11 backend.
- *
- * The display may be NULL for default display ($DISPLAY shell variable will
- * be used).
- * 
- * The coordinates are position and geometry for newly created window.
- * 
- * Upon failure NULL is returned.
- */
-GP_Backend *GP_BackendX11Init(const char *display, int x, int y,
-                              unsigned int w, unsigned int h,
-			      const char *caption,
-			      enum GP_BackendX11Flags flags);
+#include <GP.h>
 
-#endif /* BACKENDS_GP_X11_H */
+#define SEP \
+"-----------------------------------------------------------------------------"
+
+int main(int argc, char *argv[])
+{
+	GP_MetaData *data = GP_MetaDataCreate(80);
+	int i;
+
+	if (argc < 2) {
+		fprintf(stderr, "Takes an image(s) as parameter(s)\n");
+		return 1;
+	}
+	
+	//GP_SetDebugLevel(10);
+
+	for (i = 1; i < argc; i++) {
+		puts(SEP);
+		printf("Opening '%s'\n", argv[i]);
+		
+		GP_MetaDataClear(data);
+		
+		if (GP_LoadMetaData(argv[i], data)) {
+			fprintf(stderr, "Failed to read '%s' meta-data: %s\n",
+			        argv[1], strerror(errno));
+		} else {
+			GP_MetaDataPrint(data);
+		}
+	}
+	
+	puts(SEP);
+
+	return 0;
+}

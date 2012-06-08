@@ -29,6 +29,7 @@
 
 struct GP_MetaData {
 	struct GP_MetaRecord *root;
+	struct GP_MetaRecord *last;
 	unsigned int rec_count;
 	size_t size;
 	size_t free;
@@ -63,6 +64,7 @@ GP_MetaData *GP_MetaDataCreate(unsigned int expected_records)
 	}
 
 	data->root = NULL;
+	data->last = NULL;
 	data->rec_count = 0;
 	data->size = size;
 	data->free = size;
@@ -76,6 +78,7 @@ void GP_MetaDataClear(GP_MetaData *self)
 	         self, self->rec_count);
 	
 	self->root = NULL;
+	self->last = NULL;
 	self->rec_count = 0;
 	self->free = self->size;
 }
@@ -93,11 +96,15 @@ void GP_MetaDataPrint(GP_MetaData *self)
 	printf("MetaData %u record(s)\n", self->rec_count);
 
 	for (rec = self->root; rec != NULL; rec = rec->next) {
-		printf("%-16s: ", rec->id);
+		printf("%-32s: ", rec->id);
 
 		switch (rec->type) {
 		case GP_META_INT:
 			printf("%i\n", rec->val.i);
+		break;
+		case GP_META_RATIONAL:
+			printf("%i/%i (%.4f)\n", rec->val.r.num, rec->val.r.den,
+			       (float)rec->val.r.num / rec->val.r.den);
 		break;
 		case GP_META_STRING:
 			printf("'%s'\n", rec->val.str);
@@ -153,9 +160,16 @@ static GP_MetaRecord *record_create(GP_MetaData *self, const char *id,
 
 	strcpy(rec->id, id);
 	rec->hash = hash;
-	rec->next = self->root;
-	self->root = rec;
-
+	rec->next = NULL;
+	
+	if (self->root == NULL) {
+		self->root = rec;
+		self->last = rec;
+	} else {
+		self->last->next = rec;
+		self->last = rec;
+	}
+	
 	self->rec_count++;
 
 	return rec;
@@ -263,6 +277,30 @@ GP_MetaRecord *GP_MetaDataCreateInt(GP_MetaData *self, const char *id, int val)
 	return rec;
 }
 
+GP_MetaRecord *GP_MetaDataCreateRat(GP_MetaData *self, const char *id,
+                                    int num, int den)
+{
+	GP_MetaRecord *rec;
+
+	GP_DEBUG(2, "Creating GP_META_RATIONAL id '%s' = %i/%i", id, num, den);
+	
+	if (den == 0) {
+		GP_DEBUG(1, "Would not create '%s' with denominator == 0", id);
+		return NULL;
+	}
+
+	rec = GP_MetaDataCreateRecord(self, id);
+
+	if (rec == NULL)
+		return NULL;
+	
+	rec->type = GP_META_RATIONAL;
+	rec->val.r.num = num;
+	rec->val.r.den = den;
+
+	return rec;
+}
+
 GP_MetaRecord *GP_MetaDataCreateDouble(GP_MetaData *self, const char *id,
                                        double val)
 {
@@ -282,7 +320,7 @@ GP_MetaRecord *GP_MetaDataCreateDouble(GP_MetaData *self, const char *id,
 }
 
 GP_MetaRecord *GP_MetaDataCreateString(GP_MetaData *self, const char *id,
-                                       const char *str, int dup)
+                                       const char *str, int len, int dup)
 {
 	GP_MetaRecord *rec;
 
@@ -294,8 +332,13 @@ GP_MetaRecord *GP_MetaDataCreateString(GP_MetaData *self, const char *id,
 		return NULL;
 
 	if (dup) {
-		size_t size = strlen(str) + 1;
+		size_t size;
 		char *s;
+		
+		if (len == 0)
+			len = strlen(str);
+		
+		size = len + 1;
 
 		/* Play safe with aligment */
 		if (size % 8)
@@ -303,7 +346,8 @@ GP_MetaRecord *GP_MetaDataCreateString(GP_MetaData *self, const char *id,
 
 		//TODO: allocation error
 		s = do_alloc(self, size);
-		strcpy(s, str);
+		memcpy(s, str, len);
+		s[len] = '\0';
 		str = s;
 	}
 

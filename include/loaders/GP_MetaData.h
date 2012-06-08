@@ -23,18 +23,25 @@
 #ifndef LOADERS_METADATA_H
 #define LOADERS_METADATA_H
 
-#define GP_META_RECORD_ID_MAX 16
+#define GP_META_RECORD_ID_MAX 32
 
 enum GP_MetaType {
 	GP_META_INT,
 	GP_META_STRING,
 	GP_META_DOUBLE,
+	GP_META_RATIONAL,
+};
+
+struct GP_MetaRational {
+	int num;
+	int den;
 };
 
 union GP_MetaValue {
 	int i;
 	double d;
 	const char *str;
+	struct GP_MetaRational r;
 };
 
 typedef struct GP_MetaRecord {
@@ -98,6 +105,9 @@ GP_MetaRecord *GP_MetaDataCreateRecord(GP_MetaData *self, const char *id);
  */
 GP_MetaRecord *GP_MetaDataCreateInt(GP_MetaData *self, const char *id, int val);
 
+GP_MetaRecord *GP_MetaDataCreateRat(GP_MetaData *self, const char *id,
+                                    int num, int den);
+
 /*
  * Creates an double record and returns pointer to it.
  */
@@ -107,10 +117,19 @@ GP_MetaRecord *GP_MetaDataCreateDouble(GP_MetaData *self, const char *id,
 /*
  * Creates an string record and returns pointer to it.
  *
+ * If len == 0, string is copied to the terminating '\0', otherwise len
+ * characters is copied. This has no effect if dup == 0.
+ * 
  * If dup is set to 1, the string is duplicated inside of the MetaData
  * structure, otherwise only the pointer is saved.
  */
 GP_MetaRecord *GP_MetaDataCreateString(GP_MetaData *self, const char *id,
-                                       const char *str, int dup);
+                                       const char *str, int len, int dup);
+
+/*
+ * Parses Exif data from passed buffer. The start of the buffer must point to
+ * the ASCII 'Exif' string.
+ */
+int GP_MetaDataFromExif(GP_MetaData *self, void *buf, size_t buf_len);
 
 #endif /* LOADERS_GP_METADATA_H */

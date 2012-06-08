@@ -147,6 +147,11 @@ static int x11_params_to_flags(const char *param, GP_Size *w, GP_Size *h,
 		return 0;
 	}
 	
+	if (!strcasecmp(param, "CREATE_ROOT")) {
+		*flags |= GP_X11_CREATE_ROOT_WIN;
+		return 0;
+	}
+
 	/*
 	 * Accepts only string with format "intxint" or "intXint"
 	 */

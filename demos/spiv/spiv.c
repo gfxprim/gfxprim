@@ -36,6 +36,7 @@
 #include <backends/GP_Backends.h>
 #include <input/GP_InputDriverLinux.h>
 
+#include "image_cache.h"
 #include "cpu_timer.h"
 
 static GP_Pixel black_pixel;
@@ -84,12 +85,14 @@ static int image_loader_callback(GP_ProgressCallback *self)
 
 struct loader_params {
 	const char *img_path;
+	
 	int show_progress;
 	int show_progress_once;
 	int show_info;
 
-	/* cached loaded image */
-	GP_Context *img;
+	/* cached loaded images */
+	struct image_cache *img_resized_cache;
+	struct image_cache *img_orig_cache;
 };
 
 static float calc_img_size(uint32_t img_w, uint32_t img_h,
@@ -125,46 +128,94 @@ static void set_caption(const char *path, float rat)
 /*
  * Loads image
  */
-int load_image(struct loader_params *params)
+GP_Context *load_image(struct loader_params *params, int elevate)
 {
 	struct cpu_timer timer;
 	GP_Context *img, *context = backend->context;
-
-	if (params->img != NULL) {
-		fprintf(stderr, "Image cached!\n");
-		return 0;
-	}
 	
 	GP_ProgressCallback callback = {.callback = image_loader_callback,
 	                                .priv = "Loading image"};
-	
-	show_progress = params->show_progress || params->show_progress_once;
-	params->show_progress_once = 0;
 
-	fprintf(stderr, "Loading '%s'\n", params->img_path);
+	img = image_cache_get(params->img_orig_cache, params->img_path, 0, 0, elevate);
 
-	cpu_timer_start(&timer, "Loading");
-	if ((img = GP_LoadImage(params->img_path, &callback)) == NULL) {
-		GP_Fill(context, black_pixel);
-		GP_Print(context, NULL, context->w/2, context->h/2,
-		         GP_ALIGN_CENTER|GP_VALIGN_CENTER, white_pixel, black_pixel,
-			 "Failed to load image :( (%s)", strerror(errno));
-		GP_BackendFlip(backend);
-		return 1;
-	}
+	/* Image not cached, load it */
+	if (img == NULL) {
+		show_progress = params->show_progress || params->show_progress_once;
+		params->show_progress_once = 0;
+
+		fprintf(stderr, "Loading '%s'\n", params->img_path);
+
+		cpu_timer_start(&timer, "Loading");
+		if ((img = GP_LoadImage(params->img_path, &callback)) == NULL) {
+			GP_Fill(context, black_pixel);
+			GP_Print(context, NULL, context->w/2, context->h/2,
+		        	 GP_ALIGN_CENTER|GP_VALIGN_CENTER, white_pixel, black_pixel,
+				 "Failed to load image :( (%s)", strerror(errno));
+			GP_BackendFlip(backend);
+			return NULL;
+		}
+		
+		/* Workaround */
+		if (img->pixel_type != GP_PIXEL_RGB888) {
+			GP_Context *tmp = GP_ContextConvert(img, GP_PIXEL_RGB888);
+			GP_ContextFree(img);
+			img = tmp;
+		}
 	
-	/* Workaround */
-	if (img->pixel_type != GP_PIXEL_RGB888) {
-		GP_Context *tmp = GP_ContextConvert(img, GP_PIXEL_RGB888);
-		GP_ContextFree(img);
-		img = tmp;
+		image_cache_put(params->img_orig_cache, img, params->img_path, 0, 0);
+		
+		cpu_timer_stop(&timer);
 	}
+
+	return img; 
+}
+
+GP_Context *load_resized_image(struct loader_params *params, GP_Size w, GP_Size h, float rat)
+{
+	long cookie = (w & 0xffff) | (h & 0xffff)<<16;
+	GP_Context *img, *res = NULL;
+	struct cpu_timer timer;
+	GP_ProgressCallback callback = {.callback = image_loader_callback};
+
+	/* Try to get resized cached image */
+	img = image_cache_get(params->img_resized_cache, params->img_path, cookie, resampling_method, 1);
+
+	if (img != NULL)
+		return img;
 	
+	/* Otherwise load image and resize it */
+	if ((img = load_image(params, 1)) == NULL)
+		return NULL;
+
+	/* Do low pass filter */
+	if (resampling_method != GP_INTERP_LINEAR_LF_INT && rat < 1) {
+		cpu_timer_start(&timer, "Blur");
+		callback.priv = "Blurring Image";
+		
+		res = GP_FilterGaussianBlur(img, NULL, 0.4/rat, 0.4/rat, &callback);
+		
+		if (res == NULL)
+			return NULL;
+		
+		img = res;
+
+		cpu_timer_stop(&timer);
+	}
+
+	cpu_timer_start(&timer, "Resampling");
+	callback.priv = "Resampling Image";
+	img = GP_FilterResize(img, NULL, resampling_method, w, h, &callback);
 	cpu_timer_stop(&timer);
 
-	params->img = img;
+	/* Free low passed context if needed */
+	GP_ContextFree(res);
 
-	return 0; 
+	if (img == NULL)
+		return NULL;
+
+	image_cache_put(params->img_resized_cache, img, params->img_path, cookie, resampling_method);
+	
+	return img;
 }
 
 /*
@@ -173,7 +224,7 @@ int load_image(struct loader_params *params)
  */
 static int resize_backend_and_blit(struct loader_params *params)
 {
-	GP_Context *img = params->img;
+	GP_Context *img = load_image(params, 1);
 	
 	if (GP_BackendResize(backend, img->w, img->h))
 		return 1;
@@ -188,25 +239,11 @@ static int resize_backend_and_blit(struct loader_params *params)
 static void *image_loader(void *ptr)
 {
 	struct loader_params *params = ptr;
-	struct cpu_timer timer;
-	struct cpu_timer sum_timer;
+	struct cpu_timer timer, sum_timer;
 	GP_Context *img, *context = backend->context;
 	GP_ProgressCallback callback = {.callback = image_loader_callback};
 
 	cpu_timer_start(&sum_timer, "sum");
-
-	/* Load Image */
-	if (load_image(params))
-		return NULL;
-
-	img = params->img;
-
-	/*
-	if (img->w < 320 && img->h < 240) {
-		if (!resize_backend_and_blit(img, params))
-			return NULL;
-	}
-        */
 
 	/* Figure out rotation */
 	GP_Size w, h;
@@ -225,61 +262,44 @@ static void *image_loader(void *ptr)
 	break;
 	}
 
+	if ((img = load_image(params, 0)) == NULL)
+		return NULL;
+
 	float rat = calc_img_size(img->w, img->h, w, h);
 
 	w = img->w;
 	h = img->h;
 
-	GP_Context *ret;
+	img = load_resized_image(params, w * rat + 0.5, h * rat + 0.5, rat);
 
-	/* Do low pass filter */
-	if (resampling_method != GP_INTERP_LINEAR_LF_INT) {
-		if (rat < 1) {
-			cpu_timer_start(&timer, "Blur");
-			callback.priv = "Blurring Image";
-			//TODO: We can't blur saved image!
-			if (GP_FilterGaussianBlur(img, img, 0.4/rat, 0.4/rat,
-			                          &callback) == NULL)
-				return NULL;
-			cpu_timer_stop(&timer);
-		}
-	}
-
-	cpu_timer_start(&timer, "Resampling");
-	callback.priv = "Resampling Image";
-	ret = GP_FilterResize(img, NULL, resampling_method, img->w * rat, img->h * rat, &callback);
-	cpu_timer_stop(&timer);
-
-	if (ret == NULL)
+	if (img == NULL)
 		return NULL;
+
+	image_cache_print(params->img_resized_cache);
+	image_cache_print(params->img_orig_cache);
 
 	switch (rotate) {
 	case 0:
 	break;
 	case 90:
 		callback.priv = "Rotating image (90)";
-		img = GP_FilterRotate90_Alloc(ret, &callback);
+		img = GP_FilterRotate90_Alloc(img, &callback);
 	break;
 	case 180:
 		callback.priv = "Rotating image (180)";
-		img = GP_FilterRotate180_Alloc(ret, &callback);
+		img = GP_FilterRotate180_Alloc(img, &callback);
 	break;
 	case 270:
 		callback.priv = "Rotating image (270)";
-		img = GP_FilterRotate270_Alloc(ret, &callback);
+		img = GP_FilterRotate270_Alloc(img, &callback);
 	break;
 	}
-
-	if (rotate) {
-		GP_ContextFree(ret);
-		ret = img;
-	}
-
+	
 	if (img == NULL)
 		return NULL;
 
-	uint32_t cx = (context->w - ret->w)/2;
-	uint32_t cy = (context->h - ret->h)/2;
+	uint32_t cx = (context->w - img->w)/2;
+	uint32_t cy = (context->h - img->h)/2;
 
 	GP_Context sub_display;
 
@@ -287,21 +307,23 @@ static void *image_loader(void *ptr)
 	
 	if (dithering) {
 		callback.priv = "Dithering";
-		GP_ContextSubContext(context, &sub_display, cx, cy, ret->w, ret->h);
+		GP_ContextSubContext(context, &sub_display, cx, cy, img->w, img->h);
 	//	GP_FilterFloydSteinberg_RGB888(ret, &sub_display, NULL);
-		GP_FilterHilbertPeano_RGB888(ret, &sub_display, NULL);
+		GP_FilterHilbertPeano_RGB888(img, &sub_display, NULL);
 	} else {
-		GP_Blit_Raw(ret, 0, 0, ret->w, ret->h, context, cx, cy);
+		GP_Blit_Raw(img, 0, 0, img->w, img->h, context, cx, cy);
 	}
 	
 	cpu_timer_stop(&timer);
-	GP_ContextFree(ret);
+	
+	if (rotate)
+		GP_ContextFree(img);
 
 	/* clean up the rest of the display */
 	GP_FillRectXYWH(context, 0, 0, cx, context->h, black_pixel);
 	GP_FillRectXYWH(context, 0, 0, context->w, cy, black_pixel);
-	GP_FillRectXYWH(context, ret->w+cx, 0, context->w - ret->w - cx, context->h, black_pixel);
-	GP_FillRectXYWH(context, 0, ret->h+cy, context->w, context->h - ret->h - cy, black_pixel);
+	GP_FillRectXYWH(context, img->w + cx, 0, context->w - img->w - cx, context->h, black_pixel);
+	GP_FillRectXYWH(context, 0, img->h + cy, context->w, context->h - img->h - cy, black_pixel);
 
 	cpu_timer_stop(&sum_timer);
 
@@ -351,13 +373,8 @@ static void show_image(struct loader_params *params, const char *path)
 		abort_flag = 0;
 	}
 	
-	/* invalidate cached image if path has changed */
-	if (params->img_path == NULL ||
-	    (path != NULL && strcmp(params->img_path, path))) {
-		GP_ContextFree(params->img);
-		params->img = NULL;
+	if (path != NULL)
 		params->img_path = path;
-	}
 
 	ret = pthread_create(&loader_thread, NULL, image_loader, (void*)params);
 
@@ -388,27 +405,114 @@ static void init_backend(const char *backend_opts)
 	}
 }
 
+static int alarm_fired = 0;
+
+static void alarm_handler(int signo)
+{
+	alarm_fired = 1;
+}
+
+static int wait_for_event(int sleep_msec)
+{
+	static int sleep_msec_count = 0;
+	static int alarm_set = 0;
+
+	if (sleep_msec < 0) {
+		GP_BackendPoll(backend);
+		usleep(10000);
+		return 0;
+	}
+
+	/* We can't sleep on backend fd, because the backend doesn't export it. */
+	if (backend->fd < 0) {
+		GP_BackendPoll(backend);
+		usleep(10000);
+
+		sleep_msec_count += 10;
+
+		if (sleep_msec_count >= sleep_msec) {
+			sleep_msec_count = 0;
+			return 1;
+		}
+
+		return 0;
+	}
+
+	/* Initalize select */
+	fd_set rfds;
+	FD_ZERO(&rfds);
+	
+	FD_SET(backend->fd, &rfds);
+
+	if (!alarm_set) {
+		signal(SIGALRM, alarm_handler);
+		alarm(sleep_msec / 1000);
+		alarm_fired = 0;
+		alarm_set = 1;
+	}
+
+	struct timeval tv = {.tv_sec = sleep_msec / 1000,
+	                     .tv_usec = (sleep_msec % 1000) * 1000};
+	
+	int ret = select(backend->fd + 1, &rfds, NULL, NULL, &tv);
+	
+	switch (ret) {
+	case -1:
+		if (errno == EINTR)
+			return 1;
+		
+		GP_BackendExit(backend);
+		exit(1);
+	break;
+	case 0:
+		if (alarm_fired) {
+			alarm_set = 0;
+			return 1;
+		}
+
+		return 0;
+	break;
+	default:
+		GP_BackendPoll(backend);
+		return 0;
+	}
+}
+
+static void init_caches(struct loader_params *params)
+{
+	size_t size = image_cache_get_ram_size();
+	unsigned int resized_size = (1024 * size)/10;
+	unsigned int orig_size = (1024 * size)/50;
+
+	if (resized_size > 100 * 1024 * 1024)
+		resized_size = 100 * 1024 * 1024;
+
+	if (orig_size > 20 * 1024 * 1024)
+		orig_size = 20 * 1024 * 1024;
+
+	GP_DEBUG(1, "Cache sizes original = %u, resized = %u",
+	         orig_size, resized_size);
+
+	params->img_resized_cache = image_cache_create(resized_size);
+	params->img_orig_cache = image_cache_create(orig_size);
+}
+
 int main(int argc, char *argv[])
 {
-	GP_InputDriverLinux *drv = NULL;
 	GP_Context *context = NULL;
-	const char *input_dev = NULL;
 	const char *backend_opts = "X11";
 	int sleep_sec = -1;
-	struct loader_params params = {NULL, 0, 0, 0, .img = NULL};
+	struct loader_params params = {NULL, 0, 0, 0, NULL, NULL};
 	int opt, debug_level = 0;
 	GP_PixelType emul_type = GP_PIXEL_UNKNOWN;
 
-	while ((opt = getopt(argc, argv, "b:cd:e:fIi:Ps:r:")) != -1) {
+	while ((opt = getopt(argc, argv, "b:cd:e:fIPs:r:")) != -1) {
 		switch (opt) {
 		case 'I':
 			params.show_info = 1;
 		break;
 		case 'P':
 			params.show_progress = 1;
-		break;
-		case 'i':
-			input_dev = optarg;
 		break;
 		case 'f':
 			dithering = 1;
@@ -447,20 +551,12 @@ int main(int argc, char *argv[])
 	
 	GP_SetDebugLevel(debug_level);
 
-	if (input_dev != NULL) {
-		drv = GP_InputDriverLinuxOpen(input_dev);
-	
-		if (drv == NULL) {
-			fprintf(stderr, "Failed to initalize input device '%s'\n",
-			                input_dev);
-			return 1;
-		}
-	}
-
 	signal(SIGINT, sighandler);
 	signal(SIGSEGV, sighandler);
 	signal(SIGBUS, sighandler);
 	signal(SIGABRT, sighandler);
+	
+	init_caches(&params);
 
 	init_backend(backend_opts);
 
@@ -482,55 +578,16 @@ int main(int argc, char *argv[])
 
 	params.show_progress_once = 1;
 	show_image(&params, argv[argf]);
-
+		
 	for (;;) {
-		int ret;
-
-		if (drv != NULL) {
-			/* Initalize select */
-			fd_set rfds;
-			FD_ZERO(&rfds);
-			FD_SET(drv->fd, &rfds);
-			struct timeval tv = {.tv_sec = sleep_sec, .tv_usec = 0};
-			struct timeval *tvp = sleep_sec != -1 ? &tv : NULL;
-			
-			ret = select(drv->fd + 1, &rfds, NULL, NULL, tvp);
-		
-			tv.tv_sec = sleep_sec;
-	
-			switch (ret) {
-			case -1:
-				GP_BackendExit(backend);
-				return 0;
-			break;
-			case 0:
-				argn++;
-				if (argn >= argc)
-					argn = argf;
-			
-				show_image(&params, argv[argn]);
-			break;
-			default:
-				while (GP_InputDriverLinuxRead(drv));
-			}
-
-			FD_SET(drv->fd, &rfds);
-		} else {
-			if (sleep_sec != -1) {
-				sleep(sleep_sec);
-		
-				argn++;
-				if (argn >= argc)
-					argn = argf;
-			
-				show_image(&params, argv[argn]);
-			}
+		/* wait for event or a timeout */
+		if (wait_for_event(sleep_sec * 1000)) {
+			argn++;
+			if (argn >= argc)
+				argn = argf;
+					
+			show_image(&params, argv[argn]);
 		}
-
-		if (backend->Poll)
-			GP_BackendPoll(backend);
-
-		usleep(1000);
 
 		/* Read and parse events */
 		GP_Event ev;
@@ -561,6 +618,10 @@ int main(int argc, char *argv[])
 					
 					params.show_progress_once = 1;
 					show_image(&params, NULL);
+				break;
+				case GP_KEY_D:
+					image_cache_drop(params.img_resized_cache);
+					image_cache_drop(params.img_orig_cache);
 				break;
 				case GP_KEY_ESC:
 				case GP_KEY_ENTER:

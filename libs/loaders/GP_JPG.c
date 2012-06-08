@@ -214,24 +214,15 @@ static void read_jpg_metadata(struct jpeg_decompress_struct *cinfo,
 
 	for (marker = cinfo->marker_list; marker != NULL; marker = marker->next) {
 		switch (marker->marker) {
-		case JPEG_COM: {
-			char buf[JPEG_COM_MAX+1];
-			
-			memcpy(buf, marker->data, marker->data_length);
-			buf[marker->data_length] = 0;
-
-			/* Strip newline at the end of the commment */
-			if (buf[marker->data_length-1] == '\n')
-				buf[marker->data_length-1] = 0;
-
-			GP_MetaDataCreateString(data, "comment", buf, 1);
-		}
+		case JPEG_COM:
+			GP_MetaDataCreateString(data, "comment", (void*)marker->data,
+			                        marker->data_length, 1);
 		break;
 		case JPEG_APP0:
-			GP_DEBUG(0, "TODO: JFIF");
+			GP_TODO("JFIF");
 		break;
 		case JPEG_APP0 + 1:
-			GP_DEBUG(0, "TODO: EXIF");
+			GP_MetaDataFromExif(data, marker->data, marker->data_length);
 		break;
 		}
 	}

@@ -1,16 +1,11 @@
+%include "../common.i"
 %module(package="gfxprim.gfx") gfx_c
 
 %{
 #include "gfx/GP_Gfx.h"
 %}
 
-#define __attribute__(X)
-
 %import ../core/core.i
-
-%include <stdint.i>
-
-%nodefaultctor;
 
 %include "GP_Gfx.h"
 

@@ -9,7 +9,7 @@ LDLIBS+=-lGP -lGP_backends -lSDL -L$(TOPDIR)/build/
 
 APPS=spiv
 
-spiv: cpu_timer.o
+spiv: cpu_timer.o image_cache.o
 
 include $(TOPDIR)/pre.mk
 include $(TOPDIR)/app.mk
