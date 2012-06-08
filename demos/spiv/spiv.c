@@ -416,6 +416,7 @@ static int wait_for_event(int sleep_msec)
 
 	if (sleep_msec < 0) {
 		GP_BackendPoll(backend);
+		usleep(10000);
 		return 0;
 	}
 
