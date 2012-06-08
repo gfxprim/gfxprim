@@ -30,6 +30,9 @@ struct image {
 	struct image *prev;
 	struct image *next;
 
+	/* number of elevated get calls */
+	unsigned int elevated;
+
 	/* this identifies an image */
 	long cookie1;
 	long cookie2;
@@ -172,6 +175,8 @@ GP_Context *image_cache_get(struct image_cache *self, const char *path,
 	
 		remove_img(self, i, size);
 		add_img(self, i, size);
+		
+		i->elevated++;
 	}
 
 	return i->ctx;
@@ -184,8 +189,8 @@ void image_cache_print(struct image_cache *self)
 	printf("Image cache size %u used %u\n", self->max_size, self->cur_size);
 
 	for (i = self->root; i != NULL; i = i->next)
-		printf(" Image '%s:%10li:%10li' size %zu\n", i->path,
-		       i->cookie1, i->cookie2, image_size(i));
+		printf(" Image '%s:%10li:%10li' size %10zu elevated %u\n", i->path,
+		       i->cookie1, i->cookie2, image_size(i), i->elevated);
 }
 
 static int assert_size(struct image_cache *self, size_t size)
@@ -227,11 +232,22 @@ int image_cache_put(struct image_cache *self, GP_Context *ctx, const char *path,
 	img->ctx = ctx;
 	img->cookie1 = cookie1;
 	img->cookie2 = cookie2;
+	img->elevated = 0;
 	strcpy(img->path, path);
 
 	add_img(self, img, size);
 
 	return 0;
+}
+
+void image_cache_drop(struct image_cache *self)
+{
+	GP_DEBUG(1, "Dropping images in cache");
+
+	while (self->end != NULL)
+		remove_img_free(self, self->end, 0);
+
+	self->cur_size = sizeof(struct image_cache);
 }
 
 void image_cache_destroy(struct image_cache *self)

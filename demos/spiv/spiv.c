@@ -596,6 +596,9 @@ int main(int argc, char *argv[])
 					params.show_progress_once = 1;
 					show_image(&params, NULL);
 				break;
+				case GP_KEY_D:
+					image_cache_drop(params.image_cache);
+				break;
 				case GP_KEY_ESC:
 				case GP_KEY_ENTER:
 				case GP_KEY_Q:

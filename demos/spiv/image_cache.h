@@ -55,6 +55,11 @@ int image_cache_put(struct image_cache *self, GP_Context *img,
                     const char *path, long cookie1, long cookie2); 
 
 /*
+ * Drop all image in cache.
+ */
+void image_cache_drop(struct image_cache *self);
+
+/*
  * Destroys image cache and all it's images.
  */
 void image_cache_destroy(struct image_cache *self);
