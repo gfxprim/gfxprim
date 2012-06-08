@@ -26,11 +26,13 @@
 
 struct image {
 	GP_Context *ctx;
-	int cookie;
 
 	struct image *prev;
 	struct image *next;
 
+	/* this identifies an image */
+	long cookie1;
+	long cookie2;
 	char path[];
 };
 
@@ -106,8 +108,8 @@ static void remove_img(struct image_cache *self, struct image *img)
 
 static void remove_img_free(struct image_cache *self, struct image *img)
 {
-	GP_DEBUG(2, "Freeing image '%s:%i' size %u",
-	         img->path, img->cookie,
+	GP_DEBUG(2, "Freeing image '%s:%10li:%10li' size %u",
+	         img->path, img->cookie1, img->cookie2,
 		 img->ctx->bytes_per_row * img->ctx->h);
 	
 	remove_img(self, img);
@@ -137,21 +139,22 @@ static void add_img(struct image_cache *self, struct image *img)
 }
 
 GP_Context *image_cache_get(struct image_cache *self,
-                            const char *path, int cookie)
+                            const char *path, long cookie1, long cookie2)
 {
 	struct image *i;
 
-	GP_DEBUG(2, "Looking for image '%s:%i'", path, cookie);
+	GP_DEBUG(2, "Looking for image '%s:%10li:%10li'", path, cookie1, cookie2);
 
 	for (i = self->root; i != NULL; i = i->next)
-		if (!strcmp(path, i->path) && i->cookie == cookie)
+		if (!strcmp(path, i->path) &&
+		    i->cookie1 == cookie1 && i->cookie2 == cookie2)
 			break;
 	
 	if (i == NULL)
 		return NULL;
 
 	/* Push the image to the root of the list */
-	GP_DEBUG(2, "Refreshing image '%s:%i", path, cookie);
+	GP_DEBUG(2, "Refreshing image '%s:%10li:%10li", path, cookie1, cookie2);
 	remove_img(self, i);
 	add_img(self, i);
 
@@ -165,7 +168,7 @@ void image_cache_print(struct image_cache *self)
 	printf("Image cache size %u used %u\n", self->max_size, self->cur_size);
 
 	for (i = self->root; i != NULL; i = i->next)
-		printf(" Image '%s:%i' size %u\n", i->path, i->cookie,
+		printf(" Image '%s:%10li:%10li' size %u\n", i->path, i->cookie1, i->cookie2,
 		       i->ctx->bytes_per_row * i->ctx->h);
 }
 
@@ -187,8 +190,8 @@ static int assert_size(struct image_cache *self, size_t size)
 	return 0;
 }
 
-int image_cache_put(struct image_cache *self,
-                    GP_Context *ctx, const char *path, int cookie)
+int image_cache_put(struct image_cache *self, GP_Context *ctx, const char *path,
+                    long cookie1, long cookie2)
 {
 	size_t size = ctx->bytes_per_row * ctx->h;
 
@@ -202,11 +205,12 @@ int image_cache_put(struct image_cache *self,
 		return 1;
 	}
 	
-	GP_DEBUG(2, "Adding image '%s:%i' size %zu",
-	         img->path, img->cookie, size);
+	GP_DEBUG(2, "Adding image '%s:%10li:%10li' size %zu",
+	         img->path, img->cookie1, img->cookie2, size);
 
 	img->ctx = ctx;
-	img->cookie = cookie;
+	img->cookie1 = cookie1;
+	img->cookie2 = cookie2;
 	strcpy(img->path, path);
 
 	add_img(self, img);

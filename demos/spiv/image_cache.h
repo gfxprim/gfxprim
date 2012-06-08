@@ -43,13 +43,13 @@ struct image_cache *image_cache_create(unsigned int max_size);
  * Returns cached image, or NULL.
  */
 GP_Context *image_cache_get(struct image_cache *self,
-                            const char *path, int cookie);
+                            const char *path, long cookie1, long cookie2);
 
 /*
  * Puts an image into a cache.
  */
-int image_cache_put(struct image_cache *self,
-                    GP_Context *img, const char *path, int cookie); 
+int image_cache_put(struct image_cache *self, GP_Context *img,
+                    const char *path, long cookie1, long cookie2); 
 
 /*
  * Destroys image cache and all it's images.

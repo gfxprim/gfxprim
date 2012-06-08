@@ -134,7 +134,7 @@ GP_Context *load_image(struct loader_params *params)
 	GP_ProgressCallback callback = {.callback = image_loader_callback,
 	                                .priv = "Loading image"};
 
-	img = image_cache_get(params->image_cache, params->img_path, 0);
+	img = image_cache_get(params->image_cache, params->img_path, 0, 0);
 
 	/* Image not cached, load it */
 	if (img == NULL) {
@@ -160,7 +160,7 @@ GP_Context *load_image(struct loader_params *params)
 			img = tmp;
 		}
 	
-		image_cache_put(params->image_cache, img, params->img_path, 0);
+		image_cache_put(params->image_cache, img, params->img_path, 0, 0);
 		
 		cpu_timer_stop(&timer);
 	}
@@ -171,33 +171,33 @@ GP_Context *load_image(struct loader_params *params)
 GP_Context *load_resized_image(struct loader_params *params, GP_Size w, GP_Size h, float rat)
 {
 	long cookie = (w & 0xffff) | (h & 0xffff)<<16;
-	GP_Context *img;
+	GP_Context *img, *res = NULL;
 	struct cpu_timer timer;
 	GP_ProgressCallback callback = {.callback = image_loader_callback};
 
 	/* Try to get resized cached image */
-	img = image_cache_get(params->image_cache, params->img_path, cookie);
+	img = image_cache_get(params->image_cache, params->img_path, cookie, resampling_method);
 
 	if (img != NULL)
 		return img;
 	
 	/* Otherwise load image and resize it */
-	img = load_image(params);
-
-	if (img == NULL)
+	if ((img = load_image(params)) == NULL)
 		return NULL;
 
 	/* Do low pass filter */
-	if (resampling_method != GP_INTERP_LINEAR_LF_INT) {
-		if (rat < 1) {
-			cpu_timer_start(&timer, "Blur");
-			callback.priv = "Blurring Image";
-			//TODO: We can't blur saved image!
-			if (GP_FilterGaussianBlur(img, img, 0.4/rat, 0.4/rat,
-			                          &callback) == NULL)
-				return NULL;
-			cpu_timer_stop(&timer);
-		}
+	if (resampling_method != GP_INTERP_LINEAR_LF_INT && rat < 1) {
+		cpu_timer_start(&timer, "Blur");
+		callback.priv = "Blurring Image";
+		
+		res = GP_FilterGaussianBlur(img, NULL, 0.4/rat, 0.4/rat, &callback);
+		
+		if (res == NULL)
+			return NULL;
+		
+		img = res;
+
+		cpu_timer_stop(&timer);
 	}
 
 	cpu_timer_start(&timer, "Resampling");
@@ -205,11 +205,14 @@ GP_Context *load_resized_image(struct loader_params *params, GP_Size w, GP_Size 
 	img = GP_FilterResize(img, NULL, resampling_method, w, h, &callback);
 	cpu_timer_stop(&timer);
 
+	/* Free low passed context if needed */
+	GP_ContextFree(res);
+
 	if (img == NULL)
 		return NULL;
 
-	image_cache_put(params->image_cache, img, params->img_path, cookie);
-
+	image_cache_put(params->image_cache, img, params->img_path, cookie, resampling_method);
+	
 	return img;
 }
 
@@ -269,6 +272,8 @@ static void *image_loader(void *ptr)
 
 	if (img == NULL)
 		return NULL;
+
+	image_cache_print(params->image_cache);
 
 	switch (rotate) {
 	case 0:
