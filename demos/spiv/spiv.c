@@ -85,12 +85,14 @@ static int image_loader_callback(GP_ProgressCallback *self)
 
 struct loader_params {
 	const char *img_path;
+	
 	int show_progress;
 	int show_progress_once;
 	int show_info;
 
 	/* cached loaded images */
-	struct image_cache *image_cache;
+	struct image_cache *img_resized_cache;
+	struct image_cache *img_orig_cache;
 };
 
 static float calc_img_size(uint32_t img_w, uint32_t img_h,
@@ -134,7 +136,7 @@ GP_Context *load_image(struct loader_params *params, int elevate)
 	GP_ProgressCallback callback = {.callback = image_loader_callback,
 	                                .priv = "Loading image"};
 
-	img = image_cache_get(params->image_cache, params->img_path, 0, 0, elevate);
+	img = image_cache_get(params->img_orig_cache, params->img_path, 0, 0, elevate);
 
 	/* Image not cached, load it */
 	if (img == NULL) {
@@ -160,7 +162,7 @@ GP_Context *load_image(struct loader_params *params, int elevate)
 			img = tmp;
 		}
 	
-		image_cache_put(params->image_cache, img, params->img_path, 0, 0);
+		image_cache_put(params->img_orig_cache, img, params->img_path, 0, 0);
 		
 		cpu_timer_stop(&timer);
 	}
@@ -176,7 +178,7 @@ GP_Context *load_resized_image(struct loader_params *params, GP_Size w, GP_Size 
 	GP_ProgressCallback callback = {.callback = image_loader_callback};
 
 	/* Try to get resized cached image */
-	img = image_cache_get(params->image_cache, params->img_path, cookie, resampling_method, 1);
+	img = image_cache_get(params->img_resized_cache, params->img_path, cookie, resampling_method, 1);
 
 	if (img != NULL)
 		return img;
@@ -211,7 +213,7 @@ GP_Context *load_resized_image(struct loader_params *params, GP_Size w, GP_Size 
 	if (img == NULL)
 		return NULL;
 
-	image_cache_put(params->image_cache, img, params->img_path, cookie, resampling_method);
+	image_cache_put(params->img_resized_cache, img, params->img_path, cookie, resampling_method);
 	
 	return img;
 }
@@ -268,12 +270,13 @@ static void *image_loader(void *ptr)
 	w = img->w;
 	h = img->h;
 
-	img = load_resized_image(params, img->w * rat + 0.5, img->h * rat + 0.5, rat);
+	img = load_resized_image(params, w * rat + 0.5, h * rat + 0.5, rat);
 
 	if (img == NULL)
 		return NULL;
 
-	image_cache_print(params->image_cache);
+	image_cache_print(params->img_resized_cache);
+	image_cache_print(params->img_orig_cache);
 
 	switch (rotate) {
 	case 0:
@@ -475,16 +478,33 @@ static int wait_for_event(int sleep_msec)
 	}
 }
 
+static void init_caches(struct loader_params *params)
+{
+	size_t size = image_cache_get_ram_size();
+	unsigned int resized_size = (1024 * size)/10;
+	unsigned int orig_size = (1024 * size)/50;
+
+	if (resized_size > 100 * 1024 * 1024)
+		resized_size = 100 * 1024 * 1024;
+
+	if (orig_size > 20 * 1024 * 1024)
+		orig_size = 20 * 1024 * 1024;
+
+	GP_DEBUG(1, "Cache sizes original = %u, resized = %u",
+	         orig_size, resized_size);
+
+	params->img_resized_cache = image_cache_create(resized_size);
+	params->img_orig_cache = image_cache_create(orig_size);
+}
+
 int main(int argc, char *argv[])
 {
 	GP_Context *context = NULL;
 	const char *backend_opts = "X11";
 	int sleep_sec = -1;
-	struct loader_params params = {NULL, 0, 0, 0, NULL};
+	struct loader_params params = {NULL, 0, 0, 0, NULL, NULL};
 	int opt, debug_level = 0;
 	GP_PixelType emul_type = GP_PIXEL_UNKNOWN;
-
-	params.image_cache = image_cache_create(0);
 
 	while ((opt = getopt(argc, argv, "b:cd:e:fIPs:r:")) != -1) {
 		switch (opt) {
@@ -535,6 +555,8 @@ int main(int argc, char *argv[])
 	signal(SIGSEGV, sighandler);
 	signal(SIGBUS, sighandler);
 	signal(SIGABRT, sighandler);
+	
+	init_caches(&params);
 
 	init_backend(backend_opts);
 
@@ -598,7 +620,8 @@ int main(int argc, char *argv[])
 					show_image(&params, NULL);
 				break;
 				case GP_KEY_D:
-					image_cache_drop(params.image_cache);
+					image_cache_drop(params.img_resized_cache);
+					image_cache_drop(params.img_orig_cache);
 				break;
 				case GP_KEY_ESC:
 				case GP_KEY_ENTER:

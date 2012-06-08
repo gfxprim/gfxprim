@@ -32,12 +32,14 @@
 struct image_cache;
 
 /*
- * Creates an image cache with maximal memory size.
- *
- * When memory size is set to zero it's set to 10% of total machine memory
- * (as reported by /proc/meminfo).
+ * Returns size of the ram in kbytes.
  */
-struct image_cache *image_cache_create(unsigned int max_size);
+size_t image_cache_get_ram_size(void);
+
+/*
+ * Creates an image cache with maximal memory size.
+ */
+struct image_cache *image_cache_create(unsigned int max_size_bytes);
 
 /*
  * Returns cached image, or NULL.

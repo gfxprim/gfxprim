@@ -47,7 +47,7 @@ struct image_cache {
 	struct image *end;
 };
 
-static size_t read_total_memory(void)
+size_t image_cache_get_ram_size(void)
 {
 	FILE *f;
 	size_t ret;
@@ -84,7 +84,7 @@ static size_t image_size(struct image *img)
 	return image_size2(img->ctx, img->path);
 }
 
-struct image_cache *image_cache_create(unsigned int max_size)
+struct image_cache *image_cache_create(unsigned int max_size_bytes)
 {
 	struct image_cache *self;
 
@@ -93,7 +93,7 @@ struct image_cache *image_cache_create(unsigned int max_size)
 	if (self == NULL)
 		return NULL;
 
-	self->max_size = max_size ? max_size : read_total_memory();
+	self->max_size = max_size_bytes;
 	self->cur_size = sizeof(struct image_cache);
 
 	self->root = NULL;
