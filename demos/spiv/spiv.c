@@ -36,6 +36,7 @@
 #include <backends/GP_Backends.h>
 #include <input/GP_InputDriverLinux.h>
 
+#include "image_cache.h"
 #include "cpu_timer.h"
 
 static GP_Pixel black_pixel;
@@ -88,8 +89,8 @@ struct loader_params {
 	int show_progress_once;
 	int show_info;
 
-	/* cached loaded image */
-	GP_Context *img;
+	/* cached loaded images */
+	struct image_cache *image_cache;
 };
 
 static float calc_img_size(uint32_t img_w, uint32_t img_h,
@@ -125,46 +126,46 @@ static void set_caption(const char *path, float rat)
 /*
  * Loads image
  */
-int load_image(struct loader_params *params)
+GP_Context *load_image(struct loader_params *params)
 {
 	struct cpu_timer timer;
 	GP_Context *img, *context = backend->context;
-
-	if (params->img != NULL) {
-		fprintf(stderr, "Image cached!\n");
-		return 0;
-	}
 	
 	GP_ProgressCallback callback = {.callback = image_loader_callback,
 	                                .priv = "Loading image"};
+
+	img = image_cache_get(params->image_cache, params->img_path, 0);
+
+	/* Image not cached, load it */
+	if (img == NULL) {
+		show_progress = params->show_progress || params->show_progress_once;
+		params->show_progress_once = 0;
+
+		fprintf(stderr, "Loading '%s'\n", params->img_path);
+
+		cpu_timer_start(&timer, "Loading");
+		if ((img = GP_LoadImage(params->img_path, &callback)) == NULL) {
+			GP_Fill(context, black_pixel);
+			GP_Print(context, NULL, context->w/2, context->h/2,
+		        	 GP_ALIGN_CENTER|GP_VALIGN_CENTER, white_pixel, black_pixel,
+				 "Failed to load image :( (%s)", strerror(errno));
+			GP_BackendFlip(backend);
+			return NULL;
+		}
+		
+		/* Workaround */
+		if (img->pixel_type != GP_PIXEL_RGB888) {
+			GP_Context *tmp = GP_ContextConvert(img, GP_PIXEL_RGB888);
+			GP_ContextFree(img);
+			img = tmp;
+		}
 	
-	show_progress = params->show_progress || params->show_progress_once;
-	params->show_progress_once = 0;
-
-	fprintf(stderr, "Loading '%s'\n", params->img_path);
-
-	cpu_timer_start(&timer, "Loading");
-	if ((img = GP_LoadImage(params->img_path, &callback)) == NULL) {
-		GP_Fill(context, black_pixel);
-		GP_Print(context, NULL, context->w/2, context->h/2,
-		         GP_ALIGN_CENTER|GP_VALIGN_CENTER, white_pixel, black_pixel,
-			 "Failed to load image :( (%s)", strerror(errno));
-		GP_BackendFlip(backend);
-		return 1;
+		image_cache_put(params->image_cache, img, params->img_path, 0);
+		
+		cpu_timer_stop(&timer);
 	}
-	
-	/* Workaround */
-	if (img->pixel_type != GP_PIXEL_RGB888) {
-		GP_Context *tmp = GP_ContextConvert(img, GP_PIXEL_RGB888);
-		GP_ContextFree(img);
-		img = tmp;
-	}
-	
-	cpu_timer_stop(&timer);
 
-	params->img = img;
-
-	return 0; 
+	return img; 
 }
 
 /*
@@ -173,7 +174,7 @@ int load_image(struct loader_params *params)
  */
 static int resize_backend_and_blit(struct loader_params *params)
 {
-	GP_Context *img = params->img;
+	GP_Context *img = load_image(params);
 	
 	if (GP_BackendResize(backend, img->w, img->h))
 		return 1;
@@ -196,10 +197,10 @@ static void *image_loader(void *ptr)
 	cpu_timer_start(&sum_timer, "sum");
 
 	/* Load Image */
-	if (load_image(params))
-		return NULL;
+	img = load_image(params);
 
-	img = params->img;
+	if (img == NULL)
+		return NULL;
 
 	/*
 	if (img->w < 320 && img->h < 240) {
@@ -351,13 +352,8 @@ static void show_image(struct loader_params *params, const char *path)
 		abort_flag = 0;
 	}
 	
-	/* invalidate cached image if path has changed */
-	if (params->img_path == NULL ||
-	    (path != NULL && strcmp(params->img_path, path))) {
-		GP_ContextFree(params->img);
-		params->img = NULL;
+	if (path != NULL)
 		params->img_path = path;
-	}
 
 	ret = pthread_create(&loader_thread, NULL, image_loader, (void*)params);
 
@@ -465,9 +461,11 @@ int main(int argc, char *argv[])
 	GP_Context *context = NULL;
 	const char *backend_opts = "X11";
 	int sleep_sec = -1;
-	struct loader_params params = {NULL, 0, 0, 0, .img = NULL};
+	struct loader_params params = {NULL, 0, 0, 0, NULL};
 	int opt, debug_level = 0;
 	GP_PixelType emul_type = GP_PIXEL_UNKNOWN;
+
+	params.image_cache = image_cache_create(0);
 
 	while ((opt = getopt(argc, argv, "b:cd:e:fIPs:r:")) != -1) {
 		switch (opt) {
