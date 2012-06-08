@@ -34,13 +34,16 @@ struct image_cache;
 /*
  * Creates an image cache with maximal memory size.
  *
- * When memory size is set to zero, the size is read from /proc/meminfo
- * as 10% of total memory.
+ * When memory size is set to zero it's set to 10% of total machine memory
+ * (as reported by /proc/meminfo).
  */
 struct image_cache *image_cache_create(unsigned int max_size);
 
 /*
  * Returns cached image, or NULL.
+ * 
+ * Also image, if found, is rotated to the top, so recently touched images have
+ * lesser chance of being freed.
  */
 GP_Context *image_cache_get(struct image_cache *self,
                             const char *path, long cookie1, long cookie2);

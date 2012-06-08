@@ -67,6 +67,20 @@ static size_t read_total_memory(void)
 	return ret * 1024 / 10;
 }
 
+/*
+ * Reports correct image record size.
+ */
+static size_t image_size2(GP_Context *ctx, const char *path)
+{
+	return ctx->bytes_per_row * ctx->h + sizeof(GP_Context) +
+	       sizeof(struct image) + strlen(path) + 1;
+}
+
+static size_t image_size(struct image *img)
+{
+	return image_size2(img->ctx, img->path);
+}
+
 struct image_cache *image_cache_create(unsigned int max_size)
 {
 	struct image_cache *self;
@@ -77,7 +91,7 @@ struct image_cache *image_cache_create(unsigned int max_size)
 		return NULL;
 
 	self->max_size = max_size ? max_size : read_total_memory();
-	self->cur_size = 0;
+	self->cur_size = sizeof(struct image_cache);
 
 	self->root = NULL;
 	self->end = NULL;
@@ -87,10 +101,8 @@ struct image_cache *image_cache_create(unsigned int max_size)
 	return self;
 }
 
-static void remove_img(struct image_cache *self, struct image *img)
+static void remove_img(struct image_cache *self, struct image *img, size_t size)
 {
-	size_t size = img->ctx->bytes_per_row * img->ctx->h;
-
 	if (img == self->end)
 		self->end = img->prev;
 
@@ -106,13 +118,13 @@ static void remove_img(struct image_cache *self, struct image *img)
 	self->cur_size -= size;
 }
 
-static void remove_img_free(struct image_cache *self, struct image *img)
+static void remove_img_free(struct image_cache *self,
+                            struct image *img, size_t size)
 {
-	GP_DEBUG(2, "Freeing image '%s:%10li:%10li' size %u",
-	         img->path, img->cookie1, img->cookie2,
-		 img->ctx->bytes_per_row * img->ctx->h);
+	GP_DEBUG(2, "Freeing image '%s:%10li:%10li' size %zu",
+	         img->path, img->cookie1, img->cookie2, size);
 	
-	remove_img(self, img);
+	remove_img(self, img, size);
 	GP_ContextFree(img->ctx);
 	free(img);
 }
@@ -120,10 +132,8 @@ static void remove_img_free(struct image_cache *self, struct image *img)
 /*
  * Adds image to the start of the double linked list
  */
-static void add_img(struct image_cache *self, struct image *img)
+static void add_img(struct image_cache *self, struct image *img, size_t size)
 {
-	size_t size = img->ctx->bytes_per_row * img->ctx->h;
-
 	img->next = self->root;
 	
 	if (img->next)
@@ -154,9 +164,12 @@ GP_Context *image_cache_get(struct image_cache *self,
 		return NULL;
 
 	/* Push the image to the root of the list */
+	size_t size = image_size(i);
+
 	GP_DEBUG(2, "Refreshing image '%s:%10li:%10li", path, cookie1, cookie2);
-	remove_img(self, i);
-	add_img(self, i);
+	
+	remove_img(self, i, size);
+	add_img(self, i, size);
 
 	return i->ctx;
 }
@@ -168,8 +181,8 @@ void image_cache_print(struct image_cache *self)
 	printf("Image cache size %u used %u\n", self->max_size, self->cur_size);
 
 	for (i = self->root; i != NULL; i = i->next)
-		printf(" Image '%s:%10li:%10li' size %u\n", i->path, i->cookie1, i->cookie2,
-		       i->ctx->bytes_per_row * i->ctx->h);
+		printf(" Image '%s:%10li:%10li' size %zu\n", i->path,
+		       i->cookie1, i->cookie2, image_size(i));
 }
 
 static int assert_size(struct image_cache *self, size_t size)
@@ -184,7 +197,7 @@ static int assert_size(struct image_cache *self, size_t size)
 			return 1;
 		}
 
-		remove_img_free(self, self->end);
+		remove_img_free(self, self->end, image_size(self->end));
 	}
 
 	return 0;
@@ -193,7 +206,7 @@ static int assert_size(struct image_cache *self, size_t size)
 int image_cache_put(struct image_cache *self, GP_Context *ctx, const char *path,
                     long cookie1, long cookie2)
 {
-	size_t size = ctx->bytes_per_row * ctx->h;
+	size_t size = image_size2(ctx, path);
 
 	if (assert_size(self, size))
 		return 1;
@@ -213,7 +226,8 @@ int image_cache_put(struct image_cache *self, GP_Context *ctx, const char *path,
 	img->cookie2 = cookie2;
 	strcpy(img->path, path);
 
-	add_img(self, img);
+	add_img(self, img, size);
+
 	return 0;
 }
 
@@ -222,7 +236,7 @@ void image_cache_destroy(struct image_cache *self)
 	GP_DEBUG(1, "Destroying image cache");
 	
 	while (self->end != NULL)
-		remove_img_free(self, self->end);
+		remove_img_free(self, self->end, 0);
 	
 	free(self);
 }
