@@ -487,8 +487,8 @@ static void init_caches(struct loader_params *params)
 	if (resized_size > 100 * 1024 * 1024)
 		resized_size = 100 * 1024 * 1024;
 
-	if (orig_size > 20 * 1024 * 1024)
-		orig_size = 20 * 1024 * 1024;
+	if (orig_size > 40 * 1024 * 1024)
+		orig_size = 40 * 1024 * 1024;
 
 	GP_DEBUG(1, "Cache sizes original = %u, resized = %u",
 	         orig_size, resized_size);
