@@ -594,7 +594,7 @@ int main(int argc, char *argv[])
 
 		while (GP_EventGet(&ev)) {
 
-			GP_EventDump(&ev);
+		//	GP_EventDump(&ev);
 			
 			switch (ev.type) {
 			case GP_EV_KEY:
@@ -628,6 +628,24 @@ int main(int argc, char *argv[])
 				case GP_KEY_Q:
 					GP_BackendExit(backend);
 					return 0;
+				break;
+				case GP_KEY_PAGE_UP:
+					argn+=10;
+					//TODO
+					if (argn >= argc)
+						argn = argf; 
+					
+					params.show_progress_once = 1;
+					show_image(&params, argv[argn]);
+				break;
+				case GP_KEY_PAGE_DOWN:
+					argn-=10;
+					//TODO
+					if (argn < argf)
+						argn = argc - 1 ; 
+					
+					params.show_progress_once = 1;
+					show_image(&params, argv[argn]);
 				break;
 				case GP_KEY_RIGHT:
 				case GP_KEY_UP:
