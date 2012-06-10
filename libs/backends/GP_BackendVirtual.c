@@ -60,9 +60,9 @@ static void virt_update_rect(GP_Backend *self, GP_Coord x0, GP_Coord y0,
 	virt->backend->UpdateRect(virt->backend, x0, y0, x1, y1);
 }
 
-static int virt_set_attributes(struct GP_Backend *self,
-                               uint32_t w, uint32_t h,
-                               const char *caption)
+static int virt_set_attrs(struct GP_Backend *self,
+                          uint32_t w, uint32_t h,
+                          const char *caption)
 {
 	struct virt_priv *virt = GP_BACKEND_PRIV(self);
 	int ret;
@@ -84,6 +84,13 @@ static void virt_poll(GP_Backend *self)
 	struct virt_priv *virt = GP_BACKEND_PRIV(self);
 
 	virt->backend->Poll(virt->backend);
+}
+
+static void virt_wait(GP_Backend *self)
+{
+	struct virt_priv *virt = GP_BACKEND_PRIV(self);
+
+	virt->backend->Wait(virt->backend);
 }
 
 static void virt_exit(GP_Backend *self)
@@ -130,12 +137,9 @@ GP_Backend *GP_BackendVirtualInit(GP_Backend *backend,
 	self->Flip          = virt_flip;
 	self->UpdateRect    = virt_update_rect;
 	self->Exit          = virt_exit;
-
-	if (backend->Poll)
-		self->Poll = virt_poll;
-
-	if (backend->SetAttributes)
-		self->SetAttributes = virt_set_attributes;
+	self->Poll          = backend->Poll ? virt_poll : NULL;
+	self->Wait          = backend->Wait ? virt_wait : NULL;
+	self->SetAttributes = backend->SetAttributes ? virt_set_attrs : NULL;
 
 	return self;
 

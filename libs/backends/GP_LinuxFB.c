@@ -29,6 +29,7 @@
 #include <errno.h>
 #include <termios.h>
 #include <unistd.h>
+#include <poll.h>
 
 #include <linux/fb.h>
 #include <linux/kd.h>
@@ -188,6 +189,18 @@ static void fb_poll(GP_Backend *self)
 		GP_InputDriverKBDEventPut(buf[i]);
 }
 
+static void fb_wait(GP_Backend *self)
+{
+	struct fb_priv *fb = GP_BACKEND_PRIV(self); 
+
+	struct pollfd fd = {.fd = fb->con_fd, .events = POLLIN, .revents = 0};
+
+	if (poll(&fd, 1, -1) > 0)
+		fb_poll(self);
+	else
+		GP_WARN("poll(): %s", strerror(errno));
+}
+
 static void fb_exit(GP_Backend *self)
 {
 	struct fb_priv *fb = GP_BACKEND_PRIV(self); 
@@ -312,6 +325,7 @@ GP_Backend *GP_BackendLinuxFBInit(const char *path, int flag)
 	backend->Exit          = fb_exit;
 	backend->SetAttributes = NULL;
 	backend->Poll          = flag ? fb_poll : NULL;
+	backend->Wait          = flag ? fb_wait : NULL;
 	backend->fd            = fb->con_fd;
 
 	return backend;

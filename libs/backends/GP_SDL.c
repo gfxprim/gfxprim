@@ -82,6 +82,21 @@ static void sdl_poll(struct GP_Backend *self __attribute__((unused)))
 	SDL_mutexV(mutex);
 }
 
+static void sdl_wait(struct GP_Backend *self __attribute__((unused)))
+{
+	SDL_Event ev;
+
+	SDL_mutexP(mutex);
+
+	SDL_WaitEvent(&ev);
+	GP_InputDriverSDLEventPut(&ev);
+
+	while (SDL_PollEvent(&ev))
+		GP_InputDriverSDLEventPut(&ev);
+
+	SDL_mutexV(mutex);
+}
+
 int context_from_surface(GP_Context *context, SDL_Surface *surf)
 {
 	/* sanity checks on the SDL surface */
@@ -145,6 +160,7 @@ static struct GP_Backend backend = {
 	.Exit          = sdl_exit,
 	.fd            = -1,
 	.Poll          = sdl_poll,
+	.Wait          = sdl_wait,
 };
 
 static void sdl_exit(struct GP_Backend *self __attribute__((unused)))

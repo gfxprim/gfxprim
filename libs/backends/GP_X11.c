@@ -105,6 +105,34 @@ static void x11_flip(GP_Backend *self)
 	XUnlockDisplay(x11->dpy);
 }
 
+static void x11_ev(GP_Backend *self, XEvent *ev)
+{
+	struct x11_priv *x11 = GP_BACKEND_PRIV(self); 
+	
+	switch (ev->type) {
+	case Expose:
+		GP_DEBUG(4, "Expose %ix%i-%ix%i %i",
+		         ev->xexpose.x, ev->xexpose.y,
+		         ev->xexpose.width, ev->xexpose.height,
+		         ev->xexpose.count);
+	
+		if (x11->resized_flag)
+			break;
+
+		x11_update_rect(self, ev->xexpose.x, ev->xexpose.y,
+		                ev->xexpose.x + ev->xexpose.width - 1,
+				ev->xexpose.y + ev->xexpose.height - 1);
+	break;
+	case ConfigureNotify:
+		if (ev->xconfigure.width == (int)self->context->w &&
+		    ev->xconfigure.height == (int)self->context->h)
+		    	break;
+	default:
+		GP_InputDriverX11EventPut(ev);
+	break;
+	}
+}
+
 static void x11_poll(GP_Backend *self)
 {
 	struct x11_priv *x11 = GP_BACKEND_PRIV(self); 
@@ -114,30 +142,21 @@ static void x11_poll(GP_Backend *self)
 	
 	while (XPending(x11->dpy)) {
 		XNextEvent(x11->dpy, &ev);
-
-		switch (ev.type) {
-		case Expose:
-			GP_DEBUG(4, "Expose %ix%i-%ix%i %i",
-			         ev.xexpose.x, ev.xexpose.y,
-			         ev.xexpose.width, ev.xexpose.height,
-			         ev.xexpose.count);
-		
-			if (x11->resized_flag)
-				break;
-
-			x11_update_rect(self, ev.xexpose.x, ev.xexpose.y,
-			                ev.xexpose.x + ev.xexpose.width - 1,
-					ev.xexpose.y + ev.xexpose.height - 1);
-		break;
-		case ConfigureNotify:
-			if (ev.xconfigure.width == (int)self->context->w &&
-			    ev.xconfigure.height == (int)self->context->h)
-			    	break;
-		default:
-			GP_InputDriverX11EventPut(&ev);
-		break;
-		}
+		x11_ev(self, &ev);
 	}
+	
+	XUnlockDisplay(x11->dpy);
+}
+
+static void x11_wait(GP_Backend *self)
+{
+	struct x11_priv *x11 = GP_BACKEND_PRIV(self); 
+	XEvent ev;
+
+	XLockDisplay(x11->dpy);
+	
+	XNextEvent(x11->dpy, &ev);
+	x11_ev(self, &ev);
 	
 	XUnlockDisplay(x11->dpy);
 }
@@ -495,6 +514,7 @@ GP_Backend *GP_BackendX11Init(const char *display, int x, int y,
 	backend->UpdateRect    = x11_update_rect;
 	backend->Exit          = x11_exit;
 	backend->Poll          = x11_poll;
+	backend->Wait          = x11_wait;
 	backend->SetAttributes = x11_set_attributes;
 	backend->fd            = XConnectionNumber(x11->dpy);
 
