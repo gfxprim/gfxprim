@@ -140,9 +140,6 @@ GP_Context *load_image(struct loader_params *params, int elevate)
 
 	/* Image not cached, load it */
 	if (img == NULL) {
-		show_progress = params->show_progress || params->show_progress_once;
-		params->show_progress_once = 0;
-
 		fprintf(stderr, "Loading '%s'\n", params->img_path);
 
 		cpu_timer_start(&timer, "Loading");
@@ -244,6 +241,9 @@ static void *image_loader(void *ptr)
 	GP_ProgressCallback callback = {.callback = image_loader_callback};
 
 	cpu_timer_start(&sum_timer, "sum");
+	
+	show_progress = params->show_progress || params->show_progress_once;
+	params->show_progress_once = 0;
 
 	/* Figure out rotation */
 	GP_Size w, h;
