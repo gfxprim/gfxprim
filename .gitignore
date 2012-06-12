@@ -9,3 +9,4 @@
 *.a
 config.h
 config.gen.mk
+gfxprim-config
