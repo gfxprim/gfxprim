@@ -23,14 +23,15 @@
  *                                                                           *
  *****************************************************************************/
 
+#include <errno.h>
+#include <string.h>
+
 #include "GP_Debug.h"
 #include "GP_Transform.h"
 #include "GP_Pixel.h"
 #include "GP_GetPutPixel.h"
 #include "GP_Context.h"
 #include "GP_Blit.h"
-
-#include <string.h>
 
 static uint32_t get_bpr(uint32_t bpp, uint32_t w)
 {
@@ -52,6 +53,7 @@ GP_Context *GP_ContextAlloc(GP_Size w, GP_Size h, GP_PixelType type)
 		free(pixels);
 		free(context);
 		GP_WARN("Malloc failed :(");
+		errno = ENOMEM;
 		return NULL;
 	}
 
@@ -146,6 +148,7 @@ GP_Context *GP_ContextCopy(const GP_Context *src, int flags)
 		free(pixels);
 		free(new);
 		GP_WARN("Malloc failed :(");
+		errno = ENOMEM;
 		return NULL;
 	}
 
@@ -209,6 +212,7 @@ GP_Context *GP_SubContextAlloc(const GP_Context *context,
 
 	if (res == NULL) {
 		GP_WARN("Malloc failed :(");
+		errno = ENOMEM;
 		return NULL;
 	}
 
