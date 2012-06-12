@@ -222,25 +222,6 @@ GP_Context *GP_ContextSubContext(GP_Context *context, GP_Context *subcontext,
 	return ret;
 }
 
-GP_RetCode GP_ContextDump(GP_Context *context, const char *path)
-{
-	FILE *f = fopen(path, "w");
-	uint32_t x, y;
-
-	if (f == NULL)
-		return GP_EBADFILE;
-
-	for (y = 0; y < context->h; y++) {
-		for (x = 0; x < context->bytes_per_row; x++)
-			fprintf(f, "0x%02x ", ((uint8_t *)context->pixels)
-			                      [y * context->bytes_per_row + x]);
-		fprintf(f, "\n");
-	}
-
-	fclose(f);
-	return GP_ESUCCESS;
-}
-
 /*
  * The context rotations consists of two cyclic permutation groups that are
  * mirrored.

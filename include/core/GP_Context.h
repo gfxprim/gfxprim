@@ -154,11 +154,6 @@ GP_Context *GP_ContextConvert(const GP_Context *src,
 void GP_ContextFree(GP_Context *context);
 
 /*
- * Dump context into file
- */
-GP_RetCode GP_ContextDump(GP_Context *context, const char *path);
-
-/*
  * Rotates context flags clock wise.
  */
 void GP_ContextFlagsRotateCW(GP_Context *context);
