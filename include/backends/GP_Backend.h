@@ -105,13 +105,22 @@ typedef struct GP_Backend {
 	int fd;
 
 	/*
-	 * Some of the backends doesn't expose file descriptor
-	 * (for example SDL is broken that way).
+	 * Non-blocking event loop.
 	 *
-	 * In that case the fd_list is NULL and this function
-	 * is non NULL.
+	 * The events are filled into the event queue see GP_Input.h.
 	 */
 	void (*Poll)(struct GP_Backend *self);
+
+	/*
+	 * Blocking event loop. Blocks until events are ready.
+	 *
+	 * Note that events received by a backend are not necessarily
+	 * translated to input events. So input queue may be empty
+	 * after Wait has returned.
+	 *
+	 * The events are filled into the event queue see GP_Input.h.
+	 */
+	void (*Wait)(struct GP_Backend *self);
 
 	/* Backed private data */
 	char priv[];
@@ -148,6 +157,14 @@ static inline void GP_BackendExit(GP_Backend *backend)
 static inline void GP_BackendPoll(GP_Backend *backend)
 {
 	backend->Poll(backend);
+}
+
+/*
+ * Waits for backend events.
+ */
+static inline void GP_BackendWait(GP_Backend *backend)
+{
+	backend->Wait(backend);
 }
 
 /*

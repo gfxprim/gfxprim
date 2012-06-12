@@ -140,9 +140,6 @@ GP_Context *load_image(struct loader_params *params, int elevate)
 
 	/* Image not cached, load it */
 	if (img == NULL) {
-		show_progress = params->show_progress || params->show_progress_once;
-		params->show_progress_once = 0;
-
 		fprintf(stderr, "Loading '%s'\n", params->img_path);
 
 		cpu_timer_start(&timer, "Loading");
@@ -244,6 +241,9 @@ static void *image_loader(void *ptr)
 	GP_ProgressCallback callback = {.callback = image_loader_callback};
 
 	cpu_timer_start(&sum_timer, "sum");
+	
+	show_progress = params->show_progress || params->show_progress_once;
+	params->show_progress_once = 0;
 
 	/* Figure out rotation */
 	GP_Size w, h;
@@ -487,8 +487,8 @@ static void init_caches(struct loader_params *params)
 	if (resized_size > 100 * 1024 * 1024)
 		resized_size = 100 * 1024 * 1024;
 
-	if (orig_size > 20 * 1024 * 1024)
-		orig_size = 20 * 1024 * 1024;
+	if (orig_size > 40 * 1024 * 1024)
+		orig_size = 40 * 1024 * 1024;
 
 	GP_DEBUG(1, "Cache sizes original = %u, resized = %u",
 	         orig_size, resized_size);
@@ -594,7 +594,7 @@ int main(int argc, char *argv[])
 
 		while (GP_EventGet(&ev)) {
 
-			GP_EventDump(&ev);
+		//	GP_EventDump(&ev);
 			
 			switch (ev.type) {
 			case GP_EV_KEY:
@@ -628,6 +628,24 @@ int main(int argc, char *argv[])
 				case GP_KEY_Q:
 					GP_BackendExit(backend);
 					return 0;
+				break;
+				case GP_KEY_PAGE_UP:
+					argn+=10;
+					//TODO
+					if (argn >= argc)
+						argn = argf; 
+					
+					params.show_progress_once = 1;
+					show_image(&params, argv[argn]);
+				break;
+				case GP_KEY_PAGE_DOWN:
+					argn-=10;
+					//TODO
+					if (argn < argf)
+						argn = argc - 1 ; 
+					
+					params.show_progress_once = 1;
+					show_image(&params, argv[argn]);
 				break;
 				case GP_KEY_RIGHT:
 				case GP_KEY_UP:
