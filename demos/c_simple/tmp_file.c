@@ -16,65 +16,95 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2010 Jiri "BlueBear" Dluhos                            *
- *                         <jiri.bluebear.dluhos@gmail.com>                  *
- *                                                                           *
  * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
  /*
 
-   Core include file for loaders API.
+   Tmp file is interface for storing GP_Context data on disk in uncompressed
+   fast but non-portable format (more or less GP_Context dump).
 
   */
 
-#ifndef LOADERS_GP_LOADERS_H
-#define LOADERS_GP_LOADERS_H
+#include <stdio.h>
+#include <string.h>
+#include <errno.h>
 
-#include "core/GP_Context.h"
-#include "core/GP_ProgressCallback.h"
+#include <GP.h>
 
-#include "GP_PBM.h"
-#include "GP_PGM.h"
-#include "GP_PPM.h"
+struct callback_priv {
+	char *op;
+	char *name;
+};
 
-#include "GP_BMP.h"
-#include "GP_PNG.h"
-#include "GP_JPG.h"
-#include "GP_GIF.h"
+static int progress_callback(GP_ProgressCallback *self)
+{
+	struct callback_priv *priv = self->priv;
 
-#include "GP_TmpFile.h"
+	printf("\r%s '%s' %3.1f%%", priv->op, priv->name, self->percentage);
+	fflush(stdout);
 
-#include "GP_MetaData.h"
+	return 0;
+}
 
-/*
- * Tries to load image accordingly to the file extension.
- *
- * If operation fails NULL is returned and errno is filled.
- */
-GP_Context *GP_LoadImage(const char *src_path, GP_ProgressCallback *callback);
+int main(int argc, char *argv[])
+{
+	GP_Context *img;
+	struct callback_priv priv;
+	GP_ProgressCallback callback = {.callback = progress_callback,
+	                                .priv = &priv};
 
-/*
- * Loads image Meta Data (if possible).
- */
-int GP_LoadMetaData(const char *src_path, GP_MetaData *data);
+	if (argc != 2) {
+		fprintf(stderr, "Takes an image as an parameter\n");
+		return 1;
+	}
 
-/*
- * Simple saving function, the image format is matched by file extension.
- *
- * Retruns zero on succes.
- * 
- * On failure non-zero is returned.
- *
- * When file type wasn't recognized by extension or if support for requested
- * image format wasn't compiled in non-zero is returned and errno is set to
- * ENOSYS.
- * 
- * The resulting errno may also be set to any possible error from fopen(3), open(3),
- * write(3), fwrite(3), seek(3), etc..
- */
-int GP_SaveImage(const GP_Context *src, const char *dst_path,
-                 GP_ProgressCallback *callback);
+	priv.op   = "Loading";
+	priv.name = argv[1];
+	
+	img = GP_LoadImage(argv[1], &callback);
 
-#endif /* LOADERS_GP_LOADERS_H */
+	if (img == NULL) {
+		fprintf(stderr, "Failed to load image '%s':%s\n", argv[1],
+		        strerror(errno));
+		return 1;
+	}
+
+	printf("\n");
+
+	priv.op   = "Saving";
+	priv.name = "tmp.gfx";
+
+	if (GP_SaveTmpFile(img, priv.name, &callback)) {
+		fprintf(stderr, "Failed to save temp file %s\n", strerror(errno));
+		return 1;
+	}
+	
+	printf("\n");
+
+	GP_ContextFree(img);
+	
+	priv.op   = "Loading";
+	
+	img = GP_LoadTmpFile(priv.name, &callback);
+
+	if (img == NULL) {
+		fprintf(stderr, "Failed to load temp file %s\n", strerror(errno));
+		return 1;
+	}
+
+	priv.op   = "Saving";
+	priv.name = "out.png";
+	
+	printf("\n");
+
+	if (GP_SavePNG(img, "out.png", &callback)) {
+		fprintf(stderr, "Failed to save image %s\n", strerror(errno));
+		return 1;
+	}
+
+	printf("\n");
+
+	return 0;
+}

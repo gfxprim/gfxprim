@@ -16,65 +16,43 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2010 Jiri "BlueBear" Dluhos                            *
- *                         <jiri.bluebear.dluhos@gmail.com>                  *
- *                                                                           *
  * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
  /*
-
-   Core include file for loaders API.
+   
+   This is interface for saving GP_Context into non-portable uncompressed file,
+   which is usefull for caching GP_Context to disk.
 
   */
 
-#ifndef LOADERS_GP_LOADERS_H
-#define LOADERS_GP_LOADERS_H
+#ifndef LOADERS_GP_TMP_FILE_H
+#define LOADERS_GP_TMP_FILE_H
 
 #include "core/GP_Context.h"
 #include "core/GP_ProgressCallback.h"
 
-#include "GP_PBM.h"
-#include "GP_PGM.h"
-#include "GP_PPM.h"
-
-#include "GP_BMP.h"
-#include "GP_PNG.h"
-#include "GP_JPG.h"
-#include "GP_GIF.h"
-
-#include "GP_TmpFile.h"
-
-#include "GP_MetaData.h"
+/*
+ * The possible errno values:
+ *
+ * - Anything FILE operation may return (fopen(), fclose(), fseek(), ...).
+ * - EIO for fread()/fwrite() failure
+ * - ENOMEM from malloc()
+ * - ECANCELED when call was aborted from callback
+ */
 
 /*
- * Tries to load image accordingly to the file extension.
+ * Opens up and loads file.
  *
- * If operation fails NULL is returned and errno is filled.
+ * On failure NULL is returned and errno is set.
  */
-GP_Context *GP_LoadImage(const char *src_path, GP_ProgressCallback *callback);
+GP_Context *GP_LoadTmpFile(const char *src_path, GP_ProgressCallback *callback);
 
 /*
- * Loads image Meta Data (if possible).
+ * Saves context into a file. On failure non-zero is returned and errno is set.
  */
-int GP_LoadMetaData(const char *src_path, GP_MetaData *data);
+int GP_SaveTmpFile(const GP_Context *src, const char *dst_path,
+                   GP_ProgressCallback *callback);
 
-/*
- * Simple saving function, the image format is matched by file extension.
- *
- * Retruns zero on succes.
- * 
- * On failure non-zero is returned.
- *
- * When file type wasn't recognized by extension or if support for requested
- * image format wasn't compiled in non-zero is returned and errno is set to
- * ENOSYS.
- * 
- * The resulting errno may also be set to any possible error from fopen(3), open(3),
- * write(3), fwrite(3), seek(3), etc..
- */
-int GP_SaveImage(const GP_Context *src, const char *dst_path,
-                 GP_ProgressCallback *callback);
-
-#endif /* LOADERS_GP_LOADERS_H */
+#endif /* LOADERS_GP_TMP_FILE_H */
