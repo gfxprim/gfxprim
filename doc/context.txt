@@ -1,7 +1,7 @@
 Drawing Context
 ---------------
 
-The 'GP_Context' structure describes a bitmap in memory. It contains all
+The 'GP_Context' structure describes an 'in memory' memory. It contains all
 metadata needed for drawing into a bitmap.
 
 Data Structure
@@ -22,7 +22,7 @@ typedef struct GP_Context {
          */
         uint8_t offset;
 
-	GP_PixelType pixel_type; /* pixel format enum */
+	enum GP_PixelType pixel_type; /* pixel format */
 
 	uint8_t axes_swap:1;         /* swap axes */
 	uint8_t x_swap:1;            /* mirror x */
@@ -42,8 +42,8 @@ Rotation
 
 The orientation flags affects the gfx and text drawing functions and blits. If
 some of the flags is changed the origin and direction of the drawing is
-changed. Note that the image pixels are not affected by this at all only the
-coordinates passed to drawing functions are transformed accordingly.
+changed accordingly. Note that the image pixels are not affected by this at
+all only the coordinates passed to drawing functions are transformed.
 
 If you don't need this functionality just don't touch the flags the as
 overhead of these transformations is not measurable.
@@ -81,12 +81,28 @@ GP_RETRANSFORM_POINT(context, x, y)
 /*
  * Rotate context flags clock wise. 
  */
-void GP_ContextFlagsRotateCW(GP_Context *context);
+void GP_ContextRotateCW(GP_Context *context);
 
 /*
  * Rotate context flags counter clock wise.
  */
-void GP_ContextFlagsRotateCCW(GP_Context *context);
+void GP_ContextRotateCCW(GP_Context *context);
+
+/*
+ * Retruns 1 if rotation flags are equal.
+ */
+int GP_ContextRotationEqual(const GP_Context *c1, const GP_Context *c2);
+
+/*
+ * Sets context rotation flags.
+ */
+void GP_ContextSetRotation(GP_Context *dst, int axes_swap,
+                           int x_swap, int y_swap);
+
+/*
+ * Copies rotation flags.
+ */
+void GP_ContextCopyRotation(const GP_Context *src, GP_Context *dst);
 
 /*
  * Returns context width and height taking the rotation flags into the account.
@@ -104,8 +120,8 @@ Basic context functions
 /* or */
 #include <GP.h>
 
-void GP_ContextInit(GP_Context *context, GP_Size w, GP_Size h,
-                    GP_PixelType type, void *pixels);
+GP_Context *GP_ContextInit(GP_Context *context, GP_Size w, GP_Size h,
+                           GP_PixelType type, void *pixels);
 -------------------------------------------------------------------------------
 
 Initialize given context accordingly to parameters, the rest of context
@@ -115,6 +131,9 @@ bytes per row are computed from the given pixel type and size.
 
 The 'pixels' pointer can be 'NULL' and can be changed later manually (the call
 will *not* try to allocate the pixel memory automatically).
+
+The function returns a pointer to the initialized context (i.e. the same
+pointer you passed as second argument).
 
 [source,c]
 -------------------------------------------------------------------------------
@@ -138,13 +157,34 @@ appropriate size; the initial contents of the bitmap are undefined.
 /* or */
 #include <GP.h>
 
-GP_Context *GP_ContextCopy(const GP_Context *src, int flag);
+enum GP_ContextCopyFlags {
+        /* 
+         * Copy bitmap pixels too. If not set pixels are uninitialized.
+         */
+        GP_COPY_WITH_PIXELS   = 0x01,
+        /* 
+         * Copy image rotation flags. If not set flags are set to (0, 0, 0).
+         */
+        GP_COPY_WITH_ROTATION = 0x02,
+};
+
+GP_Context *GP_ContextCopy(const GP_Context *src, int flags);
 -------------------------------------------------------------------------------
 
 The 'GP_ContextCopy()' allocates and initializes a copy of the context passed
-as argument. If 'flag' is set, the bitmap contents ('src->pixels')
-are also copied; otherwise the copy will have the same dimensions but
-undefined contents.
+as arguments.
+
+The call returns pointer to newly allocated context or in case of 'malloc()'
+failure NULL.
+
+If 'GP_COPY_WITH_PIXELS' is set, the bitmap contents ('src->pixels') are also
+copied; otherwise the copy will have the same dimensions but undefined
+contents.
+
+If 'GP_COPY_WITH_ROTATION' is set rotation flags are copied; otherwise rotation
+flags are set to zero.
+
+The 'free_pixels' flag for the resulting context is set.
 
 [source,c]
 -------------------------------------------------------------------------------
@@ -163,10 +203,16 @@ Subcontext
 
 A subcontext is a context that refers to a rectangular area within another
 context. Subcontexts can be used as any other context (including creating
-another subcontexts).
+another subcontexts). Generally the subcontexts behave exactly as any other
+contexts with one exception, if you create several overlapping subcontexts the
+results may be unexpected.
 
-Calling 'GP_ContextFree()' on a subcontext is safe; the bitmap is not freed as
-it belongs to another context; it will be freed with the hosting context.
+Calling 'GP_ContextFree()' on a allocated subcontext is safe; the bitmap is not
+freed as it belongs to another context; it will be freed with the hosting
+context (i.e. the 'free_pixels' flag is not set when creating subcontext). On
+the other hand, the subcontext doesn't hold a reference to the original
+context, so once the parent context is freed the subcontext pixel pointer is
+not valid anymore.
 
 [source,c]
 -------------------------------------------------------------------------------
@@ -174,18 +220,23 @@ it belongs to another context; it will be freed with the hosting context.
 /* or */
 #include <GP.h>
 
-GP_Context *GP_ContextSubContext(GP_Context *context, GP_Context *subcontext,
-                                 GP_Coord x, GP_Coord y, GP_Size w, GP_Size h);
+GP_Context *GP_SubContext(const GP_Context *context, GP_Context *subcontext,
+                          GP_Coord x, GP_Coord y, GP_Size w, GP_Size h);
+
+GP_Context *GP_SubContextAlloc(const GP_Context *context,
+                               GP_Coord x, GP_Coord y, GP_Size w, GP_Size h);
 -------------------------------------------------------------------------------
 
 Creates subcontext of a context. The rectangular area must fit into the context.
 
-If subcontext pointer is 'NULL', the context structure is allocated; otherwise
-the metadata are filled into the context structure pointed by subcontext
-pointer.
+The 'GP_SubContext()' function initializes the passed pointer as a subcontext
+of a context and returns pointer to initialized subcontext (i.e. the same
+pointer you passed as the subcontext parameter).
 
-In both cases, the call returns either a pointer to the new subcontext,
-or NULL on failure (when there is not enough memory).
+The 'GP_SubContextAlloc()' function allocates 'GP_Context' structure and
+initializes it as a subcontext. This function may return NULL in case of
+'malloc()' failure and the newly created context should be later freed with
+'GP_ContextFree()'.
 
 Conversions
 ~~~~~~~~~~~
@@ -196,13 +247,30 @@ Conversions
 /* or */
 #include <GP.h>
 
-GP_Context *GP_ContextConvert(const GP_Context *src, GP_Context *dst,
-                              GP_PixelType dst_pixel_type); 
+GP_Context *GP_ContextConvertAlloc(const GP_Context *src,
+                                   GP_PixelType dst_pixel_type); 
+
+GP_Context *GP_ContextConvert(const GP_Context *src, GP_Context *dst);
+
 -------------------------------------------------------------------------------
 
-Provides basic context conversion functionality. A newly allocated context is
-returned.
+Converts a context to different pixel type.
 
-This function does no error distribution, it only multiplies or rounds the pixel
-values. If you need something better use Floyd Steinberg dithering instead.
+This is naive implementation that only multiplies/divides the pixel values.
 
+To get a better result use dithering filters instead.
+
+Misc
+~~~~
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <core/GP_Context.h>
+/* or */
+#include <GP.h>
+
+void GP_ContextPrintInfo(const GP_Context *self);
+-------------------------------------------------------------------------------
+
+This function prints the content of 'GP_Context' structure, in a readable
+format, into the stdout.

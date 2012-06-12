@@ -19,56 +19,18 @@
  * Copyright (C) 2009-2011 Jiri "BlueBear" Dluhos                            *
  *                         <jiri.bluebear.dluhos@gmail.com>                  *
  *                                                                           *
- * Copyright (C) 2009-2011 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
-#include "GP_Core.h"
+#include "GP_Debug.h"
+#include "GP_Transform.h"
+#include "GP_Pixel.h"
+#include "GP_GetPutPixel.h"
+#include "GP_Context.h"
 #include "GP_Blit.h"
 
 #include <string.h>
-
-GP_Context *GP_ContextCopy(const GP_Context *src, int flag)
-{
-	GP_Context *new;
-	uint8_t *pixels;
-
-	if (src == NULL)
-		return NULL;
-
-	new     = malloc(sizeof(GP_Context));
-	pixels  = malloc(src->bytes_per_row * src->h);
-
-	if (pixels == NULL || new == NULL) {
-		free(pixels);
-		free(new);
-		return NULL;
-	}
-
-	new->pixels = pixels;
-
-	if (flag)
-		memcpy(pixels, src->pixels, src->bytes_per_row * src->h);
-
-	new->bpp           = src->bpp;
-	new->bytes_per_row = src->bytes_per_row;
-	new->offset        = 0;
-
-	new->w = src->w;
-	new->h = src->h;
-
-	new->pixel_type = src->pixel_type;
-	new->bit_endian = src->bit_endian;
-
-	/* rotation and mirroring */
-	new->axes_swap = src->axes_swap;
-	new->y_swap    = src->y_swap;
-	new->x_swap    = src->x_swap;
-	
-	new->free_pixels = 1;
-
-	return new;
-}
 
 static uint32_t get_bpr(uint32_t bpp, uint32_t w)
 {
@@ -78,16 +40,18 @@ static uint32_t get_bpr(uint32_t bpp, uint32_t w)
 GP_Context *GP_ContextAlloc(GP_Size w, GP_Size h, GP_PixelType type)
 {
 	GP_CHECK_VALID_PIXELTYPE(type);
-	GP_Context *context = malloc(sizeof(GP_Context));
+	GP_Context *context;
 	uint32_t bpp = GP_PixelSize(type);
 	uint32_t bpr = get_bpr(bpp, w);
 	void *pixels;
 
 	pixels = malloc(bpr * h);
+	context = malloc(sizeof(GP_Context));
 
 	if (pixels == NULL || context == NULL) {
 		free(pixels);
 		free(context);
+		GP_WARN("Malloc failed :(");
 		return NULL;
 	}
 
@@ -100,15 +64,51 @@ GP_Context *GP_ContextAlloc(GP_Size w, GP_Size h, GP_PixelType type)
 	context->h = h;
 
 	context->pixel_type = type;
-	#warning Hmm, bit endianity... Why isn't this settled by different pixel types?
+	#warning Hmm, bit endianity... Why is not this settled by different pixel types?
 	context->bit_endian = 0;
 	
 	/* rotation and mirroring */
-	context->axes_swap = 0;
-	context->y_swap    = 0;
-	context->x_swap    = 0;
-	
+	GP_ContextSetRotation(context, 0, 0, 0);
+
 	context->free_pixels = 1;
+
+	return context;
+}
+
+void GP_ContextFree(GP_Context *context)
+{
+	GP_DEBUG(1, "Freeing context (%p)", context);
+
+	if (context == NULL)
+		return;
+
+	if (context->free_pixels)
+		free(context->pixels);
+
+	free(context);
+}
+
+GP_Context *GP_ContextInit(GP_Context *context, GP_Size w, GP_Size h,
+                           GP_PixelType type, void *pixels)
+{
+	uint32_t bpp = GP_PixelSize(type);
+	uint32_t bpr = get_bpr(bpp, w);
+
+	context->pixels        = pixels;
+	context->bpp           = bpp;
+	context->bytes_per_row = bpr;
+	context->offset        = 0;
+
+	context->w = w;
+	context->h = h;
+
+	context->pixel_type = type;
+	context->bit_endian = 0;
+
+	/* rotation and mirroring */
+	GP_ContextSetRotation(context, 0, 0, 0);
+
+	context->free_pixels = 0;
 
 	return context;
 }
@@ -131,57 +131,92 @@ int GP_ContextResize(GP_Context *context, GP_Size w, GP_Size h)
 	return 0;
 }
 
-void GP_ContextInit(GP_Context *context, GP_Size w, GP_Size h,
-                    GP_PixelType type, void *pixels)
+GP_Context *GP_ContextCopy(const GP_Context *src, int flags)
 {
-	uint32_t bpp = GP_PixelSize(type);
-	uint32_t bpr = get_bpr(bpp, w);
+	GP_Context *new;
+	uint8_t *pixels;
 
-	context->pixels        = pixels;
-	context->bpp           = bpp;
-	context->bytes_per_row = bpr;
-	context->offset        = 0;
+	if (src == NULL)
+		return NULL;
 
-	context->w = w;
-	context->h = h;
+	new     = malloc(sizeof(GP_Context));
+	pixels  = malloc(src->bytes_per_row * src->h);
 
-	context->pixel_type = type;
-	context->bit_endian = 0;
+	if (pixels == NULL || new == NULL) {
+		free(pixels);
+		free(new);
+		GP_WARN("Malloc failed :(");
+		return NULL;
+	}
 
-	/* rotation and mirroring */
-	context->axes_swap = 0;
-	context->y_swap    = 0;
-	context->x_swap    = 0;
+	new->pixels = pixels;
+
+	if (flags & GP_COPY_WITH_PIXELS)
+		memcpy(pixels, src->pixels, src->bytes_per_row * src->h);
+
+	new->bpp           = src->bpp;
+	new->bytes_per_row = src->bytes_per_row;
+	new->offset        = 0;
+
+	new->w = src->w;
+	new->h = src->h;
+
+	new->pixel_type = src->pixel_type;
+	new->bit_endian = src->bit_endian;
+
+	if (flags & GP_COPY_WITH_ROTATION)
+		GP_ContextCopyRotation(src, new);
+	else
+		GP_ContextSetRotation(new, 0, 0, 0);
 	
-	context->free_pixels = 0;
+	new->free_pixels = 1;
+
+	return new;
 }
 
-GP_Context *GP_ContextConvert(const GP_Context *src,
-                              GP_PixelType dst_pixel_type)
+
+GP_Context *GP_ContextConvertAlloc(const GP_Context *src,
+                                   GP_PixelType dst_pixel_type)
 {
 	int w = GP_ContextW(src);
 	int h = GP_ContextH(src);
+
 	GP_Context *ret = GP_ContextAlloc(w, h, dst_pixel_type);
+	
 	if (ret == NULL)
 		return NULL;
 
 	GP_Blit(src, 0, 0, w, h, ret, 0, 0);
+	
 	return ret;
 }
 
-void GP_ContextFree(GP_Context *context)
+GP_Context *GP_ContextConvert(const GP_Context *src, GP_Context *dst)
 {
-	if (context == NULL)
-		return;
+	//TODO: Asserts
+	int w = GP_ContextW(src);
+	int h = GP_ContextH(src);
+	
+	GP_Blit(src, 0, 0, w, h, dst, 0, 0);
 
-	if (context->free_pixels)
-		free(context->pixels);
-
-	free(context);
+	return dst;
 }
 
-GP_Context *GP_ContextSubContext(GP_Context *context, GP_Context *subcontext,
-                                 GP_Coord x, GP_Coord y, GP_Size w, GP_Size h)
+GP_Context *GP_SubContextAlloc(const GP_Context *context,
+                               GP_Coord x, GP_Coord y, GP_Size w, GP_Size h)
+{
+	GP_Context *res = malloc(sizeof(GP_Context));
+
+	if (res == NULL) {
+		GP_WARN("Malloc failed :(");
+		return NULL;
+	}
+
+	return GP_SubContext(context, res, x, y, w, h);
+}
+
+GP_Context *GP_SubContext(const GP_Context *context, GP_Context *subcontext,
+                          GP_Coord x, GP_Coord y, GP_Size w, GP_Size h)
 {
 	GP_CHECK(context, "NULL context");
 
@@ -190,46 +225,36 @@ GP_Context *GP_ContextSubContext(GP_Context *context, GP_Context *subcontext,
 	GP_CHECK(context->w >= x + w, "Subcontext w out of original context.");
 	GP_CHECK(context->h >= y + h, "Subcontext h out of original context.");
 	
-	GP_Context *ret = subcontext;
+	subcontext->bpp           = context->bpp;
+	subcontext->bytes_per_row = context->bytes_per_row;
+	subcontext->offset        = (context->offset +
+	                            GP_PixelAddrOffset(x, context->pixel_type)) % 8;
 
-	if (ret == NULL) {
-		ret = malloc(sizeof(GP_Context));
+	subcontext->w = w;
+	subcontext->h = h;
 
-		if (ret == NULL)
-			return NULL;
-	}
-
-	ret->bpp           = context->bpp;
-	ret->bytes_per_row = context->bytes_per_row;
-	ret->offset        = (context->offset +
-	                      GP_PixelAddrOffset(x, context->pixel_type)) % 8;
-
-	ret->w = w;
-	ret->h = h;
-
-	ret->pixel_type = context->pixel_type;
-	ret->bit_endian = context->bit_endian;
+	subcontext->pixel_type = context->pixel_type;
+	subcontext->bit_endian = context->bit_endian;
 
 	/* rotation and mirroring */
-	ret->axes_swap = context->axes_swap;
-	ret->y_swap    = context->y_swap;
-	ret->x_swap    = context->x_swap;
+	GP_ContextCopyRotation(context, subcontext);
 
-	ret->pixels = GP_PIXEL_ADDR(context, x, y);
+	subcontext->pixels = GP_PIXEL_ADDR(context, x, y);
 
-	ret->free_pixels = 0;
+	subcontext->free_pixels = 0;
 
-	return ret;
+	return subcontext;
 }
 
-void GP_ContextInfoPrint(const GP_Context *self)
+void GP_ContextPrintInfo(const GP_Context *self)
 {
 	printf("Context info\n");
 	printf("------------\n");
 	printf("Size\t%ux%u\n", self->w, self->h);
 	printf("BPP\t%u\n", self->bpp);
 	printf("BPR\t%u\n", self->bytes_per_row);
-	printf("Pixel\t%s\n", GP_PixelTypeName(self->pixel_type));
+	printf("Pixel\t%s (%u)\n", GP_PixelTypeName(self->pixel_type),
+	       self->pixel_type);
 	printf("Offset\t%u (only unaligned pixel types)\n", self->offset);
 	printf("Flags\taxes_swap=%u x_swap=%u y_swap=%u free_pixels=%u\n",
 	       self->axes_swap, self->x_swap, self->y_swap, self->free_pixels);
@@ -258,7 +283,7 @@ void GP_ContextInfoPrint(const GP_Context *self)
  *      0      1         0
  *
  */
-void GP_ContextFlagsRotateCW(GP_Context *context)
+void GP_ContextRotateCW(GP_Context *context)
 {
 	context->axes_swap = !context->axes_swap;
 
@@ -280,7 +305,7 @@ void GP_ContextFlagsRotateCW(GP_Context *context)
 	context->y_swap  = 0;
 }
 
-void GP_ContextFlagsRotateCCW(GP_Context *context)
+void GP_ContextRotateCCW(GP_Context *context)
 {
 	context->axes_swap = !context->axes_swap;
 

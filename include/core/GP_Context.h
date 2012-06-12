@@ -36,7 +36,7 @@
 /* This structure holds all information needed for drawing into an image. */
 typedef struct GP_Context {
 	uint8_t *pixels;	 /* pointer to image pixels */
-	uint8_t bpp;		 /* pixel length in bits */
+	uint8_t bpp;		 /* pixel size in bits */
 	uint32_t bytes_per_row;
 	uint32_t w;		 /* width in pixels */
 	uint32_t h;      	 /* height in pixels */
@@ -47,14 +47,15 @@ typedef struct GP_Context {
 	 */
 	uint8_t offset;          
 
-	GP_PixelType pixel_type; /* hardware pixel format */
+	enum GP_PixelType pixel_type; /* pixel format */
 
-	/* image orientation. Most common is landscape (0, 0, 0),
+	/* 
+	 * Image orientation. Most common is landscape (0, 0, 0),
 	 * portrait with normal topleft corner is (1, 0, 0).
 	 */
 	uint8_t axes_swap:1;	/* swap axes so that x is y and y is x */
-	uint8_t x_swap:1;	/* swap direction on x  */
-	uint8_t y_swap:1;	/* swap direction on y  */
+	uint8_t x_swap:1;	/* swap direction on x */
+	uint8_t y_swap:1;	/* swap direction on y */
 	uint8_t bit_endian:1;	/* GP_BIT_ENDIAN */
 	uint8_t free_pixels:1;  /* If set pixels are freed on GP_ContextFree */
 } GP_Context;
@@ -87,69 +88,13 @@ typedef struct GP_Context {
 	|| (y) < 0 || y >= (typeof(y)) context->h) \
 
 /*
- * Check for exactly same rotation flags.
- */
-#define GP_CONTEXT_ROTATION_EQUAL(c1, c2) \
-	((c1)->axes_swap == (c2)->axes_swap && \
-	 (c1)->x_swap    == (c2)->x_swap && \
-	 (c1)->y_swap    == (c2)->y_swap)
-
-/*
  * Allocate context.
+ *
+ * The context consists of two parts, the GP_Context structure and pixels array.
+ *
+ * The rotation flags are set to (0, 0, 0).
  */
 GP_Context *GP_ContextAlloc(GP_Size w, GP_Size h, GP_PixelType type);
-
-/*
- * Initalize context, pixels pointer is not dereferenced so it's safe to pass
- * NULL there and allocate it later with size context->bpr * context->h.
- */
-void GP_ContextInit(GP_Context *context, GP_Size w, GP_Size h,
-                    GP_PixelType type, void *pixels);
-
-/*
- * Resizes context->pixels array and changes metadata to match.
- *
- * Returns non-zero on failure (remalloc() has failed).
- */
-int GP_ContextResize(GP_Context *context, GP_Size w, GP_Size h);
-
-/*
- * If passed the pixels are copied to newly created context, otherwise
- * the pixels are allocated but uninitalized.
- */
-#define GP_COPY_WITH_PIXELS 1
-
-/*
- * Copy context.
- */
-GP_Context *GP_ContextCopy(const GP_Context *src, int flag);
-
-/*
- * Create subcontext.
- *
- * If pointer to subcontext is NULL, new context is allocated
- * otherwise context pointed by subcontext pointer is initalized.
- * 
- * The free_pixels flag is set to 0 upon subcontext initalization so the
- * GP_ContextFree() would not call free() upon the subcontext->pixels pointer.
- */
-GP_Context *GP_ContextSubContext(GP_Context *context, GP_Context *subcontext,
-                                 GP_Coord x, GP_Coord y, GP_Size w, GP_Size h);
-
-/*
- * Converts context to a different pixel type.
- * Returns a newly allocated context.
- *
- * This is naive implementation that doesn't do any ditherings or error
- * diffusions.
- */
-GP_Context *GP_ContextConvert(const GP_Context *src,
-                              GP_PixelType dst_pixel_type);
-
-/*
- * Prints context information into stdout.
- */
-void GP_ContextInfoPrint(const GP_Context *self);
 
 /*
  * Free context.
@@ -159,14 +104,120 @@ void GP_ContextInfoPrint(const GP_Context *self);
 void GP_ContextFree(GP_Context *context);
 
 /*
+ * Initalize context, pixels pointer is not dereferenced so it's safe to pass
+ * NULL there and allocate it later with size context->bpr * context->h.
+ *
+ * The returned pointer is the pointer you passed as first argument.
+ */
+GP_Context *GP_ContextInit(GP_Context *context, GP_Size w, GP_Size h,
+                           GP_PixelType type, void *pixels);
+
+/*
+ * Resizes context->pixels array and changes metadata to match the new size.
+ *
+ * Returns non-zero on failure (malloc() has failed).
+ *
+ * This call only resizes the pixel array. The pixel values, after resizing,
+ * are __UNINITALIZED__ use resampling filters to resize image data.
+ */
+int GP_ContextResize(GP_Context *context, GP_Size w, GP_Size h);
+
+enum GP_ContextCopyFlags {
+	/* 
+	 * Copy bitmap pixels too. If not set pixels are uninitalized.
+	 */
+	GP_COPY_WITH_PIXELS   = 0x01,
+	/* 
+	 * Copy image rotation flags. If not set flags are set to (0, 0, 0).
+	 */
+	GP_COPY_WITH_ROTATION = 0x02,
+};
+
+/*
+ * Allocates a contex with exactly same values as source context.
+ */
+GP_Context *GP_ContextCopy(const GP_Context *src, int flags);
+
+/*
+ * Initalize subcontext. The returned pointer points to passed subcontext.
+ */
+GP_Context *GP_SubContext(const GP_Context *context, GP_Context *subcontext,
+                          GP_Coord x, GP_Coord y, GP_Size w, GP_Size h);
+
+/*
+ * Allocate and initalize subcontext.
+ *
+ * The free_pixels flag is set to 0 upon subcontext initalization so the
+ * GP_ContextFree() would not call free() upon the subcontext->pixels pointer.
+ */
+GP_Context *GP_SubContextAlloc(const GP_Context *context,
+                               GP_Coord x, GP_Coord y, GP_Size w, GP_Size h);
+
+/*
+ * Converts context to a different pixel type.
+ * Returns a newly allocated context.
+ *
+ * This is naive implementation that doesn't do any ditherings or error
+ * diffusions.
+ */
+GP_Context *GP_ContextConvertAlloc(const GP_Context *src,
+                                   GP_PixelType dst_pixel_type);
+
+/*
+ * Converts context to a different pixel type.
+ *
+ * This is naive implementation that doesn't do any ditherings or error
+ * diffusions.
+ */
+GP_Context *GP_ContextConvert(const GP_Context *src, GP_Context *dst);
+
+/*
+ * Prints context information into stdout.
+ */
+void GP_ContextPrintInfo(const GP_Context *self);
+
+/*
  * Rotates context flags clock wise.
  */
-void GP_ContextFlagsRotateCW(GP_Context *context);
+void GP_ContextRotateCW(GP_Context *context);
 
 /*
  * Rotates context flags counter clock wise.
  */
-void GP_ContextFlagsRotateCCW(GP_Context *context);
+void GP_ContextRotateCCW(GP_Context *context);
+
+/*
+ * Retruns 1 if rotation flags are equal.
+ */
+static inline int GP_ContextRotationEqual(const GP_Context *c1,
+                                          const GP_Context *c2)
+{
+	return c1->axes_swap == c2->axes_swap &&
+	       c1->x_swap == c2->x_swap &&
+	       c1->y_swap == c2->y_swap;
+}
+
+/*
+ * Sets rotation flags.
+ */
+static inline void GP_ContextSetRotation(GP_Context *dst, int axes_swap,
+                                         int x_swap, int y_swap)
+{
+	dst->axes_swap = axes_swap;
+	dst->x_swap = x_swap;
+	dst->y_swap = y_swap;
+}
+
+/*
+ * Copies rotation flags.
+ */
+static inline void GP_ContextCopyRotation(const GP_Context *src,
+                                          GP_Context *dst)
+{
+	dst->axes_swap = src->axes_swap;
+	dst->x_swap = src->x_swap;
+	dst->y_swap = src->y_swap;
+}
 
 /*
  * Returns context width and height taking the rotation flags into a account. 

@@ -702,7 +702,7 @@ GP_Context *GP_FilterResize(const GP_Context *src, GP_Context *dst,
 		/*
 		 * The size of w and h is asserted in subcontext initalization
 		 */	
-		res = GP_ContextSubContext(dst, &sub, 0, 0, w, h);
+		res = GP_SubContext(dst, &sub, 0, 0, w, h);
 	}
 
 	/*

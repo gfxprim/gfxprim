@@ -77,7 +77,7 @@ void GP_BlitXYXY(const GP_Context *src,
 	GP_CHECK(x2 + (x1 - x0) < (GP_Coord)GP_ContextW(dst));
 	GP_CHECK(y2 + (y1 - y0) < (GP_Coord)GP_ContextH(dst));
 
-	if (GP_CONTEXT_ROTATION_EQUAL(src, dst))
+	if (GP_ContextRotationEqual(src, dst))
 		GP_BlitXYXY_Raw_Fast(src, x0, y0, x1, y1, dst, x2, y2);
 	else
 		GP_BlitXYXY_Fast(src, x0, y0, x1, y1, dst, x2, y2);
@@ -138,7 +138,7 @@ void GP_BlitXYXY_Clipped(const GP_Context *src,
 	         x0, y0, x1, y1, GP_ContextW(src), GP_ContextH(src),
 		 x2, y2, GP_ContextW(dst), GP_ContextH(dst));
 
-	if (GP_CONTEXT_ROTATION_EQUAL(src, dst))
+	if (GP_ContextRotationEqual(src, dst))
 		GP_BlitXYXY_Raw_Fast(src, x0, y0, x1, y1, dst, x2, y2);
 	else 
 		GP_BlitXYXY_Fast(src, x0, y0, x1, y1, dst, x2, y2);

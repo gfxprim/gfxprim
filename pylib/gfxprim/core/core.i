@@ -91,14 +91,14 @@ and self.thisown.") GP_Context;
 ERROR_ON_NONZERO(GP_ContextResize);
 ERROR_ON_NULL(GP_ContextAlloc);
 ERROR_ON_NULL(GP_ContextCopy);
-ERROR_ON_NULL(GP_ContextSubContext);
-ERROR_ON_NULL(GP_ContextConvert);
+ERROR_ON_NULL(GP_ContextConvertAlloc);
+ERROR_ON_NULL(GP_SubContextAlloc);
 
 /* Indicate new wrapper-owned GP_Context */
 %newobject GP_ContextAlloc;
 %newobject GP_ContextCopy;
-%newobject GP_ContextSubContext;
-%newobject GP_ContextConvert;
+%newobject GP_ContextConvertAlloc;
+%newobject GP_SubContextAlloc;
 
 %include "GP_Context.h"
 

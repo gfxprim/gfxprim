@@ -212,7 +212,7 @@ int main(int argc, char *argv[])
 
 	GP_SDL_ContextFromSurface(&context, display);
 	
-	bitmap_conv = GP_ContextConvert(bitmap_raw, context.pixel_type);
+	bitmap_conv = GP_ContextConvertAlloc(bitmap_raw, context.pixel_type);
 	change_bitmap();
 
 	black = GP_ColorToContextPixel(GP_COL_BLACK, &context);

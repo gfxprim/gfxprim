@@ -154,7 +154,8 @@ GP_Context *load_image(struct loader_params *params, int elevate)
 		
 		/* Workaround */
 		if (img->pixel_type != GP_PIXEL_RGB888) {
-			GP_Context *tmp = GP_ContextConvert(img, GP_PIXEL_RGB888);
+			GP_Context *tmp;
+			tmp = GP_ContextConvertAlloc(img, GP_PIXEL_RGB888);
 			GP_ContextFree(img);
 			img = tmp;
 		}
@@ -307,7 +308,7 @@ static void *image_loader(void *ptr)
 	
 	if (dithering) {
 		callback.priv = "Dithering";
-		GP_ContextSubContext(context, &sub_display, cx, cy, img->w, img->h);
+		GP_SubContext(context, &sub_display, cx, cy, img->w, img->h);
 	//	GP_FilterFloydSteinberg_RGB888(ret, &sub_display, NULL);
 		GP_FilterHilbertPeano_RGB888(img, &sub_display, NULL);
 	} else {
