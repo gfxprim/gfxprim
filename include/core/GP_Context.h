@@ -147,6 +147,11 @@ GP_Context *GP_ContextConvert(const GP_Context *src,
                               GP_PixelType dst_pixel_type);
 
 /*
+ * Prints context information into stdout.
+ */
+void GP_ContextInfoPrint(const GP_Context *self);
+
+/*
  * Free context.
  *
  * If context->free_pixels, also free pixel data.

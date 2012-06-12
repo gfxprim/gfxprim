@@ -222,6 +222,19 @@ GP_Context *GP_ContextSubContext(GP_Context *context, GP_Context *subcontext,
 	return ret;
 }
 
+void GP_ContextInfoPrint(const GP_Context *self)
+{
+	printf("Context info\n");
+	printf("------------\n");
+	printf("Size\t%ux%u\n", self->w, self->h);
+	printf("BPP\t%u\n", self->bpp);
+	printf("BPR\t%u\n", self->bytes_per_row);
+	printf("Pixel\t%s\n", GP_PixelTypeName(self->pixel_type));
+	printf("Offset\t%u (only unaligned pixel types)\n", self->offset);
+	printf("Flags\taxes_swap=%u x_swap=%u y_swap=%u free_pixels=%u\n",
+	       self->axes_swap, self->x_swap, self->y_swap, self->free_pixels);
+}
+
 /*
  * The context rotations consists of two cyclic permutation groups that are
  * mirrored.
