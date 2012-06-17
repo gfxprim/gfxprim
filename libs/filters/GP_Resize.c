@@ -252,6 +252,8 @@ int GP_FilterInterpolate_Cubic(const GP_Context *src, GP_Context *dst,
 	return 0;
 }
 
+#include "GP_Cubic.h"
+
 #define MUL 1024
 
 #define MUL_I(a, b) ({ \
@@ -299,23 +301,24 @@ int GP_FilterInterpolate_CubicInt(const GP_Context *src, GP_Context *dst,
 	int32_t xmap_c[dst->w][4];
 
 	for (i = 0; i < dst->w; i++) {
-			float x = (1.00 * i / (dst->w - 1)) * (src->w - 1);
-			
-			xmap[i][0] = floor(x - 1);
-			xmap[i][1] = x;
-			xmap[i][2] = x + 1;
-			xmap[i][3] = x + 2;
-			
-			xmap_c[i][0] = cubic(xmap[i][0] - x) * MUL + 0.5;
-			xmap_c[i][1] = cubic(xmap[i][1] - x) * MUL + 0.5;
-			xmap_c[i][2] = cubic(xmap[i][2] - x) * MUL + 0.5;
-			xmap_c[i][3] = cubic(xmap[i][3] - x) * MUL + 0.5;
-			
-			if (xmap[i][0] < 0)
-				xmap[i][0] = 0;
+ 		float x = (1.00 * i / (dst->w - 1)) * (src->w - 1);
+		
+		xmap[i][0] = floor(x - 1);
+		xmap[i][1] = x;
+		xmap[i][2] = x + 1;
+		xmap[i][3] = x + 2;
 
-			if (xmap[i][3] >= (int32_t)src->w)
-				xmap[i][3] = src->w - 1;
+			
+		xmap_c[i][0] = cubic_int((xmap[i][0] - x) * MUL + 0.5);
+		xmap_c[i][1] = cubic_int((xmap[i][1] - x) * MUL + 0.5);
+		xmap_c[i][2] = cubic_int((xmap[i][2] - x) * MUL + 0.5);
+		xmap_c[i][3] = cubic_int((xmap[i][3] - x) * MUL + 0.5);
+			
+		if (xmap[i][0] < 0)
+			xmap[i][0] = 0;
+
+		if (xmap[i][3] >= (int32_t)src->w)
+			xmap[i][3] = src->w - 1;
 	}
 
 	/* cubic resampling */
@@ -329,10 +332,10 @@ int GP_FilterInterpolate_CubicInt(const GP_Context *src, GP_Context *dst,
 		yi[2] = y + 1;
 		yi[3] = y + 2;
 		
-		cvy[0] = cubic(yi[0] - y) * MUL + 0.5;
-		cvy[1] = cubic(yi[1] - y) * MUL + 0.5;
-		cvy[2] = cubic(yi[2] - y) * MUL + 0.5;
-		cvy[3] = cubic(yi[3] - y) * MUL + 0.5;
+		cvy[0] = cubic_int((yi[0] - y) * MUL + 0.5);
+		cvy[1] = cubic_int((yi[1] - y) * MUL + 0.5);
+		cvy[2] = cubic_int((yi[2] - y) * MUL + 0.5);
+		cvy[3] = cubic_int((yi[3] - y) * MUL + 0.5);
 		
 		if (yi[0] < 0)
 			yi[0] = 0;
