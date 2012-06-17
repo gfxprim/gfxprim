@@ -27,11 +27,8 @@ static int GP_FilterResizeNN_{{ pt.name }}_Raw(const GP_Context *src,
 		    1.00 * dst->w / src->w, 1.00 * dst->h / src->h);
 
 	/* Pre-compute mapping for interpolation */
-	for (i = 0; i < dst->w; i++) {
+	for (i = 0; i < dst->w; i++)
 		xmap[i] = ((((i * (src->w - 1))<<8) + (dst->w - 1)/2) / (dst->w - 1) + (1<<7))>>8;
-		printf("%i-%i ", i, xmap[i]);
-	}
-	printf("\n%i -> %i\n", src->w, dst->w);
 
 	for (i = 0; i < dst->h; i++)
 		ymap[i] = ((((i * (src->h - 1))<<8) + (dst->h - 1)/2) / (dst->h - 1) + (1<<7))>>8;
