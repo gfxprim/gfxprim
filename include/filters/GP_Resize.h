@@ -56,6 +56,15 @@
 
 #include "GP_Filter.h"
 
+/* Nearest Neighbour */
+int GP_FilterResizeNN(const GP_Context *src, GP_Context *dst,
+                      GP_ProgressCallback *callback);
+
+GP_Context *GP_FilterResizeNNAlloc(const GP_Context *src,
+                                   GP_Size w, GP_Size h,
+                                   GP_ProgressCallback *callback);
+
+
 typedef enum GP_InterpolationType {
 	GP_INTERP_NN,            /* Nearest Neighbour                         */
 	GP_INTERP_LINEAR_INT,    /* Bilinear - fixed point arithmetics        */

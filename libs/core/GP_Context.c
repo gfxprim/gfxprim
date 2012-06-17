@@ -276,7 +276,7 @@ void GP_ContextPrintInfo(const GP_Context *self)
 	printf("Offset\t%u (only unaligned pixel types)\n", self->offset);
 	printf("Flags\taxes_swap=%u x_swap=%u y_swap=%u free_pixels=%u\n",
 	       self->axes_swap, self->x_swap, self->y_swap, self->free_pixels);
-	printf("Gamma table %p", self->gamma);
+	printf("Gamma table %p\n", self->gamma);
 }
 
 /*
