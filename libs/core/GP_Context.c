@@ -30,6 +30,7 @@
 #include "GP_Transform.h"
 #include "GP_Pixel.h"
 #include "GP_GetPutPixel.h"
+#include "GP_GammaCorrection.h"
 #include "GP_Context.h"
 #include "GP_Blit.h"
 
@@ -65,6 +66,8 @@ GP_Context *GP_ContextAlloc(GP_Size w, GP_Size h, GP_PixelType type)
 	context->w = w;
 	context->h = h;
 
+	context->gamma = NULL;
+
 	context->pixel_type = type;
 	#warning Hmm, bit endianity... Why is not this settled by different pixel types?
 	context->bit_endian = 0;
@@ -87,6 +90,9 @@ void GP_ContextFree(GP_Context *context)
 	if (context->free_pixels)
 		free(context->pixels);
 
+	if (context->gamma)
+		GP_GammaRelease(context->gamma);
+
 	free(context);
 }
 
@@ -106,6 +112,8 @@ GP_Context *GP_ContextInit(GP_Context *context, GP_Size w, GP_Size h,
 
 	context->pixel_type = type;
 	context->bit_endian = 0;
+	
+	context->gamma = NULL;
 
 	/* rotation and mirroring */
 	GP_ContextSetRotation(context, 0, 0, 0);
@@ -171,6 +179,9 @@ GP_Context *GP_ContextCopy(const GP_Context *src, int flags)
 		GP_ContextCopyRotation(src, new);
 	else
 		GP_ContextSetRotation(new, 0, 0, 0);
+	
+	//TODO: Copy the gamma too
+	new->gamma = NULL;
 	
 	new->free_pixels = 1;
 
@@ -239,6 +250,9 @@ GP_Context *GP_SubContext(const GP_Context *context, GP_Context *subcontext,
 
 	subcontext->pixel_type = context->pixel_type;
 	subcontext->bit_endian = context->bit_endian;
+	
+	/* gamma */
+	subcontext->gamma = context->gamma;
 
 	/* rotation and mirroring */
 	GP_ContextCopyRotation(context, subcontext);
@@ -262,6 +276,7 @@ void GP_ContextPrintInfo(const GP_Context *self)
 	printf("Offset\t%u (only unaligned pixel types)\n", self->offset);
 	printf("Flags\taxes_swap=%u x_swap=%u y_swap=%u free_pixels=%u\n",
 	       self->axes_swap, self->x_swap, self->y_swap, self->free_pixels);
+	printf("Gamma table %p", self->gamma);
 }
 
 /*

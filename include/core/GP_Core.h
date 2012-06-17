@@ -41,6 +41,9 @@
 /* ... and it's trasformations */
 #include "core/GP_Transform.h"
 
+/* Gamma */
+#include "core/GP_Gamma.h"
+
 /* Pixeltypes */
 #include "core/GP_Pixel.h"
 

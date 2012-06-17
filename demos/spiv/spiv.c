@@ -159,7 +159,7 @@ GP_Context *load_image(struct loader_params *params, int elevate)
 			GP_ContextFree(img);
 			img = tmp;
 		}
-	
+
 		image_cache_put(params->img_orig_cache, img, params->img_path, 0, 0);
 		
 		cpu_timer_stop(&timer);
@@ -196,13 +196,22 @@ GP_Context *load_resized_image(struct loader_params *params, GP_Size w, GP_Size 
 			return NULL;
 		
 		img = res;
+		
+	//	img->gamma = GP_GammaAcquire(img->pixel_type, 2.2);
 
 		cpu_timer_stop(&timer);
+	} else {
+	//	img->gamma = GP_GammaAcquire(img->pixel_type, 2.2);
 	}
 
 	cpu_timer_start(&timer, "Resampling");
 	callback.priv = "Resampling Image";
-	img = GP_FilterResize(img, NULL, resampling_method, w, h, &callback);
+	GP_Context *i1 = GP_FilterResize(img, NULL, resampling_method, w, h, &callback);
+//	img->gamma = NULL;
+//	GP_Context *i2 = GP_FilterResize(img, NULL, resampling_method, w, h, &callback);
+//	img = GP_FilterDifferenceAlloc(i2, i1, NULL);
+//	img = GP_FilterInvert(img, NULL, NULL);
+	img = i1;
 	cpu_timer_stop(&timer);
 
 	/* Free low passed context if needed */

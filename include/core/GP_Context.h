@@ -33,6 +33,8 @@
 #include "GP_Types.h"
 #include "GP_Pixel.h"
 
+struct GP_Gamma;
+
 /* This structure holds all information needed for drawing into an image. */
 typedef struct GP_Context {
 	uint8_t *pixels;	 /* pointer to image pixels */
@@ -47,7 +49,19 @@ typedef struct GP_Context {
 	 */
 	uint8_t offset;          
 
-	enum GP_PixelType pixel_type; /* pixel format */
+	/* 
+	 * Pixel format. See GP_Pixel.gen.h and GP_Pixel.gen.c.
+	 */
+	enum GP_PixelType pixel_type;
+
+	/*
+	 * Pointer to optional Gamma table.
+	 *
+	 * If NULL, the channel values are considered linear.
+	 *
+	 * See GP_GammaCorrection.h.
+	 */
+	struct GP_Gamma *gamma;
 
 	/* 
 	 * Image orientation. Most common is landscape (0, 0, 0),

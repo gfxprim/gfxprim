@@ -61,6 +61,8 @@
 
 #include <stdint.h>
 
-#include "core/GP_GammaCorrection.gen.h"
+#include "GP_Context.h"
+
+#include "GP_GammaCorrection.gen.h"
 
 #endif /* CORE_GP_GAMMA_CORRECTION_H */

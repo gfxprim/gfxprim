@@ -22,12 +22,13 @@
 
 #include <math.h>
 
-#include <GP_Context.h>
-#include <GP_GetPutPixel.h>
+#include "core/GP_Context.h"
+#include "core/GP_GetPutPixel.h"
+#include "core/GP_Gamma.h"
 
-#include <GP_Debug.h>
+#include "core/GP_Debug.h"
 
-#include <GP_Resize.h>
+#include "GP_Resize.h"
 
 int GP_FilterInterpolate_NN(const GP_Context *src, GP_Context *dst,
                             GP_ProgressCallback *callback)
@@ -246,7 +247,7 @@ int GP_FilterInterpolate_Cubic(const GP_Context *src, GP_Context *dst,
 	return 0;
 }
 
-#define MUL 2048
+#define MUL 1024
 
 #define MUL_I(a, b) ({ \
 	a[0] *= b[0]; \
@@ -258,6 +259,8 @@ int GP_FilterInterpolate_Cubic(const GP_Context *src, GP_Context *dst,
 #define SUM_I(a) \
 	((a)[0] + (a)[1] + (a)[2] + (a)[3])
 
+#include "core/GP_GammaCorrection.h"
+
 int GP_FilterInterpolate_CubicInt(const GP_Context *src, GP_Context *dst,
                                   GP_ProgressCallback *callback)
 {
@@ -267,6 +270,24 @@ int GP_FilterInterpolate_CubicInt(const GP_Context *src, GP_Context *dst,
 	GP_DEBUG(1, "Scaling image %ux%u -> %ux%u %2.2f %2.2f",
 	            src->w, src->h, dst->w, dst->h,
 		    1.00 * dst->w / src->w, 1.00 * dst->h / src->h);
+
+	uint16_t *R_2_LIN = NULL;
+	uint16_t *G_2_LIN = NULL;
+	uint16_t *B_2_LIN = NULL;
+
+	uint8_t *R_2_GAMMA = NULL;
+	uint8_t *G_2_GAMMA = NULL;
+	uint8_t *B_2_GAMMA = NULL;
+
+	if (src->gamma) {
+		R_2_LIN = src->gamma->tables[0]->u16;
+		G_2_LIN = src->gamma->tables[1]->u16;
+		B_2_LIN = src->gamma->tables[2]->u16;
+		
+		R_2_GAMMA = src->gamma->tables[3]->u8;
+		G_2_GAMMA = src->gamma->tables[4]->u8;
+		B_2_GAMMA = src->gamma->tables[5]->u8;
+	}
 
 	for (i = 0; i < dst->h; i++) {
 		float y = (1.00 * i / dst->h) * src->h;
@@ -306,7 +327,7 @@ int GP_FilterInterpolate_CubicInt(const GP_Context *src, GP_Context *dst,
 			rv[1] = GP_Pixel_GET_R_RGB888(pix[1]);
 			rv[2] = GP_Pixel_GET_R_RGB888(pix[2]);
 			rv[3] = GP_Pixel_GET_R_RGB888(pix[3]);
-			
+		
 			gv[0] = GP_Pixel_GET_G_RGB888(pix[0]);
 			gv[1] = GP_Pixel_GET_G_RGB888(pix[1]);
 			gv[2] = GP_Pixel_GET_G_RGB888(pix[2]);
@@ -316,6 +337,24 @@ int GP_FilterInterpolate_CubicInt(const GP_Context *src, GP_Context *dst,
 			bv[1] = GP_Pixel_GET_B_RGB888(pix[1]);
 			bv[2] = GP_Pixel_GET_B_RGB888(pix[2]);
 			bv[3] = GP_Pixel_GET_B_RGB888(pix[3]);
+			
+			
+			if (src->gamma) {
+				rv[0] = R_2_LIN[rv[0]];
+				rv[1] = R_2_LIN[rv[1]];
+				rv[2] = R_2_LIN[rv[2]];
+				rv[3] = R_2_LIN[rv[3]];
+			
+				gv[0] = G_2_LIN[gv[0]];
+				gv[1] = G_2_LIN[gv[1]];
+				gv[2] = G_2_LIN[gv[2]];
+				gv[3] = G_2_LIN[gv[3]];
+			
+				bv[0] = G_2_LIN[bv[0]];
+				bv[1] = G_2_LIN[bv[1]];
+				bv[2] = G_2_LIN[bv[2]];
+				bv[3] = G_2_LIN[bv[3]];
+			}
 
 			MUL_I(rv, cvy);
 			MUL_I(gv, cvy);
@@ -374,10 +413,30 @@ int GP_FilterInterpolate_CubicInt(const GP_Context *src, GP_Context *dst,
 			r = (SUM_I(rv) + MUL*MUL/2) / MUL / MUL;
 			g = (SUM_I(gv) + MUL*MUL/2) / MUL / MUL;
 			b = (SUM_I(bv) + MUL*MUL/2) / MUL / MUL;
+			
+			if (src->gamma) {
+				if (r > 1023)
+					r = 1023;
+				if (g > 1023)
+					g = 1023;
+				if (b > 1023)
+					b = 1023;
+			
+				if (r < 0)
+					r = 0;
+				if (g < 0)
+					g = 0;
+				if (b < 0)
+					b = 0;
 
-			CLAMP(r);
-			CLAMP(g);
-			CLAMP(b);
+				r = R_2_GAMMA[r];
+				g = G_2_GAMMA[g];
+				b = B_2_GAMMA[b];
+			} else {
+				CLAMP(r);
+				CLAMP(g);
+				CLAMP(b);
+			}		
 			
 			GP_Pixel pix = GP_Pixel_CREATE_RGB888((uint8_t)r, (uint8_t)g, (uint8_t)b);
 			GP_PutPixel_Raw_24BPP(dst, j, i, pix);
