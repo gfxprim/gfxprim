@@ -46,10 +46,8 @@ static GP_Backend *backend = NULL;
 
 /* image loader thread */
 static int abort_flag = 0;
-static int rotate = 0;
 static int show_progress = 0;
 static int resampling_method = GP_INTERP_LINEAR_LF_INT;
-static int dithering = 0;
 
 static int image_loader_callback(GP_ProgressCallback *self)
 {
@@ -86,9 +84,18 @@ static int image_loader_callback(GP_ProgressCallback *self)
 struct loader_params {
 	const char *img_path;
 	
-	int show_progress;
-	int show_progress_once;
-	int show_info;
+	/* Show loader progress */
+	long show_progress:1;
+	long show_progress_once:2;
+	/* show image info in topleft corner */
+	long show_info:3;
+	/* use nearest neighbour resampling first */
+	long show_nn_first:4;
+	/* use dithering when blitting to display */
+	long use_dithering:5;
+
+	/* Image orientation */
+	int rotate;
 
 	/* cached loaded images */
 	struct image_cache *img_resized_cache;
@@ -144,6 +151,10 @@ GP_Context *load_image(struct loader_params *params, int elevate)
 
 		cpu_timer_start(&timer, "Loading");
 		if ((img = GP_LoadImage(params->img_path, &callback)) == NULL) {
+			
+			if (errno == ECANCELED)
+				return NULL;
+
 			GP_Fill(context, black_pixel);
 			GP_Print(context, NULL, context->w/2, context->h/2,
 		        	 GP_ALIGN_CENTER|GP_VALIGN_CENTER, white_pixel, black_pixel,
@@ -168,6 +179,92 @@ GP_Context *load_image(struct loader_params *params, int elevate)
 	return img; 
 }
 
+/*
+ * Updates display.
+ */
+static void update_display(struct loader_params *params, GP_Context *img, float rat)
+{
+	GP_Context *context = backend->context;
+	struct cpu_timer timer;
+	GP_ProgressCallback callback = {.callback = image_loader_callback};
+
+	switch (params->rotate) {
+	case 0:
+	break;
+	case 90:
+		callback.priv = "Rotating image (90)";
+		img = GP_FilterRotate90_Alloc(img, &callback);
+	break;
+	case 180:
+		callback.priv = "Rotating image (180)";
+		img = GP_FilterRotate180_Alloc(img, &callback);
+	break;
+	case 270:
+		callback.priv = "Rotating image (270)";
+		img = GP_FilterRotate270_Alloc(img, &callback);
+	break;
+	}
+	
+	if (img == NULL)
+		return;
+
+	uint32_t cx = (context->w - img->w)/2;
+	uint32_t cy = (context->h - img->h)/2;
+
+	GP_Context sub_display;
+
+	cpu_timer_start(&timer, "Blitting");
+	
+	if (params->use_dithering) {
+		callback.priv = "Dithering";
+		GP_SubContext(context, &sub_display, cx, cy, img->w, img->h);
+		GP_FilterFloydSteinberg_RGB888(img, &sub_display, NULL);
+	//	GP_FilterHilbertPeano_RGB888(img, &sub_display, NULL);
+	} else {
+		GP_Blit_Raw(img, 0, 0, img->w, img->h, context, cx, cy);
+	}
+	
+	cpu_timer_stop(&timer);
+	
+	if (params->rotate)
+		GP_ContextFree(img);
+
+	/* clean up the rest of the display */
+	GP_FillRectXYWH(context, 0, 0, cx, context->h, black_pixel);
+	GP_FillRectXYWH(context, 0, 0, context->w, cy, black_pixel);
+	GP_FillRectXYWH(context, img->w + cx, 0, context->w - img->w - cx, context->h, black_pixel);
+	GP_FillRectXYWH(context, 0, img->h + cy, context->w, context->h - img->h - cy, black_pixel);
+	
+	set_caption(params->img_path, rat); 
+
+	if (!params->show_info) {
+		GP_BackendFlip(backend);
+		return;
+	}
+
+	GP_Size th = GP_TextHeight(NULL);
+	
+	GP_Print(context, NULL, 11, 11, GP_ALIGN_RIGHT|GP_VALIGN_BOTTOM,
+	         black_pixel, white_pixel, "%ux%u", img->w, img->h);
+	
+	GP_Print(context, NULL, 10, 10, GP_ALIGN_RIGHT|GP_VALIGN_BOTTOM,
+	         white_pixel, black_pixel, "%ux%u", img->w, img->h);
+	
+	GP_Print(context, NULL, 11, 13 + th, GP_ALIGN_RIGHT|GP_VALIGN_BOTTOM,
+	         black_pixel, white_pixel, "1:%3.3f", rat);
+	
+	GP_Print(context, NULL, 10, 12 + th, GP_ALIGN_RIGHT|GP_VALIGN_BOTTOM,
+	         white_pixel, black_pixel, "1:%3.3f", rat);
+	
+	GP_Print(context, NULL, 11, 15 + 2 * th, GP_ALIGN_RIGHT|GP_VALIGN_BOTTOM,
+	         black_pixel, white_pixel, "%s", img_name(params->img_path));
+	
+	GP_Print(context, NULL, 10, 14 + 2 * th, GP_ALIGN_RIGHT|GP_VALIGN_BOTTOM,
+	         white_pixel, black_pixel, "%s", img_name(params->img_path));
+	
+	GP_BackendFlip(backend);
+}
+
 GP_Context *load_resized_image(struct loader_params *params, GP_Size w, GP_Size h, float rat)
 {
 	long cookie = (w & 0xffff) | (h & 0xffff)<<16;
@@ -184,6 +281,15 @@ GP_Context *load_resized_image(struct loader_params *params, GP_Size w, GP_Size 
 	/* Otherwise load image and resize it */
 	if ((img = load_image(params, 1)) == NULL)
 		return NULL;
+
+	if (params->show_nn_first) {
+		/* Do simple interpolation and blit the result */
+		GP_Context *nn = GP_FilterResizeNNAlloc(img, w, h, NULL);
+		if (nn != NULL) {
+			update_display(params, nn, rat);
+			GP_ContextFree(nn);
+		}
+	}
 
 	/* Do low pass filter */
 	if (resampling_method != GP_INTERP_LINEAR_LF_INT && rat < 1) {
@@ -246,9 +352,8 @@ static int resize_backend_and_blit(struct loader_params *params)
 static void *image_loader(void *ptr)
 {
 	struct loader_params *params = ptr;
-	struct cpu_timer timer, sum_timer;
+	struct cpu_timer sum_timer;
 	GP_Context *img, *context = backend->context;
-	GP_ProgressCallback callback = {.callback = image_loader_callback};
 
 	cpu_timer_start(&sum_timer, "sum");
 	
@@ -258,7 +363,7 @@ static void *image_loader(void *ptr)
 	/* Figure out rotation */
 	GP_Size w, h;
 
-	switch (rotate) {
+	switch (params->rotate) {
 	case 0:
 	case 180:
 	default:
@@ -288,84 +393,10 @@ static void *image_loader(void *ptr)
 	image_cache_print(params->img_resized_cache);
 	image_cache_print(params->img_orig_cache);
 
-	switch (rotate) {
-	case 0:
-	break;
-	case 90:
-		callback.priv = "Rotating image (90)";
-		img = GP_FilterRotate90_Alloc(img, &callback);
-	break;
-	case 180:
-		callback.priv = "Rotating image (180)";
-		img = GP_FilterRotate180_Alloc(img, &callback);
-	break;
-	case 270:
-		callback.priv = "Rotating image (270)";
-		img = GP_FilterRotate270_Alloc(img, &callback);
-	break;
-	}
+	update_display(params, img, rat);
 	
-	if (img == NULL)
-		return NULL;
-
-	uint32_t cx = (context->w - img->w)/2;
-	uint32_t cy = (context->h - img->h)/2;
-
-	GP_Context sub_display;
-
-	cpu_timer_start(&timer, "Blitting");
-	
-	if (dithering) {
-		callback.priv = "Dithering";
-		GP_SubContext(context, &sub_display, cx, cy, img->w, img->h);
-	//	GP_FilterFloydSteinberg_RGB888(ret, &sub_display, NULL);
-		GP_FilterHilbertPeano_RGB888(img, &sub_display, NULL);
-	} else {
-		GP_Blit_Raw(img, 0, 0, img->w, img->h, context, cx, cy);
-	}
-	
-	cpu_timer_stop(&timer);
-	
-	if (rotate)
-		GP_ContextFree(img);
-
-	/* clean up the rest of the display */
-	GP_FillRectXYWH(context, 0, 0, cx, context->h, black_pixel);
-	GP_FillRectXYWH(context, 0, 0, context->w, cy, black_pixel);
-	GP_FillRectXYWH(context, img->w + cx, 0, context->w - img->w - cx, context->h, black_pixel);
-	GP_FillRectXYWH(context, 0, img->h + cy, context->w, context->h - img->h - cy, black_pixel);
-
 	cpu_timer_stop(&sum_timer);
-
-	set_caption(params->img_path, rat); 
-
-	if (!params->show_info) {
-		GP_BackendFlip(backend);
-		return NULL;
-	}
-
-	GP_Size th = GP_TextHeight(NULL);
 	
-	GP_Print(context, NULL, 11, 11, GP_ALIGN_RIGHT|GP_VALIGN_BOTTOM,
-	         black_pixel, white_pixel, "%ux%u", w, h);
-	
-	GP_Print(context, NULL, 10, 10, GP_ALIGN_RIGHT|GP_VALIGN_BOTTOM,
-	         white_pixel, black_pixel, "%ux%u", w, h);
-	
-	GP_Print(context, NULL, 11, 13 + th, GP_ALIGN_RIGHT|GP_VALIGN_BOTTOM,
-	         black_pixel, white_pixel, "1:%3.3f", rat);
-	
-	GP_Print(context, NULL, 10, 12 + th, GP_ALIGN_RIGHT|GP_VALIGN_BOTTOM,
-	         white_pixel, black_pixel, "1:%3.3f", rat);
-	
-	GP_Print(context, NULL, 11, 15 + 2 * th, GP_ALIGN_RIGHT|GP_VALIGN_BOTTOM,
-	         black_pixel, white_pixel, "%s", img_name(params->img_path));
-	
-	GP_Print(context, NULL, 10, 14 + 2 * th, GP_ALIGN_RIGHT|GP_VALIGN_BOTTOM,
-	         white_pixel, black_pixel, "%s", img_name(params->img_path));
-
-	GP_BackendFlip(backend);
-
 	return NULL;
 }
 
@@ -505,6 +536,9 @@ static void init_caches(struct loader_params *params)
 
 	params->img_resized_cache = image_cache_create(resized_size);
 	params->img_orig_cache = image_cache_create(orig_size);
+
+//	params->img_resized_cache = NULL;
+//	params->img_orig_cache = NULL;
 }
 
 int main(int argc, char *argv[])
@@ -512,9 +546,23 @@ int main(int argc, char *argv[])
 	GP_Context *context = NULL;
 	const char *backend_opts = "X11";
 	int sleep_sec = -1;
-	struct loader_params params = {NULL, 0, 0, 0, NULL, NULL};
 	int opt, debug_level = 0;
 	GP_PixelType emul_type = GP_PIXEL_UNKNOWN;
+	
+	struct loader_params params = {
+		.img_path = NULL, 
+		
+		.rotate = 0,
+
+		.show_progress = 0,
+		.show_progress_once = 0,
+		.show_info = 0,
+		.show_nn_first = 0,
+		.use_dithering = 0,
+
+		.img_resized_cache = NULL,
+		.img_orig_cache = NULL,
+	};
 
 	while ((opt = getopt(argc, argv, "b:cd:e:fIPs:r:")) != -1) {
 		switch (opt) {
@@ -525,13 +573,15 @@ int main(int argc, char *argv[])
 			params.show_progress = 1;
 		break;
 		case 'f':
-			dithering = 1;
+			params.use_dithering = 1;
 		break;
 		case 's':
 			sleep_sec = atoi(optarg);
 		break;
 		case 'c':
 			resampling_method = GP_INTERP_CUBIC_INT;
+			/* Cubic resampling is slow, show nn first */
+			params.show_nn_first = 1;
 		break;
 		case 'd':
 			debug_level = atoi(optarg);
@@ -546,11 +596,11 @@ int main(int argc, char *argv[])
 		break;
 		case 'r':
 			if (!strcmp(optarg, "90"))
-				rotate = 90;
+				params.rotate = 90;
 			else if (!strcmp(optarg, "180"))
-				rotate = 180;
+				params.rotate = 180;
 			else if (!strcmp(optarg, "270"))
-				rotate = 270;
+				params.rotate = 270;
 		case 'b':
 			backend_opts = optarg;
 		break;
@@ -622,9 +672,9 @@ int main(int argc, char *argv[])
 					params.show_progress = !params.show_progress;
 				break;
 				case GP_KEY_R:
-					rotate += 90;
-					if (rotate > 270)
-						rotate = 0;
+					params.rotate += 90;
+					if (params.rotate > 270)
+						params.rotate = 0;
 					
 					params.show_progress_once = 1;
 					show_image(&params, NULL);
