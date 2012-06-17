@@ -130,7 +130,7 @@ int GP_FilterInterpolate_Cubic(const GP_Context *src, GP_Context *dst,
 		    1.00 * dst->w / src->w, 1.00 * dst->h / src->h);
 
 	for (i = 0; i < dst->w; i++) {
-		float x = (1.00 * i / dst->w) * src->w;
+		float x = (1.00 * i / (dst->w - 1)) * (src->w - 1);
 		v4f cvx;
 		int xi[4];
 		
@@ -189,7 +189,7 @@ int GP_FilterInterpolate_Cubic(const GP_Context *src, GP_Context *dst,
 
 		/* now interpolate column for new image */
 		for (j = 0; j < dst->h; j++) {
-			float y = (1.00 * j / dst->h) * src->h;
+			float y = (1.00 * j / (dst->h - 1)) * (src->h - 1);
 			v4f cvy, rv, gv, bv;
 			float r, g, b;
 			int yi[4];
@@ -295,7 +295,7 @@ int GP_FilterInterpolate_CubicInt(const GP_Context *src, GP_Context *dst,
 	}
 
 	for (i = 0; i < dst->h; i++) {
-		float y = (1.00 * i / dst->h) * src->h;
+		float y = (1.00 * i / (dst->h - 1)) * (src->h - 1);
 		int32_t cvy[4];
 		int yi[4];
 		
@@ -311,9 +311,6 @@ int GP_FilterInterpolate_CubicInt(const GP_Context *src, GP_Context *dst,
 		
 		if (yi[0] < 0)
 			yi[0] = 0;
-		
-		if (yi[2] >= (int)src->h)
-			yi[2] = src->h - 1;
 		
 		if (yi[3] >= (int)src->h)
 			yi[3] = src->h - 1;
@@ -372,7 +369,7 @@ int GP_FilterInterpolate_CubicInt(const GP_Context *src, GP_Context *dst,
 
 		/* now interpolate column for new image */
 		for (j = 0; j < dst->w; j++) {
-			float x = (1.00 * j / dst->w) * src->w;
+			float x = (1.00 * j / (dst->w - 1)) * (src->w - 1);
 			int32_t cvx[4], rv[4], gv[4], bv[4];
 			int32_t r, g, b;
 			int xi[4];
@@ -390,9 +387,6 @@ int GP_FilterInterpolate_CubicInt(const GP_Context *src, GP_Context *dst,
 			if (xi[0] < 0)
 				xi[0] = 0;
 
-			if (xi[2] >= (int)src->w)
-				xi[2] = src->w - 1;
-			
 			if (xi[3] >= (int)src->w)
 				xi[3] = src->w - 1;
 
@@ -537,8 +531,8 @@ static int interpolate_linear_lp_xy(const GP_Context *src, GP_Context *dst,
 	uint32_t i, j;
 	
 	/* Pre-compute mapping for interpolation */
-	uint32_t xstep = (src->w << 16) / dst->w;
-	uint32_t xpix_dist = (dst->w << 14) / src->w;
+	uint32_t xstep = ((src->w - 1) << 16) / (dst->w - 1);
+	uint32_t xpix_dist = ((dst->w - 1) << 14) / (src->w - 1);
 
 	for (i = 0; i < dst->w + 1; i++) {
 		uint32_t val = i * xstep;
@@ -546,8 +540,8 @@ static int interpolate_linear_lp_xy(const GP_Context *src, GP_Context *dst,
 		xoff[i] = ((255 - ((val >> 8) & 0xff)) * xpix_dist)>>8;
 	}
 
-	uint32_t ystep = (src->h << 16) / dst->h;
-	uint32_t ypix_dist = (dst->h << 14) / src->h;
+	uint32_t ystep = ((src->h - 1) << 16) / (dst->h - 1);
+	uint32_t ypix_dist = ((dst->h - 1) << 14) / (src->h - 1);
 
 	for (i = 0; i < dst->h + 1; i++) {
 		uint32_t val = i * ystep;
@@ -634,7 +628,7 @@ int GP_FilterInterpolate_LinearInt(const GP_Context *src, GP_Context *dst,
 		    1.00 * dst->w / src->w, 1.00 * dst->h / src->h);
 
 	/* Pre-compute mapping for interpolation */
-	uint32_t xstep = (src->w << 16) / dst->w;
+	uint32_t xstep = ((src->w - 1) << 16) / (dst->w - 1);
 
 	for (i = 0; i < dst->w + 1; i++) {
 		uint32_t val = i * xstep;
@@ -642,7 +636,7 @@ int GP_FilterInterpolate_LinearInt(const GP_Context *src, GP_Context *dst,
 		xoff[i] = (val >> 8) & 0xff;
 	}
 
-	uint32_t ystep = (src->h << 16) / dst->h;
+	uint32_t ystep = ((src->h - 1) << 16) / (dst->h - 1);
 
 	for (i = 0; i < dst->h + 1; i++) {
 		uint32_t val = i * ystep;
