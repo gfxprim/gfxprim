@@ -294,6 +294,31 @@ int GP_FilterInterpolate_CubicInt(const GP_Context *src, GP_Context *dst,
 		B_2_GAMMA = src->gamma->tables[5]->u8;
 	}
 
+	/* pre-generate x mapping and constants */
+	int32_t xmap[dst->w][4];
+	int32_t xmap_c[dst->w][4];
+
+	for (i = 0; i < dst->w; i++) {
+			float x = (1.00 * i / (dst->w - 1)) * (src->w - 1);
+			
+			xmap[i][0] = floor(x - 1);
+			xmap[i][1] = x;
+			xmap[i][2] = x + 1;
+			xmap[i][3] = x + 2;
+			
+			xmap_c[i][0] = cubic(xmap[i][0] - x) * MUL + 0.5;
+			xmap_c[i][1] = cubic(xmap[i][1] - x) * MUL + 0.5;
+			xmap_c[i][2] = cubic(xmap[i][2] - x) * MUL + 0.5;
+			xmap_c[i][3] = cubic(xmap[i][3] - x) * MUL + 0.5;
+			
+			if (xmap[i][0] < 0)
+				xmap[i][0] = 0;
+
+			if (xmap[i][3] >= (int32_t)src->w)
+				xmap[i][3] = src->w - 1;
+	}
+
+	/* cubic resampling */
 	for (i = 0; i < dst->h; i++) {
 		float y = (1.00 * i / (dst->h - 1)) * (src->h - 1);
 		int32_t cvy[4];
@@ -369,45 +394,27 @@ int GP_FilterInterpolate_CubicInt(const GP_Context *src, GP_Context *dst,
 
 		/* now interpolate column for new image */
 		for (j = 0; j < dst->w; j++) {
-			float x = (1.00 * j / (dst->w - 1)) * (src->w - 1);
-			int32_t cvx[4], rv[4], gv[4], bv[4];
+			int32_t rv[4], gv[4], bv[4];
 			int32_t r, g, b;
-			int xi[4];
 		
-			xi[0] = floor(x - 1);
-			xi[1] = x;
-			xi[2] = x + 1;
-			xi[3] = x + 2;
+			rv[0] = col_r[xmap[j][0]];
+			rv[1] = col_r[xmap[j][1]];
+			rv[2] = col_r[xmap[j][2]];
+			rv[3] = col_r[xmap[j][3]];
 			
-			cvx[0] = cubic(xi[0] - x) * MUL + 0.5;
-			cvx[1] = cubic(xi[1] - x) * MUL + 0.5;
-			cvx[2] = cubic(xi[2] - x) * MUL + 0.5;
-			cvx[3] = cubic(xi[3] - x) * MUL + 0.5;
+			gv[0] = col_g[xmap[j][0]];
+			gv[1] = col_g[xmap[j][1]];
+			gv[2] = col_g[xmap[j][2]];
+			gv[3] = col_g[xmap[j][3]];
 			
-			if (xi[0] < 0)
-				xi[0] = 0;
-
-			if (xi[3] >= (int)src->w)
-				xi[3] = src->w - 1;
-
-			rv[0] = col_r[xi[0]];
-			rv[1] = col_r[xi[1]];
-			rv[2] = col_r[xi[2]];
-			rv[3] = col_r[xi[3]];
+			bv[0] = col_b[xmap[j][0]];
+			bv[1] = col_b[xmap[j][1]];
+			bv[2] = col_b[xmap[j][2]];
+			bv[3] = col_b[xmap[j][3]];
 			
-			gv[0] = col_g[xi[0]];
-			gv[1] = col_g[xi[1]];
-			gv[2] = col_g[xi[2]];
-			gv[3] = col_g[xi[3]];
-			
-			bv[0] = col_b[xi[0]];
-			bv[1] = col_b[xi[1]];
-			bv[2] = col_b[xi[2]];
-			bv[3] = col_b[xi[3]];
-			
-			MUL_I(rv, cvx);
-			MUL_I(gv, cvx);
-			MUL_I(bv, cvx);
+			MUL_I(rv, xmap_c[j]);
+			MUL_I(gv, xmap_c[j]);
+			MUL_I(bv, xmap_c[j]);
 
 			r = (SUM_I(rv) + MUL*MUL/2) / MUL / MUL;
 			g = (SUM_I(gv) + MUL*MUL/2) / MUL / MUL;
