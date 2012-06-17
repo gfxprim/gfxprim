@@ -58,6 +58,21 @@ GP_Context *GP_FilterResizeNNAlloc(const GP_Context *src,
 	return res;
 }
 
+static const char *interp_types[] = {
+	"Nearest Neighbour",
+	"Linear (Int)",
+	"Linear with Low Pass (Int)",
+	"Cubic (Float)",
+	"Cubic (Int)",
+};
+
+const char *GP_InterpolationTypeName(enum GP_InterpolationType interp_type)
+{
+	if (interp_type > GP_INTERP_MAX)
+		return "Unknown";
+
+	return interp_types[interp_type]; 
+}
 
 #define A 0.5
 

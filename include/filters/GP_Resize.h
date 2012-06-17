@@ -71,7 +71,10 @@ typedef enum GP_InterpolationType {
 	GP_INTERP_LINEAR_LF_INT, /* Bilinear + low pass filter on downscaling */
 	GP_INTERP_CUBIC,         /* Bicubic                                   */
 	GP_INTERP_CUBIC_INT,     /* Bicubic - fixed point arithmetics         */
+	GP_INTERP_MAX = GP_INTERP_CUBIC_INT,
 } GP_InterpolationType;
+
+const char *GP_InterpolationTypeName(enum GP_InterpolationType interp_type);
 
 /*
  * Just interpolate the source context into destination context.
