@@ -155,6 +155,9 @@ GP_Context *image_cache_get(struct image_cache *self, const char *path,
                             long cookie1, long cookie2, int elevate)
 {
 	struct image *i;
+	
+	if (self == NULL)
+		return NULL;
 
 	GP_DEBUG(2, "Looking for image '%s:%10li:%10li'", path, cookie1, cookie2);
 
@@ -186,6 +189,11 @@ void image_cache_print(struct image_cache *self)
 {
 	struct image *i;
 
+	if (self == NULL) {
+		printf("Image cache disabled\n");
+		return;
+	}
+
 	printf("Image cache size %u used %u\n", self->max_size, self->cur_size);
 
 	for (i = self->root; i != NULL; i = i->next)
@@ -214,7 +222,12 @@ static int assert_size(struct image_cache *self, size_t size)
 int image_cache_put(struct image_cache *self, GP_Context *ctx, const char *path,
                     long cookie1, long cookie2)
 {
-	size_t size = image_size2(ctx, path);
+	size_t size;
+	
+	if (self == NULL)
+		return 1;
+	
+	size = image_size2(ctx, path);
 
 	if (assert_size(self, size))
 		return 1;
@@ -242,8 +255,11 @@ int image_cache_put(struct image_cache *self, GP_Context *ctx, const char *path,
 
 void image_cache_drop(struct image_cache *self)
 {
+	if (self == NULL)
+		return;
+	
 	GP_DEBUG(1, "Dropping images in cache");
-
+	
 	while (self->end != NULL)
 		remove_img_free(self, self->end, 0);
 
@@ -252,8 +268,11 @@ void image_cache_drop(struct image_cache *self)
 
 void image_cache_destroy(struct image_cache *self)
 {
+	if (self == NULL)
+		return;
+
 	GP_DEBUG(1, "Destroying image cache");
-	
+
 	while (self->end != NULL)
 		remove_img_free(self, self->end, 0);
 	
