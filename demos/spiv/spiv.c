@@ -47,7 +47,33 @@ static GP_Backend *backend = NULL;
 /* image loader thread */
 static int abort_flag = 0;
 static int show_progress = 0;
-static int resampling_method = GP_INTERP_LINEAR_LF_INT;
+
+struct loader_params {
+	/* current image path */
+	const char *img_path;
+	/* current resize ratio */
+	float rat;
+
+	/* show loader progress */
+	long show_progress:1;
+	long show_progress_once:2;
+	/* show image info in topleft corner */
+	long show_info:3;
+	/* use nearest neighbour resampling first */
+	long show_nn_first:4;
+	/* use dithering when blitting to display */
+	long use_dithering:5;
+	/* use low pass before resampling */
+	long use_low_pass:6;
+	/* image orientation 0, 90, 180, 270 */
+	int rotate;
+	/* resampling method */
+	int resampling_method;
+
+	/* caches for loaded images */
+	struct image_cache *img_resized_cache;
+	struct image_cache *img_orig_cache;
+};
 
 static int image_loader_callback(GP_ProgressCallback *self)
 {
@@ -81,26 +107,6 @@ static int image_loader_callback(GP_ProgressCallback *self)
 	return 0;
 }
 
-struct loader_params {
-	const char *img_path;
-	
-	/* Show loader progress */
-	long show_progress:1;
-	long show_progress_once:2;
-	/* show image info in topleft corner */
-	long show_info:3;
-	/* use nearest neighbour resampling first */
-	long show_nn_first:4;
-	/* use dithering when blitting to display */
-	long use_dithering:5;
-
-	/* Image orientation */
-	int rotate;
-
-	/* cached loaded images */
-	struct image_cache *img_resized_cache;
-	struct image_cache *img_orig_cache;
-};
 
 static float calc_img_size(uint32_t img_w, uint32_t img_h,
                            uint32_t src_w, uint32_t src_h)
@@ -182,7 +188,7 @@ GP_Context *load_image(struct loader_params *params, int elevate)
 /*
  * Updates display.
  */
-static void update_display(struct loader_params *params, GP_Context *img, float rat)
+static void update_display(struct loader_params *params, GP_Context *img)
 {
 	GP_Context *context = backend->context;
 	struct cpu_timer timer;
@@ -235,7 +241,7 @@ static void update_display(struct loader_params *params, GP_Context *img, float 
 	GP_FillRectXYWH(context, img->w + cx, 0, context->w - img->w - cx, context->h, black_pixel);
 	GP_FillRectXYWH(context, 0, img->h + cy, context->w, context->h - img->h - cy, black_pixel);
 	
-	set_caption(params->img_path, rat); 
+	set_caption(params->img_path, params->rat); 
 
 	if (!params->show_info) {
 		GP_BackendFlip(backend);
@@ -251,10 +257,10 @@ static void update_display(struct loader_params *params, GP_Context *img, float 
 	         white_pixel, black_pixel, "%ux%u", img->w, img->h);
 	
 	GP_Print(context, NULL, 11, 13 + th, GP_ALIGN_RIGHT|GP_VALIGN_BOTTOM,
-	         black_pixel, white_pixel, "1:%3.3f", rat);
+	         black_pixel, white_pixel, "1:%3.3f", params->rat);
 	
 	GP_Print(context, NULL, 10, 12 + th, GP_ALIGN_RIGHT|GP_VALIGN_BOTTOM,
-	         white_pixel, black_pixel, "1:%3.3f", rat);
+	         white_pixel, black_pixel, "1:%3.3f", params->rat);
 	
 	GP_Print(context, NULL, 11, 15 + 2 * th, GP_ALIGN_RIGHT|GP_VALIGN_BOTTOM,
 	         black_pixel, white_pixel, "%s", img_name(params->img_path));
@@ -262,18 +268,30 @@ static void update_display(struct loader_params *params, GP_Context *img, float 
 	GP_Print(context, NULL, 10, 14 + 2 * th, GP_ALIGN_RIGHT|GP_VALIGN_BOTTOM,
 	         white_pixel, black_pixel, "%s", img_name(params->img_path));
 	
+	GP_Print(context, NULL, 11, 17 + 3 * th, GP_ALIGN_RIGHT|GP_VALIGN_BOTTOM,
+	         black_pixel, white_pixel, "%s%s",
+		 params->use_low_pass && params->rat < 1 ? "Gaussian LP + " : "",
+		 GP_InterpolationTypeName(params->resampling_method));
+	
+	GP_Print(context, NULL, 10, 16 + 3 * th, GP_ALIGN_RIGHT|GP_VALIGN_BOTTOM,
+	         white_pixel, black_pixel, "%s%s", 
+		 params->use_low_pass && params->rat < 1 ? "Gaussian LP + " : "",
+		 GP_InterpolationTypeName(params->resampling_method));
+
 	GP_BackendFlip(backend);
 }
 
-GP_Context *load_resized_image(struct loader_params *params, GP_Size w, GP_Size h, float rat)
+GP_Context *load_resized_image(struct loader_params *params, GP_Size w, GP_Size h)
 {
 	long cookie = (w & 0xffff) | (h & 0xffff)<<16;
 	GP_Context *img, *res = NULL;
 	struct cpu_timer timer;
 	GP_ProgressCallback callback = {.callback = image_loader_callback};
+	
+	int key = (params->resampling_method<<1) | !!(params->use_low_pass);
 
 	/* Try to get resized cached image */
-	img = image_cache_get(params->img_resized_cache, params->img_path, cookie, resampling_method, 1);
+	img = image_cache_get(params->img_resized_cache, params->img_path, cookie, key, 1);
 
 	if (img != NULL)
 		return img;
@@ -286,35 +304,34 @@ GP_Context *load_resized_image(struct loader_params *params, GP_Size w, GP_Size 
 		/* Do simple interpolation and blit the result */
 		GP_Context *nn = GP_FilterResizeNNAlloc(img, w, h, NULL);
 		if (nn != NULL) {
-			update_display(params, nn, rat);
+			update_display(params, nn);
 			GP_ContextFree(nn);
 		}
 	}
 
 	/* Do low pass filter */
-	if (resampling_method != GP_INTERP_LINEAR_LF_INT && rat < 1) {
+	if (params->use_low_pass && params->rat < 1) {
 		cpu_timer_start(&timer, "Blur");
 		callback.priv = "Blurring Image";
 		
-		res = GP_FilterGaussianBlur(img, NULL, 0.4/rat, 0.4/rat, &callback);
-		
+		res = GP_FilterGaussianBlur(img, NULL,
+		                            0.3/params->rat, 0.3/params->rat,
+					    &callback);
 		if (res == NULL)
 			return NULL;
 		
 		img = res;
 		
-	//	img->gamma = GP_GammaAcquire(img->pixel_type, 2.2);
-
 		cpu_timer_stop(&timer);
-	} else {
-	//	img->gamma = GP_GammaAcquire(img->pixel_type, 2.2);
 	}
+	
+//	img->gamma = GP_GammaAcquire(img->pixel_type, 2.2);
 
 	cpu_timer_start(&timer, "Resampling");
 	callback.priv = "Resampling Image";
-	GP_Context *i1 = GP_FilterResize(img, NULL, resampling_method, w, h, &callback);
+	GP_Context *i1 = GP_FilterResize(img, NULL, params->resampling_method, w, h, &callback);
 //	img->gamma = NULL;
-//	GP_Context *i2 = GP_FilterResize(img, NULL, resampling_method, w, h, &callback);
+//	GP_Context *i2 = GP_FilterResize(img, NULL, params->resampling_method, w, h, &callback);
 //	img = GP_FilterDifferenceAlloc(i2, i1, NULL);
 //	img = GP_FilterInvert(img, NULL, NULL);
 	img = i1;
@@ -326,7 +343,7 @@ GP_Context *load_resized_image(struct loader_params *params, GP_Size w, GP_Size 
 	if (img == NULL)
 		return NULL;
 
-	image_cache_put(params->img_resized_cache, img, params->img_path, cookie, resampling_method);
+	image_cache_put(params->img_resized_cache, img, params->img_path, cookie, key);
 	
 	return img;
 }
@@ -380,12 +397,12 @@ static void *image_loader(void *ptr)
 	if ((img = load_image(params, 0)) == NULL)
 		return NULL;
 
-	float rat = calc_img_size(img->w, img->h, w, h);
+	params->rat = calc_img_size(img->w, img->h, w, h);
 
 	w = img->w;
 	h = img->h;
 
-	img = load_resized_image(params, w * rat + 0.5, h * rat + 0.5, rat);
+	img = load_resized_image(params, w * params->rat + 0.5, h * params->rat + 0.5);
 
 	if (img == NULL)
 		return NULL;
@@ -393,7 +410,7 @@ static void *image_loader(void *ptr)
 	image_cache_print(params->img_resized_cache);
 	image_cache_print(params->img_orig_cache);
 
-	update_display(params, img, rat);
+	update_display(params, img);
 	
 	cpu_timer_stop(&sum_timer);
 	
@@ -552,13 +569,13 @@ int main(int argc, char *argv[])
 	struct loader_params params = {
 		.img_path = NULL, 
 		
-		.rotate = 0,
-
 		.show_progress = 0,
 		.show_progress_once = 0,
 		.show_info = 0,
 		.show_nn_first = 0,
 		.use_dithering = 0,
+		.rotate = 0,
+		.resampling_method = GP_INTERP_LINEAR_LF_INT,
 
 		.img_resized_cache = NULL,
 		.img_orig_cache = NULL,
@@ -579,7 +596,9 @@ int main(int argc, char *argv[])
 			sleep_sec = atoi(optarg);
 		break;
 		case 'c':
-			resampling_method = GP_INTERP_CUBIC_INT;
+			params.resampling_method = GP_INTERP_CUBIC_INT;
+			/* Cubic resampling needs low pass */
+			params.use_low_pass = 1;
 			/* Cubic resampling is slow, show nn first */
 			params.show_nn_first = 1;
 		break;
@@ -678,6 +697,46 @@ int main(int argc, char *argv[])
 					
 					params.show_progress_once = 1;
 					show_image(&params, NULL);
+				break;
+				case GP_KEY_RIGHT_BRACE:
+					params.resampling_method++;
+
+					if (params.resampling_method > GP_INTERP_MAX)
+						params.resampling_method = 0;
+				
+					if (params.resampling_method == GP_INTERP_LINEAR_LF_INT) {
+						params.use_low_pass = 0;
+						params.show_nn_first = 0;
+					} else {
+						params.use_low_pass = 1;
+						params.show_nn_first = 1;
+					}
+
+					params.show_progress_once = 1;
+					show_image(&params, argv[argn]);
+				break;
+				case GP_KEY_LEFT_BRACE:
+					if (params.resampling_method == 0)
+						params.resampling_method = GP_INTERP_MAX;
+					else
+						params.resampling_method--;
+					
+					if (params.resampling_method == GP_INTERP_LINEAR_LF_INT) {
+						params.use_low_pass = 0;
+						params.show_nn_first = 0;
+					} else {
+						params.use_low_pass = 1;
+						params.show_nn_first = 1;
+					}
+					
+					params.show_progress_once = 1;
+					show_image(&params, argv[argn]);
+				break;
+				case GP_KEY_L:
+					params.use_low_pass = !params.use_low_pass;
+					
+					params.show_progress_once = 1;
+					show_image(&params, argv[argn]);
 				break;
 				case GP_KEY_D:
 					image_cache_drop(params.img_resized_cache);
