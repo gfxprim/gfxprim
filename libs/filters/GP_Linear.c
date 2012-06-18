@@ -337,7 +337,7 @@ int GP_FilterVHLinearConvolution_Raw(const GP_Context *src, GP_Context *dst,
 	
 	conv_callback.callback = v_callback;
 	
-	if (GP_FilterHLinearConvolution_Raw(src, dst, vkernel, kh, vkern_div, new_callback))
+	if (GP_FilterHLinearConvolution_Raw(dst, dst, vkernel, kh, vkern_div, new_callback))
 		return 1;
 	
 	GP_ProgressCallbackDone(callback);
