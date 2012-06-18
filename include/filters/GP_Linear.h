@@ -16,7 +16,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2011 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
@@ -75,12 +75,14 @@ GP_Context *GP_FilterGaussianBlur(const GP_Context *src, GP_Context *dst,
  * };
  *
  * kw = kh = 3
+ * 
+ * kern_div = 9
  *
  * This function works also in-place.
  */
 int GP_FilterLinearConvolution_Raw(const GP_Context *src, GP_Context *dst,
                                    float kernel[], uint32_t kw, uint32_t kh,
-                                   GP_ProgressCallback *callback);
+                                   float kern_div, GP_ProgressCallback *callback);
 
 /*
  * Special cases for convolution only in horizontal/vertical direction.
@@ -93,11 +95,21 @@ int GP_FilterLinearConvolution_Raw(const GP_Context *src, GP_Context *dst,
  * Both works also in-place.
  */
 int GP_FilterHLinearConvolution_Raw(const GP_Context *src, GP_Context *dst,
-                                    float kernel[], uint32_t kw,
+                                    float kernel[], uint32_t kw, float kern_div,
                                     GP_ProgressCallback *callback);
 
 int GP_FilterVLinearConvolution_Raw(const GP_Context *src, GP_Context *dst,
-                                    float kernel[], uint32_t kh,
+                                    float kernel[], uint32_t kh, float kern_div,
                                     GP_ProgressCallback *callback);
+
+/*
+ * Applies both horizontal and vertical convolution and takes care of the
+ * correct progress callback (both horizontal and vertical kernels are expected
+ * to be similar in size).
+ */
+int GP_FilterVHLinearConvolution_Raw(const GP_Context *src, GP_Context *dst,
+                                     float hkernel[], uint32_t kw, float hkern_div,
+				     float vkernel[], uint32_t kh, float vkern_div,
+				     GP_ProgressCallback *callback);
 
 #endif /* FILTERS_GP_LINEAR_H */

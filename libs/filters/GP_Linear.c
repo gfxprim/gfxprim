@@ -22,12 +22,12 @@
 
 #include <math.h>
 
-#include <core/GP_Context.h>
-#include <core/GP_GetPutPixel.h>
+#include "core/GP_Context.h"
+#include "core/GP_GetPutPixel.h"
 
-#include <core/GP_Debug.h>
+#include "core/GP_Debug.h"
 
-#include <GP_Linear.h>
+#include "GP_Linear.h"
 
 static inline unsigned int gaussian_kernel_size(float sigma)
 {
@@ -36,17 +36,21 @@ static inline unsigned int gaussian_kernel_size(float sigma)
 	return 2 * center + 1;
 }
 
-static inline void gaussian_kernel_init(float sigma, float *kernel)
+static inline float gaussian_kernel_init(float sigma, float *kernel)
 {
 	int i, center = 3 * sigma;
 	int N = 2 * center + 1;
-	
+	float ret = 0;
+
 	double sigma2 = sigma * sigma;
 	
 	for (i = 0; i < N; i++) {
 		double r = center - i;
 		kernel[i] = exp(-0.5 * (r * r) / sigma2);
+		ret += kernel[i];
 	}
+
+	return ret;
 }
 
 static int gaussian_callback_horiz(GP_ProgressCallback *self)
@@ -88,10 +92,10 @@ int GP_FilterGaussianBlur_Raw(const GP_Context *src, GP_Context *dst,
 	/* compute kernel and apply in horizontal direction */
 	if (sigma_x > 0) {
 		float kernel_x[size_x];
-		gaussian_kernel_init(sigma_x, kernel_x);
-		
+		float sum = gaussian_kernel_init(sigma_x, kernel_x);
+	
 		if (GP_FilterHLinearConvolution_Raw(src, dst, kernel_x, size_x,
-		                                new_callback))
+		                                    sum, new_callback))
 			return 1;
 	}
 	
@@ -101,10 +105,10 @@ int GP_FilterGaussianBlur_Raw(const GP_Context *src, GP_Context *dst,
 	/* compute kernel and apply in vertical direction */
 	if (sigma_y > 0) {
 		float kernel_y[size_y];
-		gaussian_kernel_init(sigma_y, kernel_y);
+		float sum = gaussian_kernel_init(sigma_y, kernel_y);
 		
 		if (GP_FilterVLinearConvolution_Raw(dst, dst, kernel_y, size_y,
-		                                new_callback))
+		                                    sum, new_callback))
 			return 1;
 	}
 
@@ -147,24 +151,21 @@ GP_Context *GP_FilterGaussianBlur(const GP_Context *src, GP_Context *dst,
 } while (0)
 
 int GP_FilterHLinearConvolution_Raw(const GP_Context *src, GP_Context *dst,
-                                    float kernel[], uint32_t kw,
+                                    float kernel[], uint32_t kw, float kern_div,
                                     GP_ProgressCallback *callback)
 {
-	int32_t kernel_sum = 0;
 	GP_Coord x, y;
 	uint32_t i;
-	int32_t ikernel[kw];
+	int32_t ikernel[kw], ikern_div;
 	uint32_t size = dst->w + kw - 1;
+	
+	GP_DEBUG(1, "Horizontal linear convolution kernel width %i image %ux%u",
+	            kw, src->w, src->h);
 
 	for (i = 0; i < kw; i++)
 		ikernel[i] = kernel[i] * MUL + 0.5;
 
-	GP_DEBUG(1, "Horizontal linear convolution kernel width %i image %ux%u",
-	            kw, src->w, src->h);
-
-	/* count kernel sum for normalization */
-	for (i = 0; i < kw; i++)
-		kernel_sum += ikernel[i];
+	ikern_div = kern_div * MUL + 0.5;
 
 	/* do linear convolution */	
 	for (y = 0; y < (GP_Coord)dst->h; y++) {
@@ -203,10 +204,10 @@ int GP_FilterHLinearConvolution_Raw(const GP_Context *src, GP_Context *dst,
 				b += B[i + x] * ikernel[i];
 			}
 			
-			/* normalize the result */
-			r /= kernel_sum;
-			g /= kernel_sum;
-			b /= kernel_sum;
+			/* divide the result */
+			r /= ikern_div;
+			g /= ikern_div;
+			b /= ikern_div;
 			
 			/* and clamp just to be extra sure */
 			CLAMP(r);
@@ -226,13 +227,12 @@ int GP_FilterHLinearConvolution_Raw(const GP_Context *src, GP_Context *dst,
 }
 
 int GP_FilterVLinearConvolution_Raw(const GP_Context *src, GP_Context *dst,
-                                    float kernel[], uint32_t kh,
+                                    float kernel[], uint32_t kh, float kern_div,
                                     GP_ProgressCallback *callback)
 {
-	int32_t kernel_sum = 0;
 	GP_Coord x, y;
 	uint32_t i;
-	int32_t ikernel[kh];
+	int32_t ikernel[kh], ikern_div;
 	uint32_t size = dst->h + kh - 1;
 
 	for (i = 0; i < kh; i++)
@@ -241,9 +241,7 @@ int GP_FilterVLinearConvolution_Raw(const GP_Context *src, GP_Context *dst,
 	GP_DEBUG(1, "Vertical linear convolution kernel width %i image %ux%u",
 	            kh, src->w, src->h);
 
-	/* count kernel sum for normalization */
-	for (i = 0; i < kh; i++)
-		kernel_sum += ikernel[i];
+	ikern_div = kern_div * MUL + 0.5;
 
 	/* do linear convolution */	
 	for (x = 0; x < (GP_Coord)dst->w; x++) {
@@ -282,10 +280,10 @@ int GP_FilterVLinearConvolution_Raw(const GP_Context *src, GP_Context *dst,
 				b += B[y + i] * ikernel[i];
 			}
 
-			/* normalize the result */
-			r /= kernel_sum;
-			g /= kernel_sum;
-			b /= kernel_sum;
+			/* divide the result */
+			r /= ikern_div;
+			g /= ikern_div;
+			b /= ikern_div;
 			
 			/* and clamp just to be extra sure */
 			CLAMP(r);
@@ -304,6 +302,47 @@ int GP_FilterVLinearConvolution_Raw(const GP_Context *src, GP_Context *dst,
 	return 0;
 }
 
+static int h_callback(GP_ProgressCallback *self)
+{
+	GP_ProgressCallback *callback = self->priv;
+
+	callback->percentage = self->percentage / 2;
+	return callback->callback(callback);
+}
+
+static int v_callback(GP_ProgressCallback *self)
+{
+	GP_ProgressCallback *callback = self->priv;
+
+	callback->percentage = self->percentage / 2 + 50;
+	return callback->callback(callback);
+}
+
+int GP_FilterVHLinearConvolution_Raw(const GP_Context *src, GP_Context *dst,
+                                     float hkernel[], uint32_t kw, float hkern_div,
+                                     float vkernel[], uint32_t kh, float vkern_div,
+                                     GP_ProgressCallback *callback)
+{
+	GP_ProgressCallback *new_callback;
+
+	GP_ProgressCallback conv_callback = {
+		.callback = h_callback,
+		.priv = callback,
+	};
+
+	new_callback = callback ? &conv_callback : NULL;
+
+	if (GP_FilterVLinearConvolution_Raw(src, dst, hkernel, kw, hkern_div, new_callback))
+		return 1;
+	
+	conv_callback.callback = v_callback;
+	
+	if (GP_FilterHLinearConvolution_Raw(src, dst, vkernel, kh, vkern_div, new_callback))
+		return 1;
+	
+	GP_ProgressCallbackDone(callback);
+	return 0;
+}
 
 /*
  * Linear convolution.
@@ -312,18 +351,13 @@ int GP_FilterVLinearConvolution_Raw(const GP_Context *src, GP_Context *dst,
  */
 int GP_FilterLinearConvolution_Raw(const GP_Context *src, GP_Context *dst,
                                    float kernel[], uint32_t kw, uint32_t kh,
-                                   GP_ProgressCallback *callback)
+                                   float kern_div, GP_ProgressCallback *callback)
 {
-	float kernel_sum = 0;
 	GP_Coord x, y;
 	uint32_t i, j;
 
 	GP_DEBUG(1, "Linear convolution kernel %ix%i image %ux%u",
 	            kw, kh, src->w, src->h);
-
-	/* count kernel sum for normalization */
-	for (i = 0; i < kw * kh; i++)
-		kernel_sum += kernel[i];
 
 	/* do linear convolution */	
 	for (y = 0; y < (GP_Coord)dst->h; y++) {
@@ -394,10 +428,10 @@ int GP_FilterLinearConvolution_Raw(const GP_Context *src, GP_Context *dst,
 				}
 			}
 
-			/* normalize the result */
-			r /= kernel_sum;
-			g /= kernel_sum;
-			b /= kernel_sum;
+			/* divide the result */
+			r /= kern_div;
+			g /= kern_div;
+			b /= kern_div;
 
 			/* and clamp just to be extra sure */
 			if (r > 255)
