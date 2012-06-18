@@ -1,6 +1,6 @@
 %% extends "filter.c.t"
 
-{% block descr %}Nearest Neighbour resampling{% endblock %}
+{% block descr %}Cubic resampling{% endblock %}
 
 %% block body
 

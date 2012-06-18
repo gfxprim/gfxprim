@@ -36,22 +36,22 @@
   perception. The human eye is more sensitive to dark tones than the light ones
   so without gamma correction storage and manipulation with image data would
   either be less efficient in space (in case you decided to use more bits and
-  encode the image lineary) or quantization in darker tones would be more
+  encode the image linearly) or quantization in darker tones would be more
   visible resulting in "pixelated" images (aliasing).
 
-  So there is a gamma, the internet seems to suggest that usual values for
+  So there is a gamma, the Internet seems to suggest that usual values for
   gamma are 2.5 for old CRT monitors and about 2.2 for LCD ones, ideally you
   should have color profile for your device (you need special hardware to
   measure it). So if you are trying to draw linear gradient on the screen
-  you need to generate sequence of numbers accordinly to gamma function
+  you need to generate sequence of numbers accordingly to gamma function
   (the 50% intensity is around 186 for gamma = 2.2 and 8bit grayscale pixel).
 
   Moreover image formats tend to save data in nonlinear fashion (some formats
-  include gama value used to for the image) so before you apply filter that
+  include gamma value used to for the image) so before you apply filter that
   manipulates with pixel values, you need to convert it to linear space (adding
   some more bits to compensate for rounding errors).
 
-  Also it's important to take gamma, into an accound, when drawing anti aliased
+  Also it's important to take gamma, into an account, when drawing anti-aliased
   shapes, you can't get right results otherwise.
 
  */
@@ -62,21 +62,21 @@
    channel, gamma tables.
 
    The tables for particular gamma are reference counted. There is only one
-   table for particulal gamma value and bit depth in memory at a time.
+   table for particular gamma value and bit depth in memory at a time.
 
    Also the table output, for linear values, has two more bits than original in
    order not to loose precision.
    
-   The pointers to gamma tables are storied in GP_Gamma structure the pointers
-   are organized in the same order as channes. First N tables for each channel
-   and gamma value gamma, then N tables for inverse 1/gamma function. 
+   The pointers to gamma tables are storied in GP_Gamma structure and are
+   organized in the same order as channels. First N tables for each channel and
+   gamma value gamma, then N tables for inverse 1/gamma function. 
    
    So when we have RGB888 pixel and gamma 2.2 there are two tables in the
    memory, one for gamma 2.2 input 8bit output 10bit and it's inverse input
    10bit output 8bit. The GP_Gamma contains six pointers. First three points to
-   the gamma table for gamma 2.2 whith 8bit input (256 array members) and the
+   the gamma table for gamma 2.2 with 8bit input (256 array members) and the
    output format is 10bits so each array member is uint16_t. The other three
-   are for inverse gamma funcion (gamma = 0.454545...) with 10bit input (1024
+   are for inverse gamma function (gamma = 0.454545...) with 10bit input (1024
    array members) and 8bit output so each member is uint8_t.
 
    The whole interface is designed for speed, so that conversion to linear
@@ -94,16 +94,16 @@
 
    gamma->tables[chan_count + chan_number].u8[chan_val]
 
-   of when original pixel channel had more than 8bits
+   or when original pixel channel had more than 8bits
 
    gamma->tables[chan_count + chan_number].u16[chan_val]
 
    When doing more than one conversion it's better to save pointers to
    individual table (example for RGB888):
 
-   uint16_t *R2Lin = gamma->tables[0].u16;
+   uint16_t *R_2_LIN = gamma->tables[0].u16;
    ...
-   uint8_t *R2Gamma = gamma->tables[3].u8;
+   uint8_t *R_2_GAMMA = gamma->tables[3].u8;
    ...
 
   */
@@ -139,9 +139,9 @@ typedef struct GP_GammaTable {
  * Gamma structure for general pixel type.
  *
  * The GP_Gamma structure contains pointers to tables for each pixel
- * channel and for gamma and it's inverse transfomation.
+ * channel and for gamma and it's inverse transformation.
  * 
- * The interface is specialy designed so that getting Gamma corrected value is
+ * The interface is specially designed so that getting Gamma corrected value is
  * a matter of indexing two arrays.
  */
 typedef struct GP_Gamma {

@@ -53,7 +53,7 @@ extern int16_t GP_CubicTable[];
 /*
  * Fixed point version of above.
  *
- * Both input and output value are multiplied by MUL.
+ * The input and output are expected in 24.8 fixed point format
  */
 static inline int cubic_int(int x)
 {
