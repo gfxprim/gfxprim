@@ -16,47 +16,46 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2010 Jiri "BlueBear" Dluhos                            *
- *                         <jiri.bluebear.dluhos@gmail.com>                  *
- *                                                                           *
- * Copyright (C) 2009-2011 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
-/*
+#include "core/GP_Debug.h"
+#include "core/GP_GetPutPixel.h"
 
-  GP_Context filters.
+#include "GP_Linear.h"
 
- */
+#include "GP_Laplace.h"
 
-#ifndef GP_FILTERS_H
-#define GP_FILTERS_H
+int GP_FilterLaplace(const GP_Context *src, GP_Context *dst,
+		     GP_ProgressCallback *callback)
+{
+	GP_DEBUG(1, "Laplace filter %ux%u", src->w, src->h);
 
-/* Filter per channel parameter passing interface */
-#include "filters/GP_FilterParam.h"
+	float kern[3] = {1, -2, 1};
 
-/* Point filters, brightness, contrast ... */
-#include "filters/GP_Point.h"
+	if (GP_FilterVHLinearConvolution_Raw(src, dst, kern, 3, 1,
+	                                     kern, 3, 1, callback))
+		return 1;
 
-/* Addition, difference, min, max ... */
-#include "filters/GP_Arithmetic.h"
+	return 0;
+}
 
-/* Histograms, ... */
-#include "filters/GP_Stats.h"
+int GP_FilterEdgeSharpening(const GP_Context *src, GP_Context *dst,
+                            float w, GP_ProgressCallback *callback)
+{
+	float kern[3] = {0, 1, 0};
 
-/* Image rotations (90 180 270 grads) and mirroring */
-#include "filters/GP_Rotate.h"
+	GP_DEBUG(1, "Laplace Edge Sharpening filter %ux%u w=%f",
+	         src->w, src->h, w);
 
-/* Linear convolution based filters (mostly blurs) */
-#include "filters/GP_Linear.h"
+	kern[0] -=  1.00 * w;
+	kern[1] -= -2.00 * w;
+	kern[2] -=  1.00 * w;
 
-/* Image scaling (resampling) */
-#include "filters/GP_Resize.h"
+	if (GP_FilterVHLinearConvolution_Raw(src, dst, kern, 3, 1,
+	                                     kern, 3, 1, callback))
+		return 1;
 
-/* Bitmap dithering */
-#include "filters/GP_Dither.h"
-
-/* Laplace based filters */
-#include "filters/GP_Laplace.h"
-
-#endif /* GP_FILTERS_H */
+	return 0;
+}

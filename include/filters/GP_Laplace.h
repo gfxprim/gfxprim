@@ -16,47 +16,33 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2010 Jiri "BlueBear" Dluhos                            *
- *                         <jiri.bluebear.dluhos@gmail.com>                  *
- *                                                                           *
- * Copyright (C) 2009-2011 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
 /*
 
-  GP_Context filters.
+  Laplace filter and Laplace-based filters.
 
  */
 
-#ifndef GP_FILTERS_H
-#define GP_FILTERS_H
+#ifndef FILTERS_GP_LAPLACE_H
+#define FILTERS_GP_LAPLACE_H
 
-/* Filter per channel parameter passing interface */
-#include "filters/GP_FilterParam.h"
+#include "GP_Filter.h"
 
-/* Point filters, brightness, contrast ... */
-#include "filters/GP_Point.h"
+/*
+ * Laplace, second-derivative filter.
+ */
+int GP_FilterLaplace(const GP_Context *src, GP_Context *dst,
+                     GP_ProgressCallback *callback);
 
-/* Addition, difference, min, max ... */
-#include "filters/GP_Arithmetic.h"
+/*
+ * Laplace based filter sharpening.
+ *
+ * The w is direct weight used to multiply the result.
+ */
+int GP_FilterEdgeSharpening(const GP_Context *src, GP_Context *dst,
+                            float w, GP_ProgressCallback *callback);
 
-/* Histograms, ... */
-#include "filters/GP_Stats.h"
-
-/* Image rotations (90 180 270 grads) and mirroring */
-#include "filters/GP_Rotate.h"
-
-/* Linear convolution based filters (mostly blurs) */
-#include "filters/GP_Linear.h"
-
-/* Image scaling (resampling) */
-#include "filters/GP_Resize.h"
-
-/* Bitmap dithering */
-#include "filters/GP_Dither.h"
-
-/* Laplace based filters */
-#include "filters/GP_Laplace.h"
-
-#endif /* GP_FILTERS_H */
+#endif /* FILTERS_GP_LAPLACE_H */
