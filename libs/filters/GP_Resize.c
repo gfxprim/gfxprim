@@ -30,6 +30,7 @@
 
 #include "GP_Resize.h"
 
+/* See GP_ResizeNN.gen.c */
 int GP_FilterResizeNN_Raw(const GP_Context *src, GP_Context *dst,
                           GP_ProgressCallback *callback);
 
@@ -51,6 +52,35 @@ GP_Context *GP_FilterResizeNNAlloc(const GP_Context *src,
 		return NULL;
 
 	if (GP_FilterResizeNN_Raw(src, res, callback)) {
+		GP_ContextFree(res);
+		return NULL;
+	}
+
+	return res;
+}
+
+/* See GP_ResizeCubic.gen.c */
+int GP_FilterResizeCubicInt_Raw(const GP_Context *src, GP_Context *dst,
+                                GP_ProgressCallback *callback);
+
+int GP_FilterResizeCubicInt(const GP_Context *src, GP_Context *dst,
+                            GP_ProgressCallback *callback)
+{
+	GP_ASSERT(src->pixel_type == dst->pixel_type);
+
+	return GP_FilterResizeCubicInt_Raw(src, dst, callback);
+}
+
+GP_Context *GP_FilterResizeCubicIntAlloc(const GP_Context *src,
+                                         GP_Size w, GP_Size h,
+                                         GP_ProgressCallback *callback)
+{
+	GP_Context *res = GP_ContextAlloc(w, h, src->pixel_type);
+
+	if (res == NULL)
+		return NULL;
+
+	if (GP_FilterResizeCubicInt_Raw(src, res, callback)) {
 		GP_ContextFree(res);
 		return NULL;
 	}
@@ -245,213 +275,6 @@ int GP_FilterInterpolate_Cubic(const GP_Context *src, GP_Context *dst,
 		}
 		
 		if (GP_ProgressCallbackReport(callback, i, dst->w, dst->h))
-			return 1;
-	}
-
-	GP_ProgressCallbackDone(callback);
-	return 0;
-}
-
-#include "GP_Cubic.h"
-
-#define MUL 1024
-
-#define MUL_I(a, b) ({ \
-	a[0] *= b[0]; \
-	a[1] *= b[1]; \
-	a[2] *= b[2]; \
-	a[3] *= b[3]; \
-})
-
-#define SUM_I(a) \
-	((a)[0] + (a)[1] + (a)[2] + (a)[3])
-
-#include "core/GP_GammaCorrection.h"
-
-int GP_FilterInterpolate_CubicInt(const GP_Context *src, GP_Context *dst,
-                                  GP_ProgressCallback *callback)
-{
-	int32_t col_r[src->w], col_g[src->w], col_b[src->w];
-	uint32_t i, j;
-
-	GP_DEBUG(1, "Scaling image %ux%u -> %ux%u %2.2f %2.2f",
-	            src->w, src->h, dst->w, dst->h,
-		    1.00 * dst->w / src->w, 1.00 * dst->h / src->h);
-
-	uint16_t *R_2_LIN = NULL;
-	uint16_t *G_2_LIN = NULL;
-	uint16_t *B_2_LIN = NULL;
-
-	uint8_t *R_2_GAMMA = NULL;
-	uint8_t *G_2_GAMMA = NULL;
-	uint8_t *B_2_GAMMA = NULL;
-
-	if (src->gamma) {
-		R_2_LIN = src->gamma->tables[0]->u16;
-		G_2_LIN = src->gamma->tables[1]->u16;
-		B_2_LIN = src->gamma->tables[2]->u16;
-		
-		R_2_GAMMA = src->gamma->tables[3]->u8;
-		G_2_GAMMA = src->gamma->tables[4]->u8;
-		B_2_GAMMA = src->gamma->tables[5]->u8;
-	}
-
-	/* pre-generate x mapping and constants */
-	int32_t xmap[dst->w][4];
-	int32_t xmap_c[dst->w][4];
-
-	for (i = 0; i < dst->w; i++) {
- 		float x = (1.00 * i / (dst->w - 1)) * (src->w - 1);
-		
-		xmap[i][0] = floor(x - 1);
-		xmap[i][1] = x;
-		xmap[i][2] = x + 1;
-		xmap[i][3] = x + 2;
-
-			
-		xmap_c[i][0] = cubic_int((xmap[i][0] - x) * MUL + 0.5);
-		xmap_c[i][1] = cubic_int((xmap[i][1] - x) * MUL + 0.5);
-		xmap_c[i][2] = cubic_int((xmap[i][2] - x) * MUL + 0.5);
-		xmap_c[i][3] = cubic_int((xmap[i][3] - x) * MUL + 0.5);
-			
-		if (xmap[i][0] < 0)
-			xmap[i][0] = 0;
-
-		if (xmap[i][3] >= (int32_t)src->w)
-			xmap[i][3] = src->w - 1;
-	}
-
-	/* cubic resampling */
-	for (i = 0; i < dst->h; i++) {
-		float y = (1.00 * i / (dst->h - 1)) * (src->h - 1);
-		int32_t cvy[4];
-		int yi[4];
-		
-		yi[0] = floor(y - 1);
-		yi[1] = y;
-		yi[2] = y + 1;
-		yi[3] = y + 2;
-		
-		cvy[0] = cubic_int((yi[0] - y) * MUL + 0.5);
-		cvy[1] = cubic_int((yi[1] - y) * MUL + 0.5);
-		cvy[2] = cubic_int((yi[2] - y) * MUL + 0.5);
-		cvy[3] = cubic_int((yi[3] - y) * MUL + 0.5);
-		
-		if (yi[0] < 0)
-			yi[0] = 0;
-		
-		if (yi[3] >= (int)src->h)
-			yi[3] = src->h - 1;
-
-		/* Generate interpolated row */
-		for (j = 0; j < src->w; j++) {
-			int32_t rv[4], gv[4], bv[4];
-			GP_Pixel pix[4];
-
-			pix[0] = GP_GetPixel_Raw_24BPP(src, j, yi[0]);
-			pix[1] = GP_GetPixel_Raw_24BPP(src, j, yi[1]);
-			pix[2] = GP_GetPixel_Raw_24BPP(src, j, yi[2]);
-			pix[3] = GP_GetPixel_Raw_24BPP(src, j, yi[3]);
-				
-			rv[0] = GP_Pixel_GET_R_RGB888(pix[0]);
-			rv[1] = GP_Pixel_GET_R_RGB888(pix[1]);
-			rv[2] = GP_Pixel_GET_R_RGB888(pix[2]);
-			rv[3] = GP_Pixel_GET_R_RGB888(pix[3]);
-		
-			gv[0] = GP_Pixel_GET_G_RGB888(pix[0]);
-			gv[1] = GP_Pixel_GET_G_RGB888(pix[1]);
-			gv[2] = GP_Pixel_GET_G_RGB888(pix[2]);
-			gv[3] = GP_Pixel_GET_G_RGB888(pix[3]);
-			
-			bv[0] = GP_Pixel_GET_B_RGB888(pix[0]);
-			bv[1] = GP_Pixel_GET_B_RGB888(pix[1]);
-			bv[2] = GP_Pixel_GET_B_RGB888(pix[2]);
-			bv[3] = GP_Pixel_GET_B_RGB888(pix[3]);
-			
-			
-			if (src->gamma) {
-				rv[0] = R_2_LIN[rv[0]];
-				rv[1] = R_2_LIN[rv[1]];
-				rv[2] = R_2_LIN[rv[2]];
-				rv[3] = R_2_LIN[rv[3]];
-			
-				gv[0] = G_2_LIN[gv[0]];
-				gv[1] = G_2_LIN[gv[1]];
-				gv[2] = G_2_LIN[gv[2]];
-				gv[3] = G_2_LIN[gv[3]];
-			
-				bv[0] = G_2_LIN[bv[0]];
-				bv[1] = G_2_LIN[bv[1]];
-				bv[2] = G_2_LIN[bv[2]];
-				bv[3] = G_2_LIN[bv[3]];
-			}
-
-			MUL_I(rv, cvy);
-			MUL_I(gv, cvy);
-			MUL_I(bv, cvy);
-
-			col_r[j] = SUM_I(rv);
-			col_g[j] = SUM_I(gv);
-			col_b[j] = SUM_I(bv);
-		}
-
-		/* now interpolate column for new image */
-		for (j = 0; j < dst->w; j++) {
-			int32_t rv[4], gv[4], bv[4];
-			int32_t r, g, b;
-		
-			rv[0] = col_r[xmap[j][0]];
-			rv[1] = col_r[xmap[j][1]];
-			rv[2] = col_r[xmap[j][2]];
-			rv[3] = col_r[xmap[j][3]];
-			
-			gv[0] = col_g[xmap[j][0]];
-			gv[1] = col_g[xmap[j][1]];
-			gv[2] = col_g[xmap[j][2]];
-			gv[3] = col_g[xmap[j][3]];
-			
-			bv[0] = col_b[xmap[j][0]];
-			bv[1] = col_b[xmap[j][1]];
-			bv[2] = col_b[xmap[j][2]];
-			bv[3] = col_b[xmap[j][3]];
-			
-			MUL_I(rv, xmap_c[j]);
-			MUL_I(gv, xmap_c[j]);
-			MUL_I(bv, xmap_c[j]);
-
-			r = (SUM_I(rv) + MUL*MUL/2) / MUL / MUL;
-			g = (SUM_I(gv) + MUL*MUL/2) / MUL / MUL;
-			b = (SUM_I(bv) + MUL*MUL/2) / MUL / MUL;
-			
-			if (src->gamma) {
-				if (r > 1023)
-					r = 1023;
-				if (g > 1023)
-					g = 1023;
-				if (b > 1023)
-					b = 1023;
-			
-				if (r < 0)
-					r = 0;
-				if (g < 0)
-					g = 0;
-				if (b < 0)
-					b = 0;
-
-				r = R_2_GAMMA[r];
-				g = G_2_GAMMA[g];
-				b = B_2_GAMMA[b];
-			} else {
-				CLAMP(r);
-				CLAMP(g);
-				CLAMP(b);
-			}		
-			
-			GP_Pixel pix = GP_Pixel_CREATE_RGB888((uint8_t)r, (uint8_t)g, (uint8_t)b);
-			GP_PutPixel_Raw_24BPP(dst, j, i, pix);
-		}
-		
-		if (GP_ProgressCallbackReport(callback, i, dst->h, dst->w))
 			return 1;
 	}
 
@@ -742,7 +565,7 @@ int GP_FilterResize_Raw(const GP_Context *src, GP_Context *dst,
 	case GP_INTERP_CUBIC:
 		return GP_FilterInterpolate_Cubic(src, dst, callback);
 	case GP_INTERP_CUBIC_INT:
-		return GP_FilterInterpolate_CubicInt(src, dst, callback);
+		return GP_FilterResizeCubicInt_Raw(src, dst, callback);
 	}
 
 	return 1;

@@ -29,7 +29,7 @@
 #ifndef FILTERS_GP_CUBIC_H
 #define FILTERS_GP_CUBIC_H
 
-#define A 0.5
+#define Ap 0.5
 
 static inline float cubic_float(float x)
 {
@@ -37,10 +37,10 @@ static inline float cubic_float(float x)
 		x = -x;
 
 	if (x < 1)
-		return (2 - A)*x*x*x + (A - 3)*x*x + 1;
+		return (2 - Ap)*x*x*x + (Ap - 3)*x*x + 1;
 
 	if (x < 2)
-		return -A*x*x*x + 5*A*x*x - 8*A*x + 4*A;
+		return -Ap*x*x*x + 5*Ap*x*x - 8*Ap*x + 4*Ap;
 
 	return 0;
 }
