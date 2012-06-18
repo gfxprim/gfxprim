@@ -750,6 +750,8 @@ int main(int argc, char *argv[])
 				case GP_KEY_ESC:
 				case GP_KEY_ENTER:
 				case GP_KEY_Q:
+					image_cache_drop(params.img_resized_cache);
+					image_cache_drop(params.img_orig_cache);
 					GP_BackendExit(backend);
 					return 0;
 				break;
