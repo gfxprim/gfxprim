@@ -419,20 +419,25 @@ static void *image_loader(void *ptr)
 
 static pthread_t loader_thread = (pthread_t)0;
 
-static void show_image(struct loader_params *params, const char *path)
+static void stop_loader(void)
 {
-	int ret;
-
-	/* stop previous loader thread */
 	if (loader_thread) {
 		abort_flag = 1;
 		pthread_join(loader_thread, NULL);
 		loader_thread = (pthread_t)0;
 		abort_flag = 0;
 	}
-	
+}
+
+static void show_image(struct loader_params *params, const char *path)
+{
+	int ret;
+
 	if (path != NULL)
 		params->img_path = path;
+
+	/* stop previous loader thread */
+	stop_loader();
 
 	ret = pthread_create(&loader_thread, NULL, image_loader, (void*)params);
 
@@ -745,6 +750,8 @@ int main(int argc, char *argv[])
 				case GP_KEY_ESC:
 				case GP_KEY_ENTER:
 				case GP_KEY_Q:
+					image_cache_drop(params.img_resized_cache);
+					image_cache_drop(params.img_orig_cache);
 					GP_BackendExit(backend);
 					return 0;
 				break;
@@ -795,6 +802,8 @@ int main(int argc, char *argv[])
 			case GP_EV_SYS:
 				switch (ev.code) {
 				case GP_EV_SYS_RESIZE:
+					/* stop loader thread before resizing backend buffer */
+					stop_loader();
 					GP_BackendResize(backend, ev.val.sys.w, ev.val.sys.h);
 					GP_Fill(backend->context, 0);
 					params.show_progress_once = 1;
