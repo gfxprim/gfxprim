@@ -16,38 +16,14 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2011 Jiri "BlueBear" Dluhos                            *
- *                         <jiri.bluebear.dluhos@gmail.com>                  *
- *                                                                           *
  * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
-#ifndef GP_H
-#define GP_H
+#ifndef GP_GRABBERS_GRABBERS_H
+#define GP_GRABBERS_GRABBERS_H
 
-/* library core */
-#include "core/GP_Core.h"
+#include "grabbers/GP_Grabber.h"
+#include "grabbers/GP_V4L2.h"
 
-/* public drawing API */
-#include "gfx/GP_Gfx.h"
-
-/* fonts and text drawing */
-#include "text/GP_Text.h"
-
-/* backends */
-#include "backends/GP_Backend.h"
-
-/* input and events */
-#include "input/GP_Input.h"
-
-/* bitmap loaders */
-#include "loaders/GP_Loaders.h"
-
-/* bitmap filters */
-#include "filters/GP_Filters.h"
-
-/* grabbers */
-#include "grabbers/GP_Grabbers.h"
-
-#endif /* GP_H */
+#endif /* GP_GRABBERS_GRABBERS_H */

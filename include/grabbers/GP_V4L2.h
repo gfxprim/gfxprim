@@ -16,38 +16,23 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2011 Jiri "BlueBear" Dluhos                            *
- *                         <jiri.bluebear.dluhos@gmail.com>                  *
- *                                                                           *
  * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
-#ifndef GP_H
-#define GP_H
+#ifndef GP_GRABBERS_V4L2_H
+#define GP_GRABBERS_V4L2_H
 
-/* library core */
-#include "core/GP_Core.h"
+struct GP_Grabber;
 
-/* public drawing API */
-#include "gfx/GP_Gfx.h"
+/*
+ * Create V4L2 grabber.
+ *
+ * The prefered_width and height may not be used if driver does support only
+ * fixed image size.
+ */
+struct GP_Grabber *GP_GrabberV4L2Init(const char *device,
+                                      unsigned int prefered_width,
+				      unsigned int prefered_height);
 
-/* fonts and text drawing */
-#include "text/GP_Text.h"
-
-/* backends */
-#include "backends/GP_Backend.h"
-
-/* input and events */
-#include "input/GP_Input.h"
-
-/* bitmap loaders */
-#include "loaders/GP_Loaders.h"
-
-/* bitmap filters */
-#include "filters/GP_Filters.h"
-
-/* grabbers */
-#include "grabbers/GP_Grabbers.h"
-
-#endif /* GP_H */
+#endif /* GP_GRABBERS_V4L2_H */

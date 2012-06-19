@@ -16,38 +16,75 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2011 Jiri "BlueBear" Dluhos                            *
- *                         <jiri.bluebear.dluhos@gmail.com>                  *
- *                                                                           *
  * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
-#ifndef GP_H
-#define GP_H
+#ifndef GP_GRABBERS_GRABBER_H
+#define GP_GRABBERS_GRABBER_H
 
-/* library core */
-#include "core/GP_Core.h"
+struct GP_Context;
 
-/* public drawing API */
-#include "gfx/GP_Gfx.h"
+typedef struct GP_Grabber {
+	/*
+	 * Context with current frame.
+	 */
+	struct GP_Context *frame;
 
-/* fonts and text drawing */
-#include "text/GP_Text.h"
+	/*
+	 * Returns 0 if there are no images in queue and 1 otherwise.
+	 */
+	int (*Poll)(struct GP_Grabber *self);
 
-/* backends */
-#include "backends/GP_Backend.h"
+	/*
+	 * Grabber fd, may be set -1 if grabber doesn't have one.
+	 */
+	int fd;
 
-/* input and events */
-#include "input/GP_Input.h"
+	/*
+	 * Starts the actuall grabbing. May be NULL if not needed.
+	 */
+	int (*Start)(struct GP_Grabber *self);
 
-/* bitmap loaders */
-#include "loaders/GP_Loaders.h"
+	/*
+	 * Stops the grabbing. May be NULL if not needed.
+	 */
+	int (*Stop)(struct GP_Grabber *self);
 
-/* bitmap filters */
-#include "filters/GP_Filters.h"
+	/*
+	 * Exit functions. Closes fd, frees memory.
+	 */
+	void (*Exit)(struct GP_Grabber *self);
 
-/* grabbers */
-#include "grabbers/GP_Grabbers.h"
+	char priv[];
+} GP_Grabber;
 
-#endif /* GP_H */
+#define GP_GRABBER_PRIV(grabber) ((void*)(grabber)->priv)
+
+static inline void GP_GrabberExit(struct GP_Grabber *self)
+{
+	self->Exit(self);
+}
+
+static inline int GP_GrabberPoll(struct GP_Grabber *self)
+{
+	return self->Poll(self);
+}
+
+static inline int GP_GrabberStart(struct GP_Grabber *self)
+{
+	if (self->Start)
+		return self->Start(self);
+	
+	return 0;
+}
+
+static inline int GP_GrabberStop(struct GP_Grabber *self)
+{
+	if (self->Stop)
+		return self->Stop(self);
+	
+	return 0;
+}
+
+#endif /* GP_GRABBERS_GRABBER_H */

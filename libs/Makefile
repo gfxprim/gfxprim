@@ -1,3 +1,3 @@
 TOPDIR=..
-SUBDIRS=core gfx text loaders filters input backends SDL
+SUBDIRS=core gfx text loaders filters input backends grabbers SDL
 include $(TOPDIR)/post.mk

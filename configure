@@ -188,7 +188,7 @@ def write_config_mk(cfg, libs):
 # Generate app compilation helper
 #
 def write_gfxprim_config(cfg, libs):
-    modules = ['loaders', 'backends']
+    modules = ['loaders', 'backends', 'grabbers']
 
     f = open('gfxprim-config', 'w')
     f.write('#!/bin/sh\n'
@@ -212,6 +212,8 @@ def write_gfxprim_config(cfg, libs):
         ldflags = ''
         if i == 'backends':
             ldflags += '-lGP_backends '
+        if i == 'grabbers':
+            ldflags += '-lGP_grabbers '
         ldflags += libs.get_linker_flags(i)
         f.write('\t--libs-%s) echo -n "%s ";;\n' % (i, ldflags))
 
@@ -253,7 +255,10 @@ if __name__ ==  '__main__':
 		    [header_exists, "X11/Xlib.h"], "", "-lX11", ["backends"]],
 		   ["freetype",
                     "A high-quality and portable font engine",
-                    [header_exists, "ft2build.h"], "", "`freetype-config --libs`", ["core"]]], cfg)
+                    [header_exists, "ft2build.h"], "", "`freetype-config --libs`", ["core"]],
+		   ["V4L2",
+                    "Video for linux 2",
+                    [header_exists, "linux/videodev2.h"], "", "", ["grabbers"]]], cfg)
 
     parser = OptionParser();
     
