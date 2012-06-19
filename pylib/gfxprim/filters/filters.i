@@ -3,6 +3,7 @@
 
 %{
 #include "filters/GP_Filters.h"
+#include "core/GP_Debug.h"
 %}
 
 %import ../core/core.i
