@@ -30,7 +30,7 @@
 #include "GP_Transform.h"
 #include "GP_Pixel.h"
 #include "GP_GetPutPixel.h"
-#include "GP_GammaCorrection.h"
+#include "GP_Gamma.h"
 #include "GP_Context.h"
 #include "GP_Blit.h"
 
