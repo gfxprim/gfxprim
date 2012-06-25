@@ -228,7 +228,7 @@ if __name__ ==  '__main__':
     # Dictionary for default configuration parameters
     #
     cfg = {'CC'          : ['gcc', 'Path/name of the C compiler'],
-           'CFLAGS'      : ['-W -Wall -Wextra -fPIC -O2 -ggdb', 'C compiler flags'],
+           'CFLAGS'      : ['-W -Wall -Wextra -fPIC -O2 -ggdb -D_FORTIFY_SOURCE=2', 'C compiler flags'],
            'PYTHON_BIN'  : ['python', 'Path/name of python interpreter'],
            'SWIG'        : ['swig', 'Simplified Wrapper and Interface Generator'],
            'include_path': ['/usr/include', 'Path to the system headers']}
