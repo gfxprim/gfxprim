@@ -118,7 +118,7 @@ static void v4l2_yuv422_fillframe(struct GP_Grabber *self, void *buf)
 			
 			*tmp++ = R;
 			*tmp++ = G;
-		  	*tmp++ = G;
+		  	*tmp++ = B;
 
 			py += 2;
 			
