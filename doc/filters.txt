@@ -488,11 +488,11 @@ O(x,y)=\sum_{i=-\infty}^{\infty}\sum_{j=-\infty}^{\infty}I(x-i,y-j) \cdot K(i,j)
 \]
 -------------------------------------------------------------------------------
 
-The K denotes convolution kernel and in practice, due to computional
+The K denotes convolution kernel and in practice, due to computational
 complexity, the i and j are bounded in relatively small intervals. For example
 if i and j are in (-1,1) the kernel size is 3x3.
 
-Note that pixel values around the image cornes are undefined. The linear
+Note that pixel values around the image corners are undefined. The linear
 convolution in GFXprim simply uses the corner pixel values for all pixels
 outside the image.
 
@@ -514,7 +514,7 @@ GP_Context *GP_FilterLaplaceAlloc(const GP_Context *src,
                                   GP_ProgressCallback *callback);
 -------------------------------------------------------------------------------
 
-Discrete laplace filter that produces a second derivative of the original
+Discrete Laplace filter that produces a second derivative of the original
 image.
 
 The convolution kernel is defined as:
@@ -558,7 +558,7 @@ GP_Context *GP_FilterEdgeSharpeningAlloc(const GP_Context *src, float w,
                                          GP_ProgressCallback *callback);
 -------------------------------------------------------------------------------
 
-Laplace based edge sharpening filter, substracts weighted second derivative
+Laplace based edge sharpening filter, subtracts weighted second derivative
 from the original image.
 
 [latex, laplacian_edge_sharpening.png, 140]
