@@ -476,6 +476,112 @@ Catch all function for symmetry filters.
 Linear filters
 ~~~~~~~~~~~~~~
 
+Linear filters family consists of filters based on discrete linear
+convolution, that means that computed pixel value depends on linear
+combination of the image pixels.
+
+It's defined as:
+[latex, discrete_linear_convolution.png, 140]
+-------------------------------------------------------------------------------
+\[
+O(x,y)=\sum_{i=-\infty}^{\infty}\sum_{j=-\infty}^{\infty}I(x-i,y-j) \cdot K(i,j)
+\]
+-------------------------------------------------------------------------------
+
+The K denotes convolution kernel and in practice, due to computional
+complexity, the i and j are bounded in relatively small intervals. For example
+if i and j are in (-1,1) the kernel size is 3x3.
+
+Note that pixel values around the image cornes are undefined. The linear
+convolution in GFXprim simply uses the corner pixel values for all pixels
+outside the image.
+
+Particular convolution kernel is called separable if it could be decomposed
+into two one dimensional kernels (these when combined yields back the original
+kernel). Such convolution then could be applied as two one dimensional
+convolutions which is faster operation (especially for big kernels).
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <GP_Filters.h>
+/* or */
+#include <GP.h>
+
+int GP_FilterLaplace(const GP_Context *src, GP_Context *dst,
+                     GP_ProgressCallback *callback);
+
+GP_Context *GP_FilterLaplaceAlloc(const GP_Context *src,
+                                  GP_ProgressCallback *callback);
+-------------------------------------------------------------------------------
+
+Discrete laplace filter that produces a second derivative of the original
+image.
+
+The convolution kernel is defined as:
+
+[latex, laplacian_kernel.png, 130]
+-------------------------------------------------------------------------------
+\[
+\begin{bmatrix}
+0  &  1  &  0 \\
+0  & -2  &  0 \\
+0  &  1  &  0
+\end{bmatrix}
++
+\begin{bmatrix}
+0  &  0  &  0 \\
+1  & -2  &  1 \\
+0  &  0  &  0 
+\end{bmatrix}
+=
+\begin{bmatrix}
+0  &  1  &  0 \\
+1  & -4  &  1 \\
+0  &  1  &  0
+\end{bmatrix}
+\]
+-------------------------------------------------------------------------------
+
+NOTE: This filter is not separable but could be written as a sum of two one
+      dimensional filters as the kernel definition suggests.
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <GP_Filters.h>
+/* or */
+#include <GP.h>
+
+int GP_FilterEdgeSharpening(const GP_Context *src, GP_Context *dst,
+                            float w, GP_ProgressCallback *callback);
+
+GP_Context *GP_FilterEdgeSharpeningAlloc(const GP_Context *src, float w,
+                                         GP_ProgressCallback *callback);
+-------------------------------------------------------------------------------
+
+Laplace based edge sharpening filter, substracts weighted second derivative
+from the original image.
+
+[latex, laplacian_edge_sharpening.png, 140]
+-------------------------------------------------------------------------------
+\[
+O(x,y) = I(x,y) - w * I''(x,y)
+\]
+-------------------------------------------------------------------------------
+
+.Original Image; Edge Sharpening w=0.1, w=0.3, w=0.5
+image:images/dither/lenna_small.png[
+	"Original Image", 
+	link="images/dither/lenna.png"]
+image:images/edge_sharpening/lenna_small_w_0_1.png[
+	"Edge Sharpening w=0.1", 
+	link="images/edge_sharpening/lenna_w_0_1.png"]
+image:images/edge_sharpening/lenna_small_w_0_3.png[
+	"Edge Sharpening w=0.5", 
+	link="images/edge_sharpening/lenna_w_0_3.png"]
+image:images/edge_sharpening/lenna_small_w_0_5.png[
+	"Edge Sharpening w=0.5", 
+	link="images/edge_sharpening/lenna_w_0_5.png"]
+
 [source,c]
 -------------------------------------------------------------------------------
 #include <GP_Filters.h>
