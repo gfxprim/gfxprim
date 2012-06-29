@@ -32,17 +32,30 @@
 #include "GP_Filter.h"
 
 /*
- * Laplace, second-derivative filter.
+ * Discrete Laplace, second-derivative filter.
+ *
+ * Implemented by separable linear convolution with kernels
+ *
+ * [1 -2 1] and [ 1 ]
+ *              [-2 ]
+ *              [ 1 ]
  */
 int GP_FilterLaplace(const GP_Context *src, GP_Context *dst,
                      GP_ProgressCallback *callback);
 
+GP_Context *GP_FilterLaplaceAlloc(const GP_Context *src,
+                                  GP_ProgressCallback *callback);
+
 /*
  * Laplace based filter sharpening.
  *
- * The w is direct weight used to multiply the result.
+ * This filter substract result of Laplace filter weigted by w from the
+ * original image which amplifies edges.
  */
 int GP_FilterEdgeSharpening(const GP_Context *src, GP_Context *dst,
                             float w, GP_ProgressCallback *callback);
+
+GP_Context *GP_FilterEdgeSharpeningAlloc(const GP_Context *src, float w,
+                                         GP_ProgressCallback *callback);
 
 #endif /* FILTERS_GP_LAPLACE_H */

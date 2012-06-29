@@ -32,30 +32,71 @@ int GP_FilterLaplace(const GP_Context *src, GP_Context *dst,
 {
 	GP_DEBUG(1, "Laplace filter %ux%u", src->w, src->h);
 
-	float kern[3] = {1, -2, 1};
+	float kern[9] = {0,  1,  0,
+	                 1, -4,  1,
+	                 0,  1,  0};
 
-	if (GP_FilterVHLinearConvolution_Raw(src, dst, kern, 3, 1,
-	                                     kern, 3, 1, callback))
+	if (GP_FilterLinearConvolution_Raw(src, dst, kern, 3, 3, 1, callback))
 		return 1;
 
 	return 0;
 }
 
+GP_Context *GP_FilterLaplaceAlloc(const GP_Context *src,
+                                  GP_ProgressCallback *callback)
+{
+	GP_Context *ret = GP_ContextCopy(src, 0);
+
+	if (ret == NULL)
+		return NULL;
+	
+	if (GP_FilterLaplace(src, ret, callback)) {
+		GP_ContextFree(ret);
+		return NULL;
+	}
+
+	return ret;
+}
+
+
 int GP_FilterEdgeSharpening(const GP_Context *src, GP_Context *dst,
                             float w, GP_ProgressCallback *callback)
 {
-	float kern[3] = {0, 1, 0};
-
+	/* Identity kernel */
+	float kern[9] = {0,  0,  0,
+	                 0,  1,  0,
+	                 0,  0,  0};
+	
 	GP_DEBUG(1, "Laplace Edge Sharpening filter %ux%u w=%f",
 	         src->w, src->h, w);
 
-	kern[0] -=  1.00 * w;
-	kern[1] -= -2.00 * w;
-	kern[2] -=  1.00 * w;
+	/* Create combined kernel */
+	kern[1] -=  1.00 * w;
+	kern[3] -=  1.00 * w;
+	kern[4] -= -4.00 * w;
+	kern[5] -=  1.00 * w;
+	kern[7] -=  1.00 * w;
 
-	if (GP_FilterVHLinearConvolution_Raw(src, dst, kern, 3, 1,
-	                                     kern, 3, 1, callback))
+	GP_FilterKernelPrint(kern, 3, 3, 1);
+
+	if (GP_FilterLinearConvolution_Raw(src, dst, kern, 3, 3, 1, callback))
 		return 1;
 
 	return 0;
+}
+
+GP_Context *GP_FilterEdgeSharpeningAlloc(const GP_Context *src, float w,
+                                         GP_ProgressCallback *callback)
+{
+	GP_Context *ret = GP_ContextCopy(src, 0);
+
+	if (ret == NULL)
+		return NULL;
+	
+	if (GP_FilterEdgeSharpening(src, ret, w, callback)) {
+		GP_ContextFree(ret);
+		return NULL;
+	}
+
+	return ret;
 }
