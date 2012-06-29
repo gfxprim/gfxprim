@@ -464,3 +464,21 @@ int GP_FilterLinearConvolution_Raw(const GP_Context *src, GP_Context *dst,
 	GP_ProgressCallbackDone(callback);
 	return 0;
 }
+
+void GP_FilterKernelPrint(float kernel[], int kw, int kh, float kern_div)
+{
+	int i, j;
+
+	for (i = 0; i < kw; i++) {
+
+		if (i == kw/2)
+			printf("% 8.2f * | ", 1/kern_div);
+		else
+			printf("           | ");
+
+		for (j = 0; j < kh; j++)
+			printf("% 8.2f  ", kernel[j + i * kw]);
+
+		printf("|\n");
+	}
+}

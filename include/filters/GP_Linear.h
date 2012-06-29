@@ -112,4 +112,9 @@ int GP_FilterVHLinearConvolution_Raw(const GP_Context *src, GP_Context *dst,
 				     float vkernel[], uint32_t kh, float vkern_div,
 				     GP_ProgressCallback *callback);
 
+/*
+ * Prints a kernel into the stdout.
+ */
+void GP_FilterKernelPrint(float kernel[], int kw, int kh, float kern_div);
+
 #endif /* FILTERS_GP_LINEAR_H */
