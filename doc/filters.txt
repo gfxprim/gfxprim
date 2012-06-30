@@ -22,14 +22,17 @@ For convenience, the filters API is unified:
 * And the last argument is progress callback
 
 When using allocating version of the filter, pointer to the newly allocated
-context is returned, or in case of failure 'NULL' is returned. If filter has
-been interrupted by a callback, all allocated memory is freed and 'NULL' is
-returned.
+context is returned, or in case of failure 'NULL' is returned.
+
+If 'malloc()' has failed 'NULL' is returned.
+
+If filter has been interrupted by a callback, all allocated memory is freed,
+and 'NULL' is returned.
 
 When using non-allocating variant of the filter, the destination context must
-have correct pixel type and the context size must be big enough to store the
-result. The return value from such filter is either zero, in case of success,
-or non-zero when filter was interrupted by a callback.
+have correct pixel type and the size must be big enough to store the result.
+The return value from such filter is either zero, in case of success, or
+non-zero when filter was interrupted by a callback.
 
 For filters that work 'in-place' (which is explicitly said for each filter)
 the source and the destination could be the same context. Note that this is

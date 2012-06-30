@@ -238,7 +238,7 @@ GP_Context *GP_SubContextAlloc(const GP_Context *context,
 Creates subcontext of a context. The rectangular area must fit into the context.
 
 The 'GP_SubContext()' function initializes the passed pointer as a subcontext
-of a context and returns pointer to initialized subcontext (i.e. the same
+of a context and returns pointer to the initialized subcontext (i.e. the same
 pointer you passed as the subcontext parameter).
 
 The 'GP_SubContextAlloc()' function allocates 'GP_Context' structure and
@@ -280,6 +280,6 @@ Misc
 void GP_ContextPrintInfo(const GP_Context *self);
 -------------------------------------------------------------------------------
 
-This function prints the content of 'GP_Context' structure, in a readable
+This function prints the content of a 'GP_Context' structure, in a readable
 format, into the stdout.
 
