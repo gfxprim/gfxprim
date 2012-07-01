@@ -23,26 +23,40 @@
 #include <stdio.h>
 #include "cpu_timer.h"
 
+static void to_time(int *sec, int *nsec, struct timespec *start,
+                    struct timespec *stop)
+{
+	if (stop->tv_nsec < start->tv_nsec) {
+		*sec  = stop->tv_sec - start->tv_sec - 1;
+		*nsec = stop->tv_nsec + 1000000000 - start->tv_nsec;
+	} else {
+		*sec  = stop->tv_sec  - start->tv_sec;
+		*nsec = stop->tv_nsec - start->tv_nsec;
+	}
+}
+
 void cpu_timer_start(struct cpu_timer *self, const char *name)
 {
 	self->name = name;
-	clock_gettime(CLOCK_THREAD_CPUTIME_ID, &self->t_start);
+	
+	clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &self->t_cpu_start);
+	clock_gettime(CLOCK_MONOTONIC, &self->t_real_start);
 }
 
 void cpu_timer_stop(struct cpu_timer *self)
 {
-	clock_gettime(CLOCK_THREAD_CPUTIME_ID, &self->t_stop);
+	clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &self->t_cpu_stop);
+	clock_gettime(CLOCK_MONOTONIC, &self->t_real_stop);
 
-	int sec;
-	int nsec;
+	int cpu_sec;
+	int cpu_nsec;
 
-	if (self->t_stop.tv_nsec < self->t_start.tv_nsec) {
-		sec  = self->t_stop.tv_sec - self->t_start.tv_sec - 1;
-		nsec = self->t_stop.tv_nsec + 1000000000 - self->t_start.tv_nsec;
-	} else {
-		sec  = self->t_stop.tv_sec  - self->t_start.tv_sec;
-		nsec = self->t_stop.tv_nsec - self->t_start.tv_nsec;
-	}
+	int real_sec;
+	int real_nsec;
 
-	printf("TIMER '%s' %i.%09i sec\n", self->name, sec, nsec);
+	to_time(&cpu_sec, &cpu_nsec, &self->t_cpu_start, &self->t_cpu_stop);
+	to_time(&real_sec, &real_nsec, &self->t_real_start, &self->t_real_stop);
+
+	printf("TIMER '%s' CPU=%i.%09is REAL=%i.%09is\n", self->name,
+	       cpu_sec, cpu_nsec, real_sec, real_nsec);
 }

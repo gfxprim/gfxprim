@@ -32,8 +32,10 @@
 #include <time.h>
 
 struct cpu_timer {
-	struct timespec t_start;
-	struct timespec t_stop;
+	struct timespec t_cpu_start;
+	struct timespec t_cpu_stop;
+	struct timespec t_real_start;
+	struct timespec t_real_stop;
 	const char *name;
 };
 
