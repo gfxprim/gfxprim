@@ -9,6 +9,7 @@
 #include "core/GP_Context.h"
 #include "core/GP_GetPutPixel.h"
 #include "core/GP_Gamma.h"
+#include "core/GP_Clamp.h"
 #include "core/GP_Debug.h"
 
 #include "GP_Cubic.h"
@@ -26,13 +27,6 @@
 
 #define SUM_I(a) \
 	((a)[0] + (a)[1] + (a)[2] + (a)[3])
-
-#define CLAMP(val, max) do {    \
-	if (val < 0)       \
-		val = 0;   \
-	if (val > max)     \
-		val = max; \
-} while (0)
 
 %% for pt in pixeltypes
 %% if not pt.is_unknown() and not pt.is_palette()
@@ -165,14 +159,14 @@ static int GP_FilterResizeCubicInt_{{ pt.name }}_Raw(const GP_Context *src,
 
 			if (src->gamma) {
 			%% for c in pt.chanslist
-				CLAMP({{ c[0] }}, {{ 2 ** (c[2] + 2) - 1 }});
+				{{ c[0] }} = GP_CLAMP_GENERIC({{ c[0] }}, 0, {{ 2 ** (c[2] + 2) - 1 }});
 			%% endfor
 			%% for c in pt.chanslist
 				{{ c[0] }} = {{ c[0] }}_2_GAMMA[{{ c[0] }}];
 			%% endfor
 			} else {
 			%% for c in pt.chanslist
-				CLAMP({{ c[0] }}, {{ 2 ** c[2] - 1 }});
+				{{ c[0] }} = GP_CLAMP_GENERIC({{ c[0] }}, 0, {{ 2 ** c[2] - 1 }});
 			%% endfor
 			}
 			

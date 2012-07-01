@@ -22,19 +22,13 @@
 
 #include "core/GP_Context.h"
 #include "core/GP_GetPutPixel.h"
+#include "core/GP_Clamp.h"
 
 #include "core/GP_Debug.h"
 
 #include "GP_Linear.h"
 
 #define MUL 1024
-
-#define CLAMP(val) do {    \
-	if (val > 255)     \
-		val = 255; \
-	if (val < 0)       \
-		val = 0;   \
-} while (0)
 
 int GP_FilterHLinearConvolution_Raw(const GP_Context *src,
                                     GP_Coord x_src, GP_Coord y_src,
@@ -115,9 +109,9 @@ int GP_FilterHLinearConvolution_Raw(const GP_Context *src,
 			b /= ikern_div;
 			
 			/* and clamp just to be extra sure */
-			CLAMP(r);
-			CLAMP(g);
-			CLAMP(b);
+			r = GP_CLAMP(r, 0, 255);
+			g = GP_CLAMP(g, 0, 255);
+			b = GP_CLAMP(b, 0, 255);
 
 			GP_PutPixel_Raw_24BPP(dst, x_dst + x, y_dst + y,
 			                      GP_Pixel_CREATE_RGB888(r, g, b));
@@ -210,9 +204,9 @@ int GP_FilterVLinearConvolution_Raw(const GP_Context *src,
 			b /= ikern_div;
 			
 			/* and clamp just to be extra sure */
-			CLAMP(r);
-			CLAMP(g);
-			CLAMP(b);
+			r = GP_CLAMP(r, 0, 255);
+			g = GP_CLAMP(g, 0, 255);
+			b = GP_CLAMP(b, 0, 255);
 
 			GP_PutPixel_Raw_24BPP(dst, x_dst + x, y_dst + y,
 			                      GP_Pixel_CREATE_RGB888(r, g, b));
@@ -303,18 +297,8 @@ int GP_FilterLinearConvolution_Raw(const GP_Context *src,
 				int xi = x_src + i - kw/2;
 				int yi = y_src + y + j - kh/2;
 
-				if (xi < 0)
-					xi = 0;
-			
-				if (xi > (int)src->w - 1)
-					xi = src->w - 1;
-
-				if (yi < 0)
-					yi = 0;
-				
-				if (yi > (int)src->h - 1)
-					yi = src->h - 1;
-				
+				xi = GP_CLAMP(xi, 0, (int)src->w - 1);
+				yi = GP_CLAMP(yi, 0, (int)src->h - 1);	
 				
 				pix = GP_GetPixel_Raw_24BPP(src, xi, yi);
 
@@ -333,17 +317,8 @@ int GP_FilterLinearConvolution_Raw(const GP_Context *src,
 				int xi = x_src + x + kw/2;
 				int yi = y_src + y + j - kh/2;
 				
-				if (xi < 0)
-					xi = 0;
-			
-				if (xi > (int)src->w - 1)
-					xi = src->w - 1;
-
-				if (yi < 0)
-					yi = 0;
-
-				if (yi > (int)src->h - 1)
-					yi = src->h - 1;
+				xi = GP_CLAMP(xi, 0, (int)src->w - 1);
+				yi = GP_CLAMP(yi, 0, (int)src->h - 1);	
 
 				pix = GP_GetPixel_Raw_24BPP(src, xi, yi);
 
@@ -374,18 +349,9 @@ int GP_FilterLinearConvolution_Raw(const GP_Context *src,
 			b /= kern_div;
 
 			/* and clamp just to be extra sure */
-			if (r > 255)
-				r = 255;
-			if (r < 0)
-				r = 0;
-			if (g > 255)
-				g = 255;
-			if (g < 0)
-				g = 0;
-			if (b > 255)
-				b = 255;
-			if (b < 0)
-				b = 0;
+			r = GP_CLAMP((int)r, 0, 255);
+			g = GP_CLAMP((int)g, 0, 255);
+			b = GP_CLAMP((int)b, 0, 255);
 
 			pix = GP_Pixel_CREATE_RGB888((uint32_t)r, (uint32_t)g, (uint32_t)b);
 
