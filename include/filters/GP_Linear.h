@@ -32,35 +32,6 @@
 #include "GP_Filter.h"
 
 /*
- * Gaussian blur
- *
- * The sigma parameters defines the blur radii in horizontal and vertical
- * direction.
- *
- * Internaly this is implemented as separable linear filter (calls vertical and
- * horizontal convolution with generated gaussian kernel).
- *
- * This variant could work in-place so it's perectly okay to call
- *
- * GP_FilterGaussianBlur_Raw(context, context, ...);
- */
-int GP_FilterGaussianBlur_Raw(const GP_Context *src, GP_Context *dst,
-                              float sigma_x, float sigma_y,
-                              GP_ProgressCallback *callback);
-/*
- * Gaussian blur.
- *
- * If dst is NULL, new bitmap is allocated.
- *
- * This variant could work in-place.
- *
- * Returns pointer to destination bitmap or NULL if allocation failed.
- */
-GP_Context *GP_FilterGaussianBlur(const GP_Context *src, GP_Context *dst,
-                                  float sigma_x, float sigma_y,
-                                  GP_ProgressCallback *callback);
-
-/*
  * Linear convolution.
  *
  * The kernel is array of kw * kh floats and is indexed as two directional
