@@ -108,6 +108,7 @@ int main(int argc, char *argv[])
 			break;
 			case 1:
 				GP_FilterEdgePrewitt(img, &res, NULL, NULL);
+			//	GP_FilterEdgeSobel(img, &res, NULL, NULL);
 			break;
 			case 2:
 				GP_FilterGaussianBlur(img, img, 1, 1, NULL);

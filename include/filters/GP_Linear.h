@@ -22,7 +22,7 @@
 
 /*
 
-   Linear filters.
+   Linear Convolution _Raw filters.
 
  */
 
@@ -65,6 +65,11 @@ GP_Context *GP_FilterGaussianBlur(const GP_Context *src, GP_Context *dst,
  *
  * The kernel is array of kw * kh floats and is indexed as two directional
  * array.
+ * 
+ * The src coordinates and size defines rectangle in the source on which the
+ * filter operates.
+ *
+ * The dst coodinates defines start pixel of in the destination context.
  *
  * To define 3x3 average filter
  *
@@ -80,7 +85,11 @@ GP_Context *GP_FilterGaussianBlur(const GP_Context *src, GP_Context *dst,
  *
  * This function works also in-place.
  */
-int GP_FilterLinearConvolution_Raw(const GP_Context *src, GP_Context *dst,
+int GP_FilterLinearConvolution_Raw(const GP_Context *src,
+                                   GP_Coord x_src, GP_Coord y_src,
+                                   GP_Size w_src, GP_Size h_src,
+                                   GP_Context *dst,
+                                   GP_Coord x_dst, GP_Coord y_dst,
                                    float kernel[], uint32_t kw, uint32_t kh,
                                    float kern_div, GP_ProgressCallback *callback);
 
@@ -94,11 +103,19 @@ int GP_FilterLinearConvolution_Raw(const GP_Context *src, GP_Context *dst,
  *
  * Both works also in-place.
  */
-int GP_FilterHLinearConvolution_Raw(const GP_Context *src, GP_Context *dst,
+int GP_FilterHLinearConvolution_Raw(const GP_Context *src,
+                                    GP_Coord x_src, GP_Coord y_src,
+                                    GP_Size w_src, GP_Size h_src,
+                                    GP_Context *dst,
+                                    GP_Coord x_dst, GP_Coord y_dst,
                                     float kernel[], uint32_t kw, float kern_div,
                                     GP_ProgressCallback *callback);
 
-int GP_FilterVLinearConvolution_Raw(const GP_Context *src, GP_Context *dst,
+int GP_FilterVLinearConvolution_Raw(const GP_Context *src,
+                                    GP_Coord x_src, GP_Coord y_src,
+                                    GP_Size w_src, GP_Size h_src,
+                                    GP_Context *dst,
+                                    GP_Coord x_dst, GP_Coord y_dst,
                                     float kernel[], uint32_t kh, float kern_div,
                                     GP_ProgressCallback *callback);
 
@@ -107,14 +124,18 @@ int GP_FilterVLinearConvolution_Raw(const GP_Context *src, GP_Context *dst,
  * correct progress callback (both horizontal and vertical kernels are expected
  * to be similar in size).
  */
-int GP_FilterVHLinearConvolution_Raw(const GP_Context *src, GP_Context *dst,
+int GP_FilterVHLinearConvolution_Raw(const GP_Context *src,
+                                     GP_Coord x_src, GP_Coord y_src,
+                                     GP_Size w_src, GP_Size h_src,
+                                     GP_Context *dst,
+                                     GP_Coord x_dst, GP_Coord y_dst,
                                      float hkernel[], uint32_t kw, float hkern_div,
-				     float vkernel[], uint32_t kh, float vkern_div,
-				     GP_ProgressCallback *callback);
+                                     float vkernel[], uint32_t kh, float vkern_div,
+                                     GP_ProgressCallback *callback);
 
 /*
  * Prints a kernel into the stdout.
  */
-void GP_FilterKernelPrint(float kernel[], int kw, int kh, float kern_div);
+void GP_FilterKernelPrint_Raw(float kernel[], int kw, int kh, float kern_div);
 
 #endif /* FILTERS_GP_LINEAR_H */

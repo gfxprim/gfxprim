@@ -21,82 +21,55 @@
  *****************************************************************************/
 
 #include "core/GP_Debug.h"
-#include "core/GP_GetPutPixel.h"
 
 #include "GP_Linear.h"
 
-#include "GP_Laplace.h"
-
-int GP_FilterLaplace(const GP_Context *src, GP_Context *dst,
-		     GP_ProgressCallback *callback)
+#include "GP_Convolution.h"
+int GP_FilterConvolutionEx(const GP_Context *src,
+                           GP_Coord x_src, GP_Coord y_src,
+                           GP_Size w_src, GP_Coord h_src,
+                           GP_Context *dst,
+                           GP_Coord x_dst, GP_Coord y_dst,
+                           const GP_FilterKernel2D *kernel,
+                           GP_ProgressCallback *callback)
 {
-	GP_DEBUG(1, "Laplace filter %ux%u", src->w, src->h);
+	GP_CHECK(src->pixel_type == dst->pixel_type);
+	
+	/* Check that destination is large enough */
+	GP_CHECK(x_dst + (GP_Coord)w_src <= (GP_Coord)dst->w);
+	GP_CHECK(y_dst + (GP_Coord)h_src <= (GP_Coord)dst->h);
 
-	float kern[9] = {0,  1,  0,
-	                 1, -4,  1,
-	                 0,  1,  0};
+	/* The source pixel coordinates are clamped inside of the filter */
 
-	if (GP_FilterLinearConvolution_Raw(src, 0, 0, src->w, src->h,
-	                                   dst, 0, 0, kern, 3, 3, 1, callback))
-		return 1;
+	GP_DEBUG(1, "Linear convolution kernel size %ux%u",
+	         kernel->w, kernel->h);
 
-	return 0;
+	return GP_FilterLinearConvolution_Raw(src, x_src, y_src, w_src, h_src,
+	                                      dst, x_dst, y_dst, kernel->kernel,
+	                                      kernel->w, kernel->h, kernel->div,
+					      callback);
 }
 
-GP_Context *GP_FilterLaplaceAlloc(const GP_Context *src,
-                                  GP_ProgressCallback *callback)
+GP_Context *GP_FilterConvolutionExAlloc(const GP_Context *src,
+                                        GP_Coord x_src, GP_Coord y_src,
+                                        GP_Size w_src, GP_Size h_src,
+                                        const GP_FilterKernel2D *kernel,
+                                        GP_ProgressCallback *callback)
 {
-	GP_Context *ret = GP_ContextCopy(src, 0);
+	GP_Context *ret = GP_ContextAlloc(w_src, h_src, src->pixel_type);
+
+	GP_DEBUG(1, "Linear convolution kernel size %ux%u",
+	         kernel->w, kernel->h);
 
 	if (ret == NULL)
 		return NULL;
-	
-	if (GP_FilterLaplace(src, ret, callback)) {
+
+	if (GP_FilterLinearConvolution_Raw(src, x_src, y_src, w_src, h_src,
+	                                   ret, 0, 0, kernel->kernel, kernel->w,
+					   kernel->h, kernel->div, callback)) {
 		GP_ContextFree(ret);
 		return NULL;
 	}
 
-	return ret;
-}
-
-
-int GP_FilterEdgeSharpening(const GP_Context *src, GP_Context *dst,
-                            float w, GP_ProgressCallback *callback)
-{
-	/* Identity kernel */
-	float kern[9] = {0,  0,  0,
-	                 0,  1,  0,
-	                 0,  0,  0};
-	
-	GP_DEBUG(1, "Laplace Edge Sharpening filter %ux%u w=%f",
-	         src->w, src->h, w);
-
-	/* Create combined kernel */
-	kern[1] -=  1.00 * w;
-	kern[3] -=  1.00 * w;
-	kern[4] -= -4.00 * w;
-	kern[5] -=  1.00 * w;
-	kern[7] -=  1.00 * w;
-
-	if (GP_FilterLinearConvolution_Raw(src, 0, 0, src->w, src->h,
-	                                   dst, 0, 0,  kern, 3, 3, 1, callback))
-		return 1;
-
 	return 0;
-}
-
-GP_Context *GP_FilterEdgeSharpeningAlloc(const GP_Context *src, float w,
-                                         GP_ProgressCallback *callback)
-{
-	GP_Context *ret = GP_ContextCopy(src, 0);
-
-	if (ret == NULL)
-		return NULL;
-	
-	if (GP_FilterEdgeSharpening(src, ret, w, callback)) {
-		GP_ContextFree(ret);
-		return NULL;
-	}
-
-	return ret;
 }

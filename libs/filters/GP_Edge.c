@@ -36,11 +36,15 @@ static int prewitt(const GP_Context *src, GP_Context *dx, GP_Context *dy,
 	float smooth_kern[3] = {1, 1, 1,};
 	float grad_kern[3] = {-1, 0, 1};
 
-	if (GP_FilterVHLinearConvolution_Raw(src, dx, smooth_kern, 3, 1,
+	if (GP_FilterVHLinearConvolution_Raw(src, 0, 0, src->w, src->h,
+	                                     dx, 0, 0,
+	                                     smooth_kern, 3, 1,
 					     grad_kern, 3, 1, callback))
 		return 1;
 
-	if (GP_FilterVHLinearConvolution_Raw(src, dy, grad_kern, 3, 1,
+	if (GP_FilterVHLinearConvolution_Raw(src, 0, 0, src->w, src->h,
+	                                     dy, 0, 0,
+	                                     grad_kern, 3, 1,
 					     smooth_kern, 3, 1, callback))
 		return 1;
 	
@@ -59,7 +63,8 @@ static int sobel(const GP_Context *src, GP_Context *dx, GP_Context *dy,
 		-1,  0,  1,
 	};
 
-	if (GP_FilterLinearConvolution_Raw(src, dx, x_kern, 3, 3, 32, callback))
+	if (GP_FilterLinearConvolution_Raw(src, 0, 0, src->w, src->h,
+	                                   dx, 0, 0, x_kern, 3, 3, 32, callback))
 		return 1;
 	
 	float y_kern[] = {
@@ -68,7 +73,8 @@ static int sobel(const GP_Context *src, GP_Context *dx, GP_Context *dy,
 		 1,  2,  1,
 	};
 
-	if (GP_FilterLinearConvolution_Raw(src, dy, y_kern, 3, 3, 32, callback))
+	if (GP_FilterLinearConvolution_Raw(src, 0, 0, src->w, src->h,
+	                                   dy, 0, 0, y_kern, 3, 3, 32, callback))
 		return 1;
 
 	return 0;
@@ -103,7 +109,7 @@ static int edge_detect(const GP_Context *src,
 	}
 	
 	uint32_t i, j;
-
+	
 	for (i = 0; i < src->w; i++) {
 		for (j = 0; j < src->h; j++) {
 			GP_Pixel pix_x = GP_GetPixel_Raw_24BPP(dx, i, j);
@@ -124,7 +130,7 @@ static int edge_detect(const GP_Context *src,
 			RE = sqrt(Rx*Rx + Ry*Ry) + 0.5;
 			GE = sqrt(Gx*Gx + Gy*Gy) + 0.5;
 			BE = sqrt(Bx*Bx + By*By) + 0.5;
-		
+			
 			GP_PutPixel_Raw_24BPP(dx, i, j,
 			                      GP_Pixel_CREATE_RGB888(RE, GE, BE));
 		
@@ -171,7 +177,7 @@ int GP_FilterEdgeSobel(const GP_Context *src,
 {
 	GP_DEBUG(1, "Sobel edge detection image %ux%u", src->w, src->h);
 
-	return edge_detect(src, E, Phi, 1, callback);
+	return edge_detect(src, E, Phi, 0, callback);
 }
 
 int GP_FilterEdgePrewitt(const GP_Context *src,

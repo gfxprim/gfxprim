@@ -47,8 +47,11 @@
 /* Image rotations (90 180 270 grads) and mirroring */
 #include "filters/GP_Rotate.h"
 
-/* Linear convolution based filters (mostly blurs) */
+/* Linear convolution Raw API */
 #include "filters/GP_Linear.h"
+
+/* Convolution filters */
+#include "filters/GP_Convolution.h"
 
 /* Image scaling (resampling) */
 #include "filters/GP_Resize.h"
