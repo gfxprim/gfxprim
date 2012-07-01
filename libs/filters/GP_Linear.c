@@ -53,7 +53,7 @@ int GP_FilterHLinearConvolution_Raw(const GP_Context *src,
 
 	/* Do horizontal linear convolution */	
 	for (y = 0; y < (GP_Coord)h_src; y++) {
-		uint8_t R[size], G[size], B[size];
+		int R[size], G[size], B[size];
 		int yi = GP_MIN(y_src + y, (int)src->h - 1);
 
 		/* Fetch the whole row */
@@ -107,7 +107,11 @@ int GP_FilterHLinearConvolution_Raw(const GP_Context *src,
 			r /= ikern_div;
 			g /= ikern_div;
 			b /= ikern_div;
-			
+		
+			R[x] = r;
+			G[x] = g;
+			B[x] = b;
+
 			/* and clamp just to be extra sure */
 			r = GP_CLAMP(r, 0, 255);
 			g = GP_CLAMP(g, 0, 255);
@@ -116,7 +120,7 @@ int GP_FilterHLinearConvolution_Raw(const GP_Context *src,
 			GP_PutPixel_Raw_24BPP(dst, x_dst + x, y_dst + y,
 			                      GP_Pixel_CREATE_RGB888(r, g, b));
 		}
-		
+
 		if (GP_ProgressCallbackReport(callback, y, dst->h, dst->w))
 			return 1;
 	}
@@ -148,7 +152,7 @@ int GP_FilterVLinearConvolution_Raw(const GP_Context *src,
 
 	/* Do vertical linear convolution */	
 	for (x = 0; x < (GP_Coord)w_src; x++) {
-		uint8_t R[size], G[size], B[size];
+		int R[size], G[size], B[size];
 		int xi = GP_MIN(x_src + x, (int)src->w - 1);
 		
 		/* Fetch the whole row */
