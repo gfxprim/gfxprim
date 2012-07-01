@@ -62,15 +62,10 @@ static int GP_FilterResizeCubicInt_{{ pt.name }}_Raw(const GP_Context *src,
 		xmap_c[i][1] = cubic_int((xmap[i][1] - x) * MUL + 0.5);
 		xmap_c[i][2] = cubic_int((xmap[i][2] - x) * MUL + 0.5);
 		xmap_c[i][3] = cubic_int((xmap[i][3] - x) * MUL + 0.5);
-			
-		if (xmap[i][0] < 0)
-			xmap[i][0] = 0;
-
-		if (xmap[i][2] >= (int32_t)src->w)
-			xmap[i][2] = src->w - 1;
-
-		if (xmap[i][3] >= (int32_t)src->w)
-			xmap[i][3] = src->w - 1;
+		
+		xmap[i][0] = GP_MAX(xmap[i][0], 0);
+		xmap[i][2] = GP_MIN(xmap[i][2], (int)src->w - 1);
+		xmap[i][3] = GP_MIN(xmap[i][3], (int)src->w - 1);
 	}
 
 	/* cubic resampling */
@@ -89,14 +84,9 @@ static int GP_FilterResizeCubicInt_{{ pt.name }}_Raw(const GP_Context *src,
 		cvy[2] = cubic_int((yi[2] - y) * MUL + 0.5);
 		cvy[3] = cubic_int((yi[3] - y) * MUL + 0.5);
 		
-		if (yi[0] < 0)
-			yi[0] = 0;
-		
-		if (yi[2] >= (int)src->h)
-			yi[2] = src->h - 1;
-		
-		if (yi[3] >= (int)src->h)
-			yi[3] = src->h - 1;
+		yi[0] = GP_MAX(yi[0], 0);
+		yi[2] = GP_MIN(yi[2], (int)src->h - 1);
+		yi[3] = GP_MIN(yi[3], (int)src->h - 1);	
 
 		/* Generate interpolated row */
 		for (j = 0; j < src->w; j++) {
