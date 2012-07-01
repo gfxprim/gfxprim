@@ -487,22 +487,261 @@ It's defined as:
 [latex, discrete_linear_convolution.png, 140]
 -------------------------------------------------------------------------------
 \[
-O(x,y)=\sum_{i=-\infty}^{\infty}\sum_{j=-\infty}^{\infty}I(x-i,y-j) \cdot K(i,j)
+O(x,y)=\sum_{i=-\infty}^{\infty}\sum_{j=-\infty}^{\infty}I(x+i,y+j) \cdot K(i,j)
 \]
 -------------------------------------------------------------------------------
 
 The K denotes convolution kernel and in practice, due to computational
 complexity, the i and j are bounded in relatively small intervals. For example
-if i and j are in (-1,1) the kernel size is 3x3.
+i and j are in (-1,1) and the kernel size is 3x3.
 
-Note that pixel values around the image corners are undefined. The linear
-convolution in GFXprim simply uses the corner pixel values for all pixels
-outside the image.
+Note that pixel values outside the image are undefined. The linear convolution
+in GFXprim simply uses the closest border pixel values for all pixels outside
+the image.
 
 Particular convolution kernel is called separable if it could be decomposed
 into two one dimensional kernels (these when combined yields back the original
 kernel). Such convolution then could be applied as two one dimensional
 convolutions which is faster operation (especially for big kernels).
+
+Generic Linear Convolution
+^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+Following paragraph describes linear convolution implementation as well as a
+little of the math background skip it if you just need to use one of the
+ready-to-use filters.
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <filters/GP_Linear.h>
+/* or */
+#include <GP.h>
+
+int GP_FilterLinearConvolution_Raw(const GP_Context *src,
+                                   GP_Coord x_src, GP_Coord y_src,
+                                   GP_Size w_src, GP_Size h_src,
+                                   GP_Context *dst,
+                                   GP_Coord x_dst, GP_Coord y_dst,
+                                   float kernel[], uint32_t kw, uint32_t kh,
+                                   float kern_div, GP_ProgressCallback *callback);
+-------------------------------------------------------------------------------
+
+Internal generic convolution filter, this is a base for all linear convolution
+filters with non-separable kernel.
+
+The src coordinate and sizes denotes rectangle in the source context that the
+filter operates on.
+
+The dst coordinates defines offset into the dst context.
+
+The kernel is two-dimensional array of a size kw * kh indexed as
+kernel[x + y*kw]. 
+
+The kern_div is a coeficient that is used to divide the resuting values often
+used to normalize the result.
+
+This filter works 'in-place'.
+
+The pixel value is computed as:
+[latex, discrete_linear_convolution_alg1.png, 140]
+-------------------------------------------------------------------------------
+\[
+O(x,y)={1 \over kern\_div} \cdot \sum_{i=0}^{kw - 1}\sum_{j=0}^{kh - 1}
+       I(x + i - \lfloor kw/2 \rfloor, y + j - \lfloor kh/2 \rfloor)
+       \cdot kernel(i,j)
+\]
+-------------------------------------------------------------------------------
+
+Which is the same as:
+
+[latex, discrete_linear_convolution_alg2.png, 140]
+-------------------------------------------------------------------------------
+\[
+O(x,y)={1 \over kern\_div} \cdot
+       \sum_{i=-\lfloor kw/2 \rfloor}^{\lfloor kw/2 \rfloor}
+       \sum_{j=-\lfloor kh/2 \rfloor}^{\lfloor kh/2 \rfloor}
+       I(x + i, y + j)
+       \cdot kernel(i + \lfloor kw/2 \rfloor, j + \lfloor kh/2 \rfloor)
+\]
+-------------------------------------------------------------------------------
+
+NOTE: The number of kernel rows and columns is expected to be odd number.
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <filters/GP_Linear.h>
+/* or */
+#include <GP.h>
+
+int GP_FilterHLinearConvolution_Raw(const GP_Context *src,
+                                    GP_Coord x_src, GP_Coord y_src,
+                                    GP_Size w_src, GP_Size h_src,
+                                    GP_Context *dst,
+                                    GP_Coord x_dst, GP_Coord y_dst,
+                                    float kernel[], uint32_t kw, float kern_div,
+                                    GP_ProgressCallback *callback);
+
+int GP_FilterVLinearConvolution_Raw(const GP_Context *src,
+                                    GP_Coord x_src, GP_Coord y_src,
+                                    GP_Size w_src, GP_Size h_src,
+                                    GP_Context *dst,
+                                    GP_Coord x_dst, GP_Coord y_dst,
+                                    float kernel[], uint32_t kh, float kern_div,
+                                    GP_ProgressCallback *callback);
+
+int GP_FilterVHLinearConvolution_Raw(const GP_Context *src,
+                                     GP_Coord x_src, GP_Coord y_src,
+                                     GP_Size w_src, GP_Size h_src,
+                                     GP_Context *dst,
+                                     GP_Coord x_dst, GP_Coord y_dst,
+                                     float hkernel[], uint32_t kw, float hkern_div,
+                                     float vkernel[], uint32_t kh, float vkern_div,
+                                     GP_ProgressCallback *callback);
+
+void GP_FilterKernelPrint_Raw(float kernel[], int kw, int kh, float kern_div);
+-------------------------------------------------------------------------------
+
+Internal special functions for one dimensional vertical and horizontal
+convolution these two functions are base for all separable convolution filters.
+
+The src coordinate and sizes denotes rectangle in the source context that the
+filter operates on.
+
+The dst coordinates are offset into the dst.
+
+The kernel is one-dimensional array of floats of size kw or kh.
+
+The kern_div is a coeficient that is used to divide the resuting values. 
+
+The last function does both vertical and horizontal convolution and takes care
+of correct progress callback.
+
+These filters work 'in-place'.
+
+The pixel value is computed as:
+[latex, discrete_linear_1D_convolution_alg1.png, 140]
+-------------------------------------------------------------------------------
+\[
+O(x,y)={1 \over kern\_div} \cdot \sum_{i=0}^{kw - 1}
+       I(x + i - \lfloor kw/2 \rfloor, y)
+       \cdot kernel(i)
+\]
+
+\[
+O(x,y)={1 \over kern\_div} \cdot \sum_{j=0}^{kw - 1}
+       I(x, y + j - \lfloor kh/2 \rfloor)
+       \cdot kernel(j)
+\]
+-------------------------------------------------------------------------------
+
+Which is the same as:
+
+[latex, discrete_linear_1D_convolution_alg2.png, 140]
+-------------------------------------------------------------------------------
+\[
+O(x,y)={1 \over kern\_div} \cdot
+       \sum_{i=-\lfloor kw/2 \rfloor}^{\lfloor kw/2 \rfloor}
+       I(x + i, y)
+       \cdot kernel(i + \lfloor kw/2 \rfloor)
+\]
+
+\[
+O(x,y)={1 \over kern\_div} \cdot
+       \sum_{j=-\lfloor kh/2 \rfloor}^{\lfloor kh/2 \rfloor}
+       I(x, y + j)
+       \cdot kernel(i, j + \lfloor kh/2 \rfloor)
+\]
+-------------------------------------------------------------------------------
+
+NOTE: The number of kernel rows and columns is expected to be odd number.
+
+NOTE: The linear convolutions are internally implemented using integer
+      arithmetics, which works fine, but you need to take a care not to
+      overflow 32bit signed integer. If the pixel channel size is 8bit
+      long and 10bits are used for the fixed point part of the number 
+      the rest must fit into about 10 bits to be safe.
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <filters/GP_Convolution.h>
+/* or */
+#include <GP.h>
+
+typedef struct GP_FilterKernel2D {
+	unsigned int w;
+	unsigned int h;
+	float div;
+	float *kernel;
+} GP_FilterKernel2D;
+
+int GP_FilterConvolutionEx(const GP_Context *src,
+                           GP_Coord x_src, GP_Coord y_src,
+                           GP_Size w_src, GP_Coord h_src,
+                           GP_Context *dst,
+                           GP_Coord x_dst, GP_Coord y_dst,
+                           const GP_FilterKernel2D *kernel,
+                           GP_ProgressCallback *callback);
+
+GP_Context *GP_FilterConvolutionExAlloc(const GP_Context *src,
+                                        GP_Coord x_src, GP_Coord y_src,
+                                        GP_Size w_src, GP_Size h_src,
+                                        const GP_FilterKernel2D *kernel,
+                                        GP_ProgressCallback *callback);
+
+int GP_FilterConvolution(const GP_Context *src, GP_Context *dst,
+                         const GP_FilterKernel2D *kernel,
+                         GP_ProgressCallback *callback);
+
+GP_Context *GP_FilterConvolutionAlloc(const GP_Context *src,
+                                const GP_FilterKernel2D *kernel,
+                                GP_ProgressCallback *callback);
+
+void GP_FilterKernel2DPrint(const GP_FilterKernel2D *kernel);
+-------------------------------------------------------------------------------
+
+Linear convolution filters, you should prefferably use this API over the _Raw
+variants.
+
+The Ex variants takes a rectangle on which the filter should operate as well
+as offset into the destination. The destination must be large enough so that
+starting with offset there is at least w_dst and h_dst pixels.
+
+The kernel is a pointer to a structure initalized with the kernel size, divider
+and array of kernel values.
+
+The last function prints convolution kernel in human-readable format into the
+stdout.
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <GP.h>
+
+/*
+ * Example box smoothing filter.
+ */
+static void box_smoothing(GP_Context *img)
+{
+	float box_filter[] = {
+		1, 1, 1,
+		1, 1, 1,
+		1, 1, 1,
+	};
+
+	GP_FilterKernel2D box_kernel = {
+		.w = 3,
+		.h = 3,
+		.div = 9,
+		.kernel = box_filter,
+	};
+
+	GP_FilterConvolution(img, img, &box_kernel, NULL);
+}
+-------------------------------------------------------------------------------
+
+Example function that implements simple 'in-place' smoothing filter.
+
+Laplace Filter
+^^^^^^^^^^^^^^
 
 [source,c]
 -------------------------------------------------------------------------------
@@ -548,6 +787,9 @@ The convolution kernel is defined as:
 NOTE: This filter is not separable but could be written as a sum of two one
       dimensional filters as the kernel definition suggests.
 
+Laplacian Edge Sharpening
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
 [source,c]
 -------------------------------------------------------------------------------
 #include <GP_Filters.h>
@@ -584,6 +826,9 @@ image:images/edge_sharpening/lenna_small_w_0_3.png[
 image:images/edge_sharpening/lenna_small_w_0_5.png[
 	"Edge Sharpening w=0.5", 
 	link="images/edge_sharpening/lenna_w_0_5.png"]
+
+Gaussian Blur
+^^^^^^^^^^^^^
 
 [source,c]
 -------------------------------------------------------------------------------
