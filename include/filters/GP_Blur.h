@@ -16,53 +16,49 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2010 Jiri "BlueBear" Dluhos                            *
- *                         <jiri.bluebear.dluhos@gmail.com>                  *
- *                                                                           *
- * Copyright (C) 2009-2011 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
 /*
 
-  GP_Context filters.
+   Gaussian blur implementation.
 
  */
 
-#ifndef GP_FILTERS_H
-#define GP_FILTERS_H
+#ifndef FILTERS_GP_BLUR_H
+#define FILTERS_GP_BLUR_H
 
-/* Filter per channel parameter passing interface */
-#include "filters/GP_FilterParam.h"
+#include "GP_Filter.h"
 
-/* Point filters, brightness, contrast ... */
-#include "filters/GP_Point.h"
+/*
+ * Gaussian blur
+ *
+ * The sigma parameters defines the blur radii in horizontal and vertical
+ * direction.
+ *
+ * Internaly this is implemented as separable linear filter (calls vertical and
+ * horizontal convolution with generated gaussian kernel).
+ *
+ * This variant could work in-place so it's perectly okay to call
+ *
+ * GP_FilterGaussianBlur_Raw(context, context, ...);
+ */
+int GP_FilterGaussianBlur_Raw(const GP_Context *src, GP_Context *dst,
+                              float sigma_x, float sigma_y,
+                              GP_ProgressCallback *callback);
 
-/* Addition, difference, min, max ... */
-#include "filters/GP_Arithmetic.h"
+/*
+ * Gaussian blur.
+ *
+ * If dst is NULL, new bitmap is allocated.
+ *
+ * This variant could work in-place.
+ *
+ * Returns pointer to destination bitmap or NULL if allocation failed.
+ */
+GP_Context *GP_FilterGaussianBlur(const GP_Context *src, GP_Context *dst,
+                                  float sigma_x, float sigma_y,
+                                  GP_ProgressCallback *callback);
 
-/* Histograms, ... */
-#include "filters/GP_Stats.h"
-
-/* Image rotations (90 180 270 grads) and mirroring */
-#include "filters/GP_Rotate.h"
-
-/* Linear convolution Raw API */
-#include "filters/GP_Linear.h"
-
-/* Convolution filters */
-#include "filters/GP_Convolution.h"
-
-/* Blur filters */
-#include "filters/GP_Blur.h"
-
-/* Image scaling (resampling) */
-#include "filters/GP_Resize.h"
-
-/* Bitmap dithering */
-#include "filters/GP_Dither.h"
-
-/* Laplace based filters */
-#include "filters/GP_Laplace.h"
-
-#endif /* GP_FILTERS_H */
+#endif /* FILTERS_GP_BLUR_H */
