@@ -693,8 +693,8 @@ int GP_FilterConvolution(const GP_Context *src, GP_Context *dst,
                          GP_ProgressCallback *callback);
 
 GP_Context *GP_FilterConvolutionAlloc(const GP_Context *src,
-                                const GP_FilterKernel2D *kernel,
-                                GP_ProgressCallback *callback);
+                                      const GP_FilterKernel2D *kernel,
+                                      GP_ProgressCallback *callback);
 
 void GP_FilterKernel2DPrint(const GP_FilterKernel2D *kernel);
 -------------------------------------------------------------------------------
@@ -854,8 +854,12 @@ Interpolation filters
 #include <GP_Filters.h>
 
 typedef enum GP_InterpolationType {
-        GP_INTERP_NN,    /* Nearest Neighbour */
-        GP_INTERP_CUBIC, /* Bicubic           */
+        GP_INTERP_NN,            /* Nearest Neighbour                         */
+        GP_INTERP_LINEAR_INT,    /* Bilinear - fixed point arithmetics        */
+        GP_INTERP_LINEAR_LF_INT, /* Bilinear + low pass filter on downscaling */
+        GP_INTERP_CUBIC,         /* Bicubic                                   */
+        GP_INTERP_CUBIC_INT,     /* Bicubic - fixed point arithmetics         */
+        GP_INTERP_MAX = GP_INTERP_CUBIC_INT,
 } GP_InterpolationType;
 
 GP_Context *GP_FilterResize(const GP_Context *src, GP_Context *dst,
@@ -881,6 +885,14 @@ Nearest Neighbour Interpolation
 Fast, but produces "pixelated" images. May however work better for images with
 sharp edges mostly consisting of big one color regions (it doesn't blur the
 result on upscaling).
+
+Also is commonly used to show preview before you resample the image correctly.
+
+Bilinear Interpolation
+^^^^^^^^^^^^^^^^^^^^^^
+
+Bilinear is faster than bicubic interpolation and produces quite good results
+expecially the low pass variant doesn't need additional filter on downsampling.
 
 Bicubic Interpolation
 ^^^^^^^^^^^^^^^^^^^^^
