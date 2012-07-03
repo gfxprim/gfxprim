@@ -138,15 +138,34 @@ typdef struct GP_Backend {
 };
 -------------------------------------------------------------------------------
 
+The file descriptor 'fd' is either set to -1 (in case of SDL that shadows it)
+or to a backend connection file descriptor usable for 'select()' or 'poll()'.
+
 [source,c]
 -------------------------------------------------------------------------------
+#include <backends/GP_Backend.h>
+/* or */
+#include <GP.h>
+
 void GP_BackendExit(GP_Backend *backend);
 -------------------------------------------------------------------------------
 
-Calls an backend exit callback.
+Calls an backend exit callback. Resets the display, keyboard, etc. state back.
+
+WARNING: It's very important to call this functions on application exit. If you
+         doesn't do so, the state of the display, resolution etc. may not be
+         reset back to its original state. This includes program crashes and
+         iterruptions. Also this function may not be signal-async-safe, it's
+         better to set signal hanlers that calls it as this usually works and
+	 not doing so may leave non-working system with black display or
+	 non-responding keyboard.
 
 [source,c]
 -------------------------------------------------------------------------------
+#include <backends/GP_Backend.h>
+/* or */
+#include <GP.h>
+
 GP_BackendFlip(GP_Backend *backend);
 -------------------------------------------------------------------------------
 
@@ -154,6 +173,10 @@ Flips a screen. Updates rectangle for a buffered backends.
 
 [source,c]
 -------------------------------------------------------------------------------
+#include <backends/GP_Backend.h>
+/* or */
+#include <GP.h>
+
 void GP_BackendUpdateRect(GP_Backend *backend,
                           GP_Coord x0, GP_Coord y0,
                           GP_Coord x1, GP_Coord y1);
@@ -163,6 +186,10 @@ Updates particular rectangle for a buffered backends.
 
 [source,c]
 -------------------------------------------------------------------------------
+#include <backends/GP_Backend.h>
+/* or */
+#include <GP.h>
+
 void GP_BackendPoll(GP_Backend *backend);
 -------------------------------------------------------------------------------
 
@@ -170,8 +197,33 @@ Polls for backend events. For backends that do not expose file descriptor
 (namely SDL) this should be called repeatedly. For other backend it may be
 called either repeatedly or when data are ready on file-descriptor.
 
+
 [source,c]
 -------------------------------------------------------------------------------
+#include <backends/GP_Backend.h>
+/* or */
+#include <GP.h>
+
+void GP_BackendWait(GP_Backend *backend);
+-------------------------------------------------------------------------------
+
+Blocks until backend event arrives.
+
+NOTE: Events recieved by backend are not necessarily translated into the input
+      events.
+
+WARNING: Using GP_BackendWait() in multithreaded program will most likely
+         cause deadlocks. As the backend data structures and connection is
+	 guarded by a lock any other backend function (called from different
+	 thread while GP_BackendWait() is blocking) will lock until
+	 GP_BackendWait() returns (i.e. event was recieved).
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <backends/GP_Backend.h>
+/* or */
+#include <GP.h>
+
 int GP_BackendSetCaption(GP_Backend *backend, const char *caption)
 -------------------------------------------------------------------------------
 
@@ -180,6 +232,10 @@ support caption, operation failed) non zero is returned.
 
 [source,c]
 -------------------------------------------------------------------------------
+#include <backends/GP_Backend.h>
+/* or */
+#include <GP.h>
+
 int GP_BackendResize(GP_Backend *backend, uint32_t w, uint32_t h);
 -------------------------------------------------------------------------------
 
