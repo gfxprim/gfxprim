@@ -22,6 +22,7 @@
 
 #include "core/GP_Context.h"
 #include "core/GP_GetPutPixel.h"
+#include "core/GP_TempAlloc.h"
 #include "core/GP_Clamp.h"
 
 #include "core/GP_Debug.h"
@@ -42,18 +43,25 @@ int GP_FilterHLinearConvolution_Raw(const GP_Context *src,
 	uint32_t i;
 	int32_t ikernel[kw], ikern_div;
 	uint32_t size = w_src + kw - 1;
-	
+
 	GP_DEBUG(1, "Horizontal linear convolution kernel width %u "
-	            "rectangle %ux%u", kw, w_src, h_src);
+	            "offset %ix%i rectangle %ux%u",
+		    kw, x_src, y_src, w_src, h_src);
 
 	for (i = 0; i < kw; i++)
 		ikernel[i] = kernel[i] * MUL + 0.5;
 
 	ikern_div = kern_div * MUL + 0.5;
 
+	/* Create temporary buffers */
+	GP_TempAllocCreate(temp, 3 * size * sizeof(int));
+
+	int *R = GP_TempAllocGet(temp, size * sizeof(int));
+	int *G = GP_TempAllocGet(temp, size * sizeof(int));
+	int *B = GP_TempAllocGet(temp, size * sizeof(int));
+
 	/* Do horizontal linear convolution */	
 	for (y = 0; y < (GP_Coord)h_src; y++) {
-		int R[size], G[size], B[size];
 		int yi = GP_MIN(y_src + y, (int)src->h - 1);
 
 		/* Fetch the whole row */
@@ -63,7 +71,7 @@ int GP_FilterHLinearConvolution_Raw(const GP_Context *src,
 		i = 0;
 
 		/* Copy border pixel until the source image starts */
-		while (xi <= 0) {
+		while (xi <= 0 && i < size) {
 			R[i] = GP_Pixel_GET_R_RGB888(pix);
 			G[i] = GP_Pixel_GET_G_RGB888(pix);
 			B[i] = GP_Pixel_GET_B_RGB888(pix);
@@ -73,7 +81,7 @@ int GP_FilterHLinearConvolution_Raw(const GP_Context *src,
 		}
 
 		/* Use as much source image pixels as possible */
-		while (xi < (int)src->w) {
+		while (xi < (int)src->w && i < size) {
 			pix = GP_GetPixel_Raw_24BPP(src, xi, yi);
 
 			R[i] = GP_Pixel_GET_R_RGB888(pix);
@@ -108,10 +116,6 @@ int GP_FilterHLinearConvolution_Raw(const GP_Context *src,
 			g /= ikern_div;
 			b /= ikern_div;
 		
-			R[x] = r;
-			G[x] = g;
-			B[x] = b;
-
 			/* and clamp just to be extra sure */
 			r = GP_CLAMP(r, 0, 255);
 			g = GP_CLAMP(g, 0, 255);
@@ -121,9 +125,13 @@ int GP_FilterHLinearConvolution_Raw(const GP_Context *src,
 			                      GP_Pixel_CREATE_RGB888(r, g, b));
 		}
 
-		if (GP_ProgressCallbackReport(callback, y, dst->h, dst->w))
+		if (GP_ProgressCallbackReport(callback, y, dst->h, dst->w)) {
+			GP_TempAllocFree(temp);
 			return 1;
+		}
 	}
+			
+	GP_TempAllocFree(temp);
 
 	GP_ProgressCallbackDone(callback);
 	return 0;
@@ -146,13 +154,20 @@ int GP_FilterVLinearConvolution_Raw(const GP_Context *src,
 		ikernel[i] = kernel[i] * MUL + 0.5;
 
 	GP_DEBUG(1, "Vertical linear convolution kernel width %u "
-	            "rectangle %ux%u", kh, w_src, h_src);
+	            "offset %ix%i rectangle %ux%u",
+		    kh, x_src, y_src, w_src, h_src);
 
 	ikern_div = kern_div * MUL + 0.5;
+	
+	/* Create temporary buffers */
+	GP_TempAllocCreate(temp, 3 * size * sizeof(int));
+
+	int *R = GP_TempAllocGet(temp, size * sizeof(int));
+	int *G = GP_TempAllocGet(temp, size * sizeof(int));
+	int *B = GP_TempAllocGet(temp, size * sizeof(int));
 
 	/* Do vertical linear convolution */	
 	for (x = 0; x < (GP_Coord)w_src; x++) {
-		int R[size], G[size], B[size];
 		int xi = GP_MIN(x_src + x, (int)src->w - 1);
 		
 		/* Fetch the whole row */
@@ -162,7 +177,7 @@ int GP_FilterVLinearConvolution_Raw(const GP_Context *src,
 		i = 0;
 
 		/* Copy border pixel until the source image starts */
-		while (yi <= 0) {
+		while (yi <= 0 && i < size) {
 			R[i] = GP_Pixel_GET_R_RGB888(pix);
 			G[i] = GP_Pixel_GET_G_RGB888(pix);
 			B[i] = GP_Pixel_GET_B_RGB888(pix);
@@ -172,7 +187,7 @@ int GP_FilterVLinearConvolution_Raw(const GP_Context *src,
 		}
 
 		/* Use as much source image pixels as possible */
-		while (yi < (int)src->h) {
+		while (yi < (int)src->h && i < size) {
 			pix = GP_GetPixel_Raw_24BPP(src, xi, yi);
 
 			R[i] = GP_Pixel_GET_R_RGB888(pix);
@@ -216,10 +231,14 @@ int GP_FilterVLinearConvolution_Raw(const GP_Context *src,
 			                      GP_Pixel_CREATE_RGB888(r, g, b));
 		}
 		
-		if (GP_ProgressCallbackReport(callback, x, dst->w, dst->h))
+		if (GP_ProgressCallbackReport(callback, x, dst->w, dst->h)) {
+			GP_TempAllocFree(temp);
 			return 1;
+		}
 	}
 
+	GP_TempAllocFree(temp);
+	
 	GP_ProgressCallbackDone(callback);
 	return 0;
 }
