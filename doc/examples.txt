@@ -99,6 +99,24 @@ include::../demos/c_simple/backend_example.c[]
 include::../demos/c_simple/showimage.c[]
 ------------------------------------------------------------------
 
+Grabbers
+--------
+
+Simple C source that saves JPEG images from V4L2 device (web camera).
+
+[source,c]
+------------------------------------------------------------------
+include::../demos/c_simple/v4l2_grab.c[]
+------------------------------------------------------------------
+
+Simple C source that shows filters interactively on image stream from a
+camera.
+
+[source,c]
+------------------------------------------------------------------
+include::../demos/c_simple/v4l2_show.c[]
+------------------------------------------------------------------
+
 GFXprim + PyGTK
 ---------------
 

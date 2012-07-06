@@ -22,7 +22,7 @@ The grabber API consist GP_Grabber structure and of several functions:
 -------------------------------------------------------------------------------
 typdef struct GP_Grabber {
 	/*
-         * Currently loaded frame frame.
+         * Currently loaded frame.
          */
 	GP_Context *frame;
 	
@@ -38,7 +38,8 @@ typdef struct GP_Grabber {
 -------------------------------------------------------------------------------
 
 The frame is a pointer to currently loaded frame. Its content is undefined
-until you start the grabber with 'GP_GrabberStart()'.
+until you start the grabber with 'GP_GrabberStart()' and receive frame with
+'GP_GrabberPoll()'.
 
 The 'fd' is a file descriptor suitable for select() or poll(). It's set to -1
 if there is none.
@@ -56,8 +57,6 @@ void GP_GrabberExit(GP_Grabber *backend);
 Exits the grabber, frees memory, unmaps memory mappings, closes file
 descriptors etc...
 
-Returns zero on success and non-zero on failure.
-
 [source,c]
 -------------------------------------------------------------------------------
 #include <grabbers/GP_Grabber.h>
@@ -67,8 +66,8 @@ Returns zero on success and non-zero on failure.
 int GP_GrabberStart(struct GP_Grabber *self);
 -------------------------------------------------------------------------------
 
-Starts a grabber. After calling this calling you can start retrieving frames
-with 'GP_GrabberPoll()'.
+Starts a grabber. After calling this you can start retrieving frames with
+'GP_GrabberPoll()'.
 
 Returns zero on success and non-zero on failure.
 
@@ -84,6 +83,7 @@ int GP_GrabberStop(struct GP_Grabber *self);
 Stops a grabber. Call this when you doesn't need to receive frames but still
 plan to use the grabber later.
 
+Returns zero on success and non-zero on failure.
 
 [source,c]
 -------------------------------------------------------------------------------
