@@ -233,8 +233,8 @@ static int v4l2_stop(struct GP_Grabber *self)
 }
 
 struct GP_Grabber *GP_GrabberV4L2Init(const char *device,
-                                      unsigned int prefered_width,
-				      unsigned int prefered_height)
+                                      unsigned int preferred_width,
+				      unsigned int preferred_height)
 {
 	int fd, i, err;
 	int mode = 0;
@@ -308,8 +308,8 @@ struct GP_Grabber *GP_GrabberV4L2Init(const char *device,
 	memset(&fmt, 0, sizeof(fmt));
 
 	fmt.type                = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-	fmt.fmt.pix.width       = prefered_width;
-	fmt.fmt.pix.height      = prefered_height;
+	fmt.fmt.pix.width       = preferred_width;
+	fmt.fmt.pix.height      = preferred_height;
 	fmt.fmt.pix.pixelformat = V4L2_PIX_FMT_YUYV;
 	fmt.fmt.pix.field       = V4L2_FIELD_INTERLACED;
 
@@ -422,8 +422,8 @@ err:
 #else
 
 struct GP_Grabber *GP_GrabberV4L2Init(const char GP_UNUSED(*device),
-                                      unsigned int GP_UNUSED(prefered_width),
-				      unsigned int GP_UNUSED(prefered_height))
+                                      unsigned int GP_UNUSED(preferred_width),
+				      unsigned int GP_UNUSED(preferred_height))
 {
 	GP_WARN("V4L2 support not compiled in.");
 

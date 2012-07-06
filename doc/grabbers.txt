@@ -1,0 +1,126 @@
+Grabbers
+--------
+
+Grabber is an abstraction for a device whose output is a stream of images.
+
+There is currently V4L2 driver that implements a grabber.
+
+To link against grabbers use +-lGP_grabbers+ or better
++\`gfxprim-config --libs-grabbers`+ in your linker flags.
+
+Grabber API
+~~~~~~~~~~~
+
+The grabber API consist of structure with callbacks. Every grabber
+initialization yields pointer to this structure. Although is possible to call
+these pointers directly it's not recommended and everybody should rather use
+the inline functions instead.
+
+The grabber API consist GP_Grabber structure and of several functions:
+
+[source,c]
+-------------------------------------------------------------------------------
+typdef struct GP_Grabber {
+	/*
+         * Currently loaded frame frame.
+         */
+	GP_Context *frame;
+	
+	/* 
+         * Connection fd usable for select() or poll().
+	 *
+	 * Set to -1 if not available.
+         */
+        int fd;
+
+	/* ... */
+};
+-------------------------------------------------------------------------------
+
+The frame is a pointer to currently loaded frame. Its content is undefined
+until you start the grabber with 'GP_GrabberStart()'.
+
+The 'fd' is a file descriptor suitable for select() or poll(). It's set to -1
+if there is none.
+
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <grabbers/GP_Grabber.h>
+/* or */
+#include <GP.h>
+
+void GP_GrabberExit(GP_Grabber *backend);
+-------------------------------------------------------------------------------
+
+Exits the grabber, frees memory, unmaps memory mappings, closes file
+descriptors etc...
+
+Returns zero on success and non-zero on failure.
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <grabbers/GP_Grabber.h>
+/* or */
+#include <GP.h>
+
+int GP_GrabberStart(struct GP_Grabber *self);
+-------------------------------------------------------------------------------
+
+Starts a grabber. After calling this calling you can start retrieving frames
+with 'GP_GrabberPoll()'.
+
+Returns zero on success and non-zero on failure.
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <grabbers/GP_Grabber.h>
+/* or */
+#include <GP.h>
+
+int GP_GrabberStop(struct GP_Grabber *self);
+-------------------------------------------------------------------------------
+
+Stops a grabber. Call this when you doesn't need to receive frames but still
+plan to use the grabber later.
+
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <grabbers/GP_Grabber.h>
+/* or */
+#include <GP.h>
+
+int GP_GrabberPoll(struct GP_Grabber *self);
+-------------------------------------------------------------------------------
+
+Once grabber is created you can call this function to receive a frame. If
+grabber 'fd' is not -1 it's preferable to call it when select() or poll()
+returns that data are available on the 'fd'.
+
+This function returns non-zero if new frame was received and stored into the
+'frame' context. Otherwise zero is returned.
+
+Grabber Initializations
+~~~~~~~~~~~~~~~~~~~~~~
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <grabbers/GP_V4L2.h>
+/* or */
+#include <GP.h>
+
+struct GP_Grabber *GP_GrabberV4L2Init(const char *device,
+                                      unsigned int preferred_width,
+                                      unsigned int preferred_height);
+-------------------------------------------------------------------------------
+
+Opens and initializes V4L2 device. The device is a path in +/dev+ filesystem
+the first V4L2 device in your system should be +/dev/video0+.
+
+The height and width are preferred values, you will most likely get frame by
+that width and height, but the driver may return different values if chosen
+width and height are not supported.
+
+Returns either pointer to the initialized grabber or, in case of failure, NULL
+and errno is filled.

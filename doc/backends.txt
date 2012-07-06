@@ -245,3 +245,4 @@ returned. If backend size already matches w and h, nothing is done.
 
 Note that backend->context pointer may change upon calling this function and
 at least backend->context->pixels pointer will change.
+

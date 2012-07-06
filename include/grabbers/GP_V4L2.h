@@ -32,7 +32,7 @@ struct GP_Grabber;
  * fixed image size.
  */
 struct GP_Grabber *GP_GrabberV4L2Init(const char *device,
-                                      unsigned int prefered_width,
-				      unsigned int prefered_height);
+                                      unsigned int preferred_width,
+				      unsigned int preferred_height);
 
 #endif /* GP_GRABBERS_V4L2_H */
