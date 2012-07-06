@@ -492,8 +492,8 @@ O(x,y)=\sum_{i=-\infty}^{\infty}\sum_{j=-\infty}^{\infty}I(x+i,y+j) \cdot K(i,j)
 -------------------------------------------------------------------------------
 
 The K denotes convolution kernel and in practice, due to computational
-complexity, the i and j are bounded in relatively small intervals. For example
-i and j are in (-1,1) and the kernel size is 3x3.
+complexity i and j are bounded in relatively small intervals. For example i
+and j are in (-1,1) and the kernel size is 3x3.
 
 Note that pixel values outside the image are undefined. The linear convolution
 in GFXprim simply uses the closest border pixel values for all pixels outside
