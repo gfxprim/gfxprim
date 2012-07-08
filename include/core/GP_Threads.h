@@ -26,8 +26,8 @@
 
   */
 
-#ifndef GP_THREADS_H
-#define GP_THREADS_H
+#ifndef CORE_GP_THREADS_H
+#define CORE_GP_THREADS_H
 
 #include <pthread.h>
 
@@ -35,12 +35,31 @@
 #include "GP_Types.h"
 
 /*
- * Returns an optimal number of threads for a given image size on a particular
- * machine. Most of the time, if the image is not too small, this function
- * returns number of processors as seen by the operating system.
+ * Sets default number of threads the library uses
+ * (changes the behavior of GP_NrThreads()).
+ *
+ * 0 == auto
+ *      Most of the time, if the image is not too small, this makes
+ *      the filter run number of processors (as seen by the operating system)
+ *      threads.
+ *
+ * 1 == one thread
+ *      Everything runs in exactly one thread. This is default value.
+ *
+ *   >= 2
+ *      Runs exactly n threads unless the image is too small.
+ *
+ * This value may also be overriden by the GP_THREADS enviroment variable.
+ *
+ * Moreover the value may be changed for a single call by settings in progres
+ * callback structure.
  */
-unsigned int GP_NrThreads(GP_Size w, GP_Size h);
+void GP_NrThreadsSet(unsigned int nr);
 
+/*
+ * Returns a number of threads to use.
+ */
+unsigned int GP_NrThreads(GP_Size w, GP_Size h, GP_ProgressCallback *callback);
 
 /*
  * Multithreaded progress callback priv data guarded by a mutex.
@@ -78,4 +97,4 @@ struct GP_ProgressCallbackMPPriv {
  */
 int GP_ProgressCallbackMP(GP_ProgressCallback *self);
 
-#endif /* GP_THREADS_H */
+#endif /* CORE_GP_THREADS_H */

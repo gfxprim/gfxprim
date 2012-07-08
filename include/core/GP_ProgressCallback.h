@@ -24,10 +24,11 @@
 
   Progress callback implementation.
 
-  Progress callbacks serves two purposes
+  Progress callbacks serves following purposes:
 
   - ability to visibly show algorithm progress
   - ability to correctly abort operation in the middle of processing
+  - ability to override default number of threads to use for the operation
 
  */
 
@@ -42,8 +43,20 @@
  */
 typedef struct GP_ProgressCallback {
 	float percentage;
+	
 	int (*callback)(struct GP_ProgressCallback *self);
 	void *priv;
+	
+	/*
+	 * Number of threads to use (if supported). This setting could be used
+	 * to override the default number of threads as returned by
+	 * GP_NrThreads().
+	 * 
+	 * 0 == use number returned from GP_NrThreads().
+	 *
+	 *   >= 1 use exactly n threads
+	 */
+	unsigned int threads;
 } GP_ProgressCallback;
 
 static inline int GP_ProgressCallbackReport(GP_ProgressCallback *callback,
