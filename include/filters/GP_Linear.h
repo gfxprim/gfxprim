@@ -53,8 +53,6 @@
  * kw = kh = 3
  * 
  * kern_div = 9
- *
- * This function works also in-place.
  */
 int GP_FilterLinearConvolution_Raw(const GP_Context *src,
                                    GP_Coord x_src, GP_Coord y_src,
@@ -108,5 +106,60 @@ int GP_FilterVHLinearConvolution_Raw(const GP_Context *src,
  * Prints a kernel into the stdout.
  */
 void GP_FilterKernelPrint_Raw(float kernel[], int kw, int kh, float kern_div);
+
+
+
+typedef struct GP_ConvolutionParams {
+	const GP_Context *src;
+	GP_Coord x_src;
+	GP_Coord y_src;
+	GP_Size w_src;
+	GP_Size h_src;
+
+	GP_Context *dst;
+	GP_Coord x_dst;
+	GP_Coord y_dst;
+
+	float *kernel;
+	unsigned int kw;
+	unsigned int kh;
+	float kern_div;
+
+	GP_ProgressCallback *callback;
+} GP_ConvolutionParams;
+
+static inline int GP_FilterConvolution_Raw(const struct GP_ConvolutionParams *params)
+{
+	return GP_FilterLinearConvolution_Raw(params->src, params->x_src,
+	                                      params->y_src, params->w_src,
+	                                      params->h_src, params->dst,
+	                                      params->x_dst, params->y_dst,
+	                                      params->kernel, params->kw,
+	                                      params->kh, params->kern_div,
+	                                      params->callback);
+}
+
+static inline int GP_FilterVConvolution_Raw(const struct GP_ConvolutionParams *params)
+{
+
+	return GP_FilterVLinearConvolution_Raw(params->src, params->x_src,
+	                                       params->y_src, params->w_src,
+	                                       params->h_src, params->dst,
+	                                       params->x_dst, params->y_dst,
+	                                       params->kernel, params->kh,
+	                                       params->kern_div,
+	                                       params->callback);
+}
+
+static inline int GP_FilterHConvolution_Raw(const struct GP_ConvolutionParams *params)
+{
+	return GP_FilterHLinearConvolution_Raw(params->src, params->x_src,
+	                                       params->y_src, params->w_src,
+	                                       params->h_src, params->dst,
+	                                       params->x_dst, params->y_dst,
+	                                       params->kernel, params->kw,
+	                                       params->kern_div,
+	                                       params->callback);
+}
 
 #endif /* FILTERS_GP_LINEAR_H */

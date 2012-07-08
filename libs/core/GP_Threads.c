@@ -16,63 +16,58 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2011 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
-/*
+#include <unistd.h>
 
-  Progress callback implementation.
+#include "GP_Common.h"
+#include "GP_Debug.h"
 
-  Progress callbacks serves two purposes
+#include "GP_Threads.h"
 
-  - ability to visibly show algorithm progress
-  - ability to correctly abort operation in the middle of processing
-
- */
-
-#ifndef CORE_GP_PROGRESSCALLBACK_H
-#define CORE_GP_PROGRESSCALLBACK_H
-
-/*
- * Progress callback
- *
- * Non zero return value from callback will abort current operation
- * free memory and return NULL from filter/loader...
- */
-typedef struct GP_ProgressCallback {
-	float percentage;
-	int (*callback)(struct GP_ProgressCallback *self);
-	void *priv;
-} GP_ProgressCallback;
-
-static inline int GP_ProgressCallbackReport(GP_ProgressCallback *callback,
-                                            unsigned int val, unsigned int max,
-					    unsigned int mul __attribute__((unused)))
+unsigned int GP_NrThreads(GP_Size w, GP_Size h)
 {
-	if (callback == NULL)
-		return 0;
+	int count = sysconf(_SC_NPROCESSORS_ONLN);
+	int threads = GP_MIN(count, (int)(w * h / 1024) + 1);
 
-	if (val % 100)
-		return 0;
+	if (count < -1)
+		threads = 1;
 
-	callback->percentage = 100.00 * val / max;
-	return callback->callback(callback);
+	GP_DEBUG(1, "Found %u CPUs size %ux%u runnig %u threads",
+	         count, w, h, threads);
+
+	return threads;
 }
 
-static inline void GP_ProgressCallbackDone(GP_ProgressCallback *callback)
+int GP_ProgressCallbackMP(GP_ProgressCallback *self)
 {
-	if (callback == NULL)
-		return;
+	struct GP_ProgressCallbackMPPriv *priv = self->priv;
+
+	/* 
+	 * If any thread got non-zero return value from a callback abort all.
+	 */
+	if (priv->abort)
+		return 1;
+
+	if (pthread_mutex_trylock(&priv->mutex)) {
+		GP_DEBUG(1, "Mutex locked, skipping calllback.");
+		return 0;
+	}
+
+	/* Compute max value for the percentage */
+	priv->orig_callback->percentage = GP_MAX(self->percentage, priv->max);
+	priv->max = priv->orig_callback->percentage;
+
+	/* Call the original callback */
+	int ret = priv->orig_callback->callback(priv->orig_callback);
 	
-	callback->percentage = 100;
-	callback->callback(callback);
+	/* Turn on abort flag if callback returned nonzero */
+	if (ret)
+		priv->abort = 1;
+
+	pthread_mutex_unlock(&priv->mutex);
+
+	return ret;
 }
-
-#define GP_PROGRESS_CALLBACK(name, pcallback, ppriv) \
-	GP_ProgressCallback name = {                 \
-		.callback = pcallback,               \
-		.priv = ppriv,                       \
-	};
-
-#endif /* CORE_GP_PROGRESSCALBACK_H */

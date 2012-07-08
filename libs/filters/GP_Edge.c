@@ -57,24 +57,54 @@ static int prewitt(const GP_Context *src, GP_Context *dx, GP_Context *dy,
 static int sobel(const GP_Context *src, GP_Context *dx, GP_Context *dy,
                    GP_ProgressCallback *callback)
 {
-	float x_kern[] = {
+	float dx_kern[] = {
 		-1,  0,  1,
 		-2,  0,  2,
 		-1,  0,  1,
 	};
 
-	if (GP_FilterLinearConvolution_Raw(src, 0, 0, src->w, src->h,
-	                                   dx, 0, 0, x_kern, 3, 3, 32, callback))
+	GP_ConvolutionParams dx_conv = {
+		.src = src,
+		.x_src = 0,
+		.y_src = 0,
+		.w_src = src->w,
+		.h_src = src->h,
+		.dst = dx,
+		.x_dst = 0,
+		.y_dst = 0,
+		.kernel = dx_kern,
+		.kw = 3,
+		.kh = 3,
+		.kern_div = 1,
+		.callback = callback,
+	};
+
+	if (GP_FilterConvolution_Raw(&dx_conv))
 		return 1;
 	
-	float y_kern[] = {
+	float dy_kern[] = {
 		-1, -2, -1,
 		 0,  0,  0,
 		 1,  2,  1,
 	};
+	
+	GP_ConvolutionParams dy_conv = {
+		.src = src,
+		.x_src = 0,
+		.y_src = 0,
+		.w_src = src->w,
+		.h_src = src->h,
+		.dst = dy,
+		.x_dst = 0,
+		.y_dst = 0,
+		.kernel = dy_kern,
+		.kw = 3,
+		.kh = 3,
+		.kern_div = 1,
+		.callback = callback,
+	};
 
-	if (GP_FilterLinearConvolution_Raw(src, 0, 0, src->w, src->h,
-	                                   dy, 0, 0, y_kern, 3, 3, 32, callback))
+	if (GP_FilterConvolution_Raw(&dy_conv))
 		return 1;
 
 	return 0;
@@ -133,7 +163,7 @@ static int edge_detect(const GP_Context *src,
 			
 			GP_PutPixel_Raw_24BPP(dx, i, j,
 			                      GP_Pixel_CREATE_RGB888(RE, GE, BE));
-		
+			
 			if (Rx != 0 && Ry != 0)
 				RPhi = ((atan2(Rx, Ry) + M_PI) * 255)/(2*M_PI);
 			else

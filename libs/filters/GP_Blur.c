@@ -25,6 +25,7 @@
 #include "core/GP_Debug.h"
 
 #include "GP_Linear.h"
+#include "GP_LinearThreads.h"
 
 #include "GP_Blur.h"
 
@@ -92,10 +93,24 @@ int GP_FilterGaussianBlur_Raw(const GP_Context *src, GP_Context *dst,
 	if (sigma_x > 0) {
 		float kernel_x[size_x];
 		float sum = gaussian_kernel_init(sigma_x, kernel_x);
-	
-		if (GP_FilterHLinearConvolution_Raw(src, 0, 0, src->w, src->h,
-		                                    dst, 0, 0, kernel_x, size_x,
-		                                    sum, new_callback))
+
+		GP_ConvolutionParams params = {
+			.src = src,
+			.x_src = 0,
+			.y_src = 0,
+			.w_src = src->w,
+			.h_src = src->h,
+			.dst = dst,
+			.x_dst = 0,
+			.y_dst = 0,
+			.kernel = kernel_x,
+			.kw = size_x,
+			.kh = 1,
+			.kern_div = sum,
+			.callback = new_callback,
+		};
+
+		if (GP_FilterHConvolutionMP_Raw(&params))
 			return 1;
 	}
 	
@@ -107,9 +122,23 @@ int GP_FilterGaussianBlur_Raw(const GP_Context *src, GP_Context *dst,
 		float kernel_y[size_y];
 		float sum = gaussian_kernel_init(sigma_y, kernel_y);
 		
-		if (GP_FilterVLinearConvolution_Raw(dst, 0, 0, src->w, src->h,
-		                                    dst, 0, 0, kernel_y, size_y,
-		                                    sum, new_callback))
+		GP_ConvolutionParams params = {
+			.src = src,
+			.x_src = 0,
+			.y_src = 0,
+			.w_src = src->w,
+			.h_src = src->h,
+			.dst = dst,
+			.x_dst = 0,
+			.y_dst = 0,
+			.kernel = kernel_y,
+			.kw = 1,
+			.kh = size_y,
+			.kern_div = sum,
+			.callback = new_callback,
+		};
+		
+		if (GP_FilterVConvolutionMP_Raw(&params))
 			return 1;
 	}
 

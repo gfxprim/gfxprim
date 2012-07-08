@@ -24,29 +24,13 @@
 #define FILTERS_GP_LINEAR_THREADS_H
 
 #include "GP_Filter.h"
+#include "GP_Linear.h"
 
-int GP_FilterLinearConvolutionMP_Raw(const GP_Context *src,
-                                     GP_Coord x_src, GP_Coord y_src,
-                                     GP_Size w_src, GP_Size h_src,
-                                     GP_Context *dst,
-                                     GP_Coord x_dst, GP_Coord y_dst,
-                                     float kernel[], uint32_t kw, uint32_t kh,
-                                     float kern_div, GP_ProgressCallback *callback);
+int GP_FilterConvolutionMP_Raw(const GP_ConvolutionParams *params);
 
-int GP_FilterHLinearConvolutionMP_Raw(const GP_Context *src,
-                                      GP_Coord x_src, GP_Coord y_src,
-                                      GP_Size w_src, GP_Size h_src,
-                                      GP_Context *dst,
-                                      GP_Coord x_dst, GP_Coord y_dst,
-                                      float kernel[], uint32_t kw, float kern_div,
-                                      GP_ProgressCallback *callback);
+int GP_FilterVConvolutionMP_Raw(const GP_ConvolutionParams *params);
 
-int GP_FilterVLinearConvolutionMP_Raw(const GP_Context *src,
-                                      GP_Coord x_src, GP_Coord y_src,
-                                      GP_Size w_src, GP_Size h_src,
-                                      GP_Context *dst,
-                                      GP_Coord x_dst, GP_Coord y_dst,
-                                      float kernel[], uint32_t kh, float kern_div,
-                                      GP_ProgressCallback *callback);
+int GP_FilterHConvolutionMP_Raw(const GP_ConvolutionParams *params);
+
 
 #endif /* FILTERS_GP_LINEAR_THREADS_H */

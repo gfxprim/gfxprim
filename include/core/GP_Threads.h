@@ -16,63 +16,66 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2011 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
+ /*
+
+   A code to ease multithreaded filters and more.
+
+  */
+
+#ifndef GP_THREADS_H
+#define GP_THREADS_H
+
+#include <pthread.h>
+
+#include "GP_ProgressCallback.h"
+#include "GP_Types.h"
+
 /*
-
-  Progress callback implementation.
-
-  Progress callbacks serves two purposes
-
-  - ability to visibly show algorithm progress
-  - ability to correctly abort operation in the middle of processing
-
+ * Returns an optimal number of threads for a given image size on a particular
+ * machine. Most of the time, if the image is not too small, this function
+ * returns number of processors as seen by the operating system.
  */
+unsigned int GP_NrThreads(GP_Size w, GP_Size h);
 
-#ifndef CORE_GP_PROGRESSCALLBACK_H
-#define CORE_GP_PROGRESSCALLBACK_H
 
 /*
- * Progress callback
+ * Multithreaded progress callback priv data guarded by a mutex.
+ */
+struct GP_ProgressCallbackMPPriv {
+	float max;
+	int abort;
+	pthread_mutex_t mutex;
+	GP_ProgressCallback *orig_callback;
+};
+
+/*
+ * Creates and initalizes a on-the-stack progress callback
  *
- * Non zero return value from callback will abort current operation
- * free memory and return NULL from filter/loader...
+ * The intended usage is:
+ *
+ * GP_PROGRESS_CALLBACK(callback_mp, orig_callback);
+ *
+ * ...
+ *
+ * for n threads:
+ * 	run_filter(..., callback ? &callback_mp : NULL);
  */
-typedef struct GP_ProgressCallback {
-	float percentage;
-	int (*callback)(struct GP_ProgressCallback *self);
-	void *priv;
-} GP_ProgressCallback;
+#define GP_PROGRESS_CALLBACK_MP(name, callback)                        \
+	struct GP_ProgressCallbackMPPriv name_priv = {                 \
+		.max = 0,                                              \
+		.abort = 0,                                            \
+		.mutex = PTHREAD_MUTEX_INITIALIZER,                    \
+		.orig_callback = callback,                             \
+	};                                                             \
+	GP_PROGRESS_CALLBACK(name, GP_ProgressCallbackMP, &name_priv);
 
-static inline int GP_ProgressCallbackReport(GP_ProgressCallback *callback,
-                                            unsigned int val, unsigned int max,
-					    unsigned int mul __attribute__((unused)))
-{
-	if (callback == NULL)
-		return 0;
+/*
+ * Multithreaded callback function itself.
+ */
+int GP_ProgressCallbackMP(GP_ProgressCallback *self);
 
-	if (val % 100)
-		return 0;
-
-	callback->percentage = 100.00 * val / max;
-	return callback->callback(callback);
-}
-
-static inline void GP_ProgressCallbackDone(GP_ProgressCallback *callback)
-{
-	if (callback == NULL)
-		return;
-	
-	callback->percentage = 100;
-	callback->callback(callback);
-}
-
-#define GP_PROGRESS_CALLBACK(name, pcallback, ppriv) \
-	GP_ProgressCallback name = {                 \
-		.callback = pcallback,               \
-		.priv = ppriv,                       \
-	};
-
-#endif /* CORE_GP_PROGRESSCALBACK_H */
+#endif /* GP_THREADS_H */
