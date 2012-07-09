@@ -10,7 +10,7 @@ def main():
         print("usage: blur blur-radii image")
         sys.exit(1)
 
-    radii = int(sys.argv[1])
+    radii = float(sys.argv[1])
 
     # Load Image
     img = loaders.LoadImage(sys.argv[2], None)
