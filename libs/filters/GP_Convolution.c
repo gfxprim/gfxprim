@@ -71,5 +71,5 @@ GP_Context *GP_FilterConvolutionExAlloc(const GP_Context *src,
 		return NULL;
 	}
 
-	return 0;
+	return ret;
 }
