@@ -314,9 +314,9 @@ GP_Context *load_resized_image(struct loader_params *params, GP_Size w, GP_Size 
 		cpu_timer_start(&timer, "Blur");
 		callback.priv = "Blurring Image";
 		
-		res = GP_FilterGaussianBlur(img, NULL,
-		                            0.3/params->rat, 0.3/params->rat,
-					    &callback);
+		res = GP_FilterGaussianBlurAlloc(img, 0.3/params->rat,
+		                                 0.3/params->rat, &callback);
+
 		if (res == NULL)
 			return NULL;
 		
@@ -335,6 +335,8 @@ GP_Context *load_resized_image(struct loader_params *params, GP_Size w, GP_Size 
 //	img = GP_FilterDifferenceAlloc(i2, i1, NULL);
 //	img = GP_FilterInvert(img, NULL, NULL);
 	img = i1;
+//	if (params->resampling_method == GP_INTERP_CUBIC_INT)
+//		GP_FilterEdgeSharpening(img, img, 0.2, NULL);
 	cpu_timer_stop(&timer);
 
 	/* Free low passed context if needed */

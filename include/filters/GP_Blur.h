@@ -32,33 +32,40 @@
 #include "GP_Filter.h"
 
 /*
- * Gaussian blur
- *
- * The sigma parameters defines the blur radii in horizontal and vertical
- * direction.
- *
- * Internaly this is implemented as separable linear filter (calls vertical and
- * horizontal convolution with generated gaussian kernel).
- *
- * This variant could work in-place so it's perectly okay to call
- *
- * GP_FilterGaussianBlur_Raw(context, context, ...);
+ * Gaussian blur implemented using linear separable convolution.
+ * 
+ * The x_sigma defines the blur size in horizontal direction and y_sigma
+ * defines blur on vertical direction.
  */
-int GP_FilterGaussianBlur_Raw(const GP_Context *src, GP_Context *dst,
-                              float sigma_x, float sigma_y,
-                              GP_ProgressCallback *callback);
 
-/*
- * Gaussian blur.
- *
- * If dst is NULL, new bitmap is allocated.
- *
- * This variant could work in-place.
- *
- * Returns pointer to destination bitmap or NULL if allocation failed.
- */
-GP_Context *GP_FilterGaussianBlur(const GP_Context *src, GP_Context *dst,
-                                  float sigma_x, float sigma_y,
-                                  GP_ProgressCallback *callback);
+int GP_FilterGaussianBlurEx(const GP_Context *src,
+                            GP_Coord x_src, GP_Coord y_src,
+                            GP_Size w_src, GP_Size h_src,
+                            GP_Context *dst,
+			    GP_Coord x_dst, GP_Coord y_dst,
+			    float x_sigma, float y_sigma,
+			    GP_ProgressCallback *callback);
+
+GP_Context *GP_FilterGaussianBlurExAlloc(const GP_Context *src,
+                                         GP_Coord x_src, GP_Coord y_src,
+                                         GP_Size w_src, GP_Size h_src,
+			                 float x_sigma, float y_sigma,
+			                 GP_ProgressCallback *callback);
+
+static inline int GP_FilterGaussianBlur(const GP_Context *src, GP_Context *dst,
+                                        float x_sigma, float y_sigma,
+                                        GP_ProgressCallback *callback)
+{
+	return GP_FilterGaussianBlurEx(src, 0, 0, src->w, src->h, dst, 0, 0,
+	                               x_sigma, y_sigma, callback);
+}
+
+static inline GP_Context *GP_FilterGaussianBlurAlloc(const GP_Context *src,
+                                                     float x_sigma, float y_sigma,
+                                                     GP_ProgressCallback *callback)
+{
+	return GP_FilterGaussianBlurExAlloc(src, 0, 0, src->w, src->h,
+	                                    x_sigma, y_sigma, callback);
+}
 
 #endif /* FILTERS_GP_BLUR_H */

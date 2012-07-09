@@ -69,7 +69,11 @@ static int gaussian_callback_vert(GP_ProgressCallback *self)
 	return callback->callback(callback);
 }
 
-int GP_FilterGaussianBlur_Raw(const GP_Context *src, GP_Context *dst,
+int GP_FilterGaussianBlur_Raw(const GP_Context *src,
+                              GP_Coord x_src, GP_Coord y_src,
+                              GP_Size w_src, GP_Size h_src,
+			      GP_Context *dst,
+                              GP_Coord x_dst, GP_Coord y_dst,
                               float sigma_x, float sigma_y,
                               GP_ProgressCallback *callback)
 {
@@ -77,7 +81,7 @@ int GP_FilterGaussianBlur_Raw(const GP_Context *src, GP_Context *dst,
 	unsigned int size_y = gaussian_kernel_size(sigma_y);
 	
 	GP_DEBUG(1, "Gaussian blur sigma_x=%2.3f sigma_y=%2.3f kernel %ix%i image %ux%u",
-	            sigma_x, sigma_y, size_x, size_y, src->w, src->h);
+	            sigma_x, sigma_y, size_x, size_y, w_src, h_src);
 	
 	GP_ProgressCallback *new_callback = NULL;
 
@@ -96,13 +100,13 @@ int GP_FilterGaussianBlur_Raw(const GP_Context *src, GP_Context *dst,
 
 		GP_ConvolutionParams params = {
 			.src = src,
-			.x_src = 0,
-			.y_src = 0,
-			.w_src = src->w,
-			.h_src = src->h,
+			.x_src = x_src,
+			.y_src = y_src,
+			.w_src = w_src,
+			.h_src = h_src,
 			.dst = dst,
-			.x_dst = 0,
-			.y_dst = 0,
+			.x_dst = x_dst,
+			.y_dst = y_dst,
 			.kernel = kernel_x,
 			.kw = size_x,
 			.kh = 1,
@@ -124,13 +128,13 @@ int GP_FilterGaussianBlur_Raw(const GP_Context *src, GP_Context *dst,
 		
 		GP_ConvolutionParams params = {
 			.src = src,
-			.x_src = 0,
-			.y_src = 0,
-			.w_src = src->w,
-			.h_src = src->h,
+			.x_src = x_src,
+			.y_src = y_src,
+			.w_src = w_src,
+			.h_src = h_src,
 			.dst = dst,
-			.x_dst = 0,
-			.y_dst = 0,
+			.x_dst = x_dst,
+			.y_dst = y_dst,
 			.kernel = kernel_y,
 			.kw = 1,
 			.kh = size_y,
@@ -146,27 +150,41 @@ int GP_FilterGaussianBlur_Raw(const GP_Context *src, GP_Context *dst,
 	return 0;
 }
 
-GP_Context *GP_FilterGaussianBlur(const GP_Context *src, GP_Context *dst,
-                                  float sigma_x, float sigma_y,
-                                  GP_ProgressCallback *callback)
+int GP_FilterGaussianBlurEx(const GP_Context *src,
+                            GP_Coord x_src, GP_Coord y_src,
+                            GP_Size w_src, GP_Size h_src,
+                            GP_Context *dst,
+                            GP_Coord x_dst, GP_Coord y_dst,
+                            float sigma_x, float sigma_y,
+                            GP_ProgressCallback *callback)
 {
-	/* TODO: templatetize  */
-	if (src->pixel_type != GP_PIXEL_RGB888)
-		return NULL;
+	GP_CHECK(src->pixel_type == dst->pixel_type);
 	
-	if (dst == NULL) {
-		dst = GP_ContextCopy(src, 0);
+	/* Check that destination is large enough */
+	GP_CHECK(x_dst + (GP_Coord)w_src <= (GP_Coord)dst->w);
+	GP_CHECK(y_dst + (GP_Coord)h_src <= (GP_Coord)dst->h);
+	
+	return GP_FilterGaussianBlur_Raw(src, x_src, y_src, w_src, h_src,
+	                                 dst, x_dst, y_dst,
+	                                 sigma_x, sigma_y, callback);
+}
 
-		if (dst == NULL)
-			return NULL;
-	} else {
-		GP_ASSERT(src->pixel_type == dst->pixel_type,
-		          "The src and dst pixel types must match");
-		GP_ASSERT(src->w <= dst->w && src->h <= dst->h,
-		          "Destination is not big enough");
+GP_Context *GP_FilterGaussianBlurExAlloc(const GP_Context *src,
+                                         GP_Coord x_src, GP_Coord y_src,
+                                         GP_Size w_src, GP_Size h_src,
+				         float sigma_x, float sigma_y,
+                                         GP_ProgressCallback *callback)
+{
+	GP_Context *dst = GP_ContextAlloc(w_src, h_src, src->pixel_type);
+
+	if (dst == NULL)
+		return NULL;
+
+	if (GP_FilterGaussianBlur_Raw(src, x_src, y_src, w_src, h_src, dst,
+	                                0, 0, sigma_x, sigma_y, callback)) {
+		GP_ContextFree(dst);
+		return NULL;
 	}
-
-	GP_FilterGaussianBlur_Raw(src, dst, sigma_x, sigma_y, callback);
 
 	return dst;
 }
