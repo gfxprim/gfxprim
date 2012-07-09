@@ -69,7 +69,7 @@ int main(int argc, char *argv[])
 	img = GP_LoadImage(argv[1], &callback);
 
 	if (img == NULL) {
-		fprintf(stderr, "Failed to load image '%s':%s\n", argv[1],
+		fprintf(stderr, "Failed to load image '%s': %s\n", argv[1],
 		        strerror(errno));
 		return 1;
 	}
@@ -105,7 +105,7 @@ int main(int argc, char *argv[])
 	priv.name = "out.png";
 
 	if (GP_SavePNG(img, "out.png", &callback)) {
-		fprintf(stderr, "Failed to save image %s", strerror(errno));
+		fprintf(stderr, "Failed to save image: %s", strerror(errno));
 		return 1;
 	}
 
