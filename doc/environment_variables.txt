@@ -1,0 +1,23 @@
+Environment Variables
+---------------------
+
+The GFXprim library behavior may be changed by a couple of environment
+variables:
+
+GP_THREADS
+~~~~~~~~~~
+
+'GP_THREADS' overrides GP_NrThreadsSet() settings. The value is the same as it
+would have been set by GP_NrThreadsSet() which is described in the table
+bellow:
+
+.GP_THREADS possible values
+[width="60%",options="header"]
+|=============================================================================
+| Value | Description
+|   0   | Use auto-detection, algorithms runs in nCPU threads unless the image
+          buffer is too small.
+|   1   | Use one thread only.
+|  >=2  | Use N threads unless the image buffer is too small.
+|=============================================================================
+

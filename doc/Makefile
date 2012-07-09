@@ -1,5 +1,6 @@
 SOURCES=general.txt context.txt loaders.txt filters.txt basic_types.txt \
-        drawing_api.txt backends.txt gamma.txt grabbers.txt
+        drawing_api.txt backends.txt gamma.txt grabbers.txt \
+	environment_variables.txt
 
 PAGES=$(subst .txt,.html,$(SOURCES))
 

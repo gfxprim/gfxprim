@@ -15,9 +15,13 @@ Also available in link:api.html[all in one page form].
   The Context is description of in-memory bitmap including some meta-data
   (size, pixel format, etc...).
   +
+. link:environment_variables.html[Environment Variables]
+  +
+  Description of environment variables that affects GFXprim behavior.
+  +
 . link:gamma.html[Gamma correction]
   +
-  The gama correction description and hanlding in GFXprim.
+  The gama correction description and handling in GFXprim.
   +
 . link:drawing_api.html[Drawing primitives]
   +
