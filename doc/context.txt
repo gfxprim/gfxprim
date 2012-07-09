@@ -1,8 +1,8 @@
 Drawing Context
 ---------------
 
-The 'GP_Context' structure describes an 'in memory' memory. It contains all
-metadata needed for drawing into a bitmap.
+The 'GP_Context' structure describes an 'in memory' pixmap. It contains all
+metadata needed for drawing and filters.
 
 Data Structure
 ~~~~~~~~~~~~~~
