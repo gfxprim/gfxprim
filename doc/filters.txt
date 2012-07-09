@@ -537,7 +537,7 @@ The dst coordinates defines offset into the dst context.
 The kernel is two-dimensional array of a size kw * kh indexed as
 kernel[x + y*kw]. 
 
-The kern_div is a coeficient that is used to divide the resuting values often
+The kern_div is a coefficient that is used to divide the resulting values often
 used to normalize the result.
 
 This filter works 'in-place'.
@@ -611,7 +611,7 @@ The dst coordinates are offset into the dst.
 
 The kernel is one-dimensional array of floats of size kw or kh.
 
-The kern_div is a coeficient that is used to divide the resuting values. 
+The kern_div is a coefficient that is used to divide the resulting values. 
 
 The last function does both vertical and horizontal convolution and takes care
 of correct progress callback.
@@ -699,14 +699,14 @@ GP_Context *GP_FilterConvolutionAlloc(const GP_Context *src,
 void GP_FilterKernel2DPrint(const GP_FilterKernel2D *kernel);
 -------------------------------------------------------------------------------
 
-Linear convolution filters, you should prefferably use this API over the _Raw
+Linear convolution filters, you should preferably use this API over the _Raw
 variants.
 
 The Ex variants takes a rectangle on which the filter should operate as well
 as offset into the destination. The destination must be large enough so that
 starting with offset there is at least w_dst and h_dst pixels.
 
-The kernel is a pointer to a structure initalized with the kernel size, divider
+The kernel is a pointer to a structure initialized with the kernel size, divider
 and array of kernel values.
 
 The last function prints convolution kernel in human-readable format into the
@@ -832,19 +832,42 @@ Gaussian Blur
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <GP_Filters.h>
+#include <filters/GP_Blur.h>
+/* or */
+#include <GP.h>
 
-GP_Context *GP_FilterGaussianBlur(const GP_Context *src, GP_Context *dst,
-                                  float sigma_x, float sigma_y,
-                                  GP_ProgressCallback *callback);
+int GP_FilterGaussianBlurEx(const GP_Context *src,
+                            GP_Coord x_src, GP_Coord y_src,
+                            GP_Size w_src, GP_Size h_src,
+                            GP_Context *dst,
+                            GP_Coord x_dst, GP_Coord y_dst,
+                            float x_sigma, float y_sigma,
+                            GP_ProgressCallback *callback);
+
+GP_Context *GP_FilterGaussianBlurExAlloc(const GP_Context *src,
+                                         GP_Coord x_src, GP_Coord y_src,
+                                         GP_Size w_src, GP_Size h_src,
+                                         float x_sigma, float y_sigma,
+                                         GP_ProgressCallback *callback);
+
+int GP_FilterGaussianBlur(const GP_Context *src, GP_Context *dst,
+                          float x_sigma, float y_sigma,
+                          GP_ProgressCallback *callback)
+
+GP_Context *GP_FilterGaussianBlurAlloc(const GP_Context *src,
+                                       float x_sigma, float y_sigma,
+                                       GP_ProgressCallback *callback)
 -------------------------------------------------------------------------------
 
-Gaussian blur filter.
+Gaussian blur (low pass) filters implemented as bilinear separable
+convolution.
 
-Works 'in-place'.
+The sigma denotes amount of the blur (the radius is computed accordingly
+automatically).
 
-'TODO:' this filter is implemented for RGB888 only.
-
+The sigma values can be set for vertical and horizontal direction
+independently which may be useful when Gaussian blur is used as a low pass
+filter before image is resampled non proportionally.
 
 Interpolation filters
 ~~~~~~~~~~~~~~~~~~~~~
@@ -892,7 +915,7 @@ Bilinear Interpolation
 ^^^^^^^^^^^^^^^^^^^^^^
 
 Bilinear is faster than bicubic interpolation and produces quite good results
-expecially the low pass variant doesn't need additional filter on downsampling.
+especially the low pass variant doesn't need additional filter on down-sampling.
 
 Bicubic Interpolation
 ^^^^^^^^^^^^^^^^^^^^^
