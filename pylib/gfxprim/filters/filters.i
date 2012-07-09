@@ -38,7 +38,6 @@
 %newobject GP_FilterSymmetry_Alloc;
 %include "GP_Rotate.h"
 
-
 %newobject GP_FilterFloydSteinberg_RGB888_Alloc;
 %newobject GP_FilterHilbertPeano_RGB888_Alloc;
 %include "GP_Dither.h"
@@ -49,3 +48,11 @@
 %newobject GP_FilterMaxAlloc;
 %newobject GP_FilterMinAlloc;
 %include "GP_Arithmetic.h"
+
+%newobject GP_FilterConvolutionAlloc;
+%newobject GP_FilterConvolutionExAlloc;
+%include "GP_Convolution.h"
+
+%newobject GP_FilterBlurAlloc;
+%newobject GP_FilterBlurExAlloc;
+%include "GP_Blur.h"
