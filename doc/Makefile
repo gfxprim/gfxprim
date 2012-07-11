@@ -10,7 +10,7 @@ all: api.html examples.html $(PAGES) api_links.html
 #
 # Create all in one API page
 #
-api.html: $(SOURCES) 
+api.html: $(SOURCES) api.txt
 	asciidoc -a toc api.txt
 
 #

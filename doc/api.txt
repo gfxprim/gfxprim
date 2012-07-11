@@ -2,6 +2,9 @@ GFXprim API
 ===========
 Cyril Hrubis <metan@ucw.cz>
 
+This documentation is also available link:api_links.html[divided into several
+pages].
+
 include::general.txt[]
 include::basic_types.txt[]
 include::environment_variables.txt[]

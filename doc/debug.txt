@@ -47,5 +47,5 @@ void GP_DebugPrint(int level, const char *file, const char *function, int line,
 -------------------------------------------------------------------------------
 
 Printf-like macros used to create debug messages. All of them calls the
-'GP_DebugPrint()' function with correct paramters.
+'GP_DebugPrint()' function with correct parameters.
 
