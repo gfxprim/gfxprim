@@ -10,6 +10,10 @@ Also available in link:api.html[all in one page form].
   Describes how colors and pixels are handled also describes progress callback
   in great detail.
   +
+. link:debug.html[Debug Messages]
+  +
+  Interface to debug layer.
+  +
 . link:context.html[Context]
   +
   The Context is description of in-memory bitmap including some meta-data

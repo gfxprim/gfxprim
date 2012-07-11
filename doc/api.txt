@@ -5,6 +5,7 @@ Cyril Hrubis <metan@ucw.cz>
 include::general.txt[]
 include::basic_types.txt[]
 include::environment_variables.txt[]
+include::debug.txt[]
 include::context.txt[]
 include::gamma.txt[]
 include::drawing_api.txt[]

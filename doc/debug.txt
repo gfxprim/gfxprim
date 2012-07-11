@@ -1,0 +1,51 @@
+Debug Messages
+--------------
+
+The GFXprim library includes a debug messages infrastructure in order to ease
+debugging.
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <core/GP_Debug.h>
+/* or */
+#include <GP.h>
+
+void GP_SetDebugLevel(unsigned int level);
+
+unsigned int GP_GetDebugLevel(void);
+-------------------------------------------------------------------------------
+
+Sets or gets library debug level. The default level is 0 at which only BUG,
+WARNING, TODO and messages with debug level 0 are shown.
+
+Increasing this number would cause the library to be more verbose in debugging
+messages.
+
+Setting debug level to 1 would expose debug messages when object was created
+or destroyed or when particular algorithm has been started.
+
+Setting debug level to value higher than 1 would expose even more verbose
+messages the current maximum used by debug messages is 4.
+
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <core/GP_Debug.h>
+/* or */
+#include <GP.h>
+
+GP_DEBUG(level, ...)
+
+GP_TODO(...)
+
+GP_WARN(...)
+
+GP_BUG(...)
+
+void GP_DebugPrint(int level, const char *file, const char *function, int line,
+                   const char *fmt, ...);
+-------------------------------------------------------------------------------
+
+Printf-like macros used to create debug messages. All of them calls the
+'GP_DebugPrint()' function with correct paramters.
+
