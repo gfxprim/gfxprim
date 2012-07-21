@@ -126,7 +126,7 @@ int GP_FilterHLinearConvolution_Raw(const GP_Context *src,
 			                      GP_Pixel_CREATE_RGB888(r, g, b));
 		}
 
-		if (GP_ProgressCallbackReport(callback, y, dst->h, dst->w)) {
+		if (GP_ProgressCallbackReport(callback, y, h_src, w_src)) {
 			GP_TempAllocFree(temp);
 			return 1;
 		}
@@ -233,7 +233,7 @@ int GP_FilterVLinearConvolution_Raw(const GP_Context *src,
 			                      GP_Pixel_CREATE_RGB888(r, g, b));
 		}
 		
-		if (GP_ProgressCallbackReport(callback, x, dst->w, dst->h)) {
+		if (GP_ProgressCallbackReport(callback, x, w_src, h_src)) {
 			GP_TempAllocFree(temp);
 			return 1;
 		}
@@ -388,7 +388,7 @@ int GP_FilterLinearConvolution_Raw(const GP_Context *src,
 				idx = 0;
 		}
 		
-		if (GP_ProgressCallbackReport(callback, y, dst->h, dst->w))
+		if (GP_ProgressCallbackReport(callback, y, h_src, w_src))
 			return 1;
 	}
 
