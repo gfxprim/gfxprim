@@ -41,7 +41,7 @@ int GP_FilterHLinearConvolution_Raw(const GP_Context *src,
 {
 	GP_Coord x, y;
 	uint32_t i;
-	int32_t ikernel[kw], ikern_div;
+	int ikernel[kw], ikern_div;
 	uint32_t size = w_src + kw - 1;
 
 	GP_DEBUG(1, "Horizontal linear convolution kernel width %u "
@@ -103,12 +103,13 @@ int GP_FilterHLinearConvolution_Raw(const GP_Context *src,
 
 		for (x = 0; x < (GP_Coord)w_src; x++) {
 			int32_t r = MUL/2, g = MUL/2, b = MUL/2;
+			int *pR = R + x, *pG = G + x, *pB = B + x;
 
 			/* count the pixel value from neighbours weighted by kernel */
 			for (i = 0; i < kw; i++) {
-				r += R[i + x] * ikernel[i];
-				g += G[i + x] * ikernel[i];
-				b += B[i + x] * ikernel[i];
+				r += (*pR++) * ikernel[i];
+				g += (*pG++) * ikernel[i];
+				b += (*pB++) * ikernel[i];
 			}
 			
 			/* divide the result */
@@ -147,7 +148,7 @@ int GP_FilterVLinearConvolution_Raw(const GP_Context *src,
 {
 	GP_Coord x, y;
 	uint32_t i;
-	int32_t ikernel[kh], ikern_div;
+	int ikernel[kh], ikern_div;
 	uint32_t size = h_src + kh - 1;
 
 	for (i = 0; i < kh; i++)
@@ -206,15 +207,16 @@ int GP_FilterVLinearConvolution_Raw(const GP_Context *src,
 		
 			i++;
 		}
-
+		
 		for (y = 0; y < (GP_Coord)h_src; y++) {
 			int32_t r = MUL/2, g = MUL/2, b = MUL/2;
-			
+			int *pR = R + y, *pG = G + y, *pB = B + y;
+
 			/* count the pixel value from neighbours weighted by kernel */
 			for (i = 0; i < kh; i++) {
-				r += R[y + i] * ikernel[i];
-				g += G[y + i] * ikernel[i];
-				b += B[y + i] * ikernel[i];
+				r += (*pR++) * ikernel[i];
+				g += (*pG++) * ikernel[i];
+				b += (*pB++) * ikernel[i];
 			}
 
 			/* divide the result */
