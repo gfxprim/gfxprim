@@ -65,4 +65,7 @@
 /* Laplace based filters */
 #include "filters/GP_Laplace.h"
 
+/* Median filter */
+#include "filters/GP_Median.h"
+
 #endif /* GP_FILTERS_H */
