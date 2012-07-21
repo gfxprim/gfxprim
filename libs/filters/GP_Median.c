@@ -31,47 +31,81 @@
 
 #include <string.h>
 
-static inline void hist_inc(unsigned int *h, unsigned int x, unsigned int val)
+struct hist8 {
+	unsigned int coarse[16];
+	unsigned int fine[16][16];
+};
+
+static inline void hist8_inc(struct hist8 *h, unsigned int x, unsigned int val)
 {
-	h[256 * x + val]++;
+	h[x].coarse[val>>4]++;
+	h[x].fine[val>>4][val&0x0f]++;
 }
 
-static inline void hist_dec(unsigned int *h, unsigned int x, unsigned int val)
+static inline void hist8_dec(struct hist8 *h, unsigned int x, unsigned int val)
 {
-	h[256 * x + val]--;
+	h[x].coarse[val>>4]--;
+	h[x].fine[val>>4][val&0x0f]--;
 }
 
-static inline void hist_sub(unsigned int *a, unsigned int *b, unsigned int x)
+static inline void hist8_add(struct hist8 *out, struct hist8 *in, unsigned int x)
 {
-	int j;
+	int i, j;
+
+	for (i = 0; i < 16; i += 4) {
+		out->coarse[i + 0] += in[x].coarse[i + 0];
+		out->coarse[i + 1] += in[x].coarse[i + 1];
+		out->coarse[i + 2] += in[x].coarse[i + 2];
+		out->coarse[i + 3] += in[x].coarse[i + 3];
 	
-	for (j = 0; j < 256; j++)
-		a[j] -= b[256 * x + j];
+		for (j = 0; j < 16; j++) {
+			out->fine[i][j] += in[x].fine[i][j];
+			out->fine[i+1][j] += in[x].fine[i+1][j];
+			out->fine[i+2][j] += in[x].fine[i+2][j];
+			out->fine[i+3][j] += in[x].fine[i+3][j];
+		}
+	}
 }
 
-static inline void hist_add(unsigned int *a, unsigned int *b, unsigned int x)
+static inline void hist8_sub(struct hist8 *out, struct hist8 *in, unsigned int x)
 {
-	int j;
-	
-	for (j = 0; j < 256; j++)
-		a[j] += b[256 * x + j];
+	int i, j;
+
+	for (i = 0; i < 16; i += 4) {
+		out->coarse[i + 0] -= in[x].coarse[i + 0];
+		out->coarse[i + 1] -= in[x].coarse[i + 1];
+		out->coarse[i + 2] -= in[x].coarse[i + 2];
+		out->coarse[i + 3] -= in[x].coarse[i + 3];
+		
+		for (j = 0; j < 16; j++) {
+			out->fine[i][j] -= in[x].fine[i][j];
+			out->fine[i+1][j] -= in[x].fine[i+1][j];
+			out->fine[i+2][j] -= in[x].fine[i+2][j];
+			out->fine[i+3][j] -= in[x].fine[i+3][j];
+		}
+	}
 }
 
-#define HIST_INC hist_inc
-#define HIST_DEC hist_dec
-
-static inline unsigned int hist_median(unsigned int *hist, unsigned int len,
-                                       unsigned int trigger)
+static inline unsigned int hist8_median(struct hist8 *h, struct hist8 *row, unsigned int x, unsigned int trigger)
 {
-	unsigned int i;
+	unsigned int i, j;
 	unsigned int acc = 0;
 
-	for (i = 0; i < len; i++) {
-		acc += hist[i];
-		if (acc >= trigger)
-			return i;
+	for (i = 0; i < 16; i++) {
+		acc += h->coarse[i];
+	
+		if (acc >= trigger) {
+			acc -= h->coarse[i];
+			
+			for (j = 0; j < 16; j++) {
+				acc += h->fine[i][j];
+				
+				if (acc >= trigger)
+					return (i<<4) | j;
+			}
+		}
 	}
-
+	
 	GP_BUG("Trigger not reached");
 	return 0;
 }
@@ -90,18 +124,18 @@ static int GP_FilterMedian_Raw(const GP_Context *src,
 	            w_src, h_src, 2 * xmed + 1, 2 * ymed + 1);
 	
 	/* The buffer is w + 2*xmed + 1 size because we read the last value but we don't use it */
-	unsigned int size = (w_src + 2 * xmed + 1) * sizeof(int);
+	unsigned int size = (w_src + 2 * xmed + 1);
 
 	/* Create and initalize arrays for row of histograms */
-	GP_TempAllocCreate(temp, 3 * 256 * size);
+	GP_TempAllocCreate(temp, 3 * sizeof(struct hist8) * size);
 
-	unsigned int *R = GP_TempAllocGet(temp, 256 * size);
-	unsigned int *G = GP_TempAllocGet(temp, 256 * size);
-	unsigned int *B = GP_TempAllocGet(temp, 256 * size);
+	struct hist8 *R = GP_TempAllocGet(temp, sizeof(struct hist8) * size);
+	struct hist8 *G = GP_TempAllocGet(temp, sizeof(struct hist8) * size);
+	struct hist8 *B = GP_TempAllocGet(temp, sizeof(struct hist8) * size);
 	
-	memset(R, 0, 256 * size);
-	memset(G, 0, 256 * size);
-	memset(B, 0, 256 * size);
+	memset(R, 0, sizeof(*R));
+	memset(G, 0, sizeof(*G));
+	memset(B, 0, sizeof(*B));
 
 	/* Prefill row of histograms */
 	for (x = 0; x < (int)w_src + 2*xmed; x++) {
@@ -112,44 +146,45 @@ static int GP_FilterMedian_Raw(const GP_Context *src,
 			
 			GP_Pixel pix = GP_GetPixel_Raw_24BPP(src, xi, yi);
 			
-			HIST_INC(R, x, GP_Pixel_GET_R_RGB888(pix));
-			HIST_INC(G, x, GP_Pixel_GET_G_RGB888(pix));	
-			HIST_INC(B, x, GP_Pixel_GET_B_RGB888(pix));	
+			hist8_inc(R, x, GP_Pixel_GET_R_RGB888(pix));
+			hist8_inc(G, x, GP_Pixel_GET_G_RGB888(pix));	
+			hist8_inc(B, x, GP_Pixel_GET_B_RGB888(pix));	
 		}
 	}
 
 	/* Apply the median filter */
 	for (y = 0; y < (int)h_src; y++) {
-		unsigned int XR[256], XG[256], XB[256];
+		struct hist8 xR, xG, xB;
+		struct hist8 *XR = &xR, *XG = &xG, *XB = &xB;
 	
-		memset(XR, 0, sizeof(XR));
-		memset(XG, 0, sizeof(XG));
-		memset(XB, 0, sizeof(XB));
-	
+		memset(XR, 0, sizeof(*XR));
+		memset(XG, 0, sizeof(*XG));
+		memset(XB, 0, sizeof(*XB));
+		
 		/* Compute first histogram */
 		for (i = 0; i <= 2*xmed; i++) {
-			hist_add(XR, R, i);
-			hist_add(XG, G, i);
-			hist_add(XB, B, i);
+			hist8_add(XR, R, i);
+			hist8_add(XG, G, i);
+			hist8_add(XB, B, i);
 		}
-		
+
 		/* Generate row */
 		for (x = 0; x < (int)w_src; x++) {
-			int r = hist_median(XR, 256, (xmed + ymed + 1));
-			int g = hist_median(XG, 256, (xmed + ymed + 1));
-			int b = hist_median(XB, 256, (xmed + ymed + 1));
+			int r = hist8_median(XR, R, x, (xmed + ymed + 1));
+			int g = hist8_median(XG, G, x, (xmed + ymed + 1));
+			int b = hist8_median(XB, B, x, (xmed + ymed + 1));
 
 			GP_PutPixel_Raw_24BPP(dst, x_dst + x, y_dst + y,
 			                      GP_Pixel_CREATE_RGB888(r, g, b));
 		
 			/* Recompute histograms */
-			hist_sub(XR, R, x);
-			hist_sub(XG, G, x);
-			hist_sub(XB, B, x);
+			hist8_sub(XR, R, x);
+			hist8_sub(XG, G, x);
+			hist8_sub(XB, B, x);
 
-			hist_add(XR, R, (x + 2 * xmed + 1));
-			hist_add(XG, G, (x + 2 * xmed + 1));
-			hist_add(XB, B, (x + 2 * xmed + 1));
+			hist8_add(XR, R, (x + 2 * xmed + 1));
+			hist8_add(XG, G, (x + 2 * xmed + 1));
+			hist8_add(XB, B, (x + 2 * xmed + 1));
 		}
 
 		/* Recompute histograms, remove y - ymed pixel add y + ymed + 1 */
@@ -159,17 +194,17 @@ static int GP_FilterMedian_Raw(const GP_Context *src,
 			
 			GP_Pixel pix = GP_GetPixel_Raw_24BPP(src, xi, yi);
 		
-			HIST_DEC(R, x, GP_Pixel_GET_R_RGB888(pix));	
-			HIST_DEC(G, x, GP_Pixel_GET_G_RGB888(pix));	
-			HIST_DEC(B, x, GP_Pixel_GET_B_RGB888(pix));	
+			hist8_dec(R, x, GP_Pixel_GET_R_RGB888(pix));	
+			hist8_dec(G, x, GP_Pixel_GET_G_RGB888(pix));	
+			hist8_dec(B, x, GP_Pixel_GET_B_RGB888(pix));	
 			
 			yi = GP_MIN(y_src + y + ymed + 1, (int)src->h - 1);
 			
 			pix = GP_GetPixel_Raw_24BPP(src, xi, yi);
 			
-			HIST_INC(R, x, GP_Pixel_GET_R_RGB888(pix));	
-			HIST_INC(G, x, GP_Pixel_GET_G_RGB888(pix));	
-			HIST_INC(B, x, GP_Pixel_GET_B_RGB888(pix));
+			hist8_inc(R, x, GP_Pixel_GET_R_RGB888(pix));	
+			hist8_inc(G, x, GP_Pixel_GET_G_RGB888(pix));	
+			hist8_inc(B, x, GP_Pixel_GET_B_RGB888(pix));
 		}
 		
 		if (GP_ProgressCallbackReport(callback, y, h_src, w_src)) {
