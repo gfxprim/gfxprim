@@ -36,6 +36,12 @@ struct hist8 {
 	unsigned int fine[16][16];
 };
 
+struct hist8u {
+	unsigned int coarse[16];
+	unsigned int fine[16][16];
+	unsigned int lx[16];
+};
+
 static inline void hist8_inc(struct hist8 *h, unsigned int x, unsigned int val)
 {
 	h[x].coarse[val>>4]++;
@@ -48,7 +54,19 @@ static inline void hist8_dec(struct hist8 *h, unsigned int x, unsigned int val)
 	h[x].fine[val>>4][val&0x0f]--;
 }
 
-static inline void hist8_add(struct hist8 *out, struct hist8 *in, unsigned int x)
+static inline void hist8_add(struct hist8u *out, struct hist8 *in, unsigned int x)
+{
+	int i;
+
+	for (i = 0; i < 16; i += 4) {
+		out->coarse[i + 0] += in[x].coarse[i + 0];
+		out->coarse[i + 1] += in[x].coarse[i + 1];
+		out->coarse[i + 2] += in[x].coarse[i + 2];
+		out->coarse[i + 3] += in[x].coarse[i + 3];
+	}
+}
+
+static inline void hist8_add_fine(struct hist8u *out, struct hist8 *in, unsigned int x)
 {
 	int i, j;
 
@@ -59,34 +77,68 @@ static inline void hist8_add(struct hist8 *out, struct hist8 *in, unsigned int x
 		out->coarse[i + 3] += in[x].coarse[i + 3];
 	
 		for (j = 0; j < 16; j++) {
-			out->fine[i][j] += in[x].fine[i][j];
-			out->fine[i+1][j] += in[x].fine[i+1][j];
-			out->fine[i+2][j] += in[x].fine[i+2][j];
-			out->fine[i+3][j] += in[x].fine[i+3][j];
+			out->fine[i + 0][j] += in[x].fine[i + 0][j];
+			out->fine[i + 1][j] += in[x].fine[i + 1][j];
+			out->fine[i + 2][j] += in[x].fine[i + 2][j];
+			out->fine[i + 3][j] += in[x].fine[i + 3][j];
 		}
 	}
 }
 
-static inline void hist8_sub(struct hist8 *out, struct hist8 *in, unsigned int x)
+static inline void hist8_sub(struct hist8u *out, struct hist8 *in, unsigned int x)
 {
-	int i, j;
+	int i;
 
 	for (i = 0; i < 16; i += 4) {
 		out->coarse[i + 0] -= in[x].coarse[i + 0];
 		out->coarse[i + 1] -= in[x].coarse[i + 1];
 		out->coarse[i + 2] -= in[x].coarse[i + 2];
 		out->coarse[i + 3] -= in[x].coarse[i + 3];
-		
-		for (j = 0; j < 16; j++) {
-			out->fine[i][j] -= in[x].fine[i][j];
-			out->fine[i+1][j] -= in[x].fine[i+1][j];
-			out->fine[i+2][j] -= in[x].fine[i+2][j];
-			out->fine[i+3][j] -= in[x].fine[i+3][j];
-		}
 	}
 }
 
-static inline unsigned int hist8_median(struct hist8 *h, struct hist8 *row, unsigned int x, unsigned int trigger)
+/*
+ * Updates only one specified fine part of the histogram.
+ *
+ * The structure hist8u remebers when was particular fine row updated so we either
+ * generate it from scatch or update depending on the number of needed operations.
+ */
+static inline void hist8_update(struct hist8u *h, unsigned int i,
+                                struct hist8  *row, unsigned int x, unsigned int xmed)
+{
+	unsigned int j, k;
+	unsigned int lx = h->lx[i];
+	unsigned int dx = x - lx;
+
+	if (dx > 2*xmed) {
+		/* if last update was long ago clear it and load again */
+		for (j = 0; j < 16; j+=4) {
+			h->fine[i][j + 0] = 0;
+			h->fine[i][j + 1] = 0;
+			h->fine[i][j + 2] = 0;
+			h->fine[i][j + 3] = 0;
+		}
+
+		for (j = 0; j < 16; j++)
+			for (k = 0; k <= 2*xmed; k++)
+				h->fine[i][j + 0] += row[x + k].fine[i][j + 0];
+	} else {
+		/* update only missing bits */
+		for (j = 0; j < 16; j++) {
+			for (k = 0; k < dx; k++) {
+				h->fine[i][j] -= row[lx + k].fine[i][j];
+				h->fine[i][j] += row[lx + k + 2*xmed + 1].fine[i][j];
+			}
+		}
+
+	}
+
+	h->lx[i] = x;
+}
+
+
+static inline unsigned int hist8_median(struct hist8u *h, struct hist8 *row,
+                                        unsigned int x, int xmed, unsigned int trigger)
 {
 	unsigned int i, j;
 	unsigned int acc = 0;
@@ -96,7 +148,10 @@ static inline unsigned int hist8_median(struct hist8 *h, struct hist8 *row, unsi
 	
 		if (acc >= trigger) {
 			acc -= h->coarse[i];
-			
+
+			/* update fine on position i */
+			hist8_update(h, i, row, x, xmed);
+
 			for (j = 0; j < 16; j++) {
 				acc += h->fine[i][j];
 				
@@ -154,8 +209,8 @@ static int GP_FilterMedian_Raw(const GP_Context *src,
 
 	/* Apply the median filter */
 	for (y = 0; y < (int)h_src; y++) {
-		struct hist8 xR, xG, xB;
-		struct hist8 *XR = &xR, *XG = &xG, *XB = &xB;
+		struct hist8u xR, xG, xB;
+		struct hist8u *XR = &xR, *XG = &xG, *XB = &xB;
 	
 		memset(XR, 0, sizeof(*XR));
 		memset(XG, 0, sizeof(*XG));
@@ -163,16 +218,16 @@ static int GP_FilterMedian_Raw(const GP_Context *src,
 		
 		/* Compute first histogram */
 		for (i = 0; i <= 2*xmed; i++) {
-			hist8_add(XR, R, i);
-			hist8_add(XG, G, i);
-			hist8_add(XB, B, i);
+			hist8_add_fine(XR, R, i);
+			hist8_add_fine(XG, G, i);
+			hist8_add_fine(XB, B, i);
 		}
 
 		/* Generate row */
 		for (x = 0; x < (int)w_src; x++) {
-			int r = hist8_median(XR, R, x, (xmed + ymed + 1));
-			int g = hist8_median(XG, G, x, (xmed + ymed + 1));
-			int b = hist8_median(XB, B, x, (xmed + ymed + 1));
+			int r = hist8_median(XR, R, x, xmed, (xmed + ymed + 1));
+			int g = hist8_median(XG, G, x, xmed, (xmed + ymed + 1));
+			int b = hist8_median(XB, B, x, xmed, (xmed + ymed + 1));
 
 			GP_PutPixel_Raw_24BPP(dst, x_dst + x, y_dst + y,
 			                      GP_Pixel_CREATE_RGB888(r, g, b));
