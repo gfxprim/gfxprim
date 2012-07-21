@@ -56,3 +56,7 @@
 %newobject GP_FilterBlurAlloc;
 %newobject GP_FilterBlurExAlloc;
 %include "GP_Blur.h"
+
+%newobject GP_FilterMedianAlloc;
+%newobject GP_FilterMedianExAlloc;
+%include "GP_Median.h"
