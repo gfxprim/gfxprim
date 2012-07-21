@@ -31,38 +31,30 @@
 
 #include <string.h>
 
-#define HIST_INIT(w) \
-	unsigned int R[w][256]; \
-	unsigned int G[w][256]; \
-	unsigned int B[w][256]; \
-	memset(R, 0, sizeof(R)); \
-	memset(G, 0, sizeof(G)); \
-	memset(B, 0, sizeof(B)); \
-
-static inline void hist_inc(unsigned int h[][256], unsigned int x, unsigned int val)
+static inline void hist_inc(unsigned int *h, unsigned int x, unsigned int val)
 {
-	h[x][val]++;
+	h[256 * x + val]++;
 }
 
-static inline void hist_dec(unsigned int h[][256], unsigned int x, unsigned int val)
+static inline void hist_dec(unsigned int *h, unsigned int x, unsigned int val)
 {
-	h[x][val]--;
+	h[256 * x + val]--;
 }
 
-static inline void hist_sub(unsigned int *a, unsigned int *b)
+static inline void hist_sub(unsigned int *a, unsigned int *b, unsigned int x)
 {
 	int j;
 	
 	for (j = 0; j < 256; j++)
-		a[j] -= b[j];
+		a[j] -= b[256 * x + j];
 }
 
-static inline void hist_add(unsigned int *a, unsigned int *b)
+static inline void hist_add(unsigned int *a, unsigned int *b, unsigned int x)
 {
 	int j;
 	
 	for (j = 0; j < 256; j++)
-		a[j] += b[j];
+		a[j] += b[256 * x + j];
 }
 
 #define HIST_INC hist_inc
@@ -96,10 +88,20 @@ static int GP_FilterMedian_Raw(const GP_Context *src,
 
 	GP_DEBUG(1, "Median filter size %ux%u xmed=%u ymed=%u",
 	            w_src, h_src, 2 * xmed + 1, 2 * ymed + 1);
+	
+	/* The buffer is w + 2*xmed + 1 size because we read the last value but we don't use it */
+	unsigned int size = (w_src + 2 * xmed + 1) * sizeof(int);
 
 	/* Create and initalize arrays for row of histograms */
-	/* The buffer is w + 2*xmed + 1 size because we read the last value but we don't use it */
-	HIST_INIT(w_src + 2 * xmed + 1);	
+	GP_TempAllocCreate(temp, 3 * 256 * size);
+
+	unsigned int *R = GP_TempAllocGet(temp, 256 * size);
+	unsigned int *G = GP_TempAllocGet(temp, 256 * size);
+	unsigned int *B = GP_TempAllocGet(temp, 256 * size);
+	
+	memset(R, 0, 256 * size);
+	memset(G, 0, 256 * size);
+	memset(B, 0, 256 * size);
 
 	/* Prefill row of histograms */
 	for (x = 0; x < (int)w_src + 2*xmed; x++) {
@@ -126,9 +128,9 @@ static int GP_FilterMedian_Raw(const GP_Context *src,
 	
 		/* Compute first histogram */
 		for (i = 0; i <= 2*xmed; i++) {
-			hist_add(XR, R[i]);
-			hist_add(XG, G[i]);
-			hist_add(XB, B[i]);
+			hist_add(XR, R, i);
+			hist_add(XG, G, i);
+			hist_add(XB, B, i);
 		}
 		
 		/* Generate row */
@@ -141,13 +143,13 @@ static int GP_FilterMedian_Raw(const GP_Context *src,
 			                      GP_Pixel_CREATE_RGB888(r, g, b));
 		
 			/* Recompute histograms */
-			hist_sub(XR, R[x]);
-			hist_sub(XG, G[x]);
-			hist_sub(XB, B[x]);
+			hist_sub(XR, R, x);
+			hist_sub(XG, G, x);
+			hist_sub(XB, B, x);
 
-			hist_add(XR, R[x + 2 * xmed + 1]);
-			hist_add(XG, G[x + 2 * xmed + 1]);
-			hist_add(XB, B[x + 2 * xmed + 1]);
+			hist_add(XR, R, (x + 2 * xmed + 1));
+			hist_add(XG, G, (x + 2 * xmed + 1));
+			hist_add(XB, B, (x + 2 * xmed + 1));
 		}
 
 		/* Recompute histograms, remove y - ymed pixel add y + ymed + 1 */
@@ -171,11 +173,12 @@ static int GP_FilterMedian_Raw(const GP_Context *src,
 		}
 		
 		if (GP_ProgressCallbackReport(callback, y, h_src, w_src)) {
-		//	GP_TempAllocFree(temp);
+			GP_TempAllocFree(temp);
 			return 1;
 		}
 	}
 
+	GP_TempAllocFree(temp);
 	GP_ProgressCallbackDone(callback);
 
 	return 0;
