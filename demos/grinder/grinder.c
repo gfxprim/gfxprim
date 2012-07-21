@@ -591,6 +591,42 @@ static GP_RetCode add_noise(GP_Context **c, const char *params)
 	return GP_ESUCCESS;
 }
 
+/* median filter */
+
+static struct param median_params[] = {
+	{"radius", PARAM_INT, "median radius for both x and y", NULL, NULL},
+	{"radius_x", PARAM_INT, "median radius for x", NULL, NULL},
+	{"radius_y", PARAM_INT, "median radius for y", NULL, NULL},
+	{NULL,  0, NULL, NULL, NULL}
+};
+
+static GP_RetCode median(GP_Context **c, const char *params)
+{
+	int rad = -1, rad_x, rad_y;
+
+	if (param_parse(params, median_params, "median", param_err, &rad, &rad_x, &rad_y))
+		return GP_EINVAL;
+	
+	if (rad != -1) {
+		rad_x = rad;
+		rad_y = rad;
+	}
+
+	if (rad_x < 0 || rad_y < 0)
+		return GP_EINVAL;
+
+	GP_Context *ret = GP_FilterMedianAlloc(*c, rad_x, rad_y, progress_callback);
+
+	if (ret == NULL)
+		return GP_ENOMEM;
+
+	GP_ContextFree(*c);
+	*c = ret;
+
+	return GP_ESUCCESS;
+}
+
+
 /* arithmetics */
 
 static const char *arithmetic_ops[] = {
@@ -702,6 +738,7 @@ static struct filter filter_table[] = {
 	{"dither",     "dithers bitmap", dither_params, dither},
 	{"arithmetic", "arithmetic operation", arithmetic_params, arithmetic},
 	{"histogram",  "save histogram into image file", histogram_params, histogram},
+	{"median",     "median filter", median_params, median},
 	{"jpg",        "save jpg image", save_jpg_params, save_jpg},
 	{"png",        "save png image", save_png_params, save_png},
 	{NULL, NULL,   NULL, NULL}
