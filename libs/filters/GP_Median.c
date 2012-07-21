@@ -175,6 +175,9 @@ static int GP_FilterMedian_Raw(const GP_Context *src,
 {
 	int i, x, y;
 
+	//TODO
+	GP_CHECK(src->pixel_type == GP_PIXEL_RGB888);
+
 	GP_DEBUG(1, "Median filter size %ux%u xmed=%u ymed=%u",
 	            w_src, h_src, 2 * xmed + 1, 2 * ymed + 1);
 	
@@ -182,15 +185,19 @@ static int GP_FilterMedian_Raw(const GP_Context *src,
 	unsigned int size = (w_src + 2 * xmed + 1);
 
 	/* Create and initalize arrays for row of histograms */
-	GP_TempAllocCreate(temp, 3 * sizeof(struct hist8) * size);
+	GP_TempAllocCreate(temp, 3 * sizeof(struct hist8) * size + 3 * sizeof(struct hist8u));
 
 	struct hist8 *R = GP_TempAllocGet(temp, sizeof(struct hist8) * size);
 	struct hist8 *G = GP_TempAllocGet(temp, sizeof(struct hist8) * size);
 	struct hist8 *B = GP_TempAllocGet(temp, sizeof(struct hist8) * size);
 	
-	memset(R, 0, sizeof(*R));
-	memset(G, 0, sizeof(*G));
-	memset(B, 0, sizeof(*B));
+	memset(R, 0, sizeof(*R) * size);
+	memset(G, 0, sizeof(*G) * size);
+	memset(B, 0, sizeof(*B) * size);
+
+	struct hist8u *XR = GP_TempAllocGet(temp, sizeof(struct hist8u));
+	struct hist8u *XG = GP_TempAllocGet(temp, sizeof(struct hist8u));
+	struct hist8u *XB = GP_TempAllocGet(temp, sizeof(struct hist8u));
 
 	/* Prefill row of histograms */
 	for (x = 0; x < (int)w_src + 2*xmed; x++) {
@@ -209,9 +216,6 @@ static int GP_FilterMedian_Raw(const GP_Context *src,
 
 	/* Apply the median filter */
 	for (y = 0; y < (int)h_src; y++) {
-		struct hist8u xR, xG, xB;
-		struct hist8u *XR = &xR, *XG = &xG, *XB = &xB;
-	
 		memset(XR, 0, sizeof(*XR));
 		memset(XG, 0, sizeof(*XG));
 		memset(XB, 0, sizeof(*XB));
