@@ -22,12 +22,12 @@
 
  /*
   
-   Constant time Median Filter (the computational complexity is independend of
+   Constant time Median Filter (the computational complexity is independent of
    radius).
 
    The xmed and ymed are radius values for x and y. The algorithm uses xmed
-   respectively ymed pixel neighbours from each side so the result is median
-   of rectangle of 2 * xmed + 1 x 2 * ymed + 1 pixels.
+   respectively ymed pixel neighbors from each side so the result is median of
+   rectangle of 2 * xmed + 1 x 2 * ymed + 1 pixels.
 
   */
 
