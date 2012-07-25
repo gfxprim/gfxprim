@@ -20,11 +20,14 @@
  *                                                                           *
  *****************************************************************************/
 
+#include "../../config.h"
+#include "core/GP_Debug.h"
+#include "text/GP_Font.h"
+
+#ifdef HAVE_FREETYPE
+
 #include <ft2build.h>
 #include FT_FREETYPE_H
-
-#include "core/GP_Debug.h"
-#include "GP_Font.h"
 
 GP_FontFace *GP_FontFaceLoad(const char *path, uint32_t width, uint32_t height)
 {
@@ -199,3 +202,18 @@ err1:
 	//TODO FREETYPE CLEANUP
 	return NULL;
 }
+
+#else
+
+GP_FontFace *GP_FontFaceLoad(const char *path, uint32_t width, uint32_t height)
+{
+	(void)path;
+	(void)width;
+	(void)height;
+
+	GP_WARN("FreeType support not compiled in.");
+
+	return NULL;
+}
+
+#endif /* HAVE_FREETYPE */
