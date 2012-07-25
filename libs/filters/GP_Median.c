@@ -148,7 +148,7 @@ static inline unsigned int hist8_median(struct hist8u *h, struct hist8 *row,
 	
 		if (acc >= trigger) {
 			acc -= h->coarse[i];
-
+			
 			/* update fine on position i */
 			hist8_update(h, i, row, x, xmed);
 
@@ -174,6 +174,7 @@ static int GP_FilterMedian_Raw(const GP_Context *src,
                                GP_ProgressCallback *callback)
 {
 	int i, x, y;
+	unsigned int trigger = ((2*xmed+1)*(2*ymed+1))/2;
 
 	//TODO
 	GP_CHECK(src->pixel_type == GP_PIXEL_RGB888);
@@ -229,9 +230,9 @@ static int GP_FilterMedian_Raw(const GP_Context *src,
 
 		/* Generate row */
 		for (x = 0; x < (int)w_src; x++) {
-			int r = hist8_median(XR, R, x, xmed, (xmed + ymed + 1));
-			int g = hist8_median(XG, G, x, xmed, (xmed + ymed + 1));
-			int b = hist8_median(XB, B, x, xmed, (xmed + ymed + 1));
+			int r = hist8_median(XR, R, x, xmed, trigger);
+			int g = hist8_median(XG, G, x, xmed, trigger);
+			int b = hist8_median(XB, B, x, xmed, trigger);
 
 			GP_PutPixel_Raw_24BPP(dst, x_dst + x, y_dst + y,
 			                      GP_Pixel_CREATE_RGB888(r, g, b));
