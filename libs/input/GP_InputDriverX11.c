@@ -24,9 +24,10 @@
 
 #include "core/GP_Debug.h"
 #include "GP_Event.h"
-#include "GP_InputDriverX11.h"
 
 #ifdef HAVE_LIBX11
+
+#include "GP_InputDriverX11.h"
 
 /* X11 keycodes */
 static uint16_t keycode_table[] = {
