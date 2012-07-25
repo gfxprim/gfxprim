@@ -1,4 +1,4 @@
-LDLIBS+=-lm -ldl
+LDLIBS+=-lm
 
 ALL+=$(APPS)
 CLEAN+=$(APPS)
