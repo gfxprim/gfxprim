@@ -2,8 +2,9 @@ TOPDIR=../..
 
 CSOURCES=$(shell echo *.c)
 
-INCLUDE=core gfx SDL
-LDLIBS+=-lGP -L$(TOPDIR)/build/
+INCLUDE=core gfx
+LDFLAGS+=-L$(TOPDIR)/build/
+LDLIBS+=-lrt `$(TOPDIR)/gfxprim-config --libs --libs-backends`
 
 APPS=grinder
 

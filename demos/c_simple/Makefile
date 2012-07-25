@@ -3,7 +3,8 @@ TOPDIR=../..
 CSOURCES=$(shell echo *.c)
 
 INCLUDE=
-LDLIBS+=-lGP -lGP_backends -lSDL -L$(TOPDIR)/build/
+LDFLAGS+=-L$(TOPDIR)/build/
+LDLIBS+=-lrt `$(TOPDIR)/gfxprim-config --libs --libs-backends`
 
 APPS=backend_example loaders_example loaders filters_symmetry gfx_koch\
      virtual_backend_example meta_data meta_data_dump tmp_file showimage\

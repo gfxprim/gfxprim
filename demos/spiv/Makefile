@@ -3,9 +3,8 @@ TOPDIR=../..
 CSOURCES=$(shell echo *.c)
 
 INCLUDE=
-CFLAGS+=-pthread
-LDFLAGS+=-pthread -lrt
-LDLIBS+=-lGP -lGP_backends -lSDL -L$(TOPDIR)/build/
+LDFLAGS+=-L$(TOPDIR)/build/
+LDLIBS+=-lrt `$(TOPDIR)/gfxprim-config --libs --libs-backends`
 
 APPS=spiv
 
