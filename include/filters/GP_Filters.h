@@ -68,4 +68,7 @@
 /* Median filter */
 #include "filters/GP_Median.h"
 
+/* Median filter */
+#include "filters/GP_WeightedMedian.h"
+
 #endif /* GP_FILTERS_H */
