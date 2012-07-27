@@ -47,13 +47,13 @@ static int param_err(const struct param *self, const char *val, void *priv)
 {
 	/* invalid parameter name */
 	if (self == NULL) {
-		fprintf(stderr, "ERROR: %s: invalid parameter '%s'\n",
+		fprintf(stderr, "ERROR: %s: Unknown parameter name '%s'\n",
 		                (char*)priv, val);
 		return 1;
 	}
 	
 	/* just regular error */
-	fprintf(stderr, "ERROR: %s: invalid %s parameter %s = '%s'",
+	fprintf(stderr, "ERROR: %s: Invalid %s parameter value %s = '%s'",
 	        (char *)priv, param_type_name(self->type), self->name, val);
 	
 	if (self->type == PARAM_ENUM) {
@@ -626,6 +626,69 @@ static GP_RetCode median(GP_Context **c, const char *params)
 	return GP_ESUCCESS;
 }
 
+/* sigma mean filter */
+
+static struct param sigma_mean_params[] = {
+	{"radius", PARAM_INT, "median radius for both x and y", NULL, NULL},
+	{"min", PARAM_INT, "minimal number of pixels to use for the mean", NULL, NULL},
+	{"sigma", PARAM_FLOAT, "sigma scaled to [0,1] interval", NULL, NULL},
+	{"radius_x", PARAM_INT, "median radius for x", NULL, NULL},
+	{"radius_y", PARAM_INT, "median radius for y", NULL, NULL},
+	{NULL,  0, NULL, NULL, NULL}
+};
+
+static GP_RetCode sigma_mean(GP_Context **c, const char *params)
+{
+	int rad = -1, rad_x, rad_y, min = 0;
+	float sigma = 0.1;
+
+	if (param_parse(params, sigma_mean_params, "sigma", param_err,
+	                &rad, &min, &sigma, &rad_x, &rad_y))
+		return GP_EINVAL;
+	
+	if (rad != -1) {
+		rad_x = rad;
+		rad_y = rad;
+	}
+
+	if (rad_x < 0 || rad_y < 0)
+		return GP_EINVAL;
+
+	GP_Context *ret = GP_FilterSigmaAlloc(*c, rad_x, rad_y, min, sigma, progress_callback);
+
+	if (ret == NULL)
+		return GP_ENOMEM;
+
+	GP_ContextFree(*c);
+	*c = ret;
+
+	return GP_ESUCCESS;
+}
+
+/* laplacian edge sharpening filter */
+
+static struct param sharpen_params[] = {
+	{"weight", PARAM_FLOAT, "sharpening weight from [0,1] interval", NULL, NULL},
+	{NULL,  0, NULL, NULL, NULL}
+};
+
+static GP_RetCode sharpen(GP_Context **c, const char *params)
+{
+	float weight = 0.1;
+
+	if (param_parse(params, sharpen_params, "sigma", param_err, &weight))
+		return GP_EINVAL;
+	
+	GP_Context *ret = GP_FilterEdgeSharpeningAlloc(*c, weight, progress_callback);
+
+	if (ret == NULL)
+		return GP_ENOMEM;
+
+	GP_ContextFree(*c);
+	*c = ret;
+
+	return GP_ESUCCESS;
+}
 
 /* arithmetics */
 
@@ -739,6 +802,8 @@ static struct filter filter_table[] = {
 	{"arithmetic", "arithmetic operation", arithmetic_params, arithmetic},
 	{"histogram",  "save histogram into image file", histogram_params, histogram},
 	{"median",     "median filter", median_params, median},
+	{"sigma",      "sigma (mean) filter", sigma_mean_params, sigma_mean},
+	{"sharpen",    "laplacian edge sharpening", sharpen_params, sharpen},
 	{"jpg",        "save jpg image", save_jpg_params, save_jpg},
 	{"png",        "save png image", save_png_params, save_png},
 	{NULL, NULL,   NULL, NULL}
