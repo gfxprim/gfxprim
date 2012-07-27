@@ -654,6 +654,8 @@ static GP_RetCode sigma_mean(GP_Context **c, const char *params)
 	if (rad_x < 0 || rad_y < 0)
 		return GP_EINVAL;
 
+	(*c)->gamma = GP_GammaAcquire((*c)->pixel_type, 1.2);
+
 	GP_Context *ret = GP_FilterSigmaAlloc(*c, rad_x, rad_y, min, sigma, progress_callback);
 
 	if (ret == NULL)
@@ -946,9 +948,10 @@ static void check_fmt(const char *fmt)
 
 	for (i = 0; out_fmts[i] != NULL; i++)
 		if (!strcmp(out_fmts[i], fmt))
-			break;
+			return;
 
 	fprintf(stderr, "Invalid output format '%s'\n", fmt);
+	exit(1);
 }
 
 static void save_by_fmt(struct GP_Context *bitmap, const char *name, const char *fmt)
