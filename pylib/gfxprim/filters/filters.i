@@ -60,3 +60,7 @@
 %newobject GP_FilterMedianAlloc;
 %newobject GP_FilterMedianExAlloc;
 %include "GP_Median.h"
+
+%newobject GP_FilterSigmaAlloc;
+%newobject GP_FilterSigmaExAlloc;
+%include "GP_Sigma.h"
