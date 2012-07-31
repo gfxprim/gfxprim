@@ -128,7 +128,7 @@ int main(void)
 {
 	const char *backend_opts = "X11";
 	
-	backend = GP_BackendInit(backend_opts, "Shapetest", stderr);
+	backend = GP_BackendInit(backend_opts, "Koch", stderr);
 
 	if (backend == NULL) {
 		fprintf(stderr, "Failed to initalize backend '%s'\n",
