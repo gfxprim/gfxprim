@@ -210,7 +210,10 @@ GP_Backend *GP_BackendSDLInit(GP_Size w, GP_Size h, uint8_t bpp, uint8_t flags,
 		SDL_Quit();
 		return NULL;
 	}
-	
+
+	SDL_EnableKeyRepeat(SDL_DEFAULT_REPEAT_DELAY,
+	                    SDL_DEFAULT_REPEAT_INTERVAL);
+
 	backend.context = &context;
 	
 	return &backend;
