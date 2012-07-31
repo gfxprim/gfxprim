@@ -680,9 +680,20 @@ int main(int argc, char *argv[])
 
 		while (GP_EventGet(&ev)) {
 
-		//	GP_EventDump(&ev);
+			GP_EventDump(&ev);
 			
 			switch (ev.type) {
+			case GP_EV_REL:
+				switch (ev.code) {
+				case GP_EV_REL_WHEEL:
+					if (ev.val.val > 0)
+						goto next;
+
+					if (ev.val.val < 0)
+						goto prev;
+				break;
+				}
+			break;
 			case GP_EV_KEY:
 				if (ev.code != GP_EV_KEY_DOWN)
 					continue;
@@ -775,6 +786,7 @@ int main(int argc, char *argv[])
 					params.show_progress_once = 1;
 					show_image(&params, argv[argn]);
 				break;
+				next:
 				case GP_KEY_RIGHT:
 				case GP_KEY_UP:
 				case GP_KEY_SPACE:
@@ -785,6 +797,7 @@ int main(int argc, char *argv[])
 					params.show_progress_once = 1;
 					show_image(&params, argv[argn]);
 				break;
+				prev:
 				case GP_KEY_BACKSPACE:
 				case GP_KEY_LEFT:
 				case GP_KEY_DOWN:
