@@ -36,7 +36,7 @@
 #include "text/GP_Text.h"
 
 /* backends */
-#include "backends/GP_Backend.h"
+#include "backends/GP_Backends.h"
 
 /* input and events */
 #include "input/GP_Input.h"
