@@ -19,34 +19,17 @@
  * Copyright (C) 2009-2010 Jiri "BlueBear" Dluhos                            *
  *                         <jiri.bluebear.dluhos@gmail.com>                  *
  *                                                                           *
- * Copyright (C) 2009-2011 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <SDL/SDL.h>
 
-#include "GP.h"
-#include "GP_SDL.h"
+#include <GP.h>
 
-/* The surface used as a display (in fact it is a software surface). */
-SDL_Surface *display = NULL;
-GP_Context context;
-
-/* Timer used for refreshing the display */
-SDL_TimerID timer;
-
-/* An event used for signaling that the timer was triggered. */
-SDL_UserEvent timer_event;
-
-Uint32 timer_callback(__attribute__((unused)) Uint32 interval,
-			__attribute__((unused)) void * param)
-{
-	timer_event.type = SDL_USEREVENT;
-	SDL_PushEvent((SDL_Event *) &timer_event);
-	return 60;
-}
+static GP_Context *win;
+static GP_Backend *backend;
 
 /* Basic colors in display-specific format. */
 static GP_Pixel black, white, yellow, green, red, gray, darkgray;
@@ -79,19 +62,9 @@ static int shape = SHAPE_FIRST;
 /* Variants in coordinates, if applicable */
 static int variant = 1;
 
-/* Increments added to radii in every timeframe (0 = no change). */
-static int xradius_add = 0;
-static int yradius_add = 0;
-
-#define DISPLAY_W 640
-#define DISPLAY_H 480
-
-static int display_w = DISPLAY_W;
-static int display_h = DISPLAY_H;
-
 /* center of drawing */
-static int center_x = DISPLAY_W/2;
-static int center_y = DISPLAY_H/2;
+static int center_x;
+static int center_y;
 
 void draw_testing_triangle(int x, int y, int xradius, int yradius)
 {
@@ -135,61 +108,61 @@ void draw_testing_triangle(int x, int y, int xradius, int yradius)
 	/* draw the three vertices green; they should never be visible
 	 * because the red triangle should cover them; if they are visible,
 	 * it means we don't draw to the end */
-	GP_PutPixel(&context, x0, y0, green);
-	GP_PutPixel(&context, x1, y1, green);
-	GP_PutPixel(&context, x2, y2, green);
+	GP_PutPixel(win, x0, y0, green);
+	GP_PutPixel(win, x1, y1, green);
+	GP_PutPixel(win, x2, y2, green);
 
 	if (outline == 1)
-		GP_Triangle(&context, x0, y0, x1, y1, x2, y2, yellow);
+		GP_Triangle(win, x0, y0, x1, y1, x2, y2, yellow);
 
 	if (fill)
-		GP_FillTriangle(&context, x0, y0, x1, y1, x2, y2, red);
+		GP_FillTriangle(win, x0, y0, x1, y1, x2, y2, red);
 
 	if (outline == 2)
-		GP_Triangle(&context, x0, y0, x1, y1, x2, y2, white);
+		GP_Triangle(win, x0, y0, x1, y1, x2, y2, white);
 }
 
 void draw_testing_circle(int x, int y, int xradius,
 			__attribute__((unused)) int yradius)
 {
 	if (outline == 1)
-		GP_Circle(&context, x, y, xradius, yellow);
+		GP_Circle(win, x, y, xradius, yellow);
 
 	if (fill)
-		GP_FillCircle(&context, x, y, xradius, red);
+		GP_FillCircle(win, x, y, xradius, red);
 
 	if (outline == 2)
-		GP_Circle(&context, x, y, xradius, white);
+		GP_Circle(win, x, y, xradius, white);
 }
 
 void draw_testing_ring(int x, int y, int xradius,
 			__attribute__((unused)) int yradius)
 {
 	if (outline == 1)
-		GP_Ring(&context, x, y, xradius, yradius, yellow);
+		GP_Ring(win, x, y, xradius, yradius, yellow);
 
 	if (fill)
-		GP_FillRing(&context, x, y, xradius, yradius, red);
+		GP_FillRing(win, x, y, xradius, yradius, red);
 
 	if (outline == 2)
-		GP_Ring(&context, x, y, xradius, yradius, white);
+		GP_Ring(win, x, y, xradius, yradius, white);
 }
 
 void draw_testing_ellipse(int x, int y, int xradius, int yradius)
 {
 	if (outline == 1)
-		GP_Ellipse(&context, x, y, xradius, yradius, yellow);
+		GP_Ellipse(win, x, y, xradius, yradius, yellow);
 
 	if (fill)
-		GP_FillEllipse(&context, x, y, xradius, yradius, red);
+		GP_FillEllipse(win, x, y, xradius, yradius, red);
 
 	if (outline == 2)
-		GP_Ellipse(&context, x, y, xradius, yradius, white);
+		GP_Ellipse(win, x, y, xradius, yradius, white);
 }
 
 void draw_testing_arc(int x, int y, int xradius, int yradius)
 {
-	GP_ArcSegment(&context, x, y, xradius, yradius, -1,
+	GP_ArcSegment(win, x, y, xradius, yradius, -1,
 			M_PI - M_PI/8.0, M_PI/4.0, red);
 }
 
@@ -199,13 +172,13 @@ void draw_testing_rectangle(int x, int y, int xradius, int yradius)
 	int x1 = x + xradius, y1 = y + yradius;
 	
 	if (outline == 1)
-		GP_Rect(&context, x0, y0, x1, y1, yellow);
+		GP_Rect(win, x0, y0, x1, y1, yellow);
 
 	if (fill)
-		GP_FillRect(&context, x0, y0, x1, y1, red);
+		GP_FillRect(win, x0, y0, x1, y1, red);
 
 	if (outline == 2)
-		GP_Rect(&context, x0, y0, x1, y1, white);
+		GP_Rect(win, x0, y0, x1, y1, white);
 }
 
 void draw_testing_tetragon(int x, int y, int xradius, int yradius)
@@ -216,13 +189,13 @@ void draw_testing_tetragon(int x, int y, int xradius, int yradius)
 	int x3 = x,           y3 = y + yradius;
 
 	if (outline == 1)
-		GP_Tetragon(&context, x0, y0, x1, y1, x2, y2, x3, y3, yellow);
+		GP_Tetragon(win, x0, y0, x1, y1, x2, y2, x3, y3, yellow);
 	
 	if (fill)
-		GP_FillTetragon(&context, x0, y0, x1, y1, x2, y2, x3, y3, red);
+		GP_FillTetragon(win, x0, y0, x1, y1, x2, y2, x3, y3, red);
 
 	if (outline == 2)
-		GP_Tetragon(&context, x0, y0, x1, y1, x2, y2, x3, y3, white);
+		GP_Tetragon(win, x0, y0, x1, y1, x2, y2, x3, y3, white);
 }
 
 void redraw_screen(void)
@@ -237,17 +210,16 @@ void redraw_screen(void)
 		.pixel_yspace = 1,
 	};
 
-	SDL_LockSurface(display);
-	GP_Fill(&context, black);
+	GP_Fill(win, black);
 
 	/* axes */
 	if (show_axes) {
-		GP_HLine(&context, 0, display_w, center_y, gray);
-		GP_HLine(&context, 0, display_w, center_y-yradius, darkgray);
-		GP_HLine(&context, 0, display_w, center_y+yradius, darkgray);
-		GP_VLine(&context, center_x, 0, display_h, gray);
-		GP_VLine(&context, center_x-xradius, 0, display_h, darkgray);
-		GP_VLine(&context, center_x+xradius, 0, display_h, darkgray);
+		GP_HLine(win, 0, win->w, center_y, gray);
+		GP_HLine(win, 0, win->w, center_y-yradius, darkgray);
+		GP_HLine(win, 0, win->w, center_y+yradius, darkgray);
+		GP_VLine(win, center_x, 0, win->h, gray);
+		GP_VLine(win, center_x-xradius, 0, win->h, darkgray);
+		GP_VLine(win, center_x+xradius, 0, win->h, darkgray);
 	}
 
 	/* the shape */
@@ -283,183 +255,156 @@ void redraw_screen(void)
 		break;
 	}
 
-	GP_Text(&context, &style, 16, 16, GP_ALIGN_RIGHT|GP_VALIGN_BELOW,
+	GP_Text(win, &style, 16, 16, GP_ALIGN_RIGHT|GP_VALIGN_BELOW,
 	        white, black, title);
 
-	SDL_UnlockSurface(display);
+	GP_BackendFlip(backend);
+}
+
+static void xradius_add(int xradius_add)
+{
+	if (xradius + xradius_add > 1 &&
+	    xradius + xradius_add < (int)win->w)
+		xradius += xradius_add;
+}
+	
+
+static void yradius_add(int yradius_add)
+{
+	if (yradius + yradius_add > 1 &&
+	    yradius + yradius_add < (int)win->h)
+		yradius += yradius_add;
+}
+			
+static void xcenter_add(int xcenter_add)
+{
+	if (center_x + xcenter_add > 1 &&
+	    center_x + xcenter_add < (int)win->w/2)
+		center_x += xcenter_add;
+}
+			
+static void ycenter_add(int ycenter_add)
+{
+	if (center_y + ycenter_add > 1 &&
+	    center_y + ycenter_add < (int)win->h/2)
+		center_y += ycenter_add;
 }
 
 void event_loop(void)
 {
-	static bool shift_pressed = false;
-	static int xcenter_add = 0;
-	static int ycenter_add = 0;
-	SDL_Event event;
+	int shift_pressed;
 
-	while (SDL_WaitEvent(&event) > 0) {
+	GP_Event ev;
 
-		switch (event.type) {
-		case SDL_USEREVENT:
+	while (GP_EventGet(&ev)) {
+		GP_EventDump(&ev);
+	
+		shift_pressed = GP_EventGetKey(&ev, GP_KEY_LEFT_SHIFT) ||
+		                GP_EventGetKey(&ev, GP_KEY_RIGHT_SHIFT);
 
-			if (xradius + xradius_add > 1 &&
-			    xradius + xradius_add < display_w)
-				xradius += xradius_add;
+		switch (ev.type) {
+		case GP_EV_KEY:
+			if (ev.code != GP_EV_KEY_DOWN)
+				continue;
 			
-			if (yradius + yradius_add > 1 &&
-			    yradius + yradius_add < display_h)
-				yradius += yradius_add;
-			
-			if (center_x + xcenter_add > 1 &&
-			    center_x + xcenter_add < display_w/2)
-				center_x += xcenter_add;
-			
-			if (center_y + ycenter_add > 1 &&
-			    center_y + ycenter_add < display_h/2)
-				center_y += ycenter_add;
-
-			redraw_screen();
-			SDL_Flip(display);
+			switch (ev.val.key.key) {
+			case GP_KEY_X:
+				win->x_swap = !win->x_swap;
 			break;
-
-		case SDL_KEYDOWN:
-			switch (event.key.keysym.sym) {
-			case SDLK_LSHIFT:
-			case SDLK_RSHIFT:
-				shift_pressed = true;
+			case GP_KEY_Y:
+				win->y_swap = !win->y_swap;
 			break;
-			case SDLK_x:
-				context.x_swap = !context.x_swap;
+			case GP_KEY_R:
+				win->axes_swap = !win->axes_swap;
+				GP_SWAP(win->w, win->h);
 			break;
-			case SDLK_y:
-				context.y_swap = !context.y_swap;
-			break;
-			case SDLK_r:
-				context.axes_swap = !context.axes_swap;
-				GP_SWAP(display_w, display_h);
-			break;
-			case SDLK_f:
+			case GP_KEY_F:
 				fill = !fill;
 				if (!fill && !outline)
 					outline = 1;
-				break;
-
-			case SDLK_o:
+			break;
+			case GP_KEY_O:
 				outline++;
 				if (outline == 3)
 					outline = 0;
 				if (!fill && outline == 0)
 					fill = 1;
-				break;
-
-			case SDLK_a:
+			break;
+			case GP_KEY_A:
 				show_axes = !show_axes;
-				break;
-
-			case SDLK_ESCAPE:
-				return;
-
-			case SDLK_LEFT:
+			break;
+			case GP_KEY_LEFT:
 				if (shift_pressed)
-					xcenter_add = -1;
+					xcenter_add(-1);
 				else
-					xradius_add = -1;
-				break;
-
-			case SDLK_RIGHT:
+					xradius_add(-1);
+			break;
+			case GP_KEY_RIGHT:
 				if (shift_pressed)
-					xcenter_add = 1;
+					xcenter_add(1);
 				else
-					xradius_add = 1;
-				break;
-
-			case SDLK_UP:
+					xradius_add(1);
+			break;
+			case GP_KEY_UP:
 				if (shift_pressed)
-					ycenter_add = -1;
+					ycenter_add(-1);
 				else
-					yradius_add = 1;
-				break;
-
-			case SDLK_DOWN:
+					yradius_add(1);
+			break;
+			case GP_KEY_DOWN:
 				if (shift_pressed)
-					ycenter_add = 1;
+					ycenter_add(1);
 				else
-					yradius_add = -1;
-				break;
-
-			case SDLK_PAGEUP:
-				xradius_add = 1;
-				yradius_add = 1;
-				break;
-
-			case SDLK_PAGEDOWN:
-				xradius_add = -1;
-				yradius_add = -1;
-				break;
-
-			case SDLK_1:
-				variant = 1;
-				break;
-
-			case SDLK_2:
-				variant = 2;
-				break;
-
-			case SDLK_3:
-				variant = 3;
-				break;
-
-			case SDLK_4:
-				variant = 4;
-				break;
-
-			case SDLK_SPACE:
+					yradius_add(-1);
+			break;
+			case GP_KEY_SPACE:
 				shape++;
 				if (shape > SHAPE_LAST)
 					shape = SHAPE_FIRST;
-				break;
-
-			case SDLK_EQUALS:
+			break;
+			case GP_KEY_EQUAL:
 				if (xradius > yradius)
 					yradius = xradius;
 				else
 					xradius = yradius;
-				break;
-
-			default:
-				break;
-			}
 			break;
-		case SDL_KEYUP:
-			switch (event.key.keysym.sym) {
-			case SDLK_LSHIFT:
-			case SDLK_RSHIFT:
-				shift_pressed = false;
+			case GP_KEY_1:
+				variant = 1;
 			break;
-			/* Stop incrementing as soon as the key is released. */
-			case SDLK_LEFT:
-			case SDLK_RIGHT:
-				xradius_add = 0;
-				xcenter_add = 0;
-				break;
-			case SDLK_UP:
-			case SDLK_DOWN:
-				yradius_add = 0;
-				ycenter_add = 0;
-				break;
-
-			case SDLK_PAGEUP:
-			case SDLK_PAGEDOWN:
-				xradius_add = 0;
-				yradius_add = 0;
-				break;
-
-			default:
-				break;
+			case GP_KEY_2:
+				variant = 2;
+			break;
+			case GP_KEY_3:
+				variant = 3;
+			break;
+			case GP_KEY_4:
+				variant = 4;
+			break;
+			case GP_KEY_PAGE_UP:
+				xradius_add(1);
+				yradius_add(1);
+			break;
+			case GP_KEY_PAGE_DOWN:
+				xradius_add(-1);
+				yradius_add(-1);
+			break;
+			case GP_KEY_ESC:
+				GP_BackendExit(backend);
+				exit(0);
+			break;
 			}
 		break;
-		case SDL_QUIT:
-			return;
+		case GP_EV_SYS:
+			switch(ev.code) {
+			case GP_EV_SYS_QUIT:
+				GP_BackendExit(backend);
+				exit(1);
+			break;
+			}
+		break;
 		}
+	
+		redraw_screen();
 	}
 }
 
@@ -485,62 +430,40 @@ void print_instructions(void)
 
 int main(int argc, char ** argv)
 {
-	int display_bpp = 0;
+	const char *backend_opts = "X11";
 
-	int i;
-	for (i = 1; i < argc; i++) {
-		if (strcmp(argv[i], "-16") == 0) {
-			display_bpp = 16;
-		} else if (strcmp(argv[i], "-24") == 0) {
-			display_bpp = 24;
-		}
-	}
+//	GP_SetDebugLevel(10);
 
-	GP_SetDebugLevel(10);
+	backend_opts = "SDL:320x240";
 
-	/* Initialize SDL */
-	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) != 0) {
-		fprintf(stderr, "Could not initialize SDL: %s\n", SDL_GetError());
+	backend = GP_BackendInit(backend_opts, "Shapetest", stderr);
+
+	if (backend == NULL) {
+		fprintf(stderr, "Failed to initalize backend '%s'\n",
+		        backend_opts);
 		return 1;
 	}
+	
+	win = backend->context;
 
-	/* Create a window with a software back surface */
-	display = SDL_SetVideoMode(display_w, display_h, display_bpp, SDL_SWSURFACE);
-	if (display == NULL) {
-		fprintf(stderr, "Could not open display: %s\n", SDL_GetError());
-		goto fail;
-	}
-
-	/* Set up a clipping rectangle to exercise clipping */
-	SDL_Rect clip_rect = {10, 10, display_w - 10, display_h - 10};
-	SDL_SetClipRect(display, &clip_rect);
-
-	GP_SDL_ContextFromSurface(&context, display);
+	center_x = win->w / 2;
+	center_y = win->h / 2;
 
 	/* Load colors compatible with the display */
-	black    = GP_ColorToContextPixel(GP_COL_BLACK, &context);
-	white    = GP_ColorToContextPixel(GP_COL_WHITE, &context);
-	yellow   = GP_ColorToContextPixel(GP_COL_YELLOW, &context);
-	green    = GP_ColorToContextPixel(GP_COL_GREEN, &context);
-	red      = GP_ColorToContextPixel(GP_COL_RED, &context);
-	gray     = GP_ColorToContextPixel(GP_COL_GRAY_LIGHT, &context);
-	darkgray = GP_ColorToContextPixel(GP_COL_GRAY_DARK, &context);
-
-	/* Set up the refresh timer */
-	timer = SDL_AddTimer(60, timer_callback, NULL);
-	if (timer == 0) {
-		fprintf(stderr, "Could not set up timer: %s\n", SDL_GetError());
-		goto fail;
-	}
+	black    = GP_ColorToContextPixel(GP_COL_BLACK, win);
+	white    = GP_ColorToContextPixel(GP_COL_WHITE, win);
+	yellow   = GP_ColorToContextPixel(GP_COL_YELLOW, win);
+	green    = GP_ColorToContextPixel(GP_COL_GREEN, win);
+	red      = GP_ColorToContextPixel(GP_COL_RED, win);
+	gray     = GP_ColorToContextPixel(GP_COL_GRAY_LIGHT, win);
+	darkgray = GP_ColorToContextPixel(GP_COL_GRAY_DARK, win);
 
 	print_instructions();
+	
+	redraw_screen();
 
-	event_loop();
-	SDL_Quit();
-	return 0;
-
-fail:
-	SDL_Quit();
-	return 1;
+	for (;;) {
+		GP_BackendWait(backend);
+		event_loop();
+	}
 }
-
