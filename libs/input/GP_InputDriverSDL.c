@@ -24,6 +24,8 @@
 
 #ifdef HAVE_LIBSDL
 
+#include "core/GP_Debug.h"
+
 #include "GP_Event.h"
 #include "GP_InputDriverSDL.h"
 
@@ -108,7 +110,18 @@ void GP_InputDriverSDLEventPut(SDL_Event *ev)
 		case 3:
 			key = GP_BTN_RIGHT;
 		break;
+		/* Mouse wheel */
+		case 4:
+			if (ev->type == SDL_MOUSEBUTTONDOWN)
+				GP_EventPush(GP_EV_REL, GP_EV_REL_WHEEL, 1, NULL);
+			return;
+		case 5:
+			if (ev->type == SDL_MOUSEBUTTONDOWN)
+				GP_EventPush(GP_EV_REL, GP_EV_REL_WHEEL, -1, NULL);
+			return;
 		default:
+			GP_DEBUG(0, "Unmapped SDL Mouse button %02x",
+			         ev->button.button);
 			return;
 		}
 

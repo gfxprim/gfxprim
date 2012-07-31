@@ -81,6 +81,15 @@ void GP_InputDriverX11EventPut(XEvent *ev)
 		case 3:
 			key = GP_BTN_RIGHT;
 		break;
+		/* Mouse wheel */
+		case 4:
+			if (press)
+				GP_EventPush(GP_EV_REL, GP_EV_REL_WHEEL, 1, NULL);
+			return;
+		case 5:
+			if (press)
+				GP_EventPush(GP_EV_REL, GP_EV_REL_WHEEL, -1, NULL);
+			return;
 		}
 
 		if (key == 0) {

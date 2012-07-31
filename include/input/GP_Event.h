@@ -214,7 +214,7 @@ enum GP_EventKeyValue {
 
 enum GP_EventRelCode {
 	GP_EV_REL_POS   = 0,
-	GP_EV_REL_WHEEL = 1,
+	GP_EV_REL_WHEEL = 8,
 };
 
 enum GP_EventAbsCode {
