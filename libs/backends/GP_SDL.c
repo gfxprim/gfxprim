@@ -101,12 +101,12 @@ int context_from_surface(GP_Context *context, SDL_Surface *surf)
 {
 	/* sanity checks on the SDL surface */
 	if (surf->format->BytesPerPixel == 0) {
-		GP_DEBUG(1, "ERROR: Surface->BytesPerPixel == 0");
+		GP_WARN("Surface->BytesPerPixel == 0");
 		return 1;
 	}
 
 	if (surf->format->BytesPerPixel > 4) {
-		GP_DEBUG(1, "ERROR: Surface->BytesPerPixel > 4");
+		GP_WARN("Surface->BytesPerPixel > 4");
 		return 1;
 	}
 
@@ -182,7 +182,7 @@ GP_Backend *GP_BackendSDLInit(GP_Size w, GP_Size h, uint8_t bpp, uint8_t flags,
 		return &backend;
 
 	if (SDL_Init(SDL_INIT_VIDEO)) {
-		GP_DEBUG(1, "ERROR: SDL_Init: %s", SDL_GetError());
+		GP_WARN("SDL_Init: %s", SDL_GetError());
 		return NULL;
 	}
 
@@ -198,7 +198,7 @@ GP_Backend *GP_BackendSDLInit(GP_Size w, GP_Size h, uint8_t bpp, uint8_t flags,
 		SDL_WM_SetCaption(caption, caption);
 
 	if (sdl_surface == NULL) {
-		GP_DEBUG(1, "ERROR: SDL_SetVideoMode: %s", SDL_GetError());
+		GP_WARN("SDL_SetVideoMode: %s", SDL_GetError());
 		SDL_Quit();
 		return NULL;
 	}
@@ -206,7 +206,7 @@ GP_Backend *GP_BackendSDLInit(GP_Size w, GP_Size h, uint8_t bpp, uint8_t flags,
 	mutex = SDL_CreateMutex();
 
 	if (context_from_surface(&context, sdl_surface)) {
-		GP_DEBUG(1, "ERROR: Failed to match pixel_type");
+		GP_WARN("Failed to match pixel_type");
 		SDL_Quit();
 		return NULL;
 	}
@@ -229,7 +229,7 @@ GP_Backend *GP_BackendSDLInit(GP_Size w __attribute__((unused)),
 			      uint8_t flags __attribute__((unused)),
                               const char *caption __attribute__((unused)))
 {
-	GP_DEBUG(0, "FATAL: SDL support not compiled in.");
+	GP_WARN("SDL support not compiled in.");
 	return NULL;
 }
 
