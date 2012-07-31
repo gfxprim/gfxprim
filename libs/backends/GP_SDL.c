@@ -177,41 +177,42 @@ static void sdl_exit(struct GP_Backend *self __attribute__((unused)))
 GP_Backend *GP_BackendSDLInit(GP_Size w, GP_Size h, uint8_t bpp, uint8_t flags,
                               const char *caption)
 {
-	/* SDL not yet initalized */
-	if (backend.context == NULL) {
-		if (SDL_Init(SDL_INIT_VIDEO)) {
-			GP_DEBUG(1, "ERROR: SDL_Init: %s", SDL_GetError());
-			return NULL;
-		}
+	/* SDL was already initalized */
+	if (backend.context != NULL)
+		return &backend;
 
-		if (flags & GP_SDL_FULLSCREEN)
-			sdl_flags |= SDL_FULLSCREEN;
-
-		if (flags & GP_SDL_RESIZABLE)
-			sdl_flags |= SDL_RESIZABLE;
-
-		sdl_surface = SDL_SetVideoMode(w, h, bpp, sdl_flags);
-
-		if (caption != NULL)
-			SDL_WM_SetCaption(caption, caption);
-
-		if (sdl_surface == NULL) {
-			GP_DEBUG(1, "ERROR: SDL_SetVideoMode: %s", SDL_GetError());
-			SDL_Quit();
-			return NULL;
-		}
-
-		mutex = SDL_CreateMutex();
-
-		if (context_from_surface(&context, sdl_surface)) {
-			GP_DEBUG(1, "ERROR: Failed to match pixel_type");
-			SDL_Quit();
-			return NULL;
-		}
-	
-		backend.context = &context;
+	if (SDL_Init(SDL_INIT_VIDEO)) {
+		GP_DEBUG(1, "ERROR: SDL_Init: %s", SDL_GetError());
+		return NULL;
 	}
 
+	if (flags & GP_SDL_FULLSCREEN)
+		sdl_flags |= SDL_FULLSCREEN;
+
+	if (flags & GP_SDL_RESIZABLE)
+		sdl_flags |= SDL_RESIZABLE;
+
+	sdl_surface = SDL_SetVideoMode(w, h, bpp, sdl_flags);
+
+	if (caption != NULL)
+		SDL_WM_SetCaption(caption, caption);
+
+	if (sdl_surface == NULL) {
+		GP_DEBUG(1, "ERROR: SDL_SetVideoMode: %s", SDL_GetError());
+		SDL_Quit();
+		return NULL;
+	}
+
+	mutex = SDL_CreateMutex();
+
+	if (context_from_surface(&context, sdl_surface)) {
+		GP_DEBUG(1, "ERROR: Failed to match pixel_type");
+		SDL_Quit();
+		return NULL;
+	}
+	
+	backend.context = &context;
+	
 	return &backend;
 }
 
