@@ -434,8 +434,6 @@ int main(int argc, char ** argv)
 
 //	GP_SetDebugLevel(10);
 
-	backend_opts = "SDL:320x240";
-
 	backend = GP_BackendInit(backend_opts, "Shapetest", stderr);
 
 	if (backend == NULL) {

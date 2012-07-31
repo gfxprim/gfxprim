@@ -19,7 +19,7 @@
  * Copyright (C) 2009-2010 Jiri "BlueBear" Dluhos                            *
  *                         <jiri.bluebear.dluhos@gmail.com>                  *
  *                                                                           *
- * Copyright (C) 2009-2011 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
@@ -29,27 +29,21 @@
 
  */
 
-#include "GP_SDL.h"
-
-#include <SDL/SDL.h>
 #include <math.h>
 
-#define TIMER_TICK 50
+#include <GP.h>
+
+#define TIMER_TICK 10000
 #define DISPLAY_W 640
 #define DISPLAY_H 480
 #define sqr(x) ((x)*(x))
 #define sgn(x) ((x)>0 ? 1 : -1)
 
-SDL_Surface *display;
-GP_Context *context, ctx;
+static GP_Backend *backend;
+static GP_Context *context;
 
-SDL_TimerID timer;
-
-int iter, l, way = 1;
-
-GP_Pixel black, blue, gray, red;
-
-int draw_edge = 1;
+static int iter, l, way = 1, draw_edge = 1;
+static GP_Pixel black, blue, gray, red;
 
 static void sierpinsky(double x1, double y1, double x4, double y4, int iter)
 {
@@ -109,92 +103,80 @@ static void draw(int x, int y, int l, int iter)
 	sierpinsky(x2, y2, x3, y3, iter/60%6);
 	sierpinsky(x3, y3, x1, y1, iter/60%6);
 
-	SDL_Flip(display);
+	GP_BackendFlip(backend);
 }
 
-int paused = 0;
+static int paused = 0;
 
-Uint32 timer_callback(Uint32 interval __attribute__ ((unused)),
-                      void *ptr __attribute__ ((unused)))
+void redraw(void)
 {
 	if (paused)
-		return TIMER_TICK;
+		return;
 
 	iter += 2 * way;
 	
-	if (iter + 2 * way > 350)
+	if (iter > 350)
 		way *= -1;
 	
-	if (iter < 2 * way)
-		way *= 1;
-		
-	draw(display->w/2, display->h/2, l, iter);
+	if (iter < 0)
+		way *= -1;
 
-	return TIMER_TICK;
+	draw(context->w/2, context->h/2, l, iter);
 }
 
 int main(void)
 {
-	SDL_Event ev;
+	const char *backend_opts = "X11";
+	
+	backend = GP_BackendInit(backend_opts, "Shapetest", stderr);
 
-	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) != 0)
-		return -1;
-
-	display = SDL_SetVideoMode(DISPLAY_W, DISPLAY_H, 0, SDL_SWSURFACE | SDL_RESIZABLE | SDL_DOUBLEBUF);
-
-	if (display == NULL) {
-		SDL_Quit();
-		return -1;
+	if (backend == NULL) {
+		fprintf(stderr, "Failed to initalize backend '%s'\n",
+		        backend_opts);
+		return 1;
 	}
-
-	GP_SDL_ContextFromSurface(&ctx, display);
-
-	context = &ctx;
-
+	
+	context = backend->context;
+	
 	black = GP_ColorToContextPixel(GP_COL_BLACK, context);
 	blue  = GP_ColorToContextPixel(GP_COL_BLUE, context);
 	gray  = GP_ColorToContextPixel(GP_COL_GRAY_LIGHT, context);
 	red   = GP_ColorToContextPixel(GP_COL_RED, context);
-
+	
 	iter = 0;
-	draw(display->w/2, display->h/2, l, iter);
+	draw(context->w/2, context->h/2, l, iter);
 
-	timer = SDL_AddTimer(0, timer_callback, NULL);
+	for (;;) {
+		GP_Event ev;
 
-	if (timer == 0) {
-		SDL_Quit();
-		return -1;
-	}
-
-	while (SDL_WaitEvent(&ev) > 0) {
-		switch (ev.type) {
-			case SDL_KEYDOWN:
-				switch(ev.key.keysym.sym) {
-					case SDLK_p:
-						paused = !paused;
-					break;
-					case SDLK_e:
-						draw_edge = !draw_edge;
-					break;
-					case SDLK_ESCAPE:
-						SDL_Quit();
-						return 0;
-					break;
-					default:
-					break;
+		redraw();
+		
+		GP_BackendPoll(backend);
+		
+		while (GP_EventGet(&ev)) {
+			GP_EventDump(&ev);
+	
+			switch (ev.type) {
+			case GP_EV_KEY:
+				if (ev.code != GP_EV_KEY_DOWN)
+					continue;
+			
+				switch (ev.val.key.key) {
+				case GP_KEY_P:
+					paused = !paused;
+				break;
+				case GP_KEY_E:
+					draw_edge = !draw_edge;
+				break;
+				case GP_KEY_ESC:
+					GP_BackendExit(backend);
+					return 0;
+				break;
 				}
-			break;
-			case SDL_QUIT:
-				SDL_Quit();
-				return 0;
-			break;
-			default:
-			break;
+			}
 		}
+		usleep(TIMER_TICK);
 	}
-
-	SDL_Quit();
-
+	
 	return 0;
 }
-
