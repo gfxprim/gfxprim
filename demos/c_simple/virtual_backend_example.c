@@ -30,7 +30,6 @@
   */
 
 #include <GP.h>
-#include <backends/GP_Backends.h>
 
 int main(int argc, char *argv[])
 {
