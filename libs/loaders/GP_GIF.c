@@ -176,6 +176,44 @@ static int get_bg_color(GifFileType *gf, GP_Pixel *pixel)
 	return 1;
 }
 
+/*
+ * The interlacing consists of 8 pixel high strips. Each pass adds some lines
+ * into each strip. This function maps y in the gif buffer to real y.
+ */
+static inline unsigned int interlace_real_y(GifFileType *gf, unsigned int y)
+{
+	const unsigned int h = gf->Image.Height;
+	unsigned int real_y;
+
+	/* Pass 1: Line 0 for each strip */
+	real_y = 8 * y;
+	
+	if (real_y < h)
+		return real_y;
+
+	/* Pass 2: Line 4 for each strip */
+	real_y = 8 * (y - (h - 1)/8 - 1) + 4;
+
+	if (real_y < h)
+		return real_y;
+
+	/* Pass 3: Lines 2 and 6 */
+	real_y = 4 * (y - (h - 1)/4 - 1) + 2;
+	
+	if (real_y < h)
+		return real_y;
+	
+	/* Pass 4: Lines 1, 3, 5, and 7 */
+	real_y = 2 * (y - h/2 - h%2) + 1;
+	
+	if (real_y < h)
+		return real_y;
+	
+	GP_BUG("real_y > h");
+
+	return 0;
+}
+
 GP_Context *GP_ReadGIF(void *f, GP_ProgressCallback *callback)
 {
 	GifFileType *gf = f;
@@ -240,9 +278,16 @@ GP_Context *GP_ReadGIF(void *f, GP_ProgressCallback *callback)
 
 			DGifGetLine(gf, line, gf->Image.Width);
 			
+			unsigned int real_y = y;
+
+			if (gf->Image.Interlace == 64) {
+				real_y = interlace_real_y(gf, y);
+				GP_DEBUG(3, "Interlace y -> real_y %u %u", y, real_y);
+			}
+			
 			//TODO: just now we have only 8BPP
 			for (x = 0; x < gf->Image.Width; x++)
-				GP_PutPixel_Raw_24BPP(res, x + gf->Image.Left, y, get_color(gf, line[x]));
+				GP_PutPixel_Raw_24BPP(res, x + gf->Image.Left, real_y, get_color(gf, line[x]));
 			
 			if (GP_ProgressCallbackReport(callback, y - gf->Image.Top,
 			                              gf->Image.Height,
