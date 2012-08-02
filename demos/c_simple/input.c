@@ -19,32 +19,20 @@
  * Copyright (C) 2009-2010 Jiri "BlueBear" Dluhos                            *
  *                         <jiri.bluebear.dluhos@gmail.com>                  *
  *                                                                           *
- * Copyright (C) 2009-2011 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <SDL/SDL.h>
+#include <unistd.h>
 
 #include "GP.h"
-#include "GP_SDL.h"
 
-SDL_Surface *display = NULL;
-GP_Context context;
+static GP_Context *win;
+static GP_Backend *backend;
 
-SDL_TimerID timer;
-SDL_UserEvent timer_event;
-
-GP_Pixel black_pixel, red_pixel, green_pixel, white_pixel;
-
-Uint32 timer_callback(__attribute__((unused)) Uint32 interval,
-			__attribute__((unused)) void *param)
-{
-	timer_event.type = SDL_USEREVENT;
-	SDL_PushEvent((SDL_Event *) &timer_event);
-	return 30;
-}
+static GP_Pixel red, green, white, black;
 
 static void draw_event(GP_Event *ev)
 {
@@ -55,20 +43,19 @@ static void draw_event(GP_Event *ev)
 	
 	int align = GP_ALIGN_RIGHT|GP_VALIGN_BOTTOM;
 
-	GP_TextClear(&context, NULL, 20, 20, align, black_pixel, size);
-	size = GP_Print(&context, NULL, 20, 20, align,
-	                white_pixel, black_pixel, "Key=%s",
+	GP_TextClear(win, NULL, 20, 20, align, black, size);
+	size = GP_Print(win, NULL, 20, 20, align,
+	                white, black, "Key=%s",
 			GP_EventKeyName(ev->val.key.key));
-	SDL_Flip(display);
+	
+	GP_BackendFlip(backend);
 }
 
 static void event_loop(void)
 {
-	SDL_Event event;
-
-	while (SDL_WaitEvent(&event) > 0) {
-		GP_InputDriverSDLEventPut(&event);
-	
+	for (;;) {
+		GP_BackendWait(backend);
+		
 		while (GP_EventQueued()) {
 			GP_Event ev;
 
@@ -81,17 +68,17 @@ static void event_loop(void)
 
 				switch (ev.val.key.key) {
 				case GP_KEY_ESC:
-					SDL_Quit();
+					GP_BackendExit(backend);
 					exit(0);
 				break;
 				case GP_BTN_LEFT:
-					GP_HLineXXY(&context, ev.cursor_x - 3,
+					GP_HLineXXY(win, ev.cursor_x - 3,
 					            ev.cursor_x + 3,
-						    ev.cursor_y, red_pixel);
-					GP_VLineXYY(&context, ev.cursor_x,
+						    ev.cursor_y, red);
+					GP_VLineXYY(win, ev.cursor_x,
 					            ev.cursor_y - 3,
-						    ev.cursor_y + 3, red_pixel);
-					SDL_Flip(display);
+						    ev.cursor_y + 3, red);
+					GP_BackendFlip(backend);
 				break;
 				default:
 				break;
@@ -102,18 +89,17 @@ static void event_loop(void)
 				static int size = 0;
 				case GP_EV_REL_POS:
 					if (GP_EventGetKey(&ev, GP_BTN_LEFT)) {
-						GP_PutPixel(&context, ev.cursor_x,
-					        	    ev.cursor_y, green_pixel);
-						SDL_Flip(display);
+						GP_PutPixel(win, ev.cursor_x,
+					        	    ev.cursor_y, green);
 					}
 					int align = GP_ALIGN_RIGHT|GP_VALIGN_BOTTOM;
 
-					GP_TextClear(&context, NULL, 20, 40, align,
-					             black_pixel, size);
-					size = GP_Print(&context, NULL, 20, 40, align,
-					                white_pixel, black_pixel, "X=%3u Y=%3u",
+					GP_TextClear(win, NULL, 20, 40, align,
+					             black, size);
+					size = GP_Print(win, NULL, 20, 40, align,
+					                white, black, "X=%3u Y=%3u",
 						        ev.cursor_x, ev.cursor_y);
-					SDL_Flip(display);
+					GP_BackendFlip(backend);
 				break;
 				}
 			break;
@@ -124,49 +110,48 @@ static void event_loop(void)
 
 int main(int argc, char *argv[])
 {
-	int display_bpp = 0;
+	const char *backend_opts = "X11";
+	int opt;
 
-	int i;
-	for (i = 1; i < argc; i++) {
-		if (strcmp(argv[i], "-16") == 0) {
-			display_bpp = 16;
-		} else if (strcmp(argv[i], "-24") == 0) {
-			display_bpp = 24;
+	while ((opt = getopt(argc, argv, "b:h")) != -1) {
+		switch (opt) {
+		case 'b':
+			backend_opts = optarg;
+		break;
+		case 'h':
+			GP_BackendInit(NULL, NULL, stderr);
+			return 0;
+		break;
+		default:
+			fprintf(stderr, "Invalid paramter '%c'\n", opt);
+			return 1;
 		}
 	}
 
-	/* Initialize SDL */
-	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) != 0) {
-		fprintf(stderr, "Could not initialize SDL: %s\n", SDL_GetError());
+//	GP_SetDebugLevel(10);
+
+	backend = GP_BackendInit(backend_opts, "Input Test", stderr);
+
+	if (backend == NULL) {
+		fprintf(stderr, "Failed to initalize backend '%s'\n",
+		        backend_opts);
 		return 1;
 	}
+	
+	win = backend->context;
 
-	display = SDL_SetVideoMode(480, 640, display_bpp, SDL_SWSURFACE);
-	if (display == NULL) {
-		fprintf(stderr, "Could not open display: %s\n", SDL_GetError());
-		goto fail;
+	red   = GP_ColorToContextPixel(GP_COL_RED, win);
+	green = GP_ColorToContextPixel(GP_COL_GREEN, win);
+	white = GP_ColorToContextPixel(GP_COL_WHITE, win);
+	black = GP_ColorToContextPixel(GP_COL_BLACK, win);
+
+	GP_Fill(win, black);
+	GP_BackendFlip(backend);
+
+	GP_EventSetScreenSize(win->w, win->h);
+
+	for (;;) {
+		GP_BackendWait(backend);
+		event_loop();
 	}
-
-	GP_EventSetScreenSize(480, 640);
-
-	GP_SDL_ContextFromSurface(&context, display);
-
-	red_pixel   = GP_ColorToContextPixel(GP_COL_RED, &context);
-	green_pixel = GP_ColorToContextPixel(GP_COL_GREEN, &context);
-	white_pixel = GP_ColorToContextPixel(GP_COL_WHITE, &context);
-	black_pixel = GP_ColorToContextPixel(GP_COL_BLACK, &context);
-
-	timer = SDL_AddTimer(30, timer_callback, NULL);
-	if (timer == 0) {
-		fprintf(stderr, "Could not set up timer: %s\n", SDL_GetError());
-		goto fail;
-	}
-
-	event_loop();
-	SDL_Quit();
-	return 0;
-
-fail:
-	SDL_Quit();
-	return 1;
 }

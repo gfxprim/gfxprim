@@ -8,7 +8,7 @@ ifeq ($(HAVE_LIBSDL),yes)
 CSOURCES=$(shell echo *.c)
 
 APPS=pixeltest fileview fonttest linetest randomshapetest\
-     symbolstest textaligntest trianglefps input blittest subcontext showimage\
+     symbolstest textaligntest trianglefps blittest subcontext showimage\
      aatest mixpixeltest
 endif
 
