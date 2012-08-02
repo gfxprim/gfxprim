@@ -21,3 +21,10 @@ bellow:
 |  >=2  | Use N threads unless the image buffer is too small.
 |=============================================================================
 
+GP_DEBUG
+~~~~~~~~
+
+The 'GP_DEBUG' environment variable may be used to set library debug level.
+The variable and its value is used only once a the time first debug message is
+about to be printed.
+

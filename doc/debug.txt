@@ -27,6 +27,9 @@ or destroyed or when particular algorithm has been started.
 Setting debug level to value higher than 1 would expose even more verbose
 messages the current maximum used by debug messages is 4.
 
+The debug level may also be set by setting the 'GP_DEBUG' environment
+variable. In such case the debug level is set accordingly to its value when
+first debug message is about to be printed.
 
 [source,c]
 -------------------------------------------------------------------------------
