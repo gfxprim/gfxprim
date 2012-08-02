@@ -25,6 +25,7 @@
 #include "GP_Debug.h"
 
 static unsigned int debug_level = GP_DEFAULT_DEBUG_LEVEL;
+static int env_used = 0;
 
 void GP_SetDebugLevel(unsigned int level)
 {
@@ -43,6 +44,24 @@ void GP_DebugPrint(int level, const char *file, const char *function, int line,
 	
 	if (level > (int)debug_level)
 		return;
+
+	if (!env_used) {
+		char *level = getenv("GP_DEBUG");
+		
+		env_used = 1;
+		
+		if (level != NULL) {
+			int new_level = atoi(level);
+			
+			if (new_level >= 0) {
+				debug_level = new_level;
+
+				GP_DEBUG(1, "Using debug level GP_DEBUG=%i "
+				             "from enviroment variable",
+					     debug_level);
+			}
+		}
+	}
 
 	for (i = 1; i < level; i++)
 		fputc(' ', stderr);
