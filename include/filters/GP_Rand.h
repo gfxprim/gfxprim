@@ -16,65 +16,25 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2010 Jiri "BlueBear" Dluhos                            *
- *                         <jiri.bluebear.dluhos@gmail.com>                  *
- *                                                                           *
- * Copyright (C) 2009-2011 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
 /*
 
-  GP_Context filters.
+  Functions to generate random numbers.
 
  */
 
-#ifndef GP_FILTERS_H
-#define GP_FILTERS_H
+#ifndef FILTERS_GP_RAND_H
+#define FILTERS_GP_RAND_H
 
-/* Filter per channel parameter passing interface */
-#include "filters/GP_FilterParam.h"
+/*
+ * Fills the array with size integers with Normal (Gaussian) distribution
+ * defined by sigma and mu parameters.
+ *
+ * The size _MUST_ be odd.
+ */
+void GP_NormInt(int *arr, unsigned int size, int sigma, int mu);
 
-/* Point filters, brightness, contrast ... */
-#include "filters/GP_Point.h"
-
-/* Addition, difference, min, max ... */
-#include "filters/GP_Arithmetic.h"
-
-/* Histograms, ... */
-#include "filters/GP_Stats.h"
-
-/* Image rotations (90 180 270 grads) and mirroring */
-#include "filters/GP_Rotate.h"
-
-/* Linear convolution Raw API */
-#include "filters/GP_Linear.h"
-
-/* Convolution filters */
-#include "filters/GP_Convolution.h"
-
-/* Blur filters */
-#include "filters/GP_Blur.h"
-
-/* Image scaling (resampling) */
-#include "filters/GP_Resize.h"
-
-/* Bitmap dithering */
-#include "filters/GP_Dither.h"
-
-/* Laplace based filters */
-#include "filters/GP_Laplace.h"
-
-/* Median filter */
-#include "filters/GP_Median.h"
-
-/* Weighted Median filter */
-#include "filters/GP_WeightedMedian.h"
-
-/* Sigma Mean filter */
-#include "filters/GP_Sigma.h"
-
-/* Gaussian noise filter */
-#include "filters/GP_GaussianNoise.h"
-
-#endif /* GP_FILTERS_H */
+#endif /* FILTERS_GP_RAND_H */

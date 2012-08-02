@@ -16,65 +16,37 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2010 Jiri "BlueBear" Dluhos                            *
- *                         <jiri.bluebear.dluhos@gmail.com>                  *
- *                                                                           *
- * Copyright (C) 2009-2011 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
-/*
+#include <math.h>
 
-  GP_Context filters.
+#include "core/GP_Common.h"
 
- */
+#include "GP_Rand.h"
 
-#ifndef GP_FILTERS_H
-#define GP_FILTERS_H
+void GP_NormInt(int *arr, unsigned int size, int sigma, int mu)
+{
+	unsigned int i = 0;
+	float a, b, rsq;
 
-/* Filter per channel parameter passing interface */
-#include "filters/GP_FilterParam.h"
+	GP_ASSERT(size%2 == 0);
 
-/* Point filters, brightness, contrast ... */
-#include "filters/GP_Point.h"
+	while (i < size) {
+		/* Sample two point inside of the unit circle */
+		do {
+			a = (float)random() / (RAND_MAX/2) - 1;
+			b = (float)random() / (RAND_MAX/2) - 1;
 
-/* Addition, difference, min, max ... */
-#include "filters/GP_Arithmetic.h"
+			rsq = a * a + b * b;
 
-/* Histograms, ... */
-#include "filters/GP_Stats.h"
+		} while (rsq >= 1 || rsq == 0);
 
-/* Image rotations (90 180 270 grads) and mirroring */
-#include "filters/GP_Rotate.h"
+		/* Polar form of the Box-Muller transformation */
+		float mul = sqrtf(-2.0 * logf(rsq)/rsq);
 
-/* Linear convolution Raw API */
-#include "filters/GP_Linear.h"
-
-/* Convolution filters */
-#include "filters/GP_Convolution.h"
-
-/* Blur filters */
-#include "filters/GP_Blur.h"
-
-/* Image scaling (resampling) */
-#include "filters/GP_Resize.h"
-
-/* Bitmap dithering */
-#include "filters/GP_Dither.h"
-
-/* Laplace based filters */
-#include "filters/GP_Laplace.h"
-
-/* Median filter */
-#include "filters/GP_Median.h"
-
-/* Weighted Median filter */
-#include "filters/GP_WeightedMedian.h"
-
-/* Sigma Mean filter */
-#include "filters/GP_Sigma.h"
-
-/* Gaussian noise filter */
-#include "filters/GP_GaussianNoise.h"
-
-#endif /* GP_FILTERS_H */
+		arr[i++] = mu + sigma * a * mul;
+		arr[i++] = mu + sigma * b * mul;
+	}
+}

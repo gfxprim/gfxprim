@@ -692,6 +692,27 @@ static int sharpen(GP_Context **c, const char *params)
 	return 0;
 }
 
+/* gaussian additive noise filter */
+
+static struct param gauss_noise_params[] = {
+	{"sigma", PARAM_FLOAT, "sigma: amount of noise between [0,1]", NULL, NULL},
+	{"mu", PARAM_FLOAT, "mu: offset of noise between [0,1]", NULL, NULL},
+	{NULL,  0, NULL, NULL, NULL}
+};
+
+static int gauss_noise(GP_Context **c, const char *params)
+{
+	float sigma = 0.1;
+	float mu = 0;
+
+	if (param_parse(params, gauss_noise_params, "gaussian noise", param_err, &sigma, &mu))
+		return EINVAL;
+	
+	GP_FilterGaussianNoiseAdd(*c, *c, sigma, mu, progress_callback);
+
+	return 0;
+}
+
 /* arithmetics */
 
 static const char *arithmetic_ops[] = {
@@ -806,6 +827,7 @@ static struct filter filter_table[] = {
 	{"median",     "median filter", median_params, median},
 	{"sigma",      "sigma (mean) filter", sigma_mean_params, sigma_mean},
 	{"sharpen",    "laplacian edge sharpening", sharpen_params, sharpen},
+	{"gauss_noise", "additive gaussian (normaly distributed) noise", gauss_noise_params, gauss_noise},
 	{"jpg",        "save jpg image", save_jpg_params, save_jpg},
 	{"png",        "save png image", save_png_params, save_png},
 	{NULL, NULL,   NULL, NULL}
