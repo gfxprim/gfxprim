@@ -106,18 +106,18 @@ static struct param resize_params[] = {
 	{NULL,    0,           NULL,          NULL, NULL}
 };
 
-static GP_RetCode resize(GP_Context **c, const char *params)
+static int resize(GP_Context **c, const char *params)
 {
 	int alg = 1;
 	float ratio = -1;
 
 	if (param_parse(params, resize_params, "resize", param_err,
 	                &alg, &ratio))
-		return GP_EINVAL;
+		return EINVAL;
 
 	if (ratio == -1) {
 		print_error("resize: ratio parameter is missing");
-		return GP_EINVAL;
+		return EINVAL;
 	}
 
 	GP_Size w = ratio * (*c)->w;
@@ -127,12 +127,12 @@ static GP_RetCode resize(GP_Context **c, const char *params)
 	res = GP_FilterResize(*c, NULL, alg, w, h, progress_callback);
 	
 	if (res == NULL)
-		return GP_EINVAL;
+		return EINVAL;
 
 	GP_ContextFree(*c);
 	*c = res;
 
-	return GP_ESUCCESS;
+	return 0;
 }
 
 /* scale filter */
@@ -164,7 +164,7 @@ static struct param scale_params[] = {
 	{NULL,  0,           NULL,        NULL, NULL}
 };
 
-static GP_RetCode scale(GP_Context **c, const char *params)
+static int scale(GP_Context **c, const char *params)
 {
 	int alg = 1;
 	int w = -1;
@@ -172,11 +172,11 @@ static GP_RetCode scale(GP_Context **c, const char *params)
 
 	if (param_parse(params, scale_params, "scale", param_err,
 	                &alg, &w, &h))
-		return GP_EINVAL;
+		return EINVAL;
 
 	if (w == -1 && h == -1) {
 		print_error("scale: w and/or h missing");
-		return GP_EINVAL;
+		return EINVAL;
 	}
 
 	if (w == -1)
@@ -190,12 +190,12 @@ static GP_RetCode scale(GP_Context **c, const char *params)
 	res = GP_FilterResize(*c, NULL, alg, w, h, progress_callback);
 
 	if (res == NULL)
-		return GP_EINVAL;
+		return EINVAL;
 
 	GP_ContextFree(*c);
 	*c = res;
 
-	return GP_ESUCCESS;
+	return 0;
 }
 
 /* rotate filter */
@@ -211,16 +211,16 @@ static struct param rotate_params[] = {
 	{NULL,  0,           NULL,        NULL,             NULL}
 };
 
-static GP_RetCode rotate(GP_Context **c, const char *params)
+static int rotate(GP_Context **c, const char *params)
 {
 	int rot = -1;
 
 	if (param_parse(params, rotate_params, "rotate", param_err, &rot))
-		return GP_EINVAL;
+		return EINVAL;
 
 	if (rot == -1) {
 		print_error("rotate: rot parameter is missing");
-		return GP_EINVAL;
+		return EINVAL;
 	}
 
 	GP_Context *res = NULL;
@@ -243,7 +243,7 @@ static GP_RetCode rotate(GP_Context **c, const char *params)
 	GP_ContextFree(*c);
 	*c = res;
 
-	return GP_ESUCCESS;
+	return 0;
 }
 
 /* mirror filter */
@@ -254,12 +254,12 @@ static struct param mirror_params[] = {
 	{NULL,    0,           NULL,                  NULL, NULL}
 };
 
-static GP_RetCode mirror(GP_Context **c, const char *params)
+static int mirror(GP_Context **c, const char *params)
 {
 	int vert = 0, horiz = 0;
 
 	if (param_parse(params, mirror_params, "mirror", param_err, &vert, &horiz))
-		return GP_EINVAL;
+		return EINVAL;
 
 	if (vert)
 		GP_FilterMirrorV(*c, *c, progress_callback);
@@ -267,7 +267,7 @@ static GP_RetCode mirror(GP_Context **c, const char *params)
 	if (horiz)
 		GP_FilterMirrorH(*c, *c, progress_callback);
 
-	return GP_ESUCCESS;
+	return 0;
 }
 
 /* brightness filter */
@@ -278,17 +278,17 @@ static struct param bright_params[] = {
 	{NULL,  0,         NULL,                                  NULL, NULL}
 };
 
-static GP_RetCode bright(GP_Context **c, const char *params)
+static int bright(GP_Context **c, const char *params)
 {
 	int bright = 0;
 	char *chann = NULL;
 
 	if (param_parse(params, bright_params, "bright", param_err, &bright, &chann))
-		return GP_EINVAL;
+		return EINVAL;
 
 	if (bright == 0) {
 		print_error("bright: bright parameter is zero or missing");
-		return GP_EINVAL;
+		return EINVAL;
 	}
 
 	GP_FILTER_PARAMS((*c)->pixel_type, filter_params);
@@ -300,7 +300,7 @@ static GP_RetCode bright(GP_Context **c, const char *params)
 	
 		if (param == NULL) {
 			print_error("bright: Invalid channel name");
-			return GP_EINVAL;
+			return EINVAL;
 		}
 
 		GP_FilterParamSetIntAll(filter_params, 0);
@@ -309,7 +309,7 @@ static GP_RetCode bright(GP_Context **c, const char *params)
 
 	GP_FilterBrightness(*c, *c, filter_params, progress_callback);
 
-	return GP_ESUCCESS;
+	return 0;
 }
 
 /* contrast */
@@ -320,17 +320,17 @@ static struct param contrast_params[] = {
 	{NULL,  0,           NULL,                    NULL, NULL}
 };
 
-static GP_RetCode contrast(GP_Context **c, const char *params)
+static int contrast(GP_Context **c, const char *params)
 {
 	float mul = 0;
 	char *chann = NULL;
 
 	if (param_parse(params, contrast_params, "contrast", param_err, &mul, &chann))
-		return GP_EINVAL;
+		return EINVAL;
 
 	if (mul <= 0) {
 		print_error("contrast: mul parameter must be >= 0");
-		return GP_EINVAL;
+		return EINVAL;
 	}
 	
 	GP_FILTER_PARAMS((*c)->pixel_type, filter_params);
@@ -342,7 +342,7 @@ static GP_RetCode contrast(GP_Context **c, const char *params)
 	
 		if (param == NULL) {
 			print_error("contrast: Invalid channel name");
-			return GP_EINVAL;
+			return EINVAL;
 		}
 
 		GP_FilterParamSetFloatAll(filter_params, 1);
@@ -351,7 +351,7 @@ static GP_RetCode contrast(GP_Context **c, const char *params)
 
 	GP_FilterContrast(*c, *c, filter_params, progress_callback);
 
-	return GP_ESUCCESS;
+	return 0;
 }
 
 /* noise */
@@ -360,12 +360,12 @@ static struct param noise_params[] = {
 	{NULL,  0,            NULL,    NULL, NULL}
 };
 
-static GP_RetCode noise(GP_Context **c, const char *params)
+static int noise(GP_Context **c, const char *params)
 {
 	float rat;
 
 	if (param_parse(params, noise_params, "noise", param_err, &rat))
-		return GP_EINVAL;
+		return EINVAL;
 
 	GP_FILTER_PARAMS((*c)->pixel_type, filter_params);
 	
@@ -373,7 +373,7 @@ static GP_RetCode noise(GP_Context **c, const char *params)
 
 	GP_FilterNoise(*c, *c, filter_params, progress_callback);
 
-	return GP_ESUCCESS;
+	return 0;
 }
 
 /* invert */
@@ -382,14 +382,14 @@ static struct param invert_params[] = {
 	{NULL,  0, NULL, NULL, NULL}
 };
 
-static GP_RetCode invert(GP_Context **c, const char *params)
+static int invert(GP_Context **c, const char *params)
 {
 	if (param_parse(params, invert_params, "invert", param_err))
-		return GP_EINVAL;
+		return EINVAL;
 
 	GP_FilterInvert(*c, *c, progress_callback);
 
-	return GP_ESUCCESS;
+	return 0;
 }
 
 /* blur */
@@ -401,7 +401,7 @@ static struct param blur_params[] = {
 	{NULL,  0, NULL, NULL, NULL}
 };
 
-static GP_RetCode blur(GP_Context **c, const char *params)
+static int blur(GP_Context **c, const char *params)
 {
 	float sigma = 0;
 	float sigma_x = 0;
@@ -417,12 +417,12 @@ static GP_RetCode blur(GP_Context **c, const char *params)
 
 	if (sigma_x <= 0 && sigma_y <= 0) {
 		print_error("blur: at least one of sigma_x and sigma_y must be >= 0");
-		return GP_EINVAL;
+		return EINVAL;
 	}
 
 	GP_FilterGaussianBlur(*c, *c, sigma_x, sigma_y, progress_callback);
 
-	return GP_ESUCCESS;
+	return 0;
 }
 
 /* dithering */
@@ -454,16 +454,16 @@ static struct param dither_params[] = {
 	{NULL,  0, NULL, NULL, NULL}
 };
 
-static GP_RetCode dither(GP_Context **c, const char *params)
+static int dither(GP_Context **c, const char *params)
 {
 	int fmt = -1;
 
 	if (param_parse(params, dither_params, "dither", param_err, &fmt))
-		return GP_EINVAL;
+		return EINVAL;
 	
 	if (fmt == -1) {
 		print_error("dither: invalid format or format param missing");
-		return GP_EINVAL;
+		return EINVAL;
 	}
 
 	GP_Context *bw;
@@ -476,7 +476,7 @@ static GP_RetCode dither(GP_Context **c, const char *params)
 
 	GP_ContextFree(bw);
 
-	return GP_ESUCCESS;
+	return 0;
 }
 
 /* jpg save filter */
@@ -486,21 +486,21 @@ static struct param save_jpg_params[] = {
 	{NULL,  0, NULL, NULL, NULL}
 };
 
-static GP_RetCode save_jpg(GP_Context **c, const char *params)
+static int save_jpg(GP_Context **c, const char *params)
 {
 	char *file = NULL;
 
 	if (param_parse(params, save_jpg_params, "jpg", param_err, &file))
-		return GP_EINVAL;
+		return EINVAL;
 	
 	if (file == NULL) {
 		print_error("jpg: filename missing");
-		return GP_EINVAL;
+		return EINVAL;
 	}
 
 	GP_SaveJPG(*c, file, progress_callback);
 
-	return GP_ESUCCESS;
+	return 0;
 }
 
 /* png save filter */
@@ -510,21 +510,21 @@ static struct param save_png_params[] = {
 	{NULL,  0, NULL, NULL, NULL}
 };
 
-static GP_RetCode save_png(GP_Context **c, const char *params)
+static int save_png(GP_Context **c, const char *params)
 {
 	char *file = NULL;
 
 	if (param_parse(params, save_png_params, "png", param_err, &file))
-		return GP_EINVAL;
+		return EINVAL;
 	
 	if (file == NULL) {
 		print_error("png: filename missing");
-		return GP_EINVAL;
+		return EINVAL;
 	}
 
 	GP_SavePNG(*c, file, progress_callback);
 
-	return GP_ESUCCESS;
+	return 0;
 }
 
 /* noise filter */
@@ -559,13 +559,13 @@ static uint32_t no_op(uint32_t val)
 	return val;
 }
 
-static GP_RetCode add_noise(GP_Context **c, const char *params)
+static int add_noise(GP_Context **c, const char *params)
 {
 	float percents = 0;
 	char *chann = NULL;
 
 	if (param_parse(params, add_noise_params, "add_noise", param_err, &percents, &chann))
-		return GP_EINVAL;
+		return EINVAL;
 	
 	GP_FILTER_PARAMS((*c)->pixel_type, priv);
 	GP_FilterParamSetFloatAll(priv, percents/100);
@@ -578,7 +578,7 @@ static GP_RetCode add_noise(GP_Context **c, const char *params)
 	
 		if (param == NULL) {
 			print_error("add_noise: Invalid channel name");
-			return GP_EINVAL;
+			return EINVAL;
 		}
 
 		
@@ -588,7 +588,7 @@ static GP_RetCode add_noise(GP_Context **c, const char *params)
 
 	GP_FilterPoint(*c, *c, op_callbacks, priv, progress_callback);
 
-	return GP_ESUCCESS;
+	return 0;
 }
 
 /* median filter */
@@ -600,12 +600,12 @@ static struct param median_params[] = {
 	{NULL,  0, NULL, NULL, NULL}
 };
 
-static GP_RetCode median(GP_Context **c, const char *params)
+static int median(GP_Context **c, const char *params)
 {
 	int rad = -1, rad_x, rad_y;
 
 	if (param_parse(params, median_params, "median", param_err, &rad, &rad_x, &rad_y))
-		return GP_EINVAL;
+		return EINVAL;
 	
 	if (rad != -1) {
 		rad_x = rad;
@@ -613,17 +613,17 @@ static GP_RetCode median(GP_Context **c, const char *params)
 	}
 
 	if (rad_x < 0 || rad_y < 0)
-		return GP_EINVAL;
+		return EINVAL;
 
 	GP_Context *ret = GP_FilterMedianAlloc(*c, rad_x, rad_y, progress_callback);
 
 	if (ret == NULL)
-		return GP_ENOMEM;
+		return ENOMEM;
 
 	GP_ContextFree(*c);
 	*c = ret;
 
-	return GP_ESUCCESS;
+	return 0;
 }
 
 /* sigma mean filter */
@@ -637,14 +637,14 @@ static struct param sigma_mean_params[] = {
 	{NULL,  0, NULL, NULL, NULL}
 };
 
-static GP_RetCode sigma_mean(GP_Context **c, const char *params)
+static int sigma_mean(GP_Context **c, const char *params)
 {
 	int rad = -1, rad_x, rad_y, min = 0;
 	float sigma = 0.1;
 
 	if (param_parse(params, sigma_mean_params, "sigma", param_err,
 	                &rad, &min, &sigma, &rad_x, &rad_y))
-		return GP_EINVAL;
+		return EINVAL;
 	
 	if (rad != -1) {
 		rad_x = rad;
@@ -652,19 +652,19 @@ static GP_RetCode sigma_mean(GP_Context **c, const char *params)
 	}
 
 	if (rad_x < 0 || rad_y < 0)
-		return GP_EINVAL;
+		return EINVAL;
 
 	(*c)->gamma = GP_GammaAcquire((*c)->pixel_type, 1.2);
 
 	GP_Context *ret = GP_FilterSigmaAlloc(*c, rad_x, rad_y, min, sigma, progress_callback);
 
 	if (ret == NULL)
-		return GP_ENOMEM;
+		return ENOMEM;
 
 	GP_ContextFree(*c);
 	*c = ret;
 
-	return GP_ESUCCESS;
+	return 0;
 }
 
 /* laplacian edge sharpening filter */
@@ -674,22 +674,22 @@ static struct param sharpen_params[] = {
 	{NULL,  0, NULL, NULL, NULL}
 };
 
-static GP_RetCode sharpen(GP_Context **c, const char *params)
+static int sharpen(GP_Context **c, const char *params)
 {
 	float weight = 0.1;
 
 	if (param_parse(params, sharpen_params, "sigma", param_err, &weight))
-		return GP_EINVAL;
+		return EINVAL;
 	
 	GP_Context *ret = GP_FilterEdgeSharpeningAlloc(*c, weight, progress_callback);
 
 	if (ret == NULL)
-		return GP_ENOMEM;
+		return ENOMEM;
 
 	GP_ContextFree(*c);
 	*c = ret;
 
-	return GP_ESUCCESS;
+	return 0;
 }
 
 /* arithmetics */
@@ -709,24 +709,24 @@ static struct param arithmetic_params[] = {
 	{NULL,  0, NULL, NULL, NULL}
 };
 
-static GP_RetCode arithmetic(GP_Context **c, const char *params)
+static int arithmetic(GP_Context **c, const char *params)
 {
 	char *file = NULL;
 	int op = -1;
 
 	if (param_parse(params, arithmetic_params, "arithmetic", param_err, &file, &op))
-		return GP_EINVAL;
+		return EINVAL;
 	
 	if (file == NULL) {
 		print_error("arithmetic: Filename missing");
-		return GP_EINVAL;
+		return EINVAL;
 	}
 
 	GP_Context *img, *res = NULL;
 
 	if ((img = GP_LoadImage(file, progress_callback)) == NULL) {
 		print_error("arithmetic: Invalid image.");
-		return GP_EINVAL;
+		return EINVAL;
 	}
 
 	switch (op) {
@@ -748,13 +748,13 @@ static GP_RetCode arithmetic(GP_Context **c, const char *params)
 	}
 
 	if (res == NULL)
-		return GP_EINVAL;
+		return ENOMEM;
 
 	GP_ContextFree(*c);
 
 	*c = res;
 
-	return GP_ESUCCESS;
+	return 0;
 }
 
 /* histogram */
@@ -764,20 +764,20 @@ static struct param histogram_params[] = {
 	{NULL,  0, NULL, NULL, NULL}
 };
 
-static GP_RetCode histogram(GP_Context **c, const char *params)
+static int histogram(GP_Context **c, const char *params)
 {
 	char *file = "histogram.png";
 
 	if (param_parse(params, histogram_params, "histogram", param_err, &file))
-		return GP_EINVAL;
+		return EINVAL;
 	
 	if (file == NULL) {
 		print_error("histogram: Filename missing");
-		return GP_EINVAL;
+		return EINVAL;
 	}
 
 	histogram_to_png(*c, file);
-	return GP_ESUCCESS;
+	return 0;
 }
 
 /* filters */
@@ -786,7 +786,7 @@ struct filter {
 	const char *name;
 	const char *desc;
 	struct param *param_desc;
-	GP_RetCode (*apply)(GP_Context **c, const char *params);
+	int (*apply)(GP_Context **c, const char *params);
 };
 
 static struct filter filter_table[] = {
@@ -875,7 +875,7 @@ static void add_filter(char *params)
 static void apply_filters(GP_Context **src)
 {
 	unsigned int i;
-	GP_RetCode ret;
+	int ret;
 
 	for (i = 0; i < filter_cnt; i++) {
 		char buf[255];
@@ -885,7 +885,7 @@ static void apply_filters(GP_Context **src)
 		progress_prefix = buf;
 
 		if ((ret = filters[i]->apply(src, filter_params[i]))) {
-			fprintf(stderr, "Error: %s\n", GP_RetCodeName(ret));
+			fprintf(stderr, "Error: %s\n", strerror(ret));
 			exit(1);
 		}
 		
@@ -956,7 +956,7 @@ static void check_fmt(const char *fmt)
 
 static void save_by_fmt(struct GP_Context *bitmap, const char *name, const char *fmt)
 {
-	GP_RetCode ret;
+	int ret;
 
 	progress_prefix = "Saving Image";
 
@@ -968,7 +968,8 @@ static void save_by_fmt(struct GP_Context *bitmap, const char *name, const char 
 		ret = GP_SavePNG(bitmap, name, progress_callback);
 	
 	if (ret) {
-		fprintf(stderr, "Failed to save bitmap: %s\n", GP_RetCodeName(ret));
+		fprintf(stderr, "Failed to save bitmap: %s\n",
+		        strerror(errno));
 		exit(1);
 	}
 		
