@@ -23,7 +23,7 @@
  *                                                                           *
  *****************************************************************************/
 
-#include "core/GP_AngleUtils.h"
+#include "GP_AngleUtils.h"
 
 #include <math.h>
 
