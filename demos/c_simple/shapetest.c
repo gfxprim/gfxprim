@@ -398,7 +398,7 @@ void event_loop(void)
 			switch(ev.code) {
 			case GP_EV_SYS_QUIT:
 				GP_BackendExit(backend);
-				exit(1);
+				exit(0);
 			break;
 			}
 		break;

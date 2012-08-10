@@ -25,13 +25,12 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <SDL/SDL.h>
+#include <string.h>
 
 #include "GP.h"
-#include "GP_SDL.h"
 
-SDL_Surface *display = NULL;
-GP_Context context;
+static GP_Context *win;
+static GP_Backend *backend;
 
 static GP_Pixel white_pixel, gray_pixel, dark_gray_pixel, black_pixel,
 		red_pixel, blue_pixel;
@@ -52,9 +51,7 @@ struct FileLine *last_line = NULL;
 
 void redraw_screen(void)
 {
-	SDL_LockSurface(display);
-	
-	GP_Fill(&context, gray_pixel);
+	GP_Fill(win, gray_pixel);
 
 	GP_TextStyle style = GP_DEFAULT_TEXT_STYLE;
 
@@ -83,15 +80,13 @@ void redraw_screen(void)
 
 	struct FileLine *line = first_line;
 	unsigned int i;
-	for (i = 0; i < context.h/GP_TextHeight(&style); i++) { 
+	for (i = 0; i < win->h/GP_TextHeight(&style); i++) { 
 		if (line == NULL)
 			break;
-		GP_Text(&context, &style, 16, 16 + (1.0 * GP_TextHeight(&style))*i,
+		GP_Text(win, &style, 16, 16 + (1.0 * GP_TextHeight(&style))*i,
 		        align, black_pixel, gray_pixel, line->text);
 		line = line->next;
 	}
-
-	SDL_UnlockSurface(display);
 }
 
 static void warp_up(int lines)
@@ -101,7 +96,7 @@ static void warp_up(int lines)
 			first_line = first_line->prev;
 	
 	redraw_screen();
-	SDL_Flip(display);
+	GP_BackendFlip(backend);
 }
 
 static void warp_down(int lines)
@@ -111,63 +106,65 @@ static void warp_down(int lines)
 			first_line = first_line->next;
 	
 	redraw_screen();
-	SDL_Flip(display);
+	GP_BackendFlip(backend);
 }
 
 void event_loop(void)
 {
-	SDL_Event event;
+	GP_Event ev;
 
-	while (SDL_WaitEvent(&event) > 0) {
-		switch (event.type) {
-
-		case SDL_VIDEOEXPOSE:
-			redraw_screen();
-			SDL_Flip(display);
-		break;
-
-		case SDL_KEYDOWN:
-			switch (event.key.keysym.sym) {
-			case SDLK_SPACE:
+	while (GP_EventGet(&ev)) {
+		switch (ev.type) {
+		case GP_EV_KEY:
+			if (ev.code != GP_EV_KEY_DOWN)
+				continue;
+			
+			switch (ev.val.key.key) {
+			case GP_KEY_SPACE:
 				if (font)
 					font_flag = (font_flag + 1) % 3;
 				else
 					font_flag = (font_flag + 1) % 2;
 					
 				redraw_screen();
-				SDL_Flip(display);
+				GP_BackendFlip(backend);
 			break;
-			case SDLK_RIGHT:
+			case GP_KEY_RIGHT:
 				tracking++;
 				redraw_screen();
-				SDL_Flip(display);
+				GP_BackendFlip(backend);
 			break;
-			case SDLK_LEFT:
+			case GP_KEY_LEFT:
 				tracking--;
 				redraw_screen();
-				SDL_Flip(display);
+				GP_BackendFlip(backend);
 			break;
-			case SDLK_ESCAPE:
-				return;
-			case SDLK_UP:
+			case GP_KEY_UP:
 				warp_up(1);
 			break;
-			case SDLK_PAGEUP:
-				warp_up(29);
-			break;
-			case SDLK_DOWN:
+			case GP_KEY_DOWN:
 				warp_down(1);
 			break;
-			case SDLK_PAGEDOWN:
-				warp_down(29);
+			case GP_KEY_PAGE_UP:
+				warp_up(30);
 			break;
-			default:
+			case GP_KEY_PAGE_DOWN:
+				warp_down(30);
+			break;
+			case GP_KEY_ESC:
+				GP_BackendExit(backend);
+				exit(0);
 			break;
 			}
 		break;
-
-		case SDL_QUIT:
-			return;
+		case GP_EV_SYS:
+			switch(ev.code) {
+			case GP_EV_SYS_QUIT:
+				GP_BackendExit(backend);
+				exit(0);
+			break;
+			}
+		break;
 		}
 	}
 }
@@ -208,52 +205,43 @@ static int read_file_head(const char *filename)
 
 int main(int argc, char *argv[])
 {
+	const char *backend_opts = "X11";
+	
 	if (argc == 1) {
 		fprintf(stderr, "No file specified\n");
 		return 1;
 	}
 	
-
 	if (argc > 2)
 		font = GP_FontFaceLoad(argv[2], 0, 16);
 
 	if (!read_file_head(argv[1]))
 		return 1;
+	
+	backend = GP_BackendInit(backend_opts, "File View", stderr);
 
-	/* Initialize SDL */
-	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) != 0) {
-		fprintf(stderr, "Could not initialize SDL: %s\n", SDL_GetError());
+	if (backend == NULL) {
+		fprintf(stderr, "Failed to initalize backend '%s'\n",
+		        backend_opts);
 		return 1;
 	}
+	
+	win = backend->context;
 
-	/* Create a window with a software back surface */
-	display = SDL_SetVideoMode(800, 480, 0, SDL_SWSURFACE);
-	if (display == NULL) {
-		fprintf(stderr, "Could not open display: %s\n", SDL_GetError());
-		goto fail;
-	}
-
-	/* Initialize a GP context from the SDL display */
-	GP_SDL_ContextFromSurface(&context, display);
-
-	/* Load colors suitable for the display */
-	white_pixel     = GP_ColorToContextPixel(GP_COL_WHITE, &context);
-	gray_pixel      = GP_ColorToContextPixel(GP_COL_GRAY_LIGHT, &context);
-	dark_gray_pixel = GP_ColorToContextPixel(GP_COL_GRAY_DARK, &context);
-	black_pixel     = GP_ColorToContextPixel(GP_COL_BLACK, &context);
-	red_pixel       = GP_ColorToContextPixel(GP_COL_RED, &context);
-	blue_pixel      = GP_ColorToContextPixel(GP_COL_BLUE, &context);
+	white_pixel     = GP_ColorToContextPixel(GP_COL_WHITE, win);
+	gray_pixel      = GP_ColorToContextPixel(GP_COL_GRAY_LIGHT, win);
+	dark_gray_pixel = GP_ColorToContextPixel(GP_COL_GRAY_DARK, win);
+	black_pixel     = GP_ColorToContextPixel(GP_COL_BLACK, win);
+	red_pixel       = GP_ColorToContextPixel(GP_COL_RED, win);
+	blue_pixel      = GP_ColorToContextPixel(GP_COL_BLUE, win);
 
 	redraw_screen();
-	SDL_Flip(display);
+	GP_BackendFlip(backend);
+	
+	for (;;) {
+		GP_BackendWait(backend);
+		event_loop();
+	}
 
-	event_loop();
-
-	SDL_Quit();
 	return 0;
-
-fail:
-	SDL_Quit();
-	return 1;
 }
-
