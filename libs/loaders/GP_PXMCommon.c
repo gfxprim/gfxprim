@@ -19,7 +19,7 @@
  * Copyright (C) 2009-2010 Jiri "BlueBear" Dluhos                            *
  *                         <jiri.bluebear.dluhos@gmail.com>                  *
  *                                                                           *
- * Copyright (C) 2009-2010 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
@@ -46,7 +46,7 @@ static int read_comment(FILE *f)
 	}
 }
 
-GP_RetCode GP_PXMLoad1bpp(FILE *f, GP_Context *context)
+int GP_PXMLoad1bpp(FILE *f, GP_Context *context)
 {
 	uint8_t *pixel = context->pixels;
 	uint32_t x, y;
@@ -58,10 +58,10 @@ GP_RetCode GP_PXMLoad1bpp(FILE *f, GP_Context *context)
 			while (run) {
 				switch (fgetc(f)) {
 				case EOF:
-					return GP_EBADFILE;
+					return EIO;
 				case '#':
 					if (read_comment(f))
-						return GP_EBADFILE;
+						return EIO;
 					break;
 				case '0':
 					*pixel &= ~(0x80>>(x%8));
@@ -86,10 +86,10 @@ GP_RetCode GP_PXMLoad1bpp(FILE *f, GP_Context *context)
 			pixel++;
 	}
 
-	return GP_ESUCCESS;
+	return 0;
 }
 
-GP_RetCode GP_PXMLoad2bpp(FILE *f, GP_Context *context)
+int GP_PXMLoad2bpp(FILE *f, GP_Context *context)
 {
 	uint8_t *pixel = context->pixels;
 	uint32_t x, y;
@@ -101,10 +101,10 @@ GP_RetCode GP_PXMLoad2bpp(FILE *f, GP_Context *context)
 			while (run) {
 				switch (fgetc(f)) {
 				case EOF:
-					return GP_EBADFILE;
+					return EIO;
 				case '#':
 					if (read_comment(f))
-						return GP_EBADFILE;
+						return EIO;
 					break;
 				case '0':
 					*pixel &= ~(0xc0>>(2*(x%4)));
@@ -139,10 +139,10 @@ GP_RetCode GP_PXMLoad2bpp(FILE *f, GP_Context *context)
 			pixel++;
 	}
 
-	return GP_ESUCCESS;
+	return 0;
 }
 
-GP_RetCode GP_PXMLoad4bpp(FILE *f, GP_Context *context)
+int GP_PXMLoad4bpp(FILE *f, GP_Context *context)
 {
 	uint8_t *pixel = context->pixels;
 	uint32_t x, y;
@@ -156,10 +156,10 @@ GP_RetCode GP_PXMLoad4bpp(FILE *f, GP_Context *context)
 			while (run) {
 				switch (fgetc(f)) {
 				case EOF:
-					return GP_EBADFILE;
+					return EIO;
 				case '#':
 					if (read_comment(f))
-						return GP_EBADFILE;
+						return EIO;
 				break;
 				case '1':
 					ch = fgetc(f);
@@ -185,10 +185,10 @@ GP_RetCode GP_PXMLoad4bpp(FILE *f, GP_Context *context)
 			pixel++;
 	}
 
-	return GP_ESUCCESS;
+	return 0;
 }
 
-GP_RetCode GP_PXMLoad8bpp(FILE *f, GP_Context *context)
+int GP_PXMLoad8bpp(FILE *f, GP_Context *context)
 {
 	uint8_t *pixel = context->pixels;
 	uint32_t x, y;
@@ -202,10 +202,10 @@ GP_RetCode GP_PXMLoad8bpp(FILE *f, GP_Context *context)
 			while (run) {
 				switch (ch = fgetc(f)) {
 				case EOF:
-					return GP_EBADFILE;
+					return EIO;
 				case '#':
 					if (read_comment(f))
-						return GP_EBADFILE;
+						return EIO;
 				break;
 				case '1' ... '9':
 					val = ch - '0';
@@ -218,7 +218,7 @@ GP_RetCode GP_PXMLoad8bpp(FILE *f, GP_Context *context)
 					}
 					
 					if (val > 255)
-						return GP_EBADFILE;
+						return EIO;
 				case '0':
 					run = 0;
 					
@@ -233,12 +233,12 @@ GP_RetCode GP_PXMLoad8bpp(FILE *f, GP_Context *context)
 		}
 	}
 
-	return GP_ESUCCESS;
+	return 0;
 }
 
 #define BITMASK(byte, bit) (!!((byte)&(0x80>>(bit))))
 
-static GP_RetCode write_line_1bpp(FILE *f, const uint8_t *data, GP_Context *src)
+static int write_line_1bpp(FILE *f, const uint8_t *data, GP_Context *src)
 {
 	uint32_t x, max = src->bytes_per_row;
 	int ret;
@@ -250,7 +250,7 @@ static GP_RetCode write_line_1bpp(FILE *f, const uint8_t *data, GP_Context *src)
 		
 		if (x != 0)
 			if (fprintf(f, " ") < 0)
-				return GP_EBADFILE;
+				return EIO;
 		
 		ret = fprintf(f, "%u %u %u %u %u %u %u %u",
 		                 BITMASK(data[x], 0),
@@ -262,26 +262,26 @@ static GP_RetCode write_line_1bpp(FILE *f, const uint8_t *data, GP_Context *src)
 		                 BITMASK(data[x], 6),
 		                 BITMASK(data[x], 7));
 		if (ret < 0)
-			return GP_EBADFILE;
+			return EIO;
 	}
 
 	for (x = 0; x < (src->w % 8); x++) {
 		ret = fprintf(f, " %u", BITMASK(data[max], x));
 
 		if (ret < 0)
-			return GP_EBADFILE;
+			return EIO;
 	}
 
 	if (fprintf(f, "\n") < 0)
-		return GP_EBADFILE;
+		return EIO;
 
-	return GP_ESUCCESS;
+	return 0;
 }
 
-GP_RetCode GP_PXMSave1bpp(FILE *f, GP_Context *context)
+int GP_PXMSave1bpp(FILE *f, GP_Context *context)
 {
 	uint32_t y;
-	GP_RetCode ret;
+	int ret;
 
 	for (y = 0; y < context->h; y++) {
 		ret = write_line_1bpp(f, context->pixels + context->bytes_per_row * y,
@@ -291,12 +291,12 @@ GP_RetCode GP_PXMSave1bpp(FILE *f, GP_Context *context)
 			return ret;
 	}	
 
-	return GP_ESUCCESS;
+	return 0;
 }
 
 #define MASK_2BPP(byte, pix) (0x03 & (byte>>((3 - pix)<<1)))
 
-static GP_RetCode write_line_2bpp(FILE *f, const uint8_t *data, GP_Context *src)
+static int write_line_2bpp(FILE *f, const uint8_t *data, GP_Context *src)
 {
 	uint32_t x, max = src->bytes_per_row;
 	int ret;
@@ -308,7 +308,7 @@ static GP_RetCode write_line_2bpp(FILE *f, const uint8_t *data, GP_Context *src)
 		
 		if (x != 0)
 			if (fprintf(f, " ") < 0)
-				return GP_EBADFILE;
+				return EIO;
 		
 		ret = fprintf(f, "%u %u %u %u",
 		                 MASK_2BPP(data[x], 0),
@@ -316,26 +316,26 @@ static GP_RetCode write_line_2bpp(FILE *f, const uint8_t *data, GP_Context *src)
 		                 MASK_2BPP(data[x], 2),
 		                 MASK_2BPP(data[x], 3));
 		if (ret < 0)
-			return GP_EBADFILE;
+			return EIO;
 	}
 
 	for (x = 0; x < (src->w % 4); x++) {
 		ret = fprintf(f, " %u", MASK_2BPP(data[max], x));
 
 		if (ret < 0)
-			return GP_EBADFILE;
+			return EIO;
 	}
 
 	if (fprintf(f, "\n") < 0)
-		return GP_EBADFILE;
+		return EIO;
 
-	return GP_ESUCCESS;
+	return EIO;
 }
 
-GP_RetCode GP_PXMSave2bpp(FILE *f, GP_Context *context)
+int GP_PXMSave2bpp(FILE *f, GP_Context *context)
 {
 	uint32_t y;
-	GP_RetCode ret;
+	int ret;
 
 	for (y = 0; y < context->h; y++) {
 		ret = write_line_2bpp(f, context->pixels + context->bytes_per_row * y,
@@ -345,10 +345,10 @@ GP_RetCode GP_PXMSave2bpp(FILE *f, GP_Context *context)
 			return ret;
 	}	
 
-	return GP_ESUCCESS;
+	return EIO;
 }
 
-static GP_RetCode write_line_8bpp(FILE *f, const uint8_t *data, GP_Context *src)
+static int write_line_8bpp(FILE *f, const uint8_t *data, GP_Context *src)
 {
 	uint32_t x;
 	int ret;
@@ -357,24 +357,24 @@ static GP_RetCode write_line_8bpp(FILE *f, const uint8_t *data, GP_Context *src)
 		
 		if (x != 0)
 			if (fprintf(f, " ") < 0)
-				return GP_EBADFILE;
+				return EIO;
 		
 		ret = fprintf(f, "%u", data[x]);
 		
 		if (ret < 0)
-			return GP_EBADFILE;
+			return EIO;
 	}
 
 	if (fprintf(f, "\n") < 0)
-		return GP_EBADFILE;
+		return EIO;
 
-	return GP_ESUCCESS;
+	return 0;
 }
 
-GP_RetCode GP_PXMSave8bpp(FILE *f, GP_Context *context)
+int GP_PXMSave8bpp(FILE *f, GP_Context *context)
 {
 	uint32_t y;
-	GP_RetCode ret;
+	int ret;
 
 	for (y = 0; y < context->h; y++) {
 		ret = write_line_8bpp(f, context->pixels + context->bytes_per_row * y,
@@ -384,5 +384,5 @@ GP_RetCode GP_PXMSave8bpp(FILE *f, GP_Context *context)
 			return ret;
 	}	
 
-	return GP_ESUCCESS;
+	return 0;
 }

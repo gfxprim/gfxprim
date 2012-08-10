@@ -19,18 +19,19 @@
  * Copyright (C) 2009-2010 Jiri "BlueBear" Dluhos                            *
  *                         <jiri.bluebear.dluhos@gmail.com>                  *
  *                                                                           *
- * Copyright (C) 2009-2010 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
-#ifndef GP_PGM_H
-#define GP_PGM_H
+#ifndef LOADERS_GP_PGM_H
+#define LOADERS_GP_PGM_H
 
 #include "core/GP_Context.h"
-#include "core/GP_RetCode.h"
 
-GP_RetCode GP_LoadPGM(const char *src_path, GP_Context **res);
+GP_Context *GP_LoadPGM(const char *src_path,
+                       GP_ProgressCallback *callback);
 
-GP_RetCode GP_SavePGM(const char *res_path, GP_Context *src);
+int GP_SavePGM(const char *res_path, GP_Context *src,
+               GP_ProgressCallback *callback);
 
-#endif /* GP_PGM_H */
+#endif /* LOADERS_GP_PGM_H */

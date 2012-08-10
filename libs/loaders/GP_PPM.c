@@ -16,7 +16,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2011 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
@@ -64,51 +64,61 @@ int load_binary_ppm(FILE *f, uint32_t depth __attribute__((unused)),
 	return 0;
 }
 
-GP_RetCode GP_LoadPPM(const char *src_path, GP_Context **res)
+GP_Context *GP_LoadPPM(const char *src_path, GP_ProgressCallback *callback)
 {
 	uint32_t w, h, depth;
 	char fmt;
 	FILE *f;
+	GP_Context *ret;
+	int err;
 
 	f = GP_ReadPNM(src_path, &fmt, &w, &h, &depth);
 
-	if (f == NULL)
-		return GP_EBADFILE;
+	if (f == NULL) {
+		err = errno;
+		goto err0;
+	}
 
 	if (fmt != '3' && fmt != '6') {
 		GP_DEBUG(1, "Asked to load PPM but header is 'P%c'", fmt);
+		err = EINVAL;
 		goto err1;
 	}
 
 	if (depth != 255) {
 		GP_DEBUG(1, "Unsupported depth %"PRIu32, depth);
+		err = ENOSYS;
 		goto err1;
 	}
 
-	*res = GP_ContextAlloc(w, h, GP_PIXEL_RGB888);
+	ret = GP_ContextAlloc(w, h, GP_PIXEL_RGB888);
 
-	if (res == NULL)
+	if (ret == NULL) {
+		err = ENOMEM;
 		goto err1;
+	}
 
 	switch (fmt) {
 	case '3':
 		//TODO
-		fclose(f);
-		free(res);
-		return GP_ENOIMPL;
+		err = ENOSYS;
+		goto err2;
 	case '6':
-		if (load_binary_ppm(f, depth, *res))
+		//TODO: errno
+		if (load_binary_ppm(f, depth, ret))
 			goto err2;
 	break;
 	}
 
 	fclose(f);
-	return GP_ESUCCESS;
+	return ret;
 err2:
-	free(*res);
+	GP_ContextFree(ret);
 err1:
 	fclose(f);
-	return GP_EBADFILE;
+err0:
+	errno = err;
+	return NULL; 
 }
 
 static int write_binary_ppm(FILE *f, GP_Context *src)
@@ -130,18 +140,23 @@ static int write_binary_ppm(FILE *f, GP_Context *src)
 	return 0;
 }
 
-GP_RetCode GP_SavePPM(const char *res_path, GP_Context *src, char *fmt)
+int GP_SavePPM(const char *res_path, GP_Context *src, char *fmt,
+               GP_ProgressCallback *callback)
 {
 	char hfmt;
 	FILE *f;
+	int err;
 
-	if (src->pixel_type != GP_PIXEL_RGB888)
-		return GP_ENOIMPL;
+	if (src->pixel_type != GP_PIXEL_RGB888) {
+		errno = EINVAL;
+		return 1;
+	}
 
 	switch (*fmt) {
 	/* ASCII */
 	case 'a':
-		return GP_ENOIMPL;
+		errno = ENOSYS;
+		return 1;
 	break;
 	/* binary */
 	case 'b':
@@ -150,22 +165,32 @@ GP_RetCode GP_SavePPM(const char *res_path, GP_Context *src, char *fmt)
 		            src->w, src->h, res_path);
 	break;
 	default:
-		return GP_ENOIMPL;
+		errno = EINVAL;
+		return 1;
 	}
 	
 	f = GP_WritePNM(res_path, hfmt, src->w, src->h, 255);
-	
+
+	if (f == NULL)
+		return 1;
+
 	if (write_binary_ppm(f, src)) {
 		GP_DEBUG(1, "Failed to write buffer");
-		fclose(f);
-		return GP_EBADFILE;
+		err = EIO;
+		goto err1;
 	}
 
 	if (fclose(f) < 0) {
+		err = errno;
 		GP_DEBUG(1, "Failed to close file '%s' : %s",
 		            res_path, strerror(errno));
-		return GP_EBADFILE;
+		goto err0;
 	}
 
-	return GP_ESUCCESS;
+	return 0;
+err1:
+	fclose(f);
+err0:
+	errno = err;
+	return 1;
 }

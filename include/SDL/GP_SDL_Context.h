@@ -27,6 +27,7 @@
 #define GP_SDL_CONTEXT_H
 
 #include "GP.h"
+#include "core/GP_RetCode.h"
 
 GP_RetCode GP_SDL_ContextFromSurface(GP_Context *context, SDL_Surface *surf);
 

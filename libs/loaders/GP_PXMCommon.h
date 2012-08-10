@@ -29,30 +29,29 @@
 
  */
 
-#ifndef GP_PXM_COMMON_H
-#define GP_PXM_COMMON_H
+#ifndef LOADERS_GP_PXM_COMMON_H
+#define LOADERS_GP_PXM_COMMON_H
 
 #include <stdio.h>
 #include "core/GP_Core.h"
-#include "core/GP_RetCode.h"
 
 /*
  * Save context to ascii file.
  *
  * The pixel type is not checked here as these are internal funcitons.
  */
-GP_RetCode GP_PXMSave1bpp(FILE *f, GP_Context *context);
-GP_RetCode GP_PXMSave2bpp(FILE *f, GP_Context *context);
-GP_RetCode GP_PXMSave4bpp(FILE *f, GP_Context *context);
-GP_RetCode GP_PXMSave8bpp(FILE *f, GP_Context *context);
+int GP_PXMSave1bpp(FILE *f, GP_Context *context);
+int GP_PXMSave2bpp(FILE *f, GP_Context *context);
+int GP_PXMSave4bpp(FILE *f, GP_Context *context);
+int GP_PXMSave8bpp(FILE *f, GP_Context *context);
 
 /*
  * Load context from ascii file.
  */
-GP_RetCode GP_PXMLoad1bpp(FILE *f, GP_Context *context);
-GP_RetCode GP_PXMLoad2bpp(FILE *f, GP_Context *context);
-GP_RetCode GP_PXMLoad4bpp(FILE *f, GP_Context *context);
-GP_RetCode GP_PXMLoad8bpp(FILE *f, GP_Context *context);
+int GP_PXMLoad1bpp(FILE *f, GP_Context *context);
+int GP_PXMLoad2bpp(FILE *f, GP_Context *context);
+int GP_PXMLoad4bpp(FILE *f, GP_Context *context);
+int GP_PXMLoad8bpp(FILE *f, GP_Context *context);
 
 /*
  * Loads image header, returns pointer to FILE* on success, fills image
@@ -65,4 +64,4 @@ FILE *GP_WriteHeaderPNM(const char *dst_path, char *fmt,
                         uint32_t w, uint32_t h, uint32_t depth);
                         
 
-#endif /* GP_PXM_COMMON_H */
+#endif /* LOADERS_GP_PXM_COMMON_H */

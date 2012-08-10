@@ -238,7 +238,7 @@ static int rotate(GP_Context **c, const char *params)
 	}
 		
 	if (res == NULL)
-		return GP_ENOMEM;
+		return ENOMEM;
 		
 	GP_ContextFree(*c);
 	*c = res;
@@ -408,7 +408,7 @@ static int blur(GP_Context **c, const char *params)
 	float sigma_y = 0;
 
 	if (param_parse(params, blur_params, "blur", param_err, &sigma, &sigma_x, &sigma_y))
-		return GP_EINVAL;
+		return EINVAL;
 
 	if (sigma > 0) {
 		sigma_x = sigma;
@@ -983,7 +983,7 @@ static void save_by_fmt(struct GP_Context *bitmap, const char *name, const char 
 	progress_prefix = "Saving Image";
 
 	if (!strcmp(fmt, "ppm"))
-		ret = GP_SavePPM(name, bitmap, "b");
+		ret = GP_SavePPM(name, bitmap, "b", progress_callback);
 	else if (!strcmp(fmt, "jpg"))
 		ret = GP_SaveJPG(bitmap, name, progress_callback);
 	else if (!strcmp(fmt, "png"))

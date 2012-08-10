@@ -37,7 +37,6 @@
 GP_Context *GP_LoadImage(const char *src_path, GP_ProgressCallback *callback)
 {
 	int len, saved_errno;
-	GP_Context *res = NULL;
 	
 	if (access(src_path, R_OK)) {
 		
@@ -96,19 +95,16 @@ GP_Context *GP_LoadImage(const char *src_path, GP_ProgressCallback *callback)
 		break;
 		case 'g':
 		case 'G':
-			//TODO: Fix this!!!
 			if (src_path[len - 3] == 'p' ||
 			    src_path[len - 3] == 'P') {
-				GP_LoadPGM(src_path, &res);
-				return res;
+				return GP_LoadPGM(src_path, callback);
 			}
 		break;
 		case 'p':
 		case 'P':
 			if (src_path[len - 3] == 'p' ||
 			    src_path[len - 3] == 'P') {
-				GP_LoadPPM(src_path, &res);
-				return res;
+				return GP_LoadPPM(src_path, callback);
 			}
 		break;
 		}

@@ -16,21 +16,22 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2011 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
-#ifndef GP_PPM_H
-#define GP_PPM_H
+#ifndef LOADERS_GP_PPM_H
+#define LOADERS_GP_PPM_H
 
 #include "core/GP_Context.h"
-#include "core/GP_RetCode.h"
+#include "core/GP_ProgressCallback.h"
 
-GP_RetCode GP_LoadPPM(const char *src_path, GP_Context **res);
+GP_Context *GP_LoadPPM(const char *src_path, GP_ProgressCallback *callback);
 
 /*
  * The fmt may be either "a" for ASCII or "b" for BINARY.
  */
-GP_RetCode GP_SavePPM(const char *res_path, GP_Context *src, char *fmt);
+int GP_SavePPM(const char *res_path, GP_Context *src, char *fmt,
+               GP_ProgressCallback *callback);
 
-#endif /* GP_PPM_H */
+#endif /* LOADERS_GP_PPM_H */
