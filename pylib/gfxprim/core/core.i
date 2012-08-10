@@ -20,7 +20,6 @@ ERROR_ON_NULL(GP_GetCounter);
 %include "GP_GetSetBits.h"
 %include "GP_Transform.h"
 %include "GP_ProgressCallback.h"
-%include "GP_RetCode.h"
 
 
 /*

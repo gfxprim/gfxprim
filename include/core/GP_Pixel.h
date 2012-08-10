@@ -32,7 +32,6 @@
 #include <stdint.h>
 
 #include "GP_Common.h"
-#include "GP_RetCode.h"
 #include "GP_FnPerBpp.h"
 
 struct GP_Context;

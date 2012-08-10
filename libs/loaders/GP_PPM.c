@@ -37,6 +37,7 @@
 #include <GP_GetPutPixel.h>
 
 #include "GP_PNM.h"
+#include "GP_PPM.h"
 
 int load_binary_ppm(FILE *f, uint32_t depth __attribute__((unused)),
                     GP_Context *res)

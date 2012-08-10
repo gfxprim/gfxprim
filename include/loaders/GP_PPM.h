@@ -24,6 +24,7 @@
 #define GP_PPM_H
 
 #include "core/GP_Context.h"
+#include "core/GP_RetCode.h"
 
 GP_RetCode GP_LoadPPM(const char *src_path, GP_Context **res);
 

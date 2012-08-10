@@ -89,11 +89,9 @@ GP_Context *GP_LoadImage(const char *src_path, GP_ProgressCallback *callback)
 		switch (src_path[len - 2]) {
 		case 'b':
 		case 'B':
-			//TODO: Fix this!!!
 			if (src_path[len - 3] == 'p' ||
 			    src_path[len - 3] == 'P') {
-				GP_LoadPBM(src_path, &res);
-				return res;
+				return GP_LoadPBM(src_path, callback);
 			}
 		break;
 		case 'g':

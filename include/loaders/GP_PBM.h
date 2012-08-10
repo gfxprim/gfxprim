@@ -19,17 +19,31 @@
  * Copyright (C) 2009-2010 Jiri "BlueBear" Dluhos                            *
  *                         <jiri.bluebear.dluhos@gmail.com>                  *
  *                                                                           *
- * Copyright (C) 2009-2011 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
-#ifndef GP_PBM_H
-#define GP_PBM_H
+#ifndef LOADERS_GP_PBM_H
+#define LOADERS_GP_PBM_H
 
 #include "core/GP_Context.h"
+#include "core/GP_ProgressCallback.h"
 
-GP_RetCode GP_LoadPBM(const char *src_path, GP_Context **res);
+/*
+ * Loads 1-bit Grayscale image from portable bitmap format.
+ */
+GP_Context *GP_LoadPBM(const char *src_path, GP_ProgressCallback *callback);
 
-GP_RetCode GP_SavePBM(const char *res_path, GP_Context *src);
+/*
+ * Save 1-bit Grayscale image into portable bitmap format.
+ *
+ * On success zero is returned, otherwise non-zero is returned and errno is
+ * filled:
+ *
+ * EINVAL - context pixel type was not 1 bit grayscale.
+ *
+ */
+int GP_SavePBM(const char *res_path, GP_Context *src,
+               GP_ProgressCallback *callback);
 
-#endif /* GP_PBM_H */
+#endif /* LOADERS_GP_PBM_H */

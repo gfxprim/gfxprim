@@ -34,6 +34,7 @@
 
 #include "core/GP_Context.h"
 #include "core/GP_ProgressCallback.h"
+#include "core/GP_RetCode.h"
 
 #include "GP_PBM.h"
 #include "GP_PGM.h"

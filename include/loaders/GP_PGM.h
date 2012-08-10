@@ -27,6 +27,7 @@
 #define GP_PGM_H
 
 #include "core/GP_Context.h"
+#include "core/GP_RetCode.h"
 
 GP_RetCode GP_LoadPGM(const char *src_path, GP_Context **res);
 
