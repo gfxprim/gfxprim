@@ -44,9 +44,14 @@ ERROR_ON_NONZERO(GP_SavePNG);
 
 %include "GP_PNG.h"
 
-/* TODO: No error checking - legacy GP_RetCode form */
+ERROR_ON_NULL(GP_LoadPBM);
+ERROR_ON_NULL(GP_LoadPGM);
+ERROR_ON_NULL(GP_LoadPPM);
+ERROR_ON_NONZERO(GP_SavePBM);
+ERROR_ON_NONZERO(GP_SavePGM);
+ERROR_ON_NONZERO(GP_SavePPM);
+
 %include "GP_PBM.h"
 %include "GP_PGM.h"
 %include "GP_PPM.h"
-
 
