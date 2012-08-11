@@ -20,39 +20,61 @@
  *                                                                           *
  *****************************************************************************/
 
-#ifndef TST_PRELOAD_H
-#define TST_PRELOAD_H
+#include <errno.h>
+#include <stdlib.h>
+#include <string.h>
+#include <stdio.h>
 
-/*
- * Starts malloc check.
- */
-void tst_malloc_check_start(void);
+#include "tst_test.h"
 
-/*
- * Stops malloc check.
- */
-void tst_malloc_check_stop(void);
+#include "tst_msg.h"
 
-struct malloc_stats {
-	size_t total_size;
-	unsigned int total_chunks;
+void tst_msg_clear(struct tst_msg_store *self)
+{
+	struct tst_msg *msg, *prev = NULL;
 
-	size_t lost_size;
-	unsigned int lost_chunks;
-};
+	for (msg = self->first; msg != NULL; msg = msg->next) {
+		free(prev);
+		prev = msg;
+	}
 
-/*
- * Reports current malloc status.
- *
- * Size and chunks are filled with sum and number of currently allocated
- * chunks, i.e, chunks that were allocated but not freed. The allocs is
- * filled with number of allocations done.
- */
-void tst_malloc_check_report(struct malloc_stats *stats);
+	free(prev);
 
-/*
- * Prints malloc statistics.
- */
-void tst_malloc_print(struct malloc_stats *stats);
+	self->first = NULL;
+	self->last = NULL;
+}
 
-#endif /* TST_PRELOAD_H */
+int tst_msg_append(struct tst_msg_store *self, int type, const char *msg_text)
+{
+	size_t len = strlen(msg_text);
+	struct tst_msg *msg;
+	
+	msg = malloc(sizeof(struct tst_msg) + len + 1);
+
+	if (msg == NULL) {
+		tst_warn("tst_msg: malloc() failed: %s", strerror(errno));
+		return 1;
+	}
+
+	msg->type = type;
+	msg->next = NULL;
+	strcpy(msg->msg, msg_text);
+
+	if (self->last == NULL) {
+		self->first = msg;
+		self->last = msg;
+	} else {
+		self->last->next = msg;
+		self->last = msg;
+	}
+
+	return 0;
+}
+
+void tst_msg_print(struct tst_msg_store *self)
+{
+	struct tst_msg *msg;
+
+	for (msg = self->first; msg != NULL; msg = msg->next)
+		fprintf(stderr, "%i: %s\n", msg->type, msg->msg);
+}

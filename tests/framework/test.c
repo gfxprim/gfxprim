@@ -28,6 +28,9 @@
 
 int success_fn(void)
 {
+	tst_report(0, "This test does nothing");
+	tst_report(0, "But successfully");
+	
 	return TST_SUCCESS;
 }
 
@@ -50,12 +53,19 @@ int stack_overflow_fn(void)
 
 int timeout_fn(void)
 {
-	sleep(10000);
+	tst_report(0, "Sleeping for ten seconds");
+	sleep(10);
 	return TST_SUCCESS;
 }
 
 int temp_dir_fn(void)
 {
+	char buf[256], *res;
+
+	/* log current working directory */
+	res = getcwd(buf, sizeof(buf));
+	tst_report(0, "CWD is '%s'", res);
+
 	return TST_SUCCESS;
 }
 
@@ -63,8 +73,12 @@ int malloc_leak_fn(void)
 {
 	void *p;
 
-	p = malloc(1);
+	p = malloc(4);
 	p = malloc(3);
+
+	free(p);
+
+	tst_report(0, "Leaking 1 chunks 4 bytes total");
 
 	return TST_SUCCESS;
 }

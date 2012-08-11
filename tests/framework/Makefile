@@ -8,7 +8,7 @@ LDFLAGS+=-L.
 LDLIBS+=-ltst_preload -ldl
 CFLAGS+=
 
-test: tst_test.o tst_job.o
+test: tst_test.o tst_job.o tst_msg.o
 
 APPS=test
 

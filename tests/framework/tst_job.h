@@ -22,7 +22,7 @@
 
  /*
   
-   Test job is instance of running test.
+   Test job is an instance of running test.
 
   */
 
@@ -30,6 +30,9 @@
 #define TST_JOB_H
 
 #include <time.h>
+
+#include "tst_msg.h"
+#include "tst_preload.h"
 
 struct tst_test;
 
@@ -58,8 +61,17 @@ struct tst_job {
 
 	/* test pid */
 	int pid;
-	/* result */
-	int result;	
+	
+	/* test result */
+	int result;
+
+	/*
+	 * test malloc statistics, filled if TST_MALLOC_CHECK was set.
+	 */
+	struct malloc_stats malloc_stats;
+
+	/* store for test messages */
+	struct tst_msg_store store;
 };
 
 /*

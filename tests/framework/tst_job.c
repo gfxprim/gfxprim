@@ -29,10 +29,16 @@
 #include <string.h>
 #include <sys/types.h>
 #include <sys/wait.h>
+#include <stdarg.h>
 
 #include "tst_preload.h"
 #include "tst_test.h"
 #include "tst_job.h"
+
+/*
+ * Once we child forks to do a job, this points to its job structure.
+ */
+static struct tst_job *my_job = NULL;
 
 static void start_test(struct tst_job *job)
 {
@@ -56,41 +62,42 @@ static void stop_test(struct tst_job *job)
 {
 	const char *name = job->test->name;
 	int sec, nsec;
+	const char *result = "";
 
 	to_time(&sec, &nsec, &job->start_time, &job->stop_time);
 
 	switch (job->result) {
 	case TST_SUCCESS:
-		fprintf(stderr, "Test \e[1;37m%s\e[0m finished with "
-		                "\e[1;32mSUCCESS\e[0m (duration %i.%05is)\n",
-				name, sec, nsec);
+		result = "\e[1;32mSUCCESS\e[0m";
 	break;
 	case TST_INTERR:
-		fprintf(stderr, "Test \e[1;37m%s\e[0m finished with "
-		                "\e[1;31mINTERNAL ERROR\e[0m (duration %i.%05is)\n",
-		                name, sec, nsec);
+		result = "\e[1;31mINTERNAL ERROR\e[0m";
 	break;
 	case TST_SIGSEGV:
-		fprintf(stderr, "Test \e[1;37m%s\e[0m finished with "
-		                "\e[1;31mSEGFAULT\e[0m (duration %i.%05is)\n",
-				name, sec, nsec);
+		result = "\e[1;31mSEGFAULT\e[0m";
 	break;
 	case TST_TIMEOUT:
-		fprintf(stderr, "Test \e[1;37m%s\e[0m finished with "
-		                "\e[1;35mTIMEOUT\e[0m (duration %i.%05is}\n",
-		                name, sec, nsec);
+		result = "\e[1;35mTIMEOUT\e[0m";
 	break;
 	case TST_MEMLEAK:
-		fprintf(stderr, "Test \e[1;37m%s\e[0m finished with "
-		                "\e[1;33mMEMLEAK\e[0m (duration %i.%05is}\n",
-		                name, sec, nsec);
+		result = "\e[1;33mMEMLEAK\e[0m";
 	break;
 	case TST_FAILED:
-		fprintf(stderr, "Test \e[1;37m%s\e[0m finished with "
-		                "\e[1;31mFAILURE\e[0m (duration %i.%05is)\n",
-				name, sec, nsec);
+		result = "\e[1;31mFAILURE\e[0m";
 	break;
 	}
+		
+	fprintf(stderr, "Test \e[1;37m%s\e[0m finished with %s "
+	                "(duration %i.%09is, cputime %i.%09is)\n",
+			name, result, sec, nsec,
+			(int)job->cpu_time.tv_sec,
+			(int)job->cpu_time.tv_nsec);
+
+	if (job->result == TST_MEMLEAK)
+		tst_malloc_print(&job->malloc_stats);
+
+	/* Now print test message store */
+	tst_msg_print(&job->store);
 }
 
 /*
@@ -176,10 +183,35 @@ static void read_timespec(struct tst_job *job, struct timespec *time)
 	time->tv_nsec = *(long*)(ptr);
 }
 
-static void child_write(struct tst_job *job, char ch)
+static void child_write(struct tst_job *job, char ch, void *ptr, ssize_t size)
 {
 	if (write(job->pipefd, &ch, 1) != 1)
 		tst_warn("child write() failed: %s", strerror(errno));
+
+	if (ptr != NULL) {
+		if (write(job->pipefd, ptr, size) != size)
+			tst_warn("child write() failed: %s", strerror(errno));
+	}
+}
+
+int tst_report(int level, const char *fmt, ...)
+{
+	va_list va;
+	int ret;
+	char buf[258];
+
+	va_start(va, fmt);
+	ret = vsnprintf(buf+3, sizeof(buf) - 3, fmt, va);
+	va_end(va);
+
+	buf[0] = 'm';
+	buf[1] = level;
+	((unsigned char*)buf)[2] = ret > 255 ? 255 : ret + 1;
+
+	if (my_job != NULL)
+		write(my_job->pipefd, buf, (int)buf[2] + 3);
+
+	return ret;
 }
 
 void tst_job_run(struct tst_job *job)
@@ -187,9 +219,12 @@ void tst_job_run(struct tst_job *job)
 	int ret;
 	char template[256];
 	int pipefd[2];
-
+	
 	/* Write down starting time of the test */
 	clock_gettime(CLOCK_MONOTONIC, &job->start_time);
+
+	/* Prepare the test message store */
+	tst_msg_init(&job->store);
 
 	start_test(job);
 
@@ -211,6 +246,7 @@ void tst_job_run(struct tst_job *job)
 	case 0:
 		close(pipefd[0]);
 		job->pipefd = pipefd[1];
+		my_job = job;
 	break;
 	default:
 		close(pipefd[1]);
@@ -243,17 +279,13 @@ void tst_job_run(struct tst_job *job)
 	ret = job->test->tst_fn();
 
 	if (job->test->flags & TST_MALLOC_CHECK) {
-		size_t size;
-		unsigned int chunks;
-	
 		tst_malloc_check_stop();
-		
-		tst_malloc_check_report(&size, &chunks);
-	
-		if (size != 0 && ret == TST_SUCCESS)
+		tst_malloc_check_report(&job->malloc_stats);
+
+		child_write(job, 's', &job->malloc_stats, sizeof(job->malloc_stats));
+
+		if (job->malloc_stats.lost_chunks != 0 && ret == TST_SUCCESS)
 			ret = TST_MEMLEAK;
-		
-		//TODO message?
 	}
 
 	/* Send process cpu time to parent */
@@ -265,11 +297,36 @@ void tst_job_run(struct tst_job *job)
 		remove_tmpdir(template);
 
 	/* Send the parent we are done */
-	child_write(job, 'x');
+	child_write(job, 'x', NULL, 0);
 
 	close(job->pipefd);
 
 	exit(ret);
+}
+
+static void parent_read_msg(struct tst_job *job)
+{
+	unsigned char header[2];
+
+	if (read(job->pipefd, header, sizeof(header)) != sizeof(header))
+		tst_warn("parent: read(message header) failed: %s",
+		         strerror(errno));
+
+	char buf[header[1]];
+
+	if (read(job->pipefd, buf, sizeof(buf)) != sizeof(buf))
+		tst_warn("parent: read(message) failed: %s", strerror(errno));
+
+	/* null-terminated the string, to be extra sure */
+	buf[header[1] - 1] = '\0';
+
+	tst_msg_append(&job->store, header[0], buf);
+}
+
+static void parent_read(struct tst_job *job, void *ptr, ssize_t size)
+{
+	if (read(job->pipefd, ptr, size) != size)
+		tst_warn("parent: read(): %s", strerror(errno));
 }
 
 void tst_job_wait(struct tst_job *job)
@@ -308,6 +365,18 @@ void tst_job_wait(struct tst_job *job)
 		break;
 		case 'C':
 			read_timespec(job, &job->cpu_time);
+		break;
+		/* test message as generated by tst_report() */
+		case 'm':
+			parent_read_msg(job);
+		break;
+		/* malloc stats */
+		case 's':
+			parent_read(job, &job->malloc_stats,
+			            sizeof(job->malloc_stats));
+		break;
+		default:
+			//TODO: internal error
 		break;
 		}
 	}

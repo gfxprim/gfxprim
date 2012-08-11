@@ -20,39 +20,48 @@
  *                                                                           *
  *****************************************************************************/
 
-#ifndef TST_PRELOAD_H
-#define TST_PRELOAD_H
+ /*
+  
+   Code to store test messages into a data structure.
 
-/*
- * Starts malloc check.
- */
-void tst_malloc_check_start(void);
+  */
 
-/*
- * Stops malloc check.
- */
-void tst_malloc_check_stop(void);
+#ifndef TST_MSG_H
+#define TST_MSG_H
 
-struct malloc_stats {
-	size_t total_size;
-	unsigned int total_chunks;
+struct tst_msg {
+	struct tst_msg *next;
+	int type;
+	char msg[];
+};
 
-	size_t lost_size;
-	unsigned int lost_chunks;
+struct tst_msg_store {
+	struct tst_msg *first;
+	struct tst_msg *last;
 };
 
 /*
- * Reports current malloc status.
- *
- * Size and chunks are filled with sum and number of currently allocated
- * chunks, i.e, chunks that were allocated but not freed. The allocs is
- * filled with number of allocations done.
+ * Initalize message store.
  */
-void tst_malloc_check_report(struct malloc_stats *stats);
+static inline void tst_msg_init(struct tst_msg_store *self)
+{
+	self->first = NULL;
+	self->last = NULL;
+}
 
 /*
- * Prints malloc statistics.
+ * Cleans msg store, frees memory.
  */
-void tst_malloc_print(struct malloc_stats *stats);
+void tst_msg_clear(struct tst_msg_store *self);
 
-#endif /* TST_PRELOAD_H */
+/*
+ * Appends test message to the store.
+ */
+int tst_msg_append(struct tst_msg_store *self, int type, const char *msg);
+
+/*
+ * Prints messages in the store.
+ */
+void tst_msg_print(struct tst_msg_store *self);
+
+#endif /* TST_MSG_H */

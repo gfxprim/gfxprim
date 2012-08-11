@@ -49,13 +49,17 @@ struct chunk {
 };
 
 struct chunk chunks[MAX_CHUNKS + 1];
-static size_t total_size;
-static unsigned int total_chunks;
+static size_t cur_size = 0;
+static unsigned int cur_chunks = 0;
+static size_t total_size = 0;
+static unsigned int total_chunks = 0;
 
-void tst_malloc_check_report(size_t *size, unsigned int *chunks)
+void tst_malloc_check_report(struct malloc_stats *stats)
 {
-	*size = total_size;
-	*chunks = total_chunks;
+	stats->lost_size = cur_size;
+	stats->lost_chunks = cur_chunks;
+	stats->total_size = total_size;
+	stats->total_chunks = total_chunks;
 }
 
 static void add_chunk(size_t size, void *ptr)
@@ -66,8 +70,10 @@ static void add_chunk(size_t size, void *ptr)
 		if (chunks[i].size == 0) {
 			chunks[i].size = size;
 			chunks[i].ptr = ptr;
+			cur_size += size;
+			cur_chunks++;
 			total_size += size;
-			total_chunks += 1;
+			total_chunks++;
 			return;
 		}
 	}
@@ -85,8 +91,8 @@ static void rem_chunk(void *ptr)
 			break;
 
 		if (chunks[i].ptr == ptr) {
-			total_size -= chunks[i].size;
-			total_chunks -= 1;
+			cur_size -= chunks[i].size;
+			cur_chunks--;
 			
 			chunks[i].size = 0;
 			chunks[i].ptr = NULL;
@@ -126,4 +132,11 @@ void free(void *ptr)
 		rem_chunk(ptr);
 
 	real_free(ptr);
+}
+
+void tst_malloc_print(struct malloc_stats *stats)
+{
+	fprintf(stderr, "Total size %zu chunks %u, lost size %zu chunks %u\n",
+	        stats->total_size, stats->total_chunks,
+		stats->lost_size, stats->lost_chunks);
 }

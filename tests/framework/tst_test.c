@@ -23,28 +23,12 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <stdio.h>
-#include <stdarg.h>
 #include <errno.h>
 #include <string.h>
-#include <sys/types.h>
-#include <sys/wait.h>
-#include <ctype.h>
-#include <dirent.h>
+#include <stdarg.h>
 
 #include "tst_job.h"
 #include "tst_test.h"
-
-int tst_report(int level, const char *fmt, ...)
-{
-	va_list va;
-	int ret;
-
-	va_start(va, fmt);
-	ret = vfprintf(stderr, fmt, va);
-	va_end(va);
-
-	return ret;
-}
 
 int tst_warn(const char *fmt, ...)
 {
@@ -66,7 +50,10 @@ static int run_test(const struct tst_test *test)
 
 	tst_job_run(&job);
 	tst_job_wait(&job);
-	
+
+	/* Free the test message store */
+	tst_msg_clear(&job.store);
+
 	return job.result;
 }
 
