@@ -112,12 +112,12 @@ int main(void)
 {
 	fprintf(stderr, "(Listing testsuite tests)\n");
 	tst_list_suite(&suite);
+	
+	fprintf(stderr, "\n(Running selected test)\n");
+	tst_run_suite(&suite, "Sigsegv test");
 
 	fprintf(stderr, "\n(Running whole suite)\n");
 	tst_run_suite(&suite, NULL);
-
-	fprintf(stderr, "\n(Running selected test)\n");
-	tst_run_suite(&suite, "Sigsegv test");
 
 	return 0;
 }
