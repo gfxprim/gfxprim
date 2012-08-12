@@ -46,8 +46,8 @@ static void start_test(struct tst_job *job)
 //	fprintf(stderr, "Starting test \e[1;37m%s\e[0m\n", job->test->name);
 }
 
-static void to_time(int *sec, int *nsec, struct timespec *start,
-                    struct timespec *stop)
+void tst_diff_timespec(int *sec, int *nsec, struct timespec *start,
+                       struct timespec *stop)
 {
 	if (stop->tv_nsec < start->tv_nsec) {
 		*sec  = stop->tv_sec - start->tv_sec - 1;
@@ -64,7 +64,7 @@ static void stop_test(struct tst_job *job)
 	int sec, nsec;
 	const char *result = "";
 
-	to_time(&sec, &nsec, &job->start_time, &job->stop_time);
+	tst_diff_timespec(&sec, &nsec, &job->start_time, &job->stop_time);
 
 	switch (job->result) {
 	case TST_SUCCESS:
@@ -87,11 +87,12 @@ static void stop_test(struct tst_job *job)
 	break;
 	}
 		
-	fprintf(stderr, "Test \e[1;37m%s\e[0m finished with %s "
-	                "(duration %i.%09is, cputime %i.%09is)\n",
-			name, result, sec, nsec,
+	fprintf(stderr, "\e[1;37m%s\e[0m finished "
+	                "(Time %i.%03is, CPU %i.%03is) %s\n",
+			name, sec, nsec/1000000,
 			(int)job->cpu_time.tv_sec,
-			(int)job->cpu_time.tv_nsec);
+			(int)job->cpu_time.tv_nsec/1000000,
+			result);
 
 	if (job->result == TST_MEMLEAK)
 		tst_malloc_print(&job->malloc_stats);

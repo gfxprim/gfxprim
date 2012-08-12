@@ -23,6 +23,7 @@
 #include "tst_test.h"
 #include "tst_job.h"
 #include "tst_msg.h"
+#include "tst_preload.h"
 #include "tst_log.h"
 
 static const char *ret_to_bg_color(enum tst_ret ret)
@@ -69,23 +70,94 @@ static const char *ret_to_str(enum tst_ret ret)
 	return "Unknown";
 }
 
+static void malloc_stats_html(struct tst_job *job, FILE *f, const char *padd)
+{
+	/* Create innter table */
+	fprintf(f, "%s<tr>\n", padd);
+	fprintf(f, "%s <td bgcolor=\"#ffffcc\" colspan=\"3\">\n", padd);
+	fprintf(f, "%s  <center>\n", padd);
+	fprintf(f, "%s   <table>\n", padd);
+
+	/* Create header */
+	fprintf(f, "%s    <tr>\n", padd);
+	
+	fprintf(f, "%s     <td bgcolor=\"#ffffaa\">\n", padd);
+	fprintf(f, "%s      <small>Total size</small>\n", padd);
+	fprintf(f, "%s     </td>\n", padd);
+	
+	fprintf(f, "%s     <td bgcolor=\"#ffffaa\">\n", padd);
+	fprintf(f, "%s      <small>Total chunks</small>\n", padd);
+	fprintf(f, "%s     </td>\n", padd);
+	
+	fprintf(f, "%s     <td bgcolor=\"#ffffaa\">\n", padd);
+	fprintf(f, "%s      <small>Lost size</small>\n", padd);
+	fprintf(f, "%s     </td>\n", padd);
+	
+	fprintf(f, "%s     <td bgcolor=\"#ffffaa\">\n", padd);
+	fprintf(f, "%s      <small>Lost chunks</small>\n", padd);
+	fprintf(f, "%s     </td>\n", padd);
+
+	fprintf(f, "%s    </tr>\n", padd);
+
+	/* Create data */
+	fprintf(f, "%s    <tr>\n", padd);
+
+	fprintf(f, "%s     <td bgcolor=\"#ffffaa\">\n", padd);
+	fprintf(f, "%s      <center><small>%zu</small></center>\n",
+	           padd, job->malloc_stats.total_size);
+	fprintf(f, "%s     </td>\n", padd);
+	
+	fprintf(f, "%s     <td bgcolor=\"#ffffaa\">\n", padd);
+	fprintf(f, "%s      <center><small>%u</small></center>\n",
+	           padd, job->malloc_stats.total_chunks);
+	fprintf(f, "%s     </td>\n", padd);
+	
+	fprintf(f, "%s     <td bgcolor=\"#ffffaa\">\n", padd);
+	fprintf(f, "%s      <center><small>%zu</small></center>\n",
+	           padd, job->malloc_stats.lost_size);
+	fprintf(f, "%s     </td>\n", padd);
+	
+	fprintf(f, "%s     <td bgcolor=\"#ffffaa\">\n", padd);
+	fprintf(f, "%s      <center><small>%u</small></center>\n",
+	           padd, job->malloc_stats.lost_chunks);
+	fprintf(f, "%s     </td>\n", padd);
+	
+	fprintf(f, "%s    </tr>\n", padd);
+	
+	fprintf(f, "%s   </table>\n", padd);
+	fprintf(f, "%s  </center>\n", padd);
+	fprintf(f, "%s </td>\n", padd);
+	fprintf(f, "%s</tr>\n", padd);
+}
+
 static int append_html(struct tst_job *job, FILE *f)
 {
 	const char *padd = "   ";
+	int sec, nsec;
+
+	tst_diff_timespec(&sec, &nsec, &job->start_time, &job->stop_time);
 
 	fprintf(f, "%s<tr>\n", padd);
-	fprintf(f, "%s <td colspan=2 bgcolor=\"#ccccee\">%s</td>\n", padd, job->test->name);
-	fprintf(f, "%s <td bgcolor=\"%s\"><font color=\"white\">%s</td>\n", padd,
+	fprintf(f, "%s <td bgcolor=\"#ccccee\">%s&nbsp;</td>\n", padd, job->test->name);
+	fprintf(f, "%s <td bgcolor=\"#ccccee\">\n", padd);
+	fprintf(f, "%s  <small><font color=\"#222\">%i.%03is %i.%03is</font></small>",
+	        padd, sec, nsec/1000000, (int)job->cpu_time.tv_sec, (int)job->cpu_time.tv_nsec/1000000);
+	fprintf(f, "%s </td>\n", padd);
+	fprintf(f, "%s <td bgcolor=\"%s\"><center><font color=\"white\">&nbsp;%s&nbsp;</td></center>\n", padd,
 	        ret_to_bg_color(job->result), ret_to_str(job->result));
 
 	struct tst_msg *msg;
 
+	/* If calculated include malloc report */
+	if (job->test->flags & TST_MALLOC_CHECK)
+		malloc_stats_html(job, f, padd);
+
 	for (msg = job->store.first; msg != NULL; msg = msg->next) {
-		fprintf(f, "%s<tr>", padd);
-		fprintf(f, "%s <td colspan=\"3\" bgcolor=\"#eeeeee\">", padd);
-		fprintf(f, "%s  &nbsp;&nbsp;%s", padd, msg->msg);
-		fprintf(f, "%s </td>", padd);
-		fprintf(f, "%s</tr>", padd);
+		fprintf(f, "%s<tr>\n", padd);
+		fprintf(f, "%s <td colspan=\"3\" bgcolor=\"#eeeeee\">\n", padd);
+		fprintf(f, "%s  &nbsp;&nbsp;<small>%s</small>\n", padd, msg->msg);
+		fprintf(f, "%s </td>\n", padd);
+		fprintf(f, "%s</tr>\n", padd);
 	}
 
 	fprintf(f, "%s</tr>\n", padd);
@@ -115,10 +187,16 @@ FILE *open_html(const struct tst_suite *suite, const char *path)
 	if (f == NULL)
 		return NULL;
 
-	fprintf(f, "<html>\n <head>\n </head>\n <body>\n  <table>\n");
+	fprintf(f, "<html>\n <head>\n </head>\n <body>\n  <table bgcolor=\"#99a\">\n");
 
-	fprintf(f, "   <tr><td colspan=\"3\" bgcolor=\"#bbbbff\"><b>%s"
-	           "</b></td></tr>\n", suite->suite_name);
+	fprintf(f, "   <tr><td colspan=\"3\" bgcolor=\"#bbbbff\"><center><b>%s"
+	           "</b></center></td></tr>\n", suite->suite_name);
+
+	fprintf(f, "   <tr>\n");
+	fprintf(f, "    <td bgcolor=\"#eee\"><center>Test Name</center></td>\n");
+	fprintf(f, "    <td bgcolor=\"#eee\"><center>Time/CPU</center></td>\n");
+	fprintf(f, "    <td bgcolor=\"#eee\"><center>Result</center></td>\n");
+	fprintf(f, "   </tr>\n");
 
 	return f;
 }
