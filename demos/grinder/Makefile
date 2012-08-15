@@ -4,7 +4,7 @@ CSOURCES=$(shell echo *.c)
 
 INCLUDE=core gfx
 LDFLAGS+=-L$(TOPDIR)/build/
-LDLIBS+=-lrt `$(TOPDIR)/gfxprim-config --libs --libs-backends`
+LDLIBS+=$(shell $(TOPDIR)/gfxprim-config --libs --libs-backends) -lrt
 
 APPS=grinder
 
