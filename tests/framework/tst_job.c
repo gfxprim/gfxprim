@@ -79,11 +79,16 @@ static void stop_test(struct tst_job *job)
 	case TST_TIMEOUT:
 		result = "\e[1;35mTIMEOUT\e[0m";
 	break;
+	case TST_ABORTED:
+		result = "\e[1;31mABORTED\e[0m";
+	break;
 	case TST_MEMLEAK:
 		result = "\e[1;33mMEMLEAK\e[0m";
 	break;
 	case TST_FAILED:
 		result = "\e[1;31mFAILURE\e[0m";
+	break;
+	case TST_MAX:
 	break;
 	}
 		
@@ -272,7 +277,6 @@ void tst_job_run(struct tst_job *job)
 	clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &job->cpu_time);
 	write_timespec(job, 'c', &job->cpu_time);
 
-
 	if (job->test->flags & TST_MALLOC_CHECK)
 		tst_malloc_check_start();
 
@@ -399,7 +403,15 @@ void tst_job_wait(struct tst_job *job)
 		case SIGALRM:
 			job->result = TST_TIMEOUT;
 		break;
+		/* 
+		 * abort() called most likely double free or malloc data
+		 * corruption
+		 */
+		case SIGABRT:
+			job->result = TST_ABORTED;
+		break;
 		default:
+			printf("%i\n", WTERMSIG(status));
 			job->result = TST_INTERR;
 		}
 	}

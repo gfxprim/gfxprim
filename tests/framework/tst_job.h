@@ -33,8 +33,7 @@
 
 #include "tst_msg.h"
 #include "tst_preload.h"
-
-struct tst_test;
+#include "tst_test.h"
 
 struct tst_job {
 	const struct tst_test *test;
@@ -63,7 +62,7 @@ struct tst_job {
 	int pid;
 	
 	/* test result */
-	int result;
+	enum tst_ret result;
 
 	/*
 	 * test malloc statistics, filled if TST_MALLOC_CHECK was set.

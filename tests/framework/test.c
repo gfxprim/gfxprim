@@ -93,6 +93,16 @@ int malloc_ok_fn(void)
 	return TST_SUCCESS;
 }
 
+int double_free(void)
+{
+	void *p = malloc(100);
+
+	free(p);
+	free(p);
+
+	return TST_SUCCESS;
+}
+
 const struct tst_suite suite = {
 	.suite_name = "Testing Framework Example",
 	.tests = {
@@ -104,6 +114,7 @@ const struct tst_suite suite = {
 		{.name = "Tempdir test", .tst_fn = temp_dir_fn, .flags = TST_TMPDIR},
 		{.name = "Mem Leak test", .tst_fn = malloc_leak_fn, .flags = TST_MALLOC_CHECK},
 		{.name = "Mem Ok test", .tst_fn = malloc_ok_fn, .flags = TST_MALLOC_CHECK},
+		{.name = "Double free()", .tst_fn = double_free},
 		{.name = NULL},
 	}
 };

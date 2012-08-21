@@ -37,6 +37,8 @@ static const char *ret_to_bg_color(enum tst_ret ret)
 		return "#e00000";
 	case TST_TIMEOUT:
 		return "#800080";
+	case TST_ABORTED:
+		return "#e00000";
 	case TST_MEMLEAK:
 		return "#a0a000";
 	case TST_FAILED:
@@ -59,6 +61,8 @@ static const char *ret_to_str(enum tst_ret ret)
 		return "Segmentation Fault";
 	case TST_TIMEOUT:
 		return "Timeout";
+	case TST_ABORTED:
+		return "Aborted";
 	case TST_MEMLEAK:
 		return "Memory Leak";
 	case TST_FAILED:
