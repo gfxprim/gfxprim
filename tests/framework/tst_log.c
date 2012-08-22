@@ -20,6 +20,9 @@
  *                                                                           *
  *****************************************************************************/
 
+#include <sys/utsname.h>
+#include <stdio.h>
+
 #include "tst_test.h"
 #include "tst_job.h"
 #include "tst_msg.h"
@@ -169,11 +172,83 @@ static int append_html(struct tst_job *job, FILE *f)
 	return 0;
 }
 
+static int append_msg_json(struct tst_job *job, FILE *f)
+{
+	struct tst_msg *msg;
+
+	fprintf(f, "\t\t\t\"Test Reports\": [\n");
+
+	for (msg = job->store.first; msg != NULL; msg = msg->next) {
+		fprintf(f, "\t\t\t\t\"%s\"", msg->msg);
+
+		if (msg->next != NULL)
+			fprintf(f, ",\n");
+	}
+
+	fprintf(f, "\n\t\t\t],\n");
+
+	return 0;
+}
+
+static int append_malloc_stats_json(struct tst_job *job, FILE *f)
+{
+	fprintf(f, "\t\t\t\"Malloc Stats\": {\n");
+	fprintf(f, "\t\t\t\t\"Total Size\": %zi,\n",
+	        job->malloc_stats.total_size);
+	fprintf(f, "\t\t\t\t\"Total Chunks\": %u,\n",
+	        job->malloc_stats.total_chunks);
+	fprintf(f, "\t\t\t\t\"Lost Size\": %zi,\n",
+	        job->malloc_stats.lost_size);
+	fprintf(f, "\t\t\t\t\"Lost Chunks\": %u\n",
+	        job->malloc_stats.lost_chunks);
+	fprintf(f, "\t\t\t},\n");
+
+	return 0;
+}
+
+static int hack_json_start = 0;
+
+static int append_json(struct tst_job *job, FILE *f)
+{
+	if (hack_json_start)
+		hack_json_start = 0;
+	else
+		fprintf(f, ",\n");
+
+	fprintf(f, "\t\t{\n");
+	fprintf(f, "\t\t\t\"Test Name\": \"%s\",\n", job->test->name);
+	fprintf(f, "\t\t\t\"Test Result\": \"%s\",\n", ret_to_str(job->result));
+
+	/* Append any test reports */
+	append_msg_json(job, f);
+	
+	/* If calculated include malloc report */
+	if (job->test->flags & TST_MALLOC_CHECK)
+		append_malloc_stats_json(job, f);
+	
+	/* Time statistics */
+	int sec, nsec;
+
+	tst_diff_timespec(&sec, &nsec, &job->start_time, &job->stop_time);
+	
+	fprintf(f, "\t\t\t\"CPU Time\": %i.%09i,\n",
+	        (int)job->cpu_time.tv_sec, (int)job->cpu_time.tv_nsec);
+
+	fprintf(f, "\t\t\t\"Run Time\": %i.%09i\n", sec, nsec);
+	
+	fprintf(f, "\t\t}");
+
+	return 0;
+}
+
 int tst_log_append(struct tst_job *job, FILE *f, enum tst_log_fmt format)
 {
 	switch (format) {
 	case TST_LOG_HTML:
 		return append_html(job, f);
+	break;
+	case TST_LOG_JSON:
+		return append_json(job, f);
 	break;
 	default:
 		return 1;
@@ -205,12 +280,70 @@ FILE *open_html(const struct tst_suite *suite, const char *path)
 	return f;
 }
 
+static void write_system_info_json(FILE *f)
+{
+	struct utsname buf;
+
+	uname(&buf);
+
+	fprintf(f, "\t\"System Info\": {\n");
+	
+	fprintf(f, "\t\t\"OS\": \"%s\",\n", buf.sysname);
+	fprintf(f, "\t\t\"Hostname\": \"%s\",\n", buf.nodename);
+	fprintf(f, "\t\t\"Release\": \"%s\",\n", buf.release);
+
+	/* CPU related info */
+	fprintf(f, "\t\t\"CPU\": {");
+	
+	/* lscpu is part of reasonably new util-linux */
+	FILE *cmd = popen("lscpu", "r");
+
+	if (cmd != NULL) {
+		char id[256], val[1024];
+		char *del = "\n";
+
+		while (fscanf(cmd, "%[^:]%*c %[^\n]\n", id, val) == 2) {
+			fprintf(f, "%s\t\t\t\"%s\": \"%s\"", del, id, val);
+			del = ",\n";
+		}
+	
+		fclose(cmd);
+		fprintf(f, "\n");
+	}
+	
+	fprintf(f, "\t\t}\n");
+
+	fprintf(f, "\t},\n");
+}
+
+FILE *open_json(const struct tst_suite *suite, const char *path)
+{
+	FILE *f;
+
+	f = fopen(path, "w");
+
+	if (f == NULL)
+		return NULL;
+
+	fprintf(f, "{\n");
+	fprintf(f, "\t\"Suite Name\": \"%s\",\n", suite->suite_name);
+	write_system_info_json(f);
+	fprintf(f, "\t\"Test Results\": [\n");
+
+	hack_json_start = 1;
+
+	return f;
+}
+
 FILE *tst_log_open(const struct tst_suite *suite, const char *path,
                    enum tst_log_fmt format)
 {
 	switch (format) {
 	case TST_LOG_HTML:
 		return open_html(suite, path);
+	break;
+	case TST_LOG_JSON:
+		return open_json(suite, path);
 	break;
 	default:
 		return NULL;
@@ -222,8 +355,13 @@ FILE *tst_log_open(const struct tst_suite *suite, const char *path,
 static int close_html(FILE *f)
 {
 	fprintf(f, "  </table>\n </body>\n</html>\n");
-	fclose(f);
-	return 0;
+	return fclose(f);
+}
+
+static int close_json(FILE *f)
+{
+	fprintf(f, "\n\t]\n}\n");
+	return fclose(f);
 }
 
 int tst_log_close(FILE *f, enum tst_log_fmt format)
@@ -231,6 +369,9 @@ int tst_log_close(FILE *f, enum tst_log_fmt format)
 	switch (format) {
 	case TST_LOG_HTML:
 		return close_html(f);
+	break;
+	case TST_LOG_JSON:
+		return close_json(f);
 	break;
 	default:
 		return 1;

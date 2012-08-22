@@ -43,8 +43,7 @@ int tst_warn(const char *fmt, ...)
 	return ret;
 }
 	
-static int run_test(const struct tst_test *test, FILE *f,
-                    enum tst_log_fmt format)
+static int run_test(const struct tst_test *test, FILE *html, FILE *json)
 {
 	struct tst_job job;
 
@@ -56,12 +55,14 @@ static int run_test(const struct tst_test *test, FILE *f,
 	 * child and parent and the lines in the resulting
 	 * file would be repeated several times.
 	 */
-	fflush(f);
+	fflush(html);
+	fflush(json);
 
 	tst_job_run(&job);
 	tst_job_wait(&job);
 
-	tst_log_append(&job, f, format);
+	tst_log_append(&job, html, TST_LOG_HTML);
+	tst_log_append(&job, json, TST_LOG_JSON);
 
 	/* Free the test message store */
 	tst_msg_clear(&job.store);
@@ -79,17 +80,19 @@ void tst_run_suite(const struct tst_suite *suite, const char *tst_name)
 	fprintf(stderr, "Running \e[1;37m%s\e[0m\n\n", suite->suite_name);
 
 	//TODO:
-	FILE *f = tst_log_open(suite, "log.html", TST_LOG_HTML);
+	FILE *html = tst_log_open(suite, "log.html", TST_LOG_HTML);
+	FILE *json = tst_log_open(suite, "log.json", TST_LOG_JSON);
 
 	for (i = 0; suite->tests[i].name != NULL; i++) {
 		if (tst_name == NULL || !strcmp(tst_name, suite->tests[i].name)) {
-			ret = run_test(&suite->tests[i], f, TST_LOG_HTML);
+			ret = run_test(&suite->tests[i], html, json);
 			counters[ret]++;
 			counter++;
 		}
 	}
 
-	tst_log_close(f, TST_LOG_HTML);
+	tst_log_close(html, TST_LOG_HTML);
+	tst_log_close(json, TST_LOG_JSON);
 
 	fprintf(stderr, "\nSummary: succedded %u out of %u (%.2f%%)\n",
 	        counters[0], counter, 100.00 * counters[0] / counter);
