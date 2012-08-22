@@ -25,6 +25,7 @@
 #include <stdio.h>
 
 #include "tst_test.h"
+#include "tst_alloc_barriers.h"
 
 int success_fn(void)
 {
@@ -103,6 +104,24 @@ int double_free(void)
 	return TST_SUCCESS;
 }
 
+int barrier_allocation(void)
+{
+	char *buf = tst_alloc_barrier_right(31);
+
+	int i;
+
+	for (i = 0; i < 31; i++)
+		buf[i] = 0;
+
+	tst_report(0, "About to use address after the buffer with barrier");
+	
+	buf[31] = 0;
+
+	tst_report(0, "This is not printed at all");
+
+	return TST_SUCCESS;
+}
+
 const struct tst_suite suite = {
 	.suite_name = "Testing Framework Example",
 	.tests = {
@@ -115,6 +134,7 @@ const struct tst_suite suite = {
 		{.name = "Mem Leak test", .tst_fn = malloc_leak_fn, .flags = TST_MALLOC_CHECK},
 		{.name = "Mem Ok test", .tst_fn = malloc_ok_fn, .flags = TST_MALLOC_CHECK},
 		{.name = "Double free()", .tst_fn = double_free},
+		{.name = "Barrier allocation", .tst_fn = barrier_allocation},
 		{.name = NULL},
 	}
 };
