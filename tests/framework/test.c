@@ -72,12 +72,16 @@ int temp_dir_fn(void)
 
 int malloc_leak_fn(void)
 {
-	void *p;
-
+	void *p, *q, *r;
+	
+	q = malloc(100);
 	p = malloc(4);
 	p = malloc(3);
+	r = malloc(20);
 
 	free(p);
+	free(q);
+	free(r);
 
 	tst_report(0, "Leaking 1 chunks 4 bytes total");
 
@@ -86,10 +90,19 @@ int malloc_leak_fn(void)
 
 int malloc_ok_fn(void)
 {
-	void *p;
+	unsigned int perm[20] = {
+		1,  3,  2,  6,  4,  5,  0,  9,  8, 14,
+		7, 11, 13, 10, 12, 19, 17, 16, 15, 18,
+	};
 
-	p = malloc(100);
-	free(p);
+	unsigned int i;
+	void *p[20];
+
+	for (i = 0; i < 20; i++)
+		p[i] = malloc((7 * i) % 127);
+
+	for (i = 0; i < 20; i++)
+		free(p[perm[i]]);
 
 	return TST_SUCCESS;
 }

@@ -40,19 +40,11 @@ void tst_malloc_check_stop(void)
 	check_malloc = 0;
 }
 
-#define MAX_CHUNKS 100
-
-struct chunk {
-	void *ptr;
-	size_t size;
-	int cont;
-};
-
-struct chunk chunks[MAX_CHUNKS + 1];
 static size_t cur_size = 0;
 static unsigned int cur_chunks = 0;
 static size_t total_size = 0;
 static unsigned int total_chunks = 0;
+
 
 void tst_malloc_check_report(struct malloc_stats *stats)
 {
@@ -62,43 +54,51 @@ void tst_malloc_check_report(struct malloc_stats *stats)
 	stats->total_chunks = total_chunks;
 }
 
+#define MAX_CHUNKS 100
+
+struct chunk {
+	void *ptr;
+	size_t size;
+	int cont;
+};
+
+static struct chunk chunks[MAX_CHUNKS];
+static unsigned int chunks_top = 0;
+
 static void add_chunk(size_t size, void *ptr)
 {
-	int i;
-
-	for (i = 0; i < MAX_CHUNKS; i++) {
-		if (chunks[i].size == 0) {
-			chunks[i].size = size;
-			chunks[i].ptr = ptr;
-			cur_size += size;
-			cur_chunks++;
-			total_size += size;
-			total_chunks++;
-			return;
-		}
+	if (chunks_top >= MAX_CHUNKS) {
+		tst_warn("Not enough chunks (%i) for malloc() tracing",
+		         MAX_CHUNKS);
+		return;
 	}
 
-	tst_warn("Not enough chunks (%i) for malloc() tracing", MAX_CHUNKS);
+	/* Store chunk */
+	chunks[chunks_top].size = size;
+	chunks[chunks_top].ptr = ptr;
+	chunks_top++;
+
+	/* Update global stats */
+	cur_size += size;
+	cur_chunks++;
+	total_size += size;
+	total_chunks++;
 }
 
 static void rem_chunk(void *ptr)
 {
-	int i;
+	unsigned int i;
 
-	for (i = 0; i < MAX_CHUNKS; i++) {
-		/* Nothing interesting in the rest of the array */
-		if (chunks[i].size == 0 && chunks[i].cont == 0)
-			break;
-
+	for (i = 0; i < chunks_top; i++) {
 		if (chunks[i].ptr == ptr) {
+		
+			/* Update global stats */
 			cur_size -= chunks[i].size;
 			cur_chunks--;
 			
-			chunks[i].size = 0;
-			chunks[i].ptr = NULL;
+			/* Replace found chunk with top one */
+			chunks[i] = chunks[--chunks_top];
 			
-			if (chunks[i+1].size != 0 || chunks[i+1].cont != 0)
-				chunks[i].cont = 1;
 			return;
 		}
 	}
