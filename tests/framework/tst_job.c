@@ -261,6 +261,13 @@ void tst_job_run(struct tst_job *job)
 		return;
 	}
 
+	/* Redirect stderr/stdout TODO: catch its output */
+	if (freopen("/dev/null", "w", stderr))
+		tst_warn("freopen(stderr) failed: %s", strerror(errno));
+
+	if (freopen("/dev/null", "w", stdout))
+		tst_warn("freopen(stderr) failed: %s", strerror(errno));
+
 	/* Create directory in /tmp/ and chdir into it. */
 	if (job->test->flags & TST_TMPDIR)
 		create_tmpdir(job->test->name, template, sizeof(template));
