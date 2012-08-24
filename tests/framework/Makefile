@@ -14,7 +14,7 @@ APPS=test
 
 ALL+=libtst_preload.so
 
-libtst_preload.so: tst_preload.o tst_alloc_barriers.o
+libtst_preload.so: tst_preload.o tst_alloc_barriers.o tst_preload_FILE.o
 	gcc -Wl,-soname -Wl,tst_preload.so --shared -ldl -fPIC $^ -o $@
 
 CLEAN+=libtst_preload.so

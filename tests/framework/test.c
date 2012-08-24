@@ -23,9 +23,12 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <stdio.h>
+#include <errno.h>
+#include <string.h>
 
 #include "tst_test.h"
 #include "tst_alloc_barriers.h"
+#include "tst_preload_FILE.h"
 
 int success_fn(void)
 {
@@ -135,6 +138,54 @@ int barrier_allocation(void)
 	return TST_SUCCESS;
 }
 
+int fail_FILE(void)
+{
+	struct tst_fail_FILE failures[] = {
+		{.path = "test_fail_fopen", .call = TST_FAIL_FOPEN, .err = EPERM},
+		{.path = "test_fail_fclose", .call = TST_FAIL_FCLOSE, .err = ENOSPC},
+		{.path = NULL}
+	};
+
+	tst_fail_FILE_register(failures);
+
+	int fail = 0;
+	FILE *f;
+	
+	f = fopen("test_fail_fclose", "w");
+
+	if (f == NULL) {
+		tst_report(0, "Failed to open 'test_fail_fclose' for writing: %s",
+		           strerror(errno));
+		fail = 1;
+	}
+
+	tst_report(0, "Correctly opened 'test_fail_fclose'");
+
+	int ret = fclose(f);
+
+	if (ret == 0 || errno != ENOSPC) {
+		tst_report(0, "Failed to fail to close 'test_fail_fclose'");
+		fail = 1;
+	}
+
+	tst_report(0, "Correctly failed to close 'test_fail_fclose'");
+
+	f = fopen("test_fail_fopen", "w");
+
+	if (f != NULL && errno != EPERM) {
+		tst_report(0, "Failed to fail to open 'test_fail_fopen'");
+		fclose(f);
+		fail = 1;
+	}
+
+	tst_report(0, "Correctly failed to open 'test_fail_fopen'"); 
+
+	if (fail)
+		return TST_FAILED;
+	
+	return TST_SUCCESS;
+}
+
 const struct tst_suite suite = {
 	.suite_name = "Testing Framework Example",
 	.tests = {
@@ -148,6 +199,7 @@ const struct tst_suite suite = {
 		{.name = "Mem Ok test", .tst_fn = malloc_ok_fn, .flags = TST_MALLOC_CHECK},
 		{.name = "Double free()", .tst_fn = double_free},
 		{.name = "Barrier allocation", .tst_fn = barrier_allocation},
+		{.name = "Failed FILE", .tst_fn = fail_FILE, .flags = TST_TMPDIR},
 		{.name = NULL},
 	}
 };
