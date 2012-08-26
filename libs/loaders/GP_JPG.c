@@ -196,7 +196,6 @@ GP_Context *GP_LoadJPG(const char *src_path, GP_ProgressCallback *callback)
 
 	if (GP_OpenJPG(src_path, &f))
 		return NULL;
-	
 
 	res = GP_ReadJPG(f, callback);
 	
@@ -322,6 +321,7 @@ int GP_SaveJPG(const GP_Context *src, const char *dst_path,
 	
 	if (setjmp(my_err.setjmp_buf)) {
 		err = EIO;
+		//TODO: is cinfo allocated?
 		goto err2;
 	}
 
@@ -366,11 +366,12 @@ int GP_SaveJPG(const GP_Context *src, const char *dst_path,
 		if (GP_ProgressCallbackReport(callback, y, src->h, src->w)) {
 			GP_DEBUG(1, "Operation aborted");
 			err = ECANCELED;
-			goto err2;
+			goto err3;
 		}
 	}
 
 	jpeg_finish_compress(&cinfo);
+	jpeg_destroy_compress(&cinfo);
 
 	if (fclose(f)) {
 		err = errno;
@@ -378,12 +379,12 @@ int GP_SaveJPG(const GP_Context *src, const char *dst_path,
 		         dst_path, strerror(errno));
 		goto err1;
 	}
-
+	
 	GP_ProgressCallbackDone(callback);
 	return 0;
-//TODO: is cinfo allocated?
-err2:
+err3:
 	jpeg_destroy_compress(&cinfo);
+err2:
 	fclose(f);
 err1:
 	unlink(dst_path);
