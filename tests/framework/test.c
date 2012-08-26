@@ -186,7 +186,7 @@ int fail_FILE(void)
 	return TST_SUCCESS;
 }
 
-const struct tst_suite suite = {
+const struct tst_suite tst_suite = {
 	.suite_name = "Testing Framework Example",
 	.tests = {
 		{.name = "Success test", .tst_fn = success_fn},
@@ -203,17 +203,3 @@ const struct tst_suite suite = {
 		{.name = NULL},
 	}
 };
-
-int main(void)
-{
-	fprintf(stderr, "(Listing testsuite tests)\n");
-	tst_list_suite(&suite);
-	
-	fprintf(stderr, "\n(Running selected test)\n");
-	tst_run_suite(&suite, "Sigsegv test");
-
-	fprintf(stderr, "\n(Running whole suite)\n");
-	tst_run_suite(&suite, NULL);
-
-	return 0;
-}
