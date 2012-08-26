@@ -156,7 +156,7 @@ static int append_html(struct tst_job *job, FILE *f)
 	struct tst_msg *msg;
 
 	/* If calculated include malloc report */
-	if (job->test->flags & TST_MALLOC_CHECK)
+	if (job->test->flags & TST_CHECK_MALLOC)
 		malloc_stats_html(job, f, padd);
 
 	for (msg = job->store.first; msg != NULL; msg = msg->next) {
@@ -223,7 +223,7 @@ static int append_json(struct tst_job *job, FILE *f)
 	append_msg_json(job, f);
 	
 	/* If calculated include malloc report */
-	if (job->test->flags & TST_MALLOC_CHECK)
+	if (job->test->flags & TST_CHECK_MALLOC)
 		append_malloc_stats_json(job, f);
 	
 	/* Time statistics */

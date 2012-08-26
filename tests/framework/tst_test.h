@@ -44,7 +44,7 @@ enum tst_flags {
 	/*
 	 * Check malloc for memory leaks.
 	 */
-	TST_MALLOC_CHECK = 0x02,
+	TST_CHECK_MALLOC = 0x02,
 };
 
 struct tst_test {

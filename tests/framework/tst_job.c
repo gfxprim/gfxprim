@@ -131,17 +131,22 @@ static void remove_tmpdir(const char *path)
  */
 static void create_tmpdir(const char *name, char *template, size_t size)
 {
-	/* Create template from test name */
-	snprintf(template, size, "/tmp/ctest_%s_XXXXXX", name);
+	char safe_name[256];
 
 	/* Fix any funny characters in test name */
-	char *s = template;
+	snprintf(safe_name, sizeof(safe_name), "%s", name);
+
+	char *s = safe_name;
 
 	while (*s != '\0') {
-		if (!isalnum(*s) && *s != '/')
+		if (!isalnum(*s))
 			*s = '_';
 		s++;
 	}
+
+	/* Create template from test name */
+	snprintf(template, size, "/tmp/ctest_%s_XXXXXX", safe_name);
+
 
 	if (mkdtemp(template) == NULL) {
 		tst_warn("mkdtemp(%s) failed: %s", template, strerror(errno));
@@ -262,11 +267,11 @@ void tst_job_run(struct tst_job *job)
 	}
 
 	/* Redirect stderr/stdout TODO: catch its output */
-	if (freopen("/dev/null", "w", stderr))
-		tst_warn("freopen(stderr) failed: %s", strerror(errno));
+//	if (freopen("/dev/null", "w", stderr))
+//		tst_warn("freopen(stderr) failed: %s", strerror(errno));
 
-	if (freopen("/dev/null", "w", stdout))
-		tst_warn("freopen(stderr) failed: %s", strerror(errno));
+//	if (freopen("/dev/null", "w", stdout))
+//		tst_warn("freopen(stderr) failed: %s", strerror(errno));
 
 	/* Create directory in /tmp/ and chdir into it. */
 	if (job->test->flags & TST_TMPDIR)
@@ -284,13 +289,13 @@ void tst_job_run(struct tst_job *job)
 	clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &job->cpu_time);
 	write_timespec(job, 'c', &job->cpu_time);
 
-	if (job->test->flags & TST_MALLOC_CHECK)
+	if (job->test->flags & TST_CHECK_MALLOC)
 		tst_malloc_check_start();
 
 	/* Run test */
 	ret = job->test->tst_fn();
 
-	if (job->test->flags & TST_MALLOC_CHECK) {
+	if (job->test->flags & TST_CHECK_MALLOC) {
 		tst_malloc_check_stop();
 		tst_malloc_check_report(&job->malloc_stats);
 
