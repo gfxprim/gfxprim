@@ -9,4 +9,4 @@
 #
 export LIBC_FATAL_STDERR_=1
 
-LD_PRELOAD=`pwd`/../framework/libtst_preload.so ./loaders "$@"
+LD_PRELOAD=`pwd`/../framework/libtst_preload.so ./loaders_suite "$@"
