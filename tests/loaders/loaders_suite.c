@@ -120,6 +120,107 @@ static int test_JPG_Load_fail(void)
 	return TST_SUCCESS;
 }
 
+static int abort_callback(GP_ProgressCallback *self __attribute__((unused)))
+{
+	return 1;
+}
+
+/*
+ * We test that a correct cleanup is done after aborting the image load from a
+ * callback.
+ */
+static int test_PNG_Save_abort(void)
+{
+	GP_Context *img;
+
+	img = GP_ContextAlloc(100, 100, GP_PIXEL_RGB888);
+
+	GP_ProgressCallback callback = {.callback = abort_callback};
+
+	if (GP_SavePNG(img, "test.png", &callback) == 0) {
+		tst_report(0, "Failed to save PNG saving");
+		return TST_FAILED;
+	}
+	
+	int saved_errno = errno;
+	
+	if (saved_errno != ECANCELED) {
+		tst_report(0, "Expected errno = ECANCELED, have %s",
+		           strerror(saved_errno));
+		return TST_FAILED;
+	}
+
+	GP_ContextFree(img);
+	
+	return TST_SUCCESS;
+}
+
+static int test_PNG_Load_abort(void)
+{
+	GP_Context *img;
+
+	img = GP_ContextAlloc(100, 100, GP_PIXEL_RGB888);
+
+	if (GP_SavePNG(img, "test.png", NULL)) {
+		tst_report(0, "Failed to save PNG: %s", strerror(errno));
+		return TST_FAILED;
+	}
+
+	GP_ContextFree(img);
+
+	GP_ProgressCallback callback = {.callback = abort_callback};
+
+	img = GP_LoadPNG("test.png", &callback);
+
+	int saved_errno = errno;
+
+	if (img != NULL) {
+		tst_report(0, "Failed to abort PNG loading");
+		return TST_FAILED;
+	}
+
+	if (saved_errno != ECANCELED) {
+		tst_report(0, "Expected errno = ECANCELED, have %s",
+		           strerror(saved_errno));
+		return TST_FAILED;
+	}
+
+	return TST_SUCCESS;
+}
+
+/*
+ * PNG stress test, let it save and load 10MB image.
+ */
+static int test_PNG_stress(void)
+{
+	GP_Context *img;
+
+	img = GP_ContextAlloc(2000, 2000, GP_PIXEL_RGB888);
+
+	if (img == NULL) {
+		tst_report(0, "GP_ContextAlloc failed");
+		return TST_FAILED;
+	}
+
+	if (GP_SavePNG(img, "test.png", NULL)) {
+		tst_report(0, "GP_SavePNG failed with: %s", strerror(errno));
+		return TST_FAILED;
+	}
+
+	GP_ContextFree(img);
+
+	img = GP_LoadPNG("test.png", NULL);
+	
+	if (img == NULL) {
+		tst_report(0, "GP_LoadPNG failed with: %s", strerror(errno));
+		return TST_FAILED;
+	}
+
+	GP_ContextFree(img);
+
+	return TST_SUCCESS;
+}
+
 const struct tst_suite tst_suite = {
 	.suite_name = "Image Loaders testsuite",
 	.tests = {
@@ -131,6 +232,12 @@ const struct tst_suite tst_suite = {
 		 .flags = TST_TMPDIR},
 		{.name = "JPG Load fail", .tst_fn = test_JPG_Load_fail,
 		 .flags = TST_TMPDIR},
+		{.name = "PNG Load abort", .tst_fn = test_PNG_Load_abort,
+		 .flags = TST_TMPDIR | TST_CHECK_MALLOC},
+		{.name = "PNG Save abort", .tst_fn = test_PNG_Save_abort,
+		 .flags = TST_TMPDIR | TST_CHECK_MALLOC},
+		{.name = "PNG stress", .tst_fn = test_PNG_stress,
+		 .flags = TST_TMPDIR | TST_CHECK_MALLOC},
 		{.name = NULL},
 	}
 };
