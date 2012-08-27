@@ -44,14 +44,20 @@ static size_t cur_size = 0;
 static unsigned int cur_chunks = 0;
 static size_t total_size = 0;
 static unsigned int total_chunks = 0;
-
+/* Maximal allocated size at a time */
+static size_t max_size = 0;
+static unsigned int max_chunks = 0;
 
 void tst_malloc_check_report(struct malloc_stats *stats)
 {
-	stats->lost_size = cur_size;
-	stats->lost_chunks = cur_chunks;
 	stats->total_size = total_size;
 	stats->total_chunks = total_chunks;
+	
+	stats->max_size = max_size;
+	stats->max_chunks = max_chunks;
+	
+	stats->lost_size = cur_size;
+	stats->lost_chunks = cur_chunks;
 }
 
 #define MAX_CHUNKS 100
@@ -83,6 +89,12 @@ static void add_chunk(size_t size, void *ptr)
 	cur_chunks++;
 	total_size += size;
 	total_chunks++;
+
+	if (cur_size > max_size)
+		max_size = cur_size;
+
+	if (cur_chunks > max_chunks)
+		max_chunks = cur_chunks;
 }
 
 static void rem_chunk(void *ptr)

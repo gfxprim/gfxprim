@@ -34,9 +34,21 @@ void tst_malloc_check_start(void);
 void tst_malloc_check_stop(void);
 
 struct malloc_stats {
+	/*
+	 * Sum of all alocated chunks.
+	 */
 	size_t total_size;
 	unsigned int total_chunks;
 
+	/*
+	 * Maximal allocated size and number of chunks at any time.
+	 */
+	size_t max_size;
+	unsigned int max_chunks;
+
+	/*
+	 * Memory that was allocated but not freed
+	 */
 	size_t lost_size;
 	unsigned int lost_chunks;
 };

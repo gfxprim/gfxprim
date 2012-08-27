@@ -77,6 +77,26 @@ static const char *ret_to_str(enum tst_ret ret)
 	return "Unknown";
 }
 
+static void bytes_human_readable(FILE *f, size_t bytes)
+{
+	if (bytes < 512) {
+		fprintf(f, "%zuB", bytes);
+		return;
+	}
+
+	if (bytes < 1024 * 512) {
+		fprintf(f, "%.2fkB", (float)bytes / 1024);
+		return;
+	}
+
+	if (bytes < 1024 * 1024 * 512) {
+		fprintf(f, "%.2fMB", (float)bytes / 1024 / 1024);
+		return;
+	}
+
+	fprintf(f, "%.2fGB", (float)bytes / 1024 / 1024 / 1024);
+}
+
 static void malloc_stats_html(struct tst_job *job, FILE *f, const char *padd)
 {
 	/* Create innter table */
@@ -97,6 +117,14 @@ static void malloc_stats_html(struct tst_job *job, FILE *f, const char *padd)
 	fprintf(f, "%s     </td>\n", padd);
 	
 	fprintf(f, "%s     <td bgcolor=\"#ffffaa\">\n", padd);
+	fprintf(f, "%s      <small>Max size</small>\n", padd);
+	fprintf(f, "%s     </td>\n", padd);
+	
+	fprintf(f, "%s     <td bgcolor=\"#ffffaa\">\n", padd);
+	fprintf(f, "%s      <small>Max chunks</small>\n", padd);
+	fprintf(f, "%s     </td>\n", padd);
+	
+	fprintf(f, "%s     <td bgcolor=\"#ffffaa\">\n", padd);
 	fprintf(f, "%s      <small>Lost size</small>\n", padd);
 	fprintf(f, "%s     </td>\n", padd);
 	
@@ -110,8 +138,9 @@ static void malloc_stats_html(struct tst_job *job, FILE *f, const char *padd)
 	fprintf(f, "%s    <tr>\n", padd);
 
 	fprintf(f, "%s     <td bgcolor=\"#ffffaa\">\n", padd);
-	fprintf(f, "%s      <center><small>%zu</small></center>\n",
-	           padd, job->malloc_stats.total_size);
+	fprintf(f, "%s      <center><small>", padd);
+	bytes_human_readable(f, job->malloc_stats.total_size);
+	fprintf(f, "</small></center>\n");
 	fprintf(f, "%s     </td>\n", padd);
 	
 	fprintf(f, "%s     <td bgcolor=\"#ffffaa\">\n", padd);
@@ -120,8 +149,20 @@ static void malloc_stats_html(struct tst_job *job, FILE *f, const char *padd)
 	fprintf(f, "%s     </td>\n", padd);
 	
 	fprintf(f, "%s     <td bgcolor=\"#ffffaa\">\n", padd);
-	fprintf(f, "%s      <center><small>%zu</small></center>\n",
-	           padd, job->malloc_stats.lost_size);
+	fprintf(f, "%s      <center><small>", padd);
+	bytes_human_readable(f, job->malloc_stats.max_size);
+	fprintf(f, "</small></center>\n");
+	fprintf(f, "%s     </td>\n", padd);
+	
+	fprintf(f, "%s     <td bgcolor=\"#ffffaa\">\n", padd);
+	fprintf(f, "%s      <center><small>%u</small></center>\n",
+	           padd, job->malloc_stats.max_chunks);
+	fprintf(f, "%s     </td>\n", padd);
+	
+	fprintf(f, "%s     <td bgcolor=\"#ffffaa\">\n", padd);
+	fprintf(f, "%s      <center><small>", padd);
+	bytes_human_readable(f, job->malloc_stats.lost_size);
+	fprintf(f, "</small></center>\n");
 	fprintf(f, "%s     </td>\n", padd);
 	
 	fprintf(f, "%s     <td bgcolor=\"#ffffaa\">\n", padd);
@@ -147,7 +188,7 @@ static int append_html(struct tst_job *job, FILE *f)
 	fprintf(f, "%s<tr>\n", padd);
 	fprintf(f, "%s <td bgcolor=\"#ccccee\">%s&nbsp;</td>\n", padd, job->test->name);
 	fprintf(f, "%s <td bgcolor=\"#ccccee\">\n", padd);
-	fprintf(f, "%s  <small><font color=\"#222\">%i.%03is %i.%03is</font></small>",
+	fprintf(f, "%s  <center><small><font color=\"#222\">%i.%03is %i.%03is</font></small></center>",
 	        padd, sec, nsec/1000000, (int)job->cpu_time.tv_sec, (int)job->cpu_time.tv_nsec/1000000);
 	fprintf(f, "%s </td>\n", padd);
 	fprintf(f, "%s <td bgcolor=\"%s\"><center><font color=\"white\">&nbsp;%s&nbsp;</td></center>\n", padd,
@@ -197,6 +238,10 @@ static int append_malloc_stats_json(struct tst_job *job, FILE *f)
 	        job->malloc_stats.total_size);
 	fprintf(f, "\t\t\t\t\"Total Chunks\": %u,\n",
 	        job->malloc_stats.total_chunks);
+	fprintf(f, "\t\t\t\t\"Max Size\": %zi,\n",
+	        job->malloc_stats.max_size);
+	fprintf(f, "\t\t\t\t\"Max Chunks\": %u,\n",
+	        job->malloc_stats.max_chunks);
 	fprintf(f, "\t\t\t\t\"Lost Size\": %zi,\n",
 	        job->malloc_stats.lost_size);
 	fprintf(f, "\t\t\t\t\"Lost Chunks\": %u\n",
