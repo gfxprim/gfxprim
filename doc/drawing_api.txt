@@ -253,7 +253,7 @@ GP_RetCode GP_Text(GP_Context *context, const GP_TextStyle *style,
 
 Draws text at the position x and y; the alignment of the text in relation
 to the point is specified by alignment flags.
-If the 'style' argument is NULL, a default style is used.
+If the 'style' argument is 'NULL', a default style is used.
 
 The text size can be computed by following functions:
 

@@ -25,6 +25,6 @@ GP_DEBUG
 ~~~~~~~~
 
 The 'GP_DEBUG' environment variable may be used to set library debug level.
-The variable and its value is used only once a the time first debug message is
-about to be printed.
+The variable and its value is used only once at the time first debug message
+is about to be printed.
 
