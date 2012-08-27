@@ -58,6 +58,8 @@ void tst_diff_timespec(int *sec, int *nsec, struct timespec *start,
 	}
 }
 
+#define NAME_PADD 24
+
 static void stop_test(struct tst_job *job)
 {
 	const char *name = job->test->name;
@@ -68,33 +70,39 @@ static void stop_test(struct tst_job *job)
 
 	switch (job->result) {
 	case TST_SUCCESS:
-		result = "\e[1;32mSUCCESS\e[0m";
+		result = "[    \e[1;32mSUCCESS\e[0m     ]";
 	break;
 	case TST_INTERR:
-		result = "\e[1;31mINTERNAL ERROR\e[0m";
+		result = "[ \e[1;31mINTERNAL ERROR\e[0m ]";
 	break;
 	case TST_SIGSEGV:
-		result = "\e[1;31mSEGFAULT\e[0m";
+		result = "[    \e[1;31mSEGFAULT\e[0m    ]";
 	break;
 	case TST_TIMEOUT:
-		result = "\e[1;35mTIMEOUT\e[0m";
+		result = "[    \e[1;35mTIMEOUT\e[0m     ]";
 	break;
 	case TST_ABORTED:
-		result = "\e[1;31mABORTED\e[0m";
+		result = "[    \e[1;31mABORTED\e[0m     ]";
 	break;
 	case TST_MEMLEAK:
-		result = "\e[1;33mMEMLEAK\e[0m";
+		result = "[    \e[1;33mMEMLEAK\e[0m     ]";
 	break;
 	case TST_FAILED:
-		result = "\e[1;31mFAILURE\e[0m";
+		result = "[    \e[1;31mFAILURE\e[0m     ]";
 	break;
 	case TST_MAX:
 	break;
 	}
 		
-	fprintf(stderr, "\e[1;37m%s\e[0m finished "
-	                "(Time %i.%03is, CPU %i.%03is) %s\n",
-			name, sec, nsec/1000000,
+	fprintf(stderr, "\e[1;37m%s\e[0m", name);
+	
+	int i;
+
+	for (i = strlen(name); i < NAME_PADD; i++)
+		fprintf(stderr, " ");
+
+	fprintf(stderr, "  finished (Time %i.%03is, CPU %i.%03is)  %s\n",
+	                sec, nsec/1000000,
 			(int)job->cpu_time.tv_sec,
 			(int)job->cpu_time.tv_nsec/1000000,
 			result);
@@ -104,6 +112,8 @@ static void stop_test(struct tst_job *job)
 
 	/* Now print test message store */
 	tst_msg_print(&job->store);
+	
+	fprintf(stderr, "------------------------------------------------------------------------------- \n");
 }
 
 /*
@@ -267,11 +277,11 @@ void tst_job_run(struct tst_job *job)
 	}
 
 	/* Redirect stderr/stdout TODO: catch its output */
-//	if (freopen("/dev/null", "w", stderr))
-//		tst_warn("freopen(stderr) failed: %s", strerror(errno));
+	if (freopen("/dev/null", "w", stderr))
+		tst_warn("freopen(stderr) failed: %s", strerror(errno));
 
-//	if (freopen("/dev/null", "w", stdout))
-//		tst_warn("freopen(stderr) failed: %s", strerror(errno));
+	if (freopen("/dev/null", "w", stdout))
+		tst_warn("freopen(stderr) failed: %s", strerror(errno));
 
 	/* Create directory in /tmp/ and chdir into it. */
 	if (job->test->flags & TST_TMPDIR)
