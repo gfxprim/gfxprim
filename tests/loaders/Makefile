@@ -10,6 +10,8 @@ CFLAGS+=-I../framework/
 
 APPS=loaders_suite
 
+$(APPS): ../framework/libtst.a
+
 CLEAN+=libtst_preload.so log.html log.json
 
 include $(TOPDIR)/app.mk
