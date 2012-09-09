@@ -120,7 +120,7 @@ void GP_InputDriverSDLEventPut(SDL_Event *ev)
 				GP_EventPush(GP_EV_REL, GP_EV_REL_WHEEL, -1, NULL);
 			return;
 		default:
-			GP_DEBUG(0, "Unmapped SDL Mouse button %02x",
+			GP_WARN("Unmapped SDL Mouse button %02x",
 			         ev->button.button);
 			return;
 		}

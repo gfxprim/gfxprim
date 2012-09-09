@@ -75,5 +75,5 @@ void GP_InputDriverKBDEventPut(unsigned char ev)
 		}
 	}
 
-	GP_DEBUG(0, "Unmapped key %i", keycode);
+	GP_WARN("Unmapped key %i", keycode);
 }

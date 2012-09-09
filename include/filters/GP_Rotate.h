@@ -170,7 +170,7 @@ int GP_FilterSymmetryByName(const char *symmetry);
 
 int GP_FilterSymmetry(const GP_Context *src, GP_Context *dst,
                       GP_FilterSymmetries symmetry,
-		      GP_ProgressCallback *callback);
+                      GP_ProgressCallback *callback);
 
 GP_Context *GP_FilterSymmetry_Alloc(const GP_Context *src,
                                    GP_FilterSymmetries symmetry,

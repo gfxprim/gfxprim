@@ -100,8 +100,8 @@ static inline int GP_FilterConvolution(const GP_Context *src, GP_Context *dst,
 }
 
 static inline GP_Context *GP_FilterConvolutionAlloc(const GP_Context *src,
-				                    const GP_FilterKernel2D *kernel,
-				                    GP_ProgressCallback *callback)
+                                                    const GP_FilterKernel2D *kernel,
+                                                    GP_ProgressCallback *callback)
 {
 	return GP_FilterConvolutionExAlloc(src, 0, 0, src->w, src->h,
                                            kernel, callback);

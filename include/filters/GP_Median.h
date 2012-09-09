@@ -41,7 +41,7 @@ int GP_FilterMedianEx(const GP_Context *src,
                       GP_Size w_src, GP_Size h_src,
                       GP_Context *dst,
                       GP_Coord x_dst, GP_Coord y_dst,
-		      int xmed, int ymed,
+                      int xmed, int ymed,
                       GP_ProgressCallback *callback);
 
 GP_Context *GP_FilterMedianExAlloc(const GP_Context *src,
@@ -52,7 +52,7 @@ GP_Context *GP_FilterMedianExAlloc(const GP_Context *src,
 
 static inline int GP_FilterMedian(const GP_Context *src,
                                   GP_Context *dst,
-		                  int xmed, int ymed,
+                                  int xmed, int ymed,
                                   GP_ProgressCallback *callback)
 {
 	return GP_FilterMedianEx(src, 0, 0, src->w, src->h,

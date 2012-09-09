@@ -42,7 +42,7 @@ int GP_FilterBrightness_Raw(const GP_Context *src, GP_Context *dst,
 
 GP_Context *GP_FilterBrightness(const GP_Context *src, GP_Context *dst,
                                 GP_FilterParam params[],
-				GP_ProgressCallback *callback);
+                                GP_ProgressCallback *callback);
 
 /*
  * Contrast filter.
@@ -54,11 +54,11 @@ GP_Context *GP_FilterBrightness(const GP_Context *src, GP_Context *dst,
  */
 int GP_FilterContrast_Raw(const GP_Context *src, GP_Context *dst,
                           GP_FilterParam params[],
-			  GP_ProgressCallback *callback);
+                          GP_ProgressCallback *callback);
 
 GP_Context *GP_FilterContrast(const GP_Context *src, GP_Context *dst, 
                               GP_FilterParam params[],
-			      GP_ProgressCallback *callback);
+                              GP_ProgressCallback *callback);
 
 /*
  * Invert filter.
@@ -87,7 +87,7 @@ GP_Context *GP_FilterNoise(const GP_Context *src, GP_Context *dst,
  */
 GP_Context *GP_FilterPoint(const GP_Context *src, GP_Context *dst,
                            GP_FilterParam filter_callback[],
-			   GP_FilterParam priv[],
-			   GP_ProgressCallback *callback);
+                           GP_FilterParam priv[],
+                           GP_ProgressCallback *callback);
 
 #endif /* FILTERS_GP_POINT_H */

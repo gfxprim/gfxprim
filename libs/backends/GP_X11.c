@@ -536,7 +536,7 @@ GP_Backend *GP_BackendX11Init(const char *GP_UNUSED(display),
 			      unsigned int GP_UNUSED(h),
 			      const char *GP_UNUSED(caption))
 {
-	GP_DEBUG(0, "FATAL: X11 support not compiled in");
+	GP_WARN("FATAL: X11 support not compiled in");
 	return NULL;
 }
 

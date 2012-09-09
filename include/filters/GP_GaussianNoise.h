@@ -40,7 +40,7 @@ int GP_FilterGaussianNoiseAddEx(const GP_Context *src,
                                 GP_Size w_src, GP_Size h_src,
                                 GP_Context *dst,
                                 GP_Coord x_dst, GP_Coord y_dst,
-		                float sigma, float mu,
+                                float sigma, float mu,
                                 GP_ProgressCallback *callback);
 
 GP_Context *GP_FilterGaussianNoiseAddExAlloc(const GP_Context *src,

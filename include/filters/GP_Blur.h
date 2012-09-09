@@ -42,15 +42,15 @@ int GP_FilterGaussianBlurEx(const GP_Context *src,
                             GP_Coord x_src, GP_Coord y_src,
                             GP_Size w_src, GP_Size h_src,
                             GP_Context *dst,
-			    GP_Coord x_dst, GP_Coord y_dst,
-			    float x_sigma, float y_sigma,
-			    GP_ProgressCallback *callback);
+                            GP_Coord x_dst, GP_Coord y_dst,
+                            float x_sigma, float y_sigma,
+                            GP_ProgressCallback *callback);
 
 GP_Context *GP_FilterGaussianBlurExAlloc(const GP_Context *src,
                                          GP_Coord x_src, GP_Coord y_src,
                                          GP_Size w_src, GP_Size h_src,
-			                 float x_sigma, float y_sigma,
-			                 GP_ProgressCallback *callback);
+                                         float x_sigma, float y_sigma,
+                                         GP_ProgressCallback *callback);
 
 static inline int GP_FilterGaussianBlur(const GP_Context *src, GP_Context *dst,
                                         float x_sigma, float y_sigma,

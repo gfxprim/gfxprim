@@ -53,8 +53,8 @@
  * Semi internal raw version, use at your own risk.
  */
 int GP_FilterFloydSteinberg_RGB888_Raw(const GP_Context *src,
-                                            GP_Context *dst,
-                                            GP_ProgressCallback *callback);
+                                       GP_Context *dst,
+                                       GP_ProgressCallback *callback);
 
 /*
  * Converts RGB888 24bit image to any RGB or Grayscale bitmap.
@@ -75,7 +75,7 @@ int GP_FilterFloydSteinberg_RGB888(const GP_Context *src,
  */
 GP_Context *GP_FilterFloydSteinberg_RGB888_Alloc(const GP_Context *src,
                                                  GP_PixelType pixel_type,
-						 GP_ProgressCallback *callback);
+                                                 GP_ProgressCallback *callback);
 
 /*
  * Hilbert-Peano space filling curve based dithering.
