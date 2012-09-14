@@ -221,6 +221,91 @@ static int test_PNG_stress(void)
 	return TST_SUCCESS;
 }
 
+/*
+ * Loaders test. Hammers the GP_LoadImage() interface with plenty of
+ * unexpected filenames.
+ */
+struct file_testcase {
+	const char *filename;
+	int create;
+	int expected_errno;
+};
+
+static struct file_testcase file_testcases[] = {
+	{"a",     1, ENOSYS},
+	{".a",    1, ENOSYS},
+	{"a.",    1, ENOSYS},
+	{".bc",   1, ENOSYS},
+	{"bc",    1, ENOSYS},
+	{"abc",   1, ENOSYS},
+	{"png.",  1, ENOSYS},
+	{"jpg.",  1, ENOSYS},
+	{"gif.",  1, ENOSYS},
+	{"jpeg.", 1, ENOSYS},
+	
+	{".jpg",    1, EIO},
+	{"img.jpg", 1, EIO},
+	{".png",    1, EIO},
+	{"img.png", 1, EIO},
+	{".gif",    1, EIO},
+	{"img.gif", 1, EIO},
+	{".pbm",    1, EIO},
+	{".pgm",    1, EIO},
+	{".ppm",    1, EIO},
+
+	{"not_here.jpg", 0, ENOENT},
+
+	{NULL, 0, 0}
+};
+
+static int test_Load(void)
+{
+	unsigned int i, fail = 0;
+
+	/* Create empty files */
+	for (i = 0; file_testcases[i].filename != NULL; i++) {
+		
+		if (file_testcases[i].create != 1)
+			continue;
+
+		FILE *f = fopen(file_testcases[i].filename, "w");
+
+		if (f != NULL)
+			fclose(f);
+	}
+
+	for (i = 0; file_testcases[i].filename != NULL; i++) {
+		GP_Context *ret;
+	
+		errno = 0;
+
+		ret = GP_LoadImage(file_testcases[i].filename, NULL);
+
+		int saved_errno = errno;
+
+		if (ret != NULL) {
+			tst_report(0, "GP_LoadImage('%s') succeeded "
+			              "unexpectedly", file_testcases[i].filename);
+			fail++;
+		}
+		
+		if (ret == NULL && file_testcases[i].expected_errno != errno) {
+			tst_report(0, "Expected errno %i (%s) got %i (%s) on '%s'",
+			              file_testcases[i].expected_errno,
+				      strerror(file_testcases[i].expected_errno),
+				      saved_errno,
+				      strerror(saved_errno),
+				      file_testcases[i].filename);
+			fail++;
+		}
+	}
+
+	if (fail)
+		return TST_FAILED;
+
+	return TST_SUCCESS;
+}
+
 const struct tst_suite tst_suite = {
 	.suite_name = "Image Loaders testsuite",
 	.tests = {
@@ -238,6 +323,8 @@ const struct tst_suite tst_suite = {
 		 .flags = TST_TMPDIR | TST_CHECK_MALLOC},
 		{.name = "PNG stress", .tst_fn = test_PNG_stress,
 		 .flags = TST_TMPDIR | TST_CHECK_MALLOC},
+		{.name = "Image Load", .tst_fn = test_Load,
+		 .flags = TST_TMPDIR},
 		{.name = NULL},
 	}
 };
