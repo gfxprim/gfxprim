@@ -58,7 +58,7 @@ int GP_OpenPNG(const char *src_path, FILE **f)
 	}
 
 	if (fread(sig, 1, 8, *f) <= 0) {
-		err = errno;
+		err = EIO;
 		GP_DEBUG(1, "Failed to read '%s' : %s",
 		            src_path, strerror(errno));
 		goto err2;
@@ -67,7 +67,7 @@ int GP_OpenPNG(const char *src_path, FILE **f)
 	if (png_sig_cmp(sig, 0, 8)) {
 		GP_DEBUG(1, "Invalid file header, '%s' not a PNG image?",
 		            src_path);
-		err = EILSEQ;
+		err = EINVAL;
 		goto err2;	
 	}
 

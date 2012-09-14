@@ -54,28 +54,34 @@ GP_Context *GP_LoadPBM(const char *src_path, GP_ProgressCallback *callback)
 	FILE *f;
 	GP_Context *ret;
 	uint32_t w, h;
+	int err;
 
 	f = fopen(src_path, "r");
 	
 	if (f == NULL)
 		return NULL;
 
-	if (fgetc(f) != 'P' || fgetc(f) != '1')
+	if (fgetc(f) != 'P' || fgetc(f) != '1') {
+		err = feof(f) ? EIO : EINVAL;
 		goto err1;
+	}
 
-	if (fscanf(f, "%"PRIu32"%"PRIu32, &w, &h) < 2)
+	if (fscanf(f, "%"PRIu32"%"PRIu32, &w, &h) < 2) {
+		err = EIO;
 		goto err1;
+	}
 
 	ret = GP_ContextAlloc(w, h, GP_PIXEL_G1);
 
 	if (ret == NULL) {
-		fclose(f);
-		errno = ENOMEM;
-		return NULL;
+		err = ENOMEM;
+		goto err1;
 	}
 
-	if (GP_PXMLoad1bpp(f, ret))
+	if (GP_PXMLoad1bpp(f, ret)) {
+		err = EINVAL;
 		goto err2;
+	}
 	
 	fclose(f);
 	return ret;
@@ -83,6 +89,7 @@ err2:
 	free(ret);
 err1:
 	fclose(f);
+	errno = err;
 	return NULL;
 }
 

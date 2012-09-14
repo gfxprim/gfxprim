@@ -88,7 +88,7 @@ FILE *GP_ReadPNM(const char *src_path, char *fmt,
                  uint32_t *w, uint32_t *h, uint32_t *depth)
 {
 	FILE *f = fopen(src_path, "r");
-	int ch;
+	int ch, err;
 
 	if (f == NULL) {
 		GP_DEBUG(1, "Failed to open file '%s': %s",
@@ -98,9 +98,15 @@ FILE *GP_ReadPNM(const char *src_path, char *fmt,
 
 	ch = fgetc(f);
 
+	if (ch == EOF) {
+		err = EIO;
+		goto err1;
+	}
+
 	if (ch != 'P') {
 		GP_DEBUG(1, "Invalid PNM header start '%c' (0x%2x) expecting 'P'",
 		         isprint(ch) ? ch : ' ',  ch);
+		err = EINVAL;
 		goto err1;
 	}
 
@@ -119,6 +125,7 @@ FILE *GP_ReadPNM(const char *src_path, char *fmt,
 	default:
 		GP_DEBUG(1, "Invalid PNM format 'P%c' (0x%2x)",
 		         isprint(ch) ? ch : ' ',  ch);
+		err = EINVAL;
 		goto err1;
 	}
 	
@@ -128,6 +135,7 @@ FILE *GP_ReadPNM(const char *src_path, char *fmt,
 
 	if (fscanf(f, "%"PRIu32"\n", w) < 1) {
 		GP_DEBUG(1, "Failed to read PNM header width");
+		err = EINVAL;
 		goto err1;
 	}
 	
@@ -135,6 +143,7 @@ FILE *GP_ReadPNM(const char *src_path, char *fmt,
 	
 	if (fscanf(f, "%"PRIu32"\n", h) < 1) {
 		GP_DEBUG(1, "Failed to read PNM header height");
+		err = EINVAL;
 		goto err1;
 	}
 
@@ -148,12 +157,14 @@ FILE *GP_ReadPNM(const char *src_path, char *fmt,
 	
 	if (fscanf(f, "%"PRIu32"\n", depth) < 1) {
 		GP_DEBUG(1, "Failed to read PNM header depth");
+		err = EINVAL;
 		goto err1;
 	}
 
 	return f;
 err1:
 	fclose(f);
+	errno = err;
 	return NULL;
 }
 

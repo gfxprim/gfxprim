@@ -92,6 +92,11 @@ GP_Context *GP_LoadPGM(const char *src_path, GP_ProgressCallback *callback)
 	h1 = fgetc(f);
 	h2 = fgetc(f);
 
+	if (feof(f)) {
+		err = EIO;
+		goto err1;
+	}
+
 	if (h1 != 'P' || h2 != '2') {
 		GP_DEBUG(1, "Invalid PGM header '%c%c' (0x%2x 0x%2x)",
 		         isprint(h1) ? h1 : ' ', isprint(h2) ? h2 : ' ',
