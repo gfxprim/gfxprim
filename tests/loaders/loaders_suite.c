@@ -58,8 +58,6 @@ static int save_img(enum fmt fmt, const GP_Context *img, const char *name)
 
 	snprintf(buf, sizeof(buf), "%s.%s", name, strfmt(fmt));
 
-	tst_report(0, "Saving %s", buf);
-
 	switch (fmt) {
 	case PNG:
 		return GP_SavePNG(img, buf, NULL);
@@ -255,6 +253,63 @@ static int test_GIF_Load_EACCES(void)
 static int test_BMP_Load_EACCES(void)
 {
 	return load_eacces(BMP);
+}
+
+static int load_eio(enum fmt fmt)
+{
+	char buf[256];
+	GP_Context *img;
+
+	snprintf(buf, sizeof(buf), "test.%s", strfmt(fmt));
+	
+	FILE *f = fopen(buf, "w");
+
+	if (f == NULL) {
+		tst_report(0, "Failed to create file 'test'");
+		return TST_INTERR;
+	}
+
+	fclose(f);
+
+	img = load(fmt, "test");
+
+	if (img != NULL) {
+		tst_report(0, "Test succedded unexpectedly");
+		return TST_FAILED;
+	}
+	
+	if (errno == ENOSYS) {
+		tst_report(0, "Load %s: ENOSYS", strfmt(fmt));
+		return TST_SKIPPED;
+	}
+
+	if (errno != EIO) {
+		tst_report(0, "Expected errno = EIO, have %s",
+		              strerror(errno));
+		return TST_FAILED;
+	}
+	
+	return TST_SUCCESS;
+}
+
+static int test_PNG_Load_EIO(void)
+{
+	return load_eio(PNG);
+}
+
+static int test_JPG_Load_EIO(void)
+{
+	return load_eio(JPG);
+}
+
+static int test_GIF_Load_EIO(void)
+{
+	return load_eio(GIF);
+}
+
+static int test_BMP_Load_EIO(void)
+{
+	return load_eio(BMP);
 }
 
 /*
@@ -458,6 +513,15 @@ const struct tst_suite tst_suite = {
 		{.name = "GIF Load EACCES", .tst_fn = test_GIF_Load_EACCES,
 		 .flags = TST_TMPDIR},
 		{.name = "BMP Load EACCES", .tst_fn = test_BMP_Load_EACCES,
+		 .flags = TST_TMPDIR},
+		
+		{.name = "PNG Load EIO", .tst_fn = test_PNG_Load_EIO,
+		 .flags = TST_TMPDIR},
+		{.name = "JPG Load EIO", .tst_fn = test_JPG_Load_EIO,
+		 .flags = TST_TMPDIR},
+		{.name = "GIF Load EIO", .tst_fn = test_GIF_Load_EIO,
+		 .flags = TST_TMPDIR},
+		{.name = "BMP Load EIO", .tst_fn = test_BMP_Load_EIO,
 		 .flags = TST_TMPDIR},
 		
 		/* Generic GP_LoadImage test */
