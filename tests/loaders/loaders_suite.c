@@ -22,6 +22,7 @@
 
 #include <string.h>
 #include <errno.h>
+#include <sys/stat.h>
 
 #include <core/GP_Context.h>
 #include <loaders/GP_Loaders.h>
@@ -32,6 +33,7 @@ enum fmt {
 	PNG,
 	JPG,
 	GIF,
+	BMP,
 };
 
 static const char *strfmt(enum fmt fmt)
@@ -43,34 +45,65 @@ static const char *strfmt(enum fmt fmt)
 		return "JPG";
 	case GIF:
 		return "GIF";
+	case BMP:
+		return "BMP";
 	};
 
 	return "INVALID";
 }
 
-static int load_save(enum fmt fmt, GP_Size w, GP_Size h)
+static int save_img(enum fmt fmt, const GP_Context *img, const char *name)
 {
-	GP_Context *img, *res = NULL;
+	char buf[256];
+
+	snprintf(buf, sizeof(buf), "%s.%s", name, strfmt(fmt));
+
+	tst_report(0, "Saving %s", buf);
+
+	switch (fmt) {
+	case PNG:
+		return GP_SavePNG(img, buf, NULL);
+	case JPG:
+		return GP_SaveJPG(img, buf, NULL);
+	default:
+		tst_report(0, "WARNING: trying to save %s", strfmt(fmt));
+		exit(TST_INTERR);
+	}
+}
+
+static GP_Context *load(enum fmt fmt, const char *name)
+{
+	char buf[256];
+
+	snprintf(buf, sizeof(buf), "%s.%s", name, strfmt(fmt));
+
+	switch (fmt) {
+	case PNG:
+		return GP_LoadPNG(buf, NULL);
+	case JPG:
+		return GP_LoadJPG(buf, NULL);
+	case GIF:
+		return GP_LoadGIF(buf, NULL);
+	case BMP:
+		return GP_LoadBMP(buf, NULL);
+	default:
+		tst_report(0, "WARNING: trying to load %s", strfmt(fmt));
+		exit(TST_INTERR);
+	}
+}
+
+static int save_load(enum fmt fmt, GP_Size w, GP_Size h)
+{
+	GP_Context *img, *res;
 
 	img = GP_ContextAlloc(w, h, GP_PIXEL_RGB888);
 	
 	if (img == NULL) {
 		tst_report(0, "GP_ContextAlloc failed");
-		return TST_FAILED;
-	}
-
-	int ret = 1;
-
-	switch (fmt) {
-	case PNG:
-		ret = GP_SavePNG(img, "test.png", NULL);
-	break;
-	case JPG:
-		ret = GP_SaveJPG(img, "test.jpg", NULL);
-	break;
-	default:
 		return TST_INTERR;
 	}
+
+	int ret = save_img(fmt, img, "test");
 
 	if (ret) {
 		if (errno == ENOSYS) {
@@ -83,16 +116,7 @@ static int load_save(enum fmt fmt, GP_Size w, GP_Size h)
 		return TST_FAILED;
 	}
 
-	switch (fmt) {
-	case PNG:
-		res = GP_LoadPNG("test.png", NULL);
-	break;
-	case JPG:
-		res = GP_LoadJPG("test.jpg", NULL);
-	break;
-	default:
-		return TST_INTERR;
-	}
+	res = load(fmt, "test");
 
 	if (res == NULL) {
 		tst_report(0, "Failed to load %s: %s",
@@ -106,41 +130,31 @@ static int load_save(enum fmt fmt, GP_Size w, GP_Size h)
 	return TST_SUCCESS;
 }
 
-static int test_PNG_Load_Save(void)
+static int test_PNG_Save_Load(void)
 {
-	return load_save(PNG, 100, 100);
+	return save_load(PNG, 100, 100);
 }
 
-static int test_JPG_Load_Save(void)
+static int test_JPG_Save_Load(void)
 {
-	return load_save(JPG, 100, 100);
+	return save_load(JPG, 100, 100);
 }
 
 static int test_PNG_stress(void)
 {
-	return load_save(PNG, 2000, 2000);
+	return save_load(PNG, 2000, 2000);
 }
 
 static int test_JPG_stress(void)
 {
-	return load_save(JPG, 2000, 2000);
+	return save_load(JPG, 2000, 2000);
 }
 
 static int load_enoent(enum fmt fmt)
 {
-	GP_Context *img = NULL;
-
-	switch (fmt) {
-	case PNG:
-		img = GP_LoadPNG("nonexistent.png", NULL);
-	break;
-	case JPG:
-		img = GP_LoadJPG("nonexistent.jpg", NULL);
-	break;
-	case GIF:
-		img = GP_LoadGIF("nonexistent.gif", NULL);
-	break;
-	}
+	GP_Context *img;
+	
+	img = load(fmt, "nonexistent");	
 	
 	if (img != NULL) {
 		tst_report(0, "Test succedded unexpectedly");
@@ -176,15 +190,82 @@ static int test_GIF_Load_ENOENT(void)
 	return load_enoent(GIF);
 }
 
-static int abort_callback(GP_ProgressCallback *self __attribute__((unused)))
+static int test_BMP_Load_ENOENT(void)
 {
-	return 1;
+	return load_enoent(BMP);
+}
+
+static int load_eacces(enum fmt fmt)
+{
+	char buf[256];
+	GP_Context *img;
+
+	snprintf(buf, sizeof(buf), "test.%s", strfmt(fmt));
+	
+	FILE *f = fopen(buf, "w");
+
+	if (f == NULL) {
+		tst_report(0, "Failed to create file 'test'");
+		return TST_INTERR;
+	}
+
+	fclose(f);
+
+	if (chmod(buf, 200)) {
+		tst_report(0, "chmod failed: %s", strerror(errno));
+		return TST_INTERR;
+	}
+
+	img = load(fmt, "test");
+
+	if (img != NULL) {
+		tst_report(0, "Test succedded unexpectedly");
+		return TST_FAILED;
+	}
+	
+	if (errno == ENOSYS) {
+		tst_report(0, "Load %s: ENOSYS", strfmt(fmt));
+		return TST_SKIPPED;
+	}
+
+	if (errno != EACCES) {
+		tst_report(0, "Expected errno = EACCES, have %s",
+		              strerror(errno));
+		return TST_FAILED;
+	}
+
+	return TST_SUCCESS;
+}
+
+static int test_PNG_Load_EACCES(void)
+{
+	return load_eacces(PNG);
+}
+
+static int test_JPG_Load_EACCES(void)
+{
+	return load_eacces(JPG);
+}
+
+static int test_GIF_Load_EACCES(void)
+{
+	return load_eacces(GIF);
+}
+
+static int test_BMP_Load_EACCES(void)
+{
+	return load_eacces(BMP);
 }
 
 /*
  * We test that a correct cleanup is done after aborting the image load from a
  * callback.
  */
+static int abort_callback(GP_ProgressCallback *self __attribute__((unused)))
+{
+	return 1;
+}
+
 static int test_PNG_Save_abort(void)
 {
 	GP_Context *img;
@@ -291,7 +372,7 @@ static struct file_testcase file_testcases[] = {
 
 	{"not_here.jpg", 0, ENOENT},
 
-	//TODO: EPERM
+	//TODO: EACCES
 
 	{NULL, 0, 0}
 };
@@ -328,7 +409,7 @@ static int test_Load(void)
 			continue;
 		}
 
-		if (errno == ENOSYS) {
+		if (file_testcases[i].expected_errno != ENOSYS && errno == ENOSYS) {
 			tst_report(0, "Load Image '%s': ENOSYS",
 			           file_testcases[i].filename);
 			continue;
@@ -360,26 +441,47 @@ static int test_Load(void)
 const struct tst_suite tst_suite = {
 	.suite_name = "Image Loaders testsuite",
 	.tests = {
-		{.name = "PNG Load/Save", .tst_fn = test_PNG_Load_Save,
-		 .flags = TST_TMPDIR | TST_CHECK_MALLOC},
-		{.name = "JPG Load/Save", .tst_fn = test_JPG_Load_Save,
-		 .flags = TST_TMPDIR | TST_CHECK_MALLOC},
+		/* Correct errno tests */
 		{.name = "PNG Load ENOENT", .tst_fn = test_PNG_Load_ENOENT,
 		 .flags = TST_TMPDIR},
 		{.name = "JPG Load ENOENT", .tst_fn = test_JPG_Load_ENOENT,
 		 .flags = TST_TMPDIR},
 		{.name = "GIF Load ENOENT", .tst_fn = test_GIF_Load_ENOENT,
 		 .flags = TST_TMPDIR},
+		{.name = "BMP Load ENOENT", .tst_fn = test_BMP_Load_ENOENT,
+		 .flags = TST_TMPDIR},
+
+		{.name = "PNG Load EACCES", .tst_fn = test_PNG_Load_EACCES,
+		 .flags = TST_TMPDIR},
+		{.name = "JPG Load EACCES", .tst_fn = test_JPG_Load_EACCES,
+		 .flags = TST_TMPDIR},
+		{.name = "GIF Load EACCES", .tst_fn = test_GIF_Load_EACCES,
+		 .flags = TST_TMPDIR},
+		{.name = "BMP Load EACCES", .tst_fn = test_BMP_Load_EACCES,
+		 .flags = TST_TMPDIR},
+		
+		/* Generic GP_LoadImage test */
+		{.name = "Image Load", .tst_fn = test_Load,
+		 .flags = TST_TMPDIR},
+		
+		/* Callback abort tests */
 		{.name = "PNG Load abort", .tst_fn = test_PNG_Load_abort,
 		 .flags = TST_TMPDIR | TST_CHECK_MALLOC},
 		{.name = "PNG Save abort", .tst_fn = test_PNG_Save_abort,
 		 .flags = TST_TMPDIR | TST_CHECK_MALLOC},
-		{.name = "Image Load", .tst_fn = test_Load,
-		 .flags = TST_TMPDIR},
-		{.name = "PNG stress", .tst_fn = test_PNG_stress,
+		
+		/* Basic Save Load tests */
+		{.name = "PNG Save Load", .tst_fn = test_PNG_Save_Load,
 		 .flags = TST_TMPDIR | TST_CHECK_MALLOC},
-		{.name = "JPG stress", .tst_fn = test_JPG_stress,
+		{.name = "JPG Save Load", .tst_fn = test_JPG_Save_Load,
 		 .flags = TST_TMPDIR | TST_CHECK_MALLOC},
+		
+		/* Stress Save Load tests */
+		{.name = "PNG Stress", .tst_fn = test_PNG_stress,
+		 .flags = TST_TMPDIR | TST_CHECK_MALLOC},
+		{.name = "JPG Stress", .tst_fn = test_JPG_stress,
+		 .flags = TST_TMPDIR | TST_CHECK_MALLOC},
+		
 		{.name = NULL},
 	}
 };
