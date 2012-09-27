@@ -48,11 +48,21 @@ int GP_OpenGIF(const char *src_path, void **f)
 {
 	GifFileType *gf;
 
+	errno = 0;
+
 	gf = DGifOpenFileName(src_path);
 
 	if (gf == NULL) {
-		//TODO: error handling
-		errno = EIO;
+		/*
+		 * The giflib uses open() so when we got a failure and errno
+		 * is set => open() has failed.
+		 *
+		 * When errno is not set the file content was not valid so we
+		 * set errno to EIO.
+		 */
+		if (errno == 0)
+			errno = EIO;
+		
 		return 1;
 	}
 
