@@ -158,7 +158,7 @@ GP_Context *GP_LoadImage(const char *src_path, GP_ProgressCallback *callback)
 	case GP_FMT_GIF:
 		return GP_LoadGIF(src_path, callback);
 	case GP_FMT_BMP:
-		return GP_LoadGIF(src_path, callback);
+		return GP_LoadBMP(src_path, callback);
 	case GP_FMT_PBM:
 		return GP_LoadPBM(src_path, callback);
 	case GP_FMT_PGM:
