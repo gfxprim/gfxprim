@@ -418,14 +418,14 @@ GP_Context *GP_LoadJPG(const char GP_UNUSED(*src_path),
 int GP_ReadJPGMetaData(FILE GP_UNUSED(*f), GP_MetaData GP_UNUSED(*data))
 {
 	errno = ENOSYS;
-	return NULL;
+	return 1;
 }
 
 int GP_LoadJPGMetaData(const char GP_UNUSED(*src_path),
                        GP_MetaData GP_UNUSED(*data))
 {
 	errno = ENOSYS;
-	return NULL;
+	return 1;
 }
 
 int GP_SaveJPG(const GP_Context GP_UNUSED(*src),
