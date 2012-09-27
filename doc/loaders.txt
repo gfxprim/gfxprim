@@ -1,18 +1,26 @@
 Context loaders
 ---------------
-This part of gfxprim library aims to create API to load/save images from/to
-common image file formats.
+This part of GFXprim library aims to create API to load and save images
+from/to common image file formats.
 
 All loading functions returns a pointer to allocated and loaded image or upon
-a failure 'NULL' is returned and 'errno' is set.
+a failure 'NULL' and 'errno' is set.
 
-The possible errno values are:
+All saving functions returns zero on success and non-zero on failure and
+'errno' is set. If image saving is aborted by a callback, the opened file is
+closed and removed from a filesystem before the call returns.
 
-* anything returned by fopen(), fclose(), fseek(), ...
-* 'ENOSYS' if library wasn't compiled with particular library support
-* 'ENOMEM' as returned by malloc()
-* 'EIO'/'EILSEQ' invalid image data
-* 'ECANCELED' loading canceled from callback
+The possible 'errno' values (for both loading and saving) are:
+
+* anything returned by +open()+, +close()+, +lseek()+, +read()+, +write()+, ...
+ - 'ENOENT' if file doesn't exist
+ - 'EACCES' if process doesn't have rights
+ - etc.
+
+* 'ENOSYS'    if GFXprim wasn't compiled with particular library support
+* 'ENOMEM'    if returned by +malloc()+
+* 'EIO'       invalid image data (wrong signature, header or image data)
+* 'ECANCELED' action canceled by returning non-zero from within a callback
 
 Common Loader
 ~~~~~~~~~~~~~
@@ -27,7 +35,8 @@ GP_Context *GP_LoadImage(const char *src_path, GP_ProgressCallback *callback);
 -------------------------------------------------------------------------------
 
 Loads image from a file. The format is now matched by an image file extension.
-File signature loading method is on the TODO.
+Fallback to file signature if file content doesn't match it's extension is on
+the TODO.
 
 [source,c]
 -------------------------------------------------------------------------------
@@ -44,16 +53,11 @@ file extension, if extension is invalid or if support for requested image
 format wasn't compiled in, non-zero is returned and 'errno' is set to
 'ENOSYS'.
 
-Returns zero on success and non-zero on failure and 'errno' is set. The
-possible errno values are 'ENOSYS' for unknown format and anything that could
-be returned by 'fopen()', 'open()', 'fwrite()', 'write()', 'seek()', etc...
-
 PNG
 ~~~
-The 'PNG' loading support is optionally implemented by libpng.
+The 'PNG' image support is implemented by the libpng library.
 
-Just now, the 'PNG' support is not fully finished. Images with alpha channel
-are not supported yet.
+WARNING: PNG images with alpha channel are not supported yet.
 
 [source,c]
 -------------------------------------------------------------------------------
@@ -67,8 +71,6 @@ int GP_OpenPNG(const char *src_path, FILE **f);
 Opens file and checks for 'PNG' signature.  Returns zero on success (file
 could be opened, signature matches), the opened file is returned and the file
 position points right after the end of the 'PNG' signature.
-
-Upon failure 'errno' is filled.
 
 This function is semi-internal, you should rather use functions listed below.
 
@@ -108,17 +110,13 @@ int GP_SavePNG(const GP_Context *src, const char *dst_path,
                GP_ProgressCallback *callback);
 -------------------------------------------------------------------------------
 
-Writes a Context into a 'PNG' image. If aborted by a callback, the opened file
-is closed and removed before the call returns non-zero and 'errno' is set to
-'ECANCELED'.
-
 Currently only 'RGB888' format is supported, you should convert the
 'GP_Context' to 'RGB888' before calling this function otherwise non-zero is
 returned and 'errno' is set to 'ENOSYS'. 
 
 JPEG
 ~~~~
-The 'JPEG' loading support is optionally implemented by jpeg library.
+The 'JPEG' image support is implemented by the jpeg library.
 
 [source,c]
 -------------------------------------------------------------------------------
@@ -185,7 +183,7 @@ convert the context into one of them before this functions is called.
 GIF
 ~~~
 
-The 'GIF' format is supported optionally by giflib library.
+The 'GIF' image support is implemented by the giflib library.
 
 [source,c]
 -------------------------------------------------------------------------------
