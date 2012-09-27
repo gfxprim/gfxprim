@@ -31,6 +31,7 @@
 enum fmt {
 	PNG,
 	JPG,
+	GIF,
 };
 
 static const char *strfmt(enum fmt fmt)
@@ -40,6 +41,8 @@ static const char *strfmt(enum fmt fmt)
 		return "PNG";
 	case JPG:
 		return "JPG";
+	case GIF:
+		return "GIF";
 	};
 
 	return "INVALID";
@@ -65,9 +68,16 @@ static int load_save(enum fmt fmt, GP_Size w, GP_Size h)
 	case JPG:
 		ret = GP_SaveJPG(img, "test.jpg", NULL);
 	break;
+	default:
+		return TST_INTERR;
 	}
 
 	if (ret) {
+		if (errno == ENOSYS) {
+			tst_report(0, "Save %s: ENOSYS", strfmt(fmt));
+			return TST_SKIPPED;
+		}
+		
 		tst_report(0, "Failed to save %s: %s",
 		           strfmt(fmt), strerror(errno));
 		return TST_FAILED;
@@ -80,6 +90,8 @@ static int load_save(enum fmt fmt, GP_Size w, GP_Size h)
 	case JPG:
 		res = GP_LoadJPG("test.jpg", NULL);
 	break;
+	default:
+		return TST_INTERR;
 	}
 
 	if (res == NULL) {
@@ -114,20 +126,33 @@ static int test_JPG_stress(void)
 	return load_save(JPG, 2000, 2000);
 }
 
-static int test_PNG_Load_fail(void)
+static int load_enoent(enum fmt fmt)
 {
-	GP_Context *img;
+	GP_Context *img = NULL;
 
-	img = GP_LoadPNG("nonexistent.png", NULL);
-
-	int saved_errno = errno;
-
+	switch (fmt) {
+	case PNG:
+		img = GP_LoadPNG("nonexistent.png", NULL);
+	break;
+	case JPG:
+		img = GP_LoadJPG("nonexistent.jpg", NULL);
+	break;
+	case GIF:
+		img = GP_LoadGIF("nonexistent.gif", NULL);
+	break;
+	}
+	
 	if (img != NULL) {
 		tst_report(0, "Test succedded unexpectedly");
 		return TST_FAILED;
 	}
+	
+	if (errno == ENOSYS) {
+		tst_report(0, "Load %s: ENOSYS", strfmt(fmt));
+		return TST_SKIPPED;
+	}
 
-	if (saved_errno != ENOENT) {
+	if (errno != ENOENT) {
 		tst_report(0, "Expected errno = ENOENT, have %s",
 		              strerror(errno));
 		return TST_FAILED;
@@ -136,26 +161,19 @@ static int test_PNG_Load_fail(void)
 	return TST_SUCCESS;
 }
 
-static int test_JPG_Load_fail(void)
+static int test_PNG_Load_ENOENT(void)
 {
-	GP_Context *img;
+	return load_enoent(PNG);
+}
 
-	img = GP_LoadJPG("nonexistent.png", NULL);
+static int test_JPG_Load_ENOENT(void)
+{
+	return load_enoent(JPG);
+}
 
-	int saved_errno = errno;
-
-	if (img != NULL) {
-		tst_report(0, "Test succedded unexpectedly");
-		return TST_FAILED;
-	}
-
-	if (saved_errno != ENOENT) {
-		tst_report(0, "Expected errno = ENOENT, have %s",
-		              strerror(errno));
-		return TST_FAILED;
-	}
-
-	return TST_SUCCESS;
+static int test_GIF_Load_ENOENT(void)
+{
+	return load_enoent(GIF);
 }
 
 static int abort_callback(GP_ProgressCallback *self __attribute__((unused)))
@@ -180,11 +198,14 @@ static int test_PNG_Save_abort(void)
 		return TST_FAILED;
 	}
 	
-	int saved_errno = errno;
-	
-	if (saved_errno != ECANCELED) {
+	if (errno == ENOSYS) {
+		tst_report(0, "Load PNG: ENOSYS");
+		return TST_SKIPPED;
+	}
+
+	if (errno != ECANCELED) {
 		tst_report(0, "Expected errno = ECANCELED, have %s",
-		           strerror(saved_errno));
+		           strerror(errno));
 		return TST_FAILED;
 	}
 
@@ -200,6 +221,12 @@ static int test_PNG_Load_abort(void)
 	img = GP_ContextAlloc(100, 100, GP_PIXEL_RGB888);
 
 	if (GP_SavePNG(img, "test.png", NULL)) {
+		
+		if (errno == ENOSYS) {
+			tst_report(0, "Save PNG: ENOSYS");
+			return TST_SKIPPED;
+		}
+		
 		tst_report(0, "Failed to save PNG: %s", strerror(errno));
 		return TST_FAILED;
 	}
@@ -271,7 +298,7 @@ static struct file_testcase file_testcases[] = {
 
 static int test_Load(void)
 {
-	unsigned int i, fail = 0;
+	unsigned int i, fail = 0, success = 0;
 
 	/* Create empty files */
 	for (i = 0; file_testcases[i].filename != NULL; i++) {
@@ -298,9 +325,16 @@ static int test_Load(void)
 			tst_report(0, "GP_LoadImage('%s') succeeded "
 			              "unexpectedly", file_testcases[i].filename);
 			fail++;
+			continue;
+		}
+
+		if (errno == ENOSYS) {
+			tst_report(0, "Load Image '%s': ENOSYS",
+			           file_testcases[i].filename);
+			continue;
 		}
 		
-		if (ret == NULL && file_testcases[i].expected_errno != errno) {
+		if (file_testcases[i].expected_errno != errno) {
 			tst_report(0, "Expected errno %i (%s) got %i (%s) on '%s'",
 			              file_testcases[i].expected_errno,
 				      strerror(file_testcases[i].expected_errno),
@@ -308,13 +342,19 @@ static int test_Load(void)
 				      strerror(saved_errno),
 				      file_testcases[i].filename);
 			fail++;
+			continue;
 		}
+
+		success++;
 	}
 
 	if (fail)
 		return TST_FAILED;
 
-	return TST_SUCCESS;
+	if (success)
+		return TST_SUCCESS;
+
+	return TST_SKIPPED;
 }
 
 const struct tst_suite tst_suite = {
@@ -324,9 +364,11 @@ const struct tst_suite tst_suite = {
 		 .flags = TST_TMPDIR | TST_CHECK_MALLOC},
 		{.name = "JPG Load/Save", .tst_fn = test_JPG_Load_Save,
 		 .flags = TST_TMPDIR | TST_CHECK_MALLOC},
-		{.name = "PNG Load fail", .tst_fn = test_PNG_Load_fail,
+		{.name = "PNG Load ENOENT", .tst_fn = test_PNG_Load_ENOENT,
 		 .flags = TST_TMPDIR},
-		{.name = "JPG Load fail", .tst_fn = test_JPG_Load_fail,
+		{.name = "JPG Load ENOENT", .tst_fn = test_JPG_Load_ENOENT,
+		 .flags = TST_TMPDIR},
+		{.name = "GIF Load ENOENT", .tst_fn = test_GIF_Load_ENOENT,
 		 .flags = TST_TMPDIR},
 		{.name = "PNG Load abort", .tst_fn = test_PNG_Load_abort,
 		 .flags = TST_TMPDIR | TST_CHECK_MALLOC},
