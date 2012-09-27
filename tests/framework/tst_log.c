@@ -186,12 +186,19 @@ static int append_html(struct tst_job *job, FILE *f)
 {
 	const char *padd = "   ";
 	int sec, nsec;
+	static int hack_counter = 0;
+	const char *bgcol;
 
 	tst_diff_timespec(&sec, &nsec, &job->start_time, &job->stop_time);
 
+	if (hack_counter)
+		bgcol = "#ccccee";
+	else
+		bgcol = "#ddddee";
+
 	fprintf(f, "%s<tr>\n", padd);
-	fprintf(f, "%s <td bgcolor=\"#ccccee\">%s&nbsp;</td>\n", padd, job->test->name);
-	fprintf(f, "%s <td bgcolor=\"#ccccee\">\n", padd);
+	fprintf(f, "%s <td bgcolor=\"%s\">%s&nbsp;</td>\n", padd, bgcol, job->test->name);
+	fprintf(f, "%s <td bgcolor=\"%s\">\n", padd, bgcol);
 	fprintf(f, "%s  <center><small><font color=\"#222\">%i.%03is %i.%03is</font></small></center>",
 	        padd, sec, nsec/1000000, (int)job->cpu_time.tv_sec, (int)job->cpu_time.tv_nsec/1000000);
 	fprintf(f, "%s </td>\n", padd);
@@ -213,7 +220,9 @@ static int append_html(struct tst_job *job, FILE *f)
 	}
 
 	fprintf(f, "%s</tr>\n", padd);
-	
+
+	hack_counter = !hack_counter;
+
 	return 0;
 }
 
