@@ -186,10 +186,16 @@ int fail_FILE(void)
 	return TST_SUCCESS;
 }
 
+static int skipped_fn(void)
+{
+	return TST_SKIPPED;
+}
+
 const struct tst_suite tst_suite = {
 	.suite_name = "Testing Framework Example",
 	.tests = {
 		{.name = "Success test", .tst_fn = success_fn},
+		{.name = "Skipped test", .tst_fn = skipped_fn},
 		{.name = "Sigsegv test", .tst_fn = sigsegv_fn},
 		{.name = "Failed test", .tst_fn = failed_fn},
 		{.name = "Stack overflow test", .tst_fn = stack_overflow_fn},
