@@ -28,21 +28,63 @@
 
 #include "tst_test.h"
 
-static int test_PNG_Load_Save(void)
+enum fmt {
+	PNG,
+	JPG,
+};
+
+static const char *strfmt(enum fmt fmt)
 {
-	GP_Context *img, *res;
+	switch (fmt) {
+	case PNG:
+		return "PNG";
+	case JPG:
+		return "JPG";
+	};
 
-	img = GP_ContextAlloc(100, 100, GP_PIXEL_RGB888);
+	return "INVALID";
+}
 
-	if (GP_SavePNG(img, "test.png", NULL)) {
-		tst_report(0, "Failed to save PNG: %s", strerror(errno));
+static int load_save(enum fmt fmt, GP_Size w, GP_Size h)
+{
+	GP_Context *img, *res = NULL;
+
+	img = GP_ContextAlloc(w, h, GP_PIXEL_RGB888);
+	
+	if (img == NULL) {
+		tst_report(0, "GP_ContextAlloc failed");
 		return TST_FAILED;
 	}
 
-	res = GP_LoadPNG("test.png", NULL);
+	int ret = 1;
+
+	switch (fmt) {
+	case PNG:
+		ret = GP_SavePNG(img, "test.png", NULL);
+	break;
+	case JPG:
+		ret = GP_SaveJPG(img, "test.jpg", NULL);
+	break;
+	}
+
+	if (ret) {
+		tst_report(0, "Failed to save %s: %s",
+		           strfmt(fmt), strerror(errno));
+		return TST_FAILED;
+	}
+
+	switch (fmt) {
+	case PNG:
+		res = GP_LoadPNG("test.png", NULL);
+	break;
+	case JPG:
+		res = GP_LoadJPG("test.jpg", NULL);
+	break;
+	}
 
 	if (res == NULL) {
-		tst_report(0, "Failed to load PNG: %s", strerror(errno));
+		tst_report(0, "Failed to load %s: %s",
+		           strfmt(fmt), strerror(errno));
 		return TST_FAILED;
 	}
 
@@ -52,28 +94,24 @@ static int test_PNG_Load_Save(void)
 	return TST_SUCCESS;
 }
 
+static int test_PNG_Load_Save(void)
+{
+	return load_save(PNG, 100, 100);
+}
+
 static int test_JPG_Load_Save(void)
 {
-	GP_Context *img, *res;
+	return load_save(JPG, 100, 100);
+}
 
-	img = GP_ContextAlloc(100, 100, GP_PIXEL_RGB888);
+static int test_PNG_stress(void)
+{
+	return load_save(PNG, 2000, 2000);
+}
 
-	if (GP_SaveJPG(img, "test.jpg", NULL)) {
-		tst_report(0, "Failed to save JPG: %s", strerror(errno));
-		return TST_FAILED;
-	}
-
-	res = GP_LoadJPG("test.jpg", NULL);
-
-	if (res == NULL) {
-		tst_report(0, "Failed to load JPG: %s", strerror(errno));
-		return TST_FAILED;
-	}
-
-	GP_ContextFree(img);
-	GP_ContextFree(res);
-
-	return TST_SUCCESS;
+static int test_JPG_stress(void)
+{
+	return load_save(JPG, 2000, 2000);
 }
 
 static int test_PNG_Load_fail(void)
@@ -188,38 +226,6 @@ static int test_PNG_Load_abort(void)
 	return TST_SUCCESS;
 }
 
-/*
- * PNG stress test, let it save and load 10MB image.
- */
-static int test_PNG_stress(void)
-{
-	GP_Context *img;
-
-	img = GP_ContextAlloc(2000, 2000, GP_PIXEL_RGB888);
-
-	if (img == NULL) {
-		tst_report(0, "GP_ContextAlloc failed");
-		return TST_FAILED;
-	}
-
-	if (GP_SavePNG(img, "test.png", NULL)) {
-		tst_report(0, "GP_SavePNG failed with: %s", strerror(errno));
-		return TST_FAILED;
-	}
-
-	GP_ContextFree(img);
-
-	img = GP_LoadPNG("test.png", NULL);
-	
-	if (img == NULL) {
-		tst_report(0, "GP_LoadPNG failed with: %s", strerror(errno));
-		return TST_FAILED;
-	}
-
-	GP_ContextFree(img);
-
-	return TST_SUCCESS;
-}
 
 /*
  * Loaders test. Hammers the GP_LoadImage() interface with plenty of
@@ -242,6 +248,7 @@ static struct file_testcase file_testcases[] = {
 	{"jpg.",  1, ENOSYS},
 	{"gif.",  1, ENOSYS},
 	{"jpeg.", 1, ENOSYS},
+	{"bmp.", 1, ENOSYS},
 	
 	{".jpg",    1, EIO},
 	{"img.jpg", 1, EIO},
@@ -249,11 +256,15 @@ static struct file_testcase file_testcases[] = {
 	{"img.png", 1, EIO},
 	{".gif",    1, EIO},
 	{"img.gif", 1, EIO},
+	{".bmp",    1, EIO},
+	{"img.bmp", 1, EIO},
 	{".pbm",    1, EIO},
 	{".pgm",    1, EIO},
 	{".ppm",    1, EIO},
 
 	{"not_here.jpg", 0, ENOENT},
+
+	//TODO: EPERM
 
 	{NULL, 0, 0}
 };
@@ -321,10 +332,12 @@ const struct tst_suite tst_suite = {
 		 .flags = TST_TMPDIR | TST_CHECK_MALLOC},
 		{.name = "PNG Save abort", .tst_fn = test_PNG_Save_abort,
 		 .flags = TST_TMPDIR | TST_CHECK_MALLOC},
-		{.name = "PNG stress", .tst_fn = test_PNG_stress,
-		 .flags = TST_TMPDIR | TST_CHECK_MALLOC},
 		{.name = "Image Load", .tst_fn = test_Load,
 		 .flags = TST_TMPDIR},
+		{.name = "PNG stress", .tst_fn = test_PNG_stress,
+		 .flags = TST_TMPDIR | TST_CHECK_MALLOC},
+		{.name = "JPG stress", .tst_fn = test_JPG_stress,
+		 .flags = TST_TMPDIR | TST_CHECK_MALLOC},
 		{.name = NULL},
 	}
 };
