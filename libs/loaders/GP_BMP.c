@@ -535,7 +535,7 @@ int GP_OpenBMP(const char *src_path, FILE **f,
 		GP_DEBUG(1, "Unexpected bitmap header 0x%02x (%c) 0x%02x (%c)",
 		            ch1, isascii(ch1) ? ch1 : ' ',
 			    ch2, isascii(ch2) ? ch2 : ' ');
-		err = EILSEQ;
+		err = EIO;
 		goto err1;
 	}
 	
