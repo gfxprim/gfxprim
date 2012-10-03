@@ -116,7 +116,8 @@ static void stop_test(struct tst_job *job)
 	/* Now print test message store */
 	tst_msg_print(&job->store);
 	
-	fprintf(stderr, "------------------------------------------------------------------------------- \n");
+	fprintf(stderr, "------------------------------------------------------"
+                        "------------------------- \n");
 }
 
 /*
@@ -129,14 +130,19 @@ static void remove_tmpdir(const char *path)
 	 */
 	if (!strncmp("/tmp/", path, sizeof("/tmp/"))) {
 		tst_warn("Path '%s' doesn't start with /tmp/, "
-		         "ommiting cleanup", path);
+		         "omitting cleanup", path);
 		return;
 	}
 
 	//TODO: Cleaner solution?
 	char buf[256];
+	int ret;
+
 	snprintf(buf, sizeof(buf), "rm -rf '%s'", path);
-	(void)system(buf);
+	ret = system(buf);
+
+	if (ret)
+		tst_warn("Failed to clean temp dir.");	
 }
 
 /*
@@ -146,7 +152,7 @@ static void create_tmpdir(const char *name, char *template, size_t size)
 {
 	char safe_name[256];
 
-	/* Fix any funny characters in test name */
+	/* Fix any funny characters in the test name */
 	snprintf(safe_name, sizeof(safe_name), "%s", name);
 
 	char *s = safe_name;
@@ -159,7 +165,6 @@ static void create_tmpdir(const char *name, char *template, size_t size)
 
 	/* Create template from test name */
 	snprintf(template, size, "/tmp/ctest_%s_XXXXXX", safe_name);
-
 
 	if (mkdtemp(template) == NULL) {
 		tst_warn("mkdtemp(%s) failed: %s", template, strerror(errno));
@@ -227,13 +232,16 @@ int tst_report(int level, const char *fmt, ...)
 	va_start(va, fmt);
 	ret = vsnprintf(buf+3, sizeof(buf) - 3, fmt, va);
 	va_end(va);
+	
+	ssize_t size = ret > 255 ? 255 : ret + 1;
 
 	buf[0] = 'm';
 	buf[1] = level;
-	((unsigned char*)buf)[2] = ret > 255 ? 255 : ret + 1;
+	((unsigned char*)buf)[2] = size; 
 
 	if (my_job != NULL)
-		write(my_job->pipefd, buf, (int)buf[2] + 3);
+		if (write(my_job->pipefd, buf, size + 3) != size + 3)
+			tst_warn("Failed to write msg to pipe.");
 
 	return ret;
 }
@@ -250,6 +258,7 @@ void tst_job_run(struct tst_job *job)
 	/* Prepare the test message store */
 	tst_msg_init(&job->store);
 
+	/* marks test as started */
 	start_test(job);
 
 	if (pipe(pipefd)) {
@@ -312,7 +321,8 @@ void tst_job_run(struct tst_job *job)
 		tst_malloc_check_stop();
 		tst_malloc_check_report(&job->malloc_stats);
 
-		child_write(job, 's', &job->malloc_stats, sizeof(job->malloc_stats));
+		child_write(job, 's', &job->malloc_stats,
+                            sizeof(job->malloc_stats));
 
 		if (job->malloc_stats.lost_chunks != 0 && ret == TST_SUCCESS)
 			ret = TST_MEMLEAK;
@@ -344,7 +354,7 @@ static void parent_read_msg(struct tst_job *job)
 
 	char buf[header[1]];
 
-	if (read(job->pipefd, buf, sizeof(buf)) != sizeof(buf))
+	if (read(job->pipefd, buf, sizeof(buf)) != (ssize_t)sizeof(buf))
 		tst_warn("parent: read(message) failed: %s", strerror(errno));
 
 	/* null-terminated the string, to be extra sure */
