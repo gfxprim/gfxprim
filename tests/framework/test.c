@@ -191,6 +191,14 @@ static int skipped_fn(void)
 	return TST_SKIPPED;
 }
 
+static int res_fn(void)
+{
+	if (access("test.c", R_OK) == 0) 
+		tst_report(0, "File correctly copied");
+
+	return TST_SUCCESS;
+}
+
 const struct tst_suite tst_suite = {
 	.suite_name = "Testing Framework Example",
 	.tests = {
@@ -206,6 +214,8 @@ const struct tst_suite tst_suite = {
 		{.name = "Double free()", .tst_fn = double_free},
 		{.name = "Barrier allocation", .tst_fn = barrier_allocation},
 		{.name = "Failed FILE", .tst_fn = fail_FILE, .flags = TST_TMPDIR},
+		{.name = "Resource", .tst_fn = res_fn, .flags = TST_TMPDIR,
+		 .res_path = "test.c"},
 		{.name = NULL},
 	}
 };

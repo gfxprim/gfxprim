@@ -49,7 +49,13 @@ enum tst_flags {
 };
 
 struct tst_test {
+	/* test name */
 	const char *name;
+	/* 
+	 * Resurce path, file or directory which is copied to
+	 * test directory before test is executed.
+	 */
+	const char *res_path;
 	/* test function */
 	int (*tst_fn)(void);
 	/* time limit in seconds 0 == unlimited */

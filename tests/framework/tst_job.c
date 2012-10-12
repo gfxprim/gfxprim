@@ -146,16 +146,18 @@ static void remove_tmpdir(const char *path)
 }
 
 /*
- * Create temp directory and cd into it
+ * Create temp directory and cd into it, copy resources if needed
  */
-static void create_tmpdir(const char *name, char *template, size_t size)
+static void prepare_tmpdir(const char *name, const char *res_path,
+                          char *template, size_t size)
 {
-	char safe_name[256];
+	char tmp[256];
+	int ret;
 
 	/* Fix any funny characters in the test name */
-	snprintf(safe_name, sizeof(safe_name), "%s", name);
+	snprintf(tmp, sizeof(tmp), "%s", name);
 
-	char *s = safe_name;
+	char *s = tmp;
 
 	while (*s != '\0') {
 		if (!isalnum(*s))
@@ -164,12 +166,26 @@ static void create_tmpdir(const char *name, char *template, size_t size)
 	}
 
 	/* Create template from test name */
-	snprintf(template, size, "/tmp/ctest_%s_XXXXXX", safe_name);
+	snprintf(template, size, "/tmp/ctest_%s_XXXXXX", tmp);
 
 	if (mkdtemp(template) == NULL) {
 		tst_warn("mkdtemp(%s) failed: %s", template, strerror(errno));
 		exit(TST_INTERR);
 	}
+
+	/* Copy resources if needed */
+	if (res_path != NULL) {
+		snprintf(tmp, sizeof(tmp), "cp -r '%s' '%s'",
+		         res_path, template);
+
+		ret = system(tmp);
+
+		if (ret) {
+			tst_warn("failed to copy resource '%s'", res_path);
+			exit(TST_INTERR);
+		}
+	}
+
 
 	if (chdir(template)) {
 		tst_warn("chdir(%s) failed: %s", template, strerror(errno));
@@ -297,7 +313,8 @@ void tst_job_run(struct tst_job *job)
 
 	/* Create directory in /tmp/ and chdir into it. */
 	if (job->test->flags & TST_TMPDIR)
-		create_tmpdir(job->test->name, template, sizeof(template));
+		prepare_tmpdir(job->test->name, job->test->res_path,
+		               template, sizeof(template));
 
 	/* 
 	 * If timeout is specified, setup alarm.
