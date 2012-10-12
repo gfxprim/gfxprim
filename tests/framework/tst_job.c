@@ -87,6 +87,9 @@ static void stop_test(struct tst_job *job)
 	case TST_ABORTED:
 		result = "[    \e[1;31mABORTED\e[0m     ]";
 	break;
+	case TST_FPE:
+		result = "[ \e[1;31mFP  EXCEPTION\e[0m  ]";
+	break;
 	case TST_MEMLEAK:
 		result = "[    \e[1;33mMEMLEAK\e[0m     ]";
 	break;
@@ -454,6 +457,13 @@ void tst_job_wait(struct tst_job *job)
 		break;
 		case SIGALRM:
 			job->result = TST_TIMEOUT;
+		break;
+		/*
+		 * Floating point exception, most likely
+		 * division by zero (including integer division)
+		 */
+		case SIGFPE:
+			job->result = TST_FPE;
 		break;
 		/* 
 		 * abort() called most likely double free or malloc data

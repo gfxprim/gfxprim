@@ -199,6 +199,14 @@ static int res_fn(void)
 	return TST_SUCCESS;
 }
 
+static int fpe_fn(void)
+{
+	/* its volatile so compiler doesn't detect the division by zero */
+	volatile int i = 0;
+
+	return 1/i;
+}
+
 const struct tst_suite tst_suite = {
 	.suite_name = "Testing Framework Example",
 	.tests = {
@@ -216,6 +224,7 @@ const struct tst_suite tst_suite = {
 		{.name = "Failed FILE", .tst_fn = fail_FILE, .flags = TST_TMPDIR},
 		{.name = "Resource", .tst_fn = res_fn, .flags = TST_TMPDIR,
 		 .res_path = "test.c"},
+		{.name = "Floating point exception", .tst_fn = fpe_fn},
 		{.name = NULL},
 	}
 };
