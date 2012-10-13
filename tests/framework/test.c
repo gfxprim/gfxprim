@@ -238,7 +238,7 @@ const struct tst_suite tst_suite = {
 		{.name = "Failed FILE", .tst_fn = fail_FILE, .flags = TST_TMPDIR},
 		{.name = "Resource", .tst_fn = res_fn, .flags = TST_TMPDIR,
 		 .res_path = "test.c"},
-		{.name = "Floating point exception", .tst_fn = fpe_fn},
+		{.name = "FP exception", .tst_fn = fpe_fn},
 		{.name = "Benchmark test", .tst_fn = benchmark_fn, .bench_iter = 10},
 		{.name = NULL},
 	}

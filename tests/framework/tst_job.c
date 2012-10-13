@@ -60,7 +60,7 @@ void tst_diff_timespec(int *sec, int *nsec, struct timespec *start,
 	}
 }
 
-#define NAME_PADD 24
+#define NAME_PADD 23
 
 static void stop_test(struct tst_job *job)
 {
@@ -109,7 +109,7 @@ static void stop_test(struct tst_job *job)
 	for (i = strlen(name); i < NAME_PADD; i++)
 		fprintf(stderr, " ");
 
-	fprintf(stderr, "  finished (Time %i.%03is, CPU %i.%03is)  %s\n",
+	fprintf(stderr, " finished (Time %2i.%03is, CPU %2i.%03is)  %s\n",
 	                sec, nsec/1000000,
 			(int)job->cpu_time.tv_sec,
 			(int)job->cpu_time.tv_nsec/1000000,
@@ -119,7 +119,7 @@ static void stop_test(struct tst_job *job)
 		for (i = 0; i < NAME_PADD; i++)
 			fprintf(stderr, " ");
 
-		fprintf(stderr, "  bench CPU %i.%06is +/- %i.%06is\n",
+		fprintf(stderr, " bench CPU time %i.%06is +/- %i.%06is\n",
 	               (int)job->bench_mean.tv_sec,
 		       (int)job->bench_mean.tv_nsec/1000,
 		       (int)job->bench_var.tv_sec,
