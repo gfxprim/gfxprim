@@ -87,15 +87,19 @@ void tst_run_suite(const struct tst_suite *suite, const char *tst_name)
 		if (tst_name == NULL || !strcmp(tst_name, suite->tests[i].name)) {
 			ret = run_test(&suite->tests[i], html, json);
 			counters[ret]++;
-			counter++;
+			
+			if (ret != TST_SKIPPED)
+				counter++;
 		}
 	}
 
 	tst_log_close(html, TST_LOG_HTML);
 	tst_log_close(json, TST_LOG_JSON);
 
-	fprintf(stderr, "\nSummary: succedded %u out of %u (%.2f%%)\n",
-	        counters[0], counter, 100.00 * counters[0] / counter);
+	fprintf(stderr, "\nSummary: succedded %u out of "
+	                "%u %.2f%% (skipped %u)\n",
+	                counters[0], counter, 100.00 * counters[0] / counter,
+		        counters[TST_SKIPPED]);
 }
 
 void tst_list_suite(const struct tst_suite *suite)
