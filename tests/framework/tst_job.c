@@ -60,7 +60,7 @@ void tst_diff_timespec(int *sec, int *nsec, struct timespec *start,
 	}
 }
 
-#define NAME_PADD 23
+#define NAME_PADD 21
 
 static void stop_test(struct tst_job *job)
 {
@@ -109,7 +109,7 @@ static void stop_test(struct tst_job *job)
 	for (i = strlen(name); i < NAME_PADD; i++)
 		fprintf(stderr, " ");
 
-	fprintf(stderr, " finished (Time %2i.%03is, CPU %2i.%03is)  %s\n",
+	fprintf(stderr, " finished (Time %3i.%03is, CPU %3i.%03is)  %s\n",
 	                sec, nsec/1000000,
 			(int)job->cpu_time.tv_sec,
 			(int)job->cpu_time.tv_nsec/1000000,
@@ -215,14 +215,12 @@ static void prepare_tmpdir(const char *name, const char *res_path,
 static void write_timespec(struct tst_job *job, char type,
                            struct timespec *time)
 {
-	char buf[1 + sizeof(time_t) + sizeof(long)];
+	char buf[1 + sizeof(struct timespec)];
 	char *ptr = buf;
 
 	*(ptr++) = type;
-
-	*((time_t*)ptr) = time->tv_sec;
-	ptr += sizeof(time_t);
-	*((long*)ptr) = time->tv_nsec;
+	
+	memcpy(ptr, time, sizeof(*time));
 
 	if (write(job->pipefd, buf, sizeof(buf)) != sizeof(buf))
 		tst_warn("write(timespec) failed: %s", strerror(errno));
@@ -233,15 +231,14 @@ static void write_timespec(struct tst_job *job, char type,
  */
 static void read_timespec(struct tst_job *job, struct timespec *time)
 {
-	char buf[sizeof(time_t) + sizeof(long)];
-	char *ptr = buf;
+	int ret;
 
-	if (read(job->pipefd, buf, sizeof(buf)) != sizeof(buf))
+	do {
+		ret = read(job->pipefd, time, sizeof(*time));
+	} while (ret == 0);
+
+	if (ret < 0 || ret != sizeof(*time))
 		tst_warn("read(timespec) failed: %s", strerror(errno));
-
-	time->tv_sec = *((time_t*)ptr);
-	ptr += sizeof(time_t);
-	time->tv_nsec = *(long*)(ptr);
 }
 
 static void child_write(struct tst_job *job, char ch, void *ptr, ssize_t size)
