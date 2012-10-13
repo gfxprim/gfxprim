@@ -20,77 +20,58 @@
  *                                                                           *
  *****************************************************************************/
 
- /*
-  
-   Test job is an instance of running test.
+#include "tst_timespec.h"
 
-  */
+#define NSEC_IN_SEC 1000000000
 
-#ifndef TST_JOB_H
-#define TST_JOB_H
-
-#include <time.h>
-
-#include "tst_msg.h"
-#include "tst_preload.h"
-#include "tst_test.h"
-
-struct tst_job {
-	const struct tst_test *test;
+double timespec_to_double(const struct timespec *t)
+{
+	double res;
 	
-	/* 
-	 * Pipe fd.
-	 *
-	 * In parent this points to the read side of the pipe so the parent
-	 * recieves data from child.
-	 *
-	 * In child this points to the write side of the pipe so child can
-	 * send data to parent.
-	 */
-	int pipefd;
-	
-	int running:1;
-	
-	/* test execution time */
-	struct timespec start_time;
-	struct timespec stop_time;
-	
-	/* test cpu time */
-	struct timespec cpu_time;
+	res = t->tv_sec;
+	res *= NSEC_IN_SEC;
+	res += t->tv_nsec;
 
-	/* test pid */
-	int pid;
-	
-	/* test result */
-	enum tst_ret result;
+	return res;
+}
 
-	/* additional benchmark data */
-	unsigned int    bench_iter;
-	struct timespec bench_mean;
-	struct timespec bench_var;
+void double_to_timespec(const double time, struct timespec *res)
+{
+	res->tv_sec = time / NSEC_IN_SEC;
+	res->tv_nsec = time - res->tv_sec * NSEC_IN_SEC;
+}
 
-	/*
-	 * test malloc statistics, filled if TST_MALLOC_CHECK was set.
-	 */
-	struct malloc_stats malloc_stats;
+void timespec_sub(const struct timespec *a, const struct timespec *b,
+                  struct timespec *res)
+{
+	res->tv_sec = a->tv_sec - b->tv_sec;
+	time_t nsec = a->tv_nsec;
 
-	/* store for test messages */
-	struct tst_msg_store store;
-};
+	if (b->tv_nsec > a->tv_nsec) {
+		res->tv_sec--;
+		nsec += NSEC_IN_SEC;
+	}
 
-/*
- * Runs a test job as a separate process.
- *
- * The test field must point to correct test.
- */
-void tst_job_run(struct tst_job *job);
+	res->tv_nsec = nsec - b->tv_nsec;
+}
 
-/*
- * Waits for the test to finish.
- */
-void tst_job_wait(struct tst_job *job);
+void timespec_add(const struct timespec *a, struct timespec *res)
+{
+	res->tv_sec  += a->tv_sec;
+	res->tv_nsec += a->tv_nsec;
 
-void tst_diff_timespec(int *sec, int *nsec, struct timespec *start,
-                       struct timespec *stop);
+	if (res->tv_nsec >= NSEC_IN_SEC) {
+		res->tv_sec += res->tv_nsec / NSEC_IN_SEC;
+		res->tv_nsec %= NSEC_IN_SEC;
+	}
+}
 
-#endif /* TST_JOB_H */
+void timespec_div(struct timespec *res, unsigned int div)
+{
+	long sec = res->tv_sec;
+
+	res->tv_sec /= div;
+	sec %= div;
+
+	res->tv_nsec = (sec * NSEC_IN_SEC + res->tv_nsec)/div;
+}

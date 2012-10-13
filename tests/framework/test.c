@@ -207,6 +207,20 @@ static int fpe_fn(void)
 	return 1/i;
 }
 
+/*
+ * Let's benchmark memset.
+ */ 
+static int benchmark_fn(void)
+{
+	char buf[256];
+	unsigned int i;
+
+	for (i = 0; i < 4000000; i++)
+		memset(buf, i%100, sizeof(buf));
+
+	return TST_SUCCESS;
+}
+
 const struct tst_suite tst_suite = {
 	.suite_name = "Testing Framework Example",
 	.tests = {
@@ -225,6 +239,7 @@ const struct tst_suite tst_suite = {
 		{.name = "Resource", .tst_fn = res_fn, .flags = TST_TMPDIR,
 		 .res_path = "test.c"},
 		{.name = "Floating point exception", .tst_fn = fpe_fn},
+		{.name = "Benchmark test", .tst_fn = benchmark_fn, .bench_iter = 10},
 		{.name = NULL},
 	}
 };

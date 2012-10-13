@@ -57,6 +57,13 @@ struct tst_test {
 	 * test directory before test is executed.
 	 */
 	const char *res_path;
+	/*
+	 * If not zero, the test is benchmark.
+	 *
+	 * The test_fn is executed bench_iter times and bench
+	 * data are filled.
+	 */
+	unsigned int bench_iter;
 	/* test function */
 	int (*tst_fn)(void);
 	/* time limit in seconds 0 == unlimited */

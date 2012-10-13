@@ -186,6 +186,58 @@ static void malloc_stats_html(struct tst_job *job, FILE *f, const char *padd)
 	fprintf(f, "%s</tr>\n", padd);
 }
 
+static void benchmark_stats_html(struct tst_job *job, FILE *f, const char *padd)
+{
+	/* Create innter table */
+	fprintf(f, "%s<tr>\n", padd);
+	fprintf(f, "%s <td bgcolor=\"#fd8\" colspan=\"3\">\n", padd);
+	fprintf(f, "%s  <center>\n", padd);
+	fprintf(f, "%s   <table>\n", padd);
+
+	/* Create header */
+	fprintf(f, "%s    <tr>\n", padd);
+	
+	fprintf(f, "%s     <td colspan=\"2\" bgcolor=\"#fb2\">\n", padd);
+	fprintf(f, "%s     <center><small>Benchmark data", padd);
+	fprintf(f, "</small></center>\n");
+	fprintf(f, "%s     </td>\n", padd);
+	
+	fprintf(f, "%s    </tr>\n", padd);
+	fprintf(f, "%s    <tr>\n", padd);
+
+	fprintf(f, "%s     <td bgcolor=\"#fc4\">\n", padd);
+	fprintf(f, "%s      <center><small>Iterations", padd);
+	fprintf(f, "</small></center>\n");
+	fprintf(f, "%s     </td>\n", padd);
+	
+	fprintf(f, "%s     <td bgcolor=\"#fc4\">\n", padd);
+	fprintf(f, "%s      <center><small>Mean &#x2213; Variance", padd);
+	fprintf(f, "</small></center>\n");
+	fprintf(f, "%s     </td>\n", padd);
+	
+	fprintf(f, "%s    </tr>\n", padd);
+	
+	/* Create data */
+	fprintf(f, "%s    <tr>\n", padd);
+
+	fprintf(f, "%s     <td bgcolor=\"#fc4\">\n", padd);
+	fprintf(f, "%s      <center>%i</center>\n", padd, job->bench_iter);
+	fprintf(f, "%s     </td>\n", padd);
+	
+	fprintf(f, "%s     <td bgcolor=\"#fc4\">\n", padd);
+	fprintf(f, "%s      <center>%i.%06is &#x2213; %i.%06is</center>\n", padd,
+	        (int)job->bench_mean.tv_sec, (int)job->bench_mean.tv_nsec/1000,
+	        (int)job->bench_var.tv_sec, (int)job->bench_var.tv_nsec/1000);
+	fprintf(f, "%s     </td>\n", padd);
+	
+	fprintf(f, "%s    </tr>\n", padd);
+	
+	fprintf(f, "%s   </table>\n", padd);
+	fprintf(f, "%s  </center>\n", padd);
+	fprintf(f, "%s </td>\n", padd);
+	fprintf(f, "%s</tr>\n", padd);
+}
+
 static int append_html(struct tst_job *job, FILE *f)
 {
 	const char *padd = "   ";
@@ -201,12 +253,15 @@ static int append_html(struct tst_job *job, FILE *f)
 		bgcol = "#ddddee";
 
 	fprintf(f, "%s<tr>\n", padd);
-	fprintf(f, "%s <td bgcolor=\"%s\">%s&nbsp;</td>\n", padd, bgcol, job->test->name);
+	fprintf(f, "%s <td bgcolor=\"%s\">%s&nbsp;</td>\n",
+	        padd, bgcol, job->test->name);
 	fprintf(f, "%s <td bgcolor=\"%s\">\n", padd, bgcol);
-	fprintf(f, "%s  <center><small><font color=\"#222\">%i.%03is %i.%03is</font></small></center>",
-	        padd, sec, nsec/1000000, (int)job->cpu_time.tv_sec, (int)job->cpu_time.tv_nsec/1000000);
+	fprintf(f, "%s  <center><small><font color=\"#222\">%i.%03is %i.%03is"
+	        "</font></small></center>\n", padd, sec, nsec/1000000,
+		(int)job->cpu_time.tv_sec, (int)job->cpu_time.tv_nsec/1000000);
 	fprintf(f, "%s </td>\n", padd);
-	fprintf(f, "%s <td bgcolor=\"%s\"><center><font color=\"white\">&nbsp;%s&nbsp;</td></center>\n", padd,
+	fprintf(f, "%s <td bgcolor=\"%s\"><center><font color=\"white\">"
+	        "&nbsp;%s&nbsp;</td></center>\n", padd,
 	        ret_to_bg_color(job->result), ret_to_str(job->result));
 
 	struct tst_msg *msg;
@@ -215,10 +270,14 @@ static int append_html(struct tst_job *job, FILE *f)
 	if (job->test->flags & TST_CHECK_MALLOC)
 		malloc_stats_html(job, f, padd);
 
+	if (job->bench_iter)
+		benchmark_stats_html(job, f, padd);
+
 	for (msg = job->store.first; msg != NULL; msg = msg->next) {
 		fprintf(f, "%s<tr>\n", padd);
 		fprintf(f, "%s <td colspan=\"3\" bgcolor=\"#eeeeee\">\n", padd);
-		fprintf(f, "%s  &nbsp;&nbsp;<small>%s</small>\n", padd, msg->msg);
+		fprintf(f, "%s  &nbsp;&nbsp;<small>%s</small>\n",
+		        padd, msg->msg);
 		fprintf(f, "%s </td>\n", padd);
 		fprintf(f, "%s</tr>\n", padd);
 	}
@@ -268,6 +327,23 @@ static int append_malloc_stats_json(struct tst_job *job, FILE *f)
 	return 0;
 }
 
+static void append_benchmark_json(struct tst_job *job, FILE *f)
+{
+	fprintf(f, "\t\t\t\"Benchmark\": {\n");
+
+	fprintf(f, "\t\t\t\t\"Time Mean\": %i.%09i,\n",
+	        (int)job->bench_mean.tv_sec,
+	        (int)job->bench_mean.tv_nsec);
+	
+	fprintf(f, "\t\t\t\t\"Time Variance\": %i.%09i,\n",
+	        (int)job->bench_var.tv_sec,
+	        (int)job->bench_var.tv_nsec);
+
+	fprintf(f, "\t\t\t\t\"Iterations\": %i\n", job->bench_iter);
+
+	fprintf(f, "\t\t\t}\n");
+}
+
 static int hack_json_start = 0;
 
 static int append_json(struct tst_job *job, FILE *f)
@@ -287,7 +363,11 @@ static int append_json(struct tst_job *job, FILE *f)
 	/* If calculated include malloc report */
 	if (job->test->flags & TST_CHECK_MALLOC)
 		append_malloc_stats_json(job, f);
-	
+
+	/* If benchmark data were created */
+	if (job->bench_iter)
+		append_benchmark_json(job, f);
+
 	/* Time statistics */
 	int sec, nsec;
 
@@ -328,7 +408,8 @@ FILE *open_html(const struct tst_suite *suite, const char *path)
 	if (f == NULL)
 		return NULL;
 
-	fprintf(f, "<html>\n <head>\n </head>\n <body>\n  <table bgcolor=\"#99a\">\n");
+	fprintf(f, "<html>\n <head>\n </head>\n <body>\n  "
+	           "<table bgcolor=\"#99a\">\n");
 
 	fprintf(f, "   <tr><td colspan=\"3\" bgcolor=\"#bbbbff\"><center><b>%s"
 	           "</b></center></td></tr>\n", suite->suite_name);

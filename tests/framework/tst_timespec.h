@@ -22,75 +22,24 @@
 
  /*
   
-   Test job is an instance of running test.
+   Timespec manipulation utils.
 
   */
 
-#ifndef TST_JOB_H
-#define TST_JOB_H
+#ifndef TST_TIMESPEC_H
+#define TST_TIMESPEC_H
 
 #include <time.h>
 
-#include "tst_msg.h"
-#include "tst_preload.h"
-#include "tst_test.h"
+double timespec_to_double(const struct timespec *t);
 
-struct tst_job {
-	const struct tst_test *test;
-	
-	/* 
-	 * Pipe fd.
-	 *
-	 * In parent this points to the read side of the pipe so the parent
-	 * recieves data from child.
-	 *
-	 * In child this points to the write side of the pipe so child can
-	 * send data to parent.
-	 */
-	int pipefd;
-	
-	int running:1;
-	
-	/* test execution time */
-	struct timespec start_time;
-	struct timespec stop_time;
-	
-	/* test cpu time */
-	struct timespec cpu_time;
+void double_to_timespec(const double time, struct timespec *res);
 
-	/* test pid */
-	int pid;
-	
-	/* test result */
-	enum tst_ret result;
+void timespec_sub(const struct timespec *a, const struct timespec *b,
+                  struct timespec *res);
 
-	/* additional benchmark data */
-	unsigned int    bench_iter;
-	struct timespec bench_mean;
-	struct timespec bench_var;
+void timespec_add(const struct timespec *a, struct timespec *res);
 
-	/*
-	 * test malloc statistics, filled if TST_MALLOC_CHECK was set.
-	 */
-	struct malloc_stats malloc_stats;
+void timespec_div(struct timespec *res, unsigned int div);
 
-	/* store for test messages */
-	struct tst_msg_store store;
-};
-
-/*
- * Runs a test job as a separate process.
- *
- * The test field must point to correct test.
- */
-void tst_job_run(struct tst_job *job);
-
-/*
- * Waits for the test to finish.
- */
-void tst_job_wait(struct tst_job *job);
-
-void tst_diff_timespec(int *sec, int *nsec, struct timespec *start,
-                       struct timespec *stop);
-
-#endif /* TST_JOB_H */
+#endif /* TST_TIMESPEC_H */
