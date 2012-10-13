@@ -5,5 +5,6 @@ SUBDIRS=core SDL drivers framework loaders gfx
 
 loaders: framework
 gfx: framework
+core: framework
 
 include $(TOPDIR)/post.mk

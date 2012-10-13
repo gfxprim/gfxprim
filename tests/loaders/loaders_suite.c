@@ -493,6 +493,74 @@ static int test_Load(void)
 	return TST_SKIPPED;
 }
 
+static int test_load_BMP(const char *path)
+{
+	GP_Context *img;
+
+	img = GP_LoadBMP(path, NULL);
+
+	if (img == NULL) {
+		switch (errno) {
+		case ENOSYS:
+			tst_report(0, "Not Implemented");
+			return TST_SKIPPED;
+		default:
+			tst_report(0, "Got %s", strerror(errno));
+			return TST_FAILED;
+		}
+	}
+
+	/*
+	 * TODO: check correct data.
+	 */
+
+	GP_ContextFree(img);
+
+	return TST_SUCCESS;
+}
+
+/* Basic loading tests */
+
+static int test_load_BMP_1bpp_1x1(void)
+{
+	return test_load_BMP("1bpp-1x1.bmp");
+}
+
+static int test_load_BMP_4bpp_1x1(void)
+{
+	return test_load_BMP("4bpp-1x1.bmp");
+}
+
+static int test_load_BMP_8bpp_1x1(void)
+{
+	return test_load_BMP("8bpp-1x1.bmp");
+}
+
+static int test_load_BMP_24bpp_1x1(void)
+{
+	return test_load_BMP("24bpp-1x1.bmp");
+}
+
+static int test_load_BMP_32bpp_1x1(void)
+{
+	return test_load_BMP("32bpp-1x1.bmp");
+}
+
+static int test_load_BMP_555_1x1(void)
+{
+	return test_load_BMP("555-1x1.bmp");
+}
+
+static int test_load_BMP_565_1x1(void)
+{
+	return test_load_BMP("565-1x1.bmp");
+}
+
+static int test_load_BMP_8bpp_1x64000(void)
+{
+	return test_load_BMP("8bpp-1x64000.bmp");
+}
+
 const struct tst_suite tst_suite = {
 	.suite_name = "Image Loaders testsuite",
 	.tests = {
@@ -545,7 +613,32 @@ const struct tst_suite tst_suite = {
 		 .flags = TST_TMPDIR | TST_CHECK_MALLOC},
 		{.name = "JPG Stress", .tst_fn = test_JPG_stress,
 		 .flags = TST_TMPDIR | TST_CHECK_MALLOC},
+
+		/* BPM loader tests */
+		{.name = "BMP Load 1bpp 1x1", .tst_fn = test_load_BMP_1bpp_1x1,
+		 .flags = TST_TMPDIR, .res_path = "data/bmp/bitmaps/valid/1bpp-1x1.bmp"},
 		
+		{.name = "BMP Load 4bpp 1x1", .tst_fn = test_load_BMP_4bpp_1x1,
+		 .flags = TST_TMPDIR, .res_path = "data/bmp/bitmaps/valid/4bpp-1x1.bmp"},
+		
+		{.name = "BMP Load 8bpp 1x1", .tst_fn = test_load_BMP_8bpp_1x1,
+		 .flags = TST_TMPDIR, .res_path = "data/bmp/bitmaps/valid/8bpp-1x1.bmp"},
+		
+		{.name = "BMP 24bpp 1x1", .tst_fn = test_load_BMP_24bpp_1x1,
+		 .flags = TST_TMPDIR, .res_path = "data/bmp/bitmaps/valid/24bpp-1x1.bmp"},
+		
+		{.name = "BMP 32bpp 1x1", .tst_fn = test_load_BMP_32bpp_1x1,
+		 .flags = TST_TMPDIR, .res_path = "data/bmp/bitmaps/valid/32bpp-1x1.bmp"},
+		
+		{.name = "BMP 555 1x1", .tst_fn = test_load_BMP_555_1x1,
+		 .flags = TST_TMPDIR, .res_path = "data/bmp/bitmaps/valid/555-1x1.bmp"},
+		
+		{.name = "BMP 565 1x1", .tst_fn = test_load_BMP_565_1x1,
+		 .flags = TST_TMPDIR, .res_path = "data/bmp/bitmaps/valid/565-1x1.bmp"},
+		
+		{.name = "BMP 8bpp 1x64000", .tst_fn = test_load_BMP_8bpp_1x64000,
+		 .flags = TST_TMPDIR, .res_path = "data/bmp/bitmaps/valid/8bpp-1x64000.bmp"},
+
 		{.name = NULL},
 	}
 };
