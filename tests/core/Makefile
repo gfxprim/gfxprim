@@ -2,14 +2,24 @@ TOPDIR=../..
 
 include $(TOPDIR)/pre.mk
 
+#CSOURCES=$(shell echo *.c)
+
+# hack
 LIBNAME=core
-TESTSUITE=core_suite
-LDLIBS+=-lGP -L$(TOPDIR)/build/ -lcheck -lm -lSDL
-GENSOURCES+=GP_Convert.test.gen.c GP_WritePixel.test.gen.c \
-            GP_MixPixels.test.gen.c
 
-all: $(TESTSUITE)
+LDFLAGS+=-L../framework/ -L$(TOPDIR)/build/
+LDLIBS+=$(shell $(TOPDIR)/gfxprim-config --libs --libs-loaders)
+LDLIBS+=-ltst_preload -ldl -ltst
+CFLAGS+=-I../framework/
 
-include $(TOPDIR)/tests.mk
+GENSOURCES+=WritePixel_testsuite.gen.c
+
+APPS=WritePixel_testsuite.gen
+
+$(APPS): ../framework/libtst.a
+
+CLEAN+=log.html log.json
+
+include $(TOPDIR)/gen.mk
+include $(TOPDIR)/app.mk
 include $(TOPDIR)/post.mk
-
