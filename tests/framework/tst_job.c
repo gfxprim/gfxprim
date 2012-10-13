@@ -333,7 +333,7 @@ static int tst_job_benchmark(struct tst_job *job)
 
 	/* Send data to parent */
 	write_timespec(job, 'M', &sum);
-	write_timespec(job, 'D', &dev);
+	write_timespec(job, 'V', &dev);
 
 	return TST_SUCCESS;
 }
@@ -522,7 +522,7 @@ void tst_job_wait(struct tst_job *job)
 			            sizeof(job->malloc_stats));
 		break;
 		default:
-			//TODO: internal error
+			tst_warn("parent: Invalid characters received");
 		break;
 		}
 	}
