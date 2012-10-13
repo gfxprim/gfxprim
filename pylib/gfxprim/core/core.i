@@ -9,14 +9,11 @@
  * Basic types and common methods
  */
 
-ERROR_ON_NULL(GP_GetCounter);
-
 %include "GP_Common.h"
 %include "GP_Core.h"
 %include "GP_Debug.h"
 %include "GP_Types.h"
 %include "GP_Transform.h"
-%include "GP_Counter.h"
 %include "GP_GetSetBits.h"
 %include "GP_Transform.h"
 %include "GP_ProgressCallback.h"

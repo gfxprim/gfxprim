@@ -71,9 +71,6 @@
 /* Threads utils */
 #include "core/GP_Threads.h"
 
-/* Debug counters */
-#include "core/GP_Counter.h"
-
 /* Mix Pixel */
 #include "core/GP_MixPixels.h"
 
