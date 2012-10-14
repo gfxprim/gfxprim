@@ -5,7 +5,7 @@ CSOURCES=$(shell echo *.c)
 
 INCLUDE=
 LDFLAGS+=-L.
-LDLIBS+=-ltst_preload -ldl -ltst
+LDLIBS+=-ltst_preload -ldl -ltst -lrt
 CFLAGS+=
 
 test: libtst.a
