@@ -24,7 +24,7 @@
 
 #ifdef HAVE_LIBSDL
 
-#include "core/GP_Debug.h"
+#include <core/GP_Debug.h>
 
 #include "GP_Event.h"
 #include "GP_InputDriverSDL.h"
@@ -138,7 +138,7 @@ void GP_InputDriverSDLEventPut(SDL_Event *ev)
 			key = keysym_table2[keysym - 256];
 
 		if (key == 0) {
-			fprintf(stderr, "Unmapped SDL keysym %u\n", keysym);
+			GP_WARN("Unmapped SDL keysym %u", keysym);
 			return;
 		}
 		

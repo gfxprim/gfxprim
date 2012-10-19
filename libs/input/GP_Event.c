@@ -24,7 +24,9 @@
 #include <string.h>
 #include <stdlib.h>
 
-#include "GP_Common.h"
+#include <core/GP_Debug.h>
+#include <core/GP_Common.h>
+
 #include "GP_Event.h"
 
 /* Screen size for clipping the cursor possition */
@@ -202,7 +204,7 @@ static void event_put(struct GP_Event *ev)
 	uint32_t next = (queue_last + 1) % GP_EVENT_QUEUE_SIZE;
 
 	if (next == queue_first) {
-		fprintf(stderr, "Event queue full, dropping event\n");
+		GP_WARN("Event queue full, dropping event.");
 		return;
 	}
 	
@@ -359,7 +361,7 @@ void GP_EventPushKey(uint32_t key, uint8_t code, struct timeval *time)
 	case GP_EV_KEY_REPEAT:
 	break;
 	default:
-		fprintf(stderr, "Invalid key event code %u\n", code);
+		GP_WARN("Invalid key event code %u", code);
 		return;
 	}
 
