@@ -341,7 +341,7 @@ static void append_benchmark_json(struct tst_job *job, FILE *f)
 
 	fprintf(f, "\t\t\t\t\"Iterations\": %i\n", job->bench_iter);
 
-	fprintf(f, "\t\t\t}\n");
+	fprintf(f, "\t\t\t},\n");
 }
 
 static int hack_json_start = 0;
