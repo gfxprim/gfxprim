@@ -7,9 +7,9 @@ CSOURCES=Context.c
 # hack
 LIBNAME=core
 
-GENSOURCES+=WritePixel_testsuite.gen.c
+GENSOURCES+=WritePixel_testsuite.gen.c GetPutPixel.gen.c
 
-APPS=WritePixel_testsuite.gen Context
+APPS=WritePixel_testsuite.gen Context GetPutPixel.gen
 
 include ../tests.mk
 
