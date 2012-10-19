@@ -27,9 +27,8 @@
 #define GP_SDL_VIDEOINIT_H
 
 #include "GP.h"
-#include "core/GP_RetCode.h"
 
-GP_RetCode GP_SDL_VideoInit(GP_Context *context, int width, int height,
+int GP_SDL_VideoInit(GP_Context *context, int width, int height,
 	int argc, char **argv);
 
 #endif /* GP_SDL_VIDEOINIT_H */

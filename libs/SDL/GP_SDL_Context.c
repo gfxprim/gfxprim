@@ -31,14 +31,14 @@
 
 #include "GP_SDL.h"
 
-GP_RetCode GP_SDL_ContextFromSurface(GP_Context *context, SDL_Surface *surf)
+int GP_SDL_ContextFromSurface(GP_Context *context, SDL_Surface *surf)
 {
 	if (surf == NULL || surf->pixels == NULL || context == NULL)
-		return GP_ENULLPTR;
+		return 1;
 
 	/* sanity checks on the SDL surface */
 	if (surf->format->BytesPerPixel == 0 || surf->format->BytesPerPixel > 4)
-		return GP_ENOIMPL;
+		return 1;
 	
 	enum GP_PixelType pixeltype = GP_PixelRGBMatch(surf->format->Rmask,
 	                                               surf->format->Gmask,
@@ -47,7 +47,7 @@ GP_RetCode GP_SDL_ContextFromSurface(GP_Context *context, SDL_Surface *surf)
 						       surf->format->BitsPerPixel);
 
 	if (pixeltype == GP_PIXEL_UNKNOWN)
-		return GP_ENOIMPL;
+		return 1;
 
 	/* basic structure and size */
 	context->pixels = surf->pixels;
@@ -62,7 +62,7 @@ GP_RetCode GP_SDL_ContextFromSurface(GP_Context *context, SDL_Surface *surf)
 	context->x_swap = 0;
 	context->y_swap = 0;
 
-	return GP_ESUCCESS;
+	return 0;
 }
 
 #endif /* HAVE_LIBSDL */

@@ -33,11 +33,11 @@
 #include <stdio.h>
 #include <string.h>
 
-GP_RetCode GP_SDL_VideoInit(GP_Context *context, int width, int height,
+int GP_SDL_VideoInit(GP_Context *context, int width, int height,
                             int argc, char **argv)
 {
 	if (context == NULL)
-		return GP_ENULLPTR;
+		return 1;
 
 	/* switches that can be set on the command line */
 	int display_bpp = 0;
@@ -46,7 +46,7 @@ GP_RetCode GP_SDL_VideoInit(GP_Context *context, int width, int height,
 	if (argc > 0) {
 
 		if (argv == NULL)
-			return GP_ENULLPTR;
+			return 1;
 
 		/* extract settings from the command line */
 		int i;
@@ -69,7 +69,7 @@ GP_RetCode GP_SDL_VideoInit(GP_Context *context, int width, int height,
 			fprintf(stderr, "Error: Could not initialize SDL: %s\n",
 				SDL_GetError());
 		}
-		return GP_EBACKENDLOST;
+		return 1;
 	}
 
 	SDL_Surface *display = NULL;
@@ -80,7 +80,7 @@ GP_RetCode GP_SDL_VideoInit(GP_Context *context, int width, int height,
 				SDL_GetError());
 		}
 		SDL_Quit();
-		return GP_EINVAL;
+		return 1;
 	}
 
 	if (debug) {
@@ -94,18 +94,16 @@ GP_RetCode GP_SDL_VideoInit(GP_Context *context, int width, int height,
 			display->format->Bmask, display->format->Amask);
 	}
 
-	GP_RetCode retcode;
-	retcode = GP_SDL_ContextFromSurface(context, display);
-	if (retcode != GP_ESUCCESS) {
+	int retcode = GP_SDL_ContextFromSurface(context, display);
+	if (retcode != 0) {
 		if (debug) {
-			fprintf(stderr, "Error: Could not create context: %s\n",
-				GP_RetCodeName(retcode));
+			fprintf(stderr, "Error: Could not create context");
 		}
 		SDL_Quit();
 		return retcode;
 	}
 
-	return GP_ESUCCESS;
+	return 0;
 }
 
 #endif /* HAVE_LIBSDL */
