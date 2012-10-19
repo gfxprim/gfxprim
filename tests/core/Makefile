@@ -2,14 +2,14 @@ TOPDIR=../..
 
 include $(TOPDIR)/pre.mk
 
-#CSOURCES=$(shell echo *.c)
+CSOURCES=Context.c
 
 # hack
 LIBNAME=core
 
 GENSOURCES+=WritePixel_testsuite.gen.c
 
-APPS=WritePixel_testsuite.gen
+APPS=WritePixel_testsuite.gen Context
 
 include ../tests.mk
 

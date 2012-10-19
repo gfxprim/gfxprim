@@ -10,3 +10,4 @@
 export LIBC_FATAL_STDERR_=1
 
 LD_PRELOAD=`pwd`/../framework/libtst_preload.so LD_LIBRARY_PATH=../../build/ ./WritePixel_testsuite.gen "$@"
+LD_PRELOAD=`pwd`/../framework/libtst_preload.so LD_LIBRARY_PATH=../../build/ ./Context "$@"
