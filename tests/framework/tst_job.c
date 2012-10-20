@@ -77,6 +77,9 @@ static void stop_test(struct tst_job *job)
 	case TST_SKIPPED:
 		result = "[    \e[1;30mSKIPPED\e[0m     ]";
 	break;
+	case TST_UNTESTED:
+		result = "[    \e[1;34mUNTESTED\e[0m    ]";
+	break;
 	case TST_INTERR:
 		result = "[ \e[1;31mINTERNAL ERROR\e[0m ]";
 	break;

@@ -186,9 +186,23 @@ int fail_FILE(void)
 	return TST_SUCCESS;
 }
 
+/*
+ * This status is returned when the could not be started
+ * because of unsufficient configuration
+ */
 static int skipped_fn(void)
 {
 	return TST_SKIPPED;
+}
+
+/*
+ * This status is returned when there was failure prior
+ * the actuall testing so we could not test the feature
+ * at all.
+ */
+static int untested_fn(void)
+{
+	return TST_UNTESTED;
 }
 
 static int res_fn(void)
@@ -226,6 +240,7 @@ const struct tst_suite tst_suite = {
 	.tests = {
 		{.name = "Success test", .tst_fn = success_fn},
 		{.name = "Skipped test", .tst_fn = skipped_fn},
+		{.name = "Untested test", .tst_fn = untested_fn},
 		{.name = "Sigsegv test", .tst_fn = sigsegv_fn},
 		{.name = "Failed test", .tst_fn = failed_fn},
 		{.name = "Stack overflow test", .tst_fn = stack_overflow_fn},

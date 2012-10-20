@@ -36,6 +36,8 @@ static const char *ret_to_bg_color(enum tst_ret ret)
 		return "#008000";
 	case TST_SKIPPED:
 		return "#888888";
+	case TST_UNTESTED:
+		return "#0000bb";
 	case TST_INTERR:
 		return "#800000";
 	case TST_SIGSEGV:
@@ -64,6 +66,8 @@ static const char *ret_to_str(enum tst_ret ret)
 		return "Success";
 	case TST_SKIPPED:
 		return "Skipped";
+	case TST_UNTESTED:
+		return "Untested";
 	case TST_INTERR:
 		return "Internal Error";
 	case TST_SIGSEGV:

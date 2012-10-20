@@ -24,15 +24,16 @@
 #define TST_TEST_H
 
 enum tst_ret {
-	TST_SUCCESS, /* Test succedded                                    */
-	TST_SKIPPED, /* Test skipped due to not enough memory, ENOSYS ... */
-	TST_INTERR,  /* Test framework error                              */
-	TST_SIGSEGV, /* Test ended with SIGSEGV                           */
-	TST_TIMEOUT, /* Test hasn't finished in time                      */
-	TST_ABORTED, /* The abort() was called (possible double free)     */
-	TST_FPE,     /* Floating point exception                          */
-	TST_MEMLEAK, /* Memory leak was detected                          */
-	TST_FAILED,  /* Test failed                                       */
+	TST_SUCCESS,  /* Test succedded                                    */
+	TST_SKIPPED,  /* Test skipped due to not enough memory, ENOSYS ... */
+	TST_UNTESTED, /* Test not finished because of failure              */
+	TST_INTERR,   /* Test framework error                              */
+	TST_SIGSEGV,  /* Test ended with SIGSEGV                           */
+	TST_TIMEOUT,  /* Test hasn't finished in time                      */
+	TST_ABORTED,  /* The abort() was called (possible double free)     */
+	TST_FPE,      /* Floating point exception                          */
+	TST_MEMLEAK,  /* Memory leak was detected                          */
+	TST_FAILED,   /* Test failed                                       */
 	TST_MAX = TST_FAILED+1,
 };
 
