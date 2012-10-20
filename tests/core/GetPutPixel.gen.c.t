@@ -35,8 +35,8 @@ static void fill_context(GP_Context *c, GP_Pixel p)
 {
 	GP_Coord x, y;
 
-	for (x = 0; x < c->w; x++)
-		for (y = 0; y < c->h; y++)
+	for (x = 0; x < (GP_Coord)c->w; x++)
+		for (y = 0; y < (GP_Coord)c->h; y++)
 			GP_PutPixel(c, x, y, p);
 }
 
@@ -47,8 +47,8 @@ static int check_filled(GP_Context *c)
 
 	p = GP_GetPixel(c, 0, 0);
 
-	for (x = 0; x < c->w; x++)
-		for (y = 0; y < c->h; y++)
+	for (x = 0; x < (GP_Coord)c->w; x++)
+		for (y = 0; y < (GP_Coord)c->h; y++)
 			if (p != GP_GetPixel(c, x, y)) {
 				tst_report(0, "Pixels different %i %i", x, y);
 				return 1;
@@ -80,7 +80,7 @@ static int GetPutPixel_{{ pt.name }}(void)
 
 	if (c == NULL) {
 		tst_report(0, "GP_ContextAlloc() failed");
-		return TST_FAILED;
+		return TST_UNTESTED;
 	}
 
 	if (try_pattern(c, 0x55555555 & {{ 2 ** pt.pixelsize.size - 1}}))
@@ -105,6 +105,51 @@ static int GetPutPixel_{{ pt.name }}(void)
 %% endif
 %% endfor
 
+%% for pt in pixeltypes
+%% if not pt.is_unknown()
+static int GetPutPixel_Clipping_{{ pt.name }}(void)
+{
+	GP_Context *c;
+	
+	c = GP_ContextAlloc(100, 100, GP_PIXEL_{{ pt.name }});
+
+	if (c == NULL) {
+		tst_report(0, "GP_ContextAlloc() failed");
+		return TST_UNTESTED;
+	}
+
+	fill_context(c, 0xffffffff);
+
+	GP_Coord x, y;
+	int err = 0;
+
+	for (x = -1000; x < 200; x++) {
+		for (y = -1000; y < 200; y++) {
+			if (x > 0 && x < 100 && y > 0 && y < 100)
+				continue;
+		
+			/* Must be no-op */
+			GP_PutPixel(c, x, y, 0);
+
+			/* Must return 0 */
+			if (GP_GetPixel(c, x, y) != 0) {
+				tst_report(0, "GP_GetPixel returned non-zero "
+				              "at %i %i", x, y);
+				err++;
+			}
+		}
+	}
+	
+	GP_ContextFree(c);
+	
+	if (err)
+		return TST_FAILED;
+
+	return TST_SUCCESS;
+}
+%% endif
+%% endfor
+
 const struct tst_suite tst_suite = {
 	.suite_name = "GetPutPixel Testsuite",
 	.tests = {
@@ -112,6 +157,13 @@ const struct tst_suite tst_suite = {
 %% if not pt.is_unknown()
 		{.name = "GetPutPixel {{ pt.name }}", 
 		 .tst_fn = GetPutPixel_{{ pt.name }}},
+%% endif
+%% endfor
+
+%% for pt in pixeltypes
+%% if not pt.is_unknown()
+		{.name = "GetPutPixel Clipping {{ pt.name }}", 
+		 .tst_fn = GetPutPixel_Clipping_{{ pt.name }}},
 %% endif
 %% endfor
 		
