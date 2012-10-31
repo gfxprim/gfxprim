@@ -29,6 +29,8 @@
 
 #include "tst_test.h"
 
+#include "common.h"
+
 static const char circle_r_0_11x11[] = {
 	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
@@ -98,45 +100,6 @@ static const char circle_r_5_half_11x11[] = {
 	0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0,
 	1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0,
 };
-
-static void dump_buffer(const char *pattern, int x, int y)
-{
-	int i, j;
-
-	for (i = 0; i < y; i++) {
-		for (j = 0; j < x; j++)
-			printf("%2x ", pattern[j + i * y]);
-		printf("\n");
-	}
-}
-
-static void dump_buffers(const char *pattern, const GP_Context *c)
-{
-	printf("Expected pattern\n");
-	dump_buffer(pattern, c->w, c->h);
-	printf("Rendered pattern\n");
-	dump_buffer((char*)c->pixels, c->w, c->h);
-}
-
-static int compare_buffers(const char *pattern, const GP_Context *c)
-{
-	GP_Size x, y;
-	int err = 0;
-
-	for (x = 0; x < c->w; x++) {
-		for (y = 0; y < c->h; y++) {
-			if (pattern[x + y * c->h] !=
-			    ((char*)c->pixels)[x + y * c->h]) {
-				err++;
-			}
-		}
-	}
-
-	if (err)
-		dump_buffers(pattern, c);	
-
-	return err;
-}
 
 static int test_circle(const char *pattern, GP_Size w, GP_Size h,
                        GP_Coord x, GP_Coord y, const int r)
