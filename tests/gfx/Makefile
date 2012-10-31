@@ -3,7 +3,7 @@ include $(TOPDIR)/pre.mk
 
 CSOURCES=$(shell echo *.c)
 
-APPS=gfx_benchmark
+APPS=gfx_benchmark Circle
 
 include ../tests.mk
 
