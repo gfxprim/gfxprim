@@ -74,10 +74,21 @@
  *     FN_NAME   - name of the function to be defined
  */
 #define DEF_CIRCLE_SEG_FN(FN_NAME, CONTEXT_T, PIXVAL_T, PUTPIXEL) \
-void FN_NAME(CONTEXT_T context, int xcenter, int ycenter, unsigned int r, \
+void FN_NAME(CONTEXT_T context, int xcenter, int ycenter, int r, \
 	uint8_t seg_flags, PIXVAL_T pixval) \
 { \
 	int x, y, error; \
+\
+	/* Special case for r == 0 */ \
+	if (r == 0) { \
+		if (seg_flags) \
+			PUTPIXEL(context, xcenter, ycenter, pixval); \
+		return; \
+	} \
+\
+	/* Clip negative r */ \
+	r = r < 0 ? -r : r; \
+\
 	for (x = 0, error = -r, y = r; y >= 0; y--) { \
 \
 		/* Iterate X until we can pass to the next line. */ \
