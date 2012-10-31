@@ -3,9 +3,10 @@ include $(TOPDIR)/pre.mk
 
 CSOURCES=$(shell echo *.c)
 
-APPS=gfx_benchmark Circle CircleSeg
+APPS=gfx_benchmark Circle Line CircleSeg
 
 Circle: common.o
+Line: common.o
 CircleSeg: common.o
 
 include ../tests.mk
