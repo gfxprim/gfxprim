@@ -20,6 +20,8 @@
  *                                                                           *
  *****************************************************************************/
 
+#include <errno.h>
+
 #include "core/GP_Context.h"
 #include "core/GP_GetPutPixel.h"
 #include "core/GP_TempAlloc.h"
@@ -47,6 +49,12 @@ int GP_FilterHLinearConvolution_Raw(const GP_Context *src,
 	GP_DEBUG(1, "Horizontal linear convolution kernel width %u "
 	            "offset %ix%i rectangle %ux%u",
 		    kw, x_src, y_src, w_src, h_src);
+
+	/* Not yet implemented */
+	if (src->pixel_type != GP_PIXEL_RGB888) {
+		errno = ENOSYS;
+		return 1;
+	}
 
 	for (i = 0; i < kw; i++)
 		ikernel[i] = kernel[i] * MUL + 0.5;
@@ -157,6 +165,12 @@ int GP_FilterVLinearConvolution_Raw(const GP_Context *src,
 	GP_DEBUG(1, "Vertical linear convolution kernel width %u "
 	            "offset %ix%i rectangle %ux%u",
 		    kh, x_src, y_src, w_src, h_src);
+	
+	/* Not yet implemented */
+	if (src->pixel_type != GP_PIXEL_RGB888) {
+		errno = ENOSYS;
+		return 1;
+	}
 
 	ikern_div = kern_div * MUL + 0.5;
 	
@@ -310,6 +324,12 @@ int GP_FilterLinearConvolution_Raw(const GP_Context *src,
 
 	GP_DEBUG(1, "Linear convolution kernel %ix%i rectangle %ux%u",
 	            kw, kh, w_src, h_src);
+	
+	/* Not yet implemented */
+	if (src->pixel_type != GP_PIXEL_RGB888) {
+		errno = ENOSYS;
+		return 1;
+	}
 
 	/* Do linear convolution */	
 	for (y = 0; y < (GP_Coord)h_src; y++) {
