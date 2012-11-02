@@ -31,18 +31,6 @@
 #include "tst_job.h"
 #include "tst_test.h"
 
-int tst_warn(const char *fmt, ...)
-{
-	va_list va;
-	int ret;
-
-	va_start(va, fmt);
-	ret = vfprintf(stderr, fmt, va);
-	va_end(va);
-
-	return ret;
-}
-	
 static int run_test(const struct tst_test *test, FILE *html, FILE *json)
 {
 	struct tst_job job;

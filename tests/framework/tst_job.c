@@ -43,6 +43,11 @@
  */
 static struct tst_job *my_job = NULL;
 
+static int in_child(void)
+{
+	return my_job != NULL;
+}
+
 static void start_test(struct tst_job *job)
 {
 	(void)job;
@@ -271,15 +276,12 @@ static void child_write(struct tst_job *job, char ch, void *ptr, ssize_t size)
 	}
 }
 
-int tst_report(int level, const char *fmt, ...)
+static int tst_vreport(int level, const char *fmt, va_list va)
 {
-	va_list va;
 	int ret;
 	char buf[258];
 
-	va_start(va, fmt);
 	ret = vsnprintf(buf+3, sizeof(buf) - 3, fmt, va);
-	va_end(va);
 	
 	ssize_t size = ret > 255 ? 255 : ret + 1;
 
@@ -287,9 +289,41 @@ int tst_report(int level, const char *fmt, ...)
 	buf[1] = level;
 	((unsigned char*)buf)[2] = size; 
 
-	if (my_job != NULL)
+	if (in_child()) {
 		if (write(my_job->pipefd, buf, size + 3) != size + 3)
 			tst_warn("Failed to write msg to pipe.");
+	} else {
+		tst_warn("tst_report() called from parent, msg: '%s'",
+		         buf + 3);
+	}
+
+	return ret;
+}
+
+int tst_report(int level, const char *fmt, ...)
+{
+	va_list va;
+	int ret;
+
+	va_start(va, fmt);
+	ret = tst_vreport(level, fmt, va);
+	va_end(va);
+
+	return ret;
+}
+
+int tst_warn(const char *fmt, ...)
+{
+	va_list va;
+	int ret;
+	
+	va_start(va, fmt);
+
+	if (in_child())
+		return tst_vreport(-1, fmt, va);
+
+	ret = vfprintf(stderr, fmt, va);
+	va_end(va);
 
 	return ret;
 }
@@ -403,11 +437,11 @@ void tst_job_run(struct tst_job *job)
 	}
 
 	/* Redirect stderr/stdout TODO: catch its output */
-	if (freopen("/dev/null", "w", stderr))
+	if (freopen("/dev/null", "w", stderr) == NULL)
 		tst_warn("freopen(stderr) failed: %s", strerror(errno));
 
-	if (freopen("/dev/null", "w", stdout))
-		tst_warn("freopen(stderr) failed: %s", strerror(errno));
+	if (freopen("/dev/null", "w", stdout) == NULL)
+		tst_warn("freopen(stdout) failed: %s", strerror(errno));
 
 	/* Create directory in /tmp/ and chdir into it. */
 	if (job->test->flags & TST_TMPDIR)
