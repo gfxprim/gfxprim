@@ -29,6 +29,7 @@
 #include <string.h>
 #include <sys/types.h>
 #include <sys/wait.h>
+#include <sys/stat.h>
 #include <stdarg.h>
 #include <math.h>
 
@@ -185,22 +186,40 @@ static void prepare_tmpdir(const char *name, const char *res_path,
 	}
 
 	/* Create template from test name */
-	snprintf(template, size, "/tmp/ctest_%s_XXXXXX", tmp);
+	snprintf(template, size, "/tmp/test_%s_XXXXXX", tmp);
 
 	if (mkdtemp(template) == NULL) {
 		tst_warn("mkdtemp(%s) failed: %s", template, strerror(errno));
 		exit(TST_INTERR);
 	}
 
-	/* Copy resources if needed */
+	/* 
+	 * Copy resources if needed
+	 *
+	 * If resource is directory, copy only it's content.
+	 */
 	if (res_path != NULL) {
-		snprintf(tmp, sizeof(tmp), "cp -r '%s' '%s'",
-		         res_path, template);
+		struct stat st;
+		char *p = "";
+
+		if (stat(res_path, &st)) {
+			tst_warn("failed to stat resource '%s': %s",
+			         res_path, strerror(errno));
+			rmdir(template);
+			exit(TST_INTERR);
+		}
+
+		if (S_ISDIR(st.st_mode))
+			p = "/*";
+		
+		snprintf(tmp, sizeof(tmp), "cp -r '%s'%s '%s'",
+		         res_path, p, template);
 
 		ret = system(tmp);
 
 		if (ret) {
 			tst_warn("failed to copy resource '%s'", res_path);
+			rmdir(template);
 			exit(TST_INTERR);
 		}
 	}
