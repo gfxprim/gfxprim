@@ -62,6 +62,6 @@ int tst_msg_append(struct tst_msg_store *self, int type, const char *msg);
 /*
  * Prints messages in the store.
  */
-void tst_msg_print(struct tst_msg_store *self);
+void tst_msg_print(const struct tst_msg_store *self);
 
 #endif /* TST_MSG_H */

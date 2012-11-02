@@ -65,6 +65,6 @@ void tst_malloc_check_report(struct malloc_stats *stats);
 /*
  * Prints malloc statistics.
  */
-void tst_malloc_print(struct malloc_stats *stats);
+void tst_malloc_print(const struct malloc_stats *stats);
 
 #endif /* TST_PRELOAD_H */

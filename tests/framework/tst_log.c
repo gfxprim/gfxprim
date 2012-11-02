@@ -27,6 +27,7 @@
 #include "tst_job.h"
 #include "tst_msg.h"
 #include "tst_preload.h"
+#include "tst_timespec.h"
 #include "tst_log.h"
 
 static const char *ret_to_bg_color(enum tst_ret ret)
@@ -249,7 +250,7 @@ static int append_html(struct tst_job *job, FILE *f)
 	static int hack_counter = 0;
 	const char *bgcol;
 
-	tst_diff_timespec(&sec, &nsec, &job->start_time, &job->stop_time);
+	timespec_diff(&sec, &nsec, &job->start_time, &job->stop_time);
 
 	if (hack_counter)
 		bgcol = "#ccccee";
@@ -375,7 +376,7 @@ static int append_json(struct tst_job *job, FILE *f)
 	/* Time statistics */
 	int sec, nsec;
 
-	tst_diff_timespec(&sec, &nsec, &job->start_time, &job->stop_time);
+	timespec_diff(&sec, &nsec, &job->start_time, &job->stop_time);
 	
 	fprintf(f, "\t\t\t\"CPU Time\": %i.%09i,\n",
 	        (int)job->cpu_time.tv_sec, (int)job->cpu_time.tv_nsec);

@@ -85,7 +85,7 @@ static char type_to_char(enum tst_report_type type)
 	}
 }
 
-void tst_msg_print(struct tst_msg_store *self)
+void tst_msg_print(const struct tst_msg_store *self)
 {
 	struct tst_msg *msg;
 

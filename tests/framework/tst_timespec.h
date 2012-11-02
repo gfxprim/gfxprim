@@ -31,6 +31,10 @@
 
 #include <time.h>
 
+void timespec_diff(int *sec, int *nsec,
+                   const struct timespec *start,
+                   const struct timespec *stop);
+
 double timespec_to_double(const struct timespec *t);
 
 void double_to_timespec(const double time, struct timespec *res);

@@ -146,7 +146,7 @@ void free(void *ptr)
 	real_free(ptr);
 }
 
-void tst_malloc_print(struct malloc_stats *stats)
+void tst_malloc_print(const struct malloc_stats *stats)
 {
 	fprintf(stderr, "Total size %zu chunks %u, lost size %zu chunks %u\n",
 	        stats->total_size, stats->total_chunks,

@@ -28,12 +28,16 @@
 
 extern const struct tst_suite tst_suite;
 
+/* defined in tst_suite.c */
+extern int tst_suite_verbose;
+
 void print_help(void)
 {
 	fprintf(stderr, "Test suite '%s' Usage:\n\n", tst_suite.suite_name);
 	fprintf(stderr, "-h       prints this help\n");
 	fprintf(stderr, "-l       list all tests\n");
 	fprintf(stderr, "-t name  runs single test by name\n");
+	fprintf(stderr, "-v       turns on verbose mode\n");
 	fprintf(stderr, "without any option, all tests are executed\n");
 }
 
@@ -41,7 +45,7 @@ int main(int argc, char *argv[])
 {
 	int opt;
 
-	while ((opt = getopt(argc, argv, "hlt:")) != -1) {
+	while ((opt = getopt(argc, argv, "hlt:v")) != -1) {
 		switch (opt) {
 		case 'l':
 			tst_list_suite(&tst_suite);
@@ -54,6 +58,9 @@ int main(int argc, char *argv[])
 		case 'h':
 			print_help();
 			return 0;
+		break;
+		case 'v':
+			tst_suite_verbose = 1;
 		break;
 		default:
 			print_help();

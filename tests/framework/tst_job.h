@@ -90,7 +90,4 @@ void tst_job_run(struct tst_job *job);
  */
 void tst_job_wait(struct tst_job *job);
 
-void tst_diff_timespec(int *sec, int *nsec, struct timespec *start,
-                       struct timespec *stop);
-
 #endif /* TST_JOB_H */

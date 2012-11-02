@@ -33,7 +33,6 @@
 #include <stdarg.h>
 #include <math.h>
 
-#include "tst_preload.h"
 #include "tst_test.h"
 #include "tst_job.h"
 #include "tst_timespec.h"
@@ -46,100 +45,6 @@ static struct tst_job *my_job = NULL;
 static int in_child(void)
 {
 	return my_job != NULL;
-}
-
-static void start_test(struct tst_job *job)
-{
-	(void)job;
-//	fprintf(stderr, "Starting test \e[1;37m%s\e[0m\n", job->test->name);
-}
-
-void tst_diff_timespec(int *sec, int *nsec, struct timespec *start,
-                       struct timespec *stop)
-{
-	if (stop->tv_nsec < start->tv_nsec) {
-		*sec  = stop->tv_sec - start->tv_sec - 1;
-		*nsec = stop->tv_nsec + 1000000000 - start->tv_nsec;
-	} else {
-		*sec  = stop->tv_sec  - start->tv_sec;
-		*nsec = stop->tv_nsec - start->tv_nsec;
-	}
-}
-
-#define NAME_PADD 35
-
-static void stop_test(struct tst_job *job)
-{
-	const char *name = job->test->name;
-	int sec, nsec;
-	const char *result = "";
-
-	tst_diff_timespec(&sec, &nsec, &job->start_time, &job->stop_time);
-
-	switch (job->result) {
-	case TST_SUCCESS:
-		result = "[    \e[1;32mSUCCESS\e[0m     ]";
-	break;
-	case TST_SKIPPED:
-		result = "[    \e[1;30mSKIPPED\e[0m     ]";
-	break;
-	case TST_UNTESTED:
-		result = "[    \e[1;34mUNTESTED\e[0m    ]";
-	break;
-	case TST_INTERR:
-		result = "[ \e[1;31mINTERNAL ERROR\e[0m ]";
-	break;
-	case TST_SIGSEGV:
-		result = "[    \e[1;31mSEGFAULT\e[0m    ]";
-	break;
-	case TST_TIMEOUT:
-		result = "[    \e[1;35mTIMEOUT\e[0m     ]";
-	break;
-	case TST_ABORTED:
-		result = "[    \e[1;31mABORTED\e[0m     ]";
-	break;
-	case TST_FPE:
-		result = "[ \e[1;31mFP  EXCEPTION\e[0m  ]";
-	break;
-	case TST_MEMLEAK:
-		result = "[    \e[1;33mMEMLEAK\e[0m     ]";
-	break;
-	case TST_FAILED:
-		result = "[    \e[1;31mFAILURE\e[0m     ]";
-	break;
-	case TST_MAX:
-	break;
-	}
-		
-	fprintf(stderr, "\e[1;37m%s\e[0m", name);
-	
-	int i;
-
-	for (i = strlen(name); i < NAME_PADD; i++)
-		fprintf(stderr, " ");
-
-	fprintf(stderr, " finished (Time %3i.%03is)  %s\n",
-	                sec, nsec/1000000, result);
-	
-	if (job->bench_iter) {
-		for (i = 0; i < NAME_PADD; i++)
-			fprintf(stderr, " ");
-
-		fprintf(stderr, " bench CPU time %i.%06is +/- %i.%06is\n",
-	               (int)job->bench_mean.tv_sec,
-		       (int)job->bench_mean.tv_nsec/1000,
-		       (int)job->bench_var.tv_sec,
-		       (int)job->bench_var.tv_nsec/1000);
-	}
-
-	if (job->result == TST_MEMLEAK)
-		tst_malloc_print(&job->malloc_stats);
-
-	/* Now print test message store */
-	tst_msg_print(&job->store);
-	
-	fprintf(stderr, "------------------------------------------------------"
-                        "------------------------- \n");
 }
 
 /*
@@ -438,9 +343,6 @@ void tst_job_run(struct tst_job *job)
 	/* Prepare the test message store */
 	tst_msg_init(&job->store);
 
-	/* marks test as started */
-	start_test(job);
-
 	/* copy benchmark interation */
 	job->bench_iter = job->test->bench_iter;
 
@@ -667,8 +569,6 @@ void tst_job_collect(struct tst_job *job)
 	
 	/* Write down stop time  */
 	clock_gettime(CLOCK_MONOTONIC, &job->stop_time);
-
-	stop_test(job);
 }
 
 void tst_job_wait(struct tst_job *job)

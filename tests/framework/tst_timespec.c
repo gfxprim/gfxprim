@@ -24,6 +24,19 @@
 
 #define NSEC_IN_SEC 1000000000
 
+void timespec_diff(int *sec, int *nsec,
+                   const struct timespec *start,
+                   const struct timespec *stop)
+{
+	if (stop->tv_nsec < start->tv_nsec) {
+		*sec  = stop->tv_sec - start->tv_sec - 1;
+		*nsec = stop->tv_nsec + 1000000000 - start->tv_nsec;
+	} else {
+		*sec  = stop->tv_sec  - start->tv_sec;
+		*nsec = stop->tv_nsec - start->tv_nsec;
+	}
+}
+
 double timespec_to_double(const struct timespec *t)
 {
 	double res;

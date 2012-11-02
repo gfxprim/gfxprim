@@ -75,6 +75,7 @@ struct tst_test {
 
 struct tst_suite {
 	const char *suite_name;
+	int verbose:1;
 	struct tst_test tests[];
 };
 
