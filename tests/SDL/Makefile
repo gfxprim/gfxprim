@@ -7,8 +7,7 @@ LDLIBS+=-lGP -L$(TOPDIR)/build/ -lGP_SDL -lSDL
 ifeq ($(HAVE_LIBSDL),yes)
 CSOURCES=$(shell echo *.c)
 
-APPS=fonttest\
-     symbolstest textaligntest blittest subcontext\
+APPS=symbolstest textaligntest blittest subcontext\
      aatest mixpixeltest
 endif
 

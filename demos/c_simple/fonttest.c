@@ -25,13 +25,11 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <SDL/SDL.h>
+#include <string.h>
 
-#include "GP.h"
-#include "GP_SDL.h"
+#include <GP.h>
 
-SDL_Surface *display = NULL;
-GP_Context context;
+static GP_Backend *win;
 
 static const char *font_path = NULL;
 static unsigned int font_h = 16;
@@ -48,7 +46,7 @@ static const char *test_strings[] = {
 
 static int font_flag = 0;
 static int tracking = 0;
-GP_FontFace *font = NULL;
+static GP_FontFace *font = NULL;
 
 static const char *glyph_bitmap_format_name(const GP_FontBitmapFormat format)
 {
@@ -103,9 +101,7 @@ static void print_font_properties(const GP_FontFace *font)
 
 void redraw_screen(void)
 {
-	SDL_LockSurface(display);
-	
-	GP_Fill(&context, black_pixel);
+	GP_Fill(win->context, black_pixel);
 
 	GP_TextStyle style = GP_DEFAULT_TEXT_STYLE;
 
@@ -139,29 +135,29 @@ void redraw_screen(void)
 		style.pixel_yspace = 0;
 		style.char_xspace = tracking;
 
-		GP_FillRectXYWH(&context,
+		GP_FillRectXYWH(win->context,
 			16, SPACING*i + 16,
 			GP_TextWidth(&style, test_string),
 			GP_FontHeight(style.font),
 			dark_gray_pixel);
 
-		GP_RectXYWH(&context,
+		GP_RectXYWH(win->context,
 			15, SPACING*i + 15,
 			GP_TextMaxWidth(&style, strlen(test_string)) + 1,
 			GP_FontHeight(style.font) + 1,
 			blue_pixel);
 
-		GP_Text(&context, &style, 16, SPACING*i + 16, align,
+		GP_Text(win->context, &style, 16, SPACING*i + 16, align,
 		        white_pixel, dark_gray_pixel, test_string);
 		
 		style.pixel_xmul = 2;
 		style.pixel_ymul = 2;
 		style.pixel_yspace = 1;
 
-		GP_Text(&context, &style, 34, SPACING * i + 44, align,
+		GP_Text(win->context, &style, 34, SPACING * i + 44, align,
 		        white_pixel, black_pixel, test_string);
 
-		GP_RectXYWH(&context, 33, SPACING * i + 43,
+		GP_RectXYWH(win->context, 33, SPACING * i + 43,
 		            GP_TextWidth(&style, test_string) + 1,
 			    GP_TextHeight(&style) + 1, dark_gray_pixel);
 
@@ -170,73 +166,64 @@ void redraw_screen(void)
 		style.pixel_xspace = 1;
 		style.pixel_yspace = 1;
 
-		GP_Text(&context, &style, 64, SPACING*i + 88, align,
+		GP_Text(win->context, &style, 64, SPACING*i + 88, align,
 		        dark_gray_pixel, black_pixel, test_string);
 	}
-
-	SDL_UnlockSurface(display);
 }
 
 void event_loop(void)
 {
-	SDL_Event event;
+	GP_Event ev;
 
-	while (SDL_WaitEvent(&event) > 0) {
-		switch (event.type) {
-
-		case SDL_VIDEOEXPOSE:
-			redraw_screen();
-			SDL_Flip(display);
-		break;
-
-		case SDL_KEYDOWN:
-			switch (event.key.keysym.sym) {
-			case SDLK_SPACE:
+	while (GP_EventGet(&ev)) {
+		switch (ev.type) {
+		case GP_EV_KEY:
+			if (ev.code != GP_EV_KEY_DOWN)
+				continue;
+			
+			switch (ev.val.key.key) {
+			case GP_KEY_SPACE:
 				if (font)
 					font_flag = (font_flag + 1) % 3;
 				else
 					font_flag = (font_flag + 1) % 2;
 					
 				redraw_screen();
-				SDL_Flip(display);
+				GP_BackendFlip(win);
 			break;
-			case SDLK_UP:
+			case GP_KEY_UP:
 				tracking++;
 				redraw_screen();
-				SDL_Flip(display);
+				GP_BackendFlip(win);
 			break;
-			case SDLK_DOWN:
+			case GP_KEY_DOWN:
 				tracking--;
 				redraw_screen();
-				SDL_Flip(display);
+				GP_BackendFlip(win);
 			break;
-			case SDLK_b:
+			case GP_KEY_B:
 				font_h++;
 				if (font_path) {
 					GP_FontFaceFree(font);
 					font = GP_FontFaceLoad(font_path, 0, font_h);
 					redraw_screen();
-					SDL_Flip(display);
+					GP_BackendFlip(win);
 				}
 			break;
-			case SDLK_s:
+			case GP_KEY_S:
 				font_h--;
 				if (font_path) {
 					GP_FontFaceFree(font);
 					font = GP_FontFaceLoad(font_path, 0, font_h);
 					redraw_screen();
-					SDL_Flip(display);
+					GP_BackendFlip(win);
 				}
 			break;
-			case SDLK_ESCAPE:
-				return;
-			default:
+			case GP_KEY_ESC:
+				GP_BackendExit(win);
+				exit(0);
 			break;
 			}
-		break;
-
-		case SDL_QUIT:
-			return;
 		}
 	}
 }
@@ -252,46 +239,38 @@ void print_instructions(void)
 
 int main(int argc, char *argv[])
 {
+	const char *backend_opts = "X11";
+	
 	print_instructions();
 
 	GP_SetDebugLevel(10);
-
+	
 	if (argc > 1) {
 		font_path = argv[1];
 		fprintf(stderr, "\nLoading font '%s'\n", argv[1]);
 		font = GP_FontFaceLoad(argv[1], 0, font_h);
 	}
+	
+	win = GP_BackendInit(backend_opts, "Font Test", stderr);
 
-	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) != 0) {
-		fprintf(stderr, "Could not initialize SDL: %s\n", SDL_GetError());
+	if (win == NULL) {
+		fprintf(stderr, "Failed to initalize backend '%s'\n",
+		        backend_opts);
 		return 1;
 	}
-
-	display = SDL_SetVideoMode(640, 500, 0, SDL_SWSURFACE);
-	if (display == NULL) {
-		fprintf(stderr, "Could not open display: %s\n", SDL_GetError());
-		goto fail;
-	}
-
-	GP_SDL_ContextFromSurface(&context, display);
-
-	white_pixel     = GP_ColorToContextPixel(GP_COL_WHITE, &context);
-	gray_pixel      = GP_ColorToContextPixel(GP_COL_GRAY_LIGHT, &context);
-	dark_gray_pixel = GP_ColorToContextPixel(GP_COL_GRAY_DARK, &context);
-	black_pixel     = GP_ColorToContextPixel(GP_COL_BLACK, &context);
-	red_pixel       = GP_ColorToContextPixel(GP_COL_RED, &context);
-	blue_pixel      = GP_ColorToContextPixel(GP_COL_BLUE, &context);
+	
+	white_pixel     = GP_ColorToContextPixel(GP_COL_WHITE, win->context);
+	gray_pixel      = GP_ColorToContextPixel(GP_COL_GRAY_LIGHT, win->context);
+	dark_gray_pixel = GP_ColorToContextPixel(GP_COL_GRAY_DARK, win->context);
+	black_pixel     = GP_ColorToContextPixel(GP_COL_BLACK, win->context);
+	red_pixel       = GP_ColorToContextPixel(GP_COL_RED, win->context);
+	blue_pixel      = GP_ColorToContextPixel(GP_COL_BLUE, win->context);
 
 	redraw_screen();
-	SDL_Flip(display);
+	GP_BackendFlip(win);
 
-	event_loop();
-
-	SDL_Quit();
-	return 0;
-
-fail:
-	SDL_Quit();
-	return 1;
+	for (;;) {
+		GP_BackendWait(win);
+		event_loop();
+	}
 }
-
