@@ -30,6 +30,7 @@
 #define FILTERS_GP_CONVOLUTION_H
 
 #include "GP_Filter.h"
+#include "GP_Linear.h"
 
 /*
  * 2D convolution kernel.

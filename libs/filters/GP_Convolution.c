@@ -21,10 +21,9 @@
  *****************************************************************************/
 
 #include "core/GP_Debug.h"
-
 #include "GP_Linear.h"
-
 #include "GP_Convolution.h"
+
 int GP_FilterConvolutionEx(const GP_Context *src,
                            GP_Coord x_src, GP_Coord y_src,
                            GP_Size w_src, GP_Coord h_src,
