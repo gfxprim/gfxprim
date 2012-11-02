@@ -71,10 +71,24 @@ int tst_msg_append(struct tst_msg_store *self, int type, const char *msg_text)
 	return 0;
 }
 
+static char type_to_char(enum tst_report_type type)
+{
+	switch (type) {
+	case TST_MSG:
+		return 'M';
+	case TST_WARN:
+		return 'W';
+	case TST_ERR:
+		return 'E';
+	default:
+		return '?';
+	}
+}
+
 void tst_msg_print(struct tst_msg_store *self)
 {
 	struct tst_msg *msg;
 
 	for (msg = self->first; msg != NULL; msg = msg->next)
-		fprintf(stderr, "%i: %s\n", msg->type, msg->msg);
+		fprintf(stderr, "%c: %s\n", type_to_char(msg->type), msg->msg);
 }

@@ -37,8 +37,8 @@ static int load_resources(const char *path1, const char *path2,
 	*c2 = GP_LoadImage(path2, NULL);
 
 	if (*c1 == NULL || *c2 == NULL) {
-		tst_report(0, "Failed to load resource");
-		return TST_INTERR;
+		tst_err("Failed to load resource");
+		return TST_UNTESTED;
 	}
 
 	return TST_SUCCESS;

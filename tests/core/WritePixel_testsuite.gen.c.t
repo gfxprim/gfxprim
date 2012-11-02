@@ -58,7 +58,7 @@ static void dump_buffer(const char *name, char *buf, unsigned int buf_len)
 	unsigned int i;                                       \
                                                               \
 	if (buf1_len != buf2_len) {                           \
-		tst_report(0, "Invalid buffers");             \
+		tst_msg("Invalid buffers");                   \
         	return TST_FAILED;                            \
 	}                                                     \
 	                                                      \
@@ -67,7 +67,7 @@ static void dump_buffer(const char *name, char *buf, unsigned int buf_len)
 			printf("%s\n", id);                   \
 			dump_buffer("wrote", buf1, buf1_len); \
 			dump_buffer("gen", buf2, buf2_len);   \
-			tst_report(0, "Buffers are different"); \
+			tst_msg("Buffers are different");     \
 			return TST_FAILED;                    \
 		}                                             \
 	                                                      \

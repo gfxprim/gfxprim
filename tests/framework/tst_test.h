@@ -27,7 +27,7 @@ enum tst_ret {
 	TST_SUCCESS,  /* Test succedded                                    */
 	TST_SKIPPED,  /* Test skipped due to not enough memory, ENOSYS ... */
 	TST_UNTESTED, /* Test not finished because of failure              */
-	TST_INTERR,   /* Test framework error                              */
+	TST_INTERR,   /* Test framework error, do not use                  */
 	TST_SIGSEGV,  /* Test ended with SIGSEGV                           */
 	TST_TIMEOUT,  /* Test hasn't finished in time                      */
 	TST_ABORTED,  /* The abort() was called (possible double free)     */
@@ -91,10 +91,29 @@ void tst_list_suite(const struct tst_suite *suite);
 /*
  * Printf-like reporting function.
  */
+enum tst_report_type {
+	TST_MSG,
+	TST_WARN,
+	TST_ERR,
+};
+
+/* general report function - do not use */
 int tst_report(int level, const char *fmt, ...)
 	__attribute__ ((format (printf, 2, 3)));
 
+/* informative message */
+int tst_msg(const char *fmt, ...)
+	__attribute__ ((format (printf, 1, 2)));
+
+/* 
+ * Warning and Error are used in test framework to distinguish the type of test
+ * internal problem. You shouldn't use this one unless the test exited with
+ * TST_UNTESTED.
+ */
 int tst_warn(const char *fmt, ...)
+	__attribute__ ((format (printf, 1, 2)));
+
+int tst_err(const char *fmt, ...)
 	__attribute__ ((format (printf, 1, 2)));
 
 #endif /* TST_TEST_H */

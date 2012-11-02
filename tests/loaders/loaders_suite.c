@@ -64,8 +64,8 @@ static int save_img(enum fmt fmt, const GP_Context *img, const char *name)
 	case JPG:
 		return GP_SaveJPG(img, buf, NULL);
 	default:
-		tst_report(0, "WARNING: trying to save %s", strfmt(fmt));
-		exit(TST_INTERR);
+		tst_err("Trying to save %s image", strfmt(fmt));
+		exit(TST_UNTESTED);
 	}
 }
 
@@ -85,8 +85,8 @@ static GP_Context *load(enum fmt fmt, const char *name)
 	case BMP:
 		return GP_LoadBMP(buf, NULL);
 	default:
-		tst_report(0, "WARNING: trying to load %s", strfmt(fmt));
-		exit(TST_INTERR);
+		tst_err("Trying to load %s image", strfmt(fmt));
+		exit(TST_UNTESTED);
 	}
 }
 
@@ -97,19 +97,19 @@ static int save_load(enum fmt fmt, GP_Size w, GP_Size h)
 	img = GP_ContextAlloc(w, h, GP_PIXEL_RGB888);
 	
 	if (img == NULL) {
-		tst_report(0, "GP_ContextAlloc failed");
-		return TST_INTERR;
+		tst_warn("GP_ContextAlloc failed");
+		return TST_UNTESTED;
 	}
 
 	int ret = save_img(fmt, img, "test");
 
 	if (ret) {
 		if (errno == ENOSYS) {
-			tst_report(0, "Save %s: ENOSYS", strfmt(fmt));
+			tst_msg("Save %s: ENOSYS", strfmt(fmt));
 			return TST_SKIPPED;
 		}
 		
-		tst_report(0, "Failed to save %s: %s",
+		tst_msg("Failed to save %s: %s",
 		           strfmt(fmt), strerror(errno));
 		return TST_FAILED;
 	}
@@ -117,7 +117,7 @@ static int save_load(enum fmt fmt, GP_Size w, GP_Size h)
 	res = load(fmt, "test");
 
 	if (res == NULL) {
-		tst_report(0, "Failed to load %s: %s",
+		tst_msg("Failed to load %s: %s",
 		           strfmt(fmt), strerror(errno));
 		return TST_FAILED;
 	}
@@ -155,18 +155,17 @@ static int load_enoent(enum fmt fmt)
 	img = load(fmt, "nonexistent");	
 	
 	if (img != NULL) {
-		tst_report(0, "Test succedded unexpectedly");
+		tst_msg("Test succedded unexpectedly");
 		return TST_FAILED;
 	}
 	
 	if (errno == ENOSYS) {
-		tst_report(0, "Load %s: ENOSYS", strfmt(fmt));
+		tst_msg("Load %s: ENOSYS", strfmt(fmt));
 		return TST_SKIPPED;
 	}
 
 	if (errno != ENOENT) {
-		tst_report(0, "Expected errno = ENOENT, have %s",
-		              strerror(errno));
+		tst_msg("Expected errno = ENOENT, have %s", strerror(errno));
 		return TST_FAILED;
 	}
 
@@ -203,31 +202,31 @@ static int load_eacces(enum fmt fmt)
 	FILE *f = fopen(buf, "w");
 
 	if (f == NULL) {
-		tst_report(0, "Failed to create file 'test'");
-		return TST_INTERR;
+		tst_err("Failed to create file 'test': %s", strerror(errno));
+		return TST_UNTESTED;
 	}
 
 	fclose(f);
 
 	if (chmod(buf, 200)) {
-		tst_report(0, "chmod failed: %s", strerror(errno));
-		return TST_INTERR;
+		tst_err("chmod failed: %s", strerror(errno));
+		return TST_UNTESTED;
 	}
 
 	img = load(fmt, "test");
 
 	if (img != NULL) {
-		tst_report(0, "Test succedded unexpectedly");
+		tst_msg("Test succedded unexpectedly");
 		return TST_FAILED;
 	}
 	
 	if (errno == ENOSYS) {
-		tst_report(0, "Load %s: ENOSYS", strfmt(fmt));
+		tst_msg("Load %s: ENOSYS", strfmt(fmt));
 		return TST_SKIPPED;
 	}
 
 	if (errno != EACCES) {
-		tst_report(0, "Expected errno = EACCES, have %s",
+		tst_msg("Expected errno = EACCES, have %s",
 		              strerror(errno));
 		return TST_FAILED;
 	}
@@ -265,8 +264,8 @@ static int load_eio(enum fmt fmt)
 	FILE *f = fopen(buf, "w");
 
 	if (f == NULL) {
-		tst_report(0, "Failed to create file 'test'");
-		return TST_INTERR;
+		tst_err("Failed to create file 'test': %s", strerror(errno));
+		return TST_UNTESTED;
 	}
 
 	fclose(f);
@@ -274,17 +273,17 @@ static int load_eio(enum fmt fmt)
 	img = load(fmt, "test");
 
 	if (img != NULL) {
-		tst_report(0, "Test succedded unexpectedly");
+		tst_msg("Test succedded unexpectedly");
 		return TST_FAILED;
 	}
 	
 	if (errno == ENOSYS) {
-		tst_report(0, "Load %s: ENOSYS", strfmt(fmt));
+		tst_msg("Load %s: ENOSYS", strfmt(fmt));
 		return TST_SKIPPED;
 	}
 
 	if (errno != EIO) {
-		tst_report(0, "Expected errno = EIO, have %s",
+		tst_msg("Expected errno = EIO, have %s",
 		              strerror(errno));
 		return TST_FAILED;
 	}
@@ -330,17 +329,17 @@ static int test_PNG_Save_abort(void)
 	GP_ProgressCallback callback = {.callback = abort_callback};
 
 	if (GP_SavePNG(img, "test.png", &callback) == 0) {
-		tst_report(0, "Failed to save PNG saving");
+		tst_msg("Failed to save PNG saving");
 		return TST_FAILED;
 	}
 	
 	if (errno == ENOSYS) {
-		tst_report(0, "Load PNG: ENOSYS");
+		tst_msg("Load PNG: ENOSYS");
 		return TST_SKIPPED;
 	}
 
 	if (errno != ECANCELED) {
-		tst_report(0, "Expected errno = ECANCELED, have %s",
+		tst_msg("Expected errno = ECANCELED, have %s",
 		           strerror(errno));
 		return TST_FAILED;
 	}
@@ -359,11 +358,11 @@ static int test_PNG_Load_abort(void)
 	if (GP_SavePNG(img, "test.png", NULL)) {
 		
 		if (errno == ENOSYS) {
-			tst_report(0, "Save PNG: ENOSYS");
+			tst_msg("Save PNG: ENOSYS");
 			return TST_SKIPPED;
 		}
 		
-		tst_report(0, "Failed to save PNG: %s", strerror(errno));
+		tst_msg("Failed to save PNG: %s", strerror(errno));
 		return TST_FAILED;
 	}
 
@@ -376,12 +375,12 @@ static int test_PNG_Load_abort(void)
 	int saved_errno = errno;
 
 	if (img != NULL) {
-		tst_report(0, "Failed to abort PNG loading");
+		tst_msg("Failed to abort PNG loading");
 		return TST_FAILED;
 	}
 
 	if (saved_errno != ECANCELED) {
-		tst_report(0, "Expected errno = ECANCELED, have %s",
+		tst_msg("Expected errno = ECANCELED, have %s",
 		           strerror(saved_errno));
 		return TST_FAILED;
 	}
@@ -458,25 +457,25 @@ static int test_Load(void)
 		int saved_errno = errno;
 
 		if (ret != NULL) {
-			tst_report(0, "GP_LoadImage('%s') succeeded "
-			              "unexpectedly", file_testcases[i].filename);
+			tst_msg("GP_LoadImage('%s') succeeded unexpectedly",
+			        file_testcases[i].filename);
 			fail++;
 			continue;
 		}
 
 		if (file_testcases[i].expected_errno != ENOSYS && errno == ENOSYS) {
-			tst_report(0, "Load Image '%s': ENOSYS",
-			           file_testcases[i].filename);
+			tst_msg("Load Image '%s': ENOSYS",
+			        file_testcases[i].filename);
 			continue;
 		}
 		
 		if (file_testcases[i].expected_errno != errno) {
-			tst_report(0, "Expected errno %i (%s) got %i (%s) on '%s'",
-			              file_testcases[i].expected_errno,
-				      strerror(file_testcases[i].expected_errno),
-				      saved_errno,
-				      strerror(saved_errno),
-				      file_testcases[i].filename);
+			tst_msg("Expected errno %i (%s) got %i (%s) on '%s'",
+			        file_testcases[i].expected_errno,
+				strerror(file_testcases[i].expected_errno),
+				saved_errno,
+				strerror(saved_errno),
+				file_testcases[i].filename);
 			fail++;
 			continue;
 		}
@@ -502,10 +501,10 @@ static int test_load_BMP(const char *path)
 	if (img == NULL) {
 		switch (errno) {
 		case ENOSYS:
-			tst_report(0, "Not Implemented");
+			tst_msg("Not Implemented");
 			return TST_SKIPPED;
 		default:
-			tst_report(0, "Got %s", strerror(errno));
+			tst_msg("Got %s", strerror(errno));
 			return TST_FAILED;
 		}
 	}
@@ -570,10 +569,10 @@ static int test_load_PNG(const char *path)
 	if (img == NULL) {
 		switch (errno) {
 		case ENOSYS:
-			tst_report(0, "Not Implemented");
+			tst_msg("Not Implemented");
 			return TST_SKIPPED;
 		default:
-			tst_report(0, "Got %s", strerror(errno));
+			tst_msg("Got %s", strerror(errno));
 			return TST_FAILED;
 		}
 	}
@@ -605,10 +604,10 @@ static int test_load_JPEG(const char *path)
 	if (img == NULL) {
 		switch (errno) {
 		case ENOSYS:
-			tst_report(0, "Not Implemented");
+			tst_msg("Not Implemented");
 			return TST_SKIPPED;
 		default:
-			tst_report(0, "Got %s", strerror(errno));
+			tst_msg("Got %s", strerror(errno));
 			return TST_FAILED;
 		}
 	}

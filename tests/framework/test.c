@@ -32,8 +32,8 @@
 
 int success_fn(void)
 {
-	tst_report(0, "This test does nothing");
-	tst_report(0, "But successfully");
+	tst_msg("This test does nothing");
+	tst_msg("But successfully");
 	
 	return TST_SUCCESS;
 }
@@ -57,7 +57,7 @@ int stack_overflow_fn(void)
 
 int timeout_fn(void)
 {
-	tst_report(0, "Sleeping for ten seconds");
+	tst_msg("Sleeping for ten seconds");
 	sleep(10);
 	return TST_SUCCESS;
 }
@@ -68,7 +68,7 @@ int temp_dir_fn(void)
 
 	/* log current working directory */
 	res = getcwd(buf, sizeof(buf));
-	tst_report(0, "CWD is '%s'", res);
+	tst_msg("CWD is '%s'", res);
 
 	return TST_SUCCESS;
 }
@@ -86,7 +86,7 @@ int malloc_leak_fn(void)
 	free(q);
 	free(r);
 
-	tst_report(0, "Leaking 1 chunks 4 bytes total");
+	tst_msg("Leaking 1 chunks 4 bytes total");
 
 	return TST_SUCCESS;
 }
@@ -129,11 +129,11 @@ int barrier_allocation(void)
 	for (i = 0; i < 31; i++)
 		buf[i] = 0;
 
-	tst_report(0, "About to use address after the buffer with barrier");
+	tst_msg("About to use address after the buffer with barrier");
 	
 	buf[31] = 0;
 
-	tst_report(0, "This is not printed at all");
+	tst_msg("This is not printed at all");
 
 	return TST_SUCCESS;
 }
@@ -154,35 +154,48 @@ int fail_FILE(void)
 	f = fopen("test_fail_fclose", "w");
 
 	if (f == NULL) {
-		tst_report(0, "Failed to open 'test_fail_fclose' for writing: %s",
+		tst_msg("Failed to open 'test_fail_fclose' for writing: %s",
 		           strerror(errno));
 		fail = 1;
 	}
 
-	tst_report(0, "Correctly opened 'test_fail_fclose'");
+	tst_msg("Correctly opened 'test_fail_fclose'");
 
 	int ret = fclose(f);
 
 	if (ret == 0 || errno != ENOSPC) {
-		tst_report(0, "Failed to fail to close 'test_fail_fclose'");
+		tst_msg("Failed to fail to close 'test_fail_fclose'");
 		fail = 1;
 	}
 
-	tst_report(0, "Correctly failed to close 'test_fail_fclose'");
+	tst_msg("Correctly failed to close 'test_fail_fclose'");
 
 	f = fopen("test_fail_fopen", "w");
 
 	if (f != NULL && errno != EPERM) {
-		tst_report(0, "Failed to fail to open 'test_fail_fopen'");
+		tst_msg("Failed to fail to open 'test_fail_fopen'");
 		fclose(f);
 		fail = 1;
 	}
 
-	tst_report(0, "Correctly failed to open 'test_fail_fopen'"); 
+	tst_msg("Correctly failed to open 'test_fail_fopen'"); 
 
 	if (fail)
 		return TST_FAILED;
 	
+	return TST_SUCCESS;
+}
+
+static int messages_test_fn(void)
+{
+	/* stdout and stderr capture test */
+	printf("This is stdout\n");
+	fprintf(stderr, "This is stderr\n");
+	
+	tst_msg("This is message");
+	tst_warn("This is a warning");
+	tst_err("This is an error");
+
 	return TST_SUCCESS;
 }
 
@@ -208,7 +221,7 @@ static int untested_fn(void)
 static int res_fn(void)
 {
 	if (access("test.c", R_OK) == 0) 
-		tst_report(0, "File correctly copied");
+		tst_msg("File correctly copied");
 
 	return TST_SUCCESS;
 }
@@ -254,6 +267,7 @@ const struct tst_suite tst_suite = {
 		{.name = "Resource", .tst_fn = res_fn, .flags = TST_TMPDIR,
 		 .res_path = "test.c"},
 		{.name = "FP exception", .tst_fn = fpe_fn},
+		{.name = "Messages test", .tst_fn = messages_test_fn},
 		{.name = "Benchmark test", .tst_fn = benchmark_fn, .bench_iter = 10},
 		{.name = NULL},
 	}

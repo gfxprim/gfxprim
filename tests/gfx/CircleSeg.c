@@ -166,7 +166,7 @@ static int test_circle(const char *pattern, GP_Size w, GP_Size h,
 	c = GP_ContextAlloc(w, h, GP_PIXEL_G8);
 
 	if (c == NULL) {
-		tst_report(0, "Failed to allocate context");
+		tst_err("Failed to allocate context");
 		return TST_UNTESTED;
 	}
 
@@ -178,7 +178,7 @@ static int test_circle(const char *pattern, GP_Size w, GP_Size h,
 	err = compare_buffers(pattern, c);
 
 	if (err) {
-		tst_report(0, "Patterns are different");
+		tst_msg("Patterns are different");
 		return TST_FAILED;
 	}
 

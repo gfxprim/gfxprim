@@ -73,6 +73,20 @@ static const char line_0_0_10_10_11x11[] = {
 	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
 };
 
+static const char line_0_0_11_5_11x11[] = {
+	1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0,
+	0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0,
+	0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0,
+	0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0,
+	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+};
+
 static int test_line(const char *pattern, GP_Size w, GP_Size h,
                      GP_Coord x0, GP_Coord y0, GP_Coord x1, GP_Coord y1)
 {
@@ -82,7 +96,7 @@ static int test_line(const char *pattern, GP_Size w, GP_Size h,
 	c = GP_ContextAlloc(w, h, GP_PIXEL_G8);
 
 	if (c == NULL) {
-		tst_report(0, "Failed to allocate context");
+		tst_err("Failed to allocate context");
 		return TST_UNTESTED;
 	}
 
@@ -94,7 +108,7 @@ static int test_line(const char *pattern, GP_Size w, GP_Size h,
 	err = compare_buffers(pattern, c);
 
 	if (err) {
-		tst_report(0, "Patterns are different");
+		tst_msg("Patterns are different");
 		return TST_FAILED;
 	}
 
@@ -121,12 +135,18 @@ static int test_line__1__1_11_11(void)
 	return test_line(line_0_0_10_10_11x11, 11, 11, -1, -1, 11, 11);
 }
 
+static int test_line_0_0_11_5(void)
+{
+	return test_line(line_0_0_11_5_11x11, 11, 11, 0, 0, 11, 5);
+}
+
 const struct tst_suite tst_suite = {
 	.suite_name = "GFX Line Testsuite",
 	.tests = {
 		{.name = "Line 5x5 - 5x5", .tst_fn = test_line_5_5_5_5},
 		{.name = "Line 1x5 - 9x5", .tst_fn = test_line_1_5_9_5},
 		{.name = "Line 0x0 - 10x10", .tst_fn = test_line_0_0_10_10},
+		{.name = "Line 0x0 - 11x5", .tst_fn = test_line_0_0_11_5},
 		{.name = "Line -1x-1 - 11x11", .tst_fn = test_line__1__1_11_11},
 		{.name = NULL}
 	}

@@ -40,50 +40,50 @@ static int Context_Alloc_Free(void)
 	c = GP_ContextAlloc(100, 200, GP_PIXEL_RGB888);
 
 	if (c == NULL) {
-		tst_report(0, "GP_ContextAlloc() failed");
+		tst_msg("GP_ContextAlloc() failed");
 		return TST_FAILED;
 	}
 
 	/* Assert context properties */
 	if (c->bpp != 24) {
-		tst_report(0, "Context->bpp != 24 (== %i)", c->bpp);
+		tst_msg("Context->bpp != 24 (== %i)", c->bpp);
 		return TST_FAILED;
 	}
 
 	if (c->bytes_per_row != 3 * c->w) {
-		tst_report(0, "Context->bytes_per_row != %i (== %i)",
-		           3 * c->w, c->bytes_per_row);
+		tst_msg("Context->bytes_per_row != %i (== %i)",
+		        3 * c->w, c->bytes_per_row);
 		return TST_FAILED;
 	}
 
 	if (c->w != 100) {
-		tst_report(0, "Context->w != 100 (== %i)", c->w);
+		tst_msg("Context->w != 100 (== %i)", c->w);
 		return TST_FAILED;
 	}
 	
 	if (c->h != 200) {
-		tst_report(0, "Context->h != 200 (== %i)", c->h);
+		tst_msg("Context->h != 200 (== %i)", c->h);
 		return TST_FAILED;
 	}
 	
 	if (c->offset != 0) {
-		tst_report(0, "Context->offset != 0");
+		tst_msg("Context->offset != 0");
 		return TST_FAILED;
 	}
 
 	if (c->pixel_type != GP_PIXEL_RGB888) {
-		tst_report(0, "Context->pixel_type != GP_PIXEL_RGB888");
+		tst_msg("Context->pixel_type != GP_PIXEL_RGB888");
 		return TST_FAILED;
 	}
 
 	if (c->gamma != NULL) {
-		tst_report(0, "Context->gamma != NULL");
+		tst_msg("Context->gamma != NULL");
 		return TST_FAILED;
 	}
 
 	if (c->axes_swap != 0 || c->x_swap != 0 || c->y_swap != 0) {
-		tst_report(0, "Wrong default orientation %i %i %i",
-		           c->axes_swap, c->x_swap, c->y_swap);
+		tst_msg("Wrong default orientation %i %i %i",
+		        c->axes_swap, c->x_swap, c->y_swap);
 		return TST_FAILED;
 	}
 
@@ -101,7 +101,6 @@ const struct tst_suite tst_suite = {
 	.tests = {
 		{.name = "Context Alloc Free", .tst_fn = Context_Alloc_Free,
 		 .flags = TST_CHECK_MALLOC},
-
 		{.name = NULL},
 	}
 };

@@ -312,6 +312,23 @@ int tst_report(int level, const char *fmt, ...)
 	return ret;
 }
 
+int tst_msg(const char *fmt, ...)
+{
+	va_list va;
+	int ret;
+	
+	va_start(va, fmt);
+
+	if (in_child())
+		return tst_vreport(TST_MSG, fmt, va);
+
+	fprintf(stderr, "MSG: ");
+	ret = vfprintf(stderr, fmt, va);
+	va_end(va);
+
+	return ret;
+}
+
 int tst_warn(const char *fmt, ...)
 {
 	va_list va;
@@ -320,8 +337,26 @@ int tst_warn(const char *fmt, ...)
 	va_start(va, fmt);
 
 	if (in_child())
-		return tst_vreport(-1, fmt, va);
+		return tst_vreport(TST_WARN, fmt, va);
 
+	fprintf(stderr, "WARN: ");
+	ret = vfprintf(stderr, fmt, va);
+	va_end(va);
+
+	return ret;
+}
+
+int tst_err(const char *fmt, ...)
+{
+	va_list va;
+	int ret;
+	
+	va_start(va, fmt);
+
+	if (in_child())
+		return tst_vreport(TST_ERR, fmt, va);
+
+	fprintf(stderr, "ERR: ");
 	ret = vfprintf(stderr, fmt, va);
 	va_end(va);
 

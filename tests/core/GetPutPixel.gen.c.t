@@ -50,7 +50,7 @@ static int check_filled(GP_Context *c)
 	for (x = 0; x < (GP_Coord)c->w; x++)
 		for (y = 0; y < (GP_Coord)c->h; y++)
 			if (p != GP_GetPixel(c, x, y)) {
-				tst_report(0, "Pixels different %i %i", x, y);
+				tst_msg("Pixels different %i %i", x, y);
 				return 1;
 			}
 	
@@ -61,7 +61,7 @@ static int try_pattern(GP_Context *c, GP_Pixel p)
 {
 	fill_context(c, p);
 
-	tst_report(0, "Filling pattern 0x%x", p);
+	tst_msg("Filling pattern 0x%x", p);
 
 	if (check_filled(c))
 		return 1;
@@ -79,7 +79,7 @@ static int GetPutPixel_{{ pt.name }}(void)
 	c = GP_ContextAlloc(100, 100, GP_PIXEL_{{ pt.name }});
 
 	if (c == NULL) {
-		tst_report(0, "GP_ContextAlloc() failed");
+		tst_msg("GP_ContextAlloc() failed");
 		return TST_UNTESTED;
 	}
 
@@ -114,7 +114,7 @@ static int GetPutPixel_Clipping_{{ pt.name }}(void)
 	c = GP_ContextAlloc(100, 100, GP_PIXEL_{{ pt.name }});
 
 	if (c == NULL) {
-		tst_report(0, "GP_ContextAlloc() failed");
+		tst_msg("GP_ContextAlloc() failed");
 		return TST_UNTESTED;
 	}
 
@@ -133,8 +133,8 @@ static int GetPutPixel_Clipping_{{ pt.name }}(void)
 
 			/* Must return 0 */
 			if (GP_GetPixel(c, x, y) != 0) {
-				tst_report(0, "GP_GetPixel returned non-zero "
-				              "at %i %i", x, y);
+				tst_msg("GP_GetPixel returned non-zero "
+				        "at %i %i", x, y);
 				err++;
 			}
 		}

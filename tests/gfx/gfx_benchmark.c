@@ -30,8 +30,8 @@ static int bench_line(GP_PixelType type)
 	GP_Context *img = GP_ContextAlloc(800, 600, type);
 
 	if (img == NULL) {
-		tst_report(0, "Malloc failed");
-		return TST_INTERR;
+		tst_err("Malloc failed");
+		return TST_UNTESTED;
 	}
 
 	unsigned int i;
@@ -74,8 +74,8 @@ static int bench_circle(GP_PixelType type)
 	GP_Context *img = GP_ContextAlloc(800, 600, type);
 
 	if (img == NULL) {
-		tst_report(0, "Malloc failed");
-		return TST_INTERR;
+		tst_err("Malloc failed");
+		return TST_UNTESTED;
 	}
 
 	unsigned int i;
