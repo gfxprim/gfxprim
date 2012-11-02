@@ -96,9 +96,16 @@ void tst_run_suite(const struct tst_suite *suite, const char *tst_name)
 	tst_log_close(html, TST_LOG_HTML);
 	tst_log_close(json, TST_LOG_JSON);
 
+	float percents;
+	
+	if (counter == 0)
+		percents = 100;
+	else
+		percents = 100.00 * counters[0] / counter;
+
 	fprintf(stderr, "\nSummary: succedded %u out of "
 	                "%u %.2f%% (skipped %u)\n",
-	                counters[0], counter, 100.00 * counters[0] / counter,
+	                counters[0], counter, percents,
 		        counters[TST_SKIPPED]);
 }
 
