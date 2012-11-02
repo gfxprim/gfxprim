@@ -68,7 +68,10 @@ static int test_lin_conv_box_3x3(void)
 		.kernel = box_3x3,
 	};
 
-	GP_FilterConvolution(in, in, &box_3x3_kernel, NULL);
+	if (GP_FilterConvolution(in, in, &box_3x3_kernel, NULL)) {
+		if (errno == ENOSYS)
+			return TST_SKIPPED;
+	}
 
 	/* Check result */
 	//TODO
@@ -89,8 +92,11 @@ static int test_h_lin_conv_box_3_raw(void)
 	/* Apply the convolution */
 	float kernel[] = {1, 1, 1};
 
-	GP_FilterHLinearConvolution_Raw(in, 0, 0, in->w, in->h, in, 0, 0,
-	                                kernel, 3, 3, NULL);
+	if (GP_FilterHLinearConvolution_Raw(in, 0, 0, in->w, in->h, in, 0, 0,
+	                                kernel, 3, 3, NULL)) {
+		if (errno == ENOSYS)
+			return TST_SKIPPED;
+	}
 	
 	/* Check result */
 	//TODO
@@ -113,8 +119,11 @@ static int test_v_lin_conv_box_3_raw(void)
 	/* Apply the convolution */
 	float kernel[] = {1, 1, 1};
 
-	GP_FilterVLinearConvolution_Raw(in, 0, 0, in->w, in->h, in, 0, 0,
-	                                kernel, 3, 3, NULL);
+	if (GP_FilterVLinearConvolution_Raw(in, 0, 0, in->w, in->h, in, 0, 0,
+	                                kernel, 3, 3, NULL)) {
+		if (errno == ENOSYS)
+			return TST_SKIPPED;
+	}
 	
 	/* Check result */
 	//TODO
