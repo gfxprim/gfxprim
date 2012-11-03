@@ -40,6 +40,7 @@ enum GP_ImageFmt {
 	GP_FMT_JPG,
 	GP_FMT_BMP,
 	GP_FMT_GIF,
+	GP_FMT_PSP,
 	GP_FMT_PBM,
 	GP_FMT_PGM,
 	GP_FMT_PPM,
@@ -103,7 +104,7 @@ enum GP_ImageFmt filename_to_fmt(const char *path)
 		break;
 		}
 	break;
-	/* BMP */
+	/* BMP, PSP */
 	case 'P':
 	case 'p':
 		switch (path[len - 2]) {
@@ -112,6 +113,12 @@ enum GP_ImageFmt filename_to_fmt(const char *path)
 			if (path[len - 3] == 'B' ||
 			    path[len - 3] == 'b')
 				return GP_FMT_BMP;
+		break;
+		case 'S':
+		case 's':
+			if (path[len - 3] == 'P' ||
+			    path[len - 3] == 'p')
+				return GP_FMT_PSP;
 		break;
 		}
 	break;
@@ -157,6 +164,8 @@ GP_Context *GP_LoadImage(const char *src_path, GP_ProgressCallback *callback)
 		return GP_LoadPNG(src_path, callback);
 	case GP_FMT_GIF:
 		return GP_LoadGIF(src_path, callback);
+	case GP_FMT_PSP:
+		return GP_LoadPSP(src_path, callback);
 	case GP_FMT_BMP:
 		return GP_LoadBMP(src_path, callback);
 	case GP_FMT_PBM:
@@ -165,7 +174,6 @@ GP_Context *GP_LoadImage(const char *src_path, GP_ProgressCallback *callback)
 		return GP_LoadPGM(src_path, callback);
 	case GP_FMT_PPM:
 		return GP_LoadPPM(src_path, callback);
-	
 	case GP_FMT_UNKNOWN:
 	break;
 	}
