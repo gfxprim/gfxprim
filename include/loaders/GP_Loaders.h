@@ -49,33 +49,6 @@
 
 #include "GP_MetaData.h"
 
-/*
- * Tries to load image accordingly to the file extension.
- *
- * If operation fails NULL is returned and errno is filled.
- */
-GP_Context *GP_LoadImage(const char *src_path, GP_ProgressCallback *callback);
-
-/*
- * Loads image Meta Data (if possible).
- */
-int GP_LoadMetaData(const char *src_path, GP_MetaData *data);
-
-/*
- * Simple saving function, the image format is matched by file extension.
- *
- * Retruns zero on succes.
- * 
- * On failure non-zero is returned.
- *
- * When file type wasn't recognized by extension or if support for requested
- * image format wasn't compiled in non-zero is returned and errno is set to
- * ENOSYS.
- * 
- * The resulting errno may also be set to any possible error from fopen(3), open(3),
- * write(3), fwrite(3), seek(3), etc..
- */
-int GP_SaveImage(const GP_Context *src, const char *dst_path,
-                 GP_ProgressCallback *callback);
+#include "GP_Loader.h"
 
 #endif /* LOADERS_GP_LOADERS_H */

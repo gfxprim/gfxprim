@@ -34,6 +34,122 @@
 
 #include "GP_Loaders.h"
 
+#include "GP_Loader.h"
+
+static GP_Loader psp_image = {
+	.Load = GP_LoadPSP,
+	.Save = NULL,
+	.Match = NULL,
+	.fmt_name = "Paint Shop Pro Image",
+	.next = NULL,
+	.extensions = {"psp", "pspimage", NULL},
+};
+
+static GP_Loader *loaders = &psp_image;
+static GP_Loader *loaders_last = &psp_image;
+
+void GP_LoaderRegister(GP_Loader *self)
+{
+	GP_DEBUG(1, "Registering loader for '%s'", self->fmt_name);
+
+	self->next = NULL;
+	loaders_last->next = self;
+}
+
+void GP_LoaderUnregister(GP_Loader *self)
+{
+	struct GP_Loader *i;
+
+	if (self == NULL)
+		return;
+
+	GP_DEBUG(1, "Unregistering loader for '%s'", self->fmt_name);
+
+	for (i = loaders; i != NULL; i = i->next) {
+		if (i->next == self)
+			break;
+	}
+
+	if (i == NULL) {
+		GP_WARN("Loader '%s' (%p) wasn't registered",
+		        self->fmt_name, self);
+		return;
+	}
+
+	i->next = self->next;
+}
+
+static struct GP_Loader *loader_by_extension(const char *ext)
+{
+	struct GP_Loader *i;
+	int j;
+
+	for (i = loaders; i != NULL; i = i->next) {
+		for (j = 0; i->extensions[j] != NULL; j++) {
+			if (!strcasecmp(ext, i->extensions[j])) {
+				GP_DEBUG(1, "Found loader '%s'", i->fmt_name);
+				return i;
+			}
+		}
+	}
+
+	return NULL;
+}
+
+static struct GP_Loader *loader_by_filename(const char *path)
+{
+	size_t len = strlen(path);
+	const char *ext;
+	int i;
+
+	for (i = len - 1; i >= 0; i--)
+		if (path[i] == '.')
+			break;
+
+	ext = path + i + 1;
+
+	GP_DEBUG(1, "Loading file by filename extension '%s'", ext);
+
+	return loader_by_extension(ext);
+}
+
+static struct GP_Loader *loader_by_signature(const char *path)
+{
+	uint8_t buf[32];
+	FILE *f;
+	int err;
+
+	GP_DEBUG(1, "Trying to match file signature");
+
+	f = fopen(path, "rb");
+
+	if (f == NULL) {
+		err = errno;
+		GP_DEBUG(1, "Failed to open file '%s'", path);
+		errno = err;
+		return NULL;
+	}
+
+	if (fread(buf, sizeof(buf), 1, f) < 1) {
+		GP_DEBUG(1, "Failed to read start of the file '%s'", path);
+		errno = EIO;
+		return NULL;
+	}
+
+	fclose(f);
+
+	struct GP_Loader *i;
+	
+	for (i = loaders; i != NULL; i = i->next) {
+		if (i->Match && i->Match(buf)) {
+			GP_DEBUG(1, "Found loader '%s'", i->fmt_name);
+			return i;
+		}
+	}
+
+	return NULL;
+}
+
 enum GP_ImageFmt {
 	GP_FMT_UNKNOWN,
 	GP_FMT_PNG,
@@ -177,6 +293,18 @@ GP_Context *GP_LoadImage(const char *src_path, GP_ProgressCallback *callback)
 	case GP_FMT_UNKNOWN:
 	break;
 	}
+
+	struct GP_Loader *l;
+	
+	l = loader_by_filename(src_path);
+
+	if (l != NULL)
+		return l->Load(src_path, callback);
+
+	l = loader_by_signature(src_path);
+
+	if (l != NULL)
+		return l->Load(src_path, callback);
 
 	//TODO file signature based check
 	errno = ENOSYS;
