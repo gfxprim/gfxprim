@@ -43,6 +43,11 @@
 
 #include "core/GP_BitSwap.h"
 
+int GP_MatchPNG(const void *buf)
+{
+	return !png_sig_cmp(buf, 0, 8);
+}
+
 int GP_OpenPNG(const char *src_path, FILE **f)
 {
 	uint8_t sig[8];

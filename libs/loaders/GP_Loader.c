@@ -36,7 +36,7 @@
 
 #include "GP_Loader.h"
 
-static GP_Loader psp_image = {
+static GP_Loader psp_loader = {
 	.Load = GP_LoadPSP,
 	.Save = NULL,
 	.Match = GP_MatchPSP,
@@ -45,8 +45,44 @@ static GP_Loader psp_image = {
 	.extensions = {"psp", "pspimage", NULL},
 };
 
-static GP_Loader *loaders = &psp_image;
-static GP_Loader *loaders_last = &psp_image;
+static GP_Loader bmp_loader = {
+	.Load = GP_LoadBMP,
+	.Save = NULL,
+	.Match = NULL,
+	.fmt_name = "BMP",
+	.next = &psp_loader,
+	.extensions = {"bmp", "dib", NULL},
+};
+
+static GP_Loader gif_loader = {
+	.Load = GP_LoadGIF,
+	.Save = NULL,
+	.Match = GP_MatchGIF,
+	.fmt_name = "Graphics Interchange Format",
+	.next = &bmp_loader,
+	.extensions = {"gif", NULL},
+};
+
+static GP_Loader png_loader = {
+	.Load = GP_LoadPNG,
+	.Save = GP_SavePNG,
+	.Match = GP_MatchPNG,
+	.fmt_name = "Portable Network Graphics",
+	.next = &gif_loader,
+	.extensions = {"png", NULL},
+};
+
+static GP_Loader jpeg_loader = {
+	.Load = GP_LoadJPG,
+	.Save = GP_SaveJPG,
+	.Match = GP_MatchJPG,
+	.fmt_name = "JPEG",
+	.next = &png_loader,
+	.extensions = {"jpg", "jpeg", NULL},
+};
+
+static GP_Loader *loaders = &jpeg_loader;
+static GP_Loader *loaders_last = &psp_loader;
 
 void GP_LoaderRegister(GP_Loader *self)
 {

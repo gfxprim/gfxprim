@@ -79,4 +79,9 @@ int GP_LoadPNGMetaData(const char *src_path, GP_MetaData *data);
 int GP_SavePNG(const GP_Context *src, const char *dst_path,
                GP_ProgressCallback *callback);
 
+/*
+ * Match PNG signature.
+ */
+int GP_MatchPNG(const void *buf);
+
 #endif /* LOADERS_GP_PNG_H */

@@ -62,4 +62,9 @@ int GP_LoadJPGMetaData(const char *src_path, GP_MetaData *data);
 int GP_SaveJPG(const GP_Context *src, const char *dst_path,
                GP_ProgressCallback *callback);
 
+/*
+ * Match JPG signature.
+ */
+int GP_MatchJPG(const void *buf);
+
 #endif /* LOADERS_GP_JPG_H */

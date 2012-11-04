@@ -44,6 +44,23 @@
 
 #include <gif_lib.h>
 
+#define GIF_SIGNATURE1 "GIF87a"
+#define GIF_SIGNATURE1_LEN 6
+
+#define GIF_SIGNATURE2 "GIF89a"
+#define GIF_SIGNATURE2_LEN 6
+
+int GP_MatchGIF(const void *buf)
+{
+	if (!memcmp(buf, GIF_SIGNATURE1, GIF_SIGNATURE1_LEN))
+		return 1;
+	
+	if (!memcmp(buf, GIF_SIGNATURE2, GIF_SIGNATURE2_LEN))
+		return 1;
+
+	return 0;
+}
+
 int GP_OpenGIF(const char *src_path, void **f)
 {
 	GifFileType *gf;

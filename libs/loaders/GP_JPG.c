@@ -43,6 +43,18 @@
 
 #include <jpeglib.h>
 
+/*
+ * 0xff 0xd8 - start of image
+ * 0xff 0xe0 - APP0 JFIF meta data
+ */
+#define JPEG_SIGNATURE "\xff\xd8\xff\xe0"
+#define JPEG_SIGNATURE_LEN 4
+
+int GP_MatchJPG(const void *buf)
+{
+	return !memcmp(buf, JPEG_SIGNATURE, JPEG_SIGNATURE_LEN);
+}
+
 int GP_OpenJPG(const char *src_path, FILE **f)
 {
 	int err;

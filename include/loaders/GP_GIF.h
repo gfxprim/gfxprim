@@ -58,4 +58,9 @@ GP_Context *GP_ReadGIF(void *f, GP_ProgressCallback *callback);
  */
 GP_Context *GP_LoadGIF(const char *src_path, GP_ProgressCallback *callback);
 
+/*
+ * Match GIF signature.
+ */
+int GP_MatchGIF(const void *buf);
+
 #endif /* LOADERS_GP_GIF_H */
