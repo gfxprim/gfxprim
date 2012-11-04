@@ -39,7 +39,7 @@
 static GP_Loader psp_image = {
 	.Load = GP_LoadPSP,
 	.Save = NULL,
-	.Match = NULL,
+	.Match = GP_MatchPSP,
 	.fmt_name = "Paint Shop Pro Image",
 	.next = NULL,
 	.extensions = {"psp", "pspimage", NULL},

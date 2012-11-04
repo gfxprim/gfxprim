@@ -58,4 +58,9 @@ GP_Context *GP_ReadPSP(FILE *f, GP_ProgressCallback *callback);
  */
 GP_Context *GP_LoadPSP(const char *src_path, GP_ProgressCallback *callback);
 
+/*
+ * Match PSP signature.
+ */
+int GP_MatchPSP(const void *buf);
+
 #endif /* LOADERS_GP_PSP_H */

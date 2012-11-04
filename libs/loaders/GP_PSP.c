@@ -61,6 +61,11 @@ struct psp_version {
 	uint16_t minor;
 };
 
+int GP_MatchPSP(const void *buf)
+{
+	return !memcmp(buf, PSP_SIGNATURE, PSP_SIGNATURE_LEN);
+}
+
 int GP_OpenPSP(const char *src_path, FILE **f)
 {
 	int err;
