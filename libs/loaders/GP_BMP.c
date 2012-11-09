@@ -514,6 +514,11 @@ static int read_bitmap_pixels(FILE *f, struct bitmap_info_header *header,
 	return ENOSYS;
 }
 
+int GP_MatchBMP(const void *buf)
+{
+	return !memcmp(buf, "BM", 2);
+}
+
 int GP_OpenBMP(const char *src_path, FILE **f,
                GP_Size *w, GP_Size *h, GP_PixelType *pixel_type)
 {

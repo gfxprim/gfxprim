@@ -62,4 +62,9 @@ GP_Context *GP_ReadBMP(FILE *f, GP_ProgressCallback *callback);
  */
 GP_Context *GP_LoadBMP(const char *src_path, GP_ProgressCallback *callback);
 
+/*
+ * Match BMP signature.
+ */
+int GP_MatchBMP(const void *buf);
+
 #endif /* LOADERS_GP_BMP_H */

@@ -48,7 +48,7 @@ static GP_Loader psp_loader = {
 static GP_Loader bmp_loader = {
 	.Load = GP_LoadBMP,
 	.Save = NULL,
-	.Match = NULL,
+	.Match = GP_MatchBMP,
 	.fmt_name = "BMP",
 	.next = &psp_loader,
 	.extensions = {"bmp", "dib", NULL},
@@ -141,6 +141,9 @@ static struct GP_Loader *loader_by_filename(const char *path)
 	for (i = len - 1; i >= 0; i--)
 		if (path[i] == '.')
 			break;
+
+	if (path[i] != '.')
+		return NULL;
 
 	ext = path + i + 1;
 
@@ -342,7 +345,6 @@ GP_Context *GP_LoadImage(const char *src_path, GP_ProgressCallback *callback)
 	if (l != NULL)
 		return l->Load(src_path, callback);
 
-	//TODO file signature based check
 	errno = ENOSYS;
 	return NULL;
 }
@@ -382,17 +384,15 @@ int GP_LoadMetaData(const char *src_path, GP_MetaData *data)
 int GP_SaveImage(const GP_Context *src, const char *dst_path,
                  GP_ProgressCallback *callback)
 {
-	enum GP_ImageFmt fmt = filename_to_fmt(dst_path);
+	struct GP_Loader *l = loader_by_filename(dst_path);
 
-	switch (fmt) {
-	case GP_FMT_JPG:
-		return GP_SaveJPG(src, dst_path, callback);
-	case GP_FMT_PNG:
-		return GP_SavePNG(src, dst_path, callback);
-
-	default:
-	break;
+	if (l == NULL) {
+		errno = EINVAL;
+		return 1;
 	}
+	
+	if (l->Save)
+		return l->Save(src, dst_path, callback);
 
 	errno = ENOSYS;
 	return 1;
