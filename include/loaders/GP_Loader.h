@@ -106,4 +106,9 @@ void GP_LoaderRegister(GP_Loader *self);
 
 void GP_LoaderUnregister(GP_Loader *self);
 
+/*
+ * List loaders into the stdout
+ */
+void GP_ListLoaders(void);
+
 #endif /* LOADERS_GP_LOADER_H */

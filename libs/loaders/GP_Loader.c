@@ -45,12 +45,39 @@ static GP_Loader psp_loader = {
 	.extensions = {"psp", "pspimage", NULL},
 };
 
+static GP_Loader pbm_loader = {
+	.Load = GP_LoadPBM,
+	.Save = GP_SavePBM,
+	.Match = NULL,
+	.fmt_name = "Netpbm portable bitmap",
+	.next = &psp_loader,
+	.extensions = {"pbm", NULL},
+};
+
+static GP_Loader pgm_loader = {
+	.Load = GP_LoadPGM,
+	.Save = GP_SavePGM,
+	.Match = NULL,
+	.fmt_name = "Netpbm portable graymap",
+	.next = &pbm_loader,
+	.extensions = {"pgm", NULL},
+};
+
+static GP_Loader ppm_loader = {
+	.Load = GP_LoadPPM,
+	.Save = NULL,
+	.Match = NULL,
+	.fmt_name = "Netpbm portable pixmap",
+	.next = &pgm_loader,
+	.extensions = {"ppm", NULL},
+};
+
 static GP_Loader bmp_loader = {
 	.Load = GP_LoadBMP,
 	.Save = NULL,
 	.Match = GP_MatchBMP,
 	.fmt_name = "BMP",
-	.next = &psp_loader,
+	.next = &ppm_loader,
 	.extensions = {"bmp", "dib", NULL},
 };
 
@@ -113,6 +140,26 @@ void GP_LoaderUnregister(GP_Loader *self)
 	}
 
 	i->next = self->next;
+}
+
+void GP_ListLoaders(void)
+{
+	struct GP_Loader *i;
+	int j;
+
+	for (i = loaders; i != NULL; i = i->next) {
+		printf("Format: %s\n", i->fmt_name);
+		printf("Load:\t%s\n", i->Load ? "Yes" : "No");
+		printf("Save:\t%s\n", i->Save ? "Yes" : "No");
+		printf("Match:\t%s\n", i->Match ? "Yes" : "No");
+		printf("Extensions: ");
+		for (j = 0; i->extensions[j] != NULL; j++)
+			printf("%s ", i->extensions[j]);
+		printf("\n");
+	
+		if (i->next != NULL)
+			printf("\n");
+	}
 }
 
 static struct GP_Loader *loader_by_extension(const char *ext)
