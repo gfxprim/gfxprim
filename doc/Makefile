@@ -2,6 +2,8 @@ SOURCES=general.txt context.txt loaders.txt filters.txt basic_types.txt \
         drawing_api.txt backends.txt gamma.txt grabbers.txt \
 	environment_variables.txt debug.txt
 
+EXAMPLE_SOURCES=$(wildcard example_*.txt)
+
 #
 # Names of generated images for cleanup
 #
@@ -10,7 +12,7 @@ GENIMAGES=discrete_linear_1D_convolution_alg1 discrete_linear_1D_convolution_alg
 	  discrete_linear_convolution_alg2 laplacian_edge_sharpening laplacian_kernel
 
 PAGES=$(subst .txt,.html,$(SOURCES))
-
+PAGES+=$(subst .txt,.html,$(EXAMPLE_SOURCES))
 
 all: api.html examples.html $(PAGES) api_links.html
 

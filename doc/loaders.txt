@@ -3,14 +3,25 @@ Context loaders
 This part of GFXprim library aims to create API to load and save images
 from/to common image file formats.
 
+Currently we support JPEG, PNG and some PNM images for loading and saving and
+BMP, GIF and PSP for loading.
+
+Loaders API
+~~~~~~~~~~~
+
 All loading functions returns a pointer to allocated and loaded image or upon
-a failure 'NULL' and 'errno' is set.
+a failure 'NULL'.
 
-All saving functions returns zero on success and non-zero on failure and
-'errno' is set. If image saving is aborted by a callback, the opened file is
-closed and removed from a filesystem before the call returns.
+All saving functions returns zero on success and non-zero on failure.  If
+image saving is aborted by a callback, the opened file is closed and removed
+from a filesystem before the call returns.
 
-The possible 'errno' values (for both loading and saving) are:
+In case of a failure 'errno' is set. 
+
+The signature matching functions takes a 32 bytes long buffer and looks for a
+valid image signature. If signature is found 1 is returned.
+
+The possible 'errno' values are:
 
 * anything returned by +open()+, +close()+, +lseek()+, +read()+, +write()+, ...
  - 'ENOENT' if file doesn't exist
@@ -22,8 +33,11 @@ The possible 'errno' values (for both loading and saving) are:
 * 'EIO'       invalid image data (wrong signature, header or image data)
 * 'ECANCELED' action canceled by returning non-zero from within a callback
 
-Common Loader
-~~~~~~~~~~~~~
+You can get more information about the error condition by turning on GFXprim
+debug messages.
+
+Image Loader
+~~~~~~~~~~~~
 
 [source,c]
 -------------------------------------------------------------------------------
@@ -34,9 +48,21 @@ Common Loader
 GP_Context *GP_LoadImage(const char *src_path, GP_ProgressCallback *callback);
 -------------------------------------------------------------------------------
 
-Loads image from a file. The format is now matched by an image file extension.
-Fallback to file signature if file content doesn't match it's extension is on
-the TODO.
+Loads image from a file. 
+
+The image format is first guessed by the file extension. If loader for the
+file extension is found it's called and if it succedes the image data is
+returned.
+
+If extension based guess fails either because the extension wasn't matched or
+if the loader for the extension failed; the signature based method is used.
+The loader loads several bytes (currently 32) from the file and calls
+signature matching functions for each format that implements signature
+matching. If image signature is found particular image loader it is called
+and the result is returned.
+
+If file extension disagrees with file signature a warning is printed into the
+stdout.
 
 [source,c]
 -------------------------------------------------------------------------------
@@ -48,16 +74,115 @@ int GP_SaveImage(GP_Context *src, const char *dst_path,
                  GP_ProgressCallback *callback);
 -------------------------------------------------------------------------------
 
-Saves a context into a file. The file format is matched accordingly to the
-file extension, if extension is invalid or if support for requested image
-format wasn't compiled in, non-zero is returned and 'errno' is set to
-'ENOSYS'.
+Saves a context into a file.
 
-PNG
-~~~
+The file format is matched accordingly to the file extension. If extension is
+not found non-zero is returned and 'errno' is set to 'EINVAL'. If extension
+was found but support for saving the image format is not implemented 'errno'
+is set to 'ENOSYS'.
+
+
+Advanced usage
+^^^^^^^^^^^^^^
+
+[source,c]
+-------------------------------------------------------------------------------
+typedef struct GP_Loader {
+	/*  
+	 *  Loads an image.
+	 *
+	 *  Returns allocated and initialized bitmap on success, NULL on failure
+	 *  and errno must be set.
+	 */
+	GP_Context *(*Load)(const char *src_path, GP_ProgressCallback *callback);
+
+	/* 
+	 * Save an image.
+	 *
+	 * Returns zero on succes, non-zero on failure and errno must be set.
+	 */
+	int (*Save)(const GP_Context *src, const char *dst_path,
+	            GP_ProgressCallback *callback); 
+
+	/*
+	 * The buffer is filled with 32 bytes from an image start, returns 1 if
+	 * image signature was found zero otherwise.
+	 */
+	int (*Match)(const void *buf);
+
+	/*
+	 * Short format name.
+	 */
+	const char *fmt_name;
+
+	/* don't touch */
+	struct GP_Loader *next;
+	
+	/*
+	 * NULL terminated array of file extensions.
+	 */
+	const char *extensions[];
+} GP_Loader;
+
+/*
+ * List loaders into the stdout.
+ */
+void GP_ListLoaders(void);
+
+/*
+ * Register a loader.
+ */
+void GP_LoaderRegister(GP_Loader *self);
+
+/*
+ * Unregister loader.
+ */
+void GP_LoaderUnregister(GP_Loader *self);
+-------------------------------------------------------------------------------
+
+The 'GP_Loader' structure describes an image loader.
+
+The 'Load', 'Save' and 'Match' functions could be 'NULL' if the particular
+functionality is not implemented. 
+
+The 'fmt_name' is a short string that describes the format. For example:
+'Netbpm portable pixmap'.
+
+The extensions is 'NULL'-terminated array of strings that holds all possible
+extensions that are commonly used for this image format.
+
+All internal loaders are all described in list of this structures which is
+used to implement functions such as 'GP_LoadImage()'.
+
+You can print currently active loaders via the 'GP_ListLoaders()' register and
+unregister your own loaders by 'GP_LoaderRegister()' and
+'GP_LoaderUnregister()'. Once image loader is registered the generic loading
+functions could use it to load and save images.
+
+For example usage see image loader registration
+link:example_loader_registration.html[example].
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <loaders/GP_Loaders.h>
+/* or */
+#include <GP.h>
+
+const GP_Loader *GP_MatchSignature(const void *buf)
+-------------------------------------------------------------------------------
+
+Returns pointer to image loader accordingly to image signature or 'NULL' if no
+suitable loader was found. The buf pointer must point to a buffer at least 32
+bytes long.
+
+WARNING: If you attempt to modify the content of the strucutre the behavior is
+         undefined. Most likely the program will crash.
+
+PNG Loader
+~~~~~~~~~~
 The 'PNG' image support is implemented by the libpng library.
 
-WARNING: PNG images with alpha channel are not supported yet.
+NOTE: PNG images with alpha channel are not supported yet.
 
 [source,c]
 -------------------------------------------------------------------------------
@@ -114,8 +239,19 @@ Currently only 'RGB888' format is supported, you should convert the
 'GP_Context' to 'RGB888' before calling this function otherwise non-zero is
 returned and 'errno' is set to 'ENOSYS'. 
 
-JPEG
-~~~~
+[source,c]
+-------------------------------------------------------------------------------
+#include <loaders/GP_PNG.h>
+/* or */
+#include <GP.h>
+
+int GP_MatchPNG(const void *buf);
+-------------------------------------------------------------------------------
+
+Matches a PNG signature.
+
+JPEG Loader
+~~~~~~~~~~~
 The 'JPEG' image support is implemented by the jpeg library.
 
 [source,c]
@@ -180,8 +316,19 @@ is closed and removed before the call returns non-zero and 'errno' is set to
 The 'JPG' format could store either 'G8' or 'RGB888' pixeltypes and you must
 convert the context into one of them before this functions is called.
 
-GIF
-~~~
+[source,c]
+-------------------------------------------------------------------------------
+#include <loaders/GP_JPG.h>
+/* or */
+#include <GP.h>
+
+int GP_MatchJPG(const void *buf);
+-------------------------------------------------------------------------------
+
+Matches a JPG signature.
+
+GIF Loader
+~~~~~~~~~~
 
 The 'GIF' image support is implemented by the giflib library.
 
@@ -229,8 +376,19 @@ GP_Context *GP_LoadGIF(const char *src_path, GP_ProgressCallback *callback);
 Same as above but takes path to the file as a parameter and check for the
 signature. Basically this combines both of the calls above.
 
-BMP
-~~~
+[source,c]
+-------------------------------------------------------------------------------
+#include <loaders/GP_GIF.h>
+/* or */
+#include <GP.h>
+
+int GP_MatchGIF(const void *buf);
+-------------------------------------------------------------------------------
+
+Matches a GIF signature.
+
+BMP Loader
+~~~~~~~~~~
 
 The 'BMP' loading support is nearly complete the only missing features should
 be fancy RGB compressions and RLE support.
@@ -280,9 +438,72 @@ GP_Context *GP_LoadBMP(const char *src_path, GP_ProgressCallback *callback);
 Same as above but takes path to the file as a parameter and check for the
 signature. Basically this combines both of the calls above.
 
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <loaders/GP_BMP.h>
+/* or */
+#include <GP.h>
+
+int GP_MatchBMP(const void *buf);
+-------------------------------------------------------------------------------
+
+Matches a BMP signature.
+
+PSP Loader
+~~~~~~~~~~
+
+The 'PSP' loader can load a composite image from a Paint Shop Pro Image Files.
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <loaders/GP_PSP.h>
+/* or */
+#include <GP.h>
+
+int GP_OpenPSP(const char *src_path, FILE **f);
+-------------------------------------------------------------------------------
+
+Opens file and checks for 'PSP' signature. Upon successful return (file could
+be opened, signature matches) zero is returned. Upon failure non-zero is
+returned and 'errno' is set.
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <loaders/GP_PSP.h>
+/* or */
+#include <GP.h>
+
+GP_Context *GP_ReadPSP(FILE *f, GP_ProgressCallback *callback);
+-------------------------------------------------------------------------------
+
+Reads 'PSP' image into a context.
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <loaders/GP_PSP.h>
+/* or */
+#include <GP.h>
+
+GP_Context *GP_LoadPSP(const char *src_path, GP_ProgressCallback *callback);
+-------------------------------------------------------------------------------
+
+Same as above but takes path to the file as a parameter and check for the
+signature. Basically this combines both of the calls above.
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <loaders/GP_PSP.h>
+/* or */
+#include <GP.h>
+
+int GP_MatchPSP(const void *buf);
+-------------------------------------------------------------------------------
+
+Matches a PSP signature.
+
 PBM, PGM, PPM
 ~~~~~~~~~~~~~
 
 There is a code do load and write 'PBM', 'PGM' and 'PPM' images too. However
 it's not finished and its API is outdated. Use at your own risk.
-
