@@ -199,13 +199,13 @@ static struct GP_Loader *loader_by_filename(const char *path)
 	return loader_by_extension(ext);
 }
 
-static struct GP_Loader *loader_by_signature(const char *path)
+static const GP_Loader *loader_by_signature(const char *path)
 {
 	uint8_t buf[32];
 	FILE *f;
 	int err;
 
-	GP_DEBUG(1, "Trying to match file signature");
+	GP_DEBUG(1, "Trying to load a file by signature");
 
 	f = fopen(path, "rb");
 
@@ -224,16 +224,7 @@ static struct GP_Loader *loader_by_signature(const char *path)
 
 	fclose(f);
 
-	struct GP_Loader *i;
-	
-	for (i = loaders; i != NULL; i = i->next) {
-		if (i->Match && i->Match(buf)) {
-			GP_DEBUG(1, "Found loader '%s'", i->fmt_name);
-			return i;
-		}
-	}
-
-	return NULL;
+	return GP_MatchSignature(buf);
 }
 
 GP_Context *GP_LoadImage(const char *src_path, GP_ProgressCallback *callback)
@@ -253,7 +244,7 @@ GP_Context *GP_LoadImage(const char *src_path, GP_ProgressCallback *callback)
 	}
 	
 	GP_Context *img;
-	struct GP_Loader *ext_load = NULL, *sig_load;
+	const GP_Loader *ext_load = NULL, *sig_load;
 
 	ext_load = loader_by_filename(src_path);
 
@@ -430,4 +421,20 @@ int GP_SaveImage(const GP_Context *src, const char *dst_path,
 
 	errno = ENOSYS;
 	return 1;
+}
+
+const GP_Loader *GP_MatchSignature(const void *buf)
+{
+	struct GP_Loader *i;
+	
+	for (i = loaders; i != NULL; i = i->next) {
+		if (i->Match && i->Match(buf) == 1) {
+			GP_DEBUG(1, "Found loader '%s'", i->fmt_name);
+			return i;
+		}
+	}
+
+	GP_DEBUG(1, "Loader not found");
+
+	return NULL;
 }

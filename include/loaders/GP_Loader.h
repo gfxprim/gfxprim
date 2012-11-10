@@ -102,6 +102,12 @@ typedef struct GP_Loader {
 	const char *extensions[];
 } GP_Loader;
 
+/*
+ * Takes pointer to buffer at least 32 bytes long and returns a pointer to
+ * matched loader or NULL.
+ */
+const GP_Loader *GP_MatchSignature(const void *buf);
+
 void GP_LoaderRegister(GP_Loader *self);
 
 void GP_LoaderUnregister(GP_Loader *self);
