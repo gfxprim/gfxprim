@@ -10,6 +10,8 @@ controlling the drawing.
 So far there are three backends implemented, Linux mmaped frame-buffer, libSDL
 and X11 backend.
 
+For example usage see backend link:example_backend.html[example].
+
 Initialization functions
 ~~~~~~~~~~~~~~~~~~~~~~~
 

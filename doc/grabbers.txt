@@ -8,6 +8,8 @@ There is currently V4L2 driver that implements a grabber.
 To link against grabbers use +-lGP_grabbers+ or better
 +\`gfxprim-config --libs-grabbers`+ in your linker flags.
 
+For example usage see grabber link:example_v4l2.html[examples].
+
 Grabber API
 ~~~~~~~~~~~
 

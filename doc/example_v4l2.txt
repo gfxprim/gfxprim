@@ -1,0 +1,17 @@
+Graphics Backend Example
+------------------------
+
+Simple grabber that saves images taken from v4l2 device.
+
+[source,c]
+------------------------------------------------------------------
+include::../demos/c_simple/v4l2_grab.c[]
+------------------------------------------------------------------
+
+More sophisticated example utilizing v4l2 device and
+link:backends.html[backends].
+
+[source,c]
+------------------------------------------------------------------
+include::../demos/c_simple/v4l2_show.c[]
+------------------------------------------------------------------
