@@ -2,17 +2,56 @@ GFXprim API
 ===========
 Cyril Hrubis <metan@ucw.cz>
 
-This documentation is also available link:api_links.html[divided into several
-pages].
-
-include::general.txt[]
-include::basic_types.txt[]
-include::environment_variables.txt[]
-include::debug.txt[]
-include::context.txt[]
-include::gamma.txt[]
-include::drawing_api.txt[]
-include::filters.txt[]
-include::loaders.txt[]
-include::backends.txt[]
-include::grabbers.txt[]
+. link:basic_types.html[Basic library types]
+  +
+  Describes how colors and pixels are handled also describes progress callback
+  in great detail.
+  +
+. link:core.html[Library Core overview]
+  +
+  Describes functions and macros in library core. 
+  +
+. link:debug.html[Debug Messages]
+  +
+  Interface to debug layer.
+  +
+. link:context.html[Context]
+  +
+  The Context is description of in-memory bitmap including some meta-data
+  (size, pixel format, etc...).
+  +
+. link:environment_variables.html[Environment Variables]
+  +
+  Description of environment variables that affects GFXprim behavior.
+  +
+. link:gamma.html[Gamma correction]
+  +
+  The gama correction description and handling in GFXprim.
+  +
+. link:drawing_api.html[Drawing primitives]
+  +
+  Drawing API for primitives such as lines, polygons and circles as well as
+  text drawing.
+  +
+. link:filters.html[Context filters]
+  +
+  Context filters, basically all algorithms that takes an Context as an input
+  and returns Context as output.
+  +
+  Includes resampling, convolutions, low pass (blur) filters, dithering and
+  more.
+  +
+. link:loaders.html[Context loaders]
+  +
+  Handles loading and saving images in standard formats.
+  +
+. link:backends.html[Backends]
+  +
+  Backends API for drawing on the screen or into a window.
+  +
+. link:grabbers.html[Grabbers]
+  +
+  Video grabbers interface such as V4L2.
+  +
+ 
+There is also a nice page with code link:examples.html[examples].

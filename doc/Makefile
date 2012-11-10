@@ -1,6 +1,6 @@
 SOURCES=general.txt context.txt loaders.txt filters.txt basic_types.txt \
         drawing_api.txt backends.txt gamma.txt grabbers.txt \
-	environment_variables.txt debug.txt core.txt
+	environment_variables.txt debug.txt core.txt api.txt
 
 EXAMPLE_SOURCES=$(wildcard example_*.txt)
 
@@ -14,13 +14,7 @@ GENIMAGES=discrete_linear_1D_convolution_alg1 discrete_linear_1D_convolution_alg
 PAGES=$(subst .txt,.html,$(SOURCES))
 PAGES+=$(subst .txt,.html,$(EXAMPLE_SOURCES))
 
-all: api.html examples.html $(PAGES) api_links.html
-
-#
-# Create all in one API page
-#
-api.html: $(SOURCES) api.txt
-	asciidoc -a toc api.txt
+all: examples.html $(PAGES) api.html
 
 #
 # Create page for each part of API description
@@ -28,16 +22,8 @@ api.html: $(SOURCES) api.txt
 $(PAGES): %.html: %.txt
 	asciidoc $<
 
-api_links.html: api_links.txt
-	asciidoc $<
-
 examples.html: examples.txt ../demos/c_simple/*.c ../demos/py_simple/*.py
 	asciidoc -a toc examples.txt
-
-api.pdf: api.txt
-	asciidoc -b docbook api.txt
-	xsltproc /usr/share/sgml/docbook/xsl-stylesheets/fo/docbook.xsl api.xml > api.fo
-	fop api.fo -pdf api.pdf
 
 #
 # Clean up generated images
