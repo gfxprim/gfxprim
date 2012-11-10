@@ -43,7 +43,7 @@ GP_Context *GP_LoadPBM(const char *src_path, GP_ProgressCallback *callback);
  * EINVAL - context pixel type was not 1 bit grayscale.
  *
  */
-int GP_SavePBM(const char *res_path, GP_Context *src,
+int GP_SavePBM(const GP_Context *src, const char *res_path,
                GP_ProgressCallback *callback);
 
 #endif /* LOADERS_GP_PBM_H */

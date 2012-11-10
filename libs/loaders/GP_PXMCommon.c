@@ -238,7 +238,7 @@ int GP_PXMLoad8bpp(FILE *f, GP_Context *context)
 
 #define BITMASK(byte, bit) (!!((byte)&(0x80>>(bit))))
 
-static int write_line_1bpp(FILE *f, const uint8_t *data, GP_Context *src)
+static int write_line_1bpp(FILE *f, const uint8_t *data, const GP_Context *src)
 {
 	uint32_t x, max = src->bytes_per_row;
 	int ret;
@@ -278,7 +278,7 @@ static int write_line_1bpp(FILE *f, const uint8_t *data, GP_Context *src)
 	return 0;
 }
 
-int GP_PXMSave1bpp(FILE *f, GP_Context *context)
+int GP_PXMSave1bpp(FILE *f, const GP_Context *context)
 {
 	uint32_t y;
 	int ret;
@@ -296,7 +296,7 @@ int GP_PXMSave1bpp(FILE *f, GP_Context *context)
 
 #define MASK_2BPP(byte, pix) (0x03 & (byte>>((3 - pix)<<1)))
 
-static int write_line_2bpp(FILE *f, const uint8_t *data, GP_Context *src)
+static int write_line_2bpp(FILE *f, const uint8_t *data, const GP_Context *src)
 {
 	uint32_t x, max = src->bytes_per_row;
 	int ret;
@@ -332,7 +332,7 @@ static int write_line_2bpp(FILE *f, const uint8_t *data, GP_Context *src)
 	return EIO;
 }
 
-int GP_PXMSave2bpp(FILE *f, GP_Context *context)
+int GP_PXMSave2bpp(FILE *f, const GP_Context *context)
 {
 	uint32_t y;
 	int ret;
@@ -348,7 +348,7 @@ int GP_PXMSave2bpp(FILE *f, GP_Context *context)
 	return EIO;
 }
 
-static int write_line_8bpp(FILE *f, const uint8_t *data, GP_Context *src)
+static int write_line_8bpp(FILE *f, const uint8_t *data, const GP_Context *src)
 {
 	uint32_t x;
 	int ret;
@@ -371,7 +371,7 @@ static int write_line_8bpp(FILE *f, const uint8_t *data, GP_Context *src)
 	return 0;
 }
 
-int GP_PXMSave8bpp(FILE *f, GP_Context *context)
+int GP_PXMSave8bpp(FILE *f, const GP_Context *context)
 {
 	uint32_t y;
 	int ret;

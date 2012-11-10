@@ -40,10 +40,10 @@
  *
  * The pixel type is not checked here as these are internal funcitons.
  */
-int GP_PXMSave1bpp(FILE *f, GP_Context *context);
-int GP_PXMSave2bpp(FILE *f, GP_Context *context);
-int GP_PXMSave4bpp(FILE *f, GP_Context *context);
-int GP_PXMSave8bpp(FILE *f, GP_Context *context);
+int GP_PXMSave1bpp(FILE *f, const GP_Context *context);
+int GP_PXMSave2bpp(FILE *f, const GP_Context *context);
+int GP_PXMSave4bpp(FILE *f, const GP_Context *context);
+int GP_PXMSave8bpp(FILE *f, const GP_Context *context);
 
 /*
  * Load context from ascii file.

@@ -186,7 +186,7 @@ err0:
 	return NULL;
 }
 
-int GP_SavePGM(const char *res_path, GP_Context *src,
+int GP_SavePGM(const GP_Context *src, const char *res_path,
                GP_ProgressCallback *callback)
 {
 	FILE *f;
