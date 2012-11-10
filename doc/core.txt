@@ -56,6 +56,39 @@ Value clamping macros.
 
 NOTE: this header is not included by including the 'GP.h' header.
 
+Progress Callback
+~~~~~~~~~~~~~~~~~
+
+The 'GP_ProgressCallback' is a structure that stores user-defined callback
+function and user-defined pointer and percentage.
+
+It is passed as last parameter to functions that would take some time to
+complete and adds capability to track the operation progress as well as to
+abort the operation.
+
+Currently it's used for filters and loaders.
+
+[source,c]
+-------------------------------------------------------------------------------
+typdedef struct GP_ProgressCallback {
+	float percentage;
+	int (*callback)(struct GP_ProgressCallback *self);
+	void *priv;
+} GP_ProgressCallback;
+-------------------------------------------------------------------------------
+
+If non 'NULL' progress callback structure is passed to a function, the
+callback function is periodically called and the percentage is updated.
+
+The return value from callback could abort the function execution. If non zero
+value is returned operation is aborted, all memory freed etc. and in case of
+bitmap loaders 'errno' is set to 'ECANCELED'.
+
+The callback, if supported, is the last parameter of a function.
+
+For example usage see progress callback
+link:example_loaders_progress_callback.html[example].
+
 Temporary Buffer Allocator
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 
