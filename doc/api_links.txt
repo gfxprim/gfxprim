@@ -10,6 +10,10 @@ Also available in link:api.html[all in one page form].
   Describes how colors and pixels are handled also describes progress callback
   in great detail.
   +
+. link:core.html[Library Core overview]
+  +
+  Describes functions and macros in library core. 
+  +
 . link:debug.html[Debug Messages]
   +
   Interface to debug layer.

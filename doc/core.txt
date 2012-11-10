@@ -1,0 +1,140 @@
+Library Core
+------------
+
+The core of the library contains the 'GP_Context' structure which describes
+in-memory bitmap (see context) as well as the most basic functionality (i.e.
+reading/writing pixels, gamma handling, blits, progress callback, debug
+printing...). More complex parts of the core library are discussed in separate
+pages.
+
+Some of the interfaces described here (most notably the allocator) are
+semi-internal interfaces and as such the API may change in the future.
+
+Common Macros and Inline Functions
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <core/GP_Common.h>
+/* or */
+#include <GP.h>
+
+GP_MIN(a, b);
+
+GP_MAX(a, b);
+
+GP_ABS(a);
+
+GP_SWAP(a, b);
+
+GP_SIGN(a);
+
+-------------------------------------------------------------------------------
+
+These common macros implements basic functions such as minimum, maximum,
+absolute value, swap and sign.
+
+All macros use 'typeof()' in order to evaluate their arguments exactly once. 
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <core/GP_Clamp.h>
+
+/*
+ * Clamps integer value to 8 bit unsigned value.
+ */
+GP_CLAMP_INT_0_255(val);
+
+/*
+ * Clamps integer value.
+ */
+GP_CLAMP(val, min, max);
+
+-------------------------------------------------------------------------------
+
+Value clamping macros.
+
+NOTE: this header is not included by including the 'GP.h' header.
+
+Temporary Buffer Allocator
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Temporary buffer allocator is used to allocate temporary buffer needed for
+certain operations (mostly used in image filters).
+
+The intended usage of temporary buffers is:
+
+* Count sum of the size needed for all buffers
+* Allocate temporary buffer of this size
+* Partition the buffer into smaller blocks
+* Use the blocks as needed
+* Once operation is done, free the buffer
+
+The allocator code greatly simplifies these steps. Moreover it avoids memory
+fragmentation by creating small buffers on the process stack (current theshold
+is set to 2kB) and by grouping the temporary buffers into one continuous
+region.
+
+NOTE: The allocator itself does not align the resulting blocks. It's your
+      responsibility to allocate the buffers in a way that the result is
+      adequately aligned (hint: the start of the block is aligned, so
+      get blocks that needs to be aligned first).
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <core/GP_TempAlloc.h>
+
+/*
+ * A macro that creates block allocator.
+ *
+ * The name must be unique among variable and functions names.
+ *
+ * The bsize is actual size of the block allocated.
+ */
+GP_TempAllocCreate(name, bsize);
+
+/*
+ * A macro that returns pointer to the start of a block of a bsize
+ * partioned from the block allocator passed as self argument.
+ */
+GP_TempAllocGet(self, bsize);
+
+/*
+ * Free the allocator memory.
+ */
+GP_TempAllocFree(self);
+-------------------------------------------------------------------------------
+
+Example usage of the allocator:
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <core/GP_TempAlloc.h>
+
+int foo(...)
+{
+	GP_TempAllocCreate(tmp, 3 * img->width);
+
+	uint8_t *R = GP_TempAllocGet(tmp, img->width);
+	uint8_t *G = GP_TempAllocGet(tmp, img->width);
+	uint8_t *B = GP_TempAllocGet(tmp, img->width);
+
+	/* start of the code that uses the buffers */
+
+	...
+
+	if (error) {
+		GP_TempAllocFree(self);
+		return -1;
+	}
+
+	...
+
+	/* end of the code that uses the buffers */
+
+	GP_TempAllocFree(self);
+
+	return 0;
+}
+-------------------------------------------------------------------------------
+
