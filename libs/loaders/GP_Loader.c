@@ -236,6 +236,48 @@ static struct GP_Loader *loader_by_signature(const char *path)
 	return NULL;
 }
 
+GP_Context *GP_LoadImage(const char *src_path, GP_ProgressCallback *callback)
+{
+	int saved_errno;
+	
+	if (access(src_path, R_OK)) {
+		
+		saved_errno = errno;
+
+		GP_DEBUG(1, "Failed to access file '%s' : %s",
+		            src_path, strerror(errno));
+		
+		errno = saved_errno;
+		
+		return NULL;
+	}
+	
+	GP_Context *img;
+	struct GP_Loader *ext_load = NULL, *sig_load;
+
+	ext_load = loader_by_filename(src_path);
+
+	if (ext_load != NULL) {
+		img = ext_load->Load(src_path, callback);
+		
+		if (img)
+			return img;
+	}
+
+	sig_load = loader_by_signature(src_path);
+	
+	if (ext_load && sig_load) {
+		GP_WARN("File '%s': Extension says %s but signature %s",
+			src_path, ext_load->fmt_name, sig_load->fmt_name);
+	}
+
+	if (sig_load)
+		return sig_load->Load(src_path, callback);
+
+	errno = ENOSYS;
+	return NULL;
+}
+
 enum GP_ImageFmt {
 	GP_FMT_UNKNOWN,
 	GP_FMT_PNG,
@@ -339,61 +381,6 @@ enum GP_ImageFmt filename_to_fmt(const char *path)
 	}
 
 	return GP_FMT_UNKNOWN;
-}
-
-GP_Context *GP_LoadImage(const char *src_path, GP_ProgressCallback *callback)
-{
-	int saved_errno;
-	
-	if (access(src_path, R_OK)) {
-		
-		saved_errno = errno;
-
-		GP_DEBUG(1, "Failed to access file '%s' : %s",
-		            src_path, strerror(errno));
-		
-		errno = saved_errno;
-		
-		return NULL;
-	}
-	
-	enum GP_ImageFmt fmt = filename_to_fmt(src_path);
-
-	switch (fmt) {
-	case GP_FMT_JPG:
-		return GP_LoadJPG(src_path, callback);
-	case GP_FMT_PNG:
-		return GP_LoadPNG(src_path, callback);
-	case GP_FMT_GIF:
-		return GP_LoadGIF(src_path, callback);
-	case GP_FMT_PSP:
-		return GP_LoadPSP(src_path, callback);
-	case GP_FMT_BMP:
-		return GP_LoadBMP(src_path, callback);
-	case GP_FMT_PBM:
-		return GP_LoadPBM(src_path, callback);
-	case GP_FMT_PGM:
-		return GP_LoadPGM(src_path, callback);
-	case GP_FMT_PPM:
-		return GP_LoadPPM(src_path, callback);
-	case GP_FMT_UNKNOWN:
-	break;
-	}
-
-	struct GP_Loader *l;
-	
-	l = loader_by_filename(src_path);
-
-	if (l != NULL)
-		return l->Load(src_path, callback);
-
-	l = loader_by_signature(src_path);
-
-	if (l != NULL)
-		return l->Load(src_path, callback);
-
-	errno = ENOSYS;
-	return NULL;
 }
 
 int GP_LoadMetaData(const char *src_path, GP_MetaData *data)
