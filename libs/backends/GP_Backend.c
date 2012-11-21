@@ -25,16 +25,16 @@
 
 #include "backends/GP_Backend.h"
 
-void GP_BackendUpdateRect(GP_Backend *backend,
-                          GP_Coord x0, GP_Coord y0,
-                          GP_Coord x1, GP_Coord y1)
+void GP_BackendUpdateRectXYXY(GP_Backend *backend,
+                              GP_Coord x0, GP_Coord y0,
+                              GP_Coord x1, GP_Coord y1)
 {
 	GP_TRANSFORM_POINT(backend->context, x0, y0);
 	GP_TRANSFORM_POINT(backend->context, x1, y1);
 
 	if (x1 < x0)
 		GP_SWAP(x0, x1);
-	
+
 	if (y1 < y0)
 		GP_SWAP(y0, y1);
 

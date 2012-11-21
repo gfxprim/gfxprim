@@ -139,9 +139,23 @@ static inline void GP_BackendFlip(GP_Backend *backend)
 /*
  * Calls backend->UpdateRect().
  */
-void GP_BackendUpdateRect(GP_Backend *backend,
-                          GP_Coord x0, GP_Coord y0,
-                          GP_Coord x1, GP_Coord y1);
+void GP_BackendUpdateRectXYXY(GP_Backend *backend,
+                              GP_Coord x0, GP_Coord y0,
+                              GP_Coord x1, GP_Coord y1);
+
+static inline void GP_BackendUpdateRect(GP_Backend *backend,
+                                        GP_Coord x0, GP_Coord y0,
+                                        GP_Coord x1, GP_Coord y1)
+{
+	return GP_BackendUpdateRectXYXY(backend, x0, y0, x1, y1);
+}
+
+static inline void GP_BackendUpdateRectXYWH(GP_Backend *backend,
+                                            GP_Coord x, GP_Coord y,
+                                            GP_Size w, GP_Size h)
+{
+	GP_BackendUpdateRectXYXY(backend, x, y, x + w, y + h);
+}
 
 /*
  * Calls backend->Exit().
