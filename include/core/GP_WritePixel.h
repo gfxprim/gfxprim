@@ -26,7 +26,6 @@
 #ifndef GP_WRITEPIXEL_H
 #define GP_WRITEPIXEL_H
 
-#include <endian.h>
 #include <stdint.h>
 #include <unistd.h>
 
