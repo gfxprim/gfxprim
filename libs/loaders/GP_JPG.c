@@ -407,6 +407,12 @@ err0:
 
 #else
 
+int GP_MatchJPG(const void GP_UNUSED(*buf))
+{
+	errno = ENOSYS;
+	return -1;
+}
+
 int GP_OpenJPG(const char GP_UNUSED(*src_path), FILE GP_UNUSED(**f))
 {
 	errno = ENOSYS;

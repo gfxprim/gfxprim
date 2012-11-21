@@ -358,6 +358,12 @@ GP_Context *GP_LoadGIF(const char *src_path, GP_ProgressCallback *callback)
 
 #else
 
+int GP_MatchGIF(const void GP_UNUSED(*buf))
+{
+	errno = ENOSYS;
+	return -1;
+}
+
 int GP_OpenGIF(const char GP_UNUSED(*src_path),
                void GP_UNUSED(**f))
 {
