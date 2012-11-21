@@ -8,7 +8,7 @@ ifeq ($(HAVE_LIBSDL),yes)
 CSOURCES=$(shell echo *.c)
 
 APPS=textaligntest blittest subcontext\
-     aatest mixpixeltest
+     mixpixeltest
 endif
 
 include $(TOPDIR)/app.mk
