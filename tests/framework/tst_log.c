@@ -444,7 +444,7 @@ static void write_system_info_json(FILE *f)
 	fprintf(f, "\t\t\"CPU\": {");
 	
 	/* lscpu is part of reasonably new util-linux */
-	FILE *cmd = popen("lscpu", "r");
+	FILE *cmd = popen("lscpu 2> /dev/null", "r");
 
 	if (cmd != NULL) {
 		char id[256], val[1024];
