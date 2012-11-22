@@ -255,6 +255,13 @@ GP_Context *GP_LoadImage(const char *src_path, GP_ProgressCallback *callback)
 			return img;
 	}
 
+	/* 
+	 * Avoid further work if signature was correct but the loader issued
+	 * ENOSYS.
+	 */
+	if (errno == ENOSYS)
+		return NULL;
+
 	sig_load = loader_by_signature(src_path);
 	
 	if (ext_load && sig_load) {
