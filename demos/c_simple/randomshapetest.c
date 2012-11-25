@@ -42,9 +42,10 @@ static int pause_flag = 0;
 #define SHAPE_ELLIPSE	2
 #define SHAPE_TRIANGLE	3
 #define SHAPE_RECTANGLE	4
-#define SHAPE_TETRAGON  5
-#define SHAPE_RECTANGLE_AA 6
-#define SHAPE_LAST	6
+#define SHAPE_TETRAGON   5
+#define SHAPE_POLYGON	6
+#define SHAPE_RECTANGLE_AA 7
+#define SHAPE_LAST	7
 static int shape = SHAPE_FIRST;
 
 /* Draw outlines? */
@@ -142,6 +143,18 @@ void draw_random_tetragon(GP_Pixel pixel)
 		GP_Tetragon(win->context, x0, y0, x1, y1, x2, y2, x3, y3, pixel);
 }
 
+void draw_random_polygon(GP_Pixel pixel)
+{
+	GP_Coord xy[10];
+	int i;
+
+	for (i = 0; i < 5; i++) {
+		random_point(win->context, xy + 2*i, xy + 2*i + 1);
+	}
+
+	GP_FillPolygon_Raw(win->context, 5, xy, pixel);
+}
+
 void draw_random_rectangle_AA(GP_Pixel pixel)
 {
 	int x0, y0, x1, y1;
@@ -188,6 +201,9 @@ void redraw_screen(void)
 	case SHAPE_TETRAGON:
 		draw_random_tetragon(pixel);
 	break;
+	case SHAPE_POLYGON:
+		draw_random_polygon(pixel);
+	break;
 	case SHAPE_RECTANGLE_AA:
 		draw_random_rectangle_AA(pixel);
 	break;
@@ -203,7 +219,7 @@ void event_loop(void)
 		case GP_EV_KEY:
 			if (ev.code != GP_EV_KEY_DOWN)
 				continue;
-			
+
 			switch (ev.val.key.key) {
 			case GP_KEY_SPACE:
 				shape++;
@@ -243,7 +259,7 @@ void event_loop(void)
 int main(void)
 {
 	const char *backend_opts = "X11";
-	
+
 	win = GP_BackendInit(backend_opts, "Random Shape Test", stderr);
 
 	if (win == NULL) {
@@ -251,14 +267,14 @@ int main(void)
 		        backend_opts);
 		return 1;
 	}
-	
+
 	white = GP_ColorToContextPixel(GP_COL_WHITE, win->context);
 	black = GP_ColorToContextPixel(GP_COL_BLACK, win->context);
-	
+
 	for (;;) {
 		GP_BackendPoll(win);
 		event_loop();
-	
+
 		usleep(20000);
 
 		if (pause_flag)

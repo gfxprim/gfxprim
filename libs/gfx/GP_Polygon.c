@@ -1,193 +1,124 @@
-/*****************************************************************************
- * This file is part of gfxprim library.                                     *
- *                                                                           *
- * Gfxprim is free software; you can redistribute it and/or                  *
- * modify it under the terms of the GNU Lesser General Public                *
- * License as published by the Free Software Foundation; either              *
- * version 2.1 of the License, or (at your option) any later version.        *
- *                                                                           *
- * Gfxprim is distributed in the hope that it will be useful,                *
- * but WITHOUT ANY WARRANTY; without even the implied warranty of            *
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU         *
- * Lesser General Public License for more details.                           *
- *                                                                           *
- * You should have received a copy of the GNU Lesser General Public          *
- * License along with gfxprim; if not, write to the Free Software            *
- * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
- * Boston, MA  02110-1301  USA                                               *
- *                                                                           *
- * Copyright (C) 2009-2011 Jiri "BlueBear" Dluhos                            *
- *                         <jiri.bluebear.dluhos@gmail.com>                  *
- *                                                                           *
- * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>                       *
- *                                                                           *
- *****************************************************************************/
-
-#include "gfx/GP_Polygon.h"
-#include "gfx/GP_HLine.h"
-
-#include <limits.h>
 #include <stdlib.h>
+#include <stdio.h>
+#include <math.h>
 
+#include "GP_HLine.h"
+#include "GP_Polygon.h"
+
+/* A single edge of the polygon. */
 struct GP_PolygonEdge {
-	GP_Coord startx, starty;
-	GP_Coord endx, endy;
-	GP_Coord dx, dy;
+	float x1, y1, x2, y2;
+	float ymin, ymax;
+	float dx_by_dy;		/* dx/dy (0 for horizontal edges) */
 };
 
-struct GP_Polygon {
-	struct GP_PolygonEdge *edges;
-	GP_Coord edge_count;
-	GP_Coord ymin, ymax;
-};
+/* Threshod value for delta y; edges with dy smaller than this are considered horizontal. */
+const float GP_HORIZ_DY_THRESHOLD = 0.00001f;
 
-#define GP_POLYGON_INITIALIZER { \
-	.edges = NULL, \
-	.edge_count = 0, \
-	.ymin = INT_MAX, \
-	.ymax = 0 \
-}
-
-static void GP_InitEdge(struct GP_PolygonEdge *edge,
-		GP_Coord x1, GP_Coord y1, GP_Coord x2, GP_Coord y2)
+/* Initializes the polygon_edge structure. */
+static void GP_InitEdge(struct GP_PolygonEdge *edge, float x1, float y1,
+	float x2, float y2)
 {
-	if (y1 < y2) {			/* coords are top-down, correct */
-		edge->startx = x1;
-		edge->starty = y1;
-		edge->endx = x2;
-		edge->endy = y2;
-	} else {			/* coords are bottom-up, flip them */
-		edge->startx = x2;
-		edge->starty = y2;
-		edge->endx = x1;
-		edge->endy = y1;
+	edge->x1 = x1;
+	edge->y1 = y1;
+	edge->x2 = x2;
+	edge->y2 = y2;
+	edge->ymin = fminf(edge->y1, edge->y2);
+	edge->ymax = fmaxf(edge->y1, edge->y2);
+
+	/* horizontal (or almost horizontal) edges are a special case */
+	if ((edge->ymax - edge->ymin) < GP_HORIZ_DY_THRESHOLD) {
+		edge->dx_by_dy = 0.0;	/* not meaningful */
+		return;
 	}
 
-	edge->dx = edge->endx - edge->startx;
-	edge->dy = edge->endy - edge->starty;
+	float dx = (edge->x2 - edge->x1);
+	float dy = (edge->y2 - edge->y1);
+	edge->dx_by_dy = dx / dy;
 }
 
-static void GP_AddEdge(struct GP_Polygon *poly, GP_Coord x1, GP_Coord y1,
-                       GP_Coord x2, GP_Coord y2)
+/* Computes an intersection of the specified scanline with the given edge.
+ * If successful, returns 1 and stores the resulting X coordinate into result_x.
+ * If failed (the edge does not intersect), 0 is returned.
+ * Horizontal edges are considered to never intersect.
+ */
+static int GP_ComputeIntersection(float *result_x, struct GP_PolygonEdge *edge, float y)
 {
-	struct GP_PolygonEdge *edge = poly->edges + poly->edge_count;
-	
-	poly->edge_count++;
+	if (y<edge->ymin || y>edge->ymax)
+		return 0;		/* outside the edge Y range */
 
-	GP_InitEdge(edge, x1, y1, x2, y2);
+	if (edge->ymax - edge->ymin < GP_HORIZ_DY_THRESHOLD)
+		return 0;		/* ignore horizontal edges */
 
-	poly->ymin = GP_MIN(poly->ymin, edge->starty);
-	poly->ymax = GP_MAX(poly->ymax, edge->endy);
+	*result_x = edge->x1 + (y-edge->y1)*edge->dx_by_dy;
+
+	return 1;
 }
 
-static int GP_CompareEdges(const void *edge1, const void *edge2)
+/* Sorting callback. Compares two floats and returns -1 if A<B,
+ * +1 if A>B, 0 if they are equal.
+ */
+static int GP_CompareFloats(const void *ptr_a, const void *ptr_b)
 {
-	struct GP_PolygonEdge *e1 = (struct GP_PolygonEdge *) edge1;
-	struct GP_PolygonEdge *e2 = (struct GP_PolygonEdge *) edge2;
+	float a = ((float *) ptr_a)[0];
+	float b = ((float *) ptr_b)[0];
 
-	if (e1->starty > e2->starty)
-		return 1;
-	if (e1->starty > e2->starty)
-		return -1;
-
-	if (e1->startx > e2->startx)
-		return 1;
-	if (e1->startx < e2->startx)
-		return -1;
-
+	if (a < b) return -1;
+	if (a > b) return 1;
 	return 0;
 }
 
-static void GP_LoadPolygon(struct GP_Polygon *poly, GP_Coord vertex_count,
-		const GP_Coord *xy)
-{
-	poly->edge_count = 0;
-	poly->edges = calloc(sizeof(struct GP_PolygonEdge),
-			vertex_count);
-
-	GP_Coord i;
-	GP_Coord coord_count = 2*vertex_count - 2;
-	for (i = 0; i < coord_count; i+=2) { 
-
-		/* add the edge, unless it is horizontal */
-		if (xy[i+1] != xy[i+3]) {
-			GP_AddEdge(poly, xy[i], xy[i+1], xy[i+2], xy[i+3]);
-		}
-	}
-
-	/* add the closing edge, unless it is horizontal */
-	if (xy[1] != xy[i+1]) {
-		GP_AddEdge(poly, xy[i], xy[i+1], xy[0], xy[1]);
-	}
-
-	/* sort edges */
-	qsort(poly->edges, poly->edge_count, sizeof(struct GP_PolygonEdge),
-		GP_CompareEdges);
-}
-
-static void GP_ResetPolygon(struct GP_Polygon *poly)
-{
-	free(poly->edges);
-	poly->edges = NULL;
-	poly->edge_count = 0;
-	poly->ymin = INT_MAX;
-	poly->ymax = 0;
-}
-
-/*
- * Finds an X coordinate of an GP_Coordersection of the edge
- * with the given Y line.
+/* Computes intersections of the y coordinate with all edges,
+ * writing the X coordinates of the intersections, sorted by X coordinate,
+ * into 'results'.
  */
-static inline GP_Coord GP_FindIntersection(GP_Coord y, const struct GP_PolygonEdge *edge)
+static int GP_ComputeScanline(float *results, struct GP_PolygonEdge *edges,
+	size_t count, float y)
 {
-	GP_Coord edge_y = y - edge->starty;		/* Y relative to the edge */
-	GP_Coord x = edge->startx;
+	unsigned int edge_index = 0;
+	int result_index = 0;
 
-	if (edge->dx > 0) {
-		while (edge->startx*edge->dy + edge_y*edge->dx > x*edge->dy)
-			x++;
-	} else {
-		while (edge->startx*edge->dy + edge_y*edge->dx < x*edge->dy)
-			x--;
+	for (; edge_index<count; edge_index++) {
+
+		struct GP_PolygonEdge *edge = edges + edge_index;
+		float x;
+
+		if (GP_ComputeIntersection(&x, edge, y)) {
+			results[result_index++] = x;
+		}
 	}
 
-	return x;
+	qsort(results, result_index, sizeof(float), GP_CompareFloats);
+
+	return result_index;
 }
 
-void GP_FillPolygon_Raw(GP_Context *context, GP_Coord vertex_count,
-                        const GP_Coord *xy, GP_Pixel pixel)
+void GP_FillPolygon_Raw(GP_Context *context, int vertex_count,
+	const GP_Coord *xy, GP_Pixel pixel)
 {
-	struct GP_Polygon poly = GP_POLYGON_INITIALIZER;
+	float ymin = HUGE_VALF, ymax = -HUGE_VALF;
+	struct GP_PolygonEdge *edge;
+	struct GP_PolygonEdge edges[vertex_count];
 
-	GP_LoadPolygon(&poly, vertex_count, xy);
-
-	GP_Coord y, startx, endx;
-
-	for (y = poly.ymin; y <= poly.ymax; y++) {
-		startx = INT_MAX;
-		endx = 0;
-
-		GP_Coord i;
-		for (i = 0; i < poly.edge_count; i++) {
-			struct GP_PolygonEdge *edge = poly.edges + i;
-
-			if (y < edge->starty || y > edge->endy)
-				continue;
-
-			GP_Coord GP_Coorder = GP_FindIntersection(y, edge);
-
-			startx = GP_MIN(startx, GP_Coorder);
-			endx = GP_MAX(endx, GP_Coorder);
-
-			if (y != edge->endy) {
-				GP_Coorder = GP_FindIntersection(y + 1, edge);
-				startx = GP_MIN(startx, GP_Coorder);
-				endx = GP_MAX(endx, GP_Coorder);
-			}
-		}
-
-		GP_HLine_Raw(context, startx, endx, y, pixel);
+	int i;
+	for (i = 0; i < vertex_count - 1; i++) {
+		edge = edges + i;
+		GP_InitEdge(edge, xy[2*i], xy[2*i + 1],
+			xy[2*i + 2], xy[2*i + 3]);
+		ymin = fminf(ymin, edge->ymin);
+		ymax = fmaxf(ymax, edge->ymax);
 	}
 
-	GP_ResetPolygon(&poly);
+	/* the last edge (from the last point to the first one) */
+	edge = edges + vertex_count - 1;
+	GP_InitEdge(edge, xy[2*i], xy[2*i + 1], xy[0], xy[1]);
+
+	float intersections[vertex_count];
+	int y;
+	for (y = (int) ymin; y < (int) ymax; y++) {
+		int inter_count = GP_ComputeScanline(intersections, edges, vertex_count, y + 0.5f);
+		for (i = 0; i < inter_count; i+=2) {
+			GP_HLine_Raw(context, intersections[i], intersections[i + 1], y, pixel);
+		}
+	}
 }
