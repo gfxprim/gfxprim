@@ -20,7 +20,7 @@ libtst_preload.so: tst_preload.o tst_alloc_barriers.o tst_preload_FILE.o
 libtst.a: tst_suite.o tst_job.o tst_msg.o tst_log.o tst_main.o tst_timespec.o
 	ar rcs $@ $^
 
-CLEAN+=libtst_preload.so libtst.a log.html log.json
+CLEAN+=libtst_preload.so libtst.a log.json
 
 include $(TOPDIR)/app.mk
 include $(TOPDIR)/post.mk

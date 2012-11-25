@@ -30,36 +30,6 @@
 #include "tst_timespec.h"
 #include "tst_log.h"
 
-static const char *ret_to_bg_color(enum tst_ret ret)
-{
-	switch (ret) {
-	case TST_SUCCESS:
-		return "#008000";
-	case TST_SKIPPED:
-		return "#888888";
-	case TST_UNTESTED:
-		return "#0000bb";
-	case TST_INTERR:
-		return "#800000";
-	case TST_SIGSEGV:
-		return "#e00000";
-	case TST_TIMEOUT:
-		return "#800080";
-	case TST_ABORTED:
-		return "#e00000";
-	case TST_FPE:
-		return "#e00000";
-	case TST_MEMLEAK:
-		return "#a0a000";
-	case TST_FAILED:
-		return "#e00000";
-	case TST_MAX:
-	break;
-	}
-		
-	return "#000000";
-}
-
 static const char *ret_to_str(enum tst_ret ret)
 {
 	switch (ret) {
@@ -88,210 +58,6 @@ static const char *ret_to_str(enum tst_ret ret)
 	}
 
 	return "Unknown";
-}
-
-static void bytes_human_readable(FILE *f, size_t bytes)
-{
-	if (bytes < 512) {
-		fprintf(f, "%zuB", bytes);
-		return;
-	}
-
-	if (bytes < 1024 * 512) {
-		fprintf(f, "%.2fkB", (float)bytes / 1024);
-		return;
-	}
-
-	if (bytes < 1024 * 1024 * 512) {
-		fprintf(f, "%.2fMB", (float)bytes / 1024 / 1024);
-		return;
-	}
-
-	fprintf(f, "%.2fGB", (float)bytes / 1024 / 1024 / 1024);
-}
-
-static void malloc_stats_html(struct tst_job *job, FILE *f, const char *padd)
-{
-	/* Create innter table */
-	fprintf(f, "%s<tr>\n", padd);
-	fprintf(f, "%s <td bgcolor=\"#ffffcc\" colspan=\"3\">\n", padd);
-	fprintf(f, "%s  <center>\n", padd);
-	fprintf(f, "%s   <table>\n", padd);
-
-	/* Create header */
-	fprintf(f, "%s    <tr>\n", padd);
-	
-	fprintf(f, "%s     <td bgcolor=\"#ffffaa\">\n", padd);
-	fprintf(f, "%s      <small>Total size</small>\n", padd);
-	fprintf(f, "%s     </td>\n", padd);
-	
-	fprintf(f, "%s     <td bgcolor=\"#ffffaa\">\n", padd);
-	fprintf(f, "%s      <small>Total chunks</small>\n", padd);
-	fprintf(f, "%s     </td>\n", padd);
-	
-	fprintf(f, "%s     <td bgcolor=\"#ffffaa\">\n", padd);
-	fprintf(f, "%s      <small>Max size</small>\n", padd);
-	fprintf(f, "%s     </td>\n", padd);
-	
-	fprintf(f, "%s     <td bgcolor=\"#ffffaa\">\n", padd);
-	fprintf(f, "%s      <small>Max chunks</small>\n", padd);
-	fprintf(f, "%s     </td>\n", padd);
-	
-	fprintf(f, "%s     <td bgcolor=\"#ffffaa\">\n", padd);
-	fprintf(f, "%s      <small>Lost size</small>\n", padd);
-	fprintf(f, "%s     </td>\n", padd);
-	
-	fprintf(f, "%s     <td bgcolor=\"#ffffaa\">\n", padd);
-	fprintf(f, "%s      <small>Lost chunks</small>\n", padd);
-	fprintf(f, "%s     </td>\n", padd);
-
-	fprintf(f, "%s    </tr>\n", padd);
-
-	/* Create data */
-	fprintf(f, "%s    <tr>\n", padd);
-
-	fprintf(f, "%s     <td bgcolor=\"#ffffaa\">\n", padd);
-	fprintf(f, "%s      <center><small>", padd);
-	bytes_human_readable(f, job->malloc_stats.total_size);
-	fprintf(f, "</small></center>\n");
-	fprintf(f, "%s     </td>\n", padd);
-	
-	fprintf(f, "%s     <td bgcolor=\"#ffffaa\">\n", padd);
-	fprintf(f, "%s      <center><small>%u</small></center>\n",
-	           padd, job->malloc_stats.total_chunks);
-	fprintf(f, "%s     </td>\n", padd);
-	
-	fprintf(f, "%s     <td bgcolor=\"#ffffaa\">\n", padd);
-	fprintf(f, "%s      <center><small>", padd);
-	bytes_human_readable(f, job->malloc_stats.max_size);
-	fprintf(f, "</small></center>\n");
-	fprintf(f, "%s     </td>\n", padd);
-	
-	fprintf(f, "%s     <td bgcolor=\"#ffffaa\">\n", padd);
-	fprintf(f, "%s      <center><small>%u</small></center>\n",
-	           padd, job->malloc_stats.max_chunks);
-	fprintf(f, "%s     </td>\n", padd);
-	
-	fprintf(f, "%s     <td bgcolor=\"#ffffaa\">\n", padd);
-	fprintf(f, "%s      <center><small>", padd);
-	bytes_human_readable(f, job->malloc_stats.lost_size);
-	fprintf(f, "</small></center>\n");
-	fprintf(f, "%s     </td>\n", padd);
-	
-	fprintf(f, "%s     <td bgcolor=\"#ffffaa\">\n", padd);
-	fprintf(f, "%s      <center><small>%u</small></center>\n",
-	           padd, job->malloc_stats.lost_chunks);
-	fprintf(f, "%s     </td>\n", padd);
-	
-	fprintf(f, "%s    </tr>\n", padd);
-	
-	fprintf(f, "%s   </table>\n", padd);
-	fprintf(f, "%s  </center>\n", padd);
-	fprintf(f, "%s </td>\n", padd);
-	fprintf(f, "%s</tr>\n", padd);
-}
-
-static void benchmark_stats_html(struct tst_job *job, FILE *f, const char *padd)
-{
-	/* Create innter table */
-	fprintf(f, "%s<tr>\n", padd);
-	fprintf(f, "%s <td bgcolor=\"#fd8\" colspan=\"3\">\n", padd);
-	fprintf(f, "%s  <center>\n", padd);
-	fprintf(f, "%s   <table>\n", padd);
-
-	/* Create header */
-	fprintf(f, "%s    <tr>\n", padd);
-	
-	fprintf(f, "%s     <td colspan=\"2\" bgcolor=\"#fb2\">\n", padd);
-	fprintf(f, "%s     <center><small>Benchmark data", padd);
-	fprintf(f, "</small></center>\n");
-	fprintf(f, "%s     </td>\n", padd);
-	
-	fprintf(f, "%s    </tr>\n", padd);
-	fprintf(f, "%s    <tr>\n", padd);
-
-	fprintf(f, "%s     <td bgcolor=\"#fc4\">\n", padd);
-	fprintf(f, "%s      <center><small>Iterations", padd);
-	fprintf(f, "</small></center>\n");
-	fprintf(f, "%s     </td>\n", padd);
-	
-	fprintf(f, "%s     <td bgcolor=\"#fc4\">\n", padd);
-	fprintf(f, "%s      <center><small>Mean &#x2213; Variance", padd);
-	fprintf(f, "</small></center>\n");
-	fprintf(f, "%s     </td>\n", padd);
-	
-	fprintf(f, "%s    </tr>\n", padd);
-	
-	/* Create data */
-	fprintf(f, "%s    <tr>\n", padd);
-
-	fprintf(f, "%s     <td bgcolor=\"#fc4\">\n", padd);
-	fprintf(f, "%s      <center>%i</center>\n", padd, job->bench_iter);
-	fprintf(f, "%s     </td>\n", padd);
-	
-	fprintf(f, "%s     <td bgcolor=\"#fc4\">\n", padd);
-	fprintf(f, "%s      <center>%i.%06is &#x2213; %i.%06is</center>\n", padd,
-	        (int)job->bench_mean.tv_sec, (int)job->bench_mean.tv_nsec/1000,
-	        (int)job->bench_var.tv_sec, (int)job->bench_var.tv_nsec/1000);
-	fprintf(f, "%s     </td>\n", padd);
-	
-	fprintf(f, "%s    </tr>\n", padd);
-	
-	fprintf(f, "%s   </table>\n", padd);
-	fprintf(f, "%s  </center>\n", padd);
-	fprintf(f, "%s </td>\n", padd);
-	fprintf(f, "%s</tr>\n", padd);
-}
-
-static int append_html(struct tst_job *job, FILE *f)
-{
-	const char *padd = "   ";
-	int sec, nsec;
-	static int hack_counter = 0;
-	const char *bgcol;
-
-	timespec_diff(&sec, &nsec, &job->start_time, &job->stop_time);
-
-	if (hack_counter)
-		bgcol = "#ccccee";
-	else
-		bgcol = "#ddddee";
-
-	fprintf(f, "%s<tr>\n", padd);
-	fprintf(f, "%s <td bgcolor=\"%s\">%s&nbsp;</td>\n",
-	        padd, bgcol, job->test->name);
-	fprintf(f, "%s <td bgcolor=\"%s\">\n", padd, bgcol);
-	fprintf(f, "%s  <center><small><font color=\"#222\">%i.%03is %i.%03is"
-	        "</font></small></center>\n", padd, sec, nsec/1000000,
-		(int)job->cpu_time.tv_sec, (int)job->cpu_time.tv_nsec/1000000);
-	fprintf(f, "%s </td>\n", padd);
-	fprintf(f, "%s <td bgcolor=\"%s\"><center><font color=\"white\">"
-	        "&nbsp;%s&nbsp;</td></center>\n", padd,
-	        ret_to_bg_color(job->result), ret_to_str(job->result));
-
-	struct tst_msg *msg;
-
-	/* If calculated include malloc report */
-	if (job->test->flags & TST_CHECK_MALLOC)
-		malloc_stats_html(job, f, padd);
-
-	if (job->bench_iter)
-		benchmark_stats_html(job, f, padd);
-
-	for (msg = job->store.first; msg != NULL; msg = msg->next) {
-		fprintf(f, "%s<tr>\n", padd);
-		fprintf(f, "%s <td colspan=\"3\" bgcolor=\"#eeeeee\">\n", padd);
-		fprintf(f, "%s  &nbsp;&nbsp;<small>%s</small>\n",
-		        padd, msg->msg);
-		fprintf(f, "%s </td>\n", padd);
-		fprintf(f, "%s</tr>\n", padd);
-	}
-
-	fprintf(f, "%s</tr>\n", padd);
-
-	hack_counter = !hack_counter;
-
-	return 0;
 }
 
 static int append_msg_json(struct tst_job *job, FILE *f)
@@ -391,9 +157,6 @@ static int append_json(struct tst_job *job, FILE *f)
 int tst_log_append(struct tst_job *job, FILE *f, enum tst_log_fmt format)
 {
 	switch (format) {
-	case TST_LOG_HTML:
-		return append_html(job, f);
-	break;
 	case TST_LOG_JSON:
 		return append_json(job, f);
 	break;
@@ -402,30 +165,6 @@ int tst_log_append(struct tst_job *job, FILE *f, enum tst_log_fmt format)
 	}
 
 	return 1;
-}
-
-FILE *open_html(const struct tst_suite *suite, const char *path)
-{
-	FILE *f;
-
-	f = fopen(path, "w");
-
-	if (f == NULL)
-		return NULL;
-
-	fprintf(f, "<html>\n <head>\n </head>\n <body>\n  "
-	           "<table bgcolor=\"#99a\">\n");
-
-	fprintf(f, "   <tr><td colspan=\"3\" bgcolor=\"#bbbbff\"><center><b>%s"
-	           "</b></center></td></tr>\n", suite->suite_name);
-
-	fprintf(f, "   <tr>\n");
-	fprintf(f, "    <td bgcolor=\"#eee\"><center>Test Name</center></td>\n");
-	fprintf(f, "    <td bgcolor=\"#eee\"><center>Time/CPU</center></td>\n");
-	fprintf(f, "    <td bgcolor=\"#eee\"><center>Result</center></td>\n");
-	fprintf(f, "   </tr>\n");
-
-	return f;
 }
 
 static void write_system_info_json(FILE *f)
@@ -487,9 +226,6 @@ FILE *tst_log_open(const struct tst_suite *suite, const char *path,
                    enum tst_log_fmt format)
 {
 	switch (format) {
-	case TST_LOG_HTML:
-		return open_html(suite, path);
-	break;
 	case TST_LOG_JSON:
 		return open_json(suite, path);
 	break;
@@ -498,12 +234,6 @@ FILE *tst_log_open(const struct tst_suite *suite, const char *path,
 	}
 
 	return NULL;
-}
-
-static int close_html(FILE *f)
-{
-	fprintf(f, "  </table>\n </body>\n</html>\n");
-	return fclose(f);
 }
 
 static int close_json(FILE *f)
@@ -515,9 +245,6 @@ static int close_json(FILE *f)
 int tst_log_close(FILE *f, enum tst_log_fmt format)
 {
 	switch (format) {
-	case TST_LOG_HTML:
-		return close_html(f);
-	break;
 	case TST_LOG_JSON:
 		return close_json(f);
 	break;

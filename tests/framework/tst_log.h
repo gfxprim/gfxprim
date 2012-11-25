@@ -35,7 +35,6 @@ struct tst_suite;
 struct tst_job;
 
 enum tst_log_fmt {
-	TST_LOG_HTML,
 	TST_LOG_JSON,
 };
 
