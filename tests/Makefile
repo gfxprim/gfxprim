@@ -1,7 +1,7 @@
 TOPDIR=..
 include $(TOPDIR)/pre.mk
 
-SUBDIRS=core SDL drivers framework loaders gfx filters
+SUBDIRS=core drivers framework loaders gfx filters
 
 loaders: framework
 gfx: framework

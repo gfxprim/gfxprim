@@ -96,11 +96,125 @@ static int Context_Alloc_Free(void)
 	return TST_SUCCESS;
 }
 
+/*
+ * Asserts that subcontext structure is initialized correctly
+ */
+static int subcontext_assert(const GP_Context *c, const GP_Context *sc,
+                             GP_Size w, GP_Size h)
+{
+	if (c->bpp != sc->bpp) {
+		tst_msg("Context->bpp != SubContext->bpp");
+		return TST_FAILED;
+	}
+
+	if (c->bytes_per_row != sc->bytes_per_row) {
+		tst_msg("Context->bytes_per_row != SubContext->bytes_per_row");
+		return TST_FAILED;
+	}
+	
+	if (sc->w != w) {
+		tst_msg("SubContext->w != %u (== %i)", w, sc->w);
+		return TST_FAILED;
+	}
+	
+	if (sc->h != h) {
+		tst_msg("SubContext->h != %u (== %i)", h, sc->h);
+		return TST_FAILED;
+	}
+	
+	if (sc->offset != 0) {
+		tst_msg("SubContext->offset != 0");
+		return TST_FAILED;
+	}
+
+	if (sc->pixel_type != GP_PIXEL_RGB888) {
+		tst_msg("SubContext->pixel_type != GP_PIXEL_RGB888");
+		return TST_FAILED;
+	}
+
+	if (sc->gamma != NULL) {
+		tst_msg("SubContext->gamma != NULL");
+		return TST_FAILED;
+	}
+
+	if (sc->axes_swap != 0 || sc->x_swap != 0 || sc->y_swap != 0) {
+		tst_msg("Wrong default orientation %i %i %i",
+		        sc->axes_swap, sc->x_swap, sc->y_swap);
+		return TST_FAILED;
+	}
+	
+	/* access the start and end of the pixel buffer */
+	*(char*)GP_PIXEL_ADDR(sc, 0, 0) = 0;
+	*(char*)GP_PIXEL_ADDR(sc, sc->w - 1, sc->h - 1) = 0;
+
+	return 0;
+}
+
+static int SubContext_Alloc_Free(void)
+{
+	GP_Context *c, *sc;
+	int ret;
+
+	c = GP_ContextAlloc(300, 300, GP_PIXEL_RGB888);
+
+	if (c == NULL) {
+		tst_msg("GP_ContextAlloc() failed");
+		return TST_UNTESTED;
+	}
+
+	sc = GP_SubContextAlloc(c, 100, 100, 100, 100);
+
+	if (sc == NULL) {
+		GP_ContextFree(c);
+		return TST_FAILED;
+	}
+
+	ret = subcontext_assert(c, sc, 100, 100);
+
+	if (ret)
+		return ret;
+
+	GP_ContextFree(c);
+	GP_ContextFree(sc);
+
+	return TST_SUCCESS;
+}
+
+static int SubContext_Create(void)
+{
+	GP_Context *c, sc;
+	int ret;
+
+	c = GP_ContextAlloc(300, 300, GP_PIXEL_RGB888);
+
+	if (c == NULL) {
+		tst_msg("GP_ContextAlloc() failed");
+		return TST_UNTESTED;
+	}
+
+	GP_SubContext(c, &sc, 100, 100, 100, 100);
+	
+	ret = subcontext_assert(c, &sc, 100, 100);
+
+	if (ret)
+		return ret;
+
+	GP_ContextFree(c);
+
+	return TST_SUCCESS;
+}
+
+
 const struct tst_suite tst_suite = {
 	.suite_name = "Context Testsuite",
 	.tests = {
 		{.name = "Context Alloc Free", .tst_fn = Context_Alloc_Free,
 		 .flags = TST_CHECK_MALLOC},
+		{.name = "SubContext Alloc Free",
+		 .tst_fn = SubContext_Alloc_Free,
+		 .flags = TST_CHECK_MALLOC},
+		{.name = "SubContext Create",
+		 .tst_fn = SubContext_Create},
 		{.name = NULL},
 	}
 };

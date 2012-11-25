@@ -23,15 +23,7 @@
  *                                                                           *
  *****************************************************************************/
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <SDL/SDL.h>
-
-#include "GP.h"
-#include "GP_SDL.h"
-
-SDL_Surface *display = NULL;
-GP_Context context;
+#include <GP.h>
 
 static GP_Pixel black_pixel, red_pixel, yellow_pixel, green_pixel, blue_pixel,
 		darkgray_pixel;
@@ -41,17 +33,17 @@ static int font_flag = 0;
 static int X = 640;
 static int Y = 480;
 
-GP_FontFace *font = NULL;
+static GP_FontFace *font = NULL;
+
+static GP_Backend *win;
 
 void redraw_screen(void)
 {
-	SDL_LockSurface(display);
-	
-	GP_Fill(&context, black_pixel);
+	GP_Fill(win->context, black_pixel);
 
 	/* draw axes intersecting in the middle, where text should be shown */
-	GP_HLine(&context, 0, X, Y/2, darkgray_pixel);
-	GP_VLine(&context, X/2, 0, Y, darkgray_pixel);
+	GP_HLine(win->context, 0, X, Y/2, darkgray_pixel);
+	GP_VLine(win->context, X/2, 0, Y, darkgray_pixel);
 
 	GP_TextStyle style = GP_DEFAULT_TEXT_STYLE;
 
@@ -67,34 +59,39 @@ void redraw_screen(void)
 	break;
 	}
 
-	GP_Text(&context, &style, X/2, Y/2, GP_ALIGN_LEFT|GP_VALIGN_BELOW,
+	GP_Text(win->context, &style, X/2, Y/2, GP_ALIGN_LEFT|GP_VALIGN_BELOW,
 	        yellow_pixel, black_pixel, "bottom left");
-	GP_Text(&context, &style, X/2, Y/2, GP_ALIGN_RIGHT|GP_VALIGN_BELOW,
+	GP_Text(win->context, &style, X/2, Y/2, GP_ALIGN_RIGHT|GP_VALIGN_BELOW,
 	        red_pixel, black_pixel, "bottom right");
-	GP_Text(&context, &style, X/2, Y/2, GP_ALIGN_RIGHT|GP_VALIGN_ABOVE,
+	GP_Text(win->context, &style, X/2, Y/2, GP_ALIGN_RIGHT|GP_VALIGN_ABOVE,
 	        blue_pixel, black_pixel, "top right");
-	GP_Text(&context, &style, X/2, Y/2, GP_ALIGN_LEFT|GP_VALIGN_ABOVE,
+	GP_Text(win->context, &style, X/2, Y/2, GP_ALIGN_LEFT|GP_VALIGN_ABOVE,
 	        green_pixel, black_pixel, "top left");
-
-	SDL_UnlockSurface(display);
 }
 
-void event_loop(void)
+static void event_loop(void)
 {
-	SDL_Event event;
+	GP_Event ev;
 
-	while (SDL_WaitEvent(&event) > 0) {
-		switch (event.type) {
-
-		case SDL_VIDEOEXPOSE:
-			redraw_screen();
-			SDL_Flip(display);
-		break;
-
-		case SDL_KEYDOWN:
-			switch (event.key.keysym.sym) {
-			case SDLK_SPACE:
-				font_flag += 1;
+	while (GP_EventGet(&ev)) {
+		switch (ev.type) {
+		case GP_EV_KEY:
+			if (ev.code != GP_EV_KEY_DOWN)
+				continue;
+			
+			switch (ev.val.key.key) {
+			case GP_KEY_X:
+				win->context->x_swap = !win->context->x_swap;
+			break;
+			case GP_KEY_Y:
+				win->context->y_swap = !win->context->y_swap;
+			break;
+			case GP_KEY_R:
+				win->context->axes_swap = !win->context->axes_swap;
+				GP_SWAP(X, Y);
+			break;
+			case GP_KEY_SPACE:
+				font_flag++;
 
 				if (font) {
 					if (font_flag >= 3)
@@ -104,82 +101,67 @@ void event_loop(void)
 						font_flag = 0;
 				}
 			break;
-			case SDLK_x:
-				context.x_swap = !context.x_swap;
+			case GP_KEY_ESC:
+				GP_BackendExit(win);
+				exit(0);
 			break;
-			case SDLK_y:
-				context.y_swap = !context.y_swap;
-			break;
-			case SDLK_r:
-				context.axes_swap = !context.axes_swap;
-				GP_SWAP(X, Y);
-			break;
-			default:
-			break;
-			case SDLK_ESCAPE:
-				return;
 			}
-			redraw_screen();
-			SDL_Flip(display);
 		break;
-
-		case SDL_QUIT:
-			return;
+		case GP_EV_SYS:
+			switch(ev.code) {
+			case GP_EV_SYS_QUIT:
+				GP_BackendExit(win);
+				exit(0);
+			break;
+			}
+		break;
 		}
+	
+		redraw_screen();
+		GP_BackendFlip(win);
 	}
 }
 
 void print_instructions(void)
 {
 	printf("Use the following keys to control the test:\n");
-	printf("    Space ............... toggle proportional/nonproportional font\n");
-	printf("    X ................... mirror X\n");
-	printf("    Y ................... mirror Y\n");
-	printf("    R ................... reverse X and Y\n");
+	printf("    Space ........ toggle proportional/nonproportional font\n");
+	printf("    X ............ mirror X\n");
+	printf("    Y ............ mirror Y\n");
+	printf("    R ............ reverse X and Y\n");
 }
 
 int main(int argc, char *argv[])
 {
-	GP_SetDebugLevel(10);
+	const char *backend_opts = "X11";
 
 	if (argc > 1)
 		font = GP_FontFaceLoad(argv[1], 0, 16);
-	
-	if (SDL_Init(SDL_INIT_VIDEO | SDL_INIT_TIMER) != 0) {
-		fprintf(stderr, "Could not initialize SDL: %s\n", SDL_GetError());
-		return 1;
-	}
-
-	display = SDL_SetVideoMode(X, Y, 0, SDL_SWSURFACE);
-	if (display == NULL) {
-		fprintf(stderr, "Could not open display: %s\n", SDL_GetError());
-		goto fail;
-	}
 
 	print_instructions();
 
-	SDL_Rect clip_rect = {10, 10, X-10, Y-10};
-	SDL_SetClipRect(display, &clip_rect);
+	win = GP_BackendInit(backend_opts, "Font Align Test", stderr);
 
-	GP_SDL_ContextFromSurface(&context, display);
+	if (win == NULL) {
+		fprintf(stderr, "Failed to initalize backend '%s'\n",
+		        backend_opts);
+		return 1;
+	}
 
-	black_pixel     = GP_ColorToContextPixel(GP_COL_BLACK, &context);
-	red_pixel       = GP_ColorToContextPixel(GP_COL_RED, &context);
-	blue_pixel      = GP_ColorToContextPixel(GP_COL_BLUE, &context);
-	green_pixel     = GP_ColorToContextPixel(GP_COL_GREEN, &context);
-	yellow_pixel    = GP_ColorToContextPixel(GP_COL_YELLOW, &context);
-	darkgray_pixel  = GP_ColorToContextPixel(GP_COL_GRAY_DARK, &context);
+	black_pixel    = GP_ColorToContextPixel(GP_COL_BLACK, win->context);
+	red_pixel      = GP_ColorToContextPixel(GP_COL_RED, win->context);
+	blue_pixel     = GP_ColorToContextPixel(GP_COL_BLUE, win->context);
+	green_pixel    = GP_ColorToContextPixel(GP_COL_GREEN, win->context);
+	yellow_pixel   = GP_ColorToContextPixel(GP_COL_YELLOW, win->context);
+	darkgray_pixel = GP_ColorToContextPixel(GP_COL_GRAY_DARK, win->context);
 
 	redraw_screen();
-	SDL_Flip(display);
+	
+	GP_BackendFlip(win);
 
-	event_loop();
-
-	SDL_Quit();
-	return 0;
-
-fail:
-	SDL_Quit();
-	return 1;
+	for (;;) {
+		GP_BackendWait(win);
+		event_loop();
+	}
 }
 
