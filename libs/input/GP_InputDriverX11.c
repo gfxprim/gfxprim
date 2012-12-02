@@ -123,6 +123,19 @@ void GP_InputDriverX11EventPut(XEvent *ev)
 		
 		GP_EventPushKey(key, press, NULL);
 	break;
+	/* events from WM */
+	case ClientMessage:
+		//TODO: We know we get WM_DELETE_WINDOW because it's the only
+		//      event we requested to get but we must check anyway
+		GP_EventPush(GP_EV_SYS, GP_EV_SYS_QUIT, 0, NULL);
+#if 0
+		switch (ev->xclient.message_type) {
+		default:
+			GP_WARN("Unknown X11 ClientMessage Atom %i",
+			        ev->xclient.message_type);
+		}
+#endif
+	break;
 	default:
 		GP_WARN("Unhandled X11 event type %u", ev->type);
 	}
