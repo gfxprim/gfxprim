@@ -442,7 +442,7 @@ void create_window(struct x11_priv *x11, int x, int y,
 		XMapWindow(x11->dpy, x11->win);
 		return;
 	}
-	
+
 	GP_DEBUG(2, "Opening window '%s' %ix%i-%ux%u",
 	         caption, x, y, *w, *h);
 
@@ -453,6 +453,17 @@ void create_window(struct x11_priv *x11, int x, int y,
 	/* Set window caption */
 	XmbSetWMProperties(x11->dpy, x11->win, caption, caption,
 	                   NULL, 0, NULL, NULL, NULL);
+
+	/* Make the window close button send event */
+	Atom xa = XInternAtom(x11->dpy, "WM_DELETE_WINDOW", True);
+
+	if (xa != None) {
+		GP_DEBUG(2, "Setting WM_DELETE_WINWOW Atom to True");
+
+		XSetWMProtocols(x11->dpy, x11->win, &xa, 1);
+	} else {
+		GP_DEBUG(2, "Failed to set WM_DELETE_WINDOW Atom to True");
+	}
 	
 	/* Show window */
 	XMapWindow(x11->dpy, x11->win);
