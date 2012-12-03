@@ -1,6 +1,14 @@
 TOPDIR=../..
 
-CSOURCES=$(shell echo *.c)
+include $(TOPDIR)/pre.mk
+
+SOURCES=$(shell echo *.c)
+
+ifneq ($(HAVE_LIBSDL),yes)
+CSOURCES=$(filter-out SDL_glue.c,$(SOURCES))
+else
+CSOURCES=$(SOURCES)
+endif
 
 INCLUDE=
 LDFLAGS+=-L$(TOPDIR)/build/
@@ -12,9 +20,12 @@ APPS=backend_example loaders_example loaders filters_symmetry gfx_koch\
      fileview linetest randomshapetest fonttest loaders_register blittest\
      textaligntest
 
+ifeq ($(HAVE_LIBSDL),yes)
+APPS+=SDL_glue
+endif
+
 v4l2_show: LDLIBS+=-lGP_grabbers
 v4l2_grab: LDLIBS+=-lGP_grabbers
 
-include $(TOPDIR)/pre.mk
 include $(TOPDIR)/app.mk
 include $(TOPDIR)/post.mk

@@ -33,6 +33,8 @@
 #include "GP_Backend.h"
 #include "GP_SDL.h"
 
+#include "GP_SDL_Context.h"
+
 #include <SDL/SDL.h>
 #include <SDL/SDL_mutex.h>
 
@@ -97,7 +99,7 @@ static void sdl_wait(struct GP_Backend *self __attribute__((unused)))
 	SDL_mutexV(mutex);
 }
 
-int context_from_surface(GP_Context *context, SDL_Surface *surf)
+static int context_from_surface(GP_Context *context, const SDL_Surface *surf)
 {
 	/* sanity checks on the SDL surface */
 	if (surf->format->BytesPerPixel == 0) {
@@ -128,6 +130,11 @@ int context_from_surface(GP_Context *context, SDL_Surface *surf)
 	context->h = surf->h;
 
 	return 0;
+}
+
+int GP_ContextFromSurface(GP_Context *c, const SDL_Surface *surf)
+{
+	return context_from_surface(c, surf);
 }
 
 static int sdl_set_attributes(struct GP_Backend *self __attribute__((unused)),

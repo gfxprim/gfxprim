@@ -16,19 +16,34 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2010 Jiri "BlueBear" Dluhos                            *
- *                         <jiri.bluebear.dluhos@gmail.com>                  *
- *                                                                           *
- * Copyright (C) 2009-2010 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
-#ifndef GP_SDL_VIDEOINIT_H
-#define GP_SDL_VIDEOINIT_H
+#ifndef BACKENDS_GP_SDL_CONTEXT_H
+#define BACKENDS_GP_SDL_CONTEXT_H
 
-#include "GP.h"
+#include <SDL/SDL.h>
+#include <core/GP_Context.h>
 
-int GP_SDL_VideoInit(GP_Context *context, int width, int height,
-	int argc, char **argv);
+/*
+ * This function lets you use GFXprim together with SDL. All you need to do
+ * is to initialize context from surface. The usage is as follows:
+ *
+ * ...
+ *
+ * GP_Context c;
+ *
+ * if (GP_ContextFromSurface(&c, surface)) {
+ *	error("Failed to match PIXEL_TYPE for given surface");
+ *	exit(1);
+ * }
+ *
+ * ...
+ *
+ * Now you have initialized context that shares the pixel buffer with
+ * the SDL surface.
+ */
+int GP_ContextFromSurface(GP_Context *c, const SDL_Surface *surf);
 
-#endif /* GP_SDL_VIDEOINIT_H */
+#endif /* BACKENDS_GP_SDL_CONTEXT_H */
