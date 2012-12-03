@@ -19,16 +19,25 @@
  * Copyright (C) 2009-2011 Jiri "BlueBear" Dluhos                            *
  *                         <jiri.bluebear.dluhos@gmail.com>                  *
  *                                                                           *
- * Copyright (C) 2009-2011 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
-#ifndef GP_POLYGON_H
-#define GP_POLYGON_H
+#ifndef GFX_GP_POLYGON_H
+#define GFX_GP_POLYGON_H
 
 #include "core/GP_Context.h"
 
-void GP_FillPolygon_Raw(GP_Context *context, int vertex_count,
+void GP_Polygon(GP_Context *context, unsigned int vertex_count,
+                const GP_Coord *xy, GP_Pixel pixel);
+
+void GP_Polygon_Raw(GP_Context *context, unsigned int vertex_count,
+                    const GP_Coord *xy, GP_Pixel pixel);
+
+void GP_FillPolygon(GP_Context *context, unsigned int vertex_count,
+                    const GP_Coord *xy, GP_Pixel pixel);
+
+void GP_FillPolygon_Raw(GP_Context *context, unsigned int vertex_count,
                         const GP_Coord *xy, GP_Pixel pixel);
 
-#endif /* GP_POLYGON_H */
+#endif /* GFX_GP_POLYGON_H */

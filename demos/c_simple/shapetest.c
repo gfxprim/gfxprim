@@ -55,8 +55,9 @@ static int show_axes = 1;
 #define SHAPE_ELLIPSE	4
 #define SHAPE_RECTANGLE	5
 #define SHAPE_TETRAGON  6
-#define SHAPE_ARC	7
-#define SHAPE_LAST	7
+#define SHAPE_POLYGON   7
+#define SHAPE_ARC	8
+#define SHAPE_LAST	8
 static int shape = SHAPE_FIRST;
 
 /* Variants in coordinates, if applicable */
@@ -198,6 +199,42 @@ void draw_testing_tetragon(int x, int y, int xradius, int yradius)
 		GP_Tetragon(win, x0, y0, x1, y1, x2, y2, x3, y3, white);
 }
 
+void draw_testing_polygon(int x, int y, int xradius, int yradius)
+{
+	GP_Coord xy[14];
+	unsigned int edges = 7;
+
+	xy[0] = x + xradius;
+	xy[1] = y;
+	
+	xy[2] = x + 3 * xradius / 4;
+	xy[3] = y + yradius / 4;
+
+	xy[4] = x + 3 * xradius / 4;
+	xy[5] = y + 3 * yradius / 4;
+
+	xy[6] = x + xradius / 4;
+	xy[7] = y + 3 * yradius / 4;
+
+	xy[8] = x;
+	xy[9] = y;
+
+	xy[10] = x - xradius;
+	xy[11] = y;
+
+	xy[12] = x - 3 * xradius / 4;
+	xy[13] = y - yradius / 4;
+
+	if (outline == 1)
+		GP_Polygon(win, edges, xy, yellow);
+
+	if (fill)
+		GP_FillPolygon(win, edges, xy, red);
+
+	if (outline == 2)
+		GP_Polygon(win, edges, xy, white);
+}
+
 void redraw_screen(void)
 {
 
@@ -228,31 +265,35 @@ void redraw_screen(void)
 	case SHAPE_TRIANGLE:
 		draw_testing_triangle(center_x, center_y, xradius, yradius);
 		title = "TRIANGLE";
-		break;
+	break;
 	case SHAPE_CIRCLE:
 		draw_testing_circle(center_x, center_y, xradius, yradius);
 		title = "CIRCLE";
-		break;
+	break;
 	case SHAPE_RING:
 		draw_testing_ring(center_x, center_y, xradius, yradius);
 		title = "RING";
-		break;
+	break;
 	case SHAPE_ELLIPSE:
 		draw_testing_ellipse(center_x, center_y, xradius, yradius);
 		title = "ELLIPSE";
-		break;
+	break;
 	case SHAPE_RECTANGLE:
 		draw_testing_rectangle(center_x, center_y, xradius, yradius);
 		title = "RECTANGLE";
-		break;
+	break;
 	case SHAPE_TETRAGON:
 		draw_testing_tetragon(center_x, center_y, xradius, yradius);
 		title = "TETRAGON";
-		break;
+	break;
+	case SHAPE_POLYGON:
+		draw_testing_polygon(center_x, center_y, xradius, yradius);
+		title = "POLYGON";
+	break;
 	case SHAPE_ARC:
 		draw_testing_arc(center_x, center_y, xradius, yradius);
 		title = "ARC";
-		break;
+	break;
 	}
 
 	GP_Text(win, &style, 16, 16, GP_ALIGN_RIGHT|GP_VALIGN_BELOW,
@@ -428,7 +469,7 @@ void print_instructions(void)
 	printf("    1/2/3 ............... choose shape variant (if applicable)\n");
 }
 
-int main(int argc, char ** argv)
+int main(void)
 {
 	const char *backend_opts = "X11";
 

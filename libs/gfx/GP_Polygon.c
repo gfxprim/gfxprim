@@ -16,8 +16,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2012      Jiri Dluhos <jiri.bluebear.dluhos@gmail.com>      *
- * Copyright (C) 2012      Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009 - 2012 Jiri Dluhos <jiri.bluebear.dluhos@gmail.com>    *
+ * Copyright (C) 2009 - 2012 Cyril Hrubis <metan@ucw.cz>                     *
  *                                                                           *
  *****************************************************************************/
 
@@ -27,6 +27,9 @@
 #include <stdio.h>
 #include <math.h>
 
+#include "core/GP_Transform.h"
+
+#include "GP_Line.h"
 #include "GP_HLine.h"
 #include "GP_Polygon.h"
 
@@ -118,15 +121,15 @@ static int GP_ComputeScanline(float *results, struct GP_PolygonEdge *edges,
 	return result_index;
 }
 
-void GP_FillPolygon_Raw(GP_Context *context, int vertex_count,
-	const GP_Coord *xy, GP_Pixel pixel)
+void GP_FillPolygon_Raw(GP_Context *context, unsigned int vertex_count,
+                        const GP_Coord *xy, GP_Pixel pixel)
 {
 	float ymin = HUGE_VALF, ymax = -HUGE_VALF;
 	struct GP_PolygonEdge *edge;
 	struct GP_PolygonEdge edges[vertex_count];
 
 	int i;
-	for (i = 0; i < vertex_count - 1; i++) {
+	for (i = 0; i < (int)vertex_count - 1; i++) {
 		edge = edges + i;
 		GP_InitEdge(edge, xy[2*i], xy[2*i + 1],
 			xy[2*i + 2], xy[2*i + 3]);
@@ -145,5 +148,66 @@ void GP_FillPolygon_Raw(GP_Context *context, int vertex_count,
 		for (i = 0; i < inter_count; i+=2) {
 			GP_HLine_Raw(context, intersections[i], intersections[i + 1], y, pixel);
 		}
+	}
+}
+
+void GP_FillPolygon(GP_Context *context, unsigned int vertex_count,
+                    const GP_Coord *xy, GP_Pixel pixel)
+{
+	unsigned int i;
+	GP_Coord xy_copy[2 * vertex_count];
+
+	for (i = 0; i < vertex_count; i++) {
+		unsigned int x = 2 * i;
+		unsigned int y = 2 * i + 1;
+
+		xy_copy[x] = xy[x];
+		xy_copy[y] = xy[y];
+		GP_TRANSFORM_POINT(context, xy_copy[x], xy_copy[y]);
+	}
+
+	GP_FillPolygon_Raw(context, vertex_count, xy_copy, pixel);
+}
+
+void GP_Polygon_Raw(GP_Context *context, unsigned int vertex_count,
+                    const GP_Coord *xy, GP_Pixel pixel)
+{
+	unsigned int i;
+
+	GP_Coord prev_x = xy[2 * vertex_count - 2];
+	GP_Coord prev_y = xy[2 * vertex_count - 1];
+	
+	for (i = 0; i < vertex_count; i++) {
+		GP_Coord x = xy[2 * i];
+		GP_Coord y = xy[2 * i + 1]; 
+
+		GP_Line_Raw(context, prev_x, prev_y, x, y, pixel);
+
+		prev_x = x;
+		prev_y = y;
+	}
+}
+
+
+void GP_Polygon(GP_Context *context, unsigned int vertex_count,
+                const GP_Coord *xy, GP_Pixel pixel)
+{
+	unsigned int i;
+
+	GP_Coord prev_x = xy[2 * vertex_count - 2];
+	GP_Coord prev_y = xy[2 * vertex_count - 1];
+	
+	GP_TRANSFORM_POINT(context, prev_x, prev_y);
+
+	for (i = 0; i < vertex_count; i++) {
+		GP_Coord x = xy[2 * i];
+		GP_Coord y = xy[2 * i + 1]; 
+
+		GP_TRANSFORM_POINT(context, x, y);
+
+		GP_Line_Raw(context, prev_x, prev_y, x, y, pixel);
+
+		prev_x = x;
+		prev_y = y;
 	}
 }
