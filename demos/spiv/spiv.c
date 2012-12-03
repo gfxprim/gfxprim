@@ -565,6 +565,53 @@ static void init_caches(struct loader_params *params)
 //	params->img_orig_cache = NULL;
 }
 
+static void print_help(void)
+{
+	printf("Usage: spiv [opts] images\n\n");
+	printf("-I\n\tshow image info (filename and size)\n\n");
+	printf("-P\n\tshow loading progress\n\n");
+	printf("-f\n\tuse floyd-steinberg dithering\n\n");
+	printf("-s sec\n\tsleep interval in seconds\n\n");
+	printf("-c\n\tturns on bicubic resampling (experimental)\n\n");
+	printf("-d level\n\tsets GFXprim debug level\n\n");
+	printf("-e pixel_type\n\tturns on backend type emulation\n");
+	printf("\tfor example -e G1 sets 1-bit grayscale\n\n");
+	printf("-r angle\n\trotate display 90,180 or 270 degrees\n\n");
+	printf("-b\n\tpass backend init string to backend init\n");
+	printf("\tpass -b help for more info\n\n");
+
+	printf("Keyboard control:\n\n");
+	printf("I      - toggle show info\n");
+	printf("P      - toggle show progress\n");
+	printf("R      - rotate by 90 degrees\n");
+	printf("]      - change to next resampling method\n");
+	printf("[      - change to prev resampling method\n");
+	printf("        (current method is shown in info\n");
+	printf("L      - toggle low pass filter\n");
+	printf("D      - drop image cache\n");
+	printf("\nEsc\n");
+	printf("Enter\n");
+	printf("Q      - quit spiv\n\n");
+	printf("PgDown - move ten image forward\n");
+	printf("PgUp   - move ten image backward\n");
+	printf("\nRight\n");
+	printf("Up\n");
+	printf("Space  - move to the next image\n");
+	printf("\nLeft\n");
+	printf("Down\n");
+	printf("BckSpc - move to the prev image\n");
+	printf("\n");
+
+	printf("Some cool options to try:\n\n");
+	printf("spiv -e G1 -f images\n");
+	printf("\truns spiv in 1-bit bitmap mode and turns on dithering\n\n");
+	printf("spiv -b 'X11:ROOT_WIN' images\n");
+	printf("\truns spiv using X root window as backend window\n\n");
+	printf("spiv -b 'X11:CREATE_ROOT' images\n");
+	printf("\tSame as abowe but works in KDE\n");
+
+}
+
 int main(int argc, char *argv[])
 {
 	GP_Context *context = NULL;
@@ -588,7 +635,7 @@ int main(int argc, char *argv[])
 		.img_orig_cache = NULL,
 	};
 
-	while ((opt = getopt(argc, argv, "b:cd:e:fIPs:r:")) != -1) {
+	while ((opt = getopt(argc, argv, "b:cd:e:fhIPs:r:")) != -1) {
 		switch (opt) {
 		case 'I':
 			params.show_info = 1;
@@ -630,8 +677,14 @@ int main(int argc, char *argv[])
 		case 'b':
 			backend_opts = optarg;
 		break;
+		case 'h':
+			print_help();
+			exit(0);
+		break;
 		default:
 			fprintf(stderr, "Invalid paramter '%c'\n", opt);
+			print_help();
+			return 1;
 		}
 	}
 	
