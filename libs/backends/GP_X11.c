@@ -20,6 +20,9 @@
  *                                                                           *
  *****************************************************************************/
 
+#include <string.h>
+#include <errno.h>
+
 #include "../../config.h"
 
 #include "core/GP_Debug.h"
@@ -31,6 +34,12 @@
 #include <X11/Xutil.h>
 #include <X11/Xatom.h>
 #include <X11/Xmd.h>
+
+#ifdef HAVE_X_SHM
+#include <sys/ipc.h>
+#include <sys/shm.h>
+#include <X11/extensions/XShm.h>
+#endif /* HAVE_X_SHM */
 
 #include "input/GP_InputDriverX11.h"
 #include "GP_X11.h"
@@ -45,10 +54,17 @@ struct x11_priv {
 
 	XImage *img;
 
-	int resized_flag;
+#ifdef HAVE_X_SHM
+	XShmSegmentInfo shminfo;
+	GP_Context context;
+#endif /* HAVE_X_SHM */
+
+	int resized_flag:1;
+	int shm_flag:1;
 };
 
 static void destroy_ximage(GP_Backend *self);
+static void destroy_shm_ximage(GP_Backend *self);
 
 static int resize_ximage(GP_Backend *self, int w, int h);
 
@@ -58,7 +74,10 @@ static void x11_exit(GP_Backend *self)
 	
 	XLockDisplay(x11->dpy);
 
-	destroy_ximage(self);
+	if (x11->shm_flag)
+		destroy_shm_ximage(self);
+	else
+		destroy_ximage(self);
 
 	XDestroyWindow(x11->dpy, x11->win);
 	/* I wonder if this is right sequence... */
@@ -77,8 +96,15 @@ static void x11_update_rect(GP_Backend *self, GP_Coord x0, GP_Coord y0,
 
 	XLockDisplay(x11->dpy);
 
-	XPutImage(x11->dpy, x11->win, DefaultGC(x11->dpy, x11->scr),
-	          x11->img, x0, y0, x0, y0, x1-x0+1, y1-y0+1);
+#ifdef HAVE_X_SHM
+	if (x11->shm_flag)
+		XShmPutImage(x11->dpy, x11->win, DefaultGC(x11->dpy, x11->scr),
+		             x11->img, x0, y0, x0, y0, x1-x0+1, y1-y0+1, False);
+	else
+#endif /* HAVE_X_SHM */
+		XPutImage(x11->dpy, x11->win, DefaultGC(x11->dpy, x11->scr),
+		          x11->img, x0, y0, x0, y0, x1-x0+1, y1-y0+1);
+	
 	XFlush(x11->dpy);
 
 	x11->resized_flag = 0;
@@ -193,27 +219,127 @@ static int x11_set_attributes(struct GP_Backend *self,
 	return 0;
 }
 
-static int create_ximage(GP_Backend *self, GP_Size w, GP_Size h)
+void match_pixel_type(struct x11_priv *x11, enum GP_PixelType *pixel_type, int *depth)
 {
-	struct x11_priv *x11 = GP_BACKEND_PRIV(self); 
-	int depth;
-	enum GP_PixelType pixel_type;
-
 	/*
 	 * Eh, the XImage supports either 8, 16 or 32 bit pixels
 	 *
 	 * Do best effor on selecting appropriate pixel type
 	 */
-	for (depth = 8; depth <= 32; depth<<=1) {
-		pixel_type = GP_PixelRGBMatch(x11->vis->red_mask,
-		                              x11->vis->green_mask,
-	                                      x11->vis->blue_mask,
-					      0x0, depth);
+	for (*depth = 8; *depth <= 32; *depth<<=1) {
+		*pixel_type = GP_PixelRGBMatch(x11->vis->red_mask,
+		                               x11->vis->green_mask,
+	                                       x11->vis->blue_mask,
+		                               0x0, *depth);
 	
-		if (pixel_type != GP_PIXEL_UNKNOWN)
+		if (*pixel_type != GP_PIXEL_UNKNOWN)
 			break;
 	}
+}
 
+#ifdef HAVE_X_SHM
+
+static int create_shm_ximage(GP_Backend *self, GP_Size w, GP_Size h)
+{
+	struct x11_priv *x11 = GP_BACKEND_PRIV(self);
+
+	if (XShmQueryExtension(x11->dpy) == False) {
+		GP_DEBUG(1, "X Shm Extension not supported, "
+		            "falling back to XImage\n");
+		return 1;
+	}
+	
+	enum GP_PixelType pixel_type;
+	int depth;
+
+	match_pixel_type(x11, &pixel_type, &depth);
+	
+	if (pixel_type == GP_PIXEL_UNKNOWN) {
+		GP_DEBUG(1, "Unknown pixel type");
+		return 1;
+	}
+
+	x11->img = XShmCreateImage(x11->dpy, x11->vis, x11->scr_depth,
+	                           ZPixmap, NULL, &x11->shminfo, w, h);
+
+	if (x11->img == NULL) {
+		GP_WARN("Failed to create SHM XImage");
+		return 1;
+	}
+	
+	size_t size = x11->img->bytes_per_line * x11->img->height;
+
+	x11->shminfo.shmid = shmget(IPC_PRIVATE, size, IPC_CREAT|0777);
+
+	if (x11->shminfo.shmid == -1) {
+		GP_WARN("Calling shmget() failed: %s", strerror(errno));
+		goto err0;
+	}
+
+	x11->shminfo.shmaddr = x11->img->data = shmat(x11->shminfo.shmid, 0, 0);
+
+	if (x11->shminfo.shmaddr == (void *)-1) {
+		GP_WARN("Calling shmat() failed: %s", strerror(errno));
+		goto err1;
+	}
+
+	x11->shminfo.readOnly = False;
+
+	if (XShmAttach(x11->dpy, &x11->shminfo) == False) {
+		GP_WARN("XShmAttach failed");
+		goto err2;
+	}
+
+	GP_ContextInit(&x11->context, w, h, pixel_type, x11->shminfo.shmaddr);
+	x11->context.bytes_per_row = x11->img->bytes_per_line;
+
+	self->context = &x11->context;
+
+	x11->shm_flag = 1;
+
+	return 0;
+err2:
+	shmdt(x11->shminfo.shmaddr);
+err1:
+	shmctl(x11->shminfo.shmid, IPC_RMID, 0);
+err0:
+	XDestroyImage(x11->img);
+	return 1;
+}
+
+static void destroy_shm_ximage(GP_Backend *self)
+{
+	struct x11_priv *x11 = GP_BACKEND_PRIV(self); 
+	
+	XShmDetach(x11->dpy, &x11->shminfo);
+	shmdt(x11->shminfo.shmaddr);
+	shmctl(x11->shminfo.shmid, IPC_RMID, 0);
+	XDestroyImage(x11->img);
+}
+
+#else
+
+static int create_shm_ximage(GP_Backend GP_UNUSED(*self),
+                             GP_Size GP_UNUSED(w), GP_Size GP_UNUSED(h))
+{
+	return 1;
+}
+
+static void destroy_shm_ximage(GP_Backend GP_UNUSED(*self))
+{
+	GP_WARN("Stub called");
+}
+
+#endif /* HAVE_X_SHM */
+
+static int create_ximage(GP_Backend *self, GP_Size w, GP_Size h)
+{
+	struct x11_priv *x11 = GP_BACKEND_PRIV(self); 
+	enum GP_PixelType pixel_type;
+	int depth;
+
+	match_pixel_type(x11, &pixel_type, &depth);
+	
 	if (pixel_type == GP_PIXEL_UNKNOWN) {
 		GP_DEBUG(1, "Unknown pixel type");
 		return 1;
@@ -233,23 +359,32 @@ static int create_ximage(GP_Backend *self, GP_Size w, GP_Size h)
 		return 1;
 	}
 
+	x11->shm_flag = 0;
+
 	x11->img->data = (char*)self->context->pixels;
+	
 	return 0;
 }
 
 static void destroy_ximage(GP_Backend *self)
 {
 	struct x11_priv *x11 = GP_BACKEND_PRIV(self); 
-	
+
 	GP_ContextFree(self->context);
 	x11->img->data = NULL;
 	XDestroyImage(x11->img);
 }
 
+
 static int resize_ximage(GP_Backend *self, int w, int h)
 {
 	struct x11_priv *x11 = GP_BACKEND_PRIV(self); 
 	XImage *img;
+
+	if (x11->shm_flag) {
+		GP_WARN("UNIMPLEMENTED");
+		return 1;
+	}
 
 	/* Create new X image */
 	img = XCreateImage(x11->dpy, x11->vis, x11->scr_depth, ZPixmap, 0, NULL,
@@ -511,14 +646,14 @@ GP_Backend *GP_BackendX11Init(const char *display, int x, int y,
 		GP_DEBUG(1, "Failed to create window");
 		goto err1;
 	}
-	
-	if (create_ximage(backend, w, h))
-		goto err1;
 
+	//if (create_shm_ximage(backend, w, h))
+		if (create_ximage(backend, w, h))
+			goto err1;
 
 	XFlush(x11->dpy);
 	
-	x11->resized_flag  = 0;
+	x11->resized_flag = 0;
 
 	backend->name          = "X11";
 	backend->Flip          = x11_flip;
