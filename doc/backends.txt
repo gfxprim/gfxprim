@@ -1,19 +1,21 @@
 Drawing Backends
-----------------
+================
 
-Drawing backends provide means to draw into computer screen or into an window
+Drawing backends provide means to draw into computer screen or into a window
 inside of running operating system. Instead of having one unified
 initialization interface each backend has it's specific function and semantics
 but once backend is initialized the backend structure provides unified API for 
 controlling the drawing.
 
-So far there are three backends implemented, Linux mmaped frame-buffer, libSDL
-and X11 backend.
+So far there are backends for Linux mmaped frame-buffer, libSDL and X11.
 
 For example usage see backend link:example_backend.html[example].
 
 Initialization functions
-~~~~~~~~~~~~~~~~~~~~~~~
+------------------------
+
+Linux Framebuffer
+~~~~~~~~~~~~~~~~~
 
 [source,c]
 -------------------------------------------------------------------------------
@@ -28,6 +30,10 @@ If flag is set console KBD driver is used to feed keystrokes into the event
 queue, otherwise no events are generated and you are expected to initialize
 input event driver in order to get keystrokes and/or pointer events.
 
+
+SDL
+~~~
+
 [source,c]
 -------------------------------------------------------------------------------
 enum GP_BackendSDLFlags {
@@ -40,10 +46,10 @@ GP_Backend *GP_BackendSDLInit(GP_Size w, GP_Size h,
                               const char *caption);
 -------------------------------------------------------------------------------
 
-Initialize SDL as an backend driver. The backend is thread safe as all the
+Initialize 'SDL' as an backend driver. The backend is thread safe as all the
 operations are guarded by locks.
 
-You can't initialize more than one backend at a time, which is inherited SDL
+You can't initialize more than one backend at a time, which is inherited 'SDL'
 limitation. If you call the initialization for a second time, you will get a
 pointer to already running backend.
 
@@ -57,6 +63,26 @@ The caption is window caption.
 
 And finally flags may change the SDL to go to full-screen mode or make the
 window resizable.
+
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <backends/GP_SDL_Context.h>
+
+int GP_ContextFromSurface(GP_Context *c, const SDL_Surface *surf);
+-------------------------------------------------------------------------------
+
+This function allows you to mix 'SDL' and 'GFXprim' code. The functions
+initializes the context from 'SDL' surface using the pixel buffer from surface
+as pixel buffer for the context.
+
+Function returns zero on succes and non-zero on failure (There is no GFXprim
+pixel type to match given surface).
+
+For example usage see 'SDL' glue link:example_SDL_glue.html[example].
+
+X server
+~~~~~~~~
 
 [source,c]
 -------------------------------------------------------------------------------
@@ -73,9 +99,9 @@ GP_Backend *GP_BackendX11Init(const char *display, int x, int y,
                               enum GP_BackendX11Flags flags);
 -------------------------------------------------------------------------------
 
-Returns pointer to initialized X11 backend or in case of failure NULL.
+Returns pointer to initialized X11 backend or in case of failure 'NULL'.
 
-When display is NULL default display is used (which is what you want most of the
+When display is 'NULL' default display is used (which is what you want most of the
 time).
 
 This backend feeds key events into global input queue.
