@@ -134,9 +134,11 @@ static void backend_x11_help(FILE *help, const char *err)
 
 	fprintf(help, "X11 backend\n"
 	              "--------------\n"
-	              "X11:WxH:[ROOT_WIN]\n\n"
-		      "ROOT_WIN - starts the backend in the root window\n"
-		      "           (w and h, if set, are ignored)\n");
+	              "X11:[WxH]:[ROOT_WIN]:[CREATE_ROOT]\n\n"
+		      "ROOT_WIN    - starts the backend in the root window\n"
+		      "              (w and h, if set, are ignored)\n"
+		      "CREATE_ROOT - starts the backend in newly created\n"
+		      "              root window (w and h, if set, are ignored)\n");
 }
 
 static int x11_params_to_flags(const char *param, GP_Size *w, GP_Size *h,
