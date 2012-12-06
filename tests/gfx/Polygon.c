@@ -117,7 +117,24 @@ struct testcase testcase_line_vert_3px = {
 	}
 };
 
-struct testcase testcase_line_3px = {
+struct testcase testcase_line_horiz_3px = {
+	.edge_count = 2,
+	.edges = {
+		3, 1,
+		1, 0,
+	},
+	.w = 5,
+	.h = 5,
+	.pixmap = {
+		0, 0, 0, 0, 0,
+		0, 1, 1, 1, 0,
+		0, 0, 0, 0, 0,
+		0, 0, 0, 0, 0,
+		0, 0, 0, 0, 0,
+	}
+};
+
+struct testcase testcase_line_4px = {
 	.edge_count = 2,
 	.edges = {
 		1, 1,
@@ -130,6 +147,23 @@ struct testcase testcase_line_3px = {
 		0, 1, 0, 0, 0,
 		0, 1, 1, 0, 0,
 		0, 0, 1, 0, 0,
+		0, 0, 0, 0, 0,
+	}
+};
+
+struct testcase testcase_line_3px = {
+	.edge_count = 2,
+	.edges = {
+		1, 1,
+		3, 3,
+	},
+	.w = 5,
+	.h = 5,
+	.pixmap = {
+		0, 0, 0, 0, 0,
+		0, 1, 0, 0, 0,
+		0, 0, 1, 0, 0,
+		0, 0, 0, 1, 0,
 		0, 0, 0, 0, 0,
 	}
 };
@@ -152,6 +186,45 @@ struct testcase testcase_2x2_square = {
 	}
 };
 
+struct testcase testcase_3x3_square = {
+	.edge_count = 4,
+	.edges = {
+		1, 1,
+		3, 1,
+		3, 3,
+		1, 3,
+	},
+	.w = 5,
+	.h = 5,
+	.pixmap = {
+		0, 0, 0, 0, 0,
+		0, 1, 1, 1, 0,
+		0, 1, 1, 1, 0,
+		0, 1, 1, 1, 0,
+		0, 0, 0, 0, 0,
+	}
+};
+
+struct testcase testcase_4x4_square = {
+	.edge_count = 4,
+	.edges = {
+		1, 1,
+		4, 1,
+		4, 4,
+		1, 4,
+	},
+	.w = 6,
+	.h = 6,
+	.pixmap = {
+		0, 0, 0, 0, 0, 0,
+		0, 1, 1, 1, 1, 0,
+		0, 1, 1, 1, 1, 0,
+		0, 1, 1, 1, 1, 0,
+		0, 1, 1, 1, 1, 0,
+		0, 0, 0, 0, 0, 0,
+	}
+};
+
 struct testcase testcase_4px_triangle = {
 	.edge_count = 3,
 	.edges = {
@@ -169,6 +242,23 @@ struct testcase testcase_4px_triangle = {
 	}
 };
 
+struct testcase testcase_6px_triangle = {
+	.edge_count = 3,
+	.edges = {
+		1, 1,
+		1, 3,
+		3, 3,
+	},
+	.w = 5,
+	.h = 5,
+	.pixmap = {
+		0, 0, 0, 0, 0,
+		0, 1, 0, 0, 0,
+		0, 1, 1, 0, 0,
+		0, 1, 1, 1, 0,
+		0, 0, 0, 0, 0,
+	}
+};
 
 static int test_1_edge(void)
 {
@@ -185,9 +275,19 @@ static int test_line_vert_3px(void)
 	return test_polygon(&testcase_line_vert_3px);
 }
 
+static int test_line_horiz_3px(void)
+{
+	return test_polygon(&testcase_line_horiz_3px);
+}
+
 static int test_line_3px(void)
 {
 	return test_polygon(&testcase_line_3px);
+}
+
+static int test_line_4px(void)
+{
+	return test_polygon(&testcase_line_4px);
 }
 
 static int test_2x2_square(void)
@@ -195,9 +295,24 @@ static int test_2x2_square(void)
 	return test_polygon(&testcase_2x2_square);
 }
 
+static int test_3x3_square(void)
+{
+	return test_polygon(&testcase_3x3_square);
+}
+
+static int test_4x4_square(void)
+{
+	return test_polygon(&testcase_4x4_square);
+}
+
 static int test_4px_triangle(void)
 {
 	return test_polygon(&testcase_4px_triangle);
+}
+
+static int test_6px_triangle(void)
+{
+	return test_polygon(&testcase_6px_triangle);
 }
 
 const struct tst_suite tst_suite = {
@@ -205,10 +320,15 @@ const struct tst_suite tst_suite = {
 	.tests = {
 		{.name = "1 Edge Polygon", .tst_fn = test_1_edge},
 		{.name = "5 Edges 1px Polygon", .tst_fn = test_5_edges_1px},
-		{.name = "2x2 Square Polygon", .tst_fn = test_2x2_square},
-		{.name = "Vert Line 3px Polygon", .tst_fn = test_line_vert_3px},
+		{.name = "Vertical Line 3px Polygon", .tst_fn = test_line_vert_3px},
+		{.name = "Horizonval Line 3px Polygon", .tst_fn = test_line_horiz_3px},
 		{.name = "Line 3px Polygon", .tst_fn = test_line_3px},
+		{.name = "Line 4px Polygon", .tst_fn = test_line_4px},
+		{.name = "2x2 Square Polygon", .tst_fn = test_2x2_square},
+		{.name = "3x3 Square Polygon", .tst_fn = test_3x3_square},
+		{.name = "4x4 Square Polygon", .tst_fn = test_4x4_square},
 		{.name = "Triangle 4px Polygon", .tst_fn = test_4px_triangle},
+		{.name = "Triangle 6px Polygon", .tst_fn = test_6px_triangle},
 		{.name = NULL}
 	}
 };
