@@ -24,13 +24,13 @@
 
 #include "common.h"
 
-static void dump_buffer(const char *pattern, int x, int y)
+static void dump_buffer(const char *pattern, int w, int h)
 {
-	int i, j;
+	int x, y;
 
-	for (i = 0; i < y; i++) {
-		for (j = 0; j < x; j++)
-			printf("%2x ", pattern[j + i * y]);
+	for (y = 0; y < h; y++) {
+		for (x = 0; x < w; x++)
+			printf("%2x ", pattern[x + y * w]);
 		printf("\n");
 	}
 }
@@ -51,7 +51,7 @@ int compare_buffers(const char *pattern, const GP_Context *c)
 	for (x = 0; x < c->w; x++) {
 		for (y = 0; y < c->h; y++) {
 			if (pattern[x + y * c->h] !=
-			    ((char*)c->pixels)[x + y * c->h]) {
+			    ((char*)c->pixels)[x + y * c->w]) {
 				err++;
 			}
 		}
