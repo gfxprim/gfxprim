@@ -128,22 +128,33 @@ void GP_FillPolygon_Raw(GP_Context *context, unsigned int vertex_count,
 	struct GP_PolygonEdge *edge;
 	struct GP_PolygonEdge edges[vertex_count];
 
+
+	/* Build edge structures for each vertex-vertex connection.
+	 * NOTE: Each vertex is in fact in the middle of the pixel, so
+	 * add 0.5 to both coordinates.
+	 */
 	int i;
 	for (i = 0; i < (int)vertex_count - 1; i++) {
 		edge = edges + i;
-		GP_InitEdge(edge, xy[2*i], xy[2*i + 1],
-			xy[2*i + 2], xy[2*i + 3]);
+		GP_InitEdge(edge,
+			0.5f + xy[2*i], 0.5f + xy[2*i + 1],
+			0.5f + xy[2*i + 2], 0.5f + xy[2*i + 3]);
 		ymin = fminf(ymin, edge->ymin);
 		ymax = fmaxf(ymax, edge->ymax);
 	}
 
 	/* the last edge (from the last point to the first one) */
 	edge = edges + vertex_count - 1;
-	GP_InitEdge(edge, xy[2*i], xy[2*i + 1], xy[0], xy[1]);
+	GP_InitEdge(edge,
+		0.5f + xy[2*i], 0.5f + xy[2*i + 1],
+		0.5f + xy[0], 0.5f + xy[1]);
 
+	/* For each scanline, compute intersections with all edges
+	 * and draw a horizontal line segment between the intersections.
+	 */
 	float intersections[vertex_count];
 	int y;
-	for (y = (int) ymin; y < (int) ymax; y++) {
+	for (y = (int) ymin; y <= (int) ymax; y++) {
 		int inter_count = GP_ComputeScanline(intersections, edges, vertex_count, y + 0.5f);
 		for (i = 0; i < inter_count; i+=2) {
 			GP_HLine_Raw(context, intersections[i], intersections[i + 1], y, pixel);
@@ -176,10 +187,10 @@ void GP_Polygon_Raw(GP_Context *context, unsigned int vertex_count,
 
 	GP_Coord prev_x = xy[2 * vertex_count - 2];
 	GP_Coord prev_y = xy[2 * vertex_count - 1];
-	
+
 	for (i = 0; i < vertex_count; i++) {
 		GP_Coord x = xy[2 * i];
-		GP_Coord y = xy[2 * i + 1]; 
+		GP_Coord y = xy[2 * i + 1];
 
 		GP_Line_Raw(context, prev_x, prev_y, x, y, pixel);
 
@@ -196,12 +207,12 @@ void GP_Polygon(GP_Context *context, unsigned int vertex_count,
 
 	GP_Coord prev_x = xy[2 * vertex_count - 2];
 	GP_Coord prev_y = xy[2 * vertex_count - 1];
-	
+
 	GP_TRANSFORM_POINT(context, prev_x, prev_y);
 
 	for (i = 0; i < vertex_count; i++) {
 		GP_Coord x = xy[2 * i];
-		GP_Coord y = xy[2 * i + 1]; 
+		GP_Coord y = xy[2 * i + 1];
 
 		GP_TRANSFORM_POINT(context, x, y);
 
