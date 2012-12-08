@@ -31,69 +31,24 @@
 
 #include "common.h"
 
-static const char line_5_5_5_5_11x11[] = {
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0,
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+struct testcase {
+	/* line description */
+	GP_Coord x0;
+	GP_Coord y0;
+	GP_Coord x1;
+	GP_Coord y1;
+
+	/* expected result */
+	GP_Size w, h;
+	const char pixmap[];
 };
 
-static const char line_1_5_9_5_11x11[] = {
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0,
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-};
-
-static const char line_0_0_10_10_11x11[] = {
-	1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0,
-	0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0,
-	0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0,
-	0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0,
-	0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0,
-	0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0,
-	0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0,
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0,
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-};
-
-static const char line_0_0_11_5_11x11[] = {
-	1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0,
-	0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0,
-	0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0,
-	0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0,
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-};
-
-static int test_line(const char *pattern, GP_Size w, GP_Size h,
-                     GP_Coord x0, GP_Coord y0, GP_Coord x1, GP_Coord y1)
+static int test_line(const struct testcase *t)
 {
 	GP_Context *c;
 	int err;
 
-	c = GP_ContextAlloc(w, h, GP_PIXEL_G8);
+	c = GP_ContextAlloc(t->w, t->h, GP_PIXEL_G8);
 
 	if (c == NULL) {
 		tst_err("Failed to allocate context");
@@ -103,51 +58,142 @@ static int test_line(const char *pattern, GP_Size w, GP_Size h,
 	/* zero the pixels buffer */
 	memset(c->pixels, 0, c->w * c->h);
 
-	GP_Line(c, x0, y0, x1, y1, 1);
+	GP_Line(c, t->x0, t->y0, t->x1, t->y1, 1);
 
-	err = compare_buffers(pattern, c);
+	err = compare_buffers(t->pixmap, c);
 
-	if (err) {
-		tst_msg("Patterns are different");
+	if (err)
 		return TST_FAILED;
-	}
 
 	return TST_SUCCESS;
 }
 
-static int test_line_5_5_5_5(void)
-{
-	return test_line(line_5_5_5_5_11x11, 11, 11, 5, 5, 5, 5);
-}
+static struct testcase testcase_line_1px = {
+	.x0 = 1,
+	.y0 = 1,
+	.x1 = 1,
+	.y1 = 1,
 
-static int test_line_1_5_9_5(void)
-{
-	return test_line(line_1_5_9_5_11x11, 11, 11, 1, 5, 9, 5);
-}
+	.w = 3,
+	.h = 3,
 
-static int test_line_0_0_10_10(void)
-{
-	return test_line(line_0_0_10_10_11x11, 11, 11, 0, 0, 10, 10);
-}
+	.pixmap = {
+		0, 0, 0,
+		0, 1, 0, 
+		0, 0, 0,
+	}
+};
 
-static int test_line__1__1_11_11(void)
-{
-	return test_line(line_0_0_10_10_11x11, 11, 11, -1, -1, 11, 11);
-}
+static struct testcase testcase_line_horiz = {
+	.x0 = 2,
+	.y0 = 2,
+	.x1 = 8,
+	.y1 = 2,
 
-static int test_line_0_0_11_5(void)
-{
-	return test_line(line_0_0_11_5_11x11, 11, 11, 0, 0, 11, 5);
-}
+	.w = 11,
+	.h = 5,
+
+	.pixmap = {
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+		0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0,
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	}
+};
+
+static struct testcase testcase_line_vert = {
+	.x0 = 2,
+	.y0 = 2,
+	.x1 = 2,
+	.y1 = 8,
+
+	.w = 5,
+	.h = 11,
+
+	.pixmap = {
+		0, 0, 0, 0, 0,
+		0, 0, 0, 0, 0,
+		0, 0, 1, 0, 0,
+		0, 0, 1, 0, 0,
+		0, 0, 1, 0, 0,
+		0, 0, 1, 0, 0,
+		0, 0, 1, 0, 0,
+		0, 0, 1, 0, 0,
+		0, 0, 1, 0, 0,
+		0, 0, 0, 0, 0,
+		0, 0, 0, 0, 0,
+	}
+};
+
+static struct testcase testcase_line_45 = {
+	.x0 = 0,
+	.y0 = 0,
+	.x1 = 10,
+	.y1 = 10,
+
+	.w = 11,
+	.h = 11,
+
+	.pixmap = {
+		1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+		0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+		0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0,
+		0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0,
+		0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0,
+		0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0,
+		0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0,
+		0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0,
+		0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0,
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0,
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+	}
+};
+
+static struct testcase testcase_line_15 = {
+	.x0 = 0,
+	.y0 = 1,
+	.x1 = 11,
+	.y1 = 6,
+
+	.w = 11,
+	.h = 8,
+
+	.pixmap = {
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+		1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+		0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0,
+		0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0,
+		0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0,
+		0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0,
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	}
+};
 
 const struct tst_suite tst_suite = {
 	.suite_name = "GFX Line Testsuite",
 	.tests = {
-		{.name = "Line 5x5 - 5x5", .tst_fn = test_line_5_5_5_5},
-		{.name = "Line 1x5 - 9x5", .tst_fn = test_line_1_5_9_5},
-		{.name = "Line 0x0 - 10x10", .tst_fn = test_line_0_0_10_10},
-		{.name = "Line 0x0 - 11x5", .tst_fn = test_line_0_0_11_5},
-		{.name = "Line -1x-1 - 11x11", .tst_fn = test_line__1__1_11_11},
+		{.name = "Line 1px",
+		 .tst_fn = test_line,
+		 .data = &testcase_line_1px},
+
+		{.name = "Line Horizontal",
+		 .tst_fn = test_line,
+		 .data = &testcase_line_horiz},
+		
+		{.name = "Line Vertical",
+		 .tst_fn = test_line,
+		 .data = &testcase_line_vert},
+		
+		{.name = "Line 45 degrees",
+		 .tst_fn = test_line,
+		 .data = &testcase_line_45},
+		
+		{.name = "Line 15 degrees",
+		 .tst_fn = test_line,
+		 .data = &testcase_line_15},
+
 		{.name = NULL}
 	}
 };
