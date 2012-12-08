@@ -181,7 +181,7 @@ void SWIG_exception(const char *msg);
  * constants.
  */
 #define GP_ASSERT(check_cond_, ...) \
-	GP_GENERAL_CHECK(check_cond_, "asserion failed: ", ##__VA_ARGS__);
+	GP_GENERAL_CHECK(check_cond_, "assertion failed: ", ##__VA_ARGS__);
 
 /*
  * Perform a runtime check, on failure abort and print a message.
