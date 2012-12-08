@@ -16,10 +16,10 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2010 Jiri "BlueBear" Dluhos                            *
+ * Copyright (C) 2009-2012 Jiri "BlueBear" Dluhos                            *
  *                         <jiri.bluebear.dluhos@gmail.com>                  *
  *                                                                           *
- * Copyright (C) 2009-2011 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
@@ -31,33 +31,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-#ifdef __cplusplus
-
-/*-------------------------------------------------------------------------*/
-/* C++-specific code */
-/*-------------------------------------------------------------------------*/
-
-#include <algorithm>
-#include <cmath>
-
-/* use STL algorithms when we already have them */
-#define GP_MIN(a, b)	std::min(a, b)
-#define GP_MAX(a, b)	std::max(a, b)
-#define GP_SWAP(a, b)	std::swap(a, b)
-#define GP_ABS(a)	std::abs(a)
-
-/* C++ uses templates instead of typeof */
-template <typename t>
-int GP_SIGN(t x)
-{
-	return (x > 0) ? 1 : ((x < 0) ? -1 : 0);
-}
-
-#else	/* __cplusplus */
-
-/*-------------------------------------------------------------------------*/
-/* plain C-specific code */
-/*-------------------------------------------------------------------------*/
+#ifndef __cplusplus
 
 /*
  * Returns a minimum of the two numbers.
@@ -101,10 +75,6 @@ int GP_SIGN(t x)
 	typeof(a) _a = a; \
 	(_a > 0) ? 1 : ((_a < 0) ? -1 : 0); \
 })
-
-/*-------------------------------------------------------------------------*/
-/* end of C/C++-specific code */
-/*-------------------------------------------------------------------------*/
 
 #endif /* __cplusplus */
 
