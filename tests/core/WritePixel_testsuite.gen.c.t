@@ -26,7 +26,7 @@
 
 #include <stdio.h>
 
-#include "GP_WritePixel.h"
+#include <core/GP_WritePixel.h>
 
 #include "tst_test.h"
 

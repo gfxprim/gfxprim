@@ -1,10 +1,6 @@
 #
 # This is makefile rule for generating C sources from python templates
 #
-ifndef LIBNAME
-$(error LIBNAME not defined, fix your library Makefile)
-endif
-
 ifndef GENHEADERS
 GENHEADERS=
 endif
