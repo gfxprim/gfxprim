@@ -260,75 +260,53 @@ struct testcase testcase_6px_triangle = {
 	}
 };
 
-static int test_1_edge(void)
-{
-	return test_polygon(&testcase_1_edge);
-}
-
-static int test_5_edges_1px(void)
-{
-	return test_polygon(&testcase_5_edges_1px);
-}
-
-static int test_line_vert_3px(void)
-{
-	return test_polygon(&testcase_line_vert_3px);
-}
-
-static int test_line_horiz_3px(void)
-{
-	return test_polygon(&testcase_line_horiz_3px);
-}
-
-static int test_line_3px(void)
-{
-	return test_polygon(&testcase_line_3px);
-}
-
-static int test_line_4px(void)
-{
-	return test_polygon(&testcase_line_4px);
-}
-
-static int test_2x2_square(void)
-{
-	return test_polygon(&testcase_2x2_square);
-}
-
-static int test_3x3_square(void)
-{
-	return test_polygon(&testcase_3x3_square);
-}
-
-static int test_4x4_square(void)
-{
-	return test_polygon(&testcase_4x4_square);
-}
-
-static int test_4px_triangle(void)
-{
-	return test_polygon(&testcase_4px_triangle);
-}
-
-static int test_6px_triangle(void)
-{
-	return test_polygon(&testcase_6px_triangle);
-}
-
 const struct tst_suite tst_suite = {
 	.suite_name = "Polygon Testsuite",
 	.tests = {
-		{.name = "1 Edge Polygon", .tst_fn = test_1_edge},
-		{.name = "5 Edges 1px Polygon", .tst_fn = test_5_edges_1px},
-		{.name = "Vertical Line 3px Polygon", .tst_fn = test_line_vert_3px},
-		{.name = "Horizonval Line 3px Polygon", .tst_fn = test_line_horiz_3px},
-		{.name = "Line 3px Polygon", .tst_fn = test_line_3px},
-		{.name = "Line 4px Polygon", .tst_fn = test_line_4px},
-		{.name = "2x2 Square Polygon", .tst_fn = test_2x2_square},
-		{.name = "3x3 Square Polygon", .tst_fn = test_3x3_square},
-		{.name = "4x4 Square Polygon", .tst_fn = test_4x4_square},
-		{.name = "Triangle 4px Polygon", .tst_fn = test_4px_triangle},
-		{.name = "Triangle 6px Polygon", .tst_fn = test_6px_triangle},
+		{.name = "1 Edge Polygon",
+		 .tst_fn = test_polygon,
+		 .data = &testcase_1_edge},
+
+		{.name = "5 Edges 1px Polygon",
+		.tst_fn = test_polygon,
+		.data = &testcase_5_edges_1px},
+
+		{.name = "Vertical Line 3px Polygon",
+		 .tst_fn = test_polygon,
+		 .data = &testcase_line_vert_3px},
+
+		{.name = "Horizontal Line 3px Polygon",
+		 .tst_fn = test_polygon,
+		 .data = &testcase_line_horiz_3px},
+
+		{.name = "Line 3px Polygon",
+		 .tst_fn = test_polygon,
+		 .data = &testcase_line_3px},
+
+		{.name = "Line 4px Polygon",
+		 .tst_fn = test_polygon,
+		 .data = &testcase_line_4px},
+
+		{.name = "2x2 Square Polygon",
+		 .tst_fn = test_polygon,
+		 .data = &testcase_2x2_square},
+
+		{.name = "3x3 Square Polygon",
+		 .tst_fn = test_polygon,
+		 .data = &testcase_3x3_square},
+
+		{.name = "4x4 Square Polygon",
+		 .tst_fn = test_polygon,
+		 .data = &testcase_4x4_square},
+
+		{.name = "Triangle 4px Polygon",
+		 .tst_fn = test_polygon,
+		 .data = &testcase_4px_triangle},
+
+		{.name = "Triangle 6px Polygon",
+		 .tst_fn = test_polygon,
+		 .data = &testcase_6px_triangle},
+		
 		{.name = NULL}
 	}
 };
