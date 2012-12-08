@@ -53,29 +53,10 @@ void GP_Circle(GP_Context *context, GP_Coord xcenter, GP_Coord ycenter,
 	GP_Circle_Raw(context, xcenter, ycenter, r, pixel);
 }
 
-#include "algo/FillCircle.algo.h"
+/* #include "algo/FillCircle.algo.h" */
 
 /* Generate drawing functions for various bit depths. */
-GP_DEF_FILL_FN_PER_BPP(GP_FillCircle_Raw, DEF_FILLCIRCLE_FN)
-
-void GP_FillCircle_Raw(GP_Context *context, GP_Coord xcenter, GP_Coord ycenter,
-                       GP_Size r, GP_Pixel pixel)
-{
-	GP_CHECK_CONTEXT(context);
-
-	GP_FN_PER_BPP_CONTEXT(GP_FillCircle_Raw, context, context,
-	                      xcenter, ycenter, r, pixel);
-}
-
-void GP_FillCircle(GP_Context *context, GP_Coord xcenter, GP_Coord ycenter,
-                   GP_Size r, GP_Pixel pixel)
-{
-	GP_CHECK_CONTEXT(context);
-	
-	GP_TRANSFORM_POINT(context, xcenter, ycenter);
-	
-	GP_FillCircle_Raw(context, xcenter, ycenter, r, pixel);
-}
+//GP_DEF_FILL_FN_PER_BPP(GP_FillCircle_Raw, DEF_FILLCIRCLE_FN)
 
 void GP_Ring_Raw(GP_Context *context, GP_Coord xcenter, GP_Coord ycenter,
                  GP_Size r1, GP_Size r2, GP_Pixel pixel)
