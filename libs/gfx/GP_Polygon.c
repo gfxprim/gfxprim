@@ -156,6 +156,9 @@ void GP_FillPolygon_Raw(GP_Context *context, unsigned int vertex_count,
 	int y;
 	for (y = (int) ymin; y <= (int) ymax; y++) {
 		int inter_count = GP_ComputeScanline(intersections, edges, vertex_count, y + 0.5f);
+
+		GP_ASSERT(inter_count % 2 == 0, "odd number of intersections!");
+
 		for (i = 0; i < inter_count; i+=2) {
 			GP_HLine_Raw(context, intersections[i], intersections[i + 1], y, pixel);
 		}
