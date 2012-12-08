@@ -268,6 +268,18 @@ int tst_err(const char *fmt, ...)
 	return ret;
 }
 
+static int job_run(struct tst_job *job)
+{
+	int (*fn1)(void) = job->test->tst_fn;
+	int (*fn2)(void*) = job->test->tst_fn;
+	void *data = job->test->data;
+
+	if (data)
+		return fn2(data);
+
+	return fn1();
+}
+
 /*
  * Run benchmark job and compute result
  */
@@ -282,7 +294,7 @@ static int tst_job_benchmark(struct tst_job *job)
 	int ret;
 		
 	/* Warm up */
-	ret = job->test->tst_fn();
+	ret = job_run(job);
 	
 	if (ret)
 		return ret;
@@ -291,7 +303,7 @@ static int tst_job_benchmark(struct tst_job *job)
 	for (i = 0; i < iter; i++) {
 		clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &cputime_start);
 		
-		ret = job->test->tst_fn();
+		ret = job_run(job);
 	
 		if (ret)
 			return ret;
@@ -404,7 +416,7 @@ void tst_job_run(struct tst_job *job)
 	if (job->test->bench_iter)
 		ret = tst_job_benchmark(job);
 	else
-		ret = job->test->tst_fn();
+		ret = job_run(job);
 
 	if (job->test->flags & TST_CHECK_MALLOC) {
 		tst_malloc_check_stop();

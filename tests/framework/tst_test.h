@@ -65,8 +65,13 @@ struct tst_test {
 	 * data are filled.
 	 */
 	unsigned int bench_iter;
+
 	/* test function */
-	int (*tst_fn)(void);
+	void *tst_fn;
+
+	/* test private data pointer */
+	void *data;
+
 	/* time limit in seconds 0 == unlimited */
 	unsigned int timeout;
 	/* test flags */
