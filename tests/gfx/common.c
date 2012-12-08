@@ -50,7 +50,7 @@ int compare_buffers(const char *pattern, const GP_Context *c)
 
 	for (x = 0; x < c->w; x++) {
 		for (y = 0; y < c->h; y++) {
-			if (pattern[x + y * c->h] !=
+			if (pattern[x + y * c->w] !=
 			    ((char*)c->pixels)[x + y * c->w]) {
 				err++;
 			}
