@@ -117,7 +117,7 @@ static void append_benchmark_json(struct tst_job *job, FILE *f)
 
 static int hack_json_start = 0;
 
-static int append_json(struct tst_job *job, FILE *f)
+int tst_log_append(struct tst_job *job, FILE *f)
 {
 	if (hack_json_start)
 		hack_json_start = 0;
@@ -152,19 +152,6 @@ static int append_json(struct tst_job *job, FILE *f)
 	fprintf(f, "\t\t}");
 
 	return 0;
-}
-
-int tst_log_append(struct tst_job *job, FILE *f, enum tst_log_fmt format)
-{
-	switch (format) {
-	case TST_LOG_JSON:
-		return append_json(job, f);
-	break;
-	default:
-		return 1;
-	}
-
-	return 1;
 }
 
 static void write_system_info_json(FILE *f)
@@ -203,7 +190,7 @@ static void write_system_info_json(FILE *f)
 	fprintf(f, "\t},\n");
 }
 
-FILE *open_json(const struct tst_suite *suite, const char *path)
+FILE *tst_log_open(const struct tst_suite *suite, const char *path)
 {
 	FILE *f;
 
@@ -222,35 +209,8 @@ FILE *open_json(const struct tst_suite *suite, const char *path)
 	return f;
 }
 
-FILE *tst_log_open(const struct tst_suite *suite, const char *path,
-                   enum tst_log_fmt format)
-{
-	switch (format) {
-	case TST_LOG_JSON:
-		return open_json(suite, path);
-	break;
-	default:
-		return NULL;
-	}
-
-	return NULL;
-}
-
-static int close_json(FILE *f)
+int tst_log_close(FILE *f)
 {
 	fprintf(f, "\n\t]\n}\n");
 	return fclose(f);
-}
-
-int tst_log_close(FILE *f, enum tst_log_fmt format)
-{
-	switch (format) {
-	case TST_LOG_JSON:
-		return close_json(f);
-	break;
-	default:
-		return 1;
-	}
-
-	return 1;
 }

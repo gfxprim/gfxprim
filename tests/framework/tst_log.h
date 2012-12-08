@@ -34,15 +34,10 @@
 struct tst_suite;
 struct tst_job;
 
-enum tst_log_fmt {
-	TST_LOG_JSON,
-};
+FILE *tst_log_open(const struct tst_suite *suite, const char *path);
 
-FILE *tst_log_open(const struct tst_suite *suite, const char *path,
-                   enum tst_log_fmt format);
+int tst_log_append(struct tst_job *job, FILE *f);
 
-int tst_log_append(struct tst_job *job, FILE *f, enum tst_log_fmt format);
-
-int tst_log_close(FILE *f, enum tst_log_fmt format);
+int tst_log_close(FILE *f);
 
 #endif /* TST_LOG_H */
