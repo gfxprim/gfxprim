@@ -37,10 +37,33 @@ static void dump_buffer(const char *pattern, int w, int h)
 
 void dump_buffers(const char *pattern, const GP_Context *c)
 {
-	printf("Expected pattern\n");
+	printf("Expected pattern:\n");
 	dump_buffer(pattern, c->w, c->h);
-	printf("Rendered pattern\n");
+	printf("Rendered pattern:\n");
 	dump_buffer((char*)c->pixels, c->w, c->h);
+	printf("Difference:\n");
+
+	unsigned int x, y;
+
+	for (y = 0; y < c->h; y++) {
+		for (x = 0; x < c->w; x++) {
+			unsigned int idx = x + y * c->w;
+			char p = ((char*)c->pixels)[idx];
+
+			if (pattern[idx] != p) { 
+				/* TODO: we expect background to be 0 */	
+				if (p == 0)
+					printf(" x ");
+				else
+					printf(" * ");
+			} else {
+				printf("%2x ", pattern[idx]);
+			}
+
+		}
+
+		printf("\n");
+	}
 }
 
 int compare_buffers(const char *pattern, const GP_Context *c)
@@ -50,10 +73,10 @@ int compare_buffers(const char *pattern, const GP_Context *c)
 
 	for (x = 0; x < c->w; x++) {
 		for (y = 0; y < c->h; y++) {
-			if (pattern[x + y * c->w] !=
-			    ((char*)c->pixels)[x + y * c->w]) {
+			unsigned int idx = x + y * c->w;
+			
+			if (pattern[idx] != ((char*)c->pixels)[idx])
 				err++;
-			}
 		}
 	}
 
