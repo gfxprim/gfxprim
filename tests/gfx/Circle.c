@@ -31,83 +31,23 @@
 
 #include "common.h"
 
-static const char circle_r_0_11x11[] = {
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0,
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+struct testcase {
+	/* cicle description */
+	GP_Coord x;
+	GP_Coord y;
+	GP_Size r;
+
+	/* expected result */
+	GP_Size w, h;
+	const char pixmap[];
 };
 
-static const char circle_r_1_11x11[] = {
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0,
-	0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0,
-	0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0,
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-};
-
-static const char circle_r_2_11x11[] = {
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0,
-	0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0,
-	0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0,
-	0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0,
-	0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0,
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-};
-
-static const char circle_r_3_11x11[] = {
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0,
-	0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0,
-	0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0,
-	0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0,
-	0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0,
-	0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0,
-	0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0,
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-};
-
-static const char circle_r_5_half_11x11[] = {
-	1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0,
-	0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0,
-	0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0,
-	0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0,
-	0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0,
-	0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0,
-	0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0,
-	0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0,
-	0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0,
-	0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0,
-	1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0,
-};
-
-static int test_circle(const char *pattern, GP_Size w, GP_Size h,
-                       GP_Coord x, GP_Coord y, const int r)
+static int test_circle(const struct testcase *t)
 {
 	GP_Context *c;
 	int err;
 
-	c = GP_ContextAlloc(w, h, GP_PIXEL_G8);
+	c = GP_ContextAlloc(t->w, t->h, GP_PIXEL_G8);
 
 	if (c == NULL) {
 		tst_err("Failed to allocate context");
@@ -117,63 +57,187 @@ static int test_circle(const char *pattern, GP_Size w, GP_Size h,
 	/* zero the pixels buffer */
 	memset(c->pixels, 0, c->w * c->h);
 
-	GP_Circle(c, x, y, r, 1);
+	GP_Circle(c, t->x, t->y, t->r, 1);
 
-	err = compare_buffers(pattern, c);
+	err = compare_buffers(t->pixmap, c);
 
-	if (err) {
-		tst_msg("Patterns are different");
+	if (err)
 		return TST_FAILED;
-	}
 
 	return TST_SUCCESS;
 }
 
-static int test_circle_r_0(void)
-{
-	return test_circle(circle_r_0_11x11, 11, 11, 5, 5, 0);
-}
+struct testcase testcase_circle_r_0 = {
+	.x = 2,
+	.y = 2,
+	.r = 0,
 
-static int test_circle_r_1(void)
-{
-	return test_circle(circle_r_1_11x11, 11, 11, 5, 5, 1);
-}
+	.w = 5,
+	.h = 5,
 
-static int test_circle_r_2(void)
-{
-	return test_circle(circle_r_2_11x11, 11, 11, 5, 5, 2);
-}
+	.pixmap = {
+		0, 0, 0, 0, 0,
+		0, 0, 0, 0, 0,
+		0, 0, 1, 0, 0,
+		0, 0, 0, 0, 0,
+		0, 0, 0, 0, 0,
+	}
+};
 
-static int test_circle_r_3(void)
-{
-	return test_circle(circle_r_3_11x11, 11, 11, 5, 5, 3);
-}
+struct testcase testcase_circle_r_1 = {
+	.x = 2,
+	.y = 2,
+	.r = 1,
 
-static int test_circle_r__1(void)
-{
-	return test_circle(circle_r_1_11x11, 11, 11, 5, 5, -1);
-}
+	.w = 5,
+	.h = 5,
 
-static int test_circle_r__2(void)
-{
-	return test_circle(circle_r_2_11x11, 11, 11, 5, 5, -2);
-}
+	.pixmap = {
+		0, 0, 0, 0, 0,
+		0, 0, 1, 0, 0,
+		0, 1, 0, 1, 0,
+		0, 0, 1, 0, 0,
+		0, 0, 0, 0, 0,
+	}
+};
 
-static int test_circle_r_5_half(void)
-{
-	return test_circle(circle_r_5_half_11x11, 11, 11, 0, 5, 5);
-}
+struct testcase testcase_circle_r_2 = {
+	.x = 3,
+	.y = 3,
+	.r = 2,
+
+	.w = 7,
+	.h = 7,
+
+	.pixmap = {
+		0, 0, 0, 0, 0, 0, 0,
+		0, 0, 1, 1, 1, 0, 0,
+		0, 1, 0, 0, 0, 1, 0,
+		0, 1, 0, 0, 0, 1, 0,
+		0, 1, 0, 0, 0, 1, 0,
+		0, 0, 1, 1, 1, 0, 0,
+		0, 0, 0, 0, 0, 0, 0,
+	}
+};
+
+struct testcase testcase_circle_r_3 = {
+	.x = 4,
+	.y = 4,
+	.r = 3,
+
+	.w = 9,
+	.h = 9,
+
+	.pixmap = {
+		0, 0, 0, 0, 0, 0, 0, 0, 0,
+		0, 0, 0, 1, 1, 1, 0, 0, 0,
+		0, 0, 1, 0, 0, 0, 1, 0, 0,
+		0, 1, 0, 0, 0, 0, 0, 1, 0,
+		0, 1, 0, 0, 0, 0, 0, 1, 0,
+		0, 1, 0, 0, 0, 0, 0, 1, 0,
+		0, 0, 1, 0, 0, 0, 1, 0, 0,
+		0, 0, 0, 1, 1, 1, 0, 0, 0,
+		0, 0, 0, 0, 0, 0, 0, 0, 0,
+	}
+};
+
+struct testcase testcase_circle_r_4 = {
+	.x = 5,
+	.y = 5,
+	.r = 4,
+
+	.w = 11,
+	.h = 11,
+
+	.pixmap = {
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+		0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0,
+		0, 0, 1, 1, 0, 0, 0, 1, 1, 0, 0,
+		0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0,
+		0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0,
+		0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0,
+		0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0,
+		0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 0,
+		0, 0, 1, 1, 0, 0, 0, 1, 1, 0, 0,
+		0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0,
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	}
+};
+
+struct testcase testcase_circle_r_5_clip = {
+	.x = 0,
+	.y = 5,
+	.r = 5,
+
+	.w = 11,
+	.h = 11,
+
+	.pixmap = {
+		1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0,
+		0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0,
+		0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0,
+		0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0,
+		0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0,
+		0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0,
+		0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0,
+		0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0,
+		0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0,
+		0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0,
+		1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0,
+	}
+};
+
+struct testcase testcase_circle_r_6_clip = {
+	.x = 0,
+	.y = 0,
+	.r = 6,
+
+	.w = 8,
+	.h = 8,
+
+	.pixmap = {
+		0, 0, 0, 0, 0, 0, 1, 0,
+		0, 0, 0, 0, 0, 0, 1, 0,
+		0, 0, 0, 0, 0, 0, 1, 0,
+		0, 0, 0, 0, 0, 1, 0, 0,
+		0, 0, 0, 0, 0, 1, 0, 0,
+		0, 0, 0, 1, 1, 0, 0, 0,
+		1, 1, 1, 0, 0, 0, 0, 0,
+		0, 0, 0, 0, 0, 0, 0, 0,
+	}
+};
 
 const struct tst_suite tst_suite = {
-	.suite_name = "GFX Circle Testsuite",
+	.suite_name = "Circle Testsuite",
 	.tests = {
-		{.name = "Circle r=0", .tst_fn = test_circle_r_0},
-		{.name = "Circle r=1", .tst_fn = test_circle_r_1},
-		{.name = "Circle r=2", .tst_fn = test_circle_r_2},
-		{.name = "Circle r=3", .tst_fn = test_circle_r_3},
-		{.name = "Circle r=5 half", .tst_fn = test_circle_r_5_half},
-		{.name = "Circle r=-1", .tst_fn = test_circle_r__1},
-		{.name = "Circle r=-2", .tst_fn = test_circle_r__2},
+		{.name = "Circle r=0",
+		 .tst_fn = test_circle,
+		 .data = &testcase_circle_r_0}, 
+
+		{.name = "Circle r=1",
+		 .tst_fn = test_circle,
+		 .data = &testcase_circle_r_1}, 
+
+		{.name = "Circle r=2",
+		 .tst_fn = test_circle,
+		 .data = &testcase_circle_r_2}, 
+
+		{.name = "Circle r=3",
+		 .tst_fn = test_circle,
+		 .data = &testcase_circle_r_3}, 
+
+		{.name = "Circle r=4",
+		 .tst_fn = test_circle,
+		 .data = &testcase_circle_r_4}, 
+		
+		{.name = "Circle r=5 + clipping",
+		 .tst_fn = test_circle,
+		 .data = &testcase_circle_r_5_clip}, 
+
+		{.name = "Circle r=6 + clipping",
+		 .tst_fn = test_circle,
+		 .data = &testcase_circle_r_6_clip}, 
+
 		{.name = NULL}
 	}
 };
