@@ -31,6 +31,34 @@
 #include <stdlib.h>
 #include <unistd.h>
 
+#ifdef __cplusplus
+
+/*-------------------------------------------------------------------------*/
+/* C++-specific code */
+/*-------------------------------------------------------------------------*/
+
+#include <algorithm>
+#include <cmath>
+
+/* use STL algorithms when we already have them */
+#define GP_MIN(a, b)	std::min(a, b)
+#define GP_MAX(a, b)	std::max(a, b)
+#define GP_SWAP(a, b)	std::swap(a, b)
+#define GP_ABS(a)	std::abs(a)
+
+/* C++ uses templates instead of typeof */
+template <typename t>
+int GP_SIGN(t x)
+{
+	return (x > 0) ? 1 : ((x < 0) ? -1 : 0);
+}
+
+#else	/* __cplusplus */
+
+/*-------------------------------------------------------------------------*/
+/* plain C-specific code */
+/*-------------------------------------------------------------------------*/
+
 /*
  * Returns a minimum of the two numbers.
  */
@@ -58,6 +86,29 @@
 })
 
 /*
+ * Swap a and b using an intermediate variable
+ */
+#define GP_SWAP(a, b) do { \
+	typeof(a) tmp = b; \
+	b = a;             \
+	a = tmp;           \
+} while (0)
+
+/* Determines the sign of the integer value; it is +1 if value is positive,
+ * -1 if negative, and 0 if it is zero.
+ */
+#define GP_SIGN(a) ({ \
+	typeof(a) _a = a; \
+	(_a > 0) ? 1 : ((_a < 0) ? -1 : 0); \
+})
+
+/*-------------------------------------------------------------------------*/
+/* end of C/C++-specific code */
+/*-------------------------------------------------------------------------*/
+
+#endif /* __cplusplus */
+
+/*
  * The standard likely() and unlikely() used in Kernel
  */
 #ifndef likely
@@ -75,7 +126,7 @@
 /*
  * Internal macros with common code for GP_ABORT, GP_ASSERT and GP_CHECK.
  * GP_INTERNAL_ABORT takes a message that may contain % (e.g. assert condition)
- * and prints message and calls abort(). 
+ * and prints message and calls abort().
  * GP_GENERAL_CHECK is a check with specified message prefix
  * (for assert and check)
  *
@@ -125,40 +176,22 @@ void SWIG_exception(const char *msg);
  * printing the condition and location in the source.
  * (Intended for checking for bugs within the library itself.)
  *
- * Use as either GP_ASSERT(cond), GP_ASSERT(cond, msg) or 
- * GP_ASSERT(cond, format, params...) where msg and format must be string 
+ * Use as either GP_ASSERT(cond), GP_ASSERT(cond, msg) or
+ * GP_ASSERT(cond, format, params...) where msg and format must be string
  * constants.
  */
 #define GP_ASSERT(check_cond_, ...) \
-	GP_GENERAL_CHECK(check_cond_, "asserion failed: ", ##__VA_ARGS__);
+	GP_GENERAL_CHECK(check_cond_, "assertion failed: ", ##__VA_ARGS__);
 
 /*
  * Perform a runtime check, on failure abort and print a message.
  * (Intended for user-caused errors like invalid arguments.)
  *
- * Use as either GP_CHECK(cond), GP_CHECK(cond, msg) or 
- * GP_CHECK(cond, format, params...) where msg and format must be string 
+ * Use as either GP_CHECK(cond), GP_CHECK(cond, msg) or
+ * GP_CHECK(cond, format, params...) where msg and format must be string
  * constants.
  */
 #define GP_CHECK(check_cond_, ...) \
 	GP_GENERAL_CHECK(check_cond_, "check failed: ", ##__VA_ARGS__);
-
-/*
- * Swap a and b using an intermediate variable
- */
-#define GP_SWAP(a, b) do { \
-	typeof(a) tmp = b; \
-	b = a;             \
-	a = tmp;           \
-} while (0)
-
-
-/* Determines the sign of the integer value; it is +1 if value is positive,
- * -1 if negative, and 0 if it is zero.
- */
-#define GP_SIGN(a) ({ \
-	typeof(a) _a = a; \
-	(_a > 0) ? 1 : ((_a < 0) ? -1 : 0); \
-})
 
 #endif /* CORE_GP_COMMON_H */
