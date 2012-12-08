@@ -45,6 +45,12 @@
 void FN_NAME(CONTEXT_T context, int xcenter, int ycenter, \
 	unsigned int r, PIXVAL_T pixval) \
 { \
+	/* for r == 0, circle degenerates to a point */ \
+	if (r == 0) { \
+		HLINE(context, xcenter, xcenter, ycenter, pixval); \
+		return; \
+	} \
+\
 	int x, y, error; \
 	for (x = 0, error = -r, y = r; y >= 0; y--) { \
 		while (error < 0) { \
