@@ -46,12 +46,11 @@ void FN_NAME(CONTEXT_T context, int x0, int y0, int x1, int y1, \
 			PUTPIXEL(context, x0, y0, pixval); \
 			return; \
 		} \
-		int y = y0; \
-		while (y != y1) { \
+		if (y0 > y1) \
+			GP_SWAP(y0, y1); \
+		int y; \
+		for (y = y0; y <= y1; y++) \
 			PUTPIXEL(context, x0, y, pixval); \
-			if (y0 > y1) y--; \
-			else y++; \
-		} \
 		return; \
 	} \
 \
