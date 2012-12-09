@@ -171,8 +171,42 @@ static struct testcase testcase_line_15 = {
 	}
 };
 
+static struct testcase testcase_line_clip = {
+	.x0 = -1000,
+	.y0 = -1000,
+	.x1 = 1000,
+	.y1 = 1000,
+
+	.w = 4,
+	.h = 4,
+
+	.pixmap = {
+		1, 0, 0, 0,
+		0, 1, 0, 0,
+		0, 0, 1, 0,
+		0, 0, 0, 1,
+	}
+};
+
+static struct testcase testcase_line_large_xy = {
+	.x0 = -1000000000,
+	.y0 = -1000000000,
+	.x1 = 1000000000,
+	.y1 = 1000000000,
+
+	.w = 4,
+	.h = 4,
+
+	.pixmap = {
+		1, 0, 0, 0,
+		0, 1, 0, 0,
+		0, 0, 1, 0,
+		0, 0, 0, 1,
+	}
+};
+
 const struct tst_suite tst_suite = {
-	.suite_name = "GFX Line Testsuite",
+	.suite_name = "Line Testsuite",
 	.tests = {
 		{.name = "Line 1px",
 		 .tst_fn = test_line,
@@ -193,7 +227,16 @@ const struct tst_suite tst_suite = {
 		{.name = "Line 15 degrees",
 		 .tst_fn = test_line,
 		 .data = &testcase_line_15},
+		
+		{.name = "Line clipping",
+		 .tst_fn = test_line,
+		 .data = &testcase_line_clip},
 
+		{.name = "Line large coordinates",
+		 .tst_fn = test_line,
+		 .data = &testcase_line_large_xy,
+		 .timeout = 1},
+		
 		{.name = NULL}
 	}
 };
