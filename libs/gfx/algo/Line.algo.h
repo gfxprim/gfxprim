@@ -42,10 +42,6 @@ void FN_NAME(CONTEXT_T context, int x0, int y0, int x1, int y1, \
 	PIXVAL_T pixval) \
 { \
 	if (x0 == x1) { \
-		if (y0 == y1) { \
-			PUTPIXEL(context, x0, y0, pixval); \
-			return; \
-		} \
 		if (y0 > y1) \
 			GP_SWAP(y0, y1); \
 		int y; \
