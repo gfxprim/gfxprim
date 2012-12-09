@@ -260,6 +260,49 @@ struct testcase testcase_6px_triangle = {
 	}
 };
 
+struct testcase testcase_triangle_1 = {
+	.edge_count = 3,
+	.edges = {
+		1, 4,
+		8, 2,
+		2, 8,
+	},
+	.w = 10,
+	.h = 10,
+	.pixmap = {
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+		0, 0, 0, 0, 0, 0, 0, 0, 1, 0,
+		0, 0, 0, 0, 0, 1, 1, 1, 0, 0,
+		0, 0, 1, 1, 1, 1, 1, 1, 0, 0,
+		0, 0, 0, 1, 1, 1, 1, 0, 0, 0,
+		0, 0, 0, 1, 1, 1, 0, 0, 0, 0,
+		0, 0, 0, 1, 1, 0, 0, 0, 0, 0,
+		0, 0, 0, 1, 0, 0, 0, 0, 0, 0,
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	}
+};
+
+struct testcase testcase_bow_4edges_7px = {
+	.edge_count = 4,
+	.edges = {
+		1, 1,
+		1, 3,
+		3, 1,
+		3, 3,
+	},
+	.w = 5,
+	.h = 5,
+	.pixmap = {
+		0, 0, 0, 0, 0,
+		0, 1, 0, 1, 0,
+		0, 1, 1, 1, 0,
+		0, 1, 0, 1, 0,
+		0, 0, 0, 0, 0,
+	}
+};
+
 const struct tst_suite tst_suite = {
 	.suite_name = "Polygon Testsuite",
 	.tests = {
@@ -307,6 +350,14 @@ const struct tst_suite tst_suite = {
 		 .tst_fn = test_polygon,
 		 .data = &testcase_6px_triangle},
 		
+		{.name = "Triangle 1. Polygon",
+		 .tst_fn = test_polygon,
+		 .data = &testcase_triangle_1},
+		
+		{.name = "Bow 4edges 7px",
+		 .tst_fn = test_polygon,
+		 .data = &testcase_bow_4edges_7px},
+
 		{.name = NULL}
 	}
 };
