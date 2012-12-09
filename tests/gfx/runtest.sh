@@ -13,5 +13,6 @@ export LIBC_FATAL_STDERR_=1
 LD_PRELOAD=`pwd`/../framework/libtst_preload.so LD_LIBRARY_PATH=../../build/ ./Line "$@"
 LD_PRELOAD=`pwd`/../framework/libtst_preload.so LD_LIBRARY_PATH=../../build/ ./Circle "$@"
 LD_PRELOAD=`pwd`/../framework/libtst_preload.so LD_LIBRARY_PATH=../../build/ ./FillCircle "$@"
+LD_PRELOAD=`pwd`/../framework/libtst_preload.so LD_LIBRARY_PATH=../../build/ ./Ellipse "$@"
 LD_PRELOAD=`pwd`/../framework/libtst_preload.so LD_LIBRARY_PATH=../../build/ ./CircleSeg "$@"
 LD_PRELOAD=`pwd`/../framework/libtst_preload.so LD_LIBRARY_PATH=../../build/ ./Polygon "$@"
