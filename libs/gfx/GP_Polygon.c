@@ -66,17 +66,22 @@ static void GP_InitEdge(struct GP_PolygonEdge *edge, float x1, float y1,
 	edge->dx_by_dy = dx / dy;
 }
 
+static int GP_IsEdgeHorizontal(struct GP_PolygonEdge *edge)
+{
+	return ((edge->ymax - edge->ymin) < GP_HORIZ_DY_THRESHOLD);
+}
+
 /* Computes an intersection of the specified scanline with the given edge.
  * If successful, returns 1 and stores the resulting X coordinate into result_x.
  * If failed (the edge does not intersect), 0 is returned.
- * Horizontal edges are considered to never intersect.
+ * Horizontal edges are ignored at this point (result is always 0).
  */
 static int GP_ComputeIntersection(float *result_x, struct GP_PolygonEdge *edge, float y)
 {
 	if (y<edge->ymin || y>edge->ymax)
 		return 0;		/* outside the edge Y range */
 
-	if (edge->ymax - edge->ymin < GP_HORIZ_DY_THRESHOLD)
+	if (GP_IsEdgeHorizontal(edge))
 		return 0;		/* ignore horizontal edges */
 
 	*result_x = edge->x1 + (y-edge->y1)*edge->dx_by_dy;
@@ -112,6 +117,18 @@ static int GP_ComputeScanline(float *results, struct GP_PolygonEdge *edges,
 		struct GP_PolygonEdge *edge = edges + edge_index;
 		float x;
 
+		/*
+		 * Horizontal edges match either as a whole (yielding two
+		 * intersections), or not at all.
+		 */
+		if (GP_IsEdgeHorizontal(edge)) {
+			if (fabsf(edge->ymin - y) < 0.00001f) {
+				results[result_index++] = GP_MIN(edge->x1, edge->x2);
+				results[result_index++] = GP_MAX(edge->x1, edge->x2);
+			}
+			continue;
+		}
+
 		if (GP_ComputeIntersection(&x, edge, y)) {
 			results[result_index++] = x;
 		}
@@ -127,7 +144,7 @@ void GP_FillPolygon_Raw(GP_Context *context, unsigned int vertex_count,
 {
 	float ymin = HUGE_VALF, ymax = -HUGE_VALF;
 	struct GP_PolygonEdge *edge;
-	struct GP_PolygonEdge edges[vertex_count];
+	struct GP_PolygonEdge edges[2*vertex_count];
 
 
 	/* Build edge structures for each vertex-vertex connection.
