@@ -166,7 +166,7 @@ static int x11_params_to_flags(const char *param, GP_Size *w, GP_Size *h,
 		return 0;
 	}
 
-	backend_sdl_help(help, "X11: Invalid parameters");
+	backend_x11_help(help, "X11: Invalid parameters");
 	return 1;
 }
 
