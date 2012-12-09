@@ -28,6 +28,7 @@
 #include <math.h>
 
 #include "core/GP_Transform.h"
+#include "core/GP_GetPutPixel.h"
 
 #include "GP_Line.h"
 #include "GP_HLine.h"
@@ -157,10 +158,24 @@ void GP_FillPolygon_Raw(GP_Context *context, unsigned int vertex_count,
 	for (y = (int) ymin; y <= (int) ymax; y++) {
 		int inter_count = GP_ComputeScanline(intersections, edges, vertex_count, y + 0.5f);
 
-		GP_ASSERT(inter_count % 2 == 0, "odd number of intersections!");
+		i = 0;
+		for (;;) {
+			if (i >= inter_count) break;
+			float start = intersections[i++];
+			if (i >= inter_count) {
 
-		for (i = 0; i < inter_count; i+=2) {
-			GP_HLine_Raw(context, intersections[i], intersections[i + 1], y, pixel);
+				/* a solo vertex or a single-point intersection */
+				GP_PutPixel_Raw(context, start, y, pixel);
+				break;
+			}
+			float end = intersections[i++];
+			if (start == end) {
+
+				/* two intersections - edge joint */
+				if (i >= inter_count) break;
+				end = intersections[i++];
+			}
+			GP_HLine_Raw(context, start, end, y, pixel);
 		}
 	}
 }
