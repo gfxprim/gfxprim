@@ -22,6 +22,7 @@
 
 #include "core/GP_Common.h"
 #include "core/GP_Transform.h"
+#include "core/GP_Debug.h"
 
 #include "backends/GP_Backend.h"
 
@@ -38,6 +39,30 @@ void GP_BackendUpdateRectXYXY(GP_Backend *backend,
 	if (y1 < y0)
 		GP_SWAP(y0, y1);
 
+	if (x0 < 0) {
+		GP_WARN("Negative x coordinate %i, clipping to 0", x0);
+		x0 = 0;
+	}
+	
+	if (y0 < 0) {
+		GP_WARN("Negative y coordinate %i, clipping to 0", y0);
+		y0 = 0;
+	}
+
+	GP_Coord w = backend->context->w;
+
+	if (x1 >= w) {
+		GP_WARN("Invalid x coordinate %i, clipping to %u", x1, w - 1);
+		x1 = w - 1;
+	}
+	
+	GP_Coord h = backend->context->h;
+
+	if (y1 >= h) {
+		GP_WARN("Invalid x coordinate %i, clipping to %u", y1, h - 1);
+		y1 = h - 1;
+	}
+	
 	backend->UpdateRect(backend, x0, y0, x1, y1);
 }
 
