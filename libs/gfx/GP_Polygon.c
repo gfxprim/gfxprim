@@ -35,6 +35,11 @@
 #include "GP_HLine.h"
 #include "GP_Polygon.h"
 
+/* A 2D point specified by GP_Coord coordinates. */
+typedef struct {
+	GP_Coord x, y;
+} GP_Point;
+
 /* "almost equality" for float coordinates */
 #define GP_COORDS_ALMOST_EQUAL(a,b)	(fabsf(a-b) < 0.00001f)
 
@@ -48,6 +53,8 @@
 
 /* Working record about an edge. */
 struct GP_Edge {
+	GP_Point start;	/* starting point as specified by user */
+	GP_Point end;	/* ending point as specified by user */
 	int state;	/* edge state */
 	float x;		/* X coordinate of the working point */
 	int y;		/* Y coordinate of the working point */
@@ -56,23 +63,31 @@ struct GP_Edge {
 };
 
 /* Initializes the edge structure. */
-static void GP_InitEdge(struct GP_Edge *e, GP_Coord x1, GP_Coord y1,
-	GP_Coord x2, GP_Coord y2)
+static void GP_InitEdge(struct GP_Edge *e, GP_Point start, GP_Point end)
 {
-	GP_ASSERT(y1 != y2, "horizontal edges not allowed here");
+	e->start = start;
+	e->end = end;
 
 	/* initialize the working point to the top point of the edge */
-	if (y1 < y2) {
-		e->x = x1;
-		e->y = y1;
+	if (start.y < end.y) {
+		e->x = (float) start.x;
+		e->y = start.y;
 	} else {
-		e->x = x2;
-		e->y = y2;
+		e->x = (float) end.x;
+		e->y = end.y;
 	}
 
-	e->dy = GP_ABS(y2 - y1);
-	e->dxy = (float)(x2 - x1)/(y2 - y1);
-	e->state = EDGE_READY;
+	e->dy = GP_ABS(end.y - start.y) - 1;
+
+	if (e->dy < 0) {
+
+		/* horizontal edge */
+		e->dxy = (start.x < end.x) ? INFINITY : -INFINITY;
+		e->state = EDGE_FINISHED;	/* these are skipped */
+	} else {
+		e->dxy = (float)(end.x - start.x)/(end.y - start.y);
+		e->state = EDGE_READY;
+	}
 }
 
 /* Type of a callback function to be passed to qsort(). */
@@ -117,10 +132,6 @@ static int GP_CompareEdgesRuntime(struct GP_Edge *e1, struct GP_Edge *e2)
 	return 0;
 }
 
-typedef struct {
-	GP_Coord x, y;
-} GP_Point;
-
 void GP_FillPolygon_Raw(GP_Context *context, unsigned int nvert,
                         const GP_Coord *xy, GP_Pixel pixel)
 {
@@ -150,40 +161,17 @@ void GP_FillPolygon_Raw(GP_Context *context, unsigned int nvert,
 		 */
 		unsigned int nexti = (i+1) % nvert;
 
-		/* skip horizontal edges */
-		if (vert[i].y == vert[nexti].y) {
-			continue;
-		}
+		GP_InitEdge(edges + nedges, vert[i], vert[nexti]);
 
-		GP_InitEdge(edges + nedges,
-			vert[i].x, vert[i].y,
-			vert[nexti].x, vert[nexti].y);
-		e = edges + nedges;
-		
 		nedges++;
 	}
 
 	if (nedges < 2)
 		return;		/* not really a polygon */
-	
-	for (i = 1; i < nedges; i++) {
-		e = edges + i;
-		struct GP_Edge *prev_e = edges + i - 1;
-		if (GP_COORDS_ALMOST_EQUAL(prev_e->x + prev_e->dy*prev_e->dxy, e->x)) {
-			prev_e->dy--;
-		}
-		else if (GP_COORDS_ALMOST_EQUAL(e->x + e->dy*e->dxy, prev_e->x)) {
-			e->dy--;
-		}
-	}
 
 	/* initially sort edges by Y, then X */
 	qsort(edges, nedges, sizeof(struct GP_Edge),
 	      (GP_SortCallback) GP_CompareEdgesInitial);
-
-	for (i = 0; i < nedges; i++) {
-		e = edges + i;
-	}
 	
 	/*
 	 * for each scanline, compute intersections with all edges
@@ -224,23 +212,17 @@ void GP_FillPolygon_Raw(GP_Context *context, unsigned int nvert,
 			float end = inter[i+1];
 			GP_HLine_Raw(context, start, end, y, pixel);
 		}
-
-		/* check and mark edges we are done with */
-		for (i = 0; i < nedges; i++) {
-			e = edges + i;
-			if (e->state == EDGE_ACTIVE && e->dy == 0) {
-				e->state = EDGE_FINISHED;
-			}
-		}
-		qsort(edges, nedges, sizeof(struct GP_Edge),
-		      (GP_SortCallback) GP_CompareEdgesRuntime);
 		
 		/* update active edges for next step */
 		for (i = 0; i < nedges; i++) {
 			e = edges + i;
 			if (e->state == EDGE_ACTIVE) {
-				e->x += e->dxy;
-				e->dy--;
+				if (e->dy == 0) {
+					e->state = EDGE_FINISHED;
+				} else {
+					e->x += e->dxy;
+					e->dy--;
+				}
 			}
 		}
 	}
