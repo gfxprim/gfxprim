@@ -67,6 +67,7 @@ static void destroy_ximage(GP_Backend *self);
 static void destroy_shm_ximage(GP_Backend *self);
 
 static int resize_ximage(GP_Backend *self, int w, int h);
+static int resize_shm_ximage(GP_Backend *self, int w, int h);
 
 static void x11_exit(GP_Backend *self)
 {
@@ -107,8 +108,6 @@ static void x11_update_rect(GP_Backend *self, GP_Coord x0, GP_Coord y0,
 	
 	XFlush(x11->dpy);
 
-	x11->resized_flag = 0;
-
 	XUnlockDisplay(x11->dpy);
 }
 
@@ -126,8 +125,6 @@ static void x11_flip(GP_Backend *self)
 	          x11->img, 0, 0, 0, 0, w, h);
 	XFlush(x11->dpy);
 	
-	x11->resized_flag = 0;
-
 	XUnlockDisplay(x11->dpy);
 }
 
@@ -141,7 +138,11 @@ static void x11_ev(GP_Backend *self, XEvent *ev)
 		         ev->xexpose.x, ev->xexpose.y,
 		         ev->xexpose.width, ev->xexpose.height,
 		         ev->xexpose.count);
-	
+		
+		/*
+		 * Ignore Expose events in case user wasn't notified
+		 * about change and acked image resize.
+		 */
 		if (x11->resized_flag)
 			break;
 
@@ -153,6 +154,11 @@ static void x11_ev(GP_Backend *self, XEvent *ev)
 		if (ev->xconfigure.width == (int)self->context->w &&
 		    ev->xconfigure.height == (int)self->context->h)
 		    	break;
+	
+		/* 
+		 * Window has been resized, set flag.
+		 */
+		x11->resized_flag = 1;
 	default:
 		GP_InputDriverX11EventPut(ev);
 	break;
@@ -204,14 +210,19 @@ static int x11_set_attributes(struct GP_Backend *self,
 	if (w != 0 && h != 0) {
 		GP_DEBUG(3, "Setting window size to %ux%u", w, h);
 		
-		if (resize_ximage(self, w, h))
-			return 1;
+		if (x11->shm_flag) {
+			if (resize_shm_ximage(self, w, h))
+				return 1;
+		} else {
+			if (resize_ximage(self, w, h))
+				return 1;
+		}
 
 		/* Resize X11 window */
 	//	XResizeWindow(x11->dpy, x11->win, w, h);
 		XFlush(x11->dpy);
 
-		x11->resized_flag = 1;
+		x11->resized_flag = 0;
 	}
 	
 	XUnlockDisplay(x11->dpy);
@@ -244,11 +255,13 @@ static int create_shm_ximage(GP_Backend *self, GP_Size w, GP_Size h)
 	struct x11_priv *x11 = GP_BACKEND_PRIV(self);
 
 	if (XShmQueryExtension(x11->dpy) == False) {
-		GP_DEBUG(1, "X Shm Extension not supported, "
-		            "falling back to XImage\n");
+		GP_DEBUG(1, "MIT SHM Extension not supported, "
+		            "falling back to XImage");
 		return 1;
 	}
-	
+
+	GP_DEBUG(1, "Using MIT SHM Extension");
+
 	enum GP_PixelType pixel_type;
 	int depth;
 
@@ -312,9 +325,20 @@ static void destroy_shm_ximage(GP_Backend *self)
 	struct x11_priv *x11 = GP_BACKEND_PRIV(self); 
 	
 	XShmDetach(x11->dpy, &x11->shminfo);
+	XFlush(x11->dpy);
 	shmdt(x11->shminfo.shmaddr);
 	shmctl(x11->shminfo.shmid, IPC_RMID, 0);
 	XDestroyImage(x11->img);
+}
+
+static int resize_shm_ximage(GP_Backend *self, int w, int h)
+{
+	GP_DEBUG(4, "Resizing XShmImage %ux%u -> %ux%u",
+	         self->context->w, self->context->h, w, h);
+	
+	destroy_shm_ximage(self);
+
+	return create_shm_ximage(self, w, h);
 }
 
 #else
@@ -326,6 +350,12 @@ static int create_shm_ximage(GP_Backend GP_UNUSED(*self),
 }
 
 static void destroy_shm_ximage(GP_Backend GP_UNUSED(*self))
+{
+	GP_WARN("Stub called");
+}
+
+static int resize_shm_ximage(GP_Backend GP_UNUSED(*self),
+                             int GP_UNUSED(w), int GP_UNUSED(h))
 {
 	GP_WARN("Stub called");
 }
@@ -380,11 +410,6 @@ static int resize_ximage(GP_Backend *self, int w, int h)
 {
 	struct x11_priv *x11 = GP_BACKEND_PRIV(self); 
 	XImage *img;
-
-	if (x11->shm_flag) {
-		GP_WARN("UNIMPLEMENTED");
-		return 1;
-	}
 
 	/* Create new X image */
 	img = XCreateImage(x11->dpy, x11->vis, x11->scr_depth, ZPixmap, 0, NULL,
@@ -593,7 +618,7 @@ void create_window(struct x11_priv *x11, int x, int y,
 	Atom xa = XInternAtom(x11->dpy, "WM_DELETE_WINDOW", True);
 
 	if (xa != None) {
-		GP_DEBUG(2, "Setting WM_DELETE_WINWOW Atom to True");
+		GP_DEBUG(2, "Setting WM_DELETE_WINDOW Atom to True");
 
 		XSetWMProtocols(x11->dpy, x11->win, &xa, 1);
 	} else {
@@ -647,7 +672,7 @@ GP_Backend *GP_BackendX11Init(const char *display, int x, int y,
 		goto err1;
 	}
 
-	//if (create_shm_ximage(backend, w, h))
+	if (create_shm_ximage(backend, w, h))
 		if (create_ximage(backend, w, h))
 			goto err1;
 
