@@ -42,9 +42,6 @@ void GP_DebugPrint(int level, const char *file, const char *function, int line,
 {
 	int i;
 	
-	if (level > (int)debug_level)
-		return;
-
 	if (!env_used) {
 		char *level = getenv("GP_DEBUG");
 		
@@ -62,6 +59,9 @@ void GP_DebugPrint(int level, const char *file, const char *function, int line,
 			}
 		}
 	}
+	
+	if (level > (int)debug_level)
+		return;
 
 	for (i = 1; i < level; i++)
 		fputc(' ', stderr);
