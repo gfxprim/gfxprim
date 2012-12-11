@@ -32,7 +32,7 @@
 #include "GP_Event.h"
 #include "GP_InputDriverLinux.h"
 
-int get_version(int fd)
+static int get_version(int fd)
 {
 	int ver;
 
@@ -48,7 +48,7 @@ int get_version(int fd)
 /*
  * Returns size on success just as read()
  */
-int get_name(int fd, char *buf, size_t buf_len)
+static int get_name(int fd, char *buf, size_t buf_len)
 {
 	int ret;
 
@@ -58,7 +58,7 @@ int get_name(int fd, char *buf, size_t buf_len)
 	return ret;
 }
 	
-void print_name(int fd)
+static void print_name(int fd)
 {
 	char name[64];
 
@@ -69,7 +69,7 @@ void print_name(int fd)
 		GP_DEBUG(2, "Input device name '%s'", name);
 }
 
-void try_load_callibration(struct GP_InputDriverLinux *self)
+static void try_load_callibration(struct GP_InputDriverLinux *self)
 {
 	long bit = 0;
 	int abs[5];

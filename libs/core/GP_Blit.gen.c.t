@@ -17,7 +17,7 @@
 /*
  * TODO: this is used for same pixel but different offset, could still be optimized
  */
-void blitXYXY_Naive_Raw(const GP_Context *src,
+static void blitXYXY_Naive_Raw(const GP_Context *src,
                         GP_Coord x0, GP_Coord y0, GP_Coord x1, GP_Coord y1,
                         GP_Context *dst, GP_Coord x2, GP_Coord y2)
 {
@@ -40,7 +40,7 @@ void blitXYXY_Naive_Raw(const GP_Context *src,
 /*
  * Blit for equal pixel types {{ ps.suffix }}
  */
-void blitXYXY_Raw_{{ ps.suffix }}(const GP_Context *src,
+static void blitXYXY_Raw_{{ ps.suffix }}(const GP_Context *src,
 	GP_Coord x0, GP_Coord y0, GP_Coord x1, GP_Coord y1,
 	GP_Context *dst, GP_Coord x2, GP_Coord y2)
 {

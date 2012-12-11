@@ -39,8 +39,8 @@
 #include "GP_PNM.h"
 #include "GP_PPM.h"
 
-int load_binary_ppm(FILE *f, uint32_t depth __attribute__((unused)),
-                    GP_Context *res)
+static int load_binary_ppm(FILE *f, uint32_t depth __attribute__((unused)),
+                           GP_Context *res)
 {
 	uint32_t x, y;
 	int r, g, b;

@@ -28,7 +28,7 @@
 
 #include "GP_TmpFile.h"
 
-const char file_sig[] = {'G', 'F', 'X', 'p', 'r', 'i', 'm'};
+static const char file_sig[] = {'G', 'F', 'X', 'p', 'r', 'i', 'm'};
 
 GP_Context *GP_LoadTmpFile(const char *src_path, GP_ProgressCallback *callback)
 {

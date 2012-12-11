@@ -288,7 +288,7 @@ enum GP_ImageFmt {
 	GP_FMT_PPM,
 };
 
-enum GP_ImageFmt filename_to_fmt(const char *path)
+static enum GP_ImageFmt filename_to_fmt(const char *path)
 {
 	size_t len = strlen(path);
 
