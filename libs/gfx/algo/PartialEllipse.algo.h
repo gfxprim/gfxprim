@@ -19,7 +19,7 @@
  * Copyright (C) 2009-2010 Jiri "BlueBear" Dluhos                            *
  *                         <jiri.bluebear.dluhos@gmail.com>                  *
  *                                                                           *
- * Copyright (C) 2009-2010 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
@@ -36,7 +36,7 @@
  *     FN_NAME   - name of the function to be defined
  */
 #define DEF_PARTIAL_ELLIPSE_FN(FN_NAME, CONTEXT_T, PIXVAL_T, PUTPIXEL) \
-void FN_NAME(CONTEXT_T context, int xcenter, int ycenter, int a, int b, \
+static void FN_NAME(CONTEXT_T context, int xcenter, int ycenter, int a, int b, \
 	int start, int end, PIXVAL_T pixval) \
 { \
 	double startAngle = GP_NormalizeAngle(2*M_PI*(start / 360000.0)); \

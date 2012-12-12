@@ -21,7 +21,7 @@
 
 %% for ps in pixelsizes
 
-void GP_FillCircle_Raw_{{ ps.suffix }}(GP_Context *context,
+static void GP_FillCircle_Raw_{{ ps.suffix }}(GP_Context *context,
 	GP_Coord xcenter, GP_Coord ycenter, GP_Size r, GP_Pixel pixel)
 {
 	/* for r == 0, circle degenerates to a point */

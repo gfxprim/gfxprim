@@ -74,7 +74,7 @@
  *     FN_NAME   - name of the function to be defined
  */
 #define DEF_CIRCLE_SEG_FN(FN_NAME, CONTEXT_T, PIXVAL_T, PUTPIXEL) \
-void FN_NAME(CONTEXT_T context, int xcenter, int ycenter, int r, \
+static void FN_NAME(CONTEXT_T context, int xcenter, int ycenter, int r, \
 	uint8_t seg_flags, PIXVAL_T pixval) \
 { \
 	int x, y, error; \

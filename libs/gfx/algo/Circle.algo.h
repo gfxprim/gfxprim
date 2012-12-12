@@ -19,7 +19,7 @@
  * Copyright (C) 2009-2011 Jiri "BlueBear" Dluhos                            *
  *                         <jiri.bluebear.dluhos@gmail.com>                  *
  *                                                                           *
- * Copyright (C) 2009-2011 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
@@ -74,7 +74,7 @@
  *     FN_NAME   - name of the function to be defined
  */
 #define DEF_CIRCLE_FN(FN_NAME, CONTEXT_T, PIXVAL_T, PUTPIXEL) \
-void FN_NAME(CONTEXT_T context, int xcenter, int ycenter, int r, \
+static void FN_NAME(CONTEXT_T context, int xcenter, int ycenter, int r, \
 	PIXVAL_T pixval) \
 { \
 	int x, y, error; \
