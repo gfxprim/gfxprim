@@ -107,6 +107,7 @@ GP_Context *GP_ReadPNG(FILE *f, GP_ProgressCallback *callback)
 	GP_PixelType pixel_type = GP_PIXEL_UNKNOWN;
 	GP_Context *res;
 	int err;
+	double gamma;
 
 	png = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
 
@@ -138,12 +139,14 @@ GP_Context *GP_ReadPNG(FILE *f, GP_ProgressCallback *callback)
 	png_get_IHDR(png, png_info, &w, &h, &depth,
 	             &color_type, &interlace_type, NULL, NULL);
 
-	GP_DEBUG(2, "Have %s%s interlace %s PNG%s size %ux%u depth %i",
+	png_get_gAMA(png, png_info, &gamma);
+
+	GP_DEBUG(2, "Interlace=%s%s %s PNG%s size %ux%u depth %i gamma %.2lf",
 	         interlace_type_name(interlace_type),
-	         color_type & PNG_COLOR_MASK_PALETTE ? " pallete " : "",
+	         color_type & PNG_COLOR_MASK_PALETTE ? " pallete" : "",
 	         color_type & PNG_COLOR_MASK_COLOR ? "color" : "gray",
 		 color_type & PNG_COLOR_MASK_ALPHA ? " with alpha channel" : "",
-		 (unsigned int)w, (unsigned int)h, depth);
+		 (unsigned int)w, (unsigned int)h, depth, gamma);
 
 	switch (color_type) {
 	case PNG_COLOR_TYPE_GRAY:
@@ -187,7 +190,16 @@ GP_Context *GP_ReadPNG(FILE *f, GP_ProgressCallback *callback)
 		//TODO: add palette matching to G2 G4 and G8
 		png_set_palette_to_rgb(png);
 		png_set_bgr(png);
-		pixel_type = GP_PIXEL_RGB888;
+
+		png_read_update_info(png, png_info);
+	
+		png_get_IHDR(png, png_info, &w, &h, &depth,
+	        	     &color_type, NULL, NULL, NULL);
+
+		if (color_type & PNG_COLOR_MASK_ALPHA)
+			pixel_type = GP_PIXEL_UNKNOWN;
+		else
+			pixel_type = GP_PIXEL_RGB888;
 	break;
 	}
 
@@ -212,14 +224,13 @@ GP_Context *GP_ReadPNG(FILE *f, GP_ProgressCallback *callback)
 	/* start the actuall reading */
 	for (y = 0; y < h; y++) {
 		png_bytep row = GP_PIXEL_ADDR(res, 0, y);
-		png_read_rows(png, &row, NULL, 1);
+		png_read_row(png, row, NULL);
 
 		if (GP_ProgressCallbackReport(callback, y, h, w)) {
 			GP_DEBUG(1, "Operation aborted");
 			err = ECANCELED;
 			goto err3;
 		}
-			
 	}
 	
 	png_destroy_read_struct(&png, &png_info, NULL);
