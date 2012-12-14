@@ -3,7 +3,7 @@
 # Purpose of this script is to check library exported symbols
 #
 
-SYMBOLFILE=libGP_symbols.txt
+SYMTMPFILE=symbols.txt
 
 function grep_sym
 {
@@ -19,19 +19,42 @@ function find_symbol
 	find ../libs/ -name '*.o' | while read obj; do grep_sym "$obj" "$1"; done
 }
 
-objdump --dynamic-syms libGP.so | awk 'NR > 4 { print }' | awk '$3 != "*UND*"' | awk '{print $NF}'  > $SYMBOLFILE
+function get_symbols
+{
+	objdump --dynamic-syms "$1" | awk 'NR > 4 { print }' | awk '$3 != "*UND*"' | awk '{print $NF}'  > "$2"
 
-#
-# Remove compiler and glibc symbols
-#
-sed -i '/^.init$/d' $SYMBOLFILE
-sed -i '/^__.*$/d' $SYMBOLFILE
-sed -i '/^_.*$/d' $SYMBOLFILE
+	#
+	# Remove compiler and glibc symbols
+	#
+	sed -i '/^.init$/d' "$2"
+	sed -i '/^__.*$/d' "$2"
+	sed -i '/^_.*$/d' "$2"
+}
 
-for i in `cat libGP_symbols.txt`; do
-	if ! grep "$i" syms/*.txt 2>&1 > /dev/null; then
-		find_symbol "$i"
-	fi
-done
+function check_symbols
+{
+	local symfile=$1
+	shift
 
-rm libGP_symbols.txt
+	for i in `cat $symfile`; do
+		if ! grep $i $@ 2>&1 > /dev/null; then
+			find_symbol "$i"
+		fi
+	done
+}
+
+function do_check
+{
+	get_symbols "$1" $SYMTMPFILE
+	shift
+	check_symbols $SYMTMPFILE "$@"
+	rm $SYMTMPFILE
+}
+
+do_check libGP.so syms/Core_symbols.txt syms/Event_symbols.txt \
+                  syms/Filters_symbols.txt syms/GFX_symbols.txt \
+		  syms/Loaders_symbols.txt syms/Text_symbols.txt
+
+do_check libGP_backends.so syms/Backend_symbols.txt
+
+do_check libGP_grabbers.so syms/Grabbers_symbols.txt

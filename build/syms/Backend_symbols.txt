@@ -1,0 +1,10 @@
+GP_BackendInit
+GP_BackendLinuxFBInit
+GP_BackendVirtualInit
+GP_BackendX11Init
+GP_BackendSDLInit
+
+GP_ContextFromSurface
+
+GP_BackendResize
+GP_BackendUpdateRectXYXY
