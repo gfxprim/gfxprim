@@ -230,7 +230,8 @@ static int x11_set_attributes(struct GP_Backend *self,
 	return 0;
 }
 
-void match_pixel_type(struct x11_priv *x11, enum GP_PixelType *pixel_type, int *depth)
+static void match_pixel_type(struct x11_priv *x11,
+                             enum GP_PixelType *pixel_type, int *depth)
 {
 	/*
 	 * Eh, the XImage supports either 8, 16 or 32 bit pixels
@@ -437,9 +438,9 @@ static int resize_ximage(GP_Backend *self, int w, int h)
 	return 0;
 }
 
-void create_window(struct x11_priv *x11, int x, int y,
-                   unsigned int *w, unsigned int *h,
-		   const char *caption, enum GP_BackendX11Flags flags)
+static void create_window(struct x11_priv *x11, int x, int y,
+                          unsigned int *w, unsigned int *h,
+                          const char *caption, enum GP_BackendX11Flags flags)
 {
 	XSetWindowAttributes attrs;
 	unsigned long attr_mask = 0;
