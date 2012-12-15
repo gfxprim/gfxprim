@@ -12,6 +12,8 @@ ERROR_ON_NULL(GP_LoadImage);
 ERROR_ON_NONZERO(GP_LoadMetaData);
 ERROR_ON_NONZERO(GP_SaveImage);
 
+%newobject GP_LoadImage;
+
 %include "GP_Loaders.h"
 
 ERROR_ON_NONZERO(GP_OpenJPG);
@@ -21,17 +23,23 @@ ERROR_ON_NONZERO(GP_ReadJPGMetaData);
 ERROR_ON_NONZERO(GP_LoadJPGMetaData);
 ERROR_ON_NONZERO(GP_SaveJPG);
 
+%newobject GP_LoadJPG;
+
 %include "GP_JPG.h"
 
 ERROR_ON_NONZERO(GP_OpenBMP);
 ERROR_ON_NULL(GP_ReadBMP);
 ERROR_ON_NULL(GP_LoadBMP);
 
+%newobject GP_LoadBMP;
+
 %include "GP_BMP.h"
 
 ERROR_ON_NONZERO(GP_OpenGIF);
 ERROR_ON_NULL(GP_ReadGIF);
 ERROR_ON_NULL(GP_LoadGIF);
+
+%newobject GP_LoadGIF;
 
 %include "GP_GIF.h"
 
@@ -41,6 +49,8 @@ ERROR_ON_NULL(GP_LoadPNG);
 ERROR_ON_NONZERO(GP_ReadPNGMetaData);
 ERROR_ON_NONZERO(GP_LoadPNGMetaData);
 ERROR_ON_NONZERO(GP_SavePNG);
+
+%newobject GP_LoadPNG;
 
 %include "GP_PNG.h"
 
@@ -54,4 +64,3 @@ ERROR_ON_NONZERO(GP_SavePPM);
 %include "GP_PBM.h"
 %include "GP_PGM.h"
 %include "GP_PPM.h"
-
