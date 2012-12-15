@@ -560,41 +560,6 @@ static int test_load_BMP_8bpp_1x64000(void)
 	return test_load_BMP("8bpp-1x64000.bmp");
 }
 
-static int test_load_PNG(const char *path)
-{
-	GP_Context *img;
-
-	img = GP_LoadPNG(path, NULL);
-
-	if (img == NULL) {
-		switch (errno) {
-		case ENOSYS:
-			tst_msg("Not Implemented");
-			return TST_SKIPPED;
-		default:
-			tst_msg("Got %s", strerror(errno));
-			return TST_FAILED;
-		}
-	}
-
-	/*
-	 * TODO: check correct data.
-	 */
-	GP_ContextFree(img);
-
-	return TST_SUCCESS;
-}
-
-static int test_load_PNG_100x100(void)
-{
-	return test_load_PNG("100x100-red.png");
-}
-
-static int test_load_PNG_100x100_alpha(void)
-{
-	return test_load_PNG("100x100-red-alpha.png");
-}
-
 static int test_load_JPEG(const char *path)
 {
 	GP_Context *img;
@@ -717,16 +682,6 @@ const struct tst_suite tst_suite = {
 		{.name = "BMP 8bpp 1x64000",
 		 .tst_fn = test_load_BMP_8bpp_1x64000,
 		 .res_path = "data/bmp/bitmaps/valid/8bpp-1x64000.bmp",
-		 .flags = TST_TMPDIR},
-
-		/* PNG loader tests */
-		{.name = "PNG 100x100", .tst_fn = test_load_PNG_100x100,
-		 .res_path = "data/png/valid/100x100-red.png",
-		 .flags = TST_TMPDIR},
-		
-		{.name = "PNG 100x100 50\% alpha",
-		 .tst_fn = test_load_PNG_100x100_alpha,
-		 .res_path = "data/png/valid/100x100-red-alpha.png",
 		 .flags = TST_TMPDIR},
 
 		/* JPEG loader tests */
