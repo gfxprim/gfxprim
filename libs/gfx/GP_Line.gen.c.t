@@ -51,8 +51,8 @@ void GP_Line_Raw_{{ ps.suffix }}(GP_Context *context, int x0, int y0,
 	/* special cases: vertical line, horizontal line, single point */
 	if (x0 == x1) {
 		if (y0 == y1) {
-			GP_PutPixel_Raw_{{ ps.suffix }}(context, x0, y0,
-							pixval);
+			GP_PutPixel_Raw_Clipped_{{ ps.suffix }}(context,
+					x0, y0, pixval);
 			return;
 		}
 		GP_VLine_Raw(context, x0, y0, y1, pixval);
@@ -93,9 +93,11 @@ void GP_Line_Raw_{{ ps.suffix }}(GP_Context *context, int x0, int y0,
 	for (x = x0; x <= x1; x++) {
 
 		if (steep)
-			GP_PutPixel_Raw_{{ ps.suffix }}(context, y, x, pixval);
+			GP_PutPixel_Raw_Clipped_{{ ps.suffix }}(context, y, x,
+								pixval);
 		else
-			GP_PutPixel_Raw_{{ ps.suffix }}(context, x, y, pixval);
+			GP_PutPixel_Raw_Clipped_{{ ps.suffix }}(context, x, y,
+								pixval);
 
 		error -= deltay;
 		if (error < 0) {
