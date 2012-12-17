@@ -28,6 +28,41 @@
 
 #include "core/GP_Context.h"
 
+/* Raw per BPP HLines */
+
+void GP_VLine_Raw_1BPP_LE(GP_Context *context, GP_Coord x0, GP_Coord x1,
+                          GP_Coord y, GP_Pixel pixel);
+
+void GP_VLine_Raw_1BPP_BE(GP_Context *context, GP_Coord x0, GP_Coord x1,
+                          GP_Coord y, GP_Pixel pixel);
+
+void GP_VLine_Raw_2BPP_LE(GP_Context *context, GP_Coord x0, GP_Coord x1,
+                          GP_Coord y, GP_Pixel pixel);
+
+void GP_VLine_Raw_2BPP_BE(GP_Context *context, GP_Coord x0, GP_Coord x1,
+                          GP_Coord y, GP_Pixel pixel);
+
+void GP_VLine_Raw_4BPP_LE(GP_Context *context, GP_Coord x0, GP_Coord x1,
+                          GP_Coord y, GP_Pixel pixel);
+
+void GP_VLine_Raw_4BPP_BE(GP_Context *context, GP_Coord x0, GP_Coord x1,
+                          GP_Coord y, GP_Pixel pixel);
+
+void GP_VLine_Raw_8BPP(GP_Context *context, GP_Coord x0, GP_Coord x1,
+                       GP_Coord y, GP_Pixel pixel);
+
+void GP_VLine_Raw_18BPP_LE(GP_Context *context, GP_Coord x0, GP_Coord x1,
+                           GP_Coord y, GP_Pixel pixel);
+
+void GP_VLine_Raw_16BPP(GP_Context *context, GP_Coord x0, GP_Coord x1,
+                        GP_Coord y, GP_Pixel pixel);
+
+void GP_VLine_Raw_24BPP(GP_Context *context, GP_Coord x0, GP_Coord x1,
+                        GP_Coord y, GP_Pixel pixel);
+
+void GP_VLine_Raw_32BPP(GP_Context *context, GP_Coord x0, GP_Coord x1,
+                        GP_Coord y, GP_Pixel pixel);
+
 void GP_VLineXYY(GP_Context *context, GP_Coord x, GP_Coord y0,
                  GP_Coord y1, GP_Pixel pixel);
 
