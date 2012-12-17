@@ -41,20 +41,20 @@ typedef struct {
 } GP_Point;
 
 /* "almost equality" for float coordinates */
-#define GP_COORDS_ALMOST_EQUAL(a,b)	(fabsf(a-b) < 0.00001f)
+#define GP_COORDS_ALMOST_EQUAL(a,b)	(fabsf((a)-(b)) < 0.0001f)
 
 /*
  * Edge state. Every edge proceeds from READY to ACTIVE and then FINISHED.
- * Numeric values reflect sorting priority (ACTIVE < READY < FINISHED).
+ * HORIZONTAL is special (horizontal edges are handled separately).
+ * Numeric values reflect sorting priority (ACTIVE is foremost).
  */
+#define EDGE_HORIZONTAL	3
 #define EDGE_FINISHED	2
 #define EDGE_READY	1
 #define EDGE_ACTIVE	0
 
 /* Working record about an edge. */
 struct GP_Edge {
-	GP_Point start;	/* starting point as specified by user */
-	GP_Point end;	/* ending point as specified by user */
 	int state;	/* edge state */
 	float x;		/* X coordinate of the working point */
 	int y;		/* Y coordinate of the working point */
@@ -65,8 +65,15 @@ struct GP_Edge {
 /* Initializes the edge structure. */
 static void GP_InitEdge(struct GP_Edge *e, GP_Point start, GP_Point end)
 {
-	e->start = start;
-	e->end = end;
+	/* horizontal edges are a special case */
+	if (start.y == end.y) {
+		e->dy = 0;
+		e->x = start.x;
+		e->y = start.y;
+		e->dxy = end.x - start.x;
+		e->state = EDGE_HORIZONTAL;
+		return;
+	}
 
 	/* initialize the working point to the top point of the edge */
 	if (start.y < end.y) {
@@ -77,17 +84,17 @@ static void GP_InitEdge(struct GP_Edge *e, GP_Point start, GP_Point end)
 		e->y = end.y;
 	}
 
-	e->dy = GP_ABS(end.y - start.y) - 1;
+	e->dy = GP_ABS(end.y - start.y);
 
-	if (e->dy < 0) {
+	e->dxy = (float)(end.x - start.x)/(end.y - start.y);
+	e->state = EDGE_READY;
 
-		/* horizontal edge */
-		e->dxy = (start.x < end.x) ? INFINITY : -INFINITY;
-		e->state = EDGE_FINISHED;	/* these are skipped */
-	} else {
-		e->dxy = (float)(end.x - start.x)/(end.y - start.y);
-		e->state = EDGE_READY;
-	}
+	/* Shorten each edge by one pixel at the bottom. This prevents
+	 * every vertex point to be reported as two intersections.
+	 * This also means causes all horizontal edges cut by one pixel,
+	 * but we will fix this at the end by drawing them separately.
+	 */
+	e->dy--;
 }
 
 /* Type of a callback function to be passed to qsort(). */
@@ -140,7 +147,7 @@ void GP_FillPolygon_Raw(GP_Context *context, unsigned int nvert,
 
 	if (nvert < 3)
 		return;		/* not enough vertices */
-	
+
 	GP_Point const *vert = (GP_Point const *) xy;
 
 	/* find first and last scanline */
@@ -149,7 +156,7 @@ void GP_FillPolygon_Raw(GP_Context *context, unsigned int nvert,
 		ymax = GP_MAX(ymax, vert[i].y);
 		ymin = GP_MIN(ymin, vert[i].y);
 	}
-	
+
 	/* build a list of edges */
 	struct GP_Edge edges[nvert];
 	unsigned int nedges = 0;		/* number of edges in list */
@@ -161,9 +168,9 @@ void GP_FillPolygon_Raw(GP_Context *context, unsigned int nvert,
 		 */
 		unsigned int nexti = (i+1) % nvert;
 
-		GP_InitEdge(edges + nedges, vert[i], vert[nexti]);
-
-		nedges++;
+		/* add new edge record */
+		e = edges + nedges++;
+		GP_InitEdge(e, vert[i], vert[nexti]);
 	}
 
 	if (nedges < 2)
@@ -172,7 +179,7 @@ void GP_FillPolygon_Raw(GP_Context *context, unsigned int nvert,
 	/* initially sort edges by Y, then X */
 	qsort(edges, nedges, sizeof(struct GP_Edge),
 	      (GP_SortCallback) GP_CompareEdgesInitial);
-	
+
 	/*
 	 * for each scanline, compute intersections with all edges
 	 * and draw a horizontal line segment between the intersections.
@@ -191,7 +198,7 @@ void GP_FillPolygon_Raw(GP_Context *context, unsigned int nvert,
 		}
 		qsort(edges, nedges, sizeof(struct GP_Edge),
 		      (GP_SortCallback) GP_CompareEdgesRuntime);
-		
+
 		/* record intersections with active edges */
 		ninter = 0;
 		for (i = 0; i < nedges; i++) {
@@ -200,7 +207,7 @@ void GP_FillPolygon_Raw(GP_Context *context, unsigned int nvert,
 				inter[ninter++] = e->x;
 			}
 		}
-		
+
 		/* draw each even range between intersections */
 		for (i = 0; i < ninter; i += 2) {
 			float start = inter[i];
@@ -212,7 +219,7 @@ void GP_FillPolygon_Raw(GP_Context *context, unsigned int nvert,
 			float end = inter[i+1];
 			GP_HLine_Raw(context, start, end, y, pixel);
 		}
-		
+
 		/* update active edges for next step */
 		for (i = 0; i < nedges; i++) {
 			e = edges + i;
@@ -224,6 +231,17 @@ void GP_FillPolygon_Raw(GP_Context *context, unsigned int nvert,
 					e->dy--;
 				}
 			}
+		}
+	}
+
+	/* finishing touch: draw all horizontal edges that were skipped
+	 * in the main loop
+	 */
+	for (i = 0; i < nedges; i++) {
+		e = edges + i;
+		if (e->state == EDGE_HORIZONTAL) {
+			GP_HLine_Raw(context, e->x, e->x + e->dxy, e->y,
+				     pixel);
 		}
 	}
 }
