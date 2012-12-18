@@ -11,10 +11,11 @@ is created only together with graphics driver, this is the case for example
 for X Window backends or SDL backends.
 
 The basic structure is roughly modeled after Linux kernel input API. The main
-difference is that events that belongs together are delivered together. For
-example mouse coordinates are bundled in one event.
+difference is that events that belongs together are delivered together (the
+kernel input API sends one event for each value i.e. x or y coordinate and has
+sync event that finalizes the changes in the values).
 
-For example usage see backend link:example_input.html[example].
+For example usage see input events link:example_input.html[example].
 
 Event Structure Description
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -156,12 +157,12 @@ The 'dev_id' is not used at the moment and may be removed.
 The timeval structure 'time' holds time when the event was created (or
 received by GFXprim input driver).
 
-The 'cursor_x' and 'cursor_y' holds pointer coodinates merged from all input
-sources.
+The 'cursor_x' and 'cursor_y' holds current pointer coodinates. (All relative
+and absolute events are mixed together to compute current cursor position.)
 
 The 'key_pressed' is bitflag array of currently pressed keys which is useful
-for using keys as modificators. The array holds most of the standard keyboard
-keys and mouse buttons.
+for using keys as modificators. The array always holds state of the standard
+keyboard keys and mouse buttons.
 
 Event API
 ~~~~~~~~~
