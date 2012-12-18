@@ -26,14 +26,17 @@
 #include "GP_Backend.h"
 
 enum GP_BackendX11Flags {
-	/* 
-	 * When set, w and h is ignored and root window is used
-	 */
+	/* When set, w and h is ignored and root window is used */
 	GP_X11_USE_ROOT_WIN = 0x01,
-	/*
-	 * Create new borderless window above the root window.
-	 */
+	
+	/* Create new borderless window above the root window */
 	GP_X11_CREATE_ROOT_WIN = 0x02,
+
+	/* Start fullscreen */
+	GP_X11_FULLSCREEN = 0x04,
+
+	/* Do not use MIT SHM even if available */
+	GP_X11_DISABLE_SHM = 0x08,
 };
 
 
@@ -51,5 +54,19 @@ GP_Backend *GP_BackendX11Init(const char *display, int x, int y,
                               unsigned int w, unsigned int h,
 			      const char *caption,
 			      enum GP_BackendX11Flags flags);
+
+/*
+ * Returns non-zero if backend is X11 backend
+ */
+int GP_BackendIsX11(GP_Backend *self);
+
+/*
+ * Changes full screen mode.
+ * 
+ * 0 = off
+ * 1 = on
+ * 2 = toggle
+ */
+void GP_BackendX11RequestFullscreen(GP_Backend *self, int mode);
 
 #endif /* BACKENDS_GP_X11_H */

@@ -339,6 +339,15 @@ GP_Context *load_resized_image(struct loader_params *params, GP_Size w, GP_Size 
 //		GP_FilterEdgeSharpening(img, img, 0.2, NULL);
 	cpu_timer_stop(&timer);
 
+/*
+	if (params->rat > 1.5) {
+		cpu_timer_start(&timer, "Sharpening");
+		callback.priv = "Sharpening";
+		GP_FilterEdgeSharpening(i1, i1, 0.1, &callback);
+		cpu_timer_stop(&timer);
+	}
+*/
+
 	/* Free low passed context if needed */
 	GP_ContextFree(res);
 
@@ -764,6 +773,10 @@ int main(int argc, char *argv[])
 					continue;
 
 				switch (ev.val.key.key) {
+				case GP_KEY_F:
+					if (GP_BackendIsX11(backend))
+						GP_BackendX11RequestFullscreen(backend, 2);
+				break;
 				case GP_KEY_I:
 					params.show_info = !params.show_info;
 					

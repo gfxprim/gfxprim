@@ -727,6 +727,57 @@ static void create_window(struct x11_priv *x11, int x, int y,
 	XMapWindow(x11->dpy, x11->win);
 }
 
+#ifndef _NET_WM_STATE_ADD
+# define _NET_WM_STATE_ADD 1
+#endif /* _NET_WM_STATE_ADD */
+
+#ifndef _NET_WM_STATE_REMOVE
+# define _NET_WM_STATE_REMOVE 0
+#endif /* _NET_WM_STATE_REMOVE */
+
+/* Send NETWM message, most modern Window Managers should understand */
+static void request_fullscreen(struct GP_Backend *self, int mode)
+{
+	struct x11_priv *x11 = GP_BACKEND_PRIV(self); 
+
+	if (mode < 0 || mode > 2) {
+		GP_WARN("Invalid fullscreen mode = %u", mode);
+		return;
+	}
+
+	GP_DEBUG(2, "Requesting fullscreen mode = %u", mode);
+
+	Atom wm_state, fullscreen;
+	
+	wm_state = XInternAtom(x11->dpy, "_NET_WM_STATE", True);
+	fullscreen = XInternAtom(x11->dpy, "_NET_WM_STATE_FULLSCREEN", True);
+
+	if (wm_state == None || fullscreen == None) {
+		GP_WARN("Failed to create _NET_WM_* atoms");
+		return;
+	}
+
+	XEvent ev;
+
+	memset(&ev, 0, sizeof(ev));
+
+	ev.type = ClientMessage;
+	ev.xclient.window = x11->win;
+	ev.xclient.message_type = wm_state;
+	ev.xclient.format = 32;
+	ev.xclient.data.l[0] = mode;
+	ev.xclient.data.l[1] = fullscreen;
+	ev.xclient.data.l[2] = 0;
+	ev.xclient.data.l[3] = 1;
+
+	if (!XSendEvent(x11->dpy, XDefaultRootWindow(x11->dpy), False, SubstructureNotifyMask, &ev)) {
+		GP_WARN("Failed to send _NET_WM_STATE_FULLSCREEN event");
+		return;
+	}
+
+	XFlush(x11->dpy);
+}
+
 GP_Backend *GP_BackendX11Init(const char *display, int x, int y,
                               unsigned int w, unsigned int h,
 			      const char *caption,
@@ -771,10 +822,13 @@ GP_Backend *GP_BackendX11Init(const char *display, int x, int y,
 		GP_DEBUG(1, "Failed to create window");
 		goto err1;
 	}
-
+	
+	if (flags & GP_X11_FULLSCREEN)
+		request_fullscreen(backend, 1);
+	
 	backend->context = NULL;
 
-	if (create_shm_ximage(backend, w, h))
+	if ((flags & GP_X11_DISABLE_SHM) || create_shm_ximage(backend, w, h))
 		if (create_ximage(backend, w, h))
 			goto err1;
 
@@ -800,6 +854,11 @@ err0:
 	return NULL;
 }
 
+void GP_BackendX11RequestFullscreen(GP_Backend *self, int mode)
+{
+	return request_fullscreen(self, mode);
+}
+
 #else
 
 #include "GP_Backend.h"
@@ -814,4 +873,11 @@ GP_Backend *GP_BackendX11Init(const char *GP_UNUSED(display),
 	return NULL;
 }
 
+void GP_BackendX11RequestFullscreen(GP_Backend *GP_UNUSED(self), int mode);
+
 #endif /* HAVE_LIBX11 */
+
+int GP_BackendIsX11(GP_Backend *self)
+{
+	return !strcmp(self->name, "X11");
+}
