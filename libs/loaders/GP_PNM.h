@@ -32,7 +32,7 @@
 #include <stdint.h>
 
 /*
- * Loads image header, returns pointer to FILE* (with file possition pointing
+ * Loads image header, returns pointer to FILE* (with file position pointing
  * to the start of the data stream) on success, fills image metadata into
  * arguments.
  */

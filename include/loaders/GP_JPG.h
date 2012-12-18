@@ -40,7 +40,7 @@
 int GP_OpenJPG(const char *src_path, FILE **f);
 
 /*
- * Reads JPG from an open FILE. Expects the file possition set after the eight
+ * Reads JPG from an open FILE. Expects the file position set after the eight
  * bytes JPG signature.
  */
 GP_Context *GP_ReadJPG(FILE *f, GP_ProgressCallback *callback);

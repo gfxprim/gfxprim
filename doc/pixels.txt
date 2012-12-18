@@ -1,0 +1,87 @@
+Pixel Description
+-----------------
+
+This pages describes library core functions for handling pixels.
+
+Pixel Type
+~~~~~~~~~~
+
+Pixels are described by a pixel type, which is enumeration type. The enum is
+defined at the generated 'GP_Pixel.gen.h' header and must contain at least
+following members:
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <GP.h>
+/* or */
+#include <core/GP_Pixel.h>
+
+typedef enum GP_PixelType {
+	GP_PIXEL_UNKNOWN,
+	GP_PIXEL_xRGB8888,
+	GP_PIXEL_RGBA8888,
+	GP_PIXEL_RGB888,
+	GP_PIXEL_BGR888,
+	GP_PIXEL_G1,
+	GP_PIXEL_G2,
+	GP_PIXEL_G4,
+	GP_PIXEL_G8,
+	GP_PIXEL_MAX,
+} GP_PixelType;
+
+-------------------------------------------------------------------------------
+
+Each pixel type has accompanying record in global array of pixel types
+declared as follows:
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <GP.h>
+/* or */
+#include <core/GP_Pixel.h>
+
+typedef struct {
+	char name[8];    /* Channel name */
+	uint8_t offset;  /* Offset in bits */
+	uint8_t size;    /* Bit-size */
+} GP_PixelTypeChannel;
+
+typedef struct {
+	GP_PixelType type;        /* Number of the type */
+	const char name[16];      /* Name */
+	uint8_t size;	          /* Size in bits */
+	GP_BIT_ENDIAN bit_endian; /* Order of pixels in a byte */
+	uint8_t numchannels;      /* Number of channels */
+	/* String describing the bit-representaton (as in "RRRRRGGGGGGBBBBB")*/
+	const char bitmap[GP_PIXEL_BITS + 1];
+	/* Individual channels */
+	const GP_PixelTypeChannel channels[GP_PIXELTYPE_MAX_CHANNELS];
+} GP_PixelTypeDescription;
+
+extern const GP_PixelTypeDescription const GP_PixelTypes[];
+
+const char *GP_PixelTypeName(GP_PixelType type);
+
+uint32_t GP_PixelSize(GP_PixelType type);
+-------------------------------------------------------------------------------
+
+There are also pixel matching functions that returns pixel type given RGB
+channel masks or sizes and offsets:
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <GP.h>
+/* or */
+#include <core/GP_Pixel.h>
+
+GP_PixelType GP_PixelRGBMatch(GP_Pixel rmask, GP_Pixel gmask,
+                              GP_Pixel bmask, GP_Pixel amask,
+			      uint8_t bits_per_pixel);
+
+GP_PixelType GP_PixelRGBLookup(uint32_t rsize, uint32_t roff,
+                               uint32_t gsize, uint32_t goff,
+			       uint32_t bsize, uint32_t boff,
+			       uint32_t asize, uint32_t aoff,
+			       uint8_t bits_per_pixel);
+-------------------------------------------------------------------------------
+

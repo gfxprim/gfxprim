@@ -47,13 +47,13 @@
 
 /*
  * Opens up file and checks signature. Upon successful return (zero is
- * returned) the file possition would be set to eight bytes (exactly after the
+ * returned) the file position would be set to eight bytes (exactly after the
  * PNG signature).
  */
 int GP_OpenPNG(const char *src_path, FILE **f);
 
 /*
- * Reads PNG from an open FILE. Expects the file possition set after the eight
+ * Reads PNG from an open FILE. Expects the file position set after the eight
  * bytes PNG signature.
  * 
  * Upon succesfull return pointer to newly allocated context is returned.

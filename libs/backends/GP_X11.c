@@ -45,6 +45,7 @@
 #include "GP_X11.h"
 
 struct x11_priv {
+	/* Connection details */
 	Display *dpy;	
 	int scr;
 	Screen *scr_ptr;
@@ -52,6 +53,7 @@ struct x11_priv {
 	Window win;
 	Visual *vis;
 
+	/* Image details */
 	XImage *img;
 
 #ifdef HAVE_X_SHM
@@ -61,41 +63,18 @@ struct x11_priv {
 
 	int resized_flag:1;
 	int shm_flag:1;
-};
 
-static void destroy_ximage(GP_Backend *self);
-static void destroy_shm_ximage(GP_Backend *self);
+	/* used to store width and height from ConfigureNotify event */
+	unsigned int new_w;
+	unsigned int new_h;
+};
 
 static int resize_ximage(GP_Backend *self, int w, int h);
 static int resize_shm_ximage(GP_Backend *self, int w, int h);
 
-static void x11_exit(GP_Backend *self)
+static void putimage(struct GP_Backend *self, int x0, int y0, int x1, int y1)
 {
 	struct x11_priv *x11 = GP_BACKEND_PRIV(self); 
-	
-	XLockDisplay(x11->dpy);
-
-	if (x11->shm_flag)
-		destroy_shm_ximage(self);
-	else
-		destroy_ximage(self);
-
-	XDestroyWindow(x11->dpy, x11->win);
-	/* I wonder if this is right sequence... */
-	XUnlockDisplay(x11->dpy);
-	XCloseDisplay(x11->dpy);
-
-	free(self);
-}
-
-static void x11_update_rect(GP_Backend *self, GP_Coord x0, GP_Coord y0,
-                            GP_Coord x1, GP_Coord y1)
-{
-	struct x11_priv *x11 = GP_BACKEND_PRIV(self); 
-	
-	GP_DEBUG(4, "Updating rect %ix%i-%ix%i", x0, y0, x1, y1);
-
-	XLockDisplay(x11->dpy);
 
 #ifdef HAVE_X_SHM
 	if (x11->shm_flag)
@@ -105,8 +84,23 @@ static void x11_update_rect(GP_Backend *self, GP_Coord x0, GP_Coord y0,
 #endif /* HAVE_X_SHM */
 		XPutImage(x11->dpy, x11->win, DefaultGC(x11->dpy, x11->scr),
 		          x11->img, x0, y0, x0, y0, x1-x0+1, y1-y0+1);
+}
+
+static void x11_update_rect(GP_Backend *self, GP_Coord x0, GP_Coord y0,
+                            GP_Coord x1, GP_Coord y1)
+{
+	struct x11_priv *x11 = GP_BACKEND_PRIV(self); 
 	
-	XFlush(x11->dpy);
+	GP_DEBUG(4, "Updating rect %ix%i-%ix%i", x0, y0, x1, y1);
+	
+	if (x11->resized_flag) {
+		GP_DEBUG(4, "Ignoring update rect, waiting for resize ack");
+		return;
+	}
+	
+	XLockDisplay(x11->dpy);
+
+	putimage(self, x0, y0, x1, y1);
 
 	XUnlockDisplay(x11->dpy);
 }
@@ -118,12 +112,22 @@ static void x11_flip(GP_Backend *self)
 	unsigned int h = self->context->h;
 
 	GP_DEBUG(4, "Flipping context");
-
+	
+	if (x11->resized_flag) {
+		GP_DEBUG(4, "Ignoring flip, waiting for resize ack");
+		return;
+	}
+	
 	XLockDisplay(x11->dpy);
 
-	XPutImage(x11->dpy, x11->win, DefaultGC(x11->dpy, x11->scr),
-	          x11->img, 0, 0, 0, 0, w, h);
-	XFlush(x11->dpy);
+#ifdef HAVE_X_SHM
+	if (x11->shm_flag)
+		XShmPutImage(x11->dpy, x11->win, DefaultGC(x11->dpy, x11->scr),
+		             x11->img, 0, 0, 0, 0, w, h, False);
+	else
+#endif /* HAVE_X_SHM */
+		XPutImage(x11->dpy, x11->win, DefaultGC(x11->dpy, x11->scr),
+		          x11->img, 0, 0, 0, 0, w, h);
 	
 	XUnlockDisplay(x11->dpy);
 }
@@ -138,14 +142,22 @@ static void x11_ev(GP_Backend *self, XEvent *ev)
 		         ev->xexpose.x, ev->xexpose.y,
 		         ev->xexpose.width, ev->xexpose.height,
 		         ev->xexpose.count);
-		
-		/*
-		 * Ignore Expose events in case user wasn't notified
-		 * about change and acked image resize.
-		 */
+
 		if (x11->resized_flag)
 			break;
 
+		/* Safety measure */
+		if (ev->xexpose.x + ev->xexpose.width > (int)self->context->w) {
+			GP_WARN("Expose x + w > context->w");
+			break;
+		}
+		
+		if (ev->xexpose.y + ev->xexpose.height > (int)self->context->h) {
+			GP_WARN("Expose y + h > context->h");
+			break;
+		}
+
+		/* Update the rectangle  */
 		x11_update_rect(self, ev->xexpose.x, ev->xexpose.y,
 		                ev->xexpose.x + ev->xexpose.width - 1,
 				ev->xexpose.y + ev->xexpose.height - 1);
@@ -154,10 +166,17 @@ static void x11_ev(GP_Backend *self, XEvent *ev)
 		if (ev->xconfigure.width == (int)self->context->w &&
 		    ev->xconfigure.height == (int)self->context->h)
 		    	break;
-	
-		/* 
-		 * Window has been resized, set flag.
-		 */
+		
+		if (ev->xconfigure.width == (int)x11->new_w &&
+		    ev->xconfigure.height == (int)x11->new_h)
+		    	break;
+		
+		x11->new_w = ev->xconfigure.width;
+		x11->new_h = ev->xconfigure.height;
+
+		GP_DEBUG(4, "Configure Notify %ux%u", x11->new_w, x11->new_h);
+
+		/*  Window has been resized, set flag. */
 		x11->resized_flag = 1;
 	default:
 		GP_InputDriverX11EventPut(ev);
@@ -193,6 +212,21 @@ static void x11_wait(GP_Backend *self)
 	XUnlockDisplay(x11->dpy);
 }
 
+static int resize_buffer(struct GP_Backend *self, uint32_t w, uint32_t h)
+{
+	struct x11_priv *x11 = GP_BACKEND_PRIV(self); 
+	
+	if (x11->shm_flag) {
+		if (resize_shm_ximage(self, w, h))
+			return 1;
+	} else {
+		if (resize_ximage(self, w, h))
+			return 1;
+	}
+
+	return 0;
+}
+
 static int x11_set_attributes(struct GP_Backend *self,
                               uint32_t w, uint32_t h,
                               const char *caption)
@@ -209,25 +243,32 @@ static int x11_set_attributes(struct GP_Backend *self,
 
 	if (w != 0 && h != 0) {
 		GP_DEBUG(3, "Setting window size to %ux%u", w, h);
-		
-		if (x11->shm_flag) {
-			if (resize_shm_ximage(self, w, h))
-				return 1;
-		} else {
-			if (resize_ximage(self, w, h))
-				return 1;
-		}
-
-		/* Resize X11 window */
-	//	XResizeWindow(x11->dpy, x11->win, w, h);
-		XFlush(x11->dpy);
-
-		x11->resized_flag = 0;
+		XResizeWindow(x11->dpy, x11->win, w, h);
 	}
 	
 	XUnlockDisplay(x11->dpy);
 
 	return 0;
+}
+
+static int x11_resize_ack(struct GP_Backend *self)
+{
+	struct x11_priv *x11 = GP_BACKEND_PRIV(self); 
+	int ret;
+
+	XLockDisplay(x11->dpy);
+
+	GP_DEBUG(3, "Setting buffer size to %ux%u", x11->new_w, x11->new_h);
+
+	ret = resize_buffer(self, x11->new_w, x11->new_h);
+	
+	x11->resized_flag = 0;
+
+	GP_DEBUG(3, "Done");
+
+	XUnlockDisplay(x11->dpy);
+
+	return ret;
 }
 
 static void match_pixel_type(struct x11_priv *x11,
@@ -261,12 +302,16 @@ static int create_shm_ximage(GP_Backend *self, GP_Size w, GP_Size h)
 		return 1;
 	}
 
-	GP_DEBUG(1, "Using MIT SHM Extension");
+	if (self->context == NULL)
+		GP_DEBUG(1, "Using MIT SHM Extension");
 
 	enum GP_PixelType pixel_type;
 	int depth;
 
-	match_pixel_type(x11, &pixel_type, &depth);
+	if (self->context == NULL)
+		match_pixel_type(x11, &pixel_type, &depth);
+	else
+		pixel_type = self->context->pixel_type;
 	
 	if (pixel_type == GP_PIXEL_UNKNOWN) {
 		GP_DEBUG(1, "Unknown pixel type");
@@ -283,13 +328,13 @@ static int create_shm_ximage(GP_Backend *self, GP_Size w, GP_Size h)
 	
 	size_t size = x11->img->bytes_per_line * x11->img->height;
 
-	x11->shminfo.shmid = shmget(IPC_PRIVATE, size, IPC_CREAT|0777);
+	x11->shminfo.shmid = shmget(IPC_PRIVATE, size, 0600);
 
 	if (x11->shminfo.shmid == -1) {
 		GP_WARN("Calling shmget() failed: %s", strerror(errno));
 		goto err0;
 	}
-
+	
 	x11->shminfo.shmaddr = x11->img->data = shmat(x11->shminfo.shmid, 0, 0);
 
 	if (x11->shminfo.shmaddr == (void *)-1) {
@@ -297,6 +342,13 @@ static int create_shm_ximage(GP_Backend *self, GP_Size w, GP_Size h)
 		goto err1;
 	}
 
+	/* Mark SHM for deletion after detach */
+	if (shmctl(x11->shminfo.shmid, IPC_RMID, 0)) {
+		GP_WARN("Calling shmctl(..., IPC_RMID), 0) failed: %s",
+		         strerror(errno));
+		goto err2;
+	}
+	
 	x11->shminfo.readOnly = False;
 
 	if (XShmAttach(x11->dpy, &x11->shminfo) == False) {
@@ -311,6 +363,9 @@ static int create_shm_ximage(GP_Backend *self, GP_Size w, GP_Size h)
 
 	x11->shm_flag = 1;
 
+	//FIXME: Proper synchronization
+	XSync(x11->dpy, True);
+
 	return 0;
 err2:
 	shmdt(x11->shminfo.shmaddr);
@@ -324,22 +379,34 @@ err0:
 static void destroy_shm_ximage(GP_Backend *self)
 {
 	struct x11_priv *x11 = GP_BACKEND_PRIV(self); 
+
+	XLockDisplay(x11->dpy);
 	
 	XShmDetach(x11->dpy, &x11->shminfo);
 	XFlush(x11->dpy);
 	shmdt(x11->shminfo.shmaddr);
-	shmctl(x11->shminfo.shmid, IPC_RMID, 0);
 	XDestroyImage(x11->img);
+	XFlush(x11->dpy);
+	
+	XUnlockDisplay(x11->dpy);
 }
 
 static int resize_shm_ximage(GP_Backend *self, int w, int h)
 {
+	struct x11_priv *x11 = GP_BACKEND_PRIV(self); 
+	int ret;
+	
 	GP_DEBUG(4, "Resizing XShmImage %ux%u -> %ux%u",
 	         self->context->w, self->context->h, w, h);
 	
+	XLockDisplay(x11->dpy);
+	
 	destroy_shm_ximage(self);
-
-	return create_shm_ximage(self, w, h);
+	ret = create_shm_ximage(self, w, h);
+	
+	XUnlockDisplay(x11->dpy);
+	
+	return ret;
 }
 
 #else
@@ -406,7 +473,6 @@ static void destroy_ximage(GP_Backend *self)
 	XDestroyImage(x11->img);
 }
 
-
 static int resize_ximage(GP_Backend *self, int w, int h)
 {
 	struct x11_priv *x11 = GP_BACKEND_PRIV(self); 
@@ -423,7 +489,7 @@ static int resize_ximage(GP_Backend *self, int w, int h)
 
 	/* Resize context */
 	if (GP_ContextResize(self->context, w, h)) {
-			XDestroyImage(img);
+		XDestroyImage(img);
 		return 1;
 	}
 
@@ -436,6 +502,37 @@ static int resize_ximage(GP_Backend *self, int w, int h)
 	x11->img = img;
 
 	return 0;
+}
+
+static void window_close(GP_Backend *self)
+{
+	struct x11_priv *x11 = GP_BACKEND_PRIV(self); 
+	
+	XLockDisplay(x11->dpy);
+
+	if (x11->shm_flag)
+		destroy_shm_ximage(self);
+	else
+		destroy_ximage(self);
+
+	XDestroyWindow(x11->dpy, x11->win);
+	
+	XUnlockDisplay(x11->dpy);
+}
+
+static void x11_exit(GP_Backend *self)
+{
+	struct x11_priv *x11 = GP_BACKEND_PRIV(self); 
+	
+	XLockDisplay(x11->dpy);
+	
+	window_close(self);
+
+	/* I wonder if this is right sequence... */
+	//XUnlockDisplay(x11->dpy);
+	XCloseDisplay(x11->dpy);
+
+	free(self);
 }
 
 static void create_window(struct x11_priv *x11, int x, int y,
@@ -630,6 +727,57 @@ static void create_window(struct x11_priv *x11, int x, int y,
 	XMapWindow(x11->dpy, x11->win);
 }
 
+#ifndef _NET_WM_STATE_ADD
+# define _NET_WM_STATE_ADD 1
+#endif /* _NET_WM_STATE_ADD */
+
+#ifndef _NET_WM_STATE_REMOVE
+# define _NET_WM_STATE_REMOVE 0
+#endif /* _NET_WM_STATE_REMOVE */
+
+/* Send NETWM message, most modern Window Managers should understand */
+static void request_fullscreen(struct GP_Backend *self, int mode)
+{
+	struct x11_priv *x11 = GP_BACKEND_PRIV(self); 
+
+	if (mode < 0 || mode > 2) {
+		GP_WARN("Invalid fullscreen mode = %u", mode);
+		return;
+	}
+
+	GP_DEBUG(2, "Requesting fullscreen mode = %u", mode);
+
+	Atom wm_state, fullscreen;
+	
+	wm_state = XInternAtom(x11->dpy, "_NET_WM_STATE", True);
+	fullscreen = XInternAtom(x11->dpy, "_NET_WM_STATE_FULLSCREEN", True);
+
+	if (wm_state == None || fullscreen == None) {
+		GP_WARN("Failed to create _NET_WM_* atoms");
+		return;
+	}
+
+	XEvent ev;
+
+	memset(&ev, 0, sizeof(ev));
+
+	ev.type = ClientMessage;
+	ev.xclient.window = x11->win;
+	ev.xclient.message_type = wm_state;
+	ev.xclient.format = 32;
+	ev.xclient.data.l[0] = mode;
+	ev.xclient.data.l[1] = fullscreen;
+	ev.xclient.data.l[2] = 0;
+	ev.xclient.data.l[3] = 1;
+
+	if (!XSendEvent(x11->dpy, XDefaultRootWindow(x11->dpy), False, SubstructureNotifyMask, &ev)) {
+		GP_WARN("Failed to send _NET_WM_STATE_FULLSCREEN event");
+		return;
+	}
+
+	XFlush(x11->dpy);
+}
+
 GP_Backend *GP_BackendX11Init(const char *display, int x, int y,
                               unsigned int w, unsigned int h,
 			      const char *caption,
@@ -658,6 +806,8 @@ GP_Backend *GP_BackendX11Init(const char *display, int x, int y,
 	if (x11->dpy == NULL)
 		goto err0;
 
+	//XSynchronize(x11->dpy, True);
+
 	x11->scr = DefaultScreen(x11->dpy);
 	x11->vis = DefaultVisual(x11->dpy, x11->scr);
 	x11->scr_ptr = DefaultScreenOfDisplay(x11->dpy);
@@ -672,8 +822,13 @@ GP_Backend *GP_BackendX11Init(const char *display, int x, int y,
 		GP_DEBUG(1, "Failed to create window");
 		goto err1;
 	}
+	
+	if (flags & GP_X11_FULLSCREEN)
+		request_fullscreen(backend, 1);
+	
+	backend->context = NULL;
 
-	if (create_shm_ximage(backend, w, h))
+	if ((flags & GP_X11_DISABLE_SHM) || create_shm_ximage(backend, w, h))
 		if (create_ximage(backend, w, h))
 			goto err1;
 
@@ -688,6 +843,7 @@ GP_Backend *GP_BackendX11Init(const char *display, int x, int y,
 	backend->Poll          = x11_poll;
 	backend->Wait          = x11_wait;
 	backend->SetAttributes = x11_set_attributes;
+	backend->ResizeAck     = x11_resize_ack;
 	backend->fd            = XConnectionNumber(x11->dpy);
 
 	return backend;
@@ -696,6 +852,11 @@ err1:
 err0:
 	free(backend);
 	return NULL;
+}
+
+void GP_BackendX11RequestFullscreen(GP_Backend *self, int mode)
+{
+	return request_fullscreen(self, mode);
 }
 
 #else
@@ -712,4 +873,11 @@ GP_Backend *GP_BackendX11Init(const char *GP_UNUSED(display),
 	return NULL;
 }
 
+void GP_BackendX11RequestFullscreen(GP_Backend *GP_UNUSED(self), int mode);
+
 #endif /* HAVE_LIBX11 */
+
+int GP_BackendIsX11(GP_Backend *self)
+{
+	return !strcmp(self->name, "X11");
+}

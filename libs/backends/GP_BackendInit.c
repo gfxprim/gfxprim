@@ -138,7 +138,10 @@ static void backend_x11_help(FILE *help, const char *err)
 		      "ROOT_WIN    - starts the backend in the root window\n"
 		      "              (w and h, if set, are ignored)\n"
 		      "CREATE_ROOT - starts the backend in newly created\n"
-		      "              root window (w and h, if set, are ignored)\n");
+		      "              root window (w and h, if set, are ignored)\n"
+		      "DISABLE_SHM - disable MIT SHM even if available\n"
+		      "FS          - start fullscreen\n");
+
 }
 
 static int x11_params_to_flags(const char *param, GP_Size *w, GP_Size *h,
@@ -151,6 +154,16 @@ static int x11_params_to_flags(const char *param, GP_Size *w, GP_Size *h,
 	
 	if (!strcasecmp(param, "CREATE_ROOT")) {
 		*flags |= GP_X11_CREATE_ROOT_WIN;
+		return 0;
+	}
+
+	if (!strcasecmp(param, "DISABLE_SHM")) {
+		*flags |= GP_X11_DISABLE_SHM;
+		return 0;
+	}
+	
+	if (!strcasecmp(param, "FS")) {
+		*flags |= GP_X11_FULLSCREEN;
 		return 0;
 	}
 

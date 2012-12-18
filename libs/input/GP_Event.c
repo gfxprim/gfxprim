@@ -29,7 +29,7 @@
 
 #include "GP_Event.h"
 
-/* Screen size for clipping the cursor possition */
+/* Screen size for clipping the cursor position */
 static uint32_t screen_w = 0, screen_h = 0;
 
 /* Event queue */
@@ -89,7 +89,7 @@ void GP_EventSetScreenCursor(uint32_t x, uint32_t y)
 	cur_state.cursor_y = y;
 }
 
-uint32_t GP_EventQueued(void)
+unsigned int GP_EventsQueued(void)
 {
 	if (queue_first <= queue_last)
 		return queue_last - queue_first;
