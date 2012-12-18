@@ -299,7 +299,7 @@ void GP_EventSetScreenCursor(uint32_t x, uint32_t y);
 /*
  * Returns number of queued events.
  */
-uint32_t GP_EventQueued(void);
+unsigned int GP_EventsQueued(void);
 
 /*
  * Dump event into stdout.

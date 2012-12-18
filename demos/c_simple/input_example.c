@@ -56,7 +56,7 @@ static void event_loop(void)
 	for (;;) {
 		GP_BackendWait(backend);
 		
-		while (GP_EventQueued()) {
+		while (GP_EventsQueued()) {
 			GP_Event ev;
 
 			GP_EventGet(&ev);
@@ -127,8 +127,6 @@ int main(int argc, char *argv[])
 			return 1;
 		}
 	}
-
-//	GP_SetDebugLevel(10);
 
 	backend = GP_BackendInit(backend_opts, "Input Test", stderr);
 

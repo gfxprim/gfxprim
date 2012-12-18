@@ -274,3 +274,20 @@ returned. If backend size already matches w and h, nothing is done.
 Note that backend->context pointer may change upon calling this function and
 at least backend->context->pixels pointer will change.
 
+[source,c]
+-------------------------------------------------------------------------------
+#include <backends/GP_Backend.h>
+/* or */
+#include <GP.h>
+
+int GP_BackendResizeAck(GP_Backend *self);
+-------------------------------------------------------------------------------
+
+If backend is resizeable by user interaction (for example X Window) you will
+get resize event for each change of window size, however the backend context
+will not be resized untill you call this function. This is usefull in
+multithreaded application where one threads waits for events and others draws
+into the buffer so you can stop the drawing threads before the backend context
+size change.
+
+See input link:input.html[input events] for more information.

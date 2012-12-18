@@ -9,7 +9,7 @@ GP_EventDump
 GP_EventPushResize
 GP_EventPushRelTo
 GP_EventSetScreenCursor
-GP_EventQueued
+GP_EventsQueued
 
 GP_InputDriverLinuxRead
 GP_InputDriverSDLEventPut

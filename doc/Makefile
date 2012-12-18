@@ -1,6 +1,6 @@
 SOURCES=general.txt context.txt loaders.txt filters.txt basic_types.txt \
         drawing_api.txt backends.txt gamma.txt grabbers.txt \
-	environment_variables.txt debug.txt core.txt api.txt
+	environment_variables.txt debug.txt core.txt api.txt input.txt
 
 EXAMPLE_SOURCES=$(wildcard example_*.txt)
 

@@ -49,6 +49,11 @@ Cyril Hrubis <metan@ucw.cz>
   +
   Backends API for drawing on the screen or into a window.
   +
+. link:input.html[Input Events]
+  +
+  Input event handling such as key presses, mouse coordinates, touchscreens
+  and window manager events such as window close or window resize.
+  +
 . link:grabbers.html[Grabbers]
   +
   Video grabbers interface such as V4L2.

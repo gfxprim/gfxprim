@@ -89,7 +89,7 @@ void GP_EventSetScreenCursor(uint32_t x, uint32_t y)
 	cur_state.cursor_y = y;
 }
 
-uint32_t GP_EventQueued(void)
+unsigned int GP_EventsQueued(void)
 {
 	if (queue_first <= queue_last)
 		return queue_last - queue_first;

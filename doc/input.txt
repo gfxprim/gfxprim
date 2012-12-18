@@ -1,0 +1,271 @@
+Input Events
+------------
+
+Input events are somehow tied to the link:backends.html[backends]. Possibly in
+contrast with other libraries there is not always 1:1 correspondence between
+input driver and backend graphics driver. That means that you can, for
+example, use linux input events together with X Window without any problems.
+You can even write application that doesn't draw any graphics at all and still
+use some of the input drivers. There are, of course, cases where input driver
+is created only together with graphics driver, this is the case for example
+for X Window backends or SDL backends.
+
+The basic structure is roughly modeled after Linux kernel input API. The main
+difference is that events that belongs together are delivered together. For
+example mouse coordinates are bundled in one event.
+
+For example usage see backend link:example_input.html[example].
+
+Event Structure Description
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <GP.h>
+/* or */
+#include <input/GP_Event.h>
+
+typedef struct GP_Event {
+	/* event */
+	uint16_t type;
+	uint32_t code;
+	union GP_EventValue val;
+
+	/* input device id */
+	uint32_t dev_id;
+	
+	/* event timestamp */
+	struct timeval time;
+
+	/* 
+	 * Cursor possition, possition on screen accumulated
+	 * from all pointer devices
+	 */
+	uint32_t cursor_x;
+	uint32_t cursor_y;
+
+	/* 
+	 * Bitmap of pressed keys including mouse buttons
+	 * accumulated for all input devices.
+	 */
+	uint8_t keys_pressed[GP_EVENT_KEYMAP_BYTES];
+} GP_Event;
+-------------------------------------------------------------------------------
+
+The GP_Event structure is basic block that describes input event (i.e. key was
+pressed/released, mouse was moved, window was resized by user).
+
+[source,c]
+-------------------------------------------------------------------------------
+enum GP_EventType {
+	GP_EV_KEY, /* key/button press event */
+	GP_EV_REL, /* relative event */
+	GP_EV_ABS, /* absolute event */
+	GP_EV_SYS, /* system events window close, resize... */
+	GP_EV_MAX = GP_EV_SYS, /* maximum, greater values are free */
+};
+-------------------------------------------------------------------------------
+
+The event 'type' determines highlevel nature of the event.
+
+* Key events covers keyboard button presses, mouse buttons, etc.
+* Relative events covers mostly mouse coordinates
+* Absolute events covers touchscreens and tablets
+* System events are used mostly for propagating window close and window
+  resize events
+* Values greater than 'GP_EV_MAX' are free for user events
+
+[source,c]
+-------------------------------------------------------------------------------
+enum GP_EventKeyCode {
+	GP_EV_KEY_UP,
+	GP_EV_KEY_DOWN,
+	GP_EV_KEY_REPEAT,
+};
+
+enum GP_EventRelCode {
+	GP_EV_REL_POS,
+	GP_EV_REL_WHEEL,
+};
+
+enum GP_EventAbsCode {
+	GP_EV_ABS_POS,
+};
+
+enum GP_EventSysCode {
+	GP_EV_SYS_QUIT,
+	GP_EV_SYS_RESIZE,
+};
+-------------------------------------------------------------------------------
+
+The event 'code' specifies the event nature more closely, it has different
+meaning for each event type. The names are (hopefully) self explanatory.
+
+[source,c]
+-------------------------------------------------------------------------------
+union GP_EventValue {
+	/* generic one integer value */
+	int32_t val;
+	/* key */
+	struct GP_EventKey key;
+	/* position */
+	struct GP_EventPosRel rel;
+	struct GP_EventPosAbs abs;
+	/* system event */
+	struct GP_EventSys sys;
+};
+
+struct GP_EventPosRel {
+	int32_t rx;
+	int32_t ry;
+};
+
+struct GP_EventPosAbs {
+	uint32_t x, x_max; /* the x is between 0 and x_max */
+	uint32_t y, y_max;
+	uint32_t pressure, pressure_max;
+};
+
+struct GP_EventKey {
+	uint32_t key;
+	char ascii;
+};
+
+struct GP_EventSys {
+	uint32_t w, h;
+};
+-------------------------------------------------------------------------------
+
+The event value is a union that could hold different information. The right
+format of the data is known from the 'type' and 'code'. For some types of the
+events it's not used at all.
+  
+* The relative coordinates are used for 'GP_EV_REL_POS' and absolute coordinates
+  for 'GP_EV_ABS_POS'.
+
+* The key event value is used for keypresses, additionally it holds the key
+  value mapped to ASCII if conversion is applicable otherwise it's set to
+  zero. You should consult the header 'input/GP_Event.h' for comprehensive
+  list of key values.
+
+* And finally the system event is used with 'GP_EV_SYS_RESIZE' and informs you
+  of the new window size.
+
+The 'dev_id' is not used at the moment and may be removed.
+
+The timeval structure 'time' holds time when the event was created (or
+received by GFXprim input driver).
+
+The 'cursor_x' and 'cursor_y' holds pointer coodinates merged from all input
+sources.
+
+The 'key_pressed' is bitflag array of currently pressed keys which is useful
+for using keys as modificators. The array holds most of the standard keyboard
+keys and mouse buttons.
+
+Event API
+~~~~~~~~~
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <GP.h>
+/* or */
+#include <input/GP_Event.h>
+
+unsigned int GP_EventsQueued(void);
+-------------------------------------------------------------------------------
+
+The 'GP_EventsQueued' returns number of queued events.
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <GP.h>
+/* or */
+#include <input/GP_Event.h>
+
+int GP_EventGet(struct GP_Event *ev);
+-------------------------------------------------------------------------------
+
+The 'GP_EventGet' returns nonzero if event was copied to the structure pointed
+by ev pointer.
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <GP.h>
+/* or */
+#include <input/GP_Event.h>
+
+void GP_EventDump(struct GP_Event *ev);
+-------------------------------------------------------------------------------
+
+Dumps event in human-readable format into the 'stdout'.
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <GP.h>
+/* or */
+#include <input/GP_Event.h>
+
+void GP_EventSetScreenSize(uint32_t w, uint32_t h);
+
+void GP_EventSetScreenCursor(uint32_t x, uint32_t y);
+-------------------------------------------------------------------------------
+
+Sets screen size and pointer position, which is needed for calculating the
+'cursor_x' and 'cursor_y' coordinates.
+
+void GP_EventPushRel(int32_t rx, int32_t ry, struct timeval *time);
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <GP.h>
+/* or */
+#include <input/GP_Event.h>
+
+/*
+ * Produces relative event that moves to the point x, y
+ */
+void GP_EventPushRelTo(uint32_t x, uint32_t y, struct timeval *time);
+
+/*
+ * Inject absolute event.
+ */
+void GP_EventPushAbs(uint32_t x, uint32_t y, uint32_t pressure,
+                     uint32_t x_max, uint32_t y_max, uint32_t pressure_max,
+                     struct timeval *time);
+
+/*
+ * Inject event that changes key state.
+ */
+void GP_EventPushKey(uint32_t key, uint8_t code, struct timeval *time);
+
+/*
+ * Inject common event.
+ */
+void GP_EventPush(uint16_t type, uint32_t code, int32_t value,
+                  struct timeval *time);
+-------------------------------------------------------------------------------
+
+Following functions are used for adding events into the event queue. If
+pointer to the timeval structure is 'NULL' the event 'time' will be filled
+with exact time the event was added to the queue.
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <GP.h>
+/* or */
+#include <input/GP_Event.h>
+
+void GP_EventSetKey(struct GP_Event *ev, uint32_t key)
+
+GP_EventGetKey(struct GP_Event *ev, uint32_t key)
+
+GP_EventResetKey(struct GP_Event *ev, uint32_t key)
+-------------------------------------------------------------------------------
+
+These functions are helpers for setting/getting key pressed bits in the
+'keys_pressed' bit array.
+
+You will mostly need the 'GP_EventGetKey' function to figure out if some of
+the modificator keys (such as Ctrl or Shift) was pressed at the time the event
+was received.
