@@ -11,6 +11,10 @@ Cyril Hrubis <metan@ucw.cz>
   +
   Describes functions and macros in library core. 
   +
+. link:pixels.html[Pixel Types]
+  +
+  Describes pixel types.
+  +
 . link:debug.html[Debug Messages]
   +
   Interface to debug layer.
