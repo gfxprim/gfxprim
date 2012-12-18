@@ -36,6 +36,7 @@
 #include "gfx/GP_VLine.h"
 #include "gfx/GP_HLine.h"
 #include "gfx/GP_Line.h"
+#include "gfx/GP_LineClip.h"
 
 /*
  * The classical Bresenham line drawing algorithm.
@@ -48,6 +49,14 @@
 void GP_Line_Raw_{{ ps.suffix }}(GP_Context *context, int x0, int y0,
 	int x1, int y1, GP_Pixel pixval)
 {
+	if (!GP_LineClip(&x0, &y0, &x1, &y1, context->w - 1, context->h - 1))
+		return;
+
+	GP_ASSERT(x0 >= 0 && x0 <= (int) context->w-1);
+	GP_ASSERT(x1 >= 0 && x1 <= (int) context->w-1);
+	GP_ASSERT(y0 >= 0 && y0 <= (int) context->h-1);
+	GP_ASSERT(y1 >= 0 && y1 <= (int) context->h-1);
+	
 	/* special cases: vertical line, horizontal line, single point */
 	if (x0 == x1) {
 		if (y0 == y1) {
@@ -93,10 +102,10 @@ void GP_Line_Raw_{{ ps.suffix }}(GP_Context *context, int x0, int y0,
 	for (x = x0; x <= x1; x++) {
 
 		if (steep)
-			GP_PutPixel_Raw_Clipped_{{ ps.suffix }}(context, y, x,
+			GP_PutPixel_Raw_{{ ps.suffix }}(context, y, x,
 								pixval);
 		else
-			GP_PutPixel_Raw_Clipped_{{ ps.suffix }}(context, x, y,
+			GP_PutPixel_Raw_{{ ps.suffix }}(context, x, y,
 								pixval);
 
 		error -= deltay;
