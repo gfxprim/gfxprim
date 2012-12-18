@@ -53,7 +53,7 @@ typedef struct GP_Event {
 } GP_Event;
 -------------------------------------------------------------------------------
 
-The GP_Event structure is basic block that describes input event (i.e. key was
+The 'GP_Event' structure describes an input event (i.e. key was
 pressed/released, mouse was moved, window was resized by user).
 
 [source,c]
@@ -70,9 +70,9 @@ enum GP_EventType {
 The event 'type' determines highlevel nature of the event.
 
 * Key events covers keyboard button presses, mouse buttons, etc.
-* Relative events covers mostly mouse coordinates
+* Relative events covers mouse coordinates, mouse wheel, etc.
 * Absolute events covers touchscreens and tablets
-* System events are used mostly for propagating window close and window
+* System events are used for propagating window close and window
   resize events
 * Values greater than 'GP_EV_MAX' are free for user events
 
@@ -137,16 +137,16 @@ struct GP_EventSys {
 };
 -------------------------------------------------------------------------------
 
-The event value is a union that could hold different information. The right
-format of the data is known from the 'type' and 'code'. For some types of the
-events it's not used at all.
+The event 'value' is a union that could hold different information. The right
+format of the data is known from the 'type' and 'code'. Some types of the
+events has no value at all.
   
 * The relative coordinates are used for 'GP_EV_REL_POS' and absolute coordinates
   for 'GP_EV_ABS_POS'.
 
 * The key event value is used for keypresses, additionally it holds the key
   value mapped to ASCII if conversion is applicable otherwise it's set to
-  zero. You should consult the header 'input/GP_Event.h' for comprehensive
+  zero. You should consult the header 'input/GP_Event.h' for the comprehensive
   list of key values.
 
 * And finally the system event is used with 'GP_EV_SYS_RESIZE' and informs you
@@ -199,7 +199,7 @@ by ev pointer.
 void GP_EventDump(struct GP_Event *ev);
 -------------------------------------------------------------------------------
 
-Dumps event in human-readable format into the 'stdout'.
+The 'GP_EventDump' dumps event in human-readable format into the 'stdout'.
 
 [source,c]
 -------------------------------------------------------------------------------
@@ -215,13 +215,17 @@ void GP_EventSetScreenCursor(uint32_t x, uint32_t y);
 Sets screen size and pointer position, which is needed for calculating the
 'cursor_x' and 'cursor_y' coordinates.
 
-void GP_EventPushRel(int32_t rx, int32_t ry, struct timeval *time);
-
 [source,c]
 -------------------------------------------------------------------------------
 #include <GP.h>
 /* or */
 #include <input/GP_Event.h>
+
+/*
+ * Pushes relative event.
+ */
+void GP_EventPushRel(int32_t rx, int32_t ry, struct timeval *time);
+
 
 /*
  * Produces relative event that moves to the point x, y
