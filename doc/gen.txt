@@ -1,0 +1,103 @@
+Templating Engine
+-----------------
+
+The GFXprim uses python templating engine to generate code for different pixel
+types. This is documentation to the engine internals.
+
+GFXprim Config
+~~~~~~~~~~~~~~
+
+The configuration which describes pixel layout could be found in root GFXprim
+directory under name 'gfxprim_config.py' which is used to create objects
+described below.
+
+Main Objects
+~~~~~~~~~~~~
+
+Pixel Size
+^^^^^^^^^^
+
+[source,python]
+-------------------------------------------------------------------------------
+class PixelSize(object):
+    self.size = size
+
+    self.suffix = suffix
+
+    self.bit_endian = bit_endian    
+
+    def needs_bit_endian(self):
+        ...
+    
+-------------------------------------------------------------------------------
+
+The Pixel Size object represents pixel as a continous block of data.
+
+The 'size' is size in bits and is sometimes called bpp which stands for bits
+per pixel. It also contains suffix that is a string used as a suffix for
+functions that manipulates with this pixel size.
+
+The 'bit_endian' determines direction of bits in bitmaps and graymaps (i.e.
+most significant bit left or right). It can be either 'BE' or 'LE'.
+
+Note that different pixels can share the same pixel size as for certain types
+of operations the function doesn't depend on actual arrangements of the color
+channels in pixel (i.e. Get/Put Pixel, Rotate buffer 90 degrees, etc...).
+
+TODO: Which bit endian is which?
+
+TODO: Rename size to bpp?
+
+Pixel Type
+^^^^^^^^^^
+
+[source,python]
+-------------------------------------------------------------------------------
+class PixelType(object):
+    self.name = name
+    self.chanslist = chanslist
+    self.chans = dict() # { chan_name: (offset, size) }
+    self.pixelsize = pixelsize # bits per pixel
+
+    def is_palette(self):
+        ...
+
+    def is_unknown(self):
+        ...
+
+    def is_rgb(self):
+        ...
+
+    def is_gray(self):
+        ...
+
+    def is_alpha(self):
+        ...
+
+-------------------------------------------------------------------------------
+
+This object represents pixel type which describes the sizes and arrangements of
+channels in a pixel. Note that it carries an instance of pixel size described
+above.
+
+The chanslist is a list of triplets describing individual channels as
+[('chan_name', 'bit_offset', 'bit_size') ] where 'chan_name' is usually one of
+R, G, B, V (value, used for grayscale), A (opacity).
+
+Templating language
+~~~~~~~~~~~~~~~~~~~
+
+GFXprim uses http://jinja.pocoo.org/[Jinja] templating engine with a few
+objects added into the environment.
+
+Added are python buildins:
+
+* 'int'
+* 'float'
+* 'round'
+* 'len'
+
+And most importantly objects generated from the configuration files:
+
+* 'pixelsizes' list of all pixel size objects
+* 'pixeltypes' list of all pixel type objects
