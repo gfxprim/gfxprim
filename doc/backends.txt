@@ -81,16 +81,27 @@ pixel type to match given surface).
 
 For example usage see 'SDL' glue link:example_SDL_glue.html[example].
 
-X server
+X Server
 ~~~~~~~~
 
 [source,c]
 -------------------------------------------------------------------------------
+#include <GP.h>
+/* or */
+#include <backends/GP_X11.h>
+
 enum GP_BackendX11Flags {
-        /* 
-         * When set, w and h is ignored and root window is used
-         */
-        GP_X11_USE_ROOT_WIN = 0x01,
+	/* When set, w and h is ignored and root window is used */
+	GP_X11_USE_ROOT_WIN = 0x01,
+	
+	/* Create new borderless window above the root window */
+	GP_X11_CREATE_ROOT_WIN = 0x02,
+
+	/* Start fullscreen */
+	GP_X11_FULLSCREEN = 0x04,
+
+	/* Do not use MIT SHM even if available */
+	GP_X11_DISABLE_SHM = 0x08,
 };
 
 GP_Backend *GP_BackendX11Init(const char *display, int x, int y,
@@ -106,8 +117,33 @@ time).
 
 This backend feeds key events into global input queue.
 
-Note this is experimental version of X11 backend and will be changed to support
-more windows at a time.
+TODO: X11 backend will be changed to support more windows at a time.
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <GP.h>
+/* or */
+#include <backends/GP_X11.h>
+
+/*
+ * Returns non-zero if backend is X11 backend
+ */
+int GP_BackendIsX11(GP_Backend *self);
+
+/*
+ * Changes full screen mode.
+ * 
+ * 0 = off
+ * 1 = on
+ * 2 = toggle
+ */
+void GP_BackendX11RequestFullscreen(GP_Backend *self, int mode);
+-------------------------------------------------------------------------------
+
+The 'GP_BackendIsX11' functions allows us to detect if we are running using
+X11 backend.
+
+The 'GP_BackendX11RequestFullscreen' can toggle fullscreen mode at runtime.
 
 Overall init function
 ~~~~~~~~~~~~~~~~~~~~~
