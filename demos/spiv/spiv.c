@@ -350,24 +350,6 @@ GP_Context *load_resized_image(struct loader_params *params, GP_Size w, GP_Size 
 	return img;
 }
 
-/*
- * This function tries to resize spiv window
- * and if succedes blits the image directly to the screen.
- */
-static int resize_backend_and_blit(struct loader_params *params)
-{
-	GP_Context *img = load_image(params, 1);
-	
-	if (GP_BackendResize(backend, img->w, img->h))
-		return 1;
-
-	GP_Blit_Raw(img, 0, 0, img->w, img->h, backend->context, 0, 0);
-	GP_BackendFlip(backend);
-	set_caption(params->img_path, 1); 
-
-	return 0;
-}
-
 static void *image_loader(void *ptr)
 {
 	struct loader_params *params = ptr;
@@ -565,6 +547,23 @@ static void init_caches(struct loader_params *params)
 //	params->img_orig_cache = NULL;
 }
 
+/*
+ * Ask backend to resize window. Once window is resized we will
+ * get SYS_RESIZE event, see the main event loop.
+ */
+static void resize_backend(struct loader_params *params, float ratio, int shift_flag)
+{
+	GP_Context *img = load_image(params, 1);
+
+	if (!shift_flag)
+		ratio = 1.00 / ratio;
+
+	unsigned int w = img->w * ratio + 0.5;
+	unsigned int h = img->h * ratio + 0.5;
+
+	GP_BackendResize(backend, w, h);
+}
+
 static void print_help(void)
 {
 	printf("Usage: spiv [opts] images\n\n");
@@ -601,6 +600,15 @@ static void print_help(void)
 	printf("Down\n");
 	printf("BckSpc - move to the prev image\n");
 	printf("\n");
+	printf("1      - resize spiv window to the image size\n");
+	printf("2      - resize spiv window to the half of the image size\n");
+	printf("3      - resize spiv window to the third of the image size\n");
+	printf("...\n");
+	printf("9      - resize spiv window to the ninth of the image size\n");
+	printf("\n");
+	printf("Shift 2 - resize spiv window twice of the image size\n");
+	printf("Shift 3 - resize spiv window three times of the image size\n");
+	printf("...\n\n");
 
 	printf("Some cool options to try:\n\n");
 	printf("spiv -e G1 -f images\n");
@@ -618,6 +626,7 @@ int main(int argc, char *argv[])
 	const char *backend_opts = "X11";
 	int sleep_sec = -1;
 	int opt, debug_level = 0;
+	int shift_flag;
 	GP_PixelType emul_type = GP_PIXEL_UNKNOWN;
 	
 	struct loader_params params = {
@@ -734,7 +743,10 @@ int main(int argc, char *argv[])
 		while (GP_EventGet(&ev)) {
 
 			GP_EventDump(&ev);
-			
+		
+			shift_flag = GP_EventGetKey(&ev, GP_KEY_LEFT_SHIFT) ||
+			             GP_EventGetKey(&ev, GP_KEY_RIGHT_SHIFT);
+
 			switch (ev.type) {
 			case GP_EV_REL:
 				switch (ev.code) {
@@ -863,7 +875,31 @@ int main(int argc, char *argv[])
 					show_image(&params, argv[argn]);
 				break;
 				case GP_KEY_1:
-					resize_backend_and_blit(&params);
+					resize_backend(&params, 1, shift_flag);
+				break;
+				case GP_KEY_2:
+					resize_backend(&params, 2, shift_flag);
+				break;
+				case GP_KEY_3:
+					resize_backend(&params, 3, shift_flag);
+				break;
+				case GP_KEY_4:
+					resize_backend(&params, 4, shift_flag);
+				break;
+				case GP_KEY_5:
+					resize_backend(&params, 5, shift_flag);
+				break;
+				case GP_KEY_6:
+					resize_backend(&params, 6, shift_flag);
+				break;
+				case GP_KEY_7:
+					resize_backend(&params, 7, shift_flag);
+				break;
+				case GP_KEY_8:
+					resize_backend(&params, 8, shift_flag);
+				break;
+				case GP_KEY_9:
+					resize_backend(&params, 9, shift_flag);
 				break;
 				}
 			break;
@@ -872,7 +908,7 @@ int main(int argc, char *argv[])
 				case GP_EV_SYS_RESIZE:
 					/* stop loader thread before resizing backend buffer */
 					stop_loader();
-					GP_BackendResize(backend, ev.val.sys.w, ev.val.sys.h);
+					GP_BackendResizeAck(backend);
 					GP_Fill(backend->context, 0);
 					params.show_progress_once = 1;
 					show_image(&params, NULL);

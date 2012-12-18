@@ -7,4 +7,5 @@ GP_BackendSDLInit
 GP_ContextFromSurface
 
 GP_BackendResize
+GP_BackendResizeAck
 GP_BackendUpdateRectXYXY

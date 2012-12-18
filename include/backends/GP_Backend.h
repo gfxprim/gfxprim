@@ -95,6 +95,13 @@ typedef struct GP_Backend {
 	                     const char *caption);
 
 	/*
+	 * Resize acknowledge callback. This must be called
+	 * after you got resize event in order to resize
+	 * backend buffers.
+	 */
+	int (*ResizeAck)(struct GP_Backend *self);
+
+	/*
 	 * Exits the backend.
 	 */
 	void (*Exit)(struct GP_Backend *self);
@@ -206,5 +213,19 @@ static inline int GP_BackendSetCaption(GP_Backend *backend,
  * Note that after calling this, the backend->context pointer may change.
  */
 int GP_BackendResize(GP_Backend *backend, uint32_t w, uint32_t h);
+
+
+/*
+ * Resize acknowledge. You must call this right after you application has
+ * received resize event.
+ *
+ * This will resize backend buffers. After this call returns the backend width
+ * height and context pointer are most likely different.
+ *
+ * This function returns zero on succes. Non zero on failure. If it fails the
+ * best action to take is to save application data and exit (as the backend
+ * may be in undefined state).
+ */
+int GP_BackendResizeAck(GP_Backend *self);
 
 #endif /* BACKENDS_GP_BACKEND_H */

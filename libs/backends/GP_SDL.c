@@ -164,6 +164,7 @@ static struct GP_Backend backend = {
 	.Flip          = sdl_flip,
 	.UpdateRect    = sdl_update_rect,
 	.SetAttributes = sdl_set_attributes,
+	.ResizeAck     = NULL,
 	.Exit          = sdl_exit,
 	.fd            = -1,
 	.Poll          = sdl_poll,

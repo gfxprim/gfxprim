@@ -83,3 +83,13 @@ int GP_BackendResize(GP_Backend *backend, uint32_t w, uint32_t h)
 
 	return backend->SetAttributes(backend, w, h, NULL);
 }
+
+int GP_BackendResizeAck(GP_Backend *self)
+{
+	GP_DEBUG(2, "Calling backend %s ResizeAck()", self->name);
+	
+	if (self->ResizeAck)
+		return self->ResizeAck(self);
+
+	return 0;
+}

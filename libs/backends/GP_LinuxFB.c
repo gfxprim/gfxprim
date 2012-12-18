@@ -324,6 +324,7 @@ GP_Backend *GP_BackendLinuxFBInit(const char *path, int flag)
 	backend->UpdateRect    = fb_update_rect_noop;
 	backend->Exit          = fb_exit;
 	backend->SetAttributes = NULL;
+	backend->ResizeAck     = NULL;
 	backend->Poll          = flag ? fb_poll : NULL;
 	backend->Wait          = flag ? fb_wait : NULL;
 	backend->fd            = fb->con_fd;
