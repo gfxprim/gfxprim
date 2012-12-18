@@ -38,7 +38,7 @@ typedef struct GP_Event {
 	struct timeval time;
 
 	/* 
-	 * Cursor possition, possition on screen accumulated
+	 * Cursor position, possition on screen accumulated
 	 * from all pointer devices
 	 */
 	uint32_t cursor_x;

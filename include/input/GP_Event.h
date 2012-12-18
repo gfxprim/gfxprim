@@ -271,7 +271,7 @@ typedef struct GP_Event {
 	struct timeval time;
 
 	/* 
-	 * Cursor possition, possition on screen accumulated
+	 * Cursor position, position on screen accumulated
 	 * from all pointer devices
 	 */
 	uint32_t cursor_x;
@@ -290,7 +290,7 @@ typedef struct GP_Event {
 void GP_EventSetScreenSize(uint32_t w, uint32_t h);
 
 /*
- * Sets global cursor possition, doesn't generate event.
+ * Sets global cursor position, doesn't generate an event.
  *
  * Use for initial cursor placement.
  */

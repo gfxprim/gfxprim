@@ -29,7 +29,7 @@
 
 #include "GP_Event.h"
 
-/* Screen size for clipping the cursor possition */
+/* Screen size for clipping the cursor position */
 static uint32_t screen_w = 0, screen_h = 0;
 
 /* Event queue */
