@@ -239,14 +239,14 @@ int image_cache_put(struct image_cache *self, GP_Context *ctx, const char *path,
 		return 1;
 	}
 	
-	GP_DEBUG(2, "Adding image '%s:%10li:%10li' size %zu",
-	         img->path, img->cookie1, img->cookie2, size);
-
 	img->ctx = ctx;
 	img->cookie1 = cookie1;
 	img->cookie2 = cookie2;
 	img->elevated = 0;
 	strcpy(img->path, path);
+	
+	GP_DEBUG(2, "Adding image '%s:%10li:%10li' size %zu",
+	         img->path, img->cookie1, img->cookie2, size);
 
 	add_img(self, img, size);
 
