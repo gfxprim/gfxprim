@@ -38,13 +38,98 @@ per pixel. It also contains suffix that is a string used as a suffix for
 functions that manipulates with this pixel size.
 
 The 'bit_endian' determines direction of bits in bitmaps and graymaps (i.e.
-most significant bit left or right). It can be either 'BE' or 'LE'.
+most significant bit left or right). It can be either 'BE' or 'LE'. To avoid
+confusion following two figures describes bits layout in 1 bit and 2 bits
+grayscale bitmaps. The rectangles in the figures represents bytes as they are
+in the buffer. The start of the image (i.e. topleft corner and coodinate 0,0)
+is on the left side. The numbers describes position of the bit in the byte (as
+seen by shifts and bitmask from within C language implementation).
 
-Note that different pixels can share the same pixel size as for certain types
-of operations the function doesn't depend on actual arrangements of the color
-channels in pixel (i.e. Get/Put Pixel, Rotate buffer 90 degrees, etc...).
+BE
+~~
 
-TODO: Which bit endian is which?
+["graphviz", "bit-endian-be-1bit.png"]
+------------------------------------------------------------------------------
+digraph bit_endian {
+	node [shape = record];
+	rankdir = LR;
+
+	node0 [label = "{<e> ...}"];
+	node1 [label = "{7 | 6 | 5 | 4 | 3 | 2 | 1 | <e> 0}"];
+	node2 [label = "{<b> 7 | 6 | 5 | 4 | 3 | 2 | 1 | <e> 0}"];
+	node3 [label = "{<b> 7 | 6 | 5 | 4 | 3 | 2 | 1 | <e> 0}"];
+	node4 [label = "{<b> ...}"];
+
+	node0:e -> node1:b;
+	node1:e -> node2:b;
+	node2:e -> node3:b;
+	node3:e -> node4:b;
+}
+------------------------------------------------------------------------------
+
+["graphviz", "bit-endian-be-2bits.png"]
+------------------------------------------------------------------------------
+digraph bit_endian {
+	node [shape = record];
+	rankdir = LR;
+
+	node0 [label = "{<e> ...}"];
+	node1 [label = "{7 6 | 5 4 | 3 2 | <e> 1 0}"];
+	node2 [label = "{<b> 7 6 | 5 4 | 3 2 | <e> 1 0}"];
+	node3 [label = "{<b> 7 6 | 5 4 | 3 2 | <e> 1 0}"];
+	node4 [label = "{<b> ...}"];
+
+	node0:e -> node1:b;
+	node1:e -> node2:b;
+	node2:e -> node3:b;
+	node3:e -> node4:b;
+}
+------------------------------------------------------------------------------
+
+LE
+~~
+
+["graphviz", "bit-endian-le-1bit.png"]
+------------------------------------------------------------------------------
+digraph bit_endian {
+	node [shape = record];
+	rankdir = LR;
+
+	node0 [label = "{<e> ...}"];
+	node1 [label = "{0 | 1 | 2 | 3 | 4 | 5 | 6 | <e> 7}"];
+	node2 [label = "{<b> 0 | 1 | 2 | 3 | 4 | 5 | 6 | <e> 7}"];
+	node3 [label = "{<b> 0 | 1 | 2 | 3 | 4 | 5 | 6 | <e> 7}"];
+	node4 [label = "{<b> ...}"];
+
+	node0:e -> node1:b;
+	node1:e -> node2:b;
+	node2:e -> node3:b;
+	node3:e -> node4:b;
+}
+------------------------------------------------------------------------------
+
+["graphviz", "bit-endian-le-2bits.png"]
+------------------------------------------------------------------------------
+digraph bit_endian {
+	node [shape = record];
+	rankdir = LR;
+
+	node0 [label = "<e> ..."];
+	node1 [label = "{0 1 | 2 3 | 4 5 | <e> 6 7}"];
+	node2 [label = "{<b> 0 1 | 2 3 | 4 5 | <e> 6 7}"];
+	node3 [label = "{<b> 0 1 | 2 3 | 4 5 | <e> 6 7}"];
+	node4 [label = "{<b> ...}"];
+
+	node0:e -> node1:b;
+	node1:e -> node2:b;
+	node2:e -> node3:b;
+	node3:e -> node4:b;
+}
+------------------------------------------------------------------------------
+
+NOTE: Different pixels can share the same pixel size as for certain types
+      of operations the function doesn't depend on actual arrangements of the
+      color channels in pixel (i.e. Get/Put Pixel, Rotate buffer 90 degrees, etc...).
 
 TODO: Rename size to bpp?
 

@@ -9,3 +9,7 @@ discrete_linear_convolution_alg2.png
 laplacian_edge_sharpening.png
 laplacian_kernel.png
 
+bit-endian-be-1bit.png
+bit-endian-be-2bits.png
+bit-endian-le-1bit.png
+bit-endian-le-2bits.png
