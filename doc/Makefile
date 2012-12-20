@@ -25,6 +25,8 @@ all: toolcheck examples.html $(PAGES) api.html
 toolcheck:
 	@if [ -z `which asciidoc 2>/dev/null` ] ; then \
 		echo "ERROR: Could not find 'asciidoc'" ; exit 127 ; fi
+	@if [ -z `which source-highlight 2>/dev/null` ] ; then \
+		echo "ERROR: Could not find 'source-highlight'" ; exit 127 ; fi
 	@if [ ! -d "/usr/share/graphviz" ] ; then \
 		echo "ERROR: Could not find 'graphviz'" ; exit 127 ; fi
 	@if [ -z `which latex 2>/dev/null` ] ; then \
