@@ -24,29 +24,45 @@ class PixelSize(object):
 
     self.suffix = suffix
 
-    self.bit_endian = bit_endian    
-
-    def needs_bit_endian(self):
+    self.bit_endian = bit_endian
         ...
-    
+
 -------------------------------------------------------------------------------
 
 The Pixel Size object represents pixel as a continous block of data.
 
-The 'size' is size in bits and is sometimes called bpp which stands for bits
-per pixel. It also contains suffix that is a string used as a suffix for
-functions that manipulates with this pixel size.
+The 'size' is size in bits and is sometimes called bpp which stands for "bits
+per pixel". This number includes padding bits, if any.
 
-The 'bit_endian' determines direction of bits in bitmaps and graymaps (i.e.
-most significant bit left or right). It can be either 'BE' or 'LE'. To avoid
-confusion following two figures describes bits layout in 1 bit and 2 bits
+The 'suffix' is a string used as a suffix for functions, macros and other
+identifiers that operate with this pixel size.
+
+The 'bit_endian' determines the ordering of pixel bits within a byte in bitmaps
+and graymaps. This is significant in pixel types with pixel boundaries
+within a byte, i.e. 1 bpp, 4 bpp or 17 bpp.
+
+It can be either 'BE' or 'LE' (i.e. most significant bit left or right in the bitmap).
+Usually, the bitmap is ordered with left bits earlier in the memory, but the
+earlier/later relationship is important.
+This is defined in terms of natural pixel ordering within the memory.
+
+'BE' means that the earlier (usually left-most) pixels use the higher ("big")
+bits of the byte. I.e. in 1 bpp, the first pixel would have value 128, the second 64
+and so on.
+
+'LE' means that the earlier (usually left-most) pixels use the lower ("little")
+bits of the byte. I.e. in 1 bpp, the first pixel would have value 1, the second 2,
+the eight'th 128 and so on.
+
+The following two figures describe bit layout in 1 bpp and 2 bpp
 grayscale bitmaps. The rectangles in the figures represents bytes as they are
-in the buffer. The start of the image (i.e. topleft corner and coodinate 0,0)
-is on the left side. The numbers describes position of the bit in the byte (as
-seen by shifts and bitmask from within C language implementation).
+in the bitmap memory. The start of the image (i.e. topleft corner
+and coodinates (0,0)) is on the left side.
+The numbers describe position of the bit in the byte, 'i' representing
+value '1<<i', that is 7-th bit representing value 128 and 0-th bit value 1.
 
 BE
-~~
+++
 
 ["graphviz", "bit-endian-be-1bit.png"]
 ------------------------------------------------------------------------------
@@ -87,7 +103,7 @@ digraph bit_endian {
 ------------------------------------------------------------------------------
 
 LE
-~~
+++
 
 ["graphviz", "bit-endian-le-1bit.png"]
 ------------------------------------------------------------------------------
@@ -115,9 +131,9 @@ digraph bit_endian {
 	rankdir = LR;
 
 	node0 [label = "<e> ..."];
-	node1 [label = "{0 1 | 2 3 | 4 5 | <e> 6 7}"];
-	node2 [label = "{<b> 0 1 | 2 3 | 4 5 | <e> 6 7}"];
-	node3 [label = "{<b> 0 1 | 2 3 | 4 5 | <e> 6 7}"];
+	node1 [label = "{1 0 | 3 2 | 5 4 | <e> 7 6}"];
+	node2 [label = "{<b> 1 0 | 3 2 | 5 4 | <e> 7 6}"];
+	node3 [label = "{<b> 1 0 | 3 2 | 5 4 | <e> 7 6}"];
 	node4 [label = "{<b> ...}"];
 
 	node0:e -> node1:b;
@@ -127,9 +143,10 @@ digraph bit_endian {
 }
 ------------------------------------------------------------------------------
 
-NOTE: Different pixels can share the same pixel size as for certain types
-      of operations the function doesn't depend on actual arrangements of the
-      color channels in pixel (i.e. Get/Put Pixel, Rotate buffer 90 degrees, etc...).
+NOTE: Different pixel types (i.e. RGB888 and BGR888) can share the same pixel
+      size, since certain types of operations do not depend on the actual
+      arrangement of the color channels in a pixel
+      (i.e. get/put pixel, rotate buffer 90 degrees, etc.).
 
 TODO: Rename size to bpp?
 
