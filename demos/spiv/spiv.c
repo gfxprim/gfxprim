@@ -37,6 +37,7 @@
 #include <input/GP_InputDriverLinux.h>
 
 #include "image_cache.h"
+#include "image_list.h"
 #include "cpu_timer.h"
 
 static GP_Pixel black_pixel;
@@ -325,7 +326,7 @@ GP_Context *load_resized_image(struct loader_params *params, GP_Size w, GP_Size 
 		cpu_timer_stop(&timer);
 	}
 	
-//	img->gamma = GP_GammaAcquire(img->pixel_type, 2.2);
+//	img->gamma = GP_GammaAcquire(img->pixel_type, 0.45);
 
 	cpu_timer_start(&timer, "Resampling");
 	callback.priv = "Resampling Image";
@@ -637,7 +638,7 @@ int main(int argc, char *argv[])
 	int opt, debug_level = 0;
 	int shift_flag;
 	GP_PixelType emul_type = GP_PIXEL_UNKNOWN;
-	
+
 	struct loader_params params = {
 		.img_path = NULL, 
 		
@@ -730,21 +731,16 @@ int main(int argc, char *argv[])
 	GP_Fill(context, black_pixel);
 	GP_BackendFlip(backend);
 
-	int argf = optind;
-	int argn = argf;
+
+	struct image_list *list = image_list_create((const char**)argv + optind);
 
 	params.show_progress_once = 1;
-	show_image(&params, argv[argf]);
+	show_image(&params, image_list_img_path(list));
 		
 	for (;;) {
 		/* wait for event or a timeout */
-		if (wait_for_event(sleep_sec * 1000)) {
-			argn++;
-			if (argn >= argc)
-				argn = argf;
-					
-			show_image(&params, argv[argn]);
-		}
+		if (wait_for_event(sleep_sec * 1000))	
+			show_image(&params, image_list_move(list, 1));
 
 		/* Read and parse events */
 		GP_Event ev;
@@ -809,7 +805,7 @@ int main(int argc, char *argv[])
 					}
 
 					params.show_progress_once = 1;
-					show_image(&params, argv[argn]);
+					show_image(&params, image_list_img_path(list));
 				break;
 				case GP_KEY_LEFT_BRACE:
 					if (params.resampling_method == 0)
@@ -826,13 +822,13 @@ int main(int argc, char *argv[])
 					}
 					
 					params.show_progress_once = 1;
-					show_image(&params, argv[argn]);
+					show_image(&params, image_list_img_path(list));
 				break;
 				case GP_KEY_L:
 					params.use_low_pass = !params.use_low_pass;
 					
 					params.show_progress_once = 1;
-					show_image(&params, argv[argn]);
+					show_image(&params, image_list_img_path(list));
 				break;
 				case GP_KEY_D:
 					image_cache_drop(params.img_resized_cache);
@@ -847,45 +843,26 @@ int main(int argc, char *argv[])
 					return 0;
 				break;
 				case GP_KEY_PAGE_UP:
-					argn+=10;
-					//TODO
-					if (argn >= argc)
-						argn = argf; 
-					
 					params.show_progress_once = 1;
-					show_image(&params, argv[argn]);
+					show_image(&params, image_list_move(list, 10));
 				break;
 				case GP_KEY_PAGE_DOWN:
-					argn-=10;
-					//TODO
-					if (argn < argf)
-						argn = argc - 1 ; 
-					
 					params.show_progress_once = 1;
-					show_image(&params, argv[argn]);
+					show_image(&params, image_list_move(list, -10));
 				break;
 				next:
 				case GP_KEY_RIGHT:
 				case GP_KEY_UP:
 				case GP_KEY_SPACE:
-					argn++;
-					if (argn >= argc)
-						argn = argf;
-					
 					params.show_progress_once = 1;
-					show_image(&params, argv[argn]);
+					show_image(&params, image_list_move(list, 1));
 				break;
 				prev:
 				case GP_KEY_BACKSPACE:
 				case GP_KEY_LEFT:
 				case GP_KEY_DOWN:
-					argn--;
-
-					if (argn < argf)
-						argn = argc - 1;
-
 					params.show_progress_once = 1;
-					show_image(&params, argv[argn]);
+					show_image(&params, image_list_move(list, -1));
 				break;
 				case GP_KEY_1:
 					resize_backend(&params, 1, shift_flag);

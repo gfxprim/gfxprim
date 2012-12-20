@@ -8,7 +8,7 @@ LDLIBS+=-lrt `$(TOPDIR)/gfxprim-config --libs --libs-backends`
 
 APPS=spiv
 
-spiv: cpu_timer.o image_cache.o
+spiv: cpu_timer.o image_cache.o image_list.o
 
 include $(TOPDIR)/pre.mk
 include $(TOPDIR)/app.mk
