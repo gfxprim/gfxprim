@@ -23,16 +23,12 @@ all: toolcheck examples.html $(PAGES) api.html
 # Check if we have all the needed tools
 #
 toolcheck:
-	@echo "Checking if documentation tools are present..."
 	@if [ -z `which asciidoc 2>/dev/null` ] ; then \
-		echo "Could not find 'asciidoc'" ; exit 127 ; fi
+		echo "ERROR: Could not find 'asciidoc'" ; exit 127 ; fi
 	@if [ ! -d "/usr/share/graphviz" ] ; then \
-		echo "Could not find 'graphviz'" ; exit 127 ; fi
-	@if [ ! -e "/usr/lib/graphviz/python/gv.py" ] ; then \
-		echo "Found 'graphviz' but not Python bindings" ; exit 127 ; fi
+		echo "ERROR: Could not find 'graphviz'" ; exit 127 ; fi
 	@if [ -z `which latex 2>/dev/null` ] ; then \
-		echo "Could not find 'latex'" ; exit 127 ; fi
-	@echo "    ...seems okay"
+		echo "ERROR: Could not find 'latex'" ; exit 127 ; fi
 
 #
 # Create page for each part of API description
