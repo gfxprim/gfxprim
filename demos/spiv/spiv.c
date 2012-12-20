@@ -163,7 +163,10 @@ GP_Context *load_image(struct loader_params *params, int elevate)
 				return NULL;
 
 			GP_Fill(context, black_pixel);
-			GP_Print(context, NULL, context->w/2, context->h/2,
+			GP_Print(context, NULL, context->w/2, context->h/2 - 10,
+			         GP_ALIGN_CENTER|GP_VALIGN_CENTER, white_pixel, black_pixel,
+				 "'%s'", params->img_path);
+			GP_Print(context, NULL, context->w/2, context->h/2 + 10,
 		        	 GP_ALIGN_CENTER|GP_VALIGN_CENTER, white_pixel, black_pixel,
 				 "Failed to load image :( (%s)", strerror(errno));
 			GP_BackendFlip(backend);

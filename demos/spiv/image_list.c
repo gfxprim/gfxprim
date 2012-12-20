@@ -64,8 +64,10 @@ static int dir_filter(const struct dirent *d)
 	if (!strcmp(d->d_name, ".."))
 		return 0;
 	
+	//TODO: filter out directories, non-image files?
+
+
 	GP_DEBUG(4, "Adding file '%s'", d->d_name);
-	
 	
 	return 1;
 }
@@ -87,8 +89,13 @@ static void try_load_dir(struct image_list *self)
 
 	int ret = scandir(path, &self->dir_files, dir_filter, dir_cmp);
 
-	if (self->max_file == -1) {
+	if (ret == -1) {
 		GP_WARN("Failed to scandir '%s': %s", path, strerror(errno));
+		return;
+	}
+
+	if (ret == 0) {
+		GP_DEBUG(1, "There are no files in '%s'", path);
 		return;
 	}
 
