@@ -577,8 +577,51 @@ static void resize_backend(struct loader_params *params, float ratio, int shift_
 	GP_BackendResize(backend, w, h);
 }
 
+static const char *keys_help[] = {
+	"Keyboard control:",
+	"",
+	"I      - toggle show info box",
+	"P      - toggle show progress",
+	"R      - rotate by 90 degrees",
+	"]      - change to next resampling method",
+	"[      - change to prev resampling method",
+	"        (current method is shown in info box)",
+	"L      - toggle low pass filter",
+	"D      - drop image cache",
+	"H      - toggle help",
+	"",
+	"Esc",
+	"Enter",
+	"Q      - quit spiv",
+	"",
+	"PgDown - move ten image forward",
+	"PgUp   - move ten image backward",
+	"",
+	"Right",
+	"Up",
+	"Space  - move to the next image",
+	"",
+	"Left",
+	"Down",
+	"BckSpc - move to the prev image",
+	"",
+	"1      - resize spiv window to the image size",
+	"2      - resize spiv window to the half of the image size",
+	"3      - resize spiv window to the third of the image size",
+	"...",
+	"9      - resize spiv window to the ninth of the image size",
+	"",
+	"Shift 2 - resize spiv window twice of the image size",
+	"Shift 3 - resize spiv window three times of the image size",
+	"...",
+};
+
+static const int keys_help_len = sizeof(keys_help) / sizeof(char*);
+
 static void print_help(void)
 {
+	int i;
+
 	printf("Usage: spiv [opts] images\n\n");
 	printf("-I\n\tshow image info (filename and size)\n\n");
 	printf("-P\n\tshow loading progress\n\n");
@@ -592,36 +635,10 @@ static void print_help(void)
 	printf("-b\n\tpass backend init string to backend init\n");
 	printf("\tpass -b help for more info\n\n");
 
-	printf("Keyboard control:\n\n");
-	printf("I      - toggle show info\n");
-	printf("P      - toggle show progress\n");
-	printf("R      - rotate by 90 degrees\n");
-	printf("]      - change to next resampling method\n");
-	printf("[      - change to prev resampling method\n");
-	printf("        (current method is shown in info\n");
-	printf("L      - toggle low pass filter\n");
-	printf("D      - drop image cache\n");
-	printf("\nEsc\n");
-	printf("Enter\n");
-	printf("Q      - quit spiv\n\n");
-	printf("PgDown - move ten image forward\n");
-	printf("PgUp   - move ten image backward\n");
-	printf("\nRight\n");
-	printf("Up\n");
-	printf("Space  - move to the next image\n");
-	printf("\nLeft\n");
-	printf("Down\n");
-	printf("BckSpc - move to the prev image\n");
-	printf("\n");
-	printf("1      - resize spiv window to the image size\n");
-	printf("2      - resize spiv window to the half of the image size\n");
-	printf("3      - resize spiv window to the third of the image size\n");
-	printf("...\n");
-	printf("9      - resize spiv window to the ninth of the image size\n");
-	printf("\n");
-	printf("Shift 2 - resize spiv window twice of the image size\n");
-	printf("Shift 3 - resize spiv window three times of the image size\n");
-	printf("...\n\n");
+	for (i = 0; i < keys_help_len; i++)
+		puts(keys_help[i]);
+	
+	puts("");
 
 	printf("Some cool options to try:\n\n");
 	printf("spiv -e G1 -f images\n");
@@ -633,13 +650,28 @@ static void print_help(void)
 
 }
 
+static void show_help(void)
+{
+	GP_Context *c = backend->context;
+	int i;
+	
+	GP_Fill(c, black_pixel);
+
+	for (i = 0; i < keys_help_len; i++) {
+		GP_Print(c, NULL, 20, i * 15, GP_ALIGN_RIGHT|GP_VALIGN_BOTTOM,
+		         white_pixel, black_pixel, "%s", keys_help[i]);
+	}
+
+	GP_BackendFlip(backend);
+}
+
 int main(int argc, char *argv[])
 {
 	GP_Context *context = NULL;
 	const char *backend_opts = "X11";
 	int sleep_sec = -1;
 	int opt, debug_level = 0;
-	int shift_flag;
+	int shift_flag, help_flag = 0;
 	GP_PixelType emul_type = GP_PIXEL_UNKNOWN;
 
 	struct loader_params params = {
@@ -749,12 +781,10 @@ int main(int argc, char *argv[])
 		GP_Event ev;
 
 		while (GP_EventGet(&ev)) {
-
-			GP_EventDump(&ev);
-		
+			
 			shift_flag = GP_EventGetKey(&ev, GP_KEY_LEFT_SHIFT) ||
 			             GP_EventGetKey(&ev, GP_KEY_RIGHT_SHIFT);
-
+			
 			switch (ev.type) {
 			case GP_EV_REL:
 				switch (ev.code) {
@@ -772,6 +802,15 @@ int main(int argc, char *argv[])
 					continue;
 
 				switch (ev.val.key.key) {
+				case GP_KEY_H:
+					if (help_flag)
+						show_image(&params, NULL);
+					else
+						show_help();
+					
+					//TODO: remove help_flag on any other action done
+					help_flag = !help_flag;
+				break;
 				case GP_KEY_F:
 					if (GP_BackendIsX11(backend))
 						GP_BackendX11RequestFullscreen(backend, 2);
