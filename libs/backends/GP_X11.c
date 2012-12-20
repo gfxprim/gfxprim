@@ -129,6 +129,8 @@ static void x11_flip(GP_Backend *self)
 		XPutImage(x11->dpy, x11->win, DefaultGC(x11->dpy, x11->scr),
 		          x11->img, 0, 0, 0, 0, w, h);
 	
+	XFlush(x11->dpy);
+	
 	XUnlockDisplay(x11->dpy);
 }
 
