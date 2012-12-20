@@ -255,7 +255,7 @@ if __name__ ==  '__main__':
 		    [header_exists, "X11/Xlib.h"], "", "-lX11", ["backends"]],
                    ["X_SHM",
 		    "MIT-SHM X Extension",
-		    [header_exists, "X11/extensions/XShm.h"], "-lXext", "", ["backends"]],
+		    [header_exists, "X11/extensions/XShm.h"], "", "-lXext", ["backends"]],
 		   ["freetype",
                     "A high-quality and portable font engine",
                     [header_exists, "ft2build.h"], "", "`freetype-config --libs`", ["core"]],
