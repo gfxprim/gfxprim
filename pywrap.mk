@@ -3,9 +3,9 @@ $(error LIBNAME not defined, fix your library Makefile)
 endif
 
 SWIG_SRC=$(LIBNAME).i
-SWIG_PY=$(LIBNAME)_c.py
 SWIG_C=$(LIBNAME)_wrap.c
-SWIG_LIB=_$(LIBNAME)_c.so
+SWIG_PY=c_$(LIBNAME).py
+SWIG_LIB=_c_$(LIBNAME).so
 
 ifneq ($(SWIG),)
 

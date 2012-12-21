@@ -1,5 +1,5 @@
 %include "../common.i"
-%module(package="gfxprim.core") core_c
+%module(package="gfxprim.core") c_core
 
 %{
 #include "core/GP_Core.h"

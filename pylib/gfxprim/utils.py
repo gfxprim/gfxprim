@@ -12,6 +12,7 @@ def extend(cls, name=None):
     return method
   return decf
 
+
 def add_swig_getmethod(cls, name=None):
   "Decorator to add a property get method to a SWIG-defined class"
   def decf(method):
@@ -21,6 +22,7 @@ def add_swig_getmethod(cls, name=None):
     cls.__swig_getmethods__[propname] = method
   return decf
 
+
 def add_swig_setmethod(cls, name=None):
   "Decorator to add a property set method to a SWIG-defined class"
   def decf(method):
@@ -29,6 +31,7 @@ def add_swig_setmethod(cls, name=None):
       propname = method.__name__
     cls.__swig_setmethods__[propname] = method
   return decf
+
 
 def import_members(from_, to, include=[], exclude=[], sub=None):
   """Import members of `from_` to `to`. By default take all. If `exclude` is provided,
