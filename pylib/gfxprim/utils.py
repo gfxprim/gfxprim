@@ -13,6 +13,17 @@ def extend(cls, name=None):
   return decf
 
 
+def extend_direct(cls, name, call, doc, swig_doc=True):
+  "Decorator extending a class with a function"
+  def method(*args, **kwargs):
+    return call(*args, **kwargs)
+  method.__name__ = name
+  method.__doc__ = doc.strip() + '\n'
+  if swig_doc:
+    method.__doc__ = call.__doc__ + '\n\n' + doc.strip() + '\n'
+  type.__setattr__(cls, name, method)
+
+
 def add_swig_getmethod(cls, name=None):
   "Decorator to add a property get method to a SWIG-defined class"
   def decf(method):

@@ -22,7 +22,7 @@ def _init(module):
   """
 
   import re
-  from ..utils import extend, add_swig_getmethod, add_swig_setmethod
+  from ..utils import extend, extend_direct, add_swig_getmethod, add_swig_setmethod
   from ..utils import import_members
   _context = module['Context']
 
@@ -55,9 +55,10 @@ def _init(module):
     c.parent = None
     return c
 
+  extend_direct
   @extend(_context)
-  def Subcontext(self, x, y, w, h):
-    "Create a subcontext (rectangular view)."
+  def SubContext(self, x, y, w, h):
+    "Create a subcontext (a rectangular view)."
     c = c_core.GP_SubContextAlloc(self, x, y, w, h)
     c.parent = self
     return c
@@ -73,6 +74,22 @@ def _init(module):
     """Converts context to a different pixel type, allocates new context.
     See GP_ContextConvert() for details."""
     return c_core.GP_ContextConvert(self, pixeltype_no(target_type))
+
+  # Manipulation
+  extend_direct(_context, "PutPixel", c_core.GP_PutPixel,
+      "Set a pixel value encoded according to context PixelType. Clipped.")
+
+  extend_direct(_context, "GetPixel", c_core.GP_GetPixel,
+      "Get a pixel value (encoded according to context PixelType). Clipped.")
+
+  extend_direct(_context, "RotateCW", c_core.GP_ContextRotateCW,
+      "Rotate Context clockwise by changing the context orientation.")
+
+  extend_direct(_context, "RotateCCW", c_core.GP_ContextRotateCCW,
+      "Rotate Context counter-clockwise by changing the context orientation.")
+
+  extend_direct(_context, "Resize", c_core.GP_ContextResize,
+      "Resize the context bitmap (reallocate). Fails on subcontexts.")
 
   # Color conversions
 
@@ -136,23 +153,23 @@ TODO: on entering any func from Python, set up error reporting on GP_ABORT
 
 ! Pixeltype table and objects
 
-GP_PixelTypes
+GP_PixelTypes - FIX
 
 ! IN Context class
 
-GP_ContextAlloc
-GP_ContextResize
-GP_ContextConvertAlloc
-GP_ContextPrintInfo
-GP_ContextRotateCCW
-GP_SubContextAlloc
-GP_ContextConvert
-GP_ContextRotateCW
-GP_ContextFree
-GP_ContextInit
-GP_SubContext
-GP_ContextCopy
-GP_PixelAddrOffset
+GP_ContextAlloc         C
+GP_ContextResize        C
+GP_ContextConvertAlloc  C
+GP_ContextPrintInfo     N
+GP_ContextRotateCCW     C
+GP_SubContextAlloc      C
+GP_ContextConvert       C
+GP_ContextRotateCW      C
+GP_ContextFree          Ci
+GP_ContextInit          N
+GP_SubContext           N
+GP_ContextCopy          C
+GP_PixelAddrOffset      N
 
 ! ?
 
@@ -168,8 +185,8 @@ GP_PixelAddrOffset
 
 ! Color conversion
 
-GP_RGBA8888ToPixel
-GP_RGB888ToPixel
+GP_RGBA8888ToPixel    N
+GP_RGB888ToPixel      N
 GP_PixelToRGB888
 GP_PixelToRGBA8888
 GP_ColorNameToPixel
@@ -212,12 +229,12 @@ Blit - reimplement with keyword args, no raw
 
 ! IN Context - basic drawing
 
-GP_PutPixel
-GP_GetPixel
+GP_PutPixel             C
+GP_GetPixel             C
 
 ! ?
 
-# GP_NrThreads
+# GP_NrThreads          
 # GP_NrThreadsSet
 # GP_ProgressCallbackMP
 # SWIG_exception
