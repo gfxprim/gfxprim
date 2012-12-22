@@ -259,6 +259,9 @@ if __name__ ==  '__main__':
 		   ["freetype",
                     "A high-quality and portable font engine",
                     [header_exists, "ft2build.h"], "", "`freetype-config --libs`", ["core"]],
+		   ["dl",
+                    "Dynamic linker",
+                    [header_exists, "dlfcn.h"], "", "-ldl", ["core"]],
 		   ["V4L2",
                     "Video for linux 2",
                     [header_exists, "linux/videodev2.h"], "", "", ["grabbers"]]], cfg)
