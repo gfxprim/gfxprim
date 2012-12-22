@@ -20,8 +20,27 @@
  *                                                                           *
  *****************************************************************************/
 
+#define _GNU_SOURCE
+
+#include "../config.h"
+
 #include "core/GP_Common.h"
 
-void SWIG_exception(const char *msg)
+#ifdef HAVE_DL
+#include <dlfcn.h>
+#endif /* HAVE_DL */
+
+
+void SWIG_print_trace(void)
 {
+#ifdef HAVE_DL
+	/* Print python stack trace in case python lib is loaded and
+         * a python interpreter is initialized */
+	int (*dl_Py_IsInitialized)();
+	int (*dl_PyRun_SimpleString)(const char *);
+	dl_Py_IsInitialized = dlsym(RTLD_DEFAULT, "Py_IsInitialized");
+	dl_PyRun_SimpleString = dlsym(RTLD_DEFAULT, "PyRun_SimpleString");
+	if (dl_Py_IsInitialized && dl_PyRun_SimpleString && dl_Py_IsInitialized())
+		dl_PyRun_SimpleString("import traceback; traceback.print_stack();");
+#endif /* HAVE_DL */
 }

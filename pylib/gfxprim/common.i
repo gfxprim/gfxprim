@@ -5,6 +5,7 @@
 #define __attribute__(X)
 
 %include <stdint.i>
+%include <exception.i>
 
 %feature("autodoc");
 

@@ -100,11 +100,12 @@
  * GP_GENERAL_CHECK is a check with specified message prefix
  * (for assert and check)
  *
- * SWIG_exception is a dummy no-op that is used to raise an exception when wrapped.
- * NOTE: Currently totally useless. Hrmmppff.
+ * SWIG_print_trace() prints a trace of Python stack if a Python interpreter
+ * is set up. In case more wrappers are written, should print a trace
+ * for the currently active. 
  */
 
-void SWIG_exception(const char *msg);
+void SWIG_print_trace(void);
 
 #define GP_INTERNAL_ABORT_BUFSIZE 1024
 #define GP_INTERNAL_ABORT(str_abort_msg_, ...) do { \
@@ -117,7 +118,7 @@ void SWIG_exception(const char *msg);
 		buf += snprintf(buf, bufend - buf, "abort()"); \
 	else \
 		buf += snprintf(buf, bufend - buf, " " __VA_ARGS__); \
-	SWIG_exception(bufstart); \
+	SWIG_print_trace(); \
 	fprintf(stderr, "%s\n", bufstart); \
 	abort(); \
 } while (0)
