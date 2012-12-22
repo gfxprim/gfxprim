@@ -238,7 +238,7 @@ if __name__ ==  '__main__':
     #
     # name, description, [detection], cflags, ldflags, list of modules library is needed for
     #
-    l = libraries([["libpng", 
+    l = libraries([["libpng",
                     "Portable Network Graphics Library",
                     [header_exists, "png.h"], "", "-lpng", ["loaders"]],
                    ["libsdl",
@@ -262,6 +262,10 @@ if __name__ ==  '__main__':
 		   ["dl",
                     "Dynamic linker",
                     [header_exists, "dlfcn.h"], "", "-ldl", ["core"]],
+		   ["backtrace",
+                    "C stack trace writeout",
+                    [c_try_compile, "#include <execinfo.h>\nint main(void) { backtrace(0, 0); }",
+                      "Checking for backtrace() ... "], "", "", ["core"]],
 		   ["V4L2",
                     "Video for linux 2",
                     [header_exists, "linux/videodev2.h"], "", "", ["grabbers"]]], cfg)

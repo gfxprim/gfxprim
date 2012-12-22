@@ -24,14 +24,35 @@
 
 #include "../config.h"
 
-#include "core/GP_Common.h"
+#include <stdio.h>
+
+#ifdef HAVE_BACKTRACE
+#include <execinfo.h>
+#endif /* HAVE_BACKTRACE */
 
 #ifdef HAVE_DL
 #include <dlfcn.h>
 #endif /* HAVE_DL */
 
+#include "core/GP_Common.h"
 
-void SWIG_print_trace(void)
+#define GP_ABORT_INFO_TRACE_LEVELS 20
+
+
+void GP_PrintCStack(void)
+{
+#ifdef HAVE_BACKTRACE
+#if GP_ABORT_INFO_TRACE_LEVELS > 0
+	void * buffer[GP_ABORT_INFO_TRACE_LEVELS + 1];
+	int size = backtrace(buffer, GP_ABORT_INFO_TRACE_LEVELS);
+	fprintf(stderr, "\nC stack trace (most recent call first):\n");
+	fflush(stderr);
+	backtrace_symbols_fd(buffer, size, fileno(stderr));
+#endif /* GP_ABORT_INFO_TRACE_LEVELS > 0 */
+#endif /* HAVE_BACKTRACE */
+}
+
+void GP_PrintPythonStack(void)
 {
 #ifdef HAVE_DL
 	/* Print python stack trace in case python lib is loaded and
@@ -40,7 +61,17 @@ void SWIG_print_trace(void)
 	int (*dl_PyRun_SimpleString)(const char *);
 	dl_Py_IsInitialized = dlsym(RTLD_DEFAULT, "Py_IsInitialized");
 	dl_PyRun_SimpleString = dlsym(RTLD_DEFAULT, "PyRun_SimpleString");
-	if (dl_Py_IsInitialized && dl_PyRun_SimpleString && dl_Py_IsInitialized())
+	if (dl_Py_IsInitialized && dl_PyRun_SimpleString && dl_Py_IsInitialized()) {
+		fprintf(stderr, "\nPython stack trace (most recent call last; ignore last line):\n");
+		fflush(stderr);
 		dl_PyRun_SimpleString("import traceback; traceback.print_stack();");
+        }
 #endif /* HAVE_DL */
 }
+
+void GP_PrintAbortInfo(void)
+{
+      GP_PrintPythonStack();
+      GP_PrintCStack();
+}
+

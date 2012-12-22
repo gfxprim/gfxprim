@@ -99,13 +99,14 @@
  * and prints message and calls abort().
  * GP_GENERAL_CHECK is a check with specified message prefix
  * (for assert and check)
- *
- * SWIG_print_trace() prints a trace of Python stack if a Python interpreter
- * is set up. In case more wrappers are written, should print a trace
- * for the currently active. 
  */
 
-void SWIG_print_trace(void);
+/* 
+ * Print as much trace info as possible. Currently, the (C) call stack and
+ * the Python stack if a Python interpreter is set up. In case more wrappers
+ * are written, it should print a trace for the currently active.
+ */
+void GP_PrintAbortInfo(void);
 
 #define GP_INTERNAL_ABORT_BUFSIZE 1024
 #define GP_INTERNAL_ABORT(str_abort_msg_, ...) do { \
@@ -118,8 +119,8 @@ void SWIG_print_trace(void);
 		buf += snprintf(buf, bufend - buf, "abort()"); \
 	else \
 		buf += snprintf(buf, bufend - buf, " " __VA_ARGS__); \
-	SWIG_print_trace(); \
 	fprintf(stderr, "%s\n", bufstart); \
+	GP_PrintAbortInfo(); \
 	abort(); \
 } while (0)
 
