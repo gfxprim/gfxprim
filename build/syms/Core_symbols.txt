@@ -22,6 +22,8 @@ GP_DebugPrint
 GP_SetDebugLevel
 GP_GetDebugLevel
 
+GP_PrintAbortInfo
+
 GP_ColorToPixel
 GP_ColorLoadPixels
 GP_RGBA8888ToPixel
