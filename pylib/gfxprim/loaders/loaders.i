@@ -1,5 +1,5 @@
 %include "../common.i"
-%module(package="gfxprim.loaders") loaders_c
+%module(package="gfxprim.loaders") c_loaders
 
 %{
 #include "core/GP_Core.h"
@@ -14,7 +14,7 @@ ERROR_ON_NONZERO(GP_SaveImage);
 
 %newobject GP_LoadImage;
 
-%include "GP_Loaders.h"
+%include "GP_Loader.h"
 
 ERROR_ON_NONZERO(GP_OpenJPG);
 ERROR_ON_NULL(GP_ReadJPG);
