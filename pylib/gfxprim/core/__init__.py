@@ -91,6 +91,26 @@ def _init(module):
   extend_direct(_context, "Resize", c_core.GP_ContextResize,
       "Resize the context bitmap (reallocate). Fails on subcontexts.")
 
+  # Blit
+
+  @extend(_context)
+  def Blit(self, sx, sy, target, tx, ty, w=None, h=None, sx2=None, sy2=None,
+           tx2=None, ty2=None):
+    """Copy a rectangle from self to target. (sx,sy) and (tx,ty) define
+    upper-left corners, rectangle size is given by (width, height), lower-right
+    corner in source or lower-right corner in the target. Clipped."""
+    assert sum([w is not None, sx2 is not None, tx2 is not None]) == 1
+    assert sum([h is not None, sy2 is not None, ty2 is not None]) == 1
+    if sx2 is not None:
+      w = max(0, sx2 - sx)
+    if tx2 is not None:
+      w = max(0, tx2 - tx)
+    if sy2 is not None:
+      h = max(0, sy2 - sy)
+    if ty2 is not None:
+      h = max(0, ty2 - ty)
+    return c_core.GP_BlitXYWH_Clipped(self, sx, sy, target, tx, ty, w, h)
+
   # Color conversions
 
   @extend(_context)
@@ -163,7 +183,7 @@ GP_ContextConvertAlloc  C
 GP_ContextPrintInfo     N
 GP_ContextRotateCCW     C
 GP_SubContextAlloc      C
-GP_ContextConvert       C
+GP_ContextConvert       N
 GP_ContextRotateCW      C
 GP_ContextFree          Ci
 GP_ContextInit          N
@@ -190,10 +210,10 @@ GP_RGB888ToPixel      N
 GP_PixelToRGB888
 GP_PixelToRGBA8888
 GP_ColorNameToPixel
+GP_ColorToPixel
 
 GP_PixelTypeByName - reimplement
 
-# GP_ColorToPixel
 # GP_PixelRGBMatch
 # GP_ColorLoadPixels
 # GP_PixelRGBLookup
