@@ -16,7 +16,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2011      Tomas Gavenciak <gavento@ucw.cz>                  *
+ * Copyright (C) 2011-2012 Tomas Gavenciak <gavento@ucw.cz>                  *
+ * Copyright (C) 2012      Cyril Hrubis    <metan@ucw.cz>                    *
  *                                                                           *
  *****************************************************************************/
 
@@ -39,7 +40,7 @@
 #define GP_ABORT_INFO_TRACE_LEVELS 20
 
 
-void GP_PrintCStack(void)
+static void print_c_stack(void)
 {
 #ifdef HAVE_BACKTRACE
 #if GP_ABORT_INFO_TRACE_LEVELS > 0
@@ -52,7 +53,7 @@ void GP_PrintCStack(void)
 #endif /* HAVE_BACKTRACE */
 }
 
-void GP_PrintPythonStack(void)
+static void print_python_stack(void)
 {
 #ifdef HAVE_DL
 	/* Print python stack trace in case python lib is loaded and
@@ -65,13 +66,13 @@ void GP_PrintPythonStack(void)
 		fprintf(stderr, "\nPython stack trace (most recent call last; ignore last line):\n");
 		fflush(stderr);
 		dl_PyRun_SimpleString("import traceback; traceback.print_stack();");
-        }
+	}
 #endif /* HAVE_DL */
 }
 
 void GP_PrintAbortInfo(void)
 {
-      GP_PrintPythonStack();
-      GP_PrintCStack();
+	print_python_stack();
+	print_c_stack();
 }
 

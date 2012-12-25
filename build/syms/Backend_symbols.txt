@@ -1,7 +1,13 @@
 GP_BackendInit
+
 GP_BackendLinuxFBInit
+
 GP_BackendVirtualInit
+
 GP_BackendX11Init
+GP_BackendIsX11
+GP_BackendX11RequestFullscreen
+
 GP_BackendSDLInit
 
 GP_ContextFromSurface
