@@ -2,7 +2,6 @@
 
 %% block descr
 Pixel type definitions and functions
-Do not include directly, use GP_Pixel.h
 %% endblock
 
 %% block body
@@ -13,7 +12,7 @@ Do not include directly, use GP_Pixel.h
 /* 
  * Description of all known pixel types 
  */
-const GP_PixelTypeDescription const GP_PixelTypes [] = {
+const GP_PixelTypeDescription const GP_PixelTypes [GP_PIXEL_MAX] = {
 %% for pt in pixeltypes
 	/* GP_PIXEL_{{ pt.name }} */ {
 		.type	= GP_PIXEL_{{ pt.name }},

@@ -55,7 +55,6 @@ def _init(module):
     c.parent = None
     return c
 
-  extend_direct
   @extend(_context)
   def SubContext(self, x, y, w, h):
     "Create a subcontext (a rectangular view)."
@@ -90,6 +89,26 @@ def _init(module):
 
   extend_direct(_context, "Resize", c_core.GP_ContextResize,
       "Resize the context bitmap (reallocate). Fails on subcontexts.")
+
+  # Blit
+
+  @extend(_context)
+  def Blit(self, sx, sy, target, tx, ty, w=None, h=None, sx2=None, sy2=None,
+           tx2=None, ty2=None):
+    """Copy a rectangle from self to target. (sx,sy) and (tx,ty) define
+    upper-left corners, rectangle size is given by (width, height), lower-right
+    corner in source or lower-right corner in the target. Clipped."""
+    assert sum([w is not None, sx2 is not None, tx2 is not None]) == 1
+    assert sum([h is not None, sy2 is not None, ty2 is not None]) == 1
+    if sx2 is not None:
+      w = max(0, sx2 - sx)
+    if tx2 is not None:
+      w = max(0, tx2 - tx)
+    if sy2 is not None:
+      h = max(0, sy2 - sy)
+    if ty2 is not None:
+      h = max(0, ty2 - ty)
+    return c_core.GP_BlitXYWH_Clipped(self, sx, sy, target, tx, ty, w, h)
 
   # Color conversions
 
@@ -129,114 +148,28 @@ def _init(module):
   # every Context also points to C for convenience
   extend(_context, name='C')(C)
 
-  # Bulk import of functions - TODO: only import specified
+  # Arrays with pixel type info
+  module['PixelTypes'] = [c_core.GP_PixelTypes_access(i)
+                              for i in range(C.PIXEL_MAX)]
+
+  module['PixelTypesDict'] = dict(((t.name, t) for t in module['PixelTypes']))
+
+  def PixelTypeByName(name):
+    "Return a PixelType descriptor by name, raise KeyError if no such type exists."
+    return module['PixelTypesDict'][name]
+  module['PixelTypeByName'] = PixelTypeByName
+
+  # Bulk import of functions
   import_members(c_core, module, sub=strip_GP,
-    exclude=const_regexes + [
-      '^GP_Blit\w+$',
-      '^GP_Context\w+$',
-      '^GP_PixelSNPrint\w+$',
-      '^GP_WritePixels\w+$',
-      '.*_Raw.*',
-      '^\w+_swigregister$',
-      '^cvar$',
-      '^_\w+$'])
+      include=[
+        '^GP_Color.*$', # Might use trimming
+        '^GP_[GS]etDebugLevel$',
+        '^GP_PixelRGB.*$', # ...Lookup and ...Match
+        '^GP_PixelToRGB.*$', # Needs love
+        '^GP_RGB.*$', # Needs filtering
+        #'^GP_ProgressCallback.*$', # Needs work
+        ])
 
 _init(locals())
 del _init
-
-"""
-TODO: on entering any func from Python, set up error reporting on GP_ABORT
-(raise an exception, restore stack and return, possibly longjmp?
-(or just force python trace?)
-
-!! LIST of symbols to implement
-
-! Pixeltype table and objects
-
-GP_PixelTypes - FIX
-
-! IN Context class
-
-GP_ContextAlloc         C
-GP_ContextResize        C
-GP_ContextConvertAlloc  C
-GP_ContextPrintInfo     N
-GP_ContextRotateCCW     C
-GP_SubContextAlloc      C
-GP_ContextConvert       C
-GP_ContextRotateCW      C
-GP_ContextFree          Ci
-GP_ContextInit          N
-GP_SubContext           N
-GP_ContextCopy          C
-GP_PixelAddrOffset      N
-
-! ?
-
-# GP_GammaRelease
-# GP_GammaCopy
-# GP_GammaAcquire
-
-! ?
-
-# GP_DebugPrint
-# GP_SetDebugLevel
-# GP_GetDebugLevel
-
-! Color conversion
-
-GP_RGBA8888ToPixel    N
-GP_RGB888ToPixel      N
-GP_PixelToRGB888
-GP_PixelToRGBA8888
-GP_ColorNameToPixel
-
-GP_PixelTypeByName - reimplement
-
-# GP_ColorToPixel
-# GP_PixelRGBMatch
-# GP_ColorLoadPixels
-# GP_PixelRGBLookup
-# GP_ColorNameToColor
-# GP_ColorToColorName
-
-! IN Context class
-
-Blit - reimplement with keyword args, no raw
-
-# GP_BlitXYXY
-# GP_BlitXYXY_Fast
-# GP_BlitXYWH
-# GP_BlitXYWH_Clipped
-# GP_BlitXYXY_Clipped
-# GP_BlitXYXY_Raw_Fast
-# GP_BlitXYWH_Raw
-# GP_BlitXYXY_Raw
-
-! Do not want
-
-# GP_WritePixels_1BPP_LE
-# GP_WritePixels_2BPP_LE
-# GP_WritePixels_4BPP_LE
-# GP_WritePixels1bpp
-# GP_WritePixels2bpp
-# GP_WritePixels4bpp
-# GP_WritePixels8bpp
-# GP_WritePixels16bpp
-# GP_WritePixels18bpp
-# GP_WritePixels32bpp
-# GP_WritePixels24bpp
-
-! IN Context - basic drawing
-
-GP_PutPixel             C
-GP_GetPixel             C
-
-! ?
-
-# GP_NrThreads          
-# GP_NrThreadsSet
-# GP_ProgressCallbackMP
-# SWIG_exception
-"""
 
