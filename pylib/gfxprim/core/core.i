@@ -35,6 +35,14 @@ ERROR_ON_NULL(GP_ColorToColorName);
 %import "GP_FnPerBpp.h"
 %import "GP_FnPerBpp.gen.h"
 
+%inline %{
+const GP_PixelTypeDescription *GP_PixelTypes_access(GP_PixelType no)
+{
+        if (no < 0 || no >= GP_PIXEL_MAX) no = GP_PIXEL_UNKNOWN;
+        return &GP_PixelTypes[no];
+}
+%}
+
 /*
  * GP_Context wrapping
  */

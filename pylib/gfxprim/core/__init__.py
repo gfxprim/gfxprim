@@ -149,7 +149,18 @@ def _init(module):
   # every Context also points to C for convenience
   extend(_context, name='C')(C)
 
-  # Bulk import of functions - TODO: only import specified
+  # Arrays with pixel type info
+  module['PixelTypes'] = [c_core.GP_PixelTypes_access(i)
+                              for i in range(C.PIXEL_MAX)]
+
+  module['PixelTypesDict'] = dict(((t.name, t) for t in module['PixelTypes']))
+
+  def PixelTypeByName(name):
+    "Return a PixelType descriptor by name, raise KeyError if no such type exists."
+    return module['PixelTypesDict'][name]
+  module['PixelTypeByName'] = PixelTypeByName
+
+  # Bulk import of functions
   import_members(c_core, module, sub=strip_GP,
     exclude=const_regexes + [
       '^GP_Blit\w+$',
