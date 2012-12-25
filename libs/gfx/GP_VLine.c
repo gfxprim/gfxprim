@@ -23,23 +23,35 @@
  *                                                                           *
  *****************************************************************************/
 
+#include "core/GP_Common.h"
 #include "core/GP_GetPutPixel.h"
 #include "core/GP_FnPerBpp.h"
 
 #include "gfx/GP_VLine.h"
 #include "gfx/GP_HLine.h"
 
-#include "algo/VLine.algo.h"
-
-/* Generate drawing functions for various bit depths. */
-GP_DEF_DRAW_FN_PER_BPP(GP_VLine, DEF_VLINE_FN)
+/* 
+ * Ensures that coordinates are in correct order, and clips them.
+ * Exits immediately if the line is completely clipped out.
+ */
+#define ORDER_AND_CLIP_COORDS do {             \
+	if (y0 > y1)                           \
+		GP_SWAP(y0, y1);               \
+	if (x < 0 || x >= (int) context->w ||  \
+	    y1 < 0 || y0 >= (int) context->h)  \
+		return;                        \
+	y0 = GP_MAX(y0, 0);                    \
+	y1 = GP_MIN(y1, (int) context->h - 1); \
+} while (0)
 
 void GP_VLineXYY_Raw(GP_Context *context, GP_Coord x, GP_Coord y0,
                      GP_Coord y1, GP_Pixel pixel)
 {
 	GP_CHECK_CONTEXT(context);
+	
+	ORDER_AND_CLIP_COORDS;
 
-	GP_FN_PER_BPP_CONTEXT(GP_VLine, context, context, x, y0, y1, pixel);
+	GP_FN_PER_BPP_CONTEXT(GP_VLine_Raw, context, context, x, y0, y1, pixel);
 }
 
 void GP_VLineXYH_Raw(GP_Context *context, GP_Coord x, GP_Coord y, GP_Size h,
