@@ -93,7 +93,7 @@ static int WritePixel{{ "_%i_%i_%i_%i"|format(pixelsize, offset, len, aligment) 
 %% endfor
 %% endfor
 
-	GP_WritePixels{{ pixelsize }}bpp(write_buf + {{aligment + offset * pixelsize//8}}, {{ len }}, 0xffffffff>>{{32 - pixelsize}});
+	GP_WritePixels_{{ pixelsize }}BPP(write_buf + {{aligment + offset * pixelsize//8}}, {{ len }}, 0xffffffff>>{{32 - pixelsize}});
 
 	COMPARE_BUFFERS({{"\"p=%i o=%i l=%i a=%i\""|format(pixelsize, offset, len, aligment)}}, write_buf, gen_buf);
 }

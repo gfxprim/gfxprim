@@ -1,3 +1,3 @@
 TOPDIR=..
-SUBDIRS=core
+SUBDIRS=core gfx
 include $(TOPDIR)/post.mk

@@ -61,7 +61,6 @@ typedef uint32_t GP_Pixel;
  * Information about ordering of pixels in byte for 1, 2 and 4 bpp 
  * used in a one bit variable in GP_Context 
  */
-
 typedef enum {
 	/* less significant bits contain pixels with lower indices */
 	/* also used for irrelevant bit-endian */
@@ -80,7 +79,6 @@ typedef enum {
  *  A        - opacity (0=transparent)
  *  P        - palette (index)
  */
-
 typedef struct {
 	char name[8];    /* Channel name */
 	uint8_t offset;  /* Offset in bits */
@@ -90,7 +88,6 @@ typedef struct {
 /*
  * Maximum number of channels in a PixelType
  */
-
 #define GP_PIXELTYPE_MAX_CHANNELS 8
 
 /*
@@ -98,7 +95,6 @@ typedef struct {
  * Assumes name with at most 15 chars
  * Assumes at most 8 channels
  */
-
 typedef struct {
 	GP_PixelType type;        /* Number of the type */
 	const char name[16];      /* Name */
