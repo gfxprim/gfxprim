@@ -31,10 +31,9 @@ void *tst_alloc_barrier_right(size_t size)
 {
 	size_t pagesize = sysconf(_SC_PAGESIZE);
 	size_t pages = size/pagesize + !!(size%pagesize) + 1;
-
-	char *buf = memalign(pagesize, pages * pagesize);
-
-	if (buf == NULL)
+	char *buf;
+	
+	if (posix_memalign((void*)&buf, pagesize, pages * pagesize))
 		return NULL;
 
 	/*
@@ -70,9 +69,9 @@ void *tst_alloc_barrier_left(size_t size)
 	size_t pagesize = sysconf(_SC_PAGESIZE);
 	size_t pages = size/pagesize + !!(size%pagesize) + 1;
 
-	char *buf = memalign(pagesize, pages * pagesize);
-
-	if (buf == NULL)
+	char *buf;
+	
+	if (posix_memalign((void*)&buf, pagesize, pages * pagesize))
 		return NULL;
 
 	/* 
