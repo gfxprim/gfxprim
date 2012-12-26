@@ -16,19 +16,43 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2012 Jiri "BlueBear" Dluhos                            *
- *                         <jiri.bluebear.dluhos@gmail.com>                  *
- *                                                                           *
  * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
-#ifndef CORE_GP_WRITEPIXEL_H
-#define CORE_GP_WRITEPIXEL_H
+%% extends 'base.h.t'
 
-#include <stddef.h>
-#include <stdint.h>
+{% block description %}Write pixel{% endblock %}
 
-#include "core/GP_WritePixel.gen.h"
+{% block body %}
 
-#endif /* CORE_GP_WRITEPIXEL_H */
+#include "core/GP_GetSetBits.h"
+#include "core/GP_GetPutPixel.h"
+#include "core/GP_WritePixel.gen.h" 
+
+{# Some pixel types has hand written optimized functions #}
+%% set hand_optimized = ['1BPP_LE', '1BPP_BE',
+                         '2BPP_LE', '2BPP_BE',
+                         '4BPP_LE', '4BPP_BE',
+                         '8BPP', '16BPP',
+                         '24BPP', '32BPP']
+
+%% for ps in pixelsizes
+%% if ps.suffix not in hand_optimized
+%% if ps.needs_bit_endian()
+void GP_WritePixels_{{ ps.suffix }}(void *start, uint8_t off,
+                            size_t cnt, unsigned int val)
+{
+	//TODO:
+}
+%% else
+void GP_WritePixels_{{ ps.suffix }}(void *start, size_t cnt, unsigned int val)
+{
+	//TODO:
+}
+%% endif
+
+%% endif
+%% endfor
+
+{% endblock body %}

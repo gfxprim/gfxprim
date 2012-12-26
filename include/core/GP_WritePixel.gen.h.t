@@ -16,19 +16,31 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2012 Jiri "BlueBear" Dluhos                            *
- *                         <jiri.bluebear.dluhos@gmail.com>                  *
- *                                                                           *
  * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
-#ifndef CORE_GP_WRITEPIXEL_H
-#define CORE_GP_WRITEPIXEL_H
+%% extends 'base.h.t'
 
-#include <stddef.h>
-#include <stdint.h>
+{% block description %}Write Pixels generated header{% endblock %}
 
-#include "core/GP_WritePixel.gen.h"
+{% block body %}
 
-#endif /* CORE_GP_WRITEPIXEL_H */
+/*
+ * These functions writes cnt pixels using value val starting at start address
+ * and additionally (for pixel sizes that are not aligned to the whole bytes)
+ * at off offset in the first byte (i.e. byte at the start address).
+ */
+
+%% for ps in pixelsizes
+%% if ps.needs_bit_endian()
+void GP_WritePixels_{{ ps.suffix }}(void *start, uint8_t off,
+                            size_t cnt, unsigned int val);
+
+%% else
+void GP_WritePixels_{{ ps.suffix }}(void *start, size_t cnt, unsigned int val);
+
+%% endif
+%% endfor
+
+{% endblock body %}
