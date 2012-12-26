@@ -100,29 +100,19 @@
  * GP_GENERAL_CHECK is a check with specified message prefix
  * (for assert and check)
  */
+#define GP_INTERNAL_ABORT(...) do { \
+	GP_PrintAbortInfo(__FILE__, __FUNCTION__, __LINE__, __VA_ARGS__); \
+	abort(); \
+} while (0)
 
 /* 
  * Print as much trace info as possible. Currently, the (C) call stack and
  * the Python stack if a Python interpreter is set up. In case more wrappers
  * are written, it should print a trace for the currently active.
  */
-void GP_PrintAbortInfo(void);
-
-#define GP_INTERNAL_ABORT_BUFSIZE 1024
-#define GP_INTERNAL_ABORT(str_abort_msg_, ...) do { \
-	char bufstart[GP_INTERNAL_ABORT_BUFSIZE], *buf = bufstart; \
-	char *bufend = buf + GP_INTERNAL_ABORT_BUFSIZE; \
-	buf += snprintf(buf, bufend - buf, "*** gfxprim: %s:%d: in %s: %s", \
-			__FILE__, __LINE__, __FUNCTION__, str_abort_msg_); \
-	if (buf > bufend) buf = bufend; \
-	if (! (#__VA_ARGS__ [0])) \
-		buf += snprintf(buf, bufend - buf, "abort()"); \
-	else \
-		buf += snprintf(buf, bufend - buf, " " __VA_ARGS__); \
-	fprintf(stderr, "%s\n", bufstart); \
-	GP_PrintAbortInfo(); \
-	abort(); \
-} while (0)
+void GP_PrintAbortInfo(const char *file, const char *function, unsigned int line,
+                       const char *msg, const char *fmt, ...)
+		       __attribute__ ((format (printf, 5, 6)));
 
 #define GP_GENERAL_CHECK(check_cond_, check_message_, ...) do { \
 	if (unlikely(!(check_cond_))) { \
@@ -138,10 +128,11 @@ void GP_PrintAbortInfo(void);
  * Aborts and prints the message along with the location in code
  * to stderr. Used for fatal errors.
  *
- * Use as either GP_ABORT(), GP_ABORT(msg) or GP_ABORT(format, params...) where
+ * Use as either GP_ABORT(msg) or GP_ABORT(format, params...) where
  * msg and format must be string constants.
  */
-#define GP_ABORT(...) GP_INTERNAL_ABORT("", ##__VA_ARGS__)
+#define GP_ABORT(...) \
+	GP_INTERNAL_ABORT("\n", __VA_ARGS__)
 
 /*
  * Checks the condition and aborts immediately if it is not satisfied,
@@ -153,7 +144,7 @@ void GP_PrintAbortInfo(void);
  * constants.
  */
 #define GP_ASSERT(check_cond_, ...) \
-	GP_GENERAL_CHECK(check_cond_, "assertion failed: ", ##__VA_ARGS__);
+	GP_GENERAL_CHECK(check_cond_, "assertion failed: ", ##__VA_ARGS__)
 
 /*
  * Perform a runtime check, on failure abort and print a message.
@@ -164,6 +155,6 @@ void GP_PrintAbortInfo(void);
  * constants.
  */
 #define GP_CHECK(check_cond_, ...) \
-	GP_GENERAL_CHECK(check_cond_, "check failed: ", ##__VA_ARGS__);
+	GP_GENERAL_CHECK(check_cond_, "check failed: ", ##__VA_ARGS__)
 
 #endif /* CORE_GP_COMMON_H */

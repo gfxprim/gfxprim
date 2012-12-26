@@ -26,6 +26,7 @@
 #include "../config.h"
 
 #include <stdio.h>
+#include <stdarg.h>
 
 #ifdef HAVE_BACKTRACE
 #include <execinfo.h>
@@ -70,9 +71,20 @@ static void print_python_stack(void)
 #endif /* HAVE_DL */
 }
 
-void GP_PrintAbortInfo(void)
+void GP_PrintAbortInfo(const char *file, const char *func, unsigned int line,
+                       const char *msg, const char *fmt, ...)
 {
+	va_list va;
+
+	fprintf(stderr, "*** gfxprim: %s:%d: in %s: %s\n",
+	        file, line, func, msg);
+
+	va_start(va, fmt);
+	vfprintf(stderr, fmt, va);
+	va_end(va);
+
+	fprintf(stderr, "\n");
+
 	print_python_stack();
 	print_c_stack();
 }
-
