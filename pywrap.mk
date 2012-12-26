@@ -13,7 +13,11 @@ INCLUDES+=$(addprefix -I$(TOPDIR)/include/, $(INCLUDE))
 
 ALL+=$(SWIG_LIB) $(SWIG_PY)
 
-$(SWIG_C) $(SWIG_PY): $(SWIG_SRC)
+# Empty rule to satisfy SWIG_PY
+$(SWIG_PY): $(SWIG_C)
+	@
+
+$(SWIG_C): $(SWIG_SRC)
 ifdef VERBOSE
 	$(SWIG) $(SWIGOPTS) -python $(INCLUDES) $<
 else # VERBOSE
