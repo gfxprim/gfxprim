@@ -37,7 +37,8 @@ static int GP_FilterSigma_Raw(const GP_Context *src,
                               GP_Size w_src, GP_Size h_src,
                               GP_Context *dst,
                               GP_Coord x_dst, GP_Coord y_dst,
-                              int xrad, int yrad, int min, float sigma,
+                              int xrad, int yrad,
+                              unsigned int min, float sigma,
                               GP_ProgressCallback *callback)
 {
 	int x, y;
@@ -68,7 +69,7 @@ static int GP_FilterSigma_Raw(const GP_Context *src,
 	for (x = 0; x < (int)w; x++) {
 		int xi = GP_CLAMP(x_src + x - xrad, 0, (int)src->w - 1);
 			
-		for (y = 0; y < ydiam; y++) {
+		for (y = 0; y < (int)ydiam; y++) {
 			int yi = GP_CLAMP(y_src + y - yrad, 0, (int)src->h - 1);
 
 			GP_Pixel pix = GP_GetPixel_Raw_24BPP(src, xi, yi);
@@ -206,7 +207,8 @@ int GP_FilterSigmaEx(const GP_Context *src,
                      GP_Size w_src, GP_Size h_src,
                      GP_Context *dst,
                      GP_Coord x_dst, GP_Coord y_dst,
-                     int xrad, int yrad, int min, float sigma,
+                     int xrad, int yrad,
+                     unsigned int min, float sigma,
 		     GP_ProgressCallback *callback)
 {
 	GP_CHECK(src->pixel_type == dst->pixel_type);
@@ -225,7 +227,8 @@ int GP_FilterSigmaEx(const GP_Context *src,
 GP_Context *GP_FilterSigmaExAlloc(const GP_Context *src,
                                   GP_Coord x_src, GP_Coord y_src,
                                   GP_Size w_src, GP_Size h_src,
-                                  int xrad, int yrad, int min, float sigma,
+                                  int xrad, int yrad,
+                                  unsigned int min, float sigma,
                                   GP_ProgressCallback *callback)
 {
 	int ret;

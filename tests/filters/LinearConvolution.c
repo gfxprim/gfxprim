@@ -114,7 +114,7 @@ static int test_v_lin_conv_box_3_raw(void)
 	if (ret != TST_SUCCESS)
 		return ret;
 	
-	GP_SetDebugLevel(10);
+//	GP_SetDebugLevel(10);
 
 	/* Apply the convolution */
 	float kernel[] = {1, 1, 1};

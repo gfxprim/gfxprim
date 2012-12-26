@@ -39,7 +39,7 @@ GP_Context *GP_LoadTmpFile(const char *src_path, GP_ProgressCallback *callback)
 	enum GP_PixelType pixel_type;
 	char sig[sizeof(file_sig)];
 	GP_Context *ret;
-	int err;
+	int err, i;
 
 	f = fopen(src_path, "r");
 
@@ -58,15 +58,15 @@ GP_Context *GP_LoadTmpFile(const char *src_path, GP_ProgressCallback *callback)
 		goto err0;
 	}
 
-	/* Read context metadata */	
-	fread(&w, sizeof(w), 1, f);
-	fread(&h, sizeof(h), 1, f);
-	fread(&offset, sizeof(offset), 1, f);
-	fread(&bpr, sizeof(bpr), 1, f);
-	fread(&pixel_type, sizeof(pixel_type), 1, f);
-	fread(&flags, 1, 1, f);
+	/* Read context metadata */
+	i  = fread(&w, sizeof(w), 1, f);
+	i += fread(&h, sizeof(h), 1, f);
+	i += fread(&offset, sizeof(offset), 1, f);
+	i += fread(&bpr, sizeof(bpr), 1, f);
+	i += fread(&pixel_type, sizeof(pixel_type), 1, f);
+	i += fread(&flags, 1, 1, f);
 
-	if (ferror(f)) {
+	if (i != 6 || ferror(f)) {
 		err = EIO;
 		goto err0;
 	}
@@ -121,7 +121,7 @@ int GP_SaveTmpFile(const GP_Context *src, const char *dst_path,
 {
 	FILE *f;
 	int err;
-	uint32_t y;
+	uint32_t y, i;
 
 	f = fopen(dst_path, "w");
 
@@ -129,14 +129,14 @@ int GP_SaveTmpFile(const GP_Context *src, const char *dst_path,
 		return 1;
 
 	/* Write a signature */
-	fwrite(file_sig, sizeof(file_sig), 1, f);
+	i = fwrite(file_sig, sizeof(file_sig), 1, f);
 
 	/* Write block of metadata */
-	fwrite(&src->w, sizeof(src->w), 1, f);
-	fwrite(&src->h, sizeof(src->h), 1, f);
-	fwrite(&src->offset, sizeof(src->offset), 1, f);
-	fwrite(&src->bytes_per_row, sizeof(src->bytes_per_row), 1, f);
-	fwrite(&src->pixel_type, sizeof(src->pixel_type), 1, f);
+	i += fwrite(&src->w, sizeof(src->w), 1, f);
+	i += fwrite(&src->h, sizeof(src->h), 1, f);
+	i += fwrite(&src->offset, sizeof(src->offset), 1, f);
+	i += fwrite(&src->bytes_per_row, sizeof(src->bytes_per_row), 1, f);
+	i += fwrite(&src->pixel_type, sizeof(src->pixel_type), 1, f);
 
 	uint8_t flags = 0;
 	
@@ -149,7 +149,12 @@ int GP_SaveTmpFile(const GP_Context *src, const char *dst_path,
 	if (src->y_swap)
 		flags |= 0x04;
 
-	fwrite(&flags, 1, 1, f);
+	i += fwrite(&flags, 1, 1, f);
+
+	if (i != 7) {
+		err = EIO;
+		goto err1;
+	}
 
 	/* And pixels */
 	for (y = 0; y < src->h; y++) {
