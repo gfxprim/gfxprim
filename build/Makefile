@@ -1,7 +1,10 @@
 LIB_OBJECTS=$(shell ./get_objs.sh)
 
 all: libGP.a libGP.so libGP.so.0
-.PHONY: libGP.a libGP.so libGP.so.0
+
+libGP.a: $(LIB_OBJECTS)
+libGP.so: $(LIB_OBJECTS)
+libGP.so.0: $(LIB_OBJECTS)
 
 rebuild: all
 
