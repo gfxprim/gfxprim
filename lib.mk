@@ -29,7 +29,7 @@ ifdef VERBOSE
 else
 	@rm -f $(LIBP)$(LIB).so.0
 	@cd $(LIBP) && ln -s $(LIB).so $(LIB).so.0
-	@echo "LD  $@"
+	@echo "LD   $@"
 	@$(CC) -fPIC --shared -Wl,-soname -Wl,$(LIB).so.0 $(OBJECTS) -o $@
 endif
 
@@ -37,7 +37,7 @@ $(LIBP)$(LIB).a: $(OBJS)
 ifdef VERBOSE
 	$(AR) rcs $@ $(OBJECTS)
 else
-	@echo "AR  $@"
+	@echo "AR   $@"
 	@$(AR) rcs $@ $(OBJECTS)
 endif
 
@@ -45,7 +45,7 @@ else
 # BUILDLIB = no
 include $(TOPDIR)/config.mk
 
-ifeq ($(REBUILD_LIBGP),yes)
+ifndef TOP_MAKE
 ALL+=rebuild_lib
 
 rebuild_lib:

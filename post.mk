@@ -82,10 +82,10 @@ endif
 #
 $(SUBDIRS):
 ifdef VERBOSE
-	$(MAKE) -C $@ $(MAKECMDGOALS)
+	$(MAKE) -C $@ $(MAKECMDGOALS) TOP_MAKE=$(TOP_MAKE)
 else
-	@export CURSUBDIR="$$CURSUBDIR/$@" && echo "DIR $$CURSUBDIR" &&\
-	$(MAKE) --no-print-directory -C $@ $(MAKECMDGOALS)
+	@export CURSUBDIR="$$CURSUBDIR/$@" && echo "DIR  $$CURSUBDIR" &&\
+	$(MAKE) --no-print-directory -C $@ $(MAKECMDGOALS) TOP_MAKE=$(TOP_MAKE)
 endif
 
 #
@@ -95,7 +95,7 @@ $(DEPFILES): %.dep: %.c
 ifdef VERBOSE
 	$(CC) -MM $(CFLAGS) $< -o $@
 else
-	@echo "DEP -I(include $(INCLUDE)) $@"
+	@echo "DEP  -I(include $(INCLUDE)) $@"
 	@$(CC) -MM $(CFLAGS) $< -o $@
 endif
 
@@ -103,7 +103,7 @@ $(OBJECTS): %.o: %.c
 ifdef VERBOSE
 	$(CC) $(CFLAGS) -c $< -o $@
 else
-	@echo "CC  -I(include $(INCLUDE)) $@"
+	@echo "CC   -I(include $(INCLUDE)) $@"
 	@$(CC) $(CFLAGS) -c $< -o $@
 endif
 
@@ -112,7 +112,7 @@ clean:
 ifdef VERBOSE
 	rm -f $(CLEAN)
 else
-	@echo "RM  $(CLEAN)"
+	@echo "RM   $(CLEAN)"
 	@rm -f $(CLEAN)
 endif
 endif
