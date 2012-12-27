@@ -159,7 +159,7 @@ unregister your own loaders by 'GP_LoaderRegister()' and
 'GP_LoaderUnregister()'. Once image loader is registered the generic loading
 functions could use it to load and save images.
 
-For example usage see image loader registration
+TIP: For example usage see image loader registration
 link:example_loader_registration.html[example].
 
 [source,c]

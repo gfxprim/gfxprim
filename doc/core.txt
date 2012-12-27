@@ -86,7 +86,7 @@ bitmap loaders 'errno' is set to 'ECANCELED'.
 
 The callback, if supported, is the last parameter of a function.
 
-For example usage see progress callback
+TIP: For example usage see progress callback
 link:example_loaders_progress_callback.html[example].
 
 Temporary Buffer Allocator

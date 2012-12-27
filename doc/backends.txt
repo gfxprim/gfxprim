@@ -9,7 +9,7 @@ controlling the drawing.
 
 So far there are backends for Linux mmaped frame-buffer, libSDL and X11.
 
-For example usage see backend link:example_backend.html[example].
+TIP: For example usage see backend link:example_backend.html[example].
 
 Initialization functions
 ------------------------

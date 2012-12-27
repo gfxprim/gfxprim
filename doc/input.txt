@@ -15,7 +15,7 @@ difference is that events that belongs together are delivered together (the
 kernel input API sends one event for each value i.e. x or y coordinate and has
 sync event that finalizes the changes in the values).
 
-For example usage see input events link:example_input.html[example].
+TIP: For example usage see input events link:example_input.html[example].
 
 Event Structure Description
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~

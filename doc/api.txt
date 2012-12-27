@@ -70,6 +70,8 @@ GFXprim API
   Video grabbers interface such as V4L2.
   +
 
+TIP: There is also a nice page with code link:examples.html[examples].
+
 GFXprim Internals
 -----------------
 
@@ -78,5 +80,3 @@ GFXprim Internals
   Describes structure and basic usage of the templating engine (C code
   generator).
   +
-
-There is also a nice page with code link:examples.html[examples].
