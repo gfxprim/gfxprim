@@ -71,10 +71,8 @@ int main(int argc, char *argv[])
 	GP_BackendFlip(backend);
 
 	for (;;) {
-		if (backend->Poll)
-			GP_BackendPoll(backend);
-
-		usleep(1000);
+		/* Wait for backend event */
+		GP_BackendWait(backend);
 
 		/* Read and parse events */
 		GP_Event ev;
@@ -85,13 +83,20 @@ int main(int argc, char *argv[])
 			
 			switch (ev.type) {
 			case GP_EV_KEY:
-				switch (ev.val.key.key) {
+				switch (ev.val.val) {
 				case GP_KEY_ESC:
 				case GP_KEY_Q:
 					GP_BackendExit(backend);
 					return 0;
 				break;
 				}
+			break;
+			case GP_EV_SYS:
+				case GP_EV_SYS_QUIT:
+					GP_BackendExit(backend);
+					return 0;
+				break;
+			break;
 			}
 		}
 	}
