@@ -28,6 +28,7 @@
 #include <errno.h>
 #include <string.h>
 
+#include <loaders/GP_Loader.h>
 #include <core/GP_Debug.h>
 
 #include "image_list.h"
@@ -64,8 +65,10 @@ static int dir_filter(const struct dirent *d)
 	if (!strcmp(d->d_name, ".."))
 		return 0;
 	
-	//TODO: filter out directories, non-image files?
-
+	//TODO: filter out directories
+	
+	if (GP_MatchExtension(d->d_name) == NULL)
+		return 0;
 
 	GP_DEBUG(4, "Adding file '%s'", d->d_name);
 	
