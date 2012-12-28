@@ -29,6 +29,9 @@
 #include <string.h>
 #include <unistd.h>
 #include <errno.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
 
 #include "core/GP_Debug.h"
 
@@ -230,7 +233,17 @@ static const GP_Loader *loader_by_signature(const char *path)
 GP_Context *GP_LoadImage(const char *src_path, GP_ProgressCallback *callback)
 {
 	int saved_errno;
-	
+	struct stat st;
+
+	if (stat(src_path, &st)) {
+		GP_WARN("Failed to stat '%s': %s", src_path, strerror(errno));
+	} else {
+		if (st.st_mode & S_IFDIR) {
+			errno = EISDIR;
+			return NULL;
+		}
+	}
+
 	if (access(src_path, R_OK)) {
 		
 		saved_errno = errno;
@@ -242,7 +255,7 @@ GP_Context *GP_LoadImage(const char *src_path, GP_ProgressCallback *callback)
 		
 		return NULL;
 	}
-	
+
 	GP_Context *img;
 	const GP_Loader *ext_load = NULL, *sig_load;
 
