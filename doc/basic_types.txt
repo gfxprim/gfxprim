@@ -1,7 +1,7 @@
 Basic types
 -----------
-Coordinates and Size/Length
-~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Coordinates and Size and Length
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Most of the drawing functions use typedefed 'GP_Coord' and 'GP_Size' integer
 types for parameters.

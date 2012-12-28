@@ -147,7 +147,7 @@ void print_instructions(void)
 	printf("    P ............... pause\n");
 }
 
-int main(int argc, char *argv[])
+int main(void)
 {
 	const char *sprite = "ball.ppm";
 	const char *backend_opts = "X11";

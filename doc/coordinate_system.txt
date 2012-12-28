@@ -1,0 +1,11 @@
+Coordinate System
+-----------------
+
+GFXprim uses Cartesian coordinate system. The pixel +(0, 0)+ lies at the upper
+left corner of the bitmap and coordinates grows to the right and to the
+bottom. The last valid pixel, that still lies in the bitmap of size +w+ and
++h+, occupies coordinates +(w - 1, h - 1)+. The precise position of the point
+with integer coordinates is in the middle of the pixel (and borders between
+the pixels lies are integers + 0.5).
+
+image:coordinates-1.svg[Coordinate System]

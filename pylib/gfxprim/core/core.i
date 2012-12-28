@@ -38,7 +38,7 @@ ERROR_ON_NULL(GP_ColorToColorName);
 %inline %{
 const GP_PixelTypeDescription *GP_PixelTypes_access(GP_PixelType no)
 {
-        if (no < 0 || no >= GP_PIXEL_MAX) no = GP_PIXEL_UNKNOWN;
+        if ((signed)no < 0 || no >= GP_PIXEL_MAX) no = GP_PIXEL_UNKNOWN;
         return &GP_PixelTypes[no];
 }
 %}

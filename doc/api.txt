@@ -1,11 +1,18 @@
-GFXprim API
-===========
+GFXprim Documentation
+=====================
 Cyril Hrubis <metan@ucw.cz>
+
+GFXprim API
+-----------
 
 . link:basic_types.html[Basic library types]
   +
   Describes how colors and pixels are handled also describes progress callback
   in great detail.
+  +
+. link:coordinate_system.html[Coordinate system]
+  +
+  Describes briefly coordinate system and relation to pixels.
   +
 . link:core.html[Library Core overview]
   +
@@ -62,5 +69,14 @@ Cyril Hrubis <metan@ucw.cz>
   +
   Video grabbers interface such as V4L2.
   +
- 
+
+GFXprim Internals
+-----------------
+
+. link:gen.html[Templating engine]
+  +
+  Describes structure and basic usage of the templating engine (C code
+  generator).
+  +
+
 There is also a nice page with code link:examples.html[examples].

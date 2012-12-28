@@ -13,7 +13,11 @@ INCLUDES+=$(addprefix -I$(TOPDIR)/include/, $(INCLUDE))
 
 ALL+=$(SWIG_LIB) $(SWIG_PY)
 
-$(SWIG_C) $(SWIG_PY): $(SWIG_SRC)
+# Empty rule to satisfy SWIG_PY
+$(SWIG_PY): $(SWIG_C)
+	@
+
+$(SWIG_C): $(SWIG_SRC)
 ifdef VERBOSE
 	$(SWIG) $(SWIGOPTS) -python $(INCLUDES) $<
 else # VERBOSE
@@ -25,7 +29,7 @@ $(SWIG_LIB): $(SWIG_C)
 ifdef VERBOSE
 	$(CC) $< $(CFLAGS) -D_GNU_SOURCE=1 $(LDFLAGS) -I$(PYTHON_INCLUDE) --shared -lGP $(LDLIBS) -L$(TOPDIR)/build/ -o $@
 else # VERBOSE
-	@echo "LD  $@"
+	@echo "LD   $@"
 	@$(CC) $< $(CFLAGS) -D_GNU_SOURCE=1 $(LDFLAGS) -I$(PYTHON_INCLUDE) --shared -lGP $(LDLIBS) -L$(TOPDIR)/build/ -o $@
 endif # VERBOSE
 

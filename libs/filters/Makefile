@@ -1,4 +1,5 @@
 TOPDIR=../..
+include $(TOPDIR)/pre.mk
 
 STATS_FILTERS=GP_Histogram.gen.c
 
@@ -17,7 +18,6 @@ CSOURCES=$(filter-out $(wildcard *.gen.c),$(wildcard *.c))
 LIBNAME=filters
 INCLUDE=core
 
-include $(TOPDIR)/pre.mk
 include $(TOPDIR)/gen.mk
 include $(TOPDIR)/lib.mk
 include $(TOPDIR)/post.mk

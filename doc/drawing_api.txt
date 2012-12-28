@@ -1,6 +1,8 @@
 Drawing primitives
 ------------------
 
+NOTE: You may want to see the link:coordinate_system.html[coordinate system] first.
+
 Fill
 ~~~~
 

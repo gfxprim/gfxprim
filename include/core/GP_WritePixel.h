@@ -26,51 +26,9 @@
 #ifndef CORE_GP_WRITEPIXEL_H
 #define CORE_GP_WRITEPIXEL_H
 
+#include <stddef.h>
 #include <stdint.h>
-#include <unistd.h>
 
-/*
- * Writes cnt pixels starting at offset off.
- */
-void GP_WritePixels_1BPP_LE(uint8_t *start, uint8_t off,
-                            size_t cnt, uint8_t val);
-
-/*
- * Writes cnt pixels starting at offset off (offset is in pixel sizes not in
- * bits).
- */
-void GP_WritePixels_2BPP_LE(uint8_t *start, uint8_t off,
-                            size_t cnt, uint8_t val);
-
-/*
- * Writes cnt pixels starting at offset off (offset is in pixel sizes not in
- * bits i.e. offset could be either 0 or 1).
- */
-void GP_WritePixels_4BPP_LE(uint8_t *start, uint8_t off,
-                            size_t cnt, uint8_t val);
-
-/*
- * These calls are not byte aligned, thus need start offset.
- */
-void GP_WritePixels_1BPP_BE(uint8_t *start, uint8_t off,
-                            size_t cnt, uint8_t val);
-
-void GP_WritePixels_2BPP_BE(uint8_t *start, uint8_t off,
-                            size_t cnt, uint8_t val);
-
-void GP_WritePixels_4BPP_BE(uint8_t *start, uint8_t off,
-                            size_t cnt, uint8_t val);
-
-void GP_WritePixels_18BPP_BE(void *start, uint8_t off,
-                             size_t count, uint32_t value);
-
-void GP_WritePixels_18BPP_LE(void *start, uint8_t off,
-                             size_t count, uint32_t value);
-
-/* Byte-aligned calls. */
-void GP_WritePixels_8BPP(void *start, size_t count, uint8_t value);
-void GP_WritePixels_16BPP(void *start, size_t count, uint16_t value);
-void GP_WritePixels_24BPP(void *start, size_t count, uint32_t value);
-void GP_WritePixels_32BPP(void *start, size_t count, uint32_t value);
+#include "core/GP_WritePixel.gen.h"
 
 #endif /* CORE_GP_WRITEPIXEL_H */

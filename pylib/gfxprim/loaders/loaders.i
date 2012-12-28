@@ -6,6 +6,8 @@
 #include "loaders/GP_Loaders.h"
 %}
 
+%ignore GP_Loader;
+
 %import ../core/core.i
 
 ERROR_ON_NULL(GP_LoadImage);

@@ -47,18 +47,21 @@ int GP_FilterSigmaEx(const GP_Context *src,
                       GP_Size w_src, GP_Size h_src,
                       GP_Context *dst,
                       GP_Coord x_dst, GP_Coord y_dst,
-                      int xrad, int yrad, int min, float sigma,
+                      int xrad, int yrad,
+                      unsigned int min, float sigma,
                       GP_ProgressCallback *callback);
 
 GP_Context *GP_FilterSigmaExAlloc(const GP_Context *src,
                                    GP_Coord x_src, GP_Coord y_src,
                                    GP_Size w_src, GP_Size h_src,
-                                   int xrad, int yrad, int min, float sigma,
+                                   int xrad, int yrad,
+                                   unsigned int min, float sigma,
                                    GP_ProgressCallback *callback);
 
 static inline int GP_FilterSigma(const GP_Context *src,
                                   GP_Context *dst,
-                                  int xrad, int yrad, int min, float sigma,
+                                  int xrad, int yrad,
+                                  unsigned int min, float sigma,
                                   GP_ProgressCallback *callback)
 {
 	return GP_FilterSigmaEx(src, 0, 0, src->w, src->h,
@@ -67,7 +70,7 @@ static inline int GP_FilterSigma(const GP_Context *src,
 
 static inline GP_Context *GP_FilterSigmaAlloc(const GP_Context *src,
                                               int xrad, int yrad,
-                                              int min, float sigma,
+                                              unsigned int min, float sigma,
                                               GP_ProgressCallback *callback)
 {
 	return GP_FilterSigmaExAlloc(src, 0, 0, src->w, src->h,

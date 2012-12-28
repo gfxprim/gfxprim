@@ -20,88 +20,39 @@
  *                                                                           *
  *****************************************************************************/
 
- /*
+%% extends 'base.h.t'
 
-   Simple backend example.
+{% block description %}Write pixel{% endblock %}
 
-  */
+{% block body %}
 
-#include <GP.h>
+#include "core/GP_GetSetBits.h"
+#include "core/GP_GetPutPixel.h"
+#include "core/GP_WritePixel.gen.h" 
 
-int main(int argc, char *argv[])
+{# Some pixel types has hand written optimized functions #}
+%% set hand_optimized = ['1BPP_LE', '1BPP_BE',
+                         '2BPP_LE', '2BPP_BE',
+                         '4BPP_LE', '4BPP_BE',
+                         '8BPP', '16BPP',
+                         '24BPP', '32BPP']
+
+%% for ps in pixelsizes
+%% if ps.suffix not in hand_optimized
+%% if ps.needs_bit_endian()
+void GP_WritePixels_{{ ps.suffix }}(void *start, uint8_t off,
+                            size_t cnt, unsigned int val)
 {
-	GP_Backend *backend;
-	GP_Context *context;
-	GP_Pixel white_pixel, black_pixel;
-	const char *backend_opts = "X11:100x100";
-	int opt;
-
-	while ((opt = getopt(argc, argv, "b:h")) != -1) {
-		switch (opt) {
-		case 'b':
-			backend_opts = optarg;
-		break;
-		case 'h':
-			GP_BackendInit(NULL, NULL, stderr);
-			return 0;
-		break;
-		default:
-			fprintf(stderr, "Invalid paramter '%c'\n", opt);
-			return 1;
-		}
-	}
-
-	/* Turn on debug messages */
-	GP_SetDebugLevel(10);
-
-	backend = GP_BackendInit(backend_opts, "Backend Example", stderr);
-
-	context = backend->context;
-
-	GP_EventSetScreenSize(context->w, context->h);
-	
-	black_pixel = GP_ColorToContextPixel(GP_COL_BLACK, context);
-	white_pixel = GP_ColorToContextPixel(GP_COL_WHITE, context);
-
-	GP_Fill(context, black_pixel);
-	GP_Line(context, 0, 0, context->w - 1, context->h - 1, white_pixel);
-	GP_Line(context, 0, context->h - 1, context->w - 1, 0, white_pixel);
-
-	/* Update the backend screen */
-	GP_BackendFlip(backend);
-
-	for (;;) {
-		/* Wait for backend event */
-		GP_BackendWait(backend);
-
-		/* Read and parse events */
-		GP_Event ev;
-
-		while (GP_EventGet(&ev)) {
-
-			GP_EventDump(&ev);
-			
-			switch (ev.type) {
-			case GP_EV_KEY:
-				switch (ev.val.val) {
-				case GP_KEY_ESC:
-				case GP_KEY_Q:
-					GP_BackendExit(backend);
-					return 0;
-				break;
-				}
-			break;
-			case GP_EV_SYS:
-				case GP_EV_SYS_QUIT:
-					GP_BackendExit(backend);
-					return 0;
-				break;
-			break;
-			}
-		}
-	}
-
-	GP_BackendExit(backend);
-
-	return 0;
+	//TODO:
 }
+%% else
+void GP_WritePixels_{{ ps.suffix }}(void *start, size_t cnt, unsigned int val)
+{
+	//TODO:
+}
+%% endif
+
+%% endif
+%% endfor
+
+{% endblock body %}

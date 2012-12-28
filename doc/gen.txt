@@ -25,7 +25,11 @@ class PixelSize(object):
     self.suffix = suffix
 
     self.bit_endian = bit_endian
-        ...
+
+    def needs_bit_endian(self):
+       ...
+    
+    ...
 
 -------------------------------------------------------------------------------
 
@@ -41,10 +45,13 @@ The 'bit_endian' determines the ordering of pixel bits within a byte in bitmaps
 and graymaps. This is significant in pixel types with pixel boundaries
 within a byte, i.e. 1 bpp, 4 bpp or 17 bpp.
 
-It can be either 'BE' or 'LE' (i.e. most significant bit left or right in the bitmap).
-Usually, the bitmap is ordered with left bits earlier in the memory, but the
-earlier/later relationship is important.
-This is defined in terms of natural pixel ordering within the memory.
+The function 'needs_bit_endian()' returns true for pixel sizes that are not
+aligned to the whole bytes.
+
+The bit endian can be either 'BE' or 'LE' (i.e. most significant bit left or
+right in the bitmap).  Usually, the bitmap is ordered with left bits earlier
+in the memory, but the earlier/later relationship is important.  This is
+defined in terms of natural pixel ordering within the memory.
 
 'BE' means that the earlier (usually left-most) pixels use the higher ("big")
 bits of the byte. I.e. in 1 bpp, the first pixel would have value 128, the second 64
@@ -203,3 +210,27 @@ And most importantly objects generated from the configuration files:
 
 * 'pixelsizes' list of all pixel size objects
 * 'pixeltypes' list of all pixel type objects
+
+Quick Syntax Help
+^^^^^^^^^^^^^^^^^
+
+Jinja2 basics:
+
+- Each written line is reproduces as it is unless it contains template
+  'variable' or 'expression'
+
+- 'Variable' is text enclosed between +{{+ and +}}+
+  * +{{ ps.size }}' or +{{ ps.suffix }}+
+  * +{{ 2 ** i }}+
+  * +{{ int(2 ** (7 - i)) }} >> {{ 8 - i }}+
+
+- 'Expression' is either line that starts with +%%+ or a text enclosed between
+  +{%+ and +%}+
+  * +%% for ps in pixel_size+
+  * +%% endfor+
+  * +{% if ps.needs_bit_endian() %} ... {% endif %}+
+
+- Comments are enclosed in +{\#+ and  +#}+
+
+More complete documentation could be found in
+http://jinja.pocoo.org/docs/templates/[Jinja official documentation]

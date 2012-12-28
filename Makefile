@@ -1,6 +1,10 @@
 TOPDIR=.
+
+include $(TOPDIR)/pre.mk
+
+TOP_MAKE=1
+
 SUBDIRS=include libs tests pylib demos build
-include post.mk
 
 libs: include
 build: libs
@@ -30,3 +34,5 @@ endif
 tar:
 	$(MAKE) clean
 	cd .. && tar cf gfxprim-`date +%Y-%b-%d-%HH%MM`.tar gfxprim
+
+include $(TOPDIR)/post.mk
