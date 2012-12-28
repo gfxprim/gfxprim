@@ -79,8 +79,8 @@ def _init(module):
   @extend(_context)
   def Convert(self, target_type):
     """Converts context to a different pixel type, allocates new context.
-    See GP_ContextConvert() for details."""
-    return c_core.GP_ContextConvert(self, pixeltype_no(target_type))
+    See GP_ContextConvertAlloc() for details."""
+    return c_core.GP_ContextConvertAlloc(self, pixeltype_no(target_type))
 
   # Manipulation
   extend_direct(_context, "PutPixel", c_core.GP_PutPixel,
