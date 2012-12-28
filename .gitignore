@@ -10,3 +10,7 @@
 config.h
 config.gen.mk
 gfxprim-config
+pylib/gfxprim/*/*_c.py
+pylib/gfxprim/*/*_wrap.c
+pylib/gfxprim/*/c_*.py
+

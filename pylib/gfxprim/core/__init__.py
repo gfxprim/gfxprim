@@ -25,6 +25,14 @@ def _init(module):
   from ..utils import extend, extend_direct, add_swig_getmethod, add_swig_setmethod
   from ..utils import import_members
   _context = module['Context']
+  _ptdescr = c_core.GP_PixelTypeDescription
+
+  # String representation
+
+  @extend(_ptdescr, name='__str__')
+  @extend(_ptdescr, name='__repr__')
+  def ptdescr_str(self):
+    return "<PixelTypeDescription %s>" % (self.name, )
 
   # String representation
 
@@ -71,8 +79,8 @@ def _init(module):
   @extend(_context)
   def Convert(self, target_type):
     """Converts context to a different pixel type, allocates new context.
-    See GP_ContextConvert() for details."""
-    return c_core.GP_ContextConvert(self, pixeltype_no(target_type))
+    See GP_ContextConvertAlloc() for details."""
+    return c_core.GP_ContextConvertAlloc(self, pixeltype_no(target_type))
 
   # Manipulation
   extend_direct(_context, "PutPixel", c_core.GP_PutPixel,
