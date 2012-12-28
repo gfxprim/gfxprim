@@ -248,7 +248,7 @@ GP_Context *GP_LoadImage(const char *src_path, GP_ProgressCallback *callback)
 
 	ext_load = loader_by_filename(src_path);
 
-	if (ext_load != NULL) {
+	if (ext_load != NULL && ext_load->Load != NULL) {
 		img = ext_load->Load(src_path, callback);
 		
 		if (img)
@@ -259,7 +259,7 @@ GP_Context *GP_LoadImage(const char *src_path, GP_ProgressCallback *callback)
 	 * Avoid further work if signature was correct but the loader issued
 	 * ENOSYS.
 	 */
-	if (errno == ENOSYS)
+	if (ext_load != NULL && errno == ENOSYS)
 		return NULL;
 
 	sig_load = loader_by_signature(src_path);
@@ -269,7 +269,7 @@ GP_Context *GP_LoadImage(const char *src_path, GP_ProgressCallback *callback)
 			src_path, ext_load->fmt_name, sig_load->fmt_name);
 	}
 
-	if (sig_load)
+	if (sig_load && sig_load->Load != NULL)
 		return sig_load->Load(src_path, callback);
 
 	errno = ENOSYS;
@@ -444,4 +444,9 @@ const GP_Loader *GP_MatchSignature(const void *buf)
 	GP_DEBUG(1, "Loader not found");
 
 	return NULL;
+}
+
+const GP_Loader *GP_MatchExtension(const char *path)
+{
+	return loader_by_filename(path);
 }

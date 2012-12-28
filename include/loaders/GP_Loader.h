@@ -108,6 +108,11 @@ typedef struct GP_Loader {
  */
 const GP_Loader *GP_MatchSignature(const void *buf);
 
+/*
+ * Tries to match loader by extension. Returns NULL if no loader was found.
+ */
+const GP_Loader *GP_MatchExtension(const char *path);
+
 void GP_LoaderRegister(GP_Loader *self);
 
 void GP_LoaderUnregister(GP_Loader *self);
