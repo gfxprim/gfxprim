@@ -234,16 +234,7 @@ GP_Context *GP_LoadImage(const char *src_path, GP_ProgressCallback *callback)
 {
 	int saved_errno;
 	struct stat st;
-
-	if (stat(src_path, &st)) {
-		GP_WARN("Failed to stat '%s': %s", src_path, strerror(errno));
-	} else {
-		if (st.st_mode & S_IFDIR) {
-			errno = EISDIR;
-			return NULL;
-		}
-	}
-
+	
 	if (access(src_path, R_OK)) {
 		
 		saved_errno = errno;
@@ -254,6 +245,15 @@ GP_Context *GP_LoadImage(const char *src_path, GP_ProgressCallback *callback)
 		errno = saved_errno;
 		
 		return NULL;
+	}
+
+	if (stat(src_path, &st)) {
+		GP_WARN("Failed to stat '%s': %s", src_path, strerror(errno));
+	} else {
+		if (st.st_mode & S_IFDIR) {
+			errno = EISDIR;
+			return NULL;
+		}
 	}
 
 	GP_Context *img;
