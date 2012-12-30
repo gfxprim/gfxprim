@@ -345,3 +345,20 @@ void GP_ContextRotateCCW(GP_Context *context)
 
 	context->x_swap  = 1;
 }
+
+int GP_ContextEqual(const GP_Context *ctx1, const GP_Context *ctx2)
+{
+	if (ctx1->pixel_type != ctx2->pixel_type) return 0;
+	if (GP_ContextW(ctx1) != GP_ContextW(ctx2)) return 0;
+	if (GP_ContextH(ctx1) != GP_ContextH(ctx2)) return 0;
+
+	GP_Coord x, y, w = GP_ContextW(ctx1), h = GP_ContextH(ctx1);
+
+	for (x = 0; x < w; x++)
+		for (y = 0; y < h; y++)
+			if (GP_GetPixel(ctx1, x, y) != GP_GetPixel(ctx2, x, y))
+				return 0;
+
+	return 1;
+}
+

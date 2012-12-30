@@ -24,15 +24,21 @@ def _init(module):
   import re
   from ..utils import extend, extend_direct, add_swig_getmethod, add_swig_setmethod
   from ..utils import import_members
-  _context = module['Context']
+
+  ### PixelTypeDescription
+
   _ptdescr = c_core.GP_PixelTypeDescription
 
-  # String representation
+  # String representation of 
 
   @extend(_ptdescr, name='__str__')
   @extend(_ptdescr, name='__repr__')
   def ptdescr_str(self):
     return "<PixelTypeDescription %s>" % (self.name, )
+
+  ### Context
+
+  _context = module['Context']
 
   # String representation
 
@@ -43,6 +49,15 @@ def _init(module):
       self.w, self.h, self.bpp,
       "" if self.thisown else "not ",
       "with" if self.parent else "no")
+
+  # Equality
+
+  @extend(_context, name='__eq__')
+  def ContextEqual(self, other):
+    "Compare Contexts - pixel types, sizes and data must match (gamma ignored)."
+    if not isinstance(other, _context):
+      raise TypeError("Can only compare two Contexts.")
+    return bool(c_core.GP_ContextEqual(self, other))
 
   # Creation
 

@@ -252,4 +252,17 @@ static inline GP_Size GP_ContextH(const GP_Context *context)
 		return context->h;
 }
 
+/*
+ * Compare two contexts. Returns true only if all of types, sizes and
+ * bitmap data match. Takes transformations into account.
+ *
+ * For now ignores gamma tables.
+ *
+ * Currently rather slow (getpixel).
+ * TODO: speed up for same rotation and same bit-offset data (per-row memcpy).
+ */
+
+int GP_ContextEqual(const GP_Context *ctx1, const GP_Context *ctx2);
+
 #endif /* CORE_GP_CONTEXT_H */
+

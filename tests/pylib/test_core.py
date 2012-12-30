@@ -1,3 +1,4 @@
+"core.Context"
 
 ### Helper imports and decorators
 # TODO: separate (nose plugin?)
@@ -25,15 +26,19 @@ def test_basic_types_exist():
   assert core.C.PIXEL_RGBA8888 > 0
   assert core.C.PIXEL_G8 > 0
 
-def test_create_context():
-  c = Context.Create(7, 9, core.C.PIXEL_RGB888)
-  assert c.w == 7
-  assert c.h == 9
-
+@alltypes()
+def test_create_by_pixeltype(t):
+  "Allocate Context by pixeltype"
+  c = Context.Create(13, 15, t.type)
 
 @alltypes()
-def test_create_context_and_check_sanity(t):
-  "Allocate Context by pixeltype and check basic invariants"
+def test_create_by_number(t):
+  "Allocation by pixeltype number"
+  c = Context.Create(3, 5, t)
+
+@alltypes()
+def test_check_attributes(t):
+  "Context attributes"
   c = Context.Create(13, 15, t.type)
   assert c.w == 13
   assert c.h == 15
@@ -42,13 +47,8 @@ def test_create_context_and_check_sanity(t):
   assert c._free_pixels
 
 @alltypes()
-def test_create_by_number(t):
-  "Allocation by pixeltype number"
-  c = Context.Create(3, 5, t)
-
-@alltypes()
 def test_context_convert_from_RGB888(t):
-  "Test conversion from RGB888"
+  "Conversion from RGB888"
   if 'P' in t.name:
     raise SkipTest("Palette conversion os TODO")
   c = Context.Create(17, 19, core.C.PIXEL_RGB888)
@@ -59,10 +59,32 @@ def test_context_convert_from_RGB888(t):
   assert c3.pixel_type == t.type
 
 @alltypes()
-def test_context_convert_to_RGB888(t):
-  "Test conversion to RGB888"
+def test_convert_to_RGB888(t):
+  "Conversion to RGB888"
   if 'P' in t.name:
     raise SkipTest("Palette conversion os TODO")
   c = Context.Create(1, 1, t)
   c2 = c.Convert(core.C.PIXEL_RGB888)
   assert c2.pixel_type == core.C.PIXEL_RGB888
+
+@alltypes()
+def test_equality_same_type(t):
+  "Basics of equality"
+  c1 = Context.Create(2, 1, t)
+  assert c1 == c1
+  c2 = Context.Create(1, 2, t)
+  assert c2 == c2
+  assert c1 != c2
+  assert c2 != c1
+
+@alltypes()
+def test_equality_data(t):
+  "Equality of data"
+  c1 = Context.Create(1, 1, t)
+  c1.PutPixel(0, 0, 1)
+  c2 = Context.Create(1, 1, t)
+  c2.PutPixel(0, 0, 1)
+  assert c1 == c2
+  c2.PutPixel(0, 0, 0)
+  assert c1 != c2
+
