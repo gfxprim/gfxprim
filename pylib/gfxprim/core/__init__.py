@@ -59,7 +59,7 @@ def _init(module):
       raise TypeError("Can only compare two Contexts.")
     return bool(c_core.GP_ContextEqual(self, other))
 
-  # Creation
+  # Constructor
 
   def pixeltype_no(pixeltype):
     "Return pixel type number from the number or a PixelType instance"
@@ -69,14 +69,16 @@ def _init(module):
       return pixeltype.type
     raise TypeError("Not a PixelType instance or number: %r", pixeltype)
 
-  @extend(_context, name='Create')
-  @staticmethod
-  def Create(w, h, pixeltype):
+  extend(_context, name='__swig_init__')(_context.__init__)
+
+  @extend(_context, name='__init__')
+  def ContextCreate(self, w, h, pixeltype):
     "Allocate a new w*h bitmap of given type."
     # Add "parent" attribute, pointing to a wrapper of the actual parent or None
-    c = c_core.GP_ContextAlloc(w, h, pixeltype_no(pixeltype))
-    c.parent = None
-    return c
+    _context.__swig_init__(self, w, h, pixeltype_no(pixeltype))
+    self.parent = None
+
+  # New instance methods
 
   @extend(_context)
   def SubContext(self, x, y, w, h):
@@ -98,6 +100,7 @@ def _init(module):
     return c_core.GP_ContextConvertAlloc(self, pixeltype_no(target_type))
 
   # Manipulation
+
   extend_direct(_context, "PutPixel", c_core.GP_PutPixel,
       "Set a pixel value encoded according to context PixelType. Clipped.")
 

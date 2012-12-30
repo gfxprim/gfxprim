@@ -85,13 +85,11 @@ and self.thisown.") GP_Context;
       $self->w, $self->h, $self->bpp, $self->free_pixels);
     GP_ContextFree($self);
   }
-  /*
-  PyObject *_hacky_hacky_pixels_buffer() {
-    GP_DEBUG(0, "Evil and dangerous _hacky_hacky_pixels_buffer() used!");
-    return PyBuffer_FromMemory($self->pixels, $self->bytes_per_row * $self->h);
+  GP_Context(GP_Coord w, GP_Coord h, GP_PixelType typeno) {
+    return GP_ContextAlloc(w, h, typeno);
   }
-  */
 };
+
 
 /* Error handling */
 ERROR_ON_NONZERO(GP_ContextResize);
