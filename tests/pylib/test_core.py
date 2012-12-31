@@ -2,6 +2,10 @@
 # TODO: separate (nose plugin?)
 
 from unittest import SkipTest
+from gfxprim import core
+from gfxprim.core import Context
+from random import Random
+
 
 def alltypes(_filter=None):
   def decorate(f):
@@ -13,11 +17,21 @@ def alltypes(_filter=None):
     return gen
   return decorate
 
+def ContextRand(w, h, t, seed=None):
+  "Return new Context(w, h, t) filled with RandomizeContext(c, seed)"
+  c = Context(w, h, t)
+  RandomizeContext(c, seed)
+  return c
+
+def RandomizeContext(c, seed=None):
+  if seed is None:
+    seed = c.w + (2 ** c.h) * c.pixel_type
+  r = Random(seed)
+  for x in range(c.w):
+    for y in range(c.h):
+      c.PutPixel(x, y, r.randint(0, (1 << c.bpp) - 1))
 
 ### The actual tests
-
-from gfxprim import core
-from gfxprim.core import Context
 
 def test_basic_types_exist():
   assert core.C.PIXEL_RGB888 > 0
@@ -49,7 +63,7 @@ def test_context_convert_from_RGB888(t):
   "Conversion from RGB888"
   if 'P' in t.name:
     raise SkipTest("Palette conversion are TODO")
-  c = Context(17, 19, core.C.PIXEL_RGB888)
+  c = ContextRand(17, 19, core.C.PIXEL_RGB888)
   # both by number and the pixeltype
   c2 = c.Convert(t)
   assert c2.pixel_type == t.type
@@ -61,43 +75,34 @@ def test_convert_to_RGB888(t):
   "Conversion to RGB888"
   if 'P' in t.name:
     raise SkipTest("Palette conversion are TODO")
-  c = Context(1, 1, t)
+  c = ContextRand(11, 12, t)
   c2 = c.Convert(core.C.PIXEL_RGB888)
   assert c2.pixel_type == core.C.PIXEL_RGB888
 
 @alltypes()
-def test_equality_same_type(t):
-  "Basics of equality"
-  c1 = Context(2, 1, t)
-  assert c1 == c1
-  c2 = Context(1, 2, t)
+def test_equality(t):
+  "Equality"
+  c1a = ContextRand(2, 11, t, seed=123)
+  c1b = ContextRand(2, 11, t, seed=123)
+  assert c1a == c1a
+  assert c1a == c1b
+  c2 = ContextRand(2, 11, t, seed=456)
   assert c2 == c2
-  assert c1 != c2
-  assert c2 != c1
+  assert c1a != c2
+  assert c2 != c1a
 
 @alltypes()
 def test_get_put_pixel(t):
   "Get/Put pixel consistent"
   def f(x,y):
     return (x + 3 ** y) % (1 << t.size)
-  c = Context(45, 37, t)
+  c = ContextRand(45, 37, t)
   for x in range(c.w):
     for y in range(c.h):
       c.PutPixel(x, y, f(x, y))
   for x in range(c.w):
     for y in range(c.h):
       assert c.GetPixel(x, y) == f(x, y)
-
-@alltypes()
-def test_equality_data(t):
-  "Equality of data"
-  c1 = Context(1, 1, t)
-  c1.PutPixel(0, 0, 1)
-  c2 = Context(1, 1, t)
-  c2.PutPixel(0, 0, 1)
-  assert c1 == c2
-  c2.PutPixel(0, 0, 0)
-  assert c1 != c2
 
 @alltypes()
 def test_str_repr(t):
@@ -111,7 +116,7 @@ def test_str_repr(t):
 def test_blit_vs_convert_to_RGB888(t):
   if 'P' in t.name:
     raise SkipTest("Palette conversions are TODO")
-  c = Context(42, 43, t)
+  c = ContextRand(42, 43, t)
   c2a = Context(c.w, c.h, core.C.PIXEL_RGB888)
   c.Blit(0, 0, c2a, 0, 0, w=c.w, h=c.h)
   c2b = c.Convert(core.C.PIXEL_RGB888)
@@ -122,7 +127,5 @@ def test_blit_vs_convert_to_RGB888(t):
 #      'RGBAToPixel',
 #       'RGBToPixel',
 #        'Resize',
-#         'RotateCCW',
-#          'RotateCW',
 #           'SubContext',
 
