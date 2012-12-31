@@ -19,7 +19,7 @@ enligthening reading).
  
 * We use tabs for indentation and tab is eight spaces wide.
  
-* Lines should be maximally 80 chars long.
+* Lines should be at most 80 chars long.
  
 * No additional whitespaces (other than newline) at the end of line.
  
@@ -101,26 +101,26 @@ break;
 }
 ----
 
-TIP: You can use Linux Kernel +scripts/checkpatch.pl+ to check your code.
+TIP: You can use Linux Kernel 'scripts/checkpatch.pl' to check your code.
 
 GFXprim Specific Rules
 ^^^^^^^^^^^^^^^^^^^^^^
 
 * Library external API uses CamelCase
-** Together with mandatory +GP_+ prefix.
-** For example +GP_PixelType+, +GP_Context+, etc.
+** Together with mandatory 'GP_' prefix.
+** For example 'GP_PixelType', 'GP_Context', etc.
 ** We will not change that, get over it. (It could have been worse, trust me.)
 
 * Basic library types are typedefed
-** We have +GP_Size+ and +GP_Coord+ integer types to better distinguish
+** We have 'GP_Size' and 'GP_Coord' integer types to better distinguish
    roles of function parameters.
-** The basic structures are also typedefed so you can wite +GP_Context+
-   instead of +struct GP_Context+.
+** The basic structures are also typedefed so you can wite 'GP_Context'
+   instead of 'struct GP_Context'.
 ** Other uses of typedef are frowned upon.
  
-* When you add a externally symbol visible symbol, i.e. new API function
-  please add its name into the corresponding file at +build/syms/+. You may
-  also run the +buld/check_symbols.sh+ script to check that you haven't
+* When you add an externally visible symbol, i.e. new API function
+  please add its name into the corresponding file at 'build/syms/'. You may
+  also run the 'buld/check_symbols.sh' script to check that you haven't
   accidentally exposed intenal only interfaces.
 
 Python Coding Style
