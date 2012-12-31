@@ -45,8 +45,8 @@ def _init(module):
   @extend(_context, name='__str__')
   @extend(_context, name='__repr__')
   def context_str(self):
-    return "<Context %dx%d, %dbpp, GP_Context %sowned, %s parent>" % (
-      self.w, self.h, self.bpp,
+    return "<Context %dx%d %s (%dbpp), GP_Context %sowned, %s parent>" % (
+      self.w, self.h, module['PixelTypes'][self.pixel_type].name, self.bpp,
       "" if self.thisown else "not ",
       "with" if self.parent else "no")
 

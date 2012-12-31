@@ -1,5 +1,3 @@
-"core.Context"
-
 ### Helper imports and decorators
 # TODO: separate (nose plugin?)
 
@@ -88,5 +86,10 @@ def test_equality_data(t):
   c2.PutPixel(0, 0, 0)
   assert c1 != c2
 
-#@alltypes()
-#def test_equality_data(t):
+@alltypes()
+def test_str_repr(t):
+  c = Context(42, 43, t)
+  assert "42x43" in str(c)
+  assert "42x43" in repr(c)
+  assert t.name in str(c)
+  assert t.name in repr(c)
