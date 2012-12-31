@@ -19,14 +19,14 @@
  * Copyright (C) 2009-2010 Jiri "BlueBear" Dluhos                            *
  *                         <jiri.bluebear.dluhos@gmail.com>                  *
  *                                                                           *
- * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2013 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  * Copyright (C) 2011      Tomas Gavenciak <gavento@ucw.cz>                  *
  *                                                                           *
  *****************************************************************************/
 
-#ifndef GP_PIXEL_H
-#define GP_PIXEL_H
+#ifndef CORE_GP_PIXEL_H
+#define CORE_GP_PIXEL_H
 
 #include <stdbool.h>
 #include <stdint.h>
@@ -79,7 +79,7 @@ typedef enum {
  *  A        - opacity (0=transparent)
  *  P        - palette (index)
  */
-typedef struct {
+typedef struct GP_PixelTypeChannel {
 	char name[8];    /* Channel name */
 	uint8_t offset;  /* Offset in bits */
 	uint8_t size;    /* Bit-size */
@@ -95,7 +95,7 @@ typedef struct {
  * Assumes name with at most 15 chars
  * Assumes at most 8 channels
  */
-typedef struct {
+typedef struct GP_PixelTypeDescription {
 	GP_PixelType type;        /* Number of the type */
 	const char name[16];      /* Name */
 	uint8_t size;	          /* Size in bits */
@@ -131,6 +131,12 @@ static inline uint32_t GP_PixelSize(GP_PixelType type)
 {
 	GP_CHECK_VALID_PIXELTYPE(type);
 	return GP_PixelTypes[type].size;
+}
+
+static inline const GP_PixelTypeDescription *GP_PixelTypeDesc(GP_PixelType type)
+{
+	GP_CHECK_VALID_PIXELTYPE(type);
+	return &GP_PixelTypes[type];
 }
 
 /*
@@ -178,4 +184,4 @@ GP_PixelType GP_PixelRGBLookup(uint32_t rsize, uint32_t roff,
 			       uint32_t asize, uint32_t aoff,
 			       uint8_t bits_per_pixel);
 
-#endif /* GP_PIXEL_H */
+#endif /* CORE_GP_PIXEL_H */

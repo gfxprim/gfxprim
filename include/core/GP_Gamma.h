@@ -16,7 +16,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2013 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
@@ -115,11 +115,24 @@
 
 #include "GP_Context.h"
 
+typedef enum GP_CorrectionType {
+	/*
+	 * Classical gamma correction
+	 */
+	GP_CORRECTION_GAMMA,
+	/*
+	 * Standard RGB
+	 */
+	GP_CORRECTION_sRGB,
+} GP_CorrectionType;
+
+
 /*
  * Gamma table.
  */
 typedef struct GP_GammaTable {
 	/* Table description */
+	enum GP_CorrectionType type;
 	float gamma;
 	uint8_t in_bits;
 	uint8_t out_bits;
@@ -161,6 +174,11 @@ typedef struct GP_Gamma {
 GP_Gamma *GP_GammaAcquire(GP_PixelType pixel_type, float gamma);
 
 /*
+ * Returns pointer to the sRGB translation table.
+ */
+GP_Gamma *GP_sRGBAcquire(GP_PixelType pixel_type);
+
+/*
  * Copies Gamma table (actually increases ref_count) so it's fast and can't
  * fail.
  */
@@ -170,5 +188,10 @@ GP_Gamma *GP_GammaCopy(GP_Gamma *gamma);
  * Releases gamma table.
  */
 void GP_GammaRelease(GP_Gamma *self);
+
+/*
+ * Prints info about gamma table into the stdout.
+ */
+void GP_GammaPrint(const GP_Gamma *self);
 
 #endif /* CORE_GP_GAMMA_H */
