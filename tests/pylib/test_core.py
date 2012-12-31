@@ -48,7 +48,7 @@ def test_check_attributes(t):
 def test_context_convert_from_RGB888(t):
   "Conversion from RGB888"
   if 'P' in t.name:
-    raise SkipTest("Palette conversion os TODO")
+    raise SkipTest("Palette conversion are TODO")
   c = Context(17, 19, core.C.PIXEL_RGB888)
   # both by number and the pixeltype
   c2 = c.Convert(t)
@@ -60,7 +60,7 @@ def test_context_convert_from_RGB888(t):
 def test_convert_to_RGB888(t):
   "Conversion to RGB888"
   if 'P' in t.name:
-    raise SkipTest("Palette conversion os TODO")
+    raise SkipTest("Palette conversion are TODO")
   c = Context(1, 1, t)
   c2 = c.Convert(core.C.PIXEL_RGB888)
   assert c2.pixel_type == core.C.PIXEL_RGB888
@@ -74,6 +74,19 @@ def test_equality_same_type(t):
   assert c2 == c2
   assert c1 != c2
   assert c2 != c1
+
+@alltypes()
+def test_get_put_pixel(t):
+  "Get/Put pixel consistent"
+  def f(x,y):
+    return (x + 3 ** y) % (1 << t.size)
+  c = Context(45, 37, t)
+  for x in range(c.w):
+    for y in range(c.h):
+      c.PutPixel(x, y, f(x, y))
+  for x in range(c.w):
+    for y in range(c.h):
+      assert c.GetPixel(x, y) == f(x, y)
 
 @alltypes()
 def test_equality_data(t):
@@ -93,3 +106,23 @@ def test_str_repr(t):
   assert "42x43" in repr(c)
   assert t.name in str(c)
   assert t.name in repr(c)
+
+@alltypes()
+def test_blit_vs_convert_to_RGB888(t):
+  if 'P' in t.name:
+    raise SkipTest("Palette conversions are TODO")
+  c = Context(42, 43, t)
+  c2a = Context(c.w, c.h, core.C.PIXEL_RGB888)
+  c.Blit(0, 0, c2a, 0, 0, w=c.w, h=c.h)
+  c2b = c.Convert(core.C.PIXEL_RGB888)
+  assert c2a == c2b
+
+#'Blit',
+#   'Copy',
+#      'RGBAToPixel',
+#       'RGBToPixel',
+#        'Resize',
+#         'RotateCCW',
+#          'RotateCW',
+#           'SubContext',
+

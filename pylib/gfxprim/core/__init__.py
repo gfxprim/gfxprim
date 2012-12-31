@@ -134,7 +134,7 @@ def _init(module):
       h = max(0, sy2 - sy)
     if ty2 is not None:
       h = max(0, ty2 - ty)
-    return c_core.GP_BlitXYWH_Clipped(self, sx, sy, target, tx, ty, w, h)
+    return c_core.GP_BlitXYWH_Clipped(self, sx, sy, w, h, target, tx, ty)
 
   # Color conversions
 
