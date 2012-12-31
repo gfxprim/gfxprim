@@ -3,6 +3,7 @@
 /* Default font. */
 body {
   font-family: Georgia,serif;
+  background: white;
 }
 
 /* Title font. */
@@ -113,6 +114,14 @@ pre {
   margin-top: 1.5em;
   margin-bottom: 1.5em;
 }
+
+div.logo h1 {
+  border-bottom: 0px;
+  margin-top: 1em;
+  margin-bottom: 0em;
+  color: gray;
+}
+
 div.imageblock, div.exampleblock, div.verseblock,
 div.quoteblock, div.literalblock, div.listingblock, div.sidebarblock,
 div.admonitionblock {
@@ -127,7 +136,7 @@ div.admonitionblock {
 }
 
 div.content { /* Block element content. */
-  padding: 0;
+  padding: 0em;
 }
 
 /* Block element titles. */

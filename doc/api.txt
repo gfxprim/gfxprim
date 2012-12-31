@@ -1,7 +1,3 @@
-GFXprim Documentation
-=====================
-Cyril Hrubis <metan@ucw.cz>
-
 GFXprim API
 -----------
 
