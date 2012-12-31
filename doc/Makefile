@@ -5,6 +5,8 @@ SOURCES=general.txt context.txt loaders.txt filters.txt basic_types.txt \
 
 EXAMPLE_SOURCES=$(wildcard example_*.txt)
 
+ASCIIDOC_PARAMS=--conf-file asciidoc.conf
+
 #
 # Names of generated images for cleanup
 #
@@ -17,7 +19,10 @@ PAGES+=$(subst .txt,.html,$(EXAMPLE_SOURCES))
 
 .PHONY: toolcheck clean
 
+
 all: toolcheck examples.html $(PAGES) api.html
+
+$(PAGES): asciidoc.conf
 
 #
 # Check if we have all the needed tools
@@ -36,10 +41,10 @@ toolcheck:
 # Create page for each part of API description
 #
 $(PAGES): %.html: %.txt
-	asciidoc $<
+	asciidoc $(ASCIIDOC_PARAMS) $<
 
 examples.html: examples.txt ../demos/c_simple/*.c ../demos/py_simple/*.py
-	asciidoc -a toc examples.txt
+	asciidoc $(ASCIIDOC_PARAMS) -a toc examples.txt
 
 #
 # Clean up generated images
