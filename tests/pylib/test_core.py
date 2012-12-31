@@ -113,6 +113,16 @@ def test_str_repr(t):
   assert t.name in repr(c)
 
 @alltypes()
+def test_blit_with_offset_and_rotation(t):
+  "Blit with various shifts and rotation"
+  c1 = ContextRand(19, 17, t)
+  for r in range(4):
+    for i in [0,1,2]:
+      c2 = Context(51-i, 25+i, t)
+      c1.Blit(2+i, 3+i, c2, 1+i, 4-i, w=2+3*i, h=13-i)
+    c1.RotateCW()
+
+@alltypes()
 def test_blit_vs_convert_to_RGB888(t):
   if 'P' in t.name:
     raise SkipTest("Palette conversions are TODO")
@@ -122,10 +132,66 @@ def test_blit_vs_convert_to_RGB888(t):
   c2b = c.Convert(core.C.PIXEL_RGB888)
   assert c2a == c2b
 
-#'Blit',
-#   'Copy',
+@alltypes()
+def test_copy(t):
+  c = ContextRand(19, 43, t)
+  c2 = c.Copy(True)
+  assert c == c2
+
+@alltypes()
+def test_rotate(t):
+  c = ContextRand(42, 47, t)
+  c2 = c.Copy(True)
+  assert c == c2
+  c2.RotateCCW()
+  assert c != c2
+  c.RotateCCW()
+  assert c == c2
+  c2.RotateCCW()
+  assert c != c2
+  c2.RotateCCW()
+  assert c != c2
+  c2.RotateCCW()
+  assert c != c2
+  c.RotateCW()
+  assert c == c2
+
+@alltypes()
+def test_subcontext(t):
+  c = ContextRand(43, 51, t)
+  c2a = c.SubContext(5, 7, 10, 9)
+  c2b = c.SubContext(5, 7, 10, 9)
+  assert c2a == c2b
+
+@alltypes()
+def test_subcontext_vs_blit(t):
+  c = ContextRand(31, 21, t)
+  c2a = c.SubContext(5, 7, 15, 9)
+  c2b = Context(15, 9, t)
+  c.Blit(5, 7, c2b, 0, 0, w=15, h=9)
+  assert c2a == c2b
+
+@alltypes()
+def test_blits_by_rect(t):
+  c = ContextRand(17, 13, t, seed=765)
+  c2a = ContextRand(16, 15, t)
+  c2b = ContextRand(16, 15, t)
+  c2c = ContextRand(16, 15, t)
+  assert c2a == c2b
+  assert c2a == c2c
+  assert c != c2a
+
+  c.Blit(3, 4, c2a, 5, 2, w=4, h=5)
+  assert c2a != c2c
+  c.Blit(3, 4, c2b, 5, 2, w=4, h=5)
+  assert c2b != c2c
+  c.Blit(3, 4, c2c, 5, 2, w=4, h=5)
+
+  assert c2a == c2b
+  assert c2a == c2c
+
+
 #      'RGBAToPixel',
 #       'RGBToPixel',
 #        'Resize',
-#           'SubContext',
 
