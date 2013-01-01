@@ -64,7 +64,7 @@ static void blitXYXY_Raw_{{ ps.suffix }}(const GP_Context *src,
 		       GP_PIXEL_ADDR_{{ ps.suffix }}(src, x0, y0 + y),
 		       {{ int(ps.size/8) }} * (x1 - x0 + 1));
 %% else
-	/* Rectangles may not be bit-aligned in the same way! */
+{#	/* Rectangles may not be bit-aligned in the same way! */
 	/* Alignment (index) of first bits in the first byte */
 	//TODO: This is wrong for subcontexts where the offset
 	//      needs to be summed with context->offset and moduled
@@ -96,6 +96,7 @@ static void blitXYXY_Raw_{{ ps.suffix }}(const GP_Context *src,
 			end_p2 += dst->bytes_per_row;
 		}
 	} else /* Different bit-alignment, can't use memcpy() */
+#}
 		blitXYXY_Naive_Raw(src, x0, y0, x1, y1, dst, x2, y2);
 %% endif
 }
