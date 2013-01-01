@@ -37,10 +37,17 @@ typedef struct GP_Context {
 } GP_Context;
 -------------------------------------------------------------------------------
 
-The 'pixels' field points to the image data, stored as a one-dimensional
-array of byte-aligned lines. (There can be some unused space at the end of
-each line; this is reflected by the 'bytes_per_row' value being greater
-than what would be needed for that pixel format).
+The 'pixels' field points to the image data.
+
+The 'pixels' are stored as a one-dimensional array consisting of byte-aligned
+lines (i.e. each image line starts at whole byte and ends at whole byte). The
+'pixels' array starts exactly at the start of the first line. Each line is
+'bytes_per_row' bytes long. The first pixel may actually start at 'offset' bit
+in the first byte in each line (but only for some sub contexts for pixel types
+that are not byte aligned). The first pixel is followed by the rest of the
+pixels in the image line (there is 'w' pixels in each line) and ends somewhere
+before the end of the line (i.e. there may be padding before the start of the
+next line or in case of subcontexts image data of the parent context).
 
 Rotation
 ^^^^^^^^
