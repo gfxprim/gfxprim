@@ -29,7 +29,9 @@ def RandomizeContext(c, seed=None):
   r = Random(seed)
   for x in range(c.w):
     for y in range(c.h):
-      c.PutPixel(x, y, r.randint(0, (1 << c.bpp) - 1))
+      p = r.randint(0, (1 << c.bpp) - 1)
+      c.PutPixel(x, y, p)
+      assert c.GetPixel(x, y) == p
 
 ### The actual tests
 
@@ -59,7 +61,7 @@ def test_check_attributes(t):
   assert c._free_pixels
 
 @alltypes()
-def test_context_convert_from_RGB888(t):
+def test_convert_from_RGB888(t):
   "Conversion from RGB888"
   if 'P' in t.name:
     raise SkipTest("Palette conversion are TODO")
@@ -128,8 +130,8 @@ def test_blit_vs_convert_to_RGB888(t):
     raise SkipTest("Palette conversions are TODO")
   c = ContextRand(42, 43, t)
   c2a = Context(c.w, c.h, core.C.PIXEL_RGB888)
-  c.Blit(0, 0, c2a, 0, 0, w=c.w, h=c.h)
   c2b = c.Convert(core.C.PIXEL_RGB888)
+  c.Blit(0, 0, c2a, 0, 0, w=c.w, h=c.h)
   assert c2a == c2b
 
 @alltypes()
