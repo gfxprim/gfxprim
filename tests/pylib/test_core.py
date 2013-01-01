@@ -1,3 +1,5 @@
+"core.Context tests"
+
 from unittest import SkipTest
 from testutils import *
 
@@ -5,6 +7,7 @@ from gfxprim import core
 from gfxprim.core import Context
 
 def test_basic_types_exist():
+  "There are the basic pixel types"
   assert core.C.PIXEL_RGB888 > 0
   assert core.C.PIXEL_RGBA8888 > 0
   assert core.C.PIXEL_G8 > 0
@@ -77,6 +80,7 @@ def test_get_put_pixel(t):
 
 @alltypes()
 def test_str_repr(t):
+  "Context __str__ and __repr__ work"
   c = Context(42, 43, t)
   assert "42x43" in str(c)
   assert "42x43" in repr(c)
@@ -95,22 +99,25 @@ def test_blit_with_offset_and_rotation(t):
 
 @alltypes()
 def test_blit_vs_convert_to_RGB888(t):
+  "Compare Blit vs Convert"
   if 'P' in t.name:
     raise SkipTest("Palette conversions are TODO")
-  c = ContextRand(42, 43, t)
-  c2a = Context(c.w, c.h, core.C.PIXEL_RGB888)
+  c = ContextRand(42, 43, t, seed=0)
+  c2a = ContextRand(c.w, c.h, core.C.PIXEL_RGB888, seed=42)
   c2b = c.Convert(core.C.PIXEL_RGB888)
   c.Blit(0, 0, c2a, 0, 0, w=c.w, h=c.h)
   assert c2a == c2b
 
 @alltypes()
 def test_copy(t):
+  "Copying works"
   c = ContextRand(19, 43, t)
   c2 = c.Copy(True)
   assert c == c2
 
 @alltypes()
 def test_rotate(t):
+  "Rotations work (and LLL=R)"
   c = ContextRand(42, 47, t)
   c2 = c.Copy(True)
   assert c == c2
@@ -129,13 +136,17 @@ def test_rotate(t):
 
 @alltypes()
 def test_subcontext(t):
-  c = ContextRand(43, 51, t)
-  c2a = c.SubContext(5, 7, 10, 9)
-  c2b = c.SubContext(5, 7, 10, 9)
+  "Subcontext is sensible"
+  c1a = ContextRand(43, 51, t)
+  c1b = ContextRand(43, 51, t)
+  assert c1a == c1b
+  c2a = c1a.SubContext(5, 7, 10, 9)
+  c2b = c1b.SubContext(5, 7, 10, 9)
   assert c2a == c2b
 
 @alltypes()
 def test_subcontext_vs_blit(t):
+  "Compare Subcontext and Blit of a rectangle"
   c = ContextRand(31, 21, t)
   c2a = c.SubContext(5, 7, 15, 9)
   c2b = Context(15, 9, t)
@@ -144,6 +155,7 @@ def test_subcontext_vs_blit(t):
 
 @alltypes()
 def test_blits_by_rect(t):
+  "Blit defined by XYXY, XYX2Y2 and XYWH"
   c = ContextRand(17, 13, t, seed=765)
   c2a = ContextRand(16, 15, t)
   c2b = ContextRand(16, 15, t)
