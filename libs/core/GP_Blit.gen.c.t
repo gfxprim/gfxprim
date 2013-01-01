@@ -27,9 +27,9 @@ static void blitXYXY_Naive_Raw(const GP_Context *src,
 		for (x = x0; x <= x1; x++) {
 			GP_Pixel p = GP_GetPixel_Raw(src, x, y);
 
-			if (src->pixel_type != dst->pixel_type) 
+			if (src->pixel_type != dst->pixel_type)
 				p = GP_ConvertContextPixel(p, src, dst);
-			
+
 			GP_PutPixel_Raw(dst, x2 + (x - x0), y2 + (y - y0), p);
 		}
 
@@ -44,19 +44,8 @@ static void blitXYXY_Raw_{{ ps.suffix }}(const GP_Context *src,
 	GP_Coord x0, GP_Coord y0, GP_Coord x1, GP_Coord y1,
 	GP_Context *dst, GP_Coord x2, GP_Coord y2)
 {
-	/* Special case - copy whole line-block with one memcpy() */
-	if ((x0 == 0) && (x2 == 0) && (x1 == (GP_Coord)src->w - 1) &&
-	    (src->w == dst->w) &&
-	    (src->bytes_per_row == dst->bytes_per_row)) {
-	    	
-		memcpy(dst->pixels + dst->bytes_per_row * y2,
-		       src->pixels + src->bytes_per_row * y0,
-		       src->bytes_per_row * y1);
-		return;
-	}
-
 %% if not ps.needs_bit_endian()
-	/* General case - memcpy() each horizontal line */
+	/* memcpy() each horizontal line */
 	GP_Coord y;
 
 	for (y = 0; y <= (y1 - y0); y++)
@@ -81,7 +70,7 @@ static void blitXYXY_Raw_{{ ps.suffix }}(const GP_Context *src,
 		uint8_t *p2 = (uint8_t *) GP_PIXEL_ADDR_{{ ps.suffix }}(dst, x2, y2);
 		uint8_t *end_p1 = (uint8_t *) GP_PIXEL_ADDR_{{ ps.suffix }}(src, x1, y0);
 		uint8_t *end_p2 = (uint8_t *) GP_PIXEL_ADDR_{{ ps.suffix }}(dst, x2, y2);
-		
+
 		GP_Coord i;
 
 		for (i = 0; i < (y1 - y0 + 1); i++) {
