@@ -16,13 +16,13 @@ link:http://www.kernel.org/doc/Documentation/CodingStyle[link] (it's funny and
 enligthening reading).
 
 .Indentation and whitespaces
- 
+
 * We use tabs for indentation and tab is eight spaces wide.
- 
+
 * Lines should be at most 80 chars long.
- 
+
 * No additional whitespaces (other than newline) at the end of line.
- 
+
 * Each file must end with newline (most editors do that automatically, beware
   of Kate).
 
@@ -37,11 +37,11 @@ enligthening reading).
 /* WRONG */
 if (something) do_work();
 	do_other();
-	
+
 /* RIGHT */
 if (something)
 	do_work();
-	
+
 do_other();
 ----
 
@@ -117,7 +117,7 @@ GFXprim Specific Rules
 ** The basic structures are also typedefed so you can wite 'GP_Context'
    instead of 'struct GP_Context'.
 ** Other uses of typedef are frowned upon.
- 
+
 * When you add an externally visible symbol, i.e. new API function
   please add its name into the corresponding file at 'build/syms/'. You may
   also run the 'buld/check_symbols.sh' script to check that you haven't
@@ -126,4 +126,22 @@ GFXprim Specific Rules
 Python Coding Style
 ~~~~~~~~~~~~~~~~~~~
 
-TODO
+The Python parts of GFXprim follow mostly coding style outlined in
+link:http://www.python.org/dev/peps/pep-0008/[PEP 8].
+The major difference is that the default indent is 2 spaces.
+All files should be ASCII unless required otherwise.
+
+GFXPrim uses CamelCase as described in the C section.
+The names are mostly derived from the corresponding C names without
+the 'GP_' prefix.
+All wrapped symbols of a module are available in the SWIG modules 'foo.c_foo'
+(i.e. 'core.c_core').
+
+Some number and enum types are typedeffed in C, but left as integers
+in the Python interface.
+All constants are available in 'foo.C' submodules (i.e. 'core.C')
+to avoid clutter.
+
+Where this makes sense, functions should be available as methods of
+an object (i.e. 'Context.Copy()' rather than 'Copy(context)'). Be Pythonic.
+
