@@ -16,7 +16,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2013 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
@@ -86,6 +86,7 @@ static GP_GammaTable *get_table(float gamma, uint8_t in_bits, uint8_t out_bits)
 	i->in_bits = in_bits;
 	i->out_bits = out_bits;
 	i->ref_count = 1;
+ 	i->type = GP_CORRECTION_GAMMA;
 	
 	if (out_bits > 8)
 		fill_table16(i, gamma, in_bits, out_bits);
@@ -195,5 +196,39 @@ void GP_GammaRelease(GP_Gamma *self)
 	if (--self->ref_count == 0) {
 		GP_DEBUG(2, "Gamma ref_count == 0, releasing...");
 		free(self);
+	}
+}
+
+static const char *correction_type_names[] = {
+	"Gamma",
+	"sRGB",
+};
+
+static const char *correction_type_name(enum GP_CorrectionType type)
+{
+	if (type > GP_CORRECTION_sRGB)
+		return "Invalid";
+
+	return correction_type_names[type];
+}
+
+void GP_GammaPrint(const GP_Gamma *self)
+{
+	printf("Correction tables:\n");
+
+	const GP_PixelTypeDescription *desc = GP_PixelTypeDesc(self->pixel_type);
+
+	unsigned int i;
+
+	for (i = 0; i < desc->numchannels; i++) {
+		enum GP_CorrectionType type = self->tables[i]->type;
+		
+		printf(" %s: %s", desc->channels[i].name,
+		       correction_type_name(type));
+
+		if (type == GP_CORRECTION_GAMMA)
+			printf(" gamma = %.2f", self->tables[i]->gamma);
+	
+		printf("\n");
 	}
 }

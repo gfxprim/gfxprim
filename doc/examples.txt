@@ -1,7 +1,3 @@
-GFXprim Code Examples
-=====================
-Cyril Hrubis <metan@ucw.cz>
-
 Image loaders examples
 ----------------------
 

@@ -3,7 +3,7 @@ include $(TOPDIR)/pre.mk
 
 CSOURCES=$(shell echo *.c)
 
-APPS=gfx_benchmark Circle FillCircle Line CircleSeg Polygon Ellipse
+APPS=gfx_benchmark Circle FillCircle Line CircleSeg Polygon Ellipse HLine
 
 Circle: common.o
 FillCircle: common.o
@@ -11,6 +11,7 @@ Ellipse: common.o
 Line: common.o
 CircleSeg: common.o
 Polygon: common.o
+HLine: common.o
 
 include ../tests.mk
 

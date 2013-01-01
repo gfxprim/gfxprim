@@ -7,7 +7,8 @@ initialization interface each backend has it's specific function and semantics
 but once backend is initialized the backend structure provides unified API for 
 controlling the drawing.
 
-So far there are backends for Linux mmaped frame-buffer, libSDL and X11.
+So far there are backends for Linux mmaped 'frame-buffer', 'libSDL' and
+'X Window System'.
 
 TIP: For example usage see backend link:example_backend.html[example].
 
@@ -220,9 +221,9 @@ WARNING: It's very important to call this functions on application exit. If you
          doesn't do so, the state of the display, resolution etc. may not be
          reset back to its original state. This includes program crashes and
          iterruptions. Also this function may not be signal-async-safe, it's
-         better to set signal hanlers that calls it as this usually works and
-	 not doing so may leave non-working system with black display or
-	 non-responding keyboard.
+         better to set signal hanlers that calls it on SEGFAULT and SIGBUS
+	 as this usually works and not doing so may leave non-working system
+	 with black display or non-responding keyboard.
 
 [source,c]
 -------------------------------------------------------------------------------
@@ -273,14 +274,16 @@ void GP_BackendWait(GP_Backend *backend);
 
 Blocks until backend event arrives.
 
-NOTE: Events recieved by backend are not necessarily translated into the input
-      events.
+[NOTE]
+Events recieved by backend are not necessarily translated into the input
+events.
 
-WARNING: Using GP_BackendWait() in multithreaded program will most likely
-         cause deadlocks. As the backend data structures and connection is
-	 guarded by a lock any other backend function (called from different
-	 thread while GP_BackendWait() is blocking) will lock until
-	 GP_BackendWait() returns (i.e. event was recieved).
+[WARNING]
+Using GP_BackendWait() in multithreaded program will most likely cause
+deadlocks. As the backend data structures and connection is guarded by a lock
+any other backend function (called from different thread while
+GP_BackendWait() is blocking) will lock until GP_BackendWait() returns (i.e.
+event was recieved).
 
 [source,c]
 -------------------------------------------------------------------------------
@@ -326,4 +329,4 @@ multithreaded application where one threads waits for events and others draws
 into the buffer so you can stop the drawing threads before the backend context
 size change.
 
-See input link:input.html[input events] for more information.
+TIP: For more information see link:input.html[input events] documentation.

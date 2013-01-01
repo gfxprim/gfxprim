@@ -19,7 +19,7 @@
  * Copyright (C) 2009-2011 Jiri "BlueBear" Dluhos                            *
  *                         <jiri.bluebear.dluhos@gmail.com>                  *
  *                                                                           *
- * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2013 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
@@ -276,7 +276,9 @@ void GP_ContextPrintInfo(const GP_Context *self)
 	printf("Offset\t%u (only unaligned pixel types)\n", self->offset);
 	printf("Flags\taxes_swap=%u x_swap=%u y_swap=%u free_pixels=%u\n",
 	       self->axes_swap, self->x_swap, self->y_swap, self->free_pixels);
-	printf("Gamma table %p\n", self->gamma);
+	
+	if (self->gamma)
+		GP_GammaPrint(self->gamma);
 }
 
 /*
@@ -348,10 +350,15 @@ void GP_ContextRotateCCW(GP_Context *context)
 
 int GP_ContextEqual(const GP_Context *ctx1, const GP_Context *ctx2)
 {
-	if (ctx1->pixel_type != ctx2->pixel_type) return 0;
-	if (GP_ContextW(ctx1) != GP_ContextW(ctx2)) return 0;
-	if (GP_ContextH(ctx1) != GP_ContextH(ctx2)) return 0;
+	if (ctx1->pixel_type != ctx2->pixel_type)
+		return 0;
 
+	if (GP_ContextW(ctx1) != GP_ContextW(ctx2))
+		return 0;
+
+	if (GP_ContextH(ctx1) != GP_ContextH(ctx2))
+		return 0;
+	
 	GP_Coord x, y, w = GP_ContextW(ctx1), h = GP_ContextH(ctx1);
 
 	for (x = 0; x < w; x++)

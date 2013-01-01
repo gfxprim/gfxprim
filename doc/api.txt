@@ -1,7 +1,3 @@
-GFXprim Documentation
-=====================
-Cyril Hrubis <metan@ucw.cz>
-
 GFXprim API
 -----------
 
@@ -79,4 +75,12 @@ GFXprim Internals
   +
   Describes structure and basic usage of the templating engine (C code
   generator).
+  +
+
+Development
+-----------
+
+. link:coding_style.html[Coding Style]
+  +
+  C and Python coding style.
   +

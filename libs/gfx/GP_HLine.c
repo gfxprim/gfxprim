@@ -23,38 +23,52 @@
  *                                                                           *
  *****************************************************************************/
 
-#ifndef GFX_GP_HLINE_H
-#define GFX_GP_HLINE_H
+#include "core/GP_Transform.h"
 
-#include "core/GP_Context.h"
-
-/* Raw per BPP HLines */
-#include "gfx/GP_HLine.gen.h"
-
-/* Generic HLines */
-void GP_HLineXXY(GP_Context *context, GP_Coord x0, GP_Coord x1, GP_Coord y,
-                 GP_Pixel pixel);
+#include "gfx/GP_HLine.h"
+#include "gfx/GP_VLine.h"
 
 void GP_HLineXXY_Raw(GP_Context *context, GP_Coord x0, GP_Coord x1,
-                     GP_Coord y, GP_Pixel pixel);
+                     GP_Coord y, GP_Pixel pixel)
+{
+	GP_CHECK_CONTEXT(context);
 
-void GP_HLineXYW(GP_Context *context, GP_Coord x, GP_Coord y, GP_Size w,
-                 GP_Pixel pixel);
+	GP_FN_PER_BPP_CONTEXT(GP_HLine_Raw, context, context, x0, x1, y,
+	                      pixel);
+}
 
 void GP_HLineXYW_Raw(GP_Context *context, GP_Coord x, GP_Coord y, GP_Size w,
-                     GP_Pixel pixel);
-
-/* default argument set is XXY */
-static inline void GP_HLine_Raw(GP_Context *context, GP_Coord x0, GP_Coord x1,
-                                GP_Coord y, GP_Pixel p)
+                     GP_Pixel pixel)
 {
-	GP_HLineXXY_Raw(context, x0, x1, y, p);
+	if (w == 0)
+		return;
+
+	GP_HLineXXY_Raw(context, x, x + w - 1, y, pixel);
 }
 
-static inline void GP_HLine(GP_Context *context, GP_Coord x0, GP_Coord x1,
-                            GP_Coord y, GP_Pixel p)
+void GP_HLineXXY(GP_Context *context, GP_Coord x0, GP_Coord x1, GP_Coord y,
+                     GP_Pixel pixel)
 {
-	GP_HLineXXY(context, x0, x1, y, p);
+	GP_CHECK_CONTEXT(context);
+
+	if (context->axes_swap) {
+		GP_TRANSFORM_Y(context, x0);
+		GP_TRANSFORM_Y(context, x1);
+		GP_TRANSFORM_X(context, y);
+		GP_VLine_Raw(context, y, x0, x1, pixel);
+	} else {
+		GP_TRANSFORM_X(context, x0);
+		GP_TRANSFORM_X(context, x1);
+		GP_TRANSFORM_Y(context, y);
+		GP_HLine_Raw(context, x0, x1, y, pixel);
+	}
 }
 
-#endif /* GFX_GP_HLINE_H */
+void GP_HLineXYW(GP_Context *context, GP_Coord x, GP_Coord y, GP_Size w,
+                 GP_Pixel pixel)
+{
+	if (w == 0)
+		return;
+
+	GP_HLineXXY(context, x, x + w - 1, y, pixel);
+}

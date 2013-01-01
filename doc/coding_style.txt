@@ -1,0 +1,129 @@
+Coding Style
+------------
+
+This document defines coding style for GFXprim.
+
+C Coding Style
+~~~~~~~~~~~~~~
+
+GFXprim is written in C. There is no C++ code in and I mean it. A few headers
+do contain '#ifndef __cplusplus' so that you can interface GFXprim headers as
+'extern C' without problems. If this doesn't work, let us know.
+
+GFXprim follows mostly Linux Kernel coding style, see
+'Documentation/CodingStyle' in the Linux Kernel source or follow this
+link:http://www.kernel.org/doc/Documentation/CodingStyle[link] (it's funny and
+enligthening reading).
+
+.Indentation and whitespaces
+ 
+* We use tabs for indentation and tab is eight spaces wide.
+ 
+* Lines should be at most 80 chars long.
+ 
+* No additional whitespaces (other than newline) at the end of line.
+ 
+* Each file must end with newline (most editors do that automatically, beware
+  of Kate).
+
+.Braces and Spaces
+
+* Avoid tricky expressions if possible ;)
+
+* Do not put multiple statements on a single line.
++
+[source,c]
+----
+/* WRONG */
+if (something) do_work();
+	do_other();
+	
+/* RIGHT */
+if (something)
+	do_work();
+	
+do_other();
+----
+
+* Each block that has more than one line should be enclosed in
+  curly braces.
++
+Also if one part of if then else is enclosed in
+curly braces the other one should be enclosed too.
++
+[source,c]
+----
+/* WRONG */
+if (something)
+	do_other_thing();
+	else if (something_else)
+		do_thing();
+	else
+		return;
+
+/* RIGHT */
+if (something) {
+	do_other_thing();
+} else {
+	if (something_else)
+		do_thing();
+	else
+		return;
+}
+----
+
+* On the other hand do not use braces unnecesarily.
++
+[source,c]
+----
+/* WRONG */
+if (something) {
+	do_work();
+}
+
+/* RIGHT */
+if (something)
+	do_work();
+----
+
+* The preffered way of writing switch is as follows:
++
+[source,c]
+----
+switch (var) {
+case XYZ:
+	do_something():
+break;
+case ABC:
+	return 1;
+default:
+break;
+}
+----
+
+TIP: You can use Linux Kernel 'scripts/checkpatch.pl' to check your code.
+
+GFXprim Specific Rules
+^^^^^^^^^^^^^^^^^^^^^^
+
+* Library external API uses CamelCase
+** Together with mandatory 'GP_' prefix.
+** For example 'GP_PixelType', 'GP_Context', etc.
+** We will not change that, get over it. (It could have been worse, trust me.)
+
+* Basic library types are typedefed
+** We have 'GP_Size' and 'GP_Coord' integer types to better distinguish
+   roles of function parameters.
+** The basic structures are also typedefed so you can wite 'GP_Context'
+   instead of 'struct GP_Context'.
+** Other uses of typedef are frowned upon.
+ 
+* When you add an externally visible symbol, i.e. new API function
+  please add its name into the corresponding file at 'build/syms/'. You may
+  also run the 'buld/check_symbols.sh' script to check that you haven't
+  accidentally exposed intenal only interfaces.
+
+Python Coding Style
+~~~~~~~~~~~~~~~~~~~
+
+TODO
