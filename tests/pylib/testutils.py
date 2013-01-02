@@ -24,10 +24,11 @@ def alltypes_new_functions(_filter=None):
       if (_filter is None) or _filter(t):
         nf = lambda: f(t)
         nf.__name__ = f.__name__ + "_" + t.name
+        nf.__module__ = f.__module__
         nf.__doc__ = "%s<%s:%s>"% (
             f.__doc__ + " " if f.__doc__ else "",
-            __name__, nf.__name__)
-        globals()[nf.__name__] = nf
+            nf.__module__, nf.__name__)
+        f.__globals__[nf.__name__] = nf
     return None
   return decorate
 
