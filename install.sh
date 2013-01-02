@@ -3,7 +3,7 @@
 INSTALL_PREFIX="$1"
 
 if test -z "$INSTALL_PREFIX"; then
-	INSTALL_PREFIX="/usr/"
+	INSTALL_PREFIX="/usr"
 fi
 
 HEADER_LOC="$INSTALL_PREFIX/include/"
@@ -26,7 +26,16 @@ done
 # Library
 echo "INSTALL libraries"
 install -m 775 -d "$LIB_LOC" 
-install -m 664 build/*.so build/*.so.0 build/*.a "$LIB_LOC"
+
+for i in build/*.so build/*.so.* build/*.a; do
+	if [ -L "$i" ]; then
+	        TARGET=`basename "$i"`
+		SOURCE=`readlink "$i"`
+		(cd "$LIB_LOC" && rm -f "$TARGET" && ln -s "$LIB_LOC$SOURCE" "$TARGET")
+	else
+		install "$i" "$LIB_LOC"
+	fi
+done
 
 # Binaries
 echo "INSTALL binaries"
