@@ -70,8 +70,8 @@ GP_Context *GP_ContextAlloc(GP_Size w, GP_Size h, GP_PixelType type)
 
 	context->pixel_type = type;
 	#warning Hmm, bit endianity... Why is not this settled by different pixel types?
-	context->bit_endian = 0;
-	
+	context->bit_endian = GP_PixelTypes[type].bit_endian;
+
 	/* rotation and mirroring */
 	GP_ContextSetRotation(context, 0, 0, 0);
 
