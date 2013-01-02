@@ -127,13 +127,15 @@ def _init(module):
     assert sum([w is not None, sx2 is not None, tx2 is not None]) == 1
     assert sum([h is not None, sy2 is not None, ty2 is not None]) == 1
     if sx2 is not None:
-      w = max(0, sx2 - sx)
+      w = max(0, sx2 - sx + 1)
     if tx2 is not None:
-      w = max(0, tx2 - tx)
+      w = max(0, tx2 - tx + 1)
     if sy2 is not None:
-      h = max(0, sy2 - sy)
+      h = max(0, sy2 - sy + 1)
     if ty2 is not None:
-      h = max(0, ty2 - ty)
+      h = max(0, ty2 - ty + 1)
+    if (w < 0) or (h < 0):
+      raise ValueError("Size of blit rect must be non-negative.")
     return c_core.GP_BlitXYWH_Clipped(self, sx, sy, w, h, target, tx, ty)
 
   # Color conversions
