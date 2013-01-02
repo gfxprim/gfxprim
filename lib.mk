@@ -28,27 +28,27 @@ ALL+=$(LIBS) $(SYMLINKS)
 CLEAN+=$(LIBS) $(addprefix $(BUILD_DIR),$(SYMLINKS))
 
 # 
-# OBJECTS are set in post.mk so we need to set it here too to have
-# correct dependencies we don't care that they are overwritten laten
+# OBJECTS are set in post.mk so we need to duplicate the values in
+# OBJS here too to have correct dependencies
 #
-OBJECTS=$(CSOURCES=.c=.o)
+OBJS=$(CSOURCES:.c=.o)
 
-$(BUILD_DIR)$(DYNAMIC_LIB): $(OBJECTS)
+$(BUILD_DIR)$(DYNAMIC_LIB): $(OBJS)
 ifdef VERBOSE
 	rm -f $@
-	$(CC) -fPIC --shared -Wl,-soname -Wl,$(SONAME) $(OBJECTS) -o $@
+	$(CC) -fPIC --shared -Wl,-soname -Wl,$(SONAME) $? -o $@
 else
 	@rm -f $(@)
 	@echo "LD   $@"
-	@$(CC) -fPIC --shared -Wl,-soname -Wl,$(SONAME) $(OBJECTS) -o $@
+	@$(CC) -fPIC --shared -Wl,-soname -Wl,$(SONAME) $? -o $@
 endif
 
-$(BUILD_DIR)$(STATIC_LIB): $(OBJECTS)
+$(BUILD_DIR)$(STATIC_LIB): $(OBJS)
 ifdef VERBOSE
-	$(AR) rcs $@ $(OBJECTS)
+	$(AR) rcs $@ $?
 else
 	@echo "AR   $@"
-	@$(AR) rcs $@ $(OBJECTS)
+	@$(AR) rcs $@ $?
 endif
 
 $(SYMLINKS): $(BUILD_DIR)$(DYNAMIC_LIB)
