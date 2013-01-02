@@ -6,34 +6,44 @@ ifndef LIBNAME
 $(error LIBNAME not defined, fix your library Makefile)
 endif
 
+ifeq ($(BUILDLIB),yes)
 #
 # Rules for single library, applied only when objects
 # are not linked to the libGP.so. This generates libGP_$(LIBNAME).
 #
-ifeq ($(BUILDLIB),yes)
-# BUILDLIB = yes
 
-LIB=libGP_$(LIBNAME)
-LIBP=$(TOPDIR)/build/
+include $(TOPDIR)/libver.mk
 
-ALL+=$(LIBP)$(LIB).so $(LIBP)$(LIB).a
-CLEAN+=$(LIBP)$(LIB).so $(LIBP)$(LIB).so.0 $(LIBP)$(LIB).a
-OBJS=$(CSOURCES:.c=.o)
+LIB_NAME=libGP_$(LIBNAME)
+BUILD_DIR=$(TOPDIR)/build/
 
+STATIC_LIB=$(LIB_NAME).$(LIB_VERSION).a
+DYNAMIC_LIB=$(LIB_NAME).so.$(LIB_VERSION).$(LIB_RELEASE)
+SONAME=$(LIB_NAME).so.$(LIB_MAJOR)
+SYMLINKS=$(LIB_NAME).so.$(LIB_MAJOR) $(LIB_NAME).so
 
-$(LIBP)$(LIB).so: $(OBJS)
+LIBS=$(BUILD_DIR)$(STATIC_LIB) $(BUILD_DIR)$(DYNAMIC_LIB)
+
+ALL+=$(LIBS) $(SYMLINKS)
+CLEAN+=$(LIBS) $(addprefix $(BUILD_DIR),$(SYMLINKS))
+
+# 
+# OBJECTS are set in post.mk so we need to set it here too to have
+# correct dependencies we don't care that they are overwritten laten
+#
+OBJECTS=$(CSOURCES=.c=.o)
+
+$(BUILD_DIR)$(DYNAMIC_LIB): $(OBJECTS)
 ifdef VERBOSE
-	rm -f $(LIBP)$(LIB).so.0
-	cd $(LIBP) && ln -s $(LIB).so $(LIB).so.0
-	$(CC) -fPIC --shared -Wl,-soname -Wl,$(LIB).so.0 $(OBJECTS) -o $@
+	rm -f $@
+	$(CC) -fPIC --shared -Wl,-soname -Wl,$(SONAME) $(OBJECTS) -o $@
 else
-	@rm -f $(LIBP)$(LIB).so.0
-	@cd $(LIBP) && ln -s $(LIB).so $(LIB).so.0
+	@rm -f $(@)
 	@echo "LD   $@"
-	@$(CC) -fPIC --shared -Wl,-soname -Wl,$(LIB).so.0 $(OBJECTS) -o $@
+	@$(CC) -fPIC --shared -Wl,-soname -Wl,$(SONAME) $(OBJECTS) -o $@
 endif
 
-$(LIBP)$(LIB).a: $(OBJS)
+$(BUILD_DIR)$(STATIC_LIB): $(OBJECTS)
 ifdef VERBOSE
 	$(AR) rcs $@ $(OBJECTS)
 else
@@ -41,8 +51,21 @@ else
 	@$(AR) rcs $@ $(OBJECTS)
 endif
 
+$(SYMLINKS): $(BUILD_DIR)$(DYNAMIC_LIB)
+ifdef VERBOSE
+	rm -f $(BUILD_DIR)$@
+	cd $(BUILD_DIR) && ln -s $(DYNAMIC_LIB) $@
 else
-# BUILDLIB = no
+	@echo "LN   $@"
+	@rm -f $(BUILD_DIR)$@
+	@cd $(BUILD_DIR) && ln -s $(DYNAMIC_LIB) $@
+endif
+
+else
+#
+# If we are not executed from the top Makefile, trigger
+# libGP.so rebuild.
+#
 include $(TOPDIR)/config.mk
 
 ifndef TOP_MAKE

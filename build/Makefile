@@ -1,43 +1,48 @@
 LIB_OBJECTS=$(shell ./get_objs.sh)
 
-all: libGP.a libGP.so libGP.so.0
+include ../libver.mk
 
-libGP.a: $(LIB_OBJECTS)
-libGP.so: $(LIB_OBJECTS)
-libGP.so.0: $(LIB_OBJECTS)
+LIB_NAME=libGP
+
+STATIC_LIB=$(LIB_NAME).$(LIB_VERSION).a
+DYNAMIC_LIB=$(LIB_NAME).so.$(LIB_VERSION).$(LIB_RELEASE)
+SONAME=$(LIB_NAME).so.$(LIB_MAJOR)
+SYMLINKS=$(LIB_NAME).so.$(LIB_MAJOR) $(LIB_NAME).so
+
+all: $(STATIC_LIB) $(DYNAMIC_LIB) $(SYMLINKS) 
 
 rebuild: all
 
 clean:
 ifdef VERBOSE
-	rm -rf libGP.a libGP.so libGP.so.0 .lock
+	rm -rf $(STATIC_LIB) $(DYNAMIC_LIB) $(SYMLINKS)
 else
-	@echo "RM   libGP.a libGP.so libGP.so.0 .lock"
-	@rm -rf libGP.a libGP.so libGP.so.0 .lock
+	@echo "RM   $(STATIC_LIB) $(DYNAMIC_LIB) $(SYMLINKS)"
+	@rm -rf $(STATIC_LIB) $(DYNAMIC_LIB) $(SYMLINKS) 
 endif
 
-libGP.a:
+$(STATIC_LIB):
 ifdef VERBOSE
-	$(AR) rcs libGP.a $(LIB_OBJECTS)
+	$(AR) rcs $@ $(LIB_OBJECTS)
 else
-	@echo "AR   libGP.a"
-	@$(AR) rcs libGP.a $(LIB_OBJECTS)
+	@echo "AR   $@"
+	@$(AR) rcs $@ $(LIB_OBJECTS)
 endif
 
-libGP.so:
+$(DYNAMIC_LIB):
 ifdef VERBOSE
-	$(CC) -fPIC -dPIC --shared -Wl,-soname -Wl,libGP.so.0 $(LIB_OBJECTS) -o libGP.so
+	$(CC) -fPIC -dPIC --shared -Wl,-soname -Wl,$(SONAME) $(LIB_OBJECTS) -o $@
 else
-	@echo "LD   libGP.so"
-	@$(CC) -fPIC -dPIC --shared -Wl,-soname -Wl,libGP.so.0 $(LIB_OBJECTS) -o libGP.so
+	@echo "LD   $@"
+	@$(CC) -fPIC -dPIC --shared -Wl,-soname -Wl,$(SONAME) $(LIB_OBJECTS) -o $@
 endif
 
-libGP.so.0: libGP.so
+$(SYMLINKS): $(DYNAMIC_LIB)
 ifdef VERBOSE
-	rm -f libGP.so.0
-	ln -s libGP.so libGP.so.0
+	rm -f $@
+	ln -s $< $@
 else
-	@echo "LN   libGP.so.0"
-	@rm -f libGP.so.0
-	@ln -s libGP.so libGP.so.0
+	@echo "LN   $@"
+	@rm -f $@
+	@ln -s $< $@
 endif
