@@ -12,11 +12,13 @@ GP_ContextFree
 GP_ContextInit
 GP_SubContext
 GP_ContextCopy
+GP_ContextEqual
 GP_PixelAddrOffset
 
 GP_GammaRelease
 GP_GammaCopy
 GP_GammaAcquire
+GP_GammaPrint
 
 GP_DebugPrint
 GP_SetDebugLevel
@@ -43,14 +45,14 @@ GP_BlitXYXY_Raw
 GP_WritePixels_1BPP_LE
 GP_WritePixels_2BPP_LE
 GP_WritePixels_4BPP_LE
-GP_WritePixels1bpp
-GP_WritePixels2bpp
-GP_WritePixels4bpp
-GP_WritePixels8bpp
-GP_WritePixels16bpp
-GP_WritePixels18bpp
-GP_WritePixels32bpp
-GP_WritePixels24bpp
+GP_WritePixels_1BPP_BE
+GP_WritePixels_2BPP_BE
+GP_WritePixels_4BPP_BE
+GP_WritePixels_8BPP
+GP_WritePixels_16BPP
+GP_WritePixels_18BPP_LE
+GP_WritePixels_24BPP
+GP_WritePixels_32BPP
 
 GP_PutPixel
 GP_GetPixel
