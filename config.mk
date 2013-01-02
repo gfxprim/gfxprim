@@ -13,10 +13,3 @@ PYTHON_INCLUDE=`python-config --include`
 PYTHON=PYTHONPATH=$$PYTHONPATH:${PYLIBSDIR} ${PYTHON_BIN} -Werror
 
 SWIGOPTS=-w322,314 -I/usr/include/
-
-#
-# If set to yes, rebuilds libGP* after typing make
-# in any of the libs/*/ directories that are linked
-# to libGP*.
-#
-REBUILD_LIBGP=yes
