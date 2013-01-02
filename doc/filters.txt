@@ -926,6 +926,7 @@ downscaling. To do this reasonably fast we could cheat a little: first resize
 big images a little without the low-pass filter, then apply low-pass filter and
 finally downscale it to desired size.
 
+[[Dithering]]
 Dithering
 ~~~~~~~~~
 

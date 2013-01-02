@@ -217,17 +217,19 @@ Subcontext
 ~~~~~~~~~~
 
 A subcontext is a context that refers to a rectangular area within another
-context. Subcontexts can be used as any other context (including creating
-another subcontexts). Generally the subcontexts behave exactly as any other
-contexts with one exception, if you create several overlapping subcontexts the
-results may be unexpected.
+context. Subcontexts can be used as any other contexts (including subcontext
+creation).
 
-Calling 'GP_ContextFree()' on a allocated subcontext is safe; the bitmap is not
-freed as it belongs to another context; it will be freed with the hosting
-context (i.e. the 'free_pixels' flag is not set when creating subcontext). On
-the other hand, the subcontext doesn't hold a reference to the original
-context, so once the parent context is freed the subcontext pixel pointer is
-not valid anymore.
+WARNING: If you create overlaping subcontexts the result is undefined.
+
+Calling 'GP_ContextFree()' on a allocated subcontext is safe; the bitmap is
+not freed as it belongs to another context; it will be freed when the parent
+context is freed (i.e. the 'free_pixels' flag is not set when creating
+subcontext).
+
+CAUTION: The subcontext doesn't hold a reference to the original context, so
+         once the parent context is freed the subcontext pixels pointer is not
+	 valid anymore.
 
 [source,c]
 -------------------------------------------------------------------------------
@@ -242,7 +244,8 @@ GP_Context *GP_SubContextAlloc(const GP_Context *context,
                                GP_Coord x, GP_Coord y, GP_Size w, GP_Size h);
 -------------------------------------------------------------------------------
 
-Creates subcontext of a context. The rectangular area must fit into the context.
+Creates subcontext of a context. The rectangular area must fit into the parent
+context.
 
 The 'GP_SubContext()' function initializes the passed pointer as a subcontext
 of a context and returns pointer to the initialized subcontext (i.e. the same
@@ -273,7 +276,7 @@ Converts a context to different pixel type.
 
 This is naive implementation that only multiplies/divides the pixel values.
 
-To get a better result use dithering filters instead.
+To get a better result use link:filters.html#Dithering[dithering filters] instead.
 
 Misc
 ~~~~
