@@ -157,21 +157,31 @@ def test_subcontext_vs_blit(t):
 def test_blits_by_rect(t):
   "Blit defined by XYXY, XYX2Y2 and XYWH"
   c = ContextRand(17, 13, t, seed=765)
-  c2a = ContextRand(16, 15, t)
-  c2b = ContextRand(16, 15, t)
-  c2c = ContextRand(16, 15, t)
+  c2a = ContextRand(16, 15, t, seed=4)
+  c2b = ContextRand(16, 15, t, seed=4)
+  c2c = ContextRand(16, 15, t, seed=4)
+  c2d = ContextRand(16, 15, t, seed=4)
+  c2e = ContextRand(16, 15, t, seed=4)
   assert c2a == c2b
   assert c2a == c2c
+  assert c2a == c2d
+  assert c2a == c2e
   assert c != c2a
 
   c.Blit(3, 4, c2a, 5, 2, w=4, h=5)
-  assert c2a != c2c
-  c.Blit(3, 4, c2b, 5, 2, w=4, h=5)
-  assert c2b != c2c
-  c.Blit(3, 4, c2c, 5, 2, w=4, h=5)
+  assert c2a != c2e
+  c.Blit(3, 4, c2b, 5, 2, sx2=6, sy2=8)
+  assert c2b != c2e
+  c.Blit(3, 4, c2c, 5, 2, tx2=8, ty2=6)
+  assert c2c != c2e
+  core.c_core.GP_BlitXYWH(c, 3, 4, 4, 5, c2d, 5, 2)
+  assert c2d != c2e
+  core.c_core.GP_BlitXYXY(c, 3, 4, 6, 8, c2e, 5, 2)
 
   assert c2a == c2b
   assert c2a == c2c
+  assert c2a == c2d
+  assert c2a == c2e
 
 
 #      'RGBAToPixel',
