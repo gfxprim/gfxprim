@@ -22,7 +22,7 @@ def alltypes_new_functions(_filter=None):
   def decorate(f):
     for t in core.PixelTypes[1:]:
       if (_filter is None) or _filter(t):
-        nf = lambda: f(t)
+        nf = (lambda tt: (lambda: f(tt)))(t)
         nf.__name__ = f.__name__ + "_" + t.name
         nf.__module__ = f.__module__
         nf.__doc__ = "%s<%s:%s>"% (
