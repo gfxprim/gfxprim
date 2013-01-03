@@ -21,7 +21,7 @@ else
 	@rm -rf $(STATIC_LIB) $(DYNAMIC_LIB) $(SYMLINKS) 
 endif
 
-$(STATIC_LIB):
+$(STATIC_LIB): $(LIB_OBJECTS)
 ifdef VERBOSE
 	$(AR) rcs $@ $(LIB_OBJECTS)
 else
@@ -29,7 +29,7 @@ else
 	@$(AR) rcs $@ $(LIB_OBJECTS)
 endif
 
-$(DYNAMIC_LIB):
+$(DYNAMIC_LIB): $(LIB_OBJECTS)
 ifdef VERBOSE
 	$(CC) -fPIC -dPIC --shared -Wl,-soname -Wl,$(SONAME) $(LIB_OBJECTS) -o $@
 else
