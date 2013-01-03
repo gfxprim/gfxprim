@@ -166,12 +166,23 @@ GP_Context *GP_ReadPNG(FILE *f, GP_ProgressCallback *callback)
 		}
 	break;
 	case PNG_COLOR_TYPE_RGB:
-		
+
 		png_set_bgr(png);
-		
+
 		switch (depth) {
 		case 8:
 			pixel_type = GP_PIXEL_RGB888;
+		break;
+		}
+	break;
+	case PNG_COLOR_TYPE_RGB | PNG_COLOR_MASK_ALPHA:
+
+		png_set_bgr(png);
+		png_set_swap_alpha(png);
+
+		switch (depth) {
+		case 8:
+			pixel_type = GP_PIXEL_RGBA8888;
 		break;
 		}
 	break;
@@ -192,14 +203,16 @@ GP_Context *GP_ReadPNG(FILE *f, GP_ProgressCallback *callback)
 		png_set_bgr(png);
 
 		png_read_update_info(png, png_info);
-	
+
 		png_get_IHDR(png, png_info, &w, &h, &depth,
 	        	     &color_type, NULL, NULL, NULL);
 
-		if (color_type & PNG_COLOR_MASK_ALPHA)
-			pixel_type = GP_PIXEL_UNKNOWN;
-		else
+		if (color_type & PNG_COLOR_MASK_ALPHA) {
+			pixel_type = GP_PIXEL_RGBA8888;
+			png_set_swap_alpha(png);
+		} else {
 			pixel_type = GP_PIXEL_RGB888;
+		}
 	break;
 	}
 
