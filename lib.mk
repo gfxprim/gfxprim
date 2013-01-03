@@ -36,19 +36,19 @@ OBJS=$(CSOURCES:.c=.o)
 $(BUILD_DIR)$(DYNAMIC_LIB): $(OBJS)
 ifdef VERBOSE
 	rm -f $@
-	$(CC) -fPIC --shared -Wl,-soname -Wl,$(SONAME) $? -o $@
+	$(CC) -fPIC --shared -Wl,-soname -Wl,$(SONAME) $^ -o $@
 else
 	@rm -f $(@)
 	@echo "LD   $@"
-	@$(CC) -fPIC --shared -Wl,-soname -Wl,$(SONAME) $? -o $@
+	@$(CC) -fPIC --shared -Wl,-soname -Wl,$(SONAME) $^ -o $@
 endif
 
 $(BUILD_DIR)$(STATIC_LIB): $(OBJS)
 ifdef VERBOSE
-	$(AR) rcs $@ $?
+	$(AR) rcs $@ $^
 else
 	@echo "AR   $@"
-	@$(AR) rcs $@ $?
+	@$(AR) rcs $@ $^
 endif
 
 $(SYMLINKS): $(BUILD_DIR)$(DYNAMIC_LIB)

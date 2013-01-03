@@ -23,18 +23,18 @@ endif
 
 $(STATIC_LIB): $(LIB_OBJECTS)
 ifdef VERBOSE
-	$(AR) rcs $@ $(LIB_OBJECTS)
+	$(AR) rcs $@ $^
 else
 	@echo "AR   $@"
-	@$(AR) rcs $@ $(LIB_OBJECTS)
+	@$(AR) rcs $@ $^
 endif
 
 $(DYNAMIC_LIB): $(LIB_OBJECTS)
 ifdef VERBOSE
-	$(CC) -fPIC -dPIC --shared -Wl,-soname -Wl,$(SONAME) $(LIB_OBJECTS) -o $@
+	$(CC) -fPIC -dPIC --shared -Wl,-soname -Wl,$(SONAME) $^ -o $@
 else
 	@echo "LD   $@"
-	@$(CC) -fPIC -dPIC --shared -Wl,-soname -Wl,$(SONAME) $(LIB_OBJECTS) -o $@
+	@$(CC) -fPIC -dPIC --shared -Wl,-soname -Wl,$(SONAME) $^ -o $@
 endif
 
 $(SYMLINKS): $(DYNAMIC_LIB)
