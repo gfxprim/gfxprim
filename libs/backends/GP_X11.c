@@ -858,7 +858,7 @@ err0:
 
 void GP_BackendX11RequestFullscreen(GP_Backend *self, int mode)
 {
-	return request_fullscreen(self, mode);
+	request_fullscreen(self, mode);
 }
 
 #else
@@ -875,7 +875,10 @@ GP_Backend *GP_BackendX11Init(const char *GP_UNUSED(display),
 	return NULL;
 }
 
-void GP_BackendX11RequestFullscreen(GP_Backend *GP_UNUSED(self), int mode);
+void GP_BackendX11RequestFullscreen(GP_Backend *GP_UNUSED(self),
+                                    int GP_UNUSED(mode))
+{
+}
 
 #endif /* HAVE_LIBX11 */
 
