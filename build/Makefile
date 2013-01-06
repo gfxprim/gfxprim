@@ -1,5 +1,7 @@
 LIB_OBJECTS=$(shell ./get_objs.sh)
 
+.SUFFIXES:
+
 include ../libver.mk
 
 LIB_NAME=libGP
