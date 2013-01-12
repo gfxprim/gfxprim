@@ -1,0 +1,15 @@
+GetPixel and PutPixel
+---------------------
+
+[source,c]
+--------------------------------------------------------------------------------
+#include <GP.h>
+/* or */
+#include <core/GP_GetPutPixel.h>
+
+GP_Pixel GP_GetPixel(const GP_Context *context, GP_Coord x, GP_Coord y);
+
+void GP_PutPixel(GP_Context *context, GP_Coord x, GP_Coord y, GP_Pixel p);
+--------------------------------------------------------------------------------
+
+TODO: This is stub.

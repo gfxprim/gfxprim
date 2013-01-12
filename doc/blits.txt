@@ -1,0 +1,75 @@
+Blits
+-----
+
+NOTE: You may want to see the link:coordinate_system.html[coordinate system] first.
+
+Blit copies a rectangular area from one pixmap into the another one. Blits can
+do automatic pixel conversion i.e. swap R a B in blit from RGB888 to BGR888 or
+even convert RGB image into grayscale.
+
+The conversion however may not be ideal as the pixel channel values are just
+divided/multiplied before they are written into the destination bitmap. For
+down-sampling (i.e. size or number of channels of destination bitmap is
+smaller) you should consider using the link:filters.html#Dithering[dithering
+filters] first to convert the source bitmap into destination format.
+
+Also blits that do conversions are significantly slower than blits with equal
+pixel sizes. If you need to blit a pixmap several times consider converting it
+into destination pixel type to speed up the blitting.
+
+
+[source,c]
+--------------------------------------------------------------------------------
+#include <GP.h>
+/* or */
+#include <core/GP_Blit.h>
+
+void GP_Blit(const GP_Context *src,
+             GP_Coord x0, GP_Coord y0, GP_Size w0, GP_Size h0,
+             GP_Context *dst, GP_Coord x1, GP_Coord y1);
+
+void GP_BlitXYWH(const GP_Context *src,
+                 GP_Coord x0, GP_Coord y0, GP_Size w0, GP_Size h0,
+                 GP_Context *dst, GP_Coord x1, GP_Coord y1);
+
+void GP_BlitXYXY(const GP_Context *src,
+                 GP_Coord x0, GP_Coord y0, GP_Coord x1, GP_Coord y1,
+                 GP_Context *dst, GP_Coord x2, GP_Coord y2);
+--------------------------------------------------------------------------------
+
+Blit functions to copy rectangular area from source to destination.
+
+As you may see the 'GP_Blit()' function is just alias for 'GP_BlitXYWH()'.
+
+WARNING: For these functions the behavior is undefined when you pass
+         coordinates or width or height outside of the source or destination
+	 pixmap. If you need safe variant that automatically clips the
+	 coordinates and rectangle to fit both the source and destination use
+	 the Clipped variants described bellow.
+
+
+[source,c]
+--------------------------------------------------------------------------------
+#include <GP.h>
+/* or */
+#include <core/GP_Blit.h>
+
+void GP_BlitXYXY_Clipped(const GP_Context *src,
+                         GP_Coord x0, GP_Coord y0, GP_Coord x1, GP_Coord y1,
+                         GP_Context *dst, GP_Coord x2, GP_Coord y2);
+
+
+void GP_BlitXYWH_Clipped(const GP_Context *src,
+                         GP_Coord x0, GP_Coord y0, GP_Size w0, GP_Size h0,
+                         GP_Context *dst, GP_Coord x1, GP_Coord y1);
+
+void GP_Blit_Clipped(const GP_Context *src,
+                     GP_Coord x0, GP_Coord y0, GP_Size w0, GP_Size h0,
+                     GP_Context *dst, GP_Coord x1, GP_Coord y1);
+--------------------------------------------------------------------------------
+
+Blit functions to copy rectangular area from source to destination. Both
+source and destination coordinates and sizes are clipped to fit the pixmaps.
+
+As you may see the 'GP_Blit_Clipped()' function is just alias for
+'GP_BlitXYWH_Clipped()'.

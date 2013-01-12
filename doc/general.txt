@@ -3,18 +3,49 @@ General information
 Gfxprim is simple modular 2D bitmap graphics library with emphasis on speed
 and correctness.
 
-One of the key points of the library is code generation. Most of the graphics
-operations are written using 'jinja' templating engine which is used to
-generate specialized C code. So, for an example, once  you add pixel
-definition into configuration file, creating specialized filters, loaders and
-conversions to other pixel formats is just a matter of typing "make && make
-clean".
+One of the key points of the library is meta-programming. Most of the
+operations and filters are wriiten in http://jinja.pocoo.org/[Jinja]
+templating language that is used to generate specialized code in C
+programmming language. Creating code that works with less usuall pixel types
+should be as easy as adding pixel definition into the configuration and
+rebuilding the library. Read more link:gen.html[here].
 
-The library also includes, fairly optimized, fixed-point image filters, namely
-various resampling algorithms used to resize images, low pass filters, etc...
-
-Implemented features
+Parts of the library
 ~~~~~~~~~~~~~~~~~~~~
+
+Core
+^^^^
+
+Core of the library contains minimal amount of code to define interface that
+is shared between all parts of the library.
+
+The most important part of the core is link:context.html[CP_Context] structure
+that represents in-memory pixmap.
+
+The Core also contains generated code for basic operations such as
+link:get_put_pixel.html[GetPixel] and link:get_put_pixel.html[PutPixel] and
+optimized code for writing continous line of pixels 'GP_WritePixels' that are
+base for the more complex drawing primitives in GFX or for graphics operations
+in Filters.
+
+link:blits.html[Blits] are functions used to copy part of one bitmap into
+another bitmap. The blits be also used for primitive bitmap pixel type
+conversions (i.e.  RGB888 vs BGR888).
+
+link:progress_callback.html[Progress Callback] is an interface that allows you
+to monitor progress of an operation it is mainly used in loaders and filters.
+Generally any operation that is not really quick takes optional pointer to
+progress callback that allows your program to monitor and possibly abort the
+operation.
+
+link:debug.html[Debug] interface is used as unified facility to print debug
+messages, control debug level, etc.
+
+There is also support for link:gamma.html[Gamma] correction. Unfortunatelly
+not all parts of library use it at the moment.
+
+And last but not least Core is a home for some link:core.html[common macros]
+that are used from different parts of the library.
 
 Graphics Rendering
 ^^^^^^^^^^^^^^^^^^
