@@ -115,6 +115,13 @@ pre {
   margin-bottom: 1.5em;
 }
 
+div.left-menu {
+  position: relative;
+  top: 140pt;
+  left: -100pt;
+  width: 30pt;
+}
+
 div.logo h1 {
   border-bottom: 0px;
   margin-top: 1em;
