@@ -117,9 +117,9 @@ pre {
 
 div.left-menu {
   position: relative;
-  top: 140pt;
+  top: 90pt;
   left: -100pt;
-  width: 30pt;
+  height: 0;
 }
 
 div.logo h1 {
