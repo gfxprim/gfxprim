@@ -1,5 +1,6 @@
 General information
--------------------
+===================
+
 Gfxprim is simple modular 2D bitmap graphics library with emphasis on speed
 and correctness.
 
@@ -10,11 +11,8 @@ programmming language. Creating code that works with less usuall pixel types
 should be as easy as adding pixel definition into the configuration and
 rebuilding the library. Read more link:gen.html[here].
 
-Parts of the library
-~~~~~~~~~~~~~~~~~~~~
-
 Core
-^^^^
+----
 
 Core of the library contains minimal amount of code to define interface that
 is shared between all parts of the library.
@@ -47,77 +45,163 @@ not all parts of library use it at the moment.
 And last but not least Core is a home for some link:core.html[common macros]
 that are used from different parts of the library.
 
-Graphics Rendering
-^^^^^^^^^^^^^^^^^^
-* Basic Graphics Primitives (with and without fill)
-** PutPixel/GetPixel
-** Lines
-** Circles
-** Ellipses
-** Polygons
+Gfx
+---
 
-* Text Drawing
-** Supports both proportional and non proportional fonts
-** Basic fonts are compiled in the library
-** Font rendering can be altered by style attributes
-** Supports, for example, pixel multiplication and tracking
-** Includes basic support for freetype
+link:drawing_api.html[Gfx] is part of the library that implements basic
+graphics primitives such as lines, circles, polygons, etc. Clasicall
+primitives are nearly finished. Work on anti aliased primitives has been
+started.
 
-* Bitmaps and Blitting
-** Create, Destroy bitmap
-** Subcontext, rectangular region in one context could be used as a context
-** Fast specialized blits (with 90, 180 and 270 degree rotation)
+Text
+----
 
-* Image loading/saving
-** Read and Write support for PNG
-** Read and Write support for JPEG
-** Read support for BMP
-** Read support for GIF
+link:text_api.html[Text] part of the library implements basic support for
+printing text into the bitmap. There are two bitmap fonts compiled directly
+into the library and we support True Type fonts through
+link:http://freetype.org[FreeType] (so far ASCII printable characters only).
 
-* Graphic backed input event handling
-** Linux Frame-buffer
-** SDL support
-** Experimental X11 support
+Loaders
+-------
 
-Bitmap Filters
-^^^^^^^^^^^^^^
-* Point filters
-** Brightness
-** Contrast
-** General Point filter
+link:loaders.html[Loaders] are part that is resposible for loading and saving
+images into various standard formats (PNG, JPEG, GIF, BMP, PNM, etc...).
 
-* Linear filters
-** Specialized Gaussian blur
-** Separable Convolution
-** General Convolution
+.Currently supported formats
+[width="100%",options="header"]
+|=============================================================================
+| Extension | Format Name | Signature | Read Support | Write Support
 
-* Arithmetics filters
-** Addition
-** Multiplication
-** Difference
-** Maximum, Minimum
+| JPEG | | [green]*Yes* | [green]*Yes* | [green]*Yes*
 
-* Floyd Steinberg dithering
+| PNG |
+  Portable Network Graphics |
+  [green]*Yes* |
+  [green]#16 Bit RGB not supported# |
+  [green]#16 Bit RGB not supported#
 
-* Bitmap resampling algorithms
-** Nearest Neighbour
-** Bilinear
-** Cubic
+| GIF |
+  Graphics Interchange Format |
+  [green]*Yes* |
+  [green]*Yes* |
+  [black]*No*
 
-* Bitmap rotation and mirroring
-** 90 180 and 170 degree rotation
+| BMP | |
+  [green]*Yes* |
+  [green]#RLE and RGB Bitfields not implemented# |
+  [black]*No*
 
-* Histogram generator
+| PSP |
+  Paint Shop Pro Image |
+  [green]*Yes* |
+  [green]#Composite image only for newer formats than 3.0# |
+  [black]*No*
+
+| PBM PGM PNM |
+  Netpbm portable bitmap |
+  [black]*No* |
+  [gray]#Not finished# |
+  [gray]#Not finished#
+
+|=============================================================================
+
+
+Filters
+-------
+
+link:filters.html[Filters] are part of the library that implements bitmap
+image filters.
+
+.Currently Implemented Point Filters
+[width="100%",options="header"]
+|=============================================================================
+| Filter Name | Supported Pixel Type | Multithreaded
+| Brightness  | All                  | No
+| Contrast    | All                  | No
+|=============================================================================
+
+.Currently Implemented Linear Filters
+[width="100%",options="header"]
+|=============================================================================
+| Filter Name | Supported Pixel Type | Mutithreaded
+| Convolution | RGB888               | Yes
+| Separable Convolution | RGB888     | Yes
+| Gaussian Blur | RGB888     | Yes
+| Sobel Edge Detection | RGB888 | Yes
+| Prewitt Edge Detection | RGB888 | Yes
+|=============================================================================
+
+NOTE: Linear filters are implemented using generic convolution filters, once
+      convolution is rewritten to run for all pixel types the rest of filters
+      will support them automatically.
+
+
+.Currently Implemented Linear Filters
+[width="100%",options="header"]
+|=============================================================================
+| Filter Name | Supported Pixel Type | Multithreaded
+| Addition    | All                  | No
+| Multiplication | All               | No
+| Difference  | All                  | No
+| Max, Min    | All                  | No
+|=============================================================================
+
+.Currently Implemented Ditherings
+[width="100%",options="header"]
+|=============================================================================
+| Filter Name | Supported Pixel Type | Multithreaded
+| Floyd Steinberg | RGB888 -> Any    | No
+| Hilbert Peano | RGB888 -> Any    | No
+|=============================================================================
+
+.Currently Implemented Resamplings
+[width="100%",options="header"]
+|=============================================================================
+| Filter Name | Supported Pixel Type | Multithreaded
+| Nearest Neighbour | All           | No
+| Bilinear (Integer Arithmetics) | RGB888 | No
+| Bicubic (Integer Arithmetics) | All | No
+| Bicubic (Float Arithmetics) | RGB888 | No
+|=============================================================================
+
+.Rotation and mirroring
+[width="100%",options="header"]
+|=============================================================================
+| Filter Name | Supported Pixel Type | Multithreaded
+| Rotate 90   | All                  | No
+| Rotate 180  | All                  | No
+| Rotate 270  | All                  | No
+| Mirror Vertically | All            | No
+| Mirror Horizontally | All          | No
+|=============================================================================
+
+.Misc filters
+[width="100%",options="header"]
+|=============================================================================
+| Filter Name | Supported Pixel Type | Multithreaded
+| Histogram   | All                  | No
+| Additive Gaussian Noise | All      | No
+| Median      | RGB888               | No
+| Weighted Median | RGB888           | No
+| Sigma Lee | RGB888                 | No
+|=============================================================================
+
+Backends
+--------
+
+link:backends.html[Backends] together with link:input.html[Input] are API for
+drawing on screen (or into a window) and for getting keystrokes/mouse
+coordinates. So far we support X11, linux framebuffer and SDL as a graphics
+backend.
+
 
 Work in progress
-~~~~~~~~~~~~~~~~
+----------------
 
 * Python bindings
-** basic support works now
-** could be combined with PyGTK for GUI drawing (experimental)
 
 * Anti Aliased drawing
-** Line and PutPixel are finished
 
 * Gamma correction and color profiles
 
+* Alfa channel blits

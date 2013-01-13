@@ -2,7 +2,7 @@ SOURCES=general.txt context.txt loaders.txt filters.txt basic_types.txt \
         drawing_api.txt backends.txt gamma.txt grabbers.txt \
 	environment_variables.txt debug.txt core.txt api.txt input.txt \
 	gen.txt pixels.txt coordinate_system.txt coding_style.txt \
-	get_put_pixel.txt blits.txt progress_callback.txt
+	get_put_pixel.txt blits.txt progress_callback.txt text_api.txt
 
 EXAMPLE_SOURCES=$(wildcard example_*.txt)
 
@@ -44,7 +44,7 @@ toolcheck:
 $(PAGES): %.html: %.txt
 	asciidoc $(ASCIIDOC_PARAMS) $<
 
-examples.html: examples.txt ../demos/c_simple/*.c ../demos/py_simple/*.py
+examples.html: examples.txt ../demos/c_simple/*.c ../demos/py_simple/*.py asciidoc.conf
 	asciidoc $(ASCIIDOC_PARAMS) -a toc examples.txt
 
 #
