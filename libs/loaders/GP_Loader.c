@@ -16,7 +16,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2013 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
@@ -93,12 +93,21 @@ static GP_Loader gif_loader = {
 	.extensions = {"gif", NULL},
 };
 
+static GP_Loader tiff_loader = {
+	.Load = GP_LoadTIFF,
+	.Save = NULL,
+	.Match = GP_MatchTIFF,
+	.fmt_name = "Tag Image File Format",
+	.next = &gif_loader,
+	.extensions = {"tif", "tiff", NULL},
+};
+
 static GP_Loader png_loader = {
 	.Load = GP_LoadPNG,
 	.Save = GP_SavePNG,
 	.Match = GP_MatchPNG,
 	.fmt_name = "Portable Network Graphics",
-	.next = &gif_loader,
+	.next = &tiff_loader,
 	.extensions = {"png", NULL},
 };
 

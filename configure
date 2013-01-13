@@ -250,6 +250,9 @@ if __name__ ==  '__main__':
                    ["giflib",
 		    "Library to handle, display and manipulate GIF images",
 		    [header_exists, "gif_lib.h"], "", "-lgif", ["loaders"]],
+                   ["tiff",
+		    "Tag Image File Format (TIFF) library",
+		    [header_exists, "tiffio.h"], "", "-ltiff", ["loaders"]],
                    ["libX11",
 		    "X11 library",
 		    [header_exists, "X11/Xlib.h"], "", "-lX11", ["backends"]],
@@ -262,13 +265,13 @@ if __name__ ==  '__main__':
 		   ["dl",
                     "Dynamic linker",
                     [header_exists, "dlfcn.h"], "", "-ldl", ["core"]],
+		   ["V4L2",
+                    "Video for linux 2",
+                    [header_exists, "linux/videodev2.h"], "", "", ["grabbers"]],
 		   ["backtrace",
                     "C stack trace writeout",
                     [c_try_compile, "#include <execinfo.h>\nint main(void) { backtrace(0, 0); }",
-                      "Checking for backtrace() ... "], "", "", ["core"]],
-		   ["V4L2",
-                    "Video for linux 2",
-                    [header_exists, "linux/videodev2.h"], "", "", ["grabbers"]]], cfg)
+                      "Checking for backtrace() ... "], "", "", ["core"]]], cfg)
 
     parser = OptionParser();
     

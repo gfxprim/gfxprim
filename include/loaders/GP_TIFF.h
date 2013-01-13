@@ -16,40 +16,54 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2010 Jiri "BlueBear" Dluhos                            *
- *                         <jiri.bluebear.dluhos@gmail.com>                  *
- *                                                                           *
  * Copyright (C) 2009-2013 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
- /*
-
-   Core include file for loaders API.
-
-  */
-
-#ifndef LOADERS_GP_LOADERS_H
-#define LOADERS_GP_LOADERS_H
+#ifndef LOADERS_GP_TIFF_H
+#define LOADERS_GP_TIFF_H
 
 #include "core/GP_Context.h"
 #include "core/GP_ProgressCallback.h"
 
-#include "GP_PBM.h"
-#include "GP_PGM.h"
-#include "GP_PPM.h"
+/*
+ * The possible errno values:
+ *
+ * - Anything FILE operation may return (fopen(), fclose(), fseek(), ...).
+ * - EIO for fread()/fwrite() failure
+ * - ENOSYS for not implemented bitmap format
+ * - ENOMEM from malloc()
+ * - EILSEQ for wrong image signature/data
+ * - ECANCELED when call was aborted from callback
+ */
 
-#include "GP_BMP.h"
-#include "GP_PNG.h"
-#include "GP_JPG.h"
-#include "GP_GIF.h"
-#include "GP_TIFF.h"
-#include "GP_PSP.h"
+/*
+ * Opens up a bmp file, checks signature, parses metadata.
+ *
+ * The file, width, height and pixel type are filled upon succcessful return.
+ *
+ * Upon failure, non zero return value is returned and errno is filled.
+ */
+int GP_OpenTIFF(const char *src_path, void **t);
 
-#include "GP_TmpFile.h"
+/*
+ * Reads a TIFF from a opened file.
+ * 
+ * Upon successful return, context to store bitmap is allocated and image is
+ * loaded.
+ *
+ * Upon failure NULL is returned and errno is filled.
+ */
+GP_Context *GP_ReadTIFF(void *t, GP_ProgressCallback *callback);
 
-#include "GP_MetaData.h"
+/*
+ * Does both GP_OpenTIFF and GP_ReadTIFF.
+ */
+GP_Context *GP_LoadTIFF(const char *src_path, GP_ProgressCallback *callback);
 
-#include "GP_Loader.h"
+/*
+ * Match TIFF signature.
+ */
+int GP_MatchTIFF(const void *buf);
 
-#endif /* LOADERS_GP_LOADERS_H */
+#endif /* LOADERS_GP_TIFF_H */
