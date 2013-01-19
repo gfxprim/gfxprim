@@ -16,7 +16,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2013 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
@@ -171,7 +171,7 @@ static struct testcase testcase_xyw_1 = {
 	.h = 3,
 	.pixmap = {
 		0, 0, 0,
-		0, 1, 0,
+		0, 0, 0,
 		0, 0, 0,
 	}
 };
@@ -179,7 +179,7 @@ static struct testcase testcase_xyw_1 = {
 static struct testcase testcase_xyw_2 = {
 	.x = 1, 
 	.y = 1,
-	.lw = 1,
+	.lw = 2,
 
 	.flag = 1,
 
