@@ -262,6 +262,7 @@ Polls for backend events. For backends that do not expose file descriptor
 (namely SDL) this should be called repeatedly. For other backend it may be
 called either repeatedly or when data are ready on file-descriptor.
 
+This call returns immediately after queued backend events were processed.
 
 [source,c]
 -------------------------------------------------------------------------------
