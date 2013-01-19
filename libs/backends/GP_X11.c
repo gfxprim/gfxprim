@@ -247,7 +247,9 @@ static int x11_set_attributes(struct GP_Backend *self,
 		GP_DEBUG(3, "Setting window size to %ux%u", w, h);
 		XResizeWindow(x11->dpy, x11->win, w, h);
 	}
-	
+
+	XFlush(x11->dpy);
+
 	XUnlockDisplay(x11->dpy);
 
 	return 0;
