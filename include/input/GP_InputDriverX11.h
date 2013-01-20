@@ -34,6 +34,6 @@
 /*
  * Converts X11 event to GFXprim event and puts it into the queue.
  */
-void GP_InputDriverX11EventPut(XEvent *ev);
+void GP_InputDriverX11EventPut(XEvent *ev, int w, int h);
 
 #endif /* GP_INPUT_DRIVER_X11_H */

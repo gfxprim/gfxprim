@@ -63,7 +63,7 @@ static uint16_t keycode_table[] = {
 
 static const uint16_t keycode_table_size = sizeof(keycode_table)/2;
 
-void GP_InputDriverX11EventPut(XEvent *ev)
+void GP_InputDriverX11EventPut(XEvent *ev, int w, int h)
 {
 	int key = 0, keycode, press = 0;
 
@@ -106,6 +106,11 @@ void GP_InputDriverX11EventPut(XEvent *ev)
 	break;
 	break;
 	case MotionNotify:
+		/* Ignore all pointer events that are out of the window */
+		if (ev->xmotion.x < 0 || ev->xmotion.y < 0 ||
+		    ev->xmotion.x > w || ev->xmotion.y > h)
+			return;
+		
 		GP_EventPushRelTo(ev->xmotion.x, ev->xmotion.y, NULL);
 	break;
 	case KeyPress:

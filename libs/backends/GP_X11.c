@@ -181,7 +181,8 @@ static void x11_ev(GP_Backend *self, XEvent *ev)
 		/*  Window has been resized, set flag. */
 		x11->resized_flag = 1;
 	default:
-		GP_InputDriverX11EventPut(ev);
+		//TODO: More accurate window w and h?
+		GP_InputDriverX11EventPut(ev, x11->context.w, x11->context.h);
 	break;
 	}
 }

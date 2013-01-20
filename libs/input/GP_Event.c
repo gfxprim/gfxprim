@@ -135,7 +135,9 @@ static void dump_rel(struct GP_Event *ev)
 
 	switch (ev->code) {
 	case GP_EV_REL_POS:
-		printf("Position %u %u\n", ev->cursor_x, ev->cursor_y);
+		printf("Position %u %u dx=%i dy=%i\n",
+		       ev->cursor_x, ev->cursor_y,
+		       ev->val.rel.rx, ev->val.rel.ry);
 	break;
 	case GP_EV_REL_WHEEL:
 		printf("Wheel %i\n", ev->val.val);
@@ -237,6 +239,11 @@ static uint32_t clip_rel(uint32_t val, uint32_t max, int32_t rel)
 
 void GP_EventPushRelTo(uint32_t x, uint32_t y, struct timeval *time)
 {
+	if (x > screen_w || y > screen_h) {
+		GP_WARN("x > screen_w or y > screen_h, forgot to set screen size?");
+		return;
+	}
+	
 	int32_t rx = x - cur_state.cursor_x;
 	int32_t ry = y - cur_state.cursor_y;
 
