@@ -29,6 +29,11 @@ GP_LoadGIF
 GP_ReadGIF
 GP_OpenGIF
 
+GP_MatchTIFF
+GP_OpenTIFF
+GP_ReadTIFF
+GP_LoadTIFF
+
 GP_SavePPM
 GP_LoadPPM
 
