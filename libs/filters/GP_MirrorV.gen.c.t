@@ -11,7 +11,8 @@ Vertical Mirror alogorithm
 #include "GP_Rotate.h"
 
 %% for ps in pixelsizes
-int GP_MirrorV_Raw_{{ ps.suffix }}(const GP_Context *src, GP_Context *dst,
+static int GP_MirrorV_Raw_{{ ps.suffix }}(const GP_Context *src,
+                                    GP_Context *dst,
                                     GP_ProgressCallback *callback)
 {
 	uint32_t x, y;
