@@ -66,7 +66,7 @@ int GP_OpenTIFF(const char *src_path, void **t)
 	return 0;
 }
 
-const char *compression_name(uint16_t compression)
+static const char *compression_name(uint16_t compression)
 {
 	switch (compression) {
 	case COMPRESSION_NONE:
