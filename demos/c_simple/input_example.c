@@ -97,8 +97,9 @@ static void event_loop(void)
 					GP_TextClear(win, NULL, 20, 40, align,
 					             black, size);
 					size = GP_Print(win, NULL, 20, 40, align,
-					                white, black, "X=%3u Y=%3u",
-						        ev.cursor_x, ev.cursor_y);
+					                white, black, "X=%3u Y=%3u dX=%3i dY=%3i",
+						        ev.cursor_x, ev.cursor_y,
+							ev.val.rel.rx, ev.val.rel.ry);
 					GP_BackendFlip(backend);
 				break;
 				}
