@@ -136,10 +136,19 @@ class libraries:
     # (module may be core, loaders, backends, etc...
     #
     def get_linker_flags(self, module):
-        res = ""
+        res = ''
         for i in self.libraries:
             if module in i[5] and self.results[i[0]]:
-                res += " " + i[4]
+                res += ' ' + i[4]
+        return res
+    #
+    # Returns list of cflags needed to build module
+    #
+    def get_cflags(self, module):
+        res = ''
+        for i in self.libraries:
+            if module in i[5] and self.results[i[0]]:
+                res += ' ' + i[3]
         return res
 
 def die_screaming(msg):
@@ -204,7 +213,8 @@ def write_gfxprim_config(cfg, libs):
     # General switches cflags and ldflags
     f.write('\t--help) echo "$USAGE"; exit 0;;\n')
     f.write('\t--list-modules) echo "%s"; exit 0;;\n' % ' '.join(modules))
-    f.write('\t--cflags) echo -n "-I/usr/include/GP/ ";;\n')
+    f.write('\t--cflags) echo -n "-I/usr/include/GP/%s";;\n' %
+            libs.get_cflags('core'))
     f.write('\t--libs) echo -n "-lGP %s ";;\n' % libs.get_linker_flags('core'))
    
     # ldflags for specific modules
@@ -268,6 +278,9 @@ if __name__ ==  '__main__':
 		   ["V4L2",
                     "Video for linux 2",
                     [header_exists, "linux/videodev2.h"], "", "", ["grabbers"]],
+		   ["pthread",
+                    "Posix Threads",
+                    [header_exists, "pthread.h"], "-pthread", "-pthread", ["core"]],
 		   ["backtrace",
                     "C stack trace writeout",
                     [c_try_compile, "#include <execinfo.h>\nint main(void) { backtrace(0, 0); }",
