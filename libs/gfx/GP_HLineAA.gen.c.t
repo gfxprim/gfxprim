@@ -57,7 +57,7 @@ void GP_HLineAA_Raw(GP_Context *context, GP_Coord x0, GP_Coord x1,
 	GP_Coord int_x1 = TO_X_E(x1);
 	GP_Coord int_y  = GP_FP_FLOOR_TO_INT(y);
 
-	printf("%f %f %f -> %i %i %i\n", GP_FP_TO_FLOAT(x0), GP_FP_TO_FLOAT(x1), GP_FP_TO_FLOAT(y), int_x0, int_x1, int_y);
+//	printf("%f %f %f -> %i %i %i\n", GP_FP_TO_FLOAT(x0), GP_FP_TO_FLOAT(x1), GP_FP_TO_FLOAT(y), int_x0, int_x1, int_y);
 
 	/* Draw the four starting and ending pixels */
 	unsigned int perc;
@@ -72,7 +72,7 @@ void GP_HLineAA_Raw(GP_Context *context, GP_Coord x0, GP_Coord x1,
 	GP_MixPixel_Raw_Clipped(context, int_x0, int_y+1, pixel, perc); 
 
 	if (int_x0 != int_x1) {
-		w = GP_FP_RFRAC(x0 + GP_FP_1_2);
+		w = GP_FP_FRAC(x1 + GP_FP_1_2);
 
 		perc = FP_TO_PERC(GP_FP_MUL(GP_FP_RFRAC(y), w));
 		GP_MixPixel_Raw_Clipped(context, int_x1, int_y, pixel, perc);
