@@ -16,7 +16,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2013 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
@@ -38,7 +38,8 @@
 #include "core/GP_Context.h"
 
 /*
- * Anti Aliased Horizontal Line respecting context rotation flags and with clipping.
+ * Anti Aliased Horizontal Line respecting context rotation flags and with
+ * clipping.
  */
 void GP_HLineAA(GP_Context *context, GP_Coord x0, GP_Coord x1, GP_Coord y,
                 GP_Pixel pixel);

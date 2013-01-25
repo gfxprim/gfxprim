@@ -16,7 +16,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2013 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
@@ -30,7 +30,7 @@ static void dump_buffer(const char *pattern, int w, int h)
 
 	for (y = 0; y < h; y++) {
 		for (x = 0; x < w; x++)
-			printf("%2x ", pattern[x + y * w]);
+			printf("%2x ", (uint8_t)pattern[x + y * w]);
 		printf("\n");
 	}
 }
@@ -57,7 +57,7 @@ void dump_buffers(const char *pattern, const GP_Context *c)
 				else
 					printf(" * ");
 			} else {
-				printf("%2x ", pattern[idx]);
+				printf("%2x ", (uint8_t)pattern[idx]);
 			}
 
 		}
