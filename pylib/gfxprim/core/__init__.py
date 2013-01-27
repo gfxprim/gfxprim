@@ -29,7 +29,7 @@ def _init(module):
 
   _ptdescr = c_core.GP_PixelTypeDescription
 
-  # String representation of 
+  # String representation of a Context
 
   @extend(_ptdescr, name='__str__')
   @extend(_ptdescr, name='__repr__')
