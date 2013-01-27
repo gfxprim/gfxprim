@@ -13,15 +13,32 @@ def extend(cls, name=None):
   return decf
 
 
-def extend_direct(cls, name, call, doc, swig_doc=True):
-  "Decorator extending a class with a function"
+def extend_direct(cls, name, call, doc=None, swig_doc=True):
+  "Extend a class with a function. The first arg will be `self`."
   def method(*args, **kwargs):
     return call(*args, **kwargs)
   method.__name__ = name
-  method.__doc__ = doc.strip() + '\n'
+  if doc:
+    method.__doc__ = doc.strip() + '\n'
+  else:
+    method.__doc__ = ""
   if swig_doc:
-    method.__doc__ = call.__doc__ + '\n\n' + doc.strip() + '\n'
+    method.__doc__ = call.__doc__ + '\n\n' + method.__doc__
   type.__setattr__(cls, name, method)
+
+
+def extend_submodule(module, name, call, doc=None, swig_doc=True):
+  "Extending a submodule with a function. The first arg will be `self.ctx`."
+  def method(self, *args, **kwargs):
+    return call(self.ctx, *args, **kwargs)
+  method.__name__ = name
+  if doc:
+    method.__doc__ = doc.strip() + '\n'
+  else:
+    method.__doc__ = ""
+  if swig_doc:
+    method.__doc__ = call.__doc__ + '\n\n' + method.__doc__
+  type.__setattr__(module, name, method)
 
 
 def add_swig_getmethod(cls, name=None):
