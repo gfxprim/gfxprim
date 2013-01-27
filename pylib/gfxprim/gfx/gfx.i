@@ -1,5 +1,5 @@
 %include "../common.i"
-%module(package="gfxprim.gfx") gfx_c
+%module(package="gfxprim.gfx") c_gfx
 
 %{
 #include "gfx/GP_Gfx.h"
