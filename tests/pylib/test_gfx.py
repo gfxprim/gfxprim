@@ -22,31 +22,31 @@ def test_gfx_submodule_has_C():
 
 # These set the param types of the functions in GFX
 gfx_params = {
-    'ArcSegment': 'CCCCCFFP',
-    'Circle': 'CCCP',
-    'Ellipse': 'CCCCP',
+    'ArcSegment': 'IIIIIFFP',
+    'Circle': 'IIIP',
+    'Ellipse': 'IIIIP',
     'Fill': 'P',
-    'FillCircle': 'CCCP',
-    'FillEllipse': 'CCCCP',
+    'FillCircle': 'IIIP',
+    'FillEllipse': 'IIIIP',
     'FillPolygon': None,
-    'FillRect': 'CCCCP',
+    'FillRect': 'IIIIP',
     'FillRect_AA': 'FFFFP',
-    'FillRing': 'CCCCP',
-    'FillSymbol': '0CCCCP',
-    'FillTetragon': 'CCCCCCCCP',
-    'FillTriangle': 'CCCCCCP',
-    'HLine': 'CCCP',
+    'FillRing': 'IIIIP',
+    'FillSymbol': '0IIIIP',
+    'FillTetragon': 'IIIIIIIIP',
+    'FillTriangle': 'IIIIIIP',
+    'HLine': 'IIIP',
     'HLineAA': 'FFFP',
-    'Line': 'CCCCP',
+    'Line': 'IIIIP',
     'LineAA': 'FFFFP',
     'Polygon': None,
     'PutPixelAA': 'FFP',
-    'Rect': 'CCCCP',
-    'Ring': 'CCCCP',
-    'Symbol': '0CCCCP',
-    'Tetragon': 'CCCCCCCCP',
-    'Triangle': 'CCCCCCP',
-    'VLine': 'CCCP',
+    'Rect': 'IIIIP',
+    'Ring': 'IIIIP',
+    'Symbol': '0IIIIP',
+    'Tetragon': 'IIIIIIIIP',
+    'Triangle': 'IIIIIIP',
+    'VLine': 'IIIP',
     'VLineAA': 'FFFP',
     }
 
@@ -58,23 +58,35 @@ def test_all_methods_are_known():
     if name[0] != '_' and name not in ['C', 'ctx']:
       assert name in gfx_params
 
+def gen_dummy_args(params):
+  """
+  Generate dummy parameter tuple  according to characters in the given string.
 
-@for_each_case(gfx_params, _filter=(lambda(n, params): params is not None))
-def test_method_callable(n, params):
-  "Call with dummy parameters"
-  c = Context(10, 10, 1)
+  0 - 0
+  S - String ("")
+  I - Int (1)
+  F - Float (0.5)
+  P - Pixel (0)
+  """
   args = []
   for t in params:
     if t == '0':
       args.append(0)
-    elif t == 'C':
+    elif t == 'I':
       args.append(1)
     elif t == 'P':
       args.append(0)
     elif t == 'F':
       args.append(0.5)
+    elif t == 'S':
+      args.append("")
     else:
       assert False
-  print args
-  c.gfx.__getattribute__(n)(*tuple(args))
+  return tuple(args)
+
+@for_each_case(gfx_params, _filter=(lambda(n, params): params is not None))
+def test_method_callable(n, params):
+  "Call with dummy parameters"
+  c = Context(10, 10, 1)
+  c.gfx.__getattribute__(n)(*gen_dummy_args(params))
 
