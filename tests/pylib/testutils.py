@@ -8,35 +8,6 @@ __all__ = ["alltypes", "for_each_case",
            "RandomizeContext", "ContextRand"]
 
 
-def alltypes_generator(_filter=None):
-  def decorate(f):
-    def gen():
-      for t in core.PixelTypes[1:]:
-        if (_filter is None) or _filter(t):
-          yield f, t
-    gen.__name__ = f.__name__
-    return gen
-  return decorate
-
-
-def alltypes_new_functions(_filter=None):
-  def decorate(f):
-    for t in core.PixelTypes[1:]:
-      if (_filter is None) or _filter(t):
-        nf = (lambda tt: (lambda: f(tt)))(t)
-        nf.__name__ = f.__name__ + "_" + t.name
-        nf.__module__ = f.__module__
-        nf.__doc__ = "%s<%s:%s>"% (
-            f.__doc__ + " " if f.__doc__ else "",
-            nf.__module__, nf.__name__)
-        f.__globals__[nf.__name__] = nf
-    return None
-  return decorate
-
-# Switch to alltypes_new_functions by default
-#alltypes = alltypes_new_functions
-
-
 def alltypes(_filter=None):
   """
   Creates one test for each PixelType (except INVALID).
@@ -86,6 +57,7 @@ def ContextRand(w, h, t, seed=None):
   c = core.Context(w, h, t)
   RandomizeContext(c, seed)
   return c
+
 
 def RandomizeContext(c, seed=None):
   """Fill Context with pseudorandom data.
