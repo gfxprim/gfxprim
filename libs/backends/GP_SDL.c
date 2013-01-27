@@ -19,7 +19,7 @@
  * Copyright (C) 2009-2010 Jiri "BlueBear" Dluhos                            *
  *                         <jiri.bluebear.dluhos@gmail.com>                  *
  *                                                                           *
- * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2013 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
@@ -30,6 +30,7 @@
 #ifdef HAVE_LIBSDL
 
 #include "input/GP_InputDriverSDL.h"
+#include "input/GP_Input.h"
 #include "GP_Backend.h"
 #include "GP_SDL.h"
 
@@ -149,6 +150,9 @@ static int sdl_set_attributes(struct GP_Backend *self __attribute__((unused)),
 	if (w != 0 && h != 0) {
 		sdl_surface = SDL_SetVideoMode(w, h, 0, sdl_flags);
 		context_from_surface(&context, sdl_surface);
+		
+		/* Send event that resize was finished */
+		GP_EventPushResize(w, h, NULL);
 	}
 
 	SDL_mutexV(mutex);
