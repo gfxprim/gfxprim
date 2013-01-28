@@ -36,6 +36,7 @@
 #define NAME_PADD 35
 
 int tst_suite_verbose = 0;
+const char *tst_log_dir = NULL;
 
 static void test_job_report(const struct tst_job *job)
 {
@@ -127,7 +128,8 @@ static int run_test(const struct tst_test *test, FILE *json)
 	 * child and parent and the lines in the resulting
 	 * file would be repeated several times.
 	 */
-	fflush(json);
+	if (json)
+		fflush(json);
 
 	tst_job_run(&job);
 	tst_job_wait(&job);
@@ -135,7 +137,8 @@ static int run_test(const struct tst_test *test, FILE *json)
 	/* report result into stdout */
 	test_job_report(&job);
 
-	tst_log_append(&job, json);
+	if (json)
+		tst_log_append(&job, json);
 
 	/* Free the test message store */
 	tst_msg_clear(&job.store);
@@ -152,8 +155,14 @@ void tst_run_suite(const struct tst_suite *suite, const char *tst_name)
 
 	fprintf(stderr, "Running \e[1;37m%s\e[0m\n\n", suite->suite_name);
 
-	//TODO:
-	FILE *json = tst_log_open(suite, "log.json");
+	FILE *json = NULL;
+	
+	if (tst_log_dir) {
+		char buf[512];
+		snprintf(buf, sizeof(buf), "%s/%s.json",
+		         tst_log_dir, suite->suite_name);
+		json = tst_log_open(suite, buf);
+	}
 
 	for (i = 0; suite->tests[i].name != NULL; i++) {
 		if (tst_name == NULL || !strcmp(tst_name, suite->tests[i].name)) {
@@ -165,7 +174,8 @@ void tst_run_suite(const struct tst_suite *suite, const char *tst_name)
 		}
 	}
 
-	tst_log_close(json);
+	if (json)
+		tst_log_close(json);
 
 	float percents;
 	

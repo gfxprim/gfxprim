@@ -1,0 +1,14 @@
+# GFX test list
+
+HLine
+VLine
+Line
+Circle
+FillCircle
+Ellipse
+CircleSeg
+Polygon
+
+PutPixelAA
+HLineAA
+LineAA

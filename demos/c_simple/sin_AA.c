@@ -20,68 +20,107 @@
  *                                                                           *
  *****************************************************************************/
 
+/*
+ 
+  Simple example that shows HLineAA() usage.
+
+ */
+
 #include <stdio.h>
+#include <errno.h>
+#include <string.h>
 
-#include "common.h"
+#include <GP.h>
 
-static void dump_buffer(const char *pattern, int w, int h)
+static void redraw(GP_Context *context)
 {
-	int x, y;
+	static float param = 1;
+	static float param2 = 0.01;
+	static int flag = 1;
+	GP_Pixel b = GP_RGBToContextPixel(0xbe, 0xbe, 0x9e, context);
+	unsigned int y;
 
-	for (y = 0; y < h; y++) {
-		for (x = 0; x < w; x++)
-			printf("%2x ", (uint8_t)pattern[x + y * w]);
-		printf("\n");
+	GP_Fill(context, b);
+
+	for (y = 0; y < context->w; y++) {
+		GP_Coord x0, x1, l1, l2;
+
+		x0 = (context->w)<<7;
+		x1 = (context->w)<<7;
+
+		l1 = (context->w)<<5;
+		l2 = (context->w)<<3;
+
+		GP_Pixel p = GP_RGBToContextPixel(120 - 3 * param, abs(40 * param), 0, context);
+
+		l2 *= 4.00 * y / context->h;
+
+		l1 *= param;
+
+		x0 += l1 * sin(param2 * y) + l2;
+		x1 -= l1 * cos(param2 * y) + l2;
+
+		GP_HLineAA(context, x0, x1, y<<8, p);
+	}
+
+	if (flag) {
+		param -= 0.02;
+		
+		if (param <= -2.40) {
+			flag = 0;
+			param2 += 0.01;
+		
+			if (param2 > 0.02)
+				param2 = 0.01;
+		}
+	} else {
+		param += 0.02;
+
+		if (param >= 2.40)
+			flag = 1;
 	}
 }
 
-void dump_buffers(const char *pattern, const GP_Context *c)
+int main(void)
 {
-	printf("Expected pattern:\n");
-	dump_buffer(pattern, c->w, c->h);
-	printf("Rendered pattern:\n");
-	dump_buffer((char*)c->pixels, c->w, c->h);
-	printf("Difference:\n");
+	GP_Backend *backend;
+	static int pause_flag = 0;
 
-	unsigned int x, y;
+	/* Initalize backend */
+	backend = GP_BackendX11Init(NULL, 0, 0, 800, 600, "sin AA", 0);
 
-	for (y = 0; y < c->h; y++) {
-		for (x = 0; x < c->w; x++) {
-			unsigned int idx = x + y * c->w;
-			char p = ((char*)c->pixels)[idx];
+	if (backend == NULL) {
+		fprintf(stderr, "Failed to initalize backend\n");
+		return 1;
+	}
 
-			if (pattern[idx] != p) { 
-				/* TODO: we expect background to be 0 */	
-				if (p == 0)
-					printf(" x ");
-				else
-					printf(" * ");
-			} else {
-				printf("%2x ", (uint8_t)pattern[idx]);
+	/* Wait for events */
+	for (;;) {
+		if (!pause_flag) {
+			redraw(backend->context);
+			GP_BackendFlip(backend);
+		}
+		
+		GP_BackendPoll(backend);
+	
+		GP_Event ev;
+
+		while (GP_EventGet(&ev)) {
+			if (ev.type == GP_EV_KEY && ev.code == GP_EV_KEY_DOWN) {
+				switch (ev.val.val) {
+				case GP_KEY_ESC:
+				case GP_KEY_Q:
+					GP_BackendExit(backend);
+					return 0;
+				case GP_KEY_P:
+					pause_flag = !pause_flag;
+				break;
+				}
 			}
-
 		}
 
-		printf("\n");
-	}
-}
-
-int compare_buffers(const char *pattern, const GP_Context *c)
-{
-	GP_Size x, y;
-	int err = 0;
-
-	for (x = 0; x < c->w; x++) {
-		for (y = 0; y < c->h; y++) {
-			unsigned int idx = x + y * c->w;
-			
-			if (pattern[idx] != ((char*)c->pixels)[idx])
-				err++;
-		}
+		usleep(10000);
 	}
 
-	if (err)
-		dump_buffers(pattern, c);	
-
-	return err;
+	return 0;
 }

@@ -1,0 +1,3 @@
+# Loaders testsuite
+loaders_suite
+PNG

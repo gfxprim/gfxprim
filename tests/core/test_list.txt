@@ -1,0 +1,4 @@
+# Core testsuite
+WritePixel_testsuite.gen
+Context
+GetPutPixel.gen
