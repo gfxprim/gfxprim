@@ -28,7 +28,7 @@ gfx_params = {
     'Fill': 'P',
     'FillCircle': 'IIIP',
     'FillEllipse': 'IIIIP',
-    'FillPolygon': None,
+    'FillPolygon': ([(0,0),(1,1),(1,0)], 0, {}),
     'FillRect': 'IIIIP',
     'FillRect_AA': 'FFFFP',
     'FillRing': 'IIIIP',
@@ -39,7 +39,7 @@ gfx_params = {
     'HLineAA': 'FFFP',
     'Line': 'IIIIP',
     'LineAA': 'FFFFP',
-    'Polygon': None,
+    'Polygon': ([(0,0),(1,1),(1,0)], 0, {}),
     'PutPixelAA': 'FFP',
     'Rect': 'IIIIP',
     'Ring': 'IIIIP',
@@ -84,9 +84,13 @@ def gen_dummy_args(params):
       assert False
   return tuple(args)
 
-@for_each_case(gfx_params, _filter=(lambda(n, params): params is not None))
+@for_each_case(gfx_params)
 def test_method_callable(n, params):
   "Call with dummy parameters"
   c = Context(10, 10, 1)
-  c.gfx.__getattribute__(n)(*gen_dummy_args(params))
+  if isinstance(params, str):
+    c.gfx.__getattribute__(n)(*gen_dummy_args(params))
+  else:
+    assert isinstance(params, tuple) and isinstance(params[-1], dict)
+    c.gfx.__getattribute__(n)(*params[:-1], **params[-1])
 

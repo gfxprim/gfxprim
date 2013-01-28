@@ -12,23 +12,21 @@ def alltypes(_filter=None):
   """
   Creates one test for each PixelType (except INVALID).
   The pixeltype is given to the test function and the name
-  is appended to its name and docstring.
+  is appended to its name and is mentioned in the new docstring.
   """
-  flt = lambda n, t: _filter(t)
-  return for_each_case(dict([(t.name, t) for t in core.PixelTypes[1:]]),
-                       givename=False, _filter=(flt if _filter else None))
+  if _filter is None:
+    _filter = lambda x: True
+  cases = dict([(t.name, t) for t in core.PixelTypes[1:] if _filter(t)])
+  return for_each_case(cases, givename=False)
 
 
-def for_each_case(cases, givename=True, _filter=None):
+def for_each_case(cases, givename=True):
   """
   Creates one test for each of `cases`.
   
   Cases is either list of strings or or string dict (with any values).
   The test is then given (name) for list or (name, value) for dict,
   or just (value) if givename=False.
-
-  Optional _filter is called with (name) or (name, value) for dict to
-  determine which values to use (ret. True -> include).
   """
   def decorate(f):
     for n in cases:
