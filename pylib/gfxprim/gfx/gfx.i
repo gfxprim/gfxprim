@@ -30,3 +30,38 @@
 %include "GP_LineAA.h"
 %include "GP_RectAA.h"
 
+%inline %{
+static GP_Coord *GP_Polygon_unpack_coordinates(PyObject *coords)
+{
+  unsigned int i, vertex_count;
+  GP_Coord *cs;
+
+  GP_ASSERT(PyTuple_Check(coords));
+  vertex_count = PyTuple_Size(coords);
+  GP_ASSERT(vertex_count % 2 == 0);
+  cs = malloc(sizeof(GP_Coord[vertex_count]));
+  GP_ASSERT(cs != NULL);
+  for (i = 0; i < vertex_count; i++) {
+    PyObject *e = PyTuple_GetItem(coords, i); // Borrowed or ?
+    GP_ASSERT(PyInt_Check(e));
+    cs[i] = PyInt_AsLong(e);
+  }
+  return cs;
+}
+
+void GP_Polygon_wrap(GP_Context *context, PyObject *coords, GP_Pixel pixel)
+{
+  GP_Coord *cs = GP_Polygon_unpack_coordinates(coords);
+  GP_Polygon(context, PyTuple_Size(coords) / 2, cs, pixel);
+  free(cs);
+}
+
+void GP_FillPolygon_wrap(GP_Context *context, PyObject *coords, GP_Pixel pixel)
+{
+  GP_Coord *cs = GP_Polygon_unpack_coordinates(coords);
+  GP_FillPolygon(context, PyTuple_Size(coords) / 2, cs, pixel);
+  free(cs);
+}
+%}
+
+

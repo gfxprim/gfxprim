@@ -42,12 +42,45 @@ def _init(module):
 
   for name in [
       'ArcSegment', 'Circle', 'Ellipse', 'Fill', 'FillCircle', 'FillEllipse',
-      'FillPolygon', 'FillRect', 'FillRect_AA', 'FillRing', 'FillSymbol',
+      'FillRect', 'FillRect_AA', 'FillRing', 'FillSymbol',
       'FillTetragon', 'FillTriangle', 'HLine', 'HLineAA', 'Line', 'LineAA',
-      'Polygon', 'PutPixelAA', 'Rect', 'Ring', 'Symbol', 'Tetragon',
+      'PutPixelAA', 'Rect', 'Ring', 'Symbol', 'Tetragon',
       'Triangle', 'VLine', 'VLineAA']:
     extend_submodule(GfxSubmodule, name, c_gfx.__getattribute__('GP_' + name))
 
+  def flatten_coords(points):
+    "Helper for Polygon and FillPolygon coordinates"
+    l = []
+    for p in points:
+      if hasattr(p, '__iter__'):
+        l.extend(p)
+      else:
+        l.append(p)
+    for i in l:
+      assert isinstance(i, int)
+    return tuple(l)
+
+  @extend(GfxSubmodule)
+  def Polygon(self, points, pixel):
+    """
+    Polygon(context, coordinates, pixel)
+    
+    Draw a polygon with color `pixel`.
+    `coordinates` is either an iterable of `int` coordinates `(x0, y0, x1, y1, ...)`
+    or an iterable of tuples `[(x0, y0), (x1, y1), ...]`.
+    """
+    c_gfx.GP_Polygon_wrap(self.ctx, flatten_coords(points), pixel)
+
+  @extend(GfxSubmodule)
+  def FillPolygon(self, points, pixel):
+    """
+    FillPolygon(context, coordinates, pixel)
+    
+    Draw a filled polygon with color `pixel`.
+    `coordinates` is either an iterable of `int` coordinates `(x0, y0, x1, y1, ...)`
+    or an iterable of tuples `[(x0, y0), (x1, y1), ...]`.
+    """
+    c_gfx.GP_FillPolygon_wrap(self.ctx, flatten_coords(points), pixel)
 
 _init(locals())
 del _init
