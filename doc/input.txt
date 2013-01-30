@@ -148,6 +148,14 @@ events has no value at all.
   value mapped to ASCII if conversion is applicable otherwise it's set to
   zero. You should consult the header 'input/GP_Event.h' for the comprehensive
   list of key values.
++
+This image shows GFXprim key names without the 'GP_KEY_' prefix (Click for a
+higher resolution). So for example 'LEFTSHIFT' on the image is
+'GP_KEY_LEFT_SHIFT'.
++ 
+[[Keyboard Layout]]
+.GFXprim key names without the 'GP_KEY_' prefix.
+image::keyboard.svg["Keyboard Layout",width=800,link="keyboard.svg"]
 
 * And finally the system event is used with 'GP_EV_SYS_RESIZE' and informs you
   of the new window size.
