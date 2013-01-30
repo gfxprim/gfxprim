@@ -16,7 +16,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2013 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
@@ -229,8 +229,12 @@ int image_cache_put(struct image_cache *self, GP_Context *ctx, const char *path,
 	
 	size = image_size2(ctx, path);
 
-	if (assert_size(self, size))
-		return 1;
+	/* 
+	 * We try to create room for the image. If this fails we add the image
+	 * anyway because we need to store it while we are showing it (and it
+	 * will be removed from cache by next image for sure).
+	 */
+	assert_size(self, size);
 
 	struct image *img = malloc(sizeof(struct image) + strlen(path) + 1);
 
