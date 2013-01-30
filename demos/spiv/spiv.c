@@ -16,7 +16,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2013 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
@@ -528,15 +528,10 @@ static void show_image(struct loader_params *params, const char *path)
 	}
 }
 
-static void zoom_offset_horiz(struct loader_params *params, int size)
+static void set_zoom_offset(struct loader_params *params, int dx, int dy)
 {
-	params->zoom_x_offset += size;
-	show_image(params, NULL);
-}
-
-static void zoom_offset_vert(struct loader_params *params, int size)
-{
-	params->zoom_y_offset += size;
+	params->zoom_x_offset += dx;
+	params->zoom_y_offset += dy;
 	show_image(params, NULL);
 }
 
@@ -863,7 +858,6 @@ int main(int argc, char *argv[])
 	GP_Fill(context, black_pixel);
 	GP_BackendFlip(backend);
 
-
 	struct image_list *list = image_list_create((const char**)argv + optind);
 
 	params.show_progress_once = 1;
@@ -891,6 +885,12 @@ int main(int argc, char *argv[])
 
 					if (ev.val.val < 0)
 						goto prev;
+				break;
+				case GP_EV_REL_POS:
+					if (GP_EventGetKey(&ev, GP_BTN_LEFT))
+						set_zoom_offset(&params,
+						                ev.val.rel.rx,
+								ev.val.rel.ry);
 				break;
 				}
 			break;
@@ -992,12 +992,12 @@ int main(int argc, char *argv[])
 				next:
 				case GP_KEY_RIGHT:
 					if (shift_flag) {
-						zoom_offset_horiz(&params, 10);
+						set_zoom_offset(&params, 10, 0);
 						break;
 					}
 				case GP_KEY_UP:
 					if (shift_flag) {
-						zoom_offset_vert(&params, -10);
+						set_zoom_offset(&params, 0, -10);
 						break;
 					}
 				case GP_KEY_SPACE:
@@ -1007,12 +1007,12 @@ int main(int argc, char *argv[])
 				prev:
 				case GP_KEY_LEFT:
 					if (shift_flag) {
-						zoom_offset_horiz(&params, -10);
+						set_zoom_offset(&params, -10, 0);
 						break;
 					}
 				case GP_KEY_DOWN:
 					if (shift_flag) {
-						zoom_offset_vert(&params, 10);
+						set_zoom_offset(&params, 0, 10);
 						break;
 					}
 				case GP_KEY_BACKSPACE:
@@ -1047,9 +1047,11 @@ int main(int argc, char *argv[])
 					resize_backend(&params, 9, shift_flag);
 				break;
 				case GP_KEY_DOT:
+					params.show_progress_once = 1;
 					zoom_mul(&params, 1.5);
 				break;
 				case GP_KEY_COMMA:
+					params.show_progress_once = 1;
 					zoom_mul(&params, 1/1.5);
 				break;
 				}
@@ -1062,6 +1064,7 @@ int main(int argc, char *argv[])
 					GP_BackendResizeAck(backend);
 					GP_Fill(backend->context, 0);
 					params.show_progress_once = 1;
+					GP_EventSetScreenSize(ev.val.sys.w, ev.val.sys.h);
 					show_image(&params, NULL);
 				break;
 				case GP_EV_SYS_QUIT:
