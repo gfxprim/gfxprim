@@ -62,8 +62,8 @@ static char *key_names[] = {
  "?",           "KP Enter",  "RightCtrl",  "KP Slash",     "SysRq",
  "RightAlt",    "?",         "Home",       "Up",           "PageUp",
  "Left",        "Right",     "End",        "Down",         "PageDown",
- "Insert",      "Delete",    "?",          "?",            "?",
- "?",           "?",         "KP Equal",   "KP PlusMinus", "Pause",
+ "Insert",      "Delete",    "?",          "Mute",         "VolumeDown",
+ "VolumeUp",    "?",         "KP Equal",   "KP PlusMinus", "Pause",
  "?",           "KP Comma",  "?",          "?",            "?",
  "LeftMeta",    "RightMeta", "Compose",
 };
@@ -149,12 +149,8 @@ static void dump_key(struct GP_Event *ev)
 {
 	const char *name = GP_EventKeyName(ev->val.key.key);
 
-	if (ev->val.key.key < key_names_size)
-		name = key_names[ev->val.key.key];
-
 	printf("Key %i (Key%s) %s\n",
 	       ev->val.key.key, name, ev->code ? "down" : "up");
-
 }
 
 static void dump_abs(struct GP_Event *ev)

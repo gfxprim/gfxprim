@@ -163,6 +163,10 @@ enum GP_EventKeyValue {
 	GP_KEY_INSERT         = 110,
 	GP_KEY_DELETE         = 111,
 
+	GP_KEY_MUTE           = 113,
+	GP_KEY_VOLUMEDOWN     = 114,
+	GP_KEY_VOLUMEUP       = 115,
+
 	GP_KEY_KP_EQUAL       = 117,
 	GP_KEY_KP_PLUS_MINUS  = 118,
 	GP_KEY_PAUSE          = 119,
@@ -172,6 +176,10 @@ enum GP_EventKeyValue {
 	GP_KEY_LEFT_META      = 125,
 	GP_KEY_RIGHT_META     = 126,
 	GP_KEY_COMPOSE        = 127,
+
+	GP_KEY_NEXTSONG       = 163,
+	GP_KEY_PLAYPAUSE      = 164,
+	GP_KEY_PREVIOUSSONG   = 165,
 
 	GP_KEY_F13            = 183,
 	GP_KEY_F14            = 184,

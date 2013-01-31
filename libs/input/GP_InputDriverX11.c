@@ -59,7 +59,7 @@ static uint16_t keycode_table[] = {
  0,                  GP_KEY_HOME,        GP_KEY_UP,          GP_KEY_PAGE_UP,
  GP_KEY_LEFT,        GP_KEY_RIGHT,       GP_KEY_END,         GP_KEY_DOWN,
  GP_KEY_PAGE_DOWN,   GP_KEY_INSERT,      GP_KEY_DELETE,      0,
- 0,                  0,                  0,                  0,
+ GP_KEY_MUTE,        GP_KEY_VOLUMEDOWN,  GP_KEY_VOLUMEUP,    0,
  0,                  0,                  GP_KEY_PAUSE,       0,
  0,                  0,                  0,                  0,
  GP_KEY_LEFT_META,   GP_KEY_RIGHT_META,  GP_KEY_COMPOSE,
