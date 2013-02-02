@@ -16,7 +16,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2013 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
@@ -27,17 +27,11 @@
 #include <core/GP_Debug.h>
 #include <core/GP_Common.h>
 
+#include <input/GP_EventQueue.h>
+
 #include "GP_Event.h"
 
-/* Screen size for clipping the cursor position */
-static uint32_t screen_w = 0, screen_h = 0;
-
-/* Event queue */
-static uint32_t queue_first = 0, queue_last = 0; 
-static struct GP_Event event_queue[GP_EVENT_QUEUE_SIZE];
-
-/* Global input state */
-static struct GP_Event cur_state = {.cursor_x = 0, .cursor_y = 0};
+static GP_EVENT_QUEUE_DECLARE(event_queue, 0, 0);
 
 static char *key_names[] = {
  "Reserved",    "Escape",    "1",          "2",            "3",
@@ -72,41 +66,22 @@ static uint16_t key_names_size = sizeof(key_names)/sizeof(void*);
 
 void GP_EventSetScreenSize(uint32_t w, uint32_t h)
 {
-	screen_w = w;
-	screen_h = h;
-
-	/* clip cursor */
-	if (cur_state.cursor_x >= w)
-		cur_state.cursor_x = w - 1;
-	
-	if (cur_state.cursor_y >= h)
-		cur_state.cursor_y = h - 1;
+	GP_EventQueueSetScreenSize(&event_queue, w, h);
 }
 
 void GP_EventSetScreenCursor(uint32_t x, uint32_t y)
 {
-	cur_state.cursor_x = x;
-	cur_state.cursor_y = y;
+	GP_EventQueueSetCursorPosition(&event_queue, x, y);
 }
 
 unsigned int GP_EventsQueued(void)
 {
-	if (queue_first <= queue_last)
-		return queue_last - queue_first;
-
-	return GP_EVENT_QUEUE_SIZE - (queue_last - queue_first);
+	return GP_EventQueueEventsQueued(&event_queue);
 }
 
 int GP_EventGet(struct GP_Event *ev)
 {
-	if (queue_first == queue_last)
-		return 0;
-
-	*ev = event_queue[queue_first];
-
-	queue_first = (queue_first + 1) % GP_EVENT_QUEUE_SIZE;
-
-	return 1;
+	return GP_EventQueueGetEvent(&event_queue, ev);
 }
 
 const char *GP_EventKeyName(enum GP_EventKeyValue key)
@@ -199,23 +174,15 @@ void GP_EventDump(struct GP_Event *ev)
 
 static void event_put(struct GP_Event *ev)
 {
-	uint32_t next = (queue_last + 1) % GP_EVENT_QUEUE_SIZE;
-
-	if (next == queue_first) {
-		GP_WARN("Event queue full, dropping event.");
-		return;
-	}
-	
-	event_queue[queue_last] = *ev;
-	queue_last = next;
+	GP_EventQueuePutEvent(&event_queue, ev);
 }
 
 static void set_time(struct timeval *time)
 {
 	if (time == NULL)
-		gettimeofday(&cur_state.time, NULL);
+		gettimeofday(&event_queue.cur_state.time, NULL);
 	else
-		cur_state.time = *time;
+		event_queue.cur_state.time = *time;
 }
 
 static uint32_t clip_rel(uint32_t val, uint32_t max, int32_t rel)
@@ -235,13 +202,13 @@ static uint32_t clip_rel(uint32_t val, uint32_t max, int32_t rel)
 
 void GP_EventPushRelTo(uint32_t x, uint32_t y, struct timeval *time)
 {
-	if (x > screen_w || y > screen_h) {
+	if (x > event_queue.screen_w || y > event_queue.screen_h) {
 		GP_WARN("x > screen_w or y > screen_h, forgot to set screen size?");
 		return;
 	}
 	
-	int32_t rx = x - cur_state.cursor_x;
-	int32_t ry = y - cur_state.cursor_y;
+	int32_t rx = x - event_queue.cur_state.cursor_x;
+	int32_t ry = y - event_queue.cur_state.cursor_y;
 
 	GP_EventPushRel(rx, ry, time);
 }
@@ -249,20 +216,20 @@ void GP_EventPushRelTo(uint32_t x, uint32_t y, struct timeval *time)
 void GP_EventPushRel(int32_t rx, int32_t ry, struct timeval *time)
 {
 	/* event header */
-	cur_state.type  = GP_EV_REL;
-	cur_state.code  = GP_EV_REL_POS;
+	event_queue.cur_state.type  = GP_EV_REL;
+	event_queue.cur_state.code  = GP_EV_REL_POS;
 
-	cur_state.val.rel.rx = rx;
-	cur_state.val.rel.ry = ry;
+	event_queue.cur_state.val.rel.rx = rx;
+	event_queue.cur_state.val.rel.ry = ry;
 
  	set_time(time);
 
 	/* move the global cursor */
-	cur_state.cursor_x = clip_rel(cur_state.cursor_x, screen_w, rx); 
-	cur_state.cursor_y = clip_rel(cur_state.cursor_y, screen_h, ry); 
+	event_queue.cur_state.cursor_x = clip_rel(event_queue.cur_state.cursor_x, event_queue.screen_w, rx); 
+	event_queue.cur_state.cursor_y = clip_rel(event_queue.cur_state.cursor_y, event_queue.screen_h, ry); 
 
 	/* put it into queue */
-	event_put(&cur_state);
+	event_put(&event_queue.cur_state);
 }
 
 void GP_EventPushAbs(uint32_t x, uint32_t y, uint32_t pressure,
@@ -270,14 +237,14 @@ void GP_EventPushAbs(uint32_t x, uint32_t y, uint32_t pressure,
                      struct timeval *time)
 {
 	/* event header */
-	cur_state.type  = GP_EV_ABS;
-	cur_state.code  = GP_EV_ABS_POS;
-	cur_state.val.abs.x = x; 
-	cur_state.val.abs.y = y;
-	cur_state.val.abs.pressure = pressure;
-	cur_state.val.abs.x_max = x_max; 
-	cur_state.val.abs.y_max = y_max;
-	cur_state.val.abs.pressure_max = pressure_max;
+	event_queue.cur_state.type  = GP_EV_ABS;
+	event_queue.cur_state.code  = GP_EV_ABS_POS;
+	event_queue.cur_state.val.abs.x = x; 
+	event_queue.cur_state.val.abs.y = y;
+	event_queue.cur_state.val.abs.pressure = pressure;
+	event_queue.cur_state.val.abs.x_max = x_max; 
+	event_queue.cur_state.val.abs.y_max = y_max;
+	event_queue.cur_state.val.abs.pressure_max = pressure_max;
 	
 	set_time(time);
 
@@ -285,30 +252,29 @@ void GP_EventPushAbs(uint32_t x, uint32_t y, uint32_t pressure,
 	 * Set global cursor, the packet could be partial, eg. update only x or
 	 * only y. In such case x_max or y_max is zero.
 	 */
-
 	if (x_max != 0)	
-		cur_state.cursor_x = x * (screen_w - 1) / x_max;
+		event_queue.cur_state.cursor_x = x * (event_queue.screen_w - 1) / x_max;
 	
 	if (y_max != 0)
-		cur_state.cursor_y = y * (screen_h - 1) / y_max;
+		event_queue.cur_state.cursor_y = y * (event_queue.screen_h - 1) / y_max;
 
 	/* put it into queue */
-	event_put(&cur_state);
+	event_put(&event_queue.cur_state);
 }
 
 void GP_EventPushResize(uint32_t w, uint32_t h, struct timeval *time)
 {
 	/* event header */
-	cur_state.type  = GP_EV_SYS;
-	cur_state.code  = GP_EV_SYS_RESIZE;
+	event_queue.cur_state.type  = GP_EV_SYS;
+	event_queue.cur_state.code  = GP_EV_SYS_RESIZE;
 
-	cur_state.val.sys.w = w;
-	cur_state.val.sys.h = h;
+	event_queue.cur_state.val.sys.w = w;
+	event_queue.cur_state.val.sys.h = h;
 
  	set_time(time);
 
 	/* put it into queue */
-	event_put(&cur_state);
+	event_put(&event_queue.cur_state);
 }
 
 static char keys_to_ascii[] = {
@@ -356,10 +322,10 @@ void GP_EventPushKey(uint32_t key, uint8_t code, struct timeval *time)
 {
 	switch (code) {
 	case GP_EV_KEY_UP:
-		GP_EventResetKey(&cur_state, key);	
+		GP_EventResetKey(&event_queue.cur_state, key);	
 	break;
 	case GP_EV_KEY_DOWN:
-		GP_EventSetKey(&cur_state, key);	
+		GP_EventSetKey(&event_queue.cur_state, key);	
 	break;
 	case GP_EV_KEY_REPEAT:
 	break;
@@ -369,15 +335,15 @@ void GP_EventPushKey(uint32_t key, uint8_t code, struct timeval *time)
 	}
 
 	/* event header */
-	cur_state.type  = GP_EV_KEY;
-	cur_state.code  = code;
-	cur_state.val.key.key = key;
-	key_to_ascii(&cur_state);
+	event_queue.cur_state.type  = GP_EV_KEY;
+	event_queue.cur_state.code  = code;
+	event_queue.cur_state.val.key.key = key;
+	key_to_ascii(&event_queue.cur_state);
 	
 	set_time(time);
 
 	/* put it into queue  */
-	event_put(&cur_state);
+	event_put(&event_queue.cur_state);
 }
 
 void GP_EventPush(uint16_t type, uint32_t code, int32_t value,
@@ -388,12 +354,12 @@ void GP_EventPush(uint16_t type, uint32_t code, int32_t value,
 		GP_EventPushKey(code, value, time);
 	break;
 	default:
-		cur_state.type  = type;
-		cur_state.code  = code;
-		cur_state.val.val = value;
+		event_queue.cur_state.type  = type;
+		event_queue.cur_state.code  = code;
+		event_queue.cur_state.val.val = value;
 
 		set_time(time);
 
-		event_put(&cur_state);
+		event_put(&event_queue.cur_state);
 	}
 }
