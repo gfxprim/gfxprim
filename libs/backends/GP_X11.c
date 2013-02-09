@@ -58,8 +58,9 @@ struct x11_priv {
 
 #ifdef HAVE_X_SHM
 	XShmSegmentInfo shminfo;
-	GP_Context context;
 #endif /* HAVE_X_SHM */
+	
+	GP_Context context;
 
 	int resized_flag:1;
 	int shm_flag:1;
@@ -431,6 +432,7 @@ static int resize_shm_ximage(GP_Backend GP_UNUSED(*self),
                              int GP_UNUSED(w), int GP_UNUSED(h))
 {
 	GP_WARN("Stub called");
+	return 1;
 }
 
 #endif /* HAVE_X_SHM */
