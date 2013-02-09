@@ -19,7 +19,7 @@
  * Copyright (C) 2009-2012 Jiri "BlueBear" Dluhos                            *
  *                         <jiri.bluebear.dluhos@gmail.com>                  *
  *                                                                           *
- * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2013 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
@@ -75,6 +75,8 @@
 	typeof(a) _a = a; \
 	(_a > 0) ? 1 : ((_a < 0) ? -1 : 0); \
 })
+
+#define GP_ARRAY_SIZE(array) (sizeof(array) / sizeof(*array))
 
 #endif /* __cplusplus */
 
