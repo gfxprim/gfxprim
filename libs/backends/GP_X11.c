@@ -811,6 +811,9 @@ GP_Backend *GP_BackendX11Init(const char *display, int x, int y,
 	if (x11->dpy == NULL)
 		goto err0;
 
+	/* Initialized key translation table */
+	GP_InputDriverX11Init(x11->dpy);
+
 	//XSynchronize(x11->dpy, True);
 
 	x11->scr = DefaultScreen(x11->dpy);
