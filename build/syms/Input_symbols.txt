@@ -15,5 +15,15 @@ GP_InputDriverLinuxRead
 GP_InputDriverSDLEventPut
 GP_InputDriverLinuxOpen
 GP_InputDriverX11EventPut
+GP_InputDriverX11Init
 GP_InputDriverLinuxClose
 GP_InputDriverKBDEventPut
+
+GP_EventQueueSetCursorPosition
+GP_EventQueueGetEvent
+GP_EventQueueEventsQueued
+GP_EventQueueSetScreenSize
+GP_EventQueueInit
+GP_EventQueueFree
+GP_EventQueueAlloc
+GP_EventQueuePutEvent

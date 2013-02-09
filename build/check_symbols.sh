@@ -51,7 +51,7 @@ function do_check
 	rm $SYMTMPFILE
 }
 
-do_check libGP.so syms/Core_symbols.txt syms/Event_symbols.txt \
+do_check libGP.so syms/Core_symbols.txt syms/Input_symbols.txt \
                   syms/Filters_symbols.txt syms/GFX_symbols.txt \
 		  syms/Loaders_symbols.txt syms/Text_symbols.txt
 
