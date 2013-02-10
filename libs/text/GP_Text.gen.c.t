@@ -52,7 +52,7 @@ static void text_draw_1BPP_{{ pt.name }}(GP_Context *context, GP_TextStyle *styl
 				
 				for (k = 0; k < style->pixel_ymul; k++)
 					GP_HLine(context, x_start, x_start + style->pixel_xmul - 1,
-					         y - (glyph->bearing_y - style->font->ascend) * y_mul, fg);
+					         y - (glyph->bearing_y - style->font->ascend) * y_mul + k, fg);
 			}
 
 			y += style->pixel_ymul + style->pixel_yspace;
