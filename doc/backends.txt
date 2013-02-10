@@ -339,7 +339,7 @@ size change.
 unsigned int GP_BackendEventsQueued(GP_Backend *self);
 -------------------------------------------------------------------------------
 
-Returns number of events queued in backend event queue.
+Returns number of events queued in the backend event queue.
 
 [source,c]
 -------------------------------------------------------------------------------
@@ -347,13 +347,14 @@ Returns number of events queued in backend event queue.
 /* or */
 #include <GP.h>
 
-int GP_BackendEventGet(GP_Backend *self, GP_Event *ev);
+int GP_BackendGetEvent(GP_Backend *self, GP_Event *ev);
 -------------------------------------------------------------------------------
 
 In case there are any events queued, the top event is removed from the queue,
 copied into the event structure that is passed as argument and non-zero is
 returned.
 
-If there are no events queued the call returns immediately returning zero.
+If there are no events queued the call returns immediately with zero return
+value.
 
 TIP: For more information see link:input.html[input events] documentation.

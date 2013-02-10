@@ -1,14 +1,15 @@
 Input Events
 ------------
+Input events are somehow tied to the link:backends.html[backends] where they
+are stored in the link:event_queue.html[event queue].
 
-Input events are somehow tied to the link:backends.html[backends]. Possibly in
-contrast with other libraries there is not always 1:1 correspondence between
-input driver and backend graphics driver. That means that you can, for
-example, use linux input events together with X Window without any problems.
-You can even write application that doesn't draw any graphics at all and still
-use some of the input drivers. There are, of course, cases where input driver
-is created only together with graphics driver, this is the case for example
-for X Window backends or SDL backends.
+Possibly in contrast with other libraries there is not always 1:1
+correspondence between input driver and backend graphics driver. That means
+that you can, for example, use linux input events together with X Window
+without any problems.  You can even write application that doesn't draw any
+graphics at all and still use some of the input drivers. There are, of course,
+cases where input driver is created only together with graphics driver, this
+is the case for example for X Window backends or SDL backends.
 
 The basic structure is roughly modeled after Linux kernel input API. The main
 difference is that events that belongs together are delivered together (the
@@ -181,29 +182,6 @@ Event API
 /* or */
 #include <input/GP_Event.h>
 
-unsigned int GP_EventsQueued(void);
--------------------------------------------------------------------------------
-
-The 'GP_EventsQueued' returns number of queued events.
-
-[source,c]
--------------------------------------------------------------------------------
-#include <GP.h>
-/* or */
-#include <input/GP_Event.h>
-
-int GP_EventGet(struct GP_Event *ev);
--------------------------------------------------------------------------------
-
-The 'GP_EventGet' returns nonzero if event was copied to the structure pointed
-by ev pointer.
-
-[source,c]
--------------------------------------------------------------------------------
-#include <GP.h>
-/* or */
-#include <input/GP_Event.h>
-
 void GP_EventDump(struct GP_Event *ev);
 -------------------------------------------------------------------------------
 
@@ -215,53 +193,12 @@ The 'GP_EventDump' dumps event in human-readable format into the 'stdout'.
 /* or */
 #include <input/GP_Event.h>
 
-void GP_EventSetScreenSize(uint32_t w, uint32_t h);
-
-void GP_EventSetScreenCursor(uint32_t x, uint32_t y);
+const char *GP_EventKeyName(enum GP_EventKeyValue key);
 -------------------------------------------------------------------------------
 
-Sets screen size and pointer position, which is needed for calculating the
-'cursor_x' and 'cursor_y' coordinates.
+Returns human-readable key name.
 
-[source,c]
--------------------------------------------------------------------------------
-#include <GP.h>
-/* or */
-#include <input/GP_Event.h>
-
-/*
- * Pushes relative event.
- */
-void GP_EventPushRel(int32_t rx, int32_t ry, struct timeval *time);
-
-
-/*
- * Produces relative event that moves to the point x, y
- */
-void GP_EventPushRelTo(uint32_t x, uint32_t y, struct timeval *time);
-
-/*
- * Inject absolute event.
- */
-void GP_EventPushAbs(uint32_t x, uint32_t y, uint32_t pressure,
-                     uint32_t x_max, uint32_t y_max, uint32_t pressure_max,
-                     struct timeval *time);
-
-/*
- * Inject event that changes key state.
- */
-void GP_EventPushKey(uint32_t key, uint8_t code, struct timeval *time);
-
-/*
- * Inject common event.
- */
-void GP_EventPush(uint16_t type, uint32_t code, int32_t value,
-                  struct timeval *time);
--------------------------------------------------------------------------------
-
-Following functions are used for adding events into the event queue. If
-pointer to the timeval structure is 'NULL' the event 'time' will be filled
-with exact time the event was added to the queue.
+The returned string must not be modified.
 
 [source,c]
 -------------------------------------------------------------------------------
