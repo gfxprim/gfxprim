@@ -293,23 +293,6 @@ typedef struct GP_Event {
 } GP_Event;
 
 /*
- * Sets global screen size.
- */
-void GP_EventSetScreenSize(uint32_t w, uint32_t h);
-
-/*
- * Sets global cursor position, doesn't generate an event.
- *
- * Use for initial cursor placement.
- */
-void GP_EventSetScreenCursor(uint32_t x, uint32_t y);
-
-/*
- * Returns number of queued events.
- */
-unsigned int GP_EventsQueued(void);
-
-/*
  * Dump event into stdout.
  */
 void GP_EventDump(struct GP_Event *ev);
@@ -318,44 +301,6 @@ void GP_EventDump(struct GP_Event *ev);
  * Returns human-readable key name.
  */
 const char *GP_EventKeyName(enum GP_EventKeyValue key);
-
-/*
- * Fills event and returns true. Retuns false if queue is empty.
- */
-int GP_EventGet(struct GP_Event *ev);
-
-/*
- * Inject event that moves cursor by rx and ry.
- */
-void GP_EventPushRel(int32_t rx, int32_t ry, struct timeval *time);
-
-/*
- * Produces relative event that moves to the point x, y
- */
-void GP_EventPushRelTo(uint32_t x, uint32_t y, struct timeval *time);
-
-/*
- * Inject absolute event.
- */
-void GP_EventPushAbs(uint32_t x, uint32_t y, uint32_t pressure,
-                     uint32_t x_max, uint32_t y_max, uint32_t pressure_max,
-                     struct timeval *time);
-
-/*
- * Inject event that changes key state.
- */
-void GP_EventPushKey(uint32_t key, uint8_t code, struct timeval *time);
-
-/*
- * Inject window resize event
- */
-void GP_EventPushResize(uint32_t w, uint32_t h, struct timeval *time);
-
-/*
- * Inject common event.
- */
-void GP_EventPush(uint16_t type, uint32_t code, int32_t value,
-                  struct timeval *time);
 
 /*
  * Helpers for setting/getting key bits.

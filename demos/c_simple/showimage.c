@@ -70,7 +70,7 @@ int main(int argc, char *argv[])
 	
 		GP_Event ev;
 
-		while (GP_BackendEventGet(backend, &ev)) {
+		while (GP_BackendGetEvent(backend, &ev)) {
 			if (ev.type == GP_EV_KEY && ev.val.val == GP_KEY_Q) {
 				GP_BackendExit(backend);
 				return 0;

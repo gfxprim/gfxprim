@@ -59,7 +59,7 @@ static void event_loop(void)
 		while (GP_BackendEventsQueued(backend)) {
 			GP_Event ev;
 
-			GP_BackendEventGet(backend, &ev);
+			GP_BackendGetEvent(backend, &ev);
 			GP_EventDump(&ev);
 
 			switch (ev.type) {
@@ -101,6 +101,17 @@ static void event_loop(void)
 						        ev.cursor_x, ev.cursor_y,
 							ev.val.rel.rx, ev.val.rel.ry);
 					GP_BackendFlip(backend);
+				break;
+				}
+			break;
+			case GP_EV_SYS:
+				switch (ev.code) {
+				case GP_EV_SYS_RESIZE:
+					GP_BackendResizeAck(backend);
+				break;
+				case GP_EV_SYS_QUIT:
+					GP_BackendExit(backend);
+					exit(0);
 				break;
 				}
 			break;
@@ -146,8 +157,6 @@ int main(int argc, char *argv[])
 
 	GP_Fill(win, black);
 	GP_BackendFlip(backend);
-
-	GP_EventSetScreenSize(win->w, win->h);
 
 	for (;;) {
 		GP_BackendWait(backend);

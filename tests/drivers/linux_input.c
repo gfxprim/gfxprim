@@ -16,20 +16,24 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2011 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2013 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
  /*
 
+   Bare Linux Input event example.
+
   */
 
 #include <GP.h>
+
 #include <input/GP_InputDriverLinux.h>
 
 int main(int argc, char *argv[])
 {
 	struct GP_InputDriverLinux *drv;
+	GP_EVENT_QUEUE_DECLARE(event_queue, 640, 480);
 
 	GP_SetDebugLevel(2);
 
@@ -45,14 +49,12 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 
-	GP_EventSetScreenSize(640, 480);
-
 	for (;;) {
-		while (GP_InputDriverLinuxRead(drv) >= 1);
+		while (GP_InputDriverLinuxRead(drv, &event_queue) >= 1);
 		
 		GP_Event ev;
 
-		while (GP_EventGet(&ev))
+		while (GP_EventQueueGet(&event_queue, &ev))
 			GP_EventDump(&ev);
 
 		usleep(1000);

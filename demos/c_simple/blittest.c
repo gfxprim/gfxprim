@@ -94,7 +94,7 @@ void event_loop(void)
 {
 	GP_Event ev;
 
-	while (GP_BackendEventGet(win, &ev)) {
+	while (GP_BackendGetEvent(win, &ev)) {
 		GP_EventDump(&ev);
 		
 		switch (ev.type) {

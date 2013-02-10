@@ -44,6 +44,8 @@
 
 #include "core/GP_Context.h"
 
+#include "input/GP_EventQueue.h"
+
 struct GP_Backend;
 
 typedef struct GP_Backend {
@@ -128,6 +130,11 @@ typedef struct GP_Backend {
 	 * The events are filled into the event queue see GP_Input.h.
 	 */
 	void (*Wait)(struct GP_Backend *self);
+
+	/*
+	 * Queue to store input events.
+	 */
+	struct GP_EventQueue event_queue;
 
 	/* Backed private data */
 	char priv[];
@@ -231,18 +238,14 @@ int GP_BackendResizeAck(GP_Backend *self);
 /*
  * Event Queue functions.
  */
-#include <input/GP_Event.h>
-
 static inline unsigned int GP_BackendEventsQueued(GP_Backend *self)
 {
-	(void) self;
-	return GP_EventsQueued();
+	return GP_EventQueueEventsQueued(&self->event_queue);
 }
 
-static inline int GP_BackendEventGet(GP_Backend *self, GP_Event *ev)
+static inline int GP_BackendGetEvent(GP_Backend *self, GP_Event *ev)
 {
-	(void) self;
-	return GP_EventGet(ev);
+	return GP_EventQueueGet(&self->event_queue, ev);
 }
 
 #endif /* BACKENDS_GP_BACKEND_H */

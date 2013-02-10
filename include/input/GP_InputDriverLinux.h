@@ -16,7 +16,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2011 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2013 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
@@ -26,8 +26,8 @@
 
  */
 
-#ifndef GP_INPUT_DRIVER_LINUX_H
-#define GP_INPUT_DRIVER_LINUX_H
+#ifndef INPUT_GP_INPUT_DRIVER_LINUX_H
+#define INPUT_GP_INPUT_DRIVER_LINUX_H
 
 #include <stdint.h>
 
@@ -72,6 +72,7 @@ void GP_InputDriverLinuxClose(struct GP_InputDriverLinux *self);
  *
  * Returns 0 on succes -1 on error and errno is set.
  */
-int GP_InputDriverLinuxRead(struct GP_InputDriverLinux *self);
+int GP_InputDriverLinuxRead(struct GP_InputDriverLinux *self,
+                            struct GP_EventQueue *event_queue);
 
-#endif /* GP_INPUT_DRIVER_LINUX_H */
+#endif /* INPUT_GP_INPUT_DRIVER_LINUX_H */

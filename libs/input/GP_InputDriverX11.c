@@ -24,7 +24,7 @@
 
 #include "core/GP_Debug.h"
 #include "core/GP_Common.h"
-#include "GP_Event.h"
+#include "input/GP_EventQueue.h"
 
 #ifdef HAVE_LIBX11
 
@@ -208,7 +208,8 @@ void GP_InputDriverX11Init(Display *dpy)
 	init_table(dpy);
 }
 
-void GP_InputDriverX11EventPut(XEvent *ev, int w, int h)
+void GP_InputDriverX11EventPut(struct GP_EventQueue *event_queue,
+                               XEvent *ev, int w, int h)
 {
 	int key = 0, press = 0;
 
@@ -229,11 +230,13 @@ void GP_InputDriverX11EventPut(XEvent *ev, int w, int h)
 		/* Mouse wheel */
 		case 4:
 			if (press)
-				GP_EventPush(GP_EV_REL, GP_EV_REL_WHEEL, 1, NULL);
+				GP_EventQueuePush(event_queue, GP_EV_REL,
+				                  GP_EV_REL_WHEEL, 1, NULL);
 			return;
 		case 5:
 			if (press)
-				GP_EventPush(GP_EV_REL, GP_EV_REL_WHEEL, -1, NULL);
+				GP_EventQueuePush(event_queue, GP_EV_REL,
+				                  GP_EV_REL_WHEEL, -1, NULL);
 			return;
 		}
 		
@@ -243,11 +246,11 @@ void GP_InputDriverX11EventPut(XEvent *ev, int w, int h)
 			return;
 		}
 
-		GP_EventPush(GP_EV_KEY, key, press, NULL);
+		GP_EventQueuePush(event_queue, GP_EV_KEY, key, press, NULL);
 	break;
 	case ConfigureNotify:
-		GP_EventPushResize(ev->xconfigure.width,
-		                   ev->xconfigure.height, NULL);
+		GP_EventQueuePushResize(event_queue, ev->xconfigure.width,
+		                        ev->xconfigure.height, NULL);
 	break;
 	break;
 	case MotionNotify:
@@ -256,7 +259,8 @@ void GP_InputDriverX11EventPut(XEvent *ev, int w, int h)
 		    ev->xmotion.x > w || ev->xmotion.y > h)
 			return;
 		
-		GP_EventPushRelTo(ev->xmotion.x, ev->xmotion.y, NULL);
+		GP_EventQueuePushRelTo(event_queue,
+		                       ev->xmotion.x, ev->xmotion.y, NULL);
 	break;
 	case KeyPress:
 		press = 1;
@@ -266,13 +270,14 @@ void GP_InputDriverX11EventPut(XEvent *ev, int w, int h)
 		if (key == 0)
 			return;
 
-		GP_EventPushKey(key, press, NULL);
+		GP_EventQueuePushKey(event_queue, key, press, NULL);
 	break;
 	/* events from WM */
 	case ClientMessage:
 		//TODO: We know we get WM_DELETE_WINDOW because it's the only
 		//      event we requested to get but we must check anyway
-		GP_EventPush(GP_EV_SYS, GP_EV_SYS_QUIT, 0, NULL);
+		GP_EventQueuePush(event_queue, GP_EV_SYS,
+		                  GP_EV_SYS_QUIT, 0, NULL);
 #if 0
 		switch (ev->xclient.message_type) {
 		default:

@@ -153,7 +153,7 @@ int main(void)
 		
 		GP_BackendPoll(backend);
 		
-		while (GP_BackendEventGet(backend, &ev)) {
+		while (GP_BackendGetEvent(backend, &ev)) {
 			GP_EventDump(&ev);
 	
 			switch (ev.type) {

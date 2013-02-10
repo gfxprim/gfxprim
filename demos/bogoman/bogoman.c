@@ -64,7 +64,7 @@ static void event_loop(struct bogoman_map *map)
 	while (GP_BackendEventsQueued(backend)) {
 		GP_Event ev;
 		
-		GP_BackendEventGet(backend, &ev);
+		GP_BackendGetEvent(backend, &ev);
 
 		switch (ev.type) {
 		case GP_EV_KEY:

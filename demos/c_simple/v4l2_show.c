@@ -129,7 +129,7 @@ int main(int argc, char *argv[])
 		/* Read and parse events */
 		GP_Event ev;
 
-		while (GP_BackendEventGet(backend, &ev)) {
+		while (GP_BackendGetEvent(backend, &ev)) {
 			switch (ev.type) {
 			case GP_EV_KEY:
 				

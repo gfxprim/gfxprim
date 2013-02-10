@@ -16,21 +16,25 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2013 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
 /*
 
+  Legacy KBD input driver.
 
  */
 
-#ifndef GP_INPUT_DRIVER_KBD_H
-#define GP_INPUT_DRIVER_KBD_H
+#ifndef INPUT_GP_INPUT_DRIVER_KBD_H
+#define INPUT_GP_INPUT_DRIVER_KBD_H
+
+struct GP_EventQueue;
 
 /*
  * Converts KBD event to GFXprim event and puts it into the queue.
  */
-void GP_InputDriverKBDEventPut(unsigned char ev);
+void GP_InputDriverKBDEventPut(struct GP_EventQueue *event_queue,
+                               unsigned char ev);
 
-#endif /* GP_INPUT_DRIVER_KBD_H */
+#endif /* INPUT_GP_INPUT_DRIVER_KBD_H */

@@ -113,7 +113,7 @@ void event_loop(void)
 {
 	GP_Event ev;
 
-	while (GP_BackendEventGet(backend, &ev)) {
+	while (GP_BackendGetEvent(backend, &ev)) {
 		switch (ev.type) {
 		case GP_EV_KEY:
 			if (ev.code != GP_EV_KEY_DOWN)

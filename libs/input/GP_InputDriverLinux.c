@@ -16,7 +16,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2011 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2013 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
@@ -29,8 +29,8 @@
 
 #include "core/GP_Debug.h"
 
-#include "GP_Event.h"
-#include "GP_InputDriverLinux.h"
+#include "input/GP_EventQueue.h"
+#include "input/GP_InputDriverLinux.h"
 
 static int get_version(int fd)
 {
@@ -197,7 +197,9 @@ static void input_abs(struct GP_InputDriverLinux *self, struct input_event *ev)
 	}
 }
 
-static void input_key(struct GP_InputDriverLinux *self, struct input_event *ev)
+static void input_key(struct GP_InputDriverLinux *self,
+                      struct GP_EventQueue *event_queue,
+                      struct input_event *ev)
 {
 	GP_DEBUG(4, "Key event");
 
@@ -212,14 +214,16 @@ static void input_key(struct GP_InputDriverLinux *self, struct input_event *ev)
 			return;
 	}
 
-	GP_EventPushKey(ev->code, ev->value, NULL);
+	GP_EventQueuePushKey(event_queue, ev->code, ev->value, NULL);
 }
 
-static void do_sync(struct GP_InputDriverLinux *self)
+static void do_sync(struct GP_InputDriverLinux *self,
+                    struct GP_EventQueue *event_queue)
 {
 	if (self->rel_flag) {
 		self->rel_flag = 0;
-		GP_EventPushRel(self->rel_x, self->rel_y, NULL);
+		GP_EventQueuePushRel(event_queue, self->rel_x,
+		                     self->rel_y, NULL);
 		self->rel_x = 0;
 		self->rel_y = 0;
 	}
@@ -255,32 +259,35 @@ static void do_sync(struct GP_InputDriverLinux *self)
 			self->abs_flag_y = 0;
 		}
 
-		GP_EventPushAbs(x, y, self->abs_press, x_max, y_max,
-				self->abs_press_max, NULL);
+		GP_EventQueuePushAbs(event_queue, x, y, self->abs_press,
+		                     x_max, y_max, self->abs_press_max, NULL);
 		
 		self->abs_press = 0;
 
 		if (self->abs_pen_flag) {
-			GP_EventPushKey(BTN_TOUCH, 1, NULL);
+			GP_EventQueuePushKey(event_queue, BTN_TOUCH, 1, NULL);
 			self->abs_pen_flag = 0;
 		}
 	}
 }
 
-static void input_syn(struct GP_InputDriverLinux *self, struct input_event *ev)
+static void input_syn(struct GP_InputDriverLinux *self,
+                      struct GP_EventQueue *event_queue,
+                      struct input_event *ev)
 {
 	GP_DEBUG(4, "Sync event");
 	
 	switch (ev->code) {
 	case 0:
-		do_sync(self);
+		do_sync(self, event_queue);
 	break;
 	default:
 		GP_DEBUG(3, "Unhandled code %i", ev->code);
 	}
 }
 
-int GP_InputDriverLinuxRead(struct GP_InputDriverLinux *self)
+int GP_InputDriverLinuxRead(struct GP_InputDriverLinux *self,
+                            struct GP_EventQueue *event_queue)
 {
 	struct input_event ev;
 	int ret;
@@ -301,10 +308,10 @@ int GP_InputDriverLinuxRead(struct GP_InputDriverLinux *self)
 		input_abs(self, &ev);
 	break;
 	case EV_KEY:
-		input_key(self, &ev);
+		input_key(self, event_queue, &ev);
 	break;
 	case EV_SYN:
-		input_syn(self, &ev);
+		input_syn(self, event_queue, &ev);
 	break;
 	default:
 		GP_DEBUG(3, "Unhandled type %i", ev.type);

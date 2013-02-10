@@ -92,8 +92,6 @@ int main(int argc, char *argv[])
 
 	context = backend->context;
 
-	GP_EventSetScreenSize(context->w, context->h);
-	
 	/* Now draw some testing patters */
 	black_pixel = GP_ColorToContextPixel(GP_COL_BLACK, context);
 	white_pixel = GP_ColorToContextPixel(GP_COL_WHITE, context);
@@ -148,7 +146,7 @@ int main(int argc, char *argv[])
 		/* Read and parse events */
 		GP_Event ev;
 
-		while (GP_BackendEventGet(backend, &ev)) {
+		while (GP_BackendGetEvent(backend, &ev)) {
 
 			GP_EventDump(&ev);
 			

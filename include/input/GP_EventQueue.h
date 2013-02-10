@@ -92,12 +92,75 @@ void GP_EventQueueSetScreenSize(struct GP_EventQueue *self,
 void GP_EventQueueSetCursorPosition(struct GP_EventQueue *self,
                                     unsigned int x, unsigned int y);
 
-
+/*
+ * Returns number of events queued in the queue.
+ */
 unsigned int GP_EventQueueEventsQueued(struct GP_EventQueue *self);
 
-unsigned int GP_EventQueueGetEvent(struct GP_EventQueue *self,
-                                   struct GP_Event *ev);
+/*
+ * In case there are any events queued, the top event is removed from the
+ * queue, copied into the event structure that is passed as argument and
+ * non-zero is returned.
+ *
+ * If there are no events queued the call returns immediately with zero.
+ */
+int GP_EventQueueGet(struct GP_EventQueue *self, struct GP_Event *ev);
 
-void GP_EventQueuePutEvent(struct GP_EventQueue *self, struct GP_Event *ev);
+/*
+ * Puts the event in the queue.
+ *
+ * This is bare call that just copies the event into the queue. Use the calls
+ * bellow instead.
+ */
+void GP_EventQueuePut(struct GP_EventQueue *self, struct GP_Event *ev);
+
+struct timeval;
+
+/*
+ * Inject event that moves cursor by rx and ry.
+ *
+ * If timeval is NULL, current time is used.
+ */
+void GP_EventQueuePushRel(struct GP_EventQueue *self,
+                          int32_t rx, int32_t ry, struct timeval *time);
+
+/*
+ * Produces relative event that moves cursor to the point x, y.
+ *
+ * If timeval is NULL, current time is used.
+ */
+void GP_EventQueuePushRelTo(struct GP_EventQueue *self,
+                            uint32_t x, uint32_t y, struct timeval *time);
+
+/*
+ * Inject absolute event.
+ *
+ * If timeval is NULL, current time is used.
+ */
+void GP_EventQueuePushAbs(struct GP_EventQueue *self,
+                          uint32_t x, uint32_t y, uint32_t pressure,
+                          uint32_t x_max, uint32_t y_max, uint32_t pressure_max,
+                          struct timeval *time);
+
+/*
+ * Inject event that changes key state (i.e. press, release, repeat).
+ *
+ * If timeval is NULL, current time is used.
+ */
+void GP_EventQueuePushKey(struct GP_EventQueue *self,
+                          uint32_t key, uint8_t code, struct timeval *time);
+
+/*
+ * Inject window resize event
+ */
+void GP_EventQueuePushResize(struct GP_EventQueue *self,
+                             uint32_t w, uint32_t h, struct timeval *time);
+
+/*
+ * Inject common event.
+ */
+void GP_EventQueuePush(struct GP_EventQueue *self,
+                       uint16_t type, uint32_t code, int32_t value,
+                       struct timeval *time);
 
 #endif /* INPUT_GP_EVENT_QUEUE_H */

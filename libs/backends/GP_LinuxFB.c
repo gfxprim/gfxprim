@@ -16,7 +16,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2013 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
@@ -37,7 +37,7 @@
 
 #include "core/GP_Debug.h"
 #include "input/GP_InputDriverKBD.h"
-#include "GP_LinuxFB.h"
+#include "backends/GP_LinuxFB.h"
 
 struct fb_priv {
 	GP_Context context;
@@ -186,7 +186,7 @@ static void fb_poll(GP_Backend *self)
 	res = read(fb->con_fd, buf, sizeof(buf));
 
 	for (i = 0; i < res; i++)
-		GP_InputDriverKBDEventPut(buf[i]);
+		GP_InputDriverKBDEventPut(&self->event_queue, buf[i]);
 }
 
 static void fb_wait(GP_Backend *self)

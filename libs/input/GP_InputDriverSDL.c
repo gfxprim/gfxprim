@@ -16,7 +16,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2013 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
@@ -24,10 +24,11 @@
 
 #ifdef HAVE_LIBSDL
 
-#include <core/GP_Debug.h>
+#include "core/GP_Common.h"
+#include "core/GP_Debug.h"
 
-#include "GP_Event.h"
-#include "GP_InputDriverSDL.h"
+#include "input/GP_EventQueue.h"
+#include "input/GP_InputDriverSDL.h"
 
 /* SDL ascii mapped keys */
 static uint16_t keysym_table1[] = {
@@ -65,8 +66,6 @@ static uint16_t keysym_table1[] = {
  0,                  0,                 GP_KEY_DELETE,
 };
 
-static const uint16_t keysym_table1_size = sizeof(keysym_table1)/2;
-
 /* keypad and function keys starting at 256 */
 static uint16_t keysym_table2[] = {
  GP_KEY_KP_0,        GP_KEY_KP_1,       GP_KEY_KP_2,        GP_KEY_KP_3,
@@ -87,16 +86,16 @@ static uint16_t keysym_table2[] = {
  GP_KEY_SYSRQ,       0,                 0,                  GP_KEY_COMPOSE,
 };
 
-static const uint16_t keysym_table2_size = sizeof(keysym_table2)/2;
-
-void GP_InputDriverSDLEventPut(SDL_Event *ev)
+void GP_InputDriverSDLEventPut(struct GP_EventQueue *event_queue,
+                               SDL_Event *ev)
 {
 	uint16_t keysym;
 	uint32_t key = 0;
 
 	switch (ev->type) {
 	case SDL_MOUSEMOTION:
-		GP_EventPushRel(ev->motion.xrel, ev->motion.yrel, NULL);
+		GP_EventQueuePushRel(event_queue, ev->motion.xrel,
+		                     ev->motion.yrel, NULL);
 	break;
 	case SDL_MOUSEBUTTONDOWN:
 	case SDL_MOUSEBUTTONUP:
@@ -113,11 +112,13 @@ void GP_InputDriverSDLEventPut(SDL_Event *ev)
 		/* Mouse wheel */
 		case 4:
 			if (ev->type == SDL_MOUSEBUTTONDOWN)
-				GP_EventPush(GP_EV_REL, GP_EV_REL_WHEEL, 1, NULL);
+				GP_EventQueuePush(event_queue, GP_EV_REL,
+				                  GP_EV_REL_WHEEL, 1, NULL);
 			return;
 		case 5:
 			if (ev->type == SDL_MOUSEBUTTONDOWN)
-				GP_EventPush(GP_EV_REL, GP_EV_REL_WHEEL, -1, NULL);
+				GP_EventQueuePush(event_queue, GP_EV_REL,
+				                  GP_EV_REL_WHEEL, -1, NULL);
 			return;
 		default:
 			GP_WARN("Unmapped SDL Mouse button %02x",
@@ -125,16 +126,17 @@ void GP_InputDriverSDLEventPut(SDL_Event *ev)
 			return;
 		}
 
-		GP_EventPush(GP_EV_KEY, key, ev->button.state, NULL);
+		GP_EventQueuePush(event_queue, GP_EV_KEY,
+		                  key, ev->button.state, NULL);
 	break;
 	case SDL_KEYDOWN:
 	case SDL_KEYUP:
 		keysym = ev->key.keysym.sym;
 
-		if (keysym > 0 && keysym <= keysym_table1_size)
+		if (keysym > 0 && keysym <= GP_ARRAY_SIZE(keysym_table1))
 			key = keysym_table1[keysym - 1];
 
-		if (keysym > 255 && keysym <= 255 + keysym_table2_size)
+		if (keysym > 255 && keysym <= 255 + GP_ARRAY_SIZE(keysym_table2))
 			key = keysym_table2[keysym - 256];
 
 		if (key == 0) {
@@ -142,13 +144,15 @@ void GP_InputDriverSDLEventPut(SDL_Event *ev)
 			return;
 		}
 		
-		GP_EventPushKey(key, ev->key.state, NULL);
+		GP_EventQueuePushKey(event_queue, key, ev->key.state, NULL);
 	break;
 	case SDL_VIDEORESIZE:
-		GP_EventPushResize(ev->resize.w, ev->resize.h, NULL);
+		GP_EventQueuePushResize(event_queue, ev->resize.w,
+		                        ev->resize.h, NULL);
 	break;
 	case SDL_QUIT:
-		GP_EventPush(GP_EV_SYS, GP_EV_SYS_QUIT, 0, NULL);
+		GP_EventQueuePush(event_queue, GP_EV_SYS,
+		                  GP_EV_SYS_QUIT, 0, NULL);
 	break;
 	}
 }

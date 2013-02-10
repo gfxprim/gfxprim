@@ -16,7 +16,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2013 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
@@ -183,7 +183,8 @@ static void x11_ev(GP_Backend *self, XEvent *ev)
 		x11->resized_flag = 1;
 	default:
 		//TODO: More accurate window w and h?
-		GP_InputDriverX11EventPut(ev, x11->context.w, x11->context.h);
+		GP_InputDriverX11EventPut(&self->event_queue, ev,
+		                          x11->context.w, x11->context.h);
 	break;
 	}
 }
@@ -269,6 +270,11 @@ static int x11_resize_ack(struct GP_Backend *self)
 	ret = resize_buffer(self, x11->new_w, x11->new_h);
 	
 	x11->resized_flag = 0;
+
+	if (!ret) {
+		GP_EventQueueSetScreenSize(&self->event_queue,
+		                           x11->new_w, x11->new_h);
+	}
 
 	GP_DEBUG(3, "Done");
 
@@ -805,7 +811,7 @@ GP_Backend *GP_BackendX11Init(const char *display, int x, int y,
 
 	if (backend == NULL)
 		return NULL;
-
+	
 	x11 = GP_BACKEND_PRIV(backend);
 
 	x11->dpy = XOpenDisplay(display);
@@ -832,6 +838,9 @@ GP_Backend *GP_BackendX11Init(const char *display, int x, int y,
 		GP_DEBUG(1, "Failed to create window");
 		goto err1;
 	}
+
+	/* Init the event queue, once we know the window size */
+	GP_EventQueueInit(&backend->event_queue, w, h, 0);
 	
 	if (flags & GP_X11_FULLSCREEN)
 		request_fullscreen(backend, 1);

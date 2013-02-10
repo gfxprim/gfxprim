@@ -20,16 +20,13 @@
  *                                                                           *
  *****************************************************************************/
 
-/*
-
-
- */
-
 #ifndef GP_INPUT_DRIVER_X11_H
 #define GP_INPUT_DRIVER_X11_H
 
 #include <stdint.h>
 #include <X11/Xlib.h>
+
+struct GP_EventQueue;
 
 /*
  * Loads X11 KeyCode translation table.
@@ -39,6 +36,7 @@ void GP_InputDriverX11Init(Display *dpy);
 /*
  * Converts X11 event to GFXprim event and puts it into the queue.
  */
-void GP_InputDriverX11EventPut(XEvent *ev, int w, int h);
+void GP_InputDriverX11EventPut(struct GP_EventQueue *event_queue,
+                               XEvent *ev, int w, int h);
 
 #endif /* GP_INPUT_DRIVER_X11_H */

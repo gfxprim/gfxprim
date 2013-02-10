@@ -80,7 +80,7 @@ static void sdl_poll(struct GP_Backend *self __attribute__((unused)))
 	SDL_mutexP(mutex);
 	
 	while (SDL_PollEvent(&ev))
-		GP_InputDriverSDLEventPut(&ev);
+		GP_InputDriverSDLEventPut(&self->event_queue, &ev);
 	
 	SDL_mutexV(mutex);
 }
@@ -92,10 +92,10 @@ static void sdl_wait(struct GP_Backend *self __attribute__((unused)))
 	SDL_mutexP(mutex);
 
 	SDL_WaitEvent(&ev);
-	GP_InputDriverSDLEventPut(&ev);
+	GP_InputDriverSDLEventPut(&self->event_queue, &ev);
 
 	while (SDL_PollEvent(&ev))
-		GP_InputDriverSDLEventPut(&ev);
+		GP_InputDriverSDLEventPut(&self->event_queue, &ev);
 
 	SDL_mutexV(mutex);
 }
@@ -138,7 +138,7 @@ int GP_ContextFromSurface(GP_Context *c, const SDL_Surface *surf)
 	return context_from_surface(c, surf);
 }
 
-static int sdl_set_attributes(struct GP_Backend *self __attribute__((unused)),
+static int sdl_set_attributes(struct GP_Backend *self,
                               uint32_t w, uint32_t h,
                               const char *caption)
 {
@@ -152,10 +152,18 @@ static int sdl_set_attributes(struct GP_Backend *self __attribute__((unused)),
 		context_from_surface(&context, sdl_surface);
 		
 		/* Send event that resize was finished */
-		GP_EventPushResize(w, h, NULL);
+		GP_EventQueuePushResize(&self->event_queue, w, h, NULL);
 	}
 
 	SDL_mutexV(mutex);
+
+	return 0;
+}
+
+static int sdl_resize_ack(struct GP_Backend *self)
+{
+	GP_EventQueueSetScreenSize(&self->event_queue,
+	                           self->context->w, self->context->h);
 
 	return 0;
 }
@@ -168,7 +176,7 @@ static struct GP_Backend backend = {
 	.Flip          = sdl_flip,
 	.UpdateRect    = sdl_update_rect,
 	.SetAttributes = sdl_set_attributes,
-	.ResizeAck     = NULL,
+	.ResizeAck     = sdl_resize_ack,
 	.Exit          = sdl_exit,
 	.fd            = -1,
 	.Poll          = sdl_poll,
@@ -225,6 +233,8 @@ GP_Backend *GP_BackendSDLInit(GP_Size w, GP_Size h, uint8_t bpp, uint8_t flags,
 
 	SDL_EnableKeyRepeat(SDL_DEFAULT_REPEAT_DELAY,
 	                    SDL_DEFAULT_REPEAT_INTERVAL);
+	
+	GP_EventQueueInit(&backend.event_queue, w, h, 0);
 
 	backend.context = &context;
 	

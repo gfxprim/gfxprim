@@ -337,7 +337,7 @@ void event_loop(void)
 
 	GP_Event ev;
 
-	while (GP_BackendEventGet(backend, &ev)) {
+	while (GP_BackendGetEvent(backend, &ev)) {
 		GP_EventDump(&ev);
 	
 		shift_pressed = GP_EventGetKey(&ev, GP_KEY_LEFT_SHIFT) ||

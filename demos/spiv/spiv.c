@@ -850,8 +850,6 @@ int main(int argc, char *argv[])
 
 	context = backend->context;
 
-	GP_EventSetScreenSize(context->w, context->h);
-	
 	black_pixel = GP_ColorToContextPixel(GP_COL_BLACK, context);
 	white_pixel = GP_ColorToContextPixel(GP_COL_WHITE, context);
 
@@ -871,7 +869,7 @@ int main(int argc, char *argv[])
 		/* Read and parse events */
 		GP_Event ev;
 
-		while (GP_BackendEventGet(backend, &ev)) {
+		while (GP_BackendGetEvent(backend, &ev)) {
 			
 			shift_flag = GP_EventGetKey(&ev, GP_KEY_LEFT_SHIFT) ||
 			             GP_EventGetKey(&ev, GP_KEY_RIGHT_SHIFT);
@@ -1064,7 +1062,6 @@ int main(int argc, char *argv[])
 					GP_BackendResizeAck(backend);
 					GP_Fill(backend->context, 0);
 					params.show_progress_once = 1;
-					GP_EventSetScreenSize(ev.val.sys.w, ev.val.sys.h);
 					show_image(&params, NULL);
 				break;
 				case GP_EV_SYS_QUIT:

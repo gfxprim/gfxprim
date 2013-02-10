@@ -16,13 +16,15 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2013 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
+#include "core/GP_Common.h"
 #include "core/GP_Debug.h"
-#include "GP_Event.h"
-#include "GP_InputDriverKBD.h"
+
+#include "input/GP_EventQueue.h"
+#include "input/GP_InputDriverKBD.h"
 
 /* KBD raw mode keycodes */
 static uint16_t keycode_table[] = {
@@ -56,21 +58,20 @@ static uint16_t keycode_table[] = {
 	GP_KEY_PAGE_DOWN,  GP_KEY_INSERT,
 };
 
-static const uint16_t keycode_table_size = sizeof(keycode_table)/2;
-
-void GP_InputDriverKBDEventPut(unsigned char ev)
+void GP_InputDriverKBDEventPut(struct GP_EventQueue *event_queue,
+                               unsigned char ev)
 {
+	unsigned int keycode = ev & 0x7f;
 	int press = !(ev & 0x80);
-	int keycode = ev & 0x7f;
 	int key;
 
-	printf("Press %i keycode %i\n", press, keycode);
+	GP_DEBUG(2, "Press %i keycode %i\n", press, keycode);
 
-	if (keycode > 0 && keycode <= keycode_table_size) {
+	if (keycode > 0 && keycode <= GP_ARRAY_SIZE(keycode_table)) {
 		key = keycode_table[keycode - 1];
 		
 		if (key != 0) {
-			GP_EventPushKey(key, press, NULL);
+			GP_EventQueuePushKey(event_queue, key, press, NULL);
 			return;
 		}
 	}

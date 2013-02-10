@@ -58,8 +58,6 @@ int main(int argc, char *argv[])
 
 	context = backend->context;
 
-	GP_EventSetScreenSize(context->w, context->h);
-	
 	black_pixel = GP_ColorToContextPixel(GP_COL_BLACK, context);
 	white_pixel = GP_ColorToContextPixel(GP_COL_WHITE, context);
 
@@ -77,7 +75,7 @@ int main(int argc, char *argv[])
 		/* Read and parse events */
 		GP_Event ev;
 
-		while (GP_BackendEventGet(backend, &ev)) {
+		while (GP_BackendGetEvent(backend, &ev)) {
 
 			GP_EventDump(&ev);
 			
@@ -92,10 +90,15 @@ int main(int argc, char *argv[])
 				}
 			break;
 			case GP_EV_SYS:
+				switch (ev.code) {
+				case GP_EV_SYS_RESIZE:
+					GP_BackendResizeAck(backend);
+				break;
 				case GP_EV_SYS_QUIT:
 					GP_BackendExit(backend);
 					return 0;
 				break;
+				}
 			break;
 			}
 		}

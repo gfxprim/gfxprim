@@ -105,7 +105,7 @@ int main(void)
 	
 		GP_Event ev;
 
-		while (GP_BackendEventGet(backend, &ev)) {
+		while (GP_BackendGetEvent(backend, &ev)) {
 			if (ev.type == GP_EV_KEY && ev.code == GP_EV_KEY_DOWN) {
 				switch (ev.val.val) {
 				case GP_KEY_ESC:

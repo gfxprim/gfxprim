@@ -16,24 +16,28 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2011 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2013 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
 /*
 
+  SDL input driver. Translates SDL events to GFXprim events.
 
  */
 
-#ifndef GP_INPUT_DRIVER_SDL_H
-#define GP_INPUT_DRIVER_SDL_H
+#ifndef INPUT_GP_INPUT_DRIVER_SDL_H
+#define INPUT_GP_INPUT_DRIVER_SDL_H
 
 #include <stdint.h>
 #include <SDL/SDL.h>
 
+struct GP_EventQueue;
+
 /*
  * Converts SDL event to GFXprim evevt and puts it into the queue.
  */
-void GP_InputDriverSDLEventPut(SDL_Event *ev);
+void GP_InputDriverSDLEventPut(struct GP_EventQueue *event_queue,
+                               SDL_Event *ev);
 
-#endif /* GP_INPUT_DRIVER_SDL_H */
+#endif /* INPUT_GP_INPUT_DRIVER_SDL_H */
