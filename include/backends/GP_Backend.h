@@ -19,7 +19,7 @@
  * Copyright (C) 2009-2010 Jiri "BlueBear" Dluhos                            *
  *                         <jiri.bluebear.dluhos@gmail.com>                  *
  *                                                                           *
- * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2013 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
@@ -227,5 +227,22 @@ int GP_BackendResize(GP_Backend *backend, uint32_t w, uint32_t h);
  * may be in undefined state).
  */
 int GP_BackendResizeAck(GP_Backend *self);
+
+/*
+ * Event Queue functions.
+ */
+#include <input/GP_Event.h>
+
+static inline unsigned int GP_BackendEventsQueued(GP_Backend *self)
+{
+	(void) self;
+	return GP_EventsQueued();
+}
+
+static inline int GP_BackendEventGet(GP_Backend *self, GP_Event *ev)
+{
+	(void) self;
+	return GP_EventGet(ev);
+}
 
 #endif /* BACKENDS_GP_BACKEND_H */

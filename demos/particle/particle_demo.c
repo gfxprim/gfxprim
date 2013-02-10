@@ -104,7 +104,7 @@ int main(int argc, char *argv[])
 		/* Read and parse events */
 		GP_Event ev;
 
-		while (GP_EventGet(&ev)) {
+		while (GP_BackendEventGet(backend, &ev)) {
 
 			GP_EventDump(&ev);
 			

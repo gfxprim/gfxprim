@@ -31,8 +31,8 @@
   
  */
 
-#ifndef GP_EVENT_H
-#define GP_EVENT_H
+#ifndef INPUT_GP_EVENT_H
+#define INPUT_GP_EVENT_H
 
 #include <stdint.h>
 #include <sys/time.h>
@@ -387,4 +387,4 @@ static inline void GP_EventResetKey(struct GP_Event *ev,
 	ev->keys_pressed[(key)/8] &= ~(1<<((key)%8));
 }
 
-#endif /* GP_EVENT_H */
+#endif /* INPUT_GP_EVENT_H */

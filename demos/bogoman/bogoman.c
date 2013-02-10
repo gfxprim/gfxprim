@@ -61,10 +61,10 @@ static struct GP_Backend *backend;
 
 static void event_loop(struct bogoman_map *map)
 {
-	while (GP_EventsQueued()) {
+	while (GP_BackendEventsQueued(backend)) {
 		GP_Event ev;
 		
-		GP_EventGet(&ev);
+		GP_BackendEventGet(backend, &ev);
 
 		switch (ev.type) {
 		case GP_EV_KEY:
@@ -142,7 +142,7 @@ int main(int argc, char *argv[])
 		bogoman_render(&render, BOGOMAN_RENDER_DIRTY);
 		GP_BackendFlip(backend);
 	
-		usleep(100000);
+		usleep(50000);
 	}
 
 	return 0;

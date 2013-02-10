@@ -19,7 +19,7 @@
  * Copyright (C) 2009-2010 Jiri "BlueBear" Dluhos                            *
  *                         <jiri.bluebear.dluhos@gmail.com>                  *
  *                                                                           *
- * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2013 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
@@ -153,7 +153,7 @@ int main(void)
 		
 		GP_BackendPoll(backend);
 		
-		while (GP_EventGet(&ev)) {
+		while (GP_BackendEventGet(backend, &ev)) {
 			GP_EventDump(&ev);
 	
 			switch (ev.type) {

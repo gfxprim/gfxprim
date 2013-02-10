@@ -871,7 +871,7 @@ int main(int argc, char *argv[])
 		/* Read and parse events */
 		GP_Event ev;
 
-		while (GP_EventGet(&ev)) {
+		while (GP_BackendEventGet(backend, &ev)) {
 			
 			shift_flag = GP_EventGetKey(&ev, GP_KEY_LEFT_SHIFT) ||
 			             GP_EventGetKey(&ev, GP_KEY_RIGHT_SHIFT);

@@ -19,7 +19,7 @@
  * Copyright (C) 2009-2010 Jiri "BlueBear" Dluhos                            *
  *                         <jiri.bluebear.dluhos@gmail.com>                  *
  *                                                                           *
- * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2013 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
@@ -337,7 +337,7 @@ void event_loop(void)
 
 	GP_Event ev;
 
-	while (GP_EventGet(&ev)) {
+	while (GP_BackendEventGet(backend, &ev)) {
 		GP_EventDump(&ev);
 	
 		shift_pressed = GP_EventGetKey(&ev, GP_KEY_LEFT_SHIFT) ||

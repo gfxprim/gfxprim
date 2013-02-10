@@ -19,7 +19,7 @@
  * Copyright (C) 2009-2010 Jiri "BlueBear" Dluhos                            *
  *                         <jiri.bluebear.dluhos@gmail.com>                  *
  *                                                                           *
- * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2013 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
@@ -94,7 +94,7 @@ void event_loop(void)
 {
 	GP_Event ev;
 
-	while (GP_EventGet(&ev)) {
+	while (GP_BackendEventGet(win, &ev)) {
 		GP_EventDump(&ev);
 		
 		switch (ev.type) {
@@ -170,6 +170,9 @@ int main(void)
 
 	black = GP_ColorToContextPixel(GP_COL_BLACK, win->context);
 	white = GP_ColorToContextPixel(GP_COL_WHITE, win->context);
+
+	GP_Fill(win->context, black);
+	GP_BackendFlip(win);
 
 	for (;;) {
 		GP_BackendPoll(win);

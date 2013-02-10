@@ -330,4 +330,30 @@ multithreaded application where one threads waits for events and others draws
 into the buffer so you can stop the drawing threads before the backend context
 size change.
 
+[source,c]
+-------------------------------------------------------------------------------
+#include <backends/GP_Backend.h>
+/* or */
+#include <GP.h>
+
+unsigned int GP_BackendEventsQueued(GP_Backend *self);
+-------------------------------------------------------------------------------
+
+Returns number of events queued in backend event queue.
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <backends/GP_Backend.h>
+/* or */
+#include <GP.h>
+
+int GP_BackendEventGet(GP_Backend *self, GP_Event *ev);
+-------------------------------------------------------------------------------
+
+In case there are any events queued, the top event is removed from the queue,
+copied into the event structure that is passed as argument and non-zero is
+returned.
+
+If there are no events queued the call returns immediately returning zero.
+
 TIP: For more information see link:input.html[input events] documentation.

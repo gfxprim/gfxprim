@@ -16,7 +16,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2013 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
@@ -70,7 +70,7 @@ int main(int argc, char *argv[])
 	
 		GP_Event ev;
 
-		while (GP_EventGet(&ev)) {
+		while (GP_BackendEventGet(backend, &ev)) {
 			if (ev.type == GP_EV_KEY && ev.val.val == GP_KEY_Q) {
 				GP_BackendExit(backend);
 				return 0;
