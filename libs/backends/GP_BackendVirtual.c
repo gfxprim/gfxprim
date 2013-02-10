@@ -84,6 +84,11 @@ static void virt_poll(GP_Backend *self)
 	struct virt_priv *virt = GP_BACKEND_PRIV(self);
 
 	virt->backend->Poll(virt->backend);
+
+	struct GP_Event ev;
+
+	while (GP_BackendGetEvent(virt->backend, &ev))
+		GP_EventQueuePut(&self->event_queue, &ev);
 }
 
 static void virt_wait(GP_Backend *self)
@@ -91,6 +96,11 @@ static void virt_wait(GP_Backend *self)
 	struct virt_priv *virt = GP_BACKEND_PRIV(self);
 
 	virt->backend->Wait(virt->backend);
+	
+	struct GP_Event ev;
+
+	while (GP_BackendGetEvent(virt->backend, &ev))
+		GP_EventQueuePut(&self->event_queue, &ev);
 }
 
 static void virt_exit(GP_Backend *self)
@@ -140,6 +150,9 @@ GP_Backend *GP_BackendVirtualInit(GP_Backend *backend,
 	self->Poll          = backend->Poll ? virt_poll : NULL;
 	self->Wait          = backend->Wait ? virt_wait : NULL;
 	self->SetAttributes = backend->SetAttributes ? virt_set_attrs : NULL;
+
+	GP_EventQueueInit(&self->event_queue, backend->context->w,
+	                  backend->context->h, 0);
 
 	return self;
 
