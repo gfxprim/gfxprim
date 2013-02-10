@@ -1,15 +1,5 @@
 GP_EventKeyName
-GP_EventPushAbs
-GP_EventSetScreenSize
-GP_EventPushKey
-GP_EventGet
-GP_EventPushRel
-GP_EventPush
 GP_EventDump
-GP_EventPushResize
-GP_EventPushRelTo
-GP_EventSetScreenCursor
-GP_EventsQueued
 
 GP_InputDriverLinuxRead
 GP_InputDriverSDLEventPut
@@ -20,10 +10,17 @@ GP_InputDriverLinuxClose
 GP_InputDriverKBDEventPut
 
 GP_EventQueueSetCursorPosition
-GP_EventQueueGetEvent
-GP_EventQueueEventsQueued
 GP_EventQueueSetScreenSize
+GP_EventQueueGet
+GP_EventQueueEventsQueued
 GP_EventQueueInit
 GP_EventQueueFree
 GP_EventQueueAlloc
+
 GP_EventQueuePutEvent
+GP_EventQueuePushRelTo
+GP_EventQueuePushRel
+GP_EventQueuePushKey
+GP_EventQueuePushAbs
+GP_EventQueuePush
+GP_EventQueuePushResize
