@@ -113,6 +113,9 @@ void redraw_screen(void)
 		style.font = &GP_DefaultConsoleFont;
 	break;
 	case 2:
+		style.font = GP_FontTinyMono;
+	break;
+	case 3:
 		style.font = font;
 	break;
 	}
@@ -163,9 +166,18 @@ void redraw_screen(void)
 
 		style.pixel_xmul = 4;
 		style.pixel_ymul = 2;
+		
 		style.pixel_xspace = 1;
 		style.pixel_yspace = 1;
-
+		
+		if (font_flag == 2) {
+			style.pixel_xmul = 2;
+			style.pixel_ymul = 5;
+		
+			style.pixel_xspace = 2;
+			style.pixel_yspace = 2;
+		}
+		
 		GP_Text(win->context, &style, 64, SPACING*i + 88, align,
 		        dark_gray_pixel, black_pixel, test_string);
 	}
@@ -184,9 +196,9 @@ void event_loop(void)
 			switch (ev.val.key.key) {
 			case GP_KEY_SPACE:
 				if (font)
-					font_flag = (font_flag + 1) % 3;
+					font_flag = (font_flag + 1) % 4;
 				else
-					font_flag = (font_flag + 1) % 2;
+					font_flag = (font_flag + 1) % 3;
 					
 				redraw_screen();
 				GP_BackendFlip(win);

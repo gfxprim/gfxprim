@@ -27,7 +27,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "GP.h"
+#include <GP.h>
 
 static GP_Context *win;
 static GP_Backend *backend;
@@ -37,6 +37,9 @@ static GP_Pixel white_pixel, gray_pixel, dark_gray_pixel, black_pixel,
 
 static int font_flag = 0;
 static int tracking = 0;
+
+static int mul = 1;
+static int space = 0;
 
 static GP_FontFace *font;
 
@@ -63,14 +66,17 @@ void redraw_screen(void)
 		style.font = &GP_DefaultProportionalFont;
 	break;
 	case 2:
+		style.font = GP_FontTinyMono;
+	break;
+	case 3:
 		style.font = font;
 	break;
 	}
 
-	style.pixel_xmul = 1;
-	style.pixel_ymul = 1;
-	style.pixel_xspace = 0;
-	style.pixel_yspace = 0;
+	style.pixel_xmul = mul;
+	style.pixel_ymul = mul;
+	style.pixel_xspace = space;
+	style.pixel_yspace = space;
 	style.char_xspace = tracking;
 
 	/* Text alignment (we are always drawing to the right
@@ -122,9 +128,9 @@ void event_loop(void)
 			switch (ev.val.key.key) {
 			case GP_KEY_SPACE:
 				if (font)
-					font_flag = (font_flag + 1) % 3;
+					font_flag = (font_flag + 1) % 4;
 				else
-					font_flag = (font_flag + 1) % 2;
+					font_flag = (font_flag + 1) % 3;
 					
 				redraw_screen();
 				GP_BackendFlip(backend);
@@ -144,6 +150,27 @@ void event_loop(void)
 			break;
 			case GP_KEY_DOWN:
 				warp_down(1);
+			break;
+			case GP_KEY_DOT:
+				space++;
+				redraw_screen();
+				GP_BackendFlip(backend);
+			break;
+			case GP_KEY_COMMA:
+				space--;
+				redraw_screen();
+				GP_BackendFlip(backend);
+			break;
+			case GP_KEY_RIGHT_BRACE:
+				mul++;
+				redraw_screen();
+				GP_BackendFlip(backend);
+			break;
+			case GP_KEY_LEFT_BRACE:
+				if (mul > 0)
+					mul--;
+				redraw_screen();
+				GP_BackendFlip(backend);
 			break;
 			case GP_KEY_PAGE_UP:
 				warp_up(30);

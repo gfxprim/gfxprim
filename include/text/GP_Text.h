@@ -19,7 +19,7 @@
  * Copyright (C) 2009-2011 Jiri "BlueBear" Dluhos                            *
  *                         <jiri.bluebear.dluhos@gmail.com>                  *
  *                                                                           *
- * Copyright (C) 2009-2011 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2013 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
@@ -28,9 +28,10 @@
 
 #include "core/GP_Context.h"
 
-#include "GP_TextStyle.h"
-#include "GP_TextMetric.h"
-#include "GP_DefaultFont.h"
+#include "text/GP_TextStyle.h"
+#include "text/GP_TextMetric.h"
+#include "text/GP_DefaultFont.h"
+#include "text/GP_Fonts.h"
 
 /* How the rendered text should be aligned.
  * For GP_Text(), the alignment is relative to the specified point:
