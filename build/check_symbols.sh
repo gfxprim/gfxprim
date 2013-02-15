@@ -37,7 +37,7 @@ function check_symbols
 	shift
 
 	for i in `cat $symfile`; do
-		if ! grep $i $@ 2>&1 > /dev/null; then
+		if ! grep "^$i$" $@ 2>&1 > /dev/null; then
 			find_symbol "$i"
 		fi
 	done
