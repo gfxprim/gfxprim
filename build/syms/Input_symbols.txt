@@ -17,6 +17,7 @@ GP_EventQueueInit
 GP_EventQueueFree
 GP_EventQueueAlloc
 
+GP_EventQueuePut
 GP_EventQueuePutEvent
 GP_EventQueuePushRelTo
 GP_EventQueuePushRel
