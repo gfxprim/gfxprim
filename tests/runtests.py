@@ -26,7 +26,7 @@ results_dir='results'
 #
 # Relative path to the directory with GP libraries to run tests against
 #
-build_dir='../../build'
+build_dir='../build'
 
 #
 # By default the glibc __libc_message() writes to /dev/tty before calling
