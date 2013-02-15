@@ -34,4 +34,9 @@
  */
 extern const GP_FontFace *GP_FontTinyMono;
 
+/*
+ * Similar as FontTinyMono but proportional
+ */
+extern const GP_FontFace *GP_FontTiny;
+
 #endif /* TEXT_GP_FONTS_H */
