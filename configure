@@ -59,7 +59,18 @@ def check_for_swig(cfg):
         sys.stderr.write('No\n')
         cfg['SWIG'][0] = ''
     else:
-        sys.stderr.write("Yes\n")
+        sys.stderr.write('Yes\n')
+
+def check_for_python_config(cfg):
+    sys.stderr.write("Checking for python-config ... ")
+
+    ret = os.system("%s --libs > /dev/null 2>&1" % cfg['PYTHON_CONFIG'][0])
+
+    if ret:
+        sys.stderr.write('No\n')
+        cfg['PYTHON_CONFIG'][0] = ''
+    else:
+        sys.stderr.write('Yes\n')
 
 #
 # Library checking api
@@ -164,14 +175,15 @@ def die_screaming(msg):
 def basic_checks(cfg):
     sys.stderr.write("Basic checks\n")
     sys.stderr.write("------------\n")
-    
+
     if not c_compiler_exists(cfg):
         die_screaming("No C compiler found")
-    
+
     if not python_module_installed(cfg, 'jinja2'):
         die_screaming("No jinja2 python module found")
-    
+
     check_for_swig(cfg)
+    check_for_python_config(cfg)
     sys.stderr.write("\n")
 
 #
@@ -179,6 +191,7 @@ def basic_checks(cfg):
 #
 def write_config_h(cfg, libs):
     f = open("config.h", "w")
+    f.write("/*\n * This file is genereated by configure script\n */\n");
     f.write("#ifndef CONFIG_H\n#define CONFIG_H\n\n")
     libs.write_config_h(f);
     f.write("#endif /* CONFIG_H */\n");
@@ -237,11 +250,12 @@ if __name__ ==  '__main__':
     #
     # Dictionary for default configuration parameters
     #
-    cfg = {'CC'          : ['gcc', 'Path/name of the C compiler'],
-           'CFLAGS'      : ['-pthread -W -Wall -Wextra -fPIC -O2 -ggdb -D_FORTIFY_SOURCE=2', 'C compiler flags'],
-           'PYTHON_BIN'  : ['python', 'Path/name of python interpreter'],
-           'SWIG'        : ['swig', 'Simplified Wrapper and Interface Generator'],
-           'include_path': ['/usr/include', 'Path to the system headers']}
+    cfg = {'CC'            : ['gcc', 'Path/name of the C compiler'],
+           'CFLAGS'        : ['-pthread -W -Wall -Wextra -fPIC -O2 -ggdb -D_FORTIFY_SOURCE=2', 'C compiler flags'],
+           'PYTHON_BIN'    : ['python', 'Path/name of python interpreter'],
+           'SWIG'          : ['swig', 'Simplified Wrapper and Interface Generator'],
+           'PYTHON_CONFIG' : ['python-config', 'Python config helper'],
+           'include_path'  : ['/usr/include', 'Path to the system headers']}
 
     #
     # Library detection/enable disable

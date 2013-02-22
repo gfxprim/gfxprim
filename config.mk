@@ -1,10 +1,13 @@
 include $(TOPDIR)/config.gen.mk
+
 CFLAGS+=-I$(TOPDIR)/include/
 
 # path to local module directory
 PYLIBSDIR=$(TOPDIR)/pylib
 
-PYTHON_INCLUDE=`python-config --include`
+ifdef PYTHON_CONFIG
+PYTHON_INCLUDE=$(shell $(PYTHON_CONFIG) --include)
+endif
 
 # To test with other python versions (example):
 #PYTHON_BIN=${TOPDIR}/virtualpy2.4/bin/python

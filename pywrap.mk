@@ -7,7 +7,8 @@ SWIG_C=$(LIBNAME)_wrap.c
 SWIG_PY=c_$(LIBNAME).py
 SWIG_LIB=_c_$(LIBNAME).so
 
-ifneq ($(SWIG),)
+ifdef SWIG
+ifdef PYTHON_CONFIG
 
 INCLUDES+=$(addprefix -I$(TOPDIR)/include/, $(INCLUDE))
 
@@ -33,6 +34,7 @@ else # VERBOSE
 	@$(CC) $< $(CFLAGS) -D_GNU_SOURCE=1 $(LDFLAGS) -I$(PYTHON_INCLUDE) --shared -lGP $(LDLIBS) -L$(TOPDIR)/build/ -o $@
 endif # VERBOSE
 
-endif # ifneq ($(SWIG),)
+endif # PYTHON_CONFIG
+endif # SWIG
 
 CLEAN+=$(SWIG_C) $(SWIG_PY) $(SWIG_LIB) *.pyc
