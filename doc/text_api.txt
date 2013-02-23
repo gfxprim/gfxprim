@@ -6,13 +6,17 @@ NOTE: You may want to see the link:coordinate_system.html[coordinate system] fir
 Text
 ~~~~
 
-Text drawing is controlled by the 'GP_TextStyle' structure defined in
-'core/GP_TextStyle.h'. This structure carries the information about font,
-letter spacing and pixel multiplication and spacing. (If no font is specified,
-the default monospace font is used.)
+Text drawing is controlled by the <<TextStyle,GP_TextStyle>> structure. This
+structure carries the information about font, letter spacing and pixel
+multiplication and spacing. (If no font is specified, the default mono-space
+font is used.)
 
 [source,c]
 --------------------------------------------------------------------------------
+#include <GP.h>
+/* or */
+#include <text/GP_Text.h>
+
 /* Where the text should be drawn relatively to the specified point */
 typedef enum GP_TextAlign {
         GP_ALIGN_LEFT = 0x01,           /* to the left from the point */
@@ -26,49 +30,193 @@ typedef enum GP_TextAlign {
 
 void GP_Text(GP_Context *context, const GP_TextStyle *style,
              int x, int y, int align, const char *str, GP_Pixel pixel);
+
+
+GP_Size GP_Print(GP_Context *context, const GP_TextStyle *style,
+                 GP_Coord x, GP_Coord y, int align,
+                 GP_Pixel fg_color, GP_Pixel bg_color, const char *fmt, ...);
 --------------------------------------------------------------------------------
 
 Draws text at the position x and y; the alignment of the text in relation
 to the point is specified by alignment flags.
+
 If the 'style' argument is 'NULL', a default style is used.
 
 The text size can be computed by following functions:
 
 [source,c]
 --------------------------------------------------------------------------------
+#include <GP.h>
+/* or */
+#include <text/GP_TextMetric.h>
+
 unsigned int GP_TextWidth(const GP_TextStyle *style, const char *str);
 --------------------------------------------------------------------------------
 
 Returns the width (in pixels) that would be occupied by the string if rendered
 using the specified style.
 
+Computing a length of a given string is more complicated than it appears to
+be. The first letter needs 'advance - bearing' pixels, the middle letters
+needs 'advance' pixels and the last letter needs 'bearing + width' pixel. See
+link:images/fonts/glyph_metrics.png[Glyph Metrics] for a description of the
+terms used in this paragraph.
+
 [source,c]
 --------------------------------------------------------------------------------
+#include <GP.h>
+/* or */
+#include <text/GP_TextMetric.h>
+
 unsigned int GP_TextMaxWidth(const GP_TextStyle *style, unsigned int len);
 --------------------------------------------------------------------------------
 
-Returns maximum text width, in pixels, for string with 'len' letters. This call
-is useful for variable letter size fonts.
+Returns maximum text width, in pixels, for string with 'len' letters.
+
+This call simply computes width of a string rendered with 'len' largest glyphs
+(letters) in the font. Because of this the resulting size is often much larger
+than needed.
 
 [source,c]
 --------------------------------------------------------------------------------
+#include <GP.h>
+/* or */
+#include <text/GP_TextMetric.h>
+
+GP_Size GP_TextMaxStrWidth(const GP_TextStyle *style, const char *str,
+                           unsigned int len);
+--------------------------------------------------------------------------------
+
+Returns maximum text width, in pixels, for a string with 'len' letters that
+are composed only of letters from 'str'.
+
+This call simply computes width of a string rendered with largest letter from
+'str' and with 'len' characters.
+
+[source,c]
+--------------------------------------------------------------------------------
+#include <GP.h>
+/* or */
+#include <text/GP_TextMetric.h>
+
 unsigned int GP_TextAscent(const GP_TextStyle *style);
 --------------------------------------------------------------------------------
 
 The Ascent is the height in pixels from the top to the baseline.
 
+The baseline is imaginary line that letters are positioned upon and the ascent
+is usually height of capital letter, but it may be larger for certain fonts.
+
 [source,c]
 --------------------------------------------------------------------------------
+#include <GP.h>
+/* or */
+#include <text/GP_TextMetric.h>
+
 unsigned int GP_TextDescent(const GP_TextStyle *style);
 --------------------------------------------------------------------------------
 
 The Descent is the height in pixels from baseline to the bottom.
 
+The baseline is imaginary line that letters are positioned upon and the
+descent is usually height of upper part of the letter y that goes under the
+baseline, but it may be larger for certain fonts.
+
 [source,c]
 --------------------------------------------------------------------------------
+#include <GP.h>
+/* or */
+#include <text/GP_TextMetric.h>
+
 unsigned int GP_TextHeight(const GP_TextStyle *style);
 --------------------------------------------------------------------------------
 
 The Height is size of the font from top to the bottom, i.e. equals exactly to
 the sum of ascent and descent.
 
+This simply returns height that is needed to draw a line of a text using a
+certain font style (without the spacing between the lines).
+
+[[TextStyle]]
+TextStyle
+~~~~~~~~~
+
+[source,c]
+--------------------------------------------------------------------------------
+#include <GP.h>
+/* or */
+#include <text/GP_TextStyle.h>
+
+typedef struct GP_TextStyle {
+	const struct GP_FontFace *font;
+
+	/* Spacing between pixels (0 is the default, no spacing). */
+	int pixel_xspace, pixel_yspace;
+
+	/* Multiplier of pixel width/height (1 is default). */
+	int pixel_xmul, pixel_ymul;
+
+	/* Extra spacing (in pixels) between characters. */
+	int char_xspace;
+
+} GP_TextStyle;
+--------------------------------------------------------------------------------
+
+The TextStyle structure describes the parameters for text rendering.
+
+The first parameter is font being used.
+TODO: link to font format and description.
+
+The 'xspace' and 'yspace' parameters controls spacing between the pixels and
+the 'xmul' and 'ymul' describes pixel multiplication in respective directions.
+
+The 'char_xspace' is used to add additional space between letters.
+
+.Default Console Font xmul=ymul=1 xspace=yspace=0
+image::images/fonts/default_console_font.png["Default Console Font"]
+
+.Default Console Font xmul=ymul=2 xspace=yspace=-1
+image::images/fonts/default_console_font_embolding.png["Default Console Font"]
+
+.Default Console Font xmul=ymul=2 xspace=yspace=1
+image::images/fonts/default_console_font_big.png["Default Console Font"]
+
+
+Compiled-in Fonts
+~~~~~~~~~~~~~~~~~
+
+There is a global constant pointer to each compiled-in font structure, see
+'include/text/GP_Fonts.h'.
+
+.Default Console Font
+image::images/fonts/default_console_font.png["Default Console Font"]
+
+.Default Proportional Font
+image::images/fonts/default_proportional_font.png["Default Proportional Font"]
+
+.Font Tiny Mono (GP_FontTinyMono)
+image::images/fonts/font_tiny_mono.png["Font Tiny Mono"]
+
+.Font Tiny (GP_FontTiny)
+image::images/fonts/font_tiny.png["Font Tiny"]
+
+TrueType Fonts
+~~~~~~~~~~~~~~
+
+[source,c]
+--------------------------------------------------------------------------------
+/*
+ * Load font face from file.
+ */
+GP_FontFace *GP_FontFaceLoad(const char *path, uint32_t width, uint32_t height);
+
+/*
+ * Free the font face.
+ */
+void GP_FontFaceFree(GP_FontFace *self);
+--------------------------------------------------------------------------------
+
+Renders TrueType font using link:http://www.freetype.org[FreeType] (currently
+printable ASCII only) into GFXprim font structures.
+
+TIP: For Font and TextStyle handling see link:example_fonts.html[examples].
