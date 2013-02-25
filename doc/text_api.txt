@@ -219,4 +219,11 @@ void GP_FontFaceFree(GP_FontFace *self);
 Renders TrueType font using link:http://www.freetype.org[FreeType] (currently
 printable ASCII only) into GFXprim font structures.
 
+One of the 'width' or 'height' may be zero, which means that the second value
+should be computed accordingly.
+
+NOTE: If you pass both 'width' and 'height' non-zero the resulting font may
+      look strange as this action forced unnatural aspect ratio.
+
+
 TIP: For Font and TextStyle handling see link:example_fonts.html[examples].
