@@ -145,10 +145,7 @@ typedef struct GP_Backend {
 /*
  * Calls backend->Flip().
  */
-static inline void GP_BackendFlip(GP_Backend *backend)
-{
-	backend->Flip(backend);
-}
+void GP_BackendFlip(GP_Backend *backend);
 
 /*
  * Calls backend->UpdateRect().
@@ -168,7 +165,7 @@ static inline void GP_BackendUpdateRectXYWH(GP_Backend *backend,
                                             GP_Coord x, GP_Coord y,
                                             GP_Size w, GP_Size h)
 {
-	GP_BackendUpdateRectXYXY(backend, x, y, x + w, y + h);
+	GP_BackendUpdateRectXYXY(backend, x, y, x + w - 1, y + h - 1);
 }
 
 /*

@@ -163,20 +163,6 @@ static int allocate_console(struct fb_priv *fb, int flag)
 
 /* Backend API callbacks */
 
-static void fb_flip_noop(GP_Backend *self __attribute__((unused)))
-{
-
-}
-
-static void fb_update_rect_noop(GP_Backend *self __attribute__((unused)),
-                                GP_Coord x1 __attribute__((unused)),
-                                GP_Coord y1 __attribute__((unused)),
-                                GP_Coord x2 __attribute__((unused)),
-                                GP_Coord y2 __attribute__((unused)))
-{
-
-}
-
 static void fb_poll(GP_Backend *self)
 {
 	struct fb_priv *fb = GP_BACKEND_PRIV(self); 
@@ -320,8 +306,8 @@ GP_Backend *GP_BackendLinuxFBInit(const char *path, int flag)
 	/* update API */
 	backend->name          = "Linux FB";
 	backend->context       = &fb->context;
-	backend->Flip          = fb_flip_noop;
-	backend->UpdateRect    = fb_update_rect_noop;
+	backend->Flip          = NULL;
+	backend->UpdateRect    = NULL;
 	backend->Exit          = fb_exit;
 	backend->SetAttributes = NULL;
 	backend->ResizeAck     = NULL;

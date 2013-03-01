@@ -16,7 +16,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2013 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
@@ -26,10 +26,19 @@
 
 #include "backends/GP_Backend.h"
 
+void GP_BackendFlip(GP_Backend *backend)
+{
+	if (backend->Flip != NULL)
+		backend->Flip(backend);
+}
+
 void GP_BackendUpdateRectXYXY(GP_Backend *backend,
                               GP_Coord x0, GP_Coord y0,
                               GP_Coord x1, GP_Coord y1)
 {
+	if (backend->UpdateRect == NULL)
+		return;
+
 	GP_TRANSFORM_POINT(backend->context, x0, y0);
 	GP_TRANSFORM_POINT(backend->context, x1, y1);
 
