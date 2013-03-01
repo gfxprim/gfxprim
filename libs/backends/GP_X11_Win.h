@@ -394,7 +394,8 @@ void x11_win_close(struct x11_win *win)
 	else
 		destroy_ximage(self);
 */
-
+	XUnmapWindow(win->dpy, win->win);
+	
 	XDestroyWindow(win->dpy, win->win);
 	
 	XUnlockDisplay(win->dpy);

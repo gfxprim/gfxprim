@@ -525,8 +525,6 @@ static void x11_exit(GP_Backend *self)
 {
 	window_close(self);
 
-	x11_close();
-	
 	free(self);
 }
 
