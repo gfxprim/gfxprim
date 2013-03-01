@@ -78,6 +78,9 @@
 
 #define GP_ARRAY_SIZE(array) (sizeof(array) / sizeof(*array))
 
+#define GP_CONTAINER_OF(ptr, structure, member) \
+	((structure *)((char *)(ptr) - offsetof(structure, member)))
+
 #endif /* __cplusplus */
 
 /*
