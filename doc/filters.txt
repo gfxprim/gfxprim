@@ -19,7 +19,7 @@ For convenience, the filters API is unified:
 * First argument(s) are always source(s)
 * Then, in case of second variant, destination
 * Other parameters follow
-* And the last argument is progress callback
+* And the last argument is link:progress_callback.html[progress callback]
 
 When using allocating version of the filter, pointer to the newly allocated
 context is returned, or in case of failure 'NULL' is returned.
