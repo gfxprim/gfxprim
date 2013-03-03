@@ -1,8 +1,23 @@
 Debug Messages
 --------------
 
-The GFXprim library includes a debug messages infrastructure in order to ease
-debugging.
+The GFXprim library includes a debug message infrastructure in order to ease
+the debugging.
+ 
+Many places of the library uses debug messages to report warnings, bugs, or
+generally important events (i.e. context has been allocated, filter function
+has been called).
+
+Debug messages are printed into the stderr and could be redirected to custom
+handler.
+
+The verbosity of the messages could be changed by the debug level. The debug
+level is an unsigned integer (by default set to '0') and only messages that have
+debug level lower or equal to debug level are printed.
+
+There are few special debug message types with negative debug level (that
+means that they are always printed), and as so these are used on various error
+conditions, see bellow for more information.
 
 [source,c]
 -------------------------------------------------------------------------------
@@ -15,17 +30,17 @@ void GP_SetDebugLevel(unsigned int level);
 unsigned int GP_GetDebugLevel(void);
 -------------------------------------------------------------------------------
 
-Sets or gets library debug level. The default level is 0 at which only BUG,
-WARNING, TODO and messages with debug level 0 are shown.
+Sets or gets library debug level. The default level is '0' at which only
+'FATAL', 'BUG', 'WARNING', 'TODO' and messages with debug level '0' are shown.
 
 Increasing this number would cause the library to be more verbose in debugging
 messages.
 
-Setting debug level to 1 would expose debug messages when object was created
+Setting debug level to '1' would expose debug messages when object was created
 or destroyed or when particular algorithm has been started.
 
-Setting debug level to value higher than 1 would expose even more verbose
-messages the current maximum used by debug messages is 4.
+Setting debug level to value higher than '1' would expose even more verbose
+messages the current maximum used by debug messages is '4'.
 
 The debug level may also be set by setting the 'GP_DEBUG' environment
 variable. In such case the debug level is set accordingly to its value when
@@ -45,10 +60,47 @@ GP_WARN(...)
 
 GP_BUG(...)
 
+GP_FATAL(...)
+
 void GP_DebugPrint(int level, const char *file, const char *function, int line,
                    const char *fmt, ...);
 -------------------------------------------------------------------------------
 
-Printf-like macros used to create debug messages. All of them calls the
-'GP_DebugPrint()' function with correct parameters.
+Printf-like macros used to print debug messages. All of them calls the
+'GP_DebugPrint()' function with slightly parameters.
 
+[source,c]
+-------------------------------------------------------------------------------
+enum GP_DebugType {
+	GP_DEBUG_TODO  = -1,
+	GP_DEBUG_WARN  = -2,
+	GP_DEBUG_BUG   = -3,
+	GP_DEBUG_FATAL = -4,
+};
+
+/*
+ * Custom debug message handler structure.
+ */
+struct GP_DebugMsg {
+	int level;
+	const char *file;
+	const char *fn;
+	unsigned int line;
+	const char *msg;
+};
+
+/*
+ * Sets custom debug message handler.
+ *
+ * If NULL is passed, custom handler is disabled and debug messages are printed
+ * into the stderr.
+ */
+void GP_SetDebugHandler(void (*handler)(const struct GP_DebugMsg *msg));
+
+-------------------------------------------------------------------------------
+
+By default debug messages are printed into the 'stderr' you can redirect them
+to your debug handler by this function.
+
+NOTE: For more information see debug message handler
+      link:example_debug_handler.html[example].
