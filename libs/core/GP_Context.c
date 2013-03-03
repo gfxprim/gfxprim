@@ -47,6 +47,9 @@ GP_Context *GP_ContextAlloc(GP_Size w, GP_Size h, GP_PixelType type)
 	uint32_t bpr = get_bpr(bpp, w);
 	void *pixels;
 
+	GP_DEBUG(1, "Allocating context %u x %u - %s",
+	         w, h, GP_PixelTypeName(type));
+
 	pixels = malloc(bpr * h);
 	context = malloc(sizeof(GP_Context));
 
@@ -58,10 +61,10 @@ GP_Context *GP_ContextAlloc(GP_Size w, GP_Size h, GP_PixelType type)
 		return NULL;
 	}
 
-	context->pixels         = pixels;
-	context->bpp            = bpp;
-	context->bytes_per_row  = bpr;
-	context->offset         = 0;
+	context->pixels        = pixels;
+	context->bpp           = bpp;
+	context->bytes_per_row = bpr;
+	context->offset        = 0;
 
 	context->w = w;
 	context->h = h;

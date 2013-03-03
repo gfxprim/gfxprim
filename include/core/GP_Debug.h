@@ -16,36 +16,62 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2013 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
  /*
-   
-   Debug messages and debug level. Debug level is an unsigned integer.
 
-   Messages with debug level 0 are always printed (you should generally avoid
-   using them unless you wan't user to see the message.)
+   Debug message layer.
 
-   Debug level 1 should be used on object initalization and generally rare and
-   important events.
+   Many places of the library uses debug messages to report warnings, bugs, or
+   generally important events (i.e. context has been allocated, filter function
+   has been called).
 
-   Debug level > 1 is intended for more verbose reporting, like inner cycles
-   or loop debugging.
+   Debug messages are printed into the stderr and could be redirected to custom
+   handler.
 
-   Debug levels with negative level are special. Debug level -1 means TODO,
-   level -2 says WARNING while -2 means BUG (i.e. library get into unconsistent
-   state).
+   The verbosity of the messages could be changed by the debug level. The debug
+   level is an unsigned integer (by default set to '0') and only messages that have
+   debug level lower or equal to debug level are printed.
+
+   There are few special debug message types with negative debug level (that
+   means that they are always printed), and as so these are used on various error
+   conditions, see bellow for more information.
 
   */
 
-#ifndef GP_DEBUG_H
-#define GP_DEBUG_H
+#ifndef CORE_GP_DEBUG_H
+#define CORE_GP_DEBUG_H
 
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
 #include <unistd.h>
+
+/*
+ * Messages with debug level 0 are always printed (you should generally avoid
+ * using them unless you wan't user to see the message.)
+ *
+ * Debug level 1 should be used on object initalization and generally rare and
+ * important events.
+ *
+ * Debug level > 1 is intended for more verbose reporting, like inner cycles
+ * or loop debugging.
+ *
+ * Debug levels with negative level are special.
+ *
+ * -1   TODO     - not implemented feature
+ * -2   WARNING  - generally error that can be recovered
+ * -3   BUG      - library gets into unconsistent state
+ * -4   FATAL    - fatal condition, not compiled with XYZ support etc.
+ */
+enum GP_DebugType {
+	GP_DEBUG_TODO  = -1,
+	GP_DEBUG_WARN  = -2,
+	GP_DEBUG_BUG   = -3,
+	GP_DEBUG_FATAL = -4,
+};
 
 #define GP_DEFAULT_DEBUG_LEVEL 0
 
@@ -61,11 +87,40 @@
 #define GP_BUG(...) \
 	GP_DebugPrint(-3, __FILE__, __FUNCTION__, __LINE__, __VA_ARGS__)
 
-void GP_SetDebugLevel(unsigned int level);
-
-unsigned int GP_GetDebugLevel(void);
+#define GP_FATAL(...) \
+	GP_DebugPrint(-4, __FILE__, __FUNCTION__, __LINE__, __VA_ARGS__)
 
 void GP_DebugPrint(int level, const char *file, const char *function, int line,
                    const char *fmt, ...) __attribute__ ((format (printf, 5, 6)));
 
-#endif /* GP_DEBUG_H */
+/*
+ * Sets debug level.
+ */
+void GP_SetDebugLevel(unsigned int level);
+
+/*
+ * Returns current debug level.
+ */
+unsigned int GP_GetDebugLevel(void);
+
+
+/*
+ * Custom debug message handler structure.
+ */
+struct GP_DebugMsg {
+	int level;
+	const char *file;
+	const char *fn;
+	unsigned int line;
+	const char *msg;
+};
+
+/*
+ * Sets custom debug message handler.
+ *
+ * If NULL is passed, custom handler is disabled and debug messages are printed
+ * into the stderr.
+ */
+void GP_SetDebugHandler(void (*handler)(const struct GP_DebugMsg *msg));
+
+#endif /* CORE_GP_DEBUG_H */

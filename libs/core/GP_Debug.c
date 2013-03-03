@@ -16,16 +16,19 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2013 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
 #include <stdarg.h>
 
-#include "GP_Debug.h"
+#include "core/GP_Debug.h"
 
 static unsigned int debug_level = GP_DEFAULT_DEBUG_LEVEL;
+
 static int env_used = 0;
+
+static void (*debug_handler)(const struct GP_DebugMsg *msg) = NULL;
 
 void GP_SetDebugLevel(unsigned int level)
 {
@@ -35,6 +38,11 @@ void GP_SetDebugLevel(unsigned int level)
 unsigned int GP_GetDebugLevel(void)
 {
 	return debug_level;
+}
+
+void GP_SetDebugHandler(void (*handler)(const struct GP_DebugMsg *msg))
+{
+	debug_handler = handler;
 }
 
 void GP_DebugPrint(int level, const char *file, const char *function, int line,
@@ -63,17 +71,42 @@ void GP_DebugPrint(int level, const char *file, const char *function, int line,
 	if (level > (int)debug_level)
 		return;
 
+	/* If handler is set, fill struct msg and call it */
+	if (debug_handler) {
+		char buf[256];
+
+        	va_list va;
+		va_start(va, fmt);
+		vsnprintf(buf, sizeof(buf), fmt, va);
+		va_end(va);
+
+		struct GP_DebugMsg msg = {
+			.level = level,
+			.file = file,
+			.fn = function,
+			.line = line,
+			.msg = buf,
+		};
+
+		debug_handler(&msg);
+		
+		return;
+	}
+
 	for (i = 1; i < level; i++)
 		fputc(' ', stderr);
 
 	switch (level) {
-	case -3:
+	case GP_DEBUG_FATAL:
+		fprintf(stderr, "*** FATAL: %s:%s():%u: ", file, function, line);
+	break;
+	case GP_DEBUG_BUG:
 		fprintf(stderr, "*** BUG: %s:%s():%u: ", file, function, line);
 	break;
-	case -2:
+	case GP_DEBUG_WARN:
 		fprintf(stderr, "*** WARNING: %s:%s():%u: ", file, function, line);
 	break;
-	case -1:
+	case GP_DEBUG_TODO:
 		fprintf(stderr, "*** TODO: %s:%s():%u: ", file, function, line);
 	break;
 	default:
