@@ -16,14 +16,16 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2011 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2013 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
+
+#include <errno.h>
 
 #include "core/GP_Core.h"
 #include "core/GP_FnPerBpp.h"
 
-#include "GP_Rotate.h"
+#include "filters/GP_Rotate.h"
 
 #include <string.h>
 
@@ -32,34 +34,39 @@ int GP_FilterMirrorH_Raw(const GP_Context *src, GP_Context *dst,
 {
 	uint32_t bpr = src->bytes_per_row;
 	uint8_t  buf[bpr];
-	uint32_t y;
+	unsigned int y;
 
 	GP_DEBUG(1, "Mirroring image horizontally %ux%u", src->w, src->h);
 
 	#warning FIXME: non byte aligned pixels
-	
+
 	/* Note that this should work both for src != dst and src == dst */
 	for (y = 0; y < src->h/2; y++) {
-		uint8_t *sl1 = src->pixels + bpr * y;
-		uint8_t *sl2 = src->pixels + bpr * (src->h - y - 1);
-		uint8_t *dl1 = dst->pixels + bpr * y;
-		uint8_t *dl2 = dst->pixels + bpr * (src->h - y - 1);
+		uint8_t *sl1 = GP_PIXEL_ADDR(src, 0, y);
+		uint8_t *sl2 = GP_PIXEL_ADDR(src, 0, src->h - y - 1);
+		uint8_t *dl1 = GP_PIXEL_ADDR(dst, 0, y);
+		uint8_t *dl2 = GP_PIXEL_ADDR(dst, 0, src->h - y - 1);
+
+		int i;
 
 		memcpy(buf, sl1, bpr);
 		memcpy(dl1, sl2, bpr);
 		memcpy(dl2, buf, bpr);
 		
-		if (GP_ProgressCallbackReport(callback, 2 * y, src->h, src->w))
+		if (GP_ProgressCallbackReport(callback, 2 * y, src->h, src->w)) {
+			GP_DEBUG(1, "Operation aborted");
+			errno = ECANCELED;
 			return 1;
+		}
 	}
 
 	/* Copy the middle odd line */
 	if (src != dst && src->h % 2) {
 		y = src->h / 2;
 
-		uint8_t *sl = src->pixels + bpr * y;
-		uint8_t *dl = dst->pixels + bpr * y;
-		
+		uint8_t *sl = GP_PIXEL_ADDR(src, 0, y);
+		uint8_t *dl = GP_PIXEL_ADDR(dst, 0, y);
+
 		memcpy(dl, sl, bpr);
 	}
 
@@ -76,10 +83,8 @@ int GP_FilterMirrorH(const GP_Context *src, GP_Context *dst,
 	GP_ASSERT(src->w <= dst->w && src->h <= dst->h,
 	          "Destination is not large enough");
 
-	if (GP_FilterMirrorH_Raw(src, dst, callback)) {
-		GP_DEBUG(1, "Operation aborted");
+	if (GP_FilterMirrorH_Raw(src, dst, callback))
 		return 1;
-	}
 
 	return 0;
 }
