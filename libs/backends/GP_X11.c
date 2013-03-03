@@ -97,14 +97,7 @@ static void x11_flip(GP_Backend *self)
 
 	XLockDisplay(win->dpy);
 
-#ifdef HAVE_X_SHM
-	if (win->shm_flag)
-		XShmPutImage(win->dpy, win->win, DefaultGC(win->dpy, win->scr),
-		             win->img, 0, 0, 0, 0, w, h, False);
-	else
-#endif /* HAVE_X_SHM */
-		XPutImage(win->dpy, win->win, DefaultGC(win->dpy, win->scr),
-		          win->img, 0, 0, 0, 0, w, h);
+	putimage(win, 0, 0, w - 1, h - 1);
 
 	XFlush(win->dpy);
 
@@ -113,9 +106,9 @@ static void x11_flip(GP_Backend *self)
 
 static void x11_ev(XEvent *ev)
 {
-	/* Lookup for window */
 	static struct x11_win *win = NULL;
 
+	/* Lookup for window */
 	if (win == NULL || win->win != ev->xany.window) {
 		win = win_list_lookup(ev->xany.window);
 
@@ -566,11 +559,11 @@ GP_Backend *GP_BackendX11Init(const char *display, int x, int y,
 		goto err1;
 	}
 
-	/* Init the event queue, once we know the window size */
-	GP_EventQueueInit(&backend->event_queue, wreq.w, wreq.h, 0);
-	
 	if (flags & GP_X11_FULLSCREEN)
 		x11_win_fullscreen(win, 1);
+	
+	/* Init the event queue, once we know the window size */
+	GP_EventQueueInit(&backend->event_queue, wreq.w, wreq.h, 0);
 	
 	backend->context = NULL;
 
