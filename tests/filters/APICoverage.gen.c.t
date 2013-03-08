@@ -38,24 +38,34 @@
 
 #include "tst_test.h"
 
-%% set API_List = [['MirrorH', 'GP_Context:in', 'GP_Context:out', 'GP_ProgressCallback'],
+%% set API_List = [['MirrorH', 'GP_Context:in', 'GP_Context:out',
+                    'GP_ProgressCallback'],
                    ['MirrorH_Alloc', 'GP_Context:in', 'GP_ProgressCallback'],
 
-		   ['MirrorV', 'GP_Context:in', 'GP_Context:out', 'GP_ProgressCallback'],
+                   ['MirrorV', 'GP_Context:in', 'GP_Context:out',
+                    'GP_ProgressCallback'],
                    ['MirrorV_Alloc', 'GP_Context:in', 'GP_ProgressCallback'],
 
-		   ['Rotate90', 'GP_Context:in', 'GP_Context:out', 'GP_ProgressCallback'],
-		   ['Rotate90_Alloc', 'GP_Context:in', 'GP_ProgressCallback'],
+                   ['Rotate90', 'GP_Context:in', 'GP_Context:out',
+                    'GP_ProgressCallback'],
+                   ['Rotate90_Alloc', 'GP_Context:in', 'GP_ProgressCallback'],
 
-		   ['Rotate180', 'GP_Context:in', 'GP_Context:out', 'GP_ProgressCallback'],
-		   ['Rotate180_Alloc', 'GP_Context:in', 'GP_ProgressCallback'],
+                   ['Rotate180', 'GP_Context:in', 'GP_Context:out',
+                    'GP_ProgressCallback'],
+                   ['Rotate180_Alloc', 'GP_Context:in', 'GP_ProgressCallback'],
 
-		   ['Rotate270', 'GP_Context:in', 'GP_Context:out', 'GP_ProgressCallback'],
-		   ['Rotate270_Alloc', 'GP_Context:in', 'GP_ProgressCallback'],
-		   
-		   ['GaussianBlur', 'GP_Context:in', 'GP_Context:out',
+                   ['Rotate270', 'GP_Context:in', 'GP_Context:out',
+                    'GP_ProgressCallback'],
+                   ['Rotate270_Alloc', 'GP_Context:in', 'GP_ProgressCallback'],
+
+                   ['Convolution', 'GP_Context:in', 'GP_Context:out',
+                    'GP_FilterKernel2D:kernel', 'GP_ProgressCallback'],
+                   ['ConvolutionAlloc', 'GP_Context:in',
+                    'GP_FilterKernel2D:kernel', 'GP_ProgressCallback'],
+
+                   ['GaussianBlur', 'GP_Context:in', 'GP_Context:out',
                     'float:sigma_x', 'float:sigma_y', 'GP_ProgressCallback'],
-		   ['GaussianBlurAlloc', 'GP_Context:in', 'float:sigma_x',
+                   ['GaussianBlurAlloc', 'GP_Context:in', 'float:sigma_x',
                     'float:sigma_y', 'GP_ProgressCallback'],
 
                    ['GaussianNoiseAdd', 'GP_Context:in', 'GP_Context:out',
@@ -68,13 +78,22 @@
                    ['MedianAlloc', 'GP_Context:in',
                     'int:xmed', 'int:ymed', 'GP_ProgressCallback'],
 
-		   ['Sigma', 'GP_Context:in', 'GP_Context:out',
-                    'int:xrad', 'int:yrad', 'int:min', 'float:sigma', 'GP_ProgressCallback'],
-		   ['SigmaAlloc', 'GP_Context:in',
-                    'int:xrad', 'int:yrad', 'int:min', 'float:sigma', 'GP_ProgressCallback'],
+                   ['WeightedMedian', 'GP_Context:in', 'GP_Context:out',
+                    'GP_MedianWeights:weights', 'GP_ProgressCallback'],
+                   ['WeightedMedianAlloc', 'GP_Context:in',
+                    'GP_MedianWeights:weights', 'GP_ProgressCallback'],
 
-                   ['ResizeNN', 'GP_Context:in', 'GP_Context:out', 'GP_ProgressCallback'],
-                   ['ResizeNNAlloc', 'GP_Context:in', 'int:w', 'int:h', 'GP_ProgressCallback'],
+                   ['Sigma', 'GP_Context:in', 'GP_Context:out',
+                    'int:xrad', 'int:yrad', 'int:min', 'float:sigma',
+                    'GP_ProgressCallback'],
+                   ['SigmaAlloc', 'GP_Context:in',
+                    'int:xrad', 'int:yrad', 'int:min', 'float:sigma',
+                    'GP_ProgressCallback'],
+
+                   ['ResizeNN', 'GP_Context:in', 'GP_Context:out',
+                    'GP_ProgressCallback'],
+                   ['ResizeNNAlloc', 'GP_Context:in', 'int:w', 'int:h',
+                    'GP_ProgressCallback'],
 ]
 
 %% macro prep_context(id, pt)
@@ -89,6 +108,41 @@
 	int {{ id }} = 2;
 %% endmacro
 
+%% macro prep_median_weights(id)
+
+	unsigned int {{ id }}_w[] = {
+		1, 2, 1,
+		2, 4, 2,
+		1, 2, 1,
+	};
+
+	GP_MedianWeights {{ id }}_s = {
+		.w = 3,
+		.h = 3,
+		.weights = {{ id }}_w,
+	};
+
+	GP_MedianWeights *{{ id }} = &{{ id }}_s;
+
+%% endmacro
+
+%% macro prep_filter_kernel_2d(id)
+	float {{ id }}_kern[] = {
+		1, 1, 1,
+		1, 1, 1,
+		1, 1, 1,
+	};
+
+	GP_FilterKernel2D {{ id }}_s = {
+		.w = 3,
+		.h = 3,
+		.div = 9,
+		.kernel = {{ id }}_kern,
+	};
+
+	GP_FilterKernel2D *{{ id }} = &{{ id }}_s;
+%% endmacro
+
 %% macro prep_param(param, pt)
 %%  if (param.split(':', 1)[0] == 'GP_Context')
 {{ prep_context(param.split(':', 1)[1], pt) }}
@@ -99,27 +153,33 @@
 %%  if (param.split(':', 1)[0] == 'int')
 {{ prep_int(param.split(':', 1)[1]) }}
 %%  endif
+%%  if (param.split(':', 1)[0] == 'GP_MedianWeights')
+{{ prep_median_weights(param.split(':', 1)[1]) }}
+%%  endif
+%%  if (param.split(':', 1)[0] == 'GP_FilterKernel2D')
+{{ prep_filter_kernel_2d(param.split(':', 1)[1]) }}
+%%  endif
 %% endmacro
 
 {% macro get_param(param) %}{% if len(param.split(':', 1)) == 1 %}NULL{% else %}{{ param.split(':', 1)[1] }}{% endif %}{% endmacro %}
 
-%% for pt in pixeltypes
-%% if not pt.is_unknown()
 %% for fn in API_List
+%%  for pt in pixeltypes
+%%   if not pt.is_unknown()
 
 static int Filter_{{ fn[0]}}_{{ pt.name }}(void)
 {
-%% for param in fn[1:]
+%%    for param in fn[1:]
 {{ prep_param(param, pt) }}
-%% endfor
+%%    endfor
 
 	GP_Filter{{ fn[0] }}({{ get_param(fn[1]) }}{% for param in fn[2:] %}, {{ get_param(param) }}{% endfor %});
 
 	return TST_SUCCESS;
 }
 
-%% endfor
-%% endif
+%%   endif
+%%  endfor
 %% endfor
 
 const struct tst_suite tst_suite = {
