@@ -1,13 +1,16 @@
 TOPDIR=../..
 include $(TOPDIR)/pre.mk
 
-CSOURCES=$(shell echo *.c)
+CSOURCES=FilterMirrorH.c
 
-APPS=FilterMirrorH
+GENSOURCES=APICoverage.gen.c
+
+APPS=FilterMirrorH APICoverage.gen
 
 include ../tests.mk
 
 FilterMirrorH: common.o
 
+include $(TOPDIR)/gen.mk
 include $(TOPDIR)/app.mk
 include $(TOPDIR)/post.mk

@@ -1,3 +1,4 @@
 # Filters test list
 
+APICoverage.gen
 FilterMirrorH
