@@ -16,9 +16,11 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2013 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
+
+#include <errno.h>
 
 #include "core/GP_Context.h"
 #include "core/GP_GetPutPixel.h"
@@ -176,8 +178,10 @@ static int GP_FilterMedian_Raw(const GP_Context *src,
 	int i, x, y;
 	unsigned int trigger = ((2*xmed+1)*(2*ymed+1))/2;
 
-	//TODO
-	GP_CHECK(src->pixel_type == GP_PIXEL_RGB888);
+	if (src->pixel_type != GP_PIXEL_RGB888) {
+		errno = ENOSYS;
+		return -1;
+	}
 
 	GP_DEBUG(1, "Median filter size %ux%u xmed=%u ymed=%u",
 	            w_src, h_src, 2 * xmed + 1, 2 * ymed + 1);

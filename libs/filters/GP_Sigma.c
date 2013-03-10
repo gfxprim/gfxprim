@@ -16,9 +16,11 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2013 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
+
+#include <errno.h>
 
 #include "core/GP_Context.h"
 #include "core/GP_GetPutPixel.h"
@@ -44,7 +46,10 @@ static int GP_FilterSigma_Raw(const GP_Context *src,
 	int x, y;
 	unsigned int x1, y1;
 	
-	GP_CHECK(src->pixel_type == GP_PIXEL_RGB888);
+	if (src->pixel_type != GP_PIXEL_RGB888) {
+		errno = ENOSYS;
+		return -1;
+	}
 
 	GP_DEBUG(1, "Sigma Mean filter size %ux%u xrad=%u yrad=%u sigma=%.2f",
 	         w_src, h_src, xrad, yrad, sigma);
