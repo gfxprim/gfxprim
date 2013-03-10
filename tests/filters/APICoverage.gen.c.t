@@ -97,7 +97,7 @@
 ]
 
 %% macro prep_context(id, pt)
-	GP_Context *{{ id }} = GP_ContextAlloc(113, 900, GP_PIXEL_{{ pt.name }});
+	GP_Context *{{ id }} = GP_ContextAlloc(331, 331, GP_PIXEL_{{ pt.name }});
 %% endmacro
 
 %% macro prep_float(id)
