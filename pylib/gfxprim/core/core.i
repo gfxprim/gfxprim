@@ -11,13 +11,23 @@
 
 %include "GP_Common.h"
 %include "GP_Core.h"
-%include "GP_Debug.h"
 %include "GP_Types.h"
 %include "GP_Transform.h"
 %include "GP_GetSetBits.h"
 %include "GP_Transform.h"
 %include "GP_ProgressCallback.h"
 
+/*
+ * Make members of GP_DebugMsg structure immutable 
+ */
+
+%immutable GP_DebugMsg::level;
+%immutable GP_DebugMsg::file;
+%immutable GP_DebugMsg::fn;
+%immutable GP_DebugMsg::line;
+%immutable GP_DebugMsg::msg;
+
+%include "GP_Debug.h"
 
 /*
  * Color and pixel types
