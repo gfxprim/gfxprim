@@ -30,8 +30,8 @@
 
   */
 
-#ifndef GP_FILTERS_GAUSSIAN_NOISE_H
-#define GP_FILTERS_GAUSSIAN_NOISE_H
+#ifndef FILTERS_GP_GAUSSIAN_NOISE_H
+#define FILTERS_GP_GAUSSIAN_NOISE_H
 
 #include "GP_Filter.h"
 
@@ -67,4 +67,4 @@ GP_FilterGaussianNoiseAddAlloc(const GP_Context *src,
 	                                        sigma, mu, callback);
 }
 
-#endif /* GP_FILTERS_GAUSSIAN_NOISE_H */
+#endif /* FILTERS_GP_GAUSSIAN_NOISE_H */

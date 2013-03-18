@@ -29,8 +29,8 @@
 
  */
 
-#ifndef GP_FILTERS_H
-#define GP_FILTERS_H
+#ifndef FILTERS_GP_FILTERS_H
+#define FILTERS_GP_FILTERS_H
 
 /* Filter per channel parameter passing interface */
 #include "filters/GP_FilterParam.h"
@@ -77,4 +77,4 @@
 /* Gaussian noise filter */
 #include "filters/GP_GaussianNoise.h"
 
-#endif /* GP_FILTERS_H */
+#endif /* FILTERS_GP_FILTERS_H */

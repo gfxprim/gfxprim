@@ -25,8 +25,8 @@
 
   */
 
-#ifndef GP_FILTERS_WEIGHTED_MEDIAN_H
-#define GP_FILTERS_WEIGHTED_MEDIAN_H
+#ifndef FILTERS_GP_WEIGHTED_MEDIAN_H
+#define FILTERS_GP_WEIGHTED_MEDIAN_H
 
 #include "GP_Filter.h"
 
@@ -67,4 +67,4 @@ static inline GP_Context *GP_FilterWeightedMedianAlloc(const GP_Context *src,
 	                                      weights, callback);
 }
 
-#endif /* GP_FILTERS_MEDIAN_H */
+#endif /* FILTERS_GP_WEIGHTED_MEDIAN_H */
