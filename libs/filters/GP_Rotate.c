@@ -47,8 +47,6 @@ int GP_FilterMirrorH_Raw(const GP_Context *src, GP_Context *dst,
 		uint8_t *dl1 = GP_PIXEL_ADDR(dst, 0, y);
 		uint8_t *dl2 = GP_PIXEL_ADDR(dst, 0, src->h - y - 1);
 
-		int i;
-
 		memcpy(buf, sl1, bpr);
 		memcpy(dl1, sl2, bpr);
 		memcpy(dl2, buf, bpr);
