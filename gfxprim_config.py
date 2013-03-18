@@ -121,6 +121,9 @@ config = GfxPrimConfig(
 
       PixelType(name='G8', pixelsize=PS_8BPP, chanslist=[
 	  ('V', 0, 8)]),
+      
+      PixelType(name='G16', pixelsize=PS_16BPP, chanslist=[
+	  ('V', 0, 16)]),
 
       #
       # Experiments

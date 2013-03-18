@@ -57,7 +57,7 @@ static int GP_Filter{{ name }}_{{ pt.name }}(const GP_Context *src_a, const GP_C
  */
 %% macro filter_arithmetic_per_bpp(name, filter_op, opts="")
 %% for ps in pixelsizes
-%% if ps.size <= 8 and ps.size > 1
+%% if ps.size > 1
 static int GP_Filter{{ name }}_{{ ps.suffix }}(const GP_Context *src_a, const GP_Context *src_b,
 	GP_Context *dst, {{ maybe_opts_r(opts) }}GP_ProgressCallback *callback)
 {

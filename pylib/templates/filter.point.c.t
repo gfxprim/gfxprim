@@ -50,7 +50,7 @@ static int GP_Filter{{ name }}_{{ pt.name }}(const GP_Context *src, GP_Context *
  */
 %% macro filter_point_per_bpp(name, opts="", filter_op)
 %% for ps in pixelsizes
-%% if ps.size <= 8 and ps.size > 1
+%% if ps.size > 1
 static int GP_Filter{{ name }}_{{ ps.suffix }}(const GP_Context *src, GP_Context *dst,
 	{{ maybe_opts_r(opts) }}GP_ProgressCallback *callback)
 {
