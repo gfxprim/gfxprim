@@ -40,23 +40,23 @@
 
 %% set API_List = [['MirrorH', 'GP_Context:in', 'GP_Context:out',
                     'GP_ProgressCallback'],
-                   ['MirrorH_Alloc', 'GP_Context:in', 'GP_ProgressCallback'],
+                   ['MirrorHAlloc', 'GP_Context:in', 'GP_ProgressCallback'],
 
                    ['MirrorV', 'GP_Context:in', 'GP_Context:out',
                     'GP_ProgressCallback'],
-                   ['MirrorV_Alloc', 'GP_Context:in', 'GP_ProgressCallback'],
+                   ['MirrorVAlloc', 'GP_Context:in', 'GP_ProgressCallback'],
 
                    ['Rotate90', 'GP_Context:in', 'GP_Context:out',
                     'GP_ProgressCallback'],
-                   ['Rotate90_Alloc', 'GP_Context:in', 'GP_ProgressCallback'],
+                   ['Rotate90Alloc', 'GP_Context:in', 'GP_ProgressCallback'],
 
                    ['Rotate180', 'GP_Context:in', 'GP_Context:out',
                     'GP_ProgressCallback'],
-                   ['Rotate180_Alloc', 'GP_Context:in', 'GP_ProgressCallback'],
+                   ['Rotate180Alloc', 'GP_Context:in', 'GP_ProgressCallback'],
 
                    ['Rotate270', 'GP_Context:in', 'GP_Context:out',
                     'GP_ProgressCallback'],
-                   ['Rotate270_Alloc', 'GP_Context:in', 'GP_ProgressCallback'],
+                   ['Rotate270Alloc', 'GP_Context:in', 'GP_ProgressCallback'],
 
                    ['Convolution', 'GP_Context:in', 'GP_Context:out',
                     'GP_FilterKernel2D:kernel', 'GP_ProgressCallback'],

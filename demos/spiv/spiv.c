@@ -262,15 +262,15 @@ static void update_display(struct loader_params *params, GP_Context *img)
 	break;
 	case 90:
 		callback.priv = "Rotating image (90)";
-		img = GP_FilterRotate90_Alloc(img, &callback);
+		img = GP_FilterRotate90Alloc(img, &callback);
 	break;
 	case 180:
 		callback.priv = "Rotating image (180)";
-		img = GP_FilterRotate180_Alloc(img, &callback);
+		img = GP_FilterRotate180Alloc(img, &callback);
 	break;
 	case 270:
 		callback.priv = "Rotating image (270)";
-		img = GP_FilterRotate270_Alloc(img, &callback);
+		img = GP_FilterRotate270Alloc(img, &callback);
 	break;
 	}
 	

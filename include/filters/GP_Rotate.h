@@ -16,7 +16,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2013 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
@@ -62,8 +62,8 @@ int GP_FilterMirrorH(const GP_Context *src, GP_Context *dst,
  * Returns pointer to newly allocated context, or NULL if malloc() has failed
  * or operation was aborted from withing a callback.
  */
-GP_Context *GP_FilterMirrorH_Alloc(const GP_Context *src,
-                                   GP_ProgressCallback *callback);
+GP_Context *GP_FilterMirrorHAlloc(const GP_Context *src,
+                                  GP_ProgressCallback *callback);
 
 /*
  * Mirror vertically
@@ -95,8 +95,8 @@ int GP_FilterMirrorV(const GP_Context *src, GP_Context *dst,
  * Returns pointer to newly allocated context, or NULL if malloc() has failed
  * or operation was aborted from withing a callback.
  */
-GP_Context *GP_FilterMirrorV_Alloc(const GP_Context *src,
-                                   GP_ProgressCallback *callback);
+GP_Context *GP_FilterMirrorVAlloc(const GP_Context *src,
+                                  GP_ProgressCallback *callback);
 
 /*
  * Rotate context by 90, 180 and 270.
@@ -123,20 +123,20 @@ int GP_FilterRotate270_Raw(const GP_Context *src, GP_Context *dst,
 int GP_FilterRotate90(const GP_Context *src, GP_Context *dst,
                       GP_ProgressCallback *callback);
 
-GP_Context *GP_FilterRotate90_Alloc(const GP_Context *src,
-                                    GP_ProgressCallback *callback);
+GP_Context *GP_FilterRotate90Alloc(const GP_Context *src,
+                                   GP_ProgressCallback *callback);
 
 int GP_FilterRotate180(const GP_Context *src, GP_Context *dst,
                        GP_ProgressCallback *callback);
 
-GP_Context *GP_FilterRotate180_Alloc(const GP_Context *src,
+GP_Context *GP_FilterRotate180Alloc(const GP_Context *src,
                                     GP_ProgressCallback *callback);
 
 int GP_FilterRotate270(const GP_Context *src, GP_Context *dst,
                        GP_ProgressCallback *callback);
 
-GP_Context *GP_FilterRotate270_Alloc(const GP_Context *src,
-                                     GP_ProgressCallback *callback);
+GP_Context *GP_FilterRotate270Alloc(const GP_Context *src,
+                                    GP_ProgressCallback *callback);
 
 /*
  * Calls a symmetry filter on bitmap. 
@@ -172,7 +172,7 @@ int GP_FilterSymmetry(const GP_Context *src, GP_Context *dst,
                       GP_FilterSymmetries symmetry,
                       GP_ProgressCallback *callback);
 
-GP_Context *GP_FilterSymmetry_Alloc(const GP_Context *src,
+GP_Context *GP_FilterSymmetryAlloc(const GP_Context *src,
                                    GP_FilterSymmetries symmetry,
                                    GP_ProgressCallback *callback);
 

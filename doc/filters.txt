@@ -357,7 +357,7 @@ Rotation and Symmetry filters
 int GP_FilterMirrorH(const GP_Context *src, GP_Context *dst,
                      GP_ProgressCallback *callback);
 
-GP_Context *GP_FilterMirrorH_Alloc(const GP_Context *src,
+GP_Context *GP_FilterMirrorHAlloc(const GP_Context *src,
                                    GP_ProgressCallback *callback);
 -------------------------------------------------------------------------------
 
@@ -377,7 +377,7 @@ as large as source.
 int GP_FilterMirrorV(const GP_Context *src, GP_Context *dst,
                      GP_ProgressCallback *callback);
 
-GP_Context *GP_FilterMirrorV_Alloc(const GP_Context *src,
+GP_Context *GP_FilterMirrorVAlloc(const GP_Context *src,
                                    GP_ProgressCallback *callback);
 -------------------------------------------------------------------------------
 
@@ -397,7 +397,7 @@ as large as source.
 int GP_FilterRotate90(const GP_Context *src, GP_Context *dst,
                       GP_ProgressCallback *callback);
 
-GP_Context *GP_FilterRotate90_Alloc(const GP_Context *src,
+GP_Context *GP_FilterRotate90Alloc(const GP_Context *src,
                                     GP_ProgressCallback *callback);
 -------------------------------------------------------------------------------
 
@@ -417,7 +417,7 @@ fit rotated context (i.e. W and H are swapped).
 int GP_FilterRotate180(const GP_Context *src, GP_Context *dst,
                        GP_ProgressCallback *callback);
 
-GP_Context *GP_FilterRotate180_Alloc(const GP_Context *src,
+GP_Context *GP_FilterRotate180Alloc(const GP_Context *src,
                                      GP_ProgressCallback *callback);
 -------------------------------------------------------------------------------
 
@@ -437,7 +437,7 @@ as large as source.
 int GP_FilterRotate270(const GP_Context *src, GP_Context *dst,
                        GP_ProgressCallback *callback);
 
-GP_Context *GP_FilterRotate270_Alloc(const GP_Context *src,
+GP_Context *GP_FilterRotate270Alloc(const GP_Context *src,
                                      GP_ProgressCallback *callback);
 -------------------------------------------------------------------------------
 
