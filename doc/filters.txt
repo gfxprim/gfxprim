@@ -253,6 +253,8 @@ GP_Context *GP_FilterInvert(const GP_Context *src, GP_Context *dst,
 Inverts the image, for each channel the result value is computed as "chan_max
 - val".
 
+include::filter_additive_gaussian_noise.txt[]
+
 Arithmetic filters
 ~~~~~~~~~~~~~~~~~~
 

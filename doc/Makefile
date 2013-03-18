@@ -50,6 +50,8 @@ $(PAGES): %.html: %.txt
 examples.html: examples.txt ../demos/c_simple/*.c ../demos/py_simple/*.py asciidoc.conf
 	asciidoc $(ASCIIDOC_PARAMS) -a toc examples.txt
 
+filters.html: filter_additive_gaussian_noise.txt
+
 #
 # Clean up generated images
 #
