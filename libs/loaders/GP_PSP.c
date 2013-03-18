@@ -303,7 +303,6 @@ static int psp_read_composite_image_block(FILE *f, struct psp_img_attrs *attrs,
                                           GP_ProgressCallback *callback)
 {
 	uint8_t buf[8];
-	uint32_t chunk_size;
 	uint32_t i, composite_image_count;
 	
 	/* we are allready in subblock -> error */
@@ -317,7 +316,6 @@ static int psp_read_composite_image_block(FILE *f, struct psp_img_attrs *attrs,
 		return EIO;
 	}
 
-	chunk_size = BUF_TO_4(buf, 0);
 	composite_image_count = BUF_TO_4(buf, 4);
 
 	//TODO: utilize chunk_size
@@ -366,15 +364,12 @@ static int psp_read_composite_attributes_block(FILE *f, struct psp_img_attrs *at
 {
 	uint8_t buf[24];
 	struct psp_comp_img_attr_info info;
-	uint32_t chunk_size;
 
 	if (fread(buf, sizeof(buf), 1, f) < 1) {
 		GP_DEBUG(1, "Failed to read Composite Image Bank Info Chunk");
 		return EIO;
 	}
 
-	chunk_size = BUF_TO_4(buf, 0);
-	
 	info.w = BUF_TO_4(buf, 4);
 	info.h = BUF_TO_4(buf, 8);
 	info.bit_depth = BUF_TO_2(buf, 12);
@@ -404,7 +399,6 @@ static int psp_read_jpeg(FILE *f, struct psp_img_attrs *attrs,
                          GP_ProgressCallback *callback)
 {
 	uint8_t buf[14];	
-	uint32_t chunk_size;
 	int err;
 	
 	if (fread(buf, sizeof(buf), 1, f) < 1) {
@@ -412,8 +406,6 @@ static int psp_read_jpeg(FILE *f, struct psp_img_attrs *attrs,
 		return EIO;
 	}
 
-	chunk_size = BUF_TO_4(buf, 0);
-	
 	//TODO: utilize chunk_size
 
 	GP_DEBUG(5, "JPEG Chunk");
