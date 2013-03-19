@@ -1,5 +1,5 @@
 %include "../common.i"
-%module(package="gfxprim.filters") filters_c
+%module(package="gfxprim.filters") c_filters
 
 %{
 #include "filters/GP_Filters.h"
