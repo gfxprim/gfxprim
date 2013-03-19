@@ -5,6 +5,7 @@ import sys
 import gfxprim.core as core
 import gfxprim.loaders as loaders
 import gfxprim.backends as backends
+import gfxprim.input as input
 
 def main():
     if len(sys.argv) != 2:
@@ -19,9 +20,17 @@ def main():
     img.Blit(0, 0, bk.context, 0, 0, img.w, img.h)
     bk.Flip()
 
-    # TODO: Input events
     while True:
-        bk.Poll()
+        bk.Wait()
+        ev = bk.GetEvent()
+
+        input.EventDump(ev)
+
+        if (ev.type == input.EV_KEY):
+           sys.exit(0)
+        elif (ev.type == input.EV_SYS):
+           if (ev.code == input.EV_SYS_QUIT):
+               sys.exit(0)
 
 if __name__ == '__main__':
     main()
