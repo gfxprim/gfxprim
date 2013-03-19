@@ -301,7 +301,12 @@ if __name__ ==  '__main__':
                       "Checking for backtrace() ... "], "", "", ["core"]]], cfg)
 
     parser = OptionParser();
-    
+
+    # Get configuration parameters from environment variables
+    for i in cfg:
+    	if i in os.environ:
+        	cfg[i][0] = os.environ[i]
+
     # Enable disable libraries for linking
     parser.add_option("-e", "--enable", dest="enable", action="append",
                       help="force enable library linking", metavar="libfoo")
