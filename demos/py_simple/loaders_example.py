@@ -11,9 +11,9 @@ def main():
         sys.exit(1)
 
     # Load Image
-    img = loaders.LoadImage(sys.argv[1], None)
+    img = loaders.Load(sys.argv[1])
     # Save result
-    img.Save("out.png");
+    img.loaders.Save("out.png");
 
 if __name__ == '__main__':
     main()
