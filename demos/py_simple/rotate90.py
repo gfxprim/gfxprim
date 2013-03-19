@@ -14,11 +14,11 @@ def main():
     core.SetDebugLevel(10);
 
     # Load Image
-    src = loaders.LoadImage(sys.argv[1], None)
+    src = loaders.Load(sys.argv[1])
     # Rotate by 90 degrees
-    res = filters.FilterRotate90_Alloc(src, None)
+    res = filters.FilterRotate90Alloc(src)
     # Save Image
-    res.Save(sys.argv[2])
+    res.loaders.Save(sys.argv[2])
 
 if __name__ == '__main__':
     main()
