@@ -1,3 +1,0 @@
-"""
-Submodule for constants
-"""

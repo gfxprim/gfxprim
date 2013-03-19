@@ -2,10 +2,7 @@
 Module wrapping GfxPrim Input.
 """
 
-from . import input_c
-
-# Constants module
-from . import C
+from . import c_input
 
 def _init(module):
   # Import some members from the SWIG module
@@ -14,13 +11,9 @@ def _init(module):
   def strip_GP(s):
     return re.sub('^GP_', '', s)
 
-  # Constants
-  const_regexes = ['^GP_[A-Z0-9_]*$']
-  import_members(input_c, C, include=const_regexes, sub=strip_GP)
-
   # Functions
-  import_members(input_c, module, sub=strip_GP,
-    exclude=const_regexes + [
+  import_members(c_input, module, sub=strip_GP,
+    exclude=[
       '^gfxprim$',
       '^\w+_swigregister$',
       '^_\w+$'])
