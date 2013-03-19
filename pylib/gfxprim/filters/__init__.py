@@ -13,6 +13,7 @@ def _init(module):
   import_members(c_filters, module, sub=strip_GP,
       include=[
         '^GP_Filter.*Alloc',
+        '^GP_Filter[A-Za-z0-9]*$',
         ])
   
 _init(locals())
