@@ -1,5 +1,5 @@
 from ..utils import extend, add_swig_getmethod, add_swig_setmethod
-from . import backends_c
+from . import c_backends
 
 def extend_backend(_backend):
   """
@@ -16,24 +16,24 @@ def extend_backend(_backend):
   @extend(_backend)
   def Flip(self):
     "If display is buffered, this copies content of context onto display."
-    return backends_c.GP_BackendFlip(self)
+    return c_backends.GP_BackendFlip(self)
 
   @extend(_backend)
   def UpdateRect(self, rect):
     "Update a rectangle on a buffered backend."
-    return backends_c.GP_BackendUpdateRect(self, rect[0], rect[1], rect[2], rect[3])
+    return c_backends.GP_BackendUpdateRect(self, rect[0], rect[1], rect[2], rect[3])
 
   @extend(_backend)
   def Poll(self):
     "Poll the backend for events."
-    return backends_c.GP_BackendPoll(self)
+    return c_backends.GP_BackendPoll(self)
 
   @extend(_backend)
   def SetCaption(self, caption):
     "Set backend window caption (if possible)"
-    return backends_c.GP_BackendSetCaption(self, caption)
+    return c_backends.GP_BackendSetCaption(self, caption)
 
   @extend(_backend)
   def Resize(self, w, h):
     "Resize backend window (if possible)"
-    return backends_c.GP_BackendResize(self, w, h)
+    return c_backends.GP_BackendResize(self, w, h)

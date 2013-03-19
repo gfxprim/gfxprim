@@ -1,5 +1,5 @@
 %include "../common.i"
-%module(package="gfxprim.backends") backends_c
+%module(package="gfxprim.backends") c_backends
 
 %{
 #include "GP_Backend.h"
