@@ -13,7 +13,7 @@ def main():
     radii = float(sys.argv[1])
 
     # Load Image
-    img = loaders.LoadImage(sys.argv[2], None)
+    img = loaders.Load(sys.argv[2])
     # Do in-place gaussian blur
     filters.FilterGaussianBlur(img, img, radii, radii, None)
     # Save result
