@@ -14,15 +14,16 @@ def main():
 
     # Load Image
     img = loaders.Load(sys.argv[1])
-    
+
+    # Create X11 window
     bk = backends.BackendX11Init(None, 0, 0, img.w, img.h, sys.argv[1], 0)
     assert(bk)
     img.Blit(0, 0, bk.context, 0, 0, img.w, img.h)
     bk.Flip()
 
+    # Event loop
     while True:
-        bk.Wait()
-        ev = bk.GetEvent()
+        ev = bk.Wait()
 
         input.EventDump(ev)
 
