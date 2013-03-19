@@ -86,18 +86,19 @@ def main():
         x = int((e.x % W) * 0x100)
         y = int(e.y * 0x100)
         if e.vx > 0.2:
-          gfx.VLineAA(bk.context, x + 0x100, y - 0x300, y + 0x300, black)
+          bk.context.gfx.VLineAA(x + 0x100, y - 0x300, y + 0x300, black)
         if e.vx < -0.2:
-          gfx.VLineAA(bk.context, x - 0x100, y - 0x300, y + 0x300, black)
-        gfx.PutPixelAA(bk.context, x, y, bk.context.RGBToPixel(e.r, e.g, e.b))
+          bk.context.gfx.VLineAA(x - 0x100, y - 0x300, y + 0x300, black)
+        bk.context.gfx.PutPixelAA(x, y, bk.context.RGBToPixel(e.r, e.g, e.b))
       else:
         x = int(e.x % W)
         y = int(e.y)
         if e.vx > 0.2:
-          gfx.VLine(bk.context, x + 1, y - 2, y + 2, black)
+          bk.context.gfx.VLine(x + 1, y - 2, y + 2, black)
         if e.vx < -0.2:
-          gfx.VLine(bk.context, x - 1, y - 2, y + 2, black)
-          core.PutPixel(bk.context, x, y, bk.context.RGBToPixel(e.r, e.g, e.b))
+          bk.context.gfx.VLine(x - 1, y - 2, y + 2, black)
+          bk.context.core.PutPixel(x, y, bk.context.RGBToPixel(e.r, e.g, e.b))
+    bk.Poll()
     bk.Flip()
     global TIMEOUT
     if TIMEOUT > 0:

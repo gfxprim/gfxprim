@@ -46,13 +46,13 @@ def main():
       if AA:
         x = int(x * 0x100)
         y = int(y * 0x100)
-        gfx.VLineAA(bk.context, x + 0x100, y - 0x200, y + 0x200, black)
-        gfx.PutPixelAA(bk.context, x, y, bk.context.RGBToPixel(int(r), int(g), int(b)))
+        bk.context.gfx.VLineAA(x + 0x100, y - 0x200, y + 0x200, black)
+        bk.context.gfx.PutPixelAA(x, y, bk.context.RGBToPixel(int(r), int(g), int(b)))
       else:
         x = int(x)
         y = int(y)
-        gfx.VLine(bk.context, x + 1, y - 2, y + 2, black)
-        core.PutPixel(bk.context, x, y, bk.context.RGBToPixel(int(r), int(g), int(b)))
+        bk.context.gfx.VLine(x + 1, y - 2, y + 2, black)
+        bk.context.core.PutPixel(x, y, bk.context.RGBToPixel(int(r), int(g), int(b)))
     bk.Flip()
 
 if __name__ == '__main__':
