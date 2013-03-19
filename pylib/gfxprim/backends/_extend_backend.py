@@ -1,5 +1,6 @@
 from ..utils import extend, add_swig_getmethod, add_swig_setmethod
 from . import c_backends
+from ..input import c_input
 
 def extend_backend(_backend):
   """
@@ -29,6 +30,11 @@ def extend_backend(_backend):
     return c_backends.GP_BackendPoll(self)
 
   @extend(_backend)
+  def Wait(self):
+    "Waits for backend event"
+    return c_backends.GP_BackendWait(self)
+
+  @extend(_backend)
   def SetCaption(self, caption):
     "Set backend window caption (if possible)"
     return c_backends.GP_BackendSetCaption(self, caption)
@@ -37,3 +43,13 @@ def extend_backend(_backend):
   def Resize(self, w, h):
     "Resize backend window (if possible)"
     return c_backends.GP_BackendResize(self, w, h)
+
+  @extend(_backend)
+  def GetEvent(self):
+    "Removes and returns event from the top of the event queue"
+    if c_backends.GP_BackendEventsQueued(self) == 0:
+        return None
+    ev = c_input.GP_Event();
+    if c_backends.GP_BackendGetEvent(self, ev) != 0:
+        return ev
+    return None
