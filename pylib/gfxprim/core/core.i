@@ -15,12 +15,10 @@
 %include "GP_Transform.h"
 %include "GP_GetSetBits.h"
 %include "GP_Transform.h"
-%include "GP_ProgressCallback.h"
 
 /*
  * Make members of GP_DebugMsg structure immutable 
  */
-
 %immutable GP_DebugMsg::level;
 %immutable GP_DebugMsg::file;
 %immutable GP_DebugMsg::fn;
@@ -28,6 +26,76 @@
 %immutable GP_DebugMsg::msg;
 
 %include "GP_Debug.h"
+
+/*
+ * Callback proxy, calls the python callback from C source
+ */
+%{
+static int GP_ProgressCallbackProxy(GP_ProgressCallback *self)
+{
+        PyObject *obj = self->priv;
+        PyObject *res, *args;
+        int ret;
+
+        GP_DEBUG(2, "[wrapper] Proxy Callback called");
+
+        args = Py_BuildValue("(f)", self->percentage);
+
+        res = PyEval_CallObject(obj, args);
+
+        /* Parse Error */
+        if (res == NULL) {
+                GP_WARN("Parse error while calling callback, aborting");
+                return 1;
+        }
+
+        if (PyInt_Check(res)) {
+                ret = PyInt_AsLong(res);
+        } else {
+                GP_WARN("Wrong type returned from callback, aborting");
+                return 1;
+        }
+
+        Py_DECREF(res);
+
+        return ret;
+}
+%}
+
+%include "GP_ProgressCallback.h"
+
+/*
+ * Progress callback constructor, desctructor and proxy function.
+ */
+%extend GP_ProgressCallback {
+        ~GP_ProgressCallback() {
+                GP_DEBUG(2, "[wrapper] freeing Proxy Callback");
+                free($self);
+                Py_XDECREF($self->priv);
+        }
+        GP_ProgressCallback(PyObject* obj) {
+                GP_ProgressCallback *res;
+                
+                if (!PyCallable_Check(obj)) {
+                        GP_WARN("Callback must be callable python object");
+                        return NULL;
+                }
+
+                Py_XINCREF(obj);
+
+                res = malloc(sizeof(GP_ProgressCallback));
+
+                if (res == NULL)
+                        return NULL;
+
+                res->priv = obj;
+                res->callback = GP_ProgressCallbackProxy;
+                
+                GP_DEBUG(2, "[wrapper] creating Proxy Callback");
+
+                return res;
+        }
+};
 
 /*
  * Color and pixel types
