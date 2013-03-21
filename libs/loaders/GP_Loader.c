@@ -279,9 +279,9 @@ GP_Context *GP_LoadImage(const char *src_path, GP_ProgressCallback *callback)
 
 	/* 
 	 * Avoid further work if signature was correct but the loader issued
-	 * ENOSYS.
+	 * ENOSYS or ECANCELED.
 	 */
-	if (ext_load != NULL && errno == ENOSYS)
+	if (ext_load != NULL && (errno == ENOSYS || errno == ECANCELED))
 		return NULL;
 
 	sig_load = loader_by_signature(src_path);
