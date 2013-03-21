@@ -23,12 +23,8 @@
 %define ERROR_ON_NULL(funcname)
 %exception funcname {
   $action
-  if (result == NULL) {
-    char errbuf[128];
-    char *errmsg = strerror_r(errno, errbuf, sizeof(errbuf));
-    PyErr_Format(PyExc_RuntimeError, "Error in function %s: %s", "$name", errmsg);
-    return NULL;
-  }
+  if (result == NULL)
+    return PyErr_SetFromErrno(PyExc_RuntimeError);
 }
 %enddef
 
@@ -40,11 +36,7 @@
 %define ERROR_ON_NONZERO(funcname)
 %exception funcname {
   $action
-  if (result != 0) {
-    char errbuf[128];
-    char *errmsg = strerror_r(errno, errbuf, sizeof(errbuf));
-    PyErr_Format(PyExc_RuntimeError, "Error in function %s: %s", "$name", errmsg);
-    return NULL;
-  }
+  if (result != 0)
+    return PyErr_SetFromErrno(PyExc_RuntimeError);
 }
 %enddef

@@ -17,11 +17,18 @@ def main():
 
     callback = core.c_core.GP_ProgressCallback(progress_callback)
 
-    img = loaders.Load(sys.argv[1], callback)
-    print()
+    try:
+       img = loaders.Load(sys.argv[1], callback)
+       print()
+    except RuntimeError as detail:
+       print("Failed to load image '{}': {}".format(sys.argv[1], detail))
+       exit(1)
 
-    img = filters.FilterGaussianBlurAlloc(img, 50, 50, callback)
-    print()
+    try:
+    	img = filters.FilterGaussianBlurAlloc(img, 50, 50, callback)
+    	print()
+    except RuntimeError:
+        print("Filter Aborted")
 
 if __name__ == '__main__':
     main()
