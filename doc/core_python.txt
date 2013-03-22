@@ -1,0 +1,143 @@
+Python Core module
+------------------
+
+The python binding maps mostly to the C API with the 'GP_' prefix stripped.
+
+Structures like 'GP_Context' are not created by the 'GP_ContextAlloc()'
+function but have proper constructor and destructor to keep the Python
+reference counting happy.
+
+There there are more complicated problems like 'GP_ProgressCallback' which
+needs a proxy function to call the python callback from the C code.
+
+Context
+~~~~~~~
+
+[source,python]
+-------------------------------------------------------------------------------
+import gfxprim.core as core
+
+    # Create 100x100 RGB888 context
+    c = core.Context(100, 100, core.C.PIXEL_RGB888)
+
+    print("w={} h={} bpp={}".format(c.w, c.h, c.bpp))
+
+-------------------------------------------------------------------------------
+
+Creates a context of a particular size and pixel type.
+
+First two parameters are 'width' and 'height' third is pixel type which is an
+enumeration 
+
+May raise 'OSError' with 'ENOMEM' errno if allocation has failed.
+
+[source,python]
+-------------------------------------------------------------------------------
+import gfxprim.core as core
+
+    pixel = context.GetPixel(x, y)
+
+-------------------------------------------------------------------------------
+
+Returns a pixel value at x and y. If coordinates are outside the image zero is
+returned.
+
+[source,python]
+-------------------------------------------------------------------------------
+import gfxprim.core as core
+
+    context.PutPixel(x, y, pixel)
+
+-------------------------------------------------------------------------------
+
+Puts a pixel at specified coordinates. If coordinates are outside of the
+image nothing is done.
+
+These are basic 'Context' methods from core module. Importing other modules
+will add some other (for example gfx module adds all drawing functions).
+
+NOTE: You may want to see link:coordinate_system.html[coordinate system]
+      description.
+
+[source,python]
+-------------------------------------------------------------------------------
+import gfxprim.core as core
+
+    grayscale = context.Convert(core.C.PIXEL_G8)
+
+-------------------------------------------------------------------------------
+
+Returns context converted into the desired pixel format.
+
+The conversion is naive i.e. the values are just divided/multiplied.
+
+//TODO: link to dithering filters etc.
+
+[source,python]
+-------------------------------------------------------------------------------
+import gfxprim.core as core
+
+Blit(self, sx, sy, target, tx, ty, w=None, h=None, sx2=None, sy2=None,
+           tx2=None, ty2=None)
+
+-------------------------------------------------------------------------------
+
+Copy a rectangle from self to target. (sx,sy) and (tx,ty) define upper-left
+corners, rectangle size is given by (width, height), lower-right corner in
+source or lower-right corner in the target. Blit is clipped.
+
+Colors and Pixels
+~~~~~~~~~~~~~~~~~
+
+Pixel in gfxprim is a number large enough to store a pixel value. Pixel is
+passed as a parameter to all drawing functions. 
+
+Color is a more abstract representation for example RGB triplet.
+
+There are several functions to create a pixel value for a particualr pixel
+type from color.
+
+[source,python]
+-------------------------------------------------------------------------------
+import gfxprim.core as core
+
+    # You can create a pixel from RGB and pixel type
+    black = core.RGBToPixel(0, 0, 0, core.C.PIXEL_G1)
+
+    # Or using shortcut from context
+    black = context.RGBToPixel(0, 0, 0)
+
+-------------------------------------------------------------------------------
+
+These functions creates a pixel suitable for drawing into a bitmap with
+particular pixel type.
+
+
+[source,python]
+-------------------------------------------------------------------------------
+import gfxprim.core as core
+
+    # Print all supported pixel types
+    for i in core.PixelTypes:
+            print("Pixel type '{}' size {}".format(i.name, i.size))
+
+-------------------------------------------------------------------------------
+
+The PixelTypes array stores all supported pixel types 
+
+Debug Functions
+~~~~~~~~~~~~~~~
+
+[source,python]
+-------------------------------------------------------------------------------
+import gfxprim.core as core
+
+    core.GP_SetDebugLevel(10)
+
+    level = core.GP_GetDebugLevel()
+-------------------------------------------------------------------------------
+
+Sets and gets the GFXprim debug level. See link:debug.html[debug messages]
+description for more details.
+
+
