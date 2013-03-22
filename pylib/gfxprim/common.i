@@ -24,7 +24,7 @@
 %exception funcname {
   $action
   if (result == NULL)
-    return PyErr_SetFromErrno(PyExc_RuntimeError);
+    return PyErr_SetFromErrno(PyExc_OSError);
 }
 %enddef
 
@@ -37,6 +37,6 @@
 %exception funcname {
   $action
   if (result != 0)
-    return PyErr_SetFromErrno(PyExc_RuntimeError);
+    return PyErr_SetFromErrno(PyExc_OSError);
 }
 %enddef
