@@ -21,15 +21,8 @@ WARNING: Drawing functions takes strictly integer coordinates, make sure that
          all divisions are integer divisions (i.e. use // instead of /) to
 	 ensure portability with Python 3.X.
 
-[source,python]
--------------------------------------------------------------------------------
-import gfxprim.gfx as gfx
-
-    context.gfx.Fill(pixel)
-
--------------------------------------------------------------------------------
-
-Fills context with particualr 'pixel' value.
+Line Based Primitives
+^^^^^^^^^^^^^^^^^^^^^
 
 [source,python]
 -------------------------------------------------------------------------------
@@ -105,5 +98,120 @@ import gfxprim.gfx as gfx
 Draws a polygon defined by points, points can be either flat list of 2N
 integers or list of N tuples.
 
+[source,python]
+-------------------------------------------------------------------------------
+import gfxprim.gfx as gfx
+
+     context.gfx.Circle(x, y, r, pixel)
+
+-------------------------------------------------------------------------------
+
+Draws a circle.
+
+[source,python]
+-------------------------------------------------------------------------------
+import gfxprim.gfx as gfx
+
+     context.gfx.Ellipse(x, y, a, b, pixel)
+
+-------------------------------------------------------------------------------
+
+Draws an ellipse.
+
+[source,python]
+-------------------------------------------------------------------------------
+import gfxprim.gfx as gfx
+
+     context.gfx.Ring(x, y, r1, r2, pixel)
+
+-------------------------------------------------------------------------------
+
+Draws a ring.
+
+Filled Primitives
+^^^^^^^^^^^^^^^^^
+
+[source,python]
+-------------------------------------------------------------------------------
+import gfxprim.gfx as gfx
+
+    context.gfx.Fill(pixel)
+
+-------------------------------------------------------------------------------
+
+Fills context with particular 'pixel' value.
+
+[source,python]
+-------------------------------------------------------------------------------
+import gfxprim.gfx as gfx
+
+     context.gfx.FillRect(x0, y0, x1, y1, pixel)
+
+-------------------------------------------------------------------------------
+
+Fills a rectangle defined by two points.
+
+[source,python]
+-------------------------------------------------------------------------------
+import gfxprim.gfx as gfx
+
+     context.gfx.FillTriangle(x0, y0, x1, y1, x1, y2, pixel)
+
+-------------------------------------------------------------------------------
+
+Draws a filled triangle defined by three points.
+
+[source,python]
+-------------------------------------------------------------------------------
+import gfxprim.gfx as gfx
+
+     context.gfx.FillTetragon(x0, y0, x1, y1, x1, y2, x3, y3, pixel)
+
+-------------------------------------------------------------------------------
+
+Draws a filled tetragon defined by four points.
+
+[source,python]
+-------------------------------------------------------------------------------
+import gfxprim.gfx as gfx
+
+     context.gfx.FillPolygon([x0, y0, x1, y1, ...], pixel)
+
+     context.gfx.FillPolygon([(x0, y0), (x1, y1), ...], pixel)
+
+-------------------------------------------------------------------------------
+
+Fills a polygon defined by points, points can be either flat list of 2N
+integers or list of N tuples.
+
+[source,python]
+-------------------------------------------------------------------------------
+import gfxprim.gfx as gfx
+
+     context.gfx.FillCircle(x, y, r, pixel)
+
+-------------------------------------------------------------------------------
+
+Fills a circle.
+
+[source,python]
+-------------------------------------------------------------------------------
+import gfxprim.gfx as gfx
+
+     context.gfx.FillEllipse(x, y, a, b, pixel)
+
+-------------------------------------------------------------------------------
+
+Fills an ellipse.
+
+[source,python]
+-------------------------------------------------------------------------------
+import gfxprim.gfx as gfx
+
+     context.gfx.FillRing(x, y, r1, r2, pixel)
+
+-------------------------------------------------------------------------------
+
+Fills a ring, i.e. area enclosed between two circles.
 
 TIP: See gfx module link:example_py_gfx.html[example].
