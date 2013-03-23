@@ -1,0 +1,28 @@
+Python Loaders module
+---------------------
+
+The python binding maps mostly to the C API with the 'GP_' prefix stripped.
+
+Loaders adds support for loading and storing contexts into/from various image
+fomats.
+
+[source,python]
+-------------------------------------------------------------------------------
+import gfxprim.loaders as loaders
+
+    img = loaders.Load(path, callback=None)
+
+-------------------------------------------------------------------------------
+
+Loads an image from a file.
+
+May raise 'OSError' with errno set to 'EPERM', 'EISDIR', 'ENOENT' or any other
+'errno' set by 'open(2)', 'read(2)', 'seek(2)'.
+
+May raise 'OSError' with errno set to 'ENOSYS' on unsupported or not recognized
+format.
+
+May raise 'OSError' with errno set to 'EIO' when file is damaged.
+
+May raise 'OSError' with errno set to 'ECANCELED' when action was interrupted
+by callback.
