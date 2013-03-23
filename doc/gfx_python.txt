@@ -17,6 +17,10 @@ pixel type (context), from a RGB triplet.
 
 All drawing functions are clipped. Drawing outside of a context is no-op.
 
+WARNING: Drawing functions takes strictly integer coordinates, make sure that
+         all divisions are integer divisions (i.e. use // instead of /) to
+	 ensure portability with Python 3.X.
+
 [source,python]
 -------------------------------------------------------------------------------
 import gfxprim.gfx as gfx
@@ -32,6 +36,7 @@ Fills context with particualr 'pixel' value.
 import gfxprim.gfx as gfx
 
      context.gfx.HLine(x0, x1, y, pixel)
+
 -------------------------------------------------------------------------------
 
 Draws a horizontal line from 'x0' to 'x1' at 'y'.
@@ -41,8 +46,64 @@ Draws a horizontal line from 'x0' to 'x1' at 'y'.
 import gfxprim.gfx as gfx
 
      context.gfx.VLine(x, y0, y1, pixel)
+
 -------------------------------------------------------------------------------
 
 Draws a vertical line from 'y0' to 'y1' at 'x'.
 
 
+[source,python]
+-------------------------------------------------------------------------------
+import gfxprim.gfx as gfx
+
+     context.gfx.Line(x0, y0, x1, y1, pixel)
+
+-------------------------------------------------------------------------------
+
+Draws a line from x0, y0 to x1, y1.
+
+[source,python]
+-------------------------------------------------------------------------------
+import gfxprim.gfx as gfx
+
+     context.gfx.Rect(x0, y0, x1, y1, pixel)
+
+-------------------------------------------------------------------------------
+
+Draws a rectangle defined by two points.
+
+[source,python]
+-------------------------------------------------------------------------------
+import gfxprim.gfx as gfx
+
+     context.gfx.Triangle(x0, y0, x1, y1, x1, y2, pixel)
+
+-------------------------------------------------------------------------------
+
+Draws a triangle defined by three points.
+
+[source,python]
+-------------------------------------------------------------------------------
+import gfxprim.gfx as gfx
+
+     context.gfx.Tetragon(x0, y0, x1, y1, x1, y2, x3, y3, pixel)
+
+-------------------------------------------------------------------------------
+
+Draws a tetragon defined by four points.
+
+[source,python]
+-------------------------------------------------------------------------------
+import gfxprim.gfx as gfx
+
+     context.gfx.Polygon([x0, y0, x1, y1, ...], pixel)
+
+     context.gfx.Polygon([(x0, y0), (x1, y1), ...], pixel)
+
+-------------------------------------------------------------------------------
+
+Draws a polygon defined by points, points can be either flat list of 2N
+integers or list of N tuples.
+
+
+TIP: See gfx module link:example_py_gfx.html[example].
