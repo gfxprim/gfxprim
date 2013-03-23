@@ -53,9 +53,6 @@ import gfxprim.core as core
 Puts a pixel at specified coordinates. If coordinates are outside of the
 image nothing is done.
 
-These are basic 'Context' methods from core module. Importing other modules
-will add some other (for example gfx module adds all drawing functions).
-
 NOTE: You may want to see link:coordinate_system.html[coordinate system]
       description.
 
@@ -77,14 +74,26 @@ The conversion is naive i.e. the values are just divided/multiplied.
 -------------------------------------------------------------------------------
 import gfxprim.core as core
 
-Blit(self, sx, sy, target, tx, ty, w=None, h=None, sx2=None, sy2=None,
-           tx2=None, ty2=None)
+    # Blits context to target starting at
+    # sx and sy in the source context
+    # tx and ty in in the target
+    context.Blit(sx, sy, target, tx, ty, w, h)
+    
+    # Alternatively the size can be described by
+    # coordinates in the source or target
+    context.Blit(sx, sy, target, tx, ty, sx2=, sy2=)
+    context.Blit(sx, sy, target, tx, ty, tx2=, ty2=)
 
 -------------------------------------------------------------------------------
 
-Copy a rectangle from self to target. (sx,sy) and (tx,ty) define upper-left
-corners, rectangle size is given by (width, height), lower-right corner in
-source or lower-right corner in the target. Blit is clipped.
+Copy a rectangle from self to target.
+
+The blits can do simple conversions same as the 'Convert' functions however
+such blits are slower.
+
+Blit is clipped.
+
+TIP: See link:example_py_showimage.html[example] Blit usage.
 
 Colors and Pixels
 ~~~~~~~~~~~~~~~~~
@@ -94,7 +103,7 @@ passed as a parameter to all drawing functions.
 
 Color is a more abstract representation for example RGB triplet.
 
-There are several functions to create a pixel value for a particualr pixel
+There are several functions to create a pixel value for a particular pixel
 type from color.
 
 [source,python]
@@ -141,3 +150,7 @@ Sets and gets the GFXprim debug level. See link:debug.html[debug messages]
 description for more details.
 
 
+
+
+These are basic 'Context' methods from core module. Importing other modules
+will add some other (for example gfx module adds all drawing functions).

@@ -1,0 +1,8 @@
+Showimage
+---------
+.A simple program to load and show image
+
+[source,python]
+------------------------------------------------------------------
+include::../demos/py_simple/showimage.py[]
+------------------------------------------------------------------
