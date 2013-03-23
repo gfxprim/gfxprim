@@ -5,7 +5,7 @@ SOURCES=general.txt context.txt loaders.txt filters.txt basic_types.txt \
 	get_put_pixel.txt blits.txt progress_callback.txt text_api.txt \
 	event_queue.txt
 
-SOURCES+=core_python.txt
+SOURCES+=core_python.txt gfx_python.txt
 
 EXAMPLE_SOURCES=$(wildcard example_*.txt)
 

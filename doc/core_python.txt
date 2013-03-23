@@ -95,6 +95,7 @@ Blit is clipped.
 
 TIP: See link:example_py_showimage.html[example] Blit usage.
 
+[[Colors_and_Pixels]]
 Colors and Pixels
 ~~~~~~~~~~~~~~~~~
 

@@ -1,0 +1,48 @@
+Python GFX module
+-----------------
+
+The python binding maps mostly to the C API with the 'GP_' prefix stripped.
+
+The gfx module adds methods to the gfx context submodule.
+
+NOTE: You may want to see the link:coordinate_system.html[coordinate system]
+      first.
+
+Drawing functions
+~~~~~~~~~~~~~~~~~
+
+All drawing functions takes a 'pixel' value (to describe color) which
+link:core_python.html#Colors_and_Pixels[can be obtained], for a particular
+pixel type (context), from a RGB triplet.
+
+All drawing functions are clipped. Drawing outside of a context is no-op.
+
+[source,python]
+-------------------------------------------------------------------------------
+import gfxprim.gfx as gfx
+
+    context.gfx.Fill(pixel)
+
+-------------------------------------------------------------------------------
+
+Fills context with particualr 'pixel' value.
+
+[source,python]
+-------------------------------------------------------------------------------
+import gfxprim.gfx as gfx
+
+     context.gfx.HLine(x0, x1, y, pixel)
+-------------------------------------------------------------------------------
+
+Draws a horizontal line from 'x0' to 'x1' at 'y'.
+
+[source,python]
+-------------------------------------------------------------------------------
+import gfxprim.gfx as gfx
+
+     context.gfx.VLine(x, y0, y1, pixel)
+-------------------------------------------------------------------------------
+
+Draws a vertical line from 'y0' to 'y1' at 'x'.
+
+
