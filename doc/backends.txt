@@ -118,7 +118,12 @@ time).
 
 This backend feeds key events into global input queue.
 
-TODO: X11 backend will be changed to support more windows at a time.
+This backends supports multiple windows. Each time you call the initialization
+rutine new backend structure is returned. All backend instances share the xlib
+connection so you need to wait or poll only on one of them. Each backend, on
+the other hand, has its own input queue.
+
+TIP: See mutliple windows link:example_x11_windows.html[example].
 
 [source,c]
 -------------------------------------------------------------------------------

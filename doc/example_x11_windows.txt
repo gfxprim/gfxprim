@@ -1,0 +1,8 @@
+Graphics Backend Example
+------------------------
+.An example how to create and manage two windows using the X11 backend
+
+[source,c]
+------------------------------------------------------------------
+include::../demos/c_simple/x11_windows.c[]
+------------------------------------------------------------------
