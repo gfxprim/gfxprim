@@ -251,7 +251,7 @@ GP_Backend *GP_BackendSDLInit(GP_Size w __attribute__((unused)),
 			      uint8_t flags __attribute__((unused)),
                               const char *caption __attribute__((unused)))
 {
-	GP_WARN("SDL support not compiled in.");
+	GP_FATAL("SDL support not compiled in.");
 	return NULL;
 }
 
