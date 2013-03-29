@@ -3,7 +3,7 @@ SOURCES=general.txt context.txt loaders.txt filters.txt basic_types.txt \
 	environment_variables.txt debug.txt core.txt api.txt input.txt \
 	gen.txt pixels.txt coordinate_system.txt coding_style.txt \
 	get_put_pixel.txt blits.txt progress_callback.txt text_api.txt \
-	event_queue.txt
+	event_queue.txt compilation.txt
 
 SOURCES+=core_python.txt gfx_python.txt loaders_python.txt
 

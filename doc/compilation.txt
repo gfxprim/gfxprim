@@ -1,0 +1,102 @@
+Compilation
+-----------
+
+GFXprim needs following tools to compile:
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+* C compiler (tested with 'gcc' or 'clang')
+* GNU make
+* Python (2.6 or newer)
+* Jinja2
+
+Additional dependencies:
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+Image loaders
+^^^^^^^^^^^^^
+
+* libjpeg
+* libpng
+* giflib
+
+Text rendering
+^^^^^^^^^^^^^^
+
+* FreeType
+
+Backends
+^^^^^^^^
+
+* X11
+* SDL (not recomended, SDL is known to be slow and buggy)
+
+Python Bindings
+^^^^^^^^^^^^^^^
+
+* Swig
+
+Compilation
+~~~~~~~~~~~
+
+Once devel packages are installed the compilation is as simple as running
+'configure' and 'make'.
+
+NOTE: The 'configure' script is written in 'Python'.
+
+.Compilation
+-------------------------------------------------------------------------------
+gfxprim # ./configure
+...
+
+gfxprim # make
+-------------------------------------------------------------------------------
+
+TIP: GFXprim supports proper parallel build, you most likely want to add
+     the '-j' with number of your processors + 1 as a parameter to the 'make'.
+
+
+.Installation
+-------------------------------------------------------------------------------
+gfxprim # make install
+-------------------------------------------------------------------------------
+
+The 'make install' command will install GFXprim libraries and devel headers
+into your system. Python bindings are not installable at the moment.
+
+OpenSUSE
+~~~~~~~~
+
+Here are commands to install required packages on
+link:http://www.opensuse.org/[OpenSUSE].
+
+.Install basic tools
+-------------------------------------------------------------------------------
+zypper in gcc make python-Jinja2
+-------------------------------------------------------------------------------
+
+.Install jpeg and png devel libraries
+-------------------------------------------------------------------------------
+zypper in libjpeg-devel libpng-devel giflib-devel
+-------------------------------------------------------------------------------
+
+.Install FreeType devel library
+-------------------------------------------------------------------------------
+zypper in freetype-devel
+-------------------------------------------------------------------------------
+
+.Install X11 devel library
+-------------------------------------------------------------------------------
+zypper in libX11-devel libXext-devel
+-------------------------------------------------------------------------------
+
+.Install swig
+-------------------------------------------------------------------------------
+zypper in swig python-devel
+-------------------------------------------------------------------------------
+
+.All in the one for the lazy
+-------------------------------------------------------------------------------
+zypper in gcc make python-Jinja2 libjpeg-devel libpng-devel giflib-devel
+          freetype-devel libX11-devel libXext-devel swig python-devel
+-------------------------------------------------------------------------------
+
