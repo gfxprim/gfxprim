@@ -185,12 +185,22 @@ static inline void GP_BackendPoll(GP_Backend *backend)
 }
 
 /*
+ * Poll and GetEvent combined.
+ */
+int GP_BackendPollEvent(GP_Backend *self, GP_Event *ev);
+
+/*
  * Waits for backend events.
  */
 static inline void GP_BackendWait(GP_Backend *backend)
 {
 	backend->Wait(backend);
 }
+
+/*
+ * Wait and GetEvent combined.
+ */
+int GP_BackendWaitEvent(GP_Backend *self, GP_Event *ev);
 
 /*
  * Sets backend caption, if supported.

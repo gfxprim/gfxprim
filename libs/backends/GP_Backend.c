@@ -102,3 +102,30 @@ int GP_BackendResizeAck(GP_Backend *self)
 
 	return 0;
 }
+
+int GP_BackendWaitEvent(GP_Backend *self, GP_Event *ev)
+{
+	int ret;
+
+	for (;;) {
+		if ((ret = GP_BackendGetEvent(self, ev)))
+			return ret;
+		
+		GP_BackendWait(self);
+	}
+}
+
+int GP_BackendPollEvent(GP_Backend *self, GP_Event *ev)
+{
+	int ret;
+		
+	if ((ret = GP_BackendGetEvent(self, ev)))
+		return ret;
+
+	GP_BackendPoll(self);
+	
+	if ((ret = GP_BackendGetEvent(self, ev)))
+		return ret;
+
+	return 0;
+}
