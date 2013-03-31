@@ -78,7 +78,7 @@ static void win_list_rem(struct x11_win *win)
 		win_list = win->next;
 }
 
-struct x11_win *win_list_lookup(Window win)
+static struct x11_win *win_list_lookup(Window win)
 {
 	struct x11_win *i;
 
@@ -382,7 +382,7 @@ static int x11_win_open(struct x11_wreq *wreq)
 	return 0;
 }
 
-void x11_win_close(struct x11_win *win)
+static void x11_win_close(struct x11_win *win)
 {
 	XLockDisplay(win->dpy);
 
