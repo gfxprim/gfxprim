@@ -298,9 +298,11 @@ struct GP_Grabber *GP_GrabberV4L2Init(const char *device,
 		if (ioctl(fd, VIDIOC_S_CROP, &crop)) {
 			/* error/cropping not supported */
 		}
-
 	} else {
-		/* errors ignored? */
+		GP_WARN("ioctl VIDIOC_CROPCAP failed: %s",
+		        strerror(errno));
+		err = errno;
+		goto err0;
 	}
 
 	struct v4l2_format fmt;
