@@ -122,7 +122,9 @@ void event_loop(void)
 {
 	GP_Event ev;
 
-	while (GP_BackendGetEvent(backend, &ev)) {
+	for (;;) {
+		GP_BackendWaitEvent(backend, &ev);
+
 		switch (ev.type) {
 		case GP_EV_KEY:
 			if (ev.code != GP_EV_KEY_DOWN)
@@ -268,10 +270,7 @@ int main(int argc, char *argv[])
 	redraw_screen();
 	GP_BackendFlip(backend);
 	
-	for (;;) {
-		GP_BackendWait(backend);
-		event_loop();
-	}
+	event_loop();
 
 	return 0;
 }

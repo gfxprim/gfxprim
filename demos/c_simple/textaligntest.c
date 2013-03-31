@@ -73,7 +73,9 @@ static void event_loop(void)
 {
 	GP_Event ev;
 
-	while (GP_BackendGetEvent(win, &ev)) {
+	for (;;) {
+		GP_BackendWaitEvent(win, &ev);
+
 		switch (ev.type) {
 		case GP_EV_KEY:
 			if (ev.code != GP_EV_KEY_DOWN)
@@ -156,12 +158,9 @@ int main(int argc, char *argv[])
 	darkgray_pixel = GP_ColorToContextPixel(GP_COL_GRAY_DARK, win->context);
 
 	redraw_screen();
-	
 	GP_BackendFlip(win);
+	event_loop();
 
-	for (;;) {
-		GP_BackendWait(win);
-		event_loop();
-	}
+	return 0;
 }
 

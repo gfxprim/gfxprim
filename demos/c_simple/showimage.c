@@ -66,15 +66,13 @@ int main(int argc, char *argv[])
 
 	/* Wait for events  */
 	for (;;) {
-		GP_BackendWait(backend);
-	
 		GP_Event ev;
 
-		while (GP_BackendGetEvent(backend, &ev)) {
-			if (ev.type == GP_EV_KEY && ev.val.val == GP_KEY_Q) {
-				GP_BackendExit(backend);
-				return 0;
-			}
+		GP_BackendWaitEvent(backend, &ev);
+
+		if (ev.type == GP_EV_KEY && ev.val.val == GP_KEY_Q) {
+			GP_BackendExit(backend);
+			return 0;
 		}
 	}
 

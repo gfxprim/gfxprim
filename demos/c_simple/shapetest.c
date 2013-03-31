@@ -337,7 +337,9 @@ void event_loop(void)
 
 	GP_Event ev;
 
-	while (GP_BackendGetEvent(backend, &ev)) {
+	for (;;) {
+		GP_BackendWaitEvent(backend, &ev);
+
 		GP_EventDump(&ev);
 	
 		shift_pressed = GP_EventGetKey(&ev, GP_KEY_LEFT_SHIFT) ||
@@ -498,11 +500,8 @@ int main(void)
 	darkgray = GP_ColorToContextPixel(GP_COL_GRAY_DARK, win);
 
 	print_instructions();
-	
 	redraw_screen();
+	event_loop();
 
-	for (;;) {
-		GP_BackendWait(backend);
-		event_loop();
-	}
+	return 0;
 }
