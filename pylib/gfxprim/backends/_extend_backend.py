@@ -26,31 +26,31 @@ def extend_backend(_backend):
 
   @extend(_backend)
   def Poll(self):
+    "Poll the backend."
+    c_backends.GP_BackendPoll(self)
+
+  @extend(_backend)
+  def PollEvent(self):
     "Poll the backend for events."
     ev = c_input.GP_Event();
 
-    if c_backends.GP_BackendGetEvent(self, ev) != 0:
-        return ev
-
-    c_backends.GP_BackendPoll(self)
-
-    if c_backends.GP_BackendGetEvent(self, ev) != 0:
+    if c_backends.GP_BackendPollEvent(self, ev) != 0:
         return ev
 
     return None
 
+
   @extend(_backend)
   def Wait(self):
-    "Waits for backend event"
+    "Waits for backend."
+    c_backends.GP_BackendWait(self)
+  
+  @extend(_backend)
+  def WaitEvent(self):
+    "Waits for backend event."
     ev = c_input.GP_Event();
 
-    if c_backends.GP_BackendGetEvent(self, ev) != 0:
-        return ev
-
-    while c_backends.GP_BackendGetEvent(self, ev) == 0:
-        c_backends.GP_BackendWait(self)
-
-    c_backends.GP_BackendGetEvent(self, ev)
+    c_backends.GP_BackendWaitEvent(self, ev)
 
     return ev
 

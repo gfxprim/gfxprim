@@ -149,7 +149,7 @@ def main():
 
     # Event loop
     while True:
-        ev = bk.Wait()
+        ev = bk.WaitEvent()
 
         input.EventDump(ev)
 
