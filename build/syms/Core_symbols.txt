@@ -23,6 +23,7 @@ GP_GammaPrint
 GP_DebugPrint
 GP_SetDebugLevel
 GP_GetDebugLevel
+GP_SetDebugHandler
 
 GP_PrintAbortInfo
 

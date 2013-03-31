@@ -15,3 +15,7 @@ GP_ContextFromSurface
 GP_BackendResize
 GP_BackendResizeAck
 GP_BackendUpdateRectXYXY
+GP_BackendFlip
+GP_BackendWaitEvent
+GP_BackendPollEvent
+
