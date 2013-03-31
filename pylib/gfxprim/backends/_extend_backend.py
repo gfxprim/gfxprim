@@ -5,7 +5,7 @@ from ..input import c_input
 def extend_backend(_backend):
   """
   Extends _backend class with convenience methods.
-  Called once on module inicialization.
+  Called once on module initialization.
   """
 
   @extend(_backend, name='__str__')
