@@ -1044,10 +1044,12 @@ int main(int argc, char *argv[])
 				case GP_KEY_9:
 					resize_backend(&params, 9, shift_flag);
 				break;
+				case GP_KEY_KP_PLUS:
 				case GP_KEY_DOT:
 					params.show_progress_once = 1;
 					zoom_mul(&params, 1.5);
 				break;
+				case GP_KEY_KP_MINUS:
 				case GP_KEY_COMMA:
 					params.show_progress_once = 1;
 					zoom_mul(&params, 1/1.5);
