@@ -49,9 +49,9 @@
 #include "GP_Context.h"
 #include "GP_Pixel.h"
 
-##
-## Loop around "central" pixel types
-##
+{#
+ # Loop around "central" pixel types
+-#}
 %% for pt in [pixeltypes_dict['RGB888'], pixeltypes_dict['RGBA8888']]
 %% for i in pixeltypes
 %% if not i.is_unknown()
