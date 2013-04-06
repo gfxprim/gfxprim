@@ -17,7 +17,6 @@ def redraw(bk, id):
     c.gfx.Fill(black)
 
     align = text.C.ALIGN_CENTER | text.C.VALIGN_CENTER
-
     c.text.Text(None, c.w//2, c.h//2, align, white, black, "{} - {}x{}".format(id, c.w, c.h))
     
     bk.Flip()
