@@ -21,6 +21,7 @@
  *****************************************************************************/
 
 #include <string.h>
+#include <errno.h>
 
 #include "core/GP_Debug.h"
 
@@ -272,14 +273,21 @@ static GP_Backend *init_backend(const char *name, char *params,
                                 const char *caption, FILE *help)
 {
 	int i = get_backend(name);
+	GP_Backend *ret;
 
 	if (i < 0) {
 		GP_DEBUG(1, "Invalid backend name '%s'", name);
 		print_help(help, "Invalid backend name");
+		errno = EINVAL;
 		return NULL;
 	}
 
-	return backend_inits[i](params, caption, help);
+	ret = backend_inits[i](params, caption, help);
+
+	if (ret == NULL)
+		errno = EINVAL;
+
+	return ret;
 }
 
 GP_Backend *GP_BackendInit(const char *params, const char *caption, FILE *help)
