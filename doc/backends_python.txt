@@ -36,15 +36,20 @@ The last parameter are bitflags. TODO: Export bitflags and add a list here.
 
 [source,python]
 -------------------------------------------------------------------------------
+from sys import stderr
 import gfxprim.backends as backends
 
     # This is a default init string
     backend_string = "X11:100x100"
 
     # Initialize backend by init string
-    bk = backends.BackendInit(backend_string, "Window title", None)
+    bk = backends.BackendInit(backend_string, "Window title", stderr)
     
     # Assert that inicialization was successful
     assert(bk)
 
 -------------------------------------------------------------------------------
+
+Initialize the backend params by the 'backend_string'. The last parameter is a
+file to print help or errors to.
+
