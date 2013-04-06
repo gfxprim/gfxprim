@@ -61,14 +61,14 @@ void GP_BackendUpdateRectXYXY(GP_Backend *backend,
 	GP_Coord w = backend->context->w;
 
 	if (x1 >= w) {
-		GP_WARN("Invalid x coordinate %i, clipping to %u", x1, w - 1);
+		GP_WARN("Too large x coordinate %i, clipping to %u", x1, w - 1);
 		x1 = w - 1;
 	}
 	
 	GP_Coord h = backend->context->h;
 
 	if (y1 >= h) {
-		GP_WARN("Invalid x coordinate %i, clipping to %u", y1, h - 1);
+		GP_WARN("Too large y coordinate %i, clipping to %u", y1, h - 1);
 		y1 = h - 1;
 	}
 	
