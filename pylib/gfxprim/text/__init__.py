@@ -12,7 +12,7 @@ from . import C
 
 def _init(module):
   "Extend context with text submodule"
-
+  
   from ..utils import extend, add_swig_getmethod, add_swig_setmethod
   from ..core import Context as _context
 
@@ -34,7 +34,9 @@ def _init(module):
     '^GP_[A-Z0-9_]*$',
     ]
   import_members(c_text, C, include=const_regexes, sub=strip_GP)
-  
+
+  import_members(c_text, module, sub=strip_GP)
+
   for name in ['Text']:
     extend_submodule(TextSubmodule, name, c_text.__getattribute__('GP_' + name))
 
