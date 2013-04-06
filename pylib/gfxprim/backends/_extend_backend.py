@@ -32,13 +32,12 @@ def extend_backend(_backend):
   @extend(_backend)
   def PollEvent(self):
     "Poll the backend for events."
-    ev = c_input.GP_Event();
+    ev = c_input.GP_Event()
 
     if c_backends.GP_BackendPollEvent(self, ev) != 0:
         return ev
 
     return None
-
 
   @extend(_backend)
   def Wait(self):
@@ -48,11 +47,26 @@ def extend_backend(_backend):
   @extend(_backend)
   def WaitEvent(self):
     "Waits for backend event."
-    ev = c_input.GP_Event();
+    ev = c_input.GP_Event()
 
     c_backends.GP_BackendWaitEvent(self, ev)
 
     return ev
+
+  @extend(_backend)
+  def GetEvent(self):
+    "Removes event from the top of the backend event queue."
+    ev = c_input.GP_Event()
+
+    if c_backends.GP_BackendGetEvent(self, ev) != 0:
+    	return ev
+
+    return None
+
+  @extend(_backend)
+  def EventsQueued(self):
+    "Returns the number of events queued in the backend event queue."
+    return c_backends.GP_BackendEventsQueued(self)
 
   @extend(_backend)
   def SetCaption(self, caption):
@@ -63,3 +77,8 @@ def extend_backend(_backend):
   def Resize(self, w, h):
     "Resize backend window (if possible)"
     return c_backends.GP_BackendResize(self, w, h)
+  
+  @extend(_backend)
+  def ResizeAck(self):
+    "Acknowledge backend resize."
+    return c_backends.GP_BackendResizeAck(self)
