@@ -67,15 +67,15 @@ ERROR_ON_NULL(GP_BackendLinuxX11Init);
             return NULL;
         }
        
-       $1 = fdopen(fd, "w");
+       $1 = fdopen(dup(fd), "w");
     }
 }
 
 %exception GP_BackendInit {
 $action
   
-  //HACK: free the FILE*
-  free(arg3);
+  //HACK: fclose the FILE*
+  fclose(arg3);
   
   if (result == NULL)
     return PyErr_SetFromErrno(PyExc_OSError);
