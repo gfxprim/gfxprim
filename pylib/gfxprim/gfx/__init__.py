@@ -5,14 +5,10 @@ Use as in "import gfxprim.gfx; context_foo.gfx.Line(...)"
 """
 
 # Import the SWIG wrapper
-
 from . import c_gfx
 
-
 # Constants module
-
 from . import C
-
 
 def _init(module):
   "Extend Context with gfx submodule"
@@ -21,7 +17,6 @@ def _init(module):
   from ..core import Context as _context
 
   # New Context submodule
-
   class GfxSubmodule(object):
     def __init__(self, ctx):
       self.ctx = ctx

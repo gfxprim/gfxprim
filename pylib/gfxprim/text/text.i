@@ -1,5 +1,5 @@
 %include "../common.i"
-%module(package="gfxprim.text") text_c
+%module(package="gfxprim.text") c_text
 
 %{
 #include "text/GP_Text.h"
