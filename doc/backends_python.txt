@@ -1,0 +1,50 @@
+Python Backends module
+----------------------
+
+The python binding maps mostly to the C API with the 'GP_' prefix stripped.
+
+Backend Initialization
+~~~~~~~~~~~~~~~~~~~~~~
+
+Instead of having one unified initialization interface each backend has it's
+specific function and semantics but once backend is initialized the backend
+structure provides unified API for controlling the drawing.
+
+There is however generic backend initialization function that takes a string
+as a parameter that may contain backend-specific settings.
+
+[source,python]
+-------------------------------------------------------------------------------
+import gfxprim.backends as backends
+
+    # Create 100x100 X11 window
+    bk = backends.BackendX11Init(None, x, y, w, h, "Window title", 0)
+    
+    # Assert that inicialization was successful
+    assert(bk)
+
+-------------------------------------------------------------------------------
+
+Creates a X11 window. First parameter is display string, pass 'None' for
+default display.
+
+The 'x', 'y', 'w' and 'h' parameters describe the window geometry. The 'x' and
+'y' are ignored by most of the window managers though.
+
+The last parameter are bitflags. TODO: Export bitflags and add a list here.
+
+
+[source,python]
+-------------------------------------------------------------------------------
+import gfxprim.backends as backends
+
+    # This is a default init string
+    backend_string = "X11:100x100"
+
+    # Initialize backend by init string
+    bk = backends.BackendInit(backend_string, "Window title", None)
+    
+    # Assert that inicialization was successful
+    assert(bk)
+
+-------------------------------------------------------------------------------
