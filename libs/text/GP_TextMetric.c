@@ -108,6 +108,16 @@ static unsigned int first_glyph_width(const GP_TextStyle *style, int c)
 	return multiply_width(style, glyph->advance_x - glyph->bearing_x);
 }
 
+static const GP_TextStyle *assert_style(const GP_TextStyle *style)
+{
+	if (style == NULL)
+		style = &GP_DefaultStyle;
+
+	GP_ASSERT(style->font != NULL);
+
+	return style;
+}
+
 /*
  * Returns text width.
  *
@@ -129,8 +139,7 @@ unsigned int GP_TextWidth(const GP_TextStyle *style, const char *str)
 {
 	unsigned int i, len;
 
-	if (style == NULL)
-		style = &GP_DefaultStyle;
+	style = assert_style(style);
 
 	if (str == NULL || str[0] == '\0')
 		return 0;
@@ -158,8 +167,7 @@ unsigned int GP_TextWidth(const GP_TextStyle *style, const char *str)
  */
 GP_Size GP_TextMaxWidth(const GP_TextStyle *style, unsigned int len)
 {
-	if (style == NULL)
-		style = &GP_DefaultStyle;
+	style = assert_style(style);
 
 	if (len == 0)
 		return 0;
@@ -174,9 +182,8 @@ GP_Size GP_TextMaxWidth(const GP_TextStyle *style, unsigned int len)
 GP_Size GP_TextMaxStrWidth(const GP_TextStyle *style, const char *str,
                            unsigned int len)
 {
-	if (style == NULL)
-		style = &GP_DefaultStyle;
-	
+	style = assert_style(style);
+
 	if (len == 0 || str == NULL)
 		return 0;
 
@@ -193,9 +200,8 @@ static unsigned int multiply_height(const GP_TextStyle *style, unsigned int h)
 
 GP_Size GP_TextHeight(const GP_TextStyle *style)
 {
-	if (style == NULL)
-		style = &GP_DefaultStyle;
-	
+	style = assert_style(style);
+
 	unsigned int height = style->font->ascend + style->font->descend;
 
 	return multiply_height(style, height);
@@ -203,17 +209,14 @@ GP_Size GP_TextHeight(const GP_TextStyle *style)
 
 GP_Size GP_TextAscent(const GP_TextStyle *style)
 {
-	if (style == NULL)
-		style = &GP_DefaultStyle;
+	style = assert_style(style);
 
-	
 	return multiply_height(style, style->font->ascend);
 }
 
 GP_Size GP_TextDescent(const GP_TextStyle *style)
 {
-	if (style == NULL)
-		style = &GP_DefaultStyle;
+	style = assert_style(style);
 
 	return multiply_height(style, style->font->descend);
 }
