@@ -54,10 +54,7 @@ You can't initialize more than one backend at a time, which is inherited 'SDL'
 limitation. If you call the initialization for a second time, you will get a
 pointer to already running backend.
 
-This driver feeds input events into global input event queue (see input docs
-for details). 
-
-If w, h and/or bpp are zero SDL tries to do a guess, most of the time wrong
+If w, h and/or bpp are zero 'SDL' tries to do a guess, most of the time wrong
 for w and h though.
 
 The caption is window caption.
@@ -73,14 +70,15 @@ window resizable.
 int GP_ContextFromSurface(GP_Context *c, const SDL_Surface *surf);
 -------------------------------------------------------------------------------
 
-This function allows you to mix 'SDL' and 'GFXprim' code. The functions
-initializes the context from 'SDL' surface using the pixel buffer from surface
-as pixel buffer for the context.
+This function allows you to mix 'SDL' and 'GFXprim' code.
 
-Function returns zero on succes and non-zero on failure (There is no GFXprim
-pixel type to match given surface).
+It initializes a 'GFXprim' context from the 'SDL' surface using the pixel
+buffer from surface as pixel buffer for the context.
 
-For example usage see 'SDL' glue link:example_SDL_glue.html[example].
+Function returns zero on success and non-zero on failure (i.e. there is no
+'GFXprim' pixel type to match given surface).
+
+For example usage see the link:example_SDL_glue.html[SDL glue example].
 
 X Server
 ~~~~~~~~
@@ -116,14 +114,15 @@ Returns pointer to initialized X11 backend or in case of failure 'NULL'.
 When display is 'NULL' default display is used (which is what you want most of the
 time).
 
-This backend feeds key events into global input queue.
-
 This backends supports multiple windows. Each time you call the initialization
-rutine new backend structure is returned. All backend instances share the xlib
+routine new backend structure is returned. All backend instances share the Xlib
 connection so you need to wait or poll only on one of them. Each backend, on
 the other hand, has its own input queue.
 
-TIP: See mutliple windows link:example_x11_windows.html[example].
+TIP: See multiple windows link:example_x11_windows.html[example].
+
+GP_BackendIsX11
+^^^^^^^^^^^^^^^
 
 [source,c]
 -------------------------------------------------------------------------------
@@ -135,6 +134,20 @@ TIP: See mutliple windows link:example_x11_windows.html[example].
  * Returns non-zero if backend is X11 backend
  */
 int GP_BackendIsX11(GP_Backend *self);
+-------------------------------------------------------------------------------
+
+The 'GP_BackendIsX11()' returns non-zero if backend is X11 backend, zero
+otherwise.
+
+
+GP_BackendX11RequestFullscreen
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <GP.h>
+/* or */
+#include <backends/GP_X11.h>
 
 /*
  * Changes full screen mode.
@@ -146,10 +159,10 @@ int GP_BackendIsX11(GP_Backend *self);
 void GP_BackendX11RequestFullscreen(GP_Backend *self, int mode);
 -------------------------------------------------------------------------------
 
-The 'GP_BackendIsX11' functions allows us to detect if we are running using
-X11 backend.
-
 The 'GP_BackendX11RequestFullscreen' can toggle fullscreen mode at runtime.
+
+It will most likely generate resize event. See the 'GP_BackendResizeAck()' bellow.
+
 
 Overall init function
 ~~~~~~~~~~~~~~~~~~~~~
@@ -176,15 +189,14 @@ initialized backend is returned otherwise 'NULL' is returned and some helpful
 information should be printed into the passed help 'FILE'.
 
 
-Drawing Backend API
+General Backend API
 ~~~~~~~~~~~~~~~~~~~
 
-The drawing backend API consist of structure with callbacks. Every backend
-initialization yields pointer to this structure. Although is possible to call
-these pointers directly it's not recommended and everybody should rather use
-backend inline functions instead.
-
-The backend API consist GP_Backend structure and of several functions:
+The backend API consist of a structure with callbacks. Every backend
+initialization yields this structure. Although is possible to call these
+pointers directly it's not recommended and everybody should rather use backend
+inline functions instead as they provide more convenient API and do additional
+sanity checks on parameters.
 
 [source,c]
 -------------------------------------------------------------------------------
@@ -195,7 +207,7 @@ typdef struct GP_Backend {
         const char *name;
 
         /* 
-         * Pointer to context app should draw to.
+         * Pointer to context APP should draw to.
          */
         GP_Context *context;
 
@@ -208,8 +220,12 @@ typdef struct GP_Backend {
 };
 -------------------------------------------------------------------------------
 
-The file descriptor 'fd' is either set to -1 (in case of SDL that shadows it)
-or to a backend connection file descriptor usable for 'select()' or 'poll()'.
+The file descriptor 'fd' is either set to -1 (in case of SDL that does not
+export it) or to a backend connection file descriptor usable for 'select()' or
+'poll()'.
+
+GP_BackendExit
+^^^^^^^^^^^^^^
 
 [source,c]
 -------------------------------------------------------------------------------
@@ -220,15 +236,20 @@ or to a backend connection file descriptor usable for 'select()' or 'poll()'.
 void GP_BackendExit(GP_Backend *backend);
 -------------------------------------------------------------------------------
 
-Calls an backend exit callback. Resets the display, keyboard, etc. state back.
+Calls an backend exit callback. Restores the display, keyboard, etc. state
+back.
 
-WARNING: It's very important to call this functions on application exit. If you
+WARNING: It's important to call this functions on application exit. If you
          doesn't do so, the state of the display, resolution etc. may not be
-         reset back to its original state. This includes program crashes and
-         iterruptions. Also this function may not be signal-async-safe, it's
-         better to set signal hanlers that calls it on SEGFAULT and SIGBUS
+         restored back to its original state. This includes program crashes and
+         interruptions. Also this function may not be signal-async-safe, it's
+         better to set signal handlers that calls it on SEGFAULT and SIGBUS
 	 as this usually works and not doing so may leave non-working system
 	 with black display or non-responding keyboard.
+
+
+GP_BackendFlip
+^^^^^^^^^^^^^^
 
 [source,c]
 -------------------------------------------------------------------------------
@@ -239,7 +260,12 @@ WARNING: It's very important to call this functions on application exit. If you
 GP_BackendFlip(GP_Backend *backend);
 -------------------------------------------------------------------------------
 
-Flips a screen. Updates rectangle for a buffered backends.
+Flips a screen. Blits backend buffer to the screen or window if the backend is
+buffered.
+
+
+GP_BackendUpdateRect
+^^^^^^^^^^^^^^^^^^^^
 
 [source,c]
 -------------------------------------------------------------------------------
@@ -252,7 +278,11 @@ void GP_BackendUpdateRect(GP_Backend *backend,
                           GP_Coord x1, GP_Coord y1);
 -------------------------------------------------------------------------------
 
-Updates particular rectangle for a buffered backends.
+Updates particular rectangle in case backend is buffered.
+
+
+GP_BackendPoll
+^^^^^^^^^^^^^^
 
 [source,c]
 -------------------------------------------------------------------------------
@@ -263,11 +293,25 @@ Updates particular rectangle for a buffered backends.
 void GP_BackendPoll(GP_Backend *backend);
 -------------------------------------------------------------------------------
 
-Polls for backend events. For backends that do not expose file descriptor
-(namely SDL) this should be called repeatedly. For other backend it may be
-called either repeatedly or when data are ready on file-descriptor.
+Polls for backend events. 
 
-This call returns immediately after queued backend events were processed.
+The poll only reads events from event source (i.e. X11 socket, Linux evdev
+file descriptor), process them and may place new event into the backend event
+queue.
+
+This call returns immediately after queued events (from X11 socket, etc.) were
+processed.
+
+For backends that do not expose file descriptor (namely SDL) this should be
+called repeatedly. For other backends it may be called either repeatedly or
+when data are ready on file-descriptor.
+
+If the backend is the only source of events in your application, you should
+consider using the 'GP_BackendWait()' or 'GP_BackendEventWait()' described
+bellow.
+
+GP_BackendPollEvent
+^^^^^^^^^^^^^^^^^^^
 
 [source,c]
 -------------------------------------------------------------------------------
@@ -275,21 +319,65 @@ This call returns immediately after queued backend events were processed.
 /* or */
 #include <GP.h>
 
-void GP_BackendWait(GP_Backend *backend);
+int GP_BackendPollEvent(GP_Backend *self, GP_Event *ev);
+-------------------------------------------------------------------------------
+
+Combines the 'GP_BackendPoll()' with 'GP_BackendGetEvent()'.
+
+If there are any events in the backend event queue, the top event is removed
+from the queue and copied into the memory pointed by 'ev' and the call returns
+immediately.
+
+If backend event queue is empty 'GP_BackendPoll()' is called. Then again the
+backend event queue is checked and if an event is found it's removed from the
+queue and copied into the 'ev'.
+
+Returns non-zero if event was copied into the memory pointed by 'ev', zero
+otherwise.
+
+.Example 'GP_BackendPollEvent()' usage.
+[source,c]
+-------------------------------------------------------------------------------
+        /* Called either repeatedly or when data are ready on backend fd */
+
+	GP_Event ev;
+
+	while (GP_BackendPollEvent(backend, &ev) {
+
+		/* process events */
+	
+	}
+-------------------------------------------------------------------------------
+
+
+GP_BackendWait
+^^^^^^^^^^^^^^
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <backends/GP_Backend.h>
+/* or */
+#include <GP.h>
+
+void GP_BackendWait(GP_Backend *self);
 -------------------------------------------------------------------------------
 
 Blocks until backend event arrives.
 
 [NOTE]
-Events recieved by backend are not necessarily translated into the input
+Events received by backend are not necessarily translated into the input
 events.
 
 [WARNING]
-Using GP_BackendWait() in multithreaded program will most likely cause
+Using GP_BackendWait() in multi-threaded program will most likely cause
 deadlocks. As the backend data structures and connection is guarded by a lock
 any other backend function (called from different thread while
 GP_BackendWait() is blocking) will lock until GP_BackendWait() returns (i.e.
-event was recieved).
+event was received).
+
+
+GP_BackendWaitEvent
+^^^^^^^^^^^^^^^^^^^
 
 [source,c]
 -------------------------------------------------------------------------------
@@ -297,43 +385,36 @@ event was recieved).
 /* or */
 #include <GP.h>
 
-int GP_BackendSetCaption(GP_Backend *backend, const char *caption)
+void GP_BackendWaitEvent(GP_Backend *self, GP_Event *ev);
 -------------------------------------------------------------------------------
 
-Sets backend caption. On success zero is returned. On failure (backend doesn't
-support caption, operation failed) non zero is returned.
+Combines the 'GP_BackendWait()' with 'GP_BackendGetEvent()'.
 
+If there are any events in the backend event queue, the top event is removed
+from the queue and copied into the memory pointed by 'ev' and the call returns
+immediately.
+
+If backend event queue is empty 'GP_BackendWait()' is called until there are
+any events in the backend event queue. Then the top event is removed from the
+queue and the call returns.
+
+.Example 'GP_BackendWaitEvent()' usage.
 [source,c]
 -------------------------------------------------------------------------------
-#include <backends/GP_Backend.h>
-/* or */
-#include <GP.h>
+	/* This is the main program loop */
+	GP_Event ev;
 
-int GP_BackendResize(GP_Backend *backend, uint32_t w, uint32_t h);
+	for (;;) {
+		GP_BackendWaitEvent(backend, &ev);
+
+		/* process events */
+
+	}
 -------------------------------------------------------------------------------
 
-Resize backend, if supported. On success zero is returned and backend is
-resized, otherwise (if resize failed, or is not supported) non-zero is
-returned. If backend size already matches w and h, nothing is done.
 
-Note that backend->context pointer may change upon calling this function and
-at least backend->context->pixels pointer will change.
-
-[source,c]
--------------------------------------------------------------------------------
-#include <backends/GP_Backend.h>
-/* or */
-#include <GP.h>
-
-int GP_BackendResizeAck(GP_Backend *self);
--------------------------------------------------------------------------------
-
-If backend is resizeable by user interaction (for example X Window) you will
-get resize event for each change of window size, however the backend context
-will not be resized untill you call this function. This is usefull in
-multithreaded application where one threads waits for events and others draws
-into the buffer so you can stop the drawing threads before the backend context
-size change.
+GP_BackendEventsQueued
+^^^^^^^^^^^^^^^^^^^^^^
 
 [source,c]
 -------------------------------------------------------------------------------
@@ -345,6 +426,11 @@ unsigned int GP_BackendEventsQueued(GP_Backend *self);
 -------------------------------------------------------------------------------
 
 Returns number of events queued in the backend event queue.
+
+
+
+GP_BackendGetEvent
+^^^^^^^^^^^^^^^^^^
 
 [source,c]
 -------------------------------------------------------------------------------
@@ -362,4 +448,65 @@ returned.
 If there are no events queued the call returns immediately with zero return
 value.
 
-TIP: For more information see link:input.html[input events] documentation.
+TIP: For more information on events see link:input.html[input events]
+     documentation.
+
+
+GP_BackendSetCaption
+^^^^^^^^^^^^^^^^^^^^
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <backends/GP_Backend.h>
+/* or */
+#include <GP.h>
+
+int GP_BackendSetCaption(GP_Backend *backend, const char *caption)
+-------------------------------------------------------------------------------
+
+Sets backend caption. On success zero is returned. On failure (backend doesn't
+support caption, operation failed) non zero is returned.
+
+
+
+GP_BackendResize
+^^^^^^^^^^^^^^^^
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <backends/GP_Backend.h>
+/* or */
+#include <GP.h>
+
+int GP_BackendResize(GP_Backend *backend, uint32_t w, uint32_t h);
+-------------------------------------------------------------------------------
+
+Requests backend resize. If backend resize is supported and the resize request
+was successful (i.e. X server allowed us to resize the window) the resize
+event will be send and should be handled in your event loop. You must respond
+to it by the 'GP_BackendResizeAck()' described bellow.
+
+NOTE: The backend->context pointer may change upon calling this function and
+      at least backend->context->pixels pointer will change.
+
+
+GP_BackendResizeAck
+^^^^^^^^^^^^^^^^^^^
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <backends/GP_Backend.h>
+/* or */
+#include <GP.h>
+
+int GP_BackendResizeAck(GP_Backend *self);
+-------------------------------------------------------------------------------
+
+If backend is resizable by user interaction (for example X Window) you will
+get resize event for each change of window size, however the backend context
+will not be resized until you call this function. This is useful in
+multi-threaded application where one threads waits for events and others draws
+into the buffer so you can stop the drawing threads before the backend context
+size change.
+
+
