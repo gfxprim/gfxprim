@@ -45,7 +45,11 @@ static GP_Context context;
 
 static uint32_t sdl_flags = SDL_SWSURFACE;
 
+/* To hold size from resize event */
+static unsigned int new_w, new_h;
+
 /* Backend API funcitons */
+static struct GP_Backend backend;
 
 static void sdl_flip(struct GP_Backend *self __attribute__((unused)))
 {
@@ -73,15 +77,25 @@ static void sdl_update_rect(struct GP_Backend *self __attribute__((unused)),
 	SDL_mutexV(mutex);
 }
 
+static void sdl_put_event(SDL_Event *ev)
+{
+	if (ev->type == SDL_VIDEORESIZE) {
+		new_w = ev->resize.w;
+		new_h = ev->resize.h;
+	}
+
+	GP_InputDriverSDLEventPut(&backend.event_queue, ev);
+}
+
 static void sdl_poll(struct GP_Backend *self __attribute__((unused)))
 {
 	SDL_Event ev;
 
 	SDL_mutexP(mutex);
-	
+
 	while (SDL_PollEvent(&ev))
-		GP_InputDriverSDLEventPut(&self->event_queue, &ev);
-	
+		sdl_put_event(&ev);
+
 	SDL_mutexV(mutex);
 }
 
@@ -92,10 +106,10 @@ static void sdl_wait(struct GP_Backend *self __attribute__((unused)))
 	SDL_mutexP(mutex);
 
 	SDL_WaitEvent(&ev);
-	GP_InputDriverSDLEventPut(&self->event_queue, &ev);
+	sdl_put_event(&ev);
 
 	while (SDL_PollEvent(&ev))
-		GP_InputDriverSDLEventPut(&self->event_queue, &ev);
+		sdl_put_event(&ev);
 
 	SDL_mutexV(mutex);
 }
@@ -147,24 +161,29 @@ static int sdl_set_attributes(struct GP_Backend *self,
 	if (caption != NULL)		
 		SDL_WM_SetCaption(caption, caption);
 
-	if (w != 0 && h != 0) {
-		sdl_surface = SDL_SetVideoMode(w, h, 0, sdl_flags);
-		context_from_surface(&context, sdl_surface);
-		
-		/* Send event that resize was finished */
+	/* Send only resize event, the actual resize is done in resize_ack */
+	if (w != 0 && h != 0)
 		GP_EventQueuePushResize(&self->event_queue, w, h, NULL);
-	}
 
 	SDL_mutexV(mutex);
 
 	return 0;
 }
 
-static int sdl_resize_ack(struct GP_Backend *self)
+static int sdl_resize_ack(struct GP_Backend *self __attribute__((unused)))
 {
-	GP_EventQueueSetScreenSize(&self->event_queue,
-	                           self->context->w, self->context->h);
+	GP_DEBUG(2, "Resizing the buffer to %ux%u", new_w, new_h);
+		
+	SDL_mutexP(mutex);
 
+	sdl_surface = SDL_SetVideoMode(new_w, new_h, 0, sdl_flags);
+	context_from_surface(backend.context, sdl_surface);
+
+	GP_EventQueueSetScreenSize(&backend.event_queue,
+	                           backend.context->w, backend.context->h);
+
+	SDL_mutexV(mutex);
+		
 	return 0;
 }
 
