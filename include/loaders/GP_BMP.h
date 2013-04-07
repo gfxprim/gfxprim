@@ -16,7 +16,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2013 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
@@ -61,6 +61,13 @@ GP_Context *GP_ReadBMP(FILE *f, GP_ProgressCallback *callback);
  * Does both GP_OpenBMP and GP_ReadBMP.
  */
 GP_Context *GP_LoadBMP(const char *src_path, GP_ProgressCallback *callback);
+
+/*
+ * Saves BMP to a file. Zero is returned on succes. Upon failure non-zero is
+ * returned and errno is filled accordingly.
+ */
+int GP_SaveBMP(const GP_Context *src, const char *dst_path,
+               GP_ProgressCallback *callback);
 
 /*
  * Match BMP signature.

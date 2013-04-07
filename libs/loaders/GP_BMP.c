@@ -16,7 +16,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2013 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
@@ -39,7 +39,9 @@
 #include "core/GP_Debug.h"
 #include "core/GP_Pixel.h"
 #include "core/GP_GetPutPixel.h"
-#include "GP_BMP.h"
+
+#include "loaders/GP_ByteUtils.h"
+#include "loaders/GP_BMP.h"
 
 #define BMP_HEADER_OFFSET  0x0a       /* info header offset - 4 bytes */
 
@@ -619,21 +621,144 @@ GP_Context *GP_LoadBMP(const char *src_path, GP_ProgressCallback *callback)
 	return GP_ReadBMP(f, callback);
 }
 
-
-
-int GP_SaveBMP(const GP_Context *src, const char *dst_path, GP_ProgressCallback *callback)
+/*
+ * Rows in bmp are four byte aligned.
+ */
+static uint32_t bmp_align_row_size(uint32_t width_bits)
 {
-	FILE *f;
+	uint32_t bytes = (width_bits/8) + !!(width_bits%8);
 
+	if (bytes%4)
+		bytes += 4 - bytes%4;
+
+	return bytes;
+}
+
+/*
+ * For uncompressd images
+ */
+static uint32_t bmp_count_bitmap_size(struct bitmap_info_header *header)
+{
+	return header->h * bmp_align_row_size(header->bpp * header->w);
+}
+
+static int bmp_write_header(struct bitmap_info_header *header, FILE *f)
+{
+	uint32_t bitmap_size = bmp_count_bitmap_size(header);
+	uint32_t file_size = bitmap_size + header->header_size + 14;
+
+	/* Bitmap Header */
+	if (GP_FWrite(f, "%a2%l4%x00%x00%x00%x00%l4", "BM",
+	              file_size, header->pixel_offset) != 7)
+		return EIO;
+	
+	/* Bitmap Info Header */
+	if (GP_FWrite(f, "%l4%l4%l4%l2%l2%l4%l4%l4%l4%l4%l4",
+	              header->header_size, header->w, header->h, 1,
+		      header->bpp, header->compress_type, bitmap_size, 0, 0,
+		      header->palette_colors, 0) != 11)
+		return EIO;
+
+	return 0;
+}
+
+static int bmp_fill_header(const GP_Context *src, struct bitmap_info_header *header)
+{
 	switch (src->pixel_type) {
 	case GP_PIXEL_RGB888:
-
+		header->bpp = 24;
 	break;
 	default:
-		errno = ENOSYS;
-		return 1;
+		GP_DEBUG(1, "Unsupported pixel type (%s)",
+		         GP_PixelTypeName(src->pixel_type));
+		return ENOSYS;
 	}
 
-	GP_DEBUG(1, "Saving PNG Image '%s'", dst_path);
+	header->w = src->w;
+	header->h = src->h;
 
+	/* Most common 40 bytes Info Header */
+	header->header_size = BITMAPINFOHEADER;
+
+	/* No compression or palette */
+	header->palette_colors = 0;
+	header->compress_type = COMPRESS_RGB;
+
+	/* image data follows the header */
+	header->pixel_offset = header->header_size + 14;
+
+	return 0;
+}
+
+static int bmp_write_data(FILE *f, const GP_Context *src, GP_ProgressCallback *callback)
+{
+	int y;
+	uint32_t padd_len = 0;
+	char padd[3] = {0};
+
+	if (src->bytes_per_row%4)
+		padd_len = 4 - src->bytes_per_row%4;
+
+	for (y = src->h - 1; y >= 0; y--) {
+		void *row = GP_PIXEL_ADDR(src, 0, y);
+
+		if (fwrite(row, src->bytes_per_row, 1, f) != 1)
+			return EIO;
+
+		/* write padding */
+		if (padd_len)
+			if (fwrite(padd, padd_len, 1, f) != 1)
+				return EIO;
+
+		if (GP_ProgressCallbackReport(callback, y, src->h, src->w)) {
+			GP_DEBUG(1, "Operation aborted");
+			return ECANCELED;
+		}
+	}
+
+	return 0;
+}
+
+int GP_SaveBMP(const GP_Context *src, const char *dst_path,
+               GP_ProgressCallback *callback)
+{
+	struct bitmap_info_header header;
+	FILE *f;
+	int err;
+
+	GP_DEBUG(1, "Saving BMP Image '%s'", dst_path);
+
+	if ((err = bmp_fill_header(src, &header)))
+		goto err0;
+
+	f = fopen(dst_path, "wb");
+
+	if (f == NULL) {
+		err = errno;
+		GP_DEBUG(1, "Failed to open '%s' for writing: %s",
+		         dst_path, strerror(errno));
+		goto err0;
+	}
+
+	if ((err = bmp_write_header(&header, f)))
+		goto err1;
+
+	if ((err = bmp_write_data(f, src, callback)))
+		goto err1;
+
+	if (fclose(f)) {
+		err = errno;
+		GP_DEBUG(1, "Failed to close file '%s': %s",
+		         dst_path, strerror(errno));
+		goto err1;
+	}
+
+	GP_ProgressCallbackDone(callback);
+
+	return 0;
+err1:
+	fclose(f);
+err0:
+	errno = err;
+	return 1;
 }

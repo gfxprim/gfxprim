@@ -77,7 +77,7 @@ static GP_Loader ppm_loader = {
 
 static GP_Loader bmp_loader = {
 	.Load = GP_LoadBMP,
-	.Save = NULL,
+	.Save = GP_SaveBMP,
 	.Match = GP_MatchBMP,
 	.fmt_name = "BMP",
 	.next = &ppm_loader,
