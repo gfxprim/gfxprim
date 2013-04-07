@@ -277,15 +277,15 @@ GP_Context *GP_LoadImage(const char *src_path, GP_ProgressCallback *callback)
 			return img;
 	}
 
+	sig_load = loader_by_signature(src_path);
+
 	/* 
-	 * Avoid further work if signature was correct but the loader issued
-	 * ENOSYS or ECANCELED.
+	 * Avoid further work if extension matches the signature but image
+	 * couldn't be loaded. Probably unimplemented format or damaged file.
 	 */
-	if (ext_load != NULL && (errno == ENOSYS || errno == ECANCELED))
+	if (ext_load == sig_load)
 		return NULL;
 
-	sig_load = loader_by_signature(src_path);
-	
 	if (ext_load && sig_load) {
 		GP_WARN("File '%s': Extension says %s but signature %s",
 			src_path, ext_load->fmt_name, sig_load->fmt_name);
