@@ -1,3 +1,6 @@
+GP_FWrite
+GP_FRead
+
 GP_MatchJPG
 GP_OpenJPG
 GP_ReadJPG
@@ -18,6 +21,7 @@ GP_MatchBMP
 GP_OpenBMP
 GP_LoadBMP
 GP_ReadBMP
+GP_SaveBMP
 
 GP_MatchPSP
 GP_OpenPSP
