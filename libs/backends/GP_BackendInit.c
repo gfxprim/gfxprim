@@ -64,6 +64,7 @@ static int sdl_params_to_flags(const char *param, GP_Size *w, GP_Size *h,
 	}
 
 	backend_sdl_help(help, "SDL: Invalid parameters");
+	errno = EINVAL;
 	return 1;
 }
 
@@ -181,6 +182,7 @@ static int x11_params_to_flags(const char *param, GP_Size *w, GP_Size *h,
 	}
 
 	backend_x11_help(help, "X11: Invalid parameters");
+	errno = EINVAL;
 	return 1;
 }
 
@@ -283,9 +285,6 @@ static GP_Backend *init_backend(const char *name, char *params,
 	}
 
 	ret = backend_inits[i](params, caption, help);
-
-	if (ret == NULL)
-		errno = EINVAL;
 
 	return ret;
 }
