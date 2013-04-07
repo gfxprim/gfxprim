@@ -504,7 +504,8 @@ int GP_SavePNG(const GP_Context *src, const char *dst_path,
 	if (prepare_png_header(src, NULL, NULL, NULL)) {
 		GP_DEBUG(1, "Can't save png with %s pixel type",
 		         GP_PixelTypeName(src->pixel_type));
-		return ENOSYS;
+		err = ENOSYS;
+		goto err0;
 	}
 
 	f = fopen(dst_path, "wb");

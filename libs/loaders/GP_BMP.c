@@ -618,3 +618,22 @@ GP_Context *GP_LoadBMP(const char *src_path, GP_ProgressCallback *callback)
 
 	return GP_ReadBMP(f, callback);
 }
+
+
+
+int GP_SaveBMP(const GP_Context *src, const char *dst_path, GP_ProgressCallback *callback)
+{
+	FILE *f;
+
+	switch (src->pixel_type) {
+	case GP_PIXEL_RGB888:
+
+	break;
+	default:
+		errno = ENOSYS;
+		return 1;
+	}
+
+	GP_DEBUG(1, "Saving PNG Image '%s'", dst_path);
+
+}
