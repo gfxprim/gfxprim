@@ -89,6 +89,12 @@ images into various standard formats (PNG, JPEG, GIF, BMP, PNM, etc...).
 | BMP | |
   [green]*Yes* |
   [green]#RLE and RGB Bitfields not implemented# |
+  [green]#RGB888 only#
+
+| TIFF |
+  Tagged Image File Format |
+  [green]*Yes* |
+  [gray]#Not finished# |
   [black]*No*
 
 | PSP |
