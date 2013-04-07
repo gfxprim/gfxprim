@@ -33,6 +33,8 @@ static int test_load_PNG(const char *path)
 {
 	GP_Context *img;
 
+	errno = 0;
+
 	img = GP_LoadPNG(path, NULL);
 
 	if (img == NULL) {
@@ -55,46 +57,114 @@ static int test_load_PNG(const char *path)
 	return TST_SUCCESS;
 }
 
+static int test_save_PNG(GP_PixelType pixel_type)
+{
+	GP_Context *ctx;
+	int ret;
+
+	ctx = GP_ContextAlloc(100, 100, pixel_type);
+
+	if (ctx == NULL) {
+		tst_msg("Failed to allocate context");
+		return TST_UNTESTED;
+	}
+	
+	errno = 0;
+
+	ret = GP_SavePNG(ctx, "/dev/null", NULL);
+
+	if (ret == 0) {
+		tst_msg("Saved successfully");
+		GP_ContextFree(ctx);
+		return TST_SUCCESS;
+	}
+
+	switch (errno) {
+	case ENOSYS:
+		tst_msg("Not Implemented");
+		GP_ContextFree(ctx);
+		return TST_SUCCESS;
+	default:
+		tst_msg("Failed and errno is not ENOSYS (%i)", errno);
+		GP_ContextFree(ctx);
+		return TST_FAILED;
+	}
+}
+
 const struct tst_suite tst_suite = {
 	.suite_name = "PNG",
 	.tests = {
 		/* PNG loader tests */
-		{.name = "PNG 100x100 RGB",
+		{.name = "PNG Load 100x100 RGB",
 		 .tst_fn = test_load_PNG,
 		 .res_path = "data/png/valid/100x100-red.png",
 		 .data = "100x100-red.png",
 		 .flags = TST_TMPDIR | TST_CHECK_MALLOC},
 		
-		{.name = "PNG 100x100 RGB 50\% alpha",
+		{.name = "PNG Load 100x100 RGB 50\% alpha",
 		 .tst_fn = test_load_PNG,
 		 .res_path = "data/png/valid/100x100-red-alpha.png",
 		 .data = "100x100-red-alpha.png",
 		 .flags = TST_TMPDIR | TST_CHECK_MALLOC},
 		
-		{.name = "PNG 100x100 8 bit Grayscale",
+		{.name = "PNG Load 100x100 8 bit Grayscale",
 		 .tst_fn = test_load_PNG,
 		 .res_path = "data/png/valid/100x100-black-grayscale.png",
 		 .data = "100x100-black-grayscale.png",
 		 .flags = TST_TMPDIR | TST_CHECK_MALLOC},
 		
-		{.name = "PNG 100x100 8 bit Grayscale + alpha",
+		{.name = "PNG Load 100x100 8 bit Grayscale + alpha",
 		 .tst_fn = test_load_PNG,
 		 .res_path = "data/png/valid/100x100-black-grayscale-alpha.png",
 		 .data = "100x100-black-grayscale-alpha.png",
 		 .flags = TST_TMPDIR | TST_CHECK_MALLOC},
 		
-		{.name = "PNG 100x100 Palette + alpha",
+		{.name = "PNG Load 100x100 Palette + alpha",
 		 .tst_fn = test_load_PNG,
 		 .res_path = "data/png/valid/100x100-palette-alpha.png",
 		 .data = "100x100-palette-alpha.png",
 		 .flags = TST_TMPDIR | TST_CHECK_MALLOC},
 		
-		{.name = "PNG 100x100 Palette",
+		{.name = "PNG Load 100x100 Palette",
 		 .tst_fn = test_load_PNG,
 		 .res_path = "data/png/valid/100x100-red-palette.png",
 		 .data = "100x100-red-palette.png",
 		 .flags = TST_TMPDIR | TST_CHECK_MALLOC},
+		
+		{.name = "PNG Save 100x100 G1",
+		 .tst_fn = test_save_PNG,
+		 .data = (void*)GP_PIXEL_G1,
+		 .flags = TST_CHECK_MALLOC},
+		
+		{.name = "PNG Save 100x100 G2",
+		 .tst_fn = test_save_PNG,
+		 .data = (void*)GP_PIXEL_G2,
+		 .flags = TST_CHECK_MALLOC},
+		
+		{.name = "PNG Save 100x100 G4",
+		 .tst_fn = test_save_PNG,
+		 .data = (void*)GP_PIXEL_G4,
+		 .flags = TST_CHECK_MALLOC},
 
+		{.name = "PNG Save 100x100 G8",
+		 .tst_fn = test_save_PNG,
+		 .data = (void*)GP_PIXEL_G8,
+		 .flags = TST_CHECK_MALLOC},
+		
+		{.name = "PNG Save 100x100 RGB888",
+		 .tst_fn = test_save_PNG,
+		 .data = (void*)GP_PIXEL_RGB888,
+		 .flags = TST_CHECK_MALLOC},
+		
+		{.name = "PNG Save 100x100 BGR888",
+		 .tst_fn = test_save_PNG,
+		 .data = (void*)GP_PIXEL_BGR888,
+		 .flags = TST_CHECK_MALLOC},
+
+		{.name = "PNG Save 100x100 G16",
+		 .tst_fn = test_save_PNG,
+		 .data = (void*)GP_PIXEL_G16,
+		 .flags = TST_CHECK_MALLOC},
 		{.name = NULL},
 	}
 };
