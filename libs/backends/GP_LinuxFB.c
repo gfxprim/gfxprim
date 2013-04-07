@@ -92,7 +92,6 @@ static int allocate_console(struct fb_priv *fb, int flag)
 	if (fd < 0) {
 		GP_DEBUG(1, "Opening console %s failed: %s",
 		            buf, strerror(errno));
-		close(fd);
 		return -1;
 	}
 	
