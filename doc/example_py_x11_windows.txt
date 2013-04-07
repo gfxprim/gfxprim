@@ -1,0 +1,8 @@
+X11 Windows
+-----------
+.A simple program to demonstrate multiple windows with X11
+
+[source,python]
+------------------------------------------------------------------
+include::../demos/py_simple/x11_windows.py[]
+------------------------------------------------------------------

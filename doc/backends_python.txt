@@ -13,6 +13,10 @@ structure provides unified API for controlling the drawing.
 There is however generic backend initialization function that takes a string
 as a parameter that may contain backend-specific settings.
 
+
+BackendX11Init
+^^^^^^^^^^^^^^
+
 [source,python]
 -------------------------------------------------------------------------------
 import gfxprim.backends as backends
@@ -33,6 +37,16 @@ The 'x', 'y', 'w' and 'h' parameters describe the window geometry. The 'x' and
 
 The last parameter are bitflags. TODO: Export bitflags and add a list here.
 
+This backends supports multiple windows. Each time you call the initialization
+routine new backend structure is returned. All backend instances share the Xlib
+connection so you need to wait or poll only on one of them. Each backend, on
+the other hand, has its own input queue.
+
+TIP: See multiple windows link:example_py_x11_windows.html[example].
+
+
+BackendInit
+^^^^^^^^^^^
 
 [source,python]
 -------------------------------------------------------------------------------
@@ -53,3 +67,65 @@ import gfxprim.backends as backends
 Initialize the backend params by the 'backend_string'. The last parameter is a
 file to print help or errors to.
 
+TIP: See backend init link:example_py_backends.html[example].
+
+Backend
+^^^^^^^
+
+Initialized backend has several members that allows you to draw on the screen
+and control the backend behavior.
+
+[source,python]
+-------------------------------------------------------------------------------
+import gfxprim.core as core
+import gfxprim.gfx as gfx
+import gfxprim.backends as backends
+
+    # Initialize backend
+    bk = backends.BackendInit("X11:100x100", "Window title", stderr)
+    
+    # Assert that inicialization was successful
+    assert(bk)
+
+    # Now you can draw into the backend via bk.context
+    bk.context.gfx.Fill(bk.context.RGBToPixel(0, 0, 0));
+
+    # If backend is buffered, changes are not propagated unless the screen is
+    # updated via Flip() or UpdateRect()
+    bk.Flip()
+
+-------------------------------------------------------------------------------
+
+There are several functions to get input events such as keystrokes or pointer
+movements.
+
+[source,python]
+-------------------------------------------------------------------------------
+import gfxprim.core as core
+import gfxprim.input as input
+import gfxprim.backends as backends
+    
+    
+    # Initialize backend
+    bk = backends.BackendInit("X11:100x100", "Window title", stderr)
+    
+    # Assert that inicialization was successful
+    assert(bk)
+
+    # Now we can either poll for events via PollEvent() or wait via WaitEvent()
+    while True:
+        ev = WaitEvent();
+
+        if (ev.type == input.EV_KEY and ev.val.val == input.KEY_ESC):
+           sys.exit(0)
+        elif (ev.type == input.EV_SYS):
+           if (ev.code == input.EV_SYS_QUIT):
+               sys.exit(0)
+           if (ev.code == input.EV_SYS_RESIZE):
+               bk.ResizeAck()
+               redraw(bk)
+
+-------------------------------------------------------------------------------
+
+
+TIP: See the complete link:example_py_backends.html[example].

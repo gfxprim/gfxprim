@@ -1,0 +1,8 @@
+Backend Init
+------------
+.A simple program to demonstrate backend init function.
+
+[source,python]
+------------------------------------------------------------------
+include::../demos/py_simple/backends.py[]
+------------------------------------------------------------------
