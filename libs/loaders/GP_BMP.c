@@ -575,6 +575,12 @@ GP_Context *GP_ReadBMP(FILE *f, GP_ProgressCallback *callback)
 	if ((err = read_bitmap_header(f, &header)))
 		goto err1;
 
+	if (header.w <= 0 || header.h == 0) {
+		GP_WARN("Width and/or Height is not > 0");
+		err = EIO;
+		goto err1;
+	}
+	
 	if (header.compress_type != COMPRESS_RGB) {
 		GP_DEBUG(2, "Unknown compression type");
 		err = ENOSYS;
