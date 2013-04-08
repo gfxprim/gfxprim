@@ -50,7 +50,7 @@ static void write_file(void)
 	uint8_t bpp = 4;
 	char *sig = "MG";
 
-	ret = GP_FWrite(f, "%a2%x00%x00%b2%b2%b1", sig, w, h, bpp);
+	ret = GP_FWrite(f, "A2 0x00 0x00 B2 B2 B1", sig, w, h, bpp);
 
 	if (ret != 6)
 		printf("Failed to write header, ret = %i\n", ret);
@@ -75,9 +75,9 @@ static void read_file(void)
 	uint8_t bpp;
 	char sig[3] = {0};
 
-	ret = GP_FRead(f, "%a2%x00%x00%b2%b2%b1", sig, &w, &h, &bpp);
+	ret = GP_FRead(f, "A2 I2 B2 B2 B1", sig, &w, &h, &bpp);
 
-	if (ret != 6)
+	if (ret != 5)
 		printf("Failed to read header, ret = %i\n", ret);
 
 	printf("SIG=%s, w=%u, h=%u, bpp=%u\n", sig, w, h, bpp);

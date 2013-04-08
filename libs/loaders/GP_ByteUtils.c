@@ -45,7 +45,7 @@ static int ctoi(char c, int *i)
 {
 	switch (c) {
 	case '0' ... '9':
-		*i += c - '0';
+		*i = c - '0';
 	break;
 	default:
 		return 1;
@@ -83,31 +83,37 @@ static const char *get_hex(const char *fmt, int *type, int *val)
 
 	*val = 0;
 
-	if (ctoh(fmt[0], val))
+	if (fmt[0] != 'x') {
+		GP_BUG("Expected x after 0 in hex constant");
 		return NULL;
-
-	(*val)<<=4;
+	}
 
 	if (ctoh(fmt[1], val))
 		return NULL;
 
-	return fmt + 2;
+	(*val)<<=4;
+
+	if (ctoh(fmt[2], val))
+		return NULL;
+
+	return fmt + 3;
 }
 
 static const char *get_int(const char *fmt, int *val)
 {
-	int i = 0;
+	int i = 0, add = 0;
 
 	*val = 0;
 
 	if (ctoi(fmt[i++], val))
 		return fmt;
-	
-	while (!ctoi(fmt[i], val)) {
+
+	while (!ctoi(fmt[i], &add)) {
 		*val *= 10;
+		*val += add;
 		i++;
 	} 
-
+	
 	return fmt + i;
 }
 
@@ -126,10 +132,8 @@ static const char *get_array(const char *fmt, int *type, int *val)
 
 static const char *get_lb_size(const char *fmt, int *val)
 {
-	*val = 0;
-
 	if (ctoi(fmt[0], val)) {
-		GP_WARN("Expected number after %%l or %%b, got '%c'", fmt[0]);
+		GP_WARN("Expected number got '%c'", fmt[0]);
 		return NULL;
 	}
 
@@ -146,38 +150,33 @@ static const char *get_lb_size(const char *fmt, int *val)
 
 static const char *get_next(const char *fmt, int *type, int *val)
 {
-	if (fmt[0] == '\0')
-		return NULL;
+	/* Eat spaces */
+	while (fmt[0] == ' ')
+		fmt++;
 
-	if (fmt[0] != '%') {
-		GP_BUG("Unexpected character in format string '%c'", fmt[0]);
-		return NULL;
-	}
-
-	switch (fmt[1]) {
-	/* byte array */
-	case 'a':
-		return get_array(fmt + 2, type, val);
+	switch (fmt[0]) {
+	/* Byte array */
+	case 'A':
+		return get_array(fmt + 1, type, val);
 	break;
-	/* hexadecimal constant */
-	case 'x':
-		return get_hex(fmt + 2, type, val);
+	/* Hexadecimal constant */
+	case '0':
+		return get_hex(fmt + 1, type, val);
 	break;
 	/* 1, 2, 4 bytes long variable in defined endianity */
-	case 'l':
+	case 'L':
 		*type = LITTLE_ENDIAN_VAR;
-		return get_lb_size(fmt + 2, val);
+		return get_lb_size(fmt + 1, val);
 	break;
-	case 'b':
+	case 'B':
 		*type = BIG_ENDIAN_VAR;
-		return get_lb_size(fmt + 2, val);
+		return get_lb_size(fmt + 1, val);
 	break;
-	case 'i':
+	case 'I':
 		*type = IGNORE;
-		return get_int(fmt + 2, val);
+		return get_int(fmt + 1, val);
 	break;
 	case '\0':
-		GP_BUG("Unexpecned end of format string");
 		return NULL;
 	break;
 	}

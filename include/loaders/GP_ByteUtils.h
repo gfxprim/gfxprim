@@ -34,10 +34,14 @@
 /*
  * The format string examples:
  *
- * %l1 or %b1 assigns one byte
- * %l2 assign two bytes in little endian
- * %b4 assign four bytes in big endian
- * %a6 read six bytes into array
+ * Type Modifiers:
+ * 
+ * L - little endian (passed as value to write, passed as pointer to read)
+ * B - big endian
+ * A - byte array (passed as bointer for both read and write)
+ * I - ignore xxx bytes, GP_Fread() only
+ *
+ * Size Modifiers are just numbers.
  *
  * To read and write header with two byte signature, two reserved zero bytes
  * and size in 16 bit unsigned little endian variables.
@@ -46,10 +50,10 @@
  * uint16_t h;
  * char sig[2];
  *
- * if (GP_FWrite(f, "%a2%x00%x00%l2%l2", "SG", w, h) != 5)
+ * if (GP_FWrite(f, "A2 0x00 0x00 L2 L2", "SG", w, h) != 5)
  * 	//ERROR
  *
- * if (GP_FRead(f, "%a2%x00%x00%l2%l2", sig, &w, &h) != 5)
+ * if (GP_FRead(f, "A2 I2 L2 L2", sig, &w, &h) != 4)
  * 	//ERROR
  */
 
