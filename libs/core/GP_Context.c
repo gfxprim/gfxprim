@@ -50,6 +50,12 @@ GP_Context *GP_ContextAlloc(GP_Size w, GP_Size h, GP_PixelType type)
 	GP_DEBUG(1, "Allocating context %u x %u - %s",
 	         w, h, GP_PixelTypeName(type));
 
+	if (w <= 0 || h <= 0) {
+		GP_WARN("Trying to allocate context with zero width and/or height");
+		errno = EINVAL;
+		return NULL;
+	}
+
 	pixels = malloc(bpr * h);
 	context = malloc(sizeof(GP_Context));
 

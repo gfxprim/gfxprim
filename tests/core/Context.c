@@ -16,7 +16,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2013 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
@@ -25,6 +25,7 @@
   Very basic GP_Context tests.
 
  */
+#include <errno.h>
 
 #include <core/GP_Context.h>
 
@@ -204,6 +205,43 @@ static int SubContext_Create(void)
 	return TST_SUCCESS;
 }
 
+static int context_zero_w(void)
+{
+	GP_Context *c;
+
+	c = GP_ContextAlloc(0, 200, GP_PIXEL_G8);
+
+	if (c != NULL) {
+		tst_msg("Context with zero width successfuly allocated");
+		return TST_FAILED;
+	}
+
+	if (errno != EINVAL) {
+		tst_msg("Expected errno set to EINVAL");
+		return TST_FAILED;
+	}
+
+	return TST_SUCCESS;
+}
+
+static int context_zero_h(void)
+{
+	GP_Context *c;
+
+	c = GP_ContextAlloc(200, 0, GP_PIXEL_G8);
+
+	if (c != NULL) {
+		tst_msg("Context with zero height successfuly allocated");
+		return TST_FAILED;
+	}
+
+	if (errno != EINVAL) {
+		tst_msg("Expected errno set to EINVAL");
+		return TST_FAILED;
+	}
+
+	return TST_SUCCESS;
+}
 
 const struct tst_suite tst_suite = {
 	.suite_name = "Context Testsuite",
@@ -215,6 +253,10 @@ const struct tst_suite tst_suite = {
 		 .flags = TST_CHECK_MALLOC},
 		{.name = "SubContext Create",
 		 .tst_fn = SubContext_Create},
+		{.name = "Context Create w = 0",
+		 .tst_fn = context_zero_w},
+		{.name = "Context Create h = 0",
+		 .tst_fn = context_zero_h},
 		{.name = NULL},
 	}
 };
