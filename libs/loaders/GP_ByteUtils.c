@@ -22,7 +22,14 @@
 
 #include <stdarg.h>
 
+#ifdef __linux__
+#include <endian.h>
+#else /* BSD Family */
+#include <machine/endian.h>
+#endif
+
 #include "core/GP_Debug.h"
+#include "core/GP_Common.h"
 
 #include "loaders/GP_ByteUtils.h"
 
@@ -60,10 +67,10 @@ static int ctoh(char c, int *i)
 		*i += c - 'A' + 10;
 	break;
 	case '\0':
-		GP_WARN("Unexpected end of the format string");
+		GP_BUG("Unexpected end of the format string");
 		return 1;
 	default:
-		GP_WARN("Expected [0-9]|[a-f][A-F] in hex constant, got '%c'", c);
+		GP_BUG("Expected [0-9]|[a-f][A-F] in hex constant, got '%c'", c);
 		return 1;
 	}
 
@@ -133,7 +140,7 @@ static const char *get_lb_size(const char *fmt, int *val)
 		return fmt + 1;
 	}
 
-	GP_WARN("Invalid little/big endian variable size '%i'", *val);
+	GP_BUG("Invalid little/big endian variable size '%i'", *val);
 	return NULL;
 }
 
@@ -143,7 +150,7 @@ static const char *get_next(const char *fmt, int *type, int *val)
 		return NULL;
 
 	if (fmt[0] != '%') {
-		GP_WARN("Unexpected character in format string '%c'", fmt[0]);
+		GP_BUG("Unexpected character in format string '%c'", fmt[0]);
 		return NULL;
 	}
 
@@ -166,21 +173,48 @@ static const char *get_next(const char *fmt, int *type, int *val)
 		return get_lb_size(fmt + 2, val);
 	break;
 	case 'i':
-
+		*type = IGNORE;
+		return get_int(fmt + 2, val);
 	break;
 	case '\0':
-		GP_WARN("Unexpecned end of format string");
+		GP_BUG("Unexpecned end of format string");
 		return NULL;
 	break;
 	}
 
-	GP_WARN("Unexpected character in format string '%c'", fmt[0]);
+	GP_BUG("Unexpected character in format string '%c'", fmt[0]);
 	return NULL;
+}
+
+static void swap_bytes(void *ptr, int len, int type)
+{
+	if (__BYTE_ORDER == __LITTLE_ENDIAN && type == LITTLE_ENDIAN_VAR)
+		return;
+
+	if (__BYTE_ORDER == __BIG_ENDIAN && type == BIG_ENDIAN_VAR)
+		return;
+
+	char *buf = ptr;
+
+	switch (len) {
+	case 1:
+	break;
+	case 2:
+		GP_SWAP(buf[0], buf[1]);
+	break;
+	case 4:
+		GP_SWAP(buf[0], buf[3]);
+		GP_SWAP(buf[1], buf[2]);
+	break;
+	default:
+		GP_BUG("Invalid size %i", len);
+	}
 }
 
 int GP_FRead(FILE *f, const char *fmt, ...)
 {
 	int type, val, ret = 0;
+	void *ptr;
 	va_list va;
 
 	va_start(va, fmt);
@@ -203,13 +237,20 @@ int GP_FRead(FILE *f, const char *fmt, ...)
 		break;
 		case LITTLE_ENDIAN_VAR:
 		case BIG_ENDIAN_VAR:
-			if (fread(va_arg(va, void*), val, 1, f) != 1)
+			ptr = va_arg(va, void*);
+
+			if (fread(ptr, val, 1, f) != 1)
 				goto end;
-			//TODO: Fix byteorder
+		
+			swap_bytes(ptr, val, type);
 		break;
 		case IGNORE:
-			
+			while (val--)
+				fgetc(f);
 		break;
+		default:
+			GP_BUG("Wrong format type for reading (%i)", type);
+			goto end;
 		}
 		
 		ret++;
@@ -224,6 +265,9 @@ int GP_FWrite(FILE *f, const char *fmt, ...)
 {
 	int type, val, ret = 0;
 	va_list va;
+	uint8_t  u8;
+	uint16_t u16;
+	uint32_t u32;
 
 	va_start(va, fmt);
 
@@ -246,25 +290,31 @@ int GP_FWrite(FILE *f, const char *fmt, ...)
 		case LITTLE_ENDIAN_VAR:
 		case BIG_ENDIAN_VAR:
 			switch (val) {
-			case 1: {
-				uint8_t c = va_arg(va, int);
-				if (fwrite(&c, 1, 1, f) != 1)
+			case 1:
+				u8 = va_arg(va, int);
+				if (fwrite(&u8, 1, 1, f) != 1)
 					goto end;
-			} break;
-			case 2: {
-				uint16_t c = va_arg(va, int);
-				if (fwrite(&c, 2, 1, f) != 1)
+			break;
+			case 2:
+				u16 = va_arg(va, int);
+				
+				swap_bytes(&u16, 2, type);
+				
+				if (fwrite(&u16, 2, 1, f) != 1)
 					goto end;
-			} break;
-			case 4: {
-				uint32_t c = va_arg(va, int);
-				if (fwrite(&c, 4, 1, f) != 1)
+			break;
+			case 4:
+				u32 = va_arg(va, int);
+				
+				swap_bytes(&u32, 4, type);
+				
+				if (fwrite(&u32, 4, 1, f) != 1)
 					goto end;
-			} break;
+			break;
 			}
 		break;
 		default:
-			GP_WARN("Wrong format type for writing");
+			GP_BUG("Wrong format type for writing (%i)", type);
 			goto end;
 		}
 
