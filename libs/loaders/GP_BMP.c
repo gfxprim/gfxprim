@@ -150,20 +150,15 @@ static uint32_t get_palette_size(struct bitmap_info_header *header)
 
 static int read_bitmap_info_header(FILE *f, struct bitmap_info_header *header)
 {
-	uint8_t buf[36];
+	uint16_t nr_planes;
 
-	if (fread(buf, 1, sizeof(buf), f) != sizeof(buf)) {
+	if (GP_FRead(f, "L4 L4 L2 L2 L4 I12 L4 I4",
+	             &header->w, &header->h, &nr_planes, &header->bpp,
+		     &header->compress_type, &header->palette_colors) != 8) {
+		
 		GP_DEBUG(1, "Failed to read bitmap info header");
 		return EIO;
 	}
-
-	header->w              = BUF_TO_4(buf, 0);
-	header->h              = BUF_TO_4(buf, 4);
-	header->bpp            = BUF_TO_2(buf, 10);
-	header->compress_type  = BUF_TO_4(buf, 12);
-	header->palette_colors = BUF_TO_4(buf, 28);
-
-	uint16_t nr_planes = BUF_TO_2(buf, 8);
 
 	/* This must be 1 according to specs */
 	if (nr_planes != 1)
@@ -648,12 +643,12 @@ static int bmp_write_header(struct bitmap_info_header *header, FILE *f)
 	uint32_t file_size = bitmap_size + header->header_size + 14;
 
 	/* Bitmap Header */
-	if (GP_FWrite(f, "%a2%l4%x00%x00%x00%x00%l4", "BM",
+	if (GP_FWrite(f, "A2 L4 0x00 0x00 0x00 0x00 L4", "BM",
 	              file_size, header->pixel_offset) != 7)
 		return EIO;
 	
 	/* Bitmap Info Header */
-	if (GP_FWrite(f, "%l4%l4%l4%l2%l2%l4%l4%l4%l4%l4%l4",
+	if (GP_FWrite(f, "L4 L4 L4 L2 L2 L4 L4 L4 L4 L4 L4",
 	              header->header_size, header->w, header->h, 1,
 		      header->bpp, header->compress_type, bitmap_size, 0, 0,
 		      header->palette_colors, 0) != 11)
