@@ -399,30 +399,70 @@ struct file_testcase {
 	int expected_errno;
 };
 
+enum file_flags {
+	FILE_CREATE = 0x01,
+	FILE_FILL = 0x02,
+};
+
 static struct file_testcase file_testcases[] = {
-	{"a",     1, ENOSYS},
-	{".a",    1, ENOSYS},
-	{"a.",    1, ENOSYS},
-	{".bc",   1, ENOSYS},
-	{"bc",    1, ENOSYS},
-	{"abc",   1, ENOSYS},
-	{"png.",  1, ENOSYS},
-	{"jpg.",  1, ENOSYS},
-	{"gif.",  1, ENOSYS},
-	{"jpeg.", 1, ENOSYS},
-	{"bmp.", 1, ENOSYS},
 	
-	{".jpg",    1, EIO},
-	{"img.jpg", 1, EIO},
-	{".png",    1, EIO},
-	{"img.png", 1, EIO},
-	{".gif",    1, EIO},
-	{"img.gif", 1, EIO},
-	{".bmp",    1, EIO},
-	{"img.bmp", 1, EIO},
-	{".pbm",    1, EIO},
-	{".pgm",    1, EIO},
-	{".ppm",    1, EIO},
+	/*
+	 * Should fail the file signature based loader
+	 * as the signature could have been loaded but
+	 * the file format is unknown.
+	 */
+	{"a",     FILE_CREATE | FILE_FILL, ENOSYS},
+	{".a",    FILE_CREATE | FILE_FILL, ENOSYS},
+	{"a.",    FILE_CREATE | FILE_FILL, ENOSYS},
+	{".bc",   FILE_CREATE | FILE_FILL, ENOSYS},
+	{"bc",    FILE_CREATE | FILE_FILL, ENOSYS},
+	{"abc",   FILE_CREATE | FILE_FILL, ENOSYS},
+
+	/*
+	 * Should fail the corresponding loader and
+	 * then fail the signature based loader too.
+	 */
+	{"wrong.png",  FILE_CREATE | FILE_FILL, ENOSYS},
+	{"wrong.jpg",  FILE_CREATE | FILE_FILL, ENOSYS},
+	{"wrong.gif",  FILE_CREATE | FILE_FILL, ENOSYS},
+	{"wrong.jpeg", FILE_CREATE | FILE_FILL, ENOSYS},
+	{"wrong.bmp",  FILE_CREATE | FILE_FILL, ENOSYS},
+	{"wrong.psp",  FILE_CREATE | FILE_FILL, ENOSYS},
+	{"wrong.tif",  FILE_CREATE | FILE_FILL, ENOSYS},
+	{"wrong.tiff", FILE_CREATE | FILE_FILL, ENOSYS},
+
+	/* 
+	 * Should start signature-based loader and
+	 * fail it to read start of the file.
+	 */
+	{"b",          FILE_CREATE, EIO},
+	{".b",         FILE_CREATE, EIO},
+	{"b.",         FILE_CREATE, EIO},
+	{".dc",        FILE_CREATE, EIO},
+	{"dc",         FILE_CREATE, EIO},
+	{"cba",        FILE_CREATE, EIO},
+	
+	/*
+	 * Dtto but for hits the extension based
+	 * loader first and fail to read image header
+	 * in the particular loader.
+	 */
+	{"empty.jpg",  FILE_CREATE, EIO},
+	{"empty.png",  FILE_CREATE, EIO},
+	{"empty.gif",  FILE_CREATE, EIO},
+	{"empty.jpeg", FILE_CREATE, EIO},
+	{"empty.bmp",  FILE_CREATE, EIO},
+	{"empty.psp",  FILE_CREATE, EIO},
+	{"empty.tif",  FILE_CREATE, EIO},
+	{"empty.tiff", FILE_CREATE, EIO},
+
+	{".jpg",    FILE_CREATE, EIO},
+	{".png",    FILE_CREATE, EIO},
+	{".gif",    FILE_CREATE, EIO},
+	{".jpeg",    FILE_CREATE, EIO},
+	{".bmp",    FILE_CREATE, EIO},
+	{".psp",    FILE_CREATE, EIO},
+	{".tiff",    FILE_CREATE, EIO},
 
 	{"not_here.jpg", 0, ENOENT},
 
@@ -437,14 +477,27 @@ static int test_Load(void)
 
 	/* Create empty files */
 	for (i = 0; file_testcases[i].filename != NULL; i++) {
-		
-		if (file_testcases[i].create != 1)
+
+		if (!(file_testcases[i].create & FILE_CREATE))
 			continue;
 
-		FILE *f = fopen(file_testcases[i].filename, "w");
+		FILE *f = fopen(file_testcases[i].filename, "wb");
 
-		if (f != NULL)
+		if (f != NULL) {
+			char buf[128] = {0};
+
+			if (file_testcases[i].create & FILE_FILL) {
+				if (fwrite(buf, sizeof(buf), 1, f) != 1)
+					tst_msg("Failed to write to '%s'",
+				        	file_testcases[i].filename);
+			
+			}
+
 			fclose(f);
+		} else {
+			tst_msg("Failed to open file '%s' for writing",
+			        file_testcases[i].filename);
+		}
 	}
 
 	for (i = 0; file_testcases[i].filename != NULL; i++) {
@@ -469,7 +522,7 @@ static int test_Load(void)
 			continue;
 		}
 		
-		if (file_testcases[i].expected_errno != errno) {
+		if (file_testcases[i].expected_errno != saved_errno) {
 			tst_msg("Expected errno %i (%s) got %i (%s) on '%s'",
 			        file_testcases[i].expected_errno,
 				strerror(file_testcases[i].expected_errno),
@@ -623,7 +676,7 @@ const struct tst_suite tst_suite = {
 		
 		/* Generic GP_LoadImage test */
 		{.name = "Image Load", .tst_fn = test_Load,
-		 .flags = TST_TMPDIR},
+		 .flags = TST_TMPDIR | TST_CHECK_MALLOC},
 		
 		/* Callback abort tests */
 		{.name = "PNG Load abort", .tst_fn = test_PNG_Load_abort,
