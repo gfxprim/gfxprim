@@ -376,6 +376,9 @@ void GP_WritePixels_24BPP(void *start, size_t count, unsigned int value)
 {
 	uint8_t *bytep = (uint8_t *) start;
 
+	if (count == 0)
+		return;
+
 	/* How much bytes we are offset against the 32-bit boundary. */
 	int shift = ((intptr_t) bytep) % 4;
 
