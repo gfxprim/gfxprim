@@ -217,26 +217,37 @@ static const GP_Loader *loader_by_signature(const char *path)
 	FILE *f;
 	int err;
 
-	GP_DEBUG(1, "Trying to load a file by signature");
+	const GP_Loader *ret;
+
+	GP_DEBUG(1, "Trying to load by file signature");
 
 	f = fopen(path, "rb");
 
 	if (f == NULL) {
 		err = errno;
 		GP_DEBUG(1, "Failed to open file '%s'", path);
-		errno = err;
-		return NULL;
+		goto err0;
 	}
 
 	if (fread(buf, sizeof(buf), 1, f) < 1) {
 		GP_DEBUG(1, "Failed to read start of the file '%s'", path);
-		errno = EIO;
-		return NULL;
+		err = EIO;
+		goto err1;
 	}
 
 	fclose(f);
 
-	return GP_MatchSignature(buf);
+	ret = GP_MatchSignature(buf);
+
+	if (ret == NULL)
+		errno = ENOSYS;
+
+	return ret;
+err1:
+	fclose(f);
+err0:
+	errno = err;
+	return NULL;
 }
 
 GP_Context *GP_LoadImage(const char *src_path, GP_ProgressCallback *callback)
