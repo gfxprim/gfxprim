@@ -19,7 +19,7 @@
  * Copyright (C) 2009-2010 Jiri "BlueBear" Dluhos                            *
  *                         <jiri.bluebear.dluhos@gmail.com>                  *
  *                                                                           *
- * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2013 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
@@ -80,6 +80,19 @@ static void FN_NAME(CONTEXT_T context, int xcenter, int ycenter, \
 	int b2 = b*b; \
 \
 	int x, y, error; \
+\
+	if (a == 0) { \
+		for (y = -b; y <= (int)b; y++) \
+			PUTPIXEL(context, xcenter, ycenter + y, pixval); \
+		return; \
+	} \
+\
+	if (b == 0) { \
+		for (x = -a; x <= (int)a; x++) \
+			PUTPIXEL(context, xcenter + x, ycenter, pixval); \
+		return; \
+	} \
+\
 	for (x = 0, error = -b2*a, y = b; y >= 0; y--) { \
 		while (error < 0) { \
 \
