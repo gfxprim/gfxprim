@@ -112,8 +112,10 @@ typedef struct GP_PixelTypeDescription {
  */
 extern const GP_PixelTypeDescription const GP_PixelTypes[GP_PIXEL_MAX];
 
+#define GP_VALID_PIXELTYPE(type) (((type) > 0) && ((type) < GP_PIXEL_MAX))
+
 #define GP_CHECK_VALID_PIXELTYPE(type) \
-  GP_CHECK(((type) > 0) && ((type) < GP_PIXEL_MAX), "Invalid PixelType %d", (type))
+	GP_CHECK(GP_VALID_PIXELTYPE(type), "Invalid PixelType %d", (type))
 
 /*
  * Convert pixel type to name.

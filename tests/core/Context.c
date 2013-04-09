@@ -243,6 +243,44 @@ static int context_zero_h(void)
 	return TST_SUCCESS;
 }
 
+static int context_invalid_pixeltype1(void)
+{
+	GP_Context *c;
+
+	c = GP_ContextAlloc(100, 100, -1);
+
+	if (c != NULL) {
+		tst_msg("Context with invalid pixel type (-1) succesfully allocated");
+		return TST_FAILED;
+	}
+
+	if (errno != EINVAL) {
+		tst_msg("Expected errno set to EINVAL");
+		return TST_FAILED;
+	}
+
+	return TST_SUCCESS;
+}
+
+static int context_invalid_pixeltype2(void)
+{
+	GP_Context *c;
+
+	c = GP_ContextAlloc(100, 100, GP_PIXEL_MAX + 1000);
+
+	if (c != NULL) {
+		tst_msg("Context with invalid pixel type (-1) succesfully allocated");
+		return TST_FAILED;
+	}
+
+	if (errno != EINVAL) {
+		tst_msg("Expected errno set to EINVAL");
+		return TST_FAILED;
+	}
+
+	return TST_SUCCESS;
+}
+
 const struct tst_suite tst_suite = {
 	.suite_name = "Context Testsuite",
 	.tests = {
@@ -257,6 +295,10 @@ const struct tst_suite tst_suite = {
 		 .tst_fn = context_zero_w},
 		{.name = "Context Create h = 0",
 		 .tst_fn = context_zero_h},
+		{.name = "Context Create pixel_type = -1",
+		 .tst_fn = context_invalid_pixeltype1},
+		{.name = "Context Create invalid pixel_type",
+		 .tst_fn = context_invalid_pixeltype2},
 		{.name = NULL},
 	}
 };

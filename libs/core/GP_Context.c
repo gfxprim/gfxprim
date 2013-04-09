@@ -41,20 +41,28 @@ static uint32_t get_bpr(uint32_t bpp, uint32_t w)
 
 GP_Context *GP_ContextAlloc(GP_Size w, GP_Size h, GP_PixelType type)
 {
-	GP_CHECK_VALID_PIXELTYPE(type);
 	GP_Context *context;
-	uint32_t bpp = GP_PixelSize(type);
-	uint32_t bpr = get_bpr(bpp, w);
+	uint32_t bpp;
+	uint32_t bpr;
 	void *pixels;
 
-	GP_DEBUG(1, "Allocating context %u x %u - %s",
-	         w, h, GP_PixelTypeName(type));
+	if (!GP_VALID_PIXELTYPE(type)) {
+		GP_WARN("Invalid pixel type %u", type);
+		errno = EINVAL;
+		return NULL;
+	}
 
 	if (w <= 0 || h <= 0) {
 		GP_WARN("Trying to allocate context with zero width and/or height");
 		errno = EINVAL;
 		return NULL;
 	}
+
+	GP_DEBUG(1, "Allocating context %u x %u - %s",
+	         w, h, GP_PixelTypeName(type));
+
+	bpp = GP_PixelSize(type);
+	bpr = get_bpr(bpp, w);
 
 	pixels = malloc(bpr * h);
 	context = malloc(sizeof(GP_Context));
