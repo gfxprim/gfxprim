@@ -20,9 +20,9 @@ def extend_backend(_backend):
     return c_backends.GP_BackendFlip(self)
 
   @extend(_backend)
-  def UpdateRect(self, rect):
+  def UpdateRect(self, x0, y0, x1, y1):
     "Update a rectangle on a buffered backend."
-    return c_backends.GP_BackendUpdateRect(self, rect[0], rect[1], rect[2], rect[3])
+    return c_backends.GP_BackendUpdateRect(self, x0, y0, x1, y1)
 
   @extend(_backend)
   def Poll(self):
