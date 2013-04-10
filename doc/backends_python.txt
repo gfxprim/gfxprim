@@ -91,8 +91,10 @@ import gfxprim.backends as backends
     bk.context.gfx.Fill(bk.context.RGBToPixel(0, 0, 0));
 
     # If backend is buffered, changes are not propagated unless the screen is
-    # updated via Flip() or UpdateRect()
+    # updated via Flip()
     bk.Flip()
+    # or UpdateRect()
+    bk.UpdaterRect(x0, y0, x1, y1)
 
 -------------------------------------------------------------------------------
 
