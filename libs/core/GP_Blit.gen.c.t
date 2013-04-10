@@ -13,6 +13,7 @@
 #include "core/GP_Convert.h"
 #include "core/GP_Convert.gen.h"
 #include "core/GP_Convert_Scale.gen.h"
+#include "core/GP_MixPixels2.gen.h"
 
 /*
  * TODO: this is used for same pixel but different offset, could still be optimized
@@ -97,10 +98,10 @@ static void blitXYXY_Raw_{{ ps.suffix }}(const GP_Context *src,
  * more than 50% and the size footprint for two for cycles is really small.
  */
 %% for src in pixeltypes
-%% if not src.is_unknown() and not src.is_palette()
-%% for dst in pixeltypes
-%% if not dst.is_unknown() and not dst.is_palette()
-%% if dst.name != src.name
+%%  if not src.is_unknown() and not src.is_palette()
+%%   for dst in pixeltypes
+%%    if not dst.is_unknown() and not dst.is_palette()
+%%     if dst.name != src.name
 /*
  * Blits {{ src.name }} to {{ dst.name }}
  */
@@ -108,22 +109,32 @@ static void blitXYXY_Raw_{{ src.name }}_{{ dst.name }}(const GP_Context *src,
 	GP_Coord x0, GP_Coord y0, GP_Coord x1, GP_Coord y1,
 	GP_Context *dst, GP_Coord x2, GP_Coord y2)
 {
-	GP_Coord x, y;
+	GP_Coord x, y, dx, dy;
 
-	for (y = y0; y <= y1; y++)
+	for (y = y0; y <= y1; y++) {
 		for (x = x0; x <= x1; x++) {
-			GP_Pixel p1, p2 = 0;
+			dx = x2 + (x - x0);
+			dy = y2 + (y - y0);
+
+			GP_Pixel p1, p2 = 0, p3 = 0;
+			
 			p1 = GP_GetPixel_Raw_{{ src.pixelsize.suffix }}(src, x, y);
+%%      if src.is_alpha()
+			p2 = GP_GetPixel_Raw_{{ dst.pixelsize.suffix }}(dst, dx, dy);
+			p3 = GP_MixPixels_{{ src.name }}_{{ dst.name }}(p1, p2);
+%%      else
 			GP_Pixel_{{ src.name }}_TO_RGB888(p1, p2);
-			GP_Pixel_RGB888_TO_{{ dst.name }}(p2, p1);
-			GP_PutPixel_Raw_{{ dst.pixelsize.suffix }}(dst, x2 + (x - x0), y2 + (y - y0), p1);
+			GP_Pixel_RGB888_TO_{{ dst.name }}(p2, p3);
+%%      endif
+			GP_PutPixel_Raw_{{ dst.pixelsize.suffix }}(dst, dx, dy, p3);
 		}
+	}
 }
 
-%% endif
-%% endif
-%% endfor
-%% endif
+%%     endif
+%%    endif
+%%   endfor
+%%  endif
 %% endfor
 
 void GP_BlitXYXY_Raw_Fast(const GP_Context *src,
