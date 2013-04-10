@@ -213,9 +213,16 @@ GP_Context *GP_ContextConvertAlloc(const GP_Context *src,
 	int h = GP_ContextH(src);
 
 	GP_Context *ret = GP_ContextAlloc(w, h, dst_pixel_type);
-	
+
 	if (ret == NULL)
 		return NULL;
+	
+	/* 
+	 * Fill the buffer with zeroes, otherwise it will
+	 * contain random data which will generate mess
+	 * when converting image with alpha channel.
+	 */
+	memset(ret->pixels, 0, ret->bytes_per_row * ret->h);
 
 	GP_Blit(src, 0, 0, w, h, ret, 0, 0);
 	
@@ -227,6 +234,13 @@ GP_Context *GP_ContextConvert(const GP_Context *src, GP_Context *dst)
 	//TODO: Asserts
 	int w = GP_ContextW(src);
 	int h = GP_ContextH(src);
+	
+	/* 
+	 * Fill the buffer with zeroes, otherwise it will
+	 * contain random data which will generate mess
+	 * when converting image with alpha channel.
+	 */
+	memset(dst->pixels, 0, dst->bytes_per_row * dst->h);
 	
 	GP_Blit(src, 0, 0, w, h, dst, 0, 0);
 
