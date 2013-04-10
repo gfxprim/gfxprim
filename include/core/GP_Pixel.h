@@ -186,4 +186,10 @@ GP_PixelType GP_PixelRGBLookup(uint32_t rsize, uint32_t roff,
 			       uint32_t asize, uint32_t aoff,
 			       uint8_t bits_per_pixel);
 
+/*
+ * Function to determine pixel attributes.
+ */
+int GP_PixelHasAlpha(GP_PixelType pixel_type);
+
+
 #endif /* CORE_GP_PIXEL_H */
