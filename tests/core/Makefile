@@ -2,11 +2,11 @@ TOPDIR=../..
 
 include $(TOPDIR)/pre.mk
 
-CSOURCES=Context.c
+CSOURCES=Context.c Pixel.c
 
 GENSOURCES+=WritePixel_testsuite.gen.c GetPutPixel.gen.c
 
-APPS=WritePixel_testsuite.gen Context GetPutPixel.gen
+APPS=WritePixel_testsuite.gen Pixel Context GetPutPixel.gen
 
 include ../tests.mk
 

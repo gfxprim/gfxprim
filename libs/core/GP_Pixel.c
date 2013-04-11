@@ -163,15 +163,9 @@ GP_PixelType GP_PixelRGBLookup(uint32_t rsize, uint32_t roff,
 	return GP_PIXEL_UNKNOWN;
 }
 
-int GP_PixelHasAlpha(GP_PixelType pixel_type)
+int GP_PixelHasFlags(GP_PixelType pixel_type, GP_PixelFlags flags)
 {
-	unsigned int i;
+	GP_PixelFlags my_flags = GP_PixelTypes[pixel_type].flags;
 
-	GP_CHECK_VALID_PIXELTYPE(pixel_type);
-
-	for (i = 0; i < GP_PixelTypes[pixel_type].numchannels; i++)
-		if (!strcmp(GP_PixelTypes[pixel_type].channels[i].name, "A"))
-			return 1;
-
-	return 0;
+	return flags == (my_flags & flags);
 }

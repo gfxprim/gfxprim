@@ -91,6 +91,16 @@ typedef struct GP_PixelTypeChannel {
 #define GP_PIXELTYPE_MAX_CHANNELS 8
 
 /*
+ * Pixel type flags for various pixel properties.
+ */
+typedef enum GP_PixelFlags {
+	GP_PIXEL_HAS_ALPHA = 0x01,
+	GP_PIXEL_IS_RGB = 0x02,
+	GP_PIXEL_IS_PALETTE = 0x04,
+	GP_PIXEL_IS_GRAYSCALE = 0x10,
+} GP_PixelFlags;
+
+/*
  * Description of one PixelType
  * Assumes name with at most 15 chars
  * Assumes at most 8 channels
@@ -101,6 +111,7 @@ typedef struct GP_PixelTypeDescription {
 	uint8_t size;	          /* Size in bits */
 	GP_BIT_ENDIAN bit_endian; /* Order of pixels in a byte */
 	uint8_t numchannels;      /* Number of channels */
+	GP_PixelFlags flags;
 	/* String describing the bit-representaton (as in "RRRRRGGGGGGBBBBB")*/
 	const char bitmap[GP_PIXEL_BITS + 1];
 	/* Individual channels */
@@ -187,9 +198,13 @@ GP_PixelType GP_PixelRGBLookup(uint32_t rsize, uint32_t roff,
 			       uint8_t bits_per_pixel);
 
 /*
- * Function to determine pixel attributes.
+ * Functions to determine pixel attributes.
+ *
+ * Call as:
+ *
+ * if (GP_PixelHasFlags(pixel_type, GP_PIXEL_IS_RGB | GP_PIXEL_HAS_ALPHA))
+ * 	...
  */
-int GP_PixelHasAlpha(GP_PixelType pixel_type);
-
+int GP_PixelHasFlags(GP_PixelType pixel_type, GP_PixelFlags flags);
 
 #endif /* CORE_GP_PIXEL_H */
