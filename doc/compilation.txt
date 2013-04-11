@@ -66,7 +66,7 @@ into your system. Python bindings are not installable at the moment.
 OpenSUSE
 ~~~~~~~~
 
-Here are commands to install required packages on
+Instruction to install required packages on
 link:http://www.opensuse.org/[OpenSUSE].
 
 .Install basic tools
@@ -100,3 +100,39 @@ zypper in gcc make python-Jinja2 libjpeg-devel libpng-devel giflib-devel
           freetype-devel libX11-devel libXext-devel swig python-devel
 -------------------------------------------------------------------------------
 
+Debian
+~~~~~~
+
+Instruction to install required packages on link:http://www.debian.org[Debian]
+and other debian based distributions.
+
+.Install basic tools
+-------------------------------------------------------------------------------
+apt-get install gcc make python-jinja2
+-------------------------------------------------------------------------------
+
+.Install jpeg and png devel libraries
+-------------------------------------------------------------------------------
+apt-get install libjpeg-dev libpng-dev libgif-dev
+-------------------------------------------------------------------------------
+
+.Install FreeType devel library
+-------------------------------------------------------------------------------
+apt-get install libfreetype6-dev
+-------------------------------------------------------------------------------
+
+.Install X11 devel library
+-------------------------------------------------------------------------------
+apt-get install libx11-dev libxext-dev
+-------------------------------------------------------------------------------
+
+.Install swig
+-------------------------------------------------------------------------------
+apt-get install swig python-dev
+-------------------------------------------------------------------------------
+
+.All in the one for the lazy
+-------------------------------------------------------------------------------
+apt-get install gcc make python-jinja2 libjpeg-dev libpng-dev libgif-dev
+                libfreetype6-dev libx11-dev libxext-dev swig python-dev
+-------------------------------------------------------------------------------
