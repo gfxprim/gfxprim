@@ -833,7 +833,13 @@ int main(int argc, char *argv[])
 			return 1;
 		}
 	}
-	
+
+	if (optind >= argc) {
+		fprintf(stderr, "Requires path to at least one image\n\n");
+		print_help();
+		return 1;
+	}
+
 	GP_SetDebugLevel(debug_level);
 
 	signal(SIGINT, sighandler);
