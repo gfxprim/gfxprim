@@ -9,7 +9,8 @@ POINT_FILTERS=GP_Contrast.gen.c GP_Brightness.gen.c GP_Invert.gen.c\
 ARITHMETIC_FILTERS=GP_Difference.gen.c GP_Addition.gen.c GP_Min.gen.c\
                    GP_Max.gen.c GP_Multiply.gen.c
 
-RESAMPLING_FILTERS=GP_ResizeNN.gen.c GP_Cubic.gen.c GP_ResizeCubic.gen.c
+RESAMPLING_FILTERS=GP_ResizeNN.gen.c GP_Cubic.gen.c GP_ResizeCubic.gen.c\
+                   GP_ResizeLinear.gen.c
 
 GENSOURCES=GP_MirrorV.gen.c GP_Rotate.gen.c GP_FloydSteinberg.gen.c GP_HilbertPeano.gen.c\
            $(POINT_FILTERS) $(ARITHMETIC_FILTERS) $(STATS_FILTERS) $(RESAMPLING_FILTERS)
