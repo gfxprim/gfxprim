@@ -17,7 +17,7 @@
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
  * Copyright (C) 2011      Tomas Gavenciak <gavento@ucw.cz>                  *
- * Copyright (C) 2011,2012 Cyril Hrubis    <metan@ucw.cz>                    *
+ * Copyright (C) 2011-2012 Cyril Hrubis    <metan@ucw.cz>                    *
  *                                                                           *
  *****************************************************************************/
 

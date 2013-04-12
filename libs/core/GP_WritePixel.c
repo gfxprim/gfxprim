@@ -343,7 +343,6 @@ void GP_WritePixels_4BPP_BE(void *start, uint8_t off,
 
 void GP_WritePixels_8BPP(void *start, size_t count, unsigned int value)
 {
-
 	memset(start, value, count);
 }
 
