@@ -42,46 +42,44 @@
  * The xpix_dist is distance of two sampled pixels in source image coordinates.
  *
  * The xoff is offset of the first pixel.
- *
- * The r, g, b are used to store resulting values.
  */
-static inline void linear_lp_sample_x(const GP_Context *src,
-                                      uint32_t x, uint32_t y,
-                                      uint32_t xpix_dist, uint32_t xoff,
-                                      uint32_t *r, uint32_t *g, uint32_t *b)
+%% macro sample_x(pt, suff)
 {
-	GP_Pixel pix;
+	uint32_t mx = x0;
 	uint32_t i;
 
-	pix = GP_GetPixel_Raw_24BPP(src, x, y);
+	pix = GP_GetPixel_Raw_{{ pt.pixelsize.suffix }}(src, x0, y0);
 
-	*r = (GP_Pixel_GET_R_RGB888(pix) * xoff) >> 9;
-	*g = (GP_Pixel_GET_G_RGB888(pix) * xoff) >> 9;
-	*b = (GP_Pixel_GET_B_RGB888(pix) * xoff) >> 9;
+	%% for c in pt.chanslist
+	{{ c[0] }}{{ suff }} = (GP_Pixel_GET_{{ c[0] }}_{{ pt.name }}(pix) * xoff[x]) >> 9;
+	%% endfor
 
-	for (i = (1<<14) - xoff; i > xpix_dist; i -= xpix_dist) {
-		if (x < src->w - 1)
-			x++;
+	for (i = (1<<14) - xoff[x]; i > xpix_dist; i -= xpix_dist) {
+		if (mx < src->w - 1)
+			mx++;
 		
-		pix = GP_GetPixel_Raw_24BPP(src, x, y);
+		pix = GP_GetPixel_Raw_{{ pt.pixelsize.suffix }}(src, x0, y0);
 
-		*r += (GP_Pixel_GET_R_RGB888(pix) * xpix_dist) >> 9;
-		*g += (GP_Pixel_GET_G_RGB888(pix) * xpix_dist) >> 9;
-		*b += (GP_Pixel_GET_B_RGB888(pix) * xpix_dist) >> 9;
+		%% for c in pt.chanslist
+		{{ c[0] }}{{ suff }} += (GP_Pixel_GET_{{ c[0] }}_{{ pt.name }}(pix) * xpix_dist) >> 9;
+		%% endfor
 	}
 
 	if (i > 0) {
-		if (x < src->w - 1)
-			x++;
+		if (mx < src->w - 1)
+			mx++;
+		
+		pix = GP_GetPixel_Raw_{{ pt.pixelsize.suffix }}(src, x0, y0);
 			
-		pix = GP_GetPixel_Raw_24BPP(src, x, y);
-
-		*r += (GP_Pixel_GET_R_RGB888(pix) * i) >> 9;
-		*g += (GP_Pixel_GET_G_RGB888(pix) * i) >> 9;
-		*b += (GP_Pixel_GET_B_RGB888(pix) * i) >> 9;
+		%% for c in pt.chanslist
+		{{ c[0] }}{{ suff }} += (GP_Pixel_GET_{{ c[0] }}_{{ pt.name }}(pix) * i) >> 9;
+		%% endfor
 	}
 }
+%% endmacro
 
+%% for pt in pixeltypes
+%%  if not pt.is_unknown() and not pt.is_palette()
 /*
  * Linear interpolation with low-pass filtering, used for fast downscaling
  * on both x and y.
@@ -105,8 +103,8 @@ static inline void linear_lp_sample_x(const GP_Context *src,
  * 
  * The implementation is inspired by imlib2 downscaling algorithm.
  */
-static int interpolate_linear_lp_xy(const GP_Context *src, GP_Context *dst,
-                                    GP_ProgressCallback *callback)
+static int GP_FilterResizeLinearLFInt_{{ pt.name }}_Raw(const GP_Context *src, GP_Context *dst,
+                                                  GP_ProgressCallback *callback)
 {
 	uint32_t xmap[dst->w + 1];
 	uint32_t ymap[dst->h + 1];
@@ -114,7 +112,8 @@ static int interpolate_linear_lp_xy(const GP_Context *src, GP_Context *dst,
 	uint16_t yoff[dst->h + 1];
 	uint32_t x, y;
 	uint32_t i, j;
-	
+	GP_Pixel pix;
+
 	/* Pre-compute mapping for interpolation */
 	uint32_t xstep = ((src->w - 1) << 16) / (dst->w - 1);
 	uint32_t xpix_dist = ((dst->w - 1) << 14) / (src->w - 1);
@@ -137,35 +136,33 @@ static int interpolate_linear_lp_xy(const GP_Context *src, GP_Context *dst,
 	/* Interpolate */
 	for (y = 0; y < dst->h; y++) {
 		for (x = 0; x < dst->w; x++) {
-			uint32_t r, g, b;
-			uint32_t r1, g1, b1;
+			%% for c in pt.chanslist
+			uint32_t {{ c[0] }}, {{ c[0] }}1;
+			%% endfor
+
 			uint32_t x0, y0;
 
 			x0 = xmap[x];
 			y0 = ymap[y];
 
-			linear_lp_sample_x(src, x0, y0,
-			                   xpix_dist, xoff[x],
-			                   &r, &g, &b);
+			{{ sample_x(pt, '') }}
 
-			r = (r * yoff[y]) >> 14;
-			g = (g * yoff[y]) >> 14;
-			b = (b * yoff[y]) >> 14;
-			
+			%% for c in pt.chanslist
+			{{ c[0] }} = ({{ c[0] }} * yoff[y]) >> 14;
+			%% endfor
+
 			for (j = (1<<14) - yoff[y]; j > ypix_dist; j -= ypix_dist) {
 				
 				x0 = xmap[x];
 				
 				if (y0 < src->h - 1)
 					y0++;
-			
-				linear_lp_sample_x(src, x0, y0,
-				                   xpix_dist, xoff[x],
-			                           &r1, &g1, &b1);
+		
+				{{ sample_x(pt, '1') }}
 
-				r += (r1 * ypix_dist) >> 14;
-				g += (g1 * ypix_dist) >> 14;
-				b += (b1 * ypix_dist) >> 14;
+				%% for c in pt.chanslist
+				{{ c[0] }} += ({{ c[0] }}1 * ypix_dist) >> 14;
+				%% endfor
 			}
 
 			if (j > 0) {
@@ -173,22 +170,20 @@ static int interpolate_linear_lp_xy(const GP_Context *src, GP_Context *dst,
 				
 				if (y0 < src->h - 1)
 					y0++;
-				
-				linear_lp_sample_x(src, x0, y0,
-				                   xpix_dist, xoff[x],
-			                           &r1, &g1, &b1);
 			
-				r += (r1 * j) >> 14;
-				g += (g1 * j) >> 14;
-				b += (b1 * j) >> 14;
+				{{ sample_x(pt, '1') }}
+
+				%% for c in pt.chanslist
+				{{ c[0] }} += ({{ c[0] }}1 * j) >> 14;
+				%% endfor
 			}
 
-			r = (r + (1<<4))>>5;
-			g = (g + (1<<4))>>5;
-			b = (b + (1<<4))>>5;
-
-			GP_PutPixel_Raw_24BPP(dst, x, y,
-			                      GP_Pixel_CREATE_RGB888(r, g, b));
+			%% for c in pt.chanslist
+			{{ c[0] }} = ({{ c[0] }} + (1<<4))>>5;
+			%% endfor
+			
+			GP_PutPixel_Raw_{{ pt.pixelsize.suffix }}(dst, x, y,
+			                      GP_Pixel_CREATE_{{ pt.name }}({{ expand_chanslist(pt, "") }}));
 		}
 		
 		if (GP_ProgressCallbackReport(callback, y, dst->h, dst->w))
@@ -198,6 +193,8 @@ static int interpolate_linear_lp_xy(const GP_Context *src, GP_Context *dst,
 	GP_ProgressCallbackDone(callback);
 	return 0;
 }
+%%  endif
+%% endfor
 
 %% for pt in pixeltypes
 %%  if not pt.is_unknown() and not pt.is_palette()
@@ -319,13 +316,20 @@ int GP_FilterResizeLinearLFInt_Raw(const GP_Context *src, GP_Context *dst,
 
 	if (x_rat < 1.00 && y_rat < 1.00) {
 
-		/* Fix. */
-		if (src->pixel_type != GP_PIXEL_RGB888)
-			return -1;
-		
 		GP_DEBUG(1, "Downscaling image %ux%u -> %ux%u %2.2f %2.2f",
 	                     src->w, src->h, dst->w, dst->h, x_rat, y_rat);
-		return interpolate_linear_lp_xy(src, dst, callback);
+		
+		switch (src->pixel_type) {
+		%% for pt in pixeltypes
+		%%  if not pt.is_unknown() and not pt.is_palette()
+		case GP_PIXEL_{{ pt.name }}:
+			return GP_FilterResizeLinearLFInt_{{ pt.name }}_Raw(src, dst, callback);
+		break;
+		%%  endif
+		%% endfor
+		default:
+			return -1;
+		}
 	}
 
 	//TODO: x_rat > 1.00 && y_rat < 1.00
