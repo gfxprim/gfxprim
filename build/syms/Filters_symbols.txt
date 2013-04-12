@@ -76,8 +76,6 @@ GP_FilterHistogramAlloc
 GP_FilterHistogram_Raw
 
 GP_FilterInterpolate_Cubic
-GP_FilterInterpolate_LinearInt
-GP_FilterInterpolate_LinearLFInt
 
 GP_FilterInvert
 GP_FilterInvert_Raw
@@ -140,6 +138,14 @@ GP_FilterPoint_Raw
 
 GP_FilterResize
 GP_FilterResize_Raw
+
+GP_FilterResizeLinearInt
+GP_FilterResizeLinearIntAlloc
+GP_FilterResizeLinearInt_Raw
+
+GP_FilterResizeLinearLFInt
+GP_FilterResizeLinearLFIntAlloc
+GP_FilterResizeLinearLFInt_Raw
 
 GP_FilterResizeCubicInt
 GP_FilterResizeCubicIntAlloc

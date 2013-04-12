@@ -1,4 +1,5 @@
 GP_PixelTypes
+GP_PixelHasFlags
 
 GP_ContextAlloc
 GP_ContextResize
