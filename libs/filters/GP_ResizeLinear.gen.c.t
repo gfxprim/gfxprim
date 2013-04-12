@@ -43,39 +43,39 @@
  *
  * The xoff is offset of the first pixel.
  */
-%% macro sample_x(pt, suff)
+%%- macro sample_x(pt, suff)
 {
-	uint32_t mx = x0;
-	uint32_t i;
+		uint32_t mx = x0;
+		uint32_t i;
 
-	pix = GP_GetPixel_Raw_{{ pt.pixelsize.suffix }}(src, x0, y0);
-
-	%% for c in pt.chanslist
-	{{ c[0] }}{{ suff }} = (GP_Pixel_GET_{{ c[0] }}_{{ pt.name }}(pix) * xoff[x]) >> 9;
-	%% endfor
-
-	for (i = (1<<14) - xoff[x]; i > xpix_dist; i -= xpix_dist) {
-		if (mx < src->w - 1)
-			mx++;
-		
-		pix = GP_GetPixel_Raw_{{ pt.pixelsize.suffix }}(src, x0, y0);
+		pix = GP_GetPixel_Raw_{{ pt.pixelsize.suffix }}(src, mx, y0);
 
 		%% for c in pt.chanslist
-		{{ c[0] }}{{ suff }} += (GP_Pixel_GET_{{ c[0] }}_{{ pt.name }}(pix) * xpix_dist) >> 9;
+		{{ c[0] }}{{ suff }} = (GP_Pixel_GET_{{ c[0] }}_{{ pt.name }}(pix) * xoff[x]) >> 9;
 		%% endfor
-	}
 
-	if (i > 0) {
-		if (mx < src->w - 1)
-			mx++;
+		for (i = (1<<14) - xoff[x]; i > xpix_dist; i -= xpix_dist) {
+			if (mx < src->w - 1)
+				mx++;
 		
-		pix = GP_GetPixel_Raw_{{ pt.pixelsize.suffix }}(src, x0, y0);
+			pix = GP_GetPixel_Raw_{{ pt.pixelsize.suffix }}(src, mx, y0);
+
+			%% for c in pt.chanslist
+			{{ c[0] }}{{ suff }} += (GP_Pixel_GET_{{ c[0] }}_{{ pt.name }}(pix) * xpix_dist) >> 9;
+			%% endfor
+		}
+
+		if (i > 0) {
+			if (mx < src->w - 1)
+				mx++;
+		
+			pix = GP_GetPixel_Raw_{{ pt.pixelsize.suffix }}(src, mx, y0);
 			
-		%% for c in pt.chanslist
-		{{ c[0] }}{{ suff }} += (GP_Pixel_GET_{{ c[0] }}_{{ pt.name }}(pix) * i) >> 9;
-		%% endfor
-	}
-}
+			%% for c in pt.chanslist
+			{{ c[0] }}{{ suff }} += (GP_Pixel_GET_{{ c[0] }}_{{ pt.name }}(pix) * i) >> 9;
+			%% endfor
+		}
+		}
 %% endmacro
 
 %% for pt in pixeltypes
