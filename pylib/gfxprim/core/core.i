@@ -43,9 +43,9 @@ static int GP_ProgressCallbackProxy(GP_ProgressCallback *self)
 
         res = PyEval_CallObject(obj, args);
 
-        /* Parse Error */
+        /* Parse Error, Interruption, etc. */
         if (res == NULL) {
-                GP_WARN("Parse error while calling callback, aborting");
+                GP_WARN("Error while calling callback, aborting");
                 return 1;
         }
 
