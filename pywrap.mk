@@ -18,6 +18,8 @@ ALL+=$(SWIG_LIB) $(SWIG_PY)
 $(SWIG_PY): $(SWIG_C)
 	@
 
+$(SWIG_LIB): $(TOPDIR)/config.gen.mk
+
 $(SWIG_C): $(SWIG_SRC)
 ifdef VERBOSE
 	$(SWIG) $(SWIGOPTS) -python $(INCLUDES) $<
@@ -28,10 +30,10 @@ endif # VERBOSE
 
 $(SWIG_LIB): $(SWIG_C)
 ifdef VERBOSE
-	$(CC) $< $(CFLAGS) -D_GNU_SOURCE=1 $(LDFLAGS) -I$(PYTHON_INCLUDE) --shared -lGP $(LDLIBS) -L$(TOPDIR)/build/ -o $@
+	$(CC) $< $(CFLAGS) -D_GNU_SOURCE=1 $(LDFLAGS) $(PYTHON_INCLUDE) --shared -lGP $(LDLIBS) -L$(TOPDIR)/build/ -o $@
 else # VERBOSE
 	@echo "LD   $@"
-	@$(CC) $< $(CFLAGS) -D_GNU_SOURCE=1 $(LDFLAGS) -I$(PYTHON_INCLUDE) --shared -lGP $(LDLIBS) -L$(TOPDIR)/build/ -o $@
+	@$(CC) $< $(CFLAGS) -D_GNU_SOURCE=1 $(LDFLAGS) $(PYTHON_INCLUDE) --shared -lGP $(LDLIBS) -L$(TOPDIR)/build/ -o $@
 endif # VERBOSE
 
 endif # PYTHON_CONFIG
