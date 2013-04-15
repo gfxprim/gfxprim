@@ -136,16 +136,15 @@ def next(bk, i):
     return i
 
 def main():
-    print(dir(gfx))
-
     # Create X11 window
     bk = backends.BackendX11Init(None, 0, 0, 320, 240, "GFX demo", 0)
     assert(bk)
-    print(dir(bk.context.gfx))
 
     bk.Flip()
 
     i = 0
+
+    print("Press SPACE to draw different shape, ESC to exit")
 
     # Event loop
     while True:

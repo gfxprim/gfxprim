@@ -28,7 +28,7 @@ def main():
         backend_string = sys.argv[1]
 
     if len(sys.argv) > 2:
-        print("Usage: {} [backend init string]".format(sys.argv[0]))
+        print("Usage: %s [backend init string]" % sys.argv[0])
         sys.exit(1)
 
     # Create backend window
