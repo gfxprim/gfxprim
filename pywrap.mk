@@ -2,15 +2,16 @@ ifndef LIBNAME
 $(error LIBNAME not defined, fix your library Makefile)
 endif
 
-SWIG_SRC=$(LIBNAME).i
-SWIG_C=$(LIBNAME)_wrap.c
-SWIG_PY=c_$(LIBNAME).py
-SWIG_LIB=_c_$(LIBNAME).so
-
 ifdef SWIG
 ifdef PYTHON_CONFIG
 
 INCLUDES+=$(addprefix -I$(TOPDIR)/include/, $(INCLUDE))
+PY_SUFFIX=$(shell $(PYTHON_CONFIG) --extension-suffix)
+
+SWIG_SRC=$(LIBNAME).i
+SWIG_C=$(LIBNAME)_wrap.c
+SWIG_PY=c_$(LIBNAME).py
+SWIG_LIB=_c_$(LIBNAME)$(PY_SUFFIX)
 
 ALL+=$(SWIG_LIB) $(SWIG_PY)
 
@@ -36,7 +37,12 @@ else # VERBOSE
 	@$(CC) $< $(CFLAGS) -D_GNU_SOURCE=1 $(LDFLAGS) $(PYTHON_INCLUDE) --shared -lGP $(LDLIBS) -L$(TOPDIR)/build/ -o $@
 endif # VERBOSE
 
-endif # PYTHON_CONFIG
-endif # SWIG
+# Install python libraries into right places
+INSTALL_FILES+=__init__.py $(SWIG_PY) $(SWIG_LIB)
+
+include $(TOPDIR)/pyinst.mk
 
 CLEAN+=$(SWIG_C) $(SWIG_PY) $(SWIG_LIB) *.pyc
+
+endif # PYTHON_CONFIG
+endif # SWIG

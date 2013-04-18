@@ -5,11 +5,12 @@ ifndef SUBDIRS
 SUBDIRS=
 endif
 
-.PHONY: $(SUBDIRS) all clean rebuild help doc
+.PHONY: $(SUBDIRS) all clean rebuild help doc install
 
 all: $(SUBDIRS)
 clean: $(SUBDIRS)
 rebuild: $(SUBDIRS)
+install: $(SUBDIRS)
 
 help:
 	@echo "***      Available targets      ***"

@@ -5,6 +5,7 @@
 import os
 import sys
 from optparse import OptionParser
+from subprocess import check_output
 
 def header_exists(cfg, filename):
     fpath = cfg['include_path'][0] + '/' + filename
@@ -36,6 +37,16 @@ def c_compiler_exists(cfg):
     return c_try_compile(cfg, "int main(void) { return 0; }",
                          "Checking for working compiler (%s) ... " %
                          cfg["CC"][0])
+
+def python_version(cfg):
+    sys.stderr.write("Cddhecking for python-config Python version ... ")
+    
+    res = str(check_output("%s --ldflags" % cfg['PYTHON_CONFIG'][0], shell=True))
+    res = res[res.find('-lpython')+8:]
+    res = res[:3]
+
+    sys.stderr.write("%s\n" % res)
+    return res
 
 def python_module_installed(cfg, module):
     sys.stderr.write("Checking for python module %s ... " % module)
@@ -85,6 +96,13 @@ class libraries:
     # Print summary
     #
     def print_summary(self):
+        sys.stderr.write("Settings and variables\n")
+        sys.stderr.write("----------------------\n")
+
+        for i in cfg:
+            sys.stderr.write("%14s : %s\n" % (i, cfg[i][0]))
+            sys.stderr.write("              - %s\n\n" % cfg[i][1])
+
         sys.stderr.write("Libraries to link against\n")
         sys.stderr.write("-------------------------\n")
         
@@ -96,7 +114,7 @@ class libraries:
             else:
                 sys.stderr.write(" : Disabled\n")
 
-            sys.stderr.write("            - %s\n\n" % i[1])
+            sys.stderr.write("          - %s\n\n" % i[1])
     #
     # Enable/Disable library
     #
@@ -184,6 +202,9 @@ def basic_checks(cfg):
 
     check_for_swig(cfg)
     check_for_python_config(cfg)
+    
+    cfg['PYTHON_VER'][0] = python_version(cfg) 
+
     sys.stderr.write("\n")
 
 #
@@ -255,7 +276,9 @@ if __name__ ==  '__main__':
            'PYTHON_BIN'    : ['python', 'Path/name of python interpreter'],
            'SWIG'          : ['swig', 'Simplified Wrapper and Interface Generator'],
            'PYTHON_CONFIG' : ['python-config', 'Python config helper'],
-           'include_path'  : ['/usr/include', 'Path to the system headers']}
+           'PYTHON_VER'    : ['', 'Python version (derived from python config)'],
+	   'include_path'  : ['/usr/include', 'Path to the system headers'],
+	   'prefix'        : ['/usr', 'Installation prefix']}
 
     #
     # Library detection/enable disable
