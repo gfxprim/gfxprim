@@ -1,11 +1,9 @@
 from . import c_loaders
 
-
 def Load(filename, callback=None):
   "Load image from given file, guessing the type."
   c = c_loaders.GP_LoadImage(filename, callback)
   return c
-
 
 def _init(module):
   "Extend Context with loaders submodule"
@@ -26,6 +24,30 @@ def _init(module):
     Generally, not all pixel types work with all formats.
     """
     c_loaders.GP_SaveImage(self.ctx, filename, callback)
+  
+  @extend(LoadersSubmodule)
+  def SavePNG(self, filename, callback=None):
+    """Save the image as PNG.
+
+    Generally, not all pixel types work with all formats.
+    """
+    c_loaders.GP_SavePNG(self.ctx, filename, callback)
+  
+  @extend(LoadersSubmodule)
+  def SaveJPG(self, filename, callback=None):
+    """Save the image as JPEG.
+
+    Generally, not all pixel types work with all formats.
+    """
+    c_loaders.GP_SaveJPG(self.ctx, filename, callback)
+  
+  @extend(LoadersSubmodule)
+  def SaveBMP(self, filename, callback=None):
+    """Save the image as BMP.
+
+    Generally, not all pixel types work with all formats.
+    """
+    c_loaders.GP_SaveBMP(self.ctx, filename, callback)
 
   # Imports from the SWIG module
   import re
