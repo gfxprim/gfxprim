@@ -30,24 +30,24 @@ gfx_params = {
     'FillEllipse': 'IIIIP',
     'FillPolygon': ([(0,0),(1,1),(1,0)], 0, {}),
     'FillRect': 'IIIIP',
-    'FillRect_AA': 'FFFFP',
+    'FillRect_AA': 'IIIIP', # Fixpoint, originally 'FFFFP'
     'FillRing': 'IIIIP',
     'FillSymbol': '0IIIIP',
     'FillTetragon': 'IIIIIIIIP',
     'FillTriangle': 'IIIIIIP',
     'HLine': 'IIIP',
-    'HLineAA': 'FFFP',
+    'HLineAA': 'IIIP', # Fixpoint, originally 'FFFP'
     'Line': 'IIIIP',
-    'LineAA': 'FFFFP',
+    'LineAA': 'IIIIP', # Fixpoint, originally 'FFFFP'
     'Polygon': ([(0,0),(1,1),(1,0)], 0, {}),
-    'PutPixelAA': 'FFP',
+    'PutPixelAA': 'IIP', # Fixpoint, originally 'FFP'
     'Rect': 'IIIIP',
     'Ring': 'IIIIP',
     'Symbol': '0IIIIP',
     'Tetragon': 'IIIIIIIIP',
     'Triangle': 'IIIIIIP',
     'VLine': 'IIIP',
-    'VLineAA': 'FFFP',
+    'VLineAA': 'IIIP', # Fixpoint, originally 'FFFP'
     }
 
 
