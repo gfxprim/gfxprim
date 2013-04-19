@@ -15,7 +15,7 @@ def main():
     # Use Floyd-Steinberg dithering
     res = filters.FilterFloydSteinberg_RGB888_Alloc(img, core.C.PIXEL_G1, None)
     # Save result into grayscale png
-    loaders.SavePNG(res, "out.png", None)
+    res.loaders.SavePNG("out.png")
 
 if __name__ == '__main__':
     main()
