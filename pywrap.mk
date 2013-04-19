@@ -6,7 +6,8 @@ ifdef SWIG
 ifdef PYTHON_CONFIG
 
 INCLUDES+=$(addprefix -I$(TOPDIR)/include/, $(INCLUDE))
-PY_SUFFIX=$(shell $(PYTHON_CONFIG) --extension-suffix)
+#PY_SUFFIX=$(shell $(PYTHON_CONFIG) --extension-suffix)
+PY_SUFFIX=.so
 
 SWIG_SRC=$(LIBNAME).i
 SWIG_C=$(LIBNAME)_wrap.c
