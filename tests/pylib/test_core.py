@@ -104,6 +104,12 @@ def test_blit_vs_convert_to_RGB888(t):
     raise SkipTest("Palette conversions are TODO")
   c = ContextRand(42, 43, t, seed=0)
   c2a = ContextRand(c.w, c.h, core.C.PIXEL_RGB888, seed=42)
+  if 'A' in t.name:
+    try:
+      import gfxprim.gfx
+    except ImportError:
+      raise SkipTest("Could not import gfx for core test")
+    c2a.gfx.Fill(0)
   c2b = c.Convert(core.C.PIXEL_RGB888)
   c.Blit(0, 0, c2a, 0, 0, w=c.w, h=c.h)
   assert c2a == c2b
