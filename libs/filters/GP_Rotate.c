@@ -139,17 +139,6 @@ GP_Context *GP_FilterMirrorVAlloc(const GP_Context *src,
 	return res;
 }
 
-int GP_FilterRotate180_Raw(const GP_Context *src, GP_Context *dst,
-                           GP_ProgressCallback *callback)
-{
-	#warning FIXME: Callbacks, faster algorighm?
-
-	GP_FilterMirrorV_Raw(src, dst, NULL);
-	GP_FilterMirrorH_Raw(dst, dst, callback);
-
-	return 0;
-}
-
 int GP_FilterRotate90(const GP_Context *src, GP_Context *dst,
                       GP_ProgressCallback *callback)
 {
