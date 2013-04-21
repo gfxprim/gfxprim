@@ -3,7 +3,7 @@
 #
 # Script to convert testsuite JSON log into html page
 #
-
+from sys import argv
 import json
 
 #
@@ -274,16 +274,77 @@ class TestSuite:
         print(' </body>')
         print('</html>')
 
+    def results(self):
+        res_dict = {}
+
+        for i in html_colors:
+            res_dict[i] = 0
+
+        for tst in self.test_results:
+            res_dict[tst.result] = res_dict[tst.result] + 1;
+
+        return res_dict
+
+    # Creates table row with a link to results page
+    def html_summary(self, link):
+        print('    <tr>')
+
+        res_dict = self.results()
+
+        test_ok  = res_dict['Success']
+        test_ok += res_dict['Skipped']
+        test_ok += res_dict['Untested']
+
+        test_all = len(self.test_results)
+
+        if (test_ok < test_all):
+            bg_color = html_colors['Failed']
+        else:
+            bg_color = '#ccccee'
+
+            
+
+        print('     <td bgcolor="#ccccee">%s</td>' % (self.suite_name))
+        print('     <td bgcolor="%s">%i</td>' % (bg_color, test_all - test_ok))
+        
+        test_skipped = res_dict['Skipped']
+
+        if (test_skipped > 0):
+            bg_color = html_colors['Skipped']
+        else:
+            bg_color = '#ccccee'
+
+        print('     <td bgcolor="%s">%i</td>' % (bg_color, test_skipped))
+        print('     <td bgcolor="#ccccee">%i</td>' % (test_all))
+        print('     <td bgcolor="#ccccee"><small><a href="%s">Details</a></small></td>' % (link))
+        print('    </tr>')
+
 def main():
+    filename = 'log.json'
+    summary = False
+    pars = 1
+    link = ''
+
+    if (len(argv) > 1 and argv[1] == '-s'):
+        link = argv[2]
+        pars = 3
+        summary = True
+
+    if (len(argv) > pars):
+        filename = argv[pars]
+
     # parse JSON
-    f = open('log.json')
+    f = open(filename)
     data = json.load(f)
     f.close()
 
     # convert to python objects
     test_suite = TestSuite(data)
-    
-    test_suite.html()
+   
+    if (summary):
+        test_suite.html_summary(link)
+    else:
+        test_suite.html()
 
 if __name__ == '__main__': 
     main()
