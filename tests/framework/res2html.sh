@@ -6,7 +6,7 @@
 
 resdir=$1
 
-function die()
+die()
 {
 	echo ""
 	echo "* ERROR * ERROR * ERROR * ERROR * ERROR * ERROR *"
