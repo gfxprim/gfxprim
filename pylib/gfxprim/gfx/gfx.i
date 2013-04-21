@@ -22,7 +22,6 @@
 %include "GP_Ellipse.h"
 %include "GP_Arc.h"
 %include "GP_Polygon.h"
-%include "GP_Symbol.h"
 
 %include "GP_PutPixelAA.h"
 %include "GP_VLineAA.h"
