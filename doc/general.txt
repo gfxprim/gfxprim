@@ -129,12 +129,12 @@ image filters.
 .Currently Implemented Linear Filters
 [width="100%",options="header"]
 |=============================================================================
-| Filter Name | Supported Pixel Type | Mutithreaded
-| Convolution | RGB888               | Yes
-| Separable Convolution | RGB888     | Yes
-| Gaussian Blur | RGB888     | Yes
-| Sobel Edge Detection | RGB888 | Yes
-| Prewitt Edge Detection | RGB888 | Yes
+| Filter Name            | Supported Pixel Type | Mutithreaded
+| Convolution            | RGB888               | Yes
+| Separable Convolution  | RGB888               | Yes
+| Gaussian Blur          | RGB888               | Yes
+| Sobel Edge Detection   | RGB888               | Yes
+| Prewitt Edge Detection | RGB888               | Yes
 |=============================================================================
 
 NOTE: Linear filters are implemented using generic convolution filters, once
@@ -155,41 +155,41 @@ NOTE: Linear filters are implemented using generic convolution filters, once
 .Currently Implemented Ditherings
 [width="100%",options="header"]
 |=============================================================================
-| Filter Name | Supported Pixel Type | Multithreaded
-| Floyd Steinberg | RGB888 -> Any    | No
-| Hilbert Peano | RGB888 -> Any    | No
+| Filter Name     | Supported Pixel Type | Multithreaded
+	| Floyd Steinberg | RGB888 -> Any        | No
+| Hilbert Peano   | RGB888 -> Any        | No
 |=============================================================================
 
 .Currently Implemented Resamplings
 [width="100%",options="header"]
 |=============================================================================
-| Filter Name | Supported Pixel Type | Multithreaded
-| Nearest Neighbour | All           | No
-| Bilinear (Integer Arithmetics) | RGB888 | No
-| Bicubic (Integer Arithmetics) | All | No
-| Bicubic (Float Arithmetics) | RGB888 | No
+| Filter Name                    | Supported Pixel Type | Multithreaded
+| Nearest Neighbour              | All                  | No
+| Bilinear (Integer Arithmetics) | All                  | No
+| Bicubic (Integer Arithmetics)  | All                  | No
+| Bicubic (Float Arithmetics)    | RGB888               | No
 |=============================================================================
 
 .Rotation and mirroring
 [width="100%",options="header"]
 |=============================================================================
-| Filter Name | Supported Pixel Type | Multithreaded
-| Rotate 90   | All                  | No
-| Rotate 180  | All                  | No
-| Rotate 270  | All                  | No
-| Mirror Vertically | All            | No
-| Mirror Horizontally | All          | No
+| Filter Name         | Supported Pixel Type | Multithreaded
+| Rotate 90           | All                  | No
+| Rotate 180          | All                  | No
+| Rotate 270          | All                  | No
+| Mirror Vertically   | All                  | No
+| Mirror Horizontally | All                  | No
 |=============================================================================
 
 .Misc filters
 [width="100%",options="header"]
 |=============================================================================
-| Filter Name | Supported Pixel Type | Multithreaded
-| Histogram   | All                  | No
-| Additive Gaussian Noise | All      | No
-| Median      | RGB888               | No
-| Weighted Median | RGB888           | No
-| Sigma Lee | RGB888                 | No
+| Filter Name             | Supported Pixel Type | Multithreaded
+| Histogram               | All                  | No
+| Additive Gaussian Noise | All                  | No
+| Median                  | RGB888               | No
+| Weighted Median         | RGB888               | No
+| Sigma Lee               | RGB888               | No
 |=============================================================================
 
 Backends
