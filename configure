@@ -40,7 +40,11 @@ def c_compiler_exists(cfg):
 
 def python_version(cfg):
     sys.stderr.write("Cddhecking for python-config Python version ... ")
-    
+
+    if (cfg['PYTHON_CONFIG'][0] is ''):
+        sys.stderr.write('NA\n')
+        return ''
+
     res = str(check_output("%s --ldflags" % cfg['PYTHON_CONFIG'][0], shell=True))
     res = res[res.find('-lpython')+8:]
     res = res[:3]
