@@ -32,7 +32,6 @@ gfx_params = {
     'FillRect': 'IIIIP',
     'FillRect_AA': 'IIIIP', # Fixpoint, originally 'FFFFP'
     'FillRing': 'IIIIP',
-    'FillSymbol': '0IIIIP',
     'FillTetragon': 'IIIIIIIIP',
     'FillTriangle': 'IIIIIIP',
     'HLine': 'IIIP',
@@ -43,7 +42,6 @@ gfx_params = {
     'PutPixelAA': 'IIP', # Fixpoint, originally 'FFP'
     'Rect': 'IIIIP',
     'Ring': 'IIIIP',
-    'Symbol': '0IIIIP',
     'Tetragon': 'IIIIIIIIP',
     'Triangle': 'IIIIIIP',
     'VLine': 'IIIP',
