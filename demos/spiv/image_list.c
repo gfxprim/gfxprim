@@ -152,12 +152,17 @@ static void prev_img(struct image_list *self)
 		}
 	}
 
+	/* If we are at first image -> wrap around argv */
 	if (self->cur_arg == 0)
 		self->cur_arg = self->max_arg - 1;
 	else
 		self->cur_arg--;
 
 	try_load_dir(self);
+
+	/* if in directory, select last image in it */
+	if (self->in_dir)
+		self->cur_file = self->max_file - 1;
 
 	self->path_loaded = 0;
 }
