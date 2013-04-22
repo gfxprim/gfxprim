@@ -16,7 +16,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2013 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
@@ -25,6 +25,8 @@
 %% block body
 
 #include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
 
 #include <core/GP_WritePixel.h>
 
@@ -53,20 +55,15 @@ static void dump_buffer(const char *name, char *buf, unsigned int buf_len)
  * Compares two statically defined buffers
  */
 #define COMPARE_BUFFERS(id, buf1, buf2) do {                  \
-	unsigned int buf1_len = sizeof(buf1)/sizeof(*buf1);   \
-	unsigned int buf2_len = sizeof(buf2)/sizeof(*buf2);   \
+	unsigned int buf_len = sizeof(buf2)/sizeof(*buf2);    \
 	unsigned int i;                                       \
                                                               \
-	if (buf1_len != buf2_len) {                           \
-		tst_msg("Invalid buffers");                   \
-        	return TST_FAILED;                            \
-	}                                                     \
 	                                                      \
-	for (i = 0; i < buf1_len; i++)                        \
+	for (i = 0; i < buf_len; i++)                         \
 		if(buf1[i] != buf2[i]) {	              \
 			printf("%s\n", id);                   \
-			dump_buffer("wrote", buf1, buf1_len); \
-			dump_buffer("gen", buf2, buf2_len);   \
+			dump_buffer("wrote", buf1, buf_len);  \
+			dump_buffer("gen", buf2, buf_len);    \
 			tst_msg("Buffers are different");     \
 			return TST_FAILED;                    \
 		}                                             \
@@ -80,7 +77,6 @@ static void dump_buffer(const char *name, char *buf, unsigned int buf_len)
 %% for aligment in [0, 4]
 %% if (pixelsize != 16 and pixelsize != 32) or aligment == 0
 static int WritePixel{{ "_%i_%i_%i_%i"|format(pixelsize, offset, len, aligment) }}(void)
-//, {{ "\"offset=%i, len=%i, aligment=%i,\""|format(offset, len, aligment) }})
 {
 	char write_buf[{{ 25 * pixelsize//8 }}] = {};
 	char gen_buf[{{ 25 * pixelsize//8 }}] = {};
@@ -93,6 +89,32 @@ static int WritePixel{{ "_%i_%i_%i_%i"|format(pixelsize, offset, len, aligment) 
 	gen_buf[{{aligment + offset * pixelsize//8 + i * pixelsize//8 + j}}] = 0xff;
 %% endfor
 %% endfor
+
+	GP_WritePixels_{{ pixelsize }}BPP(write_buf + {{aligment + offset * pixelsize//8}}, {{ len }}, 0xffffffff>>{{32 - pixelsize}});
+
+	COMPARE_BUFFERS({{"\"p=%i o=%i l=%i a=%i\""|format(pixelsize, offset, len, aligment)}}, write_buf, gen_buf);
+}
+
+static int WritePixel{{ "_%i_%i_%i_%i_alloc"|format(pixelsize, offset, len, aligment) }}(void)
+{
+	char gen_buf[{{ 25 * pixelsize//8 }}] = {};
+	char *write_buf = malloc({{ 25 * pixelsize//8 }});
+
+	/*
+ 	 * Fill the compare buffer
+ 	 */
+%% for i in range(0, len)
+%% for j in range(0, pixelsize//8)
+	gen_buf[{{aligment + offset * pixelsize//8 + i * pixelsize//8 + j}}] = 0xff;
+%% endfor
+%% endfor
+
+	if (gen_buf == NULL) {
+		tst_msg("Malloc failed :(");
+		return TST_UNTESTED;
+	}
+	
+	memset(write_buf, 0, {{ 25 * pixelsize//8 }});
 
 	GP_WritePixels_{{ pixelsize }}BPP(write_buf + {{aligment + offset * pixelsize//8}}, {{ len }}, 0xffffffff>>{{32 - pixelsize}});
 
@@ -112,8 +134,10 @@ const struct tst_suite tst_suite = {
 %% for len    in range(0, 6)
 %% for aligment in [0, 4]
 %% if (pixelsize != 16 and pixelsize != 32) or aligment == 0
-		{.name = "WritePixel {{ pixelsize }} {{ offset }} {{ len }} {{ aligment }}", 
+		{.name = "WritePixel {{ pixelsize }} {{ offset }} {{ len }} {{ aligment }} stack", 
 		 .tst_fn = WritePixel{{ "_%i_%i_%i_%i"|format(pixelsize, offset, len, aligment) }}},
+		{.name = "WritePixel {{ pixelsize }} {{ offset }} {{ len }} {{ aligment }} alloc", 
+		 .tst_fn = WritePixel{{ "_%i_%i_%i_%i_alloc"|format(pixelsize, offset, len, aligment) }}},
 %% endif
 %% endfor
 %% endfor
