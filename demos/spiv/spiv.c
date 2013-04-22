@@ -673,15 +673,11 @@ static const char *keys_help[] = {
 	"Enter",
 	"Q      - quit spiv",
 	"",
-	"PgDown - move ten image forward",
-	"PgUp   - move ten image backward",
+	"PgDown - move 10 images forward",
+	"PgUp   - move 10 images backward",
 	"",
-	"Right",
-	"Up",
 	"Space  - move to the next image",
 	"",
-	"Left",
-	"Down",
 	"BckSpc - move to the prev image",
 	"",
 	"1      - resize spiv window to the image size",
@@ -993,32 +989,37 @@ int main(int argc, char *argv[])
 					params.show_progress_once = 1;
 					show_image(&params, image_list_move(list, -10));
 				break;
-				next:
 				case GP_KEY_RIGHT:
-					if (shift_flag) {
+					if (shift_flag)
+						set_zoom_offset(&params, 1, 0);
+					else
 						set_zoom_offset(&params, 10, 0);
-						break;
-					}
+						
+				break;
+				case GP_KEY_LEFT:
+					if (shift_flag)
+						set_zoom_offset(&params, -1, 0);
+					else
+						set_zoom_offset(&params, -10, 0);
+				break;
 				case GP_KEY_UP:
-					if (shift_flag) {
+					if (shift_flag)
+						set_zoom_offset(&params, 0, -1);
+					else
 						set_zoom_offset(&params, 0, -10);
-						break;
-					}
+				break;
+				case GP_KEY_DOWN:
+					if (shift_flag)
+						set_zoom_offset(&params, 0, 1);
+					else
+						set_zoom_offset(&params, 0, 10);
+				break;
+				next:
 				case GP_KEY_SPACE:
 					params.show_progress_once = 1;
 					show_image(&params, image_list_move(list, 1));
 				break;
 				prev:
-				case GP_KEY_LEFT:
-					if (shift_flag) {
-						set_zoom_offset(&params, -10, 0);
-						break;
-					}
-				case GP_KEY_DOWN:
-					if (shift_flag) {
-						set_zoom_offset(&params, 0, 10);
-						break;
-					}
 				case GP_KEY_BACKSPACE:
 					params.show_progress_once = 1;
 					show_image(&params, image_list_move(list, -1));
