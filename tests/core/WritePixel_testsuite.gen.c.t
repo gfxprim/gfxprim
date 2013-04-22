@@ -77,7 +77,8 @@ static void dump_buffer(const char *name, char *buf, unsigned int buf_len)
 %% for pixelsize in [8, 16, 24, 32]
 %% for offset in range(0, 4)
 %% for len    in range(0, 6)
-%% for aligment in [0, 1]
+%% for aligment in [0, 4]
+%% if (pixelsize != 16 and pixelsize != 32) or aligment == 0
 static int WritePixel{{ "_%i_%i_%i_%i"|format(pixelsize, offset, len, aligment) }}(void)
 //, {{ "\"offset=%i, len=%i, aligment=%i,\""|format(offset, len, aligment) }})
 {
@@ -97,6 +98,7 @@ static int WritePixel{{ "_%i_%i_%i_%i"|format(pixelsize, offset, len, aligment) 
 
 	COMPARE_BUFFERS({{"\"p=%i o=%i l=%i a=%i\""|format(pixelsize, offset, len, aligment)}}, write_buf, gen_buf);
 }
+%% endif
 %% endfor
 %% endfor
 %% endfor
@@ -108,9 +110,11 @@ const struct tst_suite tst_suite = {
 %% for pixelsize in [8, 16, 24, 32]
 %% for offset in range(0, 4)
 %% for len    in range(0, 6)
-%% for aligment in [0, 1]
+%% for aligment in [0, 4]
+%% if (pixelsize != 16 and pixelsize != 32) or aligment == 0
 		{.name = "WritePixel {{ pixelsize }} {{ offset }} {{ len }} {{ aligment }}", 
 		 .tst_fn = WritePixel{{ "_%i_%i_%i_%i"|format(pixelsize, offset, len, aligment) }}},
+%% endif
 %% endfor
 %% endfor
 %% endfor
