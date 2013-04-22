@@ -19,7 +19,7 @@
  * Copyright (C) 2009-2010 Jiri "BlueBear" Dluhos                            *
  *                         <jiri.bluebear.dluhos@gmail.com>                  *
  *                                                                           *
- * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2013 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
@@ -379,7 +379,7 @@ void GP_WritePixels_24BPP(void *start, size_t count, unsigned int value)
 		return;
 
 	/* How much bytes we are offset against the 32-bit boundary. */
-	int shift = ((intptr_t) bytep) % 4;
+	int shift = ((uintptr_t) bytep) % 4;
 
 	/*
 	 * Pixels remaining to draw (one less than pixelcount because
