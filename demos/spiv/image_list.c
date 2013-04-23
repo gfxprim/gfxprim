@@ -16,7 +16,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2013 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
@@ -38,6 +38,8 @@ struct image_list {
 	const char **args;
 	unsigned int cur_arg;
 	unsigned int max_arg;
+	/* counters for files in corresponding arg */
+	int *arg_file_counts;
 
 	/* path to the currently loaded image */
 	char path[1024];
@@ -85,8 +87,10 @@ static void try_load_dir(struct image_list *self)
 		return;
 	}
 
-	if (!(sb.st_mode & S_IFDIR))
+	if (!(sb.st_mode & S_IFDIR)) {
+		self->arg_file_counts[self->cur_arg] = 1;
 		return;
+	}
 
 	GP_DEBUG(1, "Loading directory '%s' content.", path);
 
@@ -95,6 +99,11 @@ static void try_load_dir(struct image_list *self)
 	if (ret == -1) {
 		GP_WARN("Failed to scandir '%s': %s", path, strerror(errno));
 		return;
+	}
+	
+	if (self->arg_file_counts[self->cur_arg] != ret) {
+		GP_DEBUG(1, "Updating arg counter to %i", ret);
+		self->arg_file_counts[self->cur_arg] = ret;
 	}
 
 	if (ret == 0) {
@@ -167,17 +176,81 @@ static void prev_img(struct image_list *self)
 	self->path_loaded = 0;
 }
 
+/*
+ * Sets current image, if we are in directory.
+ */
+static void set_dir_cur_img(struct image_list *self, int img)
+{
+	if (!self->in_dir) {
+		GP_BUG("Not in directory at %s",
+		       self->args[self->cur_arg]);
+		return;
+	}
+
+	if (img < 0 || img >= self->max_file) {
+		GP_BUG("Invalid image index %i", img);
+		return;
+	}
+
+	/* allready there */
+	if (self->cur_file == img)
+		return;
+
+	self->cur_file = img;
+	self->path_loaded = 0;
+}
+
+/*
+ * Returns current argument from arg list we are in.
+ * 
+ * Either it's image file or directory.
+ */
+static const char *cur_arg(struct image_list *self)
+{
+	return self->args[self->cur_arg];
+}
+
+/*
+ * Sets current argument from arg list.
+ */
+static void set_cur_arg(struct image_list *self, int arg)
+{
+	if (arg < 0 || arg >= (int)self->max_arg) {
+		GP_BUG("Invalid argument index %i", arg);
+		return;
+	}
+
+	if (self->in_dir) {
+		if ((int)self->cur_arg != arg) {
+			exit_dir(self);
+			self->cur_arg = arg;
+			self->path_loaded = 0;
+			try_load_dir(self);
+		} else {
+			set_dir_cur_img(self, 0);
+		}
+		return;
+	}
+
+	if ((int)self->cur_arg == arg)
+		return;
+
+	self->cur_arg = arg;
+	self->path_loaded = 0;
+
+	try_load_dir(self);
+}
+
 static void load_path(struct image_list *self)
 {
 	if (self->in_dir) {
 		//TODO: eliminate double /
 		snprintf(self->path, sizeof(self->path), "%s/%s",
-		         self->args[self->cur_arg],
-		         self->dir_files[self->cur_file]->d_name);
+		         cur_arg(self),
+			 self->dir_files[self->cur_file]->d_name);
 
 	} else {
-		snprintf(self->path, sizeof(self->path), "%s",
-		         self->args[self->cur_arg]);
+		snprintf(self->path, sizeof(self->path), "%s", cur_arg(self));
 	}
 
 	self->path_loaded = 1;
@@ -198,16 +271,128 @@ const char *image_list_move(struct image_list *self, int direction)
 	return image_list_img_path(self);
 }
 
+const char *image_list_dir_move(struct image_list *self, int direction)
+{
+	if (!self->in_dir) {
+		GP_DEBUG(2, "Not in directory");
+		return image_list_move(self, direction);
+	}
+
+	if (direction > 0) {
+		if (self->cur_file == self->max_file - 1) {
+			GP_DEBUG(2, "Moving after dir '%s'", cur_arg(self));
+			next_img(self);
+		} else {
+			GP_DEBUG(2, "Moving to last image in dir '%s'",
+			         cur_arg(self));
+			set_dir_cur_img(self, self->max_file - 1);
+		}
+	} else {
+		if (self->cur_file == 0) {
+			GP_DEBUG(2, "Moving before dir '%s'", cur_arg(self));
+			prev_img(self);
+		} else {
+			GP_DEBUG(2, "Moving to first image in dir '%s'",
+			         cur_arg(self));
+			set_dir_cur_img(self, 0);
+		}
+	}
+	
+	return image_list_img_path(self);
+}
+
+const char *image_list_first(struct image_list *self)
+{
+	GP_DEBUG(2, "Moving to the first image in the list");
+	
+	set_cur_arg(self, 0);
+
+	if (self->in_dir)
+		set_dir_cur_img(self, 0);
+
+	return image_list_img_path(self);
+}
+
+const char *image_list_last(struct image_list *self)
+{
+	GP_DEBUG(2, "Moving to the last image in the list");
+
+	set_cur_arg(self, self->max_arg - 1);
+
+	if (self->in_dir)
+		set_dir_cur_img(self, self->max_file - 1);
+
+	return image_list_img_path(self);
+}
+
+static unsigned int count_img_to(struct image_list *self, unsigned int arg_to)
+{
+	unsigned int cur_arg = self->cur_arg;
+	unsigned int cur_file = self->cur_file;
+	unsigned int count = 0, i;
+
+	for (i = 0; i < arg_to; i++) {
+		/* cache number of images in arg */
+		if (self->arg_file_counts[i] == -1)
+			set_cur_arg(self, i);
+
+		/* 
+		 * if the counter is still at -1
+		 * directory couldn't be loaded
+		 */
+		if (self->arg_file_counts[i] != -1)
+			count += self->arg_file_counts[i];
+	}
+
+	/* restore the original position */
+	set_cur_arg(self, cur_arg);
+	
+	if (self->in_dir)
+		set_dir_cur_img(self, cur_file);
+
+	return count;
+}
+
+unsigned int image_list_count(struct image_list *self)
+{
+	return count_img_to(self, self->max_arg);
+}
+
+unsigned int image_list_pos(struct image_list *self)
+{
+	return count_img_to(self, self->cur_arg) +  self->cur_file;
+}
+
+unsigned int image_list_dir_count(struct image_list *self)
+{
+	if (!self->in_dir)
+		return 1;
+
+	return self->max_file;
+}
+
+unsigned int image_list_dir_pos(struct image_list *self)
+{
+	if (!self->in_dir)
+		return 1;
+
+	return self->cur_file;
+}
+
 struct image_list *image_list_create(const char *args[])
 {
 	struct image_list *self;
+	size_t file_count_size;
+	unsigned int i;
 
 	GP_DEBUG(1, "Creating image list");
 	
 	self = malloc(sizeof(struct image_list));
 
-	if (self == NULL)
+	if (self == NULL) {
+		GP_WARN("Malloc failed");
 		return NULL;
+	}
 
 	self->args = args;
 	self->cur_arg = 0;
@@ -219,6 +404,18 @@ struct image_list *image_list_create(const char *args[])
 
 	self->max_arg = 0;
 	while (args[++self->max_arg] != NULL);
+
+	file_count_size = self->max_arg * sizeof(int);
+	self->arg_file_counts = malloc(file_count_size);
+
+	if (self->arg_file_counts == NULL) {
+		GP_WARN("Malloc failed");
+		free(self);
+		return NULL;
+	}
+
+	for (i = 0; i < self->max_arg; i++)
+		self->arg_file_counts[i] = -1;
 
 	try_load_dir(self);
 

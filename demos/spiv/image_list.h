@@ -16,7 +16,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2013 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
@@ -46,5 +46,44 @@ const char *image_list_img_path(struct image_list *self);
  * path.
  */
 const char *image_list_move(struct image_list *self, int direction);
+
+/*
+ * If we are in directory:
+ *  if direction > 0: move to its end and if allready there, to the next arg
+ *  if direction < 0: move to its begining and if allready there, to the previous arg
+ * 
+ * If we aren't in directory move by one in corresponding direction.
+ */
+const char *image_list_dir_move(struct image_list *self, int direction);
+
+/*
+ * Move to the first image in the list. 
+ */
+const char *image_list_first(struct image_list *self);
+
+/*
+ * Move to the last image in the list. 
+ */
+const char *image_list_last(struct image_list *self);
+
+/*
+ * Counts images int the list.
+ */
+unsigned int image_list_count(struct image_list *self);
+
+/*
+ * Returns current position in list, i.e. number between 0 and count - 1.
+ */
+unsigned int image_list_pos(struct image_list *self);
+
+/*
+ * Returns numbe of images in current dir or 1 if current arg is file.
+ */
+unsigned int image_list_dir_count(struct image_list *self);
+
+/*
+ * Returns current position in current dir or 1 if current arg is file.
+ */
+unsigned int image_list_dir_pos(struct image_list *self);
 
 #endif /* __IMAGE_LIST_H__ */

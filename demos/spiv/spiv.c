@@ -100,6 +100,9 @@ struct loader_params {
 	/* caches for loaded images */
 	struct image_cache *img_resized_cache;
 	struct image_cache *img_orig_cache;
+
+	/* image list structure */
+	struct image_list *img_list;
 };
 
 static int image_loader_callback(GP_ProgressCallback *self)
@@ -360,6 +363,26 @@ static void update_display(struct loader_params *params, GP_Context *img)
 	         white_pixel, black_pixel, "%s%s", 
 		 params->use_low_pass && params->rat < 1 ? "Gaussian LP + " : "",
 		 GP_InterpolationTypeName(params->resampling_method));
+
+	unsigned int count = image_list_count(params->img_list);
+	unsigned int pos = image_list_pos(params->img_list) + 1;
+	
+	GP_Print(context, NULL, 11, 19 + 4 * th, GP_ALIGN_RIGHT|GP_VALIGN_BOTTOM,
+	         black_pixel, white_pixel, "%u of %u", pos, count);
+	
+	GP_Print(context, NULL, 10, 18 + 4 * th, GP_ALIGN_RIGHT|GP_VALIGN_BOTTOM,
+	         white_pixel, black_pixel, "%u of %u", pos, count); 
+	
+	unsigned int dir_count = image_list_dir_count(params->img_list);
+	unsigned int dir_pos = image_list_dir_pos(params->img_list) + 1;
+
+	if (dir_count > 1 && dir_count != count) {
+		GP_Print(context, NULL, 11, 21 + 5 * th, GP_ALIGN_RIGHT|GP_VALIGN_BOTTOM,
+	        	 black_pixel, white_pixel, "%u of %u in directory", dir_pos, dir_count);
+	
+		GP_Print(context, NULL, 10, 20 + 5 * th, GP_ALIGN_RIGHT|GP_VALIGN_BOTTOM,
+	        	 white_pixel, black_pixel, "%u of %u in directory", dir_pos, dir_count); 
+	}
 
 	GP_BackendFlip(backend);
 }
@@ -859,6 +882,7 @@ int main(int argc, char *argv[])
 	GP_BackendFlip(backend);
 
 	struct image_list *list = image_list_create((const char**)argv + optind);
+	params.img_list = list;
 
 	params.show_progress_once = 1;
 	show_image(&params, image_list_img_path(list));
@@ -983,11 +1007,19 @@ int main(int argc, char *argv[])
 				break;
 				case GP_KEY_PAGE_UP:
 					params.show_progress_once = 1;
-					show_image(&params, image_list_move(list, 10));
+					show_image(&params, image_list_dir_move(list, -1));
 				break;
 				case GP_KEY_PAGE_DOWN:
 					params.show_progress_once = 1;
-					show_image(&params, image_list_move(list, -10));
+					show_image(&params, image_list_dir_move(list, 1));
+				break;
+				case GP_KEY_HOME:
+					params.show_progress_once = 1;
+					show_image(&params, image_list_first(list));
+				break;
+				case GP_KEY_END:
+					params.show_progress_once = 1;
+					show_image(&params, image_list_last(list));
 				break;
 				case GP_KEY_RIGHT:
 					if (shift_flag)
@@ -1017,12 +1049,18 @@ int main(int argc, char *argv[])
 				next:
 				case GP_KEY_SPACE:
 					params.show_progress_once = 1;
-					show_image(&params, image_list_move(list, 1));
+					if (shift_flag)
+						show_image(&params, image_list_move(list, 10));
+					else
+						show_image(&params, image_list_move(list, 1));
 				break;
 				prev:
 				case GP_KEY_BACKSPACE:
 					params.show_progress_once = 1;
-					show_image(&params, image_list_move(list, -1));
+					if (shift_flag)
+						show_image(&params, image_list_move(list, -10));
+					else
+						show_image(&params, image_list_move(list, -1));
 				break;
 				case GP_KEY_1:
 					resize_backend(&params, 1, shift_flag);
