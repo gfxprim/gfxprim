@@ -83,7 +83,7 @@ static int test_save_PNG(GP_PixelType pixel_type)
 	case ENOSYS:
 		tst_msg("Not Implemented");
 		GP_ContextFree(ctx);
-		return TST_SUCCESS;
+		return TST_SKIPPED;
 	default:
 		tst_msg("Failed and errno is not ENOSYS (%i)", errno);
 		GP_ContextFree(ctx);
