@@ -607,7 +607,6 @@ GP_Context *GP_ReadBMP(FILE *f, GP_ProgressCallback *callback)
 err2:
 	GP_ContextFree(context);
 err1:
-	fclose(f);
 	errno = err;
 	return NULL;
 }
@@ -615,11 +614,15 @@ err1:
 GP_Context *GP_LoadBMP(const char *src_path, GP_ProgressCallback *callback)
 {
 	FILE *f;
+	GP_Context *res;
 
 	if (GP_OpenBMP(src_path, &f, NULL, NULL, NULL))
 		return NULL;
 
-	return GP_ReadBMP(f, callback);
+	res = GP_ReadBMP(f, callback);
+	fclose(f);
+
+	return res;
 }
 
 /*
