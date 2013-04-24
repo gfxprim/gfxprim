@@ -63,6 +63,8 @@ static int save_img(enum fmt fmt, const GP_Context *img, const char *name)
 		return GP_SavePNG(img, buf, NULL);
 	case JPG:
 		return GP_SaveJPG(img, buf, NULL);
+	case BMP:
+		return GP_SaveBMP(img, buf, NULL);
 	default:
 		tst_err("Trying to save %s image", strfmt(fmt));
 		exit(TST_UNTESTED);
@@ -146,6 +148,16 @@ static int test_PNG_stress(void)
 static int test_JPG_stress(void)
 {
 	return save_load(JPG, 2000, 2000);
+}
+
+static int test_BMP_Save_Load(void)
+{
+	return save_load(BMP, 100, 100);
+}
+
+static int test_BMP_stress(void)
+{
+	return save_load(BMP, 2000, 2000);
 }
 
 static int load_enoent(enum fmt fmt)
@@ -689,11 +701,15 @@ const struct tst_suite tst_suite = {
 		 .flags = TST_TMPDIR | TST_CHECK_MALLOC},
 		{.name = "JPG Save Load", .tst_fn = test_JPG_Save_Load,
 		 .flags = TST_TMPDIR | TST_CHECK_MALLOC},
+		{.name = "BMP Save Load", .tst_fn = test_BMP_Save_Load,
+		 .flags = TST_TMPDIR | TST_CHECK_MALLOC},
 		
 		/* Stress Save Load tests */
 		{.name = "PNG Stress", .tst_fn = test_PNG_stress,
 		 .flags = TST_TMPDIR | TST_CHECK_MALLOC},
 		{.name = "JPG Stress", .tst_fn = test_JPG_stress,
+		 .flags = TST_TMPDIR | TST_CHECK_MALLOC},
+		{.name = "BMP Stress", .tst_fn = test_BMP_stress,
 		 .flags = TST_TMPDIR | TST_CHECK_MALLOC},
 
 		/* BPM loader tests */
