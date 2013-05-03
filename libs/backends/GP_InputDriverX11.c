@@ -286,6 +286,12 @@ void GP_InputDriverX11EventPut(struct GP_EventQueue *event_queue,
 		}
 #endif
 	break;
+	case MapNotify:
+		GP_DEBUG(1, "MapNotify event received");
+	break;
+	case ReparentNotify:
+		GP_DEBUG(1, "ReparentNotify event received");
+	break;
 	default:
 		GP_WARN("Unhandled X11 event type %u", ev->type);
 	}
