@@ -236,12 +236,12 @@ static GP_Context *load_image(struct loader_params *params, int elevate)
 		}
 		
 		/* Workaround */
-		if (img->pixel_type != GP_PIXEL_RGB888) {
-			GP_Context *tmp;
-			tmp = GP_ContextConvertAlloc(img, GP_PIXEL_RGB888);
-			GP_ContextFree(img);
-			img = tmp;
-		}
+//		if (img->pixel_type != GP_PIXEL_RGB888) {
+//			GP_Context *tmp;
+//			tmp = GP_ContextConvertAlloc(img, GP_PIXEL_RGB888);
+//			GP_ContextFree(img);
+//			img = tmp;
+//		}
 
 		image_cache_put(params->img_orig_cache, img, params->img_path, 0, 0);
 		
@@ -249,6 +249,30 @@ static GP_Context *load_image(struct loader_params *params, int elevate)
 	}
 
 	return img; 
+}
+
+/*
+ * Fill context with chessboard-like pattern.
+ */
+static void pattern_fill(GP_Context *ctx, unsigned int x0, unsigned int y0, unsigned int w, unsigned int h)
+{
+	unsigned int x, y;
+
+	GP_Pixel g1 = GP_RGBToContextPixel(0x44, 0x44, 0x44, ctx);
+	GP_Pixel g2 = GP_RGBToContextPixel(0x33, 0x33, 0x33, ctx);
+
+	for (y = 0; y < h; y++) {
+		for (x = 0; x < w; x++) {
+			GP_Pixel pix;
+
+			if ((x%(w/10) < (w/20)) ^ (y%(h/10) < (h/20)))
+				pix = g1;
+			else
+				pix = g2;
+
+			GP_PutPixel(ctx, x0 + x, y0 + y, pix);
+		}
+	}
 }
 
 /*
@@ -305,6 +329,9 @@ static void update_display(struct loader_params *params, GP_Context *img)
 		GP_FilterFloydSteinberg_RGB888(img, &sub_display, NULL);
 	//	GP_FilterHilbertPeano_RGB888(img, &sub_display, NULL);
 	} else {
+		if (GP_PixelHasFlags(img->pixel_type, GP_PIXEL_HAS_ALPHA))
+			pattern_fill(context, cx, cy, img->w, img->h);
+
 		GP_Blit_Clipped(img, 0, 0, img->w, img->h, context, cx, cy);
 	}
 	
