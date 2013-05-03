@@ -7,11 +7,16 @@ if test -z "$INSTALL_PREFIX"; then
 fi
 
 HEADER_LOC="$INSTALL_PREFIX/include/"
-LIB_LOC="$INSTALL_PREFIX/lib/"
+if [ -d $INSTALL_PREFIX/lib64 ]; then
+	LIB_LOC="$INSTALL_PREFIX/lib64/"
+else
+	LIB_LOC="$INSTALL_PREFIX/lib/"
+fi
+
 BIN_LOC="$INSTALL_PREFIX/bin/"
 
 # Headers
-echo "INSTALL headers"
+echo "INSTALL headers ($HEADER_LOC)"
 install -m 775 -d "${HEADER_LOC}GP"
 for i in `ls include/`; do
 	if [ -d "include/$i" ]; then
@@ -24,7 +29,7 @@ for i in `ls include/`; do
 done
 
 # Library
-echo "INSTALL libraries"
+echo "INSTALL libraries ($LIB_LOC)"
 install -m 775 -d "$LIB_LOC" 
 
 for i in build/*.so build/*.so.* build/*.a; do
