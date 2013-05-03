@@ -45,7 +45,6 @@ config = GfxPrimConfig(
       #
       # Standard RGB types
       #
-
       PixelType(name='xRGB8888', pixelsize=PS_32BPP, chanslist=[
 	('R', 16, 8),
 	('G', 8, 8),
@@ -76,25 +75,7 @@ config = GfxPrimConfig(
 	  ('R', 12, 6),
 	  ('G', 6, 6),
 	  ('B', 0, 6)]),
-      
-      PixelType(name='xRGB14666', pixelsize=PS_32BPP, chanslist=[
-	  ('R', 12, 6),
-	  ('G', 6, 6),
-	  ('B', 0, 6)]),
      
-      #
-      # Added for dithering tests
-      #
-      PixelType(name='xRGB7333', pixelsize=PS_16BPP, chanslist=[
-	  ('R', 6, 3),
-	  ('G', 3, 3),
-	  ('B', 0, 3)]),
-      
-      PixelType(name='xRGB2222', pixelsize=PS_8BPP, chanslist=[
-	  ('R', 4, 2),
-	  ('G', 2, 2),
-	  ('B', 0, 2)]),
-      
       #
       # Palette types
       #
@@ -124,13 +105,5 @@ config = GfxPrimConfig(
       
       PixelType(name='G16', pixelsize=PS_16BPP, chanslist=[
 	  ('V', 0, 16)]),
-
-      #
-      # Experiments
-      #
-
-      PixelType(name='VA12', pixelsize=PS_4BPP_BE, chanslist=[
-	  ('A', 1, 2),
-	  ('V', 3, 1)]),
       ]
     )

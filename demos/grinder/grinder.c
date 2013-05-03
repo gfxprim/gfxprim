@@ -433,7 +433,6 @@ static const char *dither_formats[] = {
 	"g2",
 	"g4",
 	"g8",
-	"rgb333",
 	"rgb565",
 	"rgb666",
 	NULL,
@@ -444,7 +443,6 @@ static const GP_PixelType dither_pixel_types[] = {
 	GP_PIXEL_G2,
 	GP_PIXEL_G4,
 	GP_PIXEL_G8,
-	GP_PIXEL_xRGB7333,
 	GP_PIXEL_RGB565,
 	GP_PIXEL_RGB666,
 };
