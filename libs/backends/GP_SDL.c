@@ -29,8 +29,8 @@
 
 #ifdef HAVE_LIBSDL
 
-#include "input/GP_InputDriverSDL.h"
 #include "input/GP_Input.h"
+#include "GP_InputDriverSDL.h"
 #include "GP_Backend.h"
 #include "GP_SDL.h"
 

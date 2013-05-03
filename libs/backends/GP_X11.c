@@ -41,7 +41,7 @@
 #include <X11/extensions/XShm.h>
 #endif /* HAVE_X_SHM */
 
-#include "input/GP_InputDriverX11.h"
+#include "GP_InputDriverX11.h"
 
 #include "backends/GP_X11.h"
 
