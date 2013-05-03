@@ -173,7 +173,8 @@ static inline void GP_BackendUpdateRectXYWH(GP_Backend *backend,
  */
 static inline void GP_BackendExit(GP_Backend *backend)
 {
-	backend->Exit(backend);
+	if (backend)
+		backend->Exit(backend);
 }
 
 /*

@@ -89,6 +89,12 @@ int main(void)
 	win_1 = GP_BackendX11Init(NULL, 0, 0, 300, 300, "win 1", 0);
 	win_2 = GP_BackendX11Init(NULL, 0, 0, 300, 300, "win 2", 0);
 
+	if (win_1 == NULL || win_2 == NULL) {
+		GP_BackendExit(win_1);
+		GP_BackendExit(win_2);
+		return 1;
+	}
+
 	/* Update the backend screen */
 	redraw(win_1->context);
 	redraw(win_2->context);
