@@ -3,7 +3,8 @@ TOPDIR=../..
 CSOURCES=$(shell echo *.c)
 
 INCLUDE=
-LDLIBS+=-lGP -L$(TOPDIR)/build/
+LDLIBS+=-lm
+LDLIBS+=$(LDLIBS_LOADERS)
 
 APPS=ttf2img
 

@@ -2,9 +2,10 @@ TOPDIR=../../..
 LIBNAME=grabbers
 INCLUDE=core
 
-LDFLAGS+=$(shell $(TOPDIR)/gfxprim-config --libs-grabbers)
-
 include $(TOPDIR)/pre.mk
+
+LDLIBS+=$(LDLIBS_GRABBERS)
+
 include $(TOPDIR)/pywrap.mk
 include $(TOPDIR)/post.mk
 

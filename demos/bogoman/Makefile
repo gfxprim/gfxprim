@@ -3,8 +3,7 @@ TOPDIR=../..
 CSOURCES=$(shell echo *.c)
 
 INCLUDE=
-LDFLAGS+=-L$(TOPDIR)/build/
-LDLIBS+=`$(TOPDIR)/gfxprim-config --libs --libs-backends`
+LDLIBS+=$(LDLIBS_BACKENDS)
 
 APPS=bogoman
 

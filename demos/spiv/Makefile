@@ -4,7 +4,9 @@ CSOURCES=$(shell echo *.c)
 
 INCLUDE=
 LDFLAGS+=-L$(TOPDIR)/build/
-LDLIBS+=-lrt `$(TOPDIR)/gfxprim-config --libs --libs-backends`
+LDLIBS+=-lrt
+
+LDLIBS+=$(LDLIBS_LOADERS) $(LDLIBS_BACKENDS)
 
 APPS=spiv
 

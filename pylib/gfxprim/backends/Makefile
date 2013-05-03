@@ -2,9 +2,9 @@ TOPDIR=../../..
 LIBNAME=backends
 INCLUDE=core
 
-LDFLAGS+=$(shell $(TOPDIR)/gfxprim-config --libs-backends)
-
 include $(TOPDIR)/pre.mk
+
+LDLIBS+=$(LDLIBS_BACKENDS)
 
 INSTALL_FILES+=_extend_backend.py
 
