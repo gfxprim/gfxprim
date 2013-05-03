@@ -264,30 +264,12 @@ static int x11_resize_ack(struct GP_Backend *self)
 	return ret;
 }
 
-static void match_pixel_type(struct x11_win *win,
-                             enum GP_PixelType *pixel_type, int *depth)
-{
-	/*
-	 * Eh, the XImage supports either 8, 16 or 32 bit pixels
-	 *
-	 * Do best effor on selecting appropriate pixel type
-	 */
-	for (*depth = 8; *depth <= 32; *depth<<=1) {
-		*pixel_type = GP_PixelRGBMatch(win->vis->red_mask,
-		                               win->vis->green_mask,
-	                                       win->vis->blue_mask,
-		                               0x0, *depth);
-	
-		if (*pixel_type != GP_PIXEL_UNKNOWN)
-			break;
-	}
-}
-
 #ifdef HAVE_X_SHM
 
 static int create_shm_ximage(GP_Backend *self, GP_Size w, GP_Size h)
 {
 	struct x11_win *win = GP_BACKEND_PRIV(self);
+	enum GP_PixelType pixel_type;
 
 	if (XShmQueryExtension(win->dpy) == False) {
 		GP_DEBUG(1, "MIT SHM Extension not supported, "
@@ -298,18 +280,6 @@ static int create_shm_ximage(GP_Backend *self, GP_Size w, GP_Size h)
 	if (self->context == NULL)
 		GP_DEBUG(1, "Using MIT SHM Extension");
 
-	enum GP_PixelType pixel_type;
-	int depth;
-
-	if (self->context == NULL)
-		match_pixel_type(win, &pixel_type, &depth);
-	else
-		pixel_type = self->context->pixel_type;
-	
-	if (pixel_type == GP_PIXEL_UNKNOWN) {
-		GP_DEBUG(1, "Unknown pixel type");
-		return 1;
-	}
 
 	win->img = XShmCreateImage(win->dpy, win->vis, win->scr_depth,
 	                           ZPixmap, NULL, &win->shminfo, w, h);
@@ -320,6 +290,16 @@ static int create_shm_ximage(GP_Backend *self, GP_Size w, GP_Size h)
 	}
 	
 	size_t size = win->img->bytes_per_line * win->img->height;
+
+	pixel_type = GP_PixelRGBMatch(win->img->red_mask,
+	                              win->img->green_mask,
+	                              win->img->blue_mask,
+	                              0x0, win->img->bits_per_pixel);
+
+	if (pixel_type == GP_PIXEL_UNKNOWN) {
+		GP_DEBUG(1, "Unknown pixel type");
+		goto err0;	
+	}
 
 	win->shminfo.shmid = shmget(IPC_PRIVATE, size, 0600);
 
@@ -430,25 +410,46 @@ static int create_ximage(GP_Backend *self, GP_Size w, GP_Size h)
 	enum GP_PixelType pixel_type;
 	int depth;
 
-	match_pixel_type(win, &pixel_type, &depth);
-	
-	if (pixel_type == GP_PIXEL_UNKNOWN) {
-		GP_DEBUG(1, "Unknown pixel type");
-		return 1;
+	/* Get depth similiar to the default visual depth */
+	switch (win->scr_depth) {
+	case 32:
+	case 24:
+		depth = 32;
+	case 16:
+		depth = 16;
+	case 8:
+		depth = 8;
+	default:
+		/* TODO: better default */
+		depth = 32;
 	}
 
-	self->context = GP_ContextAlloc(w, h, pixel_type);
-
-	if (self->context == NULL)
-		return 1;
+	GP_DEBUG(1, "Screen depth %i, using XImage depth %i",
+	         win->scr_depth, depth);
 
 	win->img = XCreateImage(win->dpy, win->vis, win->scr_depth, ZPixmap, 0,
 	                       NULL, w, h, depth, 0);
 
 	if (win->img == NULL) {
 		GP_DEBUG(1, "Failed to create XImage");
-		GP_ContextFree(self->context);
-		return 1;
+		goto err0;
+	}
+	
+	pixel_type = GP_PixelRGBMatch(win->img->red_mask,
+	                              win->img->green_mask,
+	                              win->img->blue_mask,
+	                              0x0, win->img->bits_per_pixel);
+
+	if (pixel_type == GP_PIXEL_UNKNOWN) {
+		GP_DEBUG(1, "Unknown pixel type");
+		goto err1;
+	}
+
+	self->context = GP_ContextAlloc(w, h, pixel_type);
+
+	if (self->context == NULL) {
+		GP_DEBUG(1, "Malloc failed :(");
+		goto err1;
 	}
 
 	win->shm_flag = 0;
@@ -456,6 +457,10 @@ static int create_ximage(GP_Backend *self, GP_Size w, GP_Size h)
 	win->img->data = (char*)self->context->pixels;
 	
 	return 0;
+err1:
+	XDestroyImage(win->img);
+err0:
+	return 1;
 }
 
 static void destroy_ximage(GP_Backend *self)
