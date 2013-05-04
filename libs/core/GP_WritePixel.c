@@ -189,17 +189,17 @@ void GP_WritePixels_2BPP_LE(void *start, uint8_t off,
 	switch (off) {
 	case 0:
 	break;
-	case 1:
+	case 2:
 		GP_SET_BITS1_ALIGNED(2, 2, start, val);
 
 		if (--len == 0)
 			return;
-	case 2:
+	case 4:
 		GP_SET_BITS1_ALIGNED(4, 2, start, val);
 
 		if (--len == 0)
 			return;
-	case 3:
+	case 6:
 		GP_SET_BITS1_ALIGNED(6, 2, start, val);
 
 		if (--len == 0)
@@ -235,17 +235,17 @@ void GP_WritePixels_2BPP_BE(void *start, uint8_t off,
 	switch (off) {
 	case 0:
 	break;
-	case 1:
+	case 2:
 		GP_SET_BITS1_ALIGNED(6, 2, start, val);
 
 		if (--len == 0)
 			return;
-	case 2:
+	case 4:
 		GP_SET_BITS1_ALIGNED(4, 2, start, val);
 
 		if (--len == 0)
 			return;
-	case 3:
+	case 6:
 		GP_SET_BITS1_ALIGNED(2, 2, start, val);
 
 		if (--len == 0)
@@ -286,7 +286,7 @@ void GP_WritePixels_4BPP_LE(void *start, uint8_t off,
 	switch (off) {
 	case 0:
 	break;
-	case 1:
+	case 4:
 		GP_SET_BITS1_ALIGNED(4, 4, start, val);
 
 		if (--len == 0)
@@ -318,7 +318,7 @@ void GP_WritePixels_4BPP_BE(void *start, uint8_t off,
 	switch (off) {
 	case 0:
 	break;
-	case 1:
+	case 4:
 		GP_SET_BITS1_ALIGNED(0, 4, start, val);
 
 		if (--len == 0)

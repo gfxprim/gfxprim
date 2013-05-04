@@ -29,6 +29,7 @@
 
 %% block body
 
+#include "core/GP_GetPutPixel.gen.h"
 #include "core/GP_WritePixel.h"
 
 #include "gfx/GP_HLine.h"
@@ -54,7 +55,9 @@ void GP_HLine_Raw_{{ ps.suffix }}(GP_Context *context, int x0, int x1, int y,
 	void *start = GP_PIXEL_ADDR(context, x0, y);
 
 %% if ps.needs_bit_endian()
-	GP_WritePixels_{{ ps.suffix }}(start, x0 % (8 / context->bpp), length, pixel);
+	unsigned int offset = GP_PIXEL_ADDR_OFFSET_{{ ps.suffix }}(x0);
+
+	GP_WritePixels_{{ ps.suffix }}(start, offset, length, pixel);
 %% else
 	GP_WritePixels_{{ ps.suffix }}(start, length, pixel);
 %% endif
