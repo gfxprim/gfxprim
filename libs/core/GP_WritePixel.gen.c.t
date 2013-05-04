@@ -16,7 +16,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2013 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
@@ -29,6 +29,7 @@
 #include "core/GP_GetSetBits.h"
 #include "core/GP_GetPutPixel.h"
 #include "core/GP_WritePixel.gen.h" 
+#include "core/GP_Debug.h"
 
 {# Some pixel types has hand written optimized functions #}
 %% set hand_optimized = ['1BPP_LE', '1BPP_BE',
@@ -43,12 +44,12 @@
 void GP_WritePixels_{{ ps.suffix }}(void *start, uint8_t off,
                             size_t cnt, unsigned int val)
 {
-	//TODO:
+	GP_TODO("Unimplemented");
 }
 %% else
 void GP_WritePixels_{{ ps.suffix }}(void *start, size_t cnt, unsigned int val)
 {
-	//TODO:
+	GP_TODO("Unimplemented");
 }
 %% endif
 
