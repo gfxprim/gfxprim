@@ -26,7 +26,7 @@
 {% block descr %}Fast value scaling macros{% endblock %}
 
 {% macro multcoef(s1, s2) -%}
-(0{% for i in range((s2 + s1 - 1) // s1) %}+(2<<{{ (i * s1) }}){% endfor %})
+(0{% for i in range((s2 + s1 - 1) // s1) %}+{{ 2 ** (i * s1) }}{% endfor %})
 {%- endmacro %}
 
 %% block body
