@@ -1,10 +1,11 @@
 TOPDIR=../..
 include $(TOPDIR)/pre.mk
 
-CSOURCES=$(shell echo *.c)
+CSOURCES=$(filter-out $(wildcard *.gen.c),$(wildcard *.c))
+GENSOURCES=APICoverage.gen.c
 
 APPS=gfx_benchmark Circle FillCircle Line CircleSeg Polygon Ellipse HLine\
-     VLine PutPixelAA HLineAA LineAA
+     VLine PutPixelAA HLineAA LineAA APICoverage.gen
 
 Circle: common.o
 FillCircle: common.o
@@ -20,5 +21,6 @@ LineAA: common.o
 
 include ../tests.mk
 
+include $(TOPDIR)/gen.mk
 include $(TOPDIR)/app.mk
 include $(TOPDIR)/post.mk

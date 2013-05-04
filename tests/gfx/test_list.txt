@@ -1,5 +1,7 @@
 # GFX test list
 
+APICoverage.gen
+
 HLine
 VLine
 Line
