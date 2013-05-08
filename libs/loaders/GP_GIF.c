@@ -67,7 +67,11 @@ int GP_OpenGIF(const char *src_path, void **f)
 
 	errno = 0;
 
+#if defined(GIFLIB_MAJOR) && GIFLIB_MAJOR >= 5
+	gf = DGifOpenFileName(src_path, NULL);
+#else
 	gf = DGifOpenFileName(src_path);
+#endif
 
 	if (gf == NULL) {
 		/*
@@ -138,6 +142,16 @@ static const char *gif_err_name(int err)
 	}
 }
 
+static int gif_err(GifFileType *gf)
+{
+#if defined(GIFLIB_MAJOR) && GIFLIB_MAJOR >= 5
+	return gf->Error;
+#else
+	(void) gf;
+	return GifLastError();
+#endif
+}
+
 static int read_extensions(GifFileType *gf)
 {
 	uint8_t *gif_ext_ptr;
@@ -147,7 +161,7 @@ static int read_extensions(GifFileType *gf)
 
 	if (DGifGetExtension(gf, &gif_ext_type, &gif_ext_ptr) != GIF_OK) {
 		GP_DEBUG(1, "DGifGetExtension() error %s (%i)",
-		         gif_err_name(GifLastError()), GifLastError());
+		         gif_err_name(gif_err(gf)), gif_err(gf));
 		return EIO;
 	}
 
@@ -156,7 +170,7 @@ static int read_extensions(GifFileType *gf)
 	do {
 		if (DGifGetExtensionNext(gf, &gif_ext_ptr) != GIF_OK) {
 			GP_DEBUG(1, "DGifGetExtension() error %s (%i)",
-			         gif_err_name(GifLastError()), GifLastError());
+			         gif_err_name(gif_err(gf)), gif_err(gf));
 			return EIO;
 		}
 
@@ -254,7 +268,7 @@ GP_Context *GP_ReadGIF(void *f, GP_ProgressCallback *callback)
 		if (DGifGetRecordType(gf, &rec_type) != GIF_OK) {
 			//TODO: error handling
 			GP_DEBUG(1, "DGifGetRecordType() error %s (%i)",
-			         gif_err_name(GifLastError()), GifLastError()); 
+			         gif_err_name(gif_err(gf)), gif_err(gf));
 			err = EIO;
 			goto err1;
 		}
@@ -276,7 +290,7 @@ GP_Context *GP_ReadGIF(void *f, GP_ProgressCallback *callback)
 		if (DGifGetImageDesc(gf) != GIF_OK) {
 			//TODO: error handling
 			GP_DEBUG(1, "DGifGetImageDesc() error %s (%i)",
-			         gif_err_name(GifLastError()), GifLastError()); 
+			         gif_err_name(gif_err(gf)), gif_err(gf)); 
 			err = EIO;
 			goto err1;
 		}
