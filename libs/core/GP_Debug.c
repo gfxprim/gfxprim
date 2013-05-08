@@ -22,6 +22,7 @@
 
 #include <stdarg.h>
 
+#include "core/GP_Version.h"
 #include "core/GP_Debug.h"
 
 static unsigned int debug_level = GP_DEFAULT_DEBUG_LEVEL;
@@ -66,6 +67,8 @@ void GP_DebugPrint(int level, const char *file, const char *function, int line,
 					     debug_level);
 			}
 		}
+	
+		GP_DEBUG(1, "GFXprim library version " GP_VER_STR);
 	}
 	
 	if (level > (int)debug_level)

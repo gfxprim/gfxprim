@@ -18,7 +18,7 @@ APPS=backend_example loaders_example loaders filters_symmetry gfx_koch\
      v4l2_show v4l2_grab convolution weighted_median shapetest koch \
      input_example fileview linetest randomshapetest fonttest\
      loaders_register blittest textaligntest abort sin_AA x11_windows\
-     debug_handler gaussian_noise byte_utils
+     debug_handler gaussian_noise byte_utils version
 
 ifeq ($(HAVE_LIBSDL),yes)
 APPS+=SDL_glue

@@ -16,65 +16,28 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2010 Jiri "BlueBear" Dluhos                            *
- *                         <jiri.bluebear.dluhos@gmail.com>                  *
- *                                                                           *
- * Copyright (C) 2009-2010 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2013 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
-/*
+ /*
 
-  This is header file for public core API.
+    Library version.
 
- */
+  */
 
-#ifndef GP_CORE_H
-#define GP_CORE_H
+#ifndef CORE_GP_VERSION_H
+#define CORE_GP_VERSION_H
 
-/* Library verson */
-#include "core/GP_Version.h"
+#define GP_VER_MAJOR 0
+#define GP_VER_MINOR 0
+#define GP_VER_MICRO 0
 
-/* Common building blocks */
-#include "core/GP_Common.h"
+#define GP_STRX(x) GP_STR(x)
+#define GP_STR(x) #x
 
-/* Context ... */
-#include "core/GP_Context.h"
+#define GP_VER_STR GP_STRX(GP_VER_MAJOR) "." \
+                   GP_STRX(GP_VER_MINOR) "." \
+                   GP_STRX(GP_VER_MICRO)
 
-/* ... and it's trasformations */
-#include "core/GP_Transform.h"
-
-/* Gamma */
-#include "core/GP_Gamma.h"
-
-/* Pixeltypes */
-#include "core/GP_Pixel.h"
-
-/* Pixel conversions */
-#include "core/GP_Convert.h"
-
-/* Individual pixel access */
-#include "core/GP_GetPutPixel.h"
-
-/* Writing pixel blocks */
-#include "GP_WritePixel.h"
-
-/* Blitting */
-#include "core/GP_Blit.h"
-
-/* Debug and debug level */
-#include "core/GP_Debug.h"
-
-/* Color */
-#include "core/GP_Color.h"
-
-/* Progress callback */
-#include "core/GP_ProgressCallback.h"
-
-/* Threads utils */
-#include "core/GP_Threads.h"
-
-/* Mix Pixel */
-#include "core/GP_MixPixels.h"
-
-#endif /* GP_CORE_H */
+#endif /* CORE_GP_VERSION_H */
