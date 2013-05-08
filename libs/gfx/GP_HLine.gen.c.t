@@ -34,6 +34,13 @@
 
 #include "gfx/GP_HLine.h"
 
+{# Explicit list of BPP that have optimized write pixel #}
+%% set have_writepixels = ['1BPP_LE', '1BPP_BE',
+                           '2BPP_LE', '2BPP_BE',
+                           '4BPP_LE', '4BPP_BE',
+                           '8BPP', '16BPP',
+                           '24BPP', '32BPP']
+
 %% for ps in pixelsizes
 
 void GP_HLine_Raw_{{ ps.suffix }}(GP_Context *context, int x0, int x1, int y,
@@ -51,17 +58,22 @@ void GP_HLine_Raw_{{ ps.suffix }}(GP_Context *context, int x0, int x1, int y,
 	x0 = GP_MAX(x0, 0);
 	x1 = GP_MIN(x1, (int) context->w - 1);
 
+%%  if ps.suffix in have_writepixels 
 	size_t length = 1 + x1 - x0;
 	void *start = GP_PIXEL_ADDR(context, x0, y);
 
-%% if ps.needs_bit_endian()
+%%   if ps.needs_bit_endian()
 	unsigned int offset = GP_PIXEL_ADDR_OFFSET_{{ ps.suffix }}(x0);
 
 	GP_WritePixels_{{ ps.suffix }}(start, offset, length, pixel);
-%% else
+%%   else
 	GP_WritePixels_{{ ps.suffix }}(start, length, pixel);
-%% endif
+%%   endif
 
+%%  else
+	for (;x0 <= x1; x0++)
+		GP_PutPixel_Raw_{{ ps.suffix }}(context, x0, y, pixel);
+%%  endif
 }
 
 %% endfor
