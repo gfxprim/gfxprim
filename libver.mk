@@ -3,7 +3,7 @@
 # for library names, soname etc
 #
 
-LIB_MAJOR=0
+LIB_MAJOR=1
 LIB_MINOR=0
 LIB_RELEASE=0
 
