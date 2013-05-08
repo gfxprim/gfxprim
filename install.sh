@@ -30,7 +30,7 @@ for i in build/*.so build/*.so.* build/*.a; do
 	if [ -L "$i" ]; then
 	        TARGET=`basename "$i"`
 		SOURCE=`readlink "$i"`
-		(cd "$LIB_LOC" && rm -f "$TARGET" && ln -s "$LIB_LOC$SOURCE" "$TARGET")
+		(cd "$LIB_LOC" && rm -f "$TARGET" && ln -s "$SOURCE" "$TARGET")
 	else
 		install "$i" "$LIB_LOC"
 	fi
