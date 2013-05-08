@@ -209,7 +209,17 @@ def basic_checks(cfg):
     
     cfg['PYTHON_VER'][0] = python_version(cfg) 
 
-    sys.stderr.write("\n")
+    if cfg['libdir'][0] == '':
+        sys.stderr.write("Checking for lib directory ... ")
+
+        if os.path.isdir(cfg['prefix'][0] + '/usr/lib64'):
+            cfg['libdir'][0] = '/usr/lib64'
+        else:
+            cfg['libdir'][0] = '/usr/lib'
+
+        sys.stderr.write(cfg['libdir'][0] + '\n');
+
+    sys.stderr.write('\n')
 
 #
 # Write configuration files
@@ -284,7 +294,10 @@ if __name__ ==  '__main__':
            'PYTHON_CONFIG' : ['python-config', 'Python config helper'],
            'PYTHON_VER'    : ['', 'Python version (derived from python config)'],
 	   'include_path'  : ['/usr/include', 'Path to the system headers'],
-	   'prefix'        : ['/usr', 'Installation prefix']}
+	   'prefix'        : ['', 'Installation prefix'],
+	   'bindir'        : ['/usr/bin', 'Where to install binaries'],
+	   'libdir'        : ['', 'Where to install libraries'],
+	   'includedir'    : ['/usr/include', 'Where to install headers']}
 
     #
     # Library detection/enable disable

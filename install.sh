@@ -1,30 +1,24 @@
 #!/bin/sh
 
-INSTALL_PREFIX="$1"
+PREFIX="$1"
+LIBDIR="$2"
+BINDIR="$3"
+INCLUDEDIR="$4"
 
-if test -z "$INSTALL_PREFIX"; then
-	INSTALL_PREFIX="/usr"
-fi
-
-HEADER_LOC="$INSTALL_PREFIX/include/"
-if [ -d $INSTALL_PREFIX/lib64 ]; then
-	LIB_LOC="$INSTALL_PREFIX/lib64/"
-else
-	LIB_LOC="$INSTALL_PREFIX/lib/"
-fi
-
-BIN_LOC="$INSTALL_PREFIX/bin/"
+HEADER_LOC="$PREFIX/$INCLUDEDIR"
+LIB_LOC="$PREFIX/$LIBDIR"
+BIN_LOC="$PREFIX/$BINDIR"
 
 # Headers
 echo "INSTALL headers ($HEADER_LOC)"
-install -m 775 -d "${HEADER_LOC}GP"
+install -m 775 -d "${HEADER_LOC}/GP"
 for i in `ls include/`; do
 	if [ -d "include/$i" ]; then
 		echo " $i"
-		install -m 775 -d "${HEADER_LOC}GP/$i"
-		install -m 664 "include/$i/"*.h "${HEADER_LOC}GP/$i"
+		install -m 775 -d "${HEADER_LOC}/GP/$i"
+		install -m 664 "include/$i/"*.h "${HEADER_LOC}/GP/$i"
 	else
-		install -m 664 "include/$i" "${HEADER_LOC}GP/$i"
+		install -m 664 "include/$i" "${HEADER_LOC}/GP/$i"
 	fi
 done
 
@@ -44,5 +38,6 @@ done
 
 # Binaries
 echo "INSTALL binaries"
+install -m 775 -d "$BIN_LOC"
 install -m 755 gfxprim-config "$BIN_LOC"
 install -m 755 demos/spiv/spiv "$BIN_LOC"
