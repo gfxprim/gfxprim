@@ -19,3 +19,6 @@ GP_BackendFlip
 GP_BackendWaitEvent
 GP_BackendPollEvent
 
+GP_InputDriverX11EventPut
+GP_InputDriverX11Init
+GP_InputDriverSDLEventPut

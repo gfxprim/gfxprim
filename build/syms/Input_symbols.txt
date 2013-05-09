@@ -2,10 +2,7 @@ GP_EventKeyName
 GP_EventDump
 
 GP_InputDriverLinuxRead
-GP_InputDriverSDLEventPut
 GP_InputDriverLinuxOpen
-GP_InputDriverX11EventPut
-GP_InputDriverX11Init
 GP_InputDriverLinuxClose
 GP_InputDriverKBDEventPut
 
