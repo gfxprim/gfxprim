@@ -30,9 +30,9 @@ LIB_LOC=/usr/lib/
 
 install:
 ifdef VERBOSE
-	./install.sh $(prefix) $(libdir) $(bindir) $(includedir)
+	./install.sh "$(prefix)" $(libdir) $(bindir) $(includedir)
 else
-	@./install.sh $(prefix) $(libdir) $(bindir) $(includedir)
+	@./install.sh "$(prefix)" $(libdir) $(bindir) $(includedir)
 endif
 
 tar:
