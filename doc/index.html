@@ -28,10 +28,12 @@
    </div>
    <div id="menu">
     <ul class="menu-tree">
-     <li class="menu-tree-item"><a href="index.html">Home</a></li>
-     <li class="menu-tree-item"><a href="api.html">API</a></li>
-     <li class="menu-tree-item"><a href="examples.html">Code Examples</a></li>
-     <li class="menu-tree-item"><a href="http://repo.or.cz/w/gfxprim.git">GIT</a></li>
+     <li class="menu-tree-item"><a href="general.html">C API</a></li>
+     <li class="menu-tree-item"><a href="core_python.html">Pyton API</a></li>
+     <li class="menu-tree-item"><a href="http://www.ucw.cz/mailman/listinfo/gfxprim">Mailing List</a></li>
+     <li class="menu-tree-item"><a href="https://github.com/gfxprim/gfxprim">GIT (GitHub)</a></li>
+     <li class="menu-tree-item"><a href="http://repo.or.cz/w/gfxprim.git">GIT (repo.or.cz)</a></li>
+     <li class="menu-tree-item"><a href="releases/gfxprim_1.0.0-rc0.tar.bz2">Download 1.0.0-rc0</a></li>
     </ul>
    </div>
    <div id="content">
@@ -46,21 +48,26 @@
      </p>
      <h3>About</h3>
      <p>
-      Once upon the time <i>GFXprim</i> had started as an simple attempt to
-      replace SDL_gfx which was unusable at the time we started. Soon it outgrew
-      the initial purpose and yielded into library that could be used as
-      replacement for SDL library. In contrast with SDL <i>GFXprim</i> is
+      Once upon the time <i>GFXprim</i> has started as a simple attempt to
+      replace SDL_gfx which was unusable then. Soon it outgrew the initial
+      purpose and yielded into a library that could be used as a replacement
+      for the family of SDL libraries. In contrast with SDL <i>GFXprim</i> is
       not aiming for abstracting the operating system interface. Instead of
-      that <i>GFXprim</i> provides means for keeping the system dependent
-      parts in well defined and isolated parts.
+      that <i>GFXprim</i> provides means for keeping the system dependent parts
+      in well defined and isolated parts.
      </p>
      <p>
-      One of the key points of the library is code generation. Most of the
+      One of the key points of the library are code generators. Most of the
       graphics operations are written using <a href="http://jinja.pocoo.org/">jinja</a>
-      templating engine which is used to generate specialized C code. So,
+      templating engine which is used to create specialized C code. So,
       for an example, once you add pixel definition into configuration file,
       creating specialized filters, loaders and conversions to other pixel
-      formats is just a matter of typing "make && make clean".
+      formats is just a matter of typing "make rebuild".
+     </p>
+     <h3>Documentation</h3>
+     <p>
+      For more information about features and API look at the
+      <a href="general.html">documentation</a>.
      </p>
      <h3>News</h3>
      <p>
@@ -73,21 +80,12 @@
       We do have a <a href="http://www.ucw.cz/mailman/listinfo/gfxprim">mailing list</a>
       and although there is not much of discussion now, we are there and listening.
      </p>
-     <h3>Documentation</h3>
-     <p>
-      For more information about internal structure and features look at the
-      <a href="api.html">API Description</a>.
-     </p>
-     <p>
-      There are also some nice C and Python
-      <a href="examples.html">Code Examples</a>.
-     </p>
    </div>
    <div id="cleaner">&nbsp;</div>
    <div id="footer">
-    <a href="http://repo.or.cz/w/gfxprim.git">git</a> |
-    <a href="http://atrey.karlin.mff.cuni.cz/~gavento/GfxPrimWiki/">wiki</a> |
-    <a href="http://www.ucw.cz/mailman/listinfo/gfxprim">mailing list</a>
+    <a href="http://repo.or.cz/w/gfxprim.git">repo.or.cz</a> |
+    <a href="https://github.com/gfxprim/gfxprim">GitHub</a> |
+    <a href="http://www.ucw.cz/mailman/listinfo/gfxprim">Mailing List</a>
    </div>
   </div>
  </body>
