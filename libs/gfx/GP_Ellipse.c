@@ -54,28 +54,3 @@ void GP_Ellipse(GP_Context *context, GP_Coord xcenter, GP_Coord ycenter,
 	
 	GP_Ellipse_Raw(context, xcenter, ycenter, a, b, pixel);
 }
-
-#include "algo/FillEllipse.algo.h"
-
-/* Generate drawing functions for various bit depths. */
-GP_DEF_FILL_FN_PER_BPP(GP_FillEllipse_Raw, DEF_FILLELLIPSE_FN)
-
-void GP_FillEllipse_Raw(GP_Context *context, GP_Coord xcenter, GP_Coord ycenter,
-	                GP_Size a, GP_Size b, GP_Pixel pixel)
-{
-	GP_CHECK_CONTEXT(context);
-
-	GP_FN_PER_BPP_CONTEXT(GP_FillEllipse_Raw, context, context,
-	                      xcenter, ycenter, a, b, pixel);
-}
-
-void GP_FillEllipse(GP_Context *context, GP_Coord xcenter, GP_Coord ycenter,
-                    GP_Size a, GP_Size b, GP_Pixel pixel)
-{
-	GP_CHECK_CONTEXT(context);
-	
-	GP_TRANSFORM_POINT(context, xcenter, ycenter);
-	GP_TRANSFORM_SWAP(context, a, b);
-	
-	GP_FillEllipse_Raw(context, xcenter, ycenter, a, b, pixel);
-}
