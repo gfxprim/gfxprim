@@ -8,6 +8,7 @@ Line
 Circle
 FillCircle
 Ellipse
+FillEllipse
 CircleSeg
 Polygon
 
