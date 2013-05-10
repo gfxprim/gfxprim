@@ -16,7 +16,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2013 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
@@ -25,6 +25,7 @@
 #include <sys/stat.h>
 
 #include <core/GP_Context.h>
+#include <core/GP_GetPutPixel.h>
 #include <loaders/GP_Loaders.h>
 
 #include "tst_test.h"
@@ -56,6 +57,71 @@ static int test_load_PNG(const char *path)
 
 	return TST_SUCCESS;
 }
+
+struct check_color_test {
+	const char *path;
+	GP_Pixel pixel;
+};
+
+static int test_load_PNG_check_color(struct check_color_test *test)
+{
+	GP_Context *img;
+
+	errno = 0;
+
+	img = GP_LoadPNG(test->path, NULL);
+
+	if (img == NULL) {
+		switch (errno) {
+		case ENOSYS:
+			tst_msg("Not Implemented");
+			return TST_SKIPPED;
+		default:
+			tst_msg("Got %s", strerror(errno));
+			return TST_FAILED;
+		}
+	}
+
+	unsigned int x, y, fail = 0;
+
+	for (x = 0; x < img->w; x++) {
+		for (y = 0; y < img->w; y++) {
+			GP_Pixel p = GP_GetPixel(img, x, y);
+
+			if (p != test->pixel) {
+				if (!fail)
+					tst_msg("First failed at %u,%u %x %x",
+					        x, y, p, test->pixel);
+				fail = 1;
+			}
+		}
+	}
+
+	if (!fail)
+		tst_msg("Context pixels are correct");
+
+	GP_ContextFree(img);
+
+	if (fail)
+		return TST_FAILED;
+
+	return TST_SUCCESS;
+}
+
+static struct check_color_test white_adam7 = {
+	.path = "100x100-white-adam7.png",
+	.pixel = 0xffffff,
+};
+
+static struct check_color_test black_grayscale = {
+	.path = "100x100-black-grayscale.png",
+	.pixel = 0x000000,
+};
+
+static struct check_color_test red = {
+	.path = "100x100-red.png",
+	.pixel = 0xff0000,
+};
 
 static int test_save_PNG(GP_PixelType pixel_type)
 {
@@ -96,9 +162,9 @@ const struct tst_suite tst_suite = {
 	.tests = {
 		/* PNG loader tests */
 		{.name = "PNG Load 100x100 RGB",
-		 .tst_fn = test_load_PNG,
+		 .tst_fn = test_load_PNG_check_color,
 		 .res_path = "data/png/valid/100x100-red.png",
-		 .data = "100x100-red.png",
+		 .data = &red,
 		 .flags = TST_TMPDIR | TST_CHECK_MALLOC},
 		
 		{.name = "PNG Load 100x100 RGB 50\% alpha",
@@ -108,9 +174,9 @@ const struct tst_suite tst_suite = {
 		 .flags = TST_TMPDIR | TST_CHECK_MALLOC},
 		
 		{.name = "PNG Load 100x100 8 bit Grayscale",
-		 .tst_fn = test_load_PNG,
+		 .tst_fn = test_load_PNG_check_color,
 		 .res_path = "data/png/valid/100x100-black-grayscale.png",
-		 .data = "100x100-black-grayscale.png",
+		 .data = &black_grayscale,
 		 .flags = TST_TMPDIR | TST_CHECK_MALLOC},
 		
 		{.name = "PNG Load 100x100 8 bit Grayscale + alpha",
@@ -129,6 +195,12 @@ const struct tst_suite tst_suite = {
 		 .tst_fn = test_load_PNG,
 		 .res_path = "data/png/valid/100x100-red-palette.png",
 		 .data = "100x100-red-palette.png",
+		 .flags = TST_TMPDIR | TST_CHECK_MALLOC},
+		
+		{.name = "PNG Load 100x100 RGB Adam7",
+		 .tst_fn = test_load_PNG_check_color,
+		 .res_path = "data/png/valid/100x100-white-adam7.png",
+		 .data = &white_adam7,
 		 .flags = TST_TMPDIR | TST_CHECK_MALLOC},
 		
 		{.name = "PNG Save 100x100 G1",
