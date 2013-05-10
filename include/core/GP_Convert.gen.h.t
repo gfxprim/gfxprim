@@ -52,7 +52,25 @@
 %% set c1 = pt1.chans['V']
         /* {{ c2[0] }}:=V */ GP_SET_BITS({{c2[1]}}+o2, {{c2[2]}}, p2,\
                 GP_SCALE_VAL_{{c1[2]}}_{{c2[2]}}(GP_GET_BITS({{c1[1]}}+o1, {{c1[2]}}, p1))); \
-{# case 5: invalid mapping -#}
+{# case 5: CMYK to RGB -#}
+%% elif c2[0] in 'RGB' and pt1.is_cmyk()
+%%  set K = pt1.chans['K']
+{# Get the right channel -#}
+%%  if c2[0] == 'R'
+%%   set V = pt1.chans['C']
+%%  elif c2[0] == 'G'
+%%   set V = pt1.chans['M']
+%%  else
+%%   set V = pt1.chans['Y']
+%%  endif
+	GP_SET_BITS({{ c2[1] }}+o2, {{ c2[2] }}, p2,\
+	            GP_SCALE_VAL_{{ K[2] + V[2] }}_{{ c2[2] }}(\
+                    (({{ 2 ** K[2] - 1 }} - GP_GET_BITS({{ K[1] }}+o1, {{ K[2] }}, p1)) * \
+                     ({{ 2 ** V[2] - 1 }} - GP_GET_BITS({{ V[1] }}+o1, {{ V[2] }}, p1))))); \
+{# case 6: RGB to CMYK -#}
+%% elif c2[0] in 'CMYK' and pt1.is_rgb()
+	/* TODO */ \
+{# case 7: invalid mapping -#}
 %% else
 {{ error('Channel conversion ' + pt1.name + ' to ' + pt2.name + ' not supported.') }}
 %% endif

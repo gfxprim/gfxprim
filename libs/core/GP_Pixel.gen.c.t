@@ -37,6 +37,7 @@ Pixel type definitions and functions
 {% if pt.is_rgb() %} | GP_PIXEL_IS_RGB{% endif -%}
 {% if pt.is_palette() %} | GP_PIXEL_IS_PALETTE{% endif -%}
 {% if pt.is_gray() %} | GP_PIXEL_IS_GRAYSCALE{% endif -%}
+{% if pt.is_cmyk() %} | GP_PIXEL_IS_CMYK{% endif -%}
 %%- endmacro
 
 /* 

@@ -4,8 +4,8 @@
 # 
 
 #
-# 2011 - Tomas Gavenciak <gavento@ucw.cz>
-# 2011 - Cyril Hrubis <metan@ucw.cz>
+# 2011      Tomas Gavenciak <gavento@ucw.cz>
+# 2011-2013 Cyril Hrubis <metan@ucw.cz>
 #
 # This file is sourced by all the generating scripts.
 # Moreover, the generated files are sourced by almost all Gfxprim sources,
@@ -75,7 +75,16 @@ config = GfxPrimConfig(
 	  ('R', 12, 6),
 	  ('G', 6, 6),
 	  ('B', 0, 6)]),
-     
+
+      #
+      # CMYK
+      #
+      PixelType(name="CMYK8888", pixelsize=PS_32BPP, chanslist=[
+	  ('K', 24, 8),
+	  ('Y', 16, 8),
+	  ('M',  8, 8),
+	  ('C',  0, 8)]),
+
       #
       # Palette types
       #

@@ -97,6 +97,7 @@ typedef enum GP_PixelFlags {
 	GP_PIXEL_HAS_ALPHA = 0x01,
 	GP_PIXEL_IS_RGB = 0x02,
 	GP_PIXEL_IS_PALETTE = 0x04,
+	GP_PIXEL_IS_CMYK = 0x08,
 	GP_PIXEL_IS_GRAYSCALE = 0x10,
 } GP_PixelFlags;
 

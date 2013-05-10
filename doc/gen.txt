@@ -181,6 +181,9 @@ class PixelType(object):
     def is_rgb(self):
         ...
 
+    def is_cmyk(self):
+        ...
+
     def is_gray(self):
         ...
 
