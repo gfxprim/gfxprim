@@ -46,7 +46,7 @@
 %% endmacro
 
 %% for pt in pixeltypes
-%% if not pt.is_unknown() and not pt.is_alpha() and not pt.is_palette()
+%% if pt.is_gray() or pt.is_rgb() and not pt.is_alpha()
 /*
  * Floyd Steinberg RGB888 to {{ pt.name }}
  */
@@ -127,7 +127,7 @@ int GP_FilterFloydSteinberg_RGB888_Raw(const GP_Context *src,
 {
 	switch (dst->pixel_type) {
 %% for pt in pixeltypes
-%% if not pt.is_unknown() and not pt.is_alpha() and not pt.is_palette()
+%% if pt.is_gray() or pt.is_rgb() and not pt.is_alpha()
 	case GP_PIXEL_{{ pt.name }}:
 		return GP_FilterFloydSteinberg_RGB888_to_{{ pt.name }}_Raw(src, dst, callback);
 %% endif
