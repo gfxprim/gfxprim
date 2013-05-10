@@ -140,6 +140,9 @@ GP_Context *GP_ReadJPG(FILE *f, GP_ProgressCallback *callback)
 	case JCS_RGB:
 		pixel_type = GP_PIXEL_RGB888;
 	break;
+	case JCS_CMYK:
+		pixel_type = GP_PIXEL_CMYK8888;
+	break;
 	default:
 		pixel_type = GP_PIXEL_UNKNOWN;
 	}
@@ -168,22 +171,35 @@ GP_Context *GP_ReadJPG(FILE *f, GP_ProgressCallback *callback)
 		JSAMPROW addr = (void*)GP_PIXEL_ADDR(ret, 0, y);
 		jpeg_read_scanlines(&cinfo, &addr, 1);
 
-		if (pixel_type != GP_PIXEL_RGB888)
-			continue;
+		if (pixel_type == GP_PIXEL_RGB888) {
+			//TODO: fixme bigendian?
+			/* fix the pixel, as we want in fact BGR */
+			unsigned int i;
 		
-		//TODO: fixme bigendian?
-		/* fix the pixel, as we want in fact BGR */
-		uint32_t i;
-		
-		for (i = 0; i < ret->w; i++) {
-			uint8_t *pix = GP_PIXEL_ADDR(ret, i, y);
-			GP_SWAP(pix[0], pix[2]);
-		}
+			for (i = 0; i < ret->w; i++) {
+				uint8_t *pix = GP_PIXEL_ADDR(ret, i, y);
+				GP_SWAP(pix[0], pix[2]);
+			}
 	
-		if (GP_ProgressCallbackReport(callback, y, ret->h, ret->w)) {
-			GP_DEBUG(1, "Operation aborted");
-			err = ECANCELED;
-			goto err2;
+			if (GP_ProgressCallbackReport(callback, y, ret->h, ret->w)) {
+				GP_DEBUG(1, "Operation aborted");
+				err = ECANCELED;
+				goto err2;
+			}
+		}
+
+		if (pixel_type == GP_PIXEL_CMYK8888) {
+			unsigned int i;
+			uint8_t *buf = GP_PIXEL_ADDR(ret, 0, y);
+
+			for (i = 0; i < ret->w; i++) {
+				unsigned int j = 4 * i;
+
+				buf[j]   = 0xff - buf[j];
+				buf[j+1] = 0xff - buf[j+1];
+				buf[j+2] = 0xff - buf[j+2];
+				buf[j+3] = 0xff - buf[j+3];
+			}
 		}
 	}
 
