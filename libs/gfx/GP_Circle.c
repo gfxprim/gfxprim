@@ -19,7 +19,7 @@
  * Copyright (C) 2009-2011 Jiri "BlueBear" Dluhos                            *
  *                         <jiri.bluebear.dluhos@gmail.com>                  *
  *                                                                           *
- * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2013 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
@@ -52,11 +52,6 @@ void GP_Circle(GP_Context *context, GP_Coord xcenter, GP_Coord ycenter,
 	
 	GP_Circle_Raw(context, xcenter, ycenter, r, pixel);
 }
-
-/* #include "algo/FillCircle.algo.h" */
-
-/* Generate drawing functions for various bit depths. */
-//GP_DEF_FILL_FN_PER_BPP(GP_FillCircle_Raw, DEF_FILLCIRCLE_FN)
 
 void GP_Ring_Raw(GP_Context *context, GP_Coord xcenter, GP_Coord ycenter,
                  GP_Size r1, GP_Size r2, GP_Pixel pixel)
