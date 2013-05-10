@@ -16,7 +16,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2013 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
@@ -106,7 +106,7 @@ GP_Context *GP_ReadPNG(FILE *f, GP_ProgressCallback *callback)
 	int depth, color_type, interlace_type;
 	GP_PixelType pixel_type = GP_PIXEL_UNKNOWN;
 	GP_Context *res;
-	int err;
+	int err, passes = 1;
 	double gamma;
 
 	png = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
@@ -147,6 +147,9 @@ GP_Context *GP_ReadPNG(FILE *f, GP_ProgressCallback *callback)
 	         color_type & PNG_COLOR_MASK_COLOR ? "color" : "gray",
 		 color_type & PNG_COLOR_MASK_ALPHA ? " with alpha channel" : "",
 		 (unsigned int)w, (unsigned int)h, depth, gamma);
+
+	if (interlace_type == PNG_INTERLACE_ADAM7)
+		passes = png_set_interlace_handling(png);
 
 	switch (color_type) {
 	case PNG_COLOR_TYPE_GRAY:
@@ -233,19 +236,26 @@ GP_Context *GP_ReadPNG(FILE *f, GP_ProgressCallback *callback)
 		png_set_packswap(png);
 
 	uint32_t y;
-	
-	/* start the actuall reading */
-	for (y = 0; y < h; y++) {
-		png_bytep row = GP_PIXEL_ADDR(res, 0, y);
-		png_read_row(png, row, NULL);
+	int p;
 
-		if (GP_ProgressCallbackReport(callback, y, h, w)) {
-			GP_DEBUG(1, "Operation aborted");
-			err = ECANCELED;
-			goto err3;
+	/* 
+	 * Do the actuall reading.
+	 *
+	 * The passes are needed for adam7 interlacing.
+	 */
+	for (p = 0; p < passes; p++) {
+		for (y = 0; y < h; y++) {
+			png_bytep row = GP_PIXEL_ADDR(res, 0, y);
+			png_read_row(png, row, NULL);
+
+			if (GP_ProgressCallbackReport(callback, y + h * p, h * passes, w)) {
+				GP_DEBUG(1, "Operation aborted");
+				err = ECANCELED;
+				goto err3;
+			}
 		}
 	}
-	
+
 	png_destroy_read_struct(&png, &png_info, NULL);
 
 	GP_ProgressCallbackDone(callback);
