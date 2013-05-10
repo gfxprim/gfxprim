@@ -5,7 +5,7 @@
 import os
 import sys
 from optparse import OptionParser
-from subprocess import check_output
+import subprocess
 
 def header_exists(cfg, filename):
     fpath = cfg['include_path'][0] + '/' + filename
@@ -45,7 +45,9 @@ def python_version(cfg):
         sys.stderr.write('NA\n')
         return ''
 
-    res = str(check_output("%s --ldflags" % cfg['PYTHON_CONFIG'][0], shell=True))
+    cmd = subprocess.Popen([cfg['PYTHON_CONFIG'][0], '--ldflags'],
+                           stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    res = str(cmd.communicate())
     res = res[res.find('-lpython')+8:]
     res = res[:3]
 
