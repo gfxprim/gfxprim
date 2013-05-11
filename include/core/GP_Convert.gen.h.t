@@ -64,7 +64,7 @@
                 GP_SCALE_VAL_{{c1[2]}}_{{c2[2]}}(GP_GET_BITS({{c1[1]}}+o1, {{c1[2]}}, p1))); \
 {# case 2: set A to full opacity (not present in source) -#}
 %% elif c2[0]=='A'
-        /* A:={{ hex(c2[2]) }} */GP_SET_BITS({{c2[1]}}+o2, {{c2[2]}}, p2, {{ hex(c2[2]) }}); \
+        /* A:={{ hex(c2[2]) }} */GP_SET_BITS({{c2[1]}}+o2, {{c2[2]}}, p2, {{ hex(2 ** c2[2] - 1) }}); \
 {# case 3: calculate V as average of RGB -#}
 %% elif c2[0]=='V' and pt1.is_rgb()
 	/* V:=RGB_avg */ GP_SET_BITS({{c2[1]}}+o2, {{c2[2]}}, p2, ( \
