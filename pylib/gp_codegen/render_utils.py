@@ -36,6 +36,8 @@ def create_environment(config, template_dir):
   env.globals['int'] = int;
   env.globals['float'] = float;
   env.globals['round'] = round;
+  env.globals['min'] = min;
+  env.globals['max'] = max;
   return env
 
 
