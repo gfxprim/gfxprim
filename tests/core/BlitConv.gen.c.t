@@ -73,11 +73,12 @@ static int check_filled(GP_Context *c, GP_Pixel p)
 	return 0;
 }
 
-%% for pt1 in pixeltypes
-%%  if not pt1.is_unknown() and not pt1.is_palette()
-%%   for pt2 in pixeltypes
-%%    if not pt2.is_unknown() and not pt2.is_palette()
-static int blit_black_{{ pt1.name }}_to_{{ pt2.name }}(void)
+%% macro blit_color(name, r, g, b)
+%%  for pt1 in pixeltypes
+%%   if not pt1.is_unknown() and not pt1.is_palette()
+%%    for pt2 in pixeltypes
+%%     if not pt2.is_unknown() and not pt2.is_palette()
+static int blit_{{ name }}_{{ pt1.name }}_to_{{ pt2.name }}(void)
 {
 	GP_Context *src = GP_ContextAlloc(100, 100, GP_PIXEL_{{ pt1.name }});
 	GP_Context *dst = GP_ContextAlloc(100, 100, GP_PIXEL_{{ pt2.name }});
@@ -90,67 +91,37 @@ static int blit_black_{{ pt1.name }}_to_{{ pt2.name }}(void)
 	}
 
 	/* Fill source with black, destination with pseudo random mess */
-%%     if pt1.is_alpha()
-	GP_Pixel black_src = GP_RGBAToContextPixel(0, 0, 0, 0xff, src);
-%%     else
-	GP_Pixel black_src = GP_RGBToContextPixel(0, 0, 0, src);
-%%     endif
-%%     if pt2.is_alpha()
-	GP_Pixel black_dst = GP_RGBAToContextPixel(0, 0, 0, 0xff, src);
-%%     else
-	GP_Pixel black_dst = GP_RGBToContextPixel(0, 0, 0, dst);
-%%     endif
+%%      if pt1.is_alpha()
+	GP_Pixel pix_src = GP_RGBAToContextPixel({{ r }}, {{ g }}, {{ b }}, 0xff, src);
+%%      else
+	GP_Pixel pix_src = GP_RGBToContextPixel({{ r }}, {{ g }}, {{ b }}, src);
+%%      endif
+%%      if pt2.is_alpha()
+	GP_Pixel pix_dst = GP_RGBAToContextPixel({{ r }}, {{ g }}, {{ b }}, 0xff, dst);
+%%      else
+	GP_Pixel pix_dst = GP_RGBToContextPixel({{ r }}, {{ g }}, {{ b }}, dst);
+%%      endif
 
-	fill_context(src, black_src);
+        tst_msg("pixel_src=%08x pixel_dst=%08x", pix_src, pix_dst);
+
+	fill_context(src, pix_src);
 	mess_context(dst);
 
 	GP_Blit(src, 0, 0, src->w, src->h, dst, 0, 0);
 
-	if (check_filled(dst, black_dst))
+	if (check_filled(dst, pix_dst))
 		return TST_FAILED;
 
 	return TST_SUCCESS;
 }
-
-static int blit_white_{{ pt1.name }}_to_{{ pt2.name }}(void)
-{
-	GP_Context *src = GP_ContextAlloc(100, 100, GP_PIXEL_{{ pt1.name }});
-	GP_Context *dst = GP_ContextAlloc(100, 100, GP_PIXEL_{{ pt2.name }});
-
-	if (src == NULL || dst == NULL) {
-		GP_ContextFree(src);
-		GP_ContextFree(dst);
-		tst_msg("Malloc failed :(");
-		return TST_UNTESTED;
-	}
-
-	/* Fill source with white, destination with pseudo random mess */
-%%     if pt1.is_alpha()
-	GP_Pixel white_src = GP_RGBAToContextPixel(0xff, 0xff, 0xff, 0xff, src);
-%%     else
-	GP_Pixel white_src = GP_RGBToContextPixel(0xff, 0xff, 0xff, src);
 %%     endif
-%%     if pt2.is_alpha()
-	GP_Pixel white_dst = GP_RGBAToContextPixel(0xff, 0xff, 0xff, 0xff, src);
-%%     else
-	GP_Pixel white_dst = GP_RGBToContextPixel(0xff, 0xff, 0xff, dst);
-%%     endif
+%%    endfor
+%%   endif
+%%  endfor
+%% endmacro
 
-	fill_context(src, white_src);
-	mess_context(dst);
-
-	GP_Blit(src, 0, 0, src->w, src->h, dst, 0, 0);
-
-	if (check_filled(dst, white_dst))
-		return TST_FAILED;
-
-	return TST_SUCCESS;
-}
-
-%%    endif
-%%   endfor
-%%  endif
-%% endfor
+{{ blit_color('black', '0x00', '0x00', '0x00') }}
+{{ blit_color('white', '0xff', '0xff', '0xff') }}
 
 const struct tst_suite tst_suite = {
 	.suite_name = "Blit Conversions Testsuite",
