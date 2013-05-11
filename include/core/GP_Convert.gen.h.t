@@ -25,12 +25,37 @@
 
 {% block descr %}Convert PixelType values macros and functions{% endblock %}
 
+{# RGB -> CMYK requires special handling #}
+%% macro rgb_to_cmyk(in, out)
+%%  set R = in.chans['R']
+%%  set G = in.chans['G']
+%%  set B = in.chans['B']
+%%  set C = out.chans['C']
+%%  set M = out.chans['M']
+%%  set Y = out.chans['Y']
+%%  set K = out.chans['K']
+%%  set max_bits = max(R[2], G[2], B[2])
+%%  set max_val = 2 ** max_bits - 1
+	GP_Pixel _R = GP_SCALE_VAL_{{ R[2] }}_{{ max_bits }}(GP_GET_BITS({{ R[1] }}+o1, {{ R[2] }}, p1)); \
+	GP_Pixel _G = GP_SCALE_VAL_{{ G[2] }}_{{ max_bits }}(GP_GET_BITS({{ G[1] }}+o1, {{ G[2] }}, p1)); \
+	GP_Pixel _B = GP_SCALE_VAL_{{ B[2] }}_{{ max_bits }}(GP_GET_BITS({{ B[1] }}+o1, {{ B[2] }}, p1)); \
+	GP_Pixel _K = GP_MAX3(_R, _G, _B); \
+	GP_SET_BITS({{ C[1] }}+o2, {{ C[2] }}, p2, GP_SCALE_VAL_{{ max_bits }}_{{ C[2] }}((_K - _R))); \
+	GP_SET_BITS({{ M[1] }}+o2, {{ M[2] }}, p2, GP_SCALE_VAL_{{ max_bits }}_{{ M[2] }}((_K - _G))); \
+	GP_SET_BITS({{ Y[1] }}+o2, {{ Y[2] }}, p2, GP_SCALE_VAL_{{ max_bits }}_{{ Y[2] }}((_K - _B))); \
+	GP_SET_BITS({{ K[1] }}+o2, {{ K[2] }}, p2, GP_SCALE_VAL_{{ max_bits }}_{{ K[2] }}({{ max_val }} - _K)); \
+%% endmacro
+
 %% macro GP_Pixel_TYPE_TO_TYPE(pt1, pt2)
 /*** {{ pt1.name }} -> {{ pt2.name }} ***
  * macro reads p1 ({{ pt1.name }} at bit-offset o1)
  * and writes to p2 ({{ pt2.name }} at bit-offset o2)
  * the relevant part of p2 is assumed to be cleared (zero) */
 #define GP_Pixel_{{ pt1.name }}_TO_{{ pt2.name }}_OFFSET(p1, o1, p2, o2) do { \
+{# special cases -#}
+%%  if pt1.is_rgb() and pt2.is_cmyk()
+{{ rgb_to_cmyk(pt1, pt2) -}}
+%%  else
 %% for c2 in pt2.chanslist
 {# case 1: just copy a channel -#}
 %% if c2[0] in pt1.chans.keys()
@@ -67,14 +92,12 @@
 	            GP_SCALE_VAL_{{ K[2] + V[2] }}_{{ c2[2] }}(\
                     (({{ 2 ** K[2] - 1 }} - GP_GET_BITS({{ K[1] }}+o1, {{ K[2] }}, p1)) * \
                      ({{ 2 ** V[2] - 1 }} - GP_GET_BITS({{ V[1] }}+o1, {{ V[2] }}, p1))))); \
-{# case 6: RGB to CMYK -#}
-%% elif c2[0] in 'CMYK' and pt1.is_rgb()
-	/* TODO */ \
 {# case 7: invalid mapping -#}
 %% else
 {{ error('Channel conversion ' + pt1.name + ' to ' + pt2.name + ' not supported.') }}
 %% endif
 %% endfor
+%% endif
 } while (0)
 
 /* a version without offsets */
