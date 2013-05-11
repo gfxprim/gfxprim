@@ -73,11 +73,15 @@ static int check_filled(GP_Context *c, GP_Pixel p)
 	return 0;
 }
 
-%% macro blit_color(name, r, g, b)
-%%  for pt1 in pixeltypes
-%%   if not pt1.is_unknown() and not pt1.is_palette()
-%%    for pt2 in pixeltypes
-%%     if not pt2.is_unknown() and not pt2.is_palette()
+static GP_Pixel rgb_to_pixel(int r, int g, int b, GP_Context *c)
+{
+	if (GP_PixelHasFlags(c->pixel_type, GP_PIXEL_HAS_ALPHA))
+		return GP_RGBAToContextPixel(r, g, b, 0xff, c);
+
+	return GP_RGBToContextPixel(r, g, b, c);
+}
+
+%% macro gen_blit(name, r, g, b, pt1, pt2)
 static int blit_{{ name }}_{{ pt1.name }}_to_{{ pt2.name }}(void)
 {
 	GP_Context *src = GP_ContextAlloc(100, 100, GP_PIXEL_{{ pt1.name }});
@@ -90,17 +94,9 @@ static int blit_{{ name }}_{{ pt1.name }}_to_{{ pt2.name }}(void)
 		return TST_UNTESTED;
 	}
 
-	/* Fill source with black, destination with pseudo random mess */
-%%      if pt1.is_alpha()
-	GP_Pixel pix_src = GP_RGBAToContextPixel({{ r }}, {{ g }}, {{ b }}, 0xff, src);
-%%      else
-	GP_Pixel pix_src = GP_RGBToContextPixel({{ r }}, {{ g }}, {{ b }}, src);
-%%      endif
-%%      if pt2.is_alpha()
-	GP_Pixel pix_dst = GP_RGBAToContextPixel({{ r }}, {{ g }}, {{ b }}, 0xff, dst);
-%%      else
-	GP_Pixel pix_dst = GP_RGBToContextPixel({{ r }}, {{ g }}, {{ b }}, dst);
-%%      endif
+	/* Fill source with color, destination with pseudo random mess */
+	GP_Pixel pix_src = rgb_to_pixel({{ r }}, {{ g }}, {{ b }}, src);
+	GP_Pixel pix_dst = rgb_to_pixel({{ r }}, {{ g }}, {{ b }}, dst);
 
         tst_msg("pixel_src=%08x pixel_dst=%08x", pix_src, pix_dst);
 
@@ -114,6 +110,14 @@ static int blit_{{ name }}_{{ pt1.name }}_to_{{ pt2.name }}(void)
 
 	return TST_SUCCESS;
 }
+%% endmacro
+
+%% macro blit_color(name, r, g, b)
+%%  for pt1 in pixeltypes
+%%   if not pt1.is_unknown() and not pt1.is_palette()
+%%    for pt2 in pixeltypes
+%%     if not pt2.is_unknown() and not pt2.is_palette()
+{{ gen_blit(name, r, g, b, pt1, pt2) }}
 %%     endif
 %%    endfor
 %%   endif
@@ -123,6 +127,36 @@ static int blit_{{ name }}_{{ pt1.name }}_to_{{ pt2.name }}(void)
 {{ blit_color('black', '0x00', '0x00', '0x00') }}
 {{ blit_color('white', '0xff', '0xff', '0xff') }}
 
+%% macro blit_equal_pixel(name, r, g, b)
+%%  for pt1 in pixeltypes
+%%   if not pt1.is_unknown() and not pt1.is_palette()
+{{ gen_blit(name, r, g, b, pt1, pt1) }}
+%%   endif
+%%  endfor
+%% endmacro
+
+{{ blit_equal_pixel('equal_pixel', '0x0f', '0xff', '0x00') }}
+
+%% macro gen_blit2(name, r, g, b, pname1, pname2)
+{{ gen_blit(name, r, g, b, pixeltypes_dict[pname1], pixeltypes_dict[pname2]) }}
+%% endmacro
+
+{{ gen_blit2('red', '0xff', '0x00', '0x00', 'RGB888', 'CMYK8888') }}
+{{ gen_blit2('green', '0x00', '0xff', '0x00', 'RGB888', 'CMYK8888') }}
+{{ gen_blit2('blue', '0x00', '0x00', '0xff', 'RGB888', 'CMYK8888') }}
+{{ gen_blit2('gray', '0xef', '0xef', '0xef', 'RGB888', 'CMYK8888') }}
+
+{{ gen_blit2('red', '0xff', '0x00', '0x00', 'CMYK8888', 'RGB888') }}
+{{ gen_blit2('green', '0x00', '0xff', '0x00', 'CMYK8888', 'RGB888') }}
+{{ gen_blit2('blue', '0x00', '0x00', '0xff', 'CMYK8888', 'RGB888') }}
+{{ gen_blit2('gray', '0xef', '0xef', '0xef', 'CMYK8888', 'RGB888') }}
+
+
+%% macro gen_suite_entry(name, from, to)
+		{.name = "Blit {{ from }} to {{ to }}", 
+		 .tst_fn = blit_{{ name }}_{{ from }}_to_{{ to }}},
+%% endmacro
+
 const struct tst_suite tst_suite = {
 	.suite_name = "Blit Conversions Testsuite",
 	.tests = {
@@ -130,14 +164,31 @@ const struct tst_suite tst_suite = {
 %%  if not pt1.is_unknown() and not pt1.is_palette()
 %%   for pt2 in pixeltypes
 %%    if not pt2.is_unknown() and not pt2.is_palette()
-		{.name = "blit black {{ pt1.name }} to {{ pt2.name }}", 
+		{.name = "Blit black {{ pt1.name }} to {{ pt2.name }}", 
 		 .tst_fn = blit_black_{{ pt1.name }}_to_{{ pt2.name }}},
-		{.name = "blit white {{ pt1.name }} to {{ pt2.name }}", 
+		{.name = "Blit white {{ pt1.name }} to {{ pt2.name }}", 
 		 .tst_fn = blit_white_{{ pt1.name }}_to_{{ pt2.name }}},
 %%    endif
 %%   endfor
 %%  endif
 %% endfor
+%% for pt1 in pixeltypes
+%%  if not pt1.is_unknown() and not pt1.is_palette()
+		{.name = "Blit {{ pt1.name }} to {{ pt1.name }}", 
+		 .tst_fn = blit_equal_pixel_{{ pt1.name }}_to_{{ pt1.name }}},
+%%  endif
+%% endfor
+
+{{ gen_suite_entry('red', 'RGB888', 'CMYK8888') }}
+{{ gen_suite_entry('green', 'RGB888', 'CMYK8888') }}
+{{ gen_suite_entry('blue', 'RGB888', 'CMYK8888') }}
+{{ gen_suite_entry('gray', 'RGB888', 'CMYK8888') }}
+
+{{ gen_suite_entry('red', 'CMYK8888', 'RGB888') }}
+{{ gen_suite_entry('green', 'CMYK8888', 'RGB888') }}
+{{ gen_suite_entry('blue', 'CMYK8888', 'RGB888') }}
+{{ gen_suite_entry('gray', 'CMYK8888', 'RGB888') }}
+
 		{.name = NULL}
 	}
 };
