@@ -709,26 +709,30 @@ static void init_caches(struct loader_params *params)
 static const char *keys_help[] = {
 	"Keyboard control:",
 	"",
+	"Esc, Enter, Q - quit spiv",
+	"",
+	"<  KP Minus           - zoom out by 1.5",
+	">, KP Plus            - zoom in by 1.5",
+	"R                     - rotate by 90 degrees clockwise",
+	"Up, Down, Left, Right - move image by 1px",
+	"                        (by 10 with Shift)",
+	"",
+	"Space     - move to the next image",
+	"BackSpace - move to the prev image",
+	"PgDown    - move to the start of directory",
+	"PgUp      - move to the end of directory",
+	"Home      - move to the first image",
+	"End       - move to the last image",
+	"",
 	"I      - toggle show info box",
 	"P      - toggle show progress",
-	"R      - rotate by 90 degrees",
+	"",
 	"]      - change to next resampling method",
 	"[      - change to prev resampling method",
 	"        (current method is shown in info box)",
 	"L      - toggle low pass filter",
 	"D      - drop image cache",
 	"H      - toggle help",
-	"",
-	"Esc",
-	"Enter",
-	"Q      - quit spiv",
-	"",
-	"PgDown - move 10 images forward",
-	"PgUp   - move 10 images backward",
-	"",
-	"Space  - move to the next image",
-	"",
-	"BckSpc - move to the prev image",
 	"",
 	"1      - resize spiv window to the image size",
 	"2      - resize spiv window to the half of the image size",
@@ -757,6 +761,8 @@ static void print_help(void)
 	printf("-e pixel_type\n\tturns on backend type emulation\n");
 	printf("\tfor example -e G1 sets 1-bit grayscale\n\n");
 	printf("-r angle\n\trotate display 90,180 or 270 degrees\n\n");
+	printf("-z sets zoom mode\n\t-zf zoom is set and modified by user\n");
+	printf("\t-zw zoom is fixed to window size (currently default)\n\n");
 	printf("-b\n\tpass backend init string to backend init\n");
 	printf("\tpass -b help for more info\n\n");
 
@@ -783,7 +789,7 @@ static void show_help(void)
 	GP_Fill(c, black_pixel);
 
 	for (i = 0; i < keys_help_len; i++) {
-		GP_Print(c, NULL, 20, i * 15, GP_ALIGN_RIGHT|GP_VALIGN_BOTTOM,
+		GP_Print(c, NULL, 20, 2 + i * 15, GP_ALIGN_RIGHT|GP_VALIGN_BOTTOM,
 		         white_pixel, black_pixel, "%s", keys_help[i]);
 	}
 
