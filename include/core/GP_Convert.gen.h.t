@@ -34,16 +34,16 @@
 %%  set M = out.chans['M']
 %%  set Y = out.chans['Y']
 %%  set K = out.chans['K']
-%%  set max_bits = max(R[2], G[2], B[2])
-%%  set max_val = 2 ** max_bits - 1
-	GP_Pixel _R = GP_SCALE_VAL_{{ R[2] }}_{{ max_bits }}(GP_GET_BITS({{ R[1] }}+o1, {{ R[2] }}, p1)); \
-	GP_Pixel _G = GP_SCALE_VAL_{{ G[2] }}_{{ max_bits }}(GP_GET_BITS({{ G[1] }}+o1, {{ G[2] }}, p1)); \
-	GP_Pixel _B = GP_SCALE_VAL_{{ B[2] }}_{{ max_bits }}(GP_GET_BITS({{ B[1] }}+o1, {{ B[2] }}, p1)); \
+%%  set max_size = max(R.size, G.size, B.size)
+%%  set max_val = 2 ** max_size - 1
+	GP_Pixel _R = GP_SCALE_VAL_{{ R.size }}_{{ max_size }}(GP_GET_BITS({{ R.off }}+o1, {{ R.size }}, p1)); \
+	GP_Pixel _G = GP_SCALE_VAL_{{ G.size }}_{{ max_size }}(GP_GET_BITS({{ G.off }}+o1, {{ G.size }}, p1)); \
+	GP_Pixel _B = GP_SCALE_VAL_{{ B.size }}_{{ max_size }}(GP_GET_BITS({{ B.off }}+o1, {{ B.size }}, p1)); \
 	GP_Pixel _K = GP_MAX3(_R, _G, _B); \
-	GP_SET_BITS({{ C[1] }}+o2, {{ C[2] }}, p2, GP_SCALE_VAL_{{ max_bits }}_{{ C[2] }}((_K - _R))); \
-	GP_SET_BITS({{ M[1] }}+o2, {{ M[2] }}, p2, GP_SCALE_VAL_{{ max_bits }}_{{ M[2] }}((_K - _G))); \
-	GP_SET_BITS({{ Y[1] }}+o2, {{ Y[2] }}, p2, GP_SCALE_VAL_{{ max_bits }}_{{ Y[2] }}((_K - _B))); \
-	GP_SET_BITS({{ K[1] }}+o2, {{ K[2] }}, p2, GP_SCALE_VAL_{{ max_bits }}_{{ K[2] }}({{ max_val }} - _K)); \
+	GP_SET_BITS({{ C.off }}+o2, {{ C.size }}, p2, GP_SCALE_VAL_{{ max_size }}_{{ C.size }}((_K - _R))); \
+	GP_SET_BITS({{ M.off }}+o2, {{ M.size }}, p2, GP_SCALE_VAL_{{ max_size }}_{{ M.size }}((_K - _G))); \
+	GP_SET_BITS({{ Y.off }}+o2, {{ Y.size }}, p2, GP_SCALE_VAL_{{ max_size }}_{{ Y.size }}((_K - _B))); \
+	GP_SET_BITS({{ K.off }}+o2, {{ K.size }}, p2, GP_SCALE_VAL_{{ max_size }}_{{ K.size }}({{ max_val }} - _K)); \
 %% endmacro
 
 %% macro GP_Pixel_TYPE_TO_TYPE(pt1, pt2)
@@ -60,23 +60,23 @@
 {# case 1: just copy a channel -#}
 %% if c2[0] in pt1.chans.keys()
 %% set c1 = pt1.chans[c2[0]]
-        /* {{ c2[0] }}:={{ c1[0] }} */ GP_SET_BITS({{c2[1]}}+o2, {{c2[2]}}, p2,\
-                GP_SCALE_VAL_{{c1[2]}}_{{c2[2]}}(GP_GET_BITS({{c1[1]}}+o1, {{c1[2]}}, p1))); \
+        /* {{ c2[0] }}:={{ c1[0] }} */ GP_SET_BITS({{ c2.off }}+o2, {{ c2.size }}, p2,\
+                GP_SCALE_VAL_{{ c1.size }}_{{ c2.size }}(GP_GET_BITS({{ c1.off }}+o1, {{ c1.size }}, p1))); \
 {# case 2: set A to full opacity (not present in source) -#}
 %% elif c2[0]=='A'
-        /* A:={{ hex(c2[2]) }} */GP_SET_BITS({{c2[1]}}+o2, {{c2[2]}}, p2, {{ hex(2 ** c2[2] - 1) }}); \
+        /* A:={{ c2.C_max }} */GP_SET_BITS({{ c2.off }}+o2, {{ c2.size }}, p2, {{ c2.C_max }}); \
 {# case 3: calculate V as average of RGB -#}
 %% elif c2[0]=='V' and pt1.is_rgb()
-	/* V:=RGB_avg */ GP_SET_BITS({{c2[1]}}+o2, {{c2[2]}}, p2, ( \
+	/* V:=RGB_avg */ GP_SET_BITS({{ c2.off }}+o2, {{ c2.size }}, p2, ( \
 %% for c1 in [pt1.chans['R'], pt1.chans['G'], pt1.chans['B']]
-                /* {{c1[0]}} */ GP_SCALE_VAL_{{c1[2]}}_{{c2[2]}}(GP_GET_BITS({{c1[1]}}+o1, {{c1[2]}}, p1)) + \
+                /* {{ c1.name }} */ GP_SCALE_VAL_{{ c1.size }}_{{ c2.size }}(GP_GET_BITS({{ c1.off }}+o1, {{ c1.size }}, p1)) + \
 %% endfor
         0)/3);\
 {# case 4: set each RGB to V -#}
 %% elif c2[0] in 'RGB' and pt1.is_gray()
 %% set c1 = pt1.chans['V']
-        /* {{ c2[0] }}:=V */ GP_SET_BITS({{c2[1]}}+o2, {{c2[2]}}, p2,\
-                GP_SCALE_VAL_{{c1[2]}}_{{c2[2]}}(GP_GET_BITS({{c1[1]}}+o1, {{c1[2]}}, p1))); \
+        /* {{ c2[0] }}:=V */ GP_SET_BITS({{ c2.off }}+o2, {{ c2.size }}, p2,\
+                GP_SCALE_VAL_{{ c1.size }}_{{ c2.size }}(GP_GET_BITS({{ c1.off }}+o1, {{ c1.size }}, p1))); \
 {# case 5: CMYK to RGB -#}
 %% elif c2[0] in 'RGB' and pt1.is_cmyk()
 %%  set K = pt1.chans['K']
@@ -88,10 +88,10 @@
 %%  else
 %%   set V = pt1.chans['Y']
 %%  endif
-	GP_SET_BITS({{ c2[1] }}+o2, {{ c2[2] }}, p2,\
-	            GP_SCALE_VAL_{{ K[2] + V[2] }}_{{ c2[2] }}(\
-                    (({{ 2 ** K[2] - 1 }} - GP_GET_BITS({{ K[1] }}+o1, {{ K[2] }}, p1)) * \
-                     ({{ 2 ** V[2] - 1 }} - GP_GET_BITS({{ V[1] }}+o1, {{ V[2] }}, p1))))); \
+	GP_SET_BITS({{ c2.off }}+o2, {{ c2.size }}, p2,\
+	            GP_SCALE_VAL_{{ K.size + V.size }}_{{ c2.size }}(\
+                    (({{ K.C_max }} - GP_GET_BITS({{ K.off }}+o1, {{ K.size }}, p1)) * \
+                     ({{ V.C_max }} - GP_GET_BITS({{ V.off }}+o1, {{ V.size }}, p1))))); \
 {# case 7: invalid mapping -#}
 %% else
 {{ error('Channel conversion ' + pt1.name + ' to ' + pt2.name + ' not supported.') }}
