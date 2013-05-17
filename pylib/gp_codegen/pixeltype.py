@@ -2,10 +2,33 @@
 #  gfxprim.pixeltype - Module with PixelType descrition class
 #
 # 2011 - Tomas Gavenciak <gavento@ucw.cz>
+# 2013   Cyril Hrubis <metan@ucw.cz>
 #
 
 import re
 from .pixelsize import PixelSize
+
+class PixelChannel(list):
+  def __init__(self, triplet):
+    (name, offset, size) = triplet
+    # Create the list -> backward compatibility with triplets
+    self.append(name)
+    self.append(offset)
+    self.append(size)
+    # Add some convinience variables
+    self.name = name
+    self.off = offset
+    self.size = size
+    # Shift ready to used in C
+    self.C_shift = " << " + hex(offset)
+    # Maximal channel value as an integer
+    self.max = 2 ** size - 1
+    # Maximal value as a C string
+    self.C_max = hex(self.max)
+    # Chanel bitmask as int
+    self.mask = self.max * (2 ** offset)
+    # Channel bitmas as hex string
+    self.C_mask = hex(self.mask)
 
 class PixelType(object):
   """Representation of one GP_PixelType"""
@@ -20,14 +43,21 @@ class PixelType(object):
     """
     assert re.match('\A[A-Za-z][A-Za-z0-9_]*\Z', name)
     self.name = name
-    self.chanslist = chanslist
+    # Create channel list with convinience variables
+    new_chanslist = []
+    for i in chanslist:
+      new_chanslist.append(PixelChannel(i))
+    self.chanslist = new_chanslist
     self.chans = dict() # { chan_name: (offset, size) }
     self.pixelsize = pixelsize
+    # C enum as defined in GP_Pixel.gen.h
+    self.C_enum = "GP_PIXEL_" + self.name
+
 
     # Verify channel bits for overlaps
     # also builds a bit-map of the PixelType
     self.bits = ['x'] * pixelsize.size
-    for c in chanslist:
+    for c in new_chanslist:
       assert c[0] not in self.chans.keys()
       self.chans[c[0]] = c
       for i in range(c[1], c[1] + c[2]):
