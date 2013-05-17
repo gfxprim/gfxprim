@@ -37,17 +37,62 @@ static GP_Pixel get_black(GP_PixelType pixel_type)
 {
 	switch (pixel_type) {
 %% for pt in pixeltypes
-	case GP_PIXEL_{{ pt.name }}:
+	case {{ pt.C_enum }}:
 %%  if pt.is_cmyk()
 %%   set K = pt.chans['K']
 		/* Black in CMYK is full K rest zero */
-		return {{ hex((2 ** K[2] - 1) * (2 ** K[1]))}};
+		return {{ K.C_mask }};
 %%  elif pt.is_alpha()
 %%   set A = pt.chans['A']
 		/* Black with Alpha channel is full A rest zero */
-		return {{ hex((2 ** A[2] - 1) * (2 ** A[1]))}};
+		return {{ A.C_mask }};
 %%  else
 		return 0;
+%%  endif
+%% endfor
+	default:
+		tst_msg("Invalid pixel type %i", pixel_type);
+		exit(TST_INTERR);
+	}
+}
+
+/*
+ * Returns white color for particular pixel type.
+ */
+static GP_Pixel get_white(GP_PixelType pixel_type)
+{
+	switch (pixel_type) {
+%% for pt in pixeltypes
+	case {{ pt.C_enum }}:
+%%  if pt.is_cmyk()
+		/* White in CMYK is zero */
+		return 0x0;
+%%  elif pt.is_rgb()
+%%   set R = pt.chans['R']
+%%   set G = pt.chans['G']
+%%   set B = pt.chans['B']
+%%   if pt.is_alpha()
+%%    set A = pt.chans['A']
+		/* White in RGBA */
+		return {{ A.C_mask }} | {{ R.C_mask }} | {{ G.C_mask }} | {{ B.C_mask }};
+%%   else
+		/* Plain old RGB */
+		return {{ R.C_mask }} | {{ G.C_mask }} | {{ B.C_mask }};
+%%   endif
+%%  elif pt.is_gray()
+%%   set V = pt.chans['V']
+%%   if pt.is_alpha()
+%%    set A = pt.chans['A']
+		/* Grayscale with Alpha */
+		return {{ V.C_mask }} | {{ A.C_mask }};
+%%   else
+		/* Grayscale */
+		return {{ V.C_mask }};
+%%   endif
+%%  else
+		tst_msg("FIXME: Unsupported conversion to %s",
+		        GP_PixelTypeName(pixel_type));
+		exit(TST_INTERR);
 %%  endif
 %% endfor
 	default:
@@ -63,37 +108,35 @@ static GP_Pixel get_red(GP_PixelType pixel_type)
 {
 	switch (pixel_type) {
 %% for pt in pixeltypes
-	case GP_PIXEL_{{ pt.name }}:
+	case {{ pt.C_enum }}:
 %%  if pt.is_cmyk()
 %%   set M = pt.chans['M']
 %%   set Y = pt.chans['Y']
 		/* Red in CMYK is full M and Y rest zero */
-		return {{ hex((2 ** M[2] - 1) * (2 ** M[1]))}}
-		       | {{ hex((2 ** Y[2] - 1) * (2 ** Y[1]))}};
+		return {{ M.C_mask }} | {{ Y.C_mask }};
 %%  elif pt.is_rgb()
 %%   set R = pt.chans['R']
 %%   if pt.is_alpha()
 %%    set A = pt.chans['A']
 		/* Red with Alpha channel is full Alpha and R rest zero */
-		return {{ hex((2 ** A[2] - 1) * (2 ** A[1]))}}
-		       | {{ hex((2 ** R[2] - 1) * (2 ** R[1]))}};
+		return {{ A.C_mask }} | {{ R.C_mask }};
 %%   else
 		/* Plain old RGB */
-		return {{ hex((2 ** R[2] - 1) * (2 ** R[1]))}};
+		return {{ R.C_mask }};
 %%   endif
 %%  elif pt.is_gray()
 %%   set V = pt.chans['V']
 %%   if pt.is_alpha()
 %%    set A = pt.chans['A']
 		/* Grayscale with Alpha channel is full Alpha + 1/3 Gray */
-		return {{ hex(((2 ** V[2] - 1) // 3) * (2 ** V[1]))}};
-		       | {{ hex((2 ** R[2] - 1) * (2 ** R[1]))}};
+		return ({{ hex(V.max // 3)}}{{ V.C_shift }}) | {{ A.C_mask }};
 %%   else
 		/* Grayscale is 1/3 Gray */
-		return {{ hex(((2 ** V[2] - 1) // 3) * (2 ** V[1]))}};
+		return {{ hex(V.max // 3) }}{{ V.C_shift }};
 %%   endif
 %%  else
-		tst_msg("Unsupported conversion to %s", GP_PixelTypeName(pixel_type));
+		tst_msg("FIXME: Unsupported conversion to %s",
+		        GP_PixelTypeName(pixel_type));
 		exit(TST_INTERR);
 %%  endif
 %% endfor
@@ -110,6 +153,8 @@ static int convert_and_check_{{ test_name }}_{{ in_name }}_to_{{ out_name }}(voi
 	GP_Pixel in = get_{{ test_name }}(GP_PIXEL_{{ in_name }});
 	GP_Pixel out_exp = get_{{ test_name }}(GP_PIXEL_{{ out_name }});
 
+	tst_msg("{{ in_name }} %08x -> {{ out_name }} %08x", in, out_exp);
+
 	GP_Pixel_{{ in_name }}_TO_{{ out_name }}(in, out);
 
 	if (out_exp != out) {
@@ -125,12 +170,22 @@ static int convert_and_check_{{ test_name }}_{{ in_name }}_to_{{ out_name }}(voi
 %% macro gen_converts()
 %%  for pt1 in pixeltypes
 %%   if not pt1.is_unknown() and not pt1.is_palette()
-%%    for pt2 in pixeltypes
-%%     if pt2.name in ['RGB888', 'RGBA8888'] 
-{{ gen_convert_and_check('black', pt2.name, pt1.name) }}
-{{ gen_convert_and_check('red', pt2.name, pt1.name) }}
-%%     endif
-%%    endfor
+%%    if pt1.name not in ['RGB888', 'RGBA8888']
+{{ gen_convert_and_check('white', pt1.name, 'RGB888') }}
+{{ gen_convert_and_check('white', pt1.name, 'RGBA8888') }}
+{{ gen_convert_and_check('white', 'RGB888', pt1.name) }}
+{{ gen_convert_and_check('white', 'RGBA8888', pt1.name) }}
+{{ gen_convert_and_check('black', pt1.name, 'RGB888') }}
+{{ gen_convert_and_check('black', pt1.name, 'RGBA8888') }}
+{{ gen_convert_and_check('black', 'RGB888', pt1.name) }}
+{{ gen_convert_and_check('black', 'RGBA8888', pt1.name) }}
+%%    if not pt1.is_gray()
+{{ gen_convert_and_check('red', pt1.name, 'RGB888') }}
+{{ gen_convert_and_check('red', pt1.name, 'RGBA8888') }}
+%%    endif
+{{ gen_convert_and_check('red', 'RGB888', pt1.name) }}
+{{ gen_convert_and_check('red', 'RGBA8888', pt1.name) }}
+%%    endif
 %%   endif
 %%  endfor
 %% endmacro
@@ -147,17 +202,24 @@ const struct tst_suite tst_suite = {
 	.tests = {
 %% for pt1 in pixeltypes
 %%  if not pt1.is_unknown() and not pt1.is_palette()
-%%   for pt2 in pixeltypes
-%%    if pt2.name in ['RGB888', 'RGBA8888'] 
-{{ gen_suite_entry('black', pt2.name, pt1.name) }}
-{{ gen_suite_entry('red', pt2.name, pt1.name) }}
+%%   if pt1.name not in ['RGB888', 'RGBA8888']
+{{ gen_suite_entry('white', pt1.name, 'RGB888') }}
+{{ gen_suite_entry('white', pt1.name, 'RGBA8888') }}
+{{ gen_suite_entry('white', 'RGB888', pt1.name) }}
+{{ gen_suite_entry('white', 'RGBA8888', pt1.name) }}
+{{ gen_suite_entry('black', pt1.name, 'RGB888') }}
+{{ gen_suite_entry('black', pt1.name, 'RGBA8888') }}
+{{ gen_suite_entry('black', 'RGB888', pt1.name) }}
+{{ gen_suite_entry('black', 'RGBA8888', pt1.name) }}
+%%    if not pt1.is_gray()
+{{ gen_suite_entry('red', pt1.name, 'RGB888') }}
+{{ gen_suite_entry('red', pt1.name, 'RGBA8888') }}
 %%    endif
-%%   endfor
+{{ gen_suite_entry('red', 'RGB888', pt1.name) }}
+{{ gen_suite_entry('red', 'RGBA8888', pt1.name) }}
+%%   endif
 %%  endif
 %% endfor
-
-{{ gen_suite_entry('red', 'RGB888', 'CMYK8888') }}
-
 		{.name = NULL}
 	}
 };

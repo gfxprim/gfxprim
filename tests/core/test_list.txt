@@ -3,4 +3,5 @@ WritePixel.gen
 Context
 Pixel
 GetPutPixel.gen
+Convert.gen
 BlitConv.gen
