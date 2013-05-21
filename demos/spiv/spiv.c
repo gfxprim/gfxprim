@@ -38,6 +38,7 @@
 
 #include "image_cache.h"
 #include "image_list.h"
+#include "image_actions.h"
 #include "cpu_timer.h"
 
 static GP_Pixel black_pixel;
@@ -734,6 +735,9 @@ static const char *keys_help[] = {
 	"D      - drop image cache",
 	"H      - toggle help",
 	"",
+	"F1-F10 - execute action 0 - 9",
+	"",
+	"1      - resize spiv window to the image size",
 	"1      - resize spiv window to the image size",
 	"2      - resize spiv window to the half of the image size",
 	"3      - resize spiv window to the third of the image size",
@@ -765,20 +769,35 @@ static void print_help(void)
 	printf("\t-zw zoom is fixed to window size (currently default)\n\n");
 	printf("-b\n\tpass backend init string to backend init\n");
 	printf("\tpass -b help for more info\n\n");
-
+	puts("");
+	printf("Actions\n");
+	printf("-0 'cmd' sets first action\n");
+	printf("-1 'cmd' sets second action\n");
+	printf("...\n");
+	printf("-9 'cmd' sets tenth action\n");
+	puts("");
+	printf(" actions are shell commands with following modifiers:\n");
+	printf("  %%f path to current image\n");
+	printf("  %%F shell escaped path to current image\n");
+	printf("  %%n current image filename without extension\n");
+	printf("  %%N shell escaped image filename without extension\n");
+	printf("  %%e current image file extension\n");
+	puts("");
+	
 	for (i = 0; i < keys_help_len; i++)
 		puts(keys_help[i]);
 	
 	puts("");
 
 	printf("Some cool options to try:\n\n");
+	printf("spiv -0 'cp %%F sorted/");
+	printf("\tcopies current image into directory 'sorted/' on F1\n");
 	printf("spiv -e G1 -f images\n");
 	printf("\truns spiv in 1-bit bitmap mode and turns on dithering\n\n");
 	printf("spiv -b 'X11:ROOT_WIN' images\n");
 	printf("\truns spiv using X root window as backend window\n\n");
 	printf("spiv -b 'X11:CREATE_ROOT' images\n");
 	printf("\tSame as abowe but works in KDE\n");
-
 }
 
 static void show_help(void)
@@ -823,7 +842,7 @@ int main(int argc, char *argv[])
 		.img_orig_cache = NULL,
 	};
 
-	while ((opt = getopt(argc, argv, "b:cd:e:fhIPs:r:z:")) != -1) {
+	while ((opt = getopt(argc, argv, "b:cd:e:fhIPs:r:z:0:1:2:3:4:5:6:7:8:9:")) != -1) {
 		switch (opt) {
 		case 'I':
 			params.show_info = 1;
@@ -878,6 +897,9 @@ int main(int argc, char *argv[])
 				params.zoom_type = ZOOM_FIXED_WIN;
 			break;
 			}
+		break;
+		case '0' ... '9':
+			image_action_set(opt - '0', optarg);
 		break;
 		default:
 			fprintf(stderr, "Invalid paramter '%c'\n", opt);
@@ -1131,6 +1153,10 @@ int main(int argc, char *argv[])
 				case GP_KEY_COMMA:
 					params.show_progress_once = 1;
 					zoom_mul(&params, 1/1.5);
+				break;
+				case GP_KEY_F1 ... GP_KEY_F10:
+					image_action_run(ev.val.key.key - GP_KEY_F1,
+					                 image_list_img_path(list));
 				break;
 				}
 			break;
