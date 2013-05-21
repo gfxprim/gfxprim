@@ -43,6 +43,7 @@
 
 static GP_Pixel black_pixel;
 static GP_Pixel white_pixel;
+static GP_Pixel gray_pixel;
 
 static GP_Backend *backend = NULL;
 
@@ -123,17 +124,21 @@ static int image_loader_callback(GP_ProgressCallback *self)
 	         (const char*)self->priv, self->percentage);
 
 	int align = GP_ALIGN_CENTER|GP_VALIGN_ABOVE;
-
-	GP_TextClear(c, NULL, c->w/2, c->h - 4, align,
-	             black_pixel, GP_MAX(size, GP_TextWidth(NULL, buf)));
-
-	GP_Text(c, NULL, c->w/2, c->h - 4, align,
-	        white_pixel, black_pixel, buf);
-
+	
 	size = GP_TextWidth(NULL, buf);
 
-	GP_BackendUpdateRect(backend, c->w/2 - size/2 - 1, c->h - 4,
-	                     c->w/2 + size/2 + 1, c->h - 4 - GP_TextHeight(NULL));
+	int start = c->w/2 - size/2 - 10;
+	int end   = c->w/2 + size/2 + 10;
+	int middle = start + (end - start) * self->percentage / 100;
+	int top = c->h - GP_TextHeight(NULL) - 11;
+
+	GP_FillRectXYXY(c, start, c->h - 1, middle, top, gray_pixel);
+	GP_FillRectXYXY(c, middle, c->h - 1, end, top, black_pixel);
+
+	GP_Text(c, NULL, c->w/2, c->h - 5, align,
+	        white_pixel, black_pixel, buf);
+
+	GP_BackendUpdateRect(backend, start, c->h - 1, end, top);
 
 	return 0;
 }
@@ -932,6 +937,7 @@ int main(int argc, char *argv[])
 
 	black_pixel = GP_ColorToContextPixel(GP_COL_BLACK, context);
 	white_pixel = GP_ColorToContextPixel(GP_COL_WHITE, context);
+	gray_pixel = GP_RGBToContextPixel(0x33, 0x33, 0x33, context);
 
 	GP_Fill(context, black_pixel);
 	GP_BackendFlip(backend);
