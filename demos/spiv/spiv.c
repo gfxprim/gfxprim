@@ -717,8 +717,8 @@ static const char *keys_help[] = {
 	"",
 	"Esc, Enter, Q - quit spiv",
 	"",
-	"<  KP Minus           - zoom out by 1.5",
-	">, KP Plus            - zoom in by 1.5",
+	"< or KP Minus         - zoom out by 1.5",
+	"> or KP Plus          - zoom in by 1.5",
 	"R                     - rotate by 90 degrees clockwise",
 	"Up, Down, Left, Right - move image by 1px",
 	"                        (by 10 with Shift)",
@@ -760,26 +760,26 @@ static void print_help(void)
 {
 	int i;
 
-	printf("Usage: spiv [opts] images\n\n");
-	printf("-I\n\tshow image info (filename and size)\n\n");
-	printf("-P\n\tshow loading progress\n\n");
-	printf("-f\n\tuse floyd-steinberg dithering\n\n");
-	printf("-s sec\n\tsleep interval in seconds\n\n");
-	printf("-c\n\tturns on bicubic resampling (experimental)\n\n");
-	printf("-d level\n\tsets GFXprim debug level\n\n");
-	printf("-e pixel_type\n\tturns on backend type emulation\n");
-	printf("\tfor example -e G1 sets 1-bit grayscale\n\n");
-	printf("-r angle\n\trotate display 90,180 or 270 degrees\n\n");
-	printf("-z sets zoom mode\n\t-zf zoom is set and modified by user\n");
-	printf("\t-zw zoom is fixed to window size (currently default)\n\n");
-	printf("-b\n\tpass backend init string to backend init\n");
-	printf("\tpass -b help for more info\n\n");
-	puts("");
-	printf("Actions\n");
-	printf("-0 'cmd' sets first action\n");
-	printf("-1 'cmd' sets second action\n");
-	printf("...\n");
-	printf("-9 'cmd' sets tenth action\n");
+	printf("Usage: spiv [opts] images or dirs with images\n\n");
+	printf(" -I show image info box\n");
+	printf(" -P show loading progress\n");
+	printf(" -f use floyd-steinberg dithering\n");
+	printf(" -s sec  sleep interval in seconds\n");
+	printf(" -c turns on bicubic resampling (experimental)\n");
+	printf(" -e pixel_type  turns on backend type emulation\n");
+	printf("    for example -e G1 sets 1-bit grayscale\n");
+	printf(" -r angle  rotate display 90,180 or 270 degrees\n");
+	printf(" -z mode\n");
+	printf("    -zf zoom is set and modified by user\n");
+	printf("    -zw zoom is fixed to window size (currently default)\n");
+	printf(" -b pass backend init string to backend init\n");
+	printf("    pass -b help for more info\n");
+	puts("\n");
+	printf("Actions:\n\n");
+	printf(" -0 'cmd' sets first action\n");
+	printf(" -1 'cmd' sets second action\n");
+	printf(" ...\n");
+	printf(" -9 'cmd' sets tenth action\n");
 	puts("");
 	printf(" actions are shell commands with following modifiers:\n");
 	printf("  %%f path to current image\n");
@@ -787,7 +787,7 @@ static void print_help(void)
 	printf("  %%n current image filename without extension\n");
 	printf("  %%N shell escaped image filename without extension\n");
 	printf("  %%e current image file extension\n");
-	puts("");
+	puts("\n");
 	
 	for (i = 0; i < keys_help_len; i++)
 		puts(keys_help[i]);
@@ -795,13 +795,13 @@ static void print_help(void)
 	puts("");
 
 	printf("Some cool options to try:\n\n");
-	printf("spiv -0 'cp %%F sorted/");
+	printf("spiv -0 'cp %%F sorted' [images]\n");
 	printf("\tcopies current image into directory 'sorted/' on F1\n");
-	printf("spiv -e G1 -f images\n");
+	printf("spiv -e G1 -f [images]\n");
 	printf("\truns spiv in 1-bit bitmap mode and turns on dithering\n\n");
-	printf("spiv -b 'X11:ROOT_WIN' images\n");
+	printf("spiv -b 'X11:ROOT_WIN' [images]\n");
 	printf("\truns spiv using X root window as backend window\n\n");
-	printf("spiv -b 'X11:CREATE_ROOT' images\n");
+	printf("spiv -b 'X11:CREATE_ROOT' [images]\n");
 	printf("\tSame as abowe but works in KDE\n");
 }
 
@@ -825,7 +825,7 @@ int main(int argc, char *argv[])
 	GP_Context *context = NULL;
 	const char *backend_opts = "X11";
 	int sleep_sec = -1;
-	int opt, debug_level = 0;
+	int opt;
 	int shift_flag, help_flag = 0;
 	GP_PixelType emul_type = GP_PIXEL_UNKNOWN;
 
@@ -847,7 +847,7 @@ int main(int argc, char *argv[])
 		.img_orig_cache = NULL,
 	};
 
-	while ((opt = getopt(argc, argv, "b:cd:e:fhIPs:r:z:0:1:2:3:4:5:6:7:8:9:")) != -1) {
+	while ((opt = getopt(argc, argv, "b:ce:fhIPs:r:z:0:1:2:3:4:5:6:7:8:9:")) != -1) {
 		switch (opt) {
 		case 'I':
 			params.show_info = 1;
@@ -867,9 +867,6 @@ int main(int argc, char *argv[])
 			params.use_low_pass = 1;
 			/* Cubic resampling is slow, show nn first */
 			params.show_nn_first = 1;
-		break;
-		case 'd':
-			debug_level = atoi(optarg);
 		break;
 		case 'e':
 			emul_type = GP_PixelTypeByName(optarg);
@@ -918,8 +915,6 @@ int main(int argc, char *argv[])
 		print_help();
 		return 1;
 	}
-
-	GP_SetDebugLevel(debug_level);
 
 	signal(SIGINT, sighandler);
 	signal(SIGSEGV, sighandler);
