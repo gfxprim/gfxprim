@@ -26,18 +26,21 @@
 
 #include <stdio.h>
 #include <math.h>
+#include <stdint.h>
 
 #include <core/GP_Convert_Scale.gen.h>
 
 #include "tst_test.h"
 
-%% set max = 16
+%% set max_in = 24
+%% set max_out = 16
 
-%% for i in range(1, max)
-%%  for j in range(1, max)
+%% for i in range(1, max_in)
+%%  for j in range(1, max_out)
 static int check_convert_{{ i }}_{{ j }}(void)
 {
-	unsigned int v, res, exp_res, fail = 0;
+	unsigned int v, fail = 0;
+	uint32_t res, exp_res;
 	float fres;
 
 	for (v = 0; v < {{ 2 ** i - 1 }}; v++) {
@@ -90,8 +93,8 @@ static int check_convert_{{ i }}_{{ j }}(void)
 const struct tst_suite tst_suite = {
 	.suite_name = "Pixel Conversions Testsuite",
 	.tests = {
-%% for i in range(1, max)
-%%  for j in range(1, max)
+%% for i in range(1, max_in)
+%%  for j in range(1, max_out)
 		{.name = "SCALE_{{ i }}_{{ j }}()",
 		 .tst_fn = check_convert_{{ i }}_{{ j }}},
 %%  endfor
