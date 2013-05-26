@@ -22,7 +22,7 @@
 
  /*
 
-   SPIV -- Simple but Powerfull Image Viewer.
+   SPIV -- Simple yet Powerful Image Viewer.
 
   */
 
@@ -33,7 +33,6 @@
 #include <pthread.h>
 
 #include <GP.h>
-#include <backends/GP_Backends.h>
 #include <input/GP_InputDriverLinux.h>
 
 #include "image_cache.h"
@@ -68,6 +67,12 @@ enum zoom_type {
 	 * the window size to fit the image size
 	 */
 	ZOOM_FIXED_WIN,
+
+	/*
+	 * Do not upscale images but downscale them
+	 * if they are too big.
+	 */
+	ZOOM_FIT_DOWNSCALE,
 };
 
 struct loader_params {
@@ -151,7 +156,8 @@ static GP_Context *load_image(struct loader_params *params, int elevate);
  * backend (window) is resized we will get SYS_RESIZE event, see the main event
  * loop.
  */
-static void resize_backend(struct loader_params *params, float ratio, int shift_flag)
+static void resize_backend(struct loader_params *params,
+                           float ratio, int shift_flag)
 {
 	GP_Context *img = load_image(params, 1);
 
@@ -173,6 +179,9 @@ static float calc_img_size(struct loader_params *params,
 	float h_rat;
 	
 	switch (params->zoom_type) {
+	case ZOOM_FIT_DOWNSCALE:
+		if (img_w <= src_w && img_h <= src_h)
+			return 1.00;
 	case ZOOM_FIT:
 		w_rat = 1.00 * src_w / img_w;
 		h_rat = 1.00 * src_h / img_h;
@@ -184,7 +193,7 @@ static float calc_img_size(struct loader_params *params,
 		return params->zoom;
 	}
 
-	return 1;
+	return 1.00;
 }
 
 static const char *img_name(const char *img_path)
@@ -265,14 +274,19 @@ static void pattern_fill(GP_Context *ctx, unsigned int x0, unsigned int y0, unsi
 {
 	unsigned int x, y;
 
-	GP_Pixel g1 = GP_RGBToContextPixel(0x44, 0x44, 0x44, ctx);
-	GP_Pixel g2 = GP_RGBToContextPixel(0x33, 0x33, 0x33, ctx);
+	GP_Pixel g1 = GP_RGBToContextPixel(0x64, 0x64, 0x64, ctx);
+	GP_Pixel g2 = GP_RGBToContextPixel(0x80, 0x80, 0x80, ctx);
+
+	unsigned int wm = w/10 < 10 ? 10 : w/10;
+	unsigned int hm = h/10 < 10 ? 10 : h/10;
+	unsigned int wt = w/20 < 5  ?  5 : w/20;
+	unsigned int ht = h/20 < 5  ?  5 : h/20;
 
 	for (y = 0; y < h; y++) {
 		for (x = 0; x < w; x++) {
 			GP_Pixel pix;
 
-			if ((x%(w/10) < (w/20)) ^ (y%(h/10) < (h/20)))
+			if ((x % wm < wt) ^ (y % hm < ht))
 				pix = g1;
 			else
 				pix = g2;
@@ -315,6 +329,7 @@ static void update_display(struct loader_params *params, GP_Context *img)
 	int cy = 0;
 
 	switch (params->zoom_type) {
+	case ZOOM_FIT_DOWNSCALE:
 	case ZOOM_FIT:
 		cx = (context->w - img->w)/2;
 		cy = (context->h - img->h)/2;
@@ -733,7 +748,7 @@ int main(int argc, char *argv[])
 		.rotate = 0,
 		.resampling_method = GP_INTERP_LINEAR_LF_INT,
 
-                .zoom_type = ZOOM_FIT,
+                .zoom_type = ZOOM_FIT_DOWNSCALE,
                 .zoom = 1,
 
 		.img_resized_cache = NULL,
