@@ -256,4 +256,14 @@ static inline int GP_BackendGetEvent(GP_Backend *self, GP_Event *ev)
 	return GP_EventQueueGet(&self->event_queue, ev);
 }
 
+static inline int GP_BackendPeekEvent(GP_Backend *self, GP_Event *ev)
+{
+	return GP_EventQueuePeek(&self->event_queue, ev);
+}
+
+static inline void GP_BackendPutEventBack(GP_Backend *self, GP_Event *ev)
+{
+	GP_EventQueuePutBack(&self->event_queue, ev);
+}
+
 #endif /* BACKENDS_GP_BACKEND_H */

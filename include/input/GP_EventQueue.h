@@ -107,12 +107,22 @@ unsigned int GP_EventQueueEventsQueued(struct GP_EventQueue *self);
 int GP_EventQueueGet(struct GP_EventQueue *self, struct GP_Event *ev);
 
 /*
+ * Same as GP_EventQueueGet but the event is not removed from the queue.
+ */
+int GP_EventQueuePeek(struct GP_EventQueue *self, struct GP_Event *ev);
+
+/*
  * Puts the event in the queue.
  *
  * This is bare call that just copies the event into the queue. Use the calls
  * bellow instead.
  */
 void GP_EventQueuePut(struct GP_EventQueue *self, struct GP_Event *ev);
+
+/*
+ * Puts event to the top of the queue.
+ */
+void GP_EventQueuePutBack(struct GP_EventQueue *self, struct GP_Event *ev);
 
 struct timeval;
 

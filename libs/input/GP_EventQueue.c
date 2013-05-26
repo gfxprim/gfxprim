@@ -116,6 +116,16 @@ int GP_EventQueueGet(struct GP_EventQueue *self, struct GP_Event *ev)
 	return 1;
 }
 
+int GP_EventQueuePeek(struct GP_EventQueue *self, struct GP_Event *ev)
+{
+	if (self->queue_first == self->queue_last)
+		return 0;
+
+	*ev = self->events[self->queue_first];
+
+	return 1;
+}
+
 static void event_put(struct GP_EventQueue *self, struct GP_Event *ev)
 {
 	unsigned int next = (self->queue_last + 1) % self->queue_size;
@@ -129,9 +139,32 @@ static void event_put(struct GP_EventQueue *self, struct GP_Event *ev)
 	self->queue_last = next;
 }
 
+static void event_put_back(struct GP_EventQueue *self, struct GP_Event *ev)
+{
+	unsigned int prev;
+
+	if (self->queue_first == 0)
+		prev = self->queue_last - 1;
+	else
+		prev = self->queue_first - 1;
+
+	if (prev == self->queue_last) {
+		GP_WARN("Event queue full, dropping event.");
+		return;
+	}
+
+	self->events[prev] = *ev;
+	self->queue_first = prev;
+}
+
 void GP_EventQueuePut(struct GP_EventQueue *self, struct GP_Event *ev)
 {
 	event_put(self, ev);
+}
+
+void GP_EventQueuePutBack(struct GP_EventQueue *self, struct GP_Event *ev)
+{
+	event_put_back(self, ev);
 }
 
 static void set_time(struct GP_EventQueue *self, struct timeval *time)
