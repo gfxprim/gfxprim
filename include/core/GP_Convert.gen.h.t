@@ -90,8 +90,7 @@
 %%  endif
 	GP_SET_BITS({{ c2.off }}+o2, {{ c2.size }}, p2,\
                     (({{ c2.C_max }} * ({{ K.C_max }} - GP_GET_BITS({{ K.off }}+o1, {{ K.size }}, p1)) * \
-                     ({{ V.C_max }} - GP_GET_BITS({{ V.off }}+o1, {{ V.size }}, p1)))) /\
-		     ({{ K.C_max }} * {{ V.C_max }})); \
+                     ({{ V.C_max }} - GP_GET_BITS({{ V.off }}+o1, {{ V.size }}, p1)))) / ({{ K.C_max }} * {{ V.C_max }})); \
 {# case 7: invalid mapping -#}
 %% else
 {{ error('Channel conversion ' + pt1.name + ' to ' + pt2.name + ' not supported.') }}
