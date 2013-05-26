@@ -117,7 +117,7 @@ void print_help(void)
 	
 }
 
-void draw_help(GP_Backend *backend)
+static int redraw_help(GP_Backend *backend, unsigned int loff, GP_Coord xoff)
 {
 	GP_Context *c = backend->context;
 	GP_Pixel black = GP_ColorToContextPixel(GP_COL_BLACK, c);
@@ -126,12 +126,31 @@ void draw_help(GP_Backend *backend)
 
 	GP_Fill(c, black);
 
-	for (i = 0; i < keys_help_len; i++) {
-		GP_Print(c, NULL, 20, 2 + i * 15, GP_ALIGN_RIGHT|GP_VALIGN_BOTTOM,
+	for (i = loff; i < keys_help_len; i++) {
+		GP_Coord h = 2 + (i - loff) * 15;
+
+		if (h + 2 >= (GP_Coord)c->h)
+			goto out;
+		
+		GP_Print(c, NULL, 20 + 10 * xoff, h, GP_ALIGN_RIGHT|GP_VALIGN_BOTTOM,
 		         white, black, "%s", keys_help[i]);
 	}
 
+out:
 	GP_BackendFlip(backend);
+	return i;
+}
+
+static int max_lines(GP_Backend *backend)
+{
+	return (backend->context->h - 4) / 15;
+}
+
+void draw_help(GP_Backend *backend)
+{
+	int loff = 0, last, xoff = 0;
+
+	last = redraw_help(backend, loff, xoff);
 
 	for (;;) {
 		GP_Event ev;
@@ -143,10 +162,52 @@ void draw_help(GP_Backend *backend)
 					continue;
 
 				switch (ev.val.key.key) {
+				case GP_KEY_DOWN:
+					if (last < keys_help_len)
+						last = redraw_help(backend, ++loff, xoff);
+				break;
+				case GP_KEY_UP:
+					if (loff > 0)
+						last = redraw_help(backend, --loff, xoff);
+				break;
+				case GP_KEY_LEFT:
+					last = redraw_help(backend, loff, --xoff);
+				break;
+				case GP_KEY_RIGHT:
+					last = redraw_help(backend, loff, ++xoff);
+				break;
+				case GP_KEY_PAGE_DOWN:
+					if (last < keys_help_len) {
+						if (loff + max_lines(backend) >= keys_help_len)
+							break;
+
+						loff += max_lines(backend);
+
+						last = redraw_help(backend, loff, xoff);
+					}
+				break;
+				case GP_KEY_PAGE_UP:
+					if (loff > 0) {
+						loff -= max_lines(backend);
+						if (loff < 0)
+							loff = 0;
+						last = redraw_help(backend, loff, xoff);
+					}
+				break;
 				default:
 				return;
 				}
 			break;
+			case GP_EV_SYS:
+				switch (ev.code) {
+				case GP_EV_SYS_RESIZE:
+					GP_BackendResizeAck(backend);
+					last = redraw_help(backend, loff, xoff);
+				break;
+				case GP_EV_SYS_QUIT:
+					GP_BackendPutEventBack(backend, &ev);
+					return;
+				}
 			}
 		}
 	}
