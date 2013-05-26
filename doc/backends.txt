@@ -452,6 +452,36 @@ TIP: For more information on events see link:input.html[input events]
      documentation.
 
 
+GP_BackendPeekEvent
+^^^^^^^^^^^^^^^^^^^
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <backends/GP_Backend.h>
+/* or */
+#include <GP.h>
+
+int GP_BackendPeekEvent(GP_Backend *self, GP_Event *ev);
+-------------------------------------------------------------------------------
+
+Same as +GP_BackendPeekEvent()+ but the top event is not removed from the
+queue.
+
+GP_BackendPutEventBack
+^^^^^^^^^^^^^^^^^^^^^^
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <backends/GP_Backend.h>
+/* or */
+#include <GP.h>
+
+void GP_BackendPutEventBack(GP_Backend *self, GP_Event *ev);
+-------------------------------------------------------------------------------
+
+Puts event to the top of the queue. May be useful for putting back events that
+were removed from the queue.
+
 GP_BackendSetCaption
 ^^^^^^^^^^^^^^^^^^^^
 
