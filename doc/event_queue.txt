@@ -54,7 +54,7 @@ failed 'NULL' is returned.
 /* or */
 #include <input/GP_EventQueue.h>
 
-unsigned int GP_EventsQueueEventsQueued(void);
+unsigned int GP_EventsQueueEventsQueued(GP_EventQueue *self);
 -------------------------------------------------------------------------------
 
 This function returns number of queued events.
@@ -65,7 +65,7 @@ This function returns number of queued events.
 /* or */
 #include <input/GP_EventQueue.h>
 
-int GP_EventQueueGet(struct GP_Event *ev);
+int GP_EventQueueGet(GP_EventQueue *self, GP_Event *ev);
 -------------------------------------------------------------------------------
 
 In case there are any events queued, the top event is removed from the
@@ -73,6 +73,29 @@ queue, copied into the event structure that is passed as argument and
 non-zero is returned.
 
 If there are no events queued the call returns immediately with zero.
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <GP.h>
+/* or */
+#include <input/GP_EventQueue.h>
+
+int GP_EventQueuePeek(GP_EventQueue *self, GP_Event *ev);
+-------------------------------------------------------------------------------
+
+Same as +GP_EventQueueGet()+ but the top event is not removed from the queue.
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <GP.h>
+/* or */
+#include <input/GP_EventQueue.h>
+
+void GP_EventQueuePutBack(GP_EventQueue *self, GP_Event *ev);
+-------------------------------------------------------------------------------
+
+Puts event to the top of the queue. Useful for putting back event that has
+been removed from the queue.
 
 [source,c]
 -------------------------------------------------------------------------------
