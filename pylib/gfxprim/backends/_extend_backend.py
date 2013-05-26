@@ -59,9 +59,24 @@ def extend_backend(_backend):
     ev = c_input.GP_Event()
 
     if c_backends.GP_BackendGetEvent(self, ev) != 0:
-    	return ev
+      return ev
 
     return None
+
+  @extend(_backend)
+  def PeekEvent(self):
+    "Returns, but not removes, the top of the backend event queue."
+    ev = c_input.GP_Event()
+
+    if c_backends.GP_BackendPeekEvent(self, ev) != 0:
+      return ev
+
+    return None
+
+  @extend(_backend)
+  def PutEventBack(self, ev):
+    "Puts back event removed from the top of the backend event queue."
+    c_backends.GP_BackendPutEventBack(self, ev)
 
   @extend(_backend)
   def EventsQueued(self):
