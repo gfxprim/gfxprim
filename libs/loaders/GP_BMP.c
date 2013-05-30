@@ -325,6 +325,10 @@ static GP_PixelType match_pixel_type(struct bitmap_info_header *header)
 	case 8:
 	case 24:
 		return GP_PIXEL_RGB888;
+#ifdef GP_PIXEL_RGB555
+	case 16:
+		return GP_PIXEL_RGB555;
+#endif
 	}
 
 	return GP_PIXEL_UNKNOWN;
@@ -446,13 +450,13 @@ static int read_palette(FILE *f, struct bitmap_info_header *header,
 	return 0;
 }
 
-static int read_rgb888(FILE *f, struct bitmap_info_header *header,
-                       GP_Context *context, GP_ProgressCallback *callback)
+static int read_rgb(FILE *f, struct bitmap_info_header *header,
+                    GP_Context *context, GP_ProgressCallback *callback)
 {
-	uint32_t row_size = 3 * header->w;
+	uint32_t row_size = header->w * (header->bpp / 8);
 	int32_t y;
 	int err;
-	
+
 	if ((err = seek_pixels_offset(header, f)))
 		return err;
 
@@ -504,8 +508,11 @@ static int read_bitmap_pixels(FILE *f, struct bitmap_info_header *header,
 	case 4:
 	case 8:
 		return read_palette(f, header, context, callback);
+#ifdef GP_PIXEL_RGB555
+	case 16:
+#endif
 	case 24:
-		return read_rgb888(f, header, context, callback);
+		return read_rgb(f, header, context, callback);
 	}
 
 	return ENOSYS;
