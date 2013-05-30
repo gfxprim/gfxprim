@@ -16,7 +16,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2011      Tomas Gavenciak <gavento@ucw.cz>                  *
+ * Copyright (C) 2011 Tomas Gavenciak <gavento@ucw.cz>                       *
+ * Copyright (C) 2013 Cyril Hrubis <metan@ucw.cz>                            *
  *                                                                           *
  *****************************************************************************/
 
@@ -38,6 +39,10 @@ typedef enum GP_PixelType {
 %% endfor
 	GP_PIXEL_MAX,
 } GP_PixelType;
+
+%% for pt in pixeltypes
+#define GP_PIXEL_{{ pt.name }} GP_PIXEL_{{ pt.name }}
+%% endfor
 
 %% for pt in pixeltypes
 %% if not pt.is_unknown()
