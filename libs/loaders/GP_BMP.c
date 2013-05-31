@@ -526,7 +526,7 @@ static int read_palette(FILE *f, struct bitmap_info_header *header,
 			GP_PutPixel_Raw_24BPP(context, x, ry, p);
 		}
 		
-		if (GP_ProgressCallbackReport(callback, header->h - y -1,
+		if (GP_ProgressCallbackReport(callback, y,
 		                              context->h, context->w)) {
 			GP_DEBUG(1, "Operation aborted");
 			return ECANCELED;
@@ -575,7 +575,7 @@ static int read_bitfields_or_rgb(FILE *f, struct bitmap_info_header *header,
 		break;
 		}
 
-		if (GP_ProgressCallbackReport(callback, header->h - y -1,
+		if (GP_ProgressCallbackReport(callback, y,
 		                              context->h, context->w)) {
 			GP_DEBUG(1, "Operation aborted");
 			return ECANCELED;
