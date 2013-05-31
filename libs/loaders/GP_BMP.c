@@ -22,9 +22,9 @@
 
 /*
 
-  BMP loader.
+  BMP loader and writer.
 
-  Thanks wikipedia for the format specification.
+  Thanks Wikipedia for the format specification.
 
  */
 
@@ -76,6 +76,13 @@ struct bitmap_info_header {
 	 * if 0 image uses whole range (2^bpp colors)
 	 */
 	uint32_t palette_colors; 
+	/*
+	 * RGBA masks for bitfields compression
+	 */
+	uint32_t R_mask;
+	uint32_t G_mask;
+	uint32_t B_mask;
+	uint32_t A_mask;
 };
 
 enum bitmap_compress {
@@ -148,6 +155,50 @@ static uint32_t get_palette_size(struct bitmap_info_header *header)
 	return (1 << header->bpp);
 }
 
+static int read_bitfields(FILE *f, struct bitmap_info_header *header)
+{
+	int ret;
+	
+	ret = GP_FRead(f, "L4 L4 L4",
+	               &header->R_mask,
+	               &header->G_mask,
+	               &header->B_mask);
+
+	if (ret != 3) {
+		GP_DEBUG(1, "Failed to read BITFIELDS");
+		return EIO;
+	}
+
+	header->A_mask = 0;
+
+	GP_DEBUG(1, "BITFIELDS R=0x%08x, G=0x%08x, B=0x%08x",
+	         header->R_mask, header->G_mask, header->B_mask);
+
+	return 0;
+}
+
+static int read_alphabitfields(FILE *f, struct bitmap_info_header *header)
+{
+	int ret;
+
+	ret = GP_FRead(f, "L4 L4 L4 L4",
+	               &header->R_mask, 
+	               &header->G_mask,
+	               &header->B_mask,
+	               &header->A_mask);
+
+	if (ret != 4) {
+		GP_DEBUG(1, "Failed to read BITFIELDS");
+		return EIO;
+	}
+
+	GP_DEBUG(1, "BITFILES R=0x%08x, G=0x%08x, B=0x%08x, A=0x%08x",
+	         header->R_mask, header->G_mask, header->B_mask,
+		 header->A_mask);
+
+	return 0;
+}
+
 static int read_bitmap_info_header(FILE *f, struct bitmap_info_header *header)
 {
 	uint16_t nr_planes;
@@ -170,6 +221,24 @@ static int read_bitmap_info_header(FILE *f, struct bitmap_info_header *header)
 		    header->w, header->h, header->bpp,
 	            get_palette_size(header),
 	            bitmap_compress_name(header->compress_type));
+
+	switch (header->compress_type) {
+	case COMPRESS_BITFIELDS:
+		switch (header->header_size) {
+		case BITMAPINFOHEADER:
+		case BITMAPINFOHEADER2:
+			return read_bitfields(f, header);
+		default:
+			/* Alpha is default in BITMAPINFOHEADER3 and newer */
+			return read_alphabitfields(f, header);
+		}
+	/* Only in BITMAPINFOHEADER */
+	case COMPRESS_ALPHABITFIELDS:
+		if (header->header_size != BITMAPINFOHEADER)
+			GP_DEBUG(1, "Unexpected ALPHABITFIELDS in %s",
+			         bitmap_header_size_name(header->header_size));
+		return read_alphabitfields(f, header);
+	}
 
 	return 0;
 }
@@ -244,7 +313,7 @@ static int read_bitmap_header(FILE *f, struct bitmap_info_header *header)
 		err = read_bitmap_info_header(f, header);
 	break;
 	};
-	
+
 	return err;
 }
 
@@ -318,17 +387,35 @@ static int seek_pixels_offset(struct bitmap_info_header *header, FILE *f)
 
 static GP_PixelType match_pixel_type(struct bitmap_info_header *header)
 {
+	/* handle bitfields */
+	switch (header->compress_type) {
+	case COMPRESS_BITFIELDS:
+	case COMPRESS_ALPHABITFIELDS:
+		return GP_PixelRGBMatch(header->R_mask, header->G_mask,
+		                        header->B_mask, header->A_mask,
+		                        header->bpp);
+	}
+
 	switch (header->bpp) {
+	/* palette formats -> expanded to RGB888 */
 	case 1:
 	case 2:
 	case 4:
 	case 8:
+	/* RGB888 */
 	case 24:
 		return GP_PIXEL_RGB888;
-#ifdef GP_PIXEL_RGB555
 	case 16:
+#ifdef GP_PIXEL_RGB555
+		//TODO: May have 1-bit ALPHA channel for BITMAPINFOHEADER3 and newer
 		return GP_PIXEL_RGB555;
+#else
+	//TODO: Conversion to RGB888?
+	break;
 #endif
+	case 32:
+		//TODO: May have ALPHA channel for BITMAPINFOHEADER3 and newer
+		return GP_PIXEL_xRGB8888;
 	}
 
 	return GP_PIXEL_UNKNOWN;
@@ -450,8 +537,9 @@ static int read_palette(FILE *f, struct bitmap_info_header *header,
 	return 0;
 }
 
-static int read_rgb(FILE *f, struct bitmap_info_header *header,
-                    GP_Context *context, GP_ProgressCallback *callback)
+static int read_bitfields_or_rgb(FILE *f, struct bitmap_info_header *header,
+                                 GP_Context *context,
+                                 GP_ProgressCallback *callback)
 {
 	uint32_t row_size = header->w * (header->bpp / 8);
 	int32_t y;
@@ -486,7 +574,7 @@ static int read_rgb(FILE *f, struct bitmap_info_header *header,
 		case 0:
 		break;
 		}
-		
+
 		if (GP_ProgressCallbackReport(callback, header->h - y -1,
 		                              context->h, context->w)) {
 			GP_DEBUG(1, "Operation aborted");
@@ -508,11 +596,10 @@ static int read_bitmap_pixels(FILE *f, struct bitmap_info_header *header,
 	case 4:
 	case 8:
 		return read_palette(f, header, context, callback);
-#ifdef GP_PIXEL_RGB555
 	case 16:
-#endif
 	case 24:
-		return read_rgb(f, header, context, callback);
+	case 32:
+		return read_bitfields_or_rgb(f, header, context, callback);
 	}
 
 	return ENOSYS;
@@ -588,8 +675,13 @@ GP_Context *GP_ReadBMP(FILE *f, GP_ProgressCallback *callback)
 		goto err1;
 	}
 	
-	if (header.compress_type != COMPRESS_RGB) {
-		GP_DEBUG(2, "Unknown compression type");
+	switch (header.compress_type) {
+	case COMPRESS_RGB:
+	case COMPRESS_BITFIELDS:
+	case COMPRESS_ALPHABITFIELDS:
+	break;
+	default:
+		GP_DEBUG(2, "Unknown/Unimplemented compression type");
 		err = ENOSYS;
 		goto err1;
 	}
@@ -599,7 +691,7 @@ GP_Context *GP_ReadBMP(FILE *f, GP_ProgressCallback *callback)
 		err = ENOSYS;
 		goto err1;
 	}
-	
+
 	context = GP_ContextAlloc(header.w, GP_ABS(header.h), pixel_type);
 
 	if (context == NULL) {
