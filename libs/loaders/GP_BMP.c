@@ -480,6 +480,8 @@ static uint8_t get_idx(struct bitmap_info_header *header,
 	return 0;
 }
 
+#include "GP_BMP_RLE.h"
+
 static int read_palette(FILE *f, struct bitmap_info_header *header,
                         GP_Context *context, GP_ProgressCallback *callback)
 {
@@ -504,7 +506,7 @@ static int read_palette(FILE *f, struct bitmap_info_header *header,
 			GP_DEBUG(1, "Failed to read row %"PRId32, y);
 			return EIO;
 		}
-	
+
 		for (x = 0; x < header->w; x++) {
 			uint8_t idx = get_idx(header, row, x);
 			GP_Pixel p;
@@ -589,6 +591,9 @@ static int read_bitfields_or_rgb(FILE *f, struct bitmap_info_header *header,
 static int read_bitmap_pixels(FILE *f, struct bitmap_info_header *header,
                               GP_Context *context, GP_ProgressCallback *callback)
 {
+	if (header->compress_type == COMPRESS_RLE8)
+		return read_RLE8(f, header, context, callback);
+
 	switch (header->bpp) {
 	case 1:
 	/* I haven't been able to locate 2bpp palette bmp file => not tested */
@@ -679,6 +684,7 @@ GP_Context *GP_ReadBMP(FILE *f, GP_ProgressCallback *callback)
 	case COMPRESS_RGB:
 	case COMPRESS_BITFIELDS:
 	case COMPRESS_ALPHABITFIELDS:
+	case COMPRESS_RLE8:
 	break;
 	default:
 		GP_DEBUG(2, "Unknown/Unimplemented compression type");
