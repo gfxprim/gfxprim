@@ -7,6 +7,26 @@ import os
 import time
 import re
 
+# Custom filters
+
+def comment(lines):
+  """Adds space and asterisk before each line from lines"""
+  ret = ''
+  l = lines.split('\n')
+
+  # Remove leading empty line
+  if l[0] == '':
+    l = l[1:]
+
+  # Remove traling empty line
+  if l[-1] == '':
+    l.pop()
+
+  for i in l:
+    ret += ' * ' + i + '\n'
+
+  return ret
+
 try:
   import jinja2
 except:
@@ -33,11 +53,13 @@ def create_environment(config, template_dir):
   env.globals['error'] = template_error
   env.globals['hex'] = lambda x: hex(x).rstrip('L')
   # Propagate some python buildins
-  env.globals['int'] = int;
-  env.globals['float'] = float;
-  env.globals['round'] = round;
-  env.globals['min'] = min;
-  env.globals['max'] = max;
+  env.globals['int'] = int
+  env.globals['float'] = float
+  env.globals['round'] = round
+  env.globals['min'] = min
+  env.globals['max'] = max
+  # Add custom filters
+  env.filters['comment'] = comment
   return env
 
 
@@ -64,7 +86,6 @@ def render_file(env, source, result):
     result_file.write(result_text)
   finally:
     result_file.close()
-
 
 def load_gfxprimconfig(config_file = None):
   """Initialize GfxPrimConfig from a given or guessed config file.

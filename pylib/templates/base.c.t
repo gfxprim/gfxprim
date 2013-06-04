@@ -4,7 +4,10 @@
  * GENERATED on {{ date }} from {{ template }}
  * DO NOT MODIFY THIS FILE DIRECTLY!
  *
- * {% block descr %}{% endblock %}
+%% filter comment()
+%%  block descr
+%%  endblock
+%% endfilter
  */
 
 %% block pre_body_guard
