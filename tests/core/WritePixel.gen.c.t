@@ -22,6 +22,8 @@
 
 %% extends "base.test.c.t"
 
+{% block descr %}WritePixel tests.{% endblock %}
+
 %% block body
 
 #include <stdio.h>

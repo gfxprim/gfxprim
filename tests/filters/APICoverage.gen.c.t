@@ -29,6 +29,8 @@
 
 %% extends "base.test.c.t"
 
+{% block descr %}Filters API coverage tests.{% endblock %}
+
 %% block body
 
 #include <stdio.h>

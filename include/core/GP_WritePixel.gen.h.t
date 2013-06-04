@@ -22,7 +22,7 @@
 
 %% extends 'base.h.t'
 
-{% block description %}Write Pixels generated header{% endblock %}
+{% block descr %}Write Pixels generated header{% endblock %}
 
 {% block body %}
 

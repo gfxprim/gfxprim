@@ -29,6 +29,8 @@
 
 %% extends "base.test.c.t"
 
+{% block descr %}GFX API converage tests.{% endblock %}
+
 %% block body
 
 #include <stdio.h>

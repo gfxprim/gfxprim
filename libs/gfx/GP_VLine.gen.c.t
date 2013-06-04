@@ -22,7 +22,7 @@
 
 %% extends 'base.h.t'
 
-{% block description %}Vertical Line{% endblock %}
+{% block descr %}Vertical Line{% endblock %}
 
 {% block body %}
 

@@ -22,7 +22,7 @@
 
 %% extends 'base.h.t'
 
-{% block description %}All FnPerBpp macros{% endblock %}
+{% block descr %}All FnPerBpp macros{% endblock %}
 
 {% block body %}
 

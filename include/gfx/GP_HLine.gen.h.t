@@ -22,7 +22,7 @@
 
 %% extends 'base.h.t'
 
-{% block description %}HLine generated header{% endblock %}
+{% block descr %}HLine generated header{% endblock %}
 
 {% block body %}
 

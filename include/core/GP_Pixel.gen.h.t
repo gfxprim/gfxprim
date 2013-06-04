@@ -24,7 +24,7 @@
 %% extends "base.h.t"
 
 %% block descr
-Pixel type definitions and functions
+Pixel type definitions and functions.
 Do not include directly, use GP_Pixel.h
 %% endblock
 
