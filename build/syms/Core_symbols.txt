@@ -35,6 +35,9 @@ GP_PixelRGBMatch
 GP_PixelTypeByName
 GP_RGB888ToPixel
 
+GP_PixelPrint
+GP_PixelSNPrint
+
 GP_BlitXYXY
 GP_BlitXYXY_Fast
 GP_BlitXYWH

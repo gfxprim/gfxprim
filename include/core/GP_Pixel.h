@@ -157,21 +157,12 @@ static inline const GP_PixelTypeDescription *GP_PixelTypeDesc(GP_PixelType type)
  * Print a human-readable representation of a pixel value to a string.
  * Arguments as for snprintf().
  */
-static inline void GP_PixelSNPrint(char *buf, size_t len, GP_Pixel pixel,
-                                   GP_PixelType type)
-{
-	GP_FN_PER_PIXELTYPE(GP_PixelSNPrint, type, buf, len, pixel);
-}
+void GP_PixelSNPrint(char *buf, size_t len, GP_Pixel pixel, GP_PixelType type);
 
 /*
- * "printf" out a human-readable representation of pixel value.
+ * Prints human-readable representation of pixel value into the stdout.
  */
-static inline void GP_PixelPrint(GP_Pixel pixel, GP_PixelType type)
-{
-	char buf[256];
-	GP_PixelSNPrint(buf, 256, pixel, type);
-	printf("%s", buf);
-}
+void GP_PixelPrint(GP_Pixel pixel, GP_PixelType type);
 
 /*
  * Returns pixel type for passed human-readable name (e.g. RGB888).

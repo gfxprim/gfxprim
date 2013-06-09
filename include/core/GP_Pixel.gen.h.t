@@ -57,11 +57,6 @@ typedef enum GP_PixelType {
 %% endfor
  */
 
-/* 
- * snprintf a human readable value of pixel type {{ pt.name }}
- */
-void GP_PixelSNPrint_{{ pt.name }}(char *buf, size_t len, GP_Pixel p);
-
 /*
  * macros to get channels of pixel type {{ pt.name }}
  */
