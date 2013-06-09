@@ -9,6 +9,8 @@ GP_InputDriverKBDEventPut
 GP_EventQueueSetCursorPosition
 GP_EventQueueSetScreenSize
 GP_EventQueueGet
+GP_EventQueuePeek
+GP_EventQueuePutBack
 GP_EventQueueEventsQueued
 GP_EventQueueInit
 GP_EventQueueFree
