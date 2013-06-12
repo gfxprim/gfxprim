@@ -88,7 +88,7 @@ images into various standard formats (PNG, JPEG, GIF, BMP, PNM, etc...).
 
 | BMP | |
   [green]*Yes* |
-  [green]#RLE and RGB Bitfields not implemented# |
+  [green]#RLE4 and some less common bitfiels not supported# |
   [green]#RGB888 only#
 
 | TIFF |
