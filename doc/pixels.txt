@@ -1,14 +1,10 @@
 Pixel Description
 -----------------
 
-This pages describes library core functions for handling pixels.
+This pages describes library core functions for handling pixel types.
 
 Pixel Type
 ~~~~~~~~~~
-
-Pixels are described by a pixel type, which is enumeration type. The enum is
-defined at the generated 'GP_Pixel.gen.h' header and must contain at least
-following members:
 
 [source,c]
 -------------------------------------------------------------------------------
@@ -26,13 +22,28 @@ typedef enum GP_PixelType {
 	GP_PIXEL_G2,
 	GP_PIXEL_G4,
 	GP_PIXEL_G8,
+	...
 	GP_PIXEL_MAX,
 } GP_PixelType;
 
+/*
+ * The same values are also defined as macros so it's possible to
+ * use them with ifdef as follows.
+ */
+#ifdef GP_PIXEL_RGB555
+
+...
+
+#endif /* GP_PIXEL_RGB555 */
+
 -------------------------------------------------------------------------------
 
-Each pixel type has accompanying record in global array of pixel types
-declared as follows:
+Pixels are described by a pixel type, which is enumeration type. The enum is
+defined in the generated 'GP_Pixel.gen.h' header and must contain at least the
+members listed above.
+
+The same names as are the enum values are also defined (to themselves) as
+macros so that it's possible to use them with 'ifdef'.
 
 [source,c]
 -------------------------------------------------------------------------------
@@ -46,12 +57,21 @@ typedef struct {
 	uint8_t size;    /* Bit-size */
 } GP_PixelTypeChannel;
 
+typedef enum GP_PixelFlags {
+	GP_PIXEL_HAS_ALPHA = 0x01,
+	GP_PIXEL_IS_RGB = 0x02,
+	GP_PIXEL_IS_PALETTE = 0x04,
+	GP_PIXEL_IS_CMYK = 0x08,
+	GP_PIXEL_IS_GRAYSCALE = 0x10,
+} GP_PixelFlags;
+
 typedef struct {
 	GP_PixelType type;        /* Number of the type */
 	const char name[16];      /* Name */
 	uint8_t size;	          /* Size in bits */
 	GP_BIT_ENDIAN bit_endian; /* Order of pixels in a byte */
 	uint8_t numchannels;      /* Number of channels */
+	GP_PixelFlags flags;
 	/* String describing the bit-representaton (as in "RRRRRGGGGGGBBBBB")*/
 	const char bitmap[GP_PIXEL_BITS + 1];
 	/* Individual channels */
@@ -60,13 +80,44 @@ typedef struct {
 
 extern const GP_PixelTypeDescription const GP_PixelTypes[];
 
+const GP_PixelTypeDescription *GP_PixelTypeDesc(GP_PixelType type);
+
 const char *GP_PixelTypeName(GP_PixelType type);
 
 uint32_t GP_PixelSize(GP_PixelType type);
+
+int GP_PixelHasFlags(GP_PixelType pixel_type, GP_PixelFlags flags);
 -------------------------------------------------------------------------------
 
-There are also pixel matching functions that returns pixel type given RGB
-channel masks or sizes and offsets:
+Each pixel type has accompanying record in global array describing pixel types.
+
+You should not use this array directly, use the 'GP_PixelTypeDesc()' function
+to query the pixel type description.
+
+The 'GP_PixelTypeName()' function returns static string with pixel type name.
+
+The 'GP_PixelSize()' returns pixel size in bits.
+
+The 'GP_PixelHasFlags()' function returns true if particular pixel type
+contains the bitmask of pixel flags.
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <GP.h>
+/* or */
+#include <core/GP_Pixel.h>
+
+void GP_PixelPrint(GP_Pixel pixel, GP_PixelType type);
+
+void GP_PixelSNPrint(char *buf, size_t len, GP_Pixel pixel, GP_PixelType type);
+-------------------------------------------------------------------------------
+
+Pretty print pixel value given the pixel type.
+
+.Sample output from the functions
+-------------------------------------------------------------------------------
+RGB888 0xffffff R=255 G=255 B=255
+-------------------------------------------------------------------------------
 
 [source,c]
 -------------------------------------------------------------------------------
@@ -85,3 +136,5 @@ GP_PixelType GP_PixelRGBLookup(uint32_t rsize, uint32_t roff,
 			       uint8_t bits_per_pixel);
 -------------------------------------------------------------------------------
 
+Returns pixel type given either RGB masks or RGB sizes and offsets. If no
+matching pixel was found 'GP_PIXEL_UNKNOWN' is returned.
