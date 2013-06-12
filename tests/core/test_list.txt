@@ -2,6 +2,7 @@
 WritePixel.gen
 Context
 Pixel
+GetSetBits.gen
 GetPutPixel.gen
 Convert.gen
 Convert_Scale.gen
