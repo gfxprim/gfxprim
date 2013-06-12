@@ -6,6 +6,7 @@ import logging as log
 import os
 import time
 import re
+from math import floor, ceil
 
 # Custom filters
 
@@ -56,6 +57,8 @@ def create_environment(config, template_dir):
   env.globals['int'] = int
   env.globals['float'] = float
   env.globals['round'] = round
+  env.globals['floor'] = floor
+  env.globals['ceil'] = ceil
   env.globals['min'] = min
   env.globals['max'] = max
   # Add custom filters
