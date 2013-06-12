@@ -61,8 +61,6 @@ const GP_PixelTypeDescription const GP_PixelTypes [GP_PIXEL_MAX] = {
 %%  endfor
 };
 
-#warning FIXME: do generic get set bit for pixel printing
-
 %%  for pt in pixeltypes
 %%   if not pt.is_unknown()
 /*

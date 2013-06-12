@@ -17,14 +17,25 @@
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
  * Copyright (C) 2011      Tomas Gavenciak <gavento@ucw.cz>                  *
- * Copyright (C) 2011      Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2011-2013 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
  /*
   
-   The macros are taking generally three arguments
-  
+   Helper macros to get/set bits given offset and lenght.
+
+   The GP_GET_BITS() and GP_SET_BITS() works __ONLY__ on aligned data types.
+   Which means that you can only pass value that is suitably aligned for it's
+   type, for example passing an 32 bit integer is OK, passing a char buffer
+   casted to 32 bit integer is not (unless you made sure that the start address
+   is multiple of 4).
+
+   Now the align-safe variants first gets the value from a buffer, byte by byte
+   and then uses the GP_GET_BITS() or GP_SET_BITS(). The number in their name
+   tells how much bytes are touched, as we need to touch minimal number of
+   bytes needed.
+
   */
 
 #ifndef CORE_GP_GET_SET_BITS_H
@@ -37,12 +48,12 @@
  * Note: operates with value types same as val 
  */
 #define GP_GET_BITS(offset, len, val) \
-	( ( (val)>>(offset) ) & ( ((((typeof(val))1)<<(len)) - 1) ) )
+	(sizeof(val) * 8 <= len ? \
+ 	 (val)>>(offset) : \
+	 ((val)>>(offset)) & (((((typeof(val))1)<<(len)) - 1)))
 
 /*
  * Align-safe getbits
- *
- * TODO: Fix big endian
  */
 #define GP_GET_BITS4_ALIGNED(offset, len, val) ({ \
 	uint32_t v;                               \
@@ -90,9 +101,9 @@
  * GP_SET_BITS does both
  */
 #define GP_CLEAR_BITS(offset, len, dest) \
-       ( (dest) &= ~(((((typeof(dest))1) << (len)) - 1) << (offset)) )
+       ((dest) &= ~(((((typeof(dest))1) << (len)) - 1) << (offset)))
 
-#define GP_SET_BITS_OR(offset, dest, val) ( (dest) |= ((val)<<(offset)) )
+#define GP_SET_BITS_OR(offset, dest, val) ((dest) |= ((val)<<(offset)))
 
 #define GP_SET_BITS(offset, len, dest, val) do {  \
                GP_CLEAR_BITS(offset, len, dest);  \
