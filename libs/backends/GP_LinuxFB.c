@@ -314,6 +314,8 @@ GP_Backend *GP_BackendLinuxFBInit(const char *path, int flag)
 	backend->Wait          = flag ? fb_wait : NULL;
 	backend->fd            = fb->con_fd;
 
+	GP_EventQueueInit(&backend->event_queue, vscri.xres, vscri.yres, 0);
+
 	return backend;
 err3:
 	close(fd);
