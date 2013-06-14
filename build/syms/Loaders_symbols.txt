@@ -38,25 +38,21 @@ GP_OpenTIFF
 GP_ReadTIFF
 GP_LoadTIFF
 
-GP_SavePPM
-GP_LoadPPM
+GP_SavePBM
+GP_LoadPBM
+GP_MatchPBM
 
 GP_SavePGM
 GP_LoadPGM
+GP_MatchPGM
 
-GP_ReadPNM
-GP_WritePNM
+GP_SavePPM
+GP_LoadPPM
+GP_MatchPPM
 
-GP_SavePBM
-GP_LoadPBM
-
-GP_PXMSave1bpp
-GP_PXMSave2bpp
-GP_PXMSave8bpp
-GP_PXMLoad1bpp
-GP_PXMLoad2bpp
-GP_PXMLoad4bpp
-GP_PXMLoad8bpp
+GP_LoadPNM
+GP_SavePNM
+GP_MatchPNM
 
 GP_SaveTmpFile
 GP_LoadTmpFile

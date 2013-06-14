@@ -35,10 +35,7 @@
 #include "core/GP_Context.h"
 #include "core/GP_ProgressCallback.h"
 
-#include "GP_PBM.h"
-#include "GP_PGM.h"
-#include "GP_PPM.h"
-
+#include "GP_PNM.h"
 #include "GP_BMP.h"
 #include "GP_PNG.h"
 #include "GP_JPG.h"

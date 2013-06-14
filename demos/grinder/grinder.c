@@ -981,7 +981,7 @@ static void save_by_fmt(struct GP_Context *bitmap, const char *name, const char 
 	progress_prefix = "Saving Image";
 
 	if (!strcmp(fmt, "ppm"))
-		ret = GP_SavePPM(name, bitmap, "b", progress_callback);
+		ret = GP_SavePPM(bitmap, name, progress_callback);
 	else if (!strcmp(fmt, "jpg"))
 		ret = GP_SaveJPG(bitmap, name, progress_callback);
 	else if (!strcmp(fmt, "png"))

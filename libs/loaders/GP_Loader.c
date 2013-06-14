@@ -51,8 +51,8 @@ static GP_Loader psp_loader = {
 static GP_Loader pbm_loader = {
 	.Load = GP_LoadPBM,
 	.Save = GP_SavePBM,
-	.Match = NULL,
-	.fmt_name = "Netpbm portable bitmap",
+	.Match = GP_MatchPBM,
+	.fmt_name = "Netpbm portable Bitmap",
 	.next = &psp_loader,
 	.extensions = {"pbm", NULL},
 };
@@ -60,8 +60,8 @@ static GP_Loader pbm_loader = {
 static GP_Loader pgm_loader = {
 	.Load = GP_LoadPGM,
 	.Save = GP_SavePGM,
-	.Match = NULL,
-	.fmt_name = "Netpbm portable graymap",
+	.Match = GP_MatchPGM,
+	.fmt_name = "Netpbm portable Graymap",
 	.next = &pbm_loader,
 	.extensions = {"pgm", NULL},
 };
@@ -69,10 +69,23 @@ static GP_Loader pgm_loader = {
 static GP_Loader ppm_loader = {
 	.Load = GP_LoadPPM,
 	.Save = NULL,
-	.Match = NULL,
-	.fmt_name = "Netpbm portable pixmap",
+	.Match = GP_MatchPPM,
+	.fmt_name = "Netpbm portable Pixmap",
 	.next = &pgm_loader,
 	.extensions = {"ppm", NULL},
+};
+
+static GP_Loader pnm_loader = {
+	.Load = GP_LoadPNM,
+	.Save = NULL,
+	/* 
+	 * Avoid double Match
+	 * This format is covered by PBM, PGM and PPM
+	 */
+	.Match = NULL,
+	.fmt_name = "Netpbm portable Anymap",
+	.next = &ppm_loader,
+	.extensions = {"pnm", NULL},
 };
 
 static GP_Loader bmp_loader = {
@@ -80,7 +93,7 @@ static GP_Loader bmp_loader = {
 	.Save = GP_SaveBMP,
 	.Match = GP_MatchBMP,
 	.fmt_name = "BMP",
-	.next = &ppm_loader,
+	.next = &pnm_loader,
 	.extensions = {"bmp", "dib", NULL},
 };
 
