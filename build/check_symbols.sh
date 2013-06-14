@@ -53,8 +53,10 @@ function do_check
 
 do_check libGP.so syms/Core_symbols.txt syms/Input_symbols.txt \
                   syms/Filters_symbols.txt syms/GFX_symbols.txt \
-		  syms/Loaders_symbols.txt syms/Text_symbols.txt
+                  syms/Text_symbols.txt
 
 do_check libGP_backends.so syms/Backend_symbols.txt
 
 do_check libGP_grabbers.so syms/Grabbers_symbols.txt
+
+do_check libGP_loaders.so syms/Loaders_symbols.txt
