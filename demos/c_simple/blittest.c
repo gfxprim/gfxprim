@@ -154,7 +154,7 @@ int main(void)
 
 	print_instructions();
 	
-	win = GP_BackendInit(backend_opts, "Line Test", stderr);
+	win = GP_BackendInit(backend_opts, "Blit Test", stderr);
 
 	if (win == NULL) {
 		fprintf(stderr, "Failed to initalize backend '%s'\n",
