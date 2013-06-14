@@ -154,6 +154,13 @@ int main(void)
 
 	print_instructions();
 	
+	bitmap_raw = GP_LoadImage(sprite, NULL);
+
+	if (!bitmap_raw) {
+		fprintf(stderr, "Failed to load '%s'\n", sprite);
+		return 1;
+	}
+	
 	win = GP_BackendInit(backend_opts, "Blit Test", stderr);
 
 	if (win == NULL) {
@@ -161,8 +168,6 @@ int main(void)
 		        backend_opts);
 		return 1;
 	}
-
-	bitmap_raw = GP_LoadImage(sprite, NULL);
 
 	bitmap_conv = GP_ContextConvertAlloc(bitmap_raw,
 	                                     win->context->pixel_type);
