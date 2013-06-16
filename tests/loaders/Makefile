@@ -3,7 +3,7 @@ include $(TOPDIR)/pre.mk
 
 CSOURCES=$(shell echo *.c)
 
-APPS=loaders_suite PNG
+APPS=loaders_suite PNG PBM
 
 include ../tests.mk
 
