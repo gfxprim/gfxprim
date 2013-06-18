@@ -48,7 +48,7 @@ int GP_SavePGM(const GP_Context *src, const char *dst_path,
  */
 GP_Context *GP_LoadPPM(const char *src_path, GP_ProgressCallback *callback);
 
-int GP_SavePPM(GP_Context *src, const char *dst_path,
+int GP_SavePPM(const GP_Context *src, const char *dst_path,
                GP_ProgressCallback *callback);
 
 /*

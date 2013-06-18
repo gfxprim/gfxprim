@@ -770,7 +770,7 @@ int GP_SavePGM(const GP_Context *src, const char *dst_path,
 	}
 
 	if (fprintf(f, "P2\n%u %u\n%u\n",
-	            (unsigned int) src->w, (unsigned int) src->h, depth) < 3)
+	            (unsigned int) src->w, (unsigned int) src->h, depth) < 0)
 		goto err1;
 
 	if ((err = save_ascii(f, src, callback)))
@@ -873,9 +873,83 @@ static int write_binary_ppm(FILE *f, GP_Context *src)
 	return 0;
 }
 
-int GP_SavePPM(GP_Context *src, const char *dst_path,
+static int save_ascii_rgb888(FILE *f, const GP_Context *ctx,
+                             GP_ProgressCallback *cb)
+{
+	uint32_t x, y;
+	int ret;
+
+	for (y = 0; y < ctx->h; y++) {
+		for (x = 0; x < ctx->w; x++) {
+			GP_Pixel pix = GP_GetPixel_Raw_24BPP(ctx, x, y);
+			
+			ret = fprintf(f, "%u %u %u ",
+			              GP_Pixel_GET_R_RGB888(pix), 
+			              GP_Pixel_GET_G_RGB888(pix),
+			              GP_Pixel_GET_B_RGB888(pix));
+
+			if (ret < 0)
+				return errno;
+		}
+
+		if (GP_ProgressCallbackReport(cb, y, ctx->h, ctx->w)) {
+			GP_DEBUG(1, "Operation aborted");
+			return ECANCELED;
+		}
+
+		if (fprintf(f, "\n") < 0)
+			return errno;
+	}
+
+	GP_ProgressCallbackDone(cb);
+	return 0;
+}
+
+int GP_SavePPM(const GP_Context *src, const char *dst_path,
                GP_ProgressCallback *callback)
 {
+	FILE *f;
+	int err = EIO;
+
+	GP_DEBUG(1, "Saving context %ux%u %s to '%s'",
+	         src->w, src->h, GP_PixelTypeName(src->pixel_type), dst_path);
+
+	if (src->pixel_type != GP_PIXEL_RGB888) {
+		GP_DEBUG(1, "Invalid pixel type '%s'",
+		         GP_PixelTypeName(src->pixel_type));
+		errno = EINVAL;
+		return 1; 
+	}
+	
+	f = fopen(dst_path, "w");
+
+	if (f == NULL) {
+		err = errno;
+		GP_DEBUG(1, "Failed to open file '%s': %s",
+		         dst_path, strerror(errno));
+		goto err0;
+	}
+
+	if (fprintf(f, "P3\n%u %u\n255\n",
+	            (unsigned int) src->w, (unsigned int) src->h) < 0)
+		goto err1;
+
+	if ((err = save_ascii_rgb888(f, src, callback)))
+		goto err1;
+
+	if (fclose(f)) {
+		err = errno;
+		GP_DEBUG(1, "Failed to close file '%s': %s",
+		         dst_path, strerror(errno));
+		goto err0;
+	}
+
+	return 0;
+err1:
+	fclose(f);
+err0:
+	errno = err;
+	return 1;
 	errno = ENOSYS;
 	return -1;
 }
@@ -920,6 +994,16 @@ err0:
 int GP_SavePNM(const GP_Context *src, const char *dst_path,
                GP_ProgressCallback *callback)
 {
-	errno = ENOSYS;
-	return -1;
+	switch (src->pixel_type) {
+	case GP_PIXEL_G1:
+	case GP_PIXEL_G2:
+	case GP_PIXEL_G4:
+	case GP_PIXEL_G8:
+		return GP_SavePGM(src, dst_path, callback);
+	case GP_PIXEL_RGB888:
+		return GP_SavePPM(src, dst_path, callback);
+	default:
+		errno = EINVAL;
+		return 1;
+	}
 }
