@@ -93,7 +93,7 @@ static int check_convert_{{ i }}_{{ j }}(void)
 %% endfor
 
 const struct tst_suite tst_suite = {
-	.suite_name = "Pixel Conversions Testsuite",
+	.suite_name = "Convert Scale Testsuite",
 	.tests = {
 %% for i in range(1, max_in)
 %%  for j in range(1, max_out)
