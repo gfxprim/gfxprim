@@ -290,7 +290,7 @@ static int get_ascii_int(FILE *f, int *val)
 }
 
 /*
- * The PBM has the values inverted
+ * The PBM ASCII has the values inverted
  */
 static int load_ascii_g1_inv(FILE *f, GP_Context *ctx, GP_ProgressCallback *cb)
 {
@@ -304,6 +304,35 @@ static int load_ascii_g1_inv(FILE *f, GP_Context *ctx, GP_ProgressCallback *cb)
 				return err;
 
 			GP_PutPixel_Raw_1BPP_LE(ctx, x, y, !val);
+		}
+
+		if (GP_ProgressCallbackReport(cb, y, ctx->h, ctx->w)) {
+			GP_DEBUG(1, "Operation aborted");
+			return ECANCELED;
+		}
+	}
+
+	GP_ProgressCallbackDone(cb);
+	return 0;
+}
+
+//TODO: This is temporary till blit works with bitendian
+#include "core/GP_BitSwap.h"
+
+static int load_raw_g1_inv(FILE *f, GP_Context *ctx, GP_ProgressCallback *cb)
+{
+	uint32_t x, y;
+	uint8_t *addr;
+	int val;
+
+	for (y = 0; y < ctx->h; y++) {
+		for (x = 0; x < ctx->w; x+=8) {
+
+			if ((val = fgetc(f)) == EOF)
+				return EIO;
+
+			addr = GP_PIXEL_ADDR(ctx, x, y);
+			*addr = ~GP_BIT_SWAP_B1(val);
 		}
 
 		if (GP_ProgressCallbackReport(cb, y, ctx->h, ctx->w)) {
@@ -572,7 +601,12 @@ static GP_Context *read_bitmap(FILE *f, struct pnm_header *header, int flag,
 		goto err1;
 	}
 
-	if ((err = load_ascii_g1_inv(f, ret, callback)))
+	if (header->magic == '1')
+		err = load_ascii_g1_inv(f, ret, callback);
+	else
+		err = load_raw_g1_inv(f, ret, callback);
+
+	if (err)
 		goto err1;
 
 	if (flag)

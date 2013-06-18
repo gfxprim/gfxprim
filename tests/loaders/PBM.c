@@ -69,6 +69,27 @@ struct testcase white_1x1 = {
 	.path = "white_1x1.pbm",
 };
 
+struct testcase black_1x1_bin = {
+	.w = 1,
+	.h = 1,
+	.pix = 0,
+	.path = "black_1x1_bin.pbm",
+};
+
+struct testcase black_2x2_bin = {
+	.w = 2,
+	.h = 2,
+	.pix = 0,
+	.path = "black_2x2_bin.pbm",
+};
+
+struct testcase black_3x9_bin = {
+	.w = 3,
+	.h = 9,
+	.pix = 0,
+	.path = "black_3x9_bin.pbm",
+};
+
 struct testcase_save_load save_load = {
 	.w = 100,
 	.h = 100,
@@ -108,7 +129,25 @@ const struct tst_suite tst_suite = {
 		 .res_path = "data/pbm/valid/black_1x1_4.pbm",
 		 .data = &black_1x1_4,
 		 .flags = TST_TMPDIR | TST_CHECK_MALLOC},
+
+		{.name = "PBM Load 1x1 (black) Raw",
+		 .tst_fn = test_load,
+		 .res_path = "data/pbm/valid/black_1x1_bin.pbm",
+		 .data = &black_1x1_bin,
+		 .flags = TST_TMPDIR | TST_CHECK_MALLOC},
+
+		{.name = "PBM Load 2x2 (black) Raw",
+		 .tst_fn = test_load,
+		 .res_path = "data/pbm/valid/black_2x2_bin.pbm",
+		 .data = &black_2x2_bin,
+		 .flags = TST_TMPDIR | TST_CHECK_MALLOC},
 		
+		{.name = "PBM Load 3x9 (black) Raw",
+		 .tst_fn = test_load,
+		 .res_path = "data/pbm/valid/black_3x9_bin.pbm",
+		 .data = &black_3x9_bin,
+		 .flags = TST_TMPDIR | TST_CHECK_MALLOC},
+	
 		{.name = "PBM Load corrupt",
 		 .tst_fn = test_load_fail,
 		 .res_path = "data/pbm/corrupt/short.pbm",
