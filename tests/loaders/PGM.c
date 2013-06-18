@@ -30,106 +30,119 @@
 
 #include "tst_test.h"
 
-#define LOAD GP_LoadPBM
-#define SAVE GP_SavePBM
+#define LOAD GP_LoadPGM
+#define SAVE GP_SavePGM
 #include "Loader.h"
 
-struct testcase black_1x1_1 = {
+struct testcase black_1x1_1bpp = {
 	.w = 1,
 	.h = 1,
 	.pix = 0,
-	.path = "black_1x1_1.pbm",
+	.path = "black_1x1_1bpp.pgm",
 };
 
-struct testcase black_1x1_2 = {
+struct testcase black_1x1_2bpp = {
 	.w = 1,
 	.h = 1,
 	.pix = 0,
-	.path = "black_1x1_2.pbm",
+	.path = "black_1x1_2bpp.pgm",
 };
 
-struct testcase black_1x1_3 = {
+struct testcase black_1x1_4bpp = {
 	.w = 1,
 	.h = 1,
 	.pix = 0,
-	.path = "black_1x1_3.pbm",
+	.path = "black_1x1_4bpp.pgm",
 };
 
-struct testcase black_1x1_4 = {
+struct testcase black_1x1_8bpp = {
 	.w = 1,
 	.h = 1,
 	.pix = 0,
-	.path = "black_1x1_4.pbm",
+	.path = "black_1x1_8bpp.pgm",
 };
 
-struct testcase white_1x1 = {
-	.w = 1,
-	.h = 1,
-	.pix = 1,
-	.path = "white_1x1.pbm",
-};
-
-struct testcase_save_load save_load = {
+struct testcase_save_load save_load_1bpp = {
 	.w = 100,
 	.h = 100,
 	.pixel_type = GP_PIXEL_G1,
 };
 
+struct testcase_save_load save_load_2bpp = {
+	.w = 100,
+	.h = 100,
+	.pixel_type = GP_PIXEL_G2,
+};
+
+struct testcase_save_load save_load_4bpp = {
+	.w = 100,
+	.h = 100,
+	.pixel_type = GP_PIXEL_G4,
+};
+
+struct testcase_save_load save_load_8bpp = {
+	.w = 100,
+	.h = 100,
+	.pixel_type = GP_PIXEL_G8,
+};
+
 const struct tst_suite tst_suite = {
-	.suite_name = "PBM",
+	.suite_name = "PGM",
 	.tests = {
-		{.name = "PBM Load 1x1 (black)",
+		{.name = "PGM Load 1x1 1bpp (black)",
 		 .tst_fn = test_load,
-		//TODO: Add copy to to res path
-		 .res_path = "data/pbm/valid/black_1x1_1.pbm",
-		 .data = &black_1x1_1,
-		 .flags = TST_TMPDIR | TST_CHECK_MALLOC},
-
-		{.name = "PBM Load 1x1 (white)",
-		 .tst_fn = test_load,
-		 .res_path = "data/pbm/valid/white_1x1.pbm",
-		 .data = &white_1x1,
-		 .flags = TST_TMPDIR | TST_CHECK_MALLOC},
-
-		{.name = "PBM Load 1x1 +comments",
-		 .tst_fn = test_load,
-		 .res_path = "data/pbm/valid/black_1x1_2.pbm",
-		 .data = &black_1x1_2,
-		 .flags = TST_TMPDIR | TST_CHECK_MALLOC},
-
-		{.name = "PBM Load 1x1 +comments +whitespaces",
-		 .tst_fn = test_load,
-		 .res_path = "data/pbm/valid/black_1x1_3.pbm",
-		 .data = &black_1x1_3,
-		 .flags = TST_TMPDIR | TST_CHECK_MALLOC},
-
-		{.name = "PBM Load 1x1 (invalid loadable)",
-		 .tst_fn = test_load,
-		 .res_path = "data/pbm/valid/black_1x1_4.pbm",
-		 .data = &black_1x1_4,
+		 .res_path = "data/pgm/valid/black_1x1_1bpp.pgm",
+		 .data = &black_1x1_1bpp,
 		 .flags = TST_TMPDIR | TST_CHECK_MALLOC},
 		
-		{.name = "PBM Load corrupt",
+		{.name = "PGM Load 1x1 2bpp (black)",
+		 .tst_fn = test_load,
+		 .res_path = "data/pgm/valid/black_1x1_2bpp.pgm",
+		 .data = &black_1x1_2bpp,
+		 .flags = TST_TMPDIR | TST_CHECK_MALLOC},
+
+		 {.name = "PGM Load 1x1 4bpp (black)",
+		  .tst_fn = test_load,
+		  .res_path = "data/pgm/valid/black_1x1_4bpp.pgm",
+		  .data = &black_1x1_4bpp,
+		  .flags = TST_TMPDIR | TST_CHECK_MALLOC},
+		 
+		 {.name = "PGM Load 1x1 8bpp (black)",
+		  .tst_fn = test_load,
+		  .res_path = "data/pgm/valid/black_1x1_8bpp.pgm",
+		  .data = &black_1x1_8bpp,
+		  .flags = TST_TMPDIR | TST_CHECK_MALLOC},
+
+		 {.name = "PGM Save Load 1bpp",
+		  .tst_fn = test_save_load,
+		  .data = &save_load_1bpp,
+		  .flags = TST_TMPDIR | TST_CHECK_MALLOC},
+
+		 {.name = "PGM Save Load 2bpp",
+		  .tst_fn = test_save_load,
+		  .data = &save_load_2bpp,
+		  .flags = TST_TMPDIR | TST_CHECK_MALLOC},
+
+		 {.name = "PGM Save Load 4bpp",
+		  .tst_fn = test_save_load,
+		  .data = &save_load_4bpp,
+		  .flags = TST_TMPDIR | TST_CHECK_MALLOC},
+
+		 {.name = "PGM Save Load 8bpp",
+		  .tst_fn = test_save_load,
+		  .data = &save_load_8bpp,
+		  .flags = TST_TMPDIR | TST_CHECK_MALLOC},
+		
+		{.name = "PGM Load wrong header",
 		 .tst_fn = test_load_fail,
-		 .res_path = "data/pbm/corrupt/short.pbm",
-		 .data = "short.pbm",
+		 .res_path = "data/pgm/corrupt/wrong_header.pgm",
+		 .data = "wrong_header.pgm",
 		 .flags = TST_TMPDIR | TST_CHECK_MALLOC},
 		
-		{.name = "PBM Load wrong header",
+		{.name = "PGM Load incomplete",
 		 .tst_fn = test_load_fail,
-		 .res_path = "data/pbm/corrupt/wrong_header.pbm",
-		 .data = "wrong_header.pbm",
-		 .flags = TST_TMPDIR | TST_CHECK_MALLOC},
-		
-		{.name = "PBM Load empty",
-		 .tst_fn = test_load_fail,
-		 .res_path = "data/pbm/corrupt/empty.pbm",
-		 .data = "empty.pbm",
-		 .flags = TST_TMPDIR | TST_CHECK_MALLOC},
-		
-		{.name = "PBM Save Load",
-		 .tst_fn = test_save_load,
-		 .data = &save_load,
+		 .res_path = "data/pgm/corrupt/incomplete.pgm",
+		 .data = "incomplete.pgm",
 		 .flags = TST_TMPDIR | TST_CHECK_MALLOC},
 
 		{.name = NULL},

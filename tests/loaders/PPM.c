@@ -30,106 +30,47 @@
 
 #include "tst_test.h"
 
-#define LOAD GP_LoadPBM
-#define SAVE GP_SavePBM
+#define LOAD GP_LoadPPM
+#define SAVE GP_SavePPM
 #include "Loader.h"
 
-struct testcase black_1x1_1 = {
+struct testcase black_1x1 = {
 	.w = 1,
 	.h = 1,
 	.pix = 0,
-	.path = "black_1x1_1.pbm",
-};
-
-struct testcase black_1x1_2 = {
-	.w = 1,
-	.h = 1,
-	.pix = 0,
-	.path = "black_1x1_2.pbm",
-};
-
-struct testcase black_1x1_3 = {
-	.w = 1,
-	.h = 1,
-	.pix = 0,
-	.path = "black_1x1_3.pbm",
-};
-
-struct testcase black_1x1_4 = {
-	.w = 1,
-	.h = 1,
-	.pix = 0,
-	.path = "black_1x1_4.pbm",
-};
-
-struct testcase white_1x1 = {
-	.w = 1,
-	.h = 1,
-	.pix = 1,
-	.path = "white_1x1.pbm",
+	.path = "black_1x1.ppm",
 };
 
 struct testcase_save_load save_load = {
 	.w = 100,
 	.h = 100,
-	.pixel_type = GP_PIXEL_G1,
+	.pixel_type = GP_PIXEL_RGB888,
 };
 
 const struct tst_suite tst_suite = {
-	.suite_name = "PBM",
+	.suite_name = "PPM",
 	.tests = {
-		{.name = "PBM Load 1x1 (black)",
+		{.name = "PPM Load 1x1 (black)",
 		 .tst_fn = test_load,
-		//TODO: Add copy to to res path
-		 .res_path = "data/pbm/valid/black_1x1_1.pbm",
-		 .data = &black_1x1_1,
-		 .flags = TST_TMPDIR | TST_CHECK_MALLOC},
-
-		{.name = "PBM Load 1x1 (white)",
-		 .tst_fn = test_load,
-		 .res_path = "data/pbm/valid/white_1x1.pbm",
-		 .data = &white_1x1,
-		 .flags = TST_TMPDIR | TST_CHECK_MALLOC},
-
-		{.name = "PBM Load 1x1 +comments",
-		 .tst_fn = test_load,
-		 .res_path = "data/pbm/valid/black_1x1_2.pbm",
-		 .data = &black_1x1_2,
-		 .flags = TST_TMPDIR | TST_CHECK_MALLOC},
-
-		{.name = "PBM Load 1x1 +comments +whitespaces",
-		 .tst_fn = test_load,
-		 .res_path = "data/pbm/valid/black_1x1_3.pbm",
-		 .data = &black_1x1_3,
-		 .flags = TST_TMPDIR | TST_CHECK_MALLOC},
-
-		{.name = "PBM Load 1x1 (invalid loadable)",
-		 .tst_fn = test_load,
-		 .res_path = "data/pbm/valid/black_1x1_4.pbm",
-		 .data = &black_1x1_4,
+		 .res_path = "data/ppm/valid/black_1x1.ppm",
+		 .data = &black_1x1,
 		 .flags = TST_TMPDIR | TST_CHECK_MALLOC},
 		
-		{.name = "PBM Load corrupt",
-		 .tst_fn = test_load_fail,
-		 .res_path = "data/pbm/corrupt/short.pbm",
-		 .data = "short.pbm",
-		 .flags = TST_TMPDIR | TST_CHECK_MALLOC},
-		
-		{.name = "PBM Load wrong header",
-		 .tst_fn = test_load_fail,
-		 .res_path = "data/pbm/corrupt/wrong_header.pbm",
-		 .data = "wrong_header.pbm",
-		 .flags = TST_TMPDIR | TST_CHECK_MALLOC},
-		
-		{.name = "PBM Load empty",
-		 .tst_fn = test_load_fail,
-		 .res_path = "data/pbm/corrupt/empty.pbm",
-		 .data = "empty.pbm",
-		 .flags = TST_TMPDIR | TST_CHECK_MALLOC},
-		
-		{.name = "PBM Save Load",
+		{.name = "PPM Save Load",
 		 .tst_fn = test_save_load,
 		 .data = &save_load,
+		 .flags = TST_TMPDIR | TST_CHECK_MALLOC},
+
+		{.name = "PPM Load wrong header",
+		 .tst_fn = test_load_fail,
+		 .res_path = "data/ppm/corrupt/wrong_header.ppm",
+		 .data = "wrong_header.ppm",
+		 .flags = TST_TMPDIR | TST_CHECK_MALLOC},
+		
+		{.name = "PPM Load incomplete",
+		 .tst_fn = test_load_fail,
+		 .res_path = "data/ppm/corrupt/incomplete.ppm",
+		 .data = "incomplete.ppm",
 		 .flags = TST_TMPDIR | TST_CHECK_MALLOC},
 
 		{.name = NULL},

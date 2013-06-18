@@ -2,3 +2,5 @@
 loaders_suite
 PNG
 PBM
+PGM
+PPM
