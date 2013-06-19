@@ -3,8 +3,8 @@ Context loaders
 This part of GFXprim library aims to create API to load and save images
 from/to common image file formats.
 
-Currently we support JPEG, PNG and some PNM images for loading and saving and
-BMP, GIF and PSP for loading.
+Currently we support JPEG, PNG, BPM and  PNM images for loading and saving and
+GIF and PSP for loading.
 
 Loaders API
 ~~~~~~~~~~~
@@ -30,11 +30,11 @@ The possible 'errno' values are:
 
 * 'ENOSYS'    if GFXprim wasn't compiled with particular library support
 * 'ENOMEM'    if returned by +malloc()+
-* 'EIO'       invalid image data (wrong signature, header or image data)
+* 'EIO', 'EINVAL' invalid image data (wrong signature, wrong or too short header or image data)
 * 'ECANCELED' action canceled by returning non-zero from within a callback
 
 You can get more information about the error condition by turning on GFXprim
-debug messages.
+link:environment_variables.html#GP_DEBUG[debug messages].
 
 Image Loader
 ~~~~~~~~~~~~
@@ -62,7 +62,7 @@ matching. If image signature is found particular image loader it is called
 and the result is returned.
 
 If file extension disagrees with file signature a warning is printed into the
-stdout.
+'stderr'.
 
 [source,c]
 -------------------------------------------------------------------------------
@@ -194,8 +194,6 @@ WARNING: If you attempt to modify the content of the strucutre the behavior is
 PNG Loader
 ~~~~~~~~~~
 The 'PNG' image support is implemented by the libpng library.
-
-NOTE: PNG images with alpha channel are not supported yet.
 
 [source,c]
 -------------------------------------------------------------------------------
@@ -404,7 +402,7 @@ BMP Loader
 ~~~~~~~~~~
 
 The 'BMP' loading support is nearly complete the only missing features should
-be fancy RGB compressions and RLE support.
+be exotic RGB compressions (RGB101010 for example) and RLE4 support.
 
 [source,c]
 -------------------------------------------------------------------------------
@@ -437,8 +435,6 @@ file. The context, to store the image to, is allocated. The loading process
 could by aborted by a callback, in such case all memory is freed and the call
 returns 'NULL' and 'errno' is set to 'ECANCELED'.
 
-Currently this function loads only first image from the 'GIF' container.
-
 [source,c]
 -------------------------------------------------------------------------------
 #include <loaders/GP_BMP.h>
@@ -451,6 +447,17 @@ GP_Context *GP_LoadBMP(const char *src_path, GP_ProgressCallback *callback);
 Same as above but takes path to the file as a parameter and check for the
 signature. Basically this combines both of the calls above.
 
+[source,c]
+-------------------------------------------------------------------------------
+#include <loaders/GP_BMP.h>
+/* or */
+#include <GP.h>
+
+int GP_SaveBMP(const GP_Context *src, const char *dst_path,
+               GP_ProgressCallback *callback);
+-------------------------------------------------------------------------------
+
+Saves 'RGB888' (24 bit RGB) image into BMP bitmap.
 
 [source,c]
 -------------------------------------------------------------------------------
@@ -501,7 +508,7 @@ Reads 'PSP' image into a context.
 GP_Context *GP_LoadPSP(const char *src_path, GP_ProgressCallback *callback);
 -------------------------------------------------------------------------------
 
-Same as above but takes path to the file as a parameter and check for the
+Same as above but takes path to the file as a parameter and checks for the
 signature. Basically this combines both of the calls above.
 
 [source,c]
@@ -515,8 +522,95 @@ int GP_MatchPSP(const void *buf);
 
 Matches a PSP signature.
 
-PBM, PGM, PPM
-~~~~~~~~~~~~~
+PNM
+~~~
 
-There is a code do load and write 'PBM', 'PGM' and 'PPM' images too. However
-it's not finished and its API is outdated. Use at your own risk.
+[source,c]
+-------------------------------------------------------------------------------
+#include <loaders/GP_PNM.h>
+/* or */
+#include <GP.h>
+
+GP_Context *GP_LoadPBM(const char *src_path, GP_ProgressCallback *callback);
+
+GP_Context *GP_LoadPGM(const char *src_path, GP_ProgressCallback *callback);
+
+GP_Context *GP_LoadPPM(const char *src_path, GP_ProgressCallback *callback);
+
+GP_Context *GP_LoadPNM(const char *src_path, GP_ProgressCallback *callback);
+-------------------------------------------------------------------------------
+
+Loads either ASCII or Rawbits (binary) PBM, PGM and PPM.
+
+The PNM can load all of them i.e. PBM, PGM and PPM.
+
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <loaders/GP_PNM.h>
+/* or */
+#include <GP.h>
+
+GP_Context *GP_SavePBM(const GP_Context *src, const char *dst_path,
+                       GP_ProgressCallback *callback);
+-------------------------------------------------------------------------------
+
+Saves 'G1' (1 bit grayscale) image into ASCII PBM.
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <loaders/GP_PNM.h>
+/* or */
+#include <GP.h>
+
+GP_Context *GP_SavePGM(const GP_Context *src, const char *dst_path,
+                       GP_ProgressCallback *callback);
+-------------------------------------------------------------------------------
+
+Saves 'G1', 'G2', 'G4' and 'G8' (1, 2, 4 and 8 bit grayscale) image into ASCII
+PGM.
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <loaders/GP_PNM.h>
+/* or */
+#include <GP.h>
+
+GP_Context *GP_SavePPM(const GP_Context *src, const char *dst_path,
+                       GP_ProgressCallback *callback);
+-------------------------------------------------------------------------------
+
+Saves 'RGB888' (24 bit RGB) image into ASCII PPM.
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <loaders/GP_PNM.h>
+/* or */
+#include <GP.h>
+
+GP_Context *GP_SavePNM(const GP_Context *src, const char *dst_path,
+                       GP_ProgressCallback *callback);
+-------------------------------------------------------------------------------
+
+Saves 'G1', 'G2', 'G4' and 'G8' (1, 2, 4, 8 bit grayscale) or 'RGB888' (24 bit
+RGB) image into ASCII PNM.
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <loaders/GP_PNM.h>
+/* or */
+#include <GP.h>
+
+int GP_MatchPBM(const void *buf);
+
+int GP_MatchPGM(const void *buf);
+
+int GP_MatchPPM(const void *buf);
+
+int GP_MatchPNM(const void *buf);
+-------------------------------------------------------------------------------
+
+Matches either ASCII or Rawbits (binary) PBM, PGM and PPM.
+
+The PNM matches all of them i.e. PBM, PGM and PPM.
+
