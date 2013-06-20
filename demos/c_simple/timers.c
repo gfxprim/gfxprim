@@ -20,17 +20,48 @@
  *                                                                           *
  *****************************************************************************/
 
-#ifndef INPUT_GP_INPUT_H
-#define INPUT_GP_INPUT_H
-
 /*
- * Base GP_Event definitions.
- */
-#include "input/GP_Event.h"
+ 
+  Simple example how to use raw timer priority queue.
 
-/*
- * Timers and priority queue
  */
-#include "input/GP_Timer.h"
 
-#endif /* INPUT_GP_INPUT_H */
+#include <GP.h>
+
+uint32_t callback1()
+{
+	return 0;
+}
+
+uint32_t callback3()
+{
+	return random() % 30 + 1;
+}
+
+int main(void)
+{
+	GP_TIMER_DECLARE(oneshot, 30, 0, "Oneshot", callback1, NULL);
+	GP_TIMER_DECLARE(recurrent, 0, 4, "Recurrent", callback1, NULL);
+	GP_TIMER_DECLARE(random, 10, 0, "Random", callback3, NULL);
+	GP_Timer *queue = NULL;
+	uint64_t now;
+	int ret;
+
+	GP_SetDebugLevel(10);
+
+	GP_TimerQueueInsert(&queue, 0, &oneshot);
+	GP_TimerQueueInsert(&queue, 0, &recurrent);
+	GP_TimerQueueInsert(&queue, 0, &random);
+	
+	for (now = 0; now < 100; now += 3) {
+		printf("NOW %u\n", (unsigned int) now);
+		printf("-------------------------------------\n");
+		ret = GP_TimerQueueProcess(&queue, now);
+		printf("Processed %i timer events\n", ret);
+		printf("--------------------------------------\n");
+		GP_TimerQueueDump(queue);
+		printf("--------------------------------------\n\n");
+	}
+
+	return 0;
+}

@@ -20,17 +20,74 @@
  *                                                                           *
  *****************************************************************************/
 
-#ifndef INPUT_GP_INPUT_H
-#define INPUT_GP_INPUT_H
+/*
+ 
+  Timers and priority queue implementation.
+
+ */
+
+#ifndef INPUT_GP_TIMER_H
+#define INPUT_GP_TIMER_H
+
+#include <stdint.h>
+
+typedef struct GP_Timer {
+	/* Heap pointers and number of sons */
+	struct GP_Timer *left;
+	struct GP_Timer *right;
+	unsigned int sons;
+
+	/* Expiration time */
+	uint64_t expires;
+	/*
+	 * If not zero return value from Callback is ignored and
+	 * timer is rescheduled each time it expires.
+	 */
+	uint32_t period;
+
+	/* Timer id, showed in debug messages */
+	char id[10];
+
+	/* 
+	 * Timer Callback 
+	 *
+	 * If non-zero is returned, the timer is rescheduled to expire
+	 * return value from now.
+	 */
+	uint32_t (*Callback)(struct GP_Timer *self);
+	void *priv;
+} GP_Timer;
+
+#define GP_TIMER_DECLARE(name, texpires, tperiod, tid, tCallback, tpriv) \
+	GP_Timer name = { \
+		.expires = texpires, \
+		.period = tperiod, \
+		.id = tid, \
+		.Callback = tCallback, \
+		.priv = tpriv \
+	}
 
 /*
- * Base GP_Event definitions.
+ * Prints the structrue of binary heap into stdout, only for debugging.
  */
-#include "input/GP_Event.h"
+void GP_TimerQueueDump(GP_Timer *queue);
 
 /*
- * Timers and priority queue
+ * Inserts timer into the timer priority queue. 
  */
-#include "input/GP_Timer.h"
+void GP_TimerQueueInsert(GP_Timer **queue, uint64_t now, GP_Timer *timer);
 
-#endif /* INPUT_GP_INPUT_H */
+/*
+ * Removes timer from timer queue. Returns NULL if id was not found.
+ */
+GP_Timer GP_TimerQueueRemove(GP_Timer *queue, GP_Timer *timer);
+GP_Timer GP_TimerQueueRemoveById(GP_Timer *queue, const char *id);
+
+/*
+ * Processes queue, all timers with expires <= now are processed.
+ *
+ * Returns number of timers processed.
+ */
+int GP_TimerQueueProcess(GP_Timer **queue, uint64_t now);
+
+#endif /* INPUT_GP_TIMER_H */
