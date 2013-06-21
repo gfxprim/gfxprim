@@ -16,8 +16,11 @@ GP_BackendResize
 GP_BackendResizeAck
 GP_BackendUpdateRectXYXY
 GP_BackendFlip
+GP_BackendWait
+GP_BackendPoll
 GP_BackendWaitEvent
 GP_BackendPollEvent
+GP_BackendAddTimer
 
 GP_InputDriverX11EventPut
 GP_InputDriverX11Init
