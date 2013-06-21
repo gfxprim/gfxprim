@@ -148,6 +148,9 @@ void GP_EventDump(struct GP_Event *ev)
 	case GP_EV_SYS:
 		dump_sys(ev);
 	break;
+	case GP_EV_TMR:
+		printf("Timer %s expired\n", ev->val.tmr->id);
+	break;
 	default:
 		printf("Unknown %u\n", ev->type);
 	}

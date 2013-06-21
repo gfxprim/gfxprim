@@ -45,8 +45,7 @@
 #include "core/GP_Context.h"
 
 #include "input/GP_EventQueue.h"
-
-struct GP_Backend;
+#include "input/GP_Timer.h" 
 
 typedef struct GP_Backend {
 	/*
@@ -136,6 +135,11 @@ typedef struct GP_Backend {
 	 */
 	struct GP_EventQueue event_queue;
 
+	/*
+	 * Priority queue for timers.
+	 */
+	struct GP_Timer *timers;
+
 	/* Backed private data */
 	char priv[];
 } GP_Backend;
@@ -180,10 +184,7 @@ static inline void GP_BackendExit(GP_Backend *backend)
 /*
  * Polls backend, the events are filled into event queue.
  */
-static inline void GP_BackendPoll(GP_Backend *backend)
-{
-	backend->Poll(backend);
-}
+void GP_BackendPoll(GP_Backend *self);
 
 /*
  * Poll and GetEvent combined.
@@ -193,15 +194,22 @@ int GP_BackendPollEvent(GP_Backend *self, GP_Event *ev);
 /*
  * Waits for backend events.
  */
-static inline void GP_BackendWait(GP_Backend *backend)
-{
-	backend->Wait(backend);
-}
+void GP_BackendWait(GP_Backend *self);
 
 /*
  * Wait and GetEvent combined.
  */
 int GP_BackendWaitEvent(GP_Backend *self, GP_Event *ev);
+
+/*
+ * Adds timer to backend.
+ *
+ * If timer Callback is NULL a timer event is pushed into
+ * the backend event queue once timer expires.
+ *
+ * See input/GP_Timer.h for more information about timers.
+ */
+void GP_BackendAddTimer(GP_Backend *self, GP_Timer *timer);
 
 /*
  * Sets backend caption, if supported.

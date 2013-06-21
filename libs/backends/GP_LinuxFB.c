@@ -313,6 +313,7 @@ GP_Backend *GP_BackendLinuxFBInit(const char *path, int flag)
 	backend->Poll          = flag ? fb_poll : NULL;
 	backend->Wait          = flag ? fb_wait : NULL;
 	backend->fd            = fb->con_fd;
+	backend->timers        = NULL;
 
 	GP_EventQueueInit(&backend->event_queue, vscri.xres, vscri.yres, 0);
 

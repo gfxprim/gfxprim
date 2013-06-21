@@ -200,6 +200,7 @@ static struct GP_Backend backend = {
 	.fd            = -1,
 	.Poll          = sdl_poll,
 	.Wait          = sdl_wait,
+	.timers        = NULL,
 };
 
 static void sdl_exit(struct GP_Backend *self __attribute__((unused)))

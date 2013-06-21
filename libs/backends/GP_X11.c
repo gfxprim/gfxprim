@@ -618,6 +618,7 @@ GP_Backend *GP_BackendX11Init(const char *display, int x, int y,
 	backend->SetAttributes = x11_set_attributes;
 	backend->ResizeAck     = x11_resize_ack;
 	backend->fd            = XConnectionNumber(win->dpy);
+	backend->timers        = NULL;
 
 	return backend;
 err1:

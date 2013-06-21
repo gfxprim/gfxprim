@@ -37,6 +37,8 @@
 #include <stdint.h>
 #include <sys/time.h>
 
+#include "input/GP_Timer.h"
+
 #define GP_EVENT_QUEUE_SIZE 32
 
 #define GP_EVENT_KEYMAP_BYTES 36
@@ -46,7 +48,8 @@ enum GP_EventType {
 	GP_EV_REL = 2, /* relative event */
 	GP_EV_ABS = 3, /* absolute event */
 	GP_EV_SYS = 4, /* system events window close, resize... */
-	GP_EV_MAX = 4, /* maximum, greater values are free */
+	GP_EV_TMR = 5, /* timer expired event */
+	GP_EV_MAX = 5, /* maximum, greater values are free */
 };
 
 enum GP_EventKeyCode {
@@ -264,6 +267,8 @@ union GP_EventValue {
 	struct GP_EventPosAbs abs;
 	/* system event */
 	struct GP_EventSys sys;
+	/* timer event */
+	GP_Timer *tmr;
 };
 
 typedef struct GP_Event {

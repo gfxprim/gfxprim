@@ -16,7 +16,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2013 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
@@ -150,6 +150,7 @@ GP_Backend *GP_BackendVirtualInit(GP_Backend *backend,
 	self->Poll          = backend->Poll ? virt_poll : NULL;
 	self->Wait          = backend->Wait ? virt_wait : NULL;
 	self->SetAttributes = backend->SetAttributes ? virt_set_attrs : NULL;
+	self->timers        = NULL;
 
 	GP_EventQueueInit(&self->event_queue, backend->context->w,
 	                  backend->context->h, 0);
