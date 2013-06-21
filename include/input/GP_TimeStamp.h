@@ -20,22 +20,17 @@
  *                                                                           *
  *****************************************************************************/
 
-#ifndef INPUT_GP_INPUT_H
-#define INPUT_GP_INPUT_H
-
 /*
- * Base GP_Event definitions.
- */
-#include "input/GP_Event.h"
+ 
+  Returns monotonously incrementing timestamps in milliseconds.
 
-/*
- * Timers and priority queue
  */
-#include "input/GP_Timer.h"
 
-/*
- * Timestamp.
- */
-#include "input/GP_TimeStamp.h"
+#ifndef INPUT_GP_TIME_STAMP_H
+#define INPUT_GP_TIME_STAMP_H
 
-#endif /* INPUT_GP_INPUT_H */
+#include <stdint.h>
+
+uint64_t GP_GetTimeStamp(void);
+
+#endif /* INPUT_GP_TIME_STAMP_H */

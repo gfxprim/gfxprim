@@ -265,7 +265,7 @@ def write_gfxprim_config(cfg, libs):
     f.write('\t--list-modules) echo "%s"; exit 0;;\n' % ' '.join(modules))
     f.write('\t--cflags) echo -n "-I/usr/include/GP/%s";;\n' %
             libs.get_cflags('core'))
-    f.write('\t--libs) echo -n "-lGP -lm %s ";;\n' % libs.get_linker_flags('core'))
+    f.write('\t--libs) echo -n "-lGP -lrt -lm %s ";;\n' % libs.get_linker_flags('core'))
    
     # ldflags for specific modules
     for i in modules:
