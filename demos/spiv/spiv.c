@@ -620,7 +620,7 @@ static void sighandler(int signo)
 	
 	fprintf(stderr, "Got signal %i\n", signo);
 
-	exit(1);
+	_exit(1);
 }
 
 static void init_backend(const char *backend_opts)
@@ -633,78 +633,6 @@ static void init_backend(const char *backend_opts)
 	}
 }
 
-static int alarm_fired = 0;
-
-static void alarm_handler(int signo)
-{
-	alarm_fired = 1;
-}
-
-static int wait_for_event(int sleep_msec)
-{
-	static int sleep_msec_count = 0;
-	static int alarm_set = 0;
-
-	if (sleep_msec < 0) {
-		GP_BackendPoll(backend);
-		usleep(10000);
-		return 0;
-	}
-
-	/* We can't sleep on backend fd, because the backend doesn't export it. */
-	if (backend->fd < 0) {
-		GP_BackendPoll(backend);
-		usleep(10000);
-
-		sleep_msec_count += 10;
-
-		if (sleep_msec_count >= sleep_msec) {
-			sleep_msec_count = 0;
-			return 1;
-		}
-
-		return 0;
-	}
-
-	/* Initalize select */
-	fd_set rfds;
-	FD_ZERO(&rfds);
-	
-	FD_SET(backend->fd, &rfds);
-
-	if (!alarm_set) {
-		signal(SIGALRM, alarm_handler);
-		alarm(sleep_msec / 1000);
-		alarm_fired = 0;
-		alarm_set = 1;
-	}
-
-	struct timeval tv = {.tv_sec = sleep_msec / 1000,
-	                     .tv_usec = (sleep_msec % 1000) * 1000};
-	
-	int ret = select(backend->fd + 1, &rfds, NULL, NULL, &tv);
-	
-	switch (ret) {
-	case -1:
-		if (errno == EINTR)
-			return 1;
-		
-		GP_BackendExit(backend);
-		exit(1);
-	break;
-	case 0:
-		if (alarm_fired) {
-			alarm_set = 0;
-			return 1;
-		}
-
-		return 0;
-	break;
-	default:
-		GP_BackendPoll(backend);
-		return 0;
-	}
-}
 
 static void init_caches(struct loader_params *params)
 {
@@ -728,11 +656,20 @@ static void init_caches(struct loader_params *params)
 //	params->img_orig_cache = NULL;
 }
 
+static uint32_t timer_callback(GP_Timer *self)
+{
+	struct loader_params *params = self->priv;
+
+	show_image(params, image_list_move(params->img_list, 1));
+
+	return 0;
+}
+
 int main(int argc, char *argv[])
 {
 	GP_Context *context = NULL;
 	const char *backend_opts = "X11";
-	int sleep_sec = -1;
+	int sleep_ms = -1;
 	int opt;
 	int shift_flag;
 	GP_PixelType emul_type = GP_PIXEL_UNKNOWN;
@@ -755,6 +692,8 @@ int main(int argc, char *argv[])
 		.img_orig_cache = NULL,
 	};
 
+	GP_TIMER_DECLARE(timer, 0, 0, "Slideshow", timer_callback, &params);
+
 	while ((opt = getopt(argc, argv, "b:ce:fhIPs:r:z:0:1:2:3:4:5:6:7:8:9:")) != -1) {
 		switch (opt) {
 		case 'I':
@@ -767,7 +706,7 @@ int main(int argc, char *argv[])
 			params.use_dithering = 1;
 		break;
 		case 's':
-			sleep_sec = atoi(optarg);
+			sleep_ms = atoi(optarg);
 		break;
 		case 'c':
 			params.resampling_method = GP_INTERP_CUBIC_INT;
@@ -850,13 +789,15 @@ int main(int argc, char *argv[])
 
 	params.show_progress_once = 1;
 	show_image(&params, image_list_img_path(list));
-		
-	for (;;) {
-		/* wait for event or a timeout */
-		if (wait_for_event(sleep_sec * 1000))	
-			show_image(&params, image_list_move(list, 1));
 
-		/* Read and parse events */
+	if (sleep_ms) {
+		timer.period = sleep_ms;
+		GP_BackendAddTimer(backend, &timer);
+	}
+
+	for (;;) {
+		GP_BackendWait(backend);
+
 		GP_Event ev;
 
 		while (GP_BackendGetEvent(backend, &ev)) {
