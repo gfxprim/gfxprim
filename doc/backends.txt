@@ -412,6 +412,25 @@ queue and the call returns.
 	}
 -------------------------------------------------------------------------------
 
+GP_BackendAddTimer
+^^^^^^^^^^^^^^^^^^
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <backends/GP_Backend.h>
+/* or */
+#include <GP.h>
+
+void GP_BackendAddTimer(GP_Backend *self, GP_Timer *timer);
+-------------------------------------------------------------------------------
+
+Adds a link:input.html#Timers[timer] to the backend timer queue.
+
+Timers added to the backend are processed automatically while you call any of
+backend 'Poll' or 'Wait' functions.
+
+If timer callback is set to 'NULL' a timer event is pushed to the backend
+input queue once timer has expired otherwise timer callback is called.
 
 GP_BackendEventsQueued
 ^^^^^^^^^^^^^^^^^^^^^^
