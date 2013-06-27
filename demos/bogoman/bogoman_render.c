@@ -30,12 +30,12 @@
 struct render_colors {
 	/* global background */
 	GP_Pixel bg;
-	
+
 	/* player color */
 	GP_Pixel player;
 
 	/* frames around things */
-	GP_Pixel frames;	
+	GP_Pixel frames;
 
 	/* diamod color */
 	GP_Pixel diamond;
@@ -79,9 +79,9 @@ static void render_player(struct bogoman_render *render,
                           struct bogoman_map_elem *elem)
 {
 	unsigned int w = render->map_elem_size;
-	
+
 	(void) elem;
-	
+
 	GP_FillRectXYWH(render->ctx, x, y, w, w, colors.bg);
 	GP_FillCircle(render->ctx, x + w/2, y + w/2, w/2 - 1, colors.player);
 	GP_Circle(render->ctx, x + w/2, y + w/2, w/2 - 1, colors.frames);
@@ -97,7 +97,7 @@ static void render_wall(struct bogoman_render *render,
 
 	if (!(elem->flags & BOGOMAN_WALL_LEFT))
 		GP_VLineXYH(render->ctx, x, y, w, colors.frames);
-	
+
 	if (!(elem->flags & BOGOMAN_WALL_RIGHT))
 		GP_VLineXYH(render->ctx, x + w - 1, y, w, colors.frames);
 
@@ -115,7 +115,7 @@ static void render_diamond(struct bogoman_render *render,
 	unsigned int w = render->map_elem_size;
 
 	GP_FillRectXYWH(render->ctx, x, y, w, w, colors.bg);
-	
+
 	GP_FillTetragon(render->ctx, x + w/2, y, x + w - 1, y + w/2,
 	                x + w/2, y + w - 1, x, y + w/2, colors.diamond);
 
@@ -128,7 +128,7 @@ static void render_moveable(struct bogoman_render *render,
                             struct bogoman_map_elem *elem)
 {
 	unsigned int w = render->map_elem_size;
-	
+
 	GP_FillRectXYWH(render->ctx, x, y, w, w, colors.bg);
 
 	GP_FillRectXYWH(render->ctx, x + 1, y + 1, w - 2, w - 2, colors.moveable);
@@ -148,7 +148,7 @@ static void render_edible(struct bogoman_render *render,
 
 static void (*renders[])(struct bogoman_render *render,
                        unsigned int x, unsigned int y,
-		       struct bogoman_map_elem *elem) = 
+		       struct bogoman_map_elem *elem) =
 {
 	render_none,
 	render_player,

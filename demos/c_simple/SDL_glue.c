@@ -24,7 +24,7 @@
  *****************************************************************************/
 
  /*
-   
+
    This example shows how to mix SDL with GFXprim.
 
   */
@@ -46,7 +46,7 @@ static GP_Pixel black_pixel, darkgray_pixel;
 void redraw_screen(void)
 {
 	SDL_LockSurface(display);
-	
+
 	GP_Fill(&context, black_pixel);
 
 	GP_Line(&context, 0, 0, W-1, H-1, darkgray_pixel);
@@ -90,7 +90,7 @@ int main(void)
 	}
 
 	display = SDL_SetVideoMode(W, H, 0, SDL_SWSURFACE);
-	
+
 	if (display == NULL) {
 		fprintf(stderr, "Could not open display: %s\n", SDL_GetError());
 		goto fail;

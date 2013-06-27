@@ -87,7 +87,7 @@ static void print_font_properties(const GP_FontFace *font)
 			GP_FontAscend(font), GP_FontDescend(font));
 	fprintf(stderr, "    Max advance_x: %u\n",
 	                GP_FontMaxAdvanceX(font));
-	fprintf(stderr, "    Glyph bitmap format: %s\n", 
+	fprintf(stderr, "    Glyph bitmap format: %s\n",
 	                glyph_bitmap_format_name(font->glyph_bitmap_format));
 	fprintf(stderr, "    Bounding box width: %d, heigth: %d\n",
 	                GP_FontMaxWidth(font), GP_FontHeight(font));
@@ -155,7 +155,7 @@ void redraw_screen(void)
 
 		GP_Text(win->context, &style, 16, SPACING*i + 16, align,
 		        white_pixel, dark_gray_pixel, test_string);
-		
+
 		style.pixel_xmul = 2;
 		style.pixel_ymul = 2;
 		style.pixel_yspace = 1;
@@ -169,18 +169,18 @@ void redraw_screen(void)
 
 		style.pixel_xmul = 4;
 		style.pixel_ymul = 2;
-		
+
 		style.pixel_xspace = 1;
 		style.pixel_yspace = 1;
-		
+
 		if (font_flag == 2 || font_flag == 3) {
 			style.pixel_xmul = 2;
 			style.pixel_ymul = 5;
-		
+
 			style.pixel_xspace = 2;
 			style.pixel_yspace = 2;
 		}
-		
+
 		GP_Text(win->context, &style, 64, SPACING*i + 88, align,
 		        dark_gray_pixel, black_pixel, test_string);
 	}
@@ -197,14 +197,14 @@ void event_loop(void)
 		case GP_EV_KEY:
 			if (ev.code != GP_EV_KEY_DOWN)
 				continue;
-			
+
 			switch (ev.val.key.key) {
 			case GP_KEY_SPACE:
 				if (font)
 					font_flag = (font_flag + 1) % 5;
 				else
 					font_flag = (font_flag + 1) % 4;
-					
+
 				redraw_screen();
 				GP_BackendFlip(win);
 			break;
@@ -257,17 +257,17 @@ void print_instructions(void)
 int main(int argc, char *argv[])
 {
 	const char *backend_opts = "X11";
-	
+
 	print_instructions();
 
 	GP_SetDebugLevel(10);
-	
+
 	if (argc > 1) {
 		font_path = argv[1];
 		fprintf(stderr, "\nLoading font '%s'\n", argv[1]);
 		font = GP_FontFaceLoad(argv[1], 0, font_h);
 	}
-	
+
 	win = GP_BackendInit(backend_opts, "Font Test", stderr);
 
 	if (win == NULL) {
@@ -275,7 +275,7 @@ int main(int argc, char *argv[])
 		        backend_opts);
 		return 1;
 	}
-	
+
 	white_pixel     = GP_ColorToContextPixel(GP_COL_WHITE, win->context);
 	gray_pixel      = GP_ColorToContextPixel(GP_COL_GRAY_LIGHT, win->context);
 	dark_gray_pixel = GP_ColorToContextPixel(GP_COL_GRAY_DARK, win->context);

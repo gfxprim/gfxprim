@@ -86,7 +86,7 @@ void draw_testing_triangle(int x, int y, int xradius, int yradius)
 		y1 = y;
 		x2 = x + xradius;
 		y2 = y + yradius;
-		break;	
+		break;
 	case 3:
 		x0 = x - xradius;
 		y0 = y - yradius;
@@ -171,7 +171,7 @@ void draw_testing_rectangle(int x, int y, int xradius, int yradius)
 {
 	int x0 = x - xradius, y0 = y - yradius;
 	int x1 = x + xradius, y1 = y + yradius;
-	
+
 	if (outline == 1)
 		GP_Rect(win, x0, y0, x1, y1, yellow);
 
@@ -191,7 +191,7 @@ void draw_testing_tetragon(int x, int y, int xradius, int yradius)
 
 	if (outline == 1)
 		GP_Tetragon(win, x0, y0, x1, y1, x2, y2, x3, y3, yellow);
-	
+
 	if (fill)
 		GP_FillTetragon(win, x0, y0, x1, y1, x2, y2, x3, y3, red);
 
@@ -206,7 +206,7 @@ void draw_testing_polygon(int x, int y, int xradius, int yradius)
 
 	xy[0] = x + xradius;
 	xy[1] = y;
-	
+
 	xy[2] = x + 3 * xradius / 4;
 	xy[3] = y + yradius / 4;
 
@@ -308,7 +308,7 @@ static void xradius_add(int xradius_add)
 	    xradius + xradius_add < (int)win->w)
 		xradius += xradius_add;
 }
-	
+
 
 static void yradius_add(int yradius_add)
 {
@@ -316,14 +316,14 @@ static void yradius_add(int yradius_add)
 	    yradius + yradius_add < (int)win->h)
 		yradius += yradius_add;
 }
-			
+
 static void xcenter_add(int xcenter_add)
 {
 	if (center_x + xcenter_add > 1 &&
 	    center_x + xcenter_add < (int)win->w/2)
 		center_x += xcenter_add;
 }
-			
+
 static void ycenter_add(int ycenter_add)
 {
 	if (center_y + ycenter_add > 1 &&
@@ -341,7 +341,7 @@ void event_loop(void)
 		GP_BackendWaitEvent(backend, &ev);
 
 		GP_EventDump(&ev);
-	
+
 		shift_pressed = GP_EventGetKey(&ev, GP_KEY_LEFT_SHIFT) ||
 		                GP_EventGetKey(&ev, GP_KEY_RIGHT_SHIFT);
 
@@ -349,7 +349,7 @@ void event_loop(void)
 		case GP_EV_KEY:
 			if (ev.code != GP_EV_KEY_DOWN)
 				continue;
-			
+
 			switch (ev.val.key.key) {
 			case GP_KEY_X:
 				win->x_swap = !win->x_swap;
@@ -446,7 +446,7 @@ void event_loop(void)
 			}
 		break;
 		}
-	
+
 		redraw_screen();
 	}
 }
@@ -484,7 +484,7 @@ int main(void)
 		        backend_opts);
 		return 1;
 	}
-	
+
 	win = backend->context;
 
 	center_x = win->w / 2;

@@ -44,8 +44,8 @@ static int progress_callback(GP_ProgressCallback *self)
 	printf("\r%s '%s' %3.1f%%", priv->op, priv->name, self->percentage);
 	fflush(stdout);
 
-	/* 
-	 * It's important to return zero as non-zero return value 
+	/*
+	 * It's important to return zero as non-zero return value
 	 * aborts the operation.
 	 */
 	return 0;
@@ -65,7 +65,7 @@ int main(int argc, char *argv[])
 
 	priv.op   = "Loading";
 	priv.name = argv[1];
-	
+
 	img = GP_LoadImage(argv[1], &callback);
 
 	if (img == NULL) {

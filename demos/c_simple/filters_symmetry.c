@@ -42,7 +42,7 @@ static void usage_and_exit(int ret)
 		printf("%s, ", GP_FilterSymmetryNames[i]);
 
 	printf("%s} image_in image_out\n", GP_FilterSymmetryNames[i]);
-	
+
 	exit(ret);
 }
 
@@ -68,7 +68,7 @@ int main(int argc, char *argv[])
 			usage_and_exit(1);
 		}
 	}
-	
+
 	/* Turn on debug messages */
 	GP_SetDebugLevel(debug);
 
@@ -111,6 +111,6 @@ int main(int argc, char *argv[])
 	/* Cleanup */
 	GP_ContextFree(src);
 	GP_ContextFree(res);
-	
+
 	return 0;
 }

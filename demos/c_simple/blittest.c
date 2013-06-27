@@ -55,21 +55,21 @@ void redraw_screen(void)
 		bitmap_vy = -bitmap_vy;
 		bitmap_y += bitmap_vy;
 	}
-	
+
 	if (bitmap_y < 0) {
 		bitmap_vy = -bitmap_vy;
 		bitmap_y += bitmap_vy;
 	}
 
 	GP_FillRectXYWH(win->context, 20, 20, 300, 50, black);
-	
+
 	GP_Text(win->context, NULL, 20, 20, GP_ALIGN_RIGHT|GP_VALIGN_BOTTOM,
 	        white, black, text_buf);
 
 	GP_Print(win->context, NULL, 250, 20, GP_ALIGN_RIGHT|GP_VALIGN_BOTTOM,
 	         white, black, "%c|%c|%c", bitmap->x_swap ? 'x' : ' ',
 		 bitmap->y_swap ? 'y' : ' ', bitmap->axes_swap ? 'a' : ' ');
-	
+
 	GP_Blit(bitmap, 0, 0, GP_ContextW(bitmap), GP_ContextH(bitmap),
 	        win->context, bitmap_x, bitmap_y);
 
@@ -84,7 +84,7 @@ static void change_bitmap(void)
 		bitmap = bitmap_conv;
 	else
 		bitmap = bitmap_raw;
-	
+
 	snprintf(text_buf, sizeof(text_buf), "'%s' -> '%s'",
 	         GP_PixelTypeName(bitmap->pixel_type),
 		 GP_PixelTypeName(win->context->pixel_type));
@@ -96,12 +96,12 @@ void event_loop(void)
 
 	while (GP_BackendGetEvent(win, &ev)) {
 		GP_EventDump(&ev);
-		
+
 		switch (ev.type) {
 		case GP_EV_KEY:
 			if (ev.code != GP_EV_KEY_DOWN)
 				continue;
-			
+
 			switch (ev.val.key.key) {
 			case GP_KEY_X:
 				bitmap->x_swap = !bitmap->x_swap;
@@ -153,14 +153,14 @@ int main(void)
 	const char *backend_opts = "X11";
 
 	print_instructions();
-	
+
 	bitmap_raw = GP_LoadImage(sprite, NULL);
 
 	if (!bitmap_raw) {
 		fprintf(stderr, "Failed to load '%s'\n", sprite);
 		return 1;
 	}
-	
+
 	win = GP_BackendInit(backend_opts, "Blit Test", stderr);
 
 	if (win == NULL) {
@@ -182,7 +182,7 @@ int main(void)
 	for (;;) {
 		GP_BackendPoll(win);
 		event_loop();
-	
+
 		usleep(8000);
 
 		if (pause_flag)

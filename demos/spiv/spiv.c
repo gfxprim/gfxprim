@@ -52,17 +52,17 @@ static int abort_flag = 0;
 static int show_progress = 0;
 
 enum zoom_type {
-	/* 
+	/*
 	 * Resize image to fit current size of the window.
 	 */
 	ZOOM_FIT,
-	
-	/* 
+
+	/*
 	 * Use zoom set in zoom float and zoom offsets.
 	 */
 	ZOOM_FIXED,
-	
-	/* 
+
+	/*
 	 * Fixed zoom but spiv tries to change
 	 * the window size to fit the image size
 	 */
@@ -100,10 +100,10 @@ struct loader_params {
 	/* offset in pixels */
 	unsigned int zoom_x_offset;
 	unsigned int zoom_y_offset;
-	
+
 	/* zoom */
 	enum zoom_type zoom_type;
-	float zoom;        
+	float zoom;
 
 	/* caches for loaded images */
 	struct image_cache *img_resized_cache;
@@ -130,7 +130,7 @@ static int image_loader_callback(GP_ProgressCallback *self)
 	         (const char*)self->priv, self->percentage);
 
 	int align = GP_ALIGN_CENTER|GP_VALIGN_ABOVE;
-	
+
 	size = GP_TextWidth(NULL, buf);
 
 	int start = c->w/2 - size/2 - 10;
@@ -177,7 +177,7 @@ static float calc_img_size(struct loader_params *params,
 {
 	float w_rat;
 	float h_rat;
-	
+
 	switch (params->zoom_type) {
 	case ZOOM_FIT_DOWNSCALE:
 		if (img_w <= src_w && img_h <= src_h)
@@ -224,7 +224,7 @@ static GP_Context *load_image(struct loader_params *params, int elevate)
 {
 	struct cpu_timer timer;
 	GP_Context *img, *context = backend->context;
-	
+
 	GP_ProgressCallback callback = {.callback = image_loader_callback,
 	                                .priv = "Loading image"};
 
@@ -236,7 +236,7 @@ static GP_Context *load_image(struct loader_params *params, int elevate)
 
 		cpu_timer_start(&timer, "Loading");
 		if ((img = GP_LoadImage(params->img_path, &callback)) == NULL) {
-			
+
 			if (errno == ECANCELED)
 				return NULL;
 
@@ -245,12 +245,12 @@ static GP_Context *load_image(struct loader_params *params, int elevate)
 			         GP_ALIGN_CENTER|GP_VALIGN_CENTER, white_pixel, black_pixel,
 				 "'%s'", params->img_path);
 			GP_Print(context, NULL, context->w/2, context->h/2 + 10,
-		        	 GP_ALIGN_CENTER|GP_VALIGN_CENTER, white_pixel, black_pixel,
+				 GP_ALIGN_CENTER|GP_VALIGN_CENTER, white_pixel, black_pixel,
 				 "Failed to load image :( (%s)", strerror(errno));
 			GP_BackendFlip(backend);
 			return NULL;
 		}
-		
+
 		/* Workaround */
 //		if (img->pixel_type != GP_PIXEL_RGB888) {
 //			GP_Context *tmp;
@@ -260,11 +260,11 @@ static GP_Context *load_image(struct loader_params *params, int elevate)
 //		}
 
 		image_cache_put(params->img_orig_cache, img, params->img_path, 0, 0);
-		
+
 		cpu_timer_stop(&timer);
 	}
 
-	return img; 
+	return img;
 }
 
 /*
@@ -321,7 +321,7 @@ static void update_display(struct loader_params *params, GP_Context *img)
 		img = GP_FilterRotate270Alloc(img, &callback);
 	break;
 	}
-	
+
 	if (img == NULL)
 		return;
 
@@ -344,7 +344,7 @@ static void update_display(struct loader_params *params, GP_Context *img)
 	GP_Context sub_display;
 
 	cpu_timer_start(&timer, "Blitting");
-	
+
 	if (params->use_dithering) {
 		callback.priv = "Dithering";
 		GP_SubContext(context, &sub_display, cx, cy, img->w, img->h);
@@ -356,18 +356,18 @@ static void update_display(struct loader_params *params, GP_Context *img)
 
 		GP_Blit_Clipped(img, 0, 0, img->w, img->h, context, cx, cy);
 	}
-	
+
 	cpu_timer_stop(&timer);
-	
+
 	if (params->rotate)
 		GP_ContextFree(img);
-	
+
 	/* clean up the rest of the display */
 	GP_FillRectXYWH(context, 0, 0, cx, context->h, black_pixel);
 	GP_FillRectXYWH(context, 0, 0, context->w, cy, black_pixel);
-	
+
 	int w = context->w - img->w - cx;
-	
+
 	if (w > 0)
 		GP_FillRectXYWH(context, img->w + cx, 0, w, context->h, black_pixel);
 
@@ -375,8 +375,8 @@ static void update_display(struct loader_params *params, GP_Context *img)
 
 	if (h > 0)
 		GP_FillRectXYWH(context, 0, img->h + cy, context->w, h, black_pixel);
-	
-	set_caption(params->img_path, params->rat); 
+
+	set_caption(params->img_path, params->rat);
 
 	if (!params->show_info) {
 		GP_BackendFlip(backend);
@@ -384,53 +384,53 @@ static void update_display(struct loader_params *params, GP_Context *img)
 	}
 
 	GP_Size th = GP_TextHeight(NULL);
-	
+
 	GP_Print(context, NULL, 11, 11, GP_ALIGN_RIGHT|GP_VALIGN_BOTTOM,
 	         black_pixel, white_pixel, "%ux%u", img->w, img->h);
-	
+
 	GP_Print(context, NULL, 10, 10, GP_ALIGN_RIGHT|GP_VALIGN_BOTTOM,
 	         white_pixel, black_pixel, "%ux%u", img->w, img->h);
-	
+
 	GP_Print(context, NULL, 11, 13 + th, GP_ALIGN_RIGHT|GP_VALIGN_BOTTOM,
 	         black_pixel, white_pixel, "1:%3.3f", params->rat);
-	
+
 	GP_Print(context, NULL, 10, 12 + th, GP_ALIGN_RIGHT|GP_VALIGN_BOTTOM,
 	         white_pixel, black_pixel, "1:%3.3f", params->rat);
-	
+
 	GP_Print(context, NULL, 11, 15 + 2 * th, GP_ALIGN_RIGHT|GP_VALIGN_BOTTOM,
 	         black_pixel, white_pixel, "%s", img_name(params->img_path));
-	
+
 	GP_Print(context, NULL, 10, 14 + 2 * th, GP_ALIGN_RIGHT|GP_VALIGN_BOTTOM,
 	         white_pixel, black_pixel, "%s", img_name(params->img_path));
-	
+
 	GP_Print(context, NULL, 11, 17 + 3 * th, GP_ALIGN_RIGHT|GP_VALIGN_BOTTOM,
 	         black_pixel, white_pixel, "%s%s",
 		 params->use_low_pass && params->rat < 1 ? "Gaussian LP + " : "",
 		 GP_InterpolationTypeName(params->resampling_method));
-	
+
 	GP_Print(context, NULL, 10, 16 + 3 * th, GP_ALIGN_RIGHT|GP_VALIGN_BOTTOM,
-	         white_pixel, black_pixel, "%s%s", 
+	         white_pixel, black_pixel, "%s%s",
 		 params->use_low_pass && params->rat < 1 ? "Gaussian LP + " : "",
 		 GP_InterpolationTypeName(params->resampling_method));
 
 	unsigned int count = image_list_count(params->img_list);
 	unsigned int pos = image_list_pos(params->img_list) + 1;
-	
+
 	GP_Print(context, NULL, 11, 19 + 4 * th, GP_ALIGN_RIGHT|GP_VALIGN_BOTTOM,
 	         black_pixel, white_pixel, "%u of %u", pos, count);
-	
+
 	GP_Print(context, NULL, 10, 18 + 4 * th, GP_ALIGN_RIGHT|GP_VALIGN_BOTTOM,
-	         white_pixel, black_pixel, "%u of %u", pos, count); 
-	
+	         white_pixel, black_pixel, "%u of %u", pos, count);
+
 	unsigned int dir_count = image_list_dir_count(params->img_list);
 	unsigned int dir_pos = image_list_dir_pos(params->img_list) + 1;
 
 	if (dir_count > 1 && dir_count != count) {
 		GP_Print(context, NULL, 11, 21 + 5 * th, GP_ALIGN_RIGHT|GP_VALIGN_BOTTOM,
-	        	 black_pixel, white_pixel, "%u of %u in directory", dir_pos, dir_count);
-	
+			 black_pixel, white_pixel, "%u of %u in directory", dir_pos, dir_count);
+
 		GP_Print(context, NULL, 10, 20 + 5 * th, GP_ALIGN_RIGHT|GP_VALIGN_BOTTOM,
-	        	 white_pixel, black_pixel, "%u of %u in directory", dir_pos, dir_count); 
+			 white_pixel, black_pixel, "%u of %u in directory", dir_pos, dir_count);
 	}
 
 	GP_BackendFlip(backend);
@@ -442,7 +442,7 @@ GP_Context *load_resized_image(struct loader_params *params, GP_Size w, GP_Size 
 	GP_Context *img, *res = NULL;
 	struct cpu_timer timer;
 	GP_ProgressCallback callback = {.callback = image_loader_callback};
-	
+
 	int key = (params->resampling_method<<1) | !!(params->use_low_pass);
 
 	/* Try to get resized cached image */
@@ -450,7 +450,7 @@ GP_Context *load_resized_image(struct loader_params *params, GP_Size w, GP_Size 
 
 	if (img != NULL)
 		return img;
-	
+
 	/* Otherwise load image and resize it */
 	if ((img = load_image(params, 1)) == NULL)
 		return NULL;
@@ -468,18 +468,18 @@ GP_Context *load_resized_image(struct loader_params *params, GP_Size w, GP_Size 
 	if (params->use_low_pass && params->rat < 1) {
 		cpu_timer_start(&timer, "Blur");
 		callback.priv = "Blurring Image";
-		
+
 		res = GP_FilterGaussianBlurAlloc(img, 0.3/params->rat,
 		                                 0.3/params->rat, &callback);
 
 		if (res == NULL)
 			return NULL;
-		
+
 		img = res;
-		
+
 		cpu_timer_stop(&timer);
 	}
-	
+
 //	img->gamma = GP_GammaAcquire(img->pixel_type, 0.45);
 
 	cpu_timer_start(&timer, "Resampling");
@@ -510,7 +510,7 @@ GP_Context *load_resized_image(struct loader_params *params, GP_Size w, GP_Size 
 		return NULL;
 
 	image_cache_put(params->img_resized_cache, img, params->img_path, cookie, key);
-	
+
 	return img;
 }
 
@@ -521,7 +521,7 @@ static void *image_loader(void *ptr)
 	GP_Context *img, *context = backend->context;
 
 	cpu_timer_start(&sum_timer, "sum");
-	
+
 	show_progress = params->show_progress || params->show_progress_once;
 	params->show_progress_once = 0;
 
@@ -565,7 +565,7 @@ static void *image_loader(void *ptr)
 update:
 	update_display(params, img);
 	cpu_timer_stop(&sum_timer);
-	
+
 	return NULL;
 }
 
@@ -617,7 +617,7 @@ static void sighandler(int signo)
 {
 	if (backend != NULL)
 		GP_BackendExit(backend);
-	
+
 	fprintf(stderr, "Got signal %i\n", signo);
 
 	_exit(1);
@@ -625,8 +625,8 @@ static void sighandler(int signo)
 
 static void init_backend(const char *backend_opts)
 {
-	backend = GP_BackendInit(backend_opts, "Spiv", stderr); 
-	
+	backend = GP_BackendInit(backend_opts, "Spiv", stderr);
+
 	if (backend == NULL) {
 		fprintf(stderr, "Failed to initalize backend '%s'\n", backend_opts);
 		exit(1);
@@ -675,8 +675,8 @@ int main(int argc, char *argv[])
 	GP_PixelType emul_type = GP_PIXEL_UNKNOWN;
 
 	struct loader_params params = {
-		.img_path = NULL, 
-		
+		.img_path = NULL,
+
 		.show_progress = 0,
 		.show_progress_once = 0,
 		.show_info = 0,
@@ -767,7 +767,7 @@ int main(int argc, char *argv[])
 	signal(SIGSEGV, sighandler);
 	signal(SIGBUS, sighandler);
 	signal(SIGABRT, sighandler);
-	
+
 	init_caches(&params);
 
 	init_backend(backend_opts);
@@ -801,10 +801,10 @@ int main(int argc, char *argv[])
 		GP_Event ev;
 
 		while (GP_BackendGetEvent(backend, &ev)) {
-			
+
 			shift_flag = GP_EventGetKey(&ev, GP_KEY_LEFT_SHIFT) ||
 			             GP_EventGetKey(&ev, GP_KEY_RIGHT_SHIFT);
-			
+
 			switch (ev.type) {
 			case GP_EV_REL:
 				switch (ev.code) {
@@ -838,7 +838,7 @@ int main(int argc, char *argv[])
 				break;
 				case GP_KEY_I:
 					params.show_info = !params.show_info;
-					
+
 					params.show_progress_once = 1;
 					show_image(&params, NULL);
 				break;
@@ -849,7 +849,7 @@ int main(int argc, char *argv[])
 					params.rotate += 90;
 					if (params.rotate > 270)
 						params.rotate = 0;
-					
+
 					params.show_progress_once = 1;
 					show_image(&params, NULL);
 				break;
@@ -858,7 +858,7 @@ int main(int argc, char *argv[])
 
 					if (params.resampling_method > GP_INTERP_MAX)
 						params.resampling_method = 0;
-				
+
 					if (params.resampling_method == GP_INTERP_LINEAR_LF_INT) {
 						params.use_low_pass = 0;
 						params.show_nn_first = 0;
@@ -875,7 +875,7 @@ int main(int argc, char *argv[])
 						params.resampling_method = GP_INTERP_MAX;
 					else
 						params.resampling_method--;
-					
+
 					if (params.resampling_method == GP_INTERP_LINEAR_LF_INT) {
 						params.use_low_pass = 0;
 						params.show_nn_first = 0;
@@ -883,13 +883,13 @@ int main(int argc, char *argv[])
 						params.use_low_pass = 1;
 						params.show_nn_first = 1;
 					}
-					
+
 					params.show_progress_once = 1;
 					show_image(&params, image_list_img_path(list));
 				break;
 				case GP_KEY_L:
 					params.use_low_pass = !params.use_low_pass;
-					
+
 					params.show_progress_once = 1;
 					show_image(&params, image_list_img_path(list));
 				break;
@@ -926,7 +926,7 @@ int main(int argc, char *argv[])
 						set_zoom_offset(&params, 1, 0);
 					else
 						set_zoom_offset(&params, 10, 0);
-						
+
 				break;
 				case GP_KEY_LEFT:
 					if (shift_flag)

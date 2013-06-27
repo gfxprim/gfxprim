@@ -42,7 +42,7 @@ static int get_image(const char *filename, GP_Grabber *grabber)
 	/* throw away first frame, it's usually wrong */
 	while (!GP_GrabberPoll(grabber))
 		usleep(100000);
-	
+
 	while (!GP_GrabberPoll(grabber))
 		usleep(100000);
 
@@ -52,7 +52,7 @@ static int get_image(const char *filename, GP_Grabber *grabber)
 		        filename, strerror(errno));
 		return 1;
 	}
-	
+
 	/* turn off grabber */
 	if (GP_GrabberStop(grabber)) {
 		fprintf(stderr, "Failed to start grabber\n");
@@ -69,7 +69,7 @@ int main(int argc, char *argv[])
 	unsigned int w = 640, h = 480;
 	int secs = 0;
 	int opt;
-	
+
 	while ((opt = getopt(argc, argv, "d:hH:o:W:l:s:")) != -1) {
 		switch (opt) {
 		case 'o':
@@ -106,7 +106,7 @@ int main(int argc, char *argv[])
 			return 1;
 		}
 	}
-	
+
 	GP_Grabber *grabber = GP_GrabberV4L2Init(v4l2_device, w, h);
 
 	if (grabber == NULL) {
@@ -122,12 +122,12 @@ int main(int argc, char *argv[])
 	}
 
 	int i = 0;
-	
+
 	for (;;) {
 		char buf[128];
 
 		snprintf(buf, sizeof(buf), "frame%03i.jpg", i++);
-		
+
 		if (get_image(buf, grabber)) {
 			fprintf(stderr, "Failed to get image, exitting...\n");
 			return 1;

@@ -143,7 +143,7 @@ static size_t get_name_ext(const char *path,
 	*extension = NULL;
 
 	for (i = len; i > 0; i--) {
-		
+
 		if (*extension)
 			name_len++;
 
@@ -222,7 +222,7 @@ static int cmd_append(const char *str, size_t len)
 
 	if (cmd_size - cmd_pos <= len) {
 		char *new_cmd = realloc(cmd, cmd_size + 1024);
-		
+
 		if (new_cmd == NULL) {
 			fprintf(stderr, "Failed to allocated command buffer\n");
 			return 1;
@@ -245,7 +245,7 @@ static int cmd_append_escape(const char *str, size_t len)
 
 	while ((ret = escape(str, len, cmd + cmd_pos, cmd_size - cmd_pos)) < 0) {
 		char *new_cmd = realloc(cmd, cmd_size + 1024);
-		
+
 		if (new_cmd == NULL) {
 			fprintf(stderr, "Failed to allocated command buffer\n");
 			return 1;
@@ -283,7 +283,7 @@ static int prepare_cmd(unsigned int action, const char *img_path)
 
 		if (cmd_append(prev, len - 1))
 			return 1;
-	
+
 		switch (actions[action]->params[i].type) {
 		case 'f':
 			cmd_append(img_path, 0);

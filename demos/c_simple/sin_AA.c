@@ -21,7 +21,7 @@
  *****************************************************************************/
 
 /*
- 
+
   Simple example that shows HLineAA() usage.
 
  */
@@ -65,11 +65,11 @@ static void redraw(GP_Context *context)
 
 	if (flag) {
 		param -= 0.02;
-		
+
 		if (param <= -2.40) {
 			flag = 0;
 			param2 += 0.01;
-		
+
 			if (param2 > 0.02)
 				param2 = 0.01;
 		}
@@ -100,9 +100,9 @@ int main(void)
 			redraw(backend->context);
 			GP_BackendFlip(backend);
 		}
-		
+
 		GP_BackendPoll(backend);
-	
+
 		GP_Event ev;
 
 		while (GP_BackendGetEvent(backend, &ev)) {

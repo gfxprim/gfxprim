@@ -103,7 +103,7 @@ static unsigned int count_params(const char *params)
 	char prev = ':';
 
 	for (i = 0; params[i] != '\0'; i++) {
-		
+
 		if (params[i] == ':' && prev != ':')
 			ret++;
 
@@ -119,7 +119,7 @@ static void split_params(char *params, char **names)
 	char prev = ':';
 
 	for (i = 0; params[i] != '\0'; i++) {
-		
+
 		if (params[i] != ':' && prev == ':')
 			names[n++] = &params[i];
 
@@ -137,7 +137,7 @@ static void do_split(char *param, char **value)
 	*value = NULL;
 
 	for (i = 0; param[i] != '\0'; i++) {
-		
+
 		if (param[i] == '=' || isspace(param[i])) {
 			param[i] = '\0';
 			*value = &param[i+1];
@@ -206,7 +206,7 @@ int set_bool(int *res, char *val)
 			*res = 0;
 			return 0;
 		}
-	
+
 	for (i = 0; bool_true[i] != NULL; i++)
 		if (!strcasecmp(val, bool_true[i])) {
 			*res = 1;
@@ -229,7 +229,7 @@ int set_float(float *res, char *val)
 
 	if (errno != 0)
 		return 1;
-	
+
 	*res = d;
 
 	return 0;
@@ -272,7 +272,7 @@ int param_parse(const char *params, const struct param *param_desc, void *priv,
 
 	if (params == NULL || *params == '\0')
 		return 0;
-	
+
 	par = strdup(params);
 
 	if (par == NULL) {
@@ -290,7 +290,7 @@ int param_parse(const char *params, const struct param *param_desc, void *priv,
 
 	split_params(par, names);
 	split_values(names, values, n);
-	
+
 	va_start(va, err);
 
 	for (i = 0; param_desc[i].name != NULL; i++) {
@@ -298,12 +298,12 @@ int param_parse(const char *params, const struct param *param_desc, void *priv,
 		int pos = 0;
 
 		while ((pos = param_pos(names, param_desc[i].name, pos, n)) >= 0) {
-			
+
 			if (values[pos] == NULL || *values[pos] == '\0') {
 				CALL_ERR_CALLBACK(err, &param_desc[i], "", priv);
 				goto err;
 			}
-		
+
 			flags[pos]++;
 
 			switch (param_desc[i].type) {

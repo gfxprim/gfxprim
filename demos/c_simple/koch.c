@@ -24,7 +24,7 @@
  *****************************************************************************/
 
 /*
-  
+
   Simple test for triangle drawing runtime.
 
  */
@@ -50,7 +50,7 @@ static void sierpinsky(double x1, double y1, double x4, double y4, int iter)
 	double x2, y2, x3, y3, x5, y5;
 	GP_Pixel pixel;
 	pixel = GP_RGBToPixel(0, 0, 255-16*iter, context->pixel_type);
-	
+
 	if (iter <= 0) {
 		if (draw_edge)
 			GP_Line(context, x1, y1, x4, y4, black);
@@ -85,13 +85,13 @@ static void draw(int x, int y, int l, int iter)
 	int h = context->h;
 
 	l = ((w < h ? w : h) - 20)/(5 - 1.00*iter/120);
-	
+
 	x1 = sin(1.00 * iter/57) * l + x;
 	y1 = cos(1.00 * iter/57) * l + y;
-	
+
 	x2 = sin(1.00 * (iter+120)/57) * l + x;
 	y2 = cos(1.00 * (iter+120)/57) * l + y;
-	
+
 	x3 = sin(1.00 * (iter+240)/57) * l + x;
 	y3 = cos(1.00 * (iter+240)/57) * l + y;
 
@@ -114,10 +114,10 @@ void redraw(void)
 		return;
 
 	iter += 2 * way;
-	
+
 	if (iter > 350)
 		way *= -1;
-	
+
 	if (iter < 0)
 		way *= -1;
 
@@ -127,7 +127,7 @@ void redraw(void)
 int main(void)
 {
 	const char *backend_opts = "X11";
-	
+
 	backend = GP_BackendInit(backend_opts, "Koch", stderr);
 
 	if (backend == NULL) {
@@ -135,14 +135,14 @@ int main(void)
 		        backend_opts);
 		return 1;
 	}
-	
+
 	context = backend->context;
-	
+
 	black = GP_ColorToContextPixel(GP_COL_BLACK, context);
 	blue  = GP_ColorToContextPixel(GP_COL_BLUE, context);
 	gray  = GP_ColorToContextPixel(GP_COL_GRAY_LIGHT, context);
 	red   = GP_ColorToContextPixel(GP_COL_RED, context);
-	
+
 	iter = 0;
 	draw(context->w/2, context->h/2, l, iter);
 
@@ -150,17 +150,17 @@ int main(void)
 		GP_Event ev;
 
 		redraw();
-		
+
 		GP_BackendPoll(backend);
-		
+
 		while (GP_BackendGetEvent(backend, &ev)) {
 			GP_EventDump(&ev);
-	
+
 			switch (ev.type) {
 			case GP_EV_KEY:
 				if (ev.code != GP_EV_KEY_DOWN)
 					continue;
-			
+
 				switch (ev.val.key.key) {
 				case GP_KEY_P:
 					paused = !paused;
@@ -177,6 +177,6 @@ int main(void)
 		}
 		usleep(TIMER_TICK);
 	}
-	
+
 	return 0;
 }

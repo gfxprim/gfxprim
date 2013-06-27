@@ -89,7 +89,7 @@ int GP_FilterHConvolutionMP_Raw(const GP_ConvolutionParams *params)
 		convs[i].y_dst = y_dst_2;
 		convs[i].callback = params->callback ? &callback_mp : NULL;
 
-		pthread_create(&threads[i], NULL, h_linear_convolution, &convs[i]); 
+		pthread_create(&threads[i], NULL, h_linear_convolution, &convs[i]);
 	}
 
 	int ret = 0;
@@ -137,7 +137,7 @@ int GP_FilterVConvolutionMP_Raw(const GP_ConvolutionParams *params)
 		convs[i].y_dst = y_dst_2;
 		convs[i].callback = params->callback ? &callback_mp : NULL;
 
-		pthread_create(&threads[i], NULL, v_linear_convolution, &convs[i]); 
+		pthread_create(&threads[i], NULL, v_linear_convolution, &convs[i]);
 	}
 
 	int ret = 0;
@@ -184,7 +184,7 @@ int GP_FilterConvolutionMP_Raw(const GP_ConvolutionParams *params)
 		convs[i].y_dst = y_dst_2;
 		convs[i].callback = params->callback ? &callback_mp : NULL;
 
-		pthread_create(&threads[i], NULL, linear_convolution, &convs[i]); 
+		pthread_create(&threads[i], NULL, linear_convolution, &convs[i]);
 	}
 
 	int ret = 0;

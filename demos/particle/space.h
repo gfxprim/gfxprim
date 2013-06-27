@@ -47,7 +47,7 @@ struct space {
 	/* space is an rectanle */
 	int min_w;
 	int min_h;
-	
+
 	int max_w;
 	int max_h;
 

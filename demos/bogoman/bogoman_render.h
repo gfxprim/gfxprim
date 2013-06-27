@@ -30,7 +30,7 @@ struct bogoman_render {
 	/* both in map elements */
 	unsigned int map_x_offset;
 	unsigned int map_y_offset;
-	
+
 	/* current map */
 	struct bogoman_map *map;
 

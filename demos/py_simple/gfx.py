@@ -103,33 +103,33 @@ def polygon(bk):
     bk.Flip()
 
 def next(bk, i):
-   
+
     if (i == 0):
         fill(bk)
 
     if (i == 1):
         hline(bk)
-    
+
     if (i == 2):
         vline(bk)
-    
+
     if (i == 3):
         line(bk)
-    
+
     if (i == 4):
         rect(bk)
 
     if (i == 5):
-    	triangle(bk)
-    
+        triangle(bk)
+
     if (i == 6):
-    	tetragon(bk)
+        tetragon(bk)
 
     if (i == 7):
         polygon(bk)
 
     i = i + 1;
-    
+
     if (i >= 8):
         i = 0
 

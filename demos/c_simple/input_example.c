@@ -40,14 +40,14 @@ static void draw_event(GP_Event *ev)
 
 	if (ev->type != GP_EV_KEY)
 		return;
-	
+
 	int align = GP_ALIGN_RIGHT|GP_VALIGN_BOTTOM;
 
 	GP_TextClear(win, NULL, 20, 20, align, black, size);
 	size = GP_Print(win, NULL, 20, 20, align,
 	                white, black, "Key=%s",
 			GP_EventKeyName(ev->val.key.key));
-	
+
 	GP_BackendFlip(backend);
 }
 
@@ -55,7 +55,7 @@ static void event_loop(void)
 {
 	for (;;) {
 		GP_BackendWait(backend);
-		
+
 		while (GP_BackendEventsQueued(backend)) {
 			GP_Event ev;
 
@@ -90,7 +90,7 @@ static void event_loop(void)
 				case GP_EV_REL_POS:
 					if (GP_EventGetKey(&ev, GP_BTN_LEFT)) {
 						GP_PutPixel(win, ev.cursor_x,
-					        	    ev.cursor_y, green);
+						            ev.cursor_y, green);
 					}
 					int align = GP_ALIGN_RIGHT|GP_VALIGN_BOTTOM;
 
@@ -147,7 +147,7 @@ int main(int argc, char *argv[])
 		        backend_opts);
 		return 1;
 	}
-	
+
 	win = backend->context;
 
 	red   = GP_ColorToContextPixel(GP_COL_RED, win);

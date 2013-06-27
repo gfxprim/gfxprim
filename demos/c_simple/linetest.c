@@ -47,19 +47,19 @@ void redraw_screen(void)
 	int ycenter = h/2;
 
 	GP_Fill(win->context, black);
-	
+
 	for (angle = 0.0; angle < 2*M_PI; angle += 0.1) {
 		x = (int) (w/2 * cos(start_angle + angle));
 		y = (int) (h/2 * sin(start_angle + angle));
 
 		int r = 127.0 + 127.0 * cos(start_angle + angle);
 		int b = 127.0 + 127.0 * sin(start_angle + angle);
-		
+
 		GP_Pixel pixel;
 		pixel = GP_RGBToPixel(r, 0, b, win->context->pixel_type);
-	
+
 		if (aa_flag) {
-			GP_LineAA_Raw(win->context, GP_FP_FROM_INT(xcenter), GP_FP_FROM_INT(ycenter), 
+			GP_LineAA_Raw(win->context, GP_FP_FROM_INT(xcenter), GP_FP_FROM_INT(ycenter),
 				GP_FP_FROM_INT(xcenter + x), GP_FP_FROM_INT(ycenter + y), pixel);
 		} else {
 			GP_Line(win->context, xcenter + x, ycenter + y, xcenter, ycenter, pixel);
@@ -83,7 +83,7 @@ void event_loop(void)
 		case GP_EV_KEY:
 			if (ev.code != GP_EV_KEY_DOWN)
 				continue;
-			
+
 			switch (ev.val.key.key) {
 			case GP_KEY_A:
 				aa_flag = !aa_flag;
@@ -103,7 +103,7 @@ void event_loop(void)
 int main(void)
 {
 	const char *backend_opts = "X11";
-	
+
 	win = GP_BackendInit(backend_opts, "Line Test", stderr);
 
 	if (win == NULL) {
@@ -111,7 +111,7 @@ int main(void)
 		        backend_opts);
 		return 1;
 	}
-	
+
 	white = GP_ColorToContextPixel(GP_COL_WHITE, win->context);
 	black = GP_ColorToContextPixel(GP_COL_BLACK, win->context);
 
@@ -120,7 +120,7 @@ int main(void)
 	for (;;) {
 		GP_BackendPoll(win);
 		event_loop();
-	
+
 		usleep(20000);
 
 		if (pause_flag)
@@ -128,7 +128,7 @@ int main(void)
 
 		redraw_screen();
 		GP_BackendFlip(win);
-		
+
 		start_angle += 0.01;
 		if (start_angle > 2*M_PI) {
 			start_angle = 0.0;

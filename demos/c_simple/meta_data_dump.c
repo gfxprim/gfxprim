@@ -44,15 +44,15 @@ int main(int argc, char *argv[])
 		fprintf(stderr, "Takes an image(s) as parameter(s)\n");
 		return 1;
 	}
-	
+
 	//GP_SetDebugLevel(10);
 
 	for (i = 1; i < argc; i++) {
 		puts(SEP);
 		printf("Opening '%s'\n", argv[i]);
-		
+
 		GP_MetaDataClear(data);
-		
+
 		if (GP_LoadMetaData(argv[i], data)) {
 			fprintf(stderr, "Failed to read '%s' meta-data: %s\n",
 			        argv[1], strerror(errno));
@@ -60,7 +60,7 @@ int main(int argc, char *argv[])
 			GP_MetaDataPrint(data);
 		}
 	}
-	
+
 	puts(SEP);
 
 	return 0;

@@ -43,7 +43,7 @@ int main(int argc, char *argv[])
 		fprintf(stderr, "Takes an image as an parameter\n");
 		return 1;
 	}
-	
+
 	img = GP_LoadImage(argv[1], NULL);
 
 	if (img == NULL) {

@@ -21,7 +21,7 @@
  *****************************************************************************/
 
 /*
- 
+
   Simple example that shows X11 window with image.
 
  */
@@ -36,7 +36,7 @@ int main(int argc, char *argv[])
 {
 	GP_Backend *backend;
 	GP_Context *image;
-	
+
 	GP_SetDebugLevel(10);
 
 	if (argc != 2) {
@@ -51,7 +51,7 @@ int main(int argc, char *argv[])
 		fprintf(stderr, "Failed to load bitmap: %s\n", strerror(errno));
 		return 1;
 	}
-	
+
 	/* Initalize backend */
 	backend = GP_BackendX11Init(NULL, 0, 0, image->w, image->h, argv[1], 0);
 

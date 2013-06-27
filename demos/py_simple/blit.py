@@ -51,7 +51,7 @@ def main():
     # Load Backgroudn Image and ball sprite
     bg = loaders.Load(sys.argv[1])
     assert(bg)
-    
+
     ball1 = Ball(bg.w//2, bg.h//2, -3, -3, 'ball_red.png', bg)
     ball2 = Ball(bg.w//2, bg.h//2, -2,  3, 'ball_green.png', bg)
     ball3 = Ball(bg.w//2, bg.h//2,  2, -3, 'ball_blue.png', bg)
@@ -65,7 +65,7 @@ def main():
 
     # Event loop
     while True:
-        
+
         while True:
             ev = bk.PollEvent()
 
@@ -79,7 +79,7 @@ def main():
             elif (ev.type == input.EV_SYS):
                if (ev.code == input.EV_SYS_QUIT):
                    sys.exit(0)
-       
+
         sleep(0.005)
 
         ball1.move(bk);

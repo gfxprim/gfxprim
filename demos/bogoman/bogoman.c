@@ -42,7 +42,7 @@ static void save_png(struct bogoman_map *map, unsigned int elem_size,
 
 	if (ctx == NULL)
 		return;
-	
+
 	struct bogoman_render render = {
 		.map = map,
 		.map_x_offset = 0,
@@ -50,20 +50,20 @@ static void save_png(struct bogoman_map *map, unsigned int elem_size,
 		.ctx = ctx,
 		.map_elem_size = elem_size,
 	};
-	
+
 	bogoman_render(&render, BOGOMAN_RENDER_ALL);
 
 	GP_SavePNG(ctx, filename, NULL);
 	GP_ContextFree(ctx);
 }
-	
+
 static struct GP_Backend *backend;
 
 static void event_loop(struct bogoman_map *map)
 {
 	while (GP_BackendEventsQueued(backend)) {
 		GP_Event ev;
-		
+
 		GP_BackendGetEvent(backend, &ev);
 
 		switch (ev.type) {
@@ -138,10 +138,10 @@ int main(int argc, char *argv[])
 	for (;;) {
 		GP_BackendPoll(backend);
 		event_loop(map);
-		
+
 		bogoman_render(&render, BOGOMAN_RENDER_DIRTY);
 		GP_BackendFlip(backend);
-	
+
 		usleep(50000);
 	}
 

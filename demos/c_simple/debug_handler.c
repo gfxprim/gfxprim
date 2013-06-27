@@ -21,7 +21,7 @@
  *****************************************************************************/
 
 /*
- 
+
   Example on custom debug message handler.
 
  */
@@ -56,7 +56,7 @@ int main(void)
 {
 	/* Set custom debug handler */
 	GP_SetDebugHandler(debug_handler);
-	
+
 	/* Print some debug messages */
 	GP_WARN("This is a warning");
 	GP_FATAL("This is a fatal condition");

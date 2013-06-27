@@ -42,7 +42,7 @@ struct image {
 struct image_cache {
 	unsigned int max_size;
 	unsigned int cur_size;
-	
+
 	struct image *root;
 	struct image *end;
 };
@@ -126,7 +126,7 @@ static void remove_img_free(struct image_cache *self,
 {
 	GP_DEBUG(2, "Freeing image '%s:%10li:%10li' size %zu",
 	         img->path, img->cookie1, img->cookie2, size);
-	
+
 	remove_img(self, img, size);
 	GP_ContextFree(img->ctx);
 	free(img);
@@ -138,10 +138,10 @@ static void remove_img_free(struct image_cache *self,
 static void add_img(struct image_cache *self, struct image *img, size_t size)
 {
 	img->next = self->root;
-	
+
 	if (img->next)
 		img->next->prev = img;
-	
+
 	img->prev = NULL;
 
 	self->root = img;
@@ -155,7 +155,7 @@ GP_Context *image_cache_get(struct image_cache *self, const char *path,
                             long cookie1, long cookie2, int elevate)
 {
 	struct image *i;
-	
+
 	if (self == NULL)
 		return NULL;
 
@@ -165,7 +165,7 @@ GP_Context *image_cache_get(struct image_cache *self, const char *path,
 		if (!strcmp(path, i->path) &&
 		    i->cookie1 == cookie1 && i->cookie2 == cookie2)
 			break;
-	
+
 	if (i == NULL)
 		return NULL;
 
@@ -175,10 +175,10 @@ GP_Context *image_cache_get(struct image_cache *self, const char *path,
 
 		GP_DEBUG(2, "Refreshing image '%s:%10li:%10li",
 		         path, cookie1, cookie2);
-	
+
 		remove_img(self, i, size);
 		add_img(self, i, size);
-		
+
 		i->elevated++;
 	}
 
@@ -207,7 +207,7 @@ static int assert_size(struct image_cache *self, size_t size)
 		return 0;
 
 	while (self->cur_size + size > self->max_size) {
-	
+
 		if (self->end == NULL) {
 			GP_WARN("Cache too small for image size %zu", size);
 			return 1;
@@ -223,13 +223,13 @@ int image_cache_put(struct image_cache *self, GP_Context *ctx, const char *path,
                     long cookie1, long cookie2)
 {
 	size_t size;
-	
+
 	if (self == NULL)
 		return 1;
-	
+
 	size = image_size2(ctx, path);
 
-	/* 
+	/*
 	 * We try to create room for the image. If this fails we add the image
 	 * anyway because we need to store it while we are showing it (and it
 	 * will be removed from cache by next image for sure).
@@ -242,13 +242,13 @@ int image_cache_put(struct image_cache *self, GP_Context *ctx, const char *path,
 		GP_WARN("Malloc failed :(");
 		return 1;
 	}
-	
+
 	img->ctx = ctx;
 	img->cookie1 = cookie1;
 	img->cookie2 = cookie2;
 	img->elevated = 0;
 	strcpy(img->path, path);
-	
+
 	GP_DEBUG(2, "Adding image '%s:%10li:%10li' size %zu",
 	         img->path, img->cookie1, img->cookie2, size);
 
@@ -261,9 +261,9 @@ void image_cache_drop(struct image_cache *self)
 {
 	if (self == NULL)
 		return;
-	
+
 	GP_DEBUG(1, "Dropping images in cache");
-	
+
 	while (self->end != NULL)
 		remove_img_free(self, self->end, 0);
 
@@ -279,6 +279,6 @@ void image_cache_destroy(struct image_cache *self)
 
 	while (self->end != NULL)
 		remove_img_free(self, self->end, 0);
-	
+
 	free(self);
 }

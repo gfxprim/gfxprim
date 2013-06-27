@@ -73,7 +73,7 @@ int main(int argc, char *argv[])
 		print_help(1);
 
 	GP_SetDebugLevel(debug_level);
-	
+
 	GP_Context *context = GP_ContextAlloc(img_w, img_h, GP_PIXEL_RGB888);
 
 	GP_Pixel black_pixel = GP_ColorToContextPixel(GP_COL_BLACK, context);
@@ -89,7 +89,7 @@ int main(int argc, char *argv[])
 	        black_pixel, white_pixel, string);
 
 	GP_SavePNG(context, img_path, NULL);
-	
+
 	GP_ContextFree(context);
 
 	return 0;

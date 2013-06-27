@@ -44,7 +44,7 @@ struct image_list {
 	/* path to the currently loaded image */
 	char path[1024];
 	int path_loaded:1;
-	
+
 	/* directory handling */
 	int in_dir:1;
 
@@ -63,17 +63,17 @@ static int dir_filter(const struct dirent *d)
 	/* Ignore some filenames */
 	if (!strcmp(d->d_name, "."))
 		return 0;
-	
+
 	if (!strcmp(d->d_name, ".."))
 		return 0;
-	
+
 	//TODO: filter out directories
-	
+
 	if (GP_MatchExtension(d->d_name) == NULL)
 		return 0;
 
 	GP_DEBUG(4, "Adding file '%s'", d->d_name);
-	
+
 	return 1;
 }
 
@@ -100,7 +100,7 @@ static void try_load_dir(struct image_list *self)
 		GP_WARN("Failed to scandir '%s': %s", path, strerror(errno));
 		return;
 	}
-	
+
 	if (self->arg_file_counts[self->cur_arg] != ret) {
 		GP_DEBUG(1, "Updating arg counter to %i", ret);
 		self->arg_file_counts[self->cur_arg] = ret;
@@ -125,7 +125,7 @@ static void exit_dir(struct image_list *self)
 
 	for (i = 0; i < self->max_file; i++)
 		free(self->dir_files[i]);
-	
+
 	free(self->dir_files);
 
 	self->in_dir = 0;
@@ -141,10 +141,10 @@ static void next_img(struct image_list *self)
 			return;
 		}
 	}
-	
+
 	if (++self->cur_arg == self->max_arg)
 		self->cur_arg = 0;
-	
+
 	try_load_dir(self);
 
 	self->path_loaded = 0;
@@ -202,7 +202,7 @@ static void set_dir_cur_img(struct image_list *self, int img)
 
 /*
  * Returns current argument from arg list we are in.
- * 
+ *
  * Either it's image file or directory.
  */
 static const char *cur_arg(struct image_list *self)
@@ -297,14 +297,14 @@ const char *image_list_dir_move(struct image_list *self, int direction)
 			set_dir_cur_img(self, 0);
 		}
 	}
-	
+
 	return image_list_img_path(self);
 }
 
 const char *image_list_first(struct image_list *self)
 {
 	GP_DEBUG(2, "Moving to the first image in the list");
-	
+
 	set_cur_arg(self, 0);
 
 	if (self->in_dir)
@@ -336,7 +336,7 @@ static unsigned int count_img_to(struct image_list *self, unsigned int arg_to)
 		if (self->arg_file_counts[i] == -1)
 			set_cur_arg(self, i);
 
-		/* 
+		/*
 		 * if the counter is still at -1
 		 * directory couldn't be loaded
 		 */
@@ -346,7 +346,7 @@ static unsigned int count_img_to(struct image_list *self, unsigned int arg_to)
 
 	/* restore the original position */
 	set_cur_arg(self, cur_arg);
-	
+
 	if (self->in_dir)
 		set_dir_cur_img(self, cur_file);
 
@@ -386,7 +386,7 @@ struct image_list *image_list_create(const char *args[])
 	unsigned int i;
 
 	GP_DEBUG(1, "Creating image list");
-	
+
 	self = malloc(sizeof(struct image_list));
 
 	if (self == NULL) {
@@ -396,9 +396,9 @@ struct image_list *image_list_create(const char *args[])
 
 	self->args = args;
 	self->cur_arg = 0;
-	
+
 	self->path_loaded = 0;
-	
+
 	self->dir_files = 0;
 	self->in_dir = 0;
 
@@ -426,7 +426,7 @@ const char *image_list_img_path(struct image_list *self)
 {
 	if (!self->path_loaded)
 		load_path(self);
-	
+
 	GP_DEBUG(2, "Returning path '%s'", self->path);
 
 	return self->path;

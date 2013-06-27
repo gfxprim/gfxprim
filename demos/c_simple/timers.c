@@ -21,7 +21,7 @@
  *****************************************************************************/
 
 /*
- 
+
   Simple example how to use raw timer priority queue.
 
  */
@@ -52,7 +52,7 @@ int main(void)
 	GP_TimerQueueInsert(&queue, 0, &oneshot);
 	GP_TimerQueueInsert(&queue, 0, &recurrent);
 	GP_TimerQueueInsert(&queue, 0, &random);
-	
+
 	for (now = 0; now < 100; now += 3) {
 		printf("NOW %u\n", (unsigned int) now);
 		printf("-------------------------------------\n");

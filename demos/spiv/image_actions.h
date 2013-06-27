@@ -40,6 +40,6 @@
 
 void image_action_set(unsigned int action, const char *cmd);
 
-int image_action_run(unsigned int action, const char *img_path); 
+int image_action_run(unsigned int action, const char *img_path);
 
 #endif /* __IMAGE_ACTIONS_H__ */

@@ -23,13 +23,13 @@ class HelloWorld:
 	self.window.connect("delete_event", self.delete_event)
         self.window.connect("destroy", self.destroy)
         self.window.set_border_width(1)
-        
+
         self.image = gtk.Image();
         self.window.add(self.image)
-        
+
         self.window.show()
         self.image.show()
-	
+
         img = loaders.LoadImage(sys.argv[2], None)
         self.pixmap = gtk.gdk.Pixmap(None, img.w, img.h, 24)
         self.gc = gtk.gdk.Drawable.new_gc(self.pixmap)

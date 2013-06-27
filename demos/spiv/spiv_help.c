@@ -99,10 +99,10 @@ void print_help(void)
 	printf("  %%N shell escaped image filename without extension\n");
 	printf("  %%e current image file extension\n");
 	puts("\n");
-	
+
 	for (i = 0; i < keys_help_len; i++)
 		puts(keys_help[i]);
-	
+
 	puts("");
 
 	printf("Some cool options to try:\n\n");
@@ -114,7 +114,7 @@ void print_help(void)
 	printf("\truns spiv using X root window as backend window\n\n");
 	printf("spiv -b 'X11:CREATE_ROOT' [images]\n");
 	printf("\tSame as abowe but works in KDE\n");
-	
+
 }
 
 static int redraw_help(GP_Backend *backend, unsigned int loff, GP_Coord xoff)
@@ -131,7 +131,7 @@ static int redraw_help(GP_Backend *backend, unsigned int loff, GP_Coord xoff)
 
 		if (h + 2 >= (GP_Coord)c->h)
 			goto out;
-		
+
 		GP_Print(c, NULL, 20 + 10 * xoff, h, GP_ALIGN_RIGHT|GP_VALIGN_BOTTOM,
 		         white, black, "%s", keys_help[i]);
 	}
@@ -154,7 +154,7 @@ void draw_help(GP_Backend *backend)
 
 	for (;;) {
 		GP_Event ev;
-		
+
 		while (GP_BackendWaitEvent(backend, &ev)) {
 			switch (ev.type) {
 			case GP_EV_KEY:

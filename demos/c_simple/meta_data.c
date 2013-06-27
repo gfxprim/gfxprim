@@ -46,7 +46,7 @@ int main(void)
 	if (data == NULL)
 		return 1;
 
-	/* 
+	/*
 	 * Create integer
 	 *
 	 * May fail, if there is allready record with id 'dpi' or

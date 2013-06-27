@@ -62,7 +62,7 @@ int main(int argc, char *argv[])
 
 	priv.op   = "Loading";
 	priv.name = argv[1];
-	
+
 	img = GP_LoadImage(argv[1], &callback);
 
 	if (img == NULL) {
@@ -80,13 +80,13 @@ int main(int argc, char *argv[])
 		fprintf(stderr, "Failed to save temp file %s\n", strerror(errno));
 		return 1;
 	}
-	
+
 	printf("\n");
 
 	GP_ContextFree(img);
-	
+
 	priv.op   = "Loading";
-	
+
 	img = GP_LoadTmpFile(priv.name, &callback);
 
 	if (img == NULL) {
@@ -96,7 +96,7 @@ int main(int argc, char *argv[])
 
 	priv.op   = "Saving";
 	priv.name = "out.png";
-	
+
 	printf("\n");
 
 	if (GP_SavePNG(img, "out.png", &callback)) {

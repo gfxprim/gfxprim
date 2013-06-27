@@ -80,7 +80,7 @@ static void event_loop(void)
 		case GP_EV_KEY:
 			if (ev.code != GP_EV_KEY_DOWN)
 				continue;
-			
+
 			switch (ev.val.key.key) {
 			case GP_KEY_X:
 				win->context->x_swap = !win->context->x_swap;
@@ -118,7 +118,7 @@ static void event_loop(void)
 			}
 		break;
 		}
-	
+
 		redraw_screen();
 		GP_BackendFlip(win);
 	}

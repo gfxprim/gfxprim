@@ -43,7 +43,7 @@ struct image_cache *image_cache_create(unsigned int max_size_bytes);
 
 /*
  * Returns cached image, or NULL.
- * 
+ *
  * If elevate set and image is found, the image is elevated to the top so
  * it has lesser chance of being freed.
  */
@@ -54,7 +54,7 @@ GP_Context *image_cache_get(struct image_cache *self, const char *path,
  * Puts an image into a cache.
  */
 int image_cache_put(struct image_cache *self, GP_Context *img,
-                    const char *path, long cookie1, long cookie2); 
+                    const char *path, long cookie1, long cookie2);
 
 /*
  * Drop all image in cache.

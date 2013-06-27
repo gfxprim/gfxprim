@@ -42,7 +42,7 @@ int main(int argc, char *argv[])
 
 	/* Turn on debug messages */
 	//GP_SetDebugLevel(10);
-	
+
 	while ((opt = getopt(argc, argv, "d:hH:W:l:")) != -1) {
 		switch (opt) {
 		case 'd':
@@ -79,7 +79,7 @@ int main(int argc, char *argv[])
 		        v4l2_device, strerror(errno));
 		return 1;
 	}
-       
+
 	backend = GP_BackendX11Init(NULL, 0, 0, grabber->frame->w,
 	                            grabber->frame->h, "V4L2", 0);
 
@@ -114,16 +114,16 @@ int main(int argc, char *argv[])
 				res = GP_FilterFloydSteinberg_RGB888_Alloc(img, GP_PIXEL_G2, NULL);
 			break;
 			}
-			
+
 			GP_Blit_Clipped(res, 0, 0, res->w, res->h, backend->context, 0, 0);
 			GP_BackendFlip(backend);
-			
+
 			if (mode)
 				GP_ContextFree(res);
 		}
-		
+
 		usleep(1000);
-		
+
 		GP_BackendPoll(backend);
 
 		/* Read and parse events */
@@ -132,7 +132,7 @@ int main(int argc, char *argv[])
 		while (GP_BackendGetEvent(backend, &ev)) {
 			switch (ev.type) {
 			case GP_EV_KEY:
-				
+
 				/* ignore key up events */
 				if (!ev.code)
 					continue;
@@ -145,7 +145,7 @@ int main(int argc, char *argv[])
 					return 0;
 				break;
 				case GP_KEY_SPACE:
-					
+
 					mode++;
 
 					if (mode > 2)

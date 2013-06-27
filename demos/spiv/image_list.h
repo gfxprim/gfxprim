@@ -51,18 +51,18 @@ const char *image_list_move(struct image_list *self, int direction);
  * If we are in directory:
  *  if direction > 0: move to its end and if allready there, to the next arg
  *  if direction < 0: move to its begining and if allready there, to the previous arg
- * 
+ *
  * If we aren't in directory move by one in corresponding direction.
  */
 const char *image_list_dir_move(struct image_list *self, int direction);
 
 /*
- * Move to the first image in the list. 
+ * Move to the first image in the list.
  */
 const char *image_list_first(struct image_list *self);
 
 /*
- * Move to the last image in the list. 
+ * Move to the last image in the list.
  */
 const char *image_list_last(struct image_list *self);
 

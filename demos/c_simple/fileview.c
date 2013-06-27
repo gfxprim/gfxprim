@@ -89,7 +89,7 @@ void redraw_screen(void)
 
 	struct FileLine *line = first_line;
 	unsigned int i;
-	for (i = 0; i < win->h/GP_TextHeight(&style); i++) { 
+	for (i = 0; i < win->h/GP_TextHeight(&style); i++) {
 		if (line == NULL)
 			break;
 		GP_Text(win, &style, 16, 16 + (1.0 * GP_TextHeight(&style))*i,
@@ -103,7 +103,7 @@ static void warp_up(int lines)
 	while (lines-- > 0)
 		if (first_line->prev != NULL)
 			first_line = first_line->prev;
-	
+
 	redraw_screen();
 	GP_BackendFlip(backend);
 }
@@ -113,7 +113,7 @@ static void warp_down(int lines)
 	while (lines-- > 0)
 		if (first_line->next != NULL)
 			first_line = first_line->next;
-	
+
 	redraw_screen();
 	GP_BackendFlip(backend);
 }
@@ -129,14 +129,14 @@ void event_loop(void)
 		case GP_EV_KEY:
 			if (ev.code != GP_EV_KEY_DOWN)
 				continue;
-			
+
 			switch (ev.val.key.key) {
 			case GP_KEY_SPACE:
 				if (font)
 					font_flag = (font_flag + 1) % 5;
 				else
 					font_flag = (font_flag + 1) % 4;
-					
+
 				redraw_screen();
 				GP_BackendFlip(backend);
 			break;
@@ -205,7 +205,7 @@ static int read_file_head(const char *filename)
 {
 	FILE *f = fopen(filename, "r");
 	char buf[512];
-	
+
 	if (f == NULL) {
 		fprintf(stderr, "Could not open file: %s\n", filename);
 		return 0;
@@ -215,7 +215,7 @@ static int read_file_head(const char *filename)
 
 		if (fgets(buf, 511, f) == NULL)
 			break;
-		
+
 		struct FileLine *line = malloc(sizeof(*line));
 		line->text = strdup(buf);
 		line->next = NULL;
@@ -238,18 +238,18 @@ static int read_file_head(const char *filename)
 int main(int argc, char *argv[])
 {
 	const char *backend_opts = "X11";
-	
+
 	if (argc == 1) {
 		fprintf(stderr, "No file specified\n");
 		return 1;
 	}
-	
+
 	if (argc > 2)
 		font = GP_FontFaceLoad(argv[2], 0, 16);
 
 	if (!read_file_head(argv[1]))
 		return 1;
-	
+
 	backend = GP_BackendInit(backend_opts, "File View", stderr);
 
 	if (backend == NULL) {
@@ -257,7 +257,7 @@ int main(int argc, char *argv[])
 		        backend_opts);
 		return 1;
 	}
-	
+
 	win = backend->context;
 
 	white_pixel     = GP_ColorToContextPixel(GP_COL_WHITE, win);
@@ -269,7 +269,7 @@ int main(int argc, char *argv[])
 
 	redraw_screen();
 	GP_BackendFlip(backend);
-	
+
 	event_loop();
 
 	return 0;

@@ -38,7 +38,7 @@ static void to_time(int *sec, int *nsec, struct timespec *start,
 void cpu_timer_start(struct cpu_timer *self, const char *name)
 {
 	self->name = name;
-	
+
 	clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &self->t_cpu_start);
 	clock_gettime(CLOCK_MONOTONIC, &self->t_real_start);
 }

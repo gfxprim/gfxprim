@@ -18,11 +18,11 @@ def redraw(bk, id):
 
     align = text.C.ALIGN_CENTER | text.C.VALIGN_CENTER
     c.text.Text(None, c.w//2, c.h//2, align, white, black, "%s - %sx%s" % (id, c.w, c.h))
-    
+
     bk.Flip()
 
 def parse_events(bk, id):
-   
+
     print("------ Window %s -------" % (id))
 
     while True:

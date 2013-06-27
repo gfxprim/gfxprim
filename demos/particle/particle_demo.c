@@ -43,7 +43,7 @@ static void sighandler(int signo)
 {
 	if (backend != NULL)
 		GP_BackendExit(backend);
-	
+
 	fprintf(stderr, "Got signal %i\n", signo);
 
 	exit(1);
@@ -74,7 +74,7 @@ int main(int argc, char *argv[])
 			fprintf(stderr, "Invalid paramter '%c'\n", opt);
 		}
 	}
-	
+
 //	GP_SetDebugLevel(10);
 
 	signal(SIGINT, sighandler);
@@ -85,7 +85,7 @@ int main(int argc, char *argv[])
 	init_backend(backend_opts);
 
 	context = backend->context;
-	
+
 	black_pixel = GP_ColorToContextPixel(GP_COL_BLACK, context);
 	white_pixel = GP_ColorToContextPixel(GP_COL_WHITE, context);
 
@@ -107,7 +107,7 @@ int main(int argc, char *argv[])
 		while (GP_BackendGetEvent(backend, &ev)) {
 
 			GP_EventDump(&ev);
-			
+
 			switch (ev.type) {
 			case GP_EV_KEY:
 				if (ev.code != GP_EV_KEY_DOWN)
@@ -133,7 +133,7 @@ int main(int argc, char *argv[])
 			break;
 			}
 		}
-	
+
 		if (!pause_flag) {
 			space_time_tick(space, 1);
 			space_draw_particles(context, space);

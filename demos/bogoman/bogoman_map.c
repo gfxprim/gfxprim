@@ -85,7 +85,7 @@ void bogoman_map_dump(struct bogoman_map *map)
 			break;
 			}
 		}
-		
+
 		printf("\n");
 	}
 
@@ -208,7 +208,7 @@ void bogoman_map_player_move(struct bogoman_map *map, int x, int y)
 		player_x = px;
 		player_y = py;
 	}
-	
+
 	/* Update the map */
 	struct bogoman_map_elem *player, *space;
 

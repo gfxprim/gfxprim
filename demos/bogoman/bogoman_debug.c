@@ -37,7 +37,7 @@ void bogoman_dbg_print(unsigned int level, const char *file, const char *fn,
 		fprintf(stderr, "WARNING: %s:%s:%i\n\t", file, fn, line);
 	else
 		fprintf(stderr, "DEBUG %i:%s:%s:%i:\n\t", level, file, fn, line);
-	
+
 	va_list va;
 
 	va_start(va, fmt);

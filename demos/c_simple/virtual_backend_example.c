@@ -70,10 +70,10 @@ int main(int argc, char *argv[])
 
 	if (emul_type != GP_PIXEL_UNKNOWN) {
 		GP_Backend *emul;
-		
-		/* 
+
+		/*
 		 * Create an emulated backend on the top of real backend.
-		 * 
+		 *
 		 * The GP_BACKEND_CALL_EXIT says that when calling exit on
 		 * emulated backend, the real backend exit will be called as
 		 * well.
@@ -100,7 +100,7 @@ int main(int argc, char *argv[])
 	green_pixel = GP_ColorToContextPixel(GP_COL_GREEN, context);
 
 	GP_Fill(context, white_pixel);
-	
+
 	unsigned int i, j;
 	for (i = 0; i < 40; i++) {
 		GP_HLineXYW(context, 0, i, i, black_pixel);
@@ -124,16 +124,16 @@ int main(int argc, char *argv[])
 
 	GP_Text(context, NULL, 60, 270, GP_VALIGN_BELOW|GP_ALIGN_RIGHT,
 	        black_pixel, white_pixel, "Lorem Ipsum dolor sit...");
-	
+
 	GP_Text(context, NULL, 60, 290, GP_VALIGN_BELOW|GP_ALIGN_RIGHT,
 	        red_pixel, white_pixel, "Lorem Ipsum dolor sit...");
-	
+
 	GP_Text(context, NULL, 60, 310, GP_VALIGN_BELOW|GP_ALIGN_RIGHT,
 	        green_pixel, white_pixel, "Lorem Ipsum dolor sit...");
 
 	GP_Text(context, NULL, 60, 330, GP_VALIGN_BELOW|GP_ALIGN_RIGHT,
 	        blue_pixel, white_pixel, "Lorem Ipsum dolor sit...");
-	
+
 	/* Update the backend screen */
 	GP_BackendFlip(backend);
 
@@ -149,7 +149,7 @@ int main(int argc, char *argv[])
 		while (GP_BackendGetEvent(backend, &ev)) {
 
 			GP_EventDump(&ev);
-			
+
 			switch (ev.type) {
 			case GP_EV_KEY:
 				switch (ev.val.key.key) {

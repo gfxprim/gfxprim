@@ -35,7 +35,7 @@
 /* Set to 1 to use Anti Aliased drawing */
 static int aa_flag = 0;
 
-/* 
+/*
  * Generate color depending on distance from center
  *
  * We could do this only and only because the context
@@ -51,7 +51,7 @@ static GP_Pixel do_color(int xc, int yc, float x, float y)
 	int rmask = 0;
 	int gmask = 0xff * sqrt(dc);
 	int bmask = 0xff * (1 - dc);
-	
+
 	if (dc < 0.1) {
 		rmask = 0xff * (1 - dc);
 		bmask = 0x00;
@@ -72,19 +72,19 @@ static void draw(GP_Context *img, int level, float x0, float y0, float x1, float
 		GP_Pixel pixel;
 
 		pixel = do_color(img->w/2, img->h/2, 1.00 * (x0+x1)/2, 1.00 * (y0 + y1)/2);
-		
+
 		if (aa_flag)
 			GP_LineAA(img, x0 * 256, y0 * 256, x1 * 256, y1 * 256, pixel);
 		else
 			GP_Line(img, x0, y0, x1, y1, pixel);
-		
+
 		return;
 	}
 
 	/* Compute varation of Koch curve */
 	float x34 = (x0 + 3 * x1) / 4;
 	float y34 = (y0 + 3 * y1) / 4;
-	
+
 	float x14 = (3 * x0 + x1) / 4;
 	float y14 = (3 * y0 + y1) / 4;
 
@@ -107,7 +107,7 @@ static void draw(GP_Context *img, int level, float x0, float y0, float x1, float
 int main(void)
 {
 	GP_Context *img;
-	
+
 	/* Create RGB 24 bit image */
 	img = GP_ContextAlloc(600, 600, GP_PIXEL_RGB888);
 
@@ -119,7 +119,7 @@ int main(void)
 	/* Clean up the bitmap */
 	GP_Fill(img, 0);
 
-	/* Draw a fractal */	
+	/* Draw a fractal */
 	draw(img, 4, 0, 0, img->w - 1, img->h - 1);
 	draw(img, 4, 0, img->h - 1, img->w - 1, 0);
 

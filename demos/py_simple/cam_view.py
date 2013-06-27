@@ -32,7 +32,7 @@ def main():
 
         if (ev is None):
             continue
-	
+
         input.EventDump(ev)
 
         if (ev.type == input.EV_KEY):

@@ -40,7 +40,7 @@ enum bogoman_map_elem_id {
 	BOGOMAN_MAX = BOGOMAN_EDIBLE,
 };
 
-/* 
+/*
  * Wall cal be applied as bitflags. Each bitflag determines wall continuation
  * in particular direction.
  */
@@ -91,7 +91,7 @@ static inline enum bogoman_map_elem_id
 	return elem->id;
 }
 
-static inline int bogoman_map_is_id(struct bogoman_map *map, 
+static inline int bogoman_map_is_id(struct bogoman_map *map,
                                    unsigned int x, unsigned int y,
 				   enum bogoman_map_elem_id id)
 {

@@ -45,7 +45,7 @@ static void get_map_info(FILE *f, unsigned int *w, unsigned int *h)
 		case '\n':
 			if (*w < curw)
 				*w = curw;
-			
+
 			if (curw == 0) {
 				rewind(f);
 				return;
@@ -130,7 +130,7 @@ static void load_map(FILE *f, struct bogoman_map *map)
 
 		for (x = 0; x < line_cur->len; x++) {
 			struct bogoman_map_elem *elem;
-			
+
 			elem = bogoman_get_map_elem(map, x, y);
 
 			elem->id = line_cur->line[x];
@@ -149,7 +149,7 @@ static void load_map(FILE *f, struct bogoman_map *map)
 				if (y > 0 &&
 				    bogoman_map_is_id(map, x, y-1, BOGOMAN_WALL))
 					elem->flags |= BOGOMAN_WALL_UP;
-				
+
 				if (x < line_next->len &&
 				    line_next->line[x] == BOGOMAN_WALL)
 					elem->flags |= BOGOMAN_WALL_DOWN;
@@ -202,11 +202,11 @@ struct bogoman_map *bogoman_load(const char *path)
 	           w * h * sizeof(struct bogoman_map_elem);
 
 	map = malloc(map_size);
-	
+
 	if (map == NULL)
 		goto err0;
 
-	memset(map, 0, map_size);	
+	memset(map, 0, map_size);
 
 	map->w = w;
 	map->h = h;

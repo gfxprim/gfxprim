@@ -73,7 +73,7 @@ static int save(const GP_Context *img, const char *dst_path,
 		}
 
 		fprintf(f, "\n");
-	
+
 		if (GP_ProgressCallbackReport(callback, img->h, j, img->w)) {
 			fclose(f);
 			unlink(dst_path);
@@ -101,7 +101,7 @@ GP_Loader loader = {
 int main(int argc, char *argv[])
 {
 	GP_Context *c, *gc;
-	
+
 	GP_LoaderRegister(&loader);
 
 	/* List all loaders */
@@ -127,7 +127,7 @@ int main(int argc, char *argv[])
 		fprintf(stderr, "FloydSteinberg: %s\n", strerror(errno));
 		return 1;
 	}
-	
+
 	printf("Saving to test.txt\n");
 
 	if (GP_SaveImage(gc, "test.txt", NULL)) {

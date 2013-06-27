@@ -84,7 +84,7 @@ int main(int argc, char *argv[])
 		GP_BackendWaitEvent(backend, &ev);
 
 		GP_EventDump(&ev);
-		
+
 		switch (ev.type) {
 		case GP_EV_KEY:
 			switch (ev.val.val) {

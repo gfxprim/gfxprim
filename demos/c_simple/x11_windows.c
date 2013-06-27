@@ -31,7 +31,7 @@
 static void redraw(struct GP_Context *context)
 {
 	GP_Pixel white_pixel, black_pixel;
-	
+
 	black_pixel = GP_ColorToContextPixel(GP_COL_BLACK, context);
 	white_pixel = GP_ColorToContextPixel(GP_COL_WHITE, context);
 
@@ -50,9 +50,9 @@ static int ev_loop(struct GP_Backend *backend, const char *name)
 	while (GP_BackendGetEvent(backend, &ev)) {
 
 		printf("-------------------------- %s\n", name);
-		
+
 		GP_EventDump(&ev);
-			
+
 		switch (ev.type) {
 		case GP_EV_KEY:
 			switch (ev.val.val) {
@@ -75,7 +75,7 @@ static int ev_loop(struct GP_Backend *backend, const char *name)
 			}
 		break;
 		}
-	
+
 		printf("-----------------------------\n");
 	}
 
@@ -98,12 +98,12 @@ int main(void)
 	/* Update the backend screen */
 	redraw(win_1->context);
 	redraw(win_2->context);
-	
+
 	GP_BackendFlip(win_1);
 	GP_BackendFlip(win_2);
 
 	for (;;) {
-		/* 
+		/*
 		 * Wait for backend event.
 		 *
 		 * Either window is fine as they share connection.
