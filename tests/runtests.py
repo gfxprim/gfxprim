@@ -98,10 +98,11 @@ def run_tests(resdir, testsdir):
             runtest = path + '/test_list.txt'
 
             if (os.access(runtest, os.R_OK)):
-	        # Create result directory
+                # Create result directory
                 curresdir = resdir + '/' + name
                 os.mkdir(curresdir)
                 # Run tests
+                print("\n========= Running " + name + " testsuites =========\n")
                 run_test(curresdir, path, runtest)
 
 def main():
