@@ -2,9 +2,9 @@ TOPDIR=../..
 
 include $(TOPDIR)/pre.mk
 
-CSOURCES=Timer.c
+CSOURCES=Timer.c TimeStamp.c
 
-APPS=Timer
+APPS=Timer TimeStamp
 
 include ../tests.mk
 
