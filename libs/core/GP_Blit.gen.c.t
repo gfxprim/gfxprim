@@ -68,7 +68,7 @@ static void blitXYXY_Raw_{{ ps.suffix }}(const GP_Context *src,
 	GP_Coord x0, GP_Coord y0, GP_Coord x1, GP_Coord y1,
 	GP_Context *dst, GP_Coord x2, GP_Coord y2)
 {
-%% if not ps.needs_bit_endian()
+%%  if not ps.needs_bit_endian()
 	/* memcpy() each horizontal line */
 	GP_Coord y;
 
@@ -76,7 +76,7 @@ static void blitXYXY_Raw_{{ ps.suffix }}(const GP_Context *src,
 		memcpy(GP_PIXEL_ADDR_{{ ps.suffix }}(dst, x2, y2 + y),
 		       GP_PIXEL_ADDR_{{ ps.suffix }}(src, x0, y0 + y),
 		       {{ int(ps.size/8) }} * (x1 - x0 + 1));
-%% else
+%%  else
 {#	/* Rectangles may not be bit-aligned in the same way! */
 	/* Alignment (index) of first bits in the first byte */
 	//TODO: This is wrong for subcontexts where the offset
@@ -111,7 +111,7 @@ static void blitXYXY_Raw_{{ ps.suffix }}(const GP_Context *src,
 	} else /* Different bit-alignment, can't use memcpy() */
 #}
 		blitXYXY_Naive_Raw(src, x0, y0, x1, y1, dst, x2, y2);
-%% endif
+%%  endif
 }
 
 %% endfor
@@ -174,24 +174,24 @@ void GP_BlitXYXY_Raw_Fast(const GP_Context *src,
 	/* Specialized functions */
 	switch (src->pixel_type) {
 %% for src in pixeltypes
-%% if not src.is_unknown() and not src.is_palette()
+%%  if not src.is_unknown() and not src.is_palette()
 	case GP_PIXEL_{{ src.name }}:
 		switch (dst->pixel_type) {
-%% for dst in pixeltypes
-%% if not dst.is_unknown() and not dst.is_palette()
-%% if dst.name != src.name
+%%   for dst in pixeltypes
+%%    if not dst.is_unknown() and not dst.is_palette()
+%%     if dst.name != src.name
 		case GP_PIXEL_{{ dst.name }}:
 			blitXYXY_Raw_{{ src.name }}_{{ dst.name }}(src, x0, y0, x1, y1, dst, x2, y2);
 		break;
-%% endif
-%% endif
-%% endfor
+%%     endif
+%%    endif
+%%   endfor
 		default:
 			GP_ABORT("Invalid destination pixel %s",
 			         GP_PixelTypeName(dst->pixel_type));
 		}
 	break;
-%% endif
+%%  endif
 %% endfor
 	default:
 		GP_ABORT("Invalid source pixel %s",
@@ -203,10 +203,10 @@ void GP_BlitXYXY_Raw_Fast(const GP_Context *src,
  * And the same for non-raw variants.
  */
 %% for src in pixeltypes
-%% if not src.is_unknown() and not src.is_palette()
-%% for dst in pixeltypes
-%% if not dst.is_unknown() and not dst.is_palette()
-%% if dst.name != src.name
+%%  if not src.is_unknown() and not src.is_palette()
+%%   for dst in pixeltypes
+%%    if not dst.is_unknown() and not dst.is_palette()
+%%     if dst.name != src.name
 /*
  * Blits {{ src.name }} to {{ dst.name }}
  */
@@ -231,10 +231,10 @@ static void blitXYXY_{{ src.name }}_{{ dst.name }}(const GP_Context *src,
 		}
 }
 
-%% endif
-%% endif
-%% endfor
-%% endif
+%%     endif
+%%    endif
+%%   endfor
+%%  endif
 %% endfor
 
 /*
@@ -274,28 +274,33 @@ void GP_BlitXYXY_Fast(const GP_Context *src,
 		              src, x0, y0, x1, y1, dst, x2, y2);
 		return;
 	}
-	
+
+	if (GP_ContextRotationEqual(src, dst)) {
+		GP_BlitXYXY_Raw_Fast(src, x0, y0, x1, y1, dst, x2, y2);
+		return;
+	}
+
 	/* Specialized functions */
 	switch (src->pixel_type) {
 %% for src in pixeltypes
-%% if not src.is_unknown() and not src.is_palette()
+%%  if not src.is_unknown() and not src.is_palette()
 	case GP_PIXEL_{{ src.name }}:
 		switch (dst->pixel_type) {
-%% for dst in pixeltypes
-%% if not dst.is_unknown() and not dst.is_palette()
-%% if dst.name != src.name
+%%   for dst in pixeltypes
+%%    if not dst.is_unknown() and not dst.is_palette()
+%%     if dst.name != src.name
 		case GP_PIXEL_{{ dst.name }}:
 			blitXYXY_{{ src.name }}_{{ dst.name }}(src, x0, y0, x1, y1, dst, x2, y2);
 		break;
-%% endif
-%% endif
-%% endfor
+%%     endif
+%%    endif
+%%   endfor
 		default:
 			GP_ABORT("Invalid destination pixel %s",
 			         GP_PixelTypeName(dst->pixel_type));
 		}
 	break;
-%% endif
+%%  endif
 %% endfor
 	default:
 		GP_ABORT("Invalid source pixel %s",

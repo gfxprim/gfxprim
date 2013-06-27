@@ -17,16 +17,16 @@
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
  * Copyright (C) 2011      Tomas Gavenciak <gavento@ucw.cz>                  *
- * Copyright (C) 2011-2012 Cyril Hrubis    <metan@ucw.cz>                    *
+ * Copyright (C) 2011-2013 Cyril Hrubis    <metan@ucw.cz>                    *
  *                                                                           *
  *****************************************************************************/
 
-#include "GP_Pixel.h"
-#include "GP_GetPutPixel.h"
-#include "GP_Context.h"
-#include "GP_Convert.h"
-#include "GP_Debug.h"
-#include "GP_Blit.h"
+#include "core/GP_Pixel.h"
+#include "core/GP_GetPutPixel.h"
+#include "core/GP_Context.h"
+#include "core/GP_Convert.h"
+#include "core/GP_Debug.h"
+#include "core/GP_Blit.h"
 
 /* Generated functions */
 void GP_BlitXYXY_Raw_Fast(const GP_Context *src,
@@ -36,25 +36,6 @@ void GP_BlitXYXY_Raw_Fast(const GP_Context *src,
 void GP_BlitXYXY_Fast(const GP_Context *src,
                       GP_Coord x0, GP_Coord y0, GP_Coord x1, GP_Coord y1,
                       GP_Context *dst, GP_Coord x2, GP_Coord y2);
-
-/*
-void GP_BlitXYXY_Naive(const GP_Context *src,
-                       GP_Coord x0, GP_Coord y0, GP_Coord x1, GP_Coord y1,
-                       GP_Context *dst, GP_Coord x2, GP_Coord y2)
-{
-	GP_Coord x, y;
-
-	for (y = y0; y <= y1; y++)
-		for (x = x0; x <= x1; x++) {
-			GP_Pixel p = GP_GetPixel(src, x, y);
-
-			if (src->pixel_type != dst->pixel_type)
-				p = GP_ConvertContextPixel(p, src, dst);
-
-			GP_PutPixel(dst, x2 + (x - x0), y2 + (y - y0), p);
-		}
-}
-*/
 
 void GP_BlitXYXY(const GP_Context *src,
                  GP_Coord x0, GP_Coord y0, GP_Coord x1, GP_Coord y1,
@@ -77,10 +58,7 @@ void GP_BlitXYXY(const GP_Context *src,
 	GP_CHECK(x2 + (x1 - x0) < (GP_Coord)GP_ContextW(dst));
 	GP_CHECK(y2 + (y1 - y0) < (GP_Coord)GP_ContextH(dst));
 
-	if (GP_ContextRotationEqual(src, dst))
-		GP_BlitXYXY_Raw_Fast(src, x0, y0, x1, y1, dst, x2, y2);
-	else
-		GP_BlitXYXY_Fast(src, x0, y0, x1, y1, dst, x2, y2);
+	GP_BlitXYXY_Fast(src, x0, y0, x1, y1, dst, x2, y2);
 }
 
 void GP_BlitXYXY_Clipped(const GP_Context *src,
@@ -138,10 +116,7 @@ void GP_BlitXYXY_Clipped(const GP_Context *src,
 	         x0, y0, x1, y1, GP_ContextW(src), GP_ContextH(src),
 		 x2, y2, GP_ContextW(dst), GP_ContextH(dst));
 
-	if (GP_ContextRotationEqual(src, dst))
-		GP_BlitXYXY_Raw_Fast(src, x0, y0, x1, y1, dst, x2, y2);
-	else
-		GP_BlitXYXY_Fast(src, x0, y0, x1, y1, dst, x2, y2);
+	GP_BlitXYXY_Fast(src, x0, y0, x1, y1, dst, x2, y2);
 }
 
 void GP_BlitXYWH(const GP_Context *src,
