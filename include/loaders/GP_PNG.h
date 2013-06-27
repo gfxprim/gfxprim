@@ -21,7 +21,7 @@
  *****************************************************************************/
 
  /*
-   
+
    PNG support using libpng library.
 
   */
@@ -55,7 +55,7 @@ int GP_OpenPNG(const char *src_path, FILE **f);
 /*
  * Reads PNG from an open FILE. Expects the file position set after the eight
  * bytes PNG signature.
- * 
+ *
  * Upon succesfull return pointer to newly allocated context is returned.
  * Otherwise NULL is returned and errno is filled.
  */

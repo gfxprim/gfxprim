@@ -28,8 +28,6 @@
 #include "GP_Rect.h"
 #include "GP_RectAA.h"
 
-
-
 void GP_FillRectXYXY_AA_Raw(GP_Context *context, GP_Coord x0, GP_Coord y0,
                             GP_Coord x1, GP_Coord y1, GP_Pixel pixel)
 {
@@ -46,7 +44,7 @@ void GP_FillRectXYXY_AA_Raw(GP_Context *context, GP_Coord x0, GP_Coord y0,
 	GP_Coord out_y0 = GP_FP_FLOOR_TO_INT(y0 + GP_FP_1_2);
 	GP_Coord out_x1 = GP_FP_CEIL_TO_INT(x1 - GP_FP_1_2);
 	GP_Coord out_y1 = GP_FP_CEIL_TO_INT(y1 - GP_FP_1_2);
-	
+
 	/* Size */
 	GP_Size w = x1 - x0;
 	GP_Size h = y1 - y0;
@@ -73,7 +71,7 @@ void GP_FillRectXYXY_AA_Raw(GP_Context *context, GP_Coord x0, GP_Coord y0,
 	if (out_y0 == out_y1) {
 		uint8_t mix = w;
 		GP_Coord i;
-		
+
 		/* Special case 1px 100% height line */
 		if (h == GP_FP_1)
 			mix = 255;
@@ -92,14 +90,14 @@ void GP_FillRectXYXY_AA_Raw(GP_Context *context, GP_Coord x0, GP_Coord y0,
 	GP_Coord in_y0 = GP_FP_CEIL_TO_INT(y0 + GP_FP_1_2);
 	GP_Coord in_x1 = GP_FP_FLOOR_TO_INT(x1 - GP_FP_1_2);
 	GP_Coord in_y1 = GP_FP_FLOOR_TO_INT(y1 - GP_FP_1_2);
-	
-	/* 
+
+	/*
 	 * Draw the inner rectanle in 100% intensity.
 	 *
 	 * Note that if out_x0 == in_x1 is 2px wide and both lines has less than
 	 * 100% intensity. The same goes for out_y0 == in_y1.
 	 */
-	if (in_x1 >= in_x0 && (out_x0 != in_x1 || out_x1 != in_x0) 
+	if (in_x1 >= in_x0 && (out_x0 != in_x1 || out_x1 != in_x0)
 	    && in_y1 >= in_y0 && (out_y0 != in_y1 || out_y1 != in_y0))
 		GP_FillRectXYXY_Raw(context, in_x0, in_y0, in_x1, in_y1, pixel);
 
@@ -107,18 +105,18 @@ void GP_FillRectXYXY_AA_Raw(GP_Context *context, GP_Coord x0, GP_Coord y0,
 	if (in_y0 != out_y0) {
 		uint8_t mix = GP_FP_FROM_INT(in_y0) + GP_FP_1_2 - y0;
 		GP_Coord i;
-	
+
 		for (i = out_x0; i <= out_x1; i++) {
 			GP_Pixel p = GP_GetPixel_Raw_Clipped(context, i, out_y0);
 			p = GP_MixPixels(pixel, p, mix, context->pixel_type);
 			GP_PutPixel_Raw_Clipped(context, i, out_y0, p);
 		}
 	}
-	
+
 	if (in_y1 != out_y1) {
 		uint8_t mix = y1 - GP_FP_FROM_INT(in_y0) - GP_FP_1_2;
 		GP_Coord i;
-	
+
 		for (i = out_x0; i <= out_x1; i++) {
 			GP_Pixel p = GP_GetPixel_Raw_Clipped(context, i, out_y1);
 			p = GP_MixPixels(pixel, p, mix, context->pixel_type);
@@ -129,7 +127,7 @@ void GP_FillRectXYXY_AA_Raw(GP_Context *context, GP_Coord x0, GP_Coord y0,
 	if (in_x0 != out_x0) {
 		uint8_t mix = GP_FP_FROM_INT(in_x0) + GP_FP_1_2 - x0;
 		GP_Coord i;
-	
+
 		for (i = out_y0; i <= out_y1; i++) {
 			GP_Pixel p = GP_GetPixel_Raw_Clipped(context, out_x0, i);
 			p = GP_MixPixels(pixel, p, mix, context->pixel_type);
@@ -140,7 +138,7 @@ void GP_FillRectXYXY_AA_Raw(GP_Context *context, GP_Coord x0, GP_Coord y0,
 	if (in_x1 != out_x1) {
 		uint8_t mix = x1 - GP_FP_FROM_INT(in_x1) - GP_FP_1_2;
 		GP_Coord i;
-	
+
 		for (i = out_y0; i <= out_y1; i++) {
 			GP_Pixel p = GP_GetPixel_Raw_Clipped(context, out_x1, i);
 			p = GP_MixPixels(pixel, p, mix, context->pixel_type);
@@ -165,7 +163,7 @@ void GP_FillRectXYXY_AA(GP_Context *context, GP_Coord x0, GP_Coord y0,
                         GP_Coord x1, GP_Coord y1, GP_Pixel pixel)
 {
 	GP_CHECK_CONTEXT(context);
-	
+
 	GP_TRANSFORM_POINT_FP(context, x0, y0);
 	GP_TRANSFORM_POINT_FP(context, x1, y1);
 

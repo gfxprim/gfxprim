@@ -17,7 +17,7 @@
 
 			if ({{ var }} > {{ 2 ** size - 1}})
 				{{ var }} = {{ 2 ** size - 1}};
-%% endmacro 
+%% endmacro
 
 /*
  * Load parameters from params structure into variables
@@ -25,7 +25,7 @@
 %% macro filter_params(pt, params, c_type, suffix, id)
 	GP_ASSERT(GP_FilterParamCheckPixelType({{ params }}, GP_PIXEL_{{ pt.name }}) == 0,
 	          "Invalid params channels for context pixel type");
-	
+
 	%% for chann in pt.chanslist
 	{{ c_type }}{{ chann[0] }}{{ suffix }} = (GP_FilterParamChannel({{ params }}, "{{ chann[0] }}"))->val.{{ id }};
 	%% endfor
@@ -34,7 +34,7 @@
 %% macro filter_params_raw(pt, params, suffix)
 	GP_ASSERT(GP_FilterParamCheckPixelType({{ params }}, GP_PIXEL_{{ pt.name }}) == 0,
 	          "Invalid params channels for context pixel type");
-	
+
 	%% for chann in pt.chanslist
 	GP_FilterParam *{{ chann[0] }}{{ suffix }} = GP_FilterParamChannel({{ params }}, "{{ chann[0] }}");
 	%% endfor

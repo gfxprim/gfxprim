@@ -31,8 +31,8 @@
 #include "GP_Common.h"
 #include "GP_FixedPoint.h"
 
-/* 
- * Flip a coordinate within context according to context transformation. 
+/*
+ * Flip a coordinate within context according to context transformation.
  */
 #define GP_TRANSFORM_X(context, x) do {   \
 	if ((context)->x_swap)            \
@@ -57,17 +57,17 @@
 		y = GP_FP_FROM_INT((context)->h - 1) - y; \
 } while (0)
 
-/* 
- * Swap coordinates (axes) according to context transformation. 
+/*
+ * Swap coordinates (axes) according to context transformation.
  */
 #define GP_TRANSFORM_SWAP(context, x, y) do { \
 	if ((context)->axes_swap)             \
 		GP_SWAP(x, y);                \
 } while (0)
 
-/* 
- * Transform "user"-coordinates to "real"-coordinates according to context 
- * transformation. 
+/*
+ * Transform "user"-coordinates to "real"-coordinates according to context
+ * transformation.
  */
 #define GP_TRANSFORM_POINT(context, x, y) do { \
 	GP_TRANSFORM_SWAP(context, x, y);      \
@@ -81,10 +81,10 @@
 	GP_TRANSFORM_Y_FP(context, y);            \
 } while (0)
 
-/* 
+/*
  * Transform "user"-coordinates to "real"-coordinates of a rectangle corner
- * according to context transformation. Corner with min-coordinates is 
- * transformed to (different) corner with min-coordinates etc. 
+ * according to context transformation. Corner with min-coordinates is
+ * transformed to (different) corner with min-coordinates etc.
  * Arguments x, y, w, h are modified.
  */
 #define GP_TRANSFORM_RECT(context, x, y, w, h) do { \
@@ -109,7 +109,7 @@
 		y = GP_FP_FROM_INT((context)->h) - y - h; \
 } while (0)
 
-/* 
+/*
  * Transform "user"-coordinates to "real"-coordinates for a blit
  * called as GP_Blit(c1, x1, y1, w, h, c2, x2, y2).
  * All x1, y1, x2, y2, w, h are adjusted.
@@ -122,7 +122,7 @@
 } while (0)
 
 /*
- * Inverse transformation to GP_TRANSFORM_POINT. 
+ * Inverse transformation to GP_TRANSFORM_POINT.
  * Use for translating mouse pointer coordinates to coordinates on context.
  */
 #define GP_RETRANSFORM_POINT(context, x, y) do { \

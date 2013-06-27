@@ -23,7 +23,7 @@
 /*
 
   TIFF image support using libtiff.
-  
+
  */
 
 #include <stdint.h>
@@ -61,7 +61,7 @@ int GP_OpenTIFF(const char *src_path, void **t)
 
 	if (tiff == NULL)
 		return 1;
-	
+
 	*t = tiff;
 	return 0;
 }
@@ -115,7 +115,7 @@ GP_Context *GP_ReadTIFF(void *t, GP_ProgressCallback *callback)
 
 	GP_DEBUG(1, "TIFF image %ux%u compression: %s, bpp: %u",
 	         w, h, compression_name(compression), bpp);
-	
+
 	/* If set tiff is saved in tiles */
 	if (TIFFGetField(tiff, TIFFTAG_TILEWIDTH, &tile_w) &&
 	    TIFFGetField(tiff, TIFFTAG_TILELENGTH, &tile_h)) {
@@ -184,9 +184,9 @@ GP_Context *GP_LoadTIFF(const char *src_path, GP_ProgressCallback *callback)
 		return NULL;
 
 	res = GP_ReadTIFF(t, callback);
-	
+
 	TIFFClose(t);
-	
+
 	return res;
 }
 

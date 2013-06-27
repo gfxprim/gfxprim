@@ -47,13 +47,13 @@ void GP_PutPixelAA_Raw(GP_Context *context, GP_Coord x, GP_Coord y,
 
 	perc = FP_TO_PERC(GP_FP_MUL(GP_FP_1 - frac_x, GP_FP_1 - frac_y));
 	GP_MixPixel_Raw_Clipped(context, int_x, int_y, pixel, perc);
-	
+
 	perc = FP_TO_PERC(GP_FP_MUL(frac_x, GP_FP_1 - frac_y));
 	GP_MixPixel_Raw_Clipped(context, int_x + 1, int_y, pixel, perc);
-	
+
 	perc = FP_TO_PERC(GP_FP_MUL(GP_FP_1 - frac_x, frac_y));
 	GP_MixPixel_Raw_Clipped(context, int_x, int_y + 1, pixel, perc);
-	
+
 	perc = FP_TO_PERC(GP_FP_MUL(frac_x, frac_y));
 	GP_MixPixel_Raw_Clipped(context, int_x + 1, int_y + 1, pixel, perc);
 }

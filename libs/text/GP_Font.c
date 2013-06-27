@@ -53,7 +53,7 @@ GP_GlyphBitmap *GP_GetGlyphBitmap(const GP_FontFace *font, int c)
 
 	uint32_t offset;
 
-	if (font->glyph_offsets[0] == 0)	
+	if (font->glyph_offsets[0] == 0)
 		offset = font->glyph_offsets[i];
 	else
 		offset = font->glyph_offsets[0] * i;

@@ -47,7 +47,7 @@ static int prewitt(const GP_Context *src, GP_Context *dx, GP_Context *dy,
 	                                     grad_kern, 3, 1,
 					     smooth_kern, 3, 1, callback))
 		return 1;
-	
+
 	return 0;
 }
 
@@ -81,13 +81,13 @@ static int sobel(const GP_Context *src, GP_Context *dx, GP_Context *dy,
 
 	if (GP_FilterConvolution_Raw(&dx_conv))
 		return 1;
-	
+
 	float dy_kern[] = {
 		-1, -2, -1,
 		 0,  0,  0,
 		 1,  2,  1,
 	};
-	
+
 	GP_ConvolutionParams dy_conv = {
 		.src = src,
 		.x_src = 0,
@@ -137,9 +137,9 @@ static int edge_detect(const GP_Context *src,
 	default:
 		goto err0;
 	}
-	
+
 	uint32_t i, j;
-	
+
 	for (i = 0; i < src->w; i++) {
 		for (j = 0; j < src->h; j++) {
 			GP_Pixel pix_x = GP_GetPixel_Raw_24BPP(dx, i, j);
@@ -152,43 +152,43 @@ static int edge_detect(const GP_Context *src,
 			Rx = GP_Pixel_GET_R_RGB888(pix_x);
 			Gx = GP_Pixel_GET_G_RGB888(pix_x);
 			Bx = GP_Pixel_GET_B_RGB888(pix_x);
-			
+
 			Ry = GP_Pixel_GET_R_RGB888(pix_y);
 			Gy = GP_Pixel_GET_G_RGB888(pix_y);
 			By = GP_Pixel_GET_B_RGB888(pix_y);
-		
+
 			RE = sqrt(Rx*Rx + Ry*Ry) + 0.5;
 			GE = sqrt(Gx*Gx + Gy*Gy) + 0.5;
 			BE = sqrt(Bx*Bx + By*By) + 0.5;
-			
+
 			GP_PutPixel_Raw_24BPP(dx, i, j,
 			                      GP_Pixel_CREATE_RGB888(RE, GE, BE));
-			
+
 			if (Rx != 0 && Ry != 0)
 				RPhi = ((atan2(Rx, Ry) + M_PI) * 255)/(2*M_PI);
 			else
 				RPhi = 0;
-			
+
 			if (Gx != 0 && Gy != 0)
 				GPhi = ((atan2(Gx, Gy) + M_PI) * 255)/(2*M_PI);
 			else
 				GPhi = 0;
-			
+
 			if (Bx != 0 && By != 0)
 				BPhi = ((atan2(Bx, By) + M_PI) * 255)/(2*M_PI);
 			else
 				BPhi = 0;
-			
+
 			GP_PutPixel_Raw_24BPP(dy, i, j,
 			                      GP_Pixel_CREATE_RGB888(RPhi, GPhi, BPhi));
 		}
 	}
-	
+
 	if (Phi != NULL)
 		*Phi = dy;
 	else
 		GP_ContextFree(dy);
-	
+
 	if (E != NULL)
 		*E = dx;
 	else

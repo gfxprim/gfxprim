@@ -43,15 +43,15 @@
  */
 typedef struct GP_ProgressCallback {
 	float percentage;
-	
+
 	int (*callback)(struct GP_ProgressCallback *self);
 	void *priv;
-	
+
 	/*
 	 * Number of threads to use (if supported). This setting could be used
 	 * to override the default number of threads as returned by
 	 * GP_NrThreads().
-	 * 
+	 *
 	 * 0 == use number returned from GP_NrThreads().
 	 *
 	 *   >= 1 use exactly n threads
@@ -77,7 +77,7 @@ static inline void GP_ProgressCallbackDone(GP_ProgressCallback *callback)
 {
 	if (callback == NULL)
 		return;
-	
+
 	callback->percentage = 100;
 	callback->callback(callback);
 }

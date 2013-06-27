@@ -66,7 +66,7 @@ void GP_FilterParamDestroy(GP_FilterParam *self);
 /*
  * Takes array of filter parameters and returns filter parameter by a channel
  * name.
- * 
+ *
  * Returns NULL if channel wasn't found.
  */
 GP_FilterParam *GP_FilterParamChannel(GP_FilterParam params[],

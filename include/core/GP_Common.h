@@ -120,7 +120,7 @@
 	abort(); \
 } while (0)
 
-/* 
+/*
  * Print as much trace info as possible. Currently, the (C) call stack and
  * the Python stack if a Python interpreter is set up. In case more wrappers
  * are written, it should print a trace for the currently active.

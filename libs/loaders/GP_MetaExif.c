@@ -89,7 +89,7 @@ enum IFD_tags {
 	IFD_RESOLUTION_UNIT = 0x0128,
 	/* Software string. */
 	IFD_SOFTWARE = 0x0131,
-	/* YYYY:MM:DD HH:MM:SS in 24 hours format */	
+	/* YYYY:MM:DD HH:MM:SS in 24 hours format */
 	IFD_DATE_TIME = 0x0132,
 	/* White Point */
 	IFD_WHITE_POINT = 0x013e,
@@ -195,7 +195,7 @@ static const struct IFD_tag IFD_tags[] = {
 	/* TAGs from Exif SubIFD */
 	{IFD_EXPOSURE_TIME, "Exposure Time", IFD_UNSIGNED_RATIONAL, 1},
 	{IFD_F_NUMBER, "F-Number", IFD_UNSIGNED_RATIONAL, 1},
-	
+
 	/* TAG from IFD0 */
 	{IFD_EXIF_OFFSET, "Exif Offset", IFD_UNSIGNED_LONG, 1},
 
@@ -222,8 +222,8 @@ static const struct IFD_tag IFD_tags[] = {
 	{IFD_FLASH_PIX_VERSION, "Flash Pix Version", IFD_UNDEFINED, 4},
 	{IFD_COLOR_SPACE, "Color Space", IFD_UNSIGNED_SHORT, 1},
 	/* these two may be short in some cases */
-	{IFD_EXIF_IMAGE_WIDTH, "Exif Image Width", IFD_UNSIGNED_LONG, 1},	
-	{IFD_EXIF_IMAGE_HEIGHT, "Exif Image Height", IFD_UNSIGNED_LONG, 1},	
+	{IFD_EXIF_IMAGE_WIDTH, "Exif Image Width", IFD_UNSIGNED_LONG, 1},
+	{IFD_EXIF_IMAGE_HEIGHT, "Exif Image Height", IFD_UNSIGNED_LONG, 1},
 	{IFD_RELATED_SOUND_FILE, "Related Soundfile", IFD_ASCII_STRING, 0},
 };
 
@@ -258,7 +258,7 @@ static const struct IFD_tag *IFD_tag_get(uint16_t tag)
 
 	if (IFD_tags[right].tag == tag)
 		return &IFD_tags[right];
-	
+
 	return NULL;
 }
 
@@ -325,13 +325,13 @@ static const char *get_string(void *buf, size_t buf_len,
 {
 	if (num_comp <= 4)
 		return (const char*)val;
-	
+
 	if (*val + num_comp >= buf_len) {
 		GP_DEBUG(1, "String out of buffer offset 0x%08x length %u",
 		         *val, num_comp);
 		return NULL;
 	}
-		
+
 	return ((const char*)buf) + *val;
 }
 
@@ -340,14 +340,14 @@ static int rat_num(void *buf, uint32_t offset, size_t buf_len, int swap)
 	int ret;
 
 	GET_32(ret, buf, offset, buf_len, swap);
-	
+
 	return ret;
 }
 
 static int rat_den(void *buf, uint32_t offset, size_t buf_len, int swap)
 {
 	int ret;
-	
+
 	GET_32(ret, buf, offset + 4, buf_len, swap);
 
 	return ret;
@@ -376,7 +376,7 @@ static void load_tag(GP_MetaData *self, void *buf, size_t buf_len, int swap,
 		GP_WARN("Unexpected tag '%s' num_components %u expected %u",
 		        res->name, num_comp, res->num_components);
 	}
-	
+
 	const char *addr;
 
 	switch (format) {
@@ -408,7 +408,7 @@ static void load_tag(GP_MetaData *self, void *buf, size_t buf_len, int swap,
 		case IFD_EXIF_VERSION:
 		case IFD_FLASH_PIX_VERSION:
 			addr = get_string(buf, buf_len, num_comp, &val);
-		
+
 			if (addr == NULL)
 				return;
 
@@ -437,7 +437,7 @@ static int load_IFD(GP_MetaData *self, void *buf, size_t buf_len,
 
 	GP_DEBUG(2, "-- IFD Offset 0x%08x Entries 0x%04x --",
 	            IFD_offset, IFD_entries_count);
-	
+
 	int i;
 
 	for (i = 0; i < IFD_entries_count; i++) {
@@ -448,19 +448,19 @@ static int load_IFD(GP_MetaData *self, void *buf, size_t buf_len,
 		GET_16_INC(format, buf, IFD_offset, buf_len, swap);
 		GET_32_INC(num_components, buf, IFD_offset, buf_len, swap);
 		GET_32_INC(val, buf, IFD_offset, buf_len, swap);
-		
+
 		GP_DEBUG(3, "IFD Entry tag 0x%04x format (0x%04x) components 0x%08x val 0x%08x",
 		         tag, format, num_components, val);
-	
+
 		GP_DEBUG(3, "IFD Entry tag '%s' format '%s'",
 			 IFD_tag_name(tag), IFD_format_name(format));
-	
+
 		if (tag == IFD_EXIF_OFFSET)
 			load_IFD(self, buf, buf_len, val, swap);
 		else
 			load_tag(self, buf, buf_len, swap, tag, format, num_components, val);
 	}
-/*	
+/*
 	GET_32(IFD_offset, buf, IFD_offset, buf_len, swap);
 
 	if (IFD_offset != 0x00000000)
@@ -478,10 +478,10 @@ int GP_MetaDataFromExif(GP_MetaData *self, void *buf, size_t buf_len)
 	int c1, c2;
 
 	if (buf_char(buf, 0, buf_len) != 'E' ||
-	    buf_char(buf, 1, buf_len) != 'x' || 
-	    buf_char(buf, 2, buf_len) != 'i' || 
-	    buf_char(buf, 3, buf_len) != 'f' || 
-	    buf_char(buf, 4, buf_len) != 0 || 
+	    buf_char(buf, 1, buf_len) != 'x' ||
+	    buf_char(buf, 2, buf_len) != 'i' ||
+	    buf_char(buf, 3, buf_len) != 'f' ||
+	    buf_char(buf, 4, buf_len) != 0 ||
 	    buf_char(buf, 5, buf_len) != 0) {
 		GP_WARN("Missing ASCII 'Exif\\0\\0' string at "
 		        "the start of the buffer");
@@ -496,7 +496,7 @@ int GP_MetaDataFromExif(GP_MetaData *self, void *buf, size_t buf_len)
 	}
 
 	swap = (c1 == 'M');
-	
+
 	GP_DEBUG(2, "TIFF aligment is '%c%c' swap = %i", c1, c1, swap);
 
 	uint16_t tag;
@@ -516,7 +516,6 @@ int GP_MetaDataFromExif(GP_MetaData *self, void *buf, size_t buf_len)
 
 	/* The offset starts from the II or MM */
 	load_IFD(self, (char*)buf + TIFF_OFFSET, buf_len - TIFF_OFFSET, IFD_offset, swap);
-
 
 	return 0;
 }

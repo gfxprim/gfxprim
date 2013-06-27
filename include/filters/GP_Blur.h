@@ -33,7 +33,7 @@
 
 /*
  * Gaussian blur implemented using linear separable convolution.
- * 
+ *
  * The x_sigma defines the blur size in horizontal direction and y_sigma
  * defines blur on vertical direction.
  */

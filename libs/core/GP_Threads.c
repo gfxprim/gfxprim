@@ -58,9 +58,9 @@ unsigned int GP_NrThreads(GP_Size w, GP_Size h, GP_ProgressCallback *callback)
 		count = nr_threads;
 		GP_DEBUG(1, "Using nr_threads=%i", count);
 	}
-	
+
 	threads = GP_MIN(count, (int)(w * h / 1024) + 1);
-	
+
 	/* Call to the sysconf may return -1 if unsupported */
 	if (threads < -1)
 		threads = 1;
@@ -74,7 +74,7 @@ unsigned int GP_NrThreads(GP_Size w, GP_Size h, GP_ProgressCallback *callback)
 void GP_NrThreadsSet(unsigned int nr)
 {
 	nr_threads = nr;
-	
+
 	GP_DEBUG(1, "Setting default number of threads to %u", nr);
 }
 
@@ -82,7 +82,7 @@ int GP_ProgressCallbackMP(GP_ProgressCallback *self)
 {
 	struct GP_ProgressCallbackMPPriv *priv = self->priv;
 
-	/* 
+	/*
 	 * If any thread got non-zero return value from a callback abort all.
 	 */
 	if (priv->abort)
@@ -99,7 +99,7 @@ int GP_ProgressCallbackMP(GP_ProgressCallback *self)
 
 	/* Call the original callback */
 	int ret = priv->orig_callback->callback(priv->orig_callback);
-	
+
 	/* Turn on abort flag if callback returned nonzero */
 	if (ret)
 		priv->abort = 1;

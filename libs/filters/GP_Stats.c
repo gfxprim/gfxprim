@@ -44,7 +44,7 @@ int GP_FilterHistogram(const GP_Context *src, GP_FilterParam histogram[],
 	for (i = 0; histogram[i].channel_name[0] != '\0'; i++) {
 		unsigned int j;
 		GP_Histogram *hist = histogram[i].val.ptr;
-	
+
 		hist->max = hist->hist[0];
 		hist->min = hist->hist[0];
 
@@ -65,7 +65,7 @@ void GP_FilterHistogramAlloc(GP_PixelType type, GP_FilterParam params[])
 	uint32_t i;
 
 	GP_FilterParamSetPtrAll(params, NULL);
-	
+
 	const GP_PixelTypeChannel *channels = GP_PixelTypes[type].channels;
 
 	for (i = 0; i < GP_PixelTypes[type].numchannels; i++) {
@@ -73,12 +73,12 @@ void GP_FilterHistogramAlloc(GP_PixelType type, GP_FilterParam params[])
 
 		GP_Histogram *hist = malloc(sizeof(struct GP_Histogram) +
 		                            sizeof(uint32_t) * chan_size);
-	
+
 		if (hist == NULL) {
 			GP_FilterHistogramFree(params);
 			return;
 		}
-		
+
 		hist->len = chan_size;
 		memset(hist->hist, 0, sizeof(uint32_t) * chan_size);
 

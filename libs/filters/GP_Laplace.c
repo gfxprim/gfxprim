@@ -50,7 +50,7 @@ GP_Context *GP_FilterLaplaceAlloc(const GP_Context *src,
 
 	if (ret == NULL)
 		return NULL;
-	
+
 	if (GP_FilterLaplace(src, ret, callback)) {
 		GP_ContextFree(ret);
 		return NULL;
@@ -67,7 +67,7 @@ int GP_FilterEdgeSharpening(const GP_Context *src, GP_Context *dst,
 	float kern[9] = {0,  0,  0,
 	                 0,  1,  0,
 	                 0,  0,  0};
-	
+
 	GP_DEBUG(1, "Laplace Edge Sharpening filter %ux%u w=%f",
 	         src->w, src->h, w);
 
@@ -92,7 +92,7 @@ GP_Context *GP_FilterEdgeSharpeningAlloc(const GP_Context *src, float w,
 
 	if (ret == NULL)
 		return NULL;
-	
+
 	if (GP_FilterEdgeSharpening(src, ret, w, callback)) {
 		GP_ContextFree(ret);
 		return NULL;

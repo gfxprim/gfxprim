@@ -43,7 +43,7 @@ static inline float gaussian_kernel_init(float sigma, float *kernel)
 	float ret = 0;
 
 	double sigma2 = sigma * sigma;
-	
+
 	for (i = 0; i < N; i++) {
 		double r = center - i;
 		kernel[i] = exp(-0.5 * (r * r) / sigma2);
@@ -79,10 +79,10 @@ int GP_FilterGaussianBlur_Raw(const GP_Context *src,
 {
 	unsigned int size_x = gaussian_kernel_size(sigma_x);
 	unsigned int size_y = gaussian_kernel_size(sigma_y);
-	
+
 	GP_DEBUG(1, "Gaussian blur sigma_x=%2.3f sigma_y=%2.3f kernel %ix%i image %ux%u",
 	            sigma_x, sigma_y, size_x, size_y, w_src, h_src);
-	
+
 	GP_ProgressCallback *new_callback = NULL;
 
 	GP_ProgressCallback gaussian_callback = {
@@ -117,7 +117,7 @@ int GP_FilterGaussianBlur_Raw(const GP_Context *src,
 		if (GP_FilterHConvolutionMP_Raw(&params))
 			return 1;
 	}
-	
+
 	if (new_callback != NULL)
 		new_callback->callback = gaussian_callback_vert;
 
@@ -125,7 +125,7 @@ int GP_FilterGaussianBlur_Raw(const GP_Context *src,
 	if (sigma_y > 0) {
 		float kernel_y[size_y];
 		float sum = gaussian_kernel_init(sigma_y, kernel_y);
-		
+
 		GP_ConvolutionParams params = {
 			.src = src,
 			.x_src = x_src,
@@ -141,7 +141,7 @@ int GP_FilterGaussianBlur_Raw(const GP_Context *src,
 			.kern_div = sum,
 			.callback = new_callback,
 		};
-		
+
 		if (GP_FilterVConvolutionMP_Raw(&params))
 			return 1;
 	}
@@ -159,11 +159,11 @@ int GP_FilterGaussianBlurEx(const GP_Context *src,
                             GP_ProgressCallback *callback)
 {
 	GP_CHECK(src->pixel_type == dst->pixel_type);
-	
+
 	/* Check that destination is large enough */
 	GP_CHECK(x_dst + (GP_Coord)w_src <= (GP_Coord)dst->w);
 	GP_CHECK(y_dst + (GP_Coord)h_src <= (GP_Coord)dst->h);
-	
+
 	return GP_FilterGaussianBlur_Raw(src, x_src, y_src, w_src, h_src,
 	                                 dst, x_dst, y_dst,
 	                                 sigma_x, sigma_y, callback);

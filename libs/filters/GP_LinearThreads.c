@@ -36,14 +36,14 @@ static void *h_linear_convolution(void *arg)
 	struct GP_ConvolutionParams *params = arg;
 
 	long ret = GP_FilterHConvolution_Raw(params);
-	
+
 	return (void*)ret;
 }
 
 static void *v_linear_convolution(void *arg)
 {
 	struct GP_ConvolutionParams *params = arg;
-	
+
 	long ret = GP_FilterVConvolution_Raw(params);
 
 	return (void*)ret;
@@ -52,7 +52,7 @@ static void *v_linear_convolution(void *arg)
 static void *linear_convolution(void *arg)
 {
 	struct GP_ConvolutionParams *params = arg;
-	
+
 	long ret = GP_FilterConvolution_Raw(params);
 
 	return (void*)ret;
@@ -79,7 +79,7 @@ int GP_FilterHConvolutionMP_Raw(const GP_ConvolutionParams *params)
 		GP_Coord y_src_2 = params->y_src + i * h;
 		GP_Coord y_dst_2 = params->y_dst + i * h;
 		GP_Size  h_src_2 = h;
-		
+
 		if (i == t - 1)
 			h_src_2 = params->h_src - i * h;
 
@@ -101,7 +101,7 @@ int GP_FilterHConvolutionMP_Raw(const GP_ConvolutionParams *params)
 
 		ret |= (int)r;
 	}
-	
+
 	return ret;
 }
 
@@ -112,12 +112,12 @@ int GP_FilterVConvolutionMP_Raw(const GP_ConvolutionParams *params)
 
 	if (t == 1)
 		return GP_FilterVConvolution_Raw(params);
-	
+
 	GP_ASSERT(params->src != params->dst,
 	          "Multithreaded convolution can't work in-place");
-	
+
 	GP_PROGRESS_CALLBACK_MP(callback_mp, params->callback);
-	
+
 	/* Run t threads */
 	pthread_t threads[t];
 	struct GP_ConvolutionParams convs[t];
@@ -127,7 +127,7 @@ int GP_FilterVConvolutionMP_Raw(const GP_ConvolutionParams *params)
 		GP_Coord y_src_2 = params->y_src + i * h;
 		GP_Coord y_dst_2 = params->y_dst + i * h;
 		GP_Size  h_src_2 = h;
-		
+
 		if (i == t - 1)
 			h_src_2 = params->h_src - i * h;
 
@@ -136,7 +136,7 @@ int GP_FilterVConvolutionMP_Raw(const GP_ConvolutionParams *params)
 		convs[i].h_src = h_src_2;
 		convs[i].y_dst = y_dst_2;
 		convs[i].callback = params->callback ? &callback_mp : NULL;
-		
+
 		pthread_create(&threads[i], NULL, v_linear_convolution, &convs[i]); 
 	}
 
@@ -148,7 +148,7 @@ int GP_FilterVConvolutionMP_Raw(const GP_ConvolutionParams *params)
 
 		ret |= (int)r;
 	}
-	
+
 	return ret;
 }
 
@@ -159,12 +159,12 @@ int GP_FilterConvolutionMP_Raw(const GP_ConvolutionParams *params)
 
 	if (t == 1)
 		return GP_FilterConvolution_Raw(params);
-	
+
 	GP_ASSERT(params->src != params->dst,
 	          "Multithreaded convolution can't work in-place");
 
 	GP_PROGRESS_CALLBACK_MP(callback_mp, params->callback);
-	
+
 	/* Run t threads */
 	pthread_t threads[t];
 	struct GP_ConvolutionParams convs[t];
@@ -174,7 +174,7 @@ int GP_FilterConvolutionMP_Raw(const GP_ConvolutionParams *params)
 		GP_Coord y_src_2 = params->y_src + i * h;
 		GP_Coord y_dst_2 = params->y_dst + i * h;
 		GP_Size  h_src_2 = h;
-		
+
 		if (i == t - 1)
 			h_src_2 = params->h_src - i * h;
 
@@ -183,7 +183,7 @@ int GP_FilterConvolutionMP_Raw(const GP_ConvolutionParams *params)
 		convs[i].h_src = h_src_2;
 		convs[i].y_dst = y_dst_2;
 		convs[i].callback = params->callback ? &callback_mp : NULL;
-		
+
 		pthread_create(&threads[i], NULL, linear_convolution, &convs[i]); 
 	}
 
@@ -195,6 +195,6 @@ int GP_FilterConvolutionMP_Raw(const GP_ConvolutionParams *params)
 
 		ret |= (int)r;
 	}
-	
+
 	return ret;
 }

@@ -65,7 +65,7 @@ int GP_FilterHilbertPeano_RGB888_to_{{ pt.name }}_Raw(const GP_Context *src,
 	GP_DEBUG(1, "Hilbert Peano dithering %ux%u -> n = %u", src->w, src->h, n);
 
 	GP_HilbertCurveInit(&state, n);
-	
+
 	/* processed pixels counter */
 	unsigned int cnt = 0;
 
@@ -85,7 +85,7 @@ int GP_FilterHilbertPeano_RGB888_to_{{ pt.name }}_Raw(const GP_Context *src,
 			                     GP_Pixel_GET_B_RGB888(pix);
 %% else
 			int pix_{{ c[0] }} = GP_Pixel_GET_{{ c[0] }}_RGB888(pix);
-%% endif			
+%% endif
 
 			pix_{{ c[0] }} += err_{{ c[0] }};
 

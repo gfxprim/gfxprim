@@ -1,3 +1,25 @@
+/*****************************************************************************
+ * This file is part of gfxprim library.                                     *
+ *                                                                           *
+ * Gfxprim is free software; you can redistribute it and/or                  *
+ * modify it under the terms of the GNU Lesser General Public                *
+ * License as published by the Free Software Foundation; either              *
+ * version 2.1 of the License, or (at your option) any later version.        *
+ *                                                                           *
+ * Gfxprim is distributed in the hope that it will be useful,                *
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of            *
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU         *
+ * Lesser General Public License for more details.                           *
+ *                                                                           *
+ * You should have received a copy of the GNU Lesser General Public          *
+ * License along with gfxprim; if not, write to the Free Software            *
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
+ * Boston, MA  02110-1301  USA                                               *
+ *                                                                           *
+ * Copyright (C) 2009-2013 Cyril Hrubis <metan@ucw.cz>                       *
+ *                                                                           *
+ *****************************************************************************/
+
 %% extends "base.c.t"
 
 {% block descr %}Anti Aliased Vertical Line{% endblock %}
@@ -27,32 +49,31 @@ void GP_VLineAA_Raw(GP_Context *context, GP_Coord x, GP_Coord y0,
 
 	/* Line is shorter than two pixels */
 	if (int_y0 == int_y1) {
-		//TODO		
+		//TODO
 		return;
 	}
 
 	/* Draw the starting and ending pixel */
 	uint8_t perc;
-	
+
 	perc = FP_TO_PERC(GP_FP_MUL(GP_FP_RFRAC(x), GP_FP_RFRAC(y0)));
 	GP_MixPixel_Raw_Clipped(context, int_x, int_y0, pixel, perc);
 
 	perc = FP_TO_PERC(GP_FP_MUL(GP_FP_FRAC(x), GP_FP_RFRAC(y0)));
-	GP_MixPixel_Raw_Clipped(context, int_x+1, int_y0, pixel, perc); 
-	
-	
+	GP_MixPixel_Raw_Clipped(context, int_x+1, int_y0, pixel, perc);
+
 	perc = FP_TO_PERC(GP_FP_MUL(GP_FP_RFRAC(x), GP_FP_FRAC(y1)));
 	GP_MixPixel_Raw_Clipped(context, int_x, int_y1, pixel, perc);
 
 	perc = FP_TO_PERC(GP_FP_MUL(GP_FP_FRAC(x), GP_FP_FRAC(y1)));
-	GP_MixPixel_Raw_Clipped(context, int_x+1, int_y1, pixel, perc); 
+	GP_MixPixel_Raw_Clipped(context, int_x+1, int_y1, pixel, perc);
 
 	/* Draw the middle pixels */
 	uint8_t up = FP_TO_PERC(GP_FP_RFRAC(x));
 	uint8_t lp = FP_TO_PERC(GP_FP_FRAC(x));
 
 	GP_Coord y;
-	
+
 	for (y = int_y0 + 1; y < int_y1; y++) {
 		GP_MixPixel_Raw_Clipped(context, int_x, y, pixel, up);
 		GP_MixPixel_Raw_Clipped(context, int_x+1, y, pixel, lp);

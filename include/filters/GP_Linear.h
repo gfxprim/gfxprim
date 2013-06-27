@@ -36,7 +36,7 @@
  *
  * The kernel is array of kw * kh floats and is indexed as two directional
  * array.
- * 
+ *
  * The src coordinates and size defines rectangle in the source on which the
  * filter operates.
  *
@@ -51,7 +51,7 @@
  * };
  *
  * kw = kh = 3
- * 
+ *
  * kern_div = 9
  */
 int GP_FilterLinearConvolution_Raw(const GP_Context *src,

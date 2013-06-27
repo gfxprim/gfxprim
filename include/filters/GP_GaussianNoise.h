@@ -21,7 +21,7 @@
  *****************************************************************************/
 
  /*
-  
+
     Additive Gaussian noise filters.
 
     The sigma and mu parameters define the noise parameters. The sigma defines

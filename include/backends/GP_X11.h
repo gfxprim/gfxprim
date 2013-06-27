@@ -28,7 +28,7 @@
 enum GP_BackendX11Flags {
 	/* When set, w and h is ignored and root window is used */
 	GP_X11_USE_ROOT_WIN = 0x01,
-	
+
 	/* Create new borderless window above the root window */
 	GP_X11_CREATE_ROOT_WIN = 0x02,
 
@@ -45,9 +45,9 @@ enum GP_BackendX11Flags {
  *
  * The display may be NULL for default display ($DISPLAY shell variable will
  * be used).
- * 
+ *
  * The coordinates are position and geometry for newly created window.
- * 
+ *
  * Upon failure NULL is returned.
  */
 GP_Backend *GP_BackendX11Init(const char *display, int x, int y,
@@ -62,7 +62,7 @@ int GP_BackendIsX11(GP_Backend *self);
 
 /*
  * Changes full screen mode.
- * 
+ *
  * 0 = off
  * 1 = on
  * 2 = toggle

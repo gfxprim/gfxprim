@@ -22,14 +22,14 @@
  *****************************************************************************/
 
 /*
-   
+
    These blits automatically converts pixel types, that's good (and fast), but
    there is a catch. This works rather well when the number of colors per
    pixel/color channel is increased (the gamma correction is still on TODO).
    However when the number of colors is decreased it's generally better to use
    dithering, which will yield into far better (you can use Floyd Steinberg
    filter for that).
-   
+
    Also variants without the _Raw suffix do honor the rotation flags, that may
    get a little tricky as the flags for rotation are put together but don't
    worry althouth there is some algebra involved the result is quite intuitive.

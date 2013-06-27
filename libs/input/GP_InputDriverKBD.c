@@ -69,7 +69,7 @@ void GP_InputDriverKBDEventPut(struct GP_EventQueue *event_queue,
 
 	if (keycode > 0 && keycode <= GP_ARRAY_SIZE(keycode_table)) {
 		key = keycode_table[keycode - 1];
-		
+
 		if (key != 0) {
 			GP_EventQueuePushKey(event_queue, key, press, NULL);
 			return;

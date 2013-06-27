@@ -76,7 +76,7 @@ void GP_MetaDataClear(GP_MetaData *self)
 {
 	GP_DEBUG(1, "Clearing MetaData %p with %u records",
 	         self, self->rec_count);
-	
+
 	self->root = NULL;
 	self->last = NULL;
 	self->rec_count = 0;
@@ -124,7 +124,7 @@ static GP_MetaRecord *record_lookup(GP_MetaData *self, const char *id,
 	for (rec = self->root; rec != NULL; rec = rec->next)
 		if (rec->hash == hash && !strcmp(rec->id, id))
 			return rec;
-	
+
 	return NULL;
 }
 
@@ -138,7 +138,7 @@ static void *do_alloc(struct GP_MetaData *self, size_t size)
 	void *ret = ((char*)self) + sizeof(struct GP_MetaData) + (self->size - self->free);
 
 	self->free -= size;
-	
+
 	return ret;
 }
 
@@ -146,7 +146,7 @@ static GP_MetaRecord *record_create(GP_MetaData *self, const char *id,
                                     unsigned int hash)
 {
 	GP_MetaRecord *rec;
-	
+
 	if (strlen(id) + 1 > GP_META_RECORD_ID_MAX) {
 		GP_DEBUG(0, "Can't create id '%s' longer than %i chars",
 		         id, GP_META_RECORD_ID_MAX - 1);
@@ -154,14 +154,14 @@ static GP_MetaRecord *record_create(GP_MetaData *self, const char *id,
 	}
 
 	rec = do_alloc(self, sizeof(struct GP_MetaRecord));
-	
+
 	if (rec == NULL)
 		return NULL;
 
 	strcpy(rec->id, id);
 	rec->hash = hash;
 	rec->next = NULL;
-	
+
 	if (self->root == NULL) {
 		self->root = rec;
 		self->last = rec;
@@ -169,7 +169,7 @@ static GP_MetaRecord *record_create(GP_MetaData *self, const char *id,
 		self->last->next = rec;
 		self->last = rec;
 	}
-	
+
 	self->rec_count++;
 
 	return rec;
@@ -184,15 +184,15 @@ GP_MetaRecord *GP_MetaDataCreateRecord(GP_MetaData *self, const char *id)
 		return NULL;
 	}
 
-	return record_create(self, id, hash);	
+	return record_create(self, id, hash);
 }
 
 int GP_MetaDataGetInt(GP_MetaData *self, const char *id, int *res)
 {
 	GP_MetaRecord *rec;
-	
+
 	GP_DEBUG(2, "Looking for GP_META_INT id '%s'", id);
-	
+
 	rec = record_lookup(self, id, do_hash(id));
 
 	if (rec == NULL) {
@@ -215,9 +215,9 @@ int GP_MetaDataGetInt(GP_MetaData *self, const char *id, int *res)
 int GP_MetaDataGetDouble(GP_MetaData *self, const char *id, double *res)
 {
 	GP_MetaRecord *rec;
-	
+
 	GP_DEBUG(2, "Looking for GP_META_DOUBLE id '%s'", id);
-	
+
 	rec = record_lookup(self, id, do_hash(id));
 
 	if (rec == NULL) {
@@ -240,9 +240,9 @@ int GP_MetaDataGetDouble(GP_MetaData *self, const char *id, double *res)
 const char *GP_MetaDataGetString(GP_MetaData *self, const char *id)
 {
 	GP_MetaRecord *rec;
-	
+
 	GP_DEBUG(2, "Looking for GP_META_STRING id '%s'", id);
-	
+
 	rec = record_lookup(self, id, do_hash(id));
 
 	if (rec == NULL) {
@@ -265,12 +265,12 @@ GP_MetaRecord *GP_MetaDataCreateInt(GP_MetaData *self, const char *id, int val)
 	GP_MetaRecord *rec;
 
 	GP_DEBUG(2, "Creating GP_META_INT id '%s' = %i", id, val);
-	
+
 	rec = GP_MetaDataCreateRecord(self, id);
 
 	if (rec == NULL)
 		return NULL;
-	
+
 	rec->type = GP_META_INT;
 	rec->val.i = val;
 
@@ -283,7 +283,7 @@ GP_MetaRecord *GP_MetaDataCreateRat(GP_MetaData *self, const char *id,
 	GP_MetaRecord *rec;
 
 	GP_DEBUG(2, "Creating GP_META_RATIONAL id '%s' = %i/%i", id, num, den);
-	
+
 	if (den == 0) {
 		GP_DEBUG(1, "Would not create '%s' with denominator == 0", id);
 		return NULL;
@@ -293,7 +293,7 @@ GP_MetaRecord *GP_MetaDataCreateRat(GP_MetaData *self, const char *id,
 
 	if (rec == NULL)
 		return NULL;
-	
+
 	rec->type = GP_META_RATIONAL;
 	rec->val.r.num = num;
 	rec->val.r.den = den;
@@ -307,12 +307,12 @@ GP_MetaRecord *GP_MetaDataCreateDouble(GP_MetaData *self, const char *id,
 	GP_MetaRecord *rec;
 
 	GP_DEBUG(2, "Creating GP_META_DOUBLE id '%s' = %lf", id, val);
-	
+
 	rec = GP_MetaDataCreateRecord(self, id);
 
 	if (rec == NULL)
 		return NULL;
-	
+
 	rec->type = GP_META_DOUBLE;
 	rec->val.d = val;
 
@@ -334,10 +334,10 @@ GP_MetaRecord *GP_MetaDataCreateString(GP_MetaData *self, const char *id,
 	if (dup) {
 		size_t size;
 		char *s;
-		
+
 		if (len == 0)
 			len = strlen(str);
-		
+
 		size = len + 1;
 
 		/* Play safe with aligment */

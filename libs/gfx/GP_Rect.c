@@ -43,7 +43,7 @@ void GP_RectXYWH_Raw(GP_Context *context, GP_Coord x, GP_Coord y,
 {
 	if (w == 0 || h == 0)
 		return;
-	
+
 	GP_RectXYXY_Raw(context, x, y, x + w - 1, y + h - 1, pixel);
 }
 
@@ -51,7 +51,7 @@ void GP_RectXYXY(GP_Context *context, GP_Coord x0, GP_Coord y0,
                  GP_Coord x1, GP_Coord y1, GP_Pixel pixel)
 {
 	GP_CHECK_CONTEXT(context);
-	
+
 	GP_TRANSFORM_POINT(context, x0, y0);
 	GP_TRANSFORM_POINT(context, x1, y1);
 
@@ -63,7 +63,7 @@ void GP_RectXYWH(GP_Context *context, GP_Coord x, GP_Coord y,
 {
 	if (w == 0 || h == 0)
 		return;
-	
+
 	GP_RectXYXY(context, x, y, x + w - 1, y + h - 1, pixel);
 }
 
@@ -93,7 +93,7 @@ void GP_FillRectXYXY(GP_Context *context, GP_Coord x0, GP_Coord y0,
                      GP_Coord x1, GP_Coord y1, GP_Pixel pixel)
 {
 	GP_CHECK_CONTEXT(context);
-	
+
 	GP_TRANSFORM_POINT(context, x0, y0);
 	GP_TRANSFORM_POINT(context, x1, y1);
 

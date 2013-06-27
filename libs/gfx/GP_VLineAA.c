@@ -40,7 +40,7 @@ void GP_VLineAA(GP_Context *context, GP_Coord x, GP_Coord y0,
                 GP_Coord y1, GP_Pixel pixel)
 {
 	GP_CHECK_CONTEXT(context);
-	
+
 	if (context->axes_swap) {
 		GP_TRANSFORM_Y_FP(context, x);
 		GP_TRANSFORM_X_FP(context, y0);

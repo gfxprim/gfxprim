@@ -56,7 +56,7 @@ void GP_Line_Raw_{{ ps.suffix }}(GP_Context *context, int x0, int y0,
 	GP_ASSERT(x1 >= 0 && x1 <= (int) context->w-1);
 	GP_ASSERT(y0 >= 0 && y0 <= (int) context->h-1);
 	GP_ASSERT(y1 >= 0 && y1 <= (int) context->h-1);
-	
+
 	/* special cases: vertical line, horizontal line, single point */
 	if (x0 == x1) {
 		if (y0 == y1) {

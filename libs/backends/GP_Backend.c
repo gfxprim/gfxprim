@@ -58,7 +58,7 @@ void GP_BackendUpdateRectXYXY(GP_Backend *backend,
 		GP_WARN("Negative x coordinate %i, clipping to 0", x0);
 		x0 = 0;
 	}
-	
+
 	if (y0 < 0) {
 		GP_WARN("Negative y coordinate %i, clipping to 0", y0);
 		y0 = 0;
@@ -70,14 +70,14 @@ void GP_BackendUpdateRectXYXY(GP_Backend *backend,
 		GP_WARN("Too large x coordinate %i, clipping to %u", x1, w - 1);
 		x1 = w - 1;
 	}
-	
+
 	GP_Coord h = backend->context->h;
 
 	if (y1 >= h) {
 		GP_WARN("Too large y coordinate %i, clipping to %u", y1, h - 1);
 		y1 = h - 1;
 	}
-	
+
 	backend->UpdateRect(backend, x0, y0, x1, y1);
 }
 
@@ -86,7 +86,7 @@ int GP_BackendResize(GP_Backend *backend, uint32_t w, uint32_t h)
 {
 	if (backend->SetAttributes == NULL)
 		return 1;
-	
+
 	if (w == 0)
 		w = backend->context->w;
 
@@ -102,7 +102,7 @@ int GP_BackendResize(GP_Backend *backend, uint32_t w, uint32_t h)
 int GP_BackendResizeAck(GP_Backend *self)
 {
 	GP_DEBUG(2, "Calling backend %s ResizeAck()", self->name);
-	
+
 	if (self->ResizeAck)
 		return self->ResizeAck(self);
 
@@ -144,7 +144,7 @@ static void wait_timers_fd(GP_Backend *self, uint64_t now)
 	int timeout;
 
 	timeout = self->timers->expires - now;
-	
+
 	struct pollfd fd = {.fd = self->fd, .events = POLLIN, fd.revents = 0};
 
 	if (poll(&fd, 1, timeout))
@@ -203,7 +203,7 @@ int GP_BackendWaitEvent(GP_Backend *self, GP_Event *ev)
 	for (;;) {
 		if ((ret = GP_BackendGetEvent(self, ev)))
 			return ret;
-		
+
 		GP_BackendWait(self);
 	}
 }
@@ -211,12 +211,12 @@ int GP_BackendWaitEvent(GP_Backend *self, GP_Event *ev)
 int GP_BackendPollEvent(GP_Backend *self, GP_Event *ev)
 {
 	int ret;
-		
+
 	if ((ret = GP_BackendGetEvent(self, ev)))
 		return ret;
 
 	GP_BackendPoll(self);
-	
+
 	if ((ret = GP_BackendGetEvent(self, ev)))
 		return ret;
 

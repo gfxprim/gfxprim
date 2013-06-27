@@ -50,13 +50,13 @@ GP_Size GP_TextMaxStrWidth(const GP_TextStyle *style, const char *str,
  */
 GP_Size GP_TextHeight(const GP_TextStyle *style);
 
-/* 
+/*
  * Returns the ascent (height from the baseline to the top of characters),
  * for the given text style. (Result is in pixels.)
  */
 GP_Size GP_TextAscent(const GP_TextStyle *style);
 
-/* 
+/*
  * Returns the descent (height from the baseline to the bottom of characters),
  * for the given text style. (Result is in pixels.)
  */

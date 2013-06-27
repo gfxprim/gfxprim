@@ -43,7 +43,7 @@ static int GP_FilterResizeNN_{{ pt.name }}_Raw(const GP_Context *src,
 	uint32_t ymap[dst->h];
 	uint32_t i;
 	GP_Coord x, y;
-	
+
 	GP_DEBUG(1, "Scaling image %ux%u -> %ux%u %2.2f %2.2f",
 	            src->w, src->h, dst->w, dst->h,
 		    1.00 * dst->w / src->w, 1.00 * dst->h / src->h);
@@ -62,7 +62,7 @@ static int GP_FilterResizeNN_{{ pt.name }}_Raw(const GP_Context *src,
 
 			GP_PutPixel_Raw_{{ pt.pixelsize.suffix }}(dst, x, y, pix);
 		}
-	
+
 		if (GP_ProgressCallbackReport(callback, y, dst->h, dst->w))
 			return 1;
 	}

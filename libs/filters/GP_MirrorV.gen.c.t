@@ -39,7 +39,7 @@ static int GP_MirrorV_Raw_{{ ps.suffix }}(const GP_Context *src,
 	GP_Pixel tmp;
 
 	GP_DEBUG(1, "Mirroring image vertically %ux%u", src->w, src->h);
-	
+
 	for (x = 0; x < src->w/2; x++) {
 		uint32_t xm = src->w - x - 1;
 		for (y = 0; y < src->h; y++) {

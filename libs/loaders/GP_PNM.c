@@ -24,9 +24,9 @@
 
   PNM portable bitmap header
   --------------------------
-  
+
   Format:
-  
+
   a magic number value of 'P' and one of
    '1' - PBM Bitmap ASCII
    '2' - PGM Gray   ASCII
@@ -40,10 +40,10 @@
   ascii height
   whitespace
   maximal value (interval is 0 ... max) (not applicable for PBM)
-  width * height ascii or binary values 
-  
+  width * height ascii or binary values
+
   lines starting with '#' are comments to the end of line
-  
+
  */
 
 #include <stdio.h>
@@ -648,9 +648,9 @@ int GP_SavePBM(const GP_Context *src, const char *dst_path,
 		GP_DEBUG(1, "Invalid pixel type '%s'",
 		         GP_PixelTypeName(src->pixel_type));
 		errno = EINVAL;
-		return 1; 
+		return 1;
 	}
-	
+
 	f = fopen(dst_path, "w");
 
 	if (f == NULL)
@@ -695,7 +695,7 @@ static GP_Context *read_graymap(FILE *f, struct pnm_header *header, int flag,
 	GP_Context *ret;
 	GP_PixelType pixel_type;
 	int err;
-	
+
 	if (!is_graymap(header->magic)) {
 		GP_DEBUG(1, "Invalid graymap magic P%c", header->magic);
 		err = EINVAL;
@@ -791,9 +791,9 @@ int GP_SavePGM(const GP_Context *src, const char *dst_path,
 		GP_DEBUG(1, "Invalid pixel type '%s'",
 		         GP_PixelTypeName(src->pixel_type));
 		errno = EINVAL;
-		return 1; 
+		return 1;
 	}
-	
+
 	f = fopen(dst_path, "w");
 
 	if (f == NULL) {
@@ -830,7 +830,7 @@ static GP_Context *read_pixmap(FILE *f, struct pnm_header *header, int flag,
 {
 	GP_Context *ret;
 	int err;
-	
+
 	if (!is_pixmap(header->magic)) {
 		GP_DEBUG(1, "Invalid Pixmap magic P%c", header->magic);
 		err = EINVAL;
@@ -872,7 +872,7 @@ err1:
 		fclose(f);
 err0:
 	errno = err;
-	return NULL; 
+	return NULL;
 }
 
 GP_Context *GP_LoadPPM(const char *src_path, GP_ProgressCallback *callback)
@@ -895,8 +895,8 @@ static int write_binary_ppm(FILE *f, GP_Context *src)
 	for (y = 0; y < src->h; y++)
 		for (x = 0; x < src->w; x++) {
 			GP_Pixel pix = GP_GetPixel_Raw_24BPP(src, x, y);
-			
-			uint8_t buf[3] = {GP_Pixel_GET_R_RGB888(pix), 
+
+			uint8_t buf[3] = {GP_Pixel_GET_R_RGB888(pix),
 			                  GP_Pixel_GET_G_RGB888(pix),
 			                  GP_Pixel_GET_B_RGB888(pix)};
 
@@ -916,9 +916,9 @@ static int save_ascii_rgb888(FILE *f, const GP_Context *ctx,
 	for (y = 0; y < ctx->h; y++) {
 		for (x = 0; x < ctx->w; x++) {
 			GP_Pixel pix = GP_GetPixel_Raw_24BPP(ctx, x, y);
-			
+
 			ret = fprintf(f, "%u %u %u ",
-			              GP_Pixel_GET_R_RGB888(pix), 
+			              GP_Pixel_GET_R_RGB888(pix),
 			              GP_Pixel_GET_G_RGB888(pix),
 			              GP_Pixel_GET_B_RGB888(pix));
 
@@ -952,9 +952,9 @@ int GP_SavePPM(const GP_Context *src, const char *dst_path,
 		GP_DEBUG(1, "Invalid pixel type '%s'",
 		         GP_PixelTypeName(src->pixel_type));
 		errno = EINVAL;
-		return 1; 
+		return 1;
 	}
-	
+
 	f = fopen(dst_path, "w");
 
 	if (f == NULL) {
@@ -990,7 +990,6 @@ err0:
 
 GP_Context *GP_LoadPNM(const char *src_path, GP_ProgressCallback *callback)
 {
-	
 	FILE *f;
 	GP_Context *ret = NULL;
 	struct pnm_header header;
@@ -1022,7 +1021,7 @@ err1:
 	fclose(f);
 err0:
 	errno = err;
-	return NULL; 
+	return NULL;
 }
 
 int GP_SavePNM(const GP_Context *src, const char *dst_path,

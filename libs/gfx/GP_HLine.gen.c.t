@@ -58,7 +58,7 @@ void GP_HLine_Raw_{{ ps.suffix }}(GP_Context *context, int x0, int x1, int y,
 	x0 = GP_MAX(x0, 0);
 	x1 = GP_MIN(x1, (int) context->w - 1);
 
-%%  if ps.suffix in have_writepixels 
+%%  if ps.suffix in have_writepixels
 	size_t length = 1 + x1 - x0;
 	void *start = GP_PIXEL_ADDR(context, x0, y);
 

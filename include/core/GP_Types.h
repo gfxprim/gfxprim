@@ -25,8 +25,8 @@
 
 #include <stdint.h>
 
-/* 
- * Integer type for coordinates: x, y, width, height, ... 
+/*
+ * Integer type for coordinates: x, y, width, height, ...
  * Should be signed to hold negative values as well.
  */
 typedef int GP_Coord;

@@ -88,7 +88,7 @@ class PixelType(object):
 
   def is_gray(self):
     return ('V' in self.chans)
- 
+
   def is_cmyk(self):
     for i in 'CMYK':
       if i not in self.chans: return False

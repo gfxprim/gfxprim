@@ -70,14 +70,14 @@ GP_FontFace *GP_FontFaceLoad(const char *path, uint32_t width, uint32_t height)
 
 	font_face_size = sizeof(GP_FontFace) +
 	                 sizeof(uint32_t) * GP_GetGlyphCount(GP_CHARSET_7BIT);
-	
+
 	GP_FontFace *font = malloc(font_face_size);
-	
+
 	if (font == NULL) {
 		GP_DEBUG(1, "Malloc failed :(");
 		goto err1;
 	}
-	
+
 	/* Copy font metadata */
 	strncpy(font->family_name, face->family_name,
 	        sizeof(font->family_name));
@@ -95,14 +95,14 @@ GP_FontFace *GP_FontFaceLoad(const char *path, uint32_t width, uint32_t height)
 
 	for (i = 0x20; i < 0x7f; i++) {
 		FT_UInt glyph_idx = FT_Get_Char_Index(face, i);
-	
+
 		err = FT_Load_Glyph(face, glyph_idx, FT_LOAD_DEFAULT);
 
 		if (err) {
 			GP_DEBUG(1, "Failed to load glyph '%c'", i);
 			goto err2;
 		}
-		
+
 		err = FT_Render_Glyph(face->glyph, FT_RENDER_MODE_NORMAL);
 
 		if (err) {
@@ -132,7 +132,7 @@ GP_FontFace *GP_FontFaceLoad(const char *path, uint32_t width, uint32_t height)
 		GP_DEBUG(1, "Malloc failed :(");
 		goto err2;
 	}
-	
+
 	font->max_glyph_width = 0;
 	font->max_glyph_advance = 0;
 	font->ascend  = 0;
@@ -140,16 +140,16 @@ GP_FontFace *GP_FontFaceLoad(const char *path, uint32_t width, uint32_t height)
 
 	for (i = 0x20; i < 0x7f; i++) {
 		FT_UInt glyph_idx = FT_Get_Char_Index(face, i);
-	
+
 		err = FT_Load_Glyph(face, glyph_idx, FT_LOAD_DEFAULT);
-		
+
 		GP_DEBUG(2, "Loading and rendering glyph '%c'", i);
 
 		if (err) {
 			GP_DEBUG(1, "Failed to load glyph '%c'", i);
 			goto err3;
 		}
-		
+
 		err = FT_Render_Glyph(face->glyph, FT_RENDER_MODE_NORMAL);
 
 		if (err) {
@@ -172,7 +172,7 @@ GP_FontFace *GP_FontFaceLoad(const char *path, uint32_t width, uint32_t height)
 
 		if (font->ascend < ascend)
 			font->ascend = ascend;
-		
+
 		if (font->descend < descend)
 			font->descend = descend;
 
@@ -183,7 +183,7 @@ GP_FontFace *GP_FontFaceLoad(const char *path, uint32_t width, uint32_t height)
 			font->max_glyph_width = width;
 
 		int x, y;
-	
+
 		for (y = 0; y < glyph_bitmap->height; y++) {
 			for (x = 0; x < glyph_bitmap->width; x++) {
 				unsigned int addr = glyph_bitmap->width * y + x;

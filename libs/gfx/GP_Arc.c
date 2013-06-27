@@ -51,11 +51,11 @@ void GP_ArcSegment(GP_Context *context, GP_Coord xcenter, GP_Coord ycenter,
 		GP_Pixel pixel)
 {
 	GP_CHECK_CONTEXT(context);
-	
+
 	/* recalculate center point and swap a and b when axes are swapped */
 	GP_TRANSFORM_POINT(context, xcenter, ycenter);
 	GP_TRANSFORM_SWAP(context, a, b);
-	
+
 	GP_ArcSegment_Raw(context, xcenter, ycenter, a, b, direction,
 			start, end, pixel);
 }

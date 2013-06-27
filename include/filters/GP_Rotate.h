@@ -34,7 +34,7 @@
 
 /*
  * Mirror horizontally.
- * 
+ *
  * Works 'in place'. The contexts must have equal pixel_type and size.
  *
  * This is semi-internal function without any assertions on destination.
@@ -101,7 +101,7 @@ GP_Context *GP_FilterMirrorVAlloc(const GP_Context *src,
 /*
  * Rotate context by 90, 180 and 270.
  *
- * Doesn't work 'in place'. The contexts must have equal pixel_type size must 
+ * Doesn't work 'in place'. The contexts must have equal pixel_type size must
  * match the rotated size (is equal for 180 and swapped for 90 and 270).
  *
  * These are semi-internal functions without any assertions on destination.
@@ -139,7 +139,7 @@ GP_Context *GP_FilterRotate270Alloc(const GP_Context *src,
                                     GP_ProgressCallback *callback);
 
 /*
- * Calls a symmetry filter on bitmap. 
+ * Calls a symmetry filter on bitmap.
  *
  * If dst is NULL, new bitmap is allocated.
  *
@@ -162,7 +162,7 @@ extern const char **GP_FilterSymmetryNames;
 
 /*
  * Symmetry by name (as defined in GP_FilerSymmetryNames).
- * 
+ *
  * Returns either one of the GP_FilterSymmetries enums or -1 in case of
  * failure.
  */

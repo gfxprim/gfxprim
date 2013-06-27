@@ -34,7 +34,7 @@
 static char *key_names[] = {
  "Reserved",    "Escape",    "1",          "2",            "3",
  "4",           "5",         "6",          "7",            "8",
- "9",           "0",         "Minus",      "Equal",        "BackSpace", 
+ "9",           "0",         "Minus",      "Equal",        "BackSpace",
  "Tab",         "Q",         "W",          "E",            "R",
  "T",           "Y",         "U",          "I",            "O",
  "P",           "LeftBrace", "RightBrace", "Enter",        "LeftCtrl",

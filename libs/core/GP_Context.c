@@ -129,7 +129,7 @@ GP_Context *GP_ContextInit(GP_Context *context, GP_Size w, GP_Size h,
 
 	context->pixel_type = type;
 	context->bit_endian = 0;
-	
+
 	context->gamma = NULL;
 
 	/* rotation and mirroring */
@@ -196,10 +196,10 @@ GP_Context *GP_ContextCopy(const GP_Context *src, int flags)
 		GP_ContextCopyRotation(src, new);
 	else
 		GP_ContextSetRotation(new, 0, 0, 0);
-	
+
 	//TODO: Copy the gamma too
 	new->gamma = NULL;
-	
+
 	new->free_pixels = 1;
 
 	return new;
@@ -216,8 +216,8 @@ GP_Context *GP_ContextConvertAlloc(const GP_Context *src,
 
 	if (ret == NULL)
 		return NULL;
-	
-	/* 
+
+	/*
 	 * Fill the buffer with zeroes, otherwise it will
 	 * contain random data which will generate mess
 	 * when converting image with alpha channel.
@@ -225,7 +225,7 @@ GP_Context *GP_ContextConvertAlloc(const GP_Context *src,
 	memset(ret->pixels, 0, ret->bytes_per_row * ret->h);
 
 	GP_Blit(src, 0, 0, w, h, ret, 0, 0);
-	
+
 	return ret;
 }
 
@@ -234,14 +234,14 @@ GP_Context *GP_ContextConvert(const GP_Context *src, GP_Context *dst)
 	//TODO: Asserts
 	int w = GP_ContextW(src);
 	int h = GP_ContextH(src);
-	
-	/* 
+
+	/*
 	 * Fill the buffer with zeroes, otherwise it will
 	 * contain random data which will generate mess
 	 * when converting image with alpha channel.
 	 */
 	memset(dst->pixels, 0, dst->bytes_per_row * dst->h);
-	
+
 	GP_Blit(src, 0, 0, w, h, dst, 0, 0);
 
 	return dst;
@@ -270,7 +270,7 @@ GP_Context *GP_SubContext(const GP_Context *context, GP_Context *subcontext,
 
 	GP_CHECK(context->w >= x + w, "Subcontext w out of original context.");
 	GP_CHECK(context->h >= y + h, "Subcontext h out of original context.");
-	
+
 	subcontext->bpp           = context->bpp;
 	subcontext->bytes_per_row = context->bytes_per_row;
 	subcontext->offset        = (context->offset +
@@ -281,7 +281,7 @@ GP_Context *GP_SubContext(const GP_Context *context, GP_Context *subcontext,
 
 	subcontext->pixel_type = context->pixel_type;
 	subcontext->bit_endian = context->bit_endian;
-	
+
 	/* gamma */
 	subcontext->gamma = context->gamma;
 
@@ -307,7 +307,7 @@ void GP_ContextPrintInfo(const GP_Context *self)
 	printf("Offset\t%u (only unaligned pixel types)\n", self->offset);
 	printf("Flags\taxes_swap=%u x_swap=%u y_swap=%u free_pixels=%u\n",
 	       self->axes_swap, self->x_swap, self->y_swap, self->free_pixels);
-	
+
 	if (self->gamma)
 		GP_GammaPrint(self->gamma);
 }
@@ -343,12 +343,12 @@ void GP_ContextRotateCW(GP_Context *context)
 		context->x_swap = 1;
 		return;
 	}
-	
+
 	if (context->x_swap && !context->y_swap) {
 		context->y_swap = 1;
 		return;
 	}
-	
+
 	if (context->x_swap && context->y_swap) {
 		context->x_swap = 0;
 		return;
@@ -365,12 +365,12 @@ void GP_ContextRotateCCW(GP_Context *context)
 		context->y_swap = 1;
 		return;
 	}
-	
+
 	if (context->x_swap && !context->y_swap) {
 		context->x_swap = 0;
 		return;
 	}
-	
+
 	if (context->x_swap && context->y_swap) {
 		context->y_swap = 0;
 		return;
@@ -389,7 +389,7 @@ int GP_ContextEqual(const GP_Context *ctx1, const GP_Context *ctx2)
 
 	if (GP_ContextH(ctx1) != GP_ContextH(ctx2))
 		return 0;
-	
+
 	GP_Coord x, y, w = GP_ContextW(ctx1), h = GP_ContextH(ctx1);
 
 	for (x = 0; x < w; x++)

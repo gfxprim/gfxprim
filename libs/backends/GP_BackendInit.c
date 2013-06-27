@@ -50,7 +50,7 @@ static int sdl_params_to_flags(const char *param, GP_Size *w, GP_Size *h,
 		*flags |= GP_SDL_FULLSCREEN;
 		return 0;
 	}
-	
+
 	/*
 	 * Accepts only string with format "intxint" or "intXint"
 	 */
@@ -73,10 +73,10 @@ static GP_Backend *backend_sdl_init(char *params, const char *caption,
 {
 	if (params == NULL)
 		return GP_BackendSDLInit(0, 0, 0, 0, caption);
-	
+
 	GP_Size w = 0, h = 0;
 	uint8_t flags = GP_SDL_RESIZABLE;
-	
+
 	char *s = params;
 
 	for (;;) {
@@ -91,7 +91,7 @@ static GP_Backend *backend_sdl_init(char *params, const char *caption,
 		case '\0':
 			if (sdl_params_to_flags(params, &w, &h, &flags, help))
 				return NULL;
-			
+
 			return GP_BackendSDLInit(w, h, 0, flags, caption);
 		break;
 		}
@@ -116,7 +116,7 @@ static GP_Backend *backend_fb_init(char *params, const char *caption,
                                    FILE *help)
 {
 	const char *fb = "/dev/fb0";
-	
+
 	(void) help;
 	(void) caption;
 
@@ -153,7 +153,7 @@ static int x11_params_to_flags(const char *param, GP_Size *w, GP_Size *h,
 		*flags |= GP_X11_USE_ROOT_WIN;
 		return 0;
 	}
-	
+
 	if (!strcasecmp(param, "CREATE_ROOT")) {
 		*flags |= GP_X11_CREATE_ROOT_WIN;
 		return 0;
@@ -163,7 +163,7 @@ static int x11_params_to_flags(const char *param, GP_Size *w, GP_Size *h,
 		*flags |= GP_X11_DISABLE_SHM;
 		return 0;
 	}
-	
+
 	if (!strcasecmp(param, "FS")) {
 		*flags |= GP_X11_FULLSCREEN;
 		return 0;
@@ -192,7 +192,7 @@ static GP_Backend *backend_x11_init(char *params, const char *caption,
 {
 	GP_Size w = 640, h = 480;
 	enum GP_BackendX11Flags flags = 0;
-	
+
 	if (params == NULL)
 		return GP_BackendX11Init(NULL, 0, 0, w, h, caption, 0);
 
@@ -210,7 +210,7 @@ static GP_Backend *backend_x11_init(char *params, const char *caption,
 		case '\0':
 			if (x11_params_to_flags(params, &w, &h, &flags, help))
 				return NULL;
-			
+
 			return GP_BackendX11Init(NULL, 0, 0, w, h, caption, flags);
 		break;
 		}
@@ -267,7 +267,7 @@ static int get_backend(const char *name)
 	for (i = 0; backend_names[i] != 0; i++)
 		if (!strcasecmp(name, backend_names[i]))
 			return i;
-	
+
 	return -1;
 }
 
@@ -295,11 +295,11 @@ GP_Backend *GP_BackendInit(const char *params, const char *caption, FILE *help)
 		print_help(help, NULL);
 		return NULL;
 	}
-	
+
 	/* parse backend name */
 	int i, len = strlen(params);
 	char buf[len+1], *backend_params = NULL;
-	
+
 	strcpy(buf, params);
 
 	for (i = 0; i < len; i++) {

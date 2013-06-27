@@ -34,10 +34,10 @@
  * First segment is where both x and y are possitive, second is where only y is
  * possitive, third is for both x and y negative and the last one for only y
  * negative.
- * 
+ *
  * Note that on computer screen (and in in-memory bitmaps) cordinates for y
  * grows in the opposite direction to the standard cartesian plane.
- * 
+ *
  * So first segment is actually down right, second is down left, third is up
  * left, and fourth is up right.
  */

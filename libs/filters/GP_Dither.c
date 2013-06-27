@@ -39,9 +39,9 @@ GP_Context *GP_FilterFloydSteinberg_RGB888_Alloc(const GP_Context *src,
                                                  GP_ProgressCallback *callback)
 {
 	GP_Context *ret;
-	
+
 	ret = GP_ContextAlloc(src->w, src->h, pixel_type);
-	
+
 	if (ret == NULL)
 		return NULL;
 

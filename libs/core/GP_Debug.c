@@ -50,15 +50,15 @@ void GP_DebugPrint(int level, const char *file, const char *function, int line,
                    const char *fmt, ...)
 {
 	int i;
-	
+
 	if (!env_used) {
 		char *level = getenv("GP_DEBUG");
-		
+
 		env_used = 1;
-		
+
 		if (level != NULL) {
 			int new_level = atoi(level);
-			
+
 			if (new_level >= 0) {
 				debug_level = new_level;
 
@@ -67,10 +67,10 @@ void GP_DebugPrint(int level, const char *file, const char *function, int line,
 					     debug_level);
 			}
 		}
-	
+
 		GP_DEBUG(1, "GFXprim library version " GP_VER_STR);
 	}
-	
+
 	if (level > (int)debug_level)
 		return;
 
@@ -78,7 +78,7 @@ void GP_DebugPrint(int level, const char *file, const char *function, int line,
 	if (debug_handler) {
 		char buf[256];
 
-        	va_list va;
+		va_list va;
 		va_start(va, fmt);
 		vsnprintf(buf, sizeof(buf), fmt, va);
 		va_end(va);
@@ -92,7 +92,7 @@ void GP_DebugPrint(int level, const char *file, const char *function, int line,
 		};
 
 		debug_handler(&msg);
-		
+
 		return;
 	}
 
@@ -122,6 +122,6 @@ void GP_DebugPrint(int level, const char *file, const char *function, int line,
 	va_start(va, fmt);
 	vfprintf(stderr, fmt, va);
 	va_end(va);
-        
+
 	fputc('\n', stderr);
 }

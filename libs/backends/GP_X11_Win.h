@@ -109,7 +109,7 @@ static void x11_win_fullscreen(struct x11_win *win, int mode)
 	GP_DEBUG(2, "Requesting fullscreen mode = %u", mode);
 
 	Atom wm_state, fullscreen;
-	
+
 	wm_state = XInternAtom(win->dpy, "_NET_WM_STATE", True);
 	fullscreen = XInternAtom(win->dpy, "_NET_WM_STATE_FULLSCREEN", True);
 
@@ -193,7 +193,7 @@ static int x11_win_open(struct x11_wreq *wreq)
 	                   KeyReleaseMask | PointerMotionMask;
 	attr_mask |= CWEventMask;
 
-	/* 
+	/*
 	 * If root window was selected, resize w and h and set win->win to root
 	 * window.
 	 */
@@ -202,66 +202,66 @@ static int x11_win_open(struct x11_wreq *wreq)
 		win->win = DefaultRootWindow(win->dpy);
 
 		x11_get_screen_size(wreq);
-	
+
 		GP_DEBUG(2, "Using root window, owerriding size to %ux%u",
-	        	 wreq->w, wreq->h);
+		         wreq->w, wreq->h);
 
 		win_list_add(win);
-		
+
 		XChangeWindowAttributes(win->dpy, win->win, attr_mask, &attrs);
-		
+
 		return 0;
 	}
 
-	/* 
+	/*
 	 * For some reason reading mouse button clicks on root win are not
 	 * allowed...
 	 */
 	attrs.event_mask |= ButtonPressMask | ButtonReleaseMask;
-	
+
 	/*
 	 * Create undecoreated root window on background
 	 */
 	if (wreq->flags & GP_X11_CREATE_ROOT_WIN) {
 		Atom xa;
-		
+
 		x11_get_screen_size(wreq);
-		
+
 		GP_DEBUG(2, "Creating a window above root, owerriding size to %ux%u",
 		         wreq->w, wreq->h);
 
 		win->win = XCreateWindow(win->dpy, DefaultRootWindow(win->dpy),
 		                         0, 0, wreq->w, wreq->h, 0, CopyFromParent,
 					 InputOutput, CopyFromParent, attr_mask, &attrs);
-		
+
 		/* Set empty WM_PROTOCOLS */
 		GP_DEBUG(2, "Setting empty MW_PROTOCOLS");
 		XSetWMProtocols(win->dpy, win->win, NULL, 0);
 
 		/* Set window type to desktop */
 		xa = XInternAtom(win->dpy, "_NET_WM_WINDOW_TYPE", False);
-		
+
 		if (xa != None) {
 			GP_DEBUG(2, "Setting Atom _NET_WM_WINDOW_TYPE to _NET_WM_WINDOW_TYPE_DESKTOP");
-		
+
 			Atom xa_prop = XInternAtom(win->dpy, "_NET_WM_WINDOW_TYPE_DESKTOP", False);
-		
+
 			XChangeProperty(win->dpy, win->win, xa, XA_ATOM, 32,
 			                PropModeReplace, (unsigned char *) &xa_prop, 1);
 		}
-		
+
 		/* Turn off window decoration */
 		xa = XInternAtom(win->dpy, "_MOTIF_WM_HINTS", False);
-		
+
 		if (xa != None) {
 			GP_DEBUG(2, "Setting Atom _MOTIF_WM_HINTS to 2, 0, 0, 0, 0");
-			
+
 			long prop[5] = {2, 0, 0, 0, 0};
 
 			XChangeProperty(win->dpy, win->win, xa, xa, 32,
                                         PropModeReplace, (unsigned char *) prop, 5);
 		}
-		
+
 		/* Set below other windows */
 		xa = XInternAtom(win->dpy, "_WIN_LAYER", False);
 
@@ -273,26 +273,26 @@ static int x11_win_open(struct x11_wreq *wreq)
 			XChangeProperty(win->dpy, win->win, xa, XA_CARDINAL, 32,
 			                PropModeAppend, (unsigned char *) &prop, 1);
 		}
-		
+
 		xa = XInternAtom(win->dpy, "_NET_WM_STATE", False);
 
 		if (xa != None) {
 			GP_DEBUG(2, "Setting Atom _NET_WM_STATE to _NET_WM_STATE_BELOW");
-			
+
 			Atom xa_prop = XInternAtom(win->dpy, "_NET_WM_STATE_BELOW", False);
 
 			XChangeProperty(win->dpy, win->win, xa, XA_ATOM, 32,
 			                PropModeAppend, (unsigned char *) &xa_prop, 1);
 		}
-		
+
 		/* Set sticky */
 		xa = XInternAtom(win->dpy, "_NET_WM_DESKTOP", False);
-		
+
 		if (xa != None) {
 			GP_DEBUG(2, "Setting Atom _NET_WM_DESKTOP to 0xffffffff");
 
 			CARD32 xa_prop = 0xffffffff;
-			
+
 			XChangeProperty(win->dpy, win->win, xa, XA_CARDINAL, 32,
 			                PropModeAppend, (unsigned char *) &xa_prop, 1);
 		}
@@ -307,10 +307,10 @@ static int x11_win_open(struct x11_wreq *wreq)
 			XChangeProperty(win->dpy, win->win, xa, XA_ATOM, 32,
 			                 PropModeAppend, (unsigned char *) &xa_prop, 1);
 		}
-		
+
 		/* Skip taskbar */
 		xa = XInternAtom(win->dpy, "_NET_WM_STATE", False);
-		
+
 		if (xa != None) {
 			GP_DEBUG(2, "Appending to Atom _NET_WM_STATE atom _NET_STATE_SKIP_TASKBAR");
 
@@ -319,10 +319,10 @@ static int x11_win_open(struct x11_wreq *wreq)
 			XChangeProperty(win->dpy, win->win, xa, XA_ATOM, 32,
 			                 PropModeAppend, (unsigned char *) &xa_prop, 1);
 		}
-		
+
 		/* Skip pager */
 		xa = XInternAtom(win->dpy, "_NET_WM_STATE", False);
-		
+
 		if (xa != None) {
 			GP_DEBUG(2, "Appending to Atom _NET_WM_STATE atom _NET_STATE_SKIP_PAGER");
 
@@ -331,7 +331,7 @@ static int x11_win_open(struct x11_wreq *wreq)
 			 XChangeProperty(win->dpy, win->win, xa, XA_ATOM, 32,
 			                 PropModeAppend, (unsigned char *) &xa_prop, 1);
 		}
-	
+
 		/* Set 100% opacity */
 		xa = XInternAtom(win->dpy, "_NET_WM_WINDOW_OPACITY", False);
 
@@ -343,7 +343,7 @@ static int x11_win_open(struct x11_wreq *wreq)
 			XChangeProperty(win->dpy, win->win, xa, XA_CARDINAL, 32,
 			                PropModeAppend, (unsigned char *) &prop, 1);
 		}
-	
+
 		win_list_add(win);
 
 		/* Show window */
@@ -358,7 +358,7 @@ static int x11_win_open(struct x11_wreq *wreq)
 	                         wreq->x, wreq->y, wreq->w, wreq->h, 0,
 	                         CopyFromParent, InputOutput, CopyFromParent,
 	                         attr_mask, &attrs);
-	
+
 	/* Set window caption */
 	XmbSetWMProperties(win->dpy, win->win, wreq->caption, wreq->caption,
 	                   NULL, 0, NULL, NULL, NULL);
@@ -373,9 +373,9 @@ static int x11_win_open(struct x11_wreq *wreq)
 	} else {
 		GP_DEBUG(2, "Failed to set WM_DELETE_WINDOW Atom to True");
 	}
-	
+
 	win_list_add(win);
-	
+
 	/* Show window */
 	XMapWindow(win->dpy, win->win);
 
@@ -395,9 +395,9 @@ static void x11_win_close(struct x11_win *win)
 		destroy_ximage(self);
 */
 	XUnmapWindow(win->dpy, win->win);
-	
+
 	XDestroyWindow(win->dpy, win->win);
-	
+
 	XUnlockDisplay(win->dpy);
 
 	/* Close connection/Decrease ref count */

@@ -101,7 +101,7 @@ static GP_Timer *swap_left(GP_Timer *heap)
 
 static GP_Timer *swap_right(GP_Timer *heap)
 {
-	GP_Timer *right = heap->right;			
+	GP_Timer *right = heap->right;
 
 	heap->right = right->right;
 	right->right = heap;
@@ -127,13 +127,13 @@ static GP_Timer *insert(GP_Timer *heap, GP_Timer *timer)
 
 	if (!heap->left || !well_balanced(heap->left->sons) ||
 	     (heap->right && heap->left->sons == heap->right->sons)) {
-		
+
 		heap->left = insert(heap->left, timer);
-		
+
 		if (timer_cmp(heap, heap->left))
 			return swap_left(heap);
 	} else {
-		
+
 		heap->right = insert(heap->right, timer);
 
 		if (timer_cmp(heap, heap->right))
@@ -239,7 +239,7 @@ static GP_Timer *process_top(GP_Timer *heap, uint64_t now)
 		         PRIu32" expires at %"PRIu64,
 		         period ? "periodic " : "",
 		         timer->id, now, ret, timer->expires);
-		heap = insert(heap, timer);		
+		heap = insert(heap, timer);
 	}
 
 	return heap;

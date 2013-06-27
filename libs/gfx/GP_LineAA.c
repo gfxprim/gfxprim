@@ -43,9 +43,9 @@ void GP_LineAA(GP_Context *context, GP_Coord x0, GP_Coord y0,
                GP_Coord x1, GP_Coord y1, GP_Pixel pixel)
 {
 	GP_CHECK_CONTEXT(context);
-	
+
 	GP_TRANSFORM_POINT_FP(context, x0, y0);
 	GP_TRANSFORM_POINT_FP(context, x1, y1);
-	
+
 	GP_LineAA_Raw(context, x0, y0, x1, y1, pixel);
 }

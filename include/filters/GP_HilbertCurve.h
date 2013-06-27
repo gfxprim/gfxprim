@@ -55,7 +55,7 @@ static inline void GP_HilbertCurveInit(struct GP_CurveState *state, int n)
 static inline void GP_HilbertCurveGetXY(struct GP_CurveState *state)
 {
 	int sa, sb;
-	/* 
+	/*
 	 * Older gcc thinks that x and y are used uninitialized that is not
 	 * true so we silence the warning by initializing them.
 	 */
@@ -70,7 +70,7 @@ static inline void GP_HilbertCurveGetXY(struct GP_CurveState *state)
 			x = y ^ (-sa);
 			y = temp ^ (-sa);
 		}
-	
+
 		x = (x >> 1) | (sa << 31);
 		y = (y >> 1) | ((sa ^ sb) << 31);
 	}

@@ -34,7 +34,7 @@
  * GP_Context or given GP_PixelType.
  *
  * Extra arguments are arguments to be passed to the function.
- * Note that if the function takes the context/type/bpp as an argument, 
+ * Note that if the function takes the context/type/bpp as an argument,
  * you still need to provide it in __VA_ARGS__
  *
  * The GP_FN_PER_* variants ignore the return value of the called function.
@@ -47,24 +47,24 @@
 #include "GP_FnPerBpp.gen.h"
 
 /*
- * Branch on GP_Context argument. 
+ * Branch on GP_Context argument.
  */
 #define GP_FN_PER_BPP_CONTEXT(FN_NAME, context, ...) \
 	GP_FN_PER_BPP(FN_NAME, (context)->bpp, (context)->bit_endian, __VA_ARGS__)
 
 /*
- * Branch on GP_PixelType argument. 
+ * Branch on GP_PixelType argument.
  */
 #define GP_FN_PER_BPP_PIXELTYPE(FN_NAME, type, ...) \
 	GP_FN_PER_BPP(FN_NAME, GP_PixelTypes[type].size, GP_PixelTypes[type].bit_endian, __VA_ARGS__)
 /*
- * Branch on GP_Context argument. 
+ * Branch on GP_Context argument.
  */
 #define GP_FN_RET_PER_BPP_CONTEXT(FN_NAME, context, ...) \
 	GP_FN_RET_PER_BPP(FN_NAME, (context)->bpp, (context)->bit_endian, __VA_ARGS__)
 
 /*
- * Branch on GP_PixelType argument. 
+ * Branch on GP_PixelType argument.
  */
 #define GP_FN_RET_PER_BPP_PIXELTYPE(FN_NAME, type, ...) \
 	GP_FN_RET_PER_BPP(FN_NAME, GP_PixelTypes[type].size, GP_PixelTypes[type].bit_endian, __VA_ARGS__)

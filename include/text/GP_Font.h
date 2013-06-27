@@ -27,9 +27,9 @@
 
 #define GP_FONT_NAME_MAX 64
 
-/* 
+/*
  * Data describing single Glyph.
- * 
+ *
  * Note that glyph do not necessarily correspond to one character (for example
  * ligature is a glyph but corresponds to at least two characters).
  *
@@ -67,7 +67,7 @@ typedef struct GP_GlyphBitmap {
 	 */
 	uint8_t advance_x;
 
-	/* 
+	/*
 	 * Character bitmap, byte aligned bitmap.
 	 */
 	uint8_t bitmap[];
@@ -79,7 +79,7 @@ typedef enum GP_CharSet {
 
 /*
  * Glyph bitmap data format.
- * 
+ *
  * The bitmap is byte aligned and for 1BPP the number of bytes per row is
  * rounted to bytes.
  *
@@ -90,7 +90,7 @@ typedef enum GP_FontBitmapFormat {
 } GP_FontBitmapFormat;
 
 /*
- * Font face 
+ * Font face
  */
 typedef struct GP_FontFace {
 	/*
@@ -112,7 +112,7 @@ typedef struct GP_FontFace {
 	 * Maximal height of font glyph from baseline to the top.
 	 */
 	uint16_t ascend;
-	
+
 	/*
 	 * Maximal length of font glyph from baseline to the bottom.
 	 */
@@ -120,7 +120,7 @@ typedef struct GP_FontFace {
 
 	/*
 	 * Maximal width of font glyph.
-	 * 
+	 *
 	 * (basically max from glyph->width + glyph->bearing_x)
 	 */
 	uint16_t max_glyph_width;
@@ -136,7 +136,7 @@ typedef struct GP_FontFace {
 	GP_FontBitmapFormat glyph_bitmap_format;
 
 	/*
-	 * Pointer to glyph bitmap buffer. 
+	 * Pointer to glyph bitmap buffer.
 	 */
 	void *glyphs;
 

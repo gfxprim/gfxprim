@@ -40,7 +40,7 @@ static int GP_Filter{{ name }}_{{ pt.name }}(const GP_Context *src_a, const GP_C
 
 			GP_PutPixel_Raw_{{ pt.pixelsize.suffix }}(dst, x, y, pix);
 		}
-		
+
 		if (GP_ProgressCallbackReport(callback, y, h, w))
 			return 1;
 	}
@@ -63,7 +63,7 @@ static int GP_Filter{{ name }}_{{ ps.suffix }}(const GP_Context *src_a, const GP
 {
 {{ caller(ps) }}
 	uint32_t x, y, w, h;
-	
+
 	w = GP_MIN(src_a->w, src_b->w);
 	h = GP_MIN(src_a->h, src_b->h);
 
@@ -75,7 +75,7 @@ static int GP_Filter{{ name }}_{{ ps.suffix }}(const GP_Context *src_a, const GP
 			{{ filter_op('pix', ps.size) }}
 			GP_PutPixel_Raw_{{ ps.suffix }}(dst, x, y, pix);
 		}
-		
+
 		if (GP_ProgressCallbackReport(callback, y, h, w))
 			return 1;
 	}
@@ -122,7 +122,7 @@ int GP_Filter{{ name }}(const GP_Context *src_a, const GP_Context *src_b,
 {
 	GP_Size w = GP_MIN(src_a->w, src_b->w);
 	GP_Size h = GP_MIN(src_a->h, src_b->h);
-	
+
 	GP_ASSERT(src_a->pixel_type == dst->pixel_type,
 	          "The src and dst pixel types must match");
 	GP_ASSERT(w <= dst->w && h <= dst->h,
@@ -146,7 +146,7 @@ GP_Context *GP_Filter{{ name }}Alloc(const GP_Context *src_a, const GP_Context *
 
 	GP_Size w = GP_MIN(src_a->w, src_b->w);
 	GP_Size h = GP_MIN(src_a->h, src_b->h);
-	
+
 	res = GP_ContextAlloc(w, h, src_a->pixel_type);
 
 	if (res == NULL)
@@ -156,7 +156,7 @@ GP_Context *GP_Filter{{ name }}Alloc(const GP_Context *src_a, const GP_Context *
 		GP_DEBUG(1, "Operation aborted");
 
 		GP_ContextFree(res);
-	
+
 		return NULL;
 	}
 

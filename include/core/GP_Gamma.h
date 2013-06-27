@@ -57,7 +57,7 @@
  */
 
  /*
-  
+
    This code implements management functions for easy, per context, per
    channel, gamma tables.
 
@@ -66,11 +66,11 @@
 
    Also the table output, for linear values, has two more bits than original in
    order not to loose precision.
-   
+
    The pointers to gamma tables are storied in GP_Gamma structure and are
    organized in the same order as channels. First N tables for each channel and
-   gamma value gamma, then N tables for inverse 1/gamma function. 
-   
+   gamma value gamma, then N tables for inverse 1/gamma function.
+
    So when we have RGB888 pixel and gamma 2.2 there are two tables in the
    memory, one for gamma 2.2 input 8bit output 10bit and it's inverse input
    10bit output 8bit. The GP_Gamma contains six pointers. First three points to
@@ -136,7 +136,7 @@ typedef struct GP_GammaTable {
 	float gamma;
 	uint8_t in_bits;
 	uint8_t out_bits;
-	
+
 	/* Used for internal purpose */
 	unsigned int ref_count;
 	struct GP_GammaTable *next;
@@ -153,7 +153,7 @@ typedef struct GP_GammaTable {
  *
  * The GP_Gamma structure contains pointers to tables for each pixel
  * channel and for gamma and it's inverse transformation.
- * 
+ *
  * The interface is specially designed so that getting Gamma corrected value is
  * a matter of indexing two arrays.
  */

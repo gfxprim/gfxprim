@@ -77,7 +77,7 @@ void GP_CircleSeg(GP_Context *context, GP_Coord xcenter, GP_Coord ycenter,
 	GP_CHECK_CONTEXT(context);
 
 	GP_TRANSFORM_POINT(context, xcenter, ycenter);
-	
+
 	GP_CircleSeg_Raw(context, xcenter, ycenter, r,
 	                 transform_segments(context, seg_flag), pixel);
 }
@@ -100,9 +100,9 @@ void GP_FillCircle(GP_Context *context, GP_Coord xcenter, GP_Coord ycenter,
                    GP_Size r, GP_Pixel pixel)
 {
 	GP_CHECK_CONTEXT(context);
-	
+
 	GP_TRANSFORM_POINT(context, xcenter, ycenter);
-	
+
 	GP_FillCircle_Raw(context, xcenter, ycenter, r, pixel);
 }
 */

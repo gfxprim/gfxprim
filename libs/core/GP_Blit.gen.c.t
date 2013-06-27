@@ -140,7 +140,7 @@ static void blitXYXY_Raw_{{ src.name }}_{{ dst.name }}(const GP_Context *src,
 			dy = y2 + (y - y0);
 
 			GP_Pixel p1, p2 = 0, p3 = 0;
-			
+
 			p1 = GP_GetPixel_Raw_{{ src.pixelsize.suffix }}(src, x, y);
 %%      if src.is_alpha()
 			p2 = GP_GetPixel_Raw_{{ dst.pixelsize.suffix }}(dst, dx, dy);

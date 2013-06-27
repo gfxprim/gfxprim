@@ -37,8 +37,8 @@
 struct GP_Context;
 
 /*
- *  GP_PixelType  is typedef enum of PixelTypes, 
- * 
+ *  GP_PixelType  is typedef enum of PixelTypes,
+ *
  * each named GP_PIXEL_<TYPENAME>, such as GP_PIXEL_RGB888
  * see the beginning of GP_Pixel.gen.h for a complete list
  *
@@ -58,8 +58,8 @@ typedef uint32_t GP_Pixel;
 #include "GP_GetSetBits.h"
 
 /*
- * Information about ordering of pixels in byte for 1, 2 and 4 bpp 
- * used in a one bit variable in GP_Context 
+ * Information about ordering of pixels in byte for 1, 2 and 4 bpp
+ * used in a one bit variable in GP_Context
  */
 typedef enum {
 	/* less significant bits contain pixels with lower indices */
@@ -172,7 +172,7 @@ GP_PixelType GP_PixelTypeByName(const char *name);
 /*
  * Match pixel type to known pixel types.
  *
- * Returns either valid PixelType or GP_PIXEL_UNKNOWN 
+ * Returns either valid PixelType or GP_PIXEL_UNKNOWN
  */
 GP_PixelType GP_PixelRGBMatch(GP_Pixel rmask, GP_Pixel gmask,
                               GP_Pixel bmask, GP_Pixel amask,
@@ -181,7 +181,7 @@ GP_PixelType GP_PixelRGBMatch(GP_Pixel rmask, GP_Pixel gmask,
 /*
  * Similar to GP_PixelRGBMatch but works with offsets and sizes
  *
- * Returns either valid PixelType or GP_PIXEL_UNKNOWN 
+ * Returns either valid PixelType or GP_PIXEL_UNKNOWN
  */
 GP_PixelType GP_PixelRGBLookup(uint32_t rsize, uint32_t roff,
                                uint32_t gsize, uint32_t goff,
@@ -195,7 +195,7 @@ GP_PixelType GP_PixelRGBLookup(uint32_t rsize, uint32_t roff,
  * Call as:
  *
  * if (GP_PixelHasFlags(pixel_type, GP_PIXEL_IS_RGB | GP_PIXEL_HAS_ALPHA))
- * 	...
+ *	...
  */
 int GP_PixelHasFlags(GP_PixelType pixel_type, GP_PixelFlags flags);
 

@@ -35,12 +35,12 @@ enum GP_BackendSDLFlags {
  * Initalize SDL as drawing backend.
  *
  * * SDL doesn't expose file descriptors.
- * 
+ *
  * * The backend is thread safe (the critical parts are guarded with a mutex)
- * 
+ *
  * * The backend is singleton, you can't have two SDL backends running at the
  *   same time.
- * 
+ *
  * * When backend is allready initalized, this function ignores it's parameters
  *   and returns pointer to allready initalized SDL backend.
  *
@@ -51,7 +51,7 @@ enum GP_BackendSDLFlags {
  * The parameters w h and bpp are directly passed to SDL_SetVideoMode().
  *
  * * If w, h and/or bpp are set to zero, SDL tries to do best fit.
- * 
+ *
  * * The GP_BackendSDLFlags are converted into SDL equivalents.
  *
  * Upon failure, or if SDL wasn't compiled in, NULL is returned.

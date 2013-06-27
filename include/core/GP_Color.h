@@ -26,7 +26,7 @@
  /*
 
    Color is enumeration of color names which may be converted into pixel values
-   in desired pixel format. 
+   in desired pixel format.
 
   */
 
@@ -63,7 +63,7 @@ typedef enum GP_Color {
 GP_Pixel GP_ColorToPixel(GP_Color color, GP_PixelType pixel_type);
 
 /*
- * Converts GP_Color to GP_Pixel. 
+ * Converts GP_Color to GP_Pixel.
  */
 static inline GP_Pixel GP_ColorToContextPixel(GP_Color color,
                                               GP_Context *context)
@@ -93,7 +93,7 @@ bool GP_ColorNameToPixel(const char *color_name, GP_PixelType pixel_type,
 
 /*
  * Converts Color name to Pixel.
- * 
+ *
  * Returns true if conversion was successful false otherwise.
  */
 static inline bool GP_ColorNameToContextPixel(const char *color_name,

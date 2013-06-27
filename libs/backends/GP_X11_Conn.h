@@ -39,7 +39,7 @@ static unsigned int x11_open(const char *display)
 {
 	if (x11_conn.ref_cnt != 0)
 		return ++x11_conn.ref_cnt;
-	
+
 	GP_DEBUG(1, "Opening X11 display '%s'", display);
 
 	if (!XInitThreads()) {
@@ -65,14 +65,14 @@ static void x11_close(void)
 	/* Ignore close requests if connection is closed */
 	if (x11_conn.ref_cnt == 0)
 		return;
-	
+
 	if (--x11_conn.ref_cnt != 0)
 		return;
 
 	GP_DEBUG(1, "Closing X11 display");
 
 	XLockDisplay(x11_conn.dpy);
-	
+
 	/* I wonder if this is right sequence... */
 	//XUnlockDisplay(x11_conn.dpy);
 	XCloseDisplay(x11_conn.dpy);

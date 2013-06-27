@@ -29,7 +29,7 @@
 #include "GP_FnPerBpp.h"
 #include "GP_Pixel.h"
 
-/* 
+/*
  * Generated header
  */
 #include "GP_GetPutPixel.gen.h"
@@ -46,9 +46,9 @@ GP_Pixel GP_GetPixel(const GP_Context *context, GP_Coord x, GP_Coord y);
 static inline GP_Pixel GP_GetPixel_Raw(const GP_Context *context,
                                        GP_Coord x, GP_Coord y)
 {
-	GP_FN_RET_PER_BPP(GP_GetPixel_Raw, context->bpp, context->bit_endian, 
+	GP_FN_RET_PER_BPP(GP_GetPixel_Raw, context->bpp, context->bit_endian,
 		context, x, y);
-	
+
 	GP_ABORT("Invalid context pixel type");
 }
 
@@ -76,7 +76,7 @@ void GP_PutPixel(GP_Context *context, GP_Coord x, GP_Coord y, GP_Pixel p);
 static inline void GP_PutPixel_Raw(GP_Context *context,
                                    GP_Coord x, GP_Coord y, GP_Pixel p)
 {
-	GP_FN_PER_BPP(GP_PutPixel_Raw, context->bpp, context->bit_endian, 
+	GP_FN_PER_BPP(GP_PutPixel_Raw, context->bpp, context->bit_endian,
 		context, x, y, p);
 }
 

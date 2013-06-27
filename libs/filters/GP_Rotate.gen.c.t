@@ -35,7 +35,7 @@ static int GP_FilterRotate90_Raw_{{ ps.suffix }}(const GP_Context *src, GP_Conte
                                           GP_ProgressCallback *callback)
 {
 	uint32_t x, y;
-	
+
 	GP_DEBUG(1, "Rotating image by 90 %ux%u", src->w, src->h);
 
 	for (x = 0; x < src->w; x++) {
@@ -43,11 +43,11 @@ static int GP_FilterRotate90_Raw_{{ ps.suffix }}(const GP_Context *src, GP_Conte
 			uint32_t yr = src->h - y - 1;
 			GP_PutPixel_Raw_{{ ps.suffix }}(dst, yr, x, GP_GetPixel_Raw_{{ ps.suffix }}(src, x, y));
 		}
-		
+
 		if (GP_ProgressCallbackReport(callback, x, src->w, src->h))
 			return 1;
 	}
-	
+
 	GP_ProgressCallbackDone(callback);
 	return 0;
 }
@@ -73,21 +73,21 @@ static int GP_FilterRotate180_Raw_{{ ps.suffix }}(const GP_Context *src, GP_Cont
                                           GP_ProgressCallback *callback)
 {
 	uint32_t x, y;
-	
+
 	GP_DEBUG(1, "Rotating image by 180 %ux%u", src->w, src->h);
 
 	for (x = 0; x < src->w; x++) {
 		for (y = 0; y < src->h; y++) {
 			uint32_t xr = src->w - x - 1;
 			uint32_t yr = src->h - y - 1;
-		
+
 			{{ swap_pixels(ps, 'src', 'dst', 'x', 'y', 'xr', 'yr') }}
 		}
-		
+
 		if (GP_ProgressCallbackReport(callback, x, src->w, src->h))
 			return 1;
 	}
-	
+
 	GP_ProgressCallbackDone(callback);
 	return 0;
 }
@@ -106,7 +106,7 @@ static int GP_FilterRotate270_Raw_{{ ps.suffix }}(const GP_Context *src, GP_Cont
                                            GP_ProgressCallback *callback)
 {
 	uint32_t x, y;
-	
+
 	GP_DEBUG(1, "Rotating image by 270 %ux%u", src->w, src->h);
 
 	for (x = 0; x < src->w; x++) {
@@ -118,7 +118,7 @@ static int GP_FilterRotate270_Raw_{{ ps.suffix }}(const GP_Context *src, GP_Cont
 		if (GP_ProgressCallbackReport(callback, x, src->w, src->h))
 			return 1;
 	}
-	
+
 	GP_ProgressCallbackDone(callback);
 	return 0;
 }

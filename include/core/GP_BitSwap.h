@@ -21,7 +21,7 @@
  *****************************************************************************/
 
  /*
-  
+
    Inline functions for swapping bits inside of the byte
 
   */

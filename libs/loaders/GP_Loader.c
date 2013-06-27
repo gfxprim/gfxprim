@@ -23,7 +23,7 @@
 /*
 
   General functions for loading and saving bitmaps.
-  
+
  */
 
 #include <string.h>
@@ -78,7 +78,7 @@ static GP_Loader ppm_loader = {
 static GP_Loader pnm_loader = {
 	.Load = GP_LoadPNM,
 	.Save = NULL,
-	/* 
+	/*
 	 * Avoid double Match
 	 * This format is covered by PBM, PGM and PPM
 	 */
@@ -181,7 +181,7 @@ void GP_ListLoaders(void)
 		for (j = 0; i->extensions[j] != NULL; j++)
 			printf("%s ", i->extensions[j]);
 		printf("\n");
-	
+
 		if (i->next != NULL)
 			printf("\n");
 	}
@@ -274,12 +274,11 @@ GP_Context *GP_LoadImage(const char *src_path, GP_ProgressCallback *callback)
 {
 	int err;
 	struct stat st;
-	
+
 	if (access(src_path, R_OK)) {
 		err = errno;
 		GP_DEBUG(1, "Failed to access file '%s' : %s",
 		            src_path, strerror(errno));
-		
 		errno = err;
 		return NULL;
 	}
@@ -300,14 +299,14 @@ GP_Context *GP_LoadImage(const char *src_path, GP_ProgressCallback *callback)
 
 	if (ext_load != NULL && ext_load->Load != NULL) {
 		img = ext_load->Load(src_path, callback);
-		
+
 		if (img)
 			return img;
 	}
 
 	sig_load = loader_by_signature(src_path);
 
-	/* 
+	/*
 	 * Avoid further work if extension matches the signature but image
 	 * couldn't be loaded. Probably unimplemented format or damaged file.
 	 */
@@ -346,7 +345,7 @@ int GP_LoadMetaData(const char *src_path, GP_MetaData *data)
 
 	if (!strcasecmp(ext, "jpg") || !strcasecmp(ext, "jpeg"))
 		return GP_LoadJPGMetaData(src_path, data);
-	
+
 	if (!strcasecmp(ext, "png"))
 		return GP_LoadPNGMetaData(src_path, data);
 
@@ -364,7 +363,7 @@ int GP_SaveImage(const GP_Context *src, const char *dst_path,
 		errno = EINVAL;
 		return 1;
 	}
-	
+
 	if (l->Save)
 		return l->Save(src, dst_path, callback);
 
@@ -375,7 +374,7 @@ int GP_SaveImage(const GP_Context *src, const char *dst_path,
 const GP_Loader *GP_MatchSignature(const void *buf)
 {
 	struct GP_Loader *i;
-	
+
 	for (i = loaders; i != NULL; i = i->next) {
 		if (i->Match && i->Match(buf) == 1) {
 			GP_DEBUG(1, "Found loader '%s'", i->fmt_name);

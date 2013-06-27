@@ -45,7 +45,7 @@
 #include "core/GP_Context.h"
 
 #include "input/GP_EventQueue.h"
-#include "input/GP_Timer.h" 
+#include "input/GP_Timer.h"
 
 typedef struct GP_Backend {
 	/*
@@ -53,7 +53,7 @@ typedef struct GP_Backend {
 	 */
 	const char *name;
 
-	/* 
+	/*
 	 * Pointer to context app should draw to.
 	 *
 	 * This MAY change upon a flip operation.
@@ -107,8 +107,8 @@ typedef struct GP_Backend {
 	 */
 	void (*Exit)(struct GP_Backend *self);
 
-	/* 
-	 * Connection fd. Set to -1 if not available 
+	/*
+	 * Connection fd. Set to -1 if not available
 	 */
 	int fd;
 

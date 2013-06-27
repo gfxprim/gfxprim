@@ -50,7 +50,7 @@ int GP_FilterMirrorH_Raw(const GP_Context *src, GP_Context *dst,
 		memcpy(buf, sl1, bpr);
 		memcpy(dl1, sl2, bpr);
 		memcpy(dl2, buf, bpr);
-		
+
 		if (GP_ProgressCallbackReport(callback, 2 * y, src->h, src->w)) {
 			GP_DEBUG(1, "Operation aborted");
 			errno = ECANCELED;
@@ -77,7 +77,7 @@ int GP_FilterMirrorH(const GP_Context *src, GP_Context *dst,
 {
 	GP_ASSERT(src->pixel_type == dst->pixel_type,
 		  "The src and dst pixel types must match");
-	
+
 	GP_ASSERT(src->w <= dst->w && src->h <= dst->h,
 	          "Destination is not large enough");
 
@@ -91,9 +91,9 @@ GP_Context *GP_FilterMirrorHAlloc(const GP_Context *src,
                                    GP_ProgressCallback *callback)
 {
 	GP_Context *res;
-	
+
 	res = GP_ContextCopy(src, 0);
-		
+
 	if (res == NULL)
 		return NULL;
 
@@ -101,7 +101,7 @@ GP_Context *GP_FilterMirrorHAlloc(const GP_Context *src,
 		GP_ContextFree(res);
 		return NULL;
 	}
-	
+
 	return res;
 }
 

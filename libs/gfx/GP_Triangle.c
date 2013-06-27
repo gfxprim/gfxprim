@@ -43,7 +43,7 @@ void GP_Triangle(GP_Context *context, GP_Coord x0, GP_Coord y0,
                  GP_Coord x2, GP_Coord y2, GP_Pixel pixel)
 {
 	GP_CHECK_CONTEXT(context);
-	
+
 	GP_TRANSFORM_POINT(context, x0, y0);
 	GP_TRANSFORM_POINT(context, x1, y1);
 	GP_TRANSFORM_POINT(context, x2, y2);

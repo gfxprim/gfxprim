@@ -52,7 +52,7 @@ int GP_LineClip(int *px0, int *py0, int *px1, int *py1, int xmax, int ymax)
 		goto give_result;
 	}
 	if (x0 == x1) {
-		
+
 		/* orient the line from top to down */
 		if (x1 < x0) {
 			GP_SWAP(x0, x1);
@@ -95,7 +95,7 @@ int GP_LineClip(int *px0, int *py0, int *px1, int *py1, int xmax, int ymax)
 		x1 = xmax;
 		y1 = y0 + (x1-x0)*dyx;
 	}
-	
+
 	if (y0 < 0.0f) {
 		x0 = x0 - y0*dxy;
 		y0 = 0.0f;
@@ -118,7 +118,7 @@ int GP_LineClip(int *px0, int *py0, int *px1, int *py1, int xmax, int ymax)
 		/* the line misses the clip rectangle around the corner */
 		return 0;
 	}
-	
+
 give_result:
 
 	*px0 = (int) x0;

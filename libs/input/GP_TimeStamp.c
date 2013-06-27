@@ -40,7 +40,7 @@ static int choose_clock(clockid_t *clock)
 
 #ifdef CLOCK_MONOTONIC_COARSE
 	GP_DEBUG(1, "Trying CLOCK_MONOTONIC_COARSE");
-	
+
 	if (clock_getres(CLOCK_MONOTONIC_COARSE, &ts)) {
 		GP_DEBUG(1, "CLOCK_MONOTONIC_COARSE: %s", strerror(errno));
 	} else {

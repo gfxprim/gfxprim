@@ -43,7 +43,7 @@ def extend_backend(_backend):
   def Wait(self):
     "Waits for backend."
     c_backends.GP_BackendWait(self)
-  
+
   @extend(_backend)
   def WaitEvent(self):
     "Waits for backend event."
@@ -92,7 +92,7 @@ def extend_backend(_backend):
   def Resize(self, w, h):
     "Resize backend window (if possible)"
     return c_backends.GP_BackendResize(self, w, h)
-  
+
   @extend(_backend)
   def ResizeAck(self):
     "Acknowledge backend resize."

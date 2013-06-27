@@ -23,7 +23,7 @@
 /*
 
   JPG image support using jpeg library.
-  
+
  */
 
 #include <stdint.h>
@@ -58,7 +58,7 @@ int GP_MatchJPG(const void *buf)
 int GP_OpenJPG(const char *src_path, FILE **f)
 {
 	int err;
-	
+
 	*f = fopen(src_path, "rb");
 
 	if (*f == NULL) {
@@ -70,7 +70,7 @@ int GP_OpenJPG(const char *src_path, FILE **f)
 	}
 
 	//TODO: check signature and rewind the stream
-	
+
 	return 0;
 }
 
@@ -175,12 +175,12 @@ GP_Context *GP_ReadJPG(FILE *f, GP_ProgressCallback *callback)
 			//TODO: fixme bigendian?
 			/* fix the pixel, as we want in fact BGR */
 			unsigned int i;
-		
+
 			for (i = 0; i < ret->w; i++) {
 				uint8_t *pix = GP_PIXEL_ADDR(ret, i, y);
 				GP_SWAP(pix[0], pix[2]);
 			}
-	
+
 			if (GP_ProgressCallbackReport(callback, y, ret->h, ret->w)) {
 				GP_DEBUG(1, "Operation aborted");
 				err = ECANCELED;
@@ -207,7 +207,7 @@ GP_Context *GP_ReadJPG(FILE *f, GP_ProgressCallback *callback)
 	jpeg_destroy_decompress(&cinfo);
 
 	GP_ProgressCallbackDone(callback);
-	
+
 	return ret;
 err2:
 	GP_ContextFree(ret);
@@ -226,7 +226,7 @@ GP_Context *GP_LoadJPG(const char *src_path, GP_ProgressCallback *callback)
 		return NULL;
 
 	res = GP_ReadJPG(f, callback);
-	
+
 	fclose(f);
 
 	return res;
@@ -259,10 +259,10 @@ static void save_jpg_markers(struct jpeg_decompress_struct *cinfo)
 {
 	/* Comment marker */
 	jpeg_save_markers(cinfo, JPEG_COM, JPEG_COM_MAX);
-	
+
 	/* APP0 marker = JFIF data */
 	jpeg_save_markers(cinfo, JPEG_APP0 + 1, 0xffff);
-	
+
 	/* APP1 marker = Exif data */
 	jpeg_save_markers(cinfo, JPEG_APP0 + 1, 0xffff);
 }
@@ -292,9 +292,9 @@ int GP_ReadJPGMetaData(FILE *f, GP_MetaData *data)
 	            get_colorspace(cinfo.jpeg_color_space),
 	            cinfo.image_width, cinfo.image_height,
 		    cinfo.num_components);
-	
+
 	read_jpg_metadata(&cinfo, data);
-	
+
 //	jpeg_finish_decompress(&cinfo);
 	jpeg_destroy_decompress(&cinfo);
 
@@ -346,7 +346,7 @@ int GP_SaveJPG(const GP_Context *src, const char *dst_path,
 		         dst_path, strerror(errno));
 		goto err0;
 	}
-	
+
 	if (setjmp(my_err.setjmp_buf)) {
 		err = EIO;
 		//TODO: is cinfo allocated?
@@ -355,7 +355,7 @@ int GP_SaveJPG(const GP_Context *src, const char *dst_path,
 
 	cinfo.err = jpeg_std_error(&my_err.error_mgr);
 	my_err.error_mgr.error_exit = my_error_exit;
-	
+
 	jpeg_create_compress(&cinfo);
 
 	jpeg_stdio_dest(&cinfo, f);
@@ -390,7 +390,7 @@ int GP_SaveJPG(const GP_Context *src, const char *dst_path,
 			JSAMPROW row = (void*)GP_PIXEL_ADDR(src, 0, y);
 			jpeg_write_scanlines(&cinfo, &row, 1);
 		}
-	
+
 		if (GP_ProgressCallbackReport(callback, y, src->h, src->w)) {
 			GP_DEBUG(1, "Operation aborted");
 			err = ECANCELED;
@@ -407,7 +407,7 @@ int GP_SaveJPG(const GP_Context *src, const char *dst_path,
 		         dst_path, strerror(errno));
 		goto err1;
 	}
-	
+
 	GP_ProgressCallbackDone(callback);
 	return 0;
 err3:

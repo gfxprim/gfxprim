@@ -9,9 +9,9 @@ import subprocess
 
 def header_exists(cfg, filename):
     fpath = cfg['include_path'][0] + '/' + filename
-    
+
     sys.stderr.write("Checking for '%s' ... " % fpath)
-    
+
     try:
         st = os.stat(fpath)
         sys.stderr.write("Yes\n")
@@ -23,9 +23,9 @@ def header_exists(cfg, filename):
 def c_try_compile(cfg, code, msg):
     sys.stderr.write(msg)
 
-    ret = os.system("echo '%s' | %s -x c -o /dev/null - > /dev/null 2>&1" % 
+    ret = os.system("echo '%s' | %s -x c -o /dev/null - > /dev/null 2>&1" %
                     (code, cfg["CC"][0]))
-    
+
     if ret:
         sys.stderr.write("No\n")
         return False
@@ -111,7 +111,7 @@ class libraries:
 
         sys.stderr.write("Libraries to link against\n")
         sys.stderr.write("-------------------------\n")
-        
+
         for i in self.libraries:
             sys.stderr.write("%10s" % i[0])
 
@@ -208,8 +208,8 @@ def basic_checks(cfg):
 
     check_for_swig(cfg)
     check_for_python_config(cfg)
-    
-    cfg['PYTHON_VER'][0] = python_version(cfg) 
+
+    cfg['PYTHON_VER'][0] = python_version(cfg)
 
     if cfg['libdir'][0] == '':
         sys.stderr.write("Checking for lib directory ... ")
@@ -266,7 +266,7 @@ def write_gfxprim_config(cfg, libs):
     f.write('\t--cflags) echo -n "-I/usr/include/GP/%s";;\n' %
             libs.get_cflags('core'))
     f.write('\t--libs) echo -n "-lGP -lrt -lm %s ";;\n' % libs.get_linker_flags('core'))
-   
+
     # ldflags for specific modules
     for i in modules:
         ldflags = ''
@@ -348,8 +348,8 @@ if __name__ ==  '__main__':
 
     # Get configuration parameters from environment variables
     for i in cfg:
-    	if i in os.environ:
-        	cfg[i][0] = os.environ[i]
+        if i in os.environ:
+            cfg[i][0] = os.environ[i]
 
     # Enable disable libraries for linking
     parser.add_option("-e", "--enable", dest="enable", action="append",
@@ -363,10 +363,10 @@ if __name__ ==  '__main__':
 
     (options, args) = parser.parse_args();
 
-    # 
+    #
     # Enable/Disable libraries as user requested
     # These are not checked later
-    # 
+    #
     if options.enable:
         for i in options.enable:
             l.set(i, True);
@@ -379,7 +379,7 @@ if __name__ ==  '__main__':
             cfg[i][0] = getattr(options, i)
 
     basic_checks(cfg);
-    
+
     l.check()
     l.print_summary()
 

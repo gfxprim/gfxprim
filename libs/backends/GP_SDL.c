@@ -73,7 +73,7 @@ static void sdl_update_rect(struct GP_Backend *self __attribute__((unused)),
 	if (x1 != 0 && y1 != 0)
 		SDL_UpdateRect(sdl_surface, x0, y0,
 		               GP_ABS(x1 - x0) + 1, GP_ABS(y1 - y0) + 1);
-	
+
 	SDL_mutexV(mutex);
 }
 
@@ -158,7 +158,7 @@ static int sdl_set_attributes(struct GP_Backend *self,
 {
 	SDL_mutexP(mutex);
 
-	if (caption != NULL)		
+	if (caption != NULL)
 		SDL_WM_SetCaption(caption, caption);
 
 	/* Send only resize event, the actual resize is done in resize_ack */
@@ -173,7 +173,7 @@ static int sdl_set_attributes(struct GP_Backend *self,
 static int sdl_resize_ack(struct GP_Backend *self __attribute__((unused)))
 {
 	GP_DEBUG(2, "Resizing the buffer to %ux%u", new_w, new_h);
-		
+
 	SDL_mutexP(mutex);
 
 	sdl_surface = SDL_SetVideoMode(new_w, new_h, 0, sdl_flags);
@@ -183,7 +183,7 @@ static int sdl_resize_ack(struct GP_Backend *self __attribute__((unused)))
 	                           backend.context->w, backend.context->h);
 
 	SDL_mutexV(mutex);
-		
+
 	return 0;
 }
 
@@ -206,9 +206,9 @@ static struct GP_Backend backend = {
 static void sdl_exit(struct GP_Backend *self __attribute__((unused)))
 {
 	SDL_mutexP(mutex);
-	
+
 	SDL_Quit();
-	
+
 	SDL_DestroyMutex(mutex);
 
 	backend.context = NULL;
@@ -253,11 +253,11 @@ GP_Backend *GP_BackendSDLInit(GP_Size w, GP_Size h, uint8_t bpp, uint8_t flags,
 
 	SDL_EnableKeyRepeat(SDL_DEFAULT_REPEAT_DELAY,
 	                    SDL_DEFAULT_REPEAT_INTERVAL);
-	
+
 	GP_EventQueueInit(&backend.event_queue, w, h, 0);
 
 	backend.context = &context;
-	
+
 	return &backend;
 }
 

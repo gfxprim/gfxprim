@@ -28,7 +28,7 @@ static int GP_Filter{{ name }}_{{ pt.name }}(const GP_Context *src,
 			{{ filter_op(c[0], c[2]) }}
 			%% endfor
 		}
-		
+
 		if (GP_ProgressCallbackReport(callback, y, src->h, src->w))
 			return 1;
 	}
@@ -58,7 +58,7 @@ static int GP_Filter{{ name }}_{{ ps.suffix }}(const GP_Context *src,
 			int32_t pix = GP_GetPixel_Raw_{{ ps.suffix }}(src, x, y);
 			{{ filter_op('pix', ps.size) }}
 		}
-		
+
 		if (GP_ProgressCallbackReport(callback, y, src->h, src->w))
 			return 1;
 	}

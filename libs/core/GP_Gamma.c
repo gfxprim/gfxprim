@@ -48,7 +48,7 @@ static void fill_table16(GP_GammaTable *table, float gamma,
 	unsigned int i;
 	unsigned int in_max = (1<<in_bits) - 1;
 	unsigned int out_max = (1<<out_bits) - 1;
-	
+
 	GP_DEBUG(3, "Initalizing gamma table %f", gamma);
 
 	for (i = 0; i < (1U<<in_bits); i++)
@@ -86,13 +86,13 @@ static GP_GammaTable *get_table(float gamma, uint8_t in_bits, uint8_t out_bits)
 	i->in_bits = in_bits;
 	i->out_bits = out_bits;
 	i->ref_count = 1;
- 	i->type = GP_CORRECTION_GAMMA;
-	
+	i->type = GP_CORRECTION_GAMMA;
+
 	if (out_bits > 8)
 		fill_table16(i, gamma, in_bits, out_bits);
 	else
 		fill_table8(i, gamma, in_bits, out_bits);
-	
+
 	/* Insert it into link list */
 	i->next = tables;
 	tables = i;
@@ -104,7 +104,7 @@ static void put_table(GP_GammaTable *table)
 {
 	if (table == NULL)
 		return;
-	
+
 	table->ref_count--;
 
 	GP_DEBUG(2, "Putting gamma table Gamma %f, in_bits %u, out_bits %u, "
@@ -113,9 +113,9 @@ static void put_table(GP_GammaTable *table)
 
 	if (table->ref_count == 0) {
 		GP_DEBUG(2, "Gamma table ref_count == 0, removing...");
-		
+
 		GP_GammaTable *i, *prev = NULL;
-		
+
 		/* Remove from link list and free */
 		for (i = tables; i != NULL; i = i->next) {
 			if (table == i)
@@ -127,7 +127,7 @@ static void put_table(GP_GammaTable *table)
 			tables = table->next;
 		else
 			prev->next = table->next;
-	
+
 		free(table);
 	}
 }
@@ -136,7 +136,7 @@ GP_Gamma *GP_GammaAcquire(GP_PixelType pixel_type, float gamma)
 {
 	GP_CHECK_VALID_PIXELTYPE(pixel_type);
 	int channels = GP_PixelTypes[pixel_type].numchannels, i;
-	
+
 	GP_DEBUG(1, "Acquiring Gamma table %s gamma %f", GP_PixelTypeName(pixel_type), gamma);
 
 	GP_Gamma *res = malloc(sizeof(struct GP_Gamma) + 2 * channels * sizeof(void*));
@@ -157,18 +157,18 @@ GP_Gamma *GP_GammaAcquire(GP_PixelType pixel_type, float gamma)
 	for (i = 0; i < channels; i++) {
 		unsigned int chan_size = GP_PixelTypes[pixel_type].channels[i].size;
 		res->tables[i] = get_table(gamma, chan_size, chan_size + 2);
-		
+
 		if (res->tables[i] == NULL) {
 			GP_GammaRelease(res);
 			return NULL;
 		}
 	}
-	
+
 	/* And reverse tables, n + 2 bits -> n bits */
 	for (i = 0; i < channels; i++) {
 		unsigned int chan_size = GP_PixelTypes[pixel_type].channels[i].size;
 		res->tables[i + channels] = get_table(1/gamma, chan_size + 2, chan_size);
-		
+
 		if (res->tables[i] == NULL) {
 			GP_GammaRelease(res);
 			return NULL;
@@ -222,13 +222,13 @@ void GP_GammaPrint(const GP_Gamma *self)
 
 	for (i = 0; i < desc->numchannels; i++) {
 		enum GP_CorrectionType type = self->tables[i]->type;
-		
+
 		printf(" %s: %s", desc->channels[i].name,
 		       correction_type_name(type));
 
 		if (type == GP_CORRECTION_GAMMA)
 			printf(" gamma = %.2f", self->tables[i]->gamma);
-	
+
 		printf("\n");
 	}
 }

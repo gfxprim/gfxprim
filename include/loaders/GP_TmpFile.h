@@ -21,7 +21,7 @@
  *****************************************************************************/
 
  /*
-   
+
    This is interface for saving GP_Context into non-portable uncompressed file,
    which is usefull for caching GP_Context to disk.
 

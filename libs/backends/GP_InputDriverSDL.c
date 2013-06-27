@@ -143,7 +143,7 @@ void GP_InputDriverSDLEventPut(struct GP_EventQueue *event_queue,
 			GP_WARN("Unmapped SDL keysym %u", keysym);
 			return;
 		}
-		
+
 		GP_EventQueuePushKey(event_queue, key, ev->key.state, NULL);
 	break;
 	case SDL_VIDEORESIZE:

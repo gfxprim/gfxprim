@@ -304,13 +304,13 @@ static int psp_read_composite_image_block(FILE *f, struct psp_img_attrs *attrs,
 {
 	uint8_t buf[8];
 	uint32_t i, composite_image_count;
-	
+
 	/* we are allready in subblock -> error */
 	if (attrs->subblock) {
 		GP_WARN("Composite Image Bank block inside of a Subblock");
 		return EINVAL;
 	}
-	
+
 	if (fread(buf, sizeof(buf), 1, f) < 1) {
 		GP_DEBUG(1, "Failed to read Composite Image Bank Info Chunk");
 		return EIO;
@@ -398,9 +398,9 @@ static int psp_read_composite_attributes_block(FILE *f, struct psp_img_attrs *at
 static int psp_read_jpeg(FILE *f, struct psp_img_attrs *attrs,
                          GP_ProgressCallback *callback)
 {
-	uint8_t buf[14];	
+	uint8_t buf[14];
 	int err;
-	
+
 	if (fread(buf, sizeof(buf), 1, f) < 1) {
 		GP_DEBUG(1, "Failed to read JPEG Information Chunk");
 		return EIO;
@@ -409,7 +409,7 @@ static int psp_read_jpeg(FILE *f, struct psp_img_attrs *attrs,
 	//TODO: utilize chunk_size
 
 	GP_DEBUG(5, "JPEG Chunk");
-	
+
 	attrs->img = GP_ReadJPG(f, callback);
 
 	if (attrs->img == NULL) {
@@ -489,10 +489,10 @@ GP_Context *GP_ReadPSP(FILE *f, GP_ProgressCallback *callback)
 
 	while (!err) {
 		err = psp_next_block(f, &attrs, callback);
-	
+
 		if (err)
 			goto err1;
-	
+
 		if (attrs.img != NULL) {
 			fclose(f);
 			return attrs.img;

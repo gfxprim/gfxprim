@@ -22,7 +22,7 @@
  *****************************************************************************/
 
  /*
-  
+
    Helper macros to get/set bits given offset and lenght.
 
    The GP_GET_BITS() and GP_SET_BITS() works __ONLY__ on aligned data types.
@@ -42,10 +42,10 @@
 #define CORE_GP_GET_SET_BITS_H
 
 /*
- * Helper macros to read/write parts of words 
+ * Helper macros to read/write parts of words
  *
  * Return (shifted) count bits at offset of value
- * Note: operates with value types same as val 
+ * Note: operates with value types same as val
  */
 #define GP_GET_BITS(offset, len, val) \
 	(sizeof(val) * 8 <= len ? \
@@ -91,9 +91,9 @@
 
 /*
  * Set count bits of dest at ofset to val (shifted by offset)
- * 
+ *
  * Does not check val for overflow
- * Operates on 8, 16, and 32 bit values, depending on the type of dest, 
+ * Operates on 8, 16, and 32 bit values, depending on the type of dest,
  * this should be unsigned
  *
  * GP_SET_BITS_OR anly sets (|=) the bits, assuming these are clear beforehand

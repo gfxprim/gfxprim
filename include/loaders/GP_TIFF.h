@@ -48,7 +48,7 @@ int GP_OpenTIFF(const char *src_path, void **t);
 
 /*
  * Reads a TIFF from a opened file.
- * 
+ *
  * Upon successful return, context to store bitmap is allocated and image is
  * loaded.
  *

@@ -21,7 +21,7 @@
  *****************************************************************************/
 
  /*
-  
+
    Constant time Median Filter (the computational complexity is independent of
    radius).
 

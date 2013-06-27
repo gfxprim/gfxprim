@@ -34,7 +34,7 @@ static const GP_GlyphBitmap *get_glyph(const GP_TextStyle *style, int c)
 
 	if (glyph == NULL)
 		glyph = GP_GetGlyphBitmap(style->font, ' ');
-	
+
 	return glyph;
 }
 
@@ -74,9 +74,9 @@ static unsigned int max_glyph_advance_x(const GP_TextStyle *style,
 static unsigned int glyph_width(const GP_TextStyle *style, int c)
 {
 	unsigned int size, advance;
-	
+
 	const GP_GlyphBitmap *glyph = get_glyph(style, c);
-	
+
 	advance = multiply_width(style, glyph->advance_x - glyph->bearing_x);
 	size    = multiply_width(style, glyph->width);
 
@@ -84,14 +84,14 @@ static unsigned int glyph_width(const GP_TextStyle *style, int c)
 }
 
 /*
- * Returns size occupied by the last glyph. Here we take advance_x into account. 
+ * Returns size occupied by the last glyph. Here we take advance_x into account.
  */
 static unsigned int last_glyph_width(const GP_TextStyle *style, int c)
 {
 	unsigned int size, advance;
-	
+
 	const GP_GlyphBitmap *glyph = get_glyph(style, c);
-	
+
 	advance = multiply_width(style, glyph->advance_x);
 	size    = multiply_width(style, glyph->width + glyph->bearing_x);
 
@@ -151,7 +151,7 @@ unsigned int GP_TextWidth(const GP_TextStyle *style, const char *str)
 
 	/* first letter */
 	len = first_glyph_width(style, str[0]) + style->char_xspace;
-	
+
 	/* middle letters */
 	for (i = 1; str[i+1] != '\0'; i++)
 		len += glyph_advance_x(style, str[i]) + style->char_xspace;
@@ -173,7 +173,7 @@ GP_Size GP_TextMaxWidth(const GP_TextStyle *style, unsigned int len)
 		return 0;
 
 	return multiply_width(style, len * style->font->max_glyph_advance) +
-	       (len - 1) * style->char_xspace; 
+	       (len - 1) * style->char_xspace;
 }
 
 /*

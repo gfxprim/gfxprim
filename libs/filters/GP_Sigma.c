@@ -45,7 +45,7 @@ static int GP_FilterSigma_Raw(const GP_Context *src,
 {
 	int x, y;
 	unsigned int x1, y1;
-	
+
 	if (src->pixel_type != GP_PIXEL_RGB888) {
 		errno = ENOSYS;
 		return -1;
@@ -69,11 +69,11 @@ static int GP_FilterSigma_Raw(const GP_Context *src,
 	unsigned int *R = GP_TempAllocGet(temp, size * sizeof(unsigned int));
 	unsigned int *G = GP_TempAllocGet(temp, size * sizeof(unsigned int));
 	unsigned int *B = GP_TempAllocGet(temp, size * sizeof(unsigned int));
-	
+
 	/* prefil the sampled array */
 	for (x = 0; x < (int)w; x++) {
 		int xi = GP_CLAMP(x_src + x - xrad, 0, (int)src->w - 1);
-			
+
 		for (y = 0; y < (int)ydiam; y++) {
 			int yi = GP_CLAMP(y_src + y - yrad, 0, (int)src->h - 1);
 
@@ -116,7 +116,7 @@ static int GP_FilterSigma_Raw(const GP_Context *src,
 			R_sum = 0;
 			G_sum = 0;
 			B_sum = 0;
-			
+
 			R_ssum = 0;
 			G_ssum = 0;
 			B_ssum = 0;
@@ -144,14 +144,14 @@ static int GP_FilterSigma_Raw(const GP_Context *src,
 						G_ssum += G_cur;
 						G_cnt++;
 					}
-					
+
 					if (abs(B_cur - B_center) < B_sigma) {
 						B_ssum += B_cur;
 						B_cnt++;
 					}
 				}
 			}
-			
+
 			R_sum -= R_center;
 			G_sum -= G_center;
 			B_sum -= B_center;
@@ -159,12 +159,12 @@ static int GP_FilterSigma_Raw(const GP_Context *src,
 			unsigned int r;
 			unsigned int g;
 			unsigned int b;
-		
+
 			if (R_cnt >= min)
 				r = R_ssum / R_cnt;
 			else
 				r = R_sum / cnt;
-			
+
 			if (G_cnt >= min)
 				g = G_ssum / G_cnt;
 			else
@@ -174,27 +174,26 @@ static int GP_FilterSigma_Raw(const GP_Context *src,
 				b = B_ssum / B_cnt;
 			else
 				b = B_sum / cnt;
-	
+
 			GP_PutPixel_Raw_24BPP(dst, x_dst + x, y_dst + y,
 			                      GP_Pixel_CREATE_RGB888(r, g, b));
 		}
-		
+
 		int yi = GP_CLAMP(y_src + y + yrad + 1, 0, (int)src->h - 1);
-		
+
 		for (x = 0; x < (int)w; x++) {
 			int xi = GP_CLAMP(x_src + x - xrad, 0, (int)src->w - 1);
-			
+
 			GP_Pixel pix = GP_GetPixel_Raw_24BPP(src, xi, yi);
-			
+
 			R[yl * w + x] = GP_Pixel_GET_R_RGB888(pix);
 			G[yl * w + x] = GP_Pixel_GET_G_RGB888(pix);
 			B[yl * w + x] = GP_Pixel_GET_B_RGB888(pix);
-			
 		}
-		
+
 		yc = (yc+1) % ydiam;
 		yl = (yl+1) % ydiam;
-		
+
 		if (GP_ProgressCallbackReport(callback, y, h_src, w_src)) {
 			GP_TempAllocFree(temp);
 			return 1;
@@ -217,7 +216,7 @@ int GP_FilterSigmaEx(const GP_Context *src,
 		     GP_ProgressCallback *callback)
 {
 	GP_CHECK(src->pixel_type == dst->pixel_type);
-	
+
 	/* Check that destination is large enough */
 	GP_CHECK(x_dst + (GP_Coord)w_src <= (GP_Coord)dst->w);
 	GP_CHECK(y_dst + (GP_Coord)h_src <= (GP_Coord)dst->h);

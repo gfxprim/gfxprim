@@ -28,8 +28,8 @@
 
 GP_FilterParam *GP_FilterParamCreate(GP_PixelType pixel_type)
 {
-	GP_FilterParam *ret; 
-	
+	GP_FilterParam *ret;
+
 	ret = malloc((GP_PixelTypes[pixel_type].numchannels + 1)
 	             * sizeof(GP_FilterParam));
 
@@ -51,7 +51,7 @@ void GP_FilterParamDestroy(GP_FilterParam *self)
 static unsigned int count_channels(GP_FilterParam params[])
 {
 	unsigned int i = 0;
-	
+
 	while (params[i].channel_name[0] != '\0')
 		i++;
 
@@ -80,7 +80,7 @@ int GP_FilterParamCheckPixelType(GP_FilterParam params[],
 {
 	unsigned int i, num_channels;
 	const GP_PixelTypeChannel *channels;
-	
+
 	num_channels = GP_PixelTypes[pixel_type].numchannels;
 	channels     = GP_PixelTypes[pixel_type].channels;
 
@@ -92,7 +92,7 @@ int GP_FilterParamCheckPixelType(GP_FilterParam params[],
 	for (i = 0; i < num_channels; i++)
 		if (GP_FilterParamChannel(params, channels[i].name) == NULL)
 			return 1;
-	
+
 	return 0;
 }
 
@@ -104,7 +104,7 @@ int GP_FilterParamCheckChannels(GP_FilterParam params[],
 	for (i = 0; channel_names[i] != NULL; i++)
 		if (GP_FilterParamChannel(params, channel_names[i]) == NULL)
 			return 1;
-	
+
 	if (i != count_channels(params))
 		return 1;
 
@@ -116,15 +116,15 @@ void GP_FilterParamInitChannels(GP_FilterParam params[],
 {
 	unsigned int i, num_channels;
 	const GP_PixelTypeChannel *channels;
-	
+
 	num_channels = GP_PixelTypes[pixel_type].numchannels;
 	channels     = GP_PixelTypes[pixel_type].channels;
-	
+
 	for (i = 0; i < num_channels; i++) {
 		strcpy(params[i].channel_name, channels[i].name);
 		memset(&params[i].val, 0, sizeof(GP_FilterParamVal));
 	}
-	
+
 	params[i].channel_name[0] = '\0';
 }
 
@@ -219,7 +219,7 @@ int GP_FilterParamSetPtr(GP_FilterParam params[], const char *channel_name,
 void GP_FilterParamFreePtrAll(GP_FilterParam params[])
 {
 	unsigned int i;
-	
+
 	for (i = 0; params[i].channel_name[0] != '\0'; i++)
 		free(params[i].val.ptr);
 }
@@ -227,7 +227,7 @@ void GP_FilterParamFreePtrAll(GP_FilterParam params[])
 void GP_FilterParamPrintInt(GP_FilterParam params[])
 {
 	unsigned int i;
-	
+
 	for (i = 0; params[i].channel_name[0] != '\0'; i++)
 		printf("Chann '%s' = %i\n", params[i].channel_name, params[i].val.i);
 }
@@ -235,7 +235,7 @@ void GP_FilterParamPrintInt(GP_FilterParam params[])
 void GP_FilterParamPrintUInt(GP_FilterParam params[])
 {
 	unsigned int i;
-	
+
 	for (i = 0; params[i].channel_name[0] != '\0'; i++)
 		printf("Chann '%s' = %u\n", params[i].channel_name, params[i].val.ui);
 }
@@ -243,7 +243,7 @@ void GP_FilterParamPrintUInt(GP_FilterParam params[])
 void GP_FilterParamPrintFloat(GP_FilterParam params[])
 {
 	unsigned int i;
-	
+
 	for (i = 0; params[i].channel_name[0] != '\0'; i++)
 		printf("Chann '%s' = %f\n", params[i].channel_name, params[i].val.f);
 }
@@ -251,7 +251,7 @@ void GP_FilterParamPrintFloat(GP_FilterParam params[])
 void GP_FilterParamPrintPtr(GP_FilterParam params[])
 {
 	unsigned int i;
-	
+
 	for (i = 0; params[i].channel_name[0] != '\0'; i++)
 		printf("Chann '%s' = %p\n", params[i].channel_name, params[i].val.ptr);
 }

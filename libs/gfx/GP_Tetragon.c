@@ -46,7 +46,7 @@ void GP_Tetragon(GP_Context *context, GP_Coord x0, GP_Coord y0,
                  GP_Coord x3, GP_Coord y3, GP_Pixel pixel)
 {
 	GP_CHECK_CONTEXT(context);
-	
+
 	GP_TRANSFORM_POINT(context, x0, y0);
 	GP_TRANSFORM_POINT(context, x1, y1);
 	GP_TRANSFORM_POINT(context, x2, y2);
@@ -60,7 +60,7 @@ void GP_FillTetragon_Raw(GP_Context *context, GP_Coord x0, GP_Coord y0,
                          GP_Coord x3, GP_Coord y3, GP_Pixel pixel)
 {
 	const GP_Coord xy[8] = {x0, y0, x1, y1, x2, y2, x3, y3};
-	
+
 	GP_FillPolygon_Raw(context, 4, xy, pixel);
 }
 
@@ -69,7 +69,7 @@ void GP_FillTetragon(GP_Context* context, GP_Coord x0, GP_Coord y0,
                      GP_Coord x3, GP_Coord y3, GP_Pixel pixel)
 {
 	GP_CHECK_CONTEXT(context);
-	
+
 	GP_TRANSFORM_POINT(context, x0, y0);
 	GP_TRANSFORM_POINT(context, x1, y1);
 	GP_TRANSFORM_POINT(context, x2, y2);

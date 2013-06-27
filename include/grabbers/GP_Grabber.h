@@ -75,7 +75,7 @@ static inline int GP_GrabberStart(struct GP_Grabber *self)
 {
 	if (self->Start)
 		return self->Start(self);
-	
+
 	return 0;
 }
 
@@ -83,7 +83,7 @@ static inline int GP_GrabberStop(struct GP_Grabber *self)
 {
 	if (self->Stop)
 		return self->Stop(self);
-	
+
 	return 0;
 }
 

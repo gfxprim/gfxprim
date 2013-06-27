@@ -43,9 +43,9 @@
  * The caption parameter may, or may not be used. For example in windowed
  * enviroment caption will become caption of a window. When running on
  * framebuffer it may be ignored completly.
- * 
+ *
  * Returns initalized backend or NULL in case of failure.
- * 
+ *
  * If initialization has failed or params is NULL and help is not NULL, help
  * text is printed to a given file.
  */

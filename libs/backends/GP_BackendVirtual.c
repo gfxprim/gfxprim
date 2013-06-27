@@ -31,7 +31,7 @@
 struct virt_priv {
 	/* Original backend */
 	GP_Backend *backend;
-	
+
 	int flags;
 };
 
@@ -51,11 +51,11 @@ static void virt_update_rect(GP_Backend *self, GP_Coord x0, GP_Coord y0,
                              GP_Coord x1, GP_Coord y1)
 {
 	struct virt_priv *virt = GP_BACKEND_PRIV(self);
-	
+
 	/* Convert and copy the buffer */
 	GP_BlitXYXY(self->context, x0, y0, x1, y1,
 	            virt->backend->context, x0, y0);
-	
+
 	/* Call blit on original backend */
 	virt->backend->UpdateRect(virt->backend, x0, y0, x1, y1);
 }
@@ -96,7 +96,7 @@ static void virt_wait(GP_Backend *self)
 	struct virt_priv *virt = GP_BACKEND_PRIV(self);
 
 	virt->backend->Wait(virt->backend);
-	
+
 	struct GP_Event ev;
 
 	while (GP_BackendGetEvent(virt->backend, &ev))
@@ -106,9 +106,9 @@ static void virt_wait(GP_Backend *self)
 static void virt_exit(GP_Backend *self)
 {
 	struct virt_priv *virt = GP_BACKEND_PRIV(self);
-	
+
 	GP_ContextFree(self->context);
-	
+
 	if (virt->flags & GP_BACKEND_CALL_EXIT)
 		virt->backend->Exit(virt->backend);
 
@@ -128,7 +128,7 @@ GP_Backend *GP_BackendVirtualInit(GP_Backend *backend,
 		GP_DEBUG(1, "Malloc failed :(");
 		return NULL;
 	}
-	
+
 	memset(self, 0, sizeof(GP_Backend));
 
 	/* Create new buffer with different context type */
@@ -137,7 +137,7 @@ GP_Backend *GP_BackendVirtualInit(GP_Backend *backend,
 
 	if (self->context == NULL)
 		goto err0;
-	
+
 	virt = GP_BACKEND_PRIV(self);
 	virt->backend = backend;
 	virt->flags = flags;

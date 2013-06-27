@@ -56,7 +56,7 @@ int GP_FilterContrast_Raw(const GP_Context *src, GP_Context *dst,
                           GP_FilterParam params[],
                           GP_ProgressCallback *callback);
 
-GP_Context *GP_FilterContrast(const GP_Context *src, GP_Context *dst, 
+GP_Context *GP_FilterContrast(const GP_Context *src, GP_Context *dst,
                               GP_FilterParam params[],
                               GP_ProgressCallback *callback);
 

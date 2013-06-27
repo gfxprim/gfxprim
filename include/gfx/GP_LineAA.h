@@ -21,12 +21,12 @@
  *****************************************************************************/
 
 /*
- 
+
    Anti Aliased line.
 
    The coordinates are in XX.8 fixed point format, see core/GP_FixedPoint.h
    for helper macros.
-   
+
    For RGB contexts gamma correction tables are used to generate correct
    intensity for pixels.
 
@@ -40,7 +40,7 @@
 /*
  * Anti Aliased Line respecting context rotation flags and with clipping.
  */
-void GP_LineAA(GP_Context *context, GP_Coord x0, GP_Coord y0, 
+void GP_LineAA(GP_Context *context, GP_Coord x0, GP_Coord y0,
                GP_Coord x1, GP_Coord y1, GP_Pixel pixel);
 
 /*

@@ -158,7 +158,7 @@ const char *GP_InterpolationTypeName(enum GP_InterpolationType interp_type)
 	if (interp_type > GP_INTERP_MAX)
 		return "Unknown";
 
-	return interp_types[interp_type]; 
+	return interp_types[interp_type];
 }
 
 #define A 0.5
@@ -223,26 +223,26 @@ int GP_FilterInterpolate_Cubic(const GP_Context *src, GP_Context *dst,
 		float x = (1.00 * i / (dst->w - 1)) * (src->w - 1);
 		v4f cvx;
 		int xi[4];
-		
+
 		xi[0] = floor(x - 1);
 		xi[1] = x;
 		xi[2] = x + 1;
 		xi[3] = x + 2;
-		
+
 		cvx.f[0] = cubic(xi[0] - x);
 		cvx.f[1] = cubic(xi[1] - x);
 		cvx.f[2] = cubic(xi[2] - x);
 		cvx.f[3] = cubic(xi[3] - x);
-		
+
 		if (xi[0] < 0)
 			xi[0] = 0;
 
 		if (xi[2] >= (int)src->w)
 			xi[2] = src->w - 1;
-		
+
 		if (xi[3] >= (int)src->w)
 			xi[3] = src->w - 1;
-		
+
 		/* Generate interpolated column */
 		for (j = 0; j < src->h; j++) {
 			v4f rv, gv, bv;
@@ -252,17 +252,17 @@ int GP_FilterInterpolate_Cubic(const GP_Context *src, GP_Context *dst,
 			pix[1] = GP_GetPixel_Raw_24BPP(src, xi[1], j);
 			pix[2] = GP_GetPixel_Raw_24BPP(src, xi[2], j);
 			pix[3] = GP_GetPixel_Raw_24BPP(src, xi[3], j);
-				
+
 			rv.f[0] = GP_Pixel_GET_R_RGB888(pix[0]);
 			rv.f[1] = GP_Pixel_GET_R_RGB888(pix[1]);
 			rv.f[2] = GP_Pixel_GET_R_RGB888(pix[2]);
 			rv.f[3] = GP_Pixel_GET_R_RGB888(pix[3]);
-			
+
 			gv.f[0] = GP_Pixel_GET_G_RGB888(pix[0]);
 			gv.f[1] = GP_Pixel_GET_G_RGB888(pix[1]);
 			gv.f[2] = GP_Pixel_GET_G_RGB888(pix[2]);
 			gv.f[3] = GP_Pixel_GET_G_RGB888(pix[3]);
-			
+
 			bv.f[0] = GP_Pixel_GET_B_RGB888(pix[0]);
 			bv.f[1] = GP_Pixel_GET_B_RGB888(pix[1]);
 			bv.f[2] = GP_Pixel_GET_B_RGB888(pix[2]);
@@ -271,7 +271,7 @@ int GP_FilterInterpolate_Cubic(const GP_Context *src, GP_Context *dst,
 			rv = MUL_V4SF(rv, cvx);
 			gv = MUL_V4SF(gv, cvx);
 			bv = MUL_V4SF(bv, cvx);
-			
+
 			col_r[j] = SUM_V4SF(rv);
 			col_g[j] = SUM_V4SF(gv);
 			col_b[j] = SUM_V4SF(bv);
@@ -283,41 +283,41 @@ int GP_FilterInterpolate_Cubic(const GP_Context *src, GP_Context *dst,
 			v4f cvy, rv, gv, bv;
 			float r, g, b;
 			int yi[4];
-		
+
 			yi[0] = floor(y - 1);
 			yi[1] = y;
 			yi[2] = y + 1;
 			yi[3] = y + 2;
-			
+
 			cvy.f[0] = cubic(yi[0] - y);
 			cvy.f[1] = cubic(yi[1] - y);
 			cvy.f[2] = cubic(yi[2] - y);
 			cvy.f[3] = cubic(yi[3] - y);
-		
+
 			if (yi[0] < 0)
 				yi[0] = 0;
-		
+
 			if (yi[2] >= (int)src->h)
 				yi[2] = src->h - 1;
-		
+
 			if (yi[3] >= (int)src->h)
 				yi[3] = src->h - 1;
-			
+
 			rv.f[0] = col_r[yi[0]];
 			rv.f[1] = col_r[yi[1]];
 			rv.f[2] = col_r[yi[2]];
 			rv.f[3] = col_r[yi[3]];
-			
+
 			gv.f[0] = col_g[yi[0]];
 			gv.f[1] = col_g[yi[1]];
 			gv.f[2] = col_g[yi[2]];
 			gv.f[3] = col_g[yi[3]];
-			
+
 			bv.f[0] = col_b[yi[0]];
 			bv.f[1] = col_b[yi[1]];
 			bv.f[2] = col_b[yi[2]];
 			bv.f[3] = col_b[yi[3]];
-			
+
 			rv = MUL_V4SF(rv, cvy);
 			gv = MUL_V4SF(gv, cvy);
 			bv = MUL_V4SF(bv, cvy);
@@ -333,7 +333,7 @@ int GP_FilterInterpolate_Cubic(const GP_Context *src, GP_Context *dst,
 			GP_Pixel pix = GP_Pixel_CREATE_RGB888((uint8_t)r, (uint8_t)g, (uint8_t)b);
 			GP_PutPixel_Raw_24BPP(dst, i, j, pix);
 		}
-		
+
 		if (GP_ProgressCallbackReport(callback, i, dst->w, dst->h))
 			return 1;
 	}
@@ -379,18 +379,18 @@ GP_Context *GP_FilterResize(const GP_Context *src, GP_Context *dst,
 		          "The src and dst pixel types must match");
 		/*
 		 * The size of w and h is asserted in subcontext initalization
-		 */	
+		 */
 		res = GP_SubContext(dst, &sub, 0, 0, w, h);
 	}
 
 	/*
 	 * Operation was aborted by progress callback.
-	 * 
+	 *
 	 * Free any alloacted data and exit.
 	 */
 	if (GP_FilterResize_Raw(src, res, type, callback)) {
 		GP_DEBUG(1, "Operation aborted");
-		
+
 		if (dst == NULL)
 			GP_ContextFree(dst);
 

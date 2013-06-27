@@ -23,7 +23,7 @@
 /*
 
   PNG image support using libpng.
-  
+
  */
 
 #include <stdint.h>
@@ -73,7 +73,7 @@ int GP_OpenPNG(const char *src_path, FILE **f)
 		GP_DEBUG(1, "Invalid file header, '%s' not a PNG image?",
 		            src_path);
 		err = EINVAL;
-		goto err2;	
+		goto err2;
 	}
 
 	GP_DEBUG(1, "Found PNG signature in '%s'", src_path);
@@ -199,7 +199,7 @@ GP_Context *GP_ReadPNG(FILE *f, GP_ProgressCallback *callback)
 			break;
 			}
 		}
-		
+
 		/* Convert everything else to RGB888 */
 		//TODO: add palette matching to G2 G4 and G8
 		png_set_palette_to_rgb(png);
@@ -208,7 +208,7 @@ GP_Context *GP_ReadPNG(FILE *f, GP_ProgressCallback *callback)
 		png_read_update_info(png, png_info);
 
 		png_get_IHDR(png, png_info, &w, &h, &depth,
-	        	     &color_type, NULL, NULL, NULL);
+		             &color_type, NULL, NULL, NULL);
 
 		if (color_type & PNG_COLOR_MASK_ALPHA) {
 			pixel_type = GP_PIXEL_RGBA8888;
@@ -238,7 +238,7 @@ GP_Context *GP_ReadPNG(FILE *f, GP_ProgressCallback *callback)
 	uint32_t y;
 	int p;
 
-	/* 
+	/*
 	 * Do the actuall reading.
 	 *
 	 * The passes are needed for adam7 interlacing.
@@ -259,7 +259,7 @@ GP_Context *GP_ReadPNG(FILE *f, GP_ProgressCallback *callback)
 	png_destroy_read_struct(&png, &png_info, NULL);
 
 	GP_ProgressCallbackDone(callback);
-	
+
 	return res;
 err3:
 	GP_ContextFree(res);
@@ -279,7 +279,7 @@ GP_Context *GP_LoadPNG(const char *src_path, GP_ProgressCallback *callback)
 		return NULL;
 
 	res = GP_ReadPNG(f, callback);
-	
+
 	fclose(f);
 
 	return res;
@@ -289,7 +289,7 @@ static void load_meta_data(png_structp png, png_infop png_info, GP_MetaData *dat
 {
 	double gamma;
 
-	if (png_get_gAMA(png, png_info, &gamma)) 
+	if (png_get_gAMA(png, png_info, &gamma))
 		GP_MetaDataCreateInt(data, "gamma", gamma * 100000);
 
 	png_uint_32 res_x, res_y;
@@ -298,14 +298,14 @@ static void load_meta_data(png_structp png, png_infop png_info, GP_MetaData *dat
 	if (png_get_pHYs(png, png_info, &res_x, &res_y, &unit)) {
 		GP_MetaDataCreateInt(data, "res_x", res_x);
 		GP_MetaDataCreateInt(data, "res_y", res_y);
-		
+
 		const char *unit_name;
-		
+
 		if (unit == PNG_RESOLUTION_METER)
 			unit_name = "meter";
 		else
 			unit_name = "unknown";
-		
+
 		GP_MetaDataCreateString(data, "res_unit", unit_name, 0, 0);
 	}
 
@@ -333,12 +333,12 @@ static void load_meta_data(png_structp png, png_infop png_info, GP_MetaData *dat
 
 	if (png_get_text(png, png_info, &text_ptr, &text_cnt)) {
 		int i;
-		
+
 		for (i = 0; i < text_cnt; i++) {
 
 			if (text_ptr[i].compression != PNG_TEXT_COMPRESSION_NONE)
 				continue;
-			
+
 			char buf[GP_META_RECORD_ID_MAX];
 			snprintf(buf, GP_META_RECORD_ID_MAX, "text:%s", text_ptr[i].key);
 			GP_MetaDataCreateString(data, buf, text_ptr[i].text, 0, 1);
@@ -359,7 +359,7 @@ int GP_ReadPNGMetaData(FILE *f, GP_MetaData *data)
 		err = ENOMEM;
 		goto err1;
 	}
-	
+
 	png_info = png_create_info_struct(png);
 
 	if (png_info == NULL) {
@@ -446,10 +446,10 @@ static int prepare_png_header(const GP_Context *src, png_structp png,
 	png_set_IHDR(png, png_info, src->w, src->h, bit_depth, color_type,
 	             PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_DEFAULT,
 		     PNG_FILTER_TYPE_DEFAULT);
-	
+
 	/* start the actuall writing */
 	png_write_info(png, png_info);
-	
+
 	//png_set_packing(png);
 
 	/* prepare for format conversion */
@@ -551,7 +551,7 @@ int GP_SavePNG(const GP_Context *src, const char *dst_path,
 	}
 
 	png_init_io(png, f);
-	
+
 	int bit_endian_flag = 0;
 	/* Fill png header and prepare for data */
 	prepare_png_header(src, png, png_info, &bit_endian_flag);
@@ -571,7 +571,7 @@ int GP_SavePNG(const GP_Context *src, const char *dst_path,
 	}
 
 	GP_ProgressCallbackDone(callback);
-	
+
 	return 0;
 err3:
 	png_destroy_write_struct(&png, png_info == NULL ? NULL : &png_info);

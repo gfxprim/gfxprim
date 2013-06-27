@@ -32,7 +32,7 @@ static int GP_Filter{{ name }}_{{ pt.name }}(const GP_Context *src, GP_Context *
 
 			GP_PutPixel_Raw_{{ pt.pixelsize.suffix }}(dst, x, y, pix);
 		}
-		
+
 		if (GP_ProgressCallbackReport(callback, y, src->h, src->w))
 			return 1;
 	}
@@ -63,7 +63,7 @@ static int GP_Filter{{ name }}_{{ ps.suffix }}(const GP_Context *src, GP_Context
 			{{ filter_op('pix', ps.size) }}
 			GP_PutPixel_Raw_{{ ps.suffix }}(dst, x, y, pix);
 		}
-		
+
 		if (GP_ProgressCallbackReport(callback, y, src->h, src->w))
 			return 1;
 	}
@@ -126,7 +126,7 @@ GP_Context *GP_Filter{{ name }}(const GP_Context *src, GP_Context *dst{{ maybe_o
 
 		if (dst == NULL)
 			GP_ContextFree(res);
-	
+
 		return NULL;
 	}
 

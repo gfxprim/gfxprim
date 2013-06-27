@@ -139,13 +139,13 @@ int GP_SaveTmpFile(const GP_Context *src, const char *dst_path,
 	i += fwrite(&src->pixel_type, sizeof(src->pixel_type), 1, f);
 
 	uint8_t flags = 0;
-	
+
 	if (src->axes_swap)
 		flags |= 0x01;
 
 	if (src->x_swap)
 		flags |= 0x02;
-	
+
 	if (src->y_swap)
 		flags |= 0x04;
 
@@ -162,13 +162,13 @@ int GP_SaveTmpFile(const GP_Context *src, const char *dst_path,
 			err = EIO;
 			goto err1;
 		}
-		
+
 		GP_ProgressCallbackReport(callback, y, src->h, src->w);
 	}
 
 	if (fclose(f))
 		goto err0;
-	
+
 	GP_ProgressCallbackDone(callback);
 
 	return 0;

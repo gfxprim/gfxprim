@@ -49,7 +49,7 @@ int GP_OpenBMP(const char *src_path, FILE **f,
 
 /*
  * Reads a BMP from a opened file.
- * 
+ *
  * Upon successful return, context to store bitmap is allocated and image is
  * loaded.
  *

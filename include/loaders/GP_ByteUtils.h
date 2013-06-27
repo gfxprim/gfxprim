@@ -35,7 +35,7 @@
  * The format string examples:
  *
  * Type Modifiers:
- * 
+ *
  * L - little endian (passed as value to write, passed as pointer to read)
  * B - big endian
  * A - byte array (passed as bointer for both read and write)
@@ -51,10 +51,10 @@
  * char sig[2];
  *
  * if (GP_FWrite(f, "A2 0x00 0x00 L2 L2", "SG", w, h) != 5)
- * 	//ERROR
+ *	//ERROR
  *
  * if (GP_FRead(f, "A2 I2 L2 L2", sig, &w, &h) != 4)
- * 	//ERROR
+ *	//ERROR
  */
 
 /*

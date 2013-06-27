@@ -149,12 +149,12 @@ static void x11_ev(XEvent *ev)
 	case ConfigureNotify:
 		if (ev->xconfigure.width == (int)self->context->w &&
 		    ev->xconfigure.height == (int)self->context->h)
-		    	break;
-	
+			break;
+
 		if (ev->xconfigure.width == (int)win->new_w &&
 		    ev->xconfigure.height == (int)win->new_h)
-		    	break;
-	
+			break;
+
 		win->new_w = ev->xconfigure.width;
 		win->new_h = ev->xconfigure.height;
 

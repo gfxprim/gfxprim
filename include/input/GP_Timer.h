@@ -21,7 +21,7 @@
  *****************************************************************************/
 
 /*
- 
+
   Timers and priority queue implementation.
 
  */
@@ -48,8 +48,8 @@ typedef struct GP_Timer {
 	/* Timer id, showed in debug messages */
 	char id[10];
 
-	/* 
-	 * Timer Callback 
+	/*
+	 * Timer Callback
 	 *
 	 * If non-zero is returned, the timer is rescheduled to expire
 	 * return value from now.
@@ -73,7 +73,7 @@ typedef struct GP_Timer {
 void GP_TimerQueueDump(GP_Timer *queue);
 
 /*
- * Inserts timer into the timer priority queue. 
+ * Inserts timer into the timer priority queue.
  */
 void GP_TimerQueueInsert(GP_Timer **queue, uint64_t now, GP_Timer *timer);
 

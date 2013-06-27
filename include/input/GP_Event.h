@@ -23,12 +23,12 @@
 /*
 
   Gfxprim event layer.
-  
+
   Events are lowlevel interface to input devices (human interface).
 
   - Events are notifications that something has changed, eg. button pressed
   - Each event carries some information about global state
-  
+
  */
 
 #ifndef INPUT_GP_EVENT_H
@@ -145,7 +145,7 @@ enum GP_EventKeyValue {
 	GP_KEY_KP_3           = 81,
 	GP_KEY_KP_0           = 82,
 	GP_KEY_KP_DOT         = 83,
-	
+
 	GP_KEY_F11            = 87,
 	GP_KEY_F12            = 88,
 
@@ -154,7 +154,7 @@ enum GP_EventKeyValue {
 	GP_KEY_KP_SLASH       = 98,
 	GP_KEY_SYSRQ          = 99,
 	GP_KEY_RIGHT_ALT      = 100,
-	
+
 	GP_KEY_HOME           = 102,
 	GP_KEY_UP             = 103,
 	GP_KEY_PAGE_UP        = 104,
@@ -279,18 +279,18 @@ typedef struct GP_Event {
 
 	/* input device id */
 	uint32_t dev_id;
-	
+
 	/* event timestamp */
 	struct timeval time;
 
-	/* 
+	/*
 	 * Cursor position, position on screen accumulated
 	 * from all pointer devices
 	 */
 	uint32_t cursor_x;
 	uint32_t cursor_y;
 
-	/* 
+	/*
 	 * Bitmap of pressed keys including mouse buttons
 	 * accumulated for all input devices.
 	 */

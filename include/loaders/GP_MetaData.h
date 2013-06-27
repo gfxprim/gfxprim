@@ -119,7 +119,7 @@ GP_MetaRecord *GP_MetaDataCreateDouble(GP_MetaData *self, const char *id,
  *
  * If len == 0, string is copied to the terminating '\0', otherwise len
  * characters is copied. This has no effect if dup == 0.
- * 
+ *
  * If dup is set to 1, the string is duplicated inside of the MetaData
  * structure, otherwise only the pointer is saved.
  */

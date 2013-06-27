@@ -77,7 +77,7 @@ static inline void hist8_add_fine(struct hist8u *out, struct hist8 *in, unsigned
 		out->coarse[i + 1] += in[x].coarse[i + 1];
 		out->coarse[i + 2] += in[x].coarse[i + 2];
 		out->coarse[i + 3] += in[x].coarse[i + 3];
-	
+
 		for (j = 0; j < 16; j++) {
 			out->fine[i + 0][j] += in[x].fine[i + 0][j];
 			out->fine[i + 1][j] += in[x].fine[i + 1][j];
@@ -147,22 +147,22 @@ static inline unsigned int hist8_median(struct hist8u *h, struct hist8 *row,
 
 	for (i = 0; i < 16; i++) {
 		acc += h->coarse[i];
-	
+
 		if (acc >= trigger) {
 			acc -= h->coarse[i];
-			
+
 			/* update fine on position i */
 			hist8_update(h, i, row, x, xmed);
 
 			for (j = 0; j < 16; j++) {
 				acc += h->fine[i][j];
-				
+
 				if (acc >= trigger)
 					return (i<<4) | j;
 			}
 		}
 	}
-	
+
 	GP_BUG("Trigger not reached");
 	return 0;
 }
@@ -185,7 +185,7 @@ static int GP_FilterMedian_Raw(const GP_Context *src,
 
 	GP_DEBUG(1, "Median filter size %ux%u xmed=%u ymed=%u",
 	            w_src, h_src, 2 * xmed + 1, 2 * ymed + 1);
-	
+
 	/* The buffer is w + 2*xmed + 1 size because we read the last value but we don't use it */
 	unsigned int size = (w_src + 2 * xmed + 1);
 
@@ -195,7 +195,7 @@ static int GP_FilterMedian_Raw(const GP_Context *src,
 	struct hist8 *R = GP_TempAllocGet(temp, sizeof(struct hist8) * size);
 	struct hist8 *G = GP_TempAllocGet(temp, sizeof(struct hist8) * size);
 	struct hist8 *B = GP_TempAllocGet(temp, sizeof(struct hist8) * size);
-	
+
 	memset(R, 0, sizeof(*R) * size);
 	memset(G, 0, sizeof(*G) * size);
 	memset(B, 0, sizeof(*B) * size);
@@ -207,15 +207,15 @@ static int GP_FilterMedian_Raw(const GP_Context *src,
 	/* Prefill row of histograms */
 	for (x = 0; x < (int)w_src + 2*xmed; x++) {
 		int xi = GP_CLAMP(x_src + x - xmed, 0, (int)src->w - 1);
-		
+
 		for (y = -ymed; y <= ymed; y++) {
 			int yi = GP_CLAMP(y_src + y, 0, (int)src->h - 1);
-			
+
 			GP_Pixel pix = GP_GetPixel_Raw_24BPP(src, xi, yi);
-			
+
 			hist8_inc(R, x, GP_Pixel_GET_R_RGB888(pix));
-			hist8_inc(G, x, GP_Pixel_GET_G_RGB888(pix));	
-			hist8_inc(B, x, GP_Pixel_GET_B_RGB888(pix));	
+			hist8_inc(G, x, GP_Pixel_GET_G_RGB888(pix));
+			hist8_inc(B, x, GP_Pixel_GET_B_RGB888(pix));
 		}
 	}
 
@@ -224,7 +224,7 @@ static int GP_FilterMedian_Raw(const GP_Context *src,
 		memset(XR, 0, sizeof(*XR));
 		memset(XG, 0, sizeof(*XG));
 		memset(XB, 0, sizeof(*XB));
-		
+
 		/* Compute first histogram */
 		for (i = 0; i <= 2*xmed; i++) {
 			hist8_add_fine(XR, R, i);
@@ -240,7 +240,7 @@ static int GP_FilterMedian_Raw(const GP_Context *src,
 
 			GP_PutPixel_Raw_24BPP(dst, x_dst + x, y_dst + y,
 			                      GP_Pixel_CREATE_RGB888(r, g, b));
-		
+
 			/* Recompute histograms */
 			hist8_sub(XR, R, x);
 			hist8_sub(XG, G, x);
@@ -255,22 +255,22 @@ static int GP_FilterMedian_Raw(const GP_Context *src,
 		for (x = 0; x < (int)w_src + 2*xmed; x++) {
 			int xi = GP_CLAMP(x_src + x - xmed, 0, (int)src->w - 1);
 			int yi = GP_CLAMP(y_src + y - ymed, 0, (int)src->h - 1);
-			
+
 			GP_Pixel pix = GP_GetPixel_Raw_24BPP(src, xi, yi);
-		
-			hist8_dec(R, x, GP_Pixel_GET_R_RGB888(pix));	
-			hist8_dec(G, x, GP_Pixel_GET_G_RGB888(pix));	
-			hist8_dec(B, x, GP_Pixel_GET_B_RGB888(pix));	
-			
+
+			hist8_dec(R, x, GP_Pixel_GET_R_RGB888(pix));
+			hist8_dec(G, x, GP_Pixel_GET_G_RGB888(pix));
+			hist8_dec(B, x, GP_Pixel_GET_B_RGB888(pix));
+
 			yi = GP_MIN(y_src + y + ymed + 1, (int)src->h - 1);
-			
+
 			pix = GP_GetPixel_Raw_24BPP(src, xi, yi);
-			
-			hist8_inc(R, x, GP_Pixel_GET_R_RGB888(pix));	
-			hist8_inc(G, x, GP_Pixel_GET_G_RGB888(pix));	
+
+			hist8_inc(R, x, GP_Pixel_GET_R_RGB888(pix));
+			hist8_inc(G, x, GP_Pixel_GET_G_RGB888(pix));
 			hist8_inc(B, x, GP_Pixel_GET_B_RGB888(pix));
 		}
-		
+
 		if (GP_ProgressCallbackReport(callback, y, h_src, w_src)) {
 			GP_TempAllocFree(temp);
 			return 1;
@@ -292,7 +292,7 @@ int GP_FilterMedianEx(const GP_Context *src,
                       GP_ProgressCallback *callback)
 {
 	GP_CHECK(src->pixel_type == dst->pixel_type);
-	
+
 	/* Check that destination is large enough */
 	GP_CHECK(x_dst + (GP_Coord)w_src <= (GP_Coord)dst->w);
 	GP_CHECK(y_dst + (GP_Coord)h_src <= (GP_Coord)dst->h);

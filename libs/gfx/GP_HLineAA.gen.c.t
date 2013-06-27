@@ -49,10 +49,10 @@ void GP_HLineAA_Raw(GP_Context *context, GP_Coord x0, GP_Coord x1,
 	/* Nothing to draw */
 	if (x0 == x1)
 		return;
-	
+
 	if (x1 < x0)
 		GP_SWAP(x1, x0);
-	
+
 	GP_Coord int_x0 = TO_X_S(x0);
 	GP_Coord int_x1 = TO_X_E(x1);
 	GP_Coord int_y  = GP_FP_FLOOR_TO_INT(y);
@@ -62,31 +62,31 @@ void GP_HLineAA_Raw(GP_Context *context, GP_Coord x0, GP_Coord x1,
 	/* Draw the four starting and ending pixels */
 	unsigned int perc;
 	unsigned int w;
-	
+
 	w = GP_FP_RFRAC(x0 + GP_FP_1_2);
 
 	perc = FP_TO_PERC(GP_FP_MUL(GP_FP_RFRAC(y), w));
 	GP_MixPixel_Raw_Clipped(context, int_x0, int_y, pixel, perc);
 
 	perc = FP_TO_PERC(GP_FP_MUL(GP_FP_FRAC(y), w));
-	GP_MixPixel_Raw_Clipped(context, int_x0, int_y+1, pixel, perc); 
+	GP_MixPixel_Raw_Clipped(context, int_x0, int_y+1, pixel, perc);
 
 	if (int_x0 != int_x1) {
 		w = GP_FP_FRAC(x1 + GP_FP_1_2);
 
 		perc = FP_TO_PERC(GP_FP_MUL(GP_FP_RFRAC(y), w));
 		GP_MixPixel_Raw_Clipped(context, int_x1, int_y, pixel, perc);
-		
+
 		perc = FP_TO_PERC(GP_FP_MUL(GP_FP_FRAC(y), w));
-		GP_MixPixel_Raw_Clipped(context, int_x1, int_y+1, pixel, perc); 
+		GP_MixPixel_Raw_Clipped(context, int_x1, int_y+1, pixel, perc);
 	}
 
 	GP_Coord x;
-	
+
 	/* Now fill the inner part of the HLine */
 	uint8_t up = FP_TO_PERC(GP_FP_RFRAC(y));
 	uint8_t lp = FP_TO_PERC(GP_FP_FRAC(y));
-	
+
 	for (x = int_x0 + 1; x < int_x1; x++) {
 		GP_MixPixel_Raw_Clipped(context, x, int_y, pixel, up);
 		GP_MixPixel_Raw_Clipped(context, x, int_y+1, pixel, lp);

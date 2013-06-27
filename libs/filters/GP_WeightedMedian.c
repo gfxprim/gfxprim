@@ -89,7 +89,7 @@ static int GP_FilterWeightedMedian_Raw(const GP_Context *src,
 	unsigned int x1, y1;
 
 	if (src->pixel_type != GP_PIXEL_RGB888) {
-		errno = ENOSYS;	
+		errno = ENOSYS;
 		return -1;
 	}
 
@@ -108,7 +108,7 @@ static int GP_FilterWeightedMedian_Raw(const GP_Context *src,
 	/* prefil the sampled array */
 	for (x = 0; x < (int)w; x++) {
 		int xi = GP_CLAMP(x_src + x - (int)weights->w/2, 0, (int)src->w - 1);
-			
+
 		for (y = 0; y < (int)weights->h; y++) {
 			int yi = GP_CLAMP(y_src + y - (int)weights->h, 0, (int)src->h - 1);
 
@@ -144,7 +144,7 @@ static int GP_FilterWeightedMedian_Raw(const GP_Context *src,
 			unsigned int r = hist_med(hist_R, 256, sum/2);
 			unsigned int g = hist_med(hist_G, 256, sum/2);
 			unsigned int b = hist_med(hist_B, 256, sum/2);
-	
+
 			GP_PutPixel_Raw_24BPP(dst, x_dst + x, y_dst + y,
 			                      GP_Pixel_CREATE_RGB888(r, g, b));
 
@@ -152,10 +152,10 @@ static int GP_FilterWeightedMedian_Raw(const GP_Context *src,
 			hist_clear(hist_G, 256);
 			hist_clear(hist_B, 256);
 		}
-		
+
 		for (x = 0; x < (int)w; x++) {
 			int xi = GP_CLAMP(x_src + x - (int)weights->w/2, 0, (int)src->w - 1);
-			
+
 			for (y1 = 0; y1 < weights->h; y1++) {
 				int yi = GP_CLAMP(y_src + y + (int)y1 - (int)weights->h/2, 0, (int)src->h - 1);
 
@@ -165,8 +165,8 @@ static int GP_FilterWeightedMedian_Raw(const GP_Context *src,
 				G[y1 * w + x] = GP_Pixel_GET_G_RGB888(pix);
 				B[y1 * w + x] = GP_Pixel_GET_B_RGB888(pix);
 			}
-		}	
-		
+		}
+
 		if (GP_ProgressCallbackReport(callback, y, h_src, w_src)) {
 			GP_TempAllocFree(temp);
 			return 1;
@@ -188,7 +188,7 @@ int GP_FilterWeightedMedianEx(const GP_Context *src,
                               GP_ProgressCallback *callback)
 {
 	GP_CHECK(src->pixel_type == dst->pixel_type);
-	
+
 	/* Check that destination is large enough */
 	GP_CHECK(x_dst + (GP_Coord)w_src <= (GP_Coord)dst->w);
 	GP_CHECK(y_dst + (GP_Coord)h_src <= (GP_Coord)dst->h);

@@ -31,7 +31,7 @@ void GP_HLineXXYAA_Raw(GP_Context *context, GP_Coord x0, GP_Coord x1,
                        GP_Coord y, GP_Pixel pixel)
 {
 	GP_CHECK_CONTEXT(context);
-	
+
 	GP_FN_PER_BPP_CONTEXT(GP_HLine_Raw, context, context, x0, x1, y,
 	                      pixel);
 }
@@ -41,7 +41,7 @@ void GP_HLineAA(GP_Context *context, GP_Coord x0, GP_Coord x1,
                 GP_Coord y, GP_Pixel pixel)
 {
 	GP_CHECK_CONTEXT(context);
-	
+
 	if (context->axes_swap) {
 		GP_TRANSFORM_Y_FP(context, x0);
 		GP_TRANSFORM_Y_FP(context, x1);

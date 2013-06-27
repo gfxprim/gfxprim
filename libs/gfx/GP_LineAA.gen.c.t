@@ -1,3 +1,25 @@
+/*****************************************************************************
+ * This file is part of gfxprim library.                                     *
+ *                                                                           *
+ * Gfxprim is free software; you can redistribute it and/or                  *
+ * modify it under the terms of the GNU Lesser General Public                *
+ * License as published by the Free Software Foundation; either              *
+ * version 2.1 of the License, or (at your option) any later version.        *
+ *                                                                           *
+ * Gfxprim is distributed in the hope that it will be useful,                *
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of            *
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU         *
+ * Lesser General Public License for more details.                           *
+ *                                                                           *
+ * You should have received a copy of the GNU Lesser General Public          *
+ * License along with gfxprim; if not, write to the Free Software            *
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
+ * Boston, MA  02110-1301  USA                                               *
+ *                                                                           *
+ * Copyright (C) 2009-2013 Cyril Hrubis <metan@ucw.cz>                       *
+ *                                                                           *
+ *****************************************************************************/
+
 %% extends "base.c.t"
 
 {% block descr %}Anti Aliased Line{% endblock %}
@@ -20,10 +42,10 @@ static inline void line_aa_x(GP_Context *context,
 {
 	GP_Coord xend, yend, xgap, xpx0, ypx0, xpx1, ypx1;
 	uint8_t perc;
-	
+
 	int64_t dx = x1 - x0;
 	int64_t dy = y1 - y0;
-	
+
 	if (x1 < x0) {
 		GP_SWAP(x0, x1);
 		GP_SWAP(y0, y1);
@@ -56,7 +78,7 @@ static inline void line_aa_x(GP_Context *context,
 
 	for (x = xpx0 + 1; x < xpx1; x++) {
 		intery = yend + GP_FP_DIV((x - xpx0) * dy, dx);
-		
+
 		perc = FP_TO_PERC(GP_FP_RFRAC(intery));
 		GP_MixPixel_Raw_Clipped(context, x, GP_FP_TO_INT(intery), pixel, perc);
 		perc = FP_TO_PERC(GP_FP_FRAC(intery));
@@ -70,10 +92,10 @@ static inline void line_aa_y(GP_Context *context,
 {
 	GP_Coord xend, yend, ygap, xpx0, ypx0, xpx1, ypx1;
 	uint8_t perc;
-	
+
 	int64_t dx = x1 - x0;
 	int64_t dy = y1 - y0;
-	
+
 	if (y1 < y0) {
 		GP_SWAP(x0, x1);
 		GP_SWAP(y0, y1);
@@ -106,7 +128,7 @@ static inline void line_aa_y(GP_Context *context,
 
 	for (y = ypx0 + 1; y < ypx1; y++) {
 		intery = xend + GP_FP_DIV((y - ypx0) * dx, dy);
-		
+
 		perc = FP_TO_PERC(GP_FP_RFRAC(intery));
 		GP_MixPixel_Raw_Clipped(context, GP_FP_TO_INT(intery), y, pixel, perc);
 		perc = FP_TO_PERC(GP_FP_FRAC(intery));

@@ -48,7 +48,7 @@ static int GP_FilterGaussianNoiseAdd_{{ pt.name }}_Raw(const GP_Context *src,
 {
 	GP_DEBUG(1, "Additive Gaussian noise filter %ux%u sigma=%f mu=%f",
 	         w_src, h_src, sigma, mu);
-	
+
 	%% for c in pt.chanslist
 	int sigma_{{ c[0] }} = {{ 2 ** c[2] - 1 }} * sigma;
 	int mu_{{ c[0] }} = {{ 2 ** c[2] - 1 }} * mu;
@@ -62,7 +62,7 @@ static int GP_FilterGaussianNoiseAdd_{{ pt.name }}_Raw(const GP_Context *src,
 	%% for c in pt.chanslist
 	int *{{ c[0] }} = GP_TempAllocGet(temp, size * sizeof(int));
 	%% endfor
-	
+
 	/* Apply the additive noise filter */
 	unsigned int x, y;
 
@@ -70,15 +70,15 @@ static int GP_FilterGaussianNoiseAdd_{{ pt.name }}_Raw(const GP_Context *src,
 		%% for c in pt.chanslist
 		GP_NormInt({{ c[0] }}, size, sigma_{{ c[0] }}, mu_{{ c[0] }});
 		%% endfor
-			
+
 		for (x = 0; x < w_src; x++) {
 			GP_Pixel pix = GP_GetPixel_Raw_{{ pt.pixelsize.suffix }}(src, x + x_src, y + y_src);
-			
+
 			%% for c in pt.chanslist
 			{{ c[0] }}[x] += GP_Pixel_GET_{{ c[0] }}_{{ pt.name }}(pix);
 			{{ c[0] }}[x] = GP_CLAMP({{ c[0] }}[x], 0, {{ 2 ** c[2] - 1 }});
 			%% endfor
-			
+
 			pix = GP_Pixel_CREATE_{{ pt.name }}({{ expand_chanslist(pt, "", "[x]") }});
 			GP_PutPixel_Raw_{{ pt.pixelsize.suffix }}(dst, x + x_dst, y + y_dst, pix);
 		}
@@ -88,7 +88,7 @@ static int GP_FilterGaussianNoiseAdd_{{ pt.name }}_Raw(const GP_Context *src,
 			return 1;
 		}
 	}
-	
+
 	GP_TempAllocFree(temp);
 	GP_ProgressCallbackDone(callback);
 
@@ -130,7 +130,7 @@ int GP_FilterGaussianNoiseAddEx(const GP_Context *src,
                                 GP_ProgressCallback *callback)
 {
 	GP_CHECK(src->pixel_type == dst->pixel_type);
-	
+
 	/* Check that destination is large enough */
 	GP_CHECK(x_dst + (GP_Coord)w_src <= (GP_Coord)dst->w);
 	GP_CHECK(y_dst + (GP_Coord)h_src <= (GP_Coord)dst->h);

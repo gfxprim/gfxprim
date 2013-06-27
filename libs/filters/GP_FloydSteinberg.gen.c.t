@@ -38,7 +38,7 @@
 
 			if ({{ x }} > 1)
 				{{ errors }}[!({{ y }}%2)][{{ x }}-1] += 3 * {{ err }} / 16;
-		
+
 			{{ errors }}[!({{ y }}%2)][{{ x }}] += 5 * {{ err }} / 16;
 
 			if ({{ x }} + 1 < {{ w }})
@@ -70,9 +70,9 @@ int GP_FilterFloydSteinberg_RGB888_to_{{ pt.name }}_Raw(const GP_Context *src, G
 %% endfor
 
 	for (y = 0; y < (GP_Coord)src->h; y++) {
-		for (x = 0; x < (GP_Coord)src->w; x++) { 
+		for (x = 0; x < (GP_Coord)src->w; x++) {
 			GP_Pixel pix = GP_GetPixel_Raw_24BPP(src, x, y);
-			
+
 %% for c in pt.chanslist
 %% if pt.is_gray()
 			float val_{{ c[0] }} = GP_Pixel_GET_R_RGB888(pix) +
@@ -80,9 +80,9 @@ int GP_FilterFloydSteinberg_RGB888_to_{{ pt.name }}_Raw(const GP_Context *src, G
 			                       GP_Pixel_GET_B_RGB888(pix);
 %% else
 			float val_{{ c[0] }} = GP_Pixel_GET_{{ c[0] }}_RGB888(pix);
-%% endif			
+%% endif
 			val_{{ c[0] }} += errors_{{ c[0] }}[y%2][x];
-			
+
 			float err_{{ c[0] }} = val_{{ c[0] }};
 %% if pt.is_gray()
 			GP_Pixel res_{{ c[0] }} = {{ 2 ** c[2] - 1}} * val_{{ c[0] }} / (3 * 255);
@@ -96,7 +96,7 @@ int GP_FilterFloydSteinberg_RGB888_to_{{ pt.name }}_Raw(const GP_Context *src, G
 
 			{{ clamp_val("res_%s"|format(c[0]), c[2]) }}
 %% endfor
-		
+
 %% if pt.is_gray()
 			GP_PutPixel_Raw_{{ pt.pixelsize.suffix }}(dst, x, y, res_V);
 %% else
@@ -109,7 +109,7 @@ int GP_FilterFloydSteinberg_RGB888_to_{{ pt.name }}_Raw(const GP_Context *src, G
 %% for c in pt.chanslist
 		memset(errors_{{ c[0] }}[y%2], 0, src->w * sizeof(float));
 %% endfor
-		
+
 		if (GP_ProgressCallbackReport(callback, y, src->h, src->w))
 			return 1;
 	}

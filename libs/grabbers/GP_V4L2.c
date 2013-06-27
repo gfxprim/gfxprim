@@ -21,7 +21,7 @@
  *****************************************************************************/
 
  /*
-  
+
    Based on V4L2 example code.
 
   */
@@ -50,8 +50,8 @@
 #include "GP_V4L2.h"
 
 struct v4l2_priv {
-	int mode;	
-	
+	int mode;
+
 	/* pointer to page aligned user buffer */
 	void *bufptr[4];
 	size_t buf_len[4];
@@ -67,9 +67,9 @@ static void v4l2_exit(struct GP_Grabber *self)
 	int i;
 
 	GP_DEBUG(1, "Grabber '%s' exitting", priv->device);
-	
+
 	v4l2_stop(self);
-	
+
 	if (priv->mode == 2) {
 		for (i = 0; i < 4; i++)
 			munmap(priv->bufptr[i], priv->buf_len[i]);
@@ -107,7 +107,7 @@ static void v4l2_yuv422_fillframe(struct GP_Grabber *self, void *buf)
 			int32_t G = MUL * (*py) - ((int32_t)(MUL * 0.344)) * PU
 			            - ((int32_t)(MUL * 0.714)) * PV;
 			int32_t B = MUL * (*py) + ((int32_t)(MUL * 1.402)) * PV;
-			
+
 			R = (R + MUL/2)/MUL;
 			G = (G + MUL/2)/MUL;
 			B = (B + MUL/2)/MUL;
@@ -115,13 +115,13 @@ static void v4l2_yuv422_fillframe(struct GP_Grabber *self, void *buf)
 			CLAMP(R, 255);
 			CLAMP(G, 255);
 			CLAMP(B, 255);
-			
+
 			*tmp++ = R;
 			*tmp++ = G;
-		  	*tmp++ = B;
+			*tmp++ = B;
 
 			py += 2;
-			
+
 			if ((j & 1) == 1) {
 				pu += 4;
 				pv += 4;
@@ -133,9 +133,9 @@ static void v4l2_yuv422_fillframe(struct GP_Grabber *self, void *buf)
 static int v4l2_poll(struct GP_Grabber *self)
 {
 	struct v4l2_priv *priv = GP_GRABBER_PRIV(self);
-	
+
 	GP_DEBUG(3, "Grabber '%s' poll", priv->device);
-	
+
 	/* read/write interface */
 	if (priv->mode == 1) {
 		GP_WARN("Read/write I/O not implemented.");
@@ -154,7 +154,7 @@ static int v4l2_poll(struct GP_Grabber *self)
 		switch (errno) {
 		case EAGAIN:
 			return 0;
-        	default:
+		default:
 			GP_WARN("Failed to ioctl VIDIOC_DQBUF on '%s' : %s",
 			        priv->device, strerror(errno));
 			return 0;
@@ -188,12 +188,12 @@ static int v4l2_start(struct GP_Grabber *self)
 	int i;
 	struct v4l2_buffer buf;
 	memset(&buf, 0, sizeof(buf));
-	
+
 	for (i = 0; i < 4; i++) {
 		buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
 		buf.memory = V4L2_MEMORY_MMAP;
 		buf.index = i;
-	
+
 		if (ioctl(self->fd, VIDIOC_QBUF, &buf)) {
 			GP_WARN("Failed to ioclt VIDIOC_QBUF on '%s': %s",
 			        priv->device, strerror(errno));
@@ -248,9 +248,9 @@ struct GP_Grabber *GP_GrabberV4L2Init(const char *device,
 		GP_WARN("Failed to open V4L2 grabber '%s'", device);
 		goto err;
 	}
-	
+
 	struct v4l2_capability cap;
-	
+
 	if (ioctl(fd, VIDIOC_QUERYCAP, &cap)) {
 		err = errno;
 		GP_WARN("ioctl VIDIOC_QUERYCAP failed, '%s' not V4L2 device?",
@@ -294,7 +294,7 @@ struct GP_Grabber *GP_GrabberV4L2Init(const char *device,
 		crop.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
 		/* reset to default */
 		crop.c = cropcap.defrect;
-		
+
 		if (ioctl(fd, VIDIOC_S_CROP, &crop)) {
 			/* error/cropping not supported */
 		}
@@ -306,7 +306,7 @@ struct GP_Grabber *GP_GrabberV4L2Init(const char *device,
 	}
 
 	struct v4l2_format fmt;
-	
+
 	memset(&fmt, 0, sizeof(fmt));
 
 	fmt.type                = V4L2_BUF_TYPE_VIDEO_CAPTURE;
@@ -330,7 +330,7 @@ struct GP_Grabber *GP_GrabberV4L2Init(const char *device,
 	}
 
 	new->frame = GP_ContextAlloc(fmt.fmt.pix.width, fmt.fmt.pix.height, GP_PIXEL_RGB888);
-	
+
 	if (new->frame == NULL) {
 		err = ENOMEM;
 		goto err1;
@@ -340,7 +340,7 @@ struct GP_Grabber *GP_GrabberV4L2Init(const char *device,
 
 	strcpy(priv->device, device);
 	priv->mode = mode;
-	
+
 	switch (mode) {
 	case 1:
 	break;
@@ -353,7 +353,7 @@ struct GP_Grabber *GP_GrabberV4L2Init(const char *device,
 		req.count  = 4;
 		req.type   = V4L2_BUF_TYPE_VIDEO_CAPTURE;
 		req.memory = V4L2_MEMORY_MMAP;
-		
+
 		if (ioctl(fd, VIDIOC_REQBUFS, &req)) {
 			err = errno;
 			GP_WARN("Failed to ioctl VIDIOC_REQBUFS on '%s' : %s",
@@ -366,7 +366,7 @@ struct GP_Grabber *GP_GrabberV4L2Init(const char *device,
 			GP_WARN("Unexpected number of buffers on '%s'", device);
 			goto err2;
 		}
-		
+
 		struct v4l2_buffer buf;
 		memset(&buf, 0, sizeof(buf));
 

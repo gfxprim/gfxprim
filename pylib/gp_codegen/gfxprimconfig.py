@@ -17,7 +17,7 @@ class GfxPrimConfig(object):
     pixel_type: name of C type for a pixel value
     pixel_size: number of bits of pixel_type
     pixelsizes: list of generated and allowed PixelSizes
-    pixelsizes_by_bpp: dictionary of bitendians by BPP 
+    pixelsizes_by_bpp: dictionary of bitendians by BPP
     pixeltypes: list of generated PixelTypes, not incl. UNKNOWN
     """
 

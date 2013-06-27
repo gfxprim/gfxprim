@@ -50,7 +50,7 @@
 
 #define BUF_TO_2(buf, off) \
 	(buf[off] + (buf[off+1]<<8))
-	
+
 
 struct bitmap_info_header {
 	/*
@@ -63,19 +63,19 @@ struct bitmap_info_header {
 	 */
 	uint32_t header_size;
 
-	/* 
+	/*
 	 * Image size in pixels.
 	 * If h is negative image is top-down (bottom-up is default)
 	 */
 	int32_t w;
-	int32_t h;               
-	
+	int32_t h;
+
 	uint16_t bpp;
 	uint32_t compress_type;
-	/* 
+	/*
 	 * if 0 image uses whole range (2^bpp colors)
 	 */
-	uint32_t palette_colors; 
+	uint32_t palette_colors;
 	/*
 	 * RGBA masks for bitfields compression
 	 */
@@ -158,7 +158,7 @@ static uint32_t get_palette_size(struct bitmap_info_header *header)
 static int read_bitfields(FILE *f, struct bitmap_info_header *header)
 {
 	int ret;
-	
+
 	ret = GP_FRead(f, "L4 L4 L4",
 	               &header->R_mask,
 	               &header->G_mask,
@@ -206,7 +206,7 @@ static int read_bitmap_info_header(FILE *f, struct bitmap_info_header *header)
 	if (GP_FRead(f, "L4 L4 L2 L2 L4 I12 L4 I4",
 	             &header->w, &header->h, &nr_planes, &header->bpp,
 		     &header->compress_type, &header->palette_colors) != 8) {
-		
+
 		GP_DEBUG(1, "Failed to read bitmap info header");
 		return EIO;
 	}
@@ -251,7 +251,7 @@ static int read_bitmap_core_header(FILE *f, struct bitmap_info_header *header)
 		GP_DEBUG(1, "Failed to read bitmap core header");
 		return EIO;
 	}
-	
+
 	header->w = BUF_TO_2(buf, 0);
 	header->h = BUF_TO_2(buf, 2);
 	header->bpp = BUF_TO_2(buf, 6);
@@ -356,13 +356,13 @@ static int read_bitmap_palette(FILE *f, struct bitmap_info_header *header,
 			GP_DEBUG(1, "Failed to read palette %"PRIu32, i);
 			return EIO;
 		}
-		
+
 		palette[i] = GP_Pixel_CREATE_RGB888(buf[2], buf[1], buf[0]);
-	
+
 		GP_DEBUG(3, "Palette[%"PRIu32"] = [0x%02x, 0x%02x, 0x%02x]", i,
-	        	    GP_Pixel_GET_R_RGB888(palette[i]),
-	        	    GP_Pixel_GET_G_RGB888(palette[i]),
-	        	    GP_Pixel_GET_B_RGB888(palette[i]));
+		         GP_Pixel_GET_R_RGB888(palette[i]),
+		         GP_Pixel_GET_G_RGB888(palette[i]),
+		         GP_Pixel_GET_B_RGB888(palette[i]));
 	}
 
 	return 0;
@@ -427,7 +427,7 @@ static GP_PixelType match_pixel_type(struct bitmap_info_header *header)
 static uint32_t bitmap_row_size(struct bitmap_info_header *header)
 {
 	uint32_t row_size = 0;
-	
+
 	/* align width to whole bytes */
 	switch (header->bpp) {
 	case 1:
@@ -458,7 +458,7 @@ static uint32_t bitmap_row_size(struct bitmap_info_header *header)
 
 	GP_DEBUG(2, "bpp = %"PRIu16", width = %"PRId32", row_size = %"PRIu32,
 	            header->bpp, header->w, row_size);
-	
+
 	return row_size;
 }
 
@@ -491,10 +491,10 @@ static int read_palette(FILE *f, struct bitmap_info_header *header,
 
 	if ((err = read_bitmap_palette(f, header, palette)))
 		return err;
-	
+
 	if ((err = seek_pixels_offset(header, f)))
 		return err;
-	
+
 	uint32_t row_size = bitmap_row_size(header);
 	int32_t y;
 
@@ -517,7 +517,7 @@ static int read_palette(FILE *f, struct bitmap_info_header *header,
 			} else {
 				p = palette[idx];
 			}
-			
+
 			int32_t ry;
 
 			if (header->h < 0)
@@ -527,14 +527,14 @@ static int read_palette(FILE *f, struct bitmap_info_header *header,
 
 			GP_PutPixel_Raw_24BPP(context, x, ry, p);
 		}
-		
+
 		if (GP_ProgressCallbackReport(callback, y,
 		                              context->h, context->w)) {
 			GP_DEBUG(1, "Operation aborted");
 			return ECANCELED;
 		}
 	}
-	
+
 	GP_ProgressCallbackDone(callback);
 	return 0;
 }
@@ -557,7 +557,7 @@ static int read_bitfields_or_rgb(FILE *f, struct bitmap_info_header *header,
 			ry = y;
 		else
 			ry = GP_ABS(header->h) - 1 - y;
-		
+
 		uint8_t *row = GP_PIXEL_ADDR(context, 0, ry);
 
 		if (fread(row, 1, row_size, f) != row_size) {
@@ -639,19 +639,19 @@ int GP_OpenBMP(const char *src_path, FILE **f,
 		err = EIO;
 		goto err1;
 	}
-	
+
 	if (w != NULL || h != NULL || pixel_type != NULL) {
 		struct bitmap_info_header header;
-	
+
 		if ((err = read_bitmap_header(*f, &header)))
 			goto err1;
 
 		if (w != NULL)
 			*w = header.w;
-	
+
 		if (h != NULL)
 			*h = header.h;
-	
+
 		if (pixel_type != NULL)
 			*pixel_type = match_pixel_type(&header); 
 	}
@@ -679,7 +679,7 @@ GP_Context *GP_ReadBMP(FILE *f, GP_ProgressCallback *callback)
 		err = EIO;
 		goto err1;
 	}
-	
+
 	switch (header.compress_type) {
 	case COMPRESS_RGB:
 	case COMPRESS_BITFIELDS:
@@ -760,7 +760,7 @@ static int bmp_write_header(struct bitmap_info_header *header, FILE *f)
 	if (GP_FWrite(f, "A2 L4 0x00 0x00 0x00 0x00 L4", "BM",
 	              file_size, header->pixel_offset) != 7)
 		return EIO;
-	
+
 	/* Bitmap Info Header */
 	if (GP_FWrite(f, "L4 L4 L4 L2 L2 L4 L4 L4 L4 L4 L4",
 	              header->header_size, header->w, header->h, 1,

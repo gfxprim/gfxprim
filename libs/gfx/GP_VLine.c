@@ -30,7 +30,7 @@
 #include "gfx/GP_VLine.h"
 #include "gfx/GP_HLine.h"
 
-/* 
+/*
  * Ensures that coordinates are in correct order, and clips them.
  * Exits immediately if the line is completely clipped out.
  */
@@ -48,7 +48,7 @@ void GP_VLineXYY_Raw(GP_Context *context, GP_Coord x, GP_Coord y0,
                      GP_Coord y1, GP_Pixel pixel)
 {
 	GP_CHECK_CONTEXT(context);
-	
+
 	ORDER_AND_CLIP_COORDS;
 
 	GP_FN_PER_BPP_CONTEXT(GP_VLine_Raw, context, context, x, y0, y1, pixel);
@@ -67,7 +67,7 @@ void GP_VLineXYY(GP_Context *context, GP_Coord x, GP_Coord y0,
                   GP_Coord y1, GP_Pixel pixel)
 {
 	GP_CHECK_CONTEXT(context);
-	
+
 	if (context->axes_swap) {
 		GP_TRANSFORM_Y(context, x);
 		GP_TRANSFORM_X(context, y0);

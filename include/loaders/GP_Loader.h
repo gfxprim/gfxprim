@@ -50,13 +50,13 @@ int GP_LoadMetaData(const char *src_path, GP_MetaData *data);
  * Simple saving function, the image format is matched by file extension.
  *
  * Retruns zero on succes.
- * 
+ *
  * On failure non-zero is returned.
  *
  * When file type wasn't recognized by extension or if support for requested
  * image format wasn't compiled in non-zero is returned and errno is set to
  * ENOSYS.
- * 
+ *
  * The resulting errno may also be set to any possible error from fopen(3), open(3),
  * write(3), fwrite(3), seek(3), etc..
  */
@@ -67,7 +67,7 @@ int GP_SaveImage(const GP_Context *src, const char *dst_path,
  * You can register your own loader here.
  */
 typedef struct GP_Loader {
-	/*  
+	/*
 	 *  Loads an image.
 	 *
 	 *  Returns allocated and initialized bitmap on success, NULL on failure
@@ -75,12 +75,12 @@ typedef struct GP_Loader {
 	 */
 	GP_Context *(*Load)(const char *src_path, GP_ProgressCallback *callback);
 
-	/* 
+	/*
 	 * Save an image.
 	 *
 	 * Returns zero on succes, non-zero on failure and errno must be set.
 	 */
-	int (*Save)(const GP_Context *src, const char *dst_path, GP_ProgressCallback *callback); 
+	int (*Save)(const GP_Context *src, const char *dst_path, GP_ProgressCallback *callback);
 
 	/*
 	 * The buffer is filled with 32 bytes from an image start, returns 1 if
@@ -95,7 +95,7 @@ typedef struct GP_Loader {
 
 	/* don't touch */
 	struct GP_Loader *next;
-	
+
 	/*
 	 * NULL terminated array of file extensions.
 	 */

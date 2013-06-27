@@ -23,7 +23,7 @@
 /*
 
   GIF image support using giflib.
-  
+
  */
 
 #include <stdint.h>
@@ -54,7 +54,7 @@ int GP_MatchGIF(const void *buf)
 {
 	if (!memcmp(buf, GIF_SIGNATURE1, GIF_SIGNATURE1_LEN))
 		return 1;
-	
+
 	if (!memcmp(buf, GIF_SIGNATURE2, GIF_SIGNATURE2_LEN))
 		return 1;
 
@@ -83,7 +83,7 @@ int GP_OpenGIF(const char *src_path, void **f)
 		 */
 		if (errno == 0)
 			errno = EIO;
-		
+
 		return 1;
 	}
 
@@ -206,14 +206,14 @@ static inline GP_Pixel get_color(GifFileType *gf, uint32_t idx)
 static int get_bg_color(GifFileType *gf, GP_Pixel *pixel)
 {
 	GifColorType *color;
-	
+
 	if (gf->SColorMap == NULL)
 		return 0;
 
 	color = get_color_from_map(gf->SColorMap, gf->SBackGroundColor);
 
 	*pixel = GP_Pixel_CREATE_RGB888(color->Red, color->Green, color->Blue);
-	
+
 	return 1;
 }
 
@@ -228,7 +228,7 @@ static inline unsigned int interlace_real_y(GifFileType *gf, unsigned int y)
 
 	/* Pass 1: Line 0 for each strip */
 	real_y = 8 * y;
-	
+
 	if (real_y < h)
 		return real_y;
 
@@ -240,16 +240,16 @@ static inline unsigned int interlace_real_y(GifFileType *gf, unsigned int y)
 
 	/* Pass 3: Lines 2 and 6 */
 	real_y = 4 * (y - (h - 1)/4 - 1) + 2;
-	
+
 	if (real_y < h)
 		return real_y;
-	
+
 	/* Pass 4: Lines 1, 3, 5, and 7 */
 	real_y = 2 * (y - h/2 - h%2) + 1;
-	
+
 	if (real_y < h)
 		return real_y;
-	
+
 	GP_BUG("real_y > h");
 
 	return 0;
@@ -272,7 +272,7 @@ GP_Context *GP_ReadGIF(void *f, GP_ProgressCallback *callback)
 			err = EIO;
 			goto err1;
 		}
-		
+
 		GP_DEBUG(2, "Have GIF record type %s",
 		         rec_type_name(rec_type));
 
@@ -301,15 +301,15 @@ GP_Context *GP_ReadGIF(void *f, GP_ProgressCallback *callback)
 			 gf->Image.ColorMap ? gf->Image.ColorMap->BitsPerPixel : -1);
 
 		res = GP_ContextAlloc(gf->SWidth, gf->SHeight, GP_PIXEL_RGB888);
-		
+
 		if (res == NULL) {
 			err = ENOMEM;
 			goto err1;
 		}
-		
+
 		/* If background color is defined, use it */
 		if (get_bg_color(gf, &bg)) {
-			GP_DEBUG(1, "Filling bg color %x", bg);	
+			GP_DEBUG(1, "Filling bg color %x", bg);
 			GP_Fill(res, bg);
 		}
 
@@ -318,18 +318,18 @@ GP_Context *GP_ReadGIF(void *f, GP_ProgressCallback *callback)
 			uint8_t line[gf->Image.Width];
 
 			DGifGetLine(gf, line, gf->Image.Width);
-			
+
 			unsigned int real_y = y;
 
 			if (gf->Image.Interlace == 64) {
 				real_y = interlace_real_y(gf, y);
 				GP_DEBUG(3, "Interlace y -> real_y %u %u", y, real_y);
 			}
-			
+
 			//TODO: just now we have only 8BPP
 			for (x = 0; x < gf->Image.Width; x++)
 				GP_PutPixel_Raw_24BPP(res, x + gf->Image.Left, real_y, get_color(gf, line[x]));
-			
+
 			if (GP_ProgressCallbackReport(callback, y - gf->Image.Top,
 			                              gf->Image.Height,
 						      gf->Image.Width)) {
@@ -343,7 +343,6 @@ GP_Context *GP_ReadGIF(void *f, GP_ProgressCallback *callback)
 		break;
 
 	} while (rec_type != TERMINATE_RECORD_TYPE);
-	
 
 	DGifCloseFile(gf);
 

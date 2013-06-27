@@ -36,7 +36,7 @@ static int do_align(GP_Coord *topleft_x, GP_Coord *topleft_y, int align,
                     GP_Size width)
 {
 	int height = GP_TextHeight(style);
-	
+
 	switch (align & 0x0f) {
 	case GP_ALIGN_LEFT:
 		*topleft_x = x - width + 1;
@@ -85,7 +85,7 @@ void GP_Text(GP_Context *context, const GP_TextStyle *style,
 
 	if (style == NULL)
 		style = &GP_DefaultStyle;
-	
+
 	GP_Coord topleft_x, topleft_y;
 	GP_Size w = GP_TextWidth(style, str);
 
@@ -121,7 +121,7 @@ GP_Size GP_Print(GP_Context *context, const GP_TextStyle *style,
 void GP_TextClear(GP_Context *context, const GP_TextStyle *style,
                   GP_Coord x, GP_Coord y, int align,
 		  GP_Pixel bg_color, GP_Size size)
-{	
+{
 	GP_Coord topleft_x, topleft_y;
 
 	GP_ASSERT(do_align(&topleft_x, &topleft_y, align, x, y, style, size) == 0,

@@ -33,7 +33,7 @@
 #include "GP_Backend.h"
 
 enum GP_BackendVirtFlags {
-	/* 
+	/*
 	 * If set virtual backend exit calls 'parent' Exit as well.
 	 */
 	GP_BACKEND_CALL_EXIT = 0x01,

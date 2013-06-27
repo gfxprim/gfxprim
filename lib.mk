@@ -27,7 +27,7 @@ LIBS=$(BUILD_DIR)$(STATIC_LIB) $(BUILD_DIR)$(DYNAMIC_LIB)
 ALL+=$(LIBS) $(SYMLINKS)
 CLEAN+=$(LIBS) $(addprefix $(BUILD_DIR),$(SYMLINKS))
 
-# 
+#
 # OBJECTS are set in post.mk so we need to duplicate the values in
 # OBJS here too to have correct dependencies
 #

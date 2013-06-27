@@ -57,7 +57,7 @@
 		for (i = (1<<14) - xoff[x]; i > xpix_dist; i -= xpix_dist) {
 			if (mx < src->w - 1)
 				mx++;
-		
+
 			pix = GP_GetPixel_Raw_{{ pt.pixelsize.suffix }}(src, mx, y0);
 
 			%% for c in pt.chanslist
@@ -68,9 +68,9 @@
 		if (i > 0) {
 			if (mx < src->w - 1)
 				mx++;
-		
+
 			pix = GP_GetPixel_Raw_{{ pt.pixelsize.suffix }}(src, mx, y0);
-			
+
 			%% for c in pt.chanslist
 			{{ c[0] }}{{ suff }} += (GP_Pixel_GET_{{ c[0] }}_{{ pt.name }}(pix) * i) >> 9;
 			%% endfor
@@ -100,7 +100,7 @@
  *
  * The pixels are weighted by how much they are 'hit' by the rectangle defined
  * by the sampled pixel.
- * 
+ *
  * The implementation is inspired by imlib2 downscaling algorithm.
  */
 static int GP_FilterResizeLinearLFInt_{{ pt.name }}_Raw(const GP_Context *src, GP_Context *dst,
@@ -152,12 +152,12 @@ static int GP_FilterResizeLinearLFInt_{{ pt.name }}_Raw(const GP_Context *src, G
 			%% endfor
 
 			for (j = (1<<14) - yoff[y]; j > ypix_dist; j -= ypix_dist) {
-				
+
 				x0 = xmap[x];
-				
+
 				if (y0 < src->h - 1)
 					y0++;
-		
+
 				{{ sample_x(pt, '1') }}
 
 				%% for c in pt.chanslist
@@ -167,10 +167,10 @@ static int GP_FilterResizeLinearLFInt_{{ pt.name }}_Raw(const GP_Context *src, G
 
 			if (j > 0) {
 				x0 = xmap[x];
-				
+
 				if (y0 < src->h - 1)
 					y0++;
-			
+
 				{{ sample_x(pt, '1') }}
 
 				%% for c in pt.chanslist
@@ -181,11 +181,11 @@ static int GP_FilterResizeLinearLFInt_{{ pt.name }}_Raw(const GP_Context *src, G
 			%% for c in pt.chanslist
 			{{ c[0] }} = ({{ c[0] }} + (1<<4))>>5;
 			%% endfor
-			
+
 			GP_PutPixel_Raw_{{ pt.pixelsize.suffix }}(dst, x, y,
 			                      GP_Pixel_CREATE_{{ pt.name }}({{ expand_chanslist(pt, "") }}));
 		}
-		
+
 		if (GP_ProgressCallbackReport(callback, y, dst->h, dst->w))
 			return 1;
 	}
@@ -207,7 +207,7 @@ static int GP_FilterResizeLinearInt_{{ pt.name }}_Raw(const GP_Context *src, GP_
 	uint8_t  xoff[dst->w + 1];
 	uint8_t  yoff[dst->h + 1];
 	uint32_t x, y, i;
-	
+
 	GP_DEBUG(1, "Scaling image %ux%u -> %ux%u %2.2f %2.2f",
 	            src->w, src->h, dst->w, dst->h,
 		    1.00 * dst->w / src->w, 1.00 * dst->h / src->h);
@@ -243,7 +243,7 @@ static int GP_FilterResizeLinearInt_{{ pt.name }}_Raw(const GP_Context *src, GP_
 
 			if (x1 >= (GP_Coord)src->w)
 				x1 = src->w - 1;
-		
+
 			y0 = ymap[y];
 			y1 = ymap[y] + 1;
 
@@ -274,11 +274,11 @@ static int GP_FilterResizeLinearInt_{{ pt.name }}_Raw(const GP_Context *src, GP_
 			%% for c in pt.chanslist
 			{{ c[0] }} = ({{ c[0] }}1 * yoff[y] + {{ c[0] }}0 * (255 - yoff[y]) + (1<<15)) >> 16;
 			%% endfor
-			
+
 			GP_PutPixel_Raw_{{ pt.pixelsize.suffix }}(dst, x, y,
 			                      GP_Pixel_CREATE_{{ pt.name }}({{ expand_chanslist(pt, "") }}));
 		}
-		
+
 		if (GP_ProgressCallbackReport(callback, y, dst->h, dst->w))
 			return 1;
 	}
@@ -318,7 +318,7 @@ int GP_FilterResizeLinearLFInt_Raw(const GP_Context *src, GP_Context *dst,
 
 		GP_DEBUG(1, "Downscaling image %ux%u -> %ux%u %2.2f %2.2f",
 	                     src->w, src->h, dst->w, dst->h, x_rat, y_rat);
-		
+
 		switch (src->pixel_type) {
 		%% for pt in pixeltypes
 		%%  if not pt.is_unknown() and not pt.is_palette()

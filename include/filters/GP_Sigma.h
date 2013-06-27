@@ -21,14 +21,14 @@
  *****************************************************************************/
 
  /*
-  
+
    Sigma Lee filter.
 
    The xrad and yrad denotes radius the filter works on. The number of neighbor
    pixels is exactly 2 * rad + 1 for both directions.
-   
+
    The sigma denotes maximal symetric difference of pixels scaled to [0,1]
-   interval. Greater sigma causes results to be closer to mean linear filter. 
+   interval. Greater sigma causes results to be closer to mean linear filter.
 
    The min parameter defines minimial number of pixels that must be in the two
    sigma iterval, if there is a less pixels in this interval the new pixel

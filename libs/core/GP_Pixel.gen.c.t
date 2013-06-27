@@ -40,8 +40,8 @@ Pixel type definitions and functions
 {% if pt.is_cmyk() %} | GP_PIXEL_IS_CMYK{% endif -%}
 %%- endmacro
 
-/* 
- * Description of all known pixel types 
+/*
+ * Description of all known pixel types
  */
 const GP_PixelTypeDescription const GP_PixelTypes [GP_PIXEL_MAX] = {
 %%  for pt in pixeltypes
@@ -64,7 +64,7 @@ const GP_PixelTypeDescription const GP_PixelTypes [GP_PIXEL_MAX] = {
 %%  for pt in pixeltypes
 %%   if not pt.is_unknown()
 /*
- * snprintf a human readable value of pixel type {{pt.name}} 
+ * snprintf a human readable value of pixel type {{pt.name}}
  */
 static void GP_PixelSNPrint_{{ pt.name }}(char *buf, size_t len, GP_Pixel p)
 {

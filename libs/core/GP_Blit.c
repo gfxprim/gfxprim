@@ -48,7 +48,7 @@ void GP_BlitXYXY_Naive(const GP_Context *src,
 		for (x = x0; x <= x1; x++) {
 			GP_Pixel p = GP_GetPixel(src, x, y);
 
-			if (src->pixel_type != dst->pixel_type) 
+			if (src->pixel_type != dst->pixel_type)
 				p = GP_ConvertContextPixel(p, src, dst);
 
 			GP_PutPixel(dst, x2 + (x - x0), y2 + (y - y0), p);
@@ -93,11 +93,11 @@ void GP_BlitXYXY_Clipped(const GP_Context *src,
 
 	if (y1 < y0)
 		GP_SWAP(y0, y1);
-	
+
 	/* Noting to blit return now */
 	if (x2 >= (GP_Coord)GP_ContextW(dst) ||
 	    y2 >= (GP_Coord)GP_ContextH(dst))
-	    	return;
+		return;
 
 	/* We need to shift source rectangle */
 	if (x2 < 0) {
@@ -140,7 +140,7 @@ void GP_BlitXYXY_Clipped(const GP_Context *src,
 
 	if (GP_ContextRotationEqual(src, dst))
 		GP_BlitXYXY_Raw_Fast(src, x0, y0, x1, y1, dst, x2, y2);
-	else 
+	else
 		GP_BlitXYXY_Fast(src, x0, y0, x1, y1, dst, x2, y2);
 }
 

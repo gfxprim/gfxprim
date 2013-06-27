@@ -34,18 +34,18 @@
 typedef struct GP_InputDriverLinux {
 	/* fd */
 	int fd;
-	
+
 	/* to store rel coordinates */
 	int rel_x;
 	int rel_y;
-	
+
 	uint8_t rel_flag;
 
 	/* to store abs coordinates */
 	int abs_x;
 	int abs_y;
 	int abs_press;
-	
+
 	int abs_x_max;
 	int abs_y_max;
 	int abs_press_max;

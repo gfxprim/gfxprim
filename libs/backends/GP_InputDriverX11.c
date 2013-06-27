@@ -183,7 +183,7 @@ static void init_table(Display *dpy)
 			GP_WARN("Key '%s' keycode %u collides with key '%s'",
 			        GP_EventKeyName(sym_to_key[i].key), keycode,
 					GP_EventKeyName(keycode_table[keycode - 9]));
-			continue; 
+			continue;
 		}
 
 		keycode_table[keycode - 9] = sym_to_key[i].key;
@@ -239,7 +239,7 @@ void GP_InputDriverX11EventPut(struct GP_EventQueue *event_queue,
 				                  GP_EV_REL_WHEEL, -1, NULL);
 			return;
 		}
-		
+
 		if (key == 0) {
 			GP_WARN("Unmapped X11 button %02x",
 			        ev->xbutton.button);
@@ -258,7 +258,7 @@ void GP_InputDriverX11EventPut(struct GP_EventQueue *event_queue,
 		if (ev->xmotion.x < 0 || ev->xmotion.y < 0 ||
 		    ev->xmotion.x > w || ev->xmotion.y > h)
 			return;
-		
+
 		GP_EventQueuePushRelTo(event_queue,
 		                       ev->xmotion.x, ev->xmotion.y, NULL);
 	break;

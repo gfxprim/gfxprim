@@ -41,15 +41,15 @@ typedef struct GP_Context {
 	uint8_t bpp;		 /* pixel size in bits */
 	uint32_t bytes_per_row;
 	uint32_t w;		 /* width in pixels */
-	uint32_t h;      	 /* height in pixels */
-	/* 
+	uint32_t h;		 /* height in pixels */
+	/*
 	 * Row bit offset. The offset is ignored for byte aligned pixels.
 	 * Basically it's used for non aligned pixels with combination
 	 * with subcontextes.
 	 */
-	uint8_t offset;          
+	uint8_t offset;
 
-	/* 
+	/*
 	 * Pixel format. See GP_Pixel.gen.h and GP_Pixel.gen.c.
 	 */
 	enum GP_PixelType pixel_type;
@@ -63,7 +63,7 @@ typedef struct GP_Context {
 	 */
 	struct GP_Gamma *gamma;
 
-	/* 
+	/*
 	 * Image orientation. Most common is landscape (0, 0, 0),
 	 * portrait with normal topleft corner is (1, 0, 0).
 	 */
@@ -137,11 +137,11 @@ GP_Context *GP_ContextInit(GP_Context *context, GP_Size w, GP_Size h,
 int GP_ContextResize(GP_Context *context, GP_Size w, GP_Size h);
 
 enum GP_ContextCopyFlags {
-	/* 
+	/*
 	 * Copy bitmap pixels too. If not set pixels are uninitalized.
 	 */
 	GP_COPY_WITH_PIXELS   = 0x01,
-	/* 
+	/*
 	 * Copy image rotation flags. If not set flags are set to (0, 0, 0).
 	 */
 	GP_COPY_WITH_ROTATION = 0x02,
@@ -234,7 +234,7 @@ static inline void GP_ContextCopyRotation(const GP_Context *src,
 }
 
 /*
- * Returns context width and height taking the rotation flags into a account. 
+ * Returns context width and height taking the rotation flags into a account.
  */
 static inline GP_Size GP_ContextW(const GP_Context *context)
 {

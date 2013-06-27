@@ -44,7 +44,7 @@
 
   Bicubic
   ~~~~~~~
-  
+
   Works well for upscaling as is. To get decent result on downscaling,
   low-pass filter (for example gaussian blur) must be used on original image
   before scaling is done.
@@ -86,7 +86,7 @@ int GP_FilterResize_Raw(const GP_Context *src, GP_Context *dst,
 /*
  * If destination is non NULL, the w and h are used to create subcontext from
  * destination which is then used to interpolate the image to.
- * 
+ *
  * Otherwise if destination is NULL, the context of size w and h is allocated
  * and returned.
  *

@@ -49,25 +49,25 @@ void GP_Circle(GP_Context *context, GP_Coord xcenter, GP_Coord ycenter,
 	GP_CHECK_CONTEXT(context);
 
 	GP_TRANSFORM_POINT(context, xcenter, ycenter);
-	
+
 	GP_Circle_Raw(context, xcenter, ycenter, r, pixel);
 }
 
 void GP_Ring_Raw(GP_Context *context, GP_Coord xcenter, GP_Coord ycenter,
                  GP_Size r1, GP_Size r2, GP_Pixel pixel)
 {
-	GP_Circle_Raw(context, xcenter, ycenter, r1, pixel); 
-	GP_Circle_Raw(context, xcenter, ycenter, r2, pixel); 
+	GP_Circle_Raw(context, xcenter, ycenter, r1, pixel);
+	GP_Circle_Raw(context, xcenter, ycenter, r2, pixel);
 }
 
 void GP_Ring(GP_Context *context, GP_Coord xcenter, GP_Coord ycenter,
              GP_Size r1, GP_Size r2, GP_Pixel pixel)
 {
 	GP_CHECK_CONTEXT(context);
-	
+
 	GP_TRANSFORM_POINT(context, xcenter, ycenter);
 
-	GP_Ring_Raw(context, xcenter, ycenter, r1, r2, pixel);	
+	GP_Ring_Raw(context, xcenter, ycenter, r1, r2, pixel);
 }
 
 #include "algo/FillRing.algo.h"
@@ -88,8 +88,8 @@ void GP_FillRing(GP_Context *context, GP_Coord xcenter, GP_Coord ycenter,
                  GP_Size r1, GP_Size r2, GP_Pixel pixel)
 {
 	GP_CHECK_CONTEXT(context);
-	
+
 	GP_TRANSFORM_POINT(context, xcenter, ycenter);
-	
+
 	GP_FillRing_Raw(context, xcenter, ycenter, r1, r2, pixel);
 }

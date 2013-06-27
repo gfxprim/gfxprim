@@ -36,23 +36,23 @@
  * 2D convolution kernel.
  *
  * The kernel array size must be w * h.
- * 
+ *
  * The div is used to divide the resulting value which is commonly used for
  * normalization.
  *
  * Example box smoothing filter kernel initialization:
  *
  * float box_filter[] = {
- * 	1, 1, 1,
- * 	1, 1, 1,
- * 	1, 1, 1,
+ *	1, 1, 1,
+ *	1, 1, 1,
+ *	1, 1, 1,
  * };
  *
  * GP_FilterKernel2D box_kernel = {
- * 	.w = 3,
- * 	.h = 3,
- * 	.div = 9,
- * 	.kernel = box_filter,
+ *	.w = 3,
+ *	.h = 3,
+ *	.div = 9,
+ *	.kernel = box_filter,
  * };
  */
 typedef struct GP_FilterKernel2D {

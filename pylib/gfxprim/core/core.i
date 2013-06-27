@@ -17,7 +17,7 @@
 %include "GP_Transform.h"
 
 /*
- * Make members of GP_DebugMsg structure immutable 
+ * Make members of GP_DebugMsg structure immutable
  */
 %immutable GP_DebugMsg::level;
 %immutable GP_DebugMsg::file;
@@ -75,7 +75,7 @@ static int GP_ProgressCallbackProxy(GP_ProgressCallback *self)
         }
         GP_ProgressCallback(PyObject* obj) {
                 GP_ProgressCallback *res;
-                
+
                 if (!PyCallable_Check(obj)) {
                         GP_WARN("Callback must be callable python object");
                         return NULL;
@@ -90,7 +90,7 @@ static int GP_ProgressCallbackProxy(GP_ProgressCallback *self)
 
                 res->priv = obj;
                 res->callback = GP_ProgressCallbackProxy;
-                
+
                 GP_DEBUG(2, "[wrapper] creating Proxy Callback");
 
                 return res;

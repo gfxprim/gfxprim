@@ -50,7 +50,7 @@ struct fb_priv {
 	int con_nr;
 	int last_con_nr;
 	int saved_kb_mode;
-	
+
 	int fb_fd;
 	char path[];
 };
@@ -74,7 +74,7 @@ static int allocate_console(struct fb_priv *fb, int flag)
 		            strerror(errno));
 		return -1;
 	}
-	
+
 	if (ioctl(fd, VT_OPENQRY, &nr) < 0) {
 		GP_DEBUG(1, "Failed to ioctl VT_OPENQRY /dev/tty1: %s",
 		            strerror(errno));
@@ -94,7 +94,7 @@ static int allocate_console(struct fb_priv *fb, int flag)
 		            buf, strerror(errno));
 		return -1;
 	}
-	
+
 	if (ioctl(fd, VT_GETSTATE, &vts) == 0)
 		fb->last_con_nr = vts.v_active;
 	else
@@ -128,14 +128,14 @@ static int allocate_console(struct fb_priv *fb, int flag)
 	if (flag) {
 		struct termios t;
 		cfmakeraw(&t);
-		
+
 		if (tcsetattr(fd, TCSANOW, &t) < 0) {
 			GP_DEBUG(1, "Failed to tcsetattr(): %s",
 			         strerror(errno));
 			close(fd);
 			return -1;
 		}
-	
+
 		if (ioctl(fd, KDGKBMODE, &fb->saved_kb_mode)) {
 			GP_DEBUG(1, "Failed to ioctl KDGKBMODE %s: %s",
                                  buf, strerror(errno));
@@ -164,7 +164,7 @@ static int allocate_console(struct fb_priv *fb, int flag)
 
 static void fb_poll(GP_Backend *self)
 {
-	struct fb_priv *fb = GP_BACKEND_PRIV(self); 
+	struct fb_priv *fb = GP_BACKEND_PRIV(self);
 	unsigned char buf[16];
 	int i, res;
 
@@ -176,7 +176,7 @@ static void fb_poll(GP_Backend *self)
 
 static void fb_wait(GP_Backend *self)
 {
-	struct fb_priv *fb = GP_BACKEND_PRIV(self); 
+	struct fb_priv *fb = GP_BACKEND_PRIV(self);
 
 	struct pollfd fd = {.fd = fb->con_fd, .events = POLLIN, .revents = 0};
 
@@ -188,15 +188,15 @@ static void fb_wait(GP_Backend *self)
 
 static void fb_exit(GP_Backend *self)
 {
-	struct fb_priv *fb = GP_BACKEND_PRIV(self); 
+	struct fb_priv *fb = GP_BACKEND_PRIV(self);
 
 	/* unmap framebuffer */
 	munmap(fb->context.pixels, fb->bsize);
 	close(fb->fb_fd);
-	
+
 	/* reset keyboard */
 	ioctl(fb->con_fd, KDSETMODE, KD_TEXT);
-	
+
 	/* restore keyboard mode */
 	if (fb->flag) {
 		if (ioctl(fb->con_fd, KDSKBMODE, fb->saved_kb_mode) < 0) {
@@ -204,11 +204,11 @@ static void fb_exit(GP_Backend *self)
                                  " /dev/tty%i: %s", fb->con_nr, strerror(errno));
 		}
 	}
-	
+
 	/* switch back console */
 	if (fb->last_con_nr != -1)
 		ioctl(fb->con_fd, VT_ACTIVATE, fb->last_con_nr);
-	
+
 	close(fb->con_fd);
 	free(self);
 }
@@ -220,7 +220,7 @@ GP_Backend *GP_BackendLinuxFBInit(const char *path, int flag)
 	struct fb_fix_screeninfo fscri;
 	struct fb_var_screeninfo vscri;
 	int fd;
-	
+
 	backend = malloc(sizeof(GP_Backend) +
 	                 sizeof(struct fb_priv) + strlen(path) + 1);
 
@@ -236,7 +236,7 @@ GP_Backend *GP_BackendLinuxFBInit(const char *path, int flag)
 	GP_DEBUG(1, "Opening framebuffer '%s'", path);
 
 	fd = open(path, O_RDWR);
-	
+
 	if (fd < 0) {
 		GP_DEBUG(1, "Opening framebuffer failed: %s", strerror(errno));
 		goto err2;
@@ -247,7 +247,7 @@ GP_Backend *GP_BackendLinuxFBInit(const char *path, int flag)
 		            strerror(errno));
 		goto err3;
 	}
-	
+
 	if (ioctl(fd, FBIOGET_VSCREENINFO, &vscri) < 0) {
 		GP_DEBUG(1, "Failed to ioctl FBIOGET_VSCREENINFO: %s",
 		            strerror(errno));
@@ -293,7 +293,7 @@ GP_Backend *GP_BackendLinuxFBInit(const char *path, int flag)
 
 	fb->context.w = vscri.xres;
 	fb->context.h = vscri.yres;
-	
+
 	fb->context.axes_swap = 0;
 	fb->context.x_swap    = 0;
 	fb->context.y_swap    = 0;
@@ -322,10 +322,10 @@ err3:
 	close(fd);
 err2:
 	close(fb->con_fd);
-	
+
 	/* reset keyboard */
 	ioctl(fb->con_fd, KDSETMODE, KD_TEXT);
-	
+
 	/* switch back console */
 	if (fb->last_con_nr != -1)
 		ioctl(fb->con_fd, VT_ACTIVATE, fb->last_con_nr);

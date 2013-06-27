@@ -112,8 +112,8 @@ static const char *get_int(const char *fmt, int *val)
 		*val *= 10;
 		*val += add;
 		i++;
-	} 
-	
+	}
+
 	return fmt + i;
 }
 
@@ -240,7 +240,7 @@ int GP_FRead(FILE *f, const char *fmt, ...)
 
 			if (fread(ptr, val, 1, f) != 1)
 				goto end;
-		
+
 			swap_bytes(ptr, val, type);
 		break;
 		case IGNORE:
@@ -251,7 +251,7 @@ int GP_FRead(FILE *f, const char *fmt, ...)
 			GP_BUG("Wrong format type for reading (%i)", type);
 			goto end;
 		}
-		
+
 		ret++;
 
 	}
@@ -296,17 +296,17 @@ int GP_FWrite(FILE *f, const char *fmt, ...)
 			break;
 			case 2:
 				u16 = va_arg(va, int);
-				
+
 				swap_bytes(&u16, 2, type);
-				
+
 				if (fwrite(&u16, 2, 1, f) != 1)
 					goto end;
 			break;
 			case 4:
 				u32 = va_arg(va, int);
-				
+
 				swap_bytes(&u32, 4, type);
-				
+
 				if (fwrite(&u32, 4, 1, f) != 1)
 					goto end;
 			break;

@@ -58,7 +58,7 @@ static void GP_FillEllipse_Raw_{{ ps.suffix }}(GP_Context *context, GP_Coord xce
 		GP_VLine_Raw_{{ ps.suffix }}(context, xcenter, ycenter - b, ycenter + b, pixel);
 		return;
 	}
-	
+
 	int x, y, error;
 	for (x = 0, error = -b2*a, y = b; y >= 0; y--) {
 		while (error < 0) {
@@ -66,7 +66,7 @@ static void GP_FillEllipse_Raw_{{ ps.suffix }}(GP_Context *context, GP_Coord xce
 			x++;
 		}
 		error += a2 * (-2*y + 1);
-		
+
 		/* Draw two horizontal lines reflected across Y. */
 		GP_HLine_Raw_{{ ps.suffix }}(context, xcenter-x+1, xcenter+x-1, ycenter-y, pixel);
 		GP_HLine_Raw_{{ ps.suffix }}(context, xcenter-x+1, xcenter+x-1, ycenter+y, pixel);
@@ -88,10 +88,10 @@ void GP_FillEllipse(GP_Context *context, GP_Coord xcenter, GP_Coord ycenter,
                     GP_Size a, GP_Size b, GP_Pixel pixel)
 {
 	GP_CHECK_CONTEXT(context);
-	
+
 	GP_TRANSFORM_POINT(context, xcenter, ycenter);
 	GP_TRANSFORM_SWAP(context, a, b);
-	
+
 	GP_FillEllipse_Raw(context, xcenter, ycenter, a, b, pixel);
 }
 

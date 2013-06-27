@@ -21,7 +21,7 @@
  *****************************************************************************/
 
 /*
- 
+
   Returns monotonously incrementing timestamps in milliseconds.
 
  */

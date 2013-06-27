@@ -21,12 +21,12 @@
  *****************************************************************************/
 
 /*
-   
+
    Anti Aliased Horizontal line.
 
    The coordinates are in XX.8 fixed point format, see core/GP_FixedPoint.h
    for helper macros.
-   
+
    For RGB contexts gamma correction tables are used to generate correct
    intensity for pixels.
 

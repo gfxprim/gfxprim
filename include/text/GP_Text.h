@@ -73,7 +73,7 @@ void GP_Text_Raw(GP_Context *context, const GP_TextStyle *style,
 
 /*
  * Draws a string.
- * 
+ *
  * The string is rendered to context (horizontally) with defined text style.
  * The x and y coordinates determines point defined by aligment flags.
  *

@@ -81,7 +81,7 @@ struct GP_ProgressCallbackMPPriv {
  * ...
  *
  * for n threads:
- * 	run_filter(..., callback ? &callback_mp : NULL);
+ *	run_filter(..., callback ? &callback_mp : NULL);
  */
 #define GP_PROGRESS_CALLBACK_MP(name, callback)                        \
 	struct GP_ProgressCallbackMPPriv name_priv = {                 \

@@ -38,7 +38,7 @@ static int get_version(int fd)
 
 	if (ioctl(fd, EVIOCGVERSION, &ver))
 		return -1;
-	
+
 	GP_DEBUG(2, "Input version %u.%u.%u",
 	            ver>>16, (ver>>8)&0xff, ver&0xff);
 
@@ -57,7 +57,7 @@ static int get_name(int fd, char *buf, size_t buf_len)
 
 	return ret;
 }
-	
+
 static void print_name(int fd)
 {
 	char name[64];
@@ -86,13 +86,13 @@ static void try_load_callibration(struct GP_InputDriverLinux *self)
                             abs[1], abs[2], abs[3], abs[4]);
 		self->abs_x_max = abs[2];
 	}
-	
+
 	if (!ioctl(self->fd, EVIOCGABS(ABS_Y), abs)) {
 		GP_DEBUG(3, "ABS Y = <%i,%i> Fuzz %i Flat %i",
                             abs[1], abs[2], abs[3], abs[4]);
 		self->abs_y_max = abs[2];
 	}
-	
+
 	if (!ioctl(self->fd, EVIOCGABS(ABS_PRESSURE), abs)) {
 		GP_DEBUG(3, "ABS P = <%i,%i> Fuzz %i Flat %i",
                             abs[1], abs[2], abs[3], abs[4]);
@@ -130,7 +130,7 @@ struct GP_InputDriverLinux *GP_InputDriverLinuxOpen(const char *path)
 	}
 
 	ret->fd = fd;
-	
+
 	ret->rel_x = 0;
 	ret->rel_y = 0;
 	ret->rel_flag = 0;
@@ -177,7 +177,7 @@ static void input_rel(struct GP_InputDriverLinux *self, struct input_event *ev)
 static void input_abs(struct GP_InputDriverLinux *self, struct input_event *ev)
 {
 	GP_DEBUG(4, "Absolute event");
-	
+
 	switch (ev->code) {
 	case ABS_X:
 		self->abs_x = ev->value;
@@ -235,12 +235,12 @@ static void do_sync(struct GP_InputDriverLinux *self,
 			/* clipping */
 			if (self->abs_x > self->abs_x_max)
 				self->abs_x = self->abs_x_max;
-		
+
 			if (self->abs_x < 0)
 				self->abs_x = 0;
-			
+
 			x     = self->abs_x;
-			x_max = self->abs_x_max;		
+			x_max = self->abs_x_max;
 
 			self->abs_flag_x = 0;
 		}
@@ -249,19 +249,19 @@ static void do_sync(struct GP_InputDriverLinux *self,
 			/* clipping */
 			if (self->abs_y > self->abs_y_max)
 				self->abs_y = self->abs_y_max;
-		
+
 			if (self->abs_y < 0)
 				self->abs_y = 0;
-			
+
 			y     = self->abs_y;
-			y_max = self->abs_y_max;		
+			y_max = self->abs_y_max;
 
 			self->abs_flag_y = 0;
 		}
 
 		GP_EventQueuePushAbs(event_queue, x, y, self->abs_press,
 		                     x_max, y_max, self->abs_press_max, NULL);
-		
+
 		self->abs_press = 0;
 
 		if (self->abs_pen_flag) {
@@ -276,7 +276,7 @@ static void input_syn(struct GP_InputDriverLinux *self,
                       struct input_event *ev)
 {
 	GP_DEBUG(4, "Sync event");
-	
+
 	switch (ev->code) {
 	case 0:
 		do_sync(self, event_queue);
