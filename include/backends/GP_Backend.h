@@ -212,6 +212,14 @@ int GP_BackendWaitEvent(GP_Backend *self, GP_Event *ev);
 void GP_BackendAddTimer(GP_Backend *self, GP_Timer *timer);
 
 /*
+ * Returns number of timers scheduled in backend.
+ */
+static inline unsigned int GP_BackendTimersInQueue(GP_Backend *self)
+{
+	return GP_TimerQueueSize(self->timers);
+}
+
+/*
  * Sets backend caption, if supported.
  *
  * When setting caption is not possible/implemented non zero is returned.

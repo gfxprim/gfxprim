@@ -432,6 +432,20 @@ backend 'Poll' or 'Wait' functions.
 If timer callback is set to 'NULL' a timer event is pushed to the backend
 input queue once timer has expired otherwise timer callback is called.
 
+GP_BackendTimersInQueue
+^^^^^^^^^^^^^^^^^^^^^^^
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <backends/GP_Backend.h>
+/* or */
+#include <GP.h>
+
+void GP_BackendTimersInQueue(GP_Backend *self);
+-------------------------------------------------------------------------------
+
+Returns number of timers scheduled in backend timer queue.
+
 GP_BackendEventsQueued
 ^^^^^^^^^^^^^^^^^^^^^^
 
