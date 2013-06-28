@@ -62,6 +62,12 @@ GP_Context *GP_ReadTIFF(void *t, GP_ProgressCallback *callback);
 GP_Context *GP_LoadTIFF(const char *src_path, GP_ProgressCallback *callback);
 
 /*
+ * Saves TIFF.
+ */
+int GP_SaveTIFF(const GP_Context *src, const char *dst_path,
+                 GP_ProgressCallback *callback);
+
+/*
  * Match TIFF signature.
  */
 int GP_MatchTIFF(const void *buf);

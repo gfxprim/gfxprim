@@ -108,7 +108,7 @@ static GP_Loader gif_loader = {
 
 static GP_Loader tiff_loader = {
 	.Load = GP_LoadTIFF,
-	.Save = NULL,
+	.Save = GP_SaveTIFF,
 	.Match = GP_MatchTIFF,
 	.fmt_name = "Tag Image File Format",
 	.next = &gif_loader,

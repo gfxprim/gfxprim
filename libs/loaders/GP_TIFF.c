@@ -215,12 +215,6 @@ static GP_PixelType match_rgb_pixel_type(TIFF *tiff, struct tiff_header *header)
 	return GP_PIXEL_UNKNOWN;
 }
 
-static GP_PixelType match_palette_pixel_type(TIFF *tiff, struct tiff_header *header)
-{
-	/* The palete is RGB161616 map it to BGR888 for now */
-	return GP_PIXEL_RGB888;
-}
-
 static GP_PixelType match_pixel_type(TIFF *tiff, struct tiff_header *header)
 {
 	if (!TIFFGetField(tiff, TIFFTAG_PHOTOMETRIC, &header->photometric))
@@ -238,7 +232,8 @@ static GP_PixelType match_pixel_type(TIFF *tiff, struct tiff_header *header)
 	break;
 	/* Palette */
 	case 3:
-		return match_palette_pixel_type(tiff, header);
+		/* The palete is RGB161616 map it to BGR888 for now */
+		return GP_PIXEL_RGB888;
 	break;
 	default:
 		GP_DEBUG(1, "Unimplemented photometric interpretation %u",
@@ -471,6 +466,163 @@ GP_Context *GP_LoadTIFF(const char *src_path, GP_ProgressCallback *callback)
 	return res;
 }
 
+static int save_grayscale(TIFF *tiff, const GP_Context *src,
+                          GP_ProgressCallback *callback)
+{
+	uint32_t x, y;
+	uint8_t buf[src->bytes_per_row];
+	tsize_t ret;
+
+	TIFFSetField(tiff, TIFFTAG_BITSPERSAMPLE, src->bpp);
+	TIFFSetField(tiff, TIFFTAG_SAMPLESPERPIXEL, 1);
+	TIFFSetField(tiff, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_MINISBLACK);
+	TIFFSetField(tiff, TIFFTAG_FILLORDER, FILLORDER_MSB2LSB);
+
+	for (y = 0; y < src->h; y++) {
+		uint8_t *addr = GP_PIXEL_ADDR(src, 0, y);
+
+		if (src->bpp < 8 && !src->bit_endian) {
+			for (x = 0; x < src->bytes_per_row; x++) {
+				switch (src->pixel_type) {
+				case GP_PIXEL_G1:
+					buf[x] = GP_BIT_SWAP_B1(addr[x]);
+				break;
+				case GP_PIXEL_G2:
+					buf[x] = GP_BIT_SWAP_B2(addr[x]);
+				break;
+				case GP_PIXEL_G4:
+					buf[x] = GP_BIT_SWAP_B4(addr[x]);
+				break;
+				default:
+					GP_BUG("Uh, oh, do we need swap?");
+				}
+			}
+			addr = buf;
+		}
+
+		ret = TIFFWriteEncodedStrip(tiff, y, addr, src->bytes_per_row);
+
+		if (ret == -1) {
+			//TODO TIFF ERROR
+			GP_DEBUG(1, "TIFFWriteEncodedStrip failed");
+			errno = EIO;
+			return 1;
+		}
+
+		if (GP_ProgressCallbackReport(callback, y, src->h, src->w)) {
+			GP_DEBUG(1, "Operation aborted");
+			errno = ECANCELED;
+			return 1;
+		}
+	}
+
+	TIFFClose(tiff);
+
+	GP_ProgressCallbackDone(callback);
+	return 0;
+}
+
+static int save_rgb(TIFF *tiff, const GP_Context *src,
+                    GP_ProgressCallback *callback)
+{
+	uint8_t buf[src->w * 3];
+	uint32_t x, y;
+
+	TIFFSetField(tiff, TIFFTAG_BITSPERSAMPLE, 8);
+	TIFFSetField(tiff, TIFFTAG_SAMPLESPERPIXEL, 3);
+	TIFFSetField(tiff, TIFFTAG_PHOTOMETRIC, PHOTOMETRIC_RGB);
+
+	for (y = 0; y < src->h; y++) {
+		uint8_t *addr = GP_PIXEL_ADDR(src, 0, y);
+
+		switch (src->pixel_type) {
+		case GP_PIXEL_RGB888:
+			for (x = 0; x < src->bytes_per_row; x+=3) {
+				buf[x + 2] = addr[x];
+				buf[x + 1] = addr[x + 1];
+				buf[x]     = addr[x + 2];
+			}
+			addr = buf;
+		break;
+		case GP_PIXEL_xRGB8888:
+			for (x = 0; x < src->bytes_per_row; x+=4) {
+				buf[3*(x/4) + 2] = addr[x];
+				buf[3*(x/4) + 1] = addr[x + 1];
+				buf[3*(x/4)]     = addr[x + 2];
+			}
+			addr = buf;
+		break;
+		default:
+		break;
+		}
+
+		TIFFWriteEncodedStrip(tiff, y, addr, src->w * 3);
+
+		if (GP_ProgressCallbackReport(callback, y, src->h, src->w)) {
+			GP_DEBUG(1, "Operation aborted");
+			errno = ECANCELED;
+			return 1;
+		}
+	}
+
+	TIFFClose(tiff);
+
+	GP_ProgressCallbackDone(callback);
+	return 0;
+}
+
+int GP_SaveTIFF(const GP_Context *src, const char *dst_path,
+                GP_ProgressCallback *callback)
+{
+	TIFF *tiff;
+
+	if (GP_PixelHasFlags(src->pixel_type, GP_PIXEL_HAS_ALPHA)) {
+		GP_DEBUG(1, "Alpha channel not supported yet");
+		errno = ENOSYS;
+		return 1;
+	}
+
+	switch (src->pixel_type) {
+	case GP_PIXEL_RGB888:
+	case GP_PIXEL_BGR888:
+	case GP_PIXEL_xRGB8888:
+	break;
+	default:
+		GP_DEBUG(1, "Unsupported pixel type %s",
+		         GP_PixelTypeName(src->pixel_type));
+	}
+
+	/* Open TIFF image */
+	tiff = TIFFOpen(dst_path, "w");
+
+	if (tiff == NULL) {
+		GP_DEBUG(1, "Failed to open tiff '%s'", dst_path);
+		return 1;
+	}
+
+	/* Set required fields */
+	TIFFSetField(tiff, TIFFTAG_IMAGEWIDTH, src->w);
+	TIFFSetField(tiff, TIFFTAG_IMAGELENGTH, src->h);
+	TIFFSetField(tiff, TIFFTAG_ROWSPERSTRIP, 1);
+	TIFFSetField(tiff, TIFFTAG_PLANARCONFIG, PLANARCONFIG_CONTIG);
+
+	/* Save grayscale */
+	if (GP_PixelHasFlags(src->pixel_type, GP_PIXEL_IS_GRAYSCALE))
+		return save_grayscale(tiff, src, callback);
+
+	switch (src->pixel_type) {
+	case GP_PIXEL_RGB888:
+	case GP_PIXEL_BGR888:
+	case GP_PIXEL_xRGB8888:
+		return save_rgb(tiff, src, callback);
+	default:
+	break;
+	}
+
+	GP_BUG("Should not be reached");
+	return 0;
+}
+
 #else
 
 int GP_MatchTIFF(const void GP_UNUSED(*buf))
@@ -498,6 +650,13 @@ GP_Context *GP_LoadTIFF(const char GP_UNUSED(*src_path),
 {
 	errno = ENOSYS;
 	return NULL;
+}
+
+int GP_SaveTIFF(const GP_Context *src, const char *dst_path,
+                GP_ProgressCallback *callback)
+{
+	errno = ENOSYS;
+	return 1;
 }
 
 #endif /* HAVE_TIFF */
