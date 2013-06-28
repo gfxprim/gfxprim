@@ -38,20 +38,34 @@ uint32_t callback3()
 	return random() % 30 + 1;
 }
 
+#define MAX 10
+
 int main(void)
 {
 	GP_TIMER_DECLARE(oneshot, 30, 0, "Oneshot", callback1, NULL);
 	GP_TIMER_DECLARE(recurrent, 0, 4, "Recurrent", callback1, NULL);
 	GP_TIMER_DECLARE(random, 10, 0, "Random", callback3, NULL);
+	GP_Timer timers[MAX];
 	GP_Timer *queue = NULL;
 	uint64_t now;
-	int ret;
+	int i, ret;
 
 	GP_SetDebugLevel(10);
 
 	GP_TimerQueueInsert(&queue, 0, &oneshot);
 	GP_TimerQueueInsert(&queue, 0, &recurrent);
 	GP_TimerQueueInsert(&queue, 0, &random);
+
+	for (i = 0; i < MAX; i++) {
+		timers[i].expires = MAX - i;
+		timers[i].period = 0;
+		timers[i].Callback = callback1;
+		timers[i].priv = NULL;
+		sprintf(timers[i].id, "Timer%i", MAX - i);
+		GP_TimerQueueInsert(&queue, 0, &timers[i]);
+	}
+
+	GP_TimerQueueDump(queue);
 
 	for (now = 0; now < 100; now += 3) {
 		printf("NOW %u\n", (unsigned int) now);

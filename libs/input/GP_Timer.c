@@ -65,26 +65,7 @@ static int timer_cmp(GP_Timer *t1, GP_Timer *t2)
  */
 static int well_balanced(unsigned int sons)
 {
-	switch (sons) {
-	case 0:
-	case 2:
-	case 6:
-	case 15:
-	case 30:
-	case 62:
-	case 126:
-	case 254:
-	case 510:
-	case 1022:
-	case 2046:
-	case 4092:
-	case 8190:
-	case 16382:
-	case 32766:
-		return 1;
-	default:
-		return 0;
-	}
+	return !((sons + 2) & (sons + 1));
 }
 
 static GP_Timer *swap_left(GP_Timer *heap)
@@ -161,7 +142,7 @@ static GP_Timer *rem_last(GP_Timer *heap, GP_Timer **last)
 	return heap;
 }
 
-static GP_Timer *buble_down(GP_Timer *heap)
+static GP_Timer *bubble_down(GP_Timer *heap)
 {
 	GP_Timer *right = heap->right;
 	GP_Timer *left = heap->left;
@@ -172,13 +153,13 @@ static GP_Timer *buble_down(GP_Timer *heap)
 
 	if (right && timer_cmp(heap, right)) {
 		swap_right(heap);
-		right->right = buble_down(heap);
+		right->right = bubble_down(heap);
 		return right;
 	}
 
 	if (left && timer_cmp(heap, left)) {
 		swap_left(heap);
-		left->left = buble_down(heap);
+		left->left = bubble_down(heap);
 		return left;
 	}
 
@@ -201,7 +182,7 @@ static GP_Timer *pop(GP_Timer *heap)
 	last->right = heap->right;
 	last->sons = heap->sons;
 
-	return buble_down(last);
+	return bubble_down(last);
 }
 
 void GP_TimerQueueInsert(GP_Timer **heap, uint64_t now, GP_Timer *timer)
