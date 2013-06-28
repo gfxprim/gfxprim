@@ -177,9 +177,9 @@ static void wait_timers_poll(GP_Backend *self)
 
 void GP_BackendWait(GP_Backend *self)
 {
-	uint64_t now = GP_GetTimeStamp();
-
 	if (self->timers) {
+		uint64_t now = GP_GetTimeStamp();
+
 		/* Get rid of possibly expired timers */
 		if (GP_TimerQueueProcess(&self->timers, now))
 			return;
