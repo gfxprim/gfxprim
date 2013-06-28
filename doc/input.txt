@@ -275,7 +275,7 @@ typedef struct GP_Timer {
 
 Timers are implemented as a simple structure with a callback, expiration, id
 string and internal heap pointers. The priority queue is described simply by
-the pointer to the top timer (soonest time to expire).
+the pointer to the top timer (soonest to expire).
 
 The 'priv' pointer is used to pass a user pointer to the callback function.
 
@@ -315,6 +315,21 @@ at `now + timer->expire`.
 /* or */
 #include <input/GP_Timer.h>
 
+void GP_TimerQueueRemove(GP_Timer **queue, GP_Timer *timer);
+-------------------------------------------------------------------------------
+
+Removes timer from the queue.
+
+If timer is not found in the queue nothing is done but warning is printed.
+
+Runs in 'O(n)' time (the insert and process runs in 'O(nlog(n))').
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <GP.h>
+/* or */
+#include <input/GP_Timer.h>
+
 int GP_TimerQueueProcess(GP_Timer **queue, uint64_t now);
 -------------------------------------------------------------------------------
 
@@ -324,6 +339,17 @@ Recurrent timers and timers that returned non-zero from callback are reinserted
 into the queue with new expiration time.
 
 Returns number of timers processed.
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <GP.h>
+/* or */
+#include <input/GP_Timer.h>
+
+unsigned int GP_TimerQueueSize(GP_Timer *queue);
+-------------------------------------------------------------------------------
+
+Returns number of timers in the queue.
 
 [[TimeStamp]]
 TimerStamp

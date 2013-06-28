@@ -78,10 +78,11 @@ void GP_TimerQueueDump(GP_Timer *queue);
 void GP_TimerQueueInsert(GP_Timer **queue, uint64_t now, GP_Timer *timer);
 
 /*
- * Removes timer from timer queue. Returns NULL if id was not found.
+ * Removes timer from timer queue.
+ *
+ * This operation (in contrast with insert and process) runs in O(n) time.
  */
-GP_Timer GP_TimerQueueRemove(GP_Timer *queue, GP_Timer *timer);
-GP_Timer GP_TimerQueueRemoveById(GP_Timer *queue, const char *id);
+void GP_TimerQueueRemove(GP_Timer **queue, GP_Timer *timer);
 
 /*
  * Processes queue, all timers with expires <= now are processed.
@@ -89,5 +90,13 @@ GP_Timer GP_TimerQueueRemoveById(GP_Timer *queue, const char *id);
  * Returns number of timers processed.
  */
 int GP_TimerQueueProcess(GP_Timer **queue, uint64_t now);
+
+/*
+ * Returns size of the queue, i.e. number of timers.
+ */
+static inline unsigned int GP_TimerQueueSize(GP_Timer *queue)
+{
+	return queue ? queue->sons + 1 : 0;
+}
 
 #endif /* INPUT_GP_TIMER_H */

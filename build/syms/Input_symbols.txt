@@ -28,5 +28,6 @@ GP_EventQueuePushResize
 GP_TimerQueueDump
 GP_TimerQueueProcess
 GP_TimerQueueInsert
+GP_TimerQueueRemove
 
 GP_GetTimeStamp

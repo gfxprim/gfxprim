@@ -198,6 +198,73 @@ void GP_TimerQueueInsert(GP_Timer **heap, uint64_t now, GP_Timer *timer)
 	*heap = insert(*heap, timer);
 }
 
+static GP_Timer *rem(GP_Timer *heap, GP_Timer *timer, GP_Timer *last, int *flag)
+{
+	if (heap == NULL)
+		return NULL;
+
+	/* Found -> remove */
+	if (heap == timer) {
+		GP_DEBUG(3, "Timer found -> removing");
+
+		*flag = 1;
+
+		last->left = heap->left;
+		last->right = heap->right;
+		last->sons = heap->sons;
+
+		return bubble_down(last);
+	}
+
+	heap->left = rem(heap->left, timer, last, flag);
+	heap->right = rem(heap->right, timer, last, flag);
+
+	return heap;
+}
+
+static GP_Timer *pre_rem(GP_Timer *heap, GP_Timer *timer)
+{
+	GP_Timer *last;
+	int flag = 0;
+
+	if (!heap) {
+		GP_WARN("Attempt to remove timer %s from empty queue",
+		        timer->id);
+		return NULL;
+	}
+
+	/*
+	 * Remove last timer from the heap prior the removal,
+	 * we will use it in place of the removed timer later.
+	 */
+	heap = rem_last(heap, &last);
+
+	if (!heap) {
+		if (timer == last)
+			return NULL;
+
+		GP_WARN("Timer %s not found (queue has one timer)", timer->id);
+		return last;
+	}
+
+	heap = rem(heap, timer, last, &flag);
+
+	if (!flag) {
+		GP_WARN("Timer %s not found", timer->id);
+		/* reinsert the last element */
+		return insert(heap, last);
+	}
+
+	return heap;
+}
+
+void GP_TimerQueueRemove(GP_Timer **queue, GP_Timer *timer)
+{
+	GP_DEBUG(3, "Removing timer %s from queue", timer->id);
+
+	*queue = pre_rem(*queue, timer);
+}
+
 static GP_Timer *process_top(GP_Timer *heap, uint64_t now)
 {
 	GP_Timer *timer = heap;

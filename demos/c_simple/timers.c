@@ -67,6 +67,10 @@ int main(void)
 
 	GP_TimerQueueDump(queue);
 
+	GP_TimerQueueRemove(&queue, &timers[MAX-1]);
+
+	GP_TimerQueueDump(queue);
+
 	for (now = 0; now < 100; now += 3) {
 		printf("NOW %u\n", (unsigned int) now);
 		printf("-------------------------------------\n");
