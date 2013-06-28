@@ -79,6 +79,8 @@ static void x11_update_rect(GP_Backend *self, GP_Coord x0, GP_Coord y0,
 
 	putimage(win, x0, y0, x1, y1);
 
+	XFlush(win->dpy);
+
 	XUnlockDisplay(win->dpy);
 }
 
@@ -185,17 +187,13 @@ static void x11_poll(GP_Backend *self)
 	XUnlockDisplay(win->dpy);
 }
 
+#include <poll.h>
+
 static void x11_wait(GP_Backend *self)
 {
-	struct x11_win *win = GP_BACKEND_PRIV(self);
-	XEvent ev;
-
-	XLockDisplay(win->dpy);
-
-	XNextEvent(win->dpy, &ev);
-	x11_ev(&ev);
-
-	XUnlockDisplay(win->dpy);
+	struct pollfd fd = {.fd = self->fd, .events = POLLIN, .revents = 0};
+	poll(&fd, 1, -1);
+	x11_poll(self);
 }
 
 static int resize_buffer(struct GP_Backend *self, uint32_t w, uint32_t h)

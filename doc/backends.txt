@@ -368,14 +368,6 @@ Blocks until backend event arrives.
 Events received by backend are not necessarily translated into the input
 events.
 
-[WARNING]
-Using GP_BackendWait() in multi-threaded program will most likely cause
-deadlocks. As the backend data structures and connection is guarded by a lock
-any other backend function (called from different thread while
-GP_BackendWait() is blocking) will lock until GP_BackendWait() returns (i.e.
-event was received).
-
-
 GP_BackendWaitEvent
 ^^^^^^^^^^^^^^^^^^^
 
