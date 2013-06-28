@@ -669,7 +669,7 @@ int main(int argc, char *argv[])
 {
 	GP_Context *context = NULL;
 	const char *backend_opts = "X11";
-	int sleep_ms = -1;
+	int sleep_ms = 0;
 	int opt;
 	int shift_flag;
 	GP_PixelType emul_type = GP_PIXEL_UNKNOWN;
