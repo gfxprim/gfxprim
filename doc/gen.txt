@@ -28,7 +28,7 @@ class PixelSize(object):
 
     def needs_bit_endian(self):
        ...
-    
+
     ...
 
 -------------------------------------------------------------------------------
@@ -74,7 +74,7 @@ BE
 ["graphviz", "bit-endian-be-1bit.png"]
 ------------------------------------------------------------------------------
 digraph bit_endian {
-	graph [ dpi = 70 ]; 
+	graph [ dpi = 70 ];
 	node [shape = record];
 	rankdir = LR;
 
@@ -94,7 +94,7 @@ digraph bit_endian {
 ["graphviz", "bit-endian-be-2bits.png"]
 ------------------------------------------------------------------------------
 digraph bit_endian {
-	graph [ dpi = 70 ]; 
+	graph [ dpi = 70 ];
 	node [shape = record];
 	rankdir = LR;
 
@@ -117,7 +117,7 @@ LE
 ["graphviz", "bit-endian-le-1bit.png"]
 ------------------------------------------------------------------------------
 digraph bit_endian {
-	graph [ dpi = 70 ]; 
+	graph [ dpi = 70 ];
 	node [shape = record];
 	rankdir = LR;
 
@@ -137,7 +137,7 @@ digraph bit_endian {
 ["graphviz", "bit-endian-le-2bits.png"]
 ------------------------------------------------------------------------------
 digraph bit_endian {
-	graph [ dpi = 70 ]; 
+	graph [ dpi = 70 ];
 	node [shape = record];
 	rankdir = LR;
 

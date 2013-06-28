@@ -48,8 +48,8 @@ order not to loose precision.
 
 The pointers to gamma tables are storied in 'GP_Gamma' structure and are
 organized in the same order as channels. First N tables for each channel and
-gamma value gamma, then N tables for inverse 1/gamma function. 
-   
+gamma value gamma, then N tables for inverse 1/gamma function.
+
 So when we have RGB888 pixel and gamma 2.2 there are two tables in the memory,
 one for gamma 2.2 input 8bit output 10bit and it's inverse input 10bit output
 8bit. The 'GP_Gamma' contains six pointers. First three points to the gamma
@@ -81,7 +81,7 @@ gamma->tables[chan_count + chan_number].u8[chan_val]
 
 gamma->tables[chan_count + chan_number].u16[chan_val]
 
-/* 
+/*
  * When doing more than one conversion it's better to save pointers to
  * individual table (example for RGB888):
  */

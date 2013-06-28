@@ -15,7 +15,7 @@ typedef struct GP_Context {
 	uint32_t bytes_per_row;
 	uint32_t w;              /* width in pixels */
 	uint32_t h;              /* height in pixels */
-	/* 
+	/*
          * Row bit offset. The offset is ignored for byte aligned pixels.
          * Basically it's used for non aligned pixels with combination
          * with subcontextes.
@@ -81,7 +81,7 @@ GP_TRANSFORM_POINT(context, x, y)
 GP_TRANSFORM_RECT(context, x, y, w, h)
 
 /* Inverse transformation, bitmap coordinates to user coordinates */
-GP_RETRANSFORM_POINT(context, x, y) 
+GP_RETRANSFORM_POINT(context, x, y)
 -------------------------------------------------------------------------------
 
 [source,c]
@@ -91,7 +91,7 @@ GP_RETRANSFORM_POINT(context, x, y)
 #include <GP.h>
 
 /*
- * Rotate context flags clock wise. 
+ * Rotate context flags clock wise.
  */
 void GP_ContextRotateCW(GP_Context *context);
 
@@ -170,11 +170,11 @@ appropriate size; the initial contents of the bitmap are undefined.
 #include <GP.h>
 
 enum GP_ContextCopyFlags {
-        /* 
+        /*
          * Copy bitmap pixels too. If not set pixels are uninitialized.
          */
         GP_COPY_WITH_PIXELS   = 0x01,
-        /* 
+        /*
          * Copy image rotation flags. If not set flags are set to (0, 0, 0).
          */
         GP_COPY_WITH_ROTATION = 0x02,
@@ -266,7 +266,7 @@ Conversions
 #include <GP.h>
 
 GP_Context *GP_ContextConvertAlloc(const GP_Context *src,
-                                   GP_PixelType dst_pixel_type); 
+                                   GP_PixelType dst_pixel_type);
 
 GP_Context *GP_ContextConvert(const GP_Context *src, GP_Context *dst);
 

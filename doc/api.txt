@@ -12,7 +12,7 @@ GFXprim API
   +
 . link:core.html[Library Core overview]
   +
-  Describes functions and macros in library core. 
+  Describes functions and macros in library core.
   +
 . link:pixels.html[Pixel Types]
   +

@@ -34,7 +34,7 @@ GP_CONTAINER_OF(ptr, structure, member);
 These common macros implements basic functions such as minimum, maximum,
 absolute value, swap and sign.
 
-All macros use 'typeof()' in order to evaluate their arguments exactly once. 
+All macros use 'typeof()' in order to evaluate their arguments exactly once.
 
 The 'GP_ARRAY_SIZE()' macro computes size of statically defined array (i.e.
 returns +sizeof(array) / sizeof(elem)+).

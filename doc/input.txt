@@ -35,18 +35,18 @@ typedef struct GP_Event {
 
 	/* input device id */
 	uint32_t dev_id;
-	
+
 	/* event timestamp */
 	struct timeval time;
 
-	/* 
+	/*
 	 * Cursor position, position on screen accumulated
 	 * from all pointer devices
 	 */
 	uint32_t cursor_x;
 	uint32_t cursor_y;
 
-	/* 
+	/*
 	 * Bitmap of pressed keys including mouse buttons
 	 * accumulated for all input devices.
 	 */
@@ -145,7 +145,7 @@ struct GP_EventSys {
 The event 'value' is a union that could hold different information. The right
 format of the data is known from the 'type' and 'code'. Some types of the
 events has no value at all.
-  
+
 * The relative coordinates are used for 'GP_EV_REL_POS' and absolute coordinates
   for 'GP_EV_ABS_POS'.
 
@@ -157,7 +157,7 @@ events has no value at all.
 This image shows GFXprim key names without the 'GP_KEY_' prefix (Click for a
 higher resolution). So for example 'LEFTSHIFT' on the image is
 'GP_KEY_LEFT_SHIFT'.
-+ 
++
 [[Keyboard Layout]]
 .GFXprim key names without the 'GP_KEY_' prefix.
 image::keyboard.svg["Keyboard Layout",width=800,link="keyboard.svg"]
@@ -259,8 +259,8 @@ typedef struct GP_Timer {
 	/* Timer id, showed in debug messages */
 	char id[10];
 
-	/* 
-	 * Timer Callback 
+	/*
+	 * Timer Callback
 	 *
 	 * If non-zero is returned, the timer is rescheduled to expire
 	 * return value from now.
@@ -277,7 +277,7 @@ Timers are implemented as a simple structure with a callback, expiration, id
 string and internal heap pointers. The priority queue is described simply by
 the pointer to the top timer (soonest time to expire).
 
-The 'priv' pointer is used to pass a user pointer to the callback function. 
+The 'priv' pointer is used to pass a user pointer to the callback function.
 
 The number of timers in the queue is the number of sons of the top timer plus
 one.
@@ -294,7 +294,7 @@ variables corresponds to the structure members.
 
 void GP_TimerQueueDump(GP_Timer *queue);
 -------------------------------------------------------------------------------
- 
+
 Prints the structure of binary heap into stdout, only for debugging.
 
 [source,c]

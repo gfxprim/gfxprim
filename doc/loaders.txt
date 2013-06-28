@@ -16,7 +16,7 @@ All saving functions returns zero on success and non-zero on failure.  If
 image saving is aborted by a callback, the opened file is closed and removed
 from a filesystem before the call returns.
 
-In case of a failure 'errno' is set. 
+In case of a failure 'errno' is set.
 
 The signature matching functions takes a 32 bytes long buffer and looks for a
 valid image signature. If signature is found 1 is returned.
@@ -48,7 +48,7 @@ Image Loader
 GP_Context *GP_LoadImage(const char *src_path, GP_ProgressCallback *callback);
 -------------------------------------------------------------------------------
 
-Loads image from a file. 
+Loads image from a file.
 
 The image format is first guessed by the file extension. If loader for the
 file extension is found it's called and if it succedes the image data is
@@ -88,7 +88,7 @@ Advanced usage
 [source,c]
 -------------------------------------------------------------------------------
 typedef struct GP_Loader {
-	/*  
+	/*
 	 *  Loads an image.
 	 *
 	 *  Returns allocated and initialized bitmap on success, NULL on failure
@@ -96,13 +96,13 @@ typedef struct GP_Loader {
 	 */
 	GP_Context *(*Load)(const char *src_path, GP_ProgressCallback *callback);
 
-	/* 
+	/*
 	 * Save an image.
 	 *
 	 * Returns zero on succes, non-zero on failure and errno must be set.
 	 */
 	int (*Save)(const GP_Context *src, const char *dst_path,
-	            GP_ProgressCallback *callback); 
+	            GP_ProgressCallback *callback);
 
 	/*
 	 * The buffer is filled with 32 bytes from an image start, returns 1 if
@@ -117,7 +117,7 @@ typedef struct GP_Loader {
 
 	/* don't touch */
 	struct GP_Loader *next;
-	
+
 	/*
 	 * NULL terminated array of file extensions.
 	 */
@@ -143,7 +143,7 @@ void GP_LoaderUnregister(GP_Loader *self);
 The 'GP_Loader' structure describes an image loader.
 
 The 'Load', 'Save' and 'Match' functions could be 'NULL' if the particular
-functionality is not implemented. 
+functionality is not implemented.
 
 The 'fmt_name' is a short string that describes the format. For example:
 'Netbpm portable pixmap'.
@@ -248,7 +248,7 @@ int GP_SavePNG(const GP_Context *src, const char *dst_path,
 
 Currently only 'RGB888' format is supported, you should convert the
 'GP_Context' to 'RGB888' before calling this function otherwise non-zero is
-returned and 'errno' is set to 'ENOSYS'. 
+returned and 'errno' is set to 'ENOSYS'.
 
 [source,c]
 -------------------------------------------------------------------------------

@@ -236,7 +236,7 @@ Brightness filter, increments all pixel channels by a fixed value.
 -------------------------------------------------------------------------------
 #include <GP_Filters.h>
 
-GP_Context *GP_FilterContrast(const GP_Context *src, GP_Context *dst, 
+GP_Context *GP_FilterContrast(const GP_Context *src, GP_Context *dst,
                               float mul, GP_ProgressCallback *callback);
 -------------------------------------------------------------------------------
 
@@ -537,7 +537,7 @@ filter operates on.
 The dst coordinates defines offset into the dst context.
 
 The kernel is two-dimensional array of a size kw * kh indexed as
-kernel[x + y*kw]. 
+kernel[x + y*kw].
 
 The kern_div is a coefficient that is used to divide the resulting values often
 used to normalize the result.
@@ -613,7 +613,7 @@ The dst coordinates are offset into the dst.
 
 The kernel is one-dimensional array of floats of size kw or kh.
 
-The kern_div is a coefficient that is used to divide the resulting values. 
+The kern_div is a coefficient that is used to divide the resulting values.
 
 The last function does both vertical and horizontal convolution and takes care
 of correct progress callback.
@@ -660,7 +660,7 @@ NOTE: The number of kernel rows and columns is expected to be odd number.
 NOTE: The linear convolutions are internally implemented using integer
       arithmetics, which works fine, but you need to take a care not to
       overflow 32bit signed integer. If the pixel channel size is 8bit
-      long and 10bits are used for the fixed point part of the number 
+      long and 10bits are used for the fixed point part of the number
       the rest must fit into about 10 bits to be safe.
 
 [source,c]
@@ -775,7 +775,7 @@ The convolution kernel is defined as:
 \begin{bmatrix}
 0  &  0  &  0 \\
 1  & -2  &  1 \\
-0  &  0  &  0 
+0  &  0  &  0
 \end{bmatrix}
 =
 \begin{bmatrix}
@@ -817,16 +817,16 @@ O(x,y) = I(x,y) - w * I''(x,y)
 
 .Original Image; Edge Sharpening w=0.1, w=0.3, w=0.5
 image:images/dither/lenna_small.png[
-	"Original Image", 
+	"Original Image",
 	link="images/dither/lenna.png"]
 image:images/edge_sharpening/lenna_small_w_0_1.png[
-	"Edge Sharpening w=0.1", 
+	"Edge Sharpening w=0.1",
 	link="images/edge_sharpening/lenna_w_0_1.png"]
 image:images/edge_sharpening/lenna_small_w_0_3.png[
-	"Edge Sharpening w=0.5", 
+	"Edge Sharpening w=0.5",
 	link="images/edge_sharpening/lenna_w_0_3.png"]
 image:images/edge_sharpening/lenna_small_w_0_5.png[
-	"Edge Sharpening w=0.5", 
+	"Edge Sharpening w=0.5",
 	link="images/edge_sharpening/lenna_w_0_5.png"]
 
 Gaussian Blur
@@ -962,7 +962,7 @@ int GP_FilterFloydSteinberg_RGB888(const GP_Context *src,
 -------------------------------------------------------------------------------
 
 Renders Floyd Steinberg dithering directly into passed context. The
-destination must be at least as large as source. 
+destination must be at least as large as source.
 
 If operation was aborted by a callback, non-zero is returned.
 
@@ -984,7 +984,7 @@ Hilbert-Peano
 ^^^^^^^^^^^^^
 
 Hilbert-Peano space filling curve based dithering.
- 
+
 The error value is distributed around the Hilbert curve.
 
 The result is a little more noisy, but doesn't create repeating patterns like
@@ -1001,7 +1001,7 @@ int GP_FilterHilbertPeano_RGB888(const GP_Context *src,
 -------------------------------------------------------------------------------
 
 Renders Hilbert Peano dithering directly into passed context. The
-destination must be at least as large as source. 
+destination must be at least as large as source.
 
 If operation was aborted by a callback, non-zero is returned.
 
@@ -1026,7 +1026,7 @@ All following images were generated using 'grinder'.
 
 .Original Image; Floyd-Steinberg, Hilbert-Peano: 1-bit, 2-bit, 4-bit, 8-bit Grayscale; 1-bit, 2-bit, 3-bit (per channel) RGB
 image:images/dither/lenna_small.png[
-	"Original Image", 
+	"Original Image",
 	link="images/dither/lenna.png"]
 image:images/dither/lenna_G1_FS_small.png[
 	"1-bit Grayscale Floyd-Steinberg",
@@ -1113,7 +1113,7 @@ rectangle of 2 * xmed + 1 x 2 * ymed + 1 pixels.
 
 .Original Image; Median 3x3, 5x5, 7x7, 9x9
 image:images/dither/lenna_small.png[
-	"Original Image", 
+	"Original Image",
 	link="images/dither/lenna.png"]
 image:images/median/lenna_small_med_3_3.png[
 	"Median 3x3",

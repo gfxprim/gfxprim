@@ -3,7 +3,7 @@ Debug Messages
 
 The GFXprim library includes a debug message infrastructure in order to ease
 the debugging.
- 
+
 Many places of the library uses debug messages to report warnings, bugs, or
 generally important events (i.e. context has been allocated, filter function
 has been called).

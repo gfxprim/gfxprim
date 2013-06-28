@@ -43,7 +43,7 @@ import gfxprim.loaders as loaders
     img.loaders.SavePNG(path, callback=None)
 
     img.loaders.SaveJPG(path, callback=None)
-    
+
     img.loaders.SaveBMP(path, callback=None)
 -------------------------------------------------------------------------------
 

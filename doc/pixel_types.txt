@@ -12,7 +12,7 @@ Pixel sizes 1, 2 and 4 depend on bit-endian setting and are supported on all sys
 Subcontext operations and blits may be slower in case of a different subpixel alignment.
 
 Pixel sizes not divisible by 8 and between 9 and 23 depend on the bit endian -
-the endianity of the system must match the bit-endianity. The other combination 
+the endianity of the system must match the bit-endianity. The other combination
 is not supported at all - it would be too complicated and probably very inefficient
 to decode/encode.
 
@@ -44,7 +44,7 @@ format, as long as it is not used (compile-time warning is generated).
 Bit-endianity
 -------------
 
-With 1, 2 and 4 bpp formats, there are two possible orders of pixels within a byte, 
+With 1, 2 and 4 bpp formats, there are two possible orders of pixels within a byte,
 both seen in the wild. The two are enumerated in `GP_BIT_ENDIAN`:
 
 `GP_BIT_ENDIAN_LE`::

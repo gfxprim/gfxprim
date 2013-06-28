@@ -27,7 +27,7 @@ import gfxprim.core as core
 Creates a context of a particular size and pixel type.
 
 First two parameters are 'width' and 'height' third is pixel type which is an
-enumeration 
+enumeration
 
 May raise 'OSError' with 'ENOMEM' errno if allocation has failed.
 
@@ -78,7 +78,7 @@ import gfxprim.core as core
     # sx and sy in the source context
     # tx and ty in in the target
     context.Blit(sx, sy, target, tx, ty, w, h)
-    
+
     # Alternatively the size can be described by
     # coordinates in the source or target
     context.Blit(sx, sy, target, tx, ty, sx2=, sy2=)
@@ -100,7 +100,7 @@ Colors and Pixels
 ~~~~~~~~~~~~~~~~~
 
 Pixel in gfxprim is a number large enough to store a pixel value. Pixel is
-passed as a parameter to all drawing functions. 
+passed as a parameter to all drawing functions.
 
 Color is a more abstract representation for example RGB triplet.
 
@@ -133,7 +133,7 @@ import gfxprim.core as core
 
 -------------------------------------------------------------------------------
 
-The PixelTypes array stores all supported pixel types 
+The PixelTypes array stores all supported pixel types
 
 Debug Functions
 ~~~~~~~~~~~~~~~

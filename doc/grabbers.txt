@@ -27,8 +27,8 @@ typdef struct GP_Grabber {
          * Currently loaded frame.
          */
 	GP_Context *frame;
-	
-	/* 
+
+	/*
          * Connection fd usable for select() or poll().
 	 *
 	 * Set to -1 if not available.

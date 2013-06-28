@@ -4,7 +4,7 @@ Drawing Backends
 Drawing backends provide means to draw into computer screen or into a window
 inside of running operating system. Instead of having one unified
 initialization interface each backend has it's specific function and semantics
-but once backend is initialized the backend structure provides unified API for 
+but once backend is initialized the backend structure provides unified API for
 controlling the drawing.
 
 So far there are backends for Linux mmaped 'frame-buffer', 'libSDL' and
@@ -92,7 +92,7 @@ X Server
 enum GP_BackendX11Flags {
 	/* When set, w and h is ignored and root window is used */
 	GP_X11_USE_ROOT_WIN = 0x01,
-	
+
 	/* Create new borderless window above the root window */
 	GP_X11_CREATE_ROOT_WIN = 0x02,
 
@@ -151,7 +151,7 @@ GP_BackendX11RequestFullscreen
 
 /*
  * Changes full screen mode.
- * 
+ *
  * 0 = off
  * 1 = on
  * 2 = toggle
@@ -206,15 +206,15 @@ typdef struct GP_Backend {
          */
         const char *name;
 
-        /* 
+        /*
          * Pointer to context APP should draw to.
          */
         GP_Context *context;
 
 	...
 
-	/* 
-         * Connection fd. Set to -1 if not available 
+	/*
+         * Connection fd. Set to -1 if not available
          */
         int fd;
 };
@@ -293,7 +293,7 @@ GP_BackendPoll
 void GP_BackendPoll(GP_Backend *backend);
 -------------------------------------------------------------------------------
 
-Polls for backend events. 
+Polls for backend events.
 
 The poll only reads events from event source (i.e. X11 socket, Linux evdev
 file descriptor), process them and may place new event into the backend event
@@ -345,7 +345,7 @@ otherwise.
 	while (GP_BackendPollEvent(backend, &ev) {
 
 		/* process events */
-	
+
 	}
 -------------------------------------------------------------------------------
 
