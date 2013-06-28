@@ -33,6 +33,9 @@
 #include <string.h>
 
 #include "../../config.h"
+
+#include "core/GP_Pixel.h"
+#include "core/GP_GetPutPixel.h"
 #include "core/GP_Debug.h"
 
 #include "GP_TIFF.h"
@@ -98,79 +101,357 @@ static const char *compression_name(uint16_t compression)
 	return "Unknown";
 }
 
-GP_Context *GP_ReadTIFF(void *t, GP_ProgressCallback *callback)
+struct tiff_header {
+	/* compulsory tiff data */
+	uint32_t w, h;
+	uint16_t compress;
+	uint16_t bits_per_sample;
+
+	/* either strips or tiles should be set */
+	uint32_t rows_per_strip;
+
+	uint32_t tile_w;
+	uint32_t tile_h;
+
+	/* pixel type related values */
+	uint16_t photometric;
+};
+
+static int read_header(TIFF *tiff, struct tiff_header *header)
 {
-	uint32_t w, h, y, tile_w, tile_h, rows_per_strip;
-	uint16_t compression, bpp;
-	TIFF *tiff = t;
-        TIFFRGBAImage img;
-	GP_Context *res;
-	int err;
-
 	/* all these fields are compulsory in tiff image */
-	TIFFGetField(tiff, TIFFTAG_IMAGEWIDTH, &w);
-        TIFFGetField(tiff, TIFFTAG_IMAGELENGTH, &h);
-	TIFFGetField(tiff, TIFFTAG_COMPRESSION, &compression);
-	TIFFGetField(tiff, TIFFTAG_BITSPERSAMPLE, &bpp);
+	if (!TIFFGetField(tiff, TIFFTAG_IMAGEWIDTH, &header->w)) {
+		GP_DEBUG(1, "Failed to read Width");
+		return EIO;
+	}
 
-	GP_DEBUG(1, "TIFF image %ux%u compression: %s, bpp: %u",
-	         w, h, compression_name(compression), bpp);
+        if (!TIFFGetField(tiff, TIFFTAG_IMAGELENGTH, &header->h)) {
+		GP_DEBUG(1, "Failed to read Height");
+		return EIO;
+	}
+
+	if (!TIFFGetField(tiff, TIFFTAG_COMPRESSION, &header->compress)) {
+		GP_DEBUG(1, "Failed to read Compression Type");
+		return EIO;
+	}
+
+	if (!TIFFGetField(tiff, TIFFTAG_BITSPERSAMPLE,
+	                  &header->bits_per_sample)) {
+		GP_DEBUG(1, "Failed to read Bits Per Sample");
+		return EIO;
+	}
+
+	GP_DEBUG(1, "TIFF image %ux%u Compression: %s, Bits Per Sample: %u",
+	         header->w, header->h,
+	         compression_name(header->compress), header->bits_per_sample);
 
 	/* If set tiff is saved in tiles */
-	if (TIFFGetField(tiff, TIFFTAG_TILEWIDTH, &tile_w) &&
-	    TIFFGetField(tiff, TIFFTAG_TILELENGTH, &tile_h)) {
-		GP_DEBUG(1, "TIFF is tiled in %ux%u", tile_w, tile_h);
+	if (TIFFGetField(tiff, TIFFTAG_TILEWIDTH, &header->tile_w) &&
+	    TIFFGetField(tiff, TIFFTAG_TILELENGTH, &header->tile_h)) {
+		GP_DEBUG(1, "TIFF is tiled in %ux%u",
+		         header->tile_w, header->tile_h);
+		header->rows_per_strip = 0;
+		return 0;
+	}
+
+	if (!TIFFGetField(tiff, TIFFTAG_ROWSPERSTRIP, &header->rows_per_strip)) {
+		GP_DEBUG(1, "TIFF not saved in tiles nor strips");
+		return ENOSYS;
+	}
+
+	GP_DEBUG(1, "TIFF is saved in strips");
+
+	return 0;
+}
+
+static GP_PixelType match_grayscale_pixel_type(TIFF *tiff,
+                                               struct tiff_header *header)
+{
+	if (!TIFFGetField(tiff, TIFFTAG_BITSPERSAMPLE,
+	                  &header->bits_per_sample)) {
+		GP_DEBUG(1, "Have 1bit Bitmap");
+		return GP_PIXEL_G1;
+	}
+
+	switch (header->bits_per_sample) {
+	case 2:
+		GP_DEBUG(1, "Have 2bit Grayscale");
+		return GP_PIXEL_G2;
+	case 4:
+		GP_DEBUG(1, "Have 4bit Grayscale");
+		return GP_PIXEL_G4;
+	case 8:
+		GP_DEBUG(1, "Have 8bit Grayscale");
+		return GP_PIXEL_G8;
+	case 16:
+		GP_DEBUG(1, "Have 16bit Grayscale");
+		return GP_PIXEL_G16;
+	default:
+		GP_DEBUG(1, "Unimplemented bits per sample %u",
+		         (unsigned) header->bits_per_sample);
+		return GP_PIXEL_UNKNOWN;
+	}
+}
+
+static GP_PixelType match_rgb_pixel_type(TIFF *tiff, struct tiff_header *header)
+{
+	uint16_t samples;
+
+	if (!TIFFGetField(tiff, TIFFTAG_SAMPLESPERPIXEL, &samples)) {
+		GP_DEBUG(1, "Failed to get Samples Per Pixel");
+		return EINVAL;
+	}
+
+	GP_DEBUG(1, "Have %u samples per pixel", (unsigned) samples);
+
+	uint16_t bps = header->bits_per_sample;
+
+	/* Mach RGB pixel type with given pixel sizes */
+	if (samples == 3)
+		return GP_PixelRGBLookup(bps, 0, bps, bps,
+		                         bps, 2*bps, 0, 0, 3*bps);
+
+	GP_DEBUG(1, "Unsupported");
+	return GP_PIXEL_UNKNOWN;
+}
+
+static GP_PixelType match_palette_pixel_type(TIFF *tiff, struct tiff_header *header)
+{
+	/* The palete is RGB161616 map it to BGR888 for now */
+	return GP_PIXEL_RGB888;
+}
+
+static GP_PixelType match_pixel_type(TIFF *tiff, struct tiff_header *header)
+{
+	if (!TIFFGetField(tiff, TIFFTAG_PHOTOMETRIC, &header->photometric))
+		return GP_PIXEL_UNKNOWN;
+
+	switch (header->photometric) {
+	/* 1-bit or 4, 8-bit grayscale */
+	case 0:
+	case 1:
+		return match_grayscale_pixel_type(tiff, header);
+	break;
+	/* RGB */
+	case 2:
+		return match_rgb_pixel_type(tiff, header);
+	break;
+	/* Palette */
+	case 3:
+		return match_palette_pixel_type(tiff, header);
+	break;
+	default:
+		GP_DEBUG(1, "Unimplemented photometric interpretation %u",
+		         (unsigned) header->photometric);
+		return GP_PIXEL_UNKNOWN;
+	}
+}
+
+uint16_t get_idx(uint8_t *row, uint32_t x, uint16_t bps)
+{
+	switch (bps) {
+	case 1:
+		return !!(row[x/8] & (1<<(7 - x%8)));
+	case 2:
+		return (row[x/4] >> (2*(3 - x%4))) & 0x03;
+	case 4:
+		return (row[x/2] >> (4*(!(x%2)))) & 0x0f;
+	case 8:
+		return row[x];
+	case 16:
+		return ((uint16_t*)row)[x];
+	}
+
+	GP_DEBUG(1, "Unsupported bits per sample %u", (unsigned) bps);
+	return 0;
+}
+
+int tiff_read_palette(TIFF *tiff, GP_Context *res, struct tiff_header *header,
+                      GP_ProgressCallback *callback)
+{
+	if (TIFFIsTiled(tiff)) {
+		//TODO
+		return ENOSYS;
+	}
+
+	if (header->bits_per_sample > 48) {
+		GP_DEBUG(1, "Bits per sample too big %u",
+		         (unsigned)header->bits_per_sample);
+		return EINVAL;
+	}
+
+	unsigned int palette_size = (1<<header->bits_per_sample);
+	uint16_t *palette_r, *palette_g, *palette_b;
+	uint32_t x, y, scanline_size;
+
+	GP_DEBUG(1, "Pallete size %u", palette_size);
+
+	if (!TIFFGetField(tiff, TIFFTAG_COLORMAP, &palette_r, &palette_g, &palette_b)) {
+		GP_DEBUG(1, "Failed to read palette");
+		return EIO;
+	}
+
+	scanline_size = TIFFScanlineSize(tiff);
+
+	GP_DEBUG(1, "Scanline size %u", (unsigned) scanline_size);
+
+	uint8_t buf[scanline_size];
+
+	/* Read image strips scanline by scanline */
+	for (y = 0; y < header->h; y++) {
+		if (TIFFReadScanline(tiff, buf, y, 0) != 1) {
+			//TODO: Make use of TIFF ERROR
+			GP_DEBUG(1, "Error reading scanline");
+			return EIO;
+		}
+
+		for (x = 0; x < header->w; x++) {
+			uint16_t i = get_idx(buf, x, header->bits_per_sample);
+
+			if (i >= palette_size) {
+				GP_WARN("Invalid palette index %u",
+				         (unsigned) i);
+				i = 0;
+			}
+
+			GP_Pixel p = GP_Pixel_CREATE_RGB888(palette_r[i]>>8,
+					                    palette_g[i]>>8,
+			                                    palette_b[i]>>8);
+
+			GP_PutPixel_Raw_24BPP(res, x, y, p);
+		}
+
+		if (GP_ProgressCallbackReport(callback, y, res->h, res->w)) {
+			GP_DEBUG(1, "Operation aborted");
+			return ECANCELED;
+		}
+	}
+
+	GP_ProgressCallbackDone(callback);
+	return 0;
+}
+
+//Temporary, the bitendians strikes again
+#include "core/GP_BitSwap.h"
+
+/*
+ * Direct read -> data in image are in right format.
+ */
+int tiff_read(TIFF *tiff, GP_Context *res, struct tiff_header *header,
+              GP_ProgressCallback *callback)
+{
+	uint32_t y;
+	uint16_t planar_config, samples, s;
+
+	GP_DEBUG(1, "Reading tiff data");
+
+	if (TIFFIsTiled(tiff)) {
+		//TODO
+		return ENOSYS;
+	}
+
+	//ASSERT ScanlineSize == w!
+
+	/* Figure out number of planes */
+	if (!TIFFGetField(tiff, TIFFTAG_PLANARCONFIG, &planar_config))
+		planar_config = 1;
+
+	switch (planar_config) {
+	case 1:
+		GP_DEBUG(1, "Planar config = 1, all samples are in one plane");
+		samples = 1;
+	break;
+	case 2:
+		if (!TIFFGetField(tiff, TIFFTAG_SAMPLESPERPIXEL, &samples)) {
+			GP_DEBUG(1, "Planar config = 2, samples per pixel undefined");
+			return EINVAL;
+		}
+		GP_DEBUG(1, "Have %u samples per pixel", (unsigned)samples);
+	break;
+	default:
+		GP_DEBUG(1, "Unimplemented planar config = %u",
+		         (unsigned)planar_config);
+		return EINVAL;
+	}
+
+	/* Read image strips scanline by scanline */
+	for (y = 0; y < header->h; y++) {
+		uint8_t *addr = GP_PIXEL_ADDR(res, 0, y);
+
+		//TODO: Does not work with RowsPerStrip > 1 -> needs StripOrientedIO
+		for (s = 0; s < samples; s++) {
+			if (TIFFReadScanline(tiff, addr, y, s) != 1) {
+				//TODO: Make use of TIFF ERROR
+				GP_DEBUG(1, "Error reading scanline");
+				return EIO;
+			}
+
+			//Temporary, till bitendians are fixed
+			switch (res->pixel_type) {
+			case GP_PIXEL_G1:
+				GP_BitSwapRow_B1(addr, res->bytes_per_row);
+			break;
+			case GP_PIXEL_G2:
+				GP_BitSwapRow_B2(addr, res->bytes_per_row);
+			break;
+			case GP_PIXEL_G4:
+				GP_BitSwapRow_B4(addr, res->bytes_per_row);
+			break;
+			default:
+			break;
+			}
+		}
+
+		if (GP_ProgressCallbackReport(callback, y, res->h, res->w)) {
+			GP_DEBUG(1, "Operation aborted");
+			return ECANCELED;
+		}
+	}
+
+	GP_ProgressCallbackDone(callback);
+	return 0;
+}
+
+GP_Context *GP_ReadTIFF(void *t, GP_ProgressCallback *callback)
+{
+	struct tiff_header header;
+	GP_Context *res = NULL;
+	GP_PixelType pixel_type;
+	int err;
+
+	if ((err = read_header(t, &header)))
+		goto err1;
+
+	pixel_type = match_pixel_type(t, &header);
+
+	if (pixel_type == GP_PIXEL_UNKNOWN) {
 		err = ENOSYS;
 		goto err1;
 	}
 
-	if (!TIFFGetField(tiff, TIFFTAG_ROWSPERSTRIP, &rows_per_strip)) {
-		GP_DEBUG(1, "TIFF is not stored in strips");
-		err = ENOSYS;
-		goto err1;
-	} else {
-		GP_DEBUG(1, "TIFF rows_per_strip = %u", rows_per_strip);
-	}
-
-	res = GP_ContextAlloc(w, h, GP_PIXEL_xRGB8888);
+	res = GP_ContextAlloc(header.w, header.h, pixel_type);
 
 	if (res == NULL) {
 		err = errno;
-		GP_WARN("Malloc failed");
+		GP_DEBUG(1, "Malloc failed");
 		goto err1;
 	}
 
-	char emsg[1024];
-
-	if (TIFFRGBAImageBegin(&img, tiff, 0, emsg) != 1) {
-		GP_DEBUG(1, "TIFFRGBAImageBegin failed: %s", emsg);
-		err = EINVAL;
-		goto err2;
+	switch (header.photometric) {
+	/* Palette */
+	case 3:
+		err = tiff_read_palette(t, res, &header, callback);
+	break;
+	default:
+		err = tiff_read(t, res, &header, callback);
 	}
 
-	for (y = 0; y < h; y += rows_per_strip) {
-		void *row = GP_PIXEL_ADDR(res, 0, y);
+	if (err)
+		goto err1;
 
-		if (TIFFReadRGBAStrip(tiff, y, row) != 1) {
-			err = EINVAL;
-			goto err2;
-		}
-
-		if (GP_ProgressCallbackReport(callback, y, h, w)) {
-			GP_DEBUG(1, "Operation aborted");
-			err = ECANCELED;
-			goto err2;
-		}
-	}
-
-	TIFFRGBAImageEnd(&img);
-
-	GP_ProgressCallbackDone(callback);
 	return res;
-
-err2:
-	GP_ContextFree(res);
 err1:
+	GP_ContextFree(res);
 	errno = err;
 	return NULL;
 }
