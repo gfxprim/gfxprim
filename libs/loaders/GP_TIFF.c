@@ -101,6 +101,38 @@ static const char *compression_name(uint16_t compression)
 	return "Unknown";
 }
 
+static const char *photometric_name(uint16_t photometric)
+{
+	switch (photometric) {
+	case PHOTOMETRIC_MINISWHITE:
+		return "Min is White";
+	case PHOTOMETRIC_MINISBLACK:
+		return "Min is black";
+	case PHOTOMETRIC_RGB:
+		return "RGB";
+	case PHOTOMETRIC_PALETTE:
+		return "Palette";
+	case PHOTOMETRIC_MASK:
+		return "Mask";
+	case PHOTOMETRIC_SEPARATED:
+		return "Separated";
+	case PHOTOMETRIC_YCBCR:
+		return "YCBCR";
+	case PHOTOMETRIC_CIELAB:
+		return "CIELAB";
+	case PHOTOMETRIC_ICCLAB:
+		return "ICCLAB";
+	case PHOTOMETRIC_ITULAB:
+		return "ITULAB";
+	case PHOTOMETRIC_LOGL:
+		return "LOGL";
+	case PHOTOMETRIC_LOGLUV:
+		return "LOGLUV";
+	default:
+		return "Unknown";
+	}
+}
+
 struct tiff_header {
 	/* compulsory tiff data */
 	uint32_t w, h;
@@ -174,6 +206,9 @@ static GP_PixelType match_grayscale_pixel_type(TIFF *tiff,
 	}
 
 	switch (header->bits_per_sample) {
+	case 1:
+		GP_DEBUG(1, "Have 1bit Bitmap");
+		return GP_PIXEL_G1;
 	case 2:
 		GP_DEBUG(1, "Have 2bit Grayscale");
 		return GP_PIXEL_G2;
@@ -220,21 +255,19 @@ static GP_PixelType match_pixel_type(TIFF *tiff, struct tiff_header *header)
 	if (!TIFFGetField(tiff, TIFFTAG_PHOTOMETRIC, &header->photometric))
 		return GP_PIXEL_UNKNOWN;
 
+	GP_DEBUG(1, "Have photometric %s",
+	         photometric_name(header->photometric));
+
 	switch (header->photometric) {
 	/* 1-bit or 4, 8-bit grayscale */
-	case 0:
-	case 1:
+	case PHOTOMETRIC_MINISWHITE:
+	case PHOTOMETRIC_MINISBLACK:
 		return match_grayscale_pixel_type(tiff, header);
-	break;
-	/* RGB */
-	case 2:
+	case PHOTOMETRIC_RGB:
 		return match_rgb_pixel_type(tiff, header);
-	break;
-	/* Palette */
-	case 3:
-		/* The palete is RGB161616 map it to BGR888 for now */
+	/* The palete is RGB161616 map it to BGR888 for now */
+	case PHOTOMETRIC_PALETTE:
 		return GP_PIXEL_RGB888;
-	break;
 	default:
 		GP_DEBUG(1, "Unimplemented photometric interpretation %u",
 		         (unsigned) header->photometric);
@@ -335,7 +368,7 @@ int tiff_read_palette(TIFF *tiff, GP_Context *res, struct tiff_header *header,
 int tiff_read(TIFF *tiff, GP_Context *res, struct tiff_header *header,
               GP_ProgressCallback *callback)
 {
-	uint32_t y;
+	uint32_t i, y;
 	uint16_t planar_config, samples, s;
 
 	GP_DEBUG(1, "Reading tiff data");
@@ -395,6 +428,11 @@ int tiff_read(TIFF *tiff, GP_Context *res, struct tiff_header *header,
 			default:
 			break;
 			}
+
+			/* We need to negate the values when Min is White */
+			if (header->photometric == PHOTOMETRIC_MINISWHITE)
+				for (i = 0; i < res->bytes_per_row; i++)
+					addr[i] = ~addr[i];
 		}
 
 		if (GP_ProgressCallbackReport(callback, y, res->h, res->w)) {
@@ -433,8 +471,7 @@ GP_Context *GP_ReadTIFF(void *t, GP_ProgressCallback *callback)
 	}
 
 	switch (header.photometric) {
-	/* Palette */
-	case 3:
+	case PHOTOMETRIC_PALETTE:
 		err = tiff_read_palette(t, res, &header, callback);
 	break;
 	default:
