@@ -54,7 +54,6 @@ static const char *keys_help[] = {
 	"F1-F10 - execute action 0 - 9",
 	"",
 	"1      - resize spiv window to the image size",
-	"1      - resize spiv window to the image size",
 	"2      - resize spiv window to the half of the image size",
 	"3      - resize spiv window to the third of the image size",
 	"...",
