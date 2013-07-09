@@ -18,6 +18,7 @@ Image loaders
 * libjpeg
 * libpng
 * giflib
+* libtiff
 
 Text rendering
 ^^^^^^^^^^^^^^
@@ -79,7 +80,7 @@ zypper in gcc make python-jinja2
 
 .Install jpeg and png devel libraries
 -------------------------------------------------------------------------------
-zypper in libjpeg-devel libpng-devel giflib-devel
+zypper in libjpeg-devel libpng-devel giflib-devel libtiff-devel
 -------------------------------------------------------------------------------
 
 .Install FreeType devel library
@@ -100,14 +101,15 @@ zypper in swig python-devel
 .All in the one for the lazy
 -------------------------------------------------------------------------------
 zypper in gcc make python-Jinja2 libjpeg-devel libpng-devel giflib-devel
-          freetype-devel libX11-devel libXext-devel swig python-devel
+          libtiff-devel freetype-devel libX11-devel libXext-devel swig
+          python-devel
 -------------------------------------------------------------------------------
 
 Debian
 ~~~~~~
 
 Instruction to install required packages on link:http://www.debian.org[Debian]
-and other debian based distributions.
+and other Debian based distributions.
 
 .Install basic tools
 -------------------------------------------------------------------------------
@@ -116,7 +118,7 @@ apt-get install gcc make python-jinja2
 
 .Install jpeg and png devel libraries
 -------------------------------------------------------------------------------
-apt-get install libjpeg-dev libpng-dev libgif-dev
+apt-get install libjpeg-dev libpng-dev libgif-dev libtiff-dev
 -------------------------------------------------------------------------------
 
 .Install FreeType devel library
@@ -137,5 +139,6 @@ apt-get install swig python-dev
 .All in the one for the lazy
 -------------------------------------------------------------------------------
 apt-get install gcc make python-jinja2 libjpeg-dev libpng-dev libgif-dev
-                libfreetype6-dev libx11-dev libxext-dev swig python-dev
+                libtiff-dev libfreetype6-dev libx11-dev libxext-dev swig
+                python-dev
 -------------------------------------------------------------------------------
