@@ -76,7 +76,7 @@ struct GP_ProgressCallbackMPPriv {
  *
  * The intended usage is:
  *
- * GP_PROGRESS_CALLBACK(callback_mp, orig_callback);
+ * GP_PROGRESS_CALLBACK_MP(callback_mp, orig_callback);
  *
  * ...
  *
