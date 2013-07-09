@@ -33,7 +33,6 @@
 #include <pthread.h>
 
 #include <GP.h>
-#include <input/GP_InputDriverLinux.h>
 
 #include "image_cache.h"
 #include "image_list.h"
@@ -270,7 +269,8 @@ static GP_Context *load_image(struct loader_params *params, int elevate)
 /*
  * Fill context with chessboard-like pattern.
  */
-static void pattern_fill(GP_Context *ctx, unsigned int x0, unsigned int y0, unsigned int w, unsigned int h)
+static void pattern_fill(GP_Context *ctx, unsigned int x0, unsigned int y0,
+                         unsigned int w, unsigned int h)
 {
 	unsigned int x, y;
 
@@ -633,7 +633,6 @@ static void init_backend(const char *backend_opts)
 	}
 }
 
-
 static void init_caches(struct loader_params *params)
 {
 	size_t size = image_cache_get_ram_size();
@@ -796,11 +795,9 @@ int main(int argc, char *argv[])
 	}
 
 	for (;;) {
-		GP_BackendWait(backend);
-
 		GP_Event ev;
 
-		while (GP_BackendGetEvent(backend, &ev)) {
+		while (GP_BackendWaitEvent(backend, &ev)) {
 
 			shift_flag = GP_EventGetKey(&ev, GP_KEY_LEFT_SHIFT) ||
 			             GP_EventGetKey(&ev, GP_KEY_RIGHT_SHIFT);
@@ -1024,8 +1021,6 @@ int main(int argc, char *argv[])
 			}
 		}
 	}
-
-	GP_BackendExit(backend);
 
 	return 0;
 }
