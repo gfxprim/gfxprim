@@ -22,7 +22,7 @@
 
  /*
 
-   Utils to read/write bytes in specified endianity.
+   Utils to read/write values with specified endianity.
 
   */
 
@@ -58,16 +58,16 @@
  */
 
 /*
- * Printf-like function to read bytes from a file.
+ * Printf-like function to read file headers.
  *
- * Returns number of characters read.
+ * Returns number of items successfully matched/converted.
  */
 int GP_FRead(FILE *f, const char *fmt, ...);
 
 /*
- * Printf-like function to write bytes to a file.
+ * Printf-like function to write file headers.
  *
- * Returns number of characters read.
+ * Returns number of items sucessfully written.
  */
 int GP_FWrite(FILE *f, const char *fmt, ...);
 
