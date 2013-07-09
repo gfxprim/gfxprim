@@ -16,40 +16,72 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2010 Jiri "BlueBear" Dluhos                            *
- *                         <jiri.bluebear.dluhos@gmail.com>                  *
- *                                                                           *
  * Copyright (C) 2009-2013 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
  /*
 
-   Core include file for loaders API.
+   Container is an abstraction for file formats that can include several images
+   in one file. For example gif, tiff, apng, cbr, cbz, etc.
 
   */
 
-#ifndef LOADERS_GP_LOADERS_H
-#define LOADERS_GP_LOADERS_H
+#ifndef LOADERS_GP_CONTAINER_H
+#define LOADERS_GP_CONTAINER_H
 
 #include "core/GP_Context.h"
 #include "core/GP_ProgressCallback.h"
 
-#include "loaders/GP_PNM.h"
-#include "loaders/GP_BMP.h"
-#include "loaders/GP_PNG.h"
-#include "loaders/GP_JPG.h"
-#include "loaders/GP_GIF.h"
-#include "loaders/GP_TIFF.h"
-#include "loaders/GP_PSP.h"
+struct GP_Container;
 
-#include "loaders/GP_TmpFile.h"
+struct GP_ContainerOps {
+	/*
+	 * Loads next image from container, use the inline function defined
+	 * bellow.
+	 */
+	GP_Context *(*LoadNext)(struct GP_Container *self,
+	                        GP_ProgressCallback *callback);
 
-#include "loaders/GP_MetaData.h"
+	/*
+	 * Close callback, use the inline function defined bellow.
+	 */
+	void (*Close)(struct GP_Container *self);
 
-#include "loaders/GP_Loader.h"
+	//TODO: Seek
+};
 
-#include "loaders/GP_Container.h"
-#include "loaders/GP_ZIP.h"
+typedef struct GP_Container {
+	/*
+	 * Image counter. This is set to number of images, or to -1 if number
+	 * of images in container is not known prior to parsing the whole
+	 * file.
+	 */
+	int img_count;
+	/*
+	 * Current image counter, do not change from application.
+	 */
+	int cur_img;
 
-#endif /* LOADERS_GP_LOADERS_H */
+	const struct GP_ContainerOps *ops;
+
+	char priv[];
+} GP_Container;
+
+#define GP_CONTAINER_PRIV(c) ((void*)(c)->priv)
+
+/*
+ * Behaves just like GP_LoadImage, but takes pointer to opened container instead.
+ */
+static inline GP_Context *GP_ContainerLoadNext(GP_Container *self,
+                                               GP_ProgressCallback *callback)
+{
+	return self->ops->LoadNext(self, callback);
+}
+
+static inline void GP_ContainerClose(GP_Container *self)
+{
+	self->ops->Close(self);
+}
+
+#endif /* LOADERS_GP_CONTAINER_H */

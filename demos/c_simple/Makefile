@@ -18,7 +18,8 @@ APPS=backend_example loaders_example loaders filters_symmetry gfx_koch\
      v4l2_show v4l2_grab convolution weighted_median shapetest koch \
      input_example fileview linetest randomshapetest fonttest\
      loaders_register blittest textaligntest abort sin_AA x11_windows\
-     debug_handler gaussian_noise byte_utils version pretty_print timers
+     debug_handler gaussian_noise byte_utils version pretty_print timers\
+     zip_container
 
 ifeq ($(HAVE_LIBSDL),yes)
 APPS+=SDL_glue
@@ -54,6 +55,7 @@ byte_utils: LDLIBS+=$(LDLIBS_LOADERS)
 blittest: LDLIBS+=$(LDLIBS_BACKENDS) $(LDLIBS_LOADERS)
 sin_AA: LDLIBS+=$(LDLIBS_BACKENDS)
 x11_windows: LDLIBS+=$(LDLIBS_BACKENDS)
+zip_container: LDLIBS+=$(LDLIBS_LOADERS) $(LDLIBS_BACKENDS)
 
 include $(TOPDIR)/app.mk
 include $(TOPDIR)/post.mk
