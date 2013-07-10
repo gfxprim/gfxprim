@@ -15,6 +15,8 @@ all: $(STATIC_LIB) $(DYNAMIC_LIB) $(SYMLINKS)
 
 rebuild: all
 
+distclean: clean
+
 clean:
 ifdef VERBOSE
 	rm -rf $(STATIC_LIB) $(DYNAMIC_LIB) $(SYMLINKS)

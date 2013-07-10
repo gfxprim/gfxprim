@@ -16,13 +16,14 @@ tests: build
 pylib: build
 demos: build
 
+GENFILES=config.h config.gen.mk gfxprim-config
+
 distclean:
 ifdef VERBOSE
-	rm config.h config.gen.mk
-	$(MAKE) clean
+	rm $(GENFILES)
 else
-	@$(MAKE) clean
-	@rm config.h config.gen.mk
+	@echo "RM   $(GENFILES)"
+	@rm $(GENFILES)
 endif
 
 HEADER_LOC=/usr/include/

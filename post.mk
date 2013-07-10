@@ -9,21 +9,25 @@ endif
 
 all: $(SUBDIRS)
 clean: $(SUBDIRS)
+distclean: $(SUBDIRS)
 rebuild: $(SUBDIRS)
 install: $(SUBDIRS)
 
 help:
-	@echo "***      Available targets      ***"
+	@echo "***        Available targets        ***"
 	@echo ""
-	@echo "help:    prints this help"
+	@echo "help:      prints this help"
 	@echo ""
-	@echo "doc:     builds (only) the documentation"
+	@echo "doc:       builds (only) the documentation"
 	@echo ""
-	@echo "clean:   cleans current directory and all subdirectories"
+	@echo "clean:     cleans current directory and all subdirectories"
 	@echo ""
-	@echo "all:     make current directory and all subdirectories"
+	@echo "distclean: cleans all generated files including possible"
+	@echo "           leftovers caused by deleted files"
 	@echo ""
-	@echo "rebuild: does clean and all"
+	@echo "all:       make current directory and all subdirectories"
+	@echo ""
+	@echo "rebuild:   does clean and all"
 	@echo ""
 	@echo "The default silent output could be turned off by defining"
 	@echo "'VERBOSE' shell variable as 'VERBOSE=1 make'"
@@ -109,6 +113,13 @@ else
 endif
 
 ifdef CLEAN
+
+ifeq ($(MAKECMDGOALS),distclean)
+CLEAN+=*.o *.dep *.gen.c *.gen.h
+endif
+
+distclean: clean
+
 clean:
 ifdef VERBOSE
 	rm -f $(CLEAN)
