@@ -257,7 +257,7 @@ static int get_ascii_int(FILE *f, int *val)
 	*val = 0;
 
 	for (;;) {
-		c = fgetc(f);
+		c = getc_unlocked(f);
 
 		switch (c) {
 		case EOF:
@@ -529,24 +529,17 @@ static int load_ascii_rgb888(FILE *f, GP_Context *ctx, GP_ProgressCallback *cb)
 
 static int load_bin_rgb888(FILE *f, GP_Context *ctx, GP_ProgressCallback *cb)
 {
-	uint32_t x, y;
-	int r, g, b, err;
+	uint32_t y, x;
 
 	for (y = 0; y < ctx->h; y++) {
-		for (x = 0; x < ctx->w; x++) {
-			r = fgetc(f);
-			g = fgetc(f);
-			b = fgetc(f);
+		uint8_t *addr = GP_PIXEL_ADDR(ctx, 0, y);
 
-			if (r == EOF || g == EOF || b == EOF) {
-				err = errno;
-				GP_DEBUG(1, "Unexpected end of PBM file");
-				return err;
-			}
+		if (fread(addr, ctx->w * 3, 1, f) != 1)
+			return errno;
 
-			GP_PutPixel_Raw_24BPP(ctx, x, y,
-			                      GP_Pixel_CREATE_RGB888(r, g, b));
-		}
+		for (x = 0; x < ctx->w; x++)
+			GP_SWAP(addr[3*x], addr[3*x + 2]);
+
 		if (GP_ProgressCallbackReport(cb, y, ctx->h, ctx->w)) {
 			GP_DEBUG(1, "Operation aborted");
 			return ECANCELED;
