@@ -51,7 +51,7 @@ static const char *keys_help[] = {
 	"D      - drop image cache",
 	"H      - toggle help",
 	"",
-	"F1-F10 - execute action 0 - 9",
+	"F1-F10 - execute action 1 - 10",
 	"",
 	"1      - resize spiv window to the image size",
 	"2      - resize spiv window to the half of the image size",
@@ -86,10 +86,10 @@ void print_help(void)
 	printf("    pass -b help for more info\n");
 	puts("\n");
 	printf("Actions:\n\n");
-	printf(" -0 'cmd' sets first action\n");
-	printf(" -1 'cmd' sets second action\n");
+	printf(" -1 'cmd' sets first action\n");
 	printf(" ...\n");
-	printf(" -9 'cmd' sets tenth action\n");
+	printf(" -9 'cmd' sets ninth action\n");
+	printf(" -0 'cmd' sets tenth action\n");
 	puts("");
 	printf(" actions are shell commands with following modifiers:\n");
 	printf("  %%f path to current image\n");

@@ -313,7 +313,7 @@ static int prepare_cmd(unsigned int action, const char *img_path)
 int image_action_run(unsigned int action, const char *img_path)
 {
 	if (!actions[action]) {
-		fprintf(stderr, "Undefined action %u\n", action);
+		fprintf(stderr, "Undefined action %u\n", action+1);
 		return 1;
 	}
 
@@ -323,7 +323,8 @@ int image_action_run(unsigned int action, const char *img_path)
 	printf("Executing cmd \"%s\"\n", cmd);
 
 	if (system(cmd)) {
-		fprintf(stderr, "Failed to execute cmd '%s': %s", cmd, strerror(errno));
+		fprintf(stderr, "Failed to execute cmd '%s': %s",
+		        cmd, strerror(errno));
 		return 1;
 	}
 

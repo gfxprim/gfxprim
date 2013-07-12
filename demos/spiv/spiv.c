@@ -746,8 +746,12 @@ int main(int argc, char *argv[])
 			break;
 			}
 		break;
-		case '0' ... '9':
-			image_action_set(opt - '0', optarg);
+		case '0':
+			/* -0 is mapped to action 10 */
+			image_action_set(9, optarg);
+		break;
+		case '1' ... '9':
+			image_action_set(opt - '1', optarg);
 		break;
 		default:
 			fprintf(stderr, "Invalid paramter '%c'\n", opt);
