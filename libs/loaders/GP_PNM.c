@@ -461,6 +461,26 @@ static int load_ascii_g8(FILE *f, GP_Context *ctx, GP_ProgressCallback *cb)
 	return 0;
 }
 
+static int load_bin_g8(FILE *f, GP_Context *ctx, GP_ProgressCallback *cb)
+{
+	uint32_t y;
+
+	for (y = 0; y < ctx->h; y++) {
+		uint8_t *addr = GP_PIXEL_ADDR(ctx, 0, y);
+
+		if (fread(addr, ctx->w, 1, f) != 1)
+			return errno;
+
+		if (GP_ProgressCallbackReport(cb, y, ctx->h, ctx->w)) {
+			GP_DEBUG(1, "Operation aborted");
+			return ECANCELED;
+		}
+	}
+
+	GP_ProgressCallbackDone(cb);
+	return 0;
+}
+
 static int load_ascii_rgb888(FILE *f, GP_Context *ctx, GP_ProgressCallback *cb)
 {
 	uint32_t x, y;
@@ -689,6 +709,43 @@ static GP_Pixel depth_to_pixel(int depth)
 	}
 }
 
+static int load_ascii_graymap(FILE *f, struct pnm_header *header,
+                              GP_Context *ret, GP_ProgressCallback *callback)
+{
+	int err = ENOSYS;
+
+	switch (header->depth) {
+	case 1:
+		err = load_ascii_g1(f, ret, callback);
+	break;
+	case 3:
+		err = load_ascii_g2(f, ret, callback);
+	break;
+	case 15:
+		err = load_ascii_g4(f, ret, callback);
+	break;
+	case 255:
+		err = load_ascii_g8(f, ret, callback);
+	break;
+	}
+
+	return err;
+}
+
+static int load_bin_graymap(FILE *f, struct pnm_header *header,
+                            GP_Context *ret, GP_ProgressCallback *callback)
+{
+	int err = ENOSYS;
+
+	switch (header->depth) {
+	case 255:
+		err = load_bin_g8(f, ret, callback);
+	break;
+	}
+
+	return err;
+}
+
 static GP_Context *read_graymap(FILE *f, struct pnm_header *header, int flag,
                                 GP_ProgressCallback *callback)
 {
@@ -715,24 +772,13 @@ static GP_Context *read_graymap(FILE *f, struct pnm_header *header, int flag,
 		goto err1;
 	}
 
-	switch (header->depth) {
-	case 1:
-		if ((err = load_ascii_g1(f, ret, callback)))
-			goto err1;
-	break;
-	case 3:
-		if ((err = load_ascii_g2(f, ret, callback)))
-			goto err1;
-	break;
-	case 15:
-		if ((err = load_ascii_g4(f, ret, callback)))
-			goto err1;
-	break;
-	case 255:
-		if ((err = load_ascii_g8(f, ret, callback)))
-			goto err1;
-	break;
-	}
+	if (header->magic == '5')
+		err = load_bin_graymap(f, header, ret, callback);
+	else
+		err = load_ascii_graymap(f, header, ret, callback);
+
+	if (err)
+		goto err1;
 
 	if (flag)
 		fclose(f);
