@@ -20,6 +20,8 @@
  *                                                                           *
  *****************************************************************************/
 
+#include <string.h>
+
 #include "core/GP_Common.h"
 #include "core/GP_Debug.h"
 
@@ -31,6 +33,8 @@ void GP_EventQueueInit(struct GP_EventQueue *self,
 {
 	self->screen_w = screen_w;
 	self->screen_h = screen_h;
+
+	memset(&self->cur_state, 0, sizeof(self->cur_state));
 
 	self->cur_state.cursor_x = screen_w / 2;
 	self->cur_state.cursor_y = screen_h / 2;
