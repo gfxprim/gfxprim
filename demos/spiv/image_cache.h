@@ -47,14 +47,21 @@ struct image_cache *image_cache_create(unsigned int max_size_bytes);
  * If elevate set and image is found, the image is elevated to the top so
  * it has lesser chance of being freed.
  */
-GP_Context *image_cache_get(struct image_cache *self, const char *path,
-                            long cookie1, long cookie2, int elevate);
+GP_Context *image_cache_get(struct image_cache *self, int elevate,
+                            const char *key);
 
+GP_Context *image_cache_get2(struct image_cache *self, int elevate,
+                             const char *fmt, ...)
+                             __attribute__ ((format (printf, 3, 4)));
 /*
  * Puts an image into a cache.
  */
 int image_cache_put(struct image_cache *self, GP_Context *img,
-                    const char *path, long cookie1, long cookie2);
+                    const char *key);
+
+int image_cache_put2(struct image_cache *self, GP_Context *img,
+                     const char *fmt, ...)
+                     __attribute__ ((format (printf, 3, 4)));
 
 /*
  * Drop all image in cache.

@@ -20,6 +20,7 @@
  *                                                                           *
  *****************************************************************************/
 
+#include <stdarg.h>
 #include <string.h>
 #include <GP.h>
 #include "image_cache.h"
@@ -34,8 +35,6 @@ struct image {
 	unsigned int elevated;
 
 	/* this identifies an image */
-	long cookie1;
-	long cookie2;
 	char path[];
 };
 
@@ -124,8 +123,7 @@ static void remove_img(struct image_cache *self, struct image *img, size_t size)
 static void remove_img_free(struct image_cache *self,
                             struct image *img, size_t size)
 {
-	GP_DEBUG(2, "Freeing image '%s:%10li:%10li' size %zu",
-	         img->path, img->cookie1, img->cookie2, size);
+	GP_DEBUG(2, "Freeing image '%s' size %zu", img->path, size);
 
 	remove_img(self, img, size);
 	GP_ContextFree(img->ctx);
@@ -151,19 +149,18 @@ static void add_img(struct image_cache *self, struct image *img, size_t size)
 		self->end = img;
 }
 
-GP_Context *image_cache_get(struct image_cache *self, const char *path,
-                            long cookie1, long cookie2, int elevate)
+GP_Context *image_cache_get(struct image_cache *self, int elevate,
+                            const char *key)
 {
 	struct image *i;
 
 	if (self == NULL)
 		return NULL;
 
-	GP_DEBUG(2, "Looking for image '%s:%10li:%10li'", path, cookie1, cookie2);
+	GP_DEBUG(2, "Looking for image '%s'", key);
 
 	for (i = self->root; i != NULL; i = i->next)
-		if (!strcmp(path, i->path) &&
-		    i->cookie1 == cookie1 && i->cookie2 == cookie2)
+		if (!strcmp(key, i->path))
 			break;
 
 	if (i == NULL)
@@ -173,8 +170,7 @@ GP_Context *image_cache_get(struct image_cache *self, const char *path,
 	if (elevate) {
 		size_t size = image_size(i);
 
-		GP_DEBUG(2, "Refreshing image '%s:%10li:%10li",
-		         path, cookie1, cookie2);
+		GP_DEBUG(2, "Refreshing image '%s'", key);
 
 		remove_img(self, i, size);
 		add_img(self, i, size);
@@ -183,6 +179,58 @@ GP_Context *image_cache_get(struct image_cache *self, const char *path,
 	}
 
 	return i->ctx;
+}
+
+GP_Context *image_cache_get2(struct image_cache *self, int elevate,
+                             const char *fmt, ...)
+{
+	va_list va;
+	size_t len;
+	char buf[512];
+	char *key = buf;
+	struct image *i;
+
+	if (self == NULL)
+		return NULL;
+
+	va_start(va, fmt);
+	len = vsnprintf(buf, sizeof(buf), fmt, va);
+	va_end(va);
+
+	if (len >= sizeof(buf)) {
+		key = malloc(len + 1);
+		if (!key) {
+			GP_WARN("Malloc failed :(");
+			return NULL;
+		}
+
+		va_start(va, fmt);
+		vsprintf(key, fmt, va);
+		va_end(va);
+	}
+
+	GP_DEBUG(2, "Looking for image '%s'", key);
+
+	for (i = self->root; i != NULL; i = i->next)
+		if (!strcmp(key, i->path))
+			break;
+
+	/* Push the image to the root of the list */
+	if (i && elevate) {
+		size_t size = image_size(i);
+
+		GP_DEBUG(2, "Refreshing image '%s'", key);
+
+		remove_img(self, i, size);
+		add_img(self, i, size);
+
+		i->elevated++;
+	}
+
+	if (len >= sizeof(buf))
+		free(key);
+
+	return i ? i->ctx : NULL;
 }
 
 void image_cache_print(struct image_cache *self)
@@ -197,8 +245,8 @@ void image_cache_print(struct image_cache *self)
 	printf("Image cache size %u used %u\n", self->max_size, self->cur_size);
 
 	for (i = self->root; i != NULL; i = i->next)
-		printf(" Image '%s:%10li:%10li' size %10zu elevated %u\n", i->path,
-		       i->cookie1, i->cookie2, image_size(i), i->elevated);
+		printf(" size=%10zu elevated=%u key='%s'\n",
+		       image_size(i), i->elevated, i->path);
 }
 
 static int assert_size(struct image_cache *self, size_t size)
@@ -219,15 +267,15 @@ static int assert_size(struct image_cache *self, size_t size)
 	return 0;
 }
 
-int image_cache_put(struct image_cache *self, GP_Context *ctx, const char *path,
-                    long cookie1, long cookie2)
+int image_cache_put(struct image_cache *self, GP_Context *ctx,
+                    const char *key)
 {
 	size_t size;
 
 	if (self == NULL)
 		return 1;
 
-	size = image_size2(ctx, path);
+	size = image_size2(ctx, key);
 
 	/*
 	 * We try to create room for the image. If this fails we add the image
@@ -236,7 +284,7 @@ int image_cache_put(struct image_cache *self, GP_Context *ctx, const char *path,
 	 */
 	assert_size(self, size);
 
-	struct image *img = malloc(sizeof(struct image) + strlen(path) + 1);
+	struct image *img = malloc(sizeof(struct image) + strlen(key) + 1);
 
 	if (img == NULL) {
 		GP_WARN("Malloc failed :(");
@@ -244,13 +292,55 @@ int image_cache_put(struct image_cache *self, GP_Context *ctx, const char *path,
 	}
 
 	img->ctx = ctx;
-	img->cookie1 = cookie1;
-	img->cookie2 = cookie2;
 	img->elevated = 0;
-	strcpy(img->path, path);
+	strcpy(img->path, key);
 
-	GP_DEBUG(2, "Adding image '%s:%10li:%10li' size %zu",
-	         img->path, img->cookie1, img->cookie2, size);
+	GP_DEBUG(2, "Adding image '%s' size %zu", img->path, size);
+
+	add_img(self, img, size);
+
+	return 0;
+}
+
+int image_cache_put2(struct image_cache *self, GP_Context *ctx,
+                     const char *fmt, ...)
+{
+	size_t size, len;
+	va_list va;
+
+	if (self == NULL)
+		return 1;
+
+	va_start(va, fmt);
+	len = vsnprintf(NULL, 0, fmt, va);
+	va_end(va);
+
+	//TODO: FIX THIS
+	size = image_size2(ctx, "") + len + 1;
+
+	/*
+	 * We try to create room for the image. If this fails we add the image
+	 * anyway because we need to store it while we are showing it (and it
+	 * will be removed from cache by next image for sure).
+	 */
+	assert_size(self, size);
+
+	struct image *img = malloc(sizeof(struct image) + len + 1);
+
+	if (img == NULL) {
+		GP_WARN("Malloc failed :(");
+		return 1;
+	}
+
+	img->ctx = ctx;
+	img->elevated = 0;
+
+	va_start(va, fmt);
+	vsprintf(img->path, fmt, va);
+	va_end(va);
+
+	GP_DEBUG(2, "Adding image '%s' size %zu",
+	         img->path, size);
 
 	add_img(self, img, size);
 
