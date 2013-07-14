@@ -45,10 +45,10 @@
 
 /*
  * 0xff 0xd8 - start of image
- * 0xff 0xe0 - APP0 JFIF meta data
+ * 0xff 0x.. - start of frame
  */
-#define JPEG_SIGNATURE "\xff\xd8\xff\xe0"
-#define JPEG_SIGNATURE_LEN 4
+#define JPEG_SIGNATURE "\xff\xd8\xff"
+#define JPEG_SIGNATURE_LEN 3
 
 int GP_MatchJPG(const void *buf)
 {
@@ -380,7 +380,7 @@ int GP_SaveJPG(const GP_Context *src, const char *dst_path,
 
 			/* fix the pixels as we want in fact BGR */
 			for (i = 0; i < src->w; i++) {
-				uint8_t *pix = tmp + 3 * i; 
+				uint8_t *pix = tmp + 3 * i;
 				GP_SWAP(pix[0], pix[2]);
 			}
 
