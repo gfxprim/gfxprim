@@ -275,7 +275,7 @@ static GP_PixelType match_pixel_type(TIFF *tiff, struct tiff_header *header)
 	}
 }
 
-uint16_t get_idx(uint8_t *row, uint32_t x, uint16_t bps)
+static uint16_t get_idx(uint8_t *row, uint32_t x, uint16_t bps)
 {
 	switch (bps) {
 	case 1:
@@ -294,8 +294,9 @@ uint16_t get_idx(uint8_t *row, uint32_t x, uint16_t bps)
 	return 0;
 }
 
-int tiff_read_palette(TIFF *tiff, GP_Context *res, struct tiff_header *header,
-                      GP_ProgressCallback *callback)
+static int tiff_read_palette(TIFF *tiff, GP_Context *res,
+                             struct tiff_header *header,
+                             GP_ProgressCallback *callback)
 {
 	if (TIFFIsTiled(tiff)) {
 		//TODO
@@ -365,8 +366,8 @@ int tiff_read_palette(TIFF *tiff, GP_Context *res, struct tiff_header *header,
 /*
  * Direct read -> data in image are in right format.
  */
-int tiff_read(TIFF *tiff, GP_Context *res, struct tiff_header *header,
-              GP_ProgressCallback *callback)
+static int tiff_read(TIFF *tiff, GP_Context *res, struct tiff_header *header,
+                     GP_ProgressCallback *callback)
 {
 	uint32_t i, y;
 	uint16_t planar_config, samples, s;
