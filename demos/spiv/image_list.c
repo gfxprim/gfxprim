@@ -422,6 +422,15 @@ struct image_list *image_list_create(const char *args[])
 	return self;
 }
 
+void image_list_destroy(struct image_list *self)
+{
+	if (self->in_dir)
+		exit_dir(self);
+
+	free(self->arg_file_counts);
+	free(self);
+}
+
 const char *image_list_img_path(struct image_list *self)
 {
 	if (!self->path_loaded)

@@ -623,7 +623,6 @@ static int init_loader(struct loader_params *params, const char **argv)
 
 	GP_DEBUG(1, "Resized cache size = %u", resized_size);
 
-	//TODO: cache size init
 	if (image_loader_init(argv, orig_size))
 		return 1;
 
@@ -874,8 +873,9 @@ int main(int argc, char *argv[])
 				case GP_KEY_ESC:
 				case GP_KEY_ENTER:
 				case GP_KEY_Q:
-					image_cache_drop(params.img_resized_cache);
-					image_loader_drop_cache();
+					stop_loader();
+					image_cache_destroy(params.img_resized_cache);
+					image_loader_destroy();
 					GP_BackendExit(backend);
 					return 0;
 				break;
@@ -940,6 +940,9 @@ int main(int argc, char *argv[])
 					int val = ev.val.key.key - GP_KEY_1 + 1;
 					resize_backend(val, shift_flag);
 				} break;
+				case GP_KEY_0:
+					resize_backend(10, shift_flag);
+				break;
 				case GP_KEY_KP_PLUS:
 				case GP_KEY_DOT:
 					params.show_progress_once = 1;

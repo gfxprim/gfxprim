@@ -102,7 +102,7 @@ static void drop_cur_img(void)
 	/*
 	 * Currently loaded image is too big to be cached -> free it.
 	 */
-	if (!image_cache_get(img_cache, 1, path))
+	if (!image_cache_get(img_cache, 0, path))
 		GP_ContextFree(cur_img);
 
 	cur_img = NULL;
@@ -164,6 +164,10 @@ void image_loader_drop_cache(void)
 
 void image_loader_destroy(void)
 {
+	GP_DEBUG(1, "Destroying loader");
+	drop_cur_img();
+	GP_DEBUG(1, "Destroying cache");
 	image_cache_destroy(img_cache);
-	//TODO Image list destroy?
+	GP_DEBUG(1, "Destroying image list");
+	image_list_destroy(img_list);
 }

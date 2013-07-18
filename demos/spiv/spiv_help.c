@@ -58,6 +58,7 @@ static const char *keys_help[] = {
 	"3      - resize spiv window to the third of the image size",
 	"...",
 	"9      - resize spiv window to the ninth of the image size",
+	"0      - resize spiv window to the tenth of the image size",
 	"",
 	"Shift 2 - resize spiv window twice of the image size",
 	"Shift 3 - resize spiv window three times of the image size",

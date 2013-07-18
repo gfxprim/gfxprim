@@ -36,6 +36,9 @@ struct image_list;
  */
 struct image_list *image_list_create(const char *args[]);
 
+
+void image_list_destroy(struct image_list *self);
+
 /*
  * Returns path to the current image.
  */
