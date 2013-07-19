@@ -37,6 +37,7 @@ GP_MatchTIFF
 GP_OpenTIFF
 GP_ReadTIFF
 GP_LoadTIFF
+GP_SaveTIFF
 
 GP_SavePBM
 GP_LoadPBM
@@ -79,3 +80,9 @@ GP_MetaDataCreate
 GP_MetaDataPrint
 GP_MetaDataGetDouble
 GP_MetaDataFromExif
+
+GP_ContainerLoad
+GP_ContainerSeek
+
+GP_MatchZip
+GP_OpenZip
