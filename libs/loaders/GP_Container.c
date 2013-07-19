@@ -20,22 +20,31 @@
  *                                                                           *
  *****************************************************************************/
 
- /*
+#include <errno.h>
 
-   Zip container, could be used to load images from cbz or from zip files.
-
-  */
-
-#ifndef LOADERS_GP_ZIP_H
-#define LOADERS_GP_ZIP_H
-
-#include "core/GP_Context.h"
-#include "core/GP_ProgressCallback.h"
-
+#include "core/GP_Debug.h"
 #include "loaders/GP_Container.h"
 
-GP_Container *GP_OpenZip(const char *path);
+int GP_ContainerSeek(GP_Container *self, int offset,
+                     enum GP_ContainerWhence whence)
+{
+	if (!self->ops->Seek) {
+		GP_DEBUG(1, "Seek not implemented in %s container",
+		         self->ops->type);
+		return ENOSYS;
+	}
 
-int GP_MatchZip(const char *buf);
+	return self->ops->Seek(self, offset, whence);
+}
 
-#endif /* LOADERS_GP_ZIP_H */
+GP_Context *GP_ContainerLoad(GP_Container *self, GP_ProgressCallback *callback)
+{
+	if (!self->ops->Load) {
+		GP_DEBUG(1, "Load not implemented in %s container",
+		         self->ops->type);
+		errno = ENOSYS;
+		return NULL;
+	}
+
+	return self->ops->Load(self, callback);
+}

@@ -35,6 +35,12 @@
 
 struct GP_Container;
 
+enum GP_ContainerWhence {
+	GP_CONT_FIRST,
+	GP_CONT_LAST,
+	GP_CONT_CUR,
+};
+
 struct GP_ContainerOps {
 	/*
 	 * Loads next image from container, use the inline function defined
@@ -44,11 +50,28 @@ struct GP_ContainerOps {
 	                        GP_ProgressCallback *callback);
 
 	/*
+	 * Just loads current image, does not advance to the next image.
+	 */
+	GP_Context *(*Load)(struct GP_Container *self,
+	                    GP_ProgressCallback *callback);
+
+	/*
 	 * Close callback, use the inline function defined bellow.
 	 */
 	void (*Close)(struct GP_Container *self);
 
-	//TODO: Seek
+	/*
+	 * Seeks to the offset from whence.
+	 *
+	 * Returns 0 on success, errno on failure.
+	 */
+	int (*Seek)(struct GP_Container *self, int offset,
+	            enum GP_ContainerWhence whence);
+
+	/*
+	 * Container type name.
+	 */
+	const char *type;
 };
 
 typedef struct GP_Container {
@@ -57,12 +80,16 @@ typedef struct GP_Container {
 	 * of images in container is not known prior to parsing the whole
 	 * file.
 	 */
-	int img_count;
+	unsigned int img_count;
+
 	/*
 	 * Current image counter, do not change from application.
 	 */
-	int cur_img;
+	unsigned int cur_img;
 
+	/*
+	 * Contains container callbacks
+	 */
 	const struct GP_ContainerOps *ops;
 
 	char priv[];
@@ -78,6 +105,14 @@ static inline GP_Context *GP_ContainerLoadNext(GP_Container *self,
 {
 	return self->ops->LoadNext(self, callback);
 }
+
+/*
+ * Just loads current image, does not advance to the next one.
+ */
+GP_Context *GP_ContainerLoad(GP_Container *self, GP_ProgressCallback *callback);
+
+int GP_ContainerSeek(GP_Container *self, int offset,
+                     enum GP_ContainerWhence whence);
 
 static inline void GP_ContainerClose(GP_Container *self)
 {
