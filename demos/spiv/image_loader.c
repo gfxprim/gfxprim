@@ -20,6 +20,8 @@
  *                                                                           *
  *****************************************************************************/
 
+#include <errno.h>
+
 #include <core/GP_Context.h>
 #include <core/GP_Debug.h>
 
@@ -33,6 +35,7 @@
 static struct image_cache *img_cache;
 static struct image_list *img_list;
 static GP_Context *cur_img;
+static GP_Container *cur_cont;
 
 int image_loader_init(const char *args[], unsigned int cache_max_bytes)
 {
@@ -58,9 +61,15 @@ GP_Context *image_loader_get_image(GP_ProgressCallback *callback, int elevate)
 	struct cpu_timer timer;
 	const char *path;
 	GP_Context *img;
+	int err;
 
 	if (cur_img)
 		return cur_img;
+
+	if (cur_cont) {
+		cur_img = GP_ContainerLoad(cur_cont, callback);
+		return cur_img;
+	}
 
 	path = image_list_img_path(img_list);
 
@@ -73,8 +82,31 @@ GP_Context *image_loader_get_image(GP_ProgressCallback *callback, int elevate)
 
 	img = GP_LoadImage(path, callback);
 
-	if (!img)
+	if (!img) {
+		err = errno;
+
+		/*
+		 * Try containers, ZIP for now, more to come
+		 *
+		 * TODO: How to cache container content?
+		 */
+		cur_cont = GP_OpenZip(path);
+
+		if (cur_cont) {
+			img = GP_ContainerLoad(cur_cont, callback);
+
+			if (img) {
+				cur_img = img;
+				return img;
+			}
+
+			GP_ContainerClose(cur_cont);
+			cur_cont = NULL;
+		}
+
+		errno = err;
 		return NULL;
+	}
 
 	image_cache_put(img_cache, img, path);
 
@@ -85,6 +117,15 @@ GP_Context *image_loader_get_image(GP_ProgressCallback *callback, int elevate)
 
 const char *image_loader_img_path(void)
 {
+	//TODO: Make this more elegant
+	static char path[512];
+
+	if (cur_cont) {
+		snprintf(path, sizeof(path), "%s:%u",
+		         image_list_img_path(img_list), cur_cont->cur_img);
+		return path;
+	}
+
 	return image_list_img_path(img_list);
 }
 
@@ -111,6 +152,36 @@ static void drop_cur_img(void)
 void image_loader_seek(enum img_seek_offset offset, int whence)
 {
 	drop_cur_img();
+
+	if (cur_cont) {
+		switch (offset) {
+		case IMG_FIRST:
+		case IMG_LAST:
+		//TODO  do something better for IMG_DIR
+		case IMG_DIR:
+			GP_ContainerClose(cur_cont);
+			cur_cont = NULL;
+			goto list_seek;
+		case IMG_CUR:
+		break;
+		}
+		/*
+		 * TODO: We should be able to count how much
+		 *       we get out of the container and seek
+		 *       N images in the list
+		 *
+		 *       What about wrapping around?
+		 */
+		if (GP_ContainerSeek(cur_cont, whence, GP_CONT_CUR)) {
+			GP_ContainerClose(cur_cont);
+			cur_cont = NULL;
+			goto list_seek;
+		}
+
+		return;
+	}
+
+list_seek:
 
 	switch (offset) {
 	case IMG_FIRST:

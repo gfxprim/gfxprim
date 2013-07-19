@@ -570,6 +570,12 @@ static void show_image(struct loader_params *params)
 static void image_seek(struct loader_params *params,
                        enum img_seek_offset offset, int whence)
 {
+	/*
+	 * We need to stop loader first because image loader seek may free
+	 * image we are currently resamling.
+	 */
+	stop_loader();
+
 	image_loader_seek(offset, whence);
 	show_image(params);
 }
