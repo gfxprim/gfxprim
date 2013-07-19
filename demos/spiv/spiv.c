@@ -575,7 +575,6 @@ static void image_seek(struct loader_params *params,
 	 * image we are currently resamling.
 	 */
 	stop_loader();
-
 	image_loader_seek(offset, whence);
 	show_image(params);
 }
@@ -641,6 +640,11 @@ static uint32_t timer_callback(GP_Timer *self)
 {
 	struct loader_params *params = self->priv;
 
+	/*
+	 * We need to stop loader first because image loader seek may free
+	 * image we are currently resamling.
+	 */
+	stop_loader();
 	image_loader_seek(IMG_CUR, 1);
 	show_image(params);
 
