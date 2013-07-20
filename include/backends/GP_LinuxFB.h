@@ -16,7 +16,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2013 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
@@ -24,6 +24,21 @@
 #define BACKENDS_GP_FRAMEBUFFER_H
 
 #include "GP_Backend.h"
+
+enum GP_LinuxFBFlags {
+	/*
+	 * Use KBD to get input events
+	 */
+	GP_FB_INPUT_KBD = 0x01,
+	/*
+	 * Use shadow framebuffer for drawing.
+	 */
+	GP_FB_SHADOW = 0x02,
+	/*
+	 * Allocate new console, if not set current is used.
+	 */
+	GP_FB_ALLOC_CON = 0x04,
+};
 
 /*
  * Initalize framebuffer.
@@ -38,6 +53,6 @@
  *
  * If flag is set, the konsole kbd is used to push events into event queue.
  */
-GP_Backend *GP_BackendLinuxFBInit(const char *path, int flag);
+GP_Backend *GP_BackendLinuxFBInit(const char *path, int flags);
 
 #endif /* BACKENDS_GP_FRAMEBUFFER_H */

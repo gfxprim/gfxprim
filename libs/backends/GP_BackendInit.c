@@ -16,7 +16,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2013 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
@@ -109,7 +109,7 @@ static void backend_fb_help(FILE *help, const char *err)
 
 	fprintf(help, "LinuxFB backend\n"
 	              "--------------\n"
-	              "FB:[/dev/fbX]\n");
+	              "FB:NO_SHADOW:USE_CON:[/dev/fbX]\n");
 }
 
 static GP_Backend *backend_fb_init(char *params, const char *caption,
@@ -123,7 +123,7 @@ static GP_Backend *backend_fb_init(char *params, const char *caption,
 	if (params != NULL)
 		fb = params;
 
-	return GP_BackendLinuxFBInit(fb, 1);
+	return GP_BackendLinuxFBInit(fb, 3);
 }
 
 static void backend_x11_help(FILE *help, const char *err)

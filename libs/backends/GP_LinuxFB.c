@@ -42,56 +42,126 @@
 struct fb_priv {
 	GP_Context context;
 	uint32_t bsize;
+	void *fb_mem;
 
-	int flag;
+	int flags;
 
 	/* console fd, nr and saved data */
 	int con_fd;
 	int con_nr;
 	int last_con_nr;
 	int saved_kb_mode;
+	struct termios ts;
+	int restore_termios;
 
 	int fb_fd;
 	char path[];
 };
 
 /*
- * Allocates and switches to newly allocated console.
+ * Restore console and keyboard mode to whatever was there before.
  */
-static int allocate_console(struct fb_priv *fb, int flag)
+static void exit_kbd(struct fb_priv *fb)
 {
-	struct vt_stat vts;
-	int fd, nr;
-	char buf[255];
-
-	/* allocate and switch to new console */
-	GP_DEBUG(1, "Allocating new console");
-
-	fd = open("/dev/tty1", O_WRONLY);
-
-	if (fd < 0) {
-		GP_DEBUG(1, "Opening console /dev/tty1 failed: %s",
-		            strerror(errno));
-		return -1;
+	if (ioctl(fb->con_fd, KDSKBMODE, fb->saved_kb_mode) < 0) {
+		GP_DEBUG(1, "Failed to ioctl KDSKBMODE (restore KBMODE)"
+		         " /dev/tty%i: %s", fb->con_nr,
+	         strerror(errno));
 	}
 
-	if (ioctl(fd, VT_OPENQRY, &nr) < 0) {
-		GP_DEBUG(1, "Failed to ioctl VT_OPENQRY /dev/tty1: %s",
-		            strerror(errno));
+	if (fb->restore_termios) {
+		if (tcsetattr(fb->con_fd, TCSANOW, &fb->ts) < 0) {
+			GP_WARN("Failed to tcsetattr() (restore termios): %s",
+			        strerror(errno));
+		}
+	}
+}
+
+/*
+ * Save console mode and set the mode to raw.
+ */
+static int init_kbd(struct fb_priv *fb)
+{
+	struct termios t;
+	int fd = fb->con_fd;
+
+	if (tcgetattr(fd, &fb->ts)) {
+		GP_WARN("Failed to tcgetattr(): %s", strerror(errno));
+		fb->restore_termios = 0;
+	} else {
+		fb->restore_termios = 1;
+	}
+
+	cfmakeraw(&t);
+
+	if (tcsetattr(fd, TCSANOW, &t) < 0) {
+		GP_DEBUG(1, "Failed to tcsetattr(): %s",
+		         strerror(errno));
 		close(fd);
 		return -1;
 	}
 
-	GP_DEBUG(1, "Has been granted tty%i", nr);
+	if (ioctl(fd, KDGKBMODE, &fb->saved_kb_mode)) {
+		GP_DEBUG(1, "Failed to ioctl KDGKBMODE tty%i: %s",
+		         fb->con_nr, strerror(errno));
+		close(fd);
+		return -1;
+	}
 
-	close(fd);
+	GP_DEBUG(2, "Previous keyboard mode was '%i'",
+	         fb->saved_kb_mode);
 
-	snprintf(buf, sizeof(buf), "/dev/tty%i", nr);
-	fd = open(buf, O_RDWR | O_NONBLOCK);
+	if (ioctl(fd, KDSKBMODE, K_MEDIUMRAW) < 0) {
+		GP_DEBUG(1, "Failed to ioctl KDSKBMODE tty%i: %s",
+		        fb->con_nr, strerror(errno));
+		close(fd);
+		return -1;
+	}
+
+	return 0;
+}
+
+/*
+ * Allocates and switches to newly allocated console.
+ */
+static int allocate_console(struct fb_priv *fb, int flags)
+{
+	struct vt_stat vts;
+	int fd, nr = -1;
+	char buf[255];
+	const char *tty = "/dev/tty";
+
+	if (flags & GP_FB_ALLOC_CON) {
+		GP_DEBUG(1, "Allocating new console");
+
+		fd = open("/dev/tty1", O_WRONLY);
+
+		if (fd < 0) {
+			GP_DEBUG(1, "Opening console /dev/tty1 failed: %s",
+			         strerror(errno));
+			return -1;
+		}
+
+		if (ioctl(fd, VT_OPENQRY, &nr) < 0) {
+			GP_DEBUG(1, "Failed to ioctl VT_OPENQRY /dev/tty1: %s",
+			            strerror(errno));
+			close(fd);
+			return -1;
+		}
+
+		GP_DEBUG(1, "Has been granted tty%i", nr);
+
+		close(fd);
+
+		snprintf(buf, sizeof(buf), "/dev/tty%i", nr);
+		tty = buf;
+	}
+
+	fd = open(tty, O_RDWR | O_NONBLOCK);
 
 	if (fd < 0) {
 		GP_DEBUG(1, "Opening console %s failed: %s",
-		            buf, strerror(errno));
+		         tty, strerror(errno));
 		return -1;
 	}
 
@@ -100,55 +170,19 @@ static int allocate_console(struct fb_priv *fb, int flag)
 	else
 		fb->last_con_nr = -1;
 
-	if (ioctl(fd, VT_ACTIVATE, nr) < 0) {
-		GP_DEBUG(1, "Failed to ioctl VT_ACTIVATE %s: %s",
-		            buf, strerror(errno));
-		close(fd);
-		return -1;
-	}
-
-	GP_DEBUG(1, "Waiting for tty%i to activate", nr);
-
-	if (ioctl(fd, VT_WAITACTIVE, nr) < 0) {
-		GP_DEBUG(1, "Failed to ioctl VT_WAITACTIVE %s: %s",
-		            buf, strerror(errno));
-		close(fd);
-		return -1;
-	}
-
-	/* turn off blinking cursor */
-	if (ioctl(fd, KDSETMODE, KD_GRAPHICS) < 0) {
-		GP_DEBUG(1, "Failed to ioctl KDSETMODE %s: %s",
-		            buf, strerror(errno));
-		close(fd);
-		return -1;
-	}
-
-	/* set keyboard to raw mode */
-	if (flag) {
-		struct termios t;
-		cfmakeraw(&t);
-
-		if (tcsetattr(fd, TCSANOW, &t) < 0) {
-			GP_DEBUG(1, "Failed to tcsetattr(): %s",
-			         strerror(errno));
+	if (flags & GP_FB_ALLOC_CON) {
+		if (ioctl(fd, VT_ACTIVATE, nr) < 0) {
+			GP_DEBUG(1, "Failed to ioctl VT_ACTIVATE %s: %s",
+			         tty, strerror(errno));
 			close(fd);
 			return -1;
 		}
 
-		if (ioctl(fd, KDGKBMODE, &fb->saved_kb_mode)) {
-			GP_DEBUG(1, "Failed to ioctl KDGKBMODE %s: %s",
-                                 buf, strerror(errno));
-			close(fd);
-			return -1;
-		}
+		GP_DEBUG(1, "Waiting for %s to activate", tty);
 
-		GP_DEBUG(2, "Previous keyboard mode was '%i'",
-                         fb->saved_kb_mode);
-
-		if (ioctl(fd, KDSKBMODE, K_MEDIUMRAW) < 0) {
-			GP_DEBUG(1, "Failed to ioctl KDSKBMODE %s: %s",
-			         buf, strerror(errno));
+		if (ioctl(fd, VT_WAITACTIVE, nr) < 0) {
+			GP_DEBUG(1, "Failed to ioctl VT_WAITACTIVE %s: %s",
+			         tty, strerror(errno));
 			close(fd);
 			return -1;
 		}
@@ -156,6 +190,14 @@ static int allocate_console(struct fb_priv *fb, int flag)
 
 	fb->con_nr = nr;
 	fb->con_fd = fd;
+
+	/* turn off blinking cursor */
+	if (ioctl(fd, KDSETMODE, KD_GRAPHICS) < 0) {
+		GP_DEBUG(1, "Failed to ioctl KDSETMODE %s: %s",
+		         tty, strerror(errno));
+		close(fd);
+		return -1;
+	}
 
 	return 0;
 }
@@ -190,20 +232,20 @@ static void fb_exit(GP_Backend *self)
 {
 	struct fb_priv *fb = GP_BACKEND_PRIV(self);
 
+	if (fb->flags & GP_FB_SHADOW)
+		free(fb->context.pixels);
+
 	/* unmap framebuffer */
-	munmap(fb->context.pixels, fb->bsize);
+	munmap(fb->fb_mem, fb->bsize);
 	close(fb->fb_fd);
 
-	/* reset keyboard */
-	ioctl(fb->con_fd, KDSETMODE, KD_TEXT);
+	/* restore blinking cursor */
+	if (ioctl(fb->con_fd, KDSETMODE, KD_TEXT))
+		GP_WARN("Failed to ioctl KDSETMODE (restore KDMODE)");
 
 	/* restore keyboard mode */
-	if (fb->flag) {
-		if (ioctl(fb->con_fd, KDSKBMODE, fb->saved_kb_mode) < 0) {
-			GP_DEBUG(1, "Failed to ioctl KDSKBMODE (restore KBMODE)"
-                                 " /dev/tty%i: %s", fb->con_nr, strerror(errno));
-		}
-	}
+	if (fb->flags & GP_FB_INPUT_KBD)
+		exit_kbd(fb);
 
 	/* switch back console */
 	if (fb->last_con_nr != -1)
@@ -213,7 +255,34 @@ static void fb_exit(GP_Backend *self)
 	free(self);
 }
 
-GP_Backend *GP_BackendLinuxFBInit(const char *path, int flag)
+static void fb_flip_shadow(GP_Backend *self)
+{
+	struct fb_priv *fb = GP_BACKEND_PRIV(self);
+
+	GP_DEBUG(2, "Flipping buffer");
+
+	memcpy(fb->fb_mem, fb->context.pixels, fb->bsize);
+}
+
+static void fb_update_rect_shadow(GP_Backend *self, GP_Coord x0, GP_Coord y0,
+                                  GP_Coord x1, GP_Coord y1)
+{
+	struct fb_priv *fb = GP_BACKEND_PRIV(self);
+
+	GP_DEBUG(2, "Flipping buffer");
+
+	size_t size = ((x1 - x0) * fb->context.bpp) / 8;
+
+	for (;y0 <= y1; y0++) {
+		void *src = GP_PIXEL_ADDR(&fb->context, x0, y0);
+		void *dst = (char*)fb->fb_mem +
+                            y0 * fb->context.bytes_per_row +
+                            (x0 * fb->context.bpp)/8;
+		memcpy(dst, src, size);
+	}
+}
+
+GP_Backend *GP_BackendLinuxFBInit(const char *path, int flags)
 {
 	GP_Backend *backend;
 	struct fb_priv *fb;
@@ -229,8 +298,13 @@ GP_Backend *GP_BackendLinuxFBInit(const char *path, int flag)
 
 	fb = GP_BACKEND_PRIV(backend);
 
-	if (allocate_console(fb, flag))
+	if (allocate_console(fb, flags & GP_FB_INPUT_KBD))
 		goto err1;
+
+	if (flags & GP_FB_INPUT_KBD) {
+		if (init_kbd(fb))
+			goto err1;
+	}
 
 	/* open and mmap framebuffer */
 	GP_DEBUG(1, "Opening framebuffer '%s'", path);
@@ -261,7 +335,7 @@ GP_Backend *GP_BackendLinuxFBInit(const char *path, int flag)
 	 * Framebuffer is grayscale.
 	 */
 	if (vscri.grayscale) {
-		//TODO
+		GP_WARN("Grayscale not implemented!");
 		goto err3;
 	}
 
@@ -277,19 +351,30 @@ GP_Backend *GP_BackendLinuxFBInit(const char *path, int flag)
 		goto err3;
 	}
 
-	fb->context.pixels = mmap(NULL, fscri.smem_len,
-	                          PROT_READ | PROT_WRITE, MAP_FILE | MAP_SHARED,
-				  fd, 0);
+	if (flags & GP_FB_SHADOW) {
+		fb->context.pixels = malloc(fscri.smem_len);
 
-	if (fb->context.pixels == MAP_FAILED) {
+		if (!fb->context.pixels) {
+			GP_DEBUG(1, "Malloc failed :(");
+			goto err3;
+		}
+	}
+
+	fb->fb_mem = mmap(NULL, fscri.smem_len,
+	                  PROT_READ | PROT_WRITE, MAP_FILE | MAP_SHARED, fd, 0);
+
+	if (fb->fb_mem == MAP_FAILED) {
 		GP_DEBUG(1, "mmaping framebuffer failed: %s", strerror(errno));
-		goto err3;
+		goto err4;
 	}
 
 	fb->fb_fd = fd;
-	fb->bsize  = fscri.smem_len;
+	fb->bsize = fscri.smem_len;
 	strcpy(fb->path, path);
-	fb->flag = flag;
+	fb->flags = flags;
+
+	if (!(flags & GP_FB_SHADOW))
+		fb->context.pixels = fb->fb_mem;
 
 	fb->context.w = vscri.xres;
 	fb->context.h = vscri.yres;
@@ -302,22 +387,28 @@ GP_Backend *GP_BackendLinuxFBInit(const char *path, int flag)
 	fb->context.bytes_per_row  = fscri.line_length;
 	fb->context.pixel_type = pixel_type;
 
+	int shadow = flags & GP_FB_SHADOW;
+	int kbd = flags & GP_FB_INPUT_KBD;
+
 	/* update API */
 	backend->name          = "Linux FB";
 	backend->context       = &fb->context;
-	backend->Flip          = NULL;
-	backend->UpdateRect    = NULL;
+	backend->Flip          = shadow ? fb_flip_shadow : NULL;
+	backend->UpdateRect    = shadow ? fb_update_rect_shadow : NULL;
 	backend->Exit          = fb_exit;
 	backend->SetAttributes = NULL;
 	backend->ResizeAck     = NULL;
-	backend->Poll          = flag ? fb_poll : NULL;
-	backend->Wait          = flag ? fb_wait : NULL;
+	backend->Poll          = kbd ? fb_poll : NULL;
+	backend->Wait          = kbd ? fb_wait : NULL;
 	backend->fd            = fb->con_fd;
 	backend->timers        = NULL;
 
 	GP_EventQueueInit(&backend->event_queue, vscri.xres, vscri.yres, 0);
 
 	return backend;
+err4:
+	if (flags & GP_FB_SHADOW)
+		free(fb->context.pixels);
 err3:
 	close(fd);
 err2:
