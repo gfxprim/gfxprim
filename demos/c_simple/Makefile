@@ -19,7 +19,7 @@ APPS=backend_example loaders_example loaders filters_symmetry gfx_koch\
      input_example fileview linetest randomshapetest fonttest\
      loaders_register blittest textaligntest abort sin_AA x11_windows\
      debug_handler gaussian_noise byte_utils version pretty_print timers\
-     zip_container
+     zip_container backend_timers_example
 
 ifeq ($(HAVE_LIBSDL),yes)
 APPS+=SDL_glue
@@ -29,6 +29,7 @@ endif
 
 showimage: LDLIBS+=$(LDLIBS_BACKENDS) $(LDLIBS_LOADERS)
 backend_example: LDLIBS+=$(LDLIBS_BACKENDS)
+backend_timers_example: LDLIBS+=$(LDLIBS_BACKENDS)
 virtual_backend_example: LDLIBS+=$(LDLIBS_BACKENDS)
 loaders_example: LDLIBS+=$(LDLIBS_LOADERS)
 loaders: LDLIBS+=$(LDLIBS_LOADERS)

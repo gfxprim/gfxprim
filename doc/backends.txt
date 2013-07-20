@@ -47,7 +47,7 @@ GP_Backend *GP_BackendSDLInit(GP_Size w, GP_Size h,
                               const char *caption);
 -------------------------------------------------------------------------------
 
-Initialize 'SDL' as an backend driver. The backend is thread safe as all the
+Initialize 'SDL' as a backend driver. The backend is thread safe as all the
 operations are guarded by locks.
 
 You can't initialize more than one backend at a time, which is inherited 'SDL'
@@ -236,7 +236,7 @@ GP_BackendExit
 void GP_BackendExit(GP_Backend *backend);
 -------------------------------------------------------------------------------
 
-Calls an backend exit callback. Restores the display, keyboard, etc. state
+Calls a backend exit callback. Restores the display, keyboard, etc. state
 back.
 
 WARNING: It's important to call this functions on application exit. If you
@@ -423,6 +423,9 @@ backend 'Poll' or 'Wait' functions.
 
 If timer callback is set to 'NULL' a timer event is pushed to the backend
 input queue once timer has expired otherwise timer callback is called.
+
+TIP: For example usage see backend timers
+     link:example_backend_timers.html[example].
 
 GP_BackendTimersInQueue
 ^^^^^^^^^^^^^^^^^^^^^^^
