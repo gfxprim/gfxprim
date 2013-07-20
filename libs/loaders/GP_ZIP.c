@@ -344,14 +344,24 @@ static GP_Context *zip_next_file(FILE *f, GP_ProgressCallback *callback)
 			goto out;
 
 		ret = GP_ReadJPG(f, callback);
+
 		goto out;
 	break;
 	case COMPRESS_DEFLATE:
 		if (read_deflate(f, &header, &fres))
 			goto out;
 
+
 		ret = GP_ReadJPG(fres, callback);
-		err = errno;
+
+		if (!ret) {
+			rewind(fres);
+			ret = GP_ReadPNG(fres, callback);
+		}
+
+		if (!ret)
+			err = errno;
+
 		fclose(fres);
 		goto out;
 	break;
