@@ -5,7 +5,7 @@ Gfxprim is simple modular 2D bitmap graphics library with emphasis on speed
 and correctness.
 
 One of the key points of the library is meta-programming. Most of the
-operations and filters are wriiten in http://jinja.pocoo.org/[Jinja]
+operations and filters are written in http://jinja.pocoo.org/[Jinja]
 templating language that is used to generate specialized code in C
 programmming language. Creating code that works with less usuall pixel types
 should be as easy as adding pixel definition into the configuration and
@@ -22,9 +22,9 @@ that represents in-memory pixmap.
 
 The Core also contains generated code for basic operations such as
 link:get_put_pixel.html[GetPixel] and link:get_put_pixel.html[PutPixel] and
-optimized code for writing continous line of pixels 'GP_WritePixels' that are
-base for the more complex drawing primitives in GFX or for graphics operations
-in Filters.
+optimized functions for writing continous line of pixels 'GP_WritePixels' that
+are base for the more complex drawing primitives in GFX or for graphics
+operations in Filters.
 
 link:blits.html[Blits] are functions used to copy part of one bitmap into
 another bitmap. The blits be also used for primitive bitmap pixel type
@@ -65,49 +65,48 @@ Loaders
 -------
 
 link:loaders.html[Loaders] are part that is resposible for loading and saving
-images into various standard formats (PNG, JPEG, GIF, BMP, PNM, etc...).
+images into various standard formats (PNG, JPEG, GIF, TIFF, BMP, PNM, etc...).
 
 .Currently supported formats
 [width="100%",options="header"]
 |=============================================================================
-| Extension | Format Name | Signature | Read Support | Write Support
+| Extension | Format Name | Read Support | Write Support
 
-| JPEG | | [green]*Yes* | [green]*Yes* | [green]*Yes*
+| JPEG | | [green]*Yes* | [green]*Yes*
 
 | PNG |
   Portable Network Graphics |
-  [green]*Yes* |
   [green]#16 Bit RGB not supported# |
   [green]#16 Bit RGB not supported#
 
 | GIF |
   Graphics Interchange Format |
   [green]*Yes* |
-  [green]*Yes* |
   [black]*No*
 
 | BMP | |
-  [green]*Yes* |
   [green]#RLE4 and some less common bitfiels not supported# |
   [green]#RGB888 only#
 
 | TIFF |
   Tagged Image File Format |
-  [green]*Yes* |
-  [gray]#Not finished# |
-  [black]*No*
+  [green]#Most of the Palette, RGB and Grayscale works (no tiles yet)# |
+  [green]#RGB888 and Grayscale#
 
 | PSP |
   Paint Shop Pro Image |
-  [green]*Yes* |
   [green]#Composite image only for newer formats than 3.0# |
   [black]*No*
 
 | PBM PGM PNM |
   Netpbm portable bitmap |
-  [black]*No* |
-  [gray]#Not finished# |
-  [gray]#Not finished#
+  [green]#All but < 8bit binary grayscale# |
+  [green]#All ASCII formats#
+
+| CBZ |
+  Comic book archive |
+  [green]#Experimental support via ZIP Container# |
+  [black]*No*
 
 |=============================================================================
 
@@ -200,14 +199,20 @@ drawing on screen (or into a window) and for getting keystrokes/mouse
 coordinates. So far we support X11, linux framebuffer and SDL as a graphics
 backend.
 
+There is also a virtual backend used for testing that allows you to create a
+backend of any pixel type on the top of other backends.
+
+Python bindings
+---------------
+
+Python bindings currently covers most of the library, there is (not yet
+finished) documentation for link:core_python.html[Core],
+link:gfx_python.html[Gfx], link:loaders_python.html[Loaders] and
+link:backends_python.html[Backends].
 
 Work in progress
 ----------------
 
-* Python bindings
-
 * Anti Aliased drawing
 
 * Gamma correction and color profiles
-
-* Alfa channel blits

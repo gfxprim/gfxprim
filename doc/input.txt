@@ -165,7 +165,7 @@ image::keyboard.svg["Keyboard Layout",width=800,link="keyboard.svg"]
 * The system event is used with 'GP_EV_SYS_RESIZE' and informs you
   of the new window size.
 
-* The value of timer event is simply pointer to the expired timer.
+* The value of timer event is simply pointer to the expired link:#Timers[Timer].
 
 The 'dev_id' is not used at the moment and may be removed.
 
