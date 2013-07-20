@@ -65,4 +65,22 @@ ERROR_ON_NONZERO(GP_SavePGM);
 ERROR_ON_NONZERO(GP_SavePPM);
 ERROR_ON_NONZERO(GP_SavePNM);
 
+%newobject GP_LoadPBM;
+%newobject GP_LoadPGM;
+%newobject GP_LoadPPM;
+%newobject GP_LoadPNM;
+
 %include "GP_PNM.h"
+
+ERROR_ON_NULL(GP_LoadTIFF);
+ERROR_ON_NONZERO(GP_SaveTIFF);
+
+%newobject GP_LoadTIFF;
+
+%include "GP_TIFF.h"
+
+ERROR_ON_NULL(GP_LoadPSP);
+
+%newobject GP_LoadPSP;
+
+%include "GP_PSP.h"

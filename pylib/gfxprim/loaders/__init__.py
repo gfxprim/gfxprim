@@ -24,7 +24,7 @@ def _init(module):
     Generally, not all pixel types work with all formats.
     """
     c_loaders.GP_SaveImage(self.ctx, filename, callback)
-  
+
   @extend(LoadersSubmodule)
   def SavePNG(self, filename, callback=None):
     """Save the image as PNG.
@@ -32,7 +32,7 @@ def _init(module):
     Generally, not all pixel types work with all formats.
     """
     c_loaders.GP_SavePNG(self.ctx, filename, callback)
-  
+
   @extend(LoadersSubmodule)
   def SaveJPG(self, filename, callback=None):
     """Save the image as JPEG.
@@ -40,7 +40,7 @@ def _init(module):
     Generally, not all pixel types work with all formats.
     """
     c_loaders.GP_SaveJPG(self.ctx, filename, callback)
-  
+
   @extend(LoadersSubmodule)
   def SaveBMP(self, filename, callback=None):
     """Save the image as BMP.
@@ -48,6 +48,46 @@ def _init(module):
     Generally, not all pixel types work with all formats.
     """
     c_loaders.GP_SaveBMP(self.ctx, filename, callback)
+
+  @extend(LoadersSubmodule)
+  def SavePBM(self, filename, callback=None):
+    """Save the image as PBM.
+
+    Generally, not all pixel types work with all formats.
+    """
+    c_loaders.GP_SavePBM(self.ctx, filename, callback)
+
+  @extend(LoadersSubmodule)
+  def SavePGM(self, filename, callback=None):
+    """Save the image as PGM.
+
+    Generally, not all pixel types work with all formats.
+    """
+    c_loaders.GP_SavePGM(self.ctx, filename, callback)
+
+  @extend(LoadersSubmodule)
+  def SavePPM(self, filename, callback=None):
+    """Save the image as PPM.
+
+    Generally, not all pixel types work with all formats.
+    """
+    c_loaders.GP_SavePPM(self.ctx, filename, callback)
+
+  @extend(LoadersSubmodule)
+  def SavePNM(self, filename, callback=None):
+    """Save the image as PNM.
+
+    Generally, not all pixel types work with all formats.
+    """
+    c_loaders.GP_SavePNM(self.ctx, filename, callback)
+
+  @extend(LoadersSubmodule)
+  def SaveTIFF(self, filename, callback=None):
+    """Save the image as TIFF.
+
+    Generally, not all pixel types work with all formats.
+    """
+    c_loaders.GP_SaveTIFF(self.ctx, filename, callback)
 
   # Imports from the SWIG module
   import re
