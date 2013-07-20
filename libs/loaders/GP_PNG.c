@@ -78,6 +78,8 @@ int GP_OpenPNG(const char *src_path, FILE **f)
 
 	GP_DEBUG(1, "Found PNG signature in '%s'", src_path);
 
+	rewind(*f);
+
 	return 0;
 err2:
 	fclose(*f);
@@ -133,7 +135,7 @@ GP_Context *GP_ReadPNG(FILE *f, GP_ProgressCallback *callback)
 	}
 
 	png_init_io(png, f);
-	png_set_sig_bytes(png, 8);
+	png_set_sig_bytes(png, 0);
 	png_read_info(png, png_info);
 
 	png_get_IHDR(png, png_info, &w, &h, &depth,
