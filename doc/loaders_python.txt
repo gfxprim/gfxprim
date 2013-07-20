@@ -12,6 +12,16 @@ import gfxprim.loaders as loaders
 
     img = loaders.Load(path, callback=None)
 
+    img = loaders.LoadBMP(path, callback=None)
+    img = loaders.LoadGIF(path, callback=None)
+    img = loaders.LoadJPG(path, callback=None)
+    img = loaders.LoadPBM(path, callback=None)
+    img = loaders.LoadPGM(path, callback=None)
+    img = loaders.LoadPNG(path, callback=None)
+    img = loaders.LoadPNM(path, callback=None)
+    img = loaders.LoadPPM(path, callback=None)
+    img = loaders.LoadPSP(path, callback=None)
+    img = loaders.LoadTIFF(path, callback=None)
 -------------------------------------------------------------------------------
 
 Loads an image from a file.
@@ -40,11 +50,14 @@ import gfxprim.loaders as loaders
 
     img.loaders.Save(path, callback=None)
 
-    img.loaders.SavePNG(path, callback=None)
-
-    img.loaders.SaveJPG(path, callback=None)
-
     img.loaders.SaveBMP(path, callback=None)
+    img.loaders.SaveJPG(path, callback=None)
+    img.loaders.SavePBM(path, callback=None)
+    img.loaders.SavePGM(path, callback=None)
+    img.loaders.SavePNG(path, callback=None)
+    img.loaders.SavePNM(path, callback=None)
+    img.loaders.SavePPM(path, callback=None)
+    img.loaders.SaveTIFF(path, callback=None)
 -------------------------------------------------------------------------------
 
 Save image to a file.
@@ -57,7 +70,7 @@ May raise 'OSError' with errno set to 'EPERM', 'EISDIR', 'ENOENT' or any other
 May raise 'OSError' with errno set to 'ENOSYS' on unsupported pixel type for
 a given format.
 
-May raise 'OSError' with errno set to 'EIO' when file is damaged.
+May raise 'OSError' with errno set to 'EIO' when filesystem is full.
 
 May raise 'OSError' with errno set to 'ECANCELED' when action was interrupted
 by callback.
