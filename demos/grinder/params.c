@@ -219,18 +219,18 @@ int set_bool(int *res, char *val)
 int set_float(float *res, char *val)
 {
 	char *end;
-	float f;
+	double d;
 
 	errno = 0;
-	f = strtof(val, &end);
+	d = strtod(val, &end);
 
 	if (*end != '\0')
 		return 1;
 
 	if (errno != 0)
 		return 1;
-
-	*res = f;
+	
+	*res = d;
 
 	return 0;
 }
@@ -262,7 +262,7 @@ int param_parse(const char *params, const struct param *param_desc, void *priv,
 	char *par;
 	unsigned int n, i;
 	va_list va;
-	int ret;
+	int ret = 0;
 
 	if (params == NULL || *params == '\0')
 		return 0;
