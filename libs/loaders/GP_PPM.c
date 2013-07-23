@@ -117,11 +117,12 @@ static int write_binary_ppm(FILE *f, GP_Context *src)
 	for (y = 0; y < src->h; y++)
 		for (x = 0; x < src->w; x++) {
 			GP_Pixel pix = GP_GetPixel_Raw_24BPP(src, x, y);
-			//TODO endianess?
 			
-			GP_SWAP(((uint8_t*)&pix)[0], ((uint8_t*)&pix)[2]);
+			uint8_t buf[3] = {GP_Pixel_GET_R_RGB888(pix), 
+			                  GP_Pixel_GET_G_RGB888(pix),
+			                  GP_Pixel_GET_B_RGB888(pix)};
 
-			if (fwrite(&pix, 3, 1, f) < 1)
+			if (fwrite(buf, 3, 1, f) < 1)
 				return 1;
 		}
 
