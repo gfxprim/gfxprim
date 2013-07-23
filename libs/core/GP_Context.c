@@ -137,7 +137,7 @@ GP_Context *GP_ContextSubContext(GP_Context *context, GP_Context *subcontext,
 	GP_Context *ret = subcontext;
 
 	if (ret == NULL) {
-		GP_Context *ret = malloc(sizeof(GP_Context));
+		ret = malloc(sizeof(GP_Context));
 
 		if (ret == NULL)
 			return NULL;
