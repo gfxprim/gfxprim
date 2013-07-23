@@ -77,7 +77,19 @@ typedef union v4f {
 	float f[4];
 } v4f;
 
-#define MUL_V4SF(a, b) ((union v4f)((a).v * (b).v))
+#define GP_USE_GCC_VECTOR
+
+#ifdef GP_USE_GCC_VECTOR
+#define MUL_V4SF(a, b) ({v4f ret; ret.v = (a).v * (b).v; ret;})
+#else
+#define MUL_V4SF(a, b) ({v4f ret; \
+                         ret.f[0] = (a).f[0] * (b).f[0]; \
+                         ret.f[1] = (a).f[1] * (b).f[1]; \
+                         ret.f[2] = (a).f[2] * (b).f[2]; \
+                         ret.f[3] = (a).f[3] * (b).f[3]; \
+						 ret;})
+#endif /* GP_USE_GCC_VECTOR */
+
 #define SUM_V4SF(a)    ((a).f[0] + (a).f[1] + (a).f[2] + (a).f[3])
 
 int GP_FilterInterpolate_Cubic(const GP_Context *src, GP_Context *dst,
