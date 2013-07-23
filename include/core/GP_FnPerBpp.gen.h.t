@@ -17,7 +17,7 @@
 	GP_DEF_FFN_FOR_BPP(fname, MACRO_NAME, {{ ps.suffix }}) \
 {% endfor %}
 
-{% macro bpp_suffix(suffix) %}{% if not suffix == None %}_{{ suffix }}{% endif %}{% endmacro %}
+{% macro bpp_suffix(suffix) %}{% if suffix == "LE" or suffix == "BE" %}_{{ suffix }}{% endif %}{% endmacro %}
 
 /*
  * Branch on bpp and bit_endian. 
