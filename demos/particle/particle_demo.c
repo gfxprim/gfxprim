@@ -135,6 +135,22 @@ int main(int argc, char *argv[])
 				break;
 				}
 			break;
+			case GP_EV_SYS:
+				switch(ev.code) {
+				case GP_EV_SYS_QUIT:
+					GP_BackendExit(backend);
+					exit(0);
+				break;
+				case GP_EV_SYS_RESIZE:
+					GP_BackendResizeAck(backend);
+					space_destroy(space);
+					space = space_create(particles,
+					                     10<<8, 10<<8,
+					                     (context->w - 10)<<8,
+					                     (context->h - 10)<<8);
+				break;
+				}
+			break;
 			}
 		}
 

@@ -443,6 +443,11 @@ void event_loop(void)
 				GP_BackendExit(backend);
 				exit(0);
 			break;
+			case GP_EV_SYS_RESIZE:
+				GP_BackendResizeAck(backend);
+				center_x = backend->context->w / 2;
+				center_y = backend->context->h / 2;
+			break;
 			}
 		break;
 		}

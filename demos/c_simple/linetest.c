@@ -96,6 +96,18 @@ void event_loop(void)
 				pause_flag = !pause_flag;
 			break;
 			}
+		break;
+		case GP_EV_SYS:
+			switch(ev.code) {
+			case GP_EV_SYS_QUIT:
+				GP_BackendExit(win);
+				exit(0);
+			break;
+			case GP_EV_SYS_RESIZE:
+				GP_BackendResizeAck(win);
+			break;
+			}
+		break;
 		}
 	}
 }
