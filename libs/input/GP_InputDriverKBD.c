@@ -52,10 +52,14 @@ static uint16_t keycode_table[] = {
 	0,                 0,                  GP_KEY_F11,         GP_KEY_F12,
 	0,                 0,                  0,                  0,
 	0,                 0,                  0,                  GP_KEY_KP_ENTER,
-	GP_KEY_RIGHT_CTRL, GP_KEY_KP_ASTERISK, 0/*PRINT_SCREEN*/,  GP_KEY_RIGHT_ALT,
-	0,                 GP_KEY_HOME,        0,                  GP_KEY_PAGE_UP,
-	0,                 0,                  GP_KEY_END,         0,
-	GP_KEY_PAGE_DOWN,  GP_KEY_INSERT,
+	GP_KEY_RIGHT_CTRL, GP_KEY_KP_ASTERISK, GP_KEY_SYSRQ,       GP_KEY_RIGHT_ALT,
+	0,                 GP_KEY_HOME,        GP_KEY_UP,          GP_KEY_PAGE_UP,
+	GP_KEY_LEFT,       GP_KEY_RIGHT,       GP_KEY_END,         GP_KEY_DOWN,
+	GP_KEY_PAGE_DOWN,  GP_KEY_INSERT,      GP_KEY_DELETE,      0,
+	0,                 0,                  0,                  0,
+	0,                 0,                  0,                  0,
+	0,                 0,                  0,                  0,
+	GP_KEY_LEFT_META,
 };
 
 void GP_InputDriverKBDEventPut(struct GP_EventQueue *event_queue,
