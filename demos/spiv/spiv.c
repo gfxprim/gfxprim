@@ -531,7 +531,7 @@ static void *image_loader(void *ptr)
 	if (img == NULL)
 		return NULL;
 
-	image_cache_print(params->img_resized_cache);
+	//image_cache_print(params->img_resized_cache);
 update:
 	update_display(params, img, orig_img);
 	cpu_timer_stop(&sum_timer);

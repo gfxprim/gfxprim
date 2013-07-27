@@ -39,7 +39,7 @@ def c_compiler_exists(cfg):
                          cfg["CC"][0])
 
 def python_version(cfg):
-    sys.stderr.write("Cddhecking for python-config Python version ... ")
+    sys.stderr.write("Checking for python-config Python version ... ")
 
     if (cfg['PYTHON_CONFIG'][0] is ''):
         sys.stderr.write('NA\n')
@@ -330,6 +330,9 @@ if __name__ ==  '__main__':
                    ["X_SHM",
 		    "MIT-SHM X Extension",
 		    [header_exists, "X11/extensions/XShm.h"], "", "-lXext", ["backends"]],
+		   ["aalib",
+		    "Portable ascii art GFX library",
+		    [header_exists, "aalib.h"], "", "-laa", ["backends"]],
 		   ["freetype",
                     "A high-quality and portable font engine",
                     [header_exists, "ft2build.h"], "", "`freetype-config --libs`", ["core"]],

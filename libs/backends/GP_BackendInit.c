@@ -218,10 +218,35 @@ static GP_Backend *backend_x11_init(char *params, const char *caption,
 	}
 }
 
+static void backend_aa_help(FILE *help, const char *err)
+{
+	if (help == NULL)
+		return;
+
+	if (err != NULL)
+		fprintf(help, "ERROR: %s\n", err);
+
+	fprintf(help, "AALib backend\n"
+	              "--------------\n"
+	              "AA\n");
+}
+
+static GP_Backend *backend_aa_init(char *params, const char *caption,
+                                   FILE *help)
+{
+	(void) help;
+	(void) caption;
+	(void) params;
+
+	return GP_BackendAALibInit();
+}
+
+
 static const char *backend_names[] = {
 	"SDL", /* libSDL            */
 	"FB",  /* Linux Framebuffer */
 	"X11", /* X11 window system */
+	"AA",  /* AALib */
 	NULL,
 };
 
@@ -229,6 +254,7 @@ static GP_Backend *(*backend_inits[])(char *, const char *, FILE *) = {
 	backend_sdl_init,
 	backend_fb_init,
 	backend_x11_init,
+	backend_aa_init,
 	NULL,
 };
 
@@ -236,6 +262,7 @@ static void (*backend_helps[])(FILE *help, const char *err) = {
 	backend_sdl_help,
 	backend_fb_help,
 	backend_x11_help,
+	backend_aa_help,
 	NULL,
 };
 
