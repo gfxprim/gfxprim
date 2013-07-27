@@ -64,11 +64,15 @@ int main(int argc, char *argv[])
 	const char *backend_opts = "X11";
 	int opt;
 	int pause_flag = 0;
+	int particles = 160;
 
-	while ((opt = getopt(argc, argv, "b:Ii:Ps:r:")) != -1) {
+	while ((opt = getopt(argc, argv, "b:n:")) != -1) {
 		switch (opt) {
 		case 'b':
 			backend_opts = optarg;
+		break;
+		case 'n':
+			particles = atoi(optarg);
 		break;
 		default:
 			fprintf(stderr, "Invalid paramter '%c'\n", opt);
@@ -93,7 +97,7 @@ int main(int argc, char *argv[])
 	GP_BackendFlip(backend);
 
 	struct space *space;
-	space = space_create(160, 10<<8, 10<<8, (context->w - 10)<<8, (context->h - 10)<<8);
+	space = space_create(particles, 10<<8, 10<<8, (context->w - 10)<<8, (context->h - 10)<<8);
 
 	for (;;) {
 		if (backend->Poll)

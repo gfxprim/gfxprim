@@ -340,7 +340,7 @@ void event_loop(void)
 	for (;;) {
 		GP_BackendWaitEvent(backend, &ev);
 
-		GP_EventDump(&ev);
+		//GP_EventDump(&ev);
 
 		shift_pressed = GP_EventGetKey(&ev, GP_KEY_LEFT_SHIFT) ||
 		                GP_EventGetKey(&ev, GP_KEY_RIGHT_SHIFT);
@@ -471,11 +471,20 @@ void print_instructions(void)
 	printf("    1/2/3 ............... choose shape variant (if applicable)\n");
 }
 
-int main(void)
+int main(int argc, char *argv[])
 {
 	const char *backend_opts = "X11";
+	int opt;
 
-//	GP_SetDebugLevel(10);
+	while ((opt = getopt(argc, argv, "b:")) != -1) {
+		switch (opt) {
+		case 'b':
+			backend_opts = optarg;
+		break;
+		default:
+			fprintf(stderr, "Invalid paramter '%c'\n", opt);
+		}
+	}
 
 	backend = GP_BackendInit(backend_opts, "Shapetest", stderr);
 

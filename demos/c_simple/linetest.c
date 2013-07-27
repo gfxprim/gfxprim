@@ -100,9 +100,20 @@ void event_loop(void)
 	}
 }
 
-int main(void)
+int main(int argc, char *argv[])
 {
 	const char *backend_opts = "X11";
+	int opt;
+
+	while ((opt = getopt(argc, argv, "b:")) != -1) {
+		switch (opt) {
+		case 'b':
+			backend_opts = optarg;
+		break;
+		default:
+			fprintf(stderr, "Invalid paramter '%c'\n", opt);
+		}
+	}
 
 	win = GP_BackendInit(backend_opts, "Line Test", stderr);
 

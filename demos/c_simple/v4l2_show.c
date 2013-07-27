@@ -40,9 +40,6 @@ int main(int argc, char *argv[])
 	int mode = 0;
 	int opt;
 
-	/* Turn on debug messages */
-	//GP_SetDebugLevel(10);
-
 	while ((opt = getopt(argc, argv, "d:hH:W:l:")) != -1) {
 		switch (opt) {
 		case 'd':
