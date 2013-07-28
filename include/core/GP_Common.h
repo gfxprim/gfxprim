@@ -30,6 +30,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <stddef.h>
 
 #ifndef __cplusplus
 
