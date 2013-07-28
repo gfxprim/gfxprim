@@ -103,15 +103,22 @@ static void sdl_wait(struct GP_Backend *self __attribute__((unused)))
 {
 	SDL_Event ev;
 
-	SDL_mutexP(mutex);
+	//SDL_WaitEvent(&ev);
+	//sdl_put_event(&ev);
 
-	SDL_WaitEvent(&ev);
-	sdl_put_event(&ev);
+	for (;;) {
+		if (GP_EventQueueEventsQueued(&self->event_queue))
+			return;
 
-	while (SDL_PollEvent(&ev))
-		sdl_put_event(&ev);
+		SDL_mutexP(mutex);
 
-	SDL_mutexV(mutex);
+		while (SDL_PollEvent(&ev))
+			sdl_put_event(&ev);
+
+		SDL_mutexV(mutex);
+
+		usleep(10000);
+	}
 }
 
 static int context_from_surface(GP_Context *context, const SDL_Surface *surf)
