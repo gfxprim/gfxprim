@@ -85,6 +85,9 @@ void print_help(void)
 	printf("    -zw zoom is fixed to window size (currently default)\n");
 	printf(" -b pass backend init string to backend init\n");
 	printf("    pass -b help for more info\n");
+	printf(" -t enable timers\n");
+	printf("    if set timers that measure cpu and wall time\n");
+	printf("    of certain operations are printed into stdout\n");
 	puts("\n");
 	printf("Actions:\n\n");
 	printf(" -1 'cmd' sets first action\n");

@@ -677,7 +677,7 @@ int main(int argc, char *argv[])
 
 	GP_TIMER_DECLARE(timer, 0, 0, "Slideshow", timer_callback, &params);
 
-	while ((opt = getopt(argc, argv, "b:ce:fhIPs:r:z:0:1:2:3:4:5:6:7:8:9:")) != -1) {
+	while ((opt = getopt(argc, argv, "b:ce:fhIPr:s:tz:0:1:2:3:4:5:6:7:8:9:")) != -1) {
 		switch (opt) {
 		case 'I':
 			params.show_info = 1;
@@ -719,6 +719,9 @@ int main(int argc, char *argv[])
 		case 'h':
 			print_help();
 			exit(0);
+		break;
+		case 't':
+			cpu_timer_switch(1);
 		break;
 		case 'z':
 			switch (optarg[0]) {

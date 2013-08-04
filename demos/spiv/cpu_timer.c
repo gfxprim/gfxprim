@@ -35,8 +35,18 @@ static void to_time(int *sec, int *nsec, struct timespec *start,
 	}
 }
 
+static int timers_disabled = 1;
+
+void cpu_timer_switch(int enable)
+{
+	timers_disabled = !enable;
+}
+
 void cpu_timer_start(struct cpu_timer *self, const char *name)
 {
+	if (timers_disabled)
+		return;
+
 	self->name = name;
 
 	clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &self->t_cpu_start);
@@ -45,6 +55,9 @@ void cpu_timer_start(struct cpu_timer *self, const char *name)
 
 void cpu_timer_stop(struct cpu_timer *self)
 {
+	if (timers_disabled)
+		return;
+
 	clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &self->t_cpu_stop);
 	clock_gettime(CLOCK_MONOTONIC, &self->t_real_stop);
 

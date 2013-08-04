@@ -22,7 +22,7 @@
 
  /*
 
-   Simple timers to count cpu time.
+   Simple timers to count and print cpu time spend in particular codepath.
 
   */
 
@@ -38,6 +38,11 @@ struct cpu_timer {
 	struct timespec t_real_stop;
 	const char *name;
 };
+
+/*
+ * Enable/disable all timers.
+ */
+void cpu_timer_switch(int enable);
 
 /*
  * Inialize cpu timer.
