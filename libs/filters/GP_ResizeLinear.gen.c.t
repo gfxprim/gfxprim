@@ -312,8 +312,6 @@ int GP_FilterResizeLinearLFInt_Raw(const GP_Context *src, GP_Context *dst,
 	float x_rat = 1.00 * dst->w / src->w;
 	float y_rat = 1.00 * dst->h / src->h;
 
-	printf("%f %f\n", x_rat, y_rat);
-
 	if (x_rat < 1.00 && y_rat < 1.00) {
 
 		GP_DEBUG(1, "Downscaling image %ux%u -> %ux%u %2.2f %2.2f",
