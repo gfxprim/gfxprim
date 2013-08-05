@@ -15,7 +15,7 @@ function grep_sym
 function find_symbol
 {
 	echo "SYM $1:"
-	
+
 	find ../libs/ -name '*.o' | while read obj; do grep_sym "$obj" "$1"; done
 }
 
