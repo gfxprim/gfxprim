@@ -34,7 +34,7 @@
  *
  * GP_Context c;
  *
- * if (GP_ContextFromSurface(&c, surface)) {
+ * if (GP_ContextFromSDLSurface(&c, surface)) {
  *	error("Failed to match PIXEL_TYPE for given surface");
  *	exit(1);
  * }
@@ -44,6 +44,6 @@
  * Now you have initialized context that shares the pixel buffer with
  * the SDL surface.
  */
-int GP_ContextFromSurface(GP_Context *c, const SDL_Surface *surf);
+int GP_ContextFromSDLSurface(GP_Context *c, const SDL_Surface *surf);
 
 #endif /* BACKENDS_GP_SDL_CONTEXT_H */

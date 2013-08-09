@@ -96,7 +96,7 @@ int main(void)
 		goto fail;
 	}
 
-	GP_ContextFromSurface(&context, display);
+	GP_ContextFromSDLSurface(&context, display);
 
 	black_pixel     = GP_ColorToContextPixel(GP_COL_BLACK, &context);
 	darkgray_pixel  = GP_ColorToContextPixel(GP_COL_GRAY_DARK, &context);

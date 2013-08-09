@@ -9,7 +9,7 @@ GP_BackendIsX11
 GP_BackendX11RequestFullscreen
 
 GP_BackendSDLInit
-GP_ContextFromSurface
+GP_ContextFromSDLSurface
 
 GP_BackendAALibInit
 

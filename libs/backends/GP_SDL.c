@@ -154,7 +154,7 @@ static int context_from_surface(GP_Context *context, const SDL_Surface *surf)
 	return 0;
 }
 
-int GP_ContextFromSurface(GP_Context *c, const SDL_Surface *surf)
+int GP_ContextFromSDLSurface(GP_Context *c, const SDL_Surface *surf)
 {
 	return context_from_surface(c, surf);
 }

@@ -67,7 +67,7 @@ window resizable.
 -------------------------------------------------------------------------------
 #include <backends/GP_SDL_Context.h>
 
-int GP_ContextFromSurface(GP_Context *c, const SDL_Surface *surf);
+int GP_ContextFromSDLSurface(GP_Context *c, const SDL_Surface *surf);
 -------------------------------------------------------------------------------
 
 This function allows you to mix 'SDL' and 'GFXprim' code.
