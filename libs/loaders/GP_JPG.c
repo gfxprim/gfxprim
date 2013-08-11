@@ -106,6 +106,54 @@ static const char *get_colorspace(J_COLOR_SPACE color_space)
 	};
 }
 
+static int load(struct jpeg_decompress_struct *cinfo, GP_Context *ret,
+                GP_ProgressCallback *callback)
+{
+	while (cinfo->output_scanline < cinfo->output_height) {
+		uint32_t y = cinfo->output_scanline;
+                JSAMPROW addr = (void*)GP_PIXEL_ADDR(ret, 0, y);
+
+		jpeg_read_scanlines(cinfo, &addr, 1);
+
+		if (GP_ProgressCallbackReport(callback, y, ret->h, ret->w)) {
+			GP_DEBUG(1, "Operation aborted");
+			return ECANCELED;
+		}
+	}
+
+	return 0;
+}
+
+static int load_cmyk(struct jpeg_decompress_struct *cinfo, GP_Context *ret,
+                       GP_ProgressCallback *callback)
+{
+	while (cinfo->output_scanline < cinfo->output_height) {
+		uint32_t y = cinfo->output_scanline;
+
+		JSAMPROW addr = (void*)GP_PIXEL_ADDR(ret, 0, y);
+		jpeg_read_scanlines(cinfo, &addr, 4);
+
+		unsigned int i;
+		uint8_t *buf = GP_PIXEL_ADDR(ret, 0, y);
+
+		for (i = 0; i < ret->w; i++) {
+			unsigned int j = 4 * i;
+
+			buf[j]   = 0xff - buf[j];
+			buf[j+1] = 0xff - buf[j+1];
+			buf[j+2] = 0xff - buf[j+2];
+			buf[j+3] = 0xff - buf[j+3];
+		}
+
+		if (GP_ProgressCallbackReport(callback, y, ret->h, ret->w)) {
+			GP_DEBUG(1, "Operation aborted");
+			return ECANCELED;
+		}
+	}
+
+	return 0;
+}
+
 GP_Context *GP_ReadJPG(FILE *f, GP_ProgressCallback *callback)
 {
 	struct jpeg_decompress_struct cinfo;
@@ -138,7 +186,7 @@ GP_Context *GP_ReadJPG(FILE *f, GP_ProgressCallback *callback)
 		pixel_type = GP_PIXEL_G8;
 	break;
 	case JCS_RGB:
-		pixel_type = GP_PIXEL_RGB888;
+		pixel_type = GP_PIXEL_BGR888;
 	break;
 	case JCS_CMYK:
 		pixel_type = GP_PIXEL_CMYK8888;
@@ -165,43 +213,20 @@ GP_Context *GP_ReadJPG(FILE *f, GP_ProgressCallback *callback)
 
 	jpeg_start_decompress(&cinfo);
 
-	while (cinfo.output_scanline < cinfo.output_height) {
-		uint32_t y = cinfo.output_scanline;
-
-		JSAMPROW addr = (void*)GP_PIXEL_ADDR(ret, 0, y);
-		jpeg_read_scanlines(&cinfo, &addr, 1);
-
-		if (pixel_type == GP_PIXEL_RGB888) {
-			//TODO: fixme bigendian?
-			/* fix the pixel, as we want in fact BGR */
-			unsigned int i;
-
-			for (i = 0; i < ret->w; i++) {
-				uint8_t *pix = GP_PIXEL_ADDR(ret, i, y);
-				GP_SWAP(pix[0], pix[2]);
-			}
-
-			if (GP_ProgressCallbackReport(callback, y, ret->h, ret->w)) {
-				GP_DEBUG(1, "Operation aborted");
-				err = ECANCELED;
-				goto err2;
-			}
-		}
-
-		if (pixel_type == GP_PIXEL_CMYK8888) {
-			unsigned int i;
-			uint8_t *buf = GP_PIXEL_ADDR(ret, 0, y);
-
-			for (i = 0; i < ret->w; i++) {
-				unsigned int j = 4 * i;
-
-				buf[j]   = 0xff - buf[j];
-				buf[j+1] = 0xff - buf[j+1];
-				buf[j+2] = 0xff - buf[j+2];
-				buf[j+3] = 0xff - buf[j+3];
-			}
-		}
+	switch (pixel_type) {
+	case GP_PIXEL_BGR888:
+	case GP_PIXEL_G8:
+		err = load(&cinfo, ret, callback);
+	break;
+	case GP_PIXEL_CMYK8888:
+		err = load_cmyk(&cinfo, ret, callback);
+	break;
+	default:
+		err = EINVAL;
 	}
+
+	if (err)
+		goto err2;
 
 	jpeg_finish_decompress(&cinfo);
 	jpeg_destroy_decompress(&cinfo);
@@ -320,6 +345,54 @@ int GP_LoadJPGMetaData(const char *src_path, GP_MetaData *data)
 	return ret;
 }
 
+static int save_rgb888(struct jpeg_compress_struct *cinfo,
+                       const GP_Context *src,
+                       GP_ProgressCallback *callback)
+{
+	unsigned int x;
+	uint8_t tmp[3 * src->w];
+
+	while (cinfo->next_scanline < cinfo->image_height) {
+		uint32_t y = cinfo->next_scanline;
+
+		memcpy(tmp, GP_PIXEL_ADDR(src, 0, y), 3 * src->w);
+
+		for (x = 0; x < src->w; x++) {
+			uint8_t *pix = tmp + 3 * x;
+			GP_SWAP(pix[0], pix[2]);
+		}
+
+		JSAMPROW row = (void*)tmp;
+		jpeg_write_scanlines(cinfo, &row, 1);
+
+		if (GP_ProgressCallbackReport(callback, y, src->h, src->w)) {
+			GP_DEBUG(1, "Operation aborted");
+			return ECANCELED;
+		}
+	}
+
+	return 0;
+}
+
+static int save(struct jpeg_compress_struct *cinfo,
+                const GP_Context *src,
+                GP_ProgressCallback *callback)
+{
+	while (cinfo->next_scanline < cinfo->image_height) {
+		uint32_t y = cinfo->next_scanline;
+
+		JSAMPROW row = (void*)GP_PIXEL_ADDR(src, 0, y);
+		jpeg_write_scanlines(cinfo, &row, 1);
+
+		if (GP_ProgressCallbackReport(callback, y, src->h, src->w)) {
+			GP_DEBUG(1, "Operation aborted");
+			return ECANCELED;
+		}
+	}
+
+	return 0;
+}
+
 int GP_SaveJPG(const GP_Context *src, const char *dst_path,
                GP_ProgressCallback *callback)
 {
@@ -330,9 +403,13 @@ int GP_SaveJPG(const GP_Context *src, const char *dst_path,
 
 	GP_DEBUG(1, "Saving JPG Image '%s'", dst_path);
 
-	if (src->pixel_type != GP_PIXEL_RGB888 &&
-	    src->pixel_type != GP_PIXEL_G8) {
-		GP_DEBUG(1, "Can't save png with pixel type %s",
+	switch (src->pixel_type) {
+	case GP_PIXEL_RGB888:
+	case GP_PIXEL_BGR888:
+	case GP_PIXEL_G8:
+	break;
+	default:
+		GP_DEBUG(1, "Unsupported pixel type %s",
 		         GP_PixelTypeName(src->pixel_type));
 		errno = ENOSYS;
 		return 1;
@@ -369,34 +446,16 @@ int GP_SaveJPG(const GP_Context *src, const char *dst_path,
 
 	jpeg_start_compress(&cinfo, TRUE);
 
-	while (cinfo.next_scanline < cinfo.image_height) {
-		uint32_t y = cinfo.next_scanline;
-
-		if (src->pixel_type == GP_PIXEL_RGB888) {
-			uint32_t i;
-			uint8_t tmp[3 * src->w];
-
-			memcpy(tmp, GP_PIXEL_ADDR(src, 0, y), 3 * src->w);
-
-			/* fix the pixels as we want in fact BGR */
-			for (i = 0; i < src->w; i++) {
-				uint8_t *pix = tmp + 3 * i;
-				GP_SWAP(pix[0], pix[2]);
-			}
-
-			JSAMPROW row = (void*)tmp;
-			jpeg_write_scanlines(&cinfo, &row, 1);
-		} else {
-			JSAMPROW row = (void*)GP_PIXEL_ADDR(src, 0, y);
-			jpeg_write_scanlines(&cinfo, &row, 1);
-		}
-
-		if (GP_ProgressCallbackReport(callback, y, src->h, src->w)) {
-			GP_DEBUG(1, "Operation aborted");
-			err = ECANCELED;
-			goto err3;
-		}
+	switch (src->pixel_type) {
+	case GP_PIXEL_RGB888:
+		err = save_rgb888(&cinfo, src, callback);
+	break;
+	default:
+		err = save(&cinfo, src, callback);
 	}
+
+	if (err)
+		goto err3;
 
 	jpeg_finish_compress(&cinfo);
 	jpeg_destroy_compress(&cinfo);
