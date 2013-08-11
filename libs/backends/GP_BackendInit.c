@@ -38,16 +38,40 @@ static void backend_sdl_help(FILE *help, const char *err)
 
 	fprintf(help, "libSDL backend\n"
 	              "--------------\n"
-	              "SDL:[FS]:[WxH]\n"
+	              "SDL:[FS]:[8]:[16]:[24]:[32]:[WxH]\n"
 		      " FS  - Full Screen mode\n"
+		      " 8   - Sets 8bpp\n"
+		      " 16  - Sets 16bpp\n"
+		      " 24  - Sets 24bpp\n"
+		      " 32   - Sets 32bpp\n"
 		      " WxH - Display Size\n");
 }
 
 static int sdl_params_to_flags(const char *param, GP_Size *w, GP_Size *h,
-                               uint8_t *flags, FILE *help)
+                               GP_Size *bpp, uint8_t *flags, FILE *help)
 {
 	if (!strcasecmp(param, "FS")) {
 		*flags |= GP_SDL_FULLSCREEN;
+		return 0;
+	}
+
+	if (!strcmp(param, "8")) {
+		*bpp = 8;
+		return 0;
+	}
+
+	if (!strcmp(param, "16")) {
+		*bpp = 16;
+		return 0;
+	}
+
+	if (!strcmp(param, "24")) {
+		*bpp = 24;
+		return 0;
+	}
+
+	if (!strcmp(param, "32")) {
+		*bpp = 32;
 		return 0;
 	}
 
@@ -74,7 +98,7 @@ static GP_Backend *backend_sdl_init(char *params, const char *caption,
 	if (params == NULL)
 		return GP_BackendSDLInit(0, 0, 0, 0, caption);
 
-	GP_Size w = 0, h = 0;
+	GP_Size w = 0, h = 0, bpp = 0;
 	uint8_t flags = GP_SDL_RESIZABLE;
 
 	char *s = params;
@@ -83,16 +107,16 @@ static GP_Backend *backend_sdl_init(char *params, const char *caption,
 		switch (*s) {
 		case ':':
 			(*s) = '\0';
-			if (sdl_params_to_flags(params, &w, &h, &flags, help))
+			if (sdl_params_to_flags(params, &w, &h, &bpp, &flags, help))
 				return NULL;
 			s++;
 			params = s;
 		break;
 		case '\0':
-			if (sdl_params_to_flags(params, &w, &h, &flags, help))
+			if (sdl_params_to_flags(params, &w, &h, &bpp, &flags, help))
 				return NULL;
 
-			return GP_BackendSDLInit(w, h, 0, flags, caption);
+			return GP_BackendSDLInit(w, h, bpp, flags, caption);
 		break;
 		}
 		s++;
