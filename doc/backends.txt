@@ -1,16 +1,21 @@
 Drawing Backends
 ================
 
-Drawing backends provide means to draw into computer screen or into a window
-inside of running operating system. Instead of having one unified
-initialization interface each backend has it's specific function and semantics
-but once backend is initialized the backend structure provides unified API for
-controlling the drawing.
-
-So far there are backends for Linux mmaped 'frame-buffer', 'libSDL' and
-'X Window System'.
+Drawing backends provide means to draw on computer screen or into a window.
+Instead of having one unified initialization interface each backend has it's
+specific function and semantics but once backend is initialized the backend
+structure provides unified API for controlling the drawing.
 
 TIP: For example usage see backend link:example_backend.html[example].
+
+Supported backends
+------------------
+
+* Linux mmaped 'frame-buffer'
+* link:http://www.libsdl.org/[SDL]
+* 'X Window System'
+* link:http://aa-project.sourceforge.net/aalib/[AA-lib]
+
 
 Initialization functions
 ------------------------
@@ -20,17 +25,28 @@ Linux Framebuffer
 
 [source,c]
 -------------------------------------------------------------------------------
-GP_Backend *GP_BackendLinuxFBInit(const char *path, int flag);
+enum GP_LinuxFBFlags {
+        GP_FB_INPUT_KBD = 0x01,
+        GP_FB_SHADOW = 0x02,
+        GP_FB_ALLOC_CON = 0x04,
+};
+
+GP_Backend *GP_BackendLinuxFBInit(const char *path, int flags);
 -------------------------------------------------------------------------------
 
 Initializes mmaped frame-buffer backend. The path is path to the frame-buffer
-device i.e. '/dev/fbX'. This backend is not buffered, everything you draw
-appears on the screen right away (an switch may be added for that purpose).
+device i.e. '/dev/fbX'.
 
-If flag is set console KBD driver is used to feed keystrokes into the event
-queue, otherwise no events are generated and you are expected to initialize
-input event driver in order to get keystrokes and/or pointer events.
+If 'GP_FB_INPUT_KBD' flag is set console KBD driver is used to feed keystrokes
+into the event queue, otherwise no events are generated and you are expected to
+initialize input event driver yourself.
 
+If 'GP_FB_SHADOW' flag is set shadow frame-buffer is allocated and used for
+drawing, the memory is blitted to mmaped frame-buffer on Blit() or UpdateRect()
+operation. Otherwise the frame-buffer mapped memory is used directly.
+
+If 'GP_FB_ALLOC_CON' flag is set new console is allocated, otherwise current
+console is used.
 
 SDL
 ~~~
@@ -59,9 +75,8 @@ for w and h though.
 
 The caption is window caption.
 
-And finally flags may change the SDL to go to full-screen mode or make the
+And finally flags may change the 'SDL' to go to full-screen mode or make the
 window resizable.
-
 
 [source,c]
 -------------------------------------------------------------------------------
@@ -163,6 +178,22 @@ The 'GP_BackendX11RequestFullscreen' can toggle fullscreen mode at runtime.
 
 It will most likely generate resize event. See the 'GP_BackendResizeAck()' bellow.
 
+AA-lib
+~~~~~~
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <GP.h>
+/* or */
+#include <backends/AALib.h>
+
+GP_Backend *GP_BackendAALibInit(void);
+-------------------------------------------------------------------------------
+
+Currently the 'AA-lib' backend uses default initialization parameters.
+
+Way how to pass 'AA-lib' specific parameters will be added. This interface
+will likely change.
 
 Overall init function
 ~~~~~~~~~~~~~~~~~~~~~
@@ -180,7 +211,7 @@ GP_Backend *GP_BackendInit(const char *params, const char *caption, FILE *help);
 This function takes a params string as an parameter which is used for
 determining backend-dependent parameters. The format is
 'backend_name:backend_parameters' where backend parameters may be window size
-(either 'WxH' or 'FS' in case of SDL backend). The caption is window caption
+(either 'WxH' or 'FS' in case of 'SDL' backend). The caption is window caption
 (which is ignored in some of the cases) and the 'FILE' is file, where an error
 is printed in case of failure, you should mostly use 'stderr' for that
 purpose. If params is set to 'NULL' the the call only prints help into the
@@ -195,8 +226,9 @@ General Backend API
 The backend API consist of a structure with callbacks. Every backend
 initialization yields this structure. Although is possible to call these
 pointers directly it's not recommended and everybody should rather use backend
-inline functions instead as they provide more convenient API and do additional
-sanity checks on parameters.
+(inline) functions instead as they provide more convenient API and do
+additional sanity checks on parameters. Also functionality such as timers
+will not work if you decide to call raw callbacks.
 
 [source,c]
 -------------------------------------------------------------------------------
@@ -220,9 +252,9 @@ typdef struct GP_Backend {
 };
 -------------------------------------------------------------------------------
 
-The file descriptor 'fd' is either set to -1 (in case of SDL that does not
-export it) or to a backend connection file descriptor usable for 'select()' or
-'poll()'.
+The file descriptor 'fd' is either set to -1 (in case of 'SDL' or 'AA-lib' as
+they does not export it) or to a backend connection file descriptor usable for
+'select()' or 'poll()'.
 
 GP_BackendExit
 ^^^^^^^^^^^^^^

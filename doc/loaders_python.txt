@@ -26,11 +26,9 @@ import gfxprim.loaders as loaders
 
 Loads an image from a file.
 
-This is a general purpose loader function that automatically detects the file
-format.
-
-The format is detected from file extension first and if this fails signature
-base method is used.
+First one is general purpose loader function that automatically detects the
+file format. The format is detected from file extension first and if this
+fails files signature is used.
 
 May raise 'OSError' with errno set to 'EPERM', 'EISDIR', 'ENOENT' or any other
 'errno' set by 'open(2)', 'read(2)', 'seek(2)'.
