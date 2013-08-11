@@ -268,6 +268,10 @@ void GP_BlitXYXY_Fast(const GP_Context *src,
                       GP_Coord x0, GP_Coord y0, GP_Coord x1, GP_Coord y1,
                       GP_Context *dst, GP_Coord x2, GP_Coord y2)
 {
+	GP_DEBUG(2, "Blitting %s -> %s",
+	         GP_PixelTypeName(src->pixel_type),
+	         GP_PixelTypeName(dst->pixel_type));
+
 	/* Same pixel type */
 	if (src->pixel_type == dst->pixel_type) {
 		GP_FN_PER_BPP(blitXYXY, src->bpp, src->bit_endian,
