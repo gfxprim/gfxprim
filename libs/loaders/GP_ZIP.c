@@ -242,7 +242,7 @@ static int read_deflate(FILE *f, struct zip_local_header *header, FILE **res_f)
 
 	if (ret != Z_STREAM_END) {
 		GP_DEBUG(1, "Failed to inflate stream %i", ret);
-		errno = EINVAL;
+		err = EINVAL;
 		goto err2;
 	}
 
