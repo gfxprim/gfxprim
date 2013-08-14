@@ -43,7 +43,7 @@ Pixel type definitions and functions
 /*
  * Description of all known pixel types
  */
-const GP_PixelTypeDescription const GP_PixelTypes [GP_PIXEL_MAX] = {
+const GP_PixelTypeDescription GP_PixelTypes [GP_PIXEL_MAX] = {
 %%  for pt in pixeltypes
 	/* GP_PIXEL_{{ pt.name }} */ {
 		.type	= GP_PIXEL_{{ pt.name }},

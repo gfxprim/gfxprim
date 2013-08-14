@@ -122,7 +122,7 @@ typedef struct GP_PixelTypeDescription {
 /*
  * Array of size GP_PIXEL_MAX describing known pixel types
  */
-extern const GP_PixelTypeDescription const GP_PixelTypes[GP_PIXEL_MAX];
+extern const GP_PixelTypeDescription GP_PixelTypes[GP_PIXEL_MAX];
 
 #define GP_VALID_PIXELTYPE(type) (((type) > 0) && ((type) < GP_PIXEL_MAX))
 
