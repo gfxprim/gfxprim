@@ -88,12 +88,21 @@ static GP_Loader pnm_loader = {
 	.extensions = {"pnm", NULL},
 };
 
+static GP_Loader jp2_loader = {
+	.Load = GP_LoadJP2,
+	.Save = NULL,
+	.Match = GP_MatchJP2,
+	.fmt_name = "JPEG 2000",
+	.next = &pnm_loader,
+	.extensions = {"jp2", "jpx", NULL},
+};
+
 static GP_Loader bmp_loader = {
 	.Load = GP_LoadBMP,
 	.Save = GP_SaveBMP,
 	.Match = GP_MatchBMP,
 	.fmt_name = "BMP",
-	.next = &pnm_loader,
+	.next = &jp2_loader,
 	.extensions = {"bmp", "dib", NULL},
 };
 
