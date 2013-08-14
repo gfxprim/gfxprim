@@ -166,8 +166,10 @@ int GP_SaveTmpFile(const GP_Context *src, const char *dst_path,
 		GP_ProgressCallbackReport(callback, y, src->h, src->w);
 	}
 
-	if (fclose(f))
+	if (fclose(f)) {
+		err = errno;
 		goto err0;
+	}
 
 	GP_ProgressCallbackDone(callback);
 
