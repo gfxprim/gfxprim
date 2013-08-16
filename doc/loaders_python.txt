@@ -15,6 +15,7 @@ import gfxprim.loaders as loaders
     img = loaders.LoadBMP(path, callback=None)
     img = loaders.LoadGIF(path, callback=None)
     img = loaders.LoadJPG(path, callback=None)
+    img = loaders.LoadJP2(path, callback=None)
     img = loaders.LoadPBM(path, callback=None)
     img = loaders.LoadPGM(path, callback=None)
     img = loaders.LoadPNG(path, callback=None)

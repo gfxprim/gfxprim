@@ -103,6 +103,11 @@ images into various standard formats (PNG, JPEG, GIF, TIFF, BMP, PNM, etc...).
   [green]#All but < 8bit binary grayscale# |
   [green]#All ASCII formats#
 
+| JP2 |
+  JPEG 2000 |
+  [green]#Experimental support for RGB images# |
+  [black]*No*
+
 | CBZ |
   Comic book archive |
   [green]#Experimental support via ZIP Container# |

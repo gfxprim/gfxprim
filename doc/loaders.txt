@@ -338,6 +338,23 @@ int GP_MatchJPG(const void *buf);
 
 Matches a JPG signature.
 
+JPEG 2000 Loader
+~~~~~~~~~~~~~~~~
+The 'JPEG 2000' image support is implemented using the openjpeg library.
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <loaders/GP_JP2.h>
+/* or */
+#include <GP.h>
+
+GP_Context *GP_LoadJP2(const char *src_path, GP_ProgressCallback *callback);
+-------------------------------------------------------------------------------
+
+Loads 'JPEG 2000' image.
+
+Due to limitations of the openjpeg library progress callback does not work.
+
 GIF Loader
 ~~~~~~~~~~
 
