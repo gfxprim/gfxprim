@@ -98,8 +98,8 @@ def _init(module):
   from ..utils import import_members
   import_members(c_loaders, module, sub=strip_GP,
       include=[
-        '^GP_Load[A-Z]{3}.*',
-        '^GP_Save[A-Z]{3}.*',
+        '^GP_Load[A-Z,0-9]{3}.*',
+        '^GP_Save[A-Z,0-9]{3}.*',
         '^GP_ListLoaders$',
         '^GP_LoadMetaData$',
         ])

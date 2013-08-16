@@ -80,7 +80,11 @@ ERROR_ON_NONZERO(GP_SaveTIFF);
 %include "GP_TIFF.h"
 
 ERROR_ON_NULL(GP_LoadPSP);
-
 %newobject GP_LoadPSP;
 
 %include "GP_PSP.h"
+
+ERROR_ON_NULL(GP_LoadJP2);
+%newobject GP_LoadJP2;
+
+%include "GP_JP2.h"
