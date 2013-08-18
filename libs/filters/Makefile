@@ -13,7 +13,8 @@ RESAMPLING_FILTERS=GP_ResizeNN.gen.c GP_Cubic.gen.c GP_ResizeCubic.gen.c\
                    GP_ResizeLinear.gen.c
 
 GENSOURCES=GP_MirrorV.gen.c GP_Rotate.gen.c GP_FloydSteinberg.gen.c GP_HilbertPeano.gen.c\
-           $(POINT_FILTERS) $(ARITHMETIC_FILTERS) $(STATS_FILTERS) $(RESAMPLING_FILTERS)
+           $(POINT_FILTERS) $(ARITHMETIC_FILTERS) $(STATS_FILTERS) $(RESAMPLING_FILTERS)\
+	   GP_LinearConvolution.gen.c
 
 CSOURCES=$(filter-out $(wildcard *.gen.c),$(wildcard *.c))
 LIBNAME=filters
