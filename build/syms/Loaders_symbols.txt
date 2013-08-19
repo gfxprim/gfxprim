@@ -55,6 +55,11 @@ GP_LoadPNM
 GP_SavePNM
 GP_MatchPNM
 
+GP_ReadJP2
+GP_OpenJP2
+GP_LoadJP2
+GP_MatchJP2
+
 GP_SaveTmpFile
 GP_LoadTmpFile
 
