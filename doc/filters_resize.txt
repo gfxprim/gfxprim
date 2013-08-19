@@ -1,0 +1,139 @@
+Resize filters
+--------------
+
+Common API
+~~~~~~~~~~
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <GP.h>
+/* or */
+#include <filters/GP_Resize.h>
+
+typedef enum GP_InterpolationType {
+        GP_INTERP_NN,            /* Nearest Neighbour                         */
+        GP_INTERP_LINEAR_INT,    /* Bilinear - fixed point arithmetics        */
+        GP_INTERP_LINEAR_LF_INT, /* Bilinear + low pass filter on downscaling */
+        GP_INTERP_CUBIC,         /* Bicubic                                   */
+        GP_INTERP_CUBIC_INT,     /* Bicubic - fixed point arithmetics         */
+        GP_INTERP_MAX = GP_INTERP_CUBIC_INT,
+} GP_InterpolationType;
+
+const char *GP_InterpolationTypeName(enum GP_InterpolationType interp_type);
+
+int GP_FilterResize(const GP_Context *src, GP_Context *dst,
+                    GP_InterpolationType type,
+                    GP_ProgressCallback *callback);
+
+GP_Context *GP_FilterResizeAlloc(const GP_Context *src,
+                                 GP_Size w, GP_Size h,
+                                 GP_InterpolationType type,
+                                 GP_ProgressCallback *callback);
+-------------------------------------------------------------------------------
+
+Interpolate (resize) the context.
+
+Resize image given size and interpolation type.
+
+GP_FilterResize
+^^^^^^^^^^^^^^^
+
+The +GP_FilterReize()+ function resizes 'src' to fit 'dst' exactly.
+
+Both 'src' and 'dst' must have the same pixel type.
+
+Returns zero on success, non-zero on failure and sets 'errno'.
+
+GP_FilterResizeAlloc
+^^^^^^^^^^^^^^^^^^^^
+
+The +GP_FilterResizeAlloc()+ allocates the destination give it's size.
+
+Returns pointer to newly allocated context or 'NULL' in case of failure and
+'errno' is set.
+
+Nearest Neighbour Interpolation
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <GP.h>
+/* or */
+#include <filters/GP_ResizeNN.h>
+
+int GP_FilterResizeNN(const GP_Context *src, GP_Context *dst,
+                      GP_ProgressCallback *callback);
+
+static inline GP_Context *GP_FilterResizeNNAlloc(const GP_Context *src,
+                                   GP_Size w, GP_Size h,
+                                   GP_ProgressCallback *callback);
+-------------------------------------------------------------------------------
+
+Pixel value is choosen as value of the closest pixel in the source bitmap
+(after destination coodinates are mapped to the source coordinates).
+
+Fast, but produces "pixelated" images. May however work better for images with
+sharp edges mostly consisting of big one color regions (it doesn't blur the
+result on upscaling).
+
+Is commonly used to show preview before you resample the image correctly.
+
+Bilinear Interpolation
+~~~~~~~~~~~~~~~~~~~~~~
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <GP.h>
+/* or */
+#include <filters/GP_ResizeLinear.h>
+
+int GP_FilterResizeLinearInt(const GP_Context *src, GP_Context *dst,
+                             GP_ProgressCallback *callback);
+
+int GP_FilterResizeLinearLFInt(const GP_Context *src, GP_Context *dst,
+                             GP_ProgressCallback *callback);
+
+GP_Context *GP_FilterResizeLinearIntAlloc(const GP_Context *src,
+                                          GP_Size w, GP_Size h,
+                                          GP_ProgressCallback *callback);
+
+GP_Context *GP_FilterResizeLinearLFIntAlloc(const GP_Context *src,
+                                            GP_Size w, GP_Size h,
+                                            GP_ProgressCallback *callback);
+-------------------------------------------------------------------------------
+
+Bilinear is faster than bicubic interpolation and produces quite good results
+especially the low pass (LF) variant doesn't need additional low-pass filter
+on down-sampling.
+
+Bicubic Interpolation
+~~~~~~~~~~~~~~~~~~~~~
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <GP.h>
+/* or */
+#include <filters/GP_ResizeCubic.h>
+
+int GP_FilterResizeCubicInt(const GP_Context *src, GP_Context *dst,
+                             GP_ProgressCallback *callback);
+
+int GP_FilterResizeCubic(const GP_Context *src, GP_Context *dst,
+                         GP_ProgressCallback *callback);
+
+GP_Context *GP_FilterResizeCubicIntAlloc(const GP_Context *src,
+                                         GP_Size w, GP_Size h,
+                                         GP_ProgressCallback *callback);
+
+GP_Context *GP_FilterResizeCubicAlloc(const GP_Context *src,
+                                      GP_Size w, GP_Size h,
+                                      GP_ProgressCallback *callback);
+-------------------------------------------------------------------------------
+
+Works well as is on image upscaling. To get decent result on downscaling
+low-pass filter (Gaussian blur) must be used on original image before actual
+downscaling.
+
+To do this reasonably fast we could cheat a little: first resize big images a
+little without the low-pass filter, then apply low-pass filter and finally
+downscale it to desired size.

@@ -26,6 +26,8 @@
 
 %% block body
 
+#include <errno.h>
+
 #include "core/GP_Context.h"
 #include "core/GP_GetPutPixel.h"
 #include "core/GP_Gamma.h"
@@ -103,8 +105,8 @@
  *
  * The implementation is inspired by imlib2 downscaling algorithm.
  */
-static int GP_FilterResizeLinearLFInt_{{ pt.name }}_Raw(const GP_Context *src, GP_Context *dst,
-                                                  GP_ProgressCallback *callback)
+static int resize_lin_lf_{{ pt.name }}(const GP_Context *src, GP_Context *dst,
+                                       GP_ProgressCallback *callback)
 {
 	uint32_t xmap[dst->w + 1];
 	uint32_t ymap[dst->h + 1];
@@ -199,7 +201,7 @@ static int GP_FilterResizeLinearLFInt_{{ pt.name }}_Raw(const GP_Context *src, G
 %% for pt in pixeltypes
 %%  if not pt.is_unknown() and not pt.is_palette()
 
-static int GP_FilterResizeLinearInt_{{ pt.name }}_Raw(const GP_Context *src, GP_Context *dst,
+static int resize_lin{{ pt.name }}(const GP_Context *src, GP_Context *dst,
                                    GP_ProgressCallback *callback)
 {
 	uint32_t xmap[dst->w + 1];
@@ -290,24 +292,39 @@ static int GP_FilterResizeLinearInt_{{ pt.name }}_Raw(const GP_Context *src, GP_
 %%  endif
 %% endfor
 
-int GP_FilterResizeLinearInt_Raw(const GP_Context *src, GP_Context *dst,
-                                 GP_ProgressCallback *callback)
+static int resize_lin(const GP_Context *src, GP_Context *dst,
+                     GP_ProgressCallback *callback)
 {
 	switch (src->pixel_type) {
 	%% for pt in pixeltypes
-	%% if not pt.is_unknown() and not pt.is_palette()
+	%%  if not pt.is_unknown() and not pt.is_palette()
 	case GP_PIXEL_{{ pt.name }}:
-		return GP_FilterResizeLinearInt_{{ pt.name }}_Raw(src, dst, callback);
+		return resize_lin{{ pt.name }}(src, dst, callback);
 	break;
-	%% endif
+	%%  endif
 	%% endfor
 	default:
+		GP_WARN("Invalid pixel type %s",
+		        GP_PixelTypeName(src->pixel_type));
+		errno = EINVAL;
 		return -1;
 	}
 }
 
-int GP_FilterResizeLinearLFInt_Raw(const GP_Context *src, GP_Context *dst,
-                                   GP_ProgressCallback *callback)
+int GP_FilterResizeLinearInt(const GP_Context *src, GP_Context *dst,
+                             GP_ProgressCallback *callback)
+{
+	if (src->pixel_type != dst->pixel_type) {
+		GP_WARN("The src and dst pixel types must match");
+		errno = EINVAL;
+		return 1;
+	}
+
+	return resize_lin(src, dst, callback);
+}
+
+static int resize_lin_lf2(const GP_Context *src, GP_Context *dst,
+                          GP_ProgressCallback *callback)
 {
 	float x_rat = 1.00 * dst->w / src->w;
 	float y_rat = 1.00 * dst->h / src->h;
@@ -321,7 +338,7 @@ int GP_FilterResizeLinearLFInt_Raw(const GP_Context *src, GP_Context *dst,
 		%% for pt in pixeltypes
 		%%  if not pt.is_unknown() and not pt.is_palette()
 		case GP_PIXEL_{{ pt.name }}:
-			return GP_FilterResizeLinearLFInt_{{ pt.name }}_Raw(src, dst, callback);
+			return resize_lin_lf_{{ pt.name }}(src, dst, callback);
 		break;
 		%%  endif
 		%% endfor
@@ -333,7 +350,19 @@ int GP_FilterResizeLinearLFInt_Raw(const GP_Context *src, GP_Context *dst,
 	//TODO: x_rat > 1.00 && y_rat < 1.00
 	//TODO: x_rat < 1.00 && y_rat > 1.00
 
-	return GP_FilterResizeLinearInt_Raw(src, dst, callback);
+	return resize_lin(src, dst, callback);
+}
+
+int GP_FilterResizeLinearLFInt(const GP_Context *src, GP_Context *dst,
+                               GP_ProgressCallback *callback)
+{
+	if (src->pixel_type != dst->pixel_type) {
+		GP_WARN("The src and dst pixel types must match");
+		errno = EINVAL;
+		return 1;
+	}
+
+	return resize_lin_lf2(src, dst, callback);
 }
 
 %% endblock body

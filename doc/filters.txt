@@ -874,35 +874,7 @@ filter before image is resampled non proportionally.
 Interpolation filters
 ~~~~~~~~~~~~~~~~~~~~~
 
-[source,c]
--------------------------------------------------------------------------------
-#include <GP_Filters.h>
-
-typedef enum GP_InterpolationType {
-        GP_INTERP_NN,            /* Nearest Neighbour                         */
-        GP_INTERP_LINEAR_INT,    /* Bilinear - fixed point arithmetics        */
-        GP_INTERP_LINEAR_LF_INT, /* Bilinear + low pass filter on downscaling */
-        GP_INTERP_CUBIC,         /* Bicubic                                   */
-        GP_INTERP_CUBIC_INT,     /* Bicubic - fixed point arithmetics         */
-        GP_INTERP_MAX = GP_INTERP_CUBIC_INT,
-} GP_InterpolationType;
-
-GP_Context *GP_FilterResize(const GP_Context *src, GP_Context *dst,
-                            GP_InterpolationType type,
-                            GP_Size w, GP_Size h,
-                            GP_ProgressCallback *callback);
--------------------------------------------------------------------------------
-
-Interpolate (resize) the context.
-
-Doesn't work 'in-place' (this is quite impossible as the size of the bitmap is
-changed by the filter).
-
-If the filter destination is non 'NULL' and the 'w' and 'h' is smaller than the
-destination size the source image is interpolated into sub-context of
-destination defined by 'w' and 'h'.
-
-'TODO:' this filter is implemented for RGB888 only.
+Filters to link:filters_resize.html[resize image].
 
 Nearest Neighbour Interpolation
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^

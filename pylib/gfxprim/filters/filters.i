@@ -6,16 +6,30 @@
 #include "core/GP_Debug.h"
 %}
 
-%import ../core/core.i
-
-%include "GP_Filters.h"
-
 /* Listed in GP_Filters.h: */
 %include "GP_Point.h"
 %ignore GP_Histogram::hist;
 %include "GP_Stats.h"
 %include "GP_Linear.h"
+
+/* Resize filters */
+ERROR_ON_NONZERO(GP_FilterResize);
+%newobject GP_FilterResizeAlloc;
+ERROR_ON_NULL(GP_FilterResizeAlloc);
 %include "GP_Resize.h"
+
+ERROR_ON_NONZERO(GP_FilterResizeNN);
+%newobject GP_FilterResizeNNAlloc;
+ERROR_ON_NULL(GP_FilterResizeNNAlloc);
+%include "GP_ResizeNN.h"
+
+ERROR_ON_NONZERO(GP_FilterResizeLinearInt);
+%newobject GP_FilterResizeLinearIntAlloc;
+ERROR_ON_NULL(GP_FilterResizeLinearIntAlloc);
+ERROR_ON_NONZERO(GP_FilterResizeLinearLFInt);
+%newobject GP_FilterResizeLinearLFIntAlloc;
+ERROR_ON_NULL(GP_FilterResizeLinearLFIntAlloc);
+%include "GP_ResizeLinear.h"
 
 %extend GP_FilterParam {
   ~GP_FilterParam() {

@@ -16,68 +16,40 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2010 Jiri "BlueBear" Dluhos                            *
- *                         <jiri.bluebear.dluhos@gmail.com>                  *
- *                                                                           *
- * Copyright (C) 2009-2011 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2013 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
 /*
 
-  GP_Context filters.
+  Bicubic interpolation.
 
  */
 
-#ifndef FILTERS_GP_FILTERS_H
-#define FILTERS_GP_FILTERS_H
+#ifndef FILTERS_GP_RESIZE_CUBIC_H
+#define FILTERS_GP_RESIZE_CUBIC_H
 
-/* Filter per channel parameter passing interface */
-#include "filters/GP_FilterParam.h"
+#include "GP_Filter.h"
+#include "GP_Resize.h"
 
-/* Point filters, brightness, contrast ... */
-#include "filters/GP_Point.h"
+int GP_FilterResizeCubicInt(const GP_Context *src, GP_Context *dst,
+                             GP_ProgressCallback *callback);
 
-/* Addition, difference, min, max ... */
-#include "filters/GP_Arithmetic.h"
+int GP_FilterResizeCubic(const GP_Context *src, GP_Context *dst,
+                         GP_ProgressCallback *callback);
 
-/* Histograms, ... */
-#include "filters/GP_Stats.h"
+static inline GP_Context *GP_FilterResizeCubicIntAlloc(const GP_Context *src,
+                                                       GP_Size w, GP_Size h,
+                                                       GP_ProgressCallback *callback)
+{
+	return GP_FilterResizeAlloc(src, w, h, GP_INTERP_CUBIC_INT, callback);
+}
 
-/* Image rotations (90 180 270 grads) and mirroring */
-#include "filters/GP_Rotate.h"
+static inline GP_Context *GP_FilterResizeCubicAlloc(const GP_Context *src,
+                                                    GP_Size w, GP_Size h,
+                                                    GP_ProgressCallback *callback)
+{
+	return GP_FilterResizeAlloc(src, w, h, GP_INTERP_CUBIC, callback);
+}
 
-/* Linear convolution Raw API */
-#include "filters/GP_Linear.h"
-
-/* Convolution filters */
-#include "filters/GP_Convolution.h"
-
-/* Blur filters */
-#include "filters/GP_Blur.h"
-
-/* Image scaling (resampling) */
-#include "filters/GP_Resize.h"
-#include "filters/GP_ResizeNN.h"
-#include "filters/GP_ResizeLinear.h"
-#include "filters/GP_ResizeCubic.h"
-
-/* Bitmap dithering */
-#include "filters/GP_Dither.h"
-
-/* Laplace based filters */
-#include "filters/GP_Laplace.h"
-
-/* Median filter */
-#include "filters/GP_Median.h"
-
-/* Weighted Median filter */
-#include "filters/GP_WeightedMedian.h"
-
-/* Sigma Mean filter */
-#include "filters/GP_Sigma.h"
-
-/* Gaussian noise filter */
-#include "filters/GP_GaussianNoise.h"
-
-#endif /* FILTERS_GP_FILTERS_H */
+#endif /* FILTERS_GP_RESIZE_CUBIC_H */

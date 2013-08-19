@@ -16,7 +16,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2011 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2013 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
@@ -56,15 +56,6 @@
 
 #include "GP_Filter.h"
 
-/* Nearest Neighbour */
-int GP_FilterResizeNN(const GP_Context *src, GP_Context *dst,
-                      GP_ProgressCallback *callback);
-
-GP_Context *GP_FilterResizeNNAlloc(const GP_Context *src,
-                                   GP_Size w, GP_Size h,
-                                   GP_ProgressCallback *callback);
-
-
 typedef enum GP_InterpolationType {
 	GP_INTERP_NN,            /* Nearest Neighbour                         */
 	GP_INTERP_LINEAR_INT,    /* Bilinear - fixed point arithmetics        */
@@ -84,18 +75,24 @@ int GP_FilterResize_Raw(const GP_Context *src, GP_Context *dst,
                         GP_ProgressCallback *callback);
 
 /*
- * If destination is non NULL, the w and h are used to create subcontext from
- * destination which is then used to interpolate the image to.
+ * Resize src to fit the dst, both src and dst must have the same pixel_type.
  *
- * Otherwise if destination is NULL, the context of size w and h is allocated
- * and returned.
- *
- * In both cases the pointer to destination or NULL in case of failure is
- * returned.
+ * Returns non-zero on error (interrupted from callback), zero on success.
  */
-GP_Context *GP_FilterResize(const GP_Context *src, GP_Context *dst,
-                            GP_InterpolationType type,
-                            GP_Size w, GP_Size h,
-                            GP_ProgressCallback *callback);
+int GP_FilterResize(const GP_Context *src, GP_Context *dst,
+                    GP_InterpolationType type,
+                    GP_ProgressCallback *callback);
+
+/*
+ * Resize src to wxh, the result is allocated.
+ *
+ * Returns pointer to newly created context.
+ *
+ * Returns NULL in case of failure and errno is set correspondinlgy.
+ */
+GP_Context *GP_FilterResizeAlloc(const GP_Context *src,
+                                 GP_Size w, GP_Size h,
+                                 GP_InterpolationType type,
+                                 GP_ProgressCallback *callback);
 
 #endif /* FILTERS_GP_RESIZE_H */

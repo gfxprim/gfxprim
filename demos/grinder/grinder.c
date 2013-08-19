@@ -124,7 +124,7 @@ static int resize(GP_Context **c, const char *params)
 	GP_Size h = ratio * (*c)->h;
 	GP_Context *res = NULL;
 
-	res = GP_FilterResize(*c, NULL, alg, w, h, progress_callback);
+	res = GP_FilterResizeAlloc(*c, alg, w, h, progress_callback);
 
 	if (res == NULL)
 		return EINVAL;
@@ -187,7 +187,7 @@ static int scale(GP_Context **c, const char *params)
 
 	GP_Context *res = NULL;
 
-	res = GP_FilterResize(*c, NULL, alg, w, h, progress_callback);
+	res = GP_FilterResizeAlloc(*c, alg, w, h, progress_callback);
 
 	if (res == NULL)
 		return EINVAL;
@@ -986,6 +986,10 @@ static void save_by_fmt(struct GP_Context *bitmap, const char *name, const char 
 		ret = GP_SaveJPG(bitmap, name, progress_callback);
 	else if (!strcmp(fmt, "png"))
 		ret = GP_SavePNG(bitmap, name, progress_callback);
+	else {
+		printf("Invalid format %s\n", fmt);
+		exit(1);
+	}
 
 	if (ret) {
 		fprintf(stderr, "Failed to save bitmap: %s\n",

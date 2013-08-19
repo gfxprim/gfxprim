@@ -437,8 +437,8 @@ GP_Context *load_resized_image(struct loader_params *params, GP_Size w, GP_Size 
 		cpu_timer_start(&timer, "Blur");
 		callback.priv = "Blurring Image";
 
-		res = GP_FilterGaussianBlurAlloc(img, 0.3/params->rat,
-		                                 0.3/params->rat, &callback);
+		res = GP_FilterGaussianBlurAlloc(img, 0.4/params->rat,
+		                                 0.4/params->rat, &callback);
 
 		if (res == NULL)
 			return NULL;
@@ -452,9 +452,9 @@ GP_Context *load_resized_image(struct loader_params *params, GP_Size w, GP_Size 
 
 	cpu_timer_start(&timer, "Resampling");
 	callback.priv = "Resampling Image";
-	GP_Context *i1 = GP_FilterResize(img, NULL, params->resampling_method, w, h, &callback);
+	GP_Context *i1 = GP_FilterResizeAlloc(img, params->resampling_method, w, h, &callback);
 //	img->gamma = NULL;
-//	GP_Context *i2 = GP_FilterResize(img, NULL, params->resampling_method, w, h, &callback);
+//	GP_Context *i2 = GP_FilterResizeAlloc(img, params->resampling_method, w, h, &callback);
 //	img = GP_FilterDifferenceAlloc(i2, i1, NULL);
 //	img = GP_FilterInvert(img, NULL, NULL);
 	img = i1;
@@ -844,7 +844,8 @@ int main(int argc, char *argv[])
 
 					if (params.resampling_method > GP_INTERP_MAX)
 						params.resampling_method = 0;
-
+					if (params.resampling_method == GP_INTERP_CUBIC)
+						params.resampling_method++;
 					if (params.resampling_method == GP_INTERP_LINEAR_LF_INT) {
 						params.use_low_pass = 0;
 						params.show_nn_first = 0;
@@ -861,7 +862,8 @@ int main(int argc, char *argv[])
 						params.resampling_method = GP_INTERP_MAX;
 					else
 						params.resampling_method--;
-
+					if (params.resampling_method == GP_INTERP_CUBIC)
+						params.resampling_method--;
 					if (params.resampling_method == GP_INTERP_LINEAR_LF_INT) {
 						params.use_low_pass = 0;
 						params.show_nn_first = 0;

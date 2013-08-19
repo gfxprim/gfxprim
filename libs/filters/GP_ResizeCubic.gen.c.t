@@ -26,6 +26,7 @@
 
 %% block body
 
+#include <errno.h>
 #include <math.h>
 
 #include "core/GP_Context.h"
@@ -51,9 +52,9 @@
 	((a)[0] + (a)[1] + (a)[2] + (a)[3])
 
 %% for pt in pixeltypes
-%% if not pt.is_unknown() and not pt.is_palette()
+%%  if not pt.is_unknown() and not pt.is_palette()
 
-static int GP_FilterResizeCubicInt_{{ pt.name }}_Raw(const GP_Context *src,
+static int resize_cubic_{{ pt.name }}(const GP_Context *src,
 	GP_Context *dst, GP_ProgressCallback *callback)
 {
 	%% for c in pt.chanslist
@@ -194,23 +195,35 @@ static int GP_FilterResizeCubicInt_{{ pt.name }}_Raw(const GP_Context *src,
 	return 0;
 }
 
-%% endif
+%%  endif
 %% endfor
 
-int GP_FilterResizeCubicInt_Raw(const GP_Context *src, GP_Context *dst,
-                                GP_ProgressCallback *callback)
+static int resize_cubic(const GP_Context *src, GP_Context *dst,
+                        GP_ProgressCallback *callback)
 {
 	switch (src->pixel_type) {
 	%% for pt in pixeltypes
-	%% if not pt.is_unknown() and not pt.is_palette()
+	%%  if not pt.is_unknown() and not pt.is_palette()
 	case GP_PIXEL_{{ pt.name }}:
-		return GP_FilterResizeCubicInt_{{ pt.name }}_Raw(src, dst, callback);
+		return resize_cubic_{{ pt.name }}(src, dst, callback);
 	break;
-	%% endif
+	%%  endif
 	%% endfor
 	default:
 		return -1;
 	}
+}
+
+int GP_FilterResizeCubicInt(const GP_Context *src, GP_Context *dst,
+                            GP_ProgressCallback *callback)
+{
+	if (src->pixel_type != dst->pixel_type) {
+		GP_WARN("The src and dst pixel types must match");
+		errno = EINVAL;
+		return 1;
+	}
+
+	return resize_cubic(src, dst, callback);
 }
 
 %% endblock body
