@@ -272,4 +272,11 @@ GP_Context *GP_ReadJP2(FILE GP_UNUSED(*f),
 	return NULL;
 }
 
+GP_Context *GP_LoadJP2(const char GP_UNUSED(*src_path),
+                       GP_ProgressCallback GP_UNUSED(*callback))
+{
+	errno = ENOSYS;
+	return NULL;
+}
+
 #endif /* HAVE_OPENJPEG */
