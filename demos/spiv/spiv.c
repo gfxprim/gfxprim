@@ -452,9 +452,9 @@ GP_Context *load_resized_image(struct loader_params *params, GP_Size w, GP_Size 
 
 	cpu_timer_start(&timer, "Resampling");
 	callback.priv = "Resampling Image";
-	GP_Context *i1 = GP_FilterResizeAlloc(img, params->resampling_method, w, h, &callback);
+	GP_Context *i1 = GP_FilterResizeAlloc(img, w, h, params->resampling_method, &callback);
 //	img->gamma = NULL;
-//	GP_Context *i2 = GP_FilterResizeAlloc(img, params->resampling_method, w, h, &callback);
+//	GP_Context *i2 = GP_FilterResizeAlloc(img, w, h, params->resampling_method, &callback);
 //	img = GP_FilterDifferenceAlloc(i2, i1, NULL);
 //	img = GP_FilterInvert(img, NULL, NULL);
 	img = i1;

@@ -68,13 +68,6 @@ typedef enum GP_InterpolationType {
 const char *GP_InterpolationTypeName(enum GP_InterpolationType interp_type);
 
 /*
- * Just interpolate the source context into destination context.
- */
-int GP_FilterResize_Raw(const GP_Context *src, GP_Context *dst,
-                        GP_InterpolationType type,
-                        GP_ProgressCallback *callback);
-
-/*
  * Resize src to fit the dst, both src and dst must have the same pixel_type.
  *
  * Returns non-zero on error (interrupted from callback), zero on success.

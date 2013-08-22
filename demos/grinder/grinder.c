@@ -124,7 +124,7 @@ static int resize(GP_Context **c, const char *params)
 	GP_Size h = ratio * (*c)->h;
 	GP_Context *res = NULL;
 
-	res = GP_FilterResizeAlloc(*c, alg, w, h, progress_callback);
+	res = GP_FilterResizeAlloc(*c, w, h, alg, progress_callback);
 
 	if (res == NULL)
 		return EINVAL;
@@ -187,7 +187,7 @@ static int scale(GP_Context **c, const char *params)
 
 	GP_Context *res = NULL;
 
-	res = GP_FilterResizeAlloc(*c, alg, w, h, progress_callback);
+	res = GP_FilterResizeAlloc(*c, w, h, alg, progress_callback);
 
 	if (res == NULL)
 		return EINVAL;
