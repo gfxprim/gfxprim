@@ -6,31 +6,18 @@
 #include "core/GP_Debug.h"
 %}
 
+%import ../core/core.i
+
+/*
+ * Creates allocating and non-allocating filter definitions
+ */
+%define FILTER_FUNC(funcname)
+%newobject GP_Filter ## funcname ## Alloc;
+ERROR_ON_NULL(GP_Filter ## funcname ## Alloc);
+ERROR_ON_NONZERO(GP_Filter ## funcname);
+%enddef
+
 /* Listed in GP_Filters.h: */
-%include "GP_Point.h"
-%ignore GP_Histogram::hist;
-%include "GP_Stats.h"
-%include "GP_Linear.h"
-
-/* Resize filters */
-ERROR_ON_NONZERO(GP_FilterResize);
-%newobject GP_FilterResizeAlloc;
-ERROR_ON_NULL(GP_FilterResizeAlloc);
-%include "GP_Resize.h"
-
-ERROR_ON_NONZERO(GP_FilterResizeNN);
-%newobject GP_FilterResizeNNAlloc;
-ERROR_ON_NULL(GP_FilterResizeNNAlloc);
-%include "GP_ResizeNN.h"
-
-ERROR_ON_NONZERO(GP_FilterResizeLinearInt);
-%newobject GP_FilterResizeLinearIntAlloc;
-ERROR_ON_NULL(GP_FilterResizeLinearIntAlloc);
-ERROR_ON_NONZERO(GP_FilterResizeLinearLFInt);
-%newobject GP_FilterResizeLinearLFIntAlloc;
-ERROR_ON_NULL(GP_FilterResizeLinearLFIntAlloc);
-%include "GP_ResizeLinear.h"
-
 %extend GP_FilterParam {
   ~GP_FilterParam() {
     GP_DEBUG(2, "[wrapper] GP_FilterParamFree");
@@ -41,40 +28,79 @@ ERROR_ON_NULL(GP_FilterResizeLinearLFIntAlloc);
 %newobject GP_FilterParamCreate;
 %include "GP_FilterParam.h"
 
-/* Functions returning new allocated context */
-%immutable GP_FilterSymmetryNames;
+/* TODO: Point filters, once fixed */
 
-%newobject GP_FilterMirrorH_Alloc;
-%newobject GP_FilterMirrorV_Alloc;
-%newobject GP_FilterRotate90_Alloc;
-%newobject GP_FilterRotate180_Alloc;
-%newobject GP_FilterRotate270_Alloc;
-%newobject GP_FilterSymmetry_Alloc;
-%include "GP_Rotate.h"
-
-%newobject GP_FilterFloydSteinberg_RGB888_Alloc;
-%newobject GP_FilterHilbertPeano_RGB888_Alloc;
-%include "GP_Dither.h"
-
-%newobject GP_FilterAdditionAlloc;
-%newobject GP_FilterMultiplyAlloc;
-%newobject GP_FilterDifferenceAlloc;
-%newobject GP_FilterMaxAlloc;
-%newobject GP_FilterMinAlloc;
+/* Arithmetic filters */
+FILTER_FUNC(Addition);
+FILTER_FUNC(Multiply);
+FILTER_FUNC(Difference);
+FILTER_FUNC(Max);
+FILTER_FUNC(Min);
 %include "GP_Arithmetic.h"
 
-%newobject GP_FilterConvolutionAlloc;
-%newobject GP_FilterConvolutionExAlloc;
+/* TODO: Stats filters */
+
+/* Rotations filters */
+FILTER_FUNC(MirrorH);
+FILTER_FUNC(MirrorV);
+FILTER_FUNC(Rotate90);
+FILTER_FUNC(Rotate180);
+FILTER_FUNC(Rotate270);
+FILTER_FUNC(Symmetry);
+%immutable GP_FilterSymmetryNames;
+%include "GP_Rotate.h"
+
+/* Convolutions */
+FILTER_FUNC(Convolution);
+FILTER_FUNC(ConvolutionEx);
 %include "GP_Convolution.h"
 
-%newobject GP_FilterBlurAlloc;
-%newobject GP_FilterBlurExAlloc;
+/* Blur */
+FILTER_FUNC(GaussianBlurEx);
+FILTER_FUNC(GaussianBlur);
 %include "GP_Blur.h"
 
-%newobject GP_FilterMedianAlloc;
-%newobject GP_FilterMedianExAlloc;
+/* Resize filters */
+FILTER_FUNC(Resize);
+%include "GP_Resize.h"
+
+FILTER_FUNC(ResizeNN);
+%include "GP_ResizeNN.h"
+
+FILTER_FUNC(ResizeLinearInt);
+FILTER_FUNC(ResizeLinearLFInt);
+%include "GP_ResizeLinear.h"
+
+/* TODO: Ditherings */
+%newobject GP_FilterFloydSteinberg_RGB888_Alloc;
+ERROR_ON_NULL(GP_FilterFloydSteinberg_RGB888_Alloc);
+%newobject GP_FilterHilbertPeano_RGB888_Alloc;
+ERROR_ON_NULL(GP_FilterHilbertPeano_RGB888_Alloc);
+ERROR_ON_NONZERO(GP_FilterFloydSteinberg_RGB888);
+ERROR_ON_NONZERO(GP_FilterHilbertPeano_RGB888);
+%include "GP_Dither.h"
+
+/* Laplace and Laplace Edge Sharpening */
+FILTER_FUNC(Laplace);
+FILTER_FUNC(EdgeSharpening);
+%include "GP_Laplace.h"
+
+/* Median */
+FILTER_FUNC(MedianEx);
+FILTER_FUNC(Median);
 %include "GP_Median.h"
 
-%newobject GP_FilterSigmaAlloc;
-%newobject GP_FilterSigmaExAlloc;
+/* Weighted Median */
+FILTER_FUNC(WeightedMedianEx);
+FILTER_FUNC(WeightedMedian);
+%include "GP_WeightedMedian.h"
+
+/* Sigma filter */
+FILTER_FUNC(GP_FilterSigmaEx);
+FILTER_FUNC(GP_FilterSigma);
 %include "GP_Sigma.h"
+
+/* Gaussian Noise */
+FILTER_FUNC(GaussianNoiseAddEx);
+FILTER_FUNC(GaussianNoiseAdd);
+%include "GP_GaussianNoise.h"

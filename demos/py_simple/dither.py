@@ -13,7 +13,7 @@ def main():
     # Load Image
     img = loaders.Load(sys.argv[1])
     # Use Floyd-Steinberg dithering
-    res = filters.FilterFloydSteinberg_RGB888_Alloc(img, core.C.PIXEL_G1, None)
+    res = filters.FloydSteinberg_RGB888_Alloc(img, core.C.PIXEL_G1, None)
     # Save result into grayscale png
     res.loaders.SavePNG("out.png")
 

@@ -26,7 +26,7 @@ def main():
        exit(1)
 
     try:
-        img = filters.FilterGaussianBlurAlloc(img, 50, 50, callback)
+        img = img.filters.GaussianBlurAlloc(50, 50, callback)
         print('')
     except OSError:
         print("Filter Aborted")
