@@ -80,12 +80,12 @@ unsigned int image_list_count(struct image_list *self);
 unsigned int image_list_pos(struct image_list *self);
 
 /*
- * Returns numbe of images in current dir or 1 if current arg is file.
+ * Returns numbe of images in current dir or 0 if current arg is file.
  */
 unsigned int image_list_dir_count(struct image_list *self);
 
 /*
- * Returns current position in current dir or 1 if current arg is file.
+ * Returns current position in current dir or 0 if current arg is file.
  */
 unsigned int image_list_dir_pos(struct image_list *self);
 

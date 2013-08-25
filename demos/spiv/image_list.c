@@ -366,7 +366,7 @@ unsigned int image_list_pos(struct image_list *self)
 unsigned int image_list_dir_count(struct image_list *self)
 {
 	if (!self->in_dir)
-		return 1;
+		return 0;
 
 	return self->max_file;
 }
@@ -374,7 +374,7 @@ unsigned int image_list_dir_count(struct image_list *self)
 unsigned int image_list_dir_pos(struct image_list *self)
 {
 	if (!self->in_dir)
-		return 1;
+		return 0;
 
 	return self->cur_file;
 }
