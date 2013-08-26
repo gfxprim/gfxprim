@@ -21,6 +21,7 @@
  *****************************************************************************/
 
 #include <math.h>
+#include <errno.h>
 
 #include "core/GP_Context.h"
 #include "core/GP_GetPutPixel.h"
@@ -81,8 +82,10 @@ int GP_FilterResizeCubic(const GP_Context *src, GP_Context *dst,
 	float col_r[src->h], col_g[src->h], col_b[src->h];
 	uint32_t i, j;
 
-	if (src->pixel_type != GP_PIXEL_RGB888 || dst->pixel_type != GP_PIXEL_RGB888)
+	if (src->pixel_type != GP_PIXEL_RGB888 || dst->pixel_type != GP_PIXEL_RGB888) {
+		errno = ENOSYS;
 		return 1;
+	}
 
 	GP_DEBUG(1, "Scaling image %ux%u -> %ux%u %2.2f %2.2f",
 	            src->w, src->h, dst->w, dst->h,
