@@ -182,7 +182,7 @@ static int read_alphabitfields(FILE *f, struct bitmap_info_header *header)
 	int ret;
 
 	ret = GP_FRead(f, "L4 L4 L4 L4",
-	               &header->R_mask, 
+	               &header->R_mask,
 	               &header->G_mask,
 	               &header->B_mask,
 	               &header->A_mask);
@@ -467,7 +467,7 @@ static uint8_t get_idx(struct bitmap_info_header *header,
 {
 	switch (header->bpp) {
 	case 1:
-		return !!(row[x/8] & (1<<(7 - x%8))); 
+		return !!(row[x/8] & (1<<(7 - x%8)));
 	case 2:
 		return (row[x/4] >> (2*(3 - x%4))) & 0x03;
 	case 4:
@@ -653,7 +653,7 @@ int GP_OpenBMP(const char *src_path, FILE **f,
 			*h = header.h;
 
 		if (pixel_type != NULL)
-			*pixel_type = match_pixel_type(&header); 
+			*pixel_type = match_pixel_type(&header);
 	}
 
 	return 0;
@@ -775,6 +775,7 @@ static int bmp_fill_header(const GP_Context *src, struct bitmap_info_header *hea
 {
 	switch (src->pixel_type) {
 	case GP_PIXEL_RGB888:
+	case GP_PIXEL_BGR888:
 		header->bpp = 24;
 	break;
 	default:
@@ -802,14 +803,26 @@ static int bmp_fill_header(const GP_Context *src, struct bitmap_info_header *hea
 static int bmp_write_data(FILE *f, const GP_Context *src, GP_ProgressCallback *callback)
 {
 	int y;
-	uint32_t padd_len = 0;
+	uint32_t padd_len = 0, x;
 	char padd[3] = {0};
+	uint8_t tmp[3 * src->w];
 
 	if (src->bytes_per_row%4)
 		padd_len = 4 - src->bytes_per_row%4;
 
 	for (y = src->h - 1; y >= 0; y--) {
 		void *row = GP_PIXEL_ADDR(src, 0, y);
+
+		if (src->pixel_type == GP_PIXEL_BGR888) {
+			memcpy(tmp, row, 3 * src->w);
+
+			for (x = 0; x < src->w; x++) {
+				uint8_t *pix = tmp + 3 * x;
+				GP_SWAP(pix[0], pix[2]);
+			}
+
+			row = tmp;
+		}
 
 		if (fwrite(row, src->bytes_per_row, 1, f) != 1)
 			return EIO;
