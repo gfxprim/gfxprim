@@ -439,8 +439,20 @@ int GP_SaveJPG(const GP_Context *src, const char *dst_path,
 
 	cinfo.image_width  = src->w;
 	cinfo.image_height = src->h;
-	cinfo.input_components = src->pixel_type == GP_PIXEL_RGB888 ? 3 : 1;
-	cinfo.in_color_space = JCS_RGB;
+
+	switch (src->pixel_type) {
+	case GP_PIXEL_RGB888:
+	case GP_PIXEL_BGR888:
+		cinfo.input_components = 3;
+		cinfo.in_color_space = JCS_RGB;
+	break;
+	case GP_PIXEL_G8:
+		cinfo.input_components = 1;
+		cinfo.in_color_space = JCS_GRAYSCALE;
+	break;
+	default:
+		GP_BUG("Don't know how to set color_space and compoments");
+	}
 
 	jpeg_set_defaults(&cinfo);
 
