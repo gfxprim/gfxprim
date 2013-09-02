@@ -202,6 +202,19 @@ static int allocate_console(struct fb_priv *fb, int flags)
 	return 0;
 }
 
+void free_console(struct fb_priv *fb)
+{
+	/* restore blinking cursor */
+	if (ioctl(fb->con_fd, KDSETMODE, KD_TEXT))
+		GP_WARN("Failed to ioctl KDSETMODE (restore KDMODE)");
+
+	/* switch back console */
+	if (fb->last_con_nr != -1)
+		ioctl(fb->con_fd, VT_ACTIVATE, fb->last_con_nr);
+
+	close(fb->con_fd);
+}
+
 /* Backend API callbacks */
 
 static void fb_poll(GP_Backend *self)
@@ -239,19 +252,11 @@ static void fb_exit(GP_Backend *self)
 	munmap(fb->fb_mem, fb->bsize);
 	close(fb->fb_fd);
 
-	/* restore blinking cursor */
-	if (ioctl(fb->con_fd, KDSETMODE, KD_TEXT))
-		GP_WARN("Failed to ioctl KDSETMODE (restore KDMODE)");
-
-	/* restore keyboard mode */
 	if (fb->flags & GP_FB_INPUT_KBD)
 		exit_kbd(fb);
 
-	/* switch back console */
-	if (fb->last_con_nr != -1)
-		ioctl(fb->con_fd, VT_ACTIVATE, fb->last_con_nr);
+	free_console(fb);
 
-	close(fb->con_fd);
 	free(self);
 }
 
@@ -298,8 +303,8 @@ GP_Backend *GP_BackendLinuxFBInit(const char *path, int flags)
 
 	fb = GP_BACKEND_PRIV(backend);
 
-	if (allocate_console(fb, flags & GP_FB_INPUT_KBD))
-		goto err1;
+	if (allocate_console(fb, flags))
+		goto err0;
 
 	if (flags & GP_FB_INPUT_KBD) {
 		if (init_kbd(fb))
@@ -412,15 +417,11 @@ err4:
 err3:
 	close(fd);
 err2:
-	close(fb->con_fd);
-
-	/* reset keyboard */
-	ioctl(fb->con_fd, KDSETMODE, KD_TEXT);
-
-	/* switch back console */
-	if (fb->last_con_nr != -1)
-		ioctl(fb->con_fd, VT_ACTIVATE, fb->last_con_nr);
+	if (flags & GP_FB_INPUT_KBD)
+		exit_kbd(fb);
 err1:
+	free_console(fb);
+err0:
 	free(backend);
 	return NULL;
 }
