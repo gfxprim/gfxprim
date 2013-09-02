@@ -709,6 +709,7 @@ err0:
 
 GP_Container *GP_OpenZip(const char *path)
 {
+	(void) path;
 	GP_FATAL("zlib support not compiled in");
 	errno = ENOSYS;
 	return NULL;
