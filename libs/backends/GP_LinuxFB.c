@@ -202,7 +202,7 @@ static int allocate_console(struct fb_priv *fb, int flags)
 	return 0;
 }
 
-void free_console(struct fb_priv *fb)
+static void free_console(struct fb_priv *fb)
 {
 	/* restore blinking cursor */
 	if (ioctl(fb->con_fd, KDSETMODE, KD_TEXT))
