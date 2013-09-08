@@ -91,3 +91,6 @@ GP_ContainerSeek
 
 GP_MatchZip
 GP_OpenZip
+
+GP_LineConvertible
+GP_LineConvertGet

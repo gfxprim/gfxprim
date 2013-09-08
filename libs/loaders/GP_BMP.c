@@ -41,6 +41,7 @@
 #include "core/GP_GetPutPixel.h"
 
 #include "loaders/GP_ByteUtils.h"
+#include "loaders/GP_LineConvert.h"
 #include "loaders/GP_BMP.h"
 
 #define BMP_HEADER_OFFSET  0x0a       /* info header offset - 4 bytes */
@@ -50,7 +51,6 @@
 
 #define BUF_TO_2(buf, off) \
 	(buf[off] + (buf[off+1]<<8))
-
 
 struct bitmap_info_header {
 	/*
@@ -771,17 +771,27 @@ static int bmp_write_header(struct bitmap_info_header *header, FILE *f)
 	return 0;
 }
 
+static GP_PixelType out_pixel_types[] = {
+	GP_PIXEL_RGB888,
+	GP_PIXEL_UNKNOWN,
+};
+
 static int bmp_fill_header(const GP_Context *src, struct bitmap_info_header *header)
 {
+	GP_PixelType out_pix;
+
 	switch (src->pixel_type) {
 	case GP_PIXEL_RGB888:
-	case GP_PIXEL_BGR888:
 		header->bpp = 24;
 	break;
 	default:
-		GP_DEBUG(1, "Unsupported pixel type (%s)",
-		         GP_PixelTypeName(src->pixel_type));
-		return ENOSYS;
+		out_pix = GP_LineConvertible(src->pixel_type, out_pixel_types);
+
+		if (out_pix == GP_PIXEL_UNKNOWN) {
+			GP_DEBUG(1, "Unsupported pixel type %s",
+			         GP_PixelTypeName(src->pixel_type));
+			return ENOSYS;
+		}
 	}
 
 	header->w = src->w;
@@ -803,9 +813,12 @@ static int bmp_fill_header(const GP_Context *src, struct bitmap_info_header *hea
 static int bmp_write_data(FILE *f, const GP_Context *src, GP_ProgressCallback *callback)
 {
 	int y;
-	uint32_t padd_len = 0, x;
+	uint32_t padd_len = 0;
 	char padd[3] = {0};
 	uint8_t tmp[3 * src->w];
+	GP_LineConvert Convert;
+
+	Convert = GP_LineConvertGet(src->pixel_type, GP_PIXEL_RGB888);
 
 	if (src->bytes_per_row%4)
 		padd_len = 4 - src->bytes_per_row%4;
@@ -813,14 +826,8 @@ static int bmp_write_data(FILE *f, const GP_Context *src, GP_ProgressCallback *c
 	for (y = src->h - 1; y >= 0; y--) {
 		void *row = GP_PIXEL_ADDR(src, 0, y);
 
-		if (src->pixel_type == GP_PIXEL_BGR888) {
-			memcpy(tmp, row, 3 * src->w);
-
-			for (x = 0; x < src->w; x++) {
-				uint8_t *pix = tmp + 3 * x;
-				GP_SWAP(pix[0], pix[2]);
-			}
-
+		if (src->pixel_type != GP_PIXEL_RGB888) {
+			Convert(row, tmp, src->w);
 			row = tmp;
 		}
 

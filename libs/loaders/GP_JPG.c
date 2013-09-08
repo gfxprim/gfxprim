@@ -37,7 +37,8 @@
 #include "../../config.h"
 #include "core/GP_Debug.h"
 
-#include "GP_JPG.h"
+#include "loaders/GP_LineConvert.h"
+#include "loaders/GP_JPG.h"
 
 #ifdef HAVE_JPEG
 
@@ -345,22 +346,21 @@ int GP_LoadJPGMetaData(const char *src_path, GP_MetaData *data)
 	return ret;
 }
 
-static int save_rgb888(struct jpeg_compress_struct *cinfo,
-                       const GP_Context *src,
-                       GP_ProgressCallback *callback)
+static int save_convert(struct jpeg_compress_struct *cinfo,
+                        const GP_Context *src,
+                        GP_PixelType out_pix,
+                        GP_ProgressCallback *callback)
 {
-	unsigned int x;
-	uint8_t tmp[3 * src->w];
+	uint8_t tmp[(src->w * GP_PixelSize(out_pix)) / 8 + 1];
+	GP_LineConvert Convert;
+
+	Convert = GP_LineConvertGet(src->pixel_type, out_pix);
 
 	while (cinfo->next_scanline < cinfo->image_height) {
 		uint32_t y = cinfo->next_scanline;
+		void *in = GP_PIXEL_ADDR(src, 0, y);
 
-		memcpy(tmp, GP_PIXEL_ADDR(src, 0, y), 3 * src->w);
-
-		for (x = 0; x < src->w; x++) {
-			uint8_t *pix = tmp + 3 * x;
-			GP_SWAP(pix[0], pix[2]);
-		}
+		Convert(in, tmp, src->w);
 
 		JSAMPROW row = (void*)tmp;
 		jpeg_write_scanlines(cinfo, &row, 1);
@@ -393,26 +393,37 @@ static int save(struct jpeg_compress_struct *cinfo,
 	return 0;
 }
 
+static GP_PixelType out_pixel_types[] = {
+	GP_PIXEL_BGR888,
+	GP_PIXEL_G8,
+	GP_PIXEL_UNKNOWN
+};
+
 int GP_SaveJPG(const GP_Context *src, const char *dst_path,
                GP_ProgressCallback *callback)
 {
 	FILE *f;
 	struct jpeg_compress_struct cinfo;
+	GP_PixelType out_pix;
 	struct my_jpg_err my_err;
 	int err;
 
 	GP_DEBUG(1, "Saving JPG Image '%s'", dst_path);
 
 	switch (src->pixel_type) {
-	case GP_PIXEL_RGB888:
 	case GP_PIXEL_BGR888:
 	case GP_PIXEL_G8:
+		out_pix = src->pixel_type;
 	break;
 	default:
-		GP_DEBUG(1, "Unsupported pixel type %s",
-		         GP_PixelTypeName(src->pixel_type));
-		errno = ENOSYS;
-		return 1;
+		out_pix = GP_LineConvertible(src->pixel_type, out_pixel_types);
+
+		if (out_pix == GP_PIXEL_UNKNOWN) {
+			GP_DEBUG(1, "Unsupported pixel type %s",
+			         GP_PixelTypeName(src->pixel_type));
+			errno = ENOSYS;
+			return 1;
+		}
 	}
 
 	f = fopen(dst_path, "wb");
@@ -440,8 +451,7 @@ int GP_SaveJPG(const GP_Context *src, const char *dst_path,
 	cinfo.image_width  = src->w;
 	cinfo.image_height = src->h;
 
-	switch (src->pixel_type) {
-	case GP_PIXEL_RGB888:
+	switch (out_pix) {
 	case GP_PIXEL_BGR888:
 		cinfo.input_components = 3;
 		cinfo.in_color_space = JCS_RGB;
@@ -458,13 +468,10 @@ int GP_SaveJPG(const GP_Context *src, const char *dst_path,
 
 	jpeg_start_compress(&cinfo, TRUE);
 
-	switch (src->pixel_type) {
-	case GP_PIXEL_RGB888:
-		err = save_rgb888(&cinfo, src, callback);
-	break;
-	default:
+	if (out_pix != src->pixel_type)
+		err = save_convert(&cinfo, src, out_pix, callback);
+	else
 		err = save(&cinfo, src, callback);
-	}
 
 	if (err)
 		goto err3;
