@@ -2,7 +2,9 @@ LIB_OBJECTS=$(shell ./get_objs.sh)
 
 .SUFFIXES:
 
-include ../libver.mk
+TOPDIR=../
+include $(TOPDIR)/config.mk
+include $(TOPDIR)/libver.mk
 
 LIB_NAME=libGP
 
