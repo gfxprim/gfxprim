@@ -55,7 +55,7 @@ static int check_filled(GP_Context *c)
 				tst_msg("Pixels different %i %i", x, y);
 				return 1;
 			}
-	
+
 	return 0;
 }
 
@@ -85,16 +85,16 @@ static int GetPutPixel_{{ pt.name }}(void)
 		return TST_UNTESTED;
 	}
 
-	if (try_pattern(c, 0x55555555 & {{ 2 ** pt.pixelsize.size - 1}}))
+	if (try_pattern(c, 0x55555555 & {{ 2 ** pt.pixelsize.size - 1}}U))
 		err++;
-	
-	if (try_pattern(c, 0xaaaaaaaa & {{ 2 ** pt.pixelsize.size - 1}}))
+
+	if (try_pattern(c, 0xaaaaaaaa & {{ 2 ** pt.pixelsize.size - 1}}U))
 		err++;
-	
-	if (try_pattern(c, 0x0f0f0f0f & {{ 2 ** pt.pixelsize.size - 1}}))
+
+	if (try_pattern(c, 0x0f0f0f0f & {{ 2 ** pt.pixelsize.size - 1}}U))
 		err++;
-	
-	if (try_pattern(c, 0xf0f0f0f0 & {{ 2 ** pt.pixelsize.size - 1}}))
+
+	if (try_pattern(c, 0xf0f0f0f0 & {{ 2 ** pt.pixelsize.size - 1}}U))
 		err++;
 
 	GP_ContextFree(c);
@@ -112,7 +112,7 @@ static int GetPutPixel_{{ pt.name }}(void)
 static int GetPutPixel_Clipping_{{ pt.name }}(void)
 {
 	GP_Context *c;
-	
+
 	c = GP_ContextAlloc(100, 100, GP_PIXEL_{{ pt.name }});
 
 	if (c == NULL) {
@@ -129,7 +129,7 @@ static int GetPutPixel_Clipping_{{ pt.name }}(void)
 		for (y = -1000; y < 200; y++) {
 			if (x > 0 && x < 100 && y > 0 && y < 100)
 				continue;
-		
+
 			/* Must be no-op */
 			GP_PutPixel(c, x, y, 0);
 
@@ -141,9 +141,9 @@ static int GetPutPixel_Clipping_{{ pt.name }}(void)
 			}
 		}
 	}
-	
+
 	GP_ContextFree(c);
-	
+
 	if (err)
 		return TST_FAILED;
 
@@ -157,18 +157,18 @@ const struct tst_suite tst_suite = {
 	.tests = {
 %% for pt in pixeltypes
 %% if not pt.is_unknown()
-		{.name = "GetPutPixel {{ pt.name }}", 
+		{.name = "GetPutPixel {{ pt.name }}",
 		 .tst_fn = GetPutPixel_{{ pt.name }}},
 %% endif
 %% endfor
 
 %% for pt in pixeltypes
 %% if not pt.is_unknown()
-		{.name = "GetPutPixel Clipping {{ pt.name }}", 
+		{.name = "GetPutPixel Clipping {{ pt.name }}",
 		 .tst_fn = GetPutPixel_Clipping_{{ pt.name }}},
 %% endif
 %% endfor
-		
+
 		{.name = NULL}
 	}
 };
