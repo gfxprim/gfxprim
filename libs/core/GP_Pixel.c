@@ -19,14 +19,14 @@
  * Copyright (C) 2009-2010 Jiri "BlueBear" Dluhos                            *
  *                         <jiri.bluebear.dluhos@gmail.com>                  *
  *                                                                           *
- * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2013 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
 #include <string.h>
 
 #include "GP_Debug.h"
-#include "GP_Pixel.h" 
+#include "GP_Pixel.h"
 
 static const GP_PixelTypeChannel *
 get_channel(const GP_PixelTypeDescription *desc, const char *name)
@@ -78,8 +78,10 @@ GP_PixelType GP_PixelRGBMatch(GP_Pixel rmask, GP_Pixel gmask,
 
 	for (i = 0; i < GP_PIXEL_MAX; i++) {
 		int res;
-
 		const GP_PixelTypeChannel *r, *g, *b, *a;
+
+		if (!GP_PixelHasFlags(i, GP_PIXEL_IS_RGB))
+			continue;
 
 		if (GP_PixelTypes[i].size != bits_per_pixel)
 			continue;
@@ -132,6 +134,9 @@ GP_PixelType GP_PixelRGBLookup(uint32_t rsize, uint32_t roff,
 
 	for (i = 0; i < GP_PIXEL_MAX; i++) {
 		const GP_PixelTypeChannel *r, *g, *b, *a;
+
+		if (!GP_PixelHasFlags(i, GP_PIXEL_IS_RGB))
+			continue;
 
 		if (GP_PixelTypes[i].size != bits_per_pixel)
 			continue;
