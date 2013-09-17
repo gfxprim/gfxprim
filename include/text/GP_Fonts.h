@@ -39,4 +39,9 @@ extern const GP_FontFace *GP_FontTinyMono;
  */
 extern const GP_FontFace *GP_FontTiny;
 
+/*
+ * Monospace 8x8 Commodore 64 like font.
+ */
+extern const GP_FontFace *GP_FontC64;
+
 #endif /* TEXT_GP_FONTS_H */

@@ -72,6 +72,9 @@ void redraw_screen(void)
 		style.font = GP_FontTiny;
 	break;
 	case 4:
+		style.font = GP_FontC64;
+	break;
+	case 5:
 		style.font = font;
 	break;
 	}
@@ -133,9 +136,9 @@ void event_loop(void)
 			switch (ev.val.key.key) {
 			case GP_KEY_SPACE:
 				if (font)
-					font_flag = (font_flag + 1) % 5;
+					font_flag = (font_flag + 1) % 6;
 				else
-					font_flag = (font_flag + 1) % 4;
+					font_flag = (font_flag + 1) % 5;
 
 				redraw_screen();
 				GP_BackendFlip(backend);
