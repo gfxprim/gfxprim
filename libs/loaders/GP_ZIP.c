@@ -343,7 +343,14 @@ static GP_Context *zip_next_file(FILE *f, GP_ProgressCallback *callback)
 		if (header.uncomp_size == 0)
 			goto out;
 
+		off_t cur_off = ftell(f);
+
 		ret = GP_ReadJPG(f, callback);
+
+		if (!ret) {
+			fseek(f, cur_off, SEEK_SET);
+			ret = GP_ReadPNG(f, callback);
+		}
 
 		goto out;
 	break;
