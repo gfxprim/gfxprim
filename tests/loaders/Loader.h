@@ -115,6 +115,7 @@ struct testcase_save_load {
 static int test_save_load(struct testcase_save_load *test)
 {
 	GP_Context *img, *img2;
+	unsigned int x, y;
 
 	img = GP_ContextAlloc(test->w, test->h, test->pixel_type);
 
@@ -123,6 +124,10 @@ static int test_save_load(struct testcase_save_load *test)
 		        test->w, test->h, GP_PixelTypeName(test->pixel_type));
 		return TST_FAILED;
 	}
+
+	for (x = 0; x < img->w; x++)
+		for (y = 0; y < img->w; y++)
+			GP_PutPixel(img, x, y, 0);
 
 	errno = 0;
 
@@ -168,12 +173,18 @@ static int test_save_load(struct testcase_save_load *test)
 		tst_msg("Source pixel type %s and loaded type %s differs",
 			GP_PixelTypeName(img->pixel_type),
 			GP_PixelTypeName(img2->pixel_type));
+		return TST_FAILED;
+	}
+
+	if (GP_GetPixel(img2, 0, 0) != 0) {
+		tst_msg("Pixel value is wrong %x", GP_GetPixel(img2, 0, 0));
+		GP_ContextFree(img);
+		GP_ContextFree(img2);
+		return TST_FAILED;
 	}
 
 	GP_ContextFree(img);
 	GP_ContextFree(img2);
-
-	//TODO: Check pixels
 
 	return TST_SUCCESS;
 }
