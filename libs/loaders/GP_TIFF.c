@@ -621,6 +621,11 @@ int GP_SaveTIFF(const GP_Context *src, const char *dst_path,
 	}
 
 	switch (src->pixel_type) {
+	case GP_PIXEL_G1:
+	case GP_PIXEL_G2:
+	case GP_PIXEL_G4:
+	case GP_PIXEL_G8:
+	break;
 	case GP_PIXEL_RGB888:
 	case GP_PIXEL_BGR888:
 	case GP_PIXEL_xRGB8888:
@@ -628,6 +633,8 @@ int GP_SaveTIFF(const GP_Context *src, const char *dst_path,
 	default:
 		GP_DEBUG(1, "Unsupported pixel type %s",
 		         GP_PixelTypeName(src->pixel_type));
+		errno = ENOSYS;
+		return 1;
 	}
 
 	/* Open TIFF image */
