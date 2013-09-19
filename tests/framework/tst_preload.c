@@ -126,8 +126,29 @@ void *malloc(size_t size)
 
 	void *ptr = real_malloc(size);
 
-	if (check_malloc && ptr != NULL)
+	if (check_malloc && ptr)
 		add_chunk(size, ptr);
+
+	return ptr;
+}
+
+void *realloc(void *optr, size_t size)
+{
+	static void *(*real_realloc)(void*, size_t) = NULL;
+
+	if (!real_realloc)
+		real_realloc = dlsym(RTLD_NEXT, "realloc");
+
+	void *ptr = real_realloc(optr, size);
+
+	if (!ptr)
+		return NULL;
+
+	if (check_malloc) {
+		if (optr)
+			rem_chunk(optr);
+		add_chunk(size, ptr);
+	}
 
 	return ptr;
 }
