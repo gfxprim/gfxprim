@@ -551,15 +551,20 @@ static int load_bin_rgb888(FILE *f, GP_Context *ctx, GP_ProgressCallback *cb)
 	return 0;
 }
 
-static int save_ascii(FILE *f, const GP_Context *ctx, GP_ProgressCallback *cb)
+static int save_ascii(FILE *f, const GP_Context *ctx,
+                      GP_ProgressCallback *cb, int inv)
 {
 	uint32_t x, y;
 	int err;
 
 	for (y = 0; y < ctx->h; y++) {
 		for (x = 0; x < ctx->w; x++) {
+			int val = GP_GetPixel_Raw(ctx, x, y);
 
-			if (fprintf(f, "%i ", GP_GetPixel_Raw(ctx, x, y)) < 0) {
+			if (inv)
+				val = !val;
+
+			if (fprintf(f, "%i ", val) < 0) {
 				err = errno;
 				GP_DEBUG(1, "Failed to write data");
 				return err;
@@ -674,7 +679,7 @@ int GP_SavePBM(const GP_Context *src, const char *dst_path,
 	            (unsigned int) src->w, (unsigned int) src->h) < 0)
 		goto err;
 
-	if (save_ascii(f, src, callback))
+	if (save_ascii(f, src, callback, 1))
 		goto err;
 
 	if (fclose(f))
@@ -847,7 +852,7 @@ int GP_SavePGM(const GP_Context *src, const char *dst_path,
 	            (unsigned int) src->w, (unsigned int) src->h, depth) < 0)
 		goto err1;
 
-	if ((err = save_ascii(f, src, callback)))
+	if ((err = save_ascii(f, src, callback, 0)))
 		goto err1;
 
 	if (fclose(f)) {
