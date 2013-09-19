@@ -57,6 +57,7 @@
 #include "core/GP_Debug.h"
 #include "core/GP_Context.h"
 #include "core/GP_GetPutPixel.h"
+#include "loaders/GP_LineConvert.h"
 
 #include "loaders/GP_PNM.h"
 
@@ -947,14 +948,23 @@ static int write_binary_ppm(FILE *f, GP_Context *src)
 }
 
 static int save_ascii_rgb888(FILE *f, const GP_Context *ctx,
-                             GP_ProgressCallback *cb)
+                             GP_LineConvert Convert, GP_ProgressCallback *cb)
 {
 	uint32_t x, y;
 	int ret;
+	uint8_t buf[3 * ctx->w], *addr;
 
 	for (y = 0; y < ctx->h; y++) {
+
+		addr = GP_PIXEL_ADDR(ctx, 0, y);
+
+		if (Convert) {
+			Convert(addr, buf, ctx->w);
+			addr = buf;
+		}
+
 		for (x = 0; x < ctx->w; x++) {
-			GP_Pixel pix = GP_GetPixel_Raw_24BPP(ctx, x, y);
+			GP_Pixel pix = *(addr+=3);
 
 			ret = fprintf(f, "%u %u %u ",
 			              GP_Pixel_GET_R_RGB888(pix),
@@ -978,16 +988,25 @@ static int save_ascii_rgb888(FILE *f, const GP_Context *ctx,
 	return 0;
 }
 
+static GP_PixelType ppm_save_pixels[] = {
+	GP_PIXEL_RGB888,
+	GP_PIXEL_UNKNOWN,
+};
+
 int GP_SavePPM(const GP_Context *src, const char *dst_path,
                GP_ProgressCallback *callback)
 {
+	GP_Pixel out_pix;
+	GP_LineConvert Convert;
 	FILE *f;
 	int err = EIO;
 
 	GP_DEBUG(1, "Saving context %ux%u %s to '%s'",
 	         src->w, src->h, GP_PixelTypeName(src->pixel_type), dst_path);
 
-	if (src->pixel_type != GP_PIXEL_RGB888) {
+	out_pix = GP_LineConvertible(src->pixel_type, ppm_save_pixels);
+
+	if (out_pix == GP_PIXEL_UNKNOWN) {
 		GP_DEBUG(1, "Invalid pixel type '%s'",
 		         GP_PixelTypeName(src->pixel_type));
 		errno = EINVAL;
@@ -1007,7 +1026,9 @@ int GP_SavePPM(const GP_Context *src, const char *dst_path,
 	            (unsigned int) src->w, (unsigned int) src->h) < 0)
 		goto err1;
 
-	if ((err = save_ascii_rgb888(f, src, callback)))
+	Convert = GP_LineConvertGet(src->pixel_type, out_pix);
+
+	if ((err = save_ascii_rgb888(f, src, Convert, callback)))
 		goto err1;
 
 	if (fclose(f)) {
@@ -1075,6 +1096,9 @@ int GP_SavePNM(const GP_Context *src, const char *dst_path,
 	case GP_PIXEL_RGB888:
 		return GP_SavePPM(src, dst_path, callback);
 	default:
+		if (GP_LineConvertible(src->pixel_type, ppm_save_pixels))
+			return GP_SavePPM(src, dst_path, callback);
+
 		errno = EINVAL;
 		return 1;
 	}
