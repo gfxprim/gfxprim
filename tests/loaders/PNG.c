@@ -134,7 +134,7 @@ static int test_save_PNG(GP_PixelType pixel_type)
 		tst_msg("Failed to allocate context");
 		return TST_UNTESTED;
 	}
-	
+
 	errno = 0;
 
 	ret = GP_SavePNG(ctx, "/dev/null", NULL);
@@ -166,53 +166,53 @@ const struct tst_suite tst_suite = {
 		 .res_path = "data/png/valid/100x100-red.png",
 		 .data = &red,
 		 .flags = TST_TMPDIR | TST_CHECK_MALLOC},
-		
+
 		{.name = "PNG Load 100x100 RGB 50\% alpha",
 		 .tst_fn = test_load_PNG,
 		 .res_path = "data/png/valid/100x100-red-alpha.png",
 		 .data = "100x100-red-alpha.png",
 		 .flags = TST_TMPDIR | TST_CHECK_MALLOC},
-		
+
 		{.name = "PNG Load 100x100 8 bit Grayscale",
 		 .tst_fn = test_load_PNG_check_color,
 		 .res_path = "data/png/valid/100x100-black-grayscale.png",
 		 .data = &black_grayscale,
 		 .flags = TST_TMPDIR | TST_CHECK_MALLOC},
-		
+
 		{.name = "PNG Load 100x100 8 bit Grayscale + alpha",
 		 .tst_fn = test_load_PNG,
 		 .res_path = "data/png/valid/100x100-black-grayscale-alpha.png",
 		 .data = "100x100-black-grayscale-alpha.png",
 		 .flags = TST_TMPDIR | TST_CHECK_MALLOC},
-		
+
 		{.name = "PNG Load 100x100 Palette + alpha",
 		 .tst_fn = test_load_PNG,
 		 .res_path = "data/png/valid/100x100-palette-alpha.png",
 		 .data = "100x100-palette-alpha.png",
 		 .flags = TST_TMPDIR | TST_CHECK_MALLOC},
-		
+
 		{.name = "PNG Load 100x100 Palette",
 		 .tst_fn = test_load_PNG,
 		 .res_path = "data/png/valid/100x100-red-palette.png",
 		 .data = "100x100-red-palette.png",
 		 .flags = TST_TMPDIR | TST_CHECK_MALLOC},
-		
+
 		{.name = "PNG Load 100x100 RGB Adam7",
 		 .tst_fn = test_load_PNG_check_color,
 		 .res_path = "data/png/valid/100x100-white-adam7.png",
 		 .data = &white_adam7,
 		 .flags = TST_TMPDIR | TST_CHECK_MALLOC},
-		
+
 		{.name = "PNG Save 100x100 G1",
 		 .tst_fn = test_save_PNG,
 		 .data = (void*)GP_PIXEL_G1,
 		 .flags = TST_CHECK_MALLOC},
-		
+
 		{.name = "PNG Save 100x100 G2",
 		 .tst_fn = test_save_PNG,
 		 .data = (void*)GP_PIXEL_G2,
 		 .flags = TST_CHECK_MALLOC},
-		
+
 		{.name = "PNG Save 100x100 G4",
 		 .tst_fn = test_save_PNG,
 		 .data = (void*)GP_PIXEL_G4,
@@ -222,12 +222,12 @@ const struct tst_suite tst_suite = {
 		 .tst_fn = test_save_PNG,
 		 .data = (void*)GP_PIXEL_G8,
 		 .flags = TST_CHECK_MALLOC},
-		
+
 		{.name = "PNG Save 100x100 RGB888",
 		 .tst_fn = test_save_PNG,
 		 .data = (void*)GP_PIXEL_RGB888,
 		 .flags = TST_CHECK_MALLOC},
-		
+
 		{.name = "PNG Save 100x100 BGR888",
 		 .tst_fn = test_save_PNG,
 		 .data = (void*)GP_PIXEL_BGR888,

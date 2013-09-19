@@ -97,7 +97,7 @@ static int save_load(enum fmt fmt, GP_Size w, GP_Size h)
 	GP_Context *img, *res;
 
 	img = GP_ContextAlloc(w, h, GP_PIXEL_RGB888);
-	
+
 	if (img == NULL) {
 		tst_warn("GP_ContextAlloc failed");
 		return TST_UNTESTED;
@@ -110,7 +110,7 @@ static int save_load(enum fmt fmt, GP_Size w, GP_Size h)
 			tst_msg("Save %s: ENOSYS", strfmt(fmt));
 			return TST_SKIPPED;
 		}
-		
+
 		tst_msg("Failed to save %s: %s",
 		           strfmt(fmt), strerror(errno));
 		return TST_FAILED;
@@ -163,14 +163,14 @@ static int test_BMP_stress(void)
 static int load_enoent(enum fmt fmt)
 {
 	GP_Context *img;
-	
-	img = load(fmt, "nonexistent");	
-	
+
+	img = load(fmt, "nonexistent");
+
 	if (img != NULL) {
 		tst_msg("Test succedded unexpectedly");
 		return TST_FAILED;
 	}
-	
+
 	if (errno == ENOSYS) {
 		tst_msg("Load %s: ENOSYS", strfmt(fmt));
 		return TST_SKIPPED;
@@ -210,7 +210,7 @@ static int load_eacces(enum fmt fmt)
 	GP_Context *img;
 
 	snprintf(buf, sizeof(buf), "test.%s", strfmt(fmt));
-	
+
 	FILE *f = fopen(buf, "w");
 
 	if (f == NULL) {
@@ -231,7 +231,7 @@ static int load_eacces(enum fmt fmt)
 		tst_msg("Test succedded unexpectedly");
 		return TST_FAILED;
 	}
-	
+
 	if (errno == ENOSYS) {
 		tst_msg("Load %s: ENOSYS", strfmt(fmt));
 		return TST_SKIPPED;
@@ -272,7 +272,7 @@ static int load_eio(enum fmt fmt)
 	GP_Context *img;
 
 	snprintf(buf, sizeof(buf), "test.%s", strfmt(fmt));
-	
+
 	FILE *f = fopen(buf, "w");
 
 	if (f == NULL) {
@@ -288,7 +288,7 @@ static int load_eio(enum fmt fmt)
 		tst_msg("Test succedded unexpectedly");
 		return TST_FAILED;
 	}
-	
+
 	if (errno == ENOSYS) {
 		tst_msg("Load %s: ENOSYS", strfmt(fmt));
 		return TST_SKIPPED;
@@ -299,7 +299,7 @@ static int load_eio(enum fmt fmt)
 		              strerror(errno));
 		return TST_FAILED;
 	}
-	
+
 	return TST_SUCCESS;
 }
 
@@ -344,7 +344,7 @@ static int test_PNG_Save_abort(void)
 		tst_msg("Failed to save PNG saving");
 		return TST_FAILED;
 	}
-	
+
 	if (errno == ENOSYS) {
 		tst_msg("Load PNG: ENOSYS");
 		return TST_SKIPPED;
@@ -357,7 +357,7 @@ static int test_PNG_Save_abort(void)
 	}
 
 	GP_ContextFree(img);
-	
+
 	return TST_SUCCESS;
 }
 
@@ -368,12 +368,12 @@ static int test_PNG_Load_abort(void)
 	img = GP_ContextAlloc(100, 100, GP_PIXEL_RGB888);
 
 	if (GP_SavePNG(img, "test.png", NULL)) {
-		
+
 		if (errno == ENOSYS) {
 			tst_msg("Save PNG: ENOSYS");
 			return TST_SKIPPED;
 		}
-		
+
 		tst_msg("Failed to save PNG: %s", strerror(errno));
 		return TST_FAILED;
 	}
@@ -417,7 +417,7 @@ enum file_flags {
 };
 
 static struct file_testcase file_testcases[] = {
-	
+
 	/*
 	 * Should fail the file signature based loader
 	 * as the signature could have been loaded but
@@ -443,7 +443,7 @@ static struct file_testcase file_testcases[] = {
 	{"wrong.tif",  FILE_CREATE | FILE_FILL, ENOSYS},
 	{"wrong.tiff", FILE_CREATE | FILE_FILL, ENOSYS},
 
-	/* 
+	/*
 	 * Should start signature-based loader and
 	 * fail it to read start of the file.
 	 */
@@ -453,7 +453,7 @@ static struct file_testcase file_testcases[] = {
 	{".dc",        FILE_CREATE, EIO},
 	{"dc",         FILE_CREATE, EIO},
 	{"cba",        FILE_CREATE, EIO},
-	
+
 	/*
 	 * Dtto but for hits the extension based
 	 * loader first and fail to read image header
@@ -501,8 +501,7 @@ static int test_Load(void)
 			if (file_testcases[i].create & FILE_FILL) {
 				if (fwrite(buf, sizeof(buf), 1, f) != 1)
 					tst_msg("Failed to write to '%s'",
-				        	file_testcases[i].filename);
-			
+						file_testcases[i].filename);
 			}
 
 			fclose(f);
@@ -514,7 +513,6 @@ static int test_Load(void)
 
 	for (i = 0; file_testcases[i].filename != NULL; i++) {
 		GP_Context *ret;
-	
 		errno = 0;
 
 		ret = GP_LoadImage(file_testcases[i].filename, NULL);
@@ -533,7 +531,7 @@ static int test_Load(void)
 			        file_testcases[i].filename);
 			continue;
 		}
-		
+
 		if (file_testcases[i].expected_errno != saved_errno) {
 			tst_msg("Expected errno %i (%s) got %i (%s) on '%s'",
 			        file_testcases[i].expected_errno,
@@ -676,7 +674,7 @@ const struct tst_suite tst_suite = {
 		 .flags = TST_TMPDIR},
 		{.name = "BMP Load EACCES", .tst_fn = test_BMP_Load_EACCES,
 		 .flags = TST_TMPDIR},
-		
+
 		{.name = "PNG Load EIO", .tst_fn = test_PNG_Load_EIO,
 		 .flags = TST_TMPDIR},
 		{.name = "JPG Load EIO", .tst_fn = test_JPG_Load_EIO,
@@ -685,17 +683,17 @@ const struct tst_suite tst_suite = {
 		 .flags = TST_TMPDIR},
 		{.name = "BMP Load EIO", .tst_fn = test_BMP_Load_EIO,
 		 .flags = TST_TMPDIR},
-		
+
 		/* Generic GP_LoadImage test */
 		{.name = "Image Load", .tst_fn = test_Load,
 		 .flags = TST_TMPDIR | TST_CHECK_MALLOC},
-		
+
 		/* Callback abort tests */
 		{.name = "PNG Load abort", .tst_fn = test_PNG_Load_abort,
 		 .flags = TST_TMPDIR | TST_CHECK_MALLOC},
 		{.name = "PNG Save abort", .tst_fn = test_PNG_Save_abort,
 		 .flags = TST_TMPDIR | TST_CHECK_MALLOC},
-		
+
 		/* Basic Save Load tests */
 		{.name = "PNG Save Load", .tst_fn = test_PNG_Save_Load,
 		 .flags = TST_TMPDIR | TST_CHECK_MALLOC},
@@ -703,7 +701,7 @@ const struct tst_suite tst_suite = {
 		 .flags = TST_TMPDIR | TST_CHECK_MALLOC},
 		{.name = "BMP Save Load", .tst_fn = test_BMP_Save_Load,
 		 .flags = TST_TMPDIR | TST_CHECK_MALLOC},
-		
+
 		/* Stress Save Load tests */
 		{.name = "PNG Stress", .tst_fn = test_PNG_stress,
 		 .flags = TST_TMPDIR | TST_CHECK_MALLOC},
@@ -717,37 +715,37 @@ const struct tst_suite tst_suite = {
 		 .tst_fn = test_load_BMP_1bpp_1x1,
 		 .res_path = "data/bmp/bitmaps/valid/1bpp-1x1.bmp",
 		 .flags = TST_TMPDIR},
-		
+
 		{.name = "BMP Load 4bpp 1x1",
 		 .tst_fn = test_load_BMP_4bpp_1x1,
 		 .res_path = "data/bmp/bitmaps/valid/4bpp-1x1.bmp",
 		 .flags = TST_TMPDIR},
-		
+
 		{.name = "BMP Load 8bpp 1x1",
 		 .tst_fn = test_load_BMP_8bpp_1x1,
 		 .res_path = "data/bmp/bitmaps/valid/8bpp-1x1.bmp",
 		 .flags = TST_TMPDIR},
-		
+
 		{.name = "BMP 24bpp 1x1",
 		 .tst_fn = test_load_BMP_24bpp_1x1,
 		 .res_path = "data/bmp/bitmaps/valid/24bpp-1x1.bmp",
 		 .flags = TST_TMPDIR},
-		
+
 		{.name = "BMP 32bpp 1x1",
 		 .tst_fn = test_load_BMP_32bpp_1x1,
 		 .res_path = "data/bmp/bitmaps/valid/32bpp-1x1.bmp",
 		 .flags = TST_TMPDIR},
-		
+
 		{.name = "BMP 555 1x1",
 		 .tst_fn = test_load_BMP_555_1x1,
 		 .res_path = "data/bmp/bitmaps/valid/555-1x1.bmp",
 		 .flags = TST_TMPDIR},
-		
+
 		{.name = "BMP 565 1x1",
 		 .tst_fn = test_load_BMP_565_1x1,
 		 .res_path = "data/bmp/bitmaps/valid/565-1x1.bmp",
 		 .flags = TST_TMPDIR},
-		
+
 		{.name = "BMP 8bpp 1x64000",
 		 .tst_fn = test_load_BMP_8bpp_1x64000,
 		 .res_path = "data/bmp/bitmaps/valid/8bpp-1x64000.bmp",

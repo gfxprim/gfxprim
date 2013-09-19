@@ -94,7 +94,7 @@ const struct tst_suite tst_suite = {
 		 .res_path = "data/pgm/valid/black_1x1_1bpp.pgm",
 		 .data = &black_1x1_1bpp,
 		 .flags = TST_TMPDIR | TST_CHECK_MALLOC},
-		
+
 		{.name = "PGM Load 1x1 2bpp (black)",
 		 .tst_fn = test_load,
 		 .res_path = "data/pgm/valid/black_1x1_2bpp.pgm",
@@ -106,7 +106,7 @@ const struct tst_suite tst_suite = {
 		  .res_path = "data/pgm/valid/black_1x1_4bpp.pgm",
 		  .data = &black_1x1_4bpp,
 		  .flags = TST_TMPDIR | TST_CHECK_MALLOC},
-		 
+
 		 {.name = "PGM Load 1x1 8bpp (black)",
 		  .tst_fn = test_load,
 		  .res_path = "data/pgm/valid/black_1x1_8bpp.pgm",
@@ -132,13 +132,13 @@ const struct tst_suite tst_suite = {
 		  .tst_fn = test_save_load,
 		  .data = &save_load_8bpp,
 		  .flags = TST_TMPDIR | TST_CHECK_MALLOC},
-		
+
 		{.name = "PGM Load wrong header",
 		 .tst_fn = test_load_fail,
 		 .res_path = "data/pgm/corrupt/wrong_header.pgm",
 		 .data = "wrong_header.pgm",
 		 .flags = TST_TMPDIR | TST_CHECK_MALLOC},
-		
+
 		{.name = "PGM Load incomplete",
 		 .tst_fn = test_load_fail,
 		 .res_path = "data/pgm/corrupt/incomplete.pgm",

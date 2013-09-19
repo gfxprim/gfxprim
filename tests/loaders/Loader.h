@@ -58,7 +58,7 @@ static int test_load(struct testcase *test)
 		for (y = 0; y < img->h; y++) {
 
 			GP_Pixel pix = GP_GetPixel(img, x, y);
-			
+
 			if (pix != test->pix) {
 				if (err < 5)
 					tst_msg("%08x instead of %08x (%ux%u)",

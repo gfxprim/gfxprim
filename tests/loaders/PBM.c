@@ -141,31 +141,31 @@ const struct tst_suite tst_suite = {
 		 .res_path = "data/pbm/valid/black_2x2_bin.pbm",
 		 .data = &black_2x2_bin,
 		 .flags = TST_TMPDIR | TST_CHECK_MALLOC},
-		
+
 		{.name = "PBM Load 3x9 (black) Raw",
 		 .tst_fn = test_load,
 		 .res_path = "data/pbm/valid/black_3x9_bin.pbm",
 		 .data = &black_3x9_bin,
 		 .flags = TST_TMPDIR | TST_CHECK_MALLOC},
-	
+
 		{.name = "PBM Load corrupt",
 		 .tst_fn = test_load_fail,
 		 .res_path = "data/pbm/corrupt/short.pbm",
 		 .data = "short.pbm",
 		 .flags = TST_TMPDIR | TST_CHECK_MALLOC},
-		
+
 		{.name = "PBM Load wrong header",
 		 .tst_fn = test_load_fail,
 		 .res_path = "data/pbm/corrupt/wrong_header.pbm",
 		 .data = "wrong_header.pbm",
 		 .flags = TST_TMPDIR | TST_CHECK_MALLOC},
-		
+
 		{.name = "PBM Load empty",
 		 .tst_fn = test_load_fail,
 		 .res_path = "data/pbm/corrupt/empty.pbm",
 		 .data = "empty.pbm",
 		 .flags = TST_TMPDIR | TST_CHECK_MALLOC},
-		
+
 		{.name = "PBM Save Load",
 		 .tst_fn = test_save_load,
 		 .data = &save_load,

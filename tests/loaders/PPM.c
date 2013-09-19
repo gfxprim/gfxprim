@@ -55,7 +55,7 @@ const struct tst_suite tst_suite = {
 		 .res_path = "data/ppm/valid/black_1x1.ppm",
 		 .data = &black_1x1,
 		 .flags = TST_TMPDIR | TST_CHECK_MALLOC},
-		
+
 		{.name = "PPM Save Load",
 		 .tst_fn = test_save_load,
 		 .data = &save_load,
@@ -66,7 +66,7 @@ const struct tst_suite tst_suite = {
 		 .res_path = "data/ppm/corrupt/wrong_header.ppm",
 		 .data = "wrong_header.ppm",
 		 .flags = TST_TMPDIR | TST_CHECK_MALLOC},
-		
+
 		{.name = "PPM Load incomplete",
 		 .tst_fn = test_load_fail,
 		 .res_path = "data/ppm/corrupt/incomplete.ppm",
