@@ -72,7 +72,7 @@ int main(int argc, char *argv[])
 			return 1;
 		}
 	}
-	
+
 	tst_run_suite(&tst_suite, NULL);
 
 	return 0;

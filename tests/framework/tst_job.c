@@ -69,7 +69,7 @@ static void remove_tmpdir(const char *path)
 	ret = system(buf);
 
 	if (ret)
-		tst_warn("Failed to clean temp dir.");	
+		tst_warn("Failed to clean temp dir.");
 }
 
 /*
@@ -100,7 +100,7 @@ static void prepare_tmpdir(const char *name, const char *res_path,
 		exit(TST_INTERR);
 	}
 
-	/* 
+	/*
 	 * Copy resources if needed
 	 *
 	 * If resource is directory, copy only it's content.
@@ -118,7 +118,7 @@ static void prepare_tmpdir(const char *name, const char *res_path,
 
 		if (S_ISDIR(st.st_mode))
 			p = "/*";
-		
+
 		snprintf(tmp, sizeof(tmp), "cp -r '%s'%s '%s'",
 		         res_path, p, template);
 
@@ -148,7 +148,7 @@ static void write_timespec(struct tst_job *job, char type,
 	char *ptr = buf;
 
 	*(ptr++) = type;
-	
+
 	memcpy(ptr, time, sizeof(*time));
 
 	if (write(job->pipefd, buf, sizeof(buf)) != sizeof(buf))
@@ -187,12 +187,12 @@ static int tst_vreport(int level, const char *fmt, va_list va)
 	char buf[258];
 
 	ret = vsnprintf(buf+3, sizeof(buf) - 3, fmt, va);
-	
+
 	ssize_t size = ret > 255 ? 255 : ret + 1;
 
 	buf[0] = 'm';
 	buf[1] = level;
-	((unsigned char*)buf)[2] = size; 
+	((unsigned char*)buf)[2] = size;
 
 	if (in_child()) {
 		if (write(my_job->pipefd, buf, size + 3) != size + 3)
@@ -221,7 +221,7 @@ int tst_msg(const char *fmt, ...)
 {
 	va_list va;
 	int ret;
-	
+
 	va_start(va, fmt);
 
 	if (in_child())
@@ -238,7 +238,7 @@ int tst_warn(const char *fmt, ...)
 {
 	va_list va;
 	int ret;
-	
+
 	va_start(va, fmt);
 
 	if (in_child())
@@ -255,7 +255,7 @@ int tst_err(const char *fmt, ...)
 {
 	va_list va;
 	int ret;
-	
+
 	va_start(va, fmt);
 
 	if (in_child())
@@ -292,24 +292,24 @@ static int tst_job_benchmark(struct tst_job *job)
 	struct timespec sum = {.tv_sec = 0, .tv_nsec = 0};
 	struct timespec dev = {.tv_sec = 0, .tv_nsec = 0};
 	int ret;
-		
+
 	/* Warm up */
 	ret = job_run(job);
-	
+
 	if (ret)
 		return ret;
 
 	/* Collect the data */
 	for (i = 0; i < iter; i++) {
 		clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &cputime_start);
-		
+
 		ret = job_run(job);
-	
+
 		if (ret)
 			return ret;
 
 		clock_gettime(CLOCK_PROCESS_CPUTIME_ID, &cputime_stop);
-	
+
 		timespec_sub(&cputime_stop, &cputime_start, &bench[i]);
 
 		timespec_add(&bench[i], &sum);
@@ -317,17 +317,17 @@ static int tst_job_benchmark(struct tst_job *job)
 
 	/* Compute mean */
 	timespec_div(&sum, iter);
-	
+
 	double sum_d = timespec_to_double(&sum);
 	double dev_d = 0;
 
 	/* And standard deviation */
 	for (i = 0; i < iter; i++) {
 		double b = timespec_to_double(&bench[i]);
-		
+
 		b -= sum_d;
 		b = b * b;
-	
+
 		dev_d += b;
 	}
 
@@ -348,7 +348,7 @@ void tst_job_run(struct tst_job *job)
 	int ret;
 	char template[256];
 	int pipefd[2];
-	
+
 	/* Write down starting time of the test */
 	clock_gettime(CLOCK_MONOTONIC, &job->start_time);
 
@@ -397,7 +397,7 @@ void tst_job_run(struct tst_job *job)
 		prepare_tmpdir(job->test->name, job->test->res_path,
 		               template, sizeof(template));
 
-	/* 
+	/*
 	 * If timeout is specified, setup alarm.
 	 *
 	 * If alarm fires the test will be killed by SIGALRM.
@@ -486,7 +486,7 @@ void tst_job_read(struct tst_job *job)
 	if (ret < 0) {
 		tst_warn("job_read: read() failed: %s", strerror(errno));
 		job->running = 0;
-		
+
 		//TODO: kill the process?
 
 		return;
@@ -498,9 +498,9 @@ void tst_job_read(struct tst_job *job)
 			tst_warn("job_read: read() returned EAGAIN");
 			return;
 		}
-		
+
 		job->running = 0;
-		
+
 		return;
 	}
 
@@ -566,7 +566,7 @@ void tst_job_collect(struct tst_job *job)
 		case SIGFPE:
 			job->result = TST_FPE;
 		break;
-		/* 
+		/*
 		 * abort() called most likely double free or malloc data
 		 * corruption
 		 */
@@ -578,7 +578,7 @@ void tst_job_collect(struct tst_job *job)
 			job->result = TST_INTERR;
 		}
 	}
-	
+
 	/* Write down stop time  */
 	clock_gettime(CLOCK_MONOTONIC, &job->stop_time);
 }

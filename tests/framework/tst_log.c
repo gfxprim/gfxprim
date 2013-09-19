@@ -105,7 +105,7 @@ static void append_benchmark_json(struct tst_job *job, FILE *f)
 	fprintf(f, "\t\t\t\t\"Time Mean\": %i.%09i,\n",
 	        (int)job->bench_mean.tv_sec,
 	        (int)job->bench_mean.tv_nsec);
-	
+
 	fprintf(f, "\t\t\t\t\"Time Variance\": %i.%09i,\n",
 	        (int)job->bench_var.tv_sec,
 	        (int)job->bench_var.tv_nsec);
@@ -143,12 +143,12 @@ int tst_log_append(struct tst_job *job, FILE *f)
 	int sec, nsec;
 
 	timespec_diff(&sec, &nsec, &job->start_time, &job->stop_time);
-	
+
 	fprintf(f, "\t\t\t\"CPU Time\": %i.%09i,\n",
 	        (int)job->cpu_time.tv_sec, (int)job->cpu_time.tv_nsec);
 
 	fprintf(f, "\t\t\t\"Run Time\": %i.%09i\n", sec, nsec);
-	
+
 	fprintf(f, "\t\t}");
 
 	return 0;
@@ -161,14 +161,14 @@ static void write_system_info_json(FILE *f)
 	uname(&buf);
 
 	fprintf(f, "\t\"System Info\": {\n");
-	
+
 	fprintf(f, "\t\t\"OS\": \"%s\",\n", buf.sysname);
 	fprintf(f, "\t\t\"Hostname\": \"%s\",\n", buf.nodename);
 	fprintf(f, "\t\t\"Release\": \"%s\",\n", buf.release);
 
 	/* CPU related info */
 	fprintf(f, "\t\t\"CPU\": {");
-	
+
 	/* lscpu is part of reasonably new util-linux */
 	FILE *cmd = popen("lscpu 2> /dev/null", "r");
 
@@ -180,11 +180,11 @@ static void write_system_info_json(FILE *f)
 			fprintf(f, "%s\t\t\t\"%s\": \"%s\"", del, id, val);
 			del = ",\n";
 		}
-	
+
 		fclose(cmd);
 		fprintf(f, "\n");
 	}
-	
+
 	fprintf(f, "\t\t}\n");
 
 	fprintf(f, "\t},\n");

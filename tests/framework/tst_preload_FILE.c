@@ -43,7 +43,7 @@ static struct tst_fail_FILE *failure_by_path(const char *path,
 
 	if (failures == NULL)
 		return NULL;
-	
+
 	for (i = 0; failures[i].path != NULL; i++)
 		if (failures[i].call == call && 
 		    !strcmp(path, failures[i].path))
@@ -58,7 +58,7 @@ void failures_init_FILE(const char *path, FILE *f)
 
 	if (failures == NULL)
 		return;
-	
+
 	//TODO: warn on f not NULL
 	for (i = 0; failures[i].path != NULL; i++)
 		if (!strcmp(path, failures[i].path))
@@ -68,7 +68,7 @@ void failures_init_FILE(const char *path, FILE *f)
 static struct tst_fail_FILE *failure_by_FILE(FILE *f, enum tst_file_call call)
 {
 	unsigned int i;
-	
+
 	if (failures == NULL)
 		return NULL;
 
@@ -109,19 +109,19 @@ int fclose(FILE *fp)
 
 	if (!real_fclose)
 		real_fclose = dlsym(RTLD_NEXT, "fclose");
-	
+
 	struct tst_fail_FILE *failure = failure_by_FILE(fp, TST_FAIL_FCLOSE);
 
-	/* 
+	/*
 	 * We close the file here correctly, we can because when fclose() has
 	 * failed any further access results in undefined behavior.
 	 */
 	if (failure) {
 		real_fclose(fp);
-		
+
 		if (failure->err)
 			errno = failure->err;
-		
+
 		return EOF;
 	}
 

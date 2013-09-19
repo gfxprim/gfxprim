@@ -47,7 +47,7 @@ static void test_job_report(const struct tst_job *job)
 	if ((job->result == TST_SUCCESS || job->result == TST_SKIPPED)
 	    && !tst_suite_verbose)
 		return;
-	
+
 	timespec_diff(&sec, &nsec, &job->start_time, &job->stop_time);
 
 	switch (job->result) {
@@ -84,9 +84,9 @@ static void test_job_report(const struct tst_job *job)
 	case TST_MAX:
 	break;
 	}
-		
+
 	fprintf(stderr, "\e[1;37m%s\e[0m", name);
-	
+
 	int i;
 
 	for (i = strlen(name); i < NAME_PADD; i++)
@@ -94,7 +94,7 @@ static void test_job_report(const struct tst_job *job)
 
 	fprintf(stderr, " finished (Time %3i.%03is)  %s\n",
 	                sec, nsec/1000000, result);
-	
+
 	if (job->bench_iter) {
 		for (i = 0; i < NAME_PADD; i++)
 			fprintf(stderr, " ");
@@ -111,7 +111,7 @@ static void test_job_report(const struct tst_job *job)
 
 	/* Now print test message store */
 	tst_msg_print(&job->store);
-	
+
 	fprintf(stderr, "------------------------------------------------------"
                         "------------------------- \n");
 }
@@ -122,7 +122,7 @@ static int run_test(const struct tst_test *test, FILE *json)
 
 	job.test = test;
 
-	/* 
+	/*
 	 * Flush the file before forking, otherwise
 	 * there would be a copy of its buffers in both
 	 * child and parent and the lines in the resulting
@@ -133,7 +133,7 @@ static int run_test(const struct tst_test *test, FILE *json)
 
 	tst_job_run(&job);
 	tst_job_wait(&job);
-	
+
 	/* report result into stdout */
 	test_job_report(&job);
 
@@ -156,7 +156,7 @@ void tst_run_suite(const struct tst_suite *suite, const char *tst_name)
 	fprintf(stderr, "Running \e[1;37m%s\e[0m\n\n", suite->suite_name);
 
 	FILE *json = NULL;
-	
+
 	if (tst_log_dir) {
 		char buf[512];
 		snprintf(buf, sizeof(buf), "%s/%s.json",
@@ -168,7 +168,7 @@ void tst_run_suite(const struct tst_suite *suite, const char *tst_name)
 		if (tst_name == NULL || !strcmp(tst_name, suite->tests[i].name)) {
 			ret = run_test(&suite->tests[i], json);
 			counters[ret]++;
-			
+
 			if (ret != TST_SKIPPED)
 				counter++;
 		}
@@ -178,7 +178,7 @@ void tst_run_suite(const struct tst_suite *suite, const char *tst_name)
 		tst_log_close(json);
 
 	float percents;
-	
+
 	if (counter == 0)
 		percents = 100;
 	else

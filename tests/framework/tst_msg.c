@@ -48,7 +48,7 @@ int tst_msg_append(struct tst_msg_store *self, int type, const char *msg_text)
 {
 	size_t len = strlen(msg_text);
 	struct tst_msg *msg;
-	
+
 	msg = malloc(sizeof(struct tst_msg) + len + 1);
 
 	if (msg == NULL) {

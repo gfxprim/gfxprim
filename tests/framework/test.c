@@ -34,7 +34,7 @@ int success_fn(void)
 {
 	tst_msg("This test does nothing");
 	tst_msg("But successfully");
-	
+
 	return TST_SUCCESS;
 }
 
@@ -76,7 +76,7 @@ int temp_dir_fn(void)
 int malloc_leak_fn(void)
 {
 	void *p, *q, *r;
-	
+
 	q = malloc(100);
 	p = malloc(4);
 	p = malloc(3);
@@ -130,7 +130,7 @@ int barrier_allocation(void)
 		buf[i] = 0;
 
 	tst_msg("About to use address after the buffer with barrier");
-	
+
 	buf[31] = 0;
 
 	tst_msg("This is not printed at all");
@@ -150,7 +150,7 @@ int fail_FILE(void)
 
 	int fail = 0;
 	FILE *f;
-	
+
 	f = fopen("test_fail_fclose", "w");
 
 	if (f == NULL) {
@@ -182,7 +182,7 @@ int fail_FILE(void)
 
 	if (fail)
 		return TST_FAILED;
-	
+
 	return TST_SUCCESS;
 }
 
@@ -191,7 +191,7 @@ static int messages_test_fn(void)
 	/* stdout and stderr capture test */
 	printf("This is stdout\n");
 	fprintf(stderr, "This is stderr\n");
-	
+
 	tst_msg("This is message");
 	tst_warn("This is a warning");
 	tst_err("This is an error");
@@ -220,7 +220,7 @@ static int untested_fn(void)
 
 static int res_fn(void)
 {
-	if (access("test.c", R_OK) == 0) 
+	if (access("test.c", R_OK) == 0)
 		tst_msg("File correctly copied");
 
 	return TST_SUCCESS;
@@ -236,7 +236,7 @@ static int fpe_fn(void)
 
 /*
  * Let's benchmark memset.
- */ 
+ */
 static int benchmark_fn(void)
 {
 	char buf[256];

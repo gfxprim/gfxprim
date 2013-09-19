@@ -40,7 +40,7 @@ void timespec_diff(int *sec, int *nsec,
 double timespec_to_double(const struct timespec *t)
 {
 	double res;
-	
+
 	res = t->tv_sec;
 	res *= NSEC_IN_SEC;
 	res += t->tv_nsec;

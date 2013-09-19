@@ -52,10 +52,10 @@ void tst_malloc_check_report(struct malloc_stats *stats)
 {
 	stats->total_size = total_size;
 	stats->total_chunks = total_chunks;
-	
+
 	stats->max_size = max_size;
 	stats->max_chunks = max_chunks;
-	
+
 	stats->lost_size = cur_size;
 	stats->lost_chunks = cur_chunks;
 }
@@ -103,14 +103,13 @@ static void rem_chunk(void *ptr)
 
 	for (i = 0; i < chunks_top; i++) {
 		if (chunks[i].ptr == ptr) {
-		
 			/* Update global stats */
 			cur_size -= chunks[i].size;
 			cur_chunks--;
-			
+
 			/* Replace found chunk with top one */
 			chunks[i] = chunks[--chunks_top];
-			
+
 			return;
 		}
 	}
@@ -139,7 +138,7 @@ void free(void *ptr)
 
 	if (!real_free)
 		real_free = dlsym(RTLD_NEXT, "free");
-	
+
 	if (check_malloc && ptr != NULL)
 		rem_chunk(ptr);
 

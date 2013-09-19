@@ -32,7 +32,7 @@ void *tst_alloc_barrier_right(size_t size)
 	size_t pagesize = sysconf(_SC_PAGESIZE);
 	size_t pages = size/pagesize + !!(size%pagesize) + 1;
 	char *buf;
-	
+
 	if (posix_memalign((void*)&buf, pagesize, pages * pagesize))
 		return NULL;
 
@@ -70,11 +70,11 @@ void *tst_alloc_barrier_left(size_t size)
 	size_t pages = size/pagesize + !!(size%pagesize) + 1;
 
 	char *buf;
-	
+
 	if (posix_memalign((void*)&buf, pagesize, pages * pagesize))
 		return NULL;
 
-	/* 
+	/*
 	 * Turn off read/write acces on the first page, the buffer starts right
 	 * after it.
 	 */
@@ -91,7 +91,7 @@ void tst_free_barrier_left(void *ptr, size_t size __attribute__((unused)))
 {
 	size_t pagesize = sysconf(_SC_PAGESIZE);
 	void *start = ptr - pagesize;
-	
+
 	/* Reset the memory protection back to RW */
 	if (mprotect(start, pagesize, PROT_READ | PROT_WRITE)) {
 		perror("mprotect");
