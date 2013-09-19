@@ -23,7 +23,8 @@
 #include "core/GP_Debug.h"
 #include "GP_LineConvert.h"
 
-static void xyz888_to_zyx888(const uint8_t *inbuf, uint8_t *outbuf, unsigned int len)
+static void ABC888_to_CBA888(const uint8_t *inbuf, uint8_t *outbuf,
+                             unsigned int len)
 {
 	unsigned int i;
 
@@ -37,13 +38,43 @@ static void xyz888_to_zyx888(const uint8_t *inbuf, uint8_t *outbuf, unsigned int
 	}
 }
 
+static void xABC8888_to_ABC888(const uint8_t *inbuf, uint8_t *outbuf,
+                               unsigned int len)
+{
+	unsigned int i;
+
+	for (i = 0; i < len; i++) {
+		outbuf[0] = inbuf[1];
+		outbuf[1] = inbuf[2];
+		outbuf[2] = inbuf[3];
+
+		outbuf+=3;
+		inbuf+=4;
+	}
+}
+
+static void xABC8888_to_CBA888(const uint8_t *inbuf, uint8_t *outbuf,
+                               unsigned int len)
+{
+	unsigned int i;
+
+	for (i = 0; i < len; i++) {
+		outbuf[0] = inbuf[3];
+		outbuf[1] = inbuf[2];
+		outbuf[2] = inbuf[1];
+
+		outbuf+=3;
+		inbuf+=4;
+	}
+}
+
 GP_LineConvert GP_LineConvertGet(GP_PixelType in, GP_PixelType out)
 {
 	switch (in) {
 	case GP_PIXEL_RGB888:
 		switch (out) {
 		case GP_PIXEL_BGR888:
-			return xyz888_to_zyx888;
+			return ABC888_to_CBA888;
 		break;
 		default:
 		break;
@@ -52,7 +83,19 @@ GP_LineConvert GP_LineConvertGet(GP_PixelType in, GP_PixelType out)
 	case GP_PIXEL_BGR888:
 		switch (out) {
 		case GP_PIXEL_RGB888:
-			return xyz888_to_zyx888;
+			return ABC888_to_CBA888;
+		break;
+		default:
+		break;
+		}
+	break;
+	case GP_PIXEL_xRGB8888:
+		switch (out) {
+		case GP_PIXEL_RGB888:
+			return xABC8888_to_ABC888;
+		break;
+		case GP_PIXEL_BGR888:
+			return xABC8888_to_CBA888;
 		break;
 		default:
 		break;
@@ -70,6 +113,14 @@ GP_PixelType GP_LineConvertible(GP_PixelType in, GP_PixelType out[])
 	unsigned int i;
 
 	GP_DEBUG(1, "Trying to find conversion for %s", GP_PixelTypeName(in));
+
+
+	for (i = 0; out[i] != GP_PIXEL_UNKNOWN; i++) {
+		if (out[i] == in) {
+			GP_DEBUG(1, "Found identity for %s", GP_PixelTypeName(in));
+			return in;
+		}
+	}
 
 	for (i = 0; out[i] != GP_PIXEL_UNKNOWN; i++) {
 		if (GP_LineConvertGet(in, out[i])) {
