@@ -780,20 +780,15 @@ static int bmp_fill_header(const GP_Context *src, struct bitmap_info_header *hea
 {
 	GP_PixelType out_pix;
 
-	switch (src->pixel_type) {
-	case GP_PIXEL_RGB888:
-		header->bpp = 24;
-	break;
-	default:
-		out_pix = GP_LineConvertible(src->pixel_type, out_pixel_types);
+	out_pix = GP_LineConvertible(src->pixel_type, out_pixel_types);
 
-		if (out_pix == GP_PIXEL_UNKNOWN) {
-			GP_DEBUG(1, "Unsupported pixel type %s",
-			         GP_PixelTypeName(src->pixel_type));
-			return ENOSYS;
-		}
+	if (out_pix == GP_PIXEL_UNKNOWN) {
+		GP_DEBUG(1, "Unsupported pixel type %s",
+		         GP_PixelTypeName(src->pixel_type));
+		return ENOSYS;
 	}
 
+	header->bpp = 24;
 	header->w = src->w;
 	header->h = src->h;
 

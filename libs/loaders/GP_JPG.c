@@ -410,20 +410,13 @@ int GP_SaveJPG(const GP_Context *src, const char *dst_path,
 
 	GP_DEBUG(1, "Saving JPG Image '%s'", dst_path);
 
-	switch (src->pixel_type) {
-	case GP_PIXEL_BGR888:
-	case GP_PIXEL_G8:
-		out_pix = src->pixel_type;
-	break;
-	default:
-		out_pix = GP_LineConvertible(src->pixel_type, out_pixel_types);
+	out_pix = GP_LineConvertible(src->pixel_type, out_pixel_types);
 
-		if (out_pix == GP_PIXEL_UNKNOWN) {
-			GP_DEBUG(1, "Unsupported pixel type %s",
-			         GP_PixelTypeName(src->pixel_type));
-			errno = ENOSYS;
-			return 1;
-		}
+	if (out_pix == GP_PIXEL_UNKNOWN) {
+		GP_DEBUG(1, "Unsupported pixel type %s",
+		         GP_PixelTypeName(src->pixel_type));
+		errno = ENOSYS;
+		return 1;
 	}
 
 	f = fopen(dst_path, "wb");
