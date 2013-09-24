@@ -18,7 +18,8 @@ GP_Print
 
 GP_DefaultStyle
 
-GP_FontTiny
-GP_FontTinyMono
 GP_DefaultProportionalFont
 GP_DefaultConsoleFont
+GP_FontTiny
+GP_FontTinyMono
+GP_FontC64
