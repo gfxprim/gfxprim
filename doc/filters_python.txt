@@ -1,0 +1,35 @@
+Python Filters module
+---------------------
+
+The python binding maps mostly to the C API with the 'GP_Filter' prefix
+stripped.
+
+The filter functions could be called directly as +filters.Foo(img, ..)+ or
+from submodule as +img.filters.Foo(..)+. Note that in the second case the
+image is passed automatically as a first parameter.
+
+Ditherings
+~~~~~~~~~~
+
+[source,python]
+-------------------------------------------------------------------------------
+import gfxprim.core as core
+import gfxprim.filters as filters
+
+    # Returns img dithered to 1-bit Grayscale as a new image
+    res = img.filters.FloydSteinbergAlloc(core.C.PIXEL_G1, None)
+
+    # Returns img dithered to 1-bit Grayscale as a new image
+    res = img.filters.HilbertPeanoAlloc(core.C.PIXEL_G1, None)
+
+-------------------------------------------------------------------------------
+
+Returns new 1-bit Grayscale image which is result from Floyd-Steinberg,
+Hilbert-Peano dithering.
+
+The first parameter is pixel type, the second is progress callback.
+
+For more information and example images see link:filters_dithering.html[C
+dithering documentation].
+
+TIP: See complete link:example_py_dithering.html[example].
