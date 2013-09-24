@@ -34,7 +34,9 @@ def _init(module):
 	       'Laplace', 'LaplaceAlloc',
 	       'EdgeSharpening', 'EdgeSharpeningAlloc',
 	       'Median', 'MedianAlloc', 'MedianEx', 'MedianExAlloc',
-	       'Sigma', 'SigmaAlloc', 'SigmaEx', 'SigmaExAlloc']:
+	       'Sigma', 'SigmaAlloc', 'SigmaEx', 'SigmaExAlloc',
+	       'FloydSteinberg', 'FloydSteinbergAlloc',
+	       'HilbertPeano', 'HilbertPeanoAlloc']:
     extend_submodule(FiltersSubmodule, name, c_filters.__getattribute__('GP_Filter' + name))
 
   # Imports from the SWIG module

@@ -108,7 +108,7 @@ int main(int argc, char *argv[])
 			break;
 			case 2:
 				GP_FilterGaussianBlur(img, img, 1, 1, NULL);
-				res = GP_FilterFloydSteinberg_RGB888_Alloc(img, GP_PIXEL_G2, NULL);
+				res = GP_FilterFloydSteinbergAlloc(img, GP_PIXEL_G2, NULL);
 			break;
 			}
 

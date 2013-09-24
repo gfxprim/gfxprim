@@ -121,7 +121,7 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 
-	gc = GP_FilterFloydSteinberg_RGB888_Alloc(c, GP_PIXEL_G2, NULL);
+	gc = GP_FilterFloydSteinbergAlloc(c, GP_PIXEL_G2, NULL);
 
 	if (gc == NULL) {
 		fprintf(stderr, "FloydSteinberg: %s\n", strerror(errno));

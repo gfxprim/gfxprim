@@ -71,13 +71,9 @@ FILTER_FUNC(ResizeLinearInt);
 FILTER_FUNC(ResizeLinearLFInt);
 %include "GP_ResizeLinear.h"
 
-/* TODO: Ditherings */
-%newobject GP_FilterFloydSteinberg_RGB888_Alloc;
-ERROR_ON_NULL(GP_FilterFloydSteinberg_RGB888_Alloc);
-%newobject GP_FilterHilbertPeano_RGB888_Alloc;
-ERROR_ON_NULL(GP_FilterHilbertPeano_RGB888_Alloc);
-ERROR_ON_NONZERO(GP_FilterFloydSteinberg_RGB888);
-ERROR_ON_NONZERO(GP_FilterHilbertPeano_RGB888);
+/* Ditherings */
+FILTER_FUNC(FloydSteinberg);
+FILTER_FUNC(GP_FilterHilbertPeano);
 %include "GP_Dither.h"
 
 /* Laplace and Laplace Edge Sharpening */

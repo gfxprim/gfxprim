@@ -465,8 +465,8 @@ static int dither(GP_Context **c, const char *params)
 	}
 
 	GP_Context *bw;
-	bw = GP_FilterFloydSteinberg_RGB888_Alloc(*c, dither_pixel_types[fmt],
-	                                          progress_callback);
+	bw = GP_FilterFloydSteinbergAlloc(*c, dither_pixel_types[fmt],
+	                                  progress_callback);
 
 	//TODO: so far we convert the context back to RGB888
 	//(so we can do further work with it)

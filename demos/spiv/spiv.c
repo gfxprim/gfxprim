@@ -318,8 +318,8 @@ static void update_display(struct loader_params *params, GP_Context *img,
 	if (params->use_dithering) {
 		callback.priv = "Dithering";
 		GP_SubContext(context, &sub_display, cx, cy, img->w, img->h);
-		GP_FilterFloydSteinberg_RGB888(img, &sub_display, NULL);
-	//	GP_FilterHilbertPeano_RGB888(img, &sub_display, NULL);
+		GP_FilterFloydSteinberg(img, &sub_display, NULL);
+	//	GP_FilterHilbertPeano(img, &sub_display, NULL);
 	} else {
 		if (GP_PixelHasFlags(img->pixel_type, GP_PIXEL_HAS_ALPHA))
 			pattern_fill(context, cx, cy, img->w, img->h);

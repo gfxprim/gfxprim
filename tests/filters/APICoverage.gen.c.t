@@ -96,6 +96,16 @@
                     'GP_ProgressCallback'],
                    ['ResizeNNAlloc', 'GP_Context:in', 'int:w', 'int:h',
                     'GP_ProgressCallback'],
+
+                   ['FloydSteinberg', 'GP_Context:in', 'GP_Context:out',
+		    'GP_ProgressCallback'],
+		   ['FloydSteinbergAlloc', 'GP_Context:in', 'GP_PixelType:G8',
+		    'GP_ProgressCallback'],
+
+		   ['HilbertPeano', 'GP_Context:in', 'GP_Context:out',
+		    'GP_ProgressCallback'],
+		   ['HilbertPeanoAlloc', 'GP_Context:in', 'GP_PixelType:G8',
+		    'GP_ProgressCallback'],
 ]
 
 %% macro prep_context(id, pt)
@@ -108,6 +118,10 @@
 
 %% macro prep_int(id)
 	int {{ id }} = 2;
+%% endmacro
+
+%% macro prep_pixel_type(id)
+	GP_PixelType {{ id }} = GP_PIXEL_{{ id }};
 %% endmacro
 
 %% macro prep_median_weights(id)
@@ -161,6 +175,9 @@
 %%  if (param.split(':', 1)[0] == 'GP_FilterKernel2D')
 {{ prep_filter_kernel_2d(param.split(':', 1)[1]) }}
 %%  endif
+%%  if (param.split(':', 1)[0] == 'GP_PixelType')
+{{ prep_pixel_type(param.split(':', 1)[1]) }}
+%%  endif
 %% endmacro
 
 {% macro get_param(param) %}{% if len(param.split(':', 1)) == 1 %}NULL{% else %}{{ param.split(':', 1)[1] }}{% endif %}{% endmacro %}
@@ -190,7 +207,7 @@ const struct tst_suite tst_suite = {
 %% for fn in API_List
 %%  for pt in pixeltypes
 %%   if not pt.is_unknown()
-		{.name = "Filter {{ fn[0] }} {{ pt.name }}", 
+		{.name = "Filter {{ fn[0] }} {{ pt.name }}",
 		 .tst_fn = Filter_{{ fn[0] }}_{{ pt.name }}},
 %%   endif
 %%  endfor
