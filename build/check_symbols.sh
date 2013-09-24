@@ -3,6 +3,9 @@
 # Purpose of this script is to check library exported symbols
 #
 
+FOUND=""
+WARN="WARNING : WARNING : WARNING : WARNING : WARNING : WARNING : WARNING : WARNING"
+
 SYMTMPFILE=symbols.txt
 
 function grep_sym
@@ -38,7 +41,14 @@ function check_symbols
 
 	for i in `cat $symfile`; do
 		if ! grep "^$i$" $@ 2>&1 > /dev/null; then
+			if [ -z "$FOUND" ]; then
+				echo "$WARN"
+				echo
+				echo "Following new API symbols found:"
+				echo
+			fi
 			find_symbol "$i"
+			FOUND="yes"
 		fi
 	done
 }
@@ -60,3 +70,10 @@ do_check libGP_backends.so syms/Backend_symbols.txt
 do_check libGP_grabbers.so syms/Grabbers_symbols.txt
 
 do_check libGP_loaders.so syms/Loaders_symbols.txt
+
+if [ -n "$FOUND" ]; then
+	echo
+	echo "Set them static or update lists of exported functions in syms/Foo_symbols.txt"
+	echo
+	echo "$WARN"
+fi

@@ -73,3 +73,6 @@ GP_NrThreadsSet
 GP_ProgressCallbackMP
 
 SWIG_exception
+
+GP_Gamma8_Linear10
+GP_Linear10_Gamma8
