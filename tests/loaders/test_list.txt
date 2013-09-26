@@ -5,3 +5,4 @@ PBM
 PGM
 PPM
 SaveLoad.gen
+SaveAbort.gen
