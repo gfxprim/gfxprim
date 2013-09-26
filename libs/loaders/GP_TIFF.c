@@ -543,20 +543,15 @@ static int save_grayscale(TIFF *tiff, const GP_Context *src,
 		if (ret == -1) {
 			//TODO TIFF ERROR
 			GP_DEBUG(1, "TIFFWriteEncodedStrip failed");
-			errno = EIO;
-			return 1;
+			return EIO;
 		}
 
 		if (GP_ProgressCallbackReport(callback, y, src->h, src->w)) {
 			GP_DEBUG(1, "Operation aborted");
-			errno = ECANCELED;
-			return 1;
+			return ECANCELED;
 		}
 	}
 
-	TIFFClose(tiff);
-
-	GP_ProgressCallbackDone(callback);
 	return 0;
 }
 
@@ -598,14 +593,10 @@ static int save_rgb(TIFF *tiff, const GP_Context *src,
 
 		if (GP_ProgressCallbackReport(callback, y, src->h, src->w)) {
 			GP_DEBUG(1, "Operation aborted");
-			errno = ECANCELED;
-			return 1;
+			return ECANCELED;
 		}
 	}
 
-	TIFFClose(tiff);
-
-	GP_ProgressCallbackDone(callback);
 	return 0;
 }
 
@@ -613,6 +604,7 @@ int GP_SaveTIFF(const GP_Context *src, const char *dst_path,
                 GP_ProgressCallback *callback)
 {
 	TIFF *tiff;
+	int err = 0;
 
 	if (GP_PixelHasFlags(src->pixel_type, GP_PIXEL_HAS_ALPHA)) {
 		GP_DEBUG(1, "Alpha channel not supported yet");
@@ -642,6 +634,7 @@ int GP_SaveTIFF(const GP_Context *src, const char *dst_path,
 
 	if (tiff == NULL) {
 		GP_DEBUG(1, "Failed to open tiff '%s'", dst_path);
+		//ERRNO?
 		return 1;
 	}
 
@@ -651,20 +644,32 @@ int GP_SaveTIFF(const GP_Context *src, const char *dst_path,
 	TIFFSetField(tiff, TIFFTAG_ROWSPERSTRIP, 1);
 	TIFFSetField(tiff, TIFFTAG_PLANARCONFIG, PLANARCONFIG_CONTIG);
 
-	/* Save grayscale */
-	if (GP_PixelHasFlags(src->pixel_type, GP_PIXEL_IS_GRAYSCALE))
-		return save_grayscale(tiff, src, callback);
-
 	switch (src->pixel_type) {
 	case GP_PIXEL_RGB888:
 	case GP_PIXEL_BGR888:
 	case GP_PIXEL_xRGB8888:
-		return save_rgb(tiff, src, callback);
+		err = save_rgb(tiff, src, callback);
+	break;
+	case GP_PIXEL_G1:
+	case GP_PIXEL_G2:
+	case GP_PIXEL_G4:
+	case GP_PIXEL_G8:
+		err = save_grayscale(tiff, src, callback);
+	break;
 	default:
+		GP_BUG("Wrong pixel type");
 	break;
 	}
 
-	GP_BUG("Should not be reached");
+	if (err) {
+		TIFFClose(tiff);
+		unlink(dst_path);
+		errno = err;
+		return 1;
+	}
+
+	TIFFClose(tiff);
+	GP_ProgressCallbackDone(callback);
 	return 0;
 }
 

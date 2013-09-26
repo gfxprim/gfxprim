@@ -883,6 +883,7 @@ int GP_SaveBMP(const GP_Context *src, const char *dst_path,
 err1:
 	fclose(f);
 err0:
+	unlink(dst_path);
 	errno = err;
 	return 1;
 }

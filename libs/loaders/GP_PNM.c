@@ -659,6 +659,7 @@ int GP_SavePBM(const GP_Context *src, const char *dst_path,
                GP_ProgressCallback *callback)
 {
 	FILE *f;
+	int err;
 
 	GP_DEBUG(1, "Saving context %ux%u %s to '%s'",
 	         src->w, src->h, GP_PixelTypeName(src->pixel_type), dst_path);
@@ -676,19 +677,22 @@ int GP_SavePBM(const GP_Context *src, const char *dst_path,
 		return 1;
 
 	if (fprintf(f, "P1\n%u %u\n",
-	            (unsigned int) src->w, (unsigned int) src->h) < 0)
-		goto err;
+	            (unsigned int) src->w, (unsigned int) src->h) < 0) {
+		err = EIO;
+		goto err0;
+	}
 
-	if (save_ascii(f, src, callback, 1))
-		goto err;
+	if ((err = save_ascii(f, src, callback, 1)))
+		goto err0;
 
 	if (fclose(f))
-		return 1;
+		goto err0;
 
 	return 0;
-err:
+err0:
 	fclose(f);
-	errno = EIO;
+	unlink(dst_path);
+	errno = err;
 	return 1;
 }
 
@@ -866,6 +870,7 @@ int GP_SavePGM(const GP_Context *src, const char *dst_path,
 err1:
 	fclose(f);
 err0:
+	unlink(dst_path);
 	errno = err;
 	return 1;
 }
@@ -1048,9 +1053,8 @@ err1:
 	fclose(f);
 err0:
 	errno = err;
+	unlink(dst_path);
 	return 1;
-	errno = ENOSYS;
-	return -1;
 }
 
 GP_Context *GP_LoadPNM(const char *src_path, GP_ProgressCallback *callback)
