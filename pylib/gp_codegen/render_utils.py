@@ -40,7 +40,7 @@ def create_environment(config, template_dir):
   env = jinja2.Environment(
       line_statement_prefix = "%%",
       undefined = jinja2.StrictUndefined,
-      loader = jinja2.FileSystemLoader(template_dir))
+      loader = jinja2.FileSystemLoader([template_dir,"./"]))
   env.globals['undefined'] = jinja2.StrictUndefined()
   env.globals['pixelsizes'] = config.pixelsizes
   env.globals['pixelsizes_by_bpp'] = config.pixelsizes_by_bpp
