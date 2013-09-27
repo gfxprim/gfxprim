@@ -813,6 +813,9 @@ GP_Context *GP_FilterEdgeSharpeningAlloc(const GP_Context *src, float w,
 Laplace based edge sharpening filter, subtracts weighted second derivative
 from the original image.
 
+The w paramerter is multiplicative weight applied on the second derivative.
+Reasonable results are when the parameter is between '0.1' and '1'.
+
 [latex, laplacian_edge_sharpening.png, 140]
 -------------------------------------------------------------------------------
 \[
@@ -820,19 +823,7 @@ O(x,y) = I(x,y) - w * I''(x,y)
 \]
 -------------------------------------------------------------------------------
 
-.Original Image; Edge Sharpening w=0.1, w=0.3, w=0.5
-image:images/dither/lenna_small.png[
-	"Original Image",
-	link="images/dither/lenna.png"]
-image:images/edge_sharpening/lenna_small_w_0_1.png[
-	"Edge Sharpening w=0.1",
-	link="images/edge_sharpening/lenna_w_0_1.png"]
-image:images/edge_sharpening/lenna_small_w_0_3.png[
-	"Edge Sharpening w=0.5",
-	link="images/edge_sharpening/lenna_w_0_3.png"]
-image:images/edge_sharpening/lenna_small_w_0_5.png[
-	"Edge Sharpening w=0.5",
-	link="images/edge_sharpening/lenna_w_0_5.png"]
+include::images/edge_sharpening/images.txt[]
 
 Gaussian Blur
 ^^^^^^^^^^^^^
@@ -875,6 +866,8 @@ automatically).
 The sigma values can be set for vertical and horizontal direction
 independently which may be useful when Gaussian blur is used as a low pass
 filter before image is resampled non proportionally.
+
+include::images/blur/images.txt[]
 
 Interpolation filters
 ~~~~~~~~~~~~~~~~~~~~~

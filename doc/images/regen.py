@@ -52,7 +52,7 @@ class ImgGen:
             res = func(self.img, *i)
             res.loaders.Save('../' + fname)
 
-            res = res.filters.ResizeAlloc(self.img_small.w, self.img_small.h, 2)
+            res = func(self.img_small, *i)
             res.loaders.Save('../' + fname_small)
 
         self.write_asciidoc_tail()
@@ -67,6 +67,10 @@ def main():
     imggen.gen(filters.MedianAlloc,
                [[3, 3], [5, 5], [7, 7], [9, 9], [12, 12]],
 	       'images/median/', 'Median')
+
+    imggen.gen(filters.EdgeSharpeningAlloc,
+               [[0.1], [0.3], [0.5], [0.8], [1.0]],
+	       'images/edge_sharpening/', 'Edge Sharpening')
 
 if __name__ == '__main__':
     main()

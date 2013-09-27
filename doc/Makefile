@@ -31,8 +31,11 @@ $(PAGES): asciidoc.conf
 #
 # Dependencies
 #
-filters_python.html: images/blur/images.txt images/median/images.txt
-filters.html: images/median/images.txt
+IMG_INCLUDES=images/blur/images.txt images/median/images.txt\
+             images/edge_sharpening/images.txt
+
+filters_python.html: $(IMG_INCLUDES)
+filters.html: $(IMG_INCLUDES)
 
 #
 # Check if we have all the needed tools

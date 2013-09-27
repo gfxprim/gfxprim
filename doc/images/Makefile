@@ -1,11 +1,11 @@
-SUBDIRS=blur median
+SUBDIRS=blur median edge_sharpening
 
 TARGETS=$(addsuffix /images.txt,$(SUBDIRS))
 IMGS=$(addsuffix /*.png,$(SUBDIRS))
 
 all: $(TARGETS)
 
-$(TARGETS):
+$(TARGETS): ./regen.py
 	@./regen.py
 
 clean:

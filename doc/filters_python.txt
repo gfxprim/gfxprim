@@ -11,6 +11,38 @@ image is passed automatically as a first parameter.
 If filter has been aborted from callback 'OSError' with 'errno' set to
 'ECANCELED' is raised.
 
+
+Laplacian Edge Sharpening
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+[source,python]
+-------------------------------------------------------------------------------
+import gfxprim.core as core
+import gfxprim.filters as filters
+
+    # Does in-place Edge Sharpening
+    filters.EdgeSharpening(img, img, 0.2, callback=None)
+
+    # Returns newly allocated sharpened image
+    res = img.filters.EdgeSharpening(0.2, callback=None)
+
+-------------------------------------------------------------------------------
+
+Laplace based edge sharpening filter, subtracts weighted second derivative
+from the original image.
+
+The float paramerter is multiplicative weight applied on the second
+derivative. Reasonable results are when the parameter is between '0.1' and
+'1'.
+
+////
+Generated in filters.txt
+////
+image:laplacian_edge_sharpening.png["Laplacian Edge Sharpening"]
+
+include::images/edge_sharpening/images.txt[]
+
+
 Blurs
 ~~~~~
 
