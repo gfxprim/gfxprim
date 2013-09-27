@@ -12,6 +12,13 @@
 %nodefaultctor;
 
 /*
+ * All progress callbacks have default NULL value
+ */
+%typemap(default) GP_ProgressCallback *callback {
+        $1 = NULL;
+}
+
+/*
  * Error handling declarations
  */
 
