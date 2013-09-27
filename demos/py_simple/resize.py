@@ -16,7 +16,7 @@ def main():
     # Load Image
     src = loaders.Load(sys.argv[1])
     # Resize image to the half of the original
-    res = src.filters.ResizeAlloc(src.w//2, src.h//2, 2, None)
+    res = src.filters.ResizeAlloc(src.w//2, src.h//2, 2)
     # Save Image
     res.loaders.Save(sys.argv[2])
 

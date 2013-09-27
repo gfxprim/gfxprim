@@ -30,7 +30,7 @@ class HelloWorld:
         self.window.show()
         self.image.show()
 
-        img = loaders.LoadImage(sys.argv[2], None)
+        img = loaders.LoadImage(sys.argv[2])
         self.pixmap = gtk.gdk.Pixmap(None, img.w, img.h, 24)
         self.gc = gtk.gdk.Drawable.new_gc(self.pixmap)
 
