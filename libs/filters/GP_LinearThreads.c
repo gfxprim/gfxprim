@@ -65,8 +65,10 @@ int GP_FilterHConvolutionMP_Raw(const GP_ConvolutionParams *params)
 	if (t == 1)
 		return GP_FilterHConvolution_Raw(params);
 
-	GP_ASSERT(params->src != params->dst,
-	          "Multithreaded convolution can't work in-place");
+	if (params->src == params->dst) {
+		GP_DEBUG(1, "In-place filter detected, running in one thread.");
+		return GP_FilterHConvolution_Raw(params);
+	}
 
 	GP_PROGRESS_CALLBACK_MP(callback_mp, params->callback);
 
@@ -113,8 +115,10 @@ int GP_FilterVConvolutionMP_Raw(const GP_ConvolutionParams *params)
 	if (t == 1)
 		return GP_FilterVConvolution_Raw(params);
 
-	GP_ASSERT(params->src != params->dst,
-	          "Multithreaded convolution can't work in-place");
+	if (params->src == params->dst) {
+		GP_DEBUG(1, "In-place filter detected, running in one thread.");
+		return GP_FilterVConvolution_Raw(params);
+	}
 
 	GP_PROGRESS_CALLBACK_MP(callback_mp, params->callback);
 
@@ -160,8 +164,10 @@ int GP_FilterConvolutionMP_Raw(const GP_ConvolutionParams *params)
 	if (t == 1)
 		return GP_FilterConvolution_Raw(params);
 
-	GP_ASSERT(params->src != params->dst,
-	          "Multithreaded convolution can't work in-place");
+	if (params->src == params->dst) {
+		GP_DEBUG(1, "In-place filter detected, running in one thread.");
+		return GP_FilterConvolution_Raw(params);
+	}
 
 	GP_PROGRESS_CALLBACK_MP(callback_mp, params->callback);
 

@@ -714,6 +714,11 @@ and array of kernel values.
 The last function prints convolution kernel in human-readable format into the
 stdout.
 
+WARNING: If filter is executed in-place the work cannot be distributed between
+         threads (as some of the threads will overwrite values read by other
+	 threads). In this case convolution filters runs in one thread
+	 regardless of if threads are eanbled or not.
+
 [source,c]
 -------------------------------------------------------------------------------
 #include <GP.h>
