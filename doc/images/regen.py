@@ -72,5 +72,9 @@ def main():
                [[0.1], [0.3], [0.5], [0.8], [1.0]],
 	       'images/edge_sharpening/', 'Edge Sharpening')
 
+    imggen.gen(filters.GaussianNoiseAddAlloc,
+               [[0.03, 0], [0.05, 0], [0.05, -0.1], [0.05, 0.1], [0.07, 0.0]],
+	       'images/gaussian_noise/', 'Gaussian Additive Noise')
+
 if __name__ == '__main__':
     main()

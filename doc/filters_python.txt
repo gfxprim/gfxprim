@@ -11,6 +11,27 @@ image is passed automatically as a first parameter.
 If filter has been aborted from callback 'OSError' with 'errno' set to
 'ECANCELED' is raised.
 
+Gaussian Additive Noise
+~~~~~~~~~~~~~~~~~~~~~~~
+
+[source,python]
+-------------------------------------------------------------------------------
+import gfxprim.core as core
+import gfxprim.filters as filters
+
+    # Adds Gaussian noise in-place with sigma=0.2 mu=0.0
+    filters.GaussianNoiseAdd(img, img, 0.2, 0.0, callback=None)
+
+    # Returns newly allocated noisy image
+    res = img.filters.GaussianNoiseAddAlloc(0.2, 0.0, callback=None)
+
+-------------------------------------------------------------------------------
+
+Gaussian additive noise filter adds gaussian distributed noise to an image
+with a defined sigma and mu. Both sigma and mu weights mapped to '[0,1]'
+interval.
+
+include::images/gaussian_noise/images.txt[]
 
 Laplacian Edge Sharpening
 ~~~~~~~~~~~~~~~~~~~~~~~~~

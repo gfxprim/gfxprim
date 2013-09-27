@@ -32,7 +32,7 @@ $(PAGES): asciidoc.conf
 # Dependencies
 #
 IMG_INCLUDES=images/blur/images.txt images/median/images.txt\
-             images/edge_sharpening/images.txt
+             images/edge_sharpening/images.txt images/gaussian_noise/images.txt
 
 filters_python.html: $(IMG_INCLUDES)
 filters.html: $(IMG_INCLUDES)
@@ -60,8 +60,6 @@ $(PAGES): %.html: %.txt
 
 examples.html: examples.txt ../demos/c_simple/*.c ../demos/py_simple/*.py asciidoc.conf
 	asciidoc $(ASCIIDOC_PARAMS) -a toc examples.txt
-
-filters.html: filter_additive_gaussian_noise.txt
 
 #
 # Clean up generated images

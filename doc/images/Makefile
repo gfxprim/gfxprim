@@ -1,4 +1,4 @@
-SUBDIRS=blur median edge_sharpening
+SUBDIRS=blur median edge_sharpening gaussian_noise
 
 TARGETS=$(addsuffix /images.txt,$(SUBDIRS))
 IMGS=$(addsuffix /*.png,$(SUBDIRS))

@@ -253,7 +253,47 @@ GP_Context *GP_FilterInvert(const GP_Context *src, GP_Context *dst,
 Inverts the image, for each channel the result value is computed as "chan_max
 - val".
 
-include::filter_additive_gaussian_noise.txt[]
+Gaussian additive noise filter
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <GP_Filters.h>
+/* or */
+#include <filters/GP_GaussianNoise.h>
+
+int GP_FilterGaussianNoiseAddEx(const GP_Context *src,
+                                GP_Coord x_src, GP_Coord y_src,
+                                GP_Size w_src, GP_Size h_src,
+                                GP_Context *dst,
+                                GP_Coord x_dst, GP_Coord y_dst,
+                                float sigma, float mu,
+                                GP_ProgressCallback *callback);
+
+GP_Context *GP_FilterGaussianNoiseAddExAlloc(const GP_Context *src,
+                                             GP_Coord x_src, GP_Coord y_src,
+                                             GP_Size w_src, GP_Size h_src,
+                                             float sigma, float mu,
+                                             GP_ProgressCallback *callback);
+
+static inline int GP_FilterGaussianNoiseAdd(const GP_Context *src,
+                                            GP_Context *dst,
+                                            float sigma, float mu,
+                                            GP_ProgressCallback *callback);
+
+static inline GP_Context *
+GP_FilterGaussianNoiseAddAlloc(const GP_Context *src,
+                               float sigma, float mu,
+                               GP_ProgressCallback *callback);
+-------------------------------------------------------------------------------
+
+Gaussian additive noise filter adds gaussian distributed noise to an image
+with a defined sigma and mu. Both sigma and mu weights mapped to [0,1]
+interval.
+
+TIP: See the link:example_gaussian_noise.html[gaussian noise example].
+
+include::images/gaussian_noise/images.txt[]
 
 Arithmetic filters
 ~~~~~~~~~~~~~~~~~~
