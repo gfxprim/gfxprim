@@ -1,17 +1,20 @@
-.Example Images: Original Image; Gaussian Blur 2 2, 0 4, 4 0, 10 10
+.Example Images: Original Image; Gaussian Blur 2 2, 0 4, 4 0, 4 4, 10 10
 image:images/orig/lenna_small.png[
 	"Original Image",
 	link="images/orig/lenna.png"]
 image:images/blur/lenna_small_2_2.png[
-	"Gaussian Blur x_sig=2 y_sig=2",
+	"Gaussian Blur 2 2",
 	link="images/blur/lenna_2_2.png"]
 image:images/blur/lenna_small_0_4.png[
-	"Gaussian Blur x_sig=4 y_sig=4",
+	"Gaussian Blur 0 4",
 	link="images/blur/lenna_0_4.png"]
 image:images/blur/lenna_small_4_0.png[
-	"Gaussian Blur x_sig=0 y_sig=0",
+	"Gaussian Blur 4 0",
 	link="images/blur/lenna_4_0.png"]
+image:images/blur/lenna_small_4_4.png[
+	"Gaussian Blur 4 4",
+	link="images/blur/lenna_4_4.png"]
 image:images/blur/lenna_small_10_10.png[
-	"Gaussian Blur x_sig=10 y_sig=10",
+	"Gaussian Blur 10 10",
 	link="images/blur/lenna_10_10.png"]
 

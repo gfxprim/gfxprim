@@ -946,27 +946,11 @@ GP_Context *GP_FilterMedianAlloc(const GP_Context *src,
                                  GP_ProgressCallback *callback);
 -------------------------------------------------------------------------------
 
-Constant time median filters (the computational complexity is independent of
+Constant time median filter (the computational complexity is independent of
 radius size).
 
 The xmed and ymed are radius values for x and y. The algorithm uses xmed
 respectively ymed pixel neighbors from each side so the result is median of
 rectangle of 2 * xmed + 1 x 2 * ymed + 1 pixels.
 
-.Original Image; Median 3x3, 5x5, 7x7, 9x9
-image:images/dither/lenna_small.png[
-	"Original Image",
-	link="images/dither/lenna.png"]
-image:images/median/lenna_small_med_3_3.png[
-	"Median 3x3",
-	link="images/median/lenna_med_3_3.png"]
-image:images/median/lenna_small_med_5_5.png[
-	"Median 5x5",
-	link="images/median/lenna_med_5_5.png"]
-image:images/median/lenna_small_med_7_7.png[
-	"Median 7x7",
-	link="images/median/lenna_med_7_7.png"]
-image:images/median/lenna_small_med_9_9.png[
-	"Median 9x9",
-	link="images/median/lenna_med_9_9.png"]
-
+include::images/median/images.txt[]

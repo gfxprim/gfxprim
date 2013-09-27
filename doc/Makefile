@@ -31,8 +31,8 @@ $(PAGES): asciidoc.conf
 #
 # Dependencies
 #
-filters_python.html: images/blur/images.txt
-
+filters_python.html: images/blur/images.txt images/median/images.txt
+filters.html: images/median/images.txt
 
 #
 # Check if we have all the needed tools

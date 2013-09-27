@@ -8,6 +8,9 @@ The filter functions could be called directly as +filters.Foo(img, ..)+ or
 from submodule as +img.filters.Foo(..)+. Note that in the second case the
 image is passed automatically as a first parameter.
 
+If filter has been aborted from callback 'OSError' with 'errno' set to
+'ECANCELED' is raised.
+
 Blurs
 ~~~~~
 
@@ -56,3 +59,27 @@ For more information and example images see link:filters_dithering.html[C
 dithering documentation].
 
 TIP: See link:example_py_dithering.html[dithering example].
+
+Median
+~~~~~~
+
+[source,python]
+-------------------------------------------------------------------------------
+import gfxprim.core as core
+import gfxprim.filters as filters
+
+    # Returns result of median filter over a rectangle of a side 2 * 3 + 1 pixels
+    res = img.filters.MedianAlloc(3, 3, callback=None)
+
+    # Applies median filter in-place
+    img.filters.Median(3, 3, callback=None)
+-------------------------------------------------------------------------------
+
+Constant time median filter (the computational complexity is independent of
+radius size).
+
+The parameters are radius values for x and y. The algorithm uses x
+respectively y pixel neighbors from each side so the result is median of
+rectangle of +2 * x + 1+ x +2 * y + 1+ pixels.
+
+include::images/median/images.txt[]
