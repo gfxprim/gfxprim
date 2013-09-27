@@ -30,6 +30,9 @@ else # VERBOSE
 	@$(SWIG) $(SWIGOPTS) -python $(INCLUDES) $<
 endif # VERBOSE
 
+# All swig sources depend on common.i
+$(SWIG_C): ../common.i
+
 $(SWIG_LIB): $(SWIG_C)
 ifdef VERBOSE
 	$(CC) $< $(CFLAGS) -D_GNU_SOURCE=1 $(LDFLAGS) $(PYTHON_INCLUDE) --shared $(LDLIBS) $(LDLIBS_GP) -L$(TOPDIR)/build/ -o $@
