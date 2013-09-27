@@ -16,7 +16,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2013 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
@@ -79,6 +79,7 @@ int GP_FilterGaussianBlur_Raw(const GP_Context *src,
 {
 	unsigned int size_x = gaussian_kernel_size(x_sigma);
 	unsigned int size_y = gaussian_kernel_size(y_sigma);
+	GP_Context *tmp = dst;
 
 	GP_DEBUG(1, "Gaussian blur x_sigma=%2.3f y_sigma=%2.3f kernel %ix%i image %ux%u",
 	            x_sigma, y_sigma, size_x, size_y, w_src, h_src);
@@ -116,18 +117,26 @@ int GP_FilterGaussianBlur_Raw(const GP_Context *src,
 
 		if (GP_FilterHConvolutionMP_Raw(&params))
 			return 1;
+	} else {
+		tmp = src;
 	}
 
 	if (new_callback != NULL)
 		new_callback->callback = gaussian_callback_vert;
 
+	/*
+	 * TODO: This part runs always in-place, which is wrong if
+	 *       we run in multiple threads as this part would run
+	 *       only singlethreaded. We need temp buffer for the
+	 *       first part in this case.
+	 */
 	/* compute kernel and apply in vertical direction */
 	if (y_sigma > 0) {
 		float kernel_y[size_y];
 		float sum = gaussian_kernel_init(y_sigma, kernel_y);
 
 		GP_ConvolutionParams params = {
-			.src = src,
+			.src = tmp,
 			.x_src = x_src,
 			.y_src = y_src,
 			.w_src = w_src,
