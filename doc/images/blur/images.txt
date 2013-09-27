@@ -1,4 +1,4 @@
-.Example Images: Original Image; Gaussian Blur 2 2, 0 4, 4 0, 4 4, 10 10
+.Original Image; Gaussian Blur xsig=2 ysig=2, xsig=0 ysig=4, xsig=4 ysig=0, xsig=4 ysig=4, xsig=10 ysig=10
 image:images/orig/lenna_small.png[
 	"Original Image",
 	link="images/orig/lenna.png"]

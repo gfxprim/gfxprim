@@ -1,4 +1,4 @@
-.Example Images: Original Image; Median 3 3, 5 5, 7 7, 9 9, 12 12
+.Original Image; Median xr=3 yr=3, xr=5 yr=5, xr=7 yr=7, xr=9 yr=9, xr=12 yr=12
 image:images/orig/lenna_small.png[
 	"Original Image",
 	link="images/orig/lenna.png"]
