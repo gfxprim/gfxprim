@@ -54,10 +54,6 @@ static int h_lin_conv_{{ pt.name }}(const GP_Context *src,
 	int ikernel[kw], ikern_div;
 	uint32_t size = w_src + kw - 1;
 
-	GP_DEBUG(1, "Horizontal linear convolution kernel width %u "
-	            "offset %ix%i rectangle %ux%u",
-		    kw, x_src, y_src, w_src, h_src);
-
 	for (i = 0; i < kw; i++)
 		ikernel[i] = kernel[i] * MUL + 0.5;
 
@@ -163,6 +159,10 @@ int GP_FilterHLinearConvolution_Raw(const GP_Context *src,
 				    float kernel[], uint32_t kw, float kern_div,
 				    GP_ProgressCallback *callback)
 {
+	GP_DEBUG(1, "Horizontal linear convolution kernel width %u "
+	            "offset %ix%i rectangle %ux%u",
+		    kw, x_src, y_src, w_src, h_src);
+
 	switch (src->pixel_type) {
 	%% for pt in pixeltypes
 	%%  if not pt.is_unknown() and not pt.is_palette()
