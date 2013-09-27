@@ -7,7 +7,7 @@ LDFLAGS+=-L$(TOPDIR)/build/
 PYLIBSDIR=$(TOPDIR)/pylib
 
 ifdef PYTHON_CONFIG
-PYTHON_INCLUDE=$(shell $(PYTHON_CONFIG) --include)
+PYTHON_INCLUDE=$(shell $(PYTHON_CONFIG) --includes)
 endif
 
 # To test with other python versions (example):
