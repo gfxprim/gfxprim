@@ -24,10 +24,15 @@ PAGES+=$(subst .txt,.html,$(EXAMPLE_SOURCES))
 
 .PHONY: toolcheck clean
 
-
 all: toolcheck examples.html $(PAGES) api.html
 
 $(PAGES): asciidoc.conf
+
+#
+# Dependencies
+#
+filters_python.html: images/blur/images.txt
+
 
 #
 # Check if we have all the needed tools

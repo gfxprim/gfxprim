@@ -8,6 +8,29 @@ The filter functions could be called directly as +filters.Foo(img, ..)+ or
 from submodule as +img.filters.Foo(..)+. Note that in the second case the
 image is passed automatically as a first parameter.
 
+Blurs
+~~~~~
+
+[source,python]
+-------------------------------------------------------------------------------
+import gfxprim.core as core
+import gfxprim.filters as filters
+
+    # Does in-place Gaussian blur, the image is modified in-place
+    filters.GaussianBlur(img, img, x_sigma, y_sigma, callback=None)
+
+    # Returns newly alocated blurred image
+    res = img.filters.GaussianBlur(x_sigma, y_sigma, callback=None)
+
+-------------------------------------------------------------------------------
+
+Gaussian blur (low pass) filters implemented as bilinear separable
+convolution.
+
+TIP: See link:example_py_blur.html[blur example].
+
+include::images/blur/images.txt[]
+
 Ditherings
 ~~~~~~~~~~
 
@@ -17,10 +40,10 @@ import gfxprim.core as core
 import gfxprim.filters as filters
 
     # Returns img dithered to 1-bit Grayscale as a new image
-    res = img.filters.FloydSteinbergAlloc(core.C.PIXEL_G1, None)
+    res = img.filters.FloydSteinbergAlloc(core.C.PIXEL_G1, callback=None)
 
     # Returns img dithered to 1-bit Grayscale as a new image
-    res = img.filters.HilbertPeanoAlloc(core.C.PIXEL_G1, None)
+    res = img.filters.HilbertPeanoAlloc(core.C.PIXEL_G1, callback=None)
 
 -------------------------------------------------------------------------------
 
@@ -32,4 +55,4 @@ The first parameter is pixel type, the second is progress callback.
 For more information and example images see link:filters_dithering.html[C
 dithering documentation].
 
-TIP: See complete link:example_py_dithering.html[example].
+TIP: See link:example_py_dithering.html[dithering example].
