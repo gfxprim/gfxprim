@@ -459,6 +459,20 @@ input queue once timer has expired otherwise timer callback is called.
 TIP: For example usage see backend timers
      link:example_backend_timers.html[example].
 
+GP_BackendRemTimer
+^^^^^^^^^^^^^^^^^^
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <backends/GP_Backend.h>
+/* or */
+#include <GP.h>
+
+void GP_BackendRemTimer(GP_Backend *self, GP_Timer *timer);
+-------------------------------------------------------------------------------
+
+Removes a link:input.html#Timers[timer] from the backend timer queue.
+
 GP_BackendTimersInQueue
 ^^^^^^^^^^^^^^^^^^^^^^^
 

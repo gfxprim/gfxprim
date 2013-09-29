@@ -131,6 +131,11 @@ void GP_BackendAddTimer(GP_Backend *self, GP_Timer *timer)
 	GP_TimerQueueInsert(&self->timers, GP_GetTimeStamp(), timer);
 }
 
+void GP_BackendRemTimer(GP_Backend *self, GP_Timer *timer)
+{
+	GP_TimerQueueRemove(&self->timers, timer);
+}
+
 void GP_BackendPoll(GP_Backend *self)
 {
 	self->Poll(self);
