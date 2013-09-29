@@ -26,6 +26,8 @@
 
  */
 
+#include "core/GP_Fill.h"
+
 enum RLE_state {
 	RLE_START,
 	/* end of RLE or bitmap was reached */
@@ -261,18 +263,13 @@ static int read_RLE8(FILE *f, struct bitmap_info_header *header,
 
 	int cnt = 0;
 
-	uint32_t x, y;
-
 	/*
 	 * Fill the image with first palette color.
 	 *
 	 * TODO: Untouched pixels should be treated as
 	 *       1 bit transpanrency (in header3+)
 	 */
-	for (y = 0; y < context->h; y++) {
-		for (x = 0; x < context->w; x++)
-			GP_PutPixel_Raw_24BPP(context, x, y, palette[0]);
-	}
+	GP_Fill(context, palette[0]);
 
 	for (;;) {
 		if ((err = RLE8_next(f, &rle)))
