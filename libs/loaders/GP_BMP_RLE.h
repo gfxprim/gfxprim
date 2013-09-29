@@ -75,7 +75,7 @@ static void RLE8_move(struct RLE *rle)
 {
 	if (!rle->move)
 		return;
-	
+
 	if (++rle->x >= rle->w) {
 		/* wrap around the end of line */
 		rle->x = 0;
@@ -140,7 +140,7 @@ static int RLE8_offset(FILE *f, struct RLE *rle)
 		return EIO;
 
 	GP_DEBUG(1, "RLE offset %i %i", x, y);
-	
+
 	if (rle->x + (uint32_t)x >= rle->w || rle->y + (uint32_t)y >= rle->h) {
 		GP_DEBUG(1, "RLE offset out of image, stop");
 		rle->state = RLE_STOP;
@@ -157,7 +157,7 @@ static int RLE8_next_undecoded(FILE *f, struct RLE *rle)
 	GETC(f, rle);
 
 	RLE8_move(rle);
-	
+
 	//GP_DEBUG(4, "RLE unencoded %u %u -> %02x", rle->x, rle->y, rle->c);
 
 	if (--rle->rep == 0) {
@@ -175,7 +175,7 @@ static int RLE8_next_undecoded(FILE *f, struct RLE *rle)
 static int RLE8_next_repeat(struct RLE *rle)
 {
 	RLE8_move(rle);
-	
+
 	//GP_DEBUG(4, "RLE repeat %u %u -> %02x", rle->x, rle->y, rle->c);
 
 	if (--rle->rep == 0)
@@ -228,8 +228,8 @@ static int RLE8_next(FILE *f, struct RLE *rle)
 	for (;;) {
 		switch (rle->state) {
 		case RLE_START:
-			 if ((err = RLE8_start(f, rle)))
-			 	return err;
+			if ((err = RLE8_start(f, rle)))
+				return err;
 		break;
 		case RLE_REPEAT:
 			return RLE8_next_repeat(rle);
@@ -255,7 +255,7 @@ static int read_RLE8(FILE *f, struct bitmap_info_header *header,
 
 	if ((err = read_bitmap_palette(f, header, palette)))
 		return err;
-	
+
 	if ((err = seek_pixels_offset(header, f)))
 		return err;
 
@@ -263,7 +263,7 @@ static int read_RLE8(FILE *f, struct bitmap_info_header *header,
 
 	uint32_t x, y;
 
-	/* 
+	/*
 	 * Fill the image with first palette color.
 	 *
 	 * TODO: Untouched pixels should be treated as
@@ -291,7 +291,7 @@ static int read_RLE8(FILE *f, struct bitmap_info_header *header,
 		} else {
 			p = palette[idx];
 		}
-			
+
 		int32_t ry;
 
 		if (header->h < 0)
