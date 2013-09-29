@@ -43,6 +43,7 @@ static const char *keys_help[] = {
 	"",
 	"I      - toggle show info box",
 	"P      - toggle show progress",
+	"S      - stop/restart slideshow",
 	"",
 	"]      - change to next resampling method",
 	"[      - change to prev resampling method",

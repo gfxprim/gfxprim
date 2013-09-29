@@ -866,6 +866,16 @@ int main(int argc, char *argv[])
 					params.show_progress_once = 1;
 					show_image(&params);
 				break;
+				case GP_KEY_S:
+					if (params.sleep_ms) {
+						if (GP_BackendTimersInQueue(backend)) {
+							GP_BackendRemTimer(backend, &timer);
+						} else {
+							timer.expires = params.sleep_ms;
+							GP_BackendAddTimer(backend, &timer);
+						}
+					}
+				break;
 				case GP_KEY_RIGHT_BRACE:
 					params.resampling_method++;
 
