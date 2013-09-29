@@ -50,6 +50,7 @@ static GP_Backend *backend = NULL;
 /* image loader thread */
 static int abort_flag = 0;
 static int show_progress = 0;
+static int loader_running = 0;
 
 enum zoom_type {
 	/*
@@ -94,6 +95,9 @@ struct loader_params {
 	int rotate;
 	/* resampling method */
 	int resampling_method;
+
+	/* slideshow sleep */
+	int sleep_ms;
 
 	/* offset in pixels */
 	unsigned int zoom_x_offset;
@@ -512,8 +516,10 @@ static void *image_loader(void *ptr)
 	break;
 	}
 
-	if ((orig_img = load_image(0)) == NULL)
+	if ((orig_img = load_image(0)) == NULL) {
+		loader_running = 0;
 		return NULL;
+	}
 
 	params->rat = calc_img_size(params, orig_img->w, orig_img->h, w, h);
 
@@ -528,13 +534,17 @@ static void *image_loader(void *ptr)
 
 	img = load_resized_image(params, w, h);
 
-	if (img == NULL)
+	if (img == NULL) {
+		loader_running = 0;
 		return NULL;
+	}
 
 	//image_cache_print(params->img_resized_cache);
 update:
 	update_display(params, img, orig_img);
 	cpu_timer_stop(&sum_timer);
+
+	loader_running = 0;
 
 	return NULL;
 }
@@ -557,6 +567,8 @@ static void show_image(struct loader_params *params)
 
 	/* stop previous loader thread */
 	stop_loader();
+
+	loader_running = 1;
 
 	ret = pthread_create(&loader_thread, NULL, image_loader, (void*)params);
 
@@ -639,6 +651,20 @@ static int init_loader(struct loader_params *params, const char **argv)
 static uint32_t timer_callback(GP_Timer *self)
 {
 	struct loader_params *params = self->priv;
+	static int retries = 0;
+
+	/*
+	 * If loader is still running, reschedule after 20ms
+	 *
+	 * If more than two seconds has passed, try load next
+	 */
+	if (loader_running && retries < 100) {
+		printf("Loader still running %ims\n", 20 * retries);
+		retries++;
+		return 20;
+	} else {
+		retries = 0;
+	}
 
 	/*
 	 * We need to stop loader first because image loader seek may free
@@ -648,14 +674,13 @@ static uint32_t timer_callback(GP_Timer *self)
 	image_loader_seek(IMG_CUR, 1);
 	show_image(params);
 
-	return 0;
+	return params->sleep_ms;
 }
 
 int main(int argc, char *argv[])
 {
 	GP_Context *context = NULL;
 	const char *backend_opts = "X11";
-	int sleep_ms = 0;
 	int opt;
 	int shift_flag;
 	GP_PixelType emul_type = GP_PIXEL_UNKNOWN;
@@ -673,6 +698,8 @@ int main(int argc, char *argv[])
                 .zoom = 1,
 
 		.img_resized_cache = NULL,
+
+		.sleep_ms = 0,
 	};
 
 	GP_TIMER_DECLARE(timer, 0, 0, "Slideshow", timer_callback, &params);
@@ -689,7 +716,7 @@ int main(int argc, char *argv[])
 			params.use_dithering = 1;
 		break;
 		case 's':
-			sleep_ms = atoi(optarg);
+			params.sleep_ms = 1000 * atof(optarg) + 0.5;
 		break;
 		case 'c':
 			params.resampling_method = GP_INTERP_CUBIC_INT;
@@ -778,8 +805,8 @@ int main(int argc, char *argv[])
 	params.show_progress_once = 1;
 	show_image(&params);
 
-	if (sleep_ms) {
-		timer.period = sleep_ms;
+	if (params.sleep_ms) {
+		timer.expires = params.sleep_ms;
 		GP_BackendAddTimer(backend, &timer);
 	}
 

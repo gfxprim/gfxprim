@@ -75,7 +75,7 @@ void print_help(void)
 	printf(" -I show image info box\n");
 	printf(" -P show loading progress\n");
 	printf(" -f use floyd-steinberg dithering\n");
-	printf(" -s msec slideshow interval in miliseconds\n");
+	printf(" -s sec slideshow interval in seconds (floating point value)\n");
 	printf(" -c turns on bicubic resampling (experimental)\n");
 	printf(" -e pixel_type  turns on backend type emulation\n");
 	printf("    for example -e G1 sets 1-bit grayscale\n");
