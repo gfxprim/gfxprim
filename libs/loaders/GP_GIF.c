@@ -35,7 +35,7 @@
 #include "../../config.h"
 #include "core/GP_Pixel.h"
 #include "core/GP_GetPutPixel.gen.h"
-#include "gfx/GP_Fill.h"
+#include "core/GP_Fill.h"
 #include "core/GP_Debug.h"
 
 #include "GP_GIF.h"

@@ -68,6 +68,8 @@ GP_ColorNameToColor
 GP_ColorToColorName
 GP_PixelToRGBA8888
 
+GP_Fill
+
 GP_NrThreads
 GP_NrThreadsSet
 GP_ProgressCallbackMP

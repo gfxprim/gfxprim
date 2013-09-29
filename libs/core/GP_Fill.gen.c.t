@@ -16,45 +16,52 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2010 Jiri "BlueBear" Dluhos                            *
- *                         <jiri.bluebear.dluhos@gmail.com>                  *
- *                                                                           *
  * Copyright (C) 2009-2013 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
-/*
+%% extends 'base.c.t'
 
-  This is a main header for gfx part.
+{% block descr %}
+Optimized fill functions.
+{% endblock descr %}
 
- */
+%% block body
 
-#ifndef GP_GFX_H
-#define GP_GFX_H
-
-/* basic definitions and structures */
 #include "core/GP_Context.h"
-#include "core/GP_GetPutPixel.h"
 #include "core/GP_WritePixel.h"
+#include "core/GP_GetPutPixel.h"
+#include "core/GP_FnPerBpp.h"
 #include "core/GP_Fill.h"
 
-/* public drawing API */
-#include "GP_HLine.h"
-#include "GP_VLine.h"
-#include "GP_Line.h"
-#include "GP_Rect.h"
-#include "GP_Triangle.h"
-#include "GP_Tetragon.h"
-#include "GP_Circle.h"
-#include "GP_CircleSeg.h"
-#include "GP_Ellipse.h"
-#include "GP_Arc.h"
-#include "GP_Polygon.h"
+%% from './WritePixels.t' import optimized_writepixels
 
-#include "GP_PutPixelAA.h"
-#include "GP_VLineAA.h"
-#include "GP_HLineAA.h"
-#include "GP_LineAA.h"
-#include "GP_RectAA.h"
+%% for ps in pixelsizes
+static void fill_{{ ps.suffix }}(GP_Context *ctx, GP_Pixel val)
+{
+	unsigned int y;
 
-#endif /* GP_GFX_H */
+	for (y = 0; y < ctx->h; y++) {
+%%  if ps.suffix in optimized_writepixels
+		void *start = GP_PIXEL_ADDR(ctx, 0, y);
+%%   if ps.needs_bit_endian()
+		GP_WritePixels_{{ ps.suffix }}(start, 0, ctx->w, val);
+%%   else
+		GP_WritePixels_{{ ps.suffix }}(start, ctx->w, val);
+%%   endif
+%%  else
+		unsigned int x;
+
+		for (x = 0; x < ctx->w; x++)
+			GP_PutPixel_Raw_{{ ps.suffix }}(ctx, x, y, val);
+%%  endif
+	}
+}
+
+%% endfor
+
+void GP_Fill(GP_Context *ctx, GP_Pixel val)
+{
+	GP_FN_PER_BPP_CONTEXT(fill, ctx, ctx, val);
+}
+%% endblock body
