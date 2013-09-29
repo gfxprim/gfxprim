@@ -56,46 +56,46 @@
 %%  if pt1.is_rgb() and pt2.is_cmyk()
 {{ rgb_to_cmyk(pt1, pt2) -}}
 %%  else
-%% for c2 in pt2.chanslist
+%%   for c2 in pt2.chanslist
 {# case 1: just copy a channel -#}
-%% if c2[0] in pt1.chans.keys()
-%% set c1 = pt1.chans[c2[0]]
+%%    if c2[0] in pt1.chans.keys()
+%%     set c1 = pt1.chans[c2[0]]
         /* {{ c2[0] }}:={{ c1[0] }} */ GP_SET_BITS({{ c2.off }}+o2, {{ c2.size }}, p2,\
                 GP_SCALE_VAL_{{ c1.size }}_{{ c2.size }}(GP_GET_BITS({{ c1.off }}+o1, {{ c1.size }}, p1))); \
 {# case 2: set A to full opacity (not present in source) -#}
-%% elif c2[0]=='A'
+%%    elif c2[0]=='A'
         /* A:={{ c2.C_max }} */GP_SET_BITS({{ c2.off }}+o2, {{ c2.size }}, p2, {{ c2.C_max }}); \
 {# case 3: calculate V as average of RGB -#}
-%% elif c2[0]=='V' and pt1.is_rgb()
+%%    elif c2[0]=='V' and pt1.is_rgb()
 	/* V:=RGB_avg */ GP_SET_BITS({{ c2.off }}+o2, {{ c2.size }}, p2, ( \
-%% for c1 in [pt1.chans['R'], pt1.chans['G'], pt1.chans['B']]
+%%     for c1 in [pt1.chans['R'], pt1.chans['G'], pt1.chans['B']]
                 /* {{ c1.name }} */ GP_SCALE_VAL_{{ c1.size }}_{{ c2.size }}(GP_GET_BITS({{ c1.off }}+o1, {{ c1.size }}, p1)) + \
-%% endfor
+%%     endfor
         0)/3);\
 {# case 4: set each RGB to V -#}
-%% elif c2[0] in 'RGB' and pt1.is_gray()
-%% set c1 = pt1.chans['V']
+%%    elif c2[0] in 'RGB' and pt1.is_gray()
+%%     set c1 = pt1.chans['V']
         /* {{ c2[0] }}:=V */ GP_SET_BITS({{ c2.off }}+o2, {{ c2.size }}, p2,\
                 GP_SCALE_VAL_{{ c1.size }}_{{ c2.size }}(GP_GET_BITS({{ c1.off }}+o1, {{ c1.size }}, p1))); \
 {# case 5: CMYK to RGB -#}
-%% elif c2[0] in 'RGB' and pt1.is_cmyk()
-%%  set K = pt1.chans['K']
+%%    elif c2[0] in 'RGB' and pt1.is_cmyk()
+%%     set K = pt1.chans['K']
 {# Get the right channel -#}
-%%  if c2[0] == 'R'
-%%   set V = pt1.chans['C']
-%%  elif c2[0] == 'G'
-%%   set V = pt1.chans['M']
-%%  else
-%%   set V = pt1.chans['Y']
-%%  endif
+%%     if c2[0] == 'R'
+%%      set V = pt1.chans['C']
+%%     elif c2[0] == 'G'
+%%      set V = pt1.chans['M']
+%%     else
+%%      set V = pt1.chans['Y']
+%%     endif
 	GP_SET_BITS({{ c2.off }}+o2, {{ c2.size }}, p2,\
                     (({{ c2.C_max }} * ({{ K.C_max }} - GP_GET_BITS({{ K.off }}+o1, {{ K.size }}, p1)) * \
                      ({{ V.C_max }} - GP_GET_BITS({{ V.off }}+o1, {{ V.size }}, p1)))) / ({{ K.C_max }} * {{ V.C_max }})); \
 {# case 7: invalid mapping -#}
-%% else
+%%    else
 {{ error('Channel conversion ' + pt1.name + ' to ' + pt2.name + ' not supported.') }}
-%% endif
-%% endfor
+%%   endif
+%%  endfor
 %% endif
 } while (0)
 
@@ -115,24 +115,22 @@
  # Loop around "central" pixel types
 -#}
 %% for pt in [pixeltypes_dict['RGB888'], pixeltypes_dict['RGBA8888']]
-%% for i in pixeltypes
-%% if not i.is_unknown()
-%% if not i.is_palette()
+%%  for i in pixeltypes
+%%   if not i.is_unknown() and not i.is_palette()
 {{ GP_Pixel_TYPE_TO_TYPE(pt, i) }}
-%% if i.name not in ['RGB888', 'RGBA8888']
+%%    if i.name not in ['RGB888', 'RGBA8888']
 {{ GP_Pixel_TYPE_TO_TYPE(i, pt) }}
-%% endif
-%% endif
-%% endif
-%% endfor
+%%    endif
+%%   endif
+%%  endfor
 
-/* 
+/*
  * Convert {{ pt.name }} to any other PixelType
  * Does not work on palette types at all (yet)
  */
 GP_Pixel GP_{{ pt.name }}ToPixel(GP_Pixel pixel, GP_PixelType type);
 
-/* 
+/*
  * Function converting to {{ pt.name }} from any other PixelType
  * Does not work on palette types at all (yet)
  */

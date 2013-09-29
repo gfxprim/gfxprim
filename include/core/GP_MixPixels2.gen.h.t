@@ -56,7 +56,7 @@ static inline GP_Pixel GP_MixPixels_{{ src.name }}_{{ dst.name }}(GP_Pixel src, 
 	sr = GP_Pixel_GET_R_RGB888(src_rgb);
 	sg = GP_Pixel_GET_G_RGB888(src_rgb);
 	sb = GP_Pixel_GET_B_RGB888(src_rgb);
-	
+
 	dr = GP_Pixel_GET_R_RGB888(dst_rgb);
 	dg = GP_Pixel_GET_G_RGB888(dst_rgb);
 	db = GP_Pixel_GET_B_RGB888(dst_rgb);

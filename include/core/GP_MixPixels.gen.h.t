@@ -34,7 +34,7 @@ Macros to mix two pixels accordingly to percentage.
 #include "core/GP_GammaCorrection.h"
 
 %% for pt in pixeltypes
-%% if not pt.is_unknown()
+%%  if not pt.is_unknown()
 
 /*
  * Mixes two {{ pt.name }} pixels.
@@ -42,14 +42,14 @@ Macros to mix two pixels accordingly to percentage.
  * The percentage is expected as 8 bit unsigned integer [0 .. 255]
  */
 #define GP_MIX_PIXELS_LINEAR_{{ pt.name }}(pix1, pix2, perc) ({ \
-%% for c in pt.chanslist
+%%   for c in pt.chanslist
 	GP_Pixel {{ c[0] }}; \
 \
 	{{ c[0] }}  = GP_Pixel_GET_{{ c[0] }}_{{ pt.name }}(pix1) * (perc); \
 	{{ c[0] }} += GP_Pixel_GET_{{ c[0] }}_{{ pt.name }}(pix2) * (255 - (perc)); \
 	{{ c[0] }} = ({{ c[0] }} + 128) / 255; \
 \
-%% endfor
+%%   endfor
 \
 	GP_Pixel_CREATE_{{ pt.name }}({{ pt.chanslist[0][0] }}{% for c in pt.chanslist[1:] %}, {{ c[0] }}{% endfor %}); \
 })
@@ -60,7 +60,7 @@ Macros to mix two pixels accordingly to percentage.
  * The percentage is expected as 8 bit unsigned integer [0 .. 255]
  */
 #define GP_MIX_PIXELS_GAMMA_{{ pt.name }}(pix1, pix2, perc) ({ \
-%% for c in pt.chanslist
+%%   for c in pt.chanslist
 	GP_Pixel {{ c[0] }}; \
 \
 	{{ c[0] }}  = GP_Gamma{{ c[2] }}ToLinear10(GP_Pixel_GET_{{ c[0] }}_{{ pt.name }}(pix1)) * (perc); \
@@ -68,19 +68,19 @@ Macros to mix two pixels accordingly to percentage.
 	{{ c[0] }} = ({{ c[0] }} + 128) / 255; \
 	{{ c[0] }} = GP_Linear10ToGamma{{ c[2] }}({{ c[0] }}); \
 \
-%% endfor
+%%   endfor
 \
 	GP_Pixel_CREATE_{{ pt.name }}({{ pt.chanslist[0][0] }}{% for c in pt.chanslist[1:] %}, {{ c[0] }}{% endfor %}); \
 })
 
 #define GP_MIX_PIXELS_{{ pt.name }}(pix1, pix2, perc) \
-%% if pt.is_rgb()
+%%   if pt.is_rgb()
 	GP_MIX_PIXELS_GAMMA_{{ pt.name }}(pix1, pix2, perc)
-%% else
+%%   else
 	GP_MIX_PIXELS_LINEAR_{{ pt.name }}(pix1, pix2, perc)
-%% endif
+%%   endif
 
-%% endif
+%%  endif
 %% endfor
 
 static inline GP_Pixel GP_MixPixels(GP_Pixel pix1, GP_Pixel pix2,
@@ -88,10 +88,10 @@ static inline GP_Pixel GP_MixPixels(GP_Pixel pix1, GP_Pixel pix2,
 {
 	switch (pixel_type) {
 %% for pt in pixeltypes
-%% if not pt.is_unknown()
+%%  if not pt.is_unknown()
 	case GP_PIXEL_{{ pt.name }}:
 		return GP_MIX_PIXELS_LINEAR_{{ pt.name }}(pix1, pix2, perc);
-%% endif
+%%  endif
 %% endfor
 	default:
 		GP_ABORT("Unknown pixeltype");
@@ -100,7 +100,7 @@ static inline GP_Pixel GP_MixPixels(GP_Pixel pix1, GP_Pixel pix2,
 
 
 %% for pt in pixeltypes
-%% if not pt.is_unknown()
+%%  if not pt.is_unknown()
 static inline void GP_MixPixel_Raw_{{ pt.name }}(GP_Context *context,
 			GP_Coord x, GP_Coord y, GP_Pixel pixel, uint8_t perc)
 {
@@ -109,11 +109,11 @@ static inline void GP_MixPixel_Raw_{{ pt.name }}(GP_Context *context,
 	GP_PutPixel_Raw_{{ pt.pixelsize.suffix }}(context, x, y, pix);
 }
 
-%% endif
+%%  endif
 %% endfor
 
 %% for pt in pixeltypes
-%% if not pt.is_unknown()
+%%  if not pt.is_unknown()
 static inline void GP_MixPixel_Raw_Clipped_{{ pt.name }}(GP_Context *context,
 			GP_Coord x, GP_Coord y, GP_Pixel pixel, uint8_t perc)
 {
@@ -123,7 +123,7 @@ static inline void GP_MixPixel_Raw_Clipped_{{ pt.name }}(GP_Context *context,
 	GP_MixPixel_Raw_{{ pt.name }}(context, x, y, pixel, perc);
 }
 
-%% endif
+%%  endif
 %% endfor
 
 static inline void GP_MixPixel_Raw(GP_Context *context, GP_Coord x, GP_Coord y,
@@ -131,11 +131,11 @@ static inline void GP_MixPixel_Raw(GP_Context *context, GP_Coord x, GP_Coord y,
 {
 	switch (context->pixel_type) {
 %% for pt in pixeltypes
-%% if not pt.is_unknown()
+%%  if not pt.is_unknown()
 	case GP_PIXEL_{{ pt.name }}:
-		GP_MixPixel_Raw_{{ pt.name }}(context, x, y, pixel, perc);
+				GP_MixPixel_Raw_{{ pt.name }}(context, x, y, pixel, perc);
 	break;
-%% endif
+%%  endif
 %% endfor
 	default:
 		GP_ABORT("Unknown pixeltype");
@@ -148,11 +148,11 @@ static inline void GP_MixPixel_Raw_Clipped(GP_Context *context,
 {
 	switch (context->pixel_type) {
 %% for pt in pixeltypes
-%% if not pt.is_unknown()
+%%  if not pt.is_unknown()
 	case GP_PIXEL_{{ pt.name }}:
 		GP_MixPixel_Raw_Clipped_{{ pt.name }}(context, x, y, pixel, perc);
 	break;
-%% endif
+%%  endif
 %% endfor
 	default:
 		GP_ABORT("Unknown pixeltype");

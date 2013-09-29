@@ -49,7 +49,7 @@
  */
 #define GP_GET_BITS(offset, len, val) \
 	(sizeof(val) * 8 <= len ? \
- 	 (val)>>(offset) : \
+	 (val)>>(offset) : \
 	 ((val)>>(offset)) & (((((typeof(val))1)<<(len)) - 1)))
 
 /*

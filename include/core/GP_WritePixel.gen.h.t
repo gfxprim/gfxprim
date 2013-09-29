@@ -33,14 +33,14 @@
  */
 
 %% for ps in pixelsizes
-%% if ps.needs_bit_endian()
+%%  if ps.needs_bit_endian()
 void GP_WritePixels_{{ ps.suffix }}(void *start, uint8_t off,
                             size_t cnt, unsigned int val);
 
-%% else
+%%  else
 void GP_WritePixels_{{ ps.suffix }}(void *start, size_t cnt, unsigned int val);
 
-%% endif
+%%  endif
 %% endfor
 
 {% endblock body %}

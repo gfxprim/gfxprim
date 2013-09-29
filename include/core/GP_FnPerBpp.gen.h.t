@@ -37,7 +37,7 @@
 {% macro bpp_suffix(suffix) %}{% if suffix == "LE" or suffix == "BE" %}_{{ suffix }}{% endif %}{% endmacro %}
 
 /*
- * Branch on bpp and bit_endian. 
+ * Branch on bpp and bit_endian.
  */
 #define GP_FN_PER_BPP(FN_NAME, bpp, bit_endian, ...) \
 	switch (bpp) { \
@@ -56,7 +56,7 @@
 	}
 
 /*
- * Branch on bpp and bit_endian. 
+ * Branch on bpp and bit_endian.
  */
 #define GP_FN_RET_PER_BPP(FN_NAME, bpp, bit_endian, ...) \
 	switch (bpp) { \

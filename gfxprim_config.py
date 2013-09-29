@@ -1,7 +1,7 @@
 #
 #  gfxprim_config.py - module configuring GfxPrim code generation and
 #                      known PixelTypes
-# 
+#
 
 #
 # 2011      Tomas Gavenciak <gavento@ucw.cz>
@@ -9,7 +9,7 @@
 #
 # This file is sourced by all the generating scripts.
 # Moreover, the generated files are sourced by almost all Gfxprim sources,
-# so a complete recompilation is required after any change. 
+# so a complete recompilation is required after any change.
 #
 
 # Declared pixel sizes:
@@ -38,7 +38,7 @@ config = GfxPrimConfig(
                   PS_18BPP_LE,
                  ],
 
-    # List of PixelTypes, order defines the numbering. 
+    # List of PixelTypes, order defines the numbering.
     # The "Undefined" type is added automatically.
     pixeltypes = [
 
@@ -60,17 +60,17 @@ config = GfxPrimConfig(
 	  ('R', 16, 8),
 	  ('G', 8, 8),
 	  ('B', 0, 8)]),
-      
+
       PixelType(name='BGR888', pixelsize=PS_24BPP, chanslist=[
 	  ('B', 16, 8),
 	  ('G', 8, 8),
 	  ('R', 0, 8)]),
-      
+
       PixelType(name='RGB555', pixelsize=PS_16BPP, chanslist=[
 	  ('R', 10, 5),
 	  ('G', 5, 5),
 	  ('B', 0, 5)]),
-      
+
       PixelType(name='RGB565', pixelsize=PS_16BPP, chanslist=[
 	  ('R', 11, 5),
 	  ('G', 5, 6),
@@ -116,7 +116,7 @@ config = GfxPrimConfig(
 
       PixelType(name='G8', pixelsize=PS_8BPP, chanslist=[
 	  ('V', 0, 8)]),
-      
+
       PixelType(name='G16', pixelsize=PS_16BPP, chanslist=[
 	  ('V', 0, 16)]),
       ]

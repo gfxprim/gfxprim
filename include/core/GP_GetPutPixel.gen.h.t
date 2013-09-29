@@ -64,7 +64,7 @@ Do not include directly, use GP_Pixel.h
    If pixel_size is coprime to 8, the offsets generates whole group and so the
    max + pixel_size = 7 + pixel_size. The 17 BPP fits into 24 bits and so 3
    bytes are needed. The 19 BPP fits into 26 bits and because of that 4 bytes
-   are needed. 
+   are needed.
 
    Once we figure maximal number of bytes and the offset all that is to be done
    is to fetch first and last byte to combine it together with given pixel value
@@ -76,7 +76,7 @@ Do not include directly, use GP_Pixel.h
 #include "GP_Context.h"
 
 %% for ps in pixelsizes
-/* 
+/*
  * macro to get address of pixel in a {{ ps.suffix }} context
  */
 #define GP_PIXEL_ADDR_{{ ps.suffix }}(context, x, y) \
@@ -105,7 +105,7 @@ Do not include directly, use GP_Pixel.h
 %% endif
 
 /*
- * GP_GetPixel for {{ ps.suffix }} 
+ * GP_GetPixel for {{ ps.suffix }}
  */
 static inline GP_Pixel GP_GetPixel_Raw_{{ ps.suffix }}(const GP_Context *c, int x, int y)
 {
@@ -180,7 +180,7 @@ static inline GP_Pixel GP_GetPixel_Raw_{{ ps.suffix }}(const GP_Context *c, int 
 }
 
 /*
- * GP_PutPixel for {{ ps.suffix }} 
+ * GP_PutPixel for {{ ps.suffix }}
  */
 static inline void GP_PutPixel_Raw_{{ ps.suffix }}(GP_Context *c, int x, int y, GP_Pixel p)
 {

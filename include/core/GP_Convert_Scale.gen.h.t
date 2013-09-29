@@ -30,7 +30,7 @@
 {%- endmacro %}
 
 %% block body
-/* 
+/*
  * Helper macros to transfer s1-bit value to s2-bit value.
  * Efficient and accurate for both up- and downscaling.
  * WARNING: GP_SCALE_VAL requires constants numbers as first two parameters
