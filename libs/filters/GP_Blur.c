@@ -79,7 +79,7 @@ int GP_FilterGaussianBlur_Raw(const GP_Context *src,
 {
 	unsigned int size_x = gaussian_kernel_size(x_sigma);
 	unsigned int size_y = gaussian_kernel_size(y_sigma);
-	GP_Context *tmp = dst;
+	const GP_Context *tmp = dst;
 
 	GP_DEBUG(1, "Gaussian blur x_sigma=%2.3f y_sigma=%2.3f kernel %ix%i image %ux%u",
 	            x_sigma, y_sigma, size_x, size_y, w_src, h_src);
