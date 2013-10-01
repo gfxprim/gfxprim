@@ -56,6 +56,9 @@
 /* Blur filters */
 #include "filters/GP_Blur.h"
 
+/* Edge detection filters */
+#include "filters/GP_EdgeDetection.h"
+
 /* Image scaling (resampling) */
 #include "filters/GP_Resize.h"
 #include "filters/GP_ResizeNN.h"
