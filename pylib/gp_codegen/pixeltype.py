@@ -51,8 +51,7 @@ class PixelType(object):
     self.chans = dict() # { chan_name: (offset, size) }
     self.pixelsize = pixelsize
     # C enum as defined in GP_Pixel.gen.h
-    self.C_enum = "GP_PIXEL_" + self.name
-
+    self.C_type = "GP_PIXEL_" + self.name
 
     # Verify channel bits for overlaps
     # also builds a bit-map of the PixelType

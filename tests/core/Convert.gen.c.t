@@ -39,7 +39,7 @@ static GP_Pixel get_black(GP_PixelType pixel_type)
 {
 	switch (pixel_type) {
 %% for pt in pixeltypes
-	case {{ pt.C_enum }}:
+	case {{ pt.C_type }}:
 %%  if pt.is_cmyk()
 %%   set K = pt.chans['K']
 		/* Black in CMYK is full K rest zero */
@@ -65,7 +65,7 @@ static GP_Pixel get_white(GP_PixelType pixel_type)
 {
 	switch (pixel_type) {
 %% for pt in pixeltypes
-	case {{ pt.C_enum }}:
+	case {{ pt.C_type }}:
 %%  if pt.is_cmyk()
 		/* White in CMYK is zero */
 		return 0x0;
@@ -110,7 +110,7 @@ static GP_Pixel get_red(GP_PixelType pixel_type)
 {
 	switch (pixel_type) {
 %% for pt in pixeltypes
-	case {{ pt.C_enum }}:
+	case {{ pt.C_type }}:
 %%  if pt.is_cmyk()
 %%   set M = pt.chans['M']
 %%   set Y = pt.chans['Y']
