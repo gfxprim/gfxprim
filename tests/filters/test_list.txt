@@ -1,4 +1,5 @@
 # Filters test list
 
 APICoverage.gen
+FiltersCompare.gen
 FilterMirrorH

@@ -3,9 +3,9 @@ include $(TOPDIR)/pre.mk
 
 CSOURCES=FilterMirrorH.c
 
-GENSOURCES=APICoverage.gen.c
+GENSOURCES=APICoverage.gen.c FiltersCompare.gen.c
 
-APPS=FilterMirrorH APICoverage.gen
+APPS=FilterMirrorH APICoverage.gen FiltersCompare.gen
 
 include ../tests.mk
 
