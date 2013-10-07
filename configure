@@ -23,8 +23,8 @@ def header_exists(cfg, filename):
 def c_try_compile(cfg, code, msg):
     sys.stderr.write(msg)
 
-    ret = os.system("echo '%s' | %s -x c -o /dev/null - > /dev/null 2>&1" %
-                    (code, cfg["CC"][0]))
+    ret = os.system("echo '%s' | %s %s -x c -o /dev/null - > /dev/null 2>&1" %
+                    (code, cfg['CC'][0], cfg['CFLAGS'][0]))
 
     if ret:
         sys.stderr.write("No\n")
@@ -37,6 +37,16 @@ def c_compiler_exists(cfg):
     return c_try_compile(cfg, "int main(void) { return 0; }",
                          "Checking for working compiler (%s) ... " %
                          cfg["CC"][0])
+
+def define_fortify_source(cfg):
+    return c_try_compile(cfg, "int main(void) {\n" +
+                              "#if !defined _FORTIFY_SOURCE &&" +
+                              "defined __OPTIMIZE__ && __OPTIMIZE__\n" +
+                              "        return 0;\n" +
+                              "#else\n" +
+                              " #error FORTIFY_SOURCE not usable\n" +
+                              "#endif\n" +
+                              "}", "Whether to define _FORTIFY_SOURCE ... ");
 
 def python_version(cfg):
     sys.stderr.write("Checking for python-config Python version ... ")
@@ -209,6 +219,9 @@ def basic_checks(cfg):
     check_for_swig(cfg)
     check_for_python_config(cfg)
 
+    if define_fortify_source(cfg):
+        cfg['CFLAGS'][0] = cfg['CFLAGS'][0] + " -D_FORTIFY_SOURCE=2"
+
     cfg['PYTHON_VER'][0] = python_version(cfg)
 
     if cfg['libdir'][0] == '':
@@ -290,7 +303,7 @@ if __name__ ==  '__main__':
     # Dictionary for default configuration parameters
     #
     cfg = {'CC'            : ['gcc', 'Path/name of the C compiler'],
-           'CFLAGS'        : ['-pthread -W -Wall -Wextra -fPIC -O2 -ggdb -D_FORTIFY_SOURCE=2', 'C compiler flags'],
+           'CFLAGS'        : ['-pthread -W -Wall -Wextra -fPIC -O2 -ggdb', 'C compiler flags'],
            'PYTHON_BIN'    : ['python', 'Path/name of python interpreter'],
            'SWIG'          : ['swig', 'Simplified Wrapper and Interface Generator'],
            'PYTHON_CONFIG' : ['python-config', 'Python config helper'],
