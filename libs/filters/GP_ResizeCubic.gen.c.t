@@ -210,6 +210,7 @@ static int resize_cubic(const GP_Context *src, GP_Context *dst,
 	%%  endif
 	%% endfor
 	default:
+		errno = EINVAL;
 		return -1;
 	}
 }
