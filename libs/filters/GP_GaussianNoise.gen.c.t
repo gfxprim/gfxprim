@@ -26,6 +26,8 @@
 
 %% block body
 
+#include <errno.h>
+
 #include "core/GP_Context.h"
 #include "core/GP_GetPutPixel.h"
 #include "core/GP_TempAlloc.h"
@@ -117,6 +119,7 @@ int GP_FilterGaussianNoiseAdd_Raw(const GP_Context *src,
 	%% endif
 	%% endfor
 	default:
+		errno = EINVAL;
 		return -1;
 	}
 }
