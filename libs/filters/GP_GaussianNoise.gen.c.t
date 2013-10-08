@@ -87,6 +87,7 @@ static int GP_FilterGaussianNoiseAdd_{{ pt.name }}_Raw(const GP_Context *src,
 
 		if (GP_ProgressCallbackReport(callback, y, h_src, w_src)) {
 			GP_TempAllocFree(temp);
+			errno = ECANCELED;
 			return 1;
 		}
 	}
@@ -153,7 +154,7 @@ GP_Context *GP_FilterGaussianNoiseAddExAlloc(const GP_Context *src,
                                              float sigma, float mu,
                                              GP_ProgressCallback *callback)
 {
-	int ret;
+	int ret, err;
 
 	GP_Context *dst = GP_ContextAlloc(w_src, h_src, src->pixel_type);
 
@@ -164,7 +165,9 @@ GP_Context *GP_FilterGaussianNoiseAddExAlloc(const GP_Context *src,
 	                                    dst, 0, 0, sigma, mu, callback);
 
 	if (ret) {
+		err = errno;
 		GP_ContextFree(dst);
+		errno = err;
 		return NULL;
 	}
 
