@@ -92,7 +92,7 @@ struct loader_params {
 	/* use low pass before resampling */
 	long use_low_pass:6;
 	/* image orientation 0, 90, 180, 270 */
-	int rotate;
+	int orientation;
 	/* resampling method */
 	int resampling_method;
 
@@ -167,31 +167,6 @@ static void resize_backend(float ratio, int shift_flag)
 	GP_BackendResize(backend, w, h);
 }
 
-
-static float calc_img_size(struct loader_params *params,
-                           uint32_t img_w, uint32_t img_h,
-                           uint32_t src_w, uint32_t src_h)
-{
-	float w_rat;
-	float h_rat;
-
-	switch (params->zoom_type) {
-	case ZOOM_FIT_DOWNSCALE:
-		if (img_w <= src_w && img_h <= src_h)
-			return 1.00;
-	case ZOOM_FIT:
-		w_rat = 1.00 * src_w / img_w;
-		h_rat = 1.00 * src_h / img_h;
-		return GP_MIN(w_rat, h_rat);
-	case ZOOM_FIXED:
-		return params->zoom;
-	case ZOOM_FIXED_WIN:
-		resize_backend(params->zoom, 0);
-		return params->zoom;
-	}
-
-	return 1.00;
-}
 
 static const char *img_name(const char *img_path)
 {
@@ -272,6 +247,66 @@ static void pattern_fill(GP_Context *ctx, unsigned int x0, unsigned int y0,
 	}
 }
 
+
+static void info_printf(GP_Context *ctx, GP_Coord x, GP_Coord y,
+                        const char *fmt, ...)
+                        __attribute__ ((format (printf, 4, 5)));
+
+static void info_printf(GP_Context *ctx, GP_Coord x, GP_Coord y,
+                        const char *fmt, ...)
+{
+	va_list va, vac;
+
+	va_start(va, fmt);
+
+	va_copy(vac, va);
+	GP_VPrint(ctx, NULL, x-1, y-1, GP_ALIGN_RIGHT|GP_VALIGN_BOTTOM,
+	          black_pixel, white_pixel, fmt, vac);
+	va_end(vac);
+
+	GP_VPrint(ctx, NULL, x, y, GP_ALIGN_RIGHT|GP_VALIGN_BOTTOM,
+	          white_pixel, black_pixel, fmt, va);
+
+	va_end(va);
+}
+
+static void show_info(struct loader_params *params, GP_Context *img,
+                      GP_Context *orig_img)
+{
+	GP_Context *context = backend->context;
+	const char *img_path = image_loader_img_path();
+
+	set_caption(img_path, params->rat);
+
+	if (!params->show_info)
+		return;
+
+	GP_Size th = GP_TextHeight(NULL);
+
+	info_printf(context, 10, 10, "%ux%u (%ux%u) 1:%3.3f",
+	         img->w, img->h, orig_img->w, orig_img->h, params->rat);
+
+	info_printf(context, 10, 12 + th, "%s", img_name(img_path));
+
+	info_printf(context, 10, 14 + 2 * th, "%s%s",
+		 params->use_low_pass && params->rat < 1 ? "Gaussian LP + " : "",
+		 GP_InterpolationTypeName(params->resampling_method));
+
+	unsigned int count = image_loader_count();
+	unsigned int pos = image_loader_pos() + 1;
+
+	info_printf(context, 10, 16 + 3 * th, "%u of %u", pos, count);
+
+	if (!image_loader_is_in_dir())
+		return;
+
+	unsigned int dir_count = image_loader_dir_count();
+	unsigned int dir_pos = image_loader_dir_pos() + 1;
+
+	info_printf(context, 10, 18 + 4 * th,
+		    "%u of %u in directory", dir_pos, dir_count);
+}
+
 static void update_display(struct loader_params *params, GP_Context *img,
                            GP_Context *orig_img)
 {
@@ -279,7 +314,7 @@ static void update_display(struct loader_params *params, GP_Context *img,
 	struct cpu_timer timer;
 	GP_ProgressCallback callback = {.callback = image_loader_callback};
 
-	switch (params->rotate) {
+	switch (params->orientation) {
 	case 0:
 	break;
 	case 90:
@@ -347,61 +382,9 @@ static void update_display(struct loader_params *params, GP_Context *img,
 	if (h > 0)
 		GP_FillRectXYWH(context, 0, img->h + cy, context->w, h, black_pixel);
 
-	const char *img_path = image_loader_img_path();
+	show_info(params, img, orig_img);
 
-	set_caption(img_path, params->rat);
-
-	if (!params->show_info)
-		goto out;
-
-	GP_Size th = GP_TextHeight(NULL);
-
-	GP_Print(context, NULL, 11, 11, GP_ALIGN_RIGHT|GP_VALIGN_BOTTOM,
-	         black_pixel, white_pixel, "%ux%u (%ux%u) 1:%3.3f",
-	         img->w, img->h, orig_img->w, orig_img->h, params->rat);
-
-	GP_Print(context, NULL, 10, 10, GP_ALIGN_RIGHT|GP_VALIGN_BOTTOM,
-	         white_pixel, black_pixel, "%ux%u (%ux%u) 1:%3.3f",
-	         img->w, img->h, orig_img->w, orig_img->h, params->rat);
-
-	GP_Print(context, NULL, 11, 13 + th, GP_ALIGN_RIGHT|GP_VALIGN_BOTTOM,
-	         black_pixel, white_pixel, "%s", img_name(img_path));
-
-	GP_Print(context, NULL, 10, 12 + th, GP_ALIGN_RIGHT|GP_VALIGN_BOTTOM,
-	         white_pixel, black_pixel, "%s", img_name(img_path));
-
-	GP_Print(context, NULL, 11, 13 + 2 * th, GP_ALIGN_RIGHT|GP_VALIGN_BOTTOM,
-	         black_pixel, white_pixel, "%s%s",
-		 params->use_low_pass && params->rat < 1 ? "Gaussian LP + " : "",
-		 GP_InterpolationTypeName(params->resampling_method));
-
-	GP_Print(context, NULL, 10, 14 + 2 * th, GP_ALIGN_RIGHT|GP_VALIGN_BOTTOM,
-	         white_pixel, black_pixel, "%s%s",
-		 params->use_low_pass && params->rat < 1 ? "Gaussian LP + " : "",
-		 GP_InterpolationTypeName(params->resampling_method));
-
-	unsigned int count = image_loader_count();
-	unsigned int pos = image_loader_pos() + 1;
-
-	GP_Print(context, NULL, 11, 17 + 3 * th, GP_ALIGN_RIGHT|GP_VALIGN_BOTTOM,
-	         black_pixel, white_pixel, "%u of %u", pos, count);
-
-	GP_Print(context, NULL, 10, 16 + 3 * th, GP_ALIGN_RIGHT|GP_VALIGN_BOTTOM,
-	         white_pixel, black_pixel, "%u of %u", pos, count);
-
-	if (!image_loader_is_in_dir())
-		goto out;
-
-	unsigned int dir_count = image_loader_dir_count();
-	unsigned int dir_pos = image_loader_dir_pos() + 1;
-
-	GP_Print(context, NULL, 11, 19 + 4 * th, GP_ALIGN_RIGHT|GP_VALIGN_BOTTOM,
-		 black_pixel, white_pixel, "%u of %u in directory", dir_pos, dir_count);
-
-	GP_Print(context, NULL, 10, 18 + 4* th, GP_ALIGN_RIGHT|GP_VALIGN_BOTTOM,
-		 white_pixel, black_pixel, "%u of %u in directory", dir_pos, dir_count);
-out:
-	if (params->rotate)
+	if (params->orientation)
 		GP_ContextFree(img);
 
 	GP_BackendFlip(backend);
@@ -457,13 +440,7 @@ GP_Context *load_resized_image(struct loader_params *params, GP_Size w, GP_Size 
 	cpu_timer_start(&timer, "Resampling");
 	callback.priv = "Resampling Image";
 	GP_Context *i1 = GP_FilterResizeAlloc(img, w, h, params->resampling_method, &callback);
-//	img->gamma = NULL;
-//	GP_Context *i2 = GP_FilterResizeAlloc(img, w, h, params->resampling_method, &callback);
-//	img = GP_FilterDifferenceAlloc(i2, i1, NULL);
-//	img = GP_FilterInvert(img, NULL, NULL);
 	img = i1;
-//	if (params->resampling_method == GP_INTERP_CUBIC_INT)
-//		GP_FilterEdgeSharpening(img, img, 0.2, NULL);
 	cpu_timer_stop(&timer);
 
 /*
@@ -488,6 +465,42 @@ GP_Context *load_resized_image(struct loader_params *params, GP_Size w, GP_Size 
 	return img;
 }
 
+static float calc_img_size(struct loader_params *params,
+                           uint32_t img_w, uint32_t img_h,
+                           uint32_t src_w, uint32_t src_h)
+{
+	float w_rat;
+	float h_rat;
+
+	switch (params->orientation) {
+	case 0:
+	case 180:
+	default:
+	break;
+	case 90:
+	case 270:
+		GP_SWAP(src_w, src_h);
+	break;
+	}
+
+	switch (params->zoom_type) {
+	case ZOOM_FIT_DOWNSCALE:
+		if (img_w <= src_w && img_h <= src_h)
+			return 1.00;
+	case ZOOM_FIT:
+		w_rat = 1.00 * src_w / img_w;
+		h_rat = 1.00 * src_h / img_h;
+		return GP_MIN(w_rat, h_rat);
+	case ZOOM_FIXED:
+		return params->zoom;
+	case ZOOM_FIXED_WIN:
+		resize_backend(params->zoom, 0);
+		return params->zoom;
+	}
+
+	return 1.00;
+}
+
 static void *image_loader(void *ptr)
 {
 	struct loader_params *params = ptr;
@@ -499,38 +512,25 @@ static void *image_loader(void *ptr)
 	show_progress = params->show_progress || params->show_progress_once;
 	params->show_progress_once = 0;
 
-	/* Figure out rotation */
-	GP_Size w, h;
-
-	switch (params->rotate) {
-	case 0:
-	case 180:
-	default:
-		w = context->w;
-		h = context->h;
-	break;
-	case 90:
-	case 270:
-		w = context->h;
-		h = context->w;
-	break;
-	}
-
 	if ((orig_img = load_image(0)) == NULL) {
 		loader_running = 0;
 		return NULL;
 	}
 
-	params->rat = calc_img_size(params, orig_img->w, orig_img->h, w, h);
+	/* Figure out rotation */
+	GP_Size w, h;
 
-	/* Special case => no need to resize */
-	if (params->rat == 1.0) {
-		img = orig_img;
-		goto update;
-	}
+	params->rat = calc_img_size(params, orig_img->w, orig_img->h,
+	                            context->w, context->h);
 
 	w = orig_img->w * params->rat + 0.5;
 	h = orig_img->h * params->rat + 0.5;
+
+	/* Special case => no need to resize */
+	if (w == orig_img->w && h == orig_img->h) {
+		img = orig_img;
+		goto update;
+	}
 
 	img = load_resized_image(params, w, h);
 
@@ -539,7 +539,6 @@ static void *image_loader(void *ptr)
 		return NULL;
 	}
 
-	//image_cache_print(params->img_resized_cache);
 update:
 	update_display(params, img, orig_img);
 	cpu_timer_stop(&sum_timer);
@@ -691,7 +690,7 @@ int main(int argc, char *argv[])
 		.show_info = 0,
 		.show_nn_first = 0,
 		.use_dithering = 0,
-		.rotate = 0,
+		.orientation = 0,
 		.resampling_method = GP_INTERP_LINEAR_LF_INT,
 
                 .zoom_type = ZOOM_FIT,
@@ -735,11 +734,11 @@ int main(int argc, char *argv[])
 		break;
 		case 'r':
 			if (!strcmp(optarg, "90"))
-				params.rotate = 90;
+				params.orientation = 90;
 			else if (!strcmp(optarg, "180"))
-				params.rotate = 180;
+				params.orientation = 180;
 			else if (!strcmp(optarg, "270"))
-				params.rotate = 270;
+				params.orientation = 270;
 		case 'b':
 			backend_opts = optarg;
 		break;
@@ -859,9 +858,9 @@ int main(int argc, char *argv[])
 					params.show_progress = !params.show_progress;
 				break;
 				case GP_KEY_R:
-					params.rotate += 90;
-					if (params.rotate > 270)
-						params.rotate = 0;
+					params.orientation += 90;
+					if (params.orientation > 270)
+						params.orientation = 0;
 
 					params.show_progress_once = 1;
 					show_image(&params);
