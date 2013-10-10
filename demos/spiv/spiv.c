@@ -26,7 +26,6 @@
 
   */
 
-#include <unistd.h>
 #include <errno.h>
 #include <signal.h>
 #include <string.h>
@@ -39,6 +38,7 @@
 #include "image_loader.h"
 #include "image_actions.h"
 #include "spiv_help.h"
+#include "spiv_config.h"
 #include "cpu_timer.h"
 
 static GP_Pixel black_pixel;
@@ -80,19 +80,11 @@ struct loader_params {
 	/* current resize ratio */
 	float rat;
 
-	/* show loader progress */
-	long show_progress:1;
 	long show_progress_once:2;
-	/* show image info in topleft corner */
-	long show_info:3;
 	/* use nearest neighbour resampling first */
 	long show_nn_first:4;
-	/* use dithering when blitting to display */
-	long use_dithering:5;
 	/* use low pass before resampling */
 	long use_low_pass:6;
-	/* image orientation 0, 90, 180, 270 */
-	int orientation;
 	/* resampling method */
 	int resampling_method;
 
@@ -278,7 +270,7 @@ static void show_info(struct loader_params *params, GP_Context *img,
 
 	set_caption(img_path, params->rat);
 
-	if (!params->show_info)
+	if (!config.show_info)
 		return;
 
 	GP_Size th = GP_TextHeight(NULL);
@@ -314,18 +306,18 @@ static void update_display(struct loader_params *params, GP_Context *img,
 	struct cpu_timer timer;
 	GP_ProgressCallback callback = {.callback = image_loader_callback};
 
-	switch (params->orientation) {
-	case 0:
+	switch (config.orientation) {
+	case ROTATE_0:
 	break;
-	case 90:
+	case ROTATE_90:
 		callback.priv = "Rotating image (90)";
 		img = GP_FilterRotate90Alloc(img, &callback);
 	break;
-	case 180:
+	case ROTATE_180:
 		callback.priv = "Rotating image (180)";
 		img = GP_FilterRotate180Alloc(img, &callback);
 	break;
-	case 270:
+	case ROTATE_270:
 		callback.priv = "Rotating image (270)";
 		img = GP_FilterRotate270Alloc(img, &callback);
 	break;
@@ -354,7 +346,7 @@ static void update_display(struct loader_params *params, GP_Context *img,
 
 	cpu_timer_start(&timer, "Blitting");
 
-	if (params->use_dithering) {
+	if (config.floyd_steinberg) {
 		callback.priv = "Dithering";
 		GP_SubContext(context, &sub_display, cx, cy, img->w, img->h);
 		GP_FilterFloydSteinberg(img, &sub_display, NULL);
@@ -384,7 +376,7 @@ static void update_display(struct loader_params *params, GP_Context *img,
 
 	show_info(params, img, orig_img);
 
-	if (params->orientation)
+	if (config.orientation)
 		GP_ContextFree(img);
 
 	GP_BackendFlip(backend);
@@ -472,13 +464,13 @@ static float calc_img_size(struct loader_params *params,
 	float w_rat;
 	float h_rat;
 
-	switch (params->orientation) {
-	case 0:
-	case 180:
+	switch (config.orientation) {
+	case ROTATE_0:
+	case ROTATE_180:
 	default:
 	break;
-	case 90:
-	case 270:
+	case ROTATE_90:
+	case ROTATE_270:
 		GP_SWAP(src_w, src_h);
 	break;
 	}
@@ -509,7 +501,7 @@ static void *image_loader(void *ptr)
 
 	cpu_timer_start(&sum_timer, "sum");
 
-	show_progress = params->show_progress || params->show_progress_once;
+	show_progress = config.show_progress || params->show_progress_once;
 	params->show_progress_once = 0;
 
 	if ((orig_img = load_image(0)) == NULL) {
@@ -679,18 +671,12 @@ static uint32_t timer_callback(GP_Timer *self)
 int main(int argc, char *argv[])
 {
 	GP_Context *context = NULL;
-	const char *backend_opts = "X11";
-	int opt;
 	int shift_flag;
-	GP_PixelType emul_type = GP_PIXEL_UNKNOWN;
+	int opts;
 
 	struct loader_params params = {
-		.show_progress = 0,
 		.show_progress_once = 0,
-		.show_info = 0,
 		.show_nn_first = 0,
-		.use_dithering = 0,
-		.orientation = 0,
 		.resampling_method = GP_INTERP_LINEAR_LF_INT,
 
                 .zoom_type = ZOOM_FIT,
@@ -703,77 +689,29 @@ int main(int argc, char *argv[])
 
 	GP_TIMER_DECLARE(timer, 0, 0, "Slideshow", timer_callback, &params);
 
-	while ((opt = getopt(argc, argv, "b:ce:fhIPr:s:tz:0:1:2:3:4:5:6:7:8:9:")) != -1) {
-		switch (opt) {
-		case 'I':
-			params.show_info = 1;
-		break;
-		case 'P':
-			params.show_progress = 1;
-		break;
-		case 'f':
-			params.use_dithering = 1;
-		break;
-		case 's':
-			params.sleep_ms = 1000 * atof(optarg) + 0.5;
-		break;
-		case 'c':
-			params.resampling_method = GP_INTERP_CUBIC_INT;
-			/* Cubic resampling needs low pass */
-			params.use_low_pass = 1;
-			/* Cubic resampling is slow, show nn first */
-			params.show_nn_first = 1;
-		break;
-		case 'e':
-			emul_type = GP_PixelTypeByName(optarg);
+	if (access("/etc/spiv.conf", R_OK) == 0)
+		spiv_config_load("/etc/spiv.conf");
 
-			if (emul_type == GP_PIXEL_UNKNOWN) {
-				fprintf(stderr, "Invalid pixel type '%s'\n", optarg);
-				return 1;
-			}
-		break;
-		case 'r':
-			if (!strcmp(optarg, "90"))
-				params.orientation = 90;
-			else if (!strcmp(optarg, "180"))
-				params.orientation = 180;
-			else if (!strcmp(optarg, "270"))
-				params.orientation = 270;
-		case 'b':
-			backend_opts = optarg;
-		break;
-		case 'h':
-			print_help();
-			exit(0);
-		break;
-		case 't':
-			cpu_timer_switch(1);
-		break;
-		case 'z':
-			switch (optarg[0]) {
-			case 'f':
-				params.zoom_type = ZOOM_FIXED;
-			break;
-			case 'w':
-				params.zoom_type = ZOOM_FIXED_WIN;
-			break;
-			}
-		break;
-		case '0':
-			/* -0 is mapped to action 10 */
-			image_action_set(9, optarg);
-		break;
-		case '1' ... '9':
-			image_action_set(opt - '1', optarg);
-		break;
-		default:
-			fprintf(stderr, "Invalid paramter '%c'\n", opt);
-			print_help();
-			return 1;
-		}
+	if (getenv("HOME")) {
+		char buf[256];
+
+		snprintf(buf, sizeof(buf), "%s/%s", getenv("HOME"), ".spiv");
+
+		if (access(buf, R_OK) == 0)
+			spiv_config_load(buf);
 	}
 
-	if (optind >= argc) {
+	opts = spiv_config_parse_args(argc, argv);
+
+	if (opts < 0) {
+		print_help();
+		return 1;
+	}
+
+	cpu_timer_switch(config.timers);
+	params.sleep_ms = 1000 * config.slideshow_delay + 0.5;
+
+	if (opts >= argc) {
 		fprintf(stderr, "Requires path to at least one image\n\n");
 		print_help();
 		return 1;
@@ -784,13 +722,15 @@ int main(int argc, char *argv[])
 	signal(SIGBUS, sighandler);
 	signal(SIGABRT, sighandler);
 
-	if (init_loader(&params, (const char **)argv + optind))
+	if (init_loader(&params, (const char **)argv + opts))
 		return 1;
 
-	init_backend(backend_opts);
+	init_backend(config.backend_init);
 
-	if (emul_type != GP_PIXEL_UNKNOWN)
-		backend = GP_BackendVirtualInit(backend, emul_type, GP_BACKEND_CALL_EXIT);
+	if (config.emul_type != GP_PIXEL_UNKNOWN) {
+		backend = GP_BackendVirtualInit(backend, config.emul_type,
+		                                GP_BACKEND_CALL_EXIT);
+	}
 
 	context = backend->context;
 
@@ -849,18 +789,28 @@ int main(int argc, char *argv[])
 						GP_BackendX11RequestFullscreen(backend, 2);
 				break;
 				case GP_KEY_I:
-					params.show_info = !params.show_info;
+				        config.show_info = !config.show_info;
 
 					params.show_progress_once = 1;
 					show_image(&params);
 				break;
 				case GP_KEY_P:
-					params.show_progress = !params.show_progress;
+					config.show_progress = !config.show_progress;
 				break;
 				case GP_KEY_R:
-					params.orientation += 90;
-					if (params.orientation > 270)
-						params.orientation = 0;
+					config.orientation++;
+
+					if (config.orientation > ROTATE_270)
+						config.orientation = 0;
+
+					params.show_progress_once = 1;
+					show_image(&params);
+				break;
+				case GP_KEY_E:
+					if (config.orientation > 0)
+						config.orientation--;
+					else
+						config.orientation = ROTATE_270;
 
 					params.show_progress_once = 1;
 					show_image(&params);

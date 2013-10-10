@@ -23,102 +23,207 @@
 #include <stdio.h>
 #include <GP.h>
 
-static const char *keys_help[] = {
-	"Keyboard control:",
-	"",
-	"Esc, Enter, Q - quit spiv",
-	"",
-	"< or KP Minus         - zoom out by 1.5",
-	"> or KP Plus          - zoom in by 1.5",
-	"R                     - rotate by 90 degrees clockwise",
-	"Up, Down, Left, Right - move image by 1px",
-	"                        (by 10 with Shift)",
-	"",
-	"Space     - move to the next image",
-	"BackSpace - move to the prev image",
-	"PgDown    - move to the start of directory",
-	"PgUp      - move to the end of directory",
-	"Home      - move to the first image",
-	"End       - move to the last image",
-	"",
-	"I      - toggle show info box",
-	"P      - toggle show progress",
-	"S      - stop/restart slideshow",
-	"",
-	"]      - change to next resampling method",
-	"[      - change to prev resampling method",
-	"        (current method is shown in info box)",
-	"L      - toggle low pass filter",
-	"D      - drop image cache",
-	"H      - toggle help",
-	"",
-	"F1-F10 - execute action 1 - 10",
-	"",
-	"1      - resize spiv window to the image size",
-	"2      - resize spiv window to the half of the image size",
-	"3      - resize spiv window to the third of the image size",
-	"...",
-	"9      - resize spiv window to the ninth of the image size",
-	"0      - resize spiv window to the tenth of the image size",
-	"",
-	"Shift 2 - resize spiv window twice of the image size",
-	"Shift 3 - resize spiv window three times of the image size",
-	"...",
+#include "spiv_config.h"
+#include "spiv_help.h"
+
+struct key_help {
+	const char *keys;
+	const char *desc;
 };
 
-static const int keys_help_len = sizeof(keys_help) / sizeof(char*);
+#define KEYS_MAX "13"
+
+static struct key_help help_keys[] = {
+	{"Esc, Enter, Q", "Quit spiv"},
+	{"Space", "Move to the next image"},
+	{"BackSpace", "Move to the prev image"},
+	{"PgDown", "Move to the start of directory"},
+	{"PgUp", "Move to the end of directory"},
+	{"Home", "Move to the first image"},
+	{"End", "Move to the last image"},
+	{"R", "Rotate by 90 degrees clockwise"},
+	{"E", "Rotate by 90 degrees counterclockwise"},
+	{"H", "Show help"},
+	{"I", "Toggle show info box"},
+	{"P", "Toggle show progress"},
+	{"S", "Start/stop slideshow"},
+	{"", ""},
+	{"F1-F10", "Execute action 1 - 10"},
+	{"", ""},
+	{"<, KP Minus", "Zoom out by 50%"},
+	{">, KP Plus",  "Zoom in by 50%"},
+	{"1", "Resize spiv window to the image size"},
+	{"2", "Resize spiv window to a half of the image size"},
+	{"3", "Resize spiv window to one third of the image size"},
+	{"9", "Resize spiv window to one ninth of the image size"},
+	{"...", ""},
+	{"0", "Resize spiv window to one tenth of the image size"},
+	{"Shift 2", "Resize spiv window twice of the image size"},
+	{"Shift 3", "Resize spiv window three times of the image size"},
+	{"...", ""},
+	{"Up", "Move image by 1px up (by 10 with Shift)"},
+	{"Down", "Move image by 1px down (by 10 with Shift)"},
+	{"Left", "Move image by 1px left (by 10 with Shift)"},
+	{"Right", "Move image by 1px right (by 10 with Shift)"},
+        {"", ""},
+	{"]", "Change to next resampling method"},
+	{"[", "Change to prev resampling method"},
+	{"L", "Toggle low pass filter"},
+	{"D", "Drop image cache"},
+};
+
+static const int help_keys_len = sizeof(help_keys) / sizeof(*help_keys);
+
+struct examples {
+	const char *example;
+	const char *desc;
+};
+
+static const struct examples examples[] = {
+	{"spiv *.jpg",
+	 "Shows all jpeg images in current directory"},
+	{"spiv images.zip",
+	 "Shows all images stored in zip file"},
+	{"spiv .",
+	 "Shows all loadable images in current directory"},
+	{"spiv -t 5 vacation/",
+	 "Runs slideshow with 5 second delay"},
+	{"spiv -1 'cp %F sorted' images/",
+	 "Copies currently loaded image into directory 'sorted/' on pressing F1"},
+	{"spiv -e G1 -f images/",
+	 "Emulates 1-bit Grayscale display and turns on Floyd-Steinberg dithering"},
+	{"spiv -b 'X11:ROOT_WIN' -t 10 images/",
+	 "Runs slideshow using X root window as backend window"},
+	{"spiv -b 'X11:CREATE_ROOT' -t 10 images/",
+	 "Same as abowe but works in KDE\n"}
+};
+
+static const int examples_len = sizeof(examples) / sizeof(*examples);
+
+struct actions {
+	const char modifier;
+	const char *desc;
+};
+
+static struct actions actions[] = {
+	{'f', "Path to current image"},
+	{'F', "Shell escaped path to current image"},
+	{'n', "Current image filename without extension"},
+	{'N', "Shell escaped image filename without extension"},
+	{'e', "Current image file extension"},
+};
+
+static const int actions_len = sizeof(actions) / sizeof(*actions);
 
 void print_help(void)
 {
 	int i;
 
-	printf("Usage: spiv [opts] images or dirs with images\n\n");
-	printf(" -I show image info box\n");
-	printf(" -P show loading progress\n");
-	printf(" -f use floyd-steinberg dithering\n");
-	printf(" -s sec slideshow interval in seconds (floating point value)\n");
-	printf(" -c turns on bicubic resampling (experimental)\n");
-	printf(" -e pixel_type  turns on backend type emulation\n");
-	printf("    for example -e G1 sets 1-bit grayscale\n");
-	printf(" -r angle  rotate display 90,180 or 270 degrees\n");
-	printf(" -z mode\n");
-	printf("    -zf zoom is set and modified by user\n");
-	printf("    -zw zoom is fixed to window size (currently default)\n");
-	printf(" -b pass backend init string to backend init\n");
-	printf("    pass -b help for more info\n");
-	printf(" -t enable timers\n");
-	printf("    if set timers that measure cpu and wall time\n");
-	printf("    of certain operations are printed into stdout\n");
-	puts("\n");
-	printf("Actions:\n\n");
-	printf(" -1 'cmd' sets first action\n");
-	printf(" ...\n");
-	printf(" -9 'cmd' sets ninth action\n");
-	printf(" -0 'cmd' sets tenth action\n");
-	puts("");
-	printf(" actions are shell commands with following modifiers:\n");
-	printf("  %%f path to current image\n");
-	printf("  %%F shell escaped path to current image\n");
-	printf("  %%n current image filename without extension\n");
-	printf("  %%N shell escaped image filename without extension\n");
-	printf("  %%e current image file extension\n");
-	puts("\n");
+	printf("Usage: spiv [opts] images or dirs with images\n");
+	spiv_config_print_help();
 
-	for (i = 0; i < keys_help_len; i++)
-		puts(keys_help[i]);
+	printf(" Action shell command modifiers:\n");
+
+	for (i = 0; i < actions_len; i++)
+		printf("  %%%c %s\n", actions[i].modifier, actions[i].desc);
+
+	printf("\n");
+
+	printf("Keyboard controls:\n\n");
+
+	for (i = 0; i < help_keys_len; i++) {
+		if (help_keys[i].desc[0] == '\0') {
+			printf(" %s\n", help_keys[i].keys);
+		} else {
+			printf(" %-"KEYS_MAX"s - %s\n",
+			       help_keys[i].keys, help_keys[i].desc);
+		}
+	}
 
 	puts("");
 
-	printf("Some cool options to try:\n\n");
-	printf("spiv -0 'cp %%F sorted' [images]\n");
-	printf("\tcopies current image into directory 'sorted/' on F1\n");
-	printf("spiv -e G1 -f [images]\n");
-	printf("\truns spiv in 1-bit bitmap mode and turns on dithering\n\n");
-	printf("spiv -b 'X11:ROOT_WIN' [images]\n");
-	printf("\truns spiv using X root window as backend window\n\n");
-	printf("spiv -b 'X11:CREATE_ROOT' [images]\n");
-	printf("\tSame as abowe but works in KDE\n");
+	printf("Example usage:\n\n");
 
+	for (i = 0; i < examples_len; i++)
+		printf("%s\n\t%s\n", examples[i].example, examples[i].desc);
+}
+
+const char *man_head =
+	".TH spiv 1 2013 GFXprim \"Simple yet Powerful Image Viewer\"\n\n"
+	".SH NAME\n"
+	"spiv \\- Simple yet Powerful Image Viewer\n"
+	".SH SYNOPSIS\n"
+	".B spiv\n"
+	"[options] images|dirs\n"
+	".SH DESCRIPTION\n"
+	".B spiv\n"
+	"is a fast, lightweight and minimalistic image viewer build on the\n"
+	"top of the GFXprim library.\n"
+	".PP\n"
+	"Spiv supports wide range of image formats, currently supported are\n"
+	"JPEG, PNG, GIF, BMP, TIFF, PSP, PPM, JP2 and CBZ (as well general\n"
+	"ZIP archives with images), and more will come in the near future.\n"
+	".PP\n"
+	"Spiv supports variety of video backends (via GFXprim backends)\n"
+	"currently these are X11, Linux Framebuffer, SDL and AAlib. Spiv also\n"
+	"supports wide range of backend pixel types from 1bit Grayscale to 32bit RGB\n"
+	"with optional Floyd-Steinberg dithering (even, for example, from RGB888 to RGB565).\n"
+	".PP\n"
+	"Spiv implements feh-like image actions, which are short shell scripts with\n"
+	"printf-like modifiers.\n"
+	"See\n.B ACTIONS\nbellow for further information.\n";
+
+static const char *man_tail =
+	".SH BUGS\n"
+	"Bugs happen. If you find one, report it on the GFXprim mailing list at\n"
+	".I gfxprim@ucw.cz\n"
+	".SH AUTHORS\n"
+	"Spiv is developed by Cyril Hrubis <chrubis@ucw.cz>\n"
+	".PP\nGFXprim was/is developed by:\n"
+	".PP\n.nf\nCyril Hrubis <chrubis@ucw.cz>\n"
+	".nf\nJiri \"BlueBear\" Dluhos <jiri.bluebear.dluhos@gmail.com>\n"
+	".nf\nTomas Gavenciak <gavento@ucw.cz>\n";
+
+static const char *actions_help =
+	".SH ACTIONS\n"
+	"Actions are short shell scripts with printf-like modifiers, the \n"
+	"modifiers are substituted to current image path, name, etc. and executed\n"
+	"by pressing function keys).\n"
+	".PP\n"
+	"Actions could be set via command line parameters or written into the\n"
+	"configuration file and support following modifiers:\n";
+
+void print_man(void)
+{
+	int i;
+
+	puts(man_head);
+
+	printf(".SH KEYBOARD CONTROL\n");
+
+	for (i = 0; i < help_keys_len; i++) {
+		if (help_keys[i].desc[0] != '\0') {
+			printf(".IP \"%s\"\n", help_keys[i].keys);
+			printf("%s\n", help_keys[i].desc);
+		}
+	}
+
+	spiv_config_print_man();
+
+	puts(".PP\nConfiguration is loaded from /etc/spiv.conf");
+	puts("then ~/.spiv and overriden by command line parameters.\n");
+
+	puts(actions_help);
+
+	for (i = 0; i < actions_len; i++)
+		printf(".PP\n.B %%%c\n%s\n", actions[i].modifier, actions[i].desc);
+
+	puts(".SH EXAMPLES");
+
+	for (i = 0; i < examples_len; i++)
+		printf(".PP\n.B %s\n.nf\n%s\n\n", examples[i].desc, examples[i].example);
+
+	puts(man_tail);
 }
 
 static int redraw_help(GP_Backend *backend, unsigned int loff, GP_Coord xoff)
@@ -130,14 +235,17 @@ static int redraw_help(GP_Backend *backend, unsigned int loff, GP_Coord xoff)
 
 	GP_Fill(c, black);
 
-	for (i = loff; i < keys_help_len; i++) {
-		GP_Coord h = 2 + (i - loff) * 15;
+	GP_Print(c, NULL, 20 + 10 * xoff, 2, GP_ALIGN_RIGHT|GP_VALIGN_BOTTOM,
+	         white, black, "%s", "Keyboard Controls:");
+
+	for (i = loff; i < help_keys_len; i++) {
+		GP_Coord h = 2 + (i - loff + 1) * 15;
 
 		if (h + 2 >= (GP_Coord)c->h)
 			goto out;
 
 		GP_Print(c, NULL, 20 + 10 * xoff, h, GP_ALIGN_RIGHT|GP_VALIGN_BOTTOM,
-		         white, black, "%s", keys_help[i]);
+		         white, black, "%-"KEYS_MAX"s - %s", help_keys[i].keys, help_keys[i].desc);
 	}
 
 out:
@@ -167,7 +275,7 @@ void draw_help(GP_Backend *backend)
 
 				switch (ev.val.key.key) {
 				case GP_KEY_DOWN:
-					if (last < keys_help_len)
+					if (last < help_keys_len)
 						last = redraw_help(backend, ++loff, xoff);
 				break;
 				case GP_KEY_UP:
@@ -181,8 +289,8 @@ void draw_help(GP_Backend *backend)
 					last = redraw_help(backend, loff, ++xoff);
 				break;
 				case GP_KEY_PAGE_DOWN:
-					if (last < keys_help_len) {
-						if (loff + max_lines(backend) >= keys_help_len)
+					if (last < help_keys_len) {
+						if (loff + max_lines(backend) >= help_keys_len)
 							break;
 
 						loff += max_lines(backend);
