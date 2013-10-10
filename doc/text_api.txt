@@ -35,6 +35,11 @@ void GP_Text(GP_Context *context, const GP_TextStyle *style,
 GP_Size GP_Print(GP_Context *context, const GP_TextStyle *style,
                  GP_Coord x, GP_Coord y, int align,
                  GP_Pixel fg_color, GP_Pixel bg_color, const char *fmt, ...);
+
+GP_Size GP_VPrint(GP_Context *context, const GP_TextStyle *style,
+                  GP_Coord x, GP_Coord y, int align,
+                  GP_Pixel fg_color, GP_Pixel bg_color,
+                  const char *fmt, va_list va);
 --------------------------------------------------------------------------------
 
 Draws text at the position x and y; the alignment of the text in relation

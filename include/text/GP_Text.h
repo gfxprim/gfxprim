@@ -26,6 +26,8 @@
 #ifndef TEXT_GP_TEXT_H
 #define TEXT_GP_TEXT_H
 
+#include <stdarg.h>
+
 #include "core/GP_Context.h"
 
 #include "text/GP_TextStyle.h"
@@ -91,6 +93,10 @@ GP_Size GP_Print(GP_Context *context, const GP_TextStyle *style,
 	         GP_Pixel fg_color, GP_Pixel bg_color, const char *fmt, ...)
 	         __attribute__ ((format (printf, 8, 9)));
 
+GP_Size GP_VPrint(GP_Context *context, const GP_TextStyle *style,
+                  GP_Coord x, GP_Coord y, int align,
+	          GP_Pixel fg_color, GP_Pixel bg_color,
+                  const char *fmt, va_list va);
 /*
  * Clears rectangle that would be used to draw text of size pixels.
  */

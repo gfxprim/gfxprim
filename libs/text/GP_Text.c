@@ -19,11 +19,10 @@
  * Copyright (C) 2009-2011 Jiri "BlueBear" Dluhos                            *
  *                         <jiri.bluebear.dluhos@gmail.com>                  *
  *                                                                           *
- * Copyright (C) 2009-2011 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2013 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
-#include <stdarg.h>
 #include "gfx/GP_Gfx.h"
 #include "core/GP_FnPerBpp.h"
 #include "core/GP_Debug.h"
@@ -96,18 +95,16 @@ void GP_Text(GP_Context *context, const GP_TextStyle *style,
 	            align & GP_TEXT_NOBG, fg_color, bg_color, str);
 }
 
-
-GP_Size GP_Print(GP_Context *context, const GP_TextStyle *style,
-                 GP_Coord x, GP_Coord y, int align,
-                 GP_Pixel fg_color, GP_Pixel bg_color, const char *fmt, ...)
+GP_Size GP_VPrint(GP_Context *context, const GP_TextStyle *style,
+                  GP_Coord x, GP_Coord y, int align,
+                  GP_Pixel fg_color, GP_Pixel bg_color,
+                  const char *fmt, va_list va)
 {
-	va_list va, vac;
+	va_list vac;
 	int size;
 
-	va_start(va, fmt);
 	va_copy(vac, va);
 	size = vsnprintf(NULL, 0, fmt, va);
-	va_end(va);
 	char buf[size+1];
 	vsnprintf(buf, sizeof(buf), fmt, vac);
 	va_end(vac);
@@ -117,6 +114,20 @@ GP_Size GP_Print(GP_Context *context, const GP_TextStyle *style,
 	return GP_TextWidth(style, buf);
 }
 
+GP_Size GP_Print(GP_Context *context, const GP_TextStyle *style,
+                 GP_Coord x, GP_Coord y, int align,
+                 GP_Pixel fg_color, GP_Pixel bg_color, const char *fmt, ...)
+{
+	va_list va;
+	GP_Size ret;
+
+	va_start(va, fmt);
+	ret = GP_VPrint(context, style, x, y, align,
+	                fg_color, bg_color, fmt, va);
+	va_end(va);
+
+	return ret;
+}
 
 void GP_TextClear(GP_Context *context, const GP_TextStyle *style,
                   GP_Coord x, GP_Coord y, int align,
