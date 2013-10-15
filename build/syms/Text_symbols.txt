@@ -15,6 +15,7 @@ GP_TextDescent
 GP_TextClearStr
 GP_Text
 GP_Print
+GP_VPrint
 
 GP_DefaultStyle
 
