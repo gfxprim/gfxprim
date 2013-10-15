@@ -311,6 +311,7 @@ struct cfg_opt spiv_opts[] = {
 	},
 	{.name_space = "Devel",
 	 .key = "BackendEmulation",
+	 .opt = 'e',
 	 .opt_long = "backend-emulation",
 	 .opt_has_value = 1,
 	 .set = set_emulation,
