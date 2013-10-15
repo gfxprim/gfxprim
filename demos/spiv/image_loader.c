@@ -230,6 +230,7 @@ unsigned int image_loader_dir_pos(void)
 
 void image_loader_drop_cache(void)
 {
+	drop_cur_img();
 	image_cache_drop(img_cache);
 }
 
