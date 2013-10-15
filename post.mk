@@ -29,12 +29,18 @@ help:
 	@echo ""
 	@echo "rebuild:   does clean and all"
 	@echo ""
+	@echo "check:     do pre-commit check"
+	@echo "           (currently checks for exported symbols)"
+	@echo ""
 	@echo "The default silent output could be turned off by defining"
 	@echo "'VERBOSE' shell variable as 'VERBOSE=1 make'"
 	@echo ""
 
 doc:
-	cd doc && make
+	@cd $(TOPDIR)/doc && make
+
+check:
+	@cd $(TOPDIR)/build && ./check_symbols.sh
 
 #
 # Determine mode (eg do not generate anything if not in compile mode

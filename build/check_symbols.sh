@@ -76,4 +76,6 @@ if [ -n "$FOUND" ]; then
 	echo "Set them static or update lists of exported functions in syms/Foo_symbols.txt"
 	echo
 	echo "$WARN"
+else
+	echo "No unexpected symbols found :)"
 fi
