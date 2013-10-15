@@ -115,6 +115,21 @@ static void virt_exit(GP_Backend *self)
 	free(self);
 }
 
+static int virt_resize_ack(GP_Backend *self)
+{
+	struct virt_priv *virt = GP_BACKEND_PRIV(self);
+	int ret;
+
+	ret = virt->backend->ResizeAck(virt->backend);
+
+	if (ret)
+		return ret;
+
+	return GP_ContextResize(self->context,
+	                        virt->backend->context->w,
+	                        virt->backend->context->h);
+}
+
 GP_Backend *GP_BackendVirtualInit(GP_Backend *backend,
                                   GP_PixelType pixel_type, int flags)
 {
@@ -147,6 +162,7 @@ GP_Backend *GP_BackendVirtualInit(GP_Backend *backend,
 	self->Flip          = virt_flip;
 	self->UpdateRect    = virt_update_rect;
 	self->Exit          = virt_exit;
+	self->ResizeAck     = virt_resize_ack;
 	self->Poll          = backend->Poll ? virt_poll : NULL;
 	self->Wait          = backend->Wait ? virt_wait : NULL;
 	self->SetAttributes = backend->SetAttributes ? virt_set_attrs : NULL;
