@@ -50,11 +50,11 @@
 %% for pt in pixeltypes
 %%  if pt.is_gray() or pt.is_rgb() and not pt.is_alpha()
 /*
- * Floyd Steinberg RGB888 to {{ pt.name }}
+ * Floyd Steinberg to {{ pt.name }}
  */
-static int floyd_steinberg_RGB888_to_{{ pt.name }}_Raw(const GP_Context *src,
-                                      GP_Context *dst,
-                                      GP_ProgressCallback *callback)
+static int floyd_steinberg_to_{{ pt.name }}_Raw(const GP_Context *src,
+                                                GP_Context *dst,
+                                                GP_ProgressCallback *callback)
 {
 %%   for c in pt.chanslist
 	float errors_{{ c[0] }}[2][src->w];
@@ -74,7 +74,10 @@ static int floyd_steinberg_RGB888_to_{{ pt.name }}_Raw(const GP_Context *src,
 
 	for (y = 0; y < (GP_Coord)src->h; y++) {
 		for (x = 0; x < (GP_Coord)src->w; x++) {
-			GP_Pixel pix = GP_GetPixel_Raw_24BPP(src, x, y);
+			GP_Pixel pix;
+
+			pix = GP_GetPixel_Raw(src, x, y);
+			pix = GP_PixelToRGB888(pix, src->pixel_type);
 
 %%   for c in pt.chanslist
 %%    if pt.is_gray()
@@ -131,7 +134,7 @@ static int floyd_steinberg(const GP_Context *src, GP_Context *dst,
 %%  for pt in pixeltypes
 %%   if pt.is_gray() or pt.is_rgb() and not pt.is_alpha()
 	case GP_PIXEL_{{ pt.name }}:
-		return floyd_steinberg_RGB888_to_{{ pt.name }}_Raw(src, dst, callback);
+		return floyd_steinberg_to_{{ pt.name }}_Raw(src, dst, callback);
 %%   endif
 %%  endfor
 	default:
@@ -145,11 +148,6 @@ int GP_FilterFloydSteinberg(const GP_Context *src, GP_Context *dst,
 	GP_CHECK(src->w <= dst->w);
 	GP_CHECK(src->h <= dst->h);
 
-	if (src->pixel_type != GP_PIXEL_RGB888) {
-		errno = ENOSYS;
-		return 1;
-	}
-
 	return floyd_steinberg(src, dst, callback);
 }
 
@@ -159,11 +157,6 @@ GP_Context *GP_FilterFloydSteinbergAlloc(const GP_Context *src,
                                          GP_ProgressCallback *callback)
 {
 	GP_Context *ret;
-
-	if (src->pixel_type != GP_PIXEL_RGB888) {
-		errno = ENOSYS;
-		return NULL;
-	}
 
 	ret = GP_ContextAlloc(src->w, src->h, pixel_type);
 

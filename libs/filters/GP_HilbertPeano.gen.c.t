@@ -56,9 +56,9 @@ static unsigned int count_bits(unsigned int n)
 /*
  * Hilbert Peano RGB888 to {{ pt.name }}
  */
-static int hilbert_peano_RGB888_to_{{ pt.name }}_Raw(const GP_Context *src,
-                                                 GP_Context *dst,
-                                                 GP_ProgressCallback *callback)
+static int hilbert_peano_to_{{ pt.name }}_Raw(const GP_Context *src,
+                                              GP_Context *dst,
+                                              GP_ProgressCallback *callback)
 {
 	struct GP_CurveState state;
 	unsigned int n;
@@ -79,7 +79,10 @@ static int hilbert_peano_RGB888_to_{{ pt.name }}_Raw(const GP_Context *src,
 
 	while (GP_HilbertCurveContinues(&state)) {
 		if (state.x < src->w && state.y < src->h) {
-			GP_Pixel pix = GP_GetPixel_Raw_24BPP(src, state.x, state.y);
+			GP_Pixel pix;
+
+			pix = GP_GetPixel_Raw(src, state.x, state.y);
+			pix = GP_PixelToRGB888(pix, src->pixel_type);
 
 %%   for c in pt.chanslist
 %%    if pt.is_gray()
@@ -141,7 +144,7 @@ static int hilbert_peano(const GP_Context *src, GP_Context *dst,
 %% for pt in pixeltypes
 %%  if pt.is_gray() or pt.is_rgb() and not pt.is_alpha()
 	case GP_PIXEL_{{ pt.name }}:
-		return hilbert_peano_RGB888_to_{{ pt.name }}_Raw(src, dst, callback);
+		return hilbert_peano_to_{{ pt.name }}_Raw(src, dst, callback);
 %%  endif
 %% endfor
 	default:
@@ -155,11 +158,6 @@ int GP_FilterHilbertPeano(const GP_Context *src, GP_Context *dst,
 	GP_CHECK(src->w <= dst->w);
 	GP_CHECK(src->h <= dst->h);
 
-	if (src->pixel_type != GP_PIXEL_RGB888) {
-		errno = ENOSYS;
-		return 1;
-	}
-
 	return hilbert_peano(src, dst, callback);
 }
 
@@ -168,11 +166,6 @@ GP_Context *GP_FilterHilbertPeanoAlloc(const GP_Context *src,
                                        GP_ProgressCallback *callback)
 {
 	GP_Context *ret;
-
-	if (src->pixel_type != GP_PIXEL_RGB888) {
-		errno = ENOSYS;
-		return NULL;
-	}
 
 	ret = GP_ContextAlloc(src->w, src->h, pixel_type);
 
