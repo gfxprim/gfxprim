@@ -1,15 +1,15 @@
 General information
-===================
+-------------------
 
 Gfxprim is simple modular 2D bitmap graphics library with emphasis on speed
 and correctness.
 
-One of the key points of the library is meta-programming. Most of the
-operations and filters are written in http://jinja.pocoo.org/[Jinja]
-templating language that is used to generate specialized code in C
-programmming language. Creating code that works with less usuall pixel types
-should be as easy as adding pixel definition into the configuration and
-rebuilding the library. Read more link:gen.html[here].
+One of the key points of the library are code generators. Most of the
+graphics operations are written using http://jinja.pocoo.org/[Jinja]
+templating engine which is used to create specialized C code. So,
+for an example, once you add pixel definition into configuration file,
+creating specialized filters, loaders and conversions to other pixel
+formats is just a matter of typing +make rebuild+.
 
 Core
 ----
@@ -21,9 +21,9 @@ The most important part of the core is link:context.html[CP_Context] structure
 that represents in-memory pixmap.
 
 The Core also contains generated code for basic operations such as
-link:get_put_pixel.html[GetPixel] and link:get_put_pixel.html[PutPixel] and
-optimized functions for writing continous line of pixels 'GP_WritePixels' that
-are base for the more complex drawing primitives in GFX or for graphics
+link:get_put_pixel.html[GP_GetPixel] and link:get_put_pixel.html[GP_PutPixel]
+and optimized functions for writing continous line of pixels 'GP_WritePixels'
+that are base for the more complex drawing primitives in GFX or for graphics
 operations in Filters.
 
 link:blits.html[Blits] are functions used to copy part of one bitmap into
@@ -48,7 +48,7 @@ that are used from different parts of the library.
 Gfx
 ---
 
-link:drawing_api.html[Gfx] is part of the library that implements basic
+link:gfx.html[Gfx] is part of the library that implements basic
 graphics primitives such as lines, circles, polygons, etc. Clasicall
 primitives are nearly finished. Work on anti aliased primitives has been
 started.
@@ -56,7 +56,7 @@ started.
 Text
 ----
 
-link:text_api.html[Text] part of the library implements basic support for
+link:text.html[Text] part of the library implements basic support for
 printing text into the bitmap. There are two bitmap fonts compiled directly
 into the library and we support True Type fonts through
 link:http://freetype.org[FreeType] (so far ASCII printable characters only).

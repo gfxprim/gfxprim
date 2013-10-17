@@ -1,5 +1,5 @@
 Drawing Backends
-================
+----------------
 
 Drawing backends provide means to draw on computer screen or into a window.
 Instead of having one unified initialization interface each backend has it's

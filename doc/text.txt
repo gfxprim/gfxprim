@@ -1,15 +1,11 @@
 Text
 ----
-
-NOTE: You may want to see the link:coordinate_system.html[coordinate system] first.
-
-Text
-~~~~
-
 Text drawing is controlled by the <<TextStyle,GP_TextStyle>> structure. This
-structure carries the information about font, letter spacing and pixel
+structure carries information about font, letter spacing and pixel
 multiplication and spacing. (If no font is specified, the default mono-space
 font is used.)
+
+You may want to see the link:coordinate_system.html[coordinate system] first.
 
 [source,c]
 --------------------------------------------------------------------------------

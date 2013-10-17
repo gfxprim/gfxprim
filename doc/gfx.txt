@@ -1,7 +1,25 @@
 Drawing primitives
 ------------------
 
-NOTE: You may want to see the link:coordinate_system.html[coordinate system] first.
+Drawing primitives implements algorithms to draw basic geometric shapes such
+as lines, circles, etc.
+
+You may want to see the link:coordinate_system.html[coordinate system] first.
+
+Rotation Flags
+~~~~~~~~~~~~~~
+
+Drawing orientation is affected by the link:context.html[context rotation
+flags]. The parameters passed to the functions are transformed accordingly to
+the flags before the drawing, which allows for fast and transparent rotated or
+mirrored rendering.
+
+
+GetPixel and PutPixel
+~~~~~~~~~~~~~~~~~~~~~
+
+link:get_put_pixel.html[GetPixel and PutPixel] are implemented in the library
+Core.
 
 Fill
 ~~~~
@@ -11,8 +29,10 @@ Fill
 void GP_Fill(GP_Context *context, GP_Pixel pixel);
 --------------------------------------------------------------------------------
 
-Fills the whole context bitmap with the specified pixel value. This has the
-same effect as calling 'GP_FillRect(context, 0, 0, context->w, context->h, pixel)'.
+Fills the whole context bitmap with the specified pixel value.
+
+NOTE: GP_Fill is implemented in the library Core rather than in GFX so that
+      it's available to all library parts.
 
 Lines
 ~~~~~
@@ -227,3 +247,25 @@ void GP_FillTetragon(GP_Context *context, GP_Coord x0, GP_Coord y0,
 --------------------------------------------------------------------------------
 
 Draws a filled tetragon.
+
+Polygons
+~~~~~~~~
+
+[source,c]
+--------------------------------------------------------------------------------
+void GP_Polygon(GP_Context *context, unsigned int vertex_count,
+                const GP_Coord *xy, GP_Pixel pixel);
+--------------------------------------------------------------------------------
+
+Draws a polygon.
+
+[source,c]
+--------------------------------------------------------------------------------
+void GP_FillPolygon(GP_Context *context, unsigned int vertex_count,
+                    const GP_Coord *xy, GP_Pixel pixel);
+--------------------------------------------------------------------------------
+
+Draws a filled polygon.
+
+The coordinages are passed in [x0, y0, x1, y1, ...] order, the vertex count
+describes a number of nodes, i.e. half of the size of the array.

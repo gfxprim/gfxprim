@@ -1,10 +1,10 @@
-SOURCES=general.txt context.txt loaders.txt filters.txt basic_types.txt \
-        drawing_api.txt backends.txt gamma.txt grabbers.txt \
-	environment_variables.txt debug.txt core.txt api.txt input.txt \
+SOURCES=index.html about.txt context.txt loaders.txt filters.txt \
+        basic_types.txt gfx.txt backends.txt gamma.txt grabbers.txt \
+	environment_variables.txt debug.txt core.txt input.txt \
 	gen.txt pixels.txt coordinate_system.txt coding_style.txt \
-	get_put_pixel.txt blits.txt progress_callback.txt text_api.txt \
+	get_put_pixel.txt blits.txt progress_callback.txt text.txt \
 	event_queue.txt compilation.txt filters_resize.txt \
-	filters_dithering.txt filters_python.txt
+	filters_dithering.txt filters_python.txt spiv.txt
 
 SOURCES+=core_python.txt gfx_python.txt loaders_python.txt backends_python.txt
 
@@ -24,7 +24,7 @@ PAGES+=$(subst .txt,.html,$(EXAMPLE_SOURCES))
 
 .PHONY: toolcheck clean
 
-all: toolcheck examples.html $(PAGES) api.html
+all: toolcheck examples.html $(PAGES)
 
 $(PAGES): asciidoc.conf
 
@@ -74,5 +74,3 @@ CLEAN+=$(PAGES)
 
 clean:
 	rm -f $(CLEAN)
-	rm -f api_links.html api.html examples.html
-	rm -f api.xml api.fo api.pdf

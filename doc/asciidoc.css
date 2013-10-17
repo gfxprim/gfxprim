@@ -1,9 +1,7 @@
-/* Shared CSS for AsciiDoc xhtml11 and html5 backends */
-
 /* Default font. */
 body {
   font-family: Georgia,serif;
-  background: white;
+  background: #bbb;
 }
 
 /* Title font. */
@@ -11,42 +9,47 @@ h1, h2, h3, h4, h5, h6,
 div.title, caption.title,
 thead, p.table.header,
 #toctitle,
-#author, #revnumber, #revdate, #revremark,
-#footer {
+#author, #revnumber, #revdate, #revremark {
   font-family: Arial,Helvetica,sans-serif;
+  clear: both;
 }
 
 body {
-  margin: 1em 5% 1em 5%;
+  margin: 1em 10% 1em 10%;
 }
 
-a {
-  color: blue;
-  text-decoration: underline;
+a, a:visited {
+  color: #333;
+  font-weight: bolder;
+  text-decoration: none;
 }
-a:visited {
-  color: fuchsia;
+
+a:hover {
+  font-weight: bolder;
+  text-decoration: none;
+  color: OrangeRed ! important;
 }
 
 em {
-  font-style: italic;
-  color: navy;
+  font-style: normal;
+  font-weight: 600;
+  color: #444;
 }
 
 strong {
   font-weight: bold;
-  color: #083194;
+  color: #223;
 }
 
 h1, h2, h3, h4, h5, h6 {
-  color: #527bbd;
+  color: #334;
   margin-top: 1.2em;
   margin-bottom: 0.5em;
   line-height: 1.3;
 }
 
 h1, h2, h3 {
-  border-bottom: 2px solid silver;
+  border-bottom: 2px solid #aaa;
 }
 h2 {
   padding-top: 0.5em;
@@ -66,7 +69,7 @@ div.sectionbody {
 }
 
 hr {
-  border: 1px solid silver;
+  border: 1px solid #aaa;
 }
 
 p {
@@ -96,18 +99,11 @@ pre {
 }
 
 #footer {
-  font-size: small;
-  border-top: 2px solid silver;
-  padding-top: 0.5em;
-  margin-top: 4.0em;
-}
-#footer-text {
-  float: left;
-  padding-bottom: 0.5em;
-}
-#footer-badges {
-  float: right;
-  padding-bottom: 0.5em;
+  background-color: #fa0;
+  text-align: center;
+  border-top: 1px solid Black;
+  border-bottom: 1px solid Black;
+  clear: both;
 }
 
 #preamble {
@@ -115,19 +111,69 @@ pre {
   margin-bottom: 1.5em;
 }
 
-div.left-menu {
+div.page-container {
+  background-color: White;
   position: relative;
-  top: 90pt;
-  left: -110pt;
-  height: 0;
-  width: 110pt;
 }
 
-div.logo h1 {
+div.left-menu {
+  position: absolute;
+  left: 1.5em;
+  top: 190px;
+  border: 1px solid Black;
+  background-color: #ddd;
+  padding-left: 0.5em;
+  padding-right: 0.5em;
+  padding-top: 0.5em;
+}
+
+div.left-menu a,a:visited,a:hover {
+  text-decoration: none;
+}
+
+div.left-menu a,a:visited {
+  color: #111;
+}
+
+div.left-menu a:hover {
+  color: OrangeRed;
+}
+
+div.left-menu ul {
+  padding: 0 0 0 0.4em;
+}
+
+div.left-menu li {
+  list-style-type: none;
+}
+
+#page-content {
+  border: 0;
+  padding-left: 13em;
+  padding-right: 2em;
+}
+
+div.logo {
   border-bottom: 0px;
   margin-top: 1em;
-  margin-bottom: 0em;
-  color: gray;
+  padding-left: 1em;
+  color: #444;
+  background-color: #fa0;
+  border-top: 1px solid Black;
+  border-bottom: 1px solid Black;
+  position: relative;
+}
+
+div.logo_picture {
+  display: inline;
+}
+
+div.upper-menu {
+  display: inline;
+  float: right;
+  position: absolute;
+  bottom: 0;
+  right: 1em;
 }
 
 div.imageblock, div.exampleblock, div.verseblock,
@@ -144,12 +190,12 @@ div.admonitionblock {
 }
 
 div.content { /* Block element content. */
-  padding: 0em;
+  padding: 1em;
 }
 
 /* Block element titles. */
 div.title, caption.title {
-  color: #527bbd;
+  color: #444;
   font-weight: bold;
   text-align: left;
   margin-top: 1.0em;
@@ -178,7 +224,7 @@ div.sidebarblock > div.content {
 
 div.listingblock > div.content {
   border: 1px solid #dddddd;
-  border-left: 5px solid #f0f0f0;
+  border-left: 5px solid #99a;
   background: #f8f8f8;
   padding: 0.5em;
 }
@@ -204,10 +250,6 @@ div.verseblock > div.attribution {
   padding-top: 0.75em;
   text-align: left;
 }
-/* DEPRECATED: Pre version 8.2.7 verse style literal block. */
-div.verseblock + div.attribution {
-  text-align: left;
-}
 
 div.admonitionblock .icon {
   vertical-align: top;
@@ -219,7 +261,7 @@ div.admonitionblock .icon {
 }
 div.admonitionblock td.content {
   padding-left: 0.5em;
-  border-left: 3px solid #dddddd;
+  border-left: 3px solid #bbc;
 }
 
 div.exampleblock > div.content {
@@ -342,10 +384,6 @@ div.colist td img {
   margin-top: 0.3em;
 }
 
-@media print {
-  #footer-badges { display: none; }
-}
-
 #toc {
   margin-bottom: 2.5em;
 }
@@ -425,7 +463,7 @@ span.line-through { text-decoration: line-through; }
 tt {
   font-family: monospace;
   font-size: inherit;
-  color: navy;
+  color: #333;
 }
 
 div.tableblock {
@@ -433,11 +471,11 @@ div.tableblock {
   margin-bottom: 1.5em;
 }
 div.tableblock > table {
-  border: 3px solid #527bbd;
+  border: 3px solid #336;
 }
 thead, p.table.header {
   font-weight: bold;
-  color: #527bbd;
+  color: #334;
 }
 p.table {
   margin-top: 0;
@@ -453,73 +491,4 @@ div.tableblock > table[frame="hsides"] {
 div.tableblock > table[frame="vsides"] {
   border-top-style: none;
   border-bottom-style: none;
-}
-
-
-/*
- * html5 specific
- *
- * */
-
-.monospaced {
-  font-family: monospace;
-  font-size: inherit;
-  color: navy;
-}
-
-table.tableblock {
-  margin-top: 1.0em;
-  margin-bottom: 1.5em;
-}
-thead, p.tableblock.header {
-  font-weight: bold;
-  color: #527bbd;
-}
-p.tableblock {
-  margin-top: 0;
-}
-table.tableblock {
-  border-width: 3px;
-  border-spacing: 0px;
-  border-style: solid;
-  border-color: #527bbd;
-  border-collapse: collapse;
-}
-th.tableblock, td.tableblock {
-  border-width: 1px;
-  padding: 4px;
-  border-style: solid;
-  border-color: #527bbd;
-}
-
-table.tableblock.frame-topbot {
-  border-left-style: hidden;
-  border-right-style: hidden;
-}
-table.tableblock.frame-sides {
-  border-top-style: hidden;
-  border-bottom-style: hidden;
-}
-table.tableblock.frame-none {
-  border-style: hidden;
-}
-
-th.tableblock.halign-left, td.tableblock.halign-left {
-  text-align: left;
-}
-th.tableblock.halign-center, td.tableblock.halign-center {
-  text-align: center;
-}
-th.tableblock.halign-right, td.tableblock.halign-right {
-  text-align: right;
-}
-
-th.tableblock.valign-top, td.tableblock.valign-top {
-  vertical-align: top;
-}
-th.tableblock.valign-middle, td.tableblock.valign-middle {
-  vertical-align: middle;
-}
-th.tableblock.valign-bottom, td.tableblock.valign-bottom {
-  vertical-align: bottom;
 }

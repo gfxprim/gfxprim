@@ -1,43 +1,39 @@
-Compilation
------------
+Dependencies
+------------
 
-GFXprim needs following tools to compile:
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+*Base dependencies*
 
 * C compiler (tested with 'gcc' or 'clang')
 * GNU make
 * Python (2.6 or newer)
 * Jinja2
 
-Additional dependencies:
-~~~~~~~~~~~~~~~~~~~~~~~~
-
-Image loaders
-^^^^^^^^^^^^^
+*Optional Image loaders*
 
 * libjpeg
 * libpng
 * giflib
 * libtiff
+* openjpeg >= 2.0.0
+* zlib (usually installed as libpng dependency)
 
-Text rendering
-^^^^^^^^^^^^^^
+*Optinal Text rendering*
 
 * FreeType
 
-Backends
-^^^^^^^^
+*Optional Backends*
 
 * X11
-* SDL (not recomended, SDL is known to be slow and buggy)
+* AA-lib
+* SDL-1.2 (not recomended, known to be slow and buggy)
 
-Python Bindings
-^^^^^^^^^^^^^^^
+*Python Bindings*
 
 * Swig
+* Python (devel library)
 
 Compilation
-~~~~~~~~~~~
+-----------
 
 Once devel packages are installed the compilation is as simple as running
 +configure+ and +make+.
@@ -65,7 +61,7 @@ The +make install+ command will install GFXprim libraries and devel headers
 into your system.
 
 OpenSUSE & Fedora
-~~~~~~~~~~~~~~~~~
+-----------------
 
 Instruction to install required packages on
 link:http://www.opensuse.org/[OpenSUSE].
@@ -78,7 +74,7 @@ Works for link:http://www.fedoraproject.org/[Fedora] too if you substitute
 zypper in gcc make python-jinja2
 -------------------------------------------------------------------------------
 
-.Install jpeg and png devel libraries
+.Install image devel libraries
 -------------------------------------------------------------------------------
 zypper in libjpeg-devel libpng-devel giflib-devel libtiff-devel
 -------------------------------------------------------------------------------
@@ -106,7 +102,7 @@ zypper in gcc make python-Jinja2 libjpeg-devel libpng-devel giflib-devel
 -------------------------------------------------------------------------------
 
 Debian
-~~~~~~
+------
 
 Instruction to install required packages on link:http://www.debian.org[Debian]
 and other Debian based distributions.
@@ -116,7 +112,7 @@ and other Debian based distributions.
 apt-get install gcc make python-jinja2
 -------------------------------------------------------------------------------
 
-.Install jpeg and png devel libraries
+.Install image devel libraries
 -------------------------------------------------------------------------------
 apt-get install libjpeg-dev libpng-dev libgif-dev libtiff-dev
 -------------------------------------------------------------------------------

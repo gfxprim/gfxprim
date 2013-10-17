@@ -1,0 +1,55 @@
+GFXprim
+-------
+
+'GFXprim' is Open-source modular 2D bitmap graphics library with emphasis on
+speed and correctness.
+
+The goal of the library is to provide simple but powerful API for applications
+that needs to work with bitmap graphics. The library itself started as a
+simple replacement for 'SDL_gfx' which was unusable at the time and soon it
+outgrew the initial purpose and became main topic of the development.
+
+GFXprim is not tied to a specific graphic system (such as X11) but on the
+other hand provides means to interact with them.
+
+GFXprim can load and save images in variety of formats, operate on the data on
+a pixel level, run image filters, render basic shapes or text, open and manage
+X11 windows, draw on Linux framebuffer and more.
+
+GFXprim also comes with link:core_python.html[Python bindings].
+
+There are a few example applications included, the most advanced is a
+link:spiv.html[spiv] image viewer which is already a full featured
+application.
+
+See the link:about.html[about page] for more detailed information.
+
+License
+-------
+
+The code is licensed under LGPL 2.1 or (at your opinion) any later.
+
+Bugs
+----
+
+Report bugs on the GFXprim
+http://www.ucw.cz/mailman/listinfo/gfxprim[mailing list].
+Eventually you can use GitHub
+https://github.com/gfxprim/gfxprim/issues[issue tracker].
+
+News
+----
+
+The GFXprim version 1.0.0-rc0 has been released!
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Download
+http://gfxprim.ucw.cz/releases/gfxprim_1.0.0-rc0.tar.bz2[1.0.0-rc0] tarball (without docs).
+
+Or get the code from directly from http://github.com/gfxprim/gfxprim/[github].
+
+Contact
+-------
+
+We do have a http://www.ucw.cz/mailman/listinfo/gfxprim[mailing list] and
+although there is not much of discussion now, we are there and listening.
