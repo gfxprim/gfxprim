@@ -11,6 +11,8 @@
 
 %ignore GP_GlyphBitmap::bitmap;
 %ignore GP_FontFace::glyph_offsets;
+%ignore GP_Print;
+%ignore GP_VPrint;
 %include "GP_Text.h"
 %include "GP_Font.h"
 %include "GP_DefaultFont.h"
