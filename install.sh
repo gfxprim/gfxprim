@@ -40,4 +40,3 @@ done
 echo "INSTALL binaries"
 install -m 775 -d "$BIN_LOC"
 install -m 755 gfxprim-config "$BIN_LOC"
-install -m 755 demos/spiv/spiv "$BIN_LOC"

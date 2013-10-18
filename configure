@@ -312,7 +312,8 @@ if __name__ ==  '__main__':
 	   'prefix'        : ['', 'Installation prefix'],
 	   'bindir'        : ['/usr/bin', 'Where to install binaries'],
 	   'libdir'        : ['', 'Where to install libraries'],
-	   'includedir'    : ['/usr/include', 'Where to install headers']}
+	   'includedir'    : ['/usr/include', 'Where to install headers'],
+           'mandir'        : ['/usr/share/man', 'Where to install man pages']}
 
     #
     # Library detection/enable disable

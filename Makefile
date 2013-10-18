@@ -7,7 +7,7 @@ TOP_MAKE=1
 ifneq ($(MAKECMDGOALS),install)
 SUBDIRS=include libs tests pylib demos build
 else
-SUBDIRS=pylib
+SUBDIRS=pylib demos
 endif
 
 libs: include
