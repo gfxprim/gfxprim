@@ -7,5 +7,6 @@ loaders: framework
 gfx: framework
 core: framework
 filters: framework
+input: framework
 
 include $(TOPDIR)/post.mk
