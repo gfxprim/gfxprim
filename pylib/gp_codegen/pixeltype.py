@@ -9,12 +9,14 @@ import re
 from .pixelsize import PixelSize
 
 class PixelChannel(list):
-  def __init__(self, triplet):
+  def __init__(self, triplet, idx):
     (name, offset, size) = triplet
     # Create the list -> backward compatibility with triplets
     self.append(name)
     self.append(offset)
     self.append(size)
+    # Add index (position in pixel from left)
+    self.idx = idx
     # Add some convinience variables
     self.name = name
     self.off = offset
@@ -45,8 +47,10 @@ class PixelType(object):
     self.name = name
     # Create channel list with convinience variables
     new_chanslist = []
+    idx = 0
     for i in chanslist:
-      new_chanslist.append(PixelChannel(i))
+      new_chanslist.append(PixelChannel(i, idx))
+      idx = idx + 1
     self.chanslist = new_chanslist
     self.chans = dict() # { chan_name: (offset, size) }
     self.pixelsize = pixelsize
