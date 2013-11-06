@@ -974,12 +974,9 @@ static int save_ascii_rgb888(FILE *f, const GP_Context *ctx,
 		}
 
 		for (x = 0; x < ctx->w; x++) {
-			GP_Pixel pix = *(addr+=3);
+			addr+=3;
 
-			ret = fprintf(f, "%u %u %u ",
-			              GP_Pixel_GET_R_RGB888(pix),
-			              GP_Pixel_GET_G_RGB888(pix),
-			              GP_Pixel_GET_B_RGB888(pix));
+			ret = fprintf(f, "%u %u %u ", addr[2], addr[1], addr[0]);
 
 			if (ret < 0)
 				return errno;
