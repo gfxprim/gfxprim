@@ -61,6 +61,7 @@ printing text into the bitmap. There are two bitmap fonts compiled directly
 into the library and we support True Type fonts through
 link:http://freetype.org[FreeType] (so far ASCII printable characters only).
 
+[[Loaders]]
 Loaders
 -------
 

@@ -3,8 +3,10 @@ Context loaders
 This part of GFXprim library aims to create API to load and save images
 from/to common image file formats.
 
-Currently we support JPEG, PNG, BPM and  PNM images for loading and saving and
-GIF and PSP for loading.
+Currently we support JPEG, PNG, BMP, TIFF and PNM images for loading and
+saving and GIF, JPEG2000 and PSP for loading.
+
+Have a look at the link:about.html#Loaders[supported formats].
 
 Loaders API
 ~~~~~~~~~~~
@@ -48,21 +50,21 @@ Image Loader
 GP_Context *GP_LoadImage(const char *src_path, GP_ProgressCallback *callback);
 -------------------------------------------------------------------------------
 
-Loads image from a file.
+Loads an image from a file.
 
 The image format is first guessed by the file extension. If loader for the
 file extension is found it's called and if it succedes the image data is
 returned.
 
-If extension based guess fails either because the extension wasn't matched or
-if the loader for the extension failed; the signature based method is used.
-The loader loads several bytes (currently 32) from the file and calls
-signature matching functions for each format that implements signature
-matching. If image signature is found particular image loader it is called
-and the result is returned.
+If file extension based guess fails either because the extension wasn't
+matched or if the loader for the extension failed; the signature based method
+is used.  The loader loads several bytes (currently 32) from the file and
+calls signature matching functions for each format that implements signature
+matching. If image signature is found image loader it is called and the result
+is returned.
 
-If file extension disagrees with file signature a warning is printed into the
-'stderr'.
+If file extension disagrees with file signature on the file format a warning
+is printed into the 'stderr'.
 
 [source,c]
 -------------------------------------------------------------------------------
@@ -76,11 +78,16 @@ int GP_SaveImage(GP_Context *src, const char *dst_path,
 
 Saves a context into a file.
 
-The file format is matched accordingly to the file extension. If extension is
-not found non-zero is returned and 'errno' is set to 'EINVAL'. If extension
-was found but support for saving the image format is not implemented 'errno'
-is set to 'ENOSYS'.
+The file format is matched accordingly to the file extension.
 
+If extension is not found non-zero is returned and 'errno' is set to 'EINVAL'.
+
+If extension was found but support for saving the image format is not
+implemented 'errno' is set to 'ENOSYS' (this may happen in case that GFXprim
+wasn't compiled with support for this image type).
+
+If context pixel type is not supported by the format 'errno' is set to
+'EINVAL'.
 
 Advanced usage
 ^^^^^^^^^^^^^^
