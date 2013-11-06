@@ -20,18 +20,46 @@
  *                                                                           *
  *****************************************************************************/
 
-%% extends "filter.point.c.t"
+/*
 
-%% block descr
-Invert Point filter -- Inverts pixel channel values
-%% endblock
+  Applies per-channel tables on a context pixels. Used for fast point filters
+  implementation.
 
-%% block body
+ */
 
-%% macro filter_op_invert(val, val_max)
-{{ val_max }} - {{ val }}
-%%- endmacro
+#ifndef FILTERS_GP_APPLY_TABLES_H
+#define FILTERS_GP_APPLY_TABLES_H
 
-{{ filter_point('Invert', filter_op_invert) }}
+#include "GP_Filter.h"
 
-%% endblock body
+/*
+ * Per-channel lookup tables.
+ */
+typedef struct GP_FilterTables {
+	GP_Pixel *table[GP_PIXELTYPE_MAX_CHANNELS];
+	int free_table:1;
+} GP_FilterTables;
+
+/*
+ * Generic point filter, applies corresponding table on bitmap.
+ */
+int GP_FilterTablesApply(const GP_FilterArea *const area,
+                         const GP_FilterTables *const tables,
+                         GP_ProgressCallback *callback);
+
+/*
+ * Aloocates and initializes tables.
+ */
+int GP_FilterTablesInit(GP_FilterTables *self, const GP_Context *ctx);
+
+/*
+ * Allocates and initializes table structure and tables.
+ */
+GP_FilterTables *GP_FilterTablesAlloc(const GP_Context *ctx);
+
+/*
+ * Frees point filter tables.
+ */
+void GP_FilterTablesFree(GP_FilterTables *self);
+
+#endif /* FILTERS_GP_APPLY_TABLES_H */

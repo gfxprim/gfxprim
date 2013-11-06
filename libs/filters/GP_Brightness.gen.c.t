@@ -16,39 +16,24 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2011      Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2013 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
 %% extends "filter.point.c.t"
 
 %% block descr
-Brightness filters -- Increments color channel(s) by a fixed value.
+Brightness Point filter
 %% endblock
 
 %% block body
 
-{{ filter_point_include() }}
+#include "core/GP_Clamp.h"
 
-%% macro filter_op(chann_name, chann_size)
-{{ chann_name }} = {{ chann_name }} + {{ chann_name }}_inc;
-{{ filter_clamp_val(chann_name, chann_size) }}
-%% endmacro
+%% macro filter_op_brightness(val, val_max)
+GP_CLAMP_GENERIC({{ val }} + (p * {{ val_max }} + 0.5), 0, {{ val_max }})
+%%- endmacro
 
-/*
- * Generated brightness filters.
- */
-%% call(pt) filter_point_per_channel('Brightness', 'GP_FilterParam incs[]', filter_op)
-{{ filter_params(pt, 'incs', 'int32_t ', '_inc', 'i') }}
-%% endcall
-
-/*
- * Generated constrast filters for pixels with one channel.
- */
-%% call(ps) filter_point_per_bpp('Brightness', 'GP_FilterParam incs[]', filter_op)
-{{ filter_param(ps, 'incs', 'int32_t ', '_inc', 'i') }}
-%% endcall
-
-{{ filter_functions('Brightness', 'GP_FilterParam incs[]', 'incs') }}
+{{ filter_point('Brightness', filter_op_brightness, 'float p', 'p') }}
 
 %% endblock body

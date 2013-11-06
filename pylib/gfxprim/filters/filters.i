@@ -28,7 +28,10 @@ ERROR_ON_NONZERO(GP_Filter ## funcname);
 %newobject GP_FilterParamCreate;
 %include "GP_FilterParam.h"
 
-/* TODO: Point filters, once fixed */
+FILTER_FUNC(Invert);
+FILTER_FUNC(Brightness);
+FILTER_FUNC(Contrast);
+%include "GP_Point.h"
 
 /* Arithmetic filters */
 FILTER_FUNC(Addition);

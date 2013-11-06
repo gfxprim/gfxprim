@@ -16,7 +16,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2011 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2013 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
@@ -34,15 +34,30 @@
 /*
  * Brightness filter.
  *
- * Increments each pixel channel by a given value.
+ * Increments each pixel channel by a p * channel_max value.
  */
-int GP_FilterBrightness_Raw(const GP_Context *src, GP_Context *dst,
-                            GP_FilterParam params[],
-                            GP_ProgressCallback *callback);
+int GP_FilterBrightnessEx(const GP_FilterArea *area, float p,
+                          GP_ProgressCallback *callback);
 
-GP_Context *GP_FilterBrightness(const GP_Context *src, GP_Context *dst,
-                                GP_FilterParam params[],
-                                GP_ProgressCallback *callback);
+GP_Context *GP_FilterBrightnessExAlloc(const GP_FilterArea *area, float p,
+                                       GP_ProgressCallback *callback);
+
+static inline int GP_FilterBrightness(const GP_Context *src, GP_Context *dst,
+                                      float p, GP_ProgressCallback *callback)
+{
+	GP_FILTER_AREA_DEFAULT(src, dst);
+
+	return GP_FilterBrightnessEx(&area, p, callback);
+}
+
+static inline GP_Context *GP_FilterBrightnessAlloc(const GP_Context *src,
+                                                   float p,
+                                                   GP_ProgressCallback *callback)
+{
+	GP_FILTER_AREA_DEFAULT(src, NULL);
+
+	return GP_FilterBrightnessExAlloc(&area, p, callback);
+}
 
 /*
  * Contrast filter.
@@ -52,42 +67,52 @@ GP_Context *GP_FilterBrightness(const GP_Context *src, GP_Context *dst,
  * The parameters should have the same pixel channels as
  * source pixel type and are expected to be float numbers.
  */
-int GP_FilterContrast_Raw(const GP_Context *src, GP_Context *dst,
-                          GP_FilterParam params[],
-                          GP_ProgressCallback *callback);
-
-GP_Context *GP_FilterContrast(const GP_Context *src, GP_Context *dst,
-                              GP_FilterParam params[],
-                              GP_ProgressCallback *callback);
-
-/*
- * Invert filter.
- *
- * Inverts each pixel channel (eg. val = max - val)
- */
-int GP_FilterInvert_Raw(const GP_Context *src, GP_Context *dst,
+int GP_FilterContrastEx(const GP_FilterArea *area, float p,
                         GP_ProgressCallback *callback);
 
-GP_Context *GP_FilterInvert(const GP_Context *src, GP_Context *dst,
-                            GP_ProgressCallback *callback);
+GP_Context *GP_FilterContrastExAlloc(const GP_FilterArea *area, float p,
+                                     GP_ProgressCallback *callback);
+
+static inline int GP_FilterContrast(const GP_Context *src, GP_Context *dst,
+                                    float p, GP_ProgressCallback *callback)
+{
+	GP_FILTER_AREA_DEFAULT(src, dst);
+
+	return GP_FilterContrastEx(&area, p, callback);
+}
+
+static inline GP_Context *GP_FilterContrastAlloc(const GP_Context *src,
+                                                 float p,
+                                                 GP_ProgressCallback *callback)
+{
+	GP_FILTER_AREA_DEFAULT(src, NULL);
+
+	return GP_FilterContrastExAlloc(&area, p, callback);
+}
 
 /*
- * Noise filter.
+ * Inverts the pixel value, i.e. sets it to max - val.
  */
-GP_Context *GP_FilterNoise(const GP_Context *src, GP_Context *dst,
-                           GP_FilterParam ratio[], GP_ProgressCallback *callback);
+int GP_FilterInvertEx(const GP_FilterArea *area,
+                      GP_ProgressCallback *callback);
 
-/*
- * Generic slow point filter.
- *
- * The filter_callback[] is expected to be filled with pointers
- * to functions of type uint32_t (*func)(uint32_t chan_val, uint8_t chan_size, GP_FilterParam *priv)
- *
- * The priv[] is free for your use and corresponding
- */
-GP_Context *GP_FilterPoint(const GP_Context *src, GP_Context *dst,
-                           GP_FilterParam filter_callback[],
-                           GP_FilterParam priv[],
-                           GP_ProgressCallback *callback);
+GP_Context *GP_FilterInvertExAlloc(const GP_FilterArea *area,
+                                   GP_ProgressCallback *callback);
+
+static inline int GP_FilterInvert(const GP_Context *src, GP_Context *dst,
+                                  GP_ProgressCallback *callback)
+{
+	GP_FILTER_AREA_DEFAULT(src, dst);
+
+	return GP_FilterInvertEx(&area, callback);
+}
+
+static inline GP_Context *GP_FilterInvertAlloc(const GP_Context *src,
+                                               GP_ProgressCallback *callback)
+{
+	GP_FILTER_AREA_DEFAULT(src, NULL);
+
+	return GP_FilterInvertExAlloc(&area, callback);
+}
 
 #endif /* FILTERS_GP_POINT_H */

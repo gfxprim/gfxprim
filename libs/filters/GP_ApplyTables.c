@@ -20,18 +20,86 @@
  *                                                                           *
  *****************************************************************************/
 
-%% extends "filter.point.c.t"
+#include "core/GP_Debug.h"
 
-%% block descr
-Invert Point filter -- Inverts pixel channel values
-%% endblock
+#include "filters/GP_ApplyTables.h"
 
-%% block body
+static GP_Pixel *create_table(const GP_PixelTypeChannel *chan)
+{
+	size_t table_size = (1 << chan->size);
+	GP_Pixel *table = malloc(table_size * sizeof(GP_Pixel));
+	GP_Pixel i;
 
-%% macro filter_op_invert(val, val_max)
-{{ val_max }} - {{ val }}
-%%- endmacro
+	if (!table) {
+		GP_DEBUG(1, "Malloc failed :(");
+		return NULL;
+	}
 
-{{ filter_point('Invert', filter_op_invert) }}
+	for (i = 0; i < table_size; i++)
+		table[i] = i;
 
-%% endblock body
+	return table;
+}
+
+static void free_tables(GP_FilterTables *self)
+{
+	unsigned int i;
+
+	for (i = 0; i < GP_PIXELTYPE_MAX_CHANNELS; i++)
+		free(self->table[i]);
+}
+
+int GP_FilterTablesInit(GP_FilterTables *self, const GP_Context *ctx)
+{
+	unsigned int i;
+	const GP_PixelTypeDescription *desc;
+
+	GP_DEBUG(2, "Allocating tables for pixel %s",
+	         GP_PixelTypeName(ctx->pixel_type));
+
+	for (i = 0; i < GP_PIXELTYPE_MAX_CHANNELS; i++)
+		self->table[i] = NULL;
+
+	desc = GP_PixelTypeDesc(ctx->pixel_type);
+
+	for (i = 0; i < desc->numchannels; i++) {
+		self->table[i] = create_table(&desc->channels[i]);
+		if (!self->table[i]) {
+			free_tables(self);
+			return 1;
+		}
+	}
+
+	return 0;
+}
+
+GP_FilterTables *GP_FilterTablesAlloc(const GP_Context *ctx)
+{
+	GP_FilterTables *tables = malloc(sizeof(GP_FilterTables));
+
+	GP_DEBUG(1, "Allocating point filter (%p)", tables);
+
+	if (!tables) {
+		GP_DEBUG(1, "Malloc failed :(");
+		return NULL;
+	}
+
+	tables->free_table = 1;
+
+	if (GP_FilterTablesInit(tables, ctx)) {
+		free(tables);
+		return NULL;
+	}
+
+	return tables;
+}
+
+void GP_FilterTablesFree(GP_FilterTables *self)
+{
+	GP_DEBUG(1, "Freeing point filter and tables (%p)", self);
+
+	free_tables(self);
+
+	if (self->free_table)
+		free(self);
+}

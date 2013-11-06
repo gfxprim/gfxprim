@@ -16,39 +16,24 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2011      Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2013 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
 %% extends "filter.point.c.t"
 
 %% block descr
-Contrast filters -- Multiply color channel(s) by a fixed float value.
+Contrast Point filter
 %% endblock
 
 %% block body
 
-{{ filter_point_include() }}
+#include "core/GP_Clamp.h"
 
-%% macro filter_op(chan_name, chan_size)
-{{ chan_name }} = {{ chan_name }} * {{ chan_name }}_mul + 0.5;
-{{ filter_clamp_val(chan_name, chan_size) }}
-%% endmacro
+%% macro filter_op_contrast(val, val_max)
+GP_CLAMP_GENERIC({{ val }} * p + 0.5, 0, {{ val_max }})
+%%- endmacro
 
-/*
- * Generated contrast filters for pixels with several channels.
- */
-%% call(pt) filter_point_per_channel('Contrast', 'GP_FilterParam muls[]', filter_op)
-{{ filter_params(pt, 'muls', 'float ', '_mul', 'f') }}
-%% endcall
-
-/*
- * Generated constrast filters for pixels with one channel.
- */
-%% call(ps) filter_point_per_bpp('Contrast', 'GP_FilterParam muls[]', filter_op)
-{{ filter_param(ps, 'muls', 'float ', '_mul', 'f') }}
-%% endcall
-
-{{ filter_functions('Contrast', 'GP_FilterParam muls[]', 'muls') }}
+{{ filter_point('Contrast', filter_op_contrast, 'float p', 'p') }}
 
 %% endblock body

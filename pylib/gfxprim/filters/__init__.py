@@ -20,7 +20,10 @@ def _init(module):
 
   _context._submodules['filters'] = FiltersSubmodule
 
-  for name in ['Resize', 'ResizeAlloc',
+  for name in ['Invert', 'InvertAlloc',
+               'Brightness', 'BrightnessAlloc',
+               'Contrast', 'ContrastAlloc',
+               'Resize', 'ResizeAlloc',
                'Rotate90', 'Rotate90Alloc',
 	       'Rotate180', 'Rotate180Alloc',
 	       'Rotate270', 'Rotate270Alloc',

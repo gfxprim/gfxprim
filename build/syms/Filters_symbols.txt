@@ -1,14 +1,22 @@
 GP_CubicTable
 
+GP_FilterTablesApply
+GP_FilterTablesAlloc
+GP_FilterTablesInit
+GP_FilterTablesFree
+
+GP_FilterInvertEx
+GP_FilterInvertExAlloc
+
+GP_FilterBrightnessEx
+GP_FilterBrightnessExAlloc
+
+GP_FilterContrastEx
+GP_FilterContrastExAlloc
+
 GP_FilterAddition
 GP_FilterAdditionAlloc
 GP_FilterAddition_Raw
-
-GP_FilterBrightness
-GP_FilterBrightness_Raw
-
-GP_FilterContrast
-GP_FilterContrast_Raw
 
 GP_FilterConvolutionEx
 GP_FilterConvolutionExAlloc
@@ -45,9 +53,6 @@ GP_FilterHLinearConvolution_Raw
 GP_FilterHistogram
 GP_FilterHistogramAlloc
 GP_FilterHistogram_Raw
-
-GP_FilterInvert
-GP_FilterInvert_Raw
 
 GP_FilterKernelPrint_Raw
 

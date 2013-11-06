@@ -3,8 +3,8 @@ include $(TOPDIR)/pre.mk
 
 STATS_FILTERS=GP_Histogram.gen.c
 
-POINT_FILTERS=GP_Contrast.gen.c GP_Brightness.gen.c GP_Invert.gen.c\
-              GP_Point.gen.c GP_Noise.gen.c GP_GaussianNoise.gen.c
+POINT_FILTERS=GP_GaussianNoise.gen.c GP_ApplyTables.gen.c GP_Invert.gen.c\
+              GP_Brightness.gen.c GP_Contrast.gen.c
 
 ARITHMETIC_FILTERS=GP_Difference.gen.c GP_Addition.gen.c GP_Min.gen.c\
                    GP_Max.gen.c GP_Multiply.gen.c
