@@ -33,16 +33,6 @@
 #include "GP_Filter.h"
 
 /*
- * Mirror horizontally.
- *
- * Works 'in place'. The contexts must have equal pixel_type and size.
- *
- * This is semi-internal function without any assertions on destination.
- */
-int GP_FilterMirrorH_Raw(const GP_Context *src, GP_Context *dst,
-                         GP_ProgressCallback *callback);
-
-/*
  * Mirrors bitmap horizontally.
  *
  * The dst must be at least as big as source.
@@ -66,16 +56,6 @@ GP_Context *GP_FilterMirrorHAlloc(const GP_Context *src,
                                   GP_ProgressCallback *callback);
 
 /*
- * Mirror vertically
- *
- * Works 'in place'. The contexts must have equal pixel_type and size.
- *
- * This is semi-internal function without any assertions on destination.
- */
-int GP_FilterMirrorV_Raw(const GP_Context *src, GP_Context *dst,
-                         GP_ProgressCallback *callback);
-
-/*
  * Mirrors bitmap vertically.
  *
  * The dst must be at least as big as source.
@@ -97,23 +77,6 @@ int GP_FilterMirrorV(const GP_Context *src, GP_Context *dst,
  */
 GP_Context *GP_FilterMirrorVAlloc(const GP_Context *src,
                                   GP_ProgressCallback *callback);
-
-/*
- * Rotate context by 90, 180 and 270.
- *
- * Doesn't work 'in place'. The contexts must have equal pixel_type size must
- * match the rotated size (is equal for 180 and swapped for 90 and 270).
- *
- * These are semi-internal functions without any assertions on destination.
- */
-int GP_FilterRotate90_Raw(const GP_Context *src, GP_Context *dst,
-                          GP_ProgressCallback *callback);
-
-int GP_FilterRotate180_Raw(const GP_Context *src, GP_Context *dst,
-                           GP_ProgressCallback *callback);
-
-int GP_FilterRotate270_Raw(const GP_Context *src, GP_Context *dst,
-                           GP_ProgressCallback *callback);
 
 /*
  * Rotate the context by 90, 180, 270.
