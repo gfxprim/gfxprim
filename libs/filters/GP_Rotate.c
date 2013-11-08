@@ -125,9 +125,9 @@ GP_Context *GP_FilterMirrorVAlloc(const GP_Context *src,
                                    GP_ProgressCallback *callback)
 {
 	GP_Context *res;
-	
+
 	res = GP_ContextCopy(src, 0);
-		
+
 	if (res == NULL)
 		return NULL;
 
@@ -135,7 +135,7 @@ GP_Context *GP_FilterMirrorVAlloc(const GP_Context *src,
 		GP_ContextFree(res);
 		return NULL;
 	}
-	
+
 	return res;
 }
 
@@ -159,9 +159,9 @@ GP_Context *GP_FilterRotate90Alloc(const GP_Context *src,
                                     GP_ProgressCallback *callback)
 {
 	GP_Context *res;
-		
+
 	res = GP_ContextAlloc(src->h, src->w, src->pixel_type);
-	
+
 	if (res == NULL)
 		return NULL;
 
@@ -194,9 +194,9 @@ GP_Context *GP_FilterRotate180Alloc(const GP_Context *src,
                                      GP_ProgressCallback *callback)
 {
 	GP_Context *res;
-		
+
 	res = GP_ContextCopy(src, 0);
-	
+
 	if (res == NULL)
 		return NULL;
 
@@ -229,9 +229,9 @@ GP_Context *GP_FilterRotate270Alloc(const GP_Context *src,
                                      GP_ProgressCallback *callback)
 {
 	GP_Context *res;
-		
+
 	res = GP_ContextAlloc(src->h, src->w, src->pixel_type);
-	
+
 	if (res == NULL)
 		return NULL;
 
