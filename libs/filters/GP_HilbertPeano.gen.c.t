@@ -54,7 +54,7 @@ static unsigned int count_bits(unsigned int n)
 %% for pt in pixeltypes
 %%  if pt.is_gray() or pt.is_rgb() and not pt.is_alpha()
 /*
- * Hilbert Peano RGB888 to {{ pt.name }}
+ * Hilbert Peano to {{ pt.name }}
  */
 static int hilbert_peano_to_{{ pt.name }}_Raw(const GP_Context *src,
                                               GP_Context *dst,
@@ -140,6 +140,13 @@ static int hilbert_peano_to_{{ pt.name }}_Raw(const GP_Context *src,
 static int hilbert_peano(const GP_Context *src, GP_Context *dst,
                          GP_ProgressCallback *callback)
 {
+	if (GP_PixelHasFlags(src->pixel_type, GP_PIXEL_IS_PALETTE)) {
+		GP_DEBUG(1, "Unsupported source pixel type %s",
+		         GP_PixelTypeName(src->pixel_type));
+		errno = EINVAL;
+		return 1;
+	}
+
 	switch (dst->pixel_type) {
 %% for pt in pixeltypes
 %%  if pt.is_gray() or pt.is_rgb() and not pt.is_alpha()
@@ -148,6 +155,7 @@ static int hilbert_peano(const GP_Context *src, GP_Context *dst,
 %%  endif
 %% endfor
 	default:
+		errno = EINVAL;
 		return 1;
 	}
 }

@@ -130,6 +130,13 @@ static int floyd_steinberg_to_{{ pt.name }}_Raw(const GP_Context *src,
 static int floyd_steinberg(const GP_Context *src, GP_Context *dst,
                            GP_ProgressCallback *callback)
 {
+	if (GP_PixelHasFlags(src->pixel_type, GP_PIXEL_IS_PALETTE)) {
+		GP_DEBUG(1, "Unsupported source pixel type %s",
+		         GP_PixelTypeName(src->pixel_type));
+		errno = EINVAL;
+		return 1;
+	}
+
 	switch (dst->pixel_type) {
 %%  for pt in pixeltypes
 %%   if pt.is_gray() or pt.is_rgb() and not pt.is_alpha()
@@ -138,6 +145,7 @@ static int floyd_steinberg(const GP_Context *src, GP_Context *dst,
 %%   endif
 %%  endfor
 	default:
+		errno = EINVAL;
 		return 1;
 	}
 }
