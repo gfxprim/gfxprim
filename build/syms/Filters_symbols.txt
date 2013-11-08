@@ -14,6 +14,12 @@ GP_FilterBrightnessExAlloc
 GP_FilterContrastEx
 GP_FilterContrastExAlloc
 
+GP_FilterBrightnessContrastEx
+GP_FilterBrightnessContrastExAlloc
+
+GP_FilterPosterizeEx
+GP_FilterPosterizeExAlloc
+
 GP_FilterAddition
 GP_FilterAdditionAlloc
 GP_FilterAddition_Raw
@@ -83,9 +89,6 @@ GP_FilterMultiply
 GP_FilterMultiplyAlloc
 GP_FilterMultiply_Raw
 
-GP_FilterNoise
-GP_FilterNoise_Raw
-
 GP_FilterParamChannel
 GP_FilterParamChannels
 GP_FilterParamCheckChannels
@@ -106,9 +109,6 @@ GP_FilterParamSetPtr
 GP_FilterParamSetPtrAll
 GP_FilterParamSetUInt
 GP_FilterParamSetUIntAll
-
-GP_FilterPoint
-GP_FilterPoint_Raw
 
 GP_FilterResize
 GP_FilterResizeAlloc
