@@ -11,6 +11,109 @@ image is passed automatically as a first parameter.
 If filter has been aborted from callback 'OSError' with 'errno' set to
 'ECANCELED' is raised.
 
+Point Filters
+~~~~~~~~~~~~~
+
+Invert
+^^^^^^
+
+[source,python]
+-------------------------------------------------------------------------------
+import gfxprim.core as core
+import gfxprim.filters as filters
+
+    # Inverts image in-place
+    img.filters.Invert(img, callback=None)
+
+    # Returns newly allocated inverted image
+    res = img.filters.InvertAlloc(callback=None)
+
+-------------------------------------------------------------------------------
+
+The pixel channel values are counted as +chann_max - val+.
+
+include::images/invert/images.txt[]
+
+Brightness
+^^^^^^^^^^
+
+[source,python]
+-------------------------------------------------------------------------------
+import gfxprim.core as core
+import gfxprim.filters as filters
+
+    # Increses images brightness in-place by channel_max * 0.2
+    img.filters.Brightness(img, 0.2, callback=None)
+
+    # Returns image with brightness decreased by channel_max * -0.5
+    res = img.filters.BrightnessAlloc(img, -0.5, callback=None)
+
+-------------------------------------------------------------------------------
+
+The pixel channel values are counted as +val + chann_max * p+.
+
+include::images/brightness/images.txt[]
+
+Contrast
+^^^^^^^^
+
+[source,python]
+-------------------------------------------------------------------------------
+import gfxprim.core as core
+import gfxprim.filters as filters
+
+    # Increses images contrast by 1.2
+    img.filters.Contrast(img, 1.2, callback=None)
+
+    # Returns image with contrast decreased by 0.2
+    res = img.filters.ContrastAlloc(img, 0.2, callback=None)
+
+-------------------------------------------------------------------------------
+
+The pixel channel values are counted as +val * p+.
+
+include::images/contrast/images.txt[]
+
+BrightnessContrast
+^^^^^^^^^^^^^^^^^^
+
+[source,python]
+-------------------------------------------------------------------------------
+import gfxprim.core as core
+import gfxprim.filters as filters
+
+    # Increses images contrast by 1.2 decreases brightness by -0.2
+    img.filters.BrightnessContrast(img, -0.2, 1.2, callback=None)
+
+    # Returns image with contrast decreased by 0.2 brightness increased by .5
+    res = img.filters.BrightnessContrastAlloc(img, 0.5, 0.2, callback=None)
+
+-------------------------------------------------------------------------------
+
+The pixel channel values are counted as +val * c + chann_max * b+.
+
+include::images/brightness_contrast/images.txt[]
+
+Posterize
+^^^^^^^^^
+
+[source,python]
+-------------------------------------------------------------------------------
+import gfxprim.core as core
+import gfxprim.filters as filters
+
+    # Posterizes image using 2 steps
+    img.filters.Posterize(img, 2, callback=None)
+
+    # Returns image posterized into 4 levels
+    res = img.filters.PosterizeAlloc(img, 4, callback=None)
+
+-------------------------------------------------------------------------------
+
+The pixel channel values are quantized into number of levels.
+
+include::images/posterize/images.txt[]
+
 Gaussian Additive Noise
 ~~~~~~~~~~~~~~~~~~~~~~~
 

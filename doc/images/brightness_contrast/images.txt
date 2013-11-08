@@ -1,0 +1,17 @@
+.Original Image; BrightnessContrast b=-0.2 c=0.8, b=-0.5 c=2, b=0.2 c=0.8, b=0.2 c=1.5
+image:images/orig/lenna_small.png[
+	"Original Image",
+	link="images/orig/lenna.png"]
+image:images/brightness_contrast/lenna_small_-0.2_0.8.png[
+	"BrightnessContrast -0.2 0.8",
+	link="images/brightness_contrast/lenna_-0.2_0.8.png"]
+image:images/brightness_contrast/lenna_small_-0.5_2.png[
+	"BrightnessContrast -0.5 2",
+	link="images/brightness_contrast/lenna_-0.5_2.png"]
+image:images/brightness_contrast/lenna_small_0.2_0.8.png[
+	"BrightnessContrast 0.2 0.8",
+	link="images/brightness_contrast/lenna_0.2_0.8.png"]
+image:images/brightness_contrast/lenna_small_0.2_1.5.png[
+	"BrightnessContrast 0.2 1.5",
+	link="images/brightness_contrast/lenna_0.2_1.5.png"]
+

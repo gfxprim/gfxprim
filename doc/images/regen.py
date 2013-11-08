@@ -61,6 +61,26 @@ class ImgGen:
 def main():
     imggen = ImgGen('images/orig/')
 
+    imggen.gen(filters.InvertAlloc, [],
+               [[]],
+	       'images/invert/', 'Inverted')
+
+    imggen.gen(filters.BrightnessAlloc, ['p'],
+               [[-.5], [-.2], [.2], [.5]],
+	       'images/brightness/', 'Brightness')
+
+    imggen.gen(filters.ContrastAlloc, ['p'],
+               [[.2], [.5], [1.5], [2], [3]],
+	       'images/contrast/', 'Contrast')
+
+    imggen.gen(filters.BrightnessContrastAlloc, ['b', 'c'],
+               [[-.2, .8], [-.5, 2], [.2, .8], [.2, 1.5]],
+	       'images/brightness_contrast/', 'BrightnessContrast')
+
+    imggen.gen(filters.PosterizeAlloc, ['s'],
+               [[2], [3], [4], [5], [6]],
+	       'images/posterize/', 'Posterize')
+
     imggen.gen(filters.GaussianBlurAlloc, ['xsig', 'ysig'],
                [[2, 2], [0, 4], [4, 0], [4, 4], [10, 10]],
 	       'images/blur/', 'Gaussian Blur')

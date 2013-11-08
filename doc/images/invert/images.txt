@@ -1,0 +1,8 @@
+.Original Image; Inverted 
+image:images/orig/lenna_small.png[
+	"Original Image",
+	link="images/orig/lenna.png"]
+image:images/invert/lenna_small_.png[
+	"Inverted ",
+	link="images/invert/lenna_.png"]
+

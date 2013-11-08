@@ -1,0 +1,20 @@
+.Original Image; Contrast p=0.2, p=0.5, p=1.5, p=2, p=3
+image:images/orig/lenna_small.png[
+	"Original Image",
+	link="images/orig/lenna.png"]
+image:images/contrast/lenna_small_0.2.png[
+	"Contrast 0.2",
+	link="images/contrast/lenna_0.2.png"]
+image:images/contrast/lenna_small_0.5.png[
+	"Contrast 0.5",
+	link="images/contrast/lenna_0.5.png"]
+image:images/contrast/lenna_small_1.5.png[
+	"Contrast 1.5",
+	link="images/contrast/lenna_1.5.png"]
+image:images/contrast/lenna_small_2.png[
+	"Contrast 2",
+	link="images/contrast/lenna_2.png"]
+image:images/contrast/lenna_small_3.png[
+	"Contrast 3",
+	link="images/contrast/lenna_3.png"]
+
