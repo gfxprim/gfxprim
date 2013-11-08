@@ -54,11 +54,46 @@ static int GP_FilterRotate90_Raw_{{ ps.suffix }}(const GP_Context *src, GP_Conte
 
 %% endfor
 
-int GP_FilterRotate90_Raw(const GP_Context *src, GP_Context *dst,
-                          GP_ProgressCallback *callback)
+static int GP_FilterRotate90_Raw(const GP_Context *src, GP_Context *dst,
+                                 GP_ProgressCallback *callback)
 {
 	GP_FN_RET_PER_BPP_CONTEXT(GP_FilterRotate90_Raw, src, src, dst, callback);
 	return 1;
+}
+
+int GP_FilterRotate90(const GP_Context *src, GP_Context *dst,
+                      GP_ProgressCallback *callback)
+{
+	GP_ASSERT(src->pixel_type == dst->pixel_type,
+	          "The src and dst pixel types must match");
+	GP_ASSERT(src->w <= dst->h && src->h <= dst->w,
+	          "Destination is not large enough");
+
+	if (GP_FilterRotate90_Raw(src, dst, callback)) {
+		GP_DEBUG(1, "Operation aborted");
+		return 1;
+	}
+
+	return 0;
+}
+
+GP_Context *GP_FilterRotate90Alloc(const GP_Context *src,
+                                    GP_ProgressCallback *callback)
+{
+	GP_Context *res;
+
+	res = GP_ContextAlloc(src->h, src->w, src->pixel_type);
+
+	if (res == NULL)
+		return NULL;
+
+	if (GP_FilterRotate90_Raw(src, res, callback)) {
+		GP_DEBUG(1, "Operation aborted");
+		GP_ContextFree(res);
+		return NULL;
+	}
+
+	return res;
 }
 
 %% macro swap_pixels(ps, src, dst, x0, y0, x1, y1)
@@ -94,11 +129,46 @@ static int GP_FilterRotate180_Raw_{{ ps.suffix }}(const GP_Context *src, GP_Cont
 
 %% endfor
 
-int GP_FilterRotate180_Raw(const GP_Context *src, GP_Context *dst,
-                           GP_ProgressCallback *callback)
+static int GP_FilterRotate180_Raw(const GP_Context *src, GP_Context *dst,
+                                  GP_ProgressCallback *callback)
 {
 	GP_FN_RET_PER_BPP_CONTEXT(GP_FilterRotate180_Raw, src, src, dst, callback);
 	return 1;
+}
+
+int GP_FilterRotate180(const GP_Context *src, GP_Context *dst,
+                       GP_ProgressCallback *callback)
+{
+	GP_ASSERT(src->pixel_type == dst->pixel_type,
+	          "The src and dst pixel types must match");
+	GP_ASSERT(src->w <= dst->w && src->h <= dst->h,
+	          "Destination is not large enough");
+
+	if (GP_FilterRotate180_Raw(src, dst, callback)) {
+		GP_DEBUG(1, "Operation aborted");
+		return 1;
+	}
+
+	return 0;
+}
+
+GP_Context *GP_FilterRotate180Alloc(const GP_Context *src,
+                                    GP_ProgressCallback *callback)
+{
+	GP_Context *res;
+
+	res = GP_ContextCopy(src, 0);
+
+	if (res == NULL)
+		return NULL;
+
+	if (GP_FilterRotate180_Raw(src, res, callback)) {
+		GP_DEBUG(1, "Operation aborted");
+		GP_ContextFree(res);
+		return NULL;
+	}
+
+	return res;
 }
 
 %% for ps in pixelsizes
@@ -125,11 +195,46 @@ static int GP_FilterRotate270_Raw_{{ ps.suffix }}(const GP_Context *src, GP_Cont
 
 %% endfor
 
-int GP_FilterRotate270_Raw(const GP_Context *src, GP_Context *dst,
-                           GP_ProgressCallback *callback)
+static int GP_FilterRotate270_Raw(const GP_Context *src, GP_Context *dst,
+                                  GP_ProgressCallback *callback)
 {
 	GP_FN_RET_PER_BPP_CONTEXT(GP_FilterRotate270_Raw, src, src, dst, callback);
 	return 1;
+}
+
+int GP_FilterRotate270(const GP_Context *src, GP_Context *dst,
+                      GP_ProgressCallback *callback)
+{
+	GP_ASSERT(src->pixel_type == dst->pixel_type,
+	          "The src and dst pixel types must match");
+	GP_ASSERT(src->w <= dst->h && src->h <= dst->w,
+	          "Destination is not large enough");
+
+	if (GP_FilterRotate270_Raw(src, dst, callback)) {
+		GP_DEBUG(1, "Operation aborted");
+		return 1;
+	}
+
+	return 0;
+}
+
+GP_Context *GP_FilterRotate270Alloc(const GP_Context *src,
+                                     GP_ProgressCallback *callback)
+{
+	GP_Context *res;
+
+	res = GP_ContextAlloc(src->h, src->w, src->pixel_type);
+
+	if (res == NULL)
+		return NULL;
+
+	if (GP_FilterRotate270_Raw(src, res, callback)) {
+		GP_DEBUG(1, "Operation aborted");
+		GP_ContextFree(res);
+		return NULL;
+	}
+
+	return res;
 }
 
 %% endblock body

@@ -121,15 +121,12 @@ GP_FilterResizeCubic
 
 GP_FilterRotate180
 GP_FilterRotate180Alloc
-GP_FilterRotate180_Raw
 
 GP_FilterRotate270
 GP_FilterRotate270Alloc
-GP_FilterRotate270_Raw
 
 GP_FilterRotate90
 GP_FilterRotate90Alloc
-GP_FilterRotate90_Raw
 
 GP_FilterSigmaEx
 GP_FilterSigmaExAlloc

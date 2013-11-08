@@ -65,11 +65,46 @@ static int GP_MirrorH_Raw_{{ ps.suffix }}(const GP_Context *src,
 
 %% endfor
 
-int GP_FilterMirrorH_Raw(const GP_Context *src, GP_Context *dst,
-                          GP_ProgressCallback *callback)
+static int GP_FilterMirrorH_Raw(const GP_Context *src, GP_Context *dst,
+                                GP_ProgressCallback *callback)
 {
 	GP_FN_RET_PER_BPP_CONTEXT(GP_MirrorH_Raw, src, src, dst, callback);
 	return 1;
 }
+
+int GP_FilterMirrorH(const GP_Context *src, GP_Context *dst,
+                     GP_ProgressCallback *callback)
+{
+	GP_ASSERT(src->pixel_type == dst->pixel_type,
+	          "The src and dst pixel types must match");
+	GP_ASSERT(src->w <= dst->w && src->h <= dst->h,
+	          "Destination is not large enough");
+
+	if (GP_FilterMirrorH_Raw(src, dst, callback)) {
+		GP_DEBUG(1, "Operation aborted");
+		return 1;
+	}
+
+	return 0;
+}
+
+GP_Context *GP_FilterMirrorHAlloc(const GP_Context *src,
+                                   GP_ProgressCallback *callback)
+{
+	GP_Context *res;
+
+	res = GP_ContextCopy(src, 0);
+
+	if (res == NULL)
+		return NULL;
+
+	if (GP_FilterMirrorH_Raw(src, res, callback)) {
+		GP_ContextFree(res);
+		return NULL;
+	}
+
+	return res;
+}
+
 
 %% endblock body
