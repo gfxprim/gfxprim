@@ -47,7 +47,20 @@ The format is [[name1, [fn1, [params]], [fn2, [params]], ...],
 
 All results from filters listed under one name are compared.
 */
-%% set compare_list = [['MirrorH',
+%% set compare_list = [['Brightness',
+		        ['Brightness', ['dst', 'dst', '0.1', 'NULL']],
+		        ['BrightnessAlloc', ['src', '0.1', 'NULL']],
+                       ],
+                       ['Contrast',
+		        ['Contrast', ['dst', 'dst', '1.2', 'NULL']],
+		        ['ContrastAlloc', ['src', '1.2', 'NULL']],
+                       ],
+                       ['Invert',
+		        ['Invert', ['dst', 'dst', 'NULL']],
+		        ['InvertAlloc', ['src', 'NULL']],
+                       ],
+
+                       ['MirrorH',
                         ['MirrorH', ['dst', 'dst', 'NULL']],
                         ['MirrorHAlloc', ['src', 'NULL']],
                         ['Symmetry', ['dst', 'dst', 'GP_MIRROR_H', 'NULL']],

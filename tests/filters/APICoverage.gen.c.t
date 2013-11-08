@@ -42,7 +42,22 @@ We check for correct return value correcness though.
 
 #include "tst_test.h"
 
-%% set API_List = [['MirrorH', '', 'GP_Context:in', 'GP_Context:out',
+%% set API_List = [['Brightness', '', 'GP_Context:in', 'GP_Context:out',
+                    'float:p', 'GP_ProgressCallback'],
+                   ['BrightnessAlloc', '', 'GP_Context:in',
+                    'float:p', 'GP_ProgressCallback'],
+
+		   ['Contrast', '', 'GP_Context:in', 'GP_Context:out',
+                    'float:p', 'GP_ProgressCallback'],
+		   ['ContrastAlloc', '', 'GP_Context:in',
+                    'float:p', 'GP_ProgressCallback'],
+
+		   ['Invert', '', 'GP_Context:in', 'GP_Context:out',
+                    'GP_ProgressCallback'],
+		   ['InvertAlloc', '', 'GP_Context:in',
+                    'GP_ProgressCallback'],
+
+                   ['MirrorH', '', 'GP_Context:in', 'GP_Context:out',
                     'GP_ProgressCallback'],
                    ['MirrorHAlloc', '', 'GP_Context:in', 'GP_ProgressCallback'],
 
