@@ -291,6 +291,22 @@ static int get_ascii_int(FILE *f, int *val)
 }
 
 /*
+ * Five times faster than printf("%u", byte)
+ */
+static inline int write_ascii_byte(FILE *f, uint8_t byte)
+{
+	if (byte >= 100)
+		fputc_unlocked('0' + byte/100, f);
+
+	if (byte >= 10)
+		fputc_unlocked('0' + (byte%100)/10, f);
+
+	fputc_unlocked('0' + (byte%10), f);
+
+	return fputc_unlocked(' ', f) == EOF;
+}
+
+/*
  * The PBM ASCII has the values inverted
  */
 static int load_ascii_g1_inv(FILE *f, GP_Context *ctx, GP_ProgressCallback *cb)
@@ -564,7 +580,7 @@ static int save_ascii(FILE *f, const GP_Context *ctx,
 			if (inv)
 				val = !val;
 
-			if (fprintf(f, "%i ", val) < 0) {
+			if (write_ascii_byte(f, val)) {
 				err = errno;
 				GP_DEBUG(1, "Failed to write data");
 				return err;
@@ -961,7 +977,7 @@ static int save_ascii_rgb888(FILE *f, const GP_Context *ctx,
                              GP_LineConvert Convert, GP_ProgressCallback *cb)
 {
 	uint32_t x, y;
-	int ret;
+	int ret = 0;
 	uint8_t buf[3 * ctx->w], *addr;
 
 	for (y = 0; y < ctx->h; y++) {
@@ -976,9 +992,11 @@ static int save_ascii_rgb888(FILE *f, const GP_Context *ctx,
 		for (x = 0; x < ctx->w; x++) {
 			addr+=3;
 
-			ret = fprintf(f, "%u %u %u ", addr[2], addr[1], addr[0]);
+			ret |= write_ascii_byte(f, addr[2]);
+			ret |= write_ascii_byte(f, addr[1]);
+			ret |= write_ascii_byte(f, addr[0]);
 
-			if (ret < 0)
+			if (ret)
 				return errno;
 		}
 
