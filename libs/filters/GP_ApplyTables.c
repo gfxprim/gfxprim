@@ -30,6 +30,9 @@ static GP_Pixel *create_table(const GP_PixelTypeChannel *chan)
 	GP_Pixel *table = malloc(table_size * sizeof(GP_Pixel));
 	GP_Pixel i;
 
+	GP_DEBUG(2, "Table for channel '%s' size %zu (%p)",
+	         chan->name, table_size, table);
+
 	if (!table) {
 		GP_DEBUG(1, "Malloc failed :(");
 		return NULL;
@@ -45,8 +48,14 @@ static void free_tables(GP_FilterTables *self)
 {
 	unsigned int i;
 
-	for (i = 0; i < GP_PIXELTYPE_MAX_CHANNELS; i++)
+	for (i = 0; i < GP_PIXELTYPE_MAX_CHANNELS; i++) {
+
+		if (!self->table[i])
+			break;
+
+		GP_DEBUG(2, "Freeing table (%p)", self->table[i]);
 		free(self->table[i]);
+	}
 }
 
 int GP_FilterTablesInit(GP_FilterTables *self, const GP_Context *ctx)
@@ -70,6 +79,8 @@ int GP_FilterTablesInit(GP_FilterTables *self, const GP_Context *ctx)
 		}
 	}
 
+	self->free_table = 0;
+
 	return 0;
 }
 
@@ -84,12 +95,12 @@ GP_FilterTables *GP_FilterTablesAlloc(const GP_Context *ctx)
 		return NULL;
 	}
 
-	tables->free_table = 1;
-
 	if (GP_FilterTablesInit(tables, ctx)) {
 		free(tables);
 		return NULL;
 	}
+
+	tables->free_table = 1;
 
 	return tables;
 }
@@ -100,6 +111,8 @@ void GP_FilterTablesFree(GP_FilterTables *self)
 
 	free_tables(self);
 
-	if (self->free_table)
+	if (self->free_table) {
+		GP_DEBUG(2, "Freeing table itself");
 		free(self);
+	}
 }
