@@ -1,0 +1,8 @@
+.Original Image; Mirrored Vertically 
+image:images/orig/lenna_small.png[
+	"Original Image",
+	link="images/orig/lenna.png"]
+image:images/mirror_v/lenna_small_.png[
+	"Mirrored Vertically ",
+	link="images/mirror_v/lenna_.png"]
+

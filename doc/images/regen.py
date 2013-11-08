@@ -81,6 +81,26 @@ def main():
                [[2], [3], [4], [5], [6]],
 	       'images/posterize/', 'Posterize')
 
+    imggen.gen(filters.MirrorHAlloc, [],
+               [[]],
+	       'images/mirror_h/', 'Mirrored Horizontally')
+
+    imggen.gen(filters.MirrorVAlloc, [],
+               [[]],
+	       'images/mirror_v/', 'Mirrored Vertically')
+
+    imggen.gen(filters.Rotate90Alloc, [],
+               [[]],
+	       'images/rotate_90/', 'Rotated by 90 degrees')
+
+    imggen.gen(filters.Rotate180Alloc, [],
+               [[]],
+	       'images/rotate_180/', 'Rotated by 180 degrees')
+
+    imggen.gen(filters.Rotate270Alloc, [],
+               [[]],
+	       'images/rotate_270/', 'Rotated by 270 degrees')
+
     imggen.gen(filters.GaussianBlurAlloc, ['xsig', 'ysig'],
                [[2, 2], [0, 4], [4, 0], [4, 4], [10, 10]],
 	       'images/blur/', 'Gaussian Blur')

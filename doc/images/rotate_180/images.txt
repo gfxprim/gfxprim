@@ -1,0 +1,8 @@
+.Original Image; Rotated by 180 degrees 
+image:images/orig/lenna_small.png[
+	"Original Image",
+	link="images/orig/lenna.png"]
+image:images/rotate_180/lenna_small_.png[
+	"Rotated by 180 degrees ",
+	link="images/rotate_180/lenna_.png"]
+

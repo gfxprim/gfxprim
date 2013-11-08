@@ -114,6 +114,109 @@ The pixel channel values are quantized into number of levels.
 
 include::images/posterize/images.txt[]
 
+Rotations and Mirroring
+~~~~~~~~~~~~~~~~~~~~~~~
+
+MirrorH
+^^^^^^^
+
+[source,python]
+-------------------------------------------------------------------------------
+import gfxprim.core as core
+import gfxprim.filters as filters
+
+    # Mirrors in-place image horizontally
+    img.filters.MirrorH(img, callback=None)
+
+    # Mirrors image horizontally
+    res = img.filters.MirrorHAlloc(callback=None)
+
+-------------------------------------------------------------------------------
+
+Mirrors image horizontally.
+
+include::images/mirror_h/images.txt[]
+
+MirrorV
+^^^^^^^
+
+[source,python]
+-------------------------------------------------------------------------------
+import gfxprim.core as core
+import gfxprim.filters as filters
+
+    # Mirrors in-place image vertically
+    img.filters.MirrorV(img, callback=None)
+
+    # Mirrors image vertically
+    res = img.filters.MirrorVAlloc(callback=None)
+
+-------------------------------------------------------------------------------
+
+Mirrors image vertically.
+
+include::images/mirror_v/images.txt[]
+
+Rotate90
+^^^^^^^^
+
+[source,python]
+-------------------------------------------------------------------------------
+import gfxprim.core as core
+import gfxprim.filters as filters
+
+    # Rotate in-place by 90 degrees
+    img.filters.Rotate90(img, callback=None)
+
+    # Rotate by 90 degrees
+    res = img.filters.Rotate90Alloc(callback=None)
+
+-------------------------------------------------------------------------------
+
+Rotate image by 90 degrees clockwise.
+
+include::images/rotate_90/images.txt[]
+
+Rotate180
+^^^^^^^^^
+
+[source,python]
+-------------------------------------------------------------------------------
+import gfxprim.core as core
+import gfxprim.filters as filters
+
+    # Rotate in-place by 180 degrees
+    img.filters.Rotate180(img, callback=None)
+
+    # Rotate by 180 degrees
+    res = img.filters.Rotate180Alloc(callback=None)
+
+-------------------------------------------------------------------------------
+
+Rotate image by 180 degrees clockwise.
+
+include::images/rotate_180/images.txt[]
+
+Rotate270
+^^^^^^^^^
+
+[source,python]
+-------------------------------------------------------------------------------
+import gfxprim.core as core
+import gfxprim.filters as filters
+
+    # Rotate in-place by 270 degrees
+    img.filters.Rotate270(img, callback=None)
+
+    # Rotate by 270 degrees
+    res = img.filters.Rotate270Alloc(callback=None)
+
+-------------------------------------------------------------------------------
+
+Rotate image by 270 degrees clockwise.
+
+include::images/rotate_270/images.txt[]
+
 Gaussian Additive Noise
 ~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -135,6 +238,7 @@ with a defined sigma and mu. Both sigma and mu weights mapped to '[0,1]'
 interval.
 
 include::images/gaussian_noise/images.txt[]
+
 
 Laplacian Edge Sharpening
 ~~~~~~~~~~~~~~~~~~~~~~~~~
