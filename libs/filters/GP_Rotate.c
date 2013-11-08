@@ -29,14 +29,14 @@
 
 #include <string.h>
 
-int GP_FilterMirrorH_Raw(const GP_Context *src, GP_Context *dst,
+int GP_FilterMirrorV_Raw(const GP_Context *src, GP_Context *dst,
                          GP_ProgressCallback *callback)
 {
 	uint32_t bpr = src->bytes_per_row;
 	uint8_t  buf[bpr];
 	unsigned int y;
 
-	GP_DEBUG(1, "Mirroring image horizontally %ux%u", src->w, src->h);
+	GP_DEBUG(1, "Mirroring image %ux%u vertically", src->w, src->h);
 
 	#warning FIXME: non byte aligned pixels
 
@@ -72,7 +72,7 @@ int GP_FilterMirrorH_Raw(const GP_Context *src, GP_Context *dst,
 	return 0;
 }
 
-int GP_FilterMirrorH(const GP_Context *src, GP_Context *dst,
+int GP_FilterMirrorV(const GP_Context *src, GP_Context *dst,
                      GP_ProgressCallback *callback)
 {
 	GP_ASSERT(src->pixel_type == dst->pixel_type,
@@ -81,42 +81,8 @@ int GP_FilterMirrorH(const GP_Context *src, GP_Context *dst,
 	GP_ASSERT(src->w <= dst->w && src->h <= dst->h,
 	          "Destination is not large enough");
 
-	if (GP_FilterMirrorH_Raw(src, dst, callback))
+	if (GP_FilterMirrorV_Raw(src, dst, callback))
 		return 1;
-
-	return 0;
-}
-
-GP_Context *GP_FilterMirrorHAlloc(const GP_Context *src,
-                                   GP_ProgressCallback *callback)
-{
-	GP_Context *res;
-
-	res = GP_ContextCopy(src, 0);
-
-	if (res == NULL)
-		return NULL;
-
-	if (GP_FilterMirrorH_Raw(src, res, callback)) {
-		GP_ContextFree(res);
-		return NULL;
-	}
-
-	return res;
-}
-
-int GP_FilterMirrorV(const GP_Context *src, GP_Context *dst,
-                     GP_ProgressCallback *callback)
-{
-	GP_ASSERT(src->pixel_type == dst->pixel_type,
-	          "The src and dst pixel types must match");
-	GP_ASSERT(src->w <= dst->w && src->h <= dst->h,
-	          "Destination is not large enough");
-
-	if (GP_FilterMirrorV_Raw(src, dst, callback)) {
-		GP_DEBUG(1, "Operation aborted");
-		return 1;
-	}
 
 	return 0;
 }
@@ -132,6 +98,40 @@ GP_Context *GP_FilterMirrorVAlloc(const GP_Context *src,
 		return NULL;
 
 	if (GP_FilterMirrorV_Raw(src, res, callback)) {
+		GP_ContextFree(res);
+		return NULL;
+	}
+
+	return res;
+}
+
+int GP_FilterMirrorH(const GP_Context *src, GP_Context *dst,
+                     GP_ProgressCallback *callback)
+{
+	GP_ASSERT(src->pixel_type == dst->pixel_type,
+	          "The src and dst pixel types must match");
+	GP_ASSERT(src->w <= dst->w && src->h <= dst->h,
+	          "Destination is not large enough");
+
+	if (GP_FilterMirrorH_Raw(src, dst, callback)) {
+		GP_DEBUG(1, "Operation aborted");
+		return 1;
+	}
+
+	return 0;
+}
+
+GP_Context *GP_FilterMirrorHAlloc(const GP_Context *src,
+                                   GP_ProgressCallback *callback)
+{
+	GP_Context *res;
+
+	res = GP_ContextCopy(src, 0);
+
+	if (res == NULL)
+		return NULL;
+
+	if (GP_FilterMirrorH_Raw(src, res, callback)) {
 		GP_ContextFree(res);
 		return NULL;
 	}

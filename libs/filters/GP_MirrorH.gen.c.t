@@ -22,7 +22,7 @@
 
 %% extends "base.c.t"
 
-{% block descr %}Vertical Mirror alogorithm{% endblock %}
+{% block descr %}Horizontal Mirror alogorithm{% endblock %}
 
 %% block body
 
@@ -31,14 +31,14 @@
 #include "GP_Rotate.h"
 
 %% for ps in pixelsizes
-static int GP_MirrorV_Raw_{{ ps.suffix }}(const GP_Context *src,
+static int GP_MirrorH_Raw_{{ ps.suffix }}(const GP_Context *src,
                                     GP_Context *dst,
                                     GP_ProgressCallback *callback)
 {
 	uint32_t x, y;
 	GP_Pixel tmp;
 
-	GP_DEBUG(1, "Mirroring image vertically %ux%u", src->w, src->h);
+	GP_DEBUG(1, "Mirroring image %ux%u horizontally", src->w, src->h);
 
 	for (x = 0; x < src->w/2; x++) {
 		uint32_t xm = src->w - x - 1;
@@ -65,10 +65,10 @@ static int GP_MirrorV_Raw_{{ ps.suffix }}(const GP_Context *src,
 
 %% endfor
 
-int GP_FilterMirrorV_Raw(const GP_Context *src, GP_Context *dst,
+int GP_FilterMirrorH_Raw(const GP_Context *src, GP_Context *dst,
                           GP_ProgressCallback *callback)
 {
-	GP_FN_RET_PER_BPP_CONTEXT(GP_MirrorV_Raw, src, src, dst, callback);
+	GP_FN_RET_PER_BPP_CONTEXT(GP_MirrorH_Raw, src, src, dst, callback);
 	return 1;
 }
 
