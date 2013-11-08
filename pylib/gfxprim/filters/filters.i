@@ -31,6 +31,8 @@ ERROR_ON_NONZERO(GP_Filter ## funcname);
 FILTER_FUNC(Invert);
 FILTER_FUNC(Brightness);
 FILTER_FUNC(Contrast);
+FILTER_FUNC(BrightnessContrast);
+FILTER_FUNC(Posterize);
 %include "GP_Point.h"
 
 /* Arithmetic filters */

@@ -50,9 +50,9 @@ static inline int GP_FilterBrightness(const GP_Context *src, GP_Context *dst,
 	return GP_FilterBrightnessEx(&area, p, callback);
 }
 
-static inline GP_Context *GP_FilterBrightnessAlloc(const GP_Context *src,
-                                                   float p,
-                                                   GP_ProgressCallback *callback)
+static inline GP_Context *
+GP_FilterBrightnessAlloc(const GP_Context *src, float p,
+                         GP_ProgressCallback *callback)
 {
 	GP_FILTER_AREA_DEFAULT(src, NULL);
 
@@ -88,6 +88,65 @@ static inline GP_Context *GP_FilterContrastAlloc(const GP_Context *src,
 	GP_FILTER_AREA_DEFAULT(src, NULL);
 
 	return GP_FilterContrastExAlloc(&area, p, callback);
+}
+
+/*
+ * Brightness and Contrast combined.
+ */
+int GP_FilterBrightnessContrastEx(const GP_FilterArea *area, float b, float c,
+                                  GP_ProgressCallback *callback);
+
+GP_Context *GP_FilterBrightnessContrastExAlloc(const GP_FilterArea *area,
+                                               float b, float c,
+                                               GP_ProgressCallback *callback);
+
+static inline int
+GP_FilterBrightnessContrast(const GP_Context *src, GP_Context *dst,
+                            float b, float c, GP_ProgressCallback *callback)
+{
+	GP_FILTER_AREA_DEFAULT(src, dst);
+
+	return GP_FilterBrightnessContrastEx(&area, b, c, callback);
+}
+
+static inline GP_Context *
+GP_FilterBrightnessContrastAlloc(const GP_Context *src,
+                                 float b, float c,
+                                 GP_ProgressCallback *callback)
+{
+	GP_FILTER_AREA_DEFAULT(src, NULL);
+
+	return GP_FilterBrightnessContrastExAlloc(&area, b, c, callback);
+}
+
+/*
+ * Posterize
+ *
+ * Does quantization into steps regions.
+ */
+int GP_FilterPosterizeEx(const GP_FilterArea *area, unsigned int steps,
+                         GP_ProgressCallback *callback);
+
+GP_Context *GP_FilterPosterizeExAlloc(const GP_FilterArea *area,
+                                      unsigned int steps,
+                                      GP_ProgressCallback *callback);
+
+static inline int GP_FilterPosterize(const GP_Context *src, GP_Context *dst,
+                                     unsigned int steps,
+                                     GP_ProgressCallback *callback)
+{
+	GP_FILTER_AREA_DEFAULT(src, dst);
+
+	return GP_FilterPosterizeEx(&area, steps, callback);
+}
+
+static inline GP_Context *
+GP_FilterPosterizeAlloc(const GP_Context *src, unsigned int steps,
+                        GP_ProgressCallback *callback)
+{
+	GP_FILTER_AREA_DEFAULT(src, NULL);
+
+	return GP_FilterPosterizeExAlloc(&area, steps, callback);
 }
 
 /*

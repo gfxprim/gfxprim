@@ -23,6 +23,8 @@ def _init(module):
   for name in ['Invert', 'InvertAlloc',
                'Brightness', 'BrightnessAlloc',
                'Contrast', 'ContrastAlloc',
+               'BrightnessContrast', 'BrightnessContrastAlloc',
+               'Posterize', 'PosterizeAlloc',
                'Resize', 'ResizeAlloc',
                'Rotate90', 'Rotate90Alloc',
 	       'Rotate180', 'Rotate180Alloc',
