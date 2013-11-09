@@ -142,9 +142,9 @@ Debug Functions
 -------------------------------------------------------------------------------
 import gfxprim.core as core
 
-    core.GP_SetDebugLevel(10)
+    core.SetDebugLevel(10)
 
-    level = core.GP_GetDebugLevel()
+    level = core.GetDebugLevel()
 -------------------------------------------------------------------------------
 
 Sets and gets the GFXprim debug level. See link:debug.html[debug messages]
