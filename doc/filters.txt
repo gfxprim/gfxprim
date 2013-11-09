@@ -458,8 +458,8 @@ into two one dimensional kernels (these when combined yields back the original
 kernel). Such convolution then could be applied as two one dimensional
 convolutions which is faster operation (especially for big kernels).
 
-Generic Linear Convolution
-^^^^^^^^^^^^^^^^^^^^^^^^^^
+Bilinear Convolution
+^^^^^^^^^^^^^^^^^^^^
 
 Following paragraph describes linear convolution implementation as well as a
 little of the math background skip it if you just need to use one of the
@@ -520,6 +520,8 @@ O(x,y)={1 \over kern\_div} \cdot
 -------------------------------------------------------------------------------
 
 NOTE: The number of kernel rows and columns is expected to be odd number.
+
+include::images/convolution/images.txt[]
 
 [source,c]
 -------------------------------------------------------------------------------

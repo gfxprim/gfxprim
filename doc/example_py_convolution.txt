@@ -1,0 +1,8 @@
+Block Blur Convolution Example
+------------------------------
+.A simple program that loads image, blurs it and saves result
+
+[source,python]
+------------------------------------------------------------------
+include::../demos/py_simple/convolution.py[]
+------------------------------------------------------------------
