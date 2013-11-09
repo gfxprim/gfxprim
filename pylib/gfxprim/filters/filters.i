@@ -1,5 +1,6 @@
 %include "../common.i"
 %module(package="gfxprim.filters") c_filters
+%include "carrays.i"
 
 %{
 #include "filters/GP_Filters.h"
@@ -16,17 +17,6 @@
 ERROR_ON_NULL(GP_Filter ## funcname ## Alloc);
 ERROR_ON_NONZERO(GP_Filter ## funcname);
 %enddef
-
-/* Listed in GP_Filters.h: */
-%extend GP_FilterParam {
-  ~GP_FilterParam() {
-    GP_DEBUG(2, "[wrapper] GP_FilterParamFree");
-    GP_FilterParamDestroy($self);
-  }
-}
-
-%newobject GP_FilterParamCreate;
-%include "GP_FilterParam.h"
 
 FILTER_FUNC(Invert);
 FILTER_FUNC(Brightness);
@@ -58,6 +48,32 @@ FILTER_FUNC(Symmetry);
 /* Convolutions */
 FILTER_FUNC(Convolution);
 FILTER_FUNC(ConvolutionEx);
+
+%array_functions(float, float_array);
+
+%extend GP_FilterKernel2D {
+        ~GP_FilterKernel2D() {
+                free($self);
+        }
+        GP_FilterKernel2D(unsigned int w, unsigned int h,
+                          float *kern, float kern_div) {
+
+                GP_FilterKernel2D *kernel = malloc(sizeof(GP_FilterKernel2D));
+
+                if (!kernel) {
+                        GP_DEBUG(1, "Malloc failed :(");
+                        return NULL;
+                }
+
+                kernel->w = w;
+                kernel->h = h;
+                kernel->div = kern_div;
+                kernel->kernel = kern;
+
+                return kernel;
+        }
+};
+
 %include "GP_Convolution.h"
 
 /* Blur */

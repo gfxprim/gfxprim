@@ -10,7 +10,7 @@ from . import c_filters
 def _init(module):
   "Extend Context with filters submodule"
 
-  from ..utils import extend_submodule
+  from ..utils import extend, extend_submodule
   from ..core import Context as _context
 
   # New Context submodule
@@ -44,6 +44,94 @@ def _init(module):
 	       'HilbertPeano', 'HilbertPeanoAlloc']:
     extend_submodule(FiltersSubmodule, name, c_filters.__getattribute__('GP_Filter' + name))
 
+  def array_to_kern(kernel, kernel_div):
+    h = len(kernel)
+    w = len(kernel[0])
+
+    # Assert that array is matrix of numbers
+    for i in range(0, h):
+      assert(len(kernel[i]) == w)
+
+      for j in kernel[i]:
+        assert(isinstance(j, float) or isinstance(j, int))
+
+    # flatten the python array into C array
+    karr = c_filters.new_float_array(w * h)
+
+    for i in range(0, h):
+      for j in range(0, w):
+        c_filters.float_array_setitem(karr, i * w + j, kernel[i][j])
+
+    kern = c_filters.GP_FilterKernel2D(w, h, karr, kernel_div)
+
+    return kern
+
+  def array_del(kern):
+    c_filters.delete_float_array(kern.kernel)
+
+  def Convolution(src, dst, kernel, kernel_div, callback=None):
+    """
+     Convolution(src, dst, kernel, kernel_div, callback=None)
+
+     Bilinear convolution. The kernel is two dimensional array of coefficients,
+     kern_div is used to divide the kernel weigthed sum.
+    """
+    kern = array_to_kern(kernel, kernel_div)
+    ret = c_filters.GP_FilterConvolution(src, dst, kern, callback)
+    array_del(kern)
+    return ret
+
+  extend_submodule(FiltersSubmodule, 'Convolution', Convolution)
+
+  def ConvolutionEx(src, x_src, y_src, w_src, h_src, dst, x_dst, y_dst,
+                    kernel, kernel_div, callback=None):
+    """
+     ConvolutionEx(src, x_src, y_src, w_src, h_src, dst, x_dst, y_dst,
+                   kernel, kernel_div, callback=None)
+
+     Bilinear convolution. The kernel is two dimensional array of coefficients,
+     kern_div is used to divide the kernel weigthed sum.
+    """
+    kern = array_to_kern(kernel, kernel_div);
+    ret =  c_filters.GP_FilterConvolutionEx(src, x_src, y_src,
+                                            w_src, h_src, dst, x_dst, y_dst,
+                                            kern, callback)
+    array_del(kern)
+    return ret
+
+  extend_submodule(FiltersSubmodule, 'ConvolutionEx', ConvolutionEx)
+
+  def ConvolutionAlloc(src, kernel, kernel_div, callback=None):
+    """
+     ConvolutionAlloc(src, kernel, kernel_div, callback=None)
+
+     Bilinear convolution. The kernel is two dimensional array of coefficients,
+     kern_div is used to divide the kernel weigthed sum.
+    """
+    kern = array_to_kern(kernel, kernel_div);
+    ret = c_filters.GP_FilterConvolutionAlloc(src, kern, callback)
+    array_del(kern)
+    return ret
+
+  extend_submodule(FiltersSubmodule, 'ConvolutionAlloc', ConvolutionAlloc)
+
+  def ConvolutionExAlloc(src, x_src, y_src, w_src, h_src,
+                         kernel, kernel_div, callback=None):
+    """
+     ConvolutionExAlloc(src, x_src, y_src, w_src, h_src,
+                        kernel, kernel_div, callback=None)
+
+     Bilinear convolution. The kernel is two dimensional array of coefficients,
+     kern_div is used to divide the kernel weigthed sum.
+    """
+    kern = array_to_kern(kernel, kernel_div);
+    ret = c_filters.GP_FilterConvolutionExAlloc(src, x_src, y_src,
+                                                w_src, h_src, kern, callback)
+    array_del(kern)
+    return ret
+
+  extend_submodule(FiltersSubmodule, 'ConvolutionExAlloc', ConvolutionExAlloc)
+
   # Imports from the SWIG module
   import re
   def strip_GP_Filter(s):
@@ -56,6 +144,11 @@ def _init(module):
         '^GP_Filter.*Alloc',
         '^GP_Filter[A-Za-z0-9]*$',
         ])
+
+  module['Convolution'] = Convolution
+  module['ConvolutionAlloc'] = ConvolutionAlloc
+  module['ConvolutionEx'] = ConvolutionEx
+  module['ConvolutionExAlloc'] = ConvolutionExAlloc
 
 _init(locals())
 del _init
