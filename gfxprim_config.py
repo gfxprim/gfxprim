@@ -81,6 +81,11 @@ config = GfxPrimConfig(
 	  ('G', 6, 6),
 	  ('B', 0, 6)]),
 
+      PixelType(name='RGB332', pixelsize=PS_8BPP, chanslist=[
+	  ('R', 5, 3),
+	  ('G', 2, 3),
+	  ('B', 0, 2)]),
+
       #
       # CMYK
       #
