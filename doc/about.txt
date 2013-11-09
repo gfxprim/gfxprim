@@ -127,8 +127,10 @@ image filters.
 [width="100%",options="header"]
 |=============================================================================
 | Filter Name | Supported Pixel Type | Multithreaded
-| Brightness  | All                  | No
-| Contrast    | All                  | No
+| Brightness  | All                  | Not Applicable
+| Contrast    | All                  | Not Applicable
+| Invert      | All                  | Not Applicable
+| Posterize   | All                  | Not Applicable
 |=============================================================================
 
 .Currently Implemented Linear Filters
@@ -142,12 +144,7 @@ image filters.
 | Prewitt Edge Detection | RGB888               | Yes
 |=============================================================================
 
-NOTE: Linear filters are implemented using generic convolution filters, once
-      convolution is rewritten to run for all pixel types the rest of filters
-      will support them automatically.
-
-
-.Currently Implemented Linear Filters
+.Currently Implemented Aritmetic Filters
 [width="100%",options="header"]
 |=============================================================================
 | Filter Name | Supported Pixel Type | Multithreaded
@@ -211,10 +208,10 @@ backend of any pixel type on the top of other backends.
 Python bindings
 ---------------
 
-Python bindings currently covers most of the library, there is (not yet
-finished) documentation for link:core_python.html[Core],
-link:gfx_python.html[Gfx], link:loaders_python.html[Loaders] and
-link:backends_python.html[Backends].
+Python bindings currently covers most of the library, there is (work in
+progress) documentation for link:core_python.html[Core],
+link:gfx_python.html[Gfx], link:loaders_python.html[Loaders],
+link:filters_python.html[Filters] and link:backends_python.html[Backends].
 
 Work in progress
 ----------------
