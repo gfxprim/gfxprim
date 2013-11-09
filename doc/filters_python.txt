@@ -374,6 +374,10 @@ dithering documentation].
 
 TIP: See link:example_py_dithering.html[dithering example].
 
+include::images/convert/images.txt[]
+include::images/floyd_steinberg/images.txt[]
+include::images/hilbert_peano/images.txt[]
+
 Median
 ~~~~~~
 

@@ -33,6 +33,11 @@ def to_str(x, to_str):
 
     return res
 
+def convert(ctx):
+    if (ctx.pixel_type == core.C.PIXEL_RGB332):
+        return ctx.Convert(core.C.PIXEL_RGB888)
+    return ctx
+
 class ImgGen:
     def __init__(self, orig_path):
         self.orig_path = orig_path
@@ -66,7 +71,7 @@ class ImgGen:
                 str(x[i]) for i in range(0, len(x))]), func_params_arr))
 
         if (descs is not None):
-            head = ', '.join(descs)
+            head = func_name + ': ' + ', '.join(descs)
 
         self.write_asciidoc_head(dst_path, head)
 
@@ -86,10 +91,10 @@ class ImgGen:
 
             self.write_img_asciidoc(desc, fname, fname_small)
 
-            res = func(self.img, *params)
+            res = convert(func(self.img, *params))
             res.loaders.Save('../' + fname)
 
-            res = func(self.img_small, *params)
+            res = convert(func(self.img_small, *params))
             res.loaders.Save('../' + fname_small)
 
         self.write_asciidoc_tail()
@@ -179,6 +184,43 @@ def main():
                 '3x3 Laplacian',
                 '3x3 Sobel',
                 '3x3 Roberts'])
+
+    imggen.gen(core.Convert, ['p'],
+               [
+                [core.C.PIXEL_RGB332],
+                [core.C.PIXEL_G8],
+                [core.C.PIXEL_G4],
+                [core.C.PIXEL_G2],
+                [core.C.PIXEL_G1],
+               ],
+               'images/convert/',
+               'Simple Conversion',
+               ['RGB332', 'G8', 'G4', 'G2', 'G1'])
+
+    imggen.gen(filters.FloydSteinbergAlloc, ['p'],
+               [
+                [core.C.PIXEL_RGB332],
+                [core.C.PIXEL_G8],
+                [core.C.PIXEL_G4],
+                [core.C.PIXEL_G2],
+                [core.C.PIXEL_G1],
+               ],
+               'images/floyd_steinberg/',
+               'Floyd Steinberg Dithering',
+               ['RGB332', 'G8', 'G4', 'G2', 'G1'])
+
+    imggen.gen(filters.HilbertPeanoAlloc, ['p'],
+               [
+                [core.C.PIXEL_RGB332],
+                [core.C.PIXEL_G8],
+                [core.C.PIXEL_G4],
+                [core.C.PIXEL_G2],
+                [core.C.PIXEL_G1],
+               ],
+               'images/hilbert_peano/',
+               'Hilbert Peano Dithering',
+               ['RGB332', 'G8', 'G4', 'G2', 'G1'])
+
 
 if __name__ == '__main__':
     main()

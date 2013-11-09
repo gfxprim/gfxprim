@@ -106,54 +106,6 @@ returned.
 Not all pixel types all supported. If particular combination is not supported
 the function returns 'NULL' and sets errno to 'ENOSYS'.
 
-Example Images
-^^^^^^^^^^^^^^
-All following images were generated using 'grinder'.
-(Click for bigger size)
-
-.Original Image; Floyd-Steinberg, Hilbert-Peano: 1-bit, 2-bit, 4-bit, 8-bit Grayscale; 1-bit, 2-bit, 3-bit (per channel) RGB
-image:images/dither/lenna_small.png[
-	"Original Image",
-	link="images/dither/lenna.png"]
-image:images/dither/lenna_G1_FS_small.png[
-	"1-bit Grayscale Floyd-Steinberg",
-	link="images/dither/lenna_G1_FS.png"]
-image:images/dither/lenna_G1_HP_small.png[
-	"1-bit Grayscale Hilbert-Peano",
-	link="images/dither/lenna_G1_HP.png"]
-image:images/dither/lenna_G2_FS_small.png[
-	"2-bit Grayscale Floyd-Steinberg",
-	link="images/dither/lenna_G2_FS.png"]
-image:images/dither/lenna_G2_HP_small.png[
-	"2-bit Grayscale Hilbert-Peano",
-	link="images/dither/lenna_G2_HP.png"]
-image:images/dither/lenna_G4_FS_small.png[
-	"4-bit Grayscale Floyd-Steinberg",
-	link="images/dither/lenna_G4_FS.png"]
-image:images/dither/lenna_G4_HP_small.png[
-	"4-bit Grayscale Hilbert-Peano",
-	link="images/dither/lenna_G4_HP.png"]
-image:images/dither/lenna_G8_FS_small.png[
-	"8-bit Grayscale Floyd-Steinberg",
-	link="images/dither/lenna_G8_FS.png"]
-image:images/dither/lenna_G8_HP_small.png[
-	"7-bit Grayscale Hilbert-Peano",
-	link="images/dither/lenna_G8_HP.png"]
-image:images/dither/lenna_RGB111_FS_small.png[
-	"1-bit RGB Floyd-Steinberg",
-	link="images/dither/lenna_RGB111_FS.png"]
-image:images/dither/lenna_RGB111_HP_small.png[
-	"1-bit RGB Hilbert-Peano",
-	link="images/dither/lenna_RGB111_HP.png"]
-image:images/dither/lenna_RGB222_FS_small.png[
-	"2-bit RGB Floyd-Steinberg",
-	link="images/dither/lenna_RGB222_FS.png"]
-image:images/dither/lenna_RGB222_HP_small.png[
-	"2-bit RGB Hilbert-Peano",
-	link="images/dither/lenna_RGB222_HP.png"]
-image:images/dither/lenna_RGB333_FS_small.png[
-	"3-bit RGB Floyd-Steinberg",
-	link="images/dither/lenna_RGB333_FS.png"]
-image:images/dither/lenna_RGB333_HP_small.png[
-	"3-bit RGB Hilbert-Peano",
-	link="images/dither/lenna_RGB333_HP.png"]
+include::images/convert/images.txt[]
+include::images/floyd_steinberg/images.txt[]
+include::images/hilbert_peano/images.txt[]

@@ -1,4 +1,4 @@
-.Original Image; 3x3 Box Blur, 5x5 Box Blur, 3x3 Laplacian, 3x3 Sobel, 3x3 Roberts
+.Original Image; Convolution: 3x3 Box Blur, 5x5 Box Blur, 3x3 Laplacian, 3x3 Sobel, 3x3 Roberts
 image:images/orig/lenna_small.png[
 	"Original Image",
 	link="images/orig/lenna.png"]
