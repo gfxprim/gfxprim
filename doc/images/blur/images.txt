@@ -2,19 +2,19 @@
 image:images/orig/lenna_small.png[
 	"Original Image",
 	link="images/orig/lenna.png"]
-image:images/blur/lenna_small_2_2.png[
+image:images/blur/lenna_small_2,2.png[
 	"Gaussian Blur 2 2",
-	link="images/blur/lenna_2_2.png"]
-image:images/blur/lenna_small_0_4.png[
+	link="images/blur/lenna_2,2.png"]
+image:images/blur/lenna_small_0,4.png[
 	"Gaussian Blur 0 4",
-	link="images/blur/lenna_0_4.png"]
-image:images/blur/lenna_small_4_0.png[
+	link="images/blur/lenna_0,4.png"]
+image:images/blur/lenna_small_4,0.png[
 	"Gaussian Blur 4 0",
-	link="images/blur/lenna_4_0.png"]
-image:images/blur/lenna_small_4_4.png[
+	link="images/blur/lenna_4,0.png"]
+image:images/blur/lenna_small_4,4.png[
 	"Gaussian Blur 4 4",
-	link="images/blur/lenna_4_4.png"]
-image:images/blur/lenna_small_10_10.png[
+	link="images/blur/lenna_4,4.png"]
+image:images/blur/lenna_small_10,10.png[
 	"Gaussian Blur 10 10",
-	link="images/blur/lenna_10_10.png"]
+	link="images/blur/lenna_10,10.png"]
 

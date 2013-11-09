@@ -1,7 +1,7 @@
-SUBDIRS=blur median edge_sharpening gaussian_noise
+SUBDIRS=$(dir $(wildcard */images.txt))
 
-TARGETS=$(addsuffix /images.txt,$(SUBDIRS))
-IMGS=$(addsuffix /*.png,$(SUBDIRS))
+TARGETS=$(addsuffix images.txt,$(SUBDIRS))
+IMGS=$(addsuffix *.png,$(SUBDIRS))
 
 all: $(TARGETS)
 

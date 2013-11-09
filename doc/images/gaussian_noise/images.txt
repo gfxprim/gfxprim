@@ -2,19 +2,19 @@
 image:images/orig/lenna_small.png[
 	"Original Image",
 	link="images/orig/lenna.png"]
-image:images/gaussian_noise/lenna_small_0.03_0.png[
+image:images/gaussian_noise/lenna_small_0.03,0.png[
 	"Gaussian Additive Noise 0.03 0",
-	link="images/gaussian_noise/lenna_0.03_0.png"]
-image:images/gaussian_noise/lenna_small_0.05_0.png[
+	link="images/gaussian_noise/lenna_0.03,0.png"]
+image:images/gaussian_noise/lenna_small_0.05,0.png[
 	"Gaussian Additive Noise 0.05 0",
-	link="images/gaussian_noise/lenna_0.05_0.png"]
-image:images/gaussian_noise/lenna_small_0.05_-0.1.png[
+	link="images/gaussian_noise/lenna_0.05,0.png"]
+image:images/gaussian_noise/lenna_small_0.05,-0.1.png[
 	"Gaussian Additive Noise 0.05 -0.1",
-	link="images/gaussian_noise/lenna_0.05_-0.1.png"]
-image:images/gaussian_noise/lenna_small_0.05_0.1.png[
+	link="images/gaussian_noise/lenna_0.05,-0.1.png"]
+image:images/gaussian_noise/lenna_small_0.05,0.1.png[
 	"Gaussian Additive Noise 0.05 0.1",
-	link="images/gaussian_noise/lenna_0.05_0.1.png"]
-image:images/gaussian_noise/lenna_small_0.07_0.0.png[
+	link="images/gaussian_noise/lenna_0.05,0.1.png"]
+image:images/gaussian_noise/lenna_small_0.07,0.0.png[
 	"Gaussian Additive Noise 0.07 0.0",
-	link="images/gaussian_noise/lenna_0.07_0.0.png"]
+	link="images/gaussian_noise/lenna_0.07,0.0.png"]
 
