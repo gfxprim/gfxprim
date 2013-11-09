@@ -195,8 +195,9 @@ def _init(module):
         '^GP_PixelRGB.*$', # ...Lookup and ...Match
         '^GP_PixelToRGB.*$', # Needs love
         '^GP_RGB.*$', # Needs filtering
-        #'^GP_ProgressCallback.*$', # Needs work
         ])
+
+  module['Convert'] = c_core.GP_ContextConvertAlloc
 
 _init(locals())
 del _init
