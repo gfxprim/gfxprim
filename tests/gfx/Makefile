@@ -5,7 +5,7 @@ CSOURCES=$(filter-out $(wildcard *.gen.c),$(wildcard *.c))
 GENSOURCES=APICoverage.gen.c
 
 APPS=gfx_benchmark Circle FillCircle Line CircleSeg Polygon Ellipse HLine\
-     VLine PutPixelAA HLineAA LineAA APICoverage.gen FillEllipse
+     VLine PutPixelAA HLineAA LineAA APICoverage.gen FillEllipse FillRect
 
 Circle: common.o
 FillCircle: common.o
@@ -19,6 +19,7 @@ VLine: common.o
 PutPixelAA: common.o
 HLineAA: common.o
 LineAA: common.o
+FillRect: common.o
 
 include ../tests.mk
 
