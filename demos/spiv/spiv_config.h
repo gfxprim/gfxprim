@@ -32,18 +32,52 @@ enum orientation {
 	ROTATE_270,
 };
 
+enum zoom_strategy {
+	/* Resize window to content size */
+	ZOOM_WIN_RESIZABLE = 0x00,
+	/* Do not change window size */
+	ZOOM_WIN_FIXED = 0x01,
+
+	/* Upscale image if window is bigger */
+	ZOOM_IMAGE_UPSCALE = 0x01,
+	/* Downscale image if window is smaller */
+	ZOOM_IMAGE_DOWNSCALE = 0x02,
+};
+
 struct spiv_config {
 	float slideshow_delay;
 	enum orientation orientation;
+	int win_strategy:2;
+	int zoom_strategy:2;
+	/* Maximal window size */
+	unsigned int max_win_w;
+	unsigned int max_win_h;
+
 	int show_progress:1;
 	int show_info:1;
 	int floyd_steinberg:1;
 	int timers:1;
+	int full_screen:1;
 	char backend_init[128];
 	GP_PixelType emul_type;
 };
 
 extern struct spiv_config config;
+
+static inline void config_win_toggle(void)
+{
+	config.win_strategy = !config.win_strategy;
+}
+
+static inline void config_upscale_toggle(void)
+{
+	config.zoom_strategy ^= ZOOM_IMAGE_UPSCALE;
+}
+
+static inline void config_downscale_toggle(void)
+{
+	config.zoom_strategy ^= ZOOM_IMAGE_DOWNSCALE;
+}
 
 int spiv_config_load(const char *path);
 

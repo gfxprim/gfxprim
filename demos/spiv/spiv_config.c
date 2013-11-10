@@ -36,14 +36,68 @@ struct spiv_config config = {
 	.show_info = 0,
 	.backend_init = "X11",
 	.emul_type = GP_PIXEL_UNKNOWN,
+	.zoom_strategy = ZOOM_IMAGE_DOWNSCALE,
+	.win_strategy = ZOOM_WIN_FIXED,
+	.full_screen = 0,
+	.max_win_w = 1024,
+	.max_win_h = 768,
 };
 
 static int set_zoom_strategy(struct cfg_opt *self, unsigned int lineno)
 {
-	(void) lineno;
-	//TODO!!!
-	printf("ZoomStrategy = %s\n", self->val);
+	switch (self->opt) {
+	case 'w':
+		switch (self->val[0]) {
+		case 'r':
+		case 'R':
+			config.win_strategy = ZOOM_WIN_RESIZABLE;
+			return 0;
+		case 'f':
+		case 'F':
+			config.win_strategy = ZOOM_WIN_FIXED;
+			return 0;
+		}
+	break;
+	case 'z':
+		switch (self->val[0]) {
+		case 'n':
+		case 'N':
+			config.zoom_strategy = 0;
+			return 0;
+		case 'u':
+		case 'U':
+			config.zoom_strategy = ZOOM_IMAGE_UPSCALE;
+			return 0;
+		case 'd':
+		case 'D':
+			config.zoom_strategy = ZOOM_IMAGE_DOWNSCALE;
+			return 0;
+		case 'b':
+		case 'B':
+			config.zoom_strategy = ZOOM_IMAGE_UPSCALE |
+			                       ZOOM_IMAGE_DOWNSCALE;
+			return 0;
+		}
+	break;
+	}
 
+	fprintf(stderr, "ERROR: %u: Invalid zoom strategy '%s'\n",
+	        lineno, self->val);
+	return 1;
+}
+
+static int set_win_max_size(struct cfg_opt *self, unsigned int lineno)
+{
+	unsigned int w, h;
+
+	if (sscanf(self->val, "%ux%u", &w, &h) != 2) {
+		fprintf(stderr, "ERROR: %u: Invalid max window size '%s'\n",
+		        lineno, self->val);
+		return 1;
+	}
+
+	config.max_win_w = w;
+	config.max_win_h = h;
 	return 0;
 }
 
@@ -60,8 +114,11 @@ static int set_opt(struct cfg_opt *self, unsigned int lineno)
 	(void) lineno;
 
 	switch (self->opt) {
-	case 'f':
+	case 'd':
 		config.floyd_steinberg = 1;
+	break;
+	case 'f':
+		config.full_screen = 1;
 	break;
 	case 'i':
 		config.show_info = 1;
@@ -195,9 +252,9 @@ struct cfg_opt spiv_opts[] = {
 	 .help = "Delay between images in seconds (float) for slideshow",
 	},
 	{.name_space = "Gui",
-	 .key = "UseFloydSteinberg",
-	 .opt = 'f',
-	 .opt_long = "floyd-steinberg",
+	 .key = "Dithering",
+	 .opt = 'd',
+	 .opt_long = "dithering",
 	 .opt_has_value = 0,
 	 .set = set_opt,
 	 .help = "Turn on Floyd-Steinberg dithering",
@@ -211,6 +268,14 @@ struct cfg_opt spiv_opts[] = {
 	 .help = "Orientation, one of 0, 90, 180, 270",
 	},
 	{.name_space = "Gui",
+	 .key = "FullScreen",
+	 .opt = 'f',
+	 .opt_long = "full-screen",
+	 .opt_has_value = 0,
+	 .set = set_opt,
+	 .help = "Start fullscreen.",
+	},
+	{.name_space = "Gui",
 	 .key = "BackendInit",
 	 .opt = 'b',
 	 .opt_long = "backend-init",
@@ -220,12 +285,29 @@ struct cfg_opt spiv_opts[] = {
 	},
 
 	{.name_space = "Zoom",
+	 .key = "WindowSize",
+	 .opt = 'w',
+	 .opt_long = "window-size",
+	 .opt_has_value = 1,
+	 .set = set_zoom_strategy,
+	 .help = "Window size, resizeable (-wr) or fixed (-wf)",
+	},
+	{.name_space = "Zoom",
 	 .key = "ZoomStrategy",
 	 .opt = 'z',
 	 .opt_long = "zoom-strategy",
 	 .opt_has_value = 1,
 	 .set = set_zoom_strategy,
-	 .help = "Zoom strategy",
+	 .help = "Zoom strategy, none (-zn), upscale (-zu), "
+	         "downscale (-zd) or both (-zb)",
+	},
+	{.name_space = "Zoom",
+	 .key = "MaxWinSize",
+	 .opt = 'm',
+	 .opt_long = "max-win-size",
+	 .opt_has_value = 1,
+	 .set = set_win_max_size,
+	 .help = "Window maximal size, 800x600 for example",
 	},
 
 

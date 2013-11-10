@@ -52,33 +52,16 @@ static int abort_flag = 0;
 static int show_progress = 0;
 static int loader_running = 0;
 
-enum zoom_type {
-	/*
-	 * Resize image to fit current size of the window.
-	 */
-	ZOOM_FIT,
-
-	/*
-	 * Use zoom set in zoom float and zoom offsets.
-	 */
-	ZOOM_FIXED,
-
-	/*
-	 * Fixed zoom but spiv tries to change
-	 * the window size to fit the image size
-	 */
-	ZOOM_FIXED_WIN,
-
-	/*
-	 * Do not upscale images but downscale them
-	 * if they are too big.
-	 */
-	ZOOM_FIT_DOWNSCALE,
-};
-
 struct loader_params {
 	/* current resize ratio */
-	float rat;
+	float zoom_rat;
+
+	/* offset in pixels */
+	unsigned int zoom_x_offset;
+	unsigned int zoom_y_offset;
+
+	/* flag that is turned on when user changes zoom */
+	unsigned int zoom_manual;
 
 	long show_progress_once:2;
 	/* use nearest neighbour resampling first */
@@ -90,14 +73,6 @@ struct loader_params {
 
 	/* slideshow sleep */
 	int sleep_ms;
-
-	/* offset in pixels */
-	unsigned int zoom_x_offset;
-	unsigned int zoom_y_offset;
-
-	/* zoom */
-	enum zoom_type zoom_type;
-	float zoom;
 
 	/* caches for loaded images */
 	struct image_cache *img_resized_cache;
@@ -140,25 +115,6 @@ static int image_loader_callback(GP_ProgressCallback *self)
 }
 
 static GP_Context *load_image(int elevate);
-
-/*
- * Ask backend to resize window may not be implemented or authorized. If
- * backend (window) is resized we will get SYS_RESIZE event, see the main event
- * loop.
- */
-static void resize_backend(float ratio, int shift_flag)
-{
-	GP_Context *img = load_image(1);
-
-	if (!shift_flag)
-		ratio = 1.00 / ratio;
-
-	unsigned int w = img->w * ratio + 0.5;
-	unsigned int h = img->h * ratio + 0.5;
-
-	GP_BackendResize(backend, w, h);
-}
-
 
 static const char *img_name(const char *img_path)
 {
@@ -268,26 +224,34 @@ static void show_info(struct loader_params *params, GP_Context *img,
 	GP_Context *context = backend->context;
 	const char *img_path = image_loader_img_path();
 
-	set_caption(img_path, params->rat);
+	set_caption(img_path, params->zoom_rat);
 
 	if (!config.show_info)
 		return;
 
-	GP_Size th = GP_TextHeight(NULL);
+	GP_Size th = GP_TextHeight(NULL), y = 10;
 
-	info_printf(context, 10, 10, "%ux%u (%ux%u) 1:%3.3f",
-	         img->w, img->h, orig_img->w, orig_img->h, params->rat);
+	info_printf(context, 10, y, "%ux%u (%ux%u) 1:%3.3f %3.1f%%",
+	         img->w, img->h, orig_img->w, orig_img->h, params->zoom_rat,
+		 params->zoom_rat * 100);
+	y += th + 2;
 
-	info_printf(context, 10, 12 + th, "%s", img_name(img_path));
+	info_printf(context, 10, y, "%s", img_name(img_path));
 
-	info_printf(context, 10, 14 + 2 * th, "%s%s",
-		 params->use_low_pass && params->rat < 1 ? "Gaussian LP + " : "",
-		 GP_InterpolationTypeName(params->resampling_method));
+	y += th + 2;
+
+	if (params->zoom_rat != 1.00) {
+		info_printf(context, 10, y, "%s%s",
+		            params->use_low_pass && params->zoom_rat < 1 ? "Gaussian LP + " : "",
+	                    GP_InterpolationTypeName(params->resampling_method));
+		y += th + 2;
+	}
 
 	unsigned int count = image_loader_count();
 	unsigned int pos = image_loader_pos() + 1;
 
-	info_printf(context, 10, 16 + 3 * th, "%u of %u", pos, count);
+	info_printf(context, 10, y, "%u of %u", pos, count);
+	y += th + 2;
 
 	if (!image_loader_is_in_dir())
 		return;
@@ -295,7 +259,7 @@ static void show_info(struct loader_params *params, GP_Context *img,
 	unsigned int dir_count = image_loader_dir_count();
 	unsigned int dir_pos = image_loader_dir_pos() + 1;
 
-	info_printf(context, 10, 18 + 4 * th,
+	info_printf(context, 10, y,
 		    "%u of %u in directory", dir_pos, dir_count);
 }
 
@@ -329,17 +293,22 @@ static void update_display(struct loader_params *params, GP_Context *img,
 	int cx = 0;
 	int cy = 0;
 
-	switch (params->zoom_type) {
-	case ZOOM_FIT_DOWNSCALE:
-	case ZOOM_FIT:
-		cx = (context->w - img->w)/2;
-		cy = (context->h - img->h)/2;
-	break;
-	case ZOOM_FIXED:
-	case ZOOM_FIXED_WIN:
+	/*
+	 * Center the image, if window size is fixed and
+	 * the image is smaller than window.
+	 */
+	if (config.win_strategy == ZOOM_WIN_FIXED) {
+
+		if (img->w < context->w)
+			cx = (context->w - img->w)/2;
+
+		if (img->h < context->h)
+			cy = (context->h - img->h)/2;
+	}
+
+	if (params->zoom_manual) {
 		cx = params->zoom_x_offset;
 		cy = params->zoom_y_offset;
-	break;
 	}
 
 	GP_Context sub_display;
@@ -363,6 +332,7 @@ static void update_display(struct loader_params *params, GP_Context *img,
 	/* clean up the rest of the display */
 	GP_FillRectXYWH(context, 0, 0, cx, context->h, black_pixel);
 	GP_FillRectXYWH(context, 0, 0, context->w, cy, black_pixel);
+
 
 	int w = context->w - img->w - cx;
 
@@ -412,12 +382,12 @@ GP_Context *load_resized_image(struct loader_params *params, GP_Size w, GP_Size 
 	}
 
 	/* Do low pass filter */
-	if (params->use_low_pass && params->rat < 1) {
+	if (params->use_low_pass && params->zoom_rat < 1) {
 		cpu_timer_start(&timer, "Blur");
 		callback.priv = "Blurring Image";
 
-		res = GP_FilterGaussianBlurAlloc(img, 0.4/params->rat,
-		                                 0.4/params->rat, &callback);
+		res = GP_FilterGaussianBlurAlloc(img, 0.4/params->zoom_rat,
+		                                 0.4/params->zoom_rat, &callback);
 
 		if (res == NULL)
 			return NULL;
@@ -436,7 +406,7 @@ GP_Context *load_resized_image(struct loader_params *params, GP_Size w, GP_Size 
 	cpu_timer_stop(&timer);
 
 /*
-	if (params->rat > 1.5) {
+	if (params->zoom_rat > 1.5) {
 		cpu_timer_start(&timer, "Sharpening");
 		callback.priv = "Sharpening";
 		GP_FilterEdgeSharpening(i1, i1, 0.1, &callback);
@@ -459,38 +429,89 @@ GP_Context *load_resized_image(struct loader_params *params, GP_Size w, GP_Size 
 
 static float calc_img_size(struct loader_params *params,
                            uint32_t img_w, uint32_t img_h,
-                           uint32_t src_w, uint32_t src_h)
+                           uint32_t win_w, uint32_t win_h)
 {
-	float w_rat;
-	float h_rat;
+	float w_rat, h_rat, rat;
+	unsigned int max_win_w = config.max_win_w;
+	unsigned int max_win_h = config.max_win_h;
 
 	switch (config.orientation) {
-	case ROTATE_0:
-	case ROTATE_180:
-	default:
-	break;
 	case ROTATE_90:
 	case ROTATE_270:
-		GP_SWAP(src_w, src_h);
+		GP_SWAP(win_w, win_h);
+		GP_SWAP(max_win_w, max_win_h);
+	break;
+	default:
 	break;
 	}
 
-	switch (params->zoom_type) {
-	case ZOOM_FIT_DOWNSCALE:
-		if (img_w <= src_w && img_h <= src_h)
-			return 1.00;
-	case ZOOM_FIT:
-		w_rat = 1.00 * src_w / img_w;
-		h_rat = 1.00 * src_h / img_h;
-		return GP_MIN(w_rat, h_rat);
-	case ZOOM_FIXED:
-		return params->zoom;
-	case ZOOM_FIXED_WIN:
-		resize_backend(params->zoom, 0);
-		return params->zoom;
+	if (params->zoom_manual) {
+		if (config.win_strategy == ZOOM_WIN_RESIZABLE) {
+			win_w = GP_MIN(max_win_w, img_w * params->zoom_rat + 0.5);
+			win_h = GP_MIN(max_win_h, img_h * params->zoom_rat + 0.5);
+
+			switch (config.orientation) {
+			case ROTATE_90:
+			case ROTATE_270:
+				GP_BackendResize(backend, win_h, win_w);
+			break;
+			default:
+				GP_BackendResize(backend, win_w, win_h);
+			}
+		}
+		return params->zoom_rat;
 	}
 
-	return 1.00;
+
+	if (config.win_strategy == ZOOM_WIN_RESIZABLE) {
+		win_w = GP_MIN(max_win_w, img_w);
+		win_h = GP_MIN(max_win_h, img_h);
+
+		/*
+		 * Image is larger than screen and downscale is enabled ->
+		 * resize window to match image ratio.
+		 */
+		if ((win_w != img_w || win_h != img_h) &&
+		    config.zoom_strategy & ZOOM_IMAGE_DOWNSCALE) {
+
+			w_rat = 1.00 * win_w / img_w;
+			h_rat = 1.00 * win_h / img_h;
+
+			if (w_rat > 1)
+				w_rat = 1;
+
+			if (h_rat > 1)
+				w_rat = 1;
+
+			rat = GP_MIN(h_rat, w_rat);
+
+			win_w = rat * img_w + 0.5;
+			win_h = rat * img_h + 0.5;
+		}
+
+		switch (config.orientation) {
+		case ROTATE_90:
+		case ROTATE_270:
+			GP_BackendResize(backend, win_h, win_w);
+		break;
+		default:
+			GP_BackendResize(backend, win_w, win_h);
+		}
+	}
+
+	if (img_w <= win_w && img_h <= win_h) {
+		if (!(config.zoom_strategy & ZOOM_IMAGE_UPSCALE))
+			return 1.00;
+	} else {
+		if (!(config.zoom_strategy & ZOOM_IMAGE_DOWNSCALE))
+			return 1.00;
+
+	}
+
+	w_rat = 1.00 * win_w / img_w;
+	h_rat = 1.00 * win_h / img_h;
+
+	return GP_MIN(w_rat, h_rat);
 }
 
 static void *image_loader(void *ptr)
@@ -509,14 +530,14 @@ static void *image_loader(void *ptr)
 		return NULL;
 	}
 
-	/* Figure out rotation */
+	/* Figure zoom */
 	GP_Size w, h;
 
-	params->rat = calc_img_size(params, orig_img->w, orig_img->h,
-	                            context->w, context->h);
+	params->zoom_rat = calc_img_size(params, orig_img->w, orig_img->h,
+	                                 context->w, context->h);
 
-	w = orig_img->w * params->rat + 0.5;
-	h = orig_img->h * params->rat + 0.5;
+	w = orig_img->w * params->zoom_rat + 0.5;
+	h = orig_img->h * params->zoom_rat + 0.5;
 
 	/* Special case => no need to resize */
 	if (w == orig_img->w && h == orig_img->h) {
@@ -578,12 +599,14 @@ static void image_seek(struct loader_params *params,
 	 * image we are currently resamling.
 	 */
 	stop_loader();
+	params->zoom_manual = 0;
 	image_loader_seek(offset, whence);
 	show_image(params);
 }
 
 static void set_zoom_offset(struct loader_params *params, int dx, int dy)
 {
+	params->zoom_manual = 1;
 	params->zoom_x_offset += dx;
 	params->zoom_y_offset += dy;
 	show_image(params);
@@ -591,7 +614,15 @@ static void set_zoom_offset(struct loader_params *params, int dx, int dy)
 
 static void zoom_mul(struct loader_params *params, float mul)
 {
-	params->zoom *= mul;
+	params->zoom_manual = 1;
+	params->zoom_rat *= mul;
+	show_image(params);
+}
+
+static void zoom_set(struct loader_params *params, float mul)
+{
+	params->zoom_manual = 1;
+	params->zoom_rat = mul;
 	show_image(params);
 }
 
@@ -612,6 +643,11 @@ static void init_backend(const char *backend_opts)
 	if (backend == NULL) {
 		fprintf(stderr, "Failed to initalize backend '%s'\n", backend_opts);
 		exit(1);
+	}
+
+	if (config.full_screen) {
+		if (GP_BackendIsX11(backend))
+			GP_BackendX11RequestFullscreen(backend, 2);
 	}
 }
 
@@ -678,9 +714,6 @@ int main(int argc, char *argv[])
 		.show_progress_once = 0,
 		.show_nn_first = 0,
 		.resampling_method = GP_INTERP_LINEAR_LF_INT,
-
-                .zoom_type = ZOOM_FIT,
-                .zoom = 1,
 
 		.img_resized_cache = NULL,
 
@@ -867,9 +900,24 @@ int main(int argc, char *argv[])
 					params.show_progress_once = 1;
 					show_image(&params);
 				break;
-				case GP_KEY_D:
+				case GP_KEY_C:
 					image_cache_drop(params.img_resized_cache);
 					image_loader_drop_cache();
+				break;
+				case GP_KEY_W:
+					config_win_toggle();
+					params.show_progress_once = 1;
+					show_image(&params);
+				break;
+				case GP_KEY_U:
+					config_upscale_toggle();
+					params.show_progress_once = 1;
+					show_image(&params);
+				break;
+				case GP_KEY_D:
+					config_downscale_toggle();
+					params.show_progress_once = 1;
+					show_image(&params);
 				break;
 				case GP_KEY_ESC:
 				case GP_KEY_ENTER:
@@ -938,21 +986,34 @@ int main(int argc, char *argv[])
 						image_seek(&params, IMG_CUR, -1);
 				break;
 				case GP_KEY_1 ... GP_KEY_9: {
-					int val = ev.val.key.key - GP_KEY_1 + 1;
-					resize_backend(val, shift_flag);
+					float val = ev.val.key.key - GP_KEY_1 + 1;
+
+					if (!shift_flag)
+						val = 1/val;
+
+					zoom_set(&params, val);
 				} break;
 				case GP_KEY_0:
-					resize_backend(10, shift_flag);
+					if (shift_flag)
+						zoom_set(&params, 10);
+					else
+						zoom_set(&params, 0.1);
 				break;
 				case GP_KEY_KP_PLUS:
 				case GP_KEY_DOT:
 					params.show_progress_once = 1;
-					zoom_mul(&params, 1.5);
+					if (shift_flag)
+						zoom_mul(&params, 1.1);
+					else
+						zoom_mul(&params, 1.5);
 				break;
 				case GP_KEY_KP_MINUS:
 				case GP_KEY_COMMA:
 					params.show_progress_once = 1;
-					zoom_mul(&params, 1/1.5);
+					if (shift_flag)
+						zoom_mul(&params, 1/1.1);
+					else
+						zoom_mul(&params, 1/1.5);
 				break;
 				case GP_KEY_F1 ... GP_KEY_F10:
 					image_action_run(ev.val.key.key - GP_KEY_F1,
