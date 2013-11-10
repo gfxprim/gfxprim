@@ -75,6 +75,9 @@ void GP_FillRectXYXY_Raw(GP_Context *context, GP_Coord x0, GP_Coord y0,
 	if (y0 > y1)
 		GP_SWAP(y0, y1);
 
+	y0 = GP_MAX(0, y0);
+	y1 = GP_MIN(y1, (GP_Coord)context->h - 1);
+
 	GP_Coord y;
 	for (y = y0; y <= y1; y++)
 		GP_HLine_Raw(context, x0, x1, y, pixel);
@@ -97,7 +100,7 @@ void GP_FillRectXYXY(GP_Context *context, GP_Coord x0, GP_Coord y0,
 	GP_TRANSFORM_POINT(context, x0, y0);
 	GP_TRANSFORM_POINT(context, x1, y1);
 
-	GP_FillRect_Raw(context, x0, y0, x1, y1, pixel);
+	GP_FillRectXYXY_Raw(context, x0, y0, x1, y1, pixel);
 }
 
 void GP_FillRectXYWH(GP_Context *context, GP_Coord x, GP_Coord y,
