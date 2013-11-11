@@ -167,7 +167,7 @@ static void x11_ev(XEvent *ev)
 	default:
 		//TODO: More accurate window w and h?
 		GP_InputDriverX11EventPut(&self->event_queue, ev,
-		                          win->context.w, win->context.h);
+		                          self->context->w, self->context->h);
 	break;
 	}
 }
@@ -480,7 +480,6 @@ static int create_ximage(GP_Backend *self, GP_Size w, GP_Size h)
 	}
 
 	win->shm_flag = 0;
-
 	win->img->data = (char*)self->context->pixels;
 
 	return 0;
