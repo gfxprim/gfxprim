@@ -90,6 +90,11 @@ static struct x11_win *win_list_lookup(Window win)
 	return NULL;
 }
 
+static int win_list_empty(void)
+{
+	return win_list == NULL;
+}
+
 /* Send NETWM message, most modern Window Managers should understand */
 static void x11_win_fullscreen(struct x11_win *win, int mode)
 {
@@ -378,6 +383,9 @@ static void x11_win_close(struct x11_win *win)
 	XUnmapWindow(win->dpy, win->win);
 
 	XDestroyWindow(win->dpy, win->win);
+
+	if (!win_list_empty())
+		XFlush(win->dpy);
 
 	XUnlockDisplay(win->dpy);
 
