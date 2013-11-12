@@ -90,17 +90,11 @@ static struct x11_win *win_list_lookup(Window win)
 	return NULL;
 }
 
-#ifndef _NET_WM_STATE_ADD
-# define _NET_WM_STATE_ADD 1
-#endif /* _NET_WM_STATE_ADD */
-
-#ifndef _NET_WM_STATE_REMOVE
-# define _NET_WM_STATE_REMOVE 0
-#endif /* _NET_WM_STATE_REMOVE */
-
 /* Send NETWM message, most modern Window Managers should understand */
 static void x11_win_fullscreen(struct x11_win *win, int mode)
 {
+	XEvent ev;
+
 	if (mode < 0 || mode > 2) {
 		GP_WARN("Invalid fullscreen mode = %u", mode);
 		return;
@@ -108,31 +102,19 @@ static void x11_win_fullscreen(struct x11_win *win, int mode)
 
 	GP_DEBUG(2, "Requesting fullscreen mode = %u", mode);
 
-	Atom wm_state, fullscreen;
-
-	wm_state = XInternAtom(win->dpy, "_NET_WM_STATE", True);
-	fullscreen = XInternAtom(win->dpy, "_NET_WM_STATE_FULLSCREEN", True);
-
-	if (wm_state == None || fullscreen == None) {
-		GP_WARN("Failed to create _NET_WM_* atoms");
-		return;
-	}
-
-	XEvent ev;
-
 	memset(&ev, 0, sizeof(ev));
 
 	ev.type = ClientMessage;
 	ev.xclient.window = win->win;
-	ev.xclient.message_type = wm_state;
+	ev.xclient.message_type = x11_conn.A__NET_WM_STATE;
 	ev.xclient.format = 32;
 	ev.xclient.data.l[0] = mode;
-	ev.xclient.data.l[1] = fullscreen;
+	ev.xclient.data.l[1] = x11_conn.A__NET_WM_STATE_FULLSCREEN;
 	ev.xclient.data.l[2] = 0;
 	ev.xclient.data.l[3] = 1;
 
 	if (!XSendEvent(win->dpy, XDefaultRootWindow(win->dpy),
-	                False, SubstructureNotifyMask, &ev)) {
+	                False, SubstructureNotifyMask|SubstructureRedirectMask, &ev)) {
 		GP_WARN("Failed to send _NET_WM_STATE_FULLSCREEN event");
 		return;
 	}
@@ -364,15 +346,7 @@ static int x11_win_open(struct x11_wreq *wreq)
 	                   NULL, 0, NULL, NULL, NULL);
 
 	/* Make the window close button send event */
-	Atom xa = XInternAtom(win->dpy, "WM_DELETE_WINDOW", True);
-
-	if (xa != None) {
-		GP_DEBUG(2, "Setting WM_DELETE_WINDOW Atom to True");
-
-		XSetWMProtocols(win->dpy, win->win, &xa, 1);
-	} else {
-		GP_DEBUG(2, "Failed to set WM_DELETE_WINDOW Atom to True");
-	}
+	XSetWMProtocols(win->dpy, win->win, &x11_conn.A_WM_DELETE_WINDOW, 1);
 
 	win_list_add(win);
 

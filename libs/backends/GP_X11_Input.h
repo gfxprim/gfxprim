@@ -20,18 +20,8 @@
  *                                                                           *
  *****************************************************************************/
 
-#include "../../config.h"
-
-#include "core/GP_Debug.h"
-#include "core/GP_Common.h"
-#include "input/GP_EventQueue.h"
-
-#ifdef HAVE_LIBX11
-
 #include <X11/keysym.h>
 #include <X11/XF86keysym.h>
-
-#include "GP_InputDriverX11.h"
 
 /* X11 keycodes */
 static uint16_t keycode_table[] = {
@@ -149,7 +139,7 @@ static const struct keytable sym_to_key[] = {
 	{XF86XK_AudioPlay,        GP_KEY_PLAYPAUSE},
 };
 
-static void init_table(Display *dpy)
+static void x11_input_init(void)
 {
 	GP_DEBUG(1, "Initializing X11 KeyCode table");
 
@@ -158,7 +148,8 @@ static void init_table(Display *dpy)
 	for (i = 0; i < GP_ARRAY_SIZE(sym_to_key); i++) {
 		unsigned int keycode;
 
-		keycode = XKeysymToKeycode(dpy, sym_to_key[i].x_keysym);
+		keycode = XKeysymToKeycode(x11_conn.dpy,
+		                           sym_to_key[i].x_keysym);
 
 		if (keycode == 0) {
 			GP_DEBUG(1, "KeySym '%s' (%u) not defined",
@@ -203,13 +194,8 @@ static unsigned int get_key(unsigned int xkey)
 	return key;
 }
 
-void GP_InputDriverX11Init(Display *dpy)
-{
-	init_table(dpy);
-}
-
-void GP_InputDriverX11EventPut(struct GP_EventQueue *event_queue,
-                               XEvent *ev, int w, int h)
+static void x11_input_event_put(struct GP_EventQueue *event_queue,
+                                XEvent *ev, int w, int h)
 {
 	int key = 0, press = 0;
 
@@ -274,17 +260,12 @@ void GP_InputDriverX11EventPut(struct GP_EventQueue *event_queue,
 	break;
 	/* events from WM */
 	case ClientMessage:
-		//TODO: We know we get WM_DELETE_WINDOW because it's the only
-		//      event we requested to get but we must check anyway
-		GP_EventQueuePush(event_queue, GP_EV_SYS,
-		                  GP_EV_SYS_QUIT, 0, NULL);
-#if 0
-		switch (ev->xclient.message_type) {
-		default:
-			GP_WARN("Unknown X11 ClientMessage Atom %i",
-			        ev->xclient.message_type);
+		if ((Atom)ev->xclient.data.l[0] == x11_conn.A_WM_DELETE_WINDOW) {
+			GP_EventQueuePush(event_queue, GP_EV_SYS,
+			                  GP_EV_SYS_QUIT, 0, NULL);
+			return;
 		}
-#endif
+		GP_WARN("Unknown X Client Message");
 	break;
 	case MapNotify:
 		GP_DEBUG(1, "MapNotify event received");
@@ -299,5 +280,3 @@ void GP_InputDriverX11EventPut(struct GP_EventQueue *event_queue,
 		GP_WARN("Unhandled X11 event type %u", ev->type);
 	}
 }
-
-#endif /* HAVE_LIBX11 */

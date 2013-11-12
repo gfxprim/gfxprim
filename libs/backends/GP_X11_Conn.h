@@ -26,7 +26,18 @@
 struct x11_conn {
 	Display *dpy;
 
-	/* window reference counter */
+	/* X Atoms */
+	Atom A_WM_DELETE_WINDOW;
+
+	/* NetWM Atoms */
+	Atom A__NET_WM_STATE;
+	Atom A__NET_WM_STATE_FULLSCREEN;
+
+	/* Bitflags for supported Atoms */
+	int S__NET_WM_STATE:1;
+	int S__NET_WM_STATE_FULLSCREEN:1;
+
+	/* reference counter, incremented on window creation */
 	unsigned int ref_cnt;
 };
 
@@ -34,6 +45,54 @@ static struct x11_conn x11_conn = {
 	.dpy = NULL,
 	.ref_cnt = 0,
 };
+
+static int x11_get_property(Atom type, Atom **args, unsigned long *count)
+{
+	int ret, format;
+	unsigned long bytesafter;
+
+	ret = XGetWindowProperty(x11_conn.dpy, XDefaultRootWindow(x11_conn.dpy),
+	                         type, 0, 16384, False, AnyPropertyType, &type,
+				 &format, count, &bytesafter, (void*)args);
+
+	return ret == Success && *count > 0;
+}
+
+#define ATOM_SUPPORTED(name, type, atom) do {                        \
+	if (x11_conn.A_##name == atom) {                             \
+		GP_DEBUG(2, type " Atom '" #name "' is supported."); \
+		x11_conn.S_##name = 1;                               \
+	}                                                            \
+} while (0)
+
+static void x11_check_atoms(Atom at)
+{
+	ATOM_SUPPORTED(_NET_WM_STATE, "NetWM", at);
+	ATOM_SUPPORTED(_NET_WM_STATE_FULLSCREEN, "NetWM", at);
+}
+
+#define INIT_ATOM(name) x11_conn.A_##name = XInternAtom(x11_conn.dpy, #name, False)
+
+static void x11_detect_wm_features(void)
+{
+	Atom *args = NULL, at;
+	unsigned long count, i;
+
+	INIT_ATOM(WM_DELETE_WINDOW);
+	INIT_ATOM(_NET_WM_STATE);
+	INIT_ATOM(_NET_WM_STATE_FULLSCREEN);
+
+	at = XInternAtom(x11_conn.dpy, "_NET_SUPPORTED", True);
+
+	if (x11_get_property(at, &args, &count)) {
+		GP_DEBUG(1, "Window manager supports NetWM");
+
+		for (i = 0; i < count; i++)
+			x11_check_atoms(args[i]);
+	}
+}
+
+static void x11_input_init(void);
 
 static unsigned int x11_open(const char *display)
 {
@@ -55,7 +114,8 @@ static unsigned int x11_open(const char *display)
 	}
 
 	/* Initialized key translation table */
-	GP_InputDriverX11Init(x11_conn.dpy);
+	x11_input_init();
+	x11_detect_wm_features();
 
 	return ++x11_conn.ref_cnt;
 }

@@ -41,12 +41,11 @@
 #include <X11/extensions/XShm.h>
 #endif /* HAVE_X_SHM */
 
-#include "GP_InputDriverX11.h"
-
 #include "backends/GP_X11.h"
 
 #include "GP_X11_Conn.h"
 #include "GP_X11_Win.h"
+#include "GP_X11_Input.h"
 
 static int resize_ximage(GP_Backend *self, int w, int h);
 static int resize_shm_ximage(GP_Backend *self, int w, int h);
@@ -166,8 +165,8 @@ static void x11_ev(XEvent *ev)
 		win->resized_flag = 1;
 	default:
 		//TODO: More accurate window w and h?
-		GP_InputDriverX11EventPut(&self->event_queue, ev,
-		                          self->context->w, self->context->h);
+		x11_input_event_put(&self->event_queue, ev,
+		                    self->context->w, self->context->h);
 	break;
 	}
 }

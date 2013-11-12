@@ -24,6 +24,4 @@ GP_BackendPollEvent
 GP_BackendAddTimer
 GP_BackendRemTimer
 
-GP_InputDriverX11EventPut
-GP_InputDriverX11Init
 GP_InputDriverSDLEventPut
