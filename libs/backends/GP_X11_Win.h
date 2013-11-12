@@ -100,6 +100,11 @@ static void x11_win_fullscreen(struct x11_win *win, int mode)
 		return;
 	}
 
+	if (!x11_conn.S__NET_WM_STATE || !x11_conn.S__NET_WM_STATE_FULLSCREEN) {
+		GP_WARN("NetWM Fullscreen not supported");
+		return;
+	}
+
 	GP_DEBUG(2, "Requesting fullscreen mode = %u", mode);
 
 	memset(&ev, 0, sizeof(ev));
