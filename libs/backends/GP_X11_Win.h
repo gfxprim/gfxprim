@@ -363,6 +363,8 @@ static int x11_win_open(struct x11_wreq *wreq)
 
 static void x11_win_close(struct x11_win *win)
 {
+	GP_DEBUG(1, "Closing window");
+
 	XLockDisplay(win->dpy);
 
 	win_list_rem(win);

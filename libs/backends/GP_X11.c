@@ -105,19 +105,23 @@ static void x11_flip(GP_Backend *self)
 	XUnlockDisplay(win->dpy);
 }
 
+static struct x11_win *last_win = NULL;
+
 static void x11_ev(XEvent *ev)
 {
-	static struct x11_win *win = NULL;
+	struct x11_win *win;
 
 	/* Lookup for window */
-	if (win == NULL || win->win != ev->xany.window) {
-		win = win_list_lookup(ev->xany.window);
+	if (last_win == NULL || last_win->win != ev->xany.window) {
+		last_win = win_list_lookup(ev->xany.window);
 
-		if (win == NULL) {
+		if (last_win == NULL) {
 			GP_WARN("Event for unknown window, ignoring.");
 			return;
 		}
 	}
+
+	win = last_win;
 
 	struct GP_Backend *self = GP_CONTAINER_OF(win, struct GP_Backend, priv);
 
@@ -546,6 +550,13 @@ static void window_close(GP_Backend *self)
 
 static void x11_exit(GP_Backend *self)
 {
+	struct x11_win *win = GP_BACKEND_PRIV(self);
+
+	GP_DEBUG(1, "Closing window %p", win);
+
+	if (win == last_win)
+		last_win = NULL;
+
 	window_close(self);
 
 	free(self);
