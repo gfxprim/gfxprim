@@ -229,14 +229,18 @@ static int x11_set_attributes(struct GP_Backend *self,
 	}
 
 	if (w != 0 && h != 0) {
+		if (win->fullscreen_flag) {
+			GP_DEBUG(1, "Ignoring resize request in fullscreen");
+			goto out;
+		}
 		GP_DEBUG(3, "Setting window size to %ux%u", w, h);
 		XResizeWindow(win->dpy, win->win, w, h);
 	}
 
 	XFlush(win->dpy);
 
+out:
 	XUnlockDisplay(win->dpy);
-
 	return 0;
 }
 

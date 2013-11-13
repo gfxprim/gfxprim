@@ -51,6 +51,7 @@ struct x11_win {
 	/* Flags */
 	int resized_flag:1;
 	int shm_flag:1;
+	int fullscreen_flag:1;
 
 	/* used to store width and height from ConfigureNotify event */
 	unsigned int new_w;
@@ -95,22 +96,48 @@ static int win_list_empty(void)
 	return win_list == NULL;
 }
 
+#ifndef _NET_WM_STATE_REMOVE
+# define _NET_WM_STATE_REMOVE 0
+#endif
+
+#ifndef _NET_WM_STATE_ADD
+# define _NET_WM_STATE_ADD 1
+#endif
+
+#ifndef _NET_WM_STATE_TOGGLE
+# define _NET_WM_STATE_TOGGLE 2
+#endif
+
 /* Send NETWM message, most modern Window Managers should understand */
 static void x11_win_fullscreen(struct x11_win *win, int mode)
 {
+	int fs;
 	XEvent ev;
 
-	if (mode < 0 || mode > 2) {
+	switch (mode) {
+	case _NET_WM_STATE_REMOVE:
+		fs = 0;
+	break;
+	case _NET_WM_STATE_ADD:
+		fs = 1;
+	break;
+	case _NET_WM_STATE_TOGGLE:
+		fs = !win->fullscreen_flag;
+	break;
+	default:
 		GP_WARN("Invalid fullscreen mode = %u", mode);
 		return;
 	}
+
+	if (fs == win->fullscreen_flag)
+		return;
 
 	if (!x11_conn.S__NET_WM_STATE || !x11_conn.S__NET_WM_STATE_FULLSCREEN) {
 		GP_WARN("NetWM Fullscreen not supported");
 		return;
 	}
 
-	GP_DEBUG(2, "Requesting fullscreen mode = %u", mode);
+	GP_DEBUG(2, "Requesting fullscreen mode = %u, fs = %i", mode, fs);
 
 	memset(&ev, 0, sizeof(ev));
 
@@ -128,6 +155,8 @@ static void x11_win_fullscreen(struct x11_win *win, int mode)
 		GP_WARN("Failed to send _NET_WM_STATE_FULLSCREEN event");
 		return;
 	}
+
+	win->fullscreen_flag = fs;
 
 	XFlush(win->dpy);
 }
@@ -168,6 +197,8 @@ static int x11_win_open(struct x11_wreq *wreq)
 		return 1;
 
 	win = wreq->win;
+
+	win->fullscreen_flag = 0;
 
 	/* Copy display */
 	win->dpy = x11_conn.dpy;
