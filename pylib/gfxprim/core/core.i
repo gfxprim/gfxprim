@@ -9,7 +9,6 @@
  * Basic types and common methods
  */
 
-%include "GP_Common.h"
 %include "GP_Core.h"
 %include "GP_Types.h"
 %include "GP_Transform.h"
@@ -24,6 +23,7 @@
 %immutable GP_DebugMsg::fn;
 %immutable GP_DebugMsg::line;
 %immutable GP_DebugMsg::msg;
+%ignore GP_DebugPrint;
 
 %include "GP_Debug.h"
 
@@ -62,6 +62,8 @@ static int GP_ProgressCallbackProxy(GP_ProgressCallback *self)
 }
 %}
 
+%ignore GP_ProgressCallbackReport;
+%ignore GP_ProgressCallbackDone;
 %include "GP_ProgressCallback.h"
 
 /*
