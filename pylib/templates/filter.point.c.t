@@ -10,8 +10,13 @@
 %% endmacro
 
 %% macro filter_point_ex(op_name, filter_op, fopts)
-int GP_Filter{{ op_name }}Ex(const GP_FilterArea *const area{{ maybe_opts_l(fopts) }},
-                          GP_ProgressCallback *callback)
+int GP_Filter{{ op_name }}Ex(const GP_Context *const src,
+                             GP_Coord x_src, GP_Coord y_src,
+                             GP_Size w_src, GP_Size h_src,
+                             GP_Context *dst,
+                             GP_Coord x_dst, GP_Coord y_dst,
+                             {{ maybe_opts_r(fopts) }}
+                             GP_ProgressCallback *callback)
 {
 	const GP_PixelTypeDescription *desc;
 	GP_FilterTables tables;
@@ -19,10 +24,10 @@ int GP_Filter{{ op_name }}Ex(const GP_FilterArea *const area{{ maybe_opts_l(fopt
 	GP_Pixel j;
 	int ret, err;
 
-	if (GP_FilterTablesInit(&tables, area->src))
+	if (GP_FilterTablesInit(&tables, src))
 		return 1;
 
-	desc = GP_PixelTypeDesc(area->src->pixel_type);
+	desc = GP_PixelTypeDesc(src->pixel_type);
 
 	for (i = 0; i < desc->numchannels; i++) {
 		GP_Pixel chan_max = (1 << desc->channels[i].size);
@@ -32,7 +37,8 @@ int GP_Filter{{ op_name }}Ex(const GP_FilterArea *const area{{ maybe_opts_l(fopt
 			table[j] = {{ filter_op('((signed)j)', '((signed)chan_max - 1)') }};
 	}
 
-	ret = GP_FilterTablesApply(area, &tables, callback);
+	ret = GP_FilterTablesApply(src, x_src, y_src, w_src, h_src,
+	                           dst, x_dst, y_dst, &tables, callback);
 
 	err = errno;
 	GP_FilterTablesFree(&tables);
@@ -43,19 +49,17 @@ int GP_Filter{{ op_name }}Ex(const GP_FilterArea *const area{{ maybe_opts_l(fopt
 %% endmacro
 
 %% macro filter_point_ex_alloc(op_name, fopts, opts)
-GP_Context *GP_Filter{{ op_name }}ExAlloc(const GP_FilterArea *const area{{ maybe_opts_l(fopts) }},
-					  GP_ProgressCallback *callback)
+GP_Context *GP_Filter{{ op_name }}ExAlloc(const GP_Context *const src,
+                                          GP_Coord x_src, GP_Coord y_src,
+                                          GP_Size w_src, GP_Size h_src,
+                                          {{ maybe_opts_r(fopts) }}
+                                          GP_ProgressCallback *callback)
 {
-	GP_FilterArea carea = *area;
-	GP_Context *new = GP_ContextAlloc(area->src_w, area->src_h,
-	                                  area->src->pixel_type);
+	GP_Context *new = GP_ContextAlloc(w_src, h_src,
+	                                  src->pixel_type);
 
-	/* Clear these just to be sure */
-	carea.dst_x = 0;
-	carea.dst_y = 0;
-	carea.dst = new;
-
-	if (GP_Filter{{ op_name }}Ex(&carea, {{ maybe_opts_r(opts) }}callback)) {
+	if (GP_Filter{{ op_name }}Ex(src, x_src, y_src, w_src, h_src, new, 0, 0,
+	                             {{ maybe_opts_r(opts) }}callback)) {
 		int err = errno;
 		GP_ContextFree(new);
 		errno = err;

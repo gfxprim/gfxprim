@@ -38,26 +38,28 @@ Generic Point filer
 
 %% for pt in pixeltypes
 %%  if not pt.is_unknown() and not pt.is_palette()
-static int apply_tables_{{ pt.name }}(const GP_FilterArea *const area,
+static int apply_tables_{{ pt.name }}(const GP_Context *const src,
+                                      GP_Coord x_src, GP_Coord y_src,
+                                      GP_Size w_src, GP_Size h_src,
+                                      GP_Context *dst,
+                                      GP_Coord x_dst, GP_Coord y_dst,
                                       const GP_FilterTables *const tables,
                                       GP_ProgressCallback *callback)
 {
-	GP_DEBUG(1, "Point filter %ux%u", area->src_w, area->src_h);
+	GP_DEBUG(1, "Point filter %ux%u", w_src, h_src);
 
 	unsigned int x, y;
-	const GP_Context *src = area->src;
-	GP_Context *dst = area->dst;
 
 %%   for c in pt.chanslist
 	GP_Pixel {{ c.name }};
 %%   endfor
 
-	for (y = 0; y < area->src_h; y++) {
-		for (x = 0; x < area->src_w; x++) {
-			unsigned int src_x = area->src_x + x;
-			unsigned int src_y = area->src_y + y;
-			unsigned int dst_x = area->dst_x + x;
-			unsigned int dst_y = area->dst_y + y;
+	for (y = 0; y < h_src; y++) {
+		for (x = 0; x < w_src; x++) {
+			unsigned int src_x = x_src + x;
+			unsigned int src_y = y_src + y;
+			unsigned int dst_x = x_dst + x;
+			unsigned int dst_y = y_dst + y;
 
 			GP_Pixel pix = GP_GetPixel_Raw_{{ pt.pixelsize.suffix }}(src, src_x, src_y);
 
@@ -70,7 +72,7 @@ static int apply_tables_{{ pt.name }}(const GP_FilterArea *const area,
 			GP_PutPixel_Raw_{{ pt.pixelsize.suffix }}(dst, dst_x, dst_y, pix);
 		}
 
-		if (GP_ProgressCallbackReport(callback, y, area->src_h, area->src_w)) {
+		if (GP_ProgressCallbackReport(callback, y, h_src, w_src)) {
 			errno = ECANCELED;
 			return 1;
 		}
@@ -84,18 +86,25 @@ static int apply_tables_{{ pt.name }}(const GP_FilterArea *const area,
 %%  endif
 %% endfor
 
-int GP_FilterTablesApply(const GP_FilterArea *const area,
+int GP_FilterTablesApply(const GP_Context *const src,
+                         GP_Coord x_src, GP_Coord y_src,
+                         GP_Size w_src, GP_Size h_src,
+                         GP_Context *dst,
+                         GP_Coord x_dst, GP_Coord y_dst,
                          const GP_FilterTables *const tables,
                          GP_ProgressCallback *callback)
 {
-	GP_ASSERT(area->src->pixel_type == area->dst->pixel_type);
+	GP_ASSERT(src->pixel_type == dst->pixel_type);
 	//TODO: Assert size
 
-	switch (area->src->pixel_type) {
+	switch (src->pixel_type) {
 %% for pt in pixeltypes
 %%  if not pt.is_unknown() and not pt.is_palette()
 	case GP_PIXEL_{{ pt.name }}:
-		return apply_tables_{{ pt.name }}(area, tables, callback);
+		return apply_tables_{{ pt.name }}(src, x_src, y_src,
+		                                  w_src, h_src, dst,
+		                                  x_dst, y_dst,
+		                                  tables, callback);
 	break;
 %%  endif
 %% endfor

@@ -43,9 +43,13 @@ typedef struct GP_FilterTables {
 /*
  * Generic point filter, applies corresponding table on bitmap.
  */
-int GP_FilterTablesApply(const GP_FilterArea *const area,
-                         const GP_FilterTables *const tables,
-                         GP_ProgressCallback *callback);
+int GP_FilterTablesApply(const GP_Context *const src,
+                         GP_Coord x_src, GP_Coord y_src,
+                         GP_Size w_src, GP_Size h_src,
+			 GP_Context *dst,
+			 GP_Coord x_dst, GP_Coord y_dst,
+			 const GP_FilterTables *const tables,
+			 GP_ProgressCallback *callback);
 
 /*
  * Aloocates and initializes tables.
