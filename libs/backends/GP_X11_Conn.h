@@ -89,6 +89,8 @@ static void x11_detect_wm_features(void)
 
 		for (i = 0; i < count; i++)
 			x11_check_atoms(args[i]);
+
+		XFree(args);
 	}
 }
 
