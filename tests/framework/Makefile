@@ -14,7 +14,7 @@ APPS=test
 
 ALL+=libtst_preload.so libtst.a
 
-libtst_preload.so: tst_preload.o tst_alloc_barriers.o tst_preload_FILE.o
+libtst_preload.so: tst_preload.o tst_malloc_canaries.o tst_preload_FILE.o
 	$(CC) -Wl,-soname -Wl,tst_preload.so --shared -ldl -fPIC $^ -o $@
 
 libtst.a: tst_suite.o tst_job.o tst_msg.o tst_log.o tst_main.o tst_timespec.o

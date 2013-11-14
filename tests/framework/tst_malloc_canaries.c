@@ -16,7 +16,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2013 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
@@ -25,9 +25,9 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-#include "tst_alloc_barriers.h"
+#include "tst_malloc_canaries.h"
 
-void *tst_alloc_barrier_right(size_t size)
+void *tst_malloc_canary_right(size_t size)
 {
 	size_t pagesize = sysconf(_SC_PAGESIZE);
 	size_t pages = size/pagesize + !!(size%pagesize) + 1;
@@ -50,7 +50,7 @@ void *tst_alloc_barrier_right(size_t size)
 	return buf + (pagesize - size%pagesize);
 }
 
-void tst_free_barrier_right(void *ptr, size_t size)
+void tst_free_canary_right(void *ptr, size_t size)
 {
 	size_t pagesize = sysconf(_SC_PAGESIZE);
 	size_t pages = size/pagesize + !!(size%pagesize);
@@ -64,7 +64,7 @@ void tst_free_barrier_right(void *ptr, size_t size)
 	free(start);
 }
 
-void *tst_alloc_barrier_left(size_t size)
+void *tst_malloc_canary_left(size_t size)
 {
 	size_t pagesize = sysconf(_SC_PAGESIZE);
 	size_t pages = size/pagesize + !!(size%pagesize) + 1;
@@ -87,7 +87,7 @@ void *tst_alloc_barrier_left(size_t size)
 	return buf + pagesize;
 }
 
-void tst_free_barrier_left(void *ptr, size_t size __attribute__((unused)))
+void tst_free_canary_left(void *ptr, size_t size __attribute__((unused)))
 {
 	size_t pagesize = sysconf(_SC_PAGESIZE);
 	void *start = ptr - pagesize;

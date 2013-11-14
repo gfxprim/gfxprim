@@ -27,7 +27,7 @@
 #include <string.h>
 
 #include "tst_test.h"
-#include "tst_alloc_barriers.h"
+#include "tst_malloc_canaries.h"
 #include "tst_preload_FILE.h"
 
 int success_fn(void)
@@ -120,9 +120,9 @@ int double_free(void)
 	return TST_SUCCESS;
 }
 
-int barrier_allocation(void)
+int canary_allocation(void)
 {
-	char *buf = tst_alloc_barrier_right(31);
+	char *buf = tst_malloc_canary_right(31);
 
 	int i;
 
@@ -262,7 +262,7 @@ const struct tst_suite tst_suite = {
 		{.name = "Mem Leak test", .tst_fn = malloc_leak_fn, .flags = TST_CHECK_MALLOC},
 		{.name = "Mem Ok test", .tst_fn = malloc_ok_fn, .flags = TST_CHECK_MALLOC},
 		{.name = "Double free()", .tst_fn = double_free},
-		{.name = "Barrier allocation", .tst_fn = barrier_allocation},
+		{.name = "Canary allocation", .tst_fn = canary_allocation},
 		{.name = "Failed FILE", .tst_fn = fail_FILE, .flags = TST_TMPDIR},
 		{.name = "Resource", .tst_fn = res_fn, .flags = TST_TMPDIR,
 		 .res_path = "test.c"},

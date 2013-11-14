@@ -16,7 +16,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2013 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
@@ -32,6 +32,25 @@ void tst_malloc_check_start(void);
  * Stops malloc check.
  */
 void tst_malloc_check_stop(void);
+
+enum tst_malloc_canary {
+	MALLOC_CANARY_OFF,
+	/* canary before the chunk */
+	MALLOC_CANARY_BEGIN,
+	/* canary after the chunk */
+	MALLOC_CANARY_END,
+};
+
+/*
+ * Turns on malloc canaries.
+ *
+ * If turned on each malloc gets a canary (a page with both read and write
+ * turned off) allocated at the end or at the start of the allocated chunk.
+ *
+ * Canaries cannot be turned on when malloc checking is off, and malloc checking
+ * cannot be turned off when canaries are turned on.
+ */
+void tst_malloc_canaries_set(enum tst_malloc_canary canary);
 
 struct malloc_stats {
 	/*

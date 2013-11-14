@@ -16,29 +16,22 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2013 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
 #define _GNU_SOURCE
 #include <stdio.h>
 #include <stdint.h>
+#include <string.h>
 #include <dlfcn.h>
 
 #include "tst_test.h"
 #include "tst_preload.h"
+#include "tst_malloc_canaries.h"
 
 static int check_malloc = 0;
-
-void tst_malloc_check_start(void)
-{
-	check_malloc = 1;
-}
-
-void tst_malloc_check_stop(void)
-{
-	check_malloc = 0;
-}
+static int malloc_canary = MALLOC_CANARY_OFF;
 
 static size_t cur_size = 0;
 static unsigned int cur_chunks = 0;
@@ -47,6 +40,43 @@ static unsigned int total_chunks = 0;
 /* Maximal allocated size at a time */
 static size_t max_size = 0;
 static unsigned int max_chunks = 0;
+
+void tst_malloc_check_start(void)
+{
+	check_malloc = 1;
+}
+
+void tst_malloc_check_stop(void)
+{
+	/*
+	 * We cannot stop the tracing when canaries are on
+	 * because we need the chunk table to keep track
+	 * which allocations are with canary and their
+	 * sizes for free and realloc.
+	 */
+	if (malloc_canary != MALLOC_CANARY_OFF) {
+		tst_warn("Cannot turn malloc checks off when canaries are on");
+		return;
+	}
+
+	check_malloc = 0;
+}
+
+void tst_malloc_canaries_set(enum tst_malloc_canary canary)
+{
+	if (!check_malloc) {
+		tst_warn("Cannot turn canaries on when checking is off");
+		return;
+	}
+
+	if (canary > MALLOC_CANARY_END) {
+		tst_warn("Invalid canary type");
+		return;
+	}
+
+	malloc_canary = canary;
+}
+
 
 void tst_malloc_check_report(struct malloc_stats *stats)
 {
@@ -65,6 +95,7 @@ void tst_malloc_check_report(struct malloc_stats *stats)
 struct chunk {
 	void *ptr;
 	size_t size;
+	enum tst_malloc_canary canary;
 	int cont;
 };
 
@@ -82,6 +113,7 @@ static void add_chunk(size_t size, void *ptr)
 	/* Store chunk */
 	chunks[chunks_top].size = size;
 	chunks[chunks_top].ptr = ptr;
+	chunks[chunks_top].canary = malloc_canary;
 	chunks_top++;
 
 	/* Update global stats */
@@ -117,14 +149,40 @@ static void rem_chunk(void *ptr)
 	tst_warn("Chunk passed to free not found (%p)", ptr);
 }
 
+static struct chunk *get_chunk(void *ptr)
+{
+	unsigned int i;
+
+	for (i = 0; i < chunks_top; i++) {
+		if (chunks[i].ptr == ptr)
+			return &chunks[i];
+	}
+
+	return NULL;
+}
+
 void *malloc(size_t size)
 {
 	static void *(*real_malloc)(size_t) = NULL;
+	void *ptr;
 
 	if (!real_malloc)
 		real_malloc = dlsym(RTLD_NEXT, "malloc");
 
-	void *ptr = real_malloc(size);
+	switch (malloc_canary) {
+	case MALLOC_CANARY_OFF:
+		ptr = real_malloc(size);
+	break;
+	case MALLOC_CANARY_BEGIN:
+		ptr = tst_malloc_canary_left(size);
+	break;
+	case MALLOC_CANARY_END:
+		ptr = tst_malloc_canary_right(size);
+	break;
+	/* Shut up gcc */
+	default:
+		return NULL;
+	}
 
 	if (check_malloc && ptr)
 		add_chunk(size, ptr);
@@ -132,15 +190,81 @@ void *malloc(size_t size)
 	return ptr;
 }
 
+void free(void *ptr)
+{
+	static void (*real_free)(void *) = NULL;
+	struct chunk *chunk;
+
+	if (!real_free)
+		real_free = dlsym(RTLD_NEXT, "free");
+
+	if (!ptr)
+		return;
+
+	chunk = get_chunk(ptr);
+
+	/* Was allocated before malloc checking was turned on */
+	if (!chunk) {
+		real_free(ptr);
+		return;
+	}
+
+	switch (chunk->canary) {
+	case MALLOC_CANARY_OFF:
+		real_free(ptr);
+	break;
+	case MALLOC_CANARY_BEGIN:
+		tst_free_canary_left(ptr, chunk->size);
+	break;
+	case MALLOC_CANARY_END:
+		tst_free_canary_right(ptr, chunk->size);
+	break;
+	}
+
+	rem_chunk(ptr);
+}
+
+#define min(a, b) (((a) < (b)) ? (a) : (b))
+
 void *realloc(void *optr, size_t size)
 {
 	static void *(*real_realloc)(void*, size_t) = NULL;
+	struct chunk *chunk;
+	void *ptr;
 
 	if (!real_realloc)
 		real_realloc = dlsym(RTLD_NEXT, "realloc");
 
-	void *ptr = real_realloc(optr, size);
+	switch (malloc_canary) {
+	case MALLOC_CANARY_OFF:
+		ptr = real_realloc(optr, size);
+	break;
+	case MALLOC_CANARY_BEGIN:
+	case MALLOC_CANARY_END:
+		chunk = get_chunk(optr);
 
+		if (!chunk) {
+			tst_warn("%p allocated before checking was turned on, "
+			         "using using real_realloc()", optr);
+
+			ptr = real_realloc(optr, size);
+
+			goto out;
+		}
+
+		ptr = malloc(size);
+
+		if (ptr) {
+			memcpy(ptr, optr, min(chunk->size, size));
+			free(optr);
+		}
+	break;
+	/* Shut up gcc */
+	default:
+		return NULL;
+	}
+
+out:
 	if (!ptr)
 		return NULL;
 
@@ -151,19 +275,6 @@ void *realloc(void *optr, size_t size)
 	}
 
 	return ptr;
-}
-
-void free(void *ptr)
-{
-	static void (*real_free)(void *) = NULL;
-
-	if (!real_free)
-		real_free = dlsym(RTLD_NEXT, "free");
-
-	if (check_malloc && ptr != NULL)
-		rem_chunk(ptr);
-
-	real_free(ptr);
 }
 
 void tst_malloc_print(const struct malloc_stats *stats)
