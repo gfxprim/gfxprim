@@ -702,8 +702,9 @@ GP_Context *GP_LoadTIFF(const char GP_UNUSED(*src_path),
 	return NULL;
 }
 
-int GP_SaveTIFF(const GP_Context *src, const char *dst_path,
-                GP_ProgressCallback *callback)
+int GP_SaveTIFF(const GP_Context GP_UNUSED(*src),
+                const char GP_UNUSED(*dst_path),
+                GP_ProgressCallback GP_UNUSED(*callback))
 {
 	errno = ENOSYS;
 	return 1;
