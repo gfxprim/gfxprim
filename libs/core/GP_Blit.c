@@ -72,21 +72,29 @@ void GP_BlitXYXY_Clipped(const GP_Context *src,
 	if (y1 < y0)
 		GP_SWAP(y0, y1);
 
-	/* Noting to blit return now */
+	/*
+	 * Handle all cases where at least one of dest coordinates are out of
+	 * the dest in positive direction -> src is out of dst completly.
+	 */
 	if (x2 >= (GP_Coord)GP_ContextW(dst) ||
 	    y2 >= (GP_Coord)GP_ContextH(dst))
 		return;
 
-	/* We need to shift source rectangle */
+	/*
+	 * The coordinates in dest are negative.
+	 *
+	 * We need to clip the source upper left corner accordingly.
+	 *
+	 * Notice that x2 and y2 are inside the dst rectangle now.
+	 * (>= 0 and < w, < h)
+	 */
 	if (x2 < 0) {
 		x0 -= x2;
-		x1 -= x2;
 		x2 = 0;
 	}
 
 	if (y2 < 0) {
 		y0 -= y2;
-		y1 -= y2;
 		y2 = 0;
 	}
 
@@ -97,8 +105,8 @@ void GP_BlitXYXY_Clipped(const GP_Context *src,
 	y1 = GP_MIN(y1, (GP_Coord)GP_ContextH(src) - 1);
 
 	/* And source rectangle fits inside of the destination */
-	GP_Coord src_w = x1 - x0;
-	GP_Coord src_h = y1 - y0;
+	GP_Coord src_w = x1 - x0 + 1;
+	GP_Coord src_h = y1 - y0 + 1;
 
 	GP_Coord dst_w = GP_ContextW(dst) - x2;
 	GP_Coord dst_h = GP_ContextH(dst) - y2;
@@ -107,10 +115,10 @@ void GP_BlitXYXY_Clipped(const GP_Context *src,
 	         src_w, src_h, dst_w, dst_h);
 
 	if (src_w > dst_w)
-		x1 -= src_w - dst_w + 1;
+		x1 -= src_w - dst_w;
 
 	if (src_h > dst_h)
-		y1 -= src_h - dst_h + 1;
+		y1 -= src_h - dst_h;
 
 	GP_DEBUG(2, "Blitting %ix%i->%ix%i in %ux%u to %ix%i in %ux%u",
 	         x0, y0, x1, y1, GP_ContextW(src), GP_ContextH(src),
