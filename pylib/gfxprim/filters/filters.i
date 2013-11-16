@@ -110,6 +110,31 @@ FILTER_FUNC(Median);
 /* Weighted Median */
 FILTER_FUNC(WeightedMedianEx);
 FILTER_FUNC(WeightedMedian);
+
+%array_functions(unsigned int, uint_array);
+
+%extend GP_MedianWeights {
+        ~GP_MedianWeights() {
+                free($self);
+        }
+        GP_MedianWeights(unsigned int w, unsigned int h,
+                         unsigned int *weights) {
+
+                GP_MedianWeights *ret = malloc(sizeof(GP_MedianWeights));
+
+                if (!ret) {
+                        GP_DEBUG(1, "Malloc failed :(");
+                        return NULL;
+                }
+
+                ret->w = w;
+                ret->h = h;
+                ret->weights = weights;
+
+                return ret;
+        }
+};
+
 %include "GP_WeightedMedian.h"
 
 /* Sigma filter */

@@ -150,5 +150,64 @@ def _init(module):
   module['ConvolutionEx'] = ConvolutionEx
   module['ConvolutionExAlloc'] = ConvolutionExAlloc
 
+
+  #
+  # Special handling for weighted median parameters
+  #
+  def array_to_weights(weights):
+    h = len(weights)
+    w = len(weights[0])
+
+    # Assert that array is matrix of numbers
+    for i in range(0, h):
+      assert(len(weights[i]) == w)
+
+      for j in weights[i]:
+        assert(isinstance(j, int) and j >= 0)
+
+    # flatten the python array into C array
+    warr = c_filters.new_uint_array(w * h)
+
+    for i in range(0, h):
+      for j in range(0, w):
+        c_filters.uint_array_setitem(warr, i * w + j, weights[i][j])
+
+    ret = c_filters.GP_MedianWeights(w, h, warr)
+
+    return ret
+
+  def uint_arr_del(w):
+    c_filters.delete_uint_array(w.weights)
+
+  def WeightedMedian(src, dst, weights, callback=None):
+    """
+     WeightedMedian(src, dst, weights, callback=None)
+
+     Weighted variant of median filter. Weights is a two dimensional
+     array of positive integers that describe weights for neighbour pixels.
+    """
+    w = array_to_weights(weights)
+    ret = c_filters.GP_FilterWeightedMedian(src, dst, w, callback)
+    uint_arr_del(w)
+    return ret
+
+#  extend_submodule(FiltersSubmodule, 'WeightedMedian', WeightedMedian)
+#  module['WeightedMedian'] = WeightedMedian
+
+  def WeightedMedianAlloc(src, weights, callback=None):
+    """
+     WeightedMedianAlloc(src, weights, callback=None)
+
+     Weighted variant of median filter. Weights is a two dimensional
+     array of positive integers that describe weights for neighbour pixels.
+    """
+    w = array_to_weights(weights)
+    ret = c_filters.GP_FilterWeightedMedianAlloc(src, w, callback)
+    uint_arr_del(w)
+    return ret
+
+#  extend_submodule(FiltersSubmodule, 'WeightedMedianAlloc', WeightedMedianAlloc)
+#  module['WeightedMedianAlloc'] = WeightedMedianAlloc
+
 _init(locals())
 del _init
