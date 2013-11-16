@@ -266,6 +266,60 @@ struct testcase testcase_rect_9d = {
 	}
 };
 
+struct testcase testcase_rect_0a = {
+	.x1 = 2147483647,
+	.y1 = -2147483648,
+	.x2 = 2147483647,
+	.y2 = -2147483648,
+
+	.w = 5,
+	.h = 5,
+
+	.pixmap = {
+		0, 0, 0, 0, 0,
+		0, 0, 0, 0, 0,
+		0, 0, 0, 0, 0,
+		0, 0, 0, 0, 0,
+		0, 0, 0, 0, 0,
+	}
+};
+
+struct testcase testcase_rect_0b = {
+	.x1 = -2147483648,
+	.y1 = 2147483647,
+	.x2 = -2147483648,
+	.y2 = 2147483647,
+
+	.w = 5,
+	.h = 5,
+
+	.pixmap = {
+		0, 0, 0, 0, 0,
+		0, 0, 0, 0, 0,
+		0, 0, 0, 0, 0,
+		0, 0, 0, 0, 0,
+		0, 0, 0, 0, 0,
+	}
+};
+
+struct testcase testcase_rect_25 = {
+	.x1 = -2147483648,
+	.y1 = 2147483647,
+	.x2 = 2147483647,
+	.y2 = -2147483648,
+
+	.w = 5,
+	.h = 5,
+
+	.pixmap = {
+		1, 1, 1, 1, 1,
+		1, 1, 1, 1, 1,
+		1, 1, 1, 1, 1,
+		1, 1, 1, 1, 1,
+		1, 1, 1, 1, 1,
+	}
+};
+
 const struct tst_suite tst_suite = {
 	.suite_name = "FillRect Testsuite",
 	.tests = {
@@ -319,6 +373,21 @@ const struct tst_suite tst_suite = {
 		{.name = "FillRect y2 out of context",
 		 .tst_fn = test_rect,
 		 .data = &testcase_rect_9d,
+		 .timeout = 2},
+
+		{.name = "FillRect rect out of context 1",
+		 .tst_fn = test_rect,
+		 .data = &testcase_rect_0a,
+		 .timeout = 2},
+
+		{.name = "FillRect rect out of context 2",
+		 .tst_fn = test_rect,
+		 .data = &testcase_rect_0b,
+		 .timeout = 2},
+
+		{.name = "FillRect full rect",
+		 .tst_fn = test_rect,
+		 .data = &testcase_rect_25,
 		 .timeout = 2},
 
 		{.name = NULL}
