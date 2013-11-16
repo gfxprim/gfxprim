@@ -21,7 +21,7 @@
  *****************************************************************************/
 
  /*
-  
+
    Test job is an instance of running test.
 
   */
@@ -37,8 +37,8 @@
 
 struct tst_job {
 	const struct tst_test *test;
-	
-	/* 
+
+	/*
 	 * Pipe fd.
 	 *
 	 * In parent this points to the read side of the pipe so the parent
@@ -48,19 +48,19 @@ struct tst_job {
 	 * send data to parent.
 	 */
 	int pipefd;
-	
+
 	int running:1;
-	
+
 	/* test execution time */
 	struct timespec start_time;
 	struct timespec stop_time;
-	
+
 	/* test cpu time */
 	struct timespec cpu_time;
 
 	/* test pid */
 	int pid;
-	
+
 	/* test result */
 	enum tst_ret result;
 

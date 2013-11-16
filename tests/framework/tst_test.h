@@ -38,7 +38,7 @@ enum tst_ret {
 };
 
 enum tst_flags {
-	/* 
+	/*
 	 * Create teporary directory and set it as CWD and
 	 * clean it after the test is finised.
 	 */
@@ -53,7 +53,7 @@ enum tst_flags {
 struct tst_test {
 	/* test name */
 	const char *name;
-	/* 
+	/*
 	 * Resurce path, file or directory which is copied to
 	 * test directory before test is executed.
 	 */
@@ -111,7 +111,7 @@ int tst_report(int level, const char *fmt, ...)
 int tst_msg(const char *fmt, ...)
 	__attribute__ ((format (printf, 1, 2)));
 
-/* 
+/*
  * Warning and Error are used in test framework to distinguish the type of test
  * internal problem. You shouldn't use this one unless the test exited with
  * TST_UNTESTED.

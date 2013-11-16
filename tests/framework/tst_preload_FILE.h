@@ -32,7 +32,7 @@ enum tst_file_call {
  * Describes which call on which file and how should fail.
  */
 struct tst_fail_FILE {
-	/* 
+	/*
 	 * File path to be failed, this is matched exactly against the path
 	 * passed to fopen().
 	 *
@@ -45,8 +45,8 @@ struct tst_fail_FILE {
 
 	/* if not zero, errno is set to this */
 	int err;
-	
-	/*	
+
+	/*
 	 * Which call should be failed.
 	 */
 	enum tst_file_call call;

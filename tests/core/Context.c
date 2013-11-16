@@ -61,12 +61,12 @@ static int Context_Alloc_Free(void)
 		tst_msg("Context->w != 100 (== %i)", c->w);
 		return TST_FAILED;
 	}
-	
+
 	if (c->h != 200) {
 		tst_msg("Context->h != 200 (== %i)", c->h);
 		return TST_FAILED;
 	}
-	
+
 	if (c->offset != 0) {
 		tst_msg("Context->offset != 0");
 		return TST_FAILED;
@@ -112,17 +112,17 @@ static int subcontext_assert(const GP_Context *c, const GP_Context *sc,
 		tst_msg("Context->bytes_per_row != SubContext->bytes_per_row");
 		return TST_FAILED;
 	}
-	
+
 	if (sc->w != w) {
 		tst_msg("SubContext->w != %u (== %i)", w, sc->w);
 		return TST_FAILED;
 	}
-	
+
 	if (sc->h != h) {
 		tst_msg("SubContext->h != %u (== %i)", h, sc->h);
 		return TST_FAILED;
 	}
-	
+
 	if (sc->offset != 0) {
 		tst_msg("SubContext->offset != 0");
 		return TST_FAILED;
@@ -143,7 +143,7 @@ static int subcontext_assert(const GP_Context *c, const GP_Context *sc,
 		        sc->axes_swap, sc->x_swap, sc->y_swap);
 		return TST_FAILED;
 	}
-	
+
 	/* access the start and end of the pixel buffer */
 	*(char*)GP_PIXEL_ADDR(sc, 0, 0) = 0;
 	*(char*)GP_PIXEL_ADDR(sc, sc->w - 1, sc->h - 1) = 0;
@@ -194,7 +194,7 @@ static int SubContext_Create(void)
 	}
 
 	GP_SubContext(c, &sc, 100, 100, 100, 100);
-	
+
 	ret = subcontext_assert(c, &sc, 100, 100);
 
 	if (ret)

@@ -79,7 +79,7 @@ static struct testcase testcase_line_1px = {
 
 	.pixmap = {
 		0, 0, 0,
-		0, 1, 0, 
+		0, 1, 0,
 		0, 0, 0,
 	}
 };
@@ -215,19 +215,19 @@ const struct tst_suite tst_suite = {
 		{.name = "Line Horizontal",
 		 .tst_fn = test_line,
 		 .data = &testcase_line_horiz},
-		
+
 		{.name = "Line Vertical",
 		 .tst_fn = test_line,
 		 .data = &testcase_line_vert},
-		
+
 		{.name = "Line 45 degrees",
 		 .tst_fn = test_line,
 		 .data = &testcase_line_45},
-		
+
 		{.name = "Line 15 degrees",
 		 .tst_fn = test_line,
 		 .data = &testcase_line_15},
-		
+
 		{.name = "Line clipping",
 		 .tst_fn = test_line,
 		 .data = &testcase_line_clip},
@@ -236,7 +236,7 @@ const struct tst_suite tst_suite = {
 		 .tst_fn = test_line,
 		 .data = &testcase_line_large_xy,
 		 .timeout = 1},
-		
+
 		{.name = NULL}
 	}
 };

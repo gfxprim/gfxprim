@@ -76,7 +76,7 @@ static struct testcase testcase_line_len_0_1 = {
 
 	.pixmap = {
 		0x00, 0x00, 0x00,
-		0x00, 0x00, 0x00, 
+		0x00, 0x00, 0x00,
 		0x00, 0x00, 0x00,
 	}
 };
@@ -91,7 +91,7 @@ static struct testcase testcase_line_len_0_2 = {
 
 	.pixmap = {
 		0x00, 0x00, 0x00,
-		0x00, 0x00, 0x00, 
+		0x00, 0x00, 0x00,
 		0x00, 0x00, 0x00,
 	}
 };
@@ -106,7 +106,7 @@ static struct testcase testcase_line_len_0_3 = {
 
 	.pixmap = {
 		0x00, 0x00, 0x00,
-		0x00, 0x00, 0x00, 
+		0x00, 0x00, 0x00,
 		0x00, 0x00, 0x00,
 	}
 };
@@ -121,7 +121,7 @@ static struct testcase testcase_line_len_0_4 = {
 
 	.pixmap = {
 		0x00, 0x00, 0x00,
-		0x00, 0x00, 0x00, 
+		0x00, 0x00, 0x00,
 		0x00, 0x00, 0x00,
 	}
 };
@@ -136,7 +136,7 @@ static struct testcase testcase_line_len_0_5 = {
 
 	.pixmap = {
 		0x00, 0x00, 0x00,
-		0x00, 0x00, 0x00, 
+		0x00, 0x00, 0x00,
 		0x00, 0x00, 0x00,
 	}
 };
@@ -151,7 +151,7 @@ static struct testcase testcase_line_len_05_1 = {
 
 	.pixmap = {
 		0x00, 0x00, 0x00,
-		0x00, 0x80, 0x00, 
+		0x00, 0x80, 0x00,
 		0x00, 0x00, 0x00,
 	}
 };
@@ -166,7 +166,7 @@ static struct testcase testcase_line_len_05_2 = {
 
 	.pixmap = {
 		0x00, 0x00, 0x00,
-		0x00, 0x40, 0x00, 
+		0x00, 0x40, 0x00,
 		0x00, 0x40, 0x00,
 		0x00, 0x00, 0x00,
 	}
@@ -283,15 +283,15 @@ const struct tst_suite tst_suite = {
 		{.name = "HLineAA len=0 4",
 		 .tst_fn = test_line,
 		 .data = &testcase_line_len_0_4},
-		
+
 		{.name = "HLineAA len=0 5",
 		 .tst_fn = test_line,
 		 .data = &testcase_line_len_0_5},
-		
+
 		{.name = "HLineAA len=0.5 1",
 		 .tst_fn = test_line,
 		 .data = &testcase_line_len_05_1},
-		
+
 		{.name = "HLineAA len=0.5 2",
 		 .tst_fn = test_line,
 		 .data = &testcase_line_len_05_2},
@@ -311,11 +311,11 @@ const struct tst_suite tst_suite = {
 		{.name = "LineAA len=1 4",
 		 .tst_fn = test_line,
 		 .data = &testcase_line_len_1_4},
-		
+
 		{.name = "LineAA len=4 1",
 		 .tst_fn = test_line,
 		 .data = &testcase_line_len_4_1},
-		
+
 		{.name = "LineAA len=4 2",
 		 .tst_fn = test_line,
 		 .data = &testcase_line_len_4_2},

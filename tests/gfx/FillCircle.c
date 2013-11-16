@@ -212,31 +212,31 @@ const struct tst_suite tst_suite = {
 	.tests = {
 		{.name = "FillCircle r=0",
 		 .tst_fn = test_circle,
-		 .data = &testcase_circle_r_0}, 
+		 .data = &testcase_circle_r_0},
 
 		{.name = "FillCircle r=1",
 		 .tst_fn = test_circle,
-		 .data = &testcase_circle_r_1}, 
+		 .data = &testcase_circle_r_1},
 
 		{.name = "FillCircle r=2",
 		 .tst_fn = test_circle,
-		 .data = &testcase_circle_r_2}, 
+		 .data = &testcase_circle_r_2},
 
 		{.name = "FillCircle r=3",
 		 .tst_fn = test_circle,
-		 .data = &testcase_circle_r_3}, 
+		 .data = &testcase_circle_r_3},
 
 		{.name = "FillCircle r=4",
 		 .tst_fn = test_circle,
-		 .data = &testcase_circle_r_4}, 
-		
+		 .data = &testcase_circle_r_4},
+
 		{.name = "FillCircle r=5 + clipping",
 		 .tst_fn = test_circle,
-		 .data = &testcase_circle_r_5_clip}, 
+		 .data = &testcase_circle_r_5_clip},
 
 		{.name = "FillCircle r=6 + clipping",
 		 .tst_fn = test_circle,
-		 .data = &testcase_circle_r_6_clip}, 
+		 .data = &testcase_circle_r_6_clip},
 
 		{.name = NULL}
 	}

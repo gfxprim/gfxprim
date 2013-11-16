@@ -161,7 +161,7 @@ static struct testcase testcase_clipping_3 = {
 };
 
 static struct testcase testcase_xyw_1 = {
-	.x = 1, 
+	.x = 1,
 	.y = 1,
 	.lw = 0,
 
@@ -177,7 +177,7 @@ static struct testcase testcase_xyw_1 = {
 };
 
 static struct testcase testcase_xyw_2 = {
-	.x = 1, 
+	.x = 1,
 	.y = 1,
 	.lw = 2,
 
@@ -193,7 +193,7 @@ static struct testcase testcase_xyw_2 = {
 };
 
 static struct testcase testcase_xyw_clipp_1 = {
-	.x = -10000, 
+	.x = -10000,
 	.y = 1,
 	.lw = 20000,
 
@@ -246,15 +246,15 @@ const struct tst_suite tst_suite = {
 		{.name = "HLine 1px",
 		 .tst_fn = test_hline,
 		 .data = &testcase_1_px},
-		
+
 		{.name = "HLine 3px 1",
 		 .tst_fn = test_hline,
 		 .data = &testcase_3_px_1},
-		
+
 		{.name = "HLine 3px 2",
 		 .tst_fn = test_hline,
 		 .data = &testcase_3_px_2},
-		
+
 		{.name = "HLine clipping 1",
 		 .tst_fn = test_hline,
 		 .data = &testcase_clipping_1},
@@ -274,7 +274,7 @@ const struct tst_suite tst_suite = {
 		{.name = "HLineXYW 2",
 		 .tst_fn = test_hline,
 		 .data = &testcase_xyw_2},
-		
+
 		{.name = "HLineXYW clipping 1",
 		 .tst_fn = test_hline,
 		 .data = &testcase_xyw_clipp_1},

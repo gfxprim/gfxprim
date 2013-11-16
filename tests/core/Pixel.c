@@ -39,17 +39,17 @@ static int pixel_flags(void)
 		tst_msg("RGB888 is RGB failed");
 		fail++;
 	}
-	
+
 	if (GP_PixelHasFlags(GP_PIXEL_G1, GP_PIXEL_IS_RGB)) {
 		tst_msg("G1 is RGB succeeded");
 		fail++;
 	}
-	
+
 	if (!GP_PixelHasFlags(GP_PIXEL_RGBA8888, GP_PIXEL_HAS_ALPHA)) {
 		tst_msg("RGBA8888 has Alpha failed");
 		fail++;
 	}
-	
+
 	if (!GP_PixelHasFlags(GP_PIXEL_RGBA8888,
 	                      GP_PIXEL_HAS_ALPHA | GP_PIXEL_IS_RGB)) {
 		tst_msg("RGBA8888 has Alpha and is RGB failed");

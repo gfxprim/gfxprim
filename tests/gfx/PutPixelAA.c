@@ -75,7 +75,7 @@ static struct testcase testcase_pixel_center = {
 
 	.pixmap = {
 		0x00, 0x00, 0x00,
-		0x00, 0xff, 0x00, 
+		0x00, 0xff, 0x00,
 		0x00, 0x00, 0x00,
 	}
 };
@@ -89,7 +89,7 @@ static struct testcase testcase_pixel_hcenter = {
 
 	.pixmap = {
 		0x00, 0x00, 0x00,
-		0x00, 0x80, 0x00, 
+		0x00, 0x80, 0x00,
 		0x00, 0x80, 0x00,
 		0x00, 0x00, 0x00,
 	}
@@ -130,15 +130,15 @@ const struct tst_suite tst_suite = {
 		{.name = "PutPixelAA center",
 		 .tst_fn = test_pixel,
 		 .data = &testcase_pixel_center},
-		
+
 		{.name = "PutPixelAA hcenter",
 		 .tst_fn = test_pixel,
 		 .data = &testcase_pixel_hcenter},
-		
+
 		{.name = "PutPixelAA vcenter",
 		 .tst_fn = test_pixel,
 		 .data = &testcase_pixel_vcenter},
-		
+
 		{.name = "PutPixelAA",
 		 .tst_fn = test_pixel,
 		 .data = &testcase_pixel},

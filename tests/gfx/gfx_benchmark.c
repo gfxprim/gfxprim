@@ -125,7 +125,7 @@ const struct tst_suite tst_suite = {
 	         .bench_iter = 10},
 		{.name = "Line 32BPP", .tst_fn = bench_line_32bpp,
 	         .bench_iter = 10},
-		
+
 		{.name = "Circle 1BPP", .tst_fn = bench_circle_1bpp,
 	         .bench_iter = 10},
 		{.name = "Circle 2BPP", .tst_fn = bench_circle_2bpp,
@@ -136,7 +136,7 @@ const struct tst_suite tst_suite = {
 	         .bench_iter = 10},
 		{.name = "Circle 32BPP", .tst_fn = bench_circle_32bpp,
 	         .bench_iter = 10},
-		
+
 		{.name = NULL},
 	}
 };

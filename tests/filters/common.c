@@ -50,8 +50,8 @@ void dump_buffers(const char *pattern, const GP_Context *c)
 			unsigned int idx = x + y * c->w;
 			char p = ((char*)c->pixels)[idx];
 
-			if (pattern[idx] != p) { 
-				/* TODO: we expect background to be 0 */	
+			if (pattern[idx] != p) {
+				/* TODO: we expect background to be 0 */
 				if (p == 0)
 					printf(" x ");
 				else
@@ -74,14 +74,14 @@ int compare_buffers(const char *pattern, const GP_Context *c)
 	for (x = 0; x < c->w; x++) {
 		for (y = 0; y < c->h; y++) {
 			unsigned int idx = x + y * c->w;
-			
+
 			if (pattern[idx] != ((char*)c->pixels)[idx])
 				err++;
 		}
 	}
 
 	if (err)
-		dump_buffers(pattern, c);	
+		dump_buffers(pattern, c);
 
 	return err;
 }

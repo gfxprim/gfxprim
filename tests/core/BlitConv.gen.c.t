@@ -71,7 +71,7 @@ static int check_filled(GP_Context *c, GP_Pixel p)
 			}
 		}
 	}
-	
+
 	return 0;
 }
 

@@ -88,7 +88,7 @@ static int setbits_{{ off }}_{{ len }}(void)
 			canary2 = 0;
 			p_get = patterns[i];
 			GP_SET_BITS({{ off }}, {{ len }}, p_get, val);
-			
+
 			p_exp = patterns[i] & {{ mask(off, len) }};
 			p_exp |= val<<{{ off }};
 

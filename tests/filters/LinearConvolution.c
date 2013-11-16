@@ -97,7 +97,7 @@ static int test_h_lin_conv_box_3_raw(void)
 		if (errno == ENOSYS)
 			return TST_SKIPPED;
 	}
-	
+
 	/* Check result */
 	//TODO
 
@@ -113,7 +113,7 @@ static int test_v_lin_conv_box_3_raw(void)
 
 	if (ret != TST_SUCCESS)
 		return ret;
-	
+
 //	GP_SetDebugLevel(10);
 
 	/* Apply the convolution */
@@ -124,7 +124,7 @@ static int test_v_lin_conv_box_3_raw(void)
 		if (errno == ENOSYS)
 			return TST_SKIPPED;
 	}
-	
+
 	/* Check result */
 	//TODO
 

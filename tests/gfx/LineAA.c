@@ -79,7 +79,7 @@ static struct testcase testcase_line_1px = {
 
 	.pixmap = {
 		0x00, 0x00, 0x00,
-		0x00, 0xff, 0x00, 
+		0x00, 0xff, 0x00,
 		0x00, 0x00, 0x00,
 	}
 };
@@ -142,15 +142,15 @@ const struct tst_suite tst_suite = {
 		{.name = "LineAA 1px",
 		 .tst_fn = test_line,
 		 .data = &testcase_line_1px},
-		
+
 		{.name = "LineAA 2px",
 		 .tst_fn = test_line,
 		 .data = &testcase_line_2px},
-		
+
 		{.name = "LineAA 2px horizontal",
 		 .tst_fn = test_line,
 		 .data = &testcase_line_2px_h},
-		
+
 		{.name = "LineAA 2px vertical",
 		 .tst_fn = test_line,
 		 .data = &testcase_line_2px_v},

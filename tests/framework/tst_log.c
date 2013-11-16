@@ -130,7 +130,7 @@ int tst_log_append(struct tst_job *job, FILE *f)
 
 	/* Append any test reports */
 	append_msg_json(job, f);
-	
+
 	/* If calculated include malloc report */
 	if (job->test->flags & TST_CHECK_MALLOC)
 		append_malloc_stats_json(job, f);

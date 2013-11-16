@@ -42,12 +42,12 @@ static void dump_buffer(const char *name, char *buf, unsigned int buf_len)
 
 	for (i = 0; i < buf_len; i++) {
 		printf("%i", !!buf[i]);
-		
+
 		if (i != buf_len - 1)
 			printf(", ");
-		
+
 		if (i % 26 == 25)
-			printf("\n "); 
+			printf("\n ");
 	}
 
 	printf("}\n");
@@ -84,8 +84,8 @@ static int WritePixel{{ "_%i_%i_%i_%i"|format(pixelsize, offset, len, aligment) 
 	char gen_buf[{{ 25 * pixelsize//8 }}] = {};
 
 	/*
- 	 * Fill the compare buffer
- 	 */
+	 * Fill the compare buffer
+	 */
 %% for i in range(0, len)
 %% for j in range(0, pixelsize//8)
 	gen_buf[{{aligment + offset * pixelsize//8 + i * pixelsize//8 + j}}] = 0xff;
@@ -103,8 +103,8 @@ static int WritePixel{{ "_%i_%i_%i_%i_alloc"|format(pixelsize, offset, len, alig
 	char *write_buf = malloc({{ 25 * pixelsize//8 }});
 
 	/*
- 	 * Fill the compare buffer
- 	 */
+	 * Fill the compare buffer
+	 */
 %% for i in range(0, len)
 %% for j in range(0, pixelsize//8)
 	gen_buf[{{aligment + offset * pixelsize//8 + i * pixelsize//8 + j}}] = 0xff;
@@ -115,7 +115,7 @@ static int WritePixel{{ "_%i_%i_%i_%i_alloc"|format(pixelsize, offset, len, alig
 		tst_msg("Malloc failed :(");
 		return TST_UNTESTED;
 	}
-	
+
 	memset(write_buf, 0, {{ 25 * pixelsize//8 }});
 
 	GP_WritePixels_{{ pixelsize }}BPP(write_buf + {{aligment + offset * pixelsize//8}}, {{ len }}, 0xffffffff>>{{32 - pixelsize}});

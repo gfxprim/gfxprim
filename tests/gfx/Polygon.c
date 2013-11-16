@@ -35,7 +35,7 @@ struct testcase {
 	/* polygon description */
 	unsigned int edge_count;
 	GP_Coord edges[20];
-	
+
 	/* expected result */
 	GP_Size w, h;
 	const char pixmap[];
@@ -349,11 +349,11 @@ const struct tst_suite tst_suite = {
 		{.name = "Triangle 6px Polygon",
 		 .tst_fn = test_polygon,
 		 .data = &testcase_6px_triangle},
-		
+
 		{.name = "Triangle 1. Polygon",
 		 .tst_fn = test_polygon,
 		 .data = &testcase_triangle_1},
-		
+
 		{.name = "Bow 4edges 7px",
 		 .tst_fn = test_polygon,
 		 .data = &testcase_bow_4edges_7px},

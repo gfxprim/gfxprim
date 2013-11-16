@@ -104,7 +104,7 @@ struct testcase testcase_2x2 = {
 		2, 3,
 		0, 1,
 	},
-	
+
 	.src = {
 		0, 1,
 		2, 3,
@@ -121,7 +121,7 @@ struct testcase testcase_10x2 = {
 		0,   1,  2,  3,  4,  5,  6,  7,  8,  9,
 		10, 11, 12, 13, 14, 15, 16, 17, 18, 19,
 	},
-	
+
 	.src = {
 		10, 11, 12, 13, 14, 15, 16, 17, 18, 19,
 		0,   1,  2,  3,  4,  5,  6,  7,  8,  9,
@@ -139,7 +139,7 @@ struct testcase testcase_2x3 = {
 		2, 3,
 		0, 1,
 	},
-	
+
 	.src = {
 		0, 1,
 		2, 3,
@@ -159,7 +159,7 @@ struct testcase testcase_3x3 = {
 		3, 4, 5,
 		0, 1, 2,
 	},
-	
+
 	.src = {
 		0, 1, 2,
 		3, 4, 5,
@@ -179,7 +179,7 @@ struct testcase testcase_4x4 = {
 		 4,  5,  6,  7,
 		 0,  1,  2,  3,
 	},
-	
+
 	.src = {
 		 0,  1,  2,  3,
 		 4,  5,  6,  7,
@@ -202,7 +202,7 @@ struct testcase testcase_G1_16x2 = {
 		0x0f, 0xaa, 0xf0,
 		0xff, 0xff, 0xff,
 	},
-	
+
 	.src = {
 		 0x0f,  0xff,  0xf0,
 		 0xff,  0xaa,  0xff,
@@ -222,7 +222,7 @@ static int test_abort(void)
 {
 	int ret;
 	GP_Context *c;
-	
+
 	c = GP_ContextAlloc(10, 10, GP_PIXEL_G8);
 
 	if (c == NULL) {
@@ -275,11 +275,11 @@ const struct tst_suite tst_suite = {
 		{.name = "MirrorH 1x1",
 		 .tst_fn = test_mirror_h,
 		 .data = &testcase_1x1},
-		
+
 		{.name = "MirrorH 2x2",
 		 .tst_fn = test_mirror_h,
 		 .data = &testcase_2x2},
-		
+
 		{.name = "MirrorH 10x2",
 		 .tst_fn = test_mirror_h,
 		 .data = &testcase_10x2},
@@ -291,7 +291,7 @@ const struct tst_suite tst_suite = {
 		{.name = "MirrorH 3x3",
 		 .tst_fn = test_mirror_h,
 		 .data = &testcase_3x3},
-		
+
 		{.name = "MirrorH 4x4",
 		 .tst_fn = test_mirror_h,
 		 .data = &testcase_3x3},

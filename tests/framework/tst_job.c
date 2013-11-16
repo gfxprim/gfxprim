@@ -386,11 +386,11 @@ void tst_job_run(struct tst_job *job)
 	}
 
 	/* Redirect stderr/stdout TODO: catch its output */
-	if (freopen("/dev/null", "w", stderr) == NULL)
-		tst_warn("freopen(stderr) failed: %s", strerror(errno));
+//	if (freopen("/dev/null", "w", stderr) == NULL)
+//		tst_warn("freopen(stderr) failed: %s", strerror(errno));
 
-	if (freopen("/dev/null", "w", stdout) == NULL)
-		tst_warn("freopen(stdout) failed: %s", strerror(errno));
+//	if (freopen("/dev/null", "w", stdout) == NULL)
+//		tst_warn("freopen(stdout) failed: %s", strerror(errno));
 
 	/* Create directory in /tmp/ and chdir into it. */
 	if (job->test->flags & TST_TMPDIR)

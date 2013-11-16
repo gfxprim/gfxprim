@@ -171,7 +171,7 @@ static struct testcase testcase_clipping_3 = {
 };
 
 static struct testcase testcase_xyh_1 = {
-	.x = 1, 
+	.x = 1,
 	.y = 1,
 	.lh = 0,
 
@@ -187,7 +187,7 @@ static struct testcase testcase_xyh_1 = {
 };
 
 static struct testcase testcase_xyh_2 = {
-	.x = 1, 
+	.x = 1,
 	.y = 1,
 	.lh = 2,
 
@@ -204,7 +204,7 @@ static struct testcase testcase_xyh_2 = {
 };
 
 static struct testcase testcase_xyh_clipp_1 = {
-	.x = 1, 
+	.x = 1,
 	.y = -10000,
 	.lh = 20000,
 
@@ -257,15 +257,15 @@ const struct tst_suite tst_suite = {
 		{.name = "VLine 1px",
 		 .tst_fn = test_vline,
 		 .data = &testcase_1_px},
-		
+
 		{.name = "VLine 3px 1",
 		 .tst_fn = test_vline,
 		 .data = &testcase_3_px_1},
-		
+
 		{.name = "VLine 3px 2",
 		 .tst_fn = test_vline,
 		 .data = &testcase_3_px_2},
-		
+
 		{.name = "VLine clipping 1",
 		 .tst_fn = test_vline,
 		 .data = &testcase_clipping_1},
@@ -277,7 +277,7 @@ const struct tst_suite tst_suite = {
 		{.name = "VLine clipping 3",
 		 .tst_fn = test_vline,
 		 .data = &testcase_clipping_3},
-		
+
 		{.name = "VLineXYH 1",
 		 .tst_fn = test_vline,
 		 .data = &testcase_xyh_1},
@@ -297,7 +297,7 @@ const struct tst_suite tst_suite = {
 		{.name = "VLineXYH clipping 3",
 		 .tst_fn = test_vline,
 		 .data = &testcase_xyh_clipp_3},
-		
+
 		{.name = NULL}
 	}
 };
