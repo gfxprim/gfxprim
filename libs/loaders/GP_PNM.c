@@ -990,14 +990,14 @@ static int save_ascii_rgb888(FILE *f, const GP_Context *ctx,
 		}
 
 		for (x = 0; x < ctx->w; x++) {
-			addr+=3;
-
 			ret |= write_ascii_byte(f, addr[2]);
 			ret |= write_ascii_byte(f, addr[1]);
 			ret |= write_ascii_byte(f, addr[0]);
 
 			if (ret)
 				return errno;
+
+			addr+=3;
 		}
 
 		if (GP_ProgressCallbackReport(cb, y, ctx->h, ctx->w)) {
