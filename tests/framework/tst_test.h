@@ -48,6 +48,14 @@ enum tst_flags {
 	 * Check malloc for memory leaks.
 	 */
 	TST_CHECK_MALLOC = 0x02,
+
+	/*
+	 * Enable malloc canaries. Executes test twice, allocating PROT_NONE
+	 * page first before, then after the allocated buffer.
+	 *
+	 * Implies TST_CHECK_MALLOC.
+	 */
+	TST_MALLOC_CANARIES = 0x06,
 };
 
 struct tst_test {

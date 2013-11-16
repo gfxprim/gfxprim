@@ -413,10 +413,23 @@ void tst_job_run(struct tst_job *job)
 		tst_malloc_check_start();
 
 	/* Run test */
-	if (job->test->bench_iter)
+	if (job->test->bench_iter) {
 		ret = tst_job_benchmark(job);
-	else
-		ret = job_run(job);
+	} else {
+		if (job->test->flags & TST_MALLOC_CANARIES) {
+			tst_malloc_canaries_set(MALLOC_CANARY_BEGIN);
+			ret = job_run(job);
+
+			if (!ret) {
+				tst_malloc_canaries_set(MALLOC_CANARY_END);
+				ret = job_run(job);
+			}
+
+			tst_malloc_canaries_set(MALLOC_CANARY_OFF);
+		} else {
+			ret = job_run(job);
+		}
+	}
 
 	if (job->test->flags & TST_CHECK_MALLOC) {
 		tst_malloc_check_stop();
