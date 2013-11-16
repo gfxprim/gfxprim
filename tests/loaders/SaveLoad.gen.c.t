@@ -125,7 +125,7 @@ const struct tst_suite tst_suite = {
 %%   if not pt.is_unknown()
 		{.name = "{{ fmt }} {{ pt.name }}",
 		 .tst_fn = test_{{ fmt }}_{{ pt.name }},
-		 .flags = TST_TMPDIR | TST_CHECK_MALLOC},
+		 .flags = TST_TMPDIR | TST_MALLOC_CANARIES},
 %%   endif
 %%  endfor
 %% endfor
