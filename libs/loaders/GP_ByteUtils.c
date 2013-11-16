@@ -22,12 +22,7 @@
 
 #include <stdarg.h>
 
-#ifdef __linux__
-#include <endian.h>
-#else /* BSD Family */
-#include <machine/endian.h>
-#endif
-
+#include "core/GP_ByteOrder.h"
 #include "core/GP_Debug.h"
 #include "core/GP_Common.h"
 
