@@ -33,6 +33,7 @@
 #include <string.h>
 
 #include "../../config.h"
+#include "core/GP_ByteOrder.h"
 #include "core/GP_Debug.h"
 
 #include "GP_PNG.h"
@@ -168,6 +169,11 @@ GP_Context *GP_ReadPNG(FILE *f, GP_ProgressCallback *callback)
 		case 8:
 			pixel_type = GP_PIXEL_G8;
 		break;
+#ifdef GP_PIXEL_G16
+		case 16:
+			pixel_type = GP_PIXEL_G16;
+		break;
+#endif
 		}
 	break;
 	case PNG_COLOR_TYPE_RGB:
@@ -234,8 +240,19 @@ GP_Context *GP_ReadPNG(FILE *f, GP_ProgressCallback *callback)
 		goto err2;
 	}
 
-	if (color_type == PNG_COLOR_TYPE_GRAY)
+	if (color_type == PNG_COLOR_TYPE_GRAY && depth < 8)
 		png_set_packswap(png);
+
+#if __BYTE_ORDER == __LITTLE_ENDIAN
+	/*
+	 * PNG stores 16 bit values in big endian, turn
+	 * on conversion to little endian if needed.
+	 */
+	if (depth > 8) {
+		GP_DEBUG(1, "Enabling byte swap for bpp = %u", depth);
+		png_set_swap(png);
+	}
+#endif
 
 	uint32_t y;
 	int p;
@@ -436,6 +453,12 @@ static int prepare_png_header(const GP_Context *src, png_structp png,
 		bit_depth = 8;
 		color_type = PNG_COLOR_TYPE_GRAY;
 	break;
+#ifdef GP_PIXEL_G16
+	case GP_PIXEL_G16:
+		bit_depth = 16;
+		color_type = PNG_COLOR_TYPE_GRAY;
+	break;
+#endif
 	default:
 		return 1;
 	break;
@@ -454,7 +477,7 @@ static int prepare_png_header(const GP_Context *src, png_structp png,
 
 	//png_set_packing(png);
 
-	/* prepare for format conversion */
+	/* prepare for format conversions */
 	switch (src->pixel_type) {
 	case GP_PIXEL_RGB888:
 		png_set_bgr(png);
@@ -467,6 +490,17 @@ static int prepare_png_header(const GP_Context *src, png_structp png,
 	default:
 	break;
 	}
+
+#if __BYTE_ORDER ==  __LITTLE_ENDIAN
+	/*
+	 * PNG stores 16 bit values in big endian, turn
+	 * on conversion to little endian if needed.
+	 */
+	if (bit_depth > 8) {
+		GP_DEBUG(1, "Enabling byte swap for bpp = %u", bit_depth);
+		png_set_swap(png);
+	}
+#endif
 
 	return 0;
 }
