@@ -1016,7 +1016,7 @@ int main(int argc, char *argv[])
 						zoom_mul(&params, 1/1.5);
 				break;
 				case GP_KEY_F1 ... GP_KEY_F10:
-					image_action_run(ev.val.key.key - GP_KEY_F1,
+					image_action_run(ev.val.key.key - GP_KEY_F1 + 1,
 					                 image_loader_img_path());
 				break;
 				}
