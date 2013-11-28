@@ -275,16 +275,37 @@ err0:
 
 static int zip_load_header(FILE *f, struct zip_local_header *header)
 {
-	int ret;
+	int ret, ch;
 
-	//TODO: check for central directory signature -> end of data
+	ret = GP_FRead(f, "0x50 0x4b");
 
-	ret = GP_FRead(f, "0x50 0x4b 0x03 0x04 L2 L2 L2 I4 L4 L4 L4 L2 L2",
+	if (ret != 2) {
+		GP_DEBUG(1, "Failed to read header");
+		return EIO;
+	}
+
+	ch = fgetc(f);
+
+	switch (ch) {
+	/* Central directory -> end of archive */
+	case 0x01:
+		GP_DEBUG(1, "Reached end of the archive");
+		return EINVAL;
+	break;
+	/* File header */
+	case 0x03:
+	break;
+	default:
+		GP_DEBUG(1, "Unexpected header PK%x", ch);
+		return EIO;
+	}
+
+	ret = GP_FRead(f, "0x04 L2 L2 L2 I4 L4 L4 L4 L2 L2",
 	               &header->ver, &header->bit_flags, &header->comp_type,
 		       &header->crc, &header->comp_size, &header->uncomp_size,
 	               &header->fname_len, &header->extf_len);
 
-	if (ret != 13) {
+	if (ret != 10) {
 		GP_DEBUG(1, "Failed to read header");
 		return EIO;
 	}
@@ -355,12 +376,15 @@ static GP_Context *zip_next_file(FILE *f, GP_ProgressCallback *callback)
 			ret = GP_ReadPNG(f, callback);
 		}
 
+		fseek(f, cur_off + header.comp_size, SEEK_SET);
+
 		goto out;
 	break;
 	case COMPRESS_DEFLATE:
-		if (read_deflate(f, &header, &fres))
+		if (read_deflate(f, &header, &fres)) {
+			err = errno;
 			goto out;
-
+		}
 
 		ret = GP_ReadJPG(fres, callback);
 
@@ -368,9 +392,6 @@ static GP_Context *zip_next_file(FILE *f, GP_ProgressCallback *callback)
 			rewind(fres);
 			ret = GP_ReadPNG(fres, callback);
 		}
-
-		if (!ret)
-			err = errno;
 
 		fclose(fres);
 		goto out;
@@ -512,7 +533,6 @@ static int load_next_offset(struct zip_priv *priv)
 	int ret;
 	long offset = ftell(priv->f);
 
-	//TODO: End of file!
 	if ((ret = zip_load_header(priv->f, &header)))
 		return ret;
 
