@@ -258,6 +258,9 @@ static int read_deflate(FILE *f, struct zip_local_header *header, FILE **res_f)
 		goto err2;
 	}
 
+	inflateBackEnd(&strm);
+	free(window);
+
 	rewind(tf);
 	*res_f = tf;
 	return 0;
