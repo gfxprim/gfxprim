@@ -1,0 +1,96 @@
+/*****************************************************************************
+ * This file is part of gfxprim library.                                     *
+ *                                                                           *
+ * Gfxprim is free software; you can redistribute it and/or                  *
+ * modify it under the terms of the GNU Lesser General Public                *
+ * License as published by the Free Software Foundation; either              *
+ * version 2.1 of the License, or (at your option) any later version.        *
+ *                                                                           *
+ * Gfxprim is distributed in the hope that it will be useful,                *
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of            *
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU         *
+ * Lesser General Public License for more details.                           *
+ *                                                                           *
+ * You should have received a copy of the GNU Lesser General Public          *
+ * License along with gfxprim; if not, write to the Free Software            *
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
+ * Boston, MA  02110-1301  USA                                               *
+ *                                                                           *
+ * Copyright (C) 2009-2013 Cyril Hrubis <metan@ucw.cz>                       *
+ *                                                                           *
+ *****************************************************************************/
+
+#include <string.h>
+#include <errno.h>
+#include <sys/stat.h>
+
+#include <core/GP_Context.h>
+#include <loaders/GP_Loaders.h>
+
+#include "tst_test.h"
+
+struct test {
+	GP_Size w, h;
+	const char *path;
+};
+
+static int test_load(struct test *test)
+{
+	GP_Container *zip = GP_OpenZip(test->path);
+	GP_Context *img;
+	int ret = TST_SUCCESS;
+
+	if (!zip) {
+		tst_msg("Failed to open zip");
+		return TST_FAILED;
+	}
+
+	img = GP_ContainerLoad(zip, NULL);
+
+	if (!img) {
+		tst_msg("Failed to load image");
+		return TST_FAILED;
+	}
+
+	if (img->w != test->w || img->h != test->h) {
+		tst_msg("Image has wrong size, expected %ux%u have %ux%u",
+		        test->w, test->h, img->w, img->h);
+		ret = TST_FAILED;
+	}
+
+	GP_ContextFree(img);
+	GP_ContainerClose(zip);
+
+	return ret;
+}
+
+struct test jpeg_deflated = {
+	.w = 100,
+	.h = 100,
+	.path = "jpeg_deflated.zip"
+};
+
+struct test jpeg_stored = {
+	.w = 100,
+	.h = 100,
+	.path = "jpeg_stored.zip"
+};
+
+const struct tst_suite tst_suite = {
+	.suite_name = "ZIP",
+	.tests = {
+		{.name = "Load JPEG deflated in ZIP",
+		 .tst_fn = test_load,
+		 .res_path = "data/zip/valid/jpeg_deflated.zip",
+		 .data = &jpeg_deflated,
+		 .flags = TST_TMPDIR | TST_MALLOC_CANARIES},
+
+		{.name = "Load JPEG stored in ZIP",
+		 .tst_fn = test_load,
+		 .res_path = "data/zip/valid/jpeg_stored.zip",
+		 .data = &jpeg_stored,
+		 .flags = TST_TMPDIR | TST_MALLOC_CANARIES},
+
+		{.name = NULL},
+	}
+};

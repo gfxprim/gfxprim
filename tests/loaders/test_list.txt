@@ -4,5 +4,6 @@ PNG
 PBM
 PGM
 PPM
+ZIP
 SaveLoad.gen
 SaveAbort.gen
