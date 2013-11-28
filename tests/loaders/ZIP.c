@@ -76,6 +76,43 @@ struct test jpeg_stored = {
 	.path = "jpeg_stored.zip"
 };
 
+struct test mixed_content = {
+	.w = 100,
+	.h = 100,
+	.path = "mixed_content.zip"
+};
+
+/*
+ * Test ZIP with no images, we expect to get NULL with errno set to zero
+ */
+static int no_images(const char *path)
+{
+	GP_Container *zip = GP_OpenZip(path);
+	GP_Context *img;
+	int ret = TST_SUCCESS;
+
+	if (!zip) {
+		tst_msg("Failed to open zip");
+		return TST_FAILED;
+	}
+
+	img = GP_ContainerLoad(zip, NULL);
+
+	if (img) {
+		tst_msg("Loaded image from zip without images");
+		ret = TST_FAILED;
+	}
+
+	if (errno) {
+		tst_msg("Get errno %d (%s)", errno, strerror(errno));
+		ret = TST_FAILED;
+	}
+
+	GP_ContainerClose(zip);
+
+	return ret;
+}
+
 const struct tst_suite tst_suite = {
 	.suite_name = "ZIP",
 	.tests = {
@@ -89,6 +126,18 @@ const struct tst_suite tst_suite = {
 		 .tst_fn = test_load,
 		 .res_path = "data/zip/valid/jpeg_stored.zip",
 		 .data = &jpeg_stored,
+		 .flags = TST_TMPDIR | TST_MALLOC_CANARIES},
+
+		{.name = "Load JPEG is second file in ZIP",
+		 .tst_fn = test_load,
+		 .res_path = "data/zip/valid/mixed_content.zip",
+		 .data = &mixed_content,
+		 .flags = TST_TMPDIR | TST_MALLOC_CANARIES},
+
+		{.name = "Load ZIP with no images",
+		 .tst_fn = no_images,
+		 .res_path = "data/zip/valid/no_images.zip",
+		 .data = "no_images.zip",
 		 .flags = TST_TMPDIR | TST_MALLOC_CANARIES},
 
 		{.name = NULL},
