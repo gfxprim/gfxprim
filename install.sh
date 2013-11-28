@@ -5,9 +5,9 @@ LIBDIR="$2"
 BINDIR="$3"
 INCLUDEDIR="$4"
 
-HEADER_LOC="$PREFIX/$INCLUDEDIR"
-LIB_LOC="$PREFIX/$LIBDIR"
-BIN_LOC="$PREFIX/$BINDIR"
+HEADER_LOC="${DESTDIR}$PREFIX/$INCLUDEDIR"
+LIB_LOC="${DESTDIR}$PREFIX/$LIBDIR"
+BIN_LOC="${DESTDIR}$PREFIX/$BINDIR"
 
 # Headers
 echo "INSTALL headers ($HEADER_LOC)"
@@ -18,13 +18,15 @@ for i in `ls include/`; do
 		install -m 775 -d "${HEADER_LOC}/GP/$i"
 		install -m 664 "include/$i/"*.h "${HEADER_LOC}/GP/$i"
 	else
-		install -m 664 "include/$i" "${HEADER_LOC}/GP/$i"
+		if [ "$i" != "Makefile" ]; then
+			install -m 664 "include/$i" "${HEADER_LOC}/GP/$i"
+		fi
 	fi
 done
 
 # Library
 echo "INSTALL libraries ($LIB_LOC)"
-install -m 775 -d "$LIB_LOC" 
+install -m 775 -d "$LIB_LOC"
 
 for i in build/*.so build/*.so.* build/*.a; do
 	if [ -L "$i" ]; then

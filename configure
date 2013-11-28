@@ -116,7 +116,7 @@ class libraries:
         sys.stderr.write("----------------------\n")
 
         for i in cfg:
-            sys.stderr.write("%14s : %s\n" % (i, cfg[i][0]))
+            sys.stderr.write("%14s : '%s'\n" % (i, cfg[i][0]))
             sys.stderr.write("              - %s\n\n" % cfg[i][1])
 
         sys.stderr.write("Libraries to link against\n")
@@ -227,10 +227,10 @@ def basic_checks(cfg):
     if cfg['libdir'][0] == '':
         sys.stderr.write("Checking for lib directory ... ")
 
-        if os.path.isdir(cfg['prefix'][0] + '/usr/lib64'):
-            cfg['libdir'][0] = '/usr/lib64'
+        if os.path.isdir('/usr/lib64'):
+            cfg['libdir'][0] = 'lib64'
         else:
-            cfg['libdir'][0] = '/usr/lib'
+            cfg['libdir'][0] = 'lib'
 
         sys.stderr.write(cfg['libdir'][0] + '\n');
 
@@ -308,12 +308,12 @@ if __name__ ==  '__main__':
            'SWIG'          : ['swig', 'Simplified Wrapper and Interface Generator'],
            'PYTHON_CONFIG' : ['python-config', 'Python config helper'],
            'PYTHON_VER'    : ['', 'Python version (derived from python config)'],
-	   'include_path'  : ['/usr/include', 'Path to the system headers'],
-	   'prefix'        : ['', 'Installation prefix'],
-	   'bindir'        : ['/usr/bin', 'Where to install binaries'],
-	   'libdir'        : ['', 'Where to install libraries'],
-	   'includedir'    : ['/usr/include', 'Where to install headers'],
-           'mandir'        : ['/usr/share/man', 'Where to install man pages']}
+           'include_path'  : ['/usr/include', 'Path to the system headers'],
+           'prefix'        : ['/usr/local/', 'Installation prefix'],
+           'bindir'        : ['bin', 'Where to install binaries'],
+           'libdir'        : ['', 'Where to install libraries'],
+           'includedir'    : ['include', 'Where to install headers'],
+           'mandir'        : ['share/man', 'Where to install man pages']}
 
     #
     # Library detection/enable disable
@@ -333,36 +333,36 @@ if __name__ ==  '__main__':
                     "An open-source JPEG 2000 library",
                     [header_exists, "openjpeg-2.0/openjpeg.h"], "", "-lopenjp2", ["loaders"]],
                    ["giflib",
-		    "Library to handle, display and manipulate GIF images",
-		    [header_exists, "gif_lib.h"], "", "-lgif", ["loaders"]],
+                    "Library to handle, display and manipulate GIF images",
+                    [header_exists, "gif_lib.h"], "", "-lgif", ["loaders"]],
                    ["tiff",
-		    "Tag Image File Format (TIFF) library",
-		    [header_exists, "tiffio.h"], "", "-ltiff", ["loaders"]],
+                    "Tag Image File Format (TIFF) library",
+                    [header_exists, "tiffio.h"], "", "-ltiff", ["loaders"]],
                    ["zlib",
-		    "Standard (de)compression library",
-		    [header_exists, "zlib.h"], "", "-lz", ["loaders"]],
-		   ["libX11",
-		    "X11 library",
-		    [header_exists, "X11/Xlib.h"], "", "-lX11", ["backends"]],
+                    "Standard (de)compression library",
+                    [header_exists, "zlib.h"], "", "-lz", ["loaders"]],
+                   ["libX11",
+                    "X11 library",
+                    [header_exists, "X11/Xlib.h"], "", "-lX11", ["backends"]],
                    ["X_SHM",
-		    "MIT-SHM X Extension",
-		    [header_exists, "X11/extensions/XShm.h"], "", "-lXext", ["backends"]],
-		   ["aalib",
-		    "Portable ascii art GFX library",
-		    [header_exists, "aalib.h"], "", "-laa", ["backends"]],
-		   ["freetype",
+                    "MIT-SHM X Extension",
+                    [header_exists, "X11/extensions/XShm.h"], "", "-lXext", ["backends"]],
+                   ["aalib",
+                    "Portable ascii art GFX library",
+                    [header_exists, "aalib.h"], "", "-laa", ["backends"]],
+                   ["freetype",
                     "A high-quality and portable font engine",
                     [header_exists, "ft2build.h"], "", "`freetype-config --libs`", ["core"]],
-		   ["dl",
+                   ["dl",
                     "Dynamic linker",
                     [header_exists, "dlfcn.h"], "", "-ldl", ["core"]],
-		   ["V4L2",
+                   ["V4L2",
                     "Video for linux 2",
                     [header_exists, "linux/videodev2.h"], "", "", ["grabbers"]],
-		   ["pthread",
+                   ["pthread",
                     "Posix Threads",
                     [header_exists, "pthread.h"], "-pthread", "-pthread", ["core"]],
-		   ["backtrace",
+                   ["backtrace",
                     "C stack trace writeout",
                     [c_try_compile, "#include <execinfo.h>\nint main(void) { backtrace(0, 0); }",
                       "Checking for backtrace() ... "], "", "", ["core"]]], cfg)
@@ -398,7 +398,7 @@ if __name__ ==  '__main__':
             l.set(i, False);
 
     for i in cfg:
-        if getattr(options, i):
+        if getattr(options, i) is not None:
             cfg[i][0] = getattr(options, i)
 
     basic_checks(cfg);
