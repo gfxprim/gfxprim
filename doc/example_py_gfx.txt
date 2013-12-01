@@ -1,6 +1,6 @@
-Gfx
----
-.A simple program to show how to use gfx
+GFX Primitives
+--------------
+A simple program to show how to use most of the graphics primitives.
 
 [source,python]
 ------------------------------------------------------------------

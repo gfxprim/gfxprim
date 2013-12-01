@@ -195,7 +195,8 @@ Currently the 'AA-lib' backend uses default initialization parameters.
 Way how to pass 'AA-lib' specific parameters will be added. This interface
 will likely change.
 
-Overall init function
+[[Backend_Init]]
+Backend init function
 ~~~~~~~~~~~~~~~~~~~~~
 
 Although there is no unified backend initialization, there is something close to
@@ -436,6 +437,7 @@ queue and the call returns.
 	}
 -------------------------------------------------------------------------------
 
+[[Timers]]
 GP_BackendAddTimer
 ^^^^^^^^^^^^^^^^^^
 
@@ -594,6 +596,7 @@ NOTE: The backend->context pointer may change upon calling this function and
       at least backend->context->pixels pointer will change.
 
 
+[[ResizeAck]]
 GP_BackendResizeAck
 ^^^^^^^^^^^^^^^^^^^
 

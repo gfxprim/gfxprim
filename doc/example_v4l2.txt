@@ -1,7 +1,8 @@
-Graphics Backend Example
+Grabbers (v4l2) Examples
 ------------------------
 
-Simple grabber that saves images taken from v4l2 device.
+Simple link:grabbers.html[grabber example] that saves images taken from v4l2
+device.
 
 [source,c]
 ------------------------------------------------------------------

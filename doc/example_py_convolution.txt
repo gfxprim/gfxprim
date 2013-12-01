@@ -1,6 +1,6 @@
-Block Blur Convolution Example
-------------------------------
-.A simple program that loads image, blurs it and saves result
+Box Blur Convolution
+--------------------
+A simple program that loads image, blurs it and saves result.
 
 [source,python]
 ------------------------------------------------------------------

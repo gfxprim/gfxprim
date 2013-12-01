@@ -1,6 +1,6 @@
 Showimage
 ---------
-.A simple program to load and show image
+A very simple program that loads an image and shows it in a window.
 
 [source,python]
 ------------------------------------------------------------------

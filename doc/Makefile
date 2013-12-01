@@ -21,6 +21,7 @@ GENIMAGES=discrete_linear_1D_convolution_alg1 discrete_linear_1D_convolution_alg
 
 PAGES=$(subst .txt,.html,$(SOURCES))
 PAGES+=$(subst .txt,.html,$(EXAMPLE_SOURCES))
+PAGES+=examples.html
 
 .PHONY: toolcheck clean
 
@@ -58,14 +59,18 @@ toolcheck:
 $(PAGES): %.html: %.txt
 	asciidoc $(ASCIIDOC_PARAMS) $<
 
-examples.html: examples.txt ../demos/c_simple/*.c ../demos/py_simple/*.py asciidoc.conf
-	asciidoc $(ASCIIDOC_PARAMS) -a toc examples.txt
+#
+# Autogenerate examples page
+#
+examples.txt: $(EXAMPLE_SOURCES) gen_examples_page.sh
+	./gen_examples_page.sh examples.txt
 
 #
 # Clean up generated images
 #
 CLEAN+=$(patsubst %,%.md5,$(GENIMAGES))
 CLEAN+=$(patsubst %,%.png,$(GENIMAGES))
+CLEAN+=examples.txt
 
 #
 # Clean up generated pages

@@ -1,6 +1,6 @@
-X11 Windows
------------
-.A simple program to demonstrate multiple windows with X11
+X11 backend with multiple windows
+---------------------------------
+A simple program to demonstrate multiple windows on X11 backend.
 
 [source,python]
 ------------------------------------------------------------------

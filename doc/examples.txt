@@ -1,122 +1,38 @@
-Image loaders examples
-----------------------
+List of examples
+----------------
+Following pages contains a list of all code examples, the source 
+files could be found and are compiled in the +demos/c_simple/+ and
++demos/py_simple+ directories in the source tree.
 
-Loads an image and saves it into 'out.png' png image.
-
-Example in C
-~~~~~~~~~~~~
-
-[source,c]
-------------------------------------------------------------------
-include::../demos/c_simple/loaders_example.c[]
-------------------------------------------------------------------
-
-Example in C utilizing progress callback
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-[source,c]
-------------------------------------------------------------------
-include::../demos/c_simple/loaders.c[]
-------------------------------------------------------------------
-
-Example in C using image meta-data interface
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-[source,c]
-------------------------------------------------------------------
-include::../demos/c_simple/meta_data.c[]
-------------------------------------------------------------------
-
-[source,c]
-------------------------------------------------------------------
-include::../demos/c_simple/meta_data_dump.c[]
-------------------------------------------------------------------
-
-Example in Python
-~~~~~~~~~~~~~~~~~
-
-[source,python]
-------------------------------------------------------------------
-include::../demos/py_simple/loaders_example.py[]
-------------------------------------------------------------------
-
-GFX Examples
-------------
-
-Drawing Lines
-~~~~~~~~~~~~~
-
-Example in C
-^^^^^^^^^^^^
-
-[source,c]
-------------------------------------------------------------------
-include::../demos/c_simple/gfx_koch.c[]
-------------------------------------------------------------------
-
-Filters
--------
-
-Symmetry filters (Rotation, Mirroring)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Example in C
-^^^^^^^^^^^^
-
-[source,c]
-------------------------------------------------------------------
-include::../demos/c_simple/filters_symmetry.c[]
-------------------------------------------------------------------
-
-Example in Python
-^^^^^^^^^^^^^^^^^
-
-[source,python]
-------------------------------------------------------------------
-include::../demos/py_simple/rotate90.py[]
-------------------------------------------------------------------
-
-Simple backend example
-----------------------
-
-Basic backend code example. Initalizes backends, draws a cross and dumps
-events.
-
-Example in C
-~~~~~~~~~~~~
-
-[source,c]
-------------------------------------------------------------------
-include::../demos/c_simple/backend_example.c[]
-------------------------------------------------------------------
-
-[source,c]
-------------------------------------------------------------------
-include::../demos/c_simple/showimage.c[]
-------------------------------------------------------------------
-
-Grabbers
---------
-
-Simple C source that saves JPEG images from V4L2 device (web camera).
-
-[source,c]
-------------------------------------------------------------------
-include::../demos/c_simple/v4l2_grab.c[]
-------------------------------------------------------------------
-
-Simple C source that shows filters interactively on image stream from a
-camera.
-
-[source,c]
-------------------------------------------------------------------
-include::../demos/c_simple/v4l2_show.c[]
-------------------------------------------------------------------
-
-GFXprim + PyGTK
----------------
-
-[source,python]
-------------------------------------------------------------------
-include::../demos/py_simple/pygtk_example.py[]
-------------------------------------------------------------------
+.List C examples
+[grid="rows"]
+[options="autowidth,header",cols="<,<m"]
+|===========================
+| Example | Source filename(s)
+| link:example_SDL_glue.html[SDL Glue] | SDL_glue.c
+| link:example_backend.html[Graphics Backend] | backend_example.c
+| link:example_backend_timers.html[Backend Timers] | backend_timers_example.c
+| link:example_debug_handler.html[Custom Debug Message Handler] | debug_handler.c
+| link:example_fonts.html[Font and Text rendering] | fonttest.c
+fileview.c
+| link:example_gaussian_noise.html[Gaussian Additive Noise Filter] | gaussian_noise.c
+| link:example_input.html[Input Events Handling] | input_example.c
+| link:example_loader_registration.html[Image Loader Registration] | loaders_register.c
+| link:example_loaders_progress_callback.html[Loaders with Progress Callback] | loaders.c
+| link:example_v4l2.html[Grabbers (v4l2) Examples] | v4l2_grab.c
+v4l2_show.c
+| link:example_x11_windows.html[X11 Backend with multiple windows] | x11_windows.c
+|===========================
+.List Python examples
+[grid="rows"]
+[options="autowidth,header",cols="<,<m"]
+|===========================
+| Example | Source filename(s)
+| link:example_py_backends.html[Backend Init] | backends.py
+| link:example_py_blur.html[Gaussian Blur Filter] | blur.py
+| link:example_py_convolution.html[Box Blur Convolution] | convolution.py
+| link:example_py_dithering.html[Floyd-Steinberg Dithering] | dither.py
+| link:example_py_gfx.html[GFX Primitives] | gfx.py
+| link:example_py_showimage.html[Showimage] | showimage.py
+| link:example_py_x11_windows.html[X11 backend with multiple windows] | x11_windows.py
+|===========================

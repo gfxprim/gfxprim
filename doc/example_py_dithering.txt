@@ -1,6 +1,6 @@
-Dithering Example
------------------
-.A simple program that loads image, dithers it and saves result
+Floyd-Steinberg Dithering
+-------------------------
+A simple program that loads image, dithers it and saves result.
 
 [source,python]
 ------------------------------------------------------------------

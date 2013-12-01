@@ -1,5 +1,7 @@
-Graphics Backend Example
-------------------------
+Loaders with Progress Callback
+------------------------------
+This example shows how to use link:progress_callback.html[progress callback]
+together with link:loaders.html[image loaders functions].
 
 [source,c]
 ------------------------------------------------------------------

@@ -1,5 +1,6 @@
-Input Events Example
---------------------
+Input Events Handling
+---------------------
+This example shows how to handle most of the link:input.html[input events].
 
 [source,c]
 ------------------------------------------------------------------

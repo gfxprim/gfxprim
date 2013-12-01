@@ -1,5 +1,7 @@
-Debug Message Handler Example
------------------------------
+Custom Debug Message Handler
+----------------------------
+This example shows how to redirect link:debug.html[library debug messages]
+into a custom debug message handler.
 
 [source,c]
 ------------------------------------------------------------------

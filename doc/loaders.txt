@@ -8,8 +8,8 @@ saving and GIF, JPEG2000 and PSP for loading.
 
 Have a look at the link:about.html#Loaders[supported formats].
 
-Loaders API
-~~~~~~~~~~~
+Image Loaders and Savers
+~~~~~~~~~~~~~~~~~~~~~~~~
 
 All loading functions returns a pointer to allocated and loaded image or upon
 a failure 'NULL'.
@@ -18,12 +18,10 @@ All saving functions returns zero on success and non-zero on failure.  If
 image saving is aborted by a callback, the opened file is closed and removed
 from a filesystem before the call returns.
 
-In case of a failure 'errno' is set.
-
 The signature matching functions takes a 32 bytes long buffer and looks for a
-valid image signature. If signature is found 1 is returned.
+valid image signature. If signature is found non-zero is returned.
 
-The possible 'errno' values are:
+In case of a failure 'errno' is set, possible 'errno' values are:
 
 * anything returned by +open()+, +close()+, +lseek()+, +read()+, +write()+, ...
  - 'ENOENT' if file doesn't exist
@@ -38,9 +36,8 @@ The possible 'errno' values are:
 You can get more information about the error condition by turning on GFXprim
 link:environment_variables.html#GP_DEBUG[debug messages].
 
-Image Loader
-~~~~~~~~~~~~
 
+[[Load_Image]]
 [source,c]
 -------------------------------------------------------------------------------
 #include <loaders/GP_Loader.h>
@@ -66,6 +63,7 @@ is returned.
 If file extension disagrees with file signature on the file format a warning
 is printed into the 'stderr'.
 
+[[Save_Image]]
 [source,c]
 -------------------------------------------------------------------------------
 #include <loaders/GP_Loader.h>
@@ -89,8 +87,9 @@ wasn't compiled with support for this image type).
 If context pixel type is not supported by the format 'errno' is set to
 'EINVAL'.
 
-Advanced usage
-^^^^^^^^^^^^^^
+[[Register_Loader]]
+Advanced Loaders usage
+^^^^^^^^^^^^^^^^^^^^^^
 
 [source,c]
 -------------------------------------------------------------------------------
@@ -161,10 +160,10 @@ extensions that are commonly used for this image format.
 All internal loaders are all described in list of this structures which is
 used to implement functions such as 'GP_LoadImage()'.
 
-You can print currently active loaders via the 'GP_ListLoaders()' register and
+You can print currently active loaders via the 'GP_ListLoaders()'. Register and
 unregister your own loaders by 'GP_LoaderRegister()' and
 'GP_LoaderUnregister()'. Once image loader is registered the generic loading
-functions could use it to load and save images.
+functions can use it to load and save images.
 
 TIP: For example usage see image loader registration
 link:example_loader_registration.html[example].

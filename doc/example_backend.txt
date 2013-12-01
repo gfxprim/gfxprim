@@ -1,5 +1,11 @@
-Graphics Backend Example
-------------------------
+Graphics Backend
+----------------
+This is a very simple backend example that shows how to use
+link:backends.html#Backend_Init[backend init function] and
+link:input.html[input event layer].
+
+It also shows how to handle
+link:backends.html#ResizeAck[window resize events].
 
 [source,c]
 ------------------------------------------------------------------

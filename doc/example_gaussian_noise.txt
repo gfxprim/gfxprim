@@ -1,5 +1,6 @@
-Gaussian Additive Noise Filter Example
---------------------------------------
+Gaussian Additive Noise Filter
+------------------------------
+Simple program that adds a gaussian distributed noise to the image.
 
 [source,c]
 ------------------------------------------------------------------

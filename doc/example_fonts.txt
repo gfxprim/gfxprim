@@ -1,6 +1,9 @@
-Font Test Example
------------------
-.A simple program to show all font characters with different styles.
+Font and Text rendering
+-----------------------
+
+Fonttest
+~~~~~~~~
+A simple program to show all font characters with different styles.
 
 [source,c]
 ------------------------------------------------------------------
@@ -8,8 +11,8 @@ include::../demos/c_simple/fonttest.c[]
 ------------------------------------------------------------------
 
 Fileview
---------
-.A simple program to show contents of a file.
+~~~~~~~~
+A simple program to show contents of a file.
 
 [source,c]
 ------------------------------------------------------------------

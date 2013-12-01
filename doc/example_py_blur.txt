@@ -1,6 +1,6 @@
-Gaussian Blur Example
----------------------
-.A simple program that loads image, blurs it and saves result
+Gaussian Blur Filter
+--------------------
+A simple program that loads image, blurs it and saves result.
 
 [source,python]
 ------------------------------------------------------------------

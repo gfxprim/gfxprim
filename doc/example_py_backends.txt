@@ -1,6 +1,7 @@
 Backend Init
 ------------
-.A simple program to demonstrate backend init function.
+A simple program to demonstrate
+link:backends_python.html#Backend_Init[backend init function].
 
 [source,python]
 ------------------------------------------------------------------

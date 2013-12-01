@@ -1,6 +1,6 @@
-Graphics Backend Example
-------------------------
-.An example how to create and manage two windows using the X11 backend
+X11 Backend with multiple windows
+---------------------------------
+This example shows how to create multiple X11 windows.
 
 [source,c]
 ------------------------------------------------------------------
