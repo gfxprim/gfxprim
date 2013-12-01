@@ -39,8 +39,9 @@ format.
 
 May raise 'OSError' with errno set to 'EIO' when file is damaged.
 
-May raise 'OSError' with errno set to 'ECANCELED' when action was interrupted
-by callback.
+May raise 'OSError' with errno set to 'ECANCELED' when action was aborted from
+callback. See progress callback
+link:core_python.html#Progress_Callback[documentation] for more.
 
 
 [source,python]

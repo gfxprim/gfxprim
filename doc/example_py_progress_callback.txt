@@ -1,0 +1,9 @@
+Progress Callback
+-----------------
+A very simple program that shows
+link:core_python.html#Progress_Callback[progress callback] usage.
+
+[source,python]
+------------------------------------------------------------------
+include::../demos/py_simple/progress_callback.py[]
+------------------------------------------------------------------

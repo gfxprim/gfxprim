@@ -135,6 +135,20 @@ import gfxprim.core as core
 
 The PixelTypes array stores all supported pixel types
 
+[[Progress_Callback]]
+Progress Callback
+~~~~~~~~~~~~~~~~~
+
+Progress callback is a last parameter of link:loaders_python.html[loaders] and
+link:filters_python.html[filters]. It can be either a python function or a
+touple with a function at the first position.
+
+Progress callback must return an integer number. Returning non-zero will abort
+the operation and the function, called with the callback as a parameter, will
+return 'OSError' with errno set to 'ECANCELED'.
+
+TIP: See link:example_py_progress_callback.html[callback example].
+
 Debug Functions
 ~~~~~~~~~~~~~~~
 

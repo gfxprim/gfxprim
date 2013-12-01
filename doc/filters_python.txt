@@ -9,7 +9,8 @@ from submodule as +img.filters.Foo(..)+. Note that in the second case the
 image is passed automatically as a first parameter.
 
 If filter has been aborted from callback 'OSError' with 'errno' set to
-'ECANCELED' is raised.
+'ECANCELED' is raised, see progress callback
+link:core_python.html#Progress_Callback[documentation] for more information.
 
 Point Filters
 ~~~~~~~~~~~~~
