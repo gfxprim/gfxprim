@@ -10,7 +10,7 @@ Pixel Type
 -------------------------------------------------------------------------------
 #include <GP.h>
 /* or */
-#include <core/GP_Pixel.h>
+#include <core/GP_Pixel.gen.h>
 
 typedef enum GP_PixelType {
 	GP_PIXEL_UNKNOWN,
@@ -28,13 +28,14 @@ typedef enum GP_PixelType {
 
 /*
  * The same values are also defined as macros so it's possible to
- * use them with ifdef as follows.
+ * use them with ifdef as:
+ * #ifdef GP_PIXEL_RGB555
+ * ...
+ * #endif /* GP_PIXEL_RGB555 */
  */
-#ifdef GP_PIXEL_RGB555
-
+#define GP_PIXEL_UNKNOWN GP_PIXEL_UNKNOWN
+#define GP_PIXEL_xRGB8888 GP_PIXEL_xRGB8888
 ...
-
-#endif /* GP_PIXEL_RGB555 */
 
 -------------------------------------------------------------------------------
 

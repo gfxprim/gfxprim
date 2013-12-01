@@ -1,8 +1,8 @@
 Drawing Context
 ---------------
 
-The 'GP_Context' structure describes an 'in memory' pixmap. It contains all
-metadata needed for drawing and filters.
+The 'GP_Context' structure describes an 'in memory' pixmap. The structure
+contains all metadata needed for drawing, loaders and filters.
 
 Data Structure
 ~~~~~~~~~~~~~~
@@ -40,14 +40,26 @@ typedef struct GP_Context {
 The 'pixels' field points to the image data.
 
 The 'pixels' are stored as a one-dimensional array consisting of byte-aligned
-lines (i.e. each image line starts at whole byte and ends at whole byte). The
-'pixels' array starts exactly at the start of the first line. Each line is
-'bytes_per_row' bytes long. The first pixel may actually start at 'offset' bit
-in the first byte in each line (but only for some sub contexts for pixel types
-that are not byte aligned). The first pixel is followed by the rest of the
-pixels in the image line (there is 'w' pixels in each line) and ends somewhere
-before the end of the line (i.e. there may be padding before the start of the
-next line or in case of subcontexts image data of the parent context).
+lines (i.e. each image line starts at whole byte and ends at whole byte).
+
+The 'pixels' array starts exactly at upper left corner of the image and is
+stored in horizontal lines (each line contains 'w' pixels and there is 'h'
+lines). Each line is 'bytes_per_row' bytes long (which equals to 'w' * 'bpp' /
+8 rouned up to the whole bytes). The first pixel may actually start at
+'offset' bit in the first byte in each line (but only for some
+<<Sub_Context,subcontexts>> for pixel types that are not byte aligned).
+
+The link:pixels.html[pixel_type enumeration] defines in which format and how
+are pixel data stored in the 'pixels' buffer, i.e. organization and function
+of the pixel channels.
+
+The optional pointer to link:gamma.html[gamma tables] describes per-channel
+gamma correction. Unfortunatelly very few parts of the library use it at the
+moment (this will be fixed in subsequent releases).
+
+The bitfield at the the end of the structure describes image orientation (see
+bellow) and a flag that tell if 'pixels' data should be freed, which is
+usefull for example for <<Sub_Context, subcontexts>>.
 
 Rotation
 ^^^^^^^^
@@ -213,6 +225,7 @@ If 'free_pixels' flag is set, the pixels buffer is freed too.
 
 If gamma pointer is not 'NULL' the 'GP_GammaRelease()' is called.
 
+[[Sub_Context]]
 Subcontext
 ~~~~~~~~~~
 

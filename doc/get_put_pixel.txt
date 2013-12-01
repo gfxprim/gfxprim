@@ -43,7 +43,7 @@ void GP_PutPixel_Raw_{{ bpp }}(GP_Context *c, GP_Coord x, GP_Coord y,
 --------------------------------------------------------------------------------
 
 These functions are generally fast, but does not honour context rotation flags
-and do not check coordinates.
+and do not check that coordinates are inside of the context.
 
 They are intended as basic building blocks for other GFX primitives, filters,
 etc.

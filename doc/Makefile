@@ -4,7 +4,7 @@ SOURCES=index.html about.txt context.txt loaders.txt filters.txt \
 	gen.txt pixels.txt coordinate_system.txt coding_style.txt \
 	get_put_pixel.txt blits.txt progress_callback.txt text.txt \
 	event_queue.txt compilation.txt filters_resize.txt \
-	filters_dithering.txt filters_python.txt spiv.txt
+	filters_dithering.txt filters_python.txt spiv.txt core_common.txt \
 
 SOURCES+=core_python.txt gfx_python.txt loaders_python.txt backends_python.txt
 

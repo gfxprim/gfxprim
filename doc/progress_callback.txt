@@ -1,9 +1,6 @@
 Progress Callback
 -----------------
 
-Progress Callback
-~~~~~~~~~~~~~~~~~
-
 The 'GP_ProgressCallback' is a structure that stores user-defined callback
 function and user-defined pointer and percentage.
 
@@ -11,7 +8,8 @@ It is passed as last parameter to functions that would take some time to
 complete and adds capability to track the operation progress as well as to
 abort the operation.
 
-Currently it's used for filters and loaders.
+Currently it's used in link:filters.html[filters] and
+link:loaders.html[loaders].
 
 [source,c]
 -------------------------------------------------------------------------------
@@ -22,12 +20,21 @@ typdedef struct GP_ProgressCallback {
 } GP_ProgressCallback;
 -------------------------------------------------------------------------------
 
-If non 'NULL' progress callback structure is passed to a function, the
-callback function is periodically called and the percentage is updated.
+The 'callback' pointer is a pointer to user defined callback function.
 
-The return value from callback could abort the function execution. If non zero
-value is returned operation is aborted, all memory freed etc. and in case of
-bitmap loaders 'errno' is set to 'ECANCELED'.
+The 'priv' pointer can be used to pass a pointer to the callback function and
+can accessed inside of the callback by defererencin the 'self' argument.
+
+The 'percentage' field is updated by the function the callback was passed to
+and is increased monotonically till it reaches 100.
+
+If 'non-NULL' progress callback structure is passed to a function, it's called
+periodically and the percentage field is updated.
+
+The return value from callback could abort the execution. If a non-zero value
+is returned operation is aborted, all memory freed etc., in case of pixmap
+loaders 'errno' is set to 'ECANCELED' and in case of pixmap savers the newly
+created file is removed too.
 
 The callback, if supported, is the last parameter of a function.
 
