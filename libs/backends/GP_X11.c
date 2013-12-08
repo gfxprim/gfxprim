@@ -612,9 +612,11 @@ GP_Backend *GP_BackendX11Init(const char *display, int x, int y,
 
 	backend->context = NULL;
 
-	if ((flags & GP_X11_DISABLE_SHM) || create_shm_ximage(backend, w, h))
+	if ((flags & GP_X11_DISABLE_SHM || !x11_conn.local)
+	    || create_shm_ximage(backend, w, h)) {
 		if (create_ximage(backend, w, h))
 			goto err1;
+	}
 
 	XFlush(win->dpy);
 

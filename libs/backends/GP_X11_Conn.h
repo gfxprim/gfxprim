@@ -37,6 +37,9 @@ struct x11_conn {
 	int S__NET_WM_STATE:1;
 	int S__NET_WM_STATE_FULLSCREEN:1;
 
+	/* Is set to 1 if connection is local -> we can use SHM */
+	int local:1;
+
 	/* reference counter, incremented on window creation */
 	unsigned int ref_cnt;
 };
@@ -98,10 +101,22 @@ static void x11_input_init(void);
 
 static unsigned int x11_open(const char *display)
 {
+	const char *disp;
+
 	if (x11_conn.ref_cnt != 0)
 		return ++x11_conn.ref_cnt;
 
 	GP_DEBUG(1, "Opening X11 display '%s'", display);
+
+	disp = XDisplayName(display);
+
+	if (disp && disp[0] == ':')
+		x11_conn.local = 1;
+	else
+		x11_conn.local = 0;
+
+	GP_DEBUG(1, "Connection is %s (%s)",
+	         x11_conn.local ? "local" : "remote", disp);
 
 	if (!XInitThreads()) {
 		GP_DEBUG(2, "XInitThreads failed");
