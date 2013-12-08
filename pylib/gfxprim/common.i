@@ -101,10 +101,10 @@ int gp_proxy_callback(GP_ProgressCallback *self)
 
 /*
  * All progress callbacks have default NULL value
+ */
 %typemap(default) GP_ProgressCallback *callback {
         $1 = NULL;
 }
- */
 
 /*
  * Error handling declarations
