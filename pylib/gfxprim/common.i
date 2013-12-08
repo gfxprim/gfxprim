@@ -70,27 +70,29 @@ int gp_proxy_callback(GP_ProgressCallback *self)
 %typemap(in) GP_ProgressCallback *callback (GP_ProgressCallback callback_proxy,
                                             struct gp_proxy_params proxy_params)
 {
-        if (PyTuple_Check($input) && PyTuple_GET_SIZE($input) > 0) {
-                if (!PyCallable_Check(PyTuple_GetItem($input, 0))) {
-                        PyErr_SetString(PyExc_TypeError,
-                                        "first arg in tuple must be callable");
-                        return NULL;
-                }
-                proxy_params.callback = PyTuple_GetItem($input, 0);
-                proxy_params.args = $input;
+        if ($input != Py_None) {
+                if (PyTuple_Check($input) && PyTuple_GET_SIZE($input) > 0) {
+                        if (!PyCallable_Check(PyTuple_GetItem($input, 0))) {
+                                PyErr_SetString(PyExc_TypeError,
+                                                "first arg in tuple must be callable");
+                                return NULL;
+                        }
+                        proxy_params.callback = PyTuple_GetItem($input, 0);
+                        proxy_params.args = $input;
 
-        } else {
-                if (!PyCallable_Check($input)) {
-                        PyErr_SetString(PyExc_TypeError,
-                                        "parameter must be callable");
-                        return NULL;
-                }
+                } else {
+                        if (!PyCallable_Check($input)) {
+                                PyErr_SetString(PyExc_TypeError,
+                                                "parameter must be callable");
+                                return NULL;
+                        }
 
-                proxy_params.callback = $input;
-                proxy_params.args = NULL;
+                        proxy_params.callback = $input;
+                        proxy_params.args = NULL;
+                }
         }
 
-        if ($input) {
+        if ($input && $input != Py_None) {
                 callback_proxy.callback = gp_proxy_callback;
                 callback_proxy.priv = &proxy_params;
                 $1 = &callback_proxy;
