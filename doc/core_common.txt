@@ -130,7 +130,7 @@ int foo(...)
 	...
 
 	if (error) {
-		GP_TempAllocFree(self);
+		GP_TempAllocFree(tmp);
 		return -1;
 	}
 
@@ -138,7 +138,7 @@ int foo(...)
 
 	/* end of the code that uses the buffers */
 
-	GP_TempAllocFree(self);
+	GP_TempAllocFree(tmp);
 
 	return 0;
 }
