@@ -83,4 +83,8 @@
 /* Gaussian noise filter */
 #include "filters/GP_GaussianNoise.h"
 
+/* Multi tone point filters */
+#include "filters/GP_MultiTone.h"
+#include "filters/GP_Sepia.h"
+
 #endif /* FILTERS_GP_FILTERS_H */

@@ -143,6 +143,12 @@ GP_FilterVLinearConvolution_Raw
 GP_FilterWeightedMedianEx
 GP_FilterWeightedMedianExAlloc
 
+GP_FilterMultiToneEx
+GP_FilterMultiToneExAlloc
+
+GP_FilterSepiaEx
+GP_FilterSepiaExAlloc
+
 GP_InterpolationTypeName
 
 GP_NormInt

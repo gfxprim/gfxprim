@@ -41,7 +41,8 @@ def _init(module):
 	       'Median', 'MedianAlloc', 'MedianEx', 'MedianExAlloc',
 	       'Sigma', 'SigmaAlloc', 'SigmaEx', 'SigmaExAlloc',
 	       'FloydSteinberg', 'FloydSteinbergAlloc',
-	       'HilbertPeano', 'HilbertPeanoAlloc']:
+	       'HilbertPeano', 'HilbertPeanoAlloc',
+	       'Sepia', 'SepiaAlloc', 'SepiaEx', 'SepiaExAlloc']:
     extend_submodule(FiltersSubmodule, name, c_filters.__getattribute__('GP_Filter' + name))
 
   def array_to_kern(kernel, kernel_div):

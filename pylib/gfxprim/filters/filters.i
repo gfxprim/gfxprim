@@ -138,11 +138,16 @@ FILTER_FUNC(WeightedMedian);
 %include "GP_WeightedMedian.h"
 
 /* Sigma filter */
-FILTER_FUNC(GP_FilterSigmaEx);
-FILTER_FUNC(GP_FilterSigma);
+FILTER_FUNC(FilterSigmaEx);
+FILTER_FUNC(FilterSigma);
 %include "GP_Sigma.h"
 
 /* Gaussian Noise */
 FILTER_FUNC(GaussianNoiseAddEx);
 FILTER_FUNC(GaussianNoiseAdd);
 %include "GP_GaussianNoise.h"
+
+/* Sepia */
+FILTER_FUNC(Sepia);
+FILTER_FUNC(SepiaEx);
+%include "GP_Sepia.h"
