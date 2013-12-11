@@ -613,8 +613,8 @@ GP_Backend *GP_BackendX11Init(const char *display, int x, int y,
 	backend->context = NULL;
 
 	if ((flags & GP_X11_DISABLE_SHM || !x11_conn.local)
-	    || create_shm_ximage(backend, w, h)) {
-		if (create_ximage(backend, w, h))
+	    || create_shm_ximage(backend, wreq.w, wreq.h)) {
+		if (create_ximage(backend, wreq.w, wreq.h))
 			goto err1;
 	}
 
