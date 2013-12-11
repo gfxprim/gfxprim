@@ -66,7 +66,7 @@ size_t image_cache_get_ram_size(void)
 
 	fclose(f);
 
-	return ret * 1024 / 10;
+	return ret;
 }
 
 /*
@@ -83,7 +83,7 @@ static size_t image_size(struct image *img)
 	return image_size2(img->ctx, img->path);
 }
 
-struct image_cache *image_cache_create(unsigned int max_size_bytes)
+struct image_cache *image_cache_create(unsigned int max_size_kbytes)
 {
 	struct image_cache *self;
 
@@ -92,13 +92,13 @@ struct image_cache *image_cache_create(unsigned int max_size_bytes)
 	if (self == NULL)
 		return NULL;
 
-	self->max_size = max_size_bytes;
+	self->max_size = max_size_kbytes * 1024;
 	self->cur_size = sizeof(struct image_cache);
 
 	self->root = NULL;
 	self->end = NULL;
 
-	GP_DEBUG(1, "Created image cache size %u bytes", self->max_size);
+	GP_DEBUG(1, "Created image cache max size %ukB", max_size_kbytes);
 
 	return self;
 }

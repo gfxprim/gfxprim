@@ -16,7 +16,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2013 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
@@ -37,9 +37,9 @@ struct image_cache;
 size_t image_cache_get_ram_size(void);
 
 /*
- * Creates an image cache with maximal memory size.
+ * Creates an image cache with maximal memory size of max_size_kbytes.
  */
-struct image_cache *image_cache_create(unsigned int max_size_bytes);
+struct image_cache *image_cache_create(unsigned int max_size_kbytes);
 
 /*
  * Returns cached image, or NULL.

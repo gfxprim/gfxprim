@@ -651,6 +651,9 @@ static void init_backend(const char *backend_opts)
 	}
 }
 
+#define RESIZED_CACHE_MAX 400 * 1024
+#define ORIG_CACHE_MAX 80 * 1024
+
 /*
  * Figure out cache size depending on the size of RAM.
  *
@@ -659,13 +662,17 @@ static void init_backend(const char *backend_opts)
 static int init_loader(struct loader_params *params, const char **argv)
 {
 	size_t size = image_cache_get_ram_size();
-	unsigned int resized_size = (1024 * size)/10;
-	unsigned int orig_size = (1024 * size)/50;
+	size_t resized_size = size/10;
+	size_t orig_size = size/50;
 
-	if (resized_size > 100 * 1024 * 1024)
-		resized_size = 100 * 1024 * 1024;
+	if (resized_size > RESIZED_CACHE_MAX)
+		resized_size = RESIZED_CACHE_MAX;
 
-	GP_DEBUG(1, "Resized cache size = %u", resized_size);
+	if (orig_size > ORIG_CACHE_MAX)
+		orig_size = ORIG_CACHE_MAX;
+
+	GP_DEBUG(1, "Resized cache size = %zukB", resized_size);
+	GP_DEBUG(1, "Orig cache size = %zukB", orig_size);
 
 	if (image_loader_init(argv, orig_size))
 		return 1;
