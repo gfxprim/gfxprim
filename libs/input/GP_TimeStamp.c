@@ -57,6 +57,7 @@ static int choose_clock(clockid_t *clock)
 
 	if (clock_getres(CLOCK_MONOTONIC, &ts)) {
 		GP_DEBUG(1, "CLOCK_MONOTONIC: %s", strerror(errno));
+		//TODO: Fallback to gettimeofday?
 		return 1;
 	}
 
@@ -68,8 +69,15 @@ static int choose_clock(clockid_t *clock)
 		return 0;
 	}
 
-	GP_DEBUG(1, "No suitable clock id found.");
-	//TODO: Fallback to gettimeofday?
+	if (ts.tv_sec) {
+		GP_FATAL("No suitable clock found");
+		return 1;
+	}
+
+	GP_WARN("Timers running with %lims granularity\n",
+                ts.tv_nsec/MS_IN_US);
+
+	*clock = CLOCK_MONOTONIC;
 
 	return 1;
 }
