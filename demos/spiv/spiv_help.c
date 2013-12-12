@@ -89,7 +89,7 @@ static const struct examples examples[] = {
 	 "Shows all images stored in zip file"},
 	{"spiv .",
 	 "Shows all loadable images in current directory"},
-	{"spiv -t 5 vacation/",
+	{"spiv -s 5 vacation/",
 	 "Runs slideshow with 5 second delay"},
 	{"spiv -1 'cp %F sorted' images/",
 	 "Copies currently loaded image into directory 'sorted/' on pressing F1"},
