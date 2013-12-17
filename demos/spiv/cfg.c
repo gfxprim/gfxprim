@@ -39,21 +39,26 @@ struct cfg_opt *opt_by_key(struct cfg_opt *cfg_opts, const char *name_space,
 {
 	struct cfg_opt *i;
 
-	GP_DEBUG(1, "Looking for key '%s' in name space '%s'",
-	         key, name_space);
+	GP_DEBUG(1, "Looking for key '%s' in [%s]", key, name_space);
 
 	for (i = cfg_opts; !terminal(i); i++) {
-		if (name_space == NULL) {
-			if (i->name_space == NULL && !strcmp(key, i->key))
-				break;
-		} else {
-			if (i->name_space != NULL && !strcmp(key, i->key))
-				break;
-		}
+		if (!i->key)
+			continue;
+
+		if (name_space && !i->name_space)
+			continue;
+
+		if (name_space && strcmp(i->name_space, name_space))
+			continue;
+
+		if (!strcmp(key, i->key))
+			break;
 	}
 
 	if (terminal(i))
 		return NULL;
+
+	GP_DEBUG(1, "Found key '%s' in [%s]", i->key, i->name_space);
 
 	return i;
 }
@@ -215,6 +220,7 @@ static int parse_namespace(struct parser_state *state)
 			return 1;
 		case ']':
 			state->name_space[len] = '\0';
+			GP_DEBUG(1, "In namespace [%s]", state->name_space);
 			return 0;
 		default:
 			state->name_space[len++] = c;
@@ -226,9 +232,6 @@ static int parse_namespace(struct parser_state *state)
 		break;
 		}
 	}
-
-
-	GP_DEBUG(1, "In namespace '%s'", state->name_space);
 }
 
 static int read_key(struct parser_state *state)
@@ -245,6 +248,8 @@ static int read_key(struct parser_state *state)
 		case EOF:
 		case ' ':
 		case '\t':
+		case '=':
+			ungetc(c, state->f);
 			state->buf[len] = '\0';
 			GP_DEBUG(1, "Have key '%s'", state->buf);
 			return 0;
@@ -352,7 +357,7 @@ static int parse_cfg(struct parser_state *state)
 
 		switch (c) {
 		case EOF:
-			GP_DEBUG(1, "End of config reached at %u",
+			GP_DEBUG(1, "End of config reached at line %u",
 			         state->lineno);
 			return 0;
 		case '\n':
