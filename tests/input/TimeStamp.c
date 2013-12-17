@@ -27,6 +27,7 @@
  */
 
 #include <stdlib.h>
+#include <unistd.h>
 #include <input/GP_TimeStamp.h>
 
 #include "tst_test.h"
@@ -35,8 +36,10 @@
 
 static int time_stamp_monotonicity(void)
 {
-	uint64_t ts = 0, nts;
+	uint64_t ts = 0, nts, fts;
 	int i, fail = 0;
+
+	fts = GP_GetTimeStamp();
 
 	for (i = 0; i < MAX; i++) {
 		nts = GP_GetTimeStamp();
@@ -46,7 +49,10 @@ static int time_stamp_monotonicity(void)
 			        (long long unsigned) ts);
 			fail++;
 		}
+		usleep(10);
 	}
+
+	tst_msg("Difference %llu", (long long unsigned)(nts - fts));
 
 	if (fail)
 		return TST_FAILED;
