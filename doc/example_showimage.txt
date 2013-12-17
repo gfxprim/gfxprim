@@ -1,0 +1,8 @@
+Showimage
+---------
+A simple example that loads an image and shows it in X11 window.
+
+[source,c]
+------------------------------------------------------------------
+include::../demos/c_simple/showimage.c[]
+------------------------------------------------------------------
