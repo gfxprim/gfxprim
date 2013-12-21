@@ -459,6 +459,10 @@ static int prepare_png_header(const GP_Context *src, png_structp png,
 		color_type = PNG_COLOR_TYPE_GRAY;
 	break;
 #endif
+	case GP_PIXEL_RGBA8888:
+		bit_depth = 8;
+		color_type =  PNG_COLOR_TYPE_RGB | PNG_COLOR_MASK_ALPHA;
+	break;
 	default:
 		return 1;
 	break;
@@ -481,6 +485,10 @@ static int prepare_png_header(const GP_Context *src, png_structp png,
 	switch (src->pixel_type) {
 	case GP_PIXEL_RGB888:
 		png_set_bgr(png);
+	break;
+	case GP_PIXEL_RGBA8888:
+		png_set_bgr(png);
+		png_set_swap_alpha(png);
 	break;
 	case GP_PIXEL_G1:
 	case GP_PIXEL_G2:
