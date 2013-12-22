@@ -752,6 +752,12 @@ int main(int argc, char *argv[])
 	params.sleep_ms = 1000 * config.slideshow_delay + 0.5;
 
 	if (opts >= argc) {
+
+		if (!strcmp(config.backend_init, "help")) {
+			init_backend(config.backend_init);
+			return 0;
+		}
+
 		fprintf(stderr, "Requires path to at least one image\n\n");
 		print_help();
 		return 1;
