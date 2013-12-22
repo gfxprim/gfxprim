@@ -235,6 +235,9 @@ void *realloc(void *optr, size_t size)
 	if (!real_realloc)
 		real_realloc = dlsym(RTLD_NEXT, "realloc");
 
+	if (!optr)
+		return malloc(size);
+
 	switch (malloc_canary) {
 	case MALLOC_CANARY_OFF:
 		ptr = real_realloc(optr, size);
