@@ -20,10 +20,12 @@
  *                                                                           *
  *****************************************************************************/
 
+#define _GNU_SOURCE
 #include <stdio.h>
 #include <sys/mman.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <dlfcn.h>
 
 #include "tst_malloc_canaries.h"
 
@@ -32,6 +34,9 @@ void *tst_malloc_canary_right(size_t size)
 	size_t pagesize = sysconf(_SC_PAGESIZE);
 	size_t pages = size/pagesize + !!(size%pagesize) + 1;
 	char *buf;
+
+	if (size == 0)
+		return NULL;
 
 	if (posix_memalign((void*)&buf, pagesize, pages * pagesize))
 		return NULL;
@@ -47,27 +52,37 @@ void *tst_malloc_canary_right(size_t size)
 		return NULL;
 	}
 
-	return buf + (pagesize - size%pagesize);
+	if (size%pagesize)
+		return buf + (pagesize - size%pagesize);
+
+	return buf;
 }
+
+static void (*real_free)(void *) = NULL;
 
 void tst_free_canary_right(void *ptr, size_t size)
 {
 	size_t pagesize = sysconf(_SC_PAGESIZE);
 	size_t pages = size/pagesize + !!(size%pagesize);
-	void *start = (char*)ptr - (pagesize - size%pagesize);
+	void *start = size%pagesize ? (char*)ptr - (pagesize - size%pagesize) : ptr;
 
 	/* Reset the memory protection back to RW */
-	if (mprotect(start + pagesize * pages, pagesize, PROT_READ | PROT_WRITE)) {
+	if (mprotect(start + pagesize * pages, pagesize, PROT_READ | PROT_WRITE))
 		perror("mprotect");
-	}
 
-	free(start);
+	if (!real_free)
+		real_free = dlsym(RTLD_NEXT, "free");
+
+	real_free(start);
 }
 
 void *tst_malloc_canary_left(size_t size)
 {
 	size_t pagesize = sysconf(_SC_PAGESIZE);
 	size_t pages = size/pagesize + !!(size%pagesize) + 1;
+
+	if (size == 0)
+		return NULL;
 
 	char *buf;
 
@@ -94,8 +109,12 @@ void tst_free_canary_left(void *ptr, size_t size __attribute__((unused)))
 
 	/* Reset the memory protection back to RW */
 	if (mprotect(start, pagesize, PROT_READ | PROT_WRITE)) {
+		printf("%p size %zu\n", ptr, size);
 		perror("mprotect");
 	}
 
-	free(start);
+	if (!real_free)
+		real_free = dlsym(RTLD_NEXT, "free");
+
+	real_free(start);
 }
