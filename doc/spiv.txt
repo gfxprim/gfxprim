@@ -1,13 +1,9 @@
 spiv
 ----
-
-'spiv' - Simple yet Powerful Image Viewer.
+.Simple yet Powerful Image Viewer.
 
 Spiv is a fast, lightweight and minimalistic image viewer build on the top of
 the GFXprim library.
-
-Spiv is optimized for keyboard control and although you can use your mouse for
-some of the actions, everything could be done from the keyboard as well.
 
 Spiv supports wide range of image formats, currently supported are JPEG, PNG,
 GIF, BMP, TIFF, PSP, PPM, JP2 and CBZ (as well general ZIP archives with
@@ -29,3 +25,6 @@ printf-like modifiers. The modifiers are substituted to current image path,
 name, etc. and executed by pressing function keys).
 
 See 'spiv(1)' man page for more information.
+
+.Spiv running in X11
+image::images/spiv/spiv_tux.png[Spiv in X11]
