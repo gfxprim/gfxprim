@@ -18,6 +18,7 @@ be changed at compile time to support colors with more than 10 bits per
 channel. The 'GP_Pixel' is thus used as opaque value big enough to hold any
 supported pixel value.
 
+[[Color]]
 Color
 ~~~~~
 

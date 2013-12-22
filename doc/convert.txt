@@ -1,0 +1,39 @@
+Pixel Conversions
+-----------------
+
+This page describes RGB tripplet to pixels conversions.
+
+See also link:basic_types.html#Color[colors].
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <GP.h>
+/* or */
+#include <core/GP_Convert.h>
+
+GP_Pixel GP_RGBToPixel(uint8_t r, uint8_t g, uint8_t b, GP_PixelType type);
+
+GP_Pixel GP_RGBAToPixel(uint8_t r, uint8_t g, uint8_t b, uint8_t a,
+                        GP_PixelType type);
+
+GP_Pixel GP_RGBToContextPixel(uint8_t r, uint8_t g, uint8_t b,
+                              const GP_Context *context);
+
+GP_Pixel GP_RGBAToContextPixel(uint8_t r, uint8_t g, uint8_t b, uint8_t a,
+                               const GP_Context *context);
+-------------------------------------------------------------------------------
+
+Simple functions to convert RGB or RGBA 8 bit values into the specific
+link:pixels.html[pixel types].
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <GP.h>
+/* or */
+#include <core/GP_Convert.h>
+
+GP_Pixel GP_ConvertPixel(GP_Pixel pixel, GP_PixelType from, GP_PixelType to);
+-------------------------------------------------------------------------------
+
+Converts pixel value. The conversion currently converts by converting the
+value to RGBA8888 and then to the resulting value.

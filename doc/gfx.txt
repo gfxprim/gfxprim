@@ -6,6 +6,8 @@ as lines, circles, etc.
 
 You may want to see the link:coordinate_system.html[coordinate system] first.
 
+See also RGB tripplet to pixel link:convert.html[conversions].
+
 Rotation Flags
 ~~~~~~~~~~~~~~
 
