@@ -28,322 +28,322 @@
 #include "GP_Backends.h"
 #include "GP_BackendInit.h"
 
-static void backend_sdl_help(FILE *help, const char *err)
+static char *next_param(char *params)
 {
-	if (help == NULL)
-		return;
-
-	if (err != NULL)
-		fprintf(help, "ERROR: %s\n", err);
-
-	fprintf(help, "libSDL backend\n"
-	              "--------------\n"
-	              "SDL:[FS]:[8]:[16]:[24]:[32]:[WxH]\n"
-		      " FS  - Full Screen mode\n"
-		      " 8   - Sets 8bpp\n"
-		      " 16  - Sets 16bpp\n"
-		      " 24  - Sets 24bpp\n"
-		      " 32   - Sets 32bpp\n"
-		      " WxH - Display Size\n");
-}
-
-static int sdl_params_to_flags(const char *param, GP_Size *w, GP_Size *h,
-                               GP_Size *bpp, uint8_t *flags, FILE *help)
-{
-	if (!strcasecmp(param, "FS")) {
-		*flags |= GP_SDL_FULLSCREEN;
-		return 0;
-	}
-
-	if (!strcmp(param, "8")) {
-		*bpp = 8;
-		return 0;
-	}
-
-	if (!strcmp(param, "16")) {
-		*bpp = 16;
-		return 0;
-	}
-
-	if (!strcmp(param, "24")) {
-		*bpp = 24;
-		return 0;
-	}
-
-	if (!strcmp(param, "32")) {
-		*bpp = 32;
-		return 0;
-	}
-
-	/*
-	 * Accepts only string with format "intxint" or "intXint"
-	 */
-	int sw, sh;
-	unsigned int n;
-
-	if (sscanf(param, "%i%*[xX]%i%n", &sw, &sh, &n) == 2 && n == strlen(param)) {
-		*w = sw;
-		*h = sh;
-		return 0;
-	}
-
-	backend_sdl_help(help, "SDL: Invalid parameters");
-	errno = EINVAL;
-	return 1;
-}
-
-static GP_Backend *backend_sdl_init(char *params, const char *caption,
-                                    FILE *help)
-{
-	if (params == NULL)
-		return GP_BackendSDLInit(0, 0, 0, 0, caption);
-
-	GP_Size w = 0, h = 0, bpp = 0;
-	uint8_t flags = GP_SDL_RESIZABLE;
-
-	char *s = params;
-
 	for (;;) {
-		switch (*s) {
+		switch (*params) {
 		case ':':
-			(*s) = '\0';
-			if (sdl_params_to_flags(params, &w, &h, &bpp, &flags, help))
-				return NULL;
-			s++;
-			params = s;
+			*params = '\0';
+			return params + 1;
 		break;
 		case '\0':
-			if (sdl_params_to_flags(params, &w, &h, &bpp, &flags, help))
-				return NULL;
-
-			return GP_BackendSDLInit(w, h, bpp, flags, caption);
+			return NULL;
 		break;
 		}
-		s++;
+		params++;
 	}
 }
 
-static void backend_fb_help(FILE *help, const char *err)
+static int parse_x11_params(char *params, GP_Size *w, GP_Size *h,
+                            enum GP_BackendX11Flags *flags)
 {
-	if (help == NULL)
-		return;
+	char *param;
 
-	if (err != NULL)
-		fprintf(help, "ERROR: %s\n", err);
+	if (!params)
+		return 0;
 
-	fprintf(help, "LinuxFB backend\n"
-	              "--------------\n"
-	              "FB:NO_SHADOW:USE_CON:[/dev/fbX]\n");
+	do {
+		param = params;
+		params = next_param(params);
+
+		if (!strcasecmp(param, "use_root")) {
+			*flags |= GP_X11_USE_ROOT_WIN;
+			GP_DEBUG(1, "X11: Using root window");
+			continue;
+		}
+
+		if (!strcasecmp(param, "create_root")) {
+			*flags |= GP_X11_CREATE_ROOT_WIN;
+			GP_DEBUG(1, "X11: Creating root window");
+			continue;
+		}
+
+		if (!strcasecmp(param, "disable_shm")) {
+			*flags |= GP_X11_DISABLE_SHM;
+			GP_DEBUG(1, "X11: Disabling SHM");
+			continue;
+		}
+
+		if (!strcasecmp(param, "fs")) {
+			*flags |= GP_X11_FULLSCREEN;
+			GP_DEBUG(1, "X11: Enabling fullscreen");
+			continue;
+		}
+
+		/*
+		 * Accepts only string with format "intxint" or "intXint"
+		 */
+		int sw, sh;
+		unsigned int n;
+
+		if (sscanf(param, "%i%*[xX]%i%n", &sw, &sh, &n) == 2 && n == strlen(param)) {
+			*w = sw;
+			*h = sh;
+			continue;
+		}
+
+		GP_WARN("X11: Invalid parameters '%s'", param);
+		errno = EINVAL;
+		return 1;
+	} while (params);
+
+	return 0;
 }
 
-static GP_Backend *backend_fb_init(char *params, const char *caption,
-                                   FILE *help)
-{
-	const char *fb = "/dev/fb0";
-
-	(void) help;
-	(void) caption;
-
-	if (params != NULL)
-		fb = params;
-
-	return GP_BackendLinuxFBInit(fb, 3);
-}
-
-static void backend_x11_help(FILE *help, const char *err)
-{
-	if (help == NULL)
-		return;
-
-	if (err != NULL)
-		fprintf(help, "ERROR: %s\n", err);
-
-	fprintf(help, "X11 backend\n"
-	              "--------------\n"
-	              "X11:[WxH]:[ROOT_WIN]:[CREATE_ROOT]\n\n"
-		      "ROOT_WIN    - starts the backend in the root window\n"
-		      "              (w and h, if set, are ignored)\n"
-		      "CREATE_ROOT - starts the backend in newly created\n"
-		      "              root window (w and h, if set, are ignored)\n"
-		      "DISABLE_SHM - disable MIT SHM even if available\n"
-		      "FS          - start fullscreen\n");
-
-}
-
-static int x11_params_to_flags(const char *param, GP_Size *w, GP_Size *h,
-                               enum GP_BackendX11Flags *flags, FILE *help)
-{
-	if (!strcasecmp(param, "ROOT_WIN")) {
-		*flags |= GP_X11_USE_ROOT_WIN;
-		return 0;
-	}
-
-	if (!strcasecmp(param, "CREATE_ROOT")) {
-		*flags |= GP_X11_CREATE_ROOT_WIN;
-		return 0;
-	}
-
-	if (!strcasecmp(param, "DISABLE_SHM")) {
-		*flags |= GP_X11_DISABLE_SHM;
-		return 0;
-	}
-
-	if (!strcasecmp(param, "FS")) {
-		*flags |= GP_X11_FULLSCREEN;
-		return 0;
-	}
-
-	/*
-	 * Accepts only string with format "intxint" or "intXint"
-	 */
-	int sw, sh;
-	unsigned int n;
-
-	if (sscanf(param, "%i%*[xX]%i%n", &sw, &sh, &n) == 2 && n == strlen(param)) {
-		*w = sw;
-		*h = sh;
-		return 0;
-	}
-
-	backend_x11_help(help, "X11: Invalid parameters");
-	errno = EINVAL;
-	return 1;
-}
-
-
-static GP_Backend *backend_x11_init(char *params, const char *caption,
-                                    FILE *help)
+static GP_Backend *x11_init(char *params, const char *caption)
 {
 	GP_Size w = 640, h = 480;
 	enum GP_BackendX11Flags flags = 0;
 
-	if (params == NULL)
-		return GP_BackendX11Init(NULL, 0, 0, w, h, caption, 0);
+	if (parse_x11_params(params, &w, &h, &flags))
+		return NULL;
 
-	char *s = params;
+	return GP_BackendX11Init(NULL, 0, 0, w, h, caption, flags);
+}
 
-	for (;;) {
-		switch (*s) {
-		case ':':
-			(*s) = '\0';
-			if (x11_params_to_flags(params, &w, &h, &flags, help))
-				return NULL;
-			s++;
-			params = s;
-		break;
-		case '\0':
-			if (x11_params_to_flags(params, &w, &h, &flags, help))
-				return NULL;
+static int parse_sdl_params(char *params, GP_Size *w, GP_Size *h,
+                            GP_Size *bpp, uint8_t *flags)
+{
+	char *param;
 
-			return GP_BackendX11Init(NULL, 0, 0, w, h, caption, flags);
-		break;
+	if (!params)
+		return 0;
+
+	do {
+		param = params;
+		params = next_param(params);
+
+		if (!strcasecmp(param, "FS")) {
+			*flags |= GP_SDL_FULLSCREEN;
+			GP_DEBUG(1, "SDL fullscreen enabled");
+			continue;
 		}
-		s++;
-	}
+
+		if (!strcmp(param, "8")) {
+			*bpp = 8;
+			GP_DEBUG(1, "SDL depth set to 8");
+			continue;
+		}
+
+		if (!strcmp(param, "16")) {
+			*bpp = 16;
+			GP_DEBUG(1, "SDL depth set to 16");
+			continue;
+		}
+
+		if (!strcmp(param, "24")) {
+			*bpp = 24;
+			GP_DEBUG(1, "SDL depth set to 24");
+			continue;
+		}
+
+		if (!strcmp(param, "32")) {
+			*bpp = 32;
+			GP_DEBUG(1, "SDL depth set to 32");
+			continue;
+		}
+
+		/*
+		 * Accepts only string with format "intxint" or "intXint"
+		 */
+		int sw, sh;
+		unsigned int n;
+
+		if (sscanf(param, "%i%*[xX]%i%n", &sw, &sh, &n) == 2 && n == strlen(param)) {
+			*w = sw;
+			*h = sh;
+			continue;
+		}
+
+		GP_WARN("SDL: Invalid parameters '%s'", param);
+		errno = EINVAL;
+		return 1;
+	} while (params);
+
+	return 0;
 }
 
-static void backend_aa_help(FILE *help, const char *err)
+static GP_Backend *sdl_init(char *params, const char *caption)
 {
-	if (help == NULL)
-		return;
+	GP_Size w = 0, h = 0, bpp = 0;
+	uint8_t flags = GP_SDL_RESIZABLE;
 
-	if (err != NULL)
-		fprintf(help, "ERROR: %s\n", err);
+	if (parse_sdl_params(params, &w, &h, &bpp, &flags))
+		return NULL;
 
-	fprintf(help, "AALib backend\n"
-	              "--------------\n"
-	              "AA\n");
+	return GP_BackendSDLInit(w, h, bpp, flags, caption);
 }
 
-static GP_Backend *backend_aa_init(char *params, const char *caption,
-                                   FILE *help)
+static int parse_fb_params(char *params, int *flags, const char **fb)
 {
-	(void) help;
+	char *param;
+
+	if (!params)
+		return 0;
+
+	do {
+		param = params;
+		params = next_param(params);
+
+		if (!strcasecmp(param, "no_shadow")) {
+			*flags &= ~GP_FB_SHADOW;
+			GP_DEBUG(1, "Shadow framebuffer disabled");
+			continue;
+		}
+
+		if (!strcasecmp(param, "new_console")) {
+			*flags |= GP_FB_ALLOC_CON;
+			GP_DEBUG(1, "Console allocation enabled");
+			continue;
+		}
+
+		*fb = param;
+
+		if (strncmp(*fb, "/dev/", 5))
+			GP_WARN("Console dev set to '%s', are you sure?", *fb);
+
+		GP_DEBUG(1, "Framebuffer console set to '%s'", *fb);
+
+	} while (params);
+
+	return 0;
+}
+
+static GP_Backend *fb_init(char *params, const char *caption)
+{
+	const char *fb = "/dev/fb0";
+
+	(void) caption;
+
+	int flags = GP_FB_INPUT_KBD | GP_FB_SHADOW;
+
+	parse_fb_params(params, &flags, &fb);
+
+	return GP_BackendLinuxFBInit(fb, flags);
+}
+
+static GP_Backend *aa_init(char *params, const char *caption)
+{
 	(void) caption;
 	(void) params;
 
 	return GP_BackendAALibInit();
 }
 
-
-static const char *backend_names[] = {
-	"SDL", /* libSDL            */
-	"FB",  /* Linux Framebuffer */
-	"X11", /* X11 window system */
-	"AA",  /* AALib */
-	NULL,
+struct backend_init {
+	const char *name;
+	GP_Backend *(*init)(char *params, const char *caption);
+	const char *usage;
+	const char *help[10];
 };
 
-static GP_Backend *(*backend_inits[])(char *, const char *, FILE *) = {
-	backend_sdl_init,
-	backend_fb_init,
-	backend_x11_init,
-	backend_aa_init,
-	NULL,
+static GP_Backend *do_help(char *params, const char *caption);
+
+static struct backend_init backends[] = {
+	{.name  = "X11",
+	 .init  = x11_init,
+	 .usage = "X11:[WxH]:[use_root]:[create_root]:[disable_shm]",
+	 .help  = {"use_root    - starts the backend in the root window",
+	           "              (w and h, if set, are ignored)",
+	           "create_root - starts the backend in newly created",
+	           "              root window (w and h, if set, are ignored)",
+	           "disable_shm - disable MIT SHM even if available",
+	           "fs          - start fullscreen",
+	           NULL}
+	},
+	{.name  = "SDL",
+	 .init  = sdl_init,
+	 .usage = "SDL:[fs]:[8]:[16]:[24]:[32]:[WxH]",
+	 .help  = {"fs  - Full Screen mode",
+	           "8   - Sets 8bpp",
+	           "16  - Sets 16bpp",
+	           "24  - Sets 24bpp",
+	           "32  - Sets 32bpp",
+	           "WxH - Display Size",
+	           NULL}
+	},
+	{.name  = "FB",
+	 .init  = fb_init,
+	 .usage = "fb:[no_shadow]:[new_console]:[/dev/fbX]",
+	 .help  = {"no_shadow   - turns off shadow buffer",
+	           "new_console - allocate new console",
+	           NULL}
+	},
+	{.name  = "AA",
+	 .init  = aa_init,
+	 .usage = "AA",
+	 .help  = {NULL}
+	},
+	{.name = "help",
+	 .init = do_help
+	},
+	{.name = NULL}
 };
 
-static void (*backend_helps[])(FILE *help, const char *err) = {
-	backend_sdl_help,
-	backend_fb_help,
-	backend_x11_help,
-	backend_aa_help,
-	NULL,
-};
-
-static void print_help(FILE *help, char *err)
+static GP_Backend *do_help(char *params, const char *caption)
 {
-	int i;
+	struct backend_init *i;
+	unsigned int j;
 
-	if (help == NULL)
-		return;
+	(void) params;
+	(void) caption;
 
-	if (err != NULL) {
-		fprintf(help, "ERROR: %s\n", err);
-		fprintf(help, "\n");
+	for (i = backends; (i+1)->name; i++) {
+		fprintf(stderr, "Backend %s\n\n %s\n\n",
+		        i->name, i->usage);
+		if (i->help[0]) {
+			for (j = 0; i->help[j]; j++)
+				fprintf(stderr, " %s\n", i->help[j]);
+			fprintf(stderr, "\n");
+		}
 	}
 
-	fprintf(help, "Backends usage\n"
-	              "--------------\n\n");
-
-	for (i = 0; backend_helps[i] != NULL; i++) {
-		backend_helps[i](help, NULL);
-		fprintf(help, "\n");
-	}
+	return NULL;
 }
 
-static int get_backend(const char *name)
+static struct backend_init *get_backend(const char *name)
 {
-	int i;
+	struct backend_init *i;
 
-	for (i = 0; backend_names[i] != 0; i++)
-		if (!strcasecmp(name, backend_names[i]))
+	for (i = backends; i->name; i++) {
+		if (!strcasecmp(name, i->name))
 			return i;
+	}
 
-	return -1;
+	return NULL;
 }
 
 static GP_Backend *init_backend(const char *name, char *params,
-                                const char *caption, FILE *help)
+                                const char *caption)
 {
-	int i = get_backend(name);
+	struct backend_init *init = get_backend(name);
 	GP_Backend *ret;
 
-	if (i < 0) {
-		GP_DEBUG(1, "Invalid backend name '%s'", name);
-		print_help(help, "Invalid backend name");
+	if (!init) {
+		GP_WARN("Invalid backend name '%s'", name);
 		errno = EINVAL;
 		return NULL;
 	}
 
-	ret = backend_inits[i](params, caption, help);
+	ret = init->init(params, caption);
 
 	return ret;
 }
 
-GP_Backend *GP_BackendInit(const char *params, const char *caption, FILE *help)
+GP_Backend *GP_BackendInit(const char *params, const char *caption)
 {
 	if (params == NULL) {
-		print_help(help, NULL);
+		do_help(NULL, NULL);
 		return NULL;
 	}
 
@@ -363,5 +363,5 @@ GP_Backend *GP_BackendInit(const char *params, const char *caption, FILE *help)
 
 	GP_DEBUG(1, "Have backend name '%s' params '%s'", buf, backend_params);
 
-	return init_backend(buf, backend_params, caption, help);
+	return init_backend(buf, backend_params, caption);
 }

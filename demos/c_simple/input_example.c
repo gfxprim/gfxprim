@@ -131,7 +131,7 @@ int main(int argc, char *argv[])
 			backend_opts = optarg;
 		break;
 		case 'h':
-			GP_BackendInit(NULL, NULL, stderr);
+			GP_BackendInit("help", NULL);
 			return 0;
 		break;
 		default:
@@ -140,7 +140,7 @@ int main(int argc, char *argv[])
 		}
 	}
 
-	backend = GP_BackendInit(backend_opts, "Input Test", stderr);
+	backend = GP_BackendInit(backend_opts, "Input Test");
 
 	if (backend == NULL) {
 		fprintf(stderr, "Failed to initalize backend '%s'\n",

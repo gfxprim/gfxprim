@@ -161,7 +161,7 @@ int main(void)
 		return 1;
 	}
 
-	win = GP_BackendInit(backend_opts, "Blit Test", stderr);
+	win = GP_BackendInit(backend_opts, "Blit Test");
 
 	if (win == NULL) {
 		fprintf(stderr, "Failed to initalize backend '%s'\n",

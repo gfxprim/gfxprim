@@ -16,7 +16,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2013 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
@@ -38,7 +38,7 @@
  *
  * "backend_name:backend_params"
  *
- * For example "SDL:FS" is string for fullscreen SDL backend.
+ * For example "SDL:fs" is string for fullscreen SDL backend.
  *
  * The caption parameter may, or may not be used. For example in windowed
  * enviroment caption will become caption of a window. When running on
@@ -46,9 +46,8 @@
  *
  * Returns initalized backend or NULL in case of failure.
  *
- * If initialization has failed or params is NULL and help is not NULL, help
- * text is printed to a given file.
+ * If help is passed as a backend name a help is printed into the stderr.
  */
-GP_Backend *GP_BackendInit(const char *params, const char *caption, FILE *help);
+GP_Backend *GP_BackendInit(const char *params, const char *caption);
 
 #endif /* BACKENDS_GP_BACKEND_INIT_H */

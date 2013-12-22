@@ -638,7 +638,7 @@ static void sighandler(int signo)
 
 static void init_backend(const char *backend_opts)
 {
-	backend = GP_BackendInit(backend_opts, "Spiv", stderr);
+	backend = GP_BackendInit(backend_opts, "Spiv");
 
 	if (backend == NULL) {
 		fprintf(stderr, "Failed to initalize backend '%s'\n", backend_opts);

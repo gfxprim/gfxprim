@@ -142,7 +142,7 @@ int main(int argc, char *argv[])
 
 	print_instructions();
 
-	win = GP_BackendInit(backend_opts, "Font Align Test", stderr);
+	win = GP_BackendInit(backend_opts, "Font Align Test");
 
 	if (win == NULL) {
 		fprintf(stderr, "Failed to initalize backend '%s'\n",

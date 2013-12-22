@@ -54,7 +54,7 @@ int main(void)
 	GP_Backend *backend;
 	const char *backend_opts = "X11:100x100";
 
-	backend = GP_BackendInit(backend_opts, "Backend Timers Example", stderr);
+	backend = GP_BackendInit(backend_opts, "Backend Timers Example");
 
 	if (backend == NULL) {
 		fprintf(stderr, "Failed to initialize backend\n");

@@ -271,7 +271,7 @@ int main(int argc, char *argv[])
 		font = GP_FontFaceLoad(argv[1], 0, font_h);
 	}
 
-	win = GP_BackendInit(backend_opts, "Font Test", stderr);
+	win = GP_BackendInit(backend_opts, "Font Test");
 
 	if (win == NULL) {
 		fprintf(stderr, "Failed to initalize backend '%s'\n",

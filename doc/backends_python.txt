@@ -57,7 +57,7 @@ import gfxprim.backends as backends
     backend_string = "X11:100x100"
 
     # Initialize backend by init string
-    bk = backends.BackendInit(backend_string, "Window title", stderr)
+    bk = backends.BackendInit(backend_string, "Window title")
 
     # Assert that inicialization was successful
     assert(bk)
@@ -82,7 +82,7 @@ import gfxprim.gfx as gfx
 import gfxprim.backends as backends
 
     # Initialize backend
-    bk = backends.BackendInit("X11:100x100", "Window title", stderr)
+    bk = backends.BackendInit("X11:100x100", "Window title")
 
     # Assert that inicialization was successful
     assert(bk)
@@ -109,7 +109,7 @@ import gfxprim.backends as backends
 
 
     # Initialize backend
-    bk = backends.BackendInit("X11:100x100", "Window title", stderr)
+    bk = backends.BackendInit("X11:100x100", "Window title")
 
     # Assert that inicialization was successful
     assert(bk)

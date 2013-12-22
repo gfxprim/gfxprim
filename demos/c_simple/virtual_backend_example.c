@@ -54,7 +54,7 @@ int main(int argc, char *argv[])
                         }
 		break;
 		case 'h':
-			GP_BackendInit(NULL, NULL, stderr);
+			GP_BackendInit("help", NULL);
 			return 0;
 		break;
 		default:
@@ -66,7 +66,7 @@ int main(int argc, char *argv[])
 	/* Turn on debug messages */
 	GP_SetDebugLevel(10);
 
-	backend = GP_BackendInit(backend_opts, "Virtual Backend Example", stderr);
+	backend = GP_BackendInit(backend_opts, "Virtual Backend Example");
 
 	if (emul_type != GP_PIXEL_UNKNOWN) {
 		GP_Backend *emul;

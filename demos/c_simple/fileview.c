@@ -253,7 +253,7 @@ int main(int argc, char *argv[])
 	if (!read_file_head(argv[1]))
 		return 1;
 
-	backend = GP_BackendInit(backend_opts, "File View", stderr);
+	backend = GP_BackendInit(backend_opts, "File View");
 
 	if (backend == NULL) {
 		fprintf(stderr, "Failed to initalize backend '%s'\n",

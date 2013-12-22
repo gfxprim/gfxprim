@@ -260,7 +260,7 @@ int main(void)
 {
 	const char *backend_opts = "X11";
 
-	win = GP_BackendInit(backend_opts, "Random Shape Test", stderr);
+	win = GP_BackendInit(backend_opts, "Random Shape Test");
 
 	if (win == NULL) {
 		fprintf(stderr, "Failed to initalize backend '%s'\n",

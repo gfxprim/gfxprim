@@ -491,7 +491,7 @@ int main(int argc, char *argv[])
 		}
 	}
 
-	backend = GP_BackendInit(backend_opts, "Shapetest", stderr);
+	backend = GP_BackendInit(backend_opts, "Shapetest");
 
 	if (backend == NULL) {
 		fprintf(stderr, "Failed to initalize backend '%s'\n",

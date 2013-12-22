@@ -56,7 +56,7 @@ int main(int argc, char *argv[])
 			backend_opts = optarg;
 		break;
 		case 'h':
-			GP_BackendInit(NULL, NULL, stderr);
+			GP_BackendInit(NULL, NULL);
 			return 0;
 		break;
 		default:
@@ -68,7 +68,7 @@ int main(int argc, char *argv[])
 	/* Turn on debug messages */
 	GP_SetDebugLevel(10);
 
-	backend = GP_BackendInit(backend_opts, "Backend Example", stderr);
+	backend = GP_BackendInit(backend_opts, "Backend Example");
 
 	if (backend == NULL) {
 		fprintf(stderr, "Failed to initialize backend\n");

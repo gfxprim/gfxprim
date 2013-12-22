@@ -206,19 +206,22 @@ it.
 -------------------------------------------------------------------------------
 #include <GP.h>
 
-GP_Backend *GP_BackendInit(const char *params, const char *caption, FILE *help);
+GP_Backend *GP_BackendInit(const char *params, const char *caption);
 -------------------------------------------------------------------------------
 
-This function takes a params string as an parameter which is used for
-determining backend-dependent parameters. The format is
-'backend_name:backend_parameters' where backend parameters may be window size
-(either 'WxH' or 'FS' in case of 'SDL' backend). The caption is window caption
-(which is ignored in some of the cases) and the 'FILE' is file, where an error
-is printed in case of failure, you should mostly use 'stderr' for that
-purpose. If params is set to 'NULL' the the call only prints help into the
-passed help 'FILE'. If initialization was successful pointer to allocated and
-initialized backend is returned otherwise 'NULL' is returned and some helpful
-information should be printed into the passed help 'FILE'.
+The 'params' string composes of backend name and backend dependend parameters.
+The format is 'backend_name:backend_params' for example
+'fb:new_console:/dev/fb1'.
+
+The 'caption' string is used for window caption, in case of X11 backend or may
+be ignored completly in case of framebuffer backend.
+
+If 'params' is set to '"help"' help for all backends is printed into the
+'stderr'.
+
+If initialization was successful pointer to allocated and initialized backend
+is returned otherwise 'NULL' is returned and some helpful information should
+be printed into the 'stderr'.
 
 
 General Backend API

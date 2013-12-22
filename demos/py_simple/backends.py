@@ -32,7 +32,7 @@ def main():
         sys.exit(1)
 
     # Create backend window
-    bk = backends.BackendInit(backend_string, "Backend Example", sys.stderr)
+    bk = backends.BackendInit(backend_string, "Backend Example")
     assert(bk)
 
     redraw(bk)

@@ -95,9 +95,9 @@ static const struct examples examples[] = {
 	 "Copies currently loaded image into directory 'sorted/' on pressing F1"},
 	{"spiv -e G1 -d images/",
 	 "Emulates 1-bit Grayscale display and turns on Floyd-Steinberg dithering"},
-	{"spiv -b 'X11:ROOT_WIN' -t 10 images/",
+	{"spiv -b 'X11:use_root' -t 10 images/",
 	 "Runs slideshow using X root window as backend window"},
-	{"spiv -b 'X11:CREATE_ROOT' -t 10 images/",
+	{"spiv -b 'X11:create_root' -t 10 images/",
 	 "Same as abowe but works in KDE\n"}
 };
 

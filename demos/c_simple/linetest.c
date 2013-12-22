@@ -127,7 +127,7 @@ int main(int argc, char *argv[])
 		}
 	}
 
-	win = GP_BackendInit(backend_opts, "Line Test", stderr);
+	win = GP_BackendInit(backend_opts, "Line Test");
 
 	if (win == NULL) {
 		fprintf(stderr, "Failed to initalize backend '%s'\n",
