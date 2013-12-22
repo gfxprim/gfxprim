@@ -106,13 +106,16 @@ def run_tests(resdir, testsdir):
                 run_test(curresdir, path, runtest)
 
 def main():
-    now = datetime.datetime.now() 
+    now = datetime.datetime.now()
     resdir = '%s_%i-%02i-%02i_%02i-%02i-%02i' % (results_dir, now.year, now.month,
                                        now.day, now.hour, now.minute, now.second)
     print('Creating result directory "%s"' % resdir)
     os.mkdir(resdir)
 
     run_tests(resdir, tests_dir)
+    os.system('cd framework && ./res2html.sh "../%s"' % resdir)
+
+    print('\nPoint your browser to "%s/index.html"\n' % resdir)
 
 if __name__ == '__main__':
     main()

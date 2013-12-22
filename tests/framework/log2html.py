@@ -54,7 +54,7 @@ class MallocStats:
         print('    <td bgcolor="#ffffcc" colspan="3">')
         print('     <center>')
         print('      <table>')
-        
+
         # Table header
         print('       <tr>')
 
@@ -300,13 +300,11 @@ class TestSuite:
         if (test_ok < test_all):
             bg_color = html_colors['Failed']
         else:
-            bg_color = '#ccccee'
-
-            
+            bg_color = html_colors['Success']
 
         print('     <td bgcolor="#ccccee">%s</td>' % (self.suite_name))
         print('     <td bgcolor="%s">%i</td>' % (bg_color, test_all - test_ok))
-        
+
         test_skipped = res_dict['Skipped']
 
         if (test_skipped > 0):
