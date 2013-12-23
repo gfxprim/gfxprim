@@ -8,21 +8,21 @@ WARN="WARNING : WARNING : WARNING : WARNING : WARNING : WARNING : WARNING : WARN
 
 SYMTMPFILE=symbols.txt
 
-function grep_sym
+grep_sym()
 {
 	if objdump --syms "$1" |grep "$2" 2>&1 > /dev/null; then
 		echo -e "\t$1"
 	fi
 }
 
-function find_symbol
+find_symbol()
 {
 	echo "SYM $1:"
 
 	find ../libs/ -name '*.o' | while read obj; do grep_sym "$obj" "$1"; done
 }
 
-function get_symbols
+get_symbols()
 {
 	objdump --dynamic-syms "$1" | awk 'NR > 4 { print }' | awk '$3 != "*UND*"' | awk '{print $NF}'  > "$2"
 
@@ -34,7 +34,7 @@ function get_symbols
 	sed -i '/^_.*$/d' "$2"
 }
 
-function check_symbols
+check_symbols()
 {
 	local symfile=$1
 	shift
@@ -53,7 +53,7 @@ function check_symbols
 	done
 }
 
-function do_check
+do_check()
 {
 	get_symbols "$1" $SYMTMPFILE
 	shift
