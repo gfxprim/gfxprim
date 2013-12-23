@@ -1,0 +1,6 @@
+gfxprim (1.0.0-rc0-1) unstable; urgency=low
+
+  * Initial release (based on the commit 38c6f4, not including
+    the Python bindings)
+
+ -- Petr Baudis <pasky@ucw.cz>  Mon, 23 Dec 2013 02:11:26 +0100

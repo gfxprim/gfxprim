@@ -1,0 +1,2 @@
+?package(spiv):needs="X11|vc|wm" section="Applications/Graphics"\
+  title="spiv (GFXPrim image viewer)" command="/usr/bin/spiv"

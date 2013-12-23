@@ -1,0 +1,5 @@
+gfxprim for Debian
+------------------
+
+We currently do not package the Python bindings, this remains a TODO
+as I don't know anything about Python packaging in Debian yet. -- pasky

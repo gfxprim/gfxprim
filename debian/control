@@ -1,0 +1,55 @@
+Source: gfxprim
+Priority: extra
+Maintainer: Petr Baudis <pasky@ucw.cz>
+Build-Depends: debhelper (>= 8.0.0), python-jinja2, libjpeg-dev, libpng-dev, libgif-dev,
+               libtiff-dev, libfreetype6-dev, libx11-dev, libxext-dev,
+               asciidoc, source-highlight, dvipng
+Standards-Version: 3.9.3
+Section: libs
+Homepage: http://gfxprim.ucw.cz/
+
+Package: libgfxprim-doc
+Section: doc
+Architecture: all
+Depends: ${misc:Depends}
+Description: Open-source modular 2D bitmap graphics library
+ GFXprim is open-source modular 2D bitmap graphics library with
+ emphasis on speed and correctness.
+ .
+ This package contains the documentation.
+
+Package: libgfxprim-dev
+Section: libdevel
+Architecture: any
+Depends: libgfxprim1 (= ${binary:Version})
+Description: Open-source modular 2D bitmap graphics library
+ GFXprim is open-source modular 2D bitmap graphics library with
+ emphasis on speed and correctness.
+ .
+ This package contains the header and development files which are
+ needed for building gfxprim applications.
+
+Package: libgfxprim1
+Section: libs
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Suggests: spiv
+Description: Open-source modular 2D bitmap graphics library
+ GFXprim is open-source modular 2D bitmap graphics library with
+ emphasis on speed and correctness.
+ .
+ This package contains the shared libraries.
+
+Package: spiv
+Section: graphics
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}, libgfxprim1 (= ${binary:Version})
+Description: Simple yet Powerful Image Viewer
+ Spiv is a fast, lightweight and minimalistic image viewer build
+ on the top of the GFXprim library.
+ .
+ Spiv supports wide range of image formats, implements image caches,
+ can also crawl a directory, supports variety of video backends, and
+ implements feh-like image actions, which are short shell scripts with
+ printf-like modifiers.
+ 
