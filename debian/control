@@ -3,7 +3,7 @@ Priority: extra
 Maintainer: Petr Baudis <pasky@ucw.cz>
 Build-Depends: debhelper (>= 8.0.0), python-jinja2, libjpeg-dev, libpng-dev, libgif-dev,
                libtiff-dev, libfreetype6-dev, libx11-dev, libxext-dev,
-               asciidoc, source-highlight, dvipng
+               asciidoc, source-highlight, dvipng, graphviz
 Standards-Version: 3.9.3
 Section: libs
 Homepage: http://gfxprim.ucw.cz/
