@@ -1,0 +1,322 @@
+.TH spiv 1 2013 GFXprim "Simple yet Powerful Image Viewer"
+
+.SH NAME
+spiv \- Simple yet Powerful Image Viewer
+.SH SYNOPSIS
+.B spiv
+[options] images|dirs
+.SH DESCRIPTION
+.B spiv
+is a fast, lightweight and minimalistic image viewer build on the
+top of the GFXprim library.
+.PP
+Spiv supports wide range of image formats, currently supported are
+JPEG, PNG, GIF, BMP, TIFF, PSP, PPM, JP2 and CBZ (as well general
+ZIP archives with images), and more will come in the near future.
+.PP
+Spiv supports variety of video backends (via GFXprim backends)
+currently these are X11, Linux Framebuffer, SDL and AAlib. Spiv also
+supports wide range of backend pixel types from 1bit Grayscale to 32bit RGB
+with optional Floyd-Steinberg dithering (even, for example, from RGB888 to RGB565).
+.PP
+Spiv implements feh-like image actions, which are short shell scripts with
+printf-like modifiers.
+See
+.B ACTIONS
+bellow for further information.
+
+.SH KEYBOARD CONTROL
+.IP "Esc, Enter, Q"
+Quit spiv
+.IP "Space"
+Move to the next image
+.IP "BackSpace"
+Move to the prev image
+.IP "PgDown"
+Move to the start of directory
+.IP "PgUp"
+Move to the end of directory
+.IP "Home"
+Move to the first image
+.IP "End"
+Move to the last image
+.IP "R"
+Rotate by 90 degrees clockwise
+.IP "E"
+Rotate by 90 degrees counterclockwise
+.IP "W"
+Toggle fixed, resizable window
+.IP "D"
+Turn on/off downscale when image is larger than win
+.IP "U"
+Turn on/off upscale when image is smaller than win
+.IP "H"
+Show help
+.IP "I"
+Toggle show info box
+.IP "P"
+Toggle show progress
+.IP "S"
+Start/stop slideshow
+.IP "F1-F10"
+Execute action 1 - 10
+.IP "<, KP Minus"
+Zoom out by 50% (by 10% with Shift)
+.IP ">, KP Plus"
+Zoom in by 50% (by 10% with Shift)
+.IP "1"
+Resize to the image size
+.IP "2"
+Resize to a half of the image size
+.IP "3"
+Resize to one third of the image size
+.IP "9"
+Resize to one ninth of the image size
+.IP "0"
+Resize to one tenth of the image size
+.IP "Shift 2"
+Resize twice of the image size
+.IP "Shift 3"
+Resize three times of the image size
+.IP "Up"
+Move image by 10px up (by 1 with Shift)
+.IP "Down"
+Move image by 10px down (by 1 with Shift)
+.IP "Left"
+Move image by 10px left (by 1 with Shift)
+.IP "Right"
+Move image by 10px right (by 1 with Shift)
+.IP "]"
+Change to next resampling method
+.IP "["
+Change to prev resampling method
+.IP "L"
+Toggle low pass filter
+.IP "C"
+Drop image cache
+.SH OPTIONS
+.TP
+.B  \-h, \-\-help
+Shows this help
+.TP
+.I Gui
+.TP
+.B  \-i, \-\-show\-info
+Show image info such as filename, size, etc...
+.TP
+.B  \-p, \-\-show\-progress
+Show progress bar when loading/resampling/... images
+.TP
+.B  \-s=value, \-\-slideshow\-delay=value
+Delay between images in seconds (float) for slideshow
+.TP
+.B  \-d, \-\-dithering
+Turn on Floyd\-Steinberg dithering
+.TP
+.B  \-o=value, \-\-orientation=value
+Orientation, one of 0, 90, 180, 270
+.TP
+.B  \-f, \-\-full\-screen
+Start fullscreen.
+.TP
+.B  \-b=value, \-\-backend\-init=value
+Backend init string, set it to 'help' for more info
+.TP
+.I Zoom
+.TP
+.B  \-w=value, \-\-window\-size=value
+Window size, resizeable (\-wr) or fixed (\-wf)
+.TP
+.B  \-z=value, \-\-zoom\-strategy=value
+Zoom strategy, none (\-zn), upscale (\-zu), downscale (\-zd) or both (\-zb)
+.TP
+.B  \-m=value, \-\-max\-win\-size=value
+Window maximal size, 800x600 for example
+.TP
+.I Actions
+.TP
+.B  \-1=value, \-\-action\-1=value
+.TP
+.B  \-2=value, \-\-action\-2=value
+.TP
+.B  \-3=value, \-\-action\-3=value
+.TP
+.B  \-4=value, \-\-action\-4=value
+.TP
+.B  \-5=value, \-\-action\-5=value
+.TP
+.B  \-6=value, \-\-action\-6=value
+.TP
+.B  \-7=value, \-\-action\-7=value
+.TP
+.B  \-8=value, \-\-action\-8=value
+.TP
+.B  \-9=value, \-\-action\-9=value
+.TP
+.B  \-0=value, \-\-action\-10=value
+Sets command line for action 1\-10
+.TP
+.I Devel
+.TP
+.B  \-t, \-\-timers
+Turns on cpu and wall clock measurement (printed to stdout)
+.TP
+.B  \-e=value, \-\-backend\-emulation=value
+Emulate different backend pixel type (G1, G2, RGB555, ...)
+.TP
+.B  \-\-print\-man
+Prints spiv man page to stdout
+.SH CONFIGURATION FILE
+Configuraton file has simple key = value syntax, keys without values are written just as key.
+Lines started with # are comments.
+Keys are grouped in namespaces, namespace block is started
+by [NameSpace] and continues until next namespace.
+.TP
+.I [Gui]
+.TP
+.B ShowInfo
+Show image info such as filename, size, etc...
+.TP
+.B ShowProgress
+Show progress bar when loading/resampling/... images
+.TP
+.B SlideshowDelay=value
+Delay between images in seconds (float) for slideshow
+.TP
+.B Dithering
+Turn on Floyd-Steinberg dithering
+.TP
+.B Orientation=value
+Orientation, one of 0, 90, 180, 270
+.TP
+.B FullScreen
+Start fullscreen.
+.TP
+.B BackendInit=value
+Backend init string, set it to 'help' for more info
+.TP
+.I [Zoom]
+.TP
+.B WindowSize=value
+Window size, resizeable (-wr) or fixed (-wf)
+.TP
+.B ZoomStrategy=value
+Zoom strategy, none (-zn), upscale (-zu), downscale (-zd) or both (-zb)
+.TP
+.B MaxWinSize=value
+Window maximal size, 800x600 for example
+.TP
+.I [Actions]
+.TP
+.B 1=value
+.TP
+.B 2=value
+.TP
+.B 3=value
+.TP
+.B 4=value
+.TP
+.B 5=value
+.TP
+.B 6=value
+.TP
+.B 7=value
+.TP
+.B 8=value
+.TP
+.B 9=value
+.TP
+.B 10=value
+Sets command line for action 1-10
+.TP
+.I [Devel]
+.TP
+.B Timers
+Turns on cpu and wall clock measurement (printed to stdout)
+.TP
+.B BackendEmulation=value
+Emulate different backend pixel type (G1, G2, RGB555, ...)
+.PP
+Configuration is loaded from /etc/spiv.conf
+then ~/.spiv and overriden by command line parameters.
+
+.SH ACTIONS
+Actions are short shell scripts with printf-like modifiers, the 
+modifiers are substituted to current image path, name, etc. and executed
+by pressing function keys).
+.PP
+Actions could be set via command line parameters or written into the
+configuration file and support following modifiers:
+
+.PP
+.B %f
+Path to current image
+.PP
+.B %F
+Shell escaped path to current image
+.PP
+.B %n
+Current image filename without extension
+.PP
+.B %N
+Shell escaped image filename without extension
+.PP
+.B %e
+Current image file extension
+.SH EXAMPLES
+.PP
+.B Shows all jpeg images in current directory
+.nf
+spiv *.jpg
+
+.PP
+.B Shows all images stored in zip file
+.nf
+spiv images.zip
+
+.PP
+.B Shows all loadable images in current directory
+.nf
+spiv .
+
+.PP
+.B Runs slideshow with 5 second delay
+.nf
+spiv -s 5 vacation/
+
+.PP
+.B Copies currently loaded image into directory 'sorted/' on pressing F1
+.nf
+spiv -1 'cp %F sorted' images/
+
+.PP
+.B Emulates 1-bit Grayscale display and turns on Floyd-Steinberg dithering
+.nf
+spiv -e G1 -d images/
+
+.PP
+.B Runs slideshow using X root window as backend window
+.nf
+spiv -b 'X11:use_root' -t 10 images/
+
+.PP
+.B Same as abowe but works in KDE
+
+.nf
+spiv -b 'X11:create_root' -t 10 images/
+
+.SH BUGS
+Bugs happen. If you find one, report it on the GFXprim mailing list at
+.I gfxprim@ucw.cz
+.SH AUTHORS
+Spiv is developed by Cyril Hrubis <chrubis@ucw.cz>
+.PP
+GFXprim was/is developed by:
+.PP
+.nf
+Cyril Hrubis <chrubis@ucw.cz>
+.nf
+Jiri "BlueBear" Dluhos <jiri.bluebear.dluhos@gmail.com>
+.nf
+Tomas Gavenciak <gavento@ucw.cz>
+
