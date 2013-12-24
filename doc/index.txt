@@ -40,8 +40,22 @@ https://github.com/gfxprim/gfxprim/issues[issue tracker].
 News
 ----
 
-The GFXprim version 1.0.0-rc0 has been released!
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+The GFXprim 1.0.0-rc1 has been released!
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+See what is link:news_1_0_0-rc1.html[new].
+
+Download the
+http://gfxprim.ucw.cz/releases/gfxprim_1.0.0-rc1.tar.bz2[1.0.0-rc1] tarball (without docs).
+
+Get rpm packages (for RedHat and SUSE) from
+https://build.opensuse.org/package/show/home:metan/gfxprim[buildservice].
+
+Or download prebuild Debian
+http://gfxprim.ucw.cz/packages/debian/wheezy/[amd64 Wheezy packages].
+
+The GFXprim 1.0.0-rc1 has been released!
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Download
 http://gfxprim.ucw.cz/releases/gfxprim_1.0.0-rc0.tar.bz2[1.0.0-rc0] tarball (without docs).

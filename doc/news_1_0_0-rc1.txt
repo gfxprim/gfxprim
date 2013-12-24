@@ -1,0 +1,74 @@
+News for 1.0.0-rc1
+------------------
+
+General changes
+~~~~~~~~~~~~~~~
+
+* 333 patches since 1.0.0-rc0
+* Plenty of bugfixes
+* New pages and nearly finished documentation
+* More automatic testcases
+* Initial debian packaging
+  (thanks to Petr Baudis)
+
+Core
+~~~~
+
+* Added support for CMYK and 16 bit Grayscale bitmaps
+
+Loaders
+~~~~~~~
+
+* LineConvert was written for automatic conversions of pixel types
+  with exacly same channels but different orgaization
+ (such as between RGB888, BGR888 and xRGB888).
+* BMP loader gained support for less common formats such as RGB555, RLE8
+* PNM loaders were rewritten from scratch
+* PNG loader gained support for 16 bit Grayscale
+
+New loaders
+^^^^^^^^^^^
+* TIFF loader and saver
+* JPEG 2000 loader
+* CBZ loader (more general ZIP container)
+
+Filters
+~~~~~~~
+
+* Most of the filters are now templatized and build for all configured pixel
+types.
+* Point filters were reimplemented to be simpler, more generic and faster.
+
+Backends
+~~~~~~~~
+
+* Backends now support link:backends.html#Timers[timers]
+* X11 and SDL video backends are now thread safe and deadlock free (hopefully)
+* Linux framebuffer backend was improved
+* Basic AALib backend was written (which is not much usefull but it brings
+  warm memories).
+
+Python bindings
+~~~~~~~~~~~~~~~
+
+* Python bindings were updated and polished
+* Python arrays are converted to C arrays before passing to filters
+  (for example when passed as a convolution kernel)
+* All functions with callback parameter can now pass
+  link:core_python.html#Progress_Callback[python function]
+  as a callback
+* Documentation and examples were greatly improved
+
+spiv
+~~~~
+
+The image viewer build on the top of the library has became full featured
+application. The user interface is still a bit clunky (you can help to make it
+better too) but apart from that it's fast and stable now.
+
+Among other things following was added:
+
+- feh like actions
+- a man page
+- different zoom and window modes
+- configuration file

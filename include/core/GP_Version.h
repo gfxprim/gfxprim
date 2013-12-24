@@ -38,6 +38,6 @@
 
 #define GP_VER_STR GP_STRX(GP_VER_MAJOR) "." \
                    GP_STRX(GP_VER_MINOR) "." \
-                   GP_STRX(GP_VER_MICRO) "-rc0"
+                   GP_STRX(GP_VER_MICRO) "-rc1"
 
 #endif /* CORE_GP_VERSION_H */
