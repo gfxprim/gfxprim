@@ -26,6 +26,7 @@
 
   */
 
+#include <stdio.h>
 #include <GP.h>
 
 static void redraw(struct GP_Context *context)

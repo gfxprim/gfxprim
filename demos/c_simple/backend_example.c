@@ -26,6 +26,7 @@
 
   */
 
+#include <stdio.h>
 #include <GP.h>
 
 static void redraw(GP_Backend *self)
@@ -64,9 +65,6 @@ int main(int argc, char *argv[])
 			return 1;
 		}
 	}
-
-	/* Turn on debug messages */
-	GP_SetDebugLevel(10);
 
 	backend = GP_BackendInit(backend_opts, "Backend Example");
 

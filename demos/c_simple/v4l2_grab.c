@@ -28,6 +28,7 @@
 
 #include <string.h>
 #include <errno.h>
+#include <stdio.h>
 
 #include <GP.h>
 

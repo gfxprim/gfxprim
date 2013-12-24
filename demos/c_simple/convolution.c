@@ -76,22 +76,21 @@ int main(int argc, char *argv[])
 
 	printf("\n");
 
-	float box_kernel[] = {
-		0.0, 0.1, 1.0, 0.1, 0.0,
-		0.1, 0.5, 1.0, 0.5, 0.1,
-		1.0, 1.0, 1.0, 1.0, 1.0,
-		0.1, 0.5, 1.0, 0.5, 0.1,
-		0.0, 0.1, 1.0, 0.1, 0.0,
-	};
 
 	GP_FilterKernel2D box = {
 		.w = 5,
 		.h = 5,
 		.div = 11.8,
-		.kernel = box_kernel,
+		.kernel = (float[]) {
+			0.0, 0.1, 1.0, 0.1, 0.0,
+			0.1, 0.5, 1.0, 0.5, 0.1,
+			1.0, 1.0, 1.0, 1.0, 1.0,
+			0.1, 0.5, 1.0, 0.5, 0.1,
+			0.0, 0.1, 1.0, 0.1, 0.0,
+		}
 	};
 
-	priv.op = "Box Linear Convolution";
+	priv.op = "Linear Convolution";
 
 	/*
 	 * Blur in-place, inner rectangle of the image.

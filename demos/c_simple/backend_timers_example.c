@@ -26,6 +26,7 @@
 
   */
 
+#include <stdio.h>
 #include <GP.h>
 
 static void redraw(GP_Backend *self)

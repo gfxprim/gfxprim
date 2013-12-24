@@ -19,7 +19,7 @@
  * Copyright (C) 2009-2010 Jiri "BlueBear" Dluhos                            *
  *                         <jiri.bluebear.dluhos@gmail.com>                  *
  *                                                                           *
- * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2013 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
@@ -48,6 +48,9 @@ void redraw_screen(void)
 	SDL_LockSurface(display);
 
 	GP_Fill(&context, black_pixel);
+
+	GP_Text(&context, NULL, W/2, 20, GP_ALIGN_CENTER | GP_VALIGN_BELOW,
+	        darkgray_pixel, black_pixel, "GFXprim SDL Demo");
 
 	GP_Line(&context, 0, 0, W-1, H-1, darkgray_pixel);
 	GP_Line(&context, 0, H-1, W-1, 0, darkgray_pixel);
@@ -93,7 +96,8 @@ int main(void)
 
 	if (display == NULL) {
 		fprintf(stderr, "Could not open display: %s\n", SDL_GetError());
-		goto fail;
+		SDL_Quit();
+		return 1;
 	}
 
 	GP_ContextFromSDLSurface(&context, display);
@@ -108,9 +112,5 @@ int main(void)
 
 	SDL_Quit();
 	return 0;
-
-fail:
-	SDL_Quit();
-	return 1;
 }
 

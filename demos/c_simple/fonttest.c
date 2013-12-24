@@ -263,8 +263,6 @@ int main(int argc, char *argv[])
 
 	print_instructions();
 
-	GP_SetDebugLevel(10);
-
 	if (argc > 1) {
 		font_path = argv[1];
 		fprintf(stderr, "\nLoading font '%s'\n", argv[1]);

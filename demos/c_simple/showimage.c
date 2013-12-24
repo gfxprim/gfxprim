@@ -37,8 +37,6 @@ int main(int argc, char *argv[])
 	GP_Backend *backend;
 	GP_Context *image;
 
-	GP_SetDebugLevel(10);
-
 	if (argc != 2) {
 		fprintf(stderr, "Takes image as an argument\n");
 		return 1;
@@ -47,7 +45,7 @@ int main(int argc, char *argv[])
 	/* Load image */
 	image = GP_LoadImage(argv[1], NULL);
 
-	if (image == NULL) {
+	if (!image) {
 		fprintf(stderr, "Failed to load bitmap: %s\n", strerror(errno));
 		return 1;
 	}
@@ -55,7 +53,7 @@ int main(int argc, char *argv[])
 	/* Initalize backend */
 	backend = GP_BackendX11Init(NULL, 0, 0, image->w, image->h, argv[1], 0);
 
-	if (backend == NULL) {
+	if (!backend) {
 		fprintf(stderr, "Failed to initalize backend\n");
 		return 1;
 	}

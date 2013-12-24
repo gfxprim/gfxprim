@@ -26,6 +26,7 @@
 
  */
 
+#include <stdio.h>
 #include <GP.h>
 
 static char level_to_c(int level)
