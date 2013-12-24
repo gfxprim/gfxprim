@@ -6,7 +6,7 @@ TOPDIR=../
 include $(TOPDIR)/config.mk
 include $(TOPDIR)/libver.mk
 
-LIB_NAME=libGP
+LIB_NAME=libgfxprim
 
 STATIC_LIB=$(LIB_NAME).$(LIB_VERSION).a
 DYNAMIC_LIB=$(LIB_NAME).so.$(LIB_VERSION).$(LIB_RELEASE)

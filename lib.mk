@@ -1,6 +1,6 @@
 #
 # Most of the libraries just generate object files that
-# are later linked in build into the libGP.so
+# are later linked in build into the libgfxprim.so
 #
 ifndef LIBNAME
 $(error LIBNAME not defined, fix your library Makefile)
@@ -9,12 +9,12 @@ endif
 ifeq ($(BUILDLIB),yes)
 #
 # Rules for single library, applied only when objects
-# are not linked to the libGP.so. This generates libGP_$(LIBNAME).
+# are not linked to the libgfxprim.so. This generates libgfxprim_$(LIBNAME).
 #
 
 include $(TOPDIR)/libver.mk
 
-LIB_NAME=libGP_$(LIBNAME)
+LIB_NAME=libgfxprim-$(LIBNAME)
 BUILD_DIR=$(TOPDIR)/build/
 
 STATIC_LIB=$(LIB_NAME).$(LIB_VERSION).a

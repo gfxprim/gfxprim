@@ -61,15 +61,15 @@ do_check()
 	rm $SYMTMPFILE
 }
 
-do_check libGP.so syms/Core_symbols.txt syms/Input_symbols.txt \
-                  syms/Filters_symbols.txt syms/GFX_symbols.txt \
-                  syms/Text_symbols.txt
+do_check libgfxprim.so syms/Core_symbols.txt syms/Input_symbols.txt \
+                       syms/Filters_symbols.txt syms/GFX_symbols.txt \
+                       syms/Text_symbols.txt
 
-do_check libGP_backends.so syms/Backend_symbols.txt
+do_check libgfxprim-backends.so syms/Backend_symbols.txt
 
-do_check libGP_grabbers.so syms/Grabbers_symbols.txt
+do_check libgfxprim-grabbers.so syms/Grabbers_symbols.txt
 
-do_check libGP_loaders.so syms/Loaders_symbols.txt
+do_check libgfxprim-loaders.so syms/Loaders_symbols.txt
 
 if [ -n "$FOUND" ]; then
 	echo

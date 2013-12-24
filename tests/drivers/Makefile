@@ -2,7 +2,7 @@ TOPDIR=../..
 
 CSOURCES=$(shell echo *.c)
 
-LDLIBS+=-lGP -lGP_backends -L$(TOPDIR)/build/
+LDLIBS+=-lgfxprim -lgfxprim-backends -L$(TOPDIR)/build/
 
 APPS=$(CSOURCES:.c=)
 
