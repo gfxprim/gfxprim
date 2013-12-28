@@ -99,6 +99,12 @@ def _init(module):
     See GP_ContextConvertAlloc() for details."""
     return c_core.GP_ContextConvertAlloc(self, pixeltype_no(target_type))
 
+  @extend(_context)
+  def ToByteArray(self):
+    """Returns new Python ByteArray created from context pixels. The
+       array size is exactly context.bytes_per_row * context.h"""
+    return c_core.GP_ContextToByteArray(self)
+
   # Manipulation
 
   extend_direct(_context, "PutPixel", c_core.GP_PutPixel,

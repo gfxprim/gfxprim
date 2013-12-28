@@ -70,6 +70,13 @@ const GP_PixelTypeDescription *GP_PixelTypes_access(GP_PixelType no)
 %rename("_%s") "GP_Context::bit_endian";
 %rename("_%s") "GP_Context::free_pixels";
 
+%inline %{
+PyObject *GP_ContextToByteArray(GP_Context *self)
+{
+        return PyByteArray_FromStringAndSize((char*)self->pixels,
+                                             self->bytes_per_row * self->h);
+}
+%}
 
 %feature("autodoc", "Proxy of C GP_Context struct
 
