@@ -1,0 +1,190 @@
+IO Interface
+------------
+
+GFXprim implements an I/O interface which is used by all image loaders.
+
+The purpose of the interface is:
+
+* Make it easy to load and save images from/into memory buffers
+* Fast and clean containers (ZIP for example) implementation
+  (zlib deflate could feed data directly into a memory based IO stream)
+
+The I/O interface is defined by a structure with callbacks.
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <loaders/GP_IO.h>
+/* or */
+#include <GP.h>
+
+/*
+ * Values are 1:1 with constants passed to lseek()
+ */
+enum GP_IOWhence {
+        GP_IO_SEEK_SET = 0,
+        GP_IO_SEEK_CUR = 1,
+        GP_IO_SEEK_END = 2,
+};
+
+
+typedef struct GP_IO {
+        ssize_t (*Read)(struct GP_IO *self, void *buf, size_t size);
+        ssize_t (*Write)(struct GP_IO *self, void *buf, size_t size);
+        off_t (*Seek)(struct GP_IO *self, off_t off, enum GP_IOWhence whence);
+        int (*Close)(struct GP_IO *self);
+
+        off_t mark;
+        char priv[];
+} GP_IO;
+-------------------------------------------------------------------------------
+
+The fields of the I/O stream structure are mostly self describing. The 'Seek'
+behaves exactly as 'lseek(2)', the 'Read' as 'read(2)' and the 'Write' as
+'write(2)'.
+
+The 'mark' and 'priv' are private fields that shall not be touched by user.
+
+An IO reader must implement at least 'Read', 'Seek' (at least able to seek
+forward to skip some data) and 'Close'.
+
+An IO writer must implement at least 'Write' and 'Close'.
+
+Return value from the 'Seek' is a value of current offset in the stream (after
+the seek has been done) or in case of failure '(off_t)-1'.
+
+Return value from 'Read' or 'Write' is a number of bytes read/written or in
+case of failure a negative number (-1).
+
+Return value from 'Close' is zero on success and non-zero on IO failure.
+
+NOTE: Make sure 'errno' is set if any of the operations has failed.
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <loaders/GP_IO.h>
+/* or */
+#include <GP.h>
+
+ssize_t GP_IORead(GP_IO *io, void *buf, size_t size);
+-------------------------------------------------------------------------------
+
+This is a wrapper to 'io->Read()'.
+
+Reads at most 'size' bytes from an 'IO' stream and stores them into the
+buffer. Returns number of bytes read.
+
+On failure the return value is negative and 'errno' is set.
+
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <loaders/GP_IO.h>
+/* or */
+#include <GP.h>
+
+ssize_t GP_IOWrite(GP_IO *io, void *buf, size_t size);
+-------------------------------------------------------------------------------
+
+This is a wrapper to 'io->Write()'.
+
+Writes at most 'size' bytes from an 'IO' stream and stores them into the
+buffer. Returns number of bytes read.
+
+On failure the return value is negative and 'errno' is set.
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <loaders/GP_IO.h>
+/* or */
+#include <GP.h>
+
+int GP_IOClose(GP_IO *io);
+-------------------------------------------------------------------------------
+
+This is a wrapper to 'io->Close()'.
+
+Finalizes reading/writing, closes file descriptors (in case of file IO), frees
+memory buffers.
+
+Returns zero on success, non-zero on IO failure and 'errno' is set.
+
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <loaders/GP_IO.h>
+/* or */
+#include <GP.h>
+
+off_t GP_IOSeek(GP_IO *io, off_t off, enum GP_IOWhence whence);
+-------------------------------------------------------------------------------
+
+This is a wrapper to 'io->Seek()'.
+
+//TODO
+
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <loaders/GP_IO.h>
+/* or */
+#include <GP.h>
+
+off_t GP_IOTell(GP_IO *io);
+-------------------------------------------------------------------------------
+
+Wrapper to 'GP_IOSeek()', returns current position in IO stream.
+
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <loaders/GP_IO.h>
+/* or */
+#include <GP.h>
+
+off_t GP_IORewind(GP_IO *io)
+-------------------------------------------------------------------------------
+
+Wrapper to 'GP_IOSeek()', rewinds to the start of the IO stream.
+
+Returns zero on success, non-zero on failure and 'errno' is set.
+
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <loaders/GP_IO.h>
+/* or */
+#include <GP.h>
+
+GP_IO *GP_IOMem(void *buf, size_t size, void (*free)(void *));
+-------------------------------------------------------------------------------
+
+Creates an read-only IO from a memory buffer.
+
+Returns initialized IO or in case of failure 'NULL' and 'errno' is set.
+
+The 'buf' is pointer to the start of the buffer, the 'size' is size in bytes.
+
+The 'free()' callback if not 'NULL' is called with the start of the buffer as
+an argument on 'IOClose()'.
+
+TIP: See link:example_memory_io.html[memory IO example].
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <loaders/GP_IO.h>
+/* or */
+#include <GP.h>
+
+enum GP_IOFileMode {
+        GP_IO_RDONLY = 0x00,
+        GP_IO_WRONLY = 0x01,
+        GP_IO_RDWR = 0x02,
+};
+
+GP_IO *GP_IOFile(const char *path, enum GP_IOFileMode mode);
+-------------------------------------------------------------------------------
+
+Creates an IO stream from a file.
+
+Returns a pointer to initialized IO stream, or in case of failure 'NULL' and
+'errno' is set.

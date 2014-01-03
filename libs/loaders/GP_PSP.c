@@ -16,7 +16,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2014 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
@@ -42,17 +42,6 @@
 #include "GP_JPG.h"
 #include "GP_PSP.h"
 
-#define BUF_TO_8(buf, off) \
-	(buf[off] + (buf[off+1]<<8) + (buf[off+2]<<16) + (buf[off+3]<<24) + \
-	 ((uint64_t)buf[off+4]<<32) + ((uint64_t)buf[off+5]<<40) + \
-	 ((uint64_t)buf[off+6]<<48) + ((uint64_t)buf[off+7]<<56))
-
-#define BUF_TO_4(buf, off) \
-	(buf[off] + (buf[off+1]<<8) + (buf[off+2]<<16) + (buf[off+3]<<24))
-
-#define BUF_TO_2(buf, off) \
-	(buf[off] + (buf[off+1]<<8))
-
 #define PSP_SIGNATURE "Paint Shop Pro Image File\n\x1a\0\0\0\0\0\0\0\0"
 #define PSP_SIGNATURE_LEN 32
 
@@ -64,49 +53,6 @@ struct psp_version {
 int GP_MatchPSP(const void *buf)
 {
 	return !memcmp(buf, PSP_SIGNATURE, PSP_SIGNATURE_LEN);
-}
-
-int GP_OpenPSP(const char *src_path, FILE **f)
-{
-	int err;
-
-	*f = fopen(src_path, "rb");
-
-	if (*f == NULL) {
-		err = errno;
-		GP_DEBUG(1, "Failed to open '%s' : %s",
-		            src_path, strerror(errno));
-		goto err2;
-	}
-
-	char buf[36];
-
-	if (fread(buf, sizeof(buf), 1, *f) < 1) {
-		GP_DEBUG(1, "Failed to read file header");
-		err = EIO;
-		goto err1;
-	}
-
-	if (memcmp(buf, PSP_SIGNATURE, PSP_SIGNATURE_LEN)) { 
-		GP_DEBUG(1, "Invalid signature, not a PSP image?");
-		err = EINVAL;
-		goto err1;
-	}
-
-	struct psp_version version;
-
-	version.major = BUF_TO_2(buf, 32);
-	version.minor = BUF_TO_2(buf, 34);
-
-	GP_DEBUG(1, "Have PSP image version %u.%u",
-	         version.major, version.minor);
-
-	return 0;
-err1:
-	fclose(*f);
-err2:
-	errno = err;
-	return 1;
 }
 
 enum psp_block_id {
@@ -229,39 +175,45 @@ struct psp_img_attrs {
 	GP_Context *img;
 };
 
-static int psp_read_general_img_attr_chunk(FILE *f,
+static int psp_read_general_img_attr_chunk(GP_IO *io,
                                            struct psp_img_attrs *attrs)
 {
-	uint8_t buf[38];
+	int err;
 
 	if (attrs->is_loaded) {
 		GP_WARN("Found Second Image Block");
 		return EINVAL;
 	}
 
-	//TODO SHIFT!!!
-	if (fread(buf, 4, 1, f) < 1) {
-		GP_DEBUG(1, "Failed to read Image block header");
-		return EIO;
-	}
+	uint16_t general_image_info[] = {
+		GP_IO_I4,   /* ??? */
+		GP_IO_L4,   /* width */
+		GP_IO_L4,   /* height */
+		GP_IO_ARRAY | 8, /* resolution FIXME: double */
+		GP_IO_BYTE, /* resolution metric */
+		GP_IO_L2,   /* compression type */
+		GP_IO_L2,   /* bit depth */
+		GP_IO_L2,   /* plane count */
+		GP_IO_L2,   /* color count */
+		GP_IO_BYTE, /* grayscale flag */
+		GP_IO_L4,   /* total image size */
+		GP_IO_I2,   /* ??? */
+		GP_IO_L4,   /* active layer */
+		GP_IO_L2,   /* layer count */
+		GP_IO_END
+	};
 
-	if (fread(buf, sizeof(buf), 1, f) < 1) {
-		GP_DEBUG(1, "Failed to read Image chunk data");
-		return EIO;
+	if (GP_IOReadF(io, general_image_info, &attrs->w, &attrs->h,
+	               &attrs->res, &attrs->res_metric, &attrs->comp_type,
+		       &attrs->bit_depth, &attrs->plane_count,
+		       &attrs->color_count, &attrs->grayscale_flag,
+		       &attrs->total_img_size, &attrs->active_layer,
+		       &attrs->layer_count) != 14) {
+		err = errno;
+		GP_DEBUG(1, "Failed to read Image attributes: %s",
+		         strerror(errno));
+		return err;
 	}
-
-	attrs->w = BUF_TO_4(buf, 0);
-	attrs->h = BUF_TO_4(buf, 4);
-	attrs->res = BUF_TO_8(buf, 8);
-	attrs->res_metric = buf[16];
-	attrs->comp_type = BUF_TO_2(buf, 17);
-	attrs->bit_depth = BUF_TO_2(buf, 19);
-	attrs->plane_count = BUF_TO_2(buf, 21);
-	attrs->color_count = BUF_TO_2(buf, 23);
-	attrs->grayscale_flag = buf[25];
-	attrs->total_img_size = BUF_TO_4(buf, 26);
-	attrs->active_layer = BUF_TO_4(buf, 32);
-	attrs->layer_count = BUF_TO_2(buf, 36);
 
 	GP_DEBUG(3, "Image w=%u h=%u, compress=%s, bit_depth=%u, grayscale=%u",
 	         attrs->w, attrs->h, psp_comp_type_name(attrs->comp_type),
@@ -275,10 +227,10 @@ static int psp_read_general_img_attr_chunk(FILE *f,
 	return 0;
 }
 
-static int psp_next_block(FILE *f, struct psp_img_attrs *attrs,
+static int psp_next_block(GP_IO *io, struct psp_img_attrs *attrs,
                           GP_ProgressCallback *callback);
 
-static int psp_read_layer_start_block(FILE *f, struct psp_img_attrs *attrs,
+static int psp_read_layer_start_block(GP_IO *io, struct psp_img_attrs *attrs,
                                       GP_ProgressCallback *callback)
 {
 	int i;
@@ -292,18 +244,18 @@ static int psp_read_layer_start_block(FILE *f, struct psp_img_attrs *attrs,
 	attrs->subblock++;
 
 	for (i = 0; i < attrs->layer_count; i++)
-		psp_next_block(f, attrs, callback);
+		psp_next_block(io, attrs, callback);
 
 	attrs->subblock--;
 
 	return 0;
 }
 
-static int psp_read_composite_image_block(FILE *f, struct psp_img_attrs *attrs,
+static int psp_read_composite_image_block(GP_IO *io, struct psp_img_attrs *attrs,
                                           GP_ProgressCallback *callback)
 {
-	uint8_t buf[8];
 	uint32_t i, composite_image_count;
+	int err;
 
 	/* we are allready in subblock -> error */
 	if (attrs->subblock) {
@@ -311,12 +263,17 @@ static int psp_read_composite_image_block(FILE *f, struct psp_img_attrs *attrs,
 		return EINVAL;
 	}
 
-	if (fread(buf, sizeof(buf), 1, f) < 1) {
-		GP_DEBUG(1, "Failed to read Composite Image Bank Info Chunk");
-		return EIO;
-	}
+	uint16_t composite_image[] = {
+		GP_IO_I4, /* chunk size */
+		GP_IO_L4, /* composit image count */
+		GP_IO_END,
+	};
 
-	composite_image_count = BUF_TO_4(buf, 4);
+	if (GP_IOReadF(io, composite_image, &composite_image_count) != 2) {
+		err = errno;
+		GP_DEBUG(1, "Failed to read Composite Image Bank Info Chunk");
+		return err;
+	}
 
 	//TODO: utilize chunk_size
 
@@ -325,7 +282,7 @@ static int psp_read_composite_image_block(FILE *f, struct psp_img_attrs *attrs,
 	attrs->subblock++;
 
 	for (i = 0; i < composite_image_count; i++)
-		psp_next_block(f, attrs, callback);
+		psp_next_block(io, attrs, callback);
 
 	attrs->subblock--;
 
@@ -359,24 +316,32 @@ struct psp_comp_img_attr_info {
 	uint16_t comp_img_type;
 };
 
-static int psp_read_composite_attributes_block(FILE *f, struct psp_img_attrs *attrs,
+static int psp_read_composite_attributes_block(GP_IO *io, struct psp_img_attrs *attrs,
                                                GP_ProgressCallback *callback)
 {
-	uint8_t buf[24];
 	struct psp_comp_img_attr_info info;
+	int err;
 
-	if (fread(buf, sizeof(buf), 1, f) < 1) {
-		GP_DEBUG(1, "Failed to read Composite Image Bank Info Chunk");
-		return EIO;
+	uint16_t info_chunk[] = {
+		GP_IO_I4, /* chunk size */
+		GP_IO_L4, /* width */
+		GP_IO_L4, /* height */
+		GP_IO_L2, /* bit depth */
+		GP_IO_L2, /* compression type */
+		GP_IO_L2, /* plane count */
+		GP_IO_L4, /* color count */
+		GP_IO_L2, /* composite image type */
+		GP_IO_END
+	};
+
+	if (GP_IOReadF(io, info_chunk, &info.w, &info.h, &info.bit_depth,
+	               &info.comp_type, &info.plane_count, &info.color_count,
+		       &info.comp_img_type) != 8) {
+		err = errno;
+		GP_DEBUG(1, "Failed to read Composite Image Attrs Info: %s",
+		         strerror(err));
+		return err;
 	}
-
-	info.w = BUF_TO_4(buf, 4);
-	info.h = BUF_TO_4(buf, 8);
-	info.bit_depth = BUF_TO_2(buf, 12);
-	info.comp_type = BUF_TO_2(buf, 14);
-	info.plane_count = BUF_TO_2(buf, 16);
-	info.color_count = BUF_TO_4(buf, 18);
-	info.comp_img_type = BUF_TO_2(buf, 22);
 
 	GP_DEBUG(4, "Composite Image w=%u h=%u, bit_depth=%u, comp_type=%s, "
 	            "comp_img_type=%s",
@@ -387,7 +352,7 @@ static int psp_read_composite_attributes_block(FILE *f, struct psp_img_attrs *at
 	attrs->subblock++;
 
 	if (info.comp_img_type == PSP_IMAGE_COMPOSITE)
-		psp_next_block(f, attrs, callback);
+		psp_next_block(io, attrs, callback);
 
 	attrs->subblock--;
 	attrs->priv = NULL;
@@ -395,22 +360,23 @@ static int psp_read_composite_attributes_block(FILE *f, struct psp_img_attrs *at
 	return 0;
 }
 
-static int psp_read_jpeg(FILE *f, struct psp_img_attrs *attrs,
+static int psp_read_jpeg(GP_IO *io, struct psp_img_attrs *attrs,
                          GP_ProgressCallback *callback)
 {
-	uint8_t buf[14];
 	int err;
 
+	GP_IOSeek(io, 14, GP_IO_SEEK_CUR);
+/*
 	if (fread(buf, sizeof(buf), 1, f) < 1) {
 		GP_DEBUG(1, "Failed to read JPEG Information Chunk");
 		return EIO;
 	}
-
+*/
 	//TODO: utilize chunk_size
 
 	GP_DEBUG(5, "JPEG Chunk");
 
-	attrs->img = GP_ReadJPG(f, callback);
+	attrs->img = GP_ReadJPG(io, callback);
 
 	if (attrs->img == NULL) {
 		err = errno;
@@ -421,99 +387,123 @@ static int psp_read_jpeg(FILE *f, struct psp_img_attrs *attrs,
 	return 0;
 }
 
-#define GEN_IMG_HEADER_ID "~BK"
-#define GEN_IMG_HEADER_ID_LEN 4
-
-static int psp_next_block(FILE *f, struct psp_img_attrs *attrs,
+static int psp_next_block(GP_IO *io, struct psp_img_attrs *attrs,
                           GP_ProgressCallback *callback)
 {
-	uint8_t buf[10];
 	uint16_t block_id;
 	uint32_t block_size;
-	long offset;
+	off_t offset;
 	int err = 0;
 
-	if (fread(buf, sizeof(buf), 1, f) < 1) {
-		GP_DEBUG(1, "Failed to read block header");
-		return EIO;
-	}
+	uint16_t block_header[] = {
+		'~', 'B', 'K', 0x00,
+		GP_IO_L2, /* block id */
+		GP_IO_L4, /* block size */
+		GP_IO_END
+	};
 
-	if (memcmp(buf, GEN_IMG_HEADER_ID, GEN_IMG_HEADER_ID_LEN)) {
-		GP_DEBUG(1, "Invalid block header identifier");
-		return EINVAL;
+	if (GP_IOReadF(io, block_header, &block_id, &block_size) != 6) {
+		err = errno;
+		GP_DEBUG(1, "Failed to read block header: %s", strerror(errno));
+		return err;
 	}
-
-	block_id = BUF_TO_2(buf, 4);
-	block_size = BUF_TO_4(buf, 6);
 
 	GP_DEBUG(2 + attrs->subblock, "%s Block size %u",
 	         psp_block_id_name(block_id), block_size);
 
-	offset = ftell(f) + block_size;
+	offset = GP_IOTell(io) + block_size;
 
 	switch (block_id) {
 	case PSP_IMAGE_BLOCK:
-		err = psp_read_general_img_attr_chunk(f, attrs);
+		err = psp_read_general_img_attr_chunk(io, attrs);
 	break;
 	case PSP_LAYER_START_BLOCK:
-		err = psp_read_layer_start_block(f, attrs, callback);
+		err = psp_read_layer_start_block(io, attrs, callback);
 	break;
 	case PSP_COMPOSITE_IMAGE_BANK_BLOCK:
-		err = psp_read_composite_image_block(f, attrs, callback);
+		err = psp_read_composite_image_block(io, attrs, callback);
 	break;
 	case PSP_COMPOSITE_ATTRIBUTES_BLOCK:
-		err = psp_read_composite_attributes_block(f, attrs, callback);
+		err = psp_read_composite_attributes_block(io, attrs, callback);
 	break;
 	case PSP_JPEG_BLOCK:
-		err = psp_read_jpeg(f, attrs, callback);
+		err = psp_read_jpeg(io, attrs, callback);
 	break;
 	}
 
 	if (err)
 		return err;
 
-	if (fseek(f, offset, SEEK_SET) == -1) {
+	if (GP_IOSeek(io, offset, GP_IO_SEEK_SET) != offset) {
 		err = errno;
-		GP_DEBUG(1, "Failed to seek to next block");
-		return errno;
+		GP_DEBUG(1, "Failed to seek to next block; %s",
+		         strerror(errno));
+		return err;
 	}
 
 	return 0;
 }
 
-GP_Context *GP_ReadPSP(FILE *f, GP_ProgressCallback *callback)
+GP_Context *GP_ReadPSP(GP_IO *io, GP_ProgressCallback *callback)
 {
 	int err = 0;
 	struct psp_img_attrs attrs = {.is_loaded = 0, .subblock = 0,
 	                              .priv = NULL, .img = NULL};
+	struct psp_version version;
 
-	while (!err) {
-		err = psp_next_block(f, &attrs, callback);
+	uint16_t psp_header[] = {
+		'P', 'a', 'i', 'n', 't', ' ',
+		'S', 'h', 'o', 'p', ' ',
+		'P', 'r', 'o', ' ',
+		'I', 'm', 'a', 'g', 'e', ' ',
+		'F', 'i', 'l', 'e', '\n', 0x1a,
+		0x00, 0x00, 0x00, 0x00, 0x00,
+		GP_IO_L2, /* version major */
+		GP_IO_L2, /* version minor */
+		GP_IO_END
+	};
 
-		if (err)
-			goto err1;
-
-		if (attrs.img != NULL) {
-			fclose(f);
-			return attrs.img;
-		}
+	if (GP_IOReadF(io, psp_header, &version.major, &version.minor) != 34) {
+		GP_DEBUG(1, "Failed to read file header");
+		err = EIO;
+		goto err0;
 	}
 
-	fclose(f);
+	GP_DEBUG(1, "Have PSP image version %u.%u",
+	         version.major, version.minor);
+
+	while (!err) {
+		err = psp_next_block(io, &attrs, callback);
+
+		if (err)
+			goto err0;
+
+		if (attrs.img != NULL)
+			return attrs.img;
+	}
+
 	errno = ENOSYS;
 	return NULL;
-err1:
-	fclose(f);
+err0:
 	errno = err;
 	return NULL;
 }
 
 GP_Context *GP_LoadPSP(const char *src_path, GP_ProgressCallback *callback)
 {
-	FILE *f;
+	GP_IO *io;
+	GP_Context *res;
+	int err;
 
-	if (GP_OpenPSP(src_path, &f))
+	io = GP_IOFile(src_path, GP_IO_RDONLY);
+	if (!io)
 		return NULL;
 
-	return GP_ReadPSP(f, callback);
+	res = GP_ReadPSP(io, callback);
+
+	err = errno;
+	GP_IOClose(io);
+	errno = err;
+
+	return res;
 }

@@ -16,13 +16,13 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2014 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
  /*
 
-   JPG support using jpeg library.
+   JPEG support using jpeg library.
 
   */
 
@@ -31,22 +31,19 @@
 
 #include "core/GP_Context.h"
 #include "core/GP_ProgressCallback.h"
-
-#include "GP_MetaData.h"
+#include "loaders/GP_IO.h"
+#include "loaders/GP_MetaData.h"
 
 /*
- * Opens up file and checks signature.
+ * Reads a JPEG from an IO stream.
+ *
+ * Returns newly allocated context cotaining the loaded image or in case of
+ * failure NULL and errno is set.
  */
-int GP_OpenJPG(const char *src_path, FILE **f);
+GP_Context *GP_ReadJPG(GP_IO *io, GP_ProgressCallback *callback);
 
 /*
- * Reads JPG from an open FILE. Expects the file position set after the eight
- * bytes JPG signature.
- */
-GP_Context *GP_ReadJPG(FILE *f, GP_ProgressCallback *callback);
-
-/*
- * Loads a JPG file into GP_Context. The Context is newly allocated.
+ * Loads a JPEG image from a file.
  */
 GP_Context *GP_LoadJPG(const char *src_path, GP_ProgressCallback *callback);
 
@@ -57,13 +54,13 @@ int GP_ReadJPGMetaData(FILE *f, GP_MetaData *data);
 int GP_LoadJPGMetaData(const char *src_path, GP_MetaData *data);
 
 /*
- * Saves JPG to a file.
+ * Saves JPEG to a file.
  */
 int GP_SaveJPG(const GP_Context *src, const char *dst_path,
                GP_ProgressCallback *callback);
 
 /*
- * Match JPG signature.
+ * Looks for JPEG file signature. Returns non-zero if found.
  */
 int GP_MatchJPG(const void *buf);
 

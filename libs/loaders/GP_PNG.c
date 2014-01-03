@@ -16,7 +16,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2013 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2014 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
@@ -49,46 +49,6 @@ int GP_MatchPNG(const void *buf)
 	return !png_sig_cmp(buf, 0, 8);
 }
 
-int GP_OpenPNG(const char *src_path, FILE **f)
-{
-	uint8_t sig[8];
-	int err;
-
-	*f = fopen(src_path, "r");
-
-	if (*f == NULL) {
-		err = errno;
-		GP_DEBUG(1, "Failed to open '%s' : %s",
-		            src_path, strerror(errno));
-		goto err1;
-	}
-
-	if (fread(sig, 1, 8, *f) <= 0) {
-		err = EIO;
-		GP_DEBUG(1, "Failed to read '%s' : %s",
-		            src_path, strerror(errno));
-		goto err2;
-	}
-
-	if (png_sig_cmp(sig, 0, 8)) {
-		GP_DEBUG(1, "Invalid file header, '%s' not a PNG image?",
-		            src_path);
-		err = EINVAL;
-		goto err2;
-	}
-
-	GP_DEBUG(1, "Found PNG signature in '%s'", src_path);
-
-	rewind(*f);
-
-	return 0;
-err2:
-	fclose(*f);
-err1:
-	errno = err;
-	return 1;
-}
-
 static const char *interlace_type_name(int interlace)
 {
 	switch (interlace) {
@@ -101,7 +61,18 @@ static const char *interlace_type_name(int interlace)
 	}
 }
 
-GP_Context *GP_ReadPNG(FILE *f, GP_ProgressCallback *callback)
+static void read_data(png_structp png_ptr, png_bytep data, png_size_t len)
+{
+	int res;
+	GP_IO *io = png_get_io_ptr(png_ptr);
+
+	res = GP_IORead(io, data, len);
+
+	if (res < 0 || (png_size_t)res != len)
+		png_error(png_ptr, "Read Error");
+}
+
+GP_Context *GP_ReadPNG(GP_IO *io, GP_ProgressCallback *callback)
 {
 	png_structp png;
 	png_infop png_info = NULL;
@@ -135,7 +106,8 @@ GP_Context *GP_ReadPNG(FILE *f, GP_ProgressCallback *callback)
 		goto err2;
 	}
 
-	png_init_io(png, f);
+	//png_init_io(png, f);
+	png_set_read_fn(png, io, read_data);
 	png_set_sig_bytes(png, 0);
 	png_read_info(png, png_info);
 
@@ -291,15 +263,19 @@ err1:
 
 GP_Context *GP_LoadPNG(const char *src_path, GP_ProgressCallback *callback)
 {
-	FILE *f;
+	GP_IO *io;
 	GP_Context *res;
+	int err;
 
-	if (GP_OpenPNG(src_path, &f))
+	io = GP_IOFile(src_path, GP_IO_RDONLY);
+	if (!io)
 		return NULL;
 
-	res = GP_ReadPNG(f, callback);
+	res = GP_ReadPNG(io, callback);
 
-	fclose(f);
+	err = errno;
+	GP_IOClose(io);
+	errno = err;
 
 	return res;
 }
@@ -413,8 +389,8 @@ int GP_LoadPNGMetaData(const char *src_path, GP_MetaData *data)
 	FILE *f;
 	int ret;
 
-	if (GP_OpenPNG(src_path, &f))
-		return 1;
+//	if (GP_OpenPNG(src_path, &f))
+//		return 1;
 
 	ret = GP_ReadPNGMetaData(f, data);
 
@@ -636,14 +612,7 @@ int GP_MatchPNG(const void GP_UNUSED(*buf))
 	return -1;
 }
 
-int GP_OpenPNG(const char GP_UNUSED(*src_path),
-               FILE GP_UNUSED(**f))
-{
-	errno = ENOSYS;
-	return 1;
-}
-
-GP_Context *GP_ReadPNG(FILE GP_UNUSED(*f),
+GP_Context *GP_ReadPNG(GP_IO GP_UNUSED(*io),
                        GP_ProgressCallback GP_UNUSED(*callback))
 {
 	errno = ENOSYS;

@@ -16,7 +16,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2013 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2014 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
@@ -25,10 +25,13 @@
 
 #include "core/GP_Context.h"
 #include "core/GP_ProgressCallback.h"
+#include "loaders/GP_IO.h"
 
 /*
  * PBM Bitmap
  */
+GP_Context *GP_ReadPBM(GP_IO *io, GP_ProgressCallback *callback);
+
 GP_Context *GP_LoadPBM(const char *src_path, GP_ProgressCallback *callback);
 
 int GP_SavePBM(const GP_Context *src, const char *dst_path,
@@ -37,6 +40,8 @@ int GP_SavePBM(const GP_Context *src, const char *dst_path,
 /*
  * PGM Graymap
  */
+GP_Context *GP_ReadPGM(GP_IO *io, GP_ProgressCallback *callback);
+
 GP_Context *GP_LoadPGM(const char *src_path,
                        GP_ProgressCallback *callback);
 
@@ -46,6 +51,8 @@ int GP_SavePGM(const GP_Context *src, const char *dst_path,
 /*
  * PPM Pixmap
  */
+GP_Context *GP_ReadPPM(GP_IO *io, GP_ProgressCallback *callback);
+
 GP_Context *GP_LoadPPM(const char *src_path, GP_ProgressCallback *callback);
 
 int GP_SavePPM(const GP_Context *src, const char *dst_path,
@@ -54,6 +61,8 @@ int GP_SavePPM(const GP_Context *src, const char *dst_path,
 /*
  * PNM Anymap (All of above)
  */
+GP_Context *GP_ReadPNM(GP_IO *io, GP_ProgressCallback *callback);
+
 GP_Context *GP_LoadPNM(const char *src_path, GP_ProgressCallback *callback);
 
 int GP_SavePNM(const GP_Context *src, const char *dst_path,

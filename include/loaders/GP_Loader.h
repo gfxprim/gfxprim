@@ -49,7 +49,7 @@ int GP_LoadMetaData(const char *src_path, GP_MetaData *data);
 /*
  * Simple saving function, the image format is matched by file extension.
  *
- * Retruns zero on succes.
+ * Retruns zero on success.
  *
  * On failure non-zero is returned.
  *

@@ -16,7 +16,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2014 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
@@ -31,38 +31,19 @@
 
 #include "core/GP_ProgressCallback.h"
 #include "core/GP_Context.h"
-
-#include "GP_MetaData.h"
+#include "loaders/GP_IO.h"
+#include "loaders/GP_MetaData.h"
 
 /*
- * The possible errno values:
+ * Reads a PNG from an IO stream.
  *
- * - Anything FILE operation may return (fopen(), fclose(), fseek(), ...).
- * - EIO for png_read()/png_write() failure
- * - ENOSYS for not implemented bitmap format
- * - ENOMEM from malloc()
- * - EILSEQ for wrong image signature/data
- * - ECANCELED when call was aborted from callback
+ * Returns newly allocated context cotaining the loaded image or in case of
+ * failure NULL and errno is set.
  */
+GP_Context *GP_ReadPNG(GP_IO *io, GP_ProgressCallback *callback);
 
 /*
- * Opens up file and checks signature. Upon successful return (zero is
- * returned) the file position would be set to eight bytes (exactly after the
- * PNG signature).
- */
-int GP_OpenPNG(const char *src_path, FILE **f);
-
-/*
- * Reads PNG from an open FILE. Expects the file position set after the eight
- * bytes PNG signature.
- *
- * Upon succesfull return pointer to newly allocated context is returned.
- * Otherwise NULL is returned and errno is filled.
- */
-GP_Context *GP_ReadPNG(FILE *f, GP_ProgressCallback *callback);
-
-/*
- * Does both GP_OpenPNG and GP_ReadPNG at once.
+ * Loads a PNG image from a file.
  */
 GP_Context *GP_LoadPNG(const char *src_path, GP_ProgressCallback *callback);
 
@@ -80,7 +61,7 @@ int GP_SavePNG(const GP_Context *src, const char *dst_path,
                GP_ProgressCallback *callback);
 
 /*
- * Match PNG signature.
+ * Looks for PNG file signature. Returns non-zero if found.
  */
 int GP_MatchPNG(const void *buf);
 

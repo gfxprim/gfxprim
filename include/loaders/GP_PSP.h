@@ -16,13 +16,15 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2014 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
  /*
 
-   Experimental Paint Shop Pro image loader.
+   Paint Shop Pro image loader.
+
+   Loads composite image from a PSP file.
 
   */
 
@@ -31,35 +33,23 @@
 
 #include "core/GP_ProgressCallback.h"
 #include "core/GP_Context.h"
+#include "loaders/GP_IO.h"
 
 /*
- * The possible errno values:
+ * Reads a BMP from an IO stream.
  *
- * - EIO for read/write failure
- * - ENOSYS for not implemented bitmap format
- * - ENOMEM from malloc()
- * - EILSEQ for wrong image signature/data
- * - ECANCELED when call was aborted from callback
+ * Returns newly allocated context cotaining the loaded image or in case of
+ * failure NULL and errno is set.
  */
+GP_Context *GP_ReadPSP(GP_IO *io, GP_ProgressCallback *callback);
 
 /*
- * Opens up the PSP image and checks signature.
- * Returns zero on success.
- */
-int GP_OpenPSP(const char *src_path, FILE **f);
-
-/*
- * Reads image from PSP format.
- */
-GP_Context *GP_ReadPSP(FILE *f, GP_ProgressCallback *callback);
-
-/*
- * Does both GP_OpenPSP and GP_ReadPSP at once.
+ * Loads a PSP image from a file.
  */
 GP_Context *GP_LoadPSP(const char *src_path, GP_ProgressCallback *callback);
 
 /*
- * Match PSP signature.
+ * Looks for PSP file signature. Returns non-zero if found.
  */
 int GP_MatchPSP(const void *buf);
 

@@ -16,7 +16,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2013 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2014 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
@@ -57,20 +57,34 @@ struct RLE {
 
 	/* current value */
 	int c;
+
+	GP_IO *io;
+
+	int buf_pos;
+	int buf_end;
+	uint8_t buf[512];
 };
 
-#define DECLARE_RLE(name, iw, ih) struct RLE name = { \
+#define DECLARE_RLE(name, iw, ih, iio) struct RLE name = { \
 	.state = RLE_START, \
-	.w = iw, .h = ih, \
-	.x = 0, .y = 0, \
-	.rep = 0\
+	.w = iw, .h = ih,   \
+	.x = 0, .y = 0,     \
+	.rep = 0,           \
+	.io = io,           \
+	.buf_pos = 0,       \
+	.buf_end = 0,       \
 }
 
-#define GETC(f, rle) do {   \
-	rle->c = fgetc(f);  \
-                            \
-	if (rle->c == EOF)  \
-		return EIO; \
+#define GETC(rle) do {   \
+	if (rle->buf_pos < rle->buf_end) { \
+		rle->c = rle->buf[rle->buf_pos++]; \
+	} else { \
+		rle->buf_end = GP_IORead(rle->io, rle->buf, sizeof(rle->buf));\
+		if (rle->buf_end <= 0) \
+			return EIO; \
+		rle->c = rle->buf[0]; \
+		rle->buf_pos = 1; \
+	} \
 } while (0)
 
 static void RLE8_move(struct RLE *rle)
@@ -119,9 +133,9 @@ static int RLE8_end_of_bitmap(struct RLE *rle)
 	return 0;
 }
 
-static int RLE8_repeat(FILE *f, uint8_t rep, struct RLE *rle)
+static int RLE8_repeat(uint8_t rep, struct RLE *rle)
 {
-	GETC(f, rle);
+	GETC(rle);
 
 	GP_DEBUG(4, "RLE Repeat %i x 0x%02x", rep, rle->c);
 
@@ -131,12 +145,14 @@ static int RLE8_repeat(FILE *f, uint8_t rep, struct RLE *rle)
 	return 0;
 }
 
-static int RLE8_offset(FILE *f, struct RLE *rle)
+static int RLE8_offset(struct RLE *rle)
 {
 	int x, y;
 
-	x = fgetc(f);
-	y = fgetc(f);
+	GETC(rle);
+	x = rle->c;
+	GETC(rle);
+	y = rle->c;
 
 	if (x == EOF || y == EOF)
 		return EIO;
@@ -154,9 +170,9 @@ static int RLE8_offset(FILE *f, struct RLE *rle)
 	return 0;
 }
 
-static int RLE8_next_undecoded(FILE *f, struct RLE *rle)
+static int RLE8_next_undecoded(struct RLE *rle)
 {
-	GETC(f, rle);
+	GETC(rle);
 
 	RLE8_move(rle);
 
@@ -166,7 +182,7 @@ static int RLE8_next_undecoded(FILE *f, struct RLE *rle)
 		rle->state = RLE_START;
 		/* must be padded to odd number of bytes */
 		if (rle->flag)
-			fgetc(f);
+			GETC(rle);
 	}
 
 	rle->move = 1;
@@ -188,9 +204,9 @@ static int RLE8_next_repeat(struct RLE *rle)
 	return 0;
 }
 
-static int RLE8_esc(FILE *f, struct RLE *rle)
+static int RLE8_esc(struct RLE *rle)
 {
-	GETC(f, rle);
+	GETC(rle);
 
 	GP_DEBUG(4, "RLE ESC %02x", rle->c);
 
@@ -200,43 +216,43 @@ static int RLE8_esc(FILE *f, struct RLE *rle)
 	case 0x01:
 		return RLE8_end_of_bitmap(rle);
 	case 0x02:
-		return RLE8_offset(f, rle);
+		return RLE8_offset(rle);
 	/* Undecoded sequence */
 	default:
 		GP_DEBUG(4, "RLE Undecoded x %i", rle->c);
 		rle->state = RLE_UNDECODED;
-		rle->rep = rle->c; 
+		rle->rep = rle->c;
 		rle->flag = rle->c % 2;
 		return 0;
 	}
 }
 
-static int RLE8_start(FILE *f, struct RLE *rle)
+static int RLE8_start(struct RLE *rle)
 {
-	GETC(f, rle);
+	GETC(rle);
 
 	switch (rle->c) {
 	case 0x00:
-		return RLE8_esc(f, rle);
+		return RLE8_esc(rle);
 	default:
-		return RLE8_repeat(f, rle->c, rle);
+		return RLE8_repeat(rle->c, rle);
 	}
 }
 
-static int RLE8_next(FILE *f, struct RLE *rle)
+static int RLE8_next(struct RLE *rle)
 {
 	int err;
 
 	for (;;) {
 		switch (rle->state) {
 		case RLE_START:
-			if ((err = RLE8_start(f, rle)))
+			if ((err = RLE8_start(rle)))
 				return err;
 		break;
 		case RLE_REPEAT:
 			return RLE8_next_repeat(rle);
 		case RLE_UNDECODED:
-			return RLE8_next_undecoded(f, rle);
+			return RLE8_next_undecoded(rle);
 		case RLE_STOP:
 			return 0;
 		default:
@@ -247,18 +263,18 @@ static int RLE8_next(FILE *f, struct RLE *rle)
 	}
 }
 
-static int read_RLE8(FILE *f, struct bitmap_info_header *header,
+static int read_RLE8(GP_IO *io, struct bitmap_info_header *header,
                      GP_Context *context, GP_ProgressCallback *callback)
 {
 	uint32_t palette_size = get_palette_size(header);
 	GP_Pixel palette[get_palette_size(header)];
-	DECLARE_RLE(rle, header->w, GP_ABS(header->h));
+	DECLARE_RLE(rle, header->w, GP_ABS(header->h), io);
 	int err;
 
-	if ((err = read_bitmap_palette(f, header, palette)))
+	if ((err = read_bitmap_palette(io, header, palette)))
 		return err;
 
-	if ((err = seek_pixels_offset(header, f)))
+	if ((err = seek_pixels_offset(io, header)))
 		return err;
 
 	int cnt = 0;
@@ -272,7 +288,7 @@ static int read_RLE8(FILE *f, struct bitmap_info_header *header,
 	GP_Fill(context, palette[0]);
 
 	for (;;) {
-		if ((err = RLE8_next(f, &rle)))
+		if ((err = RLE8_next(&rle)))
 			return err;
 
 		if (rle.state == RLE_STOP)

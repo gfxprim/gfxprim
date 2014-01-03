@@ -2,7 +2,6 @@ GP_FWrite
 GP_FRead
 
 GP_MatchJPG
-GP_OpenJPG
 GP_ReadJPG
 GP_LoadJPG
 GP_SaveJPG
@@ -10,7 +9,6 @@ GP_ReadJPGMetaData
 GP_LoadJPGMetaData
 
 GP_MatchPNG
-GP_OpenPNG
 GP_ReadPNG
 GP_LoadPNG
 GP_ReadPNGMetaData
@@ -18,45 +16,44 @@ GP_LoadPNGMetaData
 GP_SavePNG
 
 GP_MatchBMP
-GP_OpenBMP
 GP_LoadBMP
 GP_ReadBMP
 GP_SaveBMP
 
 GP_MatchPSP
-GP_OpenPSP
 GP_ReadPSP
 GP_LoadPSP
 
 GP_MatchGIF
 GP_LoadGIF
 GP_ReadGIF
-GP_OpenGIF
 
 GP_MatchTIFF
-GP_OpenTIFF
 GP_ReadTIFF
 GP_LoadTIFF
 GP_SaveTIFF
 
-GP_SavePBM
+GP_ReadPBM
 GP_LoadPBM
+GP_SavePBM
 GP_MatchPBM
 
-GP_SavePGM
+GP_ReadPGM
 GP_LoadPGM
+GP_SavePGM
 GP_MatchPGM
 
-GP_SavePPM
+GP_ReadPPM
 GP_LoadPPM
+GP_SavePPM
 GP_MatchPPM
 
+GP_ReadPNM
 GP_LoadPNM
 GP_SavePNM
 GP_MatchPNM
 
 GP_ReadJP2
-GP_OpenJP2
 GP_LoadJP2
 GP_MatchJP2
 
@@ -94,3 +91,10 @@ GP_OpenZip
 
 GP_LineConvertible
 GP_LineConvertGet
+
+GP_IOFile
+GP_IOMem
+GP_IOMark
+GP_IOSize
+GP_IOFill
+GP_IOReadF

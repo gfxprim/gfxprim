@@ -16,7 +16,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2013 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2014 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
@@ -31,24 +31,23 @@
 
 #include "core/GP_Context.h"
 #include "core/GP_ProgressCallback.h"
+#include "loaders/GP_IO.h"
 
 /*
- * Opens up file and checks signature.
+ * Reads a JPEG2000 from an IO stream.
+ *
+ * Returns newly allocated context cotaining the loaded image or in case of
+ * failure NULL and errno is set.
  */
-int GP_OpenJP2(const char *src_path, FILE **f);
+GP_Context *GP_ReadJP2(GP_IO *io, GP_ProgressCallback *callback);
 
 /*
- * Reads JP2 from an open FILE.
- */
-GP_Context *GP_ReadJP2(FILE *f, GP_ProgressCallback *callback);
-
-/*
- * Loads a JP2 file into GP_Context. The Context is newly allocated.
+ * Loads a JPEG2000 image from a file.
  */
 GP_Context *GP_LoadJP2(const char *src_path, GP_ProgressCallback *callback);
 
 /*
- * Match JP2 signature.
+ * Looks for JPEG2000 file signature. Returns non-zero if found.
  */
 int GP_MatchJP2(const void *buf);
 

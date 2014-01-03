@@ -16,7 +16,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2013 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2014 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
@@ -55,17 +55,6 @@ int GP_MatchTIFF(const void *buf)
 	if (!memcmp(buf, TIFF_HEADER_BIG, 4))
 		return 1;
 
-	return 0;
-}
-
-int GP_OpenTIFF(const char *src_path, void **t)
-{
-	TIFF *tiff = TIFFOpen(src_path, "r");
-
-	if (tiff == NULL)
-		return 1;
-
-	*t = tiff;
 	return 0;
 }
 
@@ -446,17 +435,70 @@ static int tiff_read(TIFF *tiff, GP_Context *res, struct tiff_header *header,
 	return 0;
 }
 
-GP_Context *GP_ReadTIFF(void *t, GP_ProgressCallback *callback)
+static tmsize_t tiff_io_read(thandle_t io, void *buf, tmsize_t size)
 {
+	return GP_IORead(io, buf, size);
+}
+
+static tmsize_t tiff_io_write(thandle_t io, void *buf, tmsize_t size)
+{
+	(void) io;
+	(void) buf;
+	GP_WARN("stub called");
+	return size;
+}
+
+static toff_t tiff_io_seek(thandle_t io, toff_t offset, int whence)
+{
+	return GP_IOSeek(io, offset, whence);
+}
+
+static int tiff_io_close(thandle_t GP_UNUSED(io))
+{
+	return 0;
+}
+
+static toff_t tiff_io_size(thandle_t io)
+{
+	return GP_IOSize(io);
+}
+
+/*
+static int tiff_io_map(thandle_t io, void **base, toff_t *size)
+{
+	GP_WARN("stub called");
+	return 0;
+}
+
+static void tiff_io_unmap(thandle_t io, void *base, toff_t size)
+{
+	GP_WARN("stub called");
+	return 0;
+}
+*/
+
+GP_Context *GP_ReadTIFF(GP_IO *io, GP_ProgressCallback *callback)
+{
+	TIFF *tiff;
 	struct tiff_header header;
-	GP_Context *res = NULL;
+	GP_Context *res;
 	GP_PixelType pixel_type;
 	int err;
 
-	if ((err = read_header(t, &header)))
+	tiff = TIFFClientOpen("GFXprim IO", "r", io, tiff_io_read,
+	                      tiff_io_write, tiff_io_seek, tiff_io_close,
+	                      tiff_io_size, NULL, NULL);
+
+	if (!tiff) {
+		GP_DEBUG(1, "TIFFClientOpen failed");
+		err = EIO;
+		goto err0;
+	}
+
+	if ((err = read_header(tiff, &header)))
 		goto err1;
 
-	pixel_type = match_pixel_type(t, &header);
+	pixel_type = match_pixel_type(tiff, &header);
 
 	if (pixel_type == GP_PIXEL_UNKNOWN) {
 		err = ENOSYS;
@@ -473,33 +515,42 @@ GP_Context *GP_ReadTIFF(void *t, GP_ProgressCallback *callback)
 
 	switch (header.photometric) {
 	case PHOTOMETRIC_PALETTE:
-		err = tiff_read_palette(t, res, &header, callback);
+		err = tiff_read_palette(tiff, res, &header, callback);
 	break;
 	default:
-		err = tiff_read(t, res, &header, callback);
+		err = tiff_read(tiff, res, &header, callback);
 	}
 
 	if (err)
-		goto err1;
+		goto err2;
+
+	TIFFClose(tiff);
 
 	return res;
-err1:
+err2:
 	GP_ContextFree(res);
+err1:
+	TIFFClose(tiff);
+err0:
 	errno = err;
 	return NULL;
 }
 
 GP_Context *GP_LoadTIFF(const char *src_path, GP_ProgressCallback *callback)
 {
-	void *t;
+	GP_IO *io;
 	GP_Context *res;
+	int err;
 
-	if (GP_OpenTIFF(src_path, &t))
+	io = GP_IOFile(src_path, GP_IO_RDONLY);
+	if (!io)
 		return NULL;
 
-	res = GP_ReadTIFF(t, callback);
+	res = GP_ReadTIFF(io, callback);
 
-	TIFFClose(t);
+	err = errno;
+	GP_IOClose(io);
+	errno = err;
 
 	return res;
 }

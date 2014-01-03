@@ -16,7 +16,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2014 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
@@ -54,25 +54,6 @@
 int GP_MatchJPG(const void *buf)
 {
 	return !memcmp(buf, JPEG_SIGNATURE, JPEG_SIGNATURE_LEN);
-}
-
-int GP_OpenJPG(const char *src_path, FILE **f)
-{
-	int err;
-
-	*f = fopen(src_path, "rb");
-
-	if (*f == NULL) {
-		err = errno;
-		GP_DEBUG(1, "Failed to open '%s' : %s",
-		            src_path, strerror(errno));
-		errno = err;
-		return 1;
-	}
-
-	//TODO: check signature and rewind the stream
-
-	return 0;
 }
 
 struct my_jpg_err {
@@ -155,11 +136,57 @@ static int load_cmyk(struct jpeg_decompress_struct *cinfo, GP_Context *ret,
 	return 0;
 }
 
-GP_Context *GP_ReadJPG(FILE *f, GP_ProgressCallback *callback)
+
+struct my_source_mgr {
+	struct jpeg_source_mgr mgr;
+	void *buffer;
+	size_t size;
+	GP_IO *io;
+};
+
+static void dummy(j_decompress_ptr GP_UNUSED(cinfo))
+{
+}
+
+static boolean fill_input_buffer(struct jpeg_decompress_struct *cinfo)
+{
+	int ret;
+	struct my_source_mgr* src = (void*)cinfo->src;
+
+	ret = GP_IORead(src->io, src->buffer, src->size);
+
+	if (ret < 0) {
+		GP_WARN("Failed to fill buffer");
+		return 0;
+	}
+
+	src->mgr.next_input_byte = src->buffer;
+	src->mgr.bytes_in_buffer = src->size;
+	return 1;
+}
+
+static void skip_input_data(struct jpeg_decompress_struct *cinfo, long num_bytes)
+{
+	struct my_source_mgr* src = (void*)cinfo->src;
+
+	GP_DEBUG(3, "Skipping %li bytes", num_bytes);
+
+	if (src->mgr.bytes_in_buffer < (unsigned long)num_bytes) {
+		src->mgr.bytes_in_buffer = 0;
+		GP_IOSeek(src->io, num_bytes - src->mgr.bytes_in_buffer, GP_IO_SEEK_CUR);
+	} else {
+		src->mgr.bytes_in_buffer -= num_bytes;
+		src->mgr.next_input_byte += num_bytes;
+	}
+}
+
+GP_Context *GP_ReadJPG(GP_IO *io, GP_ProgressCallback *callback)
 {
 	struct jpeg_decompress_struct cinfo;
+	struct my_source_mgr src;
 	struct my_jpg_err my_err;
 	GP_Context *ret = NULL;
+	uint8_t buffer[1024];
 	int err;
 
 	cinfo.err = jpeg_std_error(&my_err.error_mgr);
@@ -171,7 +198,19 @@ GP_Context *GP_ReadJPG(FILE *f, GP_ProgressCallback *callback)
 	}
 
 	jpeg_create_decompress(&cinfo);
-	jpeg_stdio_src(&cinfo, f);
+
+	/* Initialize custom source manager */
+	src.mgr.init_source = dummy;
+	src.mgr.resync_to_restart = jpeg_resync_to_restart;
+	src.mgr.term_source = dummy;
+	src.mgr.fill_input_buffer = fill_input_buffer;
+	src.mgr.skip_input_data = skip_input_data;
+	src.mgr.bytes_in_buffer = 0;
+	src.mgr.next_input_byte = NULL;
+	src.io = io;
+	src.buffer = buffer;
+	src.size = sizeof(buffer);
+	cinfo.src = (void*)&src;
 
 	jpeg_read_header(&cinfo, TRUE);
 
@@ -245,15 +284,19 @@ err1:
 
 GP_Context *GP_LoadJPG(const char *src_path, GP_ProgressCallback *callback)
 {
-	FILE *f;
+	GP_IO *io;
 	GP_Context *res;
+	int err;
 
-	if (GP_OpenJPG(src_path, &f))
+	io = GP_IOFile(src_path, GP_IO_RDONLY);
+	if (!io)
 		return NULL;
 
-	res = GP_ReadJPG(f, callback);
+	res = GP_ReadJPG(io, callback);
 
-	fclose(f);
+	err = errno;
+	GP_IOClose(io);
+	errno = err;
 
 	return res;
 }
@@ -333,15 +376,15 @@ err1:
 
 int GP_LoadJPGMetaData(const char *src_path, GP_MetaData *data)
 {
-	FILE *f;
-	int ret;
+	//FILE *f;
+	int ret = -1;
 
-	if (GP_OpenJPG(src_path, &f))
-		return 1;
+	//if (GP_OpenJPG(src_path, &f))
+	//	return 1;
 
-	ret = GP_ReadJPGMetaData(f, data);
+	//ret = GP_ReadJPGMetaData(f, data);
 
-	fclose(f);
+	//fclose(f);
 
 	return ret;
 }

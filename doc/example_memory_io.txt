@@ -1,0 +1,9 @@
+Memory IO with Loaders
+----------------------
+
+This example shows how to read an image from a memory buffer.
+
+[source,c]
+------------------------------------------------------------------
+include::../demos/c_simple/memory_io.c[]
+------------------------------------------------------------------

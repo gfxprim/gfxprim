@@ -16,7 +16,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2014 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
@@ -29,37 +29,25 @@
 #ifndef LOADERS_GP_GIF_H
 #define LOADERS_GP_GIF_H
 
-#include "core/GP_ProgressCallback.h"
 #include "core/GP_Context.h"
+#include "core/GP_ProgressCallback.h"
+#include "loaders/GP_IO.h"
 
 /*
- * The possible errno values:
+ * Reads first image found in GIF container from an IO stream.
  *
- * - EIO for read/write failure
- * - ENOSYS for not implemented bitmap format
- * - ENOMEM from malloc()
- * - EILSEQ for wrong image signature/data
- * - ECANCELED when call was aborted from callback
+ * Returns newly allocated context cotaining the loaded image or in case of
+ * failure NULL and errno is set.
  */
+GP_Context *GP_ReadGIF(GP_IO *io, GP_ProgressCallback *callback);
 
 /*
- * Opens up the Gif image and checks signature.
- * Returns zero on success.
- */
-int GP_OpenGIF(const char *src_path, void **f);
-
-/*
- * Reads first image found in GIF container.
- */
-GP_Context *GP_ReadGIF(void *f, GP_ProgressCallback *callback);
-
-/*
- * Does both GP_OpenGIF and GP_ReadGIF at once.
+ * Loads first image found in GIF container from a file.
  */
 GP_Context *GP_LoadGIF(const char *src_path, GP_ProgressCallback *callback);
 
 /*
- * Match GIF signature.
+ * Looks for GIF file signature. Returns non-zero if found.
  */
 int GP_MatchGIF(const void *buf);
 

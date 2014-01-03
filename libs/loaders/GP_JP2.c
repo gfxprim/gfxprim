@@ -16,7 +16,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2013 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2014 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
@@ -36,10 +36,6 @@
 
 #include "GP_JP2.h"
 
-#ifdef HAVE_OPENJPEG
-
-#include <openjpeg-2.0/openjpeg.h>
-
 #define JP2_SIG "\x00\x00\x00\x0cjP\x20\x20\x0d\x0a\x87\x0a"
 #define JP2_SIG_LEN 12
 
@@ -48,24 +44,9 @@ int GP_MatchJP2(const void *buf)
 	return !memcmp(buf, JP2_SIG, JP2_SIG_LEN);
 }
 
-int GP_OpenJP2(const char *src_path, FILE **f)
-{
-	int err;
+#ifdef HAVE_OPENJPEG
 
-	*f = fopen(src_path, "rb");
-
-	if (*f == NULL) {
-		err = errno;
-		GP_DEBUG(1, "Failed to open '%s' : %s",
-		            src_path, strerror(errno));
-		errno = err;
-		return 1;
-	}
-
-	//TODO: check signature and rewind the stream
-
-	return 0;
-}
+#include <openjpeg-2.0/openjpeg.h>
 
 static void jp2_err_callback(const char *msg, void *priv)
 {
@@ -81,11 +62,8 @@ static void jp2_warn_callback(const char *msg, void *priv)
 
 static void jp2_info_callback(const char *msg, void *priv)
 {
-	GP_ProgressCallback *callback = priv;
-
+	(void) priv;
 	GP_DEBUG(1, "openjpeg: %s", msg);
-
-	GP_ProgressCallbackReport(callback, 100, 100, 100);
 }
 
 static const char *color_space_name(OPJ_COLOR_SPACE color_space)
@@ -106,7 +84,12 @@ static const char *color_space_name(OPJ_COLOR_SPACE color_space)
 	}
 }
 
-GP_Context *GP_ReadJP2(FILE *f, GP_ProgressCallback *callback)
+static OPJ_SIZE_T jp2_io_read(void *buf, OPJ_SIZE_T size, void *io)
+{
+	return GP_IORead(io, buf, size);
+}
+
+GP_Context *GP_ReadJP2(GP_IO *io, GP_ProgressCallback *callback)
 {
 	opj_dparameters_t params;
 	opj_codec_t *codec;
@@ -138,13 +121,17 @@ GP_Context *GP_ReadJP2(FILE *f, GP_ProgressCallback *callback)
 		goto err1;
 	}
 
-	stream = opj_stream_create_default_file_stream(f, OPJ_TRUE);
+	stream = opj_stream_default_create(OPJ_TRUE);
 
 	if (!stream) {
 		GP_DEBUG(1, "opj_stream_create_default_file_stream faled");
 		err = ENOMEM;
 		goto err1;
 	}
+
+	//TODO: Do we need seek and skip?
+	opj_stream_set_read_function(stream, jp2_io_read);
+	opj_stream_set_user_data(stream, io);
 
 	if (!opj_read_header(stream, codec, &img)) {
 		GP_DEBUG(1, "opj_read_header failed");
@@ -197,6 +184,8 @@ GP_Context *GP_ReadJP2(FILE *f, GP_ProgressCallback *callback)
 		goto err3;
 	}
 
+	GP_ProgressCallbackReport(callback, 0, 100, 100);
+
 	if (!opj_decode(codec, stream, img)) {
 		GP_DEBUG(1, "opj_decode failed");
 		err = EINVAL;
@@ -238,35 +227,27 @@ err0:
 
 GP_Context *GP_LoadJP2(const char *src_path, GP_ProgressCallback *callback)
 {
-	FILE *f;
+	GP_IO *io;
 	GP_Context *res;
+	int err;
 
-	if (GP_OpenJP2(src_path, &f))
+	io = GP_IOFile(src_path, GP_IO_RDONLY);
+	if (!io)
 		return NULL;
 
-	res = GP_ReadJP2(f, callback);
+	res = GP_ReadJP2(io, callback);
 
-	fclose(f);
+	err = errno;
+	GP_IOClose(io);
+	errno = err;
 
 	return res;
 }
 
 #else
 
-int GP_MatchJP2(const void GP_UNUSED(*buf))
-{
-	errno = ENOSYS;
-	return -1;
-}
-
-int GP_OpenJP2(const char GP_UNUSED(*src_path), FILE GP_UNUSED(**f))
-{
-	errno = ENOSYS;
-	return 1;
-}
-
-GP_Context *GP_ReadJP2(FILE GP_UNUSED(*f),
-                      GP_ProgressCallback GP_UNUSED(*callback))
+GP_Context *GP_ReadJP2(GP_IO GP_UNUSED(*io),
+                       GP_ProgressCallback GP_UNUSED(*callback))
 {
 	errno = ENOSYS;
 	return NULL;

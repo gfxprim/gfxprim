@@ -6,5 +6,6 @@ PGM
 PPM
 ZIP
 GIF
+IO
 SaveLoad.gen
 SaveAbort.gen

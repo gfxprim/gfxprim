@@ -16,7 +16,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2013 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2014 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
@@ -25,40 +25,18 @@
 
 #include "core/GP_Context.h"
 #include "core/GP_ProgressCallback.h"
+#include "loaders/GP_IO.h"
 
 /*
- * The possible errno values:
+ * Reads a BMP from an IO stream.
  *
- * - Anything FILE operation may return (fopen(), fclose(), fseek(), ...).
- * - EIO for fread()/fwrite() failure
- * - ENOSYS for not implemented bitmap format
- * - ENOMEM from malloc()
- * - EILSEQ for wrong image signature/data
- * - ECANCELED when call was aborted from callback
+ * Returns newly allocated context cotaining the loaded image or in case of
+ * failure NULL and errno is set.
  */
+GP_Context *GP_ReadBMP(GP_IO *io, GP_ProgressCallback *callback);
 
 /*
- * Opens up a bmp file, checks signature, parses metadata.
- *
- * The file, width, height and pixel type are filled upon succcessful return.
- *
- * Upon failure, non zero return value is returned and errno is filled.
- */
-int GP_OpenBMP(const char *src_path, FILE **f,
-               GP_Size *w, GP_Size *h, GP_PixelType *pixel_type);
-
-/*
- * Reads a BMP from a opened file.
- *
- * Upon successful return, context to store bitmap is allocated and image is
- * loaded.
- *
- * Upon failure NULL is returned and errno is filled.
- */
-GP_Context *GP_ReadBMP(FILE *f, GP_ProgressCallback *callback);
-
-/*
- * Does both GP_OpenBMP and GP_ReadBMP.
+ * Loads a BMP image from a file.
  */
 GP_Context *GP_LoadBMP(const char *src_path, GP_ProgressCallback *callback);
 
@@ -70,7 +48,7 @@ int GP_SaveBMP(const GP_Context *src, const char *dst_path,
                GP_ProgressCallback *callback);
 
 /*
- * Match BMP signature.
+ * Looks for BMP file signature. Returns non-zero if found.
  */
 int GP_MatchBMP(const void *buf);
 

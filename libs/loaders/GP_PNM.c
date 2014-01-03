@@ -16,7 +16,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2013 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2014 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
@@ -156,12 +156,67 @@ enum state {
 	S_INT,
 };
 
-static int load_header(FILE *f, struct pnm_header *header)
+/*
+ * Simple buffer implementation on the top of the GP_IO
+ */
+struct buf {
+	uint8_t buf[100];
+	unsigned int buf_end;
+	unsigned int buf_pos;
+	GP_IO *io;
+};
+
+#define DECLARE_BUFFER(name, bio) \
+	struct buf name = {.buf_end = 0, .buf_pos = 0, .io = bio}
+
+static int getb(struct buf *buf)
+{
+	int ret;
+
+	if (buf->buf_pos < buf->buf_end)
+		return buf->buf[buf->buf_pos++];
+
+	ret = GP_IORead(buf->io, buf->buf, sizeof(buf->buf));
+
+	if (ret <= 0)
+		return EOF;
+
+	buf->buf_pos = 1;
+	buf->buf_end = ret;
+
+	return buf->buf[0];
+}
+
+static void ungetb(struct buf *buf, uint8_t byte)
+{
+	buf->buf[--buf->buf_pos] = byte;
+}
+
+static int fillb(struct buf *buf, void *ptr, size_t size)
+{
+	unsigned int buffered = buf->buf_end - buf->buf_pos;
+
+	if (buffered) {
+		unsigned int to_copy = GP_MIN(buffered, size);
+		memcpy(ptr, buf->buf + buf->buf_pos, to_copy);
+		buf->buf_pos += to_copy;
+	}
+
+	//TODO: refill buffer if request < 128
+	if (size > buffered) {
+		return GP_IOFill(buf->io, (char*)ptr + buffered,
+		                 size - buffered);
+	}
+
+	return 0;
+}
+
+static int load_header(struct buf *buf, struct pnm_header *header)
 {
 	int h1, h2, c, state = S_START, val = 0, i = 0, err;
 
-	h1 = fgetc(f);
-	h2 = fgetc(f);
+	h1 = getb(buf);
+	h2 = getb(buf);
 
 	if (h1 == EOF || h2 == EOF) {
 		GP_DEBUG(1, "Failed to read header");
@@ -180,7 +235,7 @@ static int load_header(FILE *f, struct pnm_header *header)
 	header->w = 0;
 
 	for (;;) {
-		c = fgetc(f);
+		c = getb(buf);
 
 		if (c == EOF) {
 			err = EIO;
@@ -231,7 +286,7 @@ static int load_header(FILE *f, struct pnm_header *header)
 					header->depth = val;
 					goto out;
 				}
-				ungetc(c, f);
+				ungetb(buf, c);
 				state = S_START;
 			break;
 			}
@@ -252,13 +307,13 @@ err:
 /*
  * ASCII data parser
  */
-static int get_ascii_int(FILE *f, int *val)
+static int get_ascii_int(struct buf *buf, int *val)
 {
 	int c, in_number = 0;
 	*val = 0;
 
 	for (;;) {
-		c = getc_unlocked(f);
+		c = getb(buf);
 
 		switch (c) {
 		case EOF:
@@ -309,7 +364,8 @@ static inline int write_ascii_byte(FILE *f, uint8_t byte)
 /*
  * The PBM ASCII has the values inverted
  */
-static int load_ascii_g1_inv(FILE *f, GP_Context *ctx, GP_ProgressCallback *cb)
+static int load_ascii_g1_inv(struct buf *buf, GP_Context *ctx,
+                             GP_ProgressCallback *cb)
 {
 	uint32_t x, y;
 	int val, err;
@@ -317,7 +373,7 @@ static int load_ascii_g1_inv(FILE *f, GP_Context *ctx, GP_ProgressCallback *cb)
 	for (y = 0; y < ctx->h; y++) {
 		for (x = 0; x < ctx->w; x++) {
 
-			if ((err = get_ascii_int(f, &val)))
+			if ((err = get_ascii_int(buf, &val)))
 				return err;
 
 			GP_PutPixel_Raw_1BPP_LE(ctx, x, y, !val);
@@ -336,7 +392,8 @@ static int load_ascii_g1_inv(FILE *f, GP_Context *ctx, GP_ProgressCallback *cb)
 //TODO: This is temporary till blit works with bitendian
 #include "core/GP_BitSwap.h"
 
-static int load_raw_g1_inv(FILE *f, GP_Context *ctx, GP_ProgressCallback *cb)
+static int load_raw_g1_inv(struct buf *buf, GP_Context *ctx,
+                           GP_ProgressCallback *cb)
 {
 	uint32_t x, y;
 	uint8_t *addr;
@@ -345,7 +402,7 @@ static int load_raw_g1_inv(FILE *f, GP_Context *ctx, GP_ProgressCallback *cb)
 	for (y = 0; y < ctx->h; y++) {
 		for (x = 0; x < ctx->w; x+=8) {
 
-			if ((val = fgetc(f)) == EOF)
+			if ((val = getb(buf)) == EOF)
 				return EIO;
 
 			addr = GP_PIXEL_ADDR(ctx, x, y);
@@ -362,7 +419,8 @@ static int load_raw_g1_inv(FILE *f, GP_Context *ctx, GP_ProgressCallback *cb)
 	return 0;
 }
 
-static int load_ascii_g1(FILE *f, GP_Context *ctx, GP_ProgressCallback *cb)
+static int load_ascii_g1(struct buf *buf, GP_Context *ctx,
+                         GP_ProgressCallback *cb)
 {
 	uint32_t x, y;
 	int val, err;
@@ -370,11 +428,11 @@ static int load_ascii_g1(FILE *f, GP_Context *ctx, GP_ProgressCallback *cb)
 	for (y = 0; y < ctx->h; y++) {
 		for (x = 0; x < ctx->w; x++) {
 
-			if ((err = get_ascii_int(f, &val)))
+			if ((err = get_ascii_int(buf, &val)))
 				return err;
 
 			if (val > 1) {
-				GP_WARN("Value too large for 2BPP (%i)", val);
+				GP_WARN("Value too large for 1BPP (%i)", val);
 				val = 1;
 			}
 
@@ -391,7 +449,8 @@ static int load_ascii_g1(FILE *f, GP_Context *ctx, GP_ProgressCallback *cb)
 	return 0;
 }
 
-static int load_ascii_g2(FILE *f, GP_Context *ctx, GP_ProgressCallback *cb)
+static int load_ascii_g2(struct buf *buf, GP_Context *ctx,
+                         GP_ProgressCallback *cb)
 {
 	uint32_t x, y;
 	int val, err;
@@ -399,7 +458,7 @@ static int load_ascii_g2(FILE *f, GP_Context *ctx, GP_ProgressCallback *cb)
 	for (y = 0; y < ctx->h; y++) {
 		for (x = 0; x < ctx->w; x++) {
 
-			if ((err = get_ascii_int(f, &val)))
+			if ((err = get_ascii_int(buf, &val)))
 				return err;
 
 			if (val > 3) {
@@ -420,7 +479,8 @@ static int load_ascii_g2(FILE *f, GP_Context *ctx, GP_ProgressCallback *cb)
 	return 0;
 }
 
-static int load_ascii_g4(FILE *f, GP_Context *ctx, GP_ProgressCallback *cb)
+static int load_ascii_g4(struct buf *buf, GP_Context *ctx,
+                         GP_ProgressCallback *cb)
 {
 	uint32_t x, y;
 	int val, err;
@@ -428,12 +488,12 @@ static int load_ascii_g4(FILE *f, GP_Context *ctx, GP_ProgressCallback *cb)
 	for (y = 0; y < ctx->h; y++) {
 		for (x = 0; x < ctx->w; x++) {
 
-			if ((err = get_ascii_int(f, &val)))
+			if ((err = get_ascii_int(buf, &val)))
 				return err;
 
 			if (val > 15) {
 				GP_WARN("Value too large for 4BPP (%i)", val);
-				val = 3;
+				val = 15;
 			}
 
 			GP_PutPixel_Raw_4BPP_LE(ctx, x, y, val);
@@ -449,7 +509,8 @@ static int load_ascii_g4(FILE *f, GP_Context *ctx, GP_ProgressCallback *cb)
 	return 0;
 }
 
-static int load_ascii_g8(FILE *f, GP_Context *ctx, GP_ProgressCallback *cb)
+static int load_ascii_g8(struct buf *buf, GP_Context *ctx,
+                         GP_ProgressCallback *cb)
 {
 	uint32_t x, y;
 	int val, err;
@@ -457,12 +518,12 @@ static int load_ascii_g8(FILE *f, GP_Context *ctx, GP_ProgressCallback *cb)
 	for (y = 0; y < ctx->h; y++) {
 		for (x = 0; x < ctx->w; x++) {
 
-			if ((err = get_ascii_int(f, &val)))
+			if ((err = get_ascii_int(buf, &val)))
 				return err;
 
-			if (val > 15) {
-				GP_WARN("Value too large for 4BPP (%i)", val);
-				val = 3;
+			if (val > 255) {
+				GP_WARN("Value too large for 8BPP (%i)", val);
+				val = 255;
 			}
 
 			GP_PutPixel_Raw_8BPP(ctx, x, y, val);
@@ -478,14 +539,15 @@ static int load_ascii_g8(FILE *f, GP_Context *ctx, GP_ProgressCallback *cb)
 	return 0;
 }
 
-static int load_bin_g8(FILE *f, GP_Context *ctx, GP_ProgressCallback *cb)
+static int load_bin_g8(struct buf *buf, GP_Context *ctx,
+                       GP_ProgressCallback *cb)
 {
 	uint32_t y;
 
 	for (y = 0; y < ctx->h; y++) {
 		uint8_t *addr = GP_PIXEL_ADDR(ctx, 0, y);
 
-		if (fread(addr, ctx->w, 1, f) != 1)
+		if (fillb(buf, addr, ctx->w))
 			return errno;
 
 		if (GP_ProgressCallbackReport(cb, y, ctx->h, ctx->w)) {
@@ -498,7 +560,8 @@ static int load_bin_g8(FILE *f, GP_Context *ctx, GP_ProgressCallback *cb)
 	return 0;
 }
 
-static int load_ascii_rgb888(FILE *f, GP_Context *ctx, GP_ProgressCallback *cb)
+static int load_ascii_rgb888(struct buf *buf, GP_Context *ctx,
+                             GP_ProgressCallback *cb)
 {
 	uint32_t x, y;
 	int r, g, b, err;
@@ -506,7 +569,7 @@ static int load_ascii_rgb888(FILE *f, GP_Context *ctx, GP_ProgressCallback *cb)
 	for (y = 0; y < ctx->h; y++) {
 		for (x = 0; x < ctx->w; x++) {
 
-			if ((err = get_ascii_int(f, &r)))
+			if ((err = get_ascii_int(buf, &r)))
 				return err;
 
 			if (r > 255) {
@@ -514,7 +577,7 @@ static int load_ascii_rgb888(FILE *f, GP_Context *ctx, GP_ProgressCallback *cb)
 				r = 255;
 			}
 
-			if ((err = get_ascii_int(f, &g)))
+			if ((err = get_ascii_int(buf, &g)))
 				return err;
 
 			if (g > 255) {
@@ -522,7 +585,7 @@ static int load_ascii_rgb888(FILE *f, GP_Context *ctx, GP_ProgressCallback *cb)
 				g = 255;
 			}
 
-			if ((err = get_ascii_int(f, &b)))
+			if ((err = get_ascii_int(buf, &b)))
 				return err;
 
 			if (b > 255) {
@@ -544,14 +607,15 @@ static int load_ascii_rgb888(FILE *f, GP_Context *ctx, GP_ProgressCallback *cb)
 	return 0;
 }
 
-static int load_bin_rgb888(FILE *f, GP_Context *ctx, GP_ProgressCallback *cb)
+static int load_bin_rgb888(struct buf *buf, GP_Context *ctx,
+                           GP_ProgressCallback *cb)
 {
 	uint32_t y, x;
 
 	for (y = 0; y < ctx->h; y++) {
 		uint8_t *addr = GP_PIXEL_ADDR(ctx, 0, y);
 
-		if (fread(addr, ctx->w * 3, 1, f) != 1)
+		if (fillb(buf, addr, ctx->w * 3))
 			return errno;
 
 		for (x = 0; x < ctx->w; x++)
@@ -598,26 +662,7 @@ static int save_ascii(FILE *f, const GP_Context *ctx,
 	return 0;
 }
 
-static FILE *read_header(const char *src_path, struct pnm_header *header)
-{
-	FILE *f;
-	int err;
-
-	f = fopen(src_path, "r");
-
-	if (f == NULL)
-		return NULL;
-
-	if ((err = load_header(f, header))) {
-		fclose(f);
-		errno = err;
-		return NULL;
-	}
-
-	return f;
-}
-
-static GP_Context *read_bitmap(FILE *f, struct pnm_header *header, int flag,
+static GP_Context *read_bitmap(struct buf *buf, struct pnm_header *header,
                                GP_ProgressCallback *callback)
 {
 	GP_Context *ret;
@@ -637,38 +682,53 @@ static GP_Context *read_bitmap(FILE *f, struct pnm_header *header, int flag,
 	}
 
 	if (header->magic == '1')
-		err = load_ascii_g1_inv(f, ret, callback);
+		err = load_ascii_g1_inv(buf, ret, callback);
 	else
-		err = load_raw_g1_inv(f, ret, callback);
+		err = load_raw_g1_inv(buf, ret, callback);
 
 	if (err)
 		goto err1;
 
-	if (flag)
-		fclose(f);
-
 	return ret;
 err1:
 	GP_ContextFree(ret);
-
-	if (flag)
-		fclose(f);
 err0:
 	errno = err;
 	return NULL;
 }
 
-GP_Context *GP_LoadPBM(const char *src_path, GP_ProgressCallback *callback)
+GP_Context *GP_ReadPBM(GP_IO *io, GP_ProgressCallback *callback)
 {
 	struct pnm_header header;
-	FILE *f;
+	DECLARE_BUFFER(buf, io);
+	int err;
 
-	f = read_header(src_path, &header);
+	err = load_header(&buf, &header);
+	if (err) {
+		errno = err;
+		return NULL;
+	}
 
-	if (f == NULL)
+	return read_bitmap(&buf, &header, callback);
+}
+
+GP_Context *GP_LoadPBM(const char *src_path, GP_ProgressCallback *callback)
+{
+	GP_IO *io;
+	GP_Context *res;
+	int err;
+
+	io = GP_IOFile(src_path, GP_IO_RDONLY);
+	if (!io)
 		return NULL;
 
-	return read_bitmap(f, &header, 1, callback);
+	res = GP_ReadPBM(io, callback);
+
+	err = errno;
+	GP_IOClose(io);
+	errno = err;
+
+	return res;
 }
 
 int GP_SavePBM(const GP_Context *src, const char *dst_path,
@@ -728,44 +788,44 @@ static GP_Pixel depth_to_pixel(int depth)
 	}
 }
 
-static int load_ascii_graymap(FILE *f, struct pnm_header *header,
+static int load_ascii_graymap(struct buf *buf, struct pnm_header *header,
                               GP_Context *ret, GP_ProgressCallback *callback)
 {
 	int err = ENOSYS;
 
 	switch (header->depth) {
 	case 1:
-		err = load_ascii_g1(f, ret, callback);
+		err = load_ascii_g1(buf, ret, callback);
 	break;
 	case 3:
-		err = load_ascii_g2(f, ret, callback);
+		err = load_ascii_g2(buf, ret, callback);
 	break;
 	case 15:
-		err = load_ascii_g4(f, ret, callback);
+		err = load_ascii_g4(buf, ret, callback);
 	break;
 	case 255:
-		err = load_ascii_g8(f, ret, callback);
+		err = load_ascii_g8(buf, ret, callback);
 	break;
 	}
 
 	return err;
 }
 
-static int load_bin_graymap(FILE *f, struct pnm_header *header,
+static int load_bin_graymap(struct buf *buf, struct pnm_header *header,
                             GP_Context *ret, GP_ProgressCallback *callback)
 {
 	int err = ENOSYS;
 
 	switch (header->depth) {
 	case 255:
-		err = load_bin_g8(f, ret, callback);
+		err = load_bin_g8(buf, ret, callback);
 	break;
 	}
 
 	return err;
 }
 
-static GP_Context *read_graymap(FILE *f, struct pnm_header *header, int flag,
+static GP_Context *read_graymap(struct buf *buf, struct pnm_header *header,
                                 GP_ProgressCallback *callback)
 {
 	GP_Context *ret;
@@ -792,38 +852,53 @@ static GP_Context *read_graymap(FILE *f, struct pnm_header *header, int flag,
 	}
 
 	if (header->magic == '5')
-		err = load_bin_graymap(f, header, ret, callback);
+		err = load_bin_graymap(buf, header, ret, callback);
 	else
-		err = load_ascii_graymap(f, header, ret, callback);
+		err = load_ascii_graymap(buf, header, ret, callback);
 
 	if (err)
 		goto err1;
 
-	if (flag)
-		fclose(f);
-
 	return ret;
 err1:
 	GP_ContextFree(ret);
-
-	if (flag)
-		fclose(f);
 err0:
 	errno = err;
 	return NULL;
 }
 
-GP_Context *GP_LoadPGM(const char *src_path, GP_ProgressCallback *callback)
+GP_Context *GP_ReadPGM(GP_IO *io, GP_ProgressCallback *callback)
 {
 	struct pnm_header header;
-	FILE *f;
+	DECLARE_BUFFER(buf, io);
+	int err;
 
-	f = read_header(src_path, &header);
+	err = load_header(&buf, &header);
+	if (err) {
+		errno = err;
+		return NULL;
+	}
 
-	if (f == NULL)
+	return read_graymap(&buf, &header, callback);
+}
+
+GP_Context *GP_LoadPGM(const char *src_path, GP_ProgressCallback *callback)
+{
+	GP_IO *io;
+	GP_Context *res;
+	int err;
+
+	io = GP_IOFile(src_path, GP_IO_RDONLY);
+	if (!io)
 		return NULL;
 
-	return read_graymap(f, &header, 1, callback);
+	res = GP_ReadPGM(io, callback);
+
+	err = errno;
+	GP_IOClose(io);
+	errno = err;
+
+	return res;
 }
 
 static int pixel_to_depth(GP_Pixel pixel)
@@ -891,11 +966,11 @@ err0:
 	return 1;
 }
 
-static GP_Context *read_pixmap(FILE *f, struct pnm_header *header, int flag,
-                                GP_ProgressCallback *callback)
+static GP_Context *read_pixmap(struct buf *buf, struct pnm_header *header,
+                               GP_ProgressCallback *callback)
 {
 	GP_Context *ret;
-	int err;
+	int err = 0;
 
 	if (!is_pixmap(header->magic)) {
 		GP_DEBUG(1, "Invalid Pixmap magic P%c", header->magic);
@@ -918,40 +993,56 @@ static GP_Context *read_pixmap(FILE *f, struct pnm_header *header, int flag,
 
 	switch (header->magic) {
 	case '3':
-		if ((err = load_ascii_rgb888(f, ret, callback)))
-			goto err1;
+		err = load_ascii_rgb888(buf, ret, callback);
 	break;
 	case '6':
-		if ((err = load_bin_rgb888(f, ret, callback)))
-			goto err1;
+		err = load_bin_rgb888(buf, ret, callback);
 	break;
 	}
 
-	if (flag)
-		fclose(f);
+	if (err)
+		goto err1;
 
 	return ret;
 err1:
 	GP_ContextFree(ret);
-
-	if (flag)
-		fclose(f);
 err0:
 	errno = err;
 	return NULL;
 }
 
-GP_Context *GP_LoadPPM(const char *src_path, GP_ProgressCallback *callback)
+GP_Context *GP_ReadPPM(GP_IO *io, GP_ProgressCallback *callback)
 {
 	struct pnm_header header;
-	FILE *f;
+	DECLARE_BUFFER(buf, io);
+	int err;
 
-	f = read_header(src_path, &header);
+	err = load_header(&buf, &header);
+	if (err) {
+		errno = err;
+		return NULL;
+	}
 
-	if (f == NULL)
+	return read_pixmap(&buf, &header, callback);
+}
+
+GP_Context *GP_LoadPPM(const char *src_path, GP_ProgressCallback *callback)
+{
+	GP_IO *io;
+	GP_Context *res;
+	int err;
+
+	io = GP_IOFile(src_path, GP_IO_RDONLY);
+	if (!io)
 		return NULL;
 
-	return read_pixmap(f, &header, 1, callback);
+	res = GP_ReadPPM(io, callback);
+
+	err = errno;
+	GP_IOClose(io);
+	errno = err;
+
+	return res;
 }
 
 static int write_binary_ppm(FILE *f, GP_Context *src)
@@ -1072,40 +1163,48 @@ err0:
 	return 1;
 }
 
-GP_Context *GP_LoadPNM(const char *src_path, GP_ProgressCallback *callback)
+GP_Context *GP_ReadPNM(GP_IO *io, GP_ProgressCallback *callback)
 {
-	FILE *f;
-	GP_Context *ret = NULL;
 	struct pnm_header header;
+	DECLARE_BUFFER(buf, io);
+	GP_Context *ret = NULL;
 	int err;
 
-	f = fopen(src_path, "r");
-
-	if (f == NULL) {
-		err = errno;
-		GP_DEBUG(1, "Failed to open file '%s': %s",
-		         src_path, strerror(errno));
-		goto err0;
+	err = load_header(&buf, &header);
+	if (err) {
+		errno = err;
+		return NULL;
 	}
 
-	if ((err = load_header(f, &header)))
-		goto err1;
-
 	if (is_bitmap(header.magic))
-		ret = read_bitmap(f, &header, 1, callback);
+		ret = read_bitmap(&buf, &header, callback);
 
 	if (is_graymap(header.magic))
-		ret = read_graymap(f, &header, 1, callback);
+		ret = read_graymap(&buf, &header, callback);
 
 	if (is_pixmap(header.magic))
-		ret = read_pixmap(f, &header, 1, callback);
+		ret = read_pixmap(&buf, &header, callback);
 
 	return ret;
-err1:
-	fclose(f);
-err0:
+}
+
+GP_Context *GP_LoadPNM(const char *src_path, GP_ProgressCallback *callback)
+{
+	GP_IO *io;
+	GP_Context *res;
+	int err;
+
+	io = GP_IOFile(src_path, GP_IO_RDONLY);
+	if (!io)
+		return NULL;
+
+	res = GP_ReadPNM(io, callback);
+
+	err = errno;
+	GP_IOClose(io);
 	errno = err;
-	return NULL;
+
+	return res;
 }
 
 int GP_SavePNM(const GP_Context *src, const char *dst_path,

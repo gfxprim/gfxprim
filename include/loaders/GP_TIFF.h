@@ -16,7 +16,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2013 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2014 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
@@ -25,39 +25,18 @@
 
 #include "core/GP_Context.h"
 #include "core/GP_ProgressCallback.h"
+#include "loaders/GP_IO.h"
 
 /*
- * The possible errno values:
+ * Reads first image in TIFF from an IO stream.
  *
- * - Anything FILE operation may return (fopen(), fclose(), fseek(), ...).
- * - EIO for fread()/fwrite() failure
- * - ENOSYS for not implemented bitmap format
- * - ENOMEM from malloc()
- * - EILSEQ for wrong image signature/data
- * - ECANCELED when call was aborted from callback
+ * Returns newly allocated context cotaining the loaded image or in case of
+ * failure NULL and errno is set.
  */
+GP_Context *GP_ReadTIFF(GP_IO *io, GP_ProgressCallback *callback);
 
 /*
- * Opens up a bmp file, checks signature, parses metadata.
- *
- * The file, width, height and pixel type are filled upon succcessful return.
- *
- * Upon failure, non zero return value is returned and errno is filled.
- */
-int GP_OpenTIFF(const char *src_path, void **t);
-
-/*
- * Reads a TIFF from a opened file.
- *
- * Upon successful return, context to store bitmap is allocated and image is
- * loaded.
- *
- * Upon failure NULL is returned and errno is filled.
- */
-GP_Context *GP_ReadTIFF(void *t, GP_ProgressCallback *callback);
-
-/*
- * Does both GP_OpenTIFF and GP_ReadTIFF.
+ * Loads fist image in TIFF from a file.
  */
 GP_Context *GP_LoadTIFF(const char *src_path, GP_ProgressCallback *callback);
 
@@ -68,7 +47,7 @@ int GP_SaveTIFF(const GP_Context *src, const char *dst_path,
                  GP_ProgressCallback *callback);
 
 /*
- * Match TIFF signature.
+ * Looks for TIFF file signature. Returns non-zero if found.
  */
 int GP_MatchTIFF(const void *buf);
 

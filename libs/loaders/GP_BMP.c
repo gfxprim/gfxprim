@@ -16,7 +16,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2013 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2014 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
@@ -24,7 +24,7 @@
 
   BMP loader and writer.
 
-  Thanks Wikipedia for the format specification.
+  Thanks Wikipedia for excellent format specification.
 
  */
 
@@ -45,12 +45,6 @@
 #include "loaders/GP_BMP.h"
 
 #define BMP_HEADER_OFFSET  0x0a       /* info header offset - 4 bytes */
-
-#define BUF_TO_4(buf, off) \
-	(buf[off] + (buf[off+1]<<8) + (buf[off+2]<<16) + (buf[off+3]<<24))
-
-#define BUF_TO_2(buf, off) \
-	(buf[off] + (buf[off+1]<<8))
 
 struct bitmap_info_header {
 	/*
@@ -155,16 +149,19 @@ static uint32_t get_palette_size(struct bitmap_info_header *header)
 	return (1 << header->bpp);
 }
 
-static int read_bitfields(FILE *f, struct bitmap_info_header *header)
+static int read_bitfields(GP_IO *io, struct bitmap_info_header *header)
 {
-	int ret;
+	uint16_t bitfields[] = {
+		GP_IO_L4, /* red mask */
+		GP_IO_L4, /* green mask */
+		GP_IO_L4, /* blue mask */
+		GP_IO_END
+	};
 
-	ret = GP_FRead(f, "L4 L4 L4",
+	if (GP_IOReadF(io, bitfields,
 	               &header->R_mask,
 	               &header->G_mask,
-	               &header->B_mask);
-
-	if (ret != 3) {
+	               &header->B_mask) != 3) {
 		GP_DEBUG(1, "Failed to read BITFIELDS");
 		return EIO;
 	}
@@ -177,17 +174,21 @@ static int read_bitfields(FILE *f, struct bitmap_info_header *header)
 	return 0;
 }
 
-static int read_alphabitfields(FILE *f, struct bitmap_info_header *header)
+static int read_alphabitfields(GP_IO *io, struct bitmap_info_header *header)
 {
-	int ret;
+	uint16_t abitfields[] = {
+		GP_IO_L4, /* red mask */
+		GP_IO_L4, /* green mask */
+		GP_IO_L4, /* blue mask */
+		GP_IO_L4, /* alpha mask */
+		GP_IO_END
+	};
 
-	ret = GP_FRead(f, "L4 L4 L4 L4",
+	if (GP_IOReadF(io, abitfields,
 	               &header->R_mask,
 	               &header->G_mask,
 	               &header->B_mask,
-	               &header->A_mask);
-
-	if (ret != 4) {
+	               &header->A_mask) != 4) {
 		GP_DEBUG(1, "Failed to read BITFIELDS");
 		return EIO;
 	}
@@ -199,11 +200,23 @@ static int read_alphabitfields(FILE *f, struct bitmap_info_header *header)
 	return 0;
 }
 
-static int read_bitmap_info_header(FILE *f, struct bitmap_info_header *header)
+static int read_bitmap_info_header(GP_IO *io, struct bitmap_info_header *header)
 {
 	uint16_t nr_planes;
 
-	if (GP_FRead(f, "L4 L4 L2 L2 L4 I12 L4 I4",
+	uint16_t bmp_info_header[] = {
+		GP_IO_L4, /* width */
+		GP_IO_L4, /* height */
+		GP_IO_L2, /* number of planes */
+		GP_IO_L2, /* bpp */
+		GP_IO_L4, /* compression type */
+		GP_IO_IGN | 12, /* bitmap size in bytes, resolution */
+		GP_IO_L4, /* palette colors */
+		GP_IO_I4, /* number of significant colors */
+		GP_IO_END
+	};
+
+	if (GP_IOReadF(io, bmp_info_header,
 	             &header->w, &header->h, &nr_planes, &header->bpp,
 		     &header->compress_type, &header->palette_colors) != 8) {
 
@@ -227,38 +240,45 @@ static int read_bitmap_info_header(FILE *f, struct bitmap_info_header *header)
 		switch (header->header_size) {
 		case BITMAPINFOHEADER:
 		case BITMAPINFOHEADER2:
-			return read_bitfields(f, header);
+			return read_bitfields(io, header);
 		default:
 			/* Alpha is default in BITMAPINFOHEADER3 and newer */
-			return read_alphabitfields(f, header);
+			return read_alphabitfields(io, header);
 		}
 	/* Only in BITMAPINFOHEADER */
 	case COMPRESS_ALPHABITFIELDS:
 		if (header->header_size != BITMAPINFOHEADER)
 			GP_DEBUG(1, "Unexpected ALPHABITFIELDS in %s",
 			         bitmap_header_size_name(header->header_size));
-		return read_alphabitfields(f, header);
+		return read_alphabitfields(io, header);
 	}
 
 	return 0;
 }
 
-static int read_bitmap_core_header(FILE *f, struct bitmap_info_header *header)
+static int read_bitmap_core_header(GP_IO *io, struct bitmap_info_header *header)
 {
-	uint8_t buf[12];
+	int16_t nr_planes, w, h;
 
-	if (fread(buf, 1, sizeof(buf), f) != sizeof(buf)) {
+	uint16_t bmp_core_header[] = {
+		GP_IO_L2, /* width */
+		GP_IO_L2, /* height */
+		GP_IO_L2, /* number of planes */
+		GP_IO_L2, /* bpp */
+		//GP_IO_I4,//TODO read till 12?
+		GP_IO_END
+	};
+
+	if (GP_IOReadF(io, bmp_core_header, &w, &h,
+	               &nr_planes, &header->bpp) != 4) {
 		GP_DEBUG(1, "Failed to read bitmap core header");
 		return EIO;
 	}
 
-	header->w = BUF_TO_2(buf, 0);
-	header->h = BUF_TO_2(buf, 2);
-	header->bpp = BUF_TO_2(buf, 6);
+	header->w = w;
+	header->h = h;
 	header->compress_type = COMPRESS_RGB;
 	header->palette_colors = 0;
-
-	uint16_t nr_planes = BUF_TO_2(buf, 4);
 
 	/* This must be 1 according to specs */
 	if (nr_planes != 1)
@@ -271,33 +291,32 @@ static int read_bitmap_core_header(FILE *f, struct bitmap_info_header *header)
 	return 0;
 }
 
-static int read_bitmap_header(FILE *f, struct bitmap_info_header *header)
+static int read_bitmap_header(GP_IO *io, struct bitmap_info_header *header)
 {
-	uint8_t buf[8];
 	int err;
 
-	if (fseek(f, BMP_HEADER_OFFSET, SEEK_SET)) {
-		err = errno;
-		GP_DEBUG(1, "fseek(f, 0x%02x) failed: '%s'",
-		            BMP_HEADER_OFFSET, strerror(errno));
-		return err;
-	}
+	uint16_t bmp_header[] = {
+		'B',
+		'M',
+		GP_IO_IGN | (4 + 2 + 2), /* 4 bytes filesize + 4 bytes reserved */
+		GP_IO_L4, /* offset to pixel data */
+		GP_IO_L4, /* info header size */
+		GP_IO_END,
+	};
 
-	/* Read info header size, header size determines header type */
-	if (fread(buf, 1, sizeof(buf), f) != sizeof(buf)) {
-		GP_DEBUG(1, "Failed to read info header size");
+	if (GP_IOReadF(io, bmp_header, &header->pixel_offset,
+	                 &header->header_size) != 5) {
+		GP_DEBUG(1, "Failed to read header");
+		//TODO: EIO vs EINVAL
 		return EIO;
 	}
-
-	header->pixel_offset = BUF_TO_4(buf, 0);
-	header->header_size = BUF_TO_4(buf, 4);
 
 	GP_DEBUG(2, "BMP header type '%s'",
 	            bitmap_header_size_name(header->header_size));
 
 	switch (header->header_size) {
 	case BITMAPCOREHEADER:
-		err = read_bitmap_core_header(f, header);
+		err = read_bitmap_core_header(io, header);
 	break;
 	case BITMAPCOREHEADER2:
 		return ENOSYS;
@@ -306,11 +325,11 @@ static int read_bitmap_header(FILE *f, struct bitmap_info_header *header)
 	case BITMAPINFOHEADER2:
 	case BITMAPINFOHEADER3:
 	case BITMAPINFOHEADER4:
-		err = read_bitmap_info_header(f, header);
+		err = read_bitmap_info_header(io, header);
 	break;
 	default:
 		GP_DEBUG(1, "Unknown header type, continuing anyway");
-		err = read_bitmap_info_header(f, header);
+		err = read_bitmap_info_header(io, header);
 	break;
 	};
 
@@ -320,7 +339,7 @@ static int read_bitmap_header(FILE *f, struct bitmap_info_header *header)
 /*
  * Reads palette, the format is R G B X, each one byte.
  */
-static int read_bitmap_palette(FILE *f, struct bitmap_info_header *header,
+static int read_bitmap_palette(GP_IO *io, struct bitmap_info_header *header,
                                GP_Pixel *palette)
 {
 	uint32_t palette_colors = get_palette_size(header);
@@ -342,22 +361,24 @@ static int read_bitmap_palette(FILE *f, struct bitmap_info_header *header,
 	            "pixel size %"PRIu8"bytes",
 		    palette_offset, palette_offset, pixel_size);
 
-	if (fseek(f, palette_offset, SEEK_SET)) {
+	if (GP_IOSeek(io, palette_offset, GP_IO_SEEK_SET) != palette_offset) {
 		err = errno;
-		GP_DEBUG(1, "fseek(f, 0x%02x) failed: '%s'",
+		GP_DEBUG(1, "Seek to 0x%02x failed: '%s'",
 		            BMP_HEADER_OFFSET, strerror(errno));
 		return err;
 	}
 
+	uint8_t buf[pixel_size * palette_colors];
+
+	if (GP_IOFill(io, buf, sizeof(buf))) {
+		GP_DEBUG(1, "Failed to read palette: %s", strerror(errno));
+		return EIO;
+	}
+
 	for (i = 0; i < palette_colors; i++) {
-		uint8_t buf[4];
+		unsigned int j = i * pixel_size;
 
-		if (fread(buf, 1, pixel_size, f) != pixel_size) {
-			GP_DEBUG(1, "Failed to read palette %"PRIu32, i);
-			return EIO;
-		}
-
-		palette[i] = GP_Pixel_CREATE_RGB888(buf[2], buf[1], buf[0]);
+		palette[i] = GP_Pixel_CREATE_RGB888(buf[j+2], buf[j+1], buf[j]);
 
 		GP_DEBUG(3, "Palette[%"PRIu32"] = [0x%02x, 0x%02x, 0x%02x]", i,
 		         GP_Pixel_GET_R_RGB888(palette[i]),
@@ -368,17 +389,17 @@ static int read_bitmap_palette(FILE *f, struct bitmap_info_header *header,
 	return 0;
 }
 
-static int seek_pixels_offset(struct bitmap_info_header *header, FILE *f)
+static int seek_pixels_offset(GP_IO *io, struct bitmap_info_header *header)
 {
 	int err;
 
 	GP_DEBUG(2, "Offset to BMP pixels is 0x%x (%ubytes)",
 	            header->pixel_offset, header->pixel_offset);
 
-	if (fseek(f, header->pixel_offset, SEEK_SET)) {
+	if (GP_IOSeek(io, header->pixel_offset, GP_IO_SEEK_SET) != header->pixel_offset) {
 		err = errno;
-		GP_DEBUG(1, "fseek(f, 0x%02x) failed: '%s'",
-		            header->pixel_offset, strerror(errno));
+		GP_DEBUG(1, "Seek to 0x%02x failed: %s",
+		            header->pixel_offset, strerror(err));
 		return err;
 	}
 
@@ -482,17 +503,17 @@ static uint8_t get_idx(struct bitmap_info_header *header,
 
 #include "GP_BMP_RLE.h"
 
-static int read_palette(FILE *f, struct bitmap_info_header *header,
+static int read_palette(GP_IO *io, struct bitmap_info_header *header,
                         GP_Context *context, GP_ProgressCallback *callback)
 {
 	uint32_t palette_size = get_palette_size(header);
 	GP_Pixel palette[get_palette_size(header)];
 	int err;
 
-	if ((err = read_bitmap_palette(f, header, palette)))
+	if ((err = read_bitmap_palette(io, header, palette)))
 		return err;
 
-	if ((err = seek_pixels_offset(header, f)))
+	if ((err = seek_pixels_offset(io, header)))
 		return err;
 
 	uint32_t row_size = bitmap_row_size(header);
@@ -502,9 +523,11 @@ static int read_palette(FILE *f, struct bitmap_info_header *header,
 		int32_t x;
 		uint8_t row[row_size];
 
-		if (fread(row, 1, row_size, f) != row_size) {
-			GP_DEBUG(1, "Failed to read row %"PRId32, y);
-			return EIO;
+		if (GP_IOFill(io, row, row_size)) {
+			err = errno;
+			GP_DEBUG(1, "Failed to read row %"PRId32": %s",
+			         y, strerror(errno));
+			return err;
 		}
 
 		for (x = 0; x < header->w; x++) {
@@ -539,16 +562,29 @@ static int read_palette(FILE *f, struct bitmap_info_header *header,
 	return 0;
 }
 
-static int read_bitfields_or_rgb(FILE *f, struct bitmap_info_header *header,
+static int read_bitfields_or_rgb(GP_IO *io, struct bitmap_info_header *header,
                                  GP_Context *context,
                                  GP_ProgressCallback *callback)
 {
 	uint32_t row_size = header->w * (header->bpp / 8);
+	uint32_t row_padd = 0;
 	int32_t y;
 	int err;
 
-	if ((err = seek_pixels_offset(header, f)))
+	if ((err = seek_pixels_offset(io, header)))
 		return err;
+
+	/* Rows are four byte aligned */
+	switch (row_size % 4) {
+	case 1:
+		row_padd++;
+	case 2:
+		row_padd++;
+	case 3:
+		row_padd++;
+	case 0:
+	break;
+	}
 
 	for (y = 0; y < GP_ABS(header->h); y++) {
 		int32_t ry;
@@ -560,21 +596,20 @@ static int read_bitfields_or_rgb(FILE *f, struct bitmap_info_header *header,
 
 		uint8_t *row = GP_PIXEL_ADDR(context, 0, ry);
 
-		if (fread(row, 1, row_size, f) != row_size) {
-			GP_DEBUG(1, "Failed to read row %"PRId32, y);
-			return EIO;
+		if (GP_IOFill(io, row, row_size)) {
+			err = errno;
+			GP_DEBUG(1, "Failed to read row %"PRId32": %s",
+			         y, strerror(err));
+			return err;
 		}
 
-		/* Rows are four byte aligned */
-		switch (row_size % 4) {
-		case 1:
-			fgetc(f);
-		case 2:
-			fgetc(f);
-		case 3:
-			fgetc(f);
-		case 0:
-		break;
+		if (row_padd) {
+			if (GP_IOSeek(io, row_padd, GP_IO_SEEK_CUR) == (off_t)-1) {
+				err = errno;
+				GP_DEBUG(1, "Failed to seek row %"PRId32": %s",
+				         y, strerror(err));
+				return err;
+			}
 		}
 
 		if (GP_ProgressCallbackReport(callback, y,
@@ -588,11 +623,11 @@ static int read_bitfields_or_rgb(FILE *f, struct bitmap_info_header *header,
 	return 0;
 }
 
-static int read_bitmap_pixels(FILE *f, struct bitmap_info_header *header,
+static int read_bitmap_pixels(GP_IO *io, struct bitmap_info_header *header,
                               GP_Context *context, GP_ProgressCallback *callback)
 {
 	if (header->compress_type == COMPRESS_RLE8)
-		return read_RLE8(f, header, context, callback);
+		return read_RLE8(io, header, context, callback);
 
 	switch (header->bpp) {
 	case 1:
@@ -600,11 +635,11 @@ static int read_bitmap_pixels(FILE *f, struct bitmap_info_header *header,
 	case 2:
 	case 4:
 	case 8:
-		return read_palette(f, header, context, callback);
+		return read_palette(io, header, context, callback);
 	case 16:
 	case 24:
 	case 32:
-		return read_bitfields_or_rgb(f, header, context, callback);
+		return read_bitfields_or_rgb(io, header, context, callback);
 	}
 
 	return ENOSYS;
@@ -615,68 +650,19 @@ int GP_MatchBMP(const void *buf)
 	return !memcmp(buf, "BM", 2);
 }
 
-int GP_OpenBMP(const char *src_path, FILE **f,
-               GP_Size *w, GP_Size *h, GP_PixelType *pixel_type)
-{
-	int err;
-
-	*f = fopen(src_path, "rb");
-
-	if (*f == NULL) {
-		err = errno;
-		GP_DEBUG(1, "Failed to open '%s' : %s",
-		            src_path, strerror(errno));
-		goto err2;
-	}
-
-	int ch1 = fgetc(*f);
-	int ch2 = fgetc(*f);
-
-	if (ch1 != 'B' || ch2 != 'M') {
-		GP_DEBUG(1, "Unexpected bitmap header 0x%02x (%c) 0x%02x (%c)",
-		            ch1, isascii(ch1) ? ch1 : ' ',
-			    ch2, isascii(ch2) ? ch2 : ' ');
-		err = EIO;
-		goto err1;
-	}
-
-	if (w != NULL || h != NULL || pixel_type != NULL) {
-		struct bitmap_info_header header;
-
-		if ((err = read_bitmap_header(*f, &header)))
-			goto err1;
-
-		if (w != NULL)
-			*w = header.w;
-
-		if (h != NULL)
-			*h = header.h;
-
-		if (pixel_type != NULL)
-			*pixel_type = match_pixel_type(&header);
-	}
-
-	return 0;
-err1:
-	fclose(*f);
-err2:
-	errno = err;
-	return 1;
-}
-
-GP_Context *GP_ReadBMP(FILE *f, GP_ProgressCallback *callback)
+GP_Context *GP_ReadBMP(GP_IO *io, GP_ProgressCallback *callback)
 {
 	struct bitmap_info_header header;
 	GP_PixelType pixel_type;
 	GP_Context *context;
 	int err;
 
-	if ((err = read_bitmap_header(f, &header)))
+	if ((err = read_bitmap_header(io, &header)))
 		goto err1;
 
 	if (header.w <= 0 || header.h == 0) {
 		GP_WARN("Width and/or Height is not > 0");
-		err = EIO;
+		err = EINVAL;
 		goto err1;
 	}
 
@@ -705,7 +691,7 @@ GP_Context *GP_ReadBMP(FILE *f, GP_ProgressCallback *callback)
 		goto err1;
 	}
 
-	if ((err = read_bitmap_pixels(f, &header, context, callback)))
+	if ((err = read_bitmap_pixels(io, &header, context, callback)))
 		goto err2;
 
 	return context;
@@ -718,14 +704,19 @@ err1:
 
 GP_Context *GP_LoadBMP(const char *src_path, GP_ProgressCallback *callback)
 {
-	FILE *f;
+	GP_IO *io;
 	GP_Context *res;
+	int err;
 
-	if (GP_OpenBMP(src_path, &f, NULL, NULL, NULL))
+	io = GP_IOFile(src_path, GP_IO_RDONLY);
+	if (!io)
 		return NULL;
 
-	res = GP_ReadBMP(f, callback);
-	fclose(f);
+	res = GP_ReadBMP(io, callback);
+
+	err = errno;
+	GP_IOClose(io);
+	errno = err;
 
 	return res;
 }

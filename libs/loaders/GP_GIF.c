@@ -16,7 +16,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2014 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
@@ -38,7 +38,8 @@
 #include "core/GP_Fill.h"
 #include "core/GP_Debug.h"
 
-#include "GP_GIF.h"
+#include "loaders/GP_IO.h"
+#include "loaders/GP_GIF.h"
 
 #ifdef HAVE_GIFLIB
 
@@ -61,39 +62,11 @@ int GP_MatchGIF(const void *buf)
 	return 0;
 }
 
-int GP_OpenGIF(const char *src_path, void **f)
+static int gif_input_func(GifFileType* gif, GifByteType* bytes, int size)
 {
-	GifFileType *gf;
+	GP_IO *io = gif->UserData;
 
-	errno = 0;
-
-#if defined(GIFLIB_MAJOR) && GIFLIB_MAJOR >= 5
-	gf = DGifOpenFileName(src_path, NULL);
-#else
-	gf = DGifOpenFileName(src_path);
-#endif
-
-	if (gf == NULL) {
-		/*
-		 * The giflib uses open() so when we got a failure and errno
-		 * is set => open() has failed.
-		 *
-		 * When errno is not set the file content was not valid so we
-		 * set errno to EIO.
-		 */
-		if (errno == 0)
-			errno = EIO;
-
-		return 1;
-	}
-
-	GP_DEBUG(1, "Have GIF image %ix%i, %i colors, %i bpp",
-	         gf->SWidth, gf->SHeight, gf->SColorResolution,
-		 gf->SColorMap ? gf->SColorMap->BitsPerPixel : -1);
-
-	*f = gf;
-
-	return 0;
+	return GP_IORead(io, bytes, size);
 }
 
 static const char *rec_type_name(GifRecordType rec_type)
@@ -255,14 +228,40 @@ static inline unsigned int interlace_real_y(GifFileType *gf, unsigned int y)
 	return 0;
 }
 
-GP_Context *GP_ReadGIF(void *f, GP_ProgressCallback *callback)
+GP_Context *GP_ReadGIF(GP_IO *io, GP_ProgressCallback *callback)
 {
-	GifFileType *gf = f;
+	GifFileType *gf;
 	GifRecordType rec_type;
 	GP_Context *res = NULL;
 	GP_Pixel bg;
 	int32_t x, y;
 	int err;
+
+	errno = 0;
+#if defined(GIFLIB_MAJOR) && GIFLIB_MAJOR >= 5
+	gf = DGifOpen(io, gif_input_func, NULL);
+#else
+	gf = DGifOpen(io, gif_input_func);
+#endif
+
+	if (gf == NULL) {
+		/*
+		 * The giflib uses open() so when we got a failure and errno
+		 * is set => open() has failed.
+		 *
+		 * When errno is not set the file content was not valid so we
+		 * set errno to EIO.
+		 */
+		if (errno == 0)
+			errno = EIO;
+
+		return NULL;
+	}
+
+	GP_DEBUG(1, "Have GIF image %ix%i, %i colors, %i bpp",
+	         gf->SWidth, gf->SHeight, gf->SColorResolution,
+		 gf->SColorMap ? gf->SColorMap->BitsPerPixel : -1);
+
 
 	do {
 		if (DGifGetRecordType(gf, &rec_type) != GIF_OK) {
@@ -361,12 +360,21 @@ err1:
 
 GP_Context *GP_LoadGIF(const char *src_path, GP_ProgressCallback *callback)
 {
-	void *f;
+	GP_IO *io;
+	GP_Context *res;
+	int err;
 
-	if (GP_OpenGIF(src_path, &f))
+	io = GP_IOFile(src_path, GP_IO_RDONLY);
+	if (!io)
 		return NULL;
 
-	return GP_ReadGIF(f, callback);
+	res = GP_ReadGIF(io, callback);
+
+	err = errno;
+	GP_IOClose(io);
+	errno = err;
+
+	return res;
 }
 
 #else
@@ -377,14 +385,7 @@ int GP_MatchGIF(const void GP_UNUSED(*buf))
 	return -1;
 }
 
-int GP_OpenGIF(const char GP_UNUSED(*src_path),
-               void GP_UNUSED(**f))
-{
-	errno = ENOSYS;
-	return 1;
-}
-
-GP_Context *GP_ReadGIF(void GP_UNUSED(*f),
+GP_Context *GP_ReadGIF(GP_IO GP_UNUSED(*io),
                        GP_ProgressCallback GP_UNUSED(*callback))
 {
 	errno = ENOSYS;
