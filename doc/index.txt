@@ -54,7 +54,7 @@ https://build.opensuse.org/package/show/home:metan/gfxprim[buildservice].
 Or download prebuild Debian
 http://gfxprim.ucw.cz/packages/debian/wheezy/[amd64 Wheezy packages].
 
-The GFXprim 1.0.0-rc1 has been released!
+The GFXprim 1.0.0-rc0 has been released!
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Download
