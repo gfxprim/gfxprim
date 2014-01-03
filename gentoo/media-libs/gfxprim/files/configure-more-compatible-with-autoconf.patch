@@ -1,0 +1,166 @@
+From 4ce30170690a4018166ed1e474dbbce264706958 Mon Sep 17 00:00:00 2001
+From: Cyril Hrubis <metan@ucw.cz>
+Date: Fri, 3 Jan 2014 17:40:18 +0100
+Subject: [PATCH] configure: Now more compatible with autoconf
+
+* Fix prefix handling
+
+  - now setting --foodir (mandir, bindir, ...) adds the --prefix only if the
+    value does not start with slash (i.e. local path)
+
+* Add a few compatibility options, i.e. infodir, sysconfdir, etc.
+
+* Move -fPIC and -pthread to config.mk so that it's not overridden by
+  CFLAGS from the build system
+
+Signed-off-by: Cyril Hrubis <metan@ucw.cz>
+---
+ config.mk  |  1 +
+ configure  | 36 ++++++++++++++++++++++++++++++++----
+ install.mk |  8 ++++----
+ install.sh |  6 +++---
+ pyinst.mk  |  2 +-
+ 5 files changed, 41 insertions(+), 12 deletions(-)
+
+diff --git a/config.mk b/config.mk
+index 9273375..82b349a 100644
+--- a/config.mk
++++ b/config.mk
+@@ -1,5 +1,6 @@
+ include $(TOPDIR)/config.gen.mk
+ 
++CFLAGS+=-fPIC -pthread
+ CFLAGS+=-I$(TOPDIR)/include/
+ LDFLAGS+=-L$(TOPDIR)/build/
+ 
+diff --git a/configure b/configure
+index 200bfc7..728a180 100755
+--- a/configure
++++ b/configure
+@@ -100,6 +100,23 @@ def check_for_python_config(cfg):
+         sys.stderr.write('Yes\n')
+ 
+ #
++# Adds prefix to *dir vars but only if the path does not start with '/'
++#
++def cfg_get_value(cfg_key):
++    if (cfg_key.endswith('dir')):
++        value = cfg[cfg_key][0]
++        if (value.startswith('/')):
++            return value
++        else:
++            prefix = cfg['prefix'][0]
++            if (prefix.endswith('/')):
++                return prefix + value
++            else:
++                return prefix + '/' + value
++    else:
++        return cfg[cfg_key][0]
++
++#
+ # Library checking api
+ #
+ class libraries:
+@@ -116,7 +133,8 @@ class libraries:
+         sys.stderr.write("----------------------\n")
+ 
+         for i in cfg:
+-            sys.stderr.write("%14s : '%s'\n" % (i, cfg[i][0]))
++            value = cfg_get_value(i)
++            sys.stderr.write("%14s : '%s'\n" % (i, value))
+             sys.stderr.write("              - %s\n\n" % cfg[i][1])
+ 
+         sys.stderr.write("Libraries to link against\n")
+@@ -250,8 +268,10 @@ def write_config_h(cfg, libs):
+ 
+ def write_config_mk(cfg, libs):
+     f = open('config.gen.mk', 'w')
++
+     for i in cfg:
+-        f.write("# %s\n%s=%s\n" % (cfg[i][1], i, cfg[i][0]))
++        f.write("# %s\n%s=%s\n" % (cfg[i][1], i, cfg_get_value(i)))
++
+     libs.write_config_mk(f);
+     f.close()
+     sys.stderr.write("Config 'config.gen.mk' written\n")
+@@ -303,7 +323,7 @@ if __name__ ==  '__main__':
+     # Dictionary for default configuration parameters
+     #
+     cfg = {'CC'            : ['gcc', 'Path/name of the C compiler'],
+-           'CFLAGS'        : ['-pthread -W -Wall -Wextra -fPIC -O2 -ggdb', 'C compiler flags'],
++           'CFLAGS'        : ['-W -Wall -Wextra -O2 -ggdb', 'C compiler flags'],
+            'PYTHON_BIN'    : ['python', 'Path/name of python interpreter'],
+            'SWIG'          : ['swig', 'Simplified Wrapper and Interface Generator'],
+            'PYTHON_CONFIG' : ['python-config', 'Python config helper'],
+@@ -313,7 +333,15 @@ if __name__ ==  '__main__':
+            'bindir'        : ['bin', 'Where to install binaries'],
+            'libdir'        : ['', 'Where to install libraries'],
+            'includedir'    : ['include', 'Where to install headers'],
+-           'mandir'        : ['share/man', 'Where to install man pages']}
++           'mandir'        : ['share/man', 'Where to install man pages'],
++           # Here comes autoconf compatibility cruft, not used for anything yet
++           'infodir'       : ['share/info', 'Where to install info pages'],
++           'datadir'       : ['share', 'Where to place readonly arch independend datafiles'],
++           'sysconfdir'    : ['etc', 'Where to place configuration'],
++           'localstatedir' : ['local/var/', 'Where to place runtime modified datafiles'],
++           'build'         : ['', 'WARNING not used'],
++           'host'          : ['', 'WARNING not used'],
++    }
+ 
+     #
+     # Library detection/enable disable
+diff --git a/install.mk b/install.mk
+index 991247a..4b777c0 100644
+--- a/install.mk
++++ b/install.mk
+@@ -1,13 +1,13 @@
+ ifdef DESTDIR
+-BIN_DIR=$(DESTDIR)$(prefix)/$(bindir)
++BIN_DIR=$(DESTDIR)/$(bindir)
+ else
+-BIN_DIR=$(prefix)/$(bindir)
++BIN_DIR=$(bindir)
+ endif
+ 
+ ifdef DESTDIR
+-MAN_DIR=$(DESTDIR)$(prefix)/$(mandir)/man1
++MAN_DIR=$(DESTDIR)/$(mandir)/man1
+ else
+-MAN_DIR=$(prefix)/$(mandir)/man1
++MAN_DIR=$(mandir)/man1
+ endif
+ 
+ install:
+diff --git a/install.sh b/install.sh
+index a0f8d83..dbb2ca8 100755
+--- a/install.sh
++++ b/install.sh
+@@ -5,9 +5,9 @@ LIBDIR="$2"
+ BINDIR="$3"
+ INCLUDEDIR="$4"
+ 
+-HEADER_LOC="${DESTDIR}$PREFIX/$INCLUDEDIR"
+-LIB_LOC="${DESTDIR}$PREFIX/$LIBDIR"
+-BIN_LOC="${DESTDIR}$PREFIX/$BINDIR"
++HEADER_LOC="${DESTDIR}/$INCLUDEDIR"
++LIB_LOC="${DESTDIR}/$LIBDIR"
++BIN_LOC="${DESTDIR}/$BINDIR"
+ 
+ # Headers
+ echo "INSTALL headers ($HEADER_LOC)"
+diff --git a/pyinst.mk b/pyinst.mk
+index f1323b6..4a273cb 100644
+--- a/pyinst.mk
++++ b/pyinst.mk
+@@ -6,7 +6,7 @@
+ ifdef SWIG
+ ifdef PYTHON_CONFIG
+ 
+-PY_INSTALL_PREFIX=$(prefix)/$(libdir)/python$(PYTHON_VER)/gfxprim/$(LIBNAME)
++PY_INSTALL_PREFIX=$(libdir)/python$(PYTHON_VER)/gfxprim/$(LIBNAME)
+ 
+ ifdef DESTDIR
+ PY_INSTALL_PREFIX:=$(DESTDIR)$(PY_INSTALL_PREFIX)
+-- 
+1.8.3.2
+
