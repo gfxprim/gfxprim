@@ -1,10 +1,10 @@
 TOPDIR=../..
 include $(TOPDIR)/pre.mk
 
-CSOURCES=loaders_suite.c PNG.c PBM.c PGM.c PPM.c ZIP.c
+CSOURCES=loaders_suite.c PNG.c PBM.c PGM.c PPM.c ZIP.c GIF.c
 GENSOURCES=SaveLoad.gen.c SaveAbort.gen.c
 
-APPS=loaders_suite PNG PBM PGM PPM SaveLoad.gen SaveAbort.gen ZIP
+APPS=loaders_suite PNG PBM PGM PPM SaveLoad.gen SaveAbort.gen ZIP GIF
 
 include ../tests.mk
 
