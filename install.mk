@@ -1,13 +1,13 @@
 ifdef DESTDIR
-BIN_DIR=$(DESTDIR)$(prefix)/$(bindir)
+BIN_DIR=$(DESTDIR)/$(bindir)
 else
-BIN_DIR=$(prefix)/$(bindir)
+BIN_DIR=$(bindir)
 endif
 
 ifdef DESTDIR
-MAN_DIR=$(DESTDIR)$(prefix)/$(mandir)/man1
+MAN_DIR=$(DESTDIR)/$(mandir)/man1
 else
-MAN_DIR=$(prefix)/$(mandir)/man1
+MAN_DIR=$(mandir)/man1
 endif
 
 install:

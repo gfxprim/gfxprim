@@ -6,7 +6,7 @@
 ifdef SWIG
 ifdef PYTHON_CONFIG
 
-PY_INSTALL_PREFIX=$(prefix)/$(libdir)/python$(PYTHON_VER)/gfxprim/$(LIBNAME)
+PY_INSTALL_PREFIX=$(libdir)/python$(PYTHON_VER)/gfxprim/$(LIBNAME)
 
 ifdef DESTDIR
 PY_INSTALL_PREFIX:=$(DESTDIR)$(PY_INSTALL_PREFIX)
