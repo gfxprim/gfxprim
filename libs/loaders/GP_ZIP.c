@@ -38,8 +38,7 @@
 #include "core/GP_Debug.h"
 
 #include "loaders/GP_ByteUtils.h"
-#include "loaders/GP_JPG.h"
-#include "loaders/GP_PNG.h"
+#include "loaders/GP_Loader.h"
 
 #include "loaders/GP_ZIP.h"
 
@@ -181,8 +180,6 @@ static int deflate_out(void *out_desc, unsigned char *buf, unsigned len)
 	struct deflate_outbuf *out = out_desc;
 
 	out->crc = crc32(out->crc, buf, len);
-	out->size += len;
-
 	memcpy(out->buf + out->size, buf, len);
 	out->size += len;
 
@@ -381,29 +378,19 @@ static GP_Context *zip_next_file(struct zip_priv *priv,
 
 		GP_IOMark(priv->io, GP_IO_MARK);
 
-		ret = GP_ReadJPG(priv->io, callback);
-
-		if (!ret) {
-			GP_IOMark(priv->io, GP_IO_REWIND);
-			ret = GP_ReadPNG(priv->io, callback);
-		}
+		ret = GP_ReadImage(priv->io, callback);
 
 		GP_IOSeek(priv->io, priv->io->mark + header.comp_size, GP_IO_SEEK_SET);
 
 		goto out;
 	break;
 	case COMPRESS_DEFLATE:
-		if (read_deflate(priv->io, &header, &io)) {
+		if ((err = read_deflate(priv->io, &header, &io))) {
 			err = errno;
 			goto out;
 		}
-
-		ret = GP_ReadJPG(io, callback);
-
-		if (!ret) {
-			GP_IORewind(io);
-			ret = GP_ReadPNG(io, callback);
-		}
+		GP_DEBUG(1, "Reading image");
+		ret = GP_ReadImage(io, callback);
 
 		GP_IOClose(io);
 		goto out;
