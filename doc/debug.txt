@@ -69,6 +69,8 @@ void GP_DebugPrint(int level, const char *file, const char *function, int line,
 Printf-like macros used to print debug messages. All of them calls the
 'GP_DebugPrint()' function with slightly different parameters.
 
+NOTE: 'GP_DebugPrint()' function preserves 'errno'.
+
 [source,c]
 -------------------------------------------------------------------------------
 enum GP_DebugType {

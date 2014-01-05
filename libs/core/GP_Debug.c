@@ -16,11 +16,12 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2013 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2014 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
 #include <stdarg.h>
+#include <errno.h>
 
 #include "core/GP_Version.h"
 #include "core/GP_Debug.h"
@@ -49,7 +50,9 @@ void GP_SetDebugHandler(void (*handler)(const struct GP_DebugMsg *msg))
 void GP_DebugPrint(int level, const char *file, const char *function, int line,
                    const char *fmt, ...)
 {
-	int i;
+	int i, err;
+
+	err = errno;
 
 	if (!env_used) {
 		char *level = getenv("GP_DEBUG");
@@ -72,7 +75,7 @@ void GP_DebugPrint(int level, const char *file, const char *function, int line,
 	}
 
 	if (level > (int)debug_level)
-		return;
+		goto end;
 
 	/* If handler is set, fill struct msg and call it */
 	if (debug_handler) {
@@ -93,7 +96,7 @@ void GP_DebugPrint(int level, const char *file, const char *function, int line,
 
 		debug_handler(&msg);
 
-		return;
+		goto end;
 	}
 
 	for (i = 1; i < level; i++)
@@ -124,4 +127,6 @@ void GP_DebugPrint(int level, const char *file, const char *function, int line,
 	va_end(va);
 
 	fputc('\n', stderr);
+end:
+	errno = err;
 }
