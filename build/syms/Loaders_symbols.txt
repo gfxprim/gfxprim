@@ -62,6 +62,7 @@ GP_LoadTmpFile
 
 GP_MatchSignature
 GP_MatchExtension
+GP_ReadImage
 GP_LoadImage
 GP_SaveImage
 GP_LoadMetaData

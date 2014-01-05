@@ -16,7 +16,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2013 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2014 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
@@ -32,14 +32,15 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <ctype.h>
 
 #include "core/GP_Debug.h"
 
-#include "GP_Loaders.h"
-
-#include "GP_Loader.h"
+#include "loaders/GP_Loaders.h"
+#include "loaders/GP_Loader.h"
 
 static GP_Loader psp_loader = {
+	.Read = GP_ReadPSP,
 	.Load = GP_LoadPSP,
 	.Save = NULL,
 	.Match = GP_MatchPSP,
@@ -49,6 +50,7 @@ static GP_Loader psp_loader = {
 };
 
 static GP_Loader pbm_loader = {
+	.Read = GP_ReadPBM,
 	.Load = GP_LoadPBM,
 	.Save = GP_SavePBM,
 	.Match = GP_MatchPBM,
@@ -58,6 +60,7 @@ static GP_Loader pbm_loader = {
 };
 
 static GP_Loader pgm_loader = {
+	.Read = GP_ReadPGM,
 	.Load = GP_LoadPGM,
 	.Save = GP_SavePGM,
 	.Match = GP_MatchPGM,
@@ -67,8 +70,9 @@ static GP_Loader pgm_loader = {
 };
 
 static GP_Loader ppm_loader = {
+	.Read = GP_ReadPPM,
 	.Load = GP_LoadPPM,
-	.Save = NULL,
+	.Save = GP_SavePPM,
 	.Match = GP_MatchPPM,
 	.fmt_name = "Netpbm portable Pixmap",
 	.next = &pgm_loader,
@@ -76,8 +80,9 @@ static GP_Loader ppm_loader = {
 };
 
 static GP_Loader pnm_loader = {
+	.Read = GP_ReadPNM,
 	.Load = GP_LoadPNM,
-	.Save = NULL,
+	.Save = GP_SavePNM,
 	/*
 	 * Avoid double Match
 	 * This format is covered by PBM, PGM and PPM
@@ -89,6 +94,7 @@ static GP_Loader pnm_loader = {
 };
 
 static GP_Loader jp2_loader = {
+	.Read = GP_ReadJP2,
 	.Load = GP_LoadJP2,
 	.Save = NULL,
 	.Match = GP_MatchJP2,
@@ -98,6 +104,7 @@ static GP_Loader jp2_loader = {
 };
 
 static GP_Loader bmp_loader = {
+	.Read = GP_ReadBMP,
 	.Load = GP_LoadBMP,
 	.Save = GP_SaveBMP,
 	.Match = GP_MatchBMP,
@@ -107,6 +114,7 @@ static GP_Loader bmp_loader = {
 };
 
 static GP_Loader gif_loader = {
+	.Read = GP_ReadGIF,
 	.Load = GP_LoadGIF,
 	.Save = NULL,
 	.Match = GP_MatchGIF,
@@ -116,6 +124,7 @@ static GP_Loader gif_loader = {
 };
 
 static GP_Loader tiff_loader = {
+	.Read = GP_ReadTIFF,
 	.Load = GP_LoadTIFF,
 	.Save = GP_SaveTIFF,
 	.Match = GP_MatchTIFF,
@@ -125,6 +134,7 @@ static GP_Loader tiff_loader = {
 };
 
 static GP_Loader png_loader = {
+	.Read = GP_ReadPNG,
 	.Load = GP_LoadPNG,
 	.Save = GP_SavePNG,
 	.Match = GP_MatchPNG,
@@ -134,6 +144,7 @@ static GP_Loader png_loader = {
 };
 
 static GP_Loader jpeg_loader = {
+	.Read = GP_ReadJPG,
 	.Load = GP_LoadJPG,
 	.Save = GP_SaveJPG,
 	.Match = GP_MatchJPG,
@@ -183,6 +194,7 @@ void GP_ListLoaders(void)
 
 	for (i = loaders; i != NULL; i = i->next) {
 		printf("Format: %s\n", i->fmt_name);
+		printf("Read:\t%s\n", i->Read ? "Yes" : "No");
 		printf("Load:\t%s\n", i->Load ? "Yes" : "No");
 		printf("Save:\t%s\n", i->Save ? "Yes" : "No");
 		printf("Match:\t%s\n", i->Match ? "Yes" : "No");
@@ -277,6 +289,52 @@ err1:
 err0:
 	errno = err;
 	return NULL;
+}
+
+GP_Context *GP_ReadImage(GP_IO *io, GP_ProgressCallback *callback)
+{
+	char buf[32];
+	off_t start;
+	const GP_Loader *loader;
+
+	start = GP_IOTell(io);
+	if (start == (off_t)-1) {
+		GP_DEBUG(1, "Failed to get IO stream offset: %s",
+		         strerror(errno));
+		return NULL;
+	}
+
+	if (GP_IOFill(io, buf, sizeof(buf))) {
+		GP_DEBUG(1, "Failed to read first 32 bytes: %s",
+		         strerror(errno));
+		return NULL;
+	}
+
+	if (GP_IOSeek(io, start, GP_IO_SEEK_SET) != start) {
+		GP_DEBUG(1, "Failed to seek at the start of the stream: %s",
+		         strerror(errno));
+		return NULL;
+	}
+
+	loader = GP_MatchSignature(buf);
+
+	if (!loader) {
+		GP_DEBUG(1, "Failed to find a loader by signature for"
+		            "(%x (%c) %x (%c)...)",
+			    buf[0], isprint(buf[0]) ? buf[0] : ' ',
+			    buf[1], isprint(buf[1]) ? buf[1] : ' ');
+		errno = ENOSYS;
+		return NULL;
+	}
+
+	if (!loader->Read) {
+		GP_DEBUG(1, "Loader for '%s' does not support reading",
+		         loader->fmt_name);
+		errno = ENOSYS;
+		return NULL;
+	}
+
+	return loader->Read(io, callback);
 }
 
 GP_Context *GP_LoadImage(const char *src_path, GP_ProgressCallback *callback)

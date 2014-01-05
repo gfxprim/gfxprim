@@ -16,7 +16,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2014 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
@@ -31,8 +31,17 @@
 
 #include "core/GP_Context.h"
 #include "core/GP_ProgressCallback.h"
+#include "loaders/GP_IO.h"
+#include "loaders/GP_MetaData.h"
 
-#include "GP_MetaData.h"
+
+/*
+ * Reads an image from a IO stream.
+ *
+ * The image format is matched from the file signature (first few bytes of the
+ * IO stream).
+ */
+GP_Context *GP_ReadImage(GP_IO *io, GP_ProgressCallback *callback);
 
 /*
  * Tries to load image accordingly to the file extension.
@@ -64,14 +73,21 @@ int GP_SaveImage(const GP_Context *src, const char *dst_path,
                  GP_ProgressCallback *callback);
 
 /*
- * You can register your own loader here.
+ * Describes image loader/saver.
  */
 typedef struct GP_Loader {
 	/*
-	 *  Loads an image.
+	 * Reads an image from an IO stream.
 	 *
-	 *  Returns allocated and initialized bitmap on success, NULL on failure
-	 *  and errno must be set.
+	 * Returns newly allocated context cotaining the loaded image or in
+	 * case of failure NULL and errno is set.
+	 */
+	GP_Context *(*Read)(GP_IO *io, GP_ProgressCallback *callback);
+
+	/*
+	 * Loads an image from a file.
+	 *
+	 * TODO: Remove due to Read
 	 */
 	GP_Context *(*Load)(const char *src_path, GP_ProgressCallback *callback);
 
