@@ -739,7 +739,7 @@ int GP_OpenTIFF(const char GP_UNUSED(*src_path),
 	return 1;
 }
 
-GP_Context *GP_ReadTIFF(void GP_UNUSED(*t),
+GP_Context *GP_ReadTIFF(GP_IO GP_UNUSED(*io),
                         GP_ProgressCallback GP_UNUSED(*callback))
 {
 	errno = ENOSYS;
