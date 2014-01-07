@@ -318,6 +318,17 @@ def write_gfxprim_config(cfg, libs):
     f.close()
     os.system('chmod +x gfxprim-config')
 
+def cfg_parse_args(cfg, args):
+    for i in args:
+        par = i.split('=');
+        if (len(par) != 2):
+             die_screaming('Invalid argument %s' % i)
+
+        if (par[0] not in cfg):
+            die_screaming('Invalid config key %s' % i)
+
+        cfg[par[0]][0] = par[1]
+
 if __name__ ==  '__main__':
     #
     # Dictionary for default configuration parameters
@@ -428,6 +439,11 @@ if __name__ ==  '__main__':
     for i in cfg:
         if getattr(options, i) is not None:
             cfg[i][0] = getattr(options, i)
+
+    #
+    # Handle args such as CC=gcc passed after options
+    #
+    cfg_parse_args(cfg, args)
 
     basic_checks(cfg);
 
