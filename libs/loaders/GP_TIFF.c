@@ -435,12 +435,12 @@ static int tiff_read(TIFF *tiff, GP_Context *res, struct tiff_header *header,
 	return 0;
 }
 
-static tmsize_t tiff_io_read(thandle_t io, void *buf, tmsize_t size)
+static tsize_t tiff_io_read(thandle_t io, void *buf, tsize_t size)
 {
 	return GP_IORead(io, buf, size);
 }
 
-static tmsize_t tiff_io_write(thandle_t io, void *buf, tmsize_t size)
+static tsize_t tiff_io_write(thandle_t io, void *buf, tsize_t size)
 {
 	(void) io;
 	(void) buf;
