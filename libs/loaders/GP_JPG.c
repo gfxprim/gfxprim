@@ -172,8 +172,8 @@ static void skip_input_data(struct jpeg_decompress_struct *cinfo, long num_bytes
 	GP_DEBUG(3, "Skipping %li bytes", num_bytes);
 
 	if (src->mgr.bytes_in_buffer < (unsigned long)num_bytes) {
-		src->mgr.bytes_in_buffer = 0;
 		GP_IOSeek(src->io, num_bytes - src->mgr.bytes_in_buffer, GP_IO_SEEK_CUR);
+		src->mgr.bytes_in_buffer = 0;
 	} else {
 		src->mgr.bytes_in_buffer -= num_bytes;
 		src->mgr.next_input_byte += num_bytes;
