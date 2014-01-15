@@ -18,7 +18,7 @@ APPS=backend_example loaders_example loaders filters_symmetry gfx_koch\
      v4l2_show v4l2_grab convolution weighted_median shapetest koch \
      input_example fileview linetest randomshapetest fonttest\
      loaders_register blittest textaligntest sin_AA x11_windows\
-     debug_handler gaussian_noise byte_utils version pretty_print timers\
+     debug_handler gaussian_noise version pretty_print timers\
      zip_container backend_timers_example memory_io
 
 ifeq ($(HAVE_LIBSDL),yes)
@@ -52,7 +52,6 @@ fonttest: LDLIBS+=$(LDLIBS_BACKENDS)
 textaligntest: LDLIBS+=$(LDLIBS_BACKENDS)
 loaders_register: LDLIBS+=$(LDLIBS_LOADERS)
 gaussian_noise: LDLIBS+=$(LDLIBS_LOADERS)
-byte_utils: LDLIBS+=$(LDLIBS_LOADERS)
 blittest: LDLIBS+=$(LDLIBS_BACKENDS) $(LDLIBS_LOADERS)
 sin_AA: LDLIBS+=$(LDLIBS_BACKENDS)
 x11_windows: LDLIBS+=$(LDLIBS_BACKENDS)

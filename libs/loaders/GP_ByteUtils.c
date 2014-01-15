@@ -205,56 +205,6 @@ static void swap_bytes(void *ptr, int len, int type)
 	}
 }
 
-int GP_FRead(FILE *f, const char *fmt, ...)
-{
-	int type, val, ret = 0;
-	void *ptr;
-	va_list va;
-
-	va_start(va, fmt);
-
-	for (;;) {
-		fmt = get_next(fmt, &type, &val);
-
-		/* end of the string or error */
-		if (fmt == NULL)
-			goto end;
-
-		switch (type) {
-		case BYTE_ARRAY:
-			if (fread(va_arg(va, void*), val, 1, f) != 1)
-				goto end;
-		break;
-		case CONST_BYTE:
-			if (fgetc(f) != val)
-				goto end;
-		break;
-		case LITTLE_ENDIAN_VAR:
-		case BIG_ENDIAN_VAR:
-			ptr = va_arg(va, void*);
-
-			if (fread(ptr, val, 1, f) != 1)
-				goto end;
-
-			swap_bytes(ptr, val, type);
-		break;
-		case IGNORE:
-			while (val--)
-				fgetc(f);
-		break;
-		default:
-			GP_BUG("Wrong format type for reading (%i)", type);
-			goto end;
-		}
-
-		ret++;
-
-	}
-end:
-	va_end(va);
-	return ret;
-}
-
 int GP_FWrite(FILE *f, const char *fmt, ...)
 {
 	int type, val, ret = 0;

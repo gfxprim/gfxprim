@@ -1,5 +1,4 @@
 GP_FWrite
-GP_FRead
 
 GP_MatchJPG
 GP_ReadJPG
