@@ -181,9 +181,9 @@ static const char *man_tail =
 	"Bugs happen. If you find one, report it on the GFXprim mailing list at\n"
 	".I gfxprim@ucw.cz\n"
 	".SH AUTHORS\n"
-	"Spiv is developed by Cyril Hrubis <chrubis@ucw.cz>\n"
+	"Spiv is developed by Cyril Hrubis <metan@ucw.cz>\n"
 	".PP\nGFXprim was/is developed by:\n"
-	".PP\n.nf\nCyril Hrubis <chrubis@ucw.cz>\n"
+	".PP\n.nf\nCyril Hrubis <metan@ucw.cz>\n"
 	".nf\nJiri \"BlueBear\" Dluhos <jiri.bluebear.dluhos@gmail.com>\n"
 	".nf\nTomas Gavenciak <gavento@ucw.cz>\n";
 
