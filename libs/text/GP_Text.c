@@ -19,13 +19,14 @@
  * Copyright (C) 2009-2011 Jiri "BlueBear" Dluhos                            *
  *                         <jiri.bluebear.dluhos@gmail.com>                  *
  *                                                                           *
- * Copyright (C) 2009-2013 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2014 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
 #include "gfx/GP_Gfx.h"
 #include "core/GP_FnPerBpp.h"
 #include "core/GP_Debug.h"
+#include "GP_TextMetric.h"
 #include "GP_Text.h"
 
 GP_TextStyle GP_DefaultStyle = GP_DEFAULT_TEXT_STYLE;
@@ -34,7 +35,7 @@ static int do_align(GP_Coord *topleft_x, GP_Coord *topleft_y, int align,
                     GP_Coord x, GP_Coord y, const GP_TextStyle *style,
                     GP_Size width)
 {
-	int height = GP_TextHeight(style);
+	GP_Size height = GP_TextHeight(style);
 
 	switch (align & 0x0f) {
 	case GP_ALIGN_LEFT:
@@ -59,7 +60,7 @@ static int do_align(GP_Coord *topleft_x, GP_Coord *topleft_y, int align,
 		*topleft_y = y - height/2;
 		break;
 	case GP_VALIGN_BASELINE:
-	//	*topleft_y = y - height + style->font->baseline;
+		*topleft_y = y - GP_TextAscent(style) + 1;
 		break;
 	case GP_VALIGN_BELOW:
 		*topleft_y = y;
@@ -86,6 +87,7 @@ void GP_Text(GP_Context *context, const GP_TextStyle *style,
 		style = &GP_DefaultStyle;
 
 	GP_Coord topleft_x, topleft_y;
+
 	GP_Size w = GP_TextWidth(style, str);
 
 	GP_ASSERT(do_align(&topleft_x, &topleft_y, align, x, y, style, w) == 0,

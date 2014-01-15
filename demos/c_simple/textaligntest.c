@@ -19,14 +19,15 @@
  * Copyright (C) 2009-2010 Jiri "BlueBear" Dluhos                            *
  *                         <jiri.bluebear.dluhos@gmail.com>                  *
  *                                                                           *
- * Copyright (C) 2009-2013 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2014 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
+#include <stdio.h>
 #include <GP.h>
 
 static GP_Pixel black_pixel, red_pixel, yellow_pixel, green_pixel, blue_pixel,
-		darkgray_pixel;
+		darkgray_pixel, white_pixel;
 
 static int font_flag = 0;
 
@@ -34,6 +35,7 @@ static int X = 640;
 static int Y = 480;
 
 static GP_FontFace *font = NULL;
+static GP_TextStyle style = GP_DEFAULT_TEXT_STYLE;
 
 static GP_Backend *win;
 
@@ -45,8 +47,6 @@ void redraw_screen(void)
 	GP_HLine(win->context, 0, X, Y/2, darkgray_pixel);
 	GP_VLine(win->context, X/2, 0, Y, darkgray_pixel);
 
-	GP_TextStyle style = GP_DEFAULT_TEXT_STYLE;
-
 	switch (font_flag) {
 	case 0:
 		style.font = &GP_DefaultProportionalFont;
@@ -55,6 +55,15 @@ void redraw_screen(void)
 		style.font = &GP_DefaultConsoleFont;
 	break;
 	case 2:
+		style.font = GP_FontTinyMono;
+	break;
+	case 3:
+		style.font = GP_FontTiny;
+	break;
+	case 4:
+		style.font = GP_FontC64;
+	break;
+	case 5:
 		style.font = font;
 	break;
 	}
@@ -67,6 +76,10 @@ void redraw_screen(void)
 	        blue_pixel, black_pixel, "top right");
 	GP_Text(win->context, &style, X/2, Y/2, GP_ALIGN_LEFT|GP_VALIGN_ABOVE,
 	        green_pixel, black_pixel, "top left");
+
+	GP_HLine(win->context, 0, X, Y/3, darkgray_pixel);
+	GP_Text(win->context, &style, X/2, Y/3, GP_ALIGN_CENTER|GP_VALIGN_BASELINE,
+	        white_pixel, black_pixel, "x center y baseline");
 }
 
 static void event_loop(void)
@@ -96,12 +109,28 @@ static void event_loop(void)
 				font_flag++;
 
 				if (font) {
-					if (font_flag >= 3)
+					if (font_flag > 5)
 						font_flag = 0;
 				} else {
-					if (font_flag >= 2)
+					if (font_flag > 4)
 						font_flag = 0;
 				}
+			break;
+			case GP_KEY_UP:
+				style.pixel_xspace++;
+				style.pixel_yspace++;
+			break;
+			case GP_KEY_DOWN:
+				style.pixel_xspace--;
+				style.pixel_yspace--;
+			break;
+			case GP_KEY_RIGHT:
+				style.pixel_xmul++;
+				style.pixel_ymul++;
+			break;
+			case GP_KEY_LEFT:
+				style.pixel_xmul--;
+				style.pixel_ymul--;
 			break;
 			case GP_KEY_ESC:
 				GP_BackendExit(win);
@@ -127,10 +156,12 @@ static void event_loop(void)
 void print_instructions(void)
 {
 	printf("Use the following keys to control the test:\n");
-	printf("    Space ........ toggle proportional/nonproportional font\n");
+	printf("    Space ........ toggle font\n");
 	printf("    X ............ mirror X\n");
 	printf("    Y ............ mirror Y\n");
 	printf("    R ............ reverse X and Y\n");
+	printf("    UP/DOWN ...... increase/decrease X and Y space\n");
+	printf("    RIGHT/LEFT ... increase/decrease X and Y mul\n");
 }
 
 int main(int argc, char *argv[])
@@ -138,7 +169,7 @@ int main(int argc, char *argv[])
 	const char *backend_opts = "X11";
 
 	if (argc > 1)
-		font = GP_FontFaceLoad(argv[1], 0, 16);
+		font = GP_FontFaceLoad(argv[1], 0, 20);
 
 	print_instructions();
 
@@ -155,6 +186,7 @@ int main(int argc, char *argv[])
 	blue_pixel     = GP_ColorToContextPixel(GP_COL_BLUE, win->context);
 	green_pixel    = GP_ColorToContextPixel(GP_COL_GREEN, win->context);
 	yellow_pixel   = GP_ColorToContextPixel(GP_COL_YELLOW, win->context);
+	white_pixel   = GP_ColorToContextPixel(GP_COL_WHITE, win->context);
 	darkgray_pixel = GP_ColorToContextPixel(GP_COL_GRAY_DARK, win->context);
 
 	redraw_screen();

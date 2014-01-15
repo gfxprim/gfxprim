@@ -123,9 +123,9 @@ static const GP_TextStyle *assert_style(const GP_TextStyle *style)
  *
  * There are two problems with text width it's start and it's end.
  *
- * At the start the first letter may have bearing_x negative, making it
- * overflow out of the bouding box and even in case it's possitive the returned
- * size would be slightly bigger. This one is easy to fix.
+ * First letter may have bearing_x negative, making it overflow out of the
+ * bouding box and even in case it's possitive the returned size would be
+ * slightly bigger. This one is easy to fix.
  *
  * The end of the string is problematic too, some of the glyphs may have
  * advance smaller than sum of the bitmap width and bearing_x that way we would
@@ -145,9 +145,8 @@ unsigned int GP_TextWidth(const GP_TextStyle *style, const char *str)
 		return 0;
 
 	/* special case, one letter */
-	if (str[1] == '\0') {
+	if (str[1] == '\0')
 		return glyph_width(style, str[0]);
-	}
 
 	/* first letter */
 	len = first_glyph_width(style, str[0]) + style->char_xspace;
