@@ -10,81 +10,62 @@
 
 %import ../core/core.i
 
+/* TODO IO from fd */
+
+%define LOADER_FUNC(FMT)
+%newobject GP_Load ## FMT;
+ERROR_ON_NULL(GP_Load ## FMT);
+%newobject GP_Read ## FMT;
+ERROR_ON_NULL(GP_Read ## FMT);
+%enddef
+
 ERROR_ON_NULL(GP_LoadImage);
-ERROR_ON_NONZERO(GP_LoadMetaData);
+ERROR_ON_NONZERO(GP_ReadImage);
 ERROR_ON_NONZERO(GP_SaveImage);
 
 %newobject GP_LoadImage;
 
 %include "GP_Loader.h"
 
-ERROR_ON_NONZERO(GP_OpenJPG);
-ERROR_ON_NULL(GP_ReadJPG);
-ERROR_ON_NULL(GP_LoadJPG);
-ERROR_ON_NONZERO(GP_ReadJPGMetaData);
-ERROR_ON_NONZERO(GP_LoadJPGMetaData);
+LOADER_FUNC(JPG);
 ERROR_ON_NONZERO(GP_SaveJPG);
-
-%newobject GP_LoadJPG;
 
 %include "GP_JPG.h"
 
-ERROR_ON_NONZERO(GP_OpenBMP);
-ERROR_ON_NULL(GP_ReadBMP);
-ERROR_ON_NULL(GP_LoadBMP);
-
-%newobject GP_LoadBMP;
+LOADER_FUNC(BMP);
+ERROR_ON_NONZERO(GP_SaveBMP);
 
 %include "GP_BMP.h"
 
-ERROR_ON_NONZERO(GP_OpenGIF);
-ERROR_ON_NULL(GP_ReadGIF);
-ERROR_ON_NULL(GP_LoadGIF);
-
-%newobject GP_LoadGIF;
+LOADER_FUNC(GIF);
 
 %include "GP_GIF.h"
 
-ERROR_ON_NONZERO(GP_OpenPNG);
-ERROR_ON_NULL(GP_ReadPNG);
-ERROR_ON_NULL(GP_LoadPNG);
-ERROR_ON_NONZERO(GP_ReadPNGMetaData);
-ERROR_ON_NONZERO(GP_LoadPNGMetaData);
+LOADER_FUNC(PNG);
 ERROR_ON_NONZERO(GP_SavePNG);
-
-%newobject GP_LoadPNG;
 
 %include "GP_PNG.h"
 
-ERROR_ON_NULL(GP_LoadPBM);
-ERROR_ON_NULL(GP_LoadPGM);
-ERROR_ON_NULL(GP_LoadPPM);
-ERROR_ON_NULL(GP_LoadPNM);
+LOADER_FUNC(PBM);
+LOADER_FUNC(PGM);
+LOADER_FUNC(PPM);
+LOADER_FUNC(PNM);
 ERROR_ON_NONZERO(GP_SavePBM);
 ERROR_ON_NONZERO(GP_SavePGM);
 ERROR_ON_NONZERO(GP_SavePPM);
 ERROR_ON_NONZERO(GP_SavePNM);
 
-%newobject GP_LoadPBM;
-%newobject GP_LoadPGM;
-%newobject GP_LoadPPM;
-%newobject GP_LoadPNM;
-
 %include "GP_PNM.h"
 
-ERROR_ON_NULL(GP_LoadTIFF);
+LOADER_FUNC(TIFF);
 ERROR_ON_NONZERO(GP_SaveTIFF);
-
-%newobject GP_LoadTIFF;
 
 %include "GP_TIFF.h"
 
-ERROR_ON_NULL(GP_LoadPSP);
-%newobject GP_LoadPSP;
+LOADER_FUNC(PSP);
 
 %include "GP_PSP.h"
 
-ERROR_ON_NULL(GP_LoadJP2);
-%newobject GP_LoadJP2;
+LOADER_FUNC(JP2);
 
 %include "GP_JP2.h"
