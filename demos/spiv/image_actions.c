@@ -16,7 +16,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2013 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2014 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
@@ -204,6 +204,23 @@ static char *cmd = NULL;
 static size_t cmd_size;
 static size_t cmd_pos;
 
+#define CMD_CHUNK 1024
+
+static int cmd_resize(void)
+{
+	char *new_cmd = realloc(cmd, cmd_size + CMD_CHUNK);
+
+	if (!new_cmd) {
+		fprintf(stderr, "Failed to allocate command buffer\n");
+		return 1;
+	}
+
+	cmd = new_cmd;
+	cmd_size += CMD_CHUNK;
+
+	return 0;
+}
+
 static int cmd_append(const char *str, size_t len)
 {
 	if (len == 0)
@@ -211,8 +228,8 @@ static int cmd_append(const char *str, size_t len)
 
 	/* Initial allocation size */
 	if (!cmd) {
-		cmd = malloc(1024);
-		cmd_size = 1024;
+		cmd = malloc(CMD_CHUNK);
+		cmd_size = CMD_CHUNK;
 	}
 
 	if (!cmd) {
@@ -220,13 +237,9 @@ static int cmd_append(const char *str, size_t len)
 		return 1;
 	}
 
-	if (cmd_size - cmd_pos <= len) {
-		char *new_cmd = realloc(cmd, cmd_size + 1024);
-
-		if (new_cmd == NULL) {
-			fprintf(stderr, "Failed to allocated command buffer\n");
+	while (cmd_size - cmd_pos <= len) {
+		if (cmd_resize())
 			return 1;
-		}
 	}
 
 	memcpy(cmd + cmd_pos, str, len);
@@ -244,12 +257,8 @@ static int cmd_append_escape(const char *str, size_t len)
 		len = strlen(str);
 
 	while ((ret = escape(str, len, cmd + cmd_pos, cmd_size - cmd_pos)) < 0) {
-		char *new_cmd = realloc(cmd, cmd_size + 1024);
-
-		if (new_cmd == NULL) {
-			fprintf(stderr, "Failed to allocated command buffer\n");
+		if (cmd_resize())
 			return 1;
-		}
 	}
 
 	cmd_pos += ret;
