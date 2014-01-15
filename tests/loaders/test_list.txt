@@ -4,6 +4,7 @@ PNG
 PBM
 PGM
 PPM
+PNM
 ZIP
 GIF
 IO

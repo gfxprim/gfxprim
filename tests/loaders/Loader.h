@@ -16,9 +16,14 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2013 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2014 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
+
+#ifndef TESTS_LOADER_H
+#define TESTS_LOADER_H
+
+#include "loaders/GP_IO.h"
 
 struct testcase {
 	GP_Size w;
@@ -27,25 +32,9 @@ struct testcase {
 	char *path;
 };
 
-static int test_load(struct testcase *test)
+static int test_check(struct testcase *test, GP_Context *img)
 {
-	GP_Context *img;
 	unsigned int x, y, err = 0;
-
-	errno = 0;
-
-	img = LOAD(test->path, NULL);
-
-	if (img == NULL) {
-		switch (errno) {
-		case ENOSYS:
-			tst_msg("Not Implemented");
-			return TST_SKIPPED;
-		default:
-			tst_msg("Got %s", strerror(errno));
-			return TST_FAILED;
-		}
-	}
 
 	if (img->w != test->w || img->h != test->h) {
 		tst_msg("Invalid image size have %ux%u expected %ux%u",
@@ -68,13 +57,80 @@ static int test_load(struct testcase *test)
 		}
 	}
 
-	GP_ContextFree(img);
+	if (err > 5)
+		tst_msg("And %u errors...", err);
 
 	if (err)
 		return TST_FAILED;
 
 	return TST_SUCCESS;
 }
+
+static int test_read(struct testcase *test)
+{
+	GP_Context *img;
+	GP_IO *io;
+	int err;
+
+	io = GP_IOMem(test->path, strlen(test->path), NULL);
+
+	if (!io) {
+		tst_msg("Failed to initialize memory IO: %s", strerror(errno));
+		return TST_UNTESTED;
+	}
+
+	img = READ(io, NULL);
+
+	if (!img) {
+		switch (errno) {
+		case ENOSYS:
+			tst_msg("Not Implemented");
+			err = TST_SKIPPED;
+			goto out;
+		default:
+			tst_msg("Got %s", strerror(errno));
+			err = TST_FAILED;
+			goto out;
+		}
+	}
+
+	err = test_check(test, img);
+
+	GP_ContextFree(img);
+out:
+	GP_IOClose(io);
+	return err;
+}
+
+# ifdef LOAD
+
+static int test_load(struct testcase *test)
+{
+	GP_Context *img;
+	int err;
+
+	errno = 0;
+
+	img = LOAD(test->path, NULL);
+
+	if (!img) {
+		switch (errno) {
+		case ENOSYS:
+			tst_msg("Not Implemented");
+			return TST_SKIPPED;
+		default:
+			tst_msg("Got %s", strerror(errno));
+			return TST_FAILED;
+		}
+	}
+
+	err = test_check(test, img);
+
+	GP_ContextFree(img);
+
+	return err;
+}
+
 
 static int test_load_fail(const char *path)
 {
@@ -102,6 +158,11 @@ static int test_load_fail(const char *path)
 		return TST_SUCCESS;
 	}
 }
+
+# endif /* LOAD */
+
+
+# if defined(SAVE) && defined(LOAD)
 
 /*
  * Saves and loads image using the SAVE and LOAD functions
@@ -188,3 +249,7 @@ static int test_save_load(struct testcase_save_load *test)
 
 	return TST_SUCCESS;
 }
+
+# endif /* SAVE && LOAD */
+
+#endif /* TESTS_LOADER_H */

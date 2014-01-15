@@ -30,91 +30,37 @@
 
 #include "tst_test.h"
 
-#define LOAD GP_LoadPGM
-#define SAVE GP_SavePGM
-#define READ GP_ReadPGM
+#define READ GP_ReadPNM
 #include "Loader.h"
+#include "PBM.h"
 #include "PGM.h"
-
-struct testcase black_1x1_1bpp = {
-	.w = 1,
-	.h = 1,
-	.pix = 0,
-	.path = "black_1x1_1bpp.pgm",
-};
-
-struct testcase black_1x1_2bpp = {
-	.w = 1,
-	.h = 1,
-	.pix = 0,
-	.path = "black_1x1_2bpp.pgm",
-};
-
-struct testcase black_1x1_4bpp = {
-	.w = 1,
-	.h = 1,
-	.pix = 0,
-	.path = "black_1x1_4bpp.pgm",
-};
-
-struct testcase black_1x1_8bpp = {
-	.w = 1,
-	.h = 1,
-	.pix = 0,
-	.path = "black_1x1_8bpp.pgm",
-};
-
-struct testcase_save_load save_load_1bpp = {
-	.w = 100,
-	.h = 100,
-	.pixel_type = GP_PIXEL_G1,
-};
-
-struct testcase_save_load save_load_2bpp = {
-	.w = 100,
-	.h = 100,
-	.pixel_type = GP_PIXEL_G2,
-};
-
-struct testcase_save_load save_load_4bpp = {
-	.w = 100,
-	.h = 100,
-	.pixel_type = GP_PIXEL_G4,
-};
-
-struct testcase_save_load save_load_8bpp = {
-	.w = 100,
-	.h = 100,
-	.pixel_type = GP_PIXEL_G8,
-};
+#include "PPM.h"
 
 const struct tst_suite tst_suite = {
-	.suite_name = "PGM",
+	.suite_name = "PNM",
 	.tests = {
-		{.name = "PGM Load 1x1 1bpp (black)",
-		 .tst_fn = test_load,
-		 .res_path = "data/pgm/valid/black_1x1_1bpp.pgm",
-		 .data = &black_1x1_1bpp,
-		 .flags = TST_TMPDIR | TST_CHECK_MALLOC},
+		/* PBM tests */
+		{.name = "PBM Read 1x1 (black)",
+		 .tst_fn = test_read,
+		 .data = &PBM_ascii_1x1_black,
+		 .flags = TST_CHECK_MALLOC},
 
-		{.name = "PGM Load 1x1 2bpp (black)",
-		 .tst_fn = test_load,
-		 .res_path = "data/pgm/valid/black_1x1_2bpp.pgm",
-		 .data = &black_1x1_2bpp,
-		 .flags = TST_TMPDIR | TST_CHECK_MALLOC},
+		{.name = "PBM Read 1x1 (white)",
+		 .tst_fn = test_read,
+		 .data = &PBM_ascii_1x1_white,
+		 .flags = TST_CHECK_MALLOC},
 
-		 {.name = "PGM Load 1x1 4bpp (black)",
-		  .tst_fn = test_load,
-		  .res_path = "data/pgm/valid/black_1x1_4bpp.pgm",
-		  .data = &black_1x1_4bpp,
-		  .flags = TST_TMPDIR | TST_CHECK_MALLOC},
+		{.name = "PBM Read 1x1 (black) Raw",
+		 .tst_fn = test_read,
+		 .data = &PBM_bin_1x1_black,
+		 .flags = TST_CHECK_MALLOC},
 
-		 {.name = "PGM Load 1x1 8bpp (black)",
-		  .tst_fn = test_load,
-		  .res_path = "data/pgm/valid/black_1x1_8bpp.pgm",
-		  .data = &black_1x1_8bpp,
-		  .flags = TST_TMPDIR | TST_CHECK_MALLOC},
+		{.name = "PBM Read 1x1 (white) Raw",
+		 .tst_fn = test_read,
+		 .data = &PBM_bin_1x1_white,
+		 .flags = TST_CHECK_MALLOC},
 
+		/* PGM tests */
 		 {.name = "PGM Read 1x1 1bpp (black)",
 		  .tst_fn = test_read,
 		  .data = &PGM_ascii_1x1_1bpp_black,
@@ -175,37 +121,26 @@ const struct tst_suite tst_suite = {
 		  .data = &PGM_bin_1x1_8bpp_white,
 		  .flags = TST_CHECK_MALLOC},
 
-		 {.name = "PGM Save Load 1bpp",
-		  .tst_fn = test_save_load,
-		  .data = &save_load_1bpp,
-		  .flags = TST_TMPDIR | TST_CHECK_MALLOC},
+		/* PPM tests */
+		{.name = "PPM Read 1x1 4bpp (black)",
+		 .tst_fn = test_read,
+		 .data = &PPM_ascii_1x1_4bpp_black,
+		 .flags = TST_CHECK_MALLOC},
 
-		 {.name = "PGM Save Load 2bpp",
-		  .tst_fn = test_save_load,
-		  .data = &save_load_2bpp,
-		  .flags = TST_TMPDIR | TST_CHECK_MALLOC},
+		{.name = "PPM Read 1x1 8bpp (black)",
+		 .tst_fn = test_read,
+		 .data = &PPM_ascii_1x1_8bpp_black,
+		 .flags = TST_CHECK_MALLOC},
 
-		 {.name = "PGM Save Load 4bpp",
-		  .tst_fn = test_save_load,
-		  .data = &save_load_4bpp,
-		  .flags = TST_TMPDIR | TST_CHECK_MALLOC},
+		{.name = "PPM Read 1x1 8bpp (white)",
+		 .tst_fn = test_read,
+		 .data = &PPM_ascii_1x1_8bpp_white,
+		 .flags = TST_CHECK_MALLOC},
 
-		 {.name = "PGM Save Load 8bpp",
-		  .tst_fn = test_save_load,
-		  .data = &save_load_8bpp,
-		  .flags = TST_TMPDIR | TST_CHECK_MALLOC},
-
-		{.name = "PGM Load wrong header",
-		 .tst_fn = test_load_fail,
-		 .res_path = "data/pgm/corrupt/wrong_header.pgm",
-		 .data = "wrong_header.pgm",
-		 .flags = TST_TMPDIR | TST_CHECK_MALLOC},
-
-		{.name = "PGM Load incomplete",
-		 .tst_fn = test_load_fail,
-		 .res_path = "data/pgm/corrupt/incomplete.pgm",
-		 .data = "incomplete.pgm",
-		 .flags = TST_TMPDIR | TST_CHECK_MALLOC},
+		{.name = "PPM Read 1x1 8bpp (white) Raw",
+		 .tst_fn = test_read,
+		 .data = &PPM_bin_1x1_8bpp_white,
+		 .flags = TST_CHECK_MALLOC},
 
 		{.name = NULL},
 	}

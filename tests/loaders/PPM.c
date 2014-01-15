@@ -16,7 +16,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2013 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2014 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
@@ -32,16 +32,18 @@
 
 #define LOAD GP_LoadPPM
 #define SAVE GP_SavePPM
+#define READ GP_ReadPPM
 #include "Loader.h"
+#include "PPM.h"
 
-struct testcase black_1x1 = {
+static struct testcase PPM_black_1x1 = {
 	.w = 1,
 	.h = 1,
 	.pix = 0,
 	.path = "black_1x1.ppm",
 };
 
-struct testcase_save_load save_load = {
+static struct testcase_save_load PPM_save_load = {
 	.w = 100,
 	.h = 100,
 	.pixel_type = GP_PIXEL_RGB888,
@@ -53,12 +55,32 @@ const struct tst_suite tst_suite = {
 		{.name = "PPM Load 1x1 (black)",
 		 .tst_fn = test_load,
 		 .res_path = "data/ppm/valid/black_1x1.ppm",
-		 .data = &black_1x1,
+		 .data = &PPM_black_1x1,
 		 .flags = TST_TMPDIR | TST_CHECK_MALLOC},
+
+		{.name = "PPM Read 1x1 4bpp (black)",
+		 .tst_fn = test_read,
+		 .data = &PPM_ascii_1x1_4bpp_black,
+		 .flags = TST_CHECK_MALLOC},
+
+		{.name = "PPM Read 1x1 8bpp (black)",
+		 .tst_fn = test_read,
+		 .data = &PPM_ascii_1x1_8bpp_black,
+		 .flags = TST_CHECK_MALLOC},
+
+		{.name = "PPM Read 1x1 8bpp (white)",
+		 .tst_fn = test_read,
+		 .data = &PPM_ascii_1x1_8bpp_white,
+		 .flags = TST_CHECK_MALLOC},
+
+		{.name = "PPM Read 1x1 8bpp (white) Raw",
+		 .tst_fn = test_read,
+		 .data = &PPM_bin_1x1_8bpp_white,
+		 .flags = TST_CHECK_MALLOC},
 
 		{.name = "PPM Save Load",
 		 .tst_fn = test_save_load,
-		 .data = &save_load,
+		 .data = &PPM_save_load,
 		 .flags = TST_TMPDIR | TST_CHECK_MALLOC},
 
 		{.name = "PPM Load wrong header",

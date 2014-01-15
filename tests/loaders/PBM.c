@@ -16,7 +16,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2013 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2014 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
@@ -32,7 +32,9 @@
 
 #define LOAD GP_LoadPBM
 #define SAVE GP_SavePBM
+#define READ GP_ReadPBM
 #include "Loader.h"
+#include "PBM.h"
 
 struct testcase black_1x1_1 = {
 	.w = 1,
@@ -147,6 +149,26 @@ const struct tst_suite tst_suite = {
 		 .res_path = "data/pbm/valid/black_3x9_bin.pbm",
 		 .data = &black_3x9_bin,
 		 .flags = TST_TMPDIR | TST_CHECK_MALLOC},
+
+		{.name = "PBM Read 1x1 (black)",
+		 .tst_fn = test_read,
+		 .data = &PBM_ascii_1x1_black,
+		 .flags = TST_CHECK_MALLOC},
+
+		{.name = "PBM Read 1x1 (white)",
+		 .tst_fn = test_read,
+		 .data = &PBM_ascii_1x1_white,
+		 .flags = TST_CHECK_MALLOC},
+
+		{.name = "PBM Read 1x1 (black) Raw",
+		 .tst_fn = test_read,
+		 .data = &PBM_bin_1x1_black,
+		 .flags = TST_CHECK_MALLOC},
+
+		{.name = "PBM Read 1x1 (white) Raw",
+		 .tst_fn = test_read,
+		 .data = &PBM_bin_1x1_white,
+		 .flags = TST_CHECK_MALLOC},
 
 		{.name = "PBM Load corrupt",
 		 .tst_fn = test_load_fail,
