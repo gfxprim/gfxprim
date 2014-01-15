@@ -346,8 +346,8 @@ GP_Context *GP_ReadGIF(GP_IO *io, GP_ProgressCallback *callback)
 	DGifCloseFile(gf);
 
 	/* No Image record found :( */
-	if (res == NULL)
-		err = EIO;
+	if (!res)
+		errno = EINVAL;
 
 	return res;
 err2:
