@@ -356,12 +356,14 @@ static int needs_swap(uint16_t type)
 int GP_IOReadF(GP_IO *self, uint16_t *types, ...)
 {
 	unsigned int size = readf_size(types);
-	uint8_t buffer[size], *buf = buffer;
 	int ret;
 	va_list va;
 	uint8_t *ptr;
 
-	buf[0] = 0;
+	if (size == 0)
+		return 0;
+
+	uint8_t buffer[size], *buf = buffer;
 
 	if (GP_IOFill(self, buf, size))
 		return -1;
