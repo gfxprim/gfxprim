@@ -186,7 +186,7 @@ void GP_FillPolygon_Raw(GP_Context *context, unsigned int nvert,
 	 */
 	float inter[nedges];
 	unsigned int ninter;
-	int y = ymin;
+	int y;
 	for (y = ymin; y <= ymax; y++) {
 
 		/* mark edges we have just reached as active */
