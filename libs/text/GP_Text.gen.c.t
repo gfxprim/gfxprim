@@ -28,7 +28,7 @@ static void text_draw_1BPP_{{ pt.name }}(GP_Context *context, GP_TextStyle *styl
 
 		if (glyph == NULL)
 			glyph = GP_GetGlyphBitmap(style->font, ' ');
-		
+
 		int i, j, k;
 
 		unsigned int x_mul = style->pixel_xmul + style->pixel_xspace;
@@ -41,15 +41,15 @@ static void text_draw_1BPP_{{ pt.name }}(GP_Context *context, GP_TextStyle *styl
 		for (j = 0; j < glyph->height; j++) {
 			for (i = 0; i < glyph->width; i++) {
 				uint8_t bit = (glyph->bitmap[i/8 + j * bpp]) & (0x80>>(i%8));
-				
+
 				unsigned int x_start = x + (i + glyph->bearing_x) * x_mul;
-				
+
 				if (p == str)
 					x_start -= glyph->bearing_x * x_mul;
 
 				if (!bit)
 					continue;
-				
+
 				for (k = 0; k < style->pixel_ymul; k++)
 					GP_HLine(context, x_start, x_start + style->pixel_xmul - 1,
 					         y - (glyph->bearing_y - style->font->ascend) * y_mul + k, fg);
@@ -57,9 +57,9 @@ static void text_draw_1BPP_{{ pt.name }}(GP_Context *context, GP_TextStyle *styl
 
 			y += style->pixel_ymul + style->pixel_yspace;
 		}
-	
+
 		x += glyph->advance_x * x_mul + style->char_xspace;
-		
+
 		if (p == str)
 			x -= glyph->bearing_x * x_mul;
 	}
@@ -94,7 +94,7 @@ static void text_draw_1BPP(GP_Context *context, GP_TextStyle *style, int x, int 
 
 		if (glyph == NULL)
 			glyph = GP_GetGlyphBitmap(style->font, ' ');
-		
+
 		int i, j, k;
 
 		unsigned int x_mul = style->pixel_xmul + style->pixel_xspace;
@@ -105,12 +105,12 @@ static void text_draw_1BPP(GP_Context *context, GP_TextStyle *style, int x, int 
 		for (j = 0; j < glyph->height; j++) {
 			for (i = 0; i < glyph->width; i++) {
 				uint8_t gray = glyph->bitmap[i + j * glyph->width];
-		
+
 				unsigned int x_start = x + (i + glyph->bearing_x) * x_mul;
-				
+
 				if (p == str)
 					x_start -= glyph->bearing_x * x_mul;
-				
+
 				if (!gray)
 					continue;
 
@@ -119,10 +119,10 @@ static void text_draw_1BPP(GP_Context *context, GP_TextStyle *style, int x, int 
 				for (k = 0; k < style->pixel_ymul; k++) {
 %% if use_bg
 					GP_HLine(context, x_start, x_start + style->pixel_xmul - 1, cur_y,
-				          	GP_MIX_PIXELS_{{ pt.name }}(fg, bg, gray));
+					GP_MIX_PIXELS_{{ pt.name }}(fg, bg, gray));
 %% else
 					unsigned int l;
-					
+
 					for (l = x_start; l < x_start + style->pixel_xmul; l++) {
 						unsigned int px = l;
 						unsigned int py = cur_y;
@@ -138,7 +138,7 @@ static void text_draw_1BPP(GP_Context *context, GP_TextStyle *style, int x, int 
 		}
 
 		x += glyph->advance_x * x_mul + style->char_xspace;
-		
+
 		if (p == str)
 			x -= glyph->bearing_x * x_mul;
 	}
