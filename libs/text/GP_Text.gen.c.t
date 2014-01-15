@@ -1,3 +1,28 @@
+/*****************************************************************************
+ * This file is part of gfxprim library.                                     *
+ *                                                                           *
+ * Gfxprim is free software; you can redistribute it and/or                  *
+ * modify it under the terms of the GNU Lesser General Public                *
+ * License as published by the Free Software Foundation; either              *
+ * version 2.1 of the License, or (at your option) any later version.        *
+ *                                                                           *
+ * Gfxprim is distributed in the hope that it will be useful,                *
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of            *
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU         *
+ * Lesser General Public License for more details.                           *
+ *                                                                           *
+ * You should have received a copy of the GNU Lesser General Public          *
+ * License along with gfxprim; if not, write to the Free Software            *
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
+ * Boston, MA  02110-1301  USA                                               *
+ *                                                                           *
+ * Copyright (C) 2009-2011 Jiri "BlueBear" Dluhos                            *
+ *                         <jiri.bluebear.dluhos@gmail.com>                  *
+ *                                                                           *
+ * Copyright (C) 2009-2014 Cyril Hrubis <metan@ucw.cz>                       *
+ *                                                                           *
+ *****************************************************************************/
+
 %% extends "base.c.t"
 
 {% block descr %}Text rendering rutines{% endblock %}
@@ -11,6 +36,11 @@
 #include "GP_Font.h"
 
 #define WIDTH_TO_1BPP_BPP(width) ((width)/8 + ((width)%8 != 0))
+
+static int get_width(GP_TextStyle *style, int width)
+{
+	return width * style->pixel_xmul + (width - 1) * style->pixel_xspace;
+}
 
 %% for pt in pixeltypes
 %% if not pt.is_unknown()
@@ -58,10 +88,10 @@ static void text_draw_1BPP_{{ pt.name }}(GP_Context *context, GP_TextStyle *styl
 			y += style->pixel_ymul + style->pixel_yspace;
 		}
 
-		x += glyph->advance_x * x_mul + style->char_xspace;
+		x += get_width(style, glyph->advance_x) + style->char_xspace;
 
 		if (p == str)
-			x -= glyph->bearing_x * x_mul;
+			x -= get_width(style, glyph->bearing_x);
 	}
 }
 
@@ -118,14 +148,14 @@ static void text_draw_1BPP(GP_Context *context, GP_TextStyle *style, int x, int 
 
 				for (k = 0; k < style->pixel_ymul; k++) {
 %% if use_bg
-					GP_HLine(context, x_start, x_start + style->pixel_xmul - 1, cur_y,
+					GP_HLine(context, x_start, x_start + style->pixel_xmul - 1, cur_y + k,
 					GP_MIX_PIXELS_{{ pt.name }}(fg, bg, gray));
 %% else
 					unsigned int l;
 
 					for (l = x_start; l < x_start + style->pixel_xmul; l++) {
 						unsigned int px = l;
-						unsigned int py = cur_y;
+						unsigned int py = cur_y + k;
 						//TODO: optimize this
 						GP_TRANSFORM_POINT(context, px, py);
 						GP_MixPixel_Raw_Clipped_{{ pt.name }}(context, px, py, fg, gray);
@@ -137,10 +167,10 @@ static void text_draw_1BPP(GP_Context *context, GP_TextStyle *style, int x, int 
 			y += style->pixel_ymul + style->pixel_yspace;
 		}
 
-		x += glyph->advance_x * x_mul + style->char_xspace;
+		x += get_width(style, glyph->advance_x) + style->char_xspace;
 
 		if (p == str)
-			x -= glyph->bearing_x * x_mul;
+			x -= get_width(style, glyph->bearing_x);
 	}
 %% endmacro
 
