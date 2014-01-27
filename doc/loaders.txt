@@ -600,3 +600,45 @@ signatures.
 The 'PNM' matches all of the formats. i.e. 'PBM', 'PGM' and 'PPM'.
 
 All functions return non-zero if found.
+
+PCX Loader
+~~~~~~~~~~
+
+The 'PCX' loader can load ZSoft PCX images.
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <loaders/GP_PCX.h>
+/* or */
+#include <GP.h>
+
+GP_Context *GP_ReadPCX(GP_IO *io, GP_ProgressCallback *callback);
+-------------------------------------------------------------------------------
+
+Reads a 'PCX' image from readable 'GP_IO'. The link:loaders_io.html[IO stream]
+is expected to start exactly at the 'PCX' file signature.
+
+Returns newly allocated context (containing decompressed image) or in case of
+failure 'NULL' and 'errno' is set.
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <loaders/GP_PCX.h>
+/* or */
+#include <GP.h>
+
+GP_Context *GP_LoadPCX(const char *src_path, GP_ProgressCallback *callback);
+-------------------------------------------------------------------------------
+
+Loads a 'PCX' image from a file.
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <loaders/GP_PCX.h>
+/* or */
+#include <GP.h>
+
+int GP_MatchPCX(const void *buf);
+-------------------------------------------------------------------------------
+
+Matches a 'PCX' file signature. Returns non-zero if found.

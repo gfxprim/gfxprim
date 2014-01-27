@@ -56,6 +56,10 @@ GP_ReadJP2
 GP_LoadJP2
 GP_MatchJP2
 
+GP_ReadPCX
+GP_LoadPCX
+GP_MatchPCX
+
 GP_SaveTmpFile
 GP_LoadTmpFile
 

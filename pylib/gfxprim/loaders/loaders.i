@@ -69,3 +69,7 @@ LOADER_FUNC(PSP);
 LOADER_FUNC(JP2);
 
 %include "GP_JP2.h"
+
+LOADER_FUNC(PCX);
+
+%include "GP_PCX.h"

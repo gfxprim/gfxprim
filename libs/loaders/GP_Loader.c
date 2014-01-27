@@ -49,13 +49,23 @@ static GP_Loader psp_loader = {
 	.extensions = {"psp", "pspimage", NULL},
 };
 
+static GP_Loader pcx_loader = {
+	.Read = GP_ReadPCX,
+	.Load = GP_LoadPCX,
+	.Save = NULL,
+	.Match = GP_MatchPCX,
+	.fmt_name = "ZSoft PCX",
+	.next = &psp_loader,
+	.extensions = {"pcx", NULL},
+};
+
 static GP_Loader pbm_loader = {
 	.Read = GP_ReadPBM,
 	.Load = GP_LoadPBM,
 	.Save = GP_SavePBM,
 	.Match = GP_MatchPBM,
 	.fmt_name = "Netpbm portable Bitmap",
-	.next = &psp_loader,
+	.next = &pcx_loader,
 	.extensions = {"pbm", NULL},
 };
 

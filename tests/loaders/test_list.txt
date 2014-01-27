@@ -1,12 +1,13 @@
 # Loaders testsuite
 loaders_suite
 PNG
+GIF
 PBM
 PGM
 PPM
 PNM
+PCX
 ZIP
-GIF
 IO
 SaveLoad.gen
 SaveAbort.gen

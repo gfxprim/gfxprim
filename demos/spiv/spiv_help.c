@@ -98,7 +98,7 @@ static const struct examples examples[] = {
 	{"spiv -b 'X11:use_root' -t 10 images/",
 	 "Runs slideshow using X root window as backend window"},
 	{"spiv -b 'X11:create_root' -t 10 images/",
-	 "Same as abowe but works in KDE\n"}
+	 "Same as above but works in KDE\n"}
 };
 
 static const int examples_len = sizeof(examples) / sizeof(*examples);
@@ -164,8 +164,9 @@ const char *man_head =
 	"top of the GFXprim library.\n"
 	".PP\n"
 	"Spiv supports wide range of image formats, currently supported are\n"
-	"JPEG, PNG, GIF, BMP, TIFF, PSP, PPM, JP2 and CBZ (as well general\n"
-	"ZIP archives with images), and more will come in the near future.\n"
+	"JPEG, PNG, GIF, BMP, TIFF, PSP, PNM, PCX, JPEG2000 and CBZ (as well\n"
+	"general ZIP archives with images), and more will come in the\n"
+	"near future.\n"
 	".PP\n"
 	"Spiv supports variety of video backends (via GFXprim backends)\n"
 	"currently these are X11, Linux Framebuffer, SDL and AAlib. Spiv also\n"

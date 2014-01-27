@@ -109,6 +109,11 @@ images into various standard formats (PNG, JPEG, GIF, TIFF, BMP, PNM, etc...).
   [green]#Experimental support for RGB images# |
   [black]*No*
 
+| PCX |
+  ZSoft PCX |
+  [green]#All v3.0# |
+  [black]*No*
+
 | CBZ |
   Comic book archive |
   [green]#Experimental support via ZIP Container# |

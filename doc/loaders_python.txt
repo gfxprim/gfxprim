@@ -21,6 +21,7 @@ import gfxprim.loaders as loaders
     img = loaders.LoadPNG(path, callback=None)
     img = loaders.LoadPNM(path, callback=None)
     img = loaders.LoadPPM(path, callback=None)
+    img = loaders.LoadPCX(path, callback=None)
     img = loaders.LoadPSP(path, callback=None)
     img = loaders.LoadTIFF(path, callback=None)
 -------------------------------------------------------------------------------
