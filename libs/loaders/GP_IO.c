@@ -295,7 +295,12 @@ int GP_IOFill(GP_IO *io, void *buf, size_t size)
 		ret = GP_IORead(io, (char*)buf + read, size - read);
 
 		if (ret <= 0) {
-			GP_DEBUG(1, "Failed to fill buffer");
+			/* end of file */
+			if (ret == 0)
+				errno = EIO;
+
+			GP_DEBUG(1, "Failed to fill buffer: %s",
+			         strerror(errno));
 			return 1;
 		}
 
