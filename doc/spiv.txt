@@ -6,8 +6,8 @@ Spiv is a fast, lightweight and minimalistic image viewer build on the top of
 the GFXprim library.
 
 Spiv supports wide range of image formats, currently supported are JPEG, PNG,
-GIF, BMP, TIFF, PSP, PPM, JP2 and CBZ (as well general ZIP archives with
-images), and more will come in the near future.
+GIF, BMP, TIFF, PSP, PNM, PCX, JPEG2000 and CBZ (as well general ZIP archives
+with images), and more will come in the near future.
 
 Spiv implements image caches with LRU (last recently used) algorithm which
 speeds up subsequent image operations (rotations, going back and forth).
@@ -22,7 +22,7 @@ Floyd-Steinberg dithering (even, for example, from RGB888 to RGB565).
 
 Spiv implements feh-like image actions, which are short shell scripts with
 printf-like modifiers. The modifiers are substituted to current image path,
-name, etc. and executed by pressing function keys).
+name, etc. and executed by pressing function keys.
 
 See 'spiv(1)' man page for more information.
 

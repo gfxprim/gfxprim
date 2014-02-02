@@ -129,6 +129,14 @@ static struct testcase v2_8_4bpp_10x10_white = {
 	.pixel = 0xffffff,
 };
 
+static struct testcase v3_0_8bpp_10x10_white = {
+	.path = "ver3_0_palette_8bpp_10x10_white.pcx",
+	.w = 10,
+	.h = 10,
+	.pixel_type = GP_PIXEL_RGB888,
+	.pixel = 0xffffff,
+};
+
 static struct testcase v3_0_24bpp_10x10_white = {
 	.path = "ver3_0_palette_24bpp_10x10_white.pcx",
 	.w = 10,
@@ -162,6 +170,12 @@ const struct tst_suite tst_suite = {
 		 .tst_fn = test_load_PCX,
 		 .res_path = "data/pcx/valid/ver2_8_palette_4bpp_10x10_white.pcx",
 		 .data = &v2_8_4bpp_10x10_white,
+		 .flags = TST_TMPDIR | TST_CHECK_MALLOC},
+
+		{.name = "PCX Load ver3.0 8bpp 10x10 white",
+		 .tst_fn = test_load_PCX,
+		 .res_path = "data/pcx/valid/ver3_0_palette_8bpp_10x10_white.pcx",
+		 .data = &v3_0_8bpp_10x10_white,
 		 .flags = TST_TMPDIR | TST_CHECK_MALLOC},
 
 		{.name = "PCX Load ver3.0 24bpp 10x10 white",

@@ -99,7 +99,7 @@ images into various standard formats (PNG, JPEG, GIF, TIFF, BMP, PNM, etc...).
   [green]#Composite image only for newer formats than 3.0# |
   [black]*No*
 
-| PBM PGM PNM |
+| PBM PGM PPM PNM |
   Netpbm portable bitmap |
   [green]#All but < 8bit binary grayscale# |
   [green]#All ASCII formats#
@@ -111,7 +111,7 @@ images into various standard formats (PNG, JPEG, GIF, TIFF, BMP, PNM, etc...).
 
 | PCX |
   ZSoft PCX |
-  [green]#All v3.0# |
+  [green]*Yes* |
   [black]*No*
 
 | CBZ |
