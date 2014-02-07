@@ -379,6 +379,8 @@ static GP_Context *zip_next_file(struct zip_priv *priv,
 		GP_IOMark(priv->io, GP_IO_MARK);
 
 		ret = GP_ReadImage(priv->io, callback);
+		if (errno == ECANCELED)
+			err = errno;
 
 		GP_IOSeek(priv->io, priv->io->mark + header.comp_size, GP_IO_SEEK_SET);
 
@@ -391,6 +393,8 @@ static GP_Context *zip_next_file(struct zip_priv *priv,
 		}
 		GP_DEBUG(1, "Reading image");
 		ret = GP_ReadImage(io, callback);
+		if (errno == ECANCELED)
+			err = errno;
 
 		GP_IOClose(io);
 		goto out;
