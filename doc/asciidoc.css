@@ -26,7 +26,7 @@ a, a:visited {
 
 a:hover {
   font-weight: bolder;
-  text-decoration: none;
+  text-decoration: underline ! important;
   color: OrangeRed ! important;
 }
 
