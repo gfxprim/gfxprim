@@ -16,43 +16,39 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2010 Jiri "BlueBear" Dluhos                            *
- *                         <jiri.bluebear.dluhos@gmail.com>                  *
- *                                                                           *
  * Copyright (C) 2009-2014 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
  /*
 
-   Core include file for loaders API.
+   PSD thumbnail image loader.
 
   */
 
-#ifndef LOADERS_GP_LOADERS_H
-#define LOADERS_GP_LOADERS_H
+#ifndef LOADERS_GP_PSD_H
+#define LOADERS_GP_PSD_H
 
 #include "core/GP_Context.h"
 #include "core/GP_ProgressCallback.h"
+#include "loaders/GP_IO.h"
 
-#include "loaders/GP_PNM.h"
-#include "loaders/GP_BMP.h"
-#include "loaders/GP_PNG.h"
-#include "loaders/GP_JPG.h"
-#include "loaders/GP_JP2.h"
-#include "loaders/GP_GIF.h"
-#include "loaders/GP_TIFF.h"
-#include "loaders/GP_PCX.h"
-#include "loaders/GP_PSP.h"
-#include "loaders/GP_PSD.h"
+/*
+ * Reads a PSD thumbnail from an IO stream.
+ *
+ * Returns newly allocated context cotaining the loaded image or in case of
+ * failure NULL and errno is set.
+ */
+GP_Context *GP_ReadPSD(GP_IO *io, GP_ProgressCallback *callback);
 
-#include "loaders/GP_TmpFile.h"
+/*
+ * Loads a PSD image from a file.
+ */
+GP_Context *GP_LoadPSD(const char *src_path, GP_ProgressCallback *callback);
 
-#include "loaders/GP_MetaData.h"
+/*
+ * Match PSD signature.
+ */
+int GP_MatchPSD(const void *buf);
 
-#include "loaders/GP_Loader.h"
-
-#include "loaders/GP_Container.h"
-#include "loaders/GP_ZIP.h"
-
-#endif /* LOADERS_GP_LOADERS_H */
+#endif /* LOADERS_GP_PSD_H */

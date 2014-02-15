@@ -155,6 +155,16 @@ enum GP_IOReadFTypes {
 	GP_IO_I2 = GP_IO_IGN | 2,
 	GP_IO_I3 = GP_IO_IGN | 3,
 	GP_IO_I4 = GP_IO_IGN | 4,
+	/*
+	 * Photoshop Pascal string
+	 *
+	 * first byte stores size and string is padded to even number bytes.
+	 *
+	 * The lower half stores passed buffer size.
+	 *
+	 * TODO: Unfinished
+	 */
+	GP_IO_PPSTR = 0x0800,
 	/* End of the types array */
 	GP_IO_END = 0xff00,
 };
@@ -162,6 +172,11 @@ enum GP_IOReadFTypes {
 #define GP_IO_TYPE_MASK 0xff00
 
 int GP_IOReadF(GP_IO *self, uint16_t *types, ...);
+
+/*
+ * GP_IOReadF wrappers for convinient reading of single value
+ */
+int GP_IOReadB4(GP_IO *io, uint32_t *val);
 
 enum GP_IOFileMode {
 	GP_IO_RDONLY = 0x00,

@@ -39,13 +39,23 @@
 #include "loaders/GP_Loaders.h"
 #include "loaders/GP_Loader.h"
 
+static GP_Loader psd_loader = {
+	.Read = GP_ReadPSD,
+	.Load = GP_LoadPSD,
+	.Save = NULL,
+	.Match = GP_MatchPSD,
+	.fmt_name = "Adobe Photoshop Image",
+	.next = NULL,
+	.extensions = {"psd", NULL},
+};
+
 static GP_Loader psp_loader = {
 	.Read = GP_ReadPSP,
 	.Load = GP_LoadPSP,
 	.Save = NULL,
 	.Match = GP_MatchPSP,
 	.fmt_name = "Paint Shop Pro Image",
-	.next = NULL,
+	.next = &psd_loader,
 	.extensions = {"psp", "pspimage", NULL},
 };
 

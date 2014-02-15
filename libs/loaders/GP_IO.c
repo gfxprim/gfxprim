@@ -314,33 +314,44 @@ int GP_IOFill(GP_IO *io, void *buf, size_t size)
 #define TYPE(x) ((x) & GP_IO_TYPE_MASK)
 #define VAL(x) ((x) & ~GP_IO_TYPE_MASK)
 
-static unsigned int readf_size(uint16_t *types)
+static void readf_size(uint16_t *types,
+                       unsigned int *min_size, unsigned int *max_size)
 {
-	unsigned int size = 0;
+	unsigned int min = 0;
+	unsigned int max = 0;
 
 	while (*types != GP_IO_END) {
 		switch (TYPE(*types)) {
 		case GP_IO_CONST:
 		case GP_IO_BYTE:
-			size++;
+			min++;
+			max++;
 		break;
 		case GP_IO_L2:
 		case GP_IO_B2:
-			size += 2;
+			min += 2;
+			max += 2;
 		break;
 		case GP_IO_L4:
 		case GP_IO_B4:
-			size += 4;
+			min += 4;
+			max += 4;
 		break;
 		case GP_IO_ARRAY:
 		case GP_IO_IGN:
-			size+=VAL(*types);
+			min += VAL(*types);
+			max += VAL(*types);
+		break;
+		case GP_IO_PPSTR:
+			min += 2;
+			max += 255;
 		break;
 		}
 		types++;
 	}
 
-	return size;
+	*min_size = min;
+	*max_size = max;
 }
 
 static int needs_swap(uint16_t type)
@@ -358,19 +369,36 @@ static int needs_swap(uint16_t type)
 #endif
 }
 
+static void write_str(uint16_t type, uint8_t *dest,
+                      uint8_t *src, unsigned int size)
+{
+	unsigned int dest_size = VAL(type);
+	unsigned int i;
+
+	if (!dest_size)
+		return;
+
+	for (i = 0; i < dest_size - 1 && i < size; i++)
+		dest[i] = src[i];
+
+	dest[i] = '\0';
+}
+
 int GP_IOReadF(GP_IO *self, uint16_t *types, ...)
 {
-	unsigned int size = readf_size(types);
+	unsigned int read_size, buf_size, size;
 	int ret;
 	va_list va;
 	uint8_t *ptr;
 
-	if (size == 0)
+	readf_size(types, &read_size, &buf_size);
+
+	if (!read_size)
 		return 0;
 
-	uint8_t buffer[size], *buf = buffer;
+	uint8_t buffer[buf_size], *buf = buffer;
 
-	if (GP_IOFill(self, buf, size))
+	if (GP_IOFill(self, buf, read_size))
 		return -1;
 
 	ret = 0;
@@ -427,6 +455,23 @@ int GP_IOReadF(GP_IO *self, uint16_t *types, ...)
 		case GP_IO_IGN:
 			buf += VAL(*types);
 		break;
+		case GP_IO_PPSTR:
+			ptr = va_arg(va, void*);
+			size = *buf;
+
+			/* empty string */
+			if (!size) {
+				write_str(*types, ptr, NULL, 0);
+				buf += 2;
+			} else {
+				/* fill up another part of the buffer */
+				if (GP_IOFill(self, buf + read_size, size))
+					return -1;
+				read_size += size;
+				write_str(*types, ptr, buf + 1, size);
+				buf += GP_ALIGN2(size + 1);
+                        }
+		break;
 		}
 
 		types++;
@@ -436,4 +481,14 @@ int GP_IOReadF(GP_IO *self, uint16_t *types, ...)
 end:
 	va_end(va);
 	return ret;
+}
+
+int GP_IOReadB4(GP_IO *io, uint32_t *val)
+{
+	uint16_t desc[] = {
+		GP_IO_B4,
+		GP_IO_END
+	};
+
+	return GP_IOReadF(io, desc, val) != 1;
 }
