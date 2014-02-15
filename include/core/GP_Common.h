@@ -71,6 +71,14 @@
 })
 
 /*
+ * Aligns value to be even
+ */
+#define GP_ALIGN2(a) ({   \
+	typeof(a) _a = a; \
+	_a + (_a%2);      \
+})
+
+/*
  * Swap a and b using an intermediate variable
  */
 #define GP_SWAP(a, b) do { \
