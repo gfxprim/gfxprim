@@ -178,6 +178,8 @@ int GP_IOReadF(GP_IO *self, uint16_t *types, ...);
  */
 int GP_IOReadB4(GP_IO *io, uint32_t *val);
 
+int GP_IOReadB2(GP_IO *io, uint16_t *val);
+
 enum GP_IOFileMode {
 	GP_IO_RDONLY = 0x00,
 	GP_IO_WRONLY = 0x01,

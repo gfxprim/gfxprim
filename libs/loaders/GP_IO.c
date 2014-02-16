@@ -621,3 +621,13 @@ int GP_IOReadB4(GP_IO *io, uint32_t *val)
 
 	return GP_IOReadF(io, desc, val) != 1;
 }
+
+int GP_IOReadB2(GP_IO *io, uint16_t *val)
+{
+	uint16_t desc[] = {
+		GP_IO_B2,
+		GP_IO_END
+	};
+
+	return GP_IOReadF(io, desc, val) != 1;
+}
