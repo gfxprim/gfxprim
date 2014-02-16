@@ -60,6 +60,10 @@ GP_ReadPCX
 GP_LoadPCX
 GP_MatchPCX
 
+GP_ReadPSD
+GP_LoadPSD
+GP_MatchPSD
+
 GP_SaveTmpFile
 GP_LoadTmpFile
 
@@ -98,7 +102,10 @@ GP_LineConvertGet
 
 GP_IOFile
 GP_IOMem
+GP_IOSubIO
 GP_IOMark
 GP_IOSize
 GP_IOFill
 GP_IOReadF
+GP_IOReadB2
+GP_IOReadB4
