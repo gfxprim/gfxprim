@@ -196,4 +196,17 @@ GP_IO *GP_IOFile(const char *path, enum GP_IOFileMode mode);
  */
 GP_IO *GP_IOMem(void *buf, size_t size, void (*free)(void *));
 
+/*
+ * Create a sub I/O from an I/O.
+ *
+ * The sub I/O starts at current offset in the parent I/O (which is also point
+ * where GP_IOTell() for the new I/O will return zero) and continues for
+ * maximally size bytes in the parent I/O. Reads at the end of the Sub I/O will
+ * be truncated to the.
+ *
+ * WARNING: If you combine reading/writing in the Sub I/O and parent I/O the
+ *          result is undefined.
+ */
+GP_IO *GP_IOSubIO(GP_IO *pio, size_t size);
+
 #endif /* LOADERS_GP_IO_H */

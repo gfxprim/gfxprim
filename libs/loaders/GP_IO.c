@@ -194,6 +194,7 @@ static off_t mem_seek(GP_IO *io, off_t off, enum GP_IOWhence whence)
 	break;
 	default:
 		GP_WARN("Invalid whence");
+		errno = EINVAL;
 		return (off_t)-1;
 	}
 
@@ -240,6 +241,134 @@ GP_IO *GP_IOMem(void *buf, size_t size, void (*free)(void *))
 	mem_io->buf = buf;
 	mem_io->size = size;
 	mem_io->pos = 0;
+
+	return io;
+}
+
+struct sub_io {
+	/* Points to parent IO */
+	off_t start;
+	off_t end;
+	off_t cur;
+
+	GP_IO *io;
+};
+
+static ssize_t sub_read(GP_IO *io, void *buf, size_t size)
+{
+	struct sub_io *sub_io = GP_IO_PRIV(io);
+
+	if (sub_io->cur > sub_io->end) {
+		GP_BUG("Current offset (%zi) is after the end (%zi)",
+		       sub_io->cur, sub_io->end);
+		errno = EINVAL;
+		return 0;
+	}
+
+	size_t io_size = sub_io->end - sub_io->cur;
+
+	size = GP_MIN(size, io_size);
+
+	if (size == 0)
+		return 0;
+
+	ssize_t ret = GP_IORead(sub_io->io, buf, size);
+
+	if (ret < 0)
+		return ret;
+
+	sub_io->cur += ret;
+	return ret;
+}
+
+static off_t sub_seek(GP_IO *io, off_t off, enum GP_IOWhence whence)
+{
+	struct sub_io *sub_io = GP_IO_PRIV(io);
+	off_t io_size, ret, poff;
+
+	switch (whence) {
+	case GP_IO_SEEK_CUR:
+		//TODO: Overflow
+		poff = sub_io->cur + off;
+
+		if (poff < sub_io->start || poff > sub_io->end) {
+			errno = EINVAL;
+			return (off_t)-1;
+		}
+
+		ret = GP_IOSeek(sub_io->io, off, whence);
+	break;
+	case GP_IO_SEEK_SET:
+		io_size = sub_io->end - sub_io->start;
+
+		if (off > io_size || off < 0) {
+			errno = EINVAL;
+			return (off_t)-1;
+		}
+
+		ret = GP_IOSeek(sub_io->io, sub_io->start + off, whence);
+	break;
+	case GP_IO_SEEK_END:
+		io_size = sub_io->end - sub_io->start;
+
+		if (off + io_size < 0 || off > 0) {
+			errno = EINVAL;
+			return (off_t)-1;
+		}
+
+		ret = GP_IOSeek(sub_io->io, sub_io->end + off, whence);
+	break;
+	default:
+		GP_WARN("Invalid whence");
+		errno = EINVAL;
+		return (off_t)-1;
+	}
+
+	if (ret == (off_t)-1)
+		return (off_t)-1;
+
+	sub_io->cur = ret;
+
+	return sub_io->cur - sub_io->start;
+}
+
+static int sub_close(GP_IO *io)
+{
+	struct sub_io *sub_io = GP_IO_PRIV(io);
+
+	GP_DEBUG(1, "Closing SubIO (from %p)", sub_io->io);
+
+	free(io);
+
+	return 0;
+}
+
+GP_IO *GP_IOSubIO(GP_IO *pio, size_t size)
+{
+	GP_IO *io;
+	struct sub_io *sub_io;
+
+	GP_DEBUG(1, "Creating SubIO (from %p) size=%zu", pio, size);
+
+	io = malloc(sizeof(GP_IO) + sizeof(*sub_io));
+
+	if (!io) {
+		GP_DEBUG(1, "Malloc failed :(");
+		errno = ENOMEM;
+		return NULL;
+	}
+
+	io->Read = sub_read;
+	io->Seek = sub_seek;
+	io->Close = sub_close;
+	io->Write = NULL;
+
+	sub_io = GP_IO_PRIV(io);
+	sub_io->cur = sub_io->start = GP_IOTell(pio);
+
+	//TODO: Overflow
+	sub_io->end = sub_io->start + size;
+	sub_io->io = pio;
 
 	return io;
 }
