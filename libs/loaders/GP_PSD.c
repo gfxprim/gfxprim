@@ -47,9 +47,140 @@ int GP_MatchPSD(const void *buf)
 }
 
 enum psd_img_res_id {
-	PSD_THUMBNAIL_RES40 = 1033,
-	PSD_THUMBNAIL_RES50 = 1036,
+	PSD_RESOLUTION_INFO       = 1005,
+	PSD_ALPHA_CHANNELS_NAMES  = 1006,
+	PSD_DISPLAY_INFO0         = 1007,
+	PSD_BACKGROUND_COLOR      = 1010,
+	PSD_PRINT_FLAGS           = 1011,
+	PSD_COLOR_HALFTONING_INFO = 1013,
+	PSD_COLOR_TRANSFER_FUNC   = 1016,
+	PSD_LAYER_STATE_INFO      = 1024,
+	PSD_WORKING_PATH          = 1025,
+	PSD_LAYERS_GROUP_INFO     = 1026,
+	PSD_IPTC_NAA_REC          = 1028,
+	PSD_GRID_AND_GUIDES       = 1032,
+	PSD_THUMBNAIL_RES40       = 1033,
+	PSD_COPYRIGHT_FLAG        = 1034,
+	PSD_THUMBNAIL_RES50       = 1036,
+	PSD_GLOBAL_ANGLE          = 1037,
+	PSD_ICC_PROFILE           = 1039,
+	PSD_ICC_UNTAGGED_PROFILE  = 1041,
+	PSD_ID_SEED               = 1044,
+	PSD_UNICODE_ALPHA_NAMES   = 1045,
+	PSD_GLOBAL_ALTITUDE       = 1049,
+	PSD_SLICES                = 1050,
+	PSD_ALPHA_IDENTIFIERS     = 1053,
+	PSD_URL_LIST              = 1054,
+	PSD_VERSION_INFO          = 1057,
+	PSD_EXIF1                 = 1058,
+	PSD_EXIF3                 = 1059,
+	PSD_XML_METADATA          = 1060,
+	PSD_CAPTION_DIGETST       = 1061,
+	PSD_PRINT_SCALE           = 1062,
+	PSD_PIXEL_ASPECT_RATIO    = 1064,
+	PSD_LAYER_SELECTION_IDS   = 1069,
+	PSD_PRINT_INFO_CS2        = 1071,
+	PSD_LAYER_GROUPS          = 1072,
+	PSD_TIMELINE_INFO         = 1075,
+	PSD_SHEET_DISCLOSURE      = 1076,
+	PSD_DISPLAY_INFO          = 1077,
+	PSD_ONION_SKINS           = 1078,
+	PSD_PRINT_INFO_CS5        = 1082,
+	PSD_PRINT_STYLE           = 1083,
+	PSD_PRINT_FLAGS_INFO      = 10000,
 };
+
+static const char *psd_img_res_id_name(uint16_t id)
+{
+	switch (id) {
+	case PSD_RESOLUTION_INFO:
+		return "Resolution Info";
+	case PSD_ALPHA_CHANNELS_NAMES:
+		return "Alpha Channels Names";
+	case PSD_DISPLAY_INFO0:
+		return "Display Info (Obsolete)";
+	case PSD_BACKGROUND_COLOR:
+		return "Background Color";
+	case PSD_PRINT_FLAGS:
+		return "Print Flags";
+	case PSD_COLOR_HALFTONING_INFO:
+		return "Color Halftoning Info";
+	case PSD_COLOR_TRANSFER_FUNC:
+		return "Color Transfer Function";
+	case PSD_LAYER_STATE_INFO:
+		return "Layer State Info";
+	case PSD_WORKING_PATH:
+		return "Working Path";
+	case PSD_LAYERS_GROUP_INFO:
+		return "Layers Group Info";
+	case PSD_IPTC_NAA_REC:
+		return "IPTC-NAA Record";
+	case PSD_GRID_AND_GUIDES:
+		return "Grid and Guides";
+	case PSD_THUMBNAIL_RES40:
+		return "Thumbnail 4.0";
+	case PSD_COPYRIGHT_FLAG:
+		return "Copyright Flag";
+	case PSD_THUMBNAIL_RES50:
+		return "Thumbnail 5.0+";
+	case PSD_GLOBAL_ANGLE:
+		return "Global Angle";
+	case PSD_ICC_PROFILE:
+		return "ICC Profile";
+	case PSD_ICC_UNTAGGED_PROFILE:
+		return "ICC Untagged Profile";
+	case PSD_ID_SEED:
+		return "ID Seed";
+	case PSD_UNICODE_ALPHA_NAMES:
+		return "Unicode Alpha Names";
+	case PSD_GLOBAL_ALTITUDE:
+		return "Global Altitude";
+	case PSD_SLICES:
+		return "Slices";
+	case PSD_ALPHA_IDENTIFIERS:
+		return "Alpha Identifiers";
+	case PSD_URL_LIST:
+		return "URL List";
+	case PSD_VERSION_INFO:
+		return "Version Info";
+	case PSD_EXIF1:
+		return "Exif data 1";
+	case PSD_EXIF3:
+		return "Exif data 3";
+	case PSD_XML_METADATA:
+		return "XML Metadata";
+	case PSD_CAPTION_DIGETST:
+		return "Caption Digest";
+	case PSD_PRINT_SCALE:
+		return "Print Scale";
+	case PSD_PIXEL_ASPECT_RATIO:
+		return "Pixel Aspect Ratio";
+	case PSD_LAYER_SELECTION_IDS:
+		return "Selectin IDs";
+	case PSD_PRINT_INFO_CS2:
+		return "Print Info CS2";
+	case PSD_LAYER_GROUPS:
+		return "Layer Groups";
+	case PSD_TIMELINE_INFO:
+		return "Timeline Info";
+	case PSD_SHEET_DISCLOSURE:
+		return "Sheet Disclosure";
+	case PSD_DISPLAY_INFO:
+		return "Display Info";
+	case PSD_ONION_SKINS:
+		return "Onion Skins";
+	case PSD_PRINT_INFO_CS5:
+		return "Print Info CS5";
+	case PSD_PRINT_STYLE:
+		return "Print Scale";
+	case 4000 ... 4999:
+		return "Plugin Resource";
+	case PSD_PRINT_FLAGS_INFO:
+		return "Print Flags Information";
+	default:
+		return "Unknown";
+	}
+}
 
 enum thumbnail_fmt {
 	PSD_RAW_RGB = 0,
@@ -68,10 +199,15 @@ static const char *thumbnail_fmt_name(uint16_t fmt)
 	}
 }
 
-static GP_Context *psd_thumbnail50(GP_IO *io, GP_ProgressCallback *callback)
+#define THUMBNAIL50_HSIZE 28
+
+static GP_Context *psd_thumbnail50(GP_IO *io, size_t size,
+                                   GP_ProgressCallback *callback)
 {
 	uint32_t fmt, w, h;
 	uint16_t bpp, nr_planes;
+	GP_Context *res;
+	int err;
 
 	uint16_t res_thumbnail_header[] = {
 		GP_IO_B4, /* Format */
@@ -95,7 +231,7 @@ static GP_Context *psd_thumbnail50(GP_IO *io, GP_ProgressCallback *callback)
 		return NULL;
 	}
 
-	GP_DEBUG(1, "%"PRIu32"x%"PRIu32" format=%s (%"PRIu16") bpp=%"PRIu16
+	GP_DEBUG(3, "%"PRIu32"x%"PRIu32" format=%s (%"PRIu16") bpp=%"PRIu16
 	         " nr_planes=%"PRIu16, w, h, thumbnail_fmt_name(fmt), fmt,
 		 bpp, nr_planes);
 
@@ -104,14 +240,89 @@ static GP_Context *psd_thumbnail50(GP_IO *io, GP_ProgressCallback *callback)
 		return NULL;
 	}
 
-	return GP_ReadJPG(io, callback);
+	if (size < THUMBNAIL50_HSIZE) {
+		GP_WARN("Negative thumbnail resource size");
+		errno = EINVAL;
+		return NULL;
+	}
+
+	GP_IO *sub_io = GP_IOSubIO(io, size - THUMBNAIL50_HSIZE);
+
+	if (!sub_io)
+		return NULL;
+
+	res = GP_ReadJPG(sub_io, callback);
+	err = errno;
+	GP_IOClose(sub_io);
+	errno = err;
+
+	return res;
+}
+
+static unsigned int read_unicode_string(GP_IO *io, char *str,
+                                        unsigned int size)
+{
+	uint8_t buf[size * 2];
+	unsigned int i;
+
+	if (GP_IOFill(io, buf, size * 2)) {
+		GP_DEBUG(1, "Failed to read unicode string");
+		return 0;
+	}
+
+	for (i = 0; i < size; i++) {
+		if (buf[i * 2])
+			str[i] = '?';
+		else
+			str[i] = buf[i * 2 + 1];
+	}
+
+	str[size] = 0;
+
+	return size * 2;
+}
+
+static void psd_read_version_info(GP_IO *io)
+{
+	unsigned int size = 13;
+	uint32_t version, str_size;
+
+	uint16_t version_data[] = {
+		GP_IO_B4, /* Version */
+		GP_IO_I1, /* hasRealMergedData ??? */
+		GP_IO_B4, /* Unicode version string size */
+		GP_IO_END
+	};
+
+	if (GP_IOReadF(io, version_data, &version, &str_size) != 3) {
+		GP_DEBUG(1, "Failed to read version header");
+		return;
+	}
+
+	//TODO: Check str size is small
+	char str[str_size + 1];
+
+	size += read_unicode_string(io, str, str_size);
+
+	if (GP_IOReadB4(io, &str_size)) {
+		GP_DEBUG(1, "Failed to read string size");
+		return;
+	}
+
+	char reader[str_size + 1];
+
+	size += read_unicode_string(io, reader, str_size);
+
+	GP_DEBUG(3, "Version %"PRIu32" writer='%s' reader='%s'",
+	         version, str, reader);
 }
 
 static unsigned int psd_next_img_res_block(GP_IO *io, GP_Context **res,
                                            GP_ProgressCallback *callback)
 {
 	uint16_t res_id;
-	uint32_t res_size;
+	uint32_t res_size, seek_size;
+	off_t prev, after;
 
 	uint16_t res_block_header[] = {
 		'8', 'B', 'I', 'M', /* Image resource block signature */
@@ -127,26 +338,36 @@ static unsigned int psd_next_img_res_block(GP_IO *io, GP_Context **res,
 		return 0;
 	}
 
-	GP_DEBUG(1, "Image resource id=%"PRIu16" size=%"PRIu32,
-	         res_id, res_size);
+	GP_DEBUG(2, "Image resource id=%-5"PRIu16" size=%-8"PRIu32" (%s)",
+	         res_id, res_size, psd_img_res_id_name(res_id));
+
+	seek_size = res_size = GP_ALIGN2(res_size);
 
 	switch (res_id) {
 	case PSD_THUMBNAIL_RES40:
 		GP_DEBUG(1, "Unsupported thumbnail version 4.0");
 	break;
 	case PSD_THUMBNAIL_RES50:
-		*res = psd_thumbnail50(io, callback);
-		return 0;
+		prev = GP_IOTell(io);
+		*res = psd_thumbnail50(io, res_size, callback);
+		after = GP_IOTell(io);
+		GP_DEBUG(1, "PREV %li after %li diff %li size %u", prev, after, after - prev, seek_size);
+		seek_size -= (after - prev);
+	break;
+	case PSD_VERSION_INFO:
+		prev = GP_IOTell(io);
+		psd_read_version_info(io);
+		after = GP_IOTell(io);
+		seek_size -= (after - prev);
+	break;
 	}
 
-	res_size = GP_ALIGN2(res_size);
-
-	if (GP_IOSeek(io, res_size, GP_IO_SEEK_CUR) == (off_t)-1) {
+	if (GP_IOSeek(io, seek_size, GP_IO_SEEK_CUR) == (off_t)-1) {
 		GP_DEBUG(1, "Failed skip image resource");
 		return 0;
 	}
 
-	return res_size + 10;
+	return res_size + 12;
 }
 
 enum psd_color_mode {
@@ -241,18 +462,22 @@ GP_Context *GP_ReadPSD(GP_IO *io, GP_ProgressCallback *callback)
 		return NULL;
 	}
 
-	GP_DEBUG(1, "Image Resource Section length is %x", len);
+	GP_DEBUG(1, "Image Resource Section length is %u", len);
 
 	GP_Context *res = NULL;
 
 	do {
 		size = psd_next_img_res_block(io, &res, callback);
 
-		if (!size)
+		if (size == 0)
 			return res;
 
 		read_size += size;
+	//	GP_DEBUG(1, "Read size %u", read_size);
 	} while (read_size < len);
+
+	if (res)
+		return res;
 
 	errno = ENOSYS;
 	return NULL;
