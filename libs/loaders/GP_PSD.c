@@ -35,6 +35,7 @@
 
 #include "core/GP_Debug.h"
 #include "core/GP_Common.h"
+#include "core/GP_GetPutPixel.h"
 #include "GP_JPG.h"
 #include "GP_PSD.h"
 
@@ -351,7 +352,6 @@ static unsigned int psd_next_img_res_block(GP_IO *io, GP_Context **res,
 		prev = GP_IOTell(io);
 		*res = psd_thumbnail50(io, res_size, callback);
 		after = GP_IOTell(io);
-		GP_DEBUG(1, "PREV %li after %li diff %li size %u", prev, after, after - prev, seek_size);
 		seek_size -= (after - prev);
 	break;
 	case PSD_VERSION_INFO:
@@ -405,15 +405,264 @@ static const char *psd_color_mode_name(uint16_t color_mode)
 	}
 }
 
-GP_Context *GP_ReadPSD(GP_IO *io, GP_ProgressCallback *callback)
-{
-	int err;
+enum compress_method {
+	PSD_COMPRESS_RAW    = 0,
+	PSD_COMPRESS_RLE    = 1,
+	PSD_COMPRESS_ZIP_NP = 2,
+	PSD_COMPRESS_ZIP_WP = 3,
+};
+
+struct psd_header {
 	uint32_t w;
 	uint32_t h;
 	uint16_t depth;
 	uint16_t channels;
 	uint16_t color_mode;
+};
+
+static const char *compress_method_type(uint16_t compress)
+{
+	switch (compress) {
+	case PSD_COMPRESS_RAW:
+		return "Raw";
+	case PSD_COMPRESS_RLE:
+		return "RLE";
+	case PSD_COMPRESS_ZIP_NP:
+		return "ZIP (no prediction)";
+	case PSD_COMPRESS_ZIP_WP:
+		return "ZIP (with prediction)";
+	default:
+		return "Unknown";
+	}
+}
+
+static int get_byte(GP_IO *io)
+{
+	uint8_t buf;
+
+	if (GP_IORead(io, &buf, 1) != 1) {
+		GP_WARN("END OF FILE REACHED");
+		return -1;
+	}
+
+	return buf;
+}
+
+struct rle {
+	int8_t op;
+	int size;
+	uint8_t val;
+};
+
+static void read_rle(GP_IO *io, struct rle *rle,
+                     uint8_t *buf, unsigned int size)
+{
+	unsigned int read = 0;
+
+	while (read < size) {
+		switch (rle->op) {
+		case -128:
+			rle->op = get_byte(io);
+//			fprintf(stderr, "Read command %i\n", rle->op);
+		break;
+		case 0 ... 127:
+			rle->size = rle->op + 1;
+//			fprintf(stderr, "VERBATIM %u\n", rle->size);
+			while (rle->size-- && read < size)
+				buf[read++] = get_byte(io);
+			if (rle->size < 0)
+				rle->op = -128;
+		break;
+		case -127 ... -1:
+			rle->size = 1 - rle->op;
+			rle->val = get_byte(io);
+
+//			fprintf(stderr, "REPEAT %u x %i\n", rle->size, rle->val);
+
+			while (rle->size-- && read < size)
+				buf[read++] = rle->val;
+			if (rle->size < 0)
+				rle->op = -128;
+		break;
+		}
+	}
+}
+
+/*
+ * UnPackBits RLE
+ *
+ * Data are in planar mode RRRRR... GGGGG... BBBBB... etc.
+ *
+ * TODO: Use buffered I/O
+ */
+static int psd_load_rle_rgb(GP_IO *io, GP_Context *res,
+                            GP_ProgressCallback *callback)
+{
+	unsigned int x, y, c, p;
+	unsigned int chans = res->pixel_type == GP_PIXEL_RGB888 ? 3 : 4;
+	uint8_t b[res->w], *bp;
+	struct rle rle = {.op = -128};
+
+	/*
+	 * Skip line byte counts
+	 *
+	 * Two bytes per channel per row
+	 */
+	if (GP_IOSeek(io, 2 * chans * res->h, GP_IO_SEEK_CUR) == (off_t)-1) {
+		GP_DEBUG(1, "Failed to skip Line Bytes Counts");
+		return 1;
+	}
+
+	for (c = 0; c < chans; c++) {
+		switch (c) {
+		case 0:
+			p = 2;
+		break;
+		case 2:
+			p = 0;
+		break;
+		default:
+			p = c;
+		}
+
+		for (y = 0; y < res->h; y++) {
+			bp = GP_PIXEL_ADDR(res, 0, y);
+			read_rle(io, &rle, b, sizeof(b));
+
+			for (x = 0; x < res->w; x++)
+				bp[x * chans + p] = b[x];
+
+			if (GP_ProgressCallbackReport(callback, res->h * c + y,
+			                              res->h * chans, res->w)) {
+				GP_DEBUG(1, "Operation aborted");
+				return ECANCELED;
+			}
+		}
+	}
+
+	GP_ProgressCallbackDone(callback);
+
+	return 0;
+}
+
+static int psd_load_rle_cmyk(GP_IO *io, GP_Context *res,
+                             GP_ProgressCallback *callback)
+{
+	unsigned int x, y, c;
+	uint8_t b[res->w], *bp;
+	struct rle rle = {.op = -128};
+
+	/*
+	 * Skip line byte counts
+	 *
+	 * Two bytes per channel per row
+	 */
+	if (GP_IOSeek(io, 2 * 4 * res->h, GP_IO_SEEK_CUR) == (off_t)-1) {
+		GP_DEBUG(1, "Failed to skip Line Bytes Counts");
+		return 1;
+	}
+
+	for (c = 0; c < 4; c++) {
+		for (y = 0; y < res->h; y++) {
+			bp = GP_PIXEL_ADDR(res, 0, y);
+			read_rle(io, &rle, b, sizeof(b));
+
+			for (x = 0; x < res->w; x++)
+				bp[x * 4 + c] = 255 - b[x];
+
+			if (GP_ProgressCallbackReport(callback, res->h * c + y,
+			                              4 * res->h, res->w)) {
+				GP_DEBUG(1, "Operation aborted");
+				return ECANCELED;
+			}
+		}
+	}
+
+	GP_ProgressCallbackDone(callback);
+
+	return 0;
+}
+
+static GP_Context *psd_combined_image(GP_IO *io,
+                                      struct psd_header *header,
+                                      GP_ProgressCallback *callback)
+{
+	uint16_t compress;
+	GP_PixelType pixel_type = GP_PIXEL_UNKNOWN;
+
+	if (GP_IOReadB2(io, &compress)) {
+		GP_DEBUG(1, "Failed to read Combined Image compression");
+		return NULL;
+	}
+
+	GP_DEBUG(1, "Combined image compression %s (%"PRIu16")",
+	         compress_method_type(compress), compress);
+
+
+	if (compress != PSD_COMPRESS_RLE) {
+		GP_DEBUG(1, "Unsupported compression");
+		errno = ENOSYS;
+		return NULL;
+	}
+
+	if (header->color_mode == PSD_RGB) {
+		switch (header->channels) {
+		case 3:
+			switch (header->depth) {
+			case 8:
+				pixel_type = GP_PIXEL_RGB888;
+			break;
+			}
+		break;
+		case 4:
+			switch (header->depth) {
+			case 8:
+				pixel_type = GP_PIXEL_RGBA8888;
+			break;
+			}
+		break;
+		}
+	}
+
+	if (header->color_mode == PSD_CMYK && header->channels == 4) {
+		switch (header->channels) {
+		case 4:
+			pixel_type = GP_PIXEL_CMYK8888;
+		break;
+		}
+	}
+
+	if (pixel_type == GP_PIXEL_UNKNOWN) {
+		GP_DEBUG(1, "Unsupported color_mode/channels/bpp combination");
+		errno = ENOSYS;
+		return NULL;
+	}
+
+	GP_Context *res = GP_ContextAlloc(header->w, header->h, pixel_type);
+
+	if (!res)
+		return NULL;
+
+	int ret;
+
+	if (pixel_type == GP_PIXEL_CMYK8888)
+		ret = psd_load_rle_cmyk(io, res, callback);
+	else
+		ret = psd_load_rle_rgb(io, res, callback);
+
+	if (ret) {
+		GP_ContextFree(res);
+		return NULL;
+	}
+
+	return res;
+}
+
+GP_Context *GP_ReadPSD(GP_IO *io, GP_ProgressCallback *callback)
+{
+	int err;
 	uint32_t len, size, read_size = 0;
+	struct psd_header header;
 
 	uint16_t psd_header[] = {
 	        '8', 'B', 'P', 'S',
@@ -428,8 +677,8 @@ GP_Context *GP_ReadPSD(GP_IO *io, GP_ProgressCallback *callback)
 		GP_IO_END
 	};
 
-	if (GP_IOReadF(io, psd_header, &channels, &h, &w, &depth,
-	               &color_mode, &len) != 13) {
+	if (GP_IOReadF(io, psd_header, &header.channels, &header.h, &header.w,
+	               &header.depth, &header.color_mode, &len) != 13) {
 		GP_DEBUG(1, "Failed to read file header");
 		err = EIO;
 		goto err0;
@@ -437,18 +686,21 @@ GP_Context *GP_ReadPSD(GP_IO *io, GP_ProgressCallback *callback)
 
 	GP_DEBUG(1, "Have PSD %"PRIu32"x%"PRIu32" channels=%"PRIu16","
 	         " bpp=%"PRIu16" color_mode=%s (%"PRIu16") "
-		 " color_mode_data_len=%"PRIu32, w, h, channels,
-	         depth, psd_color_mode_name(color_mode), color_mode, len);
+	         " color_mode_data_len=%"PRIu32, header.w, header.h,
+	         header.channels, header.depth,
+	         psd_color_mode_name(header.color_mode), header.color_mode, len);
 
-	switch (color_mode) {
+	switch (header.color_mode) {
 	case PSD_INDEXED:
 	case PSD_DUOTONE:
 	break;
 	default:
-		if (len)
+		if (len) {
 			GP_WARN("Color mode_mode_data_len != 0 (is %"PRIu32")"
 			        "for %s (%"PRIu16")", len,
-				psd_color_mode_name(color_mode), color_mode);
+			        psd_color_mode_name(header.color_mode),
+		                header.color_mode);
+		}
 	}
 
 	/* Seek after the color mode data */
@@ -464,20 +716,38 @@ GP_Context *GP_ReadPSD(GP_IO *io, GP_ProgressCallback *callback)
 
 	GP_DEBUG(1, "Image Resource Section length is %u", len);
 
-	GP_Context *res = NULL;
+	GP_Context *thumbnail = NULL;
 
 	do {
-		size = psd_next_img_res_block(io, &res, callback);
+		size = psd_next_img_res_block(io, &thumbnail, callback);
 
 		if (size == 0)
-			return res;
+			return thumbnail;
 
 		read_size += size;
-	//	GP_DEBUG(1, "Read size %u", read_size);
 	} while (read_size < len);
 
-	if (res)
-		return res;
+	/* Skip Layer and Mask information */
+	if (GP_IOReadB4(io, &size)) {
+		GP_DEBUG(1, "Failed to read Layer and Mask Section size");
+		goto end;
+	}
+
+	if (GP_IOSeek(io, size, GP_IO_SEEK_CUR) == (off_t)-1) {
+		GP_DEBUG(1, "Failed to seek to Image Data Section");
+		goto end;
+	}
+
+	GP_Context *combined = psd_combined_image(io, &header, callback);
+
+	if (combined) {
+		GP_ContextFree(thumbnail);
+		return combined;
+	}
+
+end:
+	if (thumbnail)
+		return thumbnail;
 
 	errno = ENOSYS;
 	return NULL;
