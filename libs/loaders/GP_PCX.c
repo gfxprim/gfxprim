@@ -37,6 +37,133 @@
 
 #include "GP_PCX.h"
 
+/*
+ * PCX RLE I/O Stream
+ */
+struct rle {
+	/* RLE internal state */
+	int cnt;
+	int val;
+
+	/* Read counter */
+	off_t pos;
+
+	/* Source I/O stream */
+	GP_IO *io;
+
+	/* Read buffer */
+	ssize_t buf_fill;
+	ssize_t buf_pos;
+	uint8_t buf[128];
+};
+
+static int rle_getc(struct rle *rle)
+{
+	if (rle->buf_pos < rle->buf_fill)
+		return rle->buf[rle->buf_pos++];
+
+	rle->buf_fill = GP_IORead(rle->io, rle->buf, sizeof(rle->buf));
+
+	if (rle->buf_fill <= 0)
+		return -1;
+
+	rle->buf_pos = 1;
+	return rle->buf[0];
+}
+
+/*
+ * RLE I/O stream
+ *
+ * - reads exactly size bytes unless read from underlying I/O has failed
+ *
+ * - the size is expected to be multiple of bytes_per_line, the specification
+ *   forbids for RLE to span across pixel lines, but there are images that does
+ *   so. This code only prints a warning in this case.
+ */
+static ssize_t rle_read(GP_IO *self, void *buf, size_t size)
+{
+	struct rle *priv = GP_IO_PRIV(self);
+	unsigned int read = 0;
+	uint8_t *bbuf = buf;
+	int b;
+
+	for (;;) {
+		while (priv->cnt > 0 && read < size) {
+			bbuf[read++] = priv->val;
+			priv->cnt--;
+		}
+
+		if (read >= size) {
+			priv->pos += read;
+			if (priv->cnt)
+				GP_WARN("Nonzero repeat count (%u) %02x at %zi",
+				        priv->cnt, priv->val, priv->pos);
+			//priv->cnt = 0;
+			return read;
+		}
+
+		b = rle_getc(priv);
+
+		if (b < 0)
+			return priv->buf_fill;
+
+		if ((b & 0xc0) == 0xc0) {
+			priv->cnt = b & 0x3f;
+			priv->val = rle_getc(priv);
+			if (priv->val < 0)
+				return priv->buf_fill;
+		} else {
+			priv->cnt = 1;
+			priv->val = b;
+		}
+	}
+}
+
+/*
+ * Only seeks forward to skip padding also works for GP_IOTell().
+ */
+static off_t rle_seek(GP_IO *self, off_t off, enum GP_IOWhence whence)
+{
+	uint8_t b;
+	struct rle *priv = GP_IO_PRIV(self);
+
+	if (whence != GP_IO_SEEK_CUR || off < 0)
+		return EINVAL;
+
+	while (off--)
+		rle_read(self, &b, 1);
+
+	return priv->pos;
+}
+
+static int rle_close(GP_IO *self)
+{
+	free(self);
+	return 0;
+}
+
+static GP_IO *rle(GP_IO *io)
+{
+	GP_IO *rle = malloc(sizeof(GP_IO) + sizeof(struct rle));
+
+	if (!rle)
+		return NULL;
+
+	struct rle *priv = GP_IO_PRIV(rle);
+
+	priv->cnt = 0;
+	priv->buf_fill = 0;
+	priv->buf_pos = 0;
+	priv->io = io;
+
+	rle->Read = rle_read;
+	rle->Write = NULL;
+	rle->Seek = rle_seek;
+	rle->Close = rle_close;
+
+	return rle;
+}
+
 /* Creator ZSoft: 0x0a
  * Version:       0x00, 0x02, 0x03, 0x04, 0x05
  * RLE:           0x01
@@ -88,69 +215,6 @@ struct pcx_header {
 	uint8_t palette[48];
 };
 
-static int get_byte(GP_IO *io)
-{
-	uint8_t buf;
-
-	if (GP_IORead(io, &buf, 1) != 1)
-		return -1;
-
-	return buf;
-}
-
-static int readline(GP_IO *io, uint8_t *buf, unsigned int size, unsigned int padd)
-{
-	int b, val = 0, cnt = 0;
-	unsigned int read = 0;
-
-	for (;;) {
-		while (cnt > 0 && read < size) {
-			buf[read++] = val;
-			cnt--;
-		}
-
-		if (read >= size) {
-			goto end;
-		}
-
-		b = get_byte(io);
-
-		if (b == -1) {
-			GP_WARN("End of file reached unexpectedly");
-			return 0;
-		}
-
-		if ((b & 0xc0) == 0xc0) {
-			cnt = b & 0x3f;
-			val = get_byte(io);
-		} else {
-			cnt = 1;
-			val = b;
-		}
-	}
-
-end:
-	/*
-	 * Data may be padded, read the excess bytes
-	 */
-	while (padd--) {
-		if (cnt) {
-			cnt--;
-		} else {
-			b = get_byte(io);
-			if ((b & 0xc0) == 0xc0) {
-				cnt = b & 0x3f;
-				get_byte(io);
-			}
-		}
-	}
-
-	if (cnt)
-		GP_WARN("Nonzero repeat count at the line end (%u)", cnt);
-
-	return 0;
-}
-
 #include "core/GP_BitSwap.h"
 
 static int read_g1(GP_IO *io, struct pcx_header *header,
@@ -164,20 +228,26 @@ static int read_g1(GP_IO *io, struct pcx_header *header,
 		return EINVAL;
 	}
 
+	GP_IO *rle_io = rle(io);
+	if (!rle_io)
+		return errno;
+
 	for (y = 0; y < res->h; y++) {
 		uint8_t *addr = GP_PIXEL_ADDR(res, 0, y);
-
-		readline(io, addr, res->bytes_per_row, padd);
+		GP_IORead(rle_io, addr, res->bytes_per_row);
+		GP_IOSeek(rle_io, GP_IO_SEEK_CUR, padd);
 
 		//TODO: FIX Endians
 		GP_BitSwapRow_B1(addr, res->bytes_per_row);
 
 		if (GP_ProgressCallbackReport(callback, y, res->h, res->w)) {
 			GP_DEBUG(1, "Operation aborted");
+			GP_IOClose(rle_io);
 			return ECANCELED;
 		}
 	}
 
+	GP_IOClose(rle_io);
 	return 0;
 }
 
@@ -188,8 +258,14 @@ static int read_rgb888(GP_IO *io, struct pcx_header *header,
 	unsigned int bpr = header->bytes_per_line;
 	uint8_t b[3 * bpr];
 
+	GP_IO *rle_io = rle(io);
+	if (!rle_io)
+		return errno;
+
 	for (y = 0; y < res->h; y++) {
-		readline(io, b, sizeof(b), 0);
+		//readline(io, b, sizeof(b), 0);
+
+		GP_IORead(rle_io, b, sizeof(b));
 
 		for (x = 0; x < res->w; x++) {
 			GP_Pixel pix = GP_Pixel_CREATE_RGB888(b[x],
@@ -200,10 +276,12 @@ static int read_rgb888(GP_IO *io, struct pcx_header *header,
 
 		if (GP_ProgressCallbackReport(callback, y, res->h, res->w)) {
 			GP_DEBUG(1, "Operation aborted");
+			GP_IOClose(rle_io);
 			return ECANCELED;
 		}
 	}
 
+	GP_IOClose(rle_io);
 	return 0;
 }
 
@@ -236,8 +314,12 @@ static int read_16_palette(GP_IO *io, struct pcx_header *header,
 		return EINVAL;
 	}
 
+	GP_IO *rle_io = rle(io);
+	if (!rle_io)
+		return errno;
+
 	for (y = 0; y < res->h; y++) {
-		readline(io, b, sizeof(b), 0);
+		GP_IORead(rle_io, b, sizeof(b));
 
 		i = 0;
 
@@ -252,36 +334,42 @@ static int read_16_palette(GP_IO *io, struct pcx_header *header,
 
 		if (GP_ProgressCallbackReport(callback, y, res->h, res->w)) {
 			GP_DEBUG(1, "Operation aborted");
+			GP_IOClose(rle_io);
 			return ECANCELED;
 		}
 	}
 
+	GP_IOClose(rle_io);
 	return 0;
 }
+
+#define PALETTE_SIZE (3 * 256 + 1)
 
 static int read_256_palette(GP_IO *io, struct pcx_header *header,
                             GP_Context *res, GP_ProgressCallback *callback)
 {
 	uint32_t x, y;
 	unsigned int i;
+	uint8_t buf[GP_MAX(PALETTE_SIZE, header->bytes_per_line)];
 	GP_Pixel palette[256];
-	uint8_t b[header->bytes_per_line];
 
 	if (GP_IOSeek(io, -769, GP_IO_SEEK_END) == (off_t)-1) {
 		GP_DEBUG(1, "Failed to seek to palette: %s", strerror(errno));
 		return EIO;
 	}
 
-	if (get_byte(io) != 0x0c) {
+	if (GP_IOFill(io, buf, PALETTE_SIZE)) {
+		GP_DEBUG(1, "Failed to read palette: %s", strerror(errno));
+		return EIO;
+	}
+
+	if (buf[0] != 0x0c) {
 		GP_DEBUG(1, "Wrong palette marker");
 		return EIO;
 	}
 
-	for (i = 0; i < 256; i++) {
-		palette[i] = get_byte(io) << 16;
-		palette[i] |= get_byte(io) << 8;
-		palette[i] |= get_byte(io);
-	}
+	for (i = 0; i < 256; i++)
+		palette[i] = (buf[3*i+1]<<16) | (buf[3*i+2])<<8 | buf[3*i+3];
 
 	if (GP_IOSeek(io, 128, GP_IO_SEEK_SET) == (off_t)-1) {
 		GP_DEBUG(1, "Failed to seek to image data: %s",
@@ -289,18 +377,24 @@ static int read_256_palette(GP_IO *io, struct pcx_header *header,
 		return EIO;
 	}
 
+	GP_IO *rle_io = rle(io);
+	if (!rle_io)
+		return errno;
+
 	for (y = 0; y < res->h; y++) {
-		readline(io, b, sizeof(b), 0);
+		GP_IORead(rle_io, buf, header->bytes_per_line);
 
 		for (x = 0; x < res->w; x++)
-			GP_PutPixel_Raw_24BPP(res, x, y, palette[b[x]]);
+			GP_PutPixel_Raw_24BPP(res, x, y, palette[buf[x]]);
 
 		if (GP_ProgressCallbackReport(callback, y, res->h, res->w)) {
 			GP_DEBUG(1, "Operation aborted");
+			GP_IOClose(rle_io);
 			return ECANCELED;
 		}
 	}
 
+	GP_IOClose(rle_io);
 	return 0;
 }
 

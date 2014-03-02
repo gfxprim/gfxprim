@@ -33,7 +33,6 @@
 #include "core/GP_ProgressCallback.h"
 #include "loaders/GP_IO.h"
 
-
 /*
  * Reads a PCX from an IO stream.
  *
