@@ -436,82 +436,135 @@ static const char *compress_method_type(uint16_t compress)
 	}
 }
 
-static int get_byte(GP_IO *io)
-{
-	uint8_t buf;
-
-	if (GP_IORead(io, &buf, 1) != 1) {
-		GP_WARN("END OF FILE REACHED");
-		return -1;
-	}
-
-	return buf;
-}
-
+/*
+ * PSD RLE I/O Stream
+ */
 struct rle {
+	/* RLE State */
 	int8_t op;
 	int size;
 	uint8_t val;
+
+	/* Source I/O stream */
+	GP_IO *io;
+
+	/* Read buffer */
+	ssize_t buf_fill;
+	ssize_t buf_pos;
+	uint8_t buf[1024];
 };
 
-static void read_rle(GP_IO *io, struct rle *rle,
-                     uint8_t *buf, unsigned int size)
+static int rle_getc(struct rle *rle)
 {
-	unsigned int read = 0;
+	if (rle->buf_pos < rle->buf_fill)
+		return rle->buf[rle->buf_pos++];
+
+	rle->buf_fill = GP_IORead(rle->io, rle->buf, sizeof(rle->buf));
+
+	if (rle->buf_fill <= 0)
+		return -1;
+
+	rle->buf_pos = 1;
+	return rle->buf[0];
+}
+
+static int rle_readb(struct rle *rle, void *buf, size_t size)
+{
+	ssize_t bytes = rle->buf_fill - rle->buf_pos;
+	size_t s = GP_MIN(size, (size_t)bytes);
+
+	memcpy(buf, rle->buf + rle->buf_pos, s);
+
+	rle->buf_pos += s;
+
+	if (s < size)
+		return GP_IOFill(rle->io, buf + s, size - s);
+
+	return 0;
+}
+
+static ssize_t rle_read(GP_IO *self, void *buf, size_t size)
+{
+	struct rle *rle = GP_IO_PRIV(self);
+	size_t read = 0, s;
+	uint8_t *bbuf = buf;
 
 	while (read < size) {
 		switch (rle->op) {
 		case -128:
-			rle->op = get_byte(io);
-//			fprintf(stderr, "Read command %i\n", rle->op);
+			rle->op = rle_getc(rle);
 		break;
 		case 0 ... 127:
 			rle->size = rle->op + 1;
-//			fprintf(stderr, "VERBATIM %u\n", rle->size);
-			while (rle->size-- && read < size)
-				buf[read++] = get_byte(io);
-			if (rle->size < 0)
+			s = GP_MIN(rle->size, read - size);
+			rle_readb(rle, bbuf + read, s);
+			rle->size -= s;
+			read += s;
+
+//			while (rle->size-- && read < size)
+//				bbuf[read++] = rle_getc(rle);
+
+			if (rle->size <= 0)
 				rle->op = -128;
 		break;
 		case -127 ... -1:
 			rle->size = 1 - rle->op;
-			rle->val = get_byte(io);
+			rle->val = rle_getc(rle);
 
-//			fprintf(stderr, "REPEAT %u x %i\n", rle->size, rle->val);
+			s = GP_MIN(rle->size, size - read);
+			memset(bbuf + read, rle->val, s);
+			rle->size -= s;
+			read += s;
 
-			while (rle->size-- && read < size)
-				buf[read++] = rle->val;
-			if (rle->size < 0)
+//			while (rle->size-- && read < size)
+//				bbuf[read++] = rle->val;
+
+			if (rle->size <= 0)
 				rle->op = -128;
 		break;
 		}
 	}
+
+	return read;
+}
+
+static int rle_close(GP_IO *self)
+{
+	free(self);
+	return 0;
+}
+
+static GP_IO *rle(GP_IO *io)
+{
+	GP_IO *rle = malloc(sizeof(GP_IO) + sizeof(struct rle));
+
+	if (!rle)
+		return NULL;
+
+	struct rle *priv = GP_IO_PRIV(rle);
+
+	priv->op = -128;
+	priv->buf_fill = 0;
+	priv->buf_pos = 0;
+	priv->io = io;
+
+	rle->Read = rle_read;
+	rle->Write = NULL;
+	rle->Seek = NULL;
+	rle->Close = rle_close;
+
+	return rle;
 }
 
 /*
- * UnPackBits RLE
- *
  * Data are in planar mode RRRRR... GGGGG... BBBBB... etc.
- *
- * TODO: Use buffered I/O
  */
-static int psd_load_rle_rgb(GP_IO *io, GP_Context *res,
+static int psd_load_rle_rgb(GP_IO *rle_io, GP_Context *res,
                             GP_ProgressCallback *callback)
 {
 	unsigned int x, y, c, p;
 	unsigned int chans = res->pixel_type == GP_PIXEL_RGB888 ? 3 : 4;
 	uint8_t b[res->w], *bp;
-	struct rle rle = {.op = -128};
-
-	/*
-	 * Skip line byte counts
-	 *
-	 * Two bytes per channel per row
-	 */
-	if (GP_IOSeek(io, 2 * chans * res->h, GP_IO_SEEK_CUR) == (off_t)-1) {
-		GP_DEBUG(1, "Failed to skip Line Bytes Counts");
-		return 1;
-	}
 
 	for (c = 0; c < chans; c++) {
 		switch (c) {
@@ -527,7 +580,7 @@ static int psd_load_rle_rgb(GP_IO *io, GP_Context *res,
 
 		for (y = 0; y < res->h; y++) {
 			bp = GP_PIXEL_ADDR(res, 0, y);
-			read_rle(io, &rle, b, sizeof(b));
+			GP_IORead(rle_io, b, sizeof(b));
 
 			for (x = 0; x < res->w; x++)
 				bp[x * chans + p] = b[x];
@@ -545,27 +598,16 @@ static int psd_load_rle_rgb(GP_IO *io, GP_Context *res,
 	return 0;
 }
 
-static int psd_load_rle_cmyk(GP_IO *io, GP_Context *res,
+static int psd_load_rle_cmyk(GP_IO *rle_io, GP_Context *res,
                              GP_ProgressCallback *callback)
 {
 	unsigned int x, y, c;
 	uint8_t b[res->w], *bp;
-	struct rle rle = {.op = -128};
-
-	/*
-	 * Skip line byte counts
-	 *
-	 * Two bytes per channel per row
-	 */
-	if (GP_IOSeek(io, 2 * 4 * res->h, GP_IO_SEEK_CUR) == (off_t)-1) {
-		GP_DEBUG(1, "Failed to skip Line Bytes Counts");
-		return 1;
-	}
 
 	for (c = 0; c < 4; c++) {
 		for (y = 0; y < res->h; y++) {
 			bp = GP_PIXEL_ADDR(res, 0, y);
-			read_rle(io, &rle, b, sizeof(b));
+			GP_IORead(rle_io, b, sizeof(b));
 
 			for (x = 0; x < res->w; x++)
 				bp[x * 4 + c] = 255 - b[x];
@@ -589,6 +631,7 @@ static GP_Context *psd_combined_image(GP_IO *io,
 {
 	uint16_t compress;
 	GP_PixelType pixel_type = GP_PIXEL_UNKNOWN;
+	int ret;
 
 	if (GP_IOReadB2(io, &compress)) {
 		GP_DEBUG(1, "Failed to read Combined Image compression");
@@ -638,23 +681,37 @@ static GP_Context *psd_combined_image(GP_IO *io,
 		return NULL;
 	}
 
+	/*
+	 * Skip line byte counts
+	 *
+	 * Two bytes per channel per row
+	 */
+	if (GP_IOSeek(io, 2 * header->channels * header->h, GP_IO_SEEK_CUR) == (off_t)-1) {
+		GP_DEBUG(1, "Failed to skip Line Bytes Counts");
+		return NULL;
+	}
+
 	GP_Context *res = GP_ContextAlloc(header->w, header->h, pixel_type);
 
 	if (!res)
 		return NULL;
 
-	int ret;
+	GP_IO *rle_io = rle(io);
+	if (!rle_io)
+		return NULL;
 
 	if (pixel_type == GP_PIXEL_CMYK8888)
-		ret = psd_load_rle_cmyk(io, res, callback);
+		ret = psd_load_rle_cmyk(rle_io, res, callback);
 	else
-		ret = psd_load_rle_rgb(io, res, callback);
+		ret = psd_load_rle_rgb(rle_io, res, callback);
 
 	if (ret) {
 		GP_ContextFree(res);
+		GP_IOClose(rle_io);
 		return NULL;
 	}
 
+	GP_IOClose(rle_io);
 	return res;
 }
 
@@ -719,7 +776,7 @@ GP_Context *GP_ReadPSD(GP_IO *io, GP_ProgressCallback *callback)
 	GP_Context *thumbnail = NULL;
 
 	do {
-		size = psd_next_img_res_block(io, &thumbnail, callback);
+		size = psd_next_img_res_block(io, &thumbnail, NULL);
 
 		if (size == 0)
 			return thumbnail;
