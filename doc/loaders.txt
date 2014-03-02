@@ -507,6 +507,57 @@ int GP_MatchPSP(const void *buf);
 
 Matches a 'PSP' file signature. Returns non-zero if found.
 
+PSD Loader
+~~~~~~~~~~
+
+The 'PSD' loader can load a merged image (if present) or a thumbnail from an
+Adobe Photoshop Image. Currently 16bit RGB and 16bit CMYK is not supported and
+the loader will fallback to the thumbnail in this case (which is always 8bit
+RGB).
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <loaders/GP_PSD.h>
+/* or */
+#include <GP.h>
+
+GP_Context *GP_ReadPSD(GP_IO *io, GP_ProgressCallback *callback);
+-------------------------------------------------------------------------------
+
+Reads a 'PSP' image from readable 'GP_IO'. The link:loaders_io.html[IO stream]
+is expected to start exactly at the 'PSD' file signature.
+
+Returns newly allocated context (containing decompressed image) or in case of
+failure 'NULL' and 'errno' is set.
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <loaders/GP_PSD.h>
+/* or */
+#include <GP.h>
+
+GP_Context *GP_LoadPSD(const char *src_path, GP_ProgressCallback *callback);
+-------------------------------------------------------------------------------
+
+Loads a merged image (if present) from a 'PSD' file.
+
+Fallbacks to thumbnail if merged image is not present or has unsupported pixel
+type.
+
+Returns 'NULL' (TODO ERRNO) if merged image is not present/supported and
+thumbnail is not present either.
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <loaders/GP_PSD.h>
+/* or */
+#include <GP.h>
+
+int GP_MatchPSD(const void *buf);
+-------------------------------------------------------------------------------
+
+Matches a 'PSD' file signature. Returns non-zero if found.
+
 PNM Loaders
 ~~~~~~~~~~~
 

@@ -6,8 +6,8 @@ Spiv is a fast, lightweight and minimalistic image viewer build on the top of
 the GFXprim library.
 
 Spiv supports wide range of image formats, currently supported are JPEG, PNG,
-GIF, BMP, TIFF, PSP, PNM, PCX, JPEG2000 and CBZ (as well general ZIP archives
-with images), and more will come in the near future.
+GIF, BMP, TIFF, PSP, PSD, PNM, PCX, JPEG2000 and CBZ (as well general ZIP
+archives with images), and more will come in the near future.
 
 Spiv implements image caches with LRU (last recently used) algorithm which
 speeds up subsequent image operations (rotations, going back and forth).

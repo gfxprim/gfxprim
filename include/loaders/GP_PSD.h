@@ -22,7 +22,7 @@
 
  /*
 
-   PSD thumbnail image loader.
+   PSD image loader.
 
   */
 
@@ -34,7 +34,11 @@
 #include "loaders/GP_IO.h"
 
 /*
- * Reads a PSD thumbnail from an IO stream.
+ * Reads a PSD from an IO stream.
+ *
+ * The loaders tries to read merged image (if present) and fallback to
+ * thumbnail. It may return NULL with errno untouched if neither merged image
+ * nor thumbnail was present (which seem to be really uncommon).
  *
  * Returns newly allocated context cotaining the loaded image or in case of
  * failure NULL and errno is set.

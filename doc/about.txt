@@ -99,6 +99,11 @@ images into various standard formats (PNG, JPEG, GIF, TIFF, BMP, PNM, etc...).
   [green]#Composite image only for newer formats than 3.0# |
   [black]*No*
 
+| PSD |
+  Adobe Photoshop Image |
+  [green]#Thumbnail or Merged image (16 bit RGB and CMYK not supported yet)#|
+  [black]*No*
+
 | PBM PGM PPM PNM |
   Netpbm portable bitmap |
   [green]#All but < 8bit binary grayscale# |
