@@ -22,7 +22,7 @@
 
 /*
 
-  Photoshop PSD thumbnail image loader.
+  Photoshop PSD image loader.
 
   Written using documentation available freely on the internet.
 
@@ -442,7 +442,7 @@ static const char *compress_method_type(uint16_t compress)
 struct rle {
 	/* RLE State */
 	int8_t op;
-	int size;
+	unsigned int size;
 	uint8_t val;
 
 	/* Source I/O stream */
@@ -625,9 +625,8 @@ static int psd_load_rle_cmyk(GP_IO *rle_io, GP_Context *res,
 	return 0;
 }
 
-static GP_Context *psd_combined_image(GP_IO *io,
-                                      struct psd_header *header,
-                                      GP_ProgressCallback *callback)
+static int psd_combined_image(GP_IO *io, struct psd_header *header,
+                              GP_Context **res, GP_ProgressCallback *callback)
 {
 	uint16_t compress;
 	GP_PixelType pixel_type = GP_PIXEL_UNKNOWN;
@@ -635,17 +634,15 @@ static GP_Context *psd_combined_image(GP_IO *io,
 
 	if (GP_IOReadB2(io, &compress)) {
 		GP_DEBUG(1, "Failed to read Combined Image compression");
-		return NULL;
+		return errno;
 	}
 
 	GP_DEBUG(1, "Combined image compression %s (%"PRIu16")",
 	         compress_method_type(compress), compress);
 
-
 	if (compress != PSD_COMPRESS_RLE) {
 		GP_DEBUG(1, "Unsupported compression");
-		errno = ENOSYS;
-		return NULL;
+		return ENOSYS;
 	}
 
 	if (header->color_mode == PSD_RGB) {
@@ -677,8 +674,7 @@ static GP_Context *psd_combined_image(GP_IO *io,
 
 	if (pixel_type == GP_PIXEL_UNKNOWN) {
 		GP_DEBUG(1, "Unsupported color_mode/channels/bpp combination");
-		errno = ENOSYS;
-		return NULL;
+		return ENOSYS;
 	}
 
 	/*
@@ -688,31 +684,28 @@ static GP_Context *psd_combined_image(GP_IO *io,
 	 */
 	if (GP_IOSeek(io, 2 * header->channels * header->h, GP_IO_SEEK_CUR) == (off_t)-1) {
 		GP_DEBUG(1, "Failed to skip Line Bytes Counts");
-		return NULL;
+		return errno;
 	}
 
-	GP_Context *res = GP_ContextAlloc(header->w, header->h, pixel_type);
+	*res = GP_ContextAlloc(header->w, header->h, pixel_type);
 
-	if (!res)
-		return NULL;
+	if (!*res)
+		return ENOMEM;
 
 	GP_IO *rle_io = rle(io);
 	if (!rle_io)
-		return NULL;
+		return ENOMEM;
 
 	if (pixel_type == GP_PIXEL_CMYK8888)
-		ret = psd_load_rle_cmyk(rle_io, res, callback);
+		ret = psd_load_rle_cmyk(rle_io, *res, callback);
 	else
-		ret = psd_load_rle_rgb(rle_io, res, callback);
+		ret = psd_load_rle_rgb(rle_io, *res, callback);
 
-	if (ret) {
-		GP_ContextFree(res);
-		GP_IOClose(rle_io);
-		return NULL;
-	}
+	if (ret)
+		GP_ContextFree(*res);
 
 	GP_IOClose(rle_io);
-	return res;
+	return ret;
 }
 
 GP_Context *GP_ReadPSD(GP_IO *io, GP_ProgressCallback *callback)
@@ -720,6 +713,7 @@ GP_Context *GP_ReadPSD(GP_IO *io, GP_ProgressCallback *callback)
 	int err;
 	uint32_t len, size, read_size = 0;
 	struct psd_header header;
+	GP_Context *thumbnail = NULL;
 
 	uint16_t psd_header[] = {
 	        '8', 'B', 'P', 'S',
@@ -737,8 +731,8 @@ GP_Context *GP_ReadPSD(GP_IO *io, GP_ProgressCallback *callback)
 	if (GP_IOReadF(io, psd_header, &header.channels, &header.h, &header.w,
 	               &header.depth, &header.color_mode, &len) != 13) {
 		GP_DEBUG(1, "Failed to read file header");
-		err = EIO;
-		goto err0;
+		err = errno;
+		goto err;
 	}
 
 	GP_DEBUG(1, "Have PSD %"PRIu32"x%"PRIu32" channels=%"PRIu16","
@@ -773,8 +767,6 @@ GP_Context *GP_ReadPSD(GP_IO *io, GP_ProgressCallback *callback)
 
 	GP_DEBUG(1, "Image Resource Section length is %u", len);
 
-	GP_Context *thumbnail = NULL;
-
 	do {
 		size = psd_next_img_res_block(io, &thumbnail, NULL);
 
@@ -787,28 +779,34 @@ GP_Context *GP_ReadPSD(GP_IO *io, GP_ProgressCallback *callback)
 	/* Skip Layer and Mask information */
 	if (GP_IOReadB4(io, &size)) {
 		GP_DEBUG(1, "Failed to read Layer and Mask Section size");
-		goto end;
+		err = errno;
+		goto err;
 	}
 
 	if (GP_IOSeek(io, size, GP_IO_SEEK_CUR) == (off_t)-1) {
 		GP_DEBUG(1, "Failed to seek to Image Data Section");
-		goto end;
+		err = errno;
+		goto err;
 	}
 
-	GP_Context *combined = psd_combined_image(io, &header, callback);
+	GP_Context *combined = NULL;
+	err = psd_combined_image(io, &header, &combined, callback);
 
-	if (combined) {
+	if (!err) {
 		GP_ContextFree(thumbnail);
 		return combined;
 	}
 
-end:
+	if (err == ECANCELED)
+		goto err;
+
 	if (thumbnail)
 		return thumbnail;
 
 	errno = ENOSYS;
 	return NULL;
-err0:
+err:
+	GP_ContextFree(thumbnail);
 	errno = err;
 	return NULL;
 }
