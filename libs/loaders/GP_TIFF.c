@@ -45,7 +45,7 @@
 #include <tiffio.h>
 
 #define TIFF_HEADER_LITTLE "II\x2a\0"
-#define TIFF_HEADER_BIG    "BB\0\x2a"
+#define TIFF_HEADER_BIG    "MM\0\x2a"
 
 int GP_MatchTIFF(const void *buf)
 {
