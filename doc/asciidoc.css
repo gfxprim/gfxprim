@@ -31,9 +31,9 @@ a:hover {
 }
 
 em {
-  font-style: normal;
-  font-weight: 600;
-  color: #444;
+  font-style: italic;
+  font-weight: bolder;
+  color: #223;
 }
 
 strong {
