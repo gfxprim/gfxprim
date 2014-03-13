@@ -210,6 +210,7 @@ flags are set to zero.
 
 The 'free_pixels' flag for the resulting context is set.
 
+[[ContextFree]]
 [source,c]
 -------------------------------------------------------------------------------
 #include <core/GP_Context.h>

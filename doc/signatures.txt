@@ -1,0 +1,36 @@
+File signatures
+---------------
+
+File signature is a short well defined sequence of bytes usually situated at
+the beginning of the file.
+
+.Table of image file signatures used by GFXprim loaders
+[options="autowidth,header"]
+|=============================================================================
+| Extension | Format Name                 | Signature | Signature in Hex
+| *JPEG*    |                             | | +0xff 0xd8 0xff+
+| *PNG*     | Portable Network Graphics   | +\211PNG\r\n\032\n+ |
+                                            +89 50 4e 47 0d 0a 1a 0a+
+| *GIF*     | Graphics Interchange Format | +GIF87a or GIF89a+ |
+| *BMP*     |                             | +BM+ | +42 4d+
+| *TIFF*    | Tagged Image File Format    | +II*\0 or MM\0*+ | +49 49 2a 00 or
+                                                                4d 4d 2a 00+
+| *PSP*     | Paint Shop Pro Image        |
+ +Paint Shop Pro Image File\n\x1a\0\0\0\0\0\0\0\0+ |
+| *PSD*     | Adobe Photoshop Image       | +8BPS\0\x01+ |
+| *PBM*     | Netpbm portable bitmap      | +P1 or P4+ |
+| *PGM*     | Netpbm portable graymap     | +P2 or P5+ |
+| *PPM*     | Netpbm portable pixmap      | +P3 or P6+ |
+| *PNM*     | Netpbm portable anymap      | +P1, P2, P3, P4, P5, P6+ |
+| *JP2*     | JPEG 2000                   |
++\0\0\0\x0cjP\x20\x20\x0d\x0a\x87\x0a+ | +00 00 00 0c 6a 50 20 20 0d 0a 87 0a+
+| *PCX*     | ZSoft PCX                   || +0a [01-05] 0x01 {01, 02, 04, 08}+
+| *CBZ*     | Comic Book Archive (ZIP)    | +PK\03\04+ |
+|=============================================================================
+
+
+Explanation
+~~~~~~~~~~~
+ * Signature strings are written in C string syntax
+ * The [A-B] denotes any number from interval
+ * The {A, B, C} denotes any number from the set
