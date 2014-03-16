@@ -3,8 +3,9 @@ Context loaders
 This part of GFXprim library implements API to load and save images for common
 image file formats.
 
-Currently we support 'JPEG', 'PNG', 'BMP', 'TIFF' and 'PNM' images for loading
-and saving and 'GIF', 'JPEG2000', 'PCX', 'CBZ', 'PSD' and 'PSP' for loading.
+Currently we support <<JPEG>>, <<PNG>>, <<BMP>>, <<TIFF>> and <<PNM>> images for
+loading and saving and <<GIF>>, <<JPEG2000>>, <<PCX>>, 'CBZ', <<PSD>> and
+<<PSP>> for loading.
 
 Have a look at the link:about.html#Loaders[supported formats] for more
 detailed information.
@@ -16,7 +17,7 @@ Loading functions exists in at least two flavors. One that works with a path
 to a file and one that reads data from an link:loaders_io.html[IO stream].
 
 All loading functions returns a pointer to newly allocated and loaded image or
-upon a failure 'NULL' and 'errno' is set.
+upon a failure NULL and errno is set.
 
 The link:context.html[Context] returned by the loaders should be later freed
 with link:context.html#ContextFree[GP_ContextFree()].
@@ -29,17 +30,19 @@ The signature matching functions takes a 32 bytes long buffer and looks for a
 valid link:signatures.html[image signature]. If signature is found non-zero is
 returned.
 
-In case of a failure 'errno' is set, possible 'errno' values are:
-
-* anything returned by +open()+, +close()+, +lseek()+, +read()+, +write()+, ...
- - 'ENOENT' if file doesn't exist
- - 'EACCES' if process doesn't have rights
- - etc.
-
-* 'ENOSYS'    if GFXprim wasn't compiled with particular library support
-* 'ENOMEM'    if returned by +malloc()+
-* 'EIO', 'EINVAL' invalid image data (wrong signature, wrong or too short header or image data)
-* 'ECANCELED' action canceled by returning non-zero from within a callback
+.Possible errno values
+|===============================================================================
+| Any errno returned by underlying 'open()', 'close()', 'lseek()', 'read()',
+  'write()', ...
+| 'ENOENT' if file doesn't exist
+| 'EACCES' if process doesn't have rights to open the file
+| 'ENOSYS' if GFXprim wasn't compiled with particular library support
+| 'ENOMEM' if returned by 'malloc()'
+| 'EIO', 'EINVAL' invalid image data (wrong signature, wrong or too short
+  header or image data)
+| 'ECANCELED' action canceled by returning non-zero from within a
+  link:progress_callback.html[callback].
+|===============================================================================
 
 You can get more information about the error condition by turning on GFXprim
 link:environment_variables.html#GP_DEBUG[debug messages].
@@ -90,13 +93,13 @@ Saves a link:context.html[Context] into a file.
 
 The file format is matched accordingly to the file extension.
 
-If extension is not found non-zero is returned and 'errno' is set to 'EINVAL'.
+If extension is not found non-zero is returned and errno is set to 'EINVAL'.
 
 If extension was found but support for saving the image format is not
-implemented 'errno' is set to 'ENOSYS' (this may happen in case that GFXprim
+implemented errno is set to 'ENOSYS' (this may happen in case that GFXprim
 wasn't compiled with support for this image type).
 
-If context pixel type is not supported by the format 'errno' is set to
+If context pixel type is not supported by the format errno is set to
 'EINVAL'.
 
 [[Register_Loader]]
@@ -160,13 +163,13 @@ void GP_LoaderUnregister(GP_Loader *self);
 
 The 'GP_Loader' structure describes an image loader.
 
-The 'Load', 'Save' and 'Match' functions could be 'NULL' if the particular
+The 'Load', 'Save' and 'Match' functions could be NULL if the particular
 functionality is not implemented.
 
 The 'fmt_name' is a short string that describes the format. For example:
 'Netbpm portable pixmap'.
 
-The extensions is 'NULL'-terminated array of strings that holds all possible
+The extensions is NULL-terminated array of strings that holds all possible
 extensions that are commonly used for this image format.
 
 All internal loaders are all described in list of this structures which is
@@ -189,7 +192,7 @@ link:example_loader_registration.html[example].
 const GP_Loader *GP_MatchSignature(const void *buf)
 -------------------------------------------------------------------------------
 
-Returns pointer to image loader accordingly to image signature or 'NULL' if no
+Returns pointer to image loader accordingly to image signature or NULL if no
 suitable loader was found. The buf pointer must point to a buffer at least 32
 bytes long.
 
@@ -209,9 +212,11 @@ string after the dot) and matches it against known extensions.
 WARNING: If you attempt to modify the content of the structure the behavior is
          undefined. Most likely the program will crash.
 
+[[PNG]]
 PNG Loader
 ~~~~~~~~~~
-The 'PNG' image support is implemented by the libpng library.
+The 'PNG' image support is implemented by the
+link:http://www.libpng.org/[libpng library].
 
 [source,c]
 -------------------------------------------------------------------------------
@@ -226,7 +231,7 @@ Reads a 'PNG' image from readable 'GP_IO'. The link:loaders_io.html[IO stream]
 is expected to start exactly at the 'PNG' file signature.
 
 Returns newly allocated context (containing decompressed image) or in case of
-failure 'NULL' and 'errno' is set.
+failure NULL and errno is set.
 
 The resulting link:context.html[Context] should be later freed with
 link:context.html#ContextFree[GP_ContextFree()].
@@ -243,7 +248,7 @@ GP_Context *GP_LoadPNG(const char *src_path, GP_ProgressCallback *callback);
 Loads a 'PNG' image from a file.
 
 Returns a pointer to newly allocated loaded image, or in case of failure
-'NULL' and 'errno' is set.
+NULL and errno is set.
 
 The resulting link:context.html[Context] should be later freed with
 link:context.html#ContextFree[GP_ContextFree()].
@@ -259,7 +264,7 @@ int GP_SavePNG(const GP_Context *src, const char *dst_path,
 -------------------------------------------------------------------------------
 
 Saves a link:context.html[Context] as a 'PNG' image, in case particular pixel
-type is not supported non-zero is returned and 'errno' is set to 'ENOSYS'.
+type is not supported non-zero is returned and errno is set to 'ENOSYS'.
 
 Supports 'G1', 'G2', 'G4', 'G8', 'G16', and 8-bit 'RGB' and 'RGBA' pixel
 types.
@@ -275,6 +280,7 @@ int GP_MatchPNG(const void *buf);
 
 Matches a 'PNG' link:signatures.html[file signature]. Returns non-zero if found.
 
+[[JPEG]]
 JPEG Loader
 ~~~~~~~~~~~
 The 'JPEG' image support is implemented by the jpeg library.
@@ -292,7 +298,7 @@ Reads a 'JPEG' image from readable 'GP_IO'. The link:loaders_io.html[IO
 stream] is expected to start exactly at the 'JPEG' file signature.
 
 Returns newly allocated context (containing decompressed image) or in case of
-failure 'NULL' and 'errno' is set.
+failure NULL and errno is set.
 
 The resulting link:context.html[Context] should be later freed with
 link:context.html#ContextFree[GP_ContextFree()].
@@ -309,7 +315,7 @@ GP_Context *GP_LoadJPG(const char *src_path, GP_ProgressCallback *callback);
 Loads a 'JPEG' image from a file.
 
 Returns a pointer to newly allocated loaded image, or in case of failure
-'NULL' and 'errno' is set.
+NULL and errno is set.
 
 The resulting link:context.html[Context] should be later freed with
 link:context.html#ContextFree[GP_ContextFree()].
@@ -340,6 +346,7 @@ int GP_MatchJPG(const void *buf);
 Matches a 'JPEG' link:signatures.html[file signature]. Returns non-zero if
 found.
 
+[[JPEG2000]]
 JPEG 2000 Loader
 ~~~~~~~~~~~~~~~~
 The 'JPEG 2000' image support is implemented using the openjpeg library.
@@ -357,7 +364,7 @@ Reads a 'JPEG2000' image from readable 'GP_IO'. The link:loaders_io.html[IO
 stream] is expected to start exactly at the 'JPEG2000' file signature.
 
 Returns newly allocated context (containing decompressed image) or in case of
-failure 'NULL' and 'errno' is set.
+failure NULL and errno is set.
 
 The resulting link:context.html[Context] should be later freed with
 link:context.html#ContextFree[GP_ContextFree()].
@@ -392,10 +399,12 @@ int GP_MatchJP2(const void *buf);
 Matches a 'JPEG2000' link:signatures.html[file signature]. Returns non-zero if
 found.
 
+[[GIF]]
 GIF Loader
 ~~~~~~~~~~
 
-The 'GIF' image support is implemented by the giflib library.
+The 'GIF' image support is implemented using the
+link:http://sourceforge.net/projects/giflib/[giflib library].
 
 [source,c]
 -------------------------------------------------------------------------------
@@ -410,7 +419,7 @@ Reads a 'GIF' image from readable 'GP_IO'. The link:loaders_io.html[IO stream]
 is expected to start exactly at the 'GIF' file signature.
 
 Returns newly allocated context (containing decompressed image) or in case of
-failure 'NULL' and 'errno' is set.
+failure NULL and errno is set.
 
 The resulting link:context.html[Context] should be later freed with
 link:context.html#ContextFree[GP_ContextFree()].
@@ -443,6 +452,7 @@ int GP_MatchGIF(const void *buf);
 Matches a 'GIF' link:signatures.html[file signature]. Returns non-zero if
 found.
 
+[[BMP]]
 BMP Loader
 ~~~~~~~~~~
 
@@ -462,7 +472,7 @@ Reads a 'BMP' image from readable 'GP_IO'. The link:loaders_io.html[IO stream]
 is expected to start exactly at the 'BMP' file signature.
 
 Returns newly allocated context (containing decompressed image) or in case of
-failure 'NULL' and 'errno' is set.
+failure NULL and errno is set.
 
 The resulting link:context.html[Context] should be later freed with
 link:context.html#ContextFree[GP_ContextFree()].
@@ -507,6 +517,77 @@ int GP_MatchBMP(const void *buf);
 Matches a 'BMP' link:signatures.html[file signature]. Returns non-zero if
 found.
 
+[[TIFF]]
+TIFF Loader
+~~~~~~~~~~~
+
+The 'TIFF' loader support is done using the
+link:http://www.remotesensing.org/libtiff/[tiff library].
+
+Currently only subset of 'tiff' images could be loaded, tiles does not work
+yet.
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <loaders/GP_TIFF.h>
+/* or */
+#include <GP.h>
+
+GP_Context *GP_ReadTIFF(GP_IO *io, GP_ProgressCallback *callback);
+-------------------------------------------------------------------------------
+
+Reads a 'TIFF' image from readable 'GP_IO'. The link:loaders_io.html[IO stream]
+is expected to start exactly at the 'TIFF' file signature.
+
+Returns newly allocated context (containing decompressed image) or in case of
+failure NULL and errno is set.
+
+The resulting link:context.html[Context] should be later freed with
+link:context.html#ContextFree[GP_ContextFree()].
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <loaders/GP_TIFF.h>
+/* or */
+#include <GP.h>
+
+GP_Context *GP_LoadTIFF(const char *src_path, GP_ProgressCallback *callback);
+-------------------------------------------------------------------------------
+
+Loads a 'TIFF' image from a file.
+
+The resulting link:context.html[Context] should be later freed with
+link:context.html#ContextFree[GP_ContextFree()].
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <loaders/GP_TIFF.h>
+/* or */
+#include <GP.h>
+
+int GP_SaveTIFF(const GP_Context *src, const char *dst_path,
+                GP_ProgressCallback *callback);
+-------------------------------------------------------------------------------
+
+Saves a link:context.html[Context] as a 'TIFF' image.
+
+Supports 'G1', 'G2', 'G4' and 'G8' grayscale and 8-bit 'RGB' pixel types.
+
+The image is saved in stripes.
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <loaders/GP_TIFF.h>
+/* or */
+#include <GP.h>
+
+int GP_MatchTIFF(const void *buf);
+-------------------------------------------------------------------------------
+
+Matches a 'TIFF' link:signatures.html[file signature]. Returns non-zero if
+found.
+
+[[PSP]]
 PSP Loader
 ~~~~~~~~~~
 
@@ -526,7 +607,7 @@ link:loaders_io.html[IO stream] is expected to start exactly at the 'PSP' file
 signature.
 
 Returns newly allocated context (containing decompressed image) or in case of
-failure 'NULL' and 'errno' is set.
+failure NULL and errno is set.
 
 The resulting link:context.html[Context] should be later freed with
 link:context.html#ContextFree[GP_ContextFree()].
@@ -557,6 +638,7 @@ int GP_MatchPSP(const void *buf);
 Matches a 'PSP' link:signatures.html[file signature]. Returns non-zero if
 found.
 
+[[PSD]]
 PSD Loader
 ~~~~~~~~~~
 
@@ -578,7 +660,7 @@ Reads a 'PSD' image from readable 'GP_IO'. The link:loaders_io.html[IO stream]
 is expected to start exactly at the 'PSD' file signature.
 
 Returns newly allocated context (containing decompressed image) or in case of
-failure 'NULL' and 'errno' is set.
+failure NULL and errno is set.
 
 The resulting link:context.html[Context] should be later freed with
 link:context.html#ContextFree[GP_ContextFree()].
@@ -597,7 +679,7 @@ Loads a merged image (if present) from a 'PSD' file.
 Fallbacks to thumbnail if merged image is not present or has unsupported pixel
 type.
 
-Returns 'NULL' (TODO ERRNO) if merged image is not present/supported and
+Returns NULL (TODO ERRNO) if merged image is not present/supported and
 thumbnail is not present either.
 
 The resulting link:context.html[Context] should be later freed with
@@ -615,6 +697,7 @@ int GP_MatchPSD(const void *buf);
 Matches a 'PSD' link:signatures.html[file signature]. Returns non-zero if
 found.
 
+[[PNM]]
 PNM Loaders
 ~~~~~~~~~~~
 
@@ -734,6 +817,7 @@ The 'PNM' matches all of the formats. i.e. 'PBM', 'PGM' and 'PPM'.
 
 All functions return non-zero if found.
 
+[[PCX]]
 PCX Loader
 ~~~~~~~~~~
 
@@ -752,7 +836,7 @@ Reads a 'PCX' image from readable 'GP_IO'. The link:loaders_io.html[IO stream]
 is expected to start exactly at the 'PCX' file signature.
 
 Returns newly allocated context (containing decompressed image) or in case of
-failure 'NULL' and 'errno' is set.
+failure NULL and errno is set.
 
 The resulting link:context.html[Context] should be later freed with
 link:context.html#ContextFree[GP_ContextFree()].
