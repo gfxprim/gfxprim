@@ -35,7 +35,7 @@ fails files signature is used.
 
 |===============================================================================
 | May raise 'OSError' with errno set to 'EPERM', 'EISDIR', 'ENOENT' or any other
-  'errno' set by 'open(2)', 'read(2)', 'seek(2)'.
+  errno set by 'open(2)', 'read(2)', 'seek(2)'.
 
 | May raise 'OSError' with errno set to 'ENOSYS' on unsupported or not recognized
   format or if specific loader was disabled upon compilation.
@@ -71,7 +71,7 @@ For the Save() method the file format is derived from the extension.
 
 |===============================================================================
 | May raise 'OSError' with errno set to 'EPERM', 'EISDIR', 'ENOENT', 'ENOSPC'
-  or any other 'errno' set by 'open(2)', 'write(2)', 'seek(2)'.
+  or any other errno set by 'open(2)', 'write(2)', 'seek(2)'.
 | May raise 'OSError' with errno set to 'ENOSYS' if pixel type is not supported
   by the format or if the save method is not implemented (possibly disabled upon
   compilation).
@@ -88,4 +88,4 @@ import gfxprim.loaders as loaders
 
 -------------------------------------------------------------------------------
 
-Prints all loaders and their capabilites into the 'stdout'.
+Prints all loaders and their capabilites into the stdout.

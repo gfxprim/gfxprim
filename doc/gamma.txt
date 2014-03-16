@@ -109,7 +109,7 @@ Returns pointer to gamma table for particular pixel_type and gamma value.
 
 The same gamma is used for all channels.
 
-May fail and return 'NULL' if 'malloc()' has failed.
+May fail and return NULL if 'malloc()' has failed.
 
 [source,c]
 -------------------------------------------------------------------------------

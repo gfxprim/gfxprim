@@ -22,12 +22,12 @@ For convenience, the filters API is unified:
 * And the last argument is link:progress_callback.html[progress callback]
 
 When using allocating version of the filter, pointer to the newly allocated
-context is returned, or in case of failure 'NULL' is returned.
+context is returned, or in case of failure NULL is returned.
 
-If 'malloc()' has failed 'NULL' is returned.
+If 'malloc()' has failed NULL is returned.
 
 If filter has been interrupted by a callback, all allocated memory is freed,
-and 'NULL' is returned.
+and NULL is returned.
 
 When using non-allocating variant of the filter, the destination context must
 have correct pixel type and the size must be big enough to store the result.

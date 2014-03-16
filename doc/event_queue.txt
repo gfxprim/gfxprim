@@ -46,7 +46,7 @@ The initialization functions takes pointer to a memory large enough to hold an
 event queue structure and array of queue_size events.
 
 The last function allocates and initializes an event queue. If allocation has
-failed 'NULL' is returned.
+failed NULL is returned.
 
 [source,c]
 -------------------------------------------------------------------------------
@@ -153,5 +153,5 @@ void GP_EventQueuePush(struct GP_EventQueue *self,
 -------------------------------------------------------------------------------
 
 Following functions are used for puting events into the event queue. If
-pointer to the timeval structure is 'NULL' the event 'time' will be filled
+pointer to the timeval structure is NULL the event 'time' will be filled
 with exact time the event was added to the queue.

@@ -42,15 +42,15 @@ The +GP_FilterReize()+ function resizes 'src' to fit 'dst' exactly.
 
 Both 'src' and 'dst' must have the same pixel type.
 
-Returns zero on success, non-zero on failure and sets 'errno'.
+Returns zero on success, non-zero on failure and sets errno.
 
 GP_FilterResizeAlloc
 ^^^^^^^^^^^^^^^^^^^^
 
 The +GP_FilterResizeAlloc()+ allocates the destination give it's size.
 
-Returns pointer to newly allocated context or 'NULL' in case of failure and
-'errno' is set.
+Returns pointer to newly allocated context or NULL in case of failure and
+errno is set.
 
 Nearest Neighbour Interpolation
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

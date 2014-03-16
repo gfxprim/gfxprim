@@ -124,5 +124,5 @@ that width and height, but the driver may return different values if chosen
 width and height are not supported.
 
 Returns either pointer to the initialized grabber or, in case of failure,
-'NULL' and 'errno' is set.
+NULL and errno is set.
 

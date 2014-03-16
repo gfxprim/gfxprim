@@ -37,7 +37,7 @@ messages are printed. Current the maximum used in GFXprim sources is 4, this
 may change in the future. Use 'GP_DEBUG=10' to enable all debug messages for
 sure.
 
-The output is, by default, written to 'stderr' and will look like:
+The output is, by default, written to stderr and will look like:
 ------------------------------------------------------------------------------
 1: GP_Debug.c:GP_DebugPrint():67: Using debug level GP_DEBUG=10 from enviroment variable
 1: GP_Debug.c:GP_DebugPrint():71: GFXprim library version 1.0.0-rc0

@@ -69,7 +69,7 @@ void GP_DebugPrint(int level, const char *file, const char *function, int line,
 Printf-like macros used to print debug messages. All of them calls the
 'GP_DebugPrint()' function with slightly different parameters.
 
-NOTE: 'GP_DebugPrint()' function preserves 'errno'.
+NOTE: 'GP_DebugPrint()' function preserves errno.
 
 [source,c]
 -------------------------------------------------------------------------------
@@ -101,7 +101,7 @@ void GP_SetDebugHandler(void (*handler)(const struct GP_DebugMsg *msg));
 
 -------------------------------------------------------------------------------
 
-By default debug messages are printed into the 'stderr' you can redirect them
+By default debug messages are printed into the stderr you can redirect them
 to your debug handler by this function.
 
 NOTE: For more information see debug message handler

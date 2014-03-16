@@ -52,11 +52,11 @@ GP_Context *GP_FilterFloydSteinbergAlloc(const GP_Context *src,
 
 Returns pointer to allocated context of given pixel_type.
 
-If 'malloc(2)' has failed, or operation was aborted by a callback 'NULL' is
+If 'malloc(2)' has failed, or operation was aborted by a callback NULL is
 returned.
 
 Not all pixel types all supported. If particular combination is not supported
-the function returns 'NULL' and sets errno to 'ENOSYS'.
+the function returns NULL and sets errno to 'ENOSYS'.
 
 Hilbert-Peano
 ~~~~~~~~~~~~~
@@ -85,7 +85,7 @@ destination must be at least as large as source.
 If operation was aborted by a callback, non-zero is returned.
 
 Not all pixel types all supported. If particular combination is not supported
-the function returns 'NULL' and sets errno to 'ENOSYS'.
+the function returns NULL and sets errno to 'ENOSYS'.
 
 [source,c]
 -------------------------------------------------------------------------------
@@ -100,11 +100,11 @@ GP_Context *GP_FilterHilbertPeanoAlloc(const GP_Context *src,
 
 Returns pointer to allocated context of given pixel_type.
 
-If 'malloc(2)' has failed, or operation was aborted by a callback 'NULL' is
+If 'malloc(2)' has failed, or operation was aborted by a callback NULL is
 returned.
 
 Not all pixel types all supported. If particular combination is not supported
-the function returns 'NULL' and sets errno to 'ENOSYS'.
+the function returns NULL and sets errno to 'ENOSYS'.
 
 include::images/convert/images.txt[]
 include::images/floyd_steinberg/images.txt[]

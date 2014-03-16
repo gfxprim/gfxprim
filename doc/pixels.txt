@@ -39,12 +39,12 @@ typedef enum GP_PixelType {
 
 -------------------------------------------------------------------------------
 
-Pixels are described by a pixel type, which is enumeration type. The enum is
-defined in the generated 'GP_Pixel.gen.h' header and must contain at least the
-members listed above.
+Pixels are described by a pixel type, which is an enumeration type.
 
-The same names as are the enum values are also defined (to themselves) as
-macros so that it's possible to use them with 'ifdef'.
+The enum is defined in the 'GP_Pixel.gen.h' header link:gen.html[generated]
+from a configuration file.
+
+The header and must contain at least the members listed above.
 
 [source,c]
 -------------------------------------------------------------------------------

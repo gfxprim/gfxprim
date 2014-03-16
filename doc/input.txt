@@ -191,7 +191,7 @@ Event API
 void GP_EventDump(struct GP_Event *ev);
 -------------------------------------------------------------------------------
 
-The 'GP_EventDump' dumps event in human-readable format into the 'stdout'.
+The 'GP_EventDump' dumps event in human-readable format into the stdout.
 
 [source,c]
 -------------------------------------------------------------------------------

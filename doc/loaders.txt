@@ -73,7 +73,7 @@ functions for each format that implements signature matching. If image
 signature is recognized, image loader it is called and the result is returned.
 
 If file extension disagrees with file signature (which is quite common on the
-internet) a warning is printed into the 'stderr'.
+internet) a warning is printed into the stderr.
 
 The resulting link:context.html[Context] should be later freed with
 link:context.html#ContextFree[GP_ContextFree()].

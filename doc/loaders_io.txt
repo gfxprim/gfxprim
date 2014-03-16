@@ -57,7 +57,7 @@ case of failure a negative number (-1).
 
 Return value from 'Close' is zero on success and non-zero on IO failure.
 
-NOTE: Make sure 'errno' is set if any of the operations has failed.
+NOTE: Make sure errno is set if any of the operations has failed.
 
 [source,c]
 -------------------------------------------------------------------------------
@@ -73,7 +73,7 @@ This is a wrapper to 'io->Read()'.
 Reads at most 'size' bytes from an 'IO' stream and stores them into the
 buffer. Returns number of bytes read.
 
-On failure the return value is negative and 'errno' is set.
+On failure the return value is negative and errno is set.
 
 
 [source,c]
@@ -90,7 +90,7 @@ This is a wrapper to 'io->Write()'.
 Writes at most 'size' bytes from an 'IO' stream and stores them into the
 buffer. Returns number of bytes read.
 
-On failure the return value is negative and 'errno' is set.
+On failure the return value is negative and errno is set.
 
 [source,c]
 -------------------------------------------------------------------------------
@@ -106,7 +106,7 @@ This is a wrapper to 'io->Close()'.
 Finalizes reading/writing, closes file descriptors (in case of file IO), frees
 memory buffers.
 
-Returns zero on success, non-zero on IO failure and 'errno' is set.
+Returns zero on success, non-zero on IO failure and errno is set.
 
 
 [source,c]
@@ -146,7 +146,7 @@ off_t GP_IORewind(GP_IO *io)
 
 Wrapper to 'GP_IOSeek()', rewinds to the start of the IO stream.
 
-Returns zero on success, non-zero on failure and 'errno' is set.
+Returns zero on success, non-zero on failure and errno is set.
 
 
 [source,c]
@@ -160,11 +160,11 @@ GP_IO *GP_IOMem(void *buf, size_t size, void (*free)(void *));
 
 Creates an read-only IO from a memory buffer.
 
-Returns initialized IO or in case of failure 'NULL' and 'errno' is set.
+Returns initialized IO or in case of failure NULL and errno is set.
 
 The 'buf' is pointer to the start of the buffer, the 'size' is size in bytes.
 
-The 'free()' callback if not 'NULL' is called with the start of the buffer as
+The 'free()' callback if not NULL is called with the start of the buffer as
 an argument on 'IOClose()'.
 
 TIP: See link:example_memory_io.html[memory IO example].
@@ -186,5 +186,5 @@ GP_IO *GP_IOFile(const char *path, enum GP_IOFileMode mode);
 
 Creates an IO stream from a file.
 
-Returns a pointer to initialized IO stream, or in case of failure 'NULL' and
-'errno' is set.
+Returns a pointer to initialized IO stream, or in case of failure NULL and
+errno is set.

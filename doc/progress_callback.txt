@@ -33,7 +33,7 @@ periodically and the percentage field is updated.
 
 The return value from callback could abort the execution. If a non-zero value
 is returned operation is aborted, all memory freed etc., in case of pixmap
-loaders 'errno' is set to 'ECANCELED' and in case of pixmap savers the newly
+loaders errno is set to 'ECANCELED' and in case of pixmap savers the newly
 created file is removed too.
 
 The callback, if supported, is the last parameter of a function.

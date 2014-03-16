@@ -44,8 +44,8 @@ lines (i.e. each image line starts at whole byte and ends at whole byte).
 
 The 'pixels' array starts exactly at upper left corner of the image and is
 stored in horizontal lines (each line contains 'w' pixels and there is 'h'
-lines). Each line is 'bytes_per_row' bytes long (which equals to 'w' * 'bpp' /
-8 rouned up to the whole bytes). The first pixel may actually start at
+lines). Each line is 'bytes_per_row' bytes long (which equals to 'w * bpp /
+8' rouned up to the whole bytes). The first pixel may actually start at
 'offset' bit in the first byte in each line (but only for some
 <<Sub_Context,subcontexts>> for pixel types that are not byte aligned).
 
@@ -153,7 +153,7 @@ parameters are set to the default values (i.e. rotation flags are all set to
 zero, 'free_pixels' flag is not set). Number of bits per pixel and
 bytes per row are computed from the given pixel type and size.
 
-The 'pixels' pointer can be 'NULL' and can be changed later manually (the call
+The 'pixels' pointer can be NULL and can be changed later manually (the call
 will *not* try to allocate the pixel memory automatically).
 
 The function returns a pointer to the initialized context (i.e. the same
@@ -224,7 +224,7 @@ Frees the context memory.
 
 If 'free_pixels' flag is set, the pixels buffer is freed too.
 
-If gamma pointer is not 'NULL' the 'GP_GammaRelease()' is called.
+If gamma pointer is not NULL the 'GP_GammaRelease()' is called.
 
 [[Sub_Context]]
 Subcontext

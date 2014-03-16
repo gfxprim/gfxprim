@@ -124,9 +124,9 @@ GP_Backend *GP_BackendX11Init(const char *display, int x, int y,
                               enum GP_BackendX11Flags flags);
 -------------------------------------------------------------------------------
 
-Returns pointer to initialized X11 backend or in case of failure 'NULL'.
+Returns pointer to initialized X11 backend or in case of failure NULL.
 
-When display is 'NULL' default display is used (which is what you want most of the
+When display is NULL default display is used (which is what you want most of the
 time).
 
 This backends supports multiple windows. Each time you call the initialization
@@ -217,11 +217,11 @@ The 'caption' string is used for window caption, in case of X11 backend or may
 be ignored completly in case of framebuffer backend.
 
 If 'params' is set to '"help"' help for all backends is printed into the
-'stderr'.
+stderr.
 
 If initialization was successful pointer to allocated and initialized backend
-is returned otherwise 'NULL' is returned and some helpful information should
-be printed into the 'stderr'.
+is returned otherwise NULL is returned and some helpful information should
+be printed into the stderr.
 
 
 General Backend API
@@ -458,7 +458,7 @@ Adds a link:input.html#Timers[timer] to the backend timer queue.
 Timers added to the backend are processed automatically while you call any of
 backend 'Poll' or 'Wait' functions.
 
-If timer callback is set to 'NULL' a timer event is pushed to the backend
+If timer callback is set to NULL a timer event is pushed to the backend
 input queue once timer has expired otherwise timer callback is called.
 
 TIP: For example usage see backend timers
