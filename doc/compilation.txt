@@ -3,33 +3,35 @@ Dependencies
 
 *Base dependencies*
 
-* C compiler (tested with 'gcc' or 'clang')
-* GNU make
-* Python (2.6 or newer)
-* Jinja2
+* C compiler (tested with link:http://gcc.gnu.org/[gcc] and
+  link:http://clang.llvm.org/[clang])
+* link:https://www.gnu.org/software/make/[GNU make]
+* link:https://www.python.org/[Python] (2.6 or newer)
+* link:http://jinja.pocoo.org/docs/[Jinja2]
 
 *Optional Image loaders*
 
 * libjpeg
-* libpng
-* giflib
-* libtiff
-* openjpeg >= 2.0.0
-* zlib (usually installed as libpng dependency)
+* link:http://www.libpng.org/[libpng]
+* link:http://sourceforge.net/projects/giflib/[giflib]
+* link:http://www.remotesensing.org/libtiff/[libtiff]
+* link:http://code.google.com/p/openjpeg/[openjpeg] >= 2.0.0
+* link:http://www.zlib.net/[zlib] (usually installed as libpng dependency)
 
 *Optinal Text rendering*
 
-* FreeType
+* link:http://www.freetype.org/[FreeType]
 
 *Optional Backends*
 
 * X11
-* AA-lib
-* SDL-1.2 (not recomended, known to be slow and buggy)
+* link:http://aa-project.sourceforge.net/aalib/[AA-lib]
+* link:http://www.libsdl.org/[SDL] 1.2
+  (not recomended, known to be slow and buggy)
 
 *Python Bindings*
 
-* Swig
+* link:http://www.swig.org/[Swig]
 * Python (devel library)
 
 Compilation
@@ -61,7 +63,7 @@ The +make install+ command will install GFXprim libraries and devel headers
 into your system.
 
 OpenSUSE & Fedora
------------------
+~~~~~~~~~~~~~~~~~
 
 Instruction to install required packages on
 link:http://www.opensuse.org/[OpenSUSE].
@@ -102,7 +104,7 @@ zypper in gcc make python-Jinja2 libjpeg-devel libpng-devel giflib-devel
 -------------------------------------------------------------------------------
 
 Debian
-------
+~~~~~~
 
 Instruction to install required packages on link:http://www.debian.org[Debian]
 and other Debian based distributions.
@@ -138,3 +140,27 @@ apt-get install gcc make python-jinja2 libjpeg-dev libpng-dev libgif-dev
                 libtiff-dev libfreetype6-dev libx11-dev libxext-dev swig
                 python-dev
 -------------------------------------------------------------------------------
+
+Packages
+--------
+
+RPM
+~~~
+RPM packages as well as specfile are available in
+link:https://build.opensuse.org/package/show/home:metan/gfxprim[build service].
+
+Deb
+~~~
+Deb packages can be build from the GFXprim source (after installing necessary
+devel packages) by:
+
+.Building debian packages
+-------------------------------------------------------------------------------
+# apt-get install devscripts
+# cd gfxprim
+# debuild -i -us -uc
+-------------------------------------------------------------------------------
+
+Gentoo
+~~~~~~
+GFXprim source contains ebuild in 'gentoo/' directory.
