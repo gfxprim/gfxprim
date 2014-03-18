@@ -177,30 +177,50 @@ struct deflate_inbuf {
 struct deflate_outbuf {
 	uint32_t crc;
 	uint32_t size;
+	uint32_t fill;
 	uint8_t *buf;
 };
 
 static unsigned deflate_in(void *in_desc, unsigned char **buf)
 {
 	struct deflate_inbuf *in = in_desc;
-	int chunk = in->to_read >= CHUNK ? CHUNK : in->to_read;
+	int chunk, ret;
 
-	if (GP_IORead(in->io, in->buf, chunk) != chunk)
-		return 0;
+	if (in->to_read)
+		chunk = in->to_read >= CHUNK ? CHUNK : in->to_read;
+	else
+		chunk = CHUNK;
+
+	ret = GP_IORead(in->io, in->buf, chunk);
+
+	if (ret <= 0)
+		return ret;
 
 	*buf = in->buf;
-	in->to_read -= chunk;
 
-	return chunk;
+	if (in->to_read)
+		in->to_read -= ret;
+
+	return ret;
 }
+
+#define BUFINC (1024 * 128)
 
 static int deflate_out(void *out_desc, unsigned char *buf, unsigned len)
 {
 	struct deflate_outbuf *out = out_desc;
 
+	if (out->fill + len >= out->size) {
+		out->buf = realloc(out->buf, out->size + GP_MAX(len, BUFINC));
+		if (!out->buf)
+			return 1;
+		out->size += GP_MAX(len, BUFINC);
+		GP_DEBUG(1, "Realloc %u %p", out->size, out->buf);
+	}
+
 	out->crc = crc32(out->crc, buf, len);
-	memcpy(out->buf + out->size, buf, len);
-	out->size += len;
+	memcpy(out->buf + out->fill, buf, len);
+	out->fill += len;
 
 	return 0;
 }
@@ -210,16 +230,12 @@ static int read_deflate(GP_IO *io, struct zip_local_header *header, GP_IO **rio)
 	uint8_t *window;
 	int err = 0, ret;
 	uint8_t *buf;
-
-	if (header->flags & FLAG_ZERO_SIZE_CRC) {
-		GP_DEBUG(1, "Size not set in local file header");
-		return ENOSYS;
-	}
+	unsigned int bufsize = header->uncomp_size ? header->uncomp_size : BUFINC;
 
 	window = malloc(32 * 1024);
 
 	//TODO: Unsafe
-	buf = malloc(header->uncomp_size);
+	buf = malloc(bufsize);
 
 	if (!window || !buf) {
 		err = ENOMEM;
@@ -242,7 +258,8 @@ static int read_deflate(GP_IO *io, struct zip_local_header *header, GP_IO **rio)
 
 	struct deflate_outbuf outbuf = {
 		.crc = crc32(0, NULL, 0),
-		.size = 0,
+		.size = bufsize,
+		.fill = 0,
 		.buf = buf,
 	};
 
@@ -260,13 +277,31 @@ static int read_deflate(GP_IO *io, struct zip_local_header *header, GP_IO **rio)
 		goto err2;
 	}
 
+	if (header->flags & FLAG_ZERO_SIZE_CRC) {
+		GP_DEBUG(2, "In buffer %i, seeking back", strm.avail_in);
+		GP_IOSeek(io, -(int)strm.avail_in, GP_IO_SEEK_CUR);
+		uint16_t data_desc_header[] = {
+			'P', 'K', 0x07, 0x08, /* Data desc header */
+			GP_IO_L4, /* CRC */
+			GP_IO_L4, /* Compressed size */
+			GP_IO_L4, /* Uncompressed size */
+			GP_IO_END
+		};
+
+		if (GP_IOReadF(io, data_desc_header, &header->crc,
+		               &header->comp_size, &header->uncomp_size) != 7) {
+			GP_DEBUG(1, "Failed to read Data Description Header");
+			goto err2;
+		}
+	}
+
 	if (outbuf.crc != header->crc) {
 		GP_DEBUG(1, "CRC does not match");
 		err = EIO;
 		goto err2;
 	}
 
-	if (outbuf.size != header->uncomp_size) {
+	if (outbuf.fill != header->uncomp_size) {
 		GP_DEBUG(1, "Decompressed size does not match");
 		err = EIO;
 		goto err2;
@@ -282,7 +317,7 @@ err2:
 	inflateBackEnd(&strm);
 err1:
 	free(window);
-	free(buf);
+	free(outbuf.buf);
 	return err;
 }
 
