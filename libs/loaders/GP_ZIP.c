@@ -73,11 +73,9 @@ struct zip_priv {
 	struct zip_chunks_table table;
 };
 
-#define GEN_FLAG_ENCRYPTED 0x01
-
 struct zip_local_header {
 	uint16_t ver;
-	uint16_t bit_flags;
+	uint16_t flags;
 	uint16_t comp_type;
 
 	uint32_t crc;
@@ -128,6 +126,27 @@ static const char *compress_method_name(enum compress_method comp)
 		return "Unknown";
 
 	return compress_method_names[comp];
+}
+
+enum zip_flags {
+	/* File is encrypted */
+	FLAG_ENCRYPTED = 0x0001,
+	/* Size and CRC are in data descriptor after the compressed data */
+	FLAG_ZERO_SIZE_CRC = 0x0008,
+	/* Filename and comment fileds are in UTF-8 */
+	FLAG_UTF8 = 0x0800,
+};
+
+static void print_flags(struct zip_local_header *header)
+{
+	if (header->flags & FLAG_ENCRYPTED)
+		GP_DEBUG(2, "File is encrypted");
+
+	if (header->flags & FLAG_ZERO_SIZE_CRC)
+		GP_DEBUG(2, "File size and CRC are after compressed data");
+
+	if (header->flags & FLAG_UTF8)
+		GP_DEBUG(2, "Filename and comment are encoded in UTF-8");
 }
 
 static int seek_bytes(GP_IO *io, uint32_t bytes)
@@ -192,7 +211,13 @@ static int read_deflate(GP_IO *io, struct zip_local_header *header, GP_IO **rio)
 	int err = 0, ret;
 	uint8_t *buf;
 
+	if (header->flags & FLAG_ZERO_SIZE_CRC) {
+		GP_DEBUG(1, "Size not set in local file header");
+		return ENOSYS;
+	}
+
 	window = malloc(32 * 1024);
+
 	//TODO: Unsafe
 	buf = malloc(header->uncomp_size);
 
@@ -307,7 +332,7 @@ static int zip_load_header(GP_IO *io, struct zip_local_header *header)
 	};
 
 	ret = GP_IOReadF(io, zip_local_header,
-	               &header->ver, &header->bit_flags, &header->comp_type,
+	               &header->ver, &header->flags, &header->comp_type,
 		       &header->crc, &header->comp_size, &header->uncomp_size,
 	               &header->fname_len, &header->extf_len);
 
@@ -334,7 +359,9 @@ static GP_Context *zip_next_file(struct zip_priv *priv,
 	         header.ver/10, header.ver%10,
 	         compress_method_name(header.comp_type));
 
-	if (header.bit_flags & GEN_FLAG_ENCRYPTED) {
+	print_flags(&header);
+
+	if (header.flags & FLAG_ENCRYPTED) {
 		GP_DEBUG(1, "Can't handle encrypted files");
 		err = ENOSYS;
 		goto out;
