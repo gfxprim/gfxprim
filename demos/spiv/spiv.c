@@ -231,9 +231,9 @@ static void show_info(struct loader_params *params, GP_Context *img,
 
 	GP_Size th = GP_TextHeight(NULL), y = 10;
 
-	info_printf(context, 10, y, "%ux%u (%ux%u) 1:%3.3f %3.1f%%",
+	info_printf(context, 10, y, "%ux%u (%ux%u) 1:%3.3f %3.1f%% %s",
 	         img->w, img->h, orig_img->w, orig_img->h, params->zoom_rat,
-		 params->zoom_rat * 100);
+		 params->zoom_rat * 100, GP_PixelTypeName(img->pixel_type));
 	y += th + 2;
 
 	info_printf(context, 10, y, "%s", img_name(img_path));
