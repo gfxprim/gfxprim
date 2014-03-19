@@ -161,18 +161,22 @@ static boolean fill_input_buffer(struct jpeg_decompress_struct *cinfo)
 	}
 
 	src->mgr.next_input_byte = src->buffer;
-	src->mgr.bytes_in_buffer = src->size;
+	src->mgr.bytes_in_buffer = ret;
 	return 1;
 }
 
 static void skip_input_data(struct jpeg_decompress_struct *cinfo, long num_bytes)
 {
 	struct my_source_mgr* src = (void*)cinfo->src;
+	off_t ret;
 
 	GP_DEBUG(3, "Skipping %li bytes", num_bytes);
 
 	if (src->mgr.bytes_in_buffer < (unsigned long)num_bytes) {
-		GP_IOSeek(src->io, num_bytes - src->mgr.bytes_in_buffer, GP_IO_SEEK_CUR);
+		ret = GP_IOSeek(src->io, num_bytes - src->mgr.bytes_in_buffer, GP_IO_SEEK_CUR);
+		//TODO: Call jpeg error
+		if (ret == (off_t)-1)
+			GP_FATAL("Failed to skip data: %s", strerror(errno));
 		src->mgr.bytes_in_buffer = 0;
 	} else {
 		src->mgr.bytes_in_buffer -= num_bytes;
