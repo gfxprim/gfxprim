@@ -63,12 +63,9 @@ static const char *interlace_type_name(int interlace)
 
 static void read_data(png_structp png_ptr, png_bytep data, png_size_t len)
 {
-	int res;
 	GP_IO *io = png_get_io_ptr(png_ptr);
 
-	res = GP_IORead(io, data, len);
-
-	if (res < 0 || (png_size_t)res != len)
+	if (GP_IOFill(io, data, len))
 		png_error(png_ptr, "Read Error");
 }
 
