@@ -67,7 +67,9 @@ GP_Context *image_loader_get_image(GP_ProgressCallback *callback, int elevate)
 		return cur_img;
 
 	if (cur_cont) {
+		cpu_timer_start(&timer, "Loading");
 		cur_img = GP_ContainerLoad(cur_cont, callback);
+		cpu_timer_stop(&timer);
 		return cur_img;
 	}
 
@@ -97,6 +99,7 @@ GP_Context *image_loader_get_image(GP_ProgressCallback *callback, int elevate)
 
 			if (img) {
 				cur_img = img;
+				cpu_timer_stop(&timer);
 				return img;
 			}
 
