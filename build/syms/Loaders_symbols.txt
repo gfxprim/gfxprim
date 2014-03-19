@@ -109,3 +109,6 @@ GP_IOFill
 GP_IOReadF
 GP_IOReadB2
 GP_IOReadB4
+
+GP_IOZlib
+GP_IOZlibReset

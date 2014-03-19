@@ -16,45 +16,37 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2010 Jiri "BlueBear" Dluhos                            *
- *                         <jiri.bluebear.dluhos@gmail.com>                  *
- *                                                                           *
  * Copyright (C) 2009-2014 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
  /*
 
-   Core include file for loaders API.
+   Zlib decompression stream.
 
   */
 
-#ifndef LOADERS_GP_LOADERS_H
-#define LOADERS_GP_LOADERS_H
+#ifndef LOADERS_GP_IO_ZLIB_H
+#define LOADERS_GP_IO_ZLIB_H
 
-#include "core/GP_Context.h"
-#include "core/GP_ProgressCallback.h"
+#include <loaders/GP_IO.h>
 
-#include "loaders/GP_PNM.h"
-#include "loaders/GP_BMP.h"
-#include "loaders/GP_PNG.h"
-#include "loaders/GP_JPG.h"
-#include "loaders/GP_JP2.h"
-#include "loaders/GP_GIF.h"
-#include "loaders/GP_TIFF.h"
-#include "loaders/GP_PCX.h"
-#include "loaders/GP_PSP.h"
-#include "loaders/GP_PSD.h"
+/*
+ * Create an Zlib RAW inflate stream on the top of the existing I/O stream.
+ *
+ * The stream will read up to comp_size bytes from the parent I/O.
+ *
+ * If comp_size is 0, no limit on number bytes from the parent stream is set.
+ * However if end of compressed stream is reached the last read will attempt to
+ * seek back by the number of extra buffered bytes.
+ */
+GP_IO *GP_IOZlib(GP_IO *io, size_t comp_size);
 
-#include "loaders/GP_TmpFile.h"
+/*
+ * Repurposes existing Zlib stream for new decompression.
+ *
+ * Returns zero on success. Returns non-zero on failure and errno is set.
+ */
+int GP_IOZlibReset(GP_IO *io, GP_IO *sub_io, size_t comp_size);
 
-#include "loaders/GP_MetaData.h"
-
-#include "loaders/GP_Loader.h"
-
-#include "loaders/GP_Container.h"
-#include "loaders/GP_ZIP.h"
-
-#include "loaders/GP_IOZlib.h"
-
-#endif /* LOADERS_GP_LOADERS_H */
+#endif /* LOADERS_GP_IO_ZLIB_H */
