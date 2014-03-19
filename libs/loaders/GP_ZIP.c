@@ -34,12 +34,12 @@
 
 #endif /* HAVE_ZLIB */
 
-#include "core/GP_Common.h"
-#include "core/GP_Debug.h"
+#include <core/GP_Common.h>
+#include <core/GP_Debug.h>
 
-#include "loaders/GP_ByteUtils.h"
-#include "loaders/GP_Loader.h"
-
+#include <loaders/GP_ByteUtils.h>
+#include <loaders/GP_Loader.h>
+#include <loaders/GP_IOZlib.h>
 #include "loaders/GP_ZIP.h"
 
 #ifdef HAVE_ZLIB
@@ -132,7 +132,7 @@ enum zip_flags {
 	/* File is encrypted */
 	FLAG_ENCRYPTED = 0x0001,
 	/* Size and CRC are in data descriptor after the compressed data */
-	FLAG_ZERO_SIZE_CRC = 0x0008,
+	FLAG_DATA_DESC_HEADER = 0x0008,
 	/* Filename and comment fileds are in UTF-8 */
 	FLAG_UTF8 = 0x0800,
 };
@@ -142,7 +142,7 @@ static void print_flags(struct zip_local_header *header)
 	if (header->flags & FLAG_ENCRYPTED)
 		GP_DEBUG(2, "File is encrypted");
 
-	if (header->flags & FLAG_ZERO_SIZE_CRC)
+	if (header->flags & FLAG_DATA_DESC_HEADER)
 		GP_DEBUG(2, "File size and CRC are after compressed data");
 
 	if (header->flags & FLAG_UTF8)
@@ -163,162 +163,6 @@ static int seek_bytes(GP_IO *io, uint32_t bytes)
 	}
 
 	return 0;
-}
-
-#define CHUNK 512
-
-struct deflate_inbuf {
-	struct zip_local_header *zip_header;
-	uint32_t to_read;
-	unsigned char buf[CHUNK];
-	GP_IO *io;
-};
-
-struct deflate_outbuf {
-	uint32_t crc;
-	uint32_t size;
-	uint32_t fill;
-	uint8_t *buf;
-};
-
-static unsigned deflate_in(void *in_desc, unsigned char **buf)
-{
-	struct deflate_inbuf *in = in_desc;
-	int chunk, ret;
-
-	if (in->to_read)
-		chunk = in->to_read >= CHUNK ? CHUNK : in->to_read;
-	else
-		chunk = CHUNK;
-
-	ret = GP_IORead(in->io, in->buf, chunk);
-
-	if (ret <= 0)
-		return ret;
-
-	*buf = in->buf;
-
-	if (in->to_read)
-		in->to_read -= ret;
-
-	return ret;
-}
-
-#define BUFINC (1024 * 128)
-
-static int deflate_out(void *out_desc, unsigned char *buf, unsigned len)
-{
-	struct deflate_outbuf *out = out_desc;
-
-	if (out->fill + len >= out->size) {
-		out->buf = realloc(out->buf, out->size + GP_MAX(len, BUFINC));
-		if (!out->buf)
-			return 1;
-		out->size += GP_MAX(len, BUFINC);
-		GP_DEBUG(1, "Realloc %u %p", out->size, out->buf);
-	}
-
-	out->crc = crc32(out->crc, buf, len);
-	memcpy(out->buf + out->fill, buf, len);
-	out->fill += len;
-
-	return 0;
-}
-
-static int read_deflate(GP_IO *io, struct zip_local_header *header, GP_IO **rio)
-{
-	uint8_t *window;
-	int err = 0, ret;
-	uint8_t *buf;
-	unsigned int bufsize = header->uncomp_size ? header->uncomp_size : BUFINC;
-
-	window = malloc(32 * 1024);
-
-	//TODO: Unsafe
-	buf = malloc(bufsize);
-
-	if (!window || !buf) {
-		err = ENOMEM;
-		goto err1;
-	}
-
-	z_stream strm = {
-		.zalloc = Z_NULL,
-		.zfree = Z_NULL,
-		.opaque = Z_NULL,
-		.next_in = Z_NULL,
-	};
-
-	if (inflateBackInit(&strm, 15, window) != Z_OK) {
-		GP_DEBUG(1, "Failed to initialize inflate stream");
-		//TODO: Better errno?
-		err = EIO;
-		goto err1;
-	}
-
-	struct deflate_outbuf outbuf = {
-		.crc = crc32(0, NULL, 0),
-		.size = bufsize,
-		.fill = 0,
-		.buf = buf,
-	};
-
-	struct deflate_inbuf inbuf = {
-		.zip_header = header,
-		.io = io,
-		.to_read = header->comp_size,
-	};
-
-	ret = inflateBack(&strm, deflate_in, &inbuf, deflate_out, &outbuf);
-
-	if (ret != Z_STREAM_END) {
-		GP_DEBUG(1, "Failed to inflate stream %i", ret);
-		err = EINVAL;
-		goto err2;
-	}
-
-	if (header->flags & FLAG_ZERO_SIZE_CRC) {
-		GP_DEBUG(2, "In buffer %i, seeking back", strm.avail_in);
-		GP_IOSeek(io, -(int)strm.avail_in, GP_IO_SEEK_CUR);
-		uint16_t data_desc_header[] = {
-			'P', 'K', 0x07, 0x08, /* Data desc header */
-			GP_IO_L4, /* CRC */
-			GP_IO_L4, /* Compressed size */
-			GP_IO_L4, /* Uncompressed size */
-			GP_IO_END
-		};
-
-		if (GP_IOReadF(io, data_desc_header, &header->crc,
-		               &header->comp_size, &header->uncomp_size) != 7) {
-			GP_DEBUG(1, "Failed to read Data Description Header");
-			goto err2;
-		}
-	}
-
-	if (outbuf.crc != header->crc) {
-		GP_DEBUG(1, "CRC does not match");
-		err = EIO;
-		goto err2;
-	}
-
-	if (outbuf.fill != header->uncomp_size) {
-		GP_DEBUG(1, "Decompressed size does not match");
-		err = EIO;
-		goto err2;
-	}
-
-	inflateBackEnd(&strm);
-	free(window);
-
-	//TODO: Failure
-	*rio = GP_IOMem(outbuf.buf, outbuf.size, free);
-	return 0;
-err2:
-	inflateBackEnd(&strm);
-err1:
-	free(window);
-	free(outbuf.buf);
-	return err;
 }
 
 static int zip_load_header(GP_IO *io, struct zip_local_header *header)
@@ -379,6 +223,25 @@ static int zip_load_header(GP_IO *io, struct zip_local_header *header)
 	return 0;
 }
 
+static int zip_read_data_desc(GP_IO *io, struct zip_local_header *header)
+{
+	uint16_t data_desc_header[] = {
+		'P', 'K', 0x07, 0x08, /* Data desc header */
+		GP_IO_L4, /* CRC */
+		GP_IO_L4, /* Compressed size */
+		GP_IO_L4, /* Uncompressed size */
+		GP_IO_END
+	};
+
+	if (GP_IOReadF(io, data_desc_header, &header->crc,
+	               &header->comp_size, &header->uncomp_size) != 7) {
+		GP_DEBUG(1, "Failed to read Data Description Header");
+		return 1;
+	}
+
+	return 0;
+}
+
 static GP_Context *zip_next_file(struct zip_priv *priv,
                                  GP_ProgressCallback *callback)
 {
@@ -415,7 +278,7 @@ static GP_Context *zip_next_file(struct zip_priv *priv,
 		}
 
 		header.file_name[header.fname_len] = '\0';
-
+		//FILL
 		if (GP_IORead(priv->io, header.file_name, header.fname_len) != header.fname_len) {
 			GP_DEBUG(1, "Failed to read filename");
 			err = EIO;
@@ -449,7 +312,7 @@ static GP_Context *zip_next_file(struct zip_priv *priv,
 		goto out;
 	break;
 	case COMPRESS_DEFLATE:
-		if ((err = read_deflate(priv->io, &header, &io))) {
+	/*	if ((err = read_deflate(priv->io, &header, &io))) {
 			err = errno;
 			goto out;
 		}
@@ -459,6 +322,24 @@ static GP_Context *zip_next_file(struct zip_priv *priv,
 			err = errno;
 
 		GP_IOClose(io);
+		goto out;
+	*/
+		io = GP_IOZlib(priv->io, header.comp_size);
+		if (!io)
+			goto out;
+
+		GP_DEBUG(1, "Reading image");
+		ret = GP_ReadImage(io, callback);
+		if (errno == ECANCELED)
+			err = errno;
+
+		GP_IOClose(io);
+
+		if (header.flags & FLAG_DATA_DESC_HEADER) {
+			if (zip_read_data_desc(priv->io, &header))
+				goto out;
+		}
+
 		goto out;
 	break;
 	default:
@@ -550,6 +431,8 @@ static GP_Context *zip_load_next(GP_Container *self,
 
 	if (ret)
 		record_offset(priv, offset);
+
+	record_offset(priv, GP_IOTell(priv->io));
 
 	priv->cur_pos++;
 	//self->cur_img++;
