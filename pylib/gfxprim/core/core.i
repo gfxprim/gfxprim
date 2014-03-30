@@ -124,9 +124,8 @@ ERROR_ON_NULL(GP_SubContextAlloc);
 /*
  * Context manipulation
  */
-
 %include "GP_GetPutPixel.h"
 %import "GP_GetPutPixel.gen.h"
 %include "GP_WritePixel.h"
 %include "GP_Blit.h"
-
+%include "GP_Fill.h"
