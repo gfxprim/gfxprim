@@ -176,7 +176,7 @@ void GP_BackendX11RequestFullscreen(GP_Backend *self, int mode);
 
 The 'GP_BackendX11RequestFullscreen' can toggle fullscreen mode at runtime.
 
-It will most likely generate resize event. See the 'GP_BackendResizeAck()' bellow.
+It will most likely generate resize event. See the 'GP_BackendResizeAck()' below.
 
 AA-lib
 ~~~~~~
@@ -344,7 +344,7 @@ when data are ready on file-descriptor.
 
 If the backend is the only source of events in your application, you should
 consider using the 'GP_BackendWait()' or 'GP_BackendEventWait()' described
-bellow.
+below.
 
 GP_BackendPollEvent
 ^^^^^^^^^^^^^^^^^^^
@@ -593,7 +593,7 @@ int GP_BackendResize(GP_Backend *backend, uint32_t w, uint32_t h);
 Requests backend resize. If backend resize is supported and the resize request
 was successful (i.e. X server allowed us to resize the window) the resize
 event will be send and should be handled in your event loop. You must respond
-to it by the 'GP_BackendResizeAck()' described bellow.
+to it by the 'GP_BackendResizeAck()' described below.
 
 NOTE: The backend->context pointer may change upon calling this function and
       at least backend->context->pixels pointer will change.

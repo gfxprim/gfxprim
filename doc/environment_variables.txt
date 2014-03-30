@@ -10,7 +10,7 @@ GP_THREADS
 
 'GP_THREADS' overrides GP_NrThreadsSet() settings. The value is the same as it
 would have been set by GP_NrThreadsSet() which is described in the table
-bellow:
+below:
 
 .GP_THREADS possible values
 [width="60%",options="header"]

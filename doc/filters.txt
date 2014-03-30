@@ -322,6 +322,8 @@ Works 'in-place'.
 The destination has to have the same pixel type and the size must be at least
 as large as source.
 
+include::images/mirror_h/images.txt[]
+
 [source,c]
 -------------------------------------------------------------------------------
 #include <filters/GP_Rotate.h>
@@ -341,6 +343,8 @@ Works 'in-place'.
 
 The destination has to have the same pixel type and the size must be at least
 as large as source.
+
+include::images/mirror_v/images.txt[]
 
 [source,c]
 -------------------------------------------------------------------------------
@@ -362,6 +366,8 @@ Doesn't work 'in-place' (yet).
 The destination has to have the same pixel type and size must be large enough to
 fit rotated context (i.e. W and H are swapped).
 
+include::images/rotate_90/images.txt[]
+
 [source,c]
 -------------------------------------------------------------------------------
 #include <filters/GP_Rotate.h>
@@ -382,6 +388,8 @@ Doesn't work 'in-place' (yet).
 The destination has to have the same pixel type and the size must be at least
 as large as source.
 
+include::images/rotate_180/images.txt[]
+
 [source,c]
 -------------------------------------------------------------------------------
 #include <filters/GP_Rotate.h>
@@ -401,6 +409,8 @@ Doesn't work 'in-place' (yet).
 
 The destination has to have the same pixel type and destination size must be
 large enough to fit rotated context (i.e. W and H are swapped).
+
+include::images/rotate_270/images.txt[]
 
 [source,c]
 -------------------------------------------------------------------------------

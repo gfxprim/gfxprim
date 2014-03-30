@@ -58,7 +58,7 @@ gamma correction. Unfortunatelly very few parts of the library use it at the
 moment (this will be fixed in subsequent releases).
 
 The bitfield at the the end of the structure describes image orientation (see
-bellow) and a flag that tell if 'pixels' data should be freed, which is
+below) and a flag that tell if 'pixels' data should be freed, which is
 usefull for example for <<Sub_Context, subcontexts>>.
 
 Rotation

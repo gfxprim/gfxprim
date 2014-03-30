@@ -45,7 +45,7 @@ WARNING: For these functions the behavior is undefined when you pass
          coordinates or width or height outside of the source or destination
 	 pixmap. If you need safe variant that automatically clips the
 	 coordinates and rectangle to fit both the source and destination use
-	 the Clipped variants described bellow.
+	 the Clipped variants described below.
 
 
 [source,c]
