@@ -44,7 +44,7 @@ enum GP_ContainerWhence {
 struct GP_ContainerOps {
 	/*
 	 * Loads next image from container, use the inline function defined
-	 * bellow.
+	 * below.
 	 */
 	GP_Context *(*LoadNext)(struct GP_Container *self,
 	                        GP_ProgressCallback *callback);
@@ -56,7 +56,7 @@ struct GP_ContainerOps {
 	                    GP_ProgressCallback *callback);
 
 	/*
-	 * Close callback, use the inline function defined bellow.
+	 * Close callback, use the inline function defined below.
 	 */
 	void (*Close)(struct GP_Container *self);
 

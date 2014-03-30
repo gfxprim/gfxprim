@@ -175,7 +175,7 @@ const char *man_head =
 	".PP\n"
 	"Spiv implements feh-like image actions, which are short shell scripts with\n"
 	"printf-like modifiers.\n"
-	"See\n.B ACTIONS\nbellow for further information.\n";
+	"See\n.B ACTIONS\nbelow for further information.\n";
 
 static const char *man_tail =
 	".SH BUGS\n"

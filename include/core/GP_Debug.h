@@ -37,7 +37,7 @@
 
    There are few special debug message types with negative debug level (that
    means that they are always printed), and as so these are used on various error
-   conditions, see bellow for more information.
+   conditions, see below for more information.
 
   */
 

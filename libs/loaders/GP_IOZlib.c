@@ -137,7 +137,6 @@ static int zlib_reset(struct priv *priv)
 	priv->strm.avail_out = 0;
 	priv->strm.next_out = Z_NULL;
 
-
 	priv->bytes_read = 0;
 	priv->comp_avail = priv->comp_size;
         priv->crc = crc32(0, NULL, 0);
@@ -151,7 +150,7 @@ static off_t zlib_seek(GP_IO *io, off_t offset, enum GP_IOWhence whence)
 	struct priv *priv = GP_IO_PRIV(io);
 	off_t ret;
 
-	GP_DEBUG(3, "Seek %li %u\n", (long)offset, whence);
+	GP_DEBUG(3, "Seek %li %u", (long)offset, whence);
 
 	if (whence == GP_IO_SEEK_CUR) {
 		if (offset == 0)

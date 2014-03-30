@@ -115,7 +115,7 @@ int GP_EventQueuePeek(struct GP_EventQueue *self, struct GP_Event *ev);
  * Puts the event in the queue.
  *
  * This is bare call that just copies the event into the queue. Use the calls
- * bellow instead.
+ * below instead.
  */
 void GP_EventQueuePut(struct GP_EventQueue *self, struct GP_Event *ev);
 
