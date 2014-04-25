@@ -145,6 +145,13 @@ GP_Context *GP_ReadPNG(GP_IO *io, GP_ProgressCallback *callback)
 #endif
 		}
 	break;
+	case PNG_COLOR_TYPE_GRAY | PNG_COLOR_MASK_ALPHA:
+		switch (depth) {
+		case 8:
+			pixel_type = GP_PIXEL_GA88;
+		break;
+		}
+	break;
 	case PNG_COLOR_TYPE_RGB:
 
 		png_set_bgr(png);
