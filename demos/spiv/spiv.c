@@ -171,26 +171,21 @@ static GP_Context *load_image(int elevate)
 static void pattern_fill(GP_Context *ctx, unsigned int x0, unsigned int y0,
                          unsigned int w, unsigned int h)
 {
-	unsigned int x, y;
+	unsigned int x, y, i, j = 0;
+	GP_Pixel col[2];
 
-	GP_Pixel g1 = GP_RGBToContextPixel(0x64, 0x64, 0x64, ctx);
-	GP_Pixel g2 = GP_RGBToContextPixel(0x80, 0x80, 0x80, ctx);
+	col[0] = GP_RGBToContextPixel(0x64, 0x64, 0x64, ctx);
+	col[1] = GP_RGBToContextPixel(0x80, 0x80, 0x80, ctx);
 
-	unsigned int wm = w/10 < 10 ? 10 : w/10;
-	unsigned int hm = h/10 < 10 ? 10 : h/10;
-	unsigned int wt = w/20 < 5  ?  5 : w/20;
-	unsigned int ht = h/20 < 5  ?  5 : h/20;
+	unsigned int wm = w/20 < 5 ? 5 : w/20;
+	unsigned int hm = h/20 < 5 ? 5 : h/20;
 
-	for (y = 0; y < h; y++) {
-		for (x = 0; x < w; x++) {
-			GP_Pixel pix;
-
-			if ((x % wm < wt) ^ (y % hm < ht))
-				pix = g1;
-			else
-				pix = g2;
-
-			GP_PutPixel(ctx, x0 + x, y0 + y, pix);
+	for (y = 0; y < h; y += hm) {
+		i = j;
+		j = !j;
+		for (x = 0; x < w; x += wm) {
+			GP_FillRectXYWH(ctx, x0 + x, y0 + y, wm, hm, col[i]);
+			i = !i;
 		}
 	}
 }
@@ -323,7 +318,6 @@ static void update_display(struct loader_params *params, GP_Context *img,
 	} else {
 		if (GP_PixelHasFlags(img->pixel_type, GP_PIXEL_HAS_ALPHA))
 			pattern_fill(context, cx, cy, img->w, img->h);
-
 		GP_Blit_Clipped(img, 0, 0, img->w, img->h, context, cx, cy);
 	}
 
