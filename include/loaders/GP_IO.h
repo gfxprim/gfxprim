@@ -173,6 +173,8 @@ enum GP_IOReadFTypes {
 
 int GP_IOReadF(GP_IO *self, uint16_t *types, ...);
 
+int GP_IOWriteF(GP_IO *self, uint16_t *types, ...);
+
 /*
  * GP_IOReadF wrappers for convinient reading of single value
  */

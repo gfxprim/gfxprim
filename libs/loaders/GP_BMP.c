@@ -226,8 +226,7 @@ static int read_bitmap_info_header(GP_IO *io, struct bitmap_info_header *header)
 
 	/* This must be 1 according to specs */
 	if (nr_planes != 1)
-		GP_DEBUG(1, "Number of planes is %"PRId16" should be 1",
-		            nr_planes);
+		GP_WARN("Number of planes %"PRId16" should be 1", nr_planes);
 
 	GP_DEBUG(2, "Have BMP bitmap size %"PRId32"x%"PRId32" %"PRIu16" "
 	            "bpp, %"PRIu32" pallete colors, '%s' compression",
@@ -742,22 +741,43 @@ static uint32_t bmp_count_bitmap_size(struct bitmap_info_header *header)
 	return header->h * bmp_align_row_size(header->bpp * header->w);
 }
 
-static int bmp_write_header(struct bitmap_info_header *header, FILE *f)
+static int bmp_write_header(GP_IO *io, struct bitmap_info_header *header)
 {
 	uint32_t bitmap_size = bmp_count_bitmap_size(header);
 	uint32_t file_size = bitmap_size + header->header_size + 14;
 
-	/* Bitmap Header */
-	if (GP_FWrite(f, "A2 L4 0x00 0x00 0x00 0x00 L4", "BM",
-	              file_size, header->pixel_offset) != 7)
+	uint16_t bitmap_header[] = {
+		'B', 'M',               /* signature */
+		GP_IO_L4,               /* pixels offset */
+		0x00, 0x00, 0x00, 0x00, /* reserved */
+		GP_IO_L4,               /* file size */
+		GP_IO_END,
+	};
+
+	if (GP_IOWriteF(io, bitmap_header, file_size, header->pixel_offset))
 		return EIO;
 
-	/* Bitmap Info Header */
-	if (GP_FWrite(f, "L4 L4 L4 L2 L2 L4 L4 L4 L4 L4 L4",
-	              header->header_size, header->w, header->h, 1,
-		      header->bpp, header->compress_type, bitmap_size, 0, 0,
-		      header->palette_colors, 0) != 11)
+	uint16_t bitmap_info_header[] = {
+		GP_IO_L4,   /* header size */
+		GP_IO_L4,   /* width */
+		GP_IO_L4,   /* height */
+		0x01, 0x00, /* nr planes, always 1 */
+		GP_IO_L2,   /* bpp */
+		GP_IO_L4,   /* compression type */
+		GP_IO_L4,   /* bitmap size */
+		0, 0, 0, 0, /* X PPM */
+		0, 0, 0, 0, /* Y PPM */
+		GP_IO_L4,   /* palette colors */
+		0, 0, 0, 0, /* important palette colors */
+		GP_IO_END,
+	};
+
+	if (GP_IOWriteF(io, bitmap_info_header, header->header_size,
+	                header->w, header->h, header->bpp,
+			header->compress_type, bitmap_size,
+			header->palette_colors)) {
 		return EIO;
+	}
 
 	return 0;
 }
@@ -796,7 +816,8 @@ static int bmp_fill_header(const GP_Context *src, struct bitmap_info_header *hea
 	return 0;
 }
 
-static int bmp_write_data(FILE *f, const GP_Context *src, GP_ProgressCallback *callback)
+static int bmp_write_data(GP_IO *io, const GP_Context *src,
+                          GP_ProgressCallback *callback)
 {
 	int y;
 	uint32_t padd_len = 0;
@@ -817,13 +838,14 @@ static int bmp_write_data(FILE *f, const GP_Context *src, GP_ProgressCallback *c
 			row = tmp;
 		}
 
-		if (fwrite(row, src->bytes_per_row, 1, f) != 1)
+		if (GP_IOWrite(io, row, src->bytes_per_row) != src->bytes_per_row)
 			return EIO;
 
 		/* write padding */
-		if (padd_len)
-			if (fwrite(padd, padd_len, 1, f) != 1)
+		if (padd_len) {
+			if (GP_IOWrite(io, padd, padd_len) != padd_len)
 				return EIO;
+		}
 
 		if (GP_ProgressCallbackReport(callback, y, src->h, src->w)) {
 			GP_DEBUG(1, "Operation aborted");
@@ -831,50 +853,55 @@ static int bmp_write_data(FILE *f, const GP_Context *src, GP_ProgressCallback *c
 		}
 	}
 
+	GP_ProgressCallbackDone(callback);
+
 	return 0;
 }
+
+int GP_WriteBMP(const GP_Context *src, GP_IO *io,
+                GP_ProgressCallback *callback)
+{
+	struct bitmap_info_header header;
+	int err;
+
+	if ((err = bmp_fill_header(src, &header)))
+		goto err;
+
+	if ((err = bmp_write_header(io, &header)))
+		goto err;
+
+	if ((err = bmp_write_data(io, src, callback)))
+		goto err;
+
+	return 0;
+err:
+	errno = err;
+	return 1;
+}
+
 
 int GP_SaveBMP(const GP_Context *src, const char *dst_path,
                GP_ProgressCallback *callback)
 {
-	struct bitmap_info_header header;
-	FILE *f;
-	int err;
+	GP_IO *io;
 
 	GP_DEBUG(1, "Saving BMP Image '%s'", dst_path);
 
-	if ((err = bmp_fill_header(src, &header)))
-		goto err0;
+	io = GP_IOFile(dst_path, GP_IO_WRONLY);
 
-	f = fopen(dst_path, "wb");
+	if (!io)
+		return 1;
 
-	if (f == NULL) {
-		err = errno;
-		GP_DEBUG(1, "Failed to open '%s' for writing: %s",
-		         dst_path, strerror(errno));
-		goto err0;
+	if (GP_WriteBMP(src, io, callback)) {
+		GP_IOClose(io);
+		unlink(dst_path);
+		return 1;
 	}
 
-	if ((err = bmp_write_header(&header, f)))
-		goto err1;
-
-	if ((err = bmp_write_data(f, src, callback)))
-		goto err1;
-
-	if (fclose(f)) {
-		err = errno;
-		GP_DEBUG(1, "Failed to close file '%s': %s",
-		         dst_path, strerror(errno));
-		goto err1;
+	if (GP_IOClose(io)) {
+		unlink(dst_path);
+		return 1;
 	}
-
-	GP_ProgressCallbackDone(callback);
 
 	return 0;
-err1:
-	fclose(f);
-err0:
-	unlink(dst_path);
-	errno = err;
-	return 1;
 }

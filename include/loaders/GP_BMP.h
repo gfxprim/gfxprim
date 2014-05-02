@@ -41,6 +41,14 @@ GP_Context *GP_ReadBMP(GP_IO *io, GP_ProgressCallback *callback);
 GP_Context *GP_LoadBMP(const char *src_path, GP_ProgressCallback *callback);
 
 /*
+ * Writes a BMP to an IO Stream.
+ *
+ * Returns zero on success, non-zero on failure and errno is set.
+ */
+int GP_WriteBMP(const GP_Context *src, GP_IO *io,
+                GP_ProgressCallback *callback);
+
+/*
  * Saves BMP to a file. Zero is returned on succes. Upon failure non-zero is
  * returned and errno is filled accordingly.
  */

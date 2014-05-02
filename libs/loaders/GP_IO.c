@@ -27,6 +27,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <stdarg.h>
+#include <inttypes.h>
 
 #include <core/GP_ByteOrder.h>
 #include <core/GP_Debug.h>
@@ -610,6 +611,60 @@ int GP_IOReadF(GP_IO *self, uint16_t *types, ...)
 end:
 	va_end(va);
 	return ret;
+}
+
+int GP_IOWriteF(GP_IO *io, uint16_t *types, ...)
+{
+	va_list va;
+	uint8_t *ptr, t;
+	int32_t i4;
+	int16_t i2;
+
+	va_start(va, types);
+
+	while (*types != GP_IO_END) {
+		switch (TYPE(*types)) {
+		case GP_IO_CONST:
+			t = VAL(*types);
+			if (GP_IOWrite(io, &t, 1) != 1)
+				goto err;
+		break;
+		case GP_IO_L2:
+		case GP_IO_B2:
+			i2 = va_arg(va, int);
+			ptr = (void*)&i2;
+
+			if (needs_swap(*types))
+				GP_SWAP(ptr[0], ptr[1]);
+
+			if (GP_IOWrite(io, ptr, 2) != 2)
+				goto err;
+		break;
+		case GP_IO_L4:
+		case GP_IO_B4:
+			i4 = va_arg(va, int);
+			ptr = (void*)&i4;
+
+			if (needs_swap(*types)) {
+				GP_SWAP(ptr[0], ptr[3]);
+				GP_SWAP(ptr[1], ptr[2]);
+			}
+
+			if (GP_IOWrite(io, ptr, 4) != 4)
+				goto err;
+		break;
+		default:
+			GP_WARN("Invalid type %"PRIu16"\n", *types);
+			goto err;
+		}
+		types++;
+	}
+
+	va_end(va);
+	return 0;
+err:
+	va_end(va);
+	return -1;
 }
 
 int GP_IOReadB4(GP_IO *io, uint32_t *val)

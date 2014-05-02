@@ -15,6 +15,7 @@ GP_LoadPNGMetaData
 GP_SavePNG
 
 GP_MatchBMP
+GP_WriteBMP
 GP_LoadBMP
 GP_ReadBMP
 GP_SaveBMP
@@ -109,6 +110,7 @@ GP_IOFill
 GP_IOReadF
 GP_IOReadB2
 GP_IOReadB4
+GP_IOWriteF
 
 GP_IOZlib
 GP_IOZlibReset
