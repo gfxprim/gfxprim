@@ -1,6 +1,7 @@
 # Loaders testsuite
 loaders_suite
 PNG
+JPG
 GIF
 PBM
 PGM
