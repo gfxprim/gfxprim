@@ -113,7 +113,7 @@ static int load_cmyk(struct jpeg_decompress_struct *cinfo, GP_Context *ret,
 		uint32_t y = cinfo->output_scanline;
 
 		JSAMPROW addr = (void*)GP_PIXEL_ADDR(ret, 0, y);
-		jpeg_read_scanlines(cinfo, &addr, 4);
+		jpeg_read_scanlines(cinfo, &addr, 1);
 
 		unsigned int i;
 		uint8_t *buf = GP_PIXEL_ADDR(ret, 0, y);
