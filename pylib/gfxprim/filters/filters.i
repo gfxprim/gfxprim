@@ -92,6 +92,10 @@ FILTER_FUNC(ResizeLinearInt);
 FILTER_FUNC(ResizeLinearLFInt);
 %include "GP_ResizeLinear.h"
 
+FILTER_FUNC(ResizeCubic);
+FILTER_FUNC(ResizeCubicInt);
+%include "GP_ResizeCubic.h"
+
 /* Ditherings */
 FILTER_FUNC(FloydSteinberg);
 FILTER_FUNC(GP_FilterHilbertPeano);
