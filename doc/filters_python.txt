@@ -8,9 +8,10 @@ The filter functions could be called directly as +filters.Foo(img, ..)+ or
 from submodule as +img.filters.Foo(..)+. Note that in the second case the
 image is passed automatically as a first parameter.
 
-If filter has been aborted from callback 'OSError' with errno set to
-'ECANCELED' is raised, see progress callback
-link:core_python.html#Progress_Callback[documentation] for more information.
+If filter is aborted from a callback 'OSError' with errno set to
+'ECANCELED' is raised, see
+link:core_python.html#Progress_Callback[progress callback] for more
+information.
 
 Point Filters
 ~~~~~~~~~~~~~
@@ -402,3 +403,29 @@ respectively y pixel neighbors from each side so the result is median of
 rectangle of +2 * x + 1+ x +2 * y + 1+ pixels.
 
 include::images/median/images.txt[]
+
+Resize
+~~~~~~
+
+[source,python]
+-------------------------------------------------------------------------------
+import gfxprim.core as core
+import gfxprim.filters as filters
+
+    # Nearest neighbour resize, fastest but lowest quality
+    res = img.ResizeNNAlloc(100, 100, callback=None)
+
+    # Fast and good quality with low pass on downscaling
+    res = img.ResizeLinearLFIntAlloc(100, 100, callback=None)
+
+    # Cubic interpolation, needs low pass (blur) applied before downscaling
+    res = img.ResizeCubicIntAlloc(100, 100, callback=None)
+
+    # All of the above, TYPE is numeric enum
+    res = img.ResizeAlloc(100, 100, TYPE, callback=None)
+
+-------------------------------------------------------------------------------
+
+Functions to resize (resample) image.
+
+TIP: See link:example_py_resize.html[resize example].

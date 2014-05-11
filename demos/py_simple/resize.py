@@ -10,13 +10,10 @@ def main():
         print("USAGE: %s imput_image output_image" % sys.argv[0]);
         sys.exit(1)
 
-    # Turns on debug messages
-    core.SetDebugLevel(10);
-
     # Load Image
     src = loaders.Load(sys.argv[1])
     # Resize image to the half of the original
-    res = src.filters.ResizeAlloc(src.w//2, src.h//2, 2)
+    res = src.filters.ResizeLFIntAlloc(src.w//2, src.h//2)
     # Save Image
     res.loaders.Save(sys.argv[2])
 
