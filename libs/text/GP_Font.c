@@ -63,6 +63,9 @@ GP_GlyphBitmap *GP_GetGlyphBitmap(const GP_FontFace *font, int c)
 
 void GP_FontFaceFree(GP_FontFace *self)
 {
+	if (!self)
+		return;
+
 	free(self->glyphs);
 	free(self);
 }
