@@ -16,12 +16,11 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2014 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
-#include "core/GP_GetPutPixel.h"
-#include "core/GP_MixPixels.gen.h"
+#include <stdlib.h>
 #include "GP_Font.h"
 
 #include "GP_DefaultFont.h"
