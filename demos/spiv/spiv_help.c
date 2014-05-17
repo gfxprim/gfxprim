@@ -230,6 +230,8 @@ void print_man(void)
 	puts(man_tail);
 }
 
+static int last_line;
+
 static int redraw_help(GP_Backend *backend, unsigned int loff, GP_Coord xoff)
 {
 	GP_Context *c = backend->context;
@@ -237,29 +239,37 @@ static int redraw_help(GP_Backend *backend, unsigned int loff, GP_Coord xoff)
 	GP_Pixel white = GP_ColorToContextPixel(GP_COL_WHITE, c);
 	int i;
 
+	int spacing = GP_TextHeight(config.style)/10 + 2;
+	int height = GP_TextHeight(config.style);
+
 	GP_Fill(c, black);
 
-	GP_Print(c, NULL, 20 + 10 * xoff, 2, GP_ALIGN_RIGHT|GP_VALIGN_BOTTOM,
+	GP_Print(c, config.style, 20 + 10 * xoff, 2, GP_ALIGN_RIGHT|GP_VALIGN_BOTTOM,
 	         white, black, "%s", "Keyboard Controls:");
 
+	unsigned int max = 0;
+
+	for (i = 0; i < help_keys_len; i++)
+		max = GP_MAX(max, GP_TextWidth(config.style, help_keys[i].keys));
+
 	for (i = loff; i < help_keys_len; i++) {
-		GP_Coord h = 2 + (i - loff + 1) * 15;
+		GP_Coord h = spacing + (i - loff + 1) * (height + spacing);
 
-		if (h + 2 >= (GP_Coord)c->h)
+		if (h + height + spacing > (GP_Coord)c->h) {
+			last_line = 0;
 			goto out;
+		}
 
-		GP_Print(c, NULL, 20 + 10 * xoff, h, GP_ALIGN_RIGHT|GP_VALIGN_BOTTOM,
-		         white, black, "%-"KEYS_MAX"s - %s", help_keys[i].keys, help_keys[i].desc);
+		GP_Print(c, config.style, 20 + 10 * xoff, h, GP_ALIGN_RIGHT|GP_VALIGN_BOTTOM,
+		         white, black, "%s", help_keys[i].keys);
+		GP_Print(c, config.style, 20 + 10 * xoff + max, h, GP_ALIGN_RIGHT|GP_VALIGN_BOTTOM,
+		         white, black, "  -  %s", help_keys[i].desc);
+		last_line = 1;
 	}
 
 out:
 	GP_BackendFlip(backend);
 	return i;
-}
-
-static int max_lines(GP_Backend *backend)
-{
-	return (backend->context->h - 4) / 15;
 }
 
 void draw_help(GP_Backend *backend)
@@ -294,17 +304,16 @@ void draw_help(GP_Backend *backend)
 				break;
 				case GP_KEY_PAGE_DOWN:
 					if (last < help_keys_len) {
-						if (loff + max_lines(backend) >= help_keys_len)
+						if (last_line)
 							break;
 
-						loff += max_lines(backend);
-
+						loff += last - loff;
 						last = redraw_help(backend, loff, xoff);
 					}
 				break;
 				case GP_KEY_PAGE_UP:
 					if (loff > 0) {
-						loff -= max_lines(backend);
+						loff -= last - loff;
 						if (loff < 0)
 							loff = 0;
 						last = redraw_help(backend, loff, xoff);

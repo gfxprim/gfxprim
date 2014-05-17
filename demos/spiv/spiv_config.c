@@ -16,7 +16,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2013 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2014 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
@@ -41,6 +41,9 @@ struct spiv_config config = {
 	.full_screen = 0,
 	.max_win_w = 1024,
 	.max_win_h = 768,
+
+	.font_path = NULL,
+	.font_height = 12,
 };
 
 static int set_zoom_strategy(struct cfg_opt *self, unsigned int lineno)
@@ -200,6 +203,60 @@ static int set_emulation(struct cfg_opt *self, unsigned int lineno)
 	return 0;
 }
 
+int load_font_face(GP_TextStyle *style, const char *path, unsigned int height,
+                   unsigned int lineno)
+{
+	GP_FontFace *font;
+	static GP_FontFace *old_font = NULL;
+
+	font = GP_FontFaceLoad(path, 0, height);
+
+	if (!font) {
+		fprintf(stderr, "ERROR: %u: Failed to load font '%s'\n",
+		        lineno, path);
+		return 1;
+	}
+
+	GP_FontFaceFree(old_font);
+	style->font = old_font = font;
+
+	return 0;
+}
+
+static int set_font(struct cfg_opt *self, unsigned int lineno)
+{
+	static GP_TextStyle style = {NULL, 0, 0, 1, 1, 0};
+
+	if (load_font_face(&style, self->val, config.font_height, lineno))
+		return 1;
+
+	free(config.font_path);
+	config.font_path = strdup(self->val);
+	config.style = &style;
+
+	return 0;
+}
+
+static int set_font_height(struct cfg_opt *self, unsigned int lineno)
+{
+	int height = atoi(self->val);
+
+	if (height <= 0) {
+		fprintf(stderr, "ERROR: %u: Wrong font height '%s'\n",
+		        lineno, self->val);
+		return 1;
+	}
+
+	config.font_height = height;
+
+	if (config.style) {
+		return load_font_face(config.style, config.font_path,
+		                      config.font_height, lineno);
+	}
+
+	return 0;
+}
+
 static int help(struct cfg_opt *self, unsigned int lineno)
 {
 	(void) self;
@@ -235,6 +292,20 @@ struct cfg_opt spiv_opts[] = {
 	 .opt_has_value = 0,
 	 .set = set_opt,
 	 .help = "Show image info such as filename, size, etc...",
+	},
+	{.name_space = "Gui",
+	 .key = "FontPath",
+	 .opt_long = "font-path",
+	 .opt_has_value = 1,
+	 .set = set_font,
+	 .help = "Path to TTF font to be used in GUI",
+	},
+	{.name_space = "Gui",
+	 .key = "FontHeight",
+	 .opt_long = "font-height",
+	 .opt_has_value = 1,
+	 .set = set_font_height,
+	 .help = "TTF font height in pixels",
 	},
 	{.name_space = "Gui",
 	 .key = "ShowProgress",

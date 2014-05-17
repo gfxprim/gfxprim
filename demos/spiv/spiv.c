@@ -16,7 +16,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2013 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2014 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
@@ -96,17 +96,17 @@ static int image_loader_callback(GP_ProgressCallback *self)
 
 	int align = GP_ALIGN_CENTER|GP_VALIGN_ABOVE;
 
-	size = GP_TextWidth(NULL, buf);
+	size = GP_TextWidth(config.style, buf);
 
 	int start = c->w/2 - size/2 - 10;
 	int end   = c->w/2 + size/2 + 10;
 	int middle = start + (end - start) * self->percentage / 100;
-	int top = c->h - GP_TextHeight(NULL) - 11;
+	int top = c->h - GP_TextHeight(config.style) - 11;
 
 	GP_FillRectXYXY(c, start, c->h - 1, middle, top, gray_pixel);
 	GP_FillRectXYXY(c, middle, c->h - 1, end, top, black_pixel);
 
-	GP_Text(c, NULL, c->w/2, c->h - 5, align,
+	GP_Text(c, config.style, c->w/2, c->h - 5, align,
 	        white_pixel, black_pixel, buf);
 
 	GP_BackendUpdateRect(backend, start, c->h - 1, end, top);
@@ -154,10 +154,10 @@ static GP_Context *load_image(int elevate)
 	GP_Context *ctx = backend->context;
 
 	GP_Fill(ctx, black_pixel);
-	GP_Print(ctx, NULL, ctx->w/2, ctx->h/2 - 10,
+	GP_Print(ctx, config.style, ctx->w/2, ctx->h/2 - 10,
 	         GP_ALIGN_CENTER|GP_VALIGN_CENTER, white_pixel, black_pixel,
 	         "'%s'", image_loader_img_path());
-	GP_Print(ctx, NULL, ctx->w/2, ctx->h/2 + 10,
+	GP_Print(ctx, config.style, ctx->w/2, ctx->h/2 + 10,
 	         GP_ALIGN_CENTER|GP_VALIGN_CENTER, white_pixel, black_pixel,
 	         "Failed to load image :( (%s)", strerror(errno));
 	GP_BackendFlip(backend);
@@ -203,11 +203,11 @@ static void info_printf(GP_Context *ctx, GP_Coord x, GP_Coord y,
 	va_start(va, fmt);
 
 	va_copy(vac, va);
-	GP_VPrint(ctx, NULL, x-1, y-1, GP_ALIGN_RIGHT|GP_VALIGN_BOTTOM,
+	GP_VPrint(ctx, config.style, x-1, y-1, GP_ALIGN_RIGHT|GP_VALIGN_BOTTOM|GP_TEXT_NOBG,
 	          black_pixel, white_pixel, fmt, vac);
 	va_end(vac);
 
-	GP_VPrint(ctx, NULL, x, y, GP_ALIGN_RIGHT|GP_VALIGN_BOTTOM,
+	GP_VPrint(ctx, config.style, x, y, GP_ALIGN_RIGHT|GP_VALIGN_BOTTOM|GP_TEXT_NOBG,
 	          white_pixel, black_pixel, fmt, va);
 
 	va_end(va);
@@ -224,7 +224,7 @@ static void show_info(struct loader_params *params, GP_Context *img,
 	if (!config.show_info)
 		return;
 
-	GP_Size th = GP_TextHeight(NULL), y = 10;
+	GP_Size th = GP_TextHeight(config.style), y = 10;
 
 	info_printf(context, 10, y, "%ux%u (%ux%u) 1:%3.3f %3.1f%% %s",
 	         img->w, img->h, orig_img->w, orig_img->h, params->zoom_rat,
