@@ -557,12 +557,6 @@ int GP_MatchJPG(const void GP_UNUSED(*buf))
 	return -1;
 }
 
-int GP_OpenJPG(const char GP_UNUSED(*src_path), FILE GP_UNUSED(**f))
-{
-	errno = ENOSYS;
-	return 1;
-}
-
 GP_Context *GP_ReadJPG(GP_IO GP_UNUSED(*io),
                        GP_ProgressCallback GP_UNUSED(*callback))
 {
