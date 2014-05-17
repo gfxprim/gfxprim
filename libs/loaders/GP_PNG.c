@@ -103,7 +103,6 @@ GP_Context *GP_ReadPNG(GP_IO *io, GP_ProgressCallback *callback)
 		goto err2;
 	}
 
-	//png_init_io(png, f);
 	png_set_read_fn(png, io, read_data);
 	png_set_sig_bytes(png, 0);
 	png_read_info(png, png_info);
@@ -345,7 +344,7 @@ static void load_meta_data(png_structp png, png_infop png_info, GP_MetaData *dat
 	}
 }
 
-int GP_ReadPNGMetaData(FILE *f, GP_MetaData *data)
+int GP_ReadPNGMetaData(GP_IO *io, GP_MetaData *data)
 {
 	png_structp png;
 	png_infop png_info = NULL;
@@ -374,8 +373,8 @@ int GP_ReadPNGMetaData(FILE *f, GP_MetaData *data)
 		goto err2;
 	}
 
-	png_init_io(png, f);
-	png_set_sig_bytes(png, 8);
+	png_set_read_fn(png, io, read_data);
+	png_set_sig_bytes(png, 0);
 	png_read_info(png, png_info);
 
 	load_meta_data(png, png_info, data);
@@ -390,15 +389,18 @@ err1:
 
 int GP_LoadPNGMetaData(const char *src_path, GP_MetaData *data)
 {
-	FILE *f;
-	int ret;
+	GP_IO *io;
+	int ret, err;
 
-//	if (GP_OpenPNG(src_path, &f))
-//		return 1;
+	io = GP_IOFile(src_path, GP_IO_RDONLY);
+	if (!io)
+		return 1;
 
-	ret = GP_ReadPNGMetaData(f, data);
+	ret = GP_ReadPNGMetaData(io, data);
 
-	fclose(f);
+	err = errno;
+	GP_IOClose(io);
+	errno = err;
 
 	return ret;
 }
@@ -630,7 +632,7 @@ GP_Context *GP_LoadPNG(const char GP_UNUSED(*src_path),
 	return NULL;
 }
 
-int GP_ReadPNGMetaData(FILE GP_UNUSED(*f), GP_MetaData GP_UNUSED(*data))
+int GP_ReadPNGMetaData(GP_IO GP_UNUSED(*io), GP_MetaData GP_UNUSED(*data))
 {
 	errno = ENOSYS;
 	return 1;

@@ -184,13 +184,28 @@ static void skip_input_data(struct jpeg_decompress_struct *cinfo, long num_bytes
 	}
 }
 
+static inline void init_source_mgr(struct my_source_mgr *src, GP_IO *io,
+                                   void *buf, size_t buf_size)
+{
+	src->mgr.init_source = dummy;
+	src->mgr.resync_to_restart = jpeg_resync_to_restart;
+	src->mgr.term_source = dummy;
+	src->mgr.fill_input_buffer = fill_input_buffer;
+	src->mgr.skip_input_data = skip_input_data;
+	src->mgr.bytes_in_buffer = 0;
+	src->mgr.next_input_byte = NULL;
+	src->io = io;
+	src->buffer = buf;
+	src->size = buf_size;
+}
+
 GP_Context *GP_ReadJPG(GP_IO *io, GP_ProgressCallback *callback)
 {
 	struct jpeg_decompress_struct cinfo;
 	struct my_source_mgr src;
 	struct my_jpg_err my_err;
 	GP_Context *ret = NULL;
-	uint8_t buffer[1024];
+	uint8_t buf[1024];
 	int err;
 
 	cinfo.err = jpeg_std_error(&my_err.error_mgr);
@@ -202,18 +217,7 @@ GP_Context *GP_ReadJPG(GP_IO *io, GP_ProgressCallback *callback)
 	}
 
 	jpeg_create_decompress(&cinfo);
-
-	/* Initialize custom source manager */
-	src.mgr.init_source = dummy;
-	src.mgr.resync_to_restart = jpeg_resync_to_restart;
-	src.mgr.term_source = dummy;
-	src.mgr.fill_input_buffer = fill_input_buffer;
-	src.mgr.skip_input_data = skip_input_data;
-	src.mgr.bytes_in_buffer = 0;
-	src.mgr.next_input_byte = NULL;
-	src.io = io;
-	src.buffer = buffer;
-	src.size = sizeof(buffer);
+	init_source_mgr(&src, io, buf, sizeof(buf));
 	cinfo.src = (void*)&src;
 
 	jpeg_read_header(&cinfo, TRUE);
@@ -340,10 +344,12 @@ static void save_jpg_markers(struct jpeg_decompress_struct *cinfo)
 	jpeg_save_markers(cinfo, JPEG_APP0 + 1, 0xffff);
 }
 
-int GP_ReadJPGMetaData(FILE *f, GP_MetaData *data)
+int GP_ReadJPGMetaData(GP_IO *io, GP_MetaData *data)
 {
 	struct jpeg_decompress_struct cinfo;
+	struct my_source_mgr src;
 	struct my_jpg_err my_err;
+	uint8_t buf[1024];
 	int err;
 
 	cinfo.err = jpeg_std_error(&my_err.error_mgr);
@@ -355,7 +361,8 @@ int GP_ReadJPGMetaData(FILE *f, GP_MetaData *data)
 	}
 
 	jpeg_create_decompress(&cinfo);
-	jpeg_stdio_src(&cinfo, f);
+	init_source_mgr(&src, io, buf, sizeof(buf));
+	cinfo.src = (void*)&src;
 
 	save_jpg_markers(&cinfo);
 
@@ -380,15 +387,18 @@ err1:
 
 int GP_LoadJPGMetaData(const char *src_path, GP_MetaData *data)
 {
-	//FILE *f;
-	int ret = -1;
+	GP_IO *io;
+	int err, ret;
 
-	//if (GP_OpenJPG(src_path, &f))
-	//	return 1;
+	io = GP_IOFile(src_path, GP_IO_RDONLY);
+	if (!io)
+		return 1;
 
-	//ret = GP_ReadJPGMetaData(f, data);
+	ret = GP_ReadJPGMetaData(io, data);
 
-	//fclose(f);
+	err = errno;
+	GP_IOClose(io);
+	errno = err;
 
 	return ret;
 }
@@ -567,7 +577,7 @@ GP_Context *GP_LoadJPG(const char GP_UNUSED(*src_path),
 	return NULL;
 }
 
-int GP_ReadJPGMetaData(FILE GP_UNUSED(*f), GP_MetaData GP_UNUSED(*data))
+int GP_ReadJPGMetaData(GP_IO GP_UNUSED(*io), GP_MetaData GP_UNUSED(*data))
 {
 	errno = ENOSYS;
 	return 1;

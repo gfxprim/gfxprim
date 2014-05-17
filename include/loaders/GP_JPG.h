@@ -50,7 +50,7 @@ GP_Context *GP_LoadJPG(const char *src_path, GP_ProgressCallback *callback);
 /*
  * Loads JPEG meta-data, called markers in JPEG terminology.
  */
-int GP_ReadJPGMetaData(FILE *f, GP_MetaData *data);
+int GP_ReadJPGMetaData(GP_IO *io, GP_MetaData *data);
 int GP_LoadJPGMetaData(const char *src_path, GP_MetaData *data);
 
 /*

@@ -48,9 +48,9 @@ GP_Context *GP_ReadPNG(GP_IO *io, GP_ProgressCallback *callback);
 GP_Context *GP_LoadPNG(const char *src_path, GP_ProgressCallback *callback);
 
 /*
- * Loads png meta-data.
+ * Loads PNG meta-data.
  */
-int GP_ReadPNGMetaData(FILE *f, GP_MetaData *data);
+int GP_ReadPNGMetaData(GP_IO *io, GP_MetaData *data);
 int GP_LoadPNGMetaData(const char *src_path, GP_MetaData *data);
 
 /*
