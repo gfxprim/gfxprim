@@ -75,7 +75,7 @@ Macros to mix two pixels accordingly to percentage.
 
 #define GP_MIX_PIXELS_{{ pt.name }}(pix1, pix2, perc) \
 %%   if pt.is_rgb()
-	GP_MIX_PIXELS_GAMMA_{{ pt.name }}(pix1, pix2, perc)
+	GP_MIX_PIXELS_LINEAR_{{ pt.name }}(pix1, pix2, perc)
 %%   else
 	GP_MIX_PIXELS_LINEAR_{{ pt.name }}(pix1, pix2, perc)
 %%   endif
