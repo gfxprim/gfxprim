@@ -16,7 +16,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2013 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2014 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
@@ -26,6 +26,7 @@
 
 %% block body
 
+#include <string.h>
 #include <errno.h>
 
 #include "core/GP_Context.h"
@@ -36,75 +37,32 @@
 
 #include "GP_Resize.h"
 
-/*
- * Sample row.
- *
- * The x and y are starting coordinates in source image.
- *
- * The xpix_dist is distance of two sampled pixels in source image coordinates.
- *
- * The xoff is offset of the first pixel.
- */
-%%- macro sample_x(pt, suff)
-{
-		uint32_t mx = x0;
-		uint32_t i;
+%%- macro fetch_row(pt, src, y, suff)
+		{
+			unsigned int x;
 
-		pix = GP_GetPixel_Raw_{{ pt.pixelsize.suffix }}(src, mx, y0);
-
-		%% for c in pt.chanslist
-		{{ c[0] }}{{ suff }} = (GP_Pixel_GET_{{ c[0] }}_{{ pt.name }}(pix) * xoff[x]) >> 9;
-		%% endfor
-
-		for (i = (1<<14) - xoff[x]; i > xpix_dist; i -= xpix_dist) {
-			if (mx < src->w - 1)
-				mx++;
-
-			pix = GP_GetPixel_Raw_{{ pt.pixelsize.suffix }}(src, mx, y0);
-
-			%% for c in pt.chanslist
-			{{ c[0] }}{{ suff }} += (GP_Pixel_GET_{{ c[0] }}_{{ pt.name }}(pix) * xpix_dist) >> 9;
-			%% endfor
-		}
-
-		if (i > 0) {
-			if (mx < src->w - 1)
-				mx++;
-
-			pix = GP_GetPixel_Raw_{{ pt.pixelsize.suffix }}(src, mx, y0);
-
-			%% for c in pt.chanslist
-			{{ c[0] }}{{ suff }} += (GP_Pixel_GET_{{ c[0] }}_{{ pt.name }}(pix) * i) >> 9;
-			%% endfor
-		}
+			for (x = 0; x < src->w; x++) {
+				GP_Pixel pix = GP_GetPixel_Raw_{{ pt.pixelsize.suffix }}({{ src }}, x, {{ y }});
+%%  for c in pt.chanslist
+				{{ c.name }}{{ suff }}[x] = GP_Pixel_GET_{{ c.name }}_{{ pt.name }}(pix);
+%%  endfor
+			}
 		}
 %% endmacro
 
+#define SUM(COL, COLD, MUL) \
+			COLD[x] += (COL[xmap[x]] * (MULT - xoff[x]) * (MUL)) / MULT;\
+\
+			for (j = xmap[x]+1; j < xmap[x+1]; j++) { \
+				COLD[x] += (COL[j] * (MUL)); \
+			} \
+\
+			if (xoff[x+1]) \
+				COLD[x] += (COL[xmap[x+1]] * xoff[x+1] * (MUL)) / MULT;
+
 %% for pt in pixeltypes
 %%  if not pt.is_unknown() and not pt.is_palette()
-/*
- * Linear interpolation with low-pass filtering, used for fast downscaling
- * on both x and y.
- *
- * Basically we do weighted arithmetic mean of the pixels:
- *
- * [x, y],    [x + 1, y], [x + 2, y] ... [x + k, y]
- * [x, y + 1]
- * [x, y + 2]                            .
- * .                      .              .
- * .                          .          .
- * .                              .
- * [x, y + l]        ....                [x + k, y + l]
- *
- *
- * The parameter k respectively l is determined by the distance between
- * sampled coordinates on x respectively y.
- *
- * The pixels are weighted by how much they are 'hit' by the rectangle defined
- * by the sampled pixel.
- *
- * The implementation is inspired by imlib2 downscaling algorithm.
- */
+
 static int resize_lin_lf_{{ pt.name }}(const GP_Context *src, GP_Context *dst,
                                        GP_ProgressCallback *callback)
 {
@@ -114,78 +72,70 @@ static int resize_lin_lf_{{ pt.name }}(const GP_Context *src, GP_Context *dst,
 	uint16_t yoff[dst->h + 1];
 	uint32_t x, y;
 	uint32_t i, j;
-	GP_Pixel pix;
-
+{# Reduce fixed point bits for > 8 bits per channel (fixed 16 bit Grayscale) #}
+%%   if pt.chanslist[0].size > 8
+	const int MULT=256;
+%%   else
+	const int MULT=1024;
+%%   endif
 	/* Pre-compute mapping for interpolation */
-	uint32_t xstep = ((src->w - 1) << 16) / (dst->w - 1);
-	uint32_t xpix_dist = ((dst->w - 1) << 14) / (src->w - 1);
-
-	for (i = 0; i < dst->w + 1; i++) {
-		uint32_t val = i * xstep;
-		xmap[i] = val >> 16;
-		xoff[i] = ((255 - ((val >> 8) & 0xff)) * xpix_dist)>>8;
+	for (i = 0; i <= dst->w; i++) {
+		xmap[i] = (i * src->w) / dst->w;
+		xoff[i] = (MULT * (i * src->w))/dst->w - MULT * xmap[i];
 	}
 
-	uint32_t ystep = ((src->h - 1) << 16) / (dst->h - 1);
-	uint32_t ypix_dist = ((dst->h - 1) << 14) / (src->h - 1);
-
-	for (i = 0; i < dst->h + 1; i++) {
-		uint32_t val = i * ystep;
-		ymap[i] = val >> 16;
-		yoff[i] = ((255 - ((val >> 8) & 0xff)) * ypix_dist)>>8;
+	for (i = 0; i <= dst->h; i++) {
+		ymap[i] = (i * src->h) / dst->h;
+		yoff[i] = (MULT * (i * src->h))/dst->h - MULT * ymap[i];
 	}
 
-	/* Interpolate */
+	/* Compute pixel area for the final normalization */
+	uint32_t div = (xmap[1] * MULT + xoff[1]) * (ymap[1] * MULT + yoff[1]) / MULT;
+
 	for (y = 0; y < dst->h; y++) {
+%%   for c in pt.chanslist
+		uint32_t {{ c.name }}[src->w];
+		uint32_t {{ c.name }}_res[src->w];
+%%   endfor
+
+%%   for c in pt.chanslist
+		memset({{ c.name }}_res, 0, sizeof({{ c.name }}_res));
+%%   endfor
+
+		/* Sum first row */
+		{{ fetch_row(pt, 'src', 'ymap[y]', '') }}
 		for (x = 0; x < dst->w; x++) {
-			%% for c in pt.chanslist
-			uint32_t {{ c[0] }}, {{ c[0] }}1;
-			%% endfor
+%%   for c in pt.chanslist
+			SUM({{ c.name }}, {{ c.name }}_res, MULT-yoff[y]);
+%%   endfor
+		}
 
-			uint32_t x0, y0;
-
-			x0 = xmap[x];
-			y0 = ymap[y];
-
-			{{ sample_x(pt, '') }}
-
-			%% for c in pt.chanslist
-			{{ c[0] }} = ({{ c[0] }} * yoff[y]) >> 14;
-			%% endfor
-
-			for (j = (1<<14) - yoff[y]; j > ypix_dist; j -= ypix_dist) {
-
-				x0 = xmap[x];
-
-				if (y0 < src->h - 1)
-					y0++;
-
-				{{ sample_x(pt, '1') }}
-
-				%% for c in pt.chanslist
-				{{ c[0] }} += ({{ c[0] }}1 * ypix_dist) >> 14;
-				%% endfor
+		/* Sum middle */
+		for (i = ymap[y]+1; i < ymap[y+1]; i++) {
+			{{ fetch_row(pt, 'src', 'i', '') }}
+			for (x = 0; x < dst->w; x++) {
+%%   for c in pt.chanslist
+				SUM({{ c.name }}, {{ c.name }}_res, MULT);
+%%   endfor
 			}
+		}
 
-			if (j > 0) {
-				x0 = xmap[x];
-
-				if (y0 < src->h - 1)
-					y0++;
-
-				{{ sample_x(pt, '1') }}
-
-				%% for c in pt.chanslist
-				{{ c[0] }} += ({{ c[0] }}1 * j) >> 14;
-				%% endfor
+		/* Sum last row */
+		if (yoff[y+1]) {
+			{{ fetch_row(pt, 'src', 'ymap[y+1]', '') }}
+			for (x = 0; x < dst->w; x++) {
+%%   for c in pt.chanslist
+				SUM({{ c.name }}, {{ c.name }}_res, yoff[y+1]);
+%%   endfor
 			}
+		}
 
-			%% for c in pt.chanslist
-			{{ c[0] }} = ({{ c[0] }} + (1<<4))>>5;
-			%% endfor
-
-			GP_PutPixel_Raw_{{ pt.pixelsize.suffix }}(dst, x, y,
-			                      GP_Pixel_CREATE_{{ pt.name }}({{ expand_chanslist(pt, "") }}));
+		for (x = 0; x < dst->w; x++) {
+%%   for c in pt.chanslist
+			uint32_t {{ c.name }}_p = ({{ c.name }}_res[x] + div/2) / div;
+%%   endfor
+                        GP_PutPixel_Raw_{{ pt.pixelsize.suffix }}(dst, x, y,
+				GP_Pixel_CREATE_{{ pt.name }}({{ expand_chanslist(pt, '', '_p') }}));
 		}
 
 		if (GP_ProgressCallbackReport(callback, y, dst->h, dst->w))
@@ -195,6 +145,7 @@ static int resize_lin_lf_{{ pt.name }}(const GP_Context *src, GP_Context *dst,
 	GP_ProgressCallbackDone(callback);
 	return 0;
 }
+
 %%  endif
 %% endfor
 
@@ -228,7 +179,7 @@ static int resize_lin{{ pt.name }}(const GP_Context *src, GP_Context *dst,
 	for (i = 0; i < dst->h + 1; i++) {
 		uint32_t val = i * ystep;
 		ymap[i] = val >> 16;
-		yoff[i] = (val >> 8) & 0xff; 
+		yoff[i] = (val >> 8) & 0xff;
 	}
 
 	/* Interpolate */
@@ -296,13 +247,13 @@ static int resize_lin(const GP_Context *src, GP_Context *dst,
                      GP_ProgressCallback *callback)
 {
 	switch (src->pixel_type) {
-	%% for pt in pixeltypes
-	%%  if not pt.is_unknown() and not pt.is_palette()
+%% for pt in pixeltypes
+%%  if not pt.is_unknown() and not pt.is_palette()
 	case GP_PIXEL_{{ pt.name }}:
 		return resize_lin{{ pt.name }}(src, dst, callback);
 	break;
-	%%  endif
-	%% endfor
+%%  endif
+%% endfor
 	default:
 		GP_WARN("Invalid pixel type %s",
 		        GP_PixelTypeName(src->pixel_type));
@@ -323,7 +274,7 @@ int GP_FilterResizeLinearInt(const GP_Context *src, GP_Context *dst,
 	return resize_lin(src, dst, callback);
 }
 
-static int resize_lin_lf2(const GP_Context *src, GP_Context *dst,
+static int resize_lin_lf(const GP_Context *src, GP_Context *dst,
                           GP_ProgressCallback *callback)
 {
 	float x_rat = 1.00 * dst->w / src->w;
@@ -335,14 +286,17 @@ static int resize_lin_lf2(const GP_Context *src, GP_Context *dst,
 	                     src->w, src->h, dst->w, dst->h, x_rat, y_rat);
 
 		switch (src->pixel_type) {
-		%% for pt in pixeltypes
-		%%  if not pt.is_unknown() and not pt.is_palette()
+%% for pt in pixeltypes
+%%  if not pt.is_unknown() and not pt.is_palette()
 		case GP_PIXEL_{{ pt.name }}:
 			return resize_lin_lf_{{ pt.name }}(src, dst, callback);
 		break;
-		%%  endif
-		%% endfor
+%%  endif
+%% endfor
 		default:
+			GP_WARN("Invalid pixel type %s",
+			        GP_PixelTypeName(src->pixel_type));
+			errno = EINVAL;
 			return -1;
 		}
 	}
@@ -362,7 +316,7 @@ int GP_FilterResizeLinearLFInt(const GP_Context *src, GP_Context *dst,
 		return 1;
 	}
 
-	return resize_lin_lf2(src, dst, callback);
+	return resize_lin_lf(src, dst, callback);
 }
 
 %% endblock body
