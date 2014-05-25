@@ -196,9 +196,25 @@ This object represents pixel type which describes the sizes and arrangements of
 channels in a pixel. Note that it carries an instance of pixel size described
 above.
 
-The chanslist is a list of triplets describing individual channels as
-[('chan_name', 'bit_offset', 'bit_size') ] where 'chan_name' is usually one of
-R, G, B, V (value, used for grayscale), A (opacity).
+[source,python]
+-------------------------------------------------------------------------------
+class PixelChannel():
+    # Index (position in pixel from left)
+    self.idx = idx
+    # Pixel channel name such as R, G, B, A, ...
+    self.name = name
+    # Bit offset in pixel
+    self.off = offset
+    # Channel bit size
+    self.size = size
+    # Maximal channel value
+    self.max = 2 ** size - 1
+    ...
+-------------------------------------------------------------------------------
+
+The chanslist describes pixel channel. There are some convenient members to be
+used directly from C code whose value is a hexadecimal string, i.e. 'C_mask',
+'C_max', 'C_shift'.
 
 Templating language
 ~~~~~~~~~~~~~~~~~~~
