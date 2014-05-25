@@ -50,17 +50,20 @@
 			for (x = 0; x < dst->w; x++) {
 				/* Get first left pixel */
 %%  for c in pt.chanslist
-				{{ c.name }}_res[x] += {{ c.name }}[xmap[x]] * (MULT - xoff[x]) * {{ mult }} / MULT;
+				uint32_t {{ c.name }}_tmp = {{ c.name }}[xmap[x]] * (MULT - xoff[x]) / DIV;
 %%  endfor
 				/* Sum middle pixels */
 				for (j = xmap[x]+1; j < xmap[x+1]; j++) {
 %%  for c in pt.chanslist
-					{{ c.name }}_res[x] += {{ c.name }}[j] * {{ mult }};
+					{{ c.name }}_tmp += {{ c.name }}[j] * MULT / DIV;
 %%  endfor
 				}
 				/* Add last right pixel */
 %%  for c in pt.chanslist
-				{{ c.name }}_res[x] += {{ c.name }}[xmap[x+1]] * xoff[x+1] * {{ mult }} / MULT;
+				{{ c.name }}_tmp += {{ c.name }}[xmap[x+1]] * xoff[x+1] / DIV;
+%%  endfor
+%%  for c in pt.chanslist
+				{{ c.name }}_res[x] += {{ c.name }}_tmp * {{ mult }} / DIV;
 %%  endfor
 			}
 %% endmacro
@@ -73,8 +76,8 @@ static int resize_lin_lf_{{ pt.name }}(const GP_Context *src, GP_Context *dst,
 {
 	uint32_t xmap[dst->w + 1];
 	uint32_t ymap[dst->h + 1];
-	uint16_t xoff[dst->w + 1];
-	uint16_t yoff[dst->h + 1];
+	uint32_t xoff[dst->w + 1];
+	uint32_t yoff[dst->h + 1];
 %%   for c in pt.chanslist
 	uint32_t {{ c.name }}[src->w];
 %%   endfor
@@ -82,23 +85,26 @@ static int resize_lin_lf_{{ pt.name }}(const GP_Context *src, GP_Context *dst,
 	uint32_t i, j;
 {# Reduce fixed point bits for > 8 bits per channel (fixed 16 bit Grayscale) #}
 %%   if pt.chanslist[0].size > 8
-	const int MULT=256;
+	const int MULT=1<<10;
+	const int DIV=1<<6;
 %%   else
-	const int MULT=1024;
+	const int MULT=1<<14;
+	const int DIV=1<<9;
 %%   endif
+
 	/* Pre-compute mapping for interpolation */
 	for (i = 0; i <= dst->w; i++) {
-		xmap[i] = (i * src->w) / dst->w;
-		xoff[i] = (MULT * (i * src->w))/dst->w - MULT * xmap[i];
+		xmap[i] = ((uint64_t)i * src->w) / dst->w;
+		xoff[i] = ((uint64_t)MULT * (i * src->w))/dst->w - MULT * xmap[i];
 	}
 
 	for (i = 0; i <= dst->h; i++) {
-		ymap[i] = (i * src->h) / dst->h;
-		yoff[i] = (MULT * (i * src->h))/dst->h - MULT * ymap[i];
+		ymap[i] = ((uint64_t)i * src->h) / dst->h;
+		yoff[i] = ((uint64_t)MULT * (i * src->h))/dst->h - MULT * ymap[i];
 	}
 
 	/* Compute pixel area for the final normalization */
-	uint32_t div = (xmap[1] * MULT + xoff[1]) * (ymap[1] * MULT + yoff[1]) / MULT;
+	uint32_t div = (((uint64_t)(xmap[1] * MULT + xoff[1]) * ((uint64_t)ymap[1] * MULT + yoff[1]) + DIV/2) / DIV + DIV/2)/DIV;
 
 	/* Prefetch first row */
 	{{ fetch_rows(pt, 0) }}
