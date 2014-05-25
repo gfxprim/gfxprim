@@ -37,28 +37,33 @@
 
 #include "GP_Resize.h"
 
-%%- macro fetch_row(pt, src, y, suff)
-		{
-			unsigned int x;
-
+%%- macro fetch_rows(pt, y)
 			for (x = 0; x < src->w; x++) {
-				GP_Pixel pix = GP_GetPixel_Raw_{{ pt.pixelsize.suffix }}({{ src }}, x, {{ y }});
+				GP_Pixel pix = GP_GetPixel_Raw_{{ pt.pixelsize.suffix }}(src, x, {{ y }});
 %%  for c in pt.chanslist
-				{{ c.name }}{{ suff }}[x] = GP_Pixel_GET_{{ c.name }}_{{ pt.name }}(pix);
+				{{ c.name }}[x] = GP_Pixel_GET_{{ c.name }}_{{ pt.name }}(pix);
 %%  endfor
 			}
-		}
 %% endmacro
 
-#define SUM(COL, COLD, MUL) \
-			COLD[x] += (COL[xmap[x]] * (MULT - xoff[x]) * (MUL)) / MULT;\
-\
-			for (j = xmap[x]+1; j < xmap[x+1]; j++) { \
-				COLD[x] += (COL[j] * (MUL)); \
-			} \
-\
-			if (xoff[x+1]) \
-				COLD[x] += (COL[xmap[x+1]] * xoff[x+1] * (MUL)) / MULT;
+%%- macro sum_rows(pt, mult)
+			for (x = 0; x < dst->w; x++) {
+				/* Get first left pixel */
+%%  for c in pt.chanslist
+				{{ c.name }}_res[x] += {{ c.name }}[xmap[x]] * (MULT - xoff[x]) * {{ mult }} / MULT;
+%%  endfor
+				/* Sum middle pixels */
+				for (j = xmap[x]+1; j < xmap[x+1]; j++) {
+%%  for c in pt.chanslist
+					{{ c.name }}_res[x] += {{ c.name }}[j] * {{ mult }};
+%%  endfor
+				}
+				/* Add last right pixel */
+%%  for c in pt.chanslist
+				{{ c.name }}_res[x] += {{ c.name }}[xmap[x+1]] * xoff[x+1] * {{ mult }} / MULT;
+%%  endfor
+			}
+%% endmacro
 
 %% for pt in pixeltypes
 %%  if not pt.is_unknown() and not pt.is_palette()
@@ -70,6 +75,9 @@ static int resize_lin_lf_{{ pt.name }}(const GP_Context *src, GP_Context *dst,
 	uint32_t ymap[dst->h + 1];
 	uint16_t xoff[dst->w + 1];
 	uint16_t yoff[dst->h + 1];
+%%   for c in pt.chanslist
+	uint32_t {{ c.name }}[src->w];
+%%   endfor
 	uint32_t x, y;
 	uint32_t i, j;
 {# Reduce fixed point bits for > 8 bits per channel (fixed 16 bit Grayscale) #}
@@ -92,10 +100,12 @@ static int resize_lin_lf_{{ pt.name }}(const GP_Context *src, GP_Context *dst,
 	/* Compute pixel area for the final normalization */
 	uint32_t div = (xmap[1] * MULT + xoff[1]) * (ymap[1] * MULT + yoff[1]) / MULT;
 
+	/* Prefetch first row */
+	{{ fetch_rows(pt, 0) }}
+
 	for (y = 0; y < dst->h; y++) {
 %%   for c in pt.chanslist
-		uint32_t {{ c.name }}[src->w];
-		uint32_t {{ c.name }}_res[src->w];
+		uint32_t {{ c.name }}_res[dst->w];
 %%   endfor
 
 %%   for c in pt.chanslist
@@ -103,31 +113,18 @@ static int resize_lin_lf_{{ pt.name }}(const GP_Context *src, GP_Context *dst,
 %%   endfor
 
 		/* Sum first row */
-		{{ fetch_row(pt, 'src', 'ymap[y]', '') }}
-		for (x = 0; x < dst->w; x++) {
-%%   for c in pt.chanslist
-			SUM({{ c.name }}, {{ c.name }}_res, MULT-yoff[y]);
-%%   endfor
-		}
+		{{ sum_rows(pt, '(MULT-yoff[y])') }}
 
 		/* Sum middle */
 		for (i = ymap[y]+1; i < ymap[y+1]; i++) {
-			{{ fetch_row(pt, 'src', 'i', '') }}
-			for (x = 0; x < dst->w; x++) {
-%%   for c in pt.chanslist
-				SUM({{ c.name }}, {{ c.name }}_res, MULT);
-%%   endfor
-			}
+			{{ fetch_rows(pt, 'i') }}
+			{{ sum_rows(pt, 'MULT') }}
 		}
 
 		/* Sum last row */
 		if (yoff[y+1]) {
-			{{ fetch_row(pt, 'src', 'ymap[y+1]', '') }}
-			for (x = 0; x < dst->w; x++) {
-%%   for c in pt.chanslist
-				SUM({{ c.name }}, {{ c.name }}_res, yoff[y+1]);
-%%   endfor
-			}
+			{{ fetch_rows(pt, 'ymap[y+1]') }}
+			{{ sum_rows(pt, 'yoff[y+1]') }}
 		}
 
 		for (x = 0; x < dst->w; x++) {
