@@ -1,0 +1,9 @@
+Qt (PySide)
+-----------
+A simple program that shows how to combine Qt (link:http://pyside.org[PySide])
+with GFXprim in python.
+
+[source,python]
+------------------------------------------------------------------
+include::../demos/py_simple/gfxprim_qt.py[]
+------------------------------------------------------------------
