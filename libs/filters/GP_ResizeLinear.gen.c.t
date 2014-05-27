@@ -50,20 +50,20 @@
 			for (x = 0; x < dst->w; x++) {
 				/* Get first left pixel */
 %%  for c in pt.chanslist
-				uint32_t {{ c.name }}_tmp = {{ c.name }}[xmap[x]] * (MULT - xoff[x]) / DIV;
+				uint32_t {{ c.name }}_middle = 0;
+				uint32_t {{ c.name }}_first = {{ c.name }}[xmap[x]] * (MULT - xoff[x]);
 %%  endfor
 				/* Sum middle pixels */
 				for (j = xmap[x]+1; j < xmap[x+1]; j++) {
 %%  for c in pt.chanslist
-					{{ c.name }}_tmp += {{ c.name }}[j] * MULT / DIV;
+					{{ c.name }}_middle += {{ c.name }}[j];
 %%  endfor
 				}
-				/* Add last right pixel */
+				/* Add it all together with last pixel on the right */
 %%  for c in pt.chanslist
-				{{ c.name }}_tmp += {{ c.name }}[xmap[x+1]] * xoff[x+1] / DIV;
-%%  endfor
-%%  for c in pt.chanslist
-				{{ c.name }}_res[x] += {{ c.name }}_tmp * {{ mult }} / DIV;
+				{{ c.name }}_res[x] += ({{ c.name }}_middle * (MULT / DIV) +
+				                        ({{ c.name }}[xmap[x+1]] * xoff[x+1] +
+				                         {{ c.name }}_first) / DIV) * {{ mult }} / DIV;
 %%  endfor
 			}
 %% endmacro
