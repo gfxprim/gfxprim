@@ -156,6 +156,11 @@ def _init(module):
     "Convert RGBA8888 (values 0-255) to context pixel type."
     return c_core.GP_RGBAToPixel(int(r), int(g), int(b), int(a), self.pixel_type)
 
+  @extend(_context)
+  def Fill(self, pixel):
+    "Fills context with given pixel value."
+    return c_core.GP_Fill(self, pixel)
+
   # Handle submodule methods such as context.gfx.Line(...)
   _available_submodules = frozenset(['gfx', 'loaders', 'text', 'filters'])
 
@@ -201,7 +206,8 @@ def _init(module):
         '^GP_PixelRGB.*$', # ...Lookup and ...Match
         '^GP_PixelToRGB.*$', # Needs love
         '^GP_RGB.*$', # Needs filtering
-        ])
+        '^GP_Fill',
+	])
 
   module['Convert'] = c_core.GP_ContextConvertAlloc
 

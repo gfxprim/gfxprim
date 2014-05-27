@@ -36,12 +36,16 @@ def _init(module):
   import_members(c_gfx, C, include=const_regexes, sub=strip_GP)
 
   for name in [
-      'ArcSegment', 'Circle', 'Ellipse', 'Fill', 'FillCircle', 'FillEllipse',
+      'ArcSegment', 'Circle', 'Ellipse', 'FillCircle', 'FillEllipse',
       'FillRect', 'FillRect_AA', 'FillRing',
       'FillTetragon', 'FillTriangle', 'HLine', 'HLineAA', 'Line', 'LineAA',
       'PutPixelAA', 'Rect', 'Ring', 'Tetragon',
       'Triangle', 'VLine', 'VLineAA']:
     extend_submodule(GfxSubmodule, name, c_gfx.__getattribute__('GP_' + name))
+
+  @extend(GfxSubmodule)
+  def Fill(self, color):
+      self.ctx.Fill(color)
 
   def flatten_coords(points):
     "Helper for Polygon and FillPolygon coordinates"
