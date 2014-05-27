@@ -202,6 +202,9 @@ image::images/fonts/font_tiny_mono.png["Font Tiny Mono"]
 .Font Tiny (GP_FontTiny)
 image::images/fonts/font_tiny.png["Font Tiny"]
 
+.Font C64 (GP_FontC64)
+image::images/fonts/font_c64.png["Font C64"]
+
 TrueType Fonts
 ~~~~~~~~~~~~~~
 
