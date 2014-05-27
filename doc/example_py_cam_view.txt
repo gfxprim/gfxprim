@@ -1,0 +1,8 @@
+Camera Viewer
+-------------
+A simple program that shows video from camera (V4L2 device)
+
+[source,python]
+------------------------------------------------------------------
+include::../demos/py_simple/cam_view.py[]
+------------------------------------------------------------------

@@ -1,0 +1,8 @@
+Font Style
+----------
+A simple example that shows drawing with compiled in bitmap fonts.
+
+[source,python]
+------------------------------------------------------------------
+include::../demos/py_simple/font_style.py[]
+------------------------------------------------------------------
