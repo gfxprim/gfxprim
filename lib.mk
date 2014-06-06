@@ -11,8 +11,8 @@ ifeq ($(BUILDLIB),yes)
 # Rules for single library, applied only when objects
 # are not linked to the libgfxprim.so. This generates libgfxprim_$(LIBNAME).
 #
-
 include $(TOPDIR)/libver.mk
+include $(TOPDIR)/config.mk
 
 LIB_NAME=libgfxprim-$(LIBNAME)
 BUILD_DIR=$(TOPDIR)/build/
@@ -36,11 +36,11 @@ OBJS=$(CSOURCES:.c=.o)
 $(BUILD_DIR)$(DYNAMIC_LIB): $(OBJS)
 ifdef VERBOSE
 	rm -f $@
-	$(CC) -fPIC --shared -Wl,-soname -Wl,$(SONAME) $^ -o $@
+	$(CC) -fPIC --shared -Wl,-soname -Wl,$(SONAME) $(LDLIBS_$(LIBNAME)) $^ -o $@
 else
 	@rm -f $(@)
 	@echo "LD   $@"
-	@$(CC) -fPIC --shared -Wl,-soname -Wl,$(SONAME) $^ -o $@
+	@$(CC) -fPIC --shared -Wl,-soname -Wl,$(SONAME) $(LDLIBS_$(LIBNAME)) $^ -o $@
 endif
 
 $(BUILD_DIR)$(STATIC_LIB): $(OBJS)
@@ -66,8 +66,6 @@ else
 # If we are not executed from the top Makefile, trigger
 # libGP.so rebuild.
 #
-include $(TOPDIR)/config.mk
-
 ifndef TOP_MAKE
 ALL+=rebuild_lib
 

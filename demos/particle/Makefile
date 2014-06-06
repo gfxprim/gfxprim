@@ -4,7 +4,7 @@ CSOURCES=$(shell echo *.c)
 
 INCLUDE=
 LDFLAGS+=-L$(TOPDIR)/build/
-LDLIBS+=-lrt `$(TOPDIR)/gfxprim-config --libs --libs-backends`
+LDLIBS+=-lrt -lm -lgfxprim-backends
 
 APPS=particle_demo
 

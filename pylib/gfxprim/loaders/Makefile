@@ -4,7 +4,7 @@ INCLUDE=core
 
 include $(TOPDIR)/pre.mk
 
-LDLIBS+=$(LDLIBS_LOADERS)
+LDLIBS+=-lgfxprim-loaders
 
 include $(TOPDIR)/pywrap.mk
 include $(TOPDIR)/post.mk

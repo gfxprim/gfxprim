@@ -35,10 +35,10 @@ $(SWIG_C): ../common.i
 
 $(SWIG_LIB): $(SWIG_C)
 ifdef VERBOSE
-	$(CC) $< $(CFLAGS) -D_GNU_SOURCE=1 $(LDFLAGS) $(PYTHON_INCLUDE) --shared $(LDLIBS) $(LDLIBS_GP) -L$(TOPDIR)/build/ -o $@
+	$(CC) $< $(CFLAGS) -D_GNU_SOURCE=1 $(LDFLAGS) $(PYTHON_INCLUDE) --shared $(LDLIBS) -lgfxprim -L$(TOPDIR)/build/ -o $@
 else # VERBOSE
 	@echo "LD   $@"
-	@$(CC) $< $(CFLAGS) -D_GNU_SOURCE=1 $(LDFLAGS) $(PYTHON_INCLUDE) --shared $(LDLIBS) $(LDLIBS_GP) -L$(TOPDIR)/build/ -o $@
+	@$(CC) $< $(CFLAGS) -D_GNU_SOURCE=1 $(LDFLAGS) $(PYTHON_INCLUDE) --shared $(LDLIBS) -lgfxprim -L$(TOPDIR)/build/ -o $@
 endif # VERBOSE
 
 # Install python libraries into right places

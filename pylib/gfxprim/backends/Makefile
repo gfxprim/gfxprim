@@ -4,7 +4,7 @@ INCLUDE=core
 
 include $(TOPDIR)/pre.mk
 
-LDLIBS+=$(LDLIBS_BACKENDS)
+LDLIBS+=-lgfxprim-backends
 
 INSTALL_FILES+=_extend_backend.py
 

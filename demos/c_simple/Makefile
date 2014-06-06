@@ -1,5 +1,4 @@
 TOPDIR=../..
-
 include $(TOPDIR)/pre.mk
 
 SOURCES=$(shell echo *.c)
@@ -24,39 +23,39 @@ APPS=backend_example loaders_example loaders filters_symmetry gfx_koch\
 ifeq ($(HAVE_LIBSDL),yes)
 APPS+=SDL_glue
 
-SDL_glue: LDLIBS+=$(LDLIBS_BACKENDS)
+SDL_glue: LDLIBS+=$(shell sdl-config --libs) -lgfxprim-backends
 endif
 
-showimage: LDLIBS+=$(LDLIBS_BACKENDS) $(LDLIBS_LOADERS)
-backend_example: LDLIBS+=$(LDLIBS_BACKENDS)
-backend_timers_example: LDLIBS+=$(LDLIBS_BACKENDS)
-virtual_backend_example: LDLIBS+=$(LDLIBS_BACKENDS)
-loaders_example: LDLIBS+=$(LDLIBS_LOADERS)
-loaders: LDLIBS+=$(LDLIBS_LOADERS)
-tmp_file: LDLIBS+=$(LDLIBS_LOADERS)
-filters_symmetry: LDLIBS+=$(LDLIBS_LOADERS)
-gfx_koch: LDLIBS+=$(LDLIBS_LOADERS)
-meta_data: LDLIBS+=$(LDLIBS_LOADERS)
-meta_data_dump: LDLIBS+=$(LDLIBS_LOADERS)
-v4l2_show: LDLIBS+=$(LDLIBS_GRABBERS) $(LDLIBS_BACKENDS)
-v4l2_grab: LDLIBS+=$(LDLIBS_GRABBERS) $(LDLIBS_LOADERS)
-convolution: LDLIBS+=$(LDLIBS_LOADERS)
-weighted_median: LDLIBS+=$(LDLIBS_LOADERS)
-shapetest: LDLIBS+=$(LDLIBS_BACKENDS)
-koch: LDLIBS+=$(LDLIBS_BACKENDS)
-input_example: LDLIBS+=$(LDLIBS_BACKENDS)
-fileview: LDLIBS+=$(LDLIBS_BACKENDS)
-linetest: LDLIBS+=$(LDLIBS_BACKENDS)
-randomshapetest: LDLIBS+=$(LDLIBS_BACKENDS)
-fonttest: LDLIBS+=$(LDLIBS_BACKENDS)
-textaligntest: LDLIBS+=$(LDLIBS_BACKENDS)
-loaders_register: LDLIBS+=$(LDLIBS_LOADERS)
-gaussian_noise: LDLIBS+=$(LDLIBS_LOADERS)
-blittest: LDLIBS+=$(LDLIBS_BACKENDS) $(LDLIBS_LOADERS)
-sin_AA: LDLIBS+=$(LDLIBS_BACKENDS)
-x11_windows: LDLIBS+=$(LDLIBS_BACKENDS)
-zip_container: LDLIBS+=$(LDLIBS_LOADERS) $(LDLIBS_BACKENDS)
-memory_io: LDLIBS+=$(LDLIBS_BACKENDS) $(LDLIBS_LOADERS)
+showimage: LDLIBS+=-lgfxprim-backends -lgfxprim-loaders
+backend_example: LDLIBS+=-lgfxprim-backends
+backend_timers_example: LDLIBS+=-lgfxprim-backends
+virtual_backend_example: LDLIBS+=-lgfxprim-backends -lm
+loaders_example: LDLIBS+=-lgfxprim-loaders
+loaders: LDLIBS+=-lgfxprim-loaders
+tmp_file: LDLIBS+=-lgfxprim-loaders
+filters_symmetry: LDLIBS+=-lgfxprim-loaders
+gfx_koch: LDLIBS+=-lgfxprim-loaders -lm
+meta_data: LDLIBS+=-lgfxprim-loaders
+meta_data_dump: LDLIBS+=-lgfxprim-loaders
+v4l2_show: LDLIBS+=-lgfxprim-grabbers -lgfxprim-backends
+v4l2_grab: LDLIBS+=-lgfxprim-grabbers -lgfxprim-loaders
+convolution: LDLIBS+=-lgfxprim-loaders
+weighted_median: LDLIBS+=-lgfxprim-loaders
+shapetest: LDLIBS+=-lgfxprim-backends
+koch: LDLIBS+=-lgfxprim-backends -lm
+input_example: LDLIBS+=-lgfxprim-backends
+fileview: LDLIBS+=-lgfxprim-backends
+linetest: LDLIBS+=-lgfxprim-backends -lm
+randomshapetest: LDLIBS+=-lgfxprim-backends
+fonttest: LDLIBS+=-lgfxprim-backends
+textaligntest: LDLIBS+=-lgfxprim-backends
+loaders_register: LDLIBS+=-lgfxprim-loaders
+gaussian_noise: LDLIBS+=-lgfxprim-loaders
+blittest: LDLIBS+=-lgfxprim-backends -lgfxprim-loaders
+sin_AA: LDLIBS+=-lgfxprim-backends -lm
+x11_windows: LDLIBS+=-lgfxprim-backends
+zip_container: LDLIBS+=-lgfxprim-loaders -lgfxprim-backends
+memory_io: LDLIBS+=-lgfxprim-backends -lgfxprim-loaders
 
 include $(TOPDIR)/app.mk
 include $(TOPDIR)/post.mk
