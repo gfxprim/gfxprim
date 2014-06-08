@@ -20,7 +20,7 @@ HOMEPAGE="http://gfxprim.ucw.cz/"
 
 LICENSE="LGPL-2.1+"
 SLOT="0"
-IUSE="jpeg png gif tiff jpeg2k freetype X sdl aalib python"
+IUSE="jpeg png gif tiff jpeg2k freetype X sdl aalib python doc"
 
 RDEPEND="jpeg? ( virtual/jpeg )
 	png? ( media-libs/libpng )
@@ -31,6 +31,8 @@ RDEPEND="jpeg? ( virtual/jpeg )
 	X? ( x11-libs/libX11 )
 	sdl? ( media-libs/libsdl )
 	aalib? ( media-libs/aalib )
+	doc? ( app-text/asciidoc dev-util/source-highlight media-gfx/graphviz
+	       app-text/dvipng virtual/latex-base )
 "
 
 DEPEND="$RDEPEND
@@ -39,7 +41,7 @@ DEPEND="$RDEPEND
 "
 
 src_prepare() {
-	if [ "${PV}" != 9999 ]; then
+	if [ "${PV}" == "1.0.0_rc1" ]; then
 		epatch ${FILESDIR}/configure-more-compatible-with-autoconf.patch
 	fi
 }
@@ -57,4 +59,14 @@ src_configure() {
 	use !python && conf="${conf} --PYTHON_CONFIG=''"
 
 	econf ${conf}
+}
+
+src_compile() {
+	default
+	use doc && cd doc && emake
+}
+
+src_install() {
+	default
+	use doc && cd doc && emake DESTDIR="${D}" install
 }
