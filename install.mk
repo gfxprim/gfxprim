@@ -1,13 +1,13 @@
-ifdef DESTDIR
-BIN_DIR=$(DESTDIR)/$(bindir)
-else
-BIN_DIR=$(bindir)
-endif
+include $(TOPDIR)/libver.mk
 
 ifdef DESTDIR
+BIN_DIR=$(DESTDIR)/$(bindir)
 MAN_DIR=$(DESTDIR)/$(mandir)/man1
+DOC_DIR=$(DESTDIR)/$(docdir)/libgfxprim-$(LIB_VERSION)
 else
 MAN_DIR=$(mandir)/man1
+BIN_DIR=$(bindir)
+DOC_DIR=$(docdir)/libgfxprim-$(LIB_MAJOR)-$(LIB_MINOR)
 endif
 
 install:
@@ -30,5 +30,16 @@ else
 	@install -d "$(MAN_DIR)"
 	@echo "MKDIR $(MAN_DIR)"
 	@for i in $(INSTALL_MAN); do echo "CP    $$i $(MAN_DIR)"; install "$$i" "$(MAN_DIR)"; done
+endif
+endif
+
+ifdef INSTALL_DOC
+ifdef VERBOSE
+	install -d "$(DOC_DIR)"
+	for i in $(INSTALL_DOC); do install -D -m 644 "$$i" "$(DOC_DIR)/$$i"; done
+else
+	@install -d "$(DOC_DIR)"
+	@echo "MKDIR $(DOC_DIR)"
+	@for i in $(INSTALL_DOC); do echo "CP    $$i $(DOC_DIR)/$$i"; install -D -m 644 "$$i" "$(DOC_DIR)/$$i"; done
 endif
 endif

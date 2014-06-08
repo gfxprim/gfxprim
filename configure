@@ -364,6 +364,7 @@ if __name__ ==  '__main__':
            'libdir'        : ['', 'Where to install libraries'],
            'includedir'    : ['include', 'Where to install headers'],
            'mandir'        : ['share/man', 'Where to install man pages'],
+           'docdir'        : ['share/doc/', 'Where to install documentation'],
            # Here comes autoconf compatibility cruft, not used for anything yet
            'infodir'       : ['share/info', 'Where to install info pages'],
            'datadir'       : ['share', 'Where to place readonly arch independend datafiles'],

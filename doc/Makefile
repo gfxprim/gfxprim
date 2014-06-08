@@ -1,3 +1,6 @@
+TOPDIR=..
+include $(TOPDIR)/config.mk
+
 SOURCES=index.html about.txt context.txt loaders.txt filters.txt \
 	basic_types.txt gfx.txt backends.txt gamma.txt grabbers.txt \
 	environment_variables.txt debug.txt core.txt input.txt \
@@ -80,3 +83,8 @@ CLEAN+=$(PAGES)
 
 clean:
 	rm -f $(CLEAN)
+
+INSTALL_DOC=$(PAGES) *.png *.svg asciidoc.css images/*/*.png
+install: $(INSTALL_DOC)
+
+include $(TOPDIR)/install.mk
