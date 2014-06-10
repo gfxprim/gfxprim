@@ -22,14 +22,15 @@
 
 #include "../../config.h"
 
-#ifdef HAVE_ZLIB
-
-#include <zlib.h>
 #include <errno.h>
 #include <stdint.h>
 #include <core/GP_Debug.h>
 #include <core/GP_Common.h>
 #include <loaders/GP_IOZlib.h>
+
+#ifdef HAVE_ZLIB
+
+#include <zlib.h>
 
 #define BUFS 512u
 
@@ -255,4 +256,5 @@ int GP_IOZlibReset(GP_IO *io, GP_IO *sub_io, size_t comp_size)
 	errno = ENOSYS;
 	return 1;
 }
+
 #endif /* HAVE_ZLIB */
