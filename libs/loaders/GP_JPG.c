@@ -593,3 +593,13 @@ int GP_SaveJPG(const GP_Context GP_UNUSED(*src),
 }
 
 #endif /* HAVE_JPEG */
+
+struct GP_Loader GP_JPG = {
+	.Read = GP_ReadJPG,
+	.Load = GP_LoadJPG,
+	.Save = GP_SaveJPG,
+	.Match = GP_MatchJPG,
+
+	.fmt_name = "JPEG",
+	.extensions = {"jpg", "jpeg", NULL},
+};

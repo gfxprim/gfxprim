@@ -23,9 +23,7 @@
 #ifndef LOADERS_GP_PNM_H
 #define LOADERS_GP_PNM_H
 
-#include "core/GP_Context.h"
-#include "core/GP_ProgressCallback.h"
-#include "loaders/GP_IO.h"
+#include "loaders/GP_Loader.h"
 
 /*
  * PBM Bitmap
@@ -87,5 +85,10 @@ int GP_MatchPPM(const void *buf);
  * All of above.
  */
 int GP_MatchPNM(const void *buf);
+
+extern GP_Loader GP_PBM;
+extern GP_Loader GP_PGM;
+extern GP_Loader GP_PPM;
+extern GP_Loader GP_PNM;
 
 #endif /* LOADERS_GP_PNM_H */

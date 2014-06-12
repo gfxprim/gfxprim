@@ -29,10 +29,7 @@
 #ifndef LOADERS_GP_PNG_H
 #define LOADERS_GP_PNG_H
 
-#include "core/GP_ProgressCallback.h"
-#include "core/GP_Context.h"
-#include "loaders/GP_IO.h"
-#include "loaders/GP_MetaData.h"
+#include "loaders/GP_Loader.h"
 
 /*
  * Reads a PNG from an IO stream.
@@ -64,5 +61,7 @@ int GP_SavePNG(const GP_Context *src, const char *dst_path,
  * Looks for PNG file signature. Returns non-zero if found.
  */
 int GP_MatchPNG(const void *buf);
+
+extern GP_Loader GP_PNG;
 
 #endif /* LOADERS_GP_PNG_H */

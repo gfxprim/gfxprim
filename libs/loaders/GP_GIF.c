@@ -400,3 +400,12 @@ GP_Context *GP_LoadGIF(const char GP_UNUSED(*src_path),
 }
 
 #endif /* HAVE_GIFLIB */
+
+struct GP_Loader GP_GIF = {
+	.Read = GP_ReadGIF,
+	.Load = GP_LoadGIF,
+	.Save = NULL,
+	.Match = GP_MatchGIF,
+	.fmt_name = "Graphics Interchange Format",
+	.extensions = {"gif", NULL},
+};

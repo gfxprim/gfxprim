@@ -29,9 +29,7 @@
 #ifndef LOADERS_GP_PCX_H
 #define LOADERS_GP_PCX_H
 
-#include "core/GP_Context.h"
-#include "core/GP_ProgressCallback.h"
-#include "loaders/GP_IO.h"
+#include "loaders/GP_Loader.h"
 
 /*
  * Reads a PCX from an IO stream.
@@ -50,5 +48,7 @@ GP_Context *GP_LoadPCX(const char *src_path, GP_ProgressCallback *callback);
  * Match PCX signature.
  */
 int GP_MatchPCX(const void *buf);
+
+extern GP_Loader GP_PCX;
 
 #endif /* LOADERS_GP_PCX_H */

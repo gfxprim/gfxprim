@@ -905,3 +905,13 @@ int GP_SaveBMP(const GP_Context *src, const char *dst_path,
 
 	return 0;
 }
+
+struct GP_Loader GP_BMP = {
+	.Read = GP_ReadBMP,
+	.Load = GP_LoadBMP,
+	.Save = GP_SaveBMP,
+	.Match = GP_MatchBMP,
+
+	.fmt_name = "BMP",
+	.extensions = {"bmp", "dib", NULL},
+};

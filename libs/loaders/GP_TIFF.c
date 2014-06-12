@@ -762,3 +762,13 @@ int GP_SaveTIFF(const GP_Context GP_UNUSED(*src),
 }
 
 #endif /* HAVE_TIFF */
+
+struct GP_Loader GP_TIFF = {
+	.Read = GP_ReadTIFF,
+	.Load = GP_LoadTIFF,
+	.Save = GP_SaveTIFF,
+	.Match = GP_MatchTIFF,
+
+	.fmt_name = "Tag Image File Format",
+	.extensions = {"tif", "tiff", NULL},
+};

@@ -1226,3 +1226,47 @@ int GP_SavePNM(const GP_Context *src, const char *dst_path,
 		return 1;
 	}
 }
+
+struct GP_Loader GP_PBM = {
+	.Read = GP_ReadPBM,
+	.Load = GP_LoadPBM,
+	.Save = GP_SavePBM,
+	.Match = GP_MatchPBM,
+
+	.fmt_name = "Netpbm portable Bitmap",
+	.extensions = {"pbm", NULL},
+};
+
+struct GP_Loader GP_PGM = {
+	.Read = GP_ReadPGM,
+	.Load = GP_LoadPGM,
+	.Save = GP_SavePGM,
+	.Match = GP_MatchPGM,
+
+	.fmt_name = "Netpbm portable Graymap",
+	.extensions = {"pgm", NULL},
+};
+
+struct GP_Loader GP_PPM = {
+	.Read = GP_ReadPPM,
+	.Load = GP_LoadPPM,
+	.Save = GP_SavePPM,
+	.Match = GP_MatchPPM,
+
+	.fmt_name = "Netpbm portable Pixmap",
+	.extensions = {"ppm", NULL},
+};
+
+struct GP_Loader GP_PNM = {
+	.Read = GP_ReadPNM,
+	.Load = GP_LoadPNM,
+	.Save = GP_SavePNM,
+	/*
+	 * Avoid double Match
+	 * This format is covered by PBM, PGM and PPM
+	 */
+	.Match = NULL,
+
+	.fmt_name = "Netpbm portable Anymap",
+	.extensions = {"pnm", NULL},
+};

@@ -29,10 +29,7 @@
 #ifndef LOADERS_GP_JPG_H
 #define LOADERS_GP_JPG_H
 
-#include "core/GP_Context.h"
-#include "core/GP_ProgressCallback.h"
-#include "loaders/GP_IO.h"
-#include "loaders/GP_MetaData.h"
+#include "loaders/GP_Loader.h"
 
 /*
  * Reads a JPEG from an IO stream.
@@ -63,5 +60,7 @@ int GP_SaveJPG(const GP_Context *src, const char *dst_path,
  * Looks for JPEG file signature. Returns non-zero if found.
  */
 int GP_MatchJPG(const void *buf);
+
+extern GP_Loader GP_JPG;
 
 #endif /* LOADERS_GP_JPG_H */

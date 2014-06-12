@@ -261,3 +261,13 @@ GP_Context *GP_LoadJP2(const char GP_UNUSED(*src_path),
 }
 
 #endif /* HAVE_OPENJPEG */
+
+struct GP_Loader GP_JP2 = {
+	.Read = GP_ReadJP2,
+	.Load = GP_LoadJP2,
+	.Save = NULL,
+	.Match = GP_MatchJP2,
+
+	.fmt_name = "JPEG 2000",
+	.extensions = {"jp2", "jpx", NULL},
+};

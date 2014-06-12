@@ -29,9 +29,7 @@
 #ifndef LOADERS_GP_JP2_H
 #define LOADERS_GP_JP2_H
 
-#include "core/GP_Context.h"
-#include "core/GP_ProgressCallback.h"
-#include "loaders/GP_IO.h"
+#include "loaders/GP_Loader.h"
 
 /*
  * Reads a JPEG2000 from an IO stream.
@@ -50,5 +48,7 @@ GP_Context *GP_LoadJP2(const char *src_path, GP_ProgressCallback *callback);
  * Looks for JPEG2000 file signature. Returns non-zero if found.
  */
 int GP_MatchJP2(const void *buf);
+
+extern GP_Loader GP_JP2;
 
 #endif /* LOADERS_GP_JP2_H */

@@ -29,9 +29,7 @@
 #ifndef LOADERS_GP_PSD_H
 #define LOADERS_GP_PSD_H
 
-#include "core/GP_Context.h"
-#include "core/GP_ProgressCallback.h"
-#include "loaders/GP_IO.h"
+#include "loaders/GP_Loader.h"
 
 /*
  * Reads a PSD from an IO stream.
@@ -54,5 +52,7 @@ GP_Context *GP_LoadPSD(const char *src_path, GP_ProgressCallback *callback);
  * Match PSD signature.
  */
 int GP_MatchPSD(const void *buf);
+
+extern GP_Loader GP_PSD;
 
 #endif /* LOADERS_GP_PSD_H */

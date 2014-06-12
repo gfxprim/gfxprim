@@ -10,5 +10,6 @@ PNM
 PCX
 ZIP
 IO
+Loader
 SaveLoad.gen
 SaveAbort.gen

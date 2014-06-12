@@ -565,3 +565,13 @@ GP_Context *GP_LoadPCX(const char *src_path, GP_ProgressCallback *callback)
 
 	return res;
 }
+
+struct GP_Loader GP_PCX = {
+	.Read = GP_ReadPCX,
+	.Load = GP_LoadPCX,
+	.Save = NULL,
+	.Match = GP_MatchPCX,
+
+	.fmt_name = "ZSoft PCX",
+	.extensions = {"pcx", NULL},
+};

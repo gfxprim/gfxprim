@@ -23,9 +23,7 @@
 #ifndef LOADERS_GP_BMP_H
 #define LOADERS_GP_BMP_H
 
-#include "core/GP_Context.h"
-#include "core/GP_ProgressCallback.h"
-#include "loaders/GP_IO.h"
+#include "loaders/GP_Loader.h"
 
 /*
  * Reads a BMP from an IO stream.
@@ -59,5 +57,8 @@ int GP_SaveBMP(const GP_Context *src, const char *dst_path,
  * Looks for BMP file signature. Returns non-zero if found.
  */
 int GP_MatchBMP(const void *buf);
+
+
+extern GP_Loader GP_BMP;
 
 #endif /* LOADERS_GP_BMP_H */

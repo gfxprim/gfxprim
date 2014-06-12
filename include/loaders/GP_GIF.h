@@ -29,9 +29,7 @@
 #ifndef LOADERS_GP_GIF_H
 #define LOADERS_GP_GIF_H
 
-#include "core/GP_Context.h"
-#include "core/GP_ProgressCallback.h"
-#include "loaders/GP_IO.h"
+#include "loaders/GP_Loader.h"
 
 /*
  * Reads first image found in GIF container from an IO stream.
@@ -50,5 +48,7 @@ GP_Context *GP_LoadGIF(const char *src_path, GP_ProgressCallback *callback);
  * Looks for GIF file signature. Returns non-zero if found.
  */
 int GP_MatchGIF(const void *buf);
+
+extern GP_Loader GP_GIF;
 
 #endif /* LOADERS_GP_GIF_H */

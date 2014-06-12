@@ -829,3 +829,13 @@ GP_Context *GP_LoadPSD(const char *src_path, GP_ProgressCallback *callback)
 
 	return res;
 }
+
+struct GP_Loader GP_PSD = {
+	.Read = GP_ReadPSD,
+	.Load = GP_LoadPSD,
+	.Save = NULL,
+	.Match = GP_MatchPSD,
+
+	.fmt_name = "Adobe Photoshop Image",
+	.extensions = {"psd", NULL},
+};

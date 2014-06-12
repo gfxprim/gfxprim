@@ -31,9 +31,7 @@
 #ifndef LOADERS_GP_PSP_H
 #define LOADERS_GP_PSP_H
 
-#include "core/GP_ProgressCallback.h"
-#include "core/GP_Context.h"
-#include "loaders/GP_IO.h"
+#include "loaders/GP_Loader.h"
 
 /*
  * Reads a BMP from an IO stream.
@@ -52,5 +50,7 @@ GP_Context *GP_LoadPSP(const char *src_path, GP_ProgressCallback *callback);
  * Looks for PSP file signature. Returns non-zero if found.
  */
 int GP_MatchPSP(const void *buf);
+
+extern GP_Loader GP_PSP;
 
 #endif /* LOADERS_GP_PSP_H */

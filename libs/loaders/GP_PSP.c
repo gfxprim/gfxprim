@@ -507,3 +507,12 @@ GP_Context *GP_LoadPSP(const char *src_path, GP_ProgressCallback *callback)
 
 	return res;
 }
+
+struct GP_Loader GP_PSP = {
+	.Read = GP_ReadPSP,
+	.Load = GP_LoadPSP,
+	.Save = NULL,
+	.Match = GP_MatchPSP,
+	.fmt_name = "Paint Shop Pro Image",
+	.extensions = {"psp", "pspimage", NULL},
+};

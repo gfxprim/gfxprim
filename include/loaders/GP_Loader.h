@@ -129,8 +129,20 @@ const GP_Loader *GP_MatchSignature(const void *buf);
  */
 const GP_Loader *GP_MatchExtension(const char *path);
 
-void GP_LoaderRegister(GP_Loader *self);
+/*
+ * Registers additional loader.
+ *
+ * Returns zero on success, non-zero if table of loaders was is full.
+ */
+int GP_LoaderRegister(GP_Loader *self);
 
+/*
+ * Unregisters a loader.
+ *
+ * All library loaders are registered by default.
+ *
+ * You can unregister them using this function if you want.
+ */
 void GP_LoaderUnregister(GP_Loader *self);
 
 /*

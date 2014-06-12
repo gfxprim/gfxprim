@@ -653,3 +653,13 @@ int GP_SavePNG(const GP_Context GP_UNUSED(*src),
 }
 
 #endif /* HAVE_LIBPNG */
+
+GP_Loader GP_PNG = {
+	.Read = GP_ReadPNG,
+	.Load = GP_LoadPNG,
+	.Save = GP_SavePNG,
+	.Match = GP_MatchPNG,
+
+	.fmt_name = "Portable Network Graphics",
+	.extensions = {"png", NULL},
+};

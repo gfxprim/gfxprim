@@ -39,205 +39,116 @@
 #include "loaders/GP_Loaders.h"
 #include "loaders/GP_Loader.h"
 
-static GP_Loader psd_loader = {
-	.Read = GP_ReadPSD,
-	.Load = GP_LoadPSD,
-	.Save = NULL,
-	.Match = GP_MatchPSD,
-	.fmt_name = "Adobe Photoshop Image",
-	.next = NULL,
-	.extensions = {"psd", NULL},
+#define MAX_LOADERS 64
+
+static GP_Loader *loaders[MAX_LOADERS] = {
+	&GP_JPG,
+	&GP_PNG,
+	&GP_TIFF,
+	&GP_GIF,
+	&GP_BMP,
+	&GP_PBM,
+	&GP_PNM,
+	&GP_PPM,
+	&GP_PNM,
+	&GP_JP2,
+	&GP_PCX,
+	&GP_PSP,
+	&GP_PSD,
 };
 
-static GP_Loader psp_loader = {
-	.Read = GP_ReadPSP,
-	.Load = GP_LoadPSP,
-	.Save = NULL,
-	.Match = GP_MatchPSP,
-	.fmt_name = "Paint Shop Pro Image",
-	.next = &psd_loader,
-	.extensions = {"psp", "pspimage", NULL},
-};
-
-static GP_Loader pcx_loader = {
-	.Read = GP_ReadPCX,
-	.Load = GP_LoadPCX,
-	.Save = NULL,
-	.Match = GP_MatchPCX,
-	.fmt_name = "ZSoft PCX",
-	.next = &psp_loader,
-	.extensions = {"pcx", NULL},
-};
-
-static GP_Loader pbm_loader = {
-	.Read = GP_ReadPBM,
-	.Load = GP_LoadPBM,
-	.Save = GP_SavePBM,
-	.Match = GP_MatchPBM,
-	.fmt_name = "Netpbm portable Bitmap",
-	.next = &pcx_loader,
-	.extensions = {"pbm", NULL},
-};
-
-static GP_Loader pgm_loader = {
-	.Read = GP_ReadPGM,
-	.Load = GP_LoadPGM,
-	.Save = GP_SavePGM,
-	.Match = GP_MatchPGM,
-	.fmt_name = "Netpbm portable Graymap",
-	.next = &pbm_loader,
-	.extensions = {"pgm", NULL},
-};
-
-static GP_Loader ppm_loader = {
-	.Read = GP_ReadPPM,
-	.Load = GP_LoadPPM,
-	.Save = GP_SavePPM,
-	.Match = GP_MatchPPM,
-	.fmt_name = "Netpbm portable Pixmap",
-	.next = &pgm_loader,
-	.extensions = {"ppm", NULL},
-};
-
-static GP_Loader pnm_loader = {
-	.Read = GP_ReadPNM,
-	.Load = GP_LoadPNM,
-	.Save = GP_SavePNM,
-	/*
-	 * Avoid double Match
-	 * This format is covered by PBM, PGM and PPM
-	 */
-	.Match = NULL,
-	.fmt_name = "Netpbm portable Anymap",
-	.next = &ppm_loader,
-	.extensions = {"pnm", NULL},
-};
-
-static GP_Loader jp2_loader = {
-	.Read = GP_ReadJP2,
-	.Load = GP_LoadJP2,
-	.Save = NULL,
-	.Match = GP_MatchJP2,
-	.fmt_name = "JPEG 2000",
-	.next = &pnm_loader,
-	.extensions = {"jp2", "jpx", NULL},
-};
-
-static GP_Loader bmp_loader = {
-	.Read = GP_ReadBMP,
-	.Load = GP_LoadBMP,
-	.Save = GP_SaveBMP,
-	.Match = GP_MatchBMP,
-	.fmt_name = "BMP",
-	.next = &jp2_loader,
-	.extensions = {"bmp", "dib", NULL},
-};
-
-static GP_Loader gif_loader = {
-	.Read = GP_ReadGIF,
-	.Load = GP_LoadGIF,
-	.Save = NULL,
-	.Match = GP_MatchGIF,
-	.fmt_name = "Graphics Interchange Format",
-	.next = &bmp_loader,
-	.extensions = {"gif", NULL},
-};
-
-static GP_Loader tiff_loader = {
-	.Read = GP_ReadTIFF,
-	.Load = GP_LoadTIFF,
-	.Save = GP_SaveTIFF,
-	.Match = GP_MatchTIFF,
-	.fmt_name = "Tag Image File Format",
-	.next = &gif_loader,
-	.extensions = {"tif", "tiff", NULL},
-};
-
-static GP_Loader png_loader = {
-	.Read = GP_ReadPNG,
-	.Load = GP_LoadPNG,
-	.Save = GP_SavePNG,
-	.Match = GP_MatchPNG,
-	.fmt_name = "Portable Network Graphics",
-	.next = &tiff_loader,
-	.extensions = {"png", NULL},
-};
-
-static GP_Loader jpeg_loader = {
-	.Read = GP_ReadJPG,
-	.Load = GP_LoadJPG,
-	.Save = GP_SaveJPG,
-	.Match = GP_MatchJPG,
-	.fmt_name = "JPEG",
-	.next = &png_loader,
-	.extensions = {"jpg", "jpeg", NULL},
-};
-
-static GP_Loader *loaders = &jpeg_loader;
-static GP_Loader *loaders_last = &psp_loader;
-
-void GP_LoaderRegister(GP_Loader *self)
+static unsigned int get_last_loader(void)
 {
+	unsigned int i;
+
+	for (i = 0; i < MAX_LOADERS; i++) {
+		if (!loaders[i])
+			return i ? i - 1 : 0;
+	}
+
+	return i - 1;
+}
+
+int GP_LoaderRegister(GP_Loader *self)
+{
+	unsigned int i;
+
 	GP_DEBUG(1, "Registering loader for '%s'", self->fmt_name);
 
-	self->next = NULL;
-	loaders_last->next = self;
+	/* We have to keep the last terminating NULL */
+	for (i = 0; i < MAX_LOADERS - 2; i++) {
+		if (loaders[i] == self) {
+			GP_DEBUG(1, "Loader '%s' allready registered",
+			         self->fmt_name);
+			errno = EEXIST;
+			return 1;
+		}
+
+		if (!loaders[i])
+			break;
+	}
+
+	if (loaders[i]) {
+		GP_DEBUG(1, "Loaders table is full");
+		errno = ENOSPC;
+		return 1;
+	}
+
+	loaders[i] = self;
+
+	return 0;
 }
 
 void GP_LoaderUnregister(GP_Loader *self)
 {
-	struct GP_Loader *i;
+	unsigned int i, last = get_last_loader();
 
 	if (self == NULL)
 		return;
 
 	GP_DEBUG(1, "Unregistering loader for '%s'", self->fmt_name);
 
-	for (i = loaders; i != NULL; i = i->next) {
-		if (i->next == self)
-			break;
+	for (i = 0; loaders[i]; i++) {
+		if (loaders[i] == self) {
+			loaders[i] = loaders[last];
+			loaders[last] = NULL;
+			return;
+		}
 	}
 
-	if (i == NULL) {
-		GP_WARN("Loader '%s' (%p) wasn't registered",
-		        self->fmt_name, self);
-		return;
-	}
-
-	i->next = self->next;
+	GP_WARN("Loader '%s' (%p) wasn't registered", self->fmt_name, self);
 }
 
 void GP_ListLoaders(void)
 {
-	struct GP_Loader *i;
-	int j;
+	unsigned int i, j;
 
-	for (i = loaders; i != NULL; i = i->next) {
-		printf("Format: %s\n", i->fmt_name);
-		printf("Read:\t%s\n", i->Read ? "Yes" : "No");
-		printf("Load:\t%s\n", i->Load ? "Yes" : "No");
-		printf("Save:\t%s\n", i->Save ? "Yes" : "No");
-		printf("Match:\t%s\n", i->Match ? "Yes" : "No");
+	for (i = 0; loaders[i]; i++) {
+		printf("Format: %s\n", loaders[i]->fmt_name);
+		printf("Read:\t%s\n", loaders[i]->Read ? "Yes" : "No");
+		printf("Load:\t%s\n", loaders[i]->Load ? "Yes" : "No");
+		printf("Save:\t%s\n", loaders[i]->Save ? "Yes" : "No");
+		printf("Match:\t%s\n", loaders[i]->Match ? "Yes" : "No");
 		printf("Extensions: ");
-		for (j = 0; i->extensions[j] != NULL; j++)
-			printf("%s ", i->extensions[j]);
+		for (j = 0; loaders[i]->extensions[j] != NULL; j++)
+			printf("%s ", loaders[i]->extensions[j]);
 		printf("\n");
 
-		if (i->next != NULL)
+		if (loaders[i+1] != NULL)
 			printf("\n");
 	}
 }
 
 static struct GP_Loader *loader_by_extension(const char *ext)
 {
-	struct GP_Loader *i;
-	int j;
+	unsigned int i, j;
 
-	for (i = loaders; i != NULL; i = i->next) {
-		for (j = 0; i->extensions[j] != NULL; j++) {
-			if (!strcasecmp(ext, i->extensions[j])) {
-				GP_DEBUG(1, "Found loader '%s'", i->fmt_name);
-				return i;
+	for (i = 0; loaders[i]; i++) {
+		for (j = 0; loaders[i]->extensions[j] != NULL; j++) {
+			if (!strcasecmp(ext, loaders[i]->extensions[j])) {
+				GP_DEBUG(1, "Found loader '%s'",
+				         loaders[i]->fmt_name);
+				return loaders[i];
 			}
 		}
 	}
@@ -460,12 +371,12 @@ int GP_SaveImage(const GP_Context *src, const char *dst_path,
 
 const GP_Loader *GP_MatchSignature(const void *buf)
 {
-	struct GP_Loader *i;
+	unsigned int i;
 
-	for (i = loaders; i != NULL; i = i->next) {
-		if (i->Match && i->Match(buf) == 1) {
-			GP_DEBUG(1, "Found loader '%s'", i->fmt_name);
-			return i;
+	for (i = 0; loaders[i]; i++) {
+		if (loaders[i]->Match && loaders[i]->Match(buf) == 1) {
+			GP_DEBUG(1, "Found loader '%s'", loaders[i]->fmt_name);
+			return loaders[i];
 		}
 	}
 
