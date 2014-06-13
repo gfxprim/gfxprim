@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/bin/sh
 #
 # Run python test with dynamically linked libGP.
 #
