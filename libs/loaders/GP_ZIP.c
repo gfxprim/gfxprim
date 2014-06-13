@@ -324,6 +324,7 @@ static GP_Context *zip_next_file(struct zip_priv *priv,
 		GP_IOClose(io);
 		goto out;
 	*/
+
 		io = GP_IOZlib(priv->io, header.comp_size);
 		if (!io)
 			goto out;
@@ -332,6 +333,15 @@ static GP_Context *zip_next_file(struct zip_priv *priv,
 		ret = GP_ReadImage(io, callback);
 		if (errno == ECANCELED)
 			err = errno;
+
+		/*
+		 * We need to finish the Zlib IO for any of:
+		 *
+		 * - File is not image -> need to get to the end of the record
+		 * - All image data were not consumed by loader (may happen)
+		 */
+		if (GP_IOSeek(io, 0, GP_IO_SEEK_END) == (off_t)-1)
+			GP_DEBUG(1, "Failed to seek Zlib IO");
 
 		GP_IOClose(io);
 
