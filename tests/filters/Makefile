@@ -1,7 +1,7 @@
 TOPDIR=../..
 include $(TOPDIR)/pre.mk
 
-CSOURCES=FilterMirrorH.c
+CSOURCES=FilterMirrorH.c common.c
 
 GENSOURCES=APICoverage.gen.c FiltersCompare.gen.c
 
@@ -10,8 +10,6 @@ APPS=FilterMirrorH APICoverage.gen FiltersCompare.gen
 include ../tests.mk
 
 FilterMirrorH: common.o
-
-CLEAN+=common.o
 
 include $(TOPDIR)/gen.mk
 include $(TOPDIR)/app.mk
