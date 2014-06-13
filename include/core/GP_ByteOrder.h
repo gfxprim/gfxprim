@@ -30,6 +30,9 @@
 # include <endian.h>
 #else /* BSD Family */
 # include <machine/endian.h>
+# define __BYTE_ORDER _BYTE_ORDER
+# define __BIG_ENDIAN _BIG_ENDIAN
+# define __LITTLE_ENDIAN _LITTLE_ENDIAN
 #endif
 
 #endif /* CORE_GP_BYTE_ORDER_H */

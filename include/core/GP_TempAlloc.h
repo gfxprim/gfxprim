@@ -47,7 +47,9 @@
 #ifndef CORE_GP_TEMP_ALLOC_H
 #define CORE_GP_TEMP_ALLOC_H
 
-#include <alloca.h>
+#ifdef __linux__
+# include <alloca.h>
+#endif
 #include <stdlib.h>
 
 #include "core/GP_Common.h"
