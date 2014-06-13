@@ -264,25 +264,6 @@ err1:
 	return NULL;
 }
 
-GP_Context *GP_LoadPNG(const char *src_path, GP_ProgressCallback *callback)
-{
-	GP_IO *io;
-	GP_Context *res;
-	int err;
-
-	io = GP_IOFile(src_path, GP_IO_RDONLY);
-	if (!io)
-		return NULL;
-
-	res = GP_ReadPNG(io, callback);
-
-	err = errno;
-	GP_IOClose(io);
-	errno = err;
-
-	return res;
-}
-
 static void load_meta_data(png_structp png, png_infop png_info, GP_MetaData *data)
 {
 	double gamma;
@@ -625,13 +606,6 @@ GP_Context *GP_ReadPNG(GP_IO GP_UNUSED(*io),
 	return NULL;
 }
 
-GP_Context *GP_LoadPNG(const char GP_UNUSED(*src_path),
-                       GP_ProgressCallback GP_UNUSED(*callback))
-{
-	errno = ENOSYS;
-	return NULL;
-}
-
 int GP_ReadPNGMetaData(GP_IO GP_UNUSED(*io), GP_MetaData GP_UNUSED(*data))
 {
 	errno = ENOSYS;
@@ -654,10 +628,16 @@ int GP_SavePNG(const GP_Context GP_UNUSED(*src),
 
 #endif /* HAVE_LIBPNG */
 
+GP_Context *GP_LoadPNG(const char *src_path, GP_ProgressCallback *callback)
+{
+	return GP_LoaderLoadImage(&GP_PNG, src_path, callback);
+}
+
 GP_Loader GP_PNG = {
+#ifdef HAVE_LIBPNG
 	.Read = GP_ReadPNG,
-	.Load = GP_LoadPNG,
 	.Save = GP_SavePNG,
+#endif
 	.Match = GP_MatchPNG,
 
 	.fmt_name = "Portable Network Graphics",

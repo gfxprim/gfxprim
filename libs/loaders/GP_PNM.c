@@ -712,25 +712,6 @@ GP_Context *GP_ReadPBM(GP_IO *io, GP_ProgressCallback *callback)
 	return read_bitmap(&buf, &header, callback);
 }
 
-GP_Context *GP_LoadPBM(const char *src_path, GP_ProgressCallback *callback)
-{
-	GP_IO *io;
-	GP_Context *res;
-	int err;
-
-	io = GP_IOFile(src_path, GP_IO_RDONLY);
-	if (!io)
-		return NULL;
-
-	res = GP_ReadPBM(io, callback);
-
-	err = errno;
-	GP_IOClose(io);
-	errno = err;
-
-	return res;
-}
-
 int GP_SavePBM(const GP_Context *src, const char *dst_path,
                GP_ProgressCallback *callback)
 {
@@ -882,25 +863,6 @@ GP_Context *GP_ReadPGM(GP_IO *io, GP_ProgressCallback *callback)
 	return read_graymap(&buf, &header, callback);
 }
 
-GP_Context *GP_LoadPGM(const char *src_path, GP_ProgressCallback *callback)
-{
-	GP_IO *io;
-	GP_Context *res;
-	int err;
-
-	io = GP_IOFile(src_path, GP_IO_RDONLY);
-	if (!io)
-		return NULL;
-
-	res = GP_ReadPGM(io, callback);
-
-	err = errno;
-	GP_IOClose(io);
-	errno = err;
-
-	return res;
-}
-
 static int pixel_to_depth(GP_Pixel pixel)
 {
 	switch (pixel) {
@@ -1024,25 +986,6 @@ GP_Context *GP_ReadPPM(GP_IO *io, GP_ProgressCallback *callback)
 	}
 
 	return read_pixmap(&buf, &header, callback);
-}
-
-GP_Context *GP_LoadPPM(const char *src_path, GP_ProgressCallback *callback)
-{
-	GP_IO *io;
-	GP_Context *res;
-	int err;
-
-	io = GP_IOFile(src_path, GP_IO_RDONLY);
-	if (!io)
-		return NULL;
-
-	res = GP_ReadPPM(io, callback);
-
-	err = errno;
-	GP_IOClose(io);
-	errno = err;
-
-	return res;
 }
 
 static int write_binary_ppm(FILE *f, GP_Context *src)
@@ -1188,25 +1131,6 @@ GP_Context *GP_ReadPNM(GP_IO *io, GP_ProgressCallback *callback)
 	return ret;
 }
 
-GP_Context *GP_LoadPNM(const char *src_path, GP_ProgressCallback *callback)
-{
-	GP_IO *io;
-	GP_Context *res;
-	int err;
-
-	io = GP_IOFile(src_path, GP_IO_RDONLY);
-	if (!io)
-		return NULL;
-
-	res = GP_ReadPNM(io, callback);
-
-	err = errno;
-	GP_IOClose(io);
-	errno = err;
-
-	return res;
-}
-
 int GP_SavePNM(const GP_Context *src, const char *dst_path,
                GP_ProgressCallback *callback)
 {
@@ -1227,9 +1151,28 @@ int GP_SavePNM(const GP_Context *src, const char *dst_path,
 	}
 }
 
+GP_Context *GP_LoadPBM(const char *src_path, GP_ProgressCallback *callback)
+{
+	return GP_LoaderLoadImage(&GP_PBM, src_path, callback);
+}
+
+GP_Context *GP_LoadPGM(const char *src_path, GP_ProgressCallback *callback)
+{
+	return GP_LoaderLoadImage(&GP_PGM, src_path, callback);
+}
+
+GP_Context *GP_LoadPPM(const char *src_path, GP_ProgressCallback *callback)
+{
+	return GP_LoaderLoadImage(&GP_PPM, src_path, callback);
+}
+
+GP_Context *GP_LoadPNM(const char *src_path, GP_ProgressCallback *callback)
+{
+	return GP_LoaderLoadImage(&GP_PNM, src_path, callback);
+}
+
 struct GP_Loader GP_PBM = {
 	.Read = GP_ReadPBM,
-	.Load = GP_LoadPBM,
 	.Save = GP_SavePBM,
 	.Match = GP_MatchPBM,
 
@@ -1239,7 +1182,6 @@ struct GP_Loader GP_PBM = {
 
 struct GP_Loader GP_PGM = {
 	.Read = GP_ReadPGM,
-	.Load = GP_LoadPGM,
 	.Save = GP_SavePGM,
 	.Match = GP_MatchPGM,
 
@@ -1249,7 +1191,6 @@ struct GP_Loader GP_PGM = {
 
 struct GP_Loader GP_PPM = {
 	.Read = GP_ReadPPM,
-	.Load = GP_LoadPPM,
 	.Save = GP_SavePPM,
 	.Match = GP_MatchPPM,
 
@@ -1259,7 +1200,6 @@ struct GP_Loader GP_PPM = {
 
 struct GP_Loader GP_PNM = {
 	.Read = GP_ReadPNM,
-	.Load = GP_LoadPNM,
 	.Save = GP_SavePNM,
 	/*
 	 * Avoid double Match

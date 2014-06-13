@@ -703,21 +703,7 @@ err1:
 
 GP_Context *GP_LoadBMP(const char *src_path, GP_ProgressCallback *callback)
 {
-	GP_IO *io;
-	GP_Context *res;
-	int err;
-
-	io = GP_IOFile(src_path, GP_IO_RDONLY);
-	if (!io)
-		return NULL;
-
-	res = GP_ReadBMP(io, callback);
-
-	err = errno;
-	GP_IOClose(io);
-	errno = err;
-
-	return res;
+	return GP_LoaderLoadImage(&GP_BMP, src_path, callback);
 }
 
 /*
@@ -908,7 +894,6 @@ int GP_SaveBMP(const GP_Context *src, const char *dst_path,
 
 struct GP_Loader GP_BMP = {
 	.Read = GP_ReadBMP,
-	.Load = GP_LoadBMP,
 	.Save = GP_SaveBMP,
 	.Match = GP_MatchBMP,
 

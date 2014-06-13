@@ -85,13 +85,6 @@ typedef struct GP_Loader {
 	GP_Context *(*Read)(GP_IO *io, GP_ProgressCallback *callback);
 
 	/*
-	 * Loads an image from a file.
-	 *
-	 * TODO: Remove due to Read
-	 */
-	GP_Context *(*Load)(const char *src_path, GP_ProgressCallback *callback);
-
-	/*
 	 * Save an image.
 	 *
 	 * Returns zero on succes, non-zero on failure and errno must be set.
@@ -108,9 +101,6 @@ typedef struct GP_Loader {
 	 * Short format name.
 	 */
 	const char *fmt_name;
-
-	/* don't touch */
-	struct GP_Loader *next;
 
 	/*
 	 * NULL terminated array of file extensions.
@@ -144,6 +134,15 @@ int GP_LoaderRegister(GP_Loader *self);
  * You can unregister them using this function if you want.
  */
 void GP_LoaderUnregister(GP_Loader *self);
+
+/*
+ * Generic LoadImage for a given loader.
+ *
+ * The function prepares the IO from file, calls the loader Read() method,
+ * closes the IO and returns the context.
+ */
+GP_Context *GP_LoaderLoadImage(const GP_Loader *self, const char *src_path,
+                               GP_ProgressCallback *callback);
 
 /*
  * List loaders into the stdout

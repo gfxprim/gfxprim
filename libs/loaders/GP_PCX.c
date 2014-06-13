@@ -549,27 +549,11 @@ err0:
 
 GP_Context *GP_LoadPCX(const char *src_path, GP_ProgressCallback *callback)
 {
-	GP_IO *io;
-	GP_Context *res;
-	int err;
-
-	io = GP_IOFile(src_path, GP_IO_RDONLY);
-	if (!io)
-		return NULL;
-
-	res = GP_ReadPCX(io, callback);
-
-	err = errno;
-	GP_IOClose(io);
-	errno = err;
-
-	return res;
+	return GP_LoaderLoadImage(&GP_PCX, src_path, callback);
 }
 
 struct GP_Loader GP_PCX = {
 	.Read = GP_ReadPCX,
-	.Load = GP_LoadPCX,
-	.Save = NULL,
 	.Match = GP_MatchPCX,
 
 	.fmt_name = "ZSoft PCX",

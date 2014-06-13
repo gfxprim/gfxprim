@@ -358,25 +358,6 @@ err1:
 	return NULL;
 }
 
-GP_Context *GP_LoadGIF(const char *src_path, GP_ProgressCallback *callback)
-{
-	GP_IO *io;
-	GP_Context *res;
-	int err;
-
-	io = GP_IOFile(src_path, GP_IO_RDONLY);
-	if (!io)
-		return NULL;
-
-	res = GP_ReadGIF(io, callback);
-
-	err = errno;
-	GP_IOClose(io);
-	errno = err;
-
-	return res;
-}
-
 #else
 
 int GP_MatchGIF(const void GP_UNUSED(*buf))
@@ -392,20 +373,19 @@ GP_Context *GP_ReadGIF(GP_IO GP_UNUSED(*io),
 	return NULL;
 }
 
-GP_Context *GP_LoadGIF(const char GP_UNUSED(*src_path),
-                       GP_ProgressCallback GP_UNUSED(*callback))
-{
-	errno = ENOSYS;
-	return NULL;
-}
-
 #endif /* HAVE_GIFLIB */
 
+GP_Context *GP_LoadGIF(const char *src_path, GP_ProgressCallback *callback)
+{
+	return GP_LoaderLoadImage(&GP_GIF, src_path, callback);
+}
+
 struct GP_Loader GP_GIF = {
+#ifdef HAVE_GIFLIB
 	.Read = GP_ReadGIF,
-	.Load = GP_LoadGIF,
-	.Save = NULL,
+#endif
 	.Match = GP_MatchGIF,
+
 	.fmt_name = "Graphics Interchange Format",
 	.extensions = {"gif", NULL},
 };

@@ -536,25 +536,6 @@ err0:
 	return NULL;
 }
 
-GP_Context *GP_LoadTIFF(const char *src_path, GP_ProgressCallback *callback)
-{
-	GP_IO *io;
-	GP_Context *res;
-	int err;
-
-	io = GP_IOFile(src_path, GP_IO_RDONLY);
-	if (!io)
-		return NULL;
-
-	res = GP_ReadTIFF(io, callback);
-
-	err = errno;
-	GP_IOClose(io);
-	errno = err;
-
-	return res;
-}
-
 static int save_grayscale(TIFF *tiff, const GP_Context *src,
                           GP_ProgressCallback *callback)
 {
@@ -746,13 +727,6 @@ GP_Context *GP_ReadTIFF(GP_IO GP_UNUSED(*io),
 	return NULL;
 }
 
-GP_Context *GP_LoadTIFF(const char GP_UNUSED(*src_path),
-                        GP_ProgressCallback GP_UNUSED(*callback))
-{
-	errno = ENOSYS;
-	return NULL;
-}
-
 int GP_SaveTIFF(const GP_Context GP_UNUSED(*src),
                 const char GP_UNUSED(*dst_path),
                 GP_ProgressCallback GP_UNUSED(*callback))
@@ -763,10 +737,16 @@ int GP_SaveTIFF(const GP_Context GP_UNUSED(*src),
 
 #endif /* HAVE_TIFF */
 
+GP_Context *GP_LoadTIFF(const char *src_path, GP_ProgressCallback *callback)
+{
+	return GP_LoaderLoadImage(&GP_TIFF, src_path, callback);
+}
+
 struct GP_Loader GP_TIFF = {
+#ifdef HAVE_TIFF
 	.Read = GP_ReadTIFF,
-	.Load = GP_LoadTIFF,
 	.Save = GP_SaveTIFF,
+#endif
 	.Match = GP_MatchTIFF,
 
 	.fmt_name = "Tag Image File Format",

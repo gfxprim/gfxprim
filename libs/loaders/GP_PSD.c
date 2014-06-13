@@ -813,27 +813,11 @@ err:
 
 GP_Context *GP_LoadPSD(const char *src_path, GP_ProgressCallback *callback)
 {
-	GP_IO *io;
-	GP_Context *res;
-	int err;
-
-	io = GP_IOFile(src_path, GP_IO_RDONLY);
-	if (!io)
-		return NULL;
-
-	res = GP_ReadPSD(io, callback);
-
-	err = errno;
-	GP_IOClose(io);
-	errno = err;
-
-	return res;
+	return GP_LoaderLoadImage(&GP_PSD, src_path, callback);
 }
 
 struct GP_Loader GP_PSD = {
 	.Read = GP_ReadPSD,
-	.Load = GP_LoadPSD,
-	.Save = NULL,
 	.Match = GP_MatchPSD,
 
 	.fmt_name = "Adobe Photoshop Image",

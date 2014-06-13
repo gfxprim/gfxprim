@@ -91,9 +91,7 @@ static int save(const GP_Context *img, const char *dst_path,
 }
 
 GP_Loader loader = {
-	.Load = NULL,
 	.Save = save,
-	.Match = NULL,
 	.fmt_name = "ASCII Art",
 	.extensions = {"txt", NULL},
 };

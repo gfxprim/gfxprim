@@ -290,25 +290,6 @@ err1:
 	return NULL;
 }
 
-GP_Context *GP_LoadJPG(const char *src_path, GP_ProgressCallback *callback)
-{
-	GP_IO *io;
-	GP_Context *res;
-	int err;
-
-	io = GP_IOFile(src_path, GP_IO_RDONLY);
-	if (!io)
-		return NULL;
-
-	res = GP_ReadJPG(io, callback);
-
-	err = errno;
-	GP_IOClose(io);
-	errno = err;
-
-	return res;
-}
-
 #define JPEG_COM_MAX 128
 
 static void read_jpg_metadata(struct jpeg_decompress_struct *cinfo,
@@ -564,13 +545,6 @@ GP_Context *GP_ReadJPG(GP_IO GP_UNUSED(*io),
 	return NULL;
 }
 
-GP_Context *GP_LoadJPG(const char GP_UNUSED(*src_path),
-                       GP_ProgressCallback GP_UNUSED(*callback))
-{
-	errno = ENOSYS;
-	return NULL;
-}
-
 int GP_ReadJPGMetaData(GP_IO GP_UNUSED(*io), GP_MetaData GP_UNUSED(*data))
 {
 	errno = ENOSYS;
@@ -594,10 +568,16 @@ int GP_SaveJPG(const GP_Context GP_UNUSED(*src),
 
 #endif /* HAVE_JPEG */
 
+GP_Context *GP_LoadJPG(const char *src_path, GP_ProgressCallback *callback)
+{
+	return GP_LoaderLoadImage(&GP_JPG, src_path, callback);
+}
+
 struct GP_Loader GP_JPG = {
+#ifdef HAVE_JPEG
 	.Read = GP_ReadJPG,
-	.Load = GP_LoadJPG,
 	.Save = GP_SaveJPG,
+#endif
 	.Match = GP_MatchJPG,
 
 	.fmt_name = "JPEG",

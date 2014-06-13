@@ -491,27 +491,11 @@ err0:
 
 GP_Context *GP_LoadPSP(const char *src_path, GP_ProgressCallback *callback)
 {
-	GP_IO *io;
-	GP_Context *res;
-	int err;
-
-	io = GP_IOFile(src_path, GP_IO_RDONLY);
-	if (!io)
-		return NULL;
-
-	res = GP_ReadPSP(io, callback);
-
-	err = errno;
-	GP_IOClose(io);
-	errno = err;
-
-	return res;
+	return GP_LoaderLoadImage(&GP_PSP, src_path, callback);
 }
 
 struct GP_Loader GP_PSP = {
 	.Read = GP_ReadPSP,
-	.Load = GP_LoadPSP,
-	.Save = NULL,
 	.Match = GP_MatchPSP,
 	.fmt_name = "Paint Shop Pro Image",
 	.extensions = {"psp", "pspimage", NULL},

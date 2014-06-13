@@ -126,7 +126,6 @@ void GP_ListLoaders(void)
 	for (i = 0; loaders[i]; i++) {
 		printf("Format: %s\n", loaders[i]->fmt_name);
 		printf("Read:\t%s\n", loaders[i]->Read ? "Yes" : "No");
-		printf("Load:\t%s\n", loaders[i]->Load ? "Yes" : "No");
 		printf("Save:\t%s\n", loaders[i]->Save ? "Yes" : "No");
 		printf("Match:\t%s\n", loaders[i]->Match ? "Yes" : "No");
 		printf("Extensions: ");
@@ -268,6 +267,31 @@ GP_Context *GP_ReadImage(GP_IO *io, GP_ProgressCallback *callback)
 	return loader->Read(io, callback);
 }
 
+GP_Context *GP_LoaderLoadImage(const GP_Loader *self, const char *src_path,
+                               GP_ProgressCallback *callback)
+{
+	GP_IO *io;
+	GP_Context *res;
+	int err;
+
+	if (!self->Read) {
+		errno = ENOSYS;
+		return NULL;
+	}
+
+	io = GP_IOFile(src_path, GP_IO_RDONLY);
+	if (!io)
+		return NULL;
+
+	res = self->Read(io, callback);
+
+	err = errno;
+	GP_IOClose(io);
+	errno = err;
+
+	return res;
+}
+
 GP_Context *GP_LoadImage(const char *src_path, GP_ProgressCallback *callback)
 {
 	int err;
@@ -295,8 +319,8 @@ GP_Context *GP_LoadImage(const char *src_path, GP_ProgressCallback *callback)
 
 	ext_load = loader_by_filename(src_path);
 
-	if (ext_load != NULL && ext_load->Load != NULL) {
-		img = ext_load->Load(src_path, callback);
+	if (ext_load) {
+		img = GP_LoaderLoadImage(ext_load, src_path, callback);
 
 		if (img)
 			return img;
@@ -316,8 +340,8 @@ GP_Context *GP_LoadImage(const char *src_path, GP_ProgressCallback *callback)
 			src_path, ext_load->fmt_name, sig_load->fmt_name);
 	}
 
-	if (sig_load && sig_load->Load != NULL)
-		return sig_load->Load(src_path, callback);
+	if (sig_load)
+		return GP_LoaderLoadImage(sig_load, src_path, callback);
 
 	errno = ENOSYS;
 	return NULL;

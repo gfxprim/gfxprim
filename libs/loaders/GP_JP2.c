@@ -225,25 +225,6 @@ err0:
 	return res;
 }
 
-GP_Context *GP_LoadJP2(const char *src_path, GP_ProgressCallback *callback)
-{
-	GP_IO *io;
-	GP_Context *res;
-	int err;
-
-	io = GP_IOFile(src_path, GP_IO_RDONLY);
-	if (!io)
-		return NULL;
-
-	res = GP_ReadJP2(io, callback);
-
-	err = errno;
-	GP_IOClose(io);
-	errno = err;
-
-	return res;
-}
-
 #else
 
 GP_Context *GP_ReadJP2(GP_IO GP_UNUSED(*io),
@@ -253,19 +234,17 @@ GP_Context *GP_ReadJP2(GP_IO GP_UNUSED(*io),
 	return NULL;
 }
 
-GP_Context *GP_LoadJP2(const char GP_UNUSED(*src_path),
-                       GP_ProgressCallback GP_UNUSED(*callback))
-{
-	errno = ENOSYS;
-	return NULL;
-}
-
 #endif /* HAVE_OPENJPEG */
 
+GP_Context *GP_LoadJP2(const char *src_path, GP_ProgressCallback *callback)
+{
+	return GP_LoaderLoadImage(&GP_JP2, src_path, callback);
+}
+
 struct GP_Loader GP_JP2 = {
+#ifdef HAVE_OPENJPEG
 	.Read = GP_ReadJP2,
-	.Load = GP_LoadJP2,
-	.Save = NULL,
+#endif
 	.Match = GP_MatchJP2,
 
 	.fmt_name = "JPEG 2000",
