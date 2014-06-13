@@ -146,6 +146,20 @@ static int zlib_reset(struct priv *priv)
 	return 0;
 }
 
+static off_t zlib_seek_end(GP_IO *io)
+{
+	struct priv *priv = GP_IO_PRIV(io);
+	char buf[BUFS];
+	int ret;
+
+	while ((ret = zlib_read(io, buf, sizeof(buf))) > 0);
+
+	if (ret < 0)
+		return (off_t)-1;
+
+	return priv->bytes_read;
+}
+
 static off_t zlib_seek(GP_IO *io, off_t offset, enum GP_IOWhence whence)
 {
 	struct priv *priv = GP_IO_PRIV(io);
@@ -175,6 +189,10 @@ static off_t zlib_seek(GP_IO *io, off_t offset, enum GP_IOWhence whence)
 
 		return 0;
 	}
+
+	if (whence == GP_IO_SEEK_END && offset == 0)
+		return zlib_seek_end(io);
+
 out:
 	errno = ENOSYS;
 	return (off_t)-1;
