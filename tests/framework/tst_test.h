@@ -130,4 +130,9 @@ int tst_warn(const char *fmt, ...)
 int tst_err(const char *fmt, ...)
 	__attribute__ ((format (printf, 1, 2)));
 
+/*
+ * Translates errno number into short string, i.e. EFOO
+ */
+const char *tst_strerr(int err);
+
 #endif /* TST_TEST_H */

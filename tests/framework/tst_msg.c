@@ -92,3 +92,58 @@ void tst_msg_print(const struct tst_msg_store *self)
 	for (msg = self->first; msg != NULL; msg = msg->next)
 		fprintf(stderr, "%c: %s\n", type_to_char(msg->type), msg->msg);
 }
+
+#define ERR(err) \
+	case err: \
+		return #err \
+
+const char *tst_strerr(int err)
+{
+	switch (err) {
+	case 0:
+		return "SUCCESS";
+	/* asm-generic/errno-base.h */
+	ERR(EPERM);
+	ERR(ENOENT);
+	ERR(ESRCH);
+	ERR(EINTR);
+	ERR(EIO);
+	ERR(ENXIO);
+	ERR(E2BIG);
+	ERR(ENOEXEC);
+	ERR(EBADF);
+	ERR(ECHILD);
+	ERR(EAGAIN);
+	ERR(ENOMEM);
+	ERR(EACCES);
+	ERR(EFAULT);
+	ERR(ENOTBLK);
+	ERR(EBUSY);
+	ERR(EEXIST);
+	ERR(EXDEV);
+	ERR(ENODEV);
+	ERR(ENOTDIR);
+	ERR(EISDIR);
+	ERR(EINVAL);
+	ERR(ENFILE);
+	ERR(EMFILE);
+	ERR(ENOTTY);
+	ERR(ETXTBSY);
+	ERR(EFBIG);
+	ERR(ENOSPC);
+	ERR(ESPIPE);
+	ERR(EROFS);
+	ERR(EMLINK);
+	ERR(EPIPE);
+	ERR(EDOM);
+	ERR(ERANGE);
+
+	/* a few from asm-generic/errno.h */
+	ERR(EDEADLK);
+	ERR(ENAMETOOLONG);
+	ERR(ENOSYS);
+	ERR(ECANCELED);
+	default:
+		return "???";
+	}
+}
