@@ -37,10 +37,10 @@ endif
 
 $(DYNAMIC_LIB): $(LIB_OBJECTS)
 ifdef VERBOSE
-	$(CC) -fPIC -dPIC --shared -Wl,-soname -Wl,$(SONAME) $^ -lm $(LDLIBS_core) -o $@
+	$(CC) -fPIC -dPIC --shared -Wl,-soname -Wl,$(SONAME) $^ -lm -lrt $(LDLIBS_core) -o $@
 else
 	@echo "LD   $@"
-	@$(CC) -fPIC -dPIC --shared -Wl,-soname -Wl,$(SONAME) $^ -lm $(LDLIBS_core) -o $@
+	@$(CC) -fPIC -dPIC --shared -Wl,-soname -Wl,$(SONAME) $^ -lm -lrt $(LDLIBS_core) -o $@
 endif
 
 $(SYMLINKS): $(DYNAMIC_LIB)
