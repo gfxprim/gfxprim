@@ -386,6 +386,20 @@ int GP_LoadPNGMetaData(const char *src_path, GP_MetaData *data)
 	return ret;
 }
 
+static GP_PixelType save_ptypes[] = {
+	GP_PIXEL_BGR888,
+	GP_PIXEL_RGB888,
+	GP_PIXEL_G1,
+	GP_PIXEL_G2,
+	GP_PIXEL_G4,
+	GP_PIXEL_G8,
+#ifdef GP_PIXEL_G16
+	GP_PIXEL_G16,
+#endif
+	GP_PIXEL_RGBA8888,
+	GP_PIXEL_UNKNOWN,
+};
+
 /*
  * Maps gfxprim Pixel Type to the PNG format
  */
@@ -637,6 +651,7 @@ GP_Loader GP_PNG = {
 #ifdef HAVE_LIBPNG
 	.Read = GP_ReadPNG,
 	.Save = GP_SavePNG,
+	.save_ptypes = save_ptypes,
 #endif
 	.Match = GP_MatchPNG,
 

@@ -632,6 +632,17 @@ static int save_rgb(TIFF *tiff, const GP_Context *src,
 	return 0;
 }
 
+static GP_PixelType save_ptypes[] = {
+	GP_PIXEL_BGR888,
+	GP_PIXEL_RGB888,
+	GP_PIXEL_xRGB8888,
+	GP_PIXEL_G1,
+	GP_PIXEL_G2,
+	GP_PIXEL_G4,
+	GP_PIXEL_G8,
+	GP_PIXEL_UNKNOWN,
+};
+
 int GP_SaveTIFF(const GP_Context *src, const char *dst_path,
                 GP_ProgressCallback *callback)
 {
@@ -746,6 +757,7 @@ struct GP_Loader GP_TIFF = {
 #ifdef HAVE_TIFF
 	.Read = GP_ReadTIFF,
 	.Save = GP_SaveTIFF,
+	.save_ptypes = save_ptypes,
 #endif
 	.Match = GP_MatchTIFF,
 

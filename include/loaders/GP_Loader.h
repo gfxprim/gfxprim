@@ -92,6 +92,14 @@ typedef struct GP_Loader {
 	int (*Save)(const GP_Context *src, const char *dst_path, GP_ProgressCallback *callback);
 
 	/*
+	 * GP_PIXEL_UNKNOWN terminated array of formats loader supports for save.
+	 *
+	 * This is _NOT_ a complete list loaders is able to save, due to automatic
+	 * conversions (i.e. RGB888 vs BRG888).
+	 */
+	const GP_PixelType *save_ptypes;
+
+	/*
 	 * The buffer is filled with 32 bytes from an image start, returns 1 if
 	 * image signature was found zero otherwise.
 	 */

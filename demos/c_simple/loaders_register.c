@@ -90,8 +90,14 @@ static int save(const GP_Context *img, const char *dst_path,
 	return 0;
 }
 
+static GP_PixelType save_ptypes[] = {
+	GP_PIXEL_G2,
+	GP_PIXEL_UNKNOWN,
+};
+
 GP_Loader loader = {
 	.Save = save,
+	.save_ptypes = save_ptypes,
 	.fmt_name = "ASCII Art",
 	.extensions = {"txt", NULL},
 };

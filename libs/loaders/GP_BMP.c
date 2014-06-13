@@ -895,6 +895,7 @@ int GP_SaveBMP(const GP_Context *src, const char *dst_path,
 struct GP_Loader GP_BMP = {
 	.Read = GP_ReadBMP,
 	.Save = GP_SaveBMP,
+	.save_ptypes = out_pixel_types,
 	.Match = GP_MatchBMP,
 
 	.fmt_name = "BMP",

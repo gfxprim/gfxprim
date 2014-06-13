@@ -127,9 +127,17 @@ void GP_ListLoaders(void)
 		printf("Format: %s\n", loaders[i]->fmt_name);
 		printf("Read:\t%s\n", loaders[i]->Read ? "Yes" : "No");
 		printf("Save:\t%s\n", loaders[i]->Save ? "Yes" : "No");
+		if (loaders[i]->save_ptypes) {
+			printf("Saves Pixel Types: ");
+			for (j = 0; loaders[i]->save_ptypes[j]; j++) {
+				GP_PixelType ptype = loaders[i]->save_ptypes[j];
+				printf("%s ", GP_PixelTypeName(ptype));
+			}
+			printf("\n");
+		}
 		printf("Match:\t%s\n", loaders[i]->Match ? "Yes" : "No");
 		printf("Extensions: ");
-		for (j = 0; loaders[i]->extensions[j] != NULL; j++)
+		for (j = 0; loaders[i]->extensions[j]; j++)
 			printf("%s ", loaders[i]->extensions[j]);
 		printf("\n");
 

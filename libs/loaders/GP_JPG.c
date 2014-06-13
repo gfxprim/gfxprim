@@ -577,6 +577,7 @@ struct GP_Loader GP_JPG = {
 #ifdef HAVE_JPEG
 	.Read = GP_ReadJPG,
 	.Save = GP_SaveJPG,
+	.save_ptypes = out_pixel_types,
 #endif
 	.Match = GP_MatchJPG,
 

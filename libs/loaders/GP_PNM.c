@@ -712,6 +712,11 @@ GP_Context *GP_ReadPBM(GP_IO *io, GP_ProgressCallback *callback)
 	return read_bitmap(&buf, &header, callback);
 }
 
+static GP_PixelType pbm_save_pixels[] = {
+	GP_PIXEL_G1,
+	GP_PIXEL_UNKNOWN,
+};
+
 int GP_SavePBM(const GP_Context *src, const char *dst_path,
                GP_ProgressCallback *callback)
 {
@@ -878,6 +883,14 @@ static int pixel_to_depth(GP_Pixel pixel)
 		return -1;
 	}
 }
+
+static GP_PixelType pgm_save_pixels[] = {
+	GP_PIXEL_G1,
+	GP_PIXEL_G2,
+	GP_PIXEL_G4,
+	GP_PIXEL_G8,
+	GP_PIXEL_UNKNOWN,
+};
 
 int GP_SavePGM(const GP_Context *src, const char *dst_path,
                GP_ProgressCallback *callback)
@@ -1131,6 +1144,15 @@ GP_Context *GP_ReadPNM(GP_IO *io, GP_ProgressCallback *callback)
 	return ret;
 }
 
+static GP_PixelType pnm_save_pixels[] = {
+	GP_PIXEL_G1,
+	GP_PIXEL_G2,
+	GP_PIXEL_G4,
+	GP_PIXEL_G8,
+	GP_PIXEL_RGB888,
+	GP_PIXEL_UNKNOWN,
+};
+
 int GP_SavePNM(const GP_Context *src, const char *dst_path,
                GP_ProgressCallback *callback)
 {
@@ -1174,6 +1196,7 @@ GP_Context *GP_LoadPNM(const char *src_path, GP_ProgressCallback *callback)
 struct GP_Loader GP_PBM = {
 	.Read = GP_ReadPBM,
 	.Save = GP_SavePBM,
+	.save_ptypes = pbm_save_pixels,
 	.Match = GP_MatchPBM,
 
 	.fmt_name = "Netpbm portable Bitmap",
@@ -1183,6 +1206,7 @@ struct GP_Loader GP_PBM = {
 struct GP_Loader GP_PGM = {
 	.Read = GP_ReadPGM,
 	.Save = GP_SavePGM,
+	.save_ptypes = pgm_save_pixels,
 	.Match = GP_MatchPGM,
 
 	.fmt_name = "Netpbm portable Graymap",
@@ -1192,6 +1216,7 @@ struct GP_Loader GP_PGM = {
 struct GP_Loader GP_PPM = {
 	.Read = GP_ReadPPM,
 	.Save = GP_SavePPM,
+	.save_ptypes = ppm_save_pixels,
 	.Match = GP_MatchPPM,
 
 	.fmt_name = "Netpbm portable Pixmap",
@@ -1201,6 +1226,7 @@ struct GP_Loader GP_PPM = {
 struct GP_Loader GP_PNM = {
 	.Read = GP_ReadPNM,
 	.Save = GP_SavePNM,
+	.save_ptypes = pnm_save_pixels,
 	/*
 	 * Avoid double Match
 	 * This format is covered by PBM, PGM and PPM
