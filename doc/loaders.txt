@@ -36,7 +36,7 @@ returned.
   'write()', ...
 | 'ENOENT' if file doesn't exist
 | 'EACCES' if process doesn't have rights to open the file
-| 'ENOSYS' if GFXprim wasn't compiled with particular library support
+| 'ENOSYS' if GFXprim wasn't compiled with particular format support
 | 'ENOMEM' if returned by 'malloc()'
 | 'EIO', 'EINVAL' invalid image data (wrong signature, wrong or too short
   header or image data)
@@ -110,12 +110,12 @@ Advanced Interface
 -------------------------------------------------------------------------------
 typedef struct GP_Loader {
 	/*
-	 *  Loads an image.
+	 * Reads an image from an IO stream.
 	 *
-	 *  Returns allocated and initialized bitmap on success, NULL on failure
-	 *  and errno must be set.
+	 * Returns newly allocated context cotaining the loaded image or in
+	 * case of failure NULL and errno is set.
 	 */
-	GP_Context *(*Load)(const char *src_path, GP_ProgressCallback *callback);
+	GP_Context *(*Read)(GP_IO *io, GP_ProgressCallback *callback);
 
 	/*
 	 * Save an image.
@@ -124,6 +124,14 @@ typedef struct GP_Loader {
 	 */
 	int (*Save)(const GP_Context *src, const char *dst_path,
 	            GP_ProgressCallback *callback);
+
+	/*
+	 * GP_PIXEL_UNKNOWN terminated array of formats loader supports for save.
+	 *
+	 * This is _NOT_ a complete list loaders is able to save, due to automatic
+	 * conversions (i.e. RGB888 vs BRG888).
+	 */
+	const GP_PixelType *save_ptypes;
 
 	/*
 	 * The buffer is filled with 32 bytes from an image start, returns 1 if
@@ -136,49 +144,49 @@ typedef struct GP_Loader {
 	 */
 	const char *fmt_name;
 
-	/* don't touch */
-	struct GP_Loader *next;
-
 	/*
 	 * NULL terminated array of file extensions.
 	 */
 	const char *extensions[];
 } GP_Loader;
-
-/*
- * List loaders into the stdout.
- */
-void GP_ListLoaders(void);
-
-/*
- * Register a loader.
- */
-void GP_LoaderRegister(GP_Loader *self);
-
-/*
- * Unregister loader.
- */
-void GP_LoaderUnregister(GP_Loader *self);
 -------------------------------------------------------------------------------
 
 The 'GP_Loader' structure describes an image loader.
 
-The 'Load', 'Save' and 'Match' functions could be NULL if the particular
+The 'Read', 'Save' and 'Match' functions could be NULL if the particular
 functionality is not implemented.
 
 The 'fmt_name' is a short string that describes the format. For example:
 'Netbpm portable pixmap'.
 
-The extensions is NULL-terminated array of strings that holds all possible
+The 'extensions' is NULL-terminated array of strings that holds all possible
 extensions that are commonly used for this image format.
 
-All internal loaders are all described in list of this structures which is
-used to implement functions such as 'GP_LoadImage()'.
+[source,c]
+-------------------------------------------------------------------------------
+#include <loaders/GP_Loader.h>
+/* or */
+#include <GP.h>
 
-You can print currently active loaders via the 'GP_ListLoaders()'. Register and
-unregister your own loaders by 'GP_LoaderRegister()' and
-'GP_LoaderUnregister()'. Once image loader is registered the generic loading
-functions can use it to load and save images.
+void GP_ListLoaders(void);
+
+int GP_LoaderRegister(const GP_Loader *self);
+
+void GP_LoaderUnregister(const GP_Loader *self);
+-------------------------------------------------------------------------------
+
+The 'GP_ListLoaders()' function prints all currently registered loaders and
+their capabilities into the stdout.
+
+You can register and unregister your own loader by 'GP_LoaderRegister()' and
+'GP_LoaderUnregister()'. Once image loader is registered it's automatically
+used by all loaders functions.
+
+The 'GP_LoaderRegister()' can fail (return non-zero) if you try to register
+loader that is allready registered or if the loaders table is full (the table
+size is compile time constant and there should be space for at least fifty
+user defined loaders). I this cases the errno would be set to 'EEXIST' or
+'ENOSPC' respectively.
 
 TIP: For example usage see image loader registration
 link:example_loader_registration.html[example].
@@ -189,7 +197,7 @@ link:example_loader_registration.html[example].
 /* or */
 #include <GP.h>
 
-const GP_Loader *GP_MatchSignature(const void *buf)
+const GP_Loader *GP_LoaderBySignature(const void *buf)
 -------------------------------------------------------------------------------
 
 Returns pointer to image loader accordingly to image signature or NULL if no
@@ -202,15 +210,30 @@ bytes long.
 /* or */
 #include <GP.h>
 
-const GP_Loader *GP_MatchExtension(const char *path)
+const GP_Loader *GP_LoaderByFilename(const char *path)
 -------------------------------------------------------------------------------
 
 Matches loader by the file extension. This function does not check that the
-file exists or that it could be opened it only looks at the extension (i.e.
-string after the dot) and matches it against known extensions.
+file exists or that it could be opened etc. It only looks at the file
+extension (i.e. string at the end of the path after a dot) and matches it
+against extensions defined by loaders.
 
-WARNING: If you attempt to modify the content of the structure the behavior is
-         undefined. Most likely the program will crash.
+[source,c]
+-------------------------------------------------------------------------------
+#include <loaders/GP_Loader.h>
+/* or */
+#include <GP.h>
+
+GP_Context *GP_LoaderLoadImage(const GP_Loader *self, const char *src_path,
+                               GP_ProgressCallback *callback);
+-------------------------------------------------------------------------------
+
+Loads an image given a loader structure.
+
+Returns NULL and sets errno to 'ENOSYS' loader 'Read()' callback is NULL.
+
+Otherwise prepares a link:loaders_io.html[GP_IO] from the 'src_path' file,
+calls the 'Read()' callbacks and closes the 'IO' before the call returns.
 
 [[PNG]]
 PNG Loader

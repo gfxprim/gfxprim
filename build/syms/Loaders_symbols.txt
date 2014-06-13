@@ -81,8 +81,9 @@ GP_PSD
 GP_SaveTmpFile
 GP_LoadTmpFile
 
-GP_MatchSignature
-GP_MatchExtension
+GP_LoaderBySignature
+GP_LoaderByFilename
+GP_LoaderLoadImage
 GP_ReadImage
 GP_LoadImage
 GP_SaveImage

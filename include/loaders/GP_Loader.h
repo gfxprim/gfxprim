@@ -120,19 +120,20 @@ typedef struct GP_Loader {
  * Takes pointer to buffer at least 32 bytes long and returns a pointer to
  * matched loader or NULL.
  */
-const GP_Loader *GP_MatchSignature(const void *buf);
+const GP_Loader *GP_LoaderBySignature(const void *buf);
 
 /*
- * Tries to match loader by extension. Returns NULL if no loader was found.
+ * Tries to match loader by filename extension. Returns NULL if no loader was
+ * found.
  */
-const GP_Loader *GP_MatchExtension(const char *path);
+const GP_Loader *GP_LoaderByFilename(const char *path);
 
 /*
  * Registers additional loader.
  *
  * Returns zero on success, non-zero if table of loaders was is full.
  */
-int GP_LoaderRegister(GP_Loader *self);
+int GP_LoaderRegister(const GP_Loader *self);
 
 /*
  * Unregisters a loader.
@@ -141,7 +142,7 @@ int GP_LoaderRegister(GP_Loader *self);
  *
  * You can unregister them using this function if you want.
  */
-void GP_LoaderUnregister(GP_Loader *self);
+void GP_LoaderUnregister(const GP_Loader *self);
 
 /*
  * Generic LoadImage for a given loader.

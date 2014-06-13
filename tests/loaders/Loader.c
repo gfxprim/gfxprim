@@ -117,7 +117,7 @@ static int loader_by_extension(void)
 		return TST_FAILED;
 	}
 
-	loader = GP_MatchExtension("file.jpg");
+	loader = GP_LoaderByFilename("file.jpg");
 
 	if (loader != &GP_JPG) {
 		tst_msg("Failed to get JPEG loader");
@@ -126,7 +126,7 @@ static int loader_by_extension(void)
 		tst_msg("Succeded to get JPEG loader");
 	}
 
-	loader = GP_MatchExtension("file.test");
+	loader = GP_LoaderByFilename("file.test");
 
 	if (loader != &test_loader) {
 		tst_msg("Failed to get registered TEST loader");
@@ -155,7 +155,7 @@ const struct tst_suite tst_suite = {
 		 .tst_fn = register_loader_twice,
 		 .flags = TST_CHECK_MALLOC},
 
-		{.name = "MatchExtension()",
+		{.name = "LoaderByFilename()",
 		 .tst_fn = loader_by_extension,
 		 .flags = TST_CHECK_MALLOC},
 

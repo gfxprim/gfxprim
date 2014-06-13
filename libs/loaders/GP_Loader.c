@@ -41,7 +41,7 @@
 
 #define MAX_LOADERS 64
 
-static GP_Loader *loaders[MAX_LOADERS] = {
+static const GP_Loader *loaders[MAX_LOADERS] = {
 	&GP_JPG,
 	&GP_PNG,
 	&GP_TIFF,
@@ -69,7 +69,7 @@ static unsigned int get_last_loader(void)
 	return i - 1;
 }
 
-int GP_LoaderRegister(GP_Loader *self)
+int GP_LoaderRegister(const GP_Loader *self)
 {
 	unsigned int i;
 
@@ -99,7 +99,7 @@ int GP_LoaderRegister(GP_Loader *self)
 	return 0;
 }
 
-void GP_LoaderUnregister(GP_Loader *self)
+void GP_LoaderUnregister(const GP_Loader *self)
 {
 	unsigned int i, last = get_last_loader();
 
@@ -146,7 +146,7 @@ void GP_ListLoaders(void)
 	}
 }
 
-static struct GP_Loader *loader_by_extension(const char *ext)
+static const GP_Loader *loader_by_extension(const char *ext)
 {
 	unsigned int i, j;
 
@@ -178,7 +178,7 @@ static const char *get_ext(const char *path)
 	return path + i + 1;
 }
 
-static struct GP_Loader *loader_by_filename(const char *path)
+const GP_Loader *GP_LoaderByFilename(const char *path)
 {
 	const char *ext = get_ext(path);
 
@@ -216,7 +216,7 @@ static const GP_Loader *loader_by_signature(const char *path)
 
 	fclose(f);
 
-	ret = GP_MatchSignature(buf);
+	ret = GP_LoaderBySignature(buf);
 
 	if (ret == NULL)
 		errno = ENOSYS;
@@ -254,7 +254,7 @@ GP_Context *GP_ReadImage(GP_IO *io, GP_ProgressCallback *callback)
 		return NULL;
 	}
 
-	loader = GP_MatchSignature(buf);
+	loader = GP_LoaderBySignature(buf);
 
 	if (!loader) {
 		GP_DEBUG(1, "Failed to find a loader by signature for"
@@ -325,7 +325,7 @@ GP_Context *GP_LoadImage(const char *src_path, GP_ProgressCallback *callback)
 	GP_Context *img;
 	const GP_Loader *ext_load = NULL, *sig_load;
 
-	ext_load = loader_by_filename(src_path);
+	ext_load = GP_LoaderByFilename(src_path);
 
 	if (ext_load) {
 		img = GP_LoaderLoadImage(ext_load, src_path, callback);
@@ -387,7 +387,7 @@ out:
 int GP_SaveImage(const GP_Context *src, const char *dst_path,
                  GP_ProgressCallback *callback)
 {
-	struct GP_Loader *l = loader_by_filename(dst_path);
+	const GP_Loader *l = GP_LoaderByFilename(dst_path);
 
 	if (l == NULL) {
 		errno = EINVAL;
@@ -401,7 +401,7 @@ int GP_SaveImage(const GP_Context *src, const char *dst_path,
 	return 1;
 }
 
-const GP_Loader *GP_MatchSignature(const void *buf)
+const GP_Loader *GP_LoaderBySignature(const void *buf)
 {
 	unsigned int i;
 
@@ -415,9 +415,4 @@ const GP_Loader *GP_MatchSignature(const void *buf)
 	GP_DEBUG(1, "Loader not found");
 
 	return NULL;
-}
-
-const GP_Loader *GP_MatchExtension(const char *path)
-{
-	return loader_by_filename(path);
 }
