@@ -31,7 +31,7 @@ Loads an image from a file.
 
 First one is general purpose loader function that automatically detects the
 file format. The format is detected from file extension first and if this
-fails files signature is used.
+fails link:signatures.html[file signature] is used.
 
 |===============================================================================
 | May raise 'OSError' with errno set to 'EPERM', 'EISDIR', 'ENOENT' or any other

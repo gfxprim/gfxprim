@@ -3,12 +3,12 @@ Python Core module
 
 The python binding maps mostly to the C API with the 'GP_' prefix stripped.
 
-Structures like 'GP_Context' are not created by the 'GP_ContextAlloc()'
+However structures as 'GP_Context' are not created by the 'GP_ContextAlloc()'
 function but have proper constructor and destructor to keep the Python
 reference counting happy.
 
-There there are more complicated problems like 'GP_ProgressCallback' which
-needs a proxy function to call the python callback from the C code.
+Then there are a bit more tricky solutions, such as 'GP_ProgressCallback'
+which needs a proxy function to call the python callback from the C code.
 
 Context
 ~~~~~~~
@@ -29,7 +29,13 @@ Creates a context of a particular size and pixel type.
 First two parameters are 'width' and 'height' third is pixel type which is an
 enumeration
 
-May raise 'OSError' with 'ENOMEM' errno if allocation has failed.
+|===============================================================================
+| May raise 'OSError' with errno set to 'ENOMEM' if allocation has failed.
+
+| May raise 'OSError' with errno set to 'EINVAL' for invalid pixel type and/or
+  zero width or height.
+
+|===============================================================================
 
 [source,python]
 -------------------------------------------------------------------------------
@@ -88,18 +94,18 @@ import gfxprim.core as core
 
 Copy a rectangle from self to target.
 
-The blits can do simple conversions same as the 'Convert' functions however
-such blits are slower.
+The blits can do naive conversions (same as 'Convert') however such blits are
+a bit slower.
 
 Blit is clipped.
 
-TIP: See link:example_py_showimage.html[example] Blit usage.
+TIP: See link:example_py_showimage.html[example Blit usage].
 
 [[Colors_and_Pixels]]
 Colors and Pixels
 ~~~~~~~~~~~~~~~~~
 
-Pixel in gfxprim is a number large enough to store a pixel value. Pixel is
+Pixel in GFXprim is a number large enough to store a pixel value. Pixel is
 passed as a parameter to all drawing functions.
 
 Color is a more abstract representation for example RGB triplet.
@@ -139,9 +145,12 @@ The PixelTypes array stores all supported pixel types
 Progress Callback
 ~~~~~~~~~~~~~~~~~
 
-Progress callback is a last parameter of link:loaders_python.html[loaders] and
-link:filters_python.html[filters]. It can be either a python function or a
-touple with a function at the first position.
+Progress callback is the last parameter of link:loaders_python.html[loaders]
+and link:filters_python.html[filters]. It can be either a python function or a
+touple with a function at first position. In the latter case the second touple
+element is passed to the callback function as a second parameter. First
+parameter of the callback is a floating point number with the current progress
+in percents.
 
 Progress callback must return an integer number. Returning non-zero will abort
 the operation and the function, called with the callback as a parameter, will
@@ -163,9 +172,6 @@ import gfxprim.core as core
 
 Sets and gets the GFXprim debug level. See link:debug.html[debug messages]
 description for more details.
-
-
-
 
 These are basic 'Context' methods from core module. Importing other modules
 will add some other (for example gfx module adds all drawing functions).
