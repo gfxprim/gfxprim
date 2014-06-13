@@ -48,7 +48,7 @@ static GP_Loader *loaders[MAX_LOADERS] = {
 	&GP_GIF,
 	&GP_BMP,
 	&GP_PBM,
-	&GP_PNM,
+	&GP_PGM,
 	&GP_PPM,
 	&GP_PNM,
 	&GP_JP2,
