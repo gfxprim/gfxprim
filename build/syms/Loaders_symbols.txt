@@ -118,13 +118,16 @@ GP_LineConvertGet
 GP_IOFile
 GP_IOMem
 GP_IOSubIO
+GP_IOWBuffer
 GP_IOMark
 GP_IOSize
 GP_IOFill
+GP_IOFlush
 GP_IOReadF
 GP_IOReadB2
 GP_IOReadB4
 GP_IOWriteF
+GP_IOPrintF
 
 GP_IOZlib
 GP_IOZlibReset

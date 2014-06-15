@@ -79,6 +79,14 @@ static inline off_t GP_IOSeek(GP_IO *io, off_t off, enum GP_IOWhence whence)
 	return io->Seek(io, off, whence);
 }
 
+/*
+ * PutC returns zero on success, non-zero on failure.
+ */
+static inline int GP_IOPutC(GP_IO *io, char c)
+{
+	return io->Write(io, &c, 1) != 1;
+}
+
 //static inline void *GP_IOMap(GP_IO *io, size_t len, off_t off)
 //{
 //	return io->Map(io, len, off);
@@ -120,6 +128,13 @@ off_t GP_IOSize(GP_IO *io);
 int GP_IOFill(GP_IO *io, void *buf, size_t size);
 
 /*
+ * Like Write but either writes whole buffer or retuns error.
+ *
+ * Returns zero on succes non-zero on failure.
+ */
+int GP_IOFlush(GP_IO *io, void *buf, size_t size);
+
+/*
  * Marks a current position, returns to mark in I/O stream.
  */
 enum GP_IOMarkTypes {
@@ -134,7 +149,7 @@ int GP_IOMark(GP_IO *self, enum GP_IOMarkTypes type);
  *
  *
  */
-enum GP_IOReadFTypes {
+enum GP_IOFTypes {
 	/* Constant byte in lower half */
 	GP_IO_CONST = 0x0000,
 	/* Pointer to one byte */
@@ -176,6 +191,14 @@ int GP_IOReadF(GP_IO *self, uint16_t *types, ...);
 int GP_IOWriteF(GP_IO *self, uint16_t *types, ...);
 
 /*
+ * Printf like function.
+ *
+ * Returns zero on success, non-zero on failure.
+ */
+int GP_IOPrintF(GP_IO *self, const char *fmt, ...)
+    __attribute__ ((format (printf, 2, 3)));
+
+/*
  * GP_IOReadF wrappers for convinient reading of single value
  */
 int GP_IOReadB4(GP_IO *io, uint32_t *val);
@@ -212,5 +235,12 @@ GP_IO *GP_IOMem(void *buf, size_t size, void (*free)(void *));
  *          result is undefined.
  */
 GP_IO *GP_IOSubIO(GP_IO *pio, size_t size);
+
+/*
+ * Creates a writeable buffered I/O on the top of the existing I/O.
+ *
+ * Passing zero as bsize select default buffer size.
+ */
+GP_IO *GP_IOWBuffer(GP_IO *pio, size_t bsize);
 
 #endif /* LOADERS_GP_IO_H */

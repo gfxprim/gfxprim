@@ -374,6 +374,82 @@ GP_IO *GP_IOSubIO(GP_IO *pio, size_t size)
 	return io;
 }
 
+struct buf_io {
+	GP_IO *io;
+	size_t bsize;
+	size_t bpos;
+	uint8_t buf[];
+};
+
+static int wbuf_close(GP_IO *io)
+{
+	struct buf_io *buf_io = GP_IO_PRIV(io);
+	int ret = 0;
+
+	GP_DEBUG(1, "Closing BufferIO (from %p)", buf_io->io);
+
+	if (buf_io->bpos) {
+		if (GP_IOFlush(buf_io->io, buf_io->buf, buf_io->bsize))
+			ret = 1;
+	}
+
+	free(io);
+	return ret;
+}
+
+static ssize_t buf_write(GP_IO *io, void *buf, size_t size)
+{
+	struct buf_io *buf_io = GP_IO_PRIV(io);
+	size_t bfree = buf_io->bsize - buf_io->bpos;
+
+	if (bfree < size) {
+		GP_DEBUG(1, "Flusing BufferIO (%p)", io);
+		if (GP_IOFlush(buf_io->io, buf_io->buf, buf_io->bpos))
+			return -1;
+		buf_io->bpos = 0;
+	}
+
+	if (size > buf_io->bsize) {
+		GP_DEBUG(1, "Buffer too large, doing direct write (%p)", io);
+		if (GP_IOFlush(buf_io->io, buf, size))
+			return -1;
+		return size;
+	}
+
+	memcpy(buf_io->buf + buf_io->bpos, buf, size);
+	buf_io->bpos += size;
+	return size;
+}
+
+GP_IO *GP_IOWBuffer(GP_IO *pio, size_t bsize)
+{
+	GP_IO *io;
+	struct buf_io *buf_io;
+
+	if (!bsize)
+		bsize = 512;
+
+	GP_DEBUG(1, "Creating IOWBuffer (from %p) size=%zu", pio, bsize);
+
+	//TODO: Do not create buffer IO for MemIO, just copy the callbacks to new IO
+	io = malloc(sizeof(GP_IO) + sizeof(*buf_io) + bsize);
+
+	if (!io)
+		return NULL;
+
+	io->Write = buf_write;
+	io->Close = wbuf_close;
+	io->Read = NULL;
+	io->Seek = NULL;
+
+	buf_io = GP_IO_PRIV(io);
+	buf_io->io = pio;
+	buf_io->bsize = bsize;
+	buf_io->bpos = 0;
+
+	return io;
+}
+
 int GP_IOMark(GP_IO *self, enum GP_IOMarkTypes type)
 {
 	off_t ret;
@@ -439,6 +515,58 @@ int GP_IOFill(GP_IO *io, void *buf, size_t size)
 	} while (read < size);
 
 	return 0;
+}
+
+int GP_IOFlush(GP_IO *io, void *buf, size_t size)
+{
+	size_t wrote = 0;
+	int ret;
+
+	do {
+		ret = GP_IOWrite(io, (char*)buf + wrote, size - wrote);
+
+		if (ret <= 0) {
+			GP_DEBUG(1, "Failed to flush buffer: %s",
+			         strerror(errno));
+			return 1;
+		}
+
+		wrote += ret;
+
+	} while (wrote < size);
+
+	return 0;
+}
+
+int GP_IOPrintF(GP_IO *io, const char *fmt, ...)
+{
+	va_list va, vac;
+	size_t size;
+	int ret;
+	char buf[1024];
+	char *bufp = buf;
+
+	va_start(va, fmt);
+	va_copy(vac, va);
+	size = vsnprintf(buf, sizeof(buf), fmt, vac);
+	va_end(vac);
+
+	if (size >= sizeof(buf)) {
+		bufp = malloc(size+1);
+		if (!bufp)
+			return 1;
+
+		vsnprintf(bufp, size, fmt, va);
+	}
+
+	ret = GP_IOFlush(io, bufp, size);
+
+	if (size >= sizeof(buf))
+		free(bufp);
+
+	va_end(va);
+
+	return ret;
 }
 
 #define TYPE(x) ((x) & GP_IO_TYPE_MASK)
