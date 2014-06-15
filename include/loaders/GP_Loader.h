@@ -34,7 +34,6 @@
 #include "loaders/GP_IO.h"
 #include "loaders/GP_MetaData.h"
 
-
 /*
  * Reads an image from a IO stream.
  *
@@ -77,7 +76,7 @@ int GP_SaveImage(const GP_Context *src, const char *dst_path,
  */
 typedef struct GP_Loader {
 	/*
-	 * Reads an image from an IO stream.
+	 * Reads an image from an I/O stream.
 	 *
 	 * Returns newly allocated context cotaining the loaded image or in
 	 * case of failure NULL and errno is set.
@@ -85,11 +84,12 @@ typedef struct GP_Loader {
 	GP_Context *(*Read)(GP_IO *io, GP_ProgressCallback *callback);
 
 	/*
-	 * Save an image.
+	 * Writes an image into an I/O stream.
 	 *
-	 * Returns zero on succes, non-zero on failure and errno must be set.
+	 * Returns zero on success, non-zero on failure and errno must be set.
 	 */
-	int (*Save)(const GP_Context *src, const char *dst_path, GP_ProgressCallback *callback);
+	int (*Write)(const GP_Context *src, GP_IO *io,
+	             GP_ProgressCallback *callback);
 
 	/*
 	 * GP_PIXEL_UNKNOWN terminated array of formats loader supports for save.
@@ -152,6 +152,15 @@ void GP_LoaderUnregister(const GP_Loader *self);
  */
 GP_Context *GP_LoaderLoadImage(const GP_Loader *self, const char *src_path,
                                GP_ProgressCallback *callback);
+
+/*
+ * Generic SaveImage for a given loader.
+ *
+ * The function/ prepares the IO from file, calls the loader Write() method,
+ * closes the IO and returns the context.
+ */
+int GP_LoaderSaveImage(const GP_Loader *self, const GP_Context *src,
+                       const char *dst_path, GP_ProgressCallback *callback);
 
 /*
  * List loaders into the stdout

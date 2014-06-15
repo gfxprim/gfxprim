@@ -32,6 +32,9 @@ GP_Context *GP_ReadPBM(GP_IO *io, GP_ProgressCallback *callback);
 
 GP_Context *GP_LoadPBM(const char *src_path, GP_ProgressCallback *callback);
 
+int GP_WritePBM(const GP_Context *src, GP_IO *io,
+                GP_ProgressCallback *callback);
+
 int GP_SavePBM(const GP_Context *src, const char *dst_path,
                GP_ProgressCallback *callback);
 
@@ -43,6 +46,9 @@ GP_Context *GP_ReadPGM(GP_IO *io, GP_ProgressCallback *callback);
 GP_Context *GP_LoadPGM(const char *src_path,
                        GP_ProgressCallback *callback);
 
+int GP_WritePGM(const GP_Context *src, GP_IO *io,
+                GP_ProgressCallback *callback);
+
 int GP_SavePGM(const GP_Context *src, const char *dst_path,
                GP_ProgressCallback *callback);
 
@@ -53,6 +59,9 @@ GP_Context *GP_ReadPPM(GP_IO *io, GP_ProgressCallback *callback);
 
 GP_Context *GP_LoadPPM(const char *src_path, GP_ProgressCallback *callback);
 
+int GP_WritePPM(const GP_Context *src, GP_IO *io,
+                GP_ProgressCallback *callback);
+
 int GP_SavePPM(const GP_Context *src, const char *dst_path,
                GP_ProgressCallback *callback);
 
@@ -62,6 +71,9 @@ int GP_SavePPM(const GP_Context *src, const char *dst_path,
 GP_Context *GP_ReadPNM(GP_IO *io, GP_ProgressCallback *callback);
 
 GP_Context *GP_LoadPNM(const char *src_path, GP_ProgressCallback *callback);
+
+int GP_WritePNM(const GP_Context *src, GP_IO *io,
+                GP_ProgressCallback *callback);
 
 int GP_SavePNM(const GP_Context *src, const char *dst_path,
                GP_ProgressCallback *callback);

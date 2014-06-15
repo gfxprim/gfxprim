@@ -522,38 +522,41 @@ static int write_png_data(const GP_Context *src, png_structp png,
 	return 0;
 }
 
-int GP_SavePNG(const GP_Context *src, const char *dst_path,
-               GP_ProgressCallback *callback)
+static void write_data(png_structp png_ptr, png_bytep data, png_size_t len)
 {
-	FILE *f;
+	GP_IO *io = png_get_io_ptr(png_ptr);
+
+	if (GP_IOWrite(io, data, len) != (ssize_t)len)
+		png_error(png_ptr, "Write Error");
+}
+
+static void flush_data(png_structp png_ptr)
+{
+	(void)png_ptr;
+}
+
+int GP_WritePNG(const GP_Context *src, GP_IO *io,
+                GP_ProgressCallback *callback)
+{
 	png_structp png;
 	png_infop png_info = NULL;
 	int err;
 
-	GP_DEBUG(1, "Saving PNG Image '%s'", dst_path);
+	GP_DEBUG(1, "Writing PNG Image to I/O (%p)", io);
 
 	if (prepare_png_header(src, NULL, NULL, NULL)) {
 		GP_DEBUG(1, "Can't save png with %s pixel type",
 		         GP_PixelTypeName(src->pixel_type));
-		err = ENOSYS;
-		goto err0;
-	}
-
-	f = fopen(dst_path, "wb");
-
-	if (f == NULL) {
-		err = errno;
-		GP_DEBUG(1, "Failed to open '%s' for writing: %s",
-		         dst_path, strerror(errno));
-		goto err0;
+		errno = ENOSYS;
+		return 1;
 	}
 
 	png = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
 
 	if (png == NULL) {
 		GP_DEBUG(1, "Failed to allocate PNG write buffer");
-		err = ENOMEM;
-		goto err2;
+		errno = ENOMEM;
+		return 1;
 	}
 
 	png_info = png_create_info_struct(png);
@@ -561,17 +564,17 @@ int GP_SavePNG(const GP_Context *src, const char *dst_path,
 	if (png_info == NULL) {
 		GP_DEBUG(1, "Failed to allocate PNG info buffer");
 		err = ENOMEM;
-		goto err3;
+		goto err;
 	}
 
 	if (setjmp(png_jmpbuf(png))) {
 		GP_DEBUG(1, "Failed to write PNG file :(");
 		//TODO: should we get better error description from libpng?
 		err = EIO;
-		goto err3;
+		goto err;
 	}
 
-	png_init_io(png, f);
+	png_set_write_fn(png, io, write_data, flush_data);
 
 	int bit_endian_flag = 0;
 	/* Fill png header and prepare for data */
@@ -579,28 +582,15 @@ int GP_SavePNG(const GP_Context *src, const char *dst_path,
 
 	/* Write bitmap buffer */
 	if ((err = write_png_data(src, png, callback, bit_endian_flag)))
-		goto err3;
+		goto err;
 
 	png_write_end(png, png_info);
 	png_destroy_write_struct(&png, &png_info);
 
-	if (fclose(f)) {
-		err = errno;
-		GP_DEBUG(1, "Failed to close file '%s': %s",
-		         dst_path, strerror(errno));
-		goto err1;
-	}
-
 	GP_ProgressCallbackDone(callback);
-
 	return 0;
-err3:
+err:
 	png_destroy_write_struct(&png, png_info == NULL ? NULL : &png_info);
-err2:
-	fclose(f);
-err1:
-	unlink(dst_path);
-err0:
 	errno = err;
 	return 1;
 }
@@ -632,9 +622,8 @@ int GP_LoadPNGMetaData(const char GP_UNUSED(*src_path), GP_MetaData GP_UNUSED(*d
 	return 1;
 }
 
-int GP_SavePNG(const GP_Context GP_UNUSED(*src),
-               const char GP_UNUSED(*dst_path),
-               GP_ProgressCallback GP_UNUSED(*callback))
+int GP_WritePNG(const GP_Context *src, GP_IO GP_UNUSED(*io),
+                GP_ProgressCallback *callback)
 {
 	errno = ENOSYS;
 	return 1;
@@ -647,10 +636,16 @@ GP_Context *GP_LoadPNG(const char *src_path, GP_ProgressCallback *callback)
 	return GP_LoaderLoadImage(&GP_PNG, src_path, callback);
 }
 
+int GP_SavePNG(const GP_Context *src, const char *dst_path,
+               GP_ProgressCallback *callback)
+{
+	return GP_LoaderSaveImage(&GP_PNG, src, dst_path, callback);
+}
+
 GP_Loader GP_PNG = {
 #ifdef HAVE_LIBPNG
 	.Read = GP_ReadPNG,
-	.Save = GP_SavePNG,
+	.Write = GP_WritePNG,
 	.save_ptypes = save_ptypes,
 #endif
 	.Match = GP_MatchPNG,

@@ -39,10 +39,16 @@ GP_Context *GP_ReadTIFF(GP_IO *io, GP_ProgressCallback *callback);
 GP_Context *GP_LoadTIFF(const char *src_path, GP_ProgressCallback *callback);
 
 /*
+ * Writes TIFF into an I/O stream.
+ */
+int GP_WriteTIFF(const GP_Context *src, GP_IO *io,
+                 GP_ProgressCallback *callback);
+
+/*
  * Saves TIFF.
  */
 int GP_SaveTIFF(const GP_Context *src, const char *dst_path,
-                 GP_ProgressCallback *callback);
+                GP_ProgressCallback *callback);
 
 /*
  * Looks for TIFF file signature. Returns non-zero if found.

@@ -40,10 +40,6 @@
 #include "loaders/GP_LineConvert.h"
 #include "loaders/GP_JPG.h"
 
-#ifdef HAVE_JPEG
-
-#include <jpeglib.h>
-
 /*
  * 0xff 0xd8 - start of image
  * 0xff 0x.. - start of frame
@@ -55,6 +51,10 @@ int GP_MatchJPG(const void *buf)
 {
 	return !memcmp(buf, JPEG_SIGNATURE, JPEG_SIGNATURE_LEN);
 }
+
+#ifdef HAVE_JPEG
+
+#include <jpeglib.h>
 
 struct my_jpg_err {
 	struct jpeg_error_mgr error_mgr;
@@ -144,7 +144,7 @@ struct my_source_mgr {
 	GP_IO *io;
 };
 
-static void dummy(j_decompress_ptr GP_UNUSED(cinfo))
+static void dummy_src(j_decompress_ptr GP_UNUSED(cinfo))
 {
 }
 
@@ -157,12 +157,12 @@ static boolean fill_input_buffer(struct jpeg_decompress_struct *cinfo)
 
 	if (ret < 0) {
 		GP_WARN("Failed to fill buffer");
-		return 0;
+		return FALSE;
 	}
 
 	src->mgr.next_input_byte = src->buffer;
 	src->mgr.bytes_in_buffer = ret;
-	return 1;
+	return TRUE;
 }
 
 static void skip_input_data(struct jpeg_decompress_struct *cinfo, long num_bytes)
@@ -187,9 +187,9 @@ static void skip_input_data(struct jpeg_decompress_struct *cinfo, long num_bytes
 static inline void init_source_mgr(struct my_source_mgr *src, GP_IO *io,
                                    void *buf, size_t buf_size)
 {
-	src->mgr.init_source = dummy;
+	src->mgr.init_source = dummy_src;
 	src->mgr.resync_to_restart = jpeg_resync_to_restart;
-	src->mgr.term_source = dummy;
+	src->mgr.term_source = dummy_src;
 	src->mgr.fill_input_buffer = fill_input_buffer;
 	src->mgr.skip_input_data = skip_input_data;
 	src->mgr.bytes_in_buffer = 0;
@@ -431,22 +431,77 @@ static int save(struct jpeg_compress_struct *cinfo,
 	return 0;
 }
 
+struct my_dest_mgr {
+	struct jpeg_destination_mgr mgr;
+	void *buffer;
+	ssize_t size;
+	GP_IO *io;
+};
+
+static void dummy_dst(j_compress_ptr GP_UNUSED(cinfo))
+{
+}
+
+static boolean empty_output_buffer(j_compress_ptr cinfo)
+{
+	struct my_dest_mgr *dest = (void*)cinfo->dest;
+
+	if (GP_IOWrite(dest->io, dest->buffer, dest->size) != dest->size) {
+		GP_DEBUG(1, "Failed to write JPEG buffer");
+		return FALSE;
+	}
+
+	dest->mgr.next_output_byte = dest->buffer;
+	dest->mgr.free_in_buffer = dest->size;
+
+	return TRUE;
+}
+
+static void term_destination(j_compress_ptr cinfo)
+{
+	struct my_dest_mgr *dest = (void*)cinfo->dest;
+	ssize_t to_write = dest->size - dest->mgr.free_in_buffer;
+
+	if (to_write > 0) {
+		if (GP_IOWrite(dest->io, dest->buffer, to_write) != to_write) {
+			GP_DEBUG(1, "Failed to write JPEG buffer");
+			//TODO: Error handling
+			return;
+		}
+	}
+}
+
+static inline void init_dest_mgr(struct my_dest_mgr *dst, GP_IO *io,
+                                 void *buf, size_t buf_size)
+{
+	dst->mgr.init_destination = dummy_dst;
+	dst->mgr.empty_output_buffer = empty_output_buffer;
+	dst->mgr.term_destination = term_destination;
+	dst->mgr.next_output_byte = buf;
+	dst->mgr.free_in_buffer = buf_size;
+
+	dst->io = io;
+	dst->buffer = buf;
+	dst->size = buf_size;
+}
+
 static GP_PixelType out_pixel_types[] = {
 	GP_PIXEL_BGR888,
 	GP_PIXEL_G8,
 	GP_PIXEL_UNKNOWN
 };
 
-int GP_SaveJPG(const GP_Context *src, const char *dst_path,
-               GP_ProgressCallback *callback)
+int GP_WriteJPG(const GP_Context *src, GP_IO *io,
+                GP_ProgressCallback *callback)
 {
-	FILE *f;
 	struct jpeg_compress_struct cinfo;
 	GP_PixelType out_pix;
 	struct my_jpg_err my_err;
+	struct my_dest_mgr dst;
+	uint8_t buf[1024];
 	int err;
 
-	GP_DEBUG(1, "Saving JPG Image '%s'", dst_path);
+	GP_DEBUG(1, "Writing JPG Image to I/O (%p)", io);
 
 	out_pix = GP_LineConvertible(src->pixel_type, out_pixel_types);
 
@@ -457,19 +512,10 @@ int GP_SaveJPG(const GP_Context *src, const char *dst_path,
 		return 1;
 	}
 
-	f = fopen(dst_path, "wb");
-
-	if (f == NULL) {
-		err = errno;
-		GP_DEBUG(1, "Failed to open '%s' for writing: %s",
-		         dst_path, strerror(errno));
-		goto err0;
-	}
-
 	if (setjmp(my_err.setjmp_buf)) {
-		err = EIO;
-		//TODO: is cinfo allocated?
-		goto err2;
+		errno = EIO;
+		return 1;
+
 	}
 
 	cinfo.err = jpeg_std_error(&my_err.error_mgr);
@@ -477,7 +523,8 @@ int GP_SaveJPG(const GP_Context *src, const char *dst_path,
 
 	jpeg_create_compress(&cinfo);
 
-	jpeg_stdio_dest(&cinfo, f);
+	init_dest_mgr(&dst, io, buf, sizeof(buf));
+	cinfo.dest = (void*)&dst;
 
 	cinfo.image_width  = src->w;
 	cinfo.image_height = src->h;
@@ -504,45 +551,34 @@ int GP_SaveJPG(const GP_Context *src, const char *dst_path,
 	else
 		err = save(&cinfo, src, callback);
 
-	if (err)
-		goto err3;
+	if (err) {
+		jpeg_destroy_compress(&cinfo);
+		errno = err;
+		return 1;
+	}
 
 	jpeg_finish_compress(&cinfo);
 	jpeg_destroy_compress(&cinfo);
 
-	if (fclose(f)) {
-		err = errno;
-		GP_DEBUG(1, "Failed to close file '%s': %s",
-		         dst_path, strerror(errno));
-		goto err1;
-	}
 
 	GP_ProgressCallbackDone(callback);
 	return 0;
-err3:
-	jpeg_destroy_compress(&cinfo);
-err2:
-	fclose(f);
-err1:
-	unlink(dst_path);
-err0:
-	errno = err;
-	return 1;
 }
 
 #else
-
-int GP_MatchJPG(const void GP_UNUSED(*buf))
-{
-	errno = ENOSYS;
-	return -1;
-}
 
 GP_Context *GP_ReadJPG(GP_IO GP_UNUSED(*io),
                        GP_ProgressCallback GP_UNUSED(*callback))
 {
 	errno = ENOSYS;
 	return NULL;
+}
+
+int GP_WriteJPG(const GP_Context *src, GP_IO *io,
+                GP_ProgressCallback *callback)
+{
+	errno = ENOSYS;
+	return 1;
 }
 
 int GP_ReadJPGMetaData(GP_IO GP_UNUSED(*io), GP_MetaData GP_UNUSED(*data))
@@ -558,14 +594,6 @@ int GP_LoadJPGMetaData(const char GP_UNUSED(*src_path),
 	return 1;
 }
 
-int GP_SaveJPG(const GP_Context GP_UNUSED(*src),
-               const char GP_UNUSED(*dst_path),
-               GP_ProgressCallback GP_UNUSED(*callback))
-{
-	errno = ENOSYS;
-	return 1;
-}
-
 #endif /* HAVE_JPEG */
 
 GP_Context *GP_LoadJPG(const char *src_path, GP_ProgressCallback *callback)
@@ -573,10 +601,16 @@ GP_Context *GP_LoadJPG(const char *src_path, GP_ProgressCallback *callback)
 	return GP_LoaderLoadImage(&GP_JPG, src_path, callback);
 }
 
+int GP_SaveJPG(const GP_Context *src, const char *dst_path,
+               GP_ProgressCallback *callback)
+{
+	return GP_LoaderSaveImage(&GP_JPG, src, dst_path, callback);
+}
+
 struct GP_Loader GP_JPG = {
 #ifdef HAVE_JPEG
 	.Read = GP_ReadJPG,
-	.Save = GP_SaveJPG,
+	.Write = GP_WriteJPG,
 	.save_ptypes = out_pixel_types,
 #endif
 	.Match = GP_MatchJPG,

@@ -32,7 +32,7 @@
 #include "loaders/GP_Loader.h"
 
 /*
- * Reads a JPEG from an IO stream.
+ * Reads a JPEG from an I/O stream.
  *
  * Returns newly allocated context cotaining the loaded image or in case of
  * failure NULL and errno is set.
@@ -49,6 +49,12 @@ GP_Context *GP_LoadJPG(const char *src_path, GP_ProgressCallback *callback);
  */
 int GP_ReadJPGMetaData(GP_IO *io, GP_MetaData *data);
 int GP_LoadJPGMetaData(const char *src_path, GP_MetaData *data);
+
+/*
+ * Writes JPEG into an I/O stream.
+ */
+int GP_WriteJPG(const GP_Context *src, GP_IO *io,
+                GP_ProgressCallback *callback);
 
 /*
  * Saves JPEG to a file.

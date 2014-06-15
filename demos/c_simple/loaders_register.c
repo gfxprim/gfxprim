@@ -16,7 +16,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2014 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
@@ -24,7 +24,7 @@
 
    Shows how to register custom image loader/saver.
 
-   Feed it with small image (cca 60x60 pixels) to produce ascii art version.
+   Feed it with small image (cca 60x60 pixels) to produce ASCII art version.
 
   */
 
@@ -37,17 +37,21 @@
 /*
  * Saves 2 bpp grayscale image as ASCII Art
  */
-static int save(const GP_Context *img, const char *dst_path,
-                GP_ProgressCallback *callback)
+static int write_data(const GP_Context *img, GP_IO *io,
+                      GP_ProgressCallback *callback)
 {
+	GP_IO *bio;
+	int err;
+
 	if (img->pixel_type != GP_PIXEL_G2) {
 		errno = ENOSYS;
 		return 1;
 	}
 
-	FILE *f = fopen(dst_path, "w");
+	/* Create buffered I/O */
+	bio = GP_IOWBuffer(io, 0);
 
-	if (f == NULL)
+	if (!bio)
 		return 1;
 
 	unsigned int i, j;
@@ -58,35 +62,33 @@ static int save(const GP_Context *img, const char *dst_path,
 
 			switch (p) {
 			case 0:
-				fprintf(f, "  ");
+				err = GP_IOFlush(bio, "  ", 2);
 			break;
 			case 1:
-				fprintf(f, "..");
+				err = GP_IOFlush(bio, "..", 2);
 			break;
 			case 2:
-				fprintf(f, "()");
+				err = GP_IOFlush(bio, "()", 2);
 			break;
 			case 3:
-				fprintf(f, "OO");
+				err = GP_IOFlush(bio, "OO", 2);
 			break;
 			}
+
+			if (err)
+				return 1;
 		}
 
-		fprintf(f, "\n");
+		if (GP_IOFlush(bio, "\n", 1))
+			return 1;
 
 		if (GP_ProgressCallbackReport(callback, img->h, j, img->w)) {
-			fclose(f);
-			unlink(dst_path);
 			errno = ECANCELED;
 			return 1;
 		}
 	}
 
-	if (fclose(f))
-		return 1;
-
 	GP_ProgressCallbackDone(callback);
-
 	return 0;
 }
 
@@ -96,7 +98,7 @@ static GP_PixelType save_ptypes[] = {
 };
 
 GP_Loader loader = {
-	.Save = save,
+	.Write = write_data,
 	.save_ptypes = save_ptypes,
 	.fmt_name = "ASCII Art",
 	.extensions = {"txt", NULL},

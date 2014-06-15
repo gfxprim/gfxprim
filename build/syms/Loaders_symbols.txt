@@ -3,6 +3,7 @@ GP_FWrite
 GP_MatchJPG
 GP_ReadJPG
 GP_LoadJPG
+GP_WriteJPG
 GP_SaveJPG
 GP_ReadJPGMetaData
 GP_LoadJPGMetaData
@@ -13,6 +14,7 @@ GP_ReadPNG
 GP_LoadPNG
 GP_ReadPNGMetaData
 GP_LoadPNGMetaData
+GP_WritePNG
 GP_SavePNG
 GP_PNG
 
@@ -36,29 +38,34 @@ GP_GIF
 GP_MatchTIFF
 GP_ReadTIFF
 GP_LoadTIFF
+GP_WriteTIFF
 GP_SaveTIFF
 GP_TIFF
 
 GP_ReadPBM
 GP_LoadPBM
+GP_WritePBM
 GP_SavePBM
 GP_MatchPBM
 GP_PBM
 
 GP_ReadPGM
 GP_LoadPGM
+GP_WritePGM
 GP_SavePGM
 GP_MatchPGM
 GP_PGM
 
 GP_ReadPPM
 GP_LoadPPM
+GP_WritePPM
 GP_SavePPM
 GP_MatchPPM
 GP_PPM
 
 GP_ReadPNM
 GP_LoadPNM
+GP_WritePNM
 GP_SavePNM
 GP_MatchPNM
 GP_PNM
@@ -84,6 +91,7 @@ GP_LoadTmpFile
 GP_LoaderBySignature
 GP_LoaderByFilename
 GP_LoaderLoadImage
+GP_LoaderSaveImage
 GP_ReadImage
 GP_LoadImage
 GP_SaveImage

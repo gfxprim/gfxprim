@@ -40,10 +40,6 @@
 
 #include "GP_TIFF.h"
 
-#ifdef HAVE_TIFF
-
-#include <tiffio.h>
-
 #define TIFF_HEADER_LITTLE "II\x2a\0"
 #define TIFF_HEADER_BIG    "MM\0\x2a"
 
@@ -57,6 +53,10 @@ int GP_MatchTIFF(const void *buf)
 
 	return 0;
 }
+
+#ifdef HAVE_TIFF
+
+#include <tiffio.h>
 
 static const char *compression_name(uint16_t compression)
 {
@@ -442,10 +442,7 @@ static tsize_t tiff_io_read(thandle_t io, void *buf, tsize_t size)
 
 static tsize_t tiff_io_write(thandle_t io, void *buf, tsize_t size)
 {
-	(void) io;
-	(void) buf;
-	GP_WARN("stub called");
-	return size;
+	return GP_IOWrite(io, buf, size);
 }
 
 static toff_t tiff_io_seek(thandle_t io, toff_t offset, int whence)
@@ -643,11 +640,13 @@ static GP_PixelType save_ptypes[] = {
 	GP_PIXEL_UNKNOWN,
 };
 
-int GP_SaveTIFF(const GP_Context *src, const char *dst_path,
-                GP_ProgressCallback *callback)
+int GP_WriteTIFF(const GP_Context *src, GP_IO *io,
+                 GP_ProgressCallback *callback)
 {
 	TIFF *tiff;
 	int err = 0;
+
+	GP_DEBUG(1, "Writing TIFF to I/O (%p)", io);
 
 	if (GP_PixelHasFlags(src->pixel_type, GP_PIXEL_HAS_ALPHA)) {
 		GP_DEBUG(1, "Alpha channel not supported yet");
@@ -673,11 +672,13 @@ int GP_SaveTIFF(const GP_Context *src, const char *dst_path,
 	}
 
 	/* Open TIFF image */
-	tiff = TIFFOpen(dst_path, "w");
+	tiff = TIFFClientOpen("GFXprim IO", "w", io, tiff_io_read,
+	                      tiff_io_write, tiff_io_seek, tiff_io_close,
+	                      tiff_io_size, NULL, NULL);
 
-	if (tiff == NULL) {
-		GP_DEBUG(1, "Failed to open tiff '%s'", dst_path);
-		//ERRNO?
+	if (!tiff) {
+		GP_DEBUG(1, "TIFFClientOpen failed");
+		errno = EIO;
 		return 1;
 	}
 
@@ -706,7 +707,6 @@ int GP_SaveTIFF(const GP_Context *src, const char *dst_path,
 
 	if (err) {
 		TIFFClose(tiff);
-		unlink(dst_path);
 		errno = err;
 		return 1;
 	}
@@ -718,19 +718,6 @@ int GP_SaveTIFF(const GP_Context *src, const char *dst_path,
 
 #else
 
-int GP_MatchTIFF(const void GP_UNUSED(*buf))
-{
-	errno = ENOSYS;
-	return -1;
-}
-
-int GP_OpenTIFF(const char GP_UNUSED(*src_path),
-                void GP_UNUSED(**t))
-{
-	errno = ENOSYS;
-	return 1;
-}
-
 GP_Context *GP_ReadTIFF(GP_IO GP_UNUSED(*io),
                         GP_ProgressCallback GP_UNUSED(*callback))
 {
@@ -738,9 +725,8 @@ GP_Context *GP_ReadTIFF(GP_IO GP_UNUSED(*io),
 	return NULL;
 }
 
-int GP_SaveTIFF(const GP_Context GP_UNUSED(*src),
-                const char GP_UNUSED(*dst_path),
-                GP_ProgressCallback GP_UNUSED(*callback))
+int GP_WriteTIFF(const GP_Context GP_UNUSED(*src), GP_IO GP_UNUSED(*io),
+                 GP_ProgressCallback GP_UNUSED(*callback))
 {
 	errno = ENOSYS;
 	return 1;
@@ -753,10 +739,16 @@ GP_Context *GP_LoadTIFF(const char *src_path, GP_ProgressCallback *callback)
 	return GP_LoaderLoadImage(&GP_TIFF, src_path, callback);
 }
 
+int GP_SaveTIFF(const GP_Context *src, const char *dst_path,
+                GP_ProgressCallback *callback)
+{
+	return GP_LoaderSaveImage(&GP_TIFF, src, dst_path, callback);
+}
+
 struct GP_Loader GP_TIFF = {
 #ifdef HAVE_TIFF
 	.Read = GP_ReadTIFF,
-	.Save = GP_SaveTIFF,
+	.Write = GP_WriteTIFF,
 	.save_ptypes = save_ptypes,
 #endif
 	.Match = GP_MatchTIFF,

@@ -348,17 +348,17 @@ static int get_ascii_int(struct buf *buf, int *val)
 /*
  * Five times faster than printf("%u", byte)
  */
-static inline int write_ascii_byte(FILE *f, uint8_t byte)
+static inline int write_ascii_byte(GP_IO *io, uint8_t byte)
 {
 	if (byte >= 100)
-		fputc_unlocked('0' + byte/100, f);
+		GP_IOPutC(io, '0' + byte/100);
 
 	if (byte >= 10)
-		fputc_unlocked('0' + (byte%100)/10, f);
+		GP_IOPutC(io, '0' + (byte%100)/10);
 
-	fputc_unlocked('0' + (byte%10), f);
+	GP_IOPutC(io, '0' + (byte%10));
 
-	return fputc_unlocked(' ', f) == EOF;
+	return GP_IOPutC(io, ' ');
 }
 
 /*
@@ -631,7 +631,7 @@ static int load_bin_rgb888(struct buf *buf, GP_Context *ctx,
 	return 0;
 }
 
-static int save_ascii(FILE *f, const GP_Context *ctx,
+static int save_ascii(GP_IO *io, const GP_Context *ctx,
                       GP_ProgressCallback *cb, int inv)
 {
 	uint32_t x, y;
@@ -644,7 +644,7 @@ static int save_ascii(FILE *f, const GP_Context *ctx,
 			if (inv)
 				val = !val;
 
-			if (write_ascii_byte(f, val)) {
+			if (write_ascii_byte(io, val)) {
 				err = errno;
 				GP_DEBUG(1, "Failed to write data");
 				return err;
@@ -655,7 +655,9 @@ static int save_ascii(FILE *f, const GP_Context *ctx,
 			GP_DEBUG(1, "Operation aborted");
 			return ECANCELED;
 		}
-		fprintf(f, "\n");
+
+		if (GP_IOPutC(io, '\n'))
+			return errno;
 	}
 
 	GP_ProgressCallbackDone(cb);
@@ -717,14 +719,13 @@ static GP_PixelType pbm_save_pixels[] = {
 	GP_PIXEL_UNKNOWN,
 };
 
-int GP_SavePBM(const GP_Context *src, const char *dst_path,
-               GP_ProgressCallback *callback)
+int GP_WritePBM(const GP_Context *src, GP_IO *io,
+                GP_ProgressCallback *callback)
 {
-	FILE *f;
+	GP_IO *bio;
 	int err;
 
-	GP_DEBUG(1, "Saving context %ux%u %s to '%s'",
-	         src->w, src->h, GP_PixelTypeName(src->pixel_type), dst_path);
+	GP_DEBUG(1, "Writing PBM into I/O (%p)", io);
 
 	if (src->pixel_type != GP_PIXEL_G1) {
 		GP_DEBUG(1, "Invalid pixel type '%s'",
@@ -733,27 +734,22 @@ int GP_SavePBM(const GP_Context *src, const char *dst_path,
 		return 1;
 	}
 
-	f = fopen(dst_path, "w");
-
-	if (f == NULL)
+	bio = GP_IOWBuffer(io, 0);
+	if (!bio)
 		return 1;
 
-	if (fprintf(f, "P1\n%u %u\n",
-	            (unsigned int) src->w, (unsigned int) src->h) < 0) {
-		err = EIO;
-		goto err0;
+	if (GP_IOPrintF(io, "P1\n%u %u\n",
+	            (unsigned int) src->w, (unsigned int) src->h)) {
+		err = errno;
+		goto err;
 	}
 
-	if ((err = save_ascii(f, src, callback, 1)))
-		goto err0;
+	if ((err = save_ascii(bio, src, callback, 1)))
+		goto err;
 
-	if (fclose(f))
-		goto err0;
-
-	return 0;
-err0:
-	fclose(f);
-	unlink(dst_path);
+	return GP_IOClose(bio);
+err:
+	GP_IOClose(bio);
 	errno = err;
 	return 1;
 }
@@ -892,15 +888,13 @@ static GP_PixelType pgm_save_pixels[] = {
 	GP_PIXEL_UNKNOWN,
 };
 
-int GP_SavePGM(const GP_Context *src, const char *dst_path,
-               GP_ProgressCallback *callback)
+int GP_WritePGM(const GP_Context *src, GP_IO *io,
+                GP_ProgressCallback *callback)
 {
-	FILE *f;
-	int depth;
-	int err = EIO;
+	int err, depth;
+	GP_IO *bio;
 
-	GP_DEBUG(1, "Saving context %ux%u %s to '%s'",
-	         src->w, src->h, GP_PixelTypeName(src->pixel_type), dst_path);
+	GP_DEBUG(1, "Writing PGM to I/O (%p)", io);
 
 	if ((depth = pixel_to_depth(src->pixel_type)) == -1) {
 		GP_DEBUG(1, "Invalid pixel type '%s'",
@@ -909,34 +903,22 @@ int GP_SavePGM(const GP_Context *src, const char *dst_path,
 		return 1;
 	}
 
-	f = fopen(dst_path, "w");
+	bio = GP_IOWBuffer(io, 0);
+	if (!bio)
+		return 1;
 
-	if (f == NULL) {
+	if (GP_IOPrintF(io, "P2\n%u %u\n%u\n",
+	            (unsigned int) src->w, (unsigned int) src->h, depth)) {
 		err = errno;
-		GP_DEBUG(1, "Failed to open file '%s': %s",
-		         dst_path, strerror(errno));
-		goto err0;
+		goto err;
 	}
 
-	if (fprintf(f, "P2\n%u %u\n%u\n",
-	            (unsigned int) src->w, (unsigned int) src->h, depth) < 0)
-		goto err1;
+	if ((err = save_ascii(bio, src, callback, 0)))
+		goto err;
 
-	if ((err = save_ascii(f, src, callback, 0)))
-		goto err1;
-
-	if (fclose(f)) {
-		err = errno;
-		GP_DEBUG(1, "Failed to close file '%s': %s",
-		         dst_path, strerror(errno));
-		goto err0;
-	}
-
-	return 0;
-err1:
-	fclose(f);
-err0:
-	unlink(dst_path);
+	return GP_IOClose(bio);
+err:
+	GP_IOClose(bio);
 	errno = err;
 	return 1;
 }
@@ -1020,7 +1002,7 @@ static int write_binary_ppm(FILE *f, GP_Context *src)
 	return 0;
 }
 
-static int save_ascii_rgb888(FILE *f, const GP_Context *ctx,
+static int save_ascii_rgb888(GP_IO *io, const GP_Context *ctx,
                              GP_LineConvert Convert, GP_ProgressCallback *cb)
 {
 	uint32_t x, y;
@@ -1037,9 +1019,9 @@ static int save_ascii_rgb888(FILE *f, const GP_Context *ctx,
 		}
 
 		for (x = 0; x < ctx->w; x++) {
-			ret |= write_ascii_byte(f, addr[2]);
-			ret |= write_ascii_byte(f, addr[1]);
-			ret |= write_ascii_byte(f, addr[0]);
+			ret |= write_ascii_byte(io, addr[2]);
+			ret |= write_ascii_byte(io, addr[1]);
+			ret |= write_ascii_byte(io, addr[0]);
 
 			if (ret)
 				return errno;
@@ -1052,7 +1034,7 @@ static int save_ascii_rgb888(FILE *f, const GP_Context *ctx,
 			return ECANCELED;
 		}
 
-		if (fprintf(f, "\n") < 0)
+		if (GP_IOPutC(io, '\n'))
 			return errno;
 	}
 
@@ -1065,16 +1047,15 @@ static GP_PixelType ppm_save_pixels[] = {
 	GP_PIXEL_UNKNOWN,
 };
 
-int GP_SavePPM(const GP_Context *src, const char *dst_path,
-               GP_ProgressCallback *callback)
+int GP_WritePPM(const GP_Context *src, GP_IO *io,
+                GP_ProgressCallback *callback)
 {
 	GP_Pixel out_pix;
 	GP_LineConvert Convert;
-	FILE *f;
-	int err = EIO;
+	GP_IO *bio;
+	int err = 0;
 
-	GP_DEBUG(1, "Saving context %ux%u %s to '%s'",
-	         src->w, src->h, GP_PixelTypeName(src->pixel_type), dst_path);
+	GP_DEBUG(1, "Writing PPM into I/O (%p)", io);
 
 	out_pix = GP_LineConvertible(src->pixel_type, ppm_save_pixels);
 
@@ -1085,37 +1066,25 @@ int GP_SavePPM(const GP_Context *src, const char *dst_path,
 		return 1;
 	}
 
-	f = fopen(dst_path, "w");
+	bio = GP_IOWBuffer(io, 0);
+	if (!bio)
+		return 1;
 
-	if (f == NULL) {
+	if (GP_IOPrintF(io, "P3\n%u %u\n255\n",
+	            (unsigned int) src->w, (unsigned int) src->h)) {
 		err = errno;
-		GP_DEBUG(1, "Failed to open file '%s': %s",
-		         dst_path, strerror(errno));
-		goto err0;
+		goto err;
 	}
-
-	if (fprintf(f, "P3\n%u %u\n255\n",
-	            (unsigned int) src->w, (unsigned int) src->h) < 0)
-		goto err1;
 
 	Convert = GP_LineConvertGet(src->pixel_type, out_pix);
 
-	if ((err = save_ascii_rgb888(f, src, Convert, callback)))
-		goto err1;
+	if ((err = save_ascii_rgb888(bio, src, Convert, callback)))
+		goto err;
 
-	if (fclose(f)) {
-		err = errno;
-		GP_DEBUG(1, "Failed to close file '%s': %s",
-		         dst_path, strerror(errno));
-		goto err0;
-	}
-
-	return 0;
-err1:
-	fclose(f);
-err0:
+	return GP_IOClose(bio);
+err:
+	GP_IOClose(bio);
 	errno = err;
-	unlink(dst_path);
 	return 1;
 }
 
@@ -1153,20 +1122,20 @@ static GP_PixelType pnm_save_pixels[] = {
 	GP_PIXEL_UNKNOWN,
 };
 
-int GP_SavePNM(const GP_Context *src, const char *dst_path,
-               GP_ProgressCallback *callback)
+int GP_WritePNM(const GP_Context *src, GP_IO *io,
+                GP_ProgressCallback *callback)
 {
 	switch (src->pixel_type) {
 	case GP_PIXEL_G1:
 	case GP_PIXEL_G2:
 	case GP_PIXEL_G4:
 	case GP_PIXEL_G8:
-		return GP_SavePGM(src, dst_path, callback);
+		return GP_WritePGM(src, io, callback);
 	case GP_PIXEL_RGB888:
-		return GP_SavePPM(src, dst_path, callback);
+		return GP_WritePPM(src, io, callback);
 	default:
 		if (GP_LineConvertible(src->pixel_type, ppm_save_pixels))
-			return GP_SavePPM(src, dst_path, callback);
+			return GP_WritePPM(src, io, callback);
 
 		errno = EINVAL;
 		return 1;
@@ -1178,9 +1147,21 @@ GP_Context *GP_LoadPBM(const char *src_path, GP_ProgressCallback *callback)
 	return GP_LoaderLoadImage(&GP_PBM, src_path, callback);
 }
 
+int GP_SavePBM(const GP_Context *src, const char *dst_path,
+               GP_ProgressCallback *callback)
+{
+	return GP_LoaderSaveImage(&GP_PBM, src, dst_path, callback);
+}
+
 GP_Context *GP_LoadPGM(const char *src_path, GP_ProgressCallback *callback)
 {
 	return GP_LoaderLoadImage(&GP_PGM, src_path, callback);
+}
+
+int GP_SavePGM(const GP_Context *src, const char *dst_path,
+               GP_ProgressCallback *callback)
+{
+	return GP_LoaderSaveImage(&GP_PGM, src, dst_path, callback);
 }
 
 GP_Context *GP_LoadPPM(const char *src_path, GP_ProgressCallback *callback)
@@ -1188,14 +1169,26 @@ GP_Context *GP_LoadPPM(const char *src_path, GP_ProgressCallback *callback)
 	return GP_LoaderLoadImage(&GP_PPM, src_path, callback);
 }
 
+int GP_SavePPM(const GP_Context *src, const char *dst_path,
+               GP_ProgressCallback *callback)
+{
+	return GP_LoaderSaveImage(&GP_PPM, src, dst_path, callback);
+}
+
 GP_Context *GP_LoadPNM(const char *src_path, GP_ProgressCallback *callback)
 {
 	return GP_LoaderLoadImage(&GP_PNM, src_path, callback);
 }
 
+int GP_SavePNM(const GP_Context *src, const char *dst_path,
+               GP_ProgressCallback *callback)
+{
+	return GP_LoaderSaveImage(&GP_PNM, src, dst_path, callback);
+}
+
 struct GP_Loader GP_PBM = {
 	.Read = GP_ReadPBM,
-	.Save = GP_SavePBM,
+	.Write = GP_WritePBM,
 	.save_ptypes = pbm_save_pixels,
 	.Match = GP_MatchPBM,
 
@@ -1205,7 +1198,7 @@ struct GP_Loader GP_PBM = {
 
 struct GP_Loader GP_PGM = {
 	.Read = GP_ReadPGM,
-	.Save = GP_SavePGM,
+	.Write = GP_WritePGM,
 	.save_ptypes = pgm_save_pixels,
 	.Match = GP_MatchPGM,
 
@@ -1215,7 +1208,7 @@ struct GP_Loader GP_PGM = {
 
 struct GP_Loader GP_PPM = {
 	.Read = GP_ReadPPM,
-	.Save = GP_SavePPM,
+	.Write = GP_WritePPM,
 	.save_ptypes = ppm_save_pixels,
 	.Match = GP_MatchPPM,
 
@@ -1225,7 +1218,7 @@ struct GP_Loader GP_PPM = {
 
 struct GP_Loader GP_PNM = {
 	.Read = GP_ReadPNM,
-	.Save = GP_SavePNM,
+	.Write = GP_WritePNM,
 	.save_ptypes = pnm_save_pixels,
 	/*
 	 * Avoid double Match

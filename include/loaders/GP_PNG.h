@@ -51,8 +51,13 @@ int GP_ReadPNGMetaData(GP_IO *io, GP_MetaData *data);
 int GP_LoadPNGMetaData(const char *src_path, GP_MetaData *data);
 
 /*
- * Saves PNG to a file. Zero is returned on succes. Upon failure non-zero is
- * returned and errno is filled accordingly.
+ * Writes PNG into an I/O stream.
+ */
+int GP_SavePNG(const GP_Context *src, const char *dst_path,
+               GP_ProgressCallback *callback);
+
+/*
+ * Saves PNG to a file.
  */
 int GP_SavePNG(const GP_Context *src, const char *dst_path,
                GP_ProgressCallback *callback);

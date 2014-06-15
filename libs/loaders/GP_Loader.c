@@ -126,9 +126,9 @@ void GP_ListLoaders(void)
 	for (i = 0; loaders[i]; i++) {
 		printf("Format: %s\n", loaders[i]->fmt_name);
 		printf("Read:\t%s\n", loaders[i]->Read ? "Yes" : "No");
-		printf("Save:\t%s\n", loaders[i]->Save ? "Yes" : "No");
+		printf("Write:\t%s\n", loaders[i]->Write ? "Yes" : "No");
 		if (loaders[i]->save_ptypes) {
-			printf("Saves Pixel Types: ");
+			printf("Write Pixel Types: ");
 			for (j = 0; loaders[i]->save_ptypes[j]; j++) {
 				GP_PixelType ptype = loaders[i]->save_ptypes[j];
 				printf("%s ", GP_PixelTypeName(ptype));
@@ -282,6 +282,8 @@ GP_Context *GP_LoaderLoadImage(const GP_Loader *self, const char *src_path,
 	GP_Context *res;
 	int err;
 
+	GP_DEBUG(1, "Loading Image '%s'", src_path);
+
 	if (!self->Read) {
 		errno = ENOSYS;
 		return NULL;
@@ -384,6 +386,37 @@ out:
 	return 1;
 }
 
+int GP_LoaderSaveImage(const GP_Loader *self, const GP_Context *src,
+                       const char *dst_path, GP_ProgressCallback *callback)
+{
+	GP_IO *io;
+
+	GP_DEBUG(1, "Saving image '%s' format %s", dst_path, self->fmt_name);
+
+	if (!self->Write) {
+		errno = ENOSYS;
+		return 1;
+	}
+
+	io = GP_IOFile(dst_path, GP_IO_WRONLY);
+
+	if (!io)
+		return 1;
+
+	if (self->Write(src, io, callback)) {
+		GP_IOClose(io);
+		unlink(dst_path);
+		return 1;
+	}
+
+	if (GP_IOClose(io)) {
+		unlink(dst_path);
+		return 1;
+	}
+
+	return 0;
+}
+
 int GP_SaveImage(const GP_Context *src, const char *dst_path,
                  GP_ProgressCallback *callback)
 {
@@ -394,11 +427,7 @@ int GP_SaveImage(const GP_Context *src, const char *dst_path,
 		return 1;
 	}
 
-	if (l->Save)
-		return l->Save(src, dst_path, callback);
-
-	errno = ENOSYS;
-	return 1;
+	return GP_LoaderSaveImage(l, src, dst_path, callback);
 }
 
 const GP_Loader *GP_LoaderBySignature(const void *buf)

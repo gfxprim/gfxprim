@@ -850,6 +850,8 @@ int GP_WriteBMP(const GP_Context *src, GP_IO *io,
 	struct bitmap_info_header header;
 	int err;
 
+	GP_DEBUG(1, "Writing BMP to I/O (%p)", io);
+
 	if ((err = bmp_fill_header(src, &header)))
 		goto err;
 
@@ -865,36 +867,15 @@ err:
 	return 1;
 }
 
-
 int GP_SaveBMP(const GP_Context *src, const char *dst_path,
                GP_ProgressCallback *callback)
 {
-	GP_IO *io;
-
-	GP_DEBUG(1, "Saving BMP Image '%s'", dst_path);
-
-	io = GP_IOFile(dst_path, GP_IO_WRONLY);
-
-	if (!io)
-		return 1;
-
-	if (GP_WriteBMP(src, io, callback)) {
-		GP_IOClose(io);
-		unlink(dst_path);
-		return 1;
-	}
-
-	if (GP_IOClose(io)) {
-		unlink(dst_path);
-		return 1;
-	}
-
-	return 0;
+	return GP_LoaderSaveImage(&GP_BMP, src, dst_path, callback);
 }
 
 struct GP_Loader GP_BMP = {
 	.Read = GP_ReadBMP,
-	.Save = GP_SaveBMP,
+	.Write = GP_WriteBMP,
 	.save_ptypes = out_pixel_types,
 	.Match = GP_MatchBMP,
 
