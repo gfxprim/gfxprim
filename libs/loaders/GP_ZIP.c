@@ -37,7 +37,6 @@
 #include <core/GP_Common.h>
 #include <core/GP_Debug.h>
 
-#include <loaders/GP_ByteUtils.h>
 #include <loaders/GP_Loader.h>
 #include <loaders/GP_IOZlib.h>
 #include "loaders/GP_ZIP.h"

@@ -40,7 +40,6 @@
 #include "core/GP_Pixel.h"
 #include "core/GP_GetPutPixel.h"
 
-#include "loaders/GP_ByteUtils.h"
 #include "loaders/GP_LineConvert.h"
 #include "loaders/GP_BMP.h"
 
