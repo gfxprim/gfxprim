@@ -255,6 +255,70 @@ static int test_IOFill(void)
 	return TST_SUCCESS;
 }
 
+static size_t counter;
+
+static ssize_t wbuf_write(GP_IO GP_UNUSED(*io), void *buf, size_t size)
+{
+	unsigned int i;
+
+	for (i = 0; i < size; i++) {
+		if (((uint8_t*)buf)[i] != 'a') {
+			tst_msg("Wrong data in buffer");
+			return -1;
+		}
+	}
+
+	counter += size;
+	return size;
+}
+
+static int wbuf_close(GP_IO GP_UNUSED(*io))
+{
+	return 0;
+}
+
+static int test_IOWBuffer(void)
+{
+	GP_IO *bio;
+	size_t cnt = 0;
+	unsigned int i;
+	GP_IO io = {
+		.Write = wbuf_write,
+		.Close = wbuf_close,
+	};
+
+	counter = 0;
+
+	bio = GP_IOWBuffer(&io, 100);
+
+	if (!bio)
+		return TST_FAILED;
+
+	for (i = 0; i < 100; i++) {
+		size_t to_write = i % 10 + 1;
+		if (GP_IOFlush(bio, "aaaaaaaaaaa", to_write)) {
+			tst_msg("Failed to write data: %s", tst_strerr(errno));
+			GP_IOClose(bio);
+			return TST_FAILED;
+		}
+		cnt += to_write;
+	}
+
+	if (GP_IOClose(bio)) {
+		tst_msg("Failed to close I/O: %s", tst_strerr(errno));
+		return TST_FAILED;
+	}
+
+	if (counter != cnt) {
+		tst_msg("Wrong number of bytes written have %zu expected %zu",
+		        counter, cnt);
+		return TST_FAILED;
+	}
+
+	return TST_SUCCESS;
+}
+
+
 const struct tst_suite tst_suite = {
 	.suite_name = "IO",
 	.tests = {
@@ -268,6 +332,9 @@ const struct tst_suite tst_suite = {
 
 		{.name = "IOFill",
 		 .tst_fn = test_IOFill},
+
+		{.name = "IOWBuffer",
+		 .tst_fn = test_IOWBuffer},
 
 		{.name = NULL},
 	}
