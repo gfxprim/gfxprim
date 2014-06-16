@@ -64,6 +64,7 @@ static off_t file_seek(GP_IO *self, off_t off, enum GP_IOWhence whence)
 	break;
 	default:
 		GP_WARN("Invalid whence");
+		errno = EINVAL;
 		return (off_t)-1;
 	}
 
@@ -389,7 +390,7 @@ static int wbuf_close(GP_IO *io)
 	GP_DEBUG(1, "Closing BufferIO (from %p)", buf_io->io);
 
 	if (buf_io->bpos) {
-		if (GP_IOFlush(buf_io->io, buf_io->buf, buf_io->bsize))
+		if (GP_IOFlush(buf_io->io, buf_io->buf, buf_io->bpos))
 			ret = 1;
 	}
 
