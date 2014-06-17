@@ -257,6 +257,50 @@ static int test_IOFill(void)
 
 static size_t counter;
 
+static ssize_t flush_write(GP_IO GP_UNUSED(*io), void *buf, size_t size)
+{
+	size_t to_write = GP_MIN(7u, size);
+
+	if (((uint8_t*)buf)[0] != counter)
+		return -1;
+
+	counter += to_write;
+
+	return to_write;
+}
+
+static int test_IOFlush(void)
+{
+	GP_IO io = {.Write = flush_write};
+	unsigned int i;
+	int fail = 0;
+	uint8_t buf[255];
+
+	for (i = 0; i < 255; i++)
+		buf[i] = i;
+
+	for (i = 1; i < 255; i++) {
+		counter = 0;
+		if (GP_IOFlush(&io, buf, i)) {
+			if (!fail)
+				tst_msg("GP_IOFlush failed");
+			fail++;
+		}
+
+		if (counter != i) {
+			if (!fail)
+				tst_msg("Bytes written %zu expected %u",
+				        counter, i);
+			fail++;
+		}
+	}
+
+	if (fail)
+		return TST_FAILED;
+
+	return TST_SUCCESS;
+}
+
 static ssize_t wbuf_write(GP_IO GP_UNUSED(*io), void *buf, size_t size)
 {
 	unsigned int i;
@@ -318,7 +362,6 @@ static int test_IOWBuffer(void)
 	return TST_SUCCESS;
 }
 
-
 const struct tst_suite tst_suite = {
 	.suite_name = "IO",
 	.tests = {
@@ -333,8 +376,12 @@ const struct tst_suite tst_suite = {
 		{.name = "IOFill",
 		 .tst_fn = test_IOFill},
 
+		{.name = "IOFlush",
+		 .tst_fn = test_IOFlush},
+
 		{.name = "IOWBuffer",
-		 .tst_fn = test_IOWBuffer},
+		 .tst_fn = test_IOWBuffer,
+		 .flags = TST_CHECK_MALLOC},
 
 		{.name = NULL},
 	}
