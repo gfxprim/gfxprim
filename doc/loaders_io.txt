@@ -248,6 +248,32 @@ Creates an IO stream from a file.
 Returns a pointer to initialized I/O stream, or in case of failure NULL and
 errno is set.
 
+[source,c]
+-------------------------------------------------------------------------------
+#include <loaders/GP_IO.h>
+/* or */
+#include <GP.h>
+
+GP_IO *GP_IOSubIO(GP_IO *pio, size_t size);
+-------------------------------------------------------------------------------
+
+Creates an readable I/O on the top of an existing readable I/O.
+
+The stream position in the parent I/O is advanced when reading or seeking the
+sub I/O.
+
+The sub I/O is limited to an interval starting at current position and can
+advance size bytes at max; then it behaves like the stream has ended i.e.
+'GP_IORead()' returns zero.
+
+You can seek in the resulting I/O if:
+
+* The parent I/O is seekable
+
+* The the combination of 'off' and 'whence' fits inside the sub I/O
+
+WARNING: If you combine reading or seeking in the parent I/O and sub I/O the
+         result is undefined.
 
 [source,c]
 -------------------------------------------------------------------------------
