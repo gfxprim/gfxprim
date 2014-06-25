@@ -65,7 +65,7 @@ static off_t file_seek(GP_IO *self, off_t off, enum GP_IOWhence whence)
 	default:
 		GP_WARN("Invalid whence");
 		errno = EINVAL;
-		return (off_t)-1;
+		return -1;
 	}
 
 	return lseek(file_io->fd, off, whence);
@@ -173,31 +173,32 @@ static off_t mem_seek(GP_IO *io, off_t off, enum GP_IOWhence whence)
 
 	switch (whence) {
 	case GP_IO_SEEK_CUR:
-		if (off + mem_io->pos > mem_io->size) {
+		if (-off > (off_t)mem_io->pos ||
+		     off + mem_io->pos > mem_io->size) {
 			errno = EINVAL;
-			return (off_t)-1;
+			return -1;
 		}
 
 		mem_io->pos += off;
 	break;
 	case GP_IO_SEEK_SET:
-		if (off < 0 || off > (off_t)mem_io->pos) {
+		if (off < 0 || off > (off_t)mem_io->size) {
 			errno = EINVAL;
-			return (off_t)-1;
+			return -1;
 		}
 		mem_io->pos = off;
 	break;
 	case GP_IO_SEEK_END:
-		if (off) {
+		if (off > 0 || off + (off_t)mem_io->size < 0) {
 			errno = EINVAL;
-			return (off_t)-1;
+			return -1;
 		}
-		mem_io->pos = mem_io->size;
+		mem_io->pos = mem_io->size + off;
 	break;
 	default:
 		GP_WARN("Invalid whence");
 		errno = EINVAL;
-		return (off_t)-1;
+		return -1;
 	}
 
 	return mem_io->pos;
@@ -295,7 +296,7 @@ static off_t sub_seek(GP_IO *io, off_t off, enum GP_IOWhence whence)
 
 		if (poff < sub_io->start || poff > sub_io->end) {
 			errno = EINVAL;
-			return (off_t)-1;
+			return -1;
 		}
 
 		ret = GP_IOSeek(sub_io->io, off, whence);
@@ -305,7 +306,7 @@ static off_t sub_seek(GP_IO *io, off_t off, enum GP_IOWhence whence)
 
 		if (off > io_size || off < 0) {
 			errno = EINVAL;
-			return (off_t)-1;
+			return -1;
 		}
 
 		ret = GP_IOSeek(sub_io->io, sub_io->start + off, whence);
@@ -315,19 +316,19 @@ static off_t sub_seek(GP_IO *io, off_t off, enum GP_IOWhence whence)
 
 		if (off + io_size < 0 || off > 0) {
 			errno = EINVAL;
-			return (off_t)-1;
+			return -1;
 		}
 
-		ret = GP_IOSeek(sub_io->io, sub_io->end + off, whence);
+		ret = GP_IOSeek(sub_io->io, sub_io->end + off, GP_IO_SEEK_SET);
 	break;
 	default:
 		GP_WARN("Invalid whence");
 		errno = EINVAL;
-		return (off_t)-1;
+		return -1;
 	}
 
-	if (ret == (off_t)-1)
-		return (off_t)-1;
+	if (ret == -1)
+		return -1;
 
 	sub_io->cur = ret;
 
@@ -467,8 +468,8 @@ int GP_IOMark(GP_IO *self, enum GP_IOMarkTypes type)
 		return -1;
 	}
 
-	if (ret == (off_t)-1) {
-		GP_WARN("Failed to lseek IO Stream");
+	if (ret == -1) {
+		GP_WARN("Failed to seek I/O Stream");
 		return -1;
 	}
 
@@ -483,12 +484,12 @@ off_t GP_IOSize(GP_IO *io)
 
 	ret = GP_IOSeek(io, 0, GP_IO_SEEK_END);
 
-	if (ret == (off_t)-1)
+	if (ret == -1)
 		return ret;
 
 	GP_IOSeek(io, cur, GP_IO_SEEK_SET);
 
-	GP_DEBUG(2, "IO Size = %lli", (long long)ret);
+	GP_DEBUG(2, "I/O Size = %lli", (long long)ret);
 
 	return ret;
 }
