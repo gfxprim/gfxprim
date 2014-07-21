@@ -31,11 +31,14 @@
 
 #include "loaders/GP_Loader.h"
 
+int GP_ReadJP2Ex(GP_IO *io, GP_Context **rimg, GP_DataStorage *storage,
+                 GP_ProgressCallback *callback);
+
+int GP_LoadJP2Ex(const char *src_path, GP_Context **img,
+		 GP_DataStorage *storage, GP_ProgressCallback *callback);
+
 /*
  * Reads a JPEG2000 from an IO stream.
- *
- * Returns newly allocated context cotaining the loaded image or in case of
- * failure NULL and errno is set.
  */
 GP_Context *GP_ReadJP2(GP_IO *io, GP_ProgressCallback *callback);
 

@@ -32,10 +32,16 @@
 #include "loaders/GP_Loader.h"
 
 /*
+ * Extended loading function.
+ */
+int GP_ReadPCXEx(GP_IO *io, GP_Context **img, GP_DataStorage *storage,
+                 GP_ProgressCallback *callback);
+
+int GP_LoadPCXEx(const char *src_path, GP_Context **img,
+                 GP_DataStorage *storage, GP_ProgressCallback *callback);
+
+/*
  * Reads a PCX from an IO stream.
- *
- * Returns newly allocated context cotaining the loaded image or in case of
- * failure NULL and errno is set.
  */
 GP_Context *GP_ReadPCX(GP_IO *io, GP_ProgressCallback *callback);
 

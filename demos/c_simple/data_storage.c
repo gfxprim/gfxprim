@@ -22,41 +22,54 @@
 
  /*
 
-   Paint Shop Pro image loader.
-
-   Loads composite image from a PSP file.
+   Data storage operations example.
 
   */
 
-#ifndef LOADERS_GP_PSP_H
-#define LOADERS_GP_PSP_H
+#include <stdio.h>
 
-#include "loaders/GP_Loader.h"
+#include <GP.h>
 
-/*
- * Reads a BMP from an IO stream.
- *
- * Returns newly allocated context cotaining the loaded image or in case of
- * failure NULL and errno is set.
- */
-GP_Context *GP_ReadPSP(GP_IO *io, GP_ProgressCallback *callback);
+int main(void)
+{
+	GP_DataStorage *storage = GP_DataStorageCreate();
+	GP_DataNode *flags;
 
-/*
- * Loads a PSP image from a file.
- */
-GP_Context *GP_LoadPSP(const char *src_path, GP_ProgressCallback *callback);
+	if (storage == NULL)
+		return 1;
 
-int GP_ReadPSPEx(GP_IO *io, GP_Context **img,
-		 GP_DataStorage *storage, GP_ProgressCallback *callback);
+	printf("Empty storage -----------------------\n");
+	GP_DataPrint(GP_DataStorageRoot(storage));
+	printf("-------------------------------------\n\n");
 
-int GP_LoadPSPEx(const char *src_path, GP_Context **img,
-		 GP_DataStorage *storage, GP_ProgressCallback *callback);
+	GP_DataNode data = {
+		.type = GP_DATA_INT,
+		.value.i = 300,
+		.id = "dpi"
+	};
 
-/*
- * Looks for PSP file signature. Returns non-zero if found.
- */
-int GP_MatchPSP(const void *buf);
+	GP_DataStorageAdd(storage, NULL, &data);
 
-extern GP_Loader GP_PSP;
+	GP_DataStorageAddString(storage, NULL, "orientation", "top-down");
 
-#endif /* LOADERS_GP_PSP_H */
+	printf("Flat storage ------------------------\n");
+	GP_DataPrint(GP_DataStorageRoot(storage));
+	printf("-------------------------------------\n\n");
+
+	flags = GP_DataStorageAddDict(storage, NULL, "flags");
+
+	data.type = GP_DATA_INT;
+	data.id = "compression_level";
+	data.value.i = 10;
+
+	GP_DataStorageAdd(storage, flags, &data);
+
+	printf("Recursive storage -------------------\n");
+	GP_DataPrint(GP_DataStorageRoot(storage));
+	printf("-------------------------------------\n\n");
+
+	GP_DataPrint(GP_DataStorageGet(storage, NULL, "dpi"));
+	GP_DataStorageDestroy(storage);
+
+	return 0;
+}

@@ -32,23 +32,25 @@
 #include "loaders/GP_Loader.h"
 
 /*
+ * Loads a PNG image from a file.
+ */
+GP_Context *GP_LoadPNG(const char *src_path, GP_ProgressCallback *callback);
+
+/*
+ * Extended load function.
+ */
+int GP_ReadPNGEx(GP_IO *io, GP_Context **img,
+                 GP_DataStorage *storage, GP_ProgressCallback *callback);
+int GP_LoadPNGEx(const char *src_path, GP_Context **img,
+                 GP_DataStorage *storage, GP_ProgressCallback *callback);
+
+/*
  * Reads a PNG from an IO stream.
  *
  * Returns newly allocated context cotaining the loaded image or in case of
  * failure NULL and errno is set.
  */
 GP_Context *GP_ReadPNG(GP_IO *io, GP_ProgressCallback *callback);
-
-/*
- * Loads a PNG image from a file.
- */
-GP_Context *GP_LoadPNG(const char *src_path, GP_ProgressCallback *callback);
-
-/*
- * Loads PNG meta-data.
- */
-int GP_ReadPNGMetaData(GP_IO *io, GP_MetaData *data);
-int GP_LoadPNGMetaData(const char *src_path, GP_MetaData *data);
 
 /*
  * Writes PNG into an I/O stream.

@@ -22,41 +22,24 @@
 
  /*
 
-   Paint Shop Pro image loader.
-
-   Loads composite image from a PSP file.
+   EXIF parser.
 
   */
 
-#ifndef LOADERS_GP_PSP_H
-#define LOADERS_GP_PSP_H
+#ifndef LOADERS_GP_EXIF_H
+#define LOADERS_GP_EXIF_H
 
+#include "loaders/GP_DataStorage.h"
 #include "loaders/GP_Loader.h"
 
 /*
- * Reads a BMP from an IO stream.
- *
- * Returns newly allocated context cotaining the loaded image or in case of
- * failure NULL and errno is set.
+ * Reads EXIF from an readable I/O stream and stores the values into storage.
  */
-GP_Context *GP_ReadPSP(GP_IO *io, GP_ProgressCallback *callback);
+int GP_ReadExif(GP_IO *io, GP_DataStorage *storage);
 
 /*
- * Loads a PSP image from a file.
+ * Looks for EXIF file signature. Returns non-zero if found.
  */
-GP_Context *GP_LoadPSP(const char *src_path, GP_ProgressCallback *callback);
+int GP_MatchExif(const void *buf);
 
-int GP_ReadPSPEx(GP_IO *io, GP_Context **img,
-		 GP_DataStorage *storage, GP_ProgressCallback *callback);
-
-int GP_LoadPSPEx(const char *src_path, GP_Context **img,
-		 GP_DataStorage *storage, GP_ProgressCallback *callback);
-
-/*
- * Looks for PSP file signature. Returns non-zero if found.
- */
-int GP_MatchPSP(const void *buf);
-
-extern GP_Loader GP_PSP;
-
-#endif /* LOADERS_GP_PSP_H */
+#endif /* LOADERS_GP_EXIF_H */

@@ -16,16 +16,17 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2014 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
 #include <stdlib.h>
 #include <string.h>
+#include <errno.h>
 
 #include "core/GP_Debug.h"
 
-#include "GP_MetaData.h"
+#include "loaders/GP_Exif.h"
 
 enum IFD_formats {
 	/* 1 bytes/components */
@@ -71,6 +72,17 @@ static const char *IFD_format_names[] = {
 };
 
 enum IFD_tags {
+	/* Image width and height */
+	IFD_IMAGE_WIDTH = 0x0100,
+	IFD_IMAGE_HEIGHT = 0x0101,
+
+	IFD_BITS_PER_SAMPLE = 0x0102,
+
+	/* TODO: enum of compressions */
+	IFD_COMPRESSION = 0x0103,
+	/* TODO: enum of interpretations */
+	IFD_PHOTOMETRIC_INTERPRETATION = 0x0106,
+
 	/* ASCII text no multibyte encoding */
 	IFD_IMAGE_DESCRIPTION = 0x010e,
 	/* Device (camer, scanner, ...) manufacturer */
@@ -85,7 +97,9 @@ enum IFD_tags {
 	IFD_X_RESOLUTION = 0x011a,
 	/* Y resolution 72 DPI is default */
 	IFD_Y_RESOLUTION = 0x011b,
-	/* 1 = no unit, 2 = inch (default), 3 = centimeter */
+	/* 1 = Chunky, 2 = Planar */
+	IFD_PLANAR_CONFIGURATION = 0x011c,
+	/* 1 = No unit, 2 = Inch (default), 3 = Centimeter */
 	IFD_RESOLUTION_UNIT = 0x0128,
 	/* Software string. */
 	IFD_SOFTWARE = 0x0131,
@@ -107,7 +121,6 @@ enum IFD_tags {
 	IFD_EXIF_OFFSET = 0x8769,
 
 	/* TAGs from Exif SubIFD */
-
 	IFD_EXPOSURE_TIME = 0x829a,
 	/* Actual F-Number of lens when image was taken */
 	IFD_F_NUMBER = 0x829d,
@@ -161,8 +174,16 @@ enum IFD_tags {
 	IFD_EXIF_IMAGE_HEIGHT = 0xa003,
 	/* May store related audio filename */
 	IFD_RELATED_SOUND_FILE = 0xa004,
-	/* */
-
+	/* TODO: enum of sensing methods */
+	IFD_SENSING_METHOD = 0xa217,
+	IFD_FILE_SOURCE = 0xa300,
+	IFD_SCENE_TYPE = 0xa301,
+	/* 0 = Normal, 1 = Custom */
+	IFD_CUSTOM_RENDERER = 0x0a401,
+	/* 0 = Auto, 1 = Manual, 2 = Auto bracket */
+	IFD_EXPOSURE_MODE = 0x0a402,
+	/* 0 = Auto, 1 = Manual */
+	IFD_WHITE_BALANCE = 0x0a403,
 };
 
 struct IFD_tag {
@@ -176,12 +197,21 @@ struct IFD_tag {
 /* These are sorted by tag */
 static const struct IFD_tag IFD_tags[] = {
 	/* TAGs from IFD0 */
+	/* TODO May be LONG */
+	{IFD_IMAGE_WIDTH, "Image Width", IFD_UNSIGNED_SHORT, 1},
+	{IFD_IMAGE_HEIGHT, "Image Height", IFD_UNSIGNED_SHORT, 1},
+
+	{IFD_BITS_PER_SAMPLE, "Bits Per Sample", IFD_UNSIGNED_SHORT, 3},
+	{IFD_COMPRESSION, "Compression", IFD_UNSIGNED_SHORT, 1},
+	{IFD_PHOTOMETRIC_INTERPRETATION, "Photometric Interpretation", IFD_UNSIGNED_SHORT, 1},
+
 	{IFD_IMAGE_DESCRIPTION, "Image Description", IFD_ASCII_STRING, 0},
 	{IFD_MAKE, "Make", IFD_ASCII_STRING, 0},
 	{IFD_MODEL, "Model", IFD_ASCII_STRING, 0},
 	{IFD_ORIENTATION, "Orientation", IFD_UNSIGNED_SHORT, 1},
 	{IFD_X_RESOLUTION, "X Resolution", IFD_UNSIGNED_RATIONAL, 1},
 	{IFD_Y_RESOLUTION, "Y Resolution", IFD_UNSIGNED_RATIONAL, 1},
+	{IFD_PLANAR_CONFIGURATION, "Planar Configuration", IFD_UNSIGNED_SHORT, 1},
 	{IFD_RESOLUTION_UNIT, "Resolution Unit", IFD_UNSIGNED_SHORT, 1},
 	{IFD_SOFTWARE, "Software", IFD_ASCII_STRING, 0},
 	{IFD_DATE_TIME, "Date Time", IFD_ASCII_STRING, 20},
@@ -225,6 +255,12 @@ static const struct IFD_tag IFD_tags[] = {
 	{IFD_EXIF_IMAGE_WIDTH, "Exif Image Width", IFD_UNSIGNED_LONG, 1},
 	{IFD_EXIF_IMAGE_HEIGHT, "Exif Image Height", IFD_UNSIGNED_LONG, 1},
 	{IFD_RELATED_SOUND_FILE, "Related Soundfile", IFD_ASCII_STRING, 0},
+	{IFD_SENSING_METHOD, "Sensing Method", IFD_UNSIGNED_SHORT, 1},
+	{IFD_FILE_SOURCE, "File Source", IFD_UNDEFINED, 1},
+	{IFD_SCENE_TYPE, "Scene Type", IFD_UNDEFINED, 1},
+	{IFD_CUSTOM_RENDERER, "Custom Renderer", IFD_UNSIGNED_SHORT, 1},
+	{IFD_EXPOSURE_MODE, "Exposure Mode", IFD_UNSIGNED_SHORT, 1},
+	{IFD_WHITE_BALANCE, "White Balance", IFD_UNSIGNED_SHORT, 1},
 };
 
 static const char *IFD_format_name(uint16_t format)
@@ -272,69 +308,64 @@ static const char *IFD_tag_name(uint16_t tag)
 		return res->name;
 }
 
-static int buf_char(void *buf, size_t pos, size_t buf_len)
+static int get_buf(GP_IO *io, off_t offset, char *buf, size_t len)
 {
-	if (pos >= buf_len) {
-		GP_DEBUG(1, "Byte position %zu out of buffer len %zu", pos, buf_len);
-		return -1;
+	off_t off;
+
+	off = GP_IOTell(io);
+
+	if (GP_IOSeek(io, offset, GP_IO_SEEK_SET) == -1) {
+		GP_WARN("Failed to seek to data");
+		return 1;
 	}
 
-	return ((char*)buf)[pos];
-}
-
-#define GET_16(res, buf, pos, buf_len, swap) do {   \
-	if (pos + 1 >= buf_len) { \
-		GP_DEBUG(1, "2-byte position %zu out of buffer len %zu", \
-		         (size_t)pos, buf_len); \
-		return -1; \
-	} \
-	\
-	if (swap) \
-		res = ((uint8_t*)buf)[pos]<<8 | ((uint8_t*)buf)[pos+1]; \
-	else \
-		res = ((uint8_t*)buf)[pos] | ((uint8_t*)buf)[pos+1]<<8; \
-} while (0)
-
-#define GET_32(res, buf, pos, buf_len, swap) do {   \
-	if (pos + 3 >= buf_len) { \
-		GP_DEBUG(1, "4-byte position %zu out of buffer len %zu", \
-		         (size_t)pos, buf_len); \
-		return -1; \
-	} \
-	\
-	if (swap) \
-		res = (((uint8_t*)buf)[pos])<<24 | (((uint8_t*)buf)[pos+1])<<16 | \
-		      (((uint8_t*)buf)[pos+2])<<8 | ((uint8_t*)buf)[pos+3]; \
-	else \
-		res = ((uint8_t*)buf)[pos] | (((uint8_t*)buf)[pos+1])<<8 | \
-		      (((uint8_t*)buf)[pos+2])<<16 | (((uint8_t*)buf)[pos+3])<<24; \
-} while (0)
-
-#define GET_16_INC(res, buf, pos, buf_len, swap) do { \
-	GET_16(res, buf, pos, buf_len, swap); \
-	pos += 2; \
-} while (0)
-
-#define GET_32_INC(res, buf, pos, buf_len, swap) do { \
-	GET_32(res, buf, pos, buf_len, swap); \
-	pos += 4; \
-} while (0)
-
-static const char *get_string(void *buf, size_t buf_len,
-                              uint32_t num_comp, uint32_t *val)
-{
-	if (num_comp <= 4)
-		return (const char*)val;
-
-	if (*val + num_comp >= buf_len) {
-		GP_DEBUG(1, "String out of buffer offset 0x%08x length %u",
-		         *val, num_comp);
-		return NULL;
+	if (GP_IOFill(io, buf, len)) {
+		GP_WARN("Failed to read data");
+		return 1;
 	}
 
-	return ((const char*)buf) + *val;
+	if (GP_IOSeek(io, off, GP_IO_SEEK_SET) == -1) {
+		GP_WARN("Failed to seek back");
+		return 1;
+	}
+
+	return 0;
 }
 
+static int load_string(GP_IO *io, GP_DataStorage *storage, GP_DataNode *node,
+                       const char *id, uint32_t num_comp, uint32_t *val)
+{
+	size_t max_len = GP_MIN(num_comp, 1024u);
+	char buf[max_len];
+
+	/* Short strings are stored in the value directly */
+	if (num_comp <= 4) {
+		memcpy(buf, val, num_comp);
+		buf[num_comp - 1] = 0;
+		goto add;
+	}
+
+	/* Longer are stored at offset starting from II or MM */
+	if (get_buf(io, *val + 6, buf, max_len))
+		return 1;
+
+	buf[max_len - 1] = '\0';
+
+	GP_DEBUG(2, "ASCII String value = '%s'", buf);
+
+add:
+	return GP_DataStorageAddString(storage, node, id, buf) != NULL;
+}
+
+static int load_rat(GP_IO *io, GP_DataStorage *storage, GP_DataNode *node,
+		    const char *id, uint32_t num_comp, uint32_t val)
+{
+	uint32_t buf[2];
+
+	return GP_DataStorageAddRational(storage, node, id, 0, 0) != NULL;
+}
+
+/*
 static int rat_num(void *buf, uint32_t offset, size_t buf_len, int swap)
 {
 	int ret;
@@ -352,16 +383,19 @@ static int rat_den(void *buf, uint32_t offset, size_t buf_len, int swap)
 
 	return ret;
 }
+*/
 
-static void load_tag(GP_MetaData *self, void *buf, size_t buf_len, int swap,
-                     uint16_t tag, uint16_t format,
-		     uint32_t num_comp, uint32_t val)
+static int load_tag(GP_IO *io, GP_DataStorage *storage,
+                    GP_DataNode* node, int endian,
+                    uint16_t tag, uint16_t format,
+                    uint32_t num_comp, uint32_t val)
 {
 	const struct IFD_tag *res = IFD_tag_get(tag);
 
 	if (res == NULL) {
-		GP_TODO("Skipping unknown IFD tag 0x%02x", tag);
-		return;
+		GP_TODO("Skipping unknown IFD tag 0x%02x format %s",
+		        tag, IFD_format_name(format));
+		return 0;
 	}
 
 	if (res->format != format) {
@@ -377,89 +411,127 @@ static void load_tag(GP_MetaData *self, void *buf, size_t buf_len, int swap,
 		        res->name, num_comp, res->num_components);
 	}
 
-	const char *addr;
-
 	switch (format) {
-	case IFD_ASCII_STRING: {
-		addr = get_string(buf, buf_len, num_comp, &val);
-
-		if (addr == NULL)
-			return;
-
-		GP_MetaDataCreateString(self, res->name, addr, num_comp, 1);
-	} break;
+	case IFD_ASCII_STRING:
+		if (load_string(io, storage, node, res->name, num_comp, &val))
+			return 1;
+	break;
+	//case IFD_UNSIGNED_LONG:
 	case IFD_UNSIGNED_SHORT:
 		if (num_comp == 1)
-			GP_MetaDataCreateInt(self, res->name, val);
+			GP_DataStorageAddInt(storage, node, res->name, val);
 		else
 			goto unused;
 	break;
+
 	case IFD_UNSIGNED_RATIONAL:
 	case IFD_SIGNED_RATIONAL:
-		if (num_comp == 1)
-			GP_MetaDataCreateRat(self, res->name,
+		if (load_rat(io, storage, node, res->name, num_comp, val))
+			return 1;
+
+/*		if (num_comp == 1) {
+			rec.type = GP_DATA_RATIONAL;
+			rec.value.rat.
+				GP_MetaDataCreateRat(self, res->name,
 			                     rat_num(buf, val, buf_len, swap),
 					     rat_den(buf, val, buf_len, swap));
-		else
+		} else {
 			goto unused;
+		}
+*/
 	break;
 	case IFD_UNDEFINED:
 		switch (res->tag) {
 		case IFD_EXIF_VERSION:
 		case IFD_FLASH_PIX_VERSION:
-			addr = get_string(buf, buf_len, num_comp, &val);
-
-			if (addr == NULL)
-				return;
-
-			GP_MetaDataCreateString(self, res->name, addr, num_comp, 1);
+		case IFD_MAKER_NOTE:
+			if (load_string(io, storage, node, res->name, num_comp, &val))
+				return 1;
 		break;
 		default:
 			goto unused;
 		}
 	break;
+
 	unused:
 	default:
 		GP_TODO("Unused record '%s' format '%s' (0x%02x)", res->name,
 			IFD_format_name(format), format);
 	}
+
+	return 0;
 }
 
-/*
- * Loads IFD block.
- */
-static int load_IFD(GP_MetaData *self, void *buf, size_t buf_len,
-                    uint32_t IFD_offset, int swap)
+static int load_IFD(GP_IO *io, GP_DataStorage *storage, GP_DataNode *node,
+                    uint32_t IFD_offset, int endian)
 {
 	uint16_t IFD_entries_count;
+	uint16_t i2 = endian == 'I' ? GP_IO_L2 : GP_IO_B2;
 
-	GET_16_INC(IFD_entries_count, buf, IFD_offset, buf_len, swap);
+	uint16_t IFD_header[] = {
+		GP_IO_IGN | IFD_offset,
+		i2,
+		GP_IO_END,
+	};
+
+	if (GP_IOReadF(io, IFD_header, &IFD_entries_count) != 2) {
+		GP_DEBUG(1, "Failed to read IFD entries count");
+		return 1;
+	}
 
 	GP_DEBUG(2, "-- IFD Offset 0x%08x Entries 0x%04x --",
 	            IFD_offset, IFD_entries_count);
+
+	uint16_t IFD_record_LE[] = {
+		GP_IO_L2, /* Tag                  */
+		GP_IO_L2, /* Format               */
+		GP_IO_L4, /* Number of components */
+		GP_IO_L4, /* Value                */
+		GP_IO_END,
+	};
+
+	uint16_t IFD_record_BE[] = {
+		GP_IO_B2, /* Tag                  */
+		GP_IO_B2, /* Format               */
+		GP_IO_B4, /* Number of components */
+		GP_IO_B4, /* Value                */
+		GP_IO_END,
+	};
+
+	uint16_t *IFD_record = endian == 'I' ? IFD_record_LE : IFD_record_BE;
 
 	int i;
 
 	for (i = 0; i < IFD_entries_count; i++) {
 		uint16_t tag, format;
-		uint32_t num_components, val;
+		uint32_t num_comp, val;
+		off_t cur_off;
 
-		GET_16_INC(tag, buf, IFD_offset, buf_len, swap);
-		GET_16_INC(format, buf, IFD_offset, buf_len, swap);
-		GET_32_INC(num_components, buf, IFD_offset, buf_len, swap);
-		GET_32_INC(val, buf, IFD_offset, buf_len, swap);
+		if (GP_IOReadF(io, IFD_record, &tag, &format, &num_comp, &val) != 4) {
+			GP_DEBUG(1, "Failed to read IFD record");
+			return 1;
+		}
 
 		GP_DEBUG(3, "IFD Entry tag 0x%04x format (0x%04x) components 0x%08x val 0x%08x",
-		         tag, format, num_components, val);
+		         tag, format, num_comp, val);
 
 		GP_DEBUG(3, "IFD Entry tag '%s' format '%s'",
 			 IFD_tag_name(tag), IFD_format_name(format));
 
-		if (tag == IFD_EXIF_OFFSET)
-			load_IFD(self, buf, buf_len, val, swap);
-		else
-			load_tag(self, buf, buf_len, swap, tag, format, num_components, val);
+
+		if (tag == IFD_EXIF_OFFSET) {
+			cur_off = GP_IOTell(io);
+
+			/* Offset is counted from the II or MM in the Exif header */
+			if (val + 6 < cur_off)
+				GP_DEBUG(1, "Negative offset!");
+			else
+				load_IFD(io, storage, node, val + 6 - cur_off, endian);
+		} else {
+			load_tag(io, storage, node, endian, tag, format, num_comp, val);
+		}
 	}
+
 /*
 	GET_32(IFD_offset, buf, IFD_offset, buf_len, swap);
 
@@ -469,53 +541,49 @@ static int load_IFD(GP_MetaData *self, void *buf, size_t buf_len,
 	return 0;
 }
 
-/* Offset from the start of the Exit to TIFF header */
-#define TIFF_OFFSET 6
-
-int GP_MetaDataFromExif(GP_MetaData *self, void *buf, size_t buf_len)
+int GP_ReadExif(GP_IO *io, GP_DataStorage *storage)
 {
 	static int swap = 0;
-	int c1, c2;
-
-	if (buf_char(buf, 0, buf_len) != 'E' ||
-	    buf_char(buf, 1, buf_len) != 'x' ||
-	    buf_char(buf, 2, buf_len) != 'i' ||
-	    buf_char(buf, 3, buf_len) != 'f' ||
-	    buf_char(buf, 4, buf_len) != 0 ||
-	    buf_char(buf, 5, buf_len) != 0) {
-		GP_WARN("Missing ASCII 'Exif\\0\\0' string at "
-		        "the start of the buffer");
-		return 1;
-	}
-
-	if (((c1 = buf_char(buf, 6, buf_len)) != 
-	    (c2 = buf_char(buf, 7, buf_len)))
-	    || (c1 != 'I' && c1 != 'M')) {
-		GP_WARN("Expected II or MM got %x%x, corrupt header?", c1, c2);
-		return 1;
-	}
-
-	swap = (c1 == 'M');
-
-	GP_DEBUG(2, "TIFF aligment is '%c%c' swap = %i", c1, c1, swap);
-
-	uint16_t tag;
-
-	GET_16(tag, buf, 8, buf_len, swap);
-
-	if (tag != 0x002a) {
-		GP_WARN("Expected TIFF TAG '0x002a' got '0x%04x'", tag);
-		return 1;
-	}
-
+	char b1, b2;
 	uint32_t IFD_offset;
 
-	GET_32(IFD_offset, buf, 10, buf_len, swap);
+	uint16_t exif_header[] = {
+		'E', 'x', 'i', 'f', 0, 0, /* EXIF signature */
+		GP_IO_BYTE, GP_IO_BYTE,   /* Endianity markers II or MM */
+		0x2a, 0x00,               /* TIFF tag */
+		GP_IO_L4,                 /* IFD offset */
+		GP_IO_END,
+	};
+
+	if (GP_IOReadF(io, exif_header, &b1, &b2, &IFD_offset) != 11) {
+		GP_DEBUG(1, "Failed to read Exif header");
+		return 1;
+	}
+
+	if (b1 != b2 || (b1 != 'I' && b1 != 'M')) {
+		GP_WARN("Expected II or MM got %x%x, corrupt header?", b1, b2);
+		errno = EINVAL;
+		return 1;
+	}
+
+	swap = (b1 == 'M');
+
+	GP_DEBUG(2, "TIFF aligment is '%c%c' swap = %i", b1, b1, swap);
+
+	if (swap) {
+		//SWAP IFD_offset
+	}
 
 	GP_DEBUG(2, "IFD offset is 0x%08x", IFD_offset);
 
-	/* The offset starts from the II or MM */
-	load_IFD(self, (char*)buf + TIFF_OFFSET, buf_len - TIFF_OFFSET, IFD_offset, swap);
+	if (IFD_offset < 8) {
+		GP_WARN("Invalid (negative) IFD offset");
+		errno = EINVAL;
+		return 1;
+	}
 
-	return 0;
+	GP_DataNode *exif_root = GP_DataStorageAddDict(storage, NULL, "Exif");
+
+	/* The offset starts from the II or MM */
+	return load_IFD(io, storage, exif_root, IFD_offset - 8, b1);
 }

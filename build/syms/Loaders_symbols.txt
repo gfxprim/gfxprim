@@ -1,18 +1,18 @@
 
 GP_MatchJPG
 GP_ReadJPG
+GP_ReadJPGEx
 GP_LoadJPG
+GP_LoadJPGEx
 GP_WriteJPG
 GP_SaveJPG
-GP_ReadJPGMetaData
-GP_LoadJPGMetaData
 GP_JPG
 
 GP_MatchPNG
 GP_ReadPNG
+GP_ReadPNGEx
 GP_LoadPNG
-GP_ReadPNGMetaData
-GP_LoadPNGMetaData
+GP_LoadPNGEx
 GP_WritePNG
 GP_SavePNG
 GP_PNG
@@ -20,6 +20,7 @@ GP_PNG
 GP_MatchBMP
 GP_WriteBMP
 GP_LoadBMP
+GP_ReadBMPEx
 GP_ReadBMP
 GP_SaveBMP
 GP_BMP
@@ -27,21 +28,27 @@ GP_BMP
 GP_MatchPSP
 GP_ReadPSP
 GP_LoadPSP
+GP_ReadPSPEx
 GP_PSP
 
 GP_MatchGIF
-GP_LoadGIF
 GP_ReadGIF
+GP_ReadGIFEx
+GP_LoadGIF
+GP_LoadGIFEx
 GP_GIF
 
-GP_MatchTIFF
 GP_ReadTIFF
 GP_LoadTIFF
+GP_ReadTIFFEx
+GP_LoadTIFFEx
+GP_MatchTIFF
 GP_WriteTIFF
 GP_SaveTIFF
 GP_TIFF
 
 GP_ReadPBM
+GP_ReadPBMEx
 GP_LoadPBM
 GP_WritePBM
 GP_SavePBM
@@ -49,6 +56,7 @@ GP_MatchPBM
 GP_PBM
 
 GP_ReadPGM
+GP_ReadPGMEx
 GP_LoadPGM
 GP_WritePGM
 GP_SavePGM
@@ -56,6 +64,7 @@ GP_MatchPGM
 GP_PGM
 
 GP_ReadPPM
+GP_ReadPPMEx
 GP_LoadPPM
 GP_WritePPM
 GP_SavePPM
@@ -63,6 +72,7 @@ GP_MatchPPM
 GP_PPM
 
 GP_ReadPNM
+GP_ReadPNMEx
 GP_LoadPNM
 GP_WritePNM
 GP_SavePNM
@@ -71,18 +81,25 @@ GP_PNM
 
 GP_ReadJP2
 GP_LoadJP2
+GP_ReadJP2Ex
+GP_LoadJP2Ex
 GP_MatchJP2
 GP_JP2
 
 GP_ReadPCX
 GP_LoadPCX
+GP_ReadPCXEx
+GP_LoadPCXEx
 GP_MatchPCX
 GP_PCX
 
 GP_ReadPSD
+GP_ReadPSDEx
 GP_LoadPSD
 GP_MatchPSD
 GP_PSD
+
+GP_ReadExif
 
 GP_SaveTmpFile
 GP_LoadTmpFile
@@ -90,28 +107,17 @@ GP_LoadTmpFile
 GP_LoaderBySignature
 GP_LoaderByFilename
 GP_LoaderLoadImage
+GP_LoaderLoadImageEx
+GP_LoaderReadImage
+GP_LoaderReadImageEx
 GP_LoaderSaveImage
 GP_ReadImage
 GP_LoadImage
-GP_SaveImage
 GP_LoadMetaData
+GP_SaveImage
 GP_ListLoaders
 GP_LoaderRegister
 GP_LoaderUnregister
-
-GP_MetaDataGetString
-GP_MetaDataCreateRat
-GP_MetaDataCreateInt
-GP_MetaDataCreateRecord
-GP_MetaDataGetInt
-GP_MetaDataDestroy
-GP_MetaDataClear
-GP_MetaDataCreateDouble
-GP_MetaDataCreateString
-GP_MetaDataCreate
-GP_MetaDataPrint
-GP_MetaDataGetDouble
-GP_MetaDataFromExif
 
 GP_ContainerLoad
 GP_ContainerSeek
@@ -138,3 +144,17 @@ GP_IOPrintF
 
 GP_IOZlib
 GP_IOZlibReset
+
+GP_DataStorageCreate
+GP_DataStorageDestroy
+GP_DataStorageClear
+GP_DataStorageRoot
+GP_DataStorageGet
+GP_DataStorageAdd
+GP_DataStorageAddInt
+GP_DataStorageAddDouble
+GP_DataStorageAddString
+GP_DataStorageAddRational
+GP_DataStorageAddDict
+GP_DataTypeName
+GP_DataPrint

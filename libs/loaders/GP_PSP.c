@@ -444,7 +444,8 @@ static int psp_next_block(GP_IO *io, struct psp_img_attrs *attrs,
 	return 0;
 }
 
-GP_Context *GP_ReadPSP(GP_IO *io, GP_ProgressCallback *callback)
+int GP_ReadPSPEx(GP_IO *io, GP_Context **img, GP_DataStorage *storage,
+                 GP_ProgressCallback *callback)
 {
 	int err = 0;
 	struct psp_img_attrs attrs = {.is_loaded = 0, .subblock = 0,
@@ -472,21 +473,31 @@ GP_Context *GP_ReadPSP(GP_IO *io, GP_ProgressCallback *callback)
 	GP_DEBUG(1, "Have PSP image version %u.%u",
 	         version.major, version.minor);
 
+	if (storage) {
+		GP_DataStorageAddInt(storage, NULL, "Version Major", version.major);
+		GP_DataStorageAddInt(storage, NULL, "Version Minor", version.minor);
+	}
+
+	if (!img)
+		return 0;
+
 	while (!err) {
 		err = psp_next_block(io, &attrs, callback);
 
 		if (err)
 			goto err0;
 
-		if (attrs.img != NULL)
-			return attrs.img;
+		if (attrs.img != NULL) {
+			*img = attrs.img;
+			return 0;
+		}
 	}
 
 	errno = ENOSYS;
-	return NULL;
+	return 1;
 err0:
 	errno = err;
-	return NULL;
+	return 1;
 }
 
 GP_Context *GP_LoadPSP(const char *src_path, GP_ProgressCallback *callback)
@@ -494,8 +505,13 @@ GP_Context *GP_LoadPSP(const char *src_path, GP_ProgressCallback *callback)
 	return GP_LoaderLoadImage(&GP_PSP, src_path, callback);
 }
 
+GP_Context *GP_ReadPSP(GP_IO *io, GP_ProgressCallback *callback)
+{
+	return GP_LoaderReadImage(&GP_PSP, io, callback);
+}
+
 struct GP_Loader GP_PSP = {
-	.Read = GP_ReadPSP,
+	.Read = GP_ReadPSPEx,
 	.Match = GP_MatchPSP,
 	.fmt_name = "Paint Shop Pro Image",
 	.extensions = {"psp", "pspimage", NULL},

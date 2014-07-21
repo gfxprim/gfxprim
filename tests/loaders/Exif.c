@@ -16,52 +16,76 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2014 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
- /*
-
-   Read image meta-data and print them into stdout.
-
-  */
-
-#include <stdio.h>
 #include <string.h>
 #include <errno.h>
+#include <sys/stat.h>
 
-#include <GP.h>
+#include <loaders/GP_Exif.h>
 
-#define SEP \
-"-----------------------------------------------------------------------------"
+#include "tst_test.h"
 
-int main(int argc, char *argv[])
+struct testcase {
+	const char *path;
+};
+
+static int test_load_Exif(struct testcase *test)
 {
-	GP_MetaData *data = GP_MetaDataCreate(80);
-	int i;
+	GP_DataStorage *data = GP_DataStorageCreate();
+	GP_IO *io;
+	int ret = TST_SUCCESS;
 
-	if (argc < 2) {
-		fprintf(stderr, "Takes an image(s) as parameter(s)\n");
-		return 1;
+	if (!data) {
+		tst_msg("Failed to create DataStorage");
+		return TST_UNTESTED;
 	}
 
-	//GP_SetDebugLevel(10);
+	io = GP_IOFile(test->path, GP_IO_RDONLY);
 
-	for (i = 1; i < argc; i++) {
-		puts(SEP);
-		printf("Opening '%s'\n", argv[i]);
-
-		GP_MetaDataClear(data);
-
-		if (GP_LoadMetaData(argv[i], data)) {
-			fprintf(stderr, "Failed to read '%s' meta-data: %s\n",
-			        argv[1], strerror(errno));
-		} else {
-			GP_MetaDataPrint(data);
-		}
+	if (!io) {
+		tst_msg("Failed to open IO %s", test->path);
+		GP_DataStorageDestroy(data);
+		return TST_UNTESTED;
 	}
 
-	puts(SEP);
+	if (GP_ReadExif(io, data)) {
+		tst_msg("Failed to load Exif");
+		ret = TST_FAILED;
+		goto end;
+	}
 
-	return 0;
+end:
+	GP_DataStorageDestroy(data);
+	GP_IOClose(io);
+	return ret;
 }
+
+static struct testcase sample001 = {
+	.path = "sample001.exif",
+};
+
+static struct testcase sample002 = {
+	.path = "sample002.exif",
+};
+
+const struct tst_suite tst_suite = {
+	.suite_name = "Exif",
+	.tests = {
+		{.name = "Exif sample001",
+		 .tst_fn = test_load_Exif,
+		 .res_path = "data/exif/sample001.exif",
+		 .data = &sample001,
+		 .flags = TST_TMPDIR | TST_CHECK_MALLOC},
+
+		{.name = "Exif sample002",
+		 .tst_fn = test_load_Exif,
+		 .res_path = "data/exif/sample002.exif",
+		 .data = &sample002,
+		 .flags = TST_TMPDIR | TST_CHECK_MALLOC},
+
+		{.name = NULL},
+	}
+};

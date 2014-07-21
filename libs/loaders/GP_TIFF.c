@@ -185,6 +185,81 @@ static int read_header(TIFF *tiff, struct tiff_header *header)
 	return 0;
 }
 
+enum rec_type {
+	REC_STRING,
+	REC_SHORT,
+	REC_FLOAT,
+};
+
+struct tag {
+	int tag;
+	const char *name;
+	enum rec_type type;
+};
+
+static struct tag tags[] = {
+	{TIFFTAG_IMAGEDESCRIPTION, "Image Description", REC_STRING},
+	{TIFFTAG_MAKE, "Make", REC_STRING},
+	{TIFFTAG_MODEL, "Model", REC_STRING},
+	{TIFFTAG_ORIENTATION, "Orientation", REC_SHORT},
+	{TIFFTAG_SAMPLESPERPIXEL, "Samples per Pixel", REC_SHORT},
+	{TIFFTAG_XRESOLUTION, "X Resolution", REC_FLOAT},
+	{TIFFTAG_YRESOLUTION, "Y Resolution", REC_FLOAT},
+	{TIFFTAG_RESOLUTIONUNIT, "Resolution Unit", REC_SHORT},
+	{TIFFTAG_SOFTWARE, "Software", REC_STRING},
+	{TIFFTAG_DATETIME, "Date Time", REC_STRING},
+	{TIFFTAG_ARTIST, "Artist", REC_STRING},
+	{TIFFTAG_HOSTCOMPUTER, "Host Computer", REC_STRING},
+	{TIFFTAG_COPYRIGHT, "Copyright", REC_STRING},
+	{0, NULL, 0},
+};
+
+static void fill_metadata(TIFF *tiff, struct tiff_header *header,
+                          GP_DataStorage *storage)
+{
+	unsigned int i;
+	int flag;
+	uint16_t s;
+	float f;
+	GP_DataNode val;
+
+	GP_DataStorageAddInt(storage, NULL, "Width", header->w);
+	GP_DataStorageAddInt(storage, NULL, "Height", header->h);
+	GP_DataStorageAddString(storage, NULL, "Compression",
+	                        compression_name(header->compress));
+	GP_DataStorageAddInt(storage, NULL, "Bits per Sample",
+	                     header->bits_per_sample);
+
+	for (i = 0; tags[i].name; i++) {
+
+		val.id = tags[i].name;
+
+		switch (tags[i].type) {
+		case REC_STRING:
+			val.type = GP_DATA_STRING;
+			flag = TIFFGetField(tiff, tags[i].tag, &(val.value.str));
+		break;
+		case REC_SHORT:
+			val.type = GP_DATA_INT;
+			flag = TIFFGetField(tiff, tags[i].tag, &s);
+			val.value.i = s;
+		break;
+		case REC_FLOAT:
+			val.type = GP_DATA_DOUBLE;
+			flag = TIFFGetField(tiff, tags[i].tag, &f);
+			val.value.d = f;
+		break;
+		default:
+			GP_WARN("Unhandled type %i", tags[i].type);
+		}
+
+		if (flag) {
+			GP_DataStorageAdd(storage, NULL, &val);
+			flag = 0;
+		}
+	}
+}
+
 static GP_PixelType match_grayscale_pixel_type(TIFF *tiff,
                                                struct tiff_header *header)
 {
@@ -474,7 +549,8 @@ static void tiff_io_unmap(thandle_t io, void *base, toff_t size)
 }
 */
 
-GP_Context *GP_ReadTIFF(GP_IO *io, GP_ProgressCallback *callback)
+int GP_ReadTIFFEx(GP_IO *io, GP_Context **img, GP_DataStorage *storage,
+                  GP_ProgressCallback *callback)
 {
 	TIFF *tiff;
 	struct tiff_header header;
@@ -494,6 +570,12 @@ GP_Context *GP_ReadTIFF(GP_IO *io, GP_ProgressCallback *callback)
 
 	if ((err = read_header(tiff, &header)))
 		goto err1;
+
+	if (storage)
+		fill_metadata(tiff, &header, storage);
+
+	if (!img)
+		return 0;
 
 	pixel_type = match_pixel_type(tiff, &header);
 
@@ -523,14 +605,15 @@ GP_Context *GP_ReadTIFF(GP_IO *io, GP_ProgressCallback *callback)
 
 	TIFFClose(tiff);
 
-	return res;
+	*img = res;
+	return 0;
 err2:
 	GP_ContextFree(res);
 err1:
 	TIFFClose(tiff);
 err0:
 	errno = err;
-	return NULL;
+	return 1;
 }
 
 static int save_grayscale(TIFF *tiff, const GP_Context *src,
@@ -718,11 +801,12 @@ int GP_WriteTIFF(const GP_Context *src, GP_IO *io,
 
 #else
 
-GP_Context *GP_ReadTIFF(GP_IO GP_UNUSED(*io),
-                        GP_ProgressCallback GP_UNUSED(*callback))
+int GP_ReadTIFFEx(GP_IO GP_UNUSED(*io), GP_Context GP_UNUSED(**img,)
+                  GP_DataStorage GP_UNUSED(*storage),
+                  GP_ProgressCallback GP_UNUSED(*callback))
 {
 	errno = ENOSYS;
-	return NULL;
+	return 1;
 }
 
 int GP_WriteTIFF(const GP_Context GP_UNUSED(*src), GP_IO GP_UNUSED(*io),
@@ -739,6 +823,17 @@ GP_Context *GP_LoadTIFF(const char *src_path, GP_ProgressCallback *callback)
 	return GP_LoaderLoadImage(&GP_TIFF, src_path, callback);
 }
 
+GP_Context *GP_ReadTIFF(GP_IO *io, GP_ProgressCallback *callback)
+{
+	return GP_LoaderReadImage(&GP_TIFF, io, callback);
+}
+
+int GP_LoadTIFFEx(const char *src_path, GP_Context **img,
+                  GP_DataStorage *storage, GP_ProgressCallback *callback)
+{
+	return GP_LoaderLoadImageEx(&GP_TIFF, src_path, img, storage, callback);
+}
+
 int GP_SaveTIFF(const GP_Context *src, const char *dst_path,
                 GP_ProgressCallback *callback)
 {
@@ -747,7 +842,7 @@ int GP_SaveTIFF(const GP_Context *src, const char *dst_path,
 
 struct GP_Loader GP_TIFF = {
 #ifdef HAVE_TIFF
-	.Read = GP_ReadTIFF,
+	.Read = GP_ReadTIFFEx,
 	.Write = GP_WriteTIFF,
 	.save_ptypes = save_ptypes,
 #endif

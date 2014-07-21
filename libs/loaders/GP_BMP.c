@@ -643,12 +643,27 @@ static int read_bitmap_pixels(GP_IO *io, struct bitmap_info_header *header,
 	return ENOSYS;
 }
 
+static void fill_metadata(struct bitmap_info_header *header,
+                          GP_DataStorage *storage)
+{
+	GP_DataStorageAddInt(storage, NULL, "Width", header->w);
+	GP_DataStorageAddInt(storage, NULL, "Height", header->h);
+	GP_DataStorageAddString(storage, NULL, "Compression",
+	                        bitmap_compress_name(header->compress_type));
+	GP_DataStorageAddString(storage, NULL, "Header Type",
+	                        bitmap_header_size_name(header->header_size));
+	GP_DataStorageAddInt(storage, NULL, "Bits per Sample",
+	                     header->bpp);
+	//TODO error check
+}
+
 int GP_MatchBMP(const void *buf)
 {
 	return !memcmp(buf, "BM", 2);
 }
 
-GP_Context *GP_ReadBMP(GP_IO *io, GP_ProgressCallback *callback)
+int GP_ReadBMPEx(GP_IO *io, GP_Context **img, GP_DataStorage *storage,
+                 GP_ProgressCallback *callback)
 {
 	struct bitmap_info_header header;
 	GP_PixelType pixel_type;
@@ -663,6 +678,9 @@ GP_Context *GP_ReadBMP(GP_IO *io, GP_ProgressCallback *callback)
 		err = EINVAL;
 		goto err1;
 	}
+
+	if (storage)
+		fill_metadata(&header, storage);
 
 	switch (header.compress_type) {
 	case COMPRESS_RGB:
@@ -682,6 +700,9 @@ GP_Context *GP_ReadBMP(GP_IO *io, GP_ProgressCallback *callback)
 		goto err1;
 	}
 
+	if (!img)
+		return 0;
+
 	context = GP_ContextAlloc(header.w, GP_ABS(header.h), pixel_type);
 
 	if (context == NULL) {
@@ -692,12 +713,19 @@ GP_Context *GP_ReadBMP(GP_IO *io, GP_ProgressCallback *callback)
 	if ((err = read_bitmap_pixels(io, &header, context, callback)))
 		goto err2;
 
-	return context;
+	*img = context;
+
+	return 0;
 err2:
 	GP_ContextFree(context);
 err1:
 	errno = err;
-	return NULL;
+	return 1;
+}
+
+GP_Context *GP_ReadBMP(GP_IO *io, GP_ProgressCallback *callback)
+{
+	return GP_LoaderReadImage(&GP_BMP, io, callback);
 }
 
 GP_Context *GP_LoadBMP(const char *src_path, GP_ProgressCallback *callback)
@@ -873,7 +901,7 @@ int GP_SaveBMP(const GP_Context *src, const char *dst_path,
 }
 
 struct GP_Loader GP_BMP = {
-	.Read = GP_ReadBMP,
+	.Read = GP_ReadBMPEx,
 	.Write = GP_WriteBMP,
 	.save_ptypes = out_pixel_types,
 	.Match = GP_MatchBMP,

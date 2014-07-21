@@ -16,69 +16,57 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2014 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
  /*
 
-   Meta-data storage operations example.
-
-   Meta-data storage is used to store image meta-data (if present) such as
-   physical size, creation date, etc...
-
-   Meta-data storage is basically an typed dictionary.
-
-   This example shows low-level interface to GP_MetaData structure.
+   Read image meta-data and print them into stdout.
 
   */
 
 #include <stdio.h>
+#include <string.h>
+#include <errno.h>
 
 #include <GP.h>
 
-int main(void)
+#define SEP \
+"-----------------------------------------------------------------------------"
+
+int main(int argc, char *argv[])
 {
-	GP_MetaData *data = GP_MetaDataCreate(10);
+	GP_DataStorage *storage;
+	int i;
 
-	//GP_SetDebugLevel(10);
-
-	if (data == NULL)
+	if (argc < 2) {
+		fprintf(stderr, "Takes an image(s) as parameter(s)\n");
 		return 1;
+	}
 
-	/*
-	 * Create integer
-	 *
-	 * May fail, if there is allready record with id 'dpi' or
-	 * if there is no space left.
-	 */
-	GP_MetaDataCreateInt(data, "dpi", 300);
+	storage = GP_DataStorageCreate();
 
-	/*
-	 * Create an string.
-	 *
-	 * The last parameter says, if the string should be duplicated
-	 * in the metadata storage.
-	 */
-	GP_MetaDataCreateString(data, "author", "Foo Bar <foo@bar.net>", 0, 1);
-	GP_MetaDataCreateString(data, "comment", "Created in hurry.", 0, 1);
-	GP_MetaDataCreateDouble(data, "pi", 3.141592);
+	if (!storage) {
+		fprintf(stderr, "Failed to create data storage\n");
+		return 1;
+	}
 
-	const char *ret;
+	for (i = 1; i < argc; i++) {
+		puts(SEP);
+		printf("Opening '%s'\n", argv[i]);
 
-	ret = GP_MetaDataGetString(data, "comment");
+		GP_DataStorageClear(storage);
 
-	if (ret != NULL)
-		printf("Found string 'comment' = '%s'\n", ret);
-	else
-		printf("ERROR: cannot cound string 'comment'\n");
+		if (GP_LoadMetaData(argv[i], storage)) {
+			fprintf(stderr, "Failed to read '%s' meta-data: %s\n",
+			        argv[i], strerror(errno));
+		} else {
+			GP_DataStoragePrint(storage);
+		}
+	}
 
-	printf("\n");
-
-	/*
-	 * Print all meta-data
-	 */
-	GP_MetaDataPrint(data);
+	puts(SEP);
 
 	return 0;
 }

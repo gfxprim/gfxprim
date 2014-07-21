@@ -24,6 +24,10 @@
 
    PSD image loader.
 
+   The loader tries to read merged image (if present) and fallbacks to
+   thumbnail. It may return NULL with errno untouched if neither merged image
+   nor thumbnail was present (which seem to be really uncommon).
+
   */
 
 #ifndef LOADERS_GP_PSD_H
@@ -31,28 +35,21 @@
 
 #include "loaders/GP_Loader.h"
 
-/*
- * Reads a PSD from an IO stream.
- *
- * The loaders tries to read merged image (if present) and fallback to
- * thumbnail. It may return NULL with errno untouched if neither merged image
- * nor thumbnail was present (which seem to be really uncommon).
- *
- * Returns newly allocated context cotaining the loaded image or in case of
- * failure NULL and errno is set.
- */
+int GP_ReadPSDEx(GP_IO *io, GP_Context **img,
+		 GP_DataStorage *storage, GP_ProgressCallback *callback);
+
+int GP_LoadPSDEx(const char *src_path, GP_Context **img,
+		 GP_DataStorage *storage, GP_ProgressCallback *callback);
+
 GP_Context *GP_ReadPSD(GP_IO *io, GP_ProgressCallback *callback);
 
-/*
- * Loads a PSD image from a file.
- */
 GP_Context *GP_LoadPSD(const char *src_path, GP_ProgressCallback *callback);
 
-/*
- * Match PSD signature.
- */
 int GP_MatchPSD(const void *buf);
 
+/*
+ * Looks for PSD file signature. Returns non-zero if found.
+ */
 extern GP_Loader GP_PSD;
 
 #endif /* LOADERS_GP_PSD_H */

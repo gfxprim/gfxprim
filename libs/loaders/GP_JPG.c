@@ -37,6 +37,7 @@
 #include "../../config.h"
 #include "core/GP_Debug.h"
 
+#include "loaders/GP_Exif.h"
 #include "loaders/GP_LineConvert.h"
 #include "loaders/GP_JPG.h"
 
@@ -199,7 +200,58 @@ static inline void init_source_mgr(struct my_source_mgr *src, GP_IO *io,
 	src->size = buf_size;
 }
 
-GP_Context *GP_ReadJPG(GP_IO *io, GP_ProgressCallback *callback)
+#define JPEG_COM_MAX 128
+
+static void read_jpg_metadata(struct jpeg_decompress_struct *cinfo,
+                              GP_DataStorage *storage)
+{
+	jpeg_saved_marker_ptr marker;
+
+	for (marker = cinfo->marker_list; marker != NULL; marker = marker->next) {
+		switch (marker->marker) {
+		case JPEG_COM: {
+			//TODO: Is comment NULL terminated?
+			char buf[marker->data_length+1];
+
+			GP_DEBUG(3, "JPEG_COM comment block, size %u",
+			         (unsigned int)marker->data_length);
+
+			memcpy(buf, marker->data, marker->data_length);
+			buf[marker->data_length] = '\0';
+			GP_DataStorageAddString(storage, NULL, "Comment", buf);
+			//GP_MetaDataCreateString(data, "comment", (void*)marker->data,
+			//                        marker->data_length, 1);
+		} break;
+		case JPEG_APP0:
+			GP_TODO("JFIF");
+		break;
+		case JPEG_APP0 + 1: {
+			GP_IO *io = GP_IOMem(marker->data, marker->data_length, NULL);
+			if (!io) {
+				GP_WARN("Failed to create MemIO");
+				return;
+			}
+			GP_ReadExif(io, storage);
+			GP_IOClose(io);
+		} break;
+		}
+	}
+}
+
+static void save_jpg_markers(struct jpeg_decompress_struct *cinfo)
+{
+	/* Comment marker */
+	jpeg_save_markers(cinfo, JPEG_COM, JPEG_COM_MAX);
+
+	/* APP0 marker = JFIF data */
+	jpeg_save_markers(cinfo, JPEG_APP0 + 1, 0xffff);
+
+	/* APP1 marker = Exif data */
+	jpeg_save_markers(cinfo, JPEG_APP0 + 1, 0xffff);
+}
+
+int GP_ReadJPGEx(GP_IO *io, GP_Context **img,
+		 GP_DataStorage *storage, GP_ProgressCallback *callback)
 {
 	struct jpeg_decompress_struct cinfo;
 	struct my_source_mgr src;
@@ -220,12 +272,22 @@ GP_Context *GP_ReadJPG(GP_IO *io, GP_ProgressCallback *callback)
 	init_source_mgr(&src, io, buf, sizeof(buf));
 	cinfo.src = (void*)&src;
 
+	if (storage)
+		save_jpg_markers(&cinfo);
+
 	jpeg_read_header(&cinfo, TRUE);
 
 	GP_DEBUG(1, "Have %s JPEG size %ux%u %i channels",
 	            get_colorspace(cinfo.jpeg_color_space),
 	            cinfo.image_width, cinfo.image_height,
 		    cinfo.num_components);
+
+	//TODO: Propagate failure?
+	if (storage)
+		read_jpg_metadata(&cinfo, storage);
+
+	if (!img)
+		goto exit;
 
 	GP_Pixel pixel_type;
 
@@ -277,111 +339,21 @@ GP_Context *GP_ReadJPG(GP_IO *io, GP_ProgressCallback *callback)
 		goto err2;
 
 	jpeg_finish_decompress(&cinfo);
+exit:
 	jpeg_destroy_decompress(&cinfo);
 
 	GP_ProgressCallbackDone(callback);
 
-	return ret;
+	if (img)
+		*img = ret;
+
+	return 0;
 err2:
 	GP_ContextFree(ret);
 err1:
 	jpeg_destroy_decompress(&cinfo);
 	errno = err;
-	return NULL;
-}
-
-#define JPEG_COM_MAX 128
-
-static void read_jpg_metadata(struct jpeg_decompress_struct *cinfo,
-                              GP_MetaData *data)
-{
-	jpeg_saved_marker_ptr marker;
-
-	for (marker = cinfo->marker_list; marker != NULL; marker = marker->next) {
-		switch (marker->marker) {
-		case JPEG_COM:
-			GP_MetaDataCreateString(data, "comment", (void*)marker->data,
-			                        marker->data_length, 1);
-		break;
-		case JPEG_APP0:
-			GP_TODO("JFIF");
-		break;
-		case JPEG_APP0 + 1:
-			GP_MetaDataFromExif(data, marker->data, marker->data_length);
-		break;
-		}
-	}
-}
-
-static void save_jpg_markers(struct jpeg_decompress_struct *cinfo)
-{
-	/* Comment marker */
-	jpeg_save_markers(cinfo, JPEG_COM, JPEG_COM_MAX);
-
-	/* APP0 marker = JFIF data */
-	jpeg_save_markers(cinfo, JPEG_APP0 + 1, 0xffff);
-
-	/* APP1 marker = Exif data */
-	jpeg_save_markers(cinfo, JPEG_APP0 + 1, 0xffff);
-}
-
-int GP_ReadJPGMetaData(GP_IO *io, GP_MetaData *data)
-{
-	struct jpeg_decompress_struct cinfo;
-	struct my_source_mgr src;
-	struct my_jpg_err my_err;
-	uint8_t buf[1024];
-	int err;
-
-	cinfo.err = jpeg_std_error(&my_err.error_mgr);
-	my_err.error_mgr.error_exit = my_error_exit;
-
-	if (setjmp(my_err.setjmp_buf)) {
-		err = EIO;
-		goto err1;
-	}
-
-	jpeg_create_decompress(&cinfo);
-	init_source_mgr(&src, io, buf, sizeof(buf));
-	cinfo.src = (void*)&src;
-
-	save_jpg_markers(&cinfo);
-
-	jpeg_read_header(&cinfo, TRUE);
-
-	GP_DEBUG(1, "Have %s JPEG size %ux%u %i channels",
-	            get_colorspace(cinfo.jpeg_color_space),
-	            cinfo.image_width, cinfo.image_height,
-		    cinfo.num_components);
-
-	read_jpg_metadata(&cinfo, data);
-
-//	jpeg_finish_decompress(&cinfo);
-	jpeg_destroy_decompress(&cinfo);
-
-	return 0;
-err1:
-	jpeg_destroy_decompress(&cinfo);
-	errno = err;
 	return 1;
-}
-
-int GP_LoadJPGMetaData(const char *src_path, GP_MetaData *data)
-{
-	GP_IO *io;
-	int err, ret;
-
-	io = GP_IOFile(src_path, GP_IO_RDONLY);
-	if (!io)
-		return 1;
-
-	ret = GP_ReadJPGMetaData(io, data);
-
-	err = errno;
-	GP_IOClose(io);
-	errno = err;
-
-	return ret;
 }
 
 static int save_convert(struct jpeg_compress_struct *cinfo,
@@ -560,18 +532,18 @@ int GP_WriteJPG(const GP_Context *src, GP_IO *io,
 	jpeg_finish_compress(&cinfo);
 	jpeg_destroy_compress(&cinfo);
 
-
 	GP_ProgressCallbackDone(callback);
 	return 0;
 }
 
 #else
 
-GP_Context *GP_ReadJPG(GP_IO GP_UNUSED(*io),
-                       GP_ProgressCallback GP_UNUSED(*callback))
+int GP_ReadJPGEx(GP_IO GP_UNUSED(*io), GP_Context GP_UNUSED(**img,)
+                 GP_DataStorage GP_UNUSED(*storage),
+                 GP_ProgressCallback GP_UNUSED(*callback))
 {
 	errno = ENOSYS;
-	return NULL;
+	return 1;
 }
 
 int GP_WriteJPG(const GP_Context *src, GP_IO *io,
@@ -581,24 +553,22 @@ int GP_WriteJPG(const GP_Context *src, GP_IO *io,
 	return 1;
 }
 
-int GP_ReadJPGMetaData(GP_IO GP_UNUSED(*io), GP_MetaData GP_UNUSED(*data))
-{
-	errno = ENOSYS;
-	return 1;
-}
-
-int GP_LoadJPGMetaData(const char GP_UNUSED(*src_path),
-                       GP_MetaData GP_UNUSED(*data))
-{
-	errno = ENOSYS;
-	return 1;
-}
-
 #endif /* HAVE_JPEG */
+
+GP_Context *GP_ReadJPG(GP_IO *io, GP_ProgressCallback *callback)
+{
+	return GP_LoaderReadImage(&GP_JPG, io, callback);
+}
 
 GP_Context *GP_LoadJPG(const char *src_path, GP_ProgressCallback *callback)
 {
 	return GP_LoaderLoadImage(&GP_JPG, src_path, callback);
+}
+
+int GP_LoadJPGEx(const char *src_path, GP_Context **img,
+                 GP_DataStorage *storage, GP_ProgressCallback *callback)
+{
+	return GP_LoaderLoadImageEx(&GP_JPG, src_path, img, storage, callback);
 }
 
 int GP_SaveJPG(const GP_Context *src, const char *dst_path,
@@ -609,7 +579,7 @@ int GP_SaveJPG(const GP_Context *src, const char *dst_path,
 
 struct GP_Loader GP_JPG = {
 #ifdef HAVE_JPEG
-	.Read = GP_ReadJPG,
+	.Read = GP_ReadJPGEx,
 	.Write = GP_WriteJPG,
 	.save_ptypes = out_pixel_types,
 #endif

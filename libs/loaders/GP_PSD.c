@@ -708,7 +708,18 @@ static int psd_combined_image(GP_IO *io, struct psd_header *header,
 	return ret;
 }
 
-GP_Context *GP_ReadPSD(GP_IO *io, GP_ProgressCallback *callback)
+static void fill_metadata(struct psd_header *header, GP_DataStorage *storage)
+{
+	GP_DataStorageAddInt(storage, NULL, "Width", header->w);
+	GP_DataStorageAddInt(storage, NULL, "Height", header->h);
+	GP_DataStorageAddInt(storage, NULL, "Samples per Pixel", header->channels);
+	GP_DataStorageAddInt(storage, NULL, "Bits per Sample", header->depth);
+	GP_DataStorageAddString(storage, NULL, "Color Mode",
+	                        psd_color_mode_name(header->color_mode));
+}
+
+int GP_ReadPSDEx(GP_IO *io, GP_Context **img, GP_DataStorage *storage,
+                 GP_ProgressCallback *callback)
 {
 	int err;
 	uint32_t len, size, read_size = 0;
@@ -741,6 +752,12 @@ GP_Context *GP_ReadPSD(GP_IO *io, GP_ProgressCallback *callback)
 	         header.channels, header.depth,
 	         psd_color_mode_name(header.color_mode), header.color_mode, len);
 
+	if (storage)
+		fill_metadata(&header, storage);
+
+	if (!img)
+		return 0;
+
 	switch (header.color_mode) {
 	case PSD_INDEXED:
 	case PSD_DUOTONE:
@@ -757,12 +774,12 @@ GP_Context *GP_ReadPSD(GP_IO *io, GP_ProgressCallback *callback)
 	/* Seek after the color mode data */
 	if (GP_IOSeek(io, len, GP_IO_SEEK_CUR) == (off_t)-1) {
 		GP_DEBUG(1, "Failed skip color mode data");
-		return NULL;
+		return 1;
 	}
 
 	if (GP_IOReadB4(io, &len)) {
 		GP_DEBUG(1, "Failed to load Image Resource Section Lenght");
-		return NULL;
+		return 1;
 	}
 
 	GP_DEBUG(1, "Image Resource Section length is %u", len);
@@ -770,8 +787,10 @@ GP_Context *GP_ReadPSD(GP_IO *io, GP_ProgressCallback *callback)
 	do {
 		size = psd_next_img_res_block(io, &thumbnail, NULL);
 
-		if (size == 0)
-			return thumbnail;
+		if (size == 0) {
+			*img = thumbnail;
+			return 0;
+		}
 
 		read_size += size;
 	} while (read_size < len);
@@ -794,21 +813,24 @@ GP_Context *GP_ReadPSD(GP_IO *io, GP_ProgressCallback *callback)
 
 	if (!err) {
 		GP_ContextFree(thumbnail);
-		return combined;
+		*img = combined;
+		return 0;
 	}
 
 	if (err == ECANCELED)
 		goto err;
 
-	if (thumbnail)
-		return thumbnail;
+	if (thumbnail) {
+		*img = thumbnail;
+		return 0;
+	}
 
 	errno = ENOSYS;
-	return NULL;
+	return 1;
 err:
 	GP_ContextFree(thumbnail);
 	errno = err;
-	return NULL;
+	return 1;
 }
 
 GP_Context *GP_LoadPSD(const char *src_path, GP_ProgressCallback *callback)
@@ -816,8 +838,13 @@ GP_Context *GP_LoadPSD(const char *src_path, GP_ProgressCallback *callback)
 	return GP_LoaderLoadImage(&GP_PSD, src_path, callback);
 }
 
+GP_Context *GP_ReadPSD(GP_IO *io, GP_ProgressCallback *callback)
+{
+	return GP_LoaderReadImage(&GP_PSD, io, callback);
+}
+
 struct GP_Loader GP_PSD = {
-	.Read = GP_ReadPSD,
+	.Read = GP_ReadPSDEx,
 	.Match = GP_MatchPSD,
 
 	.fmt_name = "Adobe Photoshop Image",

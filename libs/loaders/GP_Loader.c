@@ -234,6 +234,7 @@ GP_Context *GP_ReadImage(GP_IO *io, GP_ProgressCallback *callback)
 	char buf[32];
 	off_t start;
 	const GP_Loader *loader;
+	GP_Context *ret = NULL;
 
 	start = GP_IOTell(io);
 	if (start == (off_t)-1) {
@@ -272,34 +273,58 @@ GP_Context *GP_ReadImage(GP_IO *io, GP_ProgressCallback *callback)
 		return NULL;
 	}
 
-	return loader->Read(io, callback);
+	loader->Read(io, &ret, NULL, callback);
+	return ret;
 }
 
-GP_Context *GP_LoaderLoadImage(const GP_Loader *self, const char *src_path,
-                               GP_ProgressCallback *callback)
+int GP_LoaderLoadImageEx(const GP_Loader *self, const char *src_path,
+                         GP_Context **img, GP_DataStorage *storage,
+                         GP_ProgressCallback *callback)
 {
 	GP_IO *io;
-	GP_Context *res;
-	int err;
+	int err, ret;
 
 	GP_DEBUG(1, "Loading Image '%s'", src_path);
 
 	if (!self->Read) {
 		errno = ENOSYS;
-		return NULL;
+		return 1;
 	}
 
 	io = GP_IOFile(src_path, GP_IO_RDONLY);
 	if (!io)
-		return NULL;
+		return 1;
 
-	res = self->Read(io, callback);
+	ret = self->Read(io, img, storage, callback);
 
 	err = errno;
 	GP_IOClose(io);
 	errno = err;
 
-	return res;
+	return ret;
+}
+
+
+GP_Context *GP_LoaderLoadImage(const GP_Loader *self, const char *src_path,
+                               GP_ProgressCallback *callback)
+{
+	GP_Context *ret = NULL;
+
+	GP_LoaderLoadImageEx(self, src_path, &ret, NULL, callback);
+
+	return ret;
+}
+
+GP_Context *GP_LoaderReadImage(const GP_Loader *self, GP_IO *io,
+                               GP_ProgressCallback *callback)
+{
+	GP_Context *ret = NULL;
+
+	GP_DEBUG(1, "Reading image (I/O %p)", io);
+
+	self->Read(io, &ret, NULL, callback);
+
+	return ret;
 }
 
 GP_Context *GP_LoadImage(const char *src_path, GP_ProgressCallback *callback)
@@ -357,11 +382,13 @@ GP_Context *GP_LoadImage(const char *src_path, GP_ProgressCallback *callback)
 	return NULL;
 }
 
-int GP_LoadMetaData(const char *src_path, GP_MetaData *data)
+int GP_LoadMetaData(const char *src_path, GP_DataStorage *storage)
 {
-	const char *ext;
+	const GP_Loader *loader;
+	struct stat st;
 	int err;
 
+	// TODO unify this with GP_LoadImage()
 	if (access(src_path, R_OK)) {
 		err = errno;
 		GP_DEBUG(1, "Failed to access file '%s' : %s",
@@ -370,16 +397,21 @@ int GP_LoadMetaData(const char *src_path, GP_MetaData *data)
 		return 1;
 	}
 
-	ext = get_ext(src_path);
+	if (stat(src_path, &st)) {
+		GP_WARN("Failed to stat '%s': %s", src_path, strerror(errno));
+	} else {
+		if (st.st_mode & S_IFDIR) {
+			errno = EISDIR;
+			return 1;
+		}
+	}
 
-	if (ext == NULL)
+	loader = GP_LoaderByFilename(src_path);
+
+	if (loader == NULL)
 		goto out;
 
-	if (!strcasecmp(ext, "jpg") || !strcasecmp(ext, "jpeg"))
-		return GP_LoadJPGMetaData(src_path, data);
-
-	if (!strcasecmp(ext, "png"))
-		return GP_LoadPNGMetaData(src_path, data);
+	return GP_LoaderLoadImageEx(loader, src_path, NULL, storage, NULL);
 
 out:
 	errno = ENOSYS;

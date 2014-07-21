@@ -26,10 +26,15 @@
 #include "loaders/GP_Loader.h"
 
 /*
+ * Extended loading function.
+ */
+int GP_ReadTIFFEx(GP_IO *io, GP_Context **img,
+                  GP_DataStorage *storage, GP_ProgressCallback *callback);
+
+int GP_LoadTIFFEx(const char *src_path, GP_Context **img,
+                  GP_DataStorage *storage, GP_ProgressCallback *callback);
+/*
  * Reads first image in TIFF from an IO stream.
- *
- * Returns newly allocated context cotaining the loaded image or in case of
- * failure NULL and errno is set.
  */
 GP_Context *GP_ReadTIFF(GP_IO *io, GP_ProgressCallback *callback);
 

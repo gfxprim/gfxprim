@@ -69,14 +69,99 @@ static void read_data(png_structp png_ptr, png_bytep data, png_size_t len)
 		png_error(png_ptr, "Read Error");
 }
 
-GP_Context *GP_ReadPNG(GP_IO *io, GP_ProgressCallback *callback)
+static void load_meta_data(png_structp png, png_infop png_info,
+                           GP_DataStorage *storage)
+{
+	double gamma;
+	png_uint_32 res_x, res_y, w, h;
+	int unit, depth, color_type, interlace_type, compr_method;
+	const char *type;
+
+	png_get_IHDR(png, png_info, &w, &h, &depth,
+	             &color_type, &interlace_type, &compr_method, NULL);
+
+	GP_DataStorageAddString(storage, NULL, "Interlace Type",
+	                        interlace_type_name(interlace_type));
+
+
+	GP_DataStorageAddInt(storage, NULL, "Width", w);
+	GP_DataStorageAddInt(storage, NULL, "Height", h);
+	GP_DataStorageAddInt(storage, NULL, "Bit Depth", depth);
+
+	if (color_type & PNG_COLOR_MASK_PALETTE) {
+		type = "Palette";
+	} else {
+		if (color_type & PNG_COLOR_MASK_COLOR)
+			type = "RGB";
+		else
+			type = "Grayscale";
+	}
+
+	GP_DataStorageAddString(storage, NULL, "Color Type", type);
+
+	//TODO: To string
+	GP_DataStorageAddInt(storage, NULL, "Compression Method", compr_method);
+
+	/* TODO: BOOL ? */
+	GP_DataStorageAddString(storage, NULL, "Alpha Channel",
+			        color_type & PNG_COLOR_MASK_ALPHA ? "Yes" : "No");
+
+	if (png_get_gAMA(png, png_info, &gamma))
+		GP_DataStorageAddInt(storage, NULL, "gamma", gamma * 100000);
+
+	if (png_get_pHYs(png, png_info, &res_x, &res_y, &unit)) {
+		GP_DataStorageAddInt(storage, NULL, "X Resolution", res_x);
+		GP_DataStorageAddInt(storage, NULL, "Y Resolution", res_y);
+
+		const char *str_unit;
+
+		if (unit == PNG_RESOLUTION_METER)
+			str_unit = "Meter";
+		else
+			str_unit = "Unknown";
+
+		GP_DataStorageAddString(storage, NULL, "Resolution Unit", str_unit);
+	}
+
+	png_timep mod_time;
+
+	if (png_get_tIME(png, png_info, &mod_time)) {
+		char buf[128];
+
+		snprintf(buf, sizeof(buf), "%4i:%02i:%02i %02i:%02i:%02i",
+		         mod_time->year, mod_time->month, mod_time->day,
+			 mod_time->hour, mod_time->minute, mod_time->second);
+
+		GP_DataStorageAddString(storage, NULL, "Date Time", buf);
+	}
+
+	png_textp text_ptr;
+	int text_cnt;
+
+	if (png_get_text(png, png_info, &text_ptr, &text_cnt)) {
+		int i;
+		char buf[128];
+
+		for (i = 0; i < text_cnt; i++) {
+
+			if (text_ptr[i].compression != PNG_TEXT_COMPRESSION_NONE)
+				continue;
+
+			snprintf(buf, sizeof(buf), "Text %03i", i);
+			GP_DataStorageAddString(storage, NULL, buf, text_ptr[i].text);
+		}
+	}
+}
+
+int GP_ReadPNGEx(GP_IO *io, GP_Context **img,
+                 GP_DataStorage *storage, GP_ProgressCallback *callback)
 {
 	png_structp png;
 	png_infop png_info = NULL;
 	png_uint_32 w, h;
 	int depth, color_type, interlace_type;
 	GP_PixelType pixel_type = GP_PIXEL_UNKNOWN;
-	GP_Context *res;
+	GP_Context *res = NULL;
 	int err, passes = 1;
 	double gamma;
 
@@ -106,6 +191,12 @@ GP_Context *GP_ReadPNG(GP_IO *io, GP_ProgressCallback *callback)
 	png_set_read_fn(png, io, read_data);
 	png_set_sig_bytes(png, 0);
 	png_read_info(png, png_info);
+
+	if (storage)
+		load_meta_data(png, png_info,  storage);
+
+	if (!img)
+		goto exit;
 
 	png_get_IHDR(png, png_info, &w, &h, &depth,
 	             &color_type, &interlace_type, NULL, NULL);
@@ -250,140 +341,22 @@ GP_Context *GP_ReadPNG(GP_IO *io, GP_ProgressCallback *callback)
 		}
 	}
 
+exit:
 	png_destroy_read_struct(&png, &png_info, NULL);
 
 	GP_ProgressCallbackDone(callback);
 
-	return res;
+	if (img)
+		*img = res;
+
+	return 0;
 err3:
 	GP_ContextFree(res);
 err2:
 	png_destroy_read_struct(&png, png_info ? &png_info : NULL, NULL);
 err1:
 	errno = err;
-	return NULL;
-}
-
-static void load_meta_data(png_structp png, png_infop png_info, GP_MetaData *data)
-{
-	double gamma;
-
-	if (png_get_gAMA(png, png_info, &gamma))
-		GP_MetaDataCreateInt(data, "gamma", gamma * 100000);
-
-	png_uint_32 res_x, res_y;
-	int unit;
-
-	if (png_get_pHYs(png, png_info, &res_x, &res_y, &unit)) {
-		GP_MetaDataCreateInt(data, "res_x", res_x);
-		GP_MetaDataCreateInt(data, "res_y", res_y);
-
-		const char *unit_name;
-
-		if (unit == PNG_RESOLUTION_METER)
-			unit_name = "meter";
-		else
-			unit_name = "unknown";
-
-		GP_MetaDataCreateString(data, "res_unit", unit_name, 0, 0);
-	}
-
-	png_timep mod_time;
-
-	if (png_get_tIME(png, png_info, &mod_time)) {
-		GP_MetaDataCreateInt(data, "mod_sec", mod_time->second);
-		GP_MetaDataCreateInt(data, "mod_min", mod_time->minute);
-		GP_MetaDataCreateInt(data, "mod_hour", mod_time->hour);
-		GP_MetaDataCreateInt(data, "mod_day", mod_time->day);
-		GP_MetaDataCreateInt(data, "mod_mon", mod_time->month);
-		GP_MetaDataCreateInt(data, "mod_year", mod_time->year);
-	}
-
-	double width, height;
-
-	if (png_get_sCAL(png, png_info, &unit, &width, &height)) {
-		GP_MetaDataCreateDouble(data, "width", width);
-		GP_MetaDataCreateDouble(data, "height", height);
-		GP_MetaDataCreateInt(data, "unit", unit);
-	}
-
-	png_textp text_ptr;
-	int text_cnt;
-
-	if (png_get_text(png, png_info, &text_ptr, &text_cnt)) {
-		int i;
-
-		for (i = 0; i < text_cnt; i++) {
-
-			if (text_ptr[i].compression != PNG_TEXT_COMPRESSION_NONE)
-				continue;
-
-			char buf[GP_META_RECORD_ID_MAX];
-			snprintf(buf, GP_META_RECORD_ID_MAX, "text:%s", text_ptr[i].key);
-			GP_MetaDataCreateString(data, buf, text_ptr[i].text, 0, 1);
-		}
-	}
-}
-
-int GP_ReadPNGMetaData(GP_IO *io, GP_MetaData *data)
-{
-	png_structp png;
-	png_infop png_info = NULL;
-	int err;
-
-	png = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
-
-	if (png == NULL) {
-		GP_DEBUG(1, "Failed to allocate PNG read buffer");
-		err = ENOMEM;
-		goto err1;
-	}
-
-	png_info = png_create_info_struct(png);
-
-	if (png_info == NULL) {
-		GP_DEBUG(1, "Failed to allocate PNG info buffer");
-		err = ENOMEM;
-		goto err2;
-	}
-
-	if (setjmp(png_jmpbuf(png))) {
-		GP_DEBUG(1, "Failed to read PNG file :(");
-		//TODO: should we get better error description from libpng?
-		err = EIO;
-		goto err2;
-	}
-
-	png_set_read_fn(png, io, read_data);
-	png_set_sig_bytes(png, 0);
-	png_read_info(png, png_info);
-
-	load_meta_data(png, png_info, data);
-
-	return 0;
-err2:
-	png_destroy_read_struct(&png, png_info ? &png_info : NULL, NULL);
-err1:
-	errno = err;
 	return 1;
-}
-
-int GP_LoadPNGMetaData(const char *src_path, GP_MetaData *data)
-{
-	GP_IO *io;
-	int ret, err;
-
-	io = GP_IOFile(src_path, GP_IO_RDONLY);
-	if (!io)
-		return 1;
-
-	ret = GP_ReadPNGMetaData(io, data);
-
-	err = errno;
-	GP_IOClose(io);
-	errno = err;
-
-	return ret;
 }
 
 static GP_PixelType save_ptypes[] = {
@@ -600,23 +573,12 @@ err:
 int GP_MatchPNG(const void GP_UNUSED(*buf))
 {
 	errno = ENOSYS;
-	return -1;
-}
-
-GP_Context *GP_ReadPNG(GP_IO GP_UNUSED(*io),
-                       GP_ProgressCallback GP_UNUSED(*callback))
-{
-	errno = ENOSYS;
-	return NULL;
-}
-
-int GP_ReadPNGMetaData(GP_IO GP_UNUSED(*io), GP_MetaData GP_UNUSED(*data))
-{
-	errno = ENOSYS;
 	return 1;
 }
 
-int GP_LoadPNGMetaData(const char GP_UNUSED(*src_path), GP_MetaData GP_UNUSED(*data))
+int GP_ReadPNGEx(GP_IO GP_UNUSED(*io), GP_Context GP_UNUSED(**img),
+                 GP_DataStorage GP_UNUSED(*storage),
+                 GP_ProgressCallback GP_UNUSED(*callback))
 {
 	errno = ENOSYS;
 	return 1;
@@ -642,9 +604,20 @@ int GP_SavePNG(const GP_Context *src, const char *dst_path,
 	return GP_LoaderSaveImage(&GP_PNG, src, dst_path, callback);
 }
 
+GP_Context *GP_ReadPNG(GP_IO *io, GP_ProgressCallback *callback)
+{
+	return GP_LoaderReadImage(&GP_PNG, io, callback);
+}
+
+int GP_LoadPNGEx(const char *src_path, GP_Context **img,
+                 GP_DataStorage *storage, GP_ProgressCallback *callback)
+{
+	return GP_LoaderLoadImageEx(&GP_PNG, src_path, img, storage, callback);
+}
+
 GP_Loader GP_PNG = {
 #ifdef HAVE_LIBPNG
-	.Read = GP_ReadPNG,
+	.Read = GP_ReadPNGEx,
 	.Write = GP_WritePNG,
 	.save_ptypes = save_ptypes,
 #endif

@@ -228,7 +228,15 @@ static inline unsigned int interlace_real_y(GifFileType *gf, unsigned int y)
 	return 0;
 }
 
-GP_Context *GP_ReadGIF(GP_IO *io, GP_ProgressCallback *callback)
+static void fill_metadata(GifFileType *gf, GP_DataStorage *storage)
+{
+	GP_DataStorageAddInt(storage, NULL, "Width", gf->SWidth);
+	GP_DataStorageAddInt(storage, NULL, "Height", gf->SHeight);
+	GP_DataStorageAddInt(storage, NULL, "Interlace", gf->Image.Interlace);
+}
+
+int GP_ReadGIFEx(GP_IO *io, GP_Context **img,
+                 GP_DataStorage *storage, GP_ProgressCallback *callback)
 {
 	GifFileType *gf;
 	GifRecordType rec_type;
@@ -255,13 +263,12 @@ GP_Context *GP_ReadGIF(GP_IO *io, GP_ProgressCallback *callback)
 		if (errno == 0)
 			errno = EIO;
 
-		return NULL;
+		return 1;
 	}
 
 	GP_DEBUG(1, "Have GIF image %ix%i, %i colors, %i bpp",
 	         gf->SWidth, gf->SHeight, gf->SColorResolution,
 		 gf->SColorMap ? gf->SColorMap->BitsPerPixel : -1);
-
 
 	do {
 		if (DGifGetRecordType(gf, &rec_type) != GIF_OK) {
@@ -294,10 +301,16 @@ GP_Context *GP_ReadGIF(GP_IO *io, GP_ProgressCallback *callback)
 			goto err1;
 		}
 
+		if (storage)
+			fill_metadata(gf, storage);
+
 		GP_DEBUG(1, "Have GIF Image left-top %ix%i, width-height %ix%i,"
 		         " interlace %i, bpp %i", gf->Image.Left, gf->Image.Top,
 			 gf->Image.Width, gf->Image.Height, gf->Image.Interlace,
 			 gf->Image.ColorMap ? gf->Image.ColorMap->BitsPerPixel : -1);
+
+		if (!img)
+			break;
 
 		res = GP_ContextAlloc(gf->SWidth, gf->SHeight, GP_PIXEL_RGB888);
 
@@ -346,16 +359,21 @@ GP_Context *GP_ReadGIF(GP_IO *io, GP_ProgressCallback *callback)
 	DGifCloseFile(gf);
 
 	/* No Image record found :( */
-	if (!res)
+	if (img && !res) {
 		errno = EINVAL;
+		return 1;
+	}
 
-	return res;
+	if (img)
+		*img = res;
+
+	return 0;
 err2:
 	GP_ContextFree(res);
 err1:
 	DGifCloseFile(gf);
 	errno = err;
-	return NULL;
+	return 1;
 }
 
 #else
@@ -375,14 +393,25 @@ GP_Context *GP_ReadGIF(GP_IO GP_UNUSED(*io),
 
 #endif /* HAVE_GIFLIB */
 
+GP_Context *GP_ReadGIF(GP_IO *io, GP_ProgressCallback *callback)
+{
+	return GP_LoaderReadImage(&GP_GIF, io, callback);
+}
+
 GP_Context *GP_LoadGIF(const char *src_path, GP_ProgressCallback *callback)
 {
 	return GP_LoaderLoadImage(&GP_GIF, src_path, callback);
 }
 
+int GP_LoadGIFEx(const char *src_path, GP_Context **img,
+                 GP_DataStorage *storage, GP_ProgressCallback *callback)
+{
+	return GP_LoaderLoadImageEx(&GP_GIF, src_path, img, storage, callback);
+}
+
 struct GP_Loader GP_GIF = {
 #ifdef HAVE_GIFLIB
-	.Read = GP_ReadGIF,
+	.Read = GP_ReadGIFEx,
 #endif
 	.Match = GP_MatchGIF,
 

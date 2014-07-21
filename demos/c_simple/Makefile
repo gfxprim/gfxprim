@@ -13,12 +13,12 @@ INCLUDE=
 LDLIBS+=-lrt
 
 APPS=backend_example loaders_example loaders filters_symmetry gfx_koch\
-     virtual_backend_example meta_data meta_data_dump tmp_file showimage\
+     virtual_backend_example meta_data tmp_file showimage\
      v4l2_show v4l2_grab convolution weighted_median shapetest koch \
      input_example fileview linetest randomshapetest fonttest\
      loaders_register blittest textaligntest sin_AA x11_windows\
      debug_handler gaussian_noise version pretty_print timers\
-     zip_container backend_timers_example memory_io
+     zip_container backend_timers_example memory_io data_storage
 
 ifeq ($(HAVE_LIBSDL),yes)
 APPS+=SDL_glue
@@ -36,7 +36,6 @@ tmp_file: LDLIBS+=-lgfxprim-loaders
 filters_symmetry: LDLIBS+=-lgfxprim-loaders
 gfx_koch: LDLIBS+=-lgfxprim-loaders -lm
 meta_data: LDLIBS+=-lgfxprim-loaders
-meta_data_dump: LDLIBS+=-lgfxprim-loaders
 v4l2_show: LDLIBS+=-lgfxprim-grabbers -lgfxprim-backends
 v4l2_grab: LDLIBS+=-lgfxprim-grabbers -lgfxprim-loaders
 convolution: LDLIBS+=-lgfxprim-loaders
@@ -56,6 +55,7 @@ sin_AA: LDLIBS+=-lgfxprim-backends -lm
 x11_windows: LDLIBS+=-lgfxprim-backends
 zip_container: LDLIBS+=-lgfxprim-loaders -lgfxprim-backends
 memory_io: LDLIBS+=-lgfxprim-backends -lgfxprim-loaders
+data_storage: LDLIBS+=-lgfxprim-loaders
 
 include $(TOPDIR)/app.mk
 include $(TOPDIR)/post.mk

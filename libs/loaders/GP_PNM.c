@@ -664,8 +664,8 @@ static int save_ascii(GP_IO *io, const GP_Context *ctx,
 	return 0;
 }
 
-static GP_Context *read_bitmap(struct buf *buf, struct pnm_header *header,
-                               GP_ProgressCallback *callback)
+static int read_bitmap(struct buf *buf, struct pnm_header *header,
+                       GP_Context **img, GP_ProgressCallback *callback)
 {
 	GP_Context *ret;
 	int err;
@@ -691,27 +691,34 @@ static GP_Context *read_bitmap(struct buf *buf, struct pnm_header *header,
 	if (err)
 		goto err1;
 
-	return ret;
+	*img = ret;
+	return 0;
 err1:
 	GP_ContextFree(ret);
 err0:
 	errno = err;
-	return NULL;
+	return 1;
 }
 
-GP_Context *GP_ReadPBM(GP_IO *io, GP_ProgressCallback *callback)
+int GP_ReadPBMEx(GP_IO *io, GP_Context **img, GP_DataStorage *storage,
+                 GP_ProgressCallback *callback)
 {
 	struct pnm_header header;
 	DECLARE_BUFFER(buf, io);
 	int err;
 
+	(void) storage;
+
 	err = load_header(&buf, &header);
 	if (err) {
 		errno = err;
-		return NULL;
+		return 1;
 	}
 
-	return read_bitmap(&buf, &header, callback);
+	if (!img)
+		return 0;
+
+	return read_bitmap(&buf, &header, img, callback);
 }
 
 static GP_PixelType pbm_save_pixels[] = {
@@ -807,8 +814,8 @@ static int load_bin_graymap(struct buf *buf, struct pnm_header *header,
 	return err;
 }
 
-static GP_Context *read_graymap(struct buf *buf, struct pnm_header *header,
-                                GP_ProgressCallback *callback)
+static int read_graymap(struct buf *buf, struct pnm_header *header,
+                        GP_Context **img, GP_ProgressCallback *callback)
 {
 	GP_Context *ret;
 	GP_PixelType pixel_type;
@@ -841,27 +848,34 @@ static GP_Context *read_graymap(struct buf *buf, struct pnm_header *header,
 	if (err)
 		goto err1;
 
-	return ret;
+	*img = ret;
+	return 0;
 err1:
 	GP_ContextFree(ret);
 err0:
 	errno = err;
-	return NULL;
+	return 1;
 }
 
-GP_Context *GP_ReadPGM(GP_IO *io, GP_ProgressCallback *callback)
+int GP_ReadPGMEx(GP_IO *io, GP_Context **img, GP_DataStorage *storage,
+                 GP_ProgressCallback *callback)
 {
 	struct pnm_header header;
 	DECLARE_BUFFER(buf, io);
 	int err;
 
+	(void) storage;
+
 	err = load_header(&buf, &header);
 	if (err) {
 		errno = err;
-		return NULL;
+		return 1;
 	}
 
-	return read_graymap(&buf, &header, callback);
+	if (!img)
+		return 0;
+
+	return read_graymap(&buf, &header, img, callback);
 }
 
 static int pixel_to_depth(GP_Pixel pixel)
@@ -923,8 +937,8 @@ err:
 	return 1;
 }
 
-static GP_Context *read_pixmap(struct buf *buf, struct pnm_header *header,
-                               GP_ProgressCallback *callback)
+static int read_pixmap(struct buf *buf, struct pnm_header *header,
+                       GP_Context **img, GP_ProgressCallback *callback)
 {
 	GP_Context *ret;
 	int err = 0;
@@ -960,27 +974,34 @@ static GP_Context *read_pixmap(struct buf *buf, struct pnm_header *header,
 	if (err)
 		goto err1;
 
-	return ret;
+	*img = ret;
+	return 0;
 err1:
 	GP_ContextFree(ret);
 err0:
 	errno = err;
-	return NULL;
+	return 1;
 }
 
-GP_Context *GP_ReadPPM(GP_IO *io, GP_ProgressCallback *callback)
+int GP_ReadPPMEx(GP_IO *io, GP_Context **img, GP_DataStorage *storage,
+                 GP_ProgressCallback *callback)
 {
 	struct pnm_header header;
 	DECLARE_BUFFER(buf, io);
 	int err;
 
+	(void) storage;
+
 	err = load_header(&buf, &header);
 	if (err) {
 		errno = err;
-		return NULL;
+		return 1;
 	}
 
-	return read_pixmap(&buf, &header, callback);
+	if (!img)
+		return 0;
+
+	return read_pixmap(&buf, &header, img, callback);
 }
 
 static int write_binary_ppm(FILE *f, GP_Context *src)
@@ -1088,27 +1109,32 @@ err:
 	return 1;
 }
 
-GP_Context *GP_ReadPNM(GP_IO *io, GP_ProgressCallback *callback)
+int GP_ReadPNMEx(GP_IO *io, GP_Context **img, GP_DataStorage *storage,
+                 GP_ProgressCallback *callback)
 {
 	struct pnm_header header;
 	DECLARE_BUFFER(buf, io);
-	GP_Context *ret = NULL;
-	int err;
+	int err, ret = 1;
+
+	(void) storage;
 
 	err = load_header(&buf, &header);
 	if (err) {
 		errno = err;
-		return NULL;
+		return 1;
 	}
 
+	if (!img)
+		return 0;
+
 	if (is_bitmap(header.magic))
-		ret = read_bitmap(&buf, &header, callback);
+		ret = read_bitmap(&buf, &header, img, callback);
 
 	if (is_graymap(header.magic))
-		ret = read_graymap(&buf, &header, callback);
+		ret = read_graymap(&buf, &header, img, callback);
 
 	if (is_pixmap(header.magic))
-		ret = read_pixmap(&buf, &header, callback);
+		ret = read_pixmap(&buf, &header, img, callback);
 
 	return ret;
 }
@@ -1142,6 +1168,11 @@ int GP_WritePNM(const GP_Context *src, GP_IO *io,
 	}
 }
 
+GP_Context *GP_ReadPBM(GP_IO *io, GP_ProgressCallback *callback)
+{
+	return GP_LoaderReadImage(&GP_PBM, io, callback);
+}
+
 GP_Context *GP_LoadPBM(const char *src_path, GP_ProgressCallback *callback)
 {
 	return GP_LoaderLoadImage(&GP_PBM, src_path, callback);
@@ -1151,6 +1182,11 @@ int GP_SavePBM(const GP_Context *src, const char *dst_path,
                GP_ProgressCallback *callback)
 {
 	return GP_LoaderSaveImage(&GP_PBM, src, dst_path, callback);
+}
+
+GP_Context *GP_ReadPGM(GP_IO *io, GP_ProgressCallback *callback)
+{
+	return GP_LoaderReadImage(&GP_PGM, io, callback);
 }
 
 GP_Context *GP_LoadPGM(const char *src_path, GP_ProgressCallback *callback)
@@ -1164,6 +1200,11 @@ int GP_SavePGM(const GP_Context *src, const char *dst_path,
 	return GP_LoaderSaveImage(&GP_PGM, src, dst_path, callback);
 }
 
+GP_Context *GP_ReadPPM(GP_IO *io, GP_ProgressCallback *callback)
+{
+	return GP_LoaderReadImage(&GP_PPM, io, callback);
+}
+
 GP_Context *GP_LoadPPM(const char *src_path, GP_ProgressCallback *callback)
 {
 	return GP_LoaderLoadImage(&GP_PPM, src_path, callback);
@@ -1173,6 +1214,11 @@ int GP_SavePPM(const GP_Context *src, const char *dst_path,
                GP_ProgressCallback *callback)
 {
 	return GP_LoaderSaveImage(&GP_PPM, src, dst_path, callback);
+}
+
+GP_Context *GP_ReadPNM(GP_IO *io, GP_ProgressCallback *callback)
+{
+	return GP_LoaderReadImage(&GP_PNM, io, callback);
 }
 
 GP_Context *GP_LoadPNM(const char *src_path, GP_ProgressCallback *callback)
@@ -1187,7 +1233,7 @@ int GP_SavePNM(const GP_Context *src, const char *dst_path,
 }
 
 struct GP_Loader GP_PBM = {
-	.Read = GP_ReadPBM,
+	.Read = GP_ReadPBMEx,
 	.Write = GP_WritePBM,
 	.save_ptypes = pbm_save_pixels,
 	.Match = GP_MatchPBM,
@@ -1197,7 +1243,7 @@ struct GP_Loader GP_PBM = {
 };
 
 struct GP_Loader GP_PGM = {
-	.Read = GP_ReadPGM,
+	.Read = GP_ReadPGMEx,
 	.Write = GP_WritePGM,
 	.save_ptypes = pgm_save_pixels,
 	.Match = GP_MatchPGM,
@@ -1207,7 +1253,7 @@ struct GP_Loader GP_PGM = {
 };
 
 struct GP_Loader GP_PPM = {
-	.Read = GP_ReadPPM,
+	.Read = GP_ReadPPMEx,
 	.Write = GP_WritePPM,
 	.save_ptypes = ppm_save_pixels,
 	.Match = GP_MatchPPM,
@@ -1217,7 +1263,7 @@ struct GP_Loader GP_PPM = {
 };
 
 struct GP_Loader GP_PNM = {
-	.Read = GP_ReadPNM,
+	.Read = GP_ReadPNMEx,
 	.Write = GP_WritePNM,
 	.save_ptypes = pnm_save_pixels,
 	/*

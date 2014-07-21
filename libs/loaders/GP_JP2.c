@@ -89,17 +89,42 @@ static OPJ_SIZE_T jp2_io_read(void *buf, OPJ_SIZE_T size, void *io)
 	return GP_IORead(io, buf, size);
 }
 
-GP_Context *GP_ReadJP2(GP_IO *io, GP_ProgressCallback *callback)
+static void fill_metadata(opj_image_t *img, GP_DataStorage *storage)
+{
+	unsigned int i;
+
+	GP_DataStorageAddInt(storage, NULL, "Width", img->x1 - img->x0);
+	GP_DataStorageAddInt(storage, NULL, "Height", img->y1 - img->y0);
+	GP_DataStorageAddString(storage, NULL, "Color Space",
+	                        color_space_name(img->color_space));
+	GP_DataStorageAddInt(storage, NULL, "Samples per Pixel", img->numcomps);
+
+	for (i = 0; i < img->numcomps; i++) {
+		char buf[32];
+		GP_DataNode *comp_node;
+
+		snprintf(buf, sizeof(buf), "Channel %u", i);
+
+		comp_node = GP_DataStorageAddDict(storage, NULL, buf);
+
+		GP_DataStorageAddInt(storage, comp_node, "Width", img->comps[i].w);
+		GP_DataStorageAddInt(storage, comp_node, "Height", img->comps[i].h);
+		GP_DataStorageAddInt(storage, comp_node, "Bits per Sample", img->comps[i].prec);
+	}
+}
+
+int GP_ReadJP2Ex(GP_IO *io, GP_Context **rimg, GP_DataStorage *storage,
+                 GP_ProgressCallback *callback)
 {
 	opj_dparameters_t params;
 	opj_codec_t *codec;
 	opj_stream_t *stream;
 	opj_image_t *img;
 
-	GP_Context *res = NULL;
 	GP_PixelType pixel_type;
+	GP_Context *res = NULL;
 	unsigned int i, x, y;
-	int err = 0;
+	int err = 0, ret = 1;
 
 	opj_set_default_decoder_parameters(&params);
 
@@ -139,9 +164,15 @@ GP_Context *GP_ReadJP2(GP_IO *io, GP_ProgressCallback *callback)
 		goto err2;
 	}
 
+	if (storage)
+		fill_metadata(img, storage);
+
 	GP_DEBUG(1, "Have image %ux%u-%ux%u colorspace=%s numcomps=%u",
 	         img->x0, img->y0, img->x1, img->y1,
 	         color_space_name(img->color_space), img->numcomps);
+
+	if (!rimg)
+		return 0;
 
 	/*
 	 * Try to match the image information into pixel type.
@@ -213,6 +244,8 @@ GP_Context *GP_ReadJP2(GP_IO *io, GP_ProgressCallback *callback)
 	}
 
 	GP_ProgressCallbackDone(callback);
+	*rimg = res;
+	ret = 0;
 err3:
 	opj_image_destroy(img);
 err2:
@@ -222,16 +255,17 @@ err1:
 err0:
 	if (err)
 		errno = err;
-	return res;
+	return ret;
 }
 
 #else
 
-GP_Context *GP_ReadJP2(GP_IO GP_UNUSED(*io),
-                       GP_ProgressCallback GP_UNUSED(*callback))
+int GP_ReadJP2Ex(GP_IO GP_UNUSED(*io), GP_Context GP_UNUSED(**img),
+                 GP_DataStorage GP_UNUSED(*storage),
+                 GP_ProgressCallback GP_UNUSED(*callback))
 {
 	errno = ENOSYS;
-	return NULL;
+	return 1;
 }
 
 #endif /* HAVE_OPENJPEG */
@@ -241,10 +275,21 @@ GP_Context *GP_LoadJP2(const char *src_path, GP_ProgressCallback *callback)
 	return GP_LoaderLoadImage(&GP_JP2, src_path, callback);
 }
 
+GP_Context *GP_ReadJP2(GP_IO *io, GP_ProgressCallback *callback)
+{
+	return GP_LoaderReadImage(&GP_JP2, io, callback);
+}
+
+int GP_LoadJP2Ex(const char *src_path, GP_Context **img,
+                 GP_DataStorage *storage, GP_ProgressCallback *callback)
+{
+	return GP_LoaderLoadImageEx(&GP_JP2, src_path, img, storage, callback);
+}
+
 struct GP_Loader GP_JP2 = {
 #ifdef HAVE_OPENJPEG
-	.Read = GP_ReadJP2,
-#endif
+	.Read = GP_ReadJP2Ex,
+#endif /* HAVE_OPENJPEG */
 	.Match = GP_MatchJP2,
 
 	.fmt_name = "JPEG 2000",

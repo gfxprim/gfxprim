@@ -452,7 +452,17 @@ static int read_image(GP_IO *io, struct pcx_header *header,
 	return ENOSYS;
 }
 
-GP_Context *GP_ReadPCX(GP_IO *io, GP_ProgressCallback *callback)
+static void fill_metadata(struct pcx_header *header, GP_DataStorage *storage)
+{
+	GP_DataStorageAddInt(storage, NULL, "Width", header->xe - header->xs + 1);
+	GP_DataStorageAddInt(storage, NULL, "Height", header->ye - header->ys + 1);
+	GP_DataStorageAddInt(storage, NULL, "Version", header->ver);
+	GP_DataStorageAddInt(storage, NULL, "Bits per Sample", header->bpp);
+	GP_DataStorageAddInt(storage, NULL, "Samples per Pixel", header->nplanes);
+}
+
+int GP_ReadPCXEx(GP_IO *io, GP_Context **img, GP_DataStorage *storage,
+                 GP_ProgressCallback *callback)
 {
 	GP_Context *res = NULL;
 	GP_PixelType pixel_type;
@@ -486,7 +496,7 @@ GP_Context *GP_ReadPCX(GP_IO *io, GP_ProgressCallback *callback)
 	               header.palette, &header.nplanes,
 	               &header.bytes_per_line, &header.pal_info) != 16) {
 		GP_DEBUG(1, "Failed to read header: %s", strerror(errno));
-		return NULL;
+		return 1;
 	}
 
 	switch (header.ver) {
@@ -498,7 +508,7 @@ GP_Context *GP_ReadPCX(GP_IO *io, GP_ProgressCallback *callback)
 	break;
 		GP_DEBUG(1, "Unknown version %x", header.ver);
 		errno = EINVAL;
-		return NULL;
+		return 1;
 	}
 
 	GP_DEBUG(1, "Have PCX image ver=%x bpp=%"PRIu8" %"PRIu16"x%"PRIu16
@@ -508,6 +518,12 @@ GP_Context *GP_ReadPCX(GP_IO *io, GP_ProgressCallback *callback)
 	         header.ys, header.xe, header.ye,
 	         header.bytes_per_line, header.nplanes,
 	         header.hres, header.vres);
+
+	if (storage)
+		fill_metadata(&header, storage);
+
+	if (!img)
+		return 0;
 
 	pixel_type = match_pixel_type(&header);
 
@@ -539,12 +555,14 @@ GP_Context *GP_ReadPCX(GP_IO *io, GP_ProgressCallback *callback)
 		goto err1;
 
 	GP_ProgressCallbackDone(callback);
-	return res;
+
+	*img = res;
+	return 0;
 err1:
 	GP_ContextFree(res);
 err0:
 	errno = err;
-	return NULL;
+	return 1;
 }
 
 GP_Context *GP_LoadPCX(const char *src_path, GP_ProgressCallback *callback)
@@ -552,8 +570,19 @@ GP_Context *GP_LoadPCX(const char *src_path, GP_ProgressCallback *callback)
 	return GP_LoaderLoadImage(&GP_PCX, src_path, callback);
 }
 
+GP_Context *GP_ReadPCX(GP_IO *io, GP_ProgressCallback *callback)
+{
+	return GP_LoaderReadImage(&GP_PCX, io, callback);
+}
+
+int GP_LoadPCXEx(const char *src_path, GP_Context **img,
+                 GP_DataStorage *storage, GP_ProgressCallback *callback)
+{
+	return GP_LoaderLoadImageEx(&GP_PCX, src_path, img, storage, callback);
+}
+
 struct GP_Loader GP_PCX = {
-	.Read = GP_ReadPCX,
+	.Read = GP_ReadPCXEx,
 	.Match = GP_MatchPCX,
 
 	.fmt_name = "ZSoft PCX",

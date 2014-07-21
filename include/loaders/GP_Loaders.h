@@ -48,7 +48,8 @@
 
 #include "loaders/GP_TmpFile.h"
 
-#include "loaders/GP_MetaData.h"
+#include "loaders/GP_DataStorage.h"
+#include "loaders/GP_Exif.h"
 
 #include "loaders/GP_Loader.h"
 
