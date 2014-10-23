@@ -86,7 +86,13 @@ static const char *color_space_name(OPJ_COLOR_SPACE color_space)
 
 static OPJ_SIZE_T jp2_io_read(void *buf, OPJ_SIZE_T size, void *io)
 {
-	return GP_IORead(io, buf, size);
+	ssize_t ret;
+	ret = GP_IORead(io, buf, size);
+
+	if (ret == 0)
+		return -1;
+
+	return ret;
 }
 
 static void fill_metadata(opj_image_t *img, GP_DataStorage *storage)
