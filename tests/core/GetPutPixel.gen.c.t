@@ -1,30 +1,9 @@
-/*****************************************************************************
- * This file is part of gfxprim library.                                     *
- *                                                                           *
- * Gfxprim is free software; you can redistribute it and/or                  *
- * modify it under the terms of the GNU Lesser General Public                *
- * License as published by the Free Software Foundation; either              *
- * version 2.1 of the License, or (at your option) any later version.        *
- *                                                                           *
- * Gfxprim is distributed in the hope that it will be useful,                *
- * but WITHOUT ANY WARRANTY; without even the implied warranty of            *
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU         *
- * Lesser General Public License for more details.                           *
- *                                                                           *
- * You should have received a copy of the GNU Lesser General Public          *
- * License along with gfxprim; if not, write to the Free Software            *
- * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
- * Boston, MA  02110-1301  USA                                               *
- *                                                                           *
- * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>                       *
- *                                                                           *
- *****************************************************************************/
-
-%% extends "base.test.c.t"
-
-{% block descr %}GetPutPixel tests.{% endblock %}
-
-%% block body
+@ include source.t
+/*
+ * GetPutPixel tests.
+ *
+ * Copyright (C) 2009-2014 Cyril Hrubis <metan@ucw.cz>
+ */
 
 #include <stdio.h>
 
@@ -71,8 +50,8 @@ static int try_pattern(GP_Context *c, GP_Pixel p)
 	return 0;
 }
 
-%% for pt in pixeltypes
-%% if not pt.is_unknown()
+@ for pt in pixeltypes:
+@     if not pt.is_unknown():
 static int GetPutPixel_{{ pt.name }}(void)
 {
 	GP_Context *c;
@@ -104,11 +83,10 @@ static int GetPutPixel_{{ pt.name }}(void)
 
 	return TST_SUCCESS;
 }
-%% endif
-%% endfor
+@ end
 
-%% for pt in pixeltypes
-%% if not pt.is_unknown()
+@ for pt in pixeltypes:
+@     if not pt.is_unknown():
 static int GetPutPixel_Clipping_{{ pt.name }}(void)
 {
 	GP_Context *c;
@@ -149,28 +127,23 @@ static int GetPutPixel_Clipping_{{ pt.name }}(void)
 
 	return TST_SUCCESS;
 }
-%% endif
-%% endfor
+@ end
 
 const struct tst_suite tst_suite = {
 	.suite_name = "GetPutPixel Testsuite",
 	.tests = {
-%% for pt in pixeltypes
-%% if not pt.is_unknown()
+@ for pt in pixeltypes:
+@     if not pt.is_unknown():
 		{.name = "GetPutPixel {{ pt.name }}",
 		 .tst_fn = GetPutPixel_{{ pt.name }}},
-%% endif
-%% endfor
+@ end
 
-%% for pt in pixeltypes
-%% if not pt.is_unknown()
+@ for pt in pixeltypes:
+@     if not pt.is_unknown():
 		{.name = "GetPutPixel Clipping {{ pt.name }}",
 		 .tst_fn = GetPutPixel_Clipping_{{ pt.name }}},
-%% endif
-%% endfor
+@ end
 
 		{.name = NULL}
 	}
 };
-
-%% endblock body

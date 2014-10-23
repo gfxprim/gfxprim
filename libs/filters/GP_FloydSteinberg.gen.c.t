@@ -1,54 +1,33 @@
-/*****************************************************************************
- * This file is part of gfxprim library.                                     *
- *                                                                           *
- * Gfxprim is free software; you can redistribute it and/or                  *
- * modify it under the terms of the GNU Lesser General Public                *
- * License as published by the Free Software Foundation; either              *
- * version 2.1 of the License, or (at your option) any later version.        *
- *                                                                           *
- * Gfxprim is distributed in the hope that it will be useful,                *
- * but WITHOUT ANY WARRANTY; without even the implied warranty of            *
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU         *
- * Lesser General Public License for more details.                           *
- *                                                                           *
- * You should have received a copy of the GNU Lesser General Public          *
- * License along with gfxprim; if not, write to the Free Software            *
- * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
- * Boston, MA  02110-1301  USA                                               *
- *                                                                           *
- * Copyright (C) 2009-2013 Cyril Hrubis <metan@ucw.cz>                       *
- *                                                                           *
- *****************************************************************************/
-
-%% extends "common.c.t"
-
-{% block descr %}Floyd Steinberg dithering RGB888 -> any pixel{% endblock %}
-
-%% block body
-
+@ include source.t
+/*
+ * Floyd Steinberg dithering RGB888 -> any pixel
+ *
+ * Copyright (C) 2009-2014 Cyril Hrubis <metan@ucw.cz>
+ */
 #include <string.h>
 #include <errno.h>
 
 #include "core/GP_Core.h"
 #include "core/GP_Pixel.h"
+#include "core/GP_Clamp.h"
 #include "filters/GP_Filter.h"
 #include "filters/GP_Dither.h"
 
-%% macro distribute_error(errors, x, y, w, err)
-			if ({{ x }} + 1 < {{ w }})
-				{{ errors }}[{{ y }}%2][{{ x }}+1] += 7 * {{ err }} / 16;
+@ def distribute_error(errors, x, y, w, err):
+if ({{ x }} + 1 < {{ w }})
+	{{ errors }}[{{ y }}%2][{{ x }}+1] += 7 * {{ err }} / 16;
 
-			if ({{ x }} > 1)
-				{{ errors }}[!({{ y }}%2)][{{ x }}-1] += 3 * {{ err }} / 16;
+if ({{ x }} > 1)
+	{{ errors }}[!({{ y }}%2)][{{ x }}-1] += 3 * {{ err }} / 16;
 
-			{{ errors }}[!({{ y }}%2)][{{ x }}] += 5 * {{ err }} / 16;
+{{ errors }}[!({{ y }}%2)][{{ x }}] += 5 * {{ err }} / 16;
 
-			if ({{ x }} + 1 < {{ w }})
-				{{ errors }}[!({{ y }}%2)][{{ x }}+1] += {{ err }} / 16;
-%% endmacro
-
-%% for pt in pixeltypes
-%%  if pt.is_gray() or pt.is_rgb() and not pt.is_alpha()
+if ({{ x }} + 1 < {{ w }})
+	{{ errors }}[!({{ y }}%2)][{{ x }}+1] += {{ err }} / 16;
+@ end
+@
+@ for pt in pixeltypes:
+@     if pt.is_gray() or pt.is_rgb() and not pt.is_alpha():
 /*
  * Floyd Steinberg to {{ pt.name }}
  */
@@ -56,9 +35,9 @@ static int floyd_steinberg_to_{{ pt.name }}_Raw(const GP_Context *src,
                                                 GP_Context *dst,
                                                 GP_ProgressCallback *callback)
 {
-%%   for c in pt.chanslist
-	float errors_{{ c[0] }}[2][src->w];
-%%   endfor
+@         for c in pt.chanslist:
+	float errors_{{ c.name }}[2][src->w];
+@         end
 
 	GP_DEBUG(1, "Floyd Steinberg %s to %s %ux%u",
 	            GP_PixelTypeName(src->pixel_type),
@@ -67,10 +46,10 @@ static int floyd_steinberg_to_{{ pt.name }}_Raw(const GP_Context *src,
 
 	GP_Coord x, y;
 
-%%   for c in pt.chanslist
-	memset(errors_{{ c[0] }}[0], 0, src->w * sizeof(float));
-	memset(errors_{{ c[0] }}[1], 0, src->w * sizeof(float));
-%%   endfor
+@         for c in pt.chanslist:
+	memset(errors_{{ c.name }}[0], 0, src->w * sizeof(float));
+	memset(errors_{{ c.name }}[1], 0, src->w * sizeof(float));
+@         end
 
 	for (y = 0; y < (GP_Coord)src->h; y++) {
 		for (x = 0; x < (GP_Coord)src->w; x++) {
@@ -79,42 +58,42 @@ static int floyd_steinberg_to_{{ pt.name }}_Raw(const GP_Context *src,
 			pix = GP_GetPixel_Raw(src, x, y);
 			pix = GP_PixelToRGB888(pix, src->pixel_type);
 
-%%   for c in pt.chanslist
-%%    if pt.is_gray()
-			float val_{{ c[0] }} = GP_Pixel_GET_R_RGB888(pix) +
+@         for c in pt.chanslist:
+@             if pt.is_gray():
+			float val_{{ c.name }} = GP_Pixel_GET_R_RGB888(pix) +
 			                       GP_Pixel_GET_G_RGB888(pix) +
 			                       GP_Pixel_GET_B_RGB888(pix);
-%%    else
-			float val_{{ c[0] }} = GP_Pixel_GET_{{ c[0] }}_RGB888(pix);
-%%    endif
-			val_{{ c[0] }} += errors_{{ c[0] }}[y%2][x];
+@             else:
+			float val_{{ c.name }} = GP_Pixel_GET_{{ c.name }}_RGB888(pix);
+@             end
+			val_{{ c.name }} += errors_{{ c.name }}[y%2][x];
 
-			float err_{{ c[0] }} = val_{{ c[0] }};
-%%    if pt.is_gray()
-			GP_Pixel res_{{ c[0] }} = {{ 2 ** c[2] - 1}} * val_{{ c[0] }} / (3 * 255);
-			err_{{ c[0] }} -= res_{{ c[0] }} * (3 * 255) / {{ 2 ** c[2] - 1}};
-%%    else
-			GP_Pixel res_{{ c[0] }} = {{ 2 ** c[2] - 1}} * val_{{ c[0] }} / 255;
-			err_{{ c[0] }} -= res_{{ c[0] }} * 255 / {{ 2 ** c[2] - 1}};
-%%    endif
+			float err_{{ c.name }} = val_{{ c.name }};
+@             if pt.is_gray():
+			GP_Pixel res_{{ c.name }} = {{ 2 ** c[2] - 1}} * val_{{ c.name }} / (3 * 255);
+			err_{{ c.name }} -= res_{{ c.name }} * (3 * 255) / {{ 2 ** c[2] - 1}};
+@             else:
+			GP_Pixel res_{{ c.name }} = {{ 2 ** c[2] - 1}} * val_{{ c.name }} / 255;
+			err_{{ c.name }} -= res_{{ c.name }} * 255 / {{ 2 ** c[2] - 1}};
+@             end
 
-{{ distribute_error("errors_%s"|format(c[0]), 'x', 'y', '(GP_Coord)src->w', 'err_%s'|format(c[0])) }}
+			{@ distribute_error('errors_' + c.name, 'x', 'y', '(GP_Coord)src->w', 'err_' + c.name) @}
 
-			{{ clamp_val("res_%s"|format(c[0]), c[2]) }}
-%%   endfor
+			GP_CLAMP_DOWN({{ 'res_' + c.name }}, {{ c.max }});
+@         end
 
-%%   if pt.is_gray()
+@         if pt.is_gray():
 			GP_PutPixel_Raw_{{ pt.pixelsize.suffix }}(dst, x, y, res_V);
-%%   else
-			GP_Pixel res = GP_Pixel_CREATE_{{ pt.name }}(res_{{ pt.chanslist[0][0] }}{% for c in pt.chanslist[1:] %}, res_{{ c[0] }}{% endfor %});
+@         else:
+			GP_Pixel res = GP_Pixel_CREATE_{{ pt.name }}({{ arr_to_params(pt.chan_names, 'res_') }});
 
 			GP_PutPixel_Raw_{{ pt.pixelsize.suffix }}(dst, x, y, res);
-%%   endif
+@         end
 		}
 
-%%   for c in pt.chanslist
-		memset(errors_{{ c[0] }}[y%2], 0, src->w * sizeof(float));
-%%   endfor
+@         for c in pt.chanslist:
+		memset(errors_{{ c.name }}[y%2], 0, src->w * sizeof(float));
+@         end
 
 		if (GP_ProgressCallbackReport(callback, y, src->h, src->w))
 			return 1;
@@ -124,9 +103,8 @@ static int floyd_steinberg_to_{{ pt.name }}_Raw(const GP_Context *src,
 	return 0;
 }
 
-%%  endif
-%% endfor
-
+@ end
+@
 static int floyd_steinberg(const GP_Context *src, GP_Context *dst,
                            GP_ProgressCallback *callback)
 {
@@ -138,12 +116,11 @@ static int floyd_steinberg(const GP_Context *src, GP_Context *dst,
 	}
 
 	switch (dst->pixel_type) {
-%%  for pt in pixeltypes
-%%   if pt.is_gray() or pt.is_rgb() and not pt.is_alpha()
+@ for pt in pixeltypes:
+@     if pt.is_gray() or pt.is_rgb() and not pt.is_alpha():
 	case GP_PIXEL_{{ pt.name }}:
 		return floyd_steinberg_to_{{ pt.name }}_Raw(src, dst, callback);
-%%   endif
-%%  endfor
+@ end
 	default:
 		errno = EINVAL;
 		return 1;
@@ -178,5 +155,3 @@ GP_Context *GP_FilterFloydSteinbergAlloc(const GP_Context *src,
 
 	return ret;
 }
-
-%% endblock body

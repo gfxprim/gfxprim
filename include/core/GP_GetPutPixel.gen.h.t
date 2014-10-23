@@ -1,35 +1,11 @@
-/*****************************************************************************
- * This file is part of gfxprim library.                                     *
- *                                                                           *
- * Gfxprim is free software; you can redistribute it and/or                  *
- * modify it under the terms of the GNU Lesser General Public                *
- * License as published by the Free Software Foundation; either              *
- * version 2.1 of the License, or (at your option) any later version.        *
- *                                                                           *
- * Gfxprim is distributed in the hope that it will be useful,                *
- * but WITHOUT ANY WARRANTY; without even the implied warranty of            *
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU         *
- * Lesser General Public License for more details.                           *
- *                                                                           *
- * You should have received a copy of the GNU Lesser General Public          *
- * License along with gfxprim; if not, write to the Free Software            *
- * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
- * Boston, MA  02110-1301  USA                                               *
- *                                                                           *
- * Copyright (C) 2011      Cyril Hrubis <metan@ucw.cz>                       *
- * Copyright (C) 2011      Tomas Gavenciak <gavento@ucw.cz>                  *
- *                                                                           *
- *****************************************************************************/
-
-%% extends "base.h.t"
-
-%% block descr
-Access pixel bytes, Get and PutPixel
-Do not include directly, use GP_Pixel.h
-%% endblock
-
-%% block body
-
+@ include header.t
+/*
+ * Access pixel bytes, Get and PutPixel
+ * Do not include directly, use GP_Pixel.h
+ *
+ * Copyright (C) 2011-2014 Cyril Hrubis <metan@ucw.cz>
+ * Copyright (C) 2011      Tomas Gavenciak <gavento@ucw.cz>
+ */
 
  /*
 
@@ -75,7 +51,7 @@ Do not include directly, use GP_Pixel.h
 #include "GP_GetSetBits.h"
 #include "GP_Context.h"
 
-%% for ps in pixelsizes
+@ for ps in pixelsizes:
 /*
  * macro to get address of pixel in a {{ ps.suffix }} context
  */
@@ -86,45 +62,42 @@ Do not include directly, use GP_Pixel.h
  * macro to get bit-offset of pixel in {{ ps.suffix }} context
  */
 #define GP_PIXEL_ADDR_OFFSET_{{ ps.suffix }}(x) \
-%% if not ps.needs_bit_endian()
+@     if not ps.needs_bit_endian():
 	(0)
-%% else
-%% if ps.bit_endian == LE
-%% if ps.size < 8
+@     else:
+@         if ps.bit_endian == 'LE':
+@             if ps.size < 8:
 	(((x) % {{ 8 // ps.size }}) * {{ ps.size }})
-%% else
+@             else:
 	(({{ ps.size }} * (x)) % 8)
-%% endif
-%% else
-%% if ps.size < 8
+@         else:
+@              if ps.size < 8:
 	({{ 8 - ps.size }} - ((x) % {{ 8 // ps.size }}) * {{ ps.size }})
-%% else
+@              else:
 	{{ error('Insanity check: big bit-endian with >8 bpp. Are you sure?') }}
-%% endif
-%% endif
-%% endif
+@     end
 
 /*
  * GP_GetPixel for {{ ps.suffix }}
  */
 static inline GP_Pixel GP_GetPixel_Raw_{{ ps.suffix }}(const GP_Context *c, int x, int y)
 {
-%% if ps.size == 32
+@     if ps.size == 32:
 	/*
 	 * 32 BPP is expected to have aligned pixels
 	 */
 	return *((uint32_t*)GP_PIXEL_ADDR_{{ ps.suffix }}(c, x, y));
-%% elif ps.size == 16
+@     elif ps.size == 16:
 	/*
 	 * 16 BPP is expected to have aligned pixels
 	 */
 	return *((uint16_t*)GP_PIXEL_ADDR_{{ ps.suffix }}(c, x, y));
-%% elif ps.size == 8
+@     elif ps.size == 8:
 	/*
 	 * 8 BPP is byte aligned
 	 */
 	return *((uint8_t*)GP_PIXEL_ADDR_{{ ps.suffix }}(c, x, y));
-%% elif ps.size == 1 or ps.size == 2 or ps.size == 4 or ps.size == 8
+@     elif ps.size == 1 or ps.size == 2 or ps.size == 4 or ps.size == 8:
 	/*
 	 * Whole pixel is stored only and only in one byte
 	 *
@@ -132,7 +105,7 @@ static inline GP_Pixel GP_GetPixel_Raw_{{ ps.suffix }}(const GP_Context *c, int 
 	 */
 	return GP_GET_BITS1_ALIGNED(GP_PIXEL_ADDR_OFFSET_{{ ps.suffix }}(x), {{ ps.size }},
 		*(GP_PIXEL_ADDR_{{ ps.suffix }}(c, x, y)));
-%% elif ps.size <= 10 or ps.size == 12 or ps.size == 16
+@     elif ps.size <= 10 or ps.size == 12 or ps.size == 16:
 	/*
 	 * The pixel is stored in one or two bytes
 	 *
@@ -146,7 +119,7 @@ static inline GP_Pixel GP_GetPixel_Raw_{{ ps.suffix }}(const GP_Context *c, int 
 	 */
 	return GP_GET_BITS2_ALIGNED(GP_PIXEL_ADDR_OFFSET_{{ ps.suffix }}(x), {{ ps.size }},
 		*(GP_PIXEL_ADDR_{{ ps.suffix }}(c, x, y)));
-%% elif ps.size <= 18 or ps.size == 20 or ps.size == 24
+@     elif ps.size <= 18 or ps.size == 20 or ps.size == 24:
 	/*
 	 * The pixel is stored in two or three bytes
 	 *
@@ -160,7 +133,7 @@ static inline GP_Pixel GP_GetPixel_Raw_{{ ps.suffix }}(const GP_Context *c, int 
 	 */
 	return GP_GET_BITS3_ALIGNED(GP_PIXEL_ADDR_OFFSET_{{ ps.suffix }}(x), {{ ps.size }},
 		*(GP_PIXEL_ADDR_{{ ps.suffix }}(c, x, y)));
-%% elif ps.size <= 23 or ps.size == 25 or ps.size == 26 or ps.size == 28 or ps.size == 32
+@     elif ps.size <= 23 or ps.size == 25 or ps.size == 26 or ps.size == 28 or ps.size == 32:
 	/*
 	 * The pixel is stored in three or four bytes
 	 *
@@ -174,9 +147,9 @@ static inline GP_Pixel GP_GetPixel_Raw_{{ ps.suffix }}(const GP_Context *c, int 
 	 */
 	return GP_GET_BITS4_ALIGNED(GP_PIXEL_ADDR_OFFSET_{{ ps.suffix }}(x), {{ ps.size }},
 		*(GP_PIXEL_ADDR_{{ ps.suffix }}(c, x, y)));
-%% else
+@     else:
 	#error not implemented
-%% endif
+@     end
 }
 
 /*
@@ -184,22 +157,22 @@ static inline GP_Pixel GP_GetPixel_Raw_{{ ps.suffix }}(const GP_Context *c, int 
  */
 static inline void GP_PutPixel_Raw_{{ ps.suffix }}(GP_Context *c, int x, int y, GP_Pixel p)
 {
-%% if ps.size == 32
+@     if ps.size == 32:
 	/*
 	 * 32 BPP is expected to have aligned pixels
 	 */
 	*((uint32_t*)GP_PIXEL_ADDR_{{ ps.suffix }}(c, x, y)) = p;
-%% elif ps.size == 16
+@     elif ps.size == 16:
 	/*
 	 * 16 BPP is expected to have aligned pixels
 	 */
 	*((uint16_t*)GP_PIXEL_ADDR_{{ ps.suffix }}(c, x, y)) = p;
-%% elif ps.size == 8
+@     elif ps.size == 8:
 	/*
 	 * 8 BPP is byte aligned
 	 */
 	*((uint8_t*)GP_PIXEL_ADDR_{{ ps.suffix }}(c, x, y)) = p;
-%% elif ps.size == 1 or ps.size == 2 or ps.size == 4 or ps.size == 8
+@     elif ps.size == 1 or ps.size == 2 or ps.size == 4 or ps.size == 8:
 	/*
 	 * Whole pixel is stored only and only in one byte
 	 *
@@ -207,7 +180,7 @@ static inline void GP_PutPixel_Raw_{{ ps.suffix }}(GP_Context *c, int x, int y, 
 	 */
 	GP_SET_BITS1_ALIGNED(GP_PIXEL_ADDR_OFFSET_{{ ps.suffix }}(x), {{ ps.size }},
 	                     GP_PIXEL_ADDR_{{ ps.suffix }}(c, x, y), p);
-%% elif ps.size <= 10 or ps.size == 12 or ps.size == 16
+@     elif ps.size <= 10 or ps.size == 12 or ps.size == 16:
 	/*
 	 * The pixel is stored in one or two bytes
 	 *
@@ -221,7 +194,7 @@ static inline void GP_PutPixel_Raw_{{ ps.suffix }}(GP_Context *c, int x, int y, 
 	 */
 	GP_SET_BITS2_ALIGNED(GP_PIXEL_ADDR_OFFSET_{{ ps.suffix }}(x), {{ ps.size }},
 	                     GP_PIXEL_ADDR_{{ ps.suffix }}(c, x, y), p);
-%% elif ps.size <= 18 or ps.size == 20 or ps.size == 24
+@     elif ps.size <= 18 or ps.size == 20 or ps.size == 24:
 	/*
 	 * The pixel is stored in two or three bytes
 	 *
@@ -235,7 +208,7 @@ static inline void GP_PutPixel_Raw_{{ ps.suffix }}(GP_Context *c, int x, int y, 
 	 */
 	GP_SET_BITS3_ALIGNED(GP_PIXEL_ADDR_OFFSET_{{ ps.suffix }}(x), {{ ps.size }},
 	                     GP_PIXEL_ADDR_{{ ps.suffix }}(c, x, y), p);
-%% elif ps.size <= 23 or ps.size == 25 or ps.size == 26 or ps.size == 28 or ps.size == 32
+@     elif ps.size <= 23 or ps.size == 25 or ps.size == 26 or ps.size == 28 or ps.size == 32:
 	/*
 	 * The pixel is stored in three or four bytes
 	 *
@@ -249,9 +222,9 @@ static inline void GP_PutPixel_Raw_{{ ps.suffix }}(GP_Context *c, int x, int y, 
 	 */
 	GP_SET_BITS4_ALIGNED(GP_PIXEL_ADDR_OFFSET_{{ ps.suffix }}(x), {{ ps.size }},
 	                     GP_PIXEL_ADDR_{{ ps.suffix }}(c, x, y), p);
-%% else
+@     else:
 	#error not implemented
-%% endif
+@     end
 }
 
 static inline void GP_PutPixel_Raw_Clipped_{{ ps.suffix }}(GP_Context *c, GP_Coord x, GP_Coord y, GP_Pixel p)
@@ -262,6 +235,3 @@ static inline void GP_PutPixel_Raw_Clipped_{{ ps.suffix }}(GP_Context *c, GP_Coo
 	GP_PutPixel_Raw_{{ ps.suffix }}(c, x, y, p);
 }
 
-%% endfor
-
-%% endblock body

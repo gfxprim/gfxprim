@@ -1,30 +1,9 @@
-/*****************************************************************************
- * This file is part of gfxprim library.                                     *
- *                                                                           *
- * Gfxprim is free software; you can redistribute it and/or                  *
- * modify it under the terms of the GNU Lesser General Public                *
- * License as published by the Free Software Foundation; either              *
- * version 2.1 of the License, or (at your option) any later version.        *
- *                                                                           *
- * Gfxprim is distributed in the hope that it will be useful,                *
- * but WITHOUT ANY WARRANTY; without even the implied warranty of            *
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU         *
- * Lesser General Public License for more details.                           *
- *                                                                           *
- * You should have received a copy of the GNU Lesser General Public          *
- * License along with gfxprim; if not, write to the Free Software            *
- * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
- * Boston, MA  02110-1301  USA                                               *
- *                                                                           *
- * Copyright (C) 2009-2013 Cyril Hrubis <metan@ucw.cz>                       *
- *                                                                           *
- *****************************************************************************/
-
-%% extends "base.test.c.t"
-
-{% block descr %}GP_GET_BITS() and GP_SET_BITS() tests.{% endblock %}
-
-%% block body
+@ include source.t
+/*
+ * GP_GET_BITS() and GP_SET_BITS() tests.
+ *
+ * Copyright (C) 2009-2014 Cyril Hrubis <metan@ucw.cz>
+ */
 
 #include <stdlib.h>
 #include <stdint.h>
@@ -40,8 +19,8 @@ static const uint32_t patterns[] = {
 	0x43f8af32,
 };
 
-%%  for len in range(1, 33)
-%%   for off in range(0, 33 - len)
+@ for len in range(1, 33):
+@     for off in range(0, 33 - len):
 static int getbits_{{ off }}_{{ len }}(void)
 {
 	uint32_t p_exp, p_get;
@@ -65,15 +44,11 @@ static int getbits_{{ off }}_{{ len }}(void)
 
 	return TST_SUCCESS;
 }
-%%   endfor
-%%  endfor
 
-%%  macro mask(off, len)
-~{{ hex((2 ** len - 1) * (2 ** off)) }}
-%%-  endmacro
-
-%%  for len in range(1, 33)
-%%   for off in range(0, 33 - len)
+@ end
+@
+@ for len in range(1, 33):
+@     for off in range(0, 33 - len):
 static int setbits_{{ off }}_{{ len }}(void)
 {
 	uint32_t p_exp, canary1, p_get, canary2, val;
@@ -81,7 +56,7 @@ static int setbits_{{ off }}_{{ len }}(void)
 
 	for (i = 0; i < GP_ARRAY_SIZE(patterns); i++) {
 		for (j = 0; j < GP_ARRAY_SIZE(patterns); j++) {
-			{# GP_SET_BITS() needs value clamped to the len #}
+@                       # GP_SET_BITS() needs value clamped to the len
 			val = patterns[j] & {{ hex(2 ** len - 1) }};
 
 			canary1 = 0;
@@ -89,7 +64,7 @@ static int setbits_{{ off }}_{{ len }}(void)
 			p_get = patterns[i];
 			GP_SET_BITS({{ off }}, {{ len }}, p_get, val);
 
-			p_exp = patterns[i] & {{ mask(off, len) }};
+			p_exp = patterns[i] & ~{{ hex((2 ** len - 1) * (2 ** off)) }};
 			p_exp |= val<<{{ off }};
 
 			if (p_get != p_exp || canary1 != 0 || canary2 != 0) {
@@ -105,26 +80,22 @@ static int setbits_{{ off }}_{{ len }}(void)
 
 	return TST_SUCCESS;
 }
-%%   endfor
-%%  endfor
 
+@ end
+@
 const struct tst_suite tst_suite = {
 	.suite_name = "GetSetBits testsuite",
 	.tests = {
-%%  for len in range(1, 33)
-%%   for off in range(0, 33 - len)
+@ for len in range(1, 33):
+@     for off in range(0, 33 - len):
 		{.name = "GP_GET_BITS off={{ off }} len={{ len }}",
 		 .tst_fn = getbits_{{ off }}_{{ len }}},
-%%   endfor
-%%  endfor
-%%  for len in range(1, 33)
-%%   for off in range(0, 33 - len)
+@ end
+@ for len in range(1, 33):
+@     for off in range(0, 33 - len):
 		{.name = "GP_SET_BITS off={{ off }} len={{ len }}",
 		 .tst_fn = setbits_{{ off }}_{{ len }}},
-%%   endfor
-%%  endfor
+@ end
 		{.name = NULL}
 	}
 };
-
-%% endblock body

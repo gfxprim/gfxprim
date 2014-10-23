@@ -1,12 +1,12 @@
 #
 #  gfxprim.pixeltype - Module with PixelType descrition class
 #
-# 2011 - Tomas Gavenciak <gavento@ucw.cz>
-# 2013   Cyril Hrubis <metan@ucw.cz>
+# 2011      - Tomas Gavenciak <gavento@ucw.cz>
+# 2013-2014 - Cyril Hrubis <metan@ucw.cz>
 #
 
 import re
-from .pixelsize import PixelSize
+from pixelsize import PixelSize
 
 class PixelChannel(list):
   def __init__(self, triplet, idx):
@@ -47,10 +47,12 @@ class PixelType(object):
     self.name = name
     # Create channel list with convinience variables
     new_chanslist = []
+    self.chan_names = []
     idx = 0
     for i in chanslist:
       new_chanslist.append(PixelChannel(i, idx))
       idx = idx + 1
+      self.chan_names.append(i[0])
     self.chanslist = new_chanslist
     self.chans = dict() # { chan_name: (offset, size) }
     self.pixelsize = pixelsize

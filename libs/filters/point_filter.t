@@ -1,15 +1,4 @@
-%% extends "filter.c.t"
-
-%% macro filter_point_include()
-#include <errno.h>
-
-#include "core/GP_Debug.h"
-
-#include "filters/GP_ApplyTables.h"
-#include "filters/GP_Point.h"
-%% endmacro
-
-%% macro filter_point_ex(op_name, filter_op, fopts)
+@ def filter_point_ex(op_name, filter_op, fopts):
 int GP_Filter{{ op_name }}Ex(const GP_Context *const src,
                              GP_Coord x_src, GP_Coord y_src,
                              GP_Size w_src, GP_Size h_src,
@@ -34,7 +23,7 @@ int GP_Filter{{ op_name }}Ex(const GP_Context *const src,
 		GP_Pixel *table = tables.table[i];
 
 		for (j = 0; j < chan_max; j++)
-			table[j] = {{ filter_op('((signed)j)', '((signed)chan_max - 1)') }};
+			table[j] = {@ filter_op('((signed)j)', '((signed)chan_max - 1)') @};
 	}
 
 	ret = GP_FilterTablesApply(src, x_src, y_src, w_src, h_src,
@@ -46,9 +35,8 @@ int GP_Filter{{ op_name }}Ex(const GP_Context *const src,
 
 	return ret;
 }
-%% endmacro
-
-%% macro filter_point_ex_alloc(op_name, fopts, opts)
+@
+@ def filter_point_ex_alloc(op_name, fopts, opts):
 GP_Context *GP_Filter{{ op_name }}ExAlloc(const GP_Context *const src,
                                           GP_Coord x_src, GP_Coord y_src,
                                           GP_Size w_src, GP_Size h_src,
@@ -68,10 +56,15 @@ GP_Context *GP_Filter{{ op_name }}ExAlloc(const GP_Context *const src,
 
 	return new;
 }
-%% endmacro
+@
+@ def filter_point(op_name, filter_op, fopts="", opts=""):
+#include <errno.h>
 
-%% macro filter_point(op_name, filter_op, fopts="", opts="")
-{{ filter_point_include() }}
-{{ filter_point_ex(op_name, filter_op, fopts) }}
-{{ filter_point_ex_alloc(op_name, fopts, opts) }}
-%% endmacro
+#include "core/GP_Debug.h"
+
+#include "filters/GP_ApplyTables.h"
+#include "filters/GP_Point.h"
+
+{@ filter_point_ex(op_name, filter_op, fopts) @}
+{@ filter_point_ex_alloc(op_name, fopts, opts) @}
+@ end

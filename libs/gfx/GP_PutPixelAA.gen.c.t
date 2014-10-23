@@ -20,11 +20,7 @@
  *                                                                           *
  *****************************************************************************/
 
-%% extends "base.c.t"
-
-{% block descr %}Anti Aliased Put Pixel{% endblock %}
-
-%% block body
+/* Anti Aliased Put Pixel */
 
 #include "core/GP_Context.h"
 #include "core/GP_MixPixels.h"
@@ -70,6 +66,3 @@ void GP_PutPixelAA(GP_Context *context, GP_Coord x, GP_Coord y, GP_Pixel pixel)
 
 	GP_PutPixelAA_Raw_Clipped(context, x, y, pixel);
 }
-
-
-%% endblock body

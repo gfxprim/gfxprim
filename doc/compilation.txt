@@ -7,7 +7,6 @@ Dependencies
   link:http://clang.llvm.org/[clang])
 * link:https://www.gnu.org/software/make/[GNU make]
 * link:https://www.python.org/[Python] (2.6 or newer)
-* link:http://jinja.pocoo.org/docs/[Jinja2]
 
 *Optional Image loaders*
 
@@ -73,7 +72,7 @@ Works for link:http://www.fedoraproject.org/[Fedora] too if you substitute
 
 .Install basic tools
 -------------------------------------------------------------------------------
-zypper in gcc make python-jinja2
+zypper in gcc make
 -------------------------------------------------------------------------------
 
 .Install image devel libraries
@@ -98,9 +97,8 @@ zypper in swig python-devel
 
 .All in the one for the lazy
 -------------------------------------------------------------------------------
-zypper in gcc make python-Jinja2 libjpeg-devel libpng-devel giflib-devel
-          libtiff-devel freetype-devel libX11-devel libXext-devel swig
-          python-devel
+zypper in gcc make libjpeg-devel libpng-devel giflib-devel libtiff-devel
+          freetype-devel libX11-devel libXext-devel swig python-devel
 -------------------------------------------------------------------------------
 
 Debian
@@ -111,7 +109,7 @@ and other Debian based distributions.
 
 .Install basic tools
 -------------------------------------------------------------------------------
-apt-get install gcc make python-jinja2
+apt-get install gcc make
 -------------------------------------------------------------------------------
 
 .Install image devel libraries
@@ -136,9 +134,8 @@ apt-get install swig python-dev
 
 .All in the one for the lazy
 -------------------------------------------------------------------------------
-apt-get install gcc make python-jinja2 libjpeg-dev libpng-dev libgif-dev
-                libtiff-dev libfreetype6-dev libx11-dev libxext-dev swig
-                python-dev
+apt-get install gcc make libjpeg-dev libpng-dev libgif-dev libtiff-dev
+                libfreetype6-dev libx11-dev libxext-dev swig python-dev
 -------------------------------------------------------------------------------
 
 Packages

@@ -5,7 +5,7 @@ GFXprim is simple modular 2D bitmap graphics library with emphasis on speed
 and correctness.
 
 One of the key points of the library are code generators. Most of the
-graphics operations are written using http://jinja.pocoo.org/[Jinja]
+graphics operations are written using https://github.com/metan-ucw/cct[CCT]
 templating engine which is used to create specialized C code. So,
 for an example, once you add pixel definition into configuration file,
 creating specialized filters, loaders and conversions to other pixel

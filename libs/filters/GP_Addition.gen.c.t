@@ -1,46 +1,17 @@
-/*****************************************************************************
- * This file is part of gfxprim library.                                     *
- *                                                                           *
- * Gfxprim is free software; you can redistribute it and/or                  *
- * modify it under the terms of the GNU Lesser General Public                *
- * License as published by the Free Software Foundation; either              *
- * version 2.1 of the License, or (at your option) any later version.        *
- *                                                                           *
- * Gfxprim is distributed in the hope that it will be useful,                *
- * but WITHOUT ANY WARRANTY; without even the implied warranty of            *
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU         *
- * Lesser General Public License for more details.                           *
- *                                                                           *
- * You should have received a copy of the GNU Lesser General Public          *
- * License along with gfxprim; if not, write to the Free Software            *
- * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
- * Boston, MA  02110-1301  USA                                               *
- *                                                                           *
- * Copyright (C) 2012      Cyril Hrubis <metan@ucw.cz>                       *
- *                                                                           *
- *****************************************************************************/
+@ include source.t
+/*
+ * Addition filter -- Addition of two bitmaps.
+ *
+ * Copyright (C) 2012-2014 Cyril Hrubis <metan@ucw.cz>
+ */
 
-%% extends "filter.arithmetic.c.t"
+#include "core/GP_Clamp.h"
 
-%% block descr
-Addition filter -- Addition of two bitmaps.
-%% endblock
-
-%% block body
-
-{{ filter_arithmetic_include() }}
-
-%% macro filter_op(chan_name, chan_size)
+@ include arithmetic_filter.t
+@
+@ def filter_op(chan_name, chan_size):
 {{ chan_name }} = {{ chan_name }}_A + {{ chan_name }}_B;
-{{ filter_clamp_val(chan_name, chan_size) }}
-%% endmacro
-
-%% call(pt) filter_arithmetic_per_channel('Addition', filter_op)
-%% endcall
-
-%% call(ps) filter_arithmetic_per_bpp('Addition', filter_op)
-%% endcall
-
-{{ filter_arithmetic_functions('Addition') }}
-
-%% endblock body
+GP_CLAMP_GENERIC({{ chan_name }}, 0, {{ 2 ** chan_size - 1 }});
+@ end
+@
+{@ filter_arithmetic('Addition', filter_op) @}

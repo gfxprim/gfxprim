@@ -1,30 +1,9 @@
-/*****************************************************************************
- * This file is part of gfxprim library.                                     *
- *                                                                           *
- * Gfxprim is free software; you can redistribute it and/or                  *
- * modify it under the terms of the GNU Lesser General Public                *
- * License as published by the Free Software Foundation; either              *
- * version 2.1 of the License, or (at your option) any later version.        *
- *                                                                           *
- * Gfxprim is distributed in the hope that it will be useful,                *
- * but WITHOUT ANY WARRANTY; without even the implied warranty of            *
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU         *
- * Lesser General Public License for more details.                           *
- *                                                                           *
- * You should have received a copy of the GNU Lesser General Public          *
- * License along with gfxprim; if not, write to the Free Software            *
- * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
- * Boston, MA  02110-1301  USA                                               *
- *                                                                           *
- * Copyright (C) 2009-2013 Cyril Hrubis <metan@ucw.cz>                       *
- *                                                                           *
- *****************************************************************************/
-
-%% extends "base.test.c.t"
-
-{% block descr %}ConvertScale tests.{% endblock %}
-
-%% block body
+@ include source.t
+/*
+ * ConvertScale tests.
+ *
+ * Copyright (C) 2009-2014 Cyril Hrubis <metan@ucw.cz>
+ */
 
 #include <stdio.h>
 #include <math.h>
@@ -34,11 +13,11 @@
 
 #include "tst_test.h"
 
-%% set max_in = 24
-%% set max_out = 16
-
-%% for i in range(1, max_in)
-%%  for j in range(1, max_out)
+@ max_in = 24
+@ max_out = 16
+@
+@ for i in range(1, max_in):
+@     for j in range(1, max_out):
 static int check_convert_{{ i }}_{{ j }}(void)
 {
 	unsigned int v, fail = 0;
@@ -47,7 +26,7 @@ static int check_convert_{{ i }}_{{ j }}(void)
 
 	for (v = 0; v < {{ 2 ** i - 1 }}; v++) {
 		res = GP_SCALE_VAL_{{ i }}_{{ j }}(v);
-%%   if j > i
+@         if j > i:
 		/*
 		 * We have {{ 2**i }} values and we need to map them to
 		 * subset of {{ 2**j }} values while making sure 0 -> 0
@@ -60,7 +39,7 @@ static int check_convert_{{ i }}_{{ j }}(void)
 		 */
 		fres = (v / {{ (2.00 ** i - 1) }}) * {{ (2.00 ** j - 1) }};
 		exp_res = round(fres);
-%%   else
+@         else:
 		/*
 		 * We have {{ 2**i }} values that must be mapped to {{ 2**j }}
 		 * so we do simple division and floor() which maps the values
@@ -70,7 +49,7 @@ static int check_convert_{{ i }}_{{ j }}(void)
 		 */
 		fres = v * {{ (2.00 ** j) / (2.00 ** i) }};
 		exp_res = floor(fres);
-%%   endif
+@         end
 
 		if (res != exp_res) {
 			if (fail < 5)
@@ -89,20 +68,16 @@ static int check_convert_{{ i }}_{{ j }}(void)
 	return TST_SUCCESS;
 }
 
-%%  endfor
-%% endfor
-
+@ endfor
+@
 const struct tst_suite tst_suite = {
 	.suite_name = "Convert Scale Testsuite",
 	.tests = {
-%% for i in range(1, max_in)
-%%  for j in range(1, max_out)
+@ for i in range(1, max_in):
+@     for j in range(1, max_out):
 		{.name = "SCALE_{{ i }}_{{ j }}()",
 		 .tst_fn = check_convert_{{ i }}_{{ j }}},
-%%  endfor
-%% endfor
+@ end
 		{.name = NULL}
 	}
 };
-
-%% endblock body

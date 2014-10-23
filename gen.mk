@@ -22,7 +22,8 @@ ALL+=$(GENHEADERS) $(GENSOURCES)
 #
 # Base common templates location
 #
-TEMPLATE_DIR=$(TOPDIR)/pylib/templates/
+TEMPLATEDIR=$(TOPDIR)/gen/include/
+CCT=$(TOPDIR)/gen/bin/cct.py
 
 #
 # And clean them
@@ -32,16 +33,16 @@ CLEAN+=$(GENSOURCES) $(GENHEADERS)
 #
 # Some base dependencies
 #
-$(GENSOURCES): $(TEMPLATE_DIR)/base.c.t $(TEMPLATE_DIR)/common.c.t
-$(GENHEADERS): $(TEMPLATE_DIR)/base.h.t
+$(GENSOURCES): $(TEMPLATEDIR)/source.t $(TEMPLATEDIR)/license.t
+$(GENHEADERS): $(TEMPLATEDIR)/header.t $(TEMPLATEDIR)/license.t
 
 #
 # Generated files depend on python generators and the template
 #
 $(GENSOURCES) $(GENHEADERS): %: %.t
 ifdef VERBOSE
-	${PYTHON} ${TOPDIR}/pylib/bin/generate_file.py -t $(TEMPLATE_DIR) "$@.t" "$@"
+	PYTHONPATH=$(TEMPLATEDIR) ${CCT} -I $(TEMPLATEDIR) "$@.t"
 else
-	@echo "GEN  $@"
-	@${PYTHON} ${TOPDIR}/pylib/bin/generate_file.py -t $(TEMPLATE_DIR) "$@.t" "$@"
+	@echo "CCT  $@"
+	@PYTHONPATH=$(TEMPLATEDIR) ${CCT} -I $(TEMPLATEDIR) "$@.t"
 endif

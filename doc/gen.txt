@@ -219,41 +219,29 @@ used directly from C code whose value is a hexadecimal string, i.e. 'C_mask',
 Templating language
 ~~~~~~~~~~~~~~~~~~~
 
-GFXprim uses http://jinja.pocoo.org/[Jinja] templating engine with a few
-objects added into the environment.
-
-Added are python buildins:
-
-* 'int'
-* 'float'
-* 'round'
-* 'len'
-
-And most importantly objects generated from the configuration files:
-
-* 'pixelsizes' list of all pixel size objects
-* 'pixeltypes' list of all pixel type objects
+GFXprim uses https://github.com/metan-ucw/cct[CCT] templating engine which is
+crafted especially for generating source code. CCT is a Python based language
+that contains global variables with objects described in gfxprim config.
 
 Quick Syntax Help
 ^^^^^^^^^^^^^^^^^
 
-Jinja2 basics:
+CCT basics:
 
-- Each written line is reproduces as it is unless it contains template
-  'variable' or 'expression'
+- Each written line is verbatim (reproduced as it is) unless it starts with
+  +@\s+
 
-- 'Variable' is text enclosed between +{{+ and +}}+
-  * +{{ ps.size }}+ or +{{ ps.suffix }}+
-  * +{{ 2 ** i }}+
-  * +{{ int(2 ** (7 - i)) }} >> {{ 8 - i }}+
+- Lines starting with +@\s+ are interpreted as a Python code
 
-- 'Expression' is either line that starts with +%%+ or a text enclosed between
-  +{%+ and +%}+
-  * +%% for ps in pixel_size+
-  * +%% endfor+
-  * +{% if ps.needs_bit_endian() %} ... {% endif %}+
+- Comments are lines starting with +@ #+
 
-- Comments are enclosed in +{\#+ and  +#}+
+- Verbatim lines may also contain 'Expressions' or 'Function call'
+
+- 'Expression' is a Python code that yields a value which is included in the
+   output and is enclosed between curly braces +{{ expression }}+.
+
+- 'Function call' is a Python function whose output is included in the output.
+   It is called as {@ func() @}.
 
 More complete documentation could be found in
-http://jinja.pocoo.org/docs/templates/[Jinja official documentation]
+https://github.com/metan-ucw/cct/blob/master/HOWTO[CCT howto].

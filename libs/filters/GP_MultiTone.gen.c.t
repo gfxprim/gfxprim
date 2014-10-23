@@ -1,32 +1,9 @@
-/*****************************************************************************
- * This file is part of gfxprim library.                                     *
- *                                                                           *
- * Gfxprim is free software; you can redistribute it and/or                  *
- * modify it under the terms of the GNU Lesser General Public                *
- * License as published by the Free Software Foundation; either              *
- * version 2.1 of the License, or (at your option) any later version.        *
- *                                                                           *
- * Gfxprim is distributed in the hope that it will be useful,                *
- * but WITHOUT ANY WARRANTY; without even the implied warranty of            *
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU         *
- * Lesser General Public License for more details.                           *
- *                                                                           *
- * You should have received a copy of the GNU Lesser General Public          *
- * License along with gfxprim; if not, write to the Free Software            *
- * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
- * Boston, MA  02110-1301  USA                                               *
- *                                                                           *
- * Copyright (C) 2009-2013 Cyril Hrubis <metan@ucw.cz>                       *
- *                                                                           *
- *****************************************************************************/
-
-%% extends "filter.c.t"
-
-%% block descr
-Generic Point filer
-%% endblock
-
-%% block body
+@ include source.t
+/*
+ * Generic Point filer
+ *
+ * Copyright (C) 2009-2014 Cyril Hrubis <metan@ucw.cz>
+ */
 
 #include <errno.h>
 
@@ -38,8 +15,8 @@ Generic Point filer
 
 #include "filters/GP_MultiTone.h"
 
-%% for pt in pixeltypes
-%%  if not pt.is_unknown() and not pt.is_palette()
+@ for pt in pixeltypes:
+@     if not pt.is_unknown() and not pt.is_palette():
 static void init_table_{{ pt.name }}(GP_Pixel table[],
                                      GP_Size table_size,
                                      GP_Pixel pixels[],
@@ -67,22 +44,21 @@ static void init_table_{{ pt.name }}(GP_Pixel table[],
 //		GP_PixelPrint(table[i], GP_PIXEL_{{ pt.name }});
 	}
 }
-%%  endif
-%% endfor
 
+@ end
+@
 static void init_table(GP_PixelType type,
                        GP_Pixel table[], GP_Size table_size,
                        GP_Pixel pixels[], GP_Size pixels_size)
 {
 	switch (type) {
-%% for pt in pixeltypes
-%%  if not pt.is_unknown() and not pt.is_palette()
+@ for pt in pixeltypes:
+@     if not pt.is_unknown() and not pt.is_palette():
 	case GP_PIXEL_{{ pt.name }}:
 		init_table_{{ pt.name }}(table, table_size,
 		                         pixels, pixels_size);
 	break;
-%%  endif
-%% endfor
+@ end
 	default:
 		GP_BUG("Should not be reached");
 	break;
@@ -91,8 +67,8 @@ static void init_table(GP_PixelType type,
 
 #include <assert.h>
 
-%% for pt in pixeltypes
-%%  if pt.is_gray()
+@ for pt in pixeltypes:
+@     if pt.is_gray():
 static int multitone_{{ pt.name }}(const GP_Context *const src,
                                    GP_Coord x_src, GP_Coord y_src,
                                    GP_Size w_src, GP_Size h_src,
@@ -101,7 +77,7 @@ static int multitone_{{ pt.name }}(const GP_Context *const src,
                                    GP_Pixel pixels[], GP_Size pixels_size,
                                    GP_ProgressCallback *callback)
 {
-%% set size = pt.chanslist[0].max + 1
+@         size = pt.chanslist[0].max + 1
 	GP_TempAllocCreate(tmp, {{ size }} * sizeof(GP_Pixel));
 	GP_Pixel *table = GP_TempAllocGet(tmp, {{ size }} * sizeof(GP_Pixel));
 
@@ -139,9 +115,8 @@ static int multitone_{{ pt.name }}(const GP_Context *const src,
 	return 0;
 }
 
-%%  endif
-%% endfor
-
+@ end
+@
 int GP_FilterMultiToneEx(const GP_Context *const src,
                          GP_Coord x_src, GP_Coord y_src,
                          GP_Size w_src, GP_Size h_src,
@@ -153,8 +128,8 @@ int GP_FilterMultiToneEx(const GP_Context *const src,
 	//CHECK DST IS NOT PALETTE PixelHasFlags
 
 	switch (src->pixel_type) {
-%% for pt in pixeltypes
-%%  if pt.is_gray()
+@ for pt in pixeltypes:
+@     if pt.is_gray():
 	case GP_PIXEL_{{ pt.name }}:
 		return multitone_{{ pt.name }}(src, x_src, y_src,
 		                               w_src, h_src, dst,
@@ -162,8 +137,7 @@ int GP_FilterMultiToneEx(const GP_Context *const src,
 		                               pixels, pixels_size,
 		                               callback);
 	break;
-%%  endif
-%% endfor
+@ end
 	default:
 		errno = EINVAL;
 		return -1;
@@ -197,5 +171,3 @@ GP_Context *GP_FilterMultiToneExAlloc(const GP_Context *const src,
 
 	return res;
 }
-
-%% endblock body

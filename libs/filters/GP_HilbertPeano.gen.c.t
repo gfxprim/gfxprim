@@ -1,30 +1,9 @@
-/*****************************************************************************
- * This file is part of gfxprim library.                                     *
- *                                                                           *
- * Gfxprim is free software; you can redistribute it and/or                  *
- * modify it under the terms of the GNU Lesser General Public                *
- * License as published by the Free Software Foundation; either              *
- * version 2.1 of the License, or (at your option) any later version.        *
- *                                                                           *
- * Gfxprim is distributed in the hope that it will be useful,                *
- * but WITHOUT ANY WARRANTY; without even the implied warranty of            *
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU         *
- * Lesser General Public License for more details.                           *
- *                                                                           *
- * You should have received a copy of the GNU Lesser General Public          *
- * License along with gfxprim; if not, write to the Free Software            *
- * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
- * Boston, MA  02110-1301  USA                                               *
- *                                                                           *
- * Copyright (C) 2009-2013 Cyril Hrubis <metan@ucw.cz>                       *
- *                                                                           *
- *****************************************************************************/
-
-%% extends "base.c.t"
-
-{% block descr %}Hilbert Peano dithering RGB888 -> any pixel{% endblock %}
-
-%% block body
+@ include source.t
+/*
+ * Hilbert Peano dithering RGB888 -> any pixel
+ *
+ * Copyright (C) 2009-2014 Cyril Hrubis <metan@ucw.cz>
+ */
 
 #include <errno.h>
 
@@ -51,8 +30,8 @@ static unsigned int count_bits(unsigned int n)
 	return (i + (s != (1U<<i)));
 }
 
-%% for pt in pixeltypes
-%%  if pt.is_gray() or pt.is_rgb() and not pt.is_alpha()
+@ for pt in pixeltypes:
+@     if pt.is_gray() or pt.is_rgb() and not pt.is_alpha():
 /*
  * Hilbert Peano to {{ pt.name }}
  */
@@ -73,9 +52,9 @@ static int hilbert_peano_to_{{ pt.name }}_Raw(const GP_Context *src,
 	unsigned int cnt = 0;
 
 	/* error counters */
-%%   for c in pt.chanslist
+@         for c in pt.chanslist:
 	int err_{{ c[0] }} = 0;
-%%   endfor
+@         end
 
 	while (GP_HilbertCurveContinues(&state)) {
 		if (state.x < src->w && state.y < src->h) {
@@ -84,33 +63,31 @@ static int hilbert_peano_to_{{ pt.name }}_Raw(const GP_Context *src,
 			pix = GP_GetPixel_Raw(src, state.x, state.y);
 			pix = GP_PixelToRGB888(pix, src->pixel_type);
 
-%%   for c in pt.chanslist
-%%    if pt.is_gray()
+@         for c in pt.chanslist:
+@             if pt.is_gray():
 			int pix_{{ c[0] }} = GP_Pixel_GET_R_RGB888(pix) +
 			                     GP_Pixel_GET_G_RGB888(pix) +
 			                     GP_Pixel_GET_B_RGB888(pix);
-%%    else
+@             else:
 			int pix_{{ c[0] }} = GP_Pixel_GET_{{ c[0] }}_RGB888(pix);
-%%    endif
-
+@             end
 			pix_{{ c[0] }} += err_{{ c[0] }};
 
-%%    if pt.is_gray()
+@             if pt.is_gray():
 			int res_{{ c[0] }} = ({{ 2 ** c[2] - 1}} * pix_{{ c[0] }} + 382) / {{ 3 * 255 }};
 			err_{{ c[0] }} = pix_{{ c[0] }} - {{ 3 * 255 }} * res_{{ c[0] }} / {{ 2 ** c[2] - 1 }};
-%%    else
+@             else:
 			int res_{{ c[0] }} = ({{ 2 ** c[2] - 1}} * pix_{{ c[0] }} + 127) / 255;
 			err_{{ c[0] }} = pix_{{ c[0] }} - 255 * res_{{ c[0] }} / {{ 2 ** c[2] - 1 }};
-%%    endif
-%%   endfor
+@         end
 
-%%   if pt.is_gray()
+@         if pt.is_gray():
 			GP_PutPixel_Raw_{{ pt.pixelsize.suffix }}(dst, state.x, state.y, res_V);
-%%   else
-			GP_Pixel res = GP_Pixel_CREATE_{{ pt.name }}(res_{{ pt.chanslist[0][0] }}{% for c in pt.chanslist[1:] %}, res_{{ c[0] }}{% endfor %});
+@         else:
+			GP_Pixel res = GP_Pixel_CREATE_{{ pt.name }}({{ arr_to_params(pt.chan_names, 'res_') }});
 
 			GP_PutPixel_Raw_{{ pt.pixelsize.suffix }}(dst, state.x, state.y, res);
-%%   endif
+@         end
 			cnt++;
 
 			if (GP_ProgressCallbackReport(callback, cnt/src->h, src->w, src->h))
@@ -122,9 +99,9 @@ static int hilbert_peano_to_{{ pt.name }}_Raw(const GP_Context *src,
 				return 0;
 			}
 		} else {
-%%   for c in pt.chanslist
+@         for c in pt.chanslist:
 			err_{{ c[0] }} = 0;
-%%   endfor
+@         end
 		}
 
 		GP_HilbertCurveNext(&state);
@@ -134,9 +111,8 @@ static int hilbert_peano_to_{{ pt.name }}_Raw(const GP_Context *src,
 	return 0;
 }
 
-%%  endif
-%% endfor
-
+@ end
+@
 static int hilbert_peano(const GP_Context *src, GP_Context *dst,
                          GP_ProgressCallback *callback)
 {
@@ -148,12 +124,11 @@ static int hilbert_peano(const GP_Context *src, GP_Context *dst,
 	}
 
 	switch (dst->pixel_type) {
-%% for pt in pixeltypes
-%%  if pt.is_gray() or pt.is_rgb() and not pt.is_alpha()
+@ for pt in pixeltypes:
+@     if pt.is_gray() or pt.is_rgb() and not pt.is_alpha():
 	case GP_PIXEL_{{ pt.name }}:
 		return hilbert_peano_to_{{ pt.name }}_Raw(src, dst, callback);
-%%  endif
-%% endfor
+@ end
 	default:
 		errno = EINVAL;
 		return 1;
@@ -187,5 +162,3 @@ GP_Context *GP_FilterHilbertPeanoAlloc(const GP_Context *src,
 
 	return ret;
 }
-
-%% endblock body

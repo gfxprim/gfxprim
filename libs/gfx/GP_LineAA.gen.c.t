@@ -20,11 +20,7 @@
  *                                                                           *
  *****************************************************************************/
 
-%% extends "base.c.t"
-
-{% block descr %}Anti Aliased Line{% endblock %}
-
-%% block body
+/* Anti Aliased Line */
 
 #include "core/GP_Context.h"
 #include "core/GP_MixPixels.h"
@@ -157,5 +153,3 @@ void GP_LineAA_Raw(GP_Context *context, GP_Coord x0, GP_Coord y0,
 	else
 		line_aa_x(context, x0, y0, x1, y1, pixel);
 }
-
-%% endblock body

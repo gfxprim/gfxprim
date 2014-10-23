@@ -2,6 +2,7 @@
 #  gfxprim.pixelsize
 #
 # 2011 - Tomas Gavenciak <gavento@ucw.cz>
+# 2014 - Cyril Hrubis <chrubis@ucw.cz>
 #
 
 LE = "LE"

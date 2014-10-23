@@ -1,45 +1,68 @@
-/*****************************************************************************
- * This file is part of gfxprim library.                                     *
- *                                                                           *
- * Gfxprim is free software; you can redistribute it and/or                  *
- * modify it under the terms of the GNU Lesser General Public                *
- * License as published by the Free Software Foundation; either              *
- * version 2.1 of the License, or (at your option) any later version.        *
- *                                                                           *
- * Gfxprim is distributed in the hope that it will be useful,                *
- * but WITHOUT ANY WARRANTY; without even the implied warranty of            *
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU         *
- * Lesser General Public License for more details.                           *
- *                                                                           *
- * You should have received a copy of the GNU Lesser General Public          *
- * License along with gfxprim; if not, write to the Free Software            *
- * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
- * Boston, MA  02110-1301  USA                                               *
- *                                                                           *
- * Copyright (C) 2009-2013 Cyril Hrubis <metan@ucw.cz>                       *
- *                                                                           *
- *****************************************************************************/
+@ include source.t
+/*
+ * Histogram filter -- Compute image histogram
+ *
+ * Copyright (C) 2009-2014 Cyril Hrubis <metan@ucw.cz>
+ */
 
-%% extends "filter.stats.c.t"
+#include "core/GP_Context.h"
+#include "core/GP_Pixel.h"
+#include "core/GP_GetPutPixel.h"
+#include "core/GP_Debug.h"
+#include "GP_Filter.h"
 
-{% block descr %}Histogram filter -- Compute image histogram{% endblock %}
+#include "GP_Stats.h"
 
-%% block body
+@ for pt in pixeltypes:
+@     if not pt.is_unknown() and not pt.is_palette():
+static int GP_FilterHistogram_{{ pt.name }}(const GP_Context *src,
+        GP_FilterParam histogram[], GP_ProgressCallback *callback)
+{
+	GP_ASSERT(GP_FilterParamCheckPixelType(histogram, GP_PIXEL_{{ pt.name }}) == 0,
+	          "Invalid params channels for context pixel type");
 
-{{ filter_stats_include() }}
+@         for c in pt.chanslist:
+	GP_Histogram *{{ c.name }}_hist = (GP_FilterParamChannel(histogram, "{{ c.name }}"))->val.ptr;
+@         end
 
-%% macro filter_op(chan_name, chan_size)
-{{ chan_name }}_hist->hist[{{ chan_name }}]++;
-%% endmacro
+	uint32_t x, y;
 
-%% call(pt) filter_point_per_channel('Histogram', 'GP_FilterParam histogram[]', filter_op)
-{{ filter_params(pt, 'histogram', 'GP_Histogram *', '_hist', 'ptr') }}
-%% endcall
+	for (y = 0; y < src->h; y++) {
+		for (x = 0; x < src->w; x++) {
+			GP_Pixel pix = GP_GetPixel_Raw_{{ pt.pixelsize.suffix }}(src, x, y);
+@         for c in pt.chanslist:
+			int32_t {{ c.name }} = GP_Pixel_GET_{{ c.name }}_{{ pt.name }}(pix);
+@         end
 
-%% call(ps) filter_point_per_bpp('Histogram', 'GP_FilterParam histogram[]', filter_op)
-{{ filter_param(ps, 'histogram', 'GP_Histogram *', '_hist', 'ptr') }}
-%% endcall
+@         for c in pt.chanslist:
+			{{ c.name }}_hist->hist[{{ c.name }}]++;
+@         end
+		}
 
-{{ filter_functions('Histogram', 'GP_FilterParam histogram[]', 'histogram') }}
+		if (GP_ProgressCallbackReport(callback, y, src->h, src->w))
+			return 1;
+	}
 
-%% endblock body
+	GP_ProgressCallbackDone(callback);
+	return 0;
+}
+
+@ end
+@
+int GP_FilterHistogram_Raw(const GP_Context *src, GP_FilterParam histogram[],
+                           GP_ProgressCallback *callback)
+{
+	GP_DEBUG(1, "Running filter Histogram");
+
+	switch (src->pixel_type) {
+@ for pt in pixeltypes:
+@     if not pt.is_unknown() and not pt.is_palette():
+	case GP_PIXEL_{{ pt.name }}:
+		return GP_FilterHistogram_{{ pt.name }}(src, histogram, callback);
+@ end
+	default:
+	break;
+	}
+
+	return 1;
+}

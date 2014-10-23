@@ -65,19 +65,6 @@ def python_version(cfg):
     sys.stderr.write("%s\n" % res)
     return res
 
-def python_module_installed(cfg, module):
-    sys.stderr.write("Checking for python module %s ... " % module)
-
-    ret = os.system("echo 'import %s' | %s > /dev/null 2>&1" %
-                    (module, cfg['PYTHON_BIN'][0]))
-
-    if ret:
-        sys.stderr.write('No\n')
-        return False
-    else:
-        sys.stderr.write('Yes\n')
-        return True
-
 def check_for_swig(cfg):
     sys.stderr.write("Checking for working swig ... ")
 
@@ -251,9 +238,6 @@ def basic_checks(cfg):
 
     if not c_compiler_exists(cfg):
         die_screaming("No C compiler found")
-
-    if not python_module_installed(cfg, 'jinja2'):
-        die_screaming("No jinja2 python module found")
 
     check_for_swig(cfg)
     check_for_python_config(cfg)

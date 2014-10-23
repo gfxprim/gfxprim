@@ -1,20 +1,16 @@
-%% extends "filter.c.t"
+@ def filter_arithmetic(name, filter_op, opts='', params=''):
+#include "core/GP_Context.h"
+#include "core/GP_Pixel.h"
+#include "core/GP_GetPutPixel.h"
+#include "core/GP_Debug.h"
+#include "filters/GP_Filter.h"
+#include "filters/GP_Arithmetic.h"
 
-%% macro filter_arithmetic_include()
-{{ filter_include() }}
-#include "GP_Arithmetic.h"
-%% endmacro
-
-/*
- * Filter per pixel type, used for images with more than one channel per pixel
- */
-%% macro filter_arithmetic_per_channel(name, filter_op, opts="")
-%% for pt in pixeltypes
-%% if not pt.is_unknown() and len(pt.chanslist) > 1
+@     for pt in pixeltypes:
+@         if not pt.is_unknown():
 static int GP_Filter{{ name }}_{{ pt.name }}(const GP_Context *src_a, const GP_Context *src_b,
 	GP_Context *dst, {{ maybe_opts_r(opts) }}GP_ProgressCallback *callback)
 {
-{{ caller(pt) }}
 	uint32_t x, y, w, h;
 
 	w = GP_MIN(src_a->w, src_b->w);
@@ -25,18 +21,18 @@ static int GP_Filter{{ name }}_{{ pt.name }}(const GP_Context *src_a, const GP_C
 			GP_Pixel pix_a = GP_GetPixel_Raw_{{ pt.pixelsize.suffix }}(src_a, x, y);
 			GP_Pixel pix_b = GP_GetPixel_Raw_{{ pt.pixelsize.suffix }}(src_b, x, y);
 
-			%% for c in pt.chanslist
-			int32_t {{ c[0] }}_A = GP_Pixel_GET_{{ c[0] }}_{{ pt.name }}(pix_a);
-			int32_t {{ c[0] }}_B = GP_Pixel_GET_{{ c[0] }}_{{ pt.name }}(pix_b);
-			%% endfor
+@             for c in pt.chanslist:
+			int32_t {{ c.name }}_A = GP_Pixel_GET_{{ c.name }}_{{ pt.name }}(pix_a);
+			int32_t {{ c.name }}_B = GP_Pixel_GET_{{ c.name }}_{{ pt.name }}(pix_b);
+@             end
 
-			%% for c in pt.chanslist
-			int32_t {{ c[0] }};
-			{{ filter_op(c[0], c[2]) }}
-			%% endfor
+@             for c in pt.chanslist:
+			int32_t {{ c.name }};
+			{@ filter_op(c.name, c.size) @}
+@             end
 
 			GP_Pixel pix;
-			pix = GP_Pixel_CREATE_{{ pt.name }}({{ pt.chanslist[0][0] }}{% for c in pt.chanslist[1:] %}, {{ c[0] }}{% endfor %});
+			pix = GP_Pixel_CREATE_{{ pt.name }}({{ arr_to_params(pt.chan_names) }});
 
 			GP_PutPixel_Raw_{{ pt.pixelsize.suffix }}(dst, x, y, pix);
 		}
@@ -48,67 +44,20 @@ static int GP_Filter{{ name }}_{{ pt.name }}(const GP_Context *src_a, const GP_C
 	GP_ProgressCallbackDone(callback);
 	return 0;
 }
-%% endif
-%% endfor
-%% endmacro
 
-/*
- * Point filter per bpp (used for 1 channel pixels to save space).
- */
-%% macro filter_arithmetic_per_bpp(name, filter_op, opts="")
-%% for ps in pixelsizes
-%% if ps.size > 1
-static int GP_Filter{{ name }}_{{ ps.suffix }}(const GP_Context *src_a, const GP_Context *src_b,
-	GP_Context *dst, {{ maybe_opts_r(opts) }}GP_ProgressCallback *callback)
-{
-{{ caller(ps) }}
-	uint32_t x, y, w, h;
-
-	w = GP_MIN(src_a->w, src_b->w);
-	h = GP_MIN(src_a->h, src_b->h);
-
-	for (y = 0; y < h; y++) {
-		for (x = 0; x < w; x++) {
-			int32_t pix_A = GP_GetPixel_Raw_{{ ps.suffix }}(src_a, x, y);
-			int32_t pix_B = GP_GetPixel_Raw_{{ ps.suffix }}(src_b, x, y);
-			int32_t pix;
-			{{ filter_op('pix', ps.size) }}
-			GP_PutPixel_Raw_{{ ps.suffix }}(dst, x, y, pix);
-		}
-
-		if (GP_ProgressCallbackReport(callback, y, h, w))
-			return 1;
-	}
-
-	GP_ProgressCallbackDone(callback);
-	return 0;
-}
-
-%% endif
-%% endfor
-%% endmacro
-
-/*
- * Switch per pixel sizes or pixel types.
- */
-%% macro filter_arithmetic_functions(name, opts="", params="", fmt="")
+@     end
+@
 int GP_Filter{{ name }}_Raw(const GP_Context *src_a, const GP_Context *src_b,
 	GP_Context *dst{{ maybe_opts_l(opts) }}, GP_ProgressCallback *callback)
 {
 	GP_DEBUG(1, "Running filter {{ name }}");
 
 	switch (src_a->pixel_type) {
-	%% for pt in pixeltypes
+@     for pt in pixeltypes:
+@         if not pt.is_unknown():
 	case GP_PIXEL_{{ pt.name }}:
-		%% if pt.is_unknown() or pt.pixelsize.size < 2
-		return 1;
-		%% elif len(pt.chanslist) == 1:
-		//TODO: BITENDIAN
-		return GP_Filter{{ name }}_{{ pt.pixelsize.suffix }}(src_a, src_b, dst{{ maybe_opts_l(params) }}, callback);
-		%% else
 		return GP_Filter{{ name }}_{{ pt.name }}(src_a, src_b, dst{{ maybe_opts_l(params) }}, callback);
-		%% endif
-	%% endfor
+@     end
 	default:
 	break;
 	}
@@ -117,7 +66,7 @@ int GP_Filter{{ name }}_Raw(const GP_Context *src_a, const GP_Context *src_b,
 }
 
 int GP_Filter{{ name }}(const GP_Context *src_a, const GP_Context *src_b,
-	                GP_Context *dst{{ maybe_opts_l(opts) }},
+                        GP_Context *dst{{ maybe_opts_l(opts) }},
                         GP_ProgressCallback *callback)
 {
 	GP_Size w = GP_MIN(src_a->w, src_b->w);
@@ -135,6 +84,7 @@ int GP_Filter{{ name }}(const GP_Context *src_a, const GP_Context *src_b,
 
 	return 0;
 }
+
 
 GP_Context *GP_Filter{{ name }}Alloc(const GP_Context *src_a, const GP_Context *src_b,
 	                            {{ maybe_opts_r(opts) }}GP_ProgressCallback *callback)
@@ -162,4 +112,4 @@ GP_Context *GP_Filter{{ name }}Alloc(const GP_Context *src_a, const GP_Context *
 
 	return res;
 }
-%% endmacro
+@ end

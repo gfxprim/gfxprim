@@ -1,33 +1,9 @@
-/*****************************************************************************
- * This file is part of gfxprim library.                                     *
- *                                                                           *
- * Gfxprim is free software; you can redistribute it and/or                  *
- * modify it under the terms of the GNU Lesser General Public                *
- * License as published by the Free Software Foundation; either              *
- * version 2.1 of the License, or (at your option) any later version.        *
- *                                                                           *
- * Gfxprim is distributed in the hope that it will be useful,                *
- * but WITHOUT ANY WARRANTY; without even the implied warranty of            *
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU         *
- * Lesser General Public License for more details.                           *
- *                                                                           *
- * You should have received a copy of the GNU Lesser General Public          *
- * License along with gfxprim; if not, write to the Free Software            *
- * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
- * Boston, MA  02110-1301  USA                                               *
- *                                                                           *
- * Copyright (C) 2009-2010 Jiri "BlueBear" Dluhos                            *
- *                         <jiri.bluebear.dluhos@gmail.com>                  *
- *                                                                           *
- * Copyright (C) 2009-2013 Cyril Hrubis <metan@ucw.cz>                       *
- *                                                                           *
- *****************************************************************************/
-
-%% extends "base.c.t"
-
-{% block descr %}A filled ellipse drawing algorithm.{% endblock %}
-
-%% block body
+@ include source.t
+/*
+ * Copyright (C) 2009-2010 Jiri "BlueBear" Dluhos
+ *                         <jiri.bluebear.dluhos@gmail.com>
+ * Copyright (C) 2009-2014 Cyril Hrubis <metan@ucw.cz>
+ */
 
 #include "core/GP_GetPutPixel.h"
 #include "core/GP_FnPerBpp.h"
@@ -44,7 +20,7 @@
  * we just iterate X until Y reaches next line, and then draw the full line.
  */
 
-%% for ps in pixelsizes
+@ for ps in pixelsizes:
 
 static void GP_FillEllipse_Raw_{{ ps.suffix }}(GP_Context *context, GP_Coord xcenter,
 		GP_Coord ycenter, GP_Size a, GP_Size b, GP_Pixel pixel)
@@ -73,7 +49,7 @@ static void GP_FillEllipse_Raw_{{ ps.suffix }}(GP_Context *context, GP_Coord xce
 	}
 }
 
-%% endfor
+@ end
 
 void GP_FillEllipse_Raw(GP_Context *context, GP_Coord xcenter, GP_Coord ycenter,
 	                GP_Size a, GP_Size b, GP_Pixel pixel)
@@ -94,5 +70,3 @@ void GP_FillEllipse(GP_Context *context, GP_Coord xcenter, GP_Coord ycenter,
 
 	GP_FillEllipse_Raw(context, xcenter, ycenter, a, b, pixel);
 }
-
-%% endblock body

@@ -1,30 +1,9 @@
-/*****************************************************************************
- * This file is part of gfxprim library.                                     *
- *                                                                           *
- * Gfxprim is free software; you can redistribute it and/or                  *
- * modify it under the terms of the GNU Lesser General Public                *
- * License as published by the Free Software Foundation; either              *
- * version 2.1 of the License, or (at your option) any later version.        *
- *                                                                           *
- * Gfxprim is distributed in the hope that it will be useful,                *
- * but WITHOUT ANY WARRANTY; without even the implied warranty of            *
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU         *
- * Lesser General Public License for more details.                           *
- *                                                                           *
- * You should have received a copy of the GNU Lesser General Public          *
- * License along with gfxprim; if not, write to the Free Software            *
- * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
- * Boston, MA  02110-1301  USA                                               *
- *                                                                           *
- * Copyright (C) 2009-2013 Cyril Hrubis <metan@ucw.cz>                       *
- *                                                                           *
- *****************************************************************************/
-
-%% extends "filter.c.t"
-
-{% block descr %}Gaussian Noise{% endblock %}
-
-%% block body
+@ include source.t
+/*
+ * Gaussian Noise
+ *
+ * Copyright (C) 2009-2014 Cyril Hrubis <metan@ucw.cz>
+ */
 
 #include <errno.h>
 
@@ -38,8 +17,8 @@
 #include "GP_Rand.h"
 #include "GP_GaussianNoise.h"
 
-%% for pt in pixeltypes
-%% if not pt.is_unknown() and not pt.is_palette()
+@ for pt in pixeltypes:
+@     if not pt.is_unknown() and not pt.is_palette():
 static int GP_FilterGaussianNoiseAdd_{{ pt.name }}_Raw(const GP_Context *src,
                                 GP_Coord x_src, GP_Coord y_src,
                                 GP_Size w_src, GP_Size h_src,
@@ -51,37 +30,37 @@ static int GP_FilterGaussianNoiseAdd_{{ pt.name }}_Raw(const GP_Context *src,
 	GP_DEBUG(1, "Additive Gaussian noise filter %ux%u sigma=%f mu=%f",
 	         w_src, h_src, sigma, mu);
 
-	%% for c in pt.chanslist
-	int sigma_{{ c[0] }} = {{ 2 ** c[2] - 1 }} * sigma;
-	int mu_{{ c[0] }} = {{ 2 ** c[2] - 1 }} * mu;
-	%% endfor
+@         for c in pt.chanslist:
+	int sigma_{{ c.name }} = {{ c.max }} * sigma;
+	int mu_{{ c.name }} = {{ c.max }} * mu;
+@         end
 
 	unsigned int size = w_src + w_src%2;
 
 	/* Create temporary buffers */
 	GP_TempAllocCreate(temp, sizeof(int) * size * {{ len(pt.chanslist) }});
 
-	%% for c in pt.chanslist
-	int *{{ c[0] }} = GP_TempAllocGet(temp, size * sizeof(int));
-	%% endfor
+@         for c in pt.chanslist:
+	int *{{ c.name }} = GP_TempAllocGet(temp, size * sizeof(int));
+@         end
 
 	/* Apply the additive noise filter */
 	unsigned int x, y;
 
 	for (y = 0; y < h_src; y++) {
-		%% for c in pt.chanslist
-		GP_NormInt({{ c[0] }}, size, sigma_{{ c[0] }}, mu_{{ c[0] }});
-		%% endfor
+@         for c in pt.chanslist:
+		GP_NormInt({{ c.name }}, size, sigma_{{ c.name }}, mu_{{ c.name }});
+@         end
 
 		for (x = 0; x < w_src; x++) {
 			GP_Pixel pix = GP_GetPixel_Raw_{{ pt.pixelsize.suffix }}(src, x + x_src, y + y_src);
 
-			%% for c in pt.chanslist
-			{{ c[0] }}[x] += GP_Pixel_GET_{{ c[0] }}_{{ pt.name }}(pix);
-			{{ c[0] }}[x] = GP_CLAMP({{ c[0] }}[x], 0, {{ 2 ** c[2] - 1 }});
-			%% endfor
+@         for c in pt.chanslist:
+			{{ c.name }}[x] += GP_Pixel_GET_{{ c.name }}_{{ pt.name }}(pix);
+			{{ c.name }}[x] = GP_CLAMP({{ c.name }}[x], 0, {{ c.max }});
+@         end
 
-			pix = GP_Pixel_CREATE_{{ pt.name }}({{ expand_chanslist(pt, "", "[x]") }});
+			pix = GP_Pixel_CREATE_{{ pt.name }}({{ arr_to_params(pt.chan_names, '', '[x]') }});
 			GP_PutPixel_Raw_{{ pt.pixelsize.suffix }}(dst, x + x_dst, y + y_dst, pix);
 		}
 
@@ -98,9 +77,8 @@ static int GP_FilterGaussianNoiseAdd_{{ pt.name }}_Raw(const GP_Context *src,
 	return 0;
 }
 
-%% endif
-%% endfor
-
+@ end
+@
 int GP_FilterGaussianNoiseAdd_Raw(const GP_Context *src,
                                   GP_Coord x_src, GP_Coord y_src,
                                   GP_Size w_src, GP_Size h_src,
@@ -110,15 +88,14 @@ int GP_FilterGaussianNoiseAdd_Raw(const GP_Context *src,
                                   GP_ProgressCallback *callback)
 {
 	switch (src->pixel_type) {
-	%% for pt in pixeltypes
-	%% if not pt.is_unknown() and not pt.is_palette()
+@ for pt in pixeltypes:
+@     if not pt.is_unknown() and not pt.is_palette():
 	case GP_PIXEL_{{ pt.name }}:
 		return GP_FilterGaussianNoiseAdd_{{ pt.name }}_Raw(src, x_src,
 				y_src, w_src, h_src, dst, x_dst, y_dst,
 				sigma, mu, callback);
 	break;
-	%% endif
-	%% endfor
+@ end
 	default:
 		errno = EINVAL;
 		return -1;
@@ -173,5 +150,3 @@ GP_Context *GP_FilterGaussianNoiseAddExAlloc(const GP_Context *src,
 
 	return dst;
 }
-
-%% endblock body

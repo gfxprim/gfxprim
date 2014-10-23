@@ -1,33 +1,11 @@
-/*****************************************************************************
- * This file is part of gfxprim library.                                     *
- *                                                                           *
- * Gfxprim is free software; you can redistribute it and/or                  *
- * modify it under the terms of the GNU Lesser General Public                *
- * License as published by the Free Software Foundation; either              *
- * version 2.1 of the License, or (at your option) any later version.        *
- *                                                                           *
- * Gfxprim is distributed in the hope that it will be useful,                *
- * but WITHOUT ANY WARRANTY; without even the implied warranty of            *
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU         *
- * Lesser General Public License for more details.                           *
- *                                                                           *
- * You should have received a copy of the GNU Lesser General Public          *
- * License along with gfxprim; if not, write to the Free Software            *
- * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
- * Boston, MA  02110-1301  USA                                               *
- *                                                                           *
- * Copyright (C) 2009-2011 Jiri "BlueBear" Dluhos                            *
- *                         <jiri.bluebear.dluhos@gmail.com>                  *
- *                                                                           *
- * Copyright (C) 2009-2014 Cyril Hrubis <metan@ucw.cz>                       *
- *                                                                           *
- *****************************************************************************/
-
-%% extends "base.c.t"
-
-{% block descr %}Text rendering rutines{% endblock %}
-
-%% block body
+@ include source.t
+/*
+ * Text rendering rutines.
+ *
+ * Copyright (C) 2009-2011 Jiri "BlueBear" Dluhos
+ *                         <jiri.bluebear.dluhos@gmail.com>
+ * Copyright (C) 2009-2014 Cyril Hrubis <metan@ucw.cz>
+ */
 
 #include "core/GP_GetPutPixel.h"
 #include "core/GP_MixPixels.gen.h"
@@ -42,8 +20,8 @@ static int get_width(GP_TextStyle *style, int width)
 	return width * style->pixel_xmul + (width - 1) * style->pixel_xspace;
 }
 
-%% for pt in pixeltypes
-%% if not pt.is_unknown()
+@ for pt in pixeltypes:
+@     if not pt.is_unknown():
 
 static void text_draw_1BPP_{{ pt.name }}(GP_Context *context, GP_TextStyle *style,
                                          GP_Coord x, GP_Coord y,
@@ -95,26 +73,24 @@ static void text_draw_1BPP_{{ pt.name }}(GP_Context *context, GP_TextStyle *styl
 	}
 }
 
-%% endif
-%% endfor
+@ end
 
 static void text_draw_1BPP(GP_Context *context, GP_TextStyle *style, int x, int y,
                            GP_Pixel fg, const char *str)
 {
 	switch (context->pixel_type) {
-%% for pt in pixeltypes
-%% if not pt.is_unknown()
+@ for pt in pixeltypes:
+@     if not pt.is_unknown():
 	case GP_PIXEL_{{ pt.name }}:
 		text_draw_1BPP_{{ pt.name }}(context, style, x, y, fg, str);
 	break;
-%% endif
-%% endfor
+@ end
 	default:
 		GP_ABORT("Invalid context->pixel_type");
 	}
 }
 
-%% macro text_8BPP(pt, use_bg)
+@ def text_8BPP(pt, use_bg):
 	const char *p;
 
 	GP_Coord y0 = y;
@@ -147,10 +123,10 @@ static void text_draw_1BPP(GP_Context *context, GP_TextStyle *style, int x, int 
 				int cur_y = y - (glyph->bearing_y - style->font->ascend) * y_mul;
 
 				for (k = 0; k < style->pixel_ymul; k++) {
-%% if use_bg
+@     if use_bg:
 					GP_HLine(context, x_start, x_start + style->pixel_xmul - 1, cur_y + k,
 					GP_MIX_PIXELS_{{ pt.name }}(fg, bg, gray));
-%% else
+@     else:
 					unsigned int l;
 
 					for (l = x_start; l < x_start + style->pixel_xmul; l++) {
@@ -160,7 +136,7 @@ static void text_draw_1BPP(GP_Context *context, GP_TextStyle *style, int x, int 
 						GP_TRANSFORM_POINT(context, px, py);
 						GP_MixPixel_Raw_Clipped_{{ pt.name }}(context, px, py, fg, gray);
 					}
-%% endif
+@     end
 				}
 			}
 
@@ -172,40 +148,38 @@ static void text_draw_1BPP(GP_Context *context, GP_TextStyle *style, int x, int 
 		if (p == str)
 			x -= get_width(style, glyph->bearing_x);
 	}
-%% endmacro
-
-%% for pt in pixeltypes
-%% if not pt.is_unknown()
+@ end
+@
+@ for pt in pixeltypes:
+@     if not pt.is_unknown():
 
 static void text_8BPP_bg_{{ pt.name }}(GP_Context *context, GP_TextStyle *style,
                                        GP_Coord x, GP_Coord y,
 				       GP_Pixel fg, GP_Pixel bg, const char *str)
 {
-{{ text_8BPP(pt, True) }}
+@         text_8BPP(pt, True)
 }
 
 static void text_8BPP_{{ pt.name }}(GP_Context *context, GP_TextStyle *style,
                                     GP_Coord x, GP_Coord y,
 				    GP_Pixel fg, const char *str)
 {
-{{ text_8BPP(pt, False) }}
+@         text_8BPP(pt, False)
 }
 
-%% endif
-%% endfor
+@ end
 
 static void text_8BPP_bg(GP_Context *context, GP_TextStyle *style,
                          GP_Coord x, GP_Coord y,
                          GP_Pixel fg, GP_Pixel bg, const char *str)
 {
 	switch (context->pixel_type) {
-%% for pt in pixeltypes
-%% if not pt.is_unknown()
+@ for pt in pixeltypes:
+@     if not pt.is_unknown():
 	case GP_PIXEL_{{ pt.name }}:
 		text_8BPP_bg_{{ pt.name }}(context, style, x, y, fg, bg, str);
 	break;
-%% endif
-%% endfor
+@ end
 	default:
 		GP_ABORT("Invalid context->pixel_type");
 	}
@@ -216,13 +190,12 @@ static void text_8BPP(GP_Context *context, GP_TextStyle *style,
                       GP_Pixel fg, const char *str)
 {
 	switch (context->pixel_type) {
-%% for pt in pixeltypes
-%% if not pt.is_unknown()
+@ for pt in pixeltypes:
+@     if not pt.is_unknown():
 	case GP_PIXEL_{{ pt.name }}:
 		text_8BPP_{{ pt.name }}(context, style, x, y, fg, str);
 	break;
-%% endif
-%% endfor
+@ end
 	default:
 		GP_ABORT("Invalid context->pixel_type");
 	}
@@ -246,5 +219,3 @@ void GP_Text_Raw(GP_Context *context, GP_TextStyle *style,
 		GP_ABORT("Invalid font glyph bitmap format");
 	}
 }
-
-%% endblock body

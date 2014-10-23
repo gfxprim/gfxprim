@@ -3,10 +3,11 @@ include $(TOPDIR)/pre.mk
 
 STATS_FILTERS=GP_Histogram.gen.c
 
-POINT_FILTERS=GP_GaussianNoise.gen.c GP_ApplyTables.gen.c GP_Invert.gen.c\
+POINT_FILTERS=GP_Invert.gen.c\
               GP_Brightness.gen.c GP_Contrast.gen.c\
 	      GP_BrightnessContrast.gen.c GP_Posterize.gen.c\
-	      GP_MultiTone.gen.c
+              GP_GaussianNoise.gen.c GP_ApplyTables.gen.c \
+              GP_MultiTone.gen.c
 
 ARITHMETIC_FILTERS=GP_Difference.gen.c GP_Addition.gen.c GP_Min.gen.c\
                    GP_Max.gen.c GP_Multiply.gen.c
@@ -25,8 +26,3 @@ INCLUDE=core
 include $(TOPDIR)/gen.mk
 include $(TOPDIR)/lib.mk
 include $(TOPDIR)/post.mk
-
-$(POINT_FILTERS) $(ARITHMETIC_FILTERS) $(STATS_FILTERS): $(TEMPLATE_DIR)/filter.c.t
-$(STATS_FILTERS): $(TEMPLATE_DIR)/filter.stats.c.t
-$(POINT_FILTERS): $(TEMPLATE_DIR)/filter.point.c.t
-$(ARITHMETIC_FILTERS): $(TEMPLATE_DIR)/filter.arithmetic.c.t

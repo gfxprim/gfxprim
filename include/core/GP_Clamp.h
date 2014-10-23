@@ -16,7 +16,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2014 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
@@ -60,6 +60,13 @@
 	 min == 0 && max == 255) ?                     \
 	 GP_CLAMP_INT_0_255(val) :                     \
 	 GP_CLAMP_GENERIC(val, min, max);              \
+})
+
+#define GP_CLAMP_DOWN(val, max) ({        \
+	typeof(val) _val = (val);         \
+	typeof(val) _max = (max);         \
+	_val = _val > _max ? _max : _val; \
+	_val;                             \
 })
 
 #endif /* CORE_GP_CLAMP_H */

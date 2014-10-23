@@ -1,30 +1,9 @@
-/*****************************************************************************
- * This file is part of gfxprim library.                                     *
- *                                                                           *
- * Gfxprim is free software; you can redistribute it and/or                  *
- * modify it under the terms of the GNU Lesser General Public                *
- * License as published by the Free Software Foundation; either              *
- * version 2.1 of the License, or (at your option) any later version.        *
- *                                                                           *
- * Gfxprim is distributed in the hope that it will be useful,                *
- * but WITHOUT ANY WARRANTY; without even the implied warranty of            *
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU         *
- * Lesser General Public License for more details.                           *
- *                                                                           *
- * You should have received a copy of the GNU Lesser General Public          *
- * License along with gfxprim; if not, write to the Free Software            *
- * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
- * Boston, MA  02110-1301  USA                                               *
- *                                                                           *
- * Copyright (C) 2009-2013 Cyril Hrubis <metan@ucw.cz>                       *
- *                                                                           *
- *****************************************************************************/
-
-%% extends "filter.c.t"
-
-{% block descr %}Cubic resampling{% endblock %}
-
-%% block body
+@ include source.t
+/*
+ * Cubic resampling
+ *
+ * Copyright (C) 2009-2014 Cyril Hrubis <metan@ucw.cz>
+ */
 
 #include <errno.h>
 #include <math.h>
@@ -51,15 +30,14 @@
 #define SUM_I(a) \
 	((a)[0] + (a)[1] + (a)[2] + (a)[3])
 
-%% for pt in pixeltypes
-%%  if not pt.is_unknown() and not pt.is_palette()
-
+@ for pt in pixeltypes:
+@     if not pt.is_unknown() and not pt.is_palette():
 static int resize_cubic_{{ pt.name }}(const GP_Context *src,
 	GP_Context *dst, GP_ProgressCallback *callback)
 {
-	%% for c in pt.chanslist
-	int32_t col_{{ c[0] }}[src->w];
-	%% endfor
+@         for c in pt.chanslist:
+	int32_t col_{{ c.name }}[src->w];
+@         end
 
 	uint32_t i, j;
 
@@ -67,7 +45,7 @@ static int resize_cubic_{{ pt.name }}(const GP_Context *src,
 	            src->w, src->h, dst->w, dst->h,
 		    1.00 * dst->w / src->w, 1.00 * dst->h / src->h);
 
-{{ fetch_gamma_tables(pt, "src") }}
+	{@ fetch_gamma_tables(pt, "src") @}
 
 	/* pre-generate x mapping and constants */
 	int32_t xmap[dst->w][4];
@@ -113,9 +91,9 @@ static int resize_cubic_{{ pt.name }}(const GP_Context *src,
 
 		/* Generate interpolated row */
 		for (j = 0; j < src->w; j++) {
-			%% for c in pt.chanslist
-			int32_t {{ c[0] }}v[4];
-			%% endfor
+@         for c in pt.chanslist:
+			int32_t {{ c.name }}v[4];
+@         end
 			GP_Pixel pix[4];
 
 			pix[0] = GP_GetPixel_Raw_{{ pt.pixelsize.suffix }}(src, j, yi[0]);
@@ -123,67 +101,67 @@ static int resize_cubic_{{ pt.name }}(const GP_Context *src,
 			pix[2] = GP_GetPixel_Raw_{{ pt.pixelsize.suffix }}(src, j, yi[2]);
 			pix[3] = GP_GetPixel_Raw_{{ pt.pixelsize.suffix }}(src, j, yi[3]);
 
-			%% for c in pt.chanslist
-			{{ c[0] }}v[0] = GP_Pixel_GET_{{ c[0] }}_{{ pt.name }}(pix[0]);
-			{{ c[0] }}v[1] = GP_Pixel_GET_{{ c[0] }}_{{ pt.name }}(pix[1]);
-			{{ c[0] }}v[2] = GP_Pixel_GET_{{ c[0] }}_{{ pt.name }}(pix[2]);
-			{{ c[0] }}v[3] = GP_Pixel_GET_{{ c[0] }}_{{ pt.name }}(pix[3]);
-			%% endfor
+@         for c in pt.chanslist:
+			{{ c.name }}v[0] = GP_Pixel_GET_{{ c.name }}_{{ pt.name }}(pix[0]);
+			{{ c.name }}v[1] = GP_Pixel_GET_{{ c.name }}_{{ pt.name }}(pix[1]);
+			{{ c.name }}v[2] = GP_Pixel_GET_{{ c.name }}_{{ pt.name }}(pix[2]);
+			{{ c.name }}v[3] = GP_Pixel_GET_{{ c.name }}_{{ pt.name }}(pix[3]);
+@         end
 
 			if (src->gamma) {
-				%% for c in pt.chanslist
-				{{ c[0] }}v[0] = {{ c[0] }}_2_LIN[{{ c[0] }}v[0]];
-				{{ c[0] }}v[1] = {{ c[0] }}_2_LIN[{{ c[0] }}v[1]];
-				{{ c[0] }}v[2] = {{ c[0] }}_2_LIN[{{ c[0] }}v[2]];
-				{{ c[0] }}v[3] = {{ c[0] }}_2_LIN[{{ c[0] }}v[3]];
-				%% endfor
+@         for c in pt.chanslist:
+				{{ c.name }}v[0] = {{ c.name }}_2_LIN[{{ c.name }}v[0]];
+				{{ c.name }}v[1] = {{ c.name }}_2_LIN[{{ c.name }}v[1]];
+				{{ c.name }}v[2] = {{ c.name }}_2_LIN[{{ c.name }}v[2]];
+				{{ c.name }}v[3] = {{ c.name }}_2_LIN[{{ c.name }}v[3]];
+@         end
 			}
 
-			%% for c in pt.chanslist
-			MUL_I({{ c[0] }}v, cvy);
-			%% endfor
+@         for c in pt.chanslist:
+			MUL_I({{ c.name }}v, cvy);
+@         end
 
-			%% for c in pt.chanslist
-			col_{{ c[0] }}[j] = SUM_I({{ c[0] }}v);
-			%% endfor
+@         for c in pt.chanslist:
+			col_{{ c.name }}[j] = SUM_I({{ c.name }}v);
+@         end
 		}
 
 		/* now interpolate column for new image */
 		for (j = 0; j < dst->w; j++) {
-			%% for c in pt.chanslist
-			int32_t {{ c[0] }}v[4];
-			int32_t {{ c[0] }};
-			%% endfor
+@         for c in pt.chanslist:
+			int32_t {{ c.name }}v[4];
+			int32_t {{ c.name }};
+@         end
 
-			%% for c in pt.chanslist
-			{{ c[0] }}v[0] = col_{{ c[0] }}[xmap[j][0]];
-			{{ c[0] }}v[1] = col_{{ c[0] }}[xmap[j][1]];
-			{{ c[0] }}v[2] = col_{{ c[0] }}[xmap[j][2]];
-			{{ c[0] }}v[3] = col_{{ c[0] }}[xmap[j][3]];
-			%% endfor
+@         for c in pt.chanslist:
+			{{ c.name }}v[0] = col_{{ c.name }}[xmap[j][0]];
+			{{ c.name }}v[1] = col_{{ c.name }}[xmap[j][1]];
+			{{ c.name }}v[2] = col_{{ c.name }}[xmap[j][2]];
+			{{ c.name }}v[3] = col_{{ c.name }}[xmap[j][3]];
+@         end
 
-			%% for c in pt.chanslist
-			MUL_I({{ c[0] }}v, xmap_c[j]);
-			%% endfor
+@         for c in pt.chanslist:
+			MUL_I({{ c.name }}v, xmap_c[j]);
+@         end
 
-			%% for c in pt.chanslist
-			{{ c[0] }} = (SUM_I({{ c[0] }}v) + MUL*MUL/2) / MUL / MUL;
-			%% endfor
+@         for c in pt.chanslist:
+			{{ c.name }} = (SUM_I({{ c.name }}v) + MUL*MUL/2) / MUL / MUL;
+@         end
 
 			if (src->gamma) {
-			%% for c in pt.chanslist
-				{{ c[0] }} = GP_CLAMP_GENERIC({{ c[0] }}, 0, {{ 2 ** (c[2] + 2) - 1 }});
-			%% endfor
-			%% for c in pt.chanslist
-				{{ c[0] }} = {{ c[0] }}_2_GAMMA[{{ c[0] }}];
-			%% endfor
+@         for c in pt.chanslist:
+				{{ c.name }} = GP_CLAMP_GENERIC({{ c.name }}, 0, {{ 2 ** (c[2] + 2) - 1 }});
+@         end
+@         for c in pt.chanslist:
+				{{ c.name }} = {{ c.name }}_2_GAMMA[{{ c.name }}];
+@         end
 			} else {
-			%% for c in pt.chanslist
-				{{ c[0] }} = GP_CLAMP_GENERIC({{ c[0] }}, 0, {{ 2 ** c[2] - 1 }});
-			%% endfor
+@         for c in pt.chanslist:
+				{{ c.name }} = GP_CLAMP_GENERIC({{ c.name }}, 0, {{ 2 ** c[2] - 1 }});
+@         end
 			}
 
-			GP_Pixel pix = GP_Pixel_CREATE_{{ pt.name }}({{ expand_chanslist(pt, "(uint8_t)") }});
+			GP_Pixel pix = GP_Pixel_CREATE_{{ pt.name }}({{ arr_to_params(pt.chan_names, "(uint8_t)") }});
 			GP_PutPixel_Raw_{{ pt.pixelsize.suffix }}(dst, j, i, pix);
 		}
 
@@ -195,20 +173,18 @@ static int resize_cubic_{{ pt.name }}(const GP_Context *src,
 	return 0;
 }
 
-%%  endif
-%% endfor
-
+@ end
+@
 static int resize_cubic(const GP_Context *src, GP_Context *dst,
                         GP_ProgressCallback *callback)
 {
 	switch (src->pixel_type) {
-	%% for pt in pixeltypes
-	%%  if not pt.is_unknown() and not pt.is_palette()
+@ for pt in pixeltypes:
+@     if not pt.is_unknown() and not pt.is_palette():
 	case GP_PIXEL_{{ pt.name }}:
 		return resize_cubic_{{ pt.name }}(src, dst, callback);
 	break;
-	%%  endif
-	%% endfor
+@ end
 	default:
 		errno = EINVAL;
 		return -1;
@@ -226,5 +202,3 @@ int GP_FilterResizeCubicInt(const GP_Context *src, GP_Context *dst,
 
 	return resize_cubic(src, dst, callback);
 }
-
-%% endblock body

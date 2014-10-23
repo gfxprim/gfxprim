@@ -1,33 +1,11 @@
-/*****************************************************************************
- * This file is part of gfxprim library.                                     *
- *                                                                           *
- * Gfxprim is free software; you can redistribute it and/or                  *
- * modify it under the terms of the GNU Lesser General Public                *
- * License as published by the Free Software Foundation; either              *
- * version 2.1 of the License, or (at your option) any later version.        *
- *                                                                           *
- * Gfxprim is distributed in the hope that it will be useful,                *
- * but WITHOUT ANY WARRANTY; without even the implied warranty of            *
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU         *
- * Lesser General Public License for more details.                           *
- *                                                                           *
- * You should have received a copy of the GNU Lesser General Public          *
- * License along with gfxprim; if not, write to the Free Software            *
- * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
- * Boston, MA  02110-1301  USA                                               *
- *                                                                           *
- * Copyright (C) 2009-2012 Jiri "BlueBear" Dluhos                            *
- *                         <jiri.bluebear.dluhos@gmail.com>                  *
- *                                                                           *
- * Copyright (C) 2009-2013 Cyril Hrubis <metan@ucw.cz>                       *
- *                                                                           *
- *****************************************************************************/
-
-%% extends "base.c.t"
-
-{% block descr %}Line drawing algorithm{% endblock %}
-
-%% block body
+@ include source.t
+/*
+ * Line drawing algorithm.
+ *
+ * Copyright (C) 2009-2012 Jiri "BlueBear" Dluhos
+ *                         <jiri.bluebear.dluhos@gmail.com>
+ * Copyright (C) 2009-2014 Cyril Hrubis <metan@ucw.cz>
+ */
 
 #include "core/GP_Common.h"
 #include "core/GP_GetPutPixel.h"
@@ -44,8 +22,7 @@
  * for a nice and understandable description.
  */
 
-%% for ps in pixelsizes
-
+@ for ps in pixelsizes:
 void GP_Line_Raw_{{ ps.suffix }}(GP_Context *context, int x0, int y0,
 	int x1, int y1, GP_Pixel pixval)
 {
@@ -116,7 +93,7 @@ void GP_Line_Raw_{{ ps.suffix }}(GP_Context *context, int x0, int y0,
 	}
 }
 
-%% endfor
+@ end
 
 void GP_Line_Raw(GP_Context *context, GP_Coord x0, GP_Coord y0,
                  GP_Coord x1, GP_Coord y1, GP_Pixel pixel)
@@ -137,5 +114,3 @@ void GP_Line(GP_Context *context, GP_Coord x0, GP_Coord y0,
 
 	GP_Line_Raw(context, x0, y0, x1, y1, pixel);
 }
-
-%% endblock body

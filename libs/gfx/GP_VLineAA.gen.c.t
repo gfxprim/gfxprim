@@ -20,11 +20,7 @@
  *                                                                           *
  *****************************************************************************/
 
-%% extends "base.c.t"
-
-{% block descr %}Anti Aliased Vertical Line{% endblock %}
-
-%% block body
+/* Anti Aliased Vertical Line */
 
 #include "core/GP_Context.h"
 #include "core/GP_MixPixels.h"
@@ -79,5 +75,3 @@ void GP_VLineAA_Raw(GP_Context *context, GP_Coord x, GP_Coord y0,
 		GP_MixPixel_Raw_Clipped(context, int_x+1, y, pixel, lp);
 	}
 }
-
-%% endblock body

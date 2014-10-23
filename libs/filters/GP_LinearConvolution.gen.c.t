@@ -1,30 +1,9 @@
-/*****************************************************************************
- * This file is part of gfxprim library.                                     *
- *                                                                           *
- * Gfxprim is free software; you can redistribute it and/or                  *
- * modify it under the terms of the GNU Lesser General Public                *
- * License as published by the Free Software Foundation; either              *
- * version 2.1 of the License, or (at your option) any later version.        *
- *                                                                           *
- * Gfxprim is distributed in the hope that it will be useful,                *
- * but WITHOUT ANY WARRANTY; without even the implied warranty of            *
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU         *
- * Lesser General Public License for more details.                           *
- *                                                                           *
- * You should have received a copy of the GNU Lesser General Public          *
- * License along with gfxprim; if not, write to the Free Software            *
- * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
- * Boston, MA  02110-1301  USA                                               *
- *                                                                           *
- * Copyright (C) 2009-2013 Cyril Hrubis <metan@ucw.cz>                       *
- *                                                                           *
- *****************************************************************************/
-
-%% extends "filter.c.t"
-
-{% block descr %}Linear Convolution{% endblock %}
-
-%% block body
+@ include source.t
+/*
+ * Linear Convolution
+ *
+ * Copyright (C) 2009-2014 Cyril Hrubis <metan@ucw.cz>
+ */
 
 #include <errno.h>
 
@@ -38,8 +17,8 @@
 
 #define MUL 1024
 
-%% for pt in pixeltypes
-%%  if not pt.is_unknown() and not pt.is_palette()
+@ for pt in pixeltypes:
+@     if not pt.is_unknown() and not pt.is_palette():
 
 static int h_lin_conv_{{ pt.name }}(const GP_Context *src,
                                     GP_Coord x_src, GP_Coord y_src,
@@ -62,9 +41,9 @@ static int h_lin_conv_{{ pt.name }}(const GP_Context *src,
 	/* Create temporary buffers */
 	GP_TempAllocCreate(temp, {{ len(pt.chanslist) }} * size * sizeof(int));
 
-	%% for c in pt.chanslist
+@         for c in pt.chanslist:
 	int *{{ c.name }} = GP_TempAllocGet(temp, size * sizeof(int));
-	%% endfor
+@         end
 
 	/* Do horizontal linear convolution */
 	for (y = 0; y < (GP_Coord)h_src; y++) {
@@ -78,9 +57,9 @@ static int h_lin_conv_{{ pt.name }}(const GP_Context *src,
 
 		/* Copy border pixel until the source image starts */
 		while (xi <= 0 && i < size) {
-			%% for c in pt.chanslist
+@         for c in pt.chanslist:
 			{{ c.name }}[i] = GP_Pixel_GET_{{ c.name }}_{{ pt.name }}(pix);
-			%% endfor
+@         end
 			i++;
 			xi++;
 		}
@@ -89,9 +68,9 @@ static int h_lin_conv_{{ pt.name }}(const GP_Context *src,
 		while (xi < (int)src->w && i < size) {
 			pix = GP_GetPixel_Raw_{{ pt.pixelsize.suffix }}(src, xi, yi);
 
-			%% for c in pt.chanslist
+@         for c in pt.chanslist:
 			{{ c.name }}[i] = GP_Pixel_GET_{{ c.name }}_{{ pt.name }}(pix);
-			%% endfor
+@         end
 
 			i++;
 			xi++;
@@ -99,39 +78,38 @@ static int h_lin_conv_{{ pt.name }}(const GP_Context *src,
 
 		/* Copy the rest the border pixel when we are out again */
 		while (i < size) {
-			%% for c in pt.chanslist
+@         for c in pt.chanslist:
 			{{ c.name }}[i] = GP_Pixel_GET_{{ c.name }}_{{ pt.name }}(pix);
-			%% endfor
+@         end
 
 			i++;
 		}
 
 		for (x = 0; x < (GP_Coord)w_src; x++) {
-			%% for c in pt.chanslist
+@         for c in pt.chanslist:
 			int32_t {{ c.name }}_sum = MUL/2;
 			int *p{{ c.name }} = {{ c.name }} + x;
-			%% endfor
+@         end
 
 			/* count the pixel value from neighbours weighted by kernel */
 			for (i = 0; i < kw; i++) {
-				%% for c in pt.chanslist
+@         for c in pt.chanslist:
 				{{ c.name }}_sum += (*p{{ c.name }}++) * ikernel[i];
-				%% endfor
+@         end
 			}
 
 			/* divide the result */
-			%% for c in pt.chanslist
+@         for c in pt.chanslist:
 			{{ c.name }}_sum /= ikern_div;
-			%% endfor
+@         end
 
 			/* and clamp just to be extra sure */
-			%% for c in pt.chanslist
+@         for c in pt.chanslist:
 			{{ c.name }}_sum = GP_CLAMP({{ c.name }}_sum, 0, {{ c.max }});
-			%% endfor
-
+@         end
 			GP_PutPixel_Raw_{{ pt.pixelsize.suffix }}(dst, x_dst + x, y_dst + y,
 			                      GP_Pixel_CREATE_{{ pt.name }}(
-					      {{ expand_chanslist(pt, "", "_sum") }}
+					      {{ arr_to_params(pt.chan_names, "", "_sum") }}
 					      ));
 		}
 
@@ -147,9 +125,7 @@ static int h_lin_conv_{{ pt.name }}(const GP_Context *src,
 	return 0;
 }
 
-%%  endif
-%% endfor
-
+@ end
 
 int GP_FilterHLinearConvolution_Raw(const GP_Context *src,
                                     GP_Coord x_src, GP_Coord y_src,
@@ -164,23 +140,22 @@ int GP_FilterHLinearConvolution_Raw(const GP_Context *src,
 		    kw, x_src, y_src, w_src, h_src);
 
 	switch (src->pixel_type) {
-	%% for pt in pixeltypes
-	%%  if not pt.is_unknown() and not pt.is_palette()
+@ for pt in pixeltypes:
+@     if not pt.is_unknown() and not pt.is_palette():
 	case GP_PIXEL_{{ pt.name }}:
 		return h_lin_conv_{{ pt.name }}(src, x_src, y_src, w_src, h_src,
                                                 dst, x_dst, y_dst,
 		                                kernel, kw, kern_div, callback);
 	break;
-	%%  endif
-	%% endfor
+@ end
 	default:
 		errno = EINVAL;
 		return -1;
 	}
 }
 
-%% for pt in pixeltypes
-%%  if not pt.is_unknown() and not pt.is_palette()
+@ for pt in pixeltypes:
+@     if not pt.is_unknown() and not pt.is_palette():
 
 static int v_lin_conv_{{ pt.name }}(const GP_Context *src,
                                     GP_Coord x_src, GP_Coord y_src,
@@ -203,9 +178,9 @@ static int v_lin_conv_{{ pt.name }}(const GP_Context *src,
 	/* Create temporary buffers */
 	GP_TempAllocCreate(temp, {{ len(pt.chanslist) }} * size * sizeof(int));
 
-	%% for c in pt.chanslist
+@         for c in pt.chanslist:
 	int *{{ c.name }} = GP_TempAllocGet(temp, size * sizeof(int));
-	%% endfor
+@         end
 
 	/* Do vertical linear convolution */
 	for (x = 0; x < (GP_Coord)w_src; x++) {
@@ -219,9 +194,9 @@ static int v_lin_conv_{{ pt.name }}(const GP_Context *src,
 
 		/* Copy border pixel until the source image starts */
 		while (yi <= 0 && i < size) {
-			%% for c in pt.chanslist
+@         for c in pt.chanslist:
 			{{ c.name }}[i] = GP_Pixel_GET_{{ c.name }}_{{ pt.name }}(pix);
-			%% endfor
+@         end
 
 			i++;
 			yi++;
@@ -231,9 +206,9 @@ static int v_lin_conv_{{ pt.name }}(const GP_Context *src,
 		while (yi < (int)src->h && i < size) {
 			pix = GP_GetPixel_Raw_{{ pt.pixelsize.suffix }}(src, xi, yi);
 
-			%% for c in pt.chanslist
+@         for c in pt.chanslist:
 			{{ c.name }}[i] = GP_Pixel_GET_{{ c.name }}_{{ pt.name }}(pix);
-			%% endfor
+@         end
 
 			i++;
 			yi++;
@@ -241,39 +216,39 @@ static int v_lin_conv_{{ pt.name }}(const GP_Context *src,
 
 		/* Copy the rest the border pixel when we are out again */
 		while (i < size) {
-			%% for c in pt.chanslist
+@         for c in pt.chanslist:
 			{{ c.name }}[i] = GP_Pixel_GET_{{ c.name }}_{{ pt.name }}(pix);
-			%% endfor
+@         end
 
 			i++;
 		}
 
 		for (y = 0; y < (GP_Coord)h_src; y++) {
-			%% for c in pt.chanslist
+@         for c in pt.chanslist:
 			int32_t {{ c.name }}_sum = MUL/2;
 			int *p{{ c.name }} = {{ c.name }} + y;
-			%% endfor
+@         end
 
 			/* count the pixel value from neighbours weighted by kernel */
 			for (i = 0; i < kh; i++) {
-				%% for c in pt.chanslist
+@         for c in pt.chanslist:
 				{{ c.name }}_sum += (*p{{ c.name }}++) * ikernel[i];
-				%% endfor
+@         end
 			}
 
 			/* divide the result */
-			%% for c in pt.chanslist
+@         for c in pt.chanslist:
 			{{ c.name }}_sum /= ikern_div;
-			%% endfor
+@         end
 
 			/* and clamp just to be extra sure */
-			%% for c in pt.chanslist
+@         for c in pt.chanslist:
 			{{ c.name }}_sum = GP_CLAMP({{ c.name }}_sum, 0, {{ c.max }});
-			%% endfor
+@         end
 
 			GP_PutPixel_Raw_{{ pt.pixelsize.suffix }}(dst, x_dst + x, y_dst + y,
 			                      GP_Pixel_CREATE_{{ pt.name }}(
-					      {{ expand_chanslist(pt, "", "_sum") }}
+					      {{ arr_to_params(pt.chan_names, "", "_sum") }}
 					      ));
 		}
 
@@ -289,8 +264,7 @@ static int v_lin_conv_{{ pt.name }}(const GP_Context *src,
 	return 0;
 }
 
-%%  endif
-%% endfor
+@ end
 
 int GP_FilterVLinearConvolution_Raw(const GP_Context *src,
                                     GP_Coord x_src, GP_Coord y_src,
@@ -305,23 +279,22 @@ int GP_FilterVLinearConvolution_Raw(const GP_Context *src,
 		    kh, x_src, y_src, w_src, h_src);
 
 	switch (src->pixel_type) {
-	%% for pt in pixeltypes
-	%%  if not pt.is_unknown() and not pt.is_palette()
+@ for pt in pixeltypes:
+@     if not pt.is_unknown() and not pt.is_palette():
 	case GP_PIXEL_{{ pt.name }}:
 		return v_lin_conv_{{ pt.name }}(src, x_src, y_src, w_src, h_src,
                                                 dst, x_dst, y_dst,
 		                                kernel, kh, kern_div, callback);
 	break;
-	%%  endif
-	%% endfor
+@ end
 	default:
 		errno = EINVAL;
 		return -1;
 	}
 }
 
-%% for pt in pixeltypes
-%%  if not pt.is_unknown() and not pt.is_palette()
+@ for pt in pixeltypes:
+@     if not pt.is_unknown() and not pt.is_palette():
 
 static int lin_conv_{{ pt.name }}(const GP_Context *src,
                                   GP_Coord x_src, GP_Coord y_src,
@@ -336,9 +309,9 @@ static int lin_conv_{{ pt.name }}(const GP_Context *src,
 
 	/* Do linear convolution */
 	for (y = 0; y < (GP_Coord)h_src; y++) {
-		%% for c in pt.chanslist
+@         for c in pt.chanslist:
 		uint32_t {{ c.name }}[kw][kh];
-		%% endfor
+@         end
 		GP_Pixel pix;
 
 		/* Prefill the buffer on the start */
@@ -352,18 +325,18 @@ static int lin_conv_{{ pt.name }}(const GP_Context *src,
 
 				pix = GP_GetPixel_Raw_{{ pt.pixelsize.suffix }}(src, xi, yi);
 
-				%% for c in pt.chanslist
+@         for c in pt.chanslist:
 				{{ c.name }}[i][j] = GP_Pixel_GET_{{ c.name }}_{{ pt.name }}(pix);
-				%% endfor
+@         end
 			}
 		}
 
 		int idx = kw - 1;
 
 		for (x = 0; x < (GP_Coord)w_src; x++) {
-			%% for c in pt.chanslist
+@         for c in pt.chanslist:
 			float {{ c.name }}_sum = 0;
-			%% endfor
+@         end
 
 			for (j = 0; j < kh; j++) {
 				int xi = x_src + x + kw/2;
@@ -374,9 +347,9 @@ static int lin_conv_{{ pt.name }}(const GP_Context *src,
 
 				pix = GP_GetPixel_Raw_{{ pt.pixelsize.suffix }}(src, xi, yi);
 
-				%% for c in pt.chanslist
+@         for c in pt.chanslist:
 				{{ c.name }}[idx][j] = GP_Pixel_GET_{{ c.name }}_{{ pt.name }}(pix);
-				%% endfor
+@         end
 			}
 
 			/* Count the pixel value from neighbours weighted by kernel */
@@ -389,23 +362,23 @@ static int lin_conv_{{ pt.name }}(const GP_Context *src,
 					k = i - idx - 1;
 
 				for (j = 0; j < kh; j++) {
-					%% for c in pt.chanslist
+@         for c in pt.chanslist:
 					{{ c.name }}_sum += {{ c.name }}[i][j] * kernel[k + j * kw];
-					%% endfor
+@         end
 				}
 			}
 
 			/* divide the result */
-			%% for c in pt.chanslist
+@         for c in pt.chanslist:
 			{{ c.name }}_sum /= kern_div;
-			%% endfor
+@         end
 
 			/* and clamp just to be extra sure */
-			%% for c in pt.chanslist
+@         for c in pt.chanslist:
 			int {{ c.name }}_res = GP_CLAMP((int){{ c.name }}_sum, 0, {{ c.max }});
-			%% endfor
+@         end
 
-			pix = GP_Pixel_CREATE_{{ pt.name }}({{ expand_chanslist(pt, "", "_res") }});
+			pix = GP_Pixel_CREATE_{{ pt.name }}({{ arr_to_params(pt.chan_names, "", "_res") }});
 
 			GP_PutPixel_Raw_{{ pt.pixelsize.suffix }}(dst, x_dst + x, y_dst + y, pix);
 
@@ -423,8 +396,7 @@ static int lin_conv_{{ pt.name }}(const GP_Context *src,
 	return 0;
 }
 
-%%  endif
-%% endfor
+@ end
 
 int GP_FilterLinearConvolution_Raw(const GP_Context *src,
                                    GP_Coord x_src, GP_Coord y_src,
@@ -438,19 +410,16 @@ int GP_FilterLinearConvolution_Raw(const GP_Context *src,
 	            kw, kh, w_src, h_src);
 
 	switch (src->pixel_type) {
-	%% for pt in pixeltypes
-	%%  if not pt.is_unknown() and not pt.is_palette()
+@ for pt in pixeltypes:
+@     if not pt.is_unknown() and not pt.is_palette():
 	case GP_PIXEL_{{ pt.name }}:
 		return lin_conv_{{ pt.name }}(src, x_src, y_src, w_src, h_src,
                                               dst, x_dst, y_dst,
 		                              kernel, kw, kh, kern_div, callback);
 	break;
-	%%  endif
-	%% endfor
+@ end
 	default:
 		errno = EINVAL;
 		return -1;
 	}
 }
-
-%% endblock body

@@ -1,33 +1,11 @@
-/*****************************************************************************
- * This file is part of gfxprim library.                                     *
- *                                                                           *
- * Gfxprim is free software; you can redistribute it and/or                  *
- * modify it under the terms of the GNU Lesser General Public                *
- * License as published by the Free Software Foundation; either              *
- * version 2.1 of the License, or (at your option) any later version.        *
- *                                                                           *
- * Gfxprim is distributed in the hope that it will be useful,                *
- * but WITHOUT ANY WARRANTY; without even the implied warranty of            *
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU         *
- * Lesser General Public License for more details.                           *
- *                                                                           *
- * You should have received a copy of the GNU Lesser General Public          *
- * License along with gfxprim; if not, write to the Free Software            *
- * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
- * Boston, MA  02110-1301  USA                                               *
- *                                                                           *
- * Copyright (C) 2009-2012 Jiri "BlueBear" Dluhos                            *
- *                         <jiri.bluebear.dluhos@gmail.com>                  *
- *                                                                           *
- * Copyright (C) 2009-2013 Cyril Hrubis <metan@ucw.cz>                       *
- *                                                                           *
- *****************************************************************************/
-
-%% extends "base.c.t"
-
-{% block descr %}A filled circle drawing algorithm.{% endblock %}
-
-%% block body
+@ include source.t
+/*
+ * A filled circle drawing algorithm.
+ *
+ * Copyright (C) 2009-2012 Jiri "BlueBear" Dluhos
+ *                         <jiri.bluebear.dluhos@gmail.com>
+ * Copyright (C) 2009-2014 Cyril Hrubis <metan@ucw.cz>
+ */
 
 #include "core/GP_GetPutPixel.h"
 #include "core/GP_Transform.h"
@@ -44,8 +22,7 @@
  * until we accumulate enough Y changes to reach the next line,
  * and then draw the full line. The top and bottom half are mirrored.
  */
-
-%% for ps in pixelsizes
+@ for ps in pixelsizes:
 
 static void GP_FillCircle_Raw_{{ ps.suffix }}(GP_Context *context,
 	GP_Coord xcenter, GP_Coord ycenter, GP_Size r, GP_Pixel pixel)
@@ -68,7 +45,7 @@ static void GP_FillCircle_Raw_{{ ps.suffix }}(GP_Context *context,
 	}
 }
 
-%% endfor
+@ end
 
 void GP_FillCircle_Raw(GP_Context *context, GP_Coord xcenter, GP_Coord ycenter,
                        GP_Size r, GP_Pixel pixel)
@@ -88,5 +65,3 @@ void GP_FillCircle(GP_Context *context, GP_Coord xcenter, GP_Coord ycenter,
 
 	GP_FillCircle_Raw(context, xcenter, ycenter, r, pixel);
 }
-
-%% endblock body

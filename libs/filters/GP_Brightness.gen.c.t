@@ -1,39 +1,16 @@
-/*****************************************************************************
- * This file is part of gfxprim library.                                     *
- *                                                                           *
- * Gfxprim is free software; you can redistribute it and/or                  *
- * modify it under the terms of the GNU Lesser General Public                *
- * License as published by the Free Software Foundation; either              *
- * version 2.1 of the License, or (at your option) any later version.        *
- *                                                                           *
- * Gfxprim is distributed in the hope that it will be useful,                *
- * but WITHOUT ANY WARRANTY; without even the implied warranty of            *
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU         *
- * Lesser General Public License for more details.                           *
- *                                                                           *
- * You should have received a copy of the GNU Lesser General Public          *
- * License along with gfxprim; if not, write to the Free Software            *
- * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
- * Boston, MA  02110-1301  USA                                               *
- *                                                                           *
- * Copyright (C) 2009-2013 Cyril Hrubis <metan@ucw.cz>                       *
- *                                                                           *
- *****************************************************************************/
-
-%% extends "filter.point.c.t"
-
-%% block descr
-Brightness Point filter
-%% endblock
-
-%% block body
+@ include source.t
+/*
+ * Brightness Point filter
+ *
+ * Copyright (C) 2009-2014 Cyril Hrubis <metan@ucw.cz>
+ */
 
 #include "core/GP_Clamp.h"
 
-%% macro filter_op_brightness(val, val_max)
+@ include point_filter.t
+@
+@ def filter_op_brightness(val, val_max):
 GP_CLAMP_GENERIC({{ val }} + (p * {{ val_max }} + 0.5), 0, {{ val_max }})
-%%- endmacro
+@ end
 
-{{ filter_point('Brightness', filter_op_brightness, 'float p', 'p') }}
-
-%% endblock body
+{@ filter_point('Brightness', filter_op_brightness, 'float p', 'p') @}

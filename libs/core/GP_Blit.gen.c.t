@@ -1,31 +1,11 @@
-/*****************************************************************************
- * This file is part of gfxprim library.                                     *
- *                                                                           *
- * Gfxprim is free software; you can redistribute it and/or                  *
- * modify it under the terms of the GNU Lesser General Public                *
- * License as published by the Free Software Foundation; either              *
- * version 2.1 of the License, or (at your option) any later version.        *
- *                                                                           *
- * Gfxprim is distributed in the hope that it will be useful,                *
- * but WITHOUT ANY WARRANTY; without even the implied warranty of            *
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU         *
- * Lesser General Public License for more details.                           *
- *                                                                           *
- * You should have received a copy of the GNU Lesser General Public          *
- * License along with gfxprim; if not, write to the Free Software            *
- * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
- * Boston, MA  02110-1301  USA                                               *
- *                                                                           *
- * Copyright (C) 2011      Tomas Gavenciak <gavento@ucw.cz>                  *
- * Copyright (C) 2011-2013 Cyril Hrubis    <metan@ucw.cz>                    *
- *                                                                           *
- *****************************************************************************/
+@ include source.t
+/*
+ * Specialized blit functions and macros.
+ *
+ * Copyright (C) 2011      Tomas Gavenciak <gavento@ucw.cz>
+ * Copyright (C) 2011-2014 Cyril Hrubis <metan@ucw.cz>
+ */
 
-%% extends "base.c.t"
-
-{% block descr %}Specialized blit functions and macros.{% endblock %}
-
-%% block body
 #include <string.h>
 
 #include "core/GP_Pixel.h"
@@ -60,7 +40,7 @@ static void blitXYXY_Naive_Raw(const GP_Context *src,
 	}
 }
 
-%% for ps in pixelsizes
+@ for ps in pixelsizes:
 /*
  * Blit for equal pixel types {{ ps.suffix }}
  */
@@ -68,7 +48,7 @@ static void blitXYXY_Raw_{{ ps.suffix }}(const GP_Context *src,
 	GP_Coord x0, GP_Coord y0, GP_Coord x1, GP_Coord y1,
 	GP_Context *dst, GP_Coord x2, GP_Coord y2)
 {
-%%  if not ps.needs_bit_endian()
+@     if not ps.needs_bit_endian():
 	/* memcpy() each horizontal line */
 	GP_Coord y;
 
@@ -76,8 +56,9 @@ static void blitXYXY_Raw_{{ ps.suffix }}(const GP_Context *src,
 		memcpy(GP_PIXEL_ADDR_{{ ps.suffix }}(dst, x2, y2 + y),
 		       GP_PIXEL_ADDR_{{ ps.suffix }}(src, x0, y0 + y),
 		       {{ int(ps.size/8) }} * (x1 - x0 + 1));
-%%  else
-{#	/* Rectangles may not be bit-aligned in the same way! */
+@     else:
+# if 0
+	/* Rectangles may not be bit-aligned in the same way! */
 	/* Alignment (index) of first bits in the first byte */
 	//TODO: This is wrong for subcontexts where the offset
 	//      needs to be summed with context->offset and moduled
@@ -109,22 +90,21 @@ static void blitXYXY_Raw_{{ ps.suffix }}(const GP_Context *src,
 			end_p2 += dst->bytes_per_row;
 		}
 	} else /* Different bit-alignment, can't use memcpy() */
-#}
+#endif
 		blitXYXY_Naive_Raw(src, x0, y0, x1, y1, dst, x2, y2);
-%%  endif
+@     end
 }
 
-%% endfor
-
+@ end
 /*
  * Generate Blits, I know this is n^2 variants but the gain is in speed is
  * more than 50% and the size footprint for two for cycles is really small.
  */
-%% for src in pixeltypes
-%%  if not src.is_unknown() and not src.is_palette()
-%%   for dst in pixeltypes
-%%    if not dst.is_unknown() and not dst.is_palette()
-%%     if dst.name != src.name
+@ for src in pixeltypes:
+@     if not src.is_unknown() and not src.is_palette():
+@         for dst in pixeltypes:
+@             if not dst.is_unknown() and not dst.is_palette():
+@                 if dst.name != src.name:
 /*
  * Blits {{ src.name }} to {{ dst.name }}
  */
@@ -142,23 +122,19 @@ static void blitXYXY_Raw_{{ src.name }}_{{ dst.name }}(const GP_Context *src,
 			GP_Pixel p1, p2 = 0, p3 = 0;
 
 			p1 = GP_GetPixel_Raw_{{ src.pixelsize.suffix }}(src, x, y);
-%%      if src.is_alpha()
+@                     if src.is_alpha():
 			p2 = GP_GetPixel_Raw_{{ dst.pixelsize.suffix }}(dst, dx, dy);
 			p3 = GP_MixPixels_{{ src.name }}_{{ dst.name }}(p1, p2);
-%%      else
+@                     else:
 			GP_Pixel_{{ src.name }}_TO_RGB888(p1, p2);
 			GP_Pixel_RGB888_TO_{{ dst.name }}(p2, p3);
-%%      endif
+@                     end
 			GP_PutPixel_Raw_{{ dst.pixelsize.suffix }}(dst, dx, dy, p3);
 		}
 	}
 }
 
-%%     endif
-%%    endif
-%%   endfor
-%%  endif
-%% endfor
+@ end
 
 void GP_BlitXYXY_Raw_Fast(const GP_Context *src,
                           GP_Coord x0, GP_Coord y0, GP_Coord x1, GP_Coord y1,
@@ -173,26 +149,23 @@ void GP_BlitXYXY_Raw_Fast(const GP_Context *src,
 
 	/* Specialized functions */
 	switch (src->pixel_type) {
-%% for src in pixeltypes
-%%  if not src.is_unknown() and not src.is_palette()
+@ for src in pixeltypes:
+@     if not src.is_unknown() and not src.is_palette():
 	case GP_PIXEL_{{ src.name }}:
 		switch (dst->pixel_type) {
-%%   for dst in pixeltypes
-%%    if not dst.is_unknown() and not dst.is_palette()
-%%     if dst.name != src.name
+@         for dst in pixeltypes:
+@             if not dst.is_unknown() and not dst.is_palette():
+@                 if dst.name != src.name:
 		case GP_PIXEL_{{ dst.name }}:
 			blitXYXY_Raw_{{ src.name }}_{{ dst.name }}(src, x0, y0, x1, y1, dst, x2, y2);
 		break;
-%%     endif
-%%    endif
-%%   endfor
+@         end
 		default:
 			GP_ABORT("Invalid destination pixel %s",
 			         GP_PixelTypeName(dst->pixel_type));
 		}
 	break;
-%%  endif
-%% endfor
+@ end
 	default:
 		GP_ABORT("Invalid source pixel %s",
 		         GP_PixelTypeName(src->pixel_type));
@@ -202,11 +175,11 @@ void GP_BlitXYXY_Raw_Fast(const GP_Context *src,
 /*
  * And the same for non-raw variants.
  */
-%% for src in pixeltypes
-%%  if not src.is_unknown() and not src.is_palette()
-%%   for dst in pixeltypes
-%%    if not dst.is_unknown() and not dst.is_palette()
-%%     if dst.name != src.name
+@ for src in pixeltypes:
+@     if not src.is_unknown() and not src.is_palette():
+@         for dst in pixeltypes:
+@             if not dst.is_unknown() and not dst.is_palette():
+@                 if dst.name != src.name:
 /*
  * Blits {{ src.name }} to {{ dst.name }}
  */
@@ -231,16 +204,12 @@ static void blitXYXY_{{ src.name }}_{{ dst.name }}(const GP_Context *src,
 		}
 }
 
-%%     endif
-%%    endif
-%%   endfor
-%%  endif
-%% endfor
+@ end
 
 /*
  * Same pixel type but with rotation.
  */
-%% for ps in pixelsizes
+@ for ps in pixelsizes:
 /*
  * Blits for same pixel type and bpp {{ ps.suffix }}
  */
@@ -262,7 +231,7 @@ static void blitXYXY_{{ ps.suffix }}(const GP_Context *src,
 			GP_PutPixel_Raw_{{ ps.suffix }}(dst, xt, yt, p);
 		}
 }
-%% endfor
+@ end
 
 void GP_BlitXYXY_Fast(const GP_Context *src,
                       GP_Coord x0, GP_Coord y0, GP_Coord x1, GP_Coord y1,
@@ -286,30 +255,25 @@ void GP_BlitXYXY_Fast(const GP_Context *src,
 
 	/* Specialized functions */
 	switch (src->pixel_type) {
-%% for src in pixeltypes
-%%  if not src.is_unknown() and not src.is_palette()
+@ for src in pixeltypes:
+@     if not src.is_unknown() and not src.is_palette():
 	case GP_PIXEL_{{ src.name }}:
 		switch (dst->pixel_type) {
-%%   for dst in pixeltypes
-%%    if not dst.is_unknown() and not dst.is_palette()
-%%     if dst.name != src.name
+@         for dst in pixeltypes:
+@             if not dst.is_unknown() and not dst.is_palette():
+@                 if dst.name != src.name:
 		case GP_PIXEL_{{ dst.name }}:
 			blitXYXY_{{ src.name }}_{{ dst.name }}(src, x0, y0, x1, y1, dst, x2, y2);
 		break;
-%%     endif
-%%    endif
-%%   endfor
+@         end
 		default:
 			GP_ABORT("Invalid destination pixel %s",
 			         GP_PixelTypeName(dst->pixel_type));
 		}
 	break;
-%%  endif
-%% endfor
+@ end
 	default:
 		GP_ABORT("Invalid source pixel %s",
 		         GP_PixelTypeName(src->pixel_type));
 	}
 }
-
-%% endblock body

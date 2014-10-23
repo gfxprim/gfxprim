@@ -20,11 +20,7 @@
  *                                                                           *
  *****************************************************************************/
 
-%% extends "base.c.t"
-
-{% block descr %}Anti Aliased Horizontal Line{% endblock %}
-
-%% block body
+/* Anti Aliased Horizontal Line */
 
 #include "core/GP_Context.h"
 #include "core/GP_MixPixels.h"
@@ -92,5 +88,3 @@ void GP_HLineAA_Raw(GP_Context *context, GP_Coord x0, GP_Coord x1,
 		GP_MixPixel_Raw_Clipped(context, x, int_y+1, pixel, lp);
 	}
 }
-
-%% endblock body

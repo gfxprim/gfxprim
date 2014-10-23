@@ -1,36 +1,15 @@
-/*****************************************************************************
- * This file is part of gfxprim library.                                     *
- *                                                                           *
- * Gfxprim is free software; you can redistribute it and/or                  *
- * modify it under the terms of the GNU Lesser General Public                *
- * License as published by the Free Software Foundation; either              *
- * version 2.1 of the License, or (at your option) any later version.        *
- *                                                                           *
- * Gfxprim is distributed in the hope that it will be useful,                *
- * but WITHOUT ANY WARRANTY; without even the implied warranty of            *
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU         *
- * Lesser General Public License for more details.                           *
- *                                                                           *
- * You should have received a copy of the GNU Lesser General Public          *
- * License along with gfxprim; if not, write to the Free Software            *
- * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
- * Boston, MA  02110-1301  USA                                               *
- *                                                                           *
- * Copyright (C) 2009-2013 Cyril Hrubis <metan@ucw.cz>                       *
- *                                                                           *
- *****************************************************************************/
-
-%% extends "base.c.t"
-
-{% block descr %}Vertical Mirror alogorithm{% endblock %}
-
-%% block body
+@ include source.t
+/*
+ * Vertical Mirror alogorithm
+ *
+ * Copyright (C) 2009-2014 Cyril Hrubis <metan@ucw.cz>
+ */
 
 #include "core/GP_Debug.h"
 #include "core/GP_GetPutPixel.h"
 #include "GP_Rotate.h"
 
-%% for ps in pixelsizes
+@ for ps in pixelsizes:
 static int GP_FilterRotate90_Raw_{{ ps.suffix }}(const GP_Context *src, GP_Context *dst,
                                           GP_ProgressCallback *callback)
 {
@@ -52,8 +31,8 @@ static int GP_FilterRotate90_Raw_{{ ps.suffix }}(const GP_Context *src, GP_Conte
 	return 0;
 }
 
-%% endfor
-
+@ end
+@
 static int GP_FilterRotate90_Raw(const GP_Context *src, GP_Context *dst,
                                  GP_ProgressCallback *callback)
 {
@@ -96,14 +75,14 @@ GP_Context *GP_FilterRotate90Alloc(const GP_Context *src,
 	return res;
 }
 
-%% macro swap_pixels(ps, src, dst, x0, y0, x1, y1)
-			GP_Pixel pix0 = GP_GetPixel_Raw_{{ ps.suffix }}({{ src }}, {{ x0 }}, {{ y0 }});
-			GP_Pixel pix1 = GP_GetPixel_Raw_{{ ps.suffix }}({{ src }}, {{ x1 }}, {{ y1 }});
-			GP_PutPixel_Raw_{{ ps.suffix }}({{ dst }}, {{ x0 }}, {{ y0 }}, pix1);
-			GP_PutPixel_Raw_{{ ps.suffix }}({{ dst }}, {{ x1 }}, {{ y1 }}, pix0);
-%% endmacro
-
-%% for ps in pixelsizes
+@ def swap_pixels(ps, src, dst, x0, y0, x1, y1):
+GP_Pixel pix0 = GP_GetPixel_Raw_{{ ps.suffix }}({{ src }}, {{ x0 }}, {{ y0 }});
+GP_Pixel pix1 = GP_GetPixel_Raw_{{ ps.suffix }}({{ src }}, {{ x1 }}, {{ y1 }});
+GP_PutPixel_Raw_{{ ps.suffix }}({{ dst }}, {{ x0 }}, {{ y0 }}, pix1);
+GP_PutPixel_Raw_{{ ps.suffix }}({{ dst }}, {{ x1 }}, {{ y1 }}, pix0);
+@ end
+@
+@ for ps in pixelsizes:
 static int GP_FilterRotate180_Raw_{{ ps.suffix }}(const GP_Context *src, GP_Context *dst,
                                           GP_ProgressCallback *callback)
 {
@@ -116,7 +95,7 @@ static int GP_FilterRotate180_Raw_{{ ps.suffix }}(const GP_Context *src, GP_Cont
 			uint32_t xr = src->w - x - 1;
 			uint32_t yr = src->h - y - 1;
 
-			{{ swap_pixels(ps, 'src', 'dst', 'x', 'y', 'xr', 'yr') }}
+			{@ swap_pixels(ps, 'src', 'dst', 'x', 'y', 'xr', 'yr') @}
 		}
 
 		if (GP_ProgressCallbackReport(callback, x, src->w, src->h))
@@ -127,8 +106,8 @@ static int GP_FilterRotate180_Raw_{{ ps.suffix }}(const GP_Context *src, GP_Cont
 	return 0;
 }
 
-%% endfor
-
+@ end
+@
 static int GP_FilterRotate180_Raw(const GP_Context *src, GP_Context *dst,
                                   GP_ProgressCallback *callback)
 {
@@ -171,7 +150,7 @@ GP_Context *GP_FilterRotate180Alloc(const GP_Context *src,
 	return res;
 }
 
-%% for ps in pixelsizes
+@ for ps in pixelsizes:
 static int GP_FilterRotate270_Raw_{{ ps.suffix }}(const GP_Context *src, GP_Context *dst,
                                            GP_ProgressCallback *callback)
 {
@@ -193,8 +172,8 @@ static int GP_FilterRotate270_Raw_{{ ps.suffix }}(const GP_Context *src, GP_Cont
 	return 0;
 }
 
-%% endfor
-
+@ end
+@
 static int GP_FilterRotate270_Raw(const GP_Context *src, GP_Context *dst,
                                   GP_ProgressCallback *callback)
 {
@@ -236,5 +215,3 @@ GP_Context *GP_FilterRotate270Alloc(const GP_Context *src,
 
 	return res;
 }
-
-%% endblock body
