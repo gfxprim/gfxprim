@@ -7,18 +7,19 @@ import sys
 from optparse import OptionParser
 import subprocess
 
-def header_exists(cfg, filename):
-    fpath = cfg['include_path'][0] + '/' + filename
+def header_exists(cfg, *filenames):
+    for filename in filenames:
+        fpath = cfg['include_path'][0] + '/' + filename
 
-    sys.stderr.write("Checking for '%s' ... " % fpath)
+        sys.stderr.write("Checking for '%s' ... " % fpath)
 
-    try:
-        st = os.stat(fpath)
-        sys.stderr.write("Yes\n")
-        return True
-    except os.error:
-        sys.stderr.write("No\n")
-        return False
+        try:
+            st = os.stat(fpath)
+            sys.stderr.write("Yes\n")
+            return True
+        except os.error:
+            sys.stderr.write("No\n")
+    return False
 
 def c_try_compile(cfg, code, msg):
     sys.stderr.write(msg)
@@ -411,7 +412,8 @@ if __name__ ==  '__main__':
                     [header_exists, "aalib.h"], "", "-laa", ["backends"]],
                    ["freetype",
                     "A high-quality and portable font engine",
-                    [header_exists, "ft2build.h"], "", "`freetype-config --libs`", ["core"]],
+                    [header_exists, "ft2build.h", "freetype2/ft2build.h"],
+                    "", "`freetype-config --libs`", ["core"]],
                    ["dl",
                     "Dynamic linker",
                     [header_exists, "dlfcn.h"], "", "-ldl", ["core"]],
