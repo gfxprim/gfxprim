@@ -191,6 +191,9 @@ void GP_DataStorageDestroy(GP_DataStorage *self)
 {
 	struct block *i, *j;
 
+	if (!self)
+		return;
+
 	GP_DEBUG(1, "Destroying data storage");
 
 	for (i = self->blocks; i; ) {
@@ -229,6 +232,11 @@ void GP_DataStorageClear(GP_DataStorage *self)
 GP_DataNode *GP_DataStorageRoot(GP_DataStorage *self)
 {
 	return &self->root;
+}
+
+GP_DataNode *GP_DataDictFirst(GP_DataNode *node)
+{
+	return node->value.dict->first;
 }
 
 static void dict_add(GP_DataDict *dict, GP_DataNode *node)
@@ -277,13 +285,14 @@ GP_DataNode *GP_DataStorageGet(GP_DataStorage *self,
 	if (!node)
 		node = GP_DataStorageRoot(self);
 
-	for (i = node->value.dict->first; i; i = i->next) {
+	for (i = GP_DataDictFirst(node); i; i = i->next) {
 		if (!strcmp(i->id, id))
 			return i;
 	}
 
 	return NULL;
 }
+
 
 static void padd_printf(size_t padd, const char *id, size_t id_padd,
                         const char *fmt, ...)

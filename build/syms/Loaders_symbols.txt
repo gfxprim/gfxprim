@@ -149,6 +149,7 @@ GP_DataStorageCreate
 GP_DataStorageDestroy
 GP_DataStorageClear
 GP_DataStorageRoot
+GP_DataDictFirst
 GP_DataStorageGet
 GP_DataStorageAdd
 GP_DataStorageAddInt

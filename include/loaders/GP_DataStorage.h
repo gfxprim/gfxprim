@@ -78,6 +78,11 @@ void GP_DataStorageDestroy(GP_DataStorage *self);
 GP_DataNode *GP_DataStorageRoot(GP_DataStorage *self);
 
 /*
+ * Returns first node in a dict node list.
+ */
+GP_DataNode *GP_DataDictFirst(GP_DataNode *node);
+
+/*
  * Clears all data in storage.
  */
 void GP_DataStorageClear(GP_DataStorage *self);
