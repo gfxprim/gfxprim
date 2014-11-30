@@ -231,28 +231,37 @@ err0:
 
 GP_Context *GP_ReadImage(GP_IO *io, GP_ProgressCallback *callback)
 {
+	GP_Context *ret = NULL;
+
+	GP_ReadImageEx(io, &ret, NULL, callback);
+
+	return ret;
+}
+
+int GP_ReadImageEx(GP_IO *io, GP_Context **img, GP_DataStorage *meta_data,
+                   GP_ProgressCallback *callback)
+{
 	char buf[32];
 	off_t start;
 	const GP_Loader *loader;
-	GP_Context *ret = NULL;
 
 	start = GP_IOTell(io);
 	if (start == (off_t)-1) {
 		GP_DEBUG(1, "Failed to get IO stream offset: %s",
 		         strerror(errno));
-		return NULL;
+		return 1;
 	}
 
 	if (GP_IOFill(io, buf, sizeof(buf))) {
 		GP_DEBUG(1, "Failed to read first 32 bytes: %s",
 		         strerror(errno));
-		return NULL;
+		return 1;
 	}
 
 	if (GP_IOSeek(io, start, GP_IO_SEEK_SET) != start) {
 		GP_DEBUG(1, "Failed to seek at the start of the stream: %s",
 		         strerror(errno));
-		return NULL;
+		return 1;
 	}
 
 	loader = GP_LoaderBySignature(buf);
@@ -263,18 +272,17 @@ GP_Context *GP_ReadImage(GP_IO *io, GP_ProgressCallback *callback)
 			    buf[0], isprint(buf[0]) ? buf[0] : ' ',
 			    buf[1], isprint(buf[1]) ? buf[1] : ' ');
 		errno = ENOSYS;
-		return NULL;
+		return 1;
 	}
 
 	if (!loader->Read) {
 		GP_DEBUG(1, "Loader for '%s' does not support reading",
 		         loader->fmt_name);
 		errno = ENOSYS;
-		return NULL;
+		return 1;
 	}
 
-	loader->Read(io, &ret, NULL, callback);
-	return ret;
+	return loader->Read(io, img, meta_data, callback);
 }
 
 int GP_LoaderLoadImageEx(const GP_Loader *self, const char *src_path,
@@ -329,6 +337,18 @@ GP_Context *GP_LoaderReadImage(const GP_Loader *self, GP_IO *io,
 
 GP_Context *GP_LoadImage(const char *src_path, GP_ProgressCallback *callback)
 {
+	GP_Context *ret;
+
+	if (GP_LoadImageEx(src_path, &ret, NULL, callback))
+		return NULL;
+
+	return ret;
+}
+
+int GP_LoadImageEx(const char *src_path,
+                   GP_Context **img, GP_DataStorage *meta_data,
+                   GP_ProgressCallback *callback)
+{
 	int err;
 	struct stat st;
 
@@ -337,7 +357,7 @@ GP_Context *GP_LoadImage(const char *src_path, GP_ProgressCallback *callback)
 		GP_DEBUG(1, "Failed to access file '%s' : %s",
 		            src_path, strerror(errno));
 		errno = err;
-		return NULL;
+		return 1;
 	}
 
 	if (stat(src_path, &st)) {
@@ -345,20 +365,18 @@ GP_Context *GP_LoadImage(const char *src_path, GP_ProgressCallback *callback)
 	} else {
 		if (st.st_mode & S_IFDIR) {
 			errno = EISDIR;
-			return NULL;
+			return 1;
 		}
 	}
 
-	GP_Context *img;
-	const GP_Loader *ext_load = NULL, *sig_load;
+	const GP_Loader *ext_load, *sig_load;
 
 	ext_load = GP_LoaderByFilename(src_path);
 
 	if (ext_load) {
-		img = GP_LoaderLoadImage(ext_load, src_path, callback);
-
-		if (img)
-			return img;
+		if (!GP_LoaderLoadImageEx(ext_load, src_path,
+		                          img, meta_data, callback))
+			return 0;
 	}
 
 	sig_load = loader_by_signature(src_path);
@@ -368,18 +386,21 @@ GP_Context *GP_LoadImage(const char *src_path, GP_ProgressCallback *callback)
 	 * couldn't be loaded. Probably unimplemented format or damaged file.
 	 */
 	if (ext_load == sig_load)
-		return NULL;
+		return 0;
 
 	if (ext_load && sig_load) {
 		GP_WARN("File '%s': Extension says %s but signature %s",
 			src_path, ext_load->fmt_name, sig_load->fmt_name);
 	}
 
-	if (sig_load)
-		return GP_LoaderLoadImage(sig_load, src_path, callback);
+	if (sig_load) {
+		if (!GP_LoaderLoadImageEx(sig_load, src_path,
+		                          img, meta_data, callback))
+			return 0;
+	}
 
 	errno = ENOSYS;
-	return NULL;
+	return 1;
 }
 
 int GP_LoadMetaData(const char *src_path, GP_DataStorage *storage)

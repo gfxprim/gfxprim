@@ -112,7 +112,9 @@ GP_LoaderReadImage
 GP_LoaderReadImageEx
 GP_LoaderSaveImage
 GP_ReadImage
+GP_ReadImageEx
 GP_LoadImage
+GP_LoadImageEx
 GP_LoadMetaData
 GP_SaveImage
 GP_ListLoaders

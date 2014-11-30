@@ -43,12 +43,19 @@
  */
 GP_Context *GP_ReadImage(GP_IO *io, GP_ProgressCallback *callback);
 
+int GP_ReadImageEx(GP_IO *io, GP_Context **img, GP_DataStorage *meta_data,
+                   GP_ProgressCallback *callback);
+
 /*
  * Tries to load image accordingly to the file extension.
  *
  * If operation fails NULL is returned and errno is filled.
  */
 GP_Context *GP_LoadImage(const char *src_path, GP_ProgressCallback *callback);
+
+int GP_LoadImageEx(const char *src_path,
+                   GP_Context **img, GP_DataStorage *meta_data,
+                   GP_ProgressCallback *callback);
 
 /*
  * Loads image Meta Data (if possible).
