@@ -801,7 +801,7 @@ int GP_WriteTIFF(const GP_Context *src, GP_IO *io,
 
 #else
 
-int GP_ReadTIFFEx(GP_IO GP_UNUSED(*io), GP_Context GP_UNUSED(**img,)
+int GP_ReadTIFFEx(GP_IO GP_UNUSED(*io), GP_Context GP_UNUSED(**img),
                   GP_DataStorage GP_UNUSED(*storage),
                   GP_ProgressCallback GP_UNUSED(*callback))
 {

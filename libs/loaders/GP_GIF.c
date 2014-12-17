@@ -384,8 +384,8 @@ int GP_MatchGIF(const void GP_UNUSED(*buf))
 	return -1;
 }
 
-GP_Context *GP_ReadGIF(GP_IO GP_UNUSED(*io),
-                       GP_ProgressCallback GP_UNUSED(*callback))
+GP_Context *GP_ReadGIFEx(GP_IO GP_UNUSED(*io),
+                         GP_ProgressCallback GP_UNUSED(*callback))
 {
 	errno = ENOSYS;
 	return NULL;

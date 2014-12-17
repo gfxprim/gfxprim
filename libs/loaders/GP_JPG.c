@@ -538,7 +538,7 @@ int GP_WriteJPG(const GP_Context *src, GP_IO *io,
 
 #else
 
-int GP_ReadJPGEx(GP_IO GP_UNUSED(*io), GP_Context GP_UNUSED(**img,)
+int GP_ReadJPGEx(GP_IO GP_UNUSED(*io), GP_Context GP_UNUSED(**img),
                  GP_DataStorage GP_UNUSED(*storage),
                  GP_ProgressCallback GP_UNUSED(*callback))
 {
@@ -546,8 +546,8 @@ int GP_ReadJPGEx(GP_IO GP_UNUSED(*io), GP_Context GP_UNUSED(**img,)
 	return 1;
 }
 
-int GP_WriteJPG(const GP_Context *src, GP_IO *io,
-                GP_ProgressCallback *callback)
+int GP_WriteJPG(const GP_Context GP_UNUSED(*src), GP_IO GP_UNUSED(*io),
+                GP_ProgressCallback GP_UNUSED(*callback))
 {
 	errno = ENOSYS;
 	return 1;
