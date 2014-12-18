@@ -379,14 +379,24 @@ int GP_LoadImageEx(const char *src_path,
 			return 0;
 	}
 
+	/*
+	 * Operation was aborted, just here exit.
+	 */
+	if (errno == ECANCELED)
+		return 1;
+
 	sig_load = loader_by_signature(src_path);
 
 	/*
 	 * Avoid further work if extension matches the signature but image
 	 * couldn't be loaded. Probably unimplemented format or damaged file.
 	 */
-	if (ext_load == sig_load)
-		return 0;
+	if (ext_load == sig_load) {
+		GP_WARN("Signature matches extension but file '%s' "
+		        "can't be loaded. Unsupported/damaged file?",
+			src_path);
+		return 1;
+	}
 
 	if (ext_load && sig_load) {
 		GP_WARN("File '%s': Extension says %s but signature %s",
