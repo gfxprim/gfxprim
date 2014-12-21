@@ -78,3 +78,5 @@ SWIG_exception
 
 GP_Gamma8_Linear10
 GP_Linear10_Gamma8
+
+GP_DebugPrintCStack

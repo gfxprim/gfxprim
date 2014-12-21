@@ -104,12 +104,15 @@ void GP_DebugPrint(int level, const char *file, const char *function, int line,
 
 	switch (level) {
 	case GP_DEBUG_FATAL:
+		GP_DebugPrintCStack();
 		fprintf(stderr, "*** FATAL: %s:%s():%u: ", file, function, line);
 	break;
 	case GP_DEBUG_BUG:
+		GP_DebugPrintCStack();
 		fprintf(stderr, "*** BUG: %s:%s():%u: ", file, function, line);
 	break;
 	case GP_DEBUG_WARN:
+		GP_DebugPrintCStack();
 		fprintf(stderr, "*** WARNING: %s:%s():%u: ", file, function, line);
 	break;
 	case GP_DEBUG_TODO:

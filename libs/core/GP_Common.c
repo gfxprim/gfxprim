@@ -41,7 +41,7 @@
 #define GP_ABORT_INFO_TRACE_LEVELS 20
 
 
-static void print_c_stack(void)
+void GP_DebugPrintCStack(void)
 {
 #ifdef HAVE_BACKTRACE
 #if GP_ABORT_INFO_TRACE_LEVELS > 0
@@ -86,5 +86,5 @@ void GP_PrintAbortInfo(const char *file, const char *func, unsigned int line,
 	fprintf(stderr, "\n");
 
 	print_python_stack();
-	print_c_stack();
+	GP_DebugPrintCStack();
 }
