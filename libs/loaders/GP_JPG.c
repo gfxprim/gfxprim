@@ -207,6 +207,12 @@ static void read_jpg_metadata(struct jpeg_decompress_struct *cinfo,
 {
 	jpeg_saved_marker_ptr marker;
 
+	GP_DataStorageAddInt(storage, NULL, "Width", cinfo->image_width);
+	GP_DataStorageAddInt(storage, NULL, "Height", cinfo->image_height);
+	GP_DataStorageAddInt(storage, NULL, "Channels", cinfo->num_components);
+	GP_DataStorageAddString(storage, NULL, "Color Space",
+	                     get_colorspace(cinfo->out_color_space));
+
 	for (marker = cinfo->marker_list; marker != NULL; marker = marker->next) {
 		switch (marker->marker) {
 		case JPEG_COM: {

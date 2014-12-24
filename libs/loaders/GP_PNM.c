@@ -700,6 +700,17 @@ err0:
 	return 1;
 }
 
+static void fill_meta_data(struct pnm_header *header, GP_DataStorage *storage)
+{
+	if (!storage)
+		return;
+
+	GP_DataStorageAddInt(storage, NULL, "Width", header->w);
+	GP_DataStorageAddInt(storage, NULL, "Height", header->h);
+	GP_DataStorageAddInt(storage, NULL, "Depth", header->depth);
+	GP_DataStorageAddString(storage, NULL, "Format", pnm_magic_name(header->magic));
+}
+
 int GP_ReadPBMEx(GP_IO *io, GP_Context **img, GP_DataStorage *storage,
                  GP_ProgressCallback *callback)
 {
@@ -707,13 +718,13 @@ int GP_ReadPBMEx(GP_IO *io, GP_Context **img, GP_DataStorage *storage,
 	DECLARE_BUFFER(buf, io);
 	int err;
 
-	(void) storage;
-
 	err = load_header(&buf, &header);
 	if (err) {
 		errno = err;
 		return 1;
 	}
+
+	fill_meta_data(&header, storage);
 
 	if (!img)
 		return 0;
@@ -864,13 +875,13 @@ int GP_ReadPGMEx(GP_IO *io, GP_Context **img, GP_DataStorage *storage,
 	DECLARE_BUFFER(buf, io);
 	int err;
 
-	(void) storage;
-
 	err = load_header(&buf, &header);
 	if (err) {
 		errno = err;
 		return 1;
 	}
+
+	fill_meta_data(&header, storage);
 
 	if (!img)
 		return 0;
@@ -990,13 +1001,13 @@ int GP_ReadPPMEx(GP_IO *io, GP_Context **img, GP_DataStorage *storage,
 	DECLARE_BUFFER(buf, io);
 	int err;
 
-	(void) storage;
-
 	err = load_header(&buf, &header);
 	if (err) {
 		errno = err;
 		return 1;
 	}
+
+	fill_meta_data(&header, storage);
 
 	if (!img)
 		return 0;
@@ -1116,13 +1127,13 @@ int GP_ReadPNMEx(GP_IO *io, GP_Context **img, GP_DataStorage *storage,
 	DECLARE_BUFFER(buf, io);
 	int err, ret = 1;
 
-	(void) storage;
-
 	err = load_header(&buf, &header);
 	if (err) {
 		errno = err;
 		return 1;
 	}
+
+	fill_meta_data(&header, storage);
 
 	if (!img)
 		return 0;
