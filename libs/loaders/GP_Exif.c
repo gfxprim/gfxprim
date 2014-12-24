@@ -341,7 +341,7 @@ static int load_string(GP_IO *io, GP_DataStorage *storage, GP_DataNode *node,
 	/* Short strings are stored in the value directly */
 	if (num_comp <= 4) {
 		memcpy(buf, val, num_comp);
-		buf[num_comp - 1] = 0;
+		buf[num_comp > 0 ? num_comp - 1 : num_comp] = 0;
 		goto add;
 	}
 
@@ -351,9 +351,9 @@ static int load_string(GP_IO *io, GP_DataStorage *storage, GP_DataNode *node,
 
 	buf[max_len - 1] = '\0';
 
+add:
 	GP_DEBUG(2, "ASCII String value = '%s'", buf);
 
-add:
 	return GP_DataStorageAddString(storage, node, id, buf) != NULL;
 }
 
