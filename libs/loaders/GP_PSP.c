@@ -524,6 +524,12 @@ GP_Context *GP_ReadPSP(GP_IO *io, GP_ProgressCallback *callback)
 	return GP_LoaderReadImage(&GP_PSP, io, callback);
 }
 
+int GP_LoadPSPEx(const char *src_path, GP_Context **img,
+		 GP_DataStorage *storage, GP_ProgressCallback *callback)
+{
+	return GP_LoaderLoadImageEx(&GP_PSP, src_path, img, storage, callback);
+}
+
 struct GP_Loader GP_PSP = {
 	.Read = GP_ReadPSPEx,
 	.Match = GP_MatchPSP,

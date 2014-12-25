@@ -733,6 +733,12 @@ GP_Context *GP_LoadBMP(const char *src_path, GP_ProgressCallback *callback)
 	return GP_LoaderLoadImage(&GP_BMP, src_path, callback);
 }
 
+int GP_LoadBMPEx(const char *src_path, GP_Context **img,
+		 GP_DataStorage *storage, GP_ProgressCallback *callback)
+{
+	return GP_LoaderLoadImageEx(&GP_BMP, src_path, img, storage, callback);
+}
+
 /*
  * Rows in bmp are four byte aligned.
  */

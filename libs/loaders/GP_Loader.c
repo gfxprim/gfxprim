@@ -296,7 +296,7 @@ int GP_LoaderLoadImageEx(const GP_Loader *self, const char *src_path,
 
 	if (!self->Read) {
 		errno = ENOSYS;
-		return 1;
+		return ENOSYS;
 	}
 
 	io = GP_IOFile(src_path, GP_IO_RDONLY);
@@ -328,19 +328,30 @@ GP_Context *GP_LoaderReadImage(const GP_Loader *self, GP_IO *io,
 {
 	GP_Context *ret = NULL;
 
-	GP_DEBUG(1, "Reading image (I/O %p)", io);
-
-	self->Read(io, &ret, NULL, callback);
+	GP_LoaderReadImageEx(self, io, &ret, NULL, callback);
 
 	return ret;
 }
 
+int GP_LoaderReadImageEx(const GP_Loader *self, GP_IO *io,
+                         GP_Context **img, GP_DataStorage *data,
+                         GP_ProgressCallback *callback)
+{
+	GP_DEBUG(1, "Reading image (I/O %p)", io);
+
+	if (!self->Read) {
+		errno = ENOSYS;
+		return ENOSYS;
+	}
+
+	return self->Read(io, img, data, callback);
+}
+
 GP_Context *GP_LoadImage(const char *src_path, GP_ProgressCallback *callback)
 {
-	GP_Context *ret;
+	GP_Context *ret = NULL;
 
-	if (GP_LoadImageEx(src_path, &ret, NULL, callback))
-		return NULL;
+	GP_LoadImageEx(src_path, &ret, NULL, callback);
 
 	return ret;
 }

@@ -20,15 +20,17 @@ GP_PNG
 GP_MatchBMP
 GP_WriteBMP
 GP_LoadBMP
-GP_ReadBMPEx
+GP_LoadBMPEx
 GP_ReadBMP
+GP_ReadBMPEx
 GP_SaveBMP
 GP_BMP
 
 GP_MatchPSP
 GP_ReadPSP
-GP_LoadPSP
 GP_ReadPSPEx
+GP_LoadPSP
+GP_LoadPSPEx
 GP_PSP
 
 GP_MatchGIF
@@ -96,6 +98,7 @@ GP_PCX
 GP_ReadPSD
 GP_ReadPSDEx
 GP_LoadPSD
+GP_LoadPSDEx
 GP_MatchPSD
 GP_PSD
 
@@ -122,6 +125,7 @@ GP_LoaderRegister
 GP_LoaderUnregister
 
 GP_ContainerLoad
+GP_ContainerLoadEx
 GP_ContainerSeek
 
 GP_MatchZip
