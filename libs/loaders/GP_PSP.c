@@ -173,7 +173,18 @@ struct psp_img_attrs {
 	uint8_t subblock;
 	void *priv;
 	GP_Context *img;
+	GP_DataStorage *storage;
 };
+
+static void fill_metadata(struct psp_img_attrs *attrs)
+{
+	GP_DataStorageAddInt(attrs->storage, NULL, "Width", attrs->w);
+	GP_DataStorageAddInt(attrs->storage, NULL, "Height", attrs->h);
+	GP_DataStorageAddString(attrs->storage, NULL, "Compression",
+	                        psp_comp_type_name(attrs->comp_type));
+	GP_DataStorageAddInt(attrs->storage, NULL, "Bit Depth",
+	                     attrs->bit_depth);
+}
 
 static int psp_read_general_img_attr_chunk(GP_IO *io,
                                            struct psp_img_attrs *attrs)
@@ -220,9 +231,12 @@ static int psp_read_general_img_attr_chunk(GP_IO *io,
 		 attrs->bit_depth, attrs->grayscale_flag);
 
 	GP_DEBUG(3, "Image colors=%u, layer_count=%u, active_layer=%u",
-	         attrs->color_count, attrs->layer_count, attrs->active_layer); 
+	         attrs->color_count, attrs->layer_count, attrs->active_layer);
 
 	attrs->is_loaded = 1;
+
+	if (attrs->storage)
+		fill_metadata(attrs);
 
 	return 0;
 }
@@ -449,7 +463,7 @@ int GP_ReadPSPEx(GP_IO *io, GP_Context **img, GP_DataStorage *storage,
 {
 	int err = 0;
 	struct psp_img_attrs attrs = {.is_loaded = 0, .subblock = 0,
-	                              .priv = NULL, .img = NULL};
+	                              .priv = NULL, .img = NULL, .storage = storage};
 	struct psp_version version;
 
 	uint16_t psp_header[] = {
