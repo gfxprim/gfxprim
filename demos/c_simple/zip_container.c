@@ -58,7 +58,7 @@ static void load_next(void)
 		return;
 	}
 
-	GP_Blit(image, 0, 0, image->w, image->h, backend->context, 0, 0);
+	GP_Blit_Clipped(image, 0, 0, image->w, image->h, backend->context, 0, 0);
 	GP_BackendFlip(backend);
 }
 
@@ -95,7 +95,7 @@ int main(int argc, char *argv[])
 	}
 
 	/* Blit image into the window and show it */
-	GP_Blit(image, 0, 0, image->w, image->h, backend->context, 0, 0);
+	GP_Blit_Clipped(image, 0, 0, image->w, image->h, backend->context, 0, 0);
 	GP_BackendFlip(backend);
 
 	/* Wait for events  */
@@ -122,7 +122,7 @@ int main(int argc, char *argv[])
 		case GP_EV_SYS:
 			if (ev.code == GP_EV_SYS_RESIZE) {
 				GP_BackendResizeAck(backend);
-				GP_Blit(image, 0, 0, image->w, image->h,
+				GP_Blit_Clipped(image, 0, 0, image->w, image->h,
 				        backend->context, 0, 0);
 				GP_BackendFlip(backend);
 			}
