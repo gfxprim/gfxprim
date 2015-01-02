@@ -16,7 +16,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2013 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2015 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
@@ -30,28 +30,70 @@
 static void print_wall(struct bogoman_map_elem *elem)
 {
 	switch (elem->flags) {
-	case BOGOMAN_WALL_LEFT:
-	case BOGOMAN_WALL_RIGHT:
-	case BOGOMAN_WALL_LEFT | BOGOMAN_WALL_RIGHT:
+	case BOGOMAN_LEFT:
+	case BOGOMAN_RIGHT:
+	case BOGOMAN_LEFT | BOGOMAN_RIGHT:
 		printf("-");
 	break;
-	case BOGOMAN_WALL_UP:
-	case BOGOMAN_WALL_DOWN:
-	case BOGOMAN_WALL_UP | BOGOMAN_WALL_DOWN:
+	case BOGOMAN_UP:
+	case BOGOMAN_DOWN:
+	case BOGOMAN_UP | BOGOMAN_DOWN:
 		printf("|");
 	break;
-	case BOGOMAN_WALL_UP | BOGOMAN_WALL_RIGHT:
-	case BOGOMAN_WALL_DOWN | BOGOMAN_WALL_LEFT:
+	case BOGOMAN_UP | BOGOMAN_RIGHT:
+	case BOGOMAN_DOWN | BOGOMAN_LEFT:
 		printf("\\");
 	break;
-	case BOGOMAN_WALL_UP | BOGOMAN_WALL_LEFT:
-	case BOGOMAN_WALL_DOWN | BOGOMAN_WALL_RIGHT:
+	case BOGOMAN_UP | BOGOMAN_LEFT:
+	case BOGOMAN_DOWN | BOGOMAN_RIGHT:
 		printf("/");
 	break;
 	default:
 		printf("+");
 	break;
 	}
+}
+
+static void print_particle(struct bogoman_map_elem *elem)
+{
+	char c = '?';
+	int dir = elem->flags & BOGOMAN_DIRECTION_MASK;
+
+	if (elem->flags & BOGOMAN_PARTICLE_ROUND) {
+		switch (dir) {
+		case BOGOMAN_LEFT:
+			c = '(';
+		break;
+		case BOGOMAN_RIGHT:
+			c = ')';
+		break;
+		case BOGOMAN_UP:
+			c = 'O';
+		break;
+		case BOGOMAN_DOWN:
+			c = 'o';
+		break;
+		}
+	}
+
+	if (elem->flags & BOGOMAN_PARTICLE_SQUARE) {
+		switch (dir) {
+		case BOGOMAN_LEFT:
+			c = '<';
+		break;
+		case BOGOMAN_RIGHT:
+			c = '>';
+		break;
+		case BOGOMAN_UP:
+			c = '^';
+		break;
+		case BOGOMAN_DOWN:
+			c = 'v';
+		break;
+		}
+	}
+
+	putchar(c);
 }
 
 void bogoman_map_dump(struct bogoman_map *map)
@@ -82,6 +124,9 @@ void bogoman_map_dump(struct bogoman_map *map)
 			break;
 			case BOGOMAN_WALL:
 				print_wall(elem);
+			break;
+			case BOGOMAN_PARTICLE:
+				print_particle(elem);
 			break;
 			}
 		}
@@ -139,8 +184,6 @@ static void move_get_diamond(struct bogoman_map *map,
 static int try_move_block(struct bogoman_map *map,
                            int x, int y, int dx, int dy)
 {
-	struct bogoman_map_elem *elem = bogoman_get_map_elem(map, x, y);
-
 	int new_x = (int)x + dx;
 	int new_y = (int)y + dy;
 
@@ -194,6 +237,7 @@ void bogoman_map_player_move(struct bogoman_map *map, int x, int y)
 		case BOGOMAN_DIAMOND:
 			move_get_diamond(map, px, py);
 		break;
+		case BOGOMAN_PARTICLE:
 		case BOGOMAN_MOVEABLE:
 			if (!try_move_block(map, px, py, dx, dy))
 				goto finish_move;
@@ -231,15 +275,75 @@ finish_move:
 
 void bogoman_map_timer_tick(struct bogoman_map *map)
 {
-	unsigned int x, y;
+	unsigned int x, y, moved;
+	struct bogoman_map_elem *elem;
 
 	for (y = 0; y < map->h; y++) {
 		for (x = 0; x < map->w; x++) {
 			struct bogoman_map_elem *elem;
-
 			elem = bogoman_get_map_elem(map, x, y);
-
-			//TODO
+			elem->moved = 0;
 		}
 	}
+
+	do {
+		moved = 0;
+
+		for (y = 0; y < map->h; y++) {
+			for (x = 0; x < map->w; x++) {
+				int dir_x = 0, dir_y = 0;
+				elem = bogoman_get_map_elem(map, x, y);
+
+				if (elem->id != BOGOMAN_PARTICLE)
+					continue;
+
+				if (elem->moved)
+					continue;
+
+				switch (elem->flags & BOGOMAN_DIRECTION_MASK) {
+				case BOGOMAN_LEFT:
+					dir_x = -1;
+				break;
+				case BOGOMAN_RIGHT:
+					dir_x = 1;
+				break;
+				case BOGOMAN_UP:
+					dir_y = -1;
+				break;
+				case BOGOMAN_DOWN:
+					dir_y = +1;
+				break;
+				default:
+					continue;
+				}
+
+				if (!bogoman_is_empty(map, x + dir_x, y + dir_y)) {
+					if (!(elem->flags & BOGOMAN_PARTICLE_ROUND))
+						continue;
+
+					if (dir_x) {
+						//TODO randomly choose direction
+						if (bogoman_is_empty(map, x+dir_x, y-1))
+							dir_y = -1;
+						if (bogoman_is_empty(map, x+dir_x, y+1))
+							dir_y = 1;
+					}
+
+					if (dir_y) {
+						if (bogoman_is_empty(map, x-1, y+dir_y))
+							dir_x = -1;
+						if (bogoman_is_empty(map, x+1, y+dir_y))
+							dir_x = 1;
+					}
+
+					if (!dir_x || !dir_y)
+						continue;
+				}
+
+				elem->moved = 1;
+				bogoman_switch(map, x, y, x + dir_x, y + dir_y);
+				moved++;
+			}
+		}
+	} while (moved);
 }

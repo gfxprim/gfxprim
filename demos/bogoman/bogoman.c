@@ -16,7 +16,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2013 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2015 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
@@ -27,7 +27,7 @@
 #include "bogoman_loader.h"
 #include "bogoman_render.h"
 
-#define ELEM_SIZE 33
+#define ELEM_SIZE 27
 
 static void save_png(struct bogoman_map *map, unsigned int elem_size,
                      const char *filename)
@@ -59,8 +59,10 @@ static void save_png(struct bogoman_map *map, unsigned int elem_size,
 
 static struct GP_Backend *backend;
 
-static void event_loop(struct bogoman_map *map)
+static void event_loop(struct bogoman_render *render, GP_Backend *backend)
 {
+	struct bogoman_map *map = render->map;
+
 	while (GP_BackendEventsQueued(backend)) {
 		GP_Event ev;
 
@@ -89,6 +91,19 @@ static void event_loop(struct bogoman_map *map)
 				bogoman_map_player_move(map, 0, 1);
 			break;
 			}
+			bogoman_render(render, BOGOMAN_RENDER_DIRTY);
+		break;
+		case GP_EV_SYS:
+			switch (ev.code) {
+			case GP_EV_SYS_RESIZE:
+				GP_BackendResizeAck(backend);
+				bogoman_render(render, BOGOMAN_RENDER_ALL);
+			break;
+			}
+		break;
+		case GP_EV_TMR:
+			bogoman_map_timer_tick(render->map);
+			bogoman_render(render, BOGOMAN_RENDER_DIRTY);
 		break;
 		}
 	}
@@ -99,6 +114,7 @@ static void event_loop(struct bogoman_map *map)
 int main(int argc, char *argv[])
 {
 	struct bogoman_map *map;
+	GP_TIMER_DECLARE(timer, 0, 300, "Refresh", NULL, NULL);
 
 	bogoman_set_dbg_level(10);
 
@@ -129,20 +145,17 @@ int main(int argc, char *argv[])
 		.map_x_offset = 0,
 		.map_y_offset = 0,
 		.ctx = backend->context,
+		.backend = backend,
 		.map_elem_size = ELEM_SIZE,
 	};
 
 	bogoman_render(&render, BOGOMAN_RENDER_ALL);
-	GP_BackendFlip(backend);
+
+	GP_BackendAddTimer(backend, &timer);
 
 	for (;;) {
-		GP_BackendPoll(backend);
-		event_loop(map);
-
-		bogoman_render(&render, BOGOMAN_RENDER_DIRTY);
-		GP_BackendFlip(backend);
-
-		usleep(50000);
+		GP_BackendWait(backend);
+		event_loop(&render, backend);
 	}
 
 	return 0;

@@ -16,7 +16,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2013 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2015 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
@@ -81,6 +81,15 @@ static enum bogoman_map_elem_id id_from_char(const char ch)
 		return BOGOMAN_MOVEABLE;
 	case 'E':
 		return BOGOMAN_EDIBLE;
+	case '(':
+	case ')':
+	case 'O':
+	case 'o':
+	case '<':
+	case '>':
+	case '^':
+	case 'v':
+		return BOGOMAN_PARTICLE;
 	}
 
 	WARN("Unknown map character '%c'", ch);
@@ -93,6 +102,7 @@ static enum bogoman_map_elem_id id_from_char(const char ch)
 struct line {
 	unsigned int len;
 	unsigned char line[LINE_MAX];
+	unsigned char input[LINE_MAX];
 };
 
 static void get_line(FILE *f, struct line *l)
@@ -106,6 +116,7 @@ static void get_line(FILE *f, struct line *l)
 		case '\n':
 			return;
 		default:
+			l->input[l->len] = ch;
 			l->line[l->len++] = id_from_char(ch);
 		break;
 		}
@@ -140,19 +151,19 @@ static void load_map(FILE *f, struct bogoman_map *map)
 			case BOGOMAN_WALL:
 				if (x > 0 &&
 				    line_cur->line[x - 1] == BOGOMAN_WALL)
-					elem->flags |= BOGOMAN_WALL_LEFT;
+					elem->flags |= BOGOMAN_LEFT;
 
 				if (x + 1 < line_cur->len &&
 				    line_cur->line[x + 1] == BOGOMAN_WALL)
-				    	elem->flags |= BOGOMAN_WALL_RIGHT;
+					elem->flags |= BOGOMAN_RIGHT;
 
 				if (y > 0 &&
-				    bogoman_map_is_id(map, x, y-1, BOGOMAN_WALL))
-					elem->flags |= BOGOMAN_WALL_UP;
+				    bogoman_map_elem_id(map, x, y-1) == BOGOMAN_WALL)
+					elem->flags |= BOGOMAN_UP;
 
 				if (x < line_next->len &&
 				    line_next->line[x] == BOGOMAN_WALL)
-					elem->flags |= BOGOMAN_WALL_DOWN;
+					elem->flags |= BOGOMAN_DOWN;
 
 			break;
 			case BOGOMAN_PLAYER:
@@ -167,6 +178,34 @@ static void load_map(FILE *f, struct bogoman_map *map)
 			break;
 			case BOGOMAN_DIAMOND:
 				map->diamonds_total++;
+			break;
+			case BOGOMAN_PARTICLE:
+				switch (line_cur->input[x]) {
+				case '(':
+					elem->flags = BOGOMAN_LEFT | BOGOMAN_PARTICLE_ROUND;
+				break;
+				case ')':
+					elem->flags = BOGOMAN_RIGHT | BOGOMAN_PARTICLE_ROUND;
+				break;
+				case 'O':
+					elem->flags = BOGOMAN_UP | BOGOMAN_PARTICLE_ROUND;
+				break;
+				case 'o':
+					elem->flags = BOGOMAN_DOWN | BOGOMAN_PARTICLE_ROUND;
+				break;
+				case '<':
+					elem->flags = BOGOMAN_LEFT | BOGOMAN_PARTICLE_SQUARE;
+				break;
+				case '>':
+					elem->flags = BOGOMAN_RIGHT | BOGOMAN_PARTICLE_SQUARE;
+				break;
+				case '^':
+					elem->flags = BOGOMAN_UP | BOGOMAN_PARTICLE_SQUARE;
+				break;
+				case 'v':
+					elem->flags = BOGOMAN_DOWN | BOGOMAN_PARTICLE_SQUARE;
+				break;
+				}
 			break;
 			default:
 			break;
