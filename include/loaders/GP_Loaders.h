@@ -46,8 +46,6 @@
 #include "loaders/GP_PSP.h"
 #include "loaders/GP_PSD.h"
 
-#include "loaders/GP_TmpFile.h"
-
 #include "loaders/GP_DataStorage.h"
 #include "loaders/GP_Exif.h"
 

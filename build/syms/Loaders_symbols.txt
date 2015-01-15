@@ -104,9 +104,6 @@ GP_PSD
 
 GP_ReadExif
 
-GP_SaveTmpFile
-GP_LoadTmpFile
-
 GP_LoaderBySignature
 GP_LoaderByFilename
 GP_LoaderLoadImage

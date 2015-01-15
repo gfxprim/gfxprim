@@ -13,7 +13,7 @@ INCLUDE=
 LDLIBS+=-lrt
 
 APPS=backend_example loaders_example loaders filters_symmetry gfx_koch\
-     virtual_backend_example meta_data tmp_file showimage\
+     virtual_backend_example meta_data showimage\
      v4l2_show v4l2_grab convolution weighted_median shapetest koch \
      input_example fileview linetest randomshapetest fonttest\
      loaders_register blittest textaligntest sin_AA x11_windows\
@@ -32,7 +32,6 @@ backend_timers_example: LDLIBS+=-lgfxprim-backends
 virtual_backend_example: LDLIBS+=-lgfxprim-backends -lm
 loaders_example: LDLIBS+=-lgfxprim-loaders
 loaders: LDLIBS+=-lgfxprim-loaders
-tmp_file: LDLIBS+=-lgfxprim-loaders
 filters_symmetry: LDLIBS+=-lgfxprim-loaders
 gfx_koch: LDLIBS+=-lgfxprim-loaders -lm
 meta_data: LDLIBS+=-lgfxprim-loaders
