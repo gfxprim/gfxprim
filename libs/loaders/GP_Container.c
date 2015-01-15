@@ -16,7 +16,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2013 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2014 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
@@ -31,20 +31,22 @@ int GP_ContainerSeek(GP_Container *self, int offset,
 	if (!self->ops->Seek) {
 		GP_DEBUG(1, "Seek not implemented in %s container",
 		         self->ops->type);
+		errno = ENOSYS;
 		return ENOSYS;
 	}
 
 	return self->ops->Seek(self, offset, whence);
 }
 
-GP_Context *GP_ContainerLoad(GP_Container *self, GP_ProgressCallback *callback)
+int GP_ContainerLoadEx(GP_Container *self, GP_Context **img,
+                       GP_DataStorage *storage, GP_ProgressCallback *callback)
 {
-	if (!self->ops->Load) {
+	if (!self->ops->LoadEx) {
 		GP_DEBUG(1, "Load not implemented in %s container",
 		         self->ops->type);
 		errno = ENOSYS;
-		return NULL;
+		return ENOSYS;
 	}
 
-	return self->ops->Load(self, callback);
+	return self->ops->LoadEx(self, img, storage, callback);
 }

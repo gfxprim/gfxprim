@@ -33,6 +33,8 @@
 #include "core/GP_Context.h"
 #include "core/GP_ProgressCallback.h"
 
+#include "loaders/GP_DataStorage.h"
+
 struct GP_Container;
 
 enum GP_ContainerWhence {
@@ -52,8 +54,8 @@ struct GP_ContainerOps {
 	/*
 	 * Just loads current image, does not advance to the next image.
 	 */
-	GP_Context *(*Load)(struct GP_Container *self,
-	                    GP_ProgressCallback *callback);
+	int (*LoadEx)(struct GP_Container *self, GP_Context **img,
+	              GP_DataStorage *storage, GP_ProgressCallback *callback);
 
 	/*
 	 * Close callback, use the inline function defined below.
@@ -109,7 +111,18 @@ static inline GP_Context *GP_ContainerLoadNext(GP_Container *self,
 /*
  * Just loads current image, does not advance to the next one.
  */
-GP_Context *GP_ContainerLoad(GP_Container *self, GP_ProgressCallback *callback);
+int GP_ContainerLoadEx(GP_Container *self, GP_Context **img,
+                       GP_DataStorage *storage, GP_ProgressCallback *callback);
+
+static inline GP_Context *GP_ContainerLoad(GP_Container *self,
+                                           GP_ProgressCallback *callback)
+{
+	GP_Context *ret = NULL;
+
+	GP_ContainerLoadEx(self, &ret, NULL, callback);
+
+	return ret;
+}
 
 int GP_ContainerSeek(GP_Container *self, int offset,
                      enum GP_ContainerWhence whence);

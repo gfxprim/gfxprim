@@ -37,8 +37,8 @@
 #include <core/GP_Common.h>
 #include <core/GP_Debug.h>
 
-#include <loaders/GP_Loader.h>
-#include <loaders/GP_IOZlib.h>
+#include "loaders/GP_Loader.h"
+#include "loaders/GP_IOZlib.h"
 #include "loaders/GP_ZIP.h"
 
 #ifdef HAVE_ZLIB
@@ -241,11 +241,12 @@ static int zip_read_data_desc(GP_IO *io, struct zip_local_header *header)
 	return 0;
 }
 
-static GP_Context *zip_next_file(struct zip_priv *priv,
-                                 GP_ProgressCallback *callback)
+static int zip_next_file(struct zip_priv *priv, GP_Context **img,
+                         GP_DataStorage *storage,
+                         GP_ProgressCallback *callback)
 {
 	struct zip_local_header header = {.file_name = NULL};
-	int err = 0;
+	int err = 0, res;
 	GP_Context *ret = NULL;
 	GP_IO *io;
 
@@ -302,8 +303,8 @@ static GP_Context *zip_next_file(struct zip_priv *priv,
 
 		GP_IOMark(priv->io, GP_IO_MARK);
 
-		ret = GP_ReadImage(priv->io, callback);
-		if (errno == ECANCELED)
+		res = GP_ReadImageEx(priv->io, &ret, storage, callback);
+		if (res && errno == ECANCELED)
 			err = errno;
 
 		GP_IOSeek(priv->io, priv->io->mark + header.comp_size, GP_IO_SEEK_SET);
@@ -311,26 +312,15 @@ static GP_Context *zip_next_file(struct zip_priv *priv,
 		goto out;
 	break;
 	case COMPRESS_DEFLATE:
-	/*	if ((err = read_deflate(priv->io, &header, &io))) {
+		io = GP_IOZlib(priv->io, header.comp_size);
+		if (!io) {
 			err = errno;
 			goto out;
 		}
-		GP_DEBUG(1, "Reading image");
-		ret = GP_ReadImage(io, callback);
-		if (errno == ECANCELED)
-			err = errno;
-
-		GP_IOClose(io);
-		goto out;
-	*/
-
-		io = GP_IOZlib(priv->io, header.comp_size);
-		if (!io)
-			goto out;
 
 		GP_DEBUG(1, "Reading image");
-		ret = GP_ReadImage(io, callback);
-		if (errno == ECANCELED)
+		res = GP_ReadImageEx(io, &ret, storage, callback);
+		if (res && errno == ECANCELED)
 			err = errno;
 
 		/*
@@ -361,7 +351,8 @@ static GP_Context *zip_next_file(struct zip_priv *priv,
 out:
 	free(header.file_name);
 	errno = err;
-	return ret;
+	*img = ret;
+	return err;
 }
 
 static unsigned int last_offset_idx(struct zip_priv *priv)
@@ -421,33 +412,39 @@ static void record_offset(struct zip_priv *priv, long offset)
  */
 }
 
-static GP_Context *zip_load_next(GP_Container *self,
-                                 GP_ProgressCallback *callback)
+static int zip_load_next(GP_Container *self, GP_Context **img,
+                         GP_DataStorage *storage,
+                         GP_ProgressCallback *callback)
 {
 	struct zip_priv *priv = GP_CONTAINER_PRIV(self);
-	GP_Context *ret;
-	long offset;
+	int err;
 
 	GP_DEBUG(1, "Trying to load next image from ZIP container");
 
+	*img = NULL;
+
 	do {
-		offset = GP_IOTell(priv->io);
-		ret = zip_next_file(priv, callback);
-	} while (ret == NULL && errno == 0);
+		err = zip_next_file(priv, img, storage, callback);
+	} while (!*img && errno == 0);
 
-	if (!ret)
-		return NULL;
-
-	if (ret)
-		record_offset(priv, offset);
+	if (err)
+		return 1;
 
 	record_offset(priv, GP_IOTell(priv->io));
 
 	priv->cur_pos++;
-	//self->cur_img++;
 	self->cur_img = priv->cur_pos;
 
-	return ret;
+	return 0;
+}
+
+static GP_Context *load_next(GP_Container *self, GP_ProgressCallback *callback)
+{
+	GP_Context *img = NULL;
+
+	zip_load_next(self, &img, NULL, callback);
+
+	return img;
 }
 
 /* Seek to the current position */
@@ -573,19 +570,15 @@ static int zip_seek(GP_Container *self, int offset,
 	return ret;
 }
 
-static GP_Context *zip_load(GP_Container *self,
-                            GP_ProgressCallback *callback)
+static int zip_load(GP_Container *self, GP_Context **img,
+                    GP_DataStorage *storage, GP_ProgressCallback *callback)
 {
-	GP_Context *img;
-
-	img = zip_load_next(self, callback);
-
-	if (!img)
-		return NULL;
+	if (zip_load_next(self, img, storage, callback))
+		return 1;
 
 	zip_seek(self, -1, GP_CONT_CUR);
 
-	return img;
+	return 0;
 }
 
 static void zip_close(GP_Container *self)
@@ -649,8 +642,8 @@ err0:
 }
 
 static const struct GP_ContainerOps zip_ops = {
-	.LoadNext = zip_load_next,
-	.Load = zip_load,
+	.LoadNext = load_next,
+	.LoadEx = zip_load,
 	.Close = zip_close,
 	.Seek = zip_seek,
 	.type = "ZIP",
