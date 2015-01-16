@@ -62,6 +62,8 @@ static struct GP_Backend *backend;
 static void event_loop(struct bogoman_render *render, GP_Backend *backend)
 {
 	struct bogoman_map *map = render->map;
+	char path[128];
+	static int screenshots;
 
 	while (GP_BackendEventsQueued(backend)) {
 		GP_Event ev;
@@ -89,6 +91,11 @@ static void event_loop(struct bogoman_render *render, GP_Backend *backend)
 			break;
 			case GP_KEY_DOWN:
 				bogoman_map_player_move(map, 0, 1);
+			break;
+			case GP_KEY_S:
+				snprintf(path, sizeof(path),
+				         "screenshot%04i.png", screenshots++);
+				save_png(map, render->map_elem_size, path);
 			break;
 			}
 			bogoman_render(render, BOGOMAN_RENDER_DIRTY);

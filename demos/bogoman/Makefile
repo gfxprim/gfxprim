@@ -4,7 +4,7 @@ include $(TOPDIR)/pre.mk
 CSOURCES=$(shell echo *.c)
 
 INCLUDE=
-LDLIBS+=-lgfxprim-backends
+LDLIBS+=-lgfxprim-backends -lgfxprim-loaders
 
 APPS=bogoman
 
