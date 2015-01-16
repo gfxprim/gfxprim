@@ -49,6 +49,11 @@ int image_loader_init(const char *args[], unsigned int cache_max_bytes);
 GP_Context *image_loader_get_image(GP_ProgressCallback *callback, int elevate);
 
 /*
+ * Retruns current image meta data or NULL there are none.
+ */
+GP_DataStorage *image_loader_get_meta_data(void);
+
+/*
  * Returns path to current image.
  */
 const char *image_loader_img_path(void);

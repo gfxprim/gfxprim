@@ -27,6 +27,7 @@
 
 struct image {
 	GP_Context *ctx;
+	GP_DataStorage *meta_data;
 
 	struct image *prev;
 	struct image *next;
@@ -72,15 +73,23 @@ size_t image_cache_get_ram_size(void)
 /*
  * Reports correct image record size.
  */
-static size_t image_size2(GP_Context *ctx, const char *path)
+static size_t image_size2(GP_Context *ctx, GP_DataStorage *meta_data,
+                          const char *path)
 {
-	return ctx->bytes_per_row * ctx->h + sizeof(GP_Context) +
+	size_t meta_data_size = 0;
+	size_t context_size = ctx->bytes_per_row * ctx->h + sizeof(GP_Context);
+
+	//TODO! 4096 is a size of single block, data storage may have more blocks
+	if (meta_data)
+		meta_data_size = 4096;
+
+	return meta_data_size + context_size +
 	       sizeof(struct image) + strlen(path) + 1;
 }
 
 static size_t image_size(struct image *img)
 {
-	return image_size2(img->ctx, img->path);
+	return image_size2(img->ctx, NULL, img->path);
 }
 
 struct image_cache *image_cache_create(unsigned int max_size_kbytes)
@@ -127,6 +136,7 @@ static void remove_img_free(struct image_cache *self,
 
 	remove_img(self, img, size);
 	GP_ContextFree(img->ctx);
+	GP_DataStorageDestroy(img->meta_data);
 	free(img);
 }
 
@@ -149,13 +159,13 @@ static void add_img(struct image_cache *self, struct image *img, size_t size)
 		self->end = img;
 }
 
-GP_Context *image_cache_get(struct image_cache *self, int elevate,
-                            const char *key)
+int image_cache_get(struct image_cache *self, GP_Context **img,
+		    GP_DataStorage **meta_data, int elevate, const char *key)
 {
 	struct image *i;
 
 	if (self == NULL)
-		return NULL;
+		return 1;
 
 	GP_DEBUG(2, "Looking for image '%s'", key);
 
@@ -164,7 +174,7 @@ GP_Context *image_cache_get(struct image_cache *self, int elevate,
 			break;
 
 	if (i == NULL)
-		return NULL;
+		return 1;
 
 	/* Push the image to the root of the list */
 	if (elevate) {
@@ -178,7 +188,13 @@ GP_Context *image_cache_get(struct image_cache *self, int elevate,
 		i->elevated++;
 	}
 
-	return i->ctx;
+	if (img)
+		*img = i->ctx;
+
+	if (meta_data)
+		*meta_data = i->meta_data;
+
+	return 0;
 }
 
 GP_Context *image_cache_get2(struct image_cache *self, int elevate,
@@ -268,14 +284,14 @@ static int assert_size(struct image_cache *self, size_t size)
 }
 
 int image_cache_put(struct image_cache *self, GP_Context *ctx,
-                    const char *key)
+                    GP_DataStorage *meta_data, const char *key)
 {
 	size_t size;
 
 	if (self == NULL)
 		return 1;
 
-	size = image_size2(ctx, key);
+	size = image_size2(ctx, meta_data, key);
 
 	/*
 	 * We try to create room for the image. If this fails we add the image
@@ -292,6 +308,7 @@ int image_cache_put(struct image_cache *self, GP_Context *ctx,
 	}
 
 	img->ctx = ctx;
+	img->meta_data = meta_data;
 	img->elevated = 0;
 	strcpy(img->path, key);
 
@@ -303,7 +320,7 @@ int image_cache_put(struct image_cache *self, GP_Context *ctx,
 }
 
 int image_cache_put2(struct image_cache *self, GP_Context *ctx,
-                     const char *fmt, ...)
+                     GP_DataStorage *meta_data, const char *fmt, ...)
 {
 	size_t size, len;
 	va_list va;
@@ -316,7 +333,7 @@ int image_cache_put2(struct image_cache *self, GP_Context *ctx,
 	va_end(va);
 
 	//TODO: FIX THIS
-	size = image_size2(ctx, "") + len + 1;
+	size = image_size2(ctx, meta_data, "") + len + 1;
 
 	/*
 	 * We try to create room for the image. If this fails we add the image
@@ -333,6 +350,7 @@ int image_cache_put2(struct image_cache *self, GP_Context *ctx,
 	}
 
 	img->ctx = ctx;
+	img->meta_data = meta_data;
 	img->elevated = 0;
 
 	va_start(va, fmt);

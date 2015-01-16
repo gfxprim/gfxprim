@@ -213,6 +213,39 @@ static void info_printf(GP_Context *ctx, GP_Coord x, GP_Coord y,
 	va_end(va);
 }
 
+static unsigned int print_meta_data(GP_DataNode *node, GP_Context *context,
+                                    unsigned int th, unsigned int y, int level)
+{
+	GP_DataNode *i;
+	unsigned int x;
+
+	for (i = GP_DataDictFirst(node); i; i = i->next) {
+		y += th;
+		x = th * level + 10;
+		switch (i->type) {
+		case GP_DATA_INT:
+			info_printf(context, x, y, "%s : %li", i->id, i->value.i);
+		break;
+		case GP_DATA_DOUBLE:
+			info_printf(context, x, y, "%s : %lf", i->id, i->value.d);
+		break;
+		case GP_DATA_STRING:
+			info_printf(context, x, y, "%s : %s", i->id, i->value.str);
+		break;
+		case GP_DATA_RATIONAL:
+			info_printf(context, x, y, "%s : %li/%li",
+			            i->id, i->value.rat.num, i->value.rat.den);
+		break;
+		case GP_DATA_DICT:
+			info_printf(context, x, y, "%s", i->id);
+			y = print_meta_data(i, context, th, y, level+1);
+		break;
+		}
+	}
+
+	return y;
+}
+
 static void show_info(struct loader_params *params, GP_Context *img,
                       GP_Context *orig_img)
 {
@@ -248,14 +281,25 @@ static void show_info(struct loader_params *params, GP_Context *img,
 	info_printf(context, 10, y, "%u of %u", pos, count);
 	y += th + 2;
 
-	if (!image_loader_is_in_dir())
+	if (image_loader_is_in_dir()) {
+		unsigned int dir_count = image_loader_dir_count();
+		unsigned int dir_pos = image_loader_dir_pos() + 1;
+
+		info_printf(context, 10, y,
+			    "%u of %u in directory", dir_pos, dir_count);
+	}
+
+	GP_DataStorage *meta_data = image_loader_get_meta_data();
+
+	if (!meta_data)
 		return;
 
-	unsigned int dir_count = image_loader_dir_count();
-	unsigned int dir_pos = image_loader_dir_pos() + 1;
+	GP_DataNode *node = GP_DataStorageRoot(meta_data);
 
-	info_printf(context, 10, y,
-		    "%u of %u in directory", dir_pos, dir_count);
+	if (node->type != GP_DATA_DICT)
+		return;
+
+	print_meta_data(node, context, th + 2, y + th, 0);
 }
 
 static void update_display(struct loader_params *params, GP_Context *img,
@@ -414,7 +458,7 @@ GP_Context *load_resized_image(struct loader_params *params, GP_Size w, GP_Size 
 	if (img == NULL)
 		return NULL;
 
-	image_cache_put2(params->img_resized_cache, img, "%s %ux%u r%i l%i",
+	image_cache_put2(params->img_resized_cache, img, NULL, "%s %ux%u r%i l%i",
 	                 img_path, w, h, params->resampling_method,
 	                 params->use_low_pass);
 

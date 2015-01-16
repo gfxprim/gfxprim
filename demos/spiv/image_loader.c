@@ -35,6 +35,7 @@
 static struct image_cache *img_cache;
 static struct image_list *img_list;
 static GP_Context *cur_img;
+static GP_DataStorage *cur_meta_data;
 static GP_Container *cur_cont;
 
 int image_loader_init(const char *args[], unsigned int cache_max_bytes)
@@ -61,30 +62,31 @@ GP_Context *image_loader_get_image(GP_ProgressCallback *callback, int elevate)
 	struct cpu_timer timer;
 	const char *path;
 	GP_Context *img;
-	int err;
+	int err, ret;
 
 	if (cur_img)
 		return cur_img;
 
 	if (cur_cont) {
 		cpu_timer_start(&timer, "Loading");
-		cur_img = GP_ContainerLoad(cur_cont, callback);
+		cur_meta_data = GP_DataStorageCreate();
+		GP_ContainerLoadEx(cur_cont, &cur_img, cur_meta_data, callback);
 		cpu_timer_stop(&timer);
 		return cur_img;
 	}
 
 	path = image_list_img_path(img_list);
 
-	cur_img = image_cache_get(img_cache, elevate, path);
-
-	if (cur_img)
+	if (!image_cache_get(img_cache, &cur_img, &cur_meta_data, elevate, path))
 		return cur_img;
 
 	cpu_timer_start(&timer, "Loading");
 
-	img = GP_LoadImage(path, callback);
+	cur_meta_data = GP_DataStorageCreate();
 
-	if (!img) {
+	ret = GP_LoadImageEx(path, &img, cur_meta_data, callback);
+
+	if (ret) {
 		err = errno;
 
 		/*
@@ -95,7 +97,7 @@ GP_Context *image_loader_get_image(GP_ProgressCallback *callback, int elevate)
 		cur_cont = GP_OpenZip(path);
 
 		if (cur_cont) {
-			img = GP_ContainerLoad(cur_cont, callback);
+			GP_ContainerLoadEx(cur_cont, &img, cur_meta_data, callback);
 
 			if (img) {
 				cur_img = img;
@@ -111,11 +113,16 @@ GP_Context *image_loader_get_image(GP_ProgressCallback *callback, int elevate)
 		return NULL;
 	}
 
-	image_cache_put(img_cache, img, path);
+	image_cache_put(img_cache, img, cur_meta_data, path);
 
 	cpu_timer_stop(&timer);
 
 	return img;
+}
+
+GP_DataStorage *image_loader_get_meta_data(void)
+{
+	return cur_meta_data;
 }
 
 const char *image_loader_img_path(void)
@@ -146,10 +153,13 @@ static void drop_cur_img(void)
 	/*
 	 * Currently loaded image is too big to be cached -> free it.
 	 */
-	if (!image_cache_get(img_cache, 0, path))
+	if (image_cache_get(img_cache, NULL, NULL, 0, path)) {
 		GP_ContextFree(cur_img);
+		GP_DataStorageDestroy(cur_meta_data);
+	}
 
 	cur_img = NULL;
+	cur_meta_data = NULL;
 }
 
 void image_loader_seek(enum img_seek_offset offset, int whence)
