@@ -59,6 +59,7 @@ GP_FilterHLinearConvolution_Raw
 GP_FilterHistogram
 GP_HistogramAlloc
 GP_HistogramFree
+GP_HistogramChannelByName
 
 GP_FilterKernelPrint_Raw
 
