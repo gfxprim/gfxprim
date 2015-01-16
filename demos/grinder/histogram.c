@@ -16,7 +16,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2011 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2015 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
@@ -24,10 +24,15 @@
 
 void histogram_to_png(const GP_Context *src, const char *filename)
 {
-	GP_FILTER_PARAMS(src->pixel_type, params);
+	GP_Histogram *hist;
 
-	GP_FilterHistogramAlloc(src->pixel_type, params);
-	GP_FilterHistogram(src, params, NULL);
+	hist = GP_HistogramAlloc(src->pixel_type);
+	if (!hist) {
+		fprintf(stderr, "Failed to allocate histogram\n");
+		return;
+	}
+
+	GP_FilterHistogram(hist, src, NULL);
 
 	unsigned int i, j;
 
@@ -35,27 +40,22 @@ void histogram_to_png(const GP_Context *src, const char *filename)
 
 	GP_Fill(res, 0xffffff);
 
-	GP_Histogram *hist_r;
-	hist_r = (GP_FilterParamChannel(params, "R"))->val.ptr;
+	GP_HistogramChannel *hist_r = GP_HistogramChannelByName(hist, "R");
 
 	for (i = 0; i < hist_r->len; i++)
 		GP_VLineXYH(res, i, 256, -255.00 * hist_r->hist[i] / hist_r->max + 0.5 , 0xff0000);
 
-	GP_Histogram *hist_g;
-	hist_g = (GP_FilterParamChannel(params, "G"))->val.ptr;
+	GP_HistogramChannel *hist_g = GP_HistogramChannelByName(hist, "G");
 
 	for (i = 0; i < hist_g->len; i++)
 		GP_VLineXYH(res, i+257, 256, -255.00 * hist_g->hist[i] / hist_g->max + 0.5 , 0x00ff00);
 
-	GP_Histogram *hist_b;
-	hist_b = (GP_FilterParamChannel(params, "B"))->val.ptr;
+	GP_HistogramChannel *hist_b = GP_HistogramChannelByName(hist, "B");
 
 	for (i = 0; i < hist_b->len; i++)
 		GP_VLineXYH(res, i+514, 256, -255.00 * hist_b->hist[i] / hist_b->max + 0.5 , 0x0000ff);
 
-	uint32_t max = GP_MAX(hist_r->max, hist_g->max);
-
-	max = GP_MAX(max, hist_b->max);
+	uint32_t max = GP_MAX3(hist_r->max, hist_g->max, hist_b->max);
 
 	for (i = 0; i < hist_r->len; i++) {
 		for (j = 0; j < hist_r->len; j++) {
@@ -77,5 +77,5 @@ void histogram_to_png(const GP_Context *src, const char *filename)
 	GP_SavePNG(res, filename, NULL);
 
 	GP_ContextFree(res);
-	GP_FilterHistogramFree(params);
+	GP_HistogramFree(hist);
 }

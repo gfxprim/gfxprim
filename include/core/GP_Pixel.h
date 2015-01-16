@@ -19,7 +19,7 @@
  * Copyright (C) 2009-2010 Jiri "BlueBear" Dluhos                            *
  *                         <jiri.bluebear.dluhos@gmail.com>                  *
  *                                                                           *
- * Copyright (C) 2009-2013 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2015 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  * Copyright (C) 2011      Tomas Gavenciak <gavento@ucw.cz>                  *
  *                                                                           *
@@ -151,6 +151,25 @@ static inline const GP_PixelTypeDescription *GP_PixelTypeDesc(GP_PixelType type)
 {
 	GP_CHECK_VALID_PIXELTYPE(type);
 	return &GP_PixelTypes[type];
+}
+
+static inline unsigned int GP_PixelChannelCount(GP_PixelType type)
+{
+	GP_CHECK_VALID_PIXELTYPE(type);
+	return GP_PixelTypes[type].numchannels;
+}
+
+static inline uint8_t GP_PixelChannelBits(GP_PixelType type, uint8_t channel)
+{
+	GP_CHECK_VALID_PIXELTYPE(type);
+	return GP_PixelTypes[type].channels[channel].size;
+}
+
+static inline const char *GP_PixelChannelName(GP_PixelType type,
+                                              uint8_t channel)
+{
+	GP_CHECK_VALID_PIXELTYPE(type);
+	return GP_PixelTypes[type].channels[channel].name;
 }
 
 /*

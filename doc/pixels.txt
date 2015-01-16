@@ -87,6 +87,12 @@ const char *GP_PixelTypeName(GP_PixelType type);
 
 uint32_t GP_PixelSize(GP_PixelType type);
 
+unsigned int GP_PixelChannelCount(GP_PixelType type);
+
+uint8_t GP_PixelChannelBits(GP_PixelType type, uint8_t channel);
+
+const char *GP_PixelChannelName(GP_PixelType type, uint8_t channel);
+
 int GP_PixelHasFlags(GP_PixelType pixel_type, GP_PixelFlags flags);
 -------------------------------------------------------------------------------
 
@@ -98,6 +104,12 @@ to query the pixel type description.
 The 'GP_PixelTypeName()' function returns static string with pixel type name.
 
 The 'GP_PixelSize()' returns pixel size in bits.
+
+The 'GP_PixelChannelCount()' returns number of pixel channels.
+
+The 'GP_PixelChannelBits()' returns number of bits for respective channel.
+
+The 'GP_PixelChannelName()' returns channel name.
 
 The 'GP_PixelHasFlags()' function returns true if particular pixel type
 contains the bitmask of pixel flags.

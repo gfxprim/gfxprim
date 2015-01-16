@@ -57,8 +57,8 @@ GP_FilterHConvolutionMP_Raw
 GP_FilterHLinearConvolution_Raw
 
 GP_FilterHistogram
-GP_FilterHistogramAlloc
-GP_FilterHistogram_Raw
+GP_HistogramAlloc
+GP_HistogramFree
 
 GP_FilterKernelPrint_Raw
 
@@ -88,27 +88,6 @@ GP_FilterMirrorV_Raw
 GP_FilterMultiply
 GP_FilterMultiplyAlloc
 GP_FilterMultiply_Raw
-
-GP_FilterParamChannel
-GP_FilterParamChannels
-GP_FilterParamCheckChannels
-GP_FilterParamCheckPixelType
-GP_FilterParamCreate
-GP_FilterParamDestroy
-GP_FilterParamFreePtrAll
-GP_FilterParamInitChannels
-GP_FilterParamPrintFloat
-GP_FilterParamPrintInt
-GP_FilterParamPrintPtr
-GP_FilterParamPrintUInt
-GP_FilterParamSetFloat
-GP_FilterParamSetFloatAll
-GP_FilterParamSetInt
-GP_FilterParamSetIntAll
-GP_FilterParamSetPtr
-GP_FilterParamSetPtrAll
-GP_FilterParamSetUInt
-GP_FilterParamSetUIntAll
 
 GP_FilterResize
 GP_FilterResizeAlloc

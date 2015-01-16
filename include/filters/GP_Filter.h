@@ -32,6 +32,4 @@
 #include "core/GP_Context.h"
 #include "core/GP_ProgressCallback.h"
 
-#include "GP_FilterParam.h"
-
 #endif /* FILTERS_GP_FILTER_H */

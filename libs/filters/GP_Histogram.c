@@ -16,72 +16,72 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2011 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2015 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
 #include <string.h>
+#include <errno.h>
 
-#include <GP_Debug.h>
-
+#include <core/GP_Debug.h>
 #include "GP_Stats.h"
 
-int GP_FilterHistogram_Raw(const GP_Context *src, GP_FilterParam histogram[],
-                           GP_ProgressCallback *callback);
-
-int GP_FilterHistogram(const GP_Context *src, GP_FilterParam histogram[],
-                       GP_ProgressCallback *callback)
+GP_Histogram *GP_HistogramAlloc(GP_PixelType pixel_type)
 {
-	int ret;
-
-	ret = GP_FilterHistogram_Raw(src, histogram, callback);
-
-	if (ret)
-		return ret;
-
+	size_t hsize, size = 0;
 	unsigned int i;
+	GP_Histogram *hist;
 
-	for (i = 0; histogram[i].channel_name[0] != '\0'; i++) {
-		unsigned int j;
-		GP_Histogram *hist = histogram[i].val.ptr;
+	GP_DEBUG(1, "Allocating histogram for %s",
+	         GP_PixelTypeName(pixel_type));
 
-		hist->max = hist->hist[0];
-		hist->min = hist->hist[0];
+	hsize = sizeof(GP_Histogram) +
+	        GP_PixelChannelCount(pixel_type) * sizeof(void*);
 
-		for (j = 1; j < hist->len; j++) {
-			if (hist->hist[j] > hist->max)
-				hist->max = hist->hist[j];
-
-			if (hist->hist[j] < hist->min)
-				hist->min = hist->hist[j];
-		}
+	for (i = 0; i < GP_PixelChannelCount(pixel_type); i++) {
+		size += sizeof(GP_HistogramChannel) +
+			sizeof(uint32_t) * (1<<GP_PixelChannelBits(pixel_type, i));
 	}
 
-	return 0;
+	hist = malloc(hsize + size);
+	if (!hist) {
+		GP_WARN("Malloc failed :(");
+		errno = ENOMEM;
+		return NULL;
+	}
+
+	hist->pixel_type = pixel_type;
+
+	for (i = 0; i < GP_PixelChannelCount(pixel_type); i++) {
+		size_t chan_size = 1<<GP_PixelChannelBits(pixel_type, i);
+
+		hist->channels[i] = (void*)hist + hsize;
+
+		hsize += sizeof(GP_HistogramChannel) +
+			sizeof(uint32_t) * chan_size;
+
+		hist->channels[i]->len = chan_size;
+		hist->channels[i]->chan_name = GP_PixelChannelName(pixel_type, i);
+	}
+
+	return hist;
 }
 
-void GP_FilterHistogramAlloc(GP_PixelType type, GP_FilterParam params[])
+GP_HistogramChannel *GP_HistogramChannelByName(GP_Histogram *self,
+		                               const char *name)
 {
-	uint32_t i;
+	unsigned int i;
 
-	GP_FilterParamSetPtrAll(params, NULL);
-
-	const GP_PixelTypeChannel *channels = GP_PixelTypes[type].channels;
-
-	for (i = 0; i < GP_PixelTypes[type].numchannels; i++) {
-		size_t chan_size = 1<<channels[i].size;
-
-		GP_Histogram *hist = malloc(sizeof(struct GP_Histogram) +
-		                            sizeof(uint32_t) * chan_size);
-
-		if (hist == NULL) {
-			GP_FilterHistogramFree(params);
-			return;
-		}
-
-		hist->len = chan_size;
-		memset(hist->hist, 0, sizeof(uint32_t) * chan_size);
-
-		(GP_FilterParamChannel(params, channels[i].name))->val.ptr = hist;
+	for (i = 0; i < GP_PixelChannelCount(self->pixel_type); i++) {
+		if (!strcmp(self->channels[i]->chan_name, name))
+			return self->channels[i];
 	}
+
+	return NULL;
+}
+
+void GP_HistogramFree(GP_Histogram *self)
+{
+	GP_DEBUG(1, "Freeing histogram %p", self);
+	free(self);
 }

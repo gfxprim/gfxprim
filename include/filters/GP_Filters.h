@@ -32,9 +32,6 @@
 #ifndef FILTERS_GP_FILTERS_H
 #define FILTERS_GP_FILTERS_H
 
-/* Filter per channel parameter passing interface */
-#include "filters/GP_FilterParam.h"
-
 /* Point filters, brightness, contrast ... */
 #include "filters/GP_Point.h"
 

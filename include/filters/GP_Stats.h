@@ -16,7 +16,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2011 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2015 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
@@ -31,34 +31,39 @@
 
 #include "GP_Filter.h"
 
-typedef struct GP_Histogram {
-	uint32_t min;
-	uint32_t max;
+typedef struct GP_HistogramChannel {
+	const char *chan_name;
+	GP_Pixel min;
+	GP_Pixel max;
 	uint32_t len;
 	uint32_t hist[];
+} GP_HistogramChannel;
+
+typedef struct GP_Histogram {
+	GP_PixelType pixel_type;
+	GP_HistogramChannel *channels[];
 } GP_Histogram;
 
 /*
- * Histogram filter.
- *
- * The filter param is expected to hold pointers to struct GP_Histogram
+ * Allocates histogram for a given pixel type
  */
-int GP_FilterHistogram(const GP_Context *src, GP_FilterParam histogram[],
+GP_Histogram *GP_HistogramAlloc(GP_PixelType pixel_type);
+
+/*
+ * Frees histogram.
+ */
+void GP_HistogramFree(GP_Histogram *self);
+
+/*
+ * Returns pointer to channel given channel name.
+ */
+GP_HistogramChannel *GP_HistogramChannelByName(GP_Histogram *self,
+                                               const char *name);
+
+/*
+ * Computes histogram. Returns non-zero on failure (i.e. canceled by callback).
+ */
+int GP_FilterHistogram(GP_Histogram *self, const GP_Context *src,
                        GP_ProgressCallback *callback);
-
-/*
- * Allocate and initalize struct GP_Histogram for each channel and stores the
- * pointer to filter params array. The pixel type must match the params[]
- * channels.
- */
-void GP_FilterHistogramAlloc(GP_PixelType type, GP_FilterParam params[]);
-
-/*
- * Free the histogram arrays.
- */
-static inline void GP_FilterHistogramFree(GP_FilterParam params[])
-{
-	GP_FilterParamFreePtrAll(params);
-}
 
 #endif /* FILTERS_GP_STATS_H */
