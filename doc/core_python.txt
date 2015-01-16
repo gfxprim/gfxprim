@@ -101,14 +101,12 @@ Blit is clipped.
 
 TIP: See link:example_py_showimage.html[example Blit usage].
 
-[[Colors_and_Pixels]]
-Colors and Pixels
-~~~~~~~~~~~~~~~~~
+[[Pixels]]
+Pixels
+~~~~~~
 
 Pixel in GFXprim is a number large enough to store a pixel value. Pixel is
 passed as a parameter to all drawing functions.
-
-Color is a more abstract representation for example RGB triplet.
 
 There are several functions to create a pixel value for a particular pixel
 type from color.
@@ -127,7 +125,6 @@ import gfxprim.core as core
 
 These functions creates a pixel suitable for drawing into a bitmap with
 particular pixel type.
-
 
 [source,python]
 -------------------------------------------------------------------------------

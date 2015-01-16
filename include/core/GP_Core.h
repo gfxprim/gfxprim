@@ -65,9 +65,6 @@
 /* Debug and debug level */
 #include "core/GP_Debug.h"
 
-/* Color */
-#include "core/GP_Color.h"
-
 /* Progress callback */
 #include "core/GP_ProgressCallback.h"
 

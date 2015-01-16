@@ -28,8 +28,6 @@ GP_SetDebugHandler
 
 GP_PrintAbortInfo
 
-GP_ColorToPixel
-GP_ColorLoadPixels
 GP_RGBA8888ToPixel
 GP_PixelRGBMatch
 GP_PixelTypeByName
@@ -63,9 +61,6 @@ GP_PutPixel
 GP_GetPixel
 GP_PixelRGBLookup
 GP_PixelToRGB888
-GP_ColorNameToPixel
-GP_ColorNameToColor
-GP_ColorToColorName
 GP_PixelToRGBA8888
 
 GP_Fill

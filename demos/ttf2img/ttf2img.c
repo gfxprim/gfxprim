@@ -76,8 +76,8 @@ int main(int argc, char *argv[])
 
 	GP_Context *context = GP_ContextAlloc(img_w, img_h, GP_PIXEL_RGB888);
 
-	GP_Pixel black_pixel = GP_ColorToContextPixel(GP_COL_BLACK, context);
-	GP_Pixel white_pixel = GP_ColorToContextPixel(GP_COL_WHITE, context);
+	GP_Pixel black_pixel = GP_RGBToContextPixel(0x00, 0x00, 0x00, context);
+	GP_Pixel white_pixel = GP_RGBToContextPixel(0xff, 0xff, 0xff, context);
 
 	GP_Fill(context, white_pixel);
 

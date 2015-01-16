@@ -93,11 +93,11 @@ int main(int argc, char *argv[])
 	context = backend->context;
 
 	/* Now draw some testing patters */
-	black_pixel = GP_ColorToContextPixel(GP_COL_BLACK, context);
-	white_pixel = GP_ColorToContextPixel(GP_COL_WHITE, context);
-	red_pixel   = GP_ColorToContextPixel(GP_COL_RED, context);
-	blue_pixel  = GP_ColorToContextPixel(GP_COL_BLUE, context);
-	green_pixel = GP_ColorToContextPixel(GP_COL_GREEN, context);
+	black_pixel = GP_RGBToContextPixel(0x00, 0x00, 0x00, context);
+	white_pixel = GP_RGBToContextPixel(0xff, 0xff, 0xff, context);
+	red_pixel   = GP_RGBToContextPixel(0xff, 0x00, 0x00, context);
+	blue_pixel  = GP_RGBToContextPixel(0x00, 0x00, 0xff, context);
+	green_pixel = GP_RGBToContextPixel(0x00, 0xff, 0x00, context);
 
 	GP_Fill(context, white_pixel);
 

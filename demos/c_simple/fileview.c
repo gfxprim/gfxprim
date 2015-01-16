@@ -263,12 +263,12 @@ int main(int argc, char *argv[])
 
 	win = backend->context;
 
-	white_pixel     = GP_ColorToContextPixel(GP_COL_WHITE, win);
-	gray_pixel      = GP_ColorToContextPixel(GP_COL_GRAY_LIGHT, win);
-	dark_gray_pixel = GP_ColorToContextPixel(GP_COL_GRAY_DARK, win);
-	black_pixel     = GP_ColorToContextPixel(GP_COL_BLACK, win);
-	red_pixel       = GP_ColorToContextPixel(GP_COL_RED, win);
-	blue_pixel      = GP_ColorToContextPixel(GP_COL_BLUE, win);
+	white_pixel     = GP_RGBToContextPixel(0xff, 0xff, 0xff, win);
+	gray_pixel      = GP_RGBToContextPixel(0xbe, 0xbe, 0xbe, win);
+	dark_gray_pixel = GP_RGBToContextPixel(0x7f, 0x7f, 0x7f, win);
+	black_pixel     = GP_RGBToContextPixel(0x00, 0x00, 0x00, win);
+	red_pixel       = GP_RGBToContextPixel(0xff, 0x00, 0x00, win);
+	blue_pixel      = GP_RGBToContextPixel(0x00, 0x00, 0xff, win);
 
 	redraw_screen();
 	GP_BackendFlip(backend);

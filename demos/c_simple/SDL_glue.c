@@ -102,8 +102,8 @@ int main(void)
 
 	GP_ContextFromSDLSurface(&context, display);
 
-	black_pixel     = GP_ColorToContextPixel(GP_COL_BLACK, &context);
-	darkgray_pixel  = GP_ColorToContextPixel(GP_COL_GRAY_DARK, &context);
+	black_pixel     = GP_RGBToContextPixel(0x00, 0x00, 0x00, &context);
+	darkgray_pixel  = GP_RGBToContextPixel(0x7f, 0x7f, 0x7f, &context);
 
 	redraw_screen();
 	SDL_Flip(display);

@@ -150,10 +150,10 @@ int main(int argc, char *argv[])
 
 	win = backend->context;
 
-	red   = GP_ColorToContextPixel(GP_COL_RED, win);
-	green = GP_ColorToContextPixel(GP_COL_GREEN, win);
-	white = GP_ColorToContextPixel(GP_COL_WHITE, win);
-	black = GP_ColorToContextPixel(GP_COL_BLACK, win);
+	red   = GP_RGBToContextPixel(0xff, 0x00, 0x00, win);
+	green = GP_RGBToContextPixel(0x00, 0xff, 0x00, win);
+	white = GP_RGBToContextPixel(0xff, 0xff, 0xff, win);
+	black = GP_RGBToContextPixel(0x00, 0x00, 0x00, win);
 
 	GP_Fill(win, black);
 	GP_BackendFlip(backend);

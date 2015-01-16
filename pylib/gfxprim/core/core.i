@@ -28,12 +28,8 @@
 %include "GP_Debug.h"
 
 /*
- * Color and pixel types
+ * Pixel types
  */
-
-ERROR_ON_NULL(GP_ColorToColorName);
-
-%include "GP_Color.h"
 %include "GP_Pixel.h"
 %include "GP_Pixel.gen.h" /* Includes enum GP_PixelType definition */
 %include "GP_Convert.h"

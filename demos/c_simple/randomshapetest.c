@@ -268,8 +268,8 @@ int main(void)
 		return 1;
 	}
 
-	white = GP_ColorToContextPixel(GP_COL_WHITE, win->context);
-	black = GP_ColorToContextPixel(GP_COL_BLACK, win->context);
+	white = GP_RGBToContextPixel(0xff, 0xff, 0xff, win->context);
+	black = GP_RGBToContextPixel(0x00, 0x00, 0x00, win->context);
 
 	for (;;) {
 		GP_BackendPoll(win);

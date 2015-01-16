@@ -138,10 +138,10 @@ int main(void)
 
 	context = backend->context;
 
-	black = GP_ColorToContextPixel(GP_COL_BLACK, context);
-	blue  = GP_ColorToContextPixel(GP_COL_BLUE, context);
-	gray  = GP_ColorToContextPixel(GP_COL_GRAY_LIGHT, context);
-	red   = GP_ColorToContextPixel(GP_COL_RED, context);
+	black = GP_RGBToContextPixel(0x00, 0x00, 0x00, context);
+	blue  = GP_RGBToContextPixel(0x00, 0x00, 0xff, context);
+	gray  = GP_RGBToContextPixel(0xbe, 0xbe, 0xbe, context);
+	red   = GP_RGBToContextPixel(0xff, 0x00, 0x00, context);
 
 	iter = 0;
 	draw(context->w/2, context->h/2, l, iter);

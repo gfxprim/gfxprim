@@ -505,13 +505,13 @@ int main(int argc, char *argv[])
 	center_y = win->h / 2;
 
 	/* Load colors compatible with the display */
-	black    = GP_ColorToContextPixel(GP_COL_BLACK, win);
-	white    = GP_ColorToContextPixel(GP_COL_WHITE, win);
-	yellow   = GP_ColorToContextPixel(GP_COL_YELLOW, win);
-	green    = GP_ColorToContextPixel(GP_COL_GREEN, win);
-	red      = GP_ColorToContextPixel(GP_COL_RED, win);
-	gray     = GP_ColorToContextPixel(GP_COL_GRAY_LIGHT, win);
-	darkgray = GP_ColorToContextPixel(GP_COL_GRAY_DARK, win);
+	black    = GP_RGBToContextPixel(0x00, 0x00, 0x00, win);
+	white    = GP_RGBToContextPixel(0xff, 0xff, 0xff, win);
+	yellow   = GP_RGBToContextPixel(0xff, 0xff, 0x00, win);
+	green    = GP_RGBToContextPixel(0x00, 0xff, 0x00, win);
+	red      = GP_RGBToContextPixel(0xff, 0x00, 0x00, win);
+	gray     = GP_RGBToContextPixel(0xbe, 0xbe, 0xbe, win);
+	darkgray = GP_RGBToContextPixel(0x7f, 0x7f, 0x7f, win);
 
 	print_instructions();
 	redraw_screen();

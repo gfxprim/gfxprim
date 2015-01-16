@@ -34,8 +34,8 @@ static void redraw(GP_Backend *self)
 	GP_Context *context = self->context;
 	GP_Pixel white_pixel, black_pixel;
 
-	black_pixel = GP_ColorToContextPixel(GP_COL_BLACK, context);
-	white_pixel = GP_ColorToContextPixel(GP_COL_WHITE, context);
+	black_pixel = GP_RGBToContextPixel(0x00, 0x00, 0x00, context);
+	white_pixel = GP_RGBToContextPixel(0xff, 0xff, 0xff, context);
 
 	GP_Fill(context, black_pixel);
 	GP_Line(context, 0, 0, context->w - 1, context->h - 1, white_pixel);

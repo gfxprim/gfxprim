@@ -174,8 +174,8 @@ int main(void)
 	                                     win->context->pixel_type);
 	change_bitmap();
 
-	black = GP_ColorToContextPixel(GP_COL_BLACK, win->context);
-	white = GP_ColorToContextPixel(GP_COL_WHITE, win->context);
+	black = GP_RGBToContextPixel(0x00, 0x00, 0x00, win->context);
+	white = GP_RGBToContextPixel(0xff, 0xff, 0xff, win->context);
 
 	GP_Fill(win->context, black);
 	GP_BackendFlip(win);

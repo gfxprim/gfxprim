@@ -32,7 +32,7 @@
 static void redraw(GP_Backend *self)
 {
 	GP_Context *context = self->context;
-	GP_Pixel black_pixel = GP_ColorToContextPixel(GP_COL_BLACK, context);
+	GP_Pixel black_pixel = GP_RGBToContextPixel(0x00, 0x00, 0x00, context);
 
 	GP_Fill(context, black_pixel);
 

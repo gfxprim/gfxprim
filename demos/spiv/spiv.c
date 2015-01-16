@@ -818,8 +818,8 @@ int main(int argc, char *argv[])
 
 	context = backend->context;
 
-	black_pixel = GP_ColorToContextPixel(GP_COL_BLACK, context);
-	white_pixel = GP_ColorToContextPixel(GP_COL_WHITE, context);
+	black_pixel = GP_RGBToContextPixel(0x00, 0x00, 0x00, context);
+	white_pixel = GP_RGBToContextPixel(0xff, 0xff, 0xff, context);
 	gray_pixel = GP_RGBToContextPixel(0x33, 0x33, 0x33, context);
 
 	GP_Fill(context, black_pixel);

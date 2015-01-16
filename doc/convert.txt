@@ -3,8 +3,6 @@ Pixel Conversions
 
 This page describes RGB tripplet to pixels conversions.
 
-See also link:basic_types.html#Color[colors].
-
 [source,c]
 -------------------------------------------------------------------------------
 #include <GP.h>
