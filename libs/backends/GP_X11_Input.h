@@ -276,6 +276,9 @@ static void x11_input_event_put(struct GP_EventQueue *event_queue,
 	case GravityNotify:
 		GP_DEBUG(1, "GravityNotify event received");
 	break;
+	case UnmapNotify:
+		GP_DEBUG(1, "UnmapNotify event received");
+	break;
 	default:
 		GP_WARN("Unhandled X11 event type %u", ev->type);
 	}
