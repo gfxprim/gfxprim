@@ -309,7 +309,7 @@ static void update_display(struct loader_params *params, GP_Context *img,
 	struct cpu_timer timer;
 	GP_ProgressCallback callback = {.callback = image_loader_callback};
 
-	switch (config.orientation) {
+	switch (config.combined_orientation) {
 	case ROTATE_0:
 	break;
 	case ROTATE_90:
@@ -323,6 +323,8 @@ static void update_display(struct loader_params *params, GP_Context *img,
 	case ROTATE_270:
 		callback.priv = "Rotating image (270)";
 		img = GP_FilterRotate270Alloc(img, &callback);
+	break;
+	default:
 	break;
 	}
 
@@ -384,7 +386,7 @@ static void update_display(struct loader_params *params, GP_Context *img,
 
 	show_info(params, img, orig_img);
 
-	if (config.orientation)
+	if (config.combined_orientation)
 		GP_ContextFree(img);
 
 	GP_BackendFlip(backend);
@@ -465,6 +467,39 @@ GP_Context *load_resized_image(struct loader_params *params, GP_Size w, GP_Size 
 	return img;
 }
 
+static void exif_autorotate(void)
+{
+	GP_DataNode *orientation;
+
+	config.combined_orientation = config.orientation;
+
+	if (!config.exif_autorotate)
+		return;
+
+	orientation = GP_DataStorageGetByPath(image_loader_get_meta_data(),
+	                                      NULL, "/Exif/Orientation");
+	if (!orientation)
+		return;
+
+	switch (orientation->value.i) {
+	case GP_EXIF_UPPER_LEFT:
+		config.combined_orientation += ROTATE_0;
+	break;
+	case GP_EXIF_LOWER_RIGHT:
+		config.combined_orientation += ROTATE_180;
+	break;
+	case GP_EXIF_UPPER_RIGHT:
+		config.combined_orientation += ROTATE_90;
+	break;
+	case GP_EXIF_LOWER_LEFT:
+		config.combined_orientation += ROTATE_270;
+	break;
+	}
+
+	if (config.combined_orientation > ROTATE_270)
+		config.combined_orientation -= ROTATE_360;
+}
+
 static float calc_img_size(struct loader_params *params,
                            uint32_t img_w, uint32_t img_h,
                            uint32_t win_w, uint32_t win_h)
@@ -473,7 +508,9 @@ static float calc_img_size(struct loader_params *params,
 	unsigned int max_win_w = config.max_win_w;
 	unsigned int max_win_h = config.max_win_h;
 
-	switch (config.orientation) {
+	exif_autorotate();
+
+	switch (config.combined_orientation) {
 	case ROTATE_90:
 	case ROTATE_270:
 		GP_SWAP(win_w, win_h);
@@ -488,7 +525,7 @@ static float calc_img_size(struct loader_params *params,
 			win_w = GP_MIN(max_win_w, img_w * params->zoom_rat + 0.5);
 			win_h = GP_MIN(max_win_h, img_h * params->zoom_rat + 0.5);
 
-			switch (config.orientation) {
+			switch (config.combined_orientation) {
 			case ROTATE_90:
 			case ROTATE_270:
 				GP_BackendResize(backend, win_h, win_w);
@@ -527,7 +564,7 @@ static float calc_img_size(struct loader_params *params,
 			win_h = rat * img_h + 0.5;
 		}
 
-		switch (config.orientation) {
+		switch (config.combined_orientation) {
 		case ROTATE_90:
 		case ROTATE_270:
 			GP_BackendResize(backend, win_h, win_w);
@@ -885,13 +922,13 @@ int main(int argc, char *argv[])
 					config.orientation++;
 
 					if (config.orientation > ROTATE_270)
-						config.orientation = 0;
+						config.orientation = ROTATE_0;
 
 					params.show_progress_once = 1;
 					show_image(&params);
 				break;
 				case GP_KEY_E:
-					if (config.orientation > 0)
+					if (config.orientation > ROTATE_0)
 						config.orientation--;
 					else
 						config.orientation = ROTATE_270;

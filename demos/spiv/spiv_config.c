@@ -39,6 +39,7 @@ struct spiv_config config = {
 	.zoom_strategy = ZOOM_IMAGE_DOWNSCALE,
 	.win_strategy = ZOOM_WIN_FIXED,
 	.full_screen = 0,
+	.exif_autorotate = 1,
 	.max_win_w = 1024,
 	.max_win_h = 768,
 
@@ -131,6 +132,9 @@ static int set_opt(struct cfg_opt *self, unsigned int lineno)
 	break;
 	case 't':
 		config.timers = 1;
+	break;
+	case 'r':
+		config.exif_autorotate = 0;
 	break;
 	}
 
@@ -337,6 +341,14 @@ struct cfg_opt spiv_opts[] = {
 	 .opt_has_value = 1,
 	 .set = set_orientation,
 	 .help = "Orientation, one of 0, 90, 180, 270",
+	},
+	{.name_space = "Gui",
+	 .key = "DisableExifAutorotate",
+	 .opt = 'r',
+	 .opt_long = "disable_exif_autorotate",
+	 .opt_has_value = 0,
+	 .set = set_opt,
+	 .help = "Disables automatic rotation by EXIF",
 	},
 	{.name_space = "Gui",
 	 .key = "FullScreen",

@@ -30,6 +30,7 @@ enum orientation {
 	ROTATE_90,
 	ROTATE_180,
 	ROTATE_270,
+	ROTATE_360,
 };
 
 enum zoom_strategy {
@@ -46,7 +47,10 @@ enum zoom_strategy {
 
 struct spiv_config {
 	float slideshow_delay;
+	/* orientation set by user */
 	enum orientation orientation;
+	/* combined orientation (user orientation + EXIF rotation) */
+	enum orientation combined_orientation;
 	int win_strategy:2;
 	int zoom_strategy:2;
 	/* Maximal window size */
@@ -58,6 +62,7 @@ struct spiv_config {
 	int floyd_steinberg:1;
 	int timers:1;
 	int full_screen:1;
+	int exif_autorotate:1;
 	char backend_init[128];
 	GP_PixelType emul_type;
 
