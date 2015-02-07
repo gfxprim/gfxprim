@@ -293,6 +293,60 @@ GP_DataNode *GP_DataStorageGet(GP_DataStorage *self,
 	return NULL;
 }
 
+static struct GP_DataNode *lookup(GP_DataNode *node, const char *id,
+                                  const int id_len)
+{
+	struct GP_DataNode *i;
+
+	if (!node)
+		return NULL;
+
+	for (i = GP_DataDictFirst(node); i; i = i->next) {
+		if (!strncmp(i->id, id, id_len))
+			return i;
+	}
+
+	return NULL;
+}
+
+static struct GP_DataNode *get_by_path(GP_DataNode *node, const char *path)
+{
+	unsigned int i;
+
+	for (i = 0; path[i] && path[i] != '/'; i++);
+
+	if (!i)
+		return node;
+
+	node = lookup(node, path, i);
+
+	GP_DEBUG(3, "Lookup has node '%s'", node->id);
+
+	if (path[i] == '/')
+		path++;
+
+	path+=i;
+
+	return get_by_path(node, path);
+}
+
+GP_DataNode *GP_DataStorageGetByPath(GP_DataStorage *self, GP_DataNode *node,
+                                     const char *path)
+{
+	GP_DEBUG(3, "Looking for '%s' in %p", path, node);
+
+	if (path[0] == '/') {
+
+		if (!self)
+			return NULL;
+
+		node = GP_DataStorageRoot(self);
+		path++;
+	}
+
+	return get_by_path(node, path);
+}
+
 
 static void padd_printf(size_t padd, const char *id, size_t id_padd,
                         const char *fmt, ...)

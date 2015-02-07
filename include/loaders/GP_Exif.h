@@ -42,4 +42,14 @@ int GP_ReadExif(GP_IO *io, GP_DataStorage *storage);
  */
 int GP_MatchExif(const void *buf);
 
+/*
+ * Defines position to 0,0 coordinate.
+ */
+enum GP_EXIF_ORIENTATION {
+	GP_EXIF_UPPER_LEFT = 1,
+	GP_EXIF_LOWER_RIGHT = 3,
+	GP_EXIF_UPPER_RIGHT = 6,
+	GP_EXIF_LOWER_LEFT = 8,
+};
+
 #endif /* LOADERS_GP_EXIF_H */

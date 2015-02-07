@@ -108,6 +108,17 @@ GP_DataNode *GP_DataStorageGet(GP_DataStorage *self,
 		               GP_DataNode *node, const char *id);
 
 /*
+ * Returns data node by a path in the data storage.
+ *
+ * Example path: "/Exif/Orientation"
+ *
+ * The path works like filesystem path. The equivalent to working
+ * directory is the node pointer.
+ */
+GP_DataNode *GP_DataStorageGetByPath(GP_DataStorage *self, GP_DataNode *node,
+                                     const char *path);
+
+/*
  * Adds data into a dict.
  *
  * If node is NULL, data storage root is used.
