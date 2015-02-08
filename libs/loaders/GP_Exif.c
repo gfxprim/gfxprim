@@ -324,7 +324,7 @@ static int load_IFD(GP_IO *io, GP_DataStorage *storage, GP_DataNode *node,
 	GP_DEBUG(2, "-- IFD Offset 0x%08x Entries %04u --",
 	            IFD_offset, IFD_entries_count);
 
-	struct IFD_subrecord subrecs[IFD_entries_count];
+	struct IFD_subrecord subrecs[4];
 	unsigned int subrec_cnt = 0;
 
 	for (i = 0; i < IFD_entries_count; i++) {
@@ -346,6 +346,10 @@ static int load_IFD(GP_IO *io, GP_DataStorage *storage, GP_DataNode *node,
 		case IFD_EXIF_OFFSET:
 		case IFD_GPS_OFFSET:
 		case IFD_INTEROPERABILITY_OFFSET:
+			if (subrec_cnt >= GP_ARRAY_SIZE(subrecs)) {
+				GP_WARN("Too much subrecords, skipping one");
+				continue;
+			}
 			subrecs[subrec_cnt].tag = tag;
 			subrecs[subrec_cnt].offset = val;
 			subrec_cnt++;
