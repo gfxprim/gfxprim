@@ -24,9 +24,9 @@
 #include <string.h>
 #include <errno.h>
 
-#include "core/GP_Debug.h"
-
-#include "loaders/GP_Exif.h"
+#include <core/GP_Common.h>
+#include <core/GP_Debug.h>
+#include <loaders/GP_Exif.h>
 
 enum IFD_formats {
 	/* 1 bytes/components */
@@ -71,133 +71,13 @@ static const char *IFD_format_names[] = {
 	"Double Float",
 };
 
-enum IFD_tags {
-	/* Image width and height */
-	IFD_IMAGE_WIDTH = 0x0100,
-	IFD_IMAGE_HEIGHT = 0x0101,
+static const char *IFD_format_name(uint16_t format)
+{
+	if (format == 0 || format > IFD_FORMAT_LAST)
+		return "Unknown";
 
-	IFD_BITS_PER_SAMPLE = 0x0102,
-
-	/* TODO: enum of compressions */
-	IFD_COMPRESSION = 0x0103,
-	/* TODO: enum of interpretations */
-	IFD_PHOTOMETRIC_INTERPRETATION = 0x0106,
-
-	/* ASCII text no multibyte encoding */
-	IFD_IMAGE_DESCRIPTION = 0x010e,
-	/* Device (camer, scanner, ...) manufacturer */
-	IFD_MAKE = 0x010f,
-	/* Device model */
-	IFD_MODEL = 0x0110,
-	/* Image orientation                           *
-	 * 1 upper left, 3 lower right, 6 upper right, *
-	 * 8 lower left, other reserved                */
-	IFD_ORIENTATION = 0x0112,
-	/* X resolution 72 DPI is default */
-	IFD_X_RESOLUTION = 0x011a,
-	/* Y resolution 72 DPI is default */
-	IFD_Y_RESOLUTION = 0x011b,
-	/* 1 = Chunky, 2 = Planar */
-	IFD_PLANAR_CONFIGURATION = 0x011c,
-	/* 1 = No unit, 2 = Inch (default), 3 = Centimeter */
-	IFD_RESOLUTION_UNIT = 0x0128,
-	/* Software string. */
-	IFD_SOFTWARE = 0x0131,
-	/* YYYY:MM:DD HH:MM:SS in 24 hours format */
-	IFD_DATE_TIME = 0x0132,
-	/* White Point */
-	IFD_WHITE_POINT = 0x013e,
-	/* Primary Chromaticies */
-	IFD_PRIMARY_CHROMATICIES = 0x013f,
-	/* YCbCr Coefficients */
-	IFD_Y_CB_CR_COEFFICIENTS = 0x0211,
-	/* YCbCr Positioning */
-	IFD_Y_CB_CR_POSITIONING = 0x0213,
-	/* Reference Black White */
-	IFD_REFERENCE_BLACK_WHITE = 0x0214,
-	/* Copyright */
-	IFD_COPYRIGHT = 0x8298,
-	/* Exif SubIFD Offset */
-	IFD_EXIF_OFFSET = 0x8769,
-
-	/* TAGs from Exif SubIFD */
-	IFD_EXPOSURE_TIME = 0x829a,
-	/* Actual F-Number of lens when image was taken */
-	IFD_F_NUMBER = 0x829d,
-	/* 1 manual, 2 normal, 3 aperture priority, 4 shutter priority, *
-	 * 5 creative (slow), 6 action (high-speed), 7 portrait mode,   *
-	 * 8 landscape mode                                             */
-	IFD_EXPOSURE_PROGRAM = 0x8822,
-	/* CCD sensitivity */
-	IFD_ISO_SPEED_RATINGS = 0x8827,
-	/* ASCII 4 byte Exif version */
-	IFD_EXIF_VERSION = 0x9000,
-	/* Original time should not be modified by user program */
-	IFD_DATE_TIME_ORIGINAL = 0x9003,
-	IFD_DATE_TIME_DIGITIZED = 0x9004,
-	/* Undefined commonly 0x00, 0x01, 0x02, 0x03 */
-	IFD_COMPONENT_CONFIGURATION = 0x9101,
-	/* Average compression ration */
-	IFD_COMPRESSED_BITS_PER_PIXEL = 0x9102,
-	/* Shutter speed as 1 / (2 ^ val) */
-	IFD_SHUTTER_SPEED_VALUE = 0x9201,
-	/* Aperture to convert to F-Number do 1.4142 ^ val */
-	IFD_APERTURE_VALUE = 0x9202,
-	/* Brightness in EV */
-	IFD_BRIGHTNESS_VALUE = 0x9203,
-	/* Exposure bias in EV */
-	IFD_EXPOSURE_BIAS_VALUE = 0x9204,
-	/* Max Aperture in the same format as IFD_APERTURE_VALUE */
-	IFD_MAX_APERTURE_VALUE = 0x9205,
-	/* Distance to focus point in meters */
-	IFD_SUBJECT_DISTANCE = 0x9206,
-	/* Exposure metering method, 1 average, 2 center weighted average, *
-	 * 3 spot, 4 multi-spot, 5 multi-segment                           */
-	IFD_METERING_MODE = 0x9207,
-	/* White balance 0 auto, 1 daylight, 2 flourescent, 3 tungsten, 10 flash */
-	IFD_LIGHT_SOURCE = 0x9208,
-	/* 0 off, 1 on */
-	IFD_FLASH = 0x9209,
-	/* Focal length in milimeters */
-	IFD_FOCAL_LENGTH = 0x920a,
-	/* Maker note, undefined may be IFD block */
-	IFD_MAKER_NOTE = 0x927c,
-	/* Comment */
-	IFD_USER_COMMENT = 0x9286,
-
-	/* Stores FlashPix version, undefined, may be four ASCII numbers */
-	IFD_FLASH_PIX_VERSION = 0xa000,
-	/* Unknown may be 1 */
-	IFD_COLOR_SPACE = 0xa001,
-	/* Exif Image Width and Height */
-	IFD_EXIF_IMAGE_WIDTH = 0xa002,
-	IFD_EXIF_IMAGE_HEIGHT = 0xa003,
-	/* May store related audio filename */
-	IFD_RELATED_SOUND_FILE = 0xa004,
-	/* */
-	IFD_FOCAL_PLANE_X_RESOLUTION = 0xa20e,
-	IFD_FOCAL_PLANE_Y_RESOLUTION = 0xa20f,
-	/* 1 = No unit, 2 = Inch (default), 3 = Centimeter */
-	IFD_FOCAL_PLANE_RESOLUTION_UNIT = 0xa210,
-	/* TODO: enum of sensing methods */
-	IFD_SENSING_METHOD = 0xa217,
-	IFD_FILE_SOURCE = 0xa300,
-	IFD_SCENE_TYPE = 0xa301,
-	/* 0 = Normal, 1 = Custom */
-	IFD_CUSTOM_RENDERER = 0xa401,
-	/* 0 = Auto, 1 = Manual, 2 = Auto bracket */
-	IFD_EXPOSURE_MODE = 0xa402,
-	/* 0 = Auto, 1 = Manual */
-	IFD_WHITE_BALANCE = 0xa403,
-	/* 0 = Standard, 1 = Landscape, 2 = Portrait, 3 = Night Scene */
-	IFD_SCENE_CAPTURE_TYPE = 0xa406,
-	/* 0 = Normal, 1 = Soft, 2 = Hard */
-	IFD_CONTRAST = 0xa408,
-	/* 0 = Normal, 1 = Low Saturation, 2 = Hight Saturation */
-	IFD_SATURATION = 0xa409,
-	/* 0 = Normal, 1 = Sort, 2 = Hard */
-	IFD_SHARPNESS = 0xa40a,
-};
+	return IFD_format_names[format - 1];
+}
 
 struct IFD_tag {
 	uint16_t tag;
@@ -207,126 +87,52 @@ struct IFD_tag {
 	uint32_t num_components;
 };
 
-/* These are sorted by tag */
-static const struct IFD_tag IFD_tags[] = {
-	/* TAGs from IFD0 */
-	/* TODO May be LONG */
-	{IFD_IMAGE_WIDTH, "Image Width", IFD_UNSIGNED_SHORT, 1},
-	{IFD_IMAGE_HEIGHT, "Image Height", IFD_UNSIGNED_SHORT, 1},
-
-	{IFD_BITS_PER_SAMPLE, "Bits Per Sample", IFD_UNSIGNED_SHORT, 3},
-	{IFD_COMPRESSION, "Compression", IFD_UNSIGNED_SHORT, 1},
-	{IFD_PHOTOMETRIC_INTERPRETATION, "Photometric Interpretation", IFD_UNSIGNED_SHORT, 1},
-
-	{IFD_IMAGE_DESCRIPTION, "Image Description", IFD_ASCII_STRING, 0},
-	{IFD_MAKE, "Make", IFD_ASCII_STRING, 0},
-	{IFD_MODEL, "Model", IFD_ASCII_STRING, 0},
-	{IFD_ORIENTATION, "Orientation", IFD_UNSIGNED_SHORT, 1},
-	{IFD_X_RESOLUTION, "X Resolution", IFD_UNSIGNED_RATIONAL, 1},
-	{IFD_Y_RESOLUTION, "Y Resolution", IFD_UNSIGNED_RATIONAL, 1},
-	{IFD_PLANAR_CONFIGURATION, "Planar Configuration", IFD_UNSIGNED_SHORT, 1},
-	{IFD_RESOLUTION_UNIT, "Resolution Unit", IFD_UNSIGNED_SHORT, 1},
-	{IFD_SOFTWARE, "Software", IFD_ASCII_STRING, 0},
-	{IFD_DATE_TIME, "Date Time", IFD_ASCII_STRING, 20},
-	{IFD_WHITE_POINT, "White Point", IFD_UNSIGNED_RATIONAL, 2},
-	{IFD_PRIMARY_CHROMATICIES, "Primary Chromaticies", IFD_UNSIGNED_RATIONAL, 6},
-	{IFD_Y_CB_CR_COEFFICIENTS, "YCbCr Conefficients", IFD_UNSIGNED_RATIONAL, 3},
-	{IFD_Y_CB_CR_POSITIONING, "YCbCr Positioning", IFD_UNSIGNED_SHORT, 1},
-	{IFD_REFERENCE_BLACK_WHITE, "Reference Black White", IFD_UNSIGNED_RATIONAL, 6},
-	{IFD_COPYRIGHT, "Copyright", IFD_ASCII_STRING, 0},
-
-	/* TAGs from Exif SubIFD */
-	{IFD_EXPOSURE_TIME, "Exposure Time", IFD_UNSIGNED_RATIONAL, 1},
-	{IFD_F_NUMBER, "F-Number", IFD_UNSIGNED_RATIONAL, 1},
-
-	/* TAG from IFD0 */
-	{IFD_EXIF_OFFSET, "Exif Offset", IFD_UNSIGNED_LONG, 1},
-
-	/* TAGs from Exif SubIFD */
-	{IFD_EXPOSURE_PROGRAM, "Exposure Program", IFD_UNSIGNED_SHORT, 1},
-	{IFD_ISO_SPEED_RATINGS, "ISO Speed Ratings", IFD_UNSIGNED_SHORT, 1},
-	{IFD_EXIF_VERSION, "Exif Version", IFD_UNDEFINED, 4},
-	{IFD_DATE_TIME_ORIGINAL, "Date Time Original", IFD_ASCII_STRING, 20},
-	{IFD_DATE_TIME_DIGITIZED, "Date Time Digitized", IFD_ASCII_STRING, 20},
-	{IFD_COMPONENT_CONFIGURATION, "Component Configuration", IFD_UNDEFINED, 0},
-	{IFD_COMPRESSED_BITS_PER_PIXEL, "Compressed Bits Per Pixel", IFD_UNSIGNED_RATIONAL, 1},
-	{IFD_SHUTTER_SPEED_VALUE, "Shutter Speed", IFD_SIGNED_RATIONAL, 1},
-	{IFD_APERTURE_VALUE, "Aperture", IFD_UNSIGNED_RATIONAL, 1},
-	{IFD_BRIGHTNESS_VALUE, "Brightness", IFD_SIGNED_RATIONAL, 1},
-	{IFD_EXPOSURE_BIAS_VALUE, "Exposure Bias", IFD_SIGNED_RATIONAL, 1},
-	{IFD_MAX_APERTURE_VALUE, "Max Aperture", IFD_UNSIGNED_RATIONAL, 1},
-	{IFD_SUBJECT_DISTANCE, "Subject Distance", IFD_SIGNED_RATIONAL, 1},
-	{IFD_METERING_MODE, "Metering Mode", IFD_UNSIGNED_SHORT, 1},
-	{IFD_LIGHT_SOURCE, "Light Source", IFD_UNSIGNED_SHORT, 1},
-	{IFD_FLASH, "Flash", IFD_UNSIGNED_SHORT, 1},
-	{IFD_FOCAL_LENGTH, "Focal Length", IFD_UNSIGNED_RATIONAL, 1},
-	{IFD_MAKER_NOTE, "Maker Note", IFD_UNDEFINED, 0},
-	{IFD_USER_COMMENT, "User Comment", IFD_UNDEFINED, 0},
-	{IFD_FLASH_PIX_VERSION, "Flash Pix Version", IFD_UNDEFINED, 4},
-	{IFD_COLOR_SPACE, "Color Space", IFD_UNSIGNED_SHORT, 1},
-	/* these two may be short in some cases */
-	{IFD_EXIF_IMAGE_WIDTH, "Exif Image Width", IFD_UNSIGNED_LONG, 1},
-	{IFD_EXIF_IMAGE_HEIGHT, "Exif Image Height", IFD_UNSIGNED_LONG, 1},
-	{IFD_RELATED_SOUND_FILE, "Related Soundfile", IFD_ASCII_STRING, 0},
-	{IFD_FOCAL_PLANE_X_RESOLUTION, "Focal Plane X Resolution", IFD_UNSIGNED_RATIONAL, 1},
-	{IFD_FOCAL_PLANE_Y_RESOLUTION, "Focal Plane Y Resolution", IFD_UNSIGNED_RATIONAL, 1},
-	{IFD_FOCAL_PLANE_RESOLUTION_UNIT, "Focal Plane Resolution Unit", IFD_UNSIGNED_SHORT, 1},
-	{IFD_SENSING_METHOD, "Sensing Method", IFD_UNSIGNED_SHORT, 1},
-	{IFD_FILE_SOURCE, "File Source", IFD_UNDEFINED, 1},
-	{IFD_SCENE_TYPE, "Scene Type", IFD_UNDEFINED, 1},
-	{IFD_CUSTOM_RENDERER, "Custom Renderer", IFD_UNSIGNED_SHORT, 1},
-	{IFD_EXPOSURE_MODE, "Exposure Mode", IFD_UNSIGNED_SHORT, 1},
-	{IFD_WHITE_BALANCE, "White Balance", IFD_UNSIGNED_SHORT, 1},
-	{IFD_SCENE_CAPTURE_TYPE, "Scene Capture Type", IFD_UNSIGNED_SHORT, 1},
-	{IFD_CONTRAST, "Contrast", IFD_UNSIGNED_SHORT, 1},
-	{IFD_SATURATION, "Saturation", IFD_UNSIGNED_SHORT, 1},
-	{IFD_SHARPNESS, "Sharpness", IFD_UNSIGNED_SHORT, 1},
+struct IFD_tags {
+	const struct IFD_tag *tags;
+	unsigned int tag_cnt;
+	const char *id;
 };
 
-static const char *IFD_format_name(uint16_t format)
-{
-	if (format == 0 || format > IFD_FORMAT_LAST)
-		return "Unknown";
-
-	return IFD_format_names[format - 1];
-}
-
-static const struct IFD_tag *IFD_tag_get(uint16_t tag)
+static const struct IFD_tag *IFD_tag_get(const struct IFD_tags *tags,
+                                         uint16_t tag)
 {
 	int left = 0;
-	int right = sizeof(IFD_tags)/sizeof(struct IFD_tag) - 1;
+	int right = tags->tag_cnt - 1;
 
 	while (right - left > 1) {
 		int middle = (right + left)/2;
 
-		if (IFD_tags[middle].tag == tag)
-			return &IFD_tags[middle];
+		if (tags->tags[middle].tag == tag)
+			return &tags->tags[middle];
 
 
-		if (IFD_tags[middle].tag > tag)
+		if (tags->tags[middle].tag > tag)
 			right = middle;
 		else
 			left = middle;
 	}
 
-	if (IFD_tags[left].tag == tag)
-		return &IFD_tags[left];
+	if (tags->tags[left].tag == tag)
+		return &tags->tags[left];
 
-	if (IFD_tags[right].tag == tag)
-		return &IFD_tags[right];
+	if (tags->tags[right].tag == tag)
+		return &tags->tags[right];
 
 	return NULL;
 }
 
-static const char *IFD_tag_name(uint16_t tag)
+static const char *IFD_tag_name(const struct IFD_tags *taglist, uint16_t tag)
 {
-	const struct IFD_tag *res = IFD_tag_get(tag);
+	const struct IFD_tag *res = IFD_tag_get(taglist, tag);
 
 	if (res == NULL)
 		return "Unknown";
 	else
 		return res->name;
 }
+
+#include "GP_ExifGPS.h"
+#include "GP_Exif.h"
 
 static int get_buf(GP_IO *io, off_t offset, char *buf, size_t len)
 {
@@ -380,8 +186,7 @@ add:
 static int load_rat(GP_IO *io, GP_DataStorage *storage, GP_DataNode *node,
 		    const char *id, uint32_t num_comp, uint32_t val)
 {
-	uint32_t buf[2];
-
+	(void)io;(void)storage;(void)node;(void)id;(void)num_comp;(void)val;
 	return GP_DataStorageAddRational(storage, node, id, 0, 0) != NULL;
 }
 
@@ -406,29 +211,29 @@ static int rat_den(void *buf, uint32_t offset, size_t buf_len, int swap)
 */
 
 static int load_tag(GP_IO *io, GP_DataStorage *storage,
-                    GP_DataNode* node, int endian,
-                    uint16_t tag, uint16_t format,
+                    GP_DataNode* node, const struct IFD_tags *taglist,
+		    int endian, uint16_t tag, uint16_t format,
                     uint32_t num_comp, uint32_t val)
 {
-	const struct IFD_tag *res = IFD_tag_get(tag);
+	const struct IFD_tag *res = IFD_tag_get(taglist, tag);
 
 	if (res == NULL) {
-		GP_TODO("Skipping unknown IFD tag 0x%02x format %s",
-		        tag, IFD_format_name(format));
+		GP_TODO("Skipping unknown IFD tag 0x%02x %s cnt %u in %s block",
+		        tag, IFD_format_name(format), num_comp, taglist->id);
 		return 0;
 	}
 
 	if (res->format != format) {
 		GP_WARN("Unexpected tag '%s' format '%s' (0x%02x) "
-		        "expected '%s'", res->name,
+		        "expected '%s' in %s block", res->name,
 		        IFD_format_name(format), format,
-		        IFD_format_name(res->format));
+		        IFD_format_name(res->format), taglist->id);
 	}
 
 	if ((res->num_components != 0) &&
 	    (res->num_components != num_comp)) {
-		GP_WARN("Unexpected tag '%s' num_components %u expected %u",
-		        res->name, num_comp, res->num_components);
+		GP_WARN("Unexpected '%s' num_components %u expected %u in %s block",
+		        res->name, num_comp, res->num_components, taglist->id);
 	}
 
 	switch (format) {
@@ -436,7 +241,9 @@ static int load_tag(GP_IO *io, GP_DataStorage *storage,
 		if (load_string(io, storage, node, res->name, num_comp, &val))
 			return 1;
 	break;
-	//case IFD_UNSIGNED_LONG:
+	case IFD_SIGNED_LONG:
+	case IFD_UNSIGNED_LONG:
+	case IFD_SIGNED_SHORT:
 	case IFD_UNSIGNED_SHORT:
 		if (num_comp == 1)
 			GP_DataStorageAddInt(storage, node, res->name, val);
@@ -448,23 +255,13 @@ static int load_tag(GP_IO *io, GP_DataStorage *storage,
 	case IFD_SIGNED_RATIONAL:
 		if (load_rat(io, storage, node, res->name, num_comp, val))
 			return 1;
-
-/*		if (num_comp == 1) {
-			rec.type = GP_DATA_RATIONAL;
-			rec.value.rat.
-				GP_MetaDataCreateRat(self, res->name,
-			                     rat_num(buf, val, buf_len, swap),
-					     rat_den(buf, val, buf_len, swap));
-		} else {
-			goto unused;
-		}
-*/
 	break;
 	case IFD_UNDEFINED:
 		switch (res->tag) {
 		case IFD_EXIF_VERSION:
 		case IFD_FLASH_PIX_VERSION:
 		case IFD_MAKER_NOTE:
+		case IFD_INTEROP_VERSION:
 			if (load_string(io, storage, node, res->name, num_comp, &val))
 				return 1;
 		break;
@@ -482,25 +279,24 @@ static int load_tag(GP_IO *io, GP_DataStorage *storage,
 	return 0;
 }
 
+struct IFD_subrecord {
+	uint16_t tag;
+	uint32_t offset;
+};
+
 static int load_IFD(GP_IO *io, GP_DataStorage *storage, GP_DataNode *node,
-                    uint32_t IFD_offset, int endian)
+                    const struct IFD_tags *taglist, uint32_t IFD_offset,
+                    int endian)
 {
 	uint16_t IFD_entries_count;
 	uint16_t i2 = endian == 'I' ? GP_IO_L2 : GP_IO_B2;
+	unsigned int i;
 
 	uint16_t IFD_header[] = {
 		GP_IO_IGN | IFD_offset,
 		i2,
 		GP_IO_END,
 	};
-
-	if (GP_IOReadF(io, IFD_header, &IFD_entries_count) != 2) {
-		GP_DEBUG(1, "Failed to read IFD entries count");
-		return 1;
-	}
-
-	GP_DEBUG(2, "-- IFD Offset 0x%08x Entries 0x%04x --",
-	            IFD_offset, IFD_entries_count);
 
 	uint16_t IFD_record_LE[] = {
 		GP_IO_L2, /* Tag                  */
@@ -518,16 +314,24 @@ static int load_IFD(GP_IO *io, GP_DataStorage *storage, GP_DataNode *node,
 		GP_IO_END,
 	};
 
-	uint16_t *IFD_record = endian == 'I' ? IFD_record_LE : IFD_record_BE;
+	uint16_t *IFD_rec_head = endian == 'I' ? IFD_record_LE : IFD_record_BE;
 
-	int i;
+	if (GP_IOReadF(io, IFD_header, &IFD_entries_count) != 2) {
+		GP_DEBUG(1, "Failed to read IFD entries count");
+		return 1;
+	}
+
+	GP_DEBUG(2, "-- IFD Offset 0x%08x Entries %04u --",
+	            IFD_offset, IFD_entries_count);
+
+	struct IFD_subrecord subrecs[IFD_entries_count];
+	unsigned int subrec_cnt = 0;
 
 	for (i = 0; i < IFD_entries_count; i++) {
 		uint16_t tag, format;
 		uint32_t num_comp, val;
-		off_t cur_off;
 
-		if (GP_IOReadF(io, IFD_record, &tag, &format, &num_comp, &val) != 4) {
+		if (GP_IOReadF(io, IFD_rec_head, &tag, &format, &num_comp, &val) != 4) {
 			GP_DEBUG(1, "Failed to read IFD record");
 			return 1;
 		}
@@ -536,28 +340,55 @@ static int load_IFD(GP_IO *io, GP_DataStorage *storage, GP_DataNode *node,
 		         tag, format, num_comp, val);
 
 		GP_DEBUG(3, "IFD Entry tag '%s' format '%s'",
-			 IFD_tag_name(tag), IFD_format_name(format));
+			 IFD_tag_name(taglist, tag), IFD_format_name(format));
 
-
-		if (tag == IFD_EXIF_OFFSET) {
-			cur_off = GP_IOTell(io);
-
-			/* Offset is counted from the II or MM in the Exif header */
-			if (val + 6 < cur_off)
-				GP_DEBUG(1, "Negative offset!");
-			else
-				load_IFD(io, storage, node, val + 6 - cur_off, endian);
-		} else {
-			load_tag(io, storage, node, endian, tag, format, num_comp, val);
+		switch (tag) {
+		case IFD_EXIF_OFFSET:
+		case IFD_GPS_OFFSET:
+		case IFD_INTEROPERABILITY_OFFSET:
+			subrecs[subrec_cnt].tag = tag;
+			subrecs[subrec_cnt].offset = val;
+			subrec_cnt++;
+		break;
+		default:
+			load_tag(io, storage, node, taglist, endian, tag, format, num_comp, val);
+		break;
 		}
 	}
 
-/*
-	GET_32(IFD_offset, buf, IFD_offset, buf_len, swap);
+	for (i = 0; i < subrec_cnt; i++) {
+		off_t cur_off = GP_IOTell(io);
+		const struct IFD_tags *tags;
+		GP_DataNode *new_node;
 
-	if (IFD_offset != 0x00000000)
-		load_IFD(self, buf, buf_len, IFD_offset, swap);
-*/
+		GP_DEBUG(3, "-- Loading sub IFD %s --",
+		         IFD_tag_name(taglist, subrecs[i].tag));
+
+		switch (subrecs[i].tag) {
+		case IFD_EXIF_OFFSET:
+			tags = taglist;
+			new_node = node;
+		break;
+		case IFD_GPS_OFFSET:
+			tags = &IFD_GPS_tags;
+			new_node = GP_DataStorageAddDict(storage, node, "GPS");
+		break;
+		case IFD_INTEROPERABILITY_OFFSET:
+			tags = taglist;
+			new_node = GP_DataStorageAddDict(storage, node, "Interoperability");
+		break;
+		default:
+			GP_BUG("Invalid tag");
+			return 1;
+		}
+
+		/* Offset is counted from the II or MM in the Exif header */
+		if (subrecs[i].offset + 6 < cur_off)
+			GP_DEBUG(1, "Negative offset!");
+
+		load_IFD(io, storage, new_node, tags, subrecs[i].offset + 6 - cur_off, endian);
+	}
+
 	return 0;
 }
 
@@ -605,5 +436,5 @@ int GP_ReadExif(GP_IO *io, GP_DataStorage *storage)
 	GP_DataNode *exif_root = GP_DataStorageAddDict(storage, NULL, "Exif");
 
 	/* The offset starts from the II or MM */
-	return load_IFD(io, storage, exif_root, IFD_offset - 8, b1);
+	return load_IFD(io, storage, exif_root, &IFD_EXIF_tags, IFD_offset - 8, b1);
 }
