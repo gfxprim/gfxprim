@@ -174,16 +174,29 @@ enum IFD_tags {
 	IFD_EXIF_IMAGE_HEIGHT = 0xa003,
 	/* May store related audio filename */
 	IFD_RELATED_SOUND_FILE = 0xa004,
+	/* */
+	IFD_FOCAL_PLANE_X_RESOLUTION = 0xa20e,
+	IFD_FOCAL_PLANE_Y_RESOLUTION = 0xa20f,
+	/* 1 = No unit, 2 = Inch (default), 3 = Centimeter */
+	IFD_FOCAL_PLANE_RESOLUTION_UNIT = 0xa210,
 	/* TODO: enum of sensing methods */
 	IFD_SENSING_METHOD = 0xa217,
 	IFD_FILE_SOURCE = 0xa300,
 	IFD_SCENE_TYPE = 0xa301,
 	/* 0 = Normal, 1 = Custom */
-	IFD_CUSTOM_RENDERER = 0x0a401,
+	IFD_CUSTOM_RENDERER = 0xa401,
 	/* 0 = Auto, 1 = Manual, 2 = Auto bracket */
-	IFD_EXPOSURE_MODE = 0x0a402,
+	IFD_EXPOSURE_MODE = 0xa402,
 	/* 0 = Auto, 1 = Manual */
-	IFD_WHITE_BALANCE = 0x0a403,
+	IFD_WHITE_BALANCE = 0xa403,
+	/* 0 = Standard, 1 = Landscape, 2 = Portrait, 3 = Night Scene */
+	IFD_SCENE_CAPTURE_TYPE = 0xa406,
+	/* 0 = Normal, 1 = Soft, 2 = Hard */
+	IFD_CONTRAST = 0xa408,
+	/* 0 = Normal, 1 = Low Saturation, 2 = Hight Saturation */
+	IFD_SATURATION = 0xa409,
+	/* 0 = Normal, 1 = Sort, 2 = Hard */
+	IFD_SHARPNESS = 0xa40a,
 };
 
 struct IFD_tag {
@@ -255,12 +268,19 @@ static const struct IFD_tag IFD_tags[] = {
 	{IFD_EXIF_IMAGE_WIDTH, "Exif Image Width", IFD_UNSIGNED_LONG, 1},
 	{IFD_EXIF_IMAGE_HEIGHT, "Exif Image Height", IFD_UNSIGNED_LONG, 1},
 	{IFD_RELATED_SOUND_FILE, "Related Soundfile", IFD_ASCII_STRING, 0},
+	{IFD_FOCAL_PLANE_X_RESOLUTION, "Focal Plane X Resolution", IFD_UNSIGNED_RATIONAL, 1},
+	{IFD_FOCAL_PLANE_Y_RESOLUTION, "Focal Plane Y Resolution", IFD_UNSIGNED_RATIONAL, 1},
+	{IFD_FOCAL_PLANE_RESOLUTION_UNIT, "Focal Plane Resolution Unit", IFD_UNSIGNED_SHORT, 1},
 	{IFD_SENSING_METHOD, "Sensing Method", IFD_UNSIGNED_SHORT, 1},
 	{IFD_FILE_SOURCE, "File Source", IFD_UNDEFINED, 1},
 	{IFD_SCENE_TYPE, "Scene Type", IFD_UNDEFINED, 1},
 	{IFD_CUSTOM_RENDERER, "Custom Renderer", IFD_UNSIGNED_SHORT, 1},
 	{IFD_EXPOSURE_MODE, "Exposure Mode", IFD_UNSIGNED_SHORT, 1},
 	{IFD_WHITE_BALANCE, "White Balance", IFD_UNSIGNED_SHORT, 1},
+	{IFD_SCENE_CAPTURE_TYPE, "Scene Capture Type", IFD_UNSIGNED_SHORT, 1},
+	{IFD_CONTRAST, "Contrast", IFD_UNSIGNED_SHORT, 1},
+	{IFD_SATURATION, "Saturation", IFD_UNSIGNED_SHORT, 1},
+	{IFD_SHARPNESS, "Sharpness", IFD_UNSIGNED_SHORT, 1},
 };
 
 static const char *IFD_format_name(uint16_t format)
