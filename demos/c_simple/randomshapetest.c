@@ -44,8 +44,7 @@ static int pause_flag = 0;
 #define SHAPE_RECTANGLE	4
 #define SHAPE_TETRAGON   5
 #define SHAPE_POLYGON	6
-#define SHAPE_RECTANGLE_AA 7
-#define SHAPE_LAST	7
+#define SHAPE_LAST	6
 static int shape = SHAPE_FIRST;
 
 /* Draw outlines? */
@@ -155,20 +154,6 @@ void draw_random_polygon(GP_Pixel pixel)
 	GP_FillPolygon_Raw(win->context, 5, xy, pixel);
 }
 
-void draw_random_rectangle_AA(GP_Pixel pixel)
-{
-	int x0, y0, x1, y1;
-	random_point_AA(win->context, &x0, &y0);
-	random_point_AA(win->context, &x1, &y1);
-
-//	if (fill_flag)
-		GP_FillRect_AA(win->context, x0, y0, x1, y1, pixel);
-
-//	if (outline_flag)
-//		GP_Rect(win->context, x0, y0, x1, y1, white);
-}
-
-
 void clear_screen(void)
 {
 	GP_Fill(win->context, black);
@@ -203,9 +188,6 @@ void redraw_screen(void)
 	break;
 	case SHAPE_POLYGON:
 		draw_random_polygon(pixel);
-	break;
-	case SHAPE_RECTANGLE_AA:
-		draw_random_rectangle_AA(pixel);
 	break;
 	}
 }
@@ -252,6 +234,14 @@ void event_loop(void)
 				exit(0);
 			break;
 			}
+		break;
+		case GP_EV_SYS:
+			if (ev.code == GP_EV_SYS_RESIZE) {
+				GP_BackendResizeAck(win);
+				clear_screen();
+				GP_BackendFlip(win);
+			}
+		break;
 		}
 	}
 }
