@@ -112,7 +112,6 @@ void GP_DebugPrint(int level, const char *file, const char *function, int line,
 		fprintf(stderr, "*** BUG: %s:%s():%u: ", file, function, line);
 	break;
 	case GP_DEBUG_WARN:
-		GP_DebugPrintCStack();
 		fprintf(stderr, "*** WARNING: %s:%s():%u: ", file, function, line);
 	break;
 	case GP_DEBUG_TODO:
