@@ -186,29 +186,15 @@ add:
 static int load_rat(GP_IO *io, GP_DataStorage *storage, GP_DataNode *node,
 		    const char *id, uint32_t num_comp, uint32_t val)
 {
-	(void)io;(void)storage;(void)node;(void)id;(void)num_comp;(void)val;
-	return GP_DataStorageAddRational(storage, node, id, 0, 0) != NULL;
+	size_t max_comps = GP_MIN(num_comp, 32u);
+	uint32_t buf[2 * max_comps];
+
+	if (get_buf(io, val + 6, (void*)buf, num_comp * 8))
+		return 1;
+
+	//TODO: Data Storage needs array
+	return GP_DataStorageAddRational(storage, node, id, buf[0], buf[1]) != NULL;
 }
-
-/*
-static int rat_num(void *buf, uint32_t offset, size_t buf_len, int swap)
-{
-	int ret;
-
-	GET_32(ret, buf, offset, buf_len, swap);
-
-	return ret;
-}
-
-static int rat_den(void *buf, uint32_t offset, size_t buf_len, int swap)
-{
-	int ret;
-
-	GET_32(ret, buf, offset + 4, buf_len, swap);
-
-	return ret;
-}
-*/
 
 static int load_tag(GP_IO *io, GP_DataStorage *storage,
                     GP_DataNode* node, const struct IFD_tags *taglist,
@@ -228,6 +214,7 @@ static int load_tag(GP_IO *io, GP_DataStorage *storage,
 		        "expected '%s' in %s block", res->name,
 		        IFD_format_name(format), format,
 		        IFD_format_name(res->format), taglist->id);
+		//TODO: Load and convert!
 	}
 
 	if ((res->num_components != 0) &&
