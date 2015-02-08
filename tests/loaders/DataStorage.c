@@ -200,6 +200,87 @@ static int wrong_type_add(void)
 	return TST_SUCCESS;
 }
 
+static int get_by_path(void)
+{
+	GP_DataStorage *storage;
+	GP_DataNode *ret, *res;
+	int fail = 0;
+
+	storage = GP_DataStorageCreate();
+
+	if (!storage)
+		return TST_FAILED;
+
+	GP_DataNode data = {
+		.type = GP_DATA_STRING,
+		.id = "string",
+		.value.str = "test string",
+	};
+
+	ret = GP_DataStorageAdd(storage, NULL, &data);
+
+	if (!ret) {
+		tst_msg("DataStorageAdd() failed");
+		GP_DataStorageDestroy(storage);
+		return TST_FAILED;
+	}
+
+	/* Global path */
+	res = GP_DataStorageGetByPath(storage, NULL, "/string");
+
+	if (res != ret) {
+		tst_msg("DataStorageGetByPath(storage, NULL, '/string')");
+		fail++;
+	}
+
+	/* Local path */
+	res = GP_DataStorageGetByPath(NULL, GP_DataStorageRoot(storage), "string");
+
+	if (res != ret) {
+		tst_msg("DataStorageGetByPath(NULL, root, 'string')");
+		fail++;
+	}
+
+	/* Non existing in global path */
+	res = GP_DataStorageGetByPath(storage, NULL, "/does-not-exist");
+
+	if (res) {
+		tst_msg("DataStorageGetByPath(storage, NULL, '/does-not-exist')");
+		fail++;
+	}
+
+	/* Non existing in local path */
+	res = GP_DataStorageGetByPath(NULL, GP_DataStorageRoot(storage), "does-not-exist");
+
+	if (res) {
+		tst_msg("DataStorageGetByPath(NULL, root, 'does-not-exist')");
+		fail++;
+	}
+
+	/* Empty dict for local path */
+	res = GP_DataStorageGetByPath(NULL, NULL, "does-not-exist");
+
+	if (res) {
+		tst_msg("DataStorageGetByPath(NULL, NULL, 'does-not-exist')");
+		fail++;
+	}
+
+	/* Empty storage for global path */
+	res = GP_DataStorageGetByPath(NULL, NULL, "/does-not-exist");
+
+	if (res) {
+		tst_msg("DataStorageGetByPath(NULL, NULL, '/does-not-exist')");
+		fail++;
+	}
+
+	GP_DataStorageDestroy(storage);
+
+	if (fail)
+		return TST_FAILED;
+
+	return TST_SUCCESS;
+}
+
 const struct tst_suite tst_suite = {
 	.suite_name = "Data Storage",
 	.tests = {
@@ -221,6 +302,10 @@ const struct tst_suite tst_suite = {
 
 		{.name = "Wrong type Add",
 		 .tst_fn = wrong_type_add,
+		 .flags = TST_CHECK_MALLOC},
+
+		{.name = "GP_DataStorageGetByPath()",
+		 .tst_fn = get_by_path,
 		 .flags = TST_CHECK_MALLOC},
 
 		{.name = NULL},
