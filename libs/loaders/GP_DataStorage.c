@@ -320,6 +320,9 @@ static struct GP_DataNode *get_by_path(GP_DataNode *node, const char *path)
 
 	node = lookup(node, path, i);
 
+	if (!node)
+		return NULL;
+
 	GP_DEBUG(3, "Lookup has node '%s'", node->id);
 
 	if (path[i] == '/')
