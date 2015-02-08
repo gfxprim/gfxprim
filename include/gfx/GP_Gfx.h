@@ -55,6 +55,5 @@
 #include "GP_VLineAA.h"
 #include "GP_HLineAA.h"
 #include "GP_LineAA.h"
-#include "GP_RectAA.h"
 
 #endif /* GP_GFX_H */

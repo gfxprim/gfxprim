@@ -109,11 +109,6 @@ GP_PutPixelAA_Raw_Clipped
 GP_ArcSegment
 GP_ArcSegment_Raw
 
-GP_FillRectXYXY_AA
-GP_FillRectXYXY_AA_Raw
-GP_FillRectXYWH_AA
-GP_FillRectXYWH_AA_Raw
-
 GP_AngleInRange
 GP_NormalizeAngle
 

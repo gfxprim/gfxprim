@@ -30,7 +30,6 @@ gfx_params = {
     'FillEllipse': 'IIIIP',
     'FillPolygon': ([(0,0),(1,1),(1,0)], 0, {}),
     'FillRect': 'IIIIP',
-    'FillRect_AA': 'IIIIP', # Fixpoint, originally 'FFFFP'
     'FillRing': 'IIIIP',
     'FillTetragon': 'IIIIIIIIP',
     'FillTriangle': 'IIIIIIP',

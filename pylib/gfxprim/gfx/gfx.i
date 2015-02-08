@@ -27,7 +27,6 @@
 %include "GP_VLineAA.h"
 %include "GP_HLineAA.h"
 %include "GP_LineAA.h"
-%include "GP_RectAA.h"
 
 %inline %{
 static GP_Coord *GP_Polygon_unpack_coordinates(PyObject *coords)

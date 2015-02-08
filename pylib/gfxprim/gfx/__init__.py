@@ -37,7 +37,7 @@ def _init(module):
 
   for name in [
       'ArcSegment', 'Circle', 'Ellipse', 'FillCircle', 'FillEllipse',
-      'FillRect', 'FillRect_AA', 'FillRing',
+      'FillRect', 'FillRing',
       'FillTetragon', 'FillTriangle', 'HLine', 'HLineAA', 'Line', 'LineAA',
       'PutPixelAA', 'Rect', 'Ring', 'Tetragon',
       'Triangle', 'VLine', 'VLineAA']:
