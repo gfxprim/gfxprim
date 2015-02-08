@@ -16,7 +16,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2014 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2015 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
@@ -254,12 +254,21 @@ GP_DataNode *GP_DataStorageAdd(GP_DataStorage *self,
                                GP_DataNode *node, GP_DataNode *data)
 {
 	struct record *rec;
+	struct GP_DataNode *dup;
 
 	GP_DEBUG(2, "Adding '%s' to storage (%p)", data->id, self);
 
 	if (node && node->type != GP_DATA_DICT) {
 		GP_WARN("Trying to insert data into %s",
 		        GP_DataTypeName(node->type));
+		return NULL;
+	}
+
+	dup = GP_DataStorageGet(self, node, data->id);
+
+	if (dup) {
+		GP_WARN("Trying to insert allready existing node '%s'",
+		        data->id);
 		return NULL;
 	}
 
