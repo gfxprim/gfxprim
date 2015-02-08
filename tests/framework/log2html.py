@@ -94,7 +94,7 @@ class MallocStats:
 
         print('        <td bgcolor="#ffffaa">')
         print('         <center><small>%s</small></center>' %
-              bytes_conv(self.total_chunks))
+              self.total_chunks)
         print('        </td>')
 
         print('        <td bgcolor="#ffffaa">')
@@ -104,7 +104,7 @@ class MallocStats:
 
         print('        <td bgcolor="#ffffaa">')
         print('         <center><small>%s</small></center>' %
-              bytes_conv(self.max_chunks))
+              self.max_chunks)
         print('        </td>')
 
         print('        <td bgcolor="#ffffaa">')
@@ -114,7 +114,7 @@ class MallocStats:
 
         print('        <td bgcolor="#ffffaa">')
         print('         <center><small>%s</small></center>' %
-              bytes_conv(self.lost_chunks))
+              self.lost_chunks)
         print('        </td>')
 
         print('       </tr>')
