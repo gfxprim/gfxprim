@@ -411,7 +411,7 @@ static void data_print(const GP_DataNode *node,
 		            node->value.rat.num, node->value.rat.den);
 	break;
 	case GP_DATA_STRING:
-		padd_printf(padd, node->id, id_padd, " : %s\n", node->value.str);
+		padd_printf(padd, node->id, id_padd, " : '%s'\n", node->value.str);
 	break;
 	case GP_DATA_DICT:
 		padd_printf(padd, node->id ? node->id : "Data Root", 0, " = {\n");
