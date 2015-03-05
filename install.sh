@@ -11,15 +11,15 @@ BIN_LOC="${DESTDIR}/$BINDIR"
 
 # Headers
 echo "INSTALL headers ($HEADER_LOC)"
-install -m 775 -d "${HEADER_LOC}/GP"
+install -m 775 -d "${HEADER_LOC}/gfxprim"
 for i in `ls include/`; do
 	if [ -d "include/$i" ]; then
 		echo " $i"
-		install -m 775 -d "${HEADER_LOC}/GP/$i"
-		install -m 664 "include/$i/"*.h "${HEADER_LOC}/GP/$i"
+		install -m 775 -d "${HEADER_LOC}/gfxprim/$i"
+		install -m 664 "include/$i/"*.h "${HEADER_LOC}/gfxprim/$i"
 	else
 		if [ "$i" != "Makefile" ]; then
-			install -m 664 "include/$i" "${HEADER_LOC}/GP/$i"
+			install -m 664 "include/$i" "${HEADER_LOC}/gfxprim/$i"
 		fi
 	fi
 done

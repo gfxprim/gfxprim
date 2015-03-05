@@ -300,7 +300,7 @@ def write_gfxprim_config(cfg, libs):
     # General switches cflags and ldflags
     f.write('\t--help) echo "$USAGE"; exit 0;;\n')
     f.write('\t--list-modules) echo "%s"; exit 0;;\n' % ' '.join(modules))
-    f.write('\t--cflags) echo -n "-I/usr/include/GP/%s";;\n' %
+    f.write('\t--cflags) echo -n "-I/usr/include/gfxprim/%s";;\n' %
             libs.get_cflags('core'))
     f.write('\t--libs) echo -n "-lgfxprim -lrt -lm %s ";;\n' % libs.get_linker_flags('core'))
 
