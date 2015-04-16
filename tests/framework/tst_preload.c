@@ -16,7 +16,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2013 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2015 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
@@ -27,6 +27,7 @@
 #include <string.h>
 #include <dlfcn.h>
 #include <execinfo.h>
+#include <time.h>
 
 #include "tst_test.h"
 #include "tst_preload.h"
@@ -48,12 +49,23 @@ void tst_malloc_check_start(void)
 {
 	void  *buf[1];
 	char *str_verbose;
+
 	/*
 	 * Call backtrace() before we start tracking memory, because it calls
 	 * dlopen() on first invocation, which allocates memory that is never
 	 * freed...
 	 */
 	backtrace(buf, 1);
+
+	/*
+	 * And so does mktime(), it allocates memory which is not freed in tzset()
+	 *
+	 * Unfortunatelly this still leaves one chunk of size 15 that is reallocated
+	 * on each call to mktime() :(
+	 */
+	struct tm tm;
+	mktime(&tm);
+
 	check_malloc = 1;
 
 	str_verbose = getenv("TST_MALLOC_VERBOSE");
