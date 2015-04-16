@@ -23,14 +23,17 @@
 #define _GNU_SOURCE
 #include <stdio.h>
 #include <stdint.h>
+#include <stdlib.h>
 #include <string.h>
 #include <dlfcn.h>
+#include <execinfo.h>
 
 #include "tst_test.h"
 #include "tst_preload.h"
 #include "tst_malloc_canaries.h"
 
 static int check_malloc = 0;
+static int verbose = 0;
 static int malloc_canary = MALLOC_CANARY_OFF;
 
 static size_t cur_size = 0;
@@ -43,23 +46,30 @@ static unsigned int max_chunks = 0;
 
 void tst_malloc_check_start(void)
 {
+	void  *buf[1];
+	char *str_verbose;
+	/*
+	 * Call backtrace() before we start tracking memory, because it calls
+	 * dlopen() on first invocation, which allocates memory that is never
+	 * freed...
+	 */
+	backtrace(buf, 1);
 	check_malloc = 1;
+
+	str_verbose = getenv("TST_MALLOC_VERBOSE");
+	if (str_verbose)
+		verbose = atoi(str_verbose);
 }
 
-void tst_malloc_check_stop(void)
+static void print_c_trace(void)
 {
-	/*
-	 * We cannot stop the tracing when canaries are on
-	 * because we need the chunk table to keep track
-	 * which allocations are with canary and their
-	 * sizes for free and realloc.
-	 */
-	if (malloc_canary != MALLOC_CANARY_OFF) {
-		tst_warn("Cannot turn malloc checks off when canaries are on");
-		return;
-	}
+	void *buffer[128];
+	int size = backtrace(buffer, 128);
 
-	check_malloc = 0;
+	fprintf(stderr, "C stack trace (most recent call first):\n");
+	fflush(stderr);
+	backtrace_symbols_fd(buffer, size, fileno(stderr));
+	fprintf(stderr, "\n");
 }
 
 void tst_malloc_canaries_set(enum tst_malloc_canary canary)
@@ -102,6 +112,18 @@ struct chunk {
 static struct chunk chunks[MAX_CHUNKS];
 static unsigned int chunks_top = 0;
 
+static struct chunk *get_chunk(void *ptr)
+{
+	unsigned int i;
+
+	for (i = 0; i < chunks_top; i++) {
+		if (chunks[i].ptr == ptr)
+			return &chunks[i];
+	}
+
+	return NULL;
+}
+
 static void add_chunk(size_t size, void *ptr)
 {
 	if (chunks_top >= MAX_CHUNKS) {
@@ -109,6 +131,12 @@ static void add_chunk(size_t size, void *ptr)
 		         MAX_CHUNKS);
 		return;
 	}
+
+	if (get_chunk(ptr))
+		tst_warn("Duplicate chunk addres added %p\n", ptr);
+
+	if (verbose > 1)
+		fprintf(stderr, " (adding chunk %p %6zu %i)\n", ptr, size, chunks_top);
 
 	/* Store chunk */
 	chunks[chunks_top].size = size;
@@ -133,6 +161,9 @@ static void rem_chunk(void *ptr)
 {
 	unsigned int i;
 
+	if (verbose > 1)
+		fprintf(stderr, " (removing chunk %p)\n", ptr);
+
 	for (i = 0; i < chunks_top; i++) {
 		if (chunks[i].ptr == ptr) {
 			/* Update global stats */
@@ -149,21 +180,35 @@ static void rem_chunk(void *ptr)
 	tst_warn("Chunk passed to free not found (%p)", ptr);
 }
 
-static struct chunk *get_chunk(void *ptr)
+void tst_malloc_check_stop(void)
 {
-	unsigned int i;
-
-	for (i = 0; i < chunks_top; i++) {
-		if (chunks[i].ptr == ptr)
-			return &chunks[i];
+	/*
+	 * We cannot stop the tracing when canaries are on
+	 * because we need the chunk table to keep track
+	 * which allocations are with canary and their
+	 * sizes for free and realloc.
+	 */
+	if (malloc_canary != MALLOC_CANARY_OFF) {
+		tst_warn("Cannot turn malloc checks off when canaries are on");
+		return;
 	}
 
-	return NULL;
+	check_malloc = 0;
+
+	unsigned int i;
+
+	if (verbose) {
+		for (i = 0; i < chunks_top; i++) {
+			fprintf(stderr, "LOST CHUNK: %p %6zu\n",
+			        chunks[i].ptr, chunks[i].size);
+		}
+	}
 }
+
+static void *(*real_malloc)(size_t) = NULL;
 
 void *malloc(size_t size)
 {
-	static void *(*real_malloc)(size_t) = NULL;
 	void *ptr;
 
 	if (!real_malloc)
@@ -179,13 +224,40 @@ void *malloc(size_t size)
 	case MALLOC_CANARY_END:
 		ptr = tst_malloc_canary_right(size);
 	break;
-	/* Shut up gcc */
 	default:
 		return NULL;
 	}
 
-	if (check_malloc && ptr)
+	if (check_malloc && ptr) {
+		if (verbose)
+			fprintf(stderr, "MALLOC %p\n", ptr);
+		if (verbose > 1)
+			print_c_trace();
 		add_chunk(size, ptr);
+	}
+
+	return ptr;
+}
+
+void *calloc(size_t nmemb, size_t size)
+{
+	static int been_here = 0;
+	void *ptr;
+
+	/*
+	 * Fail calloc() before dlsym(RTLD_NEXT, "calloc") returns.
+	 *
+	 * The glibc seems to work with this failure just fine.
+	 */
+	if (!real_malloc && been_here)
+		return NULL;
+
+	been_here = 1;
+
+	ptr = malloc(nmemb * size);
+
+	if (ptr)
+		memset(ptr, 0, nmemb * size);
 
 	return ptr;
 }
@@ -221,6 +293,9 @@ void free(void *ptr)
 	break;
 	}
 
+	if (verbose)
+		fprintf(stderr, "FREE %p\n", ptr);
+
 	rem_chunk(ptr);
 }
 
@@ -229,8 +304,8 @@ void free(void *ptr)
 void *realloc(void *optr, size_t size)
 {
 	static void *(*real_realloc)(void*, size_t) = NULL;
-	struct chunk *chunk;
 	void *ptr;
+	struct chunk *chunk;
 
 	if (!real_realloc)
 		real_realloc = dlsym(RTLD_NEXT, "realloc");
@@ -238,44 +313,31 @@ void *realloc(void *optr, size_t size)
 	if (!optr)
 		return malloc(size);
 
-	switch (malloc_canary) {
-	case MALLOC_CANARY_OFF:
+	chunk = get_chunk(optr);
+
+	if (!chunk) {
+		/*
+		 * We don't know old size -> have to use real_realloc()
+		 */
 		ptr = real_realloc(optr, size);
-	break;
-	case MALLOC_CANARY_BEGIN:
-	case MALLOC_CANARY_END:
-		chunk = get_chunk(optr);
 
-		if (!chunk) {
-			tst_warn("%p allocated before checking was turned on, "
-			         "using using real_realloc()", optr);
+		/*
+		 * realloc() may call malloc(), add the chunk only if it
+		 * haven't been added previously.
+		 */
+		if (ptr && !get_chunk(ptr))
+			add_chunk(size, ptr);
 
-			ptr = real_realloc(optr, size);
-
-			goto out;
-		}
-
-		ptr = malloc(size);
-
-		if (ptr) {
-			memcpy(ptr, optr, min(chunk->size, size));
-			free(optr);
-		}
-	break;
-	/* Shut up gcc */
-	default:
-		return NULL;
+		return ptr;
 	}
 
-out:
+	ptr = malloc(size);
+
 	if (!ptr)
 		return NULL;
 
-	if (check_malloc) {
-		if (optr)
-			rem_chunk(optr);
-		add_chunk(size, ptr);
-	}
+	memcpy(ptr, optr, min(chunk->size, size));
+	free(optr);
 
 	return ptr;
 }
