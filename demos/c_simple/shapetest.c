@@ -251,12 +251,17 @@ void redraw_screen(void)
 
 	/* axes */
 	if (show_axes) {
-		GP_HLine(win, 0, win->w, center_y, gray);
-		GP_HLine(win, 0, win->w, center_y-yradius, darkgray);
-		GP_HLine(win, 0, win->w, center_y+yradius, darkgray);
-		GP_VLine(win, center_x, 0, win->h, gray);
-		GP_VLine(win, center_x-xradius, 0, win->h, darkgray);
-		GP_VLine(win, center_x+xradius, 0, win->h, darkgray);
+		int w, h;
+
+		w = GP_ContextW(win);
+		h = GP_ContextH(win);
+
+		GP_HLine(win, 0, w, center_y, gray);
+		GP_HLine(win, 0, w, center_y-yradius, darkgray);
+		GP_HLine(win, 0, w, center_y+yradius, darkgray);
+		GP_VLine(win, center_x, 0, h, gray);
+		GP_VLine(win, center_x-xradius, 0, h, darkgray);
+		GP_VLine(win, center_x+xradius, 0, h, darkgray);
 	}
 
 	/* the shape */
@@ -305,7 +310,7 @@ void redraw_screen(void)
 static void xradius_add(int xradius_add)
 {
 	if (xradius + xradius_add > 1 &&
-	    xradius + xradius_add < (int)win->w)
+	    xradius + xradius_add < (int)GP_ContextW(win))
 		xradius += xradius_add;
 }
 
@@ -313,21 +318,21 @@ static void xradius_add(int xradius_add)
 static void yradius_add(int yradius_add)
 {
 	if (yradius + yradius_add > 1 &&
-	    yradius + yradius_add < (int)win->h)
+	    yradius + yradius_add < (int)GP_ContextH(win))
 		yradius += yradius_add;
 }
 
 static void xcenter_add(int xcenter_add)
 {
 	if (center_x + xcenter_add > 1 &&
-	    center_x + xcenter_add < (int)win->w/2)
+	    center_x + xcenter_add < (int)GP_ContextW(win)/2)
 		center_x += xcenter_add;
 }
 
 static void ycenter_add(int ycenter_add)
 {
 	if (center_y + ycenter_add > 1 &&
-	    center_y + ycenter_add < (int)win->h/2)
+	    center_y + ycenter_add < (int)GP_ContextH(win)/2)
 		center_y += ycenter_add;
 }
 
@@ -359,7 +364,8 @@ void event_loop(void)
 			break;
 			case GP_KEY_R:
 				win->axes_swap = !win->axes_swap;
-				GP_SWAP(win->w, win->h);
+				center_x = GP_ContextW(win) / 2;
+				center_y = GP_ContextH(win) / 2;
 			break;
 			case GP_KEY_F:
 				fill = !fill;
@@ -445,8 +451,9 @@ void event_loop(void)
 			break;
 			case GP_EV_SYS_RESIZE:
 				GP_BackendResizeAck(backend);
-				center_x = backend->context->w / 2;
-				center_y = backend->context->h / 2;
+				win = backend->context;
+				center_x = GP_ContextW(win) / 2;
+				center_y = GP_ContextH(win) / 2;
 			break;
 			}
 		break;
