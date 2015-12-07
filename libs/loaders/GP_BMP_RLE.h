@@ -267,15 +267,16 @@ static int read_RLE8(GP_IO *io, struct bitmap_info_header *header,
                      GP_Context *context, GP_ProgressCallback *callback)
 {
 	uint32_t palette_size = get_palette_size(header);
-	GP_Pixel palette[get_palette_size(header)];
 	DECLARE_RLE(rle, header->w, GP_ABS(header->h), io);
 	int err;
 
+	GP_Pixel *palette = GP_TempAlloc(palette_size * sizeof(GP_Pixel));
+
 	if ((err = read_bitmap_palette(io, header, palette)))
-		return err;
+		goto err;
 
 	if ((err = seek_pixels_offset(io, header)))
-		return err;
+		goto err;
 
 	int cnt = 0;
 
@@ -289,7 +290,7 @@ static int read_RLE8(GP_IO *io, struct bitmap_info_header *header,
 
 	for (;;) {
 		if ((err = RLE8_next(&rle)))
-			return err;
+			goto err;
 
 		if (rle.state == RLE_STOP)
 			break;
@@ -319,11 +320,14 @@ static int read_RLE8(GP_IO *io, struct bitmap_info_header *header,
 			if (GP_ProgressCallbackReport(callback, rle.y,
 			                              context->h, context->w)) {
 				GP_DEBUG(1, "Operation aborted");
-				return ECANCELED;
+				err = ECANCELED;
+				goto err;
 			}
 		}
 	}
 
 	GP_ProgressCallbackDone(callback);
-	return 0;
+err:
+	GP_TempFree(palette_size * sizeof(GP_Pixel), palette);
+	return err;
 }
