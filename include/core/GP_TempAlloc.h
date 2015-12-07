@@ -79,9 +79,20 @@ struct GP_TempAlloc {
 	(void*)(((char*)(self.buffer)) + _pos);   \
 })
 
+#define GP_TempAllocArr(self, type, len) \
+	GP_TempAllocGet(self, sizeof(type) * len)
+
 #define GP_TempAllocFree(self) do {          \
 	if (self.size > GP_ALLOCA_THRESHOLD) \
 		free(self.buffer);           \
 } while (0)
+
+#define GP_TempAlloc(size) GP_TEMP_ALLOC(size)
+
+static inline void GP_TempFree(size_t size, void *ptr)
+{
+	if (size > GP_ALLOCA_THRESHOLD)
+		free(ptr);
+}
 
 #endif /* CORE_GP_TEMP_ALLOC_H */
