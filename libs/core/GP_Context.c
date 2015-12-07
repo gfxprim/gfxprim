@@ -43,7 +43,7 @@ GP_Context *GP_ContextAlloc(GP_Size w, GP_Size h, GP_PixelType type)
 {
 	GP_Context *context;
 	uint32_t bpp;
-	uint32_t bpr;
+	size_t bpr;
 	void *pixels;
 
 	if (!GP_VALID_PIXELTYPE(type)) {
@@ -64,7 +64,14 @@ GP_Context *GP_ContextAlloc(GP_Size w, GP_Size h, GP_PixelType type)
 	bpp = GP_PixelSize(type);
 	bpr = get_bpr(bpp, w);
 
-	pixels = malloc(bpr * h);
+	size_t size = bpr * h;
+
+	if (size / h != bpr) {
+		GP_WARN("Context too big %u x %u (owerflow detected)", w, h);
+		return NULL;
+	}
+
+	pixels = malloc(size);
 	context = malloc(sizeof(GP_Context));
 
 	if (pixels == NULL || context == NULL) {
