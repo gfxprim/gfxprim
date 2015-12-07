@@ -39,6 +39,7 @@
 #include "core/GP_Debug.h"
 #include "core/GP_Pixel.h"
 #include "core/GP_GetPutPixel.h"
+#include "core/GP_TempAlloc.h"
 
 #include "loaders/GP_LineConvert.h"
 #include "loaders/GP_BMP.h"
@@ -366,10 +367,12 @@ static int read_bitmap_palette(GP_IO *io, struct bitmap_info_header *header,
 		return err;
 	}
 
-	uint8_t buf[pixel_size * palette_colors];
+	uint32_t palette_size = pixel_size * palette_colors;
+	uint8_t *buf = GP_TempAlloc(palette_size);
 
-	if (GP_IOFill(io, buf, sizeof(buf))) {
+	if (GP_IOFill(io, buf, palette_size)) {
 		GP_DEBUG(1, "Failed to read palette: %s", strerror(errno));
+		GP_TempFree(palette_size, buf);
 		return EIO;
 	}
 
@@ -384,6 +387,7 @@ static int read_bitmap_palette(GP_IO *io, struct bitmap_info_header *header,
 		         GP_Pixel_GET_B_RGB888(palette[i]));
 	}
 
+	GP_TempFree(palette_size, buf);
 	return 0;
 }
 
@@ -505,27 +509,30 @@ static int read_palette(GP_IO *io, struct bitmap_info_header *header,
                         GP_Context *context, GP_ProgressCallback *callback)
 {
 	uint32_t palette_size = get_palette_size(header);
-	GP_Pixel palette[get_palette_size(header)];
-	int err;
-
-	if ((err = read_bitmap_palette(io, header, palette)))
-		return err;
-
-	if ((err = seek_pixels_offset(io, header)))
-		return err;
-
 	uint32_t row_size = bitmap_row_size(header);
 	int32_t y;
+	int err;
+
+	GP_TempAllocCreate(tmp, sizeof(GP_Pixel) * palette_size + row_size);
+
+	GP_Pixel *palette = GP_TempAllocArr(tmp, GP_Pixel, palette_size);
+
+	if ((err = read_bitmap_palette(io, header, palette)))
+		goto err;
+
+	if ((err = seek_pixels_offset(io, header)))
+		goto err;
+
+	uint8_t *row = GP_TempAllocArr(tmp, uint8_t, row_size);
 
 	for (y = 0; y < GP_ABS(header->h); y++) {
 		int32_t x;
-		uint8_t row[row_size];
 
 		if (GP_IOFill(io, row, row_size)) {
 			err = errno;
 			GP_DEBUG(1, "Failed to read row %"PRId32": %s",
 			         y, strerror(errno));
-			return err;
+			goto err;
 		}
 
 		for (x = 0; x < header->w; x++) {
@@ -552,12 +559,15 @@ static int read_palette(GP_IO *io, struct bitmap_info_header *header,
 		if (GP_ProgressCallbackReport(callback, y,
 		                              context->h, context->w)) {
 			GP_DEBUG(1, "Operation aborted");
-			return ECANCELED;
+			err = ECANCELED;
+			goto err;
 		}
 	}
 
 	GP_ProgressCallbackDone(callback);
-	return 0;
+err:
+	GP_TempAllocFree(tmp);
+	return err;
 }
 
 static int read_bitfields_or_rgb(GP_IO *io, struct bitmap_info_header *header,
