@@ -36,7 +36,15 @@
 
 static uint32_t get_bpr(uint32_t bpp, uint32_t w)
 {
-	return (bpp * w) / 8 + !!((bpp * w) % 8);
+	uint64_t bits_per_row = (uint64_t)bpp * w;
+	uint8_t padd = !!(bits_per_row % 8);
+
+	if (bits_per_row / 8 + padd > UINT32_MAX) {
+		GP_WARN("Context too wide %u (overflow detected)", w);
+		return 0;
+	}
+
+	return bits_per_row / 8 + padd;
 }
 
 GP_Context *GP_ContextAlloc(GP_Size w, GP_Size h, GP_PixelType type)
@@ -62,7 +70,9 @@ GP_Context *GP_ContextAlloc(GP_Size w, GP_Size h, GP_PixelType type)
 	         w, h, GP_PixelTypeName(type));
 
 	bpp = GP_PixelSize(type);
-	bpr = get_bpr(bpp, w);
+
+	if (!(bpr = get_bpr(bpp, w)))
+		return NULL;
 
 	size_t size = bpr * h;
 
