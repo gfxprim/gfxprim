@@ -270,6 +270,13 @@ static int read_RLE8(GP_IO *io, struct bitmap_info_header *header,
 	DECLARE_RLE(rle, header->w, GP_ABS(header->h), io);
 	int err;
 
+	if (context->pixel_type != GP_PIXEL_RGB888) {
+		GP_WARN("Corrupted BMP header! "
+			"RLE8 is 24bit (RGB888) palette but header says %s",
+		        GP_PixelTypeName(context->pixel_type));
+		return EINVAL;
+	}
+
 	GP_Pixel *palette = GP_TempAlloc(palette_size * sizeof(GP_Pixel));
 
 	if ((err = read_bitmap_palette(io, header, palette)))
