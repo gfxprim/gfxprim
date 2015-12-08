@@ -339,9 +339,8 @@ static int read_bitmap_header(GP_IO *io, struct bitmap_info_header *header)
  * Reads palette, the format is R G B X, each one byte.
  */
 static int read_bitmap_palette(GP_IO *io, struct bitmap_info_header *header,
-                               GP_Pixel *palette)
+                               GP_Pixel *palette, uint32_t palette_colors)
 {
-	uint32_t palette_colors = get_palette_size(header);
 	uint32_t palette_offset = header->header_size + 14;
 	uint8_t pixel_size;
 	uint32_t i;
@@ -367,7 +366,7 @@ static int read_bitmap_palette(GP_IO *io, struct bitmap_info_header *header,
 		return err;
 	}
 
-	uint32_t palette_size = pixel_size * palette_colors;
+	size_t palette_size = pixel_size * palette_colors;
 	uint8_t *buf = GP_TempAlloc(palette_size);
 
 	if (GP_IOFill(io, buf, palette_size)) {
@@ -517,7 +516,7 @@ static int read_palette(GP_IO *io, struct bitmap_info_header *header,
 
 	GP_Pixel *palette = GP_TempAllocArr(tmp, GP_Pixel, palette_size);
 
-	if ((err = read_bitmap_palette(io, header, palette)))
+	if ((err = read_bitmap_palette(io, header, palette, palette_size)))
 		goto err;
 
 	if ((err = seek_pixels_offset(io, header)))
@@ -631,11 +630,23 @@ static int read_bitfields_or_rgb(GP_IO *io, struct bitmap_info_header *header,
 	return 0;
 }
 
+static void check_palette_size(struct bitmap_info_header *header)
+{
+	if (header->palette_colors > 1u << header->bpp) {
+		GP_WARN("Corrupted header bpp=%"PRIu16" palette_size=%"PRIu32
+		        ", truncating palette_size to %u",
+		        header->bpp, header->palette_colors, 1u << header->bpp);
+		header->palette_colors = 0;
+	}
+}
+
 static int read_bitmap_pixels(GP_IO *io, struct bitmap_info_header *header,
                               GP_Context *context, GP_ProgressCallback *callback)
 {
-	if (header->compress_type == COMPRESS_RLE8)
+	if (header->compress_type == COMPRESS_RLE8) {
+		check_palette_size(header);
 		return read_RLE8(io, header, context, callback);
+	}
 
 	switch (header->bpp) {
 	case 1:
@@ -643,6 +654,7 @@ static int read_bitmap_pixels(GP_IO *io, struct bitmap_info_header *header,
 	case 2:
 	case 4:
 	case 8:
+		check_palette_size(header);
 		return read_palette(io, header, context, callback);
 	case 16:
 	case 24:

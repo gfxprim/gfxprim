@@ -279,7 +279,7 @@ static int read_RLE8(GP_IO *io, struct bitmap_info_header *header,
 
 	GP_Pixel *palette = GP_TempAlloc(palette_size * sizeof(GP_Pixel));
 
-	if ((err = read_bitmap_palette(io, header, palette)))
+	if ((err = read_bitmap_palette(io, header, palette, palette_size)))
 		goto err;
 
 	if ((err = seek_pixels_offset(io, header)))
