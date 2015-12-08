@@ -4,7 +4,7 @@ CSOURCES=$(shell echo *.c)
 
 INCLUDE=
 LDFLAGS+=-L$(TOPDIR)/build/
-LDLIBS+=-lrt -lm -lgfxprim-backends
+LDLIBS+=-lrt -lm -lgfxprim-backends -lgfxprim
 
 APPS=particle_demo
 

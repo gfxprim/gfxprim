@@ -5,7 +5,7 @@ CSOURCES=$(shell echo *.c)
 INCLUDE=core gfx
 
 LDLIBS+=-lrt -lm
-LDLIBS+=-lgfxprim-loaders
+LDLIBS+=-lgfxprim-loaders -lgfxprim
 
 APPS=grinder
 

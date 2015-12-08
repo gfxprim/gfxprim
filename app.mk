@@ -3,8 +3,8 @@ CLEAN+=$(APPS)
 
 %: %.o
 ifdef VERBOSE
-	$(CC) $(CFLAGS) $(LDFLAGS) -Wl,--start-group $^ $(LDLIBS) -lgfxprim -Wl,--end-group -o $@
+	$(CC) $(CFLAGS) $(LDFLAGS) -Wl,--start-group $^ $(LDLIBS) -Wl,--end-group -o $@
 else
 	@echo "LD   $@"
-	@$(CC) $(CFLAGS) $(LDFLAGS) -Wl,--start-group $^ $(LDLIBS) -lgfxprim -Wl,--end-group -o $@
+	@$(CC) $(CFLAGS) $(LDFLAGS) -Wl,--start-group $^ $(LDLIBS) -Wl,--end-group -o $@
 endif

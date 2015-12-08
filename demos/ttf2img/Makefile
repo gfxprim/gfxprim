@@ -4,7 +4,7 @@ include $(TOPDIR)/pre.mk
 CSOURCES=$(shell echo *.c)
 
 INCLUDE=
-LDLIBS+=-lgfxprim-loaders
+LDLIBS+=-lgfxprim-loaders -lgfxprim
 
 APPS=ttf2img
 

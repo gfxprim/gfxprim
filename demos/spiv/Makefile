@@ -7,7 +7,7 @@ INCLUDE=
 LDFLAGS+=-L$(TOPDIR)/build/
 LDLIBS+=-lrt
 
-LDLIBS+=-lgfxprim-loaders -lgfxprim-backends
+LDLIBS+=-lgfxprim-loaders -lgfxprim-backends -lgfxprim
 
 APPS=spiv
 

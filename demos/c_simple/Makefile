@@ -10,7 +10,7 @@ CSOURCES=$(SOURCES)
 endif
 
 INCLUDE=
-LDLIBS+=-lrt
+LDLIBS+=-lrt -lgfxprim
 
 APPS=backend_example loaders_example loaders filters_symmetry gfx_koch\
      virtual_backend_example meta_data showimage\
