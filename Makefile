@@ -40,4 +40,14 @@ tar:
 	$(MAKE) clean
 	cd .. && tar cf gfxprim-`date +%Y-%b-%d-%HH%MM`.tar gfxprim
 
+afl:
+	@if [ -z `which afl-gcc 2>/dev/null` ]; then \
+		echo "ERROR: afl-gcc not installed!"; \
+		exit 127; \
+	fi
+	CC=afl-gcc ./configure
+	$(MAKE) -C include
+	$(MAKE) -C libs
+	$(MAKE) afl -C tests/afl
+
 include $(TOPDIR)/post.mk
