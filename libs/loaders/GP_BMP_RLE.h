@@ -174,8 +174,6 @@ static int RLE8_next_undecoded(struct RLE *rle)
 {
 	GETC(rle);
 
-	RLE8_move(rle);
-
 	//GP_DEBUG(4, "RLE unencoded %u %u -> %02x", rle->x, rle->y, rle->c);
 
 	if (--rle->rep == 0) {
@@ -185,6 +183,8 @@ static int RLE8_next_undecoded(struct RLE *rle)
 			GETC(rle);
 	}
 
+	RLE8_move(rle);
+
 	rle->move = 1;
 
 	return 0;
@@ -192,12 +192,12 @@ static int RLE8_next_undecoded(struct RLE *rle)
 
 static int RLE8_next_repeat(struct RLE *rle)
 {
-	RLE8_move(rle);
-
 	//GP_DEBUG(4, "RLE repeat %u %u -> %02x", rle->x, rle->y, rle->c);
 
 	if (--rle->rep == 0)
 		rle->state = RLE_START;
+
+	RLE8_move(rle);
 
 	rle->move = 1;
 
