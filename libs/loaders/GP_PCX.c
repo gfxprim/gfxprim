@@ -292,7 +292,7 @@ static int read_16_palette(GP_IO *io, struct pcx_header *header,
 	unsigned int i;
 	uint8_t b[header->bytes_per_line];
 	GP_Pixel palette[16];
-	uint8_t idx=0, mask, mod;
+	uint8_t idx = 0, mask, mod;
 
 	for (i = 0; i < 16; i++) {
 		palette[i] = (GP_Pixel)header->palette[3*i] << 16;
@@ -542,6 +542,14 @@ int GP_ReadPCXEx(GP_IO *io, GP_Context **img, GP_DataStorage *storage,
 
 	w = header.xe - header.xs + 1;
 	h = header.ye - header.ys + 1;
+
+	uint32_t max_w = ((uint32_t)header.bytes_per_line * 8) / header.bpp;
+
+	if (w > max_w) {
+		GP_WARN("Truncating image width (%u) to "
+		        "bytes_per_line * 8 / bpp (%"PRIu32")", w, max_w);
+		w = max_w;
+	}
 
 	res = GP_ContextAlloc(w, h, pixel_type);
 
