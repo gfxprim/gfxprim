@@ -156,8 +156,8 @@ static boolean fill_input_buffer(struct jpeg_decompress_struct *cinfo)
 
 	ret = GP_IORead(src->io, src->buffer, src->size);
 
-	if (ret < 0) {
-		GP_WARN("Failed to fill buffer");
+	if (ret <= 0) {
+		GP_WARN("Failed to fill buffer, IORead returned %i", ret);
 		return FALSE;
 	}
 
