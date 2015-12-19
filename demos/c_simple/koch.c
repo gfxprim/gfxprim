@@ -33,7 +33,7 @@
 
 #include <GP.h>
 
-#define TIMER_TICK 10000
+#define TIMER_TICK 20000
 #define DISPLAY_W 640
 #define DISPLAY_H 480
 #define sqr(x) ((x)*(x))
@@ -173,6 +173,10 @@ int main(void)
 					return 0;
 				break;
 				}
+			break;
+			case GP_EV_SYS:
+				if (ev.code == GP_EV_SYS_RESIZE)
+					GP_BackendResizeAck(backend);
 			}
 		}
 		usleep(TIMER_TICK);
