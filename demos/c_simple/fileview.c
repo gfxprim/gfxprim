@@ -198,6 +198,11 @@ void event_loop(void)
 				GP_BackendExit(backend);
 				exit(0);
 			break;
+			case GP_EV_SYS_RESIZE:
+				GP_BackendResizeAck(backend);
+				redraw_screen();
+				GP_BackendFlip(backend);
+			break;
 			}
 		break;
 		}
