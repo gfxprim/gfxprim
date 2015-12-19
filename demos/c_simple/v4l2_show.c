@@ -37,7 +37,7 @@ int main(int argc, char *argv[])
 	GP_Backend *backend;
 	GP_Grabber *grabber;
 	const char *v4l2_device = "/dev/video0";
-	unsigned int w = 320, h = 240;
+	unsigned int w = 640, h = 480;
 	int mode = 0;
 	int opt;
 
@@ -113,7 +113,10 @@ int main(int argc, char *argv[])
 			break;
 			}
 
-			GP_Blit_Clipped(res, 0, 0, res->w, res->h, backend->context, 0, 0);
+			unsigned int c_x = (backend->context->w - res->w) / 2;
+			unsigned int c_y = (backend->context->h - res->h) / 2;
+
+			GP_Blit_Clipped(res, 0, 0, res->w, res->h, backend->context, c_x, c_y);
 			GP_BackendFlip(backend);
 
 			if (mode)
@@ -150,6 +153,13 @@ int main(int argc, char *argv[])
 						mode = 0;
 				break;
 				}
+			break;
+			case GP_EV_SYS:
+				if (ev.code == GP_EV_SYS_RESIZE) {
+					GP_BackendResizeAck(backend);
+					GP_Fill(backend->context, 0);
+				}
+			break;
 			}
 		}
 	}
