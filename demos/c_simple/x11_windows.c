@@ -68,6 +68,8 @@ static int ev_loop(struct GP_Backend *backend, const char *name)
 			switch (ev.code) {
 			case GP_EV_SYS_RESIZE:
 				GP_BackendResizeAck(backend);
+				redraw(backend->context);
+				GP_BackendFlip(backend);
 			break;
 			case GP_EV_SYS_QUIT:
 				GP_BackendExit(backend);
