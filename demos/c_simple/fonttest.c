@@ -244,6 +244,16 @@ void event_loop(void)
 				exit(0);
 			break;
 			}
+		break;
+		case GP_EV_SYS:
+			switch(ev.code) {
+			case GP_EV_SYS_RESIZE:
+				GP_BackendResizeAck(win);
+				redraw_screen();
+				GP_BackendFlip(win);
+			break;
+			}
+		break;
 		}
 	}
 }
