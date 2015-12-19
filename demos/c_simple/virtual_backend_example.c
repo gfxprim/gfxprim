@@ -31,11 +31,61 @@
 
 #include <GP.h>
 
+static GP_Pixel white_pixel, black_pixel, red_pixel, blue_pixel, green_pixel;
+
+static void redraw(GP_Backend *backend)
+{
+	GP_Context *context = backend->context;
+
+	/* Now draw some testing patters */
+	black_pixel = GP_RGBToContextPixel(0x00, 0x00, 0x00, context);
+	white_pixel = GP_RGBToContextPixel(0xff, 0xff, 0xff, context);
+	red_pixel   = GP_RGBToContextPixel(0xff, 0x00, 0x00, context);
+	blue_pixel  = GP_RGBToContextPixel(0x00, 0x00, 0xff, context);
+	green_pixel = GP_RGBToContextPixel(0x00, 0xff, 0x00, context);
+
+	GP_Fill(context, white_pixel);
+
+	unsigned int i, j;
+	for (i = 0; i < 40; i++) {
+		GP_HLineXYW(context, 0, i, i, black_pixel);
+		GP_HLineXYW(context, 1, i + 40, i, black_pixel);
+		GP_HLineXYW(context, 2, i + 80, i, black_pixel);
+		GP_HLineXYW(context, 3, i + 120, i, black_pixel);
+		GP_HLineXYW(context, 4, i + 160, i, black_pixel);
+		GP_HLineXYW(context, 5, i + 200, i, black_pixel);
+		GP_HLineXYW(context, 6, i + 240, i, black_pixel);
+		GP_HLineXYW(context, 7, i + 280, i, black_pixel);
+	}
+
+	for (i = 0; i < 256; i++) {
+		for (j = 0; j < 256; j++) {
+			uint8_t val = 1.00 * sqrt(i*i + j*j)/sqrt(2) + 0.5;
+
+			GP_Pixel pix = GP_RGBToContextPixel(i, j, val, context);
+			GP_PutPixel(context, i + 60, j + 10, pix);
+		}
+	}
+
+	GP_Text(context, NULL, 60, 270, GP_VALIGN_BELOW|GP_ALIGN_RIGHT,
+	        black_pixel, white_pixel, "Lorem Ipsum dolor sit...");
+
+	GP_Text(context, NULL, 60, 290, GP_VALIGN_BELOW|GP_ALIGN_RIGHT,
+	        red_pixel, white_pixel, "Lorem Ipsum dolor sit...");
+
+	GP_Text(context, NULL, 60, 310, GP_VALIGN_BELOW|GP_ALIGN_RIGHT,
+	        green_pixel, white_pixel, "Lorem Ipsum dolor sit...");
+
+	GP_Text(context, NULL, 60, 330, GP_VALIGN_BELOW|GP_ALIGN_RIGHT,
+	        blue_pixel, white_pixel, "Lorem Ipsum dolor sit...");
+
+	/* Update the backend screen */
+	GP_BackendFlip(backend);
+}
+
 int main(int argc, char *argv[])
 {
 	GP_Backend *backend;
-	GP_Context *context;
-	GP_Pixel white_pixel, black_pixel, red_pixel, blue_pixel, green_pixel;
 	const char *backend_opts = "X11:350x350";
 	int opt;
 	GP_PixelType emul_type = GP_PIXEL_UNKNOWN;
@@ -90,52 +140,7 @@ int main(int argc, char *argv[])
 		backend = emul;
 	}
 
-	context = backend->context;
-
-	/* Now draw some testing patters */
-	black_pixel = GP_RGBToContextPixel(0x00, 0x00, 0x00, context);
-	white_pixel = GP_RGBToContextPixel(0xff, 0xff, 0xff, context);
-	red_pixel   = GP_RGBToContextPixel(0xff, 0x00, 0x00, context);
-	blue_pixel  = GP_RGBToContextPixel(0x00, 0x00, 0xff, context);
-	green_pixel = GP_RGBToContextPixel(0x00, 0xff, 0x00, context);
-
-	GP_Fill(context, white_pixel);
-
-	unsigned int i, j;
-	for (i = 0; i < 40; i++) {
-		GP_HLineXYW(context, 0, i, i, black_pixel);
-		GP_HLineXYW(context, 1, i + 40, i, black_pixel);
-		GP_HLineXYW(context, 2, i + 80, i, black_pixel);
-		GP_HLineXYW(context, 3, i + 120, i, black_pixel);
-		GP_HLineXYW(context, 4, i + 160, i, black_pixel);
-		GP_HLineXYW(context, 5, i + 200, i, black_pixel);
-		GP_HLineXYW(context, 6, i + 240, i, black_pixel);
-		GP_HLineXYW(context, 7, i + 280, i, black_pixel);
-	}
-
-	for (i = 0; i < 256; i++) {
-		for (j = 0; j < 256; j++) {
-			uint8_t val = 1.00 * sqrt(i*i + j*j)/sqrt(2) + 0.5;
-
-			GP_Pixel pix = GP_RGBToContextPixel(i, j, val, context);
-			GP_PutPixel(context, i + 60, j + 10, pix);
-		}
-	}
-
-	GP_Text(context, NULL, 60, 270, GP_VALIGN_BELOW|GP_ALIGN_RIGHT,
-	        black_pixel, white_pixel, "Lorem Ipsum dolor sit...");
-
-	GP_Text(context, NULL, 60, 290, GP_VALIGN_BELOW|GP_ALIGN_RIGHT,
-	        red_pixel, white_pixel, "Lorem Ipsum dolor sit...");
-
-	GP_Text(context, NULL, 60, 310, GP_VALIGN_BELOW|GP_ALIGN_RIGHT,
-	        green_pixel, white_pixel, "Lorem Ipsum dolor sit...");
-
-	GP_Text(context, NULL, 60, 330, GP_VALIGN_BELOW|GP_ALIGN_RIGHT,
-	        blue_pixel, white_pixel, "Lorem Ipsum dolor sit...");
-
-	/* Update the backend screen */
-	GP_BackendFlip(backend);
+	redraw(backend);
 
 	for (;;) {
 		if (backend->Poll)
@@ -159,6 +164,15 @@ int main(int argc, char *argv[])
 					return 0;
 				break;
 				}
+			break;
+			case GP_EV_SYS:
+				switch(ev.code) {
+				case GP_EV_SYS_RESIZE:
+					GP_BackendResizeAck(backend);
+					redraw(backend);
+				break;
+				}
+			break;
 			}
 		}
 	}
