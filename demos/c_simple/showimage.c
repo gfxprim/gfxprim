@@ -72,6 +72,19 @@ int main(int argc, char *argv[])
 			GP_BackendExit(backend);
 			return 0;
 		}
+
+		if (ev.type == GP_EV_SYS && ev.code == GP_EV_SYS_RESIZE) {
+			int cx, cy;
+
+			GP_BackendResizeAck(backend);
+
+			cx = ((int)backend->context->w - (int)image->w) / 2;
+			cy = ((int)backend->context->h - (int)image->h) / 2;
+
+			GP_Fill(backend->context, 0);
+			GP_Blit_Clipped(image, 0, 0, image->w, image->h, backend->context, cx, cy);
+			GP_BackendFlip(backend);
+		}
 	}
 
 	return 0;
