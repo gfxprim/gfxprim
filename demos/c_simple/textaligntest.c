@@ -144,6 +144,11 @@ static void event_loop(void)
 				GP_BackendExit(win);
 				exit(0);
 			break;
+			case GP_EV_SYS_RESIZE:
+				GP_BackendResizeAck(win);
+				X = win->context->w;
+				Y = win->context->h;
+			break;
 			}
 		break;
 		}
