@@ -11,11 +11,12 @@
 #include "core/GP_MixPixels.gen.h"
 #include "gfx/GP_HLine.h"
 #include "GP_TextStyle.h"
+#include "GP_Text.h"
 #include "GP_Font.h"
 
 #define WIDTH_TO_1BPP_BPP(width) ((width)/8 + ((width)%8 != 0))
 
-static int get_width(GP_TextStyle *style, int width)
+static int get_width(const GP_TextStyle *style, int width)
 {
 	return width * style->pixel_xmul + (width - 1) * style->pixel_xspace;
 }
@@ -23,7 +24,7 @@ static int get_width(GP_TextStyle *style, int width)
 @ for pt in pixeltypes:
 @     if not pt.is_unknown():
 
-static void text_draw_1BPP_{{ pt.name }}(GP_Context *context, GP_TextStyle *style,
+static void text_draw_1BPP_{{ pt.name }}(GP_Context *context, const GP_TextStyle *style,
                                          GP_Coord x, GP_Coord y,
 				         GP_Pixel fg, const char *str)
 {
@@ -75,7 +76,7 @@ static void text_draw_1BPP_{{ pt.name }}(GP_Context *context, GP_TextStyle *styl
 
 @ end
 
-static void text_draw_1BPP(GP_Context *context, GP_TextStyle *style, int x, int y,
+static void text_draw_1BPP(GP_Context *context, const GP_TextStyle *style, int x, int y,
                            GP_Pixel fg, const char *str)
 {
 	switch (context->pixel_type) {
@@ -153,14 +154,14 @@ static void text_draw_1BPP(GP_Context *context, GP_TextStyle *style, int x, int 
 @ for pt in pixeltypes:
 @     if not pt.is_unknown():
 
-static void text_8BPP_bg_{{ pt.name }}(GP_Context *context, GP_TextStyle *style,
+static void text_8BPP_bg_{{ pt.name }}(GP_Context *context, const GP_TextStyle *style,
                                        GP_Coord x, GP_Coord y,
 				       GP_Pixel fg, GP_Pixel bg, const char *str)
 {
 @         text_8BPP(pt, True)
 }
 
-static void text_8BPP_{{ pt.name }}(GP_Context *context, GP_TextStyle *style,
+static void text_8BPP_{{ pt.name }}(GP_Context *context, const GP_TextStyle *style,
                                     GP_Coord x, GP_Coord y,
 				    GP_Pixel fg, const char *str)
 {
@@ -169,7 +170,7 @@ static void text_8BPP_{{ pt.name }}(GP_Context *context, GP_TextStyle *style,
 
 @ end
 
-static void text_8BPP_bg(GP_Context *context, GP_TextStyle *style,
+static void text_8BPP_bg(GP_Context *context, const GP_TextStyle *style,
                          GP_Coord x, GP_Coord y,
                          GP_Pixel fg, GP_Pixel bg, const char *str)
 {
@@ -185,7 +186,7 @@ static void text_8BPP_bg(GP_Context *context, GP_TextStyle *style,
 	}
 }
 
-static void text_8BPP(GP_Context *context, GP_TextStyle *style,
+static void text_8BPP(GP_Context *context, const GP_TextStyle *style,
                       GP_Coord x, GP_Coord y,
                       GP_Pixel fg, const char *str)
 {
@@ -201,7 +202,7 @@ static void text_8BPP(GP_Context *context, GP_TextStyle *style,
 	}
 }
 
-void GP_Text_Raw(GP_Context *context, GP_TextStyle *style,
+void GP_Text_Raw(GP_Context *context, const GP_TextStyle *style,
                  GP_Coord x, GP_Coord y, uint8_t flags,
                  GP_Pixel fg, GP_Pixel bg, const char *str)
 {
