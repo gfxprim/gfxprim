@@ -46,7 +46,10 @@ typedef struct GP_Timer {
 	uint32_t period;
 
 	/* Timer id, showed in debug messages */
-	char id[10];
+	const char *id;
+
+	/* Do not touch */
+	void *_priv;
 
 	/*
 	 * Timer Callback

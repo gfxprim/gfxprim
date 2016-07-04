@@ -49,6 +49,7 @@ int main(void)
 	GP_Timer *queue = NULL;
 	uint64_t now;
 	int i, ret;
+	char ids[MAX][8];
 
 	GP_SetDebugLevel(10);
 
@@ -61,7 +62,8 @@ int main(void)
 		timers[i].period = 0;
 		timers[i].Callback = callback1;
 		timers[i].priv = NULL;
-		sprintf(timers[i].id, "Timer%i", MAX - i);
+		sprintf(ids[i], "Timer%i", MAX - i);
+		timers[i].id = ids[i];
 		GP_TimerQueueInsert(&queue, 0, &timers[i]);
 	}
 

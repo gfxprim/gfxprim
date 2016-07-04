@@ -104,7 +104,7 @@ static int expirations_sorted(void)
 		timers[i].period = 0;
 		timers[i].Callback = callback_check_monotonicity;
 		timers[i].priv = &expires;
-		strcpy(timers[i].id, "Timer");
+		timers[i].id = "Timer";
 		GP_TimerQueueInsert(&head, 0, &timers[i]);
 	}
 

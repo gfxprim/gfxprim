@@ -117,7 +117,7 @@ static uint32_t pushevent_callback(GP_Timer *self)
 	gettimeofday(&ev.time, NULL);
 	ev.val.tmr = self;
 
-	GP_EventQueuePut(self->priv, &ev);
+	GP_EventQueuePut(self->_priv, &ev);
 
 	return 0;
 }
@@ -126,7 +126,7 @@ void GP_BackendAddTimer(GP_Backend *self, GP_Timer *timer)
 {
 	if (timer->Callback == NULL) {
 		timer->Callback = pushevent_callback;
-		timer->priv = &self->event_queue;
+		timer->_priv = &self->event_queue;
 	}
 
 	GP_TimerQueueInsert(&self->timers, GP_GetTimeStamp(), timer);
