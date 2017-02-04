@@ -356,7 +356,11 @@ int GP_ReadGIFEx(GP_IO *io, GP_Context **img,
 
 	} while (rec_type != TERMINATE_RECORD_TYPE);
 
+#if defined(GIFLIB_MAJOR) && GIFLIB_MAJOR >= 5
+	DGifCloseFile(gf, NULL);
+#else
 	DGifCloseFile(gf);
+#endif
 
 	/* No Image record found :( */
 	if (img && !res) {
@@ -371,7 +375,11 @@ int GP_ReadGIFEx(GP_IO *io, GP_Context **img,
 err2:
 	GP_ContextFree(res);
 err1:
+#if defined(GIFLIB_MAJOR) && GIFLIB_MAJOR >= 5
+	DGifCloseFile(gf, NULL);
+#else
 	DGifCloseFile(gf);
+#endif
 	errno = err;
 	return 1;
 }
