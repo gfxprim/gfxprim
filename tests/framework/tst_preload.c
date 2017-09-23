@@ -219,7 +219,7 @@ void tst_malloc_check_stop(void)
 
 static void *(*real_malloc)(size_t) = NULL;
 
-void *malloc(size_t size)
+void *malloc___(size_t size)
 {
 	void *ptr;
 
@@ -251,7 +251,7 @@ void *malloc(size_t size)
 	return ptr;
 }
 
-void *calloc(size_t nmemb, size_t size)
+void *calloc___(size_t nmemb, size_t size)
 {
 	static int been_here = 0;
 	void *ptr;
@@ -274,7 +274,7 @@ void *calloc(size_t nmemb, size_t size)
 	return ptr;
 }
 
-void free(void *ptr)
+void free___(void *ptr)
 {
 	static void (*real_free)(void *) = NULL;
 	struct chunk *chunk;
@@ -313,7 +313,7 @@ void free(void *ptr)
 
 #define min(a, b) (((a) < (b)) ? (a) : (b))
 
-void *realloc(void *optr, size_t size)
+void *realloc___(void *optr, size_t size)
 {
 	static void *(*real_realloc)(void*, size_t) = NULL;
 	void *ptr;
