@@ -38,7 +38,7 @@ static void text_draw_1BPP_{{ pt.name }}(GP_Pixmap *pixmap, const GP_TextStyle *
 		if (glyph == NULL)
 			glyph = GP_GetGlyphBitmap(style->font, ' ');
 
-		int i, j, k;
+		int i, j, k, l;
 
 		unsigned int x_mul = style->pixel_xmul + style->pixel_xspace;
 		unsigned int y_mul = style->pixel_ymul + style->pixel_yspace;
@@ -51,17 +51,25 @@ static void text_draw_1BPP_{{ pt.name }}(GP_Pixmap *pixmap, const GP_TextStyle *
 			for (i = 0; i < glyph->width; i++) {
 				uint8_t bit = (glyph->bitmap[i/8 + j * bpp]) & (0x80>>(i%8));
 
-				unsigned int x_start = x + (i + glyph->bearing_x) * x_mul;
-
-				if (p == str)
-					x_start -= glyph->bearing_x * x_mul;
-
 				if (!bit)
 					continue;
 
-				for (k = 0; k < style->pixel_ymul; k++)
-					GP_HLine(pixmap, x_start, x_start + style->pixel_xmul - 1,
-					         y - (glyph->bearing_y - style->font->ascend) * y_mul + k, fg);
+				int start_x = x + (i + glyph->bearing_x) * x_mul;
+
+				if (p == str)
+					start_x -= glyph->bearing_x * x_mul;
+
+				int start_y = y - (glyph->bearing_y - style->font->ascend) * y_mul;
+
+				for (k = start_y; k < start_y + style->pixel_ymul; k++) {
+					for (l = start_x; l < start_x + style->pixel_xmul; l++) {
+						int px = l;
+						int py = k;
+						GP_TRANSFORM_POINT(pixmap, px, py);
+						if (!GP_PIXEL_IS_CLIPPED(pixmap, px, py))
+							GP_PutPixel_Raw_{{ pt.pixelsize.suffix }}(pixmap, px, py, fg);
+					}
+				}
 			}
 
 			y += style->pixel_ymul + style->pixel_yspace;
