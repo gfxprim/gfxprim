@@ -30,13 +30,13 @@
 /*
  * This macro defines a partial ellipse drawing function.
  * Arguments:
- *     CONTEXT_T - user-defined type of drawing context (passed to PUTPIXEL)
+ *     PIXMAP_T - user-defined type of drawing pixmap (passed to PUTPIXEL)
  *     PIXVAL_T  - user-defined pixel value type (passed to PUTPIXEL)
- *     PUTPIXEL  - a pixel drawing function f(context, x, y, pixval)
+ *     PUTPIXEL  - a pixel drawing function f(pixmap, x, y, pixval)
  *     FN_NAME   - name of the function to be defined
  */
-#define DEF_PARTIAL_ELLIPSE_FN(FN_NAME, CONTEXT_T, PIXVAL_T, PUTPIXEL) \
-static void FN_NAME(CONTEXT_T context, int xcenter, int ycenter, int a, int b, \
+#define DEF_PARTIAL_ELLIPSE_FN(FN_NAME, PIXMAP_T, PIXVAL_T, PUTPIXEL) \
+static void FN_NAME(PIXMAP_T pixmap, int xcenter, int ycenter, int a, int b, \
 	int start, int end, PIXVAL_T pixval) \
 { \
 	double startAngle = GP_NormalizeAngle(2*M_PI*(start / 360000.0)); \
@@ -47,10 +47,10 @@ static void FN_NAME(CONTEXT_T context, int xcenter, int ycenter, int a, int b, \
 		double angle = acos(((double) x) / a); \
 		double y = floor(b*sin(angle)); \
 		if (GP_AngleInRange(angle, startAngle, endAngle)) { \
-			PUTPIXEL(context, xcenter+x, ycenter-y, pixval); \
+			PUTPIXEL(pixmap, xcenter+x, ycenter-y, pixval); \
 		} \
 		if (GP_AngleInRange(2*M_PI - angle, startAngle, endAngle)) { \
-			PUTPIXEL(context, xcenter+x, ycenter+y, pixval); \
+			PUTPIXEL(pixmap, xcenter+x, ycenter+y, pixval); \
 		} \
 	} \
 \
@@ -59,10 +59,10 @@ static void FN_NAME(CONTEXT_T context, int xcenter, int ycenter, int a, int b, \
 		double angle = asin(((double) y) / b); \
 		double x = floor(a*cos(angle)); \
 		if (GP_AngleInRange(angle, startAngle, endAngle)) { \
-			PUTPIXEL(context, xcenter+x, ycenter-y, pixval); \
+			PUTPIXEL(pixmap, xcenter+x, ycenter-y, pixval); \
 		} \
 		if (GP_AngleInRange(M_PI - angle, startAngle, endAngle)) { \
-			PUTPIXEL(context, xcenter-x, ycenter-y, pixval); \
+			PUTPIXEL(pixmap, xcenter-x, ycenter-y, pixval); \
 		} \
 	} \
 }

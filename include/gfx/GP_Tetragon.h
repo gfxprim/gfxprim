@@ -26,25 +26,25 @@
 #ifndef GP_TETRAGON_H
 #define GP_TETRAGON_H
 
-#include "core/GP_Context.h"
+#include "core/GP_Pixmap.h"
 
 /* Tetragon */
 
-void GP_Tetragon(GP_Context *context, GP_Coord x0, GP_Coord y0,
+void GP_Tetragon(GP_Pixmap *pixmap, GP_Coord x0, GP_Coord y0,
                  GP_Coord x1, GP_Coord y1, GP_Coord x2, GP_Coord y2,
                  GP_Coord x3, GP_Coord y3, GP_Pixel pixel);
 
-void GP_Tetragon_Raw(GP_Context *context, GP_Coord x0, GP_Coord y0,
+void GP_Tetragon_Raw(GP_Pixmap *pixmap, GP_Coord x0, GP_Coord y0,
                      GP_Coord x1, GP_Coord y1, GP_Coord x2, GP_Coord y2,
                      GP_Coord x3, GP_Coord y3, GP_Pixel pixel);
 
 /* Filled Tetragon */
 
-void GP_FillTetragon(GP_Context *context, GP_Coord x0, GP_Coord y0,
+void GP_FillTetragon(GP_Pixmap *pixmap, GP_Coord x0, GP_Coord y0,
                      GP_Coord x1, GP_Coord y1, GP_Coord x2, GP_Coord y2,
 		     GP_Coord x3, GP_Coord y3, GP_Pixel pixel);
 
-void GP_FillTetragon_Raw(GP_Context *context, GP_Coord x0, GP_Coord y0,
+void GP_FillTetragon_Raw(GP_Pixmap *pixmap, GP_Coord x0, GP_Coord y0,
                          GP_Coord x1, GP_Coord y1, GP_Coord x2, GP_Coord y2,
                          GP_Coord x3, GP_Coord y3, GP_Pixel pixel);
 

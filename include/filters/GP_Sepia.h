@@ -25,28 +25,28 @@
 
 #include "GP_Filter.h"
 
-int GP_FilterSepiaEx(const GP_Context *const src,
+int GP_FilterSepiaEx(const GP_Pixmap *const src,
                      GP_Coord x_src, GP_Coord y_src,
                      GP_Size w_src, GP_Size h_src,
-                     GP_Context *dst,
+                     GP_Pixmap *dst,
                      GP_Coord x_dst, GP_Coord y_dst,
                      GP_ProgressCallback *callback);
 
-static inline int GP_FilterSepia(const GP_Context *const src,
-                                 GP_Context *dst,
+static inline int GP_FilterSepia(const GP_Pixmap *const src,
+                                 GP_Pixmap *dst,
                                  GP_ProgressCallback *callback)
 {
 	return GP_FilterSepiaEx(src, 0, 0, src->w, src->h,
 	                        dst, 0, 0, callback);
 }
 
-GP_Context *GP_FilterSepiaExAlloc(const GP_Context *const src,
+GP_Pixmap *GP_FilterSepiaExAlloc(const GP_Pixmap *const src,
                                   GP_Coord x_src, GP_Coord y_src,
                                   GP_Size w_src, GP_Size h_src,
                                   GP_PixelType dst_pixel_type,
                                   GP_ProgressCallback *callback);
 
-static inline GP_Context *GP_FilterSepiaAlloc(const GP_Context *const src,
+static inline GP_Pixmap *GP_FilterSepiaAlloc(const GP_Pixmap *const src,
                                               GP_PixelType dst_pixel_type,
                                               GP_ProgressCallback *callback)
 {

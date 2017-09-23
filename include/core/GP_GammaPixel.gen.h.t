@@ -5,7 +5,7 @@
  * Copyright (C) 2012-2014 Cyril Hrubis <metan@ucw.cz>
  */
 
-#include "GP_Context.h"
+#include "GP_Pixmap.h"
 #include "GP_GammaCorrection.h"
 
 @ for pt in pixeltypes:

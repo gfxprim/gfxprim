@@ -53,7 +53,7 @@ static int progress_callback(GP_ProgressCallback *self)
 
 int main(int argc, char *argv[])
 {
-	GP_Context *img;
+	GP_Pixmap *img;
 	struct callback_priv priv;
 	GP_ProgressCallback callback = {.callback = progress_callback,
 	                                .priv = &priv};

@@ -23,10 +23,10 @@
 #ifndef __COMMON_H__
 #define __COMMON_H__
 
-#include <core/GP_Context.h>
+#include <core/GP_Pixmap.h>
 
-void dump_buffers(const char *pattern, const GP_Context *c);
+void dump_buffers(const char *pattern, const GP_Pixmap *c);
 
-int compare_buffers(const char *pattern, const GP_Context *c);
+int compare_buffers(const char *pattern, const GP_Pixmap *c);
 
 #endif /* __COMMON_H__ */

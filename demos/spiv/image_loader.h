@@ -31,7 +31,7 @@
 #ifndef __IMAGE_LOADER_H__
 #define __IMAGE_LOADER_H__
 
-#include <core/GP_Context.h>
+#include <core/GP_Pixmap.h>
 #include <core/GP_ProgressCallback.h>
 
 /*
@@ -46,7 +46,7 @@ int image_loader_init(const char *args[], unsigned int cache_max_bytes);
  *
  * Note that the callback may not be called when the image is cached.
  */
-GP_Context *image_loader_get_image(GP_ProgressCallback *callback, int elevate);
+GP_Pixmap *image_loader_get_image(GP_ProgressCallback *callback, int elevate);
 
 /*
  * Retruns current image meta data or NULL there are none.

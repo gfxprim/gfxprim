@@ -3,7 +3,7 @@ Module wrapping GfxPrim backends.
 
 BIG FAT WARNING
 ---------------
-Accessing a context after its backend has ben freed will probably
+Accessing a pixmap after its backend has ben freed will probably
 end your (program's) world
 """
 

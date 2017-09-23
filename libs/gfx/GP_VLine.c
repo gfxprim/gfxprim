@@ -37,55 +37,55 @@
 #define ORDER_AND_CLIP_COORDS do {             \
 	if (y0 > y1)                           \
 		GP_SWAP(y0, y1);               \
-	if (x < 0 || x >= (int) context->w ||  \
-	    y1 < 0 || y0 >= (int) context->h)  \
+	if (x < 0 || x >= (int) pixmap->w ||  \
+	    y1 < 0 || y0 >= (int) pixmap->h)  \
 		return;                        \
 	y0 = GP_MAX(y0, 0);                    \
-	y1 = GP_MIN(y1, (int) context->h - 1); \
+	y1 = GP_MIN(y1, (int) pixmap->h - 1); \
 } while (0)
 
-void GP_VLineXYY_Raw(GP_Context *context, GP_Coord x, GP_Coord y0,
+void GP_VLineXYY_Raw(GP_Pixmap *pixmap, GP_Coord x, GP_Coord y0,
                      GP_Coord y1, GP_Pixel pixel)
 {
-	GP_CHECK_CONTEXT(context);
+	GP_CHECK_PIXMAP(pixmap);
 
 	ORDER_AND_CLIP_COORDS;
 
-	GP_FN_PER_BPP_CONTEXT(GP_VLine_Raw, context, context, x, y0, y1, pixel);
+	GP_FN_PER_BPP_PIXMAP(GP_VLine_Raw, pixmap, pixmap, x, y0, y1, pixel);
 }
 
-void GP_VLineXYH_Raw(GP_Context *context, GP_Coord x, GP_Coord y, GP_Size h,
+void GP_VLineXYH_Raw(GP_Pixmap *pixmap, GP_Coord x, GP_Coord y, GP_Size h,
                      GP_Pixel pixel)
 {
 	if (h == 0)
 		return;
 
-	GP_VLineXYY(context, x, y, y + h - 1, pixel);
+	GP_VLineXYY(pixmap, x, y, y + h - 1, pixel);
 }
 
-void GP_VLineXYY(GP_Context *context, GP_Coord x, GP_Coord y0,
+void GP_VLineXYY(GP_Pixmap *pixmap, GP_Coord x, GP_Coord y0,
                   GP_Coord y1, GP_Pixel pixel)
 {
-	GP_CHECK_CONTEXT(context);
+	GP_CHECK_PIXMAP(pixmap);
 
-	if (context->axes_swap) {
-		GP_TRANSFORM_Y(context, x);
-		GP_TRANSFORM_X(context, y0);
-		GP_TRANSFORM_X(context, y1);
-		GP_HLine_Raw(context, y0, y1, x, pixel);
+	if (pixmap->axes_swap) {
+		GP_TRANSFORM_Y(pixmap, x);
+		GP_TRANSFORM_X(pixmap, y0);
+		GP_TRANSFORM_X(pixmap, y1);
+		GP_HLine_Raw(pixmap, y0, y1, x, pixel);
 	} else {
-		GP_TRANSFORM_X(context, x);
-		GP_TRANSFORM_Y(context, y0);
-		GP_TRANSFORM_Y(context, y1);
-		GP_VLine_Raw(context, x, y0, y1, pixel);
+		GP_TRANSFORM_X(pixmap, x);
+		GP_TRANSFORM_Y(pixmap, y0);
+		GP_TRANSFORM_Y(pixmap, y1);
+		GP_VLine_Raw(pixmap, x, y0, y1, pixel);
 	}
 }
 
-void GP_VLineXYH(GP_Context *context, GP_Coord x, GP_Coord y, GP_Size h,
+void GP_VLineXYH(GP_Pixmap *pixmap, GP_Coord x, GP_Coord y, GP_Size h,
                  GP_Pixel pixel)
 {
 	if (h == 0)
 		return;
 
-	GP_VLineXYY(context, x, y, y + h - 1, pixel);
+	GP_VLineXYY(pixmap, x, y, y + h - 1, pixel);
 }

@@ -119,7 +119,7 @@ static void fill_metadata(opj_image_t *img, GP_DataStorage *storage)
 	}
 }
 
-int GP_ReadJP2Ex(GP_IO *io, GP_Context **rimg, GP_DataStorage *storage,
+int GP_ReadJP2Ex(GP_IO *io, GP_Pixmap **rimg, GP_DataStorage *storage,
                  GP_ProgressCallback *callback)
 {
 	opj_dparameters_t params;
@@ -128,7 +128,7 @@ int GP_ReadJP2Ex(GP_IO *io, GP_Context **rimg, GP_DataStorage *storage,
 	opj_image_t *img;
 
 	GP_PixelType pixel_type;
-	GP_Context *res = NULL;
+	GP_Pixmap *res = NULL;
 	unsigned int i, x, y;
 	int err = 0, ret = 1;
 
@@ -229,7 +229,7 @@ int GP_ReadJP2Ex(GP_IO *io, GP_Context **rimg, GP_DataStorage *storage,
 		goto err3;
 	}
 
-	res = GP_ContextAlloc(img->comps[0].w, img->comps[0].h, pixel_type);
+	res = GP_PixmapAlloc(img->comps[0].w, img->comps[0].h, pixel_type);
 
 	if (!res) {
 		GP_DEBUG(1, "Malloc failed :(");
@@ -266,7 +266,7 @@ err0:
 
 #else
 
-int GP_ReadJP2Ex(GP_IO GP_UNUSED(*io), GP_Context GP_UNUSED(**img),
+int GP_ReadJP2Ex(GP_IO GP_UNUSED(*io), GP_Pixmap GP_UNUSED(**img),
                  GP_DataStorage GP_UNUSED(*storage),
                  GP_ProgressCallback GP_UNUSED(*callback))
 {
@@ -276,17 +276,17 @@ int GP_ReadJP2Ex(GP_IO GP_UNUSED(*io), GP_Context GP_UNUSED(**img),
 
 #endif /* HAVE_OPENJPEG */
 
-GP_Context *GP_LoadJP2(const char *src_path, GP_ProgressCallback *callback)
+GP_Pixmap *GP_LoadJP2(const char *src_path, GP_ProgressCallback *callback)
 {
 	return GP_LoaderLoadImage(&GP_JP2, src_path, callback);
 }
 
-GP_Context *GP_ReadJP2(GP_IO *io, GP_ProgressCallback *callback)
+GP_Pixmap *GP_ReadJP2(GP_IO *io, GP_ProgressCallback *callback)
 {
 	return GP_LoaderReadImage(&GP_JP2, io, callback);
 }
 
-int GP_LoadJP2Ex(const char *src_path, GP_Context **img,
+int GP_LoadJP2Ex(const char *src_path, GP_Pixmap **img,
                  GP_DataStorage *storage, GP_ProgressCallback *callback)
 {
 	return GP_LoaderLoadImageEx(&GP_JP2, src_path, img, storage, callback);

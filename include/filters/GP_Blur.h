@@ -38,21 +38,21 @@
  * defines blur on vertical direction.
  */
 
-int GP_FilterGaussianBlurEx(const GP_Context *src,
+int GP_FilterGaussianBlurEx(const GP_Pixmap *src,
                             GP_Coord x_src, GP_Coord y_src,
                             GP_Size w_src, GP_Size h_src,
-                            GP_Context *dst,
+                            GP_Pixmap *dst,
                             GP_Coord x_dst, GP_Coord y_dst,
                             float x_sigma, float y_sigma,
                             GP_ProgressCallback *callback);
 
-GP_Context *GP_FilterGaussianBlurExAlloc(const GP_Context *src,
+GP_Pixmap *GP_FilterGaussianBlurExAlloc(const GP_Pixmap *src,
                                          GP_Coord x_src, GP_Coord y_src,
                                          GP_Size w_src, GP_Size h_src,
                                          float x_sigma, float y_sigma,
                                          GP_ProgressCallback *callback);
 
-static inline int GP_FilterGaussianBlur(const GP_Context *src, GP_Context *dst,
+static inline int GP_FilterGaussianBlur(const GP_Pixmap *src, GP_Pixmap *dst,
                                         float x_sigma, float y_sigma,
                                         GP_ProgressCallback *callback)
 {
@@ -60,7 +60,7 @@ static inline int GP_FilterGaussianBlur(const GP_Context *src, GP_Context *dst,
 	                               x_sigma, y_sigma, callback);
 }
 
-static inline GP_Context *GP_FilterGaussianBlurAlloc(const GP_Context *src,
+static inline GP_Pixmap *GP_FilterGaussianBlurAlloc(const GP_Pixmap *src,
                                                      float x_sigma, float y_sigma,
                                                      GP_ProgressCallback *callback)
 {

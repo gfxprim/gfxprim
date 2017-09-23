@@ -8,7 +8,7 @@
 #include <errno.h>
 #include <math.h>
 
-#include "core/GP_Context.h"
+#include "core/GP_Pixmap.h"
 #include "core/GP_GetPutPixel.h"
 #include "core/GP_Gamma.h"
 #include "core/GP_Clamp.h"
@@ -32,8 +32,8 @@
 
 @ for pt in pixeltypes:
 @     if not pt.is_unknown() and not pt.is_palette():
-static int resize_cubic_{{ pt.name }}(const GP_Context *src,
-	GP_Context *dst, GP_ProgressCallback *callback)
+static int resize_cubic_{{ pt.name }}(const GP_Pixmap *src,
+	GP_Pixmap *dst, GP_ProgressCallback *callback)
 {
 @         for c in pt.chanslist:
 	int32_t col_{{ c.name }}[src->w];
@@ -175,7 +175,7 @@ static int resize_cubic_{{ pt.name }}(const GP_Context *src,
 
 @ end
 @
-static int resize_cubic(const GP_Context *src, GP_Context *dst,
+static int resize_cubic(const GP_Pixmap *src, GP_Pixmap *dst,
                         GP_ProgressCallback *callback)
 {
 	switch (src->pixel_type) {
@@ -191,7 +191,7 @@ static int resize_cubic(const GP_Context *src, GP_Context *dst,
 	}
 }
 
-int GP_FilterResizeCubicInt(const GP_Context *src, GP_Context *dst,
+int GP_FilterResizeCubicInt(const GP_Pixmap *src, GP_Pixmap *dst,
                             GP_ProgressCallback *callback)
 {
 	if (src->pixel_type != dst->pixel_type) {

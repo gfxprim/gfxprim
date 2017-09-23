@@ -1,12 +1,12 @@
-Context filters
+Pixmap filters
 ---------------
 
-Pixel filters for 'GP_Context'.
+Pixel filters for 'GP_Pixmap'.
 
-The context filter is basically a function that operates on context pixels.
+The pixmap filter is basically a function that operates on pixmap pixels.
 The result may be stored into a new bitmap or placed to bitmap passed as
 argument or, in some cases, the filter could be used 'in place' so the result
-is stored into the same context as the one passed as filter source.
+is stored into the same pixmap as the one passed as filter source.
 
 Common filter API
 ~~~~~~~~~~~~~~~~~
@@ -22,21 +22,21 @@ For convenience, the filters API is unified:
 * And the last argument is link:progress_callback.html[progress callback]
 
 When using allocating version of the filter, pointer to the newly allocated
-context is returned, or in case of failure NULL is returned.
+pixmap is returned, or in case of failure NULL is returned.
 
 If 'malloc()' has failed NULL is returned.
 
 If filter has been interrupted by a callback, all allocated memory is freed,
 and NULL is returned.
 
-When using non-allocating variant of the filter, the destination context must
+When using non-allocating variant of the filter, the destination pixmap must
 have correct pixel type and the size must be big enough to store the result.
 The return value from such filter is either zero, in case of success, or
 non-zero when filter was interrupted by a callback.
 
 For filters that work 'in-place' (which is explicitly said for each filter)
-the source and the destination could be the same context. Note that this is
-not expected to work if you do several overlapping sub-contexts and pass these
+the source and the destination could be the same pixmap. Note that this is
+not expected to work if you do several overlapping sub-pixmaps and pass these
 as arguments.
 
 [source,c]
@@ -44,11 +44,11 @@ as arguments.
 /*
  * Filter common API.
  */
-int GP_FilterFoo(const GP_Context *src, GP_Context *dst,
+int GP_FilterFoo(const GP_Pixmap *src, GP_Pixmap *dst,
                  foo params ...,
                  GP_ProgressCallback *callback);
 
-GP_Context *GP_FilterFooAlloc(const GP_Context *src,
+GP_Pixmap *GP_FilterFooAlloc(const GP_Pixmap *src,
                               foo params ...,
                               GP_ProgressCallback *callback);
 -------------------------------------------------------------------------------
@@ -71,10 +71,10 @@ Invert
 /* or */
 #include <filters/GP_Point.h>
 
-int GP_FilterInvert(const GP_Context *src, GP_Context *dst,
+int GP_FilterInvert(const GP_Pixmap *src, GP_Pixmap *dst,
                     GP_ProgressCallback *callback);
 
-GP_Context *GP_FilterInvertAlloc(const GP_Context *src,
+GP_Pixmap *GP_FilterInvertAlloc(const GP_Pixmap *src,
                                  GP_ProgressCallback *callback);
 -------------------------------------------------------------------------------
 
@@ -91,10 +91,10 @@ Brightness
 /* or */
 #include <filters/GP_Point.h>
 
-int GP_FilterBrightness(const GP_Context *src, GP_Context *dst,
+int GP_FilterBrightness(const GP_Pixmap *src, GP_Pixmap *dst,
                         float p, GP_ProgressCallback *callback);
 
-GP_Context *GP_FilterBrightnessAlloc(const GP_Context *src, float p,
+GP_Pixmap *GP_FilterBrightnessAlloc(const GP_Pixmap *src, float p,
                                      GP_ProgressCallback *callback);
 -------------------------------------------------------------------------------
 
@@ -111,10 +111,10 @@ Contrast
 /* or */
 #include <filters/GP_Point.h>
 
-int GP_FilterContrast(const GP_Context *src, GP_Context *dst,
+int GP_FilterContrast(const GP_Pixmap *src, GP_Pixmap *dst,
                       float p, GP_ProgressCallback *callback);
 
-GP_Context *GP_FilterContrastAlloc(const GP_Context *src, float p,
+GP_Pixmap *GP_FilterContrastAlloc(const GP_Pixmap *src, float p,
                                    GP_ProgressCallback *callback);
 -------------------------------------------------------------------------------
 
@@ -131,11 +131,11 @@ BrightnessContrast
 /* or */
 #include <filters/GP_Point.h>
 
-int GP_FilterBrightnessContrast(const GP_Context *src, GP_Context *dst,
+int GP_FilterBrightnessContrast(const GP_Pixmap *src, GP_Pixmap *dst,
                                 float b, float c,
                                 GP_ProgressCallback *callback);
 
-GP_Context *GP_FilterBrightnessContrastAlloc(const GP_Context *src,
+GP_Pixmap *GP_FilterBrightnessContrastAlloc(const GP_Pixmap *src,
                                              float b, float c,
                                              GP_ProgressCallback *callback);
 -------------------------------------------------------------------------------
@@ -153,10 +153,10 @@ Posterize
 /* or */
 #include <filters/GP_Point.h>
 
-int GP_FilterPosterize(const GP_Context *src, GP_Context *dst,
+int GP_FilterPosterize(const GP_Pixmap *src, GP_Pixmap *dst,
                        unsigned int levels, GP_ProgressCallback *callback);
 
-GP_Context *GP_FilterPosterizeAlloc(const GP_Context *src, unsigned int levels,
+GP_Pixmap *GP_FilterPosterizeAlloc(const GP_Pixmap *src, unsigned int levels,
                                     GP_ProgressCallback *callback);
 -------------------------------------------------------------------------------
 
@@ -174,27 +174,27 @@ Gaussian additive noise filter
 /* or */
 #include <filters/GP_GaussianNoise.h>
 
-int GP_FilterGaussianNoiseAddEx(const GP_Context *src,
+int GP_FilterGaussianNoiseAddEx(const GP_Pixmap *src,
                                 GP_Coord x_src, GP_Coord y_src,
                                 GP_Size w_src, GP_Size h_src,
-                                GP_Context *dst,
+                                GP_Pixmap *dst,
                                 GP_Coord x_dst, GP_Coord y_dst,
                                 float sigma, float mu,
                                 GP_ProgressCallback *callback);
 
-GP_Context *GP_FilterGaussianNoiseAddExAlloc(const GP_Context *src,
+GP_Pixmap *GP_FilterGaussianNoiseAddExAlloc(const GP_Pixmap *src,
                                              GP_Coord x_src, GP_Coord y_src,
                                              GP_Size w_src, GP_Size h_src,
                                              float sigma, float mu,
                                              GP_ProgressCallback *callback);
 
-static inline int GP_FilterGaussianNoiseAdd(const GP_Context *src,
-                                            GP_Context *dst,
+static inline int GP_FilterGaussianNoiseAdd(const GP_Pixmap *src,
+                                            GP_Pixmap *dst,
                                             float sigma, float mu,
                                             GP_ProgressCallback *callback);
 
-static inline GP_Context *
-GP_FilterGaussianNoiseAddAlloc(const GP_Context *src,
+static inline GP_Pixmap *
+GP_FilterGaussianNoiseAddAlloc(const GP_Pixmap *src,
                                float sigma, float mu,
                                GP_ProgressCallback *callback);
 -------------------------------------------------------------------------------
@@ -210,30 +210,12 @@ include::images/gaussian_noise/images.txt[]
 Arithmetic filters
 ~~~~~~~~~~~~~~~~~~
 
-Arithmetic filters do take two contexts as an input and combines them into one
-output context.
+Arithmetic filters do take two pixmaps as an input and combines them into one
+output pixmap.
 
-The pixel type of both input contexts must match.
+The pixel type of both input pixmaps must match.
 
-If size of the input contexts differs, minimum is used.
-
-[source,c]
--------------------------------------------------------------------------------
-#include <filters/GP_Arithmetic.h>
-/* or */
-#include <GP.h>
-
-int GP_FilterAddition(const GP_Context *src_a,
-                      const GP_Context *src_b,
-                      GP_Context *dst,
-                      GP_ProgressCallback *callback);
-
-GP_Context *GP_FilterAdditionAlloc(const GP_Context *src_a,
-                                   const GP_Context *src_b,
-                                   GP_ProgressCallback *callback);
--------------------------------------------------------------------------------
-
-Produces saturated (clamped) addition of two contexts.
+If size of the input pixmaps differs, minimum is used.
 
 [source,c]
 -------------------------------------------------------------------------------
@@ -241,17 +223,35 @@ Produces saturated (clamped) addition of two contexts.
 /* or */
 #include <GP.h>
 
-int GP_FilterMultiply(const GP_Context *src_a,
-                      const GP_Context *src_b,
-                      GP_Context *dst,
+int GP_FilterAddition(const GP_Pixmap *src_a,
+                      const GP_Pixmap *src_b,
+                      GP_Pixmap *dst,
                       GP_ProgressCallback *callback);
 
-GP_Context *GP_FilterMultiplyAlloc(const GP_Context *src_a,
-                                   const GP_Context *src_b,
+GP_Pixmap *GP_FilterAdditionAlloc(const GP_Pixmap *src_a,
+                                   const GP_Pixmap *src_b,
                                    GP_ProgressCallback *callback);
 -------------------------------------------------------------------------------
 
-Produces saturated (clamped) multiplication of two contexts.
+Produces saturated (clamped) addition of two pixmaps.
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <filters/GP_Arithmetic.h>
+/* or */
+#include <GP.h>
+
+int GP_FilterMultiply(const GP_Pixmap *src_a,
+                      const GP_Pixmap *src_b,
+                      GP_Pixmap *dst,
+                      GP_ProgressCallback *callback);
+
+GP_Pixmap *GP_FilterMultiplyAlloc(const GP_Pixmap *src_a,
+                                   const GP_Pixmap *src_b,
+                                   GP_ProgressCallback *callback);
+-------------------------------------------------------------------------------
+
+Produces saturated (clamped) multiplication of two pixmaps.
 
 [source,c]
 -------------------------------------------------------------------------------
@@ -259,13 +259,13 @@ Produces saturated (clamped) multiplication of two contexts.
 /* or */
 #include <GP.h>
 
-int GP_FilterDifference(const GP_Context *src_a,
-                        const GP_Context *src_b,
-                        GP_Context *dst,
+int GP_FilterDifference(const GP_Pixmap *src_a,
+                        const GP_Pixmap *src_b,
+                        GP_Pixmap *dst,
                         GP_ProgressCallback *callback);
 
-GP_Context *GP_FilterDifferenceAlloc(const GP_Context *src_a,
-                                     const GP_Context *src_b,
+GP_Pixmap *GP_FilterDifferenceAlloc(const GP_Pixmap *src_a,
+                                     const GP_Pixmap *src_b,
                                      GP_ProgressCallback *callback);
 
 -------------------------------------------------------------------------------
@@ -278,22 +278,22 @@ Produces symmetric difference (i.e. abs(a - b)).
 /* or */
 #include <GP.h>
 
-int GP_FilterMax(const GP_Context *src_a,
-                 const GP_Context *src_b,
-                 GP_Context *dst,
+int GP_FilterMax(const GP_Pixmap *src_a,
+                 const GP_Pixmap *src_b,
+                 GP_Pixmap *dst,
                  GP_ProgressCallback *callback);
 
-GP_Context *GP_FilterMaxAlloc(const GP_Context *src_a,
-                              const GP_Context *src_b,
+GP_Pixmap *GP_FilterMaxAlloc(const GP_Pixmap *src_a,
+                              const GP_Pixmap *src_b,
                               GP_ProgressCallback *callback);
 
-int GP_FilterMin(const GP_Context *src_a,
-                 const GP_Context *src_b,
-                 GP_Context *dst,
+int GP_FilterMin(const GP_Pixmap *src_a,
+                 const GP_Pixmap *src_b,
+                 GP_Pixmap *dst,
                  GP_ProgressCallback *callback);
 
-GP_Context *GP_FilterMinAlloc(const GP_Context *src_a,
-                              const GP_Context *src_b,
+GP_Pixmap *GP_FilterMinAlloc(const GP_Pixmap *src_a,
+                              const GP_Pixmap *src_b,
                               GP_ProgressCallback *callback);
 -------------------------------------------------------------------------------
 
@@ -308,14 +308,14 @@ Rotation and Symmetry filters
 /* or */
 #include <GP.h>
 
-int GP_FilterMirrorH(const GP_Context *src, GP_Context *dst,
+int GP_FilterMirrorH(const GP_Pixmap *src, GP_Pixmap *dst,
                      GP_ProgressCallback *callback);
 
-GP_Context *GP_FilterMirrorHAlloc(const GP_Context *src,
+GP_Pixmap *GP_FilterMirrorHAlloc(const GP_Pixmap *src,
                                    GP_ProgressCallback *callback);
 -------------------------------------------------------------------------------
 
-Mirrors context horizontally.
+Mirrors pixmap horizontally.
 
 Works 'in-place'.
 
@@ -330,14 +330,14 @@ include::images/mirror_h/images.txt[]
 /* or */
 #include <GP.h>
 
-int GP_FilterMirrorV(const GP_Context *src, GP_Context *dst,
+int GP_FilterMirrorV(const GP_Pixmap *src, GP_Pixmap *dst,
                      GP_ProgressCallback *callback);
 
-GP_Context *GP_FilterMirrorVAlloc(const GP_Context *src,
+GP_Pixmap *GP_FilterMirrorVAlloc(const GP_Pixmap *src,
                                    GP_ProgressCallback *callback);
 -------------------------------------------------------------------------------
 
-Mirrors context vertically.
+Mirrors pixmap vertically.
 
 Works 'in-place'.
 
@@ -352,19 +352,19 @@ include::images/mirror_v/images.txt[]
 /* or */
 #include <GP.h>
 
-int GP_FilterRotate90(const GP_Context *src, GP_Context *dst,
+int GP_FilterRotate90(const GP_Pixmap *src, GP_Pixmap *dst,
                       GP_ProgressCallback *callback);
 
-GP_Context *GP_FilterRotate90Alloc(const GP_Context *src,
+GP_Pixmap *GP_FilterRotate90Alloc(const GP_Pixmap *src,
                                     GP_ProgressCallback *callback);
 -------------------------------------------------------------------------------
 
-Rotate context by 90 degrees.
+Rotate pixmap by 90 degrees.
 
 Doesn't work 'in-place' (yet).
 
 The destination has to have the same pixel type and size must be large enough to
-fit rotated context (i.e. W and H are swapped).
+fit rotated pixmap (i.e. W and H are swapped).
 
 include::images/rotate_90/images.txt[]
 
@@ -374,14 +374,14 @@ include::images/rotate_90/images.txt[]
 /* or */
 #include <GP.h>
 
-int GP_FilterRotate180(const GP_Context *src, GP_Context *dst,
+int GP_FilterRotate180(const GP_Pixmap *src, GP_Pixmap *dst,
                        GP_ProgressCallback *callback);
 
-GP_Context *GP_FilterRotate180Alloc(const GP_Context *src,
+GP_Pixmap *GP_FilterRotate180Alloc(const GP_Pixmap *src,
                                      GP_ProgressCallback *callback);
 -------------------------------------------------------------------------------
 
-Rotate context by 180 degrees.
+Rotate pixmap by 180 degrees.
 
 Doesn't work 'in-place' (yet).
 
@@ -396,19 +396,19 @@ include::images/rotate_180/images.txt[]
 /* or */
 #include <GP.h>
 
-int GP_FilterRotate270(const GP_Context *src, GP_Context *dst,
+int GP_FilterRotate270(const GP_Pixmap *src, GP_Pixmap *dst,
                        GP_ProgressCallback *callback);
 
-GP_Context *GP_FilterRotate270Alloc(const GP_Context *src,
+GP_Pixmap *GP_FilterRotate270Alloc(const GP_Pixmap *src,
                                      GP_ProgressCallback *callback);
 -------------------------------------------------------------------------------
 
-Rotate context by 270 degrees.
+Rotate pixmap by 270 degrees.
 
 Doesn't work 'in-place' (yet).
 
 The destination has to have the same pixel type and destination size must be
-large enough to fit rotated context (i.e. W and H are swapped).
+large enough to fit rotated pixmap (i.e. W and H are swapped).
 
 include::images/rotate_270/images.txt[]
 
@@ -428,11 +428,11 @@ typedef enum GP_FilterSymmetries {
         GP_MIRROR_V,
 } GP_FilterSymmetries;
 
-GP_Context *GP_FilterSymmetry(const GP_Context *src,
+GP_Pixmap *GP_FilterSymmetry(const GP_Pixmap *src,
                               GP_FilterSymmetries symmetry,
                               GP_ProgressCallback *callback);
 
-int GP_FilterSymmetry(const GP_Context *src, GP_Context *dst,
+int GP_FilterSymmetry(const GP_Pixmap *src, GP_Pixmap *dst,
                       GP_FilterSymmetries symmetry,
                       GP_ProgressCallback *callback);
 -------------------------------------------------------------------------------
@@ -481,10 +481,10 @@ ready-to-use filters.
 /* or */
 #include <GP.h>
 
-int GP_FilterLinearConvolution_Raw(const GP_Context *src,
+int GP_FilterLinearConvolution_Raw(const GP_Pixmap *src,
                                    GP_Coord x_src, GP_Coord y_src,
                                    GP_Size w_src, GP_Size h_src,
-                                   GP_Context *dst,
+                                   GP_Pixmap *dst,
                                    GP_Coord x_dst, GP_Coord y_dst,
                                    float kernel[], uint32_t kw, uint32_t kh,
                                    float kern_div, GP_ProgressCallback *callback);
@@ -493,10 +493,10 @@ int GP_FilterLinearConvolution_Raw(const GP_Context *src,
 Internal generic convolution filter, this is a base for all linear convolution
 filters with non-separable kernel.
 
-The src coordinate and sizes denotes rectangle in the source context that the
+The src coordinate and sizes denotes rectangle in the source pixmap that the
 filter operates on.
 
-The dst coordinates defines offset into the dst context.
+The dst coordinates defines offset into the dst pixmap.
 
 The kernel is two-dimensional array of a size kw * kh indexed as
 kernel[x + y*kw].
@@ -539,26 +539,26 @@ include::images/convolution/images.txt[]
 /* or */
 #include <GP.h>
 
-int GP_FilterHLinearConvolution_Raw(const GP_Context *src,
+int GP_FilterHLinearConvolution_Raw(const GP_Pixmap *src,
                                     GP_Coord x_src, GP_Coord y_src,
                                     GP_Size w_src, GP_Size h_src,
-                                    GP_Context *dst,
+                                    GP_Pixmap *dst,
                                     GP_Coord x_dst, GP_Coord y_dst,
                                     float kernel[], uint32_t kw, float kern_div,
                                     GP_ProgressCallback *callback);
 
-int GP_FilterVLinearConvolution_Raw(const GP_Context *src,
+int GP_FilterVLinearConvolution_Raw(const GP_Pixmap *src,
                                     GP_Coord x_src, GP_Coord y_src,
                                     GP_Size w_src, GP_Size h_src,
-                                    GP_Context *dst,
+                                    GP_Pixmap *dst,
                                     GP_Coord x_dst, GP_Coord y_dst,
                                     float kernel[], uint32_t kh, float kern_div,
                                     GP_ProgressCallback *callback);
 
-int GP_FilterVHLinearConvolution_Raw(const GP_Context *src,
+int GP_FilterVHLinearConvolution_Raw(const GP_Pixmap *src,
                                      GP_Coord x_src, GP_Coord y_src,
                                      GP_Size w_src, GP_Size h_src,
-                                     GP_Context *dst,
+                                     GP_Pixmap *dst,
                                      GP_Coord x_dst, GP_Coord y_dst,
                                      float hkernel[], uint32_t kw, float hkern_div,
                                      float vkernel[], uint32_t kh, float vkern_div,
@@ -570,7 +570,7 @@ void GP_FilterKernelPrint_Raw(float kernel[], int kw, int kh, float kern_div);
 Internal special functions for one dimensional vertical and horizontal
 convolution these two functions are base for all separable convolution filters.
 
-The src coordinate and sizes denotes rectangle in the source context that the
+The src coordinate and sizes denotes rectangle in the source pixmap that the
 filter operates on.
 
 The dst coordinates are offset into the dst.
@@ -640,25 +640,25 @@ typedef struct GP_FilterKernel2D {
 	float *kernel;
 } GP_FilterKernel2D;
 
-int GP_FilterConvolutionEx(const GP_Context *src,
+int GP_FilterConvolutionEx(const GP_Pixmap *src,
                            GP_Coord x_src, GP_Coord y_src,
                            GP_Size w_src, GP_Coord h_src,
-                           GP_Context *dst,
+                           GP_Pixmap *dst,
                            GP_Coord x_dst, GP_Coord y_dst,
                            const GP_FilterKernel2D *kernel,
                            GP_ProgressCallback *callback);
 
-GP_Context *GP_FilterConvolutionExAlloc(const GP_Context *src,
+GP_Pixmap *GP_FilterConvolutionExAlloc(const GP_Pixmap *src,
                                         GP_Coord x_src, GP_Coord y_src,
                                         GP_Size w_src, GP_Size h_src,
                                         const GP_FilterKernel2D *kernel,
                                         GP_ProgressCallback *callback);
 
-int GP_FilterConvolution(const GP_Context *src, GP_Context *dst,
+int GP_FilterConvolution(const GP_Pixmap *src, GP_Pixmap *dst,
                          const GP_FilterKernel2D *kernel,
                          GP_ProgressCallback *callback);
 
-GP_Context *GP_FilterConvolutionAlloc(const GP_Context *src,
+GP_Pixmap *GP_FilterConvolutionAlloc(const GP_Pixmap *src,
                                       const GP_FilterKernel2D *kernel,
                                       GP_ProgressCallback *callback);
 
@@ -690,7 +690,7 @@ WARNING: If filter is executed in-place the work cannot be distributed between
 /*
  * Example box smoothing filter.
  */
-static void box_smoothing(GP_Context *img)
+static void box_smoothing(GP_Pixmap *img)
 {
 	float box_filter[] = {
 		1, 1, 1,
@@ -720,10 +720,10 @@ Laplace Filter
 /* or */
 #include <GP.h>
 
-int GP_FilterLaplace(const GP_Context *src, GP_Context *dst,
+int GP_FilterLaplace(const GP_Pixmap *src, GP_Pixmap *dst,
                      GP_ProgressCallback *callback);
 
-GP_Context *GP_FilterLaplaceAlloc(const GP_Context *src,
+GP_Pixmap *GP_FilterLaplaceAlloc(const GP_Pixmap *src,
                                   GP_ProgressCallback *callback);
 -------------------------------------------------------------------------------
 
@@ -767,10 +767,10 @@ Laplacian Edge Sharpening
 /* or */
 #include <GP.h>
 
-int GP_FilterEdgeSharpening(const GP_Context *src, GP_Context *dst,
+int GP_FilterEdgeSharpening(const GP_Pixmap *src, GP_Pixmap *dst,
                             float w, GP_ProgressCallback *callback);
 
-GP_Context *GP_FilterEdgeSharpeningAlloc(const GP_Context *src, float w,
+GP_Pixmap *GP_FilterEdgeSharpeningAlloc(const GP_Pixmap *src, float w,
                                          GP_ProgressCallback *callback);
 -------------------------------------------------------------------------------
 
@@ -798,25 +798,25 @@ Gaussian Blur
 /* or */
 #include <GP.h>
 
-int GP_FilterGaussianBlurEx(const GP_Context *src,
+int GP_FilterGaussianBlurEx(const GP_Pixmap *src,
                             GP_Coord x_src, GP_Coord y_src,
                             GP_Size w_src, GP_Size h_src,
-                            GP_Context *dst,
+                            GP_Pixmap *dst,
                             GP_Coord x_dst, GP_Coord y_dst,
                             float x_sigma, float y_sigma,
                             GP_ProgressCallback *callback);
 
-GP_Context *GP_FilterGaussianBlurExAlloc(const GP_Context *src,
+GP_Pixmap *GP_FilterGaussianBlurExAlloc(const GP_Pixmap *src,
                                          GP_Coord x_src, GP_Coord y_src,
                                          GP_Size w_src, GP_Size h_src,
                                          float x_sigma, float y_sigma,
                                          GP_ProgressCallback *callback);
 
-int GP_FilterGaussianBlur(const GP_Context *src, GP_Context *dst,
+int GP_FilterGaussianBlur(const GP_Pixmap *src, GP_Pixmap *dst,
                           float x_sigma, float y_sigma,
                           GP_ProgressCallback *callback)
 
-GP_Context *GP_FilterGaussianBlurAlloc(const GP_Context *src,
+GP_Pixmap *GP_FilterGaussianBlurAlloc(const GP_Pixmap *src,
                                        float x_sigma, float y_sigma,
                                        GP_ProgressCallback *callback)
 -------------------------------------------------------------------------------
@@ -879,26 +879,26 @@ Median
 /* or */
 #include <GP.h>
 
-int GP_FilterMedianEx(const GP_Context *src,
+int GP_FilterMedianEx(const GP_Pixmap *src,
                       GP_Coord x_src, GP_Coord y_src,
                       GP_Size w_src, GP_Size h_src,
-                      GP_Context *dst,
+                      GP_Pixmap *dst,
                       GP_Coord x_dst, GP_Coord y_dst,
                       int xmed, int ymed,
                       GP_ProgressCallback *callback);
 
-GP_Context *GP_FilterMedianExAlloc(const GP_Context *src,
+GP_Pixmap *GP_FilterMedianExAlloc(const GP_Pixmap *src,
                                    GP_Coord x_src, GP_Coord y_src,
                                    GP_Size w_src, GP_Size h_src,
                                    int xmed, int ymed,
                                    GP_ProgressCallback *callback);
 
-int GP_FilterMedian(const GP_Context *src,
-                    GP_Context *dst,
+int GP_FilterMedian(const GP_Pixmap *src,
+                    GP_Pixmap *dst,
                     int xmed, int ymed,
                     GP_ProgressCallback *callback);
 
-GP_Context *GP_FilterMedianAlloc(const GP_Context *src,
+GP_Pixmap *GP_FilterMedianAlloc(const GP_Pixmap *src,
                                  int xmed, int ymed,
                                  GP_ProgressCallback *callback);
 -------------------------------------------------------------------------------

@@ -37,7 +37,7 @@
 /*
  * Saves 2 bpp grayscale image as ASCII Art
  */
-static int write_data(const GP_Context *img, GP_IO *io,
+static int write_data(const GP_Pixmap *img, GP_IO *io,
                       GP_ProgressCallback *callback)
 {
 	GP_IO *bio;
@@ -106,7 +106,7 @@ GP_Loader loader = {
 
 int main(int argc, char *argv[])
 {
-	GP_Context *c, *gc;
+	GP_Pixmap *c, *gc;
 
 	GP_LoaderRegister(&loader);
 

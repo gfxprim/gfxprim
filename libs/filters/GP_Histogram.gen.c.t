@@ -8,7 +8,7 @@
 #include <string.h>
 #include <errno.h>
 
-#include <core/GP_Context.h>
+#include <core/GP_Pixmap.h>
 #include <core/GP_Pixel.h>
 #include <core/GP_GetPutPixel.h>
 #include <core/GP_Debug.h>
@@ -18,10 +18,10 @@
 @ for pt in pixeltypes:
 @     if not pt.is_unknown() and not pt.is_palette():
 static int GP_FilterHistogram_{{ pt.name }}(GP_Histogram *self,
-	const GP_Context *src, GP_ProgressCallback *callback)
+	const GP_Pixmap *src, GP_ProgressCallback *callback)
 {
 	if (self->pixel_type != src->pixel_type) {
-		GP_WARN("Histogram (%s) and context (%s) pixel type must match",
+		GP_WARN("Histogram (%s) and pixmap (%s) pixel type must match",
 		        GP_PixelTypeName(self->pixel_type),
 			GP_PixelTypeName(src->pixel_type));
 		errno = EINVAL;
@@ -56,7 +56,7 @@ static int GP_FilterHistogram_{{ pt.name }}(GP_Histogram *self,
 
 @ end
 @
-int GP_FilterHistogram(GP_Histogram *self, const GP_Context *src,
+int GP_FilterHistogram(GP_Histogram *self, const GP_Pixmap *src,
                        GP_ProgressCallback *callback)
 {
 	unsigned int i, j;

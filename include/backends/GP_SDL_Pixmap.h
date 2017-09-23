@@ -20,30 +20,30 @@
  *                                                                           *
  *****************************************************************************/
 
-#ifndef BACKENDS_GP_SDL_CONTEXT_H
-#define BACKENDS_GP_SDL_CONTEXT_H
+#ifndef BACKENDS_GP_SDL_PIXMAP_H
+#define BACKENDS_GP_SDL_PIXMAP_H
 
 #include <SDL/SDL.h>
-#include <core/GP_Context.h>
+#include <core/GP_Pixmap.h>
 
 /*
  * This function lets you use GFXprim together with SDL. All you need to do
- * is to initialize context from surface. The usage is as follows:
+ * is to initialize pixmap from surface. The usage is as follows:
  *
  * ...
  *
- * GP_Context c;
+ * GP_Pixmap c;
  *
- * if (GP_ContextFromSDLSurface(&c, surface)) {
+ * if (GP_PixmapFromSDLSurface(&c, surface)) {
  *	error("Failed to match PIXEL_TYPE for given surface");
  *	exit(1);
  * }
  *
  * ...
  *
- * Now you have initialized context that shares the pixel buffer with
+ * Now you have initialized pixmap that shares the pixel buffer with
  * the SDL surface.
  */
-int GP_ContextFromSDLSurface(GP_Context *c, const SDL_Surface *surf);
+int GP_PixmapFromSDLSurface(GP_Pixmap *c, const SDL_Surface *surf);
 
-#endif /* BACKENDS_GP_SDL_CONTEXT_H */
+#endif /* BACKENDS_GP_SDL_PIXMAP_H */

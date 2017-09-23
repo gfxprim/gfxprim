@@ -63,7 +63,7 @@ GP_HistogramChannel *GP_HistogramChannelByName(GP_Histogram *self,
 /*
  * Computes histogram. Returns non-zero on failure (i.e. canceled by callback).
  */
-int GP_FilterHistogram(GP_Histogram *self, const GP_Context *src,
+int GP_FilterHistogram(GP_Histogram *self, const GP_Pixmap *src,
                        GP_ProgressCallback *callback);
 
 #endif /* FILTERS_GP_STATS_H */

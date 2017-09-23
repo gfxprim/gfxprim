@@ -28,7 +28,7 @@
 
 #include <GP.h>
 
-static GP_Context *win;
+static GP_Pixmap *win;
 static GP_Backend *backend;
 
 /* Basic colors in display-specific format. */
@@ -253,8 +253,8 @@ void redraw_screen(void)
 	if (show_axes) {
 		int w, h;
 
-		w = GP_ContextW(win);
-		h = GP_ContextH(win);
+		w = GP_PixmapW(win);
+		h = GP_PixmapH(win);
 
 		GP_HLine(win, 0, w, center_y, gray);
 		GP_HLine(win, 0, w, center_y-yradius, darkgray);
@@ -310,7 +310,7 @@ void redraw_screen(void)
 static void xradius_add(int xradius_add)
 {
 	if (xradius + xradius_add > 1 &&
-	    xradius + xradius_add < (int)GP_ContextW(win))
+	    xradius + xradius_add < (int)GP_PixmapW(win))
 		xradius += xradius_add;
 }
 
@@ -318,21 +318,21 @@ static void xradius_add(int xradius_add)
 static void yradius_add(int yradius_add)
 {
 	if (yradius + yradius_add > 1 &&
-	    yradius + yradius_add < (int)GP_ContextH(win))
+	    yradius + yradius_add < (int)GP_PixmapH(win))
 		yradius += yradius_add;
 }
 
 static void xcenter_add(int xcenter_add)
 {
 	if (center_x + xcenter_add > 1 &&
-	    center_x + xcenter_add < (int)GP_ContextW(win)/2)
+	    center_x + xcenter_add < (int)GP_PixmapW(win)/2)
 		center_x += xcenter_add;
 }
 
 static void ycenter_add(int ycenter_add)
 {
 	if (center_y + ycenter_add > 1 &&
-	    center_y + ycenter_add < (int)GP_ContextH(win)/2)
+	    center_y + ycenter_add < (int)GP_PixmapH(win)/2)
 		center_y += ycenter_add;
 }
 
@@ -364,8 +364,8 @@ void event_loop(void)
 			break;
 			case GP_KEY_R:
 				win->axes_swap = !win->axes_swap;
-				center_x = GP_ContextW(win) / 2;
-				center_y = GP_ContextH(win) / 2;
+				center_x = GP_PixmapW(win) / 2;
+				center_y = GP_PixmapH(win) / 2;
 			break;
 			case GP_KEY_F:
 				fill = !fill;
@@ -451,9 +451,9 @@ void event_loop(void)
 			break;
 			case GP_EV_SYS_RESIZE:
 				GP_BackendResizeAck(backend);
-				win = backend->context;
-				center_x = GP_ContextW(win) / 2;
-				center_y = GP_ContextH(win) / 2;
+				win = backend->pixmap;
+				center_x = GP_PixmapW(win) / 2;
+				center_y = GP_PixmapH(win) / 2;
 			break;
 			}
 		break;
@@ -506,19 +506,19 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 
-	win = backend->context;
+	win = backend->pixmap;
 
 	center_x = win->w / 2;
 	center_y = win->h / 2;
 
 	/* Load colors compatible with the display */
-	black    = GP_RGBToContextPixel(0x00, 0x00, 0x00, win);
-	white    = GP_RGBToContextPixel(0xff, 0xff, 0xff, win);
-	yellow   = GP_RGBToContextPixel(0xff, 0xff, 0x00, win);
-	green    = GP_RGBToContextPixel(0x00, 0xff, 0x00, win);
-	red      = GP_RGBToContextPixel(0xff, 0x00, 0x00, win);
-	gray     = GP_RGBToContextPixel(0xbe, 0xbe, 0xbe, win);
-	darkgray = GP_RGBToContextPixel(0x7f, 0x7f, 0x7f, win);
+	black    = GP_RGBToPixmapPixel(0x00, 0x00, 0x00, win);
+	white    = GP_RGBToPixmapPixel(0xff, 0xff, 0xff, win);
+	yellow   = GP_RGBToPixmapPixel(0xff, 0xff, 0x00, win);
+	green    = GP_RGBToPixmapPixel(0x00, 0xff, 0x00, win);
+	red      = GP_RGBToPixmapPixel(0xff, 0x00, 0x00, win);
+	gray     = GP_RGBToPixmapPixel(0xbe, 0xbe, 0xbe, win);
+	darkgray = GP_RGBToPixmapPixel(0x7f, 0x7f, 0x7f, win);
 
 	print_instructions();
 	redraw_screen();

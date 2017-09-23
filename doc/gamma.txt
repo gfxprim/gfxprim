@@ -38,7 +38,7 @@ and text still use legacy gamma support.)
 Implementation
 ~~~~~~~~~~~~~~
 
-The 'GP_Gamma' structure defines per context, per channel, gamma tables.
+The 'GP_Gamma' structure defines per pixmap, per channel, gamma tables.
 
 The tables for particular gamma are reference counted. There is only one table
 for particular gamma value and bit depth in memory at a time.

@@ -26,12 +26,12 @@
 #ifndef GP_LINE_H
 #define GP_LINE_H
 
-#include "core/GP_Context.h"
+#include "core/GP_Pixmap.h"
 
-void GP_Line(GP_Context *context, GP_Coord x0, GP_Coord y0,
+void GP_Line(GP_Pixmap *pixmap, GP_Coord x0, GP_Coord y0,
               GP_Coord x1, GP_Coord y1, GP_Pixel pixel);
 
-void GP_Line_Raw(GP_Context *context, GP_Coord x0, GP_Coord y0,
+void GP_Line_Raw(GP_Pixmap *pixmap, GP_Coord x0, GP_Coord y0,
                  GP_Coord x1, GP_Coord y1, GP_Pixel pixel);
 
 #endif /* GP_LINE_H */

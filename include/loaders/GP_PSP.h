@@ -36,20 +36,20 @@
 /*
  * Reads a BMP from an IO stream.
  *
- * Returns newly allocated context cotaining the loaded image or in case of
+ * Returns newly allocated pixmap cotaining the loaded image or in case of
  * failure NULL and errno is set.
  */
-GP_Context *GP_ReadPSP(GP_IO *io, GP_ProgressCallback *callback);
+GP_Pixmap *GP_ReadPSP(GP_IO *io, GP_ProgressCallback *callback);
 
 /*
  * Loads a PSP image from a file.
  */
-GP_Context *GP_LoadPSP(const char *src_path, GP_ProgressCallback *callback);
+GP_Pixmap *GP_LoadPSP(const char *src_path, GP_ProgressCallback *callback);
 
-int GP_ReadPSPEx(GP_IO *io, GP_Context **img,
+int GP_ReadPSPEx(GP_IO *io, GP_Pixmap **img,
 		 GP_DataStorage *storage, GP_ProgressCallback *callback);
 
-int GP_LoadPSPEx(const char *src_path, GP_Context **img,
+int GP_LoadPSPEx(const char *src_path, GP_Pixmap **img,
 		 GP_DataStorage *storage, GP_ProgressCallback *callback);
 
 /*

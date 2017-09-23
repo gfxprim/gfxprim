@@ -22,7 +22,7 @@
 
 /* Anti Aliased Line */
 
-#include "core/GP_Context.h"
+#include "core/GP_Pixmap.h"
 #include "core/GP_MixPixels.h"
 #include "core/GP_FixedPoint.h"
 #include "core/GP_GammaCorrection.h"
@@ -32,7 +32,7 @@
 
 #define FP_TO_PERC(a) (GP_FP_ROUND_TO_INT((a) * 255))
 
-static inline void line_aa_x(GP_Context *context,
+static inline void line_aa_x(GP_Pixmap *pixmap,
                              GP_Coord x0, GP_Coord y0,
                              GP_Coord x1, GP_Coord y1, GP_Pixel pixel)
 {
@@ -54,9 +54,9 @@ static inline void line_aa_x(GP_Context *context,
 	ypx1 = GP_FP_TO_INT(yend);
 
 	perc = FP_TO_PERC(GP_FP_MUL(GP_FP_RFRAC(yend), xgap));
-	GP_MixPixel_Raw_Clipped(context, xpx1, ypx1, pixel, perc);
+	GP_MixPixel_Raw_Clipped(pixmap, xpx1, ypx1, pixel, perc);
 	perc = FP_TO_PERC(GP_FP_MUL(GP_FP_FRAC(yend), xgap));
-	GP_MixPixel_Raw_Clipped(context, xpx1, ypx1+1, pixel, perc);
+	GP_MixPixel_Raw_Clipped(pixmap, xpx1, ypx1+1, pixel, perc);
 
 	xend = GP_FP_ROUND(x0);
 	yend = y0 + GP_FP_DIV(GP_FP_MUL(dy, xend - x0), dx);
@@ -65,9 +65,9 @@ static inline void line_aa_x(GP_Context *context,
 	ypx0 = GP_FP_TO_INT(yend);
 
 	perc = FP_TO_PERC(GP_FP_MUL(GP_FP_RFRAC(yend), xgap));
-	GP_MixPixel_Raw_Clipped(context, xpx0, ypx0, pixel, perc);
+	GP_MixPixel_Raw_Clipped(pixmap, xpx0, ypx0, pixel, perc);
 	perc = FP_TO_PERC(GP_FP_MUL(GP_FP_FRAC(yend), xgap));
-	GP_MixPixel_Raw_Clipped(context, xpx0, ypx0+1, pixel, perc);
+	GP_MixPixel_Raw_Clipped(pixmap, xpx0, ypx0+1, pixel, perc);
 
 	GP_Coord x;
 	GP_Coord intery;
@@ -76,13 +76,13 @@ static inline void line_aa_x(GP_Context *context,
 		intery = yend + GP_FP_DIV((x - xpx0) * dy, dx);
 
 		perc = FP_TO_PERC(GP_FP_RFRAC(intery));
-		GP_MixPixel_Raw_Clipped(context, x, GP_FP_TO_INT(intery), pixel, perc);
+		GP_MixPixel_Raw_Clipped(pixmap, x, GP_FP_TO_INT(intery), pixel, perc);
 		perc = FP_TO_PERC(GP_FP_FRAC(intery));
-		GP_MixPixel_Raw_Clipped(context, x, GP_FP_TO_INT(intery)+1, pixel, perc);
+		GP_MixPixel_Raw_Clipped(pixmap, x, GP_FP_TO_INT(intery)+1, pixel, perc);
 	}
 }
 
-static inline void line_aa_y(GP_Context *context,
+static inline void line_aa_y(GP_Pixmap *pixmap,
                              GP_Coord x0, GP_Coord y0,
                              GP_Coord x1, GP_Coord y1, GP_Pixel pixel)
 {
@@ -104,9 +104,9 @@ static inline void line_aa_y(GP_Context *context,
 	xpx1 = GP_FP_TO_INT(xend);
 
 	perc = FP_TO_PERC(GP_FP_MUL(GP_FP_RFRAC(xend), ygap));
-	GP_MixPixel_Raw_Clipped(context, xpx1, ypx1, pixel, perc);
+	GP_MixPixel_Raw_Clipped(pixmap, xpx1, ypx1, pixel, perc);
 	perc = FP_TO_PERC(GP_FP_MUL(GP_FP_FRAC(xend), ygap));
-	GP_MixPixel_Raw_Clipped(context, xpx1, ypx1+1, pixel, perc);
+	GP_MixPixel_Raw_Clipped(pixmap, xpx1, ypx1+1, pixel, perc);
 
 	yend = GP_FP_ROUND(y0);
 	xend = x0 + GP_FP_DIV(GP_FP_MUL(dx, yend - y0), dy);
@@ -115,9 +115,9 @@ static inline void line_aa_y(GP_Context *context,
 	xpx0 = GP_FP_TO_INT(xend);
 
 	perc = FP_TO_PERC(GP_FP_MUL(GP_FP_RFRAC(xend), ygap));
-	GP_MixPixel_Raw_Clipped(context, xpx0, ypx0, pixel, perc);
+	GP_MixPixel_Raw_Clipped(pixmap, xpx0, ypx0, pixel, perc);
 	perc = FP_TO_PERC(GP_FP_MUL(GP_FP_FRAC(xend), ygap));
-	GP_MixPixel_Raw_Clipped(context, xpx0, ypx0+1, pixel, perc);
+	GP_MixPixel_Raw_Clipped(pixmap, xpx0, ypx0+1, pixel, perc);
 
 	GP_Coord y;
 	GP_Coord intery;
@@ -126,30 +126,30 @@ static inline void line_aa_y(GP_Context *context,
 		intery = xend + GP_FP_DIV((y - ypx0) * dx, dy);
 
 		perc = FP_TO_PERC(GP_FP_RFRAC(intery));
-		GP_MixPixel_Raw_Clipped(context, GP_FP_TO_INT(intery), y, pixel, perc);
+		GP_MixPixel_Raw_Clipped(pixmap, GP_FP_TO_INT(intery), y, pixel, perc);
 		perc = FP_TO_PERC(GP_FP_FRAC(intery));
-		GP_MixPixel_Raw_Clipped(context, GP_FP_TO_INT(intery)+1, y, pixel, perc);
+		GP_MixPixel_Raw_Clipped(pixmap, GP_FP_TO_INT(intery)+1, y, pixel, perc);
 	}
 }
 
-void GP_LineAA_Raw(GP_Context *context, GP_Coord x0, GP_Coord y0,
+void GP_LineAA_Raw(GP_Pixmap *pixmap, GP_Coord x0, GP_Coord y0,
                    GP_Coord x1, GP_Coord y1, GP_Pixel pixel)
 {
 	int64_t dx = x1 - x0;
 	int64_t dy = y1 - y0;
 
 	if (dy == 0) {
-		GP_HLineAA_Raw(context, x0, x1, y0, pixel);
+		GP_HLineAA_Raw(pixmap, x0, x1, y0, pixel);
 		return;
 	}
 
 	if (dx == 0) {
-		GP_VLineAA_Raw(context, x0, y0, y1, pixel);
+		GP_VLineAA_Raw(pixmap, x0, y0, y1, pixel);
 		return;
 	}
 
 	if (GP_ABS(dx) < GP_ABS(dy))
-		line_aa_y(context, x0, y0, x1, y1, pixel);
+		line_aa_y(pixmap, x0, y0, x1, y1, pixel);
 	else
-		line_aa_x(context, x0, y0, x1, y1, pixel);
+		line_aa_x(pixmap, x0, y0, x1, y1, pixel);
 }

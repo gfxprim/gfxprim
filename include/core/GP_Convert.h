@@ -24,7 +24,7 @@
 #define CORE_GP_CONVERT_H
 
 #include "GP_Common.h"
-#include "GP_Context.h"
+#include "GP_Pixmap.h"
 #include "GP_Pixel.h"
 
 /* Generated headers */
@@ -77,23 +77,23 @@ static inline GP_Pixel GP_RGBAToPixel(uint8_t r, uint8_t g, uint8_t b,
 
 /*
  * Converts a color specified by its R, G, B components to a pixel value
- * compatible with the specified context.
+ * compatible with the specified pixmap.
  */
-static inline GP_Pixel GP_RGBToContextPixel(uint8_t r, uint8_t g, uint8_t b,
-					    const GP_Context *context)
+static inline GP_Pixel GP_RGBToPixmapPixel(uint8_t r, uint8_t g, uint8_t b,
+					    const GP_Pixmap *pixmap)
 {
-	return GP_RGBToPixel(r, g, b, context->pixel_type);
+	return GP_RGBToPixel(r, g, b, pixmap->pixel_type);
 }
 
 /*
  * Converts a color specified by its R, G, B, A components to a pixel value
- * compatible with the specified context.
+ * compatible with the specified pixmap.
  */
-static inline GP_Pixel GP_RGBAToContextPixel(uint8_t r, uint8_t g,
+static inline GP_Pixel GP_RGBAToPixmapPixel(uint8_t r, uint8_t g,
                                              uint8_t b, uint8_t a,
-					     const GP_Context *context)
+					     const GP_Pixmap *pixmap)
 {
-	return GP_RGBAToPixel(r, g, b, a, context->pixel_type);
+	return GP_RGBAToPixel(r, g, b, a, pixmap->pixel_type);
 }
 
 /*
@@ -106,12 +106,12 @@ static inline GP_Pixel GP_ConvertPixel(GP_Pixel pixel, GP_PixelType from,
 }
 
 /*
- * Convert between pixel types of given contexts (excl. palette types) via
+ * Convert between pixel types of given pixmaps (excl. palette types) via
  * RGBA8888.
  */
-static inline GP_Pixel GP_ConvertContextPixel(GP_Pixel pixel,
-                                              const GP_Context *from,
-					      const GP_Context *to)
+static inline GP_Pixel GP_ConvertPixmapPixel(GP_Pixel pixel,
+                                              const GP_Pixmap *from,
+					      const GP_Pixmap *to)
 {
 	return GP_RGBA8888ToPixel(GP_PixelToRGBA8888(pixel, from->pixel_type),
 	                          to->pixel_type);

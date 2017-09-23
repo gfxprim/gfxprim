@@ -31,15 +31,15 @@
 
 static void redraw(GP_Backend *self)
 {
-	GP_Context *context = self->context;
+	GP_Pixmap *pixmap = self->pixmap;
 	GP_Pixel white_pixel, black_pixel;
 
-	black_pixel = GP_RGBToContextPixel(0x00, 0x00, 0x00, context);
-	white_pixel = GP_RGBToContextPixel(0xff, 0xff, 0xff, context);
+	black_pixel = GP_RGBToPixmapPixel(0x00, 0x00, 0x00, pixmap);
+	white_pixel = GP_RGBToPixmapPixel(0xff, 0xff, 0xff, pixmap);
 
-	GP_Fill(context, black_pixel);
-	GP_Line(context, 0, 0, context->w - 1, context->h - 1, white_pixel);
-	GP_Line(context, 0, context->h - 1, context->w - 1, 0, white_pixel);
+	GP_Fill(pixmap, black_pixel);
+	GP_Line(pixmap, 0, 0, pixmap->w - 1, pixmap->h - 1, white_pixel);
+	GP_Line(pixmap, 0, pixmap->h - 1, pixmap->w - 1, 0, white_pixel);
 
 	/* Update the backend screen */
 	GP_BackendFlip(self);

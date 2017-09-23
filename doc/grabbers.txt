@@ -25,7 +25,7 @@ typdef struct GP_Grabber {
 	/*
          * Currently loaded frame.
          */
-	GP_Context *frame;
+	GP_Pixmap *frame;
 
 	/*
          * Connection fd usable for select() or poll().
@@ -100,7 +100,7 @@ grabber 'fd' is not -1 it's preferable to call it when select() or poll()
 returns that data are available on the 'fd'.
 
 This function returns non-zero if new frame was received and stored into the
-'frame' context. Otherwise zero is returned.
+'frame' pixmap. Otherwise zero is returned.
 
 Grabber Initializations
 ~~~~~~~~~~~~~~~~~~~~~~

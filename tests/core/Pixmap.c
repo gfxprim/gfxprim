@@ -22,63 +22,63 @@
 
 /*
 
-  Very basic GP_Context tests.
+  Very basic GP_Pixmap tests.
 
  */
 #include <errno.h>
 
-#include <core/GP_Context.h>
+#include <core/GP_Pixmap.h>
 
 #include "tst_test.h"
 
 /*
- * Check that Context is correctly allocated and freed
+ * Check that Pixmap is correctly allocated and freed
  */
-static int Context_Alloc_Free(void)
+static int Pixmap_Alloc_Free(void)
 {
-	GP_Context *c;
+	GP_Pixmap *c;
 
-	c = GP_ContextAlloc(100, 200, GP_PIXEL_RGB888);
+	c = GP_PixmapAlloc(100, 200, GP_PIXEL_RGB888);
 
 	if (c == NULL) {
-		tst_msg("GP_ContextAlloc() failed");
+		tst_msg("GP_PixmapAlloc() failed");
 		return TST_FAILED;
 	}
 
-	/* Assert context properties */
+	/* Assert pixmap properties */
 	if (c->bpp != 24) {
-		tst_msg("Context->bpp != 24 (== %i)", c->bpp);
+		tst_msg("Pixmap->bpp != 24 (== %i)", c->bpp);
 		return TST_FAILED;
 	}
 
 	if (c->bytes_per_row != 3 * c->w) {
-		tst_msg("Context->bytes_per_row != %i (== %i)",
+		tst_msg("Pixmap->bytes_per_row != %i (== %i)",
 		        3 * c->w, c->bytes_per_row);
 		return TST_FAILED;
 	}
 
 	if (c->w != 100) {
-		tst_msg("Context->w != 100 (== %i)", c->w);
+		tst_msg("Pixmap->w != 100 (== %i)", c->w);
 		return TST_FAILED;
 	}
 
 	if (c->h != 200) {
-		tst_msg("Context->h != 200 (== %i)", c->h);
+		tst_msg("Pixmap->h != 200 (== %i)", c->h);
 		return TST_FAILED;
 	}
 
 	if (c->offset != 0) {
-		tst_msg("Context->offset != 0");
+		tst_msg("Pixmap->offset != 0");
 		return TST_FAILED;
 	}
 
 	if (c->pixel_type != GP_PIXEL_RGB888) {
-		tst_msg("Context->pixel_type != GP_PIXEL_RGB888");
+		tst_msg("Pixmap->pixel_type != GP_PIXEL_RGB888");
 		return TST_FAILED;
 	}
 
 	if (c->gamma != NULL) {
-		tst_msg("Context->gamma != NULL");
+		tst_msg("Pixmap->gamma != NULL");
 		return TST_FAILED;
 	}
 
@@ -92,49 +92,49 @@ static int Context_Alloc_Free(void)
 	*(char*)GP_PIXEL_ADDR(c, 0, 0) = 0;
 	*(char*)GP_PIXEL_ADDR(c, 100, 100) = 0;
 
-	GP_ContextFree(c);
+	GP_PixmapFree(c);
 
 	return TST_SUCCESS;
 }
 
 /*
- * Asserts that subcontext structure is initialized correctly
+ * Asserts that subpixmap structure is initialized correctly
  */
-static int subcontext_assert(const GP_Context *c, const GP_Context *sc,
+static int subpixmap_assert(const GP_Pixmap *c, const GP_Pixmap *sc,
                              GP_Size w, GP_Size h)
 {
 	if (c->bpp != sc->bpp) {
-		tst_msg("Context->bpp != SubContext->bpp");
+		tst_msg("Pixmap->bpp != SubPixmap->bpp");
 		return TST_FAILED;
 	}
 
 	if (c->bytes_per_row != sc->bytes_per_row) {
-		tst_msg("Context->bytes_per_row != SubContext->bytes_per_row");
+		tst_msg("Pixmap->bytes_per_row != SubPixmap->bytes_per_row");
 		return TST_FAILED;
 	}
 
 	if (sc->w != w) {
-		tst_msg("SubContext->w != %u (== %i)", w, sc->w);
+		tst_msg("SubPixmap->w != %u (== %i)", w, sc->w);
 		return TST_FAILED;
 	}
 
 	if (sc->h != h) {
-		tst_msg("SubContext->h != %u (== %i)", h, sc->h);
+		tst_msg("SubPixmap->h != %u (== %i)", h, sc->h);
 		return TST_FAILED;
 	}
 
 	if (sc->offset != 0) {
-		tst_msg("SubContext->offset != 0");
+		tst_msg("SubPixmap->offset != 0");
 		return TST_FAILED;
 	}
 
 	if (sc->pixel_type != GP_PIXEL_RGB888) {
-		tst_msg("SubContext->pixel_type != GP_PIXEL_RGB888");
+		tst_msg("SubPixmap->pixel_type != GP_PIXEL_RGB888");
 		return TST_FAILED;
 	}
 
 	if (sc->gamma != NULL) {
-		tst_msg("SubContext->gamma != NULL");
+		tst_msg("SubPixmap->gamma != NULL");
 		return TST_FAILED;
 	}
 
@@ -151,68 +151,68 @@ static int subcontext_assert(const GP_Context *c, const GP_Context *sc,
 	return 0;
 }
 
-static int SubContext_Alloc_Free(void)
+static int SubPixmap_Alloc_Free(void)
 {
-	GP_Context *c, *sc;
+	GP_Pixmap *c, *sc;
 	int ret;
 
-	c = GP_ContextAlloc(300, 300, GP_PIXEL_RGB888);
+	c = GP_PixmapAlloc(300, 300, GP_PIXEL_RGB888);
 
 	if (c == NULL) {
-		tst_msg("GP_ContextAlloc() failed");
+		tst_msg("GP_PixmapAlloc() failed");
 		return TST_UNTESTED;
 	}
 
-	sc = GP_SubContextAlloc(c, 100, 100, 100, 100);
+	sc = GP_SubPixmapAlloc(c, 100, 100, 100, 100);
 
 	if (sc == NULL) {
-		GP_ContextFree(c);
+		GP_PixmapFree(c);
 		return TST_FAILED;
 	}
 
-	ret = subcontext_assert(c, sc, 100, 100);
+	ret = subpixmap_assert(c, sc, 100, 100);
 
 	if (ret)
 		return ret;
 
-	GP_ContextFree(c);
-	GP_ContextFree(sc);
+	GP_PixmapFree(c);
+	GP_PixmapFree(sc);
 
 	return TST_SUCCESS;
 }
 
-static int SubContext_Create(void)
+static int SubPixmap_Create(void)
 {
-	GP_Context *c, sc;
+	GP_Pixmap *c, sc;
 	int ret;
 
-	c = GP_ContextAlloc(300, 300, GP_PIXEL_RGB888);
+	c = GP_PixmapAlloc(300, 300, GP_PIXEL_RGB888);
 
 	if (c == NULL) {
-		tst_msg("GP_ContextAlloc() failed");
+		tst_msg("GP_PixmapAlloc() failed");
 		return TST_UNTESTED;
 	}
 
-	GP_SubContext(c, &sc, 100, 100, 100, 100);
+	GP_SubPixmap(c, &sc, 100, 100, 100, 100);
 
-	ret = subcontext_assert(c, &sc, 100, 100);
+	ret = subpixmap_assert(c, &sc, 100, 100);
 
 	if (ret)
 		return ret;
 
-	GP_ContextFree(c);
+	GP_PixmapFree(c);
 
 	return TST_SUCCESS;
 }
 
-static int context_zero_w(void)
+static int pixmap_zero_w(void)
 {
-	GP_Context *c;
+	GP_Pixmap *c;
 
-	c = GP_ContextAlloc(0, 200, GP_PIXEL_G8);
+	c = GP_PixmapAlloc(0, 200, GP_PIXEL_G8);
 
 	if (c != NULL) {
-		tst_msg("Context with zero width successfuly allocated");
+		tst_msg("Pixmap with zero width successfuly allocated");
 		return TST_FAILED;
 	}
 
@@ -224,14 +224,14 @@ static int context_zero_w(void)
 	return TST_SUCCESS;
 }
 
-static int context_zero_h(void)
+static int pixmap_zero_h(void)
 {
-	GP_Context *c;
+	GP_Pixmap *c;
 
-	c = GP_ContextAlloc(200, 0, GP_PIXEL_G8);
+	c = GP_PixmapAlloc(200, 0, GP_PIXEL_G8);
 
 	if (c != NULL) {
-		tst_msg("Context with zero height successfuly allocated");
+		tst_msg("Pixmap with zero height successfuly allocated");
 		return TST_FAILED;
 	}
 
@@ -243,14 +243,14 @@ static int context_zero_h(void)
 	return TST_SUCCESS;
 }
 
-static int context_invalid_pixeltype1(void)
+static int pixmap_invalid_pixeltype1(void)
 {
-	GP_Context *c;
+	GP_Pixmap *c;
 
-	c = GP_ContextAlloc(100, 100, -1);
+	c = GP_PixmapAlloc(100, 100, -1);
 
 	if (c != NULL) {
-		tst_msg("Context with invalid pixel type (-1) succesfully allocated");
+		tst_msg("Pixmap with invalid pixel type (-1) succesfully allocated");
 		return TST_FAILED;
 	}
 
@@ -262,14 +262,14 @@ static int context_invalid_pixeltype1(void)
 	return TST_SUCCESS;
 }
 
-static int context_invalid_pixeltype2(void)
+static int pixmap_invalid_pixeltype2(void)
 {
-	GP_Context *c;
+	GP_Pixmap *c;
 
-	c = GP_ContextAlloc(100, 100, GP_PIXEL_MAX + 1000);
+	c = GP_PixmapAlloc(100, 100, GP_PIXEL_MAX + 1000);
 
 	if (c != NULL) {
-		tst_msg("Context with invalid pixel type (-1) succesfully allocated");
+		tst_msg("Pixmap with invalid pixel type (-1) succesfully allocated");
 		return TST_FAILED;
 	}
 
@@ -282,23 +282,23 @@ static int context_invalid_pixeltype2(void)
 }
 
 const struct tst_suite tst_suite = {
-	.suite_name = "Context Testsuite",
+	.suite_name = "Pixmap Testsuite",
 	.tests = {
-		{.name = "Context Alloc Free", .tst_fn = Context_Alloc_Free,
+		{.name = "Pixmap Alloc Free", .tst_fn = Pixmap_Alloc_Free,
 		 .flags = TST_CHECK_MALLOC},
-		{.name = "SubContext Alloc Free",
-		 .tst_fn = SubContext_Alloc_Free,
+		{.name = "SubPixmap Alloc Free",
+		 .tst_fn = SubPixmap_Alloc_Free,
 		 .flags = TST_CHECK_MALLOC},
-		{.name = "SubContext Create",
-		 .tst_fn = SubContext_Create},
-		{.name = "Context Create w = 0",
-		 .tst_fn = context_zero_w},
-		{.name = "Context Create h = 0",
-		 .tst_fn = context_zero_h},
-		{.name = "Context Create pixel_type = -1",
-		 .tst_fn = context_invalid_pixeltype1},
-		{.name = "Context Create invalid pixel_type",
-		 .tst_fn = context_invalid_pixeltype2},
+		{.name = "SubPixmap Create",
+		 .tst_fn = SubPixmap_Create},
+		{.name = "Pixmap Create w = 0",
+		 .tst_fn = pixmap_zero_w},
+		{.name = "Pixmap Create h = 0",
+		 .tst_fn = pixmap_zero_h},
+		{.name = "Pixmap Create pixel_type = -1",
+		 .tst_fn = pixmap_invalid_pixeltype1},
+		{.name = "Pixmap Create invalid pixel_type",
+		 .tst_fn = pixmap_invalid_pixeltype2},
 		{.name = NULL},
 	}
 };

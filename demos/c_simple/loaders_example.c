@@ -34,7 +34,7 @@
 
 int main(int argc, char *argv[])
 {
-	GP_Context *img;
+	GP_Pixmap *img;
 
 	/* Turn on debug messages */
 	GP_SetDebugLevel(10);

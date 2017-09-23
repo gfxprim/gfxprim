@@ -3,7 +3,7 @@ Python GFX module
 
 The python binding maps mostly to the C API with the 'GP_' prefix stripped.
 
-The gfx module adds methods to the gfx context submodule.
+The gfx module adds methods to the gfx pixmap submodule.
 
 NOTE: You may want to see the link:coordinate_system.html[coordinate system]
       first.
@@ -13,9 +13,9 @@ Drawing functions
 
 All drawing functions takes a 'pixel' value (to describe color) which
 link:core_python.html#Colors_and_Pixels[can be obtained], for a particular
-pixel type (context), from a RGB triplet.
+pixel type (pixmap), from a RGB triplet.
 
-All drawing functions are clipped. Drawing outside of a context is no-op.
+All drawing functions are clipped. Drawing outside of a pixmap is no-op.
 
 WARNING: Drawing functions takes strictly integer coordinates, make sure that
          all divisions are integer divisions (i.e. use // instead of /) to
@@ -28,7 +28,7 @@ Line Based Primitives
 -------------------------------------------------------------------------------
 import gfxprim.gfx as gfx
 
-     context.gfx.HLine(x0, x1, y, pixel)
+     pixmap.gfx.HLine(x0, x1, y, pixel)
 
 -------------------------------------------------------------------------------
 
@@ -38,7 +38,7 @@ Draws a horizontal line from 'x0' to 'x1' at 'y'.
 -------------------------------------------------------------------------------
 import gfxprim.gfx as gfx
 
-     context.gfx.VLine(x, y0, y1, pixel)
+     pixmap.gfx.VLine(x, y0, y1, pixel)
 
 -------------------------------------------------------------------------------
 
@@ -49,7 +49,7 @@ Draws a vertical line from 'y0' to 'y1' at 'x'.
 -------------------------------------------------------------------------------
 import gfxprim.gfx as gfx
 
-     context.gfx.Line(x0, y0, x1, y1, pixel)
+     pixmap.gfx.Line(x0, y0, x1, y1, pixel)
 
 -------------------------------------------------------------------------------
 
@@ -59,7 +59,7 @@ Draws a line from x0, y0 to x1, y1.
 -------------------------------------------------------------------------------
 import gfxprim.gfx as gfx
 
-     context.gfx.Rect(x0, y0, x1, y1, pixel)
+     pixmap.gfx.Rect(x0, y0, x1, y1, pixel)
 
 -------------------------------------------------------------------------------
 
@@ -69,7 +69,7 @@ Draws a rectangle defined by two points.
 -------------------------------------------------------------------------------
 import gfxprim.gfx as gfx
 
-     context.gfx.Triangle(x0, y0, x1, y1, x1, y2, pixel)
+     pixmap.gfx.Triangle(x0, y0, x1, y1, x1, y2, pixel)
 
 -------------------------------------------------------------------------------
 
@@ -79,7 +79,7 @@ Draws a triangle defined by three points.
 -------------------------------------------------------------------------------
 import gfxprim.gfx as gfx
 
-     context.gfx.Tetragon(x0, y0, x1, y1, x1, y2, x3, y3, pixel)
+     pixmap.gfx.Tetragon(x0, y0, x1, y1, x1, y2, x3, y3, pixel)
 
 -------------------------------------------------------------------------------
 
@@ -89,9 +89,9 @@ Draws a tetragon defined by four points.
 -------------------------------------------------------------------------------
 import gfxprim.gfx as gfx
 
-     context.gfx.Polygon([x0, y0, x1, y1, ...], pixel)
+     pixmap.gfx.Polygon([x0, y0, x1, y1, ...], pixel)
 
-     context.gfx.Polygon([(x0, y0), (x1, y1), ...], pixel)
+     pixmap.gfx.Polygon([(x0, y0), (x1, y1), ...], pixel)
 
 -------------------------------------------------------------------------------
 
@@ -102,7 +102,7 @@ integers or list of N tuples.
 -------------------------------------------------------------------------------
 import gfxprim.gfx as gfx
 
-     context.gfx.Circle(x, y, r, pixel)
+     pixmap.gfx.Circle(x, y, r, pixel)
 
 -------------------------------------------------------------------------------
 
@@ -112,7 +112,7 @@ Draws a circle.
 -------------------------------------------------------------------------------
 import gfxprim.gfx as gfx
 
-     context.gfx.Ellipse(x, y, a, b, pixel)
+     pixmap.gfx.Ellipse(x, y, a, b, pixel)
 
 -------------------------------------------------------------------------------
 
@@ -122,7 +122,7 @@ Draws an ellipse.
 -------------------------------------------------------------------------------
 import gfxprim.gfx as gfx
 
-     context.gfx.Ring(x, y, r1, r2, pixel)
+     pixmap.gfx.Ring(x, y, r1, r2, pixel)
 
 -------------------------------------------------------------------------------
 
@@ -135,17 +135,17 @@ Filled Primitives
 -------------------------------------------------------------------------------
 import gfxprim.gfx as gfx
 
-    context.gfx.Fill(pixel)
+    pixmap.gfx.Fill(pixel)
 
 -------------------------------------------------------------------------------
 
-Fills context with particular 'pixel' value.
+Fills pixmap with particular 'pixel' value.
 
 [source,python]
 -------------------------------------------------------------------------------
 import gfxprim.gfx as gfx
 
-     context.gfx.FillRect(x0, y0, x1, y1, pixel)
+     pixmap.gfx.FillRect(x0, y0, x1, y1, pixel)
 
 -------------------------------------------------------------------------------
 
@@ -155,7 +155,7 @@ Fills a rectangle defined by two points.
 -------------------------------------------------------------------------------
 import gfxprim.gfx as gfx
 
-     context.gfx.FillTriangle(x0, y0, x1, y1, x1, y2, pixel)
+     pixmap.gfx.FillTriangle(x0, y0, x1, y1, x1, y2, pixel)
 
 -------------------------------------------------------------------------------
 
@@ -165,7 +165,7 @@ Draws a filled triangle defined by three points.
 -------------------------------------------------------------------------------
 import gfxprim.gfx as gfx
 
-     context.gfx.FillTetragon(x0, y0, x1, y1, x1, y2, x3, y3, pixel)
+     pixmap.gfx.FillTetragon(x0, y0, x1, y1, x1, y2, x3, y3, pixel)
 
 -------------------------------------------------------------------------------
 
@@ -175,9 +175,9 @@ Draws a filled tetragon defined by four points.
 -------------------------------------------------------------------------------
 import gfxprim.gfx as gfx
 
-     context.gfx.FillPolygon([x0, y0, x1, y1, ...], pixel)
+     pixmap.gfx.FillPolygon([x0, y0, x1, y1, ...], pixel)
 
-     context.gfx.FillPolygon([(x0, y0), (x1, y1), ...], pixel)
+     pixmap.gfx.FillPolygon([(x0, y0), (x1, y1), ...], pixel)
 
 -------------------------------------------------------------------------------
 
@@ -188,7 +188,7 @@ integers or list of N tuples.
 -------------------------------------------------------------------------------
 import gfxprim.gfx as gfx
 
-     context.gfx.FillCircle(x, y, r, pixel)
+     pixmap.gfx.FillCircle(x, y, r, pixel)
 
 -------------------------------------------------------------------------------
 
@@ -198,7 +198,7 @@ Fills a circle.
 -------------------------------------------------------------------------------
 import gfxprim.gfx as gfx
 
-     context.gfx.FillEllipse(x, y, a, b, pixel)
+     pixmap.gfx.FillEllipse(x, y, a, b, pixel)
 
 -------------------------------------------------------------------------------
 
@@ -208,7 +208,7 @@ Fills an ellipse.
 -------------------------------------------------------------------------------
 import gfxprim.gfx as gfx
 
-     context.gfx.FillRing(x, y, r1, r2, pixel)
+     pixmap.gfx.FillRing(x, y, r1, r2, pixel)
 
 -------------------------------------------------------------------------------
 

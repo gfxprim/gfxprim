@@ -21,13 +21,13 @@ class Ball:
         self.bg_img = bg_img
 
     def draw(self, bk):
-        self.ball.Blit(0, 0, bk.context, self.x, self.y, self.ball.w, self.ball.h)
+        self.ball.Blit(0, 0, bk.pixmap, self.x, self.y, self.ball.w, self.ball.h)
 
     def move(self, bk):
         old_x = self.x;
         old_y = self.y;
 
-        self.bg_img.Blit(old_x, old_y, bk.context, old_x, old_y, self.ball.w, self.ball.h)
+        self.bg_img.Blit(old_x, old_y, bk.pixmap, old_x, old_y, self.ball.w, self.ball.h)
 
         self.x += self.dx
         self.y += self.dy
@@ -38,7 +38,7 @@ class Ball:
         if (self.y <= 0 or self.y >= self.bg_img.h - self.ball.h):
             self.dy = -self.dy
 
-        self.ball.Blit(0, 0, bk.context, self.x, self.y, self.ball.w, self.ball.h)
+        self.ball.Blit(0, 0, bk.pixmap, self.x, self.y, self.ball.w, self.ball.h)
         bk.UpdateRect(min(old_x, self.x), min(self.y, old_y),
                       max(old_x, self.x) + self.ball.w - 1,
                       max(old_y, self.y) + self.ball.h - 1)
@@ -59,7 +59,7 @@ def main():
     # Create X11 window
     bk = backends.BackendX11Init(None, 0, 0, bg.w, bg.h, sys.argv[1], 0)
     assert(bk)
-    bg.Blit(0, 0, bk.context, 0, 0, bg.w, bg.h)
+    bg.Blit(0, 0, bk.pixmap, 0, 0, bg.w, bg.h)
 
     bk.Flip()
 

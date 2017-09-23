@@ -1,7 +1,7 @@
 TOPDIR=..
 include $(TOPDIR)/config.mk
 
-SOURCES=index.html about.txt context.txt loaders.txt filters.txt \
+SOURCES=index.html about.txt pixmap.txt loaders.txt filters.txt \
 	basic_types.txt gfx.txt backends.txt gamma.txt grabbers.txt \
 	environment_variables.txt debug.txt core.txt input.txt \
 	gen.txt pixels.txt coordinate_system.txt coding_style.txt \

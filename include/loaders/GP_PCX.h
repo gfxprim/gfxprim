@@ -34,21 +34,21 @@
 /*
  * Extended loading function.
  */
-int GP_ReadPCXEx(GP_IO *io, GP_Context **img, GP_DataStorage *storage,
+int GP_ReadPCXEx(GP_IO *io, GP_Pixmap **img, GP_DataStorage *storage,
                  GP_ProgressCallback *callback);
 
-int GP_LoadPCXEx(const char *src_path, GP_Context **img,
+int GP_LoadPCXEx(const char *src_path, GP_Pixmap **img,
                  GP_DataStorage *storage, GP_ProgressCallback *callback);
 
 /*
  * Reads a PCX from an IO stream.
  */
-GP_Context *GP_ReadPCX(GP_IO *io, GP_ProgressCallback *callback);
+GP_Pixmap *GP_ReadPCX(GP_IO *io, GP_ProgressCallback *callback);
 
 /*
  * Loads a PCX image from a file.
  */
-GP_Context *GP_LoadPCX(const char *src_path, GP_ProgressCallback *callback);
+GP_Pixmap *GP_LoadPCX(const char *src_path, GP_ProgressCallback *callback);
 
 /*
  * Match PCX signature.

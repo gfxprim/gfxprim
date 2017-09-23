@@ -505,7 +505,7 @@ static uint8_t get_idx(struct bitmap_info_header *header,
 #include "GP_BMP_RLE.h"
 
 static int read_palette(GP_IO *io, struct bitmap_info_header *header,
-                        GP_Context *context, GP_ProgressCallback *callback)
+                        GP_Pixmap *pixmap, GP_ProgressCallback *callback)
 {
 	uint32_t palette_size = get_palette_size(header);
 	uint32_t row_size = bitmap_row_size(header);
@@ -552,11 +552,11 @@ static int read_palette(GP_IO *io, struct bitmap_info_header *header,
 			else
 				ry = GP_ABS(header->h) - 1 - y;
 
-			GP_PutPixel_Raw_24BPP(context, x, ry, p);
+			GP_PutPixel_Raw_24BPP(pixmap, x, ry, p);
 		}
 
 		if (GP_ProgressCallbackReport(callback, y,
-		                              context->h, context->w)) {
+		                              pixmap->h, pixmap->w)) {
 			GP_DEBUG(1, "Operation aborted");
 			err = ECANCELED;
 			goto err;
@@ -570,7 +570,7 @@ err:
 }
 
 static int read_bitfields_or_rgb(GP_IO *io, struct bitmap_info_header *header,
-                                 GP_Context *context,
+                                 GP_Pixmap *pixmap,
                                  GP_ProgressCallback *callback)
 {
 	uint32_t row_size = header->w * (header->bpp / 8);
@@ -601,7 +601,7 @@ static int read_bitfields_or_rgb(GP_IO *io, struct bitmap_info_header *header,
 		else
 			ry = GP_ABS(header->h) - 1 - y;
 
-		uint8_t *row = GP_PIXEL_ADDR(context, 0, ry);
+		uint8_t *row = GP_PIXEL_ADDR(pixmap, 0, ry);
 
 		if (GP_IOFill(io, row, row_size)) {
 			err = errno;
@@ -620,7 +620,7 @@ static int read_bitfields_or_rgb(GP_IO *io, struct bitmap_info_header *header,
 		}
 
 		if (GP_ProgressCallbackReport(callback, y,
-		                              context->h, context->w)) {
+		                              pixmap->h, pixmap->w)) {
 			GP_DEBUG(1, "Operation aborted");
 			return ECANCELED;
 		}
@@ -641,11 +641,11 @@ static void check_palette_size(struct bitmap_info_header *header)
 }
 
 static int read_bitmap_pixels(GP_IO *io, struct bitmap_info_header *header,
-                              GP_Context *context, GP_ProgressCallback *callback)
+                              GP_Pixmap *pixmap, GP_ProgressCallback *callback)
 {
 	if (header->compress_type == COMPRESS_RLE8) {
 		check_palette_size(header);
-		return read_RLE8(io, header, context, callback);
+		return read_RLE8(io, header, pixmap, callback);
 	}
 
 	switch (header->bpp) {
@@ -655,11 +655,11 @@ static int read_bitmap_pixels(GP_IO *io, struct bitmap_info_header *header,
 	case 4:
 	case 8:
 		check_palette_size(header);
-		return read_palette(io, header, context, callback);
+		return read_palette(io, header, pixmap, callback);
 	case 16:
 	case 24:
 	case 32:
-		return read_bitfields_or_rgb(io, header, context, callback);
+		return read_bitfields_or_rgb(io, header, pixmap, callback);
 	}
 
 	return ENOSYS;
@@ -684,12 +684,12 @@ int GP_MatchBMP(const void *buf)
 	return !memcmp(buf, "BM", 2);
 }
 
-int GP_ReadBMPEx(GP_IO *io, GP_Context **img, GP_DataStorage *storage,
+int GP_ReadBMPEx(GP_IO *io, GP_Pixmap **img, GP_DataStorage *storage,
                  GP_ProgressCallback *callback)
 {
 	struct bitmap_info_header header;
 	GP_PixelType pixel_type;
-	GP_Context *context;
+	GP_Pixmap *pixmap;
 	int err;
 
 	if ((err = read_bitmap_header(io, &header)))
@@ -725,37 +725,37 @@ int GP_ReadBMPEx(GP_IO *io, GP_Context **img, GP_DataStorage *storage,
 	if (!img)
 		return 0;
 
-	context = GP_ContextAlloc(header.w, GP_ABS(header.h), pixel_type);
+	pixmap = GP_PixmapAlloc(header.w, GP_ABS(header.h), pixel_type);
 
-	if (context == NULL) {
+	if (pixmap == NULL) {
 		err = ENOMEM;
 		goto err1;
 	}
 
-	if ((err = read_bitmap_pixels(io, &header, context, callback)))
+	if ((err = read_bitmap_pixels(io, &header, pixmap, callback)))
 		goto err2;
 
-	*img = context;
+	*img = pixmap;
 
 	return 0;
 err2:
-	GP_ContextFree(context);
+	GP_PixmapFree(pixmap);
 err1:
 	errno = err;
 	return 1;
 }
 
-GP_Context *GP_ReadBMP(GP_IO *io, GP_ProgressCallback *callback)
+GP_Pixmap *GP_ReadBMP(GP_IO *io, GP_ProgressCallback *callback)
 {
 	return GP_LoaderReadImage(&GP_BMP, io, callback);
 }
 
-GP_Context *GP_LoadBMP(const char *src_path, GP_ProgressCallback *callback)
+GP_Pixmap *GP_LoadBMP(const char *src_path, GP_ProgressCallback *callback)
 {
 	return GP_LoaderLoadImage(&GP_BMP, src_path, callback);
 }
 
-int GP_LoadBMPEx(const char *src_path, GP_Context **img,
+int GP_LoadBMPEx(const char *src_path, GP_Pixmap **img,
 		 GP_DataStorage *storage, GP_ProgressCallback *callback)
 {
 	return GP_LoaderLoadImageEx(&GP_BMP, src_path, img, storage, callback);
@@ -828,7 +828,7 @@ static GP_PixelType out_pixel_types[] = {
 	GP_PIXEL_UNKNOWN,
 };
 
-static int bmp_fill_header(const GP_Context *src, struct bitmap_info_header *header)
+static int bmp_fill_header(const GP_Pixmap *src, struct bitmap_info_header *header)
 {
 	GP_PixelType out_pix;
 
@@ -857,7 +857,7 @@ static int bmp_fill_header(const GP_Context *src, struct bitmap_info_header *hea
 	return 0;
 }
 
-static int bmp_write_data(GP_IO *io, const GP_Context *src,
+static int bmp_write_data(GP_IO *io, const GP_Pixmap *src,
                           GP_ProgressCallback *callback)
 {
 	int y;
@@ -899,7 +899,7 @@ static int bmp_write_data(GP_IO *io, const GP_Context *src,
 	return 0;
 }
 
-int GP_WriteBMP(const GP_Context *src, GP_IO *io,
+int GP_WriteBMP(const GP_Pixmap *src, GP_IO *io,
                 GP_ProgressCallback *callback)
 {
 	struct bitmap_info_header header;
@@ -922,7 +922,7 @@ err:
 	return 1;
 }
 
-int GP_SaveBMP(const GP_Context *src, const char *dst_path,
+int GP_SaveBMP(const GP_Pixmap *src, const char *dst_path,
                GP_ProgressCallback *callback)
 {
 	return GP_LoaderSaveImage(&GP_BMP, src, dst_path, callback);

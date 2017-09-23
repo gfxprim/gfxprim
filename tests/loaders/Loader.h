@@ -32,14 +32,14 @@ struct testcase {
 	char *path;
 };
 
-static int test_check(struct testcase *test, GP_Context *img)
+static int test_check(struct testcase *test, GP_Pixmap *img)
 {
 	unsigned int x, y, err = 0;
 
 	if (img->w != test->w || img->h != test->h) {
 		tst_msg("Invalid image size have %ux%u expected %ux%u",
 		        img->w, img->h, test->w, test->h);
-		GP_ContextFree(img);
+		GP_PixmapFree(img);
 		return TST_FAILED;
 	}
 
@@ -68,7 +68,7 @@ static int test_check(struct testcase *test, GP_Context *img)
 
 static int test_read(struct testcase *test)
 {
-	GP_Context *img;
+	GP_Pixmap *img;
 	GP_IO *io;
 	int err;
 
@@ -96,7 +96,7 @@ static int test_read(struct testcase *test)
 
 	err = test_check(test, img);
 
-	GP_ContextFree(img);
+	GP_PixmapFree(img);
 out:
 	GP_IOClose(io);
 	return err;
@@ -106,7 +106,7 @@ out:
 
 static int test_load(struct testcase *test)
 {
-	GP_Context *img;
+	GP_Pixmap *img;
 	int err;
 
 	errno = 0;
@@ -126,7 +126,7 @@ static int test_load(struct testcase *test)
 
 	err = test_check(test, img);
 
-	GP_ContextFree(img);
+	GP_PixmapFree(img);
 
 	return err;
 }
@@ -134,7 +134,7 @@ static int test_load(struct testcase *test)
 
 static int test_load_fail(const char *path)
 {
-	GP_Context *img;
+	GP_Pixmap *img;
 
 	errno = 0;
 
@@ -142,7 +142,7 @@ static int test_load_fail(const char *path)
 
 	if (img != NULL) {
 		tst_msg("Succeeded unexpectedly");
-		GP_ContextFree(img);
+		GP_PixmapFree(img);
 		return TST_FAILED;
 	}
 
@@ -175,13 +175,13 @@ struct testcase_save_load {
 
 static int test_save_load(struct testcase_save_load *test)
 {
-	GP_Context *img, *img2;
+	GP_Pixmap *img, *img2;
 	unsigned int x, y;
 
-	img = GP_ContextAlloc(test->w, test->h, test->pixel_type);
+	img = GP_PixmapAlloc(test->w, test->h, test->pixel_type);
 
 	if (img == NULL) {
-		tst_msg("Failed to allocate context %ux%u %s",
+		tst_msg("Failed to allocate pixmap %ux%u %s",
 		        test->w, test->h, GP_PixelTypeName(test->pixel_type));
 		return TST_FAILED;
 	}
@@ -198,7 +198,7 @@ static int test_save_load(struct testcase_save_load *test)
 			return TST_SKIPPED;
 		}
 
-		tst_msg("Failed to save context %ux%u %s: %s",
+		tst_msg("Failed to save pixmap %ux%u %s: %s",
 		        test->w, test->h, GP_PixelTypeName(test->pixel_type),
 			strerror(errno));
 		return TST_FAILED;
@@ -211,11 +211,11 @@ static int test_save_load(struct testcase_save_load *test)
 		switch (errno) {
 		case ENOSYS:
 			tst_msg("Not Implemented");
-			GP_ContextFree(img);
+			GP_PixmapFree(img);
 			return TST_SKIPPED;
 		default:
 			tst_msg("Got %s", strerror(errno));
-			GP_ContextFree(img);
+			GP_PixmapFree(img);
 			return TST_FAILED;
 		}
 	}
@@ -223,14 +223,14 @@ static int test_save_load(struct testcase_save_load *test)
 	if (img->w != img2->w || img->h != img2->h) {
 		tst_msg("Source size %ux%u and loaded size %ux%u differs",
 		        img->w, img->h, img2->w, img2->h);
-		GP_ContextFree(img);
-		GP_ContextFree(img2);
+		GP_PixmapFree(img);
+		GP_PixmapFree(img2);
 		return TST_FAILED;
 	}
 
 	if (img->pixel_type != img2->pixel_type) {
-		GP_ContextFree(img);
-		GP_ContextFree(img2);
+		GP_PixmapFree(img);
+		GP_PixmapFree(img2);
 		tst_msg("Source pixel type %s and loaded type %s differs",
 			GP_PixelTypeName(img->pixel_type),
 			GP_PixelTypeName(img2->pixel_type));
@@ -239,13 +239,13 @@ static int test_save_load(struct testcase_save_load *test)
 
 	if (GP_GetPixel(img2, 0, 0) != 0) {
 		tst_msg("Pixel value is wrong %x", GP_GetPixel(img2, 0, 0));
-		GP_ContextFree(img);
-		GP_ContextFree(img2);
+		GP_PixmapFree(img);
+		GP_PixmapFree(img2);
 		return TST_FAILED;
 	}
 
-	GP_ContextFree(img);
-	GP_ContextFree(img2);
+	GP_PixmapFree(img);
+	GP_PixmapFree(img2);
 
 	return TST_SUCCESS;
 }

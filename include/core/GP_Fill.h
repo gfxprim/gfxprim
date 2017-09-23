@@ -24,8 +24,8 @@
 #define CORE_GP_FILL_H
 
 /*
- * Fills context with givel pixel value
+ * Fills pixmap with givel pixel value
  */
-void GP_Fill(GP_Context *context, GP_Pixel val);
+void GP_Fill(GP_Pixmap *pixmap, GP_Pixel val);
 
 #endif /* CORE_GP_FILL_H */

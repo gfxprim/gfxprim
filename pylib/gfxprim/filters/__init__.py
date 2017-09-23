@@ -1,24 +1,24 @@
 """
-Module extending the Context class with .filter submodule.
+Module extending the Pixmap class with .filter submodule.
 
-Use as in "import gfxprim.filters; context_foo.filter.Resize(...)"
+Use as in "import gfxprim.filters; pixmap_foo.filter.Resize(...)"
 """
 
 # Import the SWIG wrapper
 from . import c_filters
 
 def _init(module):
-  "Extend Context with filters submodule"
+  "Extend Pixmap with filters submodule"
 
   from ..utils import extend, extend_submodule
-  from ..core import Context as _context
+  from ..core import Pixmap as _pixmap
 
-  # New Context submodule
+  # New Pixmap submodule
   class FiltersSubmodule(object):
     def __init__(self, ctx):
       self.ctx = ctx
 
-  _context._submodules['filters'] = FiltersSubmodule
+  _pixmap._submodules['filters'] = FiltersSubmodule
 
   for name in ['Invert', 'InvertAlloc',
                'Brightness', 'BrightnessAlloc',

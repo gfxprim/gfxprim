@@ -69,17 +69,17 @@ static int gaussian_callback_vert(GP_ProgressCallback *self)
 	return callback->callback(callback);
 }
 
-int GP_FilterGaussianBlur_Raw(const GP_Context *src,
+int GP_FilterGaussianBlur_Raw(const GP_Pixmap *src,
                               GP_Coord x_src, GP_Coord y_src,
                               GP_Size w_src, GP_Size h_src,
-			      GP_Context *dst,
+			      GP_Pixmap *dst,
                               GP_Coord x_dst, GP_Coord y_dst,
                               float x_sigma, float y_sigma,
                               GP_ProgressCallback *callback)
 {
 	unsigned int size_x = gaussian_kernel_size(x_sigma);
 	unsigned int size_y = gaussian_kernel_size(y_sigma);
-	const GP_Context *tmp = dst;
+	const GP_Pixmap *tmp = dst;
 
 	GP_DEBUG(1, "Gaussian blur x_sigma=%2.3f y_sigma=%2.3f kernel %ix%i image %ux%u",
 	            x_sigma, y_sigma, size_x, size_y, w_src, h_src);
@@ -159,10 +159,10 @@ int GP_FilterGaussianBlur_Raw(const GP_Context *src,
 	return 0;
 }
 
-int GP_FilterGaussianBlurEx(const GP_Context *src,
+int GP_FilterGaussianBlurEx(const GP_Pixmap *src,
                             GP_Coord x_src, GP_Coord y_src,
                             GP_Size w_src, GP_Size h_src,
-                            GP_Context *dst,
+                            GP_Pixmap *dst,
                             GP_Coord x_dst, GP_Coord y_dst,
                             float x_sigma, float y_sigma,
                             GP_ProgressCallback *callback)
@@ -178,20 +178,20 @@ int GP_FilterGaussianBlurEx(const GP_Context *src,
 	                                 x_sigma, y_sigma, callback);
 }
 
-GP_Context *GP_FilterGaussianBlurExAlloc(const GP_Context *src,
+GP_Pixmap *GP_FilterGaussianBlurExAlloc(const GP_Pixmap *src,
                                          GP_Coord x_src, GP_Coord y_src,
                                          GP_Size w_src, GP_Size h_src,
 				         float x_sigma, float y_sigma,
                                          GP_ProgressCallback *callback)
 {
-	GP_Context *dst = GP_ContextAlloc(w_src, h_src, src->pixel_type);
+	GP_Pixmap *dst = GP_PixmapAlloc(w_src, h_src, src->pixel_type);
 
 	if (dst == NULL)
 		return NULL;
 
 	if (GP_FilterGaussianBlur_Raw(src, x_src, y_src, w_src, h_src, dst,
 	                                0, 0, x_sigma, y_sigma, callback)) {
-		GP_ContextFree(dst);
+		GP_PixmapFree(dst);
 		return NULL;
 	}
 

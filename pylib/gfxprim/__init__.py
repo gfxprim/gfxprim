@@ -4,9 +4,9 @@ GFXPrim Python bindings. Mostly generated using SWIG.
 Structure:
 gfxprim:
   core:
-    context: module defining Context
-      Context - wrapper class, with many proxy methods
-    [Context from context]
+    pixmap: module defining Pixmap
+      Pixmap - wrapper class, with many proxy methods
+    [Pixmap from pixmap]
     gfxprim_core_c: - SWIG module
     [almost * from gfxprim_core_c]
   loaders:

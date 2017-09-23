@@ -33,29 +33,29 @@
 /* Generate drawing functions for various bit depths. */
 GP_DEF_DRAW_FN_PER_BPP(GP_ArcSegment_Raw, DEF_ARCSEGMENT_FN)
 
-void GP_ArcSegment_Raw(GP_Context *context, GP_Coord xcenter, GP_Coord ycenter,
+void GP_ArcSegment_Raw(GP_Pixmap *pixmap, GP_Coord xcenter, GP_Coord ycenter,
 		GP_Size a, GP_Size b, int direction,
 		double start, double end,
 		GP_Pixel pixel)
 {
-	GP_CHECK_CONTEXT(context);
+	GP_CHECK_PIXMAP(pixmap);
 
-	GP_FN_PER_BPP_CONTEXT(GP_ArcSegment_Raw, context, context,
+	GP_FN_PER_BPP_PIXMAP(GP_ArcSegment_Raw, pixmap, pixmap,
 	                      xcenter, ycenter, a, b, direction,
 	                      start, end, pixel);
 }
 
-void GP_ArcSegment(GP_Context *context, GP_Coord xcenter, GP_Coord ycenter,
+void GP_ArcSegment(GP_Pixmap *pixmap, GP_Coord xcenter, GP_Coord ycenter,
 		GP_Size a, GP_Size b, int direction,
 		double start, double end,
 		GP_Pixel pixel)
 {
-	GP_CHECK_CONTEXT(context);
+	GP_CHECK_PIXMAP(pixmap);
 
 	/* recalculate center point and swap a and b when axes are swapped */
-	GP_TRANSFORM_POINT(context, xcenter, ycenter);
-	GP_TRANSFORM_SWAP(context, a, b);
+	GP_TRANSFORM_POINT(pixmap, xcenter, ycenter);
+	GP_TRANSFORM_SWAP(pixmap, a, b);
 
-	GP_ArcSegment_Raw(context, xcenter, ycenter, a, b, direction,
+	GP_ArcSegment_Raw(pixmap, xcenter, ycenter, a, b, direction,
 			start, end, pixel);
 }

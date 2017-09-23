@@ -49,17 +49,17 @@
  */
 
 #include "GP_GetSetBits.h"
-#include "GP_Context.h"
+#include "GP_Pixmap.h"
 
 @ for ps in pixelsizes:
 /*
- * macro to get address of pixel in a {{ ps.suffix }} context
+ * macro to get address of pixel in a {{ ps.suffix }} pixmap
  */
-#define GP_PIXEL_ADDR_{{ ps.suffix }}(context, x, y) \
-	((GP_Pixel*)(((void*)((context)->pixels)) + (context)->bytes_per_row * (y) + ({{ ps.size }} * (x)) / 8))
+#define GP_PIXEL_ADDR_{{ ps.suffix }}(pixmap, x, y) \
+	((GP_Pixel*)(((void*)((pixmap)->pixels)) + (pixmap)->bytes_per_row * (y) + ({{ ps.size }} * (x)) / 8))
 
 /*
- * macro to get bit-offset of pixel in {{ ps.suffix }} context
+ * macro to get bit-offset of pixel in {{ ps.suffix }} pixmap
  */
 #define GP_PIXEL_ADDR_OFFSET_{{ ps.suffix }}(x) \
 @     if not ps.needs_bit_endian():
@@ -80,7 +80,7 @@
 /*
  * GP_GetPixel for {{ ps.suffix }}
  */
-static inline GP_Pixel GP_GetPixel_Raw_{{ ps.suffix }}(const GP_Context *c, int x, int y)
+static inline GP_Pixel GP_GetPixel_Raw_{{ ps.suffix }}(const GP_Pixmap *c, int x, int y)
 {
 @     if ps.size == 32:
 	/*
@@ -155,7 +155,7 @@ static inline GP_Pixel GP_GetPixel_Raw_{{ ps.suffix }}(const GP_Context *c, int 
 /*
  * GP_PutPixel for {{ ps.suffix }}
  */
-static inline void GP_PutPixel_Raw_{{ ps.suffix }}(GP_Context *c, int x, int y, GP_Pixel p)
+static inline void GP_PutPixel_Raw_{{ ps.suffix }}(GP_Pixmap *c, int x, int y, GP_Pixel p)
 {
 @     if ps.size == 32:
 	/*
@@ -227,7 +227,7 @@ static inline void GP_PutPixel_Raw_{{ ps.suffix }}(GP_Context *c, int x, int y, 
 @     end
 }
 
-static inline void GP_PutPixel_Raw_Clipped_{{ ps.suffix }}(GP_Context *c, GP_Coord x, GP_Coord y, GP_Pixel p)
+static inline void GP_PutPixel_Raw_Clipped_{{ ps.suffix }}(GP_Pixmap *c, GP_Coord x, GP_Coord y, GP_Pixel p)
 {
 	if (GP_PIXEL_IS_CLIPPED(c, x, y))
 		return;

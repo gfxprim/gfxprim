@@ -68,20 +68,20 @@
 /*
  * This macro defines a circle drawing function.
  * Arguments:
- *     CONTEXT_T - user-defined type of drawing context (passed to PUTPIXEL)
+ *     PIXMAP_T - user-defined type of drawing pixmap (passed to PUTPIXEL)
  *     PIXVAL_T  - user-defined pixel value type (passed to PUTPIXEL)
- *     PUTPIXEL  - a pixel drawing function f(context, x, y, pixval)
+ *     PUTPIXEL  - a pixel drawing function f(pixmap, x, y, pixval)
  *     FN_NAME   - name of the function to be defined
  */
-#define DEF_CIRCLE_FN(FN_NAME, CONTEXT_T, PIXVAL_T, PUTPIXEL) \
-static void FN_NAME(CONTEXT_T context, int xcenter, int ycenter, int r, \
+#define DEF_CIRCLE_FN(FN_NAME, PIXMAP_T, PIXVAL_T, PUTPIXEL) \
+static void FN_NAME(PIXMAP_T pixmap, int xcenter, int ycenter, int r, \
 	PIXVAL_T pixval) \
 { \
 	int x, y, error; \
 \
 	/* Special case for r == 0 */ \
 	if (r == 0) { \
-		PUTPIXEL(context, xcenter, ycenter, pixval); \
+		PUTPIXEL(pixmap, xcenter, ycenter, pixval); \
 		return; \
 	} \
 \
@@ -94,17 +94,17 @@ static void FN_NAME(CONTEXT_T context, int xcenter, int ycenter, int r, \
 		while (error < 0) { \
 			error += 2*x + 1; \
 			x++; \
-			PUTPIXEL(context, xcenter-x+1, ycenter-y, pixval); \
-			PUTPIXEL(context, xcenter+x-1, ycenter-y, pixval); \
-			PUTPIXEL(context, xcenter-x+1, ycenter+y, pixval); \
-			PUTPIXEL(context, xcenter+x-1, ycenter+y, pixval); \
+			PUTPIXEL(pixmap, xcenter-x+1, ycenter-y, pixval); \
+			PUTPIXEL(pixmap, xcenter+x-1, ycenter-y, pixval); \
+			PUTPIXEL(pixmap, xcenter-x+1, ycenter+y, pixval); \
+			PUTPIXEL(pixmap, xcenter+x-1, ycenter+y, pixval); \
 		} \
 \
 		/* Enough changes accumulated, go to next line. */ \
 		error += -2*y + 1; \
-		PUTPIXEL(context, xcenter-x+1, ycenter-y, pixval); \
-		PUTPIXEL(context, xcenter+x-1, ycenter-y, pixval); \
-		PUTPIXEL(context, xcenter-x+1, ycenter+y, pixval); \
-		PUTPIXEL(context, xcenter+x-1, ycenter+y, pixval); \
+		PUTPIXEL(pixmap, xcenter-x+1, ycenter-y, pixval); \
+		PUTPIXEL(pixmap, xcenter+x-1, ycenter-y, pixval); \
+		PUTPIXEL(pixmap, xcenter-x+1, ycenter+y, pixval); \
+		PUTPIXEL(pixmap, xcenter+x-1, ycenter+y, pixval); \
 	} \
 }

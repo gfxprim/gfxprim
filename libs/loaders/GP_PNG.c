@@ -153,7 +153,7 @@ static void load_meta_data(png_structp png, png_infop png_info,
 	}
 }
 
-int GP_ReadPNGEx(GP_IO *io, GP_Context **img,
+int GP_ReadPNGEx(GP_IO *io, GP_Pixmap **img,
                  GP_DataStorage *storage, GP_ProgressCallback *callback)
 {
 	png_structp png;
@@ -161,7 +161,7 @@ int GP_ReadPNGEx(GP_IO *io, GP_Context **img,
 	png_uint_32 w, h;
 	int depth, color_type, interlace_type;
 	GP_PixelType pixel_type = GP_PIXEL_UNKNOWN;
-	GP_Context *res = NULL;
+	GP_Pixmap *res = NULL;
 	int err, passes = 1;
 	double gamma;
 
@@ -299,7 +299,7 @@ int GP_ReadPNGEx(GP_IO *io, GP_Context **img,
 		goto err2;
 	}
 
-	res = GP_ContextAlloc(w, h, pixel_type);
+	res = GP_PixmapAlloc(w, h, pixel_type);
 
 	if (res == NULL) {
 		err = ENOMEM;
@@ -351,7 +351,7 @@ exit:
 
 	return 0;
 err3:
-	GP_ContextFree(res);
+	GP_PixmapFree(res);
 err2:
 	png_destroy_read_struct(&png, png_info ? &png_info : NULL, NULL);
 err1:
@@ -376,7 +376,7 @@ static GP_PixelType save_ptypes[] = {
 /*
  * Maps gfxprim Pixel Type to the PNG format
  */
-static int prepare_png_header(const GP_Context *src, png_structp png,
+static int prepare_png_header(const GP_Pixmap *src, png_structp png,
                               png_infop png_info, int *bit_endian_flag)
 {
 	int bit_depth, color_type;
@@ -463,7 +463,7 @@ static int prepare_png_header(const GP_Context *src, png_structp png,
 	return 0;
 }
 
-static int write_png_data(const GP_Context *src, png_structp png,
+static int write_png_data(const GP_Pixmap *src, png_structp png,
                           GP_ProgressCallback *callback, int bit_endian_flag)
 {
 	/* Look if we need to swap data when writing */
@@ -508,7 +508,7 @@ static void flush_data(png_structp png_ptr)
 	(void)png_ptr;
 }
 
-int GP_WritePNG(const GP_Context *src, GP_IO *io,
+int GP_WritePNG(const GP_Pixmap *src, GP_IO *io,
                 GP_ProgressCallback *callback)
 {
 	png_structp png;
@@ -576,7 +576,7 @@ int GP_MatchPNG(const void GP_UNUSED(*buf))
 	return 1;
 }
 
-int GP_ReadPNGEx(GP_IO GP_UNUSED(*io), GP_Context GP_UNUSED(**img),
+int GP_ReadPNGEx(GP_IO GP_UNUSED(*io), GP_Pixmap GP_UNUSED(**img),
                  GP_DataStorage GP_UNUSED(*storage),
                  GP_ProgressCallback GP_UNUSED(*callback))
 {
@@ -584,7 +584,7 @@ int GP_ReadPNGEx(GP_IO GP_UNUSED(*io), GP_Context GP_UNUSED(**img),
 	return 1;
 }
 
-int GP_WritePNG(const GP_Context *src, GP_IO GP_UNUSED(*io),
+int GP_WritePNG(const GP_Pixmap *src, GP_IO GP_UNUSED(*io),
                 GP_ProgressCallback *callback)
 {
 	errno = ENOSYS;
@@ -593,23 +593,23 @@ int GP_WritePNG(const GP_Context *src, GP_IO GP_UNUSED(*io),
 
 #endif /* HAVE_LIBPNG */
 
-GP_Context *GP_LoadPNG(const char *src_path, GP_ProgressCallback *callback)
+GP_Pixmap *GP_LoadPNG(const char *src_path, GP_ProgressCallback *callback)
 {
 	return GP_LoaderLoadImage(&GP_PNG, src_path, callback);
 }
 
-int GP_SavePNG(const GP_Context *src, const char *dst_path,
+int GP_SavePNG(const GP_Pixmap *src, const char *dst_path,
                GP_ProgressCallback *callback)
 {
 	return GP_LoaderSaveImage(&GP_PNG, src, dst_path, callback);
 }
 
-GP_Context *GP_ReadPNG(GP_IO *io, GP_ProgressCallback *callback)
+GP_Pixmap *GP_ReadPNG(GP_IO *io, GP_ProgressCallback *callback)
 {
 	return GP_LoaderReadImage(&GP_PNG, io, callback);
 }
 
-int GP_LoadPNGEx(const char *src_path, GP_Context **img,
+int GP_LoadPNGEx(const char *src_path, GP_Pixmap **img,
                  GP_DataStorage *storage, GP_ProgressCallback *callback)
 {
 	return GP_LoaderLoadImageEx(&GP_PNG, src_path, img, storage, callback);

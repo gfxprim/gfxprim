@@ -241,13 +241,13 @@ static int zip_read_data_desc(GP_IO *io, struct zip_local_header *header)
 	return 0;
 }
 
-static int zip_next_file(struct zip_priv *priv, GP_Context **img,
+static int zip_next_file(struct zip_priv *priv, GP_Pixmap **img,
                          GP_DataStorage *storage,
                          GP_ProgressCallback *callback)
 {
 	struct zip_local_header header = {.file_name = NULL};
 	int err = 0, res;
-	GP_Context *ret = NULL;
+	GP_Pixmap *ret = NULL;
 	GP_IO *io;
 
 	if ((err = zip_load_header(priv->io, &header)))
@@ -412,7 +412,7 @@ static void record_offset(struct zip_priv *priv, long offset)
  */
 }
 
-static int zip_load_next(GP_Container *self, GP_Context **img,
+static int zip_load_next(GP_Container *self, GP_Pixmap **img,
                          GP_DataStorage *storage,
                          GP_ProgressCallback *callback)
 {
@@ -438,9 +438,9 @@ static int zip_load_next(GP_Container *self, GP_Context **img,
 	return 0;
 }
 
-static GP_Context *load_next(GP_Container *self, GP_ProgressCallback *callback)
+static GP_Pixmap *load_next(GP_Container *self, GP_ProgressCallback *callback)
 {
-	GP_Context *img = NULL;
+	GP_Pixmap *img = NULL;
 
 	zip_load_next(self, &img, NULL, callback);
 
@@ -570,7 +570,7 @@ static int zip_seek(GP_Container *self, int offset,
 	return ret;
 }
 
-static int zip_load(GP_Container *self, GP_Context **img,
+static int zip_load(GP_Container *self, GP_Pixmap **img,
                     GP_DataStorage *storage, GP_ProgressCallback *callback)
 {
 	if (zip_load_next(self, img, storage, callback))

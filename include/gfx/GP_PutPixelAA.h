@@ -22,12 +22,12 @@
 
 /*
 
-   Puts an anti aliased pixel to context.
+   Puts an anti aliased pixel to pixmap.
 
    The coordinates are in XX.8 fixed point format, see core/GP_FixedPoint.h
    for helper macros.
 
-   For RGB contexts gamma correction tables are used to generate correct
+   For RGB pixmaps gamma correction tables are used to generate correct
    intensity for pixels.
 
  */
@@ -35,23 +35,23 @@
 #ifndef GFX_GP_PUT_PIXEL_AA_H
 #define GFX_GP_PUT_PIXEL_AA_H
 
-#include "core/GP_Context.h"
+#include "core/GP_Pixmap.h"
 
 /*
- * Anti Aliased Put Pixel respecting context rotation flags and with clipping.
+ * Anti Aliased Put Pixel respecting pixmap rotation flags and with clipping.
  */
-void GP_PutPixelAA(GP_Context *context, GP_Coord x, GP_Coord y, GP_Pixel pixel);
+void GP_PutPixelAA(GP_Pixmap *pixmap, GP_Coord x, GP_Coord y, GP_Pixel pixel);
 
 /*
  * Anti Aliased Put Pixel with clipping.
  */
-void GP_PutPixelAA_Raw_Clipped(GP_Context *context, GP_Coord x, GP_Coord y,
+void GP_PutPixelAA_Raw_Clipped(GP_Pixmap *pixmap, GP_Coord x, GP_Coord y,
                                GP_Pixel pixel);
 
 /*
  * Raw Put Pixel.
  */
-void GP_PutPixelAA_Raw(GP_Context *context, GP_Coord x, GP_Coord y,
+void GP_PutPixelAA_Raw(GP_Pixmap *pixmap, GP_Coord x, GP_Coord y,
                        GP_Pixel pixel);
 
 #endif /* GFX_GP_PUT_PIXEL_AA_H */

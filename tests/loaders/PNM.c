@@ -24,7 +24,7 @@
 #include <errno.h>
 #include <sys/stat.h>
 
-#include <core/GP_Context.h>
+#include <core/GP_Pixmap.h>
 #include <core/GP_GetPutPixel.h>
 #include <loaders/GP_Loaders.h>
 

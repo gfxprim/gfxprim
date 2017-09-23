@@ -58,15 +58,15 @@
  *
  * If operation was aborted from within a callback, non-zero is returned.
  */
-int GP_FilterFloydSteinberg(const GP_Context *src,
-                            GP_Context *dst,
+int GP_FilterFloydSteinberg(const GP_Pixmap *src,
+                            GP_Pixmap *dst,
                             GP_ProgressCallback *callback);
 
 /*
  * If malloc() has failed, or operation was aborted by a callback, NULL is
  * returned.
  */
-GP_Context *GP_FilterFloydSteinbergAlloc(const GP_Context *src,
+GP_Pixmap *GP_FilterFloydSteinbergAlloc(const GP_Pixmap *src,
                                          GP_PixelType pixel_type,
                                          GP_ProgressCallback *callback);
 
@@ -89,15 +89,15 @@ GP_Context *GP_FilterFloydSteinbergAlloc(const GP_Context *src,
  *
  * If the operation was aborted from within a callback, non-zero is returned.
  */
-int GP_FilterHilbertPeano(const GP_Context *src,
-                          GP_Context *dst,
+int GP_FilterHilbertPeano(const GP_Pixmap *src,
+                          GP_Pixmap *dst,
                           GP_ProgressCallback *callback);
 
 /*
  * If malloc() has failed, or operation was aborted by a callback, NULL is
  * returned.
  */
-GP_Context *GP_FilterHilbertPeanoAlloc(const GP_Context *src,
+GP_Pixmap *GP_FilterHilbertPeanoAlloc(const GP_Pixmap *src,
                                        GP_PixelType pixel_type,
                                        GP_ProgressCallback *callback);
 

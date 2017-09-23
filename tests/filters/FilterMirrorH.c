@@ -22,7 +22,7 @@
 
 #include <errno.h>
 
-#include <core/GP_Context.h>
+#include <core/GP_Pixmap.h>
 #include <filters/GP_Rotate.h>
 
 #include "tst_test.h"
@@ -45,20 +45,20 @@ struct testcase {
 
 static int test_mirror_h(struct testcase *t)
 {
-	GP_Context src, *c;
+	GP_Pixmap src, *c;
 	int err;
 
-	/* Initialize source context */
-	GP_ContextInit(&src, t->w, t->h, t->pixel_type, t->src);
+	/* Initialize source pixmap */
+	GP_PixmapInit(&src, t->w, t->h, t->pixel_type, t->src);
 
-	/* Set offset to emulate non-byte aligned subcontexts */
+	/* Set offset to emulate non-byte aligned subpixmaps */
 	src.offset = t->offset;
 
 	/* Test with allocated destination */
-	c = GP_ContextAlloc(t->w, t->h, t->pixel_type);
+	c = GP_PixmapAlloc(t->w, t->h, t->pixel_type);
 
 	if (c == NULL) {
-		tst_err("Failed to allocate context");
+		tst_err("Failed to allocate pixmap");
 		return TST_UNTESTED;
 	}
 
@@ -66,7 +66,7 @@ static int test_mirror_h(struct testcase *t)
 
 	err = compare_buffers(t->res, c);
 
-	GP_ContextFree(c);
+	GP_PixmapFree(c);
 
 	/* And with in-place variant */
 //	GP_FilterMirrorH(&src, &src, NULL);
@@ -221,12 +221,12 @@ static GP_ProgressCallback abort_callback = {
 static int test_abort(void)
 {
 	int ret;
-	GP_Context *c;
+	GP_Pixmap *c;
 
-	c = GP_ContextAlloc(10, 10, GP_PIXEL_G8);
+	c = GP_PixmapAlloc(10, 10, GP_PIXEL_G8);
 
 	if (c == NULL) {
-		tst_err("Failed to allocate context");
+		tst_err("Failed to allocate pixmap");
 		return TST_UNTESTED;
 	}
 
@@ -250,20 +250,20 @@ static int all_pixels(void)
 	GP_Pixel pixel_type;
 
 	for (pixel_type = 1; pixel_type < GP_PIXEL_MAX; pixel_type++) {
-		GP_Context *c;
+		GP_Pixmap *c;
 
 		tst_msg("Trying pixel %s", GP_PixelTypeName(pixel_type));
 
-		c = GP_ContextAlloc(10, 10, pixel_type);
+		c = GP_PixmapAlloc(10, 10, pixel_type);
 
 		if (c == NULL) {
-			tst_err("Failed to allocate context");
+			tst_err("Failed to allocate pixmap");
 			return TST_UNTESTED;
 		}
 
 		GP_FilterMirrorH(c, c, NULL);
 
-		GP_ContextFree(c);
+		GP_PixmapFree(c);
 	}
 
 	return TST_SUCCESS;

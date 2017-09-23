@@ -27,11 +27,11 @@ And is throwed away at the image borders.
 /* or */
 #include <filters/GP_Dither.h>
 
-int GP_FilterFloydSteinberg(const GP_Context *src, GP_Context *dst,
+int GP_FilterFloydSteinberg(const GP_Pixmap *src, GP_Pixmap *dst,
                             GP_ProgressCallback *callback);
 -------------------------------------------------------------------------------
 
-Renders Floyd Steinberg dithering directly into passed context. The
+Renders Floyd Steinberg dithering directly into passed pixmap. The
 destination must be at least as large as source.
 
 If operation was aborted by a callback, non-zero is returned.
@@ -45,12 +45,12 @@ the function returns non-zero and sets errno to 'ENOSYS'.
 /* or */
 #include <filters/GP_Dither.h>
 
-GP_Context *GP_FilterFloydSteinbergAlloc(const GP_Context *src,
+GP_Pixmap *GP_FilterFloydSteinbergAlloc(const GP_Pixmap *src,
                                          GP_PixelType pixel_type,
                                          GP_ProgressCallback *callback);
 -------------------------------------------------------------------------------
 
-Returns pointer to allocated context of given pixel_type.
+Returns pointer to allocated pixmap of given pixel_type.
 
 If 'malloc(2)' has failed, or operation was aborted by a callback NULL is
 returned.
@@ -75,11 +75,11 @@ edges tend to be less sharp.
 /* or */
 #include <filters/GP_Dither.h>
 
-int GP_FilterHilbertPeano(const GP_Context *src, GP_Context *dst,
+int GP_FilterHilbertPeano(const GP_Pixmap *src, GP_Pixmap *dst,
                           GP_ProgressCallback *callback);
 -------------------------------------------------------------------------------
 
-Renders Hilbert Peano dithering directly into passed context. The
+Renders Hilbert Peano dithering directly into passed pixmap. The
 destination must be at least as large as source.
 
 If operation was aborted by a callback, non-zero is returned.
@@ -93,12 +93,12 @@ the function returns NULL and sets errno to 'ENOSYS'.
 /* or */
 #include <filters/GP_Dither.h>
 
-GP_Context *GP_FilterHilbertPeanoAlloc(const GP_Context *src,
+GP_Pixmap *GP_FilterHilbertPeanoAlloc(const GP_Pixmap *src,
                                        GP_PixelType pixel_type,
                                        GP_ProgressCallback *callback);
 -------------------------------------------------------------------------------
 
-Returns pointer to allocated context of given pixel_type.
+Returns pointer to allocated pixmap of given pixel_type.
 
 If 'malloc(2)' has failed, or operation was aborted by a callback NULL is
 returned.

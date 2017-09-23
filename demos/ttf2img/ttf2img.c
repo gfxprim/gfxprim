@@ -74,23 +74,23 @@ int main(int argc, char *argv[])
 
 	GP_SetDebugLevel(debug_level);
 
-	GP_Context *context = GP_ContextAlloc(img_w, img_h, GP_PIXEL_RGB888);
+	GP_Pixmap *pixmap = GP_PixmapAlloc(img_w, img_h, GP_PIXEL_RGB888);
 
-	GP_Pixel black_pixel = GP_RGBToContextPixel(0x00, 0x00, 0x00, context);
-	GP_Pixel white_pixel = GP_RGBToContextPixel(0xff, 0xff, 0xff, context);
+	GP_Pixel black_pixel = GP_RGBToPixmapPixel(0x00, 0x00, 0x00, pixmap);
+	GP_Pixel white_pixel = GP_RGBToPixmapPixel(0xff, 0xff, 0xff, pixmap);
 
-	GP_Fill(context, white_pixel);
+	GP_Fill(pixmap, white_pixel);
 
 	GP_TextStyle style = GP_DEFAULT_TEXT_STYLE;
 
 	style.font = GP_FontFaceLoad(font_path, 27, 0);
 
-	GP_Text(context, &style, img_w/2, img_h/2, GP_ALIGN_CENTER|GP_VALIGN_CENTER,
+	GP_Text(pixmap, &style, img_w/2, img_h/2, GP_ALIGN_CENTER|GP_VALIGN_CENTER,
 	        black_pixel, white_pixel, string);
 
-	GP_SavePNG(context, img_path, NULL);
+	GP_SavePNG(pixmap, img_path, NULL);
 
-	GP_ContextFree(context);
+	GP_PixmapFree(pixmap);
 
 	return 0;
 }

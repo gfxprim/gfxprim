@@ -34,7 +34,7 @@
 #include "GP_Common.h"
 #include "GP_FnPerBpp.h"
 
-struct GP_Context;
+struct GP_Pixmap;
 
 /*
  *  GP_PixelType  is typedef enum of PixelTypes,
@@ -59,7 +59,7 @@ typedef uint32_t GP_Pixel;
 
 /*
  * Information about ordering of pixels in byte for 1, 2 and 4 bpp
- * used in a one bit variable in GP_Context
+ * used in a one bit variable in GP_Pixmap
  */
 typedef enum {
 	/* less significant bits contain pixels with lower indices */

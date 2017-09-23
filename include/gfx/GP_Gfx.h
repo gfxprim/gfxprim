@@ -33,7 +33,7 @@
 #define GP_GFX_H
 
 /* basic definitions and structures */
-#include "core/GP_Context.h"
+#include "core/GP_Pixmap.h"
 #include "core/GP_GetPutPixel.h"
 #include "core/GP_WritePixel.h"
 #include "core/GP_Fill.h"

@@ -48,13 +48,13 @@ The output is, by default, written to stderr and will look like:
 1: GP_Loader.c:loader_by_filename():222: Loading file by filename extension 'pgm'
 1: GP_Loader.c:loader_by_extension():198: Found loader 'Netpbm portable Graymap'
 1: GP_PNM.c:load_header():244: Have header P2 (ASCII encoded PGM) 24x7 depth=15
-1: GP_Context.c:GP_ContextAlloc():62: Allocating context 24 x 7 - G4
+1: GP_Pixmap.c:GP_PixmapAlloc():62: Allocating pixmap 24 x 7 - G4
    4: GP_X11.c:x11_update_rect():71: Updating rect 222x458-418x479
    4: GP_X11.c:x11_update_rect():71: Updating rect 214x458-426x479
  2: GP_Blit.c:GP_BlitXYXY_Clipped():129: Blitting 23x6, available 332x244
  2: GP_Blit.c:GP_BlitXYXY_Clipped():139: Blitting 0x0->23x6 in 24x7 to 308x236 in 640x480
   3: GP_X11.c:x11_set_attributes():225: Setting window caption to 'Spiv ~ test.pgm 1:1.000'
-   4: GP_X11.c:x11_flip():91: Flipping context
-1: GP_Context.c:GP_ContextFree():102: Freeing context (0x7f5008000b60)
+   4: GP_X11.c:x11_flip():91: Flipping pixmap
+1: GP_Pixmap.c:GP_PixmapFree():102: Freeing pixmap (0x7f5008000b60)
 1: GP_X11_Conn.h:x11_close():72: Closing X11 display
 ------------------------------------------------------------------------------

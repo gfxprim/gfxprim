@@ -218,7 +218,7 @@ struct pcx_header {
 #include "core/GP_BitSwap.h"
 
 static int read_g1(GP_IO *io, struct pcx_header *header,
-                   GP_Context *res, GP_ProgressCallback *callback)
+                   GP_Pixmap *res, GP_ProgressCallback *callback)
 {
 	uint32_t y;
 	int padd = (int)header->bytes_per_line - (int)res->bytes_per_row;
@@ -252,7 +252,7 @@ static int read_g1(GP_IO *io, struct pcx_header *header,
 }
 
 static int read_rgb888(GP_IO *io, struct pcx_header *header,
-                       GP_Context *res, GP_ProgressCallback *callback)
+                       GP_Pixmap *res, GP_ProgressCallback *callback)
 {
 	uint32_t x, y;
 	unsigned int bpr = header->bytes_per_line;
@@ -286,7 +286,7 @@ static int read_rgb888(GP_IO *io, struct pcx_header *header,
 }
 
 static int read_16_palette(GP_IO *io, struct pcx_header *header,
-                           GP_Context *res, GP_ProgressCallback *callback)
+                           GP_Pixmap *res, GP_ProgressCallback *callback)
 {
 	uint32_t x, y;
 	unsigned int i;
@@ -346,7 +346,7 @@ static int read_16_palette(GP_IO *io, struct pcx_header *header,
 #define PALETTE_SIZE (3 * 256 + 1)
 
 static int read_256_palette(GP_IO *io, struct pcx_header *header,
-                            GP_Context *res, GP_ProgressCallback *callback)
+                            GP_Pixmap *res, GP_ProgressCallback *callback)
 {
 	uint32_t x, y;
 	unsigned int i;
@@ -425,7 +425,7 @@ static GP_PixelType match_pixel_type(struct pcx_header *header)
 }
 
 static int read_image(GP_IO *io, struct pcx_header *header,
-                      GP_Context *res, GP_ProgressCallback *callback)
+                      GP_Pixmap *res, GP_ProgressCallback *callback)
 {
 	switch (header->nplanes) {
 	case 1:
@@ -461,10 +461,10 @@ static void fill_metadata(struct pcx_header *header, GP_DataStorage *storage)
 	GP_DataStorageAddInt(storage, NULL, "Samples per Pixel", header->nplanes);
 }
 
-int GP_ReadPCXEx(GP_IO *io, GP_Context **img, GP_DataStorage *storage,
+int GP_ReadPCXEx(GP_IO *io, GP_Pixmap **img, GP_DataStorage *storage,
                  GP_ProgressCallback *callback)
 {
-	GP_Context *res = NULL;
+	GP_Pixmap *res = NULL;
 	GP_PixelType pixel_type;
 	struct pcx_header header;
 	unsigned int w, h;
@@ -551,7 +551,7 @@ int GP_ReadPCXEx(GP_IO *io, GP_Context **img, GP_DataStorage *storage,
 		w = max_w;
 	}
 
-	res = GP_ContextAlloc(w, h, pixel_type);
+	res = GP_PixmapAlloc(w, h, pixel_type);
 
 	if (!res) {
 		GP_DEBUG(1, "Malloc failed :(");
@@ -567,23 +567,23 @@ int GP_ReadPCXEx(GP_IO *io, GP_Context **img, GP_DataStorage *storage,
 	*img = res;
 	return 0;
 err1:
-	GP_ContextFree(res);
+	GP_PixmapFree(res);
 err0:
 	errno = err;
 	return 1;
 }
 
-GP_Context *GP_LoadPCX(const char *src_path, GP_ProgressCallback *callback)
+GP_Pixmap *GP_LoadPCX(const char *src_path, GP_ProgressCallback *callback)
 {
 	return GP_LoaderLoadImage(&GP_PCX, src_path, callback);
 }
 
-GP_Context *GP_ReadPCX(GP_IO *io, GP_ProgressCallback *callback)
+GP_Pixmap *GP_ReadPCX(GP_IO *io, GP_ProgressCallback *callback)
 {
 	return GP_LoaderReadImage(&GP_PCX, io, callback);
 }
 
-int GP_LoadPCXEx(const char *src_path, GP_Context **img,
+int GP_LoadPCXEx(const char *src_path, GP_Pixmap **img,
                  GP_DataStorage *storage, GP_ProgressCallback *callback)
 {
 	return GP_LoaderLoadImageEx(&GP_PCX, src_path, img, storage, callback);

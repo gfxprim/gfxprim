@@ -48,77 +48,77 @@ const GP_PixelTypeDescription *GP_PixelTypes_access(GP_PixelType no)
 %}
 
 /*
- * GP_Context wrapping
+ * GP_Pixmap wrapping
  */
 
 /* Make some members RO */
-%immutable GP_Context::w;
-%immutable GP_Context::h;
-%immutable GP_Context::pixel_type;
-%immutable GP_Context::bpp;
-%immutable GP_Context::bytes_per_row;
-/* Rename "internal" GP_Context */
-%rename("_%s") "GP_Context::pixels";
-%rename("_%s") "GP_Context::offset";
-%rename("_%s") "GP_Context::axes_swap";
-%rename("_%s") "GP_Context::x_swap";
-%rename("_%s") "GP_Context::y_swap";
-%rename("_%s") "GP_Context::bit_endian";
-%rename("_%s") "GP_Context::free_pixels";
+%immutable GP_Pixmap::w;
+%immutable GP_Pixmap::h;
+%immutable GP_Pixmap::pixel_type;
+%immutable GP_Pixmap::bpp;
+%immutable GP_Pixmap::bytes_per_row;
+/* Rename "internal" GP_Pixmap */
+%rename("_%s") "GP_Pixmap::pixels";
+%rename("_%s") "GP_Pixmap::offset";
+%rename("_%s") "GP_Pixmap::axes_swap";
+%rename("_%s") "GP_Pixmap::x_swap";
+%rename("_%s") "GP_Pixmap::y_swap";
+%rename("_%s") "GP_Pixmap::bit_endian";
+%rename("_%s") "GP_Pixmap::free_pixels";
 
 %inline %{
-PyObject *GP_ContextToByteArray(GP_Context *self)
+PyObject *GP_PixmapToByteArray(GP_Pixmap *self)
 {
         return PyByteArray_FromStringAndSize((char*)self->pixels,
                                              self->bytes_per_row * self->h);
 }
 %}
 
-%feature("autodoc", "Proxy of C GP_Context struct
+%feature("autodoc", "Proxy of C GP_Pixmap struct
 
-You can pass this class to wrapped GP_DrawSomething(...) as GP_Context.
-All attributes of GP_Context are accessible directly as _attribute
+You can pass this class to wrapped GP_DrawSomething(...) as GP_Pixmap.
+All attributes of GP_Pixmap are accessible directly as _attribute
 (self._w etc.), but it is reccomended to use redefined properties:
 
-self.w: Context width (transformed)
-self.h: Context height (transformed)
-self.pixel_type: Context pixel type (number)
+self.w: Pixmap width (transformed)
+self.h: Pixmap height (transformed)
+self.pixel_type: Pixmap pixel type (number)
 
-Some context-related methods are provided as class members for convenience.
+Some pixmap-related methods are provided as class members for convenience.
 
-GP_Context memory allocation is handled by gfxprim, deallocation by GP_ContextFree().
-The wrapper can be used without owning the GP_Context struct by setting self.this
-and self.thisown.") GP_Context;
+GP_Pixmap memory allocation is handled by gfxprim, deallocation by GP_PixmapFree().
+The wrapper can be used without owning the GP_Pixmap struct by setting self.this
+and self.thisown.") GP_Pixmap;
 
-%extend GP_Context {
-  ~GP_Context() {
-    GP_DEBUG(2, "[wrapper] GP_ContextFree (%dx%d raw, %dbpp, free_pixels:%d)",
+%extend GP_Pixmap {
+  ~GP_Pixmap() {
+    GP_DEBUG(2, "[wrapper] GP_PixmapFree (%dx%d raw, %dbpp, free_pixels:%d)",
       $self->w, $self->h, $self->bpp, $self->free_pixels);
-    GP_ContextFree($self);
+    GP_PixmapFree($self);
   }
-  GP_Context(GP_Coord w, GP_Coord h, GP_PixelType typeno) {
-    return GP_ContextAlloc(w, h, typeno);
+  GP_Pixmap(GP_Coord w, GP_Coord h, GP_PixelType typeno) {
+    return GP_PixmapAlloc(w, h, typeno);
   }
 };
 
 
 /* Error handling */
-ERROR_ON_NONZERO(GP_ContextResize);
-ERROR_ON_NULL(GP_ContextAlloc);
-ERROR_ON_NULL(GP_ContextCopy);
-ERROR_ON_NULL(GP_ContextConvertAlloc);
-ERROR_ON_NULL(GP_SubContextAlloc);
+ERROR_ON_NONZERO(GP_PixmapResize);
+ERROR_ON_NULL(GP_PixmapAlloc);
+ERROR_ON_NULL(GP_PixmapCopy);
+ERROR_ON_NULL(GP_PixmapConvertAlloc);
+ERROR_ON_NULL(GP_SubPixmapAlloc);
 
-/* Indicate new wrapper-owned GP_Context */
-%newobject GP_ContextAlloc;
-%newobject GP_ContextCopy;
-%newobject GP_ContextConvertAlloc;
-%newobject GP_SubContextAlloc;
+/* Indicate new wrapper-owned GP_Pixmap */
+%newobject GP_PixmapAlloc;
+%newobject GP_PixmapCopy;
+%newobject GP_PixmapConvertAlloc;
+%newobject GP_SubPixmapAlloc;
 
-%include "GP_Context.h"
+%include "GP_Pixmap.h"
 
 /*
- * Context manipulation
+ * Pixmap manipulation
  */
 %include "GP_GetPutPixel.h"
 %import "GP_GetPutPixel.gen.h"

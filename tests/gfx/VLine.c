@@ -23,7 +23,7 @@
 #include <string.h>
 #include <errno.h>
 
-#include <core/GP_Context.h>
+#include <core/GP_Pixmap.h>
 #include <gfx/GP_VLine.h>
 
 #include "tst_test.h"
@@ -48,13 +48,13 @@ struct testcase {
 
 static int test_vline(struct testcase *t)
 {
-	GP_Context *c;
+	GP_Pixmap *c;
 	int err;
 
-	c = GP_ContextAlloc(t->w, t->h, GP_PIXEL_G8);
+	c = GP_PixmapAlloc(t->w, t->h, GP_PIXEL_G8);
 
 	if (c == NULL) {
-		tst_err("Failed to allocate context");
+		tst_err("Failed to allocate pixmap");
 		return TST_UNTESTED;
 	}
 

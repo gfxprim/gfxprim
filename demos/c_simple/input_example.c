@@ -29,7 +29,7 @@
 
 #include "GP.h"
 
-static GP_Context *win;
+static GP_Pixmap *win;
 static GP_Backend *backend;
 
 static GP_Pixel red, green, white, black;
@@ -148,12 +148,12 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 
-	win = backend->context;
+	win = backend->pixmap;
 
-	red   = GP_RGBToContextPixel(0xff, 0x00, 0x00, win);
-	green = GP_RGBToContextPixel(0x00, 0xff, 0x00, win);
-	white = GP_RGBToContextPixel(0xff, 0xff, 0xff, win);
-	black = GP_RGBToContextPixel(0x00, 0x00, 0x00, win);
+	red   = GP_RGBToPixmapPixel(0xff, 0x00, 0x00, win);
+	green = GP_RGBToPixmapPixel(0x00, 0xff, 0x00, win);
+	white = GP_RGBToPixmapPixel(0xff, 0xff, 0xff, win);
+	black = GP_RGBToPixmapPixel(0x00, 0x00, 0x00, win);
 
 	GP_Fill(win, black);
 	GP_BackendFlip(backend);

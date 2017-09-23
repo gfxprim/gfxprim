@@ -28,7 +28,7 @@
 
 #include <stdarg.h>
 
-#include "core/GP_Context.h"
+#include "core/GP_Pixmap.h"
 
 #include "text/GP_TextStyle.h"
 #include "text/GP_TextMetric.h"
@@ -45,7 +45,7 @@
  *   - GP_VALIGN_CENTER centers the text vertically at the point
  *   - GP_VALIGN_BASELINE places the text baseline at the point
  *   - GP_VALIGN_BELOW (or BOTTOM) draws the text below the point
- *   - GP_TEXT_NOBG mix the alpha pixels with data read from the context
+ *   - GP_TEXT_NOBG mix the alpha pixels with data read from the pixmap
  *                  rather than mixing them with bg_color
  *                  (which is slightly slower)
  */
@@ -66,9 +66,9 @@ typedef enum GP_TextAttr {
  * Raw version, doesn't use Text aligment.
  *
  * If flags are set to GP_TEXT_NOBG the the bg_color is ignored and
- * the context pixels are used for alpha mixing.
+ * the pixmap pixels are used for alpha mixing.
  */
-void GP_Text_Raw(GP_Context *context, const GP_TextStyle *style,
+void GP_Text_Raw(GP_Pixmap *pixmap, const GP_TextStyle *style,
                  GP_Coord x, GP_Coord y, uint8_t flags,
                  GP_Pixel fg_color, GP_Pixel bg_color,
 		 const char *str);
@@ -76,38 +76,38 @@ void GP_Text_Raw(GP_Context *context, const GP_TextStyle *style,
 /*
  * Draws a string.
  *
- * The string is rendered to context (horizontally) with defined text style.
+ * The string is rendered to pixmap (horizontally) with defined text style.
  * The x and y coordinates determines point defined by aligment flags.
  *
  * The background color is ignored for 1bpp font formats.
  */
-void GP_Text(GP_Context *context, const GP_TextStyle *style,
+void GP_Text(GP_Pixmap *pixmap, const GP_TextStyle *style,
              GP_Coord x, GP_Coord y, int align,
              GP_Pixel fg_color, GP_Pixel bg_color, const char *str);
 
 /*
  * Same as above, but printf like and returns text width in pixels.
  */
-GP_Size GP_Print(GP_Context *context, const GP_TextStyle *style,
+GP_Size GP_Print(GP_Pixmap *pixmap, const GP_TextStyle *style,
                  GP_Coord x, GP_Coord y, int align,
 	         GP_Pixel fg_color, GP_Pixel bg_color, const char *fmt, ...)
 	         __attribute__ ((format (printf, 8, 9)));
 
-GP_Size GP_VPrint(GP_Context *context, const GP_TextStyle *style,
+GP_Size GP_VPrint(GP_Pixmap *pixmap, const GP_TextStyle *style,
                   GP_Coord x, GP_Coord y, int align,
 	          GP_Pixel fg_color, GP_Pixel bg_color,
                   const char *fmt, va_list va);
 /*
  * Clears rectangle that would be used to draw text of size pixels.
  */
-void GP_TextClear(GP_Context *context, const GP_TextStyle *style,
+void GP_TextClear(GP_Pixmap *pixmap, const GP_TextStyle *style,
                   GP_Coord x, GP_Coord y, int align,
 		  GP_Pixel bg_color, GP_Size size);
 
 /*
  * Dtto, but with string.
  */
-void GP_TextClearStr(GP_Context *context, const GP_TextStyle *style,
+void GP_TextClearStr(GP_Pixmap *pixmap, const GP_TextStyle *style,
                      GP_Coord x, GP_Coord y, int align,
 		     GP_Pixel bg_color, const char *str);
 

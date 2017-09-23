@@ -35,15 +35,15 @@
 
 #include "loaders/GP_Loader.h"
 
-int GP_ReadPSDEx(GP_IO *io, GP_Context **img,
+int GP_ReadPSDEx(GP_IO *io, GP_Pixmap **img,
 		 GP_DataStorage *storage, GP_ProgressCallback *callback);
 
-int GP_LoadPSDEx(const char *src_path, GP_Context **img,
+int GP_LoadPSDEx(const char *src_path, GP_Pixmap **img,
 		 GP_DataStorage *storage, GP_ProgressCallback *callback);
 
-GP_Context *GP_ReadPSD(GP_IO *io, GP_ProgressCallback *callback);
+GP_Pixmap *GP_ReadPSD(GP_IO *io, GP_ProgressCallback *callback);
 
-GP_Context *GP_LoadPSD(const char *src_path, GP_ProgressCallback *callback);
+GP_Pixmap *GP_LoadPSD(const char *src_path, GP_ProgressCallback *callback);
 
 int GP_MatchPSD(const void *buf);
 

@@ -22,7 +22,7 @@
 
 /*
 
-  GP_Context interpolations.
+  GP_Pixmap interpolations.
 
   Nearest Neighbour
   ~~~~~~~~~~~~~~~~~
@@ -72,18 +72,18 @@ const char *GP_InterpolationTypeName(enum GP_InterpolationType interp_type);
  *
  * Returns non-zero on error (interrupted from callback), zero on success.
  */
-int GP_FilterResize(const GP_Context *src, GP_Context *dst,
+int GP_FilterResize(const GP_Pixmap *src, GP_Pixmap *dst,
                     GP_InterpolationType type,
                     GP_ProgressCallback *callback);
 
 /*
  * Resize src to wxh, the result is allocated.
  *
- * Returns pointer to newly created context.
+ * Returns pointer to newly created pixmap.
  *
  * Returns NULL in case of failure and errno is set correspondinlgy.
  */
-GP_Context *GP_FilterResizeAlloc(const GP_Context *src,
+GP_Pixmap *GP_FilterResizeAlloc(const GP_Pixmap *src,
                                  GP_Size w, GP_Size h,
                                  GP_InterpolationType type,
                                  GP_ProgressCallback *callback);

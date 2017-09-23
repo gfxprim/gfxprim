@@ -10,7 +10,7 @@
 
 #include "core/GP_Pixel.h"
 #include "core/GP_GetPutPixel.h"
-#include "core/GP_Context.h"
+#include "core/GP_Pixmap.h"
 #include "core/GP_Blit.h"
 #include "core/GP_Debug.h"
 #include "core/GP_Convert.h"
@@ -21,9 +21,9 @@
 /*
  * TODO: this is used for same pixel but different offset, could still be optimized
  */
-static void blitXYXY_Naive_Raw(const GP_Context *src,
+static void blitXYXY_Naive_Raw(const GP_Pixmap *src,
                         GP_Coord x0, GP_Coord y0, GP_Coord x1, GP_Coord y1,
-                        GP_Context *dst, GP_Coord x2, GP_Coord y2)
+                        GP_Pixmap *dst, GP_Coord x2, GP_Coord y2)
 {
 	GP_Coord x, y;
 
@@ -32,7 +32,7 @@ static void blitXYXY_Naive_Raw(const GP_Context *src,
 			GP_Pixel p = GP_GetPixel_Raw(src, x, y);
 
 			if (src->pixel_type != dst->pixel_type)
-				p = GP_ConvertContextPixel(p, src, dst);
+				p = GP_ConvertPixmapPixel(p, src, dst);
 
 			GP_PutPixel_Raw(dst, x2 + (x - x0), y2 + (y - y0), p);
 		}
@@ -44,9 +44,9 @@ static void blitXYXY_Naive_Raw(const GP_Context *src,
 /*
  * Blit for equal pixel types {{ ps.suffix }}
  */
-static void blitXYXY_Raw_{{ ps.suffix }}(const GP_Context *src,
+static void blitXYXY_Raw_{{ ps.suffix }}(const GP_Pixmap *src,
 	GP_Coord x0, GP_Coord y0, GP_Coord x1, GP_Coord y1,
-	GP_Context *dst, GP_Coord x2, GP_Coord y2)
+	GP_Pixmap *dst, GP_Coord x2, GP_Coord y2)
 {
 @     if not ps.needs_bit_endian():
 	/* memcpy() each horizontal line */
@@ -60,8 +60,8 @@ static void blitXYXY_Raw_{{ ps.suffix }}(const GP_Context *src,
 # if 0
 	/* Rectangles may not be bit-aligned in the same way! */
 	/* Alignment (index) of first bits in the first byte */
-	//TODO: This is wrong for subcontexts where the offset
-	//      needs to be summed with context->offset and moduled
+	//TODO: This is wrong for subpixmaps where the offset
+	//      needs to be summed with pixmap->offset and moduled
 	int al1 = GP_PIXEL_ADDR_OFFSET_{{ ps.suffix }}(x0);
 	int al2 = GP_PIXEL_ADDR_OFFSET_{{ ps.suffix }}(x2);
 	/* Special case of the same alignment and width >=2 bytes */
@@ -108,9 +108,9 @@ static void blitXYXY_Raw_{{ ps.suffix }}(const GP_Context *src,
 /*
  * Blits {{ src.name }} to {{ dst.name }}
  */
-static void blitXYXY_Raw_{{ src.name }}_{{ dst.name }}(const GP_Context *src,
+static void blitXYXY_Raw_{{ src.name }}_{{ dst.name }}(const GP_Pixmap *src,
 	GP_Coord x0, GP_Coord y0, GP_Coord x1, GP_Coord y1,
-	GP_Context *dst, GP_Coord x2, GP_Coord y2)
+	GP_Pixmap *dst, GP_Coord x2, GP_Coord y2)
 {
 	GP_Coord x, y, dx, dy;
 
@@ -136,9 +136,9 @@ static void blitXYXY_Raw_{{ src.name }}_{{ dst.name }}(const GP_Context *src,
 
 @ end
 
-void GP_BlitXYXY_Raw_Fast(const GP_Context *src,
+void GP_BlitXYXY_Raw_Fast(const GP_Pixmap *src,
                           GP_Coord x0, GP_Coord y0, GP_Coord x1, GP_Coord y1,
-                          GP_Context *dst, GP_Coord x2, GP_Coord y2)
+                          GP_Pixmap *dst, GP_Coord x2, GP_Coord y2)
 {
 	/* Same pixel type, could be (mostly) optimized to memcpy() */
 	if (src->pixel_type == dst->pixel_type) {
@@ -183,9 +183,9 @@ void GP_BlitXYXY_Raw_Fast(const GP_Context *src,
 /*
  * Blits {{ src.name }} to {{ dst.name }}
  */
-static void blitXYXY_{{ src.name }}_{{ dst.name }}(const GP_Context *src,
+static void blitXYXY_{{ src.name }}_{{ dst.name }}(const GP_Pixmap *src,
 	GP_Coord x0, GP_Coord y0, GP_Coord x1, GP_Coord y1,
-	GP_Context *dst, GP_Coord x2, GP_Coord y2)
+	GP_Pixmap *dst, GP_Coord x2, GP_Coord y2)
 {
 	GP_Coord x, y, xt, yt;
 
@@ -213,9 +213,9 @@ static void blitXYXY_{{ src.name }}_{{ dst.name }}(const GP_Context *src,
 /*
  * Blits for same pixel type and bpp {{ ps.suffix }}
  */
-static void blitXYXY_{{ ps.suffix }}(const GP_Context *src,
+static void blitXYXY_{{ ps.suffix }}(const GP_Pixmap *src,
 	GP_Coord x0, GP_Coord y0, GP_Coord x1, GP_Coord y1,
-	GP_Context *dst, GP_Coord x2, GP_Coord y2)
+	GP_Pixmap *dst, GP_Coord x2, GP_Coord y2)
 {
 	GP_Coord x, y, xt, yt;
 
@@ -233,9 +233,9 @@ static void blitXYXY_{{ ps.suffix }}(const GP_Context *src,
 }
 @ end
 
-void GP_BlitXYXY_Fast(const GP_Context *src,
+void GP_BlitXYXY_Fast(const GP_Pixmap *src,
                       GP_Coord x0, GP_Coord y0, GP_Coord x1, GP_Coord y1,
-                      GP_Context *dst, GP_Coord x2, GP_Coord y2)
+                      GP_Pixmap *dst, GP_Coord x2, GP_Coord y2)
 {
 	GP_DEBUG(2, "Blitting %s -> %s",
 	         GP_PixelTypeName(src->pixel_type),
@@ -248,7 +248,7 @@ void GP_BlitXYXY_Fast(const GP_Context *src,
 		return;
 	}
 
-	if (GP_ContextRotationEqual(src, dst)) {
+	if (GP_PixmapRotationEqual(src, dst)) {
 		GP_BlitXYXY_Raw_Fast(src, x0, y0, x1, y1, dst, x2, y2);
 		return;
 	}

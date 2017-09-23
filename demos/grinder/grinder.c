@@ -106,7 +106,7 @@ static struct param resize_params[] = {
 	{NULL,    0,           NULL,          NULL, NULL}
 };
 
-static int resize(GP_Context **c, const char *params)
+static int resize(GP_Pixmap **c, const char *params)
 {
 	int alg = 1;
 	float ratio = -1;
@@ -122,14 +122,14 @@ static int resize(GP_Context **c, const char *params)
 
 	GP_Size w = ratio * (*c)->w;
 	GP_Size h = ratio * (*c)->h;
-	GP_Context *res = NULL;
+	GP_Pixmap *res = NULL;
 
 	res = GP_FilterResizeAlloc(*c, w, h, alg, progress_callback);
 
 	if (res == NULL)
 		return EINVAL;
 
-	GP_ContextFree(*c);
+	GP_PixmapFree(*c);
 	*c = res;
 
 	return 0;
@@ -164,7 +164,7 @@ static struct param scale_params[] = {
 	{NULL,  0,           NULL,        NULL, NULL}
 };
 
-static int scale(GP_Context **c, const char *params)
+static int scale(GP_Pixmap **c, const char *params)
 {
 	int alg = 1;
 	int w = -1;
@@ -185,14 +185,14 @@ static int scale(GP_Context **c, const char *params)
 	if (h == -1)
 		h = (*c)->h * (1.00 * w/(*c)->w) + 0.5;
 
-	GP_Context *res = NULL;
+	GP_Pixmap *res = NULL;
 
 	res = GP_FilterResizeAlloc(*c, w, h, alg, progress_callback);
 
 	if (res == NULL)
 		return EINVAL;
 
-	GP_ContextFree(*c);
+	GP_PixmapFree(*c);
 	*c = res;
 
 	return 0;
@@ -211,7 +211,7 @@ static struct param rotate_params[] = {
 	{NULL,  0,           NULL,        NULL,             NULL}
 };
 
-static int rotate(GP_Context **c, const char *params)
+static int rotate(GP_Pixmap **c, const char *params)
 {
 	int rot = -1;
 
@@ -223,7 +223,7 @@ static int rotate(GP_Context **c, const char *params)
 		return EINVAL;
 	}
 
-	GP_Context *res = NULL;
+	GP_Pixmap *res = NULL;
 
 	switch (rot) {
 	case 0:
@@ -240,7 +240,7 @@ static int rotate(GP_Context **c, const char *params)
 	if (res == NULL)
 		return ENOMEM;
 
-	GP_ContextFree(*c);
+	GP_PixmapFree(*c);
 	*c = res;
 
 	return 0;
@@ -254,7 +254,7 @@ static struct param mirror_params[] = {
 	{NULL,    0,           NULL,                  NULL, NULL}
 };
 
-static int mirror(GP_Context **c, const char *params)
+static int mirror(GP_Pixmap **c, const char *params)
 {
 	int vert = 0, horiz = 0;
 
@@ -277,7 +277,7 @@ static struct param bright_params[] = {
 	{NULL,  0,         NULL,                                  NULL, NULL}
 };
 
-static int bright(GP_Context **c, const char *params)
+static int bright(GP_Pixmap **c, const char *params)
 {
 	float bright = 0;
 
@@ -296,7 +296,7 @@ static struct param contrast_params[] = {
 	{NULL,  0,           NULL,                    NULL, NULL}
 };
 
-static int contrast(GP_Context **c, const char *params)
+static int contrast(GP_Pixmap **c, const char *params)
 {
 	float mul = 0;
 
@@ -319,7 +319,7 @@ static struct param invert_params[] = {
 	{NULL,  0, NULL, NULL, NULL}
 };
 
-static int invert(GP_Context **c, const char *params)
+static int invert(GP_Pixmap **c, const char *params)
 {
 	if (param_parse(params, invert_params, "invert", param_err))
 		return EINVAL;
@@ -338,7 +338,7 @@ static struct param blur_params[] = {
 	{NULL,  0, NULL, NULL, NULL}
 };
 
-static int blur(GP_Context **c, const char *params)
+static int blur(GP_Pixmap **c, const char *params)
 {
 	float sigma = 0;
 	float sigma_x = 0;
@@ -389,7 +389,7 @@ static struct param dither_params[] = {
 	{NULL,  0, NULL, NULL, NULL}
 };
 
-static int dither(GP_Context **c, const char *params)
+static int dither(GP_Pixmap **c, const char *params)
 {
 	int fmt = -1;
 
@@ -401,15 +401,15 @@ static int dither(GP_Context **c, const char *params)
 		return EINVAL;
 	}
 
-	GP_Context *bw;
+	GP_Pixmap *bw;
 	bw = GP_FilterFloydSteinbergAlloc(*c, dither_pixel_types[fmt],
 	                                  progress_callback);
 
-	//TODO: so far we convert the context back to RGB888
+	//TODO: so far we convert the pixmap back to RGB888
 	//(so we can do further work with it)
-	GP_Blit(bw, 0, 0, GP_ContextW(bw), GP_ContextH(bw), *c, 0, 0);
+	GP_Blit(bw, 0, 0, GP_PixmapW(bw), GP_PixmapH(bw), *c, 0, 0);
 
-	GP_ContextFree(bw);
+	GP_PixmapFree(bw);
 
 	return 0;
 }
@@ -421,7 +421,7 @@ static struct param save_jpg_params[] = {
 	{NULL,  0, NULL, NULL, NULL}
 };
 
-static int save_jpg(GP_Context **c, const char *params)
+static int save_jpg(GP_Pixmap **c, const char *params)
 {
 	char *file = NULL;
 
@@ -445,7 +445,7 @@ static struct param save_png_params[] = {
 	{NULL,  0, NULL, NULL, NULL}
 };
 
-static int save_png(GP_Context **c, const char *params)
+static int save_png(GP_Pixmap **c, const char *params)
 {
 	char *file = NULL;
 
@@ -471,7 +471,7 @@ static struct param median_params[] = {
 	{NULL,  0, NULL, NULL, NULL}
 };
 
-static int median(GP_Context **c, const char *params)
+static int median(GP_Pixmap **c, const char *params)
 {
 	int rad = -1, rad_x, rad_y;
 
@@ -486,12 +486,12 @@ static int median(GP_Context **c, const char *params)
 	if (rad_x < 0 || rad_y < 0)
 		return EINVAL;
 
-	GP_Context *ret = GP_FilterMedianAlloc(*c, rad_x, rad_y, progress_callback);
+	GP_Pixmap *ret = GP_FilterMedianAlloc(*c, rad_x, rad_y, progress_callback);
 
 	if (ret == NULL)
 		return ENOMEM;
 
-	GP_ContextFree(*c);
+	GP_PixmapFree(*c);
 	*c = ret;
 
 	return 0;
@@ -508,7 +508,7 @@ static struct param sigma_mean_params[] = {
 	{NULL,  0, NULL, NULL, NULL}
 };
 
-static int sigma_mean(GP_Context **c, const char *params)
+static int sigma_mean(GP_Pixmap **c, const char *params)
 {
 	int rad = -1, rad_x, rad_y, min = 0;
 	float sigma = 0.1;
@@ -527,12 +527,12 @@ static int sigma_mean(GP_Context **c, const char *params)
 
 	(*c)->gamma = GP_GammaAcquire((*c)->pixel_type, 1.2);
 
-	GP_Context *ret = GP_FilterSigmaAlloc(*c, rad_x, rad_y, min, sigma, progress_callback);
+	GP_Pixmap *ret = GP_FilterSigmaAlloc(*c, rad_x, rad_y, min, sigma, progress_callback);
 
 	if (ret == NULL)
 		return ENOMEM;
 
-	GP_ContextFree(*c);
+	GP_PixmapFree(*c);
 	*c = ret;
 
 	return 0;
@@ -545,19 +545,19 @@ static struct param sharpen_params[] = {
 	{NULL,  0, NULL, NULL, NULL}
 };
 
-static int sharpen(GP_Context **c, const char *params)
+static int sharpen(GP_Pixmap **c, const char *params)
 {
 	float weight = 0.1;
 
 	if (param_parse(params, sharpen_params, "sigma", param_err, &weight))
 		return EINVAL;
 
-	GP_Context *ret = GP_FilterEdgeSharpeningAlloc(*c, weight, progress_callback);
+	GP_Pixmap *ret = GP_FilterEdgeSharpeningAlloc(*c, weight, progress_callback);
 
 	if (ret == NULL)
 		return ENOMEM;
 
-	GP_ContextFree(*c);
+	GP_PixmapFree(*c);
 	*c = ret;
 
 	return 0;
@@ -571,7 +571,7 @@ static struct param gauss_noise_params[] = {
 	{NULL,  0, NULL, NULL, NULL}
 };
 
-static int gauss_noise(GP_Context **c, const char *params)
+static int gauss_noise(GP_Pixmap **c, const char *params)
 {
 	float sigma = 0.1;
 	float mu = 0;
@@ -601,7 +601,7 @@ static struct param arithmetic_params[] = {
 	{NULL,  0, NULL, NULL, NULL}
 };
 
-static int arithmetic(GP_Context **c, const char *params)
+static int arithmetic(GP_Pixmap **c, const char *params)
 {
 	char *file = NULL;
 	int op = -1;
@@ -614,7 +614,7 @@ static int arithmetic(GP_Context **c, const char *params)
 		return EINVAL;
 	}
 
-	GP_Context *img, *res = NULL;
+	GP_Pixmap *img, *res = NULL;
 
 	if ((img = GP_LoadImage(file, progress_callback)) == NULL) {
 		print_error("arithmetic: Invalid image.");
@@ -642,7 +642,7 @@ static int arithmetic(GP_Context **c, const char *params)
 	if (res == NULL)
 		return ENOMEM;
 
-	GP_ContextFree(*c);
+	GP_PixmapFree(*c);
 
 	*c = res;
 
@@ -656,7 +656,7 @@ static struct param histogram_params[] = {
 	{NULL,  0, NULL, NULL, NULL}
 };
 
-static int histogram(GP_Context **c, const char *params)
+static int histogram(GP_Pixmap **c, const char *params)
 {
 	char *file = "histogram.png";
 
@@ -678,7 +678,7 @@ struct filter {
 	const char *name;
 	const char *desc;
 	struct param *param_desc;
-	int (*apply)(GP_Context **c, const char *params);
+	int (*apply)(GP_Pixmap **c, const char *params);
 };
 
 static struct filter filter_table[] = {
@@ -763,7 +763,7 @@ static void add_filter(char *params)
 	filter_params[filter_cnt++] = params;
 }
 
-static void apply_filters(GP_Context **src)
+static void apply_filters(GP_Pixmap **src)
 {
 	unsigned int i;
 	int ret;
@@ -845,7 +845,7 @@ static void check_fmt(const char *fmt)
 	exit(1);
 }
 
-static void save_by_fmt(struct GP_Context *bitmap, const char *name, const char *fmt)
+static void save_by_fmt(struct GP_Pixmap *bitmap, const char *name, const char *fmt)
 {
 	int ret;
 
@@ -874,7 +874,7 @@ static void save_by_fmt(struct GP_Context *bitmap, const char *name, const char 
 
 int main(int argc, char *argv[])
 {
-	GP_Context *bitmap;
+	GP_Pixmap *bitmap;
 	int opt, i;
 	const char *out_fmt = "ppm";
 

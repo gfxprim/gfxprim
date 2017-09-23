@@ -35,8 +35,8 @@ static unsigned int count_bits(unsigned int n)
 /*
  * Hilbert Peano to {{ pt.name }}
  */
-static int hilbert_peano_to_{{ pt.name }}_Raw(const GP_Context *src,
-                                              GP_Context *dst,
+static int hilbert_peano_to_{{ pt.name }}_Raw(const GP_Pixmap *src,
+                                              GP_Pixmap *dst,
                                               GP_ProgressCallback *callback)
 {
 	struct GP_CurveState state;
@@ -113,7 +113,7 @@ static int hilbert_peano_to_{{ pt.name }}_Raw(const GP_Context *src,
 
 @ end
 @
-static int hilbert_peano(const GP_Context *src, GP_Context *dst,
+static int hilbert_peano(const GP_Pixmap *src, GP_Pixmap *dst,
                          GP_ProgressCallback *callback)
 {
 	if (GP_PixelHasFlags(src->pixel_type, GP_PIXEL_IS_PALETTE)) {
@@ -135,7 +135,7 @@ static int hilbert_peano(const GP_Context *src, GP_Context *dst,
 	}
 }
 
-int GP_FilterHilbertPeano(const GP_Context *src, GP_Context *dst,
+int GP_FilterHilbertPeano(const GP_Pixmap *src, GP_Pixmap *dst,
                           GP_ProgressCallback *callback)
 {
 	GP_CHECK(src->w <= dst->w);
@@ -144,19 +144,19 @@ int GP_FilterHilbertPeano(const GP_Context *src, GP_Context *dst,
 	return hilbert_peano(src, dst, callback);
 }
 
-GP_Context *GP_FilterHilbertPeanoAlloc(const GP_Context *src,
+GP_Pixmap *GP_FilterHilbertPeanoAlloc(const GP_Pixmap *src,
                                        GP_PixelType pixel_type,
                                        GP_ProgressCallback *callback)
 {
-	GP_Context *ret;
+	GP_Pixmap *ret;
 
-	ret = GP_ContextAlloc(src->w, src->h, pixel_type);
+	ret = GP_PixmapAlloc(src->w, src->h, pixel_type);
 
 	if (ret == NULL)
 		return NULL;
 
 	if (hilbert_peano(src, ret, callback)) {
-		GP_ContextFree(ret);
+		GP_PixmapFree(ret);
 		return NULL;
 	}
 

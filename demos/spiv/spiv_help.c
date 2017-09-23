@@ -234,9 +234,9 @@ static int last_line;
 
 static int redraw_help(GP_Backend *backend, unsigned int loff, GP_Coord xoff)
 {
-	GP_Context *c = backend->context;
-	GP_Pixel black = GP_RGBToContextPixel(0x00, 0x00, 0x00, c);
-	GP_Pixel white = GP_RGBToContextPixel(0xff, 0xff, 0xff, c);
+	GP_Pixmap *c = backend->pixmap;
+	GP_Pixel black = GP_RGBToPixmapPixel(0x00, 0x00, 0x00, c);
+	GP_Pixel white = GP_RGBToPixmapPixel(0xff, 0xff, 0xff, c);
 	int i;
 
 	int spacing = GP_TextHeight(config.style)/10 + 2;

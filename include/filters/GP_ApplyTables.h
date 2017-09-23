@@ -22,7 +22,7 @@
 
 /*
 
-  Applies per-channel tables on a context pixels. Used for fast point filters
+  Applies per-channel tables on a pixmap pixels. Used for fast point filters
   implementation.
 
  */
@@ -43,10 +43,10 @@ typedef struct GP_FilterTables {
 /*
  * Generic point filter, applies corresponding table on bitmap.
  */
-int GP_FilterTablesApply(const GP_Context *const src,
+int GP_FilterTablesApply(const GP_Pixmap *const src,
                          GP_Coord x_src, GP_Coord y_src,
                          GP_Size w_src, GP_Size h_src,
-			 GP_Context *dst,
+			 GP_Pixmap *dst,
 			 GP_Coord x_dst, GP_Coord y_dst,
 			 const GP_FilterTables *const tables,
 			 GP_ProgressCallback *callback);
@@ -54,12 +54,12 @@ int GP_FilterTablesApply(const GP_Context *const src,
 /*
  * Aloocates and initializes tables.
  */
-int GP_FilterTablesInit(GP_FilterTables *self, const GP_Context *ctx);
+int GP_FilterTablesInit(GP_FilterTables *self, const GP_Pixmap *pixmap);
 
 /*
  * Allocates and initializes table structure and tables.
  */
-GP_FilterTables *GP_FilterTablesAlloc(const GP_Context *ctx);
+GP_FilterTables *GP_FilterTablesAlloc(const GP_Pixmap *pixmap);
 
 /*
  * Frees point filter tables.

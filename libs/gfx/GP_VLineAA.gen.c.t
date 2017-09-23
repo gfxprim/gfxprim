@@ -22,14 +22,14 @@
 
 /* Anti Aliased Vertical Line */
 
-#include "core/GP_Context.h"
+#include "core/GP_Pixmap.h"
 #include "core/GP_MixPixels.h"
 #include "core/GP_FixedPoint.h"
 #include "core/GP_GammaCorrection.h"
 
 #define FP_TO_PERC(a) (GP_FP_ROUND_TO_INT((a) * 255))
 
-void GP_VLineAA_Raw(GP_Context *context, GP_Coord x, GP_Coord y0,
+void GP_VLineAA_Raw(GP_Pixmap *pixmap, GP_Coord x, GP_Coord y0,
                     GP_Coord y1, GP_Pixel pixel)
 {
 	if (y1 < y0)
@@ -53,16 +53,16 @@ void GP_VLineAA_Raw(GP_Context *context, GP_Coord x, GP_Coord y0,
 	uint8_t perc;
 
 	perc = FP_TO_PERC(GP_FP_MUL(GP_FP_RFRAC(x), GP_FP_RFRAC(y0)));
-	GP_MixPixel_Raw_Clipped(context, int_x, int_y0, pixel, perc);
+	GP_MixPixel_Raw_Clipped(pixmap, int_x, int_y0, pixel, perc);
 
 	perc = FP_TO_PERC(GP_FP_MUL(GP_FP_FRAC(x), GP_FP_RFRAC(y0)));
-	GP_MixPixel_Raw_Clipped(context, int_x+1, int_y0, pixel, perc);
+	GP_MixPixel_Raw_Clipped(pixmap, int_x+1, int_y0, pixel, perc);
 
 	perc = FP_TO_PERC(GP_FP_MUL(GP_FP_RFRAC(x), GP_FP_FRAC(y1)));
-	GP_MixPixel_Raw_Clipped(context, int_x, int_y1, pixel, perc);
+	GP_MixPixel_Raw_Clipped(pixmap, int_x, int_y1, pixel, perc);
 
 	perc = FP_TO_PERC(GP_FP_MUL(GP_FP_FRAC(x), GP_FP_FRAC(y1)));
-	GP_MixPixel_Raw_Clipped(context, int_x+1, int_y1, pixel, perc);
+	GP_MixPixel_Raw_Clipped(pixmap, int_x+1, int_y1, pixel, perc);
 
 	/* Draw the middle pixels */
 	uint8_t up = FP_TO_PERC(GP_FP_RFRAC(x));
@@ -71,7 +71,7 @@ void GP_VLineAA_Raw(GP_Context *context, GP_Coord x, GP_Coord y0,
 	GP_Coord y;
 
 	for (y = int_y0 + 1; y < int_y1; y++) {
-		GP_MixPixel_Raw_Clipped(context, int_x, y, pixel, up);
-		GP_MixPixel_Raw_Clipped(context, int_x+1, y, pixel, lp);
+		GP_MixPixel_Raw_Clipped(pixmap, int_x, y, pixel, up);
+		GP_MixPixel_Raw_Clipped(pixmap, int_x+1, y, pixel, lp);
 	}
 }

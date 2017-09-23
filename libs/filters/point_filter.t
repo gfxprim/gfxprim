@@ -1,8 +1,8 @@
 @ def filter_point_ex(op_name, filter_op, fopts):
-int GP_Filter{{ op_name }}Ex(const GP_Context *const src,
+int GP_Filter{{ op_name }}Ex(const GP_Pixmap *const src,
                              GP_Coord x_src, GP_Coord y_src,
                              GP_Size w_src, GP_Size h_src,
-                             GP_Context *dst,
+                             GP_Pixmap *dst,
                              GP_Coord x_dst, GP_Coord y_dst,
                              {{ maybe_opts_r(fopts) }}
                              GP_ProgressCallback *callback)
@@ -37,19 +37,19 @@ int GP_Filter{{ op_name }}Ex(const GP_Context *const src,
 }
 @
 @ def filter_point_ex_alloc(op_name, fopts, opts):
-GP_Context *GP_Filter{{ op_name }}ExAlloc(const GP_Context *const src,
+GP_Pixmap *GP_Filter{{ op_name }}ExAlloc(const GP_Pixmap *const src,
                                           GP_Coord x_src, GP_Coord y_src,
                                           GP_Size w_src, GP_Size h_src,
                                           {{ maybe_opts_r(fopts) }}
                                           GP_ProgressCallback *callback)
 {
-	GP_Context *new = GP_ContextAlloc(w_src, h_src,
+	GP_Pixmap *new = GP_PixmapAlloc(w_src, h_src,
 	                                  src->pixel_type);
 
 	if (GP_Filter{{ op_name }}Ex(src, x_src, y_src, w_src, h_src, new, 0, 0,
 	                             {{ maybe_opts_r(opts) }}callback)) {
 		int err = errno;
-		GP_ContextFree(new);
+		GP_PixmapFree(new);
 		errno = err;
 		return NULL;
 	}

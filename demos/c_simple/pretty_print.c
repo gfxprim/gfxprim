@@ -22,7 +22,7 @@
 
 /*
 
-  Pretty print function for pixel and context.
+  Pretty print function for pixel and pixmap.
 
  */
 
@@ -30,14 +30,14 @@
 
 int main(void)
 {
-	GP_Context *ctx = GP_ContextAlloc(100, 100, GP_PIXEL_RGB888);
+	GP_Pixmap *pixmap = GP_PixmapAlloc(100, 100, GP_PIXEL_RGB888);
 	GP_Pixel pix = ~(GP_Pixel)0;
 
 	/* Pretty prints pixel values */
 	GP_PixelPrint(pix, GP_PIXEL_RGB888);
 
-	/* Pretty prints context info */
-	GP_ContextPrintInfo(ctx);
+	/* Pretty prints pixmap info */
+	GP_PixmapPrintInfo(pixmap);
 
 	return 0;
 }

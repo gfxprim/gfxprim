@@ -56,7 +56,7 @@ static int fill_flag = 1;
 /* Do a clipping test? */
 static int cliptest_flag = 0;
 
-void random_point(const GP_Context *c, int *x, int *y)
+void random_point(const GP_Pixmap *c, int *x, int *y)
 {
 	if (cliptest_flag) {
 		*x = random() % (3*c->w) - c->w;
@@ -67,7 +67,7 @@ void random_point(const GP_Context *c, int *x, int *y)
 	}
 }
 
-void random_point_AA(const GP_Context *c, int *x, int *y)
+void random_point_AA(const GP_Pixmap *c, int *x, int *y)
 {
 	*x = random() % (c->w<<8);
 	*y = random() % (c->h<<8);
@@ -76,70 +76,70 @@ void random_point_AA(const GP_Context *c, int *x, int *y)
 void draw_random_circle(GP_Pixel pixel)
 {
 	int x, y;
-	random_point(win->context, &x, &y);
+	random_point(win->pixmap, &x, &y);
 	int r = random() % 50;
 
 	if (fill_flag)
-		GP_FillCircle(win->context, x, y, r, pixel);
+		GP_FillCircle(win->pixmap, x, y, r, pixel);
 
 	if (outline_flag)
-		GP_Circle(win->context, x, y, r, white);
+		GP_Circle(win->pixmap, x, y, r, white);
 }
 
 void draw_random_ellipse(GP_Pixel pixel)
 {
 	int x, y;
-	random_point(win->context, &x, &y);
+	random_point(win->pixmap, &x, &y);
 	int rx = random() % 50;
 	int ry = random() % 50;
 
 	if (fill_flag)
-		GP_FillEllipse(win->context, x, y, rx, ry, pixel);
+		GP_FillEllipse(win->pixmap, x, y, rx, ry, pixel);
 
 	if (outline_flag)
-		GP_Ellipse(win->context, x, y, rx, ry, white);
+		GP_Ellipse(win->pixmap, x, y, rx, ry, white);
 }
 
 void draw_random_triangle(GP_Pixel pixel)
 {
 	int x0, y0, x1, y1, x2, y2;
-	random_point(win->context, &x0, &y0);
-	random_point(win->context, &x1, &y1);
-	random_point(win->context, &x2, &y2);
+	random_point(win->pixmap, &x0, &y0);
+	random_point(win->pixmap, &x1, &y1);
+	random_point(win->pixmap, &x2, &y2);
 
 	if (fill_flag)
-		GP_FillTriangle(win->context, x0, y0, x1, y1, x2, y2, pixel);
+		GP_FillTriangle(win->pixmap, x0, y0, x1, y1, x2, y2, pixel);
 
 	if (outline_flag)
-		GP_Triangle(win->context, x0, y0, x1, y1, x2, y2, white);
+		GP_Triangle(win->pixmap, x0, y0, x1, y1, x2, y2, white);
 }
 
 void draw_random_rectangle(GP_Pixel pixel)
 {
 	int x0, y0, x1, y1;
-	random_point(win->context, &x0, &y0);
-	random_point(win->context, &x1, &y1);
+	random_point(win->pixmap, &x0, &y0);
+	random_point(win->pixmap, &x1, &y1);
 
 	if (fill_flag)
-		GP_FillRect(win->context, x0, y0, x1, y1, pixel);
+		GP_FillRect(win->pixmap, x0, y0, x1, y1, pixel);
 
 	if (outline_flag)
-		GP_Rect(win->context, x0, y0, x1, y1, white);
+		GP_Rect(win->pixmap, x0, y0, x1, y1, white);
 }
 
 void draw_random_tetragon(GP_Pixel pixel)
 {
 	int x0, y0, x1, y1, x2, y2, x3, y3;
-	random_point(win->context, &x0, &y0);
-	random_point(win->context, &x1, &y1);
-	random_point(win->context, &x2, &y2);
-	random_point(win->context, &x3, &y3);
+	random_point(win->pixmap, &x0, &y0);
+	random_point(win->pixmap, &x1, &y1);
+	random_point(win->pixmap, &x2, &y2);
+	random_point(win->pixmap, &x3, &y3);
 
 	if (fill_flag)
-		GP_FillTetragon(win->context, x0, y0, x1, y1, x2, y2, x3, y3, pixel);
+		GP_FillTetragon(win->pixmap, x0, y0, x1, y1, x2, y2, x3, y3, pixel);
 
 	if (outline_flag)
-		GP_Tetragon(win->context, x0, y0, x1, y1, x2, y2, x3, y3, pixel);
+		GP_Tetragon(win->pixmap, x0, y0, x1, y1, x2, y2, x3, y3, pixel);
 }
 
 void draw_random_polygon(GP_Pixel pixel)
@@ -148,15 +148,15 @@ void draw_random_polygon(GP_Pixel pixel)
 	int i;
 
 	for (i = 0; i < 5; i++) {
-		random_point(win->context, xy + 2*i, xy + 2*i + 1);
+		random_point(win->pixmap, xy + 2*i, xy + 2*i + 1);
 	}
 
-	GP_FillPolygon_Raw(win->context, 5, xy, pixel);
+	GP_FillPolygon_Raw(win->pixmap, 5, xy, pixel);
 }
 
 void clear_screen(void)
 {
-	GP_Fill(win->context, black);
+	GP_Fill(win->pixmap, black);
 	GP_BackendFlip(win);
 }
 
@@ -168,7 +168,7 @@ void redraw_screen(void)
 	/* Pick a random color for drawing. */
 	GP_Pixel pixel;
 	pixel = GP_RGBToPixel(random() % 256, random() % 256,
-	                      random() % 256, win->context->pixel_type);
+	                      random() % 256, win->pixmap->pixel_type);
 
 	switch (shape) {
 	case SHAPE_CIRCLE:
@@ -258,8 +258,8 @@ int main(void)
 		return 1;
 	}
 
-	white = GP_RGBToContextPixel(0xff, 0xff, 0xff, win->context);
-	black = GP_RGBToContextPixel(0x00, 0x00, 0x00, win->context);
+	white = GP_RGBToPixmapPixel(0xff, 0xff, 0xff, win->pixmap);
+	black = GP_RGBToPixmapPixel(0x00, 0x00, 0x00, win->pixmap);
 
 	for (;;) {
 		GP_BackendPoll(win);

@@ -1,5 +1,5 @@
 @ def filter_arithmetic(name, filter_op, opts='', params=''):
-#include "core/GP_Context.h"
+#include "core/GP_Pixmap.h"
 #include "core/GP_Pixel.h"
 #include "core/GP_GetPutPixel.h"
 #include "core/GP_Debug.h"
@@ -8,8 +8,8 @@
 
 @     for pt in pixeltypes:
 @         if not pt.is_unknown():
-static int GP_Filter{{ name }}_{{ pt.name }}(const GP_Context *src_a, const GP_Context *src_b,
-	GP_Context *dst, {{ maybe_opts_r(opts) }}GP_ProgressCallback *callback)
+static int GP_Filter{{ name }}_{{ pt.name }}(const GP_Pixmap *src_a, const GP_Pixmap *src_b,
+	GP_Pixmap *dst, {{ maybe_opts_r(opts) }}GP_ProgressCallback *callback)
 {
 	uint32_t x, y, w, h;
 
@@ -47,8 +47,8 @@ static int GP_Filter{{ name }}_{{ pt.name }}(const GP_Context *src_a, const GP_C
 
 @     end
 @
-int GP_Filter{{ name }}_Raw(const GP_Context *src_a, const GP_Context *src_b,
-	GP_Context *dst{{ maybe_opts_l(opts) }}, GP_ProgressCallback *callback)
+int GP_Filter{{ name }}_Raw(const GP_Pixmap *src_a, const GP_Pixmap *src_b,
+	GP_Pixmap *dst{{ maybe_opts_l(opts) }}, GP_ProgressCallback *callback)
 {
 	GP_DEBUG(1, "Running filter {{ name }}");
 
@@ -65,8 +65,8 @@ int GP_Filter{{ name }}_Raw(const GP_Context *src_a, const GP_Context *src_b,
 	return 1;
 }
 
-int GP_Filter{{ name }}(const GP_Context *src_a, const GP_Context *src_b,
-                        GP_Context *dst{{ maybe_opts_l(opts) }},
+int GP_Filter{{ name }}(const GP_Pixmap *src_a, const GP_Pixmap *src_b,
+                        GP_Pixmap *dst{{ maybe_opts_l(opts) }},
                         GP_ProgressCallback *callback)
 {
 	GP_Size w = GP_MIN(src_a->w, src_b->w);
@@ -86,10 +86,10 @@ int GP_Filter{{ name }}(const GP_Context *src_a, const GP_Context *src_b,
 }
 
 
-GP_Context *GP_Filter{{ name }}Alloc(const GP_Context *src_a, const GP_Context *src_b,
+GP_Pixmap *GP_Filter{{ name }}Alloc(const GP_Pixmap *src_a, const GP_Pixmap *src_b,
 	                            {{ maybe_opts_r(opts) }}GP_ProgressCallback *callback)
 {
-	GP_Context *res;
+	GP_Pixmap *res;
 
 	GP_ASSERT(src_a->pixel_type == src_b->pixel_type,
 	          "Pixel types for sources must match.");
@@ -97,7 +97,7 @@ GP_Context *GP_Filter{{ name }}Alloc(const GP_Context *src_a, const GP_Context *
 	GP_Size w = GP_MIN(src_a->w, src_b->w);
 	GP_Size h = GP_MIN(src_a->h, src_b->h);
 
-	res = GP_ContextAlloc(w, h, src_a->pixel_type);
+	res = GP_PixmapAlloc(w, h, src_a->pixel_type);
 
 	if (res == NULL)
 		return NULL;
@@ -105,7 +105,7 @@ GP_Context *GP_Filter{{ name }}Alloc(const GP_Context *src_a, const GP_Context *
 	if (GP_Filter{{ name }}_Raw(src_a, src_b, res{{ maybe_opts_l(params) }}, callback)) {
 		GP_DEBUG(1, "Operation aborted");
 
-		GP_ContextFree(res);
+		GP_PixmapFree(res);
 
 		return NULL;
 	}

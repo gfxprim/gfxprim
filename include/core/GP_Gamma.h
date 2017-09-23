@@ -58,7 +58,7 @@
 
  /*
 
-   This code implements management functions for easy, per context, per
+   This code implements management functions for easy, per pixmap, per
    channel, gamma tables.
 
    The tables for particular gamma are reference counted. There is only one
@@ -113,7 +113,7 @@
 
 #include <stdint.h>
 
-#include "GP_Context.h"
+#include "GP_Pixmap.h"
 
 typedef enum GP_CorrectionType {
 	/*

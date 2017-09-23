@@ -20,14 +20,14 @@
  *                                                                           *
  *****************************************************************************/
 
-#include <core/GP_Context.h>
+#include <core/GP_Pixmap.h>
 #include <gfx/GP_Gfx.h>
 
 #include "tst_test.h"
 
 static int bench_line(GP_PixelType type)
 {
-	GP_Context *img = GP_ContextAlloc(800, 600, type);
+	GP_Pixmap *img = GP_PixmapAlloc(800, 600, type);
 
 	if (img == NULL) {
 		tst_err("Malloc failed");
@@ -71,7 +71,7 @@ static int bench_line_32bpp(void)
 
 static int bench_circle(GP_PixelType type)
 {
-	GP_Context *img = GP_ContextAlloc(800, 600, type);
+	GP_Pixmap *img = GP_PixmapAlloc(800, 600, type);
 
 	if (img == NULL) {
 		tst_err("Malloc failed");

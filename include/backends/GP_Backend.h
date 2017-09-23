@@ -42,7 +42,7 @@
 #ifndef BACKENDS_GP_BACKEND_H
 #define BACKENDS_GP_BACKEND_H
 
-#include "core/GP_Context.h"
+#include "core/GP_Pixmap.h"
 
 #include "input/GP_EventQueue.h"
 #include "input/GP_Timer.h"
@@ -54,15 +54,15 @@ typedef struct GP_Backend {
 	const char *name;
 
 	/*
-	 * Pointer to context app should draw to.
+	 * Pointer to pixmap app should draw to.
 	 *
 	 * This MAY change upon a flip operation.
 	 */
-	GP_Context *context;
+	GP_Pixmap *pixmap;
 
 	/*
 	 * If display is buffered, this copies content
-	 * of context onto display.
+	 * of pixmap onto display.
 	 *
 	 * If display is not buffered, this is no-op (set to NULL).
 	 */
@@ -71,7 +71,7 @@ typedef struct GP_Backend {
 	/*
 	 * Updates display rectangle.
 	 *
-	 * In contrast to flip operation, the context
+	 * In contrast to flip operation, the pixmap
 	 * must not change (this is intended for updating very small areas).
 	 *
 	 * If display is not buffered, this is no-op (set to NULL).
@@ -246,7 +246,7 @@ static inline int GP_BackendSetCaption(GP_Backend *backend,
  * When the backend size matches the passed width and height,
  * no action is done.
  *
- * Note that after calling this, the backend->context pointer may change.
+ * Note that after calling this, the backend->pixmap pointer may change.
  */
 int GP_BackendResize(GP_Backend *backend, uint32_t w, uint32_t h);
 
@@ -256,7 +256,7 @@ int GP_BackendResize(GP_Backend *backend, uint32_t w, uint32_t h);
  * received resize event.
  *
  * This will resize backend buffers. After this call returns the backend width
- * height and context pointer are most likely different.
+ * height and pixmap pointer are most likely different.
  *
  * This function returns zero on succes. Non zero on failure. If it fails the
  * best action to take is to save application data and exit (as the backend

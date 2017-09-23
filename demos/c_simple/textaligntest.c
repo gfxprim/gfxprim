@@ -41,11 +41,11 @@ static GP_Backend *win;
 
 void redraw_screen(void)
 {
-	GP_Fill(win->context, black_pixel);
+	GP_Fill(win->pixmap, black_pixel);
 
 	/* draw axes intersecting in the middle, where text should be shown */
-	GP_HLine(win->context, 0, X, Y/2, darkgray_pixel);
-	GP_VLine(win->context, X/2, 0, Y, darkgray_pixel);
+	GP_HLine(win->pixmap, 0, X, Y/2, darkgray_pixel);
+	GP_VLine(win->pixmap, X/2, 0, Y, darkgray_pixel);
 
 	switch (font_flag) {
 	case 0:
@@ -68,17 +68,17 @@ void redraw_screen(void)
 	break;
 	}
 
-	GP_Text(win->context, &style, X/2, Y/2, GP_ALIGN_LEFT|GP_VALIGN_BELOW,
+	GP_Text(win->pixmap, &style, X/2, Y/2, GP_ALIGN_LEFT|GP_VALIGN_BELOW,
 	        yellow_pixel, black_pixel, "bottom left");
-	GP_Text(win->context, &style, X/2, Y/2, GP_ALIGN_RIGHT|GP_VALIGN_BELOW,
+	GP_Text(win->pixmap, &style, X/2, Y/2, GP_ALIGN_RIGHT|GP_VALIGN_BELOW,
 	        red_pixel, black_pixel, "bottom right");
-	GP_Text(win->context, &style, X/2, Y/2, GP_ALIGN_RIGHT|GP_VALIGN_ABOVE,
+	GP_Text(win->pixmap, &style, X/2, Y/2, GP_ALIGN_RIGHT|GP_VALIGN_ABOVE,
 	        blue_pixel, black_pixel, "top right");
-	GP_Text(win->context, &style, X/2, Y/2, GP_ALIGN_LEFT|GP_VALIGN_ABOVE,
+	GP_Text(win->pixmap, &style, X/2, Y/2, GP_ALIGN_LEFT|GP_VALIGN_ABOVE,
 	        green_pixel, black_pixel, "top left");
 
-	GP_HLine(win->context, 0, X, Y/3, darkgray_pixel);
-	GP_Text(win->context, &style, X/2, Y/3, GP_ALIGN_CENTER|GP_VALIGN_BASELINE,
+	GP_HLine(win->pixmap, 0, X, Y/3, darkgray_pixel);
+	GP_Text(win->pixmap, &style, X/2, Y/3, GP_ALIGN_CENTER|GP_VALIGN_BASELINE,
 	        white_pixel, black_pixel, "x center y baseline");
 }
 
@@ -96,13 +96,13 @@ static void event_loop(void)
 
 			switch (ev.val.key.key) {
 			case GP_KEY_X:
-				win->context->x_swap = !win->context->x_swap;
+				win->pixmap->x_swap = !win->pixmap->x_swap;
 			break;
 			case GP_KEY_Y:
-				win->context->y_swap = !win->context->y_swap;
+				win->pixmap->y_swap = !win->pixmap->y_swap;
 			break;
 			case GP_KEY_R:
-				win->context->axes_swap = !win->context->axes_swap;
+				win->pixmap->axes_swap = !win->pixmap->axes_swap;
 				GP_SWAP(X, Y);
 			break;
 			case GP_KEY_SPACE:
@@ -146,8 +146,8 @@ static void event_loop(void)
 			break;
 			case GP_EV_SYS_RESIZE:
 				GP_BackendResizeAck(win);
-				X = win->context->w;
-				Y = win->context->h;
+				X = win->pixmap->w;
+				Y = win->pixmap->h;
 			break;
 			}
 		break;
@@ -186,13 +186,13 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 
-	black_pixel    = GP_RGBToContextPixel(0x00, 0x00, 0x00, win->context);
-	red_pixel      = GP_RGBToContextPixel(0xff, 0x00, 0x00, win->context);
-	blue_pixel     = GP_RGBToContextPixel(0x00, 0x00, 0xff, win->context);
-	green_pixel    = GP_RGBToContextPixel(0x00, 0xff, 0x00, win->context);
-	yellow_pixel   = GP_RGBToContextPixel(0xff, 0xff, 0x00, win->context);
-	white_pixel   = GP_RGBToContextPixel(0xff, 0xff, 0xff, win->context);
-	darkgray_pixel = GP_RGBToContextPixel(0x7f, 0x7f, 0x7f, win->context);
+	black_pixel    = GP_RGBToPixmapPixel(0x00, 0x00, 0x00, win->pixmap);
+	red_pixel      = GP_RGBToPixmapPixel(0xff, 0x00, 0x00, win->pixmap);
+	blue_pixel     = GP_RGBToPixmapPixel(0x00, 0x00, 0xff, win->pixmap);
+	green_pixel    = GP_RGBToPixmapPixel(0x00, 0xff, 0x00, win->pixmap);
+	yellow_pixel   = GP_RGBToPixmapPixel(0xff, 0xff, 0x00, win->pixmap);
+	white_pixel   = GP_RGBToPixmapPixel(0xff, 0xff, 0xff, win->pixmap);
+	darkgray_pixel = GP_RGBToPixmapPixel(0x7f, 0x7f, 0x7f, win->pixmap);
 
 	redraw_screen();
 	GP_BackendFlip(win);

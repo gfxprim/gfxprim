@@ -5,7 +5,7 @@ from random import Random
 from gfxprim import core
 
 __all__ = ["alltypes", "for_each_case",
-           "RandomizeContext", "ContextRand"]
+           "RandomizePixmap", "PixmapRand"]
 
 
 def alltypes(_filter=None):
@@ -48,17 +48,17 @@ def for_each_case(cases, givename=True):
   return decorate
 
 
-### core.Context helpers
+### core.Pixmap helpers
 
-def ContextRand(w, h, t, seed=None):
-  "Return new Context(w, h, t) filled with RandomizeContext(c, seed)"
-  c = core.Context(w, h, t)
-  RandomizeContext(c, seed)
+def PixmapRand(w, h, t, seed=None):
+  "Return new Pixmap(w, h, t) filled with RandomizePixmap(c, seed)"
+  c = core.Pixmap(w, h, t)
+  RandomizePixmap(c, seed)
   return c
 
 
-def RandomizeContext(c, seed=None):
-  """Fill Context with pseudorandom data.
+def RandomizePixmap(c, seed=None):
+  """Fill Pixmap with pseudorandom data.
 
   The default seed is computed from size and type number.
   """

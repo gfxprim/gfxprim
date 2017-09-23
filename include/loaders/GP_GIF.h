@@ -34,15 +34,15 @@
 /*
  * Reads first image found in GIF container from an IO stream.
  *
- * Returns newly allocated context cotaining the loaded image or in case of
+ * Returns newly allocated pixmap cotaining the loaded image or in case of
  * failure NULL and errno is set.
  */
-GP_Context *GP_ReadGIF(GP_IO *io, GP_ProgressCallback *callback);
+GP_Pixmap *GP_ReadGIF(GP_IO *io, GP_ProgressCallback *callback);
 
 /*
  * Loads first image found in GIF container from a file.
  */
-GP_Context *GP_LoadGIF(const char *src_path, GP_ProgressCallback *callback);
+GP_Pixmap *GP_LoadGIF(const char *src_path, GP_ProgressCallback *callback);
 
 /*
  * Looks for GIF file signature. Returns non-zero if found.

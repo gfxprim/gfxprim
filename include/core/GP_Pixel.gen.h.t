@@ -42,9 +42,9 @@ typedef enum GP_PixelType {
 @         end
 
 /*
- * macros to get address and bit-offset of a pixel {{ pt.name }} in a context
+ * macros to get address and bit-offset of a pixel {{ pt.name }} in a pixmap
  */
-#define GP_PIXEL_ADDR_{{ pt.name }}(context, x, y) GP_PIXEL_ADDR_{{ pt.pixelsize.suffix }}(context, x, y)
+#define GP_PIXEL_ADDR_{{ pt.name }}(pixmap, x, y) GP_PIXEL_ADDR_{{ pt.pixelsize.suffix }}(pixmap, x, y)
 #define GP_PIXEL_ADDR_OFFSET_{{ pt.name }}(x) GP_PIXEL_ADDR_OFFSET_{{ pt.pixelsize.suffix }}(x)
 
 /*

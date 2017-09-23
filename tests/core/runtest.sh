@@ -12,4 +12,4 @@ export LIBC_FATAL_STDERR_=1
 TEST="$1"
 shift
 
-LD_PRELOAD=`pwd`/../framework/libtst_preload.so LD_LIBRARY_PATH=../../build/ "./$TEST" "$@"
+LD_PRELOAD=`pwd`/../framework/libtst_preload.so LD_LIBRARY_PATH=../../build/ gdb "./$TEST" "$@"

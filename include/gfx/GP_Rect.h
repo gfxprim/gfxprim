@@ -26,61 +26,61 @@
 #ifndef GP_RECT_H
 #define GP_RECT_H
 
-#include "core/GP_Context.h"
+#include "core/GP_Pixmap.h"
 
 /* Rectangle */
 
-void GP_RectXYXY(GP_Context *context, GP_Coord x0, GP_Coord y0,
+void GP_RectXYXY(GP_Pixmap *pixmap, GP_Coord x0, GP_Coord y0,
                  GP_Coord x1, GP_Coord y1, GP_Pixel pixel);
 
-void GP_RectXYXY_Raw(GP_Context *context, GP_Coord x0, GP_Coord y0,
+void GP_RectXYXY_Raw(GP_Pixmap *pixmap, GP_Coord x0, GP_Coord y0,
                      GP_Coord x1, GP_Coord y1, GP_Pixel pixel);
 
-void GP_RectXYWH(GP_Context *context, GP_Coord x, GP_Coord y,
+void GP_RectXYWH(GP_Pixmap *pixmap, GP_Coord x, GP_Coord y,
                  GP_Size w, GP_Size h, GP_Pixel pixel);
 
-void GP_RectXYWH_Raw(GP_Context *context, GP_Coord x, GP_Coord y,
+void GP_RectXYWH_Raw(GP_Pixmap *pixmap, GP_Coord x, GP_Coord y,
                      GP_Size w, GP_Size h, GP_Pixel pixel);
 
 /* The XYXY argument set is the default */
-static inline void GP_Rect(GP_Context *context, GP_Coord x0, GP_Coord y0,
+static inline void GP_Rect(GP_Pixmap *pixmap, GP_Coord x0, GP_Coord y0,
                            GP_Coord x1, GP_Coord y1, GP_Pixel pixel)
 {
-	GP_RectXYXY(context, x0, y0, x1, y1, pixel);
+	GP_RectXYXY(pixmap, x0, y0, x1, y1, pixel);
 }
 
-static inline void GP_Rect_Raw(GP_Context *context, GP_Coord x0, GP_Coord y0,
+static inline void GP_Rect_Raw(GP_Pixmap *pixmap, GP_Coord x0, GP_Coord y0,
                                GP_Coord x1, GP_Coord y1, GP_Pixel pixel)
 {
-	GP_RectXYXY_Raw(context, x0, y0, x1, y1, pixel);
+	GP_RectXYXY_Raw(pixmap, x0, y0, x1, y1, pixel);
 }
 
 /* Filled Rectangle */
 
-void GP_FillRectXYXY(GP_Context *context, GP_Coord x0, GP_Coord y0,
+void GP_FillRectXYXY(GP_Pixmap *pixmap, GP_Coord x0, GP_Coord y0,
                      GP_Coord x1, GP_Coord y1, GP_Pixel pixel);
 
-void GP_FillRectXYXY_Raw(GP_Context *context, GP_Coord x0, GP_Coord y0,
+void GP_FillRectXYXY_Raw(GP_Pixmap *pixmap, GP_Coord x0, GP_Coord y0,
                          GP_Coord x1, GP_Coord y1, GP_Pixel pixel);
 
-void GP_FillRectXYWH(GP_Context *context, GP_Coord x, GP_Coord y,
+void GP_FillRectXYWH(GP_Pixmap *pixmap, GP_Coord x, GP_Coord y,
                      GP_Size w, GP_Size h, GP_Pixel pixel);
 
-void GP_FillRectXYWH_Raw(GP_Context *context, GP_Coord x, GP_Coord y,
+void GP_FillRectXYWH_Raw(GP_Pixmap *pixmap, GP_Coord x, GP_Coord y,
 	                 GP_Size w, GP_Size h, GP_Pixel pixel);
 
 /* The XYXY argument set is the default */
-static inline void GP_FillRect(GP_Context *context, GP_Coord x0, GP_Coord y0,
+static inline void GP_FillRect(GP_Pixmap *pixmap, GP_Coord x0, GP_Coord y0,
                                GP_Coord x1, GP_Coord y1, GP_Pixel pixel)
 {
-	GP_FillRectXYXY(context, x0, y0, x1, y1, pixel);
+	GP_FillRectXYXY(pixmap, x0, y0, x1, y1, pixel);
 }
 
-static inline void GP_FillRect_Raw(GP_Context *context,
+static inline void GP_FillRect_Raw(GP_Pixmap *pixmap,
                                    GP_Coord x0, GP_Coord y0,
                                    GP_Coord x1, GP_Coord y1, GP_Pixel pixel)
 {
-	GP_FillRectXYXY_Raw(context, x0, y0, x1, y1, pixel);
+	GP_FillRectXYXY_Raw(pixmap, x0, y0, x1, y1, pixel);
 }
 
 #endif /* GP_RECT_H */

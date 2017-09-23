@@ -24,7 +24,7 @@
 #include <errno.h>
 #include <sys/stat.h>
 
-#include <core/GP_Context.h>
+#include <core/GP_Pixmap.h>
 #include <gfx/GP_CircleSeg.h>
 
 #include "tst_test.h"
@@ -160,13 +160,13 @@ static const char circle_r_2_s_1_4_11x11[] = {
 static int test_circle(const char *pattern, GP_Size w, GP_Size h,
                        GP_Coord x, GP_Coord y, const int r, uint8_t seg_flag)
 {
-	GP_Context *c;
+	GP_Pixmap *c;
 	int err;
 
-	c = GP_ContextAlloc(w, h, GP_PIXEL_G8);
+	c = GP_PixmapAlloc(w, h, GP_PIXEL_G8);
 
 	if (c == NULL) {
-		tst_err("Failed to allocate context");
+		tst_err("Failed to allocate pixmap");
 		return TST_UNTESTED;
 	}
 

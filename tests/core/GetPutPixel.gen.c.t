@@ -7,12 +7,12 @@
 
 #include <stdio.h>
 
-#include <core/GP_Context.h>
+#include <core/GP_Pixmap.h>
 #include <core/GP_GetPutPixel.h>
 
 #include "tst_test.h"
 
-static void fill_context(GP_Context *c, GP_Pixel p)
+static void fill_pixmap(GP_Pixmap *c, GP_Pixel p)
 {
 	GP_Coord x, y;
 
@@ -21,7 +21,7 @@ static void fill_context(GP_Context *c, GP_Pixel p)
 			GP_PutPixel(c, x, y, p);
 }
 
-static int check_filled(GP_Context *c)
+static int check_filled(GP_Pixmap *c)
 {
 	GP_Coord x, y;
 	GP_Pixel p;
@@ -38,9 +38,9 @@ static int check_filled(GP_Context *c)
 	return 0;
 }
 
-static int try_pattern(GP_Context *c, GP_Pixel p)
+static int try_pattern(GP_Pixmap *c, GP_Pixel p)
 {
-	fill_context(c, p);
+	fill_pixmap(c, p);
 
 	tst_msg("Filling pattern 0x%x", p);
 
@@ -54,13 +54,13 @@ static int try_pattern(GP_Context *c, GP_Pixel p)
 @     if not pt.is_unknown():
 static int GetPutPixel_{{ pt.name }}(void)
 {
-	GP_Context *c;
+	GP_Pixmap *c;
 	int err = 0;
 
-	c = GP_ContextAlloc(100, 100, GP_PIXEL_{{ pt.name }});
+	c = GP_PixmapAlloc(100, 100, GP_PIXEL_{{ pt.name }});
 
 	if (c == NULL) {
-		tst_msg("GP_ContextAlloc() failed");
+		tst_msg("GP_PixmapAlloc() failed");
 		return TST_UNTESTED;
 	}
 
@@ -76,7 +76,7 @@ static int GetPutPixel_{{ pt.name }}(void)
 	if (try_pattern(c, 0xf0f0f0f0 & {{ 2 ** pt.pixelsize.size - 1}}U))
 		err++;
 
-	GP_ContextFree(c);
+	GP_PixmapFree(c);
 
 	if (err)
 		return TST_FAILED;
@@ -89,16 +89,16 @@ static int GetPutPixel_{{ pt.name }}(void)
 @     if not pt.is_unknown():
 static int GetPutPixel_Clipping_{{ pt.name }}(void)
 {
-	GP_Context *c;
+	GP_Pixmap *c;
 
-	c = GP_ContextAlloc(100, 100, GP_PIXEL_{{ pt.name }});
+	c = GP_PixmapAlloc(100, 100, GP_PIXEL_{{ pt.name }});
 
 	if (c == NULL) {
-		tst_msg("GP_ContextAlloc() failed");
+		tst_msg("GP_PixmapAlloc() failed");
 		return TST_UNTESTED;
 	}
 
-	fill_context(c, 0xffffffff);
+	fill_pixmap(c, 0xffffffff);
 
 	GP_Coord x, y;
 	int err = 0;
@@ -120,7 +120,7 @@ static int GetPutPixel_Clipping_{{ pt.name }}(void)
 		}
 	}
 
-	GP_ContextFree(c);
+	GP_PixmapFree(c);
 
 	if (err)
 		return TST_FAILED;

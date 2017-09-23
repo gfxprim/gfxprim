@@ -22,7 +22,7 @@
 
 #include "histogram.h"
 
-void histogram_to_png(const GP_Context *src, const char *filename)
+void histogram_to_png(const GP_Pixmap *src, const char *filename)
 {
 	GP_Histogram *hist;
 
@@ -36,7 +36,7 @@ void histogram_to_png(const GP_Context *src, const char *filename)
 
 	unsigned int i, j;
 
-	GP_Context *res = GP_ContextAlloc(257*4, 256, GP_PIXEL_RGB888);
+	GP_Pixmap *res = GP_PixmapAlloc(257*4, 256, GP_PIXEL_RGB888);
 
 	GP_Fill(res, 0xffffff);
 
@@ -76,6 +76,6 @@ void histogram_to_png(const GP_Context *src, const char *filename)
 
 	GP_SavePNG(res, filename, NULL);
 
-	GP_ContextFree(res);
+	GP_PixmapFree(res);
 	GP_HistogramFree(hist);
 }

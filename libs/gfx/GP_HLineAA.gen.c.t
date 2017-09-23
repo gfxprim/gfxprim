@@ -22,7 +22,7 @@
 
 /* Anti Aliased Horizontal Line */
 
-#include "core/GP_Context.h"
+#include "core/GP_Pixmap.h"
 #include "core/GP_MixPixels.h"
 #include "core/GP_FixedPoint.h"
 #include "core/GP_GammaCorrection.h"
@@ -39,7 +39,7 @@
 #define TO_X_S(x) GP_FP_FLOOR_TO_INT((x) + GP_FP_1_2)
 #define TO_X_E(x) GP_FP_CEIL_TO_INT((x) - GP_FP_1_2)
 
-void GP_HLineAA_Raw(GP_Context *context, GP_Coord x0, GP_Coord x1,
+void GP_HLineAA_Raw(GP_Pixmap *pixmap, GP_Coord x0, GP_Coord x1,
                     GP_Coord y, GP_Pixel pixel)
 {
 	/* Nothing to draw */
@@ -62,19 +62,19 @@ void GP_HLineAA_Raw(GP_Context *context, GP_Coord x0, GP_Coord x1,
 	w = GP_FP_RFRAC(x0 + GP_FP_1_2);
 
 	perc = FP_TO_PERC(GP_FP_MUL(GP_FP_RFRAC(y), w));
-	GP_MixPixel_Raw_Clipped(context, int_x0, int_y, pixel, perc);
+	GP_MixPixel_Raw_Clipped(pixmap, int_x0, int_y, pixel, perc);
 
 	perc = FP_TO_PERC(GP_FP_MUL(GP_FP_FRAC(y), w));
-	GP_MixPixel_Raw_Clipped(context, int_x0, int_y+1, pixel, perc);
+	GP_MixPixel_Raw_Clipped(pixmap, int_x0, int_y+1, pixel, perc);
 
 	if (int_x0 != int_x1) {
 		w = GP_FP_FRAC(x1 + GP_FP_1_2);
 
 		perc = FP_TO_PERC(GP_FP_MUL(GP_FP_RFRAC(y), w));
-		GP_MixPixel_Raw_Clipped(context, int_x1, int_y, pixel, perc);
+		GP_MixPixel_Raw_Clipped(pixmap, int_x1, int_y, pixel, perc);
 
 		perc = FP_TO_PERC(GP_FP_MUL(GP_FP_FRAC(y), w));
-		GP_MixPixel_Raw_Clipped(context, int_x1, int_y+1, pixel, perc);
+		GP_MixPixel_Raw_Clipped(pixmap, int_x1, int_y+1, pixel, perc);
 	}
 
 	GP_Coord x;
@@ -84,7 +84,7 @@ void GP_HLineAA_Raw(GP_Context *context, GP_Coord x0, GP_Coord x1,
 	uint8_t lp = FP_TO_PERC(GP_FP_FRAC(y));
 
 	for (x = int_x0 + 1; x < int_x1; x++) {
-		GP_MixPixel_Raw_Clipped(context, x, int_y, pixel, up);
-		GP_MixPixel_Raw_Clipped(context, x, int_y+1, pixel, lp);
+		GP_MixPixel_Raw_Clipped(pixmap, x, int_y, pixel, up);
+		GP_MixPixel_Raw_Clipped(pixmap, x, int_y+1, pixel, lp);
 	}
 }

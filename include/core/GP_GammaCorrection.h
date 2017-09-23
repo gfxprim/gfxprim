@@ -61,7 +61,7 @@
 
 #include <stdint.h>
 
-#include "GP_Context.h"
+#include "GP_Pixmap.h"
 
 #include "GP_GammaCorrection.gen.h"
 

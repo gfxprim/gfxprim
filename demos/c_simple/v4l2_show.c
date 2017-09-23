@@ -97,7 +97,7 @@ int main(int argc, char *argv[])
 
 	for (;;) {
 		if (GP_GrabberPoll(grabber) > 0) {
-			GP_Context *res, *img = grabber->frame;
+			GP_Pixmap *res, *img = grabber->frame;
 
 			switch (mode) {
 			case 0:
@@ -113,14 +113,14 @@ int main(int argc, char *argv[])
 			break;
 			}
 
-			unsigned int c_x = (backend->context->w - res->w) / 2;
-			unsigned int c_y = (backend->context->h - res->h) / 2;
+			unsigned int c_x = (backend->pixmap->w - res->w) / 2;
+			unsigned int c_y = (backend->pixmap->h - res->h) / 2;
 
-			GP_Blit_Clipped(res, 0, 0, res->w, res->h, backend->context, c_x, c_y);
+			GP_Blit_Clipped(res, 0, 0, res->w, res->h, backend->pixmap, c_x, c_y);
 			GP_BackendFlip(backend);
 
 			if (mode)
-				GP_ContextFree(res);
+				GP_PixmapFree(res);
 		}
 
 		usleep(1000);
@@ -157,7 +157,7 @@ int main(int argc, char *argv[])
 			case GP_EV_SYS:
 				if (ev.code == GP_EV_SYS_RESIZE) {
 					GP_BackendResizeAck(backend);
-					GP_Fill(backend->context, 0);
+					GP_Fill(backend->pixmap, 0);
 				}
 			break;
 			}

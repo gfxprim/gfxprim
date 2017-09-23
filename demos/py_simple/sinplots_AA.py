@@ -34,7 +34,7 @@ def main():
   print(bk)
   print("Modify source for parameters,")
   print("Kill to terminate ;-)")
-  black = bk.context.RGBToPixel(0, 0, 0)
+  black = bk.pixmap.RGBToPixel(0, 0, 0)
 
   ps = [plotter() for i in range(N)]
   t = random.uniform(0.0, 10.0 * W)
@@ -46,13 +46,13 @@ def main():
       if AA:
         x = int(x * 0x100)
         y = int(y * 0x100)
-        bk.context.gfx.VLineAA(x + 0x100, y - 0x200, y + 0x200, black)
-        bk.context.gfx.PutPixelAA(x, y, bk.context.RGBToPixel(int(r), int(g), int(b)))
+        bk.pixmap.gfx.VLineAA(x + 0x100, y - 0x200, y + 0x200, black)
+        bk.pixmap.gfx.PutPixelAA(x, y, bk.pixmap.RGBToPixel(int(r), int(g), int(b)))
       else:
         x = int(x)
         y = int(y)
-        bk.context.gfx.VLine(x + 1, y - 2, y + 2, black)
-        bk.context.core.PutPixel(x, y, bk.context.RGBToPixel(int(r), int(g), int(b)))
+        bk.pixmap.gfx.VLine(x + 1, y - 2, y + 2, black)
+        bk.pixmap.core.PutPixel(x, y, bk.pixmap.RGBToPixel(int(r), int(g), int(b)))
     bk.Flip()
 
 if __name__ == '__main__':

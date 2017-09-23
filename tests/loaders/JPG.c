@@ -24,7 +24,7 @@
 #include <errno.h>
 #include <sys/stat.h>
 
-#include <core/GP_Context.h>
+#include <core/GP_Pixmap.h>
 #include <core/GP_GetPutPixel.h>
 #include <loaders/GP_Loaders.h>
 
@@ -32,7 +32,7 @@
 
 static int test_load_JPG(const char *path)
 {
-	GP_Context *img;
+	GP_Pixmap *img;
 
 	errno = 0;
 
@@ -53,41 +53,41 @@ static int test_load_JPG(const char *path)
 	 * TODO: check correct data.
 	 */
 
-	GP_ContextFree(img);
+	GP_PixmapFree(img);
 
 	return TST_SUCCESS;
 }
 
 static int test_save_JPG(GP_PixelType pixel_type)
 {
-	GP_Context *ctx;
+	GP_Pixmap *pixmap;
 	int ret;
 
-	ctx = GP_ContextAlloc(100, 100, pixel_type);
+	pixmap = GP_PixmapAlloc(100, 100, pixel_type);
 
-	if (ctx == NULL) {
-		tst_msg("Failed to allocate context");
+	if (pixmap == NULL) {
+		tst_msg("Failed to allocate pixmap");
 		return TST_UNTESTED;
 	}
 
 	errno = 0;
 
-	ret = GP_SaveJPG(ctx, "/dev/null", NULL);
+	ret = GP_SaveJPG(pixmap, "/dev/null", NULL);
 
 	if (ret == 0) {
 		tst_msg("Saved successfully");
-		GP_ContextFree(ctx);
+		GP_PixmapFree(pixmap);
 		return TST_SUCCESS;
 	}
 
 	switch (errno) {
 	case ENOSYS:
 		tst_msg("Not Implemented");
-		GP_ContextFree(ctx);
+		GP_PixmapFree(pixmap);
 		return TST_SKIPPED;
 	default:
 		tst_msg("Failed and errno is not ENOSYS (%i)", errno);
-		GP_ContextFree(ctx);
+		GP_PixmapFree(pixmap);
 		return TST_FAILED;
 	}
 }

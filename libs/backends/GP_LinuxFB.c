@@ -40,7 +40,7 @@
 #include "backends/GP_LinuxFB.h"
 
 struct fb_priv {
-	GP_Context context;
+	GP_Pixmap pixmap;
 	uint32_t bsize;
 	void *fb_mem;
 
@@ -246,7 +246,7 @@ static void fb_exit(GP_Backend *self)
 	struct fb_priv *fb = GP_BACKEND_PRIV(self);
 
 	if (fb->flags & GP_FB_SHADOW)
-		free(fb->context.pixels);
+		free(fb->pixmap.pixels);
 
 	/* unmap framebuffer */
 	munmap(fb->fb_mem, fb->bsize);
@@ -266,7 +266,7 @@ static void fb_flip_shadow(GP_Backend *self)
 
 	GP_DEBUG(2, "Flipping buffer");
 
-	memcpy(fb->fb_mem, fb->context.pixels, fb->bsize);
+	memcpy(fb->fb_mem, fb->pixmap.pixels, fb->bsize);
 }
 
 static void fb_update_rect_shadow(GP_Backend *self, GP_Coord x0, GP_Coord y0,
@@ -276,13 +276,13 @@ static void fb_update_rect_shadow(GP_Backend *self, GP_Coord x0, GP_Coord y0,
 
 	GP_DEBUG(2, "Flipping buffer");
 
-	size_t size = ((x1 - x0) * fb->context.bpp) / 8;
+	size_t size = ((x1 - x0) * fb->pixmap.bpp) / 8;
 
 	for (;y0 <= y1; y0++) {
-		void *src = GP_PIXEL_ADDR(&fb->context, x0, y0);
+		void *src = GP_PIXEL_ADDR(&fb->pixmap, x0, y0);
 		void *dst = (char*)fb->fb_mem +
-                            y0 * fb->context.bytes_per_row +
-                            (x0 * fb->context.bpp)/8;
+                            y0 * fb->pixmap.bytes_per_row +
+                            (x0 * fb->pixmap.bpp)/8;
 		memcpy(dst, src, size);
 	}
 }
@@ -357,9 +357,9 @@ GP_Backend *GP_BackendLinuxFBInit(const char *path, int flags)
 	}
 
 	if (flags & GP_FB_SHADOW) {
-		fb->context.pixels = malloc(fscri.smem_len);
+		fb->pixmap.pixels = malloc(fscri.smem_len);
 
-		if (!fb->context.pixels) {
+		if (!fb->pixmap.pixels) {
 			GP_DEBUG(1, "Malloc failed :(");
 			goto err3;
 		}
@@ -379,25 +379,25 @@ GP_Backend *GP_BackendLinuxFBInit(const char *path, int flags)
 	fb->flags = flags;
 
 	if (!(flags & GP_FB_SHADOW))
-		fb->context.pixels = fb->fb_mem;
+		fb->pixmap.pixels = fb->fb_mem;
 
-	fb->context.w = vscri.xres;
-	fb->context.h = vscri.yres;
+	fb->pixmap.w = vscri.xres;
+	fb->pixmap.h = vscri.yres;
 
-	fb->context.axes_swap = 0;
-	fb->context.x_swap    = 0;
-	fb->context.y_swap    = 0;
+	fb->pixmap.axes_swap = 0;
+	fb->pixmap.x_swap    = 0;
+	fb->pixmap.y_swap    = 0;
 
-	fb->context.bpp = vscri.bits_per_pixel;
-	fb->context.bytes_per_row  = fscri.line_length;
-	fb->context.pixel_type = pixel_type;
+	fb->pixmap.bpp = vscri.bits_per_pixel;
+	fb->pixmap.bytes_per_row  = fscri.line_length;
+	fb->pixmap.pixel_type = pixel_type;
 
 	int shadow = flags & GP_FB_SHADOW;
 	int kbd = flags & GP_FB_INPUT_KBD;
 
 	/* update API */
 	backend->name          = "Linux FB";
-	backend->context       = &fb->context;
+	backend->pixmap       = &fb->pixmap;
 	backend->Flip          = shadow ? fb_flip_shadow : NULL;
 	backend->UpdateRect    = shadow ? fb_update_rect_shadow : NULL;
 	backend->Exit          = fb_exit;
@@ -413,7 +413,7 @@ GP_Backend *GP_BackendLinuxFBInit(const char *path, int flags)
 	return backend;
 err4:
 	if (flags & GP_FB_SHADOW)
-		free(fb->context.pixels);
+		free(fb->pixmap.pixels);
 err3:
 	close(fd);
 err2:

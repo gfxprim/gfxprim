@@ -24,7 +24,7 @@
 #define __BOGOMAN_RENDER_H__
 
 struct bogoman_map;
-struct GP_Context;
+struct GP_Pixmap;
 
 struct bogoman_render {
 	/* both in map elements */
@@ -34,8 +34,8 @@ struct bogoman_render {
 	/* current map */
 	struct bogoman_map *map;
 
-	/* context to be used for rendering */
-	struct GP_Context *ctx;
+	/* pixmap to be used for rendering */
+	struct GP_Pixmap *pixmap;
 
 	/* if not NULL is used to update screen */
 	struct GP_Backend *backend;

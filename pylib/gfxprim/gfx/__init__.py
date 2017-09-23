@@ -1,7 +1,7 @@
 """
-Module extending the Context class with .gfx submodule and its drawing functions.
+Module extending the Pixmap class with .gfx submodule and its drawing functions.
 
-Use as in "import gfxprim.gfx; context_foo.gfx.Line(...)"
+Use as in "import gfxprim.gfx; pixmap_foo.gfx.Line(...)"
 """
 
 # Import the SWIG wrapper
@@ -11,18 +11,18 @@ from . import c_gfx
 from . import C
 
 def _init(module):
-  "Extend Context with gfx submodule"
+  "Extend Pixmap with gfx submodule"
 
   from ..utils import extend, add_swig_getmethod, add_swig_setmethod
-  from ..core import Context as _context
+  from ..core import Pixmap as _pixmap
 
-  # New Context submodule
+  # New Pixmap submodule
   class GfxSubmodule(object):
     def __init__(self, ctx):
       self.ctx = ctx
       self.C = C
 
-  _context._submodules['gfx'] = GfxSubmodule
+  _pixmap._submodules['gfx'] = GfxSubmodule
 
   # Imports from the SWIG module
   from ..utils import import_members, extend_submodule
@@ -62,7 +62,7 @@ def _init(module):
   @extend(GfxSubmodule)
   def Polygon(self, points, pixel):
     """
-    Polygon(context, coordinates, pixel)
+    Polygon(pixmap, coordinates, pixel)
     
     Draw a polygon with color `pixel`.
     `coordinates` is either an iterable of `int` coordinates `(x0, y0, x1, y1, ...)`
@@ -73,7 +73,7 @@ def _init(module):
   @extend(GfxSubmodule)
   def FillPolygon(self, points, pixel):
     """
-    FillPolygon(context, coordinates, pixel)
+    FillPolygon(pixmap, coordinates, pixel)
     
     Draw a filled polygon with color `pixel`.
     `coordinates` is either an iterable of `int` coordinates `(x0, y0, x1, y1, ...)`

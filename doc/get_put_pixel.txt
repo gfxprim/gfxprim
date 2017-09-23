@@ -7,17 +7,17 @@ GetPixel and PutPixel
 /* or */
 #include <core/GP_GetPutPixel.h>
 
-GP_Pixel GP_GetPixel(const GP_Context *context, GP_Coord x, GP_Coord y);
+GP_Pixel GP_GetPixel(const GP_Pixmap *pixmap, GP_Coord x, GP_Coord y);
 
-void GP_PutPixel(GP_Context *context, GP_Coord x, GP_Coord y, GP_Pixel p);
+void GP_PutPixel(GP_Pixmap *pixmap, GP_Coord x, GP_Coord y, GP_Pixel p);
 --------------------------------------------------------------------------------
 
 Gets, puts a pixel value. GP_Pixel is a number which holds a pixel value.
 
-This functions are clipped, GetPixel outside of the context returns zero,
-PutPixel outside the context is no-op.
+This functions are clipped, GetPixel outside of the pixmap returns zero,
+PutPixel outside the pixmap is no-op.
 
-This functions honour link:context.html[context rotation flags].
+This functions honour link:pixmap.html[pixmap rotation flags].
 
 Generally these function are safe to use but rather slow in innner cycles.
 
@@ -27,23 +27,23 @@ Generally these function are safe to use but rather slow in innner cycles.
 /* or */
 #include <core/GP_GetPutPixel.h>
 
-GP_Pixel GP_GetPixel_Raw(const GP_Context *context, GP_Coord x, GP_Coord y);
+GP_Pixel GP_GetPixel_Raw(const GP_Pixmap *pixmap, GP_Coord x, GP_Coord y);
 
-void GP_PutPixel_Raw(GP_Context *context, GP_Coord x, GP_Coord y, GP_Pixel p);
+void GP_PutPixel_Raw(GP_Pixmap *pixmap, GP_Coord x, GP_Coord y, GP_Pixel p);
 
 /*
  * Substitute {{ bpp }} for specific bits per pixel (1BPP_LE, 24BPP, ...)
  *
  * These macros are generated to core/GP_GetPutPixel.gen.h
  */
-GP_Pixel GP_GetPixel_Raw_{{ bpp }}(const GP_Context *c, int x, int y);
+GP_Pixel GP_GetPixel_Raw_{{ bpp }}(const GP_Pixmap *c, int x, int y);
 
-void GP_PutPixel_Raw_{{ bpp }}(GP_Context *c, GP_Coord x, GP_Coord y,
+void GP_PutPixel_Raw_{{ bpp }}(GP_Pixmap *c, GP_Coord x, GP_Coord y,
                                GP_Pixel p);
 --------------------------------------------------------------------------------
 
-These functions are generally fast, but does not honour context rotation flags
-and do not check that coordinates are inside of the context.
+These functions are generally fast, but does not honour pixmap rotation flags
+and do not check that coordinates are inside of the pixmap.
 
 They are intended as basic building blocks for other GFX primitives, filters,
 etc.

@@ -22,7 +22,7 @@
 
 #include <errno.h>
 
-#include "core/GP_Context.h"
+#include "core/GP_Pixmap.h"
 #include "core/GP_GetPutPixel.h"
 #include "core/GP_TempAlloc.h"
 #include "core/GP_Clamp.h"
@@ -77,10 +77,10 @@ static inline unsigned int get_weight(GP_MedianWeights *weights,
 	return weights->weights[y * weights->w + x];
 }
 
-static int GP_FilterWeightedMedian_Raw(const GP_Context *src,
+static int GP_FilterWeightedMedian_Raw(const GP_Pixmap *src,
                                        GP_Coord x_src, GP_Coord y_src,
                                        GP_Size w_src, GP_Size h_src,
-                                       GP_Context *dst,
+                                       GP_Pixmap *dst,
                                        GP_Coord x_dst, GP_Coord y_dst,
                                        GP_MedianWeights *weights,
 				       GP_ProgressCallback *callback)
@@ -179,10 +179,10 @@ static int GP_FilterWeightedMedian_Raw(const GP_Context *src,
 	return 0;
 }
 
-int GP_FilterWeightedMedianEx(const GP_Context *src,
+int GP_FilterWeightedMedianEx(const GP_Pixmap *src,
                               GP_Coord x_src, GP_Coord y_src,
                               GP_Size w_src, GP_Size h_src,
-                              GP_Context *dst,
+                              GP_Pixmap *dst,
                               GP_Coord x_dst, GP_Coord y_dst,
                               GP_MedianWeights *weights,
                               GP_ProgressCallback *callback)
@@ -199,7 +199,7 @@ int GP_FilterWeightedMedianEx(const GP_Context *src,
 	                                   dst, x_dst, y_dst, weights, callback);
 }
 
-GP_Context *GP_FilterWeightedMedianExAlloc(const GP_Context *src,
+GP_Pixmap *GP_FilterWeightedMedianExAlloc(const GP_Pixmap *src,
                                            GP_Coord x_src, GP_Coord y_src,
                                            GP_Size w_src, GP_Size h_src,
                                            GP_MedianWeights *weights,
@@ -209,7 +209,7 @@ GP_Context *GP_FilterWeightedMedianExAlloc(const GP_Context *src,
 
 	//GP_CHECK(xmed >= 0 && ymed >= 0);
 
-	GP_Context *dst = GP_ContextAlloc(w_src, h_src, src->pixel_type);
+	GP_Pixmap *dst = GP_PixmapAlloc(w_src, h_src, src->pixel_type);
 
 	if (dst == NULL)
 		return NULL;
@@ -218,7 +218,7 @@ GP_Context *GP_FilterWeightedMedianExAlloc(const GP_Context *src,
 	                                  dst, 0, 0, weights, callback);
 
 	if (ret) {
-		GP_ContextFree(dst);
+		GP_PixmapFree(dst);
 		return NULL;
 	}
 

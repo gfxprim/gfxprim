@@ -30,7 +30,7 @@
 #ifndef LOADERS_GP_CONTAINER_H
 #define LOADERS_GP_CONTAINER_H
 
-#include "core/GP_Context.h"
+#include "core/GP_Pixmap.h"
 #include "core/GP_ProgressCallback.h"
 
 #include "loaders/GP_DataStorage.h"
@@ -48,13 +48,13 @@ struct GP_ContainerOps {
 	 * Loads next image from container, use the inline function defined
 	 * below.
 	 */
-	GP_Context *(*LoadNext)(struct GP_Container *self,
+	GP_Pixmap *(*LoadNext)(struct GP_Container *self,
 	                        GP_ProgressCallback *callback);
 
 	/*
 	 * Just loads current image, does not advance to the next image.
 	 */
-	int (*LoadEx)(struct GP_Container *self, GP_Context **img,
+	int (*LoadEx)(struct GP_Container *self, GP_Pixmap **img,
 	              GP_DataStorage *storage, GP_ProgressCallback *callback);
 
 	/*
@@ -102,7 +102,7 @@ typedef struct GP_Container {
 /*
  * Behaves just like GP_LoadImage, but takes pointer to opened container instead.
  */
-static inline GP_Context *GP_ContainerLoadNext(GP_Container *self,
+static inline GP_Pixmap *GP_ContainerLoadNext(GP_Container *self,
                                                GP_ProgressCallback *callback)
 {
 	return self->ops->LoadNext(self, callback);
@@ -111,13 +111,13 @@ static inline GP_Context *GP_ContainerLoadNext(GP_Container *self,
 /*
  * Just loads current image, does not advance to the next one.
  */
-int GP_ContainerLoadEx(GP_Container *self, GP_Context **img,
+int GP_ContainerLoadEx(GP_Container *self, GP_Pixmap **img,
                        GP_DataStorage *storage, GP_ProgressCallback *callback);
 
-static inline GP_Context *GP_ContainerLoad(GP_Container *self,
+static inline GP_Pixmap *GP_ContainerLoad(GP_Container *self,
                                            GP_ProgressCallback *callback)
 {
-	GP_Context *ret = NULL;
+	GP_Pixmap *ret = NULL;
 
 	GP_ContainerLoadEx(self, &ret, NULL, callback);
 

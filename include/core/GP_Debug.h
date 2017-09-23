@@ -25,7 +25,7 @@
    Debug message layer.
 
    Many places of the library uses debug messages to report warnings, bugs, or
-   generally important events (i.e. context has been allocated, filter function
+   generally important events (i.e. pixmap has been allocated, filter function
    has been called).
 
    Debug messages are printed into the stderr and could be redirected to custom

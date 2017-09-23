@@ -23,29 +23,29 @@
  */
 
 @ for ps in pixelsizes:
-void GP_Line_Raw_{{ ps.suffix }}(GP_Context *context, int x0, int y0,
+void GP_Line_Raw_{{ ps.suffix }}(GP_Pixmap *pixmap, int x0, int y0,
 	int x1, int y1, GP_Pixel pixval)
 {
-	if (!GP_LineClip(&x0, &y0, &x1, &y1, context->w - 1, context->h - 1))
+	if (!GP_LineClip(&x0, &y0, &x1, &y1, pixmap->w - 1, pixmap->h - 1))
 		return;
 
-	GP_ASSERT(x0 >= 0 && x0 <= (int) context->w-1);
-	GP_ASSERT(x1 >= 0 && x1 <= (int) context->w-1);
-	GP_ASSERT(y0 >= 0 && y0 <= (int) context->h-1);
-	GP_ASSERT(y1 >= 0 && y1 <= (int) context->h-1);
+	GP_ASSERT(x0 >= 0 && x0 <= (int) pixmap->w-1);
+	GP_ASSERT(x1 >= 0 && x1 <= (int) pixmap->w-1);
+	GP_ASSERT(y0 >= 0 && y0 <= (int) pixmap->h-1);
+	GP_ASSERT(y1 >= 0 && y1 <= (int) pixmap->h-1);
 
 	/* special cases: vertical line, horizontal line, single point */
 	if (x0 == x1) {
 		if (y0 == y1) {
-			GP_PutPixel_Raw_Clipped_{{ ps.suffix }}(context,
+			GP_PutPixel_Raw_Clipped_{{ ps.suffix }}(pixmap,
 					x0, y0, pixval);
 			return;
 		}
-		GP_VLine_Raw(context, x0, y0, y1, pixval);
+		GP_VLine_Raw(pixmap, x0, y0, y1, pixval);
 		return;
 	}
 	if (y0 == y1) {
-		GP_HLine_Raw(context, x0, x1, y0, pixval);
+		GP_HLine_Raw(pixmap, x0, x1, y0, pixval);
 		return;
 	}
 
@@ -79,10 +79,10 @@ void GP_Line_Raw_{{ ps.suffix }}(GP_Context *context, int x0, int y0,
 	for (x = x0; x <= x1; x++) {
 
 		if (steep)
-			GP_PutPixel_Raw_{{ ps.suffix }}(context, y, x,
+			GP_PutPixel_Raw_{{ ps.suffix }}(pixmap, y, x,
 								pixval);
 		else
-			GP_PutPixel_Raw_{{ ps.suffix }}(context, x, y,
+			GP_PutPixel_Raw_{{ ps.suffix }}(pixmap, x, y,
 								pixval);
 
 		error -= deltay;
@@ -95,22 +95,22 @@ void GP_Line_Raw_{{ ps.suffix }}(GP_Context *context, int x0, int y0,
 
 @ end
 
-void GP_Line_Raw(GP_Context *context, GP_Coord x0, GP_Coord y0,
+void GP_Line_Raw(GP_Pixmap *pixmap, GP_Coord x0, GP_Coord y0,
                  GP_Coord x1, GP_Coord y1, GP_Pixel pixel)
 {
-	GP_CHECK_CONTEXT(context);
+	GP_CHECK_PIXMAP(pixmap);
 
-	GP_FN_PER_BPP_CONTEXT(GP_Line_Raw, context, context, x0, y0, x1, y1,
+	GP_FN_PER_BPP_PIXMAP(GP_Line_Raw, pixmap, pixmap, x0, y0, x1, y1,
 	                      pixel);
 }
 
-void GP_Line(GP_Context *context, GP_Coord x0, GP_Coord y0,
+void GP_Line(GP_Pixmap *pixmap, GP_Coord x0, GP_Coord y0,
              GP_Coord x1, GP_Coord y1, GP_Pixel pixel)
 {
-	GP_CHECK_CONTEXT(context);
+	GP_CHECK_PIXMAP(pixmap);
 
-	GP_TRANSFORM_POINT(context, x0, y0);
-	GP_TRANSFORM_POINT(context, x1, y1);
+	GP_TRANSFORM_POINT(pixmap, x0, y0);
+	GP_TRANSFORM_POINT(pixmap, x1, y1);
 
-	GP_Line_Raw(context, x0, y0, x1, y1, pixel);
+	GP_Line_Raw(pixmap, x0, y0, x1, y1, pixel);
 }

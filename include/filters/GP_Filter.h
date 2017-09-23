@@ -29,7 +29,7 @@
 #ifndef FILTERS_GP_FILTER_H
 #define FILTERS_GP_FILTER_H
 
-#include "core/GP_Context.h"
+#include "core/GP_Pixmap.h"
 #include "core/GP_ProgressCallback.h"
 
 #endif /* FILTERS_GP_FILTER_H */

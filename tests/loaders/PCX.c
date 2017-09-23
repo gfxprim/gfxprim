@@ -24,7 +24,7 @@
 #include <errno.h>
 #include <sys/stat.h>
 
-#include <core/GP_Context.h>
+#include <core/GP_Pixmap.h>
 #include <core/GP_GetPutPixel.h>
 #include <loaders/GP_PCX.h>
 
@@ -39,7 +39,7 @@ struct testcase {
 
 static int test_load_PCX(struct testcase *test)
 {
-	GP_Context *img;
+	GP_Pixmap *img;
 
 	errno = 0;
 
@@ -59,7 +59,7 @@ static int test_load_PCX(struct testcase *test)
 	if (img->w != test->w || img->h != test->h) {
 		tst_msg("Wrong size have %ux%u expected %ux%u",
 		        img->w, img->h, test->w, test->h);
-		GP_ContextFree(img);
+		GP_PixmapFree(img);
 		return TST_FAILED;
 	}
 
@@ -67,7 +67,7 @@ static int test_load_PCX(struct testcase *test)
 		tst_msg("Wrong pixel type have %s expected %s",
 		        GP_PixelTypeName(img->pixel_type),
 		        GP_PixelTypeName(test->pixel_type));
-		GP_ContextFree(img);
+		GP_PixmapFree(img);
 		return TST_FAILED;
 	}
 
@@ -87,9 +87,9 @@ static int test_load_PCX(struct testcase *test)
 	}
 
 	if (!fail)
-		tst_msg("Context pixels are correct");
+		tst_msg("Pixmap pixels are correct");
 
-	GP_ContextFree(img);
+	GP_PixmapFree(img);
 
 	if (fail)
 		return TST_FAILED;

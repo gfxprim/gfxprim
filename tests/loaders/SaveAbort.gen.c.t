@@ -1,7 +1,7 @@
 @ include source.t
 @ include savers.t
 /*
- * Iterate over all pixel types, try to save context but abort it from callback.
+ * Iterate over all pixel types, try to save pixmap but abort it from callback.
  *
  * Copyright (C) 2009-2014 Cyril Hrubis <metan@ucw.cz>
  */
@@ -10,12 +10,12 @@
 #include <errno.h>
 #include <stdlib.h>
 
-#include <core/GP_Context.h>
+#include <core/GP_Pixmap.h>
 #include <loaders/GP_Loaders.h>
 
 #include "tst_test.h"
 
-typedef int (*Save)(const GP_Context *src, const char *path, GP_ProgressCallback *callback);
+typedef int (*Save)(const GP_Pixmap *src, const char *path, GP_ProgressCallback *callback);
 
 static int progress_callback(GP_ProgressCallback *self)
 {
@@ -25,11 +25,11 @@ static int progress_callback(GP_ProgressCallback *self)
 
 static int test(Save Saver, GP_PixelType pixel_type)
 {
-	GP_Context *src;
+	GP_Pixmap *src;
 	GP_ProgressCallback callback ={.callback = progress_callback};
 	int ret = TST_SUCCESS;
 
-	src = GP_ContextAlloc(100, 100, pixel_type);
+	src = GP_PixmapAlloc(100, 100, pixel_type);
 
 	if (!src) {
 		tst_msg("Malloc failed");
@@ -68,7 +68,7 @@ static int test(Save Saver, GP_PixelType pixel_type)
 	}
 
 err:
-	GP_ContextFree(src);
+	GP_PixmapFree(src);
 	return ret;
 }
 

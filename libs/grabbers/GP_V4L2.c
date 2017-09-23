@@ -36,7 +36,7 @@
 
 #include <stdint.h>
 
-#include "core/GP_Context.h"
+#include "core/GP_Pixmap.h"
 
 #include "core/GP_Debug.h"
 
@@ -76,7 +76,7 @@ static void v4l2_exit(struct GP_Grabber *self)
 	}
 
 	close(self->fd);
-	GP_ContextFree(self->frame);
+	GP_PixmapFree(self->frame);
 	free(self);
 }
 
@@ -329,7 +329,7 @@ struct GP_Grabber *GP_GrabberV4L2Init(const char *device,
 		goto err0;
 	}
 
-	new->frame = GP_ContextAlloc(fmt.fmt.pix.width, fmt.fmt.pix.height, GP_PIXEL_RGB888);
+	new->frame = GP_PixmapAlloc(fmt.fmt.pix.width, fmt.fmt.pix.height, GP_PIXEL_RGB888);
 
 	if (new->frame == NULL) {
 		err = ENOMEM;
@@ -411,7 +411,7 @@ err3:
 		if (priv->bufptr[i] != NULL)
 			munmap(priv->bufptr[i], priv->buf_len[i]);
 err2:
-	GP_ContextFree(new->frame);
+	GP_PixmapFree(new->frame);
 err1:
 	free(new);
 err0:

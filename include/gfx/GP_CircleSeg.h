@@ -26,7 +26,7 @@
 #ifndef GFX_GP_CIRCLE_H
 #define GFX_GP_CIRCLE_H
 
-#include "core/GP_Context.h"
+#include "core/GP_Pixmap.h"
 
 /*
  * Quadrants in cartesian space the center is set in the middle of the circle.
@@ -50,18 +50,18 @@ enum GP_CircleSegments {
 
 /* Circle Segment */
 
-void GP_CircleSeg(GP_Context *context, GP_Coord xcenter, GP_Coord ycenter,
+void GP_CircleSeg(GP_Pixmap *pixmap, GP_Coord xcenter, GP_Coord ycenter,
                   GP_Size r, uint8_t seg_flag, GP_Pixel pixel);
 
-void GP_CircleSeg_Raw(GP_Context *context, GP_Coord xcenter, GP_Coord ycenter,
+void GP_CircleSeg_Raw(GP_Pixmap *pixmap, GP_Coord xcenter, GP_Coord ycenter,
                       GP_Size r, uint8_t seg_flag, GP_Pixel pixel);
 
 /* Filled Circle Segment */
 
-void GP_FillCircleSeg(GP_Context *context, GP_Coord xcenter, GP_Coord ycenter,
+void GP_FillCircleSeg(GP_Pixmap *pixmap, GP_Coord xcenter, GP_Coord ycenter,
                       GP_Size r, uint8_t seg_flag, GP_Pixel pixel);
 
-void GP_FillCircleSeg_Raw(GP_Context *context, GP_Coord xcenter, GP_Coord ycenter,
+void GP_FillCircleSeg_Raw(GP_Pixmap *pixmap, GP_Coord xcenter, GP_Coord ycenter,
                           GP_Size r, uint8_t seg_flag, GP_Pixel pixel);
 
 #endif /* GFX_GP_CIRCLE_H */

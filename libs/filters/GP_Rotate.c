@@ -29,7 +29,7 @@
 
 #include <string.h>
 
-int GP_FilterMirrorV_Raw(const GP_Context *src, GP_Context *dst,
+int GP_FilterMirrorV_Raw(const GP_Pixmap *src, GP_Pixmap *dst,
                          GP_ProgressCallback *callback)
 {
 	uint32_t bpr = src->bytes_per_row;
@@ -72,7 +72,7 @@ int GP_FilterMirrorV_Raw(const GP_Context *src, GP_Context *dst,
 	return 0;
 }
 
-int GP_FilterMirrorV(const GP_Context *src, GP_Context *dst,
+int GP_FilterMirrorV(const GP_Pixmap *src, GP_Pixmap *dst,
                      GP_ProgressCallback *callback)
 {
 	GP_ASSERT(src->pixel_type == dst->pixel_type,
@@ -87,18 +87,18 @@ int GP_FilterMirrorV(const GP_Context *src, GP_Context *dst,
 	return 0;
 }
 
-GP_Context *GP_FilterMirrorVAlloc(const GP_Context *src,
+GP_Pixmap *GP_FilterMirrorVAlloc(const GP_Pixmap *src,
                                    GP_ProgressCallback *callback)
 {
-	GP_Context *res;
+	GP_Pixmap *res;
 
-	res = GP_ContextCopy(src, 0);
+	res = GP_PixmapCopy(src, 0);
 
 	if (res == NULL)
 		return NULL;
 
 	if (GP_FilterMirrorV_Raw(src, res, callback)) {
-		GP_ContextFree(res);
+		GP_PixmapFree(res);
 		return NULL;
 	}
 
@@ -127,7 +127,7 @@ int GP_FilterSymmetryByName(const char *symmetry)
 	return -1;
 }
 
-GP_Context *GP_FilterSymmetryAlloc(const GP_Context *src,
+GP_Pixmap *GP_FilterSymmetryAlloc(const GP_Pixmap *src,
                                     GP_FilterSymmetries symmetry,
 			            GP_ProgressCallback *callback)
 {
@@ -148,7 +148,7 @@ GP_Context *GP_FilterSymmetryAlloc(const GP_Context *src,
 	}
 }
 
-int GP_FilterSymmetry(const GP_Context *src, GP_Context *dst,
+int GP_FilterSymmetry(const GP_Pixmap *src, GP_Pixmap *dst,
                       GP_FilterSymmetries symmetry,
                       GP_ProgressCallback *callback)
 {

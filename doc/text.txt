@@ -24,16 +24,16 @@ typedef enum GP_TextAlign {
         GP_VALIGN_BELOW = 0x40          /* below the point */
 } GP_TextAlign;
 
-void GP_Text(GP_Context *context, const GP_TextStyle *style,
+void GP_Text(GP_Pixmap *pixmap, const GP_TextStyle *style,
              GP_Coord x, GP_Coord y, int align,
              GP_Pixel fg, GP_Pixel bg, const char *str);
 
 
-GP_Size GP_Print(GP_Context *context, const GP_TextStyle *style,
+GP_Size GP_Print(GP_Pixmap *pixmap, const GP_TextStyle *style,
                  GP_Coord x, GP_Coord y, int align,
                  GP_Pixel fg, GP_Pixel bg, const char *fmt, ...);
 
-GP_Size GP_VPrint(GP_Context *context, const GP_TextStyle *style,
+GP_Size GP_VPrint(GP_Pixmap *pixmap, const GP_TextStyle *style,
                   GP_Coord x, GP_Coord y, int align,
                   GP_Pixel fg, GP_Pixel bg,
                   const char *fmt, va_list va);

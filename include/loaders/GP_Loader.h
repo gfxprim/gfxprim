@@ -29,7 +29,7 @@
 #ifndef LOADERS_GP_LOADER_H
 #define LOADERS_GP_LOADER_H
 
-#include "core/GP_Context.h"
+#include "core/GP_Pixmap.h"
 #include "core/GP_ProgressCallback.h"
 
 #include "loaders/GP_IO.h"
@@ -41,9 +41,9 @@
  * The image format is matched from the file signature (first few bytes of the
  * I/O stream).
  */
-GP_Context *GP_ReadImage(GP_IO *io, GP_ProgressCallback *callback);
+GP_Pixmap *GP_ReadImage(GP_IO *io, GP_ProgressCallback *callback);
 
-int GP_ReadImageEx(GP_IO *io, GP_Context **img, GP_DataStorage *meta_data,
+int GP_ReadImageEx(GP_IO *io, GP_Pixmap **img, GP_DataStorage *meta_data,
                    GP_ProgressCallback *callback);
 
 /*
@@ -51,10 +51,10 @@ int GP_ReadImageEx(GP_IO *io, GP_Context **img, GP_DataStorage *meta_data,
  *
  * If operation fails NULL is returned and errno is filled.
  */
-GP_Context *GP_LoadImage(const char *src_path, GP_ProgressCallback *callback);
+GP_Pixmap *GP_LoadImage(const char *src_path, GP_ProgressCallback *callback);
 
 int GP_LoadImageEx(const char *src_path,
-                   GP_Context **img, GP_DataStorage *meta_data,
+                   GP_Pixmap **img, GP_DataStorage *meta_data,
                    GP_ProgressCallback *callback);
 
 /*
@@ -76,7 +76,7 @@ int GP_LoadMetaData(const char *src_path, GP_DataStorage *storage);
  * The resulting errno may also be set to any possible error from fopen(3), open(3),
  * write(3), fwrite(3), seek(3), etc..
  */
-int GP_SaveImage(const GP_Context *src, const char *dst_path,
+int GP_SaveImage(const GP_Pixmap *src, const char *dst_path,
                  GP_ProgressCallback *callback);
 
 /*
@@ -86,7 +86,7 @@ typedef struct GP_Loader {
 	/*
 	 * Reads image and/or metadata from an I/O stream.
 	 */
-	int (*Read)(GP_IO *io, GP_Context **img, GP_DataStorage *storage,
+	int (*Read)(GP_IO *io, GP_Pixmap **img, GP_DataStorage *storage,
                     GP_ProgressCallback *callback);
 
 	/*
@@ -94,7 +94,7 @@ typedef struct GP_Loader {
 	 *
 	 * Returns zero on success, non-zero on failure and errno must be set.
 	 */
-	int (*Write)(const GP_Context *src, GP_IO *io,
+	int (*Write)(const GP_Pixmap *src, GP_IO *io,
 	             GP_ProgressCallback *callback);
 
 	/*
@@ -154,9 +154,9 @@ void GP_LoaderUnregister(const GP_Loader *self);
  * Generic LoadImage for a given loader.
  *
  * The function prepares the I/O from file, calls the loader Read() method,
- * closes the I/O and returns the context.
+ * closes the I/O and returns the pixmap.
  */
-GP_Context *GP_LoaderLoadImage(const GP_Loader *self, const char *src_path,
+GP_Pixmap *GP_LoaderLoadImage(const GP_Loader *self, const char *src_path,
                                GP_ProgressCallback *callback);
 
 /*
@@ -164,7 +164,7 @@ GP_Context *GP_LoaderLoadImage(const GP_Loader *self, const char *src_path,
  *
  * The function calls the loader Read() method for a given I/O.
  */
-GP_Context *GP_LoaderReadImage(const GP_Loader *self, GP_IO *io,
+GP_Pixmap *GP_LoaderReadImage(const GP_Loader *self, GP_IO *io,
                                GP_ProgressCallback *callback);
 
 /*
@@ -173,17 +173,17 @@ GP_Context *GP_LoaderReadImage(const GP_Loader *self, GP_IO *io,
  * The function calls the loader Read() method for a given I/O.
  */
 int GP_LoaderReadImageEx(const GP_Loader *self, GP_IO *io,
-                         GP_Context **img, GP_DataStorage *data,
+                         GP_Pixmap **img, GP_DataStorage *data,
                          GP_ProgressCallback *callback);
 
 /*
  * Generic LoadImageEx for a given loader.
  *
  * The function prepares the I/O from file, calls the loader ReadEx() method,
- * closes the I/O and returns the context.
+ * closes the I/O and returns the pixmap.
  */
 int GP_LoaderLoadImageEx(const GP_Loader *self, const char *src_path,
-                         GP_Context **img, GP_DataStorage *data,
+                         GP_Pixmap **img, GP_DataStorage *data,
                          GP_ProgressCallback *callback);
 
 /*
@@ -192,7 +192,7 @@ int GP_LoaderLoadImageEx(const GP_Loader *self, const char *src_path,
  * The function/ prepares the I/O from file, calls the loader Write() method
  * and closes the I/O.
  */
-int GP_LoaderSaveImage(const GP_Loader *self, const GP_Context *src,
+int GP_LoaderSaveImage(const GP_Loader *self, const GP_Pixmap *src,
                        const char *dst_path, GP_ProgressCallback *callback);
 
 /*

@@ -5,7 +5,7 @@
  * Copyright (C) 2011-2014 Cyril Hrubis <metan@ucw.cz>
  */
 
-#include "core/GP_Context.h"
+#include "core/GP_Pixmap.h"
 #include "core/GP_Pixel.h"
 #include "core/GP_GetPutPixel.h"
 #include "core/GP_GammaCorrection.h"
@@ -74,37 +74,37 @@ static inline GP_Pixel GP_MixPixels(GP_Pixel pix1, GP_Pixel pix2,
 
 @ for pt in pixeltypes:
 @     if not pt.is_unknown():
-static inline void GP_MixPixel_Raw_{{ pt.name }}(GP_Context *context,
+static inline void GP_MixPixel_Raw_{{ pt.name }}(GP_Pixmap *pixmap,
 			GP_Coord x, GP_Coord y, GP_Pixel pixel, uint8_t perc)
 {
-	GP_Pixel pix = GP_GetPixel_Raw_{{ pt.pixelsize.suffix }}(context, x, y);
+	GP_Pixel pix = GP_GetPixel_Raw_{{ pt.pixelsize.suffix }}(pixmap, x, y);
 	pix = GP_MIX_PIXELS_{{ pt.name }}(pixel, pix, perc);
-	GP_PutPixel_Raw_{{ pt.pixelsize.suffix }}(context, x, y, pix);
+	GP_PutPixel_Raw_{{ pt.pixelsize.suffix }}(pixmap, x, y, pix);
 }
 
 @ end
 
 @ for pt in pixeltypes:
 @     if not pt.is_unknown():
-static inline void GP_MixPixel_Raw_Clipped_{{ pt.name }}(GP_Context *context,
+static inline void GP_MixPixel_Raw_Clipped_{{ pt.name }}(GP_Pixmap *pixmap,
 			GP_Coord x, GP_Coord y, GP_Pixel pixel, uint8_t perc)
 {
-	if (GP_PIXEL_IS_CLIPPED(context, x, y))
+	if (GP_PIXEL_IS_CLIPPED(pixmap, x, y))
 		return;
 
-	GP_MixPixel_Raw_{{ pt.name }}(context, x, y, pixel, perc);
+	GP_MixPixel_Raw_{{ pt.name }}(pixmap, x, y, pixel, perc);
 }
 
 @ end
 
-static inline void GP_MixPixel_Raw(GP_Context *context, GP_Coord x, GP_Coord y,
+static inline void GP_MixPixel_Raw(GP_Pixmap *pixmap, GP_Coord x, GP_Coord y,
                                    GP_Pixel pixel, uint8_t perc)
 {
-	switch (context->pixel_type) {
+	switch (pixmap->pixel_type) {
 @ for pt in pixeltypes:
 @     if not pt.is_unknown():
 	case GP_PIXEL_{{ pt.name }}:
-				GP_MixPixel_Raw_{{ pt.name }}(context, x, y, pixel, perc);
+				GP_MixPixel_Raw_{{ pt.name }}(pixmap, x, y, pixel, perc);
 	break;
 @ end
 	default:
@@ -112,15 +112,15 @@ static inline void GP_MixPixel_Raw(GP_Context *context, GP_Coord x, GP_Coord y,
 	}
 }
 
-static inline void GP_MixPixel_Raw_Clipped(GP_Context *context,
+static inline void GP_MixPixel_Raw_Clipped(GP_Pixmap *pixmap,
                                            GP_Coord x, GP_Coord y,
                                            GP_Pixel pixel, uint8_t perc)
 {
-	switch (context->pixel_type) {
+	switch (pixmap->pixel_type) {
 @ for pt in pixeltypes:
 @     if not pt.is_unknown():
 	case GP_PIXEL_{{ pt.name }}:
-		GP_MixPixel_Raw_Clipped_{{ pt.name }}(context, x, y, pixel, perc);
+		GP_MixPixel_Raw_Clipped_{{ pt.name }}(pixmap, x, y, pixel, perc);
 	break;
 @ end
 	default:

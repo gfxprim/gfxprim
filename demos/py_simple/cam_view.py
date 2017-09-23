@@ -25,7 +25,7 @@ def main():
         sleep(0.01)
 
         if (grabber.Poll()):
-            grabber.frame.Blit(0, 0, bk.context, 0, 0, grabber.frame.w, grabber.frame.h)
+            grabber.frame.Blit(0, 0, bk.pixmap, 0, 0, grabber.frame.w, grabber.frame.h)
             bk.Flip()
 
         ev = bk.PollEvent()

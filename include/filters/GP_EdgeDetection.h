@@ -25,12 +25,12 @@
 
 #include "GP_Filter.h"
 
-int GP_FilterEdgeSobel(const GP_Context *src,
-                       GP_Context **E, GP_Context **Phi,
+int GP_FilterEdgeSobel(const GP_Pixmap *src,
+                       GP_Pixmap **E, GP_Pixmap **Phi,
                        GP_ProgressCallback *callback);
 
-int GP_FilterEdgePrewitt(const GP_Context *src,
-                         GP_Context **E, GP_Context **Phi,
+int GP_FilterEdgePrewitt(const GP_Pixmap *src,
+                         GP_Pixmap **E, GP_Pixmap **Phi,
                          GP_ProgressCallback *callback);
 
 

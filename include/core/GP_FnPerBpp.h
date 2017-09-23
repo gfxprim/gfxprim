@@ -31,10 +31,10 @@
  * y_xBPP, resp y_xBPP_LE (or _BE; the bit-endian) for x<8.
  *
  * The functions branch either on bpp and bit_endian, type of given
- * GP_Context or given GP_PixelType.
+ * GP_Pixmap or given GP_PixelType.
  *
  * Extra arguments are arguments to be passed to the function.
- * Note that if the function takes the context/type/bpp as an argument,
+ * Note that if the function takes the pixmap/type/bpp as an argument,
  * you still need to provide it in __VA_ARGS__
  *
  * The GP_FN_PER_* variants ignore the return value of the called function.
@@ -47,10 +47,10 @@
 #include "GP_FnPerBpp.gen.h"
 
 /*
- * Branch on GP_Context argument.
+ * Branch on GP_Pixmap argument.
  */
-#define GP_FN_PER_BPP_CONTEXT(FN_NAME, context, ...) \
-	GP_FN_PER_BPP(FN_NAME, (context)->bpp, (context)->bit_endian, __VA_ARGS__)
+#define GP_FN_PER_BPP_PIXMAP(FN_NAME, pixmap, ...) \
+	GP_FN_PER_BPP(FN_NAME, (pixmap)->bpp, (pixmap)->bit_endian, __VA_ARGS__)
 
 /*
  * Branch on GP_PixelType argument.
@@ -58,10 +58,10 @@
 #define GP_FN_PER_BPP_PIXELTYPE(FN_NAME, type, ...) \
 	GP_FN_PER_BPP(FN_NAME, GP_PixelTypes[type].size, GP_PixelTypes[type].bit_endian, __VA_ARGS__)
 /*
- * Branch on GP_Context argument.
+ * Branch on GP_Pixmap argument.
  */
-#define GP_FN_RET_PER_BPP_CONTEXT(FN_NAME, context, ...) \
-	GP_FN_RET_PER_BPP(FN_NAME, (context)->bpp, (context)->bit_endian, __VA_ARGS__)
+#define GP_FN_RET_PER_BPP_PIXMAP(FN_NAME, pixmap, ...) \
+	GP_FN_RET_PER_BPP(FN_NAME, (pixmap)->bpp, (pixmap)->bit_endian, __VA_ARGS__)
 
 /*
  * Branch on GP_PixelType argument.
@@ -73,7 +73,7 @@
  * Macros that gets MACRO template for drawing function and generates drawing
  * functions for each BPP.
  *
- * This functions are later used by GP_FN_PER_BPP_CONTEXT() to generate one
+ * This functions are later used by GP_FN_PER_BPP_PIXMAP() to generate one
  * drawing function for all BPP Yay!
  */
 #define GP_DEF_DRAW_FN_PER_BPP(fname, MACRO_NAME) \
@@ -83,6 +83,6 @@
 	GP_DEF_FN_PER_BPP(fname, MACRO_NAME, GP_HLine_Raw_)
 
 #define GP_DEF_FN_FOR_BPP(fname, MACRO_NAME, fdraw, bpp) \
-	MACRO_NAME(fname##_##bpp, GP_Context *, GP_Pixel, fdraw##bpp)
+	MACRO_NAME(fname##_##bpp, GP_Pixmap *, GP_Pixel, fdraw##bpp)
 
 #endif /* GP_FN_PER_BPP_H */

@@ -1,21 +1,21 @@
-"core.Context tests"
+"core.Pixmap tests"
 
 from unittest import SkipTest
 from testutils import *
 
-from gfxprim.core import Context
+from gfxprim.core import Pixmap
 from gfxprim import gfx, core
 
 
 def test_gfx_submodule_loads():
-  "gfx is present in a Context"
-  c = Context(1, 1, core.C.PIXEL_RGB888)
+  "gfx is present in a Pixmap"
+  c = Pixmap(1, 1, core.C.PIXEL_RGB888)
   assert c.gfx
 
 
 def test_gfx_submodule_has_C():
   "gfx contains C"
-  c = Context(1, 1, core.C.PIXEL_RGB888)
+  c = Pixmap(1, 1, core.C.PIXEL_RGB888)
   assert c.gfx.C
   assert gfx.C
 
@@ -50,7 +50,7 @@ gfx_params = {
 
 def test_all_methods_are_known():
   "All methods of gfx submodule have known param types in this test"
-  c = Context(1, 1, core.C.PIXEL_RGB888)
+  c = Pixmap(1, 1, core.C.PIXEL_RGB888)
   for name in dir(c.gfx):
     if name[0] != '_' and name not in ['C', 'ctx']:
       assert name in gfx_params
@@ -84,7 +84,7 @@ def gen_dummy_args(params):
 @for_each_case(gfx_params)
 def test_method_call(n, params):
   "Calling with dummy parameters:"
-  c = ContextRand(10, 10, core.C.PIXEL_RGB888)
+  c = PixmapRand(10, 10, core.C.PIXEL_RGB888)
   if isinstance(params, str):
     c.gfx.__getattribute__(n)(*gen_dummy_args(params))
   else:
@@ -93,9 +93,9 @@ def test_method_call(n, params):
 
 def test_Polygon():
   "Polygon() works"
-  c0 = ContextRand(13, 12, core.C.PIXEL_RGB888, seed=42)
-  c1 = ContextRand(13, 12, core.C.PIXEL_RGB888, seed=42)
-  c2 = ContextRand(13, 12, core.C.PIXEL_RGB888, seed=42)
+  c0 = PixmapRand(13, 12, core.C.PIXEL_RGB888, seed=42)
+  c1 = PixmapRand(13, 12, core.C.PIXEL_RGB888, seed=42)
+  c2 = PixmapRand(13, 12, core.C.PIXEL_RGB888, seed=42)
   assert c1 == c0
   c1.gfx.Polygon([1,2,0,4,7,9,5,4,3,2], 43)
   c2.gfx.Polygon([(1,2),(0,4),(7,9),(5,4),(3,2)], 43)
@@ -104,9 +104,9 @@ def test_Polygon():
 
 def test_FillPolygon():
   "FillPolygon() works"
-  c0 = ContextRand(13, 9, core.C.PIXEL_RGB888, seed=41)
-  c1 = ContextRand(13, 9, core.C.PIXEL_RGB888, seed=41)
-  c2 = ContextRand(13, 9, core.C.PIXEL_RGB888, seed=41)
+  c0 = PixmapRand(13, 9, core.C.PIXEL_RGB888, seed=41)
+  c1 = PixmapRand(13, 9, core.C.PIXEL_RGB888, seed=41)
+  c2 = PixmapRand(13, 9, core.C.PIXEL_RGB888, seed=41)
   assert c1 == c0
   c1.gfx.FillPolygon([1,2,0,4,7,9,5,4,3,2], 0)
   c2.gfx.FillPolygon([(1,2),(0,4),(7,9),(5,4),(3,2)], 0)

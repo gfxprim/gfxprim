@@ -22,7 +22,7 @@
 
 #include <errno.h>
 
-#include "core/GP_Context.h"
+#include "core/GP_Pixmap.h"
 #include "core/GP_GetPutPixel.h"
 #include "core/GP_TempAlloc.h"
 #include "core/GP_Clamp.h"
@@ -34,10 +34,10 @@
 
 #include <string.h>
 
-static int GP_FilterSigma_Raw(const GP_Context *src,
+static int GP_FilterSigma_Raw(const GP_Pixmap *src,
                               GP_Coord x_src, GP_Coord y_src,
                               GP_Size w_src, GP_Size h_src,
-                              GP_Context *dst,
+                              GP_Pixmap *dst,
                               GP_Coord x_dst, GP_Coord y_dst,
                               int xrad, int yrad,
                               unsigned int min, float sigma,
@@ -206,10 +206,10 @@ static int GP_FilterSigma_Raw(const GP_Context *src,
 	return 0;
 }
 
-int GP_FilterSigmaEx(const GP_Context *src,
+int GP_FilterSigmaEx(const GP_Pixmap *src,
                      GP_Coord x_src, GP_Coord y_src,
                      GP_Size w_src, GP_Size h_src,
-                     GP_Context *dst,
+                     GP_Pixmap *dst,
                      GP_Coord x_dst, GP_Coord y_dst,
                      int xrad, int yrad,
                      unsigned int min, float sigma,
@@ -228,7 +228,7 @@ int GP_FilterSigmaEx(const GP_Context *src,
 	                          callback);
 }
 
-GP_Context *GP_FilterSigmaExAlloc(const GP_Context *src,
+GP_Pixmap *GP_FilterSigmaExAlloc(const GP_Pixmap *src,
                                   GP_Coord x_src, GP_Coord y_src,
                                   GP_Size w_src, GP_Size h_src,
                                   int xrad, int yrad,
@@ -239,7 +239,7 @@ GP_Context *GP_FilterSigmaExAlloc(const GP_Context *src,
 
 	GP_CHECK(xrad >= 0 && yrad >= 0);
 
-	GP_Context *dst = GP_ContextAlloc(w_src, h_src, src->pixel_type);
+	GP_Pixmap *dst = GP_PixmapAlloc(w_src, h_src, src->pixel_type);
 
 	if (dst == NULL)
 		return NULL;
@@ -248,7 +248,7 @@ GP_Context *GP_FilterSigmaExAlloc(const GP_Context *src,
 	                         dst, 0, 0, xrad, yrad, min, sigma, callback);
 
 	if (ret) {
-		GP_ContextFree(dst);
+		GP_PixmapFree(dst);
 		return NULL;
 	}
 

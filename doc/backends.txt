@@ -80,15 +80,15 @@ window resizable.
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <backends/GP_SDL_Context.h>
+#include <backends/GP_SDL_Pixmap.h>
 
-int GP_ContextFromSDLSurface(GP_Context *c, const SDL_Surface *surf);
+int GP_PixmapFromSDLSurface(GP_Pixmap *c, const SDL_Surface *surf);
 -------------------------------------------------------------------------------
 
 This function allows you to mix 'SDL' and 'GFXprim' code.
 
-It initializes a 'GFXprim' context from the 'SDL' surface using the pixel
-buffer from surface as pixel buffer for the context.
+It initializes a 'GFXprim' pixmap from the 'SDL' surface using the pixel
+buffer from surface as pixel buffer for the pixmap.
 
 Function returns zero on success and non-zero on failure (i.e. there is no
 'GFXprim' pixel type to match given surface).
@@ -243,9 +243,9 @@ typdef struct GP_Backend {
         const char *name;
 
         /*
-         * Pointer to context APP should draw to.
+         * Pointer to pixmap APP should draw to.
          */
-        GP_Context *context;
+        GP_Pixmap *pixmap;
 
 	...
 
@@ -595,8 +595,8 @@ was successful (i.e. X server allowed us to resize the window) the resize
 event will be send and should be handled in your event loop. You must respond
 to it by the 'GP_BackendResizeAck()' described below.
 
-NOTE: The backend->context pointer may change upon calling this function and
-      at least backend->context->pixels pointer will change.
+NOTE: The backend->pixmap pointer may change upon calling this function and
+      at least backend->pixmap->pixels pointer will change.
 
 
 [[ResizeAck]]
@@ -613,10 +613,10 @@ int GP_BackendResizeAck(GP_Backend *self);
 -------------------------------------------------------------------------------
 
 If backend is resizable by user interaction (for example X Window) you will
-get resize event for each change of window size, however the backend context
+get resize event for each change of window size, however the backend pixmap
 will not be resized until you call this function. This is useful in
 multi-threaded application where one threads waits for events and others draws
-into the buffer so you can stop the drawing threads before the backend context
+into the buffer so you can stop the drawing threads before the backend pixmap
 size change.
 
 

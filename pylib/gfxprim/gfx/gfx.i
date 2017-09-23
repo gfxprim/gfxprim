@@ -47,17 +47,17 @@ static GP_Coord *GP_Polygon_unpack_coordinates(PyObject *coords)
   return cs;
 }
 
-void GP_Polygon_wrap(GP_Context *context, PyObject *coords, GP_Pixel pixel)
+void GP_Polygon_wrap(GP_Pixmap *pixmap, PyObject *coords, GP_Pixel pixel)
 {
   GP_Coord *cs = GP_Polygon_unpack_coordinates(coords);
-  GP_Polygon(context, PyTuple_Size(coords) / 2, cs, pixel);
+  GP_Polygon(pixmap, PyTuple_Size(coords) / 2, cs, pixel);
   free(cs);
 }
 
-void GP_FillPolygon_wrap(GP_Context *context, PyObject *coords, GP_Pixel pixel)
+void GP_FillPolygon_wrap(GP_Pixmap *pixmap, PyObject *coords, GP_Pixel pixel)
 {
   GP_Coord *cs = GP_Polygon_unpack_coordinates(coords);
-  GP_FillPolygon(context, PyTuple_Size(coords) / 2, cs, pixel);
+  GP_FillPolygon(pixmap, PyTuple_Size(coords) / 2, cs, pixel);
   free(cs);
 }
 %}

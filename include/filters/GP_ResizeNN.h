@@ -32,10 +32,10 @@
 #include "GP_Filter.h"
 #include "GP_Resize.h"
 
-int GP_FilterResizeNN(const GP_Context *src, GP_Context *dst,
+int GP_FilterResizeNN(const GP_Pixmap *src, GP_Pixmap *dst,
                       GP_ProgressCallback *callback);
 
-static inline GP_Context *GP_FilterResizeNNAlloc(const GP_Context *src,
+static inline GP_Pixmap *GP_FilterResizeNNAlloc(const GP_Pixmap *src,
                                    GP_Size w, GP_Size h,
                                    GP_ProgressCallback *callback)
 {

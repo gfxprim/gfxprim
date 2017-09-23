@@ -40,7 +40,7 @@
 #define sgn(x) ((x)>0 ? 1 : -1)
 
 static GP_Backend *backend;
-static GP_Context *context;
+static GP_Pixmap *pixmap;
 
 static int iter, l, way = 1, draw_edge = 1;
 static GP_Pixel black, blue, gray, red;
@@ -49,11 +49,11 @@ static void sierpinsky(double x1, double y1, double x4, double y4, int iter)
 {
 	double x2, y2, x3, y3, x5, y5;
 	GP_Pixel pixel;
-	pixel = GP_RGBToPixel(0, 0, 255-16*iter, context->pixel_type);
+	pixel = GP_RGBToPixel(0, 0, 255-16*iter, pixmap->pixel_type);
 
 	if (iter <= 0) {
 		if (draw_edge)
-			GP_Line(context, x1, y1, x4, y4, black);
+			GP_Line(pixmap, x1, y1, x4, y4, black);
 		return;
 	}
 
@@ -66,11 +66,11 @@ static void sierpinsky(double x1, double y1, double x4, double y4, int iter)
 	x5 = (x1+x4)/2 + (y2 - y3)*sqrt(3.00/4);
 	y5 = (y1+y4)/2 + (x3 - x2)*sqrt(3.00/4);
 
-	GP_FillTriangle(context, x2, y2, x3, y3, x5, y5, pixel);
+	GP_FillTriangle(pixmap, x2, y2, x3, y3, x5, y5, pixel);
 
-	GP_PutPixel(context, x2, y2, red);
-	GP_PutPixel(context, x3, y3, red);
-	GP_PutPixel(context, x5, y5, red);
+	GP_PutPixel(pixmap, x2, y2, red);
+	GP_PutPixel(pixmap, x3, y3, red);
+	GP_PutPixel(pixmap, x5, y5, red);
 
 	sierpinsky(x1, y1, x2, y2, iter - 1);
 	sierpinsky(x2, y2, x5, y5, iter - 1);
@@ -81,8 +81,8 @@ static void sierpinsky(double x1, double y1, double x4, double y4, int iter)
 static void draw(int x, int y, int l, int iter)
 {
 	double x1, y1, x2, y2, x3, y3;
-	int w = context->w;
-	int h = context->h;
+	int w = pixmap->w;
+	int h = pixmap->h;
 
 	l = ((w < h ? w : h) - 20)/(5 - 1.00*iter/120);
 
@@ -95,9 +95,9 @@ static void draw(int x, int y, int l, int iter)
 	x3 = sin(1.00 * (iter+240)/57) * l + x;
 	y3 = cos(1.00 * (iter+240)/57) * l + y;
 
-	GP_Fill(context, gray);
+	GP_Fill(pixmap, gray);
 
-	GP_FillTriangle(context, x1, y1, x2, y2, x3, y3, blue);
+	GP_FillTriangle(pixmap, x1, y1, x2, y2, x3, y3, blue);
 
 	sierpinsky(x1, y1, x2, y2, iter/60%6);
 	sierpinsky(x2, y2, x3, y3, iter/60%6);
@@ -121,7 +121,7 @@ void redraw(void)
 	if (iter < 0)
 		way *= -1;
 
-	draw(context->w/2, context->h/2, l, iter);
+	draw(pixmap->w/2, pixmap->h/2, l, iter);
 }
 
 int main(void)
@@ -136,15 +136,15 @@ int main(void)
 		return 1;
 	}
 
-	context = backend->context;
+	pixmap = backend->pixmap;
 
-	black = GP_RGBToContextPixel(0x00, 0x00, 0x00, context);
-	blue  = GP_RGBToContextPixel(0x00, 0x00, 0xff, context);
-	gray  = GP_RGBToContextPixel(0xbe, 0xbe, 0xbe, context);
-	red   = GP_RGBToContextPixel(0xff, 0x00, 0x00, context);
+	black = GP_RGBToPixmapPixel(0x00, 0x00, 0x00, pixmap);
+	blue  = GP_RGBToPixmapPixel(0x00, 0x00, 0xff, pixmap);
+	gray  = GP_RGBToPixmapPixel(0xbe, 0xbe, 0xbe, pixmap);
+	red   = GP_RGBToPixmapPixel(0xff, 0x00, 0x00, pixmap);
 
 	iter = 0;
-	draw(context->w/2, context->h/2, l, iter);
+	draw(pixmap->w/2, pixmap->h/2, l, iter);
 
 	for (;;) {
 		GP_Event ev;

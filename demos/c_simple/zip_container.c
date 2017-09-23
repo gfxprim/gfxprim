@@ -33,7 +33,7 @@
 #include <GP.h>
 
 static GP_Backend *backend;
-static GP_Context *image;
+static GP_Pixmap *image;
 static GP_Container *container;
 
 /*
@@ -45,20 +45,20 @@ static GP_Container *container;
  */
 static void load_next(void)
 {
-	GP_ContextFree(image);
+	GP_PixmapFree(image);
 
 	image = GP_ContainerLoadNext(container, NULL);
 
 	if (image == NULL)
 		return;
 
-	if (image->w != backend->context->w ||
-	    image->h != backend->context->h) {
+	if (image->w != backend->pixmap->w ||
+	    image->h != backend->pixmap->h) {
 		GP_BackendResize(backend, image->w, image->h);
 		return;
 	}
 
-	GP_Blit_Clipped(image, 0, 0, image->w, image->h, backend->context, 0, 0);
+	GP_Blit_Clipped(image, 0, 0, image->w, image->h, backend->pixmap, 0, 0);
 	GP_BackendFlip(backend);
 }
 
@@ -95,7 +95,7 @@ int main(int argc, char *argv[])
 	}
 
 	/* Blit image into the window and show it */
-	GP_Blit_Clipped(image, 0, 0, image->w, image->h, backend->context, 0, 0);
+	GP_Blit_Clipped(image, 0, 0, image->w, image->h, backend->pixmap, 0, 0);
 	GP_BackendFlip(backend);
 
 	/* Wait for events  */
@@ -123,7 +123,7 @@ int main(int argc, char *argv[])
 			if (ev.code == GP_EV_SYS_RESIZE) {
 				GP_BackendResizeAck(backend);
 				GP_Blit_Clipped(image, 0, 0, image->w, image->h,
-				        backend->context, 0, 0);
+				        backend->pixmap, 0, 0);
 				GP_BackendFlip(backend);
 			}
 		break;

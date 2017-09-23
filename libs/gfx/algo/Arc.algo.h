@@ -38,13 +38,13 @@
  * (y > 0) are used.
  *
  * Arguments:
- *     CONTEXT_T - user-defined type of drawing context (passed to PUTPIXEL)
+ *     PIXMAP_T - user-defined type of drawing pixmap (passed to PUTPIXEL)
  *     PIXVAL_T  - user-defined pixel value type (passed to PUTPIXEL)
- *     PUTPIXEL  - a pixel drawing function f(context, x, y, pixval)
+ *     PUTPIXEL  - a pixel drawing function f(pixmap, x, y, pixval)
  *     FN_NAME   - name of the function to be defined
  */
-#define DEF_ARCSEGMENT_FN(FN_NAME, CONTEXT_T, PIXVAL_T, PUTPIXEL) \
-static void FN_NAME(CONTEXT_T context, int xcenter, int ycenter, \
+#define DEF_ARCSEGMENT_FN(FN_NAME, PIXMAP_T, PIXVAL_T, PUTPIXEL) \
+static void FN_NAME(PIXMAP_T pixmap, int xcenter, int ycenter, \
 	unsigned int a, unsigned int b, int direction, \
 	double start, double end, PIXVAL_T pixval) \
 { \
@@ -68,18 +68,18 @@ static void FN_NAME(CONTEXT_T context, int xcenter, int ycenter, \
 \
 			if (direction < 0) { \
 				if ((-x+1) >= xmin && (-x+1) <= xmax) { \
-					PUTPIXEL(context, xcenter-x+1, ycenter-y, pixval); \
+					PUTPIXEL(pixmap, xcenter-x+1, ycenter-y, pixval); \
 				} \
 				if ((x-1) >= xmin && (x-1) <= xmax) { \
-					PUTPIXEL(context, xcenter+x-1, ycenter-y, pixval); \
+					PUTPIXEL(pixmap, xcenter+x-1, ycenter-y, pixval); \
 				} \
 			} \
 			if (direction > 0) { \
 				if ((-x+1) >= xmin && (-x+1) <= xmax) { \
-					PUTPIXEL(context, xcenter-x+1, ycenter+y, pixval); \
+					PUTPIXEL(pixmap, xcenter-x+1, ycenter+y, pixval); \
 				} \
 				if ((x-1) >= xmin && (x-1) <= xmax) { \
-					PUTPIXEL(context, xcenter+x-1, ycenter+y, pixval); \
+					PUTPIXEL(pixmap, xcenter+x-1, ycenter+y, pixval); \
 				} \
 			} \
 		} \
@@ -89,18 +89,18 @@ static void FN_NAME(CONTEXT_T context, int xcenter, int ycenter, \
 \
 		if (direction < 0) { \
 			if ((-x+1) >= xmin && (-x+1) <= xmax) { \
-				PUTPIXEL(context, xcenter-x+1, ycenter-y, pixval); \
+				PUTPIXEL(pixmap, xcenter-x+1, ycenter-y, pixval); \
 			} \
 			if ((x-1) >= xmin && (x-1) <= xmax) { \
-				PUTPIXEL(context, xcenter+x-1, ycenter-y, pixval); \
+				PUTPIXEL(pixmap, xcenter+x-1, ycenter-y, pixval); \
 			} \
 		} \
 		if (direction > 0) { \
 			if ((-x+1) >= xmin && (-x+1) <= xmax) { \
-				PUTPIXEL(context, xcenter-x+1, ycenter+y, pixval); \
+				PUTPIXEL(pixmap, xcenter-x+1, ycenter+y, pixval); \
 			} \
 			if ((x-1) >= xmin && (x-1) <= xmax) { \
-				PUTPIXEL(context, xcenter+x-1, ycenter+y, pixval); \
+				PUTPIXEL(pixmap, xcenter+x-1, ycenter+y, pixval); \
 			} \
 		} \
 	} \

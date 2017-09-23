@@ -14,11 +14,11 @@ GP_Pixel GP_RGBToPixel(uint8_t r, uint8_t g, uint8_t b, GP_PixelType type);
 GP_Pixel GP_RGBAToPixel(uint8_t r, uint8_t g, uint8_t b, uint8_t a,
                         GP_PixelType type);
 
-GP_Pixel GP_RGBToContextPixel(uint8_t r, uint8_t g, uint8_t b,
-                              const GP_Context *context);
+GP_Pixel GP_RGBToPixmapPixel(uint8_t r, uint8_t g, uint8_t b,
+                              const GP_Pixmap *pixmap);
 
-GP_Pixel GP_RGBAToContextPixel(uint8_t r, uint8_t g, uint8_t b, uint8_t a,
-                               const GP_Context *context);
+GP_Pixel GP_RGBAToPixmapPixel(uint8_t r, uint8_t g, uint8_t b, uint8_t a,
+                               const GP_Pixmap *pixmap);
 -------------------------------------------------------------------------------
 
 Simple functions to convert RGB or RGBA 8 bit values into the specific

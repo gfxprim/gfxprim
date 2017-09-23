@@ -43,49 +43,49 @@
  * Blits rectangle from src defined by x0, y0, x1, y1 (x1, y1 included) to dst
  * starting on x2, y2.
  */
-void GP_BlitXYXY(const GP_Context *src,
+void GP_BlitXYXY(const GP_Pixmap *src,
                  GP_Coord x0, GP_Coord y0, GP_Coord x1, GP_Coord y1,
-                 GP_Context *dst, GP_Coord x2, GP_Coord y2);
+                 GP_Pixmap *dst, GP_Coord x2, GP_Coord y2);
 
 /*
  * Clipped variant. Could handle destination coordinates outside of the
  * destination rectangle (both possitive and negative). Source larger than
  * destination and so.
  */
-void GP_BlitXYXY_Clipped(const GP_Context *src,
+void GP_BlitXYXY_Clipped(const GP_Pixmap *src,
                          GP_Coord x0, GP_Coord y0, GP_Coord x1, GP_Coord y1,
-                         GP_Context *dst, GP_Coord x2, GP_Coord y2);
+                         GP_Pixmap *dst, GP_Coord x2, GP_Coord y2);
 
 /*
  * Blits rectangle from src defined by x0, y0, w0, h0 (uses w0 x h0 pixels) to
  * dst starting on x2, y2.
  */
-void GP_BlitXYWH(const GP_Context *src,
+void GP_BlitXYWH(const GP_Pixmap *src,
                  GP_Coord x0, GP_Coord y0, GP_Size w0, GP_Size h0,
-                 GP_Context *dst, GP_Coord x1, GP_Coord y1);
+                 GP_Pixmap *dst, GP_Coord x1, GP_Coord y1);
 
 /*
  * Clipped variant. Could handle destination coordinates outside of the
  * destination rectangle (both possitive and negative). Source larger than
  * destination and so.
  */
-void GP_BlitXYWH_Clipped(const GP_Context *src,
+void GP_BlitXYWH_Clipped(const GP_Pixmap *src,
                          GP_Coord x0, GP_Coord y0, GP_Size w0, GP_Size h0,
-                         GP_Context *dst, GP_Coord x1, GP_Coord y1);
+                         GP_Pixmap *dst, GP_Coord x1, GP_Coord y1);
 
 /* The default is XYWH */
-static inline void GP_Blit(const GP_Context *src,
+static inline void GP_Blit(const GP_Pixmap *src,
                            GP_Coord x0, GP_Coord y0,
                            GP_Size w0, GP_Size h0,
-                           GP_Context *dst, GP_Coord x1, GP_Coord y1)
+                           GP_Pixmap *dst, GP_Coord x1, GP_Coord y1)
 {
 	GP_BlitXYWH(src, x0, y0, w0, h0, dst, x1, y1);
 }
 
-static inline void GP_Blit_Clipped(const GP_Context *src,
+static inline void GP_Blit_Clipped(const GP_Pixmap *src,
                                    GP_Coord x0, GP_Coord y0,
                                    GP_Size w0, GP_Size h0,
-                                   GP_Context *dst, GP_Coord x1, GP_Coord y1)
+                                   GP_Pixmap *dst, GP_Coord x1, GP_Coord y1)
 {
 	GP_BlitXYWH_Clipped(src, x0, y0, w0, h0, dst, x1, y1);
 }
@@ -93,24 +93,24 @@ static inline void GP_Blit_Clipped(const GP_Context *src,
 /*
  * Same as GP_BlitXYXY but doesn't respect rotations. Faster (for now).
  */
-void GP_BlitXYXY_Raw(const GP_Context *src,
+void GP_BlitXYXY_Raw(const GP_Pixmap *src,
                      GP_Coord x0, GP_Coord y0, GP_Coord x1, GP_Coord y1,
-		     GP_Context *dst, GP_Coord x2, GP_Coord y2);
+		     GP_Pixmap *dst, GP_Coord x2, GP_Coord y2);
 
 /*
  * Same as GP_BlitXYWH but doesn't respect rotations. Faster (for now).
  */
-void GP_BlitXYWH_Raw(const GP_Context *src,
+void GP_BlitXYWH_Raw(const GP_Pixmap *src,
                      GP_Coord x0, GP_Coord y0, GP_Size w0, GP_Size h0,
-		     GP_Context *dst, GP_Coord x2, GP_Coord y2);
+		     GP_Pixmap *dst, GP_Coord x2, GP_Coord y2);
 
 /*
  * Same as GP_Blit but doesn't respect rotations. Faster (for now).
  */
-static inline void GP_Blit_Raw(const GP_Context *src,
+static inline void GP_Blit_Raw(const GP_Pixmap *src,
                                GP_Coord x0, GP_Coord y0,
                                GP_Size w0, GP_Size h0,
-                               GP_Context *dst, GP_Coord x1, GP_Coord y1)
+                               GP_Pixmap *dst, GP_Coord x1, GP_Coord y1)
 {
 	GP_BlitXYWH_Raw(src, x0, y0, w0, h0, dst, x1, y1);
 }

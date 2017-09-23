@@ -24,12 +24,12 @@
  */
 @ for ps in pixelsizes:
 
-static void GP_FillCircle_Raw_{{ ps.suffix }}(GP_Context *context,
+static void GP_FillCircle_Raw_{{ ps.suffix }}(GP_Pixmap *pixmap,
 	GP_Coord xcenter, GP_Coord ycenter, GP_Size r, GP_Pixel pixel)
 {
 	/* for r == 0, circle degenerates to a point */
 	if (r == 0) {
-		GP_PutPixel_Raw_{{ ps.suffix }}(context, xcenter, ycenter, pixel);
+		GP_PutPixel_Raw_{{ ps.suffix }}(pixmap, xcenter, ycenter, pixel);
 		return;
 	}
 
@@ -40,28 +40,28 @@ static void GP_FillCircle_Raw_{{ ps.suffix }}(GP_Context *context,
 			x++;
 		}
 		error += -2*y + 1;
-		GP_HLine_Raw_{{ ps.suffix }}(context, xcenter-x+1, xcenter+x-1, ycenter-y, pixel);
-		GP_HLine_Raw_{{ ps.suffix }}(context, xcenter-x+1, xcenter+x-1, ycenter+y, pixel);
+		GP_HLine_Raw_{{ ps.suffix }}(pixmap, xcenter-x+1, xcenter+x-1, ycenter-y, pixel);
+		GP_HLine_Raw_{{ ps.suffix }}(pixmap, xcenter-x+1, xcenter+x-1, ycenter+y, pixel);
 	}
 }
 
 @ end
 
-void GP_FillCircle_Raw(GP_Context *context, GP_Coord xcenter, GP_Coord ycenter,
+void GP_FillCircle_Raw(GP_Pixmap *pixmap, GP_Coord xcenter, GP_Coord ycenter,
                        GP_Size r, GP_Pixel pixel)
 {
-	GP_CHECK_CONTEXT(context);
+	GP_CHECK_PIXMAP(pixmap);
 
-	GP_FN_PER_BPP_CONTEXT(GP_FillCircle_Raw, context, context,
+	GP_FN_PER_BPP_PIXMAP(GP_FillCircle_Raw, pixmap, pixmap,
 	                      xcenter, ycenter, r, pixel);
 }
 
-void GP_FillCircle(GP_Context *context, GP_Coord xcenter, GP_Coord ycenter,
+void GP_FillCircle(GP_Pixmap *pixmap, GP_Coord xcenter, GP_Coord ycenter,
                    GP_Size r, GP_Pixel pixel)
 {
-	GP_CHECK_CONTEXT(context);
+	GP_CHECK_PIXMAP(pixmap);
 
-	GP_TRANSFORM_POINT(context, xcenter, ycenter);
+	GP_TRANSFORM_POINT(pixmap, xcenter, ycenter);
 
-	GP_FillCircle_Raw(context, xcenter, ycenter, r, pixel);
+	GP_FillCircle_Raw(pixmap, xcenter, ycenter, r, pixel);
 }

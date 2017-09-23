@@ -23,8 +23,8 @@
  *                                                                           *
  *****************************************************************************/
 
-#ifndef CORE_GP_CONTEXT_H
-#define CORE_GP_CONTEXT_H
+#ifndef CORE_GP_PIXMAP_H
+#define CORE_GP_PIXMAP_H
 
 #include <stdint.h>
 #include <unistd.h>
@@ -36,7 +36,7 @@
 struct GP_Gamma;
 
 /* This structure holds all information needed for drawing into an image. */
-typedef struct GP_Context {
+typedef struct GP_Pixmap {
 	uint8_t *pixels;	 /* pointer to image pixels */
 	uint8_t bpp;		 /* pixel size in bits */
 	uint32_t bytes_per_row;
@@ -45,7 +45,7 @@ typedef struct GP_Context {
 	/*
 	 * Row bit offset. The offset is ignored for byte aligned pixels.
 	 * Basically it's used for non aligned pixels with combination
-	 * with subcontextes.
+	 * with subpixmapes.
 	 */
 	uint8_t offset;
 
@@ -71,72 +71,72 @@ typedef struct GP_Context {
 	uint8_t x_swap:1;	/* swap direction on x */
 	uint8_t y_swap:1;	/* swap direction on y */
 	uint8_t bit_endian:1;	/* GP_BIT_ENDIAN */
-	uint8_t free_pixels:1;  /* If set pixels are freed on GP_ContextFree */
-} GP_Context;
+	uint8_t free_pixels:1;  /* If set pixels are freed on GP_PixmapFree */
+} GP_Pixmap;
 
-/* Determines the address of a pixel within the context's image.
+/* Determines the address of a pixel within the pixmap's image.
  * Rows and columns are specified in the image's orientation
  * (i.e. they might not be XY if the image is rotated).
  */
-#define GP_PIXEL_ADDR(context, x, y) ((context)->pixels \
-	+ (y) * (context)->bytes_per_row \
-	+ ((x) * (context)->bpp) / 8)
+#define GP_PIXEL_ADDR(pixmap, x, y) ((pixmap)->pixels \
+	+ (y) * (pixmap)->bytes_per_row \
+	+ ((x) * (pixmap)->bpp) / 8)
 
 #define GP_CALC_ROW_SIZE(pixel_type, width) \
 	 ((GP_PixelSize(pixel_type) * width) / 8 + \
 	!!((GP_PixelSize(pixel_type) * width) % 8))
 
-/* Performs a series of sanity checks on context, aborting if any fails. */
-#define GP_CHECK_CONTEXT(context) do { \
-	GP_CHECK(context, "NULL passed as context"); \
-	GP_CHECK(context->pixels, "invalid context: NULL image pointer"); \
-	GP_CHECK(context->bpp <= 32, "invalid context: unsupported bits-per-pixel count"); \
-	GP_CHECK(context->w > 0 && context->h > 0, "invalid context: invalid image size"); \
+/* Performs a series of sanity checks on pixmap, aborting if any fails. */
+#define GP_CHECK_PIXMAP(pixmap) do { \
+	GP_CHECK(pixmap, "NULL passed as pixmap"); \
+	GP_CHECK(pixmap->pixels, "invalid pixmap: NULL image pointer"); \
+	GP_CHECK(pixmap->bpp <= 32, "invalid pixmap: unsupported bits-per-pixel count"); \
+	GP_CHECK(pixmap->w > 0 && pixmap->h > 0, "invalid pixmap: invalid image size"); \
 } while (0)
 
 /*
- * Is true, when pixel is clipped out of context.
+ * Is true, when pixel is clipped out of pixmap.
  */
-#define GP_PIXEL_IS_CLIPPED(context, x, y) \
-	((x) < 0 || x >= (typeof(x)) context->w \
-	|| (y) < 0 || y >= (typeof(y)) context->h) \
+#define GP_PIXEL_IS_CLIPPED(pixmap, x, y) \
+	((x) < 0 || x >= (typeof(x)) pixmap->w \
+	|| (y) < 0 || y >= (typeof(y)) pixmap->h) \
 
 /*
- * Allocate context.
+ * Allocate pixmap.
  *
- * The context consists of two parts, the GP_Context structure and pixels array.
+ * The pixmap consists of two parts, the GP_Pixmap structure and pixels array.
  *
  * The rotation flags are set to (0, 0, 0).
  */
-GP_Context *GP_ContextAlloc(GP_Size w, GP_Size h, GP_PixelType type);
+GP_Pixmap *GP_PixmapAlloc(GP_Size w, GP_Size h, GP_PixelType type);
 
 /*
- * Free context.
+ * Free pixmap.
  *
- * If context->free_pixels, also free pixel data.
+ * If pixmap->free_pixels, also free pixel data.
  */
-void GP_ContextFree(GP_Context *context);
+void GP_PixmapFree(GP_Pixmap *pixmap);
 
 /*
- * Initalize context, pixels pointer is not dereferenced so it's safe to pass
- * NULL there and allocate it later with size context->bpr * context->h.
+ * Initalize pixmap, pixels pointer is not dereferenced so it's safe to pass
+ * NULL there and allocate it later with size pixmap->bpr * pixmap->h.
  *
  * The returned pointer is the pointer you passed as first argument.
  */
-GP_Context *GP_ContextInit(GP_Context *context, GP_Size w, GP_Size h,
+GP_Pixmap *GP_PixmapInit(GP_Pixmap *pixmap, GP_Size w, GP_Size h,
                            GP_PixelType type, void *pixels);
 
 /*
- * Resizes context->pixels array and changes metadata to match the new size.
+ * Resizes pixmap->pixels array and changes metadata to match the new size.
  *
  * Returns non-zero on failure (malloc() has failed).
  *
  * This call only resizes the pixel array. The pixel values, after resizing,
  * are __UNINITALIZED__ use resampling filters to resize image data.
  */
-int GP_ContextResize(GP_Context *context, GP_Size w, GP_Size h);
+int GP_PixmapResize(GP_Pixmap *pixmap, GP_Size w, GP_Size h);
 
-enum GP_ContextCopyFlags {
+enum GP_PixmapCopyFlags {
 	/*
 	 * Copy bitmap pixels too. If not set pixels are uninitalized.
 	 */
@@ -148,63 +148,63 @@ enum GP_ContextCopyFlags {
 };
 
 /*
- * Allocates a contex with exactly same values as source context.
+ * Allocates a contex with exactly same values as source pixmap.
  */
-GP_Context *GP_ContextCopy(const GP_Context *src, int flags);
+GP_Pixmap *GP_PixmapCopy(const GP_Pixmap *src, int flags);
 
 /*
- * Initalize subcontext. The returned pointer points to passed subcontext.
+ * Initalize subpixmap. The returned pointer points to passed subpixmap.
  */
-GP_Context *GP_SubContext(const GP_Context *context, GP_Context *subcontext,
+GP_Pixmap *GP_SubPixmap(const GP_Pixmap *pixmap, GP_Pixmap *subpixmap,
                           GP_Coord x, GP_Coord y, GP_Size w, GP_Size h);
 
 /*
- * Allocate and initalize subcontext.
+ * Allocate and initalize subpixmap.
  *
- * The free_pixels flag is set to 0 upon subcontext initalization so the
- * GP_ContextFree() would not call free() upon the subcontext->pixels pointer.
+ * The free_pixels flag is set to 0 upon subpixmap initalization so the
+ * GP_PixmapFree() would not call free() upon the subpixmap->pixels pointer.
  */
-GP_Context *GP_SubContextAlloc(const GP_Context *context,
+GP_Pixmap *GP_SubPixmapAlloc(const GP_Pixmap *pixmap,
                                GP_Coord x, GP_Coord y, GP_Size w, GP_Size h);
 
 /*
- * Converts context to a different pixel type.
- * Returns a newly allocated context.
+ * Converts pixmap to a different pixel type.
+ * Returns a newly allocated pixmap.
  *
  * This is naive implementation that doesn't do any ditherings or error
  * diffusions.
  */
-GP_Context *GP_ContextConvertAlloc(const GP_Context *src,
+GP_Pixmap *GP_PixmapConvertAlloc(const GP_Pixmap *src,
                                    GP_PixelType dst_pixel_type);
 
 /*
- * Converts context to a different pixel type.
+ * Converts pixmap to a different pixel type.
  *
  * This is naive implementation that doesn't do any ditherings or error
  * diffusions.
  */
-GP_Context *GP_ContextConvert(const GP_Context *src, GP_Context *dst);
+GP_Pixmap *GP_PixmapConvert(const GP_Pixmap *src, GP_Pixmap *dst);
 
 /*
- * Prints context information into stdout.
+ * Prints pixmap information into stdout.
  */
-void GP_ContextPrintInfo(const GP_Context *self);
+void GP_PixmapPrintInfo(const GP_Pixmap *self);
 
 /*
- * Rotates context flags clock wise.
+ * Rotates pixmap flags clock wise.
  */
-void GP_ContextRotateCW(GP_Context *context);
+void GP_PixmapRotateCW(GP_Pixmap *pixmap);
 
 /*
- * Rotates context flags counter clock wise.
+ * Rotates pixmap flags counter clock wise.
  */
-void GP_ContextRotateCCW(GP_Context *context);
+void GP_PixmapRotateCCW(GP_Pixmap *pixmap);
 
 /*
  * Retruns 1 if rotation flags are equal.
  */
-static inline int GP_ContextRotationEqual(const GP_Context *c1,
-                                          const GP_Context *c2)
+static inline int GP_PixmapRotationEqual(const GP_Pixmap *c1,
+                                          const GP_Pixmap *c2)
 {
 	return c1->axes_swap == c2->axes_swap &&
 	       c1->x_swap == c2->x_swap &&
@@ -214,7 +214,7 @@ static inline int GP_ContextRotationEqual(const GP_Context *c1,
 /*
  * Sets rotation flags.
  */
-static inline void GP_ContextSetRotation(GP_Context *dst, int axes_swap,
+static inline void GP_PixmapSetRotation(GP_Pixmap *dst, int axes_swap,
                                          int x_swap, int y_swap)
 {
 	dst->axes_swap = axes_swap;
@@ -225,8 +225,8 @@ static inline void GP_ContextSetRotation(GP_Context *dst, int axes_swap,
 /*
  * Copies rotation flags.
  */
-static inline void GP_ContextCopyRotation(const GP_Context *src,
-                                          GP_Context *dst)
+static inline void GP_PixmapCopyRotation(const GP_Pixmap *src,
+                                          GP_Pixmap *dst)
 {
 	dst->axes_swap = src->axes_swap;
 	dst->x_swap = src->x_swap;
@@ -234,26 +234,26 @@ static inline void GP_ContextCopyRotation(const GP_Context *src,
 }
 
 /*
- * Returns context width and height taking the rotation flags into a account.
+ * Returns pixmap width and height taking the rotation flags into a account.
  */
-static inline GP_Size GP_ContextW(const GP_Context *context)
+static inline GP_Size GP_PixmapW(const GP_Pixmap *pixmap)
 {
-	if (context->axes_swap)
-		return context->h;
+	if (pixmap->axes_swap)
+		return pixmap->h;
 	else
-		return context->w;
+		return pixmap->w;
 }
 
-static inline GP_Size GP_ContextH(const GP_Context *context)
+static inline GP_Size GP_PixmapH(const GP_Pixmap *pixmap)
 {
-	if (context->axes_swap)
-		return context->w;
+	if (pixmap->axes_swap)
+		return pixmap->w;
 	else
-		return context->h;
+		return pixmap->h;
 }
 
 /*
- * Compare two contexts. Returns true only if all of types, sizes and
+ * Compare two pixmaps. Returns true only if all of types, sizes and
  * bitmap data match. Takes transformations into account.
  *
  * For now ignores gamma tables.
@@ -262,7 +262,7 @@ static inline GP_Size GP_ContextH(const GP_Context *context)
  * TODO: speed up for same rotation and same bit-offset data (per-row memcpy).
  */
 
-int GP_ContextEqual(const GP_Context *ctx1, const GP_Context *ctx2);
+int GP_PixmapEqual(const GP_Pixmap *pixmap1, const GP_Pixmap *pixmap2);
 
-#endif /* CORE_GP_CONTEXT_H */
+#endif /* CORE_GP_PIXMAP_H */
 

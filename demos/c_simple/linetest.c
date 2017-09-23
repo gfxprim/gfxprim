@@ -41,12 +41,12 @@ void redraw_screen(void)
 {
 	double angle;
 	int x, y;
-	int w = win->context->w;
-	int h = win->context->h;
+	int w = win->pixmap->w;
+	int h = win->pixmap->h;
 	int xcenter = w/2;
 	int ycenter = h/2;
 
-	GP_Fill(win->context, black);
+	GP_Fill(win->pixmap, black);
 
 	for (angle = 0.0; angle < 2*M_PI; angle += 0.1) {
 		x = (int) (w/2 * cos(start_angle + angle));
@@ -56,22 +56,22 @@ void redraw_screen(void)
 		int b = 127.0 + 127.0 * sin(start_angle + angle);
 
 		GP_Pixel pixel;
-		pixel = GP_RGBToPixel(r, 0, b, win->context->pixel_type);
+		pixel = GP_RGBToPixel(r, 0, b, win->pixmap->pixel_type);
 
 		if (aa_flag) {
-			GP_LineAA_Raw(win->context, GP_FP_FROM_INT(xcenter), GP_FP_FROM_INT(ycenter),
+			GP_LineAA_Raw(win->pixmap, GP_FP_FROM_INT(xcenter), GP_FP_FROM_INT(ycenter),
 				GP_FP_FROM_INT(xcenter + x), GP_FP_FROM_INT(ycenter + y), pixel);
 		} else {
-			GP_Line(win->context, xcenter + x, ycenter + y, xcenter, ycenter, pixel);
-			GP_Line(win->context, xcenter, ycenter, xcenter + x, ycenter + y, pixel);
+			GP_Line(win->pixmap, xcenter + x, ycenter + y, xcenter, ycenter, pixel);
+			GP_Line(win->pixmap, xcenter, ycenter, xcenter + x, ycenter + y, pixel);
 		}
 	}
 
 	GP_BackendFlip(win);
 
 	/* axes */
-//	GP_HLineXYW(&context, 0, ycenter, display->w, white);
-//	GP_VLineXYH(&context, xcenter, 0, display->h, white);
+//	GP_HLineXYW(&pixmap, 0, ycenter, display->w, white);
+//	GP_VLineXYH(&pixmap, xcenter, 0, display->h, white);
 }
 
 void event_loop(void)
@@ -135,8 +135,8 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 
-	white = GP_RGBToContextPixel(0xff, 0xff, 0xff, win->context);
-	black = GP_RGBToContextPixel(0x00, 0x00, 0x00, win->context);
+	white = GP_RGBToPixmapPixel(0xff, 0xff, 0xff, win->pixmap);
+	black = GP_RGBToPixmapPixel(0x00, 0x00, 0x00, win->pixmap);
 
 	redraw_screen();
 

@@ -6,16 +6,16 @@ def Load(filename, callback=None):
   return c
 
 def _init(module):
-  "Extend Context with loaders submodule"
+  "Extend Pixmap with loaders submodule"
 
   from ..utils import extend, add_swig_getmethod, add_swig_setmethod
-  from ..core import Context as _context
+  from ..core import Pixmap as _pixmap
 
   class LoadersSubmodule(object):
     def __init__(self, ctx):
       self.ctx = ctx
 
-  _context._submodules['loaders'] = LoadersSubmodule
+  _pixmap._submodules['loaders'] = LoadersSubmodule
 
   @extend(LoadersSubmodule)
   def Save(self, filename, callback=None):

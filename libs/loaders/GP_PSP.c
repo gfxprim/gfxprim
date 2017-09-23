@@ -172,7 +172,7 @@ struct psp_img_attrs {
 	int is_loaded:1;
 	uint8_t subblock;
 	void *priv;
-	GP_Context *img;
+	GP_Pixmap *img;
 	GP_DataStorage *storage;
 };
 
@@ -458,7 +458,7 @@ static int psp_next_block(GP_IO *io, struct psp_img_attrs *attrs,
 	return 0;
 }
 
-int GP_ReadPSPEx(GP_IO *io, GP_Context **img, GP_DataStorage *storage,
+int GP_ReadPSPEx(GP_IO *io, GP_Pixmap **img, GP_DataStorage *storage,
                  GP_ProgressCallback *callback)
 {
 	int err = 0;
@@ -514,17 +514,17 @@ err0:
 	return 1;
 }
 
-GP_Context *GP_LoadPSP(const char *src_path, GP_ProgressCallback *callback)
+GP_Pixmap *GP_LoadPSP(const char *src_path, GP_ProgressCallback *callback)
 {
 	return GP_LoaderLoadImage(&GP_PSP, src_path, callback);
 }
 
-GP_Context *GP_ReadPSP(GP_IO *io, GP_ProgressCallback *callback)
+GP_Pixmap *GP_ReadPSP(GP_IO *io, GP_ProgressCallback *callback)
 {
 	return GP_LoaderReadImage(&GP_PSP, io, callback);
 }
 
-int GP_LoadPSPEx(const char *src_path, GP_Context **img,
+int GP_LoadPSPEx(const char *src_path, GP_Pixmap **img,
 		 GP_DataStorage *storage, GP_ProgressCallback *callback)
 {
 	return GP_LoaderLoadImageEx(&GP_PSP, src_path, img, storage, callback);

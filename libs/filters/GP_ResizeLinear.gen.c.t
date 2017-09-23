@@ -8,7 +8,7 @@
 #include <string.h>
 #include <errno.h>
 
-#include "core/GP_Context.h"
+#include "core/GP_Pixmap.h"
 #include "core/GP_GetPutPixel.h"
 #include "core/GP_Gamma.h"
 
@@ -49,7 +49,7 @@ for (x = 0; x < dst->w; x++) {
 
 @ for pt in pixeltypes:
 @     if not pt.is_unknown() and not pt.is_palette():
-static int resize_lin_lf_{{ pt.name }}(const GP_Context *src, GP_Context *dst,
+static int resize_lin_lf_{{ pt.name }}(const GP_Pixmap *src, GP_Pixmap *dst,
                                        GP_ProgressCallback *callback)
 {
 	uint32_t xmap[dst->w + 1];
@@ -131,7 +131,7 @@ static int resize_lin_lf_{{ pt.name }}(const GP_Context *src, GP_Context *dst,
 @
 @ for pt in pixeltypes:
 @     if not pt.is_unknown() and not pt.is_palette():
-static int resize_lin{{ pt.name }}(const GP_Context *src, GP_Context *dst,
+static int resize_lin{{ pt.name }}(const GP_Pixmap *src, GP_Pixmap *dst,
                                    GP_ProgressCallback *callback)
 {
 	uint32_t xmap[dst->w + 1];
@@ -221,7 +221,7 @@ static int resize_lin{{ pt.name }}(const GP_Context *src, GP_Context *dst,
 
 @ end
 @
-static int resize_lin(const GP_Context *src, GP_Context *dst,
+static int resize_lin(const GP_Pixmap *src, GP_Pixmap *dst,
                      GP_ProgressCallback *callback)
 {
 	switch (src->pixel_type) {
@@ -239,7 +239,7 @@ static int resize_lin(const GP_Context *src, GP_Context *dst,
 	}
 }
 
-int GP_FilterResizeLinearInt(const GP_Context *src, GP_Context *dst,
+int GP_FilterResizeLinearInt(const GP_Pixmap *src, GP_Pixmap *dst,
                              GP_ProgressCallback *callback)
 {
 	if (src->pixel_type != dst->pixel_type) {
@@ -251,7 +251,7 @@ int GP_FilterResizeLinearInt(const GP_Context *src, GP_Context *dst,
 	return resize_lin(src, dst, callback);
 }
 
-static int resize_lin_lf(const GP_Context *src, GP_Context *dst,
+static int resize_lin_lf(const GP_Pixmap *src, GP_Pixmap *dst,
                           GP_ProgressCallback *callback)
 {
 	float x_rat = 1.00 * dst->w / src->w;
@@ -283,7 +283,7 @@ static int resize_lin_lf(const GP_Context *src, GP_Context *dst,
 	return resize_lin(src, dst, callback);
 }
 
-int GP_FilterResizeLinearLFInt(const GP_Context *src, GP_Context *dst,
+int GP_FilterResizeLinearLFInt(const GP_Pixmap *src, GP_Pixmap *dst,
                                GP_ProgressCallback *callback)
 {
 	if (src->pixel_type != dst->pixel_type) {

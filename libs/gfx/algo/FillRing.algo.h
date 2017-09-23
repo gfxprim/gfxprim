@@ -30,13 +30,13 @@
 /*
  * This macro defines a filled circle drawing function.
  * Arguments:
- *     CONTEXT_T - user-defined type of drawing context (passed to HLINE)
+ *     PIXMAP_T - user-defined type of drawing pixmap (passed to HLINE)
  *     PIXVAL_T  - user-defined pixel value type (passed to HLINE)
- *     HLINE     - horizontal line drawing function f(context, x0, x1, y, pixval)
+ *     HLINE     - horizontal line drawing function f(pixmap, x0, x1, y, pixval)
  *     FN_NAME   - name of the function to be defined
  */
-#define DEF_FILLRING_FN(FN_NAME, CONTEXT_T, PIXVAL_T, HLINE) \
-static void FN_NAME(CONTEXT_T context, int xcenter, int ycenter, \
+#define DEF_FILLRING_FN(FN_NAME, PIXMAP_T, PIXVAL_T, HLINE) \
+static void FN_NAME(PIXMAP_T pixmap, int xcenter, int ycenter, \
 	unsigned int r1, unsigned int r2, PIXVAL_T pixval) \
 { \
 	int outer_r = (int) GP_MAX(r1, r2); \
@@ -61,13 +61,13 @@ static void FN_NAME(CONTEXT_T context, int xcenter, int ycenter, \
 			} \
 			inner_error += -2*y + 1; \
 \
-			HLINE(context, xcenter - outer_x + 1, xcenter - inner_x,     ycenter - y, pixval); \
-			HLINE(context, xcenter + inner_x,     xcenter + outer_x - 1, ycenter - y, pixval); \
-			HLINE(context, xcenter - outer_x + 1, xcenter - inner_x,     ycenter + y, pixval); \
-			HLINE(context, xcenter + inner_x,     xcenter + outer_x - 1, ycenter + y, pixval); \
+			HLINE(pixmap, xcenter - outer_x + 1, xcenter - inner_x,     ycenter - y, pixval); \
+			HLINE(pixmap, xcenter + inner_x,     xcenter + outer_x - 1, ycenter - y, pixval); \
+			HLINE(pixmap, xcenter - outer_x + 1, xcenter - inner_x,     ycenter + y, pixval); \
+			HLINE(pixmap, xcenter + inner_x,     xcenter + outer_x - 1, ycenter + y, pixval); \
 		} else { \
-			HLINE(context, xcenter - outer_x + 1, xcenter + outer_x - 1, ycenter-y, pixval); \
-			HLINE(context, xcenter - outer_x + 1, xcenter + outer_x - 1, ycenter+y, pixval); \
+			HLINE(pixmap, xcenter - outer_x + 1, xcenter + outer_x - 1, ycenter-y, pixval); \
+			HLINE(pixmap, xcenter - outer_x + 1, xcenter + outer_x - 1, ycenter+y, pixval); \
 		} \
 	} \
 }

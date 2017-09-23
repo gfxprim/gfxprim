@@ -89,7 +89,7 @@ static const char *get_colorspace(J_COLOR_SPACE color_space)
 	};
 }
 
-static int load(struct jpeg_decompress_struct *cinfo, GP_Context *ret,
+static int load(struct jpeg_decompress_struct *cinfo, GP_Pixmap *ret,
                 GP_ProgressCallback *callback)
 {
 	while (cinfo->output_scanline < cinfo->output_height) {
@@ -107,7 +107,7 @@ static int load(struct jpeg_decompress_struct *cinfo, GP_Context *ret,
 	return 0;
 }
 
-static int load_cmyk(struct jpeg_decompress_struct *cinfo, GP_Context *ret,
+static int load_cmyk(struct jpeg_decompress_struct *cinfo, GP_Pixmap *ret,
                        GP_ProgressCallback *callback)
 {
 	while (cinfo->output_scanline < cinfo->output_height) {
@@ -256,13 +256,13 @@ static void save_jpg_markers(struct jpeg_decompress_struct *cinfo)
 	jpeg_save_markers(cinfo, JPEG_APP0 + 1, 0xffff);
 }
 
-int GP_ReadJPGEx(GP_IO *io, GP_Context **img,
+int GP_ReadJPGEx(GP_IO *io, GP_Pixmap **img,
 		 GP_DataStorage *storage, GP_ProgressCallback *callback)
 {
 	struct jpeg_decompress_struct cinfo;
 	struct my_source_mgr src;
 	struct my_jpg_err my_err;
-	GP_Context *ret = NULL;
+	GP_Pixmap *ret = NULL;
 	uint8_t buf[1024];
 	int err;
 
@@ -318,7 +318,7 @@ int GP_ReadJPGEx(GP_IO *io, GP_Context **img,
 		goto err1;
 	}
 
-	ret = GP_ContextAlloc(cinfo.image_width, cinfo.image_height,
+	ret = GP_PixmapAlloc(cinfo.image_width, cinfo.image_height,
 	                      pixel_type);
 
 	if (ret == NULL) {
@@ -355,7 +355,7 @@ exit:
 
 	return 0;
 err2:
-	GP_ContextFree(ret);
+	GP_PixmapFree(ret);
 err1:
 	jpeg_destroy_decompress(&cinfo);
 	errno = err;
@@ -363,7 +363,7 @@ err1:
 }
 
 static int save_convert(struct jpeg_compress_struct *cinfo,
-                        const GP_Context *src,
+                        const GP_Pixmap *src,
                         GP_PixelType out_pix,
                         GP_ProgressCallback *callback)
 {
@@ -391,7 +391,7 @@ static int save_convert(struct jpeg_compress_struct *cinfo,
 }
 
 static int save(struct jpeg_compress_struct *cinfo,
-                const GP_Context *src,
+                const GP_Pixmap *src,
                 GP_ProgressCallback *callback)
 {
 	while (cinfo->next_scanline < cinfo->image_height) {
@@ -469,7 +469,7 @@ static GP_PixelType out_pixel_types[] = {
 	GP_PIXEL_UNKNOWN
 };
 
-int GP_WriteJPG(const GP_Context *src, GP_IO *io,
+int GP_WriteJPG(const GP_Pixmap *src, GP_IO *io,
                 GP_ProgressCallback *callback)
 {
 	struct jpeg_compress_struct cinfo;
@@ -544,7 +544,7 @@ int GP_WriteJPG(const GP_Context *src, GP_IO *io,
 
 #else
 
-int GP_ReadJPGEx(GP_IO GP_UNUSED(*io), GP_Context GP_UNUSED(**img),
+int GP_ReadJPGEx(GP_IO GP_UNUSED(*io), GP_Pixmap GP_UNUSED(**img),
                  GP_DataStorage GP_UNUSED(*storage),
                  GP_ProgressCallback GP_UNUSED(*callback))
 {
@@ -552,7 +552,7 @@ int GP_ReadJPGEx(GP_IO GP_UNUSED(*io), GP_Context GP_UNUSED(**img),
 	return 1;
 }
 
-int GP_WriteJPG(const GP_Context GP_UNUSED(*src), GP_IO GP_UNUSED(*io),
+int GP_WriteJPG(const GP_Pixmap GP_UNUSED(*src), GP_IO GP_UNUSED(*io),
                 GP_ProgressCallback GP_UNUSED(*callback))
 {
 	errno = ENOSYS;
@@ -561,23 +561,23 @@ int GP_WriteJPG(const GP_Context GP_UNUSED(*src), GP_IO GP_UNUSED(*io),
 
 #endif /* HAVE_JPEG */
 
-GP_Context *GP_ReadJPG(GP_IO *io, GP_ProgressCallback *callback)
+GP_Pixmap *GP_ReadJPG(GP_IO *io, GP_ProgressCallback *callback)
 {
 	return GP_LoaderReadImage(&GP_JPG, io, callback);
 }
 
-GP_Context *GP_LoadJPG(const char *src_path, GP_ProgressCallback *callback)
+GP_Pixmap *GP_LoadJPG(const char *src_path, GP_ProgressCallback *callback)
 {
 	return GP_LoaderLoadImage(&GP_JPG, src_path, callback);
 }
 
-int GP_LoadJPGEx(const char *src_path, GP_Context **img,
+int GP_LoadJPGEx(const char *src_path, GP_Pixmap **img,
                  GP_DataStorage *storage, GP_ProgressCallback *callback)
 {
 	return GP_LoaderLoadImageEx(&GP_JPG, src_path, img, storage, callback);
 }
 
-int GP_SaveJPG(const GP_Context *src, const char *dst_path,
+int GP_SaveJPG(const GP_Pixmap *src, const char *dst_path,
                GP_ProgressCallback *callback)
 {
 	return GP_LoaderSaveImage(&GP_JPG, src, dst_path, callback);

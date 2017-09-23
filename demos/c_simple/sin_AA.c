@@ -32,35 +32,35 @@
 
 #include <GP.h>
 
-static void redraw(GP_Context *context)
+static void redraw(GP_Pixmap *pixmap)
 {
 	static float param = 1;
 	static float param2 = 0.01;
 	static int flag = 1;
-	GP_Pixel b = GP_RGBToContextPixel(0xbe, 0xbe, 0x9e, context);
+	GP_Pixel b = GP_RGBToPixmapPixel(0xbe, 0xbe, 0x9e, pixmap);
 	unsigned int y;
 
-	GP_Fill(context, b);
+	GP_Fill(pixmap, b);
 
-	for (y = 0; y < context->w; y++) {
+	for (y = 0; y < pixmap->w; y++) {
 		GP_Coord x0, x1, l1, l2;
 
-		x0 = (context->w)<<7;
-		x1 = (context->w)<<7;
+		x0 = (pixmap->w)<<7;
+		x1 = (pixmap->w)<<7;
 
-		l1 = (context->w)<<5;
-		l2 = (context->w)<<3;
+		l1 = (pixmap->w)<<5;
+		l2 = (pixmap->w)<<3;
 
-		GP_Pixel p = GP_RGBToContextPixel(120 - 3 * param, abs(40 * param), 0, context);
+		GP_Pixel p = GP_RGBToPixmapPixel(120 - 3 * param, abs(40 * param), 0, pixmap);
 
-		l2 *= 4.00 * y / context->h;
+		l2 *= 4.00 * y / pixmap->h;
 
 		l1 *= param;
 
 		x0 += l1 * sin(param2 * y) + l2;
 		x1 -= l1 * cos(param2 * y) + l2;
 
-		GP_HLineAA(context, x0, x1, y<<8, p);
+		GP_HLineAA(pixmap, x0, x1, y<<8, p);
 	}
 
 	if (flag) {
@@ -97,7 +97,7 @@ int main(void)
 	/* Wait for events */
 	for (;;) {
 		if (!pause_flag) {
-			redraw(backend->context);
+			redraw(backend->pixmap);
 			GP_BackendFlip(backend);
 		}
 

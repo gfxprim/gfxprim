@@ -32,81 +32,81 @@
 #include "GP_FixedPoint.h"
 
 /*
- * Flip a coordinate within context according to context transformation.
+ * Flip a coordinate within pixmap according to pixmap transformation.
  */
-#define GP_TRANSFORM_X(context, x) do {   \
-	if ((context)->x_swap)            \
-		x = (context)->w - x - 1; \
+#define GP_TRANSFORM_X(pixmap, x) do {   \
+	if ((pixmap)->x_swap)            \
+		x = (pixmap)->w - x - 1; \
 } while (0)
 
-#define GP_TRANSFORM_Y(context, y) do {   \
-	if ((context)->y_swap)            \
-		y = (context)->h - y - 1; \
+#define GP_TRANSFORM_Y(pixmap, y) do {   \
+	if ((pixmap)->y_swap)            \
+		y = (pixmap)->h - y - 1; \
 } while (0)
 
 /*
  * Fixed point variants.
  */
-#define GP_TRANSFORM_X_FP(context, x) do {                \
-	if ((context)->x_swap)                            \
-		x = GP_FP_FROM_INT((context)->w - 1) - x; \
+#define GP_TRANSFORM_X_FP(pixmap, x) do {                \
+	if ((pixmap)->x_swap)                            \
+		x = GP_FP_FROM_INT((pixmap)->w - 1) - x; \
 } while (0)
 
-#define GP_TRANSFORM_Y_FP(context, y) do {                \
-	if ((context)->y_swap)                            \
-		y = GP_FP_FROM_INT((context)->h - 1) - y; \
+#define GP_TRANSFORM_Y_FP(pixmap, y) do {                \
+	if ((pixmap)->y_swap)                            \
+		y = GP_FP_FROM_INT((pixmap)->h - 1) - y; \
 } while (0)
 
 /*
- * Swap coordinates (axes) according to context transformation.
+ * Swap coordinates (axes) according to pixmap transformation.
  */
-#define GP_TRANSFORM_SWAP(context, x, y) do { \
-	if ((context)->axes_swap)             \
+#define GP_TRANSFORM_SWAP(pixmap, x, y) do { \
+	if ((pixmap)->axes_swap)             \
 		GP_SWAP(x, y);                \
 } while (0)
 
 /*
- * Transform "user"-coordinates to "real"-coordinates according to context
+ * Transform "user"-coordinates to "real"-coordinates according to pixmap
  * transformation.
  */
-#define GP_TRANSFORM_POINT(context, x, y) do { \
-	GP_TRANSFORM_SWAP(context, x, y);      \
-	GP_TRANSFORM_X(context, x);            \
-	GP_TRANSFORM_Y(context, y);            \
+#define GP_TRANSFORM_POINT(pixmap, x, y) do { \
+	GP_TRANSFORM_SWAP(pixmap, x, y);      \
+	GP_TRANSFORM_X(pixmap, x);            \
+	GP_TRANSFORM_Y(pixmap, y);            \
 } while (0)
 
-#define GP_TRANSFORM_POINT_FP(context, x, y) do { \
-	GP_TRANSFORM_SWAP(context, x, y);         \
-	GP_TRANSFORM_X_FP(context, x);            \
-	GP_TRANSFORM_Y_FP(context, y);            \
+#define GP_TRANSFORM_POINT_FP(pixmap, x, y) do { \
+	GP_TRANSFORM_SWAP(pixmap, x, y);         \
+	GP_TRANSFORM_X_FP(pixmap, x);            \
+	GP_TRANSFORM_Y_FP(pixmap, y);            \
 } while (0)
 
 /*
  * Transform "user"-coordinates to "real"-coordinates of a rectangle corner
- * according to context transformation. Corner with min-coordinates is
+ * according to pixmap transformation. Corner with min-coordinates is
  * transformed to (different) corner with min-coordinates etc.
  * Arguments x, y, w, h are modified.
  */
-#define GP_TRANSFORM_RECT(context, x, y, w, h) do { \
-	GP_TRANSFORM_SWAP(context, x, y);           \
-	GP_TRANSFORM_SWAP(context, w, h);           \
+#define GP_TRANSFORM_RECT(pixmap, x, y, w, h) do { \
+	GP_TRANSFORM_SWAP(pixmap, x, y);           \
+	GP_TRANSFORM_SWAP(pixmap, w, h);           \
 	                                            \
-	if ((context)->x_swap)                      \
-		x = (context)->w - x - w;           \
+	if ((pixmap)->x_swap)                      \
+		x = (pixmap)->w - x - w;           \
 	                                            \
-	if ((context)->y_swap)                      \
-		y = (context)->h - y - h;           \
+	if ((pixmap)->y_swap)                      \
+		y = (pixmap)->h - y - h;           \
 } while (0)
 
-#define GP_TRANSFORM_RECT_FP(context, x, y, w, h) do {    \
-	GP_TRANSFORM_SWAP(context, x, y);                 \
-	GP_TRANSFORM_SWAP(context, w, h);                 \
+#define GP_TRANSFORM_RECT_FP(pixmap, x, y, w, h) do {    \
+	GP_TRANSFORM_SWAP(pixmap, x, y);                 \
+	GP_TRANSFORM_SWAP(pixmap, w, h);                 \
 	                                                  \
-	if ((context)->x_swap)                            \
-		x = GP_FP_FROM_INT((context)->w) - x - w; \
+	if ((pixmap)->x_swap)                            \
+		x = GP_FP_FROM_INT((pixmap)->w) - x - w; \
 	                                                  \
-	if ((context)->y_swap)                            \
-		y = GP_FP_FROM_INT((context)->h) - y - h; \
+	if ((pixmap)->y_swap)                            \
+		y = GP_FP_FROM_INT((pixmap)->h) - y - h; \
 } while (0)
 
 /*
@@ -123,12 +123,12 @@
 
 /*
  * Inverse transformation to GP_TRANSFORM_POINT.
- * Use for translating mouse pointer coordinates to coordinates on context.
+ * Use for translating mouse pointer coordinates to coordinates on pixmap.
  */
-#define GP_RETRANSFORM_POINT(context, x, y) do { \
-	GP_TRANSFORM_X(context, x);              \
-	GP_TRANSFORM_Y(context, y);              \
-	GP_TRANSFORM_SWAP(context, x, y);        \
+#define GP_RETRANSFORM_POINT(pixmap, x, y) do { \
+	GP_TRANSFORM_X(pixmap, x);              \
+	GP_TRANSFORM_Y(pixmap, y);              \
+	GP_TRANSFORM_SWAP(pixmap, x, y);        \
 } while (0)
 
 #endif /* CORE_GP_TRANSFORM_H */

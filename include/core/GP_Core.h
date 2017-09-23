@@ -38,8 +38,8 @@
 /* Common building blocks */
 #include "core/GP_Common.h"
 
-/* Context ... */
-#include "core/GP_Context.h"
+/* Pixmap ... */
+#include "core/GP_Pixmap.h"
 
 /* ... and it's trasformations */
 #include "core/GP_Transform.h"

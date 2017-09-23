@@ -31,7 +31,7 @@
 #include "GP_Pixel.h"
 #include "GP_GetPutPixel.h"
 #include "GP_Gamma.h"
-#include "GP_Context.h"
+#include "GP_Pixmap.h"
 #include "GP_Blit.h"
 
 static uint32_t get_bpr(uint32_t bpp, uint32_t w)
@@ -40,16 +40,16 @@ static uint32_t get_bpr(uint32_t bpp, uint32_t w)
 	uint8_t padd = !!(bits_per_row % 8);
 
 	if (bits_per_row / 8 + padd > UINT32_MAX) {
-		GP_WARN("Context too wide %u (overflow detected)", w);
+		GP_WARN("Pixmap too wide %u (overflow detected)", w);
 		return 0;
 	}
 
 	return bits_per_row / 8 + padd;
 }
 
-GP_Context *GP_ContextAlloc(GP_Size w, GP_Size h, GP_PixelType type)
+GP_Pixmap *GP_PixmapAlloc(GP_Size w, GP_Size h, GP_PixelType type)
 {
-	GP_Context *context;
+	GP_Pixmap *pixmap;
 	uint32_t bpp;
 	size_t bpr;
 	void *pixels;
@@ -61,12 +61,12 @@ GP_Context *GP_ContextAlloc(GP_Size w, GP_Size h, GP_PixelType type)
 	}
 
 	if (w <= 0 || h <= 0) {
-		GP_WARN("Trying to allocate context with zero width and/or height");
+		GP_WARN("Trying to allocate pixmap with zero width and/or height");
 		errno = EINVAL;
 		return NULL;
 	}
 
-	GP_DEBUG(1, "Allocating context %u x %u - %s",
+	GP_DEBUG(1, "Allocating pixmap %u x %u - %s",
 	         w, h, GP_PixelTypeName(type));
 
 	bpp = GP_PixelSize(type);
@@ -77,113 +77,113 @@ GP_Context *GP_ContextAlloc(GP_Size w, GP_Size h, GP_PixelType type)
 	size_t size = bpr * h;
 
 	if (size / h != bpr) {
-		GP_WARN("Context too big %u x %u (owerflow detected)", w, h);
+		GP_WARN("Pixmap too big %u x %u (owerflow detected)", w, h);
 		return NULL;
 	}
 
 	pixels = malloc(size);
-	context = malloc(sizeof(GP_Context));
+	pixmap = malloc(sizeof(GP_Pixmap));
 
-	if (pixels == NULL || context == NULL) {
+	if (pixels == NULL || pixmap == NULL) {
 		free(pixels);
-		free(context);
+		free(pixmap);
 		GP_WARN("Malloc failed :(");
 		errno = ENOMEM;
 		return NULL;
 	}
 
-	context->pixels        = pixels;
-	context->bpp           = bpp;
-	context->bytes_per_row = bpr;
-	context->offset        = 0;
+	pixmap->pixels        = pixels;
+	pixmap->bpp           = bpp;
+	pixmap->bytes_per_row = bpr;
+	pixmap->offset        = 0;
 
-	context->w = w;
-	context->h = h;
+	pixmap->w = w;
+	pixmap->h = h;
 
-	context->gamma = NULL;
+	pixmap->gamma = NULL;
 
-	context->pixel_type = type;
+	pixmap->pixel_type = type;
 	#warning Hmm, bit endianity... Why is not this settled by different pixel types?
-	context->bit_endian = GP_PixelTypes[type].bit_endian;
+	pixmap->bit_endian = GP_PixelTypes[type].bit_endian;
 
 	/* rotation and mirroring */
-	GP_ContextSetRotation(context, 0, 0, 0);
+	GP_PixmapSetRotation(pixmap, 0, 0, 0);
 
-	context->free_pixels = 1;
+	pixmap->free_pixels = 1;
 
-	return context;
+	return pixmap;
 }
 
-void GP_ContextFree(GP_Context *context)
+void GP_PixmapFree(GP_Pixmap *pixmap)
 {
-	GP_DEBUG(1, "Freeing context (%p)", context);
+	GP_DEBUG(1, "Freeing pixmap (%p)", pixmap);
 
-	if (context == NULL)
+	if (pixmap == NULL)
 		return;
 
-	if (context->free_pixels)
-		free(context->pixels);
+	if (pixmap->free_pixels)
+		free(pixmap->pixels);
 
-	if (context->gamma)
-		GP_GammaRelease(context->gamma);
+	if (pixmap->gamma)
+		GP_GammaRelease(pixmap->gamma);
 
-	free(context);
+	free(pixmap);
 }
 
-GP_Context *GP_ContextInit(GP_Context *context, GP_Size w, GP_Size h,
+GP_Pixmap *GP_PixmapInit(GP_Pixmap *pixmap, GP_Size w, GP_Size h,
                            GP_PixelType type, void *pixels)
 {
 	uint32_t bpp = GP_PixelSize(type);
 	uint32_t bpr = get_bpr(bpp, w);
 
-	context->pixels        = pixels;
-	context->bpp           = bpp;
-	context->bytes_per_row = bpr;
-	context->offset        = 0;
+	pixmap->pixels        = pixels;
+	pixmap->bpp           = bpp;
+	pixmap->bytes_per_row = bpr;
+	pixmap->offset        = 0;
 
-	context->w = w;
-	context->h = h;
+	pixmap->w = w;
+	pixmap->h = h;
 
-	context->pixel_type = type;
-	context->bit_endian = 0;
+	pixmap->pixel_type = type;
+	pixmap->bit_endian = 0;
 
-	context->gamma = NULL;
+	pixmap->gamma = NULL;
 
 	/* rotation and mirroring */
-	GP_ContextSetRotation(context, 0, 0, 0);
+	GP_PixmapSetRotation(pixmap, 0, 0, 0);
 
-	context->free_pixels = 0;
+	pixmap->free_pixels = 0;
 
-	return context;
+	return pixmap;
 }
 
-int GP_ContextResize(GP_Context *context, GP_Size w, GP_Size h)
+int GP_PixmapResize(GP_Pixmap *pixmap, GP_Size w, GP_Size h)
 {
-	uint32_t bpr = get_bpr(context->bpp, w);
+	uint32_t bpr = get_bpr(pixmap->bpp, w);
 	void *pixels;
 
-	pixels = realloc(context->pixels, bpr * h);
+	pixels = realloc(pixmap->pixels, bpr * h);
 
 	if (pixels == NULL)
 		return 1;
 
-	context->w = w;
-	context->h = h;
-	context->bytes_per_row = bpr;
-	context->pixels = pixels;
+	pixmap->w = w;
+	pixmap->h = h;
+	pixmap->bytes_per_row = bpr;
+	pixmap->pixels = pixels;
 
 	return 0;
 }
 
-GP_Context *GP_ContextCopy(const GP_Context *src, int flags)
+GP_Pixmap *GP_PixmapCopy(const GP_Pixmap *src, int flags)
 {
-	GP_Context *new;
+	GP_Pixmap *new;
 	uint8_t *pixels;
 
 	if (src == NULL)
 		return NULL;
 
-	new     = malloc(sizeof(GP_Context));
+	new     = malloc(sizeof(GP_Pixmap));
 	pixels  = malloc(src->bytes_per_row * src->h);
 
 	if (pixels == NULL || new == NULL) {
@@ -210,9 +210,9 @@ GP_Context *GP_ContextCopy(const GP_Context *src, int flags)
 	new->bit_endian = src->bit_endian;
 
 	if (flags & GP_COPY_WITH_ROTATION)
-		GP_ContextCopyRotation(src, new);
+		GP_PixmapCopyRotation(src, new);
 	else
-		GP_ContextSetRotation(new, 0, 0, 0);
+		GP_PixmapSetRotation(new, 0, 0, 0);
 
 	//TODO: Copy the gamma too
 	new->gamma = NULL;
@@ -223,13 +223,13 @@ GP_Context *GP_ContextCopy(const GP_Context *src, int flags)
 }
 
 
-GP_Context *GP_ContextConvertAlloc(const GP_Context *src,
+GP_Pixmap *GP_PixmapConvertAlloc(const GP_Pixmap *src,
                                    GP_PixelType dst_pixel_type)
 {
-	int w = GP_ContextW(src);
-	int h = GP_ContextH(src);
+	int w = GP_PixmapW(src);
+	int h = GP_PixmapH(src);
 
-	GP_Context *ret = GP_ContextAlloc(w, h, dst_pixel_type);
+	GP_Pixmap *ret = GP_PixmapAlloc(w, h, dst_pixel_type);
 
 	if (ret == NULL)
 		return NULL;
@@ -246,11 +246,11 @@ GP_Context *GP_ContextConvertAlloc(const GP_Context *src,
 	return ret;
 }
 
-GP_Context *GP_ContextConvert(const GP_Context *src, GP_Context *dst)
+GP_Pixmap *GP_PixmapConvert(const GP_Pixmap *src, GP_Pixmap *dst)
 {
 	//TODO: Asserts
-	int w = GP_ContextW(src);
-	int h = GP_ContextH(src);
+	int w = GP_PixmapW(src);
+	int h = GP_PixmapH(src);
 
 	/*
 	 * Fill the buffer with zeroes, otherwise it will
@@ -264,10 +264,10 @@ GP_Context *GP_ContextConvert(const GP_Context *src, GP_Context *dst)
 	return dst;
 }
 
-GP_Context *GP_SubContextAlloc(const GP_Context *context,
+GP_Pixmap *GP_SubPixmapAlloc(const GP_Pixmap *pixmap,
                                GP_Coord x, GP_Coord y, GP_Size w, GP_Size h)
 {
-	GP_Context *res = malloc(sizeof(GP_Context));
+	GP_Pixmap *res = malloc(sizeof(GP_Pixmap));
 
 	if (res == NULL) {
 		GP_WARN("Malloc failed :(");
@@ -275,46 +275,46 @@ GP_Context *GP_SubContextAlloc(const GP_Context *context,
 		return NULL;
 	}
 
-	return GP_SubContext(context, res, x, y, w, h);
+	return GP_SubPixmap(pixmap, res, x, y, w, h);
 }
 
-GP_Context *GP_SubContext(const GP_Context *context, GP_Context *subcontext,
+GP_Pixmap *GP_SubPixmap(const GP_Pixmap *pixmap, GP_Pixmap *subpixmap,
                           GP_Coord x, GP_Coord y, GP_Size w, GP_Size h)
 {
-	GP_CHECK(context, "NULL context");
+	GP_CHECK(pixmap, "NULL pixmap");
 
-	GP_TRANSFORM_RECT(context, x, y, w, h);
+	GP_TRANSFORM_RECT(pixmap, x, y, w, h);
 
-	GP_CHECK(context->w >= x + w, "Subcontext w out of original context.");
-	GP_CHECK(context->h >= y + h, "Subcontext h out of original context.");
+	GP_CHECK(pixmap->w >= x + w, "Subpixmap w out of original pixmap.");
+	GP_CHECK(pixmap->h >= y + h, "Subpixmap h out of original pixmap.");
 
-	subcontext->bpp           = context->bpp;
-	subcontext->bytes_per_row = context->bytes_per_row;
-	subcontext->offset        = (context->offset +
-	                            GP_PixelAddrOffset(x, context->pixel_type)) % 8;
+	subpixmap->bpp           = pixmap->bpp;
+	subpixmap->bytes_per_row = pixmap->bytes_per_row;
+	subpixmap->offset        = (pixmap->offset +
+	                            GP_PixelAddrOffset(x, pixmap->pixel_type)) % 8;
 
-	subcontext->w = w;
-	subcontext->h = h;
+	subpixmap->w = w;
+	subpixmap->h = h;
 
-	subcontext->pixel_type = context->pixel_type;
-	subcontext->bit_endian = context->bit_endian;
+	subpixmap->pixel_type = pixmap->pixel_type;
+	subpixmap->bit_endian = pixmap->bit_endian;
 
 	/* gamma */
-	subcontext->gamma = context->gamma;
+	subpixmap->gamma = pixmap->gamma;
 
 	/* rotation and mirroring */
-	GP_ContextCopyRotation(context, subcontext);
+	GP_PixmapCopyRotation(pixmap, subpixmap);
 
-	subcontext->pixels = GP_PIXEL_ADDR(context, x, y);
+	subpixmap->pixels = GP_PIXEL_ADDR(pixmap, x, y);
 
-	subcontext->free_pixels = 0;
+	subpixmap->free_pixels = 0;
 
-	return subcontext;
+	return subpixmap;
 }
 
-void GP_ContextPrintInfo(const GP_Context *self)
+void GP_PixmapPrintInfo(const GP_Pixmap *self)
 {
-	printf("Context info\n");
+	printf("Pixmap info\n");
 	printf("------------\n");
 	printf("Size\t%ux%u\n", self->w, self->h);
 	printf("BPP\t%u\n", self->bpp);
@@ -330,7 +330,7 @@ void GP_ContextPrintInfo(const GP_Context *self)
 }
 
 /*
- * The context rotations consists of two cyclic permutation groups that are
+ * The pixmap rotations consists of two cyclic permutation groups that are
  * mirrored.
  *
  * The flags change as follows:
@@ -352,66 +352,66 @@ void GP_ContextPrintInfo(const GP_Context *self)
  *      0      1         0
  *
  */
-void GP_ContextRotateCW(GP_Context *context)
+void GP_PixmapRotateCW(GP_Pixmap *pixmap)
 {
-	context->axes_swap = !context->axes_swap;
+	pixmap->axes_swap = !pixmap->axes_swap;
 
-	if (!context->x_swap && !context->y_swap) {
-		context->x_swap = 1;
+	if (!pixmap->x_swap && !pixmap->y_swap) {
+		pixmap->x_swap = 1;
 		return;
 	}
 
-	if (context->x_swap && !context->y_swap) {
-		context->y_swap = 1;
+	if (pixmap->x_swap && !pixmap->y_swap) {
+		pixmap->y_swap = 1;
 		return;
 	}
 
-	if (context->x_swap && context->y_swap) {
-		context->x_swap = 0;
+	if (pixmap->x_swap && pixmap->y_swap) {
+		pixmap->x_swap = 0;
 		return;
 	}
 
-	context->y_swap  = 0;
+	pixmap->y_swap  = 0;
 }
 
-void GP_ContextRotateCCW(GP_Context *context)
+void GP_PixmapRotateCCW(GP_Pixmap *pixmap)
 {
-	context->axes_swap = !context->axes_swap;
+	pixmap->axes_swap = !pixmap->axes_swap;
 
-	if (!context->x_swap && !context->y_swap) {
-		context->y_swap = 1;
+	if (!pixmap->x_swap && !pixmap->y_swap) {
+		pixmap->y_swap = 1;
 		return;
 	}
 
-	if (context->x_swap && !context->y_swap) {
-		context->x_swap = 0;
+	if (pixmap->x_swap && !pixmap->y_swap) {
+		pixmap->x_swap = 0;
 		return;
 	}
 
-	if (context->x_swap && context->y_swap) {
-		context->y_swap = 0;
+	if (pixmap->x_swap && pixmap->y_swap) {
+		pixmap->y_swap = 0;
 		return;
 	}
 
-	context->x_swap  = 1;
+	pixmap->x_swap  = 1;
 }
 
-int GP_ContextEqual(const GP_Context *ctx1, const GP_Context *ctx2)
+int GP_PixmapEqual(const GP_Pixmap *pixmap1, const GP_Pixmap *pixmap2)
 {
-	if (ctx1->pixel_type != ctx2->pixel_type)
+	if (pixmap1->pixel_type != pixmap2->pixel_type)
 		return 0;
 
-	if (GP_ContextW(ctx1) != GP_ContextW(ctx2))
+	if (GP_PixmapW(pixmap1) != GP_PixmapW(pixmap2))
 		return 0;
 
-	if (GP_ContextH(ctx1) != GP_ContextH(ctx2))
+	if (GP_PixmapH(pixmap1) != GP_PixmapH(pixmap2))
 		return 0;
 
-	GP_Coord x, y, w = GP_ContextW(ctx1), h = GP_ContextH(ctx1);
+	GP_Coord x, y, w = GP_PixmapW(pixmap1), h = GP_PixmapH(pixmap1);
 
 	for (x = 0; x < w; x++)
 		for (y = 0; y < h; y++)
-			if (GP_GetPixel(ctx1, x, y) != GP_GetPixel(ctx2, x, y))
+			if (GP_GetPixel(pixmap1, x, y) != GP_GetPixel(pixmap2, x, y))
 				return 0;
 
 	return 1;

@@ -108,14 +108,14 @@ GFXprim Specific Rules
 
 * Library external API uses CamelCase
 ** Together with mandatory 'GP_' prefix.
-** For example 'GP_PixelType', 'GP_Context', etc.
+** For example 'GP_PixelType', 'GP_Pixmap', etc.
 ** We will not change that, get over it. (It could have been worse, trust me.)
 
 * Basic library types are typedefed
 ** We have 'GP_Size' and 'GP_Coord' integer types to better distinguish
    roles of function parameters.
-** The basic structures are also typedefed so you can wite 'GP_Context'
-   instead of 'struct GP_Context'.
+** The basic structures are also typedefed so you can wite 'GP_Pixmap'
+   instead of 'struct GP_Pixmap'.
 ** Other uses of typedef are frowned upon.
 
 * When you add an externally visible symbol, i.e. new API function
@@ -143,5 +143,5 @@ All constants are available in 'foo.C' submodules (i.e. 'core.C')
 to avoid clutter.
 
 Where this makes sense, functions should be available as methods of
-an object (i.e. 'Context.Copy()' rather than 'Copy(context)'). Be Pythonic.
+an object (i.e. 'Pixmap.Copy()' rather than 'Copy(pixmap)'). Be Pythonic.
 

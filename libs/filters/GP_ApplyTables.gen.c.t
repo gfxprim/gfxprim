@@ -7,7 +7,7 @@
 
 #include <errno.h>
 
-#include "core/GP_Context.h"
+#include "core/GP_Pixmap.h"
 #include "core/GP_GetPutPixel.h"
 #include "core/GP_Debug.h"
 
@@ -15,10 +15,10 @@
 
 @ for pt in pixeltypes:
 @     if not pt.is_unknown() and not pt.is_palette():
-static int apply_tables_{{ pt.name }}(const GP_Context *const src,
+static int apply_tables_{{ pt.name }}(const GP_Pixmap *const src,
                                       GP_Coord x_src, GP_Coord y_src,
                                       GP_Size w_src, GP_Size h_src,
-                                      GP_Context *dst,
+                                      GP_Pixmap *dst,
                                       GP_Coord x_dst, GP_Coord y_dst,
                                       const GP_FilterTables *const tables,
                                       GP_ProgressCallback *callback)
@@ -62,10 +62,10 @@ static int apply_tables_{{ pt.name }}(const GP_Context *const src,
 
 @ end
 @
-int GP_FilterTablesApply(const GP_Context *const src,
+int GP_FilterTablesApply(const GP_Pixmap *const src,
                          GP_Coord x_src, GP_Coord y_src,
                          GP_Size w_src, GP_Size h_src,
-                         GP_Context *dst,
+                         GP_Pixmap *dst,
                          GP_Coord x_dst, GP_Coord y_dst,
                          const GP_FilterTables *const tables,
                          GP_ProgressCallback *callback)

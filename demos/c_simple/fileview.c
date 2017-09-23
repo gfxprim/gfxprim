@@ -29,7 +29,7 @@
 
 #include <GP.h>
 
-static GP_Context *win;
+static GP_Pixmap *win;
 static GP_Backend *backend;
 
 static GP_Pixel white_pixel, gray_pixel, dark_gray_pixel, black_pixel,
@@ -266,14 +266,14 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 
-	win = backend->context;
+	win = backend->pixmap;
 
-	white_pixel     = GP_RGBToContextPixel(0xff, 0xff, 0xff, win);
-	gray_pixel      = GP_RGBToContextPixel(0xbe, 0xbe, 0xbe, win);
-	dark_gray_pixel = GP_RGBToContextPixel(0x7f, 0x7f, 0x7f, win);
-	black_pixel     = GP_RGBToContextPixel(0x00, 0x00, 0x00, win);
-	red_pixel       = GP_RGBToContextPixel(0xff, 0x00, 0x00, win);
-	blue_pixel      = GP_RGBToContextPixel(0x00, 0x00, 0xff, win);
+	white_pixel     = GP_RGBToPixmapPixel(0xff, 0xff, 0xff, win);
+	gray_pixel      = GP_RGBToPixmapPixel(0xbe, 0xbe, 0xbe, win);
+	dark_gray_pixel = GP_RGBToPixmapPixel(0x7f, 0x7f, 0x7f, win);
+	black_pixel     = GP_RGBToPixmapPixel(0x00, 0x00, 0x00, win);
+	red_pixel       = GP_RGBToPixmapPixel(0xff, 0x00, 0x00, win);
+	blue_pixel      = GP_RGBToPixmapPixel(0x00, 0x00, 0xff, win);
 
 	redraw_screen();
 	GP_BackendFlip(backend);

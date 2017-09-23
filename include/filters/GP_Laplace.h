@@ -40,10 +40,10 @@
  *              [-2 ]
  *              [ 1 ]
  */
-int GP_FilterLaplace(const GP_Context *src, GP_Context *dst,
+int GP_FilterLaplace(const GP_Pixmap *src, GP_Pixmap *dst,
                      GP_ProgressCallback *callback);
 
-GP_Context *GP_FilterLaplaceAlloc(const GP_Context *src,
+GP_Pixmap *GP_FilterLaplaceAlloc(const GP_Pixmap *src,
                                   GP_ProgressCallback *callback);
 
 /*
@@ -52,10 +52,10 @@ GP_Context *GP_FilterLaplaceAlloc(const GP_Context *src,
  * This filter substract result of Laplace filter weigted by w from the
  * original image which amplifies edges.
  */
-int GP_FilterEdgeSharpening(const GP_Context *src, GP_Context *dst,
+int GP_FilterEdgeSharpening(const GP_Pixmap *src, GP_Pixmap *dst,
                             float w, GP_ProgressCallback *callback);
 
-GP_Context *GP_FilterEdgeSharpeningAlloc(const GP_Context *src, float w,
+GP_Pixmap *GP_FilterEdgeSharpeningAlloc(const GP_Pixmap *src, float w,
                                          GP_ProgressCallback *callback);
 
 #endif /* FILTERS_GP_LAPLACE_H */

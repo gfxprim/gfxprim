@@ -26,7 +26,7 @@
 #include "image_cache.h"
 
 struct image {
-	GP_Context *ctx;
+	GP_Pixmap *pixmap;
 	GP_DataStorage *meta_data;
 
 	struct image *prev;
@@ -73,23 +73,23 @@ size_t image_cache_get_ram_size(void)
 /*
  * Reports correct image record size.
  */
-static size_t image_size2(GP_Context *ctx, GP_DataStorage *meta_data,
+static size_t image_size2(GP_Pixmap *pixmap, GP_DataStorage *meta_data,
                           const char *path)
 {
 	size_t meta_data_size = 0;
-	size_t context_size = ctx->bytes_per_row * ctx->h + sizeof(GP_Context);
+	size_t pixmap_size = pixmap->bytes_per_row * pixmap->h + sizeof(GP_Pixmap);
 
 	//TODO! 4096 is a size of single block, data storage may have more blocks
 	if (meta_data)
 		meta_data_size = 4096;
 
-	return meta_data_size + context_size +
+	return meta_data_size + pixmap_size +
 	       sizeof(struct image) + strlen(path) + 1;
 }
 
 static size_t image_size(struct image *img)
 {
-	return image_size2(img->ctx, NULL, img->path);
+	return image_size2(img->pixmap, NULL, img->path);
 }
 
 struct image_cache *image_cache_create(unsigned int max_size_kbytes)
@@ -135,7 +135,7 @@ static void remove_img_free(struct image_cache *self,
 	GP_DEBUG(2, "Freeing image '%s' size %zu", img->path, size);
 
 	remove_img(self, img, size);
-	GP_ContextFree(img->ctx);
+	GP_PixmapFree(img->pixmap);
 	GP_DataStorageDestroy(img->meta_data);
 	free(img);
 }
@@ -159,7 +159,7 @@ static void add_img(struct image_cache *self, struct image *img, size_t size)
 		self->end = img;
 }
 
-int image_cache_get(struct image_cache *self, GP_Context **img,
+int image_cache_get(struct image_cache *self, GP_Pixmap **img,
 		    GP_DataStorage **meta_data, int elevate, const char *key)
 {
 	struct image *i;
@@ -189,7 +189,7 @@ int image_cache_get(struct image_cache *self, GP_Context **img,
 	}
 
 	if (img)
-		*img = i->ctx;
+		*img = i->pixmap;
 
 	if (meta_data)
 		*meta_data = i->meta_data;
@@ -197,7 +197,7 @@ int image_cache_get(struct image_cache *self, GP_Context **img,
 	return 0;
 }
 
-GP_Context *image_cache_get2(struct image_cache *self, int elevate,
+GP_Pixmap *image_cache_get2(struct image_cache *self, int elevate,
                              const char *fmt, ...)
 {
 	va_list va;
@@ -246,7 +246,7 @@ GP_Context *image_cache_get2(struct image_cache *self, int elevate,
 	if (len >= sizeof(buf))
 		free(key);
 
-	return i ? i->ctx : NULL;
+	return i ? i->pixmap : NULL;
 }
 
 void image_cache_print(struct image_cache *self)
@@ -283,7 +283,7 @@ static int assert_size(struct image_cache *self, size_t size)
 	return 0;
 }
 
-int image_cache_put(struct image_cache *self, GP_Context *ctx,
+int image_cache_put(struct image_cache *self, GP_Pixmap *pixmap,
                     GP_DataStorage *meta_data, const char *key)
 {
 	size_t size;
@@ -291,7 +291,7 @@ int image_cache_put(struct image_cache *self, GP_Context *ctx,
 	if (self == NULL)
 		return 1;
 
-	size = image_size2(ctx, meta_data, key);
+	size = image_size2(pixmap, meta_data, key);
 
 	/*
 	 * We try to create room for the image. If this fails we add the image
@@ -307,7 +307,7 @@ int image_cache_put(struct image_cache *self, GP_Context *ctx,
 		return 1;
 	}
 
-	img->ctx = ctx;
+	img->pixmap = pixmap;
 	img->meta_data = meta_data;
 	img->elevated = 0;
 	strcpy(img->path, key);
@@ -319,7 +319,7 @@ int image_cache_put(struct image_cache *self, GP_Context *ctx,
 	return 0;
 }
 
-int image_cache_put2(struct image_cache *self, GP_Context *ctx,
+int image_cache_put2(struct image_cache *self, GP_Pixmap *pixmap,
                      GP_DataStorage *meta_data, const char *fmt, ...)
 {
 	size_t size, len;
@@ -333,7 +333,7 @@ int image_cache_put2(struct image_cache *self, GP_Context *ctx,
 	va_end(va);
 
 	//TODO: FIX THIS
-	size = image_size2(ctx, meta_data, "") + len + 1;
+	size = image_size2(pixmap, meta_data, "") + len + 1;
 
 	/*
 	 * We try to create room for the image. If this fails we add the image
@@ -349,7 +349,7 @@ int image_cache_put2(struct image_cache *self, GP_Context *ctx,
 		return 1;
 	}
 
-	img->ctx = ctx;
+	img->pixmap = pixmap;
 	img->meta_data = meta_data;
 	img->elevated = 0;
 

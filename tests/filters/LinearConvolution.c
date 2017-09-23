@@ -24,14 +24,14 @@
 #include <errno.h>
 #include <sys/stat.h>
 
-#include <core/GP_Context.h>
+#include <core/GP_Pixmap.h>
 #include <loaders/GP_Loaders.h>
 #include <filters/GP_Convolution.h>
 
 #include "tst_test.h"
 
 static int load_resources(const char *path1, const char *path2,
-                          GP_Context **c1, GP_Context **c2)
+                          GP_Pixmap **c1, GP_Pixmap **c2)
 {
 	*c1 = GP_LoadImage(path1, NULL);
 	*c2 = GP_LoadImage(path2, NULL);
@@ -46,7 +46,7 @@ static int load_resources(const char *path1, const char *path2,
 
 static int test_lin_conv_box_3x3(void)
 {
-	GP_Context *in, *out;
+	GP_Pixmap *in, *out;
 	int ret;
 
 	ret = load_resources("in.pgm", "out.pgm", &in, &out);
@@ -81,7 +81,7 @@ static int test_lin_conv_box_3x3(void)
 
 static int test_h_lin_conv_box_3_raw(void)
 {
-	GP_Context *in, *out;
+	GP_Pixmap *in, *out;
 	int ret;
 
 	ret = load_resources("in.pgm", "out.pgm", &in, &out);
@@ -106,7 +106,7 @@ static int test_h_lin_conv_box_3_raw(void)
 
 static int test_v_lin_conv_box_3_raw(void)
 {
-	GP_Context *in, *out;
+	GP_Pixmap *in, *out;
 	int ret;
 
 	ret = load_resources("in.pgm", "out.pgm", &in, &out);

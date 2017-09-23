@@ -34,23 +34,23 @@
 /* Generate drawing functions for various bit depths. */
 GP_DEF_DRAW_FN_PER_BPP(GP_Ellipse_Raw, DEF_ELLIPSE_FN)
 
-void GP_Ellipse_Raw(GP_Context *context, GP_Coord xcenter, GP_Coord ycenter,
+void GP_Ellipse_Raw(GP_Pixmap *pixmap, GP_Coord xcenter, GP_Coord ycenter,
                     GP_Size a, GP_Size b, GP_Pixel pixel)
 {
-	GP_CHECK_CONTEXT(context);
+	GP_CHECK_PIXMAP(pixmap);
 
-	GP_FN_PER_BPP_CONTEXT(GP_Ellipse_Raw, context, context,
+	GP_FN_PER_BPP_PIXMAP(GP_Ellipse_Raw, pixmap, pixmap,
 	                      xcenter, ycenter, a, b, pixel);
 }
 
-void GP_Ellipse(GP_Context *context, GP_Coord xcenter, GP_Coord ycenter,
+void GP_Ellipse(GP_Pixmap *pixmap, GP_Coord xcenter, GP_Coord ycenter,
                 GP_Size a, GP_Size b, GP_Pixel pixel)
 {
-	GP_CHECK_CONTEXT(context);
+	GP_CHECK_PIXMAP(pixmap);
 
 	/* recalculate center point and swap a and b when axes are swapped */
-	GP_TRANSFORM_POINT(context, xcenter, ycenter);
-	GP_TRANSFORM_SWAP(context, a, b);
+	GP_TRANSFORM_POINT(pixmap, xcenter, ycenter);
+	GP_TRANSFORM_SWAP(pixmap, a, b);
 
-	GP_Ellipse_Raw(context, xcenter, ycenter, a, b, pixel);
+	GP_Ellipse_Raw(pixmap, xcenter, ycenter, a, b, pixel);
 }

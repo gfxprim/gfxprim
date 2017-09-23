@@ -34,34 +34,34 @@
 /*
  * Loads a PNG image from a file.
  */
-GP_Context *GP_LoadPNG(const char *src_path, GP_ProgressCallback *callback);
+GP_Pixmap *GP_LoadPNG(const char *src_path, GP_ProgressCallback *callback);
 
 /*
  * Extended load function.
  */
-int GP_ReadPNGEx(GP_IO *io, GP_Context **img,
+int GP_ReadPNGEx(GP_IO *io, GP_Pixmap **img,
                  GP_DataStorage *storage, GP_ProgressCallback *callback);
-int GP_LoadPNGEx(const char *src_path, GP_Context **img,
+int GP_LoadPNGEx(const char *src_path, GP_Pixmap **img,
                  GP_DataStorage *storage, GP_ProgressCallback *callback);
 
 /*
  * Reads a PNG from an IO stream.
  *
- * Returns newly allocated context cotaining the loaded image or in case of
+ * Returns newly allocated pixmap cotaining the loaded image or in case of
  * failure NULL and errno is set.
  */
-GP_Context *GP_ReadPNG(GP_IO *io, GP_ProgressCallback *callback);
+GP_Pixmap *GP_ReadPNG(GP_IO *io, GP_ProgressCallback *callback);
 
 /*
  * Writes PNG into an I/O stream.
  */
-int GP_SavePNG(const GP_Context *src, const char *dst_path,
+int GP_SavePNG(const GP_Pixmap *src, const char *dst_path,
                GP_ProgressCallback *callback);
 
 /*
  * Saves PNG to a file.
  */
-int GP_SavePNG(const GP_Context *src, const char *dst_path,
+int GP_SavePNG(const GP_Pixmap *src, const char *dst_path,
                GP_ProgressCallback *callback);
 
 /*

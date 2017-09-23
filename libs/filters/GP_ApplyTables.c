@@ -58,18 +58,18 @@ static void free_tables(GP_FilterTables *self)
 	}
 }
 
-int GP_FilterTablesInit(GP_FilterTables *self, const GP_Context *ctx)
+int GP_FilterTablesInit(GP_FilterTables *self, const GP_Pixmap *pixmap)
 {
 	unsigned int i;
 	const GP_PixelTypeDescription *desc;
 
 	GP_DEBUG(2, "Allocating tables for pixel %s",
-	         GP_PixelTypeName(ctx->pixel_type));
+	         GP_PixelTypeName(pixmap->pixel_type));
 
 	for (i = 0; i < GP_PIXELTYPE_MAX_CHANNELS; i++)
 		self->table[i] = NULL;
 
-	desc = GP_PixelTypeDesc(ctx->pixel_type);
+	desc = GP_PixelTypeDesc(pixmap->pixel_type);
 
 	for (i = 0; i < desc->numchannels; i++) {
 		self->table[i] = create_table(&desc->channels[i]);
@@ -84,7 +84,7 @@ int GP_FilterTablesInit(GP_FilterTables *self, const GP_Context *ctx)
 	return 0;
 }
 
-GP_FilterTables *GP_FilterTablesAlloc(const GP_Context *ctx)
+GP_FilterTables *GP_FilterTablesAlloc(const GP_Pixmap *pixmap)
 {
 	GP_FilterTables *tables = malloc(sizeof(GP_FilterTables));
 
@@ -95,7 +95,7 @@ GP_FilterTables *GP_FilterTablesAlloc(const GP_Context *ctx)
 		return NULL;
 	}
 
-	if (GP_FilterTablesInit(tables, ctx)) {
+	if (GP_FilterTablesInit(tables, pixmap)) {
 		free(tables);
 		return NULL;
 	}

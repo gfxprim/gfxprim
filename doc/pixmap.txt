@@ -1,7 +1,7 @@
-Drawing Context
+Drawing Pixmap
 ---------------
 
-The 'GP_Context' structure describes an 'in memory' pixmap. The structure
+The 'GP_Pixmap' structure describes an 'in memory' pixmap. The structure
 contains all metadata needed for drawing, loaders and filters.
 
 Data Structure
@@ -9,7 +9,7 @@ Data Structure
 
 [source,c]
 -------------------------------------------------------------------------------
-typedef struct GP_Context {
+typedef struct GP_Pixmap {
 	uint8_t *pixels;         /* pointer to image pixels */
 	uint8_t  bpp;            /* pixel length in bits */
 	uint32_t bytes_per_row;
@@ -18,7 +18,7 @@ typedef struct GP_Context {
 	/*
          * Row bit offset. The offset is ignored for byte aligned pixels.
          * Basically it's used for non aligned pixels with combination
-         * with subcontextes.
+         * with subpixmapes.
          */
         uint8_t offset;
 
@@ -33,8 +33,8 @@ typedef struct GP_Context {
 	uint8_t x_swap:1;            /* mirror x */
 	uint8_t y_swap:1;            /* mirror y */
 	uint8_t bit_endian:1;        /* GP_BIT_ENDIAN */
-	uint8_t free_pixels:1;       /* if set GP_ContextFree() calls free on context->pixels */
-} GP_Context;
+	uint8_t free_pixels:1;       /* if set GP_PixmapFree() calls free on pixmap->pixels */
+} GP_Pixmap;
 -------------------------------------------------------------------------------
 
 The 'pixels' field points to the image data.
@@ -47,7 +47,7 @@ stored in horizontal lines (each line contains 'w' pixels and there is 'h'
 lines). Each line is 'bytes_per_row' bytes long (which equals to 'w * bpp /
 8' rouned up to the whole bytes). The first pixel may actually start at
 'offset' bit in the first byte in each line (but only for some
-<<Sub_Context,subcontexts>> for pixel types that are not byte aligned).
+<<Sub_Pixmap,subpixmaps>> for pixel types that are not byte aligned).
 
 The link:pixels.html[pixel_type enumeration] defines in which format and how
 are pixel data stored in the 'pixels' buffer, i.e. organization and function
@@ -59,7 +59,7 @@ moment (this will be fixed in subsequent releases).
 
 The bitfield at the the end of the structure describes image orientation (see
 below) and a flag that tell if 'pixels' data should be freed, which is
-usefull for example for <<Sub_Context, subcontexts>>.
+usefull for example for <<Sub_Pixmap, subpixmaps>>.
 
 Rotation
 ^^^^^^^^
@@ -76,8 +76,8 @@ If you really need drawing primitives that do not use the orientation flags,
 you could use variants with _Raw suffix (although this is not recommended).
 
 There are various helper macros for transforming coordinates and sizes in
-'core/GP_Transform.h'. And context helper functions to "rotate" the flags
-clock wise and counter clock wise as well as functions to get the context size
+'core/GP_Transform.h'. And pixmap helper functions to "rotate" the flags
+clock wise and counter clock wise as well as functions to get the pixmap size
 when taking into the account the width and height.
 
 [source,c]
@@ -87,68 +87,68 @@ when taking into the account the width and height.
 #include <GP.h>
 
 /* Transforms point user coordinates to bitmap coordinates */
-GP_TRANSFORM_POINT(context, x, y)
+GP_TRANSFORM_POINT(pixmap, x, y)
 
 /* Transforms rectangular area coordinates and size */
-GP_TRANSFORM_RECT(context, x, y, w, h)
+GP_TRANSFORM_RECT(pixmap, x, y, w, h)
 
 /* Inverse transformation, bitmap coordinates to user coordinates */
-GP_RETRANSFORM_POINT(context, x, y)
+GP_RETRANSFORM_POINT(pixmap, x, y)
 -------------------------------------------------------------------------------
 
 [source,c]
 ------------------------------------------------------------------------------
-#include <core/GP_Context.h>
+#include <core/GP_Pixmap.h>
 /* or */
 #include <GP.h>
 
 /*
- * Rotate context flags clock wise.
+ * Rotate pixmap flags clock wise.
  */
-void GP_ContextRotateCW(GP_Context *context);
+void GP_PixmapRotateCW(GP_Pixmap *pixmap);
 
 /*
- * Rotate context flags counter clock wise.
+ * Rotate pixmap flags counter clock wise.
  */
-void GP_ContextRotateCCW(GP_Context *context);
+void GP_PixmapRotateCCW(GP_Pixmap *pixmap);
 
 /*
  * Retruns 1 if rotation flags are equal.
  */
-int GP_ContextRotationEqual(const GP_Context *c1, const GP_Context *c2);
+int GP_PixmapRotationEqual(const GP_Pixmap *c1, const GP_Pixmap *c2);
 
 /*
- * Sets context rotation flags.
+ * Sets pixmap rotation flags.
  */
-void GP_ContextSetRotation(GP_Context *dst, int axes_swap,
+void GP_PixmapSetRotation(GP_Pixmap *dst, int axes_swap,
                            int x_swap, int y_swap);
 
 /*
  * Copies rotation flags.
  */
-void GP_ContextCopyRotation(const GP_Context *src, GP_Context *dst);
+void GP_PixmapCopyRotation(const GP_Pixmap *src, GP_Pixmap *dst);
 
 /*
- * Returns context width and height taking the rotation flags into the account.
+ * Returns pixmap width and height taking the rotation flags into the account.
  */
-GP_Size GP_ContextW(const GP_Context *context);
-GP_Size GP_ContextH(const GP_Context *context);
+GP_Size GP_PixmapW(const GP_Pixmap *pixmap);
+GP_Size GP_PixmapH(const GP_Pixmap *pixmap);
 -------------------------------------------------------------------------------
 
-Basic context functions
+Basic pixmap functions
 ~~~~~~~~~~~~~~~~~~~~~~~
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <core/GP_Context.h>
+#include <core/GP_Pixmap.h>
 /* or */
 #include <GP.h>
 
-GP_Context *GP_ContextInit(GP_Context *context, GP_Size w, GP_Size h,
+GP_Pixmap *GP_PixmapInit(GP_Pixmap *pixmap, GP_Size w, GP_Size h,
                            GP_PixelType type, void *pixels);
 -------------------------------------------------------------------------------
 
-Initialize given context accordingly to parameters, the rest of context
+Initialize given pixmap accordingly to parameters, the rest of pixmap
 parameters are set to the default values (i.e. rotation flags are all set to
 zero, 'free_pixels' flag is not set). Number of bits per pixel and
 bytes per row are computed from the given pixel type and size.
@@ -156,19 +156,19 @@ bytes per row are computed from the given pixel type and size.
 The 'pixels' pointer can be NULL and can be changed later manually (the call
 will *not* try to allocate the pixel memory automatically).
 
-The function returns a pointer to the initialized context (i.e. the same
+The function returns a pointer to the initialized pixmap (i.e. the same
 pointer you passed as second argument).
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <core/GP_Context.h>
+#include <core/GP_Pixmap.h>
 /* or */
 #include <GP.h>
 
-GP_Context *GP_ContextAlloc(GP_Size w, GP_Size h, GP_PixelType type);
+GP_Pixmap *GP_PixmapAlloc(GP_Size w, GP_Size h, GP_PixelType type);
 -------------------------------------------------------------------------------
 
-The 'GP_ContextAlloc()' allocates and initializes a context.
+The 'GP_PixmapAlloc()' allocates and initializes a pixmap.
 
 The orientation flags are all set to zero, the 'free_pixels' flag is set and the
 rest of the metadata are calculated accordingly to width, height and
@@ -177,11 +177,11 @@ appropriate size; the initial contents of the bitmap are undefined.
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <core/GP_Context.h>
+#include <core/GP_Pixmap.h>
 /* or */
 #include <GP.h>
 
-enum GP_ContextCopyFlags {
+enum GP_PixmapCopyFlags {
         /*
          * Copy bitmap pixels too. If not set pixels are uninitialized.
          */
@@ -192,13 +192,13 @@ enum GP_ContextCopyFlags {
         GP_COPY_WITH_ROTATION = 0x02,
 };
 
-GP_Context *GP_ContextCopy(const GP_Context *src, int flags);
+GP_Pixmap *GP_PixmapCopy(const GP_Pixmap *src, int flags);
 -------------------------------------------------------------------------------
 
-The 'GP_ContextCopy()' allocates and initializes a copy of the context passed
+The 'GP_PixmapCopy()' allocates and initializes a copy of the pixmap passed
 as arguments.
 
-The call returns pointer to newly allocated context or in case of 'malloc()'
+The call returns pointer to newly allocated pixmap or in case of 'malloc()'
 failure NULL.
 
 If 'GP_COPY_WITH_PIXELS' is set, the bitmap contents ('src->pixels') are also
@@ -208,85 +208,85 @@ contents.
 If 'GP_COPY_WITH_ROTATION' is set rotation flags are copied; otherwise rotation
 flags are set to zero.
 
-The 'free_pixels' flag for the resulting context is set.
+The 'free_pixels' flag for the resulting pixmap is set.
 
-[[ContextFree]]
+[[PixmapFree]]
 [source,c]
 -------------------------------------------------------------------------------
-#include <core/GP_Context.h>
+#include <core/GP_Pixmap.h>
 /* or */
 #include <GP.h>
 
-void GP_ContextFree(GP_Context *context);
+void GP_PixmapFree(GP_Pixmap *pixmap);
 -------------------------------------------------------------------------------
 
-Frees the context memory.
+Frees the pixmap memory.
 
 If 'free_pixels' flag is set, the pixels buffer is freed too.
 
 If gamma pointer is not NULL the 'GP_GammaRelease()' is called.
 
-[[Sub_Context]]
-Subcontext
+[[Sub_Pixmap]]
+Subpixmap
 ~~~~~~~~~~
 
-A subcontext is a context that refers to a rectangular area within another
-context. Subcontexts can be used as any other contexts (including subcontext
+A subpixmap is a pixmap that refers to a rectangular area within another
+pixmap. Subpixmaps can be used as any other pixmaps (including subpixmap
 creation).
 
-WARNING: If you create overlaping subcontexts the result is undefined.
+WARNING: If you create overlaping subpixmaps the result is undefined.
 
-Calling 'GP_ContextFree()' on a allocated subcontext is safe; the bitmap is
-not freed as it belongs to another context; it will be freed when the parent
-context is freed (i.e. the 'free_pixels' flag is not set when creating
-subcontext).
+Calling 'GP_PixmapFree()' on a allocated subpixmap is safe; the bitmap is
+not freed as it belongs to another pixmap; it will be freed when the parent
+pixmap is freed (i.e. the 'free_pixels' flag is not set when creating
+subpixmap).
 
-CAUTION: The subcontext doesn't hold a reference to the original context, so
-         once the parent context is freed the subcontext pixels pointer is not
+CAUTION: The subpixmap doesn't hold a reference to the original pixmap, so
+         once the parent pixmap is freed the subpixmap pixels pointer is not
 	 valid anymore.
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <core/GP_Context.h>
+#include <core/GP_Pixmap.h>
 /* or */
 #include <GP.h>
 
-GP_Context *GP_SubContext(const GP_Context *context, GP_Context *subcontext,
+GP_Pixmap *GP_SubPixmap(const GP_Pixmap *pixmap, GP_Pixmap *subpixmap,
                           GP_Coord x, GP_Coord y, GP_Size w, GP_Size h);
 
-GP_Context *GP_SubContextAlloc(const GP_Context *context,
+GP_Pixmap *GP_SubPixmapAlloc(const GP_Pixmap *pixmap,
                                GP_Coord x, GP_Coord y, GP_Size w, GP_Size h);
 -------------------------------------------------------------------------------
 
-Creates subcontext of a context. The rectangular area must fit into the parent
-context.
+Creates subpixmap of a pixmap. The rectangular area must fit into the parent
+pixmap.
 
-The 'GP_SubContext()' function initializes the passed pointer as a subcontext
-of a context and returns pointer to the initialized subcontext (i.e. the same
-pointer you passed as the subcontext parameter).
+The 'GP_SubPixmap()' function initializes the passed pointer as a subpixmap
+of a pixmap and returns pointer to the initialized subpixmap (i.e. the same
+pointer you passed as the subpixmap parameter).
 
-The 'GP_SubContextAlloc()' function allocates 'GP_Context' structure and
-initializes it as a subcontext. This function may return NULL in case of
-'malloc()' failure and the newly created context should be later freed with
-'GP_ContextFree()'.
+The 'GP_SubPixmapAlloc()' function allocates 'GP_Pixmap' structure and
+initializes it as a subpixmap. This function may return NULL in case of
+'malloc()' failure and the newly created pixmap should be later freed with
+'GP_PixmapFree()'.
 
 Conversions
 ~~~~~~~~~~~
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <core/GP_Context.h>
+#include <core/GP_Pixmap.h>
 /* or */
 #include <GP.h>
 
-GP_Context *GP_ContextConvertAlloc(const GP_Context *src,
+GP_Pixmap *GP_PixmapConvertAlloc(const GP_Pixmap *src,
                                    GP_PixelType dst_pixel_type);
 
-GP_Context *GP_ContextConvert(const GP_Context *src, GP_Context *dst);
+GP_Pixmap *GP_PixmapConvert(const GP_Pixmap *src, GP_Pixmap *dst);
 
 -------------------------------------------------------------------------------
 
-Converts a context to different pixel type.
+Converts a pixmap to different pixel type.
 
 This is naive implementation that only multiplies/divides the pixel values.
 
@@ -297,13 +297,13 @@ Misc
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <core/GP_Context.h>
+#include <core/GP_Pixmap.h>
 /* or */
 #include <GP.h>
 
-void GP_ContextPrintInfo(const GP_Context *self);
+void GP_PixmapPrintInfo(const GP_Pixmap *self);
 -------------------------------------------------------------------------------
 
-This function prints the content of a 'GP_Context' structure, in a readable
+This function prints the content of a 'GP_Pixmap' structure, in a readable
 format, into the stdout.
 

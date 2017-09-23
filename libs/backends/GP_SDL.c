@@ -34,14 +34,14 @@
 #include "GP_Backend.h"
 #include "GP_SDL.h"
 
-#include "GP_SDL_Context.h"
+#include "GP_SDL_Pixmap.h"
 
 #include <SDL/SDL.h>
 #include <SDL/SDL_mutex.h>
 
 static SDL_Surface *sdl_surface;
 static SDL_mutex *mutex;
-static GP_Context context;
+static GP_Pixmap pixmap;
 
 static uint32_t sdl_flags = SDL_SWSURFACE;
 
@@ -56,7 +56,7 @@ static void sdl_flip(struct GP_Backend *self __attribute__((unused)))
 	SDL_mutexP(mutex);
 
 	SDL_Flip(sdl_surface);
-	context.pixels = sdl_surface->pixels;
+	pixmap.pixels = sdl_surface->pixels;
 
 	SDL_mutexV(mutex);
 }
@@ -121,7 +121,7 @@ static void sdl_wait(struct GP_Backend *self __attribute__((unused)))
 	}
 }
 
-static int context_from_surface(GP_Context *context, const SDL_Surface *surf)
+static int pixmap_from_surface(GP_Pixmap *pixmap, const SDL_Surface *surf)
 {
 	/* sanity checks on the SDL surface */
 	if (surf->format->BytesPerPixel == 0) {
@@ -144,19 +144,19 @@ static int context_from_surface(GP_Context *context, const SDL_Surface *surf)
 		return 1;
 
 	/* basic structure and size */
-	context->pixels = surf->pixels;
-	context->bpp = 8 * surf->format->BytesPerPixel;
-	context->pixel_type = pixeltype;
-	context->bytes_per_row = surf->pitch;
-	context->w = surf->w;
-	context->h = surf->h;
+	pixmap->pixels = surf->pixels;
+	pixmap->bpp = 8 * surf->format->BytesPerPixel;
+	pixmap->pixel_type = pixeltype;
+	pixmap->bytes_per_row = surf->pitch;
+	pixmap->w = surf->w;
+	pixmap->h = surf->h;
 
 	return 0;
 }
 
-int GP_ContextFromSDLSurface(GP_Context *c, const SDL_Surface *surf)
+int GP_PixmapFromSDLSurface(GP_Pixmap *c, const SDL_Surface *surf)
 {
-	return context_from_surface(c, surf);
+	return pixmap_from_surface(c, surf);
 }
 
 static int sdl_set_attributes(struct GP_Backend *self,
@@ -184,10 +184,10 @@ static int sdl_resize_ack(struct GP_Backend *self __attribute__((unused)))
 	SDL_mutexP(mutex);
 
 	sdl_surface = SDL_SetVideoMode(new_w, new_h, 0, sdl_flags);
-	context_from_surface(backend.context, sdl_surface);
+	pixmap_from_surface(backend.pixmap, sdl_surface);
 
 	GP_EventQueueSetScreenSize(&backend.event_queue,
-	                           backend.context->w, backend.context->h);
+	                           backend.pixmap->w, backend.pixmap->h);
 
 	SDL_mutexV(mutex);
 
@@ -198,7 +198,7 @@ static void sdl_exit(struct GP_Backend *self __attribute__((unused)));
 
 static struct GP_Backend backend = {
 	.name          = "SDL",
-	.context       = NULL,
+	.pixmap       = NULL,
 	.Flip          = sdl_flip,
 	.UpdateRect    = sdl_update_rect,
 	.SetAttributes = sdl_set_attributes,
@@ -218,14 +218,14 @@ static void sdl_exit(struct GP_Backend *self __attribute__((unused)))
 
 	SDL_DestroyMutex(mutex);
 
-	backend.context = NULL;
+	backend.pixmap = NULL;
 }
 
 GP_Backend *GP_BackendSDLInit(GP_Size w, GP_Size h, uint8_t bpp, uint8_t flags,
                               const char *caption)
 {
 	/* SDL was already initalized */
-	if (backend.context != NULL)
+	if (backend.pixmap != NULL)
 		return &backend;
 
 	if (SDL_Init(SDL_INIT_VIDEO)) {
@@ -252,7 +252,7 @@ GP_Backend *GP_BackendSDLInit(GP_Size w, GP_Size h, uint8_t bpp, uint8_t flags,
 
 	mutex = SDL_CreateMutex();
 
-	if (context_from_surface(&context, sdl_surface)) {
+	if (pixmap_from_surface(&pixmap, sdl_surface)) {
 		GP_WARN("Failed to match pixel_type");
 		SDL_Quit();
 		return NULL;
@@ -263,7 +263,7 @@ GP_Backend *GP_BackendSDLInit(GP_Size w, GP_Size h, uint8_t bpp, uint8_t flags,
 
 	GP_EventQueueInit(&backend.event_queue, w, h, 0);
 
-	backend.context = &context;
+	backend.pixmap = &pixmap;
 
 	return &backend;
 }

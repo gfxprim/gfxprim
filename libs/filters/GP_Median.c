@@ -22,7 +22,7 @@
 
 #include <errno.h>
 
-#include "core/GP_Context.h"
+#include "core/GP_Pixmap.h"
 #include "core/GP_GetPutPixel.h"
 #include "core/GP_TempAlloc.h"
 #include "core/GP_Clamp.h"
@@ -167,10 +167,10 @@ static inline unsigned int hist8_median(struct hist8u *h, struct hist8 *row,
 	return 0;
 }
 
-static int GP_FilterMedian_Raw(const GP_Context *src,
+static int GP_FilterMedian_Raw(const GP_Pixmap *src,
                                GP_Coord x_src, GP_Coord y_src,
                                GP_Size w_src, GP_Size h_src,
-                               GP_Context *dst,
+                               GP_Pixmap *dst,
                                GP_Coord x_dst, GP_Coord y_dst,
 		               int xmed, int ymed,
                                GP_ProgressCallback *callback)
@@ -283,10 +283,10 @@ static int GP_FilterMedian_Raw(const GP_Context *src,
 	return 0;
 }
 
-int GP_FilterMedianEx(const GP_Context *src,
+int GP_FilterMedianEx(const GP_Pixmap *src,
                       GP_Coord x_src, GP_Coord y_src,
                       GP_Size w_src, GP_Size h_src,
-                      GP_Context *dst,
+                      GP_Pixmap *dst,
                       GP_Coord x_dst, GP_Coord y_dst,
 		      int xmed, int ymed,
                       GP_ProgressCallback *callback)
@@ -303,7 +303,7 @@ int GP_FilterMedianEx(const GP_Context *src,
 	                           dst, x_dst, y_dst, xmed, ymed, callback);
 }
 
-GP_Context *GP_FilterMedianExAlloc(const GP_Context *src,
+GP_Pixmap *GP_FilterMedianExAlloc(const GP_Pixmap *src,
                                   GP_Coord x_src, GP_Coord y_src,
                                   GP_Size w_src, GP_Size h_src,
                                   int xmed, int ymed,
@@ -313,7 +313,7 @@ GP_Context *GP_FilterMedianExAlloc(const GP_Context *src,
 
 	GP_CHECK(xmed >= 0 && ymed >= 0);
 
-	GP_Context *dst = GP_ContextAlloc(w_src, h_src, src->pixel_type);
+	GP_Pixmap *dst = GP_PixmapAlloc(w_src, h_src, src->pixel_type);
 
 	if (dst == NULL)
 		return NULL;
@@ -322,7 +322,7 @@ GP_Context *GP_FilterMedianExAlloc(const GP_Context *src,
 	                          dst, 0, 0, xmed, ymed, callback);
 
 	if (ret) {
-		GP_ContextFree(dst);
+		GP_PixmapFree(dst);
 		return NULL;
 	}
 

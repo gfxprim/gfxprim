@@ -24,7 +24,7 @@
 #include <errno.h>
 #include <sys/stat.h>
 
-#include <core/GP_Context.h>
+#include <core/GP_Pixmap.h>
 #include <loaders/GP_Loaders.h>
 
 #include "tst_test.h"
@@ -37,7 +37,7 @@ struct test {
 static int test_load(struct test *test)
 {
 	GP_Container *zip = GP_OpenZip(test->path);
-	GP_Context *img;
+	GP_Pixmap *img;
 	int ret = TST_SUCCESS;
 
 	if (!zip) {
@@ -58,7 +58,7 @@ static int test_load(struct test *test)
 		ret = TST_FAILED;
 	}
 
-	GP_ContextFree(img);
+	GP_PixmapFree(img);
 	GP_ContainerClose(zip);
 
 	return ret;
@@ -88,7 +88,7 @@ struct test mixed_content = {
 static int no_images(const char *path)
 {
 	GP_Container *zip = GP_OpenZip(path);
-	GP_Context *img;
+	GP_Pixmap *img;
 	int ret = TST_SUCCESS;
 
 	if (!zip) {

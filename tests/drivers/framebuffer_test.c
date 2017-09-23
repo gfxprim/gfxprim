@@ -35,30 +35,30 @@
 #include <GP.h>
 #include <backends/GP_Backends.h>
 
-static void draw(GP_Context *context, int x, int y, int l)
+static void draw(GP_Pixmap *pixmap, int x, int y, int l)
 {
 	int x2, y2, x3, y3;
 
 	GP_Pixel red, blue, green;
 	
-	red = GP_RGBToContextPixel(255,   0,   0, context);
-	blue = GP_RGBToContextPixel(0,   0, 255, context);
-	green = GP_RGBToContextPixel(0, 255,   0, context);
+	red = GP_RGBToPixmapPixel(255,   0,   0, pixmap);
+	blue = GP_RGBToPixmapPixel(0,   0, 255, pixmap);
+	green = GP_RGBToPixmapPixel(0, 255,   0, pixmap);
 
 	x2 = x + l/2;
 	y2 = y + sqrt(2)/2 * l;
 	x3 = x - l/2;
 	y3 = y2;
 
-	GP_FillTriangle(context,  x,  y, x2, y2, x + l, y, red);
-	GP_FillTriangle(context,  x,  y, x3, y3, x - l, y, green);
-	GP_FillTriangle(context, x2, y2, x3, y3, x, y + sqrt(2) * l, blue);
+	GP_FillTriangle(pixmap,  x,  y, x2, y2, x + l, y, red);
+	GP_FillTriangle(pixmap,  x,  y, x3, y3, x - l, y, green);
+	GP_FillTriangle(pixmap, x2, y2, x3, y3, x, y + sqrt(2) * l, blue);
 }
 
 int main(void)
 {
 	GP_Backend *backend;
-	GP_Context *context;
+	GP_Pixmap *pixmap;
 	GP_TextStyle style;
 
 	GP_SetDebugLevel(10);
@@ -70,7 +70,7 @@ int main(void)
 		return 1;
 	}
 	
-	context = backend->context;
+	pixmap = backend->pixmap;
 	
 	GP_DefaultTextStyle(&style);
 
@@ -79,20 +79,20 @@ int main(void)
 
 	GP_Pixel gray, black;
 
-	gray = GP_RGBToContextPixel(200, 200, 200, context);
-	black = GP_RGBToContextPixel(0, 0, 0, context);
+	gray = GP_RGBToPixmapPixel(200, 200, 200, pixmap);
+	black = GP_RGBToPixmapPixel(0, 0, 0, pixmap);
 	
 	const char *text = "Framebuffer test";
 
-	GP_Fill(context, gray);
-	GP_Line(context, 0, 0, context->w, context->h, black);
-	GP_Line(context, 0, context->h, context->w, 0, black);
-	GP_Text(context, &style,
-	        (context->w - GP_TextWidth(&style, text))/2,
+	GP_Fill(pixmap, gray);
+	GP_Line(pixmap, 0, 0, pixmap->w, pixmap->h, black);
+	GP_Line(pixmap, 0, pixmap->h, pixmap->w, 0, black);
+	GP_Text(pixmap, &style,
+	        (pixmap->w - GP_TextWidth(&style, text))/2,
 		16, GP_ALIGN_RIGHT|GP_VALIGN_BELOW, black, gray, text);
 
 
-	draw(context, context->w / 2, 2.00 * context->h / 3, 60);
+	draw(pixmap, pixmap->w / 2, 2.00 * pixmap->h / 3, 60);
 
 	GP_BackendFlip(backend);
 

@@ -21,17 +21,17 @@ typedef enum GP_InterpolationType {
 
 const char *GP_InterpolationTypeName(enum GP_InterpolationType interp_type);
 
-int GP_FilterResize(const GP_Context *src, GP_Context *dst,
+int GP_FilterResize(const GP_Pixmap *src, GP_Pixmap *dst,
                     GP_InterpolationType type,
                     GP_ProgressCallback *callback);
 
-GP_Context *GP_FilterResizeAlloc(const GP_Context *src,
+GP_Pixmap *GP_FilterResizeAlloc(const GP_Pixmap *src,
                                  GP_Size w, GP_Size h,
                                  GP_InterpolationType type,
                                  GP_ProgressCallback *callback);
 -------------------------------------------------------------------------------
 
-Interpolate (resize) the context.
+Interpolate (resize) the pixmap.
 
 Resize image given size and interpolation type.
 
@@ -49,7 +49,7 @@ GP_FilterResizeAlloc
 
 The +GP_FilterResizeAlloc()+ allocates the destination give it's size.
 
-Returns pointer to newly allocated context or NULL in case of failure and
+Returns pointer to newly allocated pixmap or NULL in case of failure and
 errno is set.
 
 Nearest Neighbour Interpolation
@@ -61,10 +61,10 @@ Nearest Neighbour Interpolation
 /* or */
 #include <filters/GP_ResizeNN.h>
 
-int GP_FilterResizeNN(const GP_Context *src, GP_Context *dst,
+int GP_FilterResizeNN(const GP_Pixmap *src, GP_Pixmap *dst,
                       GP_ProgressCallback *callback);
 
-static inline GP_Context *GP_FilterResizeNNAlloc(const GP_Context *src,
+static inline GP_Pixmap *GP_FilterResizeNNAlloc(const GP_Pixmap *src,
                                    GP_Size w, GP_Size h,
                                    GP_ProgressCallback *callback);
 -------------------------------------------------------------------------------
@@ -87,17 +87,17 @@ Bilinear Interpolation
 /* or */
 #include <filters/GP_ResizeLinear.h>
 
-int GP_FilterResizeLinearInt(const GP_Context *src, GP_Context *dst,
+int GP_FilterResizeLinearInt(const GP_Pixmap *src, GP_Pixmap *dst,
                              GP_ProgressCallback *callback);
 
-int GP_FilterResizeLinearLFInt(const GP_Context *src, GP_Context *dst,
+int GP_FilterResizeLinearLFInt(const GP_Pixmap *src, GP_Pixmap *dst,
                              GP_ProgressCallback *callback);
 
-GP_Context *GP_FilterResizeLinearIntAlloc(const GP_Context *src,
+GP_Pixmap *GP_FilterResizeLinearIntAlloc(const GP_Pixmap *src,
                                           GP_Size w, GP_Size h,
                                           GP_ProgressCallback *callback);
 
-GP_Context *GP_FilterResizeLinearLFIntAlloc(const GP_Context *src,
+GP_Pixmap *GP_FilterResizeLinearLFIntAlloc(const GP_Pixmap *src,
                                             GP_Size w, GP_Size h,
                                             GP_ProgressCallback *callback);
 -------------------------------------------------------------------------------
@@ -115,17 +115,17 @@ Bicubic Interpolation
 /* or */
 #include <filters/GP_ResizeCubic.h>
 
-int GP_FilterResizeCubicInt(const GP_Context *src, GP_Context *dst,
+int GP_FilterResizeCubicInt(const GP_Pixmap *src, GP_Pixmap *dst,
                              GP_ProgressCallback *callback);
 
-int GP_FilterResizeCubic(const GP_Context *src, GP_Context *dst,
+int GP_FilterResizeCubic(const GP_Pixmap *src, GP_Pixmap *dst,
                          GP_ProgressCallback *callback);
 
-GP_Context *GP_FilterResizeCubicIntAlloc(const GP_Context *src,
+GP_Pixmap *GP_FilterResizeCubicIntAlloc(const GP_Pixmap *src,
                                          GP_Size w, GP_Size h,
                                          GP_ProgressCallback *callback);
 
-GP_Context *GP_FilterResizeCubicAlloc(const GP_Context *src,
+GP_Pixmap *GP_FilterResizeCubicAlloc(const GP_Pixmap *src,
                                       GP_Size w, GP_Size h,
                                       GP_ProgressCallback *callback);
 -------------------------------------------------------------------------------

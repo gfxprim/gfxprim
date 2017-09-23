@@ -86,10 +86,10 @@ static void x11_update_rect(GP_Backend *self, GP_Coord x0, GP_Coord y0,
 static void x11_flip(GP_Backend *self)
 {
 	struct x11_win *win = GP_BACKEND_PRIV(self);
-	unsigned int w = self->context->w;
-	unsigned int h = self->context->h;
+	unsigned int w = self->pixmap->w;
+	unsigned int h = self->pixmap->h;
 
-	GP_DEBUG(4, "Flipping context");
+	GP_DEBUG(4, "Flipping pixmap");
 
 	if (win->resized_flag) {
 		GP_DEBUG(4, "Ignoring flip, waiting for resize ack");
@@ -136,13 +136,13 @@ static void x11_ev(XEvent *ev)
 			break;
 
 		/* Safety measure */
-		if (ev->xexpose.x + ev->xexpose.width > (int)self->context->w) {
-			GP_WARN("Expose x + w > context->w");
+		if (ev->xexpose.x + ev->xexpose.width > (int)self->pixmap->w) {
+			GP_WARN("Expose x + w > pixmap->w");
 			break;
 		}
 
-		if (ev->xexpose.y + ev->xexpose.height > (int)self->context->h) {
-			GP_WARN("Expose y + h > context->h");
+		if (ev->xexpose.y + ev->xexpose.height > (int)self->pixmap->h) {
+			GP_WARN("Expose y + h > pixmap->h");
 			break;
 		}
 
@@ -152,8 +152,8 @@ static void x11_ev(XEvent *ev)
 				ev->xexpose.y + ev->xexpose.height - 1);
 	break;
 	case ConfigureNotify:
-		if (ev->xconfigure.width == (int)self->context->w &&
-		    ev->xconfigure.height == (int)self->context->h)
+		if (ev->xconfigure.width == (int)self->pixmap->w &&
+		    ev->xconfigure.height == (int)self->pixmap->h)
 			break;
 
 		if (ev->xconfigure.width == (int)win->new_w &&
@@ -170,7 +170,7 @@ static void x11_ev(XEvent *ev)
 	default:
 		//TODO: More accurate window w and h?
 		x11_input_event_put(&self->event_queue, ev,
-		                    self->context->w, self->context->h);
+		                    self->pixmap->w, self->pixmap->h);
 	break;
 	}
 }
@@ -318,7 +318,7 @@ static int create_shm_ximage(GP_Backend *self, GP_Size w, GP_Size h)
 		return 1;
 	}
 
-	if (self->context == NULL)
+	if (self->pixmap == NULL)
 		GP_DEBUG(1, "Using MIT SHM Extension");
 
 	win->img = XShmCreateImage(win->dpy, win->vis, win->scr_depth,
@@ -366,10 +366,10 @@ static int create_shm_ximage(GP_Backend *self, GP_Size w, GP_Size h)
 		goto err2;
 	}
 
-	GP_ContextInit(&win->context, w, h, pixel_type, win->shminfo.shmaddr);
-	win->context.bytes_per_row = win->img->bytes_per_line;
+	GP_PixmapInit(&win->pixmap, w, h, pixel_type, win->shminfo.shmaddr);
+	win->pixmap.bytes_per_row = win->img->bytes_per_line;
 
-	self->context = &win->context;
+	self->pixmap = &win->pixmap;
 
 	win->shm_flag = 1;
 
@@ -407,7 +407,7 @@ static int resize_shm_ximage(GP_Backend *self, int w, int h)
 	int ret;
 
 	GP_DEBUG(4, "Resizing XShmImage %ux%u -> %ux%u",
-	         self->context->w, self->context->h, w, h);
+	         self->pixmap->w, self->pixmap->h, w, h);
 
 	XLockDisplay(win->dpy);
 
@@ -479,15 +479,15 @@ static int create_ximage(GP_Backend *self, GP_Size w, GP_Size h)
 		goto err1;
 	}
 
-	self->context = GP_ContextAlloc(w, h, pixel_type);
+	self->pixmap = GP_PixmapAlloc(w, h, pixel_type);
 
-	if (self->context == NULL) {
+	if (self->pixmap == NULL) {
 		GP_DEBUG(1, "Malloc failed :(");
 		goto err1;
 	}
 
 	win->shm_flag = 0;
-	win->img->data = (char*)self->context->pixels;
+	win->img->data = (char*)self->pixmap->pixels;
 
 	return 0;
 err1:
@@ -500,7 +500,7 @@ static void destroy_ximage(GP_Backend *self)
 {
 	struct x11_win *win = GP_BACKEND_PRIV(self);
 
-	GP_ContextFree(self->context);
+	GP_PixmapFree(self->pixmap);
 	win->img->data = NULL;
 	XDestroyImage(win->img);
 }
@@ -519,8 +519,8 @@ static int resize_ximage(GP_Backend *self, int w, int h)
 		return 1;
 	}
 
-	/* Resize context */
-	if (GP_ContextResize(self->context, w, h)) {
+	/* Resize pixmap */
+	if (GP_PixmapResize(self->pixmap, w, h)) {
 		XDestroyImage(img);
 		return 1;
 	}
@@ -530,7 +530,7 @@ static int resize_ximage(GP_Backend *self, int w, int h)
 	XDestroyImage(win->img);
 
 	/* Swap the pointers */
-	img->data = (char*)self->context->pixels;
+	img->data = (char*)self->pixmap->pixels;
 	win->img = img;
 
 	return 0;
@@ -610,7 +610,7 @@ GP_Backend *GP_BackendX11Init(const char *display, int x, int y,
 	/* Init the event queue, once we know the window size */
 	GP_EventQueueInit(&backend->event_queue, wreq.w, wreq.h, 0);
 
-	backend->context = NULL;
+	backend->pixmap = NULL;
 
 	if ((flags & GP_X11_DISABLE_SHM || !x11_conn.local)
 	    || create_shm_ximage(backend, wreq.w, wreq.h)) {

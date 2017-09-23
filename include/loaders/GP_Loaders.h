@@ -32,7 +32,7 @@
 #ifndef LOADERS_GP_LOADERS_H
 #define LOADERS_GP_LOADERS_H
 
-#include "core/GP_Context.h"
+#include "core/GP_Pixmap.h"
 #include "core/GP_ProgressCallback.h"
 
 #include "loaders/GP_PNM.h"

@@ -17,7 +17,7 @@ Core
 Core of the library contains minimal amount of code to define interface that
 is shared between all parts of the library.
 
-The most important part of the core is link:context.html[CP_Context] structure
+The most important part of the core is link:pixmap.html[GP_Pixmap] structure
 that represents in-memory pixmap.
 
 The Core also contains generated code for basic operations such as

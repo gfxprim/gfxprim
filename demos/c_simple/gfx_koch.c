@@ -38,7 +38,7 @@ static int aa_flag = 0;
 /*
  * Generate color depending on distance from center
  *
- * We could do this only and only because the context
+ * We could do this only and only because the pixmap
  * pixel type is fixed to GP_PIXEL_RGB888.
  */
 static GP_Pixel do_color(int xc, int yc, float x, float y)
@@ -66,7 +66,7 @@ static GP_Pixel do_color(int xc, int yc, float x, float y)
 	return bmask | (gmask<<8) | (rmask << 16);
 }
 
-static void draw(GP_Context *img, int level, float x0, float y0, float x1, float y1)
+static void draw(GP_Pixmap *img, int level, float x0, float y0, float x1, float y1)
 {
 	if (level == 0) {
 		GP_Pixel pixel;
@@ -106,13 +106,13 @@ static void draw(GP_Context *img, int level, float x0, float y0, float x1, float
 
 int main(void)
 {
-	GP_Context *img;
+	GP_Pixmap *img;
 
 	/* Create RGB 24 bit image */
-	img = GP_ContextAlloc(600, 600, GP_PIXEL_RGB888);
+	img = GP_PixmapAlloc(600, 600, GP_PIXEL_RGB888);
 
 	if (img == NULL) {
-		fprintf(stderr, "Failed to allocate context");
+		fprintf(stderr, "Failed to allocate pixmap");
 		return 1;
 	}
 
@@ -129,7 +129,7 @@ int main(void)
 	}
 
 	/* Cleanup */
-	GP_ContextFree(img);
+	GP_PixmapFree(img);
 
 	return 0;
 }

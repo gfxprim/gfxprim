@@ -29,85 +29,85 @@
 #include "gfx/GP_VLine.h"
 #include "gfx/GP_Rect.h"
 
-void GP_RectXYXY_Raw(GP_Context *context, GP_Coord x0, GP_Coord y0,
+void GP_RectXYXY_Raw(GP_Pixmap *pixmap, GP_Coord x0, GP_Coord y0,
                      GP_Coord x1, GP_Coord y1, GP_Pixel pixel)
 {
-	GP_HLine_Raw(context, x0, x1, y0, pixel);
-	GP_HLine_Raw(context, x0, x1, y1, pixel);
-	GP_VLine_Raw(context, x0, y0, y1, pixel);
-	GP_VLine_Raw(context, x1, y0, y1, pixel);
+	GP_HLine_Raw(pixmap, x0, x1, y0, pixel);
+	GP_HLine_Raw(pixmap, x0, x1, y1, pixel);
+	GP_VLine_Raw(pixmap, x0, y0, y1, pixel);
+	GP_VLine_Raw(pixmap, x1, y0, y1, pixel);
 }
 
-void GP_RectXYWH_Raw(GP_Context *context, GP_Coord x, GP_Coord y,
+void GP_RectXYWH_Raw(GP_Pixmap *pixmap, GP_Coord x, GP_Coord y,
 	             GP_Size w, GP_Size h, GP_Pixel pixel)
 {
 	if (w == 0 || h == 0)
 		return;
 
-	GP_RectXYXY_Raw(context, x, y, x + w - 1, y + h - 1, pixel);
+	GP_RectXYXY_Raw(pixmap, x, y, x + w - 1, y + h - 1, pixel);
 }
 
-void GP_RectXYXY(GP_Context *context, GP_Coord x0, GP_Coord y0,
+void GP_RectXYXY(GP_Pixmap *pixmap, GP_Coord x0, GP_Coord y0,
                  GP_Coord x1, GP_Coord y1, GP_Pixel pixel)
 {
-	GP_CHECK_CONTEXT(context);
+	GP_CHECK_PIXMAP(pixmap);
 
-	GP_TRANSFORM_POINT(context, x0, y0);
-	GP_TRANSFORM_POINT(context, x1, y1);
+	GP_TRANSFORM_POINT(pixmap, x0, y0);
+	GP_TRANSFORM_POINT(pixmap, x1, y1);
 
-	GP_RectXYXY_Raw(context, x0, y0, x1, y1, pixel);
+	GP_RectXYXY_Raw(pixmap, x0, y0, x1, y1, pixel);
 }
 
-void GP_RectXYWH(GP_Context *context, GP_Coord x, GP_Coord y,
+void GP_RectXYWH(GP_Pixmap *pixmap, GP_Coord x, GP_Coord y,
                  GP_Size w, GP_Size h, GP_Pixel pixel)
 {
 	if (w == 0 || h == 0)
 		return;
 
-	GP_RectXYXY(context, x, y, x + w - 1, y + h - 1, pixel);
+	GP_RectXYXY(pixmap, x, y, x + w - 1, y + h - 1, pixel);
 }
 
-void GP_FillRectXYXY_Raw(GP_Context *context, GP_Coord x0, GP_Coord y0,
+void GP_FillRectXYXY_Raw(GP_Pixmap *pixmap, GP_Coord x0, GP_Coord y0,
                          GP_Coord x1, GP_Coord y1, GP_Pixel pixel)
 {
-	GP_CHECK_CONTEXT(context);
+	GP_CHECK_PIXMAP(pixmap);
 
 	if (y0 > y1)
 		GP_SWAP(y0, y1);
 
 	y0 = GP_MAX(0, y0);
-	y1 = GP_MIN(y1, (GP_Coord)context->h - 1);
+	y1 = GP_MIN(y1, (GP_Coord)pixmap->h - 1);
 
 	GP_Coord y;
 	for (y = y0; y <= y1; y++)
-		GP_HLine_Raw(context, x0, x1, y, pixel);
+		GP_HLine_Raw(pixmap, x0, x1, y, pixel);
 }
 
-void GP_FillRectXYWH_Raw(GP_Context *context, GP_Coord x, GP_Coord y,
+void GP_FillRectXYWH_Raw(GP_Pixmap *pixmap, GP_Coord x, GP_Coord y,
                          GP_Size w, GP_Size h, GP_Pixel pixel)
 {
 	if (w == 0 || h == 0)
 		return;
 
-	GP_FillRectXYXY_Raw(context, x, y, x + w - 1, y + h - 1, pixel);
+	GP_FillRectXYXY_Raw(pixmap, x, y, x + w - 1, y + h - 1, pixel);
 }
 
-void GP_FillRectXYXY(GP_Context *context, GP_Coord x0, GP_Coord y0,
+void GP_FillRectXYXY(GP_Pixmap *pixmap, GP_Coord x0, GP_Coord y0,
                      GP_Coord x1, GP_Coord y1, GP_Pixel pixel)
 {
-	GP_CHECK_CONTEXT(context);
+	GP_CHECK_PIXMAP(pixmap);
 
-	GP_TRANSFORM_POINT(context, x0, y0);
-	GP_TRANSFORM_POINT(context, x1, y1);
+	GP_TRANSFORM_POINT(pixmap, x0, y0);
+	GP_TRANSFORM_POINT(pixmap, x1, y1);
 
-	GP_FillRectXYXY_Raw(context, x0, y0, x1, y1, pixel);
+	GP_FillRectXYXY_Raw(pixmap, x0, y0, x1, y1, pixel);
 }
 
-void GP_FillRectXYWH(GP_Context *context, GP_Coord x, GP_Coord y,
+void GP_FillRectXYWH(GP_Pixmap *pixmap, GP_Coord x, GP_Coord y,
                      GP_Size w, GP_Size h, GP_Pixel pixel)
 {
 	if (w == 0 || h == 0)
 		return;
 
-	GP_FillRectXYXY(context, x, y, x + w - 1, y + h - 1, pixel);
+	GP_FillRectXYXY(pixmap, x, y, x + w - 1, y + h - 1, pixel);
 }

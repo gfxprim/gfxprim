@@ -27,30 +27,30 @@
 #include "gfx/GP_VLineAA.h"
 
 /*
-void GP_HLineXXYAA_Raw(GP_Context *context, GP_Coord x0, GP_Coord x1,
+void GP_HLineXXYAA_Raw(GP_Pixmap *pixmap, GP_Coord x0, GP_Coord x1,
                        GP_Coord y, GP_Pixel pixel)
 {
-	GP_CHECK_CONTEXT(context);
+	GP_CHECK_PIXMAP(pixmap);
 
-	GP_FN_PER_BPP_CONTEXT(GP_HLine_Raw, context, context, x0, x1, y,
+	GP_FN_PER_BPP_PIXMAP(GP_HLine_Raw, pixmap, pixmap, x0, x1, y,
 	                      pixel);
 }
 */
 
-void GP_HLineAA(GP_Context *context, GP_Coord x0, GP_Coord x1,
+void GP_HLineAA(GP_Pixmap *pixmap, GP_Coord x0, GP_Coord x1,
                 GP_Coord y, GP_Pixel pixel)
 {
-	GP_CHECK_CONTEXT(context);
+	GP_CHECK_PIXMAP(pixmap);
 
-	if (context->axes_swap) {
-		GP_TRANSFORM_Y_FP(context, x0);
-		GP_TRANSFORM_Y_FP(context, x1);
-		GP_TRANSFORM_X_FP(context, y);
-		GP_VLineAA_Raw(context, y, x0, x1, pixel);
+	if (pixmap->axes_swap) {
+		GP_TRANSFORM_Y_FP(pixmap, x0);
+		GP_TRANSFORM_Y_FP(pixmap, x1);
+		GP_TRANSFORM_X_FP(pixmap, y);
+		GP_VLineAA_Raw(pixmap, y, x0, x1, pixel);
 	} else {
-		GP_TRANSFORM_X_FP(context, x0);
-		GP_TRANSFORM_X_FP(context, x1);
-		GP_TRANSFORM_Y_FP(context, y);
-		GP_HLineAA_Raw(context, x0, x1, y, pixel);
+		GP_TRANSFORM_X_FP(pixmap, x0);
+		GP_TRANSFORM_X_FP(pixmap, x1);
+		GP_TRANSFORM_Y_FP(pixmap, y);
+		GP_HLineAA_Raw(pixmap, x0, x1, y, pixel);
 	}
 }

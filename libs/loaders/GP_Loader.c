@@ -229,16 +229,16 @@ err0:
 	return NULL;
 }
 
-GP_Context *GP_ReadImage(GP_IO *io, GP_ProgressCallback *callback)
+GP_Pixmap *GP_ReadImage(GP_IO *io, GP_ProgressCallback *callback)
 {
-	GP_Context *ret = NULL;
+	GP_Pixmap *ret = NULL;
 
 	GP_ReadImageEx(io, &ret, NULL, callback);
 
 	return ret;
 }
 
-int GP_ReadImageEx(GP_IO *io, GP_Context **img, GP_DataStorage *meta_data,
+int GP_ReadImageEx(GP_IO *io, GP_Pixmap **img, GP_DataStorage *meta_data,
                    GP_ProgressCallback *callback)
 {
 	char buf[32];
@@ -286,7 +286,7 @@ int GP_ReadImageEx(GP_IO *io, GP_Context **img, GP_DataStorage *meta_data,
 }
 
 int GP_LoaderLoadImageEx(const GP_Loader *self, const char *src_path,
-                         GP_Context **img, GP_DataStorage *storage,
+                         GP_Pixmap **img, GP_DataStorage *storage,
                          GP_ProgressCallback *callback)
 {
 	GP_IO *io;
@@ -313,20 +313,20 @@ int GP_LoaderLoadImageEx(const GP_Loader *self, const char *src_path,
 }
 
 
-GP_Context *GP_LoaderLoadImage(const GP_Loader *self, const char *src_path,
+GP_Pixmap *GP_LoaderLoadImage(const GP_Loader *self, const char *src_path,
                                GP_ProgressCallback *callback)
 {
-	GP_Context *ret = NULL;
+	GP_Pixmap *ret = NULL;
 
 	GP_LoaderLoadImageEx(self, src_path, &ret, NULL, callback);
 
 	return ret;
 }
 
-GP_Context *GP_LoaderReadImage(const GP_Loader *self, GP_IO *io,
+GP_Pixmap *GP_LoaderReadImage(const GP_Loader *self, GP_IO *io,
                                GP_ProgressCallback *callback)
 {
-	GP_Context *ret = NULL;
+	GP_Pixmap *ret = NULL;
 
 	GP_LoaderReadImageEx(self, io, &ret, NULL, callback);
 
@@ -334,7 +334,7 @@ GP_Context *GP_LoaderReadImage(const GP_Loader *self, GP_IO *io,
 }
 
 int GP_LoaderReadImageEx(const GP_Loader *self, GP_IO *io,
-                         GP_Context **img, GP_DataStorage *data,
+                         GP_Pixmap **img, GP_DataStorage *data,
                          GP_ProgressCallback *callback)
 {
 	GP_DEBUG(1, "Reading image (I/O %p)", io);
@@ -347,9 +347,9 @@ int GP_LoaderReadImageEx(const GP_Loader *self, GP_IO *io,
 	return self->Read(io, img, data, callback);
 }
 
-GP_Context *GP_LoadImage(const char *src_path, GP_ProgressCallback *callback)
+GP_Pixmap *GP_LoadImage(const char *src_path, GP_ProgressCallback *callback)
 {
-	GP_Context *ret = NULL;
+	GP_Pixmap *ret = NULL;
 
 	GP_LoadImageEx(src_path, &ret, NULL, callback);
 
@@ -357,7 +357,7 @@ GP_Context *GP_LoadImage(const char *src_path, GP_ProgressCallback *callback)
 }
 
 int GP_LoadImageEx(const char *src_path,
-                   GP_Context **img, GP_DataStorage *meta_data,
+                   GP_Pixmap **img, GP_DataStorage *meta_data,
                    GP_ProgressCallback *callback)
 {
 	int err;
@@ -460,7 +460,7 @@ out:
 	return 1;
 }
 
-int GP_LoaderSaveImage(const GP_Loader *self, const GP_Context *src,
+int GP_LoaderSaveImage(const GP_Loader *self, const GP_Pixmap *src,
                        const char *dst_path, GP_ProgressCallback *callback)
 {
 	GP_IO *io;
@@ -491,7 +491,7 @@ int GP_LoaderSaveImage(const GP_Loader *self, const GP_Context *src,
 	return 0;
 }
 
-int GP_SaveImage(const GP_Context *src, const char *dst_path,
+int GP_SaveImage(const GP_Pixmap *src, const char *dst_path,
                  GP_ProgressCallback *callback)
 {
 	const GP_Loader *l = GP_LoaderByFilename(dst_path);

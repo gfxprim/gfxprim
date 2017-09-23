@@ -34,7 +34,7 @@
 
 int main(int argc, char *argv[])
 {
-	GP_Context *img;
+	GP_Pixmap *img;
 
 	if (argc != 2) {
 		fprintf(stderr, "Takes an image as an parameter\n");
@@ -43,7 +43,7 @@ int main(int argc, char *argv[])
 
 	img = GP_LoadImage(argv[1], NULL);
 
-	GP_ContextFree(img);
+	GP_PixmapFree(img);
 
 	return 0;
 }

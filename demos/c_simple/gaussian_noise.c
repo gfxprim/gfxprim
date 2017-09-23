@@ -42,7 +42,7 @@ static void help(const char *app)
 
 int main(int argc, char *argv[])
 {
-	GP_Context *img;
+	GP_Pixmap *img;
 	float sigma = 0.1, mu = 0.1;
 	int opt;
 
@@ -73,7 +73,7 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 
-	GP_Context *res = GP_FilterGaussianNoiseAddAlloc(img, sigma, mu, NULL);
+	GP_Pixmap *res = GP_FilterGaussianNoiseAddAlloc(img, sigma, mu, NULL);
 
 	if (GP_SaveImage(res, argv[optind + 1], NULL)) {
 		fprintf(stderr, "Failed to save image '%s': %s",

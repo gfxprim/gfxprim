@@ -26,18 +26,18 @@
 #ifndef GFX_GP_POLYGON_H
 #define GFX_GP_POLYGON_H
 
-#include "core/GP_Context.h"
+#include "core/GP_Pixmap.h"
 
-void GP_Polygon(GP_Context *context, unsigned int vertex_count,
+void GP_Polygon(GP_Pixmap *pixmap, unsigned int vertex_count,
                 const GP_Coord *xy, GP_Pixel pixel);
 
-void GP_Polygon_Raw(GP_Context *context, unsigned int vertex_count,
+void GP_Polygon_Raw(GP_Pixmap *pixmap, unsigned int vertex_count,
                     const GP_Coord *xy, GP_Pixel pixel);
 
-void GP_FillPolygon(GP_Context *context, unsigned int vertex_count,
+void GP_FillPolygon(GP_Pixmap *pixmap, unsigned int vertex_count,
                     const GP_Coord *xy, GP_Pixel pixel);
 
-void GP_FillPolygon_Raw(GP_Context *context, unsigned int vertex_count,
+void GP_FillPolygon_Raw(GP_Pixmap *pixmap, unsigned int vertex_count,
                         const GP_Coord *xy, GP_Pixel pixel);
 
 #endif /* GFX_GP_POLYGON_H */

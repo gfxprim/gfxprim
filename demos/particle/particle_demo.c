@@ -37,7 +37,7 @@ static GP_Pixel black_pixel;
 static GP_Pixel white_pixel;
 
 static GP_Backend *backend = NULL;
-static GP_Context *context = NULL;
+static GP_Pixmap *pixmap = NULL;
 
 static void sighandler(int signo)
 {
@@ -88,16 +88,16 @@ int main(int argc, char *argv[])
 
 	init_backend(backend_opts);
 
-	context = backend->context;
+	pixmap = backend->pixmap;
 
-	black_pixel = GP_RGBToContextPixel(0x00, 0x00, 0x00, context);
-	white_pixel = GP_RGBToContextPixel(0xff, 0xff, 0xff, context);
+	black_pixel = GP_RGBToPixmapPixel(0x00, 0x00, 0x00, pixmap);
+	white_pixel = GP_RGBToPixmapPixel(0xff, 0xff, 0xff, pixmap);
 
-	GP_Fill(context, black_pixel);
+	GP_Fill(pixmap, black_pixel);
 	GP_BackendFlip(backend);
 
 	struct space *space;
-	space = space_create(particles, 10<<8, 10<<8, (context->w - 10)<<8, (context->h - 10)<<8);
+	space = space_create(particles, 10<<8, 10<<8, (pixmap->w - 10)<<8, (pixmap->h - 10)<<8);
 
 	for (;;) {
 		if (backend->Poll)
@@ -146,8 +146,8 @@ int main(int argc, char *argv[])
 					space_destroy(space);
 					space = space_create(particles,
 					                     10<<8, 10<<8,
-					                     (context->w - 10)<<8,
-					                     (context->h - 10)<<8);
+					                     (pixmap->w - 10)<<8,
+					                     (pixmap->h - 10)<<8);
 				break;
 				}
 			break;
@@ -156,7 +156,7 @@ int main(int argc, char *argv[])
 
 		if (!pause_flag) {
 			space_time_tick(space, 1);
-			space_draw_particles(context, space);
+			space_draw_particles(pixmap, space);
 			GP_BackendFlip(backend);
 		}
 	}

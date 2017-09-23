@@ -36,22 +36,22 @@
 
 #include "GP_Filter.h"
 
-int GP_FilterMedianEx(const GP_Context *src,
+int GP_FilterMedianEx(const GP_Pixmap *src,
                       GP_Coord x_src, GP_Coord y_src,
                       GP_Size w_src, GP_Size h_src,
-                      GP_Context *dst,
+                      GP_Pixmap *dst,
                       GP_Coord x_dst, GP_Coord y_dst,
                       int xmed, int ymed,
                       GP_ProgressCallback *callback);
 
-GP_Context *GP_FilterMedianExAlloc(const GP_Context *src,
+GP_Pixmap *GP_FilterMedianExAlloc(const GP_Pixmap *src,
                                    GP_Coord x_src, GP_Coord y_src,
                                    GP_Size w_src, GP_Size h_src,
                                    int xmed, int ymed,
                                    GP_ProgressCallback *callback);
 
-static inline int GP_FilterMedian(const GP_Context *src,
-                                  GP_Context *dst,
+static inline int GP_FilterMedian(const GP_Pixmap *src,
+                                  GP_Pixmap *dst,
                                   int xmed, int ymed,
                                   GP_ProgressCallback *callback)
 {
@@ -59,7 +59,7 @@ static inline int GP_FilterMedian(const GP_Context *src,
 	                         dst, 0, 0, xmed, ymed, callback);
 }
 
-static inline GP_Context *GP_FilterMedianAlloc(const GP_Context *src,
+static inline GP_Pixmap *GP_FilterMedianAlloc(const GP_Pixmap *src,
                                                int xmed, int ymed,
                                                GP_ProgressCallback *callback)
 {

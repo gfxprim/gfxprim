@@ -31,8 +31,8 @@ if ({{ x }} + 1 < {{ w }})
 /*
  * Floyd Steinberg to {{ pt.name }}
  */
-static int floyd_steinberg_to_{{ pt.name }}_Raw(const GP_Context *src,
-                                                GP_Context *dst,
+static int floyd_steinberg_to_{{ pt.name }}_Raw(const GP_Pixmap *src,
+                                                GP_Pixmap *dst,
                                                 GP_ProgressCallback *callback)
 {
 @         for c in pt.chanslist:
@@ -105,7 +105,7 @@ static int floyd_steinberg_to_{{ pt.name }}_Raw(const GP_Context *src,
 
 @ end
 @
-static int floyd_steinberg(const GP_Context *src, GP_Context *dst,
+static int floyd_steinberg(const GP_Pixmap *src, GP_Pixmap *dst,
                            GP_ProgressCallback *callback)
 {
 	if (GP_PixelHasFlags(src->pixel_type, GP_PIXEL_IS_PALETTE)) {
@@ -127,7 +127,7 @@ static int floyd_steinberg(const GP_Context *src, GP_Context *dst,
 	}
 }
 
-int GP_FilterFloydSteinberg(const GP_Context *src, GP_Context *dst,
+int GP_FilterFloydSteinberg(const GP_Pixmap *src, GP_Pixmap *dst,
                             GP_ProgressCallback *callback)
 {
 	GP_CHECK(src->w <= dst->w);
@@ -137,19 +137,19 @@ int GP_FilterFloydSteinberg(const GP_Context *src, GP_Context *dst,
 }
 
 
-GP_Context *GP_FilterFloydSteinbergAlloc(const GP_Context *src,
+GP_Pixmap *GP_FilterFloydSteinbergAlloc(const GP_Pixmap *src,
                                          GP_PixelType pixel_type,
                                          GP_ProgressCallback *callback)
 {
-	GP_Context *ret;
+	GP_Pixmap *ret;
 
-	ret = GP_ContextAlloc(src->w, src->h, pixel_type);
+	ret = GP_PixmapAlloc(src->w, src->h, pixel_type);
 
 	if (ret == NULL)
 		return NULL;
 
 	if (floyd_steinberg(src, ret, callback)) {
-		GP_ContextFree(ret);
+		GP_PixmapFree(ret);
 		return NULL;
 	}
 

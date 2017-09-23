@@ -4,7 +4,7 @@ Library Core
 Library core contains all basic data structures and functions that forms the
 glue which holds the GFXprim libraries together.
 
-The most important data structure is a link:context.html[Context] which
+The most important data structure is a link:pixmap.html[Pixmap] which
 describes in-memory pixmap which is used extensively in all parts of the
 library.
 
@@ -20,7 +20,7 @@ or link:progress_callback.html[Progress callback].
 [grid="rows"]
 [options="autowidth"]
 |=============================================================================
-| link:context.html[Context] | Describes in-memory pixmap
+| link:pixmap.html[Pixmap] | Describes in-memory pixmap
 
 | link:basic_types.html[Basic types] | Types for size, lenght, pixel and
                                        color
@@ -30,7 +30,7 @@ or link:progress_callback.html[Progress callback].
 | link:get_put_pixel.html[GetPixel and PutPixel] | Macros and functions to
                                                    get and put pixels
 
-| link:blits.html[Blits] | Blits (copies) a rectangular area from one context to
+| link:blits.html[Blits] | Blits (copies) a rectangular area from one pixmap to
                            another as well as simple pixel format conversions
 
 | link:progress_callback.html[Progress Callback] | Progress callback passed

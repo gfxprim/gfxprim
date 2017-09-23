@@ -28,54 +28,54 @@
 /*
  * PBM Bitmap
  */
-GP_Context *GP_ReadPBM(GP_IO *io, GP_ProgressCallback *callback);
+GP_Pixmap *GP_ReadPBM(GP_IO *io, GP_ProgressCallback *callback);
 
-GP_Context *GP_LoadPBM(const char *src_path, GP_ProgressCallback *callback);
+GP_Pixmap *GP_LoadPBM(const char *src_path, GP_ProgressCallback *callback);
 
-int GP_WritePBM(const GP_Context *src, GP_IO *io,
+int GP_WritePBM(const GP_Pixmap *src, GP_IO *io,
                 GP_ProgressCallback *callback);
 
-int GP_SavePBM(const GP_Context *src, const char *dst_path,
+int GP_SavePBM(const GP_Pixmap *src, const char *dst_path,
                GP_ProgressCallback *callback);
 
 /*
  * PGM Graymap
  */
-GP_Context *GP_ReadPGM(GP_IO *io, GP_ProgressCallback *callback);
+GP_Pixmap *GP_ReadPGM(GP_IO *io, GP_ProgressCallback *callback);
 
-GP_Context *GP_LoadPGM(const char *src_path,
+GP_Pixmap *GP_LoadPGM(const char *src_path,
                        GP_ProgressCallback *callback);
 
-int GP_WritePGM(const GP_Context *src, GP_IO *io,
+int GP_WritePGM(const GP_Pixmap *src, GP_IO *io,
                 GP_ProgressCallback *callback);
 
-int GP_SavePGM(const GP_Context *src, const char *dst_path,
+int GP_SavePGM(const GP_Pixmap *src, const char *dst_path,
                GP_ProgressCallback *callback);
 
 /*
  * PPM Pixmap
  */
-GP_Context *GP_ReadPPM(GP_IO *io, GP_ProgressCallback *callback);
+GP_Pixmap *GP_ReadPPM(GP_IO *io, GP_ProgressCallback *callback);
 
-GP_Context *GP_LoadPPM(const char *src_path, GP_ProgressCallback *callback);
+GP_Pixmap *GP_LoadPPM(const char *src_path, GP_ProgressCallback *callback);
 
-int GP_WritePPM(const GP_Context *src, GP_IO *io,
+int GP_WritePPM(const GP_Pixmap *src, GP_IO *io,
                 GP_ProgressCallback *callback);
 
-int GP_SavePPM(const GP_Context *src, const char *dst_path,
+int GP_SavePPM(const GP_Pixmap *src, const char *dst_path,
                GP_ProgressCallback *callback);
 
 /*
  * PNM Anymap (All of above)
  */
-GP_Context *GP_ReadPNM(GP_IO *io, GP_ProgressCallback *callback);
+GP_Pixmap *GP_ReadPNM(GP_IO *io, GP_ProgressCallback *callback);
 
-GP_Context *GP_LoadPNM(const char *src_path, GP_ProgressCallback *callback);
+GP_Pixmap *GP_LoadPNM(const char *src_path, GP_ProgressCallback *callback);
 
-int GP_WritePNM(const GP_Context *src, GP_IO *io,
+int GP_WritePNM(const GP_Pixmap *src, GP_IO *io,
                 GP_ProgressCallback *callback);
 
-int GP_SavePNM(const GP_Context *src, const char *dst_path,
+int GP_SavePNM(const GP_Pixmap *src, const char *dst_path,
                GP_ProgressCallback *callback);
 
 /*

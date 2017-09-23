@@ -25,36 +25,36 @@
 
 #include "loaders/GP_Loader.h"
 
-int GP_ReadBMPEx(GP_IO *io, GP_Context **img, GP_DataStorage *storage,
+int GP_ReadBMPEx(GP_IO *io, GP_Pixmap **img, GP_DataStorage *storage,
                  GP_ProgressCallback *callback);
 
-int GP_LoadBMPEx(const char *src_path, GP_Context **img,
+int GP_LoadBMPEx(const char *src_path, GP_Pixmap **img,
 		 GP_DataStorage *storage, GP_ProgressCallback *callback);
 
 /*
  * Reads a BMP from an IO stream.
  */
-GP_Context *GP_ReadBMP(GP_IO *io, GP_ProgressCallback *callback);
+GP_Pixmap *GP_ReadBMP(GP_IO *io, GP_ProgressCallback *callback);
 
 
 /*
  * Loads a BMP image from a file.
  */
-GP_Context *GP_LoadBMP(const char *src_path, GP_ProgressCallback *callback);
+GP_Pixmap *GP_LoadBMP(const char *src_path, GP_ProgressCallback *callback);
 
 /*
  * Writes a BMP to an IO Stream.
  *
  * Returns zero on success, non-zero on failure and errno is set.
  */
-int GP_WriteBMP(const GP_Context *src, GP_IO *io,
+int GP_WriteBMP(const GP_Pixmap *src, GP_IO *io,
                 GP_ProgressCallback *callback);
 
 /*
  * Saves BMP to a file. Zero is returned on succes. Upon failure non-zero is
  * returned and errno is filled accordingly.
  */
-int GP_SaveBMP(const GP_Context *src, const char *dst_path,
+int GP_SaveBMP(const GP_Pixmap *src, const char *dst_path,
                GP_ProgressCallback *callback);
 
 /*

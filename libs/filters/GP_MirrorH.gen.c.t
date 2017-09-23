@@ -10,8 +10,8 @@
 #include "GP_Rotate.h"
 
 @ for ps in pixelsizes:
-static int GP_MirrorH_Raw_{{ ps.suffix }}(const GP_Context *src,
-                                    GP_Context *dst,
+static int GP_MirrorH_Raw_{{ ps.suffix }}(const GP_Pixmap *src,
+                                    GP_Pixmap *dst,
                                     GP_ProgressCallback *callback)
 {
 	uint32_t x, y;
@@ -44,14 +44,14 @@ static int GP_MirrorH_Raw_{{ ps.suffix }}(const GP_Context *src,
 
 @ end
 @
-static int GP_FilterMirrorH_Raw(const GP_Context *src, GP_Context *dst,
+static int GP_FilterMirrorH_Raw(const GP_Pixmap *src, GP_Pixmap *dst,
                                 GP_ProgressCallback *callback)
 {
-	GP_FN_RET_PER_BPP_CONTEXT(GP_MirrorH_Raw, src, src, dst, callback);
+	GP_FN_RET_PER_BPP_PIXMAP(GP_MirrorH_Raw, src, src, dst, callback);
 	return 1;
 }
 
-int GP_FilterMirrorH(const GP_Context *src, GP_Context *dst,
+int GP_FilterMirrorH(const GP_Pixmap *src, GP_Pixmap *dst,
                      GP_ProgressCallback *callback)
 {
 	GP_ASSERT(src->pixel_type == dst->pixel_type,
@@ -67,18 +67,18 @@ int GP_FilterMirrorH(const GP_Context *src, GP_Context *dst,
 	return 0;
 }
 
-GP_Context *GP_FilterMirrorHAlloc(const GP_Context *src,
+GP_Pixmap *GP_FilterMirrorHAlloc(const GP_Pixmap *src,
                                    GP_ProgressCallback *callback)
 {
-	GP_Context *res;
+	GP_Pixmap *res;
 
-	res = GP_ContextCopy(src, 0);
+	res = GP_PixmapCopy(src, 0);
 
 	if (res == NULL)
 		return NULL;
 
 	if (GP_FilterMirrorH_Raw(src, res, callback)) {
-		GP_ContextFree(res);
+		GP_PixmapFree(res);
 		return NULL;
 	}
 

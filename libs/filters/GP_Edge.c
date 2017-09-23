@@ -31,7 +31,7 @@
 /*
  * Apply prewitt operator.
  */
-static int prewitt(const GP_Context *src, GP_Context *dx, GP_Context *dy,
+static int prewitt(const GP_Pixmap *src, GP_Pixmap *dx, GP_Pixmap *dy,
                    GP_ProgressCallback *callback)
 {
 	float smooth_kern[3] = {1, 1, 1,};
@@ -55,7 +55,7 @@ static int prewitt(const GP_Context *src, GP_Context *dx, GP_Context *dy,
 /*
  * Apply sobel operator.
  */
-static int sobel(const GP_Context *src, GP_Context *dx, GP_Context *dy,
+static int sobel(const GP_Pixmap *src, GP_Pixmap *dx, GP_Pixmap *dy,
                    GP_ProgressCallback *callback)
 {
 	float dx_kern[] = {
@@ -111,17 +111,17 @@ static int sobel(const GP_Context *src, GP_Context *dx, GP_Context *dy,
 	return 0;
 }
 
-static int edge_detect(const GP_Context *src,
-                       GP_Context **E, GP_Context **Phi, int type,
+static int edge_detect(const GP_Pixmap *src,
+                       GP_Pixmap **E, GP_Pixmap **Phi, int type,
 		       GP_ProgressCallback *callback)
 {
 	//TODO
 	GP_ASSERT(src->pixel_type == GP_PIXEL_RGB888);
 
-	GP_Context *dx, *dy;
+	GP_Pixmap *dx, *dy;
 
-	dx = GP_ContextCopy(src, 0);
-	dy = GP_ContextCopy(src, 0);
+	dx = GP_PixmapCopy(src, 0);
+	dy = GP_PixmapCopy(src, 0);
 
 	if (dx == NULL || dy == NULL)
 		goto err0;
@@ -188,22 +188,22 @@ static int edge_detect(const GP_Context *src,
 	if (Phi != NULL)
 		*Phi = dy;
 	else
-		GP_ContextFree(dy);
+		GP_PixmapFree(dy);
 
 	if (E != NULL)
 		*E = dx;
 	else
-		GP_ContextFree(dx);
+		GP_PixmapFree(dx);
 
 	return 0;
 err0:
-	GP_ContextFree(dx);
-	GP_ContextFree(dy);
+	GP_PixmapFree(dx);
+	GP_PixmapFree(dy);
 	return 1;
 }
 
-int GP_FilterEdgeSobel(const GP_Context *src,
-                       GP_Context **E, GP_Context **Phi,
+int GP_FilterEdgeSobel(const GP_Pixmap *src,
+                       GP_Pixmap **E, GP_Pixmap **Phi,
                        GP_ProgressCallback *callback)
 {
 	GP_DEBUG(1, "Sobel edge detection image %ux%u", src->w, src->h);
@@ -211,8 +211,8 @@ int GP_FilterEdgeSobel(const GP_Context *src,
 	return edge_detect(src, E, Phi, 0, callback);
 }
 
-int GP_FilterEdgePrewitt(const GP_Context *src,
-                         GP_Context **E, GP_Context **Phi,
+int GP_FilterEdgePrewitt(const GP_Pixmap *src,
+                         GP_Pixmap **E, GP_Pixmap **Phi,
                          GP_ProgressCallback *callback)
 {
 	GP_DEBUG(1, "Prewitt edge detection image %ux%u", src->w, src->h);

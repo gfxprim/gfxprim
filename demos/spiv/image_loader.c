@@ -22,7 +22,7 @@
 
 #include <errno.h>
 
-#include <core/GP_Context.h>
+#include <core/GP_Pixmap.h>
 #include <core/GP_Debug.h>
 
 #include <loaders/GP_Loaders.h>
@@ -34,7 +34,7 @@
 
 static struct image_cache *img_cache;
 static struct image_list *img_list;
-static GP_Context *cur_img;
+static GP_Pixmap *cur_img;
 static GP_DataStorage *cur_meta_data;
 static GP_Container *cur_cont;
 
@@ -57,11 +57,11 @@ int image_loader_init(const char *args[], unsigned int cache_max_bytes)
 	return 0;
 }
 
-GP_Context *image_loader_get_image(GP_ProgressCallback *callback, int elevate)
+GP_Pixmap *image_loader_get_image(GP_ProgressCallback *callback, int elevate)
 {
 	struct cpu_timer timer;
 	const char *path;
-	GP_Context *img;
+	GP_Pixmap *img;
 	int err, ret;
 
 	if (cur_img)
@@ -154,7 +154,7 @@ static void drop_cur_img(void)
 	 * Currently loaded image is too big to be cached -> free it.
 	 */
 	if (image_cache_get(img_cache, NULL, NULL, 0, path)) {
-		GP_ContextFree(cur_img);
+		GP_PixmapFree(cur_img);
 		GP_DataStorageDestroy(cur_meta_data);
 	}
 

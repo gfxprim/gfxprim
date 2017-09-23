@@ -20,7 +20,7 @@
  *                                                                           *
  *****************************************************************************/
 
-#include "core/GP_Context.h"
+#include "core/GP_Pixmap.h"
 #include "core/GP_Debug.h"
 
 #include "GP_Linear.h"
@@ -41,10 +41,10 @@ static int v_callback(GP_ProgressCallback *self)
 	return callback->callback(callback);
 }
 
-int GP_FilterVHLinearConvolution_Raw(const GP_Context *src,
+int GP_FilterVHLinearConvolution_Raw(const GP_Pixmap *src,
                                      GP_Coord x_src, GP_Coord y_src,
                                      GP_Size w_src, GP_Size h_src,
-                                     GP_Context *dst,
+                                     GP_Pixmap *dst,
                                      GP_Coord x_dst, GP_Coord y_dst,
                                      float hkernel[], uint32_t kw, float hkern_div,
                                      float vkernel[], uint32_t kh, float vkern_div,

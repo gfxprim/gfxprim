@@ -7,7 +7,7 @@
 
 #include <errno.h>
 
-#include "core/GP_Context.h"
+#include "core/GP_Pixmap.h"
 #include "core/GP_GetPutPixel.h"
 
 #include "core/GP_Debug.h"
@@ -16,7 +16,7 @@
 
 @ for pt in pixeltypes:
 @     if not pt.is_unknown():
-static int resize_nn{{ pt.name }}(const GP_Context *src, GP_Context *dst,
+static int resize_nn{{ pt.name }}(const GP_Pixmap *src, GP_Pixmap *dst,
                                   GP_ProgressCallback *callback)
 {
 	uint32_t xmap[dst->w];
@@ -55,7 +55,7 @@ static int resize_nn{{ pt.name }}(const GP_Context *src, GP_Context *dst,
 
 @ end
 @
-static int resize_nn(const GP_Context *src, GP_Context *dst,
+static int resize_nn(const GP_Pixmap *src, GP_Pixmap *dst,
                      GP_ProgressCallback *callback)
 {
 	switch (src->pixel_type) {
@@ -70,7 +70,7 @@ static int resize_nn(const GP_Context *src, GP_Context *dst,
 	}
 }
 
-int GP_FilterResizeNN(const GP_Context *src, GP_Context *dst,
+int GP_FilterResizeNN(const GP_Pixmap *src, GP_Pixmap *dst,
                            GP_ProgressCallback *callback)
 {
 	if (src->pixel_type != dst->pixel_type) {

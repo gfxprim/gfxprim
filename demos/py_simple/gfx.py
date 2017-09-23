@@ -8,88 +8,88 @@ import gfxprim.backends as backends
 import gfxprim.input as input
 
 def fill(bk):
-    color = bk.context.RGBToPixel(0xee, 0xee, 0xee)
-    bk.context.gfx.Fill(color)
+    color = bk.pixmap.RGBToPixel(0xee, 0xee, 0xee)
+    bk.pixmap.gfx.Fill(color)
     bk.Flip()
 
 def hline(bk):
-    fg = bk.context.RGBToPixel(0xee, 0xee, 0xee)
-    bg = bk.context.RGBToPixel(0, 0, 0);
+    fg = bk.pixmap.RGBToPixel(0xee, 0xee, 0xee)
+    bg = bk.pixmap.RGBToPixel(0, 0, 0);
 
-    bk.context.gfx.Fill(bg)
-    for i in range(0, bk.context.h, 10):
-        bk.context.gfx.HLine(0, bk.context.w, i, fg)
+    bk.pixmap.gfx.Fill(bg)
+    for i in range(0, bk.pixmap.h, 10):
+        bk.pixmap.gfx.HLine(0, bk.pixmap.w, i, fg)
     bk.Flip()
 
 def vline(bk):
-    fg = bk.context.RGBToPixel(0xee, 0xee, 0xee)
-    bg = bk.context.RGBToPixel(0, 0, 0);
+    fg = bk.pixmap.RGBToPixel(0xee, 0xee, 0xee)
+    bg = bk.pixmap.RGBToPixel(0, 0, 0);
 
-    bk.context.gfx.Fill(bg)
+    bk.pixmap.gfx.Fill(bg)
 
-    for i in range(0, bk.context.w, 10):
-        bk.context.gfx.VLine(i, 0, bk.context.h, fg)
+    for i in range(0, bk.pixmap.w, 10):
+        bk.pixmap.gfx.VLine(i, 0, bk.pixmap.h, fg)
 
     bk.Flip()
 
 def line(bk):
-    fg = bk.context.RGBToPixel(0xee, 0xee, 0xee)
-    bg = bk.context.RGBToPixel(0, 0, 0);
+    fg = bk.pixmap.RGBToPixel(0xee, 0xee, 0xee)
+    bg = bk.pixmap.RGBToPixel(0, 0, 0);
 
-    bk.context.gfx.Fill(bg)
+    bk.pixmap.gfx.Fill(bg)
 
-    for i in range(0, 2 * max(bk.context.w, bk.context.h), 13):
-           bk.context.gfx.Line(0, i, i, 0, fg)
+    for i in range(0, 2 * max(bk.pixmap.w, bk.pixmap.h), 13):
+           bk.pixmap.gfx.Line(0, i, i, 0, fg)
 
     bk.Flip()
 
 def rect(bk):
-    fg = bk.context.RGBToPixel(0xee, 0xee, 0xee)
-    bg = bk.context.RGBToPixel(0, 0, 0);
+    fg = bk.pixmap.RGBToPixel(0xee, 0xee, 0xee)
+    bg = bk.pixmap.RGBToPixel(0, 0, 0);
 
-    bk.context.gfx.Fill(bg)
+    bk.pixmap.gfx.Fill(bg)
 
     for i in range(10, 130, 10):
-        bk.context.gfx.Rect(i, i, bk.context.w - i, bk.context.h - i, fg)
+        bk.pixmap.gfx.Rect(i, i, bk.pixmap.w - i, bk.pixmap.h - i, fg)
 
     bk.Flip()
 
 def triangle(bk):
-    fg = bk.context.RGBToPixel(0xee, 0xee, 0xee)
-    bg = bk.context.RGBToPixel(0, 0, 0);
+    fg = bk.pixmap.RGBToPixel(0xee, 0xee, 0xee)
+    bg = bk.pixmap.RGBToPixel(0, 0, 0);
 
-    bk.context.gfx.Fill(bg)
+    bk.pixmap.gfx.Fill(bg)
 
-    w = bk.context.w
-    h = bk.context.h
+    w = bk.pixmap.w
+    h = bk.pixmap.h
 
     for i in range(10, 90, 10):
-        bk.context.gfx.Triangle(2*i, i, w - 2*i, i, w//2, h - 2*i, fg)
+        bk.pixmap.gfx.Triangle(2*i, i, w - 2*i, i, w//2, h - 2*i, fg)
 
     bk.Flip()
 
 def tetragon(bk):
-    fg = bk.context.RGBToPixel(0xee, 0xee, 0xee)
-    bg = bk.context.RGBToPixel(0, 0, 0);
+    fg = bk.pixmap.RGBToPixel(0xee, 0xee, 0xee)
+    bg = bk.pixmap.RGBToPixel(0, 0, 0);
 
-    bk.context.gfx.Fill(bg)
+    bk.pixmap.gfx.Fill(bg)
 
-    w = bk.context.w
-    h = bk.context.h
+    w = bk.pixmap.w
+    h = bk.pixmap.h
 
     for i in range(10, 70, 10):
-        bk.context.gfx.Tetragon(i, i, w-2*i, i, w-i, h-i, 2*i, h-i, fg)
+        bk.pixmap.gfx.Tetragon(i, i, w-2*i, i, w-i, h-i, 2*i, h-i, fg)
 
     bk.Flip()
 
 def polygon(bk):
-    fg = bk.context.RGBToPixel(0xee, 0xee, 0xee)
-    bg = bk.context.RGBToPixel(0, 0, 0);
+    fg = bk.pixmap.RGBToPixel(0xee, 0xee, 0xee)
+    bg = bk.pixmap.RGBToPixel(0, 0, 0);
 
-    bk.context.gfx.Fill(bg)
+    bk.pixmap.gfx.Fill(bg)
 
-    w = bk.context.w
-    h = bk.context.h
+    w = bk.pixmap.w
+    h = bk.pixmap.h
 
     polygon = [(10, 10), (10, (h-10)//3), ((w-10)//3, (h-10)//2),
                (10, 2*(h-10)//3), (10, h-10), ((w-10)//3, h-10),
@@ -98,7 +98,7 @@ def polygon(bk):
                (w-10, (h-10)//3), (w-10, 10), (2*(w-10)//3, 10),
                ((w-10)//2, (h-10)//3), ((w-10)//3, 10)]
 
-    bk.context.gfx.Polygon(polygon, fg)
+    bk.pixmap.gfx.Polygon(polygon, fg)
 
     bk.Flip()
 

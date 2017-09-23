@@ -32,20 +32,20 @@
 #include "GP_Filter.h"
 #include "GP_Resize.h"
 
-int GP_FilterResizeLinearInt(const GP_Context *src, GP_Context *dst,
+int GP_FilterResizeLinearInt(const GP_Pixmap *src, GP_Pixmap *dst,
                              GP_ProgressCallback *callback);
 
-int GP_FilterResizeLinearLFInt(const GP_Context *src, GP_Context *dst,
+int GP_FilterResizeLinearLFInt(const GP_Pixmap *src, GP_Pixmap *dst,
                              GP_ProgressCallback *callback);
 
-static inline GP_Context *GP_FilterResizeLinearIntAlloc(const GP_Context *src,
+static inline GP_Pixmap *GP_FilterResizeLinearIntAlloc(const GP_Pixmap *src,
                                                         GP_Size w, GP_Size h,
                                                         GP_ProgressCallback *callback)
 {
 	return GP_FilterResizeAlloc(src, w, h, GP_INTERP_LINEAR_INT, callback);
 }
 
-static inline GP_Context *GP_FilterResizeLinearLFIntAlloc(const GP_Context *src,
+static inline GP_Pixmap *GP_FilterResizeLinearLFIntAlloc(const GP_Pixmap *src,
                                                           GP_Size w, GP_Size h,
                                                           GP_ProgressCallback *callback)
 {

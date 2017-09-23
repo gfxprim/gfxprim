@@ -56,17 +56,17 @@ struct render_colors {
 
 static struct render_colors colors;
 
-static void init_colors(GP_Context *ctx, struct render_colors *colors)
+static void init_colors(GP_Pixmap *pixmap, struct render_colors *colors)
 {
-	colors->bg           = GP_RGBToContextPixel(0xee, 0xee, 0xee, ctx);
-	colors->player       = GP_RGBToContextPixel(0x00, 0xee, 0x00, ctx);
-	colors->frames       = GP_RGBToContextPixel(0x00, 0x00, 0x00, ctx);
-	colors->diamond      = GP_RGBToContextPixel(0x00, 0x00, 0xee, ctx);
-	colors->wall         = GP_RGBToContextPixel(0x66, 0x66, 0x66, ctx);
-	colors->moveable     = GP_RGBToContextPixel(0xff, 0xff, 0x60, ctx);
-	colors->edible       = GP_RGBToContextPixel(0xff, 0x7f, 0x50, ctx);
-	colors->particle     = GP_RGBToContextPixel(0xff, 0xff, 0x00, ctx);
-	colors->particle_dir = GP_RGBToContextPixel(0xff, 0x44, 0x00, ctx);
+	colors->bg           = GP_RGBToPixmapPixel(0xee, 0xee, 0xee, pixmap);
+	colors->player       = GP_RGBToPixmapPixel(0x00, 0xee, 0x00, pixmap);
+	colors->frames       = GP_RGBToPixmapPixel(0x00, 0x00, 0x00, pixmap);
+	colors->diamond      = GP_RGBToPixmapPixel(0x00, 0x00, 0xee, pixmap);
+	colors->wall         = GP_RGBToPixmapPixel(0x66, 0x66, 0x66, pixmap);
+	colors->moveable     = GP_RGBToPixmapPixel(0xff, 0xff, 0x60, pixmap);
+	colors->edible       = GP_RGBToPixmapPixel(0xff, 0x7f, 0x50, pixmap);
+	colors->particle     = GP_RGBToPixmapPixel(0xff, 0xff, 0x00, pixmap);
+	colors->particle_dir = GP_RGBToPixmapPixel(0xff, 0x44, 0x00, pixmap);
 }
 
 static void render_none(struct bogoman_render *render,
@@ -77,7 +77,7 @@ static void render_none(struct bogoman_render *render,
 
 	(void) elem;
 
-	GP_FillRectXYWH(render->ctx, x, y, w, w, colors.bg);
+	GP_FillRectXYWH(render->pixmap, x, y, w, w, colors.bg);
 }
 
 static void render_player(struct bogoman_render *render,
@@ -88,10 +88,10 @@ static void render_player(struct bogoman_render *render,
 
 	(void) elem;
 
-	GP_FillRectXYWH(render->ctx, x, y, w, w, colors.bg);
+	GP_FillRectXYWH(render->pixmap, x, y, w, w, colors.bg);
 
-	GP_FillCircle(render->ctx, x + w/2, y + w/2, w/2 - 1, colors.player);
-	GP_FillRing(render->ctx, x + w/2, y + w/2, w/2 - 1, w/2 - 2, colors.frames);
+	GP_FillCircle(render->pixmap, x + w/2, y + w/2, w/2 - 1, colors.player);
+	GP_FillRing(render->pixmap, x + w/2, y + w/2, w/2 - 1, w/2 - 2, colors.frames);
 }
 
 static void render_wall(struct bogoman_render *render,
@@ -100,26 +100,26 @@ static void render_wall(struct bogoman_render *render,
 {
 	unsigned int w = render->map_elem_size;
 
-	GP_FillRectXYWH(render->ctx, x, y, w, w, colors.wall);
+	GP_FillRectXYWH(render->pixmap, x, y, w, w, colors.wall);
 
 	if (!(elem->flags & BOGOMAN_LEFT)) {
-		GP_VLineXYH(render->ctx, x, y, w, colors.frames);
-		GP_VLineXYH(render->ctx, x+1, y, w, colors.frames);
+		GP_VLineXYH(render->pixmap, x, y, w, colors.frames);
+		GP_VLineXYH(render->pixmap, x+1, y, w, colors.frames);
 	}
 
 	if (!(elem->flags & BOGOMAN_RIGHT)) {
-		GP_VLineXYH(render->ctx, x + w - 1, y, w, colors.frames);
-		GP_VLineXYH(render->ctx, x + w - 2, y, w, colors.frames);
+		GP_VLineXYH(render->pixmap, x + w - 1, y, w, colors.frames);
+		GP_VLineXYH(render->pixmap, x + w - 2, y, w, colors.frames);
 	}
 
 	if (!(elem->flags & BOGOMAN_UP)) {
-		GP_HLineXYW(render->ctx, x, y, w, colors.frames);
-		GP_HLineXYW(render->ctx, x, y+1, w, colors.frames);
+		GP_HLineXYW(render->pixmap, x, y, w, colors.frames);
+		GP_HLineXYW(render->pixmap, x, y+1, w, colors.frames);
 	}
 
 	if (!(elem->flags & BOGOMAN_DOWN)) {
-		GP_HLineXYW(render->ctx, x, y + w - 1, w, colors.frames);
-		GP_HLineXYW(render->ctx, x, y + w - 2, w, colors.frames);
+		GP_HLineXYW(render->pixmap, x, y + w - 1, w, colors.frames);
+		GP_HLineXYW(render->pixmap, x, y + w - 2, w, colors.frames);
 	}
 }
 
@@ -129,16 +129,16 @@ static void render_diamond(struct bogoman_render *render,
 {
 	unsigned int w = render->map_elem_size;
 
-	GP_FillRectXYWH(render->ctx, x, y, w, w, colors.bg);
+	GP_FillRectXYWH(render->pixmap, x, y, w, w, colors.bg);
 
 	(void) elem;
 
-	GP_FillTetragon(render->ctx, x + w/2, y, x + w - 1, y + w/2,
+	GP_FillTetragon(render->pixmap, x + w/2, y, x + w - 1, y + w/2,
 	                x + w/2, y + w - 1, x, y + w/2, colors.diamond);
 
-	GP_Tetragon(render->ctx, x + w/2, y, x + w - 1, y + w/2,
+	GP_Tetragon(render->pixmap, x + w/2, y, x + w - 1, y + w/2,
 	            x + w/2, y + w - 1, x, y + w/2, colors.frames);
-	GP_Tetragon(render->ctx, x + w/2, y+1, x + w - 2, y + w/2,
+	GP_Tetragon(render->pixmap, x + w/2, y+1, x + w - 2, y + w/2,
 	            x + w/2, y + w - 2, x+1, y + w/2, colors.frames);
 }
 
@@ -150,11 +150,11 @@ static void render_moveable(struct bogoman_render *render,
 
 	(void) elem;
 
-	GP_FillRectXYWH(render->ctx, x, y, w, w, colors.bg);
+	GP_FillRectXYWH(render->pixmap, x, y, w, w, colors.bg);
 
-	GP_FillRectXYWH(render->ctx, x + 1, y + 1, w - 2, w - 2, colors.moveable);
-	GP_RectXYWH(render->ctx, x + 1, y + 1, w - 2, w - 2, colors.frames);
-	GP_RectXYWH(render->ctx, x + 2, y + 2, w - 4, w - 4, colors.frames);
+	GP_FillRectXYWH(render->pixmap, x + 1, y + 1, w - 2, w - 2, colors.moveable);
+	GP_RectXYWH(render->pixmap, x + 1, y + 1, w - 2, w - 2, colors.frames);
+	GP_RectXYWH(render->pixmap, x + 2, y + 2, w - 4, w - 4, colors.frames);
 }
 
 static void render_edible(struct bogoman_render *render,
@@ -165,9 +165,9 @@ static void render_edible(struct bogoman_render *render,
 
 	(void) elem;
 
-	GP_FillRectXYWH(render->ctx, x, y, w, w, colors.bg);
+	GP_FillRectXYWH(render->pixmap, x, y, w, w, colors.bg);
 
-	GP_FillRectXYWH(render->ctx, x + 1, y + 1, w - 2, w - 2, colors.edible);
+	GP_FillRectXYWH(render->pixmap, x + 1, y + 1, w - 2, w - 2, colors.edible);
 }
 
 static void render_particle(struct bogoman_render *render,
@@ -177,43 +177,43 @@ static void render_particle(struct bogoman_render *render,
 	unsigned int w = render->map_elem_size;
 	int dir = elem->flags & BOGOMAN_DIRECTION_MASK;
 
-	GP_FillRectXYWH(render->ctx, x, y, w, w, colors.bg);
+	GP_FillRectXYWH(render->pixmap, x, y, w, w, colors.bg);
 
 	switch (elem->flags & ~BOGOMAN_DIRECTION_MASK) {
 	case BOGOMAN_PARTICLE_ROUND:
-		GP_FillCircle(render->ctx, x + w/2, y + w/2, w/2-1, colors.particle);
-		GP_FillRing(render->ctx, x + w/2, y + w/2, w/2 - 1, w/2 - 2, colors.frames);
+		GP_FillCircle(render->pixmap, x + w/2, y + w/2, w/2-1, colors.particle);
+		GP_FillRing(render->pixmap, x + w/2, y + w/2, w/2 - 1, w/2 - 2, colors.frames);
 	break;
 	case BOGOMAN_PARTICLE_SQUARE:
-		GP_FillRectXYWH(render->ctx, x+1, y+1, w-2, w-2, colors.particle);
-		GP_RectXYWH(render->ctx, x+1, y+1, w-2, w-2, colors.frames);
-		GP_RectXYWH(render->ctx, x+2, y+2, w-4, w-4, colors.frames);
+		GP_FillRectXYWH(render->pixmap, x+1, y+1, w-2, w-2, colors.particle);
+		GP_RectXYWH(render->pixmap, x+1, y+1, w-2, w-2, colors.frames);
+		GP_RectXYWH(render->pixmap, x+2, y+2, w-4, w-4, colors.frames);
 	break;
 	}
 
 	switch (dir) {
 	case BOGOMAN_LEFT:
-		GP_FillTriangle(render->ctx, x + w/4, y + w/2,
+		GP_FillTriangle(render->pixmap, x + w/4, y + w/2,
 		                x + 5*w/8, y + w/4, x + 5*w/8, y + 3*w/4, colors.particle_dir);
-		GP_Triangle(render->ctx, x + w/4, y + w/2,
+		GP_Triangle(render->pixmap, x + w/4, y + w/2,
 		            x + 5*w/8, y + w/4, x + 5*w/8, y + 3*w/4, colors.frames);
 	break;
 	case BOGOMAN_RIGHT:
-		GP_FillTriangle(render->ctx, x + 3*w/4, y + w/2,
+		GP_FillTriangle(render->pixmap, x + 3*w/4, y + w/2,
 		                x + 3*w/8, y + w/4, x + 3*w/8, y + 3*w/4, colors.particle_dir);
-		GP_Triangle(render->ctx, x + 3*w/4, y + w/2,
+		GP_Triangle(render->pixmap, x + 3*w/4, y + w/2,
 		            x + 3*w/8, y + w/4, x + 3*w/8, y + 3*w/4, colors.frames);
 	break;
 	case BOGOMAN_UP:
-		GP_FillTriangle(render->ctx, x + w/2, y + w/4,
+		GP_FillTriangle(render->pixmap, x + w/2, y + w/4,
 		                x + w/4, y + 5*w/8, x + 3*w/4, y + 5*w/8, colors.particle_dir);
-		GP_Triangle(render->ctx, x + w/2, y + w/4,
+		GP_Triangle(render->pixmap, x + w/2, y + w/4,
 		            x + w/4, y + 5*w/8, x + 3*w/4, y + 5*w/8, colors.frames);
 	break;
 	case BOGOMAN_DOWN:
-		GP_FillTriangle(render->ctx, x + w/2, y + 3*w/4,
+		GP_FillTriangle(render->pixmap, x + w/2, y + 3*w/4,
 		                x + w/4, y + 3*w/8, x + 3*w/4, y + 3*w/8, colors.particle_dir);
-		GP_Triangle(render->ctx, x + w/2, y + 3*w/4,
+		GP_Triangle(render->pixmap, x + w/2, y + 3*w/4,
 		            x + w/4, y + 3*w/8, x + 3*w/4, y + 3*w/8, colors.frames);
 	break;
 	}
@@ -268,10 +268,10 @@ void bogoman_render(struct bogoman_render *render, int flags)
 	unsigned int x, y;
 
 	//TODO: Hack
-	init_colors(render->ctx, &colors);
+	init_colors(render->pixmap, &colors);
 
 	if (flags & BOGOMAN_RENDER_ALL)
-		GP_Fill(render->ctx, colors.bg);
+		GP_Fill(render->pixmap, colors.bg);
 
 	for (y = render->map_x_offset; y < render->map->h; y++) {
 		for (x = render->map_x_offset; x < render->map->w; x++)

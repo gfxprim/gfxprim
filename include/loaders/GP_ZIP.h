@@ -29,7 +29,7 @@
 #ifndef LOADERS_GP_ZIP_H
 #define LOADERS_GP_ZIP_H
 
-#include "core/GP_Context.h"
+#include "core/GP_Pixmap.h"
 #include "core/GP_ProgressCallback.h"
 
 #include "loaders/GP_Container.h"

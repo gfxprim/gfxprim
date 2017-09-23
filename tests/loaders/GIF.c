@@ -24,7 +24,7 @@
 #include <errno.h>
 #include <sys/stat.h>
 
-#include <core/GP_Context.h>
+#include <core/GP_Pixmap.h>
 #include <core/GP_GetPutPixel.h>
 #include <loaders/GP_Loaders.h>
 
@@ -32,7 +32,7 @@
 
 static int test_load_GIF(const char *path)
 {
-	GP_Context *img;
+	GP_Pixmap *img;
 
 	errno = 0;
 
@@ -49,7 +49,7 @@ static int test_load_GIF(const char *path)
 		}
 	}
 
-	GP_ContextFree(img);
+	GP_PixmapFree(img);
 
 	return TST_SUCCESS;
 }

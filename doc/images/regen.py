@@ -33,10 +33,10 @@ def to_str(x, to_str):
 
     return res
 
-def convert(ctx):
-    if (ctx.pixel_type == core.C.PIXEL_RGB332):
-        return ctx.Convert(core.C.PIXEL_RGB888)
-    return ctx
+def convert(pixmap):
+    if (pixmap.pixel_type == core.C.PIXEL_RGB332):
+        return pixmap.Convert(core.C.PIXEL_RGB888)
+    return pixmap
 
 class ImgGen:
     def __init__(self, orig_path):

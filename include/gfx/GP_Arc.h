@@ -26,16 +26,16 @@
 #ifndef GP_ARC_H
 #define GP_ARC_H
 
-#include "core/GP_Context.h"
+#include "core/GP_Pixmap.h"
 
 #include <math.h>
 
-void GP_ArcSegment(GP_Context *context, GP_Coord xcenter, GP_Coord ycenter,
+void GP_ArcSegment(GP_Pixmap *pixmap, GP_Coord xcenter, GP_Coord ycenter,
 		GP_Size a, GP_Size b, int direction,
 		double start, double end,
 		GP_Pixel pixel);
 
-void GP_ArcSegment_Raw(GP_Context *context, GP_Coord xcenter, GP_Coord ycenter,
+void GP_ArcSegment_Raw(GP_Pixmap *pixmap, GP_Coord xcenter, GP_Coord ycenter,
 		GP_Size a, GP_Size b, int direction,
 		double start, double end,
 		GP_Pixel pixel);

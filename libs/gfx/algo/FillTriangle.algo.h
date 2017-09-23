@@ -46,8 +46,8 @@
  * determined by comparing Bx against Ax.
  */
 
-#define DEF_FILLTRIANGLE_FN(FN_NAME, CONTEXT_T, PIXVAL_T, HLINE, PUTPIXEL) \
-void FN_NAME(CONTEXT_T context, int x0, int y0, int x1, int y1, \
+#define DEF_FILLTRIANGLE_FN(FN_NAME, PIXMAP_T, PIXVAL_T, HLINE, PUTPIXEL) \
+void FN_NAME(PIXMAP_T pixmap, int x0, int y0, int x1, int y1, \
 		int x2, int y2, PIXVAL_T pixval) \
 { \
 \
@@ -89,7 +89,7 @@ void FN_NAME(CONTEXT_T context, int x0, int y0, int x1, int y1, \
 \
 	/* Special case: Ay = By = Cy, triangle degenerates to a line. */ \
 	if (Ay == Cy) { \
-		return HLINE(context, \
+		return HLINE(pixmap, \
 		                GP_MIN(Ax, GP_MIN(Bx, Cx)), \
 		                GP_MAX(Ax, GP_MAX(Bx, Cx)), \
 		                Ay, pixval); \
@@ -140,7 +140,7 @@ void FN_NAME(CONTEXT_T context, int x0, int y0, int x1, int y1, \
 		} \
 		xstart = GP_MIN(ACx, xstart); \
 		xend = GP_MAX(ACx, xend); \
-		HLINE(context, xstart, xend, y, pixval); \
+		HLINE(pixmap, xstart, xend, y, pixval); \
 	} \
 \
 bottom_part: \
@@ -171,7 +171,7 @@ bottom_part: \
 		} \
 		xstart = GP_MIN(xstart, ACx); \
 		xend = GP_MAX(xend, ACx); \
-		HLINE(context, xstart, xend, y, pixval); \
+		HLINE(pixmap, xstart, xend, y, pixval); \
 	} \
 \
 end: \

@@ -7,14 +7,14 @@
 
 #include <stdio.h>
 
-#include <core/GP_Context.h>
+#include <core/GP_Pixmap.h>
 #include <core/GP_Convert.h>
 #include <core/GP_GetPutPixel.h>
 #include <core/GP_Blit.h>
 
 #include "tst_test.h"
 
-static void fill_context(GP_Context *c, GP_Pixel p)
+static void fill_pixmap(GP_Pixmap *c, GP_Pixel p)
 {
 	GP_Coord x, y;
 
@@ -23,7 +23,7 @@ static void fill_context(GP_Context *c, GP_Pixel p)
 			GP_PutPixel(c, x, y, p);
 }
 
-static void mess_context(GP_Context *c)
+static void mess_pixmap(GP_Pixmap *c)
 {
 	GP_Coord y;
 	unsigned int i;
@@ -36,7 +36,7 @@ static void mess_context(GP_Context *c)
 	}
 }
 
-static int check_filled(GP_Context *c, GP_Pixel p)
+static int check_filled(GP_Pixmap *c, GP_Pixel p)
 {
 	GP_Coord x, y;
 	GP_Pixel pc;
@@ -54,23 +54,23 @@ static int check_filled(GP_Context *c, GP_Pixel p)
 	return 0;
 }
 
-static GP_Pixel rgb_to_pixel(int r, int g, int b, GP_Context *c)
+static GP_Pixel rgb_to_pixel(int r, int g, int b, GP_Pixmap *c)
 {
 	if (GP_PixelHasFlags(c->pixel_type, GP_PIXEL_HAS_ALPHA))
-		return GP_RGBAToContextPixel(r, g, b, 0xff, c);
+		return GP_RGBAToPixmapPixel(r, g, b, 0xff, c);
 
-	return GP_RGBToContextPixel(r, g, b, c);
+	return GP_RGBToPixmapPixel(r, g, b, c);
 }
 
 @ def gen_blit(name, r, g, b, pt1, pt2):
 static int blit_{{ name }}_{{ pt1.name }}_to_{{ pt2.name }}(void)
 {
-	GP_Context *src = GP_ContextAlloc(100, 100, GP_PIXEL_{{ pt1.name }});
-	GP_Context *dst = GP_ContextAlloc(100, 100, GP_PIXEL_{{ pt2.name }});
+	GP_Pixmap *src = GP_PixmapAlloc(100, 100, GP_PIXEL_{{ pt1.name }});
+	GP_Pixmap *dst = GP_PixmapAlloc(100, 100, GP_PIXEL_{{ pt2.name }});
 
 	if (src == NULL || dst == NULL) {
-		GP_ContextFree(src);
-		GP_ContextFree(dst);
+		GP_PixmapFree(src);
+		GP_PixmapFree(dst);
 		tst_msg("Malloc failed :(");
 		return TST_UNTESTED;
 	}
@@ -81,8 +81,8 @@ static int blit_{{ name }}_{{ pt1.name }}_to_{{ pt2.name }}(void)
 
         tst_msg("pixel_src=%08x pixel_dst=%08x", pix_src, pix_dst);
 
-	fill_context(src, pix_src);
-	mess_context(dst);
+	fill_pixmap(src, pix_src);
+	mess_pixmap(dst);
 
 	GP_Blit(src, 0, 0, src->w, src->h, dst, 0, 0);
 

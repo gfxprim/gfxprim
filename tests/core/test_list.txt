@@ -1,6 +1,6 @@
 # Core testsuite
 WritePixel.gen
-Context
+Pixmap
 Pixel
 GetSetBits.gen
 GetPutPixel.gen

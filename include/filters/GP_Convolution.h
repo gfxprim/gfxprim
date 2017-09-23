@@ -70,10 +70,10 @@ typedef struct GP_FilterKernel2D {
  * The result is stored into dst strating from x_dst and y_dst.
  *
  */
-int GP_FilterConvolutionEx(const GP_Context *src,
+int GP_FilterConvolutionEx(const GP_Pixmap *src,
                            GP_Coord x_src, GP_Coord y_src,
                            GP_Size w_src, GP_Coord h_src,
-                           GP_Context *dst,
+                           GP_Pixmap *dst,
                            GP_Coord x_dst, GP_Coord y_dst,
                            const GP_FilterKernel2D *kernel,
                            GP_ProgressCallback *callback);
@@ -83,16 +83,16 @@ int GP_FilterConvolutionEx(const GP_Context *src,
  *
  * Works on rectangle in src defined by x_src, y_src, w_src and h_src.
  *
- * Allocates context of a w_src x h_src.
+ * Allocates pixmap of a w_src x h_src.
  */
-GP_Context *GP_FilterConvolutionExAlloc(const GP_Context *src,
+GP_Pixmap *GP_FilterConvolutionExAlloc(const GP_Pixmap *src,
                                         GP_Coord x_src, GP_Coord y_src,
                                         GP_Size w_src, GP_Size h_src,
                                         const GP_FilterKernel2D *kernel,
                                         GP_ProgressCallback *callback);
 
 
-static inline int GP_FilterConvolution(const GP_Context *src, GP_Context *dst,
+static inline int GP_FilterConvolution(const GP_Pixmap *src, GP_Pixmap *dst,
                                        const GP_FilterKernel2D *kernel,
                                        GP_ProgressCallback *callback)
 {
@@ -100,7 +100,7 @@ static inline int GP_FilterConvolution(const GP_Context *src, GP_Context *dst,
 	                              kernel, callback);
 }
 
-static inline GP_Context *GP_FilterConvolutionAlloc(const GP_Context *src,
+static inline GP_Pixmap *GP_FilterConvolutionAlloc(const GP_Pixmap *src,
                                                     const GP_FilterKernel2D *kernel,
                                                     GP_ProgressCallback *callback)
 {

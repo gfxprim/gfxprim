@@ -36,29 +36,29 @@
  *
  * Increments each pixel channel by a p * channel_max value.
  */
-int GP_FilterBrightnessEx(const GP_Context *const src,
+int GP_FilterBrightnessEx(const GP_Pixmap *const src,
                           GP_Coord x_src, GP_Coord y_src,
                           GP_Size w_src, GP_Size h_src,
-                          GP_Context *dst,
+                          GP_Pixmap *dst,
                           GP_Coord x_dst, GP_Coord y_dst,
                           float p,
                           GP_ProgressCallback *callback);
 
-GP_Context *GP_FilterBrightnessExAlloc(const GP_Context *const src,
+GP_Pixmap *GP_FilterBrightnessExAlloc(const GP_Pixmap *const src,
                                        GP_Coord x_src, GP_Coord y_src,
                                        GP_Size w_src, GP_Size h_src,
                                        float p,
                                        GP_ProgressCallback *callback);
 
-static inline int GP_FilterBrightness(const GP_Context *src, GP_Context *dst,
+static inline int GP_FilterBrightness(const GP_Pixmap *src, GP_Pixmap *dst,
                                       float p, GP_ProgressCallback *callback)
 {
 	return GP_FilterBrightnessEx(src, 0, 0, src->w, src->h,
 	                             dst, 0, 0, p, callback);
 }
 
-static inline GP_Context *
-GP_FilterBrightnessAlloc(const GP_Context *src, float p,
+static inline GP_Pixmap *
+GP_FilterBrightnessAlloc(const GP_Pixmap *src, float p,
                          GP_ProgressCallback *callback)
 {
 	return GP_FilterBrightnessExAlloc(src, 0, 0, src->w, src->h,
@@ -73,28 +73,28 @@ GP_FilterBrightnessAlloc(const GP_Context *src, float p,
  * The parameters should have the same pixel channels as
  * source pixel type and are expected to be float numbers.
  */
-int GP_FilterContrastEx(const GP_Context *const src,
+int GP_FilterContrastEx(const GP_Pixmap *const src,
                         GP_Coord x_src, GP_Coord y_src,
                         GP_Size w_src, GP_Size h_src,
-                        GP_Context *dst,
+                        GP_Pixmap *dst,
                         GP_Coord x_dst, GP_Coord y_dst,
                         float p,
                         GP_ProgressCallback *callback);
 
-GP_Context *GP_FilterContrastExAlloc(const GP_Context *const src,
+GP_Pixmap *GP_FilterContrastExAlloc(const GP_Pixmap *const src,
                                      GP_Coord x_src, GP_Coord y_src,
                                      GP_Size w_src, GP_Size h_src,
                                      float p,
                                      GP_ProgressCallback *callback);
 
-static inline int GP_FilterContrast(const GP_Context *src, GP_Context *dst,
+static inline int GP_FilterContrast(const GP_Pixmap *src, GP_Pixmap *dst,
                                     float p, GP_ProgressCallback *callback)
 {
 	return GP_FilterContrastEx(src, 0, 0, src->w, src->h,
 	                           dst, 0, 0, p, callback);
 }
 
-static inline GP_Context *GP_FilterContrastAlloc(const GP_Context *src,
+static inline GP_Pixmap *GP_FilterContrastAlloc(const GP_Pixmap *src,
                                                  float p,
                                                  GP_ProgressCallback *callback)
 {
@@ -105,29 +105,29 @@ static inline GP_Context *GP_FilterContrastAlloc(const GP_Context *src,
 /*
  * Brightness and Contrast combined.
  */
-int GP_FilterBrightnessContrastEx(const GP_Context *const src,
+int GP_FilterBrightnessContrastEx(const GP_Pixmap *const src,
                                   GP_Coord x_src, GP_Coord y_src,
                                   GP_Size w_src, GP_Size h_src,
-                                  GP_Context *dst,
+                                  GP_Pixmap *dst,
                                   GP_Coord x_dst, GP_Coord y_dst,
                                   float b, float c,
                                   GP_ProgressCallback *callback);
 
-GP_Context *GP_FilterBrightnessContrastExAlloc(const GP_Context *const src,
+GP_Pixmap *GP_FilterBrightnessContrastExAlloc(const GP_Pixmap *const src,
                                                GP_Coord x_src, GP_Coord y_src,
                                                GP_Size w_src, GP_Size h_src,
                                                float b, float c,
                                                GP_ProgressCallback *callback);
 static inline int
-GP_FilterBrightnessContrast(const GP_Context *src, GP_Context *dst,
+GP_FilterBrightnessContrast(const GP_Pixmap *src, GP_Pixmap *dst,
                             float b, float c, GP_ProgressCallback *callback)
 {
 	return GP_FilterBrightnessContrastEx(src, 0, 0, src->w, src->h,
 	                                     dst, 0, 0, b, c, callback);
 }
 
-static inline GP_Context *
-GP_FilterBrightnessContrastAlloc(const GP_Context *src,
+static inline GP_Pixmap *
+GP_FilterBrightnessContrastAlloc(const GP_Pixmap *src,
                                  float b, float c,
                                  GP_ProgressCallback *callback)
 {
@@ -140,21 +140,21 @@ GP_FilterBrightnessContrastAlloc(const GP_Context *src,
  *
  * Does quantization into steps regions.
  */
-int GP_FilterPosterizeEx(const GP_Context *const src,
+int GP_FilterPosterizeEx(const GP_Pixmap *const src,
                          GP_Coord x_src, GP_Coord y_src,
                          GP_Size w_src, GP_Size h_src,
-                         GP_Context *dst,
+                         GP_Pixmap *dst,
                          GP_Coord x_dst, GP_Coord y_dst,
                          unsigned int steps,
                          GP_ProgressCallback *callback);
 
-GP_Context *GP_FilterPosterizeExAlloc(const GP_Context *const src,
+GP_Pixmap *GP_FilterPosterizeExAlloc(const GP_Pixmap *const src,
                                       GP_Coord x_src, GP_Coord y_src,
                                       GP_Size w_src, GP_Size h_src,
                                       unsigned int steps,
                                       GP_ProgressCallback *callback);
 
-static inline int GP_FilterPosterize(const GP_Context *src, GP_Context *dst,
+static inline int GP_FilterPosterize(const GP_Pixmap *src, GP_Pixmap *dst,
                                      unsigned int steps,
                                      GP_ProgressCallback *callback)
 {
@@ -162,8 +162,8 @@ static inline int GP_FilterPosterize(const GP_Context *src, GP_Context *dst,
 	                            dst, 0, 0, steps, callback);
 }
 
-static inline GP_Context *
-GP_FilterPosterizeAlloc(const GP_Context *src, unsigned int steps,
+static inline GP_Pixmap *
+GP_FilterPosterizeAlloc(const GP_Pixmap *src, unsigned int steps,
                         GP_ProgressCallback *callback)
 {
 	return GP_FilterPosterizeExAlloc(src, 0, 0, src->w, src->h,
@@ -173,26 +173,26 @@ GP_FilterPosterizeAlloc(const GP_Context *src, unsigned int steps,
 /*
  * Inverts the pixel value, i.e. sets it to max - val.
  */
-int GP_FilterInvertEx(const GP_Context *const src,
+int GP_FilterInvertEx(const GP_Pixmap *const src,
                       GP_Coord x_src, GP_Coord y_src,
                       GP_Size w_src, GP_Size h_src,
-                      GP_Context *dst,
+                      GP_Pixmap *dst,
                       GP_Coord x_dst, GP_Coord y_dst,
                       GP_ProgressCallback *callback);
 
-GP_Context *GP_FilterInvertExAlloc(const GP_Context *const src,
+GP_Pixmap *GP_FilterInvertExAlloc(const GP_Pixmap *const src,
                                    GP_Coord x_src, GP_Coord y_src,
                                    GP_Size w_src, GP_Size h_src,
                                    GP_ProgressCallback *callback);
 
-static inline int GP_FilterInvert(const GP_Context *src, GP_Context *dst,
+static inline int GP_FilterInvert(const GP_Pixmap *src, GP_Pixmap *dst,
                                   GP_ProgressCallback *callback)
 {
 	return GP_FilterInvertEx(src, 0, 0, src->w, src->h,
 	                         dst, 0, 0, callback);
 }
 
-static inline GP_Context *GP_FilterInvertAlloc(const GP_Context *src,
+static inline GP_Pixmap *GP_FilterInvertAlloc(const GP_Pixmap *src,
                                                GP_ProgressCallback *callback)
 {
 	return GP_FilterInvertExAlloc(src, 0, 0, src->w, src->h, callback);

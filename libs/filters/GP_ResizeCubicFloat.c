@@ -23,7 +23,7 @@
 #include <math.h>
 #include <errno.h>
 
-#include "core/GP_Context.h"
+#include "core/GP_Pixmap.h"
 #include "core/GP_GetPutPixel.h"
 #include "core/GP_Gamma.h"
 
@@ -76,7 +76,7 @@ typedef union v4f {
 		val = 255; \
 } while (0)
 
-int GP_FilterResizeCubic(const GP_Context *src, GP_Context *dst,
+int GP_FilterResizeCubic(const GP_Pixmap *src, GP_Pixmap *dst,
                          GP_ProgressCallback *callback)
 {
 	float col_r[src->h], col_g[src->h], col_b[src->h];

@@ -27,7 +27,7 @@
  */
 #include <errno.h>
 
-#include <core/GP_Context.h>
+#include <core/GP_Pixmap.h>
 #include <core/GP_Blit.h>
 #include <core/GP_Fill.h>
 
@@ -55,16 +55,16 @@ struct clipped_test {
 static int clipped_test(struct clipped_test *test)
 {
 	int ret = TST_SUCCESS;
-	GP_Context *src, *dst;
+	GP_Pixmap *src, *dst;
 
-	src = GP_ContextAlloc(test->src_w, test->src_h, GP_PIXEL_G8);
-	dst = GP_ContextAlloc(test->dst_w, test->dst_h, GP_PIXEL_G8);
+	src = GP_PixmapAlloc(test->src_w, test->src_h, GP_PIXEL_G8);
+	dst = GP_PixmapAlloc(test->dst_w, test->dst_h, GP_PIXEL_G8);
 
 	GP_Fill(src, 1);
 	GP_Fill(dst, 0);
 
 	if (!src || !dst) {
-		tst_msg("GP_ContextAlloc() failed");
+		tst_msg("GP_PixmapAlloc() failed");
 		return TST_UNTESTED;
 	}
 
@@ -76,8 +76,8 @@ static int clipped_test(struct clipped_test *test)
 			ret = TST_FAILED;
 	}
 
-	GP_ContextFree(src);
-	GP_ContextFree(dst);
+	GP_PixmapFree(src);
+	GP_PixmapFree(dst);
 
 	return ret;
 }

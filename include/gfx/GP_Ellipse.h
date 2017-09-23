@@ -26,22 +26,22 @@
 #ifndef GP_ELLIPSE_H
 #define GP_ELLIPSE_H
 
-#include "core/GP_Context.h"
+#include "core/GP_Pixmap.h"
 
 /* Ellipse */
 
-void GP_Ellipse(GP_Context *context, GP_Coord xcenter, GP_Coord ycenter,
+void GP_Ellipse(GP_Pixmap *pixmap, GP_Coord xcenter, GP_Coord ycenter,
                 GP_Size a, GP_Size b, GP_Pixel pixel);
 
-void GP_Ellipse_Raw(GP_Context *context, GP_Coord xcenter, GP_Coord ycenter,
+void GP_Ellipse_Raw(GP_Pixmap *pixmap, GP_Coord xcenter, GP_Coord ycenter,
                     GP_Size a, GP_Size b, GP_Pixel pixel);
 
 /* Filled Ellipse */
 
-void GP_FillEllipse(GP_Context *context, GP_Coord xcenter, GP_Coord ycenter,
+void GP_FillEllipse(GP_Pixmap *pixmap, GP_Coord xcenter, GP_Coord ycenter,
                     GP_Size a, GP_Size b, GP_Pixel pixel);
 
-void GP_FillEllipse_Raw(GP_Context *context, GP_Coord xcenter, GP_Coord ycenter,
+void GP_FillEllipse_Raw(GP_Pixmap *pixmap, GP_Coord xcenter, GP_Coord ycenter,
                         GP_Size a, GP_Size b, GP_Pixel pixel);
 
 #endif /* GP_ELLIPSE_H */

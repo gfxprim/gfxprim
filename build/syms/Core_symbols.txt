@@ -1,19 +1,19 @@
 GP_PixelTypes
 GP_PixelHasFlags
 
-GP_ContextAlloc
-GP_ContextResize
-GP_ContextConvertAlloc
-GP_ContextPrintInfo
-GP_ContextRotateCCW
-GP_SubContextAlloc
-GP_ContextConvert
-GP_ContextRotateCW
-GP_ContextFree
-GP_ContextInit
-GP_SubContext
-GP_ContextCopy
-GP_ContextEqual
+GP_PixmapAlloc
+GP_PixmapResize
+GP_PixmapConvertAlloc
+GP_PixmapPrintInfo
+GP_PixmapRotateCCW
+GP_SubPixmapAlloc
+GP_PixmapConvert
+GP_PixmapRotateCW
+GP_PixmapFree
+GP_PixmapInit
+GP_SubPixmap
+GP_PixmapCopy
+GP_PixmapEqual
 GP_PixelAddrOffset
 
 GP_GammaRelease

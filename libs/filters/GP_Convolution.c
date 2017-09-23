@@ -24,10 +24,10 @@
 #include "GP_Linear.h"
 #include "GP_Convolution.h"
 
-int GP_FilterConvolutionEx(const GP_Context *src,
+int GP_FilterConvolutionEx(const GP_Pixmap *src,
                            GP_Coord x_src, GP_Coord y_src,
                            GP_Size w_src, GP_Coord h_src,
-                           GP_Context *dst,
+                           GP_Pixmap *dst,
                            GP_Coord x_dst, GP_Coord y_dst,
                            const GP_FilterKernel2D *kernel,
                            GP_ProgressCallback *callback)
@@ -49,13 +49,13 @@ int GP_FilterConvolutionEx(const GP_Context *src,
 					      callback);
 }
 
-GP_Context *GP_FilterConvolutionExAlloc(const GP_Context *src,
+GP_Pixmap *GP_FilterConvolutionExAlloc(const GP_Pixmap *src,
                                         GP_Coord x_src, GP_Coord y_src,
                                         GP_Size w_src, GP_Size h_src,
                                         const GP_FilterKernel2D *kernel,
                                         GP_ProgressCallback *callback)
 {
-	GP_Context *ret = GP_ContextAlloc(w_src, h_src, src->pixel_type);
+	GP_Pixmap *ret = GP_PixmapAlloc(w_src, h_src, src->pixel_type);
 
 	GP_DEBUG(1, "Linear convolution kernel size %ux%u",
 	         kernel->w, kernel->h);
@@ -66,7 +66,7 @@ GP_Context *GP_FilterConvolutionExAlloc(const GP_Context *src,
 	if (GP_FilterLinearConvolution_Raw(src, x_src, y_src, w_src, h_src,
 	                                   ret, 0, 0, kernel->kernel, kernel->w,
 					   kernel->h, kernel->div, callback)) {
-		GP_ContextFree(ret);
+		GP_PixmapFree(ret);
 		return NULL;
 	}
 

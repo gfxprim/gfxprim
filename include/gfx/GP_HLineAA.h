@@ -27,7 +27,7 @@
    The coordinates are in XX.8 fixed point format, see core/GP_FixedPoint.h
    for helper macros.
 
-   For RGB contexts gamma correction tables are used to generate correct
+   For RGB pixmaps gamma correction tables are used to generate correct
    intensity for pixels.
 
  */
@@ -35,19 +35,19 @@
 #ifndef GFX_GP_HLINE_AA_H
 #define GFX_GP_HLINE_AA_H
 
-#include "core/GP_Context.h"
+#include "core/GP_Pixmap.h"
 
 /*
- * Anti Aliased Horizontal Line respecting context rotation flags and with
+ * Anti Aliased Horizontal Line respecting pixmap rotation flags and with
  * clipping.
  */
-void GP_HLineAA(GP_Context *context, GP_Coord x0, GP_Coord x1, GP_Coord y,
+void GP_HLineAA(GP_Pixmap *pixmap, GP_Coord x0, GP_Coord x1, GP_Coord y,
                 GP_Pixel pixel);
 
 /*
  * Horizontal Line without contect rotation flags.
  */
-void GP_HLineAA_Raw(GP_Context *context, GP_Coord x0, GP_Coord x1,
+void GP_HLineAA_Raw(GP_Pixmap *pixmap, GP_Coord x0, GP_Coord x1,
                     GP_Coord y, GP_Pixel pixel);
 
 #endif /* GFX_GP_HLINE_AA_H */

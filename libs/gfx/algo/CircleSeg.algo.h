@@ -68,13 +68,13 @@
 /*
  * This macro defines a circle drawing function.
  * Arguments:
- *     CONTEXT_T - user-defined type of drawing context (passed to PUTPIXEL)
+ *     PIXMAP_T - user-defined type of drawing pixmap (passed to PUTPIXEL)
  *     PIXVAL_T  - user-defined pixel value type (passed to PUTPIXEL)
- *     PUTPIXEL  - a pixel drawing function f(context, x, y, pixval)
+ *     PUTPIXEL  - a pixel drawing function f(pixmap, x, y, pixval)
  *     FN_NAME   - name of the function to be defined
  */
-#define DEF_CIRCLE_SEG_FN(FN_NAME, CONTEXT_T, PIXVAL_T, PUTPIXEL) \
-static void FN_NAME(CONTEXT_T context, int xcenter, int ycenter, int r, \
+#define DEF_CIRCLE_SEG_FN(FN_NAME, PIXMAP_T, PIXVAL_T, PUTPIXEL) \
+static void FN_NAME(PIXMAP_T pixmap, int xcenter, int ycenter, int r, \
 	uint8_t seg_flags, PIXVAL_T pixval) \
 { \
 	int x, y, error; \
@@ -82,7 +82,7 @@ static void FN_NAME(CONTEXT_T context, int xcenter, int ycenter, int r, \
 	/* Special case for r == 0 */ \
 	if (r == 0) { \
 		if (seg_flags) \
-			PUTPIXEL(context, xcenter, ycenter, pixval); \
+			PUTPIXEL(pixmap, xcenter, ycenter, pixval); \
 		return; \
 	} \
 \
@@ -96,24 +96,24 @@ static void FN_NAME(CONTEXT_T context, int xcenter, int ycenter, int r, \
 			error += 2*x + 1; \
 			x++; \
 			if (seg_flags & GP_CIRCLE_SEG2) \
-				PUTPIXEL(context, xcenter-x+1, ycenter-y, pixval); \
+				PUTPIXEL(pixmap, xcenter-x+1, ycenter-y, pixval); \
 			if (seg_flags & GP_CIRCLE_SEG1) \
-				PUTPIXEL(context, xcenter+x-1, ycenter-y, pixval); \
+				PUTPIXEL(pixmap, xcenter+x-1, ycenter-y, pixval); \
 			if (seg_flags & GP_CIRCLE_SEG3) \
-				PUTPIXEL(context, xcenter-x+1, ycenter+y, pixval); \
+				PUTPIXEL(pixmap, xcenter-x+1, ycenter+y, pixval); \
 			if (seg_flags & GP_CIRCLE_SEG4) \
-				PUTPIXEL(context, xcenter+x-1, ycenter+y, pixval); \
+				PUTPIXEL(pixmap, xcenter+x-1, ycenter+y, pixval); \
 		} \
 \
 		/* Enough changes accumulated, go to next line. */ \
 		error += -2*y + 1; \
 		if (seg_flags & GP_CIRCLE_SEG2) \
-			PUTPIXEL(context, xcenter-x+1, ycenter-y, pixval); \
+			PUTPIXEL(pixmap, xcenter-x+1, ycenter-y, pixval); \
 		if (seg_flags & GP_CIRCLE_SEG1) \
-			PUTPIXEL(context, xcenter+x-1, ycenter-y, pixval); \
+			PUTPIXEL(pixmap, xcenter+x-1, ycenter-y, pixval); \
 		if (seg_flags & GP_CIRCLE_SEG3) \
-			PUTPIXEL(context, xcenter-x+1, ycenter+y, pixval); \
+			PUTPIXEL(pixmap, xcenter-x+1, ycenter+y, pixval); \
 		if (seg_flags & GP_CIRCLE_SEG4) \
-			PUTPIXEL(context, xcenter+x-1, ycenter+y, pixval); \
+			PUTPIXEL(pixmap, xcenter+x-1, ycenter+y, pixval); \
 	} \
 }

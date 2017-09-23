@@ -22,7 +22,7 @@
 
 @ for ps in pixelsizes:
 
-static void GP_FillEllipse_Raw_{{ ps.suffix }}(GP_Context *context, GP_Coord xcenter,
+static void GP_FillEllipse_Raw_{{ ps.suffix }}(GP_Pixmap *pixmap, GP_Coord xcenter,
 		GP_Coord ycenter, GP_Size a, GP_Size b, GP_Pixel pixel)
 {
 	/* Precompute quadratic terms. */
@@ -31,7 +31,7 @@ static void GP_FillEllipse_Raw_{{ ps.suffix }}(GP_Context *context, GP_Coord xce
 
 	/* Handle special case */
 	if (a == 0) {
-		GP_VLine_Raw_{{ ps.suffix }}(context, xcenter, ycenter - b, ycenter + b, pixel);
+		GP_VLine_Raw_{{ ps.suffix }}(pixmap, xcenter, ycenter - b, ycenter + b, pixel);
 		return;
 	}
 
@@ -44,29 +44,29 @@ static void GP_FillEllipse_Raw_{{ ps.suffix }}(GP_Context *context, GP_Coord xce
 		error += a2 * (-2*y + 1);
 
 		/* Draw two horizontal lines reflected across Y. */
-		GP_HLine_Raw_{{ ps.suffix }}(context, xcenter-x+1, xcenter+x-1, ycenter-y, pixel);
-		GP_HLine_Raw_{{ ps.suffix }}(context, xcenter-x+1, xcenter+x-1, ycenter+y, pixel);
+		GP_HLine_Raw_{{ ps.suffix }}(pixmap, xcenter-x+1, xcenter+x-1, ycenter-y, pixel);
+		GP_HLine_Raw_{{ ps.suffix }}(pixmap, xcenter-x+1, xcenter+x-1, ycenter+y, pixel);
 	}
 }
 
 @ end
 
-void GP_FillEllipse_Raw(GP_Context *context, GP_Coord xcenter, GP_Coord ycenter,
+void GP_FillEllipse_Raw(GP_Pixmap *pixmap, GP_Coord xcenter, GP_Coord ycenter,
 	                GP_Size a, GP_Size b, GP_Pixel pixel)
 {
-	GP_CHECK_CONTEXT(context);
+	GP_CHECK_PIXMAP(pixmap);
 
-	GP_FN_PER_BPP_CONTEXT(GP_FillEllipse_Raw, context, context,
+	GP_FN_PER_BPP_PIXMAP(GP_FillEllipse_Raw, pixmap, pixmap,
 	                      xcenter, ycenter, a, b, pixel);
 }
 
-void GP_FillEllipse(GP_Context *context, GP_Coord xcenter, GP_Coord ycenter,
+void GP_FillEllipse(GP_Pixmap *pixmap, GP_Coord xcenter, GP_Coord ycenter,
                     GP_Size a, GP_Size b, GP_Pixel pixel)
 {
-	GP_CHECK_CONTEXT(context);
+	GP_CHECK_PIXMAP(pixmap);
 
-	GP_TRANSFORM_POINT(context, xcenter, ycenter);
-	GP_TRANSFORM_SWAP(context, a, b);
+	GP_TRANSFORM_POINT(pixmap, xcenter, ycenter);
+	GP_TRANSFORM_SWAP(pixmap, a, b);
 
-	GP_FillEllipse_Raw(context, xcenter, ycenter, a, b, pixel);
+	GP_FillEllipse_Raw(pixmap, xcenter, ycenter, a, b, pixel);
 }

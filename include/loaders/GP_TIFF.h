@@ -28,31 +28,31 @@
 /*
  * Extended loading function.
  */
-int GP_ReadTIFFEx(GP_IO *io, GP_Context **img,
+int GP_ReadTIFFEx(GP_IO *io, GP_Pixmap **img,
                   GP_DataStorage *storage, GP_ProgressCallback *callback);
 
-int GP_LoadTIFFEx(const char *src_path, GP_Context **img,
+int GP_LoadTIFFEx(const char *src_path, GP_Pixmap **img,
                   GP_DataStorage *storage, GP_ProgressCallback *callback);
 /*
  * Reads first image in TIFF from an IO stream.
  */
-GP_Context *GP_ReadTIFF(GP_IO *io, GP_ProgressCallback *callback);
+GP_Pixmap *GP_ReadTIFF(GP_IO *io, GP_ProgressCallback *callback);
 
 /*
  * Loads fist image in TIFF from a file.
  */
-GP_Context *GP_LoadTIFF(const char *src_path, GP_ProgressCallback *callback);
+GP_Pixmap *GP_LoadTIFF(const char *src_path, GP_ProgressCallback *callback);
 
 /*
  * Writes TIFF into an I/O stream.
  */
-int GP_WriteTIFF(const GP_Context *src, GP_IO *io,
+int GP_WriteTIFF(const GP_Pixmap *src, GP_IO *io,
                  GP_ProgressCallback *callback);
 
 /*
  * Saves TIFF.
  */
-int GP_SaveTIFF(const GP_Context *src, const char *dst_path,
+int GP_SaveTIFF(const GP_Pixmap *src, const char *dst_path,
                 GP_ProgressCallback *callback);
 
 /*

@@ -23,13 +23,13 @@
 #ifndef GP_GRABBERS_GRABBER_H
 #define GP_GRABBERS_GRABBER_H
 
-struct GP_Context;
+struct GP_Pixmap;
 
 typedef struct GP_Grabber {
 	/*
-	 * Context with current frame.
+	 * Pixmap with current frame.
 	 */
-	struct GP_Context *frame;
+	struct GP_Pixmap *frame;
 
 	/*
 	 * Returns 0 if there are no images in queue and 1 otherwise.

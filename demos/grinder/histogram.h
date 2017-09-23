@@ -25,6 +25,6 @@
 
 #include <GP.h>
 
-void histogram_to_png(const GP_Context *src, const char *filename);
+void histogram_to_png(const GP_Pixmap *src, const char *filename);
 
 #endif /* HISTOGRAM_H */

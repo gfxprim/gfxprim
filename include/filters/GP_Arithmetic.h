@@ -36,13 +36,13 @@
  *
  * Produces saturated (clamped) addtion.
  */
-int GP_FilterAddition(const GP_Context *src_a,
-                      const GP_Context *src_b,
-                      GP_Context *dst,
+int GP_FilterAddition(const GP_Pixmap *src_a,
+                      const GP_Pixmap *src_b,
+                      GP_Pixmap *dst,
                       GP_ProgressCallback *callback);
 
-GP_Context *GP_FilterAdditionAlloc(const GP_Context *src_a,
-                                   const GP_Context *src_b,
+GP_Pixmap *GP_FilterAdditionAlloc(const GP_Pixmap *src_a,
+                                   const GP_Pixmap *src_b,
                                    GP_ProgressCallback *callback);
 
 /*
@@ -50,13 +50,13 @@ GP_Context *GP_FilterAdditionAlloc(const GP_Context *src_a,
  *
  * Produces saturated (clamped) multiplication.
  */
-int GP_FilterMultiply(const GP_Context *src_a,
-                      const GP_Context *src_b,
-                      GP_Context *dst,
+int GP_FilterMultiply(const GP_Pixmap *src_a,
+                      const GP_Pixmap *src_b,
+                      GP_Pixmap *dst,
                       GP_ProgressCallback *callback);
 
-GP_Context *GP_FilterMultiplyAlloc(const GP_Context *src_a,
-                                   const GP_Context *src_b,
+GP_Pixmap *GP_FilterMultiplyAlloc(const GP_Pixmap *src_a,
+                                   const GP_Pixmap *src_b,
                                    GP_ProgressCallback *callback);
 
 /*
@@ -65,37 +65,37 @@ GP_Context *GP_FilterMultiplyAlloc(const GP_Context *src_a,
  * Produces symetric difference.
  * eg. dst = abs(src_a - src_b)
  */
-int GP_FilterDifference(const GP_Context *src_a,
-                        const GP_Context *src_b,
-                        GP_Context *dst,
+int GP_FilterDifference(const GP_Pixmap *src_a,
+                        const GP_Pixmap *src_b,
+                        GP_Pixmap *dst,
                         GP_ProgressCallback *callback);
 
-GP_Context *GP_FilterDifferenceAlloc(const GP_Context *src_a,
-                                     const GP_Context *src_b,
+GP_Pixmap *GP_FilterDifferenceAlloc(const GP_Pixmap *src_a,
+                                     const GP_Pixmap *src_b,
                                      GP_ProgressCallback *callback);
 
 /*
  * Maximum filter.
  */
-int GP_FilterMax(const GP_Context *src_a,
-                 const GP_Context *src_b,
-                 GP_Context *dst,
+int GP_FilterMax(const GP_Pixmap *src_a,
+                 const GP_Pixmap *src_b,
+                 GP_Pixmap *dst,
                  GP_ProgressCallback *callback);
 
-GP_Context *GP_FilterMaxAlloc(const GP_Context *src_a,
-                              const GP_Context *src_b,
+GP_Pixmap *GP_FilterMaxAlloc(const GP_Pixmap *src_a,
+                              const GP_Pixmap *src_b,
                               GP_ProgressCallback *callback);
 
 /*
  * Minimum filter.
  */
-int GP_FilterMin(const GP_Context *src_a,
-                 const GP_Context *src_b,
-                 GP_Context *dst,
+int GP_FilterMin(const GP_Pixmap *src_a,
+                 const GP_Pixmap *src_b,
+                 GP_Pixmap *dst,
                  GP_ProgressCallback *callback);
 
-GP_Context *GP_FilterMinAlloc(const GP_Context *src_a,
-                              const GP_Context *src_b,
+GP_Pixmap *GP_FilterMinAlloc(const GP_Pixmap *src_a,
+                              const GP_Pixmap *src_b,
                               GP_ProgressCallback *callback);
 
 #endif /* FILTERS_GP_ARITHMETIC_H */

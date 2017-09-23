@@ -26,35 +26,35 @@
 #ifndef GFX_GP_HLINE_H
 #define GFX_GP_HLINE_H
 
-#include "core/GP_Context.h"
+#include "core/GP_Pixmap.h"
 
 /* Raw per BPP HLines */
 #include "gfx/GP_HLine.gen.h"
 
 /* Generic HLines */
-void GP_HLineXXY(GP_Context *context, GP_Coord x0, GP_Coord x1, GP_Coord y,
+void GP_HLineXXY(GP_Pixmap *pixmap, GP_Coord x0, GP_Coord x1, GP_Coord y,
                  GP_Pixel pixel);
 
-void GP_HLineXXY_Raw(GP_Context *context, GP_Coord x0, GP_Coord x1,
+void GP_HLineXXY_Raw(GP_Pixmap *pixmap, GP_Coord x0, GP_Coord x1,
                      GP_Coord y, GP_Pixel pixel);
 
-void GP_HLineXYW(GP_Context *context, GP_Coord x, GP_Coord y, GP_Size w,
+void GP_HLineXYW(GP_Pixmap *pixmap, GP_Coord x, GP_Coord y, GP_Size w,
                  GP_Pixel pixel);
 
-void GP_HLineXYW_Raw(GP_Context *context, GP_Coord x, GP_Coord y, GP_Size w,
+void GP_HLineXYW_Raw(GP_Pixmap *pixmap, GP_Coord x, GP_Coord y, GP_Size w,
                      GP_Pixel pixel);
 
 /* default argument set is XXY */
-static inline void GP_HLine_Raw(GP_Context *context, GP_Coord x0, GP_Coord x1,
+static inline void GP_HLine_Raw(GP_Pixmap *pixmap, GP_Coord x0, GP_Coord x1,
                                 GP_Coord y, GP_Pixel p)
 {
-	GP_HLineXXY_Raw(context, x0, x1, y, p);
+	GP_HLineXXY_Raw(pixmap, x0, x1, y, p);
 }
 
-static inline void GP_HLine(GP_Context *context, GP_Coord x0, GP_Coord x1,
+static inline void GP_HLine(GP_Pixmap *pixmap, GP_Coord x0, GP_Coord x1,
                             GP_Coord y, GP_Pixel p)
 {
-	GP_HLineXXY(context, x0, x1, y, p);
+	GP_HLineXXY(pixmap, x0, x1, y, p);
 }
 
 #endif /* GFX_GP_HLINE_H */

@@ -22,7 +22,7 @@
 
 #include <errno.h>
 
-#include "core/GP_Context.h"
+#include "core/GP_Pixmap.h"
 #include "core/GP_Debug.h"
 
 #include "GP_ResizeNN.h"
@@ -46,7 +46,7 @@ const char *GP_InterpolationTypeName(enum GP_InterpolationType interp_type)
 	return interp_types[interp_type];
 }
 
-static int resize(const GP_Context *src, GP_Context *dst,
+static int resize(const GP_Pixmap *src, GP_Pixmap *dst,
                   GP_InterpolationType type,
                   GP_ProgressCallback *callback)
 {
@@ -69,7 +69,7 @@ static int resize(const GP_Context *src, GP_Context *dst,
 	return 1;
 }
 
-int GP_FilterResize(const GP_Context *src, GP_Context *dst,
+int GP_FilterResize(const GP_Pixmap *src, GP_Pixmap *dst,
                     GP_InterpolationType type,
                     GP_ProgressCallback *callback)
 {
@@ -82,18 +82,18 @@ int GP_FilterResize(const GP_Context *src, GP_Context *dst,
 	return resize(src, dst, type, callback);
 }
 
-GP_Context *GP_FilterResizeAlloc(const GP_Context *src,
+GP_Pixmap *GP_FilterResizeAlloc(const GP_Pixmap *src,
                                  GP_Size w, GP_Size h,
                                  GP_InterpolationType type,
                                  GP_ProgressCallback *callback)
 {
-	GP_Context *res = GP_ContextAlloc(w, h, src->pixel_type);
+	GP_Pixmap *res = GP_PixmapAlloc(w, h, src->pixel_type);
 
 	if (!res)
 		return NULL;
 
 	if (resize(src, res, type, callback)) {
-		GP_ContextFree(res);
+		GP_PixmapFree(res);
 		return NULL;
 	}
 

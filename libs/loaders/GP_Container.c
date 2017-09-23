@@ -38,7 +38,7 @@ int GP_ContainerSeek(GP_Container *self, int offset,
 	return self->ops->Seek(self, offset, whence);
 }
 
-int GP_ContainerLoadEx(GP_Container *self, GP_Context **img,
+int GP_ContainerLoadEx(GP_Container *self, GP_Pixmap **img,
                        GP_DataStorage *storage, GP_ProgressCallback *callback)
 {
 	if (!self->ops->LoadEx) {

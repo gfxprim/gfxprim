@@ -29,46 +29,46 @@
 #include "gfx/GP_Polygon.h"
 #include "gfx/GP_Triangle.h"
 
-void GP_Triangle_Raw(GP_Context *context, GP_Coord x0, GP_Coord y0,
+void GP_Triangle_Raw(GP_Pixmap *pixmap, GP_Coord x0, GP_Coord y0,
                      GP_Coord x1, GP_Coord y1,
                      GP_Coord x2, GP_Coord y2, GP_Pixel pixel)
 {
-	GP_Line_Raw(context, x0, y0, x1, y1, pixel);
-	GP_Line_Raw(context, x0, y0, x2, y2, pixel);
-	GP_Line_Raw(context, x1, y1, x2, y2, pixel);
+	GP_Line_Raw(pixmap, x0, y0, x1, y1, pixel);
+	GP_Line_Raw(pixmap, x0, y0, x2, y2, pixel);
+	GP_Line_Raw(pixmap, x1, y1, x2, y2, pixel);
 }
 
-void GP_Triangle(GP_Context *context, GP_Coord x0, GP_Coord y0,
+void GP_Triangle(GP_Pixmap *pixmap, GP_Coord x0, GP_Coord y0,
                  GP_Coord x1, GP_Coord y1,
                  GP_Coord x2, GP_Coord y2, GP_Pixel pixel)
 {
-	GP_CHECK_CONTEXT(context);
+	GP_CHECK_PIXMAP(pixmap);
 
-	GP_TRANSFORM_POINT(context, x0, y0);
-	GP_TRANSFORM_POINT(context, x1, y1);
-	GP_TRANSFORM_POINT(context, x2, y2);
+	GP_TRANSFORM_POINT(pixmap, x0, y0);
+	GP_TRANSFORM_POINT(pixmap, x1, y1);
+	GP_TRANSFORM_POINT(pixmap, x2, y2);
 
-	GP_Triangle_Raw(context, x0, y0, x1, y1, x2, y2, pixel);
+	GP_Triangle_Raw(pixmap, x0, y0, x1, y1, x2, y2, pixel);
 }
 
-void GP_FillTriangle_Raw(GP_Context *context, GP_Coord x0, GP_Coord y0,
+void GP_FillTriangle_Raw(GP_Pixmap *pixmap, GP_Coord x0, GP_Coord y0,
                          GP_Coord x1, GP_Coord y1,
                          GP_Coord x2, GP_Coord y2, GP_Pixel pixel)
 {
 	const GP_Coord coords[6] = {x0, y0, x1, y1, x2, y2};
 
-	GP_FillPolygon_Raw(context, 3, coords, pixel);
+	GP_FillPolygon_Raw(pixmap, 3, coords, pixel);
 }
 
-void GP_FillTriangle(GP_Context* context, GP_Coord x0, GP_Coord y0,
+void GP_FillTriangle(GP_Pixmap* pixmap, GP_Coord x0, GP_Coord y0,
                      GP_Coord x1, GP_Coord y1,
                      GP_Coord x2, GP_Coord y2, GP_Pixel pixel)
 {
-	GP_CHECK_CONTEXT(context);
+	GP_CHECK_PIXMAP(pixmap);
 
-	GP_TRANSFORM_POINT(context, x0, y0);
-	GP_TRANSFORM_POINT(context, x1, y1);
-	GP_TRANSFORM_POINT(context, x2, y2);
+	GP_TRANSFORM_POINT(pixmap, x0, y0);
+	GP_TRANSFORM_POINT(pixmap, x1, y1);
+	GP_TRANSFORM_POINT(pixmap, x2, y2);
 
-	GP_FillTriangle_Raw(context, x0, y0, x1, y1, x2, y2, pixel);
+	GP_FillTriangle_Raw(pixmap, x0, y0, x1, y1, x2, y2, pixel);
 }

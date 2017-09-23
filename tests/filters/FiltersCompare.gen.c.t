@@ -10,7 +10,7 @@
 #include <errno.h>
 #include <string.h>
 
-#include <core/GP_Context.h>
+#include <core/GP_Pixmap.h>
 #include <filters/GP_Filters.h>
 
 #include "tst_test.h"
@@ -109,10 +109,10 @@
 @
 @ def apply_filter(filter):
 @     if 'dst' in filter[1]:
-	dst = GP_ContextCopy(src, GP_COPY_WITH_PIXELS);
+	dst = GP_PixmapCopy(src, GP_COPY_WITH_PIXELS);
 	if (GP_Filter{{ filter[0] }}({{ arr_to_params(filter[1]) }})) {
 		int err = errno;
-		GP_ContextFree(dst);
+		GP_PixmapFree(dst);
 		dst = NULL;
 		errno = err;
 	}
@@ -125,8 +125,8 @@
 @ for fs in compare_list:
 static int compare_{{ fs[0] }}(GP_PixelType pt)
 {
-	GP_Context *src = GP_ContextAlloc(134, 1072, pt);
-	GP_Context *dst, *ref;
+	GP_Pixmap *src = GP_PixmapAlloc(134, 1072, pt);
+	GP_Pixmap *dst, *ref;
 	int fail = 0;
 
 	errno = 0;
@@ -136,7 +136,7 @@ static int compare_{{ fs[0] }}(GP_PixelType pt)
 		return TST_UNTESTED;
 	}
 
-	/* randomize context content */
+	/* randomize pixmap content */
 	GP_FilterGaussianNoiseAdd(src, src, 10, 0, NULL);
 
 	/* Create reference result */
@@ -144,7 +144,7 @@ static int compare_{{ fs[0] }}(GP_PixelType pt)
 	ref = dst;
 
 	if (ref == NULL) {
-		GP_ContextFree(src);
+		GP_PixmapFree(src);
 		switch (errno) {
 		case ENOSYS:
 			tst_msg("Not implemented");
@@ -161,16 +161,16 @@ static int compare_{{ fs[0] }}(GP_PixelType pt)
 @     for i in fs[2:]:
 {@ apply_filter(i) @}
 
-	if (!GP_ContextEqual(ref, dst)) {
+	if (!GP_PixmapEqual(ref, dst)) {
 		fail++;
 		tst_msg("Results for {{ fs[1][0] }} and {{ i[0] }} differs");
 	}
 
-	GP_ContextFree(dst);
+	GP_PixmapFree(dst);
 @     end
 
-	GP_ContextFree(src);
-	GP_ContextFree(ref);
+	GP_PixmapFree(src);
+	GP_PixmapFree(ref);
 
 	if (fail) {
 		tst_msg("%i failure(s)", fail);

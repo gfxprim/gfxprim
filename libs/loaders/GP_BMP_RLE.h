@@ -264,16 +264,16 @@ static int RLE8_next(struct RLE *rle)
 }
 
 static int read_RLE8(GP_IO *io, struct bitmap_info_header *header,
-                     GP_Context *context, GP_ProgressCallback *callback)
+                     GP_Pixmap *pixmap, GP_ProgressCallback *callback)
 {
 	uint32_t palette_size = get_palette_size(header);
 	DECLARE_RLE(rle, header->w, GP_ABS(header->h), io);
 	int err;
 
-	if (context->pixel_type != GP_PIXEL_RGB888) {
+	if (pixmap->pixel_type != GP_PIXEL_RGB888) {
 		GP_WARN("Corrupted BMP header! "
 			"RLE8 is 24bit (RGB888) palette but header says %s",
-		        GP_PixelTypeName(context->pixel_type));
+		        GP_PixelTypeName(pixmap->pixel_type));
 		return EINVAL;
 	}
 
@@ -293,7 +293,7 @@ static int read_RLE8(GP_IO *io, struct bitmap_info_header *header,
 	 * TODO: Untouched pixels should be treated as
 	 *       1 bit transpanrency (in header3+)
 	 */
-	GP_Fill(context, palette[0]);
+	GP_Fill(pixmap, palette[0]);
 
 	for (;;) {
 		if ((err = RLE8_next(&rle)))
@@ -320,12 +320,12 @@ static int read_RLE8(GP_IO *io, struct bitmap_info_header *header,
 		else
 			ry = GP_ABS(header->h) - 1 - rle.y;
 
-		GP_PutPixel_Raw_24BPP(context, rle.x, ry, p);
+		GP_PutPixel_Raw_24BPP(pixmap, rle.x, ry, p);
 
 		if (cnt++ > header->w) {
 			cnt = 0;
 			if (GP_ProgressCallbackReport(callback, rle.y,
-			                              context->h, context->w)) {
+			                              pixmap->h, pixmap->w)) {
 				GP_DEBUG(1, "Operation aborted");
 				err = ECANCELED;
 				goto err;

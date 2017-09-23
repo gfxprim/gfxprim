@@ -10,7 +10,7 @@
 #include "GP_Rotate.h"
 
 @ for ps in pixelsizes:
-static int GP_FilterRotate90_Raw_{{ ps.suffix }}(const GP_Context *src, GP_Context *dst,
+static int GP_FilterRotate90_Raw_{{ ps.suffix }}(const GP_Pixmap *src, GP_Pixmap *dst,
                                           GP_ProgressCallback *callback)
 {
 	uint32_t x, y;
@@ -33,14 +33,14 @@ static int GP_FilterRotate90_Raw_{{ ps.suffix }}(const GP_Context *src, GP_Conte
 
 @ end
 @
-static int GP_FilterRotate90_Raw(const GP_Context *src, GP_Context *dst,
+static int GP_FilterRotate90_Raw(const GP_Pixmap *src, GP_Pixmap *dst,
                                  GP_ProgressCallback *callback)
 {
-	GP_FN_RET_PER_BPP_CONTEXT(GP_FilterRotate90_Raw, src, src, dst, callback);
+	GP_FN_RET_PER_BPP_PIXMAP(GP_FilterRotate90_Raw, src, src, dst, callback);
 	return 1;
 }
 
-int GP_FilterRotate90(const GP_Context *src, GP_Context *dst,
+int GP_FilterRotate90(const GP_Pixmap *src, GP_Pixmap *dst,
                       GP_ProgressCallback *callback)
 {
 	GP_ASSERT(src->pixel_type == dst->pixel_type,
@@ -56,19 +56,19 @@ int GP_FilterRotate90(const GP_Context *src, GP_Context *dst,
 	return 0;
 }
 
-GP_Context *GP_FilterRotate90Alloc(const GP_Context *src,
+GP_Pixmap *GP_FilterRotate90Alloc(const GP_Pixmap *src,
                                     GP_ProgressCallback *callback)
 {
-	GP_Context *res;
+	GP_Pixmap *res;
 
-	res = GP_ContextAlloc(src->h, src->w, src->pixel_type);
+	res = GP_PixmapAlloc(src->h, src->w, src->pixel_type);
 
 	if (res == NULL)
 		return NULL;
 
 	if (GP_FilterRotate90_Raw(src, res, callback)) {
 		GP_DEBUG(1, "Operation aborted");
-		GP_ContextFree(res);
+		GP_PixmapFree(res);
 		return NULL;
 	}
 
@@ -83,7 +83,7 @@ GP_PutPixel_Raw_{{ ps.suffix }}({{ dst }}, {{ x1 }}, {{ y1 }}, pix0);
 @ end
 @
 @ for ps in pixelsizes:
-static int GP_FilterRotate180_Raw_{{ ps.suffix }}(const GP_Context *src, GP_Context *dst,
+static int GP_FilterRotate180_Raw_{{ ps.suffix }}(const GP_Pixmap *src, GP_Pixmap *dst,
                                           GP_ProgressCallback *callback)
 {
 	uint32_t x, y;
@@ -108,14 +108,14 @@ static int GP_FilterRotate180_Raw_{{ ps.suffix }}(const GP_Context *src, GP_Cont
 
 @ end
 @
-static int GP_FilterRotate180_Raw(const GP_Context *src, GP_Context *dst,
+static int GP_FilterRotate180_Raw(const GP_Pixmap *src, GP_Pixmap *dst,
                                   GP_ProgressCallback *callback)
 {
-	GP_FN_RET_PER_BPP_CONTEXT(GP_FilterRotate180_Raw, src, src, dst, callback);
+	GP_FN_RET_PER_BPP_PIXMAP(GP_FilterRotate180_Raw, src, src, dst, callback);
 	return 1;
 }
 
-int GP_FilterRotate180(const GP_Context *src, GP_Context *dst,
+int GP_FilterRotate180(const GP_Pixmap *src, GP_Pixmap *dst,
                        GP_ProgressCallback *callback)
 {
 	GP_ASSERT(src->pixel_type == dst->pixel_type,
@@ -131,19 +131,19 @@ int GP_FilterRotate180(const GP_Context *src, GP_Context *dst,
 	return 0;
 }
 
-GP_Context *GP_FilterRotate180Alloc(const GP_Context *src,
+GP_Pixmap *GP_FilterRotate180Alloc(const GP_Pixmap *src,
                                     GP_ProgressCallback *callback)
 {
-	GP_Context *res;
+	GP_Pixmap *res;
 
-	res = GP_ContextCopy(src, 0);
+	res = GP_PixmapCopy(src, 0);
 
 	if (res == NULL)
 		return NULL;
 
 	if (GP_FilterRotate180_Raw(src, res, callback)) {
 		GP_DEBUG(1, "Operation aborted");
-		GP_ContextFree(res);
+		GP_PixmapFree(res);
 		return NULL;
 	}
 
@@ -151,7 +151,7 @@ GP_Context *GP_FilterRotate180Alloc(const GP_Context *src,
 }
 
 @ for ps in pixelsizes:
-static int GP_FilterRotate270_Raw_{{ ps.suffix }}(const GP_Context *src, GP_Context *dst,
+static int GP_FilterRotate270_Raw_{{ ps.suffix }}(const GP_Pixmap *src, GP_Pixmap *dst,
                                            GP_ProgressCallback *callback)
 {
 	uint32_t x, y;
@@ -174,14 +174,14 @@ static int GP_FilterRotate270_Raw_{{ ps.suffix }}(const GP_Context *src, GP_Cont
 
 @ end
 @
-static int GP_FilterRotate270_Raw(const GP_Context *src, GP_Context *dst,
+static int GP_FilterRotate270_Raw(const GP_Pixmap *src, GP_Pixmap *dst,
                                   GP_ProgressCallback *callback)
 {
-	GP_FN_RET_PER_BPP_CONTEXT(GP_FilterRotate270_Raw, src, src, dst, callback);
+	GP_FN_RET_PER_BPP_PIXMAP(GP_FilterRotate270_Raw, src, src, dst, callback);
 	return 1;
 }
 
-int GP_FilterRotate270(const GP_Context *src, GP_Context *dst,
+int GP_FilterRotate270(const GP_Pixmap *src, GP_Pixmap *dst,
                       GP_ProgressCallback *callback)
 {
 	GP_ASSERT(src->pixel_type == dst->pixel_type,
@@ -197,19 +197,19 @@ int GP_FilterRotate270(const GP_Context *src, GP_Context *dst,
 	return 0;
 }
 
-GP_Context *GP_FilterRotate270Alloc(const GP_Context *src,
+GP_Pixmap *GP_FilterRotate270Alloc(const GP_Pixmap *src,
                                      GP_ProgressCallback *callback)
 {
-	GP_Context *res;
+	GP_Pixmap *res;
 
-	res = GP_ContextAlloc(src->h, src->w, src->pixel_type);
+	res = GP_PixmapAlloc(src->h, src->w, src->pixel_type);
 
 	if (res == NULL)
 		return NULL;
 
 	if (GP_FilterRotate270_Raw(src, res, callback)) {
 		GP_DEBUG(1, "Operation aborted");
-		GP_ContextFree(res);
+		GP_PixmapFree(res);
 		return NULL;
 	}
 

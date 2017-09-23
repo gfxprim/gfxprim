@@ -24,7 +24,7 @@
 #include <errno.h>
 #include <sys/stat.h>
 
-#include <core/GP_Context.h>
+#include <core/GP_Pixmap.h>
 #include <loaders/GP_Loaders.h>
 
 #include "tst_test.h"
@@ -52,7 +52,7 @@ static const char *strfmt(enum fmt fmt)
 	return "INVALID";
 }
 
-static int save_img(enum fmt fmt, const GP_Context *img, const char *name)
+static int save_img(enum fmt fmt, const GP_Pixmap *img, const char *name)
 {
 	char buf[256];
 
@@ -71,7 +71,7 @@ static int save_img(enum fmt fmt, const GP_Context *img, const char *name)
 	}
 }
 
-static GP_Context *load(enum fmt fmt, const char *name)
+static GP_Pixmap *load(enum fmt fmt, const char *name)
 {
 	char buf[256];
 
@@ -94,12 +94,12 @@ static GP_Context *load(enum fmt fmt, const char *name)
 
 static int save_load(enum fmt fmt, GP_Size w, GP_Size h)
 {
-	GP_Context *img, *res;
+	GP_Pixmap *img, *res;
 
-	img = GP_ContextAlloc(w, h, GP_PIXEL_RGB888);
+	img = GP_PixmapAlloc(w, h, GP_PIXEL_RGB888);
 
 	if (img == NULL) {
-		tst_warn("GP_ContextAlloc failed");
+		tst_warn("GP_PixmapAlloc failed");
 		return TST_UNTESTED;
 	}
 
@@ -124,8 +124,8 @@ static int save_load(enum fmt fmt, GP_Size w, GP_Size h)
 		return TST_FAILED;
 	}
 
-	GP_ContextFree(img);
-	GP_ContextFree(res);
+	GP_PixmapFree(img);
+	GP_PixmapFree(res);
 
 	return TST_SUCCESS;
 }
@@ -162,7 +162,7 @@ static int test_BMP_stress(void)
 
 static int load_enoent(enum fmt fmt)
 {
-	GP_Context *img;
+	GP_Pixmap *img;
 
 	img = load(fmt, "nonexistent");
 
@@ -207,7 +207,7 @@ static int test_BMP_Load_ENOENT(void)
 static int load_eacces(enum fmt fmt)
 {
 	char buf[256];
-	GP_Context *img;
+	GP_Pixmap *img;
 
 	snprintf(buf, sizeof(buf), "test.%s", strfmt(fmt));
 
@@ -269,7 +269,7 @@ static int test_BMP_Load_EACCES(void)
 static int load_eio(enum fmt fmt)
 {
 	char buf[256];
-	GP_Context *img;
+	GP_Pixmap *img;
 
 	snprintf(buf, sizeof(buf), "test.%s", strfmt(fmt));
 
@@ -334,9 +334,9 @@ static int abort_callback(GP_ProgressCallback *self __attribute__((unused)))
 
 static int test_PNG_Save_abort(void)
 {
-	GP_Context *img;
+	GP_Pixmap *img;
 
-	img = GP_ContextAlloc(100, 100, GP_PIXEL_RGB888);
+	img = GP_PixmapAlloc(100, 100, GP_PIXEL_RGB888);
 
 	GP_ProgressCallback callback = {.callback = abort_callback};
 
@@ -356,16 +356,16 @@ static int test_PNG_Save_abort(void)
 		return TST_FAILED;
 	}
 
-	GP_ContextFree(img);
+	GP_PixmapFree(img);
 
 	return TST_SUCCESS;
 }
 
 static int test_PNG_Load_abort(void)
 {
-	GP_Context *img;
+	GP_Pixmap *img;
 
-	img = GP_ContextAlloc(100, 100, GP_PIXEL_RGB888);
+	img = GP_PixmapAlloc(100, 100, GP_PIXEL_RGB888);
 
 	if (GP_SavePNG(img, "test.png", NULL)) {
 
@@ -378,7 +378,7 @@ static int test_PNG_Load_abort(void)
 		return TST_FAILED;
 	}
 
-	GP_ContextFree(img);
+	GP_PixmapFree(img);
 
 	GP_ProgressCallback callback = {.callback = abort_callback};
 
@@ -512,7 +512,7 @@ static int test_Load(void)
 	}
 
 	for (i = 0; file_testcases[i].filename != NULL; i++) {
-		GP_Context *ret;
+		GP_Pixmap *ret;
 		errno = 0;
 
 		ret = GP_LoadImage(file_testcases[i].filename, NULL);
@@ -557,7 +557,7 @@ static int test_Load(void)
 
 static int test_load_BMP(const char *path)
 {
-	GP_Context *img;
+	GP_Pixmap *img;
 
 	img = GP_LoadBMP(path, NULL);
 
@@ -576,7 +576,7 @@ static int test_load_BMP(const char *path)
 	 * TODO: check correct data.
 	 */
 
-	GP_ContextFree(img);
+	GP_PixmapFree(img);
 
 	return TST_SUCCESS;
 }
@@ -625,7 +625,7 @@ static int test_load_BMP_8bpp_1x64000(void)
 
 static int test_load_JPEG(const char *path)
 {
-	GP_Context *img;
+	GP_Pixmap *img;
 
 	img = GP_LoadJPG(path, NULL);
 
@@ -643,7 +643,7 @@ static int test_load_JPEG(const char *path)
 	/*
 	 * TODO: check correct data.
 	 */
-	GP_ContextFree(img);
+	GP_PixmapFree(img);
 
 	return TST_SUCCESS;
 }

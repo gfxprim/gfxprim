@@ -72,7 +72,7 @@ def main():
   print(bk)
   print("Modify source for parameters,")
   print("Kill to terminate ;-)")
-  black = bk.context.RGBToPixel(0, 0, 0)
+  black = bk.pixmap.RGBToPixel(0, 0, 0)
 
   es = [elem() for i in range(N)]
   while True:
@@ -86,18 +86,18 @@ def main():
         x = int((e.x % W) * 0x100)
         y = int(e.y * 0x100)
         if e.vx > 0.2:
-          bk.context.gfx.VLineAA(x + 0x100, y - 0x300, y + 0x300, black)
+          bk.pixmap.gfx.VLineAA(x + 0x100, y - 0x300, y + 0x300, black)
         if e.vx < -0.2:
-          bk.context.gfx.VLineAA(x - 0x100, y - 0x300, y + 0x300, black)
-        bk.context.gfx.PutPixelAA(x, y, bk.context.RGBToPixel(e.r, e.g, e.b))
+          bk.pixmap.gfx.VLineAA(x - 0x100, y - 0x300, y + 0x300, black)
+        bk.pixmap.gfx.PutPixelAA(x, y, bk.pixmap.RGBToPixel(e.r, e.g, e.b))
       else:
         x = int(e.x % W)
         y = int(e.y)
         if e.vx > 0.2:
-          bk.context.gfx.VLine(x + 1, y - 2, y + 2, black)
+          bk.pixmap.gfx.VLine(x + 1, y - 2, y + 2, black)
         if e.vx < -0.2:
-          bk.context.gfx.VLine(x - 1, y - 2, y + 2, black)
-          bk.context.core.PutPixel(x, y, bk.context.RGBToPixel(e.r, e.g, e.b))
+          bk.pixmap.gfx.VLine(x - 1, y - 2, y + 2, black)
+          bk.pixmap.core.PutPixel(x, y, bk.pixmap.RGBToPixel(e.r, e.g, e.b))
     bk.Poll()
     bk.Flip()
     global TIMEOUT
@@ -106,7 +106,7 @@ def main():
     if TIMEOUT == 0:
       break
   if SAVETO:
-    bk.context.Save(SAVETO)
+    bk.pixmap.Save(SAVETO)
 
 if __name__ == '__main__':
   main()

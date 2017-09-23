@@ -358,7 +358,7 @@ static uint16_t get_idx(uint8_t *row, uint32_t x, uint16_t bps)
 	return 0;
 }
 
-static int tiff_read_palette(TIFF *tiff, GP_Context *res,
+static int tiff_read_palette(TIFF *tiff, GP_Pixmap *res,
                              struct tiff_header *header,
                              GP_ProgressCallback *callback)
 {
@@ -430,7 +430,7 @@ static int tiff_read_palette(TIFF *tiff, GP_Context *res,
 /*
  * Direct read -> data in image are in right format.
  */
-static int tiff_read(TIFF *tiff, GP_Context *res, struct tiff_header *header,
+static int tiff_read(TIFF *tiff, GP_Pixmap *res, struct tiff_header *header,
                      GP_ProgressCallback *callback)
 {
 	uint32_t i, y;
@@ -549,12 +549,12 @@ static void tiff_io_unmap(thandle_t io, void *base, toff_t size)
 }
 */
 
-int GP_ReadTIFFEx(GP_IO *io, GP_Context **img, GP_DataStorage *storage,
+int GP_ReadTIFFEx(GP_IO *io, GP_Pixmap **img, GP_DataStorage *storage,
                   GP_ProgressCallback *callback)
 {
 	TIFF *tiff;
 	struct tiff_header header;
-	GP_Context *res;
+	GP_Pixmap *res;
 	GP_PixelType pixel_type;
 	int err;
 
@@ -584,7 +584,7 @@ int GP_ReadTIFFEx(GP_IO *io, GP_Context **img, GP_DataStorage *storage,
 		goto err1;
 	}
 
-	res = GP_ContextAlloc(header.w, header.h, pixel_type);
+	res = GP_PixmapAlloc(header.w, header.h, pixel_type);
 
 	if (res == NULL) {
 		err = errno;
@@ -608,7 +608,7 @@ int GP_ReadTIFFEx(GP_IO *io, GP_Context **img, GP_DataStorage *storage,
 	*img = res;
 	return 0;
 err2:
-	GP_ContextFree(res);
+	GP_PixmapFree(res);
 err1:
 	TIFFClose(tiff);
 err0:
@@ -616,7 +616,7 @@ err0:
 	return 1;
 }
 
-static int save_grayscale(TIFF *tiff, const GP_Context *src,
+static int save_grayscale(TIFF *tiff, const GP_Pixmap *src,
                           GP_ProgressCallback *callback)
 {
 	uint32_t x, y;
@@ -667,7 +667,7 @@ static int save_grayscale(TIFF *tiff, const GP_Context *src,
 	return 0;
 }
 
-static int save_rgb(TIFF *tiff, const GP_Context *src,
+static int save_rgb(TIFF *tiff, const GP_Pixmap *src,
                     GP_ProgressCallback *callback)
 {
 	uint8_t buf[src->w * 3];
@@ -723,7 +723,7 @@ static GP_PixelType save_ptypes[] = {
 	GP_PIXEL_UNKNOWN,
 };
 
-int GP_WriteTIFF(const GP_Context *src, GP_IO *io,
+int GP_WriteTIFF(const GP_Pixmap *src, GP_IO *io,
                  GP_ProgressCallback *callback)
 {
 	TIFF *tiff;
@@ -801,7 +801,7 @@ int GP_WriteTIFF(const GP_Context *src, GP_IO *io,
 
 #else
 
-int GP_ReadTIFFEx(GP_IO GP_UNUSED(*io), GP_Context GP_UNUSED(**img),
+int GP_ReadTIFFEx(GP_IO GP_UNUSED(*io), GP_Pixmap GP_UNUSED(**img),
                   GP_DataStorage GP_UNUSED(*storage),
                   GP_ProgressCallback GP_UNUSED(*callback))
 {
@@ -809,7 +809,7 @@ int GP_ReadTIFFEx(GP_IO GP_UNUSED(*io), GP_Context GP_UNUSED(**img),
 	return 1;
 }
 
-int GP_WriteTIFF(const GP_Context GP_UNUSED(*src), GP_IO GP_UNUSED(*io),
+int GP_WriteTIFF(const GP_Pixmap GP_UNUSED(*src), GP_IO GP_UNUSED(*io),
                  GP_ProgressCallback GP_UNUSED(*callback))
 {
 	errno = ENOSYS;
@@ -818,23 +818,23 @@ int GP_WriteTIFF(const GP_Context GP_UNUSED(*src), GP_IO GP_UNUSED(*io),
 
 #endif /* HAVE_TIFF */
 
-GP_Context *GP_LoadTIFF(const char *src_path, GP_ProgressCallback *callback)
+GP_Pixmap *GP_LoadTIFF(const char *src_path, GP_ProgressCallback *callback)
 {
 	return GP_LoaderLoadImage(&GP_TIFF, src_path, callback);
 }
 
-GP_Context *GP_ReadTIFF(GP_IO *io, GP_ProgressCallback *callback)
+GP_Pixmap *GP_ReadTIFF(GP_IO *io, GP_ProgressCallback *callback)
 {
 	return GP_LoaderReadImage(&GP_TIFF, io, callback);
 }
 
-int GP_LoadTIFFEx(const char *src_path, GP_Context **img,
+int GP_LoadTIFFEx(const char *src_path, GP_Pixmap **img,
                   GP_DataStorage *storage, GP_ProgressCallback *callback)
 {
 	return GP_LoaderLoadImageEx(&GP_TIFF, src_path, img, storage, callback);
 }
 
-int GP_SaveTIFF(const GP_Context *src, const char *dst_path,
+int GP_SaveTIFF(const GP_Pixmap *src, const char *dst_path,
                 GP_ProgressCallback *callback)
 {
 	return GP_LoaderSaveImage(&GP_TIFF, src, dst_path, callback);

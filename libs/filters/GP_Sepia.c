@@ -36,10 +36,10 @@ static void init_sepia_tones(GP_Pixel pixels[PIX], GP_PixelType pixel_type)
 	pixels[2] = GP_RGBToPixel(230, 230, 230, pixel_type);
 }
 
-int GP_FilterSepiaEx(const GP_Context *const src,
+int GP_FilterSepiaEx(const GP_Pixmap *const src,
                      GP_Coord x_src, GP_Coord y_src,
                      GP_Size w_src, GP_Size h_src,
-                     GP_Context *dst,
+                     GP_Pixmap *dst,
                      GP_Coord x_dst, GP_Coord y_dst,
                      GP_ProgressCallback *callback)
 {
@@ -51,7 +51,7 @@ int GP_FilterSepiaEx(const GP_Context *const src,
 	                            dst, x_dst, y_dst, pixels, PIX, callback);
 }
 
-GP_Context *GP_FilterSepiaExAlloc(const GP_Context *const src,
+GP_Pixmap *GP_FilterSepiaExAlloc(const GP_Pixmap *const src,
                                   GP_Coord x_src, GP_Coord y_src,
                                   GP_Size w_src, GP_Size h_src,
                                   GP_PixelType dst_pixel_type,

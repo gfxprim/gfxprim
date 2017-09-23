@@ -7,7 +7,7 @@
 
 #include <errno.h>
 
-#include "core/GP_Context.h"
+#include "core/GP_Pixmap.h"
 #include "core/GP_GetPutPixel.h"
 #include "core/GP_TempAlloc.h"
 //#include "core/GP_Gamma.h"
@@ -19,10 +19,10 @@
 
 @ for pt in pixeltypes:
 @     if not pt.is_unknown() and not pt.is_palette():
-static int GP_FilterGaussianNoiseAdd_{{ pt.name }}_Raw(const GP_Context *src,
+static int GP_FilterGaussianNoiseAdd_{{ pt.name }}_Raw(const GP_Pixmap *src,
                                 GP_Coord x_src, GP_Coord y_src,
                                 GP_Size w_src, GP_Size h_src,
-                                GP_Context *dst,
+                                GP_Pixmap *dst,
                                 GP_Coord x_dst, GP_Coord y_dst,
                                 float sigma, float mu,
                                 GP_ProgressCallback *callback)
@@ -79,10 +79,10 @@ static int GP_FilterGaussianNoiseAdd_{{ pt.name }}_Raw(const GP_Context *src,
 
 @ end
 @
-int GP_FilterGaussianNoiseAdd_Raw(const GP_Context *src,
+int GP_FilterGaussianNoiseAdd_Raw(const GP_Pixmap *src,
                                   GP_Coord x_src, GP_Coord y_src,
                                   GP_Size w_src, GP_Size h_src,
-                                  GP_Context *dst,
+                                  GP_Pixmap *dst,
                                   GP_Coord x_dst, GP_Coord y_dst,
                                   float sigma, float mu,
                                   GP_ProgressCallback *callback)
@@ -102,10 +102,10 @@ int GP_FilterGaussianNoiseAdd_Raw(const GP_Context *src,
 	}
 }
 
-int GP_FilterGaussianNoiseAddEx(const GP_Context *src,
+int GP_FilterGaussianNoiseAddEx(const GP_Pixmap *src,
                                 GP_Coord x_src, GP_Coord y_src,
                                 GP_Size w_src, GP_Size h_src,
-                                GP_Context *dst,
+                                GP_Pixmap *dst,
                                 GP_Coord x_dst, GP_Coord y_dst,
                                 float sigma, float mu,
                                 GP_ProgressCallback *callback)
@@ -125,7 +125,7 @@ int GP_FilterGaussianNoiseAddEx(const GP_Context *src,
 	                                     sigma, mu, callback);
 }
 
-GP_Context *GP_FilterGaussianNoiseAddExAlloc(const GP_Context *src,
+GP_Pixmap *GP_FilterGaussianNoiseAddExAlloc(const GP_Pixmap *src,
                                              GP_Coord x_src, GP_Coord y_src,
                                              GP_Size w_src, GP_Size h_src,
                                              float sigma, float mu,
@@ -133,7 +133,7 @@ GP_Context *GP_FilterGaussianNoiseAddExAlloc(const GP_Context *src,
 {
 	int ret, err;
 
-	GP_Context *dst = GP_ContextAlloc(w_src, h_src, src->pixel_type);
+	GP_Pixmap *dst = GP_PixmapAlloc(w_src, h_src, src->pixel_type);
 
 	if (dst == NULL)
 		return NULL;
@@ -143,7 +143,7 @@ GP_Context *GP_FilterGaussianNoiseAddExAlloc(const GP_Context *src,
 
 	if (ret) {
 		err = errno;
-		GP_ContextFree(dst);
+		GP_PixmapFree(dst);
 		errno = err;
 		return NULL;
 	}

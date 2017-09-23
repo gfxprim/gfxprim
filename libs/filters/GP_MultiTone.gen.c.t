@@ -7,7 +7,7 @@
 
 #include <errno.h>
 
-#include "core/GP_Context.h"
+#include "core/GP_Pixmap.h"
 #include "core/GP_GetPutPixel.h"
 #include "core/GP_TempAlloc.h"
 #include "core/GP_MixPixels.h"
@@ -69,10 +69,10 @@ static void init_table(GP_PixelType type,
 
 @ for pt in pixeltypes:
 @     if pt.is_gray():
-static int multitone_{{ pt.name }}(const GP_Context *const src,
+static int multitone_{{ pt.name }}(const GP_Pixmap *const src,
                                    GP_Coord x_src, GP_Coord y_src,
                                    GP_Size w_src, GP_Size h_src,
-                                   GP_Context *dst,
+                                   GP_Pixmap *dst,
                                    GP_Coord x_dst, GP_Coord y_dst,
                                    GP_Pixel pixels[], GP_Size pixels_size,
                                    GP_ProgressCallback *callback)
@@ -117,10 +117,10 @@ static int multitone_{{ pt.name }}(const GP_Context *const src,
 
 @ end
 @
-int GP_FilterMultiToneEx(const GP_Context *const src,
+int GP_FilterMultiToneEx(const GP_Pixmap *const src,
                          GP_Coord x_src, GP_Coord y_src,
                          GP_Size w_src, GP_Size h_src,
-                         GP_Context *dst,
+                         GP_Pixmap *dst,
                          GP_Coord x_dst, GP_Coord y_dst,
                          GP_Pixel pixels[], GP_Size pixels_size,
                          GP_ProgressCallback *callback)
@@ -144,17 +144,17 @@ int GP_FilterMultiToneEx(const GP_Context *const src,
 	}
 }
 
-GP_Context *GP_FilterMultiToneExAlloc(const GP_Context *const src,
+GP_Pixmap *GP_FilterMultiToneExAlloc(const GP_Pixmap *const src,
                                       GP_Coord x_src, GP_Coord y_src,
                                       GP_Size w_src, GP_Size h_src,
                                       GP_PixelType dst_pixel_type,
                                       GP_Pixel pixels[], GP_Size pixels_size,
                                       GP_ProgressCallback *callback)
 {
-	GP_Context *res;
+	GP_Pixmap *res;
 	int err;
 
-	res = GP_ContextAlloc(w_src, h_src, dst_pixel_type);
+	res = GP_PixmapAlloc(w_src, h_src, dst_pixel_type);
 
 	if (!res) {
 		GP_DEBUG(1, "Malloc failed :(");
@@ -164,7 +164,7 @@ GP_Context *GP_FilterMultiToneExAlloc(const GP_Context *const src,
 	if (GP_FilterMultiToneEx(src, x_src, y_src, w_src, h_src, res, 0, 0,
 	                         pixels, pixels_size, callback)) {
 		err = errno;
-		GP_ContextFree(res);
+		GP_PixmapFree(res);
 		errno = err;
 		return NULL;
 	}

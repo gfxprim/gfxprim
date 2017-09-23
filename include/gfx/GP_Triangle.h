@@ -26,25 +26,25 @@
 #ifndef GP_TRIANGLE_H
 #define GP_TRIANGLE_H
 
-#include "core/GP_Context.h"
+#include "core/GP_Pixmap.h"
 
 /* Triangle */
 
-void GP_Triangle(GP_Context *context, GP_Coord x0, GP_Coord y0,
+void GP_Triangle(GP_Pixmap *pixmap, GP_Coord x0, GP_Coord y0,
                  GP_Coord x1, GP_Coord y1,
                  GP_Coord x2, GP_Coord y2, GP_Pixel pixel);
 
-void GP_Triangle_Raw(GP_Context *context, GP_Coord x0, GP_Coord y0,
+void GP_Triangle_Raw(GP_Pixmap *pixmap, GP_Coord x0, GP_Coord y0,
                      GP_Coord x1, GP_Coord y1,
                      GP_Coord x2, GP_Coord y2, GP_Pixel pixel);
 
 /* Filled Triangle */
 
-void GP_FillTriangle(GP_Context *context, GP_Coord x0, GP_Coord y0,
+void GP_FillTriangle(GP_Pixmap *pixmap, GP_Coord x0, GP_Coord y0,
                      GP_Coord x1, GP_Coord y1,
                      GP_Coord x2, GP_Coord y2, GP_Pixel pixel);
 
-void GP_FillTriangle_Raw(GP_Context *context, GP_Coord x0, GP_Coord y0,
+void GP_FillTriangle_Raw(GP_Pixmap *pixmap, GP_Coord x0, GP_Coord y0,
                          GP_Coord x1, GP_Coord y1,
                          GP_Coord x2, GP_Coord y2, GP_Pixel pixel);
 

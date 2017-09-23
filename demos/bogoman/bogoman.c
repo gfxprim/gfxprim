@@ -32,29 +32,29 @@
 static void save_png(struct bogoman_map *map, unsigned int elem_size,
                      const char *filename)
 {
-	GP_Context *ctx;
+	GP_Pixmap *pixmap;
 	unsigned int rx, ry;
 
 	rx = elem_size * map->w;
 	ry = elem_size * map->h;
 
-	ctx = GP_ContextAlloc(rx, ry, GP_PIXEL_RGB888);
+	pixmap = GP_PixmapAlloc(rx, ry, GP_PIXEL_RGB888);
 
-	if (ctx == NULL)
+	if (pixmap == NULL)
 		return;
 
 	struct bogoman_render render = {
 		.map = map,
 		.map_x_offset = 0,
 		.map_y_offset = 0,
-		.ctx = ctx,
+		.pixmap = pixmap,
 		.map_elem_size = elem_size,
 	};
 
 	bogoman_render(&render, BOGOMAN_RENDER_ALL);
 
-	GP_SavePNG(ctx, filename, NULL);
-	GP_ContextFree(ctx);
+	GP_SavePNG(pixmap, filename, NULL);
+	GP_PixmapFree(pixmap);
 }
 
 static struct GP_Backend *backend;
@@ -151,7 +151,7 @@ int main(int argc, char *argv[])
 		.map = map,
 		.map_x_offset = 0,
 		.map_y_offset = 0,
-		.ctx = backend->context,
+		.pixmap = backend->pixmap,
 		.backend = backend,
 		.map_elem_size = ELEM_SIZE,
 	};

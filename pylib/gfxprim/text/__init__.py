@@ -1,7 +1,7 @@
 """
-Module extending the Context class with .text submodule and its text drawing functions.
+Module extending the Pixmap class with .text submodule and its text drawing functions.
 
-Use as in "import gfxprim.text; context_foo.text.Text(...)"
+Use as in "import gfxprim.text; pixmap_foo.text.Text(...)"
 """
 
 # Import the SWIG wrapper
@@ -11,18 +11,18 @@ from . import c_text
 from . import C
 
 def _init(module):
-  "Extend context with text submodule"
+  "Extend pixmap with text submodule"
   
   from ..utils import extend, add_swig_getmethod, add_swig_setmethod
-  from ..core import Context as _context
+  from ..core import Pixmap as _pixmap
 
-  # New Context submodule
+  # New Pixmap submodule
   class TextSubmodule(object):
     def __init__(self, ctx):
       self.ctx = ctx
       self.C = C
 
-  _context._submodules['text'] = TextSubmodule
+  _pixmap._submodules['text'] = TextSubmodule
 
   # Imports from the SWIG module
   from ..utils import import_members, extend_submodule

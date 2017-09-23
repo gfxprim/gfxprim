@@ -56,7 +56,7 @@ static char pgm[] = {
 int main(void)
 {
 	GP_Backend *b;
-	GP_Context *img;
+	GP_Pixmap *img;
 	GP_IO *io;
 
 	io = GP_IOMem(pgm, sizeof(pgm), NULL);
@@ -81,8 +81,8 @@ int main(void)
 		return 1;
 	}
 
-	GP_Fill(b->context, 0);
-	GP_Blit_Clipped(img, 0, 0, img->w, img->h, b->context,
+	GP_Fill(b->pixmap, 0);
+	GP_Blit_Clipped(img, 0, 0, img->w, img->h, b->pixmap,
 	                (WIN_W - img->w)/2, (WIN_H - img->h)/2);
 	GP_BackendFlip(b);
 

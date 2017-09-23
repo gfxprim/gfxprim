@@ -48,7 +48,7 @@ static void usage_and_exit(int ret)
 
 int main(int argc, char *argv[])
 {
-	GP_Context *src, *res;
+	GP_Pixmap *src, *res;
 	const char *symmetry = NULL;
 	int opt, sym, debug = 0;
 
@@ -109,8 +109,8 @@ int main(int argc, char *argv[])
 	}
 
 	/* Cleanup */
-	GP_ContextFree(src);
-	GP_ContextFree(res);
+	GP_PixmapFree(src);
+	GP_PixmapFree(res);
 
 	return 0;
 }

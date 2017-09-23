@@ -7,7 +7,7 @@
 
 #include <errno.h>
 
-#include "core/GP_Context.h"
+#include "core/GP_Pixmap.h"
 #include "core/GP_GetPutPixel.h"
 #include "core/GP_TempAlloc.h"
 #include "core/GP_Clamp.h"
@@ -20,10 +20,10 @@
 @ for pt in pixeltypes:
 @     if not pt.is_unknown() and not pt.is_palette():
 
-static int h_lin_conv_{{ pt.name }}(const GP_Context *src,
+static int h_lin_conv_{{ pt.name }}(const GP_Pixmap *src,
                                     GP_Coord x_src, GP_Coord y_src,
                                     GP_Size w_src, GP_Size h_src,
-                                    GP_Context *dst,
+                                    GP_Pixmap *dst,
                                     GP_Coord x_dst, GP_Coord y_dst,
 				    float kernel[], uint32_t kw, float kern_div,
 				    GP_ProgressCallback *callback)
@@ -127,10 +127,10 @@ static int h_lin_conv_{{ pt.name }}(const GP_Context *src,
 
 @ end
 
-int GP_FilterHLinearConvolution_Raw(const GP_Context *src,
+int GP_FilterHLinearConvolution_Raw(const GP_Pixmap *src,
                                     GP_Coord x_src, GP_Coord y_src,
                                     GP_Size w_src, GP_Size h_src,
-                                    GP_Context *dst,
+                                    GP_Pixmap *dst,
                                     GP_Coord x_dst, GP_Coord y_dst,
 				    float kernel[], uint32_t kw, float kern_div,
 				    GP_ProgressCallback *callback)
@@ -157,10 +157,10 @@ int GP_FilterHLinearConvolution_Raw(const GP_Context *src,
 @ for pt in pixeltypes:
 @     if not pt.is_unknown() and not pt.is_palette():
 
-static int v_lin_conv_{{ pt.name }}(const GP_Context *src,
+static int v_lin_conv_{{ pt.name }}(const GP_Pixmap *src,
                                     GP_Coord x_src, GP_Coord y_src,
                                     GP_Size w_src, GP_Size h_src,
-                                    GP_Context *dst,
+                                    GP_Pixmap *dst,
                                     GP_Coord x_dst, GP_Coord y_dst,
                                     float kernel[], uint32_t kh, float kern_div,
                                     GP_ProgressCallback *callback)
@@ -266,10 +266,10 @@ static int v_lin_conv_{{ pt.name }}(const GP_Context *src,
 
 @ end
 
-int GP_FilterVLinearConvolution_Raw(const GP_Context *src,
+int GP_FilterVLinearConvolution_Raw(const GP_Pixmap *src,
                                     GP_Coord x_src, GP_Coord y_src,
                                     GP_Size w_src, GP_Size h_src,
-                                    GP_Context *dst,
+                                    GP_Pixmap *dst,
                                     GP_Coord x_dst, GP_Coord y_dst,
                                     float kernel[], uint32_t kh, float kern_div,
                                     GP_ProgressCallback *callback)
@@ -296,10 +296,10 @@ int GP_FilterVLinearConvolution_Raw(const GP_Context *src,
 @ for pt in pixeltypes:
 @     if not pt.is_unknown() and not pt.is_palette():
 
-static int lin_conv_{{ pt.name }}(const GP_Context *src,
+static int lin_conv_{{ pt.name }}(const GP_Pixmap *src,
                                   GP_Coord x_src, GP_Coord y_src,
                                   GP_Size w_src, GP_Size h_src,
-                                  GP_Context *dst,
+                                  GP_Pixmap *dst,
                                   GP_Coord x_dst, GP_Coord y_dst,
                                   float kernel[], uint32_t kw, uint32_t kh,
                                   float kern_div, GP_ProgressCallback *callback)
@@ -398,10 +398,10 @@ static int lin_conv_{{ pt.name }}(const GP_Context *src,
 
 @ end
 
-int GP_FilterLinearConvolution_Raw(const GP_Context *src,
+int GP_FilterLinearConvolution_Raw(const GP_Pixmap *src,
                                    GP_Coord x_src, GP_Coord y_src,
                                    GP_Size w_src, GP_Size h_src,
-                                   GP_Context *dst,
+                                   GP_Pixmap *dst,
                                    GP_Coord x_dst, GP_Coord y_dst,
                                    float kernel[], uint32_t kw, uint32_t kh,
                                    float kern_div, GP_ProgressCallback *callback)

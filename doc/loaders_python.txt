@@ -3,7 +3,7 @@ Python Loaders module
 
 The python binding maps mostly to the C API with the 'GP_' prefix stripped.
 
-Loaders adds support for loading and storing contexts into/from various image
+Loaders adds support for loading and storing pixmaps into/from various image
 fomats.
 
 [source,python]

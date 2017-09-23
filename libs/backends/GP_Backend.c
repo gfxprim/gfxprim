@@ -45,8 +45,8 @@ void GP_BackendUpdateRectXYXY(GP_Backend *backend,
 	if (backend->UpdateRect == NULL)
 		return;
 
-	GP_TRANSFORM_POINT(backend->context, x0, y0);
-	GP_TRANSFORM_POINT(backend->context, x1, y1);
+	GP_TRANSFORM_POINT(backend->pixmap, x0, y0);
+	GP_TRANSFORM_POINT(backend->pixmap, x1, y1);
 
 	if (x1 < x0)
 		GP_SWAP(x0, x1);
@@ -64,14 +64,14 @@ void GP_BackendUpdateRectXYXY(GP_Backend *backend,
 		y0 = 0;
 	}
 
-	GP_Coord w = backend->context->w;
+	GP_Coord w = backend->pixmap->w;
 
 	if (x1 >= w) {
 		GP_WARN("Too large x coordinate %i, clipping to %u", x1, w - 1);
 		x1 = w - 1;
 	}
 
-	GP_Coord h = backend->context->h;
+	GP_Coord h = backend->pixmap->h;
 
 	if (y1 >= h) {
 		GP_WARN("Too large y coordinate %i, clipping to %u", y1, h - 1);
@@ -88,12 +88,12 @@ int GP_BackendResize(GP_Backend *backend, uint32_t w, uint32_t h)
 		return 1;
 
 	if (w == 0)
-		w = backend->context->w;
+		w = backend->pixmap->w;
 
 	if (h == 0)
-		h = backend->context->h;
+		h = backend->pixmap->h;
 
-	if (backend->context->w == w && backend->context->h == h)
+	if (backend->pixmap->w == w && backend->pixmap->h == h)
 		return 0;
 
 	return backend->SetAttributes(backend, w, h, NULL);

@@ -101,7 +101,7 @@ static void print_font_properties(const GP_FontFace *font)
 
 void redraw_screen(void)
 {
-	GP_Fill(win->context, black_pixel);
+	GP_Fill(win->pixmap, black_pixel);
 
 	GP_TextStyle style = GP_DEFAULT_TEXT_STYLE;
 
@@ -144,29 +144,29 @@ void redraw_screen(void)
 		style.pixel_yspace = 0;
 		style.char_xspace = tracking;
 
-		GP_FillRectXYWH(win->context,
+		GP_FillRectXYWH(win->pixmap,
 			16, SPACING*i + 16,
 			GP_TextWidth(&style, test_string),
 			GP_FontHeight(style.font),
 			dark_gray_pixel);
 
-		GP_RectXYWH(win->context,
+		GP_RectXYWH(win->pixmap,
 			15, SPACING*i + 15,
 			GP_TextMaxWidth(&style, strlen(test_string)) + 1,
 			GP_FontHeight(style.font) + 1,
 			blue_pixel);
 
-		GP_Text(win->context, &style, 16, SPACING*i + 16, align,
+		GP_Text(win->pixmap, &style, 16, SPACING*i + 16, align,
 		        white_pixel, dark_gray_pixel, test_string);
 
 		style.pixel_xmul = 2;
 		style.pixel_ymul = 2;
 		style.pixel_yspace = 1;
 
-		GP_Text(win->context, &style, 34, SPACING * i + 44, align,
+		GP_Text(win->pixmap, &style, 34, SPACING * i + 44, align,
 		        white_pixel, black_pixel, test_string);
 
-		GP_RectXYWH(win->context, 33, SPACING * i + 43,
+		GP_RectXYWH(win->pixmap, 33, SPACING * i + 43,
 		            GP_TextWidth(&style, test_string) + 1,
 			    GP_TextHeight(&style) + 1, dark_gray_pixel);
 
@@ -184,7 +184,7 @@ void redraw_screen(void)
 			style.pixel_yspace = 2;
 		}
 
-		GP_Text(win->context, &style, 64, SPACING*i + 88, align,
+		GP_Text(win->pixmap, &style, 64, SPACING*i + 88, align,
 		        dark_gray_pixel, black_pixel, test_string);
 	}
 }
@@ -287,12 +287,12 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 
-	white_pixel     = GP_RGBToContextPixel(0xff, 0xff, 0xff, win->context);
-	gray_pixel      = GP_RGBToContextPixel(0xbe, 0xbe, 0xbe, win->context);
-	dark_gray_pixel = GP_RGBToContextPixel(0x7f, 0x7f, 0x7f, win->context);
-	black_pixel     = GP_RGBToContextPixel(0x00, 0x00, 0x00, win->context);
-	red_pixel       = GP_RGBToContextPixel(0xff, 0x00, 0x00, win->context);
-	blue_pixel      = GP_RGBToContextPixel(0x00, 0x00, 0xff, win->context);
+	white_pixel     = GP_RGBToPixmapPixel(0xff, 0xff, 0xff, win->pixmap);
+	gray_pixel      = GP_RGBToPixmapPixel(0xbe, 0xbe, 0xbe, win->pixmap);
+	dark_gray_pixel = GP_RGBToPixmapPixel(0x7f, 0x7f, 0x7f, win->pixmap);
+	black_pixel     = GP_RGBToPixmapPixel(0x00, 0x00, 0x00, win->pixmap);
+	red_pixel       = GP_RGBToPixmapPixel(0xff, 0x00, 0x00, win->pixmap);
+	blue_pixel      = GP_RGBToPixmapPixel(0x00, 0x00, 0xff, win->pixmap);
 
 	redraw_screen();
 	GP_BackendFlip(win);

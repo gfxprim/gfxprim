@@ -1,7 +1,7 @@
 SDL Glue
 --------
 
-You can easily mix SDL and GFXprim code using 'GP_ContextFromSDLSurface()'
+You can easily mix SDL and GFXprim code using 'GP_PixmapFromSDLSurface()'
 function.
 
 [source,c]

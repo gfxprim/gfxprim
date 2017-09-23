@@ -235,12 +235,12 @@ static void fill_metadata(GifFileType *gf, GP_DataStorage *storage)
 	GP_DataStorageAddInt(storage, NULL, "Interlace", gf->Image.Interlace);
 }
 
-int GP_ReadGIFEx(GP_IO *io, GP_Context **img,
+int GP_ReadGIFEx(GP_IO *io, GP_Pixmap **img,
                  GP_DataStorage *storage, GP_ProgressCallback *callback)
 {
 	GifFileType *gf;
 	GifRecordType rec_type;
-	GP_Context *res = NULL;
+	GP_Pixmap *res = NULL;
 	GP_Pixel bg;
 	int32_t x, y;
 	int err;
@@ -312,7 +312,7 @@ int GP_ReadGIFEx(GP_IO *io, GP_Context **img,
 		if (!img)
 			break;
 
-		res = GP_ContextAlloc(gf->SWidth, gf->SHeight, GP_PIXEL_RGB888);
+		res = GP_PixmapAlloc(gf->SWidth, gf->SHeight, GP_PIXEL_RGB888);
 
 		if (res == NULL) {
 			err = ENOMEM;
@@ -373,7 +373,7 @@ int GP_ReadGIFEx(GP_IO *io, GP_Context **img,
 
 	return 0;
 err2:
-	GP_ContextFree(res);
+	GP_PixmapFree(res);
 err1:
 #if defined(GIFLIB_MAJOR) && GIFLIB_MAJOR >= 5
 	DGifCloseFile(gf, NULL);
@@ -392,7 +392,7 @@ int GP_MatchGIF(const void GP_UNUSED(*buf))
 	return -1;
 }
 
-GP_Context *GP_ReadGIFEx(GP_IO GP_UNUSED(*io),
+GP_Pixmap *GP_ReadGIFEx(GP_IO GP_UNUSED(*io),
                          GP_ProgressCallback GP_UNUSED(*callback))
 {
 	errno = ENOSYS;
@@ -401,17 +401,17 @@ GP_Context *GP_ReadGIFEx(GP_IO GP_UNUSED(*io),
 
 #endif /* HAVE_GIFLIB */
 
-GP_Context *GP_ReadGIF(GP_IO *io, GP_ProgressCallback *callback)
+GP_Pixmap *GP_ReadGIF(GP_IO *io, GP_ProgressCallback *callback)
 {
 	return GP_LoaderReadImage(&GP_GIF, io, callback);
 }
 
-GP_Context *GP_LoadGIF(const char *src_path, GP_ProgressCallback *callback)
+GP_Pixmap *GP_LoadGIF(const char *src_path, GP_ProgressCallback *callback)
 {
 	return GP_LoaderLoadImage(&GP_GIF, src_path, callback);
 }
 
-int GP_LoadGIFEx(const char *src_path, GP_Context **img,
+int GP_LoadGIFEx(const char *src_path, GP_Pixmap **img,
                  GP_DataStorage *storage, GP_ProgressCallback *callback)
 {
 	return GP_LoaderLoadImageEx(&GP_GIF, src_path, img, storage, callback);

@@ -9,7 +9,7 @@ import gfxprim.input as input
 import gfxprim.text as text
 
 def redraw(bk, id):
-    c = bk.context
+    c = bk.pixmap
 
     black = c.RGBToPixel(0, 0, 0)
     white = c.RGBToPixel(0xff, 0xff, 0xff)

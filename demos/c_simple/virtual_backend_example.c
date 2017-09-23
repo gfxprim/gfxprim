@@ -35,48 +35,48 @@ static GP_Pixel white_pixel, black_pixel, red_pixel, blue_pixel, green_pixel;
 
 static void redraw(GP_Backend *backend)
 {
-	GP_Context *context = backend->context;
+	GP_Pixmap *pixmap = backend->pixmap;
 
 	/* Now draw some testing patters */
-	black_pixel = GP_RGBToContextPixel(0x00, 0x00, 0x00, context);
-	white_pixel = GP_RGBToContextPixel(0xff, 0xff, 0xff, context);
-	red_pixel   = GP_RGBToContextPixel(0xff, 0x00, 0x00, context);
-	blue_pixel  = GP_RGBToContextPixel(0x00, 0x00, 0xff, context);
-	green_pixel = GP_RGBToContextPixel(0x00, 0xff, 0x00, context);
+	black_pixel = GP_RGBToPixmapPixel(0x00, 0x00, 0x00, pixmap);
+	white_pixel = GP_RGBToPixmapPixel(0xff, 0xff, 0xff, pixmap);
+	red_pixel   = GP_RGBToPixmapPixel(0xff, 0x00, 0x00, pixmap);
+	blue_pixel  = GP_RGBToPixmapPixel(0x00, 0x00, 0xff, pixmap);
+	green_pixel = GP_RGBToPixmapPixel(0x00, 0xff, 0x00, pixmap);
 
-	GP_Fill(context, white_pixel);
+	GP_Fill(pixmap, white_pixel);
 
 	unsigned int i, j;
 	for (i = 0; i < 40; i++) {
-		GP_HLineXYW(context, 0, i, i, black_pixel);
-		GP_HLineXYW(context, 1, i + 40, i, black_pixel);
-		GP_HLineXYW(context, 2, i + 80, i, black_pixel);
-		GP_HLineXYW(context, 3, i + 120, i, black_pixel);
-		GP_HLineXYW(context, 4, i + 160, i, black_pixel);
-		GP_HLineXYW(context, 5, i + 200, i, black_pixel);
-		GP_HLineXYW(context, 6, i + 240, i, black_pixel);
-		GP_HLineXYW(context, 7, i + 280, i, black_pixel);
+		GP_HLineXYW(pixmap, 0, i, i, black_pixel);
+		GP_HLineXYW(pixmap, 1, i + 40, i, black_pixel);
+		GP_HLineXYW(pixmap, 2, i + 80, i, black_pixel);
+		GP_HLineXYW(pixmap, 3, i + 120, i, black_pixel);
+		GP_HLineXYW(pixmap, 4, i + 160, i, black_pixel);
+		GP_HLineXYW(pixmap, 5, i + 200, i, black_pixel);
+		GP_HLineXYW(pixmap, 6, i + 240, i, black_pixel);
+		GP_HLineXYW(pixmap, 7, i + 280, i, black_pixel);
 	}
 
 	for (i = 0; i < 256; i++) {
 		for (j = 0; j < 256; j++) {
 			uint8_t val = 1.00 * sqrt(i*i + j*j)/sqrt(2) + 0.5;
 
-			GP_Pixel pix = GP_RGBToContextPixel(i, j, val, context);
-			GP_PutPixel(context, i + 60, j + 10, pix);
+			GP_Pixel pix = GP_RGBToPixmapPixel(i, j, val, pixmap);
+			GP_PutPixel(pixmap, i + 60, j + 10, pix);
 		}
 	}
 
-	GP_Text(context, NULL, 60, 270, GP_VALIGN_BELOW|GP_ALIGN_RIGHT,
+	GP_Text(pixmap, NULL, 60, 270, GP_VALIGN_BELOW|GP_ALIGN_RIGHT,
 	        black_pixel, white_pixel, "Lorem Ipsum dolor sit...");
 
-	GP_Text(context, NULL, 60, 290, GP_VALIGN_BELOW|GP_ALIGN_RIGHT,
+	GP_Text(pixmap, NULL, 60, 290, GP_VALIGN_BELOW|GP_ALIGN_RIGHT,
 	        red_pixel, white_pixel, "Lorem Ipsum dolor sit...");
 
-	GP_Text(context, NULL, 60, 310, GP_VALIGN_BELOW|GP_ALIGN_RIGHT,
+	GP_Text(pixmap, NULL, 60, 310, GP_VALIGN_BELOW|GP_ALIGN_RIGHT,
 	        green_pixel, white_pixel, "Lorem Ipsum dolor sit...");
 
-	GP_Text(context, NULL, 60, 330, GP_VALIGN_BELOW|GP_ALIGN_RIGHT,
+	GP_Text(pixmap, NULL, 60, 330, GP_VALIGN_BELOW|GP_ALIGN_RIGHT,
 	        blue_pixel, white_pixel, "Lorem Ipsum dolor sit...");
 
 	/* Update the backend screen */

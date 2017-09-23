@@ -65,11 +65,11 @@ int main(void)
 	/* Turn on verbose debug and call some library functions */
 	GP_SetDebugLevel(10);
 
-	GP_Context *ctx = GP_ContextAlloc(1000, 1000, 1);
+	GP_Pixmap *pixmap = GP_PixmapAlloc(1000, 1000, 1);
 
-	GP_FilterGaussianBlur(ctx, ctx, 10, 10, NULL);
+	GP_FilterGaussianBlur(pixmap, pixmap, 10, 10, NULL);
 
-	GP_ContextFree(ctx);
+	GP_PixmapFree(pixmap);
 
 	return 0;
 }

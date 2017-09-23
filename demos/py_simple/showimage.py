@@ -18,7 +18,7 @@ def main():
     # Create X11 window
     bk = backends.BackendX11Init(None, 0, 0, img.w, img.h, sys.argv[1], 0)
     assert(bk)
-    img.Blit(0, 0, bk.context, 0, 0, img.w, img.h)
+    img.Blit(0, 0, bk.pixmap, 0, 0, img.w, img.h)
     bk.Flip()
 
     # Event loop

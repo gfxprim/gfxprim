@@ -31,7 +31,7 @@ static GP_Pixel white;
 
 static GP_Backend *win;
 
-static GP_Context *bitmap, *bitmap_raw, *bitmap_conv;
+static GP_Pixmap *bitmap, *bitmap_raw, *bitmap_conv;
 static int bitmap_x, bitmap_y, bitmap_vx = -3, bitmap_vy = -3;
 static int pause_flag = 0;
 
@@ -42,7 +42,7 @@ void redraw_screen(void)
 	bitmap_x += bitmap_vx;
 	bitmap_y += bitmap_vy;
 
-	if (bitmap_x + GP_ContextW(bitmap) > win->context->w) {
+	if (bitmap_x + GP_PixmapW(bitmap) > win->pixmap->w) {
 		bitmap_vx = -bitmap_vx;
 		bitmap_x += bitmap_vx;
 	}
@@ -52,7 +52,7 @@ void redraw_screen(void)
 		bitmap_x += bitmap_vx;
 	}
 
-	if (bitmap_y + GP_ContextH(bitmap) > win->context->h) {
+	if (bitmap_y + GP_PixmapH(bitmap) > win->pixmap->h) {
 		bitmap_vy = -bitmap_vy;
 		bitmap_y += bitmap_vy;
 	}
@@ -62,20 +62,20 @@ void redraw_screen(void)
 		bitmap_y += bitmap_vy;
 	}
 
-	GP_FillRectXYWH(win->context, 20, 20, 300, 50, black);
+	GP_FillRectXYWH(win->pixmap, 20, 20, 300, 50, black);
 
-	GP_Text(win->context, NULL, 20, 20, GP_ALIGN_RIGHT|GP_VALIGN_BOTTOM,
+	GP_Text(win->pixmap, NULL, 20, 20, GP_ALIGN_RIGHT|GP_VALIGN_BOTTOM,
 	        white, black, text_buf);
 
-	GP_Print(win->context, NULL, 250, 20, GP_ALIGN_RIGHT|GP_VALIGN_BOTTOM,
+	GP_Print(win->pixmap, NULL, 250, 20, GP_ALIGN_RIGHT|GP_VALIGN_BOTTOM,
 	         white, black, "%c|%c|%c", bitmap->x_swap ? 'x' : ' ',
 		 bitmap->y_swap ? 'y' : ' ', bitmap->axes_swap ? 'a' : ' ');
 
-	GP_Blit(bitmap, 0, 0, GP_ContextW(bitmap), GP_ContextH(bitmap),
-	        win->context, bitmap_x, bitmap_y);
+	GP_Blit(bitmap, 0, 0, GP_PixmapW(bitmap), GP_PixmapH(bitmap),
+	        win->pixmap, bitmap_x, bitmap_y);
 
 	GP_BackendUpdateRectXYWH(win, bitmap_x, bitmap_y,
-	                     GP_ContextW(bitmap), GP_ContextH(bitmap));
+	                     GP_PixmapW(bitmap), GP_PixmapH(bitmap));
 	GP_BackendUpdateRectXYWH(win, 20, 20, 400, 50);
 }
 
@@ -88,7 +88,7 @@ static void change_bitmap(void)
 
 	snprintf(text_buf, sizeof(text_buf), "'%s' -> '%s'",
 	         GP_PixelTypeName(bitmap->pixel_type),
-		 GP_PixelTypeName(win->context->pixel_type));
+		 GP_PixelTypeName(win->pixmap->pixel_type));
 }
 
 void event_loop(void)
@@ -133,7 +133,7 @@ void event_loop(void)
 			break;
 			case GP_EV_SYS_RESIZE:
 				GP_BackendResizeAck(win);
-				GP_Fill(win->context, black);
+				GP_Fill(win->pixmap, black);
 				GP_BackendFlip(win);
 			break;
 			}
@@ -175,14 +175,14 @@ int main(void)
 		return 1;
 	}
 
-	bitmap_conv = GP_ContextConvertAlloc(bitmap_raw,
-	                                     win->context->pixel_type);
+	bitmap_conv = GP_PixmapConvertAlloc(bitmap_raw,
+	                                     win->pixmap->pixel_type);
 	change_bitmap();
 
-	black = GP_RGBToContextPixel(0x00, 0x00, 0x00, win->context);
-	white = GP_RGBToContextPixel(0xff, 0xff, 0xff, win->context);
+	black = GP_RGBToPixmapPixel(0x00, 0x00, 0x00, win->pixmap);
+	white = GP_RGBToPixmapPixel(0xff, 0xff, 0xff, win->pixmap);
 
-	GP_Fill(win->context, black);
+	GP_Fill(win->pixmap, black);
 	GP_BackendFlip(win);
 
 	for (;;) {

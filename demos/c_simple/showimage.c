@@ -35,7 +35,7 @@
 int main(int argc, char *argv[])
 {
 	GP_Backend *backend;
-	GP_Context *image;
+	GP_Pixmap *image;
 
 	if (argc != 2) {
 		fprintf(stderr, "Takes image as an argument\n");
@@ -59,7 +59,7 @@ int main(int argc, char *argv[])
 	}
 
 	/* Blit image into the window and show it */
-	GP_Blit(image, 0, 0, image->w, image->h, backend->context, 0, 0);
+	GP_Blit(image, 0, 0, image->w, image->h, backend->pixmap, 0, 0);
 	GP_BackendFlip(backend);
 
 	/* Wait for events  */
@@ -78,11 +78,11 @@ int main(int argc, char *argv[])
 
 			GP_BackendResizeAck(backend);
 
-			cx = ((int)backend->context->w - (int)image->w) / 2;
-			cy = ((int)backend->context->h - (int)image->h) / 2;
+			cx = ((int)backend->pixmap->w - (int)image->w) / 2;
+			cy = ((int)backend->pixmap->h - (int)image->h) / 2;
 
-			GP_Fill(backend->context, 0);
-			GP_Blit_Clipped(image, 0, 0, image->w, image->h, backend->context, cx, cy);
+			GP_Fill(backend->pixmap, 0);
+			GP_Blit_Clipped(image, 0, 0, image->w, image->h, backend->pixmap, cx, cy);
 			GP_BackendFlip(backend);
 		}
 	}

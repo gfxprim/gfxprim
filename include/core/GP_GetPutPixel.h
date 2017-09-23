@@ -24,7 +24,7 @@
 #ifndef CORE_GP_GETPUTPIXEL_H
 #define CORE_GP_GETPUTPIXEL_H
 
-#include "GP_Context.h"
+#include "GP_Pixmap.h"
 #include "GP_Transform.h"
 #include "GP_FnPerBpp.h"
 #include "GP_Pixel.h"
@@ -35,59 +35,59 @@
 #include "GP_GetPutPixel.gen.h"
 
 /*
- * GetPixel with context transformations and clipping.
+ * GetPixel with pixmap transformations and clipping.
  * Returns 0 for clipped pixels or pixels outside bitmap.
  */
-GP_Pixel GP_GetPixel(const GP_Context *context, GP_Coord x, GP_Coord y);
+GP_Pixel GP_GetPixel(const GP_Pixmap *pixmap, GP_Coord x, GP_Coord y);
 
 /*
  * Version of GetPixel without transformations nor border checking.
  */
-static inline GP_Pixel GP_GetPixel_Raw(const GP_Context *context,
+static inline GP_Pixel GP_GetPixel_Raw(const GP_Pixmap *pixmap,
                                        GP_Coord x, GP_Coord y)
 {
-	GP_FN_RET_PER_BPP(GP_GetPixel_Raw, context->bpp, context->bit_endian,
-		context, x, y);
+	GP_FN_RET_PER_BPP(GP_GetPixel_Raw, pixmap->bpp, pixmap->bit_endian,
+		pixmap, x, y);
 
-	GP_ABORT("Invalid context pixel type");
+	GP_ABORT("Invalid pixmap pixel type");
 }
 
 /*
  * Version of GetPixel without transformations and with border checking.
  */
-static inline GP_Pixel GP_GetPixel_Raw_Clipped(const GP_Context *context,
+static inline GP_Pixel GP_GetPixel_Raw_Clipped(const GP_Pixmap *pixmap,
                                                GP_Coord x, GP_Coord y)
 {
-	if (GP_PIXEL_IS_CLIPPED(context, x, y))
+	if (GP_PIXEL_IS_CLIPPED(pixmap, x, y))
 		return 0;
 
-	return GP_GetPixel_Raw(context, x, y);
+	return GP_GetPixel_Raw(pixmap, x, y);
 }
 
 /*
- * PutPixel with context transformations and clipping.
+ * PutPixel with pixmap transformations and clipping.
  * NOP for clipped pixels or pixels outside bitmap.
  */
-void GP_PutPixel(GP_Context *context, GP_Coord x, GP_Coord y, GP_Pixel p);
+void GP_PutPixel(GP_Pixmap *pixmap, GP_Coord x, GP_Coord y, GP_Pixel p);
 
 /*
  * Version of PutPixel without transformations nor border checking.
  */
-static inline void GP_PutPixel_Raw(GP_Context *context,
+static inline void GP_PutPixel_Raw(GP_Pixmap *pixmap,
                                    GP_Coord x, GP_Coord y, GP_Pixel p)
 {
-	GP_FN_PER_BPP(GP_PutPixel_Raw, context->bpp, context->bit_endian,
-		context, x, y, p);
+	GP_FN_PER_BPP(GP_PutPixel_Raw, pixmap->bpp, pixmap->bit_endian,
+		pixmap, x, y, p);
 }
 
 /*
  * Version of PutPixel without transformation and with border checking.
  */
-static inline void GP_PutPixel_Raw_Clipped(GP_Context *context,
+static inline void GP_PutPixel_Raw_Clipped(GP_Pixmap *pixmap,
                                            GP_Coord x, GP_Coord y, GP_Pixel p)
 {
-	GP_FN_PER_BPP(GP_PutPixel_Raw_Clipped, context->bpp, context->bit_endian,
-	              context, x, y, p);
+	GP_FN_PER_BPP(GP_PutPixel_Raw_Clipped, pixmap->bpp, pixmap->bit_endian,
+	              pixmap, x, y, p);
 }
 
 /*

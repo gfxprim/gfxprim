@@ -1,7 +1,7 @@
 @ include source.t
 @ include savers.t
 /*
- * Iterate over all pixel types, try to save and load back context.
+ * Iterate over all pixel types, try to save and load back pixmap.
  *
  * Copyright (C) 2009-2014 Cyril Hrubis <metan@ucw.cz>
  */
@@ -10,23 +10,23 @@
 #include <errno.h>
 #include <stdlib.h>
 
-#include <core/GP_Context.h>
+#include <core/GP_Pixmap.h>
 #include <core/GP_GetPutPixel.h>
 #include <loaders/GP_Loaders.h>
 
 #include "tst_test.h"
 
-typedef int (*Save)(const GP_Context *src, const char *path, GP_ProgressCallback *callback);
-typedef GP_Context *(*Load)(const char *path, GP_ProgressCallback *callback);
+typedef int (*Save)(const GP_Pixmap *src, const char *path, GP_ProgressCallback *callback);
+typedef GP_Pixmap *(*Load)(const char *path, GP_ProgressCallback *callback);
 
 static int test(Save Saver, Load Loader, GP_PixelType pixel_type)
 {
-	GP_Context *src;
-	GP_Context *res;
+	GP_Pixmap *src;
+	GP_Pixmap *res;
 	unsigned int x, y;
 	int ret = TST_SUCCESS;
 
-	src = GP_ContextAlloc(100, 100, pixel_type);
+	src = GP_PixmapAlloc(100, 100, pixel_type);
 
 	if (!src) {
 		tst_msg("Malloc failed");
@@ -75,9 +75,9 @@ static int test(Save Saver, Load Loader, GP_PixelType pixel_type)
 		ret = TST_FAILED;
 	}
 
-	GP_ContextFree(res);
+	GP_PixmapFree(res);
 err:
-	GP_ContextFree(src);
+	GP_PixmapFree(src);
 	return ret;
 }
 

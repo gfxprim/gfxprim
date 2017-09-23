@@ -202,12 +202,12 @@ static const char *thumbnail_fmt_name(uint16_t fmt)
 
 #define THUMBNAIL50_HSIZE 28
 
-static GP_Context *psd_thumbnail50(GP_IO *io, size_t size,
+static GP_Pixmap *psd_thumbnail50(GP_IO *io, size_t size,
                                    GP_ProgressCallback *callback)
 {
 	uint32_t fmt, w, h;
 	uint16_t bpp, nr_planes;
-	GP_Context *res;
+	GP_Pixmap *res;
 	int err;
 
 	uint16_t res_thumbnail_header[] = {
@@ -318,7 +318,7 @@ static void psd_read_version_info(GP_IO *io)
 	         version, str, reader);
 }
 
-static unsigned int psd_next_img_res_block(GP_IO *io, GP_Context **res,
+static unsigned int psd_next_img_res_block(GP_IO *io, GP_Pixmap **res,
                                            GP_ProgressCallback *callback)
 {
 	uint16_t res_id;
@@ -559,7 +559,7 @@ static GP_IO *rle(GP_IO *io)
 /*
  * Data are in planar mode RRRRR... GGGGG... BBBBB... etc.
  */
-static int psd_load_rle_rgb(GP_IO *rle_io, GP_Context *res,
+static int psd_load_rle_rgb(GP_IO *rle_io, GP_Pixmap *res,
                             GP_ProgressCallback *callback)
 {
 	unsigned int x, y, c, p;
@@ -598,7 +598,7 @@ static int psd_load_rle_rgb(GP_IO *rle_io, GP_Context *res,
 	return 0;
 }
 
-static int psd_load_rle_cmyk(GP_IO *rle_io, GP_Context *res,
+static int psd_load_rle_cmyk(GP_IO *rle_io, GP_Pixmap *res,
                              GP_ProgressCallback *callback)
 {
 	unsigned int x, y, c;
@@ -626,7 +626,7 @@ static int psd_load_rle_cmyk(GP_IO *rle_io, GP_Context *res,
 }
 
 static int psd_combined_image(GP_IO *io, struct psd_header *header,
-                              GP_Context **res, GP_ProgressCallback *callback)
+                              GP_Pixmap **res, GP_ProgressCallback *callback)
 {
 	uint16_t compress;
 	GP_PixelType pixel_type = GP_PIXEL_UNKNOWN;
@@ -687,7 +687,7 @@ static int psd_combined_image(GP_IO *io, struct psd_header *header,
 		return errno;
 	}
 
-	*res = GP_ContextAlloc(header->w, header->h, pixel_type);
+	*res = GP_PixmapAlloc(header->w, header->h, pixel_type);
 
 	if (!*res)
 		return ENOMEM;
@@ -702,7 +702,7 @@ static int psd_combined_image(GP_IO *io, struct psd_header *header,
 		ret = psd_load_rle_rgb(rle_io, *res, callback);
 
 	if (ret)
-		GP_ContextFree(*res);
+		GP_PixmapFree(*res);
 
 	GP_IOClose(rle_io);
 	return ret;
@@ -718,13 +718,13 @@ static void fill_metadata(struct psd_header *header, GP_DataStorage *storage)
 	                        psd_color_mode_name(header->color_mode));
 }
 
-int GP_ReadPSDEx(GP_IO *io, GP_Context **img, GP_DataStorage *storage,
+int GP_ReadPSDEx(GP_IO *io, GP_Pixmap **img, GP_DataStorage *storage,
                  GP_ProgressCallback *callback)
 {
 	int err;
 	uint32_t len, size, read_size = 0;
 	struct psd_header header;
-	GP_Context *thumbnail = NULL;
+	GP_Pixmap *thumbnail = NULL;
 
 	uint16_t psd_header[] = {
 	        '8', 'B', 'P', 'S',
@@ -808,11 +808,11 @@ int GP_ReadPSDEx(GP_IO *io, GP_Context **img, GP_DataStorage *storage,
 		goto err;
 	}
 
-	GP_Context *combined = NULL;
+	GP_Pixmap *combined = NULL;
 	err = psd_combined_image(io, &header, &combined, callback);
 
 	if (!err) {
-		GP_ContextFree(thumbnail);
+		GP_PixmapFree(thumbnail);
 		*img = combined;
 		return 0;
 	}
@@ -828,22 +828,22 @@ int GP_ReadPSDEx(GP_IO *io, GP_Context **img, GP_DataStorage *storage,
 	errno = ENOSYS;
 	return 1;
 err:
-	GP_ContextFree(thumbnail);
+	GP_PixmapFree(thumbnail);
 	errno = err;
 	return 1;
 }
 
-GP_Context *GP_LoadPSD(const char *src_path, GP_ProgressCallback *callback)
+GP_Pixmap *GP_LoadPSD(const char *src_path, GP_ProgressCallback *callback)
 {
 	return GP_LoaderLoadImage(&GP_PSD, src_path, callback);
 }
 
-GP_Context *GP_ReadPSD(GP_IO *io, GP_ProgressCallback *callback)
+GP_Pixmap *GP_ReadPSD(GP_IO *io, GP_ProgressCallback *callback)
 {
 	return GP_LoaderReadImage(&GP_PSD, io, callback);
 }
 
-int GP_LoadPSDEx(const char *src_path, GP_Context **img,
+int GP_LoadPSDEx(const char *src_path, GP_Pixmap **img,
 		 GP_DataStorage *storage, GP_ProgressCallback *callback)
 {
 	return GP_LoaderLoadImageEx(&GP_PSD, src_path, img, storage, callback);

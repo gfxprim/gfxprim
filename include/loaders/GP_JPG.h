@@ -34,32 +34,32 @@
 /*
  * Extended loading function.
  */
-int GP_ReadJPGEx(GP_IO *io, GP_Context **img,
+int GP_ReadJPGEx(GP_IO *io, GP_Pixmap **img,
                   GP_DataStorage *storage, GP_ProgressCallback *callback);
 
-int GP_LoadJPGEx(const char *src_path, GP_Context **img,
+int GP_LoadJPGEx(const char *src_path, GP_Pixmap **img,
                  GP_DataStorage *storage, GP_ProgressCallback *callback);
 
 /*
  * Loads a JPEG image from a file.
  */
-GP_Context *GP_LoadJPG(const char *src_path, GP_ProgressCallback *callback);
+GP_Pixmap *GP_LoadJPG(const char *src_path, GP_ProgressCallback *callback);
 
 /*
  * Reads a JPEG image from an I/O stream.
  */
-GP_Context *GP_ReadJPG(GP_IO *io, GP_ProgressCallback *callback);
+GP_Pixmap *GP_ReadJPG(GP_IO *io, GP_ProgressCallback *callback);
 
 /*
  * Writes JPEG into an I/O stream.
  */
-int GP_WriteJPG(const GP_Context *src, GP_IO *io,
+int GP_WriteJPG(const GP_Pixmap *src, GP_IO *io,
                 GP_ProgressCallback *callback);
 
 /*
  * Saves JPEG to a file.
  */
-int GP_SaveJPG(const GP_Context *src, const char *dst_path,
+int GP_SaveJPG(const GP_Pixmap *src, const char *dst_path,
                GP_ProgressCallback *callback);
 
 /*

@@ -24,7 +24,7 @@
 #include <errno.h>
 #include <sys/stat.h>
 
-#include <core/GP_Context.h>
+#include <core/GP_Pixmap.h>
 #include <gfx/GP_Rect.h>
 
 #include "tst_test.h"
@@ -45,13 +45,13 @@ struct testcase {
 
 static int test_rect(const struct testcase *t)
 {
-	GP_Context *c;
+	GP_Pixmap *c;
 	int err;
 
-	c = GP_ContextAlloc(t->w, t->h, GP_PIXEL_G8);
+	c = GP_PixmapAlloc(t->w, t->h, GP_PIXEL_G8);
 
 	if (c == NULL) {
-		tst_err("Failed to allocate context");
+		tst_err("Failed to allocate pixmap");
 		return TST_UNTESTED;
 	}
 
@@ -335,52 +335,52 @@ const struct tst_suite tst_suite = {
 		 .tst_fn = test_rect,
 		 .data = &testcase_rect_9b},
 
-		{.name = "FillRect x1,y1 out of context",
+		{.name = "FillRect x1,y1 out of pixmap",
 		 .tst_fn = test_rect,
 		 .data = &testcase_rect_9lu,
 		 .timeout = 2},
 
-		{.name = "FillRect x1,y2 out of context",
+		{.name = "FillRect x1,y2 out of pixmap",
 		 .tst_fn = test_rect,
 		 .data = &testcase_rect_9ld,
 		 .timeout = 2},
 
-		{.name = "FillRect x2,y1 out of context",
+		{.name = "FillRect x2,y1 out of pixmap",
 		 .tst_fn = test_rect,
 		 .data = &testcase_rect_9ru,
 		 .timeout = 2},
 
-		{.name = "FillRect x2,y2 out of context",
+		{.name = "FillRect x2,y2 out of pixmap",
 		 .tst_fn = test_rect,
 		 .data = &testcase_rect_9rd,
 		 .timeout = 2},
 
-		{.name = "FillRect x1 out of context",
+		{.name = "FillRect x1 out of pixmap",
 		 .tst_fn = test_rect,
 		 .data = &testcase_rect_9r,
 		 .timeout = 2},
 
-		{.name = "FillRect x2 out of context",
+		{.name = "FillRect x2 out of pixmap",
 		 .tst_fn = test_rect,
 		 .data = &testcase_rect_9l,
 		 .timeout = 2},
 
-		{.name = "FillRect y1 out of context",
+		{.name = "FillRect y1 out of pixmap",
 		 .tst_fn = test_rect,
 		 .data = &testcase_rect_9u,
 		 .timeout = 2},
 
-		{.name = "FillRect y2 out of context",
+		{.name = "FillRect y2 out of pixmap",
 		 .tst_fn = test_rect,
 		 .data = &testcase_rect_9d,
 		 .timeout = 2},
 
-		{.name = "FillRect rect out of context 1",
+		{.name = "FillRect rect out of pixmap 1",
 		 .tst_fn = test_rect,
 		 .data = &testcase_rect_0a,
 		 .timeout = 2},
 
-		{.name = "FillRect rect out of context 2",
+		{.name = "FillRect rect out of pixmap 2",
 		 .tst_fn = test_rect,
 		 .data = &testcase_rect_0b,
 		 .timeout = 2},

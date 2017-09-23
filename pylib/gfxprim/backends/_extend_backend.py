@@ -16,7 +16,7 @@ def extend_backend(_backend):
 
   @extend(_backend)
   def Flip(self):
-    "If display is buffered, this copies content of context onto display."
+    "If display is buffered, this copies content of pixmap onto display."
     return c_backends.GP_BackendFlip(self)
 
   @extend(_backend)

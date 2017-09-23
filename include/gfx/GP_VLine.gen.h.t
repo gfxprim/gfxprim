@@ -6,6 +6,6 @@
  */
 
 @ for ps in pixelsizes:
-void GP_VLine_Raw_{{ ps.suffix }}(GP_Context *context, GP_Coord x,
+void GP_VLine_Raw_{{ ps.suffix }}(GP_Pixmap *pixmap, GP_Coord x,
 			GP_Coord y0, GP_Coord y1, GP_Pixel pixel);
 

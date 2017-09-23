@@ -24,7 +24,7 @@
 #include <errno.h>
 #include <sys/stat.h>
 
-#include <core/GP_Context.h>
+#include <core/GP_Pixmap.h>
 #include <core/GP_GetPutPixel.h>
 #include <loaders/GP_Loaders.h>
 
@@ -32,7 +32,7 @@
 
 static int test_load_PNG(const char *path)
 {
-	GP_Context *img;
+	GP_Pixmap *img;
 
 	errno = 0;
 
@@ -53,7 +53,7 @@ static int test_load_PNG(const char *path)
 	 * TODO: check correct data.
 	 */
 
-	GP_ContextFree(img);
+	GP_PixmapFree(img);
 
 	return TST_SUCCESS;
 }
@@ -65,7 +65,7 @@ struct check_color_test {
 
 static int test_load_PNG_check_color(struct check_color_test *test)
 {
-	GP_Context *img;
+	GP_Pixmap *img;
 
 	errno = 0;
 
@@ -98,9 +98,9 @@ static int test_load_PNG_check_color(struct check_color_test *test)
 	}
 
 	if (!fail)
-		tst_msg("Context pixels are correct");
+		tst_msg("Pixmap pixels are correct");
 
-	GP_ContextFree(img);
+	GP_PixmapFree(img);
 
 	if (fail)
 		return TST_FAILED;
@@ -125,34 +125,34 @@ static struct check_color_test red = {
 
 static int test_save_PNG(GP_PixelType pixel_type)
 {
-	GP_Context *ctx;
+	GP_Pixmap *pixmap;
 	int ret;
 
-	ctx = GP_ContextAlloc(100, 100, pixel_type);
+	pixmap = GP_PixmapAlloc(100, 100, pixel_type);
 
-	if (ctx == NULL) {
-		tst_msg("Failed to allocate context");
+	if (pixmap == NULL) {
+		tst_msg("Failed to allocate pixmap");
 		return TST_UNTESTED;
 	}
 
 	errno = 0;
 
-	ret = GP_SavePNG(ctx, "/dev/null", NULL);
+	ret = GP_SavePNG(pixmap, "/dev/null", NULL);
 
 	if (ret == 0) {
 		tst_msg("Saved successfully");
-		GP_ContextFree(ctx);
+		GP_PixmapFree(pixmap);
 		return TST_SUCCESS;
 	}
 
 	switch (errno) {
 	case ENOSYS:
 		tst_msg("Not Implemented");
-		GP_ContextFree(ctx);
+		GP_PixmapFree(pixmap);
 		return TST_SKIPPED;
 	default:
 		tst_msg("Failed and errno is not ENOSYS (%i)", errno);
-		GP_ContextFree(ctx);
+		GP_PixmapFree(pixmap);
 		return TST_FAILED;
 	}
 }

@@ -22,14 +22,14 @@
 
 /*
 
-  GP_Context rotations and mirroring.
+  GP_Pixmap rotations and mirroring.
 
  */
 
 #ifndef FILTERS_GP_ROTATE_H
 #define FILTERS_GP_ROTATE_H
 
-#include "core/GP_Context.h"
+#include "core/GP_Pixmap.h"
 #include "GP_Filter.h"
 
 /*
@@ -38,21 +38,21 @@
  * The dst must be at least as big as source.
  *
  * The filter works 'in-place' which means that src and dst
- * may be very same context. Note that when aborting in-place operation
+ * may be very same pixmap. Note that when aborting in-place operation
  * the image buffer gets into an inconsistent state.
  *
  * Returns zero on success, non-zero if operation was aborted.
  */
-int GP_FilterMirrorH(const GP_Context *src, GP_Context *dst,
+int GP_FilterMirrorH(const GP_Pixmap *src, GP_Pixmap *dst,
                      GP_ProgressCallback *callback);
 
 /*
  * Mirrors bitmap horizontally.
  *
- * Returns pointer to newly allocated context, or NULL if malloc() has failed
+ * Returns pointer to newly allocated pixmap, or NULL if malloc() has failed
  * or operation was aborted from withing a callback.
  */
-GP_Context *GP_FilterMirrorHAlloc(const GP_Context *src,
+GP_Pixmap *GP_FilterMirrorHAlloc(const GP_Pixmap *src,
                                   GP_ProgressCallback *callback);
 
 /*
@@ -61,44 +61,44 @@ GP_Context *GP_FilterMirrorHAlloc(const GP_Context *src,
  * The dst must be at least as big as source.
  *
  * The filter works 'in-place' which means that src and dst
- * may be very same context. Note that when aborting in-place operation
+ * may be very same pixmap. Note that when aborting in-place operation
  * the image buffer gets into an inconsistent state.
  *
  * Returns zero on success, non-zero if operation was aborted.
  */
-int GP_FilterMirrorV(const GP_Context *src, GP_Context *dst,
+int GP_FilterMirrorV(const GP_Pixmap *src, GP_Pixmap *dst,
                      GP_ProgressCallback *callback);
 
 /*
  * Mirrors bitmap vertically.
  *
- * Returns pointer to newly allocated context, or NULL if malloc() has failed
+ * Returns pointer to newly allocated pixmap, or NULL if malloc() has failed
  * or operation was aborted from withing a callback.
  */
-GP_Context *GP_FilterMirrorVAlloc(const GP_Context *src,
+GP_Pixmap *GP_FilterMirrorVAlloc(const GP_Pixmap *src,
                                   GP_ProgressCallback *callback);
 
 /*
- * Rotate the context by 90, 180, 270.
+ * Rotate the pixmap by 90, 180, 270.
  *
  * Returns pointer to destination bitmap or NULL if allocation failed.
  */
-int GP_FilterRotate90(const GP_Context *src, GP_Context *dst,
+int GP_FilterRotate90(const GP_Pixmap *src, GP_Pixmap *dst,
                       GP_ProgressCallback *callback);
 
-GP_Context *GP_FilterRotate90Alloc(const GP_Context *src,
+GP_Pixmap *GP_FilterRotate90Alloc(const GP_Pixmap *src,
                                    GP_ProgressCallback *callback);
 
-int GP_FilterRotate180(const GP_Context *src, GP_Context *dst,
+int GP_FilterRotate180(const GP_Pixmap *src, GP_Pixmap *dst,
                        GP_ProgressCallback *callback);
 
-GP_Context *GP_FilterRotate180Alloc(const GP_Context *src,
+GP_Pixmap *GP_FilterRotate180Alloc(const GP_Pixmap *src,
                                     GP_ProgressCallback *callback);
 
-int GP_FilterRotate270(const GP_Context *src, GP_Context *dst,
+int GP_FilterRotate270(const GP_Pixmap *src, GP_Pixmap *dst,
                        GP_ProgressCallback *callback);
 
-GP_Context *GP_FilterRotate270Alloc(const GP_Context *src,
+GP_Pixmap *GP_FilterRotate270Alloc(const GP_Pixmap *src,
                                     GP_ProgressCallback *callback);
 
 /*
@@ -131,11 +131,11 @@ extern const char **GP_FilterSymmetryNames;
  */
 int GP_FilterSymmetryByName(const char *symmetry);
 
-int GP_FilterSymmetry(const GP_Context *src, GP_Context *dst,
+int GP_FilterSymmetry(const GP_Pixmap *src, GP_Pixmap *dst,
                       GP_FilterSymmetries symmetry,
                       GP_ProgressCallback *callback);
 
-GP_Context *GP_FilterSymmetryAlloc(const GP_Context *src,
+GP_Pixmap *GP_FilterSymmetryAlloc(const GP_Pixmap *src,
                                    GP_FilterSymmetries symmetry,
                                    GP_ProgressCallback *callback);
 

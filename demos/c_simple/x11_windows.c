@@ -29,16 +29,16 @@
 #include <stdio.h>
 #include <GP.h>
 
-static void redraw(struct GP_Context *context)
+static void redraw(struct GP_Pixmap *pixmap)
 {
 	GP_Pixel white_pixel, black_pixel;
 
-	black_pixel = GP_RGBToContextPixel(0x00, 0x00, 0x00, context);
-	white_pixel = GP_RGBToContextPixel(0xff, 0xff, 0xff, context);
+	black_pixel = GP_RGBToPixmapPixel(0x00, 0x00, 0x00, pixmap);
+	white_pixel = GP_RGBToPixmapPixel(0xff, 0xff, 0xff, pixmap);
 
-	GP_Fill(context, black_pixel);
-	GP_Line(context, 0, 0, context->w - 1, context->h - 1, white_pixel);
-	GP_Line(context, 0, context->h - 1, context->w - 1, 0, white_pixel);
+	GP_Fill(pixmap, black_pixel);
+	GP_Line(pixmap, 0, 0, pixmap->w - 1, pixmap->h - 1, white_pixel);
+	GP_Line(pixmap, 0, pixmap->h - 1, pixmap->w - 1, 0, white_pixel);
 }
 
 static int ev_loop(struct GP_Backend *backend, const char *name)
@@ -68,7 +68,7 @@ static int ev_loop(struct GP_Backend *backend, const char *name)
 			switch (ev.code) {
 			case GP_EV_SYS_RESIZE:
 				GP_BackendResizeAck(backend);
-				redraw(backend->context);
+				redraw(backend->pixmap);
 				GP_BackendFlip(backend);
 			break;
 			case GP_EV_SYS_QUIT:
@@ -99,8 +99,8 @@ int main(void)
 	}
 
 	/* Update the backend screen */
-	redraw(win_1->context);
-	redraw(win_2->context);
+	redraw(win_1->pixmap);
+	redraw(win_2->pixmap);
 
 	GP_BackendFlip(win_1);
 	GP_BackendFlip(win_2);

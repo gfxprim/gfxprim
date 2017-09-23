@@ -25,7 +25,7 @@
 
 /*
 
-  GP_Context filters.
+  GP_Pixmap filters.
 
  */
 

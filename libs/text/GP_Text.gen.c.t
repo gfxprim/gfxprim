@@ -24,7 +24,7 @@ static int get_width(const GP_TextStyle *style, int width)
 @ for pt in pixeltypes:
 @     if not pt.is_unknown():
 
-static void text_draw_1BPP_{{ pt.name }}(GP_Context *context, const GP_TextStyle *style,
+static void text_draw_1BPP_{{ pt.name }}(GP_Pixmap *pixmap, const GP_TextStyle *style,
                                          GP_Coord x, GP_Coord y,
 				         GP_Pixel fg, const char *str)
 {
@@ -60,7 +60,7 @@ static void text_draw_1BPP_{{ pt.name }}(GP_Context *context, const GP_TextStyle
 					continue;
 
 				for (k = 0; k < style->pixel_ymul; k++)
-					GP_HLine(context, x_start, x_start + style->pixel_xmul - 1,
+					GP_HLine(pixmap, x_start, x_start + style->pixel_xmul - 1,
 					         y - (glyph->bearing_y - style->font->ascend) * y_mul + k, fg);
 			}
 
@@ -76,18 +76,18 @@ static void text_draw_1BPP_{{ pt.name }}(GP_Context *context, const GP_TextStyle
 
 @ end
 
-static void text_draw_1BPP(GP_Context *context, const GP_TextStyle *style, int x, int y,
+static void text_draw_1BPP(GP_Pixmap *pixmap, const GP_TextStyle *style, int x, int y,
                            GP_Pixel fg, const char *str)
 {
-	switch (context->pixel_type) {
+	switch (pixmap->pixel_type) {
 @ for pt in pixeltypes:
 @     if not pt.is_unknown():
 	case GP_PIXEL_{{ pt.name }}:
-		text_draw_1BPP_{{ pt.name }}(context, style, x, y, fg, str);
+		text_draw_1BPP_{{ pt.name }}(pixmap, style, x, y, fg, str);
 	break;
 @ end
 	default:
-		GP_ABORT("Invalid context->pixel_type");
+		GP_ABORT("Invalid pixmap->pixel_type");
 	}
 }
 
@@ -125,7 +125,7 @@ static void text_draw_1BPP(GP_Context *context, const GP_TextStyle *style, int x
 
 				for (k = 0; k < style->pixel_ymul; k++) {
 @     if use_bg:
-					GP_HLine(context, x_start, x_start + style->pixel_xmul - 1, cur_y + k,
+					GP_HLine(pixmap, x_start, x_start + style->pixel_xmul - 1, cur_y + k,
 					GP_MIX_PIXELS_{{ pt.name }}(fg, bg, gray));
 @     else:
 					unsigned int l;
@@ -134,8 +134,8 @@ static void text_draw_1BPP(GP_Context *context, const GP_TextStyle *style, int x
 						unsigned int px = l;
 						unsigned int py = cur_y + k;
 						//TODO: optimize this
-						GP_TRANSFORM_POINT(context, px, py);
-						GP_MixPixel_Raw_Clipped_{{ pt.name }}(context, px, py, fg, gray);
+						GP_TRANSFORM_POINT(pixmap, px, py);
+						GP_MixPixel_Raw_Clipped_{{ pt.name }}(pixmap, px, py, fg, gray);
 					}
 @     end
 				}
@@ -154,14 +154,14 @@ static void text_draw_1BPP(GP_Context *context, const GP_TextStyle *style, int x
 @ for pt in pixeltypes:
 @     if not pt.is_unknown():
 
-static void text_8BPP_bg_{{ pt.name }}(GP_Context *context, const GP_TextStyle *style,
+static void text_8BPP_bg_{{ pt.name }}(GP_Pixmap *pixmap, const GP_TextStyle *style,
                                        GP_Coord x, GP_Coord y,
 				       GP_Pixel fg, GP_Pixel bg, const char *str)
 {
 @         text_8BPP(pt, True)
 }
 
-static void text_8BPP_{{ pt.name }}(GP_Context *context, const GP_TextStyle *style,
+static void text_8BPP_{{ pt.name }}(GP_Pixmap *pixmap, const GP_TextStyle *style,
                                     GP_Coord x, GP_Coord y,
 				    GP_Pixel fg, const char *str)
 {
@@ -170,51 +170,51 @@ static void text_8BPP_{{ pt.name }}(GP_Context *context, const GP_TextStyle *sty
 
 @ end
 
-static void text_8BPP_bg(GP_Context *context, const GP_TextStyle *style,
+static void text_8BPP_bg(GP_Pixmap *pixmap, const GP_TextStyle *style,
                          GP_Coord x, GP_Coord y,
                          GP_Pixel fg, GP_Pixel bg, const char *str)
 {
-	switch (context->pixel_type) {
+	switch (pixmap->pixel_type) {
 @ for pt in pixeltypes:
 @     if not pt.is_unknown():
 	case GP_PIXEL_{{ pt.name }}:
-		text_8BPP_bg_{{ pt.name }}(context, style, x, y, fg, bg, str);
+		text_8BPP_bg_{{ pt.name }}(pixmap, style, x, y, fg, bg, str);
 	break;
 @ end
 	default:
-		GP_ABORT("Invalid context->pixel_type");
+		GP_ABORT("Invalid pixmap->pixel_type");
 	}
 }
 
-static void text_8BPP(GP_Context *context, const GP_TextStyle *style,
+static void text_8BPP(GP_Pixmap *pixmap, const GP_TextStyle *style,
                       GP_Coord x, GP_Coord y,
                       GP_Pixel fg, const char *str)
 {
-	switch (context->pixel_type) {
+	switch (pixmap->pixel_type) {
 @ for pt in pixeltypes:
 @     if not pt.is_unknown():
 	case GP_PIXEL_{{ pt.name }}:
-		text_8BPP_{{ pt.name }}(context, style, x, y, fg, str);
+		text_8BPP_{{ pt.name }}(pixmap, style, x, y, fg, str);
 	break;
 @ end
 	default:
-		GP_ABORT("Invalid context->pixel_type");
+		GP_ABORT("Invalid pixmap->pixel_type");
 	}
 }
 
-void GP_Text_Raw(GP_Context *context, const GP_TextStyle *style,
+void GP_Text_Raw(GP_Pixmap *pixmap, const GP_TextStyle *style,
                  GP_Coord x, GP_Coord y, uint8_t flags,
                  GP_Pixel fg, GP_Pixel bg, const char *str)
 {
 	switch (style->font->glyph_bitmap_format) {
 	case GP_FONT_BITMAP_1BPP:
-		text_draw_1BPP(context, style, x, y, fg, str);
+		text_draw_1BPP(pixmap, style, x, y, fg, str);
 	break;
 	case GP_FONT_BITMAP_8BPP:
 		if (flags)
-			text_8BPP(context, style, x, y, fg, str);
+			text_8BPP(pixmap, style, x, y, fg, str);
 		else
-			text_8BPP_bg(context, style, x, y, fg, bg, str);
+			text_8BPP_bg(pixmap, style, x, y, fg, bg, str);
 	break;
 	default:
 		GP_ABORT("Invalid font glyph bitmap format");

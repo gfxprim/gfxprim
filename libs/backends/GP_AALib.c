@@ -23,7 +23,7 @@
 #include <errno.h>
 
 #include "core/GP_Debug.h"
-#include "core/GP_Context.h"
+#include "core/GP_Pixmap.h"
 #include "backends/GP_AALib.h"
 #include "input/GP_Input.h"
 
@@ -44,7 +44,7 @@ static pthread_mutex_t aalib_mutex = PTHREAD_MUTEX_INITIALIZER;
 
 struct aalib_priv {
 	aa_context *c;
-	GP_Context ctx;
+	GP_Pixmap pixmap;
 };
 
 /* ascii mapped keys */
@@ -145,9 +145,9 @@ static int aalib_resize_ack(GP_Backend *self)
 	int w = aa_imgwidth(aa->c);
 	int h = aa_imgheight(aa->c);
 
-	GP_DEBUG(1, "Reinitializing Context %ix%i", w, h);
+	GP_DEBUG(1, "Reinitializing Pixmap %ix%i", w, h);
 
-	GP_ContextInit(&aa->ctx, w, h, GP_PIXEL_G8, aa_image(aa->c));
+	GP_PixmapInit(&aa->pixmap, w, h, GP_PIXEL_G8, aa_image(aa->c));
 
 	return 0;
 }
@@ -241,13 +241,13 @@ GP_Backend *GP_BackendAALibInit(void)
 	w = aa_imgwidth(aa->c);
 	h = aa_imgheight(aa->c);
 
-	GP_DEBUG(1, "Initializing Context %ix%i", w, h);
+	GP_DEBUG(1, "Initializing Pixmap %ix%i", w, h);
 
-	GP_ContextInit(&aa->ctx, w, h, GP_PIXEL_G8, aa_image(aa->c));
+	GP_PixmapInit(&aa->pixmap, w, h, GP_PIXEL_G8, aa_image(aa->c));
 
 	/* update API */
 	backend->name          = "AALib";
-	backend->context       = &aa->ctx;
+	backend->pixmap       = &aa->pixmap;
 	backend->Flip          = aalib_flip;
 	backend->UpdateRect    = aalib_update_rect;
 	backend->Exit          = aalib_exit;

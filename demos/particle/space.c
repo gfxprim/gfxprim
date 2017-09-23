@@ -67,11 +67,11 @@ void space_destroy(struct space *space)
 
 #define SQUARE(x) ((x) * (x))
 
-void space_draw_particles(GP_Context *context, struct space *space)
+void space_draw_particles(GP_Pixmap *pixmap, struct space *space)
 {
 	unsigned int i;
 
-	GP_Fill(context, 0x000000);
+	GP_Fill(pixmap, 0x000000);
 
 	for (i = 0; i < space->particle_count; i++) {
 		GP_Pixel color;
@@ -88,9 +88,9 @@ void space_draw_particles(GP_Context *context, struct space *space)
 		}
 */
 
-		color = GP_RGBToContextPixel(0xee, 0xee, 0xee, context);
+		color = GP_RGBToPixmapPixel(0xee, 0xee, 0xee, pixmap);
 
-		GP_PutPixelAA(context, x, y, color);
+		GP_PutPixelAA(pixmap, x, y, color);
 
 		int val = SQUARE(space->particles[i].vx) + SQUARE(space->particles[i].vy);
 
@@ -99,29 +99,29 @@ void space_draw_particles(GP_Context *context, struct space *space)
 		if (val > 255)
 			val = 255;
 
-		color = GP_RGBToContextPixel(val, val, 0x40, context);
+		color = GP_RGBToPixmapPixel(val, val, 0x40, pixmap);
 
 		/* Hexagons */
-		GP_LineAA(context, x - a2, y - a1, x + a2, y - a1, color);
-	//	GP_LineAA(context, x + a2, y - a1, x + a1, y - a2, color);
-		GP_LineAA(context, x + a1, y - a2, x + a1, y + a2, color);
-	//	GP_LineAA(context, x + a1, y + a2, x + a2, y + a1, color);
-		GP_LineAA(context, x + a2, y + a1, x - a2, y + a1, color);
-	//	GP_LineAA(context, x - a2, y + a1, x - a1, y + a2, color);
-		GP_LineAA(context, x - a1, y + a2, x - a1, y - a2, color);
-	//	GP_LineAA(context, x - a1, y - a2, x - a2, y - a1, color);
+		GP_LineAA(pixmap, x - a2, y - a1, x + a2, y - a1, color);
+	//	GP_LineAA(pixmap, x + a2, y - a1, x + a1, y - a2, color);
+		GP_LineAA(pixmap, x + a1, y - a2, x + a1, y + a2, color);
+	//	GP_LineAA(pixmap, x + a1, y + a2, x + a2, y + a1, color);
+		GP_LineAA(pixmap, x + a2, y + a1, x - a2, y + a1, color);
+	//	GP_LineAA(pixmap, x - a2, y + a1, x - a1, y + a2, color);
+		GP_LineAA(pixmap, x - a1, y + a2, x - a1, y - a2, color);
+	//	GP_LineAA(pixmap, x - a1, y - a2, x - a2, y - a1, color);
 /*
-		GP_PutPixelAA(context, x + a2, y - a1, 0xffffff);
-		GP_PutPixelAA(context, x + a1, y - a2, 0xffffff);
+		GP_PutPixelAA(pixmap, x + a2, y - a1, 0xffffff);
+		GP_PutPixelAA(pixmap, x + a1, y - a2, 0xffffff);
 
-		GP_PutPixelAA(context, x + a1, y + a2, 0xffffff);
-		GP_PutPixelAA(context, x + a2, y + a1, 0xffffff);
+		GP_PutPixelAA(pixmap, x + a1, y + a2, 0xffffff);
+		GP_PutPixelAA(pixmap, x + a2, y + a1, 0xffffff);
 
-		GP_PutPixelAA(context, x - a2, y + a1, 0xffffff);
-		GP_PutPixelAA(context, x - a1, y + a2, 0xffffff);
+		GP_PutPixelAA(pixmap, x - a2, y + a1, 0xffffff);
+		GP_PutPixelAA(pixmap, x - a1, y + a2, 0xffffff);
 
-		GP_PutPixelAA(context, x - a1, y - a2, 0xffffff);
-		GP_PutPixelAA(context, x - a2, y - a1, 0xffffff);
+		GP_PutPixelAA(pixmap, x - a1, y - a2, 0xffffff);
+		GP_PutPixelAA(pixmap, x - a2, y - a1, 0xffffff);
 */
 	}
 }

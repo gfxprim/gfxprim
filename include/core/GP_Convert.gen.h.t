@@ -84,7 +84,7 @@
 @ end
 
 #include "GP_GetSetBits.h"
-#include "GP_Context.h"
+#include "GP_Pixmap.h"
 #include "GP_Pixel.h"
 
 @

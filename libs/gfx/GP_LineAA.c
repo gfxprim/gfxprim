@@ -29,23 +29,23 @@
 #include "gfx/GP_LineAA.h"
 
 /*
-void GP_Line_Raw(GP_Context *context, GP_Coord x0, GP_Coord y0,
+void GP_Line_Raw(GP_Pixmap *pixmap, GP_Coord x0, GP_Coord y0,
                  GP_Coord x1, GP_Coord y1, GP_Pixel pixel)
 {
-	GP_CHECK_CONTEXT(context);
+	GP_CHECK_PIXMAP(pixmap);
 
-	GP_FN_PER_BPP_CONTEXT(GP_Line_Raw, context, context, x0, y0, x1, y1,
+	GP_FN_PER_BPP_PIXMAP(GP_Line_Raw, pixmap, pixmap, x0, y0, x1, y1,
 	                      pixel);
 }
 */
 
-void GP_LineAA(GP_Context *context, GP_Coord x0, GP_Coord y0,
+void GP_LineAA(GP_Pixmap *pixmap, GP_Coord x0, GP_Coord y0,
                GP_Coord x1, GP_Coord y1, GP_Pixel pixel)
 {
-	GP_CHECK_CONTEXT(context);
+	GP_CHECK_PIXMAP(pixmap);
 
-	GP_TRANSFORM_POINT_FP(context, x0, y0);
-	GP_TRANSFORM_POINT_FP(context, x1, y1);
+	GP_TRANSFORM_POINT_FP(pixmap, x0, y0);
+	GP_TRANSFORM_POINT_FP(pixmap, x1, y1);
 
-	GP_LineAA_Raw(context, x0, y0, x1, y1, pixel);
+	GP_LineAA_Raw(pixmap, x0, y0, x1, y1, pixel);
 }

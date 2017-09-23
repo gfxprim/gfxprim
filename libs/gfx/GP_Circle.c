@@ -34,40 +34,40 @@
 /* Generate drawing functions for various bit depths. */
 GP_DEF_DRAW_FN_PER_BPP(GP_Circle_Raw, DEF_CIRCLE_FN)
 
-void GP_Circle_Raw(GP_Context *context, GP_Coord xcenter, GP_Coord ycenter,
+void GP_Circle_Raw(GP_Pixmap *pixmap, GP_Coord xcenter, GP_Coord ycenter,
                    GP_Size r, GP_Pixel pixel)
 {
-	GP_CHECK_CONTEXT(context);
+	GP_CHECK_PIXMAP(pixmap);
 
-	GP_FN_PER_BPP_CONTEXT(GP_Circle_Raw, context, context,
+	GP_FN_PER_BPP_PIXMAP(GP_Circle_Raw, pixmap, pixmap,
 	                      xcenter, ycenter, r, pixel);
 }
 
-void GP_Circle(GP_Context *context, GP_Coord xcenter, GP_Coord ycenter,
+void GP_Circle(GP_Pixmap *pixmap, GP_Coord xcenter, GP_Coord ycenter,
                GP_Size r, GP_Pixel pixel)
 {
-	GP_CHECK_CONTEXT(context);
+	GP_CHECK_PIXMAP(pixmap);
 
-	GP_TRANSFORM_POINT(context, xcenter, ycenter);
+	GP_TRANSFORM_POINT(pixmap, xcenter, ycenter);
 
-	GP_Circle_Raw(context, xcenter, ycenter, r, pixel);
+	GP_Circle_Raw(pixmap, xcenter, ycenter, r, pixel);
 }
 
-void GP_Ring_Raw(GP_Context *context, GP_Coord xcenter, GP_Coord ycenter,
+void GP_Ring_Raw(GP_Pixmap *pixmap, GP_Coord xcenter, GP_Coord ycenter,
                  GP_Size r1, GP_Size r2, GP_Pixel pixel)
 {
-	GP_Circle_Raw(context, xcenter, ycenter, r1, pixel);
-	GP_Circle_Raw(context, xcenter, ycenter, r2, pixel);
+	GP_Circle_Raw(pixmap, xcenter, ycenter, r1, pixel);
+	GP_Circle_Raw(pixmap, xcenter, ycenter, r2, pixel);
 }
 
-void GP_Ring(GP_Context *context, GP_Coord xcenter, GP_Coord ycenter,
+void GP_Ring(GP_Pixmap *pixmap, GP_Coord xcenter, GP_Coord ycenter,
              GP_Size r1, GP_Size r2, GP_Pixel pixel)
 {
-	GP_CHECK_CONTEXT(context);
+	GP_CHECK_PIXMAP(pixmap);
 
-	GP_TRANSFORM_POINT(context, xcenter, ycenter);
+	GP_TRANSFORM_POINT(pixmap, xcenter, ycenter);
 
-	GP_Ring_Raw(context, xcenter, ycenter, r1, r2, pixel);
+	GP_Ring_Raw(pixmap, xcenter, ycenter, r1, r2, pixel);
 }
 
 #include "algo/FillRing.algo.h"
@@ -75,21 +75,21 @@ void GP_Ring(GP_Context *context, GP_Coord xcenter, GP_Coord ycenter,
 /* Generate drawing functions for various bit depths. */
 GP_DEF_FILL_FN_PER_BPP(GP_FillRing_Raw, DEF_FILLRING_FN)
 
-void GP_FillRing_Raw(GP_Context *context, GP_Coord xcenter, GP_Coord ycenter,
+void GP_FillRing_Raw(GP_Pixmap *pixmap, GP_Coord xcenter, GP_Coord ycenter,
                      GP_Size r1, GP_Size r2, GP_Pixel pixel)
 {
-	GP_CHECK_CONTEXT(context);
+	GP_CHECK_PIXMAP(pixmap);
 
-	GP_FN_PER_BPP_CONTEXT(GP_FillRing_Raw, context, context,
+	GP_FN_PER_BPP_PIXMAP(GP_FillRing_Raw, pixmap, pixmap,
 	                      xcenter, ycenter, r1, r2, pixel);
 }
 
-void GP_FillRing(GP_Context *context, GP_Coord xcenter, GP_Coord ycenter,
+void GP_FillRing(GP_Pixmap *pixmap, GP_Coord xcenter, GP_Coord ycenter,
                  GP_Size r1, GP_Size r2, GP_Pixel pixel)
 {
-	GP_CHECK_CONTEXT(context);
+	GP_CHECK_PIXMAP(pixmap);
 
-	GP_TRANSFORM_POINT(context, xcenter, ycenter);
+	GP_TRANSFORM_POINT(pixmap, xcenter, ycenter);
 
-	GP_FillRing_Raw(context, xcenter, ycenter, r1, r2, pixel);
+	GP_FillRing_Raw(pixmap, xcenter, ycenter, r1, r2, pixel);
 }
