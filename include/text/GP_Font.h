@@ -143,9 +143,12 @@ typedef struct GP_FontFace {
 	/*
 	 * Offsets to the glyph data.
 	 *
-	 * If glyph_offset[0] == 0, the table glyph_offsets holds
-	 * offsets for all characters in glyphs. Otherwise the
-	 * glyph_offset[0] defines step in the glyph table.
+	 * If glyph_offset[0] == 0, the table glyph_offsets holds offsets for
+	 * all characters in glyphs, the last offset i.e. offsets[len] holds
+	 * the size of glyphs array.
+	 *
+	 * If glyph_offset[0] != 0 the glyph_offset[0] defines step in the
+	 * glyph table.
 	 */
 	uint32_t glyph_offsets[];
 } GP_FontFace;

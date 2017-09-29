@@ -24,3 +24,9 @@ GP_DefaultConsoleFont
 GP_FontTiny
 GP_FontTinyMono
 GP_FontC64
+GP_FontHaxorNarrow15
+GP_FontHaxorNarrowBold15
+GP_FontHaxorNarrow16
+GP_FontHaxorNarrowBold16
+GP_FontHaxorNarrow17
+GP_FontHaxorNarrowBold17

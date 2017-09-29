@@ -44,4 +44,16 @@ extern const GP_FontFace *GP_FontTiny;
  */
 extern const GP_FontFace *GP_FontC64;
 
+/*
+ * HaxorNarrow family, converted from bdf fonts from:
+ *
+ * https://github.com/metan-ucw/fonts
+ */
+extern const GP_FontFace *GP_FontHaxorNarrow15;
+extern const GP_FontFace *GP_FontHaxorNarrowBold15;
+extern const GP_FontFace *GP_FontHaxorNarrow16;
+extern const GP_FontFace *GP_FontHaxorNarrowBold16;
+extern const GP_FontFace *GP_FontHaxorNarrow17;
+extern const GP_FontFace *GP_FontHaxorNarrowBold17;
+
 #endif /* TEXT_GP_FONTS_H */
