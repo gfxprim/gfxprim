@@ -35,6 +35,7 @@
 #include "../../config.h"
 #include "core/GP_ByteOrder.h"
 #include "core/GP_Debug.h"
+#include "core/GP_GammaCorrection.h"
 
 #include "GP_PNG.h"
 
@@ -178,7 +179,7 @@ static int read_bitmap(GP_Pixmap *res, GP_ProgressCallback *callback,
 }
 
 static int read_convert_bitmap(GP_Pixmap *res, GP_ProgressCallback *callback,
-		               png_structp png, int passes)
+		               png_structp png, int passes, double gamma)
 {
 	uint16_t *row;
 
@@ -200,11 +201,19 @@ static int read_convert_bitmap(GP_Pixmap *res, GP_ProgressCallback *callback,
 		uint8_t *rrow = GP_PIXEL_ADDR(res, 0, y);
 		unsigned int x = 0;
 
-		//TODO: Gamma
-		for (x = 0; x < res->w; x++) {
-			rrow[3*x] = row[3 * x]>>8;
-			rrow[3*x + 1] = row[3 * x + 1]>>8;
-			rrow[3*x + 2] = row[3 * x + 2]>>8;
+
+		if (gamma > 0.1) {
+			for (x = 0; x < res->w; x++) {
+				rrow[3*x] = row[3 * x]>>8;
+				rrow[3*x + 1] = row[3 * x + 1]>>8;
+				rrow[3*x + 2] = row[3 * x + 2]>>8;
+			}
+		} else {
+			for (x = 0; x < res->w; x++) {
+				rrow[3*x] = GP_Linear16ToGamma8(row[3 * x]);
+				rrow[3*x + 1] = GP_Linear16ToGamma8(row[3 * x + 1]);
+				rrow[3*x + 2] = GP_Linear16ToGamma8(row[3 * x + 2]);
+			}
 		}
 
 		if (GP_ProgressCallbackReport(callback, y, res->h, res->w)) {
@@ -390,7 +399,7 @@ int GP_ReadPNGEx(GP_IO *io, GP_Pixmap **img,
 	}
 #endif
 	if (convert_16_to_8) {
-		if ((err = read_convert_bitmap(res, callback, png, passes)))
+		if ((err = read_convert_bitmap(res, callback, png, passes, gamma)))
 			goto err3;
 	} else {
 		if ((err = read_bitmap(res, callback, png, passes)))
