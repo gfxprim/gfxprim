@@ -82,7 +82,7 @@ static int write_data(const GP_Pixmap *img, GP_IO *io,
 		if (GP_IOFlush(bio, "\n", 1))
 			return 1;
 
-		if (GP_ProgressCallbackReport(callback, img->h, j, img->w)) {
+		if (GP_ProgressCallbackReport(callback, j, img->h, img->w)) {
 			errno = ECANCELED;
 			return 1;
 		}
