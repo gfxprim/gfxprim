@@ -360,6 +360,9 @@ unsigned int image_list_count(struct image_list *self)
 
 unsigned int image_list_pos(struct image_list *self)
 {
+	if (!self->in_dir)
+		return count_img_to(self, self->cur_arg);
+
 	return count_img_to(self, self->cur_arg) +  self->cur_file;
 }
 
