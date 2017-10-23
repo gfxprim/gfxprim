@@ -196,6 +196,9 @@ static int read_convert_bitmap(GP_Pixmap *res, GP_ProgressCallback *callback,
 
 	unsigned int y;
 
+	if (gamma < 0.01)
+		GP_PixmapSetGamma(res, 2.2);
+
 	for (y = 0; y < res->h; y++) {
 		png_read_row(png, (void*)row, NULL);
 		uint8_t *rrow = GP_PIXEL_ADDR(res, 0, y);
@@ -384,6 +387,9 @@ int GP_ReadPNGEx(GP_IO *io, GP_Pixmap **img,
 		err = ENOMEM;
 		goto err2;
 	}
+
+	if (gamma > 0.1)
+		GP_PixmapSetGamma(res, 1/gamma);
 
 	if (color_type == PNG_COLOR_TYPE_GRAY && depth < 8)
 		png_set_packswap(png);
