@@ -111,6 +111,11 @@ typedef struct GP_Pixmap {
 GP_Pixmap *GP_PixmapAlloc(GP_Size w, GP_Size h, GP_PixelType type);
 
 /*
+ * Sets gamma for the pixmap.
+ */
+int GP_PixmapSetGamma(GP_Pixmap *self, float gamma);
+
+/*
  * Free pixmap.
  *
  * If pixmap->free_pixels, also free pixel data.

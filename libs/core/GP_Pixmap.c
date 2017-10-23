@@ -114,6 +114,15 @@ GP_Pixmap *GP_PixmapAlloc(GP_Size w, GP_Size h, GP_PixelType type)
 	return pixmap;
 }
 
+int GP_PixmapSetGamma(GP_Pixmap *self, float gamma)
+{
+	GP_GammaRelease(self->gamma);
+
+	self->gamma = GP_GammaAcquire(self->pixel_type, gamma);
+
+	return !self->gamma;
+}
+
 void GP_PixmapFree(GP_Pixmap *pixmap)
 {
 	GP_DEBUG(1, "Freeing pixmap (%p)", pixmap);

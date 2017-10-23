@@ -186,7 +186,12 @@ GP_Gamma *GP_GammaCopy(GP_Gamma *self)
 
 void GP_GammaRelease(GP_Gamma *self)
 {
-	int channels = GP_PixelTypes[self->pixel_type].numchannels, i;
+	int channels, i;
+
+	if (!self)
+		return;
+
+	channels = GP_PixelTypes[self->pixel_type].numchannels;
 
 	GP_DEBUG(1, "Releasing Gamma table %s gamma %f", GP_PixelTypeName(self->pixel_type), self->tables[0]->gamma);
 

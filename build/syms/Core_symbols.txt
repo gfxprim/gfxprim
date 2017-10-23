@@ -2,6 +2,7 @@ GP_PixelTypes
 GP_PixelHasFlags
 
 GP_PixmapAlloc
+GP_PixmapSetGamma
 GP_PixmapResize
 GP_PixmapConvertAlloc
 GP_PixmapPrintInfo
