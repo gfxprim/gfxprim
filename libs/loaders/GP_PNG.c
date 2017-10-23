@@ -153,6 +153,71 @@ static void load_meta_data(png_structp png, png_infop png_info,
 	}
 }
 
+static int read_bitmap(GP_Pixmap *res, GP_ProgressCallback *callback,
+                       png_structp png, int passes)
+{
+	uint32_t y;
+	int p;
+
+	/*
+	 * The passes are needed for adam7 interlacing.
+	 */
+	for (p = 0; p < passes; p++) {
+		for (y = 0; y < res->h; y++) {
+			png_bytep row = GP_PIXEL_ADDR(res, 0, y);
+			png_read_row(png, row, NULL);
+
+			if (GP_ProgressCallbackReport(callback, y + res->h * p, res->h * passes, res->w)) {
+				GP_DEBUG(1, "Operation aborted");
+				return ECANCELED;
+			}
+		}
+	}
+
+	return 0;
+}
+
+static int read_convert_bitmap(GP_Pixmap *res, GP_ProgressCallback *callback,
+		               png_structp png, int passes)
+{
+	uint16_t *row;
+
+	if (passes > 1) {
+		GP_DEBUG(1, "Interlaced 16 bit PNG not supported");
+		return ENOSYS;
+	}
+
+	row = malloc(6 * res->w);
+	if (!row) {
+		GP_DEBUG(1, "Malloc failed :(");
+		return ENOMEM;
+	}
+
+	unsigned int y;
+
+	for (y = 0; y < res->h; y++) {
+		png_read_row(png, (void*)row, NULL);
+		uint8_t *rrow = GP_PIXEL_ADDR(res, 0, y);
+		unsigned int x = 0;
+
+		//TODO: Gamma
+		for (x = 0; x < res->w; x++) {
+			rrow[3*x] = row[3 * x]>>8;
+			rrow[3*x + 1] = row[3 * x + 1]>>8;
+			rrow[3*x + 2] = row[3 * x + 2]>>8;
+		}
+
+		if (GP_ProgressCallbackReport(callback, y, res->h, res->w)) {
+			GP_DEBUG(1, "Operation aborted");
+			free(row);
+			return ECANCELED;
+		}
+	}
+
+	free(row);
+	return 0;
+}
+
 int GP_ReadPNGEx(GP_IO *io, GP_Pixmap **img,
                  GP_DataStorage *storage, GP_ProgressCallback *callback)
 {
@@ -164,6 +229,7 @@ int GP_ReadPNGEx(GP_IO *io, GP_Pixmap **img,
 	GP_Pixmap *res = NULL;
 	int err, passes = 1;
 	double gamma;
+	int convert_16_to_8 = 0;
 
 	png = png_create_read_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
 
@@ -250,6 +316,10 @@ int GP_ReadPNGEx(GP_IO *io, GP_Pixmap **img,
 		case 8:
 			pixel_type = GP_PIXEL_RGB888;
 		break;
+		case 16:
+			pixel_type = GP_PIXEL_RGB888;
+			convert_16_to_8 = 1;
+		break;
 		}
 	break;
 	case PNG_COLOR_TYPE_RGB | PNG_COLOR_MASK_ALPHA:
@@ -319,26 +389,12 @@ int GP_ReadPNGEx(GP_IO *io, GP_Pixmap **img,
 		png_set_swap(png);
 	}
 #endif
-
-	uint32_t y;
-	int p;
-
-	/*
-	 * Do the actuall reading.
-	 *
-	 * The passes are needed for adam7 interlacing.
-	 */
-	for (p = 0; p < passes; p++) {
-		for (y = 0; y < h; y++) {
-			png_bytep row = GP_PIXEL_ADDR(res, 0, y);
-			png_read_row(png, row, NULL);
-
-			if (GP_ProgressCallbackReport(callback, y + h * p, h * passes, w)) {
-				GP_DEBUG(1, "Operation aborted");
-				err = ECANCELED;
-				goto err3;
-			}
-		}
+	if (convert_16_to_8) {
+		if ((err = read_convert_bitmap(res, callback, png, passes)))
+			goto err3;
+	} else {
+		if ((err = read_bitmap(res, callback, png, passes)))
+			goto err3;
 	}
 
 exit:
