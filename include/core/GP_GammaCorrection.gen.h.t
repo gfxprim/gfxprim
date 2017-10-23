@@ -21,4 +21,9 @@ static inline uint8_t GP_Linear10ToGamma{{ i }}(uint16_t val)
 	return (GP_Linear10_Gamma8[val] + {{ int(2 ** (7 - i))}})>>{{8 - i}};
 }
 
+static inline uint8_t GP_Linear16ToGamma{{ i }}(uint16_t val)
+{
+	return (GP_Linear10_Gamma8[val>>6] + {{ int(2 ** (7 - i))}})>>{{8 - i}};
+}
+
 @ end
