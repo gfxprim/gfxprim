@@ -16,7 +16,7 @@ APPS=backend_example loaders_example loaders filters_symmetry gfx_koch\
      virtual_backend_example meta_data showimage\
      v4l2_show v4l2_grab convolution weighted_median shapetest koch \
      input_example fileview linetest randomshapetest fonttest\
-     loaders_register blittest textaligntest sin_AA x11_windows\
+     loaders_register blittest textaligntest x11_windows\
      debug_handler gaussian_noise version pretty_print timers\
      zip_container backend_timers_example memory_io data_storage
 
@@ -50,7 +50,6 @@ textaligntest: LDLIBS+=-lgfxprim-backends
 loaders_register: LDLIBS+=-lgfxprim-loaders
 gaussian_noise: LDLIBS+=-lgfxprim-loaders
 blittest: LDLIBS+=-lgfxprim-backends -lgfxprim-loaders
-sin_AA: LDLIBS+=-lgfxprim-backends -lm
 x11_windows: LDLIBS+=-lgfxprim-backends
 zip_container: LDLIBS+=-lgfxprim-loaders -lgfxprim-backends
 memory_io: LDLIBS+=-lgfxprim-backends -lgfxprim-loaders
