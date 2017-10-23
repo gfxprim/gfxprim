@@ -70,9 +70,6 @@ GP_Ellipse_Raw
 GP_FillEllipse
 GP_FillEllipse_Raw
 
-GP_PartialEllipse
-GP_PartialEllipse_Raw
-
 GP_RectXYXY
 GP_RectXYXY_Raw
 GP_RectXYWH
@@ -108,7 +105,3 @@ GP_PutPixelAA_Raw_Clipped
 
 GP_ArcSegment
 GP_ArcSegment_Raw
-
-GP_AngleInRange
-GP_NormalizeAngle
-
