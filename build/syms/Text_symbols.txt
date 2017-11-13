@@ -11,6 +11,7 @@ GP_TextClear
 GP_TextMaxWidth
 GP_TextHeight
 GP_TextWidth
+GP_TextLenWidth
 GP_TextDescent
 GP_TextClearStr
 GP_Text

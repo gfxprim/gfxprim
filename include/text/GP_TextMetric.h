@@ -32,6 +32,9 @@
 /*
  * Calculates the width of the string drawn in the given style, in pixels.
  */
+GP_Size GP_TextLenWidth(const GP_TextStyle *style,
+                        const char *str, size_t len);
+
 GP_Size GP_TextWidth(const GP_TextStyle *style, const char *str);
 
 /*

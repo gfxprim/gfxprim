@@ -135,30 +135,39 @@ static const GP_TextStyle *assert_style(const GP_TextStyle *style)
  * not known), so we likely return some more pixels than is needed, but that's
  * the joy of life.
  */
-unsigned int GP_TextWidth(const GP_TextStyle *style, const char *str)
+unsigned int GP_TextLenWidth(const GP_TextStyle *style,
+                             const char *str, size_t len)
 {
-	unsigned int i, len;
+	unsigned int i, ret;
 
 	style = assert_style(style);
 
 	if (str == NULL || str[0] == '\0')
 		return 0;
 
+	if (len == 0)
+		return 0;
+
 	/* special case, one letter */
-	if (str[1] == '\0')
+	if (str[1] == '\0' || len == 1)
 		return glyph_width(style, str[0]);
 
 	/* first letter */
-	len = first_glyph_width(style, str[0]) + style->char_xspace;
+	ret = first_glyph_width(style, str[0]) + style->char_xspace;
 
 	/* middle letters */
-	for (i = 1; str[i+1] != '\0'; i++)
-		len += glyph_advance_x(style, str[i]) + style->char_xspace;
+	for (i = 1; i + 1 < len && str[i+1]; i++)
+		ret += glyph_advance_x(style, str[i]) + style->char_xspace;
 
 	/* last letter */
-	len += last_glyph_width(style, str[i]);
+	ret += last_glyph_width(style, str[i]);
 
-	return len;
+	return ret;
+}
+
+unsigned int GP_TextWidth(const GP_TextStyle *style, const char *str)
+{
+	return GP_TextLenWidth(style, str, SIZE_MAX);
 }
 
 /*
