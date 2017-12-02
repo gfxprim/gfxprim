@@ -82,27 +82,13 @@ void GP_CircleSeg(GP_Pixmap *pixmap, GP_Coord xcenter, GP_Coord ycenter,
 	                 transform_segments(pixmap, seg_flag), pixel);
 }
 
-/*
-#include "algo/FillCircle.algo.h"
-
-GP_DEF_FILL_FN_PER_BPP(GP_FillCircle_Raw, DEF_FILLCIRCLE_FN)
-
-void GP_FillCircle_Raw(GP_Pixmap *pixmap, GP_Coord xcenter, GP_Coord ycenter,
-                       GP_Size r, GP_Pixel pixel)
-{
-	GP_CHECK_PIXMAP(pixmap);
-
-	GP_FN_PER_BPP_PIXMAP(GP_FillCircle_Raw, pixmap, pixmap,
-	                      xcenter, ycenter, r, pixel);
-}
-
-void GP_FillCircle(GP_Pixmap *pixmap, GP_Coord xcenter, GP_Coord ycenter,
-                   GP_Size r, GP_Pixel pixel)
+void GP_FillCircleSeg(GP_Pixmap *pixmap, GP_Coord xcenter, GP_Coord ycenter,
+                      GP_Size r, uint8_t seg_flag, GP_Pixel pixel)
 {
 	GP_CHECK_PIXMAP(pixmap);
 
 	GP_TRANSFORM_POINT(pixmap, xcenter, ycenter);
 
-	GP_FillCircle_Raw(pixmap, xcenter, ycenter, r, pixel);
+	GP_FillCircleSeg_Raw(pixmap, xcenter, ycenter, r,
+	                     transform_segments(pixmap, seg_flag), pixel);
 }
-*/
