@@ -56,6 +56,7 @@ int GP_MatchJPG(const void *buf)
 #ifdef HAVE_JPEG
 
 #include <jpeglib.h>
+#include <jerror.h>
 
 struct my_jpg_err {
 	struct jpeg_error_mgr error_mgr;
@@ -65,8 +66,11 @@ struct my_jpg_err {
 static void my_error_exit(j_common_ptr cinfo)
 {
 	struct my_jpg_err *my_err = (struct my_jpg_err*) cinfo->err;
+	char msg[JMSG_LENGTH_MAX];
 
-	GP_DEBUG(1, "ERROR reading/writing jpeg file");
+	cinfo->err->format_message(cinfo, msg);
+
+	GP_WARN("jpeg lib error: %s", msg);
 
 	longjmp(my_err->setjmp_buf, 1);
 }
@@ -140,6 +144,7 @@ static int load_cmyk(struct jpeg_decompress_struct *cinfo, GP_Pixmap *ret,
 
 struct my_source_mgr {
 	struct jpeg_source_mgr mgr;
+	int start_of_file;
 	void *buffer;
 	size_t size;
 	GP_IO *io;
@@ -158,11 +163,25 @@ static boolean fill_input_buffer(struct jpeg_decompress_struct *cinfo)
 
 	if (ret <= 0) {
 		GP_WARN("Failed to fill buffer, IORead returned %i", ret);
-		return FALSE;
+		if (src->start_of_file)
+			ERREXIT(cinfo, JERR_INPUT_EMPTY);
+
+		/*
+		 * Insert fake EOI so that we proceed with whater has been read
+		 * so far, likely the libjpeg will emit premature end of data
+		 * segment or other kind of error but we may as well happen to
+		 * load slightly corrupted image.
+		 */
+		char *b = src->buffer;
+		b[0] = 0xff;
+		b[1] = JPEG_EOI;
+		ret = 2;
 	}
 
 	src->mgr.next_input_byte = src->buffer;
 	src->mgr.bytes_in_buffer = ret;
+	src->start_of_file = 0;
+
 	return TRUE;
 }
 
@@ -198,6 +217,7 @@ static inline void init_source_mgr(struct my_source_mgr *src, GP_IO *io,
 	src->io = io;
 	src->buffer = buf;
 	src->size = buf_size;
+	src->start_of_file = 1;
 }
 
 #define JPEG_COM_MAX 128
