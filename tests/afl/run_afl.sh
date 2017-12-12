@@ -9,8 +9,8 @@ DATADIR=data/
 OUTDIR=result/
 EXEC="./loaders @@"
 
-for i in $(seq -w 1 $NCPU); do
+for i in $(seq -w 2 $NCPU); do
 	afl-fuzz -i "$DATADIR" -o "$OUTDIR" -S fuzzer$i $EXEC > /dev/null&
 done
 
-afl-fuzz -i "$DATADIR" -o "$OUTDIR" -M fuzzer00 $EXEC
+afl-fuzz -i "$DATADIR" -o "$OUTDIR" -M fuzzer01 $EXEC
