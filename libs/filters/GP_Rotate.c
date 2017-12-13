@@ -21,16 +21,14 @@
  *****************************************************************************/
 
 #include <errno.h>
-
-#include "core/GP_Core.h"
-#include "core/GP_FnPerBpp.h"
-
-#include "filters/GP_Rotate.h"
-
 #include <string.h>
 
-int GP_FilterMirrorV_Raw(const GP_Pixmap *src, GP_Pixmap *dst,
-                         GP_ProgressCallback *callback)
+#include <core/GP_Core.h>
+#include <core/GP_FnPerBpp.h>
+#include <filters/GP_Rotate.h>
+
+int gp_filter_mirror_v_raw(const gp_pixmap *src, gp_pixmap *dst,
+                           gp_progress_cb *callback)
 {
 	uint32_t bpr = src->bytes_per_row;
 	uint8_t  buf[bpr];
@@ -51,7 +49,7 @@ int GP_FilterMirrorV_Raw(const GP_Pixmap *src, GP_Pixmap *dst,
 		memcpy(dl1, sl2, bpr);
 		memcpy(dl2, buf, bpr);
 
-		if (GP_ProgressCallbackReport(callback, 2 * y, src->h, src->w)) {
+		if (gp_progress_cb_report(callback, 2 * y, src->h, src->w)) {
 			GP_DEBUG(1, "Operation aborted");
 			errno = ECANCELED;
 			return 1;
@@ -68,12 +66,12 @@ int GP_FilterMirrorV_Raw(const GP_Pixmap *src, GP_Pixmap *dst,
 		memcpy(dl, sl, bpr);
 	}
 
-	GP_ProgressCallbackDone(callback);
+	gp_progress_cb_done(callback);
 	return 0;
 }
 
-int GP_FilterMirrorV(const GP_Pixmap *src, GP_Pixmap *dst,
-                     GP_ProgressCallback *callback)
+int gp_filter_mirror_v(const gp_pixmap *src, gp_pixmap *dst,
+                       gp_progress_cb *callback)
 {
 	GP_ASSERT(src->pixel_type == dst->pixel_type,
 		  "The src and dst pixel types must match");
@@ -81,24 +79,24 @@ int GP_FilterMirrorV(const GP_Pixmap *src, GP_Pixmap *dst,
 	GP_ASSERT(src->w <= dst->w && src->h <= dst->h,
 	          "Destination is not large enough");
 
-	if (GP_FilterMirrorV_Raw(src, dst, callback))
+	if (gp_filter_mirror_v_raw(src, dst, callback))
 		return 1;
 
 	return 0;
 }
 
-GP_Pixmap *GP_FilterMirrorVAlloc(const GP_Pixmap *src,
-                                   GP_ProgressCallback *callback)
+gp_pixmap *gp_filter_mirror_v_alloc(const gp_pixmap *src,
+                                    gp_progress_cb *callback)
 {
-	GP_Pixmap *res;
+	gp_pixmap *res;
 
-	res = GP_PixmapCopy(src, 0);
+	res = gp_pixmap_copy(src, 0);
 
 	if (res == NULL)
 		return NULL;
 
-	if (GP_FilterMirrorV_Raw(src, res, callback)) {
-		GP_PixmapFree(res);
+	if (gp_filter_mirror_v_raw(src, res, callback)) {
+		gp_pixmap_free(res);
 		return NULL;
 	}
 
@@ -114,9 +112,9 @@ static const char *symmetry_names[] = {
 	NULL,
 };
 
-const char **GP_FilterSymmetryNames = symmetry_names;
+const char **gp_filter_symmetry_names = symmetry_names;
 
-int GP_FilterSymmetryByName(const char *symmetry)
+int gp_filter_symmetry_by_name(const char *symmetry)
 {
 	int i;
 
@@ -127,42 +125,42 @@ int GP_FilterSymmetryByName(const char *symmetry)
 	return -1;
 }
 
-GP_Pixmap *GP_FilterSymmetryAlloc(const GP_Pixmap *src,
-                                    GP_FilterSymmetries symmetry,
-			            GP_ProgressCallback *callback)
+gp_pixmap *gp_filter_symmetry_alloc(const gp_pixmap *src,
+                                    gp_filter_symmetries symmetry,
+			            gp_progress_cb *callback)
 {
 	switch (symmetry) {
 	case GP_ROTATE_90:
-		return GP_FilterRotate90Alloc(src, callback);
+		return gp_filter_rotate_90_alloc(src, callback);
 	case GP_ROTATE_180:
-		return GP_FilterRotate180Alloc(src, callback);
+		return gp_filter_rotate_180_alloc(src, callback);
 	case GP_ROTATE_270:
-		return GP_FilterRotate270Alloc(src, callback);
+		return gp_filter_rotate_270_alloc(src, callback);
 	case GP_MIRROR_H:
-		return GP_FilterMirrorHAlloc(src, callback);
+		return gp_filter_mirror_h_alloc(src, callback);
 	case GP_MIRROR_V:
-		return GP_FilterMirrorVAlloc(src, callback);
+		return gp_filter_mirror_v_alloc(src, callback);
 	default:
 		GP_DEBUG(1, "Invalid symmetry %i", (int) symmetry);
 		return NULL;
 	}
 }
 
-int GP_FilterSymmetry(const GP_Pixmap *src, GP_Pixmap *dst,
-                      GP_FilterSymmetries symmetry,
-                      GP_ProgressCallback *callback)
+int gp_filter_symmetry(const gp_pixmap *src, gp_pixmap *dst,
+                       gp_filter_symmetries symmetry,
+                       gp_progress_cb *callback)
 {
 	switch (symmetry) {
 	case GP_ROTATE_90:
-		return GP_FilterRotate90(src, dst, callback);
+		return gp_filter_rotate_90(src, dst, callback);
 	case GP_ROTATE_180:
-		return GP_FilterRotate180(src, dst, callback);
+		return gp_filter_rotate_180(src, dst, callback);
 	case GP_ROTATE_270:
-		return GP_FilterRotate270(src, dst, callback);
+		return gp_filter_rotate_270(src, dst, callback);
 	case GP_MIRROR_H:
-		return GP_FilterMirrorH(src, dst, callback);
+		return gp_filter_mirror_h(src, dst, callback);
 	case GP_MIRROR_V:
-		return GP_FilterMirrorV(src, dst, callback);
+		return gp_filter_mirror_v(src, dst, callback);
 	default:
 		GP_DEBUG(1, "Invalid symmetry %i", (int) symmetry);
 		return 1;

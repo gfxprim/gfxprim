@@ -22,7 +22,7 @@
 
  /*
 
-   I/O abstraction for GFXprim loaders.
+   I/O abstraction for gfxprim loaders.
 
   */
 
@@ -35,121 +35,108 @@
 /*
  * Values are 1:1 with constants passed to lseek()
  */
-enum GP_IOWhence {
+enum gp_io_whence {
 	GP_IO_SEEK_SET = 0,
 	GP_IO_SEEK_CUR = 1,
 	GP_IO_SEEK_END = 2,
 };
 
-typedef struct GP_IO {
-	ssize_t (*Read)(struct GP_IO *self, void *buf, size_t size);
-	ssize_t (*Write)(struct GP_IO *self, void *buf, size_t size);
-	off_t (*Seek)(struct GP_IO *self, off_t off, enum GP_IOWhence whence);
-	int (*Close)(struct GP_IO *self);
+typedef struct gp_io gp_io;
 
-//	void *(*Map)(struct GP_IO *self, size_t len, off_t off);
-//	void (*UnMap)(struct GP_IO *self, void *addr, size_t len);
+struct gp_io {
+	ssize_t (*read)(gp_io *self, void *buf, size_t size);
+	ssize_t (*write)(gp_io *self, void *buf, size_t size);
+	off_t (*seek)(gp_io *self, off_t off, enum gp_io_whence whence);
+	int (*close)(gp_io *self);
 
 	off_t mark;
 	char priv[];
-} GP_IO;
+};
 
 #define GP_IO_PRIV(io) ((void *)(io)->priv)
 
 /*
  * Just inline wrappers.
  */
-static inline ssize_t GP_IORead(GP_IO *io, void *buf, size_t size)
+static inline ssize_t gp_io_read(gp_io *io, void *buf, size_t size)
 {
-	return io->Read(io, buf, size);
+	return io->read(io, buf, size);
 }
 
-static inline ssize_t GP_IOWrite(GP_IO *io, void *buf, size_t size)
+static inline ssize_t gp_io_write(gp_io *io, void *buf, size_t size)
 {
-	return io->Write(io, buf, size);
+	return io->write(io, buf, size);
 }
 
-static inline int GP_IOClose(GP_IO *io)
+static inline int gp_io_close(gp_io *io)
 {
-	return io->Close(io);
+	return io->close(io);
 }
 
-static inline off_t GP_IOSeek(GP_IO *io, off_t off, enum GP_IOWhence whence)
+static inline off_t gp_io_seek(gp_io *io, off_t off, enum gp_io_whence whence)
 {
-	return io->Seek(io, off, whence);
+	return io->seek(io, off, whence);
 }
 
 /*
  * PutC returns zero on success, non-zero on failure.
  */
-static inline int GP_IOPutC(GP_IO *io, char c)
+static inline int gp_io_putc(gp_io *io, char c)
 {
-	return io->Write(io, &c, 1) != 1;
+	return io->write(io, &c, 1) != 1;
 }
-
-//static inline void *GP_IOMap(GP_IO *io, size_t len, off_t off)
-//{
-//	return io->Map(io, len, off);
-//}
-
-//static inline void *GP_IOUnMap(GP_IO *io, size_t len, off_t off)
-//{
-//	return io->UnMap(io, len, off);
-//}
 
 /*
  * Returns current offset
  */
-static inline off_t GP_IOTell(GP_IO *io)
+static inline off_t gp_io_tell(gp_io *io)
 {
-	return io->Seek(io, 0, GP_IO_SEEK_CUR);
+	return io->seek(io, 0, GP_IO_SEEK_CUR);
 }
 
 /*
  * Rewinds to start of the I/O stream.
  */
-static inline off_t GP_IORewind(GP_IO *io)
+static inline off_t gp_io_rewind(gp_io *io)
 {
-	return io->Seek(io, 0, GP_IO_SEEK_SET);
+	return io->seek(io, 0, GP_IO_SEEK_SET);
 }
 
 /*
  * Returns I/O stream size.
  *
- * May return (off_t)-1 in case that GP_IO_SEEK_END is not possible.
+ * May return (off_t)-1 in case that gp_io_SEEK_END is not possible.
  */
-off_t GP_IOSize(GP_IO *io);
+off_t gp_io_size(gp_io *io);
 
 /*
  * Like a Read but either fills whole buffer or returns error.
  *
  * Returns zero on success non-zero on failure.
  */
-int GP_IOFill(GP_IO *io, void *buf, size_t size);
+int gp_io_fill(gp_io *io, void *buf, size_t size);
 
 /*
  * Like Write but either writes whole buffer or retuns error.
  *
  * Returns zero on succes non-zero on failure.
  */
-int GP_IOFlush(GP_IO *io, void *buf, size_t size);
+int gp_io_flush(gp_io *io, void *buf, size_t size);
 
 /*
  * Marks a current position, returns to mark in I/O stream.
  */
-enum GP_IOMarkTypes {
+enum gp_io_mark_types {
 	GP_IO_MARK,
 	GP_IO_REWIND,
 };
 
-int GP_IOMark(GP_IO *self, enum GP_IOMarkTypes type);
+int gp_io_mark(gp_io *self, enum gp_io_mark_types type);
 
 /*
  * Formatted read.
- *
- *
  */
-enum GP_IOFTypes {
+enum gp_io_fmt_types {
 	/* Constant byte in lower half */
 	GP_IO_CONST = 0x0000,
 	/* Pointer to one byte */
@@ -186,26 +173,26 @@ enum GP_IOFTypes {
 
 #define GP_IO_TYPE_MASK 0xff00
 
-int GP_IOReadF(GP_IO *self, uint16_t *types, ...);
+int gp_io_readf(gp_io *self, uint16_t *types, ...);
 
-int GP_IOWriteF(GP_IO *self, uint16_t *types, ...);
+int gp_io_writef(gp_io *self, uint16_t *types, ...);
 
 /*
  * Printf like function.
  *
  * Returns zero on success, non-zero on failure.
  */
-int GP_IOPrintF(GP_IO *self, const char *fmt, ...)
+int gp_io_printf(gp_io *self, const char *fmt, ...)
     __attribute__ ((format (printf, 2, 3)));
 
 /*
- * GP_IOReadF wrappers for convinient reading of single value
+ * gp_io_readf wrappers for convinient reading of single value
  */
-int GP_IOReadB4(GP_IO *io, uint32_t *val);
+int gp_io_read_b4(gp_io *io, uint32_t *val);
 
-int GP_IOReadB2(GP_IO *io, uint16_t *val);
+int gp_io_read_b2(gp_io *io, uint16_t *val);
 
-enum GP_IOFileMode {
+enum gp_io_file_mode {
 	GP_IO_RDONLY = 0x00,
 	GP_IO_WRONLY = 0x01,
 	GP_IO_RDWR = 0x02,
@@ -214,33 +201,33 @@ enum GP_IOFileMode {
 /*
  * Creates I/O from a file. On error NULL is returned and errno is set.
  */
-GP_IO *GP_IOFile(const char *path, enum GP_IOFileMode mode);
+gp_io *gp_io_file(const char *path, enum gp_io_file_mode mode);
 
 /*
  * Creates I/O from a memory buffer.
  *
- * If free is not NULL, it's called on buf pointer on GP_IOClose().
+ * If free is not NULL, it's called on buf pointer on gp_ioClose().
  */
-GP_IO *GP_IOMem(void *buf, size_t size, void (*free)(void *));
+gp_io *gp_io_mem(void *buf, size_t size, void (*free)(void *));
 
 /*
  * Create a sub I/O from an I/O.
  *
  * The sub I/O starts at current offset in the parent I/O (which is also point
- * where GP_IOTell() for the new I/O will return zero) and continues for
+ * where gp_ioTell() for the new I/O will return zero) and continues for
  * maximally size bytes in the parent I/O. Reads at the end of the Sub I/O will
  * be truncated to the.
  *
  * WARNING: If you combine reading/writing in the Sub I/O and parent I/O the
  *          result is undefined.
  */
-GP_IO *GP_IOSubIO(GP_IO *pio, size_t size);
+gp_io *gp_io_sub_io(gp_io *pio, size_t size);
 
 /*
  * Creates a writeable buffered I/O on the top of the existing I/O.
  *
  * Passing zero as bsize select default buffer size.
  */
-GP_IO *GP_IOWBuffer(GP_IO *pio, size_t bsize);
+gp_io *gp_io_wbuffer(gp_io *pio, size_t bsize);
 
-#endif /* LOADERS_GP_IO_H */
+#endif /* LOADERS_gp_io_H */

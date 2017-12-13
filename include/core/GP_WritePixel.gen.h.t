@@ -13,9 +13,9 @@
 
 @ for ps in pixelsizes:
 @     if ps.needs_bit_endian():
-void GP_WritePixels_{{ ps.suffix }}(void *start, uint8_t off,
+void gp_write_pixels_{{ ps.suffix }}(void *start, uint8_t off,
                             size_t cnt, unsigned int val);
 
 @     else:
-void GP_WritePixels_{{ ps.suffix }}(void *start, size_t cnt, unsigned int val);
+void gp_write_pixels_{{ ps.suffix }}(void *start, size_t cnt, unsigned int val);
 

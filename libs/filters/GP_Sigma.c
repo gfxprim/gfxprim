@@ -21,27 +21,24 @@
  *****************************************************************************/
 
 #include <errno.h>
-
-#include "core/GP_Pixmap.h"
-#include "core/GP_GetPutPixel.h"
-#include "core/GP_TempAlloc.h"
-#include "core/GP_Clamp.h"
-#include "core/GP_Common.h"
-
-#include "core/GP_Debug.h"
-
-#include "GP_Sigma.h"
-
 #include <string.h>
 
-static int GP_FilterSigma_Raw(const GP_Pixmap *src,
-                              GP_Coord x_src, GP_Coord y_src,
-                              GP_Size w_src, GP_Size h_src,
-                              GP_Pixmap *dst,
-                              GP_Coord x_dst, GP_Coord y_dst,
-                              int xrad, int yrad,
-                              unsigned int min, float sigma,
-                              GP_ProgressCallback *callback)
+#include <core/GP_Pixmap.h>
+#include <core/GP_GetPutPixel.h>
+#include <core/GP_TempAlloc.h>
+#include <core/GP_Clamp.h>
+#include <core/GP_Common.h>
+#include <core/GP_Debug.h>
+#include <filters/GP_Sigma.h>
+
+static int gp_filter_sigma_raw(const gp_pixmap *src,
+                               gp_coord x_src, gp_coord y_src,
+                               gp_size w_src, gp_size h_src,
+                               gp_pixmap *dst,
+                               gp_coord x_dst, gp_coord y_dst,
+                               int xrad, int yrad,
+                               unsigned int min, float sigma,
+                               gp_progress_cb *callback)
 {
 	int x, y;
 	unsigned int x1, y1;
@@ -64,11 +61,11 @@ static int GP_FilterSigma_Raw(const GP_Pixmap *src,
 	unsigned int w = w_src + xdiam; 
 	unsigned int size = w * ydiam;
 
-	GP_TempAllocCreate(temp, 3 * size * sizeof(unsigned int));
+	gp_temp_alloc_create(temp, 3 * size * sizeof(unsigned int));
 
-	unsigned int *R = GP_TempAllocGet(temp, size * sizeof(unsigned int));
-	unsigned int *G = GP_TempAllocGet(temp, size * sizeof(unsigned int));
-	unsigned int *B = GP_TempAllocGet(temp, size * sizeof(unsigned int));
+	unsigned int *R = gp_temp_alloc_get(temp, size * sizeof(unsigned int));
+	unsigned int *G = gp_temp_alloc_get(temp, size * sizeof(unsigned int));
+	unsigned int *B = gp_temp_alloc_get(temp, size * sizeof(unsigned int));
 
 	/* prefil the sampled array */
 	for (x = 0; x < (int)w; x++) {
@@ -77,11 +74,11 @@ static int GP_FilterSigma_Raw(const GP_Pixmap *src,
 		for (y = 0; y < (int)ydiam; y++) {
 			int yi = GP_CLAMP(y_src + y - yrad, 0, (int)src->h - 1);
 
-			GP_Pixel pix = GP_GetPixel_Raw_24BPP(src, xi, yi);
+			gp_pixel pix = gp_getpixel_raw_24BPP(src, xi, yi);
 
-			R[y * w + x] = GP_Pixel_GET_R_RGB888(pix);
-			G[y * w + x] = GP_Pixel_GET_G_RGB888(pix);
-			B[y * w + x] = GP_Pixel_GET_B_RGB888(pix);
+			R[y * w + x] = GP_PIXEL_GET_R_RGB888(pix);
+			G[y * w + x] = GP_PIXEL_GET_G_RGB888(pix);
+			B[y * w + x] = GP_PIXEL_GET_B_RGB888(pix);
 		}
 	}
 
@@ -175,8 +172,8 @@ static int GP_FilterSigma_Raw(const GP_Pixmap *src,
 			else
 				b = B_sum / cnt;
 
-			GP_PutPixel_Raw_24BPP(dst, x_dst + x, y_dst + y,
-			                      GP_Pixel_CREATE_RGB888(r, g, b));
+			gp_putpixel_raw_24BPP(dst, x_dst + x, y_dst + y,
+			                      GP_PIXEL_CREATE_RGB888(r, g, b));
 		}
 
 		int yi = GP_CLAMP(y_src + y + yrad + 1, 0, (int)src->h - 1);
@@ -184,71 +181,71 @@ static int GP_FilterSigma_Raw(const GP_Pixmap *src,
 		for (x = 0; x < (int)w; x++) {
 			int xi = GP_CLAMP(x_src + x - xrad, 0, (int)src->w - 1);
 
-			GP_Pixel pix = GP_GetPixel_Raw_24BPP(src, xi, yi);
+			gp_pixel pix = gp_getpixel_raw_24BPP(src, xi, yi);
 
-			R[yl * w + x] = GP_Pixel_GET_R_RGB888(pix);
-			G[yl * w + x] = GP_Pixel_GET_G_RGB888(pix);
-			B[yl * w + x] = GP_Pixel_GET_B_RGB888(pix);
+			R[yl * w + x] = GP_PIXEL_GET_R_RGB888(pix);
+			G[yl * w + x] = GP_PIXEL_GET_G_RGB888(pix);
+			B[yl * w + x] = GP_PIXEL_GET_B_RGB888(pix);
 		}
 
 		yc = (yc+1) % ydiam;
 		yl = (yl+1) % ydiam;
 
-		if (GP_ProgressCallbackReport(callback, y, h_src, w_src)) {
-			GP_TempAllocFree(temp);
+		if (gp_progress_cb_report(callback, y, h_src, w_src)) {
+			gp_temp_alloc_free(temp);
 			return 1;
 		}
 	}
 
-	GP_TempAllocFree(temp);
-	GP_ProgressCallbackDone(callback);
+	gp_temp_alloc_free(temp);
+	gp_progress_cb_done(callback);
 
 	return 0;
 }
 
-int GP_FilterSigmaEx(const GP_Pixmap *src,
-                     GP_Coord x_src, GP_Coord y_src,
-                     GP_Size w_src, GP_Size h_src,
-                     GP_Pixmap *dst,
-                     GP_Coord x_dst, GP_Coord y_dst,
-                     int xrad, int yrad,
-                     unsigned int min, float sigma,
-		     GP_ProgressCallback *callback)
+int gp_filter_sigma_ex(const gp_pixmap *src,
+                       gp_coord x_src, gp_coord y_src,
+                       gp_size w_src, gp_size h_src,
+                       gp_pixmap *dst,
+                       gp_coord x_dst, gp_coord y_dst,
+                       int xrad, int yrad,
+                       unsigned int min, float sigma,
+                       gp_progress_cb *callback)
 {
 	GP_CHECK(src->pixel_type == dst->pixel_type);
 
 	/* Check that destination is large enough */
-	GP_CHECK(x_dst + (GP_Coord)w_src <= (GP_Coord)dst->w);
-	GP_CHECK(y_dst + (GP_Coord)h_src <= (GP_Coord)dst->h);
+	GP_CHECK(x_dst + (gp_coord)w_src <= (gp_coord)dst->w);
+	GP_CHECK(y_dst + (gp_coord)h_src <= (gp_coord)dst->h);
 
 	GP_CHECK(xrad >= 0 && yrad >= 0);
 
-	return GP_FilterSigma_Raw(src, x_src, y_src, w_src, h_src,
-	                          dst, x_dst, y_dst, xrad, yrad, min, sigma,
-	                          callback);
+	return gp_filter_sigma_raw(src, x_src, y_src, w_src, h_src,
+	                           dst, x_dst, y_dst, xrad, yrad, min, sigma,
+	                           callback);
 }
 
-GP_Pixmap *GP_FilterSigmaExAlloc(const GP_Pixmap *src,
-                                  GP_Coord x_src, GP_Coord y_src,
-                                  GP_Size w_src, GP_Size h_src,
-                                  int xrad, int yrad,
-                                  unsigned int min, float sigma,
-                                  GP_ProgressCallback *callback)
+gp_pixmap *gp_filter_sigma_ex_alloc(const gp_pixmap *src,
+                                    gp_coord x_src, gp_coord y_src,
+                                    gp_size w_src, gp_size h_src,
+                                    int xrad, int yrad,
+                                    unsigned int min, float sigma,
+                                    gp_progress_cb *callback)
 {
 	int ret;
 
 	GP_CHECK(xrad >= 0 && yrad >= 0);
 
-	GP_Pixmap *dst = GP_PixmapAlloc(w_src, h_src, src->pixel_type);
+	gp_pixmap *dst = gp_pixmap_alloc(w_src, h_src, src->pixel_type);
 
 	if (dst == NULL)
 		return NULL;
 
-	ret = GP_FilterSigma_Raw(src, x_src, y_src, w_src, h_src,
-	                         dst, 0, 0, xrad, yrad, min, sigma, callback);
+	ret = gp_filter_sigma_raw(src, x_src, y_src, w_src, h_src,
+	                          dst, 0, 0, xrad, yrad, min, sigma, callback);
 
 	if (ret) {
-		GP_PixmapFree(dst);
+		gp_pixmap_free(dst);
 		return NULL;
 	}
 

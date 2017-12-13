@@ -7,7 +7,7 @@ import gfxprim.loaders as loaders
 import gfxprim.filters as filters
 
 def progress_callback1(perc):
-    sys.stdout.write("\rLoading %3.2f%%" % perc)
+    sys.stdout.write("\rloading %3.2f%%" % perc)
     sys.stdout.flush()
     return 0
 
@@ -22,7 +22,7 @@ def main():
         sys.exit(1)
 
     try:
-       img = loaders.Load(sys.argv[1], progress_callback1)
+       img = loaders.load(sys.argv[1], progress_callback1)
        print('')
     except OSError as detail:
        print("Failed to load image '%s': %s" % (sys.argv[1], detail))
@@ -30,7 +30,7 @@ def main():
 
     try:
         callback = (progress_callback2, "Gaussian Blur")
-        img = img.filters.GaussianBlurAlloc(50, 50, callback)
+        img = img.filters.gaussian_blur_alloc(50, 50, callback)
         print('')
     except OSError:
         print("Filter Aborted")

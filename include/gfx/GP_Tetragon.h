@@ -30,22 +30,22 @@
 
 /* Tetragon */
 
-void GP_Tetragon(GP_Pixmap *pixmap, GP_Coord x0, GP_Coord y0,
-                 GP_Coord x1, GP_Coord y1, GP_Coord x2, GP_Coord y2,
-                 GP_Coord x3, GP_Coord y3, GP_Pixel pixel);
+void gp_tetragon(gp_pixmap *pixmap, gp_coord x0, gp_coord y0,
+                 gp_coord x1, gp_coord y1, gp_coord x2, gp_coord y2,
+                 gp_coord x3, gp_coord y3, gp_pixel pixel);
 
-void GP_Tetragon_Raw(GP_Pixmap *pixmap, GP_Coord x0, GP_Coord y0,
-                     GP_Coord x1, GP_Coord y1, GP_Coord x2, GP_Coord y2,
-                     GP_Coord x3, GP_Coord y3, GP_Pixel pixel);
+void gp_tetragon_raw(gp_pixmap *pixmap, gp_coord x0, gp_coord y0,
+                     gp_coord x1, gp_coord y1, gp_coord x2, gp_coord y2,
+                     gp_coord x3, gp_coord y3, gp_pixel pixel);
 
 /* Filled Tetragon */
 
-void GP_FillTetragon(GP_Pixmap *pixmap, GP_Coord x0, GP_Coord y0,
-                     GP_Coord x1, GP_Coord y1, GP_Coord x2, GP_Coord y2,
-		     GP_Coord x3, GP_Coord y3, GP_Pixel pixel);
+void gp_fill_tetragon(gp_pixmap *pixmap, gp_coord x0, gp_coord y0,
+                      gp_coord x1, gp_coord y1, gp_coord x2, gp_coord y2,
+		      gp_coord x3, gp_coord y3, gp_pixel pixel);
 
-void GP_FillTetragon_Raw(GP_Pixmap *pixmap, GP_Coord x0, GP_Coord y0,
-                         GP_Coord x1, GP_Coord y1, GP_Coord x2, GP_Coord y2,
-                         GP_Coord x3, GP_Coord y3, GP_Pixel pixel);
+void gp_fill_tetragon_raw(gp_pixmap *pixmap, gp_coord x0, gp_coord y0,
+                          gp_coord x1, gp_coord y1, gp_coord x2, gp_coord y2,
+                          gp_coord x3, gp_coord y3, gp_pixel pixel);
 
 #endif /* GP_TETRAGON_H */

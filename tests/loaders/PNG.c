@@ -32,11 +32,11 @@
 
 static int test_load_PNG(const char *path)
 {
-	GP_Pixmap *img;
+	gp_pixmap *img;
 
 	errno = 0;
 
-	img = GP_LoadPNG(path, NULL);
+	img = gp_load_png(path, NULL);
 
 	if (img == NULL) {
 		switch (errno) {
@@ -53,23 +53,23 @@ static int test_load_PNG(const char *path)
 	 * TODO: check correct data.
 	 */
 
-	GP_PixmapFree(img);
+	gp_pixmap_free(img);
 
 	return TST_SUCCESS;
 }
 
 struct check_color_test {
 	const char *path;
-	GP_Pixel pixel;
+	gp_pixel pixel;
 };
 
 static int test_load_PNG_check_color(struct check_color_test *test)
 {
-	GP_Pixmap *img;
+	gp_pixmap *img;
 
 	errno = 0;
 
-	img = GP_LoadPNG(test->path, NULL);
+	img = gp_load_png(test->path, NULL);
 
 	if (img == NULL) {
 		switch (errno) {
@@ -86,7 +86,7 @@ static int test_load_PNG_check_color(struct check_color_test *test)
 
 	for (x = 0; x < img->w; x++) {
 		for (y = 0; y < img->w; y++) {
-			GP_Pixel p = GP_GetPixel(img, x, y);
+			gp_pixel p = gp_getpixel(img, x, y);
 
 			if (p != test->pixel) {
 				if (!fail)
@@ -100,7 +100,7 @@ static int test_load_PNG_check_color(struct check_color_test *test)
 	if (!fail)
 		tst_msg("Pixmap pixels are correct");
 
-	GP_PixmapFree(img);
+	gp_pixmap_free(img);
 
 	if (fail)
 		return TST_FAILED;
@@ -123,12 +123,12 @@ static struct check_color_test red = {
 	.pixel = 0xff0000,
 };
 
-static int test_save_PNG(GP_PixelType pixel_type)
+static int test_save_PNG(gp_pixel_type pixel_type)
 {
-	GP_Pixmap *pixmap;
+	gp_pixmap *pixmap;
 	int ret;
 
-	pixmap = GP_PixmapAlloc(100, 100, pixel_type);
+	pixmap = gp_pixmap_alloc(100, 100, pixel_type);
 
 	if (pixmap == NULL) {
 		tst_msg("Failed to allocate pixmap");
@@ -137,22 +137,22 @@ static int test_save_PNG(GP_PixelType pixel_type)
 
 	errno = 0;
 
-	ret = GP_SavePNG(pixmap, "/dev/null", NULL);
+	ret = gp_save_png(pixmap, "/dev/null", NULL);
 
 	if (ret == 0) {
 		tst_msg("Saved successfully");
-		GP_PixmapFree(pixmap);
+		gp_pixmap_free(pixmap);
 		return TST_SUCCESS;
 	}
 
 	switch (errno) {
 	case ENOSYS:
 		tst_msg("Not Implemented");
-		GP_PixmapFree(pixmap);
+		gp_pixmap_free(pixmap);
 		return TST_SKIPPED;
 	default:
 		tst_msg("Failed and errno is not ENOSYS (%i)", errno);
-		GP_PixmapFree(pixmap);
+		gp_pixmap_free(pixmap);
 		return TST_FAILED;
 	}
 }

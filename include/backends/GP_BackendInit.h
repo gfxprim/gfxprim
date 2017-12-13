@@ -48,6 +48,6 @@
  *
  * If help is passed as a backend name a help is printed into the stderr.
  */
-GP_Backend *GP_BackendInit(const char *params, const char *caption);
+gp_backend *gp_backend_init(const char *params, const char *caption);
 
 #endif /* BACKENDS_GP_BACKEND_INIT_H */

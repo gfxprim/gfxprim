@@ -31,24 +31,24 @@
 #include "algo/Arc.algo.h"
 
 /* Generate drawing functions for various bit depths. */
-GP_DEF_DRAW_FN_PER_BPP(GP_ArcSegment_Raw, DEF_ARCSEGMENT_FN)
+GP_DEF_DRAW_FN_PER_BPP(gp_arc_segment_raw, DEF_ARCSEGMENT_FN)
 
-void GP_ArcSegment_Raw(GP_Pixmap *pixmap, GP_Coord xcenter, GP_Coord ycenter,
-		GP_Size a, GP_Size b, int direction,
-		double start, double end,
-		GP_Pixel pixel)
+void gp_arc_segment_raw(gp_pixmap *pixmap, gp_coord xcenter, gp_coord ycenter,
+		        gp_size a, gp_size b, int direction,
+		        double start, double end,
+		        gp_pixel pixel)
 {
 	GP_CHECK_PIXMAP(pixmap);
 
-	GP_FN_PER_BPP_PIXMAP(GP_ArcSegment_Raw, pixmap, pixmap,
-	                      xcenter, ycenter, a, b, direction,
-	                      start, end, pixel);
+	GP_FN_PER_BPP_PIXMAP(gp_arc_segment_raw, pixmap, pixmap,
+	                     xcenter, ycenter, a, b, direction,
+	                     start, end, pixel);
 }
 
-void GP_ArcSegment(GP_Pixmap *pixmap, GP_Coord xcenter, GP_Coord ycenter,
-		GP_Size a, GP_Size b, int direction,
-		double start, double end,
-		GP_Pixel pixel)
+void gp_arc_segment(gp_pixmap *pixmap, gp_coord xcenter, gp_coord ycenter,
+		    gp_size a, gp_size b, int direction,
+		    double start, double end,
+		    gp_pixel pixel)
 {
 	GP_CHECK_PIXMAP(pixmap);
 
@@ -56,6 +56,6 @@ void GP_ArcSegment(GP_Pixmap *pixmap, GP_Coord xcenter, GP_Coord ycenter,
 	GP_TRANSFORM_POINT(pixmap, xcenter, ycenter);
 	GP_TRANSFORM_SWAP(pixmap, a, b);
 
-	GP_ArcSegment_Raw(pixmap, xcenter, ycenter, a, b, direction,
-			start, end, pixel);
+	gp_arc_segment_raw(pixmap, xcenter, ycenter, a, b, direction,
+			   start, end, pixel);
 }

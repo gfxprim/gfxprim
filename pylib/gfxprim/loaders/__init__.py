@@ -1,8 +1,8 @@
 from . import c_loaders
 
-def Load(filename, callback=None):
+def load(filename, callback=None):
   "Load image from given file, guessing the type."
-  c = c_loaders.GP_LoadImage(filename, callback)
+  c = c_loaders.gp_load_image(filename, callback)
   return c
 
 def _init(module):
@@ -18,90 +18,90 @@ def _init(module):
   _pixmap._submodules['loaders'] = LoadersSubmodule
 
   @extend(LoadersSubmodule)
-  def Save(self, filename, callback=None):
+  def save(self, filename, callback=None):
     """Save the image, guessing the type from the extension.
 
     Generally, not all pixel types work with all formats.
     """
-    c_loaders.GP_SaveImage(self.ctx, filename, callback)
+    c_loaders.gp_save_image(self.ctx, filename, callback)
 
   @extend(LoadersSubmodule)
-  def SavePNG(self, filename, callback=None):
+  def save_png(self, filename, callback=None):
     """Save the image as PNG.
 
     Generally, not all pixel types work with all formats.
     """
-    c_loaders.GP_SavePNG(self.ctx, filename, callback)
+    c_loaders.gp_save_png(self.ctx, filename, callback)
 
   @extend(LoadersSubmodule)
-  def SaveJPG(self, filename, callback=None):
+  def save_jpg(self, filename, callback=None):
     """Save the image as JPEG.
 
     Generally, not all pixel types work with all formats.
     """
-    c_loaders.GP_SaveJPG(self.ctx, filename, callback)
+    c_loaders.gp_save_jpg(self.ctx, filename, callback)
 
   @extend(LoadersSubmodule)
-  def SaveBMP(self, filename, callback=None):
+  def save_bmp(self, filename, callback=None):
     """Save the image as BMP.
 
     Generally, not all pixel types work with all formats.
     """
-    c_loaders.GP_SaveBMP(self.ctx, filename, callback)
+    c_loaders.gp_save_bmp(self.ctx, filename, callback)
 
   @extend(LoadersSubmodule)
-  def SavePBM(self, filename, callback=None):
+  def save_pbm(self, filename, callback=None):
     """Save the image as PBM.
 
     Generally, not all pixel types work with all formats.
     """
-    c_loaders.GP_SavePBM(self.ctx, filename, callback)
+    c_loaders.gp_save_pbm(self.ctx, filename, callback)
 
   @extend(LoadersSubmodule)
-  def SavePGM(self, filename, callback=None):
+  def save_pgm(self, filename, callback=None):
     """Save the image as PGM.
 
     Generally, not all pixel types work with all formats.
     """
-    c_loaders.GP_SavePGM(self.ctx, filename, callback)
+    c_loaders.gp_save_pgm(self.ctx, filename, callback)
 
   @extend(LoadersSubmodule)
-  def SavePPM(self, filename, callback=None):
+  def save_ppm(self, filename, callback=None):
     """Save the image as PPM.
 
     Generally, not all pixel types work with all formats.
     """
-    c_loaders.GP_SavePPM(self.ctx, filename, callback)
+    c_loaders.gp_save_ppm(self.ctx, filename, callback)
 
   @extend(LoadersSubmodule)
-  def SavePNM(self, filename, callback=None):
+  def save_pnm(self, filename, callback=None):
     """Save the image as PNM.
 
     Generally, not all pixel types work with all formats.
     """
-    c_loaders.GP_SavePNM(self.ctx, filename, callback)
+    c_loaders.gp_save_pnm(self.ctx, filename, callback)
 
   @extend(LoadersSubmodule)
-  def SaveTIFF(self, filename, callback=None):
+  def save_tiff(self, filename, callback=None):
     """Save the image as TIFF.
 
     Generally, not all pixel types work with all formats.
     """
-    c_loaders.GP_SaveTIFF(self.ctx, filename, callback)
+    c_loaders.gp_save_tiff(self.ctx, filename, callback)
 
   # Imports from the SWIG module
   import re
-  def strip_GP(s):
-    return re.sub('^GP_', '', s)
+  def strip_gp(s):
+    return re.sub('^gp_|^GP_', '', s)
 
   # Import functions from the SWIG module
   from ..utils import import_members
-  import_members(c_loaders, module, sub=strip_GP,
+  import_members(c_loaders, module, sub=strip_gp,
       include=[
-        '^GP_Load[A-Z,0-9]{3}.*',
-        '^GP_Save[A-Z,0-9]{3}.*',
-        '^GP_ListLoaders$',
-        '^GP_LoadMetaData$',
+        '^gp_load[A-Z,0-9]{3}.*',
+        '^gp_save[A-Z,0-9]{3}.*',
+        '^gp_loaders_lists$',
+        '^gp_load_meta_data$',
         ])
 
 _init(locals())

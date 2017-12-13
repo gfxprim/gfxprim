@@ -23,7 +23,7 @@
 #ifndef GP_GRABBERS_V4L2_H
 #define GP_GRABBERS_V4L2_H
 
-struct GP_Grabber;
+#include <grabbers/GP_Grabber.h>
 
 /*
  * Create V4L2 grabber.
@@ -31,8 +31,8 @@ struct GP_Grabber;
  * The prefered_width and height may not be used if driver does support only
  * fixed image size.
  */
-struct GP_Grabber *GP_GrabberV4L2Init(const char *device,
-                                      unsigned int preferred_width,
-				      unsigned int preferred_height);
+gp_grabber *gp_grabber_v4l2_init(const char *device,
+                                 unsigned int preferred_width,
+				 unsigned int preferred_height);
 
 #endif /* GP_GRABBERS_V4L2_H */

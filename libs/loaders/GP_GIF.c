@@ -38,8 +38,8 @@
 #include "core/GP_Fill.h"
 #include "core/GP_Debug.h"
 
-#include "loaders/GP_IO.h"
-#include "loaders/GP_GIF.h"
+#include <loaders/GP_IO.h>
+#include <loaders/GP_Loaders.gen.h>
 
 #ifdef HAVE_GIFLIB
 
@@ -51,7 +51,7 @@
 #define GIF_SIGNATURE2 "GIF89a"
 #define GIF_SIGNATURE2_LEN 6
 
-int GP_MatchGIF(const void *buf)
+int gp_match_gif(const void *buf)
 {
 	if (!memcmp(buf, GIF_SIGNATURE1, GIF_SIGNATURE1_LEN))
 		return 1;
@@ -64,9 +64,9 @@ int GP_MatchGIF(const void *buf)
 
 static int gif_input_func(GifFileType* gif, GifByteType* bytes, int size)
 {
-	GP_IO *io = gif->UserData;
+	gp_io *io = gif->UserData;
 
-	return GP_IORead(io, bytes, size);
+	return gp_io_read(io, bytes, size);
 }
 
 static const char *rec_type_name(GifRecordType rec_type)
@@ -163,7 +163,7 @@ static inline GifColorType *get_color_from_map(ColorMapObject *map, int idx)
 	return &map->Colors[idx];
 }
 
-static inline GP_Pixel get_color(GifFileType *gf, uint32_t idx)
+static inline gp_pixel get_color(GifFileType *gf, uint32_t idx)
 {
 	GifColorType *color;
 
@@ -173,10 +173,10 @@ static inline GP_Pixel get_color(GifFileType *gf, uint32_t idx)
 
 	color = get_color_from_map(gf->SColorMap, idx);
 
-	return  GP_Pixel_CREATE_RGB888(color->Red, color->Green, color->Blue);
+	return  GP_PIXEL_CREATE_RGB888(color->Red, color->Green, color->Blue);
 }
 
-static int get_bg_color(GifFileType *gf, GP_Pixel *pixel)
+static int get_bg_color(GifFileType *gf, gp_pixel *pixel)
 {
 	GifColorType *color;
 
@@ -185,7 +185,7 @@ static int get_bg_color(GifFileType *gf, GP_Pixel *pixel)
 
 	color = get_color_from_map(gf->SColorMap, gf->SBackGroundColor);
 
-	*pixel = GP_Pixel_CREATE_RGB888(color->Red, color->Green, color->Blue);
+	*pixel = GP_PIXEL_CREATE_RGB888(color->Red, color->Green, color->Blue);
 
 	return 1;
 }
@@ -228,20 +228,20 @@ static inline unsigned int interlace_real_y(GifFileType *gf, unsigned int y)
 	return 0;
 }
 
-static void fill_metadata(GifFileType *gf, GP_DataStorage *storage)
+static void fill_metadata(GifFileType *gf, gp_storage *storage)
 {
-	GP_DataStorageAddInt(storage, NULL, "Width", gf->SWidth);
-	GP_DataStorageAddInt(storage, NULL, "Height", gf->SHeight);
-	GP_DataStorageAddInt(storage, NULL, "Interlace", gf->Image.Interlace);
+	gp_storage_add_int(storage, NULL, "Width", gf->SWidth);
+	gp_storage_add_int(storage, NULL, "Height", gf->SHeight);
+	gp_storage_add_int(storage, NULL, "Interlace", gf->Image.Interlace);
 }
 
-int GP_ReadGIFEx(GP_IO *io, GP_Pixmap **img,
-                 GP_DataStorage *storage, GP_ProgressCallback *callback)
+int gp_read_gif_ex(gp_io *io, gp_pixmap **img,
+                   gp_storage *storage, gp_progress_cb *callback)
 {
 	GifFileType *gf;
 	GifRecordType rec_type;
-	GP_Pixmap *res = NULL;
-	GP_Pixel bg;
+	gp_pixmap *res = NULL;
+	gp_pixel bg;
 	int32_t x, y;
 	int err;
 
@@ -312,7 +312,8 @@ int GP_ReadGIFEx(GP_IO *io, GP_Pixmap **img,
 		if (!img)
 			break;
 
-		res = GP_PixmapAlloc(gf->SWidth, gf->SHeight, GP_PIXEL_RGB888);
+		res = gp_pixmap_alloc(gf->SWidth, gf->SHeight,
+				      GP_PIXEL_RGB888);
 
 		if (res == NULL) {
 			err = ENOMEM;
@@ -322,7 +323,7 @@ int GP_ReadGIFEx(GP_IO *io, GP_Pixmap **img,
 		/* If background color is defined, use it */
 		if (get_bg_color(gf, &bg)) {
 			GP_DEBUG(1, "Filling bg color %x", bg);
-			GP_Fill(res, bg);
+			gp_fill(res, bg);
 		}
 
 		/* Now finally read gif image data */
@@ -340,9 +341,9 @@ int GP_ReadGIFEx(GP_IO *io, GP_Pixmap **img,
 
 			//TODO: just now we have only 8BPP
 			for (x = 0; x < gf->Image.Width; x++)
-				GP_PutPixel_Raw_24BPP(res, x + gf->Image.Left, real_y, get_color(gf, line[x]));
+				gp_putpixel_raw_24BPP(res, x + gf->Image.Left, real_y, get_color(gf, line[x]));
 
-			if (GP_ProgressCallbackReport(callback, y - gf->Image.Top,
+			if (gp_progress_cb_report(callback, y - gf->Image.Top,
 			                              gf->Image.Height,
 						      gf->Image.Width)) {
 				GP_DEBUG(1, "Operation aborted");
@@ -373,7 +374,7 @@ int GP_ReadGIFEx(GP_IO *io, GP_Pixmap **img,
 
 	return 0;
 err2:
-	GP_PixmapFree(res);
+	gp_pixmap_free(res);
 err1:
 #if defined(GIFLIB_MAJOR) && GIFLIB_MAJOR >= 5
 	DGifCloseFile(gf, NULL);
@@ -386,14 +387,14 @@ err1:
 
 #else
 
-int GP_MatchGIF(const void GP_UNUSED(*buf))
+int gp_match_gif(const void GP_UNUSED(*buf))
 {
 	errno = ENOSYS;
 	return -1;
 }
 
-GP_Pixmap *GP_ReadGIFEx(GP_IO GP_UNUSED(*io),
-                         GP_ProgressCallback GP_UNUSED(*callback))
+gp_pixmap *gp_read_gif_ex(GP_IO GP_UNUSED(*io),
+                          gp_progress_cb GP_UNUSED(*callback))
 {
 	errno = ENOSYS;
 	return NULL;
@@ -401,27 +402,11 @@ GP_Pixmap *GP_ReadGIFEx(GP_IO GP_UNUSED(*io),
 
 #endif /* HAVE_GIFLIB */
 
-GP_Pixmap *GP_ReadGIF(GP_IO *io, GP_ProgressCallback *callback)
-{
-	return GP_LoaderReadImage(&GP_GIF, io, callback);
-}
-
-GP_Pixmap *GP_LoadGIF(const char *src_path, GP_ProgressCallback *callback)
-{
-	return GP_LoaderLoadImage(&GP_GIF, src_path, callback);
-}
-
-int GP_LoadGIFEx(const char *src_path, GP_Pixmap **img,
-                 GP_DataStorage *storage, GP_ProgressCallback *callback)
-{
-	return GP_LoaderLoadImageEx(&GP_GIF, src_path, img, storage, callback);
-}
-
-struct GP_Loader GP_GIF = {
+const gp_loader gp_gif = {
 #ifdef HAVE_GIFLIB
-	.Read = GP_ReadGIFEx,
+	.Read = gp_read_gif_ex,
 #endif
-	.Match = GP_MatchGIF,
+	.Match = gp_match_gif,
 
 	.fmt_name = "Graphics Interchange Format",
 	.extensions = {"gif", NULL},

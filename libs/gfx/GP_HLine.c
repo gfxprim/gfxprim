@@ -28,26 +28,26 @@
 #include "gfx/GP_HLine.h"
 #include "gfx/GP_VLine.h"
 
-void GP_HLineXXY_Raw(GP_Pixmap *pixmap, GP_Coord x0, GP_Coord x1,
-                     GP_Coord y, GP_Pixel pixel)
+void gp_hline_xxy_raw(gp_pixmap *pixmap, gp_coord x0, gp_coord x1,
+                     gp_coord y, gp_pixel pixel)
 {
 	GP_CHECK_PIXMAP(pixmap);
 
-	GP_FN_PER_BPP_PIXMAP(GP_HLine_Raw, pixmap, pixmap, x0, x1, y,
+	GP_FN_PER_BPP_PIXMAP(gp_hline_raw, pixmap, pixmap, x0, x1, y,
 	                      pixel);
 }
 
-void GP_HLineXYW_Raw(GP_Pixmap *pixmap, GP_Coord x, GP_Coord y, GP_Size w,
-                     GP_Pixel pixel)
+void gp_hline_xyw_raw(gp_pixmap *pixmap, gp_coord x, gp_coord y, gp_size w,
+                     gp_pixel pixel)
 {
 	if (w == 0)
 		return;
 
-	GP_HLineXXY_Raw(pixmap, x, x + w - 1, y, pixel);
+	gp_hline_xxy_raw(pixmap, x, x + w - 1, y, pixel);
 }
 
-void GP_HLineXXY(GP_Pixmap *pixmap, GP_Coord x0, GP_Coord x1, GP_Coord y,
-                     GP_Pixel pixel)
+void gp_hline_xxy(gp_pixmap *pixmap, gp_coord x0, gp_coord x1, gp_coord y,
+                     gp_pixel pixel)
 {
 	GP_CHECK_PIXMAP(pixmap);
 
@@ -55,20 +55,20 @@ void GP_HLineXXY(GP_Pixmap *pixmap, GP_Coord x0, GP_Coord x1, GP_Coord y,
 		GP_TRANSFORM_Y(pixmap, x0);
 		GP_TRANSFORM_Y(pixmap, x1);
 		GP_TRANSFORM_X(pixmap, y);
-		GP_VLine_Raw(pixmap, y, x0, x1, pixel);
+		gp_vline_raw(pixmap, y, x0, x1, pixel);
 	} else {
 		GP_TRANSFORM_X(pixmap, x0);
 		GP_TRANSFORM_X(pixmap, x1);
 		GP_TRANSFORM_Y(pixmap, y);
-		GP_HLine_Raw(pixmap, x0, x1, y, pixel);
+		gp_hline_raw(pixmap, x0, x1, y, pixel);
 	}
 }
 
-void GP_HLineXYW(GP_Pixmap *pixmap, GP_Coord x, GP_Coord y, GP_Size w,
-                 GP_Pixel pixel)
+void gp_hline_xyw(gp_pixmap *pixmap, gp_coord x, gp_coord y, gp_size w,
+                 gp_pixel pixel)
 {
 	if (w == 0)
 		return;
 
-	GP_HLineXXY(pixmap, x, x + w - 1, y, pixel);
+	gp_hline_xxy(pixmap, x, x + w - 1, y, pixel);
 }

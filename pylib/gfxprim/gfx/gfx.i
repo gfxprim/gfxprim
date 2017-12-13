@@ -29,15 +29,15 @@
 %include "GP_LineAA.h"
 
 %inline %{
-static GP_Coord *GP_Polygon_unpack_coordinates(PyObject *coords)
+static gp_coord *gp_polygon_unpack_coordinates(PyObject *coords)
 {
   unsigned int i, vertex_count;
-  GP_Coord *cs;
+  gp_coord *cs;
 
   GP_ASSERT(PyTuple_Check(coords));
   vertex_count = PyTuple_Size(coords);
   GP_ASSERT(vertex_count % 2 == 0);
-  cs = malloc(sizeof(GP_Coord[vertex_count]));
+  cs = malloc(sizeof(gp_coord[vertex_count]));
   GP_ASSERT(cs != NULL);
   for (i = 0; i < vertex_count; i++) {
     PyObject *e = PyTuple_GetItem(coords, i); // Borrowed or ?
@@ -47,17 +47,17 @@ static GP_Coord *GP_Polygon_unpack_coordinates(PyObject *coords)
   return cs;
 }
 
-void GP_Polygon_wrap(GP_Pixmap *pixmap, PyObject *coords, GP_Pixel pixel)
+void gp_polygon_wrap(gp_pixmap *pixmap, PyObject *coords, gp_pixel pixel)
 {
-  GP_Coord *cs = GP_Polygon_unpack_coordinates(coords);
-  GP_Polygon(pixmap, PyTuple_Size(coords) / 2, cs, pixel);
+  gp_coord *cs = gp_polygon_unpack_coordinates(coords);
+  gp_polygon(pixmap, PyTuple_Size(coords) / 2, cs, pixel);
   free(cs);
 }
 
-void GP_FillPolygon_wrap(GP_Pixmap *pixmap, PyObject *coords, GP_Pixel pixel)
+void gp_fill_polygon_wrap(gp_pixmap *pixmap, PyObject *coords, gp_pixel pixel)
 {
-  GP_Coord *cs = GP_Polygon_unpack_coordinates(coords);
-  GP_FillPolygon(pixmap, PyTuple_Size(coords) / 2, cs, pixel);
+  gp_coord *cs = gp_polygon_unpack_coordinates(coords);
+  gp_fill_polygon(pixmap, PyTuple_Size(coords) / 2, cs, pixel);
   free(cs);
 }
 %}

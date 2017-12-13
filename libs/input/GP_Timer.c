@@ -23,12 +23,11 @@
 #include <inttypes.h>
 #include <string.h>
 
-#include "core/GP_Debug.h"
-#include "core/GP_Common.h"
+#include <core/GP_Debug.h>
+#include <core/GP_Common.h>
+#include <input/GP_Timer.h>
 
-#include "input/GP_Timer.h"
-
-static void dump_level(GP_Timer *heap, unsigned int level, unsigned int cur)
+static void dump_level(gp_timer *heap, unsigned int level, unsigned int cur)
 {
 	if (level == cur) {
 		if (heap)
@@ -42,7 +41,7 @@ static void dump_level(GP_Timer *heap, unsigned int level, unsigned int cur)
 	dump_level(heap ? heap->right : NULL , level, cur+1);
 }
 
-void GP_TimerQueueDump(GP_Timer *heap)
+void gp_timer_queue_dump(gp_timer *heap)
 {
 	unsigned int i, j = 0;
 
@@ -55,7 +54,7 @@ void GP_TimerQueueDump(GP_Timer *heap)
 	}
 }
 
-static int timer_cmp(GP_Timer *t1, GP_Timer *t2)
+static int timer_cmp(gp_timer *t1, gp_timer *t2)
 {
 	return t1->expires > t2->expires;
 }
@@ -68,9 +67,9 @@ static int well_balanced(unsigned int sons)
 	return !((sons + 2) & (sons + 1));
 }
 
-static GP_Timer *swap_left(GP_Timer *heap)
+static gp_timer *swap_left(gp_timer *heap)
 {
-	GP_Timer *left = heap->left;
+	gp_timer *left = heap->left;
 
 	heap->left = left->left;
 	left->left = heap;
@@ -80,9 +79,9 @@ static GP_Timer *swap_left(GP_Timer *heap)
 	return left;
 }
 
-static GP_Timer *swap_right(GP_Timer *heap)
+static gp_timer *swap_right(gp_timer *heap)
 {
-	GP_Timer *right = heap->right;
+	gp_timer *right = heap->right;
 
 	heap->right = right->right;
 	right->right = heap;
@@ -95,7 +94,7 @@ static GP_Timer *swap_right(GP_Timer *heap)
 /*
  * Inserts timer into binary heap. Returns new root for the tree.
  */
-static GP_Timer *insert(GP_Timer *heap, GP_Timer *timer)
+static gp_timer *insert(gp_timer *heap, gp_timer *timer)
 {
 	if (heap == NULL) {
 		timer->left = NULL;
@@ -124,7 +123,7 @@ static GP_Timer *insert(GP_Timer *heap, GP_Timer *timer)
 	return heap;
 }
 
-static GP_Timer *rem_last(GP_Timer *heap, GP_Timer **last)
+static gp_timer *rem_last(gp_timer *heap, gp_timer **last)
 {
 	if (!heap->left) {
 		*last = heap;
@@ -142,10 +141,10 @@ static GP_Timer *rem_last(GP_Timer *heap, GP_Timer **last)
 	return heap;
 }
 
-static GP_Timer *bubble_down(GP_Timer *heap)
+static gp_timer *bubble_down(gp_timer *heap)
 {
-	GP_Timer *right = heap->right;
-	GP_Timer *left = heap->left;
+	gp_timer *right = heap->right;
+	gp_timer *left = heap->left;
 
 	/* Make sure we choose smaller one */
 	if (right && left && timer_cmp(right, left))
@@ -166,9 +165,9 @@ static GP_Timer *bubble_down(GP_Timer *heap)
 	return heap;
 }
 
-static GP_Timer *pop(GP_Timer *heap)
+static gp_timer *pop(gp_timer *heap)
 {
-	GP_Timer *last;
+	gp_timer *last;
 
 	if (heap == NULL)
 		return NULL;
@@ -185,7 +184,7 @@ static GP_Timer *pop(GP_Timer *heap)
 	return bubble_down(last);
 }
 
-void GP_TimerQueueInsert(GP_Timer **heap, uint64_t now, GP_Timer *timer)
+void gp_timer_queue_insert(gp_timer **heap, uint64_t now, gp_timer *timer)
 {
 	uint32_t after = timer->period ? timer->period : timer->expires;
 	uint64_t expires = now + after;
@@ -198,7 +197,7 @@ void GP_TimerQueueInsert(GP_Timer **heap, uint64_t now, GP_Timer *timer)
 	*heap = insert(*heap, timer);
 }
 
-static GP_Timer *rem(GP_Timer *heap, GP_Timer *timer, GP_Timer *last, int *flag)
+static gp_timer *rem(gp_timer *heap, gp_timer *timer, gp_timer *last, int *flag)
 {
 	if (heap == NULL)
 		return NULL;
@@ -222,9 +221,9 @@ static GP_Timer *rem(GP_Timer *heap, GP_Timer *timer, GP_Timer *last, int *flag)
 	return heap;
 }
 
-static GP_Timer *pre_rem(GP_Timer *heap, GP_Timer *timer)
+static gp_timer *pre_rem(gp_timer *heap, gp_timer *timer)
 {
-	GP_Timer *last;
+	gp_timer *last;
 	int flag = 0;
 
 	if (!heap) {
@@ -258,16 +257,16 @@ static GP_Timer *pre_rem(GP_Timer *heap, GP_Timer *timer)
 	return heap;
 }
 
-void GP_TimerQueueRemove(GP_Timer **queue, GP_Timer *timer)
+void gp_timer_queue_remove(gp_timer **queue, gp_timer *timer)
 {
 	GP_DEBUG(3, "Removing timer %s from queue", timer->id);
 
 	*queue = pre_rem(*queue, timer);
 }
 
-static GP_Timer *process_top(GP_Timer *heap, uint64_t now)
+static gp_timer *process_top(gp_timer *heap, uint64_t now)
 {
-	GP_Timer *timer = heap;
+	gp_timer *timer = heap;
 	uint32_t ret, period;
 
 	GP_DEBUG(3, "Timer %s expired at %"PRIu64" now is %"PRIu64,
@@ -276,7 +275,7 @@ static GP_Timer *process_top(GP_Timer *heap, uint64_t now)
 	heap = pop(heap);
 
 	period = timer->period;
-	ret = timer->Callback(timer);
+	ret = timer->callback(timer);
 
 	if (period)
 		ret = period;
@@ -293,7 +292,7 @@ static GP_Timer *process_top(GP_Timer *heap, uint64_t now)
 	return heap;
 }
 
-int GP_TimerQueueProcess(GP_Timer **heap, uint64_t now)
+int gp_timer_queue_process(gp_timer **heap, uint64_t now)
 {
 	int ret = 0;
 

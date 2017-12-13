@@ -17,22 +17,22 @@
 @     K = out_pix.chans['K']
 @     max_size = max(R.size, G.size, B.size)
 @     max_val = 2 ** max_size - 1
-	GP_Pixel _R = GP_SCALE_VAL_{{ R.size }}_{{ max_size }}(GP_GET_BITS({{ R.off }}+o1, {{ R.size }}, p1)); \
-	GP_Pixel _G = GP_SCALE_VAL_{{ G.size }}_{{ max_size }}(GP_GET_BITS({{ G.off }}+o1, {{ G.size }}, p1)); \
-	GP_Pixel _B = GP_SCALE_VAL_{{ B.size }}_{{ max_size }}(GP_GET_BITS({{ B.off }}+o1, {{ B.size }}, p1)); \
-	GP_Pixel _K = GP_MAX3(_R, _G, _B); \
+	gp_pixel _R = GP_SCALE_VAL_{{ R.size }}_{{ max_size }}(GP_GET_BITS({{ R.off }}+o1, {{ R.size }}, p1)); \
+	gp_pixel _G = GP_SCALE_VAL_{{ G.size }}_{{ max_size }}(GP_GET_BITS({{ G.off }}+o1, {{ G.size }}, p1)); \
+	gp_pixel _B = GP_SCALE_VAL_{{ B.size }}_{{ max_size }}(GP_GET_BITS({{ B.off }}+o1, {{ B.size }}, p1)); \
+	gp_pixel _K = GP_MAX3(_R, _G, _B); \
 	GP_SET_BITS({{ C.off }}+o2, {{ C.size }}, p2, GP_SCALE_VAL_{{ max_size }}_{{ C.size }}((_K - _R))); \
 	GP_SET_BITS({{ M.off }}+o2, {{ M.size }}, p2, GP_SCALE_VAL_{{ max_size }}_{{ M.size }}((_K - _G))); \
 	GP_SET_BITS({{ Y.off }}+o2, {{ Y.size }}, p2, GP_SCALE_VAL_{{ max_size }}_{{ Y.size }}((_K - _B))); \
 	GP_SET_BITS({{ K.off }}+o2, {{ K.size }}, p2, GP_SCALE_VAL_{{ max_size }}_{{ K.size }}({{ max_val }} - _K)); \
 @ end
 @
-@ def GP_Pixel_TYPE_TO_TYPE(pt1, pt2):
+@ def pixel_type_to_type(pt1, pt2):
 /*** {{ pt1.name }} -> {{ pt2.name }} ***
  * macro reads p1 ({{ pt1.name }} at bit-offset o1)
  * and writes to p2 ({{ pt2.name }} at bit-offset o2)
  * the relevant part of p2 is assumed to be cleared (zero) */
-#define GP_Pixel_{{ pt1.name }}_TO_{{ pt2.name }}_OFFSET(p1, o1, p2, o2) do { \
+#define GP_PIXEL_{{ pt1.name }}_TO_{{ pt2.name }}_OFFSET(p1, o1, p2, o2) do { \
 @     # special cases
 @     if pt1.is_rgb() and pt2.is_cmyk():
 @         rgb_to_cmyk(pt1, pt2)
@@ -78,8 +78,8 @@
 } while (0)
 
 /* a version without offsets */
-#define GP_Pixel_{{ pt1.name }}_TO_{{ pt2.name }}(p1, p2) \
-        GP_Pixel_{{ pt1.name }}_TO_{{ pt2.name }}_OFFSET(p1, 0, p2, 0)
+#define GP_PIXEL_{{ pt1.name }}_TO_{{ pt2.name }}(p1, p2) \
+        GP_PIXEL_{{ pt1.name }}_TO_{{ pt2.name }}_OFFSET(p1, 0, p2, 0)
 
 @ end
 
@@ -93,25 +93,25 @@
 @ for pt in [pixeltypes_dict['RGB888'], pixeltypes_dict['RGBA8888']]:
 @     for i in pixeltypes:
 @         if not i.is_unknown() and not i.is_palette():
-@             GP_Pixel_TYPE_TO_TYPE(pt, i)
+@             pixel_type_to_type(pt, i)
 @             if i.name not in ['RGB888', 'RGBA8888']:
-@                 GP_Pixel_TYPE_TO_TYPE(i, pt)
+@                 pixel_type_to_type(i, pt)
 @     end
 
 /*
  * Convert {{ pt.name }} to any other PixelType
  * Does not work on palette types at all (yet)
  */
-GP_Pixel GP_{{ pt.name }}ToPixel(GP_Pixel pixel, GP_PixelType type);
+gp_pixel gp_{{ pt.name }}_to_pixel(gp_pixel pixel, gp_pixel_type type);
 
 /*
  * Function converting to {{ pt.name }} from any other PixelType
  * Does not work on palette types at all (yet)
  */
-GP_Pixel GP_PixelTo{{ pt.name }}(GP_Pixel pixel, GP_PixelType type);
+gp_pixel gp_pixel_to{{ pt.name }}(gp_pixel pixel, gp_pixel_type type);
 
 @ end
 
 /* Experimental macros testing generated scripts */
-@ GP_Pixel_TYPE_TO_TYPE(pixeltypes_dict['RGB565'], pixeltypes_dict['RGBA8888'])
-@ GP_Pixel_TYPE_TO_TYPE(pixeltypes_dict['RGBA8888'], pixeltypes_dict['G2'])
+@ pixel_type_to_type(pixeltypes_dict['RGB565'], pixeltypes_dict['RGBA8888'])
+@ pixel_type_to_type(pixeltypes_dict['RGBA8888'], pixeltypes_dict['G2'])

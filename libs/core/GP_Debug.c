@@ -23,32 +23,33 @@
 #include <stdarg.h>
 #include <errno.h>
 
-#include "core/GP_Version.h"
-#include "core/GP_Debug.h"
+#include <core/GP_Version.h>
+#include <core/GP_Common.h>
+#include <core/GP_Debug.h>
 
 static unsigned int debug_level = GP_DEFAULT_DEBUG_LEVEL;
 
 static int env_used = 0;
 
-static void (*debug_handler)(const struct GP_DebugMsg *msg) = NULL;
+static void (*debug_handler)(const struct gp_debug_msg *msg) = NULL;
 
-void GP_SetDebugLevel(unsigned int level)
+void gp_set_debug_level(unsigned int level)
 {
 	debug_level = level;
 }
 
-unsigned int GP_GetDebugLevel(void)
+unsigned int gp_get_debug_level(void)
 {
 	return debug_level;
 }
 
-void GP_SetDebugHandler(void (*handler)(const struct GP_DebugMsg *msg))
+void gp_set_debug_handler(void (*handler)(const struct gp_debug_msg *msg))
 {
 	debug_handler = handler;
 }
 
-void GP_DebugPrint(int level, const char *file, const char *function, int line,
-                   const char *fmt, ...)
+void gp_debug_print(int level, const char *file, const char *function, int line,
+                    const char *fmt, ...)
 {
 	int i, err;
 
@@ -86,7 +87,7 @@ void GP_DebugPrint(int level, const char *file, const char *function, int line,
 		vsnprintf(buf, sizeof(buf), fmt, va);
 		va_end(va);
 
-		struct GP_DebugMsg msg = {
+		struct gp_debug_msg msg = {
 			.level = level,
 			.file = file,
 			.fn = function,
@@ -104,11 +105,11 @@ void GP_DebugPrint(int level, const char *file, const char *function, int line,
 
 	switch (level) {
 	case GP_DEBUG_FATAL:
-		GP_DebugPrintCStack();
+		gp_debug_print_cstack();
 		fprintf(stderr, "*** FATAL: %s:%s():%u: ", file, function, line);
 	break;
 	case GP_DEBUG_BUG:
-		GP_DebugPrintCStack();
+		gp_debug_print_cstack();
 		fprintf(stderr, "*** BUG: %s:%s():%u: ", file, function, line);
 	break;
 	case GP_DEBUG_WARN:

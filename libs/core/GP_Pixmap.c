@@ -47,9 +47,9 @@ static uint32_t get_bpr(uint32_t bpp, uint32_t w)
 	return bits_per_row / 8 + padd;
 }
 
-GP_Pixmap *GP_PixmapAlloc(GP_Size w, GP_Size h, GP_PixelType type)
+gp_pixmap *gp_pixmap_alloc(gp_size w, gp_size h, gp_pixel_type type)
 {
-	GP_Pixmap *pixmap;
+	gp_pixmap *pixmap;
 	uint32_t bpp;
 	size_t bpr;
 	void *pixels;
@@ -67,9 +67,9 @@ GP_Pixmap *GP_PixmapAlloc(GP_Size w, GP_Size h, GP_PixelType type)
 	}
 
 	GP_DEBUG(1, "Allocating pixmap %u x %u - %s",
-	         w, h, GP_PixelTypeName(type));
+	         w, h, gp_pixel_type_name(type));
 
-	bpp = GP_PixelSize(type);
+	bpp = gp_pixel_size(type);
 
 	if (!(bpr = get_bpr(bpp, w)))
 		return NULL;
@@ -82,7 +82,7 @@ GP_Pixmap *GP_PixmapAlloc(GP_Size w, GP_Size h, GP_PixelType type)
 	}
 
 	pixels = malloc(size);
-	pixmap = malloc(sizeof(GP_Pixmap));
+	pixmap = malloc(sizeof(gp_pixmap));
 
 	if (pixels == NULL || pixmap == NULL) {
 		free(pixels);
@@ -104,26 +104,26 @@ GP_Pixmap *GP_PixmapAlloc(GP_Size w, GP_Size h, GP_PixelType type)
 
 	pixmap->pixel_type = type;
 	#warning Hmm, bit endianity... Why is not this settled by different pixel types?
-	pixmap->bit_endian = GP_PixelTypes[type].bit_endian;
+	pixmap->bit_endian = gp_pixel_types[type].bit_endian;
 
 	/* rotation and mirroring */
-	GP_PixmapSetRotation(pixmap, 0, 0, 0);
+	gp_pixmap_set_rotation(pixmap, 0, 0, 0);
 
 	pixmap->free_pixels = 1;
 
 	return pixmap;
 }
 
-int GP_PixmapSetGamma(GP_Pixmap *self, float gamma)
+int gp_pixmap_set_gamma(gp_pixmap *self, float gamma)
 {
-	GP_GammaRelease(self->gamma);
+	gp_gamma_release(self->gamma);
 
-	self->gamma = GP_GammaAcquire(self->pixel_type, gamma);
+	self->gamma = gp_gamma_acquire(self->pixel_type, gamma);
 
 	return !self->gamma;
 }
 
-void GP_PixmapFree(GP_Pixmap *pixmap)
+void gp_pixmap_free(gp_pixmap *pixmap)
 {
 	GP_DEBUG(1, "Freeing pixmap (%p)", pixmap);
 
@@ -134,15 +134,15 @@ void GP_PixmapFree(GP_Pixmap *pixmap)
 		free(pixmap->pixels);
 
 	if (pixmap->gamma)
-		GP_GammaRelease(pixmap->gamma);
+		gp_gamma_release(pixmap->gamma);
 
 	free(pixmap);
 }
 
-GP_Pixmap *GP_PixmapInit(GP_Pixmap *pixmap, GP_Size w, GP_Size h,
-                           GP_PixelType type, void *pixels)
+gp_pixmap *gp_pixmap_init(gp_pixmap *pixmap, gp_size w, gp_size h,
+                          gp_pixel_type type, void *pixels)
 {
-	uint32_t bpp = GP_PixelSize(type);
+	uint32_t bpp = gp_pixel_size(type);
 	uint32_t bpr = get_bpr(bpp, w);
 
 	pixmap->pixels        = pixels;
@@ -159,14 +159,14 @@ GP_Pixmap *GP_PixmapInit(GP_Pixmap *pixmap, GP_Size w, GP_Size h,
 	pixmap->gamma = NULL;
 
 	/* rotation and mirroring */
-	GP_PixmapSetRotation(pixmap, 0, 0, 0);
+	gp_pixmap_set_rotation(pixmap, 0, 0, 0);
 
 	pixmap->free_pixels = 0;
 
 	return pixmap;
 }
 
-int GP_PixmapResize(GP_Pixmap *pixmap, GP_Size w, GP_Size h)
+int gp_pixmap_resize(gp_pixmap *pixmap, gp_size w, gp_size h)
 {
 	uint32_t bpr = get_bpr(pixmap->bpp, w);
 	void *pixels;
@@ -184,16 +184,16 @@ int GP_PixmapResize(GP_Pixmap *pixmap, GP_Size w, GP_Size h)
 	return 0;
 }
 
-GP_Pixmap *GP_PixmapCopy(const GP_Pixmap *src, int flags)
+gp_pixmap *gp_pixmap_copy(const gp_pixmap *src, int flags)
 {
-	GP_Pixmap *new;
+	gp_pixmap *new;
 	uint8_t *pixels;
 
 	if (src == NULL)
 		return NULL;
 
-	new     = malloc(sizeof(GP_Pixmap));
-	pixels  = malloc(src->bytes_per_row * src->h);
+	new = malloc(sizeof(gp_pixmap));
+	pixels = malloc(src->bytes_per_row * src->h);
 
 	if (pixels == NULL || new == NULL) {
 		free(pixels);
@@ -219,9 +219,9 @@ GP_Pixmap *GP_PixmapCopy(const GP_Pixmap *src, int flags)
 	new->bit_endian = src->bit_endian;
 
 	if (flags & GP_COPY_WITH_ROTATION)
-		GP_PixmapCopyRotation(src, new);
+		gp_pixmap_copy_rotation(src, new);
 	else
-		GP_PixmapSetRotation(new, 0, 0, 0);
+		gp_pixmap_set_rotation(new, 0, 0, 0);
 
 	//TODO: Copy the gamma too
 	new->gamma = NULL;
@@ -232,13 +232,13 @@ GP_Pixmap *GP_PixmapCopy(const GP_Pixmap *src, int flags)
 }
 
 
-GP_Pixmap *GP_PixmapConvertAlloc(const GP_Pixmap *src,
-                                   GP_PixelType dst_pixel_type)
+gp_pixmap *gp_pixmap_convert_alloc(const gp_pixmap *src,
+                                   gp_pixel_type dst_pixel_type)
 {
-	int w = GP_PixmapW(src);
-	int h = GP_PixmapH(src);
+	int w = gp_pixmap_w(src);
+	int h = gp_pixmap_h(src);
 
-	GP_Pixmap *ret = GP_PixmapAlloc(w, h, dst_pixel_type);
+	gp_pixmap *ret = gp_pixmap_alloc(w, h, dst_pixel_type);
 
 	if (ret == NULL)
 		return NULL;
@@ -250,16 +250,16 @@ GP_Pixmap *GP_PixmapConvertAlloc(const GP_Pixmap *src,
 	 */
 	memset(ret->pixels, 0, ret->bytes_per_row * ret->h);
 
-	GP_Blit(src, 0, 0, w, h, ret, 0, 0);
+	gp_blit(src, 0, 0, w, h, ret, 0, 0);
 
 	return ret;
 }
 
-GP_Pixmap *GP_PixmapConvert(const GP_Pixmap *src, GP_Pixmap *dst)
+gp_pixmap *gp_pixmap_convert(const gp_pixmap *src, gp_pixmap *dst)
 {
 	//TODO: Asserts
-	int w = GP_PixmapW(src);
-	int h = GP_PixmapH(src);
+	int w = gp_pixmap_w(src);
+	int h = gp_pixmap_h(src);
 
 	/*
 	 * Fill the buffer with zeroes, otherwise it will
@@ -268,15 +268,15 @@ GP_Pixmap *GP_PixmapConvert(const GP_Pixmap *src, GP_Pixmap *dst)
 	 */
 	memset(dst->pixels, 0, dst->bytes_per_row * dst->h);
 
-	GP_Blit(src, 0, 0, w, h, dst, 0, 0);
+	gp_blit(src, 0, 0, w, h, dst, 0, 0);
 
 	return dst;
 }
 
-GP_Pixmap *GP_SubPixmapAlloc(const GP_Pixmap *pixmap,
-                               GP_Coord x, GP_Coord y, GP_Size w, GP_Size h)
+gp_pixmap *gp_sub_pixmap_alloc(const gp_pixmap *pixmap,
+                               gp_coord x, gp_coord y, gp_size w, gp_size h)
 {
-	GP_Pixmap *res = malloc(sizeof(GP_Pixmap));
+	gp_pixmap *res = malloc(sizeof(gp_pixmap));
 
 	if (res == NULL) {
 		GP_WARN("Malloc failed :(");
@@ -284,11 +284,11 @@ GP_Pixmap *GP_SubPixmapAlloc(const GP_Pixmap *pixmap,
 		return NULL;
 	}
 
-	return GP_SubPixmap(pixmap, res, x, y, w, h);
+	return gp_sub_pixmap(pixmap, res, x, y, w, h);
 }
 
-GP_Pixmap *GP_SubPixmap(const GP_Pixmap *pixmap, GP_Pixmap *subpixmap,
-                          GP_Coord x, GP_Coord y, GP_Size w, GP_Size h)
+gp_pixmap *gp_sub_pixmap(const gp_pixmap *pixmap, gp_pixmap *subpixmap,
+                         gp_coord x, gp_coord y, gp_size w, gp_size h)
 {
 	GP_CHECK(pixmap, "NULL pixmap");
 
@@ -300,7 +300,7 @@ GP_Pixmap *GP_SubPixmap(const GP_Pixmap *pixmap, GP_Pixmap *subpixmap,
 	subpixmap->bpp           = pixmap->bpp;
 	subpixmap->bytes_per_row = pixmap->bytes_per_row;
 	subpixmap->offset        = (pixmap->offset +
-	                            GP_PixelAddrOffset(x, pixmap->pixel_type)) % 8;
+	                            gp_pixel_addr_offset(x, pixmap->pixel_type)) % 8;
 
 	subpixmap->w = w;
 	subpixmap->h = h;
@@ -312,7 +312,7 @@ GP_Pixmap *GP_SubPixmap(const GP_Pixmap *pixmap, GP_Pixmap *subpixmap,
 	subpixmap->gamma = pixmap->gamma;
 
 	/* rotation and mirroring */
-	GP_PixmapCopyRotation(pixmap, subpixmap);
+	gp_pixmap_copy_rotation(pixmap, subpixmap);
 
 	subpixmap->pixels = GP_PIXEL_ADDR(pixmap, x, y);
 
@@ -321,21 +321,21 @@ GP_Pixmap *GP_SubPixmap(const GP_Pixmap *pixmap, GP_Pixmap *subpixmap,
 	return subpixmap;
 }
 
-void GP_PixmapPrintInfo(const GP_Pixmap *self)
+void gp_pixmap_print_info(const gp_pixmap *self)
 {
 	printf("Pixmap info\n");
 	printf("------------\n");
 	printf("Size\t%ux%u\n", self->w, self->h);
 	printf("BPP\t%u\n", self->bpp);
 	printf("BPR\t%u\n", self->bytes_per_row);
-	printf("Pixel\t%s (%u)\n", GP_PixelTypeName(self->pixel_type),
+	printf("Pixel\t%s (%u)\n", gp_pixel_type_name(self->pixel_type),
 	       self->pixel_type);
 	printf("Offset\t%u (only unaligned pixel types)\n", self->offset);
 	printf("Flags\taxes_swap=%u x_swap=%u y_swap=%u free_pixels=%u\n",
 	       self->axes_swap, self->x_swap, self->y_swap, self->free_pixels);
 
 	if (self->gamma)
-		GP_GammaPrint(self->gamma);
+		gp_gamma_print(self->gamma);
 }
 
 /*
@@ -361,7 +361,7 @@ void GP_PixmapPrintInfo(const GP_Pixmap *self)
  *      0      1         0
  *
  */
-void GP_PixmapRotateCW(GP_Pixmap *pixmap)
+void gp_pixmap_rotate_cw(gp_pixmap *pixmap)
 {
 	pixmap->axes_swap = !pixmap->axes_swap;
 
@@ -383,7 +383,7 @@ void GP_PixmapRotateCW(GP_Pixmap *pixmap)
 	pixmap->y_swap  = 0;
 }
 
-void GP_PixmapRotateCCW(GP_Pixmap *pixmap)
+void gp_pixmap_rotate_ccw(gp_pixmap *pixmap)
 {
 	pixmap->axes_swap = !pixmap->axes_swap;
 
@@ -405,24 +405,23 @@ void GP_PixmapRotateCCW(GP_Pixmap *pixmap)
 	pixmap->x_swap  = 1;
 }
 
-int GP_PixmapEqual(const GP_Pixmap *pixmap1, const GP_Pixmap *pixmap2)
+int gp_pixmap_equal(const gp_pixmap *pixmap1, const gp_pixmap *pixmap2)
 {
 	if (pixmap1->pixel_type != pixmap2->pixel_type)
 		return 0;
 
-	if (GP_PixmapW(pixmap1) != GP_PixmapW(pixmap2))
+	if (gp_pixmap_w(pixmap1) != gp_pixmap_w(pixmap2))
 		return 0;
 
-	if (GP_PixmapH(pixmap1) != GP_PixmapH(pixmap2))
+	if (gp_pixmap_h(pixmap1) != gp_pixmap_h(pixmap2))
 		return 0;
 
-	GP_Coord x, y, w = GP_PixmapW(pixmap1), h = GP_PixmapH(pixmap1);
+	gp_coord x, y, w = gp_pixmap_w(pixmap1), h = gp_pixmap_h(pixmap1);
 
 	for (x = 0; x < w; x++)
 		for (y = 0; y < h; y++)
-			if (GP_GetPixel(pixmap1, x, y) != GP_GetPixel(pixmap2, x, y))
+			if (gp_getpixel(pixmap1, x, y) != gp_getpixel(pixmap2, x, y))
 				return 0;
 
 	return 1;
 }
-

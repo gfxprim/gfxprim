@@ -10,12 +10,12 @@
 /*
  * List of all known pixel types
  */
-typedef enum GP_PixelType {
+typedef enum gp_pixel_type {
 @ for pt in pixeltypes:
 	GP_PIXEL_{{ pt.name }},
 @ end
 	GP_PIXEL_MAX,
-} GP_PixelType;
+} gp_pixel_type;
 
 @ for pt in pixeltypes:
 #define GP_PIXEL_{{ pt.name }} GP_PIXEL_{{ pt.name }}
@@ -38,7 +38,7 @@ typedef enum GP_PixelType {
  * macros to get channels of pixel type {{ pt.name }}
  */
 @         for c in pt.chanslist:
-#define GP_Pixel_GET_{{ c[0] }}_{{ pt.name }}(p) (GP_GET_BITS({{ c[1] }}, {{ c[2] }}, (p)))
+#define GP_PIXEL_GET_{{ c[0] }}_{{ pt.name }}(p) (GP_GET_BITS({{ c[1] }}, {{ c[2] }}, (p)))
 @         end
 
 /*
@@ -48,10 +48,10 @@ typedef enum GP_PixelType {
 #define GP_PIXEL_ADDR_OFFSET_{{ pt.name }}(x) GP_PIXEL_ADDR_OFFSET_{{ pt.pixelsize.suffix }}(x)
 
 /*
- * macros to create GP_Pixel of pixel type {{ pt.name }} directly from given values.
+ * macros to create gp_pixel of pixel type {{ pt.name }} directly from given values.
  * The values MUST be already clipped/converted to relevant value ranges.
  */
-#define GP_Pixel_CREATE_{{ pt.name }}({{ ', '.join(pt.chan_names) }}) (0\
+#define GP_PIXEL_CREATE_{{ pt.name }}({{ ', '.join(pt.chan_names) }}) (0\
 @         for c in pt.chanslist:
 	+ (({{ c[0] }}) << {{ c[1] }}) \
 @         end
@@ -60,7 +60,7 @@ typedef enum GP_PixelType {
 @ end
 
 /*
- * macros for branching on PixelType (similar to GP_FnPerBpp macros)
+ * macros for branching on PixelType (similar to GP_FnPerBpp.h macros)
  */
 
 @ for r in [('', ''), ('return ', 'RET_')]:

@@ -8,19 +8,17 @@
 #include <string.h>
 #include <errno.h>
 
-#include "core/GP_Pixmap.h"
-#include "core/GP_GetPutPixel.h"
-#include "core/GP_Gamma.h"
-
-#include "core/GP_Debug.h"
-
-#include "GP_Resize.h"
+#include <core/GP_Pixmap.h>
+#include <core/GP_GetPutPixel.h>
+#include <core/GP_Gamma.h>
+#include <core/GP_Debug.h>
+#include <filters/GP_Resize.h>
 @
 @ def fetch_rows(pt, y):
 for (x = 0; x < src->w; x++) {
-	GP_Pixel pix = GP_GetPixel_Raw_{{ pt.pixelsize.suffix }}(src, x, {{ y }});
+	gp_pixel pix = gp_getpixel_raw_{{ pt.pixelsize.suffix }}(src, x, {{ y }});
 @     for c in pt.chanslist:
-	{{ c.name }}[x] = GP_Pixel_GET_{{ c.name }}_{{ pt.name }}(pix);
+	{{ c.name }}[x] = GP_PIXEL_GET_{{ c.name }}_{{ pt.name }}(pix);
 @     end
 }
 @ end
@@ -49,8 +47,8 @@ for (x = 0; x < dst->w; x++) {
 
 @ for pt in pixeltypes:
 @     if not pt.is_unknown() and not pt.is_palette():
-static int resize_lin_lf_{{ pt.name }}(const GP_Pixmap *src, GP_Pixmap *dst,
-                                       GP_ProgressCallback *callback)
+static int resize_lin_lf_{{ pt.name }}(const gp_pixmap *src, gp_pixmap *dst,
+                                       gp_progress_cb *callback)
 {
 	uint32_t xmap[dst->w + 1];
 	uint32_t ymap[dst->h + 1];
@@ -115,15 +113,15 @@ static int resize_lin_lf_{{ pt.name }}(const GP_Pixmap *src, GP_Pixmap *dst,
 @         for c in pt.chanslist:
 			uint32_t {{ c.name }}_p = ({{ c.name }}_res[x] + div/2) / div;
 @         end
-                        GP_PutPixel_Raw_{{ pt.pixelsize.suffix }}(dst, x, y,
-				GP_Pixel_CREATE_{{ pt.name }}({{ arr_to_params(pt.chan_names, '', '_p') }}));
+                        gp_putpixel_raw_{{ pt.pixelsize.suffix }}(dst, x, y,
+				GP_PIXEL_CREATE_{{ pt.name }}({{ arr_to_params(pt.chan_names, '', '_p') }}));
 		}
 
-		if (GP_ProgressCallbackReport(callback, y, dst->h, dst->w))
+		if (gp_progress_cb_report(callback, y, dst->h, dst->w))
 			return 1;
 	}
 
-	GP_ProgressCallbackDone(callback);
+	gp_progress_cb_done(callback);
 	return 0;
 }
 
@@ -131,8 +129,8 @@ static int resize_lin_lf_{{ pt.name }}(const GP_Pixmap *src, GP_Pixmap *dst,
 @
 @ for pt in pixeltypes:
 @     if not pt.is_unknown() and not pt.is_palette():
-static int resize_lin{{ pt.name }}(const GP_Pixmap *src, GP_Pixmap *dst,
-                                   GP_ProgressCallback *callback)
+static int resize_lin{{ pt.name }}(const gp_pixmap *src, gp_pixmap *dst,
+                                   gp_progress_cb *callback)
 {
 	uint32_t xmap[dst->w + 1];
 	uint32_t ymap[dst->h + 1];
@@ -164,8 +162,8 @@ static int resize_lin{{ pt.name }}(const GP_Pixmap *src, GP_Pixmap *dst,
 	/* Interpolate */
 	for (y = 0; y < dst->h; y++) {
 		for (x = 0; x < dst->w; x++) {
-			GP_Pixel pix00, pix01, pix10, pix11;
-			GP_Coord x0, x1, y0, y1;
+			gp_pixel pix00, pix01, pix10, pix11;
+			gp_coord x0, x1, y0, y1;
 @         for c in pt.chanslist:
 			uint32_t {{ c[0] }}, {{ c[0] }}0, {{ c[0] }}1;
 @         end
@@ -173,56 +171,56 @@ static int resize_lin{{ pt.name }}(const GP_Pixmap *src, GP_Pixmap *dst,
 			x0 = xmap[x];
 			x1 = xmap[x] + 1;
 
-			if (x1 >= (GP_Coord)src->w)
+			if (x1 >= (gp_coord)src->w)
 				x1 = src->w - 1;
 
 			y0 = ymap[y];
 			y1 = ymap[y] + 1;
 
-			if (y1 >= (GP_Coord)src->h)
+			if (y1 >= (gp_coord)src->h)
 				y1 = src->h - 1;
 
-			pix00 = GP_GetPixel_Raw_{{ pt.pixelsize.suffix }}(src, x0, y0);
-			pix10 = GP_GetPixel_Raw_{{ pt.pixelsize.suffix }}(src, x1, y0);
-			pix01 = GP_GetPixel_Raw_{{ pt.pixelsize.suffix }}(src, x0, y1);
-			pix11 = GP_GetPixel_Raw_{{ pt.pixelsize.suffix }}(src, x1, y1);
+			pix00 = gp_getpixel_raw_{{ pt.pixelsize.suffix }}(src, x0, y0);
+			pix10 = gp_getpixel_raw_{{ pt.pixelsize.suffix }}(src, x1, y0);
+			pix01 = gp_getpixel_raw_{{ pt.pixelsize.suffix }}(src, x0, y1);
+			pix11 = gp_getpixel_raw_{{ pt.pixelsize.suffix }}(src, x1, y1);
 
 @         for c in pt.chanslist:
-			{{ c.name }}0 = GP_Pixel_GET_{{ c.name }}_{{ pt.name }}(pix00) * (255 - xoff[x]);
+			{{ c.name }}0 = GP_PIXEL_GET_{{ c.name }}_{{ pt.name }}(pix00) * (255 - xoff[x]);
 @         end
 
 @         for c in pt.chanslist:
-			{{ c.name }}0 += GP_Pixel_GET_{{ c.name }}_{{ pt.name }}(pix10) * xoff[x];
+			{{ c.name }}0 += GP_PIXEL_GET_{{ c.name }}_{{ pt.name }}(pix10) * xoff[x];
 @         end
 
 @         for c in pt.chanslist:
-			{{ c.name }}1 = GP_Pixel_GET_{{ c.name }}_{{ pt.name }}(pix01) * (255 - xoff[x]);
+			{{ c.name }}1 = GP_PIXEL_GET_{{ c.name }}_{{ pt.name }}(pix01) * (255 - xoff[x]);
 @         end
 
 @         for c in pt.chanslist:
-			{{ c.name }}1 += GP_Pixel_GET_{{ c.name }}_{{ pt.name }}(pix11) * xoff[x];
+			{{ c.name }}1 += GP_PIXEL_GET_{{ c.name }}_{{ pt.name }}(pix11) * xoff[x];
 @         end
 
 @         for c in pt.chanslist:
 			{{ c.name }} = ({{ c.name }}1 * yoff[y] + {{ c.name }}0 * (255 - yoff[y]) + (1<<15)) >> 16;
 @         end
 
-			GP_PutPixel_Raw_{{ pt.pixelsize.suffix }}(dst, x, y,
-			                      GP_Pixel_CREATE_{{ pt.name }}({{ arr_to_params(pt.chan_names) }}));
+			gp_putpixel_raw_{{ pt.pixelsize.suffix }}(dst, x, y,
+			                      GP_PIXEL_CREATE_{{ pt.name }}({{ arr_to_params(pt.chan_names) }}));
 		}
 
-		if (GP_ProgressCallbackReport(callback, y, dst->h, dst->w))
+		if (gp_progress_cb_report(callback, y, dst->h, dst->w))
 			return 1;
 	}
 
-	GP_ProgressCallbackDone(callback);
+	gp_progress_cb_done(callback);
 	return 0;
 }
 
 @ end
 @
-static int resize_lin(const GP_Pixmap *src, GP_Pixmap *dst,
-                     GP_ProgressCallback *callback)
+static int resize_lin(const gp_pixmap *src, gp_pixmap *dst,
+                     gp_progress_cb *callback)
 {
 	switch (src->pixel_type) {
 @ for pt in pixeltypes:
@@ -233,14 +231,14 @@ static int resize_lin(const GP_Pixmap *src, GP_Pixmap *dst,
 @ end
 	default:
 		GP_WARN("Invalid pixel type %s",
-		        GP_PixelTypeName(src->pixel_type));
+		        gp_pixel_type_name(src->pixel_type));
 		errno = EINVAL;
 		return -1;
 	}
 }
 
-int GP_FilterResizeLinearInt(const GP_Pixmap *src, GP_Pixmap *dst,
-                             GP_ProgressCallback *callback)
+int gp_filter_resize_linear_int(const gp_pixmap *src, gp_pixmap *dst,
+                                gp_progress_cb *callback)
 {
 	if (src->pixel_type != dst->pixel_type) {
 		GP_WARN("The src and dst pixel types must match");
@@ -251,8 +249,8 @@ int GP_FilterResizeLinearInt(const GP_Pixmap *src, GP_Pixmap *dst,
 	return resize_lin(src, dst, callback);
 }
 
-static int resize_lin_lf(const GP_Pixmap *src, GP_Pixmap *dst,
-                          GP_ProgressCallback *callback)
+static int resize_lin_lf(const gp_pixmap *src, gp_pixmap *dst,
+                          gp_progress_cb *callback)
 {
 	float x_rat = 1.00 * dst->w / src->w;
 	float y_rat = 1.00 * dst->h / src->h;
@@ -271,7 +269,7 @@ static int resize_lin_lf(const GP_Pixmap *src, GP_Pixmap *dst,
 @ end
 		default:
 			GP_WARN("Invalid pixel type %s",
-			        GP_PixelTypeName(src->pixel_type));
+			        gp_pixel_type_name(src->pixel_type));
 			errno = EINVAL;
 			return -1;
 		}
@@ -283,8 +281,8 @@ static int resize_lin_lf(const GP_Pixmap *src, GP_Pixmap *dst,
 	return resize_lin(src, dst, callback);
 }
 
-int GP_FilterResizeLinearLFInt(const GP_Pixmap *src, GP_Pixmap *dst,
-                               GP_ProgressCallback *callback)
+int gp_filter_resize_linear_lf_int(const gp_pixmap *src, gp_pixmap *dst,
+                                   gp_progress_cb *callback)
 {
 	if (src->pixel_type != dst->pixel_type) {
 		GP_WARN("The src and dst pixel types must match");

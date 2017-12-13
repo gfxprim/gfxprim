@@ -23,7 +23,7 @@ def alltypes(_filter=None):
 def for_each_case(cases, givename=True):
   """
   Creates one test for each of `cases`.
-  
+
   Cases is either list of strings or or string dict (with any values).
   The test is then given (name) for list or (name, value) for dict,
   or just (value) if givename=False.
@@ -69,6 +69,6 @@ def RandomizePixmap(c, seed=None):
   for x in range(c.w):
     for y in range(c.h):
       p = r.randint(0, (1 << c.bpp) - 1)
-      c.PutPixel(x, y, p)
-      assert c.GetPixel(x, y) == p
+      c.putpixel(x, y, p)
+      assert c.getpixel(x, y) == p
 

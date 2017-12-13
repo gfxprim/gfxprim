@@ -29,17 +29,17 @@
 #ifndef FILTERS_GP_RESIZE_NN_H
 #define FILTERS_GP_RESIZE_NN_H
 
-#include "GP_Filter.h"
-#include "GP_Resize.h"
+#include <filters/GP_Filter.h>
+#include <filters/GP_Resize.h>
 
-int GP_FilterResizeNN(const GP_Pixmap *src, GP_Pixmap *dst,
-                      GP_ProgressCallback *callback);
+int gp_filter_resize_nn(const gp_pixmap *src, gp_pixmap *dst,
+                      gp_progress_cb *callback);
 
-static inline GP_Pixmap *GP_FilterResizeNNAlloc(const GP_Pixmap *src,
-                                   GP_Size w, GP_Size h,
-                                   GP_ProgressCallback *callback)
+static inline gp_pixmap *gp_filter_resize_nn_alloc(const gp_pixmap *src,
+                                   gp_size w, gp_size h,
+                                   gp_progress_cb *callback)
 {
-	return GP_FilterResizeAlloc(src, w, h, GP_INTERP_NN, callback);
+	return gp_filter_resize_alloc(src, w, h, GP_INTERP_NN, callback);
 }
 
 #endif /* FILTERS_GP_RESIZE_NN_H */

@@ -33,7 +33,7 @@ class PixelChannel(list):
     self.C_mask = hex(self.mask)
 
 class PixelType(object):
-  """Representation of one GP_PixelType"""
+  """Representation of one gp_pixel_type"""
 
   def __init__(self, name, pixelsize, chanslist):
     """`name` must be a valid C identifier

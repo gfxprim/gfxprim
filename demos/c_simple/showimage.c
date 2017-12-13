@@ -30,12 +30,12 @@
 #include <errno.h>
 #include <string.h>
 
-#include <GP.h>
+#include <gfxprim.h>
 
 int main(int argc, char *argv[])
 {
-	GP_Backend *backend;
-	GP_Pixmap *image;
+	gp_backend *backend;
+	gp_pixmap *image;
 
 	if (argc != 2) {
 		fprintf(stderr, "Takes image as an argument\n");
@@ -43,7 +43,7 @@ int main(int argc, char *argv[])
 	}
 
 	/* Load image */
-	image = GP_LoadImage(argv[1], NULL);
+	image = gp_load_image(argv[1], NULL);
 
 	if (!image) {
 		fprintf(stderr, "Failed to load bitmap: %s\n", strerror(errno));
@@ -51,7 +51,7 @@ int main(int argc, char *argv[])
 	}
 
 	/* Initalize backend */
-	backend = GP_BackendX11Init(NULL, 0, 0, image->w, image->h, argv[1], 0);
+	backend = gp_x11_init(NULL, 0, 0, image->w, image->h, argv[1], 0);
 
 	if (!backend) {
 		fprintf(stderr, "Failed to initalize backend\n");
@@ -59,31 +59,31 @@ int main(int argc, char *argv[])
 	}
 
 	/* Blit image into the window and show it */
-	GP_Blit(image, 0, 0, image->w, image->h, backend->pixmap, 0, 0);
-	GP_BackendFlip(backend);
+	gp_blit(image, 0, 0, image->w, image->h, backend->pixmap, 0, 0);
+	gp_backend_flip(backend);
 
 	/* Wait for events  */
 	for (;;) {
-		GP_Event ev;
+		gp_event ev;
 
-		GP_BackendWaitEvent(backend, &ev);
+		gp_backend_wait_event(backend, &ev);
 
 		if (ev.type == GP_EV_KEY && ev.val.val == GP_KEY_Q) {
-			GP_BackendExit(backend);
+			gp_backend_exit(backend);
 			return 0;
 		}
 
 		if (ev.type == GP_EV_SYS && ev.code == GP_EV_SYS_RESIZE) {
 			int cx, cy;
 
-			GP_BackendResizeAck(backend);
+			gp_backend_resize_ack(backend);
 
 			cx = ((int)backend->pixmap->w - (int)image->w) / 2;
 			cy = ((int)backend->pixmap->h - (int)image->h) / 2;
 
-			GP_Fill(backend->pixmap, 0);
-			GP_Blit_Clipped(image, 0, 0, image->w, image->h, backend->pixmap, cx, cy);
-			GP_BackendFlip(backend);
+			gp_fill(backend->pixmap, 0);
+			gp_blit_clipped(image, 0, 0, image->w, image->h, backend->pixmap, cx, cy);
+			gp_backend_flip(backend);
 		}
 	}
 

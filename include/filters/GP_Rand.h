@@ -33,8 +33,8 @@
  * Fills the array with size integers with Normal (Gaussian) distribution
  * defined by sigma and mu parameters.
  *
- * The size _MUST_ be odd.
+ * The size _MUST_ be even.
  */
-void GP_NormInt(int *arr, unsigned int size, int sigma, int mu);
+void gp_norm_int(int *arr, unsigned int size, int sigma, int mu);
 
 #endif /* FILTERS_GP_RAND_H */

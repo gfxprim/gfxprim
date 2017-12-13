@@ -10,12 +10,12 @@ def main():
         print("usage: invert.py image")
         sys.exit(1)
 
-    # Load Image
-    img = loaders.Load(sys.argv[1])
-    # Invert image in-place
-    img.filters.Invert(img);
+    # load Image
+    img = loaders.load(sys.argv[1])
+    # invert image in-place
+    img.filters.invert(img);
     # Save result into png
-    img.loaders.SavePNG("out.png")
+    img.loaders.save_png("out.png")
 
 if __name__ == '__main__':
     main()

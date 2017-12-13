@@ -43,7 +43,7 @@ static inline uint8_t GP_BIT_SWAP_B1(uint8_t byte)
                 (byte * 0x8020LU & 0x88440LU)) * 0x10101LU >> 16;
 }
 
-static inline void GP_BitSwapRow_B1(uint8_t *row, unsigned int len)
+static inline void gp_bit_swap_row_b1(uint8_t *row, unsigned int len)
 {
 	unsigned int i;
 
@@ -65,7 +65,7 @@ static inline uint8_t GP_BIT_SWAP_B2(uint8_t byte)
 	       ((byte & 0x0C) << 2) | ((byte & 0x03) << 6);
 }
 
-static inline void GP_BitSwapRow_B2(uint8_t *row, unsigned int len)
+static inline void gp_bit_swap_row_b2(uint8_t *row, unsigned int len)
 {
 	unsigned int i;
 
@@ -86,7 +86,7 @@ static inline uint8_t GP_BIT_SWAP_B4(uint8_t byte)
 	return ((byte & 0xf0) >> 4) | ((byte & 0x0f) << 4);
 }
 
-static inline void GP_BitSwapRow_B4(uint8_t *row, unsigned int len)
+static inline void gp_bit_swap_row_b4(uint8_t *row, unsigned int len)
 {
 	unsigned int i;
 

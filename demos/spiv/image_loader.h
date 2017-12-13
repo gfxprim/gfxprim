@@ -46,12 +46,12 @@ int image_loader_init(const char *args[], unsigned int cache_max_bytes);
  *
  * Note that the callback may not be called when the image is cached.
  */
-GP_Pixmap *image_loader_get_image(GP_ProgressCallback *callback, int elevate);
+gp_pixmap *image_loader_get_image(gp_progress_cb *callback, int elevate);
 
 /*
  * Retruns current image meta data or NULL there are none.
  */
-GP_DataStorage *image_loader_get_meta_data(void);
+gp_storage *image_loader_get_meta_data(void);
 
 /*
  * Returns path to current image.

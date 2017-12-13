@@ -14,44 +14,44 @@
  * General backend structure handling
  */
 
-%extend GP_Backend {
-  ~GP_Backend() {
-    GP_DEBUG(2, "[wrapper] GP_BackendExit (%s)",
+%extend gp_backend {
+  ~gp_backend() {
+    GP_DEBUG(2, "[wrapper] gp_backend_exit (%s)",
       $self->name);
-    GP_BackendExit($self);
+    gp_backend_exit($self);
   }
 };
 
-%ignore GP_Backend::priv;
-%ignore GP_Backend::fd_list;
-%immutable GP_Backend::name;
-%ignore GP_BackendFD;
+%ignore gp_backend::priv;
+%ignore gp_backend::fd_list;
+%immutable gp_backend::name;
+%ignore gp_backend_fd;
 
-ERROR_ON_NONZERO(GP_BackendSetCaption);
-ERROR_ON_NONZERO(GP_BackendResize);
+ERROR_ON_NONZERO(gp_backend_set_caption);
+ERROR_ON_NONZERO(gp_backend_resize);
 
 %include "GP_Backend.h"
 
 /*
  * Particular backends.
  */
-ERROR_ON_NULL(GP_BackendVirtualInit);
-%newobject GP_BackendVirtualInit;
+ERROR_ON_NULL(gp_backend_virtual_init);
+%newobject gp_backend_virtual_init;
 %include "GP_BackendVirtual.h"
 
-ERROR_ON_NULL(GP_BackendLinuxFBInit);
+ERROR_ON_NULL(gp_backend_linux_fb_init);
 %newobject GP_BackendLinuxFBInit;
 %include "GP_LinuxFB.h"
 
-ERROR_ON_NULL(GP_BackendLinuxSDLInit);
+ERROR_ON_NULL(gp_backend_sdl_init);
 %newobject GP_BackendSDLInit;
 %include "GP_SDL.h"
 
-ERROR_ON_NULL(GP_BackendLinuxX11Init);
-%newobject GP_BackendX11Init;
+ERROR_ON_NULL(gp_backend_x11_init);
+%newobject gp_backend_x11_init;
 %include "GP_X11.h"
 
-%newobject GP_BackendInit;
-ERROR_ON_NULL(GP_BackendInit);
+%newobject gp_backend_init;
+ERROR_ON_NULL(gp_backend_init);
 %include "GP_BackendInit.h"
 

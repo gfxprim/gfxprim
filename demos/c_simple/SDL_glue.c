@@ -32,28 +32,28 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <SDL/SDL.h>
-#include <GP.h>
+#include <gfxprim.h>
 #include <backends/GP_SDL_Pixmap.h>
 
 #define W 320
 #define H 240
 
 static SDL_Surface *display = NULL;
-static GP_Pixmap pixmap;
+static gp_pixmap pixmap;
 
-static GP_Pixel black_pixel, darkgray_pixel;
+static gp_pixel black_pixel, darkgray_pixel;
 
 void redraw_screen(void)
 {
 	SDL_LockSurface(display);
 
-	GP_Fill(&pixmap, black_pixel);
+	gp_fill(&pixmap, black_pixel);
 
-	GP_Text(&pixmap, NULL, W/2, 20, GP_ALIGN_CENTER | GP_VALIGN_BELOW,
+	gp_text(&pixmap, NULL, W/2, 20, GP_ALIGN_CENTER | GP_VALIGN_BELOW,
 	        darkgray_pixel, black_pixel, "GFXprim SDL Demo");
 
-	GP_Line(&pixmap, 0, 0, W-1, H-1, darkgray_pixel);
-	GP_Line(&pixmap, 0, H-1, W-1, 0, darkgray_pixel);
+	gp_line(&pixmap, 0, 0, W-1, H-1, darkgray_pixel);
+	gp_line(&pixmap, 0, H-1, W-1, 0, darkgray_pixel);
 
 	SDL_UnlockSurface(display);
 }
@@ -100,10 +100,10 @@ int main(void)
 		return 1;
 	}
 
-	GP_PixmapFromSDLSurface(&pixmap, display);
+	gp_pixmap_from_sdl_surface(&pixmap, display);
 
-	black_pixel     = GP_RGBToPixmapPixel(0x00, 0x00, 0x00, &pixmap);
-	darkgray_pixel  = GP_RGBToPixmapPixel(0x7f, 0x7f, 0x7f, &pixmap);
+	black_pixel     = gp_rgb_to_pixmap_pixel(0x00, 0x00, 0x00, &pixmap);
+	darkgray_pixel  = gp_rgb_to_pixmap_pixel(0x7f, 0x7f, 0x7f, &pixmap);
 
 	redraw_screen();
 	SDL_Flip(display);

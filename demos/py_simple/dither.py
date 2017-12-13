@@ -10,12 +10,12 @@ def main():
         print("usage: dither.py image")
         sys.exit(1)
 
-    # Load Image
-    img = loaders.Load(sys.argv[1])
+    # load Image
+    img = loaders.load(sys.argv[1])
     # Use Floyd-Steinberg dithering
-    res = img.filters.FloydSteinbergAlloc(core.C.PIXEL_G1)
+    res = img.filters.floyd_steinberg_alloc(core.C.PIXEL_G1)
     # Save result into grayscale png
-    res.loaders.SavePNG("out.png")
+    res.loaders.save_png("out.png")
 
 if __name__ == '__main__':
     main()

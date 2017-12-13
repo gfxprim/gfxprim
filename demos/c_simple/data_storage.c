@@ -28,48 +28,48 @@
 
 #include <stdio.h>
 
-#include <GP.h>
+#include <gfxprim.h>
 
 int main(void)
 {
-	GP_DataStorage *storage = GP_DataStorageCreate();
-	GP_DataNode *flags;
+	gp_storage *storage = gp_storage_create();
+	gp_data_node *flags;
 
 	if (storage == NULL)
 		return 1;
 
 	printf("Empty storage -----------------------\n");
-	GP_DataPrint(GP_DataStorageRoot(storage));
+	gp_data_print(gp_storage_root(storage));
 	printf("-------------------------------------\n\n");
 
-	GP_DataNode data = {
+	gp_data_node data = {
 		.type = GP_DATA_INT,
 		.value.i = 300,
 		.id = "dpi"
 	};
 
-	GP_DataStorageAdd(storage, NULL, &data);
+	gp_storage_add(storage, NULL, &data);
 
-	GP_DataStorageAddString(storage, NULL, "orientation", "top-down");
+	gp_storage_add_string(storage, NULL, "orientation", "top-down");
 
 	printf("Flat storage ------------------------\n");
-	GP_DataPrint(GP_DataStorageRoot(storage));
+	gp_data_print(gp_storage_root(storage));
 	printf("-------------------------------------\n\n");
 
-	flags = GP_DataStorageAddDict(storage, NULL, "flags");
+	flags = gp_storage_add_dict(storage, NULL, "flags");
 
 	data.type = GP_DATA_INT;
 	data.id = "compression_level";
 	data.value.i = 10;
 
-	GP_DataStorageAdd(storage, flags, &data);
+	gp_storage_add(storage, flags, &data);
 
 	printf("Recursive storage -------------------\n");
-	GP_DataPrint(GP_DataStorageRoot(storage));
+	gp_data_print(gp_storage_root(storage));
 	printf("-------------------------------------\n\n");
 
-	GP_DataPrint(GP_DataStorageGet(storage, NULL, "dpi"));
-	GP_DataStorageDestroy(storage);
+	gp_data_print(gp_storage_get(storage, NULL, "dpi"));
+	gp_storage_destroy(storage);
 
 	return 0;
 }

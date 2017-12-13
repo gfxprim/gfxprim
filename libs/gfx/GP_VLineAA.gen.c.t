@@ -29,8 +29,8 @@
 
 #define FP_TO_PERC(a) (GP_FP_ROUND_TO_INT((a) * 255))
 
-void GP_VLineAA_Raw(GP_Pixmap *pixmap, GP_Coord x, GP_Coord y0,
-                    GP_Coord y1, GP_Pixel pixel)
+void gp_vline_aa_raw(gp_pixmap *pixmap, gp_coord x, gp_coord y0,
+                     gp_coord y1, gp_pixel pixel)
 {
 	if (y1 < y0)
 		GP_SWAP(y1, y0);
@@ -39,9 +39,9 @@ void GP_VLineAA_Raw(GP_Pixmap *pixmap, GP_Coord x, GP_Coord y0,
 	y1 += GP_FP_1_2;
 	x  -= GP_FP_1_2;
 
-	GP_Coord int_y0 = GP_FP_TO_INT(y0);
-	GP_Coord int_y1 = GP_FP_TO_INT(y1);
-	GP_Coord int_x  = GP_FP_TO_INT(x);
+	gp_coord int_y0 = GP_FP_TO_INT(y0);
+	gp_coord int_y1 = GP_FP_TO_INT(y1);
+	gp_coord int_x  = GP_FP_TO_INT(x);
 
 	/* Line is shorter than two pixels */
 	if (int_y0 == int_y1) {
@@ -53,25 +53,25 @@ void GP_VLineAA_Raw(GP_Pixmap *pixmap, GP_Coord x, GP_Coord y0,
 	uint8_t perc;
 
 	perc = FP_TO_PERC(GP_FP_MUL(GP_FP_RFRAC(x), GP_FP_RFRAC(y0)));
-	GP_MixPixel_Raw_Clipped(pixmap, int_x, int_y0, pixel, perc);
+	gp_mix_pixel_raw_clipped(pixmap, int_x, int_y0, pixel, perc);
 
 	perc = FP_TO_PERC(GP_FP_MUL(GP_FP_FRAC(x), GP_FP_RFRAC(y0)));
-	GP_MixPixel_Raw_Clipped(pixmap, int_x+1, int_y0, pixel, perc);
+	gp_mix_pixel_raw_clipped(pixmap, int_x+1, int_y0, pixel, perc);
 
 	perc = FP_TO_PERC(GP_FP_MUL(GP_FP_RFRAC(x), GP_FP_FRAC(y1)));
-	GP_MixPixel_Raw_Clipped(pixmap, int_x, int_y1, pixel, perc);
+	gp_mix_pixel_raw_clipped(pixmap, int_x, int_y1, pixel, perc);
 
 	perc = FP_TO_PERC(GP_FP_MUL(GP_FP_FRAC(x), GP_FP_FRAC(y1)));
-	GP_MixPixel_Raw_Clipped(pixmap, int_x+1, int_y1, pixel, perc);
+	gp_mix_pixel_raw_clipped(pixmap, int_x+1, int_y1, pixel, perc);
 
 	/* Draw the middle pixels */
 	uint8_t up = FP_TO_PERC(GP_FP_RFRAC(x));
 	uint8_t lp = FP_TO_PERC(GP_FP_FRAC(x));
 
-	GP_Coord y;
+	gp_coord y;
 
 	for (y = int_y0 + 1; y < int_y1; y++) {
-		GP_MixPixel_Raw_Clipped(pixmap, int_x, y, pixel, up);
-		GP_MixPixel_Raw_Clipped(pixmap, int_x+1, y, pixel, lp);
+		gp_mix_pixel_raw_clipped(pixmap, int_x, y, pixel, up);
+		gp_mix_pixel_raw_clipped(pixmap, int_x+1, y, pixel, lp);
 	}
 }

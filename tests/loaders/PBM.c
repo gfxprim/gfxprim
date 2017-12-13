@@ -30,9 +30,9 @@
 
 #include "tst_test.h"
 
-#define LOAD GP_LoadPBM
-#define SAVE GP_SavePBM
-#define READ GP_ReadPBM
+#define LOAD gp_load_pbm
+#define SAVE gp_save_pbm
+#define READ gp_read_pbm
 #include "Loader.h"
 #include "PBM.h"
 

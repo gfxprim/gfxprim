@@ -30,113 +30,113 @@
 
 struct virt_priv {
 	/* Original backend */
-	GP_Backend *backend;
+	gp_backend *backend;
 
 	int flags;
 };
 
-static void virt_flip(GP_Backend *self)
+static void virt_flip(gp_backend *self)
 {
 	struct virt_priv *virt = GP_BACKEND_PRIV(self);
 
 	/* Convert and copy the buffer */
-	GP_Blit(self->pixmap, 0, 0, self->pixmap->w, self->pixmap->h,
-	        virt->backend->pixmap, 0, 0);
+	gp_blit(self->pixmap, 0, 0, self->pixmap->w, self->pixmap->h,
+		virt->backend->pixmap, 0, 0);
 
 	/* Call blit on original backend */
-	virt->backend->Flip(virt->backend);
+	virt->backend->flip(virt->backend);
 }
 
-static void virt_update_rect(GP_Backend *self, GP_Coord x0, GP_Coord y0,
-                             GP_Coord x1, GP_Coord y1)
+static void virt_update_rect(gp_backend *self, gp_coord x0, gp_coord y0,
+                             gp_coord x1, gp_coord y1)
 {
 	struct virt_priv *virt = GP_BACKEND_PRIV(self);
 
 	/* Convert and copy the buffer */
-	GP_BlitXYXY(self->pixmap, x0, y0, x1, y1,
-	            virt->backend->pixmap, x0, y0);
+	gp_blit_xyxy(self->pixmap, x0, y0, x1, y1,
+	             virt->backend->pixmap, x0, y0);
 
 	/* Call blit on original backend */
-	virt->backend->UpdateRect(virt->backend, x0, y0, x1, y1);
+	virt->backend->update_rect(virt->backend, x0, y0, x1, y1);
 }
 
-static int virt_set_attrs(struct GP_Backend *self,
+static int virt_set_attrs(struct gp_backend *self,
                           uint32_t w, uint32_t h,
                           const char *caption)
 {
 	struct virt_priv *virt = GP_BACKEND_PRIV(self);
 	int ret;
 
-	ret = virt->backend->SetAttributes(virt->backend, w, h, caption);
+	ret = virt->backend->set_attrs(virt->backend, w, h, caption);
 
 	if (ret)
 		return ret;
 
 	/* If backend was resized, update our buffer as well */
 	if (h != 0 && w != 0)
-		GP_PixmapResize(self->pixmap, w, h);
+		gp_pixmap_resize(self->pixmap, w, h);
 
 	return 0;
 }
 
-static void virt_poll(GP_Backend *self)
+static void virt_poll(gp_backend *self)
 {
 	struct virt_priv *virt = GP_BACKEND_PRIV(self);
 
-	virt->backend->Poll(virt->backend);
+	virt->backend->poll(virt->backend);
 
-	struct GP_Event ev;
+	gp_event ev;
 
-	while (GP_BackendGetEvent(virt->backend, &ev))
-		GP_EventQueuePut(&self->event_queue, &ev);
+	while (gp_backend_get_event(virt->backend, &ev))
+		gp_event_queue_put(&self->event_queue, &ev);
 }
 
-static void virt_wait(GP_Backend *self)
+static void virt_wait(gp_backend *self)
 {
 	struct virt_priv *virt = GP_BACKEND_PRIV(self);
 
-	virt->backend->Wait(virt->backend);
+	virt->backend->wait(virt->backend);
 
-	struct GP_Event ev;
+	gp_event ev;
 
-	while (GP_BackendGetEvent(virt->backend, &ev))
-		GP_EventQueuePut(&self->event_queue, &ev);
+	while (gp_backend_get_event(virt->backend, &ev))
+		gp_event_queue_put(&self->event_queue, &ev);
 }
 
-static void virt_exit(GP_Backend *self)
+static void virt_exit(gp_backend *self)
 {
 	struct virt_priv *virt = GP_BACKEND_PRIV(self);
 
-	GP_PixmapFree(self->pixmap);
+	gp_pixmap_free(self->pixmap);
 
 	if (virt->flags & GP_BACKEND_CALL_EXIT)
-		virt->backend->Exit(virt->backend);
+		virt->backend->exit(virt->backend);
 
 	free(self);
 }
 
-static int virt_resize_ack(GP_Backend *self)
+static int virt_resize_ack(gp_backend *self)
 {
 	struct virt_priv *virt = GP_BACKEND_PRIV(self);
 	int ret;
 
-	ret = virt->backend->ResizeAck(virt->backend);
+	ret = virt->backend->resize_ack(virt->backend);
 
 	if (ret)
 		return ret;
 
-	return GP_PixmapResize(self->pixmap,
-	                        virt->backend->pixmap->w,
-	                        virt->backend->pixmap->h);
+	return gp_pixmap_resize(self->pixmap, virt->backend->pixmap->w,
+				virt->backend->pixmap->h);
 }
 
-GP_Backend *GP_BackendVirtualInit(GP_Backend *backend,
-                                  GP_PixelType pixel_type, int flags)
+gp_backend *gp_backend_virt_init(gp_backend *backend,
+                                 gp_pixel_type pixel_type,
+                                 enum gp_backend_virt_flags flags)
 {
-	GP_Backend *self;
+	gp_backend *self;
 	struct virt_priv *virt;
 
-	self = malloc(sizeof(GP_Backend) +
+	self = malloc(sizeof(gp_backend) +
 	              sizeof(struct virt_priv));
 
 	if (self == NULL) {
@@ -144,11 +144,11 @@ GP_Backend *GP_BackendVirtualInit(GP_Backend *backend,
 		return NULL;
 	}
 
-	memset(self, 0, sizeof(GP_Backend));
+	memset(self, 0, sizeof(gp_backend));
 
 	/* Create new buffer with different pixmap type */
-	self->pixmap = GP_PixmapAlloc(backend->pixmap->w, backend->pixmap->h,
-	                                pixel_type);
+	self->pixmap = gp_pixmap_alloc(backend->pixmap->w, backend->pixmap->h,
+				       pixel_type);
 
 	if (self->pixmap == NULL)
 		goto err0;
@@ -158,18 +158,18 @@ GP_Backend *GP_BackendVirtualInit(GP_Backend *backend,
 	virt->flags = flags;
 
 	/* Initalize new backend */
-	self->name          = "Virtual Backend";
-	self->Flip          = virt_flip;
-	self->UpdateRect    = virt_update_rect;
-	self->Exit          = virt_exit;
-	self->ResizeAck     = virt_resize_ack;
-	self->Poll          = backend->Poll ? virt_poll : NULL;
-	self->Wait          = backend->Wait ? virt_wait : NULL;
-	self->SetAttributes = backend->SetAttributes ? virt_set_attrs : NULL;
-	self->timers        = NULL;
+	self->update_rect = virt_update_rect;
+	self->resize_ack = virt_resize_ack;
+	self->set_attrs = backend->set_attrs ? virt_set_attrs : NULL;
+	self->name = "Virtual Backend";
+	self->flip = virt_flip;
+	self->poll = backend->poll ? virt_poll : NULL;
+	self->wait = backend->wait ? virt_wait : NULL;
+	self->exit = virt_exit;
+	self->timers = NULL;
 
-	GP_EventQueueInit(&self->event_queue, backend->pixmap->w,
-	                  backend->pixmap->h, 0);
+	gp_event_queue_init(&self->event_queue, backend->pixmap->w,
+	                    backend->pixmap->h, 0);
 
 	return self;
 

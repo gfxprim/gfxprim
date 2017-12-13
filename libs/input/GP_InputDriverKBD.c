@@ -20,11 +20,11 @@
  *                                                                           *
  *****************************************************************************/
 
-#include "core/GP_Common.h"
-#include "core/GP_Debug.h"
+#include <core/GP_Common.h>
+#include <core/GP_Debug.h>
 
-#include "input/GP_EventQueue.h"
-#include "input/GP_InputDriverKBD.h"
+#include <input/GP_EventQueue.h>
+#include <input/GP_InputDriverKBD.h>
 
 /* KBD raw mode keycodes */
 static uint16_t keycode_table[] = {
@@ -62,8 +62,8 @@ static uint16_t keycode_table[] = {
 	GP_KEY_LEFT_META,
 };
 
-void GP_InputDriverKBDEventPut(struct GP_EventQueue *event_queue,
-                               unsigned char ev)
+void gp_input_driver_kbd_event_put(gp_event_queue *event_queue,
+                                   unsigned char ev)
 {
 	unsigned int keycode = ev & 0x7f;
 	int press = !(ev & 0x80);
@@ -75,7 +75,7 @@ void GP_InputDriverKBDEventPut(struct GP_EventQueue *event_queue,
 		key = keycode_table[keycode - 1];
 
 		if (key != 0) {
-			GP_EventQueuePushKey(event_queue, key, press, NULL);
+			gp_event_queue_push_key(event_queue, key, press, NULL);
 			return;
 		}
 	}

@@ -23,18 +23,20 @@
 #ifndef GP_GRABBERS_GRABBER_H
 #define GP_GRABBERS_GRABBER_H
 
-struct GP_Pixmap;
+#include <core/GP_Types.h>
 
-typedef struct GP_Grabber {
+typedef struct gp_grabber gp_grabber;
+
+struct gp_grabber {
 	/*
 	 * Pixmap with current frame.
 	 */
-	struct GP_Pixmap *frame;
+	struct gp_pixmap *frame;
 
 	/*
 	 * Returns 0 if there are no images in queue and 1 otherwise.
 	 */
-	int (*Poll)(struct GP_Grabber *self);
+	int (*poll)(gp_grabber *self);
 
 	/*
 	 * Grabber fd, may be set -1 if grabber doesn't have one.
@@ -42,47 +44,47 @@ typedef struct GP_Grabber {
 	int fd;
 
 	/*
-	 * Starts the actuall grabbing. May be NULL if not needed.
+	 * starts the actuall grabbing. May be NULL if not needed.
 	 */
-	int (*Start)(struct GP_Grabber *self);
+	int (*start)(gp_grabber *self);
 
 	/*
-	 * Stops the grabbing. May be NULL if not needed.
+	 * stops the grabbing. May be NULL if not needed.
 	 */
-	int (*Stop)(struct GP_Grabber *self);
+	int (*stop)(gp_grabber *self);
 
 	/*
-	 * Exit functions. Closes fd, frees memory.
+	 * exit functions. Closes fd, frees memory.
 	 */
-	void (*Exit)(struct GP_Grabber *self);
+	void (*exit)(gp_grabber *self);
 
 	char priv[];
-} GP_Grabber;
+};
 
 #define GP_GRABBER_PRIV(grabber) ((void*)(grabber)->priv)
 
-static inline void GP_GrabberExit(struct GP_Grabber *self)
+static inline void gp_grabber_exit(gp_grabber *self)
 {
-	self->Exit(self);
+	self->exit(self);
 }
 
-static inline int GP_GrabberPoll(struct GP_Grabber *self)
+static inline int gp_grabber_poll(gp_grabber *self)
 {
-	return self->Poll(self);
+	return self->poll(self);
 }
 
-static inline int GP_GrabberStart(struct GP_Grabber *self)
+static inline int gp_grabber_start(gp_grabber *self)
 {
-	if (self->Start)
-		return self->Start(self);
+	if (self->start)
+		return self->start(self);
 
 	return 0;
 }
 
-static inline int GP_GrabberStop(struct GP_Grabber *self)
+static inline int gp_grabber_stop(gp_grabber *self)
 {
-	if (self->Stop)
-		return self->Stop(self);
+	if (self->stop)
+		return self->stop(self);
 
 	return 0;
 }

@@ -16,17 +16,17 @@
 
 #include "tst_test.h"
 
-typedef int (*Save)(const GP_Pixmap *src, const char *path, GP_ProgressCallback *callback);
-typedef GP_Pixmap *(*Load)(const char *path, GP_ProgressCallback *callback);
+typedef int (*Save)(const gp_pixmap *src, const char *path, gp_progress_cb *callback);
+typedef gp_pixmap *(*Load)(const char *path, gp_progress_cb *callback);
 
-static int test(Save Saver, Load Loader, GP_PixelType pixel_type)
+static int test(Save Saver, Load Loader, gp_pixel_type pixel_type)
 {
-	GP_Pixmap *src;
-	GP_Pixmap *res;
+	gp_pixmap *src;
+	gp_pixmap *res;
 	unsigned int x, y;
 	int ret = TST_SUCCESS;
 
-	src = GP_PixmapAlloc(100, 100, pixel_type);
+	src = gp_pixmap_alloc(100, 100, pixel_type);
 
 	if (!src) {
 		tst_msg("Malloc failed");
@@ -35,7 +35,7 @@ static int test(Save Saver, Load Loader, GP_PixelType pixel_type)
 
 	for (x = 0; x < src->w; x++)
 		for (y = 0; y < src->w; y++)
-			GP_PutPixel(src, x, y, 0);
+			gp_putpixel(src, x, y, 0);
 
 	if (Saver(src, "testfile", NULL)) {
 		if (errno == ENOSYS) {
@@ -63,21 +63,21 @@ static int test(Save Saver, Load Loader, GP_PixelType pixel_type)
 		goto err;
 	}
 
-	tst_msg("Loaded back as %s", GP_PixelTypeName(res->pixel_type));
+	tst_msg("Loaded back as %s", gp_pixel_type_name(res->pixel_type));
 
 	if (res->w != src->w || res->h != src->h) {
 		tst_msg("Invalid loaded image size %ux%u", res->w, res->h);
 		ret = TST_FAILED;
 	}
 
-	if (GP_GetPixel(res, 0, 0) != 0) {
-		tst_msg("Pixel value is wrong %x", GP_GetPixel(res, 0, 0));
+	if (gp_getpixel(res, 0, 0) != 0) {
+		tst_msg("Pixel value is wrong %x", gp_getpixel(res, 0, 0));
 		ret = TST_FAILED;
 	}
 
-	GP_PixmapFree(res);
+	gp_pixmap_free(res);
 err:
-	GP_PixmapFree(src);
+	gp_pixmap_free(src);
 	return ret;
 }
 
@@ -86,7 +86,7 @@ err:
 @         if not pt.is_unknown():
 static int test_{{ fmt }}_{{ pt.name }}(void)
 {
-	return test(GP_Save{{ fmt }}, GP_Load{{ fmt }}, GP_PIXEL_{{ pt.name }});
+	return test(gp_save_{{ fmt }}, gp_load_{{ fmt }}, GP_PIXEL_{{ pt.name }});
 }
 
 @ end

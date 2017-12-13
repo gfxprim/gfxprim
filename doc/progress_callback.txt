@@ -1,7 +1,7 @@
 Progress Callback
 -----------------
 
-The 'GP_ProgressCallback' is a structure that stores user-defined callback
+The 'gp_progress_cb' is a structure that stores user-defined callback
 function and user-defined pointer and percentage.
 
 It is passed as last parameter to functions that would take some time to
@@ -13,11 +13,11 @@ link:loaders.html[loaders].
 
 [source,c]
 -------------------------------------------------------------------------------
-typdedef struct GP_ProgressCallback {
+typdedef struct gp_progress_cb {
 	float percentage;
-	int (*callback)(struct GP_ProgressCallback *self);
+	int (*callback)(struct gp_progress_cb *self);
 	void *priv;
-} GP_ProgressCallback;
+} gp_progress_cb;
 -------------------------------------------------------------------------------
 
 The 'callback' pointer is a pointer to user defined callback function.

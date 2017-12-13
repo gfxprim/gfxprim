@@ -16,27 +16,27 @@
 @             if not dst.is_unknown() and not dst.is_palette():
 @                 if src.is_alpha():
 
-static inline GP_Pixel GP_MixPixels_{{ src.name }}_{{ dst.name }}(GP_Pixel src, GP_Pixel dst)
+static inline gp_pixel gp_mix_pixels_{{ src.name }}_{{ dst.name }}(gp_pixel src, gp_pixel dst)
 {
 	/* Extract the alpha channel */
-	unsigned int alpha = GP_Pixel_GET_A_{{ src.name }}(src);
+	unsigned int alpha = GP_PIXEL_GET_A_{{ src.name }}(src);
 
 	/* Convert the pixel to RGB888, mix the values */
-	GP_Pixel src_rgb = 0, dst_rgb = 0, res = 0;
+	gp_pixel src_rgb = 0, dst_rgb = 0, res = 0;
 
-	GP_Pixel_{{ src.name }}_TO_RGB888(src, src_rgb);
-	GP_Pixel_{{ dst.name }}_TO_RGB888(dst, dst_rgb);
+	GP_PIXEL_{{ src.name }}_TO_RGB888(src, src_rgb);
+	GP_PIXEL_{{ dst.name }}_TO_RGB888(dst, dst_rgb);
 
 	int sr, sg, sb;
 	int dr, dg, db;
 
-	sr = GP_Pixel_GET_R_RGB888(src_rgb);
-	sg = GP_Pixel_GET_G_RGB888(src_rgb);
-	sb = GP_Pixel_GET_B_RGB888(src_rgb);
+	sr = GP_PIXEL_GET_R_RGB888(src_rgb);
+	sg = GP_PIXEL_GET_G_RGB888(src_rgb);
+	sb = GP_PIXEL_GET_B_RGB888(src_rgb);
 
-	dr = GP_Pixel_GET_R_RGB888(dst_rgb);
-	dg = GP_Pixel_GET_G_RGB888(dst_rgb);
-	db = GP_Pixel_GET_B_RGB888(dst_rgb);
+	dr = GP_PIXEL_GET_R_RGB888(dst_rgb);
+	dg = GP_PIXEL_GET_G_RGB888(dst_rgb);
+	db = GP_PIXEL_GET_B_RGB888(dst_rgb);
 
 @                     a_max = 2 ** src.chans['A'][2] - 1
 
@@ -44,9 +44,9 @@ static inline GP_Pixel GP_MixPixels_{{ src.name }}_{{ dst.name }}(GP_Pixel src, 
 	dg = (dg * ({{ a_max }} - alpha) + sg * alpha + {{ a_max // 2 }}) / {{ a_max }};
 	db = (db * ({{ a_max }} - alpha) + sb * alpha + {{ a_max // 2 }}) / {{ a_max }};
 
-	dst_rgb = GP_Pixel_CREATE_RGB888(dr, dg, db);
+	dst_rgb = GP_PIXEL_CREATE_RGB888(dr, dg, db);
 
-	GP_Pixel_RGB888_TO_{{ dst.name }}(dst_rgb, res);
+	GP_PIXEL_RGB888_TO_{{ dst.name }}(dst_rgb, res);
 
 	return res;
 }

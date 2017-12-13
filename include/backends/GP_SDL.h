@@ -24,9 +24,9 @@
 #define BACKENDS_GP_SDL_H
 
 #include <stdint.h>
-#include "backends/GP_Backend.h"
+#include <backends/GP_Backend.h>
 
-enum GP_BackendSDLFlags {
+enum gp_sdl_lags {
 	GP_SDL_FULLSCREEN = 0x01,
 	GP_SDL_RESIZABLE  = 0x02,
 };
@@ -44,7 +44,7 @@ enum GP_BackendSDLFlags {
  * * When backend is allready initalized, this function ignores it's parameters
  *   and returns pointer to allready initalized SDL backend.
  *
- * * The SDL backends (upon calling GP_BackendPoll()) feeds keyboard and mouse
+ * * The SDL backends (upon calling gp_backend_poll()) feeds keyboard and mouse
  *   events into global GP event queue (see input/GP_Event.h).
  *
  *
@@ -52,12 +52,11 @@ enum GP_BackendSDLFlags {
  *
  * * If w, h and/or bpp are set to zero, SDL tries to do best fit.
  *
- * * The GP_BackendSDLFlags are converted into SDL equivalents.
+ * * The gp_sdl_flags are converted into SDL equivalents.
  *
  * Upon failure, or if SDL wasn't compiled in, NULL is returned.
  */
-GP_Backend *GP_BackendSDLInit(GP_Size w, GP_Size h,
-                              uint8_t bpp, uint8_t flags,
-			      const char *caption);
+gp_backend *gp_sdl_init(gp_size w, gp_size h, uint8_t bpp, uint8_t flags,
+			const char *caption);
 
 #endif /* BACKENDS_GP_SDL_H */

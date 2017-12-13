@@ -30,21 +30,21 @@
 #include <string.h>
 #include <errno.h>
 
-#include <GP.h>
+#include <gfxprim.h>
 
 int main(int argc, char *argv[])
 {
-	GP_Pixmap *img;
+	gp_pixmap *img;
 
 	/* Turn on debug messages */
-	GP_SetDebugLevel(10);
+	gp_set_debug_level(10);
 
 	if (argc != 2) {
 		fprintf(stderr, "Takes an image as an parameter\n");
 		return 1;
 	}
 
-	img = GP_LoadImage(argv[1], NULL);
+	img = gp_load_image(argv[1], NULL);
 
 	if (img == NULL) {
 		fprintf(stderr, "Failed to load image '%s':%s\n", argv[1],
@@ -52,7 +52,7 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 
-	if (GP_SavePNG(img, "out.png", NULL)) {
+	if (gp_save_png(img, "out.png", NULL)) {
 		fprintf(stderr, "Failed to save image %s", strerror(errno));
 		return 1;
 	}

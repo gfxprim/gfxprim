@@ -30,13 +30,13 @@
 
 #include "tst_test.h"
 
-static int test_load_JPG(const char *path)
+static int test_load_jpg(const char *path)
 {
-	GP_Pixmap *img;
+	gp_pixmap *img;
 
 	errno = 0;
 
-	img = GP_LoadJPG(path, NULL);
+	img = gp_load_jpg(path, NULL);
 
 	if (img == NULL) {
 		switch (errno) {
@@ -53,17 +53,17 @@ static int test_load_JPG(const char *path)
 	 * TODO: check correct data.
 	 */
 
-	GP_PixmapFree(img);
+	gp_pixmap_free(img);
 
 	return TST_SUCCESS;
 }
 
-static int test_save_JPG(GP_PixelType pixel_type)
+static int test_save_jpg(gp_pixel_type pixel_type)
 {
-	GP_Pixmap *pixmap;
+	gp_pixmap *pixmap;
 	int ret;
 
-	pixmap = GP_PixmapAlloc(100, 100, pixel_type);
+	pixmap = gp_pixmap_alloc(100, 100, pixel_type);
 
 	if (pixmap == NULL) {
 		tst_msg("Failed to allocate pixmap");
@@ -72,22 +72,22 @@ static int test_save_JPG(GP_PixelType pixel_type)
 
 	errno = 0;
 
-	ret = GP_SaveJPG(pixmap, "/dev/null", NULL);
+	ret = gp_save_jpg(pixmap, "/dev/null", NULL);
 
 	if (ret == 0) {
 		tst_msg("Saved successfully");
-		GP_PixmapFree(pixmap);
+		gp_pixmap_free(pixmap);
 		return TST_SUCCESS;
 	}
 
 	switch (errno) {
 	case ENOSYS:
 		tst_msg("Not Implemented");
-		GP_PixmapFree(pixmap);
+		gp_pixmap_free(pixmap);
 		return TST_SKIPPED;
 	default:
 		tst_msg("Failed and errno is not ENOSYS (%i)", errno);
-		GP_PixmapFree(pixmap);
+		gp_pixmap_free(pixmap);
 		return TST_FAILED;
 	}
 }
@@ -97,42 +97,42 @@ const struct tst_suite tst_suite = {
 	.tests = {
 		/* JPEG loader tests */
 		{.name = "JPEG Load 100x100 CMYK",
-		 .tst_fn = test_load_JPG,
+		 .tst_fn = test_load_jpg,
 		 .res_path = "data/jpeg/valid/100x100-cmyk-red.jpeg",
 		 .data = "100x100-cmyk-red.jpeg",
 		 .flags = TST_TMPDIR | TST_CHECK_MALLOC},
 
 		{.name = "JPEG Load 100x100 RGB",
-		 .tst_fn = test_load_JPG,
+		 .tst_fn = test_load_jpg,
 		 .res_path = "data/jpeg/valid/100x100-red.jpeg",
 		 .data = "100x100-red.jpeg",
 		 .flags = TST_TMPDIR | TST_CHECK_MALLOC},
 
 		{.name = "JPEG Load 100x100 G8",
-		 .tst_fn = test_load_JPG,
+		 .tst_fn = test_load_jpg,
 		 .res_path = "data/jpeg/valid/100x100-grayscale-white.jpeg",
 		 .data = "100x100-grayscale-white.jpeg",
 		 .flags = TST_TMPDIR | TST_CHECK_MALLOC},
 
 		{.name = "JPEG Load 100x100 G8",
-		 .tst_fn = test_load_JPG,
+		 .tst_fn = test_load_jpg,
 		 .res_path = "data/jpeg/valid/100x100-grayscale-black.jpeg",
 		 .data = "100x100-grayscale-black.jpeg",
 		 .flags = TST_TMPDIR | TST_CHECK_MALLOC},
 
 		/* JPEG save tests */
 		{.name = "JPEG Save 100x100 G8",
-		 .tst_fn = test_save_JPG,
+		 .tst_fn = test_save_jpg,
 		 .data = (void*)GP_PIXEL_G8,
 		 .flags = TST_CHECK_MALLOC},
 
 		{.name = "JPEG Save 100x100 RGB888",
-		 .tst_fn = test_save_JPG,
+		 .tst_fn = test_save_jpg,
 		 .data = (void*)GP_PIXEL_RGB888,
 		 .flags = TST_CHECK_MALLOC},
 
 		{.name = "JPEG Save 100x100 BGR888",
-		 .tst_fn = test_save_JPG,
+		 .tst_fn = test_save_jpg,
 		 .data = (void*)GP_PIXEL_BGR888,
 		 .flags = TST_CHECK_MALLOC},
 

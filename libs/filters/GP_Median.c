@@ -29,7 +29,7 @@
 
 #include "core/GP_Debug.h"
 
-#include "GP_Median.h"
+#include <filters/GP_Median.h>
 
 #include <string.h>
 
@@ -167,13 +167,13 @@ static inline unsigned int hist8_median(struct hist8u *h, struct hist8 *row,
 	return 0;
 }
 
-static int GP_FilterMedian_Raw(const GP_Pixmap *src,
-                               GP_Coord x_src, GP_Coord y_src,
-                               GP_Size w_src, GP_Size h_src,
-                               GP_Pixmap *dst,
-                               GP_Coord x_dst, GP_Coord y_dst,
-		               int xmed, int ymed,
-                               GP_ProgressCallback *callback)
+static int gp_filter_median_raw(const gp_pixmap *src,
+                                gp_coord x_src, gp_coord y_src,
+                                gp_size w_src, gp_size h_src,
+                                gp_pixmap *dst,
+                                gp_coord x_dst, gp_coord y_dst,
+		                int xmed, int ymed,
+                                gp_progress_cb *callback)
 {
 	int i, x, y;
 	unsigned int trigger = ((2*xmed+1)*(2*ymed+1))/2;
@@ -190,19 +190,19 @@ static int GP_FilterMedian_Raw(const GP_Pixmap *src,
 	unsigned int size = (w_src + 2 * xmed + 1);
 
 	/* Create and initalize arrays for row of histograms */
-	GP_TempAllocCreate(temp, 3 * sizeof(struct hist8) * size + 3 * sizeof(struct hist8u));
+	gp_temp_alloc_create(temp, 3 * sizeof(struct hist8) * size + 3 * sizeof(struct hist8u));
 
-	struct hist8 *R = GP_TempAllocGet(temp, sizeof(struct hist8) * size);
-	struct hist8 *G = GP_TempAllocGet(temp, sizeof(struct hist8) * size);
-	struct hist8 *B = GP_TempAllocGet(temp, sizeof(struct hist8) * size);
+	struct hist8 *R = gp_temp_alloc_get(temp, sizeof(struct hist8) * size);
+	struct hist8 *G = gp_temp_alloc_get(temp, sizeof(struct hist8) * size);
+	struct hist8 *B = gp_temp_alloc_get(temp, sizeof(struct hist8) * size);
 
 	memset(R, 0, sizeof(*R) * size);
 	memset(G, 0, sizeof(*G) * size);
 	memset(B, 0, sizeof(*B) * size);
 
-	struct hist8u *XR = GP_TempAllocGet(temp, sizeof(struct hist8u));
-	struct hist8u *XG = GP_TempAllocGet(temp, sizeof(struct hist8u));
-	struct hist8u *XB = GP_TempAllocGet(temp, sizeof(struct hist8u));
+	struct hist8u *XR = gp_temp_alloc_get(temp, sizeof(struct hist8u));
+	struct hist8u *XG = gp_temp_alloc_get(temp, sizeof(struct hist8u));
+	struct hist8u *XB = gp_temp_alloc_get(temp, sizeof(struct hist8u));
 
 	/* Prefill row of histograms */
 	for (x = 0; x < (int)w_src + 2*xmed; x++) {
@@ -211,11 +211,11 @@ static int GP_FilterMedian_Raw(const GP_Pixmap *src,
 		for (y = -ymed; y <= ymed; y++) {
 			int yi = GP_CLAMP(y_src + y, 0, (int)src->h - 1);
 
-			GP_Pixel pix = GP_GetPixel_Raw_24BPP(src, xi, yi);
+			gp_pixel pix = gp_getpixel_raw_24BPP(src, xi, yi);
 
-			hist8_inc(R, x, GP_Pixel_GET_R_RGB888(pix));
-			hist8_inc(G, x, GP_Pixel_GET_G_RGB888(pix));
-			hist8_inc(B, x, GP_Pixel_GET_B_RGB888(pix));
+			hist8_inc(R, x, GP_PIXEL_GET_R_RGB888(pix));
+			hist8_inc(G, x, GP_PIXEL_GET_G_RGB888(pix));
+			hist8_inc(B, x, GP_PIXEL_GET_B_RGB888(pix));
 		}
 	}
 
@@ -238,8 +238,8 @@ static int GP_FilterMedian_Raw(const GP_Pixmap *src,
 			int g = hist8_median(XG, G, x, xmed, trigger);
 			int b = hist8_median(XB, B, x, xmed, trigger);
 
-			GP_PutPixel_Raw_24BPP(dst, x_dst + x, y_dst + y,
-			                      GP_Pixel_CREATE_RGB888(r, g, b));
+			gp_putpixel_raw_24BPP(dst, x_dst + x, y_dst + y,
+			                      GP_PIXEL_CREATE_RGB888(r, g, b));
 
 			/* Recompute histograms */
 			hist8_sub(XR, R, x);
@@ -256,73 +256,73 @@ static int GP_FilterMedian_Raw(const GP_Pixmap *src,
 			int xi = GP_CLAMP(x_src + x - xmed, 0, (int)src->w - 1);
 			int yi = GP_CLAMP(y_src + y - ymed, 0, (int)src->h - 1);
 
-			GP_Pixel pix = GP_GetPixel_Raw_24BPP(src, xi, yi);
+			gp_pixel pix = gp_getpixel_raw_24BPP(src, xi, yi);
 
-			hist8_dec(R, x, GP_Pixel_GET_R_RGB888(pix));
-			hist8_dec(G, x, GP_Pixel_GET_G_RGB888(pix));
-			hist8_dec(B, x, GP_Pixel_GET_B_RGB888(pix));
+			hist8_dec(R, x, GP_PIXEL_GET_R_RGB888(pix));
+			hist8_dec(G, x, GP_PIXEL_GET_G_RGB888(pix));
+			hist8_dec(B, x, GP_PIXEL_GET_B_RGB888(pix));
 
 			yi = GP_MIN(y_src + y + ymed + 1, (int)src->h - 1);
 
-			pix = GP_GetPixel_Raw_24BPP(src, xi, yi);
+			pix = gp_getpixel_raw_24BPP(src, xi, yi);
 
-			hist8_inc(R, x, GP_Pixel_GET_R_RGB888(pix));
-			hist8_inc(G, x, GP_Pixel_GET_G_RGB888(pix));
-			hist8_inc(B, x, GP_Pixel_GET_B_RGB888(pix));
+			hist8_inc(R, x, GP_PIXEL_GET_R_RGB888(pix));
+			hist8_inc(G, x, GP_PIXEL_GET_G_RGB888(pix));
+			hist8_inc(B, x, GP_PIXEL_GET_B_RGB888(pix));
 		}
 
-		if (GP_ProgressCallbackReport(callback, y, h_src, w_src)) {
-			GP_TempAllocFree(temp);
+		if (gp_progress_cb_report(callback, y, h_src, w_src)) {
+			gp_temp_alloc_free(temp);
 			return 1;
 		}
 	}
 
-	GP_TempAllocFree(temp);
-	GP_ProgressCallbackDone(callback);
+	gp_temp_alloc_free(temp);
+	gp_progress_cb_done(callback);
 
 	return 0;
 }
 
-int GP_FilterMedianEx(const GP_Pixmap *src,
-                      GP_Coord x_src, GP_Coord y_src,
-                      GP_Size w_src, GP_Size h_src,
-                      GP_Pixmap *dst,
-                      GP_Coord x_dst, GP_Coord y_dst,
-		      int xmed, int ymed,
-                      GP_ProgressCallback *callback)
+int gp_filter_median_ex(const gp_pixmap *src,
+                        gp_coord x_src, gp_coord y_src,
+                        gp_size w_src, gp_size h_src,
+                        gp_pixmap *dst,
+                        gp_coord x_dst, gp_coord y_dst,
+		        int xmed, int ymed,
+                        gp_progress_cb *callback)
 {
 	GP_CHECK(src->pixel_type == dst->pixel_type);
 
 	/* Check that destination is large enough */
-	GP_CHECK(x_dst + (GP_Coord)w_src <= (GP_Coord)dst->w);
-	GP_CHECK(y_dst + (GP_Coord)h_src <= (GP_Coord)dst->h);
+	GP_CHECK(x_dst + (gp_coord)w_src <= (gp_coord)dst->w);
+	GP_CHECK(y_dst + (gp_coord)h_src <= (gp_coord)dst->h);
 
 	GP_CHECK(xmed >= 0 && ymed >= 0);
 
-	return GP_FilterMedian_Raw(src, x_src, y_src, w_src, h_src,
-	                           dst, x_dst, y_dst, xmed, ymed, callback);
+	return gp_filter_median_raw(src, x_src, y_src, w_src, h_src,
+	                            dst, x_dst, y_dst, xmed, ymed, callback);
 }
 
-GP_Pixmap *GP_FilterMedianExAlloc(const GP_Pixmap *src,
-                                  GP_Coord x_src, GP_Coord y_src,
-                                  GP_Size w_src, GP_Size h_src,
-                                  int xmed, int ymed,
-                                  GP_ProgressCallback *callback)
+gp_pixmap *gp_filter_median_ex_alloc(const gp_pixmap *src,
+                                     gp_coord x_src, gp_coord y_src,
+                                     gp_size w_src, gp_size h_src,
+                                     int xmed, int ymed,
+                                     gp_progress_cb *callback)
 {
 	int ret;
 
 	GP_CHECK(xmed >= 0 && ymed >= 0);
 
-	GP_Pixmap *dst = GP_PixmapAlloc(w_src, h_src, src->pixel_type);
+	gp_pixmap *dst = gp_pixmap_alloc(w_src, h_src, src->pixel_type);
 
 	if (dst == NULL)
 		return NULL;
 
-	ret = GP_FilterMedian_Raw(src, x_src, y_src, w_src, h_src,
+	ret = gp_filter_median_raw(src, x_src, y_src, w_src, h_src,
 	                          dst, 0, 0, xmed, ymed, callback);
 
 	if (ret) {
-		GP_PixmapFree(dst);
+		gp_pixmap_free(dst);
 		return NULL;
 	}
 

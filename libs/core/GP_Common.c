@@ -41,7 +41,7 @@
 #define GP_ABORT_INFO_TRACE_LEVELS 20
 
 
-void GP_DebugPrintCStack(void)
+void gp_debug_print_cstack(void)
 {
 #ifdef HAVE_BACKTRACE
 #if GP_ABORT_INFO_TRACE_LEVELS > 0
@@ -71,7 +71,7 @@ static void print_python_stack(void)
 #endif /* HAVE_DL */
 }
 
-void GP_PrintAbortInfo(const char *file, const char *func, unsigned int line,
+void gp_print_abort_info(const char *file, const char *func, unsigned int line,
                        const char *msg, const char *fmt, ...)
 {
 	va_list va;
@@ -86,5 +86,5 @@ void GP_PrintAbortInfo(const char *file, const char *func, unsigned int line,
 	fprintf(stderr, "\n");
 
 	print_python_stack();
-	GP_DebugPrintCStack();
+	gp_debug_print_cstack();
 }

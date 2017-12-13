@@ -157,13 +157,13 @@ static const char circle_r_2_s_1_4_11x11[] = {
 	0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 };
 
-static int test_circle(const char *pattern, GP_Size w, GP_Size h,
-                       GP_Coord x, GP_Coord y, const int r, uint8_t seg_flag)
+static int test_circle(const char *pattern, gp_size w, gp_size h,
+                       gp_coord x, gp_coord y, const int r, uint8_t seg_flag)
 {
-	GP_Pixmap *c;
+	gp_pixmap *c;
 	int err;
 
-	c = GP_PixmapAlloc(w, h, GP_PIXEL_G8);
+	c = gp_pixmap_alloc(w, h, GP_PIXEL_G8);
 
 	if (c == NULL) {
 		tst_err("Failed to allocate pixmap");
@@ -173,7 +173,7 @@ static int test_circle(const char *pattern, GP_Size w, GP_Size h,
 	/* zero the pixels buffer */
 	memset(c->pixels, 0, c->w * c->h);
 
-	GP_CircleSeg(c, x, y, r, seg_flag, 1);
+	gp_circle_seg(c, x, y, r, seg_flag, 1);
 
 	err = compare_buffers(pattern, c);
 

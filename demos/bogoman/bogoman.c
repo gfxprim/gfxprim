@@ -20,7 +20,7 @@
  *                                                                           *
  *****************************************************************************/
 
-#include <GP.h>
+#include <gfxprim.h>
 
 #include "bogoman_debug.h"
 #include "bogoman_map.h"
@@ -32,13 +32,13 @@
 static void save_png(struct bogoman_map *map, unsigned int elem_size,
                      const char *filename)
 {
-	GP_Pixmap *pixmap;
+	gp_pixmap *pixmap;
 	unsigned int rx, ry;
 
 	rx = elem_size * map->w;
 	ry = elem_size * map->h;
 
-	pixmap = GP_PixmapAlloc(rx, ry, GP_PIXEL_RGB888);
+	pixmap = gp_pixmap_alloc(rx, ry, GP_PIXEL_RGB888);
 
 	if (pixmap == NULL)
 		return;
@@ -53,22 +53,22 @@ static void save_png(struct bogoman_map *map, unsigned int elem_size,
 
 	bogoman_render(&render, BOGOMAN_RENDER_ALL);
 
-	GP_SavePNG(pixmap, filename, NULL);
-	GP_PixmapFree(pixmap);
+	gp_save_png(pixmap, filename, NULL);
+	gp_pixmap_free(pixmap);
 }
 
-static struct GP_Backend *backend;
+static struct gp_backend *backend;
 
-static void event_loop(struct bogoman_render *render, GP_Backend *backend)
+static void event_loop(struct bogoman_render *render, gp_backend *backend)
 {
 	struct bogoman_map *map = render->map;
 	char path[128];
 	static int screenshots;
 
-	while (GP_BackendEventsQueued(backend)) {
-		GP_Event ev;
+	while (gp_backend_events_queued(backend)) {
+		gp_event ev;
 
-		GP_BackendGetEvent(backend, &ev);
+		gp_backend_get_event(backend, &ev);
 
 		switch (ev.type) {
 		case GP_EV_KEY:
@@ -77,7 +77,7 @@ static void event_loop(struct bogoman_render *render, GP_Backend *backend)
 
 			switch (ev.val.val) {
 			case GP_KEY_ESC:
-				GP_BackendExit(backend);
+				gp_backend_exit(backend);
 				exit(0);
 			break;
 			case GP_KEY_RIGHT:
@@ -103,7 +103,7 @@ static void event_loop(struct bogoman_render *render, GP_Backend *backend)
 		case GP_EV_SYS:
 			switch (ev.code) {
 			case GP_EV_SYS_RESIZE:
-				GP_BackendResizeAck(backend);
+				gp_backend_resize_ack(backend);
 				bogoman_render(render, BOGOMAN_RENDER_ALL);
 			break;
 			}
@@ -140,7 +140,7 @@ int main(int argc, char *argv[])
 	unsigned int cw = map->w * ELEM_SIZE;
 	unsigned int ch = map->h * ELEM_SIZE;
 
-	backend = GP_BackendX11Init(NULL, 0, 0, cw, ch, "Bogoman", 0);
+	backend = gp_x11_init(NULL, 0, 0, cw, ch, "Bogoman", 0);
 
 	if (backend == NULL) {
 		fprintf(stderr, "Failed to initialize backend");
@@ -158,10 +158,10 @@ int main(int argc, char *argv[])
 
 	bogoman_render(&render, BOGOMAN_RENDER_ALL);
 
-	GP_BackendAddTimer(backend, &timer);
+	gp_backend_add_timer(backend, &timer);
 
 	for (;;) {
-		GP_BackendWait(backend);
+		gp_backend_wait(backend);
 		event_loop(&render, backend);
 	}
 

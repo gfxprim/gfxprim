@@ -23,11 +23,11 @@
  *                                                                           *
  *****************************************************************************/
 
-#include "core/GP_Common.h"
-#include "core/GP_Types.h"
-#include "gfx/GP_LineClip.h"
+#include <core/GP_Common.h>
+#include <core/GP_Types.h>
+#include <gfx/GP_LineClip.h>
 
-int GP_LineClip(int *px0, int *py0, int *px1, int *py1, int xmax, int ymax)
+int gp_line_clip(int *px0, int *py0, int *px1, int *py1, int xmax, int ymax)
 {
 	float x0 = (float) *px0;
 	float y0 = (float) *py0;

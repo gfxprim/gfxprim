@@ -56,7 +56,7 @@
  * macro to get address of pixel in a {{ ps.suffix }} pixmap
  */
 #define GP_PIXEL_ADDR_{{ ps.suffix }}(pixmap, x, y) \
-	((GP_Pixel*)(((void*)((pixmap)->pixels)) + (pixmap)->bytes_per_row * (y) + ({{ ps.size }} * (x)) / 8))
+	((gp_pixel*)(((void*)((pixmap)->pixels)) + (pixmap)->bytes_per_row * (y) + ({{ ps.size }} * (x)) / 8))
 
 /*
  * macro to get bit-offset of pixel in {{ ps.suffix }} pixmap
@@ -78,9 +78,9 @@
 @     end
 
 /*
- * GP_GetPixel for {{ ps.suffix }}
+ * gp_getpixel for {{ ps.suffix }}
  */
-static inline GP_Pixel GP_GetPixel_Raw_{{ ps.suffix }}(const GP_Pixmap *c, int x, int y)
+static inline gp_pixel gp_getpixel_raw_{{ ps.suffix }}(const gp_pixmap *c, gp_coord x, gp_coord y)
 {
 @     if ps.size == 32:
 	/*
@@ -153,9 +153,9 @@ static inline GP_Pixel GP_GetPixel_Raw_{{ ps.suffix }}(const GP_Pixmap *c, int x
 }
 
 /*
- * GP_PutPixel for {{ ps.suffix }}
+ * gp_putpixel for {{ ps.suffix }}
  */
-static inline void GP_PutPixel_Raw_{{ ps.suffix }}(GP_Pixmap *c, int x, int y, GP_Pixel p)
+static inline void gp_putpixel_raw_{{ ps.suffix }}(gp_pixmap *c, gp_coord x, gp_coord y, gp_pixel p)
 {
 @     if ps.size == 32:
 	/*
@@ -227,11 +227,10 @@ static inline void GP_PutPixel_Raw_{{ ps.suffix }}(GP_Pixmap *c, int x, int y, G
 @     end
 }
 
-static inline void GP_PutPixel_Raw_Clipped_{{ ps.suffix }}(GP_Pixmap *c, GP_Coord x, GP_Coord y, GP_Pixel p)
+static inline void gp_putpixel_raw_clipped_{{ ps.suffix }}(gp_pixmap *c, gp_coord x, gp_coord y, gp_pixel p)
 {
 	if (GP_PIXEL_IS_CLIPPED(c, x, y))
 		return;
 
-	GP_PutPixel_Raw_{{ ps.suffix }}(c, x, y, p);
+	gp_putpixel_raw_{{ ps.suffix }}(c, x, y, p);
 }
-

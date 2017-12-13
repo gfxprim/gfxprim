@@ -20,42 +20,42 @@
  *                                                                           *
  *****************************************************************************/
 
-#include "core/GP_Debug.h"
-#include "GP_Linear.h"
-#include "GP_Convolution.h"
+#include <core/GP_Debug.h>
+#include <filters/GP_Linear.h>
+#include <filters/GP_Convolution.h>
 
-int GP_FilterConvolutionEx(const GP_Pixmap *src,
-                           GP_Coord x_src, GP_Coord y_src,
-                           GP_Size w_src, GP_Coord h_src,
-                           GP_Pixmap *dst,
-                           GP_Coord x_dst, GP_Coord y_dst,
-                           const GP_FilterKernel2D *kernel,
-                           GP_ProgressCallback *callback)
+int gp_filter_convolution_ex(const gp_pixmap *src,
+                             gp_coord x_src, gp_coord y_src,
+                             gp_size w_src, gp_coord h_src,
+                             gp_pixmap *dst,
+                             gp_coord x_dst, gp_coord y_dst,
+                             const gp_filter_kernel_2d *kernel,
+                             gp_progress_cb *callback)
 {
 	GP_CHECK(src->pixel_type == dst->pixel_type);
 
 	/* Check that destination is large enough */
-	GP_CHECK(x_dst + (GP_Coord)w_src <= (GP_Coord)dst->w);
-	GP_CHECK(y_dst + (GP_Coord)h_src <= (GP_Coord)dst->h);
+	GP_CHECK(x_dst + (gp_coord)w_src <= (gp_coord)dst->w);
+	GP_CHECK(y_dst + (gp_coord)h_src <= (gp_coord)dst->h);
 
 	/* The source pixel coordinates are clamped inside of the filter */
 
 	GP_DEBUG(1, "Linear convolution kernel size %ux%u",
 	         kernel->w, kernel->h);
 
-	return GP_FilterLinearConvolution_Raw(src, x_src, y_src, w_src, h_src,
-	                                      dst, x_dst, y_dst, kernel->kernel,
-	                                      kernel->w, kernel->h, kernel->div,
-					      callback);
+	return gp_filter_linear_convolution_raw(src, x_src, y_src, w_src, h_src,
+	                                        dst, x_dst, y_dst, kernel->kernel,
+	                                        kernel->w, kernel->h, kernel->div,
+					        callback);
 }
 
-GP_Pixmap *GP_FilterConvolutionExAlloc(const GP_Pixmap *src,
-                                        GP_Coord x_src, GP_Coord y_src,
-                                        GP_Size w_src, GP_Size h_src,
-                                        const GP_FilterKernel2D *kernel,
-                                        GP_ProgressCallback *callback)
+gp_pixmap *gp_filter_convolution_ex_alloc(const gp_pixmap *src,
+                                          gp_coord x_src, gp_coord y_src,
+                                          gp_size w_src, gp_size h_src,
+                                          const gp_filter_kernel_2d *kernel,
+                                          gp_progress_cb *callback)
 {
-	GP_Pixmap *ret = GP_PixmapAlloc(w_src, h_src, src->pixel_type);
+	gp_pixmap *ret = gp_pixmap_alloc(w_src, h_src, src->pixel_type);
 
 	GP_DEBUG(1, "Linear convolution kernel size %ux%u",
 	         kernel->w, kernel->h);
@@ -63,10 +63,10 @@ GP_Pixmap *GP_FilterConvolutionExAlloc(const GP_Pixmap *src,
 	if (ret == NULL)
 		return NULL;
 
-	if (GP_FilterLinearConvolution_Raw(src, x_src, y_src, w_src, h_src,
-	                                   ret, 0, 0, kernel->kernel, kernel->w,
-					   kernel->h, kernel->div, callback)) {
-		GP_PixmapFree(ret);
+	if (gp_filter_linear_convolution_raw(src, x_src, y_src, w_src, h_src,
+	                                     ret, 0, 0, kernel->kernel, kernel->w,
+					     kernel->h, kernel->div, callback)) {
+		gp_pixmap_free(ret);
 		return NULL;
 	}
 

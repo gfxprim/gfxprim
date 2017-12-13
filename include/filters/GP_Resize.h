@@ -22,7 +22,7 @@
 
 /*
 
-  GP_Pixmap interpolations.
+  gp_pixmap interpolations.
 
   Nearest Neighbour
   ~~~~~~~~~~~~~~~~~
@@ -54,27 +54,27 @@
 #ifndef FILTERS_GP_RESIZE_H
 #define FILTERS_GP_RESIZE_H
 
-#include "GP_Filter.h"
+#include <filters/GP_Filter.h>
 
-typedef enum GP_InterpolationType {
+typedef enum gp_interpolation_type {
 	GP_INTERP_NN,            /* Nearest Neighbour                         */
 	GP_INTERP_LINEAR_INT,    /* Bilinear - fixed point arithmetics        */
 	GP_INTERP_LINEAR_LF_INT, /* Bilinear + low pass filter on downscaling */
 	GP_INTERP_CUBIC,         /* Bicubic                                   */
 	GP_INTERP_CUBIC_INT,     /* Bicubic - fixed point arithmetics         */
 	GP_INTERP_MAX = GP_INTERP_CUBIC_INT,
-} GP_InterpolationType;
+} gp_interpolation_type;
 
-const char *GP_InterpolationTypeName(enum GP_InterpolationType interp_type);
+const char *gp_interpolation_type_name(enum gp_interpolation_type interp_type);
 
 /*
  * Resize src to fit the dst, both src and dst must have the same pixel_type.
  *
  * Returns non-zero on error (interrupted from callback), zero on success.
  */
-int GP_FilterResize(const GP_Pixmap *src, GP_Pixmap *dst,
-                    GP_InterpolationType type,
-                    GP_ProgressCallback *callback);
+int gp_filter_resize(const gp_pixmap *src, gp_pixmap *dst,
+                     gp_interpolation_type type,
+                     gp_progress_cb *callback);
 
 /*
  * Resize src to wxh, the result is allocated.
@@ -83,9 +83,9 @@ int GP_FilterResize(const GP_Pixmap *src, GP_Pixmap *dst,
  *
  * Returns NULL in case of failure and errno is set correspondinlgy.
  */
-GP_Pixmap *GP_FilterResizeAlloc(const GP_Pixmap *src,
-                                 GP_Size w, GP_Size h,
-                                 GP_InterpolationType type,
-                                 GP_ProgressCallback *callback);
+gp_pixmap *gp_filter_resize_alloc(const gp_pixmap *src,
+                                  gp_size w, gp_size h,
+                                  gp_interpolation_type type,
+                                  gp_progress_cb *callback);
 
 #endif /* FILTERS_GP_RESIZE_H */

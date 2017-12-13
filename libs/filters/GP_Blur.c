@@ -22,12 +22,12 @@
 
 #include <math.h>
 
-#include "core/GP_Debug.h"
+#include <core/GP_Debug.h>
 
-#include "GP_Linear.h"
-#include "GP_LinearThreads.h"
+#include <filters/GP_Linear.h>
+#include <filters/GP_LinearThreads.h>
 
-#include "GP_Blur.h"
+#include <filters/GP_Blur.h>
 
 static inline unsigned int gaussian_kernel_size(float sigma)
 {
@@ -53,40 +53,40 @@ static inline float gaussian_kernel_init(float sigma, float *kernel)
 	return ret;
 }
 
-static int gaussian_callback_horiz(GP_ProgressCallback *self)
+static int gaussian_callback_horiz(gp_progress_cb *self)
 {
-	GP_ProgressCallback *callback = self->priv;
+	gp_progress_cb *callback = self->priv;
 
 	callback->percentage = self->percentage / 2;
 	return callback->callback(callback);
 }
 
-static int gaussian_callback_vert(GP_ProgressCallback *self)
+static int gaussian_callback_vert(gp_progress_cb *self)
 {
-	GP_ProgressCallback *callback = self->priv;
+	gp_progress_cb *callback = self->priv;
 
 	callback->percentage = self->percentage / 2 + 50;
 	return callback->callback(callback);
 }
 
-int GP_FilterGaussianBlur_Raw(const GP_Pixmap *src,
-                              GP_Coord x_src, GP_Coord y_src,
-                              GP_Size w_src, GP_Size h_src,
-			      GP_Pixmap *dst,
-                              GP_Coord x_dst, GP_Coord y_dst,
-                              float x_sigma, float y_sigma,
-                              GP_ProgressCallback *callback)
+int gp_filter_gaussian_blur_raw(const gp_pixmap *src,
+                                gp_coord x_src, gp_coord y_src,
+                                gp_size w_src, gp_size h_src,
+			        gp_pixmap *dst,
+                                gp_coord x_dst, gp_coord y_dst,
+                                float x_sigma, float y_sigma,
+                                gp_progress_cb *callback)
 {
 	unsigned int size_x = gaussian_kernel_size(x_sigma);
 	unsigned int size_y = gaussian_kernel_size(y_sigma);
-	const GP_Pixmap *tmp = dst;
+	const gp_pixmap *tmp = dst;
 
 	GP_DEBUG(1, "Gaussian blur x_sigma=%2.3f y_sigma=%2.3f kernel %ix%i image %ux%u",
 	            x_sigma, y_sigma, size_x, size_y, w_src, h_src);
 
-	GP_ProgressCallback *new_callback = NULL;
+	gp_progress_cb *new_callback = NULL;
 
-	GP_ProgressCallback gaussian_callback = {
+	gp_progress_cb gaussian_callback = {
 		.callback = gaussian_callback_horiz,
 		.priv = callback
 	};
@@ -99,7 +99,7 @@ int GP_FilterGaussianBlur_Raw(const GP_Pixmap *src,
 		float kernel_x[size_x];
 		float sum = gaussian_kernel_init(x_sigma, kernel_x);
 
-		GP_ConvolutionParams params = {
+		gp_convolution_params params = {
 			.src = src,
 			.x_src = x_src,
 			.y_src = y_src,
@@ -115,7 +115,7 @@ int GP_FilterGaussianBlur_Raw(const GP_Pixmap *src,
 			.callback = new_callback,
 		};
 
-		if (GP_FilterHConvolutionMP_Raw(&params))
+		if (gp_filter_hconvolution_mp_raw(&params))
 			return 1;
 	} else {
 		tmp = src;
@@ -135,7 +135,7 @@ int GP_FilterGaussianBlur_Raw(const GP_Pixmap *src,
 		float kernel_y[size_y];
 		float sum = gaussian_kernel_init(y_sigma, kernel_y);
 
-		GP_ConvolutionParams params = {
+		gp_convolution_params params = {
 			.src = tmp,
 			.x_src = x_src,
 			.y_src = y_src,
@@ -151,47 +151,47 @@ int GP_FilterGaussianBlur_Raw(const GP_Pixmap *src,
 			.callback = new_callback,
 		};
 
-		if (GP_FilterVConvolutionMP_Raw(&params))
+		if (gp_filter_vconvolution_mp_raw(&params))
 			return 1;
 	}
 
-	GP_ProgressCallbackDone(callback);
+	gp_progress_cb_done(callback);
 	return 0;
 }
 
-int GP_FilterGaussianBlurEx(const GP_Pixmap *src,
-                            GP_Coord x_src, GP_Coord y_src,
-                            GP_Size w_src, GP_Size h_src,
-                            GP_Pixmap *dst,
-                            GP_Coord x_dst, GP_Coord y_dst,
-                            float x_sigma, float y_sigma,
-                            GP_ProgressCallback *callback)
+int gp_filter_gaussian_blur_ex(const gp_pixmap *src,
+                               gp_coord x_src, gp_coord y_src,
+                               gp_size w_src, gp_size h_src,
+                               gp_pixmap *dst,
+                               gp_coord x_dst, gp_coord y_dst,
+                               float x_sigma, float y_sigma,
+                               gp_progress_cb *callback)
 {
 	GP_CHECK(src->pixel_type == dst->pixel_type);
 
 	/* Check that destination is large enough */
-	GP_CHECK(x_dst + (GP_Coord)w_src <= (GP_Coord)dst->w);
-	GP_CHECK(y_dst + (GP_Coord)h_src <= (GP_Coord)dst->h);
+	GP_CHECK(x_dst + (gp_coord)w_src <= (gp_coord)dst->w);
+	GP_CHECK(y_dst + (gp_coord)h_src <= (gp_coord)dst->h);
 
-	return GP_FilterGaussianBlur_Raw(src, x_src, y_src, w_src, h_src,
-	                                 dst, x_dst, y_dst,
-	                                 x_sigma, y_sigma, callback);
+	return gp_filter_gaussian_blur_raw(src, x_src, y_src, w_src, h_src,
+	                                   dst, x_dst, y_dst,
+	                                   x_sigma, y_sigma, callback);
 }
 
-GP_Pixmap *GP_FilterGaussianBlurExAlloc(const GP_Pixmap *src,
-                                         GP_Coord x_src, GP_Coord y_src,
-                                         GP_Size w_src, GP_Size h_src,
-				         float x_sigma, float y_sigma,
-                                         GP_ProgressCallback *callback)
+gp_pixmap *gp_filter_gaussian_blur_ex_alloc(const gp_pixmap *src,
+                                             gp_coord x_src, gp_coord y_src,
+                                             gp_size w_src, gp_size h_src,
+				             float x_sigma, float y_sigma,
+                                             gp_progress_cb *callback)
 {
-	GP_Pixmap *dst = GP_PixmapAlloc(w_src, h_src, src->pixel_type);
+	gp_pixmap *dst = gp_pixmap_alloc(w_src, h_src, src->pixel_type);
 
 	if (dst == NULL)
 		return NULL;
 
-	if (GP_FilterGaussianBlur_Raw(src, x_src, y_src, w_src, h_src, dst,
+	if (gp_filter_gaussian_blur_raw(src, x_src, y_src, w_src, h_src, dst,
 	                                0, 0, x_sigma, y_sigma, callback)) {
-		GP_PixmapFree(dst);
+		gp_pixmap_free(dst);
 		return NULL;
 	}
 

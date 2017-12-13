@@ -6,48 +6,48 @@ Common API
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <GP.h>
+#include <gfxprim.h>
 /* or */
 #include <filters/GP_Resize.h>
 
-typedef enum GP_InterpolationType {
+typedef enum gp_interpolation_type {
         GP_INTERP_NN,            /* Nearest Neighbour                         */
         GP_INTERP_LINEAR_INT,    /* Bilinear - fixed point arithmetics        */
         GP_INTERP_LINEAR_LF_INT, /* Bilinear + low pass filter on downscaling */
         GP_INTERP_CUBIC,         /* Bicubic                                   */
         GP_INTERP_CUBIC_INT,     /* Bicubic - fixed point arithmetics         */
         GP_INTERP_MAX = GP_INTERP_CUBIC_INT,
-} GP_InterpolationType;
+} gp_interpolation_type;
 
-const char *GP_InterpolationTypeName(enum GP_InterpolationType interp_type);
+const char *gp_interpolation_type_name(enum gp_interpolation_type interp_type);
 
-int GP_FilterResize(const GP_Pixmap *src, GP_Pixmap *dst,
-                    GP_InterpolationType type,
-                    GP_ProgressCallback *callback);
+int gp_filter_resize(const gp_pixmap *src, gp_pixmap *dst,
+                    gp_interpolation_type type,
+                    gp_progress_cb *callback);
 
-GP_Pixmap *GP_FilterResizeAlloc(const GP_Pixmap *src,
-                                 GP_Size w, GP_Size h,
-                                 GP_InterpolationType type,
-                                 GP_ProgressCallback *callback);
+gp_pixmap *gp_filter_resize_alloc(const gp_pixmap *src,
+                                  gp_size w, gp_size h,
+                                  gp_interpolation_type type,
+                                  gp_progress_cb *callback);
 -------------------------------------------------------------------------------
 
 Interpolate (resize) the pixmap.
 
 Resize image given size and interpolation type.
 
-GP_FilterResize
-^^^^^^^^^^^^^^^
+gp_filter_resize
+^^^^^^^^^^^^^^^^
 
-The +GP_FilterReize()+ function resizes 'src' to fit 'dst' exactly.
+The +gp_filter_reize()+ function resizes 'src' to fit 'dst' exactly.
 
 Both 'src' and 'dst' must have the same pixel type.
 
 Returns zero on success, non-zero on failure and sets errno.
 
-GP_FilterResizeAlloc
-^^^^^^^^^^^^^^^^^^^^
+gp_filter_resize_alloc
+^^^^^^^^^^^^^^^^^^^^^^
 
-The +GP_FilterResizeAlloc()+ allocates the destination give it's size.
+The +gp_filter_resize_alloc()+ allocates the destination give it's size.
 
 Returns pointer to newly allocated pixmap or NULL in case of failure and
 errno is set.
@@ -57,16 +57,16 @@ Nearest Neighbour Interpolation
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <GP.h>
+#include <gfxprim.h>
 /* or */
 #include <filters/GP_ResizeNN.h>
 
-int GP_FilterResizeNN(const GP_Pixmap *src, GP_Pixmap *dst,
-                      GP_ProgressCallback *callback);
+int gp_filter_resize_nn(const gp_pixmap *src, gp_pixmap *dst,
+                        gp_progress_cb *callback);
 
-static inline GP_Pixmap *GP_FilterResizeNNAlloc(const GP_Pixmap *src,
-                                   GP_Size w, GP_Size h,
-                                   GP_ProgressCallback *callback);
+gp_pixmap *gp_filter_resize_nn_alloc(const gp_pixmap *src,
+                                     gp_size w, gp_size h,
+                                     gp_progress_cb *callback);
 -------------------------------------------------------------------------------
 
 Pixel value is choosen as value of the closest pixel in the source bitmap
@@ -83,23 +83,23 @@ Bilinear Interpolation
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <GP.h>
+#include <gfxprim.h>
 /* or */
 #include <filters/GP_ResizeLinear.h>
 
-int GP_FilterResizeLinearInt(const GP_Pixmap *src, GP_Pixmap *dst,
-                             GP_ProgressCallback *callback);
+int gp_filter_resize_linear_int(const gp_pixmap *src, gp_pixmap *dst,
+                                gp_progress_cb *callback);
 
-int GP_FilterResizeLinearLFInt(const GP_Pixmap *src, GP_Pixmap *dst,
-                             GP_ProgressCallback *callback);
+int gp_filter_resize_linear_lf_int(const gp_pixmap *src, gp_pixmap *dst,
+                                   gp_progress_cb *callback);
 
-GP_Pixmap *GP_FilterResizeLinearIntAlloc(const GP_Pixmap *src,
-                                          GP_Size w, GP_Size h,
-                                          GP_ProgressCallback *callback);
+gp_pixmap *gp_filter_resize_linear_int_alloc(const gp_pixmap *src,
+                                             gp_size w, gp_size h,
+                                             gp_progress_cb *callback);
 
-GP_Pixmap *GP_FilterResizeLinearLFIntAlloc(const GP_Pixmap *src,
-                                            GP_Size w, GP_Size h,
-                                            GP_ProgressCallback *callback);
+gp_pixmap *gp_filter_resize_linear_lf_int_alloc(const gp_pixmap *src,
+                                                gp_size w, gp_size h,
+                                                gp_progress_cb *callback);
 -------------------------------------------------------------------------------
 
 Bilinear is faster than bicubic interpolation and produces quite good results
@@ -111,23 +111,23 @@ Bicubic Interpolation
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <GP.h>
+#include <gfxprim.h>
 /* or */
 #include <filters/GP_ResizeCubic.h>
 
-int GP_FilterResizeCubicInt(const GP_Pixmap *src, GP_Pixmap *dst,
-                             GP_ProgressCallback *callback);
+int gp_filter_resize_cubic_int(const gp_pixmap *src, gp_pixmap *dst,
+                               gp_progress_cb *callback);
 
-int GP_FilterResizeCubic(const GP_Pixmap *src, GP_Pixmap *dst,
-                         GP_ProgressCallback *callback);
+int gp_filter_resize_cubic(const gp_pixmap *src, gp_pixmap *dst,
+                           gp_progress_cb *callback);
 
-GP_Pixmap *GP_FilterResizeCubicIntAlloc(const GP_Pixmap *src,
-                                         GP_Size w, GP_Size h,
-                                         GP_ProgressCallback *callback);
+gp_pixmap *gp_filter_resize_cubic_int_alloc(const gp_pixmap *src,
+                                            gp_size w, gp_size h,
+                                            gp_progress_cb *callback);
 
-GP_Pixmap *GP_FilterResizeCubicAlloc(const GP_Pixmap *src,
-                                      GP_Size w, GP_Size h,
-                                      GP_ProgressCallback *callback);
+gp_pixmap *gp_filter_resize_cubic_alloc(const gp_pixmap *src,
+                                        gp_size w, gp_size h,
+                                        gp_progress_cb *callback);
 -------------------------------------------------------------------------------
 
 Works well as is on image upscaling. To get decent result on downscaling

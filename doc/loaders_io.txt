@@ -15,7 +15,7 @@ The I/O interface is defined by a structure with callbacks.
 -------------------------------------------------------------------------------
 #include <loaders/GP_IO.h>
 /* or */
-#include <GP.h>
+#include <gfxprim.h>
 
 /*
  * Values are 1:1 with constants passed to lseek()
@@ -63,7 +63,7 @@ NOTE: Make sure errno is set if any of the operations has failed.
 -------------------------------------------------------------------------------
 #include <loaders/GP_IO.h>
 /* or */
-#include <GP.h>
+#include <gfxprim.h>
 
 ssize_t GP_IORead(GP_IO *io, void *buf, size_t size);
 -------------------------------------------------------------------------------
@@ -80,7 +80,7 @@ On failure negative value is returned and errno is set.
 -------------------------------------------------------------------------------
 #include <loaders/GP_IO.h>
 /* or */
-#include <GP.h>
+#include <gfxprim.h>
 
 int GP_IOFill(GP_IO *io, void *buf, size_t size);
 -------------------------------------------------------------------------------
@@ -94,7 +94,7 @@ Returns zero on success and non-zero on failure.
 -------------------------------------------------------------------------------
 #include <loaders/GP_IO.h>
 /* or */
-#include <GP.h>
+#include <gfxprim.h>
 
 ssize_t GP_IOWrite(GP_IO *io, void *buf, size_t size);
 -------------------------------------------------------------------------------
@@ -111,7 +111,7 @@ On failure negative value is returned and errno is set.
 -------------------------------------------------------------------------------
 #include <loaders/GP_IO.h>
 /* or */
-#include <GP.h>
+#include <gfxprim.h>
 
 int GP_IOFlush(GP_IO *io, void *buf, size_t size);
 -------------------------------------------------------------------------------
@@ -124,7 +124,7 @@ Returns zero on success and non-zero on failure.
 -------------------------------------------------------------------------------
 #include <loaders/GP_IO.h>
 /* or */
-#include <GP.h>
+#include <gfxprim.h>
 
 int GP_IOPrintF(GP_IO *io, const char *fmt, ...);
 -------------------------------------------------------------------------------
@@ -137,7 +137,7 @@ Returns zero on success and non-zero on failure.
 -------------------------------------------------------------------------------
 #include <loaders/GP_IO.h>
 /* or */
-#include <GP.h>
+#include <gfxprim.h>
 
 int GP_IOClose(GP_IO *io);
 -------------------------------------------------------------------------------
@@ -154,7 +154,7 @@ Returns zero on success, non-zero on I/O failure and errno is set.
 -------------------------------------------------------------------------------
 #include <loaders/GP_IO.h>
 /* or */
-#include <GP.h>
+#include <gfxprim.h>
 
 enum GP_IOWhence {
 	GP_IO_SEEK_SET = 0,
@@ -185,7 +185,7 @@ stream, to the end and forward.
 -------------------------------------------------------------------------------
 #include <loaders/GP_IO.h>
 /* or */
-#include <GP.h>
+#include <gfxprim.h>
 
 off_t GP_IOTell(GP_IO *io);
 -------------------------------------------------------------------------------
@@ -197,7 +197,7 @@ Wrapper to 'GP_IOSeek()', returns current position in I/O stream.
 -------------------------------------------------------------------------------
 #include <loaders/GP_IO.h>
 /* or */
-#include <GP.h>
+#include <gfxprim.h>
 
 off_t GP_IORewind(GP_IO *io)
 -------------------------------------------------------------------------------
@@ -211,7 +211,7 @@ Returns zero on success, non-zero on failure and errno is set.
 -------------------------------------------------------------------------------
 #include <loaders/GP_IO.h>
 /* or */
-#include <GP.h>
+#include <gfxprim.h>
 
 GP_IO *GP_IOMem(void *buf, size_t size, void (*free)(void *));
 -------------------------------------------------------------------------------
@@ -232,7 +232,7 @@ TIP: See link:example_memory_io.html[memory I/O example].
 -------------------------------------------------------------------------------
 #include <loaders/GP_IO.h>
 /* or */
-#include <GP.h>
+#include <gfxprim.h>
 
 enum GP_IOFileMode {
         GP_IO_RDONLY = 0x00,
@@ -252,7 +252,7 @@ errno is set.
 -------------------------------------------------------------------------------
 #include <loaders/GP_IO.h>
 /* or */
-#include <GP.h>
+#include <gfxprim.h>
 
 GP_IO *GP_IOSubIO(GP_IO *pio, size_t size);
 -------------------------------------------------------------------------------
@@ -279,7 +279,7 @@ WARNING: If you combine reading or seeking in the parent I/O and sub I/O the
 -------------------------------------------------------------------------------
 #include <loaders/GP_IO.h>
 /* or */
-#include <GP.h>
+#include <gfxprim.h>
 
 GP_IO *GP_IOWBuffer(GP_IO *io, size_t bsize);
 -------------------------------------------------------------------------------

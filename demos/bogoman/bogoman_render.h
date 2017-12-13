@@ -24,7 +24,6 @@
 #define __BOGOMAN_RENDER_H__
 
 struct bogoman_map;
-struct GP_Pixmap;
 
 struct bogoman_render {
 	/* both in map elements */
@@ -35,10 +34,10 @@ struct bogoman_render {
 	struct bogoman_map *map;
 
 	/* pixmap to be used for rendering */
-	struct GP_Pixmap *pixmap;
+	struct gp_pixmap *pixmap;
 
 	/* if not NULL is used to update screen */
-	struct GP_Backend *backend;
+	struct gp_backend *backend;
 
 	/* elem size in pixels */
 	unsigned int map_elem_size;

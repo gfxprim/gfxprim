@@ -32,26 +32,26 @@
 
 struct testcase {
 	/* HLine description */
-	GP_Coord x0;
-	GP_Coord x1;
-	GP_Coord y;
+	gp_coord x0;
+	gp_coord x1;
+	gp_coord y;
 
-	GP_Coord x;
-	GP_Size lw;
+	gp_coord x;
+	gp_size lw;
 
 	int flag;
 
 	/* expected result */
-	GP_Size w, h;
+	gp_size w, h;
 	const char pixmap[];
 };
 
 static int test_hline(struct testcase *t)
 {
-	GP_Pixmap *c;
+	gp_pixmap *c;
 	int err;
 
-	c = GP_PixmapAlloc(t->w, t->h, GP_PIXEL_G8);
+	c = gp_pixmap_alloc(t->w, t->h, GP_PIXEL_G8);
 
 	if (c == NULL) {
 		tst_err("Failed to allocate pixmap");
@@ -62,9 +62,9 @@ static int test_hline(struct testcase *t)
 	memset(c->pixels, 0, c->w * c->h);
 
 	if (t->flag)
-		GP_HLineXYW(c, t->x, t->y, t->lw, 1);
+		gp_hline_xyw(c, t->x, t->y, t->lw, 1);
 	else
-		GP_HLine(c, t->x0, t->x1, t->y, 1);
+		gp_hline(c, t->x0, t->x1, t->y, 1);
 
 	err = compare_buffers(t->pixmap, c);
 

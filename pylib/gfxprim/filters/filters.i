@@ -13,52 +13,52 @@
  * Creates allocating and non-allocating filter definitions
  */
 %define FILTER_FUNC(funcname)
-%newobject GP_Filter ## funcname ## Alloc;
-ERROR_ON_NULL(GP_Filter ## funcname ## Alloc);
-ERROR_ON_NONZERO(GP_Filter ## funcname);
+%newobject  gp_filter_ ## funcname ## _alloc;
+ERROR_ON_NULL(gp_filter_ ## funcname ## _alloc);
+ERROR_ON_NONZERO(gp_filter_ ## funcname);
 %enddef
 
-FILTER_FUNC(Invert);
-FILTER_FUNC(Brightness);
-FILTER_FUNC(Contrast);
-FILTER_FUNC(BrightnessContrast);
-FILTER_FUNC(Posterize);
+FILTER_FUNC(invert);
+FILTER_FUNC(brightness);
+FILTER_FUNC(contrast);
+FILTER_FUNC(brightness_contrast);
+FILTER_FUNC(posterize);
 %include "GP_Point.h"
 
 /* Arithmetic filters */
-FILTER_FUNC(Addition);
-FILTER_FUNC(Multiply);
-FILTER_FUNC(Difference);
-FILTER_FUNC(Max);
-FILTER_FUNC(Min);
+FILTER_FUNC(addition);
+FILTER_FUNC(multiply);
+FILTER_FUNC(difference);
+FILTER_FUNC(max);
+FILTER_FUNC(min);
 %include "GP_Arithmetic.h"
 
 /* TODO: Stats filters */
 
 /* Rotations filters */
-FILTER_FUNC(MirrorH);
-FILTER_FUNC(MirrorV);
-FILTER_FUNC(Rotate90);
-FILTER_FUNC(Rotate180);
-FILTER_FUNC(Rotate270);
-FILTER_FUNC(Symmetry);
-%immutable GP_FilterSymmetryNames;
+FILTER_FUNC(mirror_h);
+FILTER_FUNC(mirror_v);
+FILTER_FUNC(rotate_90);
+FILTER_FUNC(rotate_180);
+FILTER_FUNC(rotate_270);
+FILTER_FUNC(symmetry);
+%immutable gp_filter_symmetry_names;
 %include "GP_Rotate.h"
 
 /* Convolutions */
-FILTER_FUNC(Convolution);
-FILTER_FUNC(ConvolutionEx);
+FILTER_FUNC(convolution);
+FILTER_FUNC(convolution_ex);
 
 %array_functions(float, float_array);
 
-%extend GP_FilterKernel2D {
-        ~GP_FilterKernel2D() {
+%extend gp_filter_kernel_2d {
+        ~gp_filter_kernel_2d() {
                 free($self);
         }
-        GP_FilterKernel2D(unsigned int w, unsigned int h,
-                          float *kern, float kern_div) {
+        gp_filter_kernel_2d(unsigned int w, unsigned int h,
+                  float *kern, float kern_div) {
 
-                GP_FilterKernel2D *kernel = malloc(sizeof(GP_FilterKernel2D));
+                gp_filter_kernel_2d *kernel = malloc(sizeof(gp_filter_kernel_2d));
 
                 if (!kernel) {
                         GP_DEBUG(1, "Malloc failed :(");
@@ -77,54 +77,54 @@ FILTER_FUNC(ConvolutionEx);
 %include "GP_Convolution.h"
 
 /* Blur */
-FILTER_FUNC(GaussianBlurEx);
-FILTER_FUNC(GaussianBlur);
+FILTER_FUNC(gaussian_blur_ex);
+FILTER_FUNC(gaussian_blur);
 %include "GP_Blur.h"
 
 /* Resize filters */
-FILTER_FUNC(Resize);
+FILTER_FUNC(resize);
 %include "GP_Resize.h"
 
-FILTER_FUNC(ResizeNN);
+FILTER_FUNC(resize_nn);
 %include "GP_ResizeNN.h"
 
-FILTER_FUNC(ResizeLinearInt);
-FILTER_FUNC(ResizeLinearLFInt);
+FILTER_FUNC(resize_linear_int);
+FILTER_FUNC(resize_linear_lf_int);
 %include "GP_ResizeLinear.h"
 
-FILTER_FUNC(ResizeCubic);
-FILTER_FUNC(ResizeCubicInt);
+FILTER_FUNC(resize_cubic);
+FILTER_FUNC(resize_cubic_int);
 %include "GP_ResizeCubic.h"
 
 /* Ditherings */
-FILTER_FUNC(FloydSteinberg);
-FILTER_FUNC(GP_FilterHilbertPeano);
+FILTER_FUNC(floyd_steinberg);
+FILTER_FUNC(hilbert_peano);
 %include "GP_Dither.h"
 
 /* Laplace and Laplace Edge Sharpening */
-FILTER_FUNC(Laplace);
-FILTER_FUNC(EdgeSharpening);
+FILTER_FUNC(laplace);
+FILTER_FUNC(edge_sharpening);
 %include "GP_Laplace.h"
 
 /* Median */
-FILTER_FUNC(MedianEx);
-FILTER_FUNC(Median);
+FILTER_FUNC(median_ex);
+FILTER_FUNC(median);
 %include "GP_Median.h"
 
 /* Weighted Median */
-FILTER_FUNC(WeightedMedianEx);
-FILTER_FUNC(WeightedMedian);
+FILTER_FUNC(weighted_median_ex);
+FILTER_FUNC(weighted_median);
 
 %array_functions(unsigned int, uint_array);
 
-%extend GP_MedianWeights {
-        ~GP_MedianWeights() {
+%extend gp_median_weights {
+        ~gp_median_weights() {
                 free($self);
         }
-        GP_MedianWeights(unsigned int w, unsigned int h,
+        gp_median_weights(unsigned int w, unsigned int h,
                          unsigned int *weights) {
 
-                GP_MedianWeights *ret = malloc(sizeof(GP_MedianWeights));
+                gp_median_weights *ret = malloc(sizeof(gp_median_weights));
 
                 if (!ret) {
                         GP_DEBUG(1, "Malloc failed :(");
@@ -142,16 +142,16 @@ FILTER_FUNC(WeightedMedian);
 %include "GP_WeightedMedian.h"
 
 /* Sigma filter */
-FILTER_FUNC(FilterSigmaEx);
-FILTER_FUNC(FilterSigma);
+FILTER_FUNC(sigma_ex);
+FILTER_FUNC(sigma);
 %include "GP_Sigma.h"
 
 /* Gaussian Noise */
-FILTER_FUNC(GaussianNoiseAddEx);
-FILTER_FUNC(GaussianNoiseAdd);
+FILTER_FUNC(gaussian_noise_add_ex);
+FILTER_FUNC(gaussian_noise_add);
 %include "GP_GaussianNoise.h"
 
 /* Sepia */
-FILTER_FUNC(Sepia);
-FILTER_FUNC(SepiaEx);
+FILTER_FUNC(sepia);
+FILTER_FUNC(sepia_ex);
 %include "GP_Sepia.h"

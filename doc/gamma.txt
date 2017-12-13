@@ -38,7 +38,7 @@ and text still use legacy gamma support.)
 Implementation
 ~~~~~~~~~~~~~~
 
-The 'GP_Gamma' structure defines per pixmap, per channel, gamma tables.
+The 'gp_gamma' structure defines per pixmap, per channel, gamma tables.
 
 The tables for particular gamma are reference counted. There is only one table
 for particular gamma value and bit depth in memory at a time.
@@ -46,13 +46,13 @@ for particular gamma value and bit depth in memory at a time.
 Also the table output, for linear values, has two more bits than original in
 order not to loose precision.
 
-The pointers to gamma tables are storied in 'GP_Gamma' structure and are
+The pointers to gamma tables are storied in 'gp_gamma' structure and are
 organized in the same order as channels. First N tables for each channel and
 gamma value gamma, then N tables for inverse 1/gamma function.
 
 So when we have RGB888 pixel and gamma 2.2 there are two tables in the memory,
 one for gamma 2.2 input 8bit output 10bit and it's inverse input 10bit output
-8bit. The 'GP_Gamma' contains six pointers. First three points to the gamma
+8bit. The 'gp_gamma' contains six pointers. First three points to the gamma
 table for gamma 2.2 with 8bit input (256 array members) and the output format
 is 10bits so each array member is 'uint16_t'. The other three are for inverse
 gamma function (gamma = 0.454545...) with 10bit input (1024 array members) and
@@ -61,7 +61,7 @@ gamma function (gamma = 0.454545...) with 10bit input (1024 array members) and
 The whole interface is designed for speed, so that conversion to linear space
 or from linear space is just a matter of indexing arrays. Imagine you need to
 get gamma-corrected pixel value. First you take individual pixel channels then
-use the GP_Gamma structure as follows:
+use the gp_gamma structure as follows:
 
 [source,c]
 -------------------------------------------------------------------------------
@@ -100,9 +100,9 @@ Gamma low level API
 -------------------------------------------------------------------------------
 #include <core/GP_Gamma.h>
 /* or */
-#include <GP.h>
+#include <gfxprim.h>
 
-GP_Gamma *GP_GammaAcquire(GP_PixelType pixel_type, float gamma);
+gp_gamma *gp_gamma_acquire(gp_pixel_type pixel_type, float gamma);
 -------------------------------------------------------------------------------
 
 Returns pointer to gamma table for particular pixel_type and gamma value.
@@ -115,9 +115,9 @@ May fail and return NULL if 'malloc()' has failed.
 -------------------------------------------------------------------------------
 #include <core/GP_Gamma.h>
 /* or */
-#include <GP.h>
+#include <gfxprim.h>
 
-GP_Gamma *GP_GammaCopy(GP_Gamma *gamma);
+gp_gamma *gp_gamma_copy(gp_gamma *gamma);
 -------------------------------------------------------------------------------
 
 Copies a Gamma table (actually only increases ref_count).
@@ -128,10 +128,9 @@ Can't fail.
 -------------------------------------------------------------------------------
 #include <core/GP_Gamma.h>
 /* or */
-#include <GP.h>
+#include <gfxprim.h>
 
-void GP_GammaRelease(GP_Gamma *self);
+void gp_gamma_release(gp_gamma *self);
 -------------------------------------------------------------------------------
 
 Releases Gama table (if ref_count has fallen to zero, frees memory).
-

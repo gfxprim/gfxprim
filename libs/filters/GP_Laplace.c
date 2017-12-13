@@ -20,15 +20,13 @@
  *                                                                           *
  *****************************************************************************/
 
-#include "core/GP_Debug.h"
-#include "core/GP_GetPutPixel.h"
+#include <core/GP_Debug.h>
+#include <core/GP_GetPutPixel.h>
+#include <filters/GP_Linear.h>
+#include <filters/GP_Laplace.h>
 
-#include "GP_Linear.h"
-
-#include "GP_Laplace.h"
-
-int GP_FilterLaplace(const GP_Pixmap *src, GP_Pixmap *dst,
-		     GP_ProgressCallback *callback)
+int gp_filter_laplace(const gp_pixmap *src, gp_pixmap *dst,
+		      gp_progress_cb *callback)
 {
 	GP_DEBUG(1, "Laplace filter %ux%u", src->w, src->h);
 
@@ -36,23 +34,23 @@ int GP_FilterLaplace(const GP_Pixmap *src, GP_Pixmap *dst,
 	                 1, -4,  1,
 	                 0,  1,  0};
 
-	if (GP_FilterLinearConvolution_Raw(src, 0, 0, src->w, src->h,
-	                                   dst, 0, 0, kern, 3, 3, 1, callback))
+	if (gp_filter_linear_convolution_raw(src, 0, 0, src->w, src->h,
+	                                     dst, 0, 0, kern, 3, 3, 1, callback))
 		return 1;
 
 	return 0;
 }
 
-GP_Pixmap *GP_FilterLaplaceAlloc(const GP_Pixmap *src,
-                                  GP_ProgressCallback *callback)
+gp_pixmap *gp_filter_laplace_alloc(const gp_pixmap *src,
+                                   gp_progress_cb *callback)
 {
-	GP_Pixmap *ret = GP_PixmapCopy(src, 0);
+	gp_pixmap *ret = gp_pixmap_copy(src, 0);
 
 	if (ret == NULL)
 		return NULL;
 
-	if (GP_FilterLaplace(src, ret, callback)) {
-		GP_PixmapFree(ret);
+	if (gp_filter_laplace(src, ret, callback)) {
+		gp_pixmap_free(ret);
 		return NULL;
 	}
 
@@ -60,8 +58,8 @@ GP_Pixmap *GP_FilterLaplaceAlloc(const GP_Pixmap *src,
 }
 
 
-int GP_FilterEdgeSharpening(const GP_Pixmap *src, GP_Pixmap *dst,
-                            float w, GP_ProgressCallback *callback)
+int gp_filter_edge_sharpening(const gp_pixmap *src, gp_pixmap *dst,
+                              float w, gp_progress_cb *callback)
 {
 	/* Identity kernel */
 	float kern[9] = {0,  0,  0,
@@ -78,23 +76,23 @@ int GP_FilterEdgeSharpening(const GP_Pixmap *src, GP_Pixmap *dst,
 	kern[5] -=  1.00 * w;
 	kern[7] -=  1.00 * w;
 
-	if (GP_FilterLinearConvolution_Raw(src, 0, 0, src->w, src->h,
-	                                   dst, 0, 0,  kern, 3, 3, 1, callback))
+	if (gp_filter_linear_convolution_raw(src, 0, 0, src->w, src->h,
+	                                     dst, 0, 0,  kern, 3, 3, 1, callback))
 		return 1;
 
 	return 0;
 }
 
-GP_Pixmap *GP_FilterEdgeSharpeningAlloc(const GP_Pixmap *src, float w,
-                                         GP_ProgressCallback *callback)
+gp_pixmap *gp_filter_edge_sharpening_alloc(const gp_pixmap *src, float w,
+                                           gp_progress_cb *callback)
 {
-	GP_Pixmap *ret = GP_PixmapCopy(src, 0);
+	gp_pixmap *ret = gp_pixmap_copy(src, 0);
 
 	if (ret == NULL)
 		return NULL;
 
-	if (GP_FilterEdgeSharpening(src, ret, w, callback)) {
-		GP_PixmapFree(ret);
+	if (gp_filter_edge_sharpening(src, ret, w, callback)) {
+		gp_pixmap_free(ret);
 		return NULL;
 	}
 

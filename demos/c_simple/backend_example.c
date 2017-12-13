@@ -27,27 +27,27 @@
   */
 
 #include <stdio.h>
-#include <GP.h>
+#include <gfxprim.h>
 
-static void redraw(GP_Backend *self)
+static void redraw(gp_backend *self)
 {
-	GP_Pixmap *pixmap = self->pixmap;
-	GP_Pixel white_pixel, black_pixel;
+	gp_pixmap *pixmap = self->pixmap;
+	gp_pixel white_pixel, black_pixel;
 
-	black_pixel = GP_RGBToPixmapPixel(0x00, 0x00, 0x00, pixmap);
-	white_pixel = GP_RGBToPixmapPixel(0xff, 0xff, 0xff, pixmap);
+	black_pixel = gp_rgb_to_pixmap_pixel(0x00, 0x00, 0x00, pixmap);
+	white_pixel = gp_rgb_to_pixmap_pixel(0xff, 0xff, 0xff, pixmap);
 
-	GP_Fill(pixmap, black_pixel);
-	GP_Line(pixmap, 0, 0, pixmap->w - 1, pixmap->h - 1, white_pixel);
-	GP_Line(pixmap, 0, pixmap->h - 1, pixmap->w - 1, 0, white_pixel);
+	gp_fill(pixmap, black_pixel);
+	gp_line(pixmap, 0, 0, pixmap->w - 1, pixmap->h - 1, white_pixel);
+	gp_line(pixmap, 0, pixmap->h - 1, pixmap->w - 1, 0, white_pixel);
 
 	/* Update the backend screen */
-	GP_BackendFlip(self);
+	gp_backend_flip(self);
 }
 
 int main(int argc, char *argv[])
 {
-	GP_Backend *backend;
+	gp_backend *backend;
 	const char *backend_opts = "X11:100x100";
 	int opt;
 
@@ -57,7 +57,7 @@ int main(int argc, char *argv[])
 			backend_opts = optarg;
 		break;
 		case 'h':
-			GP_BackendInit(NULL, NULL);
+			gp_backend_init(NULL, NULL);
 			return 0;
 		break;
 		default:
@@ -66,7 +66,7 @@ int main(int argc, char *argv[])
 		}
 	}
 
-	backend = GP_BackendInit(backend_opts, "Backend Example");
+	backend = gp_backend_init(backend_opts, "Backend Example");
 
 	if (backend == NULL) {
 		fprintf(stderr, "Failed to initialize backend\n");
@@ -77,18 +77,18 @@ int main(int argc, char *argv[])
 
 	/* Handle events */
 	for (;;) {
-		GP_Event ev;
+		gp_event ev;
 
-		GP_BackendWaitEvent(backend, &ev);
+		gp_backend_wait_event(backend, &ev);
 
-		GP_EventDump(&ev);
+		gp_event_dump(&ev);
 
 		switch (ev.type) {
 		case GP_EV_KEY:
 			switch (ev.val.val) {
 			case GP_KEY_ESC:
 			case GP_KEY_Q:
-				GP_BackendExit(backend);
+				gp_backend_exit(backend);
 				return 0;
 			break;
 			}
@@ -96,11 +96,11 @@ int main(int argc, char *argv[])
 		case GP_EV_SYS:
 			switch (ev.code) {
 			case GP_EV_SYS_RESIZE:
-				GP_BackendResizeAck(backend);
+				gp_backend_resize_ack(backend);
 				redraw(backend);
 			break;
 			case GP_EV_SYS_QUIT:
-				GP_BackendExit(backend);
+				gp_backend_exit(backend);
 				return 0;
 			break;
 			}
@@ -108,7 +108,7 @@ int main(int argc, char *argv[])
 		}
 	}
 
-	GP_BackendExit(backend);
+	gp_backend_exit(backend);
 
 	return 0;
 }

@@ -3,17 +3,17 @@ Basic types
 Coordinates and Size and Length
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Most of the drawing functions use typedefed 'GP_Coord' and 'GP_Size' integer
+Most of the drawing functions use typedefed 'gp_coord' and 'gp_size' integer
 types for parameters.
 
-The 'GP_Coord' is signed integer which is used for coordinates and the
-'GP_Size' is unsigned integer type used for object size, length and so.
+The 'gp_coord' is signed integer which is used for coordinates and the
+'gp_size' is unsigned integer type used for object size, length and so.
 
 Pixel
 ~~~~~
 
 Pixel value in 'GFXprim' is an integer big enough to hold the actual pixel
-values. The default typedef for 'GP_Pixel' is set to 32 bit integer, which may
+values. The default typedef for 'gp_pixel' is set to 32 bit integer, which may
 be changed at compile time to support colors with more than 10 bits per
-channel. The 'GP_Pixel' is thus used as opaque value big enough to hold any
+channel. The 'gp_pixel' is thus used as opaque value big enough to hold any
 supported pixel value.

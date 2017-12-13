@@ -30,11 +30,11 @@
 #include <errno.h>
 #include <string.h>
 
-#include <GP.h>
+#include <gfxprim.h>
 
-static GP_Backend *backend;
-static GP_Pixmap *image;
-static GP_Container *container;
+static gp_backend *backend;
+static gp_pixmap *image;
+static gp_container *container;
 
 /*
  * Try to load next image in container, if image has different size than the
@@ -45,21 +45,21 @@ static GP_Container *container;
  */
 static void load_next(void)
 {
-	GP_PixmapFree(image);
+	gp_pixmap_free(image);
 
-	image = GP_ContainerLoadNext(container, NULL);
+	image = gp_container_load_next(container, NULL);
 
 	if (image == NULL)
 		return;
 
 	if (image->w != backend->pixmap->w ||
 	    image->h != backend->pixmap->h) {
-		GP_BackendResize(backend, image->w, image->h);
+		gp_backend_resize(backend, image->w, image->h);
 		return;
 	}
 
-	GP_Blit_Clipped(image, 0, 0, image->w, image->h, backend->pixmap, 0, 0);
-	GP_BackendFlip(backend);
+	gp_blit_clipped(image, 0, 0, image->w, image->h, backend->pixmap, 0, 0);
+	gp_backend_flip(backend);
 }
 
 int main(int argc, char *argv[])
@@ -71,7 +71,7 @@ int main(int argc, char *argv[])
 	}
 
 	/* Open zip container */
-	container = GP_OpenZip(argv[1]);
+	container = gp_open_zip(argv[1]);
 
 	if (container == NULL) {
 		fprintf(stderr, "Failed to open container: %s\n", strerror(errno));
@@ -79,7 +79,7 @@ int main(int argc, char *argv[])
 	}
 
 	/* Load image */
-	image = GP_ContainerLoadNext(container, NULL);
+	image = gp_container_load_next(container, NULL);
 
 	if (image == NULL) {
 		fprintf(stderr, "Failed to load image %s\n", strerror(errno));
@@ -87,7 +87,7 @@ int main(int argc, char *argv[])
 	}
 
 	/* Initalize backend */
-	backend = GP_BackendX11Init(NULL, 0, 0, image->w, image->h, argv[1], 0);
+	backend = gp_x11_init(NULL, 0, 0, image->w, image->h, argv[1], 0);
 
 	if (backend == NULL) {
 		fprintf(stderr, "Failed to initalize backend\n");
@@ -95,23 +95,23 @@ int main(int argc, char *argv[])
 	}
 
 	/* Blit image into the window and show it */
-	GP_Blit_Clipped(image, 0, 0, image->w, image->h, backend->pixmap, 0, 0);
-	GP_BackendFlip(backend);
+	gp_blit_clipped(image, 0, 0, image->w, image->h, backend->pixmap, 0, 0);
+	gp_backend_flip(backend);
 
 	/* Wait for events  */
 	for (;;) {
-		GP_Event ev;
+		gp_event ev;
 
-		GP_BackendWaitEvent(backend, &ev);
+		gp_backend_wait_event(backend, &ev);
 
 		switch (ev.type) {
 		case GP_EV_KEY:
-			if (!ev.code == GP_EV_KEY_DOWN)
+			if (!(ev.code == GP_EV_KEY_DOWN))
 				continue;
 
 			switch (ev.val.val) {
 			case GP_KEY_Q:
-				GP_BackendExit(backend);
+				gp_backend_exit(backend);
 				return 0;
 			break;
 			case GP_KEY_SPACE:
@@ -121,10 +121,10 @@ int main(int argc, char *argv[])
 		break;
 		case GP_EV_SYS:
 			if (ev.code == GP_EV_SYS_RESIZE) {
-				GP_BackendResizeAck(backend);
-				GP_Blit_Clipped(image, 0, 0, image->w, image->h,
+				gp_backend_resize_ack(backend);
+				gp_blit_clipped(image, 0, 0, image->w, image->h,
 				        backend->pixmap, 0, 0);
-				GP_BackendFlip(backend);
+				gp_backend_flip(backend);
 			}
 		break;
 		}

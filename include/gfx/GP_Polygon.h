@@ -28,16 +28,16 @@
 
 #include "core/GP_Pixmap.h"
 
-void GP_Polygon(GP_Pixmap *pixmap, unsigned int vertex_count,
-                const GP_Coord *xy, GP_Pixel pixel);
+void gp_polygon(gp_pixmap *pixmap, unsigned int vertex_count,
+                const gp_coord *xy, gp_pixel pixel);
 
-void GP_Polygon_Raw(GP_Pixmap *pixmap, unsigned int vertex_count,
-                    const GP_Coord *xy, GP_Pixel pixel);
+void gp_polygon_raw(gp_pixmap *pixmap, unsigned int vertex_count,
+                    const gp_coord *xy, gp_pixel pixel);
 
-void GP_FillPolygon(GP_Pixmap *pixmap, unsigned int vertex_count,
-                    const GP_Coord *xy, GP_Pixel pixel);
+void gp_fill_polygon(gp_pixmap *pixmap, unsigned int vertex_count,
+                     const gp_coord *xy, gp_pixel pixel);
 
-void GP_FillPolygon_Raw(GP_Pixmap *pixmap, unsigned int vertex_count,
-                        const GP_Coord *xy, GP_Pixel pixel);
+void gp_fill_polygon_raw(gp_pixmap *pixmap, unsigned int vertex_count,
+                         const gp_coord *xy, gp_pixel pixel);
 
 #endif /* GFX_GP_POLYGON_H */

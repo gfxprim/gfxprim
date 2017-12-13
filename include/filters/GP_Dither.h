@@ -29,7 +29,7 @@
 #ifndef FILTERS_GP_DITHER_H
 #define FILTERS_GP_DITHER_H
 
-#include "GP_Filter.h"
+#include <filters/GP_Filter.h>
 
 /*
  * Classical Floyd-Steinberg. Produces good results and is a little faster than
@@ -58,17 +58,17 @@
  *
  * If operation was aborted from within a callback, non-zero is returned.
  */
-int GP_FilterFloydSteinberg(const GP_Pixmap *src,
-                            GP_Pixmap *dst,
-                            GP_ProgressCallback *callback);
+int gp_filter_floyd_steinberg(const gp_pixmap *src,
+                              gp_pixmap *dst,
+                              gp_progress_cb *callback);
 
 /*
  * If malloc() has failed, or operation was aborted by a callback, NULL is
  * returned.
  */
-GP_Pixmap *GP_FilterFloydSteinbergAlloc(const GP_Pixmap *src,
-                                         GP_PixelType pixel_type,
-                                         GP_ProgressCallback *callback);
+gp_pixmap *gp_filter_floyd_steinberg_alloc(const gp_pixmap *src,
+                                           gp_pixel_type pixel_type,
+                                           gp_progress_cb *callback);
 
 /*
  * Hilbert-Peano space filling curve based dithering.
@@ -89,16 +89,16 @@ GP_Pixmap *GP_FilterFloydSteinbergAlloc(const GP_Pixmap *src,
  *
  * If the operation was aborted from within a callback, non-zero is returned.
  */
-int GP_FilterHilbertPeano(const GP_Pixmap *src,
-                          GP_Pixmap *dst,
-                          GP_ProgressCallback *callback);
+int gp_filter_hilbert_peano(const gp_pixmap *src,
+                            gp_pixmap *dst,
+                            gp_progress_cb *callback);
 
 /*
  * If malloc() has failed, or operation was aborted by a callback, NULL is
  * returned.
  */
-GP_Pixmap *GP_FilterHilbertPeanoAlloc(const GP_Pixmap *src,
-                                       GP_PixelType pixel_type,
-                                       GP_ProgressCallback *callback);
+gp_pixmap *gp_filter_hilbert_peano_alloc(const gp_pixmap *src,
+                                         gp_pixel_type pixel_type,
+                                         gp_progress_cb *callback);
 
 #endif /* FILTERS_GP_DITHER_H */

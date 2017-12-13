@@ -32,7 +32,7 @@
 
 #include "tst_test.h"
 
-static uint32_t callback_set_priv(GP_Timer *self)
+static uint32_t callback_set_priv(gp_timer *self)
 {
 	self->priv = (void*)1;
 
@@ -42,14 +42,14 @@ static uint32_t callback_set_priv(GP_Timer *self)
 static int callback_is_called(void)
 {
 	GP_TIMER_DECLARE(timer, 10, 0, "Timer", callback_set_priv, NULL);
-	GP_Timer *head = NULL;
+	gp_timer *head = NULL;
 	int fail = 0;
 
-	GP_TimerQueueInsert(&head, 10, &timer);
+	gp_timer_queue_insert(&head, 10, &timer);
 
 	/* Now call process before the timer expiration */
-	if (GP_TimerQueueProcess(&head, 10)) {
-		tst_msg("GP_TimerQueueProcess() reported non-zero");
+	if (gp_timer_queue_process(&head, 10)) {
+		tst_msg("gp_timer_queue_process() reported non-zero");
 		fail++;
 	}
 
@@ -59,8 +59,8 @@ static int callback_is_called(void)
 	}
 
 	/* Now call process after the expiration time */
-	if (GP_TimerQueueProcess(&head, 30) != 1) {
-		tst_msg("GP_TimerQueueProcess() reported wrong number");
+	if (gp_timer_queue_process(&head, 30) != 1) {
+		tst_msg("gp_timer_queue_process() reported wrong number");
 		fail++;
 	}
 
@@ -80,7 +80,7 @@ static int callback_is_called(void)
 static int monotonicity_failed = 0;
 static uint64_t prev_expires;
 
-static uint32_t callback_check_monotonicity(GP_Timer *self)
+static uint32_t callback_check_monotonicity(gp_timer *self)
 {
 	if (self->expires < prev_expires) {
 		monotonicity_failed = 1;
@@ -94,24 +94,24 @@ static uint32_t callback_check_monotonicity(GP_Timer *self)
 
 static int expirations_sorted(void)
 {
-	GP_Timer *head = NULL;
-	GP_Timer timers[MAX];
+	gp_timer *head = NULL;
+	gp_timer timers[MAX];
 	int i;
 	uint64_t expires;
 
 	for (i = 0; i < MAX; i++) {
 		timers[i].expires = random();
 		timers[i].period = 0;
-		timers[i].Callback = callback_check_monotonicity;
+		timers[i].callback = callback_check_monotonicity;
 		timers[i].priv = &expires;
 		timers[i].id = "Timer";
-		GP_TimerQueueInsert(&head, 0, &timers[i]);
+		gp_timer_queue_insert(&head, 0, &timers[i]);
 	}
 
 	prev_expires = head->expires;
 
 	for (i = 0; i < MAX; i++)
-		GP_TimerQueueProcess(&head, head ? head->expires : 0);
+		gp_timer_queue_process(&head, head ? head->expires : 0);
 
 	if (monotonicity_failed)
 		return TST_FAILED;
@@ -121,10 +121,10 @@ static int expirations_sorted(void)
 
 static int process_with_NULL_head(void)
 {
-	GP_Timer *head = NULL;
+	gp_timer *head = NULL;
 
-	if (GP_TimerQueueProcess(&head, 1024)) {
-		tst_msg("GP_TimerQueueProcess returned non-zero");
+	if (gp_timer_queue_process(&head, 1024)) {
+		tst_msg("gp_timer_queue_process returned non-zero");
 		return TST_FAILED;
 	}
 
@@ -138,15 +138,15 @@ static int periodic_timers(void)
 {
 	GP_TIMER_DECLARE(timer1, 0, 10, "Timer1", callback_set_priv, NULL);
 	GP_TIMER_DECLARE(timer2, 0, 20, "Timer2", callback_set_priv, NULL);
-	GP_Timer *head = NULL;
+	gp_timer *head = NULL;
 	int fail = 0;
 
-	GP_TimerQueueInsert(&head, 10, &timer1);
-	GP_TimerQueueInsert(&head, 10, &timer2);
+	gp_timer_queue_insert(&head, 10, &timer1);
+	gp_timer_queue_insert(&head, 10, &timer2);
 
 	/* Make timer1 expire */
-	if (GP_TimerQueueProcess(&head, 20) != 1) {
-		tst_msg("GP_TimerQueueProcess() reported wrong number");
+	if (gp_timer_queue_process(&head, 20) != 1) {
+		tst_msg("gp_timer_queue_process() reported wrong number");
 		fail++;
 	}
 
@@ -164,8 +164,8 @@ static int periodic_timers(void)
 	timer1.priv = NULL;
 
 	/* Make both timers expire */
-	if (GP_TimerQueueProcess(&head, 30) != 2) {
-		tst_msg("GP_TimerQueueProcess() reported wrong number");
+	if (gp_timer_queue_process(&head, 30) != 2) {
+		tst_msg("gp_timer_queue_process() reported wrong number");
 		fail++;
 	}
 

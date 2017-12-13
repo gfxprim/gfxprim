@@ -17,15 +17,15 @@ initialization yields pointer to this structure. Although is possible to call
 these pointers directly it's not recommended and everybody should rather use
 the inline functions instead.
 
-The grabber API consist GP_Grabber structure and of several functions:
+The grabber API consist gp_grabber structure and of several functions:
 
 [source,c]
 -------------------------------------------------------------------------------
-typdef struct GP_Grabber {
+typdef struct gp_grabber {
 	/*
          * Currently loaded frame.
          */
-	GP_Pixmap *frame;
+	gp_pixmap *frame;
 
 	/*
          * Connection fd usable for select() or poll().
@@ -35,12 +35,12 @@ typdef struct GP_Grabber {
         int fd;
 
 	/* ... */
-};
+} gp_grabber;
 -------------------------------------------------------------------------------
 
 The frame is a pointer to currently loaded frame. Its content is undefined
-until you start the grabber with 'GP_GrabberStart()' and receive frame with
-'GP_GrabberPoll()'.
+until you start the grabber with 'gp_grabber_start()' and receive frame with
+'gp_grabber_poll()'.
 
 The 'fd' is a file descriptor suitable for select() or poll(). It's set to -1
 if there is none.
@@ -50,9 +50,9 @@ if there is none.
 -------------------------------------------------------------------------------
 #include <grabbers/GP_Grabber.h>
 /* or */
-#include <GP.h>
+#include <gfxprim.h>
 
-void GP_GrabberExit(GP_Grabber *backend);
+void gp_grabber_exit(gp_grabber *backend);
 -------------------------------------------------------------------------------
 
 Exits the grabber, frees memory, unmaps memory mappings, closes file
@@ -62,13 +62,13 @@ descriptors etc...
 -------------------------------------------------------------------------------
 #include <grabbers/GP_Grabber.h>
 /* or */
-#include <GP.h>
+#include <gfxprim.h>
 
-int GP_GrabberStart(struct GP_Grabber *self);
+int gp_grabber_start(struct gp_grabber *self);
 -------------------------------------------------------------------------------
 
 Starts a grabber. After calling this you can start retrieving frames with
-'GP_GrabberPoll()'.
+'gp_grabber_poll()'.
 
 Returns zero on success and non-zero on failure.
 
@@ -76,9 +76,9 @@ Returns zero on success and non-zero on failure.
 -------------------------------------------------------------------------------
 #include <grabbers/GP_Grabber.h>
 /* or */
-#include <GP.h>
+#include <gfxprim.h>
 
-int GP_GrabberStop(struct GP_Grabber *self);
+int gp_grabber_stop(struct gp_grabber *self);
 -------------------------------------------------------------------------------
 
 Stops a grabber. Call this when you doesn't need to receive frames but still
@@ -90,9 +90,9 @@ Returns zero on success and non-zero on failure.
 -------------------------------------------------------------------------------
 #include <grabbers/GP_Grabber.h>
 /* or */
-#include <GP.h>
+#include <gfxprim.h>
 
-int GP_GrabberPoll(struct GP_Grabber *self);
+int gp_grabber_poll(struct gp_grabber *self);
 -------------------------------------------------------------------------------
 
 Once grabber is created you can call this function to receive a frame. If
@@ -109,11 +109,11 @@ Grabber Initializations
 -------------------------------------------------------------------------------
 #include <grabbers/GP_V4L2.h>
 /* or */
-#include <GP.h>
+#include <gfxprim.h>
 
-struct GP_Grabber *GP_GrabberV4L2Init(const char *device,
-                                      unsigned int preferred_width,
-                                      unsigned int preferred_height);
+struct gp_grabber *gp_grabber_v4l2_init(const char *device,
+                                        unsigned int preferred_width,
+                                        unsigned int preferred_height);
 -------------------------------------------------------------------------------
 
 Opens and initializes V4L2 device. The device is a path in +/dev+ filesystem

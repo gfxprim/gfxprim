@@ -24,22 +24,22 @@
 #include "GP_GetPutPixel.h"
 #include "GP_Transform.h"
 
-GP_Pixel GP_GetPixel(const GP_Pixmap *pixmap, GP_Coord x, GP_Coord y)
+gp_pixel gp_getpixel(const gp_pixmap *pixmap, gp_coord x, gp_coord y)
 {
 	GP_TRANSFORM_POINT(pixmap, x, y);
 	if (GP_PIXEL_IS_CLIPPED(pixmap, x, y))
 		return 0;
-	return GP_GetPixel_Raw(pixmap, x, y);
+	return gp_getpixel_raw(pixmap, x, y);
 }
 
-void GP_PutPixel(GP_Pixmap *pixmap, GP_Coord x, GP_Coord y, GP_Pixel p)
+void gp_putpixel(gp_pixmap *pixmap, gp_coord x, gp_coord y, gp_pixel p)
 {
 	GP_TRANSFORM_POINT(pixmap, x, y);
 	if (!GP_PIXEL_IS_CLIPPED(pixmap, x, y))
-		GP_PutPixel_Raw(pixmap, x, y, p);
+		gp_putpixel_raw(pixmap, x, y, p);
 }
 
-uint8_t GP_PixelAddrOffset(GP_Coord x, GP_PixelType pixel_type)
+uint8_t gp_pixel_addr_offset(gp_coord x, gp_pixel_type pixel_type)
 {
 	GP_FN_RET_PER_BPP_PIXELTYPE(GP_PIXEL_ADDR_OFFSET, pixel_type, x);
 

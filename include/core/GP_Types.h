@@ -16,20 +16,34 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2011 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2017 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
-#ifndef GP_TYPES_H
-#define GP_TYPES_H
+#ifndef CORE_GP_TYPES_H
+#define CORE_GP_TYPES_H
 
 #include <stdint.h>
 
-/*
- * Integer type for coordinates: x, y, width, height, ...
- * Should be signed to hold negative values as well.
- */
-typedef int GP_Coord;
-typedef unsigned int GP_Size;
+/* Integer type for coordinates i.e. x, y, ... */
+typedef int gp_coord;
 
-#endif /* GP_TYPES_H */
+/* Integer type for sizes i.e. w, h, ... */
+typedef unsigned int gp_size;
+
+/* Pixel integer value packed accordingly to gp_pixel_type */
+typedef uint32_t gp_pixel;
+
+/* Pixel type description */
+typedef struct gp_pixel_type_desc gp_pixel_type_desc;
+
+/* Bitmap image */
+typedef struct gp_pixmap gp_pixmap;
+
+/* Gamma correction tables */
+typedef struct gp_gamma gp_gamma;
+
+/* Progress callback */
+typedef struct gp_progress_cb gp_progress_cb;
+
+#endif /* CORE_GP_TYPES_H */

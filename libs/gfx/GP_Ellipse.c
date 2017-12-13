@@ -32,19 +32,19 @@
 #include "algo/Ellipse.algo.h"
 
 /* Generate drawing functions for various bit depths. */
-GP_DEF_DRAW_FN_PER_BPP(GP_Ellipse_Raw, DEF_ELLIPSE_FN)
+GP_DEF_DRAW_FN_PER_BPP(gp_ellipse_raw, DEF_ELLIPSE_FN)
 
-void GP_Ellipse_Raw(GP_Pixmap *pixmap, GP_Coord xcenter, GP_Coord ycenter,
-                    GP_Size a, GP_Size b, GP_Pixel pixel)
+void gp_ellipse_raw(gp_pixmap *pixmap, gp_coord xcenter, gp_coord ycenter,
+                    gp_size a, gp_size b, gp_pixel pixel)
 {
 	GP_CHECK_PIXMAP(pixmap);
 
-	GP_FN_PER_BPP_PIXMAP(GP_Ellipse_Raw, pixmap, pixmap,
+	GP_FN_PER_BPP_PIXMAP(gp_ellipse_raw, pixmap, pixmap,
 	                      xcenter, ycenter, a, b, pixel);
 }
 
-void GP_Ellipse(GP_Pixmap *pixmap, GP_Coord xcenter, GP_Coord ycenter,
-                GP_Size a, GP_Size b, GP_Pixel pixel)
+void gp_ellipse(gp_pixmap *pixmap, gp_coord xcenter, gp_coord ycenter,
+                gp_size a, gp_size b, gp_pixel pixel)
 {
 	GP_CHECK_PIXMAP(pixmap);
 
@@ -52,5 +52,5 @@ void GP_Ellipse(GP_Pixmap *pixmap, GP_Coord xcenter, GP_Coord ycenter,
 	GP_TRANSFORM_POINT(pixmap, xcenter, ycenter);
 	GP_TRANSFORM_SWAP(pixmap, a, b);
 
-	GP_Ellipse_Raw(pixmap, xcenter, ycenter, a, b, pixel);
+	gp_ellipse_raw(pixmap, xcenter, ycenter, a, b, pixel);
 }

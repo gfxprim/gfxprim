@@ -11,9 +11,9 @@
 @ # Loop around pixel types central for the conversion.
 @ for pt in [pixeltypes_dict['RGB888'], pixeltypes_dict['RGBA8888']]:
 
-GP_Pixel GP_{{ pt.name }}ToPixel(GP_Pixel pixel, GP_PixelType type)
+gp_pixel gp_{{ pt.name }}_to_pixel(gp_pixel pixel, gp_pixel_type type)
 {
-	GP_Pixel p = 0;
+	gp_pixel p = 0;
 	switch (type) {
 @     for tf in pixeltypes:
 @         if tf.is_unknown():
@@ -26,7 +26,7 @@ GP_Pixel GP_{{ pt.name }}ToPixel(GP_Pixel pixel, GP_PixelType type)
 			break;
 @         else:
 		case GP_PIXEL_{{ tf.name }}:
-			GP_Pixel_{{ pt.name }}_TO_{{ tf.name }}(pixel, p);
+			GP_PIXEL_{{ pt.name }}_TO_{{ tf.name }}(pixel, p);
 			break;
 @     end
 		default:
@@ -35,9 +35,9 @@ GP_Pixel GP_{{ pt.name }}ToPixel(GP_Pixel pixel, GP_PixelType type)
 	return p;
 }
 
-GP_Pixel GP_PixelTo{{ pt.name }}(GP_Pixel pixel, GP_PixelType type)
+gp_pixel gp_pixel_to_{{ pt.name }}(gp_pixel pixel, gp_pixel_type type)
 {
-	GP_Pixel p = 0;
+	gp_pixel p = 0;
 	switch (type) {
 @     for sf in pixeltypes:
 @         if sf.is_unknown():
@@ -50,7 +50,7 @@ GP_Pixel GP_PixelTo{{ pt.name }}(GP_Pixel pixel, GP_PixelType type)
 			break;
 @         else:
 		case GP_PIXEL_{{ sf.name }}:
-			GP_Pixel_{{ sf.name }}_TO_{{ pt.name }}(pixel, p);
+			GP_PIXEL_{{ sf.name }}_TO_{{ pt.name }}(pixel, p);
 			break;
 @     end
 		default:

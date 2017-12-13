@@ -23,14 +23,13 @@
 #ifndef FILTERS_GP_LINEAR_THREADS_H
 #define FILTERS_GP_LINEAR_THREADS_H
 
-#include "GP_Filter.h"
-#include "GP_Linear.h"
+#include <filters/GP_Filter.h>
+#include <filters/GP_Linear.h>
 
-int GP_FilterConvolutionMP_Raw(const GP_ConvolutionParams *params);
+int gp_filter_convolution_mp_raw(const gp_convolution_params *params);
 
-int GP_FilterVConvolutionMP_Raw(const GP_ConvolutionParams *params);
+int gp_filter_vconvolution_mp_raw(const gp_convolution_params *params);
 
-int GP_FilterHConvolutionMP_Raw(const GP_ConvolutionParams *params);
-
+int gp_filter_hconvolution_mp_raw(const gp_convolution_params *params);
 
 #endif /* FILTERS_GP_LINEAR_THREADS_H */

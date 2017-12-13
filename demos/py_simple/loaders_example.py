@@ -10,10 +10,10 @@ def main():
         print("Takes an image as an argument")
         sys.exit(1)
 
-    # Load Image
-    img = loaders.Load(sys.argv[1])
-    # Save result
-    img.loaders.Save("out.png");
+    # load Image
+    img = loaders.load(sys.argv[1])
+    # save result
+    img.loaders.save("out.png");
 
 if __name__ == '__main__':
     main()

@@ -17,10 +17,10 @@
 
 @ for pt in pixeltypes:
 @     if not pt.is_unknown() and not pt.is_palette():
-static void init_table_{{ pt.name }}(GP_Pixel table[],
-                                     GP_Size table_size,
-                                     GP_Pixel pixels[],
-                                     GP_Size pixels_size)
+static void init_table_{{ pt.name }}(gp_pixel table[],
+                                     gp_size table_size,
+                                     gp_pixel pixels[],
+                                     gp_size pixels_size)
 {
 	unsigned int i;
 	unsigned int p = 0;
@@ -41,15 +41,15 @@ static void init_table_{{ pt.name }}(GP_Pixel table[],
 
 		table[i] = GP_MIX_PIXELS_{{ pt.name }}(pixels[p+1], pixels[p], 255 * perc);
 //		printf("p = %u i = %u PERC %.2f\n", p, i, perc);
-//		GP_PixelPrint(table[i], GP_PIXEL_{{ pt.name }});
+//		gp_pixel_print(table[i], GP_PIXEL_{{ pt.name }});
 	}
 }
 
 @ end
 @
-static void init_table(GP_PixelType type,
-                       GP_Pixel table[], GP_Size table_size,
-                       GP_Pixel pixels[], GP_Size pixels_size)
+static void init_table(gp_pixel_type type,
+                       gp_pixel table[], gp_size table_size,
+                       gp_pixel pixels[], gp_size pixels_size)
 {
 	switch (type) {
 @ for pt in pixeltypes:
@@ -69,20 +69,20 @@ static void init_table(GP_PixelType type,
 
 @ for pt in pixeltypes:
 @     if pt.is_gray():
-static int multitone_{{ pt.name }}(const GP_Pixmap *const src,
-                                   GP_Coord x_src, GP_Coord y_src,
-                                   GP_Size w_src, GP_Size h_src,
-                                   GP_Pixmap *dst,
-                                   GP_Coord x_dst, GP_Coord y_dst,
-                                   GP_Pixel pixels[], GP_Size pixels_size,
-                                   GP_ProgressCallback *callback)
+static int multitone_{{ pt.name }}(const gp_pixmap *const src,
+                                   gp_coord x_src, gp_coord y_src,
+                                   gp_size w_src, gp_size h_src,
+                                   gp_pixmap *dst,
+                                   gp_coord x_dst, gp_coord y_dst,
+                                   gp_pixel pixels[], gp_size pixels_size,
+                                   gp_progress_cb *callback)
 {
 @         size = pt.chanslist[0].max + 1
-	GP_TempAllocCreate(tmp, {{ size }} * sizeof(GP_Pixel));
-	GP_Pixel *table = GP_TempAllocGet(tmp, {{ size }} * sizeof(GP_Pixel));
+	gp_temp_alloc_create(tmp, {{ size }} * sizeof(gp_pixel));
+	gp_pixel *table = gp_temp_alloc_get(tmp, {{ size }} * sizeof(gp_pixel));
 
 	GP_DEBUG(1, "Duotone filter %ux%u {{ pt.name }} -> %s",
-	         w_src, h_src, GP_PixelTypeName(dst->pixel_type));
+	         w_src, h_src, gp_pixel_type_name(dst->pixel_type));
 
 	init_table(dst->pixel_type, table, {{ size }}, pixels, pixels_size);
 
@@ -95,35 +95,35 @@ static int multitone_{{ pt.name }}(const GP_Pixmap *const src,
 			unsigned int dst_x = x_dst + x;
 			unsigned int dst_y = y_dst + y;
 
-			GP_Pixel pix = GP_GetPixel_Raw_{{ pt.pixelsize.suffix }}(src, src_x, src_y);
+			gp_pixel pix = gp_getpixel_raw_{{ pt.pixelsize.suffix }}(src, src_x, src_y);
 
 			pix = table[pix];
 
-			GP_PutPixel_Raw(dst, dst_x, dst_y, pix);
+			gp_putpixel_raw(dst, dst_x, dst_y, pix);
 		}
 
-		if (GP_ProgressCallbackReport(callback, y, h_src, w_src)) {
-			GP_TempAllocFree(tmp);
+		if (gp_progress_cb_report(callback, y, h_src, w_src)) {
+			gp_temp_alloc_free(tmp);
 			errno = ECANCELED;
 			return 1;
 		}
 	}
 
-	GP_TempAllocFree(tmp);
-	GP_ProgressCallbackDone(callback);
+	gp_temp_alloc_free(tmp);
+	gp_progress_cb_done(callback);
 
 	return 0;
 }
 
 @ end
 @
-int GP_FilterMultiToneEx(const GP_Pixmap *const src,
-                         GP_Coord x_src, GP_Coord y_src,
-                         GP_Size w_src, GP_Size h_src,
-                         GP_Pixmap *dst,
-                         GP_Coord x_dst, GP_Coord y_dst,
-                         GP_Pixel pixels[], GP_Size pixels_size,
-                         GP_ProgressCallback *callback)
+int gp_filter_multitone_ex(const gp_pixmap *const src,
+                           gp_coord x_src, gp_coord y_src,
+                           gp_size w_src, gp_size h_src,
+                           gp_pixmap *dst,
+                           gp_coord x_dst, gp_coord y_dst,
+                           gp_pixel pixels[], gp_size pixels_size,
+                           gp_progress_cb *callback)
 {
 	//CHECK DST IS NOT PALETTE PixelHasFlags
 
@@ -144,27 +144,27 @@ int GP_FilterMultiToneEx(const GP_Pixmap *const src,
 	}
 }
 
-GP_Pixmap *GP_FilterMultiToneExAlloc(const GP_Pixmap *const src,
-                                      GP_Coord x_src, GP_Coord y_src,
-                                      GP_Size w_src, GP_Size h_src,
-                                      GP_PixelType dst_pixel_type,
-                                      GP_Pixel pixels[], GP_Size pixels_size,
-                                      GP_ProgressCallback *callback)
+gp_pixmap *gp_filter_multitone_ex_alloc(const gp_pixmap *const src,
+                                        gp_coord x_src, gp_coord y_src,
+                                        gp_size w_src, gp_size h_src,
+                                        gp_pixel_type dst_pixel_type,
+                                        gp_pixel pixels[], gp_size pixels_size,
+                                        gp_progress_cb *callback)
 {
-	GP_Pixmap *res;
+	gp_pixmap *res;
 	int err;
 
-	res = GP_PixmapAlloc(w_src, h_src, dst_pixel_type);
+	res = gp_pixmap_alloc(w_src, h_src, dst_pixel_type);
 
 	if (!res) {
 		GP_DEBUG(1, "Malloc failed :(");
 		return NULL;
 	}
 
-	if (GP_FilterMultiToneEx(src, x_src, y_src, w_src, h_src, res, 0, 0,
+	if (gp_filter_multitone_ex(src, x_src, y_src, w_src, h_src, res, 0, 0,
 	                         pixels, pixels_size, callback)) {
 		err = errno;
-		GP_PixmapFree(res);
+		gp_pixmap_free(res);
 		errno = err;
 		return NULL;
 	}

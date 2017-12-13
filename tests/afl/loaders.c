@@ -30,20 +30,20 @@
 #include <string.h>
 #include <errno.h>
 
-#include <GP.h>
+#include <gfxprim.h>
 
 int main(int argc, char *argv[])
 {
-	GP_Pixmap *img;
+	gp_pixmap *img;
 
 	if (argc != 2) {
 		fprintf(stderr, "Takes an image as an parameter\n");
 		return 1;
 	}
 
-	img = GP_LoadImage(argv[1], NULL);
+	img = gp_load_image(argv[1], NULL);
 
-	GP_PixmapFree(img);
+	gp_pixmap_free(img);
 
 	return 0;
 }

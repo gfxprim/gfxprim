@@ -29,7 +29,7 @@
 #ifndef PARTICLE_H
 #define PARTICLE_H
 
-#include <GP.h>
+#include <gfxprim.h>
 
 struct particle {
 	/* fixed point coordinates */
@@ -69,7 +69,7 @@ struct space *space_create(unsigned int particle_count, int min_w, int min_h,
 
 void space_destroy(struct space *space);
 
-void space_draw_particles(GP_Pixmap *pixmap, struct space *space);
+void space_draw_particles(gp_pixmap *pixmap, struct space *space);
 
 void space_time_tick(struct space *space, int time);
 

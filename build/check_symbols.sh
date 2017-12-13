@@ -61,19 +61,19 @@ do_check()
 	rm $SYMTMPFILE
 }
 
-do_check libgfxprim.so syms/Core_symbols.txt syms/Input_symbols.txt \
-                       syms/Filters_symbols.txt syms/GFX_symbols.txt \
-                       syms/Text_symbols.txt
+do_check libgfxprim.so syms/core_symbols.txt syms/input_symbols.txt \
+                       syms/filters_symbols.txt syms/gfx_symbols.txt \
+                       syms/text_symbols.txt
 
-do_check libgfxprim-backends.so syms/Backend_symbols.txt
+do_check libgfxprim-backends.so syms/backend_symbols.txt
 
-do_check libgfxprim-grabbers.so syms/Grabbers_symbols.txt
+do_check libgfxprim-grabbers.so syms/grabbers_symbols.txt
 
-do_check libgfxprim-loaders.so syms/Loaders_symbols.txt
+do_check libgfxprim-loaders.so syms/loaders_symbols.txt
 
 if [ -n "$FOUND" ]; then
 	echo
-	echo "Set them static or update lists of exported functions in syms/Foo_symbols.txt"
+	echo "Set them static or update lists of exported functions in syms/foo_symbols.txt"
 	echo
 	echo "$WARN"
 else

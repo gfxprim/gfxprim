@@ -31,9 +31,9 @@
 #include <poll.h>
 #include <pty.h>
 #include <vterm.h>
-#include <GP.h>
+#include <gfxprim.h>
 
-static GP_Backend *backend;
+static gp_backend *backend;
 
 static VTerm *vt;
 static VTermScreen *vts;
@@ -42,47 +42,47 @@ static unsigned int cols;
 static unsigned int rows;
 static unsigned int char_width;
 static unsigned int char_height;
-static GP_TextStyle *text_style;
-static GP_TextStyle *text_style_bold;
+static gp_text_style *text_style;
+static gp_text_style *text_style_bold;
 
-static GP_Pixel colors[16];
+static gp_pixel colors[16];
 
 /* delay before we repaint merged damage */
 static int repaint_sleep_ms = -1;
 
 /* HACK to draw frames */
-static void draw_utf8_frames(int x, int y, uint32_t val, GP_Pixel fg)
+static void draw_utf8_frames(int x, int y, uint32_t val, gp_pixel fg)
 {
 	switch (val) {
 	case 0x2500: /* Horizontal line */
-		GP_HLineXYW(backend->pixmap, x, y + char_height/2, char_width, fg);
+		gp_hline_xyw(backend->pixmap, x, y + char_height/2, char_width, fg);
 	break;
 	case 0x2502: /* Vertical line */
-		GP_VLineXYH(backend->pixmap, x + char_width/2, y, char_height, fg);
+		gp_vline_xyh(backend->pixmap, x + char_width/2, y, char_height, fg);
 	break;
 	case 0x250c: /* Upper left corner */
-		GP_HLineXYW(backend->pixmap, x + char_width/2, y + char_height/2, char_width/2, fg);
-		GP_VLineXYH(backend->pixmap, x + char_width/2, y + char_height/2, char_height/2+1, fg);
+		gp_hline_xyw(backend->pixmap, x + char_width/2, y + char_height/2, char_width/2, fg);
+		gp_vline_xyh(backend->pixmap, x + char_width/2, y + char_height/2, char_height/2+1, fg);
 	break;
 	case 0x2510: /* Upper right corner */
-		GP_HLineXYW(backend->pixmap, x, y + char_height/2, char_width/2, fg);
-		GP_VLineXYH(backend->pixmap, x + char_width/2, y + char_height/2, char_height/2+1, fg);
+		gp_hline_xyw(backend->pixmap, x, y + char_height/2, char_width/2, fg);
+		gp_vline_xyh(backend->pixmap, x + char_width/2, y + char_height/2, char_height/2+1, fg);
 	break;
 	case 0x2514: /* Bottom left corner */
-		GP_HLineXYW(backend->pixmap, x + char_width/2, y + char_height/2, char_width/2, fg);
-		GP_VLineXYH(backend->pixmap, x + char_width/2, y, char_height/2, fg);
+		gp_hline_xyw(backend->pixmap, x + char_width/2, y + char_height/2, char_width/2, fg);
+		gp_vline_xyh(backend->pixmap, x + char_width/2, y, char_height/2, fg);
 	break;
 	case 0x2518: /* Bottom right corner */
-		GP_HLineXYW(backend->pixmap, x, y + char_height/2, char_width/2, fg);
-		GP_VLineXYH(backend->pixmap, x + char_width/2, y, char_height/2+1, fg);
+		gp_hline_xyw(backend->pixmap, x, y + char_height/2, char_width/2, fg);
+		gp_vline_xyh(backend->pixmap, x + char_width/2, y, char_height/2+1, fg);
 	break;
 	case 0x251c: /* Left vertical tee */
-		GP_HLineXYW(backend->pixmap, x + char_width/2, y + char_height/2, char_width/2, fg);
-		GP_VLineXYH(backend->pixmap, x + char_width/2, y, char_height, fg);
+		gp_hline_xyw(backend->pixmap, x + char_width/2, y + char_height/2, char_width/2, fg);
+		gp_vline_xyh(backend->pixmap, x + char_width/2, y, char_height, fg);
 	break;
 	case 0x2524: /* Right vertical tee */
-		GP_HLineXYW(backend->pixmap, x, y + char_height/2, char_width/2, fg);
-		GP_VLineXYH(backend->pixmap, x + char_width/2, y, char_height, fg);
+		gp_hline_xyw(backend->pixmap, x, y + char_height/2, char_width/2, fg);
+		gp_vline_xyh(backend->pixmap, x + char_width/2, y, char_height, fg);
 	break;
 	default:
 		fprintf(stderr, "WARN: unhandled utf8 char %x\n", val);
@@ -95,8 +95,8 @@ static void draw_cell(VTermPos pos)
 
 	vterm_screen_get_cell(vts, pos, &c);
 
-	GP_Pixel bg = colors[c.bg.red];
-	GP_Pixel fg = colors[c.fg.red];
+	gp_pixel bg = colors[c.bg.red];
+	gp_pixel fg = colors[c.fg.red];
 
 	if (c.attrs.reverse)
 		GP_SWAP(bg, fg);
@@ -106,7 +106,7 @@ static void draw_cell(VTermPos pos)
 	int x = pos.col * char_width;
 	int y = pos.row * char_height;
 
-	GP_FillRectXYWH(backend->pixmap, x, y, char_width, char_height, bg);
+	gp_fill_rect_xywh(backend->pixmap, x, y, char_width, char_height, bg);
 
 	//fprintf(stderr, "Drawing %x %c %02i %02i\n", buf[0], buf[0], pos.row, pos.col);
 
@@ -118,9 +118,9 @@ static void draw_cell(VTermPos pos)
 		return;
 	}
 
-	GP_TextStyle *style = c.attrs.bold ? text_style_bold : text_style;
+	gp_text_style *style = c.attrs.bold ? text_style_bold : text_style;
 
-	GP_Text(backend->pixmap, style, x, y, GP_ALIGN_RIGHT | GP_VALIGN_BELOW, fg, bg, buf);
+	gp_text(backend->pixmap, style, x, y, GP_ALIGN_RIGHT | GP_VALIGN_BELOW, fg, bg, buf);
 }
 
 static void update_rect(VTermRect rect)
@@ -130,7 +130,7 @@ static void update_rect(VTermRect rect)
 	int w = rect.end_col * char_width;
 	int h = rect.end_row * char_height;
 
-	GP_BackendUpdateRectXYXY(backend, x, y, w, h);
+	gp_backend_update_rect_xyxy(backend, x, y, w, h);
 }
 
 static VTermRect damaged;
@@ -197,13 +197,13 @@ static int term_movecursor(VTermPos pos, VTermPos oldpos, int visible, void *use
 	unsigned int y = oldpos.row * char_height;
 
 	draw_cell(oldpos);
-	GP_BackendUpdateRectXYWH(backend, x, y, char_width, char_height);
+	gp_backend_update_rect_xywh(backend, x, y, char_width, char_height);
 
 	x = pos.col * char_width;
 	y = pos.row * char_height;
 
-	GP_RectXYWH(backend->pixmap, x, y, char_width, char_height, 0xffffff);
-	GP_BackendUpdateRectXYWH(backend, x, y, char_width, char_height);
+	gp_rect_xywh(backend->pixmap, x, y, char_width, char_height, 0xffffff);
+	gp_backend_update_rect_xywh(backend, x, y, char_width, char_height);
 
 	//fprintf(stderr, "Move cursor %i %i -> %i %i!\n", oldpos.col, oldpos.row, pos.col, pos.row);
 
@@ -219,7 +219,7 @@ static int term_settermprop(VTermProp prop, VTermValue *val, void *user_data)
 	switch (prop) {
 	case VTERM_PROP_TITLE:
 		fprintf(stderr, "caption %s\n", val->string);
-		GP_BackendSetCaption(backend, val->string);
+		gp_backend_set_caption(backend, val->string);
 		return 1;
 	case VTERM_PROP_ALTSCREEN:
 		fprintf(stderr, "altscreen\n");
@@ -382,14 +382,14 @@ static void console_resize(int fd, int cols, int rows)
 static void do_exit(int fd)
 {
 	close_console(fd);
-	GP_BackendExit(backend);
+	gp_backend_exit(backend);
 	vterm_free(vt);
 }
 
-static void event_to_console(GP_Event *ev, int fd)
+static void event_to_console(gp_event *ev, int fd)
 {
-	int ctrl = GP_EventGetKey(ev, GP_KEY_RIGHT_CTRL) ||
-		   GP_EventGetKey(ev, GP_KEY_LEFT_CTRL);
+	int ctrl = gp_event_get_key(ev, GP_KEY_RIGHT_CTRL) ||
+		   gp_event_get_key(ev, GP_KEY_LEFT_CTRL);
 
 	if (ctrl) {
 		if (ev->val.key.ascii >= 'a' && ev->val.key.ascii <= 'z') {
@@ -518,14 +518,14 @@ static void backend_init(void)
 {
 	int i;
 
-	backend = GP_BackendInit("X11", "Termini");
+	backend = gp_backend_init("X11", "Termini");
 	if (backend == NULL) {
 		fprintf(stderr, "Failed to initalize backend\n");
 		exit(1);
 	}
 
 	for (i = 0; i < 16; i++) {
-		colors[i] = GP_RGBToPixmapPixel(RGB_colors[i].r,
+		colors[i] = gp_rgb_to_pixmap_pixel(RGB_colors[i].r,
 		                                RGB_colors[i].g,
 		                                RGB_colors[i].b,
 		                                backend->pixmap);
@@ -536,16 +536,14 @@ int main(int argc, char *argv[])
 {
 	backend_init();
 
-	GP_TextStyle style = {
-		.font = GP_FontHaxorNarrow17,
-		//.font = &GP_DefaultConsoleFont,
+	gp_text_style style = {
+		.font = gp_font_haxor_narrow_17,
 	        .pixel_xmul = 1,
 		.pixel_ymul = 1,
 	};
 
-	GP_TextStyle style_bold = {
-		.font = GP_FontHaxorNarrowBold17,
-		//.font = &GP_DefaultConsoleFont,
+	gp_text_style style_bold = {
+		.font = gp_font_haxor_narrow_bold_17,
 	        .pixel_xmul = 1,
 		.pixel_ymul = 1,
 	};
@@ -553,11 +551,11 @@ int main(int argc, char *argv[])
 	text_style = &style;
 	text_style_bold = &style_bold;
 
-	char_width  = GP_TextMaxWidth(text_style, 1);
-	char_height = GP_TextHeight(text_style);
+	char_width  = gp_text_max_width(text_style, 1);
+	char_height = gp_text_height(text_style);
 
-	cols = GP_PixmapW(backend->pixmap)/char_width;
-	rows = GP_PixmapH(backend->pixmap)/char_height;
+	cols = gp_pixmap_w(backend->pixmap)/char_width;
+	rows = gp_pixmap_h(backend->pixmap)/char_height;
 
 	fprintf(stderr, "Cols %i Rows %i\n", cols, rows);
 
@@ -571,12 +569,12 @@ int main(int argc, char *argv[])
 	};
 
 	for (;;) {
-		GP_Event ev;
+		gp_event ev;
 
 		if (poll(fds, 2, repaint_sleep_ms) == 0)
 			repaint_damage();
 
-		while (GP_BackendPollEvent(backend, &ev)) {
+		while (gp_backend_poll_event(backend, &ev)) {
 			switch (ev.type) {
 			case GP_EV_KEY:
 				if (ev.code == GP_EV_KEY_UP)
@@ -587,12 +585,12 @@ int main(int argc, char *argv[])
 			case GP_EV_SYS:
 				switch (ev.code) {
 				case GP_EV_SYS_RESIZE:
-					GP_BackendResizeAck(backend);
+					gp_backend_resize_ack(backend);
 					cols = ev.val.sys.w/char_width;
 					rows = ev.val.sys.h/char_height;
 					vterm_set_size(vt, rows, cols);
 					console_resize(fd, cols, rows);
-					GP_Fill(backend->pixmap, 0);
+					gp_fill(backend->pixmap, 0);
 					VTermRect rect = {.start_row = 0, .start_col = 0, .end_row = rows, .end_col = cols};
 					term_damage(rect, NULL);
 					//TODO cursor

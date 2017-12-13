@@ -34,8 +34,8 @@ struct testcase {
 
 static int test_load_Exif(struct testcase *test)
 {
-	GP_DataStorage *data = GP_DataStorageCreate();
-	GP_IO *io;
+	gp_storage *data = gp_storage_create();
+	gp_io *io;
 	int ret = TST_SUCCESS;
 
 	if (!data) {
@@ -43,23 +43,23 @@ static int test_load_Exif(struct testcase *test)
 		return TST_UNTESTED;
 	}
 
-	io = GP_IOFile(test->path, GP_IO_RDONLY);
+	io = gp_io_file(test->path, GP_IO_RDONLY);
 
 	if (!io) {
 		tst_msg("Failed to open IO %s", test->path);
-		GP_DataStorageDestroy(data);
+		gp_storage_destroy(data);
 		return TST_UNTESTED;
 	}
 
-	if (GP_ReadExif(io, data)) {
+	if (gp_read_exif(io, data)) {
 		tst_msg("Failed to load Exif");
 		ret = TST_FAILED;
 		goto end;
 	}
 
 end:
-	GP_DataStorageDestroy(data);
-	GP_IOClose(io);
+	gp_storage_destroy(data);
+	gp_io_close(io);
 	return ret;
 }
 

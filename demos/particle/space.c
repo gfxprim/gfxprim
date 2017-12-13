@@ -67,19 +67,19 @@ void space_destroy(struct space *space)
 
 #define SQUARE(x) ((x) * (x))
 
-void space_draw_particles(GP_Pixmap *pixmap, struct space *space)
+void space_draw_particles(gp_pixmap *pixmap, struct space *space)
 {
 	unsigned int i;
 
-	GP_Fill(pixmap, 0x000000);
+	gp_fill(pixmap, 0x000000);
 
 	for (i = 0; i < space->particle_count; i++) {
-		GP_Pixel color;
+		gp_pixel color;
 
-		GP_Coord x = space->particles[i].x;
-		GP_Coord y = space->particles[i].y;
-		GP_Coord a1 = GP_FP_1 * 4;
-		GP_Coord a2 = GP_FP_1_2 * 2;
+		gp_coord x = space->particles[i].x;
+		gp_coord y = space->particles[i].y;
+		gp_coord a1 = GP_FP_1 * 4;
+		gp_coord a2 = GP_FP_1_2 * 2;
 
 /*
 		if (i == 0) {
@@ -88,9 +88,9 @@ void space_draw_particles(GP_Pixmap *pixmap, struct space *space)
 		}
 */
 
-		color = GP_RGBToPixmapPixel(0xee, 0xee, 0xee, pixmap);
+		color = gp_rgb_to_pixmap_pixel(0xee, 0xee, 0xee, pixmap);
 
-		GP_PutPixelAA(pixmap, x, y, color);
+		gp_putpixel_aa(pixmap, x, y, color);
 
 		int val = SQUARE(space->particles[i].vx) + SQUARE(space->particles[i].vy);
 
@@ -99,29 +99,29 @@ void space_draw_particles(GP_Pixmap *pixmap, struct space *space)
 		if (val > 255)
 			val = 255;
 
-		color = GP_RGBToPixmapPixel(val, val, 0x40, pixmap);
+		color = gp_rgb_to_pixmap_pixel(val, val, 0x40, pixmap);
 
 		/* Hexagons */
-		GP_LineAA(pixmap, x - a2, y - a1, x + a2, y - a1, color);
-	//	GP_LineAA(pixmap, x + a2, y - a1, x + a1, y - a2, color);
-		GP_LineAA(pixmap, x + a1, y - a2, x + a1, y + a2, color);
-	//	GP_LineAA(pixmap, x + a1, y + a2, x + a2, y + a1, color);
-		GP_LineAA(pixmap, x + a2, y + a1, x - a2, y + a1, color);
-	//	GP_LineAA(pixmap, x - a2, y + a1, x - a1, y + a2, color);
-		GP_LineAA(pixmap, x - a1, y + a2, x - a1, y - a2, color);
-	//	GP_LineAA(pixmap, x - a1, y - a2, x - a2, y - a1, color);
+		gp_line_aa(pixmap, x - a2, y - a1, x + a2, y - a1, color);
+	//	gp_line_aa(pixmap, x + a2, y - a1, x + a1, y - a2, color);
+		gp_line_aa(pixmap, x + a1, y - a2, x + a1, y + a2, color);
+	//	gp_line_aa(pixmap, x + a1, y + a2, x + a2, y + a1, color);
+		gp_line_aa(pixmap, x + a2, y + a1, x - a2, y + a1, color);
+	//	gp_line_aa(pixmap, x - a2, y + a1, x - a1, y + a2, color);
+		gp_line_aa(pixmap, x - a1, y + a2, x - a1, y - a2, color);
+	//	gp_line_aa(pixmap, x - a1, y - a2, x - a2, y - a1, color);
 /*
-		GP_PutPixelAA(pixmap, x + a2, y - a1, 0xffffff);
-		GP_PutPixelAA(pixmap, x + a1, y - a2, 0xffffff);
+		gp_putpixel_aa(pixmap, x + a2, y - a1, 0xffffff);
+		gp_putpixel_aa(pixmap, x + a1, y - a2, 0xffffff);
 
-		GP_PutPixelAA(pixmap, x + a1, y + a2, 0xffffff);
-		GP_PutPixelAA(pixmap, x + a2, y + a1, 0xffffff);
+		gp_putpixel_aa(pixmap, x + a1, y + a2, 0xffffff);
+		gp_putpixel_aa(pixmap, x + a2, y + a1, 0xffffff);
 
-		GP_PutPixelAA(pixmap, x - a2, y + a1, 0xffffff);
-		GP_PutPixelAA(pixmap, x - a1, y + a2, 0xffffff);
+		gp_putpixel_aa(pixmap, x - a2, y + a1, 0xffffff);
+		gp_putpixel_aa(pixmap, x - a1, y + a2, 0xffffff);
 
-		GP_PutPixelAA(pixmap, x - a1, y - a2, 0xffffff);
-		GP_PutPixelAA(pixmap, x - a2, y - a1, 0xffffff);
+		gp_putpixel_aa(pixmap, x - a1, y - a2, 0xffffff);
+		gp_putpixel_aa(pixmap, x - a2, y - a1, 0xffffff);
 */
 	}
 }

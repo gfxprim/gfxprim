@@ -31,19 +31,19 @@
 /*
  * Apply prewitt operator.
  */
-static int prewitt(const GP_Pixmap *src, GP_Pixmap *dx, GP_Pixmap *dy,
-                   GP_ProgressCallback *callback)
+static int prewitt(const gp_pixmap *src, gp_pixmap *dx, gp_pixmap *dy,
+                   gp_progress_cb *callback)
 {
 	float smooth_kern[3] = {1, 1, 1,};
 	float grad_kern[3] = {-1, 0, 1};
 
-	if (GP_FilterVHLinearConvolution_Raw(src, 0, 0, src->w, src->h,
+	if (gp_filter_vhlinear_convolution_raw(src, 0, 0, src->w, src->h,
 	                                     dx, 0, 0,
 	                                     smooth_kern, 3, 1,
 					     grad_kern, 3, 1, callback))
 		return 1;
 
-	if (GP_FilterVHLinearConvolution_Raw(src, 0, 0, src->w, src->h,
+	if (gp_filter_vhlinear_convolution_raw(src, 0, 0, src->w, src->h,
 	                                     dy, 0, 0,
 	                                     grad_kern, 3, 1,
 					     smooth_kern, 3, 1, callback))
@@ -55,8 +55,8 @@ static int prewitt(const GP_Pixmap *src, GP_Pixmap *dx, GP_Pixmap *dy,
 /*
  * Apply sobel operator.
  */
-static int sobel(const GP_Pixmap *src, GP_Pixmap *dx, GP_Pixmap *dy,
-                   GP_ProgressCallback *callback)
+static int sobel(const gp_pixmap *src, gp_pixmap *dx, gp_pixmap *dy,
+                   gp_progress_cb *callback)
 {
 	float dx_kern[] = {
 		-1,  0,  1,
@@ -64,7 +64,7 @@ static int sobel(const GP_Pixmap *src, GP_Pixmap *dx, GP_Pixmap *dy,
 		-1,  0,  1,
 	};
 
-	GP_ConvolutionParams dx_conv = {
+	gp_convolution_params dx_conv = {
 		.src = src,
 		.x_src = 0,
 		.y_src = 0,
@@ -80,7 +80,7 @@ static int sobel(const GP_Pixmap *src, GP_Pixmap *dx, GP_Pixmap *dy,
 		.callback = callback,
 	};
 
-	if (GP_FilterConvolution_Raw(&dx_conv))
+	if (gp_filter_convolution_raw(&dx_conv))
 		return 1;
 
 	float dy_kern[] = {
@@ -89,7 +89,7 @@ static int sobel(const GP_Pixmap *src, GP_Pixmap *dx, GP_Pixmap *dy,
 		 1,  2,  1,
 	};
 
-	GP_ConvolutionParams dy_conv = {
+	gp_convolution_params dy_conv = {
 		.src = src,
 		.x_src = 0,
 		.y_src = 0,
@@ -105,23 +105,23 @@ static int sobel(const GP_Pixmap *src, GP_Pixmap *dx, GP_Pixmap *dy,
 		.callback = callback,
 	};
 
-	if (GP_FilterConvolution_Raw(&dy_conv))
+	if (gp_filter_convolution_raw(&dy_conv))
 		return 1;
 
 	return 0;
 }
 
-static int edge_detect(const GP_Pixmap *src,
-                       GP_Pixmap **E, GP_Pixmap **Phi, int type,
-		       GP_ProgressCallback *callback)
+static int edge_detect(const gp_pixmap *src,
+                       gp_pixmap **E, gp_pixmap **Phi, int type,
+		       gp_progress_cb *callback)
 {
 	//TODO
 	GP_ASSERT(src->pixel_type == GP_PIXEL_RGB888);
 
-	GP_Pixmap *dx, *dy;
+	gp_pixmap *dx, *dy;
 
-	dx = GP_PixmapCopy(src, 0);
-	dy = GP_PixmapCopy(src, 0);
+	dx = gp_pixmap_copy(src, 0);
+	dy = gp_pixmap_copy(src, 0);
 
 	if (dx == NULL || dy == NULL)
 		goto err0;
@@ -143,27 +143,27 @@ static int edge_detect(const GP_Pixmap *src,
 
 	for (i = 0; i < src->w; i++) {
 		for (j = 0; j < src->h; j++) {
-			GP_Pixel pix_x = GP_GetPixel_Raw_24BPP(dx, i, j);
-			GP_Pixel pix_y = GP_GetPixel_Raw_24BPP(dy, i, j);
+			gp_pixel pix_x = gp_getpixel_raw_24BPP(dx, i, j);
+			gp_pixel pix_y = gp_getpixel_raw_24BPP(dy, i, j);
 			int Rx, Gx, Bx;
 			int Ry, Gy, By;
 			int RE, GE, BE;
 			int RPhi, GPhi, BPhi;
 
-			Rx = GP_Pixel_GET_R_RGB888(pix_x);
-			Gx = GP_Pixel_GET_G_RGB888(pix_x);
-			Bx = GP_Pixel_GET_B_RGB888(pix_x);
+			Rx = GP_PIXEL_GET_R_RGB888(pix_x);
+			Gx = GP_PIXEL_GET_G_RGB888(pix_x);
+			Bx = GP_PIXEL_GET_B_RGB888(pix_x);
 
-			Ry = GP_Pixel_GET_R_RGB888(pix_y);
-			Gy = GP_Pixel_GET_G_RGB888(pix_y);
-			By = GP_Pixel_GET_B_RGB888(pix_y);
+			Ry = GP_PIXEL_GET_R_RGB888(pix_y);
+			Gy = GP_PIXEL_GET_G_RGB888(pix_y);
+			By = GP_PIXEL_GET_B_RGB888(pix_y);
 
 			RE = sqrt(Rx*Rx + Ry*Ry) + 0.5;
 			GE = sqrt(Gx*Gx + Gy*Gy) + 0.5;
 			BE = sqrt(Bx*Bx + By*By) + 0.5;
 
-			GP_PutPixel_Raw_24BPP(dx, i, j,
-			                      GP_Pixel_CREATE_RGB888(RE, GE, BE));
+			gp_putpixel_raw_24BPP(dx, i, j,
+			                      GP_PIXEL_CREATE_RGB888(RE, GE, BE));
 
 			if (Rx != 0 && Ry != 0)
 				RPhi = ((atan2(Rx, Ry) + M_PI) * 255)/(2*M_PI);
@@ -180,40 +180,40 @@ static int edge_detect(const GP_Pixmap *src,
 			else
 				BPhi = 0;
 
-			GP_PutPixel_Raw_24BPP(dy, i, j,
-			                      GP_Pixel_CREATE_RGB888(RPhi, GPhi, BPhi));
+			gp_putpixel_raw_24BPP(dy, i, j,
+			                      GP_PIXEL_CREATE_RGB888(RPhi, GPhi, BPhi));
 		}
 	}
 
 	if (Phi != NULL)
 		*Phi = dy;
 	else
-		GP_PixmapFree(dy);
+		gp_pixmap_free(dy);
 
 	if (E != NULL)
 		*E = dx;
 	else
-		GP_PixmapFree(dx);
+		gp_pixmap_free(dx);
 
 	return 0;
 err0:
-	GP_PixmapFree(dx);
-	GP_PixmapFree(dy);
+	gp_pixmap_free(dx);
+	gp_pixmap_free(dy);
 	return 1;
 }
 
-int GP_FilterEdgeSobel(const GP_Pixmap *src,
-                       GP_Pixmap **E, GP_Pixmap **Phi,
-                       GP_ProgressCallback *callback)
+int gp_filter_edge_sobel(const gp_pixmap *src,
+                         gp_pixmap **E, gp_pixmap **Phi,
+                         gp_progress_cb *callback)
 {
 	GP_DEBUG(1, "Sobel edge detection image %ux%u", src->w, src->h);
 
 	return edge_detect(src, E, Phi, 0, callback);
 }
 
-int GP_FilterEdgePrewitt(const GP_Pixmap *src,
-                         GP_Pixmap **E, GP_Pixmap **Phi,
-                         GP_ProgressCallback *callback)
+int gp_filter_edge_prewitt(const gp_pixmap *src,
+                           gp_pixmap **E, gp_pixmap **Phi,
+                           gp_progress_cb *callback)
 {
 	GP_DEBUG(1, "Prewitt edge detection image %ux%u", src->w, src->h);
 

@@ -27,7 +27,7 @@
   */
 
 #include <stdio.h>
-#include <GP.h>
+#include <gfxprim.h>
 
 /*
  * Binary PGM stored in an array
@@ -55,48 +55,48 @@ static char pgm[] = {
 
 int main(void)
 {
-	GP_Backend *b;
-	GP_Pixmap *img;
-	GP_IO *io;
+	gp_backend *b;
+	gp_pixmap *img;
+	gp_io *io;
 
-	io = GP_IOMem(pgm, sizeof(pgm), NULL);
+	io = gp_io_mem(pgm, sizeof(pgm), NULL);
 
 	if (!io) {
 		fprintf(stderr, "Failed to initialize IO\n");
 		return 1;
 	}
 
-	img = GP_ReadPGM(io, NULL);
-	GP_IOClose(io);
+	img = gp_read_pgm(io, NULL);
+	gp_io_close(io);
 
 	if (!img) {
 		fprintf(stderr, "Failed to load image\n");
 		return 1;
 	}
 
-	b = GP_BackendX11Init(NULL, 0, 0, WIN_W, WIN_H, "IO Example", 0);
+	b = gp_x11_init(NULL, 0, 0, WIN_W, WIN_H, "IO Example", 0);
 
 	if (!b) {
 		fprintf(stderr, "Failed to initialize backend\n");
 		return 1;
 	}
 
-	GP_Fill(b->pixmap, 0);
-	GP_Blit_Clipped(img, 0, 0, img->w, img->h, b->pixmap,
+	gp_fill(b->pixmap, 0);
+	gp_blit_clipped(img, 0, 0, img->w, img->h, b->pixmap,
 	                (WIN_W - img->w)/2, (WIN_H - img->h)/2);
-	GP_BackendFlip(b);
+	gp_backend_flip(b);
 
 	for (;;) {
-		GP_Event ev;
+		gp_event ev;
 
-		GP_BackendWaitEvent(b, &ev);
+		gp_backend_wait_event(b, &ev);
 
 		switch (ev.type) {
 		case GP_EV_KEY:
 			switch (ev.val.val) {
 			case GP_KEY_ESC:
 			case GP_KEY_Q:
-				GP_BackendExit(b);
+				gp_backend_exit(b);
 				return 0;
 			break;
 			}
@@ -105,7 +105,7 @@ int main(void)
 			switch (ev.code) {
 			case GP_EV_SYS_RESIZE:
 			case GP_EV_SYS_QUIT:
-				GP_BackendExit(b);
+				gp_backend_exit(b);
 				return 0;
 			break;
 			}
@@ -113,6 +113,6 @@ int main(void)
 		}
 	}
 
-	GP_BackendExit(b);
+	gp_backend_exit(b);
 	return 0;
 }

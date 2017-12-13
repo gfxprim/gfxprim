@@ -12,25 +12,25 @@
 
 #include "tst_test.h"
 
-static void fill_pixmap(GP_Pixmap *c, GP_Pixel p)
+static void fill_pixmap(gp_pixmap *c, gp_pixel p)
 {
-	GP_Coord x, y;
+	gp_coord x, y;
 
-	for (x = 0; x < (GP_Coord)c->w; x++)
-		for (y = 0; y < (GP_Coord)c->h; y++)
-			GP_PutPixel(c, x, y, p);
+	for (x = 0; x < (gp_coord)c->w; x++)
+		for (y = 0; y < (gp_coord)c->h; y++)
+			gp_putpixel(c, x, y, p);
 }
 
-static int check_filled(GP_Pixmap *c)
+static int check_filled(gp_pixmap *c)
 {
-	GP_Coord x, y;
-	GP_Pixel p;
+	gp_coord x, y;
+	gp_pixel p;
 
-	p = GP_GetPixel(c, 0, 0);
+	p = gp_getpixel(c, 0, 0);
 
-	for (x = 0; x < (GP_Coord)c->w; x++)
-		for (y = 0; y < (GP_Coord)c->h; y++)
-			if (p != GP_GetPixel(c, x, y)) {
+	for (x = 0; x < (gp_coord)c->w; x++)
+		for (y = 0; y < (gp_coord)c->h; y++)
+			if (p != gp_getpixel(c, x, y)) {
 				tst_msg("Pixels different %i %i", x, y);
 				return 1;
 			}
@@ -38,7 +38,7 @@ static int check_filled(GP_Pixmap *c)
 	return 0;
 }
 
-static int try_pattern(GP_Pixmap *c, GP_Pixel p)
+static int try_pattern(gp_pixmap *c, gp_pixel p)
 {
 	fill_pixmap(c, p);
 
@@ -54,13 +54,13 @@ static int try_pattern(GP_Pixmap *c, GP_Pixel p)
 @     if not pt.is_unknown():
 static int GetPutPixel_{{ pt.name }}(void)
 {
-	GP_Pixmap *c;
+	gp_pixmap *c;
 	int err = 0;
 
-	c = GP_PixmapAlloc(100, 100, GP_PIXEL_{{ pt.name }});
+	c = gp_pixmap_alloc(100, 100, GP_PIXEL_{{ pt.name }});
 
 	if (c == NULL) {
-		tst_msg("GP_PixmapAlloc() failed");
+		tst_msg("gp_pixmap_alloc() failed");
 		return TST_UNTESTED;
 	}
 
@@ -76,7 +76,7 @@ static int GetPutPixel_{{ pt.name }}(void)
 	if (try_pattern(c, 0xf0f0f0f0 & {{ 2 ** pt.pixelsize.size - 1}}U))
 		err++;
 
-	GP_PixmapFree(c);
+	gp_pixmap_free(c);
 
 	if (err)
 		return TST_FAILED;
@@ -89,18 +89,18 @@ static int GetPutPixel_{{ pt.name }}(void)
 @     if not pt.is_unknown():
 static int GetPutPixel_Clipping_{{ pt.name }}(void)
 {
-	GP_Pixmap *c;
+	gp_pixmap *c;
 
-	c = GP_PixmapAlloc(100, 100, GP_PIXEL_{{ pt.name }});
+	c = gp_pixmap_alloc(100, 100, GP_PIXEL_{{ pt.name }});
 
 	if (c == NULL) {
-		tst_msg("GP_PixmapAlloc() failed");
+		tst_msg("gp_pixmap_alloc() failed");
 		return TST_UNTESTED;
 	}
 
 	fill_pixmap(c, 0xffffffff);
 
-	GP_Coord x, y;
+	gp_coord x, y;
 	int err = 0;
 
 	for (x = -1000; x < 200; x++) {
@@ -109,18 +109,18 @@ static int GetPutPixel_Clipping_{{ pt.name }}(void)
 				continue;
 
 			/* Must be no-op */
-			GP_PutPixel(c, x, y, 0);
+			gp_putpixel(c, x, y, 0);
 
 			/* Must return 0 */
-			if (GP_GetPixel(c, x, y) != 0) {
-				tst_msg("GP_GetPixel returned non-zero "
+			if (gp_getpixel(c, x, y) != 0) {
+				tst_msg("gp_getpixel returned non-zero "
 				        "at %i %i", x, y);
 				err++;
 			}
 		}
 	}
 
-	GP_PixmapFree(c);
+	gp_pixmap_free(c);
 
 	if (err)
 		return TST_FAILED;

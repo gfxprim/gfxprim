@@ -1,13 +1,13 @@
 Python Core module
 ------------------
 
-The python binding maps mostly to the C API with the 'GP_' prefix stripped.
+The python binding maps mostly to the C API with the 'gp_' prefix stripped.
 
-However structures as 'GP_Pixmap' are not created by the 'GP_PixmapAlloc()'
+However structures as 'gp_pixmap' are not created by the 'gp_pixmap_alloc()'
 function but have proper constructor and destructor to keep the Python
 reference counting happy.
 
-Then there are a bit more tricky solutions, such as 'GP_ProgressCallback'
+Then there are a bit more tricky solutions, such as 'gp_progress_cb'
 which needs a proxy function to call the python callback from the C code.
 
 Pixmap
@@ -18,7 +18,7 @@ Pixmap
 import gfxprim.core as core
 
     # Create 100x100 RGB888 pixmap
-    c = core.Pixmap(100, 100, core.C.PIXEL_RGB888)
+    c = core.pixmap(100, 100, core.C.PIXEL_RGB888)
 
     print("w={} h={} bpp={}".format(c.w, c.h, c.bpp))
 
@@ -41,7 +41,7 @@ enumeration
 -------------------------------------------------------------------------------
 import gfxprim.core as core
 
-    pixel = pixmap.GetPixel(x, y)
+    pixel = pixmap.get_pixel(x, y)
 
 -------------------------------------------------------------------------------
 
@@ -52,7 +52,7 @@ returned.
 -------------------------------------------------------------------------------
 import gfxprim.core as core
 
-    pixmap.PutPixel(x, y, pixel)
+    pixmap.put_pixel(x, y, pixel)
 
 -------------------------------------------------------------------------------
 
@@ -66,7 +66,7 @@ NOTE: You may want to see link:coordinate_system.html[coordinate system]
 -------------------------------------------------------------------------------
 import gfxprim.core as core
 
-    grayscale = pixmap.Convert(core.C.PIXEL_G8)
+    grayscale = pixmap.convert(core.C.PIXEL_G8)
 
 -------------------------------------------------------------------------------
 
@@ -83,18 +83,18 @@ import gfxprim.core as core
     # Blits pixmap to target starting at
     # sx and sy in the source pixmap
     # tx and ty in in the target
-    pixmap.Blit(sx, sy, target, tx, ty, w, h)
+    pixmap.blit(sx, sy, target, tx, ty, w, h)
 
     # Alternatively the size can be described by
     # coordinates in the source or target
-    pixmap.Blit(sx, sy, target, tx, ty, sx2=, sy2=)
-    pixmap.Blit(sx, sy, target, tx, ty, tx2=, ty2=)
+    pixmap.blit(sx, sy, target, tx, ty, sx2=, sy2=)
+    pixmap.blit(sx, sy, target, tx, ty, tx2=, ty2=)
 
 -------------------------------------------------------------------------------
 
 Copy a rectangle from self to target.
 
-The blits can do naive conversions (same as 'Convert') however such blits are
+The blits can do naive conversions (same as 'convert') however such blits are
 a bit slower.
 
 Blit is clipped.
@@ -116,10 +116,10 @@ type from color.
 import gfxprim.core as core
 
     # You can create a pixel from RGB and pixel type
-    black = core.RGBToPixel(0, 0, 0, core.C.PIXEL_G1)
+    black = core.rgb_to_pixel(0, 0, 0, core.C.PIXEL_G1)
 
     # Or using shortcut from pixmap
-    black = pixmap.RGBToPixel(0, 0, 0)
+    black = pixmap.rgb_to_pixel(0, 0, 0)
 
 -------------------------------------------------------------------------------
 
@@ -131,12 +131,12 @@ particular pixel type.
 import gfxprim.core as core
 
     # Print all supported pixel types
-    for i in core.PixelTypes:
+    for i in core.pixel_types:
             print("Pixel type '{}' size {}".format(i.name, i.size))
 
 -------------------------------------------------------------------------------
 
-The PixelTypes array stores all supported pixel types
+The pixel_types array stores all supported pixel types
 
 [[Progress_Callback]]
 Progress Callback
@@ -162,9 +162,9 @@ Debug Functions
 -------------------------------------------------------------------------------
 import gfxprim.core as core
 
-    core.SetDebugLevel(10)
+    core.set_debug_level(10)
 
-    level = core.GetDebugLevel()
+    level = core.get_debug_level()
 -------------------------------------------------------------------------------
 
 Sets and gets the GFXprim debug level. See link:debug.html[debug messages]

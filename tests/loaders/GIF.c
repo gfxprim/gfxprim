@@ -30,13 +30,13 @@
 
 #include "tst_test.h"
 
-static int test_load_GIF(const char *path)
+static int test_load_gif(const char *path)
 {
-	GP_Pixmap *img;
+	gp_pixmap *img;
 
 	errno = 0;
 
-	img = GP_LoadGIF(path, NULL);
+	img = gp_load_gif(path, NULL);
 
 	if (img == NULL) {
 		switch (errno) {
@@ -49,16 +49,16 @@ static int test_load_GIF(const char *path)
 		}
 	}
 
-	GP_PixmapFree(img);
+	gp_pixmap_free(img);
 
 	return TST_SUCCESS;
 }
 
 const struct tst_suite tst_suite = {
-	.suite_name = "GIF",
+	.suite_name = "gif",
 	.tests = {
-		{.name = "GIF Load 100x100",
-		 .tst_fn = test_load_GIF,
+		{.name = "gif Load 100x100",
+		 .tst_fn = test_load_gif,
 		 .res_path = "data/gif/valid/100x100-white.gif",
 		 .data = "100x100-white.gif",
 		 .flags = TST_TMPDIR | TST_CHECK_MALLOC},

@@ -24,10 +24,10 @@
 #include <string.h>
 #include <time.h>
 
-#include "core/GP_Common.h"
-#include "core/GP_Debug.h"
+#include <core/GP_Common.h>
+#include <core/GP_Debug.h>
 
-#include "input/GP_TimeStamp.h"
+#include <input/GP_TimeStamp.h>
 
 #define MS_IN_US 1000000
 
@@ -82,7 +82,7 @@ static int choose_clock(clockid_t *clock)
 	return 1;
 }
 
-uint64_t GP_GetTimeStamp(void)
+uint64_t gp_time_stamp(void)
 {
 	struct timespec ts;
 	static clockid_t clock = -1;

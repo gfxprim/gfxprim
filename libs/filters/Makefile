@@ -9,8 +9,8 @@ POINT_FILTERS=GP_Invert.gen.c\
               GP_GaussianNoise.gen.c GP_ApplyTables.gen.c \
               GP_MultiTone.gen.c
 
-ARITHMETIC_FILTERS=GP_Difference.gen.c GP_Addition.gen.c GP_Min.gen.c\
-                   GP_Max.gen.c GP_Multiply.gen.c
+ARITHMETIC_FILTERS=GP_Diff.gen.c GP_Add.gen.c GP_Min.gen.c\
+                   GP_Max.gen.c GP_Mul.gen.c
 
 RESAMPLING_FILTERS=GP_ResizeNN.gen.c GP_Cubic.gen.c GP_ResizeCubic.gen.c\
                    GP_ResizeLinear.gen.c

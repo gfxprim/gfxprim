@@ -58,7 +58,7 @@ struct RLE {
 	/* current value */
 	int c;
 
-	GP_IO *io;
+	gp_io *io;
 
 	int buf_pos;
 	int buf_end;
@@ -79,7 +79,7 @@ struct RLE {
 	if (rle->buf_pos < rle->buf_end) { \
 		rle->c = rle->buf[rle->buf_pos++]; \
 	} else { \
-		rle->buf_end = GP_IORead(rle->io, rle->buf, sizeof(rle->buf));\
+		rle->buf_end = gp_io_read(rle->io, rle->buf, sizeof(rle->buf));\
 		if (rle->buf_end <= 0) \
 			return EIO; \
 		rle->c = rle->buf[0]; \
@@ -263,8 +263,8 @@ static int RLE8_next(struct RLE *rle)
 	}
 }
 
-static int read_RLE8(GP_IO *io, struct bitmap_info_header *header,
-                     GP_Pixmap *pixmap, GP_ProgressCallback *callback)
+static int read_RLE8(gp_io *io, struct bitmap_info_header *header,
+                     gp_pixmap *pixmap, gp_progress_cb *callback)
 {
 	uint32_t palette_size = get_palette_size(header);
 	DECLARE_RLE(rle, header->w, GP_ABS(header->h), io);
@@ -273,11 +273,11 @@ static int read_RLE8(GP_IO *io, struct bitmap_info_header *header,
 	if (pixmap->pixel_type != GP_PIXEL_RGB888) {
 		GP_WARN("Corrupted BMP header! "
 			"RLE8 is 24bit (RGB888) palette but header says %s",
-		        GP_PixelTypeName(pixmap->pixel_type));
+		        gp_pixel_type_name(pixmap->pixel_type));
 		return EINVAL;
 	}
 
-	GP_Pixel *palette = GP_TempAlloc(palette_size * sizeof(GP_Pixel));
+	gp_pixel *palette = gp_temp_alloc(palette_size * sizeof(gp_pixel));
 
 	if ((err = read_bitmap_palette(io, header, palette, palette_size)))
 		goto err;
@@ -293,7 +293,7 @@ static int read_RLE8(GP_IO *io, struct bitmap_info_header *header,
 	 * TODO: Untouched pixels should be treated as
 	 *       1 bit transpanrency (in header3+)
 	 */
-	GP_Fill(pixmap, palette[0]);
+	gp_fill(pixmap, palette[0]);
 
 	for (;;) {
 		if ((err = RLE8_next(&rle)))
@@ -302,7 +302,7 @@ static int read_RLE8(GP_IO *io, struct bitmap_info_header *header,
 		if (rle.state == RLE_STOP)
 			break;
 
-		GP_Pixel p;
+		gp_pixel p;
 
 		uint8_t idx = rle.c;
 
@@ -320,11 +320,11 @@ static int read_RLE8(GP_IO *io, struct bitmap_info_header *header,
 		else
 			ry = GP_ABS(header->h) - 1 - rle.y;
 
-		GP_PutPixel_Raw_24BPP(pixmap, rle.x, ry, p);
+		gp_putpixel_raw_24BPP(pixmap, rle.x, ry, p);
 
 		if (cnt++ > header->w) {
 			cnt = 0;
-			if (GP_ProgressCallbackReport(callback, rle.y,
+			if (gp_progress_cb_report(callback, rle.y,
 			                              pixmap->h, pixmap->w)) {
 				GP_DEBUG(1, "Operation aborted");
 				err = ECANCELED;
@@ -333,8 +333,8 @@ static int read_RLE8(GP_IO *io, struct bitmap_info_header *header,
 		}
 	}
 
-	GP_ProgressCallbackDone(callback);
+	gp_progress_cb_done(callback);
 err:
-	GP_TempFree(palette_size * sizeof(GP_Pixel), palette);
+	gp_temp_free(palette_size * sizeof(gp_pixel), palette);
 	return err;
 }

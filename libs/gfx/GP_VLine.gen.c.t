@@ -9,12 +9,12 @@
 #include "gfx/GP_VLine.gen.h"
 
 @ for ps in pixelsizes:
-void GP_VLine_Raw_{{ ps.suffix }}(GP_Pixmap *pixmap, GP_Coord x,
-			GP_Coord y0, GP_Coord y1, GP_Pixel pixel)
+void gp_vline_raw_{{ ps.suffix }}(gp_pixmap *pixmap, gp_coord x,
+			gp_coord y0, gp_coord y1, gp_pixel pixel)
 {
 	int y;
 
 	for (y = y0; y <= y1; y++)
-		GP_PutPixel_Raw_{{ ps.suffix }}(pixmap, x, y, pixel);
+		gp_putpixel_raw_{{ ps.suffix }}(pixmap, x, y, pixel);
 }
 

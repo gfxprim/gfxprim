@@ -27,6 +27,7 @@
 #include "cfg.h"
 #include "image_actions.h"
 #include "spiv_config.h"
+#include "spiv_help.h"
 
 /*
  * These are default config values, you can hardcompile yours here.
@@ -196,7 +197,7 @@ static int set_slideshow(struct cfg_opt *self, unsigned int lineno)
 
 static int set_emulation(struct cfg_opt *self, unsigned int lineno)
 {
-	config.emul_type = GP_PixelTypeByName(optarg);
+	config.emul_type = gp_pixel_type_by_name(optarg);
 
 	if (config.emul_type == GP_PIXEL_UNKNOWN) {
 		fprintf(stderr, "ERROR: %u: Invalid pixel type '%s'\n",
@@ -207,13 +208,13 @@ static int set_emulation(struct cfg_opt *self, unsigned int lineno)
 	return 0;
 }
 
-int load_font_face(GP_TextStyle *style, const char *path, unsigned int height,
+int load_font_face(gp_text_style *style, const char *path, unsigned int height,
                    unsigned int lineno)
 {
-	GP_FontFace *font;
-	static GP_FontFace *old_font = NULL;
+	gp_font_face *font;
+	static gp_font_face *old_font = NULL;
 
-	font = GP_FontFaceLoad(path, 0, height);
+	font = gp_font_face_load(path, 0, height);
 
 	if (!font) {
 		fprintf(stderr, "ERROR: %u: Failed to load font '%s'\n",
@@ -221,7 +222,7 @@ int load_font_face(GP_TextStyle *style, const char *path, unsigned int height,
 		return 1;
 	}
 
-	GP_FontFaceFree(old_font);
+	gp_font_face_free(old_font);
 	style->font = old_font = font;
 
 	return 0;
@@ -229,7 +230,7 @@ int load_font_face(GP_TextStyle *style, const char *path, unsigned int height,
 
 static int set_font(struct cfg_opt *self, unsigned int lineno)
 {
-	static GP_TextStyle style = {NULL, 0, 0, 1, 1, 0};
+	static gp_text_style style = {NULL, 0, 0, 1, 1, 0};
 
 	if (load_font_face(&style, self->val, config.font_height, lineno))
 		return 1;

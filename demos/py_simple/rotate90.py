@@ -11,14 +11,14 @@ def main():
         sys.exit(1)
 
     # Turns on debug messages
-    core.SetDebugLevel(10);
+    core.set_debug_level(10);
 
-    # Load Image
-    src = loaders.Load(sys.argv[1])
+    # load Image
+    src = loaders.load(sys.argv[1])
     # Rotate by 90 degrees
-    res = src.filters.Rotate90Alloc()
-    # Save Image
-    res.loaders.Save(sys.argv[2])
+    res = src.filters.rotate_90_alloc()
+    # save Image
+    res.loaders.save(sys.argv[2])
 
 if __name__ == '__main__':
     main()

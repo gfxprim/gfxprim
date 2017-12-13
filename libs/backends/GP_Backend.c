@@ -23,30 +23,25 @@
 #include <inttypes.h>
 #include <poll.h>
 
-#include "core/GP_Common.h"
-#include "core/GP_Transform.h"
-#include "core/GP_Debug.h"
+#include <core/GP_Common.h>
+#include <core/GP_Transform.h>
+#include <core/GP_Pixmap.h>
+#include <core/GP_Debug.h>
 
-#include "input/GP_EventQueue.h"
-#include "input/GP_TimeStamp.h"
+#include <input/GP_EventQueue.h>
+#include <input/GP_TimeStamp.h>
 
-#include "backends/GP_Backend.h"
+#include <backends/GP_Backend.h>
 
-void GP_BackendFlip(GP_Backend *backend)
+void gp_backend_update_rect_xyxy(gp_backend *self,
+                                 gp_coord x0, gp_coord y0,
+                                 gp_coord x1, gp_coord y1)
 {
-	if (backend->Flip != NULL)
-		backend->Flip(backend);
-}
-
-void GP_BackendUpdateRectXYXY(GP_Backend *backend,
-                              GP_Coord x0, GP_Coord y0,
-                              GP_Coord x1, GP_Coord y1)
-{
-	if (backend->UpdateRect == NULL)
+	if (!self->update_rect)
 		return;
 
-	GP_TRANSFORM_POINT(backend->pixmap, x0, y0);
-	GP_TRANSFORM_POINT(backend->pixmap, x1, y1);
+	GP_TRANSFORM_POINT(self->pixmap, x0, y0);
+	GP_TRANSFORM_POINT(self->pixmap, x1, y1);
 
 	if (x1 < x0)
 		GP_SWAP(x0, x1);
@@ -64,88 +59,87 @@ void GP_BackendUpdateRectXYXY(GP_Backend *backend,
 		y0 = 0;
 	}
 
-	GP_Coord w = backend->pixmap->w;
+	gp_coord w = self->pixmap->w;
 
 	if (x1 >= w) {
 		GP_WARN("Too large x coordinate %i, clipping to %u", x1, w - 1);
 		x1 = w - 1;
 	}
 
-	GP_Coord h = backend->pixmap->h;
+	gp_coord h = self->pixmap->h;
 
 	if (y1 >= h) {
 		GP_WARN("Too large y coordinate %i, clipping to %u", y1, h - 1);
 		y1 = h - 1;
 	}
 
-	backend->UpdateRect(backend, x0, y0, x1, y1);
+	self->update_rect(self, x0, y0, x1, y1);
 }
 
-
-int GP_BackendResize(GP_Backend *backend, uint32_t w, uint32_t h)
+int gp_backend_resize(gp_backend *self, uint32_t w, uint32_t h)
 {
-	if (backend->SetAttributes == NULL)
+	if (!self->set_attrs)
 		return 1;
 
 	if (w == 0)
-		w = backend->pixmap->w;
+		w = self->pixmap->w;
 
 	if (h == 0)
-		h = backend->pixmap->h;
+		h = self->pixmap->h;
 
-	if (backend->pixmap->w == w && backend->pixmap->h == h)
+	if (self->pixmap->w == w && self->pixmap->h == h)
 		return 0;
 
-	return backend->SetAttributes(backend, w, h, NULL);
+	return self->set_attrs(self, w, h, NULL);
 }
 
-int GP_BackendResizeAck(GP_Backend *self)
+int gp_backend_resize_ack(gp_backend *self)
 {
-	GP_DEBUG(2, "Calling backend %s ResizeAck()", self->name);
+	GP_DEBUG(2, "Calling backend %s resize_ack()", self->name);
 
-	if (self->ResizeAck)
-		return self->ResizeAck(self);
+	if (self->resize_ack)
+		return self->resize_ack(self);
 
 	return 0;
 }
 
-static uint32_t pushevent_callback(GP_Timer *self)
+static uint32_t pushevent_callback(gp_timer *self)
 {
-	GP_Event ev;
+	gp_event ev;
 
 	ev.type = GP_EV_TMR;
 	gettimeofday(&ev.time, NULL);
 	ev.val.tmr = self;
 
-	GP_EventQueuePut(self->_priv, &ev);
+	gp_event_queue_put(self->_priv, &ev);
 
 	return 0;
 }
 
-void GP_BackendAddTimer(GP_Backend *self, GP_Timer *timer)
+void gp_backend_add_timer(gp_backend *self, gp_timer *timer)
 {
-	if (timer->Callback == NULL) {
-		timer->Callback = pushevent_callback;
+	if (timer->callback == NULL) {
+		timer->callback = pushevent_callback;
 		timer->_priv = &self->event_queue;
 	}
 
-	GP_TimerQueueInsert(&self->timers, GP_GetTimeStamp(), timer);
+	gp_timer_queue_insert(&self->timers, gp_time_stamp(), timer);
 }
 
-void GP_BackendRemTimer(GP_Backend *self, GP_Timer *timer)
+void gp_backend_rem_timer(gp_backend *self, gp_timer *timer)
 {
-	GP_TimerQueueRemove(&self->timers, timer);
+	gp_timer_queue_remove(&self->timers, timer);
 }
 
-void GP_BackendPoll(GP_Backend *self)
+void gp_backend_poll(gp_backend *self)
 {
-	self->Poll(self);
+	self->poll(self);
 
 	if (self->timers)
-		GP_TimerQueueProcess(&self->timers, GP_GetTimeStamp());
+		gp_timer_queue_process(&self->timers, gp_time_stamp());
 }
 
-static void wait_timers_fd(GP_Backend *self, uint64_t now)
+static void wait_timers_fd(gp_backend *self, uint64_t now)
 {
 	int timeout;
 
@@ -154,40 +148,40 @@ static void wait_timers_fd(GP_Backend *self, uint64_t now)
 	struct pollfd fd = {.fd = self->fd, .events = POLLIN, fd.revents = 0};
 
 	if (poll(&fd, 1, timeout))
-		self->Poll(self);
+		self->poll(self);
 
-	now = GP_GetTimeStamp();
+	now = gp_time_stamp();
 
-	GP_TimerQueueProcess(&self->timers, now);
+	gp_timer_queue_process(&self->timers, now);
 }
 
 /*
  * Polling for backends that does not expose FD to wait on (namely SDL).
  */
-static void wait_timers_poll(GP_Backend *self)
+static void wait_timers_poll(gp_backend *self)
 {
 	for (;;) {
-		uint64_t now = GP_GetTimeStamp();
+		uint64_t now = gp_time_stamp();
 
-		if (GP_TimerQueueProcess(&self->timers, now))
+		if (gp_timer_queue_process(&self->timers, now))
 			return;
 
-		self->Poll(self);
+		self->poll(self);
 
-		if (GP_BackendEventsQueued(self))
+		if (gp_backend_events_queued(self))
 			return;
 
 		usleep(10000);
 	}
 }
 
-void GP_BackendWait(GP_Backend *self)
+void gp_backend_wait(gp_backend *self)
 {
 	if (self->timers) {
-		uint64_t now = GP_GetTimeStamp();
+		uint64_t now = gp_time_stamp();
 
 		/* Get rid of possibly expired timers */
-		if (GP_TimerQueueProcess(&self->timers, now))
+		if (gp_timer_queue_process(&self->timers, now))
 			return;
 
 		/* Wait for events or timer expiration */
@@ -199,31 +193,31 @@ void GP_BackendWait(GP_Backend *self)
 		return;
 	}
 
-	self->Wait(self);
+	self->wait(self);
 }
 
-int GP_BackendWaitEvent(GP_Backend *self, GP_Event *ev)
+int gp_backend_wait_event(gp_backend *self, gp_event *ev)
 {
 	int ret;
 
 	for (;;) {
-		if ((ret = GP_BackendGetEvent(self, ev)))
+		if ((ret = gp_backend_get_event(self, ev)))
 			return ret;
 
-		GP_BackendWait(self);
+		gp_backend_wait(self);
 	}
 }
 
-int GP_BackendPollEvent(GP_Backend *self, GP_Event *ev)
+int gp_backend_poll_event(gp_backend *self, gp_event *ev)
 {
 	int ret;
 
-	if ((ret = GP_BackendGetEvent(self, ev)))
+	if ((ret = gp_backend_get_event(self, ev)))
 		return ret;
 
-	GP_BackendPoll(self);
+	gp_backend_poll(self);
 
-	if ((ret = GP_BackendGetEvent(self, ev)))
+	if ((ret = gp_backend_get_event(self, ev)))
 		return ret;
 
 	return 0;

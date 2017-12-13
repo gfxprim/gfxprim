@@ -22,13 +22,12 @@
 
 #include <errno.h>
 
-#include "core/GP_Pixmap.h"
-#include "core/GP_Debug.h"
-
-#include "GP_ResizeNN.h"
-#include "GP_ResizeLinear.h"
-#include "GP_ResizeCubic.h"
-#include "GP_Resize.h"
+#include <core/GP_Pixmap.h>
+#include <core/GP_Debug.h>
+#include <filters/GP_ResizeNN.h>
+#include <filters/GP_ResizeLinear.h>
+#include <filters/GP_ResizeCubic.h>
+#include <filters/GP_Resize.h>
 
 static const char *interp_types[] = {
 	"Nearest Neighbour",
@@ -38,7 +37,7 @@ static const char *interp_types[] = {
 	"Cubic (Int)",
 };
 
-const char *GP_InterpolationTypeName(enum GP_InterpolationType interp_type)
+const char *gp_interpolation_type_name(enum gp_interpolation_type interp_type)
 {
 	if (interp_type > GP_INTERP_MAX)
 		return "Unknown";
@@ -46,21 +45,21 @@ const char *GP_InterpolationTypeName(enum GP_InterpolationType interp_type)
 	return interp_types[interp_type];
 }
 
-static int resize(const GP_Pixmap *src, GP_Pixmap *dst,
-                  GP_InterpolationType type,
-                  GP_ProgressCallback *callback)
+static int resize(const gp_pixmap *src, gp_pixmap *dst,
+                  gp_interpolation_type type,
+                  gp_progress_cb *callback)
 {
 	switch (type) {
 	case GP_INTERP_NN:
-		return GP_FilterResizeNN(src, dst, callback);
+		return gp_filter_resize_nn(src, dst, callback);
 	case GP_INTERP_LINEAR_INT:
-		return GP_FilterResizeLinearInt(src, dst, callback);
+		return gp_filter_resize_linear_int(src, dst, callback);
 	case GP_INTERP_LINEAR_LF_INT:
-		return GP_FilterResizeLinearLFInt(src, dst, callback);
+		return gp_filter_resize_linear_lf_int(src, dst, callback);
 	case GP_INTERP_CUBIC:
-		return GP_FilterResizeCubic(src, dst, callback);
+		return gp_filter_resize_cubic(src, dst, callback);
 	case GP_INTERP_CUBIC_INT:
-		return GP_FilterResizeCubicInt(src, dst, callback);
+		return gp_filter_resize_cubic_int(src, dst, callback);
 	}
 
 	GP_WARN("Invalid interpolation type %u", (unsigned int)type);
@@ -69,9 +68,9 @@ static int resize(const GP_Pixmap *src, GP_Pixmap *dst,
 	return 1;
 }
 
-int GP_FilterResize(const GP_Pixmap *src, GP_Pixmap *dst,
-                    GP_InterpolationType type,
-                    GP_ProgressCallback *callback)
+int gp_filter_resize(const gp_pixmap *src, gp_pixmap *dst,
+                     gp_interpolation_type type,
+                     gp_progress_cb *callback)
 {
 	if (src->pixel_type != dst->pixel_type) {
 		GP_WARN("The src and dst pixel types must match");
@@ -82,18 +81,18 @@ int GP_FilterResize(const GP_Pixmap *src, GP_Pixmap *dst,
 	return resize(src, dst, type, callback);
 }
 
-GP_Pixmap *GP_FilterResizeAlloc(const GP_Pixmap *src,
-                                 GP_Size w, GP_Size h,
-                                 GP_InterpolationType type,
-                                 GP_ProgressCallback *callback)
+gp_pixmap *gp_filter_resize_alloc(const gp_pixmap *src,
+                                  gp_size w, gp_size h,
+                                  gp_interpolation_type type,
+                                  gp_progress_cb *callback)
 {
-	GP_Pixmap *res = GP_PixmapAlloc(w, h, src->pixel_type);
+	gp_pixmap *res = gp_pixmap_alloc(w, h, src->pixel_type);
 
 	if (!res)
 		return NULL;
 
 	if (resize(src, res, type, callback)) {
-		GP_PixmapFree(res);
+		gp_pixmap_free(res);
 		return NULL;
 	}
 

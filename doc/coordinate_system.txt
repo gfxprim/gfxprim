@@ -12,7 +12,7 @@ integer coordinates is in the middle of the pixel (and borders between the
 pixels lies are integers + 0.5).
 
 [[Coordinates]]
-.GFXprim coordinate system and GP_LineXYXY(5, 3, 9, 3)
+.GFXprim coordinate system and gp_line_xyxy(5, 3, 9, 3)
 image::coordinates-1.svg["Coordinate system"]
 
 Width and Height
@@ -25,6 +25,6 @@ first pixel to draw would be '(x,y)' and last one would be '(x+w-1,y+h-1)'.
 Especially when 'w' or 'h' is less than or equal to zero no action is taken.
 
 [[Coordinates_Rectangle]]
-.GP_RectangleXYWH(2, 1, 8, 4)
+.gp_rectangle_xywh(2, 1, 8, 4)
 image::coordinates-2.svg["Coordinates Rectangle"]
 

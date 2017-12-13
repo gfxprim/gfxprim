@@ -38,15 +38,15 @@
  * GetPixel with pixmap transformations and clipping.
  * Returns 0 for clipped pixels or pixels outside bitmap.
  */
-GP_Pixel GP_GetPixel(const GP_Pixmap *pixmap, GP_Coord x, GP_Coord y);
+gp_pixel gp_getpixel(const gp_pixmap *pixmap, gp_coord x, gp_coord y);
 
 /*
  * Version of GetPixel without transformations nor border checking.
  */
-static inline GP_Pixel GP_GetPixel_Raw(const GP_Pixmap *pixmap,
-                                       GP_Coord x, GP_Coord y)
+static inline gp_pixel gp_getpixel_raw(const gp_pixmap *pixmap,
+                                       gp_coord x, gp_coord y)
 {
-	GP_FN_RET_PER_BPP(GP_GetPixel_Raw, pixmap->bpp, pixmap->bit_endian,
+	GP_FN_RET_PER_BPP(gp_getpixel_raw, pixmap->bpp, pixmap->bit_endian,
 		pixmap, x, y);
 
 	GP_ABORT("Invalid pixmap pixel type");
@@ -55,44 +55,44 @@ static inline GP_Pixel GP_GetPixel_Raw(const GP_Pixmap *pixmap,
 /*
  * Version of GetPixel without transformations and with border checking.
  */
-static inline GP_Pixel GP_GetPixel_Raw_Clipped(const GP_Pixmap *pixmap,
-                                               GP_Coord x, GP_Coord y)
+static inline gp_pixel gp_getpixel_raw_clipped(const gp_pixmap *pixmap,
+                                               gp_coord x, gp_coord y)
 {
 	if (GP_PIXEL_IS_CLIPPED(pixmap, x, y))
 		return 0;
 
-	return GP_GetPixel_Raw(pixmap, x, y);
+	return gp_getpixel_raw(pixmap, x, y);
 }
 
 /*
  * PutPixel with pixmap transformations and clipping.
  * NOP for clipped pixels or pixels outside bitmap.
  */
-void GP_PutPixel(GP_Pixmap *pixmap, GP_Coord x, GP_Coord y, GP_Pixel p);
+void gp_putpixel(gp_pixmap *pixmap, gp_coord x, gp_coord y, gp_pixel p);
 
 /*
  * Version of PutPixel without transformations nor border checking.
  */
-static inline void GP_PutPixel_Raw(GP_Pixmap *pixmap,
-                                   GP_Coord x, GP_Coord y, GP_Pixel p)
+static inline void gp_putpixel_raw(gp_pixmap *pixmap,
+                                   gp_coord x, gp_coord y, gp_pixel p)
 {
-	GP_FN_PER_BPP(GP_PutPixel_Raw, pixmap->bpp, pixmap->bit_endian,
+	GP_FN_PER_BPP(gp_putpixel_raw, pixmap->bpp, pixmap->bit_endian,
 		pixmap, x, y, p);
 }
 
 /*
  * Version of PutPixel without transformation and with border checking.
  */
-static inline void GP_PutPixel_Raw_Clipped(GP_Pixmap *pixmap,
-                                           GP_Coord x, GP_Coord y, GP_Pixel p)
+static inline void gp_putpixel_raw_clipped(gp_pixmap *pixmap,
+                                           gp_coord x, gp_coord y, gp_pixel p)
 {
-	GP_FN_PER_BPP(GP_PutPixel_Raw_Clipped, pixmap->bpp, pixmap->bit_endian,
+	GP_FN_PER_BPP(gp_putpixel_raw_clipped, pixmap->bpp, pixmap->bit_endian,
 	              pixmap, x, y, p);
 }
 
 /*
  * Returns pixel offset.
  */
-uint8_t GP_PixelAddrOffset(GP_Coord x, GP_PixelType pixel_type);
+uint8_t gp_pixel_addr_offset(gp_coord x, gp_pixel_type pixel_type);
 
 #endif /* CORE_GP_GETPUTPIXEL_H */

@@ -24,7 +24,7 @@ struct gp_proxy_params {
         PyObject *args;
 };
 
-int gp_proxy_callback(GP_ProgressCallback *self)
+int gp_proxy_callback(gp_progress_cb *self)
 {
         struct gp_proxy_params *params = self->priv;
         PyObject *res, *args;
@@ -61,14 +61,14 @@ int gp_proxy_callback(GP_ProgressCallback *self)
 %}
 
 /*
- * Progress Callback typemap, package python function into proxy callback structure
+ * Progress callback typemap, package python function into proxy callback structure
  * and passes it to the C function.
  *
  * The python callback object can either be a function or a tuple with a function
  * as a first parameter
  */
-%typemap(in) GP_ProgressCallback *callback (GP_ProgressCallback callback_proxy,
-                                            struct gp_proxy_params proxy_params)
+%typemap(in) gp_progress_cb *callback(gp_progress_cb callback_proxy,
+                                      struct gp_proxy_params proxy_params)
 {
         if ($input != Py_None) {
                 if (PyTuple_Check($input) && PyTuple_GET_SIZE($input) > 0) {
@@ -104,7 +104,7 @@ int gp_proxy_callback(GP_ProgressCallback *self)
 /*
  * All progress callbacks have default NULL value
  */
-%typemap(default) GP_ProgressCallback *callback {
+%typemap(default) gp_progress_cb *callback {
         $1 = NULL;
 }
 

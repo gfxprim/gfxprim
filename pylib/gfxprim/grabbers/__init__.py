@@ -12,35 +12,35 @@ def extend_grabber(_Grabber):
   Called once on module initialization.
   """
   @extend(_Grabber)
-  def Start(self):
+  def start(self):
     "Starts frame capture."
-    c_grabbers.GP_GrabberStart(self)
-  
-  @extend(_Grabber)
-  def Stop(self):
-    "Stops frame capture."
-    c_grabbers.GP_GrabberStop(self)
-  
-  @extend(_Grabber)
-  def Poll(self):
-    "Polls for a frame."
-    return c_grabbers.GP_GrabberPoll(self)
+    c_grabbers.gp_grabber_start(self)
 
-# Pull GP_Grabber
-Grabber = c_grabbers.GP_Grabber
+  @extend(_Grabber)
+  def stop(self):
+    "Stops frame capture."
+    c_grabbers.gp_grabber_stop(self)
+
+  @extend(_Grabber)
+  def poll(self):
+    "Polls for a frame."
+    return c_grabbers.gp_grabber_poll(self)
+
+# Pull gp_grabber
+Grabber = c_grabbers.gp_grabber
 
 def _init(module):
-  # Extend GP_Grabber with convenience methods
-  extend_grabber(Grabber)  
-  
+  # Extend gp_grabber with convenience methods
+  extend_grabber(Grabber)
+
   # Imports from the SWIG module
   import re
-  def strip_GP(s):
-    return re.sub('^GP_', '', s)
+  def strip_gp(s):
+    return re.sub('^gp_', '', s)
 
   # Import some members from the SWIG module
   from ..utils import import_members
-  import_members(c_grabbers, module, sub=strip_GP,
+  import_members(c_grabbers, module, sub=strip_gp,
     exclude=[
       '^gfxprim$',
       '^\w+_swigregister$',

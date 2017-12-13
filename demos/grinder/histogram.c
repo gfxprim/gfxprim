@@ -22,44 +22,44 @@
 
 #include "histogram.h"
 
-void histogram_to_png(const GP_Pixmap *src, const char *filename)
+void histogram_to_png(const gp_pixmap *src, const char *filename)
 {
-	GP_Histogram *hist;
+	gp_histogram *hist;
 
-	hist = GP_HistogramAlloc(src->pixel_type);
+	hist = gp_histogram_alloc(src->pixel_type);
 	if (!hist) {
 		fprintf(stderr, "Failed to allocate histogram\n");
 		return;
 	}
 
-	GP_FilterHistogram(hist, src, NULL);
+	gp_filter_histogram(hist, src, NULL);
 
 	unsigned int i, j;
 
-	GP_Pixmap *res = GP_PixmapAlloc(257*4, 256, GP_PIXEL_RGB888);
+	gp_pixmap *res = gp_pixmap_alloc(257 * 4, 256, GP_PIXEL_RGB888);
 
-	GP_Fill(res, 0xffffff);
+	gp_fill(res, 0xffffff);
 
-	GP_HistogramChannel *hist_r = GP_HistogramChannelByName(hist, "R");
+	gp_histogram_channel *hist_r = gp_histogram_channel_by_name(hist, "R");
 
 	for (i = 0; i < hist_r->len; i++)
-		GP_VLineXYH(res, i, 256, -255.00 * hist_r->hist[i] / hist_r->max + 0.5 , 0xff0000);
+		gp_vline_xyh(res, i, 256, -255.00 * hist_r->hist[i] / hist_r->max + 0.5 , 0xff0000);
 
-	GP_HistogramChannel *hist_g = GP_HistogramChannelByName(hist, "G");
+	gp_histogram_channel *hist_g = gp_histogram_channel_by_name(hist, "G");
 
 	for (i = 0; i < hist_g->len; i++)
-		GP_VLineXYH(res, i+257, 256, -255.00 * hist_g->hist[i] / hist_g->max + 0.5 , 0x00ff00);
+		gp_vline_xyh(res, i+257, 256, -255.00 * hist_g->hist[i] / hist_g->max + 0.5 , 0x00ff00);
 
-	GP_HistogramChannel *hist_b = GP_HistogramChannelByName(hist, "B");
+	gp_histogram_channel *hist_b = gp_histogram_channel_by_name(hist, "B");
 
 	for (i = 0; i < hist_b->len; i++)
-		GP_VLineXYH(res, i+514, 256, -255.00 * hist_b->hist[i] / hist_b->max + 0.5 , 0x0000ff);
+		gp_vline_xyh(res, i+514, 256, -255.00 * hist_b->hist[i] / hist_b->max + 0.5 , 0x0000ff);
 
 	uint32_t max = GP_MAX3(hist_r->max, hist_g->max, hist_b->max);
 
 	for (i = 0; i < hist_r->len; i++) {
 		for (j = 0; j < hist_r->len; j++) {
-			GP_Pixel pix = 0;
+			gp_pixel pix = 0;
 
 			if (255 * hist_r->hist[i] / max + 0.5 > j)
 				pix |= 0xff0000;
@@ -70,12 +70,11 @@ void histogram_to_png(const GP_Pixmap *src, const char *filename)
 			if (255 * hist_b->hist[i] / max + 0.5 > j)
 				pix |= 0x0000ff;
 
-			GP_PutPixel(res, i+771, 256-j, pix);
+			gp_putpixel(res, i + 771, 256 - j, pix);
 		}
 	}
 
-	GP_SavePNG(res, filename, NULL);
-
-	GP_PixmapFree(res);
-	GP_HistogramFree(hist);
+	gp_save_png(res, filename, NULL);
+	gp_pixmap_free(res);
+	gp_histogram_free(hist);
 }

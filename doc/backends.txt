@@ -25,13 +25,13 @@ Linux Framebuffer
 
 [source,c]
 -------------------------------------------------------------------------------
-enum GP_LinuxFBFlags {
+enum gp_linux_fb_flags {
         GP_FB_INPUT_KBD = 0x01,
         GP_FB_SHADOW = 0x02,
         GP_FB_ALLOC_CON = 0x04,
 };
 
-GP_Backend *GP_BackendLinuxFBInit(const char *path, int flags);
+gp_backend *gp_linux_fb_init(const char *path, int flags);
 -------------------------------------------------------------------------------
 
 Initializes mmaped frame-buffer backend. The path is path to the frame-buffer
@@ -53,14 +53,14 @@ SDL
 
 [source,c]
 -------------------------------------------------------------------------------
-enum GP_BackendSDLFlags {
+enum gp_sdl_flags {
         GP_SDL_FULLSCREEN = 0x01,
         GP_SDL_RESIZABLE  = 0x02,
 };
 
-GP_Backend *GP_BackendSDLInit(GP_Size w, GP_Size h,
-                              uint8_t bpp, uint8_t flags,
-                              const char *caption);
+gp_backend *gp_sdl_init(gp_size w, gp_size h,
+                        uint8_t bpp, uint8_t flags,
+                        const char *caption);
 -------------------------------------------------------------------------------
 
 Initialize 'SDL' as a backend driver. The backend is thread safe as all the
@@ -82,7 +82,7 @@ window resizable.
 -------------------------------------------------------------------------------
 #include <backends/GP_SDL_Pixmap.h>
 
-int GP_PixmapFromSDLSurface(GP_Pixmap *c, const SDL_Surface *surf);
+int gp_pixmap_from_sdl_surface(gp_pixmap *c, const SDL_Surface *surf);
 -------------------------------------------------------------------------------
 
 This function allows you to mix 'SDL' and 'GFXprim' code.
@@ -100,11 +100,11 @@ X Server
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <GP.h>
+#include <gfxprim.h>
 /* or */
 #include <backends/GP_X11.h>
 
-enum GP_BackendX11Flags {
+enum gp_x11_flags {
 	/* When set, w and h is ignored and root window is used */
 	GP_X11_USE_ROOT_WIN = 0x01,
 
@@ -118,10 +118,10 @@ enum GP_BackendX11Flags {
 	GP_X11_DISABLE_SHM = 0x08,
 };
 
-GP_Backend *GP_BackendX11Init(const char *display, int x, int y,
-                              unsigned int w, unsigned int h,
-                              const char *caption,
-                              enum GP_BackendX11Flags flags);
+gp_backend *gp_x11_init(const char *display, int x, int y,
+                        unsigned int w, unsigned int h,
+                        const char *caption,
+                        enum gp_x11_flags flags);
 -------------------------------------------------------------------------------
 
 Returns pointer to initialized X11 backend or in case of failure NULL.
@@ -136,31 +136,31 @@ the other hand, has its own input queue.
 
 TIP: See multiple windows link:example_x11_windows.html[example].
 
-GP_BackendIsX11
-^^^^^^^^^^^^^^^
+gp_backend_is_x11
+^^^^^^^^^^^^^^^^^
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <GP.h>
+#include <gfxprim.h>
 /* or */
 #include <backends/GP_X11.h>
 
 /*
  * Returns non-zero if backend is X11 backend
  */
-int GP_BackendIsX11(GP_Backend *self);
+int gp_backend_is_x11(gp_backend *self);
 -------------------------------------------------------------------------------
 
-The 'GP_BackendIsX11()' returns non-zero if backend is X11 backend, zero
+The 'gp_backend_is_x11()' returns non-zero if backend is X11 backend, zero
 otherwise.
 
 
-GP_BackendX11RequestFullscreen
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+gp_x11_fullscreenn
+^^^^^^^^^^^^^^^^^^
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <GP.h>
+#include <gfxprim.h>
 /* or */
 #include <backends/GP_X11.h>
 
@@ -171,23 +171,23 @@ GP_BackendX11RequestFullscreen
  * 1 = on
  * 2 = toggle
  */
-void GP_BackendX11RequestFullscreen(GP_Backend *self, int mode);
+void gp_x11_fullscreenn(gp_backend *self, int mode);
 -------------------------------------------------------------------------------
 
-The 'GP_BackendX11RequestFullscreen' can toggle fullscreen mode at runtime.
+The 'gp_x11_fullscreenn()' can toggle fullscreen mode at runtime.
 
-It will most likely generate resize event. See the 'GP_BackendResizeAck()' below.
+It will most likely generate resize event. See the 'gp_backend_resize_ack()' below.
 
 AA-lib
 ~~~~~~
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <GP.h>
+#include <gfxprim.h>
 /* or */
 #include <backends/AALib.h>
 
-GP_Backend *GP_BackendAALibInit(void);
+gp_backend *gp_aalib_init(void);
 -------------------------------------------------------------------------------
 
 Currently the 'AA-lib' backend uses default initialization parameters.
@@ -204,9 +204,9 @@ it.
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <GP.h>
+#include <gfxprim.h>
 
-GP_Backend *GP_BackendInit(const char *params, const char *caption);
+gp_backend *gp_backend_init(const char *params, const char *caption);
 -------------------------------------------------------------------------------
 
 The 'params' string composes of backend name and backend dependend parameters.
@@ -236,7 +236,7 @@ will not work if you decide to call raw callbacks.
 
 [source,c]
 -------------------------------------------------------------------------------
-typdef struct GP_Backend {
+typdef struct gp_backend {
         /*
          * Backend name.
          */
@@ -245,7 +245,7 @@ typdef struct GP_Backend {
         /*
          * Pointer to pixmap APP should draw to.
          */
-        GP_Pixmap *pixmap;
+        gp_pixmap *pixmap;
 
 	...
 
@@ -260,16 +260,16 @@ The file descriptor 'fd' is either set to -1 (in case of 'SDL' or 'AA-lib' as
 they does not export it) or to a backend connection file descriptor usable for
 'select()' or 'poll()'.
 
-GP_BackendExit
-^^^^^^^^^^^^^^
+gp_backend_exit
+^^^^^^^^^^^^^^^
 
 [source,c]
 -------------------------------------------------------------------------------
 #include <backends/GP_Backend.h>
 /* or */
-#include <GP.h>
+#include <gfxprim.h>
 
-void GP_BackendExit(GP_Backend *backend);
+void gp_backend_exit(gp_backend *backend);
 -------------------------------------------------------------------------------
 
 Calls a backend exit callback. Restores the display, keyboard, etc. state
@@ -284,49 +284,49 @@ WARNING: It's important to call this functions on application exit. If you
 	 with black display or non-responding keyboard.
 
 
-GP_BackendFlip
-^^^^^^^^^^^^^^
+gp_backend_flip
+^^^^^^^^^^^^^^^
 
 [source,c]
 -------------------------------------------------------------------------------
 #include <backends/GP_Backend.h>
 /* or */
-#include <GP.h>
+#include <gfxprim.h>
 
-GP_BackendFlip(GP_Backend *backend);
+gp_backend_flip(gp_backend *backend);
 -------------------------------------------------------------------------------
 
 Flips a screen. Blits backend buffer to the screen or window if the backend is
 buffered.
 
 
-GP_BackendUpdateRect
-^^^^^^^^^^^^^^^^^^^^
+gp_backend_update_rect
+^^^^^^^^^^^^^^^^^^^^^^
 
 [source,c]
 -------------------------------------------------------------------------------
 #include <backends/GP_Backend.h>
 /* or */
-#include <GP.h>
+#include <gfxprim.h>
 
-void GP_BackendUpdateRect(GP_Backend *backend,
-                          GP_Coord x0, GP_Coord y0,
-                          GP_Coord x1, GP_Coord y1);
+void gp_backend_update_rect(gp_backend *backend,
+                            gp_coord x0, gp_coord y0,
+                            gp_coord x1, gp_coord y1);
 -------------------------------------------------------------------------------
 
 Updates particular rectangle in case backend is buffered.
 
 
-GP_BackendPoll
-^^^^^^^^^^^^^^
+gp_backend_poll
+^^^^^^^^^^^^^^^
 
 [source,c]
 -------------------------------------------------------------------------------
 #include <backends/GP_Backend.h>
 /* or */
-#include <GP.h>
+#include <gfxprim.h>
 
-void GP_BackendPoll(GP_Backend *backend);
+void gp_backend_poll(gp_backend *backend);
 -------------------------------------------------------------------------------
 
 Polls for backend events.
@@ -343,42 +343,42 @@ called repeatedly. For other backends it may be called either repeatedly or
 when data are ready on file-descriptor.
 
 If the backend is the only source of events in your application, you should
-consider using the 'GP_BackendWait()' or 'GP_BackendEventWait()' described
+consider using the 'gp_backend_wait()' or 'gp_backend_wait_event()' described
 below.
 
-GP_BackendPollEvent
-^^^^^^^^^^^^^^^^^^^
+gp_backend_poll_event
+^^^^^^^^^^^^^^^^^^^^^
 
 [source,c]
 -------------------------------------------------------------------------------
 #include <backends/GP_Backend.h>
 /* or */
-#include <GP.h>
+#include <gfxprim.h>
 
-int GP_BackendPollEvent(GP_Backend *self, GP_Event *ev);
+int gp_backend_poll_event(gp_backend *self, gp_event *ev);
 -------------------------------------------------------------------------------
 
-Combines the 'GP_BackendPoll()' with 'GP_BackendGetEvent()'.
+Combines the 'gp_backend_poll()' with 'gp_backend_get_event()'.
 
 If there are any events in the backend event queue, the top event is removed
 from the queue and copied into the memory pointed by 'ev' and the call returns
 immediately.
 
-If backend event queue is empty 'GP_BackendPoll()' is called. Then again the
+If backend event queue is empty 'gp_backend_poll()' is called. Then again the
 backend event queue is checked and if an event is found it's removed from the
 queue and copied into the 'ev'.
 
 Returns non-zero if event was copied into the memory pointed by 'ev', zero
 otherwise.
 
-.Example 'GP_BackendPollEvent()' usage.
+.Example 'gp_backend_poll_event()' usage.
 [source,c]
 -------------------------------------------------------------------------------
         /* Called either repeatedly or when data are ready on backend fd */
 
-	GP_Event ev;
+	gp_event ev;
 
-	while (GP_BackendPollEvent(backend, &ev) {
+	while (gp_backend_poll_event(backend, &ev) {
 
 		/* process events */
 
@@ -386,16 +386,16 @@ otherwise.
 -------------------------------------------------------------------------------
 
 
-GP_BackendWait
-^^^^^^^^^^^^^^
+gp_backend_wait
+^^^^^^^^^^^^^^^
 
 [source,c]
 -------------------------------------------------------------------------------
 #include <backends/GP_Backend.h>
 /* or */
-#include <GP.h>
+#include <gfxprim.h>
 
-void GP_BackendWait(GP_Backend *self);
+void gp_backend_wait(gp_backend *self);
 -------------------------------------------------------------------------------
 
 Blocks until backend event arrives.
@@ -404,36 +404,36 @@ Blocks until backend event arrives.
 Events received by backend are not necessarily translated into the input
 events.
 
-GP_BackendWaitEvent
-^^^^^^^^^^^^^^^^^^^
+gp_backend_wait_event
+^^^^^^^^^^^^^^^^^^^^^
 
 [source,c]
 -------------------------------------------------------------------------------
 #include <backends/GP_Backend.h>
 /* or */
-#include <GP.h>
+#include <gfxprim.h>
 
-void GP_BackendWaitEvent(GP_Backend *self, GP_Event *ev);
+void gp_backend_wait_event(gp_backend *self, gp_event *ev);
 -------------------------------------------------------------------------------
 
-Combines the 'GP_BackendWait()' with 'GP_BackendGetEvent()'.
+Combines the 'gp_backend_wait()' with 'gp_backend_get_event()'.
 
 If there are any events in the backend event queue, the top event is removed
 from the queue and copied into the memory pointed by 'ev' and the call returns
 immediately.
 
-If backend event queue is empty 'GP_BackendWait()' is called until there are
+If backend event queue is empty 'gp_backend_wait()' is called until there are
 any events in the backend event queue. Then the top event is removed from the
 queue and the call returns.
 
-.Example 'GP_BackendWaitEvent()' usage.
+.Example 'gp_backend_wait_event()' usage.
 [source,c]
 -------------------------------------------------------------------------------
 	/* This is the main program loop */
-	GP_Event ev;
+	gp_event ev;
 
 	for (;;) {
-		GP_BackendWaitEvent(backend, &ev);
+		gp_backend_wait_event(backend, &ev);
 
 		/* process events */
 
@@ -441,16 +441,16 @@ queue and the call returns.
 -------------------------------------------------------------------------------
 
 [[Timers]]
-GP_BackendAddTimer
-^^^^^^^^^^^^^^^^^^
+gp_backend_add_timer
+^^^^^^^^^^^^^^^^^^^^
 
 [source,c]
 -------------------------------------------------------------------------------
 #include <backends/GP_Backend.h>
 /* or */
-#include <GP.h>
+#include <gfxprim.h>
 
-void GP_BackendAddTimer(GP_Backend *self, GP_Timer *timer);
+void gp_backend_add_timer(gp_backend *self, gp_timer *timer);
 -------------------------------------------------------------------------------
 
 Adds a link:input.html#Timers[timer] to the backend timer queue.
@@ -464,60 +464,60 @@ input queue once timer has expired otherwise timer callback is called.
 TIP: For example usage see backend timers
      link:example_backend_timers.html[example].
 
-GP_BackendRemTimer
-^^^^^^^^^^^^^^^^^^
+gp_backend_rem_timer
+^^^^^^^^^^^^^^^^^^^^
 
 [source,c]
 -------------------------------------------------------------------------------
 #include <backends/GP_Backend.h>
 /* or */
-#include <GP.h>
+#include <gfxprim.h>
 
-void GP_BackendRemTimer(GP_Backend *self, GP_Timer *timer);
+void gp_backend_rem_timer(gp_backend *self, gp_timer *timer);
 -------------------------------------------------------------------------------
 
 Removes a link:input.html#Timers[timer] from the backend timer queue.
 
-GP_BackendTimersInQueue
-^^^^^^^^^^^^^^^^^^^^^^^
+gp_backend_timers_in_queue
+^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 [source,c]
 -------------------------------------------------------------------------------
 #include <backends/GP_Backend.h>
 /* or */
-#include <GP.h>
+#include <gfxprim.h>
 
-void GP_BackendTimersInQueue(GP_Backend *self);
+void gp_backend_timers_in_queue(gp_backend *self);
 -------------------------------------------------------------------------------
 
 Returns number of timers scheduled in backend timer queue.
 
-GP_BackendEventsQueued
-^^^^^^^^^^^^^^^^^^^^^^
+gp_backend_events_queued
+^^^^^^^^^^^^^^^^^^^^^^^^
 
 [source,c]
 -------------------------------------------------------------------------------
 #include <backends/GP_Backend.h>
 /* or */
-#include <GP.h>
+#include <gfxprim.h>
 
-unsigned int GP_BackendEventsQueued(GP_Backend *self);
+unsigned int gp_backend_events_queued(gp_backend *self);
 -------------------------------------------------------------------------------
 
 Returns number of events queued in the backend event queue.
 
 
 
-GP_BackendGetEvent
-^^^^^^^^^^^^^^^^^^
+gp_backend_get_event
+^^^^^^^^^^^^^^^^^^^^
 
 [source,c]
 -------------------------------------------------------------------------------
 #include <backends/GP_Backend.h>
 /* or */
-#include <GP.h>
+#include <gfxprim.h>
 
-int GP_BackendGetEvent(GP_Backend *self, GP_Event *ev);
+int gp_backend_get_event(gp_backend *self, gp_event *ev);
 -------------------------------------------------------------------------------
 
 In case there are any events queued, the top event is removed from the queue,
@@ -531,46 +531,46 @@ TIP: For more information on events see link:input.html[input events]
      documentation.
 
 
-GP_BackendPeekEvent
-^^^^^^^^^^^^^^^^^^^
+gp_backend_peek_event
+^^^^^^^^^^^^^^^^^^^^^
 
 [source,c]
 -------------------------------------------------------------------------------
 #include <backends/GP_Backend.h>
 /* or */
-#include <GP.h>
+#include <gfxprim.h>
 
-int GP_BackendPeekEvent(GP_Backend *self, GP_Event *ev);
+int gp_backend_peek_event(gp_backend *self, gp_event *ev);
 -------------------------------------------------------------------------------
 
-Same as +GP_BackendPeekEvent()+ but the top event is not removed from the
+Same as +gp_backend_peek_event()+ but the top event is not removed from the
 queue.
 
-GP_BackendPutEventBack
+gp_backend_put_event_back
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <backends/GP_Backend.h>
+/* or */
+#include <gfxprim.h>
+
+void gp_backend_put_event_back(gp_backend *self, gp_event *ev);
+-------------------------------------------------------------------------------
+
+Puts event to the top of the queue. May be useful for putting back events that
+were removed from the queue.
+
+gp_backend_set_caption
 ^^^^^^^^^^^^^^^^^^^^^^
 
 [source,c]
 -------------------------------------------------------------------------------
 #include <backends/GP_Backend.h>
 /* or */
-#include <GP.h>
+#include <gfxprim.h>
 
-void GP_BackendPutEventBack(GP_Backend *self, GP_Event *ev);
--------------------------------------------------------------------------------
-
-Puts event to the top of the queue. May be useful for putting back events that
-were removed from the queue.
-
-GP_BackendSetCaption
-^^^^^^^^^^^^^^^^^^^^
-
-[source,c]
--------------------------------------------------------------------------------
-#include <backends/GP_Backend.h>
-/* or */
-#include <GP.h>
-
-int GP_BackendSetCaption(GP_Backend *backend, const char *caption)
+int gp_backend_set_caption(gp_backend *backend, const char *caption)
 -------------------------------------------------------------------------------
 
 Sets backend caption. On success zero is returned. On failure (backend doesn't
@@ -578,38 +578,38 @@ support caption, operation failed) non zero is returned.
 
 
 
-GP_BackendResize
-^^^^^^^^^^^^^^^^
+gp_backend_resize
+^^^^^^^^^^^^^^^^^
 
 [source,c]
 -------------------------------------------------------------------------------
 #include <backends/GP_Backend.h>
 /* or */
-#include <GP.h>
+#include <gfxprim.h>
 
-int GP_BackendResize(GP_Backend *backend, uint32_t w, uint32_t h);
+int gp_backend_resize(gp_backend *backend, uint32_t w, uint32_t h);
 -------------------------------------------------------------------------------
 
 Requests backend resize. If backend resize is supported and the resize request
 was successful (i.e. X server allowed us to resize the window) the resize
 event will be send and should be handled in your event loop. You must respond
-to it by the 'GP_BackendResizeAck()' described below.
+to it by the 'gp_backend_resize_ack()' described below.
 
 NOTE: The backend->pixmap pointer may change upon calling this function and
       at least backend->pixmap->pixels pointer will change.
 
 
 [[ResizeAck]]
-GP_BackendResizeAck
-^^^^^^^^^^^^^^^^^^^
+gp_backend_resize_ack
+^^^^^^^^^^^^^^^^^^^^^
 
 [source,c]
 -------------------------------------------------------------------------------
 #include <backends/GP_Backend.h>
 /* or */
-#include <GP.h>
+#include <gfxprim.h>
 
-int GP_BackendResizeAck(GP_Backend *self);
+int gp_backend_resize_ack(gp_backend *self);
 -------------------------------------------------------------------------------
 
 If backend is resizable by user interaction (for example X Window) you will

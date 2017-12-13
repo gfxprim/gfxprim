@@ -35,10 +35,10 @@
 #include "GP_HLine.h"
 #include "GP_Polygon.h"
 
-/* A 2D point specified by GP_Coord coordinates. */
+/* A 2D point specified by gp_coord coordinates. */
 typedef struct {
-	GP_Coord x, y;
-} GP_Point;
+	gp_coord x, y;
+} gp_point;
 
 /* "almost equality" for float coordinates */
 #define GP_COORDS_ALMOST_EQUAL(a,b)	(fabsf((a)-(b)) < 0.0001f)
@@ -54,7 +54,7 @@ typedef struct {
 #define EDGE_ACTIVE	0
 
 /* Working record about an edge. */
-struct GP_Edge {
+struct edge {
 	int state;	/* edge state */
 	float x;		/* X coordinate of the working point */
 	int y;		/* Y coordinate of the working point */
@@ -63,7 +63,7 @@ struct GP_Edge {
 };
 
 /* Initializes the edge structure. */
-static void GP_InitEdge(struct GP_Edge *e, GP_Point start, GP_Point end)
+static void init_edge(struct edge *e, gp_point start, gp_point end)
 {
 	/* horizontal edges are a special case */
 	if (start.y == end.y) {
@@ -98,14 +98,14 @@ static void GP_InitEdge(struct GP_Edge *e, GP_Point start, GP_Point end)
 }
 
 /* Type of a callback function to be passed to qsort(). */
-typedef int (*GP_SortCallback)(const void *, const void *);
+typedef int (*gp_sort_callback)(const void *, const void *);
 
 /*
  * Compares two edges. Used for initial sorting of the edges.
  * Edges are sorted by Y first, then by X, then by DXY.
  * Returns -1 if e1<e2, +1 if e1>e2, 0 if e1==e2.
  */
-static int GP_CompareEdgesInitial(struct GP_Edge *e1, struct GP_Edge *e2)
+static int edges_compare_initial(struct edge *e1, struct edge *e2)
 {
 	if (e1->y < e2->y) return -1;
 	if (e1->y > e2->y) return 1;
@@ -125,7 +125,7 @@ static int GP_CompareEdgesInitial(struct GP_Edge *e1, struct GP_Edge *e2)
  * then by DXY.
  * Returns -1 if e1<e2, +1 if e1>e2, 0 if e1==e2.
  */
-static int GP_CompareEdgesRuntime(struct GP_Edge *e1, struct GP_Edge *e2)
+static int edges_compare_runtime(struct edge *e1, struct edge *e2)
 {
 	if (e1->state < e2->state) return -1;
 	if (e1->state > e2->state) return 1;
@@ -139,26 +139,26 @@ static int GP_CompareEdgesRuntime(struct GP_Edge *e1, struct GP_Edge *e2)
 	return 0;
 }
 
-void GP_FillPolygon_Raw(GP_Pixmap *pixmap, unsigned int nvert,
-                        const GP_Coord *xy, GP_Pixel pixel)
+void gp_fill_polygon_raw(gp_pixmap *pixmap, unsigned int nvert,
+                         const gp_coord *xy, gp_pixel pixel)
 {
 	unsigned int i;
-	struct GP_Edge *e;
+	struct edge *e;
 
 	if (nvert < 3)
 		return;		/* not enough vertices */
 
-	GP_Point const *vert = (GP_Point const *) xy;
+	gp_point const *vert = (gp_point const *) xy;
 
 	/* find first and last scanline */
-	GP_Coord ymin = INT_MAX, ymax = -INT_MAX;
+	gp_coord ymin = INT_MAX, ymax = -INT_MAX;
 	for (i = 0; i < nvert; i++) {
 		ymax = GP_MAX(ymax, vert[i].y);
 		ymin = GP_MIN(ymin, vert[i].y);
 	}
 
 	/* build a list of edges */
-	struct GP_Edge edges[nvert];
+	struct edge edges[nvert];
 	unsigned int nedges = 0;		/* number of edges in list */
 	for (i = 0; i < nvert; i++) {
 
@@ -170,15 +170,15 @@ void GP_FillPolygon_Raw(GP_Pixmap *pixmap, unsigned int nvert,
 
 		/* add new edge record */
 		e = edges + nedges++;
-		GP_InitEdge(e, vert[i], vert[nexti]);
+		init_edge(e, vert[i], vert[nexti]);
 	}
 
 	if (nedges < 2)
 		return;		/* not really a polygon */
 
 	/* initially sort edges by Y, then X */
-	qsort(edges, nedges, sizeof(struct GP_Edge),
-	      (GP_SortCallback) GP_CompareEdgesInitial);
+	qsort(edges, nedges, sizeof(struct edge),
+	      (gp_sort_callback) edges_compare_initial);
 
 	/*
 	 * for each scanline, compute intersections with all edges
@@ -196,8 +196,8 @@ void GP_FillPolygon_Raw(GP_Pixmap *pixmap, unsigned int nvert,
 				e->state = EDGE_ACTIVE;
 			}
 		}
-		qsort(edges, nedges, sizeof(struct GP_Edge),
-		      (GP_SortCallback) GP_CompareEdgesRuntime);
+		qsort(edges, nedges, sizeof(struct edge),
+		      (gp_sort_callback) edges_compare_runtime);
 
 		/* record intersections with active edges */
 		ninter = 0;
@@ -217,7 +217,7 @@ void GP_FillPolygon_Raw(GP_Pixmap *pixmap, unsigned int nvert,
 				break;
 
 			float end = inter[i+1];
-			GP_HLine_Raw(pixmap, start, end, y, pixel);
+			gp_hline_raw(pixmap, start, end, y, pixel);
 		}
 
 		/* update active edges for next step */
@@ -240,17 +240,17 @@ void GP_FillPolygon_Raw(GP_Pixmap *pixmap, unsigned int nvert,
 	for (i = 0; i < nedges; i++) {
 		e = edges + i;
 		if (e->state == EDGE_HORIZONTAL) {
-			GP_HLine_Raw(pixmap, e->x, e->x + e->dxy, e->y,
+			gp_hline_raw(pixmap, e->x, e->x + e->dxy, e->y,
 				     pixel);
 		}
 	}
 }
 
-void GP_FillPolygon(GP_Pixmap *pixmap, unsigned int vertex_count,
-                    const GP_Coord *xy, GP_Pixel pixel)
+void gp_fill_polygon(gp_pixmap *pixmap, unsigned int vertex_count,
+                     const gp_coord *xy, gp_pixel pixel)
 {
 	unsigned int i;
-	GP_Coord xy_copy[2 * vertex_count];
+	gp_coord xy_copy[2 * vertex_count];
 
 	for (i = 0; i < vertex_count; i++) {
 		unsigned int x = 2 * i;
@@ -261,22 +261,22 @@ void GP_FillPolygon(GP_Pixmap *pixmap, unsigned int vertex_count,
 		GP_TRANSFORM_POINT(pixmap, xy_copy[x], xy_copy[y]);
 	}
 
-	GP_FillPolygon_Raw(pixmap, vertex_count, xy_copy, pixel);
+	gp_fill_polygon_raw(pixmap, vertex_count, xy_copy, pixel);
 }
 
-void GP_Polygon_Raw(GP_Pixmap *pixmap, unsigned int vertex_count,
-                    const GP_Coord *xy, GP_Pixel pixel)
+void gp_polygon_raw(gp_pixmap *pixmap, unsigned int vertex_count,
+                    const gp_coord *xy, gp_pixel pixel)
 {
 	unsigned int i;
 
-	GP_Coord prev_x = xy[2 * vertex_count - 2];
-	GP_Coord prev_y = xy[2 * vertex_count - 1];
+	gp_coord prev_x = xy[2 * vertex_count - 2];
+	gp_coord prev_y = xy[2 * vertex_count - 1];
 
 	for (i = 0; i < vertex_count; i++) {
-		GP_Coord x = xy[2 * i];
-		GP_Coord y = xy[2 * i + 1];
+		gp_coord x = xy[2 * i];
+		gp_coord y = xy[2 * i + 1];
 
-		GP_Line_Raw(pixmap, prev_x, prev_y, x, y, pixel);
+		gp_line_raw(pixmap, prev_x, prev_y, x, y, pixel);
 
 		prev_x = x;
 		prev_y = y;
@@ -284,23 +284,23 @@ void GP_Polygon_Raw(GP_Pixmap *pixmap, unsigned int vertex_count,
 }
 
 
-void GP_Polygon(GP_Pixmap *pixmap, unsigned int vertex_count,
-                const GP_Coord *xy, GP_Pixel pixel)
+void gp_polygon(gp_pixmap *pixmap, unsigned int vertex_count,
+                const gp_coord *xy, gp_pixel pixel)
 {
 	unsigned int i;
 
-	GP_Coord prev_x = xy[2 * vertex_count - 2];
-	GP_Coord prev_y = xy[2 * vertex_count - 1];
+	gp_coord prev_x = xy[2 * vertex_count - 2];
+	gp_coord prev_y = xy[2 * vertex_count - 1];
 
 	GP_TRANSFORM_POINT(pixmap, prev_x, prev_y);
 
 	for (i = 0; i < vertex_count; i++) {
-		GP_Coord x = xy[2 * i];
-		GP_Coord y = xy[2 * i + 1];
+		gp_coord x = xy[2 * i];
+		gp_coord y = xy[2 * i + 1];
 
 		GP_TRANSFORM_POINT(pixmap, x, y);
 
-		GP_Line_Raw(pixmap, prev_x, prev_y, x, y, pixel);
+		gp_line_raw(pixmap, prev_x, prev_y, x, y, pixel);
 
 		prev_x = x;
 		prev_y = y;

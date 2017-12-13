@@ -24,10 +24,10 @@
 
 #ifdef HAVE_LIBSDL
 
-#include "core/GP_Common.h"
-#include "core/GP_Debug.h"
+#include <core/GP_Common.h>
+#include <core/GP_Debug.h>
 
-#include "input/GP_EventQueue.h"
+#include <input/GP_EventQueue.h>
 #include "GP_InputDriverSDL.h"
 
 /* SDL ascii mapped keys */
@@ -86,16 +86,15 @@ static uint16_t keysym_table2[] = {
  GP_KEY_SYSRQ,       0,                 0,                  GP_KEY_COMPOSE,
 };
 
-void GP_InputDriverSDLEventPut(struct GP_EventQueue *event_queue,
-                               SDL_Event *ev)
+void gp_input_driver_sdl_event_put(gp_event_queue *event_queue, SDL_Event *ev)
 {
 	uint16_t keysym;
 	uint32_t key = 0;
 
 	switch (ev->type) {
 	case SDL_MOUSEMOTION:
-		GP_EventQueuePushRel(event_queue, ev->motion.xrel,
-		                     ev->motion.yrel, NULL);
+		gp_event_queue_push_rel(event_queue, ev->motion.xrel,
+		                        ev->motion.yrel, NULL);
 	break;
 	case SDL_MOUSEBUTTONDOWN:
 	case SDL_MOUSEBUTTONUP:
@@ -112,13 +111,13 @@ void GP_InputDriverSDLEventPut(struct GP_EventQueue *event_queue,
 		/* Mouse wheel */
 		case 4:
 			if (ev->type == SDL_MOUSEBUTTONDOWN)
-				GP_EventQueuePush(event_queue, GP_EV_REL,
-				                  GP_EV_REL_WHEEL, 1, NULL);
+				gp_event_queue_push(event_queue, GP_EV_REL,
+				                    GP_EV_REL_WHEEL, 1, NULL);
 			return;
 		case 5:
 			if (ev->type == SDL_MOUSEBUTTONDOWN)
-				GP_EventQueuePush(event_queue, GP_EV_REL,
-				                  GP_EV_REL_WHEEL, -1, NULL);
+				gp_event_queue_push(event_queue, GP_EV_REL,
+				                    GP_EV_REL_WHEEL, -1, NULL);
 			return;
 		default:
 			GP_WARN("Unmapped SDL Mouse button %02x",
@@ -126,7 +125,7 @@ void GP_InputDriverSDLEventPut(struct GP_EventQueue *event_queue,
 			return;
 		}
 
-		GP_EventQueuePush(event_queue, GP_EV_KEY,
+		gp_event_queue_push(event_queue, GP_EV_KEY,
 		                  key, ev->button.state, NULL);
 	break;
 	case SDL_KEYDOWN:
@@ -144,14 +143,14 @@ void GP_InputDriverSDLEventPut(struct GP_EventQueue *event_queue,
 			return;
 		}
 
-		GP_EventQueuePushKey(event_queue, key, ev->key.state, NULL);
+		gp_event_queue_push_key(event_queue, key, ev->key.state, NULL);
 	break;
 	case SDL_VIDEORESIZE:
-		GP_EventQueuePushResize(event_queue, ev->resize.w,
+		gp_event_queue_push_resize(event_queue, ev->resize.w,
 		                        ev->resize.h, NULL);
 	break;
 	case SDL_QUIT:
-		GP_EventQueuePush(event_queue, GP_EV_SYS,
+		gp_event_queue_push(event_queue, GP_EV_SYS,
 		                  GP_EV_SYS_QUIT, 0, NULL);
 	break;
 	}

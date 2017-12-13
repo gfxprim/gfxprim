@@ -23,9 +23,9 @@
 #ifndef BACKENDS_GP_X11_H
 #define BACKENDS_GP_X11_H
 
-#include "GP_Backend.h"
+#include <backends/GP_Backend.h>
 
-enum GP_BackendX11Flags {
+enum gp_x11_flags {
 	/* When set, w and h is ignored and root window is used */
 	GP_X11_USE_ROOT_WIN = 0x01,
 
@@ -50,15 +50,15 @@ enum GP_BackendX11Flags {
  *
  * Upon failure NULL is returned.
  */
-GP_Backend *GP_BackendX11Init(const char *display, int x, int y,
-                              unsigned int w, unsigned int h,
-			      const char *caption,
-			      enum GP_BackendX11Flags flags);
+gp_backend *gp_x11_init(const char *display, int x, int y,
+                        unsigned int w, unsigned int h,
+			const char *caption,
+			enum gp_x11_flags flags);
 
 /*
  * Returns non-zero if backend is X11 backend
  */
-int GP_BackendIsX11(GP_Backend *self);
+int gp_backend_is_x11(gp_backend *self);
 
 /*
  * Changes full screen mode.
@@ -67,6 +67,6 @@ int GP_BackendIsX11(GP_Backend *self);
  * 1 = on
  * 2 = toggle
  */
-void GP_BackendX11RequestFullscreen(GP_Backend *self, int mode);
+void gp_x11_fullscreen(gp_backend *self, int mode);
 
 #endif /* BACKENDS_GP_X11_H */

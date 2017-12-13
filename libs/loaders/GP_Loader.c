@@ -34,27 +34,27 @@
 #include <unistd.h>
 #include <ctype.h>
 
-#include "core/GP_Debug.h"
+#include <core/GP_Debug.h>
 
-#include "loaders/GP_Loaders.h"
-#include "loaders/GP_Loader.h"
+#include <loaders/GP_Loaders.h>
+#include <loaders/GP_Loader.h>
 
 #define MAX_LOADERS 64
 
-static const GP_Loader *loaders[MAX_LOADERS] = {
-	&GP_JPG,
-	&GP_PNG,
-	&GP_TIFF,
-	&GP_GIF,
-	&GP_BMP,
-	&GP_PBM,
-	&GP_PGM,
-	&GP_PPM,
-	&GP_PNM,
-	&GP_JP2,
-	&GP_PCX,
-	&GP_PSP,
-	&GP_PSD,
+static const gp_loader *loaders[MAX_LOADERS] = {
+	&gp_jpg,
+	&gp_png,
+	&gp_tiff,
+	&gp_gif,
+	&gp_bmp,
+	&gp_pbm,
+	&gp_pgm,
+	&gp_ppm,
+	&gp_pnm,
+	&gp_jp2,
+	&gp_pcx,
+	&gp_psp,
+	&gp_psd,
 };
 
 static unsigned int get_last_loader(void)
@@ -69,7 +69,7 @@ static unsigned int get_last_loader(void)
 	return i - 1;
 }
 
-int GP_LoaderRegister(const GP_Loader *self)
+int gp_loader_register(const gp_loader *self)
 {
 	unsigned int i;
 
@@ -99,7 +99,7 @@ int GP_LoaderRegister(const GP_Loader *self)
 	return 0;
 }
 
-void GP_LoaderUnregister(const GP_Loader *self)
+void gp_loader_unregister(const gp_loader *self)
 {
 	unsigned int i, last = get_last_loader();
 
@@ -119,7 +119,7 @@ void GP_LoaderUnregister(const GP_Loader *self)
 	GP_WARN("Loader '%s' (%p) wasn't registered", self->fmt_name, self);
 }
 
-void GP_ListLoaders(void)
+void gp_loaders_lists(void)
 {
 	unsigned int i, j;
 
@@ -130,8 +130,8 @@ void GP_ListLoaders(void)
 		if (loaders[i]->save_ptypes) {
 			printf("Write Pixel Types: ");
 			for (j = 0; loaders[i]->save_ptypes[j]; j++) {
-				GP_PixelType ptype = loaders[i]->save_ptypes[j];
-				printf("%s ", GP_PixelTypeName(ptype));
+				gp_pixel_type ptype = loaders[i]->save_ptypes[j];
+				printf("%s ", gp_pixel_type_name(ptype));
 			}
 			printf("\n");
 		}
@@ -146,7 +146,7 @@ void GP_ListLoaders(void)
 	}
 }
 
-static const GP_Loader *loader_by_extension(const char *ext)
+static const gp_loader *loader_by_extension(const char *ext)
 {
 	unsigned int i, j;
 
@@ -178,7 +178,7 @@ static const char *get_ext(const char *path)
 	return path + i + 1;
 }
 
-const GP_Loader *GP_LoaderByFilename(const char *path)
+const gp_loader *gp_loader_by_filename(const char *path)
 {
 	const char *ext = get_ext(path);
 
@@ -190,13 +190,13 @@ const GP_Loader *GP_LoaderByFilename(const char *path)
 	return loader_by_extension(ext);
 }
 
-static const GP_Loader *loader_by_signature(const char *path)
+static const gp_loader *loader_by_signature(const char *path)
 {
 	uint8_t buf[32];
 	FILE *f;
 	int err;
 
-	const GP_Loader *ret;
+	const gp_loader *ret;
 
 	GP_DEBUG(1, "Trying to load by file signature");
 
@@ -216,7 +216,7 @@ static const GP_Loader *loader_by_signature(const char *path)
 
 	fclose(f);
 
-	ret = GP_LoaderBySignature(buf);
+	ret = gp_loader_by_signature(buf);
 
 	if (ret == NULL)
 		errno = ENOSYS;
@@ -229,42 +229,42 @@ err0:
 	return NULL;
 }
 
-GP_Pixmap *GP_ReadImage(GP_IO *io, GP_ProgressCallback *callback)
+gp_pixmap *gp_read_image(gp_io *io, gp_progress_cb *callback)
 {
-	GP_Pixmap *ret = NULL;
+	gp_pixmap *ret = NULL;
 
-	GP_ReadImageEx(io, &ret, NULL, callback);
+	gp_read_image_ex(io, &ret, NULL, callback);
 
 	return ret;
 }
 
-int GP_ReadImageEx(GP_IO *io, GP_Pixmap **img, GP_DataStorage *meta_data,
-                   GP_ProgressCallback *callback)
+int gp_read_image_ex(gp_io *io, gp_pixmap **img, gp_storage *meta_data,
+                     gp_progress_cb *callback)
 {
 	char buf[32];
 	off_t start;
-	const GP_Loader *loader;
+	const gp_loader *loader;
 
-	start = GP_IOTell(io);
+	start = gp_io_tell(io);
 	if (start == (off_t)-1) {
 		GP_DEBUG(1, "Failed to get IO stream offset: %s",
 		         strerror(errno));
 		return 1;
 	}
 
-	if (GP_IOFill(io, buf, sizeof(buf))) {
+	if (gp_io_fill(io, buf, sizeof(buf))) {
 		GP_DEBUG(1, "Failed to read first 32 bytes: %s",
 		         strerror(errno));
 		return 1;
 	}
 
-	if (GP_IOSeek(io, start, GP_IO_SEEK_SET) != start) {
+	if (gp_io_seek(io, start, GP_IO_SEEK_SET) != start) {
 		GP_DEBUG(1, "Failed to seek at the start of the stream: %s",
 		         strerror(errno));
 		return 1;
 	}
 
-	loader = GP_LoaderBySignature(buf);
+	loader = gp_loader_by_signature(buf);
 
 	if (!loader) {
 		GP_DEBUG(1, "Failed to find a loader by signature for"
@@ -285,11 +285,11 @@ int GP_ReadImageEx(GP_IO *io, GP_Pixmap **img, GP_DataStorage *meta_data,
 	return loader->Read(io, img, meta_data, callback);
 }
 
-int GP_LoaderLoadImageEx(const GP_Loader *self, const char *src_path,
-                         GP_Pixmap **img, GP_DataStorage *storage,
-                         GP_ProgressCallback *callback)
+int gp_loader_load_image_ex(const gp_loader *self, const char *src_path,
+                            gp_pixmap **img, gp_storage *storage,
+                            gp_progress_cb *callback)
 {
-	GP_IO *io;
+	gp_io *io;
 	int err, ret;
 
 	GP_DEBUG(1, "Loading Image '%s'", src_path);
@@ -299,43 +299,43 @@ int GP_LoaderLoadImageEx(const GP_Loader *self, const char *src_path,
 		return ENOSYS;
 	}
 
-	io = GP_IOFile(src_path, GP_IO_RDONLY);
+	io = gp_io_file(src_path, GP_IO_RDONLY);
 	if (!io)
 		return 1;
 
 	ret = self->Read(io, img, storage, callback);
 
 	err = errno;
-	GP_IOClose(io);
+	gp_io_close(io);
 	errno = err;
 
 	return ret;
 }
 
 
-GP_Pixmap *GP_LoaderLoadImage(const GP_Loader *self, const char *src_path,
-                               GP_ProgressCallback *callback)
+gp_pixmap *gp_loader_load_image(const gp_loader *self, const char *src_path,
+                               gp_progress_cb *callback)
 {
-	GP_Pixmap *ret = NULL;
+	gp_pixmap *ret = NULL;
 
-	GP_LoaderLoadImageEx(self, src_path, &ret, NULL, callback);
+	gp_loader_load_image_ex(self, src_path, &ret, NULL, callback);
 
 	return ret;
 }
 
-GP_Pixmap *GP_LoaderReadImage(const GP_Loader *self, GP_IO *io,
-                               GP_ProgressCallback *callback)
+gp_pixmap *gp_loader_read_image(const gp_loader *self, gp_io *io,
+                               gp_progress_cb *callback)
 {
-	GP_Pixmap *ret = NULL;
+	gp_pixmap *ret = NULL;
 
-	GP_LoaderReadImageEx(self, io, &ret, NULL, callback);
+	gp_loader_read_image_ex(self, io, &ret, NULL, callback);
 
 	return ret;
 }
 
-int GP_LoaderReadImageEx(const GP_Loader *self, GP_IO *io,
-                         GP_Pixmap **img, GP_DataStorage *data,
-                         GP_ProgressCallback *callback)
+int gp_loader_read_image_ex(const gp_loader *self, gp_io *io,
+                         gp_pixmap **img, gp_storage *data,
+                         gp_progress_cb *callback)
 {
 	GP_DEBUG(1, "Reading image (I/O %p)", io);
 
@@ -347,18 +347,18 @@ int GP_LoaderReadImageEx(const GP_Loader *self, GP_IO *io,
 	return self->Read(io, img, data, callback);
 }
 
-GP_Pixmap *GP_LoadImage(const char *src_path, GP_ProgressCallback *callback)
+gp_pixmap *gp_load_image(const char *src_path, gp_progress_cb *callback)
 {
-	GP_Pixmap *ret = NULL;
+	gp_pixmap *ret = NULL;
 
-	GP_LoadImageEx(src_path, &ret, NULL, callback);
+	gp_load_image_ex(src_path, &ret, NULL, callback);
 
 	return ret;
 }
 
-int GP_LoadImageEx(const char *src_path,
-                   GP_Pixmap **img, GP_DataStorage *meta_data,
-                   GP_ProgressCallback *callback)
+int gp_load_image_ex(const char *src_path,
+                     gp_pixmap **img, gp_storage *meta_data,
+                     gp_progress_cb *callback)
 {
 	int err;
 	struct stat st;
@@ -380,13 +380,13 @@ int GP_LoadImageEx(const char *src_path,
 		}
 	}
 
-	const GP_Loader *ext_load, *sig_load;
+	const gp_loader *ext_load, *sig_load;
 
-	ext_load = GP_LoaderByFilename(src_path);
+	ext_load = gp_loader_by_filename(src_path);
 
 	if (ext_load) {
-		if (!GP_LoaderLoadImageEx(ext_load, src_path,
-		                          img, meta_data, callback))
+		if (!gp_loader_load_image_ex(ext_load, src_path,
+		                             img, meta_data, callback))
 			return 0;
 	}
 
@@ -415,7 +415,7 @@ int GP_LoadImageEx(const char *src_path,
 	}
 
 	if (sig_load) {
-		if (!GP_LoaderLoadImageEx(sig_load, src_path,
+		if (!gp_loader_load_image_ex(sig_load, src_path,
 		                          img, meta_data, callback))
 			return 0;
 	}
@@ -424,13 +424,13 @@ int GP_LoadImageEx(const char *src_path,
 	return 1;
 }
 
-int GP_LoadMetaData(const char *src_path, GP_DataStorage *storage)
+int gp_load_meta_data(const char *src_path, gp_storage *storage)
 {
-	const GP_Loader *loader;
+	const gp_loader *loader;
 	struct stat st;
 	int err;
 
-	// TODO unify this with GP_LoadImage()
+	// TODO unify this with gp_load_image()
 	if (access(src_path, R_OK)) {
 		err = errno;
 		GP_DEBUG(1, "Failed to access file '%s' : %s",
@@ -448,22 +448,22 @@ int GP_LoadMetaData(const char *src_path, GP_DataStorage *storage)
 		}
 	}
 
-	loader = GP_LoaderByFilename(src_path);
+	loader = gp_loader_by_filename(src_path);
 
 	if (loader == NULL)
 		goto out;
 
-	return GP_LoaderLoadImageEx(loader, src_path, NULL, storage, NULL);
+	return gp_loader_load_image_ex(loader, src_path, NULL, storage, NULL);
 
 out:
 	errno = ENOSYS;
 	return 1;
 }
 
-int GP_LoaderSaveImage(const GP_Loader *self, const GP_Pixmap *src,
-                       const char *dst_path, GP_ProgressCallback *callback)
+int gp_loader_save_image(const gp_loader *self, const gp_pixmap *src,
+                         const char *dst_path, gp_progress_cb *callback)
 {
-	GP_IO *io;
+	gp_io *io;
 
 	GP_DEBUG(1, "Saving image '%s' format %s", dst_path, self->fmt_name);
 
@@ -472,18 +472,18 @@ int GP_LoaderSaveImage(const GP_Loader *self, const GP_Pixmap *src,
 		return 1;
 	}
 
-	io = GP_IOFile(dst_path, GP_IO_WRONLY);
+	io = gp_io_file(dst_path, GP_IO_WRONLY);
 
 	if (!io)
 		return 1;
 
 	if (self->Write(src, io, callback)) {
-		GP_IOClose(io);
+		gp_io_close(io);
 		unlink(dst_path);
 		return 1;
 	}
 
-	if (GP_IOClose(io)) {
+	if (gp_io_close(io)) {
 		unlink(dst_path);
 		return 1;
 	}
@@ -491,20 +491,20 @@ int GP_LoaderSaveImage(const GP_Loader *self, const GP_Pixmap *src,
 	return 0;
 }
 
-int GP_SaveImage(const GP_Pixmap *src, const char *dst_path,
-                 GP_ProgressCallback *callback)
+int gp_save_image(const gp_pixmap *src, const char *dst_path,
+                  gp_progress_cb *callback)
 {
-	const GP_Loader *l = GP_LoaderByFilename(dst_path);
+	const gp_loader *l = gp_loader_by_filename(dst_path);
 
 	if (l == NULL) {
 		errno = EINVAL;
 		return 1;
 	}
 
-	return GP_LoaderSaveImage(l, src, dst_path, callback);
+	return gp_loader_save_image(l, src, dst_path, callback);
 }
 
-const GP_Loader *GP_LoaderBySignature(const void *buf)
+const gp_loader *gp_loader_by_signature(const void *buf)
 {
 	unsigned int i;
 

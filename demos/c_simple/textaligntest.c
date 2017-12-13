@@ -24,9 +24,9 @@
  *****************************************************************************/
 
 #include <stdio.h>
-#include <GP.h>
+#include <gfxprim.h>
 
-static GP_Pixel black_pixel, red_pixel, yellow_pixel, green_pixel, blue_pixel,
+static gp_pixel black_pixel, red_pixel, yellow_pixel, green_pixel, blue_pixel,
 		darkgray_pixel, white_pixel;
 
 static int font_flag = 0;
@@ -34,60 +34,60 @@ static int font_flag = 0;
 static int X = 640;
 static int Y = 480;
 
-static GP_FontFace *font = NULL;
-static GP_TextStyle style = GP_DEFAULT_TEXT_STYLE;
+static gp_font_face *font = NULL;
+static gp_text_style style = GP_DEFAULT_TEXT_STYLE;
 
-static GP_Backend *win;
+static gp_backend *win;
 
 void redraw_screen(void)
 {
-	GP_Fill(win->pixmap, black_pixel);
+	gp_fill(win->pixmap, black_pixel);
 
 	/* draw axes intersecting in the middle, where text should be shown */
-	GP_HLine(win->pixmap, 0, X, Y/2, darkgray_pixel);
-	GP_VLine(win->pixmap, X/2, 0, Y, darkgray_pixel);
+	gp_hline(win->pixmap, 0, X, Y/2, darkgray_pixel);
+	gp_vline(win->pixmap, X/2, 0, Y, darkgray_pixel);
 
 	switch (font_flag) {
 	case 0:
-		style.font = &GP_DefaultProportionalFont;
+		style.font = gp_font_gfxprim;
 	break;
 	case 1:
-		style.font = &GP_DefaultConsoleFont;
+		style.font = gp_font_gfxprim_mono;
 	break;
 	case 2:
-		style.font = GP_FontTinyMono;
+		style.font = gp_font_tiny_mono;
 	break;
 	case 3:
-		style.font = GP_FontTiny;
+		style.font = gp_font_tiny;
 	break;
 	case 4:
-		style.font = GP_FontC64;
+		style.font = gp_font_c64;
 	break;
 	case 5:
 		style.font = font;
 	break;
 	}
 
-	GP_Text(win->pixmap, &style, X/2, Y/2, GP_ALIGN_LEFT|GP_VALIGN_BELOW,
+	gp_text(win->pixmap, &style, X/2, Y/2, GP_ALIGN_LEFT|GP_VALIGN_BELOW,
 	        yellow_pixel, black_pixel, "bottom left");
-	GP_Text(win->pixmap, &style, X/2, Y/2, GP_ALIGN_RIGHT|GP_VALIGN_BELOW,
+	gp_text(win->pixmap, &style, X/2, Y/2, GP_ALIGN_RIGHT|GP_VALIGN_BELOW,
 	        red_pixel, black_pixel, "bottom right");
-	GP_Text(win->pixmap, &style, X/2, Y/2, GP_ALIGN_RIGHT|GP_VALIGN_ABOVE,
+	gp_text(win->pixmap, &style, X/2, Y/2, GP_ALIGN_RIGHT|GP_VALIGN_ABOVE,
 	        blue_pixel, black_pixel, "top right");
-	GP_Text(win->pixmap, &style, X/2, Y/2, GP_ALIGN_LEFT|GP_VALIGN_ABOVE,
+	gp_text(win->pixmap, &style, X/2, Y/2, GP_ALIGN_LEFT|GP_VALIGN_ABOVE,
 	        green_pixel, black_pixel, "top left");
 
-	GP_HLine(win->pixmap, 0, X, Y/3, darkgray_pixel);
-	GP_Text(win->pixmap, &style, X/2, Y/3, GP_ALIGN_CENTER|GP_VALIGN_BASELINE,
+	gp_hline(win->pixmap, 0, X, Y/3, darkgray_pixel);
+	gp_text(win->pixmap, &style, X/2, Y/3, GP_ALIGN_CENTER|GP_VALIGN_BASELINE,
 	        white_pixel, black_pixel, "x center y baseline");
 }
 
 static void event_loop(void)
 {
-	GP_Event ev;
+	gp_event ev;
 
 	for (;;) {
-		GP_BackendWaitEvent(win, &ev);
+		gp_backend_wait_event(win, &ev);
 
 		switch (ev.type) {
 		case GP_EV_KEY:
@@ -133,7 +133,7 @@ static void event_loop(void)
 				style.pixel_ymul--;
 			break;
 			case GP_KEY_ESC:
-				GP_BackendExit(win);
+				gp_backend_exit(win);
 				exit(0);
 			break;
 			}
@@ -141,11 +141,11 @@ static void event_loop(void)
 		case GP_EV_SYS:
 			switch(ev.code) {
 			case GP_EV_SYS_QUIT:
-				GP_BackendExit(win);
+				gp_backend_exit(win);
 				exit(0);
 			break;
 			case GP_EV_SYS_RESIZE:
-				GP_BackendResizeAck(win);
+				gp_backend_resize_ack(win);
 				X = win->pixmap->w;
 				Y = win->pixmap->h;
 			break;
@@ -154,7 +154,7 @@ static void event_loop(void)
 		}
 
 		redraw_screen();
-		GP_BackendFlip(win);
+		gp_backend_flip(win);
 	}
 }
 
@@ -174,11 +174,11 @@ int main(int argc, char *argv[])
 	const char *backend_opts = "X11";
 
 	if (argc > 1)
-		font = GP_FontFaceLoad(argv[1], 0, 20);
+		font = gp_font_face_load(argv[1], 0, 20);
 
 	print_instructions();
 
-	win = GP_BackendInit(backend_opts, "Font Align Test");
+	win = gp_backend_init(backend_opts, "Font Align Test");
 
 	if (win == NULL) {
 		fprintf(stderr, "Failed to initalize backend '%s'\n",
@@ -186,16 +186,16 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 
-	black_pixel    = GP_RGBToPixmapPixel(0x00, 0x00, 0x00, win->pixmap);
-	red_pixel      = GP_RGBToPixmapPixel(0xff, 0x00, 0x00, win->pixmap);
-	blue_pixel     = GP_RGBToPixmapPixel(0x00, 0x00, 0xff, win->pixmap);
-	green_pixel    = GP_RGBToPixmapPixel(0x00, 0xff, 0x00, win->pixmap);
-	yellow_pixel   = GP_RGBToPixmapPixel(0xff, 0xff, 0x00, win->pixmap);
-	white_pixel   = GP_RGBToPixmapPixel(0xff, 0xff, 0xff, win->pixmap);
-	darkgray_pixel = GP_RGBToPixmapPixel(0x7f, 0x7f, 0x7f, win->pixmap);
+	black_pixel    = gp_rgb_to_pixmap_pixel(0x00, 0x00, 0x00, win->pixmap);
+	red_pixel      = gp_rgb_to_pixmap_pixel(0xff, 0x00, 0x00, win->pixmap);
+	blue_pixel     = gp_rgb_to_pixmap_pixel(0x00, 0x00, 0xff, win->pixmap);
+	green_pixel    = gp_rgb_to_pixmap_pixel(0x00, 0xff, 0x00, win->pixmap);
+	yellow_pixel   = gp_rgb_to_pixmap_pixel(0xff, 0xff, 0x00, win->pixmap);
+	white_pixel   = gp_rgb_to_pixmap_pixel(0xff, 0xff, 0xff, win->pixmap);
+	darkgray_pixel = gp_rgb_to_pixmap_pixel(0x7f, 0x7f, 0x7f, win->pixmap);
 
 	redraw_screen();
-	GP_BackendFlip(win);
+	gp_backend_flip(win);
 	event_loop();
 
 	return 0;

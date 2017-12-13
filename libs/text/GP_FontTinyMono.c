@@ -215,7 +215,7 @@ static int8_t tiny_mono_glyphs[] = {
 	         	0x00, 0x50, 0xa0, 0x00, 0x00, 0x00, 0x00,
 };
 
-static struct GP_FontFace tiny_mono = {
+static struct gp_font_face tiny_mono = {
 	.family_name = "Tiny",
 	.style_name = "Mono",
 	.charset = GP_CHARSET_7BIT,
@@ -228,4 +228,4 @@ static struct GP_FontFace tiny_mono = {
 	.glyph_offsets = {12},
 };
 
-struct GP_FontFace *GP_FontTinyMono = &tiny_mono;
+struct gp_font_face *gp_font_tiny_mono = &tiny_mono;

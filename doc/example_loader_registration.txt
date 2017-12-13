@@ -1,10 +1,10 @@
 Image Loader Registration
 -------------------------
 This example shows how to
-link:loaders.html#Register_Loader[register custom image loader]
+link:loaders.html#register_loader[register custom image loader]
 so that library functions such as
-link:loaders.html#Load_Image[GP_LoadImage()] and
-link:loaders.html#Save_Image[GP_SaveImage()] can use it.
+link:loaders.html#load_image[gp_load_image()] and
+link:loaders.html#save_image[gp_save_image()] can use it.
 
 [source,c]
 ------------------------------------------------------------------

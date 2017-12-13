@@ -27,20 +27,20 @@
   */
 
 #include <stdio.h>
-#include <GP.h>
+#include <gfxprim.h>
 
-static void redraw(GP_Backend *self)
+static void redraw(gp_backend *self)
 {
-	GP_Pixmap *pixmap = self->pixmap;
-	GP_Pixel black_pixel = GP_RGBToPixmapPixel(0x00, 0x00, 0x00, pixmap);
+	gp_pixmap *pixmap = self->pixmap;
+	gp_pixel black_pixel = gp_rgb_to_pixmap_pixel(0x00, 0x00, 0x00, pixmap);
 
-	GP_Fill(pixmap, black_pixel);
+	gp_fill(pixmap, black_pixel);
 
 	/* Update the backend screen */
-	GP_BackendFlip(self);
+	gp_backend_flip(self);
 }
 
-static uint32_t timer_callback(GP_Timer *self)
+static uint32_t timer_callback(gp_timer *self)
 {
 	uint32_t next = random() % 10000;
 
@@ -52,10 +52,10 @@ static uint32_t timer_callback(GP_Timer *self)
 
 int main(void)
 {
-	GP_Backend *backend;
+	gp_backend *backend;
 	const char *backend_opts = "X11:100x100";
 
-	backend = GP_BackendInit(backend_opts, "Backend Timers Example");
+	backend = gp_backend_init(backend_opts, "Backend Timers Example");
 
 	if (backend == NULL) {
 		fprintf(stderr, "Failed to initialize backend\n");
@@ -76,23 +76,23 @@ int main(void)
 	 */
 	GP_TIMER_DECLARE(timer2, 5000, 0, "Timer 2", timer_callback, NULL);
 
-	GP_BackendAddTimer(backend, &timer1);
-	GP_BackendAddTimer(backend, &timer2);
+	gp_backend_add_timer(backend, &timer1);
+	gp_backend_add_timer(backend, &timer2);
 
 	/* Handle events */
 	for (;;) {
-		GP_Event ev;
+		gp_event ev;
 
-		GP_BackendWaitEvent(backend, &ev);
+		gp_backend_wait_event(backend, &ev);
 
-		GP_EventDump(&ev);
+		gp_event_dump(&ev);
 
 		switch (ev.type) {
 		case GP_EV_KEY:
 			switch (ev.val.val) {
 			case GP_KEY_ESC:
 			case GP_KEY_Q:
-				GP_BackendExit(backend);
+				gp_backend_exit(backend);
 				return 0;
 			break;
 			}
@@ -100,11 +100,11 @@ int main(void)
 		case GP_EV_SYS:
 			switch (ev.code) {
 			case GP_EV_SYS_RESIZE:
-				GP_BackendResizeAck(backend);
+				gp_backend_resize_ack(backend);
 				redraw(backend);
 			break;
 			case GP_EV_SYS_QUIT:
-				GP_BackendExit(backend);
+				gp_backend_exit(backend);
 				return 0;
 			break;
 			}
@@ -112,7 +112,7 @@ int main(void)
 		}
 	}
 
-	GP_BackendExit(backend);
+	gp_backend_exit(backend);
 
 	return 0;
 }

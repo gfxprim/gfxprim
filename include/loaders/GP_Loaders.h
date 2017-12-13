@@ -32,28 +32,19 @@
 #ifndef LOADERS_GP_LOADERS_H
 #define LOADERS_GP_LOADERS_H
 
-#include "core/GP_Pixmap.h"
-#include "core/GP_ProgressCallback.h"
+#include <core/GP_Pixmap.h>
+#include <core/GP_ProgressCallback.h>
 
-#include "loaders/GP_PNM.h"
-#include "loaders/GP_BMP.h"
-#include "loaders/GP_PNG.h"
-#include "loaders/GP_JPG.h"
-#include "loaders/GP_JP2.h"
-#include "loaders/GP_GIF.h"
-#include "loaders/GP_TIFF.h"
-#include "loaders/GP_PCX.h"
-#include "loaders/GP_PSP.h"
-#include "loaders/GP_PSD.h"
+#include <loaders/GP_Loaders.gen.h>
 
-#include "loaders/GP_DataStorage.h"
-#include "loaders/GP_Exif.h"
+#include <loaders/GP_DataStorage.h>
+#include <loaders/GP_Exif.h>
 
-#include "loaders/GP_Loader.h"
+#include <loaders/GP_Loader.h>
 
-#include "loaders/GP_Container.h"
-#include "loaders/GP_ZIP.h"
+#include <loaders/GP_Container.h>
+#include <loaders/GP_ZIP.h>
 
-#include "loaders/GP_IOZlib.h"
+#include <loaders/GP_IOZlib.h>
 
 #endif /* LOADERS_GP_LOADERS_H */

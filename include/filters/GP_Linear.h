@@ -22,14 +22,14 @@
 
 /*
 
-   Linear Convolution _Raw filters.
+   Linear Convolution _raw filters.
 
  */
 
 #ifndef FILTERS_GP_LINEAR_H
 #define FILTERS_GP_LINEAR_H
 
-#include "GP_Filter.h"
+#include <filters/GP_Filter.h>
 
 /*
  * Linear convolution.
@@ -54,13 +54,13 @@
  *
  * kern_div = 9
  */
-int GP_FilterLinearConvolution_Raw(const GP_Pixmap *src,
-                                   GP_Coord x_src, GP_Coord y_src,
-                                   GP_Size w_src, GP_Size h_src,
-                                   GP_Pixmap *dst,
-                                   GP_Coord x_dst, GP_Coord y_dst,
+int gp_filter_linear_convolution_raw(const gp_pixmap *src,
+                                   gp_coord x_src, gp_coord y_src,
+                                   gp_size w_src, gp_size h_src,
+                                   gp_pixmap *dst,
+                                   gp_coord x_dst, gp_coord y_dst,
                                    float kernel[], uint32_t kw, uint32_t kh,
-                                   float kern_div, GP_ProgressCallback *callback);
+                                   float kern_div, gp_progress_cb *callback);
 
 /*
  * Special cases for convolution only in horizontal/vertical direction.
@@ -72,65 +72,63 @@ int GP_FilterLinearConvolution_Raw(const GP_Pixmap *src,
  *
  * Both works also in-place.
  */
-int GP_FilterHLinearConvolution_Raw(const GP_Pixmap *src,
-                                    GP_Coord x_src, GP_Coord y_src,
-                                    GP_Size w_src, GP_Size h_src,
-                                    GP_Pixmap *dst,
-                                    GP_Coord x_dst, GP_Coord y_dst,
+int gp_filter_hlinear_convolution_raw(const gp_pixmap *src,
+                                    gp_coord x_src, gp_coord y_src,
+                                    gp_size w_src, gp_size h_src,
+                                    gp_pixmap *dst,
+                                    gp_coord x_dst, gp_coord y_dst,
                                     float kernel[], uint32_t kw, float kern_div,
-                                    GP_ProgressCallback *callback);
+                                    gp_progress_cb *callback);
 
-int GP_FilterVLinearConvolution_Raw(const GP_Pixmap *src,
-                                    GP_Coord x_src, GP_Coord y_src,
-                                    GP_Size w_src, GP_Size h_src,
-                                    GP_Pixmap *dst,
-                                    GP_Coord x_dst, GP_Coord y_dst,
+int gp_filter_vlinear_convolution_raw(const gp_pixmap *src,
+                                    gp_coord x_src, gp_coord y_src,
+                                    gp_size w_src, gp_size h_src,
+                                    gp_pixmap *dst,
+                                    gp_coord x_dst, gp_coord y_dst,
                                     float kernel[], uint32_t kh, float kern_div,
-                                    GP_ProgressCallback *callback);
+                                    gp_progress_cb *callback);
 
 /*
  * Applies both horizontal and vertical convolution and takes care of the
  * correct progress callback (both horizontal and vertical kernels are expected
  * to be similar in size).
  */
-int GP_FilterVHLinearConvolution_Raw(const GP_Pixmap *src,
-                                     GP_Coord x_src, GP_Coord y_src,
-                                     GP_Size w_src, GP_Size h_src,
-                                     GP_Pixmap *dst,
-                                     GP_Coord x_dst, GP_Coord y_dst,
+int gp_filter_vhlinear_convolution_raw(const gp_pixmap *src,
+                                     gp_coord x_src, gp_coord y_src,
+                                     gp_size w_src, gp_size h_src,
+                                     gp_pixmap *dst,
+                                     gp_coord x_dst, gp_coord y_dst,
                                      float hkernel[], uint32_t kw, float hkern_div,
                                      float vkernel[], uint32_t kh, float vkern_div,
-                                     GP_ProgressCallback *callback);
+                                     gp_progress_cb *callback);
 
 /*
  * Prints a kernel into the stdout.
  */
-void GP_FilterKernelPrint_Raw(float kernel[], int kw, int kh, float kern_div);
+void gp_filter_kernel_print_raw(float kernel[], int kw, int kh, float kern_div);
 
+typedef struct gp_convolution_params {
+	const gp_pixmap *src;
+	gp_coord x_src;
+	gp_coord y_src;
+	gp_size w_src;
+	gp_size h_src;
 
-
-typedef struct GP_ConvolutionParams {
-	const GP_Pixmap *src;
-	GP_Coord x_src;
-	GP_Coord y_src;
-	GP_Size w_src;
-	GP_Size h_src;
-
-	GP_Pixmap *dst;
-	GP_Coord x_dst;
-	GP_Coord y_dst;
+	gp_pixmap *dst;
+	gp_coord x_dst;
+	gp_coord y_dst;
 
 	float *kernel;
 	unsigned int kw;
 	unsigned int kh;
 	float kern_div;
 
-	GP_ProgressCallback *callback;
-} GP_ConvolutionParams;
+	gp_progress_cb *callback;
+} gp_convolution_params;
 
-static inline int GP_FilterConvolution_Raw(const struct GP_ConvolutionParams *params)
+static inline int gp_filter_convolution_raw(const struct gp_convolution_params *params)
 {
-	return GP_FilterLinearConvolution_Raw(params->src, params->x_src,
+	return gp_filter_linear_convolution_raw(params->src, params->x_src,
 	                                      params->y_src, params->w_src,
 	                                      params->h_src, params->dst,
 	                                      params->x_dst, params->y_dst,
@@ -139,10 +137,10 @@ static inline int GP_FilterConvolution_Raw(const struct GP_ConvolutionParams *pa
 	                                      params->callback);
 }
 
-static inline int GP_FilterVConvolution_Raw(const struct GP_ConvolutionParams *params)
+static inline int gp_filter_vconvolution_raw(const struct gp_convolution_params *params)
 {
 
-	return GP_FilterVLinearConvolution_Raw(params->src, params->x_src,
+	return gp_filter_vlinear_convolution_raw(params->src, params->x_src,
 	                                       params->y_src, params->w_src,
 	                                       params->h_src, params->dst,
 	                                       params->x_dst, params->y_dst,
@@ -151,9 +149,9 @@ static inline int GP_FilterVConvolution_Raw(const struct GP_ConvolutionParams *p
 	                                       params->callback);
 }
 
-static inline int GP_FilterHConvolution_Raw(const struct GP_ConvolutionParams *params)
+static inline int gp_filter_hconvolution_raw(const struct gp_convolution_params *params)
 {
-	return GP_FilterHLinearConvolution_Raw(params->src, params->x_src,
+	return gp_filter_hlinear_convolution_raw(params->src, params->x_src,
 	                                       params->y_src, params->w_src,
 	                                       params->h_src, params->dst,
 	                                       params->x_dst, params->y_dst,

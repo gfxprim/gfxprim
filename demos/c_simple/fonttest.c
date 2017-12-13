@@ -27,14 +27,14 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <GP.h>
+#include <gfxprim.h>
 
-static GP_Backend *win;
+static gp_backend *win;
 
 static const char *font_path = NULL;
 static unsigned int font_h = 16;
 
-static GP_Pixel white_pixel, gray_pixel, dark_gray_pixel, black_pixel,
+static gp_pixel white_pixel, gray_pixel, dark_gray_pixel, black_pixel,
 		red_pixel, blue_pixel;
 
 static const char *test_strings[] = {
@@ -46,9 +46,9 @@ static const char *test_strings[] = {
 
 static int font_flag = 0;
 static int tracking = 0;
-static GP_FontFace *font = NULL;
+static gp_font_face *font = NULL;
 
-static const char *glyph_bitmap_format_name(const GP_FontBitmapFormat format)
+static const char *glyph_bitmap_format_name(const gp_font_bitmap_format format)
 {
 	switch (format) {
 	case GP_FONT_BITMAP_1BPP:
@@ -62,9 +62,9 @@ static const char *glyph_bitmap_format_name(const GP_FontBitmapFormat format)
 	}
 }
 
-static void print_character_metadata(const GP_FontFace *font, int c)
+static void print_character_metadata(const gp_font_face *font, int c)
 {
-	const GP_GlyphBitmap *glyph = GP_GetGlyphBitmap(font, c);
+	const gp_glyph *glyph = gp_get_glyph(font, c);
 	fprintf(stderr, "Properties of the character '%c':\n", c);
 
 	if (glyph) {
@@ -79,18 +79,18 @@ static void print_character_metadata(const GP_FontFace *font, int c)
 	}
 }
 
-static void print_font_properties(const GP_FontFace *font)
+static void print_font_properties(const gp_font_face *font)
 {
 	fprintf(stderr, "Font '%s %s' properties:\n",
-	                GP_FontFamily(font), GP_FontStyle(font));
+	                gp_font_family(font), gp_font_style(font));
 	fprintf(stderr, "    Height: ascend: %d, descend: %d\n",
-			GP_FontAscend(font), GP_FontDescend(font));
+			gp_font_ascend(font), gp_font_descend(font));
 	fprintf(stderr, "    Max advance_x: %u\n",
-	                GP_FontMaxAdvanceX(font));
+	                gp_font_max_advance_x(font));
 	fprintf(stderr, "    Glyph bitmap format: %s\n",
 	                glyph_bitmap_format_name(font->glyph_bitmap_format));
 	fprintf(stderr, "    Bounding box width: %d, heigth: %d\n",
-	                GP_FontMaxWidth(font), GP_FontHeight(font));
+	                gp_font_max_width(font), gp_font_height(font));
 
 	print_character_metadata(font, 'a');
 	print_character_metadata(font, 'm');
@@ -101,25 +101,25 @@ static void print_font_properties(const GP_FontFace *font)
 
 void redraw_screen(void)
 {
-	GP_Fill(win->pixmap, black_pixel);
+	gp_fill(win->pixmap, black_pixel);
 
-	GP_TextStyle style = GP_DEFAULT_TEXT_STYLE;
+	gp_text_style style = GP_DEFAULT_TEXT_STYLE;
 
 	switch (font_flag) {
 	case 0:
-		style.font = &GP_DefaultProportionalFont;
+		style.font = gp_font_gfxprim;
 	break;
 	case 1:
-		style.font = &GP_DefaultConsoleFont;
+		style.font = gp_font_gfxprim_mono;
 	break;
 	case 2:
-		style.font = GP_FontTiny;
+		style.font = gp_font_tiny;
 	break;
 	case 3:
-		style.font = GP_FontTinyMono;
+		style.font = gp_font_tiny_mono;
 	break;
 	case 4:
-		style.font = GP_FontC64;
+		style.font = gp_font_c64;
 	break;
 	case 5:
 		style.font = font;
@@ -144,31 +144,31 @@ void redraw_screen(void)
 		style.pixel_yspace = 0;
 		style.char_xspace = tracking;
 
-		GP_FillRectXYWH(win->pixmap,
+		gp_fill_rect_xywh(win->pixmap,
 			16, SPACING*i + 16,
-			GP_TextWidth(&style, test_string),
-			GP_FontHeight(style.font),
+			gp_text_width(&style, test_string),
+			gp_font_height(style.font),
 			dark_gray_pixel);
 
-		GP_RectXYWH(win->pixmap,
+		gp_rect_xywh(win->pixmap,
 			15, SPACING*i + 15,
-			GP_TextMaxWidth(&style, strlen(test_string)) + 1,
-			GP_FontHeight(style.font) + 1,
+			gp_text_max_width(&style, strlen(test_string)) + 1,
+			gp_font_height(style.font) + 1,
 			blue_pixel);
 
-		GP_Text(win->pixmap, &style, 16, SPACING*i + 16, align,
+		gp_text(win->pixmap, &style, 16, SPACING*i + 16, align,
 		        white_pixel, dark_gray_pixel, test_string);
 
 		style.pixel_xmul = 2;
 		style.pixel_ymul = 2;
 		style.pixel_yspace = 1;
 
-		GP_Text(win->pixmap, &style, 34, SPACING * i + 44, align,
+		gp_text(win->pixmap, &style, 34, SPACING * i + 44, align,
 		        white_pixel, black_pixel, test_string);
 
-		GP_RectXYWH(win->pixmap, 33, SPACING * i + 43,
-		            GP_TextWidth(&style, test_string) + 1,
-			    GP_TextHeight(&style) + 1, dark_gray_pixel);
+		gp_rect_xywh(win->pixmap, 33, SPACING * i + 43,
+		             gp_text_width(&style, test_string) + 1,
+			     gp_text_height(&style) + 1, dark_gray_pixel);
 
 		style.pixel_xmul = 4;
 		style.pixel_ymul = 2;
@@ -184,17 +184,17 @@ void redraw_screen(void)
 			style.pixel_yspace = 2;
 		}
 
-		GP_Text(win->pixmap, &style, 64, SPACING*i + 88, align,
+		gp_text(win->pixmap, &style, 64, SPACING*i + 88, align,
 		        dark_gray_pixel, black_pixel, test_string);
 	}
 }
 
 void event_loop(void)
 {
-	GP_Event ev;
+	gp_event ev;
 
 	for (;;) {
-		GP_BackendWaitEvent(win, &ev);
+		gp_backend_wait_event(win, &ev);
 
 		switch (ev.type) {
 		case GP_EV_KEY:
@@ -209,38 +209,38 @@ void event_loop(void)
 					font_flag = (font_flag + 1) % 5;
 
 				redraw_screen();
-				GP_BackendFlip(win);
+				gp_backend_flip(win);
 			break;
 			case GP_KEY_UP:
 				tracking++;
 				redraw_screen();
-				GP_BackendFlip(win);
+				gp_backend_flip(win);
 			break;
 			case GP_KEY_DOWN:
 				tracking--;
 				redraw_screen();
-				GP_BackendFlip(win);
+				gp_backend_flip(win);
 			break;
 			case GP_KEY_B:
 				font_h++;
 				if (font_path) {
-					GP_FontFaceFree(font);
-					font = GP_FontFaceLoad(font_path, 0, font_h);
+					gp_font_face_free(font);
+					font = gp_font_face_load(font_path, 0, font_h);
 					redraw_screen();
-					GP_BackendFlip(win);
+					gp_backend_flip(win);
 				}
 			break;
 			case GP_KEY_S:
 				font_h--;
 				if (font_path) {
-					GP_FontFaceFree(font);
-					font = GP_FontFaceLoad(font_path, 0, font_h);
+					gp_font_face_free(font);
+					font = gp_font_face_load(font_path, 0, font_h);
 					redraw_screen();
-					GP_BackendFlip(win);
+					gp_backend_flip(win);
 				}
 			break;
 			case GP_KEY_ESC:
-				GP_BackendExit(win);
+				gp_backend_exit(win);
 				exit(0);
 			break;
 			}
@@ -248,9 +248,9 @@ void event_loop(void)
 		case GP_EV_SYS:
 			switch(ev.code) {
 			case GP_EV_SYS_RESIZE:
-				GP_BackendResizeAck(win);
+				gp_backend_resize_ack(win);
 				redraw_screen();
-				GP_BackendFlip(win);
+				gp_backend_flip(win);
 			break;
 			}
 		break;
@@ -276,10 +276,10 @@ int main(int argc, char *argv[])
 	if (argc > 1) {
 		font_path = argv[1];
 		fprintf(stderr, "\nLoading font '%s'\n", argv[1]);
-		font = GP_FontFaceLoad(argv[1], 0, font_h);
+		font = gp_font_face_load(argv[1], 0, font_h);
 	}
 
-	win = GP_BackendInit(backend_opts, "Font Test");
+	win = gp_backend_init(backend_opts, "Font Test");
 
 	if (win == NULL) {
 		fprintf(stderr, "Failed to initalize backend '%s'\n",
@@ -287,15 +287,15 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 
-	white_pixel     = GP_RGBToPixmapPixel(0xff, 0xff, 0xff, win->pixmap);
-	gray_pixel      = GP_RGBToPixmapPixel(0xbe, 0xbe, 0xbe, win->pixmap);
-	dark_gray_pixel = GP_RGBToPixmapPixel(0x7f, 0x7f, 0x7f, win->pixmap);
-	black_pixel     = GP_RGBToPixmapPixel(0x00, 0x00, 0x00, win->pixmap);
-	red_pixel       = GP_RGBToPixmapPixel(0xff, 0x00, 0x00, win->pixmap);
-	blue_pixel      = GP_RGBToPixmapPixel(0x00, 0x00, 0xff, win->pixmap);
+	white_pixel     = gp_rgb_to_pixmap_pixel(0xff, 0xff, 0xff, win->pixmap);
+	gray_pixel      = gp_rgb_to_pixmap_pixel(0xbe, 0xbe, 0xbe, win->pixmap);
+	dark_gray_pixel = gp_rgb_to_pixmap_pixel(0x7f, 0x7f, 0x7f, win->pixmap);
+	black_pixel     = gp_rgb_to_pixmap_pixel(0x00, 0x00, 0x00, win->pixmap);
+	red_pixel       = gp_rgb_to_pixmap_pixel(0xff, 0x00, 0x00, win->pixmap);
+	blue_pixel      = gp_rgb_to_pixmap_pixel(0x00, 0x00, 0xff, win->pixmap);
 
 	redraw_screen();
-	GP_BackendFlip(win);
+	gp_backend_flip(win);
 
 	event_loop();
 

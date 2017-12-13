@@ -9,26 +9,34 @@
 
 %import ../core/core.i
 
-%ignore GP_GlyphBitmap::bitmap;
-%ignore GP_FontFace::glyph_offsets;
-%ignore GP_Print;
-%ignore GP_VPrint;
+%ignore gp_glyph::bitmap;
+%ignore gp_font_face::glyph_offsets;
+%ignore gp_print;
+%ignore gp_vprint;
 %include "GP_Text.h"
 %include "GP_Font.h"
-%include "GP_DefaultFont.h"
 %include "GP_TextMetric.h"
 
+%immutable gp_font_gfxprim;
+%immutable gp_font_gfxprim_mono;
+%immutable gp_font_tiny;
+%immutable gp_font_tiny_mono;
+%immutable gp_font_c64;
+%immutable gp_font_haxor_narrow_15;
+%immutable gp_font_haxor_narrow_bold_15;
+%include "GP_Fonts.h"
+
 /* GP_TextStyle wrappers */
-%extend GP_TextStyle {
-  ~GP_TextStyle() {
-    GP_DEBUG(2, "[wrapper] GP_TextStyleFree (%p)", $self);
+%extend gp_text_style {
+  ~gp_text_style() {
+    GP_DEBUG(2, "[wrapper] gp_text_style_free (%p)", $self);
     free($self);
   }
-  GP_TextStyle(const struct GP_FontFace *font, int xspace, int yspace,
+  gp_text_style(const struct gp_font_face *font, int xspace, int yspace,
                int xmul, int ymul, int spacing) {
-    GP_TextStyle *style = malloc(sizeof(GP_TextStyle));
+    gp_text_style *style = malloc(sizeof(gp_text_style));
 
-    GP_DEBUG(2, "[wrapper] GP_TextStyleAlloc (%p)", style);
+    GP_DEBUG(2, "[wrapper] gp_text_style_alloc (%p)", style);
 
     if (style == NULL)
       return NULL;

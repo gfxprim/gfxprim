@@ -30,14 +30,14 @@
 #include <string.h>
 #include <errno.h>
 
-#include <GP.h>
+#include <gfxprim.h>
 
 struct callback_priv {
 	char *op;
 	char *name;
 };
 
-static int progress_callback(GP_ProgressCallback *self)
+static int progress_callback(gp_progress_cb *self)
 {
 	struct callback_priv *priv = self->priv;
 
@@ -53,9 +53,9 @@ static int progress_callback(GP_ProgressCallback *self)
 
 int main(int argc, char *argv[])
 {
-	GP_Pixmap *img;
+	gp_pixmap *img;
 	struct callback_priv priv;
-	GP_ProgressCallback callback = {.callback = progress_callback,
+	gp_progress_cb callback = {.callback = progress_callback,
 	                                .priv = &priv};
 
 	if (argc != 2) {
@@ -66,7 +66,7 @@ int main(int argc, char *argv[])
 	priv.op   = "Loading";
 	priv.name = argv[1];
 
-	img = GP_LoadImage(argv[1], &callback);
+	img = gp_load_image(argv[1], &callback);
 
 	if (img == NULL) {
 		fprintf(stderr, "Failed to load image '%s': %s\n", argv[1],
@@ -133,7 +133,7 @@ int main(int argc, char *argv[])
 		0, 1, 1, 1, 1, 1, 1, 1, 1, 1, 0,
 	};
 
-	GP_MedianWeights weights = {
+	gp_median_weights weights = {
 		.w = 11,
 		.h = 11,
 		.weights = circle,
@@ -141,14 +141,14 @@ int main(int argc, char *argv[])
 
 	priv.op = "Weighted Median";
 
-	GP_Pixmap *res = GP_FilterWeightedMedianAlloc(img, &weights, &callback);
+	gp_pixmap *res = gp_filter_weighted_median_alloc(img, &weights, &callback);
 
 	printf("\n");
 
 	priv.op   = "Saving";
 	priv.name = "out.png";
 
-	if (GP_SavePNG(res, "out.png", &callback)) {
+	if (gp_save_png(res, "out.png", &callback)) {
 		fprintf(stderr, "Failed to save image: %s", strerror(errno));
 		return 1;
 	}

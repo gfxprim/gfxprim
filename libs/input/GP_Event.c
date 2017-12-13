@@ -28,7 +28,7 @@
 #include <core/GP_Common.h>
 
 #include <input/GP_EventQueue.h>
-
+#include <input/GP_Timer.h>
 #include <input/GP_Event.h>
 
 static char *key_names[] = {
@@ -60,7 +60,7 @@ static char *key_names[] = {
  "LeftMeta",    "RightMeta", "Compose",
 };
 
-const char *GP_EventKeyName(enum GP_EventKeyValue key)
+const char *gp_event_key_name(enum gp_event_key_value key)
 {
 	if (key < GP_ARRAY_SIZE(key_names))
 		return key_names[key];
@@ -85,7 +85,7 @@ const char *GP_EventKeyName(enum GP_EventKeyValue key)
 	};
 }
 
-static void dump_rel(struct GP_Event *ev)
+static void dump_rel(gp_event *ev)
 {
 	printf("Rel ");
 
@@ -101,15 +101,15 @@ static void dump_rel(struct GP_Event *ev)
 	}
 }
 
-static void dump_key(struct GP_Event *ev)
+static void dump_key(gp_event *ev)
 {
-	const char *name = GP_EventKeyName(ev->val.key.key);
+	const char *name = gp_event_key_name(ev->val.key.key);
 
 	printf("Key %i (Key%s) %s\n",
 	       ev->val.key.key, name, ev->code ? "down" : "up");
 }
 
-static void dump_abs(struct GP_Event *ev)
+static void dump_abs(gp_event *ev)
 {
 	switch (ev->code) {
 	case GP_EV_ABS_POS:
@@ -119,7 +119,7 @@ static void dump_abs(struct GP_Event *ev)
 	}
 }
 
-static void dump_sys(struct GP_Event *ev)
+static void dump_sys(gp_event *ev)
 {
 	switch (ev->code) {
 	case GP_EV_SYS_QUIT:
@@ -131,7 +131,7 @@ static void dump_sys(struct GP_Event *ev)
 	}
 }
 
-void GP_EventDump(struct GP_Event *ev)
+void gp_event_dump(gp_event *ev)
 {
 	printf("Event (%u) ", (unsigned int)ev->time.tv_sec % 10000);
 

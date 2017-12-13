@@ -29,66 +29,66 @@
 
   */
 
-#include <GP.h>
+#include <gfxprim.h>
 
-static GP_Pixel white_pixel, black_pixel, red_pixel, blue_pixel, green_pixel;
+static gp_pixel white_pixel, black_pixel, red_pixel, blue_pixel, green_pixel;
 
-static void redraw(GP_Backend *backend)
+static void redraw(gp_backend *backend)
 {
-	GP_Pixmap *pixmap = backend->pixmap;
+	gp_pixmap *pixmap = backend->pixmap;
 
 	/* Now draw some testing patters */
-	black_pixel = GP_RGBToPixmapPixel(0x00, 0x00, 0x00, pixmap);
-	white_pixel = GP_RGBToPixmapPixel(0xff, 0xff, 0xff, pixmap);
-	red_pixel   = GP_RGBToPixmapPixel(0xff, 0x00, 0x00, pixmap);
-	blue_pixel  = GP_RGBToPixmapPixel(0x00, 0x00, 0xff, pixmap);
-	green_pixel = GP_RGBToPixmapPixel(0x00, 0xff, 0x00, pixmap);
+	black_pixel = gp_rgb_to_pixmap_pixel(0x00, 0x00, 0x00, pixmap);
+	white_pixel = gp_rgb_to_pixmap_pixel(0xff, 0xff, 0xff, pixmap);
+	red_pixel   = gp_rgb_to_pixmap_pixel(0xff, 0x00, 0x00, pixmap);
+	blue_pixel  = gp_rgb_to_pixmap_pixel(0x00, 0x00, 0xff, pixmap);
+	green_pixel = gp_rgb_to_pixmap_pixel(0x00, 0xff, 0x00, pixmap);
 
-	GP_Fill(pixmap, white_pixel);
+	gp_fill(pixmap, white_pixel);
 
 	unsigned int i, j;
 	for (i = 0; i < 40; i++) {
-		GP_HLineXYW(pixmap, 0, i, i, black_pixel);
-		GP_HLineXYW(pixmap, 1, i + 40, i, black_pixel);
-		GP_HLineXYW(pixmap, 2, i + 80, i, black_pixel);
-		GP_HLineXYW(pixmap, 3, i + 120, i, black_pixel);
-		GP_HLineXYW(pixmap, 4, i + 160, i, black_pixel);
-		GP_HLineXYW(pixmap, 5, i + 200, i, black_pixel);
-		GP_HLineXYW(pixmap, 6, i + 240, i, black_pixel);
-		GP_HLineXYW(pixmap, 7, i + 280, i, black_pixel);
+		gp_hline_xyw(pixmap, 0, i, i, black_pixel);
+		gp_hline_xyw(pixmap, 1, i + 40, i, black_pixel);
+		gp_hline_xyw(pixmap, 2, i + 80, i, black_pixel);
+		gp_hline_xyw(pixmap, 3, i + 120, i, black_pixel);
+		gp_hline_xyw(pixmap, 4, i + 160, i, black_pixel);
+		gp_hline_xyw(pixmap, 5, i + 200, i, black_pixel);
+		gp_hline_xyw(pixmap, 6, i + 240, i, black_pixel);
+		gp_hline_xyw(pixmap, 7, i + 280, i, black_pixel);
 	}
 
 	for (i = 0; i < 256; i++) {
 		for (j = 0; j < 256; j++) {
 			uint8_t val = 1.00 * sqrt(i*i + j*j)/sqrt(2) + 0.5;
 
-			GP_Pixel pix = GP_RGBToPixmapPixel(i, j, val, pixmap);
-			GP_PutPixel(pixmap, i + 60, j + 10, pix);
+			gp_pixel pix = gp_rgb_to_pixmap_pixel(i, j, val, pixmap);
+			gp_putpixel(pixmap, i + 60, j + 10, pix);
 		}
 	}
 
-	GP_Text(pixmap, NULL, 60, 270, GP_VALIGN_BELOW|GP_ALIGN_RIGHT,
+	gp_text(pixmap, NULL, 60, 270, GP_VALIGN_BELOW|GP_ALIGN_RIGHT,
 	        black_pixel, white_pixel, "Lorem Ipsum dolor sit...");
 
-	GP_Text(pixmap, NULL, 60, 290, GP_VALIGN_BELOW|GP_ALIGN_RIGHT,
+	gp_text(pixmap, NULL, 60, 290, GP_VALIGN_BELOW|GP_ALIGN_RIGHT,
 	        red_pixel, white_pixel, "Lorem Ipsum dolor sit...");
 
-	GP_Text(pixmap, NULL, 60, 310, GP_VALIGN_BELOW|GP_ALIGN_RIGHT,
+	gp_text(pixmap, NULL, 60, 310, GP_VALIGN_BELOW|GP_ALIGN_RIGHT,
 	        green_pixel, white_pixel, "Lorem Ipsum dolor sit...");
 
-	GP_Text(pixmap, NULL, 60, 330, GP_VALIGN_BELOW|GP_ALIGN_RIGHT,
+	gp_text(pixmap, NULL, 60, 330, GP_VALIGN_BELOW|GP_ALIGN_RIGHT,
 	        blue_pixel, white_pixel, "Lorem Ipsum dolor sit...");
 
 	/* Update the backend screen */
-	GP_BackendFlip(backend);
+	gp_backend_flip(backend);
 }
 
 int main(int argc, char *argv[])
 {
-	GP_Backend *backend;
+	gp_backend *backend;
 	const char *backend_opts = "X11:350x350";
 	int opt;
-	GP_PixelType emul_type = GP_PIXEL_UNKNOWN;
+	gp_pixel_type emul_type = GP_PIXEL_UNKNOWN;
 
 	while ((opt = getopt(argc, argv, "b:h:p:")) != -1) {
 		switch (opt) {
@@ -96,7 +96,7 @@ int main(int argc, char *argv[])
 			backend_opts = optarg;
 		break;
 		case 'p':
-			emul_type = GP_PixelTypeByName(optarg);
+			emul_type = gp_pixel_type_by_name(optarg);
 
 			if (emul_type == GP_PIXEL_UNKNOWN) {
 				fprintf(stderr, "Invalid pixel type '%s'\n", optarg);
@@ -104,7 +104,7 @@ int main(int argc, char *argv[])
                         }
 		break;
 		case 'h':
-			GP_BackendInit("help", NULL);
+			gp_backend_init("help", NULL);
 			return 0;
 		break;
 		default:
@@ -114,12 +114,12 @@ int main(int argc, char *argv[])
 	}
 
 	/* Turn on debug messages */
-	GP_SetDebugLevel(10);
+	gp_set_debug_level(10);
 
-	backend = GP_BackendInit(backend_opts, "Virtual Backend Example");
+	backend = gp_backend_init(backend_opts, "Virtual Backend Example");
 
 	if (emul_type != GP_PIXEL_UNKNOWN) {
-		GP_Backend *emul;
+		gp_backend *emul;
 
 		/*
 		 * Create an emulated backend on the top of real backend.
@@ -128,11 +128,11 @@ int main(int argc, char *argv[])
 		 * emulated backend, the real backend exit will be called as
 		 * well.
 		 */
-		emul = GP_BackendVirtualInit(backend, emul_type, GP_BACKEND_CALL_EXIT);
+		emul = gp_backend_virt_init(backend, emul_type, GP_BACKEND_CALL_EXIT);
 
 		if (emul == NULL) {
 			fprintf(stderr, "Failed to create Virtual Backend\n");
-			GP_BackendExit(backend);
+			gp_backend_exit(backend);
 			return 1;
 		}
 
@@ -143,24 +143,24 @@ int main(int argc, char *argv[])
 	redraw(backend);
 
 	for (;;) {
-		if (backend->Poll)
-			GP_BackendPoll(backend);
+		if (backend->poll)
+			gp_backend_poll(backend);
 
 		usleep(1000);
 
 		/* Read and parse events */
-		GP_Event ev;
+		gp_event ev;
 
-		while (GP_BackendGetEvent(backend, &ev)) {
+		while (gp_backend_get_event(backend, &ev)) {
 
-			GP_EventDump(&ev);
+			gp_event_dump(&ev);
 
 			switch (ev.type) {
 			case GP_EV_KEY:
 				switch (ev.val.key.key) {
 				case GP_KEY_ESC:
 				case GP_KEY_Q:
-					GP_BackendExit(backend);
+					gp_backend_exit(backend);
 					return 0;
 				break;
 				}
@@ -168,7 +168,7 @@ int main(int argc, char *argv[])
 			case GP_EV_SYS:
 				switch(ev.code) {
 				case GP_EV_SYS_RESIZE:
-					GP_BackendResizeAck(backend);
+					gp_backend_resize_ack(backend);
 					redraw(backend);
 				break;
 				}
@@ -177,7 +177,7 @@ int main(int argc, char *argv[])
 		}
 	}
 
-	GP_BackendExit(backend);
+	gp_backend_exit(backend);
 
 	return 0;
 }

@@ -23,30 +23,30 @@
 #ifndef TESTS_LOADER_H
 #define TESTS_LOADER_H
 
-#include "loaders/GP_IO.h"
+#include <loaders/GP_IO.h>
 
 struct testcase {
-	GP_Size w;
-	GP_Size h;
-	GP_Pixel pix;
+	gp_size w;
+	gp_size h;
+	gp_pixel pix;
 	char *path;
 };
 
-static int test_check(struct testcase *test, GP_Pixmap *img)
+static int test_check(struct testcase *test, gp_pixmap *img)
 {
 	unsigned int x, y, err = 0;
 
 	if (img->w != test->w || img->h != test->h) {
 		tst_msg("Invalid image size have %ux%u expected %ux%u",
 		        img->w, img->h, test->w, test->h);
-		GP_PixmapFree(img);
+		gp_pixmap_free(img);
 		return TST_FAILED;
 	}
 
 	for (x = 0; x < img->w; x++) {
 		for (y = 0; y < img->h; y++) {
 
-			GP_Pixel pix = GP_GetPixel(img, x, y);
+			gp_pixel pix = gp_getpixel(img, x, y);
 
 			if (pix != test->pix) {
 				if (err < 5)
@@ -68,11 +68,11 @@ static int test_check(struct testcase *test, GP_Pixmap *img)
 
 static int test_read(struct testcase *test)
 {
-	GP_Pixmap *img;
-	GP_IO *io;
+	gp_pixmap *img;
+	gp_io *io;
 	int err;
 
-	io = GP_IOMem(test->path, strlen(test->path), NULL);
+	io = gp_io_mem(test->path, strlen(test->path), NULL);
 
 	if (!io) {
 		tst_msg("Failed to initialize memory IO: %s", strerror(errno));
@@ -96,9 +96,9 @@ static int test_read(struct testcase *test)
 
 	err = test_check(test, img);
 
-	GP_PixmapFree(img);
+	gp_pixmap_free(img);
 out:
-	GP_IOClose(io);
+	gp_io_close(io);
 	return err;
 }
 
@@ -106,7 +106,7 @@ out:
 
 static int test_load(struct testcase *test)
 {
-	GP_Pixmap *img;
+	gp_pixmap *img;
 	int err;
 
 	errno = 0;
@@ -126,7 +126,7 @@ static int test_load(struct testcase *test)
 
 	err = test_check(test, img);
 
-	GP_PixmapFree(img);
+	gp_pixmap_free(img);
 
 	return err;
 }
@@ -134,7 +134,7 @@ static int test_load(struct testcase *test)
 
 static int test_load_fail(const char *path)
 {
-	GP_Pixmap *img;
+	gp_pixmap *img;
 
 	errno = 0;
 
@@ -142,7 +142,7 @@ static int test_load_fail(const char *path)
 
 	if (img != NULL) {
 		tst_msg("Succeeded unexpectedly");
-		GP_PixmapFree(img);
+		gp_pixmap_free(img);
 		return TST_FAILED;
 	}
 
@@ -169,26 +169,26 @@ static int test_load_fail(const char *path)
  * and compares the results.
  */
 struct testcase_save_load {
-	GP_PixelType pixel_type;
-	GP_Size w, h;
+	gp_pixel_type pixel_type;
+	gp_size w, h;
 };
 
 static int test_save_load(struct testcase_save_load *test)
 {
-	GP_Pixmap *img, *img2;
+	gp_pixmap *img, *img2;
 	unsigned int x, y;
 
-	img = GP_PixmapAlloc(test->w, test->h, test->pixel_type);
+	img = gp_pixmap_alloc(test->w, test->h, test->pixel_type);
 
 	if (img == NULL) {
 		tst_msg("Failed to allocate pixmap %ux%u %s",
-		        test->w, test->h, GP_PixelTypeName(test->pixel_type));
+		        test->w, test->h, gp_pixel_type_name(test->pixel_type));
 		return TST_FAILED;
 	}
 
 	for (x = 0; x < img->w; x++)
 		for (y = 0; y < img->w; y++)
-			GP_PutPixel(img, x, y, 0);
+			gp_putpixel(img, x, y, 0);
 
 	errno = 0;
 
@@ -199,7 +199,7 @@ static int test_save_load(struct testcase_save_load *test)
 		}
 
 		tst_msg("Failed to save pixmap %ux%u %s: %s",
-		        test->w, test->h, GP_PixelTypeName(test->pixel_type),
+		        test->w, test->h, gp_pixel_type_name(test->pixel_type),
 			strerror(errno));
 		return TST_FAILED;
 	}
@@ -211,11 +211,11 @@ static int test_save_load(struct testcase_save_load *test)
 		switch (errno) {
 		case ENOSYS:
 			tst_msg("Not Implemented");
-			GP_PixmapFree(img);
+			gp_pixmap_free(img);
 			return TST_SKIPPED;
 		default:
 			tst_msg("Got %s", strerror(errno));
-			GP_PixmapFree(img);
+			gp_pixmap_free(img);
 			return TST_FAILED;
 		}
 	}
@@ -223,29 +223,29 @@ static int test_save_load(struct testcase_save_load *test)
 	if (img->w != img2->w || img->h != img2->h) {
 		tst_msg("Source size %ux%u and loaded size %ux%u differs",
 		        img->w, img->h, img2->w, img2->h);
-		GP_PixmapFree(img);
-		GP_PixmapFree(img2);
+		gp_pixmap_free(img);
+		gp_pixmap_free(img2);
 		return TST_FAILED;
 	}
 
 	if (img->pixel_type != img2->pixel_type) {
-		GP_PixmapFree(img);
-		GP_PixmapFree(img2);
+		gp_pixmap_free(img);
+		gp_pixmap_free(img2);
 		tst_msg("Source pixel type %s and loaded type %s differs",
-			GP_PixelTypeName(img->pixel_type),
-			GP_PixelTypeName(img2->pixel_type));
+			gp_pixel_type_name(img->pixel_type),
+			gp_pixel_type_name(img2->pixel_type));
 		return TST_FAILED;
 	}
 
-	if (GP_GetPixel(img2, 0, 0) != 0) {
-		tst_msg("Pixel value is wrong %x", GP_GetPixel(img2, 0, 0));
-		GP_PixmapFree(img);
-		GP_PixmapFree(img2);
+	if (gp_getpixel(img2, 0, 0) != 0) {
+		tst_msg("Pixel value is wrong %x", gp_getpixel(img2, 0, 0));
+		gp_pixmap_free(img);
+		gp_pixmap_free(img2);
 		return TST_FAILED;
 	}
 
-	GP_PixmapFree(img);
-	GP_PixmapFree(img2);
+	gp_pixmap_free(img);
+	gp_pixmap_free(img2);
 
 	return TST_SUCCESS;
 }

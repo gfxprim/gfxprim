@@ -26,7 +26,7 @@
 
  */
 
-#include <GP.h>
+#include <gfxprim.h>
 
 uint32_t callback1()
 {
@@ -45,41 +45,41 @@ int main(void)
 	GP_TIMER_DECLARE(oneshot, 30, 0, "Oneshot", callback1, NULL);
 	GP_TIMER_DECLARE(recurrent, 0, 4, "Recurrent", callback1, NULL);
 	GP_TIMER_DECLARE(random, 10, 0, "Random", callback3, NULL);
-	GP_Timer timers[MAX];
-	GP_Timer *queue = NULL;
+	gp_timer timers[MAX];
+	gp_timer *queue = NULL;
 	uint64_t now;
 	int i, ret;
 	char ids[MAX][8];
 
-	GP_SetDebugLevel(10);
+	gp_set_debug_level(10);
 
-	GP_TimerQueueInsert(&queue, 0, &oneshot);
-	GP_TimerQueueInsert(&queue, 0, &recurrent);
-	GP_TimerQueueInsert(&queue, 0, &random);
+	gp_timer_queue_insert(&queue, 0, &oneshot);
+	gp_timer_queue_insert(&queue, 0, &recurrent);
+	gp_timer_queue_insert(&queue, 0, &random);
 
 	for (i = 0; i < MAX; i++) {
 		timers[i].expires = MAX - i;
 		timers[i].period = 0;
-		timers[i].Callback = callback1;
+		timers[i].callback = callback1;
 		timers[i].priv = NULL;
 		sprintf(ids[i], "Timer%i", MAX - i);
 		timers[i].id = ids[i];
-		GP_TimerQueueInsert(&queue, 0, &timers[i]);
+		gp_timer_queue_insert(&queue, 0, &timers[i]);
 	}
 
-	GP_TimerQueueDump(queue);
+	gp_timer_queue_dump(queue);
 
-	GP_TimerQueueRemove(&queue, &timers[MAX-1]);
+	gp_timer_queue_remove(&queue, &timers[MAX-1]);
 
-	GP_TimerQueueDump(queue);
+	gp_timer_queue_dump(queue);
 
 	for (now = 0; now < 100; now += 3) {
 		printf("NOW %u\n", (unsigned int) now);
 		printf("-------------------------------------\n");
-		ret = GP_TimerQueueProcess(&queue, now);
+		ret = gp_timer_queue_process(&queue, now);
 		printf("Processed %i timer events\n", ret);
 		printf("--------------------------------------\n");
-		GP_TimerQueueDump(queue);
+		gp_timer_queue_dump(queue);
 		printf("--------------------------------------\n\n");
 	}
 

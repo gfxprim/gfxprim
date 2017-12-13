@@ -66,7 +66,7 @@
  * -3   BUG      - library gets into unconsistent state
  * -4   FATAL    - fatal condition, not compiled with XYZ support etc.
  */
-enum GP_DebugType {
+enum gp_debug_type {
 	GP_DEBUG_TODO  = -1,
 	GP_DEBUG_WARN  = -2,
 	GP_DEBUG_BUG   = -3,
@@ -76,38 +76,38 @@ enum GP_DebugType {
 #define GP_DEFAULT_DEBUG_LEVEL 0
 
 #define GP_DEBUG(level, ...) \
-	GP_DebugPrint(level, __FILE__, __FUNCTION__, __LINE__, __VA_ARGS__)
+	gp_debug_print(level, __FILE__, __FUNCTION__, __LINE__, __VA_ARGS__)
 
 #define GP_TODO(...) \
-	GP_DebugPrint(-1, __FILE__, __FUNCTION__, __LINE__, __VA_ARGS__)
+	gp_debug_print(-1, __FILE__, __FUNCTION__, __LINE__, __VA_ARGS__)
 
 #define GP_WARN(...) \
-	GP_DebugPrint(-2, __FILE__, __FUNCTION__, __LINE__, __VA_ARGS__)
+	gp_debug_print(-2, __FILE__, __FUNCTION__, __LINE__, __VA_ARGS__)
 
 #define GP_BUG(...) \
-	GP_DebugPrint(-3, __FILE__, __FUNCTION__, __LINE__, __VA_ARGS__)
+	gp_debug_print(-3, __FILE__, __FUNCTION__, __LINE__, __VA_ARGS__)
 
 #define GP_FATAL(...) \
-	GP_DebugPrint(-4, __FILE__, __FUNCTION__, __LINE__, __VA_ARGS__)
+	gp_debug_print(-4, __FILE__, __FUNCTION__, __LINE__, __VA_ARGS__)
 
-void GP_DebugPrint(int level, const char *file, const char *function, int line,
+void gp_debug_print(int level, const char *file, const char *function, int line,
                    const char *fmt, ...) __attribute__ ((format (printf, 5, 6)));
 
 /*
  * Sets debug level.
  */
-void GP_SetDebugLevel(unsigned int level);
+void gp_set_debug_level(unsigned int level);
 
 /*
  * Returns current debug level.
  */
-unsigned int GP_GetDebugLevel(void);
+unsigned int gp_get_debug_level(void);
 
 
 /*
  * Custom debug message handler structure.
  */
-struct GP_DebugMsg {
+struct gp_debug_msg {
 	int level;
 	const char *file;
 	const char *fn;
@@ -121,6 +121,6 @@ struct GP_DebugMsg {
  * If NULL is passed, custom handler is disabled and debug messages are printed
  * into the stderr.
  */
-void GP_SetDebugHandler(void (*handler)(const struct GP_DebugMsg *msg));
+void gp_set_debug_handler(void (*handler)(const struct gp_debug_msg *msg));
 
 #endif /* CORE_GP_DEBUG_H */

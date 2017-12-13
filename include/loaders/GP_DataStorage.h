@@ -31,7 +31,7 @@
 #ifndef LOADERS_DATA_STORAGE_H
 #define LOADERS_DATA_STORAGE_H
 
-enum GP_DataType {
+enum gp_data_type {
 	GP_DATA_INT,
 	GP_DATA_STRING,
 	GP_DATA_DOUBLE,
@@ -39,73 +39,73 @@ enum GP_DataType {
 	GP_DATA_DICT,
 };
 
-struct GP_DataRational {
+struct gp_data_rational {
 	long num;
 	long den;
 };
 
-typedef struct GP_DataStorage GP_DataStorage;
-typedef struct GP_DataDict GP_DataDict;
+typedef struct gp_storage gp_storage;
+typedef struct gp_data_dict gp_data_dict;
 
-union GP_DataValue {
+union gp_data_value {
 	long i;
 	double d;
 	const char *str;
-	struct GP_DataRational rat;
-	GP_DataDict *dict;
+	struct gp_data_rational rat;
+	gp_data_dict *dict;
 };
 
-typedef struct GP_DataNode {
-	enum GP_DataType type;
-	union GP_DataValue value;
+typedef struct gp_data_node {
+	enum gp_data_type type;
+	union gp_data_value value;
 	const char *id;
-	struct GP_DataNode *next;
-} GP_DataNode;
+	struct gp_data_node *next;
+} gp_data_node;
 
 /*
  * Creates a data storage
  */
-GP_DataStorage *GP_DataStorageCreate(void);
+gp_storage *gp_storage_create(void);
 
 /*
  * Destroys a data storage and all its data
  */
-void GP_DataStorageDestroy(GP_DataStorage *self);
+void gp_storage_destroy(gp_storage *self);
 
 /*
  * Returns storage root node.
  */
-GP_DataNode *GP_DataStorageRoot(GP_DataStorage *self);
+gp_data_node *gp_storage_root(gp_storage *self);
 
 /*
  * Returns first node in a dict node list.
  */
-GP_DataNode *GP_DataDictFirst(GP_DataNode *node);
+gp_data_node *gp_data_dict_first(gp_data_node *node);
 
 /*
  * Clears all data in storage.
  */
-void GP_DataStorageClear(GP_DataStorage *self);
+void gp_storage_clear(gp_storage *self);
 
 /*
  * Prints a data
  */
-void GP_DataPrint(const GP_DataNode *node);
+void gp_data_print(const gp_data_node *node);
 
-static inline void GP_DataStoragePrint(GP_DataStorage *self)
+static inline void gp_storage_print(gp_storage *self)
 {
-	GP_DataPrint(GP_DataStorageRoot(self));
+	gp_data_print(gp_storage_root(self));
 }
 
-const char *GP_DataTypeName(enum GP_DataType type);
+const char *gp_data_type_name(enum gp_data_type type);
 
 /*
  * Returns subnode of a given id (or NULL) starting at node.
  *
  * If node is NULL storage root is used.
  */
-GP_DataNode *GP_DataStorageGet(GP_DataStorage *self,
-		               GP_DataNode *node, const char *id);
+gp_data_node *gp_storage_get(gp_storage *self,
+		             gp_data_node *node, const char *id);
 
 /*
  * Returns data node by a path in the data storage.
@@ -115,7 +115,7 @@ GP_DataNode *GP_DataStorageGet(GP_DataStorage *self,
  * The path works like filesystem path. The equivalent to working
  * directory is the node pointer.
  */
-GP_DataNode *GP_DataStorageGetByPath(GP_DataStorage *self, GP_DataNode *node,
+gp_data_node *gp_storage_get_by_path(gp_storage *self, gp_data_node *node,
                                      const char *path);
 
 /*
@@ -127,27 +127,27 @@ GP_DataNode *GP_DataStorageGetByPath(GP_DataStorage *self, GP_DataNode *node,
  *
  * Returns newly created node or NULL in case of failure.
  */
-GP_DataNode *GP_DataStorageAdd(GP_DataStorage *self,
-		               GP_DataNode *node, GP_DataNode *data);
+gp_data_node *gp_storage_add(gp_storage *self,
+		             gp_data_node *node, gp_data_node *data);
 
 /*
  * Shortcuts for adding a int/string/double/rational
  *
  * If dict is NULL data is added to the root.
  */
-GP_DataNode *GP_DataStorageAddInt(GP_DataStorage *self, GP_DataNode *node,
-                                  const char *id, long i);
+gp_data_node *gp_storage_add_int(gp_storage *self, gp_data_node *node,
+                                 const char *id, long i);
 
-GP_DataNode *GP_DataStorageAddString(GP_DataStorage *self, GP_DataNode *node,
-                                     const char *id, const char *str);
+gp_data_node *gp_storage_add_string(gp_storage *self, gp_data_node *node,
+                                    const char *id, const char *str);
 
-GP_DataNode *GP_DataStorageAddDouble(GP_DataStorage *self, GP_DataNode *node,
-                                     const char *id, double d);
+gp_data_node *gp_storage_add_double(gp_storage *self, gp_data_node *node,
+                                    const char *id, double d);
 
-GP_DataNode *GP_DataStorageAddRational(GP_DataStorage *self, GP_DataNode *node,
-                                       const char *id, long num, long den);
+gp_data_node *gp_storage_add_rational(gp_storage *self, gp_data_node *node,
+                                      const char *id, long num, long den);
 
-GP_DataNode *GP_DataStorageAddDict(GP_DataStorage *self, GP_DataNode *node,
-                                   const char *id);
+gp_data_node *gp_storage_add_dict(gp_storage *self, gp_data_node *node,
+                                  const char *id);
 
 #endif /* LOADERS_GP_DATA_STORAGE_H */

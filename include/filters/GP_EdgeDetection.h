@@ -23,15 +23,15 @@
 #ifndef FILTERS_GP_EDGE_DETECTION_H
 #define FILTERS_GP_EDGE_DETECTION_H
 
-#include "GP_Filter.h"
+#include <filters/GP_Filter.h>
 
-int GP_FilterEdgeSobel(const GP_Pixmap *src,
-                       GP_Pixmap **E, GP_Pixmap **Phi,
-                       GP_ProgressCallback *callback);
+int gp_filter_edge_sobel(const gp_pixmap *src,
+                         gp_pixmap **E, gp_pixmap **Phi,
+                         gp_progress_cb *callback);
 
-int GP_FilterEdgePrewitt(const GP_Pixmap *src,
-                         GP_Pixmap **E, GP_Pixmap **Phi,
-                         GP_ProgressCallback *callback);
+int gp_filter_edge_prewitt(const gp_pixmap *src,
+                           gp_pixmap **E, gp_pixmap **Phi,
+                           gp_progress_cb *callback);
 
 
 #endif /* FILTERS_GP_EDGE_DETECTION_H */

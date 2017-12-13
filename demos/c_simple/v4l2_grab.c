@@ -30,32 +30,32 @@
 #include <errno.h>
 #include <stdio.h>
 
-#include <GP.h>
+#include <gfxprim.h>
 
-static int get_image(const char *filename, GP_Grabber *grabber)
+static int get_image(const char *filename, gp_grabber *grabber)
 {
 	/* turn on grabber */
-	if (GP_GrabberStart(grabber)) {
+	if (gp_grabber_start(grabber)) {
 		fprintf(stderr, "Failed to start grabber\n");
 		return 1;
 	}
 
 	/* throw away first frame, it's usually wrong */
-	while (!GP_GrabberPoll(grabber))
+	while (!gp_grabber_poll(grabber))
 		usleep(100000);
 
-	while (!GP_GrabberPoll(grabber))
+	while (!gp_grabber_poll(grabber))
 		usleep(100000);
 
 	/* save image */
-	if (GP_SaveJPG(grabber->frame, filename, NULL)) {
+	if (gp_save_jpg(grabber->frame, filename, NULL)) {
 		fprintf(stderr, "Failed to save image '%s': %s",
 		        filename, strerror(errno));
 		return 1;
 	}
 
 	/* turn off grabber */
-	if (GP_GrabberStop(grabber)) {
+	if (gp_grabber_stop(grabber)) {
 		fprintf(stderr, "Failed to start grabber\n");
 		return 1;
 	}
@@ -89,7 +89,7 @@ int main(int argc, char *argv[])
 			secs = atoi(optarg);
 		break;
 		case 'l':
-			GP_SetDebugLevel(atoi(optarg));
+			gp_set_debug_level(atoi(optarg));
 		break;
 		case 'h':
 			printf("Usage; %s opts\n", argv[0]);
@@ -108,7 +108,7 @@ int main(int argc, char *argv[])
 		}
 	}
 
-	GP_Grabber *grabber = GP_GrabberV4L2Init(v4l2_device, w, h);
+	gp_grabber *grabber = gp_grabber_v4l2_init(v4l2_device, w, h);
 
 	if (grabber == NULL) {
 		fprintf(stderr, "Failed to initalize grabber '%s': %s\n",
@@ -118,7 +118,7 @@ int main(int argc, char *argv[])
 
 	if (secs == 0) {
 		get_image(image_filename, grabber);
-		GP_GrabberExit(grabber);
+		gp_grabber_exit(grabber);
 		return 0;
 	}
 
@@ -136,7 +136,6 @@ int main(int argc, char *argv[])
 
 		sleep(secs);
 	}
-
 
 	return 0;
 }

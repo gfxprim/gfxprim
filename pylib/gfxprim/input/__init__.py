@@ -9,7 +9,7 @@ def _init(module):
   from ..utils import import_members
   import re
   def strip_GP(s):
-    return re.sub('^GP_', '', s)
+    return re.sub('^gp_|^GP_', '', s)
 
   # Functions
   import_members(c_input, module, sub=strip_GP,

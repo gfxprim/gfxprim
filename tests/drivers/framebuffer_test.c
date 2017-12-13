@@ -32,73 +32,67 @@
 
 #include <math.h>
 
-#include <GP.h>
+#include <gfxprim.h>
 #include <backends/GP_Backends.h>
 
-static void draw(GP_Pixmap *pixmap, int x, int y, int l)
+static void draw(gp_pixmap *pixmap, int x, int y, int l)
 {
 	int x2, y2, x3, y3;
 
-	GP_Pixel red, blue, green;
-	
-	red = GP_RGBToPixmapPixel(255,   0,   0, pixmap);
-	blue = GP_RGBToPixmapPixel(0,   0, 255, pixmap);
-	green = GP_RGBToPixmapPixel(0, 255,   0, pixmap);
+	gp_pixel red, blue, green;
+
+	red = gp_rgb_to_pixmap_pixel(255,   0,   0, pixmap);
+	blue = gp_rgb_to_pixmap_pixel(0,   0, 255, pixmap);
+	green = gp_rgb_to_pixmap_pixel(0, 255,   0, pixmap);
 
 	x2 = x + l/2;
 	y2 = y + sqrt(2)/2 * l;
 	x3 = x - l/2;
 	y3 = y2;
 
-	GP_FillTriangle(pixmap,  x,  y, x2, y2, x + l, y, red);
-	GP_FillTriangle(pixmap,  x,  y, x3, y3, x - l, y, green);
-	GP_FillTriangle(pixmap, x2, y2, x3, y3, x, y + sqrt(2) * l, blue);
+	gp_fill_triangle(pixmap,  x,  y, x2, y2, x + l, y, red);
+	gp_fill_triangle(pixmap,  x,  y, x3, y3, x - l, y, green);
+	gp_fill_triangle(pixmap, x2, y2, x3, y3, x, y + sqrt(2) * l, blue);
 }
 
 int main(void)
 {
-	GP_Backend *backend;
-	GP_Pixmap *pixmap;
-	GP_TextStyle style;
+	gp_backend *backend;
+	gp_pixmap *pixmap;
 
-	GP_SetDebugLevel(10);
+	gp_set_debug_level(10);
 
-	backend = GP_BackendLinuxFBInit("/dev/fb0", 0);
-	
+	backend = gp_linux_fb_init("/dev/fb0", 0);
+
 	if (backend == NULL) {
 		fprintf(stderr, "Failed to initalize framebuffer\n");
 		return 1;
 	}
-	
+
 	pixmap = backend->pixmap;
-	
-	GP_DefaultTextStyle(&style);
 
-	style.pixel_xspace = 2;
-	style.pixel_ymul   = 2;
+	gp_pixel gray, black;
 
-	GP_Pixel gray, black;
+	gray = gp_rgb_to_pixmap_pixel(200, 200, 200, pixmap);
+	black = gp_rgb_to_pixmap_pixel(0, 0, 0, pixmap);
 
-	gray = GP_RGBToPixmapPixel(200, 200, 200, pixmap);
-	black = GP_RGBToPixmapPixel(0, 0, 0, pixmap);
-	
 	const char *text = "Framebuffer test";
 
-	GP_Fill(pixmap, gray);
-	GP_Line(pixmap, 0, 0, pixmap->w, pixmap->h, black);
-	GP_Line(pixmap, 0, pixmap->h, pixmap->w, 0, black);
-	GP_Text(pixmap, &style,
-	        (pixmap->w - GP_TextWidth(&style, text))/2,
+	gp_fill(pixmap, gray);
+	gp_line(pixmap, 0, 0, pixmap->w, pixmap->h, black);
+	gp_line(pixmap, 0, pixmap->h, pixmap->w, 0, black);
+	gp_text(pixmap, NULL,
+	        (pixmap->w - gp_text_width(NULL, text))/2,
 		16, GP_ALIGN_RIGHT|GP_VALIGN_BELOW, black, gray, text);
 
 
 	draw(pixmap, pixmap->w / 2, 2.00 * pixmap->h / 3, 60);
 
-	GP_BackendFlip(backend);
+	gp_backend_flip(backend);
 
 	sleep(10);
 
-	GP_BackendExit(backend);
+	gp_backend_exit(backend);
 
 	return 0;
 }

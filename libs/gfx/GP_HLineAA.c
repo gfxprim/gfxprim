@@ -26,19 +26,8 @@
 #include "gfx/GP_HLineAA.h"
 #include "gfx/GP_VLineAA.h"
 
-/*
-void GP_HLineXXYAA_Raw(GP_Pixmap *pixmap, GP_Coord x0, GP_Coord x1,
-                       GP_Coord y, GP_Pixel pixel)
-{
-	GP_CHECK_PIXMAP(pixmap);
-
-	GP_FN_PER_BPP_PIXMAP(GP_HLine_Raw, pixmap, pixmap, x0, x1, y,
-	                      pixel);
-}
-*/
-
-void GP_HLineAA(GP_Pixmap *pixmap, GP_Coord x0, GP_Coord x1,
-                GP_Coord y, GP_Pixel pixel)
+void gp_hline_aa(gp_pixmap *pixmap, gp_coord x0, gp_coord x1,
+                 gp_coord y, gp_pixel pixel)
 {
 	GP_CHECK_PIXMAP(pixmap);
 
@@ -46,11 +35,11 @@ void GP_HLineAA(GP_Pixmap *pixmap, GP_Coord x0, GP_Coord x1,
 		GP_TRANSFORM_Y_FP(pixmap, x0);
 		GP_TRANSFORM_Y_FP(pixmap, x1);
 		GP_TRANSFORM_X_FP(pixmap, y);
-		GP_VLineAA_Raw(pixmap, y, x0, x1, pixel);
+		gp_vline_aa_raw(pixmap, y, x0, x1, pixel);
 	} else {
 		GP_TRANSFORM_X_FP(pixmap, x0);
 		GP_TRANSFORM_X_FP(pixmap, x1);
 		GP_TRANSFORM_Y_FP(pixmap, y);
-		GP_HLineAA_Raw(pixmap, x0, x1, y, pixel);
+		gp_hline_aa_raw(pixmap, x0, x1, y, pixel);
 	}
 }

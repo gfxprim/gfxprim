@@ -17,23 +17,23 @@ the flags before the drawing, which allows for fast and transparent rotated or
 mirrored rendering.
 
 
-GetPixel and PutPixel
-~~~~~~~~~~~~~~~~~~~~~
+Getting and Putting Pixels
+~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-link:get_put_pixel.html[GetPixel and PutPixel] are implemented in the library
-Core.
+link:get_put_pixel.html[getpixel() and putpixel()] are implemented in the
+library core.
 
 Fill
 ~~~~
 
 [source,c]
 --------------------------------------------------------------------------------
-void GP_Fill(GP_Pixmap *pixmap, GP_Pixel pixel);
+void gp_fill(gp_pixmap *pixmap, gp_pixel pixel);
 --------------------------------------------------------------------------------
 
 Fills the whole pixmap bitmap with the specified pixel value.
 
-NOTE: GP_Fill is implemented in the library Core rather than in GFX so that
+NOTE: gp_fill() is implemented in the library Core rather than in GFX so that
       it's available to all library parts.
 
 Lines
@@ -41,22 +41,19 @@ Lines
 
 [source,c]
 --------------------------------------------------------------------------------
-void GP_HLineXXY(GP_Pixmap *pixmap, GP_Coord x0, GP_Coord x1, GP_Coord y,
-                 GP_Pixel pixel);
+void gp_hline_xxy(gp_pixmap *pixmap, gp_coord x0, gp_coord x1, gp_coord y, gp_pixel pixel);
 
-void GP_HLine(GP_Pixmap *pixmap, GP_Coord x0, GP_Coord x1, GP_Coord y,
-              GP_Pixel pixel);
+void gp_hline(gp_pixmap *pixmap, gp_coord x0, gp_coord x1, gp_coord y, gp_pixel pixel);
 --------------------------------------------------------------------------------
 
 Draws a horizontal line from (x0, y) to (x1, y), inclusive. The coordinates
 x0, x1 can be specified in any order.
 
-'GP_HLine()' is an alias for 'GP_HLineXXY()'.
+'gp_hline()' is an alias for 'gp_hline_xxy()'.
 
 [source,c]
 --------------------------------------------------------------------------------
-void GP_HLineXYW(GP_Pixmap *pixmap, GP_Coord x, GP_Coord y, GP_Size w,
-                 GP_Pixel pixel);
+void gp_hline_xyw(gp_pixmap *pixmap, gp_coord x, gp_coord y, gp_size w, gp_pixel pixel);
 --------------------------------------------------------------------------------
 
 Draws a horizontal line from (x, y) to (x+w-1, y), inclusive.
@@ -64,22 +61,22 @@ Draws a horizontal line from (x, y) to (x+w-1, y), inclusive.
 
 [source,c]
 --------------------------------------------------------------------------------
-void GP_VLineXYY(GP_Pixmap *pixmap, GP_Coord x, GP_Coord y0, GP_Coord y1,
-                 GP_Pixel pixel);
+void gp_vline_xyy(gp_pixmap *pixmap, gp_coord x, gp_coord y0, gp_coord y1,
+                  gp_pixel pixel);
 
-void GP_VLine(GP_Pixmap *pixmap, GP_Coord x, GP_Coord y0, GP_Coord y1,
-              GP_Pixel pixel);
+void gp_vline(gp_pixmap *pixmap, gp_coord x, gp_coord y0, gp_coord y1,
+              gp_pixel pixel);
 --------------------------------------------------------------------------------
 
 Draws a vertical line from (x, y0) to (x, y1), inclusive. The coordinates
 y0, y1 can be specified in any order.
 
-'GP_VLine()' is an alias for 'GP_VLineXYY()'.
+'gp_vline()' is an alias for 'gp_vline_xyy()'.
 
 [source,c]
 --------------------------------------------------------------------------------
-void GP_VLineXYH(GP_Pixmap *pixmap, GP_Coord x, GP_Coord y, GP_Size h,
-                 GP_Pixel pixel);
+void gp_vline_xyh(gp_pixmap *pixmap, gp_coord x, gp_coord y, gp_size h,
+                  gp_pixel pixel);
 
 --------------------------------------------------------------------------------
 
@@ -87,8 +84,8 @@ Draws a vertical line from (x, y) to (x, y+h-1), inclusive.
 
 [source,c]
 --------------------------------------------------------------------------------
-void GP_Line(GP_Pixmap *pixmap, GP_Coord x0, GP_Coord y0,
-             GP_Coord x1, GP_Coord y1, GP_Pixel pixel);
+void gp_line(gp_pixmap *pixmap, gp_coord x0, gp_coord y0,
+             gp_coord x1, gp_coord y1, gp_pixel pixel);
 --------------------------------------------------------------------------------
 
 Draws a line from (x0, y0) to (x1, y1), inclusive. The starting and ending
@@ -100,8 +97,8 @@ Circles
 
 [source,c]
 --------------------------------------------------------------------------------
-void GP_Circle(GP_Pixmap *pixmap, GP_Coord xcenter, GP_Coord ycenter,
-               GP_Size r, GP_Pixel pixel);
+void gp_circle(gp_pixmap *pixmap, gp_coord xcenter, gp_coord ycenter,
+               gp_size r, gp_pixel pixel);
 --------------------------------------------------------------------------------
 
 Draws a circle centered at (xcenter, ycenter) with radius 'r' (in pixels).
@@ -111,33 +108,33 @@ specified by points (xcenter-r, ycenter-r, xcenter+r, ycenter+r), inclusive.
 
 [source,c]
 --------------------------------------------------------------------------------
-void GP_FillCircle(GP_Pixmap *pixmap, GP_Coord xcenter, GP_Coord ycenter,
-                   GP_Size r, GP_Pixel pixel);
+void gp_fill_circle(gp_pixmap *pixmap, gp_coord xcenter, gp_coord ycenter,
+                    gp_size r, gp_pixel pixel);
 --------------------------------------------------------------------------------
 
 Draws a filled circle.
 
-The set of pixels affected by 'GP_FillCircle()' is exactly the same as if
-drawing the circle boundary using 'GP_Circle()' and then filling all pixels
+The set of pixels affected by 'gp_fill_circle()' is exactly the same as if
+drawing the circle boundary using 'gp_circle()' and then filling all pixels
 within the boundary with the same color.
 
 Rings
 ~~~~~
 [source,c]
 --------------------------------------------------------------------------------
-void GP_Ring(GP_Pixmap *pixmap, GP_Coord xcenter, GP_Coord ycenter,
-             GP_Size r1, GP_Size r2, GP_Pixel pixel);
+void gp_ring(gp_pixmap *pixmap, gp_coord xcenter, gp_coord ycenter,
+             gp_size r1, gp_size r2, gp_pixel pixel);
 --------------------------------------------------------------------------------
 
 Draws a ring (two circles centered at (xcenter, ycenter) with radii 'r1' and 'r2').
 
-The result is exactly the same as calling 'GP_Circle()' with the same center
+The result is exactly the same as calling 'gp_circle()' with the same center
 and appropriate radii.
 
 [source,c]
 --------------------------------------------------------------------------------
-void GP_FillRing(GP_Pixmap *pixmap, GP_Coord xcenter, GP_Coord ycenter,
-                 GP_Size r1, GP_Size r2, GP_Pixel pixel);
+void gp_fill_ring(gp_pixmap *pixmap, gp_coord xcenter, gp_coord ycenter,
+                  gp_size r1, gp_size r2, gp_pixel pixel);
 --------------------------------------------------------------------------------
 
 Draws a filled ring.
@@ -150,8 +147,8 @@ Ellipses
 
 [source,c]
 --------------------------------------------------------------------------------
-void GP_Ellipse(GP_Pixmap *pixmap, GP_Coord xcenter, GP_Coord ycenter,
-                GP_Size a, GP_Size b, GP_Pixel pixel);
+void gp_ellipse(gp_pixmap *pixmap, gp_coord xcenter, gp_coord ycenter,
+                gp_size a, gp_size b, gp_pixel pixel);
 --------------------------------------------------------------------------------
 
 Draws an axis-aligned ellipse.
@@ -161,8 +158,8 @@ specified by points (xcenter-a, ycenter-b, xcenter+a, ycenter+b), inclusive.
 
 [source,c]
 --------------------------------------------------------------------------------
-void GP_FillEllipse(GP_Pixmap *pixmap, GP_Coord xcenter, GP_Coord ycenter,
-                    GP_Size a, GP_Size b, GP_Pixel pixel);
+void gp_fill_ellipse(gp_pixmap *pixmap, gp_coord xcenter, gp_coord ycenter,
+                     gp_size a, gp_size b, gp_pixel pixel);
 --------------------------------------------------------------------------------
 
 Draws a filled axis-aligned ellipse.
@@ -172,18 +169,18 @@ Triangles
 
 [source,c]
 --------------------------------------------------------------------------------
-void GP_Triangle(GP_Pixmap *pixmap, GP_Coord x0, GP_Coord y0,
-                 GP_Coord x1, GP_Coord y1, GP_Coord x2, GP_Coord y2,
-                 GP_Pixel pixel);
+void gp_triangle(gp_pixmap *pixmap, gp_coord x0, gp_coord y0,
+                 gp_coord x1, gp_coord y1, gp_coord x2, gp_coord y2,
+                 gp_pixel pixel);
 --------------------------------------------------------------------------------
 
 Draws a triangle.
 
 [source,c]
 --------------------------------------------------------------------------------
-void GP_FillTriangle(GP_Pixmap *pixmap, GP_Coord x0, GP_Coord y0,
-                     GP_Coord x1, GP_Coord y1, GP_Coord x2, GP_Coord y2,
-                     GP_Pixel pixel);
+void gp_fill_triangle(gp_pixmap *pixmap, gp_coord x0, gp_coord y0,
+                      gp_coord x1, gp_coord y1, gp_coord x2, gp_coord y2,
+                      gp_pixel pixel);
 --------------------------------------------------------------------------------
 
 Draws a filled triangle.
@@ -193,59 +190,59 @@ Rects
 
 [source,c]
 --------------------------------------------------------------------------------
-void GP_RectXYXY(GP_Pixmap *pixmap, GP_Coord x0, GP_Coord y0,
-                 GP_Coord x1, GP_Coord y1, GP_Pixel pixel);
+void gp_rect_xyxy(gp_pixmap *pixmap, gp_coord x0, gp_coord y0,
+                  gp_coord x1, gp_coord y1, gp_pixel pixel);
 
-void GP_RectXYWH(GP_Pixmap *pixmap, GP_Coord x, GP_Coord y,
-                 GP_Size w, GP_Size h, GP_Pixel pixel);
+void gp_rect_xywh(gp_pixmap *pixmap, gp_coord x, gp_coord y,
+                  gp_size w, gp_size h, gp_pixel pixel);
 
-void GP_Rect(GP_Pixmap *pixmap, GP_Coord x0, GP_Coord y0,
-             GP_Coord x1, GP_Coord y1, GP_Pixel pixel);
+void gp_rect(gp_pixmap *pixmap, gp_coord x0, gp_coord y0,
+             gp_coord x1, gp_coord y1, gp_pixel pixel);
 --------------------------------------------------------------------------------
 
 Draws a rectangle.
 
-The 'GP_RectXYXY()' expects two corner points (x0, y0), and (x1, y1).
-The 'GP_RectXYWH()' expects a corner point (x0, y0), width and height.
-The 'GP_Rect()' function is an alias for 'GP_RectXYXY()'.
+The 'gp_rect_xyxy()' expects two corner points (x0, y0), and (x1, y1).
+The 'gp_rect_xywh()' expects a corner point (x0, y0), width and height.
+The 'gp_rect()' function is an alias for 'gp_rect_xyxy()'.
 
 [source,c]
 --------------------------------------------------------------------------------
-void GP_FillRectXYXY(GP_Pixmap *pixmap, GP_Coord x0, GP_Coord y0,
-                     GP_Coord x1, GP_Coord y1, GP_Pixel pixel);
+void gp_fill_rect_xyxy(gp_pixmap *pixmap, gp_coord x0, gp_coord y0,
+                       gp_coord x1, gp_coord y1, gp_pixel pixel);
 
-void GP_FillRectXYWH(GP_Pixmap *pixmap, GP_Coord x, GP_Coord y,
-                     GP_Size w, GP_Size h, GP_Pixel pixel);
+void gp_fill_rect_xywh(gp_pixmap *pixmap, gp_coord x, gp_coord y,
+                       gp_size w, gp_size h, gp_pixel pixel);
 
-void GP_FillRect(GP_Pixmap *pixmap, GP_Coord x0, GP_Coord y0,
-                 GP_Coord x1, GP_Coord y1, GP_Pixel pixel);
+void gp_fill_rect(gp_pixmap *pixmap, gp_coord x0, gp_coord y0,
+                  gp_coord x1, gp_coord y1, gp_pixel pixel);
 --------------------------------------------------------------------------------
 
 Draws a filled rectangle.
 
-The 'GP_RectXYXY' fills an area between corner points (x0, y0) and (x1, y1),
+The 'gp_rect_xyxy' fills an area between corner points (x0, y0) and (x1, y1),
 inclusive.
-The 'GP_RectXYWH' fills an area starting from (x0, y0) with specified width
+The 'gp_rect_xywh' fills an area starting from (x0, y0) with specified width
 and height, i.e. from (x0, y0) to (x0 + w, x1 + y), NOT inclusive.
-The 'GP_FillRect()' functions is an alias for 'GP_FillRectXYXY()'.
+The 'gp_fill_rect()' functions is an alias for 'gp_fill_rect_xyxy()'.
 
 Tetragons
 ~~~~~~~~~
 
 [source,c]
 --------------------------------------------------------------------------------
-void GP_Tetragon(GP_Pixmap *pixmap, GP_Coord x0, GP_Coord y0,
-                 GP_Coord x1, GP_Coord y1, GP_Coord x2, GP_Coord y2,
-                 GP_Coord x3, GP_Coord y3, GP_Pixel pixel);
+void gp_tetragon(gp_pixmap *pixmap, gp_coord x0, gp_coord y0,
+                 gp_coord x1, gp_coord y1, gp_coord x2, gp_coord y2,
+                 gp_coord x3, gp_coord y3, gp_pixel pixel);
 --------------------------------------------------------------------------------
 
 Draws a tetragon.
 
 [source,c]
 --------------------------------------------------------------------------------
-void GP_FillTetragon(GP_Pixmap *pixmap, GP_Coord x0, GP_Coord y0,
-                     GP_Coord x1, GP_Coord y1, GP_Coord x2, GP_Coord y2,
-                     GP_Coord x3, GP_Coord y3, GP_Pixel pixel);
+void gp_fill_tetragon(gp_pixmap *pixmap, gp_coord x0, gp_coord y0,
+                     gp_coord x1, gp_coord y1, gp_coord x2, gp_coord y2,
+                     gp_coord x3, gp_coord y3, gp_pixel pixel);
 --------------------------------------------------------------------------------
 
 Draws a filled tetragon.
@@ -255,16 +252,16 @@ Polygons
 
 [source,c]
 --------------------------------------------------------------------------------
-void GP_Polygon(GP_Pixmap *pixmap, unsigned int vertex_count,
-                const GP_Coord *xy, GP_Pixel pixel);
+void gp_polygon(gp_pixmap *pixmap, unsigned int vertex_count,
+                const gp_coord *xy, gp_pixel pixel);
 --------------------------------------------------------------------------------
 
 Draws a polygon.
 
 [source,c]
 --------------------------------------------------------------------------------
-void GP_FillPolygon(GP_Pixmap *pixmap, unsigned int vertex_count,
-                    const GP_Coord *xy, GP_Pixel pixel);
+void gp_fill_polygon(gp_pixmap *pixmap, unsigned int vertex_count,
+                     const gp_coord *xy, gp_pixel pixel);
 --------------------------------------------------------------------------------
 
 Draws a filled polygon.

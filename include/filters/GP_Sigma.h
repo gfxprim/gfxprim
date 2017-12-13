@@ -40,41 +40,41 @@
 #ifndef FILTERS_GP_SIGMA_H
 #define FILTERS_GP_SIGMA_H
 
-#include "GP_Filter.h"
+#include <filters/GP_Filter.h>
 
-int GP_FilterSigmaEx(const GP_Pixmap *src,
-                     GP_Coord x_src, GP_Coord y_src,
-                     GP_Size w_src, GP_Size h_src,
-                     GP_Pixmap *dst,
-                     GP_Coord x_dst, GP_Coord y_dst,
-                     int xrad, int yrad,
-                     unsigned int min, float sigma,
-                     GP_ProgressCallback *callback);
+int gp_filter_sigma_ex(const gp_pixmap *src,
+                       gp_coord x_src, gp_coord y_src,
+                       gp_size w_src, gp_size h_src,
+                       gp_pixmap *dst,
+                       gp_coord x_dst, gp_coord y_dst,
+                       int xrad, int yrad,
+                       unsigned int min, float sigma,
+                       gp_progress_cb *callback);
 
-GP_Pixmap *GP_FilterSigmaExAlloc(const GP_Pixmap *src,
-                                  GP_Coord x_src, GP_Coord y_src,
-                                  GP_Size w_src, GP_Size h_src,
+gp_pixmap *gp_filter_sigma_ex_alloc(const gp_pixmap *src,
+                                    gp_coord x_src, gp_coord y_src,
+                                    gp_size w_src, gp_size h_src,
+                                    int xrad, int yrad,
+                                    unsigned int min, float sigma,
+                                    gp_progress_cb *callback);
+
+static inline int gp_filter_sigma(const gp_pixmap *src,
+                                  gp_pixmap *dst,
                                   int xrad, int yrad,
                                   unsigned int min, float sigma,
-                                  GP_ProgressCallback *callback);
-
-static inline int GP_FilterSigma(const GP_Pixmap *src,
-                                 GP_Pixmap *dst,
-                                 int xrad, int yrad,
-                                 unsigned int min, float sigma,
-                                 GP_ProgressCallback *callback)
+                                  gp_progress_cb *callback)
 {
-	return GP_FilterSigmaEx(src, 0, 0, src->w, src->h,
-	                        dst, 0, 0, xrad, yrad, min, sigma, callback);
+	return gp_filter_sigma_ex(src, 0, 0, src->w, src->h,
+	                          dst, 0, 0, xrad, yrad, min, sigma, callback);
 }
 
-static inline GP_Pixmap *GP_FilterSigmaAlloc(const GP_Pixmap *src,
-                                              int xrad, int yrad,
-                                              unsigned int min, float sigma,
-                                              GP_ProgressCallback *callback)
+static inline gp_pixmap *gp_filter_sigma_alloc(const gp_pixmap *src,
+                                               int xrad, int yrad,
+                                               unsigned int min, float sigma,
+                                               gp_progress_cb *callback)
 {
-	return GP_FilterSigmaExAlloc(src, 0, 0, src->w, src->h,
-	                             xrad, yrad, min, sigma, callback);
+	return gp_filter_sigma_ex_alloc(src, 0, 0, src->w, src->h,
+	                                xrad, yrad, min, sigma, callback);
 }
 
 #endif /* FILTERS_GP_SIGMA_H */

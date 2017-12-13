@@ -26,7 +26,7 @@
 
  */
 
-#include <GP.h>
+#include <gfxprim.h>
 
 int main(void)
 {

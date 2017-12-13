@@ -30,7 +30,7 @@
 
 static const uint8_t bytes_1BPP[] = {0x00, 0xff};
 
-void GP_WritePixels_1BPP_LE(void *start, uint8_t off,
+void gp_write_pixels_1BPP_LE(void *start, uint8_t off,
                             size_t cnt, unsigned int val)
 {
 	int len = cnt;
@@ -104,7 +104,7 @@ void GP_WritePixels_1BPP_LE(void *start, uint8_t off,
 	}
 }
 
-void GP_WritePixels_1BPP_BE(void *start, uint8_t off,
+void gp_write_pixels_1BPP_BE(void *start, uint8_t off,
                             size_t cnt, unsigned int val)
 {
 	int len = cnt;
@@ -180,7 +180,7 @@ void GP_WritePixels_1BPP_BE(void *start, uint8_t off,
 
 static const uint8_t bytes_2BPP[] = {0x00, 0x55, 0xaa, 0xff};
 
-void GP_WritePixels_2BPP_LE(void *start, uint8_t off,
+void gp_write_pixels_2BPP_LE(void *start, uint8_t off,
                             size_t cnt, unsigned int val)
 {
 	int len = cnt;
@@ -226,7 +226,7 @@ void GP_WritePixels_2BPP_LE(void *start, uint8_t off,
 	}
 }
 
-void GP_WritePixels_2BPP_BE(void *start, uint8_t off,
+void gp_write_pixels_2BPP_BE(void *start, uint8_t off,
                             size_t cnt, unsigned int val)
 {
 	int len = cnt;
@@ -277,7 +277,7 @@ static const uint8_t bytes_4BPP[] = {
 	0x88, 0x99, 0xaa, 0xbb, 0xcc, 0xdd, 0xee, 0xff
 };
 
-void GP_WritePixels_4BPP_LE(void *start, uint8_t off,
+void gp_write_pixels_4BPP_LE(void *start, uint8_t off,
                             size_t cnt, unsigned int val)
 {
 	int len = cnt;
@@ -309,7 +309,7 @@ void GP_WritePixels_4BPP_LE(void *start, uint8_t off,
 	}
 }
 
-void GP_WritePixels_4BPP_BE(void *start, uint8_t off,
+void gp_write_pixels_4BPP_BE(void *start, uint8_t off,
                             size_t cnt, unsigned int val)
 {
 	int len = cnt;
@@ -341,12 +341,12 @@ void GP_WritePixels_4BPP_BE(void *start, uint8_t off,
 	}
 }
 
-void GP_WritePixels_8BPP(void *start, size_t count, unsigned int value)
+void gp_write_pixels_8BPP(void *start, size_t count, unsigned int value)
 {
 	memset(start, value, count);
 }
 
-void GP_WritePixels_16BPP(void *start, size_t count, unsigned int value)
+void gp_write_pixels_16BPP(void *start, size_t count, unsigned int value)
 {
 	uint16_t *p = (uint16_t *) start;
 	size_t i;
@@ -371,7 +371,7 @@ void GP_WritePixels_16BPP(void *start, size_t count, unsigned int value)
 	}
 }
 
-void GP_WritePixels_24BPP(void *start, size_t count, unsigned int value)
+void gp_write_pixels_24BPP(void *start, size_t count, unsigned int value)
 {
 	uint8_t *bytep = (uint8_t *) start;
 
@@ -494,7 +494,7 @@ void GP_WritePixels_24BPP(void *start, size_t count, unsigned int value)
 	}
 }
 
-void GP_WritePixels_32BPP(void *start, size_t count, unsigned int value)
+void gp_write_pixels_32BPP(void *start, size_t count, unsigned int value)
 {
 	/*
 	 * Inspired by GNU libc's wmemset() (by Ulrich Drepper, licensed under LGPL).

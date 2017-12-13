@@ -30,7 +30,7 @@
 
 #include "tst_test.h"
 
-#define READ GP_ReadPNM
+#define READ gp_read_pnm
 #include "Loader.h"
 #include "PBM.h"
 #include "PGM.h"

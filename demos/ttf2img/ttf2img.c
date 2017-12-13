@@ -26,7 +26,7 @@
 
   */
 
-#include <GP.h>
+#include <gfxprim.h>
 
 static const char help[] = {
 	"usage: ttf2img -f font.ttf -i file.png -s string [-d debug_level]\n",
@@ -72,25 +72,25 @@ int main(int argc, char *argv[])
 	if (font_path == NULL || img_path == NULL)
 		print_help(1);
 
-	GP_SetDebugLevel(debug_level);
+	gp_set_debug_level(debug_level);
 
-	GP_Pixmap *pixmap = GP_PixmapAlloc(img_w, img_h, GP_PIXEL_RGB888);
+	gp_pixmap *pixmap = gp_pixmap_alloc(img_w, img_h, GP_PIXEL_RGB888);
 
-	GP_Pixel black_pixel = GP_RGBToPixmapPixel(0x00, 0x00, 0x00, pixmap);
-	GP_Pixel white_pixel = GP_RGBToPixmapPixel(0xff, 0xff, 0xff, pixmap);
+	gp_pixel black_pixel = gp_rgb_to_pixmap_pixel(0x00, 0x00, 0x00, pixmap);
+	gp_pixel white_pixel = gp_rgb_to_pixmap_pixel(0xff, 0xff, 0xff, pixmap);
 
-	GP_Fill(pixmap, white_pixel);
+	gp_fill(pixmap, white_pixel);
 
-	GP_TextStyle style = GP_DEFAULT_TEXT_STYLE;
+	gp_text_style style = GP_DEFAULT_TEXT_STYLE;
 
-	style.font = GP_FontFaceLoad(font_path, 27, 0);
+	style.font = gp_font_face_load(font_path, 27, 0);
 
-	GP_Text(pixmap, &style, img_w/2, img_h/2, GP_ALIGN_CENTER|GP_VALIGN_CENTER,
+	gp_text(pixmap, &style, img_w/2, img_h/2, GP_ALIGN_CENTER|GP_VALIGN_CENTER,
 	        black_pixel, white_pixel, string);
 
-	GP_SavePNG(pixmap, img_path, NULL);
+	gp_save_png(pixmap, img_path, NULL);
 
-	GP_PixmapFree(pixmap);
+	gp_pixmap_free(pixmap);
 
 	return 0;
 }

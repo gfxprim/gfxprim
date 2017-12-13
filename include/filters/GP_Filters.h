@@ -25,7 +25,7 @@
 
 /*
 
-  GP_Pixmap filters.
+  gp_pixmap filters.
 
  */
 

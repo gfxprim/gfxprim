@@ -22,15 +22,15 @@
 
 /*
 
-  GP_Pixmap rotations and mirroring.
+  gp_pixmap rotations and mirroring.
 
  */
 
 #ifndef FILTERS_GP_ROTATE_H
 #define FILTERS_GP_ROTATE_H
 
-#include "core/GP_Pixmap.h"
-#include "GP_Filter.h"
+#include <core/GP_Types.h>
+#include <filters/GP_Filter.h>
 
 /*
  * Mirrors bitmap horizontally.
@@ -43,8 +43,8 @@
  *
  * Returns zero on success, non-zero if operation was aborted.
  */
-int GP_FilterMirrorH(const GP_Pixmap *src, GP_Pixmap *dst,
-                     GP_ProgressCallback *callback);
+int gp_filter_mirror_h(const gp_pixmap *src, gp_pixmap *dst,
+                       gp_progress_cb *callback);
 
 /*
  * Mirrors bitmap horizontally.
@@ -52,8 +52,8 @@ int GP_FilterMirrorH(const GP_Pixmap *src, GP_Pixmap *dst,
  * Returns pointer to newly allocated pixmap, or NULL if malloc() has failed
  * or operation was aborted from withing a callback.
  */
-GP_Pixmap *GP_FilterMirrorHAlloc(const GP_Pixmap *src,
-                                  GP_ProgressCallback *callback);
+gp_pixmap *gp_filter_mirror_h_alloc(const gp_pixmap *src,
+                                    gp_progress_cb *callback);
 
 /*
  * Mirrors bitmap vertically.
@@ -66,8 +66,8 @@ GP_Pixmap *GP_FilterMirrorHAlloc(const GP_Pixmap *src,
  *
  * Returns zero on success, non-zero if operation was aborted.
  */
-int GP_FilterMirrorV(const GP_Pixmap *src, GP_Pixmap *dst,
-                     GP_ProgressCallback *callback);
+int gp_filter_mirror_v(const gp_pixmap *src, gp_pixmap *dst,
+                       gp_progress_cb *callback);
 
 /*
  * Mirrors bitmap vertically.
@@ -75,31 +75,31 @@ int GP_FilterMirrorV(const GP_Pixmap *src, GP_Pixmap *dst,
  * Returns pointer to newly allocated pixmap, or NULL if malloc() has failed
  * or operation was aborted from withing a callback.
  */
-GP_Pixmap *GP_FilterMirrorVAlloc(const GP_Pixmap *src,
-                                  GP_ProgressCallback *callback);
+gp_pixmap *gp_filter_mirror_v_alloc(const gp_pixmap *src,
+                                    gp_progress_cb *callback);
 
 /*
  * Rotate the pixmap by 90, 180, 270.
  *
  * Returns pointer to destination bitmap or NULL if allocation failed.
  */
-int GP_FilterRotate90(const GP_Pixmap *src, GP_Pixmap *dst,
-                      GP_ProgressCallback *callback);
+int gp_filter_rotate_90(const gp_pixmap *src, gp_pixmap *dst,
+                        gp_progress_cb *callback);
 
-GP_Pixmap *GP_FilterRotate90Alloc(const GP_Pixmap *src,
-                                   GP_ProgressCallback *callback);
+gp_pixmap *gp_filter_rotate_90_alloc(const gp_pixmap *src,
+                                     gp_progress_cb *callback);
 
-int GP_FilterRotate180(const GP_Pixmap *src, GP_Pixmap *dst,
-                       GP_ProgressCallback *callback);
+int gp_filter_rotate_180(const gp_pixmap *src, gp_pixmap *dst,
+                         gp_progress_cb *callback);
 
-GP_Pixmap *GP_FilterRotate180Alloc(const GP_Pixmap *src,
-                                    GP_ProgressCallback *callback);
+gp_pixmap *gp_filter_rotate_180_alloc(const gp_pixmap *src,
+                                      gp_progress_cb *callback);
 
-int GP_FilterRotate270(const GP_Pixmap *src, GP_Pixmap *dst,
-                       GP_ProgressCallback *callback);
+int gp_filter_rotate_270(const gp_pixmap *src, gp_pixmap *dst,
+                         gp_progress_cb *callback);
 
-GP_Pixmap *GP_FilterRotate270Alloc(const GP_Pixmap *src,
-                                    GP_ProgressCallback *callback);
+gp_pixmap *gp_filter_rotate_270_alloc(const gp_pixmap *src,
+                                      gp_progress_cb *callback);
 
 /*
  * Calls a symmetry filter on bitmap.
@@ -108,7 +108,7 @@ GP_Pixmap *GP_FilterRotate270Alloc(const GP_Pixmap *src,
  *
  * Returns pointer to destination bitmap or NULL if allocation failed.
  */
-typedef enum GP_FilterSymmetries {
+typedef enum gp_filter_symmetries {
 	GP_ROTATE_90 = 0,
 	GP_ROTATE_CW = GP_ROTATE_90,
 	GP_ROTATE_180,
@@ -116,27 +116,27 @@ typedef enum GP_FilterSymmetries {
 	GP_ROTATE_CCW = GP_ROTATE_270,
 	GP_MIRROR_H,
 	GP_MIRROR_V,
-} GP_FilterSymmetries;
+} gp_filter_symmetries;
 
 /*
  * NULL-terminated array of symmetry names (C strings).
  */
-extern const char **GP_FilterSymmetryNames;
+extern const char **gp_filter_symmetry_names;
 
 /*
- * Symmetry by name (as defined in GP_FilerSymmetryNames).
+ * Symmetry by name (as defined in gp_filer_symmetry_names).
  *
- * Returns either one of the GP_FilterSymmetries enums or -1 in case of
+ * Returns either one of the gp_filter_symmetries enums or -1 in case of
  * failure.
  */
-int GP_FilterSymmetryByName(const char *symmetry);
+int gp_filter_symmetry_by_name(const char *symmetry);
 
-int GP_FilterSymmetry(const GP_Pixmap *src, GP_Pixmap *dst,
-                      GP_FilterSymmetries symmetry,
-                      GP_ProgressCallback *callback);
+int gp_filter_symmetry(const gp_pixmap *src, gp_pixmap *dst,
+                       gp_filter_symmetries symmetry,
+                       gp_progress_cb *callback);
 
-GP_Pixmap *GP_FilterSymmetryAlloc(const GP_Pixmap *src,
-                                   GP_FilterSymmetries symmetry,
-                                   GP_ProgressCallback *callback);
+gp_pixmap *gp_filter_symmetry_alloc(const gp_pixmap *src,
+                                    gp_filter_symmetries symmetry,
+                                    gp_progress_cb *callback);
 
 #endif /* FILTERS_GP_ROTATE_H */

@@ -60,9 +60,7 @@
 #define CORE_GP_GAMMA_CORRECTION_H
 
 #include <stdint.h>
-
-#include "GP_Pixmap.h"
-
-#include "GP_GammaCorrection.gen.h"
+#include <core/GP_Types.h>
+#include <core/GP_GammaCorrection.gen.h>
 
 #endif /* CORE_GP_GAMMA_CORRECTION_H */

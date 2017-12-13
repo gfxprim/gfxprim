@@ -29,13 +29,13 @@
 #ifndef LOADERS_GP_ZIP_H
 #define LOADERS_GP_ZIP_H
 
-#include "core/GP_Pixmap.h"
-#include "core/GP_ProgressCallback.h"
+#include <core/GP_Pixmap.h>
+#include <core/GP_ProgressCallback.h>
 
-#include "loaders/GP_Container.h"
+#include <loaders/GP_Container.h>
 
-GP_Container *GP_OpenZip(const char *path);
+gp_container *gp_open_zip(const char *path);
 
-int GP_MatchZip(const char *buf);
+int gp_match_zip(const char *buf);
 
 #endif /* LOADERS_GP_ZIP_H */

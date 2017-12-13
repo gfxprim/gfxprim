@@ -23,22 +23,22 @@
  *                                                                           *
  *****************************************************************************/
 
-#include "core/GP_Common.h"
-#include "GP_TextMetric.h"
+#include <core/GP_Common.h>
+#include <text/GP_TextMetric.h>
 
-extern GP_TextStyle GP_DefaultStyle;
+extern gp_text_style gp_default_style;
 
-static const GP_GlyphBitmap *get_glyph(const GP_TextStyle *style, int c)
+static const gp_glyph *get_glyph(const gp_text_style *style, int c)
 {
-	const GP_GlyphBitmap *glyph = GP_GetGlyphBitmap(style->font, c);
+	const gp_glyph *glyph = gp_get_glyph(style->font, c);
 
 	if (glyph == NULL)
-		glyph = GP_GetGlyphBitmap(style->font, ' ');
+		glyph = gp_get_glyph(style->font, ' ');
 
 	return glyph;
 }
 
-static unsigned int multiply_width(const GP_TextStyle *style, unsigned int w)
+static unsigned int multiply_width(const gp_text_style *style, unsigned int w)
 {
 	return w * style->pixel_xmul + (w - 1) * style->pixel_xspace;
 }
@@ -46,9 +46,9 @@ static unsigned int multiply_width(const GP_TextStyle *style, unsigned int w)
 /*
  * Returns glyph advance.
  */
-static unsigned int glyph_advance_x(const GP_TextStyle *style, int ch)
+static unsigned int glyph_advance_x(const gp_text_style *style, int ch)
 {
-	const GP_GlyphBitmap *glyph = get_glyph(style, ch);
+	const gp_glyph *glyph = get_glyph(style, ch);
 
 	return multiply_width(style, glyph->advance_x);
 }
@@ -56,7 +56,7 @@ static unsigned int glyph_advance_x(const GP_TextStyle *style, int ch)
 /*
  * Return maximal glyph advance for a character from str.
  */
-static unsigned int max_glyph_advance_x(const GP_TextStyle *style,
+static unsigned int max_glyph_advance_x(const gp_text_style *style,
                                         const char *str)
 {
 	unsigned int max = 0, i;
@@ -71,11 +71,11 @@ static unsigned int max_glyph_advance_x(const GP_TextStyle *style,
  * Returns _SINGLE_ glyph size, not including the bearing_x and including space
  * occupied by the glyph bitmap if the bitmap width overflows glyph advance_x.
  */
-static unsigned int glyph_width(const GP_TextStyle *style, int c)
+static unsigned int glyph_width(const gp_text_style *style, int c)
 {
 	unsigned int size, advance;
 
-	const GP_GlyphBitmap *glyph = get_glyph(style, c);
+	const gp_glyph *glyph = get_glyph(style, c);
 
 	advance = multiply_width(style, glyph->advance_x - glyph->bearing_x);
 	size    = multiply_width(style, glyph->width);
@@ -86,11 +86,11 @@ static unsigned int glyph_width(const GP_TextStyle *style, int c)
 /*
  * Returns size occupied by the last glyph. Here we take advance_x into account.
  */
-static unsigned int last_glyph_width(const GP_TextStyle *style, int c)
+static unsigned int last_glyph_width(const gp_text_style *style, int c)
 {
 	unsigned int size, advance;
 
-	const GP_GlyphBitmap *glyph = get_glyph(style, c);
+	const gp_glyph *glyph = get_glyph(style, c);
 
 	advance = multiply_width(style, glyph->advance_x);
 	size    = multiply_width(style, glyph->width + glyph->bearing_x);
@@ -101,17 +101,17 @@ static unsigned int last_glyph_width(const GP_TextStyle *style, int c)
 /*
  * Returns first glyph width, that is and advance minus the bearing_x.
  */
-static unsigned int first_glyph_width(const GP_TextStyle *style, int c)
+static unsigned int first_glyph_width(const gp_text_style *style, int c)
 {
-	const GP_GlyphBitmap *glyph = get_glyph(style, c);
+	const gp_glyph *glyph = get_glyph(style, c);
 
 	return multiply_width(style, glyph->advance_x - glyph->bearing_x);
 }
 
-static const GP_TextStyle *assert_style(const GP_TextStyle *style)
+static const gp_text_style *assert_style(const gp_text_style *style)
 {
 	if (style == NULL)
-		style = &GP_DefaultStyle;
+		style = &gp_default_style;
 
 	GP_ASSERT(style->font != NULL);
 
@@ -135,8 +135,8 @@ static const GP_TextStyle *assert_style(const GP_TextStyle *style)
  * not known), so we likely return some more pixels than is needed, but that's
  * the joy of life.
  */
-unsigned int GP_TextLenWidth(const GP_TextStyle *style,
-                             const char *str, size_t len)
+unsigned int gp_text_width_len(const gp_text_style *style,
+                               const char *str, size_t len)
 {
 	unsigned int i, ret;
 
@@ -165,15 +165,15 @@ unsigned int GP_TextLenWidth(const GP_TextStyle *style,
 	return ret;
 }
 
-unsigned int GP_TextWidth(const GP_TextStyle *style, const char *str)
+unsigned int gp_text_width(const gp_text_style *style, const char *str)
 {
-	return GP_TextLenWidth(style, str, SIZE_MAX);
+	return gp_text_width_len(style, str, SIZE_MAX);
 }
 
 /*
  * Return max advance now. We will do something better maybe.
  */
-GP_Size GP_TextMaxWidth(const GP_TextStyle *style, unsigned int len)
+gp_size gp_text_max_width(const gp_text_style *style, unsigned int len)
 {
 	style = assert_style(style);
 
@@ -187,26 +187,26 @@ GP_Size GP_TextMaxWidth(const GP_TextStyle *style, unsigned int len)
 /*
  * Here too.
  */
-GP_Size GP_TextMaxStrWidth(const GP_TextStyle *style, const char *str,
-                           unsigned int len)
+gp_size gp_text_max_width_chars(const gp_text_style *style, const char *chars,
+                              unsigned int len)
 {
 	style = assert_style(style);
 
-	if (len == 0 || str == NULL)
+	if (len == 0 || chars == NULL)
 		return 0;
 
-	return len * max_glyph_advance_x(style, str) +
+	return len * max_glyph_advance_x(style, chars) +
 	       (len - 1) * style->char_xspace;
 }
 
 /* Ascend, Descend, Height -- far easier */
 
-static unsigned int multiply_height(const GP_TextStyle *style, unsigned int h)
+static unsigned int multiply_height(const gp_text_style *style, unsigned int h)
 {
 	return h * style->pixel_ymul + (h - 1) * style->pixel_yspace;
 }
 
-GP_Size GP_TextHeight(const GP_TextStyle *style)
+gp_size gp_text_height(const gp_text_style *style)
 {
 	style = assert_style(style);
 
@@ -215,14 +215,14 @@ GP_Size GP_TextHeight(const GP_TextStyle *style)
 	return multiply_height(style, height);
 }
 
-GP_Size GP_TextAscent(const GP_TextStyle *style)
+gp_size gp_text_ascent(const gp_text_style *style)
 {
 	style = assert_style(style);
 
 	return multiply_height(style, style->font->ascend);
 }
 
-GP_Size GP_TextDescent(const GP_TextStyle *style)
+gp_size gp_text_descent(const gp_text_style *style)
 {
 	style = assert_style(style);
 

@@ -37,7 +37,7 @@
 struct priv {
 	z_stream strm;
 
-	GP_IO *io;
+	gp_io *io;
 	off_t io_start;
 	int eos;
 
@@ -49,7 +49,7 @@ struct priv {
 	char inbuf[BUFS];
 };
 
-static int zlib_close(GP_IO *io)
+static int zlib_close(gp_io *io)
 {
 	struct priv *priv = GP_IO_PRIV(io);
 
@@ -61,7 +61,7 @@ static int zlib_close(GP_IO *io)
 	return 0;
 }
 
-static ssize_t zlib_read(GP_IO *io, void *buf, size_t size)
+static ssize_t zlib_read(gp_io *io, void *buf, size_t size)
 {
 	struct priv *priv = GP_IO_PRIV(io);
 	size_t bread;
@@ -82,7 +82,7 @@ static ssize_t zlib_read(GP_IO *io, void *buf, size_t size)
 			if (priv->comp_avail)
 				to_read = GP_MIN(BUFS, priv->comp_avail);
 
-			ret = GP_IORead(priv->io, priv->inbuf, to_read);
+			ret = gp_io_read(priv->io, priv->inbuf, to_read);
 
 			if (ret <= 0)
 				return ret;
@@ -108,7 +108,7 @@ static ssize_t zlib_read(GP_IO *io, void *buf, size_t size)
 			/* Attempt to seek back in the parent I/O stream */
 			if (priv->strm.avail_in) {
 				GP_DEBUG(1, "Seeking back by %zu", (size_t)priv->strm.avail_in);
-				GP_IOSeek(priv->io, -(int)priv->strm.avail_in, GP_IO_SEEK_CUR);
+				gp_io_seek(priv->io, -(int)priv->strm.avail_in, GP_IO_SEEK_CUR);
 			}
 
 			goto out;
@@ -146,7 +146,7 @@ static int zlib_reset(struct priv *priv)
 	return 0;
 }
 
-static off_t zlib_seek_end(GP_IO *io)
+static off_t zlib_seek_end(gp_io *io)
 {
 	struct priv *priv = GP_IO_PRIV(io);
 	char buf[BUFS];
@@ -160,7 +160,7 @@ static off_t zlib_seek_end(GP_IO *io)
 	return priv->bytes_read;
 }
 
-static off_t zlib_seek(GP_IO *io, off_t offset, enum GP_IOWhence whence)
+static off_t zlib_seek(gp_io *io, off_t offset, enum gp_io_whence whence)
 {
 	struct priv *priv = GP_IO_PRIV(io);
 	off_t ret;
@@ -174,12 +174,12 @@ static off_t zlib_seek(GP_IO *io, off_t offset, enum GP_IOWhence whence)
 			goto out;
 		char b[offset];
 		priv->bytes_read += offset;
-		GP_IOFill(io, b, offset);
+		gp_io_fill(io, b, offset);
 		return priv->bytes_read;
 	}
 
 	if (whence == GP_IO_SEEK_SET && offset == 0) {
-		ret = GP_IOSeek(priv->io, priv->io_start, GP_IO_SEEK_SET);
+		ret = gp_io_seek(priv->io, priv->io_start, GP_IO_SEEK_SET);
 
 		if (ret == (off_t)-1)
 			return ret;
@@ -198,7 +198,7 @@ out:
 	return (off_t)-1;
 }
 
-int GP_IOZlibReset(GP_IO *io, GP_IO *sub_io, size_t comp_size)
+int gp_io_zlib_reset(gp_io *io, gp_io *sub_io, size_t comp_size)
 {
 	struct priv *priv = GP_IO_PRIV(io);
 
@@ -211,9 +211,9 @@ int GP_IOZlibReset(GP_IO *io, GP_IO *sub_io, size_t comp_size)
 	return zlib_reset(priv);
 }
 
-GP_IO *GP_IOZlib(GP_IO *io, size_t comp_size)
+gp_io *gp_io_zlib(gp_io *io, size_t comp_size)
 {
-	GP_IO *new = malloc(sizeof(GP_IO) + sizeof(struct priv));
+	gp_io *new = malloc(sizeof(gp_io) + sizeof(struct priv));
 	struct priv *priv;
 	int err, ret;
 
@@ -229,7 +229,7 @@ GP_IO *GP_IOZlib(GP_IO *io, size_t comp_size)
 	priv->comp_size  = comp_size;
 	priv->bytes_read = 0;
         priv->crc = crc32(0, NULL, 0);
-	priv->io_start = GP_IOTell(io);
+	priv->io_start = gp_io_tell(io);
 	priv->eos = 0;
 
 	priv->strm.zalloc = Z_NULL;
@@ -246,11 +246,10 @@ GP_IO *GP_IOZlib(GP_IO *io, size_t comp_size)
 		goto err1;
 	}
 
-	//INIT IO
-	new->Close = zlib_close;
-	new->Read  = zlib_read;
-	new->Write = NULL;
-	new->Seek = zlib_seek;
+	new->close = zlib_close;
+	new->read  = zlib_read;
+	new->write = NULL;
+	new->seek = zlib_seek;
 
 	GP_DEBUG(1, "Initialized ZlibIO (%p)", new);
 
@@ -263,13 +262,13 @@ err1:
 
 #else
 
-GP_IO *GP_IOZlib(GP_IO *io, size_t comp_size)
+gp_io *gp_io_zlib(gp_io *io, size_t comp_size)
 {
 	errno = ENOSYS;
 	return NULL;
 }
 
-int GP_IOZlibReset(GP_IO *io, GP_IO *sub_io, size_t comp_size)
+int gp_io_zlib_reset(gp_io *io, gp_io *sub_io, size_t comp_size)
 {
 	errno = ENOSYS;
 	return 1;

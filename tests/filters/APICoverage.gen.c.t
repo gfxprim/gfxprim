@@ -20,116 +20,116 @@
 #include "tst_test.h"
 
 @ API_List = [
-@              ['Brightness', '', 'GP_Pixmap:in', 'GP_Pixmap:out',
-@               'float:p', 'GP_ProgressCallback'],
-@              ['BrightnessAlloc', '', 'GP_Pixmap:in',
-@               'float:p', 'GP_ProgressCallback'],
+@              ['brightness', '', 'gp_pixmap:in', 'gp_pixmap:out',
+@               'float:p', 'gp_progress_cb'],
+@              ['brightness_alloc', '', 'gp_pixmap:in',
+@               'float:p', 'gp_progress_cb'],
 @
-@              ['Contrast', '', 'GP_Pixmap:in', 'GP_Pixmap:out',
-@               'float:p', 'GP_ProgressCallback'],
-@              ['ContrastAlloc', '', 'GP_Pixmap:in',
-@               'float:p', 'GP_ProgressCallback'],
+@              ['contrast', '', 'gp_pixmap:in', 'gp_pixmap:out',
+@               'float:p', 'gp_progress_cb'],
+@              ['contrast_alloc', '', 'gp_pixmap:in',
+@               'float:p', 'gp_progress_cb'],
 @
-@              ['Invert', '', 'GP_Pixmap:in', 'GP_Pixmap:out',
-@               'GP_ProgressCallback'],
-@              ['InvertAlloc', '', 'GP_Pixmap:in',
-@               'GP_ProgressCallback'],
+@              ['invert', '', 'gp_pixmap:in', 'gp_pixmap:out',
+@               'gp_progress_cb'],
+@              ['invert_alloc', '', 'gp_pixmap:in',
+@               'gp_progress_cb'],
 @
-@             ['MirrorH', '', 'GP_Pixmap:in', 'GP_Pixmap:out',
-@              'GP_ProgressCallback'],
-@             ['MirrorHAlloc', '', 'GP_Pixmap:in', 'GP_ProgressCallback'],
+@             ['mirror_h', '', 'gp_pixmap:in', 'gp_pixmap:out',
+@              'gp_progress_cb'],
+@             ['mirror_h_alloc', '', 'gp_pixmap:in', 'gp_progress_cb'],
 @
-@             ['MirrorV', '', 'GP_Pixmap:in', 'GP_Pixmap:out',
-@              'GP_ProgressCallback'],
-@             ['MirrorVAlloc', '', 'GP_Pixmap:in', 'GP_ProgressCallback'],
+@             ['mirror_v', '', 'gp_pixmap:in', 'gp_pixmap:out',
+@              'gp_progress_cb'],
+@             ['mirror_v_alloc', '', 'gp_pixmap:in', 'gp_progress_cb'],
 @
-@             ['Rotate90', '', 'GP_Pixmap:in', 'GP_Pixmap:out',
-@              'GP_ProgressCallback'],
-@             ['Rotate90Alloc', '', 'GP_Pixmap:in', 'GP_ProgressCallback'],
+@             ['rotate_90', '', 'gp_pixmap:in', 'gp_pixmap:out',
+@              'gp_progress_cb'],
+@             ['rotate_90_alloc', '', 'gp_pixmap:in', 'gp_progress_cb'],
 @
-@             ['Rotate180', '', 'GP_Pixmap:in', 'GP_Pixmap:out',
-@              'GP_ProgressCallback'],
-@             ['Rotate180Alloc', '', 'GP_Pixmap:in', 'GP_ProgressCallback'],
+@             ['rotate_180', '', 'gp_pixmap:in', 'gp_pixmap:out',
+@              'gp_progress_cb'],
+@             ['rotate_180_alloc', '', 'gp_pixmap:in', 'gp_progress_cb'],
 @
-@             ['Rotate270', '', 'GP_Pixmap:in', 'GP_Pixmap:out',
-@              'GP_ProgressCallback'],
-@             ['Rotate270Alloc', '', 'GP_Pixmap:in', 'GP_ProgressCallback'],
+@             ['rotate_270', '', 'gp_pixmap:in', 'gp_pixmap:out',
+@              'gp_progress_cb'],
+@             ['rotate_270_alloc', '', 'gp_pixmap:in', 'gp_progress_cb'],
 @
-@             ['Symmetry', 'H', 'GP_Pixmap:in', 'GP_Pixmap:out',
-@              'GP_MIRROR_H', 'GP_ProgressCallback'],
-@             ['SymmetryAlloc', 'H', 'GP_Pixmap:in', 'GP_MIRROR_H',
-@              'GP_ProgressCallback'],
+@             ['symmetry', 'H', 'gp_pixmap:in', 'gp_pixmap:out',
+@              'GP_MIRROR_H', 'gp_progress_cb'],
+@             ['symmetry_alloc', 'H', 'gp_pixmap:in', 'GP_MIRROR_H',
+@              'gp_progress_cb'],
 @
-@             ['Symmetry', 'V', 'GP_Pixmap:in', 'GP_Pixmap:out',
-@              'GP_MIRROR_V', 'GP_ProgressCallback'],
-@             ['SymmetryAlloc', 'V', 'GP_Pixmap:in', 'GP_MIRROR_V',
-@              'GP_ProgressCallback'],
+@             ['symmetry', 'V', 'gp_pixmap:in', 'gp_pixmap:out',
+@              'GP_MIRROR_V', 'gp_progress_cb'],
+@             ['symmetry_alloc', 'V', 'gp_pixmap:in', 'GP_MIRROR_V',
+@              'gp_progress_cb'],
 @
-@             ['Symmetry', '90', 'GP_Pixmap:in', 'GP_Pixmap:out',
-@              'GP_ROTATE_90', 'GP_ProgressCallback'],
-@             ['SymmetryAlloc', '90', 'GP_Pixmap:in', 'GP_ROTATE_90',
-@              'GP_ProgressCallback'],
+@             ['symmetry', '90', 'gp_pixmap:in', 'gp_pixmap:out',
+@              'GP_ROTATE_90', 'gp_progress_cb'],
+@             ['symmetry_alloc', '90', 'gp_pixmap:in', 'GP_ROTATE_90',
+@              'gp_progress_cb'],
 @
-@             ['Symmetry', '180', 'GP_Pixmap:in', 'GP_Pixmap:out',
-@              'GP_ROTATE_180', 'GP_ProgressCallback'],
-@             ['SymmetryAlloc', '180', 'GP_Pixmap:in', 'GP_ROTATE_180',
-@              'GP_ProgressCallback'],
+@             ['symmetry', '180', 'gp_pixmap:in', 'gp_pixmap:out',
+@              'GP_ROTATE_180', 'gp_progress_cb'],
+@             ['symmetry_alloc', '180', 'gp_pixmap:in', 'GP_ROTATE_180',
+@              'gp_progress_cb'],
 @
-@             ['Symmetry', '270', 'GP_Pixmap:in', 'GP_Pixmap:out',
-@              'GP_ROTATE_270', 'GP_ProgressCallback'],
-@             ['SymmetryAlloc', '270', 'GP_Pixmap:in', 'GP_ROTATE_270',
-@              'GP_ProgressCallback'],
+@             ['symmetry', '270', 'gp_pixmap:in', 'gp_pixmap:out',
+@              'GP_ROTATE_270', 'gp_progress_cb'],
+@             ['symmetry_alloc', '270', 'gp_pixmap:in', 'GP_ROTATE_270',
+@              'gp_progress_cb'],
 @
-@             ['Convolution', '', 'GP_Pixmap:in', 'GP_Pixmap:out',
-@              'GP_FilterKernel2D:kernel', 'GP_ProgressCallback'],
-@             ['ConvolutionAlloc', '', 'GP_Pixmap:in',
-@              'GP_FilterKernel2D:kernel', 'GP_ProgressCallback'],
+@             ['convolution', '', 'gp_pixmap:in', 'gp_pixmap:out',
+@              'gp_filter_kernel_2d:kernel', 'gp_progress_cb'],
+@             ['convolution_alloc', '', 'gp_pixmap:in',
+@              'gp_filter_kernel_2d:kernel', 'gp_progress_cb'],
 @
-@             ['GaussianBlur', '', 'GP_Pixmap:in', 'GP_Pixmap:out',
-@              'float:sigma_x', 'float:sigma_y', 'GP_ProgressCallback'],
-@             ['GaussianBlurAlloc', '', 'GP_Pixmap:in', 'float:sigma_x',
-@              'float:sigma_y', 'GP_ProgressCallback'],
+@             ['gaussian_blur', '', 'gp_pixmap:in', 'gp_pixmap:out',
+@              'float:sigma_x', 'float:sigma_y', 'gp_progress_cb'],
+@             ['gaussian_blur_alloc', '', 'gp_pixmap:in', 'float:sigma_x',
+@              'float:sigma_y', 'gp_progress_cb'],
 @
-@             ['GaussianNoiseAdd', '', 'GP_Pixmap:in', 'GP_Pixmap:out',
-@              'float:sigma', 'float:mu', 'GP_ProgressCallback'],
-@             ['GaussianNoiseAddAlloc', '', 'GP_Pixmap:in',
-@              'float:sigma', 'float:mu', 'GP_ProgressCallback'],
+@             ['gaussian_noise_add', '', 'gp_pixmap:in', 'gp_pixmap:out',
+@              'float:sigma', 'float:mu', 'gp_progress_cb'],
+@             ['gaussian_noise_add_alloc', '', 'gp_pixmap:in',
+@              'float:sigma', 'float:mu', 'gp_progress_cb'],
 @
-@             ['Median', '', 'GP_Pixmap:in', 'GP_Pixmap:out',
-@              'int:xmed', 'int:ymed', 'GP_ProgressCallback'],
-@             ['MedianAlloc', '', 'GP_Pixmap:in',
-@              'int:xmed', 'int:ymed', 'GP_ProgressCallback'],
+@             ['median', '', 'gp_pixmap:in', 'gp_pixmap:out',
+@              'int:xmed', 'int:ymed', 'gp_progress_cb'],
+@             ['median_alloc', '', 'gp_pixmap:in',
+@              'int:xmed', 'int:ymed', 'gp_progress_cb'],
 @
-@             ['WeightedMedian', '', 'GP_Pixmap:in', 'GP_Pixmap:out',
-@              'GP_MedianWeights:weights', 'GP_ProgressCallback'],
-@             ['WeightedMedianAlloc', '', 'GP_Pixmap:in',
-@              'GP_MedianWeights:weights', 'GP_ProgressCallback'],
+@             ['weighted_median', '', 'gp_pixmap:in', 'gp_pixmap:out',
+@              'gp_median_weights:weights', 'gp_progress_cb'],
+@             ['weighted_median_alloc', '', 'gp_pixmap:in',
+@              'gp_median_weights:weights', 'gp_progress_cb'],
 @
-@             ['Sigma', '', 'GP_Pixmap:in', 'GP_Pixmap:out',
+@             ['sigma', '', 'gp_pixmap:in', 'gp_pixmap:out',
 @              'int:xrad', 'int:yrad', 'int:min', 'float:sigma',
-@              'GP_ProgressCallback'],
-@             ['SigmaAlloc', '', 'GP_Pixmap:in',
+@              'gp_progress_cb'],
+@             ['sigma_alloc', '', 'gp_pixmap:in',
 @              'int:xrad', 'int:yrad', 'int:min', 'float:sigma',
-@              'GP_ProgressCallback'],
+@              'gp_progress_cb'],
 @
-@              ['ResizeNN', '', 'GP_Pixmap:in', 'GP_Pixmap:out',
-@               'GP_ProgressCallback'],
-@              ['ResizeNNAlloc', '', 'GP_Pixmap:in', 'int:w', 'int:h',
-@               'GP_ProgressCallback'],
+@              ['resize_nn', '', 'gp_pixmap:in', 'gp_pixmap:out',
+@               'gp_progress_cb'],
+@              ['resize_nn_alloc', '', 'gp_pixmap:in', 'int:w', 'int:h',
+@               'gp_progress_cb'],
 @
-@              ['FloydSteinberg', '', 'GP_Pixmap:in', 'GP_Pixmap:out',
-@		'GP_ProgressCallback'],
-@              ['FloydSteinbergAlloc', '', 'GP_Pixmap:in', 'GP_PixelType:G8',
-@               'GP_ProgressCallback'],
+@              ['floyd_steinberg', '', 'gp_pixmap:in', 'gp_pixmap:out',
+@		'gp_progress_cb'],
+@              ['floyd_steinberg_alloc', '', 'gp_pixmap:in', 'gp_pixel_type:G8',
+@               'gp_progress_cb'],
 @
-@              ['HilbertPeano', '', 'GP_Pixmap:in', 'GP_Pixmap:out',
-@               'GP_ProgressCallback'],
-@              ['HilbertPeanoAlloc', '', 'GP_Pixmap:in', 'GP_PixelType:G8',
-@               'GP_ProgressCallback'],
+@              ['hilbert_peano', '', 'gp_pixmap:in', 'gp_pixmap:out',
+@               'gp_progress_cb'],
+@              ['hilbert_peano_alloc', '', 'gp_pixmap:in', 'gp_pixel_type:G8',
+@               'gp_progress_cb'],
 @ ]
 @
 @ def prep_pixmap(id):
-	GP_Pixmap *{{ id }} = GP_PixmapAlloc(331, 331, pt);
+	gp_pixmap *{{ id }} = gp_pixmap_alloc(331, 331, pt);
 @
 @ def prep_float(id):
 	float {{ id }} = 1;
@@ -138,7 +138,7 @@
 	int {{ id }} = 2;
 @
 @ def prep_pixel_type(id):
-	GP_PixelType {{ id }} = GP_PIXEL_{{ id }};
+	gp_pixel_type {{ id }} = GP_PIXEL_{{ id }};
 @
 @ def prep_median_weights(id):
 
@@ -148,13 +148,13 @@
 		1, 2, 1,
 	};
 
-	GP_MedianWeights {{ id }}_s = {
+	gp_median_weights {{ id }}_s = {
 		.w = 3,
 		.h = 3,
 		.weights = {{ id }}_w,
 	};
 
-	GP_MedianWeights *{{ id }} = &{{ id }}_s;
+	gp_median_weights *{{ id }} = &{{ id }}_s;
 @
 @ def prep_filter_kernel_2d(id):
 	float {{ id }}_kern[] = {
@@ -163,32 +163,32 @@
 		1, 1, 1,
 	};
 
-	GP_FilterKernel2D {{ id }}_s = {
+	gp_filter_kernel_2d {{ id }}_s = {
 		.w = 3,
 		.h = 3,
 		.div = 9,
 		.kernel = {{ id }}_kern,
 	};
 
-	GP_FilterKernel2D *{{ id }} = &{{ id }}_s;
+	gp_filter_kernel_2d *{{ id }} = &{{ id }}_s;
 @
 @
 @ def prep_param(param):
-@     if (param.split(':', 1)[0] == 'GP_Pixmap'):
+@     if (param.split(':', 1)[0] == 'gp_pixmap'):
 {@ prep_pixmap(param.split(':', 1)[1]) @}
 @     if (param.split(':', 1)[0] == 'float'):
 {@ prep_float(param.split(':', 1)[1]) @}
 @     if (param.split(':', 1)[0] == 'int'):
 {@ prep_int(param.split(':', 1)[1]) @}
-@     if (param.split(':', 1)[0] == 'GP_MedianWeights'):
+@     if (param.split(':', 1)[0] == 'gp_median_weights'):
 {@ prep_median_weights(param.split(':', 1)[1]) @}
-@     if (param.split(':', 1)[0] == 'GP_FilterKernel2D'):
+@     if (param.split(':', 1)[0] == 'gp_filter_kernel_2d'):
 {@ prep_filter_kernel_2d(param.split(':', 1)[1]) @}
-@     if (param.split(':', 1)[0] == 'GP_PixelType'):
+@     if (param.split(':', 1)[0] == 'gp_pixel_type'):
 {@ prep_pixel_type(param.split(':', 1)[1]) @}
 @
 @ def do_param(param):
-@     if param == 'GP_ProgressCallback':
+@     if param == 'gp_progress_cb':
 @         return 'NULL'
 @     else:
 @         return param
@@ -204,19 +204,19 @@
 @     return ', '.join(res)
 @
 @ for fn in API_List:
-static int filter_{{ fn[0] }}_{{ fn[1] }}(GP_PixelType pt)
+static int filter_{{ fn[0] }}_{{ fn[1] }}(gp_pixel_type pt)
 {
 @     for param in fn[1:]:
 {@ prep_param(param) @}
-@     if 'Alloc' in fn[0]:
-	GP_Pixmap *res;
+@     if 'alloc' in fn[0]:
+	gp_pixmap *res;
 @     else:
 	int res;
 @     end
 
-	res = GP_Filter{{ fn[0] }}({{ gen_params(fn[2:]) }});
+	res = gp_filter_{{ fn[0] }}({{ gen_params(fn[2:]) }});
 
-@     if 'Alloc' in fn[0]:
+@     if 'alloc' in fn[0]:
 	if (res == NULL) {
 @     else:
 	if (res) {

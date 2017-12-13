@@ -25,13 +25,12 @@
 
 #include "core/GP_GetPutPixel.h"
 #include "core/GP_FnPerBpp.h"
-
 #include "gfx/GP_CircleSeg.h"
 #include "gfx/GP_HLine.h"
 
 #include "algo/CircleSeg.algo.h"
 
-static uint8_t transform_segments(GP_Pixmap *pixmap, uint8_t seg_flags)
+static uint8_t transform_segments(gp_pixmap *pixmap, uint8_t seg_flags)
 {
 	uint8_t seg1 = seg_flags & GP_CIRCLE_SEG1;
 	uint8_t seg2 = seg_flags & GP_CIRCLE_SEG2;
@@ -60,35 +59,35 @@ static uint8_t transform_segments(GP_Pixmap *pixmap, uint8_t seg_flags)
 }
 
 /* Generate drawing functions for various bit depths. */
-GP_DEF_DRAW_FN_PER_BPP(GP_CircleSeg_Raw, DEF_CIRCLE_SEG_FN)
+GP_DEF_DRAW_FN_PER_BPP(circle_seg, DEF_CIRCLE_SEG_FN)
 
-void GP_CircleSeg_Raw(GP_Pixmap *pixmap, GP_Coord xcenter, GP_Coord ycenter,
-                      GP_Size r, uint8_t seg_flag, GP_Pixel pixel)
+void gp_circle_seg_raw(gp_pixmap *pixmap, gp_coord xcenter, gp_coord ycenter,
+                       gp_size r, uint8_t seg_flag, gp_pixel pixel)
 {
 	GP_CHECK_PIXMAP(pixmap);
 
-	GP_FN_PER_BPP_PIXMAP(GP_CircleSeg_Raw, pixmap, pixmap,
-	                      xcenter, ycenter, r, seg_flag, pixel);
+	GP_FN_PER_BPP_PIXMAP(circle_seg, pixmap, pixmap,
+	                     xcenter, ycenter, r, seg_flag, pixel);
 }
 
-void GP_CircleSeg(GP_Pixmap *pixmap, GP_Coord xcenter, GP_Coord ycenter,
-                  GP_Size r, uint8_t seg_flag, GP_Pixel pixel)
+void gp_circle_seg(gp_pixmap *pixmap, gp_coord xcenter, gp_coord ycenter,
+                   gp_size r, uint8_t seg_flag, gp_pixel pixel)
 {
 	GP_CHECK_PIXMAP(pixmap);
 
 	GP_TRANSFORM_POINT(pixmap, xcenter, ycenter);
 
-	GP_CircleSeg_Raw(pixmap, xcenter, ycenter, r,
-	                 transform_segments(pixmap, seg_flag), pixel);
+	gp_circle_seg_raw(pixmap, xcenter, ycenter, r,
+	                  transform_segments(pixmap, seg_flag), pixel);
 }
 
-void GP_FillCircleSeg(GP_Pixmap *pixmap, GP_Coord xcenter, GP_Coord ycenter,
-                      GP_Size r, uint8_t seg_flag, GP_Pixel pixel)
+void gp_fill_circle_seg(gp_pixmap *pixmap, gp_coord xcenter, gp_coord ycenter,
+                        gp_size r, uint8_t seg_flag, gp_pixel pixel)
 {
 	GP_CHECK_PIXMAP(pixmap);
 
 	GP_TRANSFORM_POINT(pixmap, xcenter, ycenter);
 
-	GP_FillCircleSeg_Raw(pixmap, xcenter, ycenter, r,
-	                     transform_segments(pixmap, seg_flag), pixel);
+	gp_fill_circle_seg_raw(pixmap, xcenter, ycenter, r,
+	                       transform_segments(pixmap, seg_flag), pixel);
 }

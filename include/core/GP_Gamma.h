@@ -67,13 +67,13 @@
    Also the table output, for linear values, has two more bits than original in
    order not to loose precision.
 
-   The pointers to gamma tables are storied in GP_Gamma structure and are
+   The pointers to gamma tables are storied in gp_gamma structure and are
    organized in the same order as channels. First N tables for each channel and
    gamma value gamma, then N tables for inverse 1/gamma function.
 
    So when we have RGB888 pixel and gamma 2.2 there are two tables in the
    memory, one for gamma 2.2 input 8bit output 10bit and it's inverse input
-   10bit output 8bit. The GP_Gamma contains six pointers. First three points to
+   10bit output 8bit. The gp_gamma contains six pointers. First three points to
    the gamma table for gamma 2.2 with 8bit input (256 array members) and the
    output format is 10bits so each array member is uint16_t. The other three
    are for inverse gamma function (gamma = 0.454545...) with 10bit input (1024
@@ -82,7 +82,7 @@
    The whole interface is designed for speed, so that conversion to linear
    space or from linear space is just a matter of indexing arrays. Imagine you
    need to get gamma-corrected pixel value. First you take individual pixel
-   channels then use the GP_Gamma structure as follows:
+   channels then use the gp_gamma structure as follows:
 
    gamma->tables[chan_number].u16[chan_val]
 
@@ -113,57 +113,53 @@
 
 #include <stdint.h>
 
-#include "GP_Pixmap.h"
+#include <core/GP_Pixmap.h>
 
-typedef enum GP_CorrectionType {
-	/*
-	 * Classical gamma correction
-	 */
+typedef enum gp_correction_type {
+	/* Classical gamma correction */
 	GP_CORRECTION_GAMMA,
-	/*
-	 * Standard RGB
-	 */
+	/* Standard RGB */
 	GP_CORRECTION_sRGB,
-} GP_CorrectionType;
+} gp_correction_type;
 
 
 /*
  * Gamma table.
  */
-typedef struct GP_GammaTable {
+typedef struct gp_gamma_table {
 	/* Table description */
-	enum GP_CorrectionType type;
+	gp_correction_type type;
 	float gamma;
 	uint8_t in_bits;
 	uint8_t out_bits;
 
 	/* Used for internal purpose */
 	unsigned int ref_count;
-	struct GP_GammaTable *next;
+	struct gp_gamma_table *next;
 
 	/* The table itself */
 	union {
 		uint8_t u8[0];
 		uint16_t u16[0];
 	};
-} GP_GammaTable;
+} gp_gamma_table;
 
 /*
  * Gamma structure for general pixel type.
  *
- * The GP_Gamma structure contains pointers to tables for each pixel
+ * The gp_gamma structure contains pointers to tables for each pixel
  * channel and for gamma and it's inverse transformation.
  *
  * The interface is specially designed so that getting Gamma corrected value is
  * a matter of indexing two arrays.
  */
-typedef struct GP_Gamma {
-	GP_PixelType pixel_type;
+struct gp_gamma {
+	gp_pixel_type pixel_type;
 
 	unsigned int ref_count;
 
-	GP_GammaTable *tables[];
-} GP_Gamma;
+	gp_gamma_table *tables[];
+};
 
 /*
  * Returns pointer to a gamma translation table, the same gamma is used for all
@@ -171,27 +167,27 @@ typedef struct GP_Gamma {
  *
  * May fail, in case malloc() has failed.
  */
-GP_Gamma *GP_GammaAcquire(GP_PixelType pixel_type, float gamma);
+gp_gamma *gp_gamma_acquire(gp_pixel_type pixel_type, float gamma);
 
 /*
  * Returns pointer to the sRGB translation table.
  */
-GP_Gamma *GP_sRGBAcquire(GP_PixelType pixel_type);
+gp_gamma *gp_sRGB_acquire(gp_pixel_type pixel_type);
 
 /*
  * Copies Gamma table (actually increases ref_count) so it's fast and can't
  * fail.
  */
-GP_Gamma *GP_GammaCopy(GP_Gamma *gamma);
+gp_gamma *gp_gamma_copy(gp_gamma *gamma);
 
 /*
  * Releases gamma table.
  */
-void GP_GammaRelease(GP_Gamma *self);
+void gp_gamma_release(gp_gamma *self);
 
 /*
  * Prints info about gamma table into the stdout.
  */
-void GP_GammaPrint(const GP_Gamma *self);
+void gp_gamma_print(const gp_gamma *self);
 
 #endif /* CORE_GP_GAMMA_H */

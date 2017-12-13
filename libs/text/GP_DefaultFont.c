@@ -23,7 +23,7 @@
  *                                                                           *
  *****************************************************************************/
 
-#include "GP_Font.h"
+#include <text/GP_Font.h>
 
 static int8_t default_console_glyphs[] = {
 	/* ' ' */	7, 11, 0, 9, 8,
@@ -218,7 +218,7 @@ static int8_t default_console_glyphs[] = {
 			0x32, 0x4c, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 };
 
-struct GP_FontFace GP_DefaultConsoleFont = {
+const struct gp_font_face gp_default_font = {
 	.family_name = "Gfxprim",
 	.style_name = "Mono",
 	.charset = GP_CHARSET_7BIT,
@@ -230,6 +230,8 @@ struct GP_FontFace GP_DefaultConsoleFont = {
 	.glyphs = default_console_glyphs,
 	.glyph_offsets = {16},
 };
+
+const gp_font_face *const gp_font_gfxprim_mono = &gp_default_font;
 
 static uint8_t default_proportional_glyphs[] = {
 	/* ' ' */	6, 11, 0, 9, 7,
@@ -424,7 +426,7 @@ static uint8_t default_proportional_glyphs[] = {
 			0x64, 0x98, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 };
 
-struct GP_FontFace GP_DefaultProportionalFont = {
+static struct gp_font_face font_gfxprim = {
 	.family_name = "Gfxprim",
 	.style_name = "Proportional",
 	.charset = GP_CHARSET_7BIT,
@@ -436,3 +438,5 @@ struct GP_FontFace GP_DefaultProportionalFont = {
 	.glyphs = default_proportional_glyphs,
 	.glyph_offsets = {16},
 };
+
+const gp_font_face *gp_font_gfxprim = &font_gfxprim;

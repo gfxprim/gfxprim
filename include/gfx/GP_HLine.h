@@ -32,29 +32,29 @@
 #include "gfx/GP_HLine.gen.h"
 
 /* Generic HLines */
-void GP_HLineXXY(GP_Pixmap *pixmap, GP_Coord x0, GP_Coord x1, GP_Coord y,
-                 GP_Pixel pixel);
+void gp_hline_xxy(gp_pixmap *pixmap, gp_coord x0, gp_coord x1, gp_coord y,
+                  gp_pixel pixel);
 
-void GP_HLineXXY_Raw(GP_Pixmap *pixmap, GP_Coord x0, GP_Coord x1,
-                     GP_Coord y, GP_Pixel pixel);
+void gp_hline_xxy_raw(gp_pixmap *pixmap, gp_coord x0, gp_coord x1,
+                      gp_coord y, gp_pixel pixel);
 
-void GP_HLineXYW(GP_Pixmap *pixmap, GP_Coord x, GP_Coord y, GP_Size w,
-                 GP_Pixel pixel);
+void gp_hline_xyw(gp_pixmap *pixmap, gp_coord x, gp_coord y, gp_size w,
+                  gp_pixel pixel);
 
-void GP_HLineXYW_Raw(GP_Pixmap *pixmap, GP_Coord x, GP_Coord y, GP_Size w,
-                     GP_Pixel pixel);
+void gp_hline_xyw_raw(gp_pixmap *pixmap, gp_coord x, gp_coord y, gp_size w,
+                      gp_pixel pixel);
 
-/* default argument set is XXY */
-static inline void GP_HLine_Raw(GP_Pixmap *pixmap, GP_Coord x0, GP_Coord x1,
-                                GP_Coord y, GP_Pixel p)
+/* default argument set is xxy */
+static inline void gp_hline_raw(gp_pixmap *pixmap, gp_coord x0, gp_coord x1,
+                                gp_coord y, gp_pixel p)
 {
-	GP_HLineXXY_Raw(pixmap, x0, x1, y, p);
+	gp_hline_xxy_raw(pixmap, x0, x1, y, p);
 }
 
-static inline void GP_HLine(GP_Pixmap *pixmap, GP_Coord x0, GP_Coord x1,
-                            GP_Coord y, GP_Pixel p)
+static inline void gp_hline(gp_pixmap *pixmap, gp_coord x0, gp_coord x1,
+                            gp_coord y, gp_pixel p)
 {
-	GP_HLineXXY(pixmap, x0, x1, y, p);
+	gp_hline_xxy(pixmap, x0, x1, y, p);
 }
 
 #endif /* GFX_GP_HLINE_H */

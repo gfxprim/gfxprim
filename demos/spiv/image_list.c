@@ -69,7 +69,7 @@ static int dir_filter(const struct dirent *d)
 
 	//TODO: filter out directories
 
-	if (!GP_LoaderByFilename(d->d_name))
+	if (!gp_loader_by_filename(d->d_name))
 		return 0;
 
 	GP_DEBUG(4, "Adding file '%s'", d->d_name);

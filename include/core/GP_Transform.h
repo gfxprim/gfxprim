@@ -111,7 +111,7 @@
 
 /*
  * Transform "user"-coordinates to "real"-coordinates for a blit
- * called as GP_Blit(c1, x1, y1, w, h, c2, x2, y2).
+ * called as gp_blit(c1, x1, y1, w, h, c2, x2, y2).
  * All x1, y1, x2, y2, w, h are adjusted.
  */
 #define GP_TRANSFORM_BLIT(c1, x1, y1, w, h, c2, x2, y2) do { \

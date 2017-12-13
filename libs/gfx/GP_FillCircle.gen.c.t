@@ -25,12 +25,12 @@
  */
 @ for ps in pixelsizes:
 
-static void GP_FillCircle_Raw_{{ ps.suffix }}(GP_Pixmap *pixmap,
-	GP_Coord xcenter, GP_Coord ycenter, GP_Size r, GP_Pixel pixel)
+static void fill_circle_{{ ps.suffix }}(gp_pixmap *pixmap,
+	gp_coord xcenter, gp_coord ycenter, gp_size r, gp_pixel pixel)
 {
 	/* for r == 0, circle degenerates to a point */
 	if (r == 0) {
-		GP_PutPixel_Raw_{{ ps.suffix }}(pixmap, xcenter, ycenter, pixel);
+		gp_putpixel_raw_{{ ps.suffix }}(pixmap, xcenter, ycenter, pixel);
 		return;
 	}
 
@@ -41,17 +41,17 @@ static void GP_FillCircle_Raw_{{ ps.suffix }}(GP_Pixmap *pixmap,
 			x++;
 		}
 		error += -2*y + 1;
-		GP_HLine_Raw_{{ ps.suffix }}(pixmap, xcenter-x+1, xcenter+x-1, ycenter-y, pixel);
-		GP_HLine_Raw_{{ ps.suffix }}(pixmap, xcenter-x+1, xcenter+x-1, ycenter+y, pixel);
+		gp_hline_raw_{{ ps.suffix }}(pixmap, xcenter-x+1, xcenter+x-1, ycenter-y, pixel);
+		gp_hline_raw_{{ ps.suffix }}(pixmap, xcenter-x+1, xcenter+x-1, ycenter+y, pixel);
 	}
 }
 
-static void GP_FillCircleSeg_Raw_{{ ps.suffix }}(GP_Pixmap *pixmap,
-	GP_Coord xcenter, GP_Coord ycenter, GP_Size r, uint8_t seg_flag, GP_Pixel pixel)
+static void fill_circle_seg_{{ ps.suffix }}(gp_pixmap *pixmap,
+	gp_coord xcenter, gp_coord ycenter, gp_size r, uint8_t seg_flag, gp_pixel pixel)
 {
 	/* for r == 0, circle degenerates to a point */
 	if (r == 0) {
-		GP_PutPixel_Raw_{{ ps.suffix }}(pixmap, xcenter, ycenter, pixel);
+		gp_putpixel_raw_{{ ps.suffix }}(pixmap, xcenter, ycenter, pixel);
 		return;
 	}
 
@@ -64,45 +64,45 @@ static void GP_FillCircleSeg_Raw_{{ ps.suffix }}(GP_Pixmap *pixmap,
 		error += -2*y + 1;
 
 		if (seg_flag & GP_CIRCLE_SEG1)
-			GP_HLine_Raw_{{ ps.suffix }}(pixmap, xcenter, xcenter+x-1, ycenter-y, pixel);
+			gp_hline_raw_{{ ps.suffix }}(pixmap, xcenter, xcenter+x-1, ycenter-y, pixel);
 
 		if (seg_flag & GP_CIRCLE_SEG2)
-			GP_HLine_Raw_{{ ps.suffix }}(pixmap, xcenter-x+1, xcenter, ycenter-y, pixel);
+			gp_hline_raw_{{ ps.suffix }}(pixmap, xcenter-x+1, xcenter, ycenter-y, pixel);
 
 		if (seg_flag & GP_CIRCLE_SEG3)
-			GP_HLine_Raw_{{ ps.suffix }}(pixmap, xcenter-x+1, xcenter, ycenter+y, pixel);
+			gp_hline_raw_{{ ps.suffix }}(pixmap, xcenter-x+1, xcenter, ycenter+y, pixel);
 
 		if (seg_flag & GP_CIRCLE_SEG4)
-			GP_HLine_Raw_{{ ps.suffix }}(pixmap, xcenter, xcenter+x-1, ycenter+y, pixel);
+			gp_hline_raw_{{ ps.suffix }}(pixmap, xcenter, xcenter+x-1, ycenter+y, pixel);
 	}
 }
 
 @ end
 
-void GP_FillCircle_Raw(GP_Pixmap *pixmap, GP_Coord xcenter, GP_Coord ycenter,
-                       GP_Size r, GP_Pixel pixel)
+void gp_fill_circle_raw(gp_pixmap *pixmap, gp_coord xcenter, gp_coord ycenter,
+                        gp_size r, gp_pixel pixel)
 {
 	GP_CHECK_PIXMAP(pixmap);
 
-	GP_FN_PER_BPP_PIXMAP(GP_FillCircle_Raw, pixmap, pixmap,
-	                      xcenter, ycenter, r, pixel);
+	GP_FN_PER_BPP_PIXMAP(fill_circle, pixmap, pixmap,
+	                     xcenter, ycenter, r, pixel);
 }
 
-void GP_FillCircleSeg_Raw(GP_Pixmap *pixmap, GP_Coord xcenter, GP_Coord ycenter,
-                          GP_Size r, uint8_t seg_flag, GP_Pixel pixel)
+void gp_fill_circle_seg_raw(gp_pixmap *pixmap, gp_coord xcenter, gp_coord ycenter,
+                            gp_size r, uint8_t seg_flag, gp_pixel pixel)
 {
 	GP_CHECK_PIXMAP(pixmap);
 
-	GP_FN_PER_BPP_PIXMAP(GP_FillCircleSeg_Raw, pixmap, pixmap,
-	                      xcenter, ycenter, r, seg_flag, pixel);
+	GP_FN_PER_BPP_PIXMAP(fill_circle_seg, pixmap, pixmap,
+	                     xcenter, ycenter, r, seg_flag, pixel);
 }
 
-void GP_FillCircle(GP_Pixmap *pixmap, GP_Coord xcenter, GP_Coord ycenter,
-                   GP_Size r, GP_Pixel pixel)
+void gp_fill_circle(gp_pixmap *pixmap, gp_coord xcenter, gp_coord ycenter,
+                    gp_size r, gp_pixel pixel)
 {
 	GP_CHECK_PIXMAP(pixmap);
 
 	GP_TRANSFORM_POINT(pixmap, xcenter, ycenter);
 
-	GP_FillCircle_Raw(pixmap, xcenter, ycenter, r, pixel);
+	gp_fill_circle_raw(pixmap, xcenter, ycenter, r, pixel);
 }

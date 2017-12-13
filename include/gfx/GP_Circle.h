@@ -30,34 +30,34 @@
 
 /* Circle */
 
-void GP_Circle(GP_Pixmap *pixmap, GP_Coord xcenter, GP_Coord ycenter,
-               GP_Size r, GP_Pixel pixel);
+void gp_circle(gp_pixmap *pixmap, gp_coord xcenter, gp_coord ycenter,
+               gp_size r, gp_pixel pixel);
 
-void GP_Circle_Raw(GP_Pixmap *pixmap, GP_Coord xcenter, GP_Coord ycenter,
-                   GP_Size r, GP_Pixel pixel);
+void gp_circle_raw(gp_pixmap *pixmap, gp_coord xcenter, gp_coord ycenter,
+                   gp_size r, gp_pixel pixel);
 
 /* Filled Circle */
 
-void GP_FillCircle(GP_Pixmap *pixmap, GP_Coord xcenter, GP_Coord ycenter,
-                   GP_Size r, GP_Pixel pixel);
+void gp_fill_circle(gp_pixmap *pixmap, gp_coord xcenter, gp_coord ycenter,
+                    gp_size r, gp_pixel pixel);
 
-void GP_FillCircle_Raw(GP_Pixmap *pixmap, GP_Coord xcenter, GP_Coord ycenter,
-                       GP_Size r, GP_Pixel pixel);
+void gp_fill_circle_raw(gp_pixmap *pixmap, gp_coord xcenter, gp_coord ycenter,
+                        gp_size r, gp_pixel pixel);
 
 /* Ring */
 
-void GP_Ring(GP_Pixmap *pixmap, GP_Coord xcenter, GP_Coord ycenter,
-             GP_Size r1, GP_Size r2, GP_Pixel pixel);
+void gp_ring(gp_pixmap *pixmap, gp_coord xcenter, gp_coord ycenter,
+             gp_size r1, gp_size r2, gp_pixel pixel);
 
-void GP_Ring_Raw(GP_Pixmap *pixmap, GP_Coord xcenter, GP_Coord ycenter,
-                 GP_Size r1, GP_Size r2, GP_Pixel pixel);
+void gp_ring_raw(gp_pixmap *pixmap, gp_coord xcenter, gp_coord ycenter,
+                 gp_size r1, gp_size r2, gp_pixel pixel);
 
 /* Filled Ring */
 
-void GP_FillRing(GP_Pixmap *pixmap, GP_Coord xcenter, GP_Coord ycenter,
-                 GP_Size r1, GP_Size r2, GP_Pixel pixel);
+void gp_fill_ring(gp_pixmap *pixmap, gp_coord xcenter, gp_coord ycenter,
+                  gp_size r1, gp_size r2, gp_pixel pixel);
 
-void GP_FillRing_Raw(GP_Pixmap *pixmap, GP_Coord xcenter, GP_Coord ycenter,
-                     GP_Size r1, GP_Size r2, GP_Pixel pixel);
+void gp_fill_ring_raw(gp_pixmap *pixmap, gp_coord xcenter, gp_coord ycenter,
+                      gp_size r1, gp_size r2, gp_pixel pixel);
 
 #endif /* GP_CIRCLE_H */

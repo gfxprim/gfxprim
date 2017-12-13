@@ -16,59 +16,38 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2014 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2011 Jiri "BlueBear" Dluhos                            *
+ *                         <jiri.bluebear.dluhos@gmail.com>                  *
+ *                                                                           *
+ * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
- /*
+#ifndef GFXPRIM_H__
+#define GFXPRIM_H__
 
-   PNG support using libpng library.
+/* library core */
+#include "core/GP_Core.h"
 
-  */
+/* public drawing API */
+#include "gfx/GP_Gfx.h"
 
-#ifndef LOADERS_GP_PNG_H
-#define LOADERS_GP_PNG_H
+/* fonts and text drawing */
+#include "text/GP_Text.h"
 
-#include "loaders/GP_Loader.h"
+/* backends */
+#include "backends/GP_Backends.h"
 
-/*
- * Loads a PNG image from a file.
- */
-GP_Pixmap *GP_LoadPNG(const char *src_path, GP_ProgressCallback *callback);
+/* input and events */
+#include "input/GP_Input.h"
 
-/*
- * Extended load function.
- */
-int GP_ReadPNGEx(GP_IO *io, GP_Pixmap **img,
-                 GP_DataStorage *storage, GP_ProgressCallback *callback);
-int GP_LoadPNGEx(const char *src_path, GP_Pixmap **img,
-                 GP_DataStorage *storage, GP_ProgressCallback *callback);
+/* bitmap loaders */
+#include "loaders/GP_Loaders.h"
 
-/*
- * Reads a PNG from an IO stream.
- *
- * Returns newly allocated pixmap cotaining the loaded image or in case of
- * failure NULL and errno is set.
- */
-GP_Pixmap *GP_ReadPNG(GP_IO *io, GP_ProgressCallback *callback);
+/* bitmap filters */
+#include "filters/GP_Filters.h"
 
-/*
- * Writes PNG into an I/O stream.
- */
-int GP_SavePNG(const GP_Pixmap *src, const char *dst_path,
-               GP_ProgressCallback *callback);
+/* grabbers */
+#include "grabbers/GP_Grabbers.h"
 
-/*
- * Saves PNG to a file.
- */
-int GP_SavePNG(const GP_Pixmap *src, const char *dst_path,
-               GP_ProgressCallback *callback);
-
-/*
- * Looks for PNG file signature. Returns non-zero if found.
- */
-int GP_MatchPNG(const void *buf);
-
-extern GP_Loader GP_PNG;
-
-#endif /* LOADERS_GP_PNG_H */
+#endif /* GFXPRIM_H__ */

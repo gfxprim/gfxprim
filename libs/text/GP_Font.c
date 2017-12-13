@@ -21,11 +21,10 @@
  *****************************************************************************/
 
 #include <stdlib.h>
-#include "GP_Font.h"
+#include <text/GP_Font.h>
+#include <text/GP_Fonts.h>
 
-#include "GP_DefaultFont.h"
-
-uint32_t GP_GetGlyphCount(GP_CharSet charset)
+uint32_t gp_get_glyph_count(gp_char_set charset)
 {
 	switch (charset) {
 	case GP_CHARSET_7BIT:
@@ -36,7 +35,7 @@ uint32_t GP_GetGlyphCount(GP_CharSet charset)
 	}
 }
 
-GP_GlyphBitmap *GP_GetGlyphBitmap(const GP_FontFace *font, int c)
+gp_glyph *gp_get_glyph(const gp_font_face *font, int c)
 {
 	int i;
 
@@ -57,10 +56,10 @@ GP_GlyphBitmap *GP_GetGlyphBitmap(const GP_FontFace *font, int c)
 	else
 		offset = font->glyph_offsets[0] * i;
 
-	return (GP_GlyphBitmap*)(font->glyphs + offset);
+	return (gp_glyph*)(font->glyphs + offset);
 }
 
-void GP_FontFaceFree(GP_FontFace *self)
+void gp_font_face_free(gp_font_face *self)
 {
 	if (!self)
 		return;

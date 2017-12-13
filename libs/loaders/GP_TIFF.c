@@ -38,12 +38,12 @@
 #include "core/GP_GetPutPixel.h"
 #include "core/GP_Debug.h"
 
-#include "GP_TIFF.h"
+#include <loaders/GP_Loaders.gen.h>
 
 #define TIFF_HEADER_LITTLE "II\x2a\0"
 #define TIFF_HEADER_BIG    "MM\0\x2a"
 
-int GP_MatchTIFF(const void *buf)
+int gp_match_tiff(const void *buf)
 {
 	if (!memcmp(buf, TIFF_HEADER_LITTLE, 4))
 		return 1;
@@ -215,19 +215,19 @@ static struct tag tags[] = {
 };
 
 static void fill_metadata(TIFF *tiff, struct tiff_header *header,
-                          GP_DataStorage *storage)
+                          gp_storage *storage)
 {
 	unsigned int i;
 	int flag;
 	uint16_t s;
 	float f;
-	GP_DataNode val;
+	gp_data_node val;
 
-	GP_DataStorageAddInt(storage, NULL, "Width", header->w);
-	GP_DataStorageAddInt(storage, NULL, "Height", header->h);
-	GP_DataStorageAddString(storage, NULL, "Compression",
+	gp_storage_add_int(storage, NULL, "Width", header->w);
+	gp_storage_add_int(storage, NULL, "Height", header->h);
+	gp_storage_add_string(storage, NULL, "Compression",
 	                        compression_name(header->compress));
-	GP_DataStorageAddInt(storage, NULL, "Bits per Sample",
+	gp_storage_add_int(storage, NULL, "Bits per Sample",
 	                     header->bits_per_sample);
 
 	for (i = 0; tags[i].name; i++) {
@@ -254,13 +254,13 @@ static void fill_metadata(TIFF *tiff, struct tiff_header *header,
 		}
 
 		if (flag) {
-			GP_DataStorageAdd(storage, NULL, &val);
+			gp_storage_add(storage, NULL, &val);
 			flag = 0;
 		}
 	}
 }
 
-static GP_PixelType match_grayscale_pixel_type(TIFF *tiff,
+static gp_pixel_type match_grayscale_pixel_type(TIFF *tiff,
                                                struct tiff_header *header)
 {
 	if (!TIFFGetField(tiff, TIFFTAG_BITSPERSAMPLE,
@@ -292,7 +292,7 @@ static GP_PixelType match_grayscale_pixel_type(TIFF *tiff,
 	}
 }
 
-static GP_PixelType match_rgb_pixel_type(TIFF *tiff, struct tiff_header *header)
+static gp_pixel_type match_rgb_pixel_type(TIFF *tiff, struct tiff_header *header)
 {
 	uint16_t samples;
 
@@ -307,14 +307,14 @@ static GP_PixelType match_rgb_pixel_type(TIFF *tiff, struct tiff_header *header)
 
 	/* Mach RGB pixel type with given pixel sizes */
 	if (samples == 3)
-		return GP_PixelRGBLookup(bps, 0, bps, bps,
-		                         bps, 2*bps, 0, 0, 3*bps);
+		return gp_pixel_rgb_lookup(bps, 0, bps, bps, bps, 2 * bps, 0,
+					   0, 3 * bps);
 
 	GP_DEBUG(1, "Unsupported");
 	return GP_PIXEL_UNKNOWN;
 }
 
-static GP_PixelType match_pixel_type(TIFF *tiff, struct tiff_header *header)
+static gp_pixel_type match_pixel_type(TIFF *tiff, struct tiff_header *header)
 {
 	if (!TIFFGetField(tiff, TIFFTAG_PHOTOMETRIC, &header->photometric))
 		return GP_PIXEL_UNKNOWN;
@@ -358,9 +358,9 @@ static uint16_t get_idx(uint8_t *row, uint32_t x, uint16_t bps)
 	return 0;
 }
 
-static int tiff_read_palette(TIFF *tiff, GP_Pixmap *res,
+static int tiff_read_palette(TIFF *tiff, gp_pixmap *res,
                              struct tiff_header *header,
-                             GP_ProgressCallback *callback)
+                             gp_progress_cb *callback)
 {
 	if (TIFFIsTiled(tiff)) {
 		//TODO
@@ -407,20 +407,20 @@ static int tiff_read_palette(TIFF *tiff, GP_Pixmap *res,
 				i = 0;
 			}
 
-			GP_Pixel p = GP_Pixel_CREATE_RGB888(palette_r[i]>>8,
+			gp_pixel p = GP_PIXEL_CREATE_RGB888(palette_r[i]>>8,
 					                    palette_g[i]>>8,
 			                                    palette_b[i]>>8);
 
-			GP_PutPixel_Raw_24BPP(res, x, y, p);
+			gp_putpixel_raw_24BPP(res, x, y, p);
 		}
 
-		if (GP_ProgressCallbackReport(callback, y, res->h, res->w)) {
+		if (gp_progress_cb_report(callback, y, res->h, res->w)) {
 			GP_DEBUG(1, "Operation aborted");
 			return ECANCELED;
 		}
 	}
 
-	GP_ProgressCallbackDone(callback);
+	gp_progress_cb_done(callback);
 	return 0;
 }
 
@@ -430,8 +430,8 @@ static int tiff_read_palette(TIFF *tiff, GP_Pixmap *res,
 /*
  * Direct read -> data in image are in right format.
  */
-static int tiff_read(TIFF *tiff, GP_Pixmap *res, struct tiff_header *header,
-                     GP_ProgressCallback *callback)
+static int tiff_read(TIFF *tiff, gp_pixmap *res, struct tiff_header *header,
+                     gp_progress_cb *callback)
 {
 	uint32_t i, y;
 	uint16_t planar_config, samples, s;
@@ -482,13 +482,13 @@ static int tiff_read(TIFF *tiff, GP_Pixmap *res, struct tiff_header *header,
 			//Temporary, till bitendians are fixed
 			switch (res->pixel_type) {
 			case GP_PIXEL_G1:
-				GP_BitSwapRow_B1(addr, res->bytes_per_row);
+				gp_bit_swap_row_b1(addr, res->bytes_per_row);
 			break;
 			case GP_PIXEL_G2:
-				GP_BitSwapRow_B2(addr, res->bytes_per_row);
+				gp_bit_swap_row_b2(addr, res->bytes_per_row);
 			break;
 			case GP_PIXEL_G4:
-				GP_BitSwapRow_B4(addr, res->bytes_per_row);
+				gp_bit_swap_row_b4(addr, res->bytes_per_row);
 			break;
 			default:
 			break;
@@ -500,29 +500,29 @@ static int tiff_read(TIFF *tiff, GP_Pixmap *res, struct tiff_header *header,
 					addr[i] = ~addr[i];
 		}
 
-		if (GP_ProgressCallbackReport(callback, y, res->h, res->w)) {
+		if (gp_progress_cb_report(callback, y, res->h, res->w)) {
 			GP_DEBUG(1, "Operation aborted");
 			return ECANCELED;
 		}
 	}
 
-	GP_ProgressCallbackDone(callback);
+	gp_progress_cb_done(callback);
 	return 0;
 }
 
 static tsize_t tiff_io_read(thandle_t io, void *buf, tsize_t size)
 {
-	return GP_IORead(io, buf, size);
+	return gp_io_read(io, buf, size);
 }
 
 static tsize_t tiff_io_write(thandle_t io, void *buf, tsize_t size)
 {
-	return GP_IOWrite(io, buf, size);
+	return gp_io_write(io, buf, size);
 }
 
 static toff_t tiff_io_seek(thandle_t io, toff_t offset, int whence)
 {
-	return GP_IOSeek(io, offset, whence);
+	return gp_io_seek(io, offset, whence);
 }
 
 static int tiff_io_close(thandle_t GP_UNUSED(io))
@@ -532,7 +532,7 @@ static int tiff_io_close(thandle_t GP_UNUSED(io))
 
 static toff_t tiff_io_size(thandle_t io)
 {
-	return GP_IOSize(io);
+	return gp_io_size(io);
 }
 
 /*
@@ -549,13 +549,13 @@ static void tiff_io_unmap(thandle_t io, void *base, toff_t size)
 }
 */
 
-int GP_ReadTIFFEx(GP_IO *io, GP_Pixmap **img, GP_DataStorage *storage,
-                  GP_ProgressCallback *callback)
+int gp_read_tiff_ex(gp_io *io, gp_pixmap **img, gp_storage *storage,
+                  gp_progress_cb *callback)
 {
 	TIFF *tiff;
 	struct tiff_header header;
-	GP_Pixmap *res;
-	GP_PixelType pixel_type;
+	gp_pixmap *res;
+	gp_pixel_type pixel_type;
 	int err;
 
 	tiff = TIFFClientOpen("GFXprim IO", "r", io, tiff_io_read,
@@ -584,7 +584,7 @@ int GP_ReadTIFFEx(GP_IO *io, GP_Pixmap **img, GP_DataStorage *storage,
 		goto err1;
 	}
 
-	res = GP_PixmapAlloc(header.w, header.h, pixel_type);
+	res = gp_pixmap_alloc(header.w, header.h, pixel_type);
 
 	if (res == NULL) {
 		err = errno;
@@ -608,7 +608,7 @@ int GP_ReadTIFFEx(GP_IO *io, GP_Pixmap **img, GP_DataStorage *storage,
 	*img = res;
 	return 0;
 err2:
-	GP_PixmapFree(res);
+	gp_pixmap_free(res);
 err1:
 	TIFFClose(tiff);
 err0:
@@ -616,8 +616,8 @@ err0:
 	return 1;
 }
 
-static int save_grayscale(TIFF *tiff, const GP_Pixmap *src,
-                          GP_ProgressCallback *callback)
+static int save_grayscale(TIFF *tiff, const gp_pixmap *src,
+                          gp_progress_cb *callback)
 {
 	uint32_t x, y;
 	uint8_t buf[src->bytes_per_row];
@@ -658,7 +658,7 @@ static int save_grayscale(TIFF *tiff, const GP_Pixmap *src,
 			return EIO;
 		}
 
-		if (GP_ProgressCallbackReport(callback, y, src->h, src->w)) {
+		if (gp_progress_cb_report(callback, y, src->h, src->w)) {
 			GP_DEBUG(1, "Operation aborted");
 			return ECANCELED;
 		}
@@ -667,8 +667,8 @@ static int save_grayscale(TIFF *tiff, const GP_Pixmap *src,
 	return 0;
 }
 
-static int save_rgb(TIFF *tiff, const GP_Pixmap *src,
-                    GP_ProgressCallback *callback)
+static int save_rgb(TIFF *tiff, const gp_pixmap *src,
+                    gp_progress_cb *callback)
 {
 	uint8_t buf[src->w * 3];
 	uint32_t x, y;
@@ -703,7 +703,7 @@ static int save_rgb(TIFF *tiff, const GP_Pixmap *src,
 
 		TIFFWriteEncodedStrip(tiff, y, addr, src->w * 3);
 
-		if (GP_ProgressCallbackReport(callback, y, src->h, src->w)) {
+		if (gp_progress_cb_report(callback, y, src->h, src->w)) {
 			GP_DEBUG(1, "Operation aborted");
 			return ECANCELED;
 		}
@@ -712,7 +712,7 @@ static int save_rgb(TIFF *tiff, const GP_Pixmap *src,
 	return 0;
 }
 
-static GP_PixelType save_ptypes[] = {
+static gp_pixel_type save_ptypes[] = {
 	GP_PIXEL_BGR888,
 	GP_PIXEL_RGB888,
 	GP_PIXEL_xRGB8888,
@@ -723,15 +723,15 @@ static GP_PixelType save_ptypes[] = {
 	GP_PIXEL_UNKNOWN,
 };
 
-int GP_WriteTIFF(const GP_Pixmap *src, GP_IO *io,
-                 GP_ProgressCallback *callback)
+int gp_write_tiff(const gp_pixmap *src, gp_io *io,
+                 gp_progress_cb *callback)
 {
 	TIFF *tiff;
 	int err = 0;
 
 	GP_DEBUG(1, "Writing TIFF to I/O (%p)", io);
 
-	if (GP_PixelHasFlags(src->pixel_type, GP_PIXEL_HAS_ALPHA)) {
+	if (gp_pixel_has_flags(src->pixel_type, GP_PIXEL_HAS_ALPHA)) {
 		GP_DEBUG(1, "Alpha channel not supported yet");
 		errno = ENOSYS;
 		return 1;
@@ -749,7 +749,7 @@ int GP_WriteTIFF(const GP_Pixmap *src, GP_IO *io,
 	break;
 	default:
 		GP_DEBUG(1, "Unsupported pixel type %s",
-		         GP_PixelTypeName(src->pixel_type));
+		         gp_pixel_type_name(src->pixel_type));
 		errno = ENOSYS;
 		return 1;
 	}
@@ -795,22 +795,22 @@ int GP_WriteTIFF(const GP_Pixmap *src, GP_IO *io,
 	}
 
 	TIFFClose(tiff);
-	GP_ProgressCallbackDone(callback);
+	gp_progress_cb_done(callback);
 	return 0;
 }
 
 #else
 
-int GP_ReadTIFFEx(GP_IO GP_UNUSED(*io), GP_Pixmap GP_UNUSED(**img),
-                  GP_DataStorage GP_UNUSED(*storage),
-                  GP_ProgressCallback GP_UNUSED(*callback))
+int gp_read_tiff_ex(GP_IO GP_UNUSED(*io), gp_pixmap GP_UNUSED(**img),
+                  gp_storage GP_UNUSED(*storage),
+                  gp_progress_cb GP_UNUSED(*callback))
 {
 	errno = ENOSYS;
 	return 1;
 }
 
-int GP_WriteTIFF(const GP_Pixmap GP_UNUSED(*src), GP_IO GP_UNUSED(*io),
-                 GP_ProgressCallback GP_UNUSED(*callback))
+int gp_write_tiff(const gp_pixmap GP_UNUSED(*src), GP_IO GP_UNUSED(*io),
+                 gp_progress_cb GP_UNUSED(*callback))
 {
 	errno = ENOSYS;
 	return 1;
@@ -818,35 +818,13 @@ int GP_WriteTIFF(const GP_Pixmap GP_UNUSED(*src), GP_IO GP_UNUSED(*io),
 
 #endif /* HAVE_TIFF */
 
-GP_Pixmap *GP_LoadTIFF(const char *src_path, GP_ProgressCallback *callback)
-{
-	return GP_LoaderLoadImage(&GP_TIFF, src_path, callback);
-}
-
-GP_Pixmap *GP_ReadTIFF(GP_IO *io, GP_ProgressCallback *callback)
-{
-	return GP_LoaderReadImage(&GP_TIFF, io, callback);
-}
-
-int GP_LoadTIFFEx(const char *src_path, GP_Pixmap **img,
-                  GP_DataStorage *storage, GP_ProgressCallback *callback)
-{
-	return GP_LoaderLoadImageEx(&GP_TIFF, src_path, img, storage, callback);
-}
-
-int GP_SaveTIFF(const GP_Pixmap *src, const char *dst_path,
-                GP_ProgressCallback *callback)
-{
-	return GP_LoaderSaveImage(&GP_TIFF, src, dst_path, callback);
-}
-
-struct GP_Loader GP_TIFF = {
+const struct gp_loader gp_tiff = {
 #ifdef HAVE_TIFF
-	.Read = GP_ReadTIFFEx,
-	.Write = GP_WriteTIFF,
+	.Read = gp_read_tiff_ex,
+	.Write = gp_write_tiff,
 	.save_ptypes = save_ptypes,
 #endif
-	.Match = GP_MatchTIFF,
+	.Match = gp_match_tiff,
 
 	.fmt_name = "Tag Image File Format",
 	.extensions = {"tif", "tiff", NULL},

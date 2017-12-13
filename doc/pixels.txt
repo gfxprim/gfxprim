@@ -8,11 +8,11 @@ Pixel Type
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <GP.h>
+#include <gfxprim.h>
 /* or */
 #include <core/GP_Pixel.gen.h>
 
-typedef enum GP_PixelType {
+typedef enum gp_pixel_type {
 	GP_PIXEL_UNKNOWN,
 	GP_PIXEL_xRGB8888,
 	GP_PIXEL_RGBA8888,
@@ -24,7 +24,7 @@ typedef enum GP_PixelType {
 	GP_PIXEL_G8,
 	...
 	GP_PIXEL_MAX,
-} GP_PixelType;
+} gp_pixel_type;
 
 /*
  * The same values are also defined as macros so it's possible to
@@ -48,7 +48,7 @@ The header and must contain at least the members listed above.
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <GP.h>
+#include <gfxprim.h>
 /* or */
 #include <core/GP_Pixel.h>
 
@@ -56,73 +56,73 @@ typedef struct {
 	char name[8];    /* Channel name */
 	uint8_t offset;  /* Offset in bits */
 	uint8_t size;    /* Bit-size */
-} GP_PixelTypeChannel;
+} gp_pixel_channel;
 
-typedef enum GP_PixelFlags {
+typedef enum gp_pixel_flags {
 	GP_PIXEL_HAS_ALPHA = 0x01,
 	GP_PIXEL_IS_RGB = 0x02,
 	GP_PIXEL_IS_PALETTE = 0x04,
 	GP_PIXEL_IS_CMYK = 0x08,
 	GP_PIXEL_IS_GRAYSCALE = 0x10,
-} GP_PixelFlags;
+} gp_pixel_flags;
 
 typedef struct {
-	GP_PixelType type;        /* Number of the type */
+	gp_pixel_type type;        /* Number of the type */
 	const char name[16];      /* Name */
 	uint8_t size;	          /* Size in bits */
 	GP_BIT_ENDIAN bit_endian; /* Order of pixels in a byte */
 	uint8_t numchannels;      /* Number of channels */
-	GP_PixelFlags flags;
+	gp_pixel_flags flags;
 	/* String describing the bit-representaton (as in "RRRRRGGGGGGBBBBB")*/
 	const char bitmap[GP_PIXEL_BITS + 1];
 	/* Individual channels */
-	const GP_PixelTypeChannel channels[GP_PIXELTYPE_MAX_CHANNELS];
-} GP_PixelTypeDescription;
+	const gp_pixel_channel channels[GP_PIXELTYPE_MAX_CHANNELS];
+} gp_pixel_type_desc;
 
-extern const GP_PixelTypeDescription const GP_PixelTypes[];
+extern const gp_pixel_type_desc const gp_pixel_types[];
 
-const GP_PixelTypeDescription *GP_PixelTypeDesc(GP_PixelType type);
+const gp_pixel_type_desc *gp_pixel_desc(gp_pixel_type type);
 
-const char *GP_PixelTypeName(GP_PixelType type);
+const char *gp_pixel_typeName(gp_pixel_type type);
 
-uint32_t GP_PixelSize(GP_PixelType type);
+uint32_t gp_pixel_size(gp_pixel_type type);
 
-unsigned int GP_PixelChannelCount(GP_PixelType type);
+unsigned int gp_pixel_channel_count(gp_pixel_type type);
 
-uint8_t GP_PixelChannelBits(GP_PixelType type, uint8_t channel);
+uint8_t gp_pixel_channel_bits(gp_pixel_type type, uint8_t channel);
 
-const char *GP_PixelChannelName(GP_PixelType type, uint8_t channel);
+const char *gp_pixel_channel_name(gp_pixel_type type, uint8_t channel);
 
-int GP_PixelHasFlags(GP_PixelType pixel_type, GP_PixelFlags flags);
+int gp_pixel_has_flags(gp_pixel_type pixel_type, gp_pixel_flags flags);
 -------------------------------------------------------------------------------
 
 Each pixel type has accompanying record in global array describing pixel types.
 
-You should not use this array directly, use the 'GP_PixelTypeDesc()' function
-to query the pixel type description.
+You should not use this array directly, use the 'gp_pixel_desc()' function to
+query the pixel type description or one of the gp_pixel_*() functions below.
 
-The 'GP_PixelTypeName()' function returns static string with pixel type name.
+The 'gp_pixel_type_name()' function returns static string with pixel type name.
 
-The 'GP_PixelSize()' returns pixel size in bits.
+The 'gp_pixel_size()' returns pixel size in bits.
 
-The 'GP_PixelChannelCount()' returns number of pixel channels.
+The 'gp_pixel_channel_count()' returns number of pixel channels.
 
-The 'GP_PixelChannelBits()' returns number of bits for respective channel.
+The 'gp_pixel_channel_bits()' returns number of bits for respective channel.
 
-The 'GP_PixelChannelName()' returns channel name.
+The 'gp_pixel_channel_name()' returns channel name.
 
-The 'GP_PixelHasFlags()' function returns true if particular pixel type
+The 'gp_pixel_has_flags()' function returns true if particular pixel type
 contains the bitmask of pixel flags.
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <GP.h>
+#include <gfxprim.h>
 /* or */
 #include <core/GP_Pixel.h>
 
-void GP_PixelPrint(GP_Pixel pixel, GP_PixelType type);
+void gp_pixel_print(gp_pixel pixel, gp_pixel_type type);
 
-void GP_PixelSNPrint(char *buf, size_t len, GP_Pixel pixel, GP_PixelType type);
+void gp_pixel_snprint(char *buf, size_t len, gp_pixel pixel, gp_pixel_type type);
 -------------------------------------------------------------------------------
 
 Pretty print pixel value given the pixel type.
@@ -134,19 +134,19 @@ RGB888 0xffffff R=255 G=255 B=255
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <GP.h>
+#include <gfxprim.h>
 /* or */
 #include <core/GP_Pixel.h>
 
-GP_PixelType GP_PixelRGBMatch(GP_Pixel rmask, GP_Pixel gmask,
-                              GP_Pixel bmask, GP_Pixel amask,
-			      uint8_t bits_per_pixel);
+gp_pixel_type gp_pixel_rgb_match(gp_pixel rmask, gp_pixel gmask,
+                                 gp_pixel bmask, gp_pixel amask,
+			         uint8_t bits_per_pixel);
 
-GP_PixelType GP_PixelRGBLookup(uint32_t rsize, uint32_t roff,
-                               uint32_t gsize, uint32_t goff,
-			       uint32_t bsize, uint32_t boff,
-			       uint32_t asize, uint32_t aoff,
-			       uint8_t bits_per_pixel);
+gp_pixel_type gp_pixel_rgb_lookup(uint32_t rsize, uint32_t roff,
+                                  uint32_t gsize, uint32_t goff,
+			          uint32_t bsize, uint32_t boff,
+			          uint32_t asize, uint32_t aoff,
+			          uint8_t bits_per_pixel);
 -------------------------------------------------------------------------------
 
 Returns pixel type given either RGB masks or RGB sizes and offsets. If no

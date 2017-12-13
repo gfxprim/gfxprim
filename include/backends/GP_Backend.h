@@ -25,7 +25,7 @@
 
 /*
 
-  The GP_Backend is overall structure for API for managing
+  The gp_backend is overall structure for API for managing
   connection/mmaped memory/... to xserver window/framebuffer/... .
 
   In contrast to other graphics libraries we do not try to create unified
@@ -33,7 +33,7 @@
   backend. Rather than that we are trying to create API that is the same
   for all backends, once initalization is done.
 
-  So once you initalize, for example, framebuffer driver, the GP_Backend
+  So once you initalize, for example, framebuffer driver, the gp_backend
   structure is returned, which then could be used with generic code for
   backend drawing.
 
@@ -42,31 +42,31 @@
 #ifndef BACKENDS_GP_BACKEND_H
 #define BACKENDS_GP_BACKEND_H
 
-#include "core/GP_Pixmap.h"
+#include <core/GP_Types.h>
 
-#include "input/GP_EventQueue.h"
-#include "input/GP_Timer.h"
+#include <input/GP_EventQueue.h>
+#include <input/GP_Timer.h>
 
-typedef struct GP_Backend {
-	/*
-	 * Backend name.
-	 */
-	const char *name;
+typedef struct gp_backend gp_backend;
 
+struct gp_backend {
 	/*
 	 * Pointer to pixmap app should draw to.
 	 *
 	 * This MAY change upon a flip operation.
 	 */
-	GP_Pixmap *pixmap;
+	gp_pixmap *pixmap;
+
+	/* Backend name */
+	const char *name;
 
 	/*
 	 * If display is buffered, this copies content
-	 * of pixmap onto display.
+	 * of pixmap into display.
 	 *
 	 * If display is not buffered, this is no-op (set to NULL).
 	 */
-	void (*Flip)(struct GP_Backend *self);
+	void (*flip)(gp_backend *self);
 
 	/*
 	 * Updates display rectangle.
@@ -76,9 +76,9 @@ typedef struct GP_Backend {
 	 *
 	 * If display is not buffered, this is no-op (set to NULL).
 	 */
-	void (*UpdateRect)(struct GP_Backend *self,
-	                   GP_Coord x0, GP_Coord y0,
-	                   GP_Coord x1, GP_Coord y1);
+	void (*update_rect)(gp_backend *self,
+	                    gp_coord x0, gp_coord y0,
+	                    gp_coord x1, gp_coord y1);
 
 	/*
 	 * Callback to change attributes.
@@ -91,33 +91,29 @@ typedef struct GP_Backend {
 	 *
 	 * Use the inline wrappers instead.
 	 */
-	int (*SetAttributes)(struct GP_Backend *self,
-	                     uint32_t w, uint32_t h,
-	                     const char *caption);
+	int (*set_attrs)(gp_backend *self,
+	                 uint32_t w, uint32_t h,
+	                 const char *caption);
 
 	/*
 	 * Resize acknowledge callback. This must be called
 	 * after you got resize event in order to resize
 	 * backend buffers.
 	 */
-	int (*ResizeAck)(struct GP_Backend *self);
+	int (*resize_ack)(gp_backend *self);
 
 	/*
 	 * Exits the backend.
 	 */
-	void (*Exit)(struct GP_Backend *self);
+	void (*exit)(gp_backend *self);
 
-	/*
-	 * Connection fd. Set to -1 if not available
-	 */
-	int fd;
 
 	/*
 	 * Non-blocking event loop.
 	 *
 	 * The events are filled into the event queue see GP_Input.h.
 	 */
-	void (*Poll)(struct GP_Backend *self);
+	void (*poll)(gp_backend *self);
 
 	/*
 	 * Blocking event loop. Blocks until events are ready.
@@ -128,78 +124,74 @@ typedef struct GP_Backend {
 	 *
 	 * The events are filled into the event queue see GP_Input.h.
 	 */
-	void (*Wait)(struct GP_Backend *self);
+	void (*wait)(gp_backend *self);
+
+	/* Connection fd. Set to -1 if not available */
+	int fd;
 
 	/*
 	 * Queue to store input events.
 	 */
-	struct GP_EventQueue event_queue;
+	gp_event_queue event_queue;
 
-	/*
-	 * Priority queue for timers.
-	 */
-	struct GP_Timer *timers;
+	/* Priority queue for timers. */
+	struct gp_timer *timers;
 
 	/* Backed private data */
 	char priv[];
-} GP_Backend;
+};
 
 #define GP_BACKEND_PRIV(backend) ((void*)(backend)->priv)
 
-/*
- * Calls backend->Flip().
- */
-void GP_BackendFlip(GP_Backend *backend);
-
-/*
- * Calls backend->UpdateRect().
- */
-void GP_BackendUpdateRectXYXY(GP_Backend *backend,
-                              GP_Coord x0, GP_Coord y0,
-                              GP_Coord x1, GP_Coord y1);
-
-static inline void GP_BackendUpdateRect(GP_Backend *backend,
-                                        GP_Coord x0, GP_Coord y0,
-                                        GP_Coord x1, GP_Coord y1)
+static inline void gp_backend_flip(gp_backend *self)
 {
-	return GP_BackendUpdateRectXYXY(backend, x0, y0, x1, y1);
+	if (self->flip)
+		self->flip(self);
 }
 
-static inline void GP_BackendUpdateRectXYWH(GP_Backend *backend,
-                                            GP_Coord x, GP_Coord y,
-                                            GP_Size w, GP_Size h)
+void gp_backend_update_rect_xyxy(gp_backend *self,
+                                gp_coord x0, gp_coord y0,
+                                gp_coord x1, gp_coord y1);
+
+static inline void gp_backend_update_rect(gp_backend *self,
+                                          gp_coord x0, gp_coord y0,
+                                          gp_coord x1, gp_coord y1)
 {
-	GP_BackendUpdateRectXYXY(backend, x, y, x + w - 1, y + h - 1);
+	return gp_backend_update_rect_xyxy(self, x0, y0, x1, y1);
 }
 
-/*
- * Calls backend->Exit().
- */
-static inline void GP_BackendExit(GP_Backend *backend)
+static inline void gp_backend_update_rect_xywh(gp_backend *self,
+                                               gp_coord x, gp_coord y,
+                                               gp_size w, gp_size h)
 {
-	if (backend)
-		backend->Exit(backend);
+	gp_backend_update_rect_xyxy(self, x, y, x + w - 1, y + h - 1);
+}
+
+static inline void gp_backend_exit(gp_backend *self)
+{
+	if (self)
+		self->exit(self);
 }
 
 /*
  * Polls backend, the events are filled into event queue.
  */
-void GP_BackendPoll(GP_Backend *self);
+void gp_backend_poll(gp_backend *self);
 
 /*
  * Poll and GetEvent combined.
  */
-int GP_BackendPollEvent(GP_Backend *self, GP_Event *ev);
+int gp_backend_poll_event(gp_backend *self, gp_event *ev);
 
 /*
  * Waits for backend events.
  */
-void GP_BackendWait(GP_Backend *self);
+void gp_backend_wait(gp_backend *self);
 
 /*
  * Wait and GetEvent combined.
  */
-int GP_BackendWaitEvent(GP_Backend *self, GP_Event *ev);
+int gp_backend_wait_event(gp_backend *self, gp_event *ev);
 
 /*
  * Adds timer to backend.
@@ -209,19 +201,19 @@ int GP_BackendWaitEvent(GP_Backend *self, GP_Event *ev);
  *
  * See input/GP_Timer.h for more information about timers.
  */
-void GP_BackendAddTimer(GP_Backend *self, GP_Timer *timer);
+void gp_backend_add_timer(gp_backend *self, gp_timer *timer);
 
 /*
  * Removes timer from backend timer queue.
  */
-void GP_BackendRemTimer(GP_Backend *self, GP_Timer *timer);
+void gp_backend_rem_timer(gp_backend *self, gp_timer *timer);
 
 /*
  * Returns number of timers scheduled in backend.
  */
-static inline unsigned int GP_BackendTimersInQueue(GP_Backend *self)
+static inline unsigned int gp_backend_timers_in_queue(gp_backend *self)
 {
-	return GP_TimerQueueSize(self->timers);
+	return gp_timer_queue_size(self->timers);
 }
 
 /*
@@ -229,13 +221,13 @@ static inline unsigned int GP_BackendTimersInQueue(GP_Backend *self)
  *
  * When setting caption is not possible/implemented non zero is returned.
  */
-static inline int GP_BackendSetCaption(GP_Backend *backend,
-                                       const char *caption)
+static inline int gp_backend_set_caption(gp_backend *backend,
+                                         const char *caption)
 {
-	if (backend->SetAttributes == NULL)
+	if (!backend->set_attrs)
 		return 1;
 
-	return backend->SetAttributes(backend, 0, 0, caption);
+	return backend->set_attrs(backend, 0, 0, caption);
 }
 
 /*
@@ -248,7 +240,7 @@ static inline int GP_BackendSetCaption(GP_Backend *backend,
  *
  * Note that after calling this, the backend->pixmap pointer may change.
  */
-int GP_BackendResize(GP_Backend *backend, uint32_t w, uint32_t h);
+int gp_backend_resize(gp_backend *backend, uint32_t w, uint32_t h);
 
 
 /*
@@ -262,29 +254,29 @@ int GP_BackendResize(GP_Backend *backend, uint32_t w, uint32_t h);
  * best action to take is to save application data and exit (as the backend
  * may be in undefined state).
  */
-int GP_BackendResizeAck(GP_Backend *self);
+int gp_backend_resize_ack(gp_backend *self);
 
 /*
  * Event Queue functions.
  */
-static inline unsigned int GP_BackendEventsQueued(GP_Backend *self)
+static inline unsigned int gp_backend_events_queued(gp_backend *self)
 {
-	return GP_EventQueueEventsQueued(&self->event_queue);
+	return gp_event_queue_events_queued(&self->event_queue);
 }
 
-static inline int GP_BackendGetEvent(GP_Backend *self, GP_Event *ev)
+static inline int gp_backend_get_event(gp_backend *self, gp_event *ev)
 {
-	return GP_EventQueueGet(&self->event_queue, ev);
+	return gp_event_queue_get(&self->event_queue, ev);
 }
 
-static inline int GP_BackendPeekEvent(GP_Backend *self, GP_Event *ev)
+static inline int gp_backend_peek_event(gp_backend *self, gp_event *ev)
 {
-	return GP_EventQueuePeek(&self->event_queue, ev);
+	return gp_event_queue_peek(&self->event_queue, ev);
 }
 
-static inline void GP_BackendPutEventBack(GP_Backend *self, GP_Event *ev)
+static inline void gp_backend_put_event_back(gp_backend *self, gp_event *ev)
 {
-	GP_EventQueuePutBack(&self->event_queue, ev);
+	gp_event_queue_put_back(&self->event_queue, ev);
 }
 
 #endif /* BACKENDS_GP_BACKEND_H */

@@ -29,8 +29,8 @@
 #ifndef FILTERS_GP_CONVOLUTION_H
 #define FILTERS_GP_CONVOLUTION_H
 
-#include "GP_Filter.h"
-#include "GP_Linear.h"
+#include <filters/GP_Filter.h>
+#include <filters/GP_Linear.h>
 
 /*
  * 2D convolution kernel.
@@ -40,7 +40,7 @@
  * The div is used to divide the resulting value which is commonly used for
  * normalization.
  *
- * Example box smoothing filter kernel initialization:
+ * _example box smoothing filter kernel initialization:
  *
  * float box_filter[] = {
  *	1, 1, 1,
@@ -48,73 +48,73 @@
  *	1, 1, 1,
  * };
  *
- * GP_FilterKernel2D box_kernel = {
+ * gp_filter_kernel_2d box_kernel = {
  *	.w = 3,
  *	.h = 3,
  *	.div = 9,
  *	.kernel = box_filter,
  * };
  */
-typedef struct GP_FilterKernel2D {
+typedef struct gp_filter_kernel_2d {
 	unsigned int w;
 	unsigned int h;
 	float div;
 	float *kernel;
-} GP_FilterKernel2D;
+} gp_filter_kernel_2d;
 
 /*
- * Extended convolution filter.
+ * _extended convolution filter.
  *
  * Works on rectangle in src defined by x_src, y_src, w_src and h_src.
  *
  * The result is stored into dst strating from x_dst and y_dst.
  *
  */
-int GP_FilterConvolutionEx(const GP_Pixmap *src,
-                           GP_Coord x_src, GP_Coord y_src,
-                           GP_Size w_src, GP_Coord h_src,
-                           GP_Pixmap *dst,
-                           GP_Coord x_dst, GP_Coord y_dst,
-                           const GP_FilterKernel2D *kernel,
-                           GP_ProgressCallback *callback);
+int gp_filter_convolution_ex(const gp_pixmap *src,
+                             gp_coord x_src, gp_coord y_src,
+                             gp_size w_src, gp_coord h_src,
+                             gp_pixmap *dst,
+                             gp_coord x_dst, gp_coord y_dst,
+                             const gp_filter_kernel_2d *kernel,
+                             gp_progress_cb *callback);
 
 /*
- * Extended convolution filter.
+ * _extended convolution filter.
  *
  * Works on rectangle in src defined by x_src, y_src, w_src and h_src.
  *
- * Allocates pixmap of a w_src x h_src.
+ * _allocates pixmap of a w_src x h_src.
  */
-GP_Pixmap *GP_FilterConvolutionExAlloc(const GP_Pixmap *src,
-                                        GP_Coord x_src, GP_Coord y_src,
-                                        GP_Size w_src, GP_Size h_src,
-                                        const GP_FilterKernel2D *kernel,
-                                        GP_ProgressCallback *callback);
+gp_pixmap *gp_filter_convolution_ex_alloc(const gp_pixmap *src,
+                                          gp_coord x_src, gp_coord y_src,
+                                          gp_size w_src, gp_size h_src,
+                                          const gp_filter_kernel_2d *kernel,
+                                          gp_progress_cb *callback);
 
 
-static inline int GP_FilterConvolution(const GP_Pixmap *src, GP_Pixmap *dst,
-                                       const GP_FilterKernel2D *kernel,
-                                       GP_ProgressCallback *callback)
+static inline int gp_filter_convolution(const gp_pixmap *src, gp_pixmap *dst,
+                                        const gp_filter_kernel_2d *kernel,
+                                        gp_progress_cb *callback)
 {
-	return GP_FilterConvolutionEx(src, 0, 0, dst->w, dst->h, dst, 0, 0,
-	                              kernel, callback);
+	return gp_filter_convolution_ex(src, 0, 0, dst->w, dst->h, dst, 0, 0,
+	                                kernel, callback);
 }
 
-static inline GP_Pixmap *GP_FilterConvolutionAlloc(const GP_Pixmap *src,
-                                                    const GP_FilterKernel2D *kernel,
-                                                    GP_ProgressCallback *callback)
+static inline gp_pixmap *gp_filter_convolution_alloc(const gp_pixmap *src,
+                                                     const gp_filter_kernel_2d *kernel,
+                                                     gp_progress_cb *callback)
 {
-	return GP_FilterConvolutionExAlloc(src, 0, 0, src->w, src->h,
-                                           kernel, callback);
+	return gp_filter_convolution_ex_alloc(src, 0, 0, src->w, src->h,
+                                              kernel, callback);
 }
 
 /*
  * Prints a kernel into the stdout.
  */
-static inline void GP_FilterKernel2DPrint(const GP_FilterKernel2D *kernel)
+static inline void gp_filter_kernel_2d_print(const gp_filter_kernel_2d *kernel)
 {
-	GP_FilterKernelPrint_Raw(kernel->kernel, kernel->w, kernel->h,
-	                         kernel->div);
+	gp_filter_kernel_print_raw(kernel->kernel, kernel->w, kernel->h,
+	                           kernel->div);
 }
 
 #endif /* FILTERS_GP_CONVOLUTION_H */

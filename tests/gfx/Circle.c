@@ -33,21 +33,21 @@
 
 struct testcase {
 	/* cicle description */
-	GP_Coord x;
-	GP_Coord y;
-	GP_Size r;
+	gp_coord x;
+	gp_coord y;
+	gp_size r;
 
 	/* expected result */
-	GP_Size w, h;
+	gp_size w, h;
 	const char pixmap[];
 };
 
 static int test_circle(const struct testcase *t)
 {
-	GP_Pixmap *c;
+	gp_pixmap *c;
 	int err;
 
-	c = GP_PixmapAlloc(t->w, t->h, GP_PIXEL_G8);
+	c = gp_pixmap_alloc(t->w, t->h, GP_PIXEL_G8);
 
 	if (c == NULL) {
 		tst_err("Failed to allocate pixmap");
@@ -57,7 +57,7 @@ static int test_circle(const struct testcase *t)
 	/* zero the pixels buffer */
 	memset(c->pixels, 0, c->w * c->h);
 
-	GP_Circle(c, t->x, t->y, t->r, 1);
+	gp_circle(c, t->x, t->y, t->r, 1);
 
 	err = compare_buffers(t->pixmap, c);
 

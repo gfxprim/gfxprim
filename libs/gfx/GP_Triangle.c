@@ -29,18 +29,18 @@
 #include "gfx/GP_Polygon.h"
 #include "gfx/GP_Triangle.h"
 
-void GP_Triangle_Raw(GP_Pixmap *pixmap, GP_Coord x0, GP_Coord y0,
-                     GP_Coord x1, GP_Coord y1,
-                     GP_Coord x2, GP_Coord y2, GP_Pixel pixel)
+void gp_triangle_raw(gp_pixmap *pixmap, gp_coord x0, gp_coord y0,
+                     gp_coord x1, gp_coord y1,
+                     gp_coord x2, gp_coord y2, gp_pixel pixel)
 {
-	GP_Line_Raw(pixmap, x0, y0, x1, y1, pixel);
-	GP_Line_Raw(pixmap, x0, y0, x2, y2, pixel);
-	GP_Line_Raw(pixmap, x1, y1, x2, y2, pixel);
+	gp_line_raw(pixmap, x0, y0, x1, y1, pixel);
+	gp_line_raw(pixmap, x0, y0, x2, y2, pixel);
+	gp_line_raw(pixmap, x1, y1, x2, y2, pixel);
 }
 
-void GP_Triangle(GP_Pixmap *pixmap, GP_Coord x0, GP_Coord y0,
-                 GP_Coord x1, GP_Coord y1,
-                 GP_Coord x2, GP_Coord y2, GP_Pixel pixel)
+void gp_triangle(gp_pixmap *pixmap, gp_coord x0, gp_coord y0,
+                 gp_coord x1, gp_coord y1,
+                 gp_coord x2, gp_coord y2, gp_pixel pixel)
 {
 	GP_CHECK_PIXMAP(pixmap);
 
@@ -48,21 +48,21 @@ void GP_Triangle(GP_Pixmap *pixmap, GP_Coord x0, GP_Coord y0,
 	GP_TRANSFORM_POINT(pixmap, x1, y1);
 	GP_TRANSFORM_POINT(pixmap, x2, y2);
 
-	GP_Triangle_Raw(pixmap, x0, y0, x1, y1, x2, y2, pixel);
+	gp_triangle_raw(pixmap, x0, y0, x1, y1, x2, y2, pixel);
 }
 
-void GP_FillTriangle_Raw(GP_Pixmap *pixmap, GP_Coord x0, GP_Coord y0,
-                         GP_Coord x1, GP_Coord y1,
-                         GP_Coord x2, GP_Coord y2, GP_Pixel pixel)
+void gp_fill_triangle_raw(gp_pixmap *pixmap, gp_coord x0, gp_coord y0,
+                         gp_coord x1, gp_coord y1,
+                         gp_coord x2, gp_coord y2, gp_pixel pixel)
 {
-	const GP_Coord coords[6] = {x0, y0, x1, y1, x2, y2};
+	const gp_coord coords[6] = {x0, y0, x1, y1, x2, y2};
 
-	GP_FillPolygon_Raw(pixmap, 3, coords, pixel);
+	gp_fill_polygon_raw(pixmap, 3, coords, pixel);
 }
 
-void GP_FillTriangle(GP_Pixmap* pixmap, GP_Coord x0, GP_Coord y0,
-                     GP_Coord x1, GP_Coord y1,
-                     GP_Coord x2, GP_Coord y2, GP_Pixel pixel)
+void gp_fill_triangle(gp_pixmap *pixmap, gp_coord x0, gp_coord y0,
+                     gp_coord x1, gp_coord y1,
+                     gp_coord x2, gp_coord y2, gp_pixel pixel)
 {
 	GP_CHECK_PIXMAP(pixmap);
 
@@ -70,5 +70,5 @@ void GP_FillTriangle(GP_Pixmap* pixmap, GP_Coord x0, GP_Coord y0,
 	GP_TRANSFORM_POINT(pixmap, x1, y1);
 	GP_TRANSFORM_POINT(pixmap, x2, y2);
 
-	GP_FillTriangle_Raw(pixmap, x0, y0, x1, y1, x2, y2, pixel);
+	gp_fill_triangle_raw(pixmap, x0, y0, x1, y1, x2, y2, pixel);
 }

@@ -215,7 +215,7 @@ static int8_t tiny_glyphs[] = {
 	         	0x00, 0x50, 0xa0, 0x00, 0x00, 0x00, 0x00,
 };
 
-static struct GP_FontFace tiny = {
+static struct gp_font_face tiny = {
 	.family_name = "Tiny",
 	.style_name = "",
 	.charset = GP_CHARSET_7BIT,
@@ -228,4 +228,4 @@ static struct GP_FontFace tiny = {
 	.glyph_offsets = {12},
 };
 
-struct GP_FontFace *GP_FontTiny = &tiny;
+struct gp_font_face *gp_font_tiny = &tiny;

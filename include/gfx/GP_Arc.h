@@ -30,14 +30,14 @@
 
 #include <math.h>
 
-void GP_ArcSegment(GP_Pixmap *pixmap, GP_Coord xcenter, GP_Coord ycenter,
-		GP_Size a, GP_Size b, int direction,
-		double start, double end,
-		GP_Pixel pixel);
+void gp_arc_segment(gp_pixmap *pixmap, gp_coord xcenter, gp_coord ycenter,
+		    gp_size a, gp_size b, int direction,
+		    double start, double end,
+		    gp_pixel pixel);
 
-void GP_ArcSegment_Raw(GP_Pixmap *pixmap, GP_Coord xcenter, GP_Coord ycenter,
-		GP_Size a, GP_Size b, int direction,
-		double start, double end,
-		GP_Pixel pixel);
+void gp_arc_segment_raw(gp_pixmap *pixmap, gp_coord xcenter, gp_coord ycenter,
+		        gp_size a, gp_size b, int direction,
+		        double start, double end,
+		        gp_pixel pixel);
 
 #endif /* GP_ARC_H */

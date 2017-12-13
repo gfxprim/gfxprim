@@ -39,12 +39,12 @@ static int time_stamp_monotonicity(void)
 	uint64_t ts = 0, nts, fts;
 	int i, fail = 0;
 
-	fts = GP_GetTimeStamp();
+	fts = gp_time_stamp();
 
 	for (i = 0; i < MAX; i++) {
-		nts = GP_GetTimeStamp();
+		nts = gp_time_stamp();
 		if (nts < ts) {
-			tst_msg("TimeStamp failed at %i %llu < %llu", i,
+			tst_msg("Time stamp failed at %i %llu < %llu", i,
 			        (long long unsigned)nts,
 			        (long long unsigned) ts);
 			fail++;

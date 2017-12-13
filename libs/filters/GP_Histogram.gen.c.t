@@ -17,28 +17,27 @@
 
 @ for pt in pixeltypes:
 @     if not pt.is_unknown() and not pt.is_palette():
-static int GP_FilterHistogram_{{ pt.name }}(GP_Histogram *self,
-	const GP_Pixmap *src, GP_ProgressCallback *callback)
+static int histogram_{{ pt.name }}(gp_histogram *self, const gp_pixmap *src, gp_progress_cb *callback)
 {
 	if (self->pixel_type != src->pixel_type) {
 		GP_WARN("Histogram (%s) and pixmap (%s) pixel type must match",
-		        GP_PixelTypeName(self->pixel_type),
-			GP_PixelTypeName(src->pixel_type));
+		        gp_pixel_type_name(self->pixel_type),
+			gp_pixel_type_name(src->pixel_type));
 		errno = EINVAL;
 		return 1;
 	}
 
 @         for c in pt.chanslist:
-	  GP_HistogramChannel *chan_{{ c.name }} = self->channels[{{ c.idx }}];
+	gp_histogram_channel *chan_{{ c.name }} = self->channels[{{ c.idx }}];
 @         end
 
 	uint32_t x, y;
 
 	for (y = 0; y < src->h; y++) {
 		for (x = 0; x < src->w; x++) {
-			GP_Pixel pix = GP_GetPixel_Raw_{{ pt.pixelsize.suffix }}(src, x, y);
+			gp_pixel pix = gp_getpixel_raw_{{ pt.pixelsize.suffix }}(src, x, y);
 @         for c in pt.chanslist:
-			int32_t {{ c.name }} = GP_Pixel_GET_{{ c.name }}_{{ pt.name }}(pix);
+			int32_t {{ c.name }} = GP_PIXEL_GET_{{ c.name }}_{{ pt.name }}(pix);
 @         end
 
 @         for c in pt.chanslist:
@@ -46,27 +45,26 @@ static int GP_FilterHistogram_{{ pt.name }}(GP_Histogram *self,
 @         end
 		}
 
-		if (GP_ProgressCallbackReport(callback, y, src->h, src->w))
+		if (gp_progress_cb_report(callback, y, src->h, src->w))
 			return 1;
 	}
 
-	GP_ProgressCallbackDone(callback);
+	gp_progress_cb_done(callback);
 	return 0;
 }
 
 @ end
 @
-int GP_FilterHistogram(GP_Histogram *self, const GP_Pixmap *src,
-                       GP_ProgressCallback *callback)
+int gp_filter_histogram(gp_histogram *self, const gp_pixmap *src,
+                       gp_progress_cb *callback)
 {
 	unsigned int i, j;
 	int ret;
 
 	GP_DEBUG(1, "Running Histogram filter");
 
-	for (i = 0; i < GP_PixelChannelCount(self->pixel_type); i++) {
-		GP_HistogramChannel *chan = self->channels[i];
-		printf("CHAN %i %i %p\n", i, chan->len, chan->hist);
+	for (i = 0; i < gp_pixel_channel_count(self->pixel_type); i++) {
+		gp_histogram_channel *chan = self->channels[i];
 		memset(chan->hist, 0, sizeof(uint32_t) * chan->len);
 	}
 
@@ -74,7 +72,7 @@ int GP_FilterHistogram(GP_Histogram *self, const GP_Pixmap *src,
 @ for pt in pixeltypes:
 @     if not pt.is_unknown() and not pt.is_palette():
 	case GP_PIXEL_{{ pt.name }}:
-		ret = GP_FilterHistogram_{{ pt.name }}(self, src, callback);
+		ret = histogram_{{ pt.name }}(self, src, callback);
 	break;
 @ end
 	default:
@@ -86,8 +84,8 @@ int GP_FilterHistogram(GP_Histogram *self, const GP_Pixmap *src,
 	if (ret)
 		return ret;
 
-	for (i = 0; i < GP_PixelChannelCount(self->pixel_type); i++) {
-		GP_HistogramChannel *chan = self->channels[i];
+	for (i = 0; i < gp_pixel_channel_count(self->pixel_type); i++) {
+		gp_histogram_channel *chan = self->channels[i];
 
 		chan->max = chan->hist[0];
 		chan->min = chan->hist[0];

@@ -35,7 +35,7 @@ static void dump_buffer(const char *pattern, int w, int h)
 	}
 }
 
-void dump_buffers(const char *pattern, const GP_Pixmap *c)
+void dump_buffers(const char *pattern, const gp_pixmap *c)
 {
 	printf("Expected pattern:\n");
 	dump_buffer(pattern, c->w, c->h);
@@ -66,9 +66,9 @@ void dump_buffers(const char *pattern, const GP_Pixmap *c)
 	}
 }
 
-int compare_buffers(const char *pattern, const GP_Pixmap *c)
+int compare_buffers(const char *pattern, const gp_pixmap *c)
 {
-	GP_Size x, y;
+	gp_size x, y;
 	int err = 0;
 
 	for (x = 0; x < c->w; x++) {

@@ -1,11 +1,11 @@
 @ include source.t
 /*
- * Multiply filter -- Multiplies two images.
+ * Multiplies two images.
  *
  * Copyright (C) 2012-2014 Cyril Hrubis <metan@ucw.cz>
  */
 
-#include "core/GP_Clamp.h"
+#include <core/GP_Clamp.h>
 
 @ include arithmetic_filter.t
 @
@@ -14,5 +14,5 @@
 GP_CLAMP_GENERIC({{ chan_name }}, 0, {{ 2 ** chan_size - 1 }});
 @ end
 @
-{@ filter_arithmetic('Multiply', filter_op) @}
+{@ filter_arithmetic('mul', filter_op) @}
 

@@ -31,29 +31,29 @@
 /* Raw per BPP HLines */
 #include "gfx/GP_VLine.gen.h"
 
-void GP_VLineXYY(GP_Pixmap *pixmap, GP_Coord x, GP_Coord y0,
-                 GP_Coord y1, GP_Pixel pixel);
+void gp_vline_xyy(gp_pixmap *pixmap, gp_coord x, gp_coord y0,
+                  gp_coord y1, gp_pixel pixel);
 
-void GP_VLineXYY_Raw(GP_Pixmap *pixmap, GP_Coord x, GP_Coord y0,
-                     GP_Coord y1, GP_Pixel pixel);
+void gp_vline_xyy_raw(gp_pixmap *pixmap, gp_coord x, gp_coord y0,
+                      gp_coord y1, gp_pixel pixel);
 
-void GP_VLineXYH(GP_Pixmap *pixmap, GP_Coord x, GP_Coord y, GP_Size h,
-                 GP_Pixel pixel);
+void gp_vline_xyh(gp_pixmap *pixmap, gp_coord x, gp_coord y, gp_size h,
+                  gp_pixel pixel);
 
-void GP_VLineXYH_Raw(GP_Pixmap *pixmap, GP_Coord x, GP_Coord y, GP_Size h,
-                     GP_Pixel pixel);
+void gp_vline_xyh_raw(gp_pixmap *pixmap, gp_coord x, gp_coord y, gp_size h,
+                      gp_pixel pixel);
 
-/* default argument set is XYY */
-static inline void GP_VLine(GP_Pixmap *pixmap, GP_Coord x,
-                            GP_Coord y0, GP_Coord y1, GP_Pixel pixel)
+/* default argument set is xyy */
+static inline void gp_vline(gp_pixmap *pixmap, gp_coord x,
+                            gp_coord y0, gp_coord y1, gp_pixel pixel)
 {
-	GP_VLineXYY(pixmap, x, y0, y1, pixel);
+	gp_vline_xyy(pixmap, x, y0, y1, pixel);
 }
 
-static inline void GP_VLine_Raw(GP_Pixmap *pixmap, GP_Coord x,
-                                GP_Coord y0, GP_Coord y1, GP_Pixel pixel)
+static inline void gp_vline_raw(gp_pixmap *pixmap, gp_coord x,
+                                gp_coord y0, gp_coord y1, gp_pixel pixel)
 {
-	GP_VLineXYY_Raw(pixmap, x, y0, y1, pixel);
+	gp_vline_xyy_raw(pixmap, x, y0, y1, pixel);
 }
 
 #endif /* GFX_GP_VLINE_H */

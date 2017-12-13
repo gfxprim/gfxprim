@@ -40,7 +40,7 @@
  * the bitmap format is stored in the font structure. The bitmap lines are byte
  * aligned.
  */
-typedef struct GP_GlyphBitmap {
+typedef struct gp_glyph {
 	/*
 	 * Bitmap width in pixels.
 	 */
@@ -71,11 +71,11 @@ typedef struct GP_GlyphBitmap {
 	 * Character bitmap, byte aligned bitmap.
 	 */
 	uint8_t bitmap[];
-} GP_GlyphBitmap;
+} gp_glyph;
 
-typedef enum GP_CharSet {
+typedef enum gp_char_set {
 	GP_CHARSET_7BIT,
-} GP_CharSet;
+} gp_char_set;
 
 /*
  * Glyph bitmap data format.
@@ -84,38 +84,25 @@ typedef enum GP_CharSet {
  * rounted to bytes.
  *
  */
-typedef enum GP_FontBitmapFormat {
+typedef enum gp_font_bitmap_format {
 	GP_FONT_BITMAP_1BPP,
 	GP_FONT_BITMAP_8BPP,
-} GP_FontBitmapFormat;
+} gp_font_bitmap_format;
 
-/*
- * Font face
- */
-typedef struct GP_FontFace {
-	/*
-	 * Font family name - eg. Sans, Serif ...
-	 */
+typedef struct gp_font_face {
+	/* Font family name - eg. Sans, Serif ... */
 	char family_name[GP_FONT_NAME_MAX];
 
-	/*
-	 * Font style name - Medium, Bold, Italic ...
-	 */
+	/* Font style name - Medium, Bold, Italic ... */
 	char style_name[GP_FONT_NAME_MAX];
 
-	/*
-	 * Enum for supported charsets.
-	 */
+	/* Enum for supported charsets */
 	uint8_t charset;
 
-	/*
-	 * Maximal height of font glyph from baseline to the top.
-	 */
+	/* Maximal height of font glyph from baseline to the top. */
 	uint16_t ascend;
 
-	/*
-	 * Maximal length of font glyph from baseline to the bottom.
-	 */
+	/* Maximal length of font glyph from baseline to the bottom. */
 	uint16_t descend;
 
 	/*
@@ -133,11 +120,9 @@ typedef struct GP_FontFace {
 	/*
 	 * Bitmap format for all glyphs
 	 */
-	GP_FontBitmapFormat glyph_bitmap_format;
+	gp_font_bitmap_format glyph_bitmap_format;
 
-	/*
-	 * Pointer to glyph bitmap buffer.
-	 */
+	/* Pointer to glyph bitmap buffer */
 	void *glyphs;
 
 	/*
@@ -151,42 +136,42 @@ typedef struct GP_FontFace {
 	 * glyph table.
 	 */
 	uint32_t glyph_offsets[];
-} GP_FontFace;
+} gp_font_face;
 
 /*
  * Returns font height eg. ascend + descend
  */
-static inline unsigned int GP_FontHeight(const GP_FontFace *font)
+static inline unsigned int gp_font_height(const gp_font_face *font)
 {
 	return font->ascend + font->descend;
 }
 
-static inline unsigned int GP_FontAscend(const GP_FontFace *font)
+static inline unsigned int gp_font_ascend(const gp_font_face *font)
 {
 	return font->ascend;
 }
 
-static inline unsigned int GP_FontDescend(const GP_FontFace *font)
+static inline unsigned int gp_font_descend(const gp_font_face *font)
 {
 	return font->descend;
 }
 
-static inline unsigned int GP_FontMaxWidth(const GP_FontFace *font)
+static inline unsigned int gp_font_max_width(const gp_font_face *font)
 {
 	return font->max_glyph_width;
 }
 
-static inline unsigned int GP_FontMaxAdvanceX(const GP_FontFace *font)
+static inline unsigned int gp_font_max_advance_x(const gp_font_face *font)
 {
 	return font->max_glyph_advance;
 }
 
-static inline const char *GP_FontFamily(const GP_FontFace *font)
+static inline const char *gp_font_family(const gp_font_face *font)
 {
 	return font->family_name;
 }
 
-static inline const char *GP_FontStyle(const GP_FontFace *font)
+static inline const char *gp_font_style(const gp_font_face *font)
 {
 	return font->style_name;
 }
@@ -194,21 +179,17 @@ static inline const char *GP_FontStyle(const GP_FontFace *font)
 /*
  * Returns glyph count for charset.
  */
-uint32_t GP_GetGlyphCount(GP_CharSet charset);
+uint32_t gp_get_glyph_count(gp_char_set charset);
 
 /*
  * Returns glyph mapping
  */
-GP_GlyphBitmap *GP_GetGlyphBitmap(const GP_FontFace *font, int c);
+gp_glyph *gp_get_glyph(const gp_font_face *font, int c);
 
-/*
- * Loads font face from file.
- */
-GP_FontFace *GP_FontFaceLoad(const char *path, uint32_t width, uint32_t height);
+/* Loads font face from file  */
+gp_font_face *gp_font_face_load(const char *path, uint32_t width, uint32_t height);
 
-/*
- * Free the font face memory.
- */
-void GP_FontFaceFree(GP_FontFace *self);
+/* Free the font face memory */
+void gp_font_face_free(gp_font_face *self);
 
 #endif /* TEXT_GP_FONT_H */

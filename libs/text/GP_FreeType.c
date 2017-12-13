@@ -29,7 +29,7 @@
 #include <ft2build.h>
 #include FT_FREETYPE_H
 
-GP_FontFace *GP_FontFaceLoad(const char *path, uint32_t width, uint32_t height)
+gp_font_face *gp_font_face_load(const char *path, uint32_t width, uint32_t height)
 {
 	FT_Library library;
 	FT_Face face;
@@ -68,10 +68,10 @@ GP_FontFace *GP_FontFaceLoad(const char *path, uint32_t width, uint32_t height)
 	/* Allocate font face structure */
 	unsigned int font_face_size;
 
-	font_face_size = sizeof(GP_FontFace) +
-	                 sizeof(uint32_t) * GP_GetGlyphCount(GP_CHARSET_7BIT);
+	font_face_size = sizeof(gp_font_face) +
+	                 sizeof(uint32_t) * gp_get_glyph_count(GP_CHARSET_7BIT);
 
-	GP_FontFace *font = malloc(font_face_size);
+	gp_font_face *font = malloc(font_face_size);
 
 	if (font == NULL) {
 		GP_DEBUG(1, "Malloc failed :(");
@@ -120,7 +120,7 @@ GP_FontFace *GP_FontFaceLoad(const char *path, uint32_t width, uint32_t height)
 
 		/* count glyph table size and fill offset table */
 		font->glyph_offsets[i - 0x20] = glyph_table_size;
-		glyph_table_size += sizeof(GP_GlyphBitmap) +
+		glyph_table_size += sizeof(gp_glyph) +
 		                    bitmap->rows * bitmap->pitch;
 	}
 
@@ -157,7 +157,7 @@ GP_FontFace *GP_FontFaceLoad(const char *path, uint32_t width, uint32_t height)
 			goto err3;
 		}
 
-		GP_GlyphBitmap *glyph_bitmap = GP_GetGlyphBitmap(font, i);
+		gp_glyph *glyph_bitmap = gp_get_glyph(font, i);
 		FT_GlyphSlot glyph = face->glyph;
 
 		glyph_bitmap->width     = glyph->bitmap.width;
@@ -205,7 +205,7 @@ err1:
 
 #else
 
-GP_FontFace *GP_FontFaceLoad(const char *path, uint32_t width, uint32_t height)
+gp_font_face *gp_font_face_load(const char *path, uint32_t width, uint32_t height)
 {
 	(void)path;
 	(void)width;

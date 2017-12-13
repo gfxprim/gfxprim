@@ -59,9 +59,9 @@ struct v4l2_priv {
 	char device[];
 };
 
-static int v4l2_stop(struct GP_Grabber *self);
+static int v4l2_stop(gp_grabber *self);
 
-static void v4l2_exit(struct GP_Grabber *self)
+static void v4l2_exit(gp_grabber *self)
 {
 	struct v4l2_priv *priv = GP_GRABBER_PRIV(self);
 	int i;
@@ -76,7 +76,7 @@ static void v4l2_exit(struct GP_Grabber *self)
 	}
 
 	close(self->fd);
-	GP_PixmapFree(self->frame);
+	gp_pixmap_free(self->frame);
 	free(self);
 }
 
@@ -88,7 +88,7 @@ static void v4l2_exit(struct GP_Grabber *self)
 
 #define MUL 1024
 
-static void v4l2_yuv422_fillframe(struct GP_Grabber *self, void *buf)
+static void v4l2_yuv422_fillframe(gp_grabber *self, void *buf)
 {
 	unsigned int i, j;
 	unsigned char *py, *pu, *pv;
@@ -130,7 +130,7 @@ static void v4l2_yuv422_fillframe(struct GP_Grabber *self, void *buf)
 	}
 }
 
-static int v4l2_poll(struct GP_Grabber *self)
+static int v4l2_poll(gp_grabber *self)
 {
 	struct v4l2_priv *priv = GP_GRABBER_PRIV(self);
 
@@ -176,7 +176,7 @@ static int v4l2_poll(struct GP_Grabber *self)
 	return 1;
 }
 
-static int v4l2_start(struct GP_Grabber *self)
+static int v4l2_start(gp_grabber *self)
 {
 	struct v4l2_priv *priv = GP_GRABBER_PRIV(self);
 
@@ -212,7 +212,7 @@ static int v4l2_start(struct GP_Grabber *self)
 	return 0;
 }
 
-static int v4l2_stop(struct GP_Grabber *self)
+static int v4l2_stop(gp_grabber *self)
 {
 	struct v4l2_priv *priv = GP_GRABBER_PRIV(self);
 
@@ -232,9 +232,9 @@ static int v4l2_stop(struct GP_Grabber *self)
 	return 0;
 }
 
-struct GP_Grabber *GP_GrabberV4L2Init(const char *device,
-                                      unsigned int preferred_width,
-				      unsigned int preferred_height)
+gp_grabber *gp_grabber_v4l2_init(const char *device,
+                                 unsigned int preferred_width,
+				 unsigned int preferred_height)
 {
 	int fd, i, err;
 	int mode = 0;
@@ -321,7 +321,7 @@ struct GP_Grabber *GP_GrabberV4L2Init(const char *device,
 		goto err0;
 	}
 
-	GP_Grabber *new = malloc(sizeof(GP_Grabber) + sizeof(struct v4l2_priv) + strlen(device) + 1);
+	gp_grabber *new = malloc(sizeof(gp_grabber) + sizeof(struct v4l2_priv) + strlen(device) + 1);
 
 	if (new == NULL) {
 		err = ENOMEM;
@@ -329,7 +329,8 @@ struct GP_Grabber *GP_GrabberV4L2Init(const char *device,
 		goto err0;
 	}
 
-	new->frame = GP_PixmapAlloc(fmt.fmt.pix.width, fmt.fmt.pix.height, GP_PIXEL_RGB888);
+	new->frame = gp_pixmap_alloc(fmt.fmt.pix.width, fmt.fmt.pix.height,
+				     GP_PIXEL_RGB888);
 
 	if (new->frame == NULL) {
 		err = ENOMEM;
@@ -400,10 +401,10 @@ struct GP_Grabber *GP_GrabberV4L2Init(const char *device,
 	}
 
 	new->fd = fd;
-	new->Exit = v4l2_exit;
-	new->Poll = v4l2_poll;
-	new->Start = v4l2_start;
-	new->Stop = v4l2_stop;
+	new->exit = v4l2_exit;
+	new->poll = v4l2_poll;
+	new->start = v4l2_start;
+	new->stop = v4l2_stop;
 
 	return new;
 err3:
@@ -411,7 +412,7 @@ err3:
 		if (priv->bufptr[i] != NULL)
 			munmap(priv->bufptr[i], priv->buf_len[i]);
 err2:
-	GP_PixmapFree(new->frame);
+	gp_pixmap_free(new->frame);
 err1:
 	free(new);
 err0:
@@ -423,9 +424,9 @@ err:
 
 #else
 
-struct GP_Grabber *GP_GrabberV4L2Init(const char GP_UNUSED(*device),
-                                      unsigned int GP_UNUSED(preferred_width),
-				      unsigned int GP_UNUSED(preferred_height))
+gp_grabber *gp_grabber_v4l2_init(const char GP_UNUSED(*device),
+                                 unsigned int GP_UNUSED(preferred_width),
+			         unsigned int GP_UNUSED(preferred_height))
 {
 	GP_WARN("V4L2 support not compiled in.");
 

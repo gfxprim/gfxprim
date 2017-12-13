@@ -30,7 +30,7 @@
 
 static unsigned int nr_threads = 1;
 
-unsigned int GP_NrThreads(GP_Size w, GP_Size h, GP_ProgressCallback *callback)
+unsigned int gp_nr_threads(gp_size w, gp_size h, gp_progress_cb *callback)
 {
 	int count, threads;
 	char *env;
@@ -71,16 +71,16 @@ unsigned int GP_NrThreads(GP_Size w, GP_Size h, GP_ProgressCallback *callback)
 	return threads;
 }
 
-void GP_NrThreadsSet(unsigned int nr)
+void gp_nr_threads_set(unsigned int nr)
 {
 	nr_threads = nr;
 
 	GP_DEBUG(1, "Setting default number of threads to %u", nr);
 }
 
-int GP_ProgressCallbackMP(GP_ProgressCallback *self)
+int gp_progress_cb_mp(gp_progress_cb *self)
 {
-	struct GP_ProgressCallbackMPPriv *priv = self->priv;
+	struct gp_progress_cb_mp_priv *priv = self->priv;
 
 	/*
 	 * If any thread got non-zero return value from a callback abort all.

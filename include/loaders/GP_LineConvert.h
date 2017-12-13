@@ -30,7 +30,7 @@
 
   The code is mainly used in image loaders when saving image from memory buffer
   that has exactly same channels (in size and names) but placed differently in
-  buffer of pixel.
+  pixel buffer.
 
  */
 
@@ -38,9 +38,9 @@
 #ifndef LOADERS_LINE_CONVERT_H
 #define LOADERS_LINE_CONVERT_H
 
-#include "core/GP_Pixel.h"
+#include <core/GP_Pixel.h>
 
-typedef void (*GP_LineConvert)(const uint8_t *in, uint8_t *out, unsigned int len);
+typedef void (*gp_line_convert)(const uint8_t *in, uint8_t *out, unsigned int len);
 
 /*
  * The out array is terminated by GP_PIXEL_UNKNOWN.
@@ -50,11 +50,11 @@ typedef void (*GP_LineConvert)(const uint8_t *in, uint8_t *out, unsigned int len
  *
  * Returns GP_PIXEL_UNKNOWN if no conversion is posible.
  */
-GP_PixelType GP_LineConvertible(GP_PixelType in, GP_PixelType out[]);
+gp_pixel_type gp_line_convertible(gp_pixel_type in, gp_pixel_type out[]);
 
 /*
  * Returns pointer to conversion function or NULL if there is none.
  */
-GP_LineConvert GP_LineConvertGet(GP_PixelType in, GP_PixelType out);
+gp_line_convert gp_line_convert_get(gp_pixel_type in, gp_pixel_type out);
 
 #endif /* LOADERS_LINE_CONVERT_H */

@@ -29,27 +29,27 @@
 #ifndef FILTERS_GP_RESIZE_LINEAR_H
 #define FILTERS_GP_RESIZE_LINEAR_H
 
-#include "GP_Filter.h"
-#include "GP_Resize.h"
+#include <filters/GP_Filter.h>
+#include <filters/GP_Resize.h>
 
-int GP_FilterResizeLinearInt(const GP_Pixmap *src, GP_Pixmap *dst,
-                             GP_ProgressCallback *callback);
+int gp_filter_resize_linear_int(const gp_pixmap *src, gp_pixmap *dst,
+                                gp_progress_cb *callback);
 
-int GP_FilterResizeLinearLFInt(const GP_Pixmap *src, GP_Pixmap *dst,
-                             GP_ProgressCallback *callback);
+int gp_filter_resize_linear_lf_int(const gp_pixmap *src, gp_pixmap *dst,
+                                   gp_progress_cb *callback);
 
-static inline GP_Pixmap *GP_FilterResizeLinearIntAlloc(const GP_Pixmap *src,
-                                                        GP_Size w, GP_Size h,
-                                                        GP_ProgressCallback *callback)
+static inline gp_pixmap *gp_filter_resize_linear_int_alloc(const gp_pixmap *src,
+                                                           gp_size w, gp_size h,
+                                                           gp_progress_cb *callback)
 {
-	return GP_FilterResizeAlloc(src, w, h, GP_INTERP_LINEAR_INT, callback);
+	return gp_filter_resize_alloc(src, w, h, GP_INTERP_LINEAR_INT, callback);
 }
 
-static inline GP_Pixmap *GP_FilterResizeLinearLFIntAlloc(const GP_Pixmap *src,
-                                                          GP_Size w, GP_Size h,
-                                                          GP_ProgressCallback *callback)
+static inline gp_pixmap *gp_filter_resize_linear_lf_int_alloc(const gp_pixmap *src,
+                                                              gp_size w, gp_size h,
+                                                              gp_progress_cb *callback)
 {
-	return GP_FilterResizeAlloc(src, w, h, GP_INTERP_LINEAR_LF_INT, callback);
+	return gp_filter_resize_alloc(src, w, h, GP_INTERP_LINEAR_LF_INT, callback);
 }
 
 #endif /* FILTERS_GP_RESIZE_LINEAR_H */

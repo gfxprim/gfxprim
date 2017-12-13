@@ -1,3 +1,3 @@
 TOPDIR=..
-SUBDIRS=core gfx
+SUBDIRS=core gfx loaders
 include $(TOPDIR)/post.mk

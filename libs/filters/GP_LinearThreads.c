@@ -33,54 +33,55 @@
 
 static void *h_linear_convolution(void *arg)
 {
-	struct GP_ConvolutionParams *params = arg;
+	struct gp_convolution_params *params = arg;
 
-	long ret = GP_FilterHConvolution_Raw(params);
+	long ret = gp_filter_hconvolution_raw(params);
 
 	return (void*)ret;
 }
 
 static void *v_linear_convolution(void *arg)
 {
-	struct GP_ConvolutionParams *params = arg;
+	struct gp_convolution_params *params = arg;
 
-	long ret = GP_FilterVConvolution_Raw(params);
+	long ret = gp_filter_vconvolution_raw(params);
 
 	return (void*)ret;
 }
 
 static void *linear_convolution(void *arg)
 {
-	struct GP_ConvolutionParams *params = arg;
+	struct gp_convolution_params *params = arg;
 
-	long ret = GP_FilterConvolution_Raw(params);
+	long ret = gp_filter_convolution_raw(params);
 
 	return (void*)ret;
 }
 
-int GP_FilterHConvolutionMP_Raw(const GP_ConvolutionParams *params)
+int gp_filter_hconvolution_mp_raw(const gp_convolution_params *params)
 {
-	int i, t = GP_NrThreads(params->w_src, params->h_src, params->callback);
+	int i, t = gp_nr_threads(params->w_src, params->h_src,
+				 params->callback);
 
 	if (t == 1)
-		return GP_FilterHConvolution_Raw(params);
+		return gp_filter_hconvolution_raw(params);
 
 	if (params->src == params->dst) {
 		GP_DEBUG(1, "In-place filter detected, running in one thread.");
-		return GP_FilterHConvolution_Raw(params);
+		return gp_filter_hconvolution_raw(params);
 	}
 
 	GP_PROGRESS_CALLBACK_MP(callback_mp, params->callback);
 
 	/* Run t threads */
 	pthread_t threads[t];
-	struct GP_ConvolutionParams convs[t];
-	GP_Size h = params->h_src/t;
+	struct gp_convolution_params convs[t];
+	gp_size h = params->h_src/t;
 
 	for (i = 0; i < t; i++) {
-		GP_Coord y_src_2 = params->y_src + i * h;
-		GP_Coord y_dst_2 = params->y_dst + i * h;
-		GP_Size  h_src_2 = h;
+		gp_coord y_src_2 = params->y_src + i * h;
+		gp_coord y_dst_2 = params->y_dst + i * h;
+		gp_size  h_src_2 = h;
 
 		if (i == t - 1)
 			h_src_2 = params->h_src - i * h;
@@ -108,29 +109,30 @@ int GP_FilterHConvolutionMP_Raw(const GP_ConvolutionParams *params)
 }
 
 
-int GP_FilterVConvolutionMP_Raw(const GP_ConvolutionParams *params)
+int gp_filter_vconvolution_mp_raw(const gp_convolution_params *params)
 {
-	int i, t = GP_NrThreads(params->w_src, params->h_src, params->callback);
+	int i, t = gp_nr_threads(params->w_src, params->h_src,
+				 params->callback);
 
 	if (t == 1)
-		return GP_FilterVConvolution_Raw(params);
+		return gp_filter_vconvolution_raw(params);
 
 	if (params->src == params->dst) {
 		GP_DEBUG(1, "In-place filter detected, running in one thread.");
-		return GP_FilterVConvolution_Raw(params);
+		return gp_filter_vconvolution_raw(params);
 	}
 
 	GP_PROGRESS_CALLBACK_MP(callback_mp, params->callback);
 
 	/* Run t threads */
 	pthread_t threads[t];
-	struct GP_ConvolutionParams convs[t];
-	GP_Size h = params->h_src/t;
+	struct gp_convolution_params convs[t];
+	gp_size h = params->h_src/t;
 
 	for (i = 0; i < t; i++) {
-		GP_Coord y_src_2 = params->y_src + i * h;
-		GP_Coord y_dst_2 = params->y_dst + i * h;
-		GP_Size  h_src_2 = h;
+		gp_coord y_src_2 = params->y_src + i * h;
+		gp_coord y_dst_2 = params->y_dst + i * h;
+		gp_size  h_src_2 = h;
 
 		if (i == t - 1)
 			h_src_2 = params->h_src - i * h;
@@ -157,29 +159,30 @@ int GP_FilterVConvolutionMP_Raw(const GP_ConvolutionParams *params)
 }
 
 
-int GP_FilterConvolutionMP_Raw(const GP_ConvolutionParams *params)
+int gp_filter_convolution_mp_raw(const gp_convolution_params *params)
 {
-	int i, t = GP_NrThreads(params->w_src, params->h_src, params->callback);
+	int i, t = gp_nr_threads(params->w_src, params->h_src,
+				 params->callback);
 
 	if (t == 1)
-		return GP_FilterConvolution_Raw(params);
+		return gp_filter_convolution_raw(params);
 
 	if (params->src == params->dst) {
 		GP_DEBUG(1, "In-place filter detected, running in one thread.");
-		return GP_FilterConvolution_Raw(params);
+		return gp_filter_convolution_raw(params);
 	}
 
 	GP_PROGRESS_CALLBACK_MP(callback_mp, params->callback);
 
 	/* Run t threads */
 	pthread_t threads[t];
-	struct GP_ConvolutionParams convs[t];
-	GP_Size h = params->h_src/t;
+	struct gp_convolution_params convs[t];
+	gp_size h = params->h_src/t;
 
 	for (i = 0; i < t; i++) {
-		GP_Coord y_src_2 = params->y_src + i * h;
-		GP_Coord y_dst_2 = params->y_dst + i * h;
-		GP_Size  h_src_2 = h;
+		gp_coord y_src_2 = params->y_src + i * h;
+		gp_coord y_dst_2 = params->y_dst + i * h;
+		gp_size  h_src_2 = h;
 
 		if (i == t - 1)
 			h_src_2 = params->h_src - i * h;

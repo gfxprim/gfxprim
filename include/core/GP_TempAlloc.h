@@ -30,17 +30,17 @@
   The usage is:
 
   // Creates new allocation pool
-  GP_TempAllocCrate(buf, 3 * 1024);
+  gp_temp_alloc_create(buf, 3 * 1024);
 
   // Make use of it
-  int *R = GP_TempAllocGet(buf, 1024);
-  int *G = GP_TempAllocGet(buf, 1024);
-  int *B = GP_TempAllocGet(buf, 1024);
+  int *R = gp_temp_alloc_get(buf, 1024);
+  int *G = gp_temp_alloc_get(buf, 1024);
+  int *B = gp_temp_alloc_get(buf, 1024);
 
   ...
 
   // Free it
-  GP_TempAllocDestroy(buf);
+  gp_temp_allocDestroy(buf);
 
  */
 
@@ -58,7 +58,7 @@
 # define GP_ALLOCA_THRESHOLD 2048
 #endif
 
-struct GP_TempAlloc {
+struct gp_temp_alloc {
 	void *buffer;
 	size_t pos;
 	size_t size;
@@ -68,28 +68,28 @@ struct GP_TempAlloc {
 	((size) > GP_ALLOCA_THRESHOLD) ? malloc(size) : alloca(size); \
 })
 
-#define GP_TempAllocCreate(name, bsize)                              \
-	struct GP_TempAlloc name = {.size = (bsize), .pos = 0,       \
+#define gp_temp_alloc_create(name, bsize)                              \
+	struct gp_temp_alloc name = {.size = (bsize), .pos = 0,       \
 				    .buffer = GP_TEMP_ALLOC(bsize)};
 
-#define GP_TempAllocGet(self, bsize) ({           \
+#define gp_temp_alloc_get(self, bsize) ({           \
 	GP_ASSERT(self.pos + bsize <= self.size); \
 	size_t _pos = self.pos;                   \
 	self.pos += bsize;                        \
 	(void*)(((char*)(self.buffer)) + _pos);   \
 })
 
-#define GP_TempAllocArr(self, type, len) \
-	GP_TempAllocGet(self, sizeof(type) * len)
+#define gp_temp_alloc_arr(self, type, len) \
+	gp_temp_alloc_get(self, sizeof(type) * len)
 
-#define GP_TempAllocFree(self) do {          \
+#define gp_temp_alloc_free(self) do {          \
 	if (self.size > GP_ALLOCA_THRESHOLD) \
 		free(self.buffer);           \
 } while (0)
 
-#define GP_TempAlloc(size) GP_TEMP_ALLOC(size)
+#define gp_temp_alloc(size) GP_TEMP_ALLOC(size)
 
-static inline void GP_TempFree(size_t size, void *ptr)
+static inline void gp_temp_free(size_t size, void *ptr)
 {
 	if (size > GP_ALLOCA_THRESHOLD)
 		free(ptr);

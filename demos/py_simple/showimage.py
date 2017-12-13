@@ -12,20 +12,20 @@ def main():
         print("Takes an image as an argument")
         sys.exit(1)
 
-    # Load Image
-    img = loaders.Load(sys.argv[1])
+    # load Image
+    img = loaders.load(sys.argv[1])
 
     # Create X11 window
-    bk = backends.BackendX11Init(None, 0, 0, img.w, img.h, sys.argv[1], 0)
+    bk = backends.x11_init(None, 0, 0, img.w, img.h, sys.argv[1], 0)
     assert(bk)
-    img.Blit(0, 0, bk.pixmap, 0, 0, img.w, img.h)
-    bk.Flip()
+    img.blit(0, 0, bk.pixmap, 0, 0, img.w, img.h)
+    bk.flip()
 
     # Event loop
     while True:
-        ev = bk.WaitEvent()
+        ev = bk.wait_event()
 
-        input.EventDump(ev)
+        input.event_dump(ev)
 
         if (ev.type == input.EV_KEY):
            sys.exit(0)

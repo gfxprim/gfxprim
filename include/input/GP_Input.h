@@ -24,7 +24,7 @@
 #define INPUT_GP_INPUT_H
 
 /*
- * Base GP_Event definitions.
+ * Base gp_event definitions.
  */
 #include "input/GP_Event.h"
 

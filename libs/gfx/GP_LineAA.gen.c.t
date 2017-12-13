@@ -32,11 +32,11 @@
 
 #define FP_TO_PERC(a) (GP_FP_ROUND_TO_INT((a) * 255))
 
-static inline void line_aa_x(GP_Pixmap *pixmap,
-                             GP_Coord x0, GP_Coord y0,
-                             GP_Coord x1, GP_Coord y1, GP_Pixel pixel)
+static inline void line_aa_x(gp_pixmap *pixmap,
+                             gp_coord x0, gp_coord y0,
+                             gp_coord x1, gp_coord y1, gp_pixel pixel)
 {
-	GP_Coord xend, yend, xgap, xpx0, ypx0, xpx1, ypx1;
+	gp_coord xend, yend, xgap, xpx0, ypx0, xpx1, ypx1;
 	uint8_t perc;
 
 	int64_t dx = x1 - x0;
@@ -54,9 +54,9 @@ static inline void line_aa_x(GP_Pixmap *pixmap,
 	ypx1 = GP_FP_TO_INT(yend);
 
 	perc = FP_TO_PERC(GP_FP_MUL(GP_FP_RFRAC(yend), xgap));
-	GP_MixPixel_Raw_Clipped(pixmap, xpx1, ypx1, pixel, perc);
+	gp_mix_pixel_raw_clipped(pixmap, xpx1, ypx1, pixel, perc);
 	perc = FP_TO_PERC(GP_FP_MUL(GP_FP_FRAC(yend), xgap));
-	GP_MixPixel_Raw_Clipped(pixmap, xpx1, ypx1+1, pixel, perc);
+	gp_mix_pixel_raw_clipped(pixmap, xpx1, ypx1+1, pixel, perc);
 
 	xend = GP_FP_ROUND(x0);
 	yend = y0 + GP_FP_DIV(GP_FP_MUL(dy, xend - x0), dx);
@@ -65,28 +65,28 @@ static inline void line_aa_x(GP_Pixmap *pixmap,
 	ypx0 = GP_FP_TO_INT(yend);
 
 	perc = FP_TO_PERC(GP_FP_MUL(GP_FP_RFRAC(yend), xgap));
-	GP_MixPixel_Raw_Clipped(pixmap, xpx0, ypx0, pixel, perc);
+	gp_mix_pixel_raw_clipped(pixmap, xpx0, ypx0, pixel, perc);
 	perc = FP_TO_PERC(GP_FP_MUL(GP_FP_FRAC(yend), xgap));
-	GP_MixPixel_Raw_Clipped(pixmap, xpx0, ypx0+1, pixel, perc);
+	gp_mix_pixel_raw_clipped(pixmap, xpx0, ypx0+1, pixel, perc);
 
-	GP_Coord x;
-	GP_Coord intery;
+	gp_coord x;
+	gp_coord intery;
 
 	for (x = xpx0 + 1; x < xpx1; x++) {
 		intery = yend + GP_FP_DIV((x - xpx0) * dy, dx);
 
 		perc = FP_TO_PERC(GP_FP_RFRAC(intery));
-		GP_MixPixel_Raw_Clipped(pixmap, x, GP_FP_TO_INT(intery), pixel, perc);
+		gp_mix_pixel_raw_clipped(pixmap, x, GP_FP_TO_INT(intery), pixel, perc);
 		perc = FP_TO_PERC(GP_FP_FRAC(intery));
-		GP_MixPixel_Raw_Clipped(pixmap, x, GP_FP_TO_INT(intery)+1, pixel, perc);
+		gp_mix_pixel_raw_clipped(pixmap, x, GP_FP_TO_INT(intery)+1, pixel, perc);
 	}
 }
 
-static inline void line_aa_y(GP_Pixmap *pixmap,
-                             GP_Coord x0, GP_Coord y0,
-                             GP_Coord x1, GP_Coord y1, GP_Pixel pixel)
+static inline void line_aa_y(gp_pixmap *pixmap,
+                             gp_coord x0, gp_coord y0,
+                             gp_coord x1, gp_coord y1, gp_pixel pixel)
 {
-	GP_Coord xend, yend, ygap, xpx0, ypx0, xpx1, ypx1;
+	gp_coord xend, yend, ygap, xpx0, ypx0, xpx1, ypx1;
 	uint8_t perc;
 
 	int64_t dx = x1 - x0;
@@ -104,9 +104,9 @@ static inline void line_aa_y(GP_Pixmap *pixmap,
 	xpx1 = GP_FP_TO_INT(xend);
 
 	perc = FP_TO_PERC(GP_FP_MUL(GP_FP_RFRAC(xend), ygap));
-	GP_MixPixel_Raw_Clipped(pixmap, xpx1, ypx1, pixel, perc);
+	gp_mix_pixel_raw_clipped(pixmap, xpx1, ypx1, pixel, perc);
 	perc = FP_TO_PERC(GP_FP_MUL(GP_FP_FRAC(xend), ygap));
-	GP_MixPixel_Raw_Clipped(pixmap, xpx1, ypx1+1, pixel, perc);
+	gp_mix_pixel_raw_clipped(pixmap, xpx1, ypx1+1, pixel, perc);
 
 	yend = GP_FP_ROUND(y0);
 	xend = x0 + GP_FP_DIV(GP_FP_MUL(dx, yend - y0), dy);
@@ -115,36 +115,36 @@ static inline void line_aa_y(GP_Pixmap *pixmap,
 	xpx0 = GP_FP_TO_INT(xend);
 
 	perc = FP_TO_PERC(GP_FP_MUL(GP_FP_RFRAC(xend), ygap));
-	GP_MixPixel_Raw_Clipped(pixmap, xpx0, ypx0, pixel, perc);
+	gp_mix_pixel_raw_clipped(pixmap, xpx0, ypx0, pixel, perc);
 	perc = FP_TO_PERC(GP_FP_MUL(GP_FP_FRAC(xend), ygap));
-	GP_MixPixel_Raw_Clipped(pixmap, xpx0, ypx0+1, pixel, perc);
+	gp_mix_pixel_raw_clipped(pixmap, xpx0, ypx0+1, pixel, perc);
 
-	GP_Coord y;
-	GP_Coord intery;
+	gp_coord y;
+	gp_coord intery;
 
 	for (y = ypx0 + 1; y < ypx1; y++) {
 		intery = xend + GP_FP_DIV((y - ypx0) * dx, dy);
 
 		perc = FP_TO_PERC(GP_FP_RFRAC(intery));
-		GP_MixPixel_Raw_Clipped(pixmap, GP_FP_TO_INT(intery), y, pixel, perc);
+		gp_mix_pixel_raw_clipped(pixmap, GP_FP_TO_INT(intery), y, pixel, perc);
 		perc = FP_TO_PERC(GP_FP_FRAC(intery));
-		GP_MixPixel_Raw_Clipped(pixmap, GP_FP_TO_INT(intery)+1, y, pixel, perc);
+		gp_mix_pixel_raw_clipped(pixmap, GP_FP_TO_INT(intery)+1, y, pixel, perc);
 	}
 }
 
-void GP_LineAA_Raw(GP_Pixmap *pixmap, GP_Coord x0, GP_Coord y0,
-                   GP_Coord x1, GP_Coord y1, GP_Pixel pixel)
+void gp_line_aa_raw(gp_pixmap *pixmap, gp_coord x0, gp_coord y0,
+                    gp_coord x1, gp_coord y1, gp_pixel pixel)
 {
 	int64_t dx = x1 - x0;
 	int64_t dy = y1 - y0;
 
 	if (dy == 0) {
-		GP_HLineAA_Raw(pixmap, x0, x1, y0, pixel);
+		gp_hline_aa_raw(pixmap, x0, x1, y0, pixel);
 		return;
 	}
 
 	if (dx == 0) {
-		GP_VLineAA_Raw(pixmap, x0, y0, y1, pixel);
+		gp_vline_aa_raw(pixmap, x0, y0, y1, pixel);
 		return;
 	}
 

@@ -38,15 +38,15 @@
 
 struct clipped_test {
 	/* size of the contexes */
-	GP_Size src_w, src_h;
-	GP_Size dst_w, dst_h;
+	gp_size src_w, src_h;
+	gp_size dst_w, dst_h;
 
 	/* Source rectangle */
-	GP_Coord x0, y0;
-	GP_Size w0, h0;
+	gp_coord x0, y0;
+	gp_size w0, h0;
 
 	/* Destination offset */
-	GP_Coord x1, y1;
+	gp_coord x1, y1;
 
 	/* If set, is used to check assert correct result */
 	const char *dst;
@@ -55,29 +55,29 @@ struct clipped_test {
 static int clipped_test(struct clipped_test *test)
 {
 	int ret = TST_SUCCESS;
-	GP_Pixmap *src, *dst;
+	gp_pixmap *src, *dst;
 
-	src = GP_PixmapAlloc(test->src_w, test->src_h, GP_PIXEL_G8);
-	dst = GP_PixmapAlloc(test->dst_w, test->dst_h, GP_PIXEL_G8);
+	src = gp_pixmap_alloc(test->src_w, test->src_h, GP_PIXEL_G8);
+	dst = gp_pixmap_alloc(test->dst_w, test->dst_h, GP_PIXEL_G8);
 
-	GP_Fill(src, 1);
-	GP_Fill(dst, 0);
+	gp_fill(src, 1);
+	gp_fill(dst, 0);
 
 	if (!src || !dst) {
-		tst_msg("GP_PixmapAlloc() failed");
+		tst_msg("gp_pixmap_alloc() failed");
 		return TST_UNTESTED;
 	}
 
-	GP_BlitXYWH_Clipped(src, test->x0, test->y0, test->w0, test->h0,
-	                    dst, test->x1, test->y1);
+	gp_blit_xywh_clipped(src, test->x0, test->y0, test->w0, test->h0, dst,
+			     test->x1, test->y1);
 
 	if (test->dst) {
 		if (compare_buffers(test->dst, dst))
 			ret = TST_FAILED;
 	}
 
-	GP_PixmapFree(src);
-	GP_PixmapFree(dst);
+	gp_pixmap_free(src);
+	gp_pixmap_free(dst);
 
 	return ret;
 }

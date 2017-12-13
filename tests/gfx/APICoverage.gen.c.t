@@ -14,47 +14,47 @@
 #include "tst_test.h"
 
 @ API_List = [
-@    ['Fill', 'GP_Pixmap:in', 'int:pixel'],
+@    ['fill', 'gp_pixmap:in', 'int:pixel'],
 @
-@    ['HLine', 'GP_Pixmap:in', 'int:x0', 'int:x1', 'int:y', 'int:pixel'],
-@    ['VLine', 'GP_Pixmap:in', 'int:x', 'int:y0', 'int:y1', 'int:pixel'],
+@    ['hline', 'gp_pixmap:in', 'int:x0', 'int:x1', 'int:y', 'int:pixel'],
+@    ['vline', 'gp_pixmap:in', 'int:x', 'int:y0', 'int:y1', 'int:pixel'],
 @
-@    ['Line', 'GP_Pixmap:in', 'int:x0', 'int:y0',
+@    ['line', 'gp_pixmap:in', 'int:x0', 'int:y0',
 @     'int:x1', 'int:y1', 'int:pixel'],
 @
-@    ['Circle', 'GP_Pixmap:in', 'int:xcenter', 'int:ycenter',
+@    ['circle', 'gp_pixmap:in', 'int:xcenter', 'int:ycenter',
 @     'int:r', 'int:pixel'],
-@    ['FillCircle', 'GP_Pixmap:in', 'int:xcenter', 'int:ycenter',
+@    ['fill_circle', 'gp_pixmap:in', 'int:xcenter', 'int:ycenter',
 @     'int:r', 'int:pixel'],
 @
-@    ['Ellipse', 'GP_Pixmap:in', 'int:xcenter', 'int:ycenter',
+@    ['ellipse', 'gp_pixmap:in', 'int:xcenter', 'int:ycenter',
 @     'int:a', 'int:b', 'int:pixel'],
-@    ['FillEllipse', 'GP_Pixmap:in', 'int:xcenter', 'int:ycenter',
+@    ['fill_ellipse', 'gp_pixmap:in', 'int:xcenter', 'int:ycenter',
 @     'int:a', 'int:b', 'int:pixel'],
 @
-@    ['Ring', 'GP_Pixmap:in', 'int:xc', 'int:yc',
+@    ['ring', 'gp_pixmap:in', 'int:xc', 'int:yc',
 @     'int:r1', 'int:r2', 'int:pixel'],
-@    ['FillRing', 'GP_Pixmap:in', 'int:xc', 'int:yc',
+@    ['fill_ring', 'gp_pixmap:in', 'int:xc', 'int:yc',
 @     'int:r1', 'int:r2', 'int:pixel'],
 @
-@    ['Rect', 'GP_Pixmap:in', 'int:x0', 'int:y0',
+@    ['rect', 'gp_pixmap:in', 'int:x0', 'int:y0',
 @     'int:x1', 'int:y1', 'int:pixel'],
-@    ['FillRect', 'GP_Pixmap:in', 'int:x0', 'int:y0',
+@    ['fill_rect', 'gp_pixmap:in', 'int:x0', 'int:y0',
 @     'int:x1', 'int:y1', 'int:pixel'],
 @
-@    ['Triangle', 'GP_Pixmap:in', 'int:x0', 'int:y0',
+@    ['triangle', 'gp_pixmap:in', 'int:x0', 'int:y0',
 @     'int:x1', 'int:y1', 'int:x2', 'int:y2', 'int:pixel'],
-@    ['FillTriangle', 'GP_Pixmap:in', 'int:x0', 'int:y0',
+@    ['fill_triangle', 'gp_pixmap:in', 'int:x0', 'int:y0',
 @     'int:x1', 'int:y1', 'int:x2', 'int:y2', 'int:pixel'],
 @
-@    ['Tetragon', 'GP_Pixmap:in', 'int:x0', 'int:y0', 'int:x1', 'int:y1',
+@    ['tetragon', 'gp_pixmap:in', 'int:x0', 'int:y0', 'int:x1', 'int:y1',
 @     'int:x2', 'int:y2', 'int:x3', 'int:y3', 'int:pixel'],
-@    ['FillTetragon', 'GP_Pixmap:in', 'int:x0', 'int:y0', 'int:x1', 'int:y1',
+@    ['fill_tetragon', 'gp_pixmap:in', 'int:x0', 'int:y0', 'int:x1', 'int:y1',
 @     'int:x2', 'int:y2', 'int:x3', 'int:y3', 'int:pixel'],
 @ ]
 @
 @ def prep_pixmap(id, pt):
-GP_Pixmap *{{ id }} = GP_PixmapAlloc(331, 331, GP_PIXEL_{{ pt.name }});
+gp_pixmap *{{ id }} = gp_pixmap_alloc(331, 331, GP_PIXEL_{{ pt.name }});
 @ end
 @
 @ def prep_int(id):
@@ -62,7 +62,7 @@ int {{ id }} = 2;
 @ end
 @
 @ def prep_param(param, pt):
-@     if (param.split(':', 1)[0] == 'GP_Pixmap'):
+@     if (param.split(':', 1)[0] == 'gp_pixmap'):
 {@ prep_pixmap(param.split(':', 1)[1], pt) @}
 @     if (param.split(':', 1)[0] == 'float'):
 {@ prep_float(param.split(':', 1)[1]) @}
@@ -86,7 +86,7 @@ static int Gfx_{{ fn[0]}}_{{ pt.name }}(void)
 	{@ prep_param(param, pt) @}
 @             end
 
-	GP_{{ fn[0] }}({{ ', '.join(map(get_param, fn[1:])) }});
+	gp_{{ fn[0] }}({{ ', '.join(map(get_param, fn[1:])) }});
 
 	return TST_SUCCESS;
 }

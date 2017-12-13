@@ -23,35 +23,35 @@
 #ifndef FILTERS_GP_SEPIA_H
 #define FILTERS_GP_SEPIA_H
 
-#include "GP_Filter.h"
+#include <filters/GP_Filter.h>
 
-int GP_FilterSepiaEx(const GP_Pixmap *const src,
-                     GP_Coord x_src, GP_Coord y_src,
-                     GP_Size w_src, GP_Size h_src,
-                     GP_Pixmap *dst,
-                     GP_Coord x_dst, GP_Coord y_dst,
-                     GP_ProgressCallback *callback);
+int gp_filter_sepia_ex(const gp_pixmap *const src,
+                       gp_coord x_src, gp_coord y_src,
+                       gp_size w_src, gp_size h_src,
+                       gp_pixmap *dst,
+                       gp_coord x_dst, gp_coord y_dst,
+                       gp_progress_cb *callback);
 
-static inline int GP_FilterSepia(const GP_Pixmap *const src,
-                                 GP_Pixmap *dst,
-                                 GP_ProgressCallback *callback)
+static inline int gp_filter_sepia(const gp_pixmap *const src,
+                                 gp_pixmap *dst,
+                                 gp_progress_cb *callback)
 {
-	return GP_FilterSepiaEx(src, 0, 0, src->w, src->h,
-	                        dst, 0, 0, callback);
+	return gp_filter_sepia_ex(src, 0, 0, src->w, src->h,
+	                          dst, 0, 0, callback);
 }
 
-GP_Pixmap *GP_FilterSepiaExAlloc(const GP_Pixmap *const src,
-                                  GP_Coord x_src, GP_Coord y_src,
-                                  GP_Size w_src, GP_Size h_src,
-                                  GP_PixelType dst_pixel_type,
-                                  GP_ProgressCallback *callback);
+gp_pixmap *gp_filter_sepia_ex_alloc(const gp_pixmap *const src,
+                                    gp_coord x_src, gp_coord y_src,
+                                    gp_size w_src, gp_size h_src,
+                                    gp_pixel_type dst_pixel_type,
+                                    gp_progress_cb *callback);
 
-static inline GP_Pixmap *GP_FilterSepiaAlloc(const GP_Pixmap *const src,
-                                              GP_PixelType dst_pixel_type,
-                                              GP_ProgressCallback *callback)
+static inline gp_pixmap *gp_filter_sepia_alloc(const gp_pixmap *const src,
+                                               gp_pixel_type dst_pixel_type,
+                                               gp_progress_cb *callback)
 {
-	return GP_FilterSepiaExAlloc(src, 0, 0, src->w, src->h,
-	                             dst_pixel_type, callback);
+	return gp_filter_sepia_ex_alloc(src, 0, 0, src->w, src->h,
+	                                dst_pixel_type, callback);
 }
 
 #endif /* FILTERS_GP_SEPIA_H */

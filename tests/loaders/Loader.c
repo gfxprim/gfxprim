@@ -26,14 +26,14 @@
 
 #include "tst_test.h"
 
-static GP_Loader dummy_loaders[1000];
+static gp_loader dummy_loaders[1000];
 
 static int register_max_loaders(void)
 {
 	unsigned int cnt = 0, i;
 
 	for (;;) {
-		if (GP_LoaderRegister(&dummy_loaders[cnt])) {
+		if (gp_loader_register(&dummy_loaders[cnt])) {
 			if (errno != ENOSPC) {
 				tst_msg("Wrong errno %s (%i), expected ENOSPC",
 					tst_strerr(errno), errno);
@@ -52,13 +52,13 @@ static int register_max_loaders(void)
 	tst_msg("Registered %u loaders", cnt);
 
 	/* Let's provoke SEGFAULT by walking the loaders list */
-	GP_ListLoaders();
+	gp_loaders_lists();
 
 	for (i = 0; i < cnt; i++)
-		GP_LoaderUnregister(&dummy_loaders[i]);
+		gp_loader_unregister(&dummy_loaders[i]);
 
 	for (i = 0; i < cnt; i++) {
-		if (GP_LoaderRegister(&dummy_loaders[i])) {
+		if (gp_loader_register(&dummy_loaders[i])) {
 			tst_msg("Failed to register %u loader (max=%u)",
 				i, cnt);
 			return TST_FAILED;
@@ -66,7 +66,7 @@ static int register_max_loaders(void)
 	}
 
 	for (i = 0; i < cnt; i++)
-		GP_LoaderUnregister(&dummy_loaders[cnt - i - 1]);
+		gp_loader_unregister(&dummy_loaders[cnt - i - 1]);
 
 	return TST_SUCCESS;
 }
@@ -75,13 +75,13 @@ static int register_loader_twice(void)
 {
 	int ret;
 
-	if (GP_LoaderRegister(dummy_loaders)) {
+	if (gp_loader_register(dummy_loaders)) {
 		tst_msg("Failed to register loader %s (%i)",
 		        tst_strerr(errno), errno);
 		return TST_FAILED;
 	}
 
-	if (GP_LoaderRegister(dummy_loaders)) {
+	if (gp_loader_register(dummy_loaders)) {
 		if (errno != EEXIST) {
 			tst_msg("Loader failed but errno %s (%i)",
 			        tst_strerr(errno), errno);
@@ -97,36 +97,36 @@ static int register_loader_twice(void)
 	tst_msg("Second attempt to register loader succeded");
 	ret = TST_FAILED;
 exit:
-	GP_LoaderUnregister(dummy_loaders);
+	gp_loader_unregister(dummy_loaders);
 	return ret;
 }
 
-static GP_Loader test_loader = {
+static gp_loader test_loader = {
 	.fmt_name = "TEST",
 	.extensions = {"test", NULL},
 };
 
 static int loader_by_extension(void)
 {
-	const GP_Loader *loader;
+	const gp_loader *loader;
 	int err = 0;
 
-	if (GP_LoaderRegister(&test_loader)) {
+	if (gp_loader_register(&test_loader)) {
 		tst_msg("Failed to register loader %s (%i)",
 		        tst_strerr(errno), errno);
 		return TST_FAILED;
 	}
 
-	loader = GP_LoaderByFilename("file.jpg");
+	loader = gp_loader_by_filename("file.jpg");
 
-	if (loader != &GP_JPG) {
+	if (loader != &gp_jpg) {
 		tst_msg("Failed to get JPEG loader");
 		err++;
 	} else {
 		tst_msg("Succeded to get JPEG loader");
 	}
 
-	loader = GP_LoaderByFilename("file.test");
+	loader = gp_loader_by_filename("file.test");
 
 	if (loader != &test_loader) {
 		tst_msg("Failed to get registered TEST loader");
@@ -135,7 +135,7 @@ static int loader_by_extension(void)
 		tst_msg("Succeded to get TEST loader");
 	}
 
-	GP_LoaderUnregister(&test_loader);
+	gp_loader_unregister(&test_loader);
 
 	if (err)
 		return TST_FAILED;

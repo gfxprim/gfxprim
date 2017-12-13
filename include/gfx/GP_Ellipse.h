@@ -30,18 +30,18 @@
 
 /* Ellipse */
 
-void GP_Ellipse(GP_Pixmap *pixmap, GP_Coord xcenter, GP_Coord ycenter,
-                GP_Size a, GP_Size b, GP_Pixel pixel);
+void gp_ellipse(gp_pixmap *pixmap, gp_coord xcenter, gp_coord ycenter,
+                gp_size a, gp_size b, gp_pixel pixel);
 
-void GP_Ellipse_Raw(GP_Pixmap *pixmap, GP_Coord xcenter, GP_Coord ycenter,
-                    GP_Size a, GP_Size b, GP_Pixel pixel);
+void gp_ellipse_raw(gp_pixmap *pixmap, gp_coord xcenter, gp_coord ycenter,
+                    gp_size a, gp_size b, gp_pixel pixel);
 
 /* Filled Ellipse */
 
-void GP_FillEllipse(GP_Pixmap *pixmap, GP_Coord xcenter, GP_Coord ycenter,
-                    GP_Size a, GP_Size b, GP_Pixel pixel);
+void gp_fill_ellipse(gp_pixmap *pixmap, gp_coord xcenter, gp_coord ycenter,
+                     gp_size a, gp_size b, gp_pixel pixel);
 
-void GP_FillEllipse_Raw(GP_Pixmap *pixmap, GP_Coord xcenter, GP_Coord ycenter,
-                        GP_Size a, GP_Size b, GP_Pixel pixel);
+void gp_fill_ellipse_raw(gp_pixmap *pixmap, gp_coord xcenter, gp_coord ycenter,
+                         gp_size a, gp_size b, gp_pixel pixel);
 
 #endif /* GP_ELLIPSE_H */

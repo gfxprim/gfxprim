@@ -11,7 +11,7 @@ Common Macros and Inline Functions
 -------------------------------------------------------------------------------
 #include <core/GP_Common.h>
 /* or */
-#include <GP.h>
+#include <gfxprim.h>
 
 GP_MIN(a, b);
 
@@ -60,7 +60,7 @@ GP_CLAMP(val, min, max);
 
 Value clamping macros.
 
-NOTE: this header is not included by including the 'GP.h' header.
+NOTE: this header is not included by including the 'gfxprim.h' header.
 
 Temporary Buffer Allocator
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -97,18 +97,18 @@ NOTE: The allocator itself does not align the resulting blocks. It's your
  *
  * The bsize is actual size of the block allocated.
  */
-GP_TempAllocCreate(name, bsize);
+gp_temp_alloc_create(name, bsize);
 
 /*
  * A macro that returns pointer to the start of a block of a bsize
  * partioned from the block allocator passed as self argument.
  */
-GP_TempAllocGet(self, bsize);
+gp_temp_alloc_get(self, bsize);
 
 /*
  * Free the allocator memory.
  */
-GP_TempAllocFree(self);
+gp_temp_alloc_free(self);
 -------------------------------------------------------------------------------
 
 Example usage of the allocator:
@@ -119,18 +119,18 @@ Example usage of the allocator:
 
 int foo(...)
 {
-	GP_TempAllocCreate(tmp, 3 * img->width);
+	gp_temp_alloc_create(tmp, 3 * img->width);
 
-	uint8_t *R = GP_TempAllocGet(tmp, img->width);
-	uint8_t *G = GP_TempAllocGet(tmp, img->width);
-	uint8_t *B = GP_TempAllocGet(tmp, img->width);
+	uint8_t *R = gp_temp_alloc_get(tmp, img->width);
+	uint8_t *G = gp_temp_alloc_get(tmp, img->width);
+	uint8_t *B = gp_temp_alloc_get(tmp, img->width);
 
 	/* start of the code that uses the buffers */
 
 	...
 
 	if (error) {
-		GP_TempAllocFree(tmp);
+		gp_temp_alloc_free(tmp);
 		return -1;
 	}
 
@@ -138,7 +138,7 @@ int foo(...)
 
 	/* end of the code that uses the buffers */
 
-	GP_TempAllocFree(tmp);
+	gp_temp_alloc_free(tmp);
 
 	return 0;
 }

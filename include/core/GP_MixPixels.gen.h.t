@@ -20,15 +20,15 @@
  */
 #define GP_MIX_PIXELS_LINEAR_{{ pt.name }}(pix1, pix2, perc) ({ \
 @         for c in pt.chanslist:
-	GP_Pixel {{ c[0] }}; \
+	gp_pixel {{ c[0] }}; \
 \
-	{{ c[0] }}  = GP_Pixel_GET_{{ c[0] }}_{{ pt.name }}(pix1) * (perc); \
-	{{ c[0] }} += GP_Pixel_GET_{{ c[0] }}_{{ pt.name }}(pix2) * (255 - (perc)); \
+	{{ c[0] }}  = GP_PIXEL_GET_{{ c[0] }}_{{ pt.name }}(pix1) * (perc); \
+	{{ c[0] }} += GP_PIXEL_GET_{{ c[0] }}_{{ pt.name }}(pix2) * (255 - (perc)); \
 	{{ c[0] }} = ({{ c[0] }} + 128) / 255; \
 \
 @         end
 \
-	GP_Pixel_CREATE_{{ pt.name }}({{ ', '.join(pt.chan_names) }}); \
+	GP_PIXEL_CREATE_{{ pt.name }}({{ ', '.join(pt.chan_names) }}); \
 })
 
 /*
@@ -38,16 +38,16 @@
  */
 #define GP_MIX_PIXELS_GAMMA_{{ pt.name }}(pix1, pix2, perc) ({ \
 @         for c in pt.chanslist:
-	GP_Pixel {{ c[0] }}; \
+	gp_pixel {{ c[0] }}; \
 \
-	{{ c[0] }}  = GP_Gamma{{ c[2] }}ToLinear10(GP_Pixel_GET_{{ c[0] }}_{{ pt.name }}(pix1)) * (perc); \
-	{{ c[0] }} += GP_Gamma{{ c[2] }}ToLinear10(GP_Pixel_GET_{{ c[0] }}_{{ pt.name }}(pix2)) * (255 - (perc)); \
+	{{ c[0] }}  = gp_gamma{{ c[2] }}_to_linear10(GP_PIXEL_GET_{{ c[0] }}_{{ pt.name }}(pix1)) * (perc); \
+	{{ c[0] }} += gp_gamma{{ c[2] }}_to_linear10(GP_PIXEL_GET_{{ c[0] }}_{{ pt.name }}(pix2)) * (255 - (perc)); \
 	{{ c[0] }} = ({{ c[0] }} + 128) / 255; \
-	{{ c[0] }} = GP_Linear10ToGamma{{ c[2] }}({{ c[0] }}); \
+	{{ c[0] }} = gp_linear10_to_gamma{{ c[2] }}({{ c[0] }}); \
 \
 @         end
 \
-	GP_Pixel_CREATE_{{ pt.name }}({{ ", ".join(pt.chan_names) }}); \
+	GP_PIXEL_CREATE_{{ pt.name }}({{ ", ".join(pt.chan_names) }}); \
 })
 
 #define GP_MIX_PIXELS_{{ pt.name }}(pix1, pix2, perc) \
@@ -57,8 +57,8 @@
 	GP_MIX_PIXELS_LINEAR_{{ pt.name }}(pix1, pix2, perc)
 @ end
 
-static inline GP_Pixel GP_MixPixels(GP_Pixel pix1, GP_Pixel pix2,
-                                    uint8_t perc, GP_PixelType pixel_type)
+static inline gp_pixel gp_mix_pixels(gp_pixel pix1, gp_pixel pix2,
+                                     uint8_t perc, gp_pixel_type pixel_type)
 {
 	switch (pixel_type) {
 @ for pt in pixeltypes:
@@ -74,37 +74,37 @@ static inline GP_Pixel GP_MixPixels(GP_Pixel pix1, GP_Pixel pix2,
 
 @ for pt in pixeltypes:
 @     if not pt.is_unknown():
-static inline void GP_MixPixel_Raw_{{ pt.name }}(GP_Pixmap *pixmap,
-			GP_Coord x, GP_Coord y, GP_Pixel pixel, uint8_t perc)
+static inline void gp_mix_pixel_raw_{{ pt.name }}(gp_pixmap *pixmap,
+			gp_coord x, gp_coord y, gp_pixel pixel, uint8_t perc)
 {
-	GP_Pixel pix = GP_GetPixel_Raw_{{ pt.pixelsize.suffix }}(pixmap, x, y);
+	gp_pixel pix = gp_getpixel_raw_{{ pt.pixelsize.suffix }}(pixmap, x, y);
 	pix = GP_MIX_PIXELS_{{ pt.name }}(pixel, pix, perc);
-	GP_PutPixel_Raw_{{ pt.pixelsize.suffix }}(pixmap, x, y, pix);
+	gp_putpixel_raw_{{ pt.pixelsize.suffix }}(pixmap, x, y, pix);
 }
 
 @ end
 
 @ for pt in pixeltypes:
 @     if not pt.is_unknown():
-static inline void GP_MixPixel_Raw_Clipped_{{ pt.name }}(GP_Pixmap *pixmap,
-			GP_Coord x, GP_Coord y, GP_Pixel pixel, uint8_t perc)
+static inline void gp_mix_pixel_raw_clipped_{{ pt.name }}(gp_pixmap *pixmap,
+			gp_coord x, gp_coord y, gp_pixel pixel, uint8_t perc)
 {
 	if (GP_PIXEL_IS_CLIPPED(pixmap, x, y))
 		return;
 
-	GP_MixPixel_Raw_{{ pt.name }}(pixmap, x, y, pixel, perc);
+	gp_mix_pixel_raw_{{ pt.name }}(pixmap, x, y, pixel, perc);
 }
 
 @ end
 
-static inline void GP_MixPixel_Raw(GP_Pixmap *pixmap, GP_Coord x, GP_Coord y,
-                                   GP_Pixel pixel, uint8_t perc)
+static inline void gp_mix_pixel_raw(gp_pixmap *pixmap, gp_coord x, gp_coord y,
+                                    gp_pixel pixel, uint8_t perc)
 {
 	switch (pixmap->pixel_type) {
 @ for pt in pixeltypes:
 @     if not pt.is_unknown():
 	case GP_PIXEL_{{ pt.name }}:
-				GP_MixPixel_Raw_{{ pt.name }}(pixmap, x, y, pixel, perc);
+				gp_mix_pixel_raw_{{ pt.name }}(pixmap, x, y, pixel, perc);
 	break;
 @ end
 	default:
@@ -112,19 +112,18 @@ static inline void GP_MixPixel_Raw(GP_Pixmap *pixmap, GP_Coord x, GP_Coord y,
 	}
 }
 
-static inline void GP_MixPixel_Raw_Clipped(GP_Pixmap *pixmap,
-                                           GP_Coord x, GP_Coord y,
-                                           GP_Pixel pixel, uint8_t perc)
+static inline void gp_mix_pixel_raw_clipped(gp_pixmap *pixmap,
+                                            gp_coord x, gp_coord y,
+                                            gp_pixel pixel, uint8_t perc)
 {
 	switch (pixmap->pixel_type) {
 @ for pt in pixeltypes:
 @     if not pt.is_unknown():
 	case GP_PIXEL_{{ pt.name }}:
-		GP_MixPixel_Raw_Clipped_{{ pt.name }}(pixmap, x, y, pixel, perc);
+		gp_mix_pixel_raw_clipped_{{ pt.name }}(pixmap, x, y, pixel, perc);
 	break;
 @ end
 	default:
 		GP_ABORT("Unknown pixeltype");
 	}
 }
-

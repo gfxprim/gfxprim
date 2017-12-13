@@ -42,7 +42,7 @@ struct x11_win {
 	XShmSegmentInfo shminfo;
 #endif /* HAVE_X_SHM */
 
-	GP_Pixmap pixmap;
+	gp_pixmap pixmap;
 
 	/* Window list pointers */
 	struct x11_win *prev;

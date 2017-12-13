@@ -32,8 +32,8 @@
 #include "core/GP_Pixmap.h"
 #include "core/GP_ProgressCallback.h"
 
-#include "loaders/GP_IO.h"
-#include "loaders/GP_DataStorage.h"
+#include <loaders/GP_IO.h>
+#include <loaders/GP_DataStorage.h>
 
 /*
  * Reads an image from a I/O stream.
@@ -41,26 +41,26 @@
  * The image format is matched from the file signature (first few bytes of the
  * I/O stream).
  */
-GP_Pixmap *GP_ReadImage(GP_IO *io, GP_ProgressCallback *callback);
+gp_pixmap *gp_read_image(gp_io *io, gp_progress_cb *callback);
 
-int GP_ReadImageEx(GP_IO *io, GP_Pixmap **img, GP_DataStorage *meta_data,
-                   GP_ProgressCallback *callback);
+int gp_read_image_ex(gp_io *io, gp_pixmap **img, gp_storage *meta_data,
+                     gp_progress_cb *callback);
 
 /*
  * Tries to load image accordingly to the file extension.
  *
  * If operation fails NULL is returned and errno is filled.
  */
-GP_Pixmap *GP_LoadImage(const char *src_path, GP_ProgressCallback *callback);
+gp_pixmap *gp_load_image(const char *src_path, gp_progress_cb *callback);
 
-int GP_LoadImageEx(const char *src_path,
-                   GP_Pixmap **img, GP_DataStorage *meta_data,
-                   GP_ProgressCallback *callback);
+int gp_load_image_ex(const char *src_path,
+                     gp_pixmap **img, gp_storage *meta_data,
+                     gp_progress_cb *callback);
 
 /*
  * Loads image Meta Data (if possible).
  */
-int GP_LoadMetaData(const char *src_path, GP_DataStorage *storage);
+int gp_load_meta_data(const char *src_path, gp_storage *storage);
 
 /*
  * Simple saving function, the image format is matched by file extension.
@@ -76,26 +76,28 @@ int GP_LoadMetaData(const char *src_path, GP_DataStorage *storage);
  * The resulting errno may also be set to any possible error from fopen(3), open(3),
  * write(3), fwrite(3), seek(3), etc..
  */
-int GP_SaveImage(const GP_Pixmap *src, const char *dst_path,
-                 GP_ProgressCallback *callback);
+int gp_save_image(const gp_pixmap *src, const char *dst_path,
+                  gp_progress_cb *callback);
+
+typedef struct gp_loader gp_loader;
 
 /*
  * Describes image loader/saver.
  */
-typedef struct GP_Loader {
+struct gp_loader {
 	/*
 	 * Reads image and/or metadata from an I/O stream.
 	 */
-	int (*Read)(GP_IO *io, GP_Pixmap **img, GP_DataStorage *storage,
-                    GP_ProgressCallback *callback);
+	int (*Read)(gp_io *io, gp_pixmap **img, gp_storage *storage,
+                    gp_progress_cb *callback);
 
 	/*
 	 * Writes an image into an I/O stream.
 	 *
 	 * Returns zero on success, non-zero on failure and errno must be set.
 	 */
-	int (*Write)(const GP_Pixmap *src, GP_IO *io,
-	             GP_ProgressCallback *callback);
+	int (*Write)(const gp_pixmap *src, gp_io *io,
+	             gp_progress_cb *callback);
 
 	/*
 	 * GP_PIXEL_UNKNOWN terminated array of formats loader supports for save.
@@ -103,7 +105,7 @@ typedef struct GP_Loader {
 	 * This is _NOT_ a complete list loaders is able to save, due to automatic
 	 * conversions (i.e. RGB888 vs BRG888).
 	 */
-	const GP_PixelType *save_ptypes;
+	const gp_pixel_type *save_ptypes;
 
 	/*
 	 * The buffer is filled with 32 bytes from an image start, returns 1 if
@@ -120,26 +122,26 @@ typedef struct GP_Loader {
 	 * NULL terminated array of file extensions.
 	 */
 	const char *extensions[];
-} GP_Loader;
+};
 
 /*
  * Takes pointer to buffer at least 32 bytes long and returns a pointer to
  * matched loader or NULL.
  */
-const GP_Loader *GP_LoaderBySignature(const void *buf);
+const gp_loader *gp_loader_by_signature(const void *buf);
 
 /*
  * Tries to match loader by filename extension. Returns NULL if no loader was
  * found.
  */
-const GP_Loader *GP_LoaderByFilename(const char *path);
+const gp_loader *gp_loader_by_filename(const char *path);
 
 /*
  * Registers additional loader.
  *
  * Returns zero on success, non-zero if table of loaders was is full.
  */
-int GP_LoaderRegister(const GP_Loader *self);
+int gp_loader_register(const gp_loader *self);
 
 /*
  * Unregisters a loader.
@@ -148,7 +150,7 @@ int GP_LoaderRegister(const GP_Loader *self);
  *
  * You can unregister them using this function if you want.
  */
-void GP_LoaderUnregister(const GP_Loader *self);
+void gp_loader_unregister(const gp_loader *self);
 
 /*
  * Generic LoadImage for a given loader.
@@ -156,25 +158,25 @@ void GP_LoaderUnregister(const GP_Loader *self);
  * The function prepares the I/O from file, calls the loader Read() method,
  * closes the I/O and returns the pixmap.
  */
-GP_Pixmap *GP_LoaderLoadImage(const GP_Loader *self, const char *src_path,
-                               GP_ProgressCallback *callback);
+gp_pixmap *gp_loader_load_image(const gp_loader *self, const char *src_path,
+                                gp_progress_cb *callback);
 
 /*
  * Generic ReadImage for a given loader.
  *
  * The function calls the loader Read() method for a given I/O.
  */
-GP_Pixmap *GP_LoaderReadImage(const GP_Loader *self, GP_IO *io,
-                               GP_ProgressCallback *callback);
+gp_pixmap *gp_loader_read_image(const gp_loader *self, gp_io *io,
+                                gp_progress_cb *callback);
 
 /*
  * Generic ReadImageEx for a given loader.
  *
  * The function calls the loader Read() method for a given I/O.
  */
-int GP_LoaderReadImageEx(const GP_Loader *self, GP_IO *io,
-                         GP_Pixmap **img, GP_DataStorage *data,
-                         GP_ProgressCallback *callback);
+int gp_loader_read_image_ex(const gp_loader *self, gp_io *io,
+                            gp_pixmap **img, gp_storage *data,
+                            gp_progress_cb *callback);
 
 /*
  * Generic LoadImageEx for a given loader.
@@ -182,9 +184,9 @@ int GP_LoaderReadImageEx(const GP_Loader *self, GP_IO *io,
  * The function prepares the I/O from file, calls the loader ReadEx() method,
  * closes the I/O and returns the pixmap.
  */
-int GP_LoaderLoadImageEx(const GP_Loader *self, const char *src_path,
-                         GP_Pixmap **img, GP_DataStorage *data,
-                         GP_ProgressCallback *callback);
+int gp_loader_load_image_ex(const gp_loader *self, const char *src_path,
+                            gp_pixmap **img, gp_storage *data,
+                            gp_progress_cb *callback);
 
 /*
  * Generic SaveImage for a given loader.
@@ -192,12 +194,12 @@ int GP_LoaderLoadImageEx(const GP_Loader *self, const char *src_path,
  * The function/ prepares the I/O from file, calls the loader Write() method
  * and closes the I/O.
  */
-int GP_LoaderSaveImage(const GP_Loader *self, const GP_Pixmap *src,
-                       const char *dst_path, GP_ProgressCallback *callback);
+int gp_loader_save_image(const gp_loader *self, const gp_pixmap *src,
+                         const char *dst_path, gp_progress_cb *callback);
 
 /*
  * List loaders into the stdout
  */
-void GP_ListLoaders(void);
+void gp_loaders_lists(void);
 
 #endif /* LOADERS_GP_LOADER_H */

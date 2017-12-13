@@ -39,21 +39,21 @@ struct file_io {
 	int fd;
 };
 
-static ssize_t file_read(GP_IO *self, void *buf, size_t size)
+static ssize_t file_read(gp_io *self, void *buf, size_t size)
 {
 	struct file_io *file_io = GP_IO_PRIV(self);
 
 	return read(file_io->fd, buf, size);
 }
 
-static ssize_t file_write(GP_IO *self, void *buf, size_t size)
+static ssize_t file_write(gp_io *self, void *buf, size_t size)
 {
 	struct file_io *file_io = GP_IO_PRIV(self);
 
 	return write(file_io->fd, buf, size);
 }
 
-static off_t file_seek(GP_IO *self, off_t off, enum GP_IOWhence whence)
+static off_t file_seek(gp_io *self, off_t off, enum gp_io_whence whence)
 {
 	struct file_io *file_io = GP_IO_PRIV(self);
 
@@ -71,7 +71,7 @@ static off_t file_seek(GP_IO *self, off_t off, enum GP_IOWhence whence)
 	return lseek(file_io->fd, off, whence);
 }
 
-static int file_close(GP_IO *self)
+static int file_close(gp_io *self)
 {
 	struct file_io *file_io = GP_IO_PRIV(self);
 	int fd;
@@ -84,15 +84,15 @@ static int file_close(GP_IO *self)
 	return close(fd);
 }
 
-GP_IO *GP_IOFile(const char *path, enum GP_IOFileMode mode)
+gp_io *gp_io_file(const char *path, enum gp_io_file_mode mode)
 {
 	int err, flags;
-	GP_IO *io;
+	gp_io *io;
 	struct file_io *file_io;
 
 	GP_DEBUG(1, "Creating IOFile '%s'", path);
 
-	io = malloc(sizeof(GP_IO) + sizeof(struct file_io));
+	io = malloc(sizeof(gp_io) + sizeof(struct file_io));
 
 	if (!io) {
 		GP_DEBUG(1, "Malloc failed :(");
@@ -123,17 +123,17 @@ GP_IO *GP_IOFile(const char *path, enum GP_IOFileMode mode)
 
 	io->mark = 0;
 
-	io->Seek = file_seek;
-	io->Read = file_read;
-	io->Write = file_write;
+	io->seek = file_seek;
+	io->read = file_read;
+	io->write = file_write;
 
 	if (mode == GP_IO_RDONLY)
-		io->Write = NULL;
+		io->write = NULL;
 
 	if (mode == GP_IO_WRONLY)
-		io->Read = NULL;
+		io->read = NULL;
 
-	io->Close = file_close;
+	io->close = file_close;
 
 	return io;
 err1:
@@ -150,7 +150,7 @@ struct mem_io {
 	void (*free)(void *);
 };
 
-static ssize_t mem_read(GP_IO *io, void *buf, size_t size)
+static ssize_t mem_read(gp_io *io, void *buf, size_t size)
 {
 	struct mem_io *mem_io = GP_IO_PRIV(io);
 	size_t rest = mem_io->size - mem_io->pos;
@@ -167,7 +167,7 @@ static ssize_t mem_read(GP_IO *io, void *buf, size_t size)
 	return ret;
 }
 
-static off_t mem_seek(GP_IO *io, off_t off, enum GP_IOWhence whence)
+static off_t mem_seek(gp_io *io, off_t off, enum gp_io_whence whence)
 {
 	struct mem_io *mem_io = GP_IO_PRIV(io);
 
@@ -204,7 +204,7 @@ static off_t mem_seek(GP_IO *io, off_t off, enum GP_IOWhence whence)
 	return mem_io->pos;
 }
 
-static int mem_close(GP_IO *io)
+static int mem_close(gp_io *io)
 {
 	struct mem_io *mem_io = GP_IO_PRIV(io);
 
@@ -218,14 +218,14 @@ static int mem_close(GP_IO *io)
 	return 0;
 }
 
-GP_IO *GP_IOMem(void *buf, size_t size, void (*free)(void *))
+gp_io *gp_io_mem(void *buf, size_t size, void (*free)(void *))
 {
-	GP_IO *io;
+	gp_io *io;
 	struct mem_io *mem_io;
 
 	GP_DEBUG(1, "Creating IOMem %p size=%zu", buf, size);
 
-	io = malloc(sizeof(GP_IO) + sizeof(*mem_io));
+	io = malloc(sizeof(gp_io) + sizeof(*mem_io));
 
 	if (!io) {
 		GP_DEBUG(1, "Malloc failed :(");
@@ -233,10 +233,10 @@ GP_IO *GP_IOMem(void *buf, size_t size, void (*free)(void *))
 		return NULL;
 	}
 
-	io->Read = mem_read;
-	io->Seek = mem_seek;
-	io->Close = mem_close;
-	io->Write = NULL;
+	io->read = mem_read;
+	io->seek = mem_seek;
+	io->close = mem_close;
+	io->write = NULL;
 
 	mem_io = GP_IO_PRIV(io);
 
@@ -254,10 +254,10 @@ struct sub_io {
 	off_t end;
 	off_t cur;
 
-	GP_IO *io;
+	gp_io *io;
 };
 
-static ssize_t sub_read(GP_IO *io, void *buf, size_t size)
+static ssize_t sub_read(gp_io *io, void *buf, size_t size)
 {
 	struct sub_io *sub_io = GP_IO_PRIV(io);
 
@@ -275,7 +275,7 @@ static ssize_t sub_read(GP_IO *io, void *buf, size_t size)
 	if (size == 0)
 		return 0;
 
-	ssize_t ret = GP_IORead(sub_io->io, buf, size);
+	ssize_t ret = gp_io_read(sub_io->io, buf, size);
 
 	if (ret < 0)
 		return ret;
@@ -284,7 +284,7 @@ static ssize_t sub_read(GP_IO *io, void *buf, size_t size)
 	return ret;
 }
 
-static off_t sub_seek(GP_IO *io, off_t off, enum GP_IOWhence whence)
+static off_t sub_seek(gp_io *io, off_t off, enum gp_io_whence whence)
 {
 	struct sub_io *sub_io = GP_IO_PRIV(io);
 	off_t io_size, ret, poff;
@@ -299,7 +299,7 @@ static off_t sub_seek(GP_IO *io, off_t off, enum GP_IOWhence whence)
 			return -1;
 		}
 
-		ret = GP_IOSeek(sub_io->io, off, whence);
+		ret = gp_io_seek(sub_io->io, off, whence);
 	break;
 	case GP_IO_SEEK_SET:
 		io_size = sub_io->end - sub_io->start;
@@ -309,7 +309,7 @@ static off_t sub_seek(GP_IO *io, off_t off, enum GP_IOWhence whence)
 			return -1;
 		}
 
-		ret = GP_IOSeek(sub_io->io, sub_io->start + off, whence);
+		ret = gp_io_seek(sub_io->io, sub_io->start + off, whence);
 	break;
 	case GP_IO_SEEK_END:
 		io_size = sub_io->end - sub_io->start;
@@ -319,7 +319,7 @@ static off_t sub_seek(GP_IO *io, off_t off, enum GP_IOWhence whence)
 			return -1;
 		}
 
-		ret = GP_IOSeek(sub_io->io, sub_io->end + off, GP_IO_SEEK_SET);
+		ret = gp_io_seek(sub_io->io, sub_io->end + off, GP_IO_SEEK_SET);
 	break;
 	default:
 		GP_WARN("Invalid whence");
@@ -335,7 +335,7 @@ static off_t sub_seek(GP_IO *io, off_t off, enum GP_IOWhence whence)
 	return sub_io->cur - sub_io->start;
 }
 
-static int sub_close(GP_IO *io)
+static int sub_close(gp_io *io)
 {
 	struct sub_io *sub_io = GP_IO_PRIV(io);
 
@@ -346,14 +346,14 @@ static int sub_close(GP_IO *io)
 	return 0;
 }
 
-GP_IO *GP_IOSubIO(GP_IO *pio, size_t size)
+gp_io *gp_io_sub_io(gp_io *pio, size_t size)
 {
-	GP_IO *io;
+	gp_io *io;
 	struct sub_io *sub_io;
 
 	GP_DEBUG(1, "Creating SubIO (from %p) size=%zu", pio, size);
 
-	io = malloc(sizeof(GP_IO) + sizeof(*sub_io));
+	io = malloc(sizeof(gp_io) + sizeof(*sub_io));
 
 	if (!io) {
 		GP_DEBUG(1, "Malloc failed :(");
@@ -361,13 +361,13 @@ GP_IO *GP_IOSubIO(GP_IO *pio, size_t size)
 		return NULL;
 	}
 
-	io->Read = sub_read;
-	io->Seek = sub_seek;
-	io->Close = sub_close;
-	io->Write = NULL;
+	io->read = sub_read;
+	io->seek = sub_seek;
+	io->close = sub_close;
+	io->write = NULL;
 
 	sub_io = GP_IO_PRIV(io);
-	sub_io->cur = sub_io->start = GP_IOTell(pio);
+	sub_io->cur = sub_io->start = gp_io_tell(pio);
 
 	//TODO: Overflow
 	sub_io->end = sub_io->start + size;
@@ -377,13 +377,13 @@ GP_IO *GP_IOSubIO(GP_IO *pio, size_t size)
 }
 
 struct buf_io {
-	GP_IO *io;
+	gp_io *io;
 	size_t bsize;
 	size_t bpos;
 	uint8_t buf[];
 };
 
-static int wbuf_close(GP_IO *io)
+static int wbuf_close(gp_io *io)
 {
 	struct buf_io *buf_io = GP_IO_PRIV(io);
 	int ret = 0;
@@ -391,7 +391,7 @@ static int wbuf_close(GP_IO *io)
 	GP_DEBUG(1, "Closing BufferIO (from %p)", buf_io->io);
 
 	if (buf_io->bpos) {
-		if (GP_IOFlush(buf_io->io, buf_io->buf, buf_io->bpos))
+		if (gp_io_flush(buf_io->io, buf_io->buf, buf_io->bpos))
 			ret = 1;
 	}
 
@@ -399,21 +399,21 @@ static int wbuf_close(GP_IO *io)
 	return ret;
 }
 
-static ssize_t buf_write(GP_IO *io, void *buf, size_t size)
+static ssize_t buf_write(gp_io *io, void *buf, size_t size)
 {
 	struct buf_io *buf_io = GP_IO_PRIV(io);
 	size_t bfree = buf_io->bsize - buf_io->bpos;
 
 	if (bfree < size) {
 		GP_DEBUG(1, "Flusing BufferIO (%p)", io);
-		if (GP_IOFlush(buf_io->io, buf_io->buf, buf_io->bpos))
+		if (gp_io_flush(buf_io->io, buf_io->buf, buf_io->bpos))
 			return -1;
 		buf_io->bpos = 0;
 	}
 
 	if (size > buf_io->bsize) {
 		GP_DEBUG(1, "Buffer too large, doing direct write (%p)", io);
-		if (GP_IOFlush(buf_io->io, buf, size))
+		if (gp_io_flush(buf_io->io, buf, size))
 			return -1;
 		return size;
 	}
@@ -423,9 +423,9 @@ static ssize_t buf_write(GP_IO *io, void *buf, size_t size)
 	return size;
 }
 
-GP_IO *GP_IOWBuffer(GP_IO *pio, size_t bsize)
+gp_io *gp_io_wbuffer(gp_io *pio, size_t bsize)
 {
-	GP_IO *io;
+	gp_io *io;
 	struct buf_io *buf_io;
 
 	if (!bsize)
@@ -434,15 +434,15 @@ GP_IO *GP_IOWBuffer(GP_IO *pio, size_t bsize)
 	GP_DEBUG(1, "Creating IOWBuffer (from %p) size=%zu", pio, bsize);
 
 	//TODO: Do not create buffer IO for MemIO, just copy the callbacks to new IO
-	io = malloc(sizeof(GP_IO) + sizeof(*buf_io) + bsize);
+	io = malloc(sizeof(gp_io) + sizeof(*buf_io) + bsize);
 
 	if (!io)
 		return NULL;
 
-	io->Write = buf_write;
-	io->Close = wbuf_close;
-	io->Read = NULL;
-	io->Seek = NULL;
+	io->write = buf_write;
+	io->close = wbuf_close;
+	io->read = NULL;
+	io->seek = NULL;
 
 	buf_io = GP_IO_PRIV(io);
 	buf_io->io = pio;
@@ -452,16 +452,16 @@ GP_IO *GP_IOWBuffer(GP_IO *pio, size_t bsize)
 	return io;
 }
 
-int GP_IOMark(GP_IO *self, enum GP_IOMarkTypes type)
+int gp_io_mark(gp_io *self, enum gp_io_mark_types type)
 {
 	off_t ret;
 
 	switch (type) {
 	case GP_IO_MARK:
-		ret = GP_IOSeek(self, 0, GP_IO_SEEK_CUR);
+		ret = gp_io_seek(self, 0, GP_IO_SEEK_CUR);
 	break;
 	case GP_IO_REWIND:
-		ret = GP_IOSeek(self, self->mark, SEEK_SET);
+		ret = gp_io_seek(self, self->mark, SEEK_SET);
 	break;
 	default:
 		GP_WARN("Invalid mark type");
@@ -477,30 +477,30 @@ int GP_IOMark(GP_IO *self, enum GP_IOMarkTypes type)
 	return 0;
 }
 
-off_t GP_IOSize(GP_IO *io)
+off_t gp_io_size(gp_io *io)
 {
-	off_t cur = GP_IOTell(io);
+	off_t cur = gp_io_tell(io);
 	off_t ret;
 
-	ret = GP_IOSeek(io, 0, GP_IO_SEEK_END);
+	ret = gp_io_seek(io, 0, GP_IO_SEEK_END);
 
 	if (ret == -1)
 		return ret;
 
-	GP_IOSeek(io, cur, GP_IO_SEEK_SET);
+	gp_io_seek(io, cur, GP_IO_SEEK_SET);
 
 	GP_DEBUG(2, "I/O Size = %lli", (long long)ret);
 
 	return ret;
 }
 
-int GP_IOFill(GP_IO *io, void *buf, size_t size)
+int gp_io_fill(gp_io *io, void *buf, size_t size)
 {
 	size_t read = 0;
 	int ret;
 
 	do {
-		ret = GP_IORead(io, (char*)buf + read, size - read);
+		ret = gp_io_read(io, (char*)buf + read, size - read);
 
 		if (ret <= 0) {
 			/* end of file */
@@ -519,13 +519,13 @@ int GP_IOFill(GP_IO *io, void *buf, size_t size)
 	return 0;
 }
 
-int GP_IOFlush(GP_IO *io, void *buf, size_t size)
+int gp_io_flush(gp_io *io, void *buf, size_t size)
 {
 	size_t wrote = 0;
 	int ret;
 
 	do {
-		ret = GP_IOWrite(io, (char*)buf + wrote, size - wrote);
+		ret = gp_io_write(io, (char*)buf + wrote, size - wrote);
 
 		if (ret <= 0) {
 			GP_DEBUG(1, "Failed to flush buffer: %s",
@@ -540,7 +540,7 @@ int GP_IOFlush(GP_IO *io, void *buf, size_t size)
 	return 0;
 }
 
-int GP_IOPrintF(GP_IO *io, const char *fmt, ...)
+int gp_io_printf(gp_io *io, const char *fmt, ...)
 {
 	va_list va, vac;
 	size_t size;
@@ -561,7 +561,7 @@ int GP_IOPrintF(GP_IO *io, const char *fmt, ...)
 		vsnprintf(bufp, size, fmt, va);
 	}
 
-	ret = GP_IOFlush(io, bufp, size);
+	ret = gp_io_flush(io, bufp, size);
 
 	if (size >= sizeof(buf))
 		free(bufp);
@@ -644,7 +644,7 @@ static void write_str(uint16_t type, uint8_t *dest,
 	dest[i] = '\0';
 }
 
-int GP_IOReadF(GP_IO *self, uint16_t *types, ...)
+int gp_io_readf(gp_io *self, uint16_t *types, ...)
 {
 	unsigned int read_size, buf_size, size;
 	int ret;
@@ -658,7 +658,7 @@ int GP_IOReadF(GP_IO *self, uint16_t *types, ...)
 
 	uint8_t buffer[buf_size], *buf = buffer;
 
-	if (GP_IOFill(self, buf, read_size))
+	if (gp_io_fill(self, buf, read_size))
 		return -1;
 
 	ret = 0;
@@ -725,7 +725,7 @@ int GP_IOReadF(GP_IO *self, uint16_t *types, ...)
 				buf += 2;
 			} else {
 				/* fill up another part of the buffer */
-				if (GP_IOFill(self, buf + read_size, size))
+				if (gp_io_fill(self, buf + read_size, size))
 					return -1;
 				read_size += size;
 				write_str(*types, ptr, buf + 1, size);
@@ -743,7 +743,7 @@ end:
 	return ret;
 }
 
-int GP_IOWriteF(GP_IO *io, uint16_t *types, ...)
+int gp_io_writef(gp_io *io, uint16_t *types, ...)
 {
 	va_list va;
 	uint8_t *ptr, t;
@@ -756,7 +756,7 @@ int GP_IOWriteF(GP_IO *io, uint16_t *types, ...)
 		switch (TYPE(*types)) {
 		case GP_IO_CONST:
 			t = VAL(*types);
-			if (GP_IOWrite(io, &t, 1) != 1)
+			if (gp_io_write(io, &t, 1) != 1)
 				goto err;
 		break;
 		case GP_IO_L2:
@@ -767,7 +767,7 @@ int GP_IOWriteF(GP_IO *io, uint16_t *types, ...)
 			if (needs_swap(*types))
 				GP_SWAP(ptr[0], ptr[1]);
 
-			if (GP_IOWrite(io, ptr, 2) != 2)
+			if (gp_io_write(io, ptr, 2) != 2)
 				goto err;
 		break;
 		case GP_IO_L4:
@@ -780,7 +780,7 @@ int GP_IOWriteF(GP_IO *io, uint16_t *types, ...)
 				GP_SWAP(ptr[1], ptr[2]);
 			}
 
-			if (GP_IOWrite(io, ptr, 4) != 4)
+			if (gp_io_write(io, ptr, 4) != 4)
 				goto err;
 		break;
 		default:
@@ -797,22 +797,22 @@ err:
 	return -1;
 }
 
-int GP_IOReadB4(GP_IO *io, uint32_t *val)
+int gp_io_read_b4(gp_io *io, uint32_t *val)
 {
 	uint16_t desc[] = {
 		GP_IO_B4,
 		GP_IO_END
 	};
 
-	return GP_IOReadF(io, desc, val) != 1;
+	return gp_io_readf(io, desc, val) != 1;
 }
 
-int GP_IOReadB2(GP_IO *io, uint16_t *val)
+int gp_io_read_b2(gp_io *io, uint16_t *val)
 {
 	uint16_t desc[] = {
 		GP_IO_B2,
 		GP_IO_END
 	};
 
-	return GP_IOReadF(io, desc, val) != 1;
+	return gp_io_readf(io, desc, val) != 1;
 }

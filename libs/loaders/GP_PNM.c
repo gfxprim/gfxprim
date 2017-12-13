@@ -57,9 +57,9 @@
 #include "core/GP_Debug.h"
 #include "core/GP_Pixmap.h"
 #include "core/GP_GetPutPixel.h"
-#include "loaders/GP_LineConvert.h"
 
-#include "loaders/GP_PNM.h"
+#include <loaders/GP_LineConvert.h>
+#include <loaders/GP_Loaders.gen.h>
 
 struct pnm_header {
 	char magic;
@@ -91,7 +91,7 @@ static int is_bitmap(char magic)
 	return magic == '1' || magic == '4';
 }
 
-int GP_MatchPBM(const void *buf)
+int gp_match_pbm(const void *buf)
 {
 	const char *b = buf;
 
@@ -107,7 +107,7 @@ static int is_graymap(char magic)
 	return magic == '2' || magic == '5';
 }
 
-int GP_MatchPGM(const void *buf)
+int gp_match_pgm(const void *buf)
 {
 	const char *b = buf;
 
@@ -123,7 +123,7 @@ static int is_pixmap(char magic)
 	return magic == '3' || magic == '6';
 }
 
-int GP_MatchPPM(const void *buf)
+int gp_match_ppm(const void *buf)
 {
 	const char *b = buf;
 
@@ -140,7 +140,7 @@ static int magic_is_valid(char magic)
 	}
 }
 
-int GP_MatchPNM(const void *buf)
+int gp_match_pnm(const void *buf)
 {
 	const char *b = buf;
 
@@ -163,7 +163,7 @@ struct buf {
 	uint8_t buf[100];
 	unsigned int buf_end;
 	unsigned int buf_pos;
-	GP_IO *io;
+	gp_io *io;
 };
 
 #define DECLARE_BUFFER(name, bio) \
@@ -176,7 +176,7 @@ static int getb(struct buf *buf)
 	if (buf->buf_pos < buf->buf_end)
 		return buf->buf[buf->buf_pos++];
 
-	ret = GP_IORead(buf->io, buf->buf, sizeof(buf->buf));
+	ret = gp_io_read(buf->io, buf->buf, sizeof(buf->buf));
 
 	if (ret <= 0)
 		return EOF;
@@ -204,7 +204,7 @@ static int fillb(struct buf *buf, void *ptr, size_t size)
 
 	//TODO: refill buffer if request < 128
 	if (size > buffered) {
-		return GP_IOFill(buf->io, (char*)ptr + buffered,
+		return gp_io_fill(buf->io, (char*)ptr + buffered,
 		                 size - buffered);
 	}
 
@@ -348,24 +348,24 @@ static int get_ascii_int(struct buf *buf, int *val)
 /*
  * Five times faster than printf("%u", byte)
  */
-static inline int write_ascii_byte(GP_IO *io, uint8_t byte)
+static inline int write_ascii_byte(gp_io *io, uint8_t byte)
 {
 	if (byte >= 100)
-		GP_IOPutC(io, '0' + byte/100);
+		gp_io_putc(io, '0' + byte/100);
 
 	if (byte >= 10)
-		GP_IOPutC(io, '0' + (byte%100)/10);
+		gp_io_putc(io, '0' + (byte%100)/10);
 
-	GP_IOPutC(io, '0' + (byte%10));
+	gp_io_putc(io, '0' + (byte%10));
 
-	return GP_IOPutC(io, ' ');
+	return gp_io_putc(io, ' ');
 }
 
 /*
  * The PBM ASCII has the values inverted
  */
-static int load_ascii_g1_inv(struct buf *buf, GP_Pixmap *pixmap,
-                             GP_ProgressCallback *cb)
+static int load_ascii_g1_inv(struct buf *buf, gp_pixmap *pixmap,
+                             gp_progress_cb *cb)
 {
 	uint32_t x, y;
 	int val, err;
@@ -376,24 +376,24 @@ static int load_ascii_g1_inv(struct buf *buf, GP_Pixmap *pixmap,
 			if ((err = get_ascii_int(buf, &val)))
 				return err;
 
-			GP_PutPixel_Raw_1BPP_LE(pixmap, x, y, !val);
+			gp_putpixel_raw_1BPP_LE(pixmap, x, y, !val);
 		}
 
-		if (GP_ProgressCallbackReport(cb, y, pixmap->h, pixmap->w)) {
+		if (gp_progress_cb_report(cb, y, pixmap->h, pixmap->w)) {
 			GP_DEBUG(1, "Operation aborted");
 			return ECANCELED;
 		}
 	}
 
-	GP_ProgressCallbackDone(cb);
+	gp_progress_cb_done(cb);
 	return 0;
 }
 
 //TODO: This is temporary till blit works with bitendian
 #include "core/GP_BitSwap.h"
 
-static int load_raw_g1_inv(struct buf *buf, GP_Pixmap *pixmap,
-                           GP_ProgressCallback *cb)
+static int load_raw_g1_inv(struct buf *buf, gp_pixmap *pixmap,
+                           gp_progress_cb *cb)
 {
 	uint32_t x, y;
 	uint8_t *addr;
@@ -409,18 +409,18 @@ static int load_raw_g1_inv(struct buf *buf, GP_Pixmap *pixmap,
 			*addr = ~GP_BIT_SWAP_B1(val);
 		}
 
-		if (GP_ProgressCallbackReport(cb, y, pixmap->h, pixmap->w)) {
+		if (gp_progress_cb_report(cb, y, pixmap->h, pixmap->w)) {
 			GP_DEBUG(1, "Operation aborted");
 			return ECANCELED;
 		}
 	}
 
-	GP_ProgressCallbackDone(cb);
+	gp_progress_cb_done(cb);
 	return 0;
 }
 
-static int load_ascii_g1(struct buf *buf, GP_Pixmap *pixmap,
-                         GP_ProgressCallback *cb)
+static int load_ascii_g1(struct buf *buf, gp_pixmap *pixmap,
+                         gp_progress_cb *cb)
 {
 	uint32_t x, y;
 	int val, err;
@@ -436,21 +436,21 @@ static int load_ascii_g1(struct buf *buf, GP_Pixmap *pixmap,
 				val = 1;
 			}
 
-			GP_PutPixel_Raw_1BPP_LE(pixmap, x, y, val);
+			gp_putpixel_raw_1BPP_LE(pixmap, x, y, val);
 		}
 
-		if (GP_ProgressCallbackReport(cb, y, pixmap->h, pixmap->w)) {
+		if (gp_progress_cb_report(cb, y, pixmap->h, pixmap->w)) {
 			GP_DEBUG(1, "Operation aborted");
 			return ECANCELED;
 		}
 	}
 
-	GP_ProgressCallbackDone(cb);
+	gp_progress_cb_done(cb);
 	return 0;
 }
 
-static int load_ascii_g2(struct buf *buf, GP_Pixmap *pixmap,
-                         GP_ProgressCallback *cb)
+static int load_ascii_g2(struct buf *buf, gp_pixmap *pixmap,
+                         gp_progress_cb *cb)
 {
 	uint32_t x, y;
 	int val, err;
@@ -466,21 +466,21 @@ static int load_ascii_g2(struct buf *buf, GP_Pixmap *pixmap,
 				val = 3;
 			}
 
-			GP_PutPixel_Raw_2BPP_LE(pixmap, x, y, val);
+			gp_putpixel_raw_2BPP_LE(pixmap, x, y, val);
 		}
 
-		if (GP_ProgressCallbackReport(cb, y, pixmap->h, pixmap->w)) {
+		if (gp_progress_cb_report(cb, y, pixmap->h, pixmap->w)) {
 			GP_DEBUG(1, "Operation aborted");
 			return ECANCELED;
 		}
 	}
 
-	GP_ProgressCallbackDone(cb);
+	gp_progress_cb_done(cb);
 	return 0;
 }
 
-static int load_ascii_g4(struct buf *buf, GP_Pixmap *pixmap,
-                         GP_ProgressCallback *cb)
+static int load_ascii_g4(struct buf *buf, gp_pixmap *pixmap,
+                         gp_progress_cb *cb)
 {
 	uint32_t x, y;
 	int val, err;
@@ -496,21 +496,21 @@ static int load_ascii_g4(struct buf *buf, GP_Pixmap *pixmap,
 				val = 15;
 			}
 
-			GP_PutPixel_Raw_4BPP_LE(pixmap, x, y, val);
+			gp_putpixel_raw_4BPP_LE(pixmap, x, y, val);
 		}
 
-		if (GP_ProgressCallbackReport(cb, y, pixmap->h, pixmap->w)) {
+		if (gp_progress_cb_report(cb, y, pixmap->h, pixmap->w)) {
 			GP_DEBUG(1, "Operation aborted");
 			return ECANCELED;
 		}
 	}
 
-	GP_ProgressCallbackDone(cb);
+	gp_progress_cb_done(cb);
 	return 0;
 }
 
-static int load_ascii_g8(struct buf *buf, GP_Pixmap *pixmap,
-                         GP_ProgressCallback *cb)
+static int load_ascii_g8(struct buf *buf, gp_pixmap *pixmap,
+                         gp_progress_cb *cb)
 {
 	uint32_t x, y;
 	int val, err;
@@ -526,21 +526,21 @@ static int load_ascii_g8(struct buf *buf, GP_Pixmap *pixmap,
 				val = 255;
 			}
 
-			GP_PutPixel_Raw_8BPP(pixmap, x, y, val);
+			gp_putpixel_raw_8BPP(pixmap, x, y, val);
 		}
 
-		if (GP_ProgressCallbackReport(cb, y, pixmap->h, pixmap->w)) {
+		if (gp_progress_cb_report(cb, y, pixmap->h, pixmap->w)) {
 			GP_DEBUG(1, "Operation aborted");
 			return ECANCELED;
 		}
 	}
 
-	GP_ProgressCallbackDone(cb);
+	gp_progress_cb_done(cb);
 	return 0;
 }
 
-static int load_bin_g8(struct buf *buf, GP_Pixmap *pixmap,
-                       GP_ProgressCallback *cb)
+static int load_bin_g8(struct buf *buf, gp_pixmap *pixmap,
+                       gp_progress_cb *cb)
 {
 	uint32_t y;
 
@@ -550,18 +550,18 @@ static int load_bin_g8(struct buf *buf, GP_Pixmap *pixmap,
 		if (fillb(buf, addr, pixmap->w))
 			return errno;
 
-		if (GP_ProgressCallbackReport(cb, y, pixmap->h, pixmap->w)) {
+		if (gp_progress_cb_report(cb, y, pixmap->h, pixmap->w)) {
 			GP_DEBUG(1, "Operation aborted");
 			return ECANCELED;
 		}
 	}
 
-	GP_ProgressCallbackDone(cb);
+	gp_progress_cb_done(cb);
 	return 0;
 }
 
-static int load_ascii_rgb888(struct buf *buf, GP_Pixmap *pixmap,
-                             GP_ProgressCallback *cb)
+static int load_ascii_rgb888(struct buf *buf, gp_pixmap *pixmap,
+                             gp_progress_cb *cb)
 {
 	uint32_t x, y;
 	int r, g, b, err;
@@ -593,22 +593,22 @@ static int load_ascii_rgb888(struct buf *buf, GP_Pixmap *pixmap,
 				b = 255;
 			}
 
-			GP_PutPixel_Raw_24BPP(pixmap, x, y,
-			                      GP_Pixel_CREATE_RGB888(r, g, b));
+			gp_putpixel_raw_24BPP(pixmap, x, y,
+			                      GP_PIXEL_CREATE_RGB888(r, g, b));
 		}
 
-		if (GP_ProgressCallbackReport(cb, y, pixmap->h, pixmap->w)) {
+		if (gp_progress_cb_report(cb, y, pixmap->h, pixmap->w)) {
 			GP_DEBUG(1, "Operation aborted");
 			return ECANCELED;
 		}
 	}
 
-	GP_ProgressCallbackDone(cb);
+	gp_progress_cb_done(cb);
 	return 0;
 }
 
-static int load_bin_rgb888(struct buf *buf, GP_Pixmap *pixmap,
-                           GP_ProgressCallback *cb)
+static int load_bin_rgb888(struct buf *buf, gp_pixmap *pixmap,
+                           gp_progress_cb *cb)
 {
 	uint32_t y, x;
 
@@ -621,25 +621,25 @@ static int load_bin_rgb888(struct buf *buf, GP_Pixmap *pixmap,
 		for (x = 0; x < pixmap->w; x++)
 			GP_SWAP(addr[3*x], addr[3*x + 2]);
 
-		if (GP_ProgressCallbackReport(cb, y, pixmap->h, pixmap->w)) {
+		if (gp_progress_cb_report(cb, y, pixmap->h, pixmap->w)) {
 			GP_DEBUG(1, "Operation aborted");
 			return ECANCELED;
 		}
 	}
 
-	GP_ProgressCallbackDone(cb);
+	gp_progress_cb_done(cb);
 	return 0;
 }
 
-static int save_ascii(GP_IO *io, const GP_Pixmap *pixmap,
-                      GP_ProgressCallback *cb, int inv)
+static int save_ascii(gp_io *io, const gp_pixmap *pixmap,
+                      gp_progress_cb *cb, int inv)
 {
 	uint32_t x, y;
 	int err;
 
 	for (y = 0; y < pixmap->h; y++) {
 		for (x = 0; x < pixmap->w; x++) {
-			int val = GP_GetPixel_Raw(pixmap, x, y);
+			int val = gp_getpixel_raw(pixmap, x, y);
 
 			if (inv)
 				val = !val;
@@ -651,23 +651,23 @@ static int save_ascii(GP_IO *io, const GP_Pixmap *pixmap,
 			}
 
 		}
-		if (GP_ProgressCallbackReport(cb, y, pixmap->h, pixmap->w)) {
+		if (gp_progress_cb_report(cb, y, pixmap->h, pixmap->w)) {
 			GP_DEBUG(1, "Operation aborted");
 			return ECANCELED;
 		}
 
-		if (GP_IOPutC(io, '\n'))
+		if (gp_io_putc(io, '\n'))
 			return errno;
 	}
 
-	GP_ProgressCallbackDone(cb);
+	gp_progress_cb_done(cb);
 	return 0;
 }
 
 static int read_bitmap(struct buf *buf, struct pnm_header *header,
-                       GP_Pixmap **img, GP_ProgressCallback *callback)
+                       gp_pixmap **img, gp_progress_cb *callback)
 {
-	GP_Pixmap *ret;
+	gp_pixmap *ret;
 	int err;
 
 	if (!is_bitmap(header->magic)) {
@@ -676,7 +676,7 @@ static int read_bitmap(struct buf *buf, struct pnm_header *header,
 		goto err0;
 	}
 
-	ret = GP_PixmapAlloc(header->w, header->h, GP_PIXEL_G1);
+	ret = gp_pixmap_alloc(header->w, header->h, GP_PIXEL_G1);
 
 	if (ret == NULL) {
 		err = ENOMEM;
@@ -694,25 +694,25 @@ static int read_bitmap(struct buf *buf, struct pnm_header *header,
 	*img = ret;
 	return 0;
 err1:
-	GP_PixmapFree(ret);
+	gp_pixmap_free(ret);
 err0:
 	errno = err;
 	return 1;
 }
 
-static void fill_meta_data(struct pnm_header *header, GP_DataStorage *storage)
+static void fill_meta_data(struct pnm_header *header, gp_storage *storage)
 {
 	if (!storage)
 		return;
 
-	GP_DataStorageAddInt(storage, NULL, "Width", header->w);
-	GP_DataStorageAddInt(storage, NULL, "Height", header->h);
-	GP_DataStorageAddInt(storage, NULL, "Depth", header->depth);
-	GP_DataStorageAddString(storage, NULL, "Format", pnm_magic_name(header->magic));
+	gp_storage_add_int(storage, NULL, "Width", header->w);
+	gp_storage_add_int(storage, NULL, "Height", header->h);
+	gp_storage_add_int(storage, NULL, "Depth", header->depth);
+	gp_storage_add_string(storage, NULL, "Format", pnm_magic_name(header->magic));
 }
 
-int GP_ReadPBMEx(GP_IO *io, GP_Pixmap **img, GP_DataStorage *storage,
-                 GP_ProgressCallback *callback)
+int gp_read_pbm_ex(gp_io *io, gp_pixmap **img, gp_storage *storage,
+                 gp_progress_cb *callback)
 {
 	struct pnm_header header;
 	DECLARE_BUFFER(buf, io);
@@ -732,31 +732,31 @@ int GP_ReadPBMEx(GP_IO *io, GP_Pixmap **img, GP_DataStorage *storage,
 	return read_bitmap(&buf, &header, img, callback);
 }
 
-static GP_PixelType pbm_save_pixels[] = {
+static gp_pixel_type pbm_save_pixels[] = {
 	GP_PIXEL_G1,
 	GP_PIXEL_UNKNOWN,
 };
 
-int GP_WritePBM(const GP_Pixmap *src, GP_IO *io,
-                GP_ProgressCallback *callback)
+int gp_write_pbm(const gp_pixmap *src, gp_io *io,
+                gp_progress_cb *callback)
 {
-	GP_IO *bio;
+	gp_io *bio;
 	int err;
 
 	GP_DEBUG(1, "Writing PBM into I/O (%p)", io);
 
 	if (src->pixel_type != GP_PIXEL_G1) {
 		GP_DEBUG(1, "Invalid pixel type '%s'",
-		         GP_PixelTypeName(src->pixel_type));
+		         gp_pixel_type_name(src->pixel_type));
 		errno = EINVAL;
 		return 1;
 	}
 
-	bio = GP_IOWBuffer(io, 0);
+	bio = gp_io_wbuffer(io, 0);
 	if (!bio)
 		return 1;
 
-	if (GP_IOPrintF(io, "P1\n%u %u\n",
+	if (gp_io_printf(io, "P1\n%u %u\n",
 	            (unsigned int) src->w, (unsigned int) src->h)) {
 		err = errno;
 		goto err;
@@ -765,14 +765,14 @@ int GP_WritePBM(const GP_Pixmap *src, GP_IO *io,
 	if ((err = save_ascii(bio, src, callback, 1)))
 		goto err;
 
-	return GP_IOClose(bio);
+	return gp_io_close(bio);
 err:
-	GP_IOClose(bio);
+	gp_io_close(bio);
 	errno = err;
 	return 1;
 }
 
-static GP_Pixel depth_to_pixel(int depth)
+static gp_pixel depth_to_pixel(int depth)
 {
 	switch (depth) {
 	case 1:
@@ -789,7 +789,7 @@ static GP_Pixel depth_to_pixel(int depth)
 }
 
 static int load_ascii_graymap(struct buf *buf, struct pnm_header *header,
-                              GP_Pixmap *ret, GP_ProgressCallback *callback)
+                              gp_pixmap *ret, gp_progress_cb *callback)
 {
 	int err = ENOSYS;
 
@@ -812,7 +812,7 @@ static int load_ascii_graymap(struct buf *buf, struct pnm_header *header,
 }
 
 static int load_bin_graymap(struct buf *buf, struct pnm_header *header,
-                            GP_Pixmap *ret, GP_ProgressCallback *callback)
+                            gp_pixmap *ret, gp_progress_cb *callback)
 {
 	int err = ENOSYS;
 
@@ -826,10 +826,10 @@ static int load_bin_graymap(struct buf *buf, struct pnm_header *header,
 }
 
 static int read_graymap(struct buf *buf, struct pnm_header *header,
-                        GP_Pixmap **img, GP_ProgressCallback *callback)
+                        gp_pixmap **img, gp_progress_cb *callback)
 {
-	GP_Pixmap *ret;
-	GP_PixelType pixel_type;
+	gp_pixmap *ret;
+	gp_pixel_type pixel_type;
 	int err;
 
 	if (!is_graymap(header->magic)) {
@@ -844,7 +844,7 @@ static int read_graymap(struct buf *buf, struct pnm_header *header,
 		goto err0;
 	}
 
-	ret = GP_PixmapAlloc(header->w, header->h, pixel_type);
+	ret = gp_pixmap_alloc(header->w, header->h, pixel_type);
 
 	if (ret == NULL) {
 		err = ENOMEM;
@@ -862,14 +862,14 @@ static int read_graymap(struct buf *buf, struct pnm_header *header,
 	*img = ret;
 	return 0;
 err1:
-	GP_PixmapFree(ret);
+	gp_pixmap_free(ret);
 err0:
 	errno = err;
 	return 1;
 }
 
-int GP_ReadPGMEx(GP_IO *io, GP_Pixmap **img, GP_DataStorage *storage,
-                 GP_ProgressCallback *callback)
+int gp_read_pgm_ex(gp_io *io, gp_pixmap **img, gp_storage *storage,
+                 gp_progress_cb *callback)
 {
 	struct pnm_header header;
 	DECLARE_BUFFER(buf, io);
@@ -889,7 +889,7 @@ int GP_ReadPGMEx(GP_IO *io, GP_Pixmap **img, GP_DataStorage *storage,
 	return read_graymap(&buf, &header, img, callback);
 }
 
-static int pixel_to_depth(GP_Pixel pixel)
+static int pixel_to_depth(gp_pixel pixel)
 {
 	switch (pixel) {
 	case GP_PIXEL_G1:
@@ -905,7 +905,7 @@ static int pixel_to_depth(GP_Pixel pixel)
 	}
 }
 
-static GP_PixelType pgm_save_pixels[] = {
+static gp_pixel_type pgm_save_pixels[] = {
 	GP_PIXEL_G1,
 	GP_PIXEL_G2,
 	GP_PIXEL_G4,
@@ -913,26 +913,26 @@ static GP_PixelType pgm_save_pixels[] = {
 	GP_PIXEL_UNKNOWN,
 };
 
-int GP_WritePGM(const GP_Pixmap *src, GP_IO *io,
-                GP_ProgressCallback *callback)
+int gp_write_pgm(const gp_pixmap *src, gp_io *io,
+                gp_progress_cb *callback)
 {
 	int err, depth;
-	GP_IO *bio;
+	gp_io *bio;
 
 	GP_DEBUG(1, "Writing PGM to I/O (%p)", io);
 
 	if ((depth = pixel_to_depth(src->pixel_type)) == -1) {
 		GP_DEBUG(1, "Invalid pixel type '%s'",
-		         GP_PixelTypeName(src->pixel_type));
+		         gp_pixel_type_name(src->pixel_type));
 		errno = EINVAL;
 		return 1;
 	}
 
-	bio = GP_IOWBuffer(io, 0);
+	bio = gp_io_wbuffer(io, 0);
 	if (!bio)
 		return 1;
 
-	if (GP_IOPrintF(io, "P2\n%u %u\n%u\n",
+	if (gp_io_printf(io, "P2\n%u %u\n%u\n",
 	            (unsigned int) src->w, (unsigned int) src->h, depth)) {
 		err = errno;
 		goto err;
@@ -941,17 +941,17 @@ int GP_WritePGM(const GP_Pixmap *src, GP_IO *io,
 	if ((err = save_ascii(bio, src, callback, 0)))
 		goto err;
 
-	return GP_IOClose(bio);
+	return gp_io_close(bio);
 err:
-	GP_IOClose(bio);
+	gp_io_close(bio);
 	errno = err;
 	return 1;
 }
 
 static int read_pixmap(struct buf *buf, struct pnm_header *header,
-                       GP_Pixmap **img, GP_ProgressCallback *callback)
+                       gp_pixmap **img, gp_progress_cb *callback)
 {
-	GP_Pixmap *ret;
+	gp_pixmap *ret;
 	int err = 0;
 
 	if (!is_pixmap(header->magic)) {
@@ -966,7 +966,7 @@ static int read_pixmap(struct buf *buf, struct pnm_header *header,
 		goto err0;
 	}
 
-	ret = GP_PixmapAlloc(header->w, header->h, GP_PIXEL_RGB888);
+	ret = gp_pixmap_alloc(header->w, header->h, GP_PIXEL_RGB888);
 
 	if (ret == NULL) {
 		err = ENOMEM;
@@ -988,14 +988,14 @@ static int read_pixmap(struct buf *buf, struct pnm_header *header,
 	*img = ret;
 	return 0;
 err1:
-	GP_PixmapFree(ret);
+	gp_pixmap_free(ret);
 err0:
 	errno = err;
 	return 1;
 }
 
-int GP_ReadPPMEx(GP_IO *io, GP_Pixmap **img, GP_DataStorage *storage,
-                 GP_ProgressCallback *callback)
+int gp_read_ppm_ex(gp_io *io, gp_pixmap **img, gp_storage *storage,
+                 gp_progress_cb *callback)
 {
 	struct pnm_header header;
 	DECLARE_BUFFER(buf, io);
@@ -1015,17 +1015,17 @@ int GP_ReadPPMEx(GP_IO *io, GP_Pixmap **img, GP_DataStorage *storage,
 	return read_pixmap(&buf, &header, img, callback);
 }
 
-static int write_binary_ppm(FILE *f, GP_Pixmap *src)
+static int write_binary_ppm(FILE *f, gp_pixmap *src)
 {
 	uint32_t x, y;
 
 	for (y = 0; y < src->h; y++)
 		for (x = 0; x < src->w; x++) {
-			GP_Pixel pix = GP_GetPixel_Raw_24BPP(src, x, y);
+			gp_pixel pix = gp_getpixel_raw_24BPP(src, x, y);
 
-			uint8_t buf[3] = {GP_Pixel_GET_R_RGB888(pix),
-			                  GP_Pixel_GET_G_RGB888(pix),
-			                  GP_Pixel_GET_B_RGB888(pix)};
+			uint8_t buf[3] = {GP_PIXEL_GET_R_RGB888(pix),
+			                  GP_PIXEL_GET_G_RGB888(pix),
+			                  GP_PIXEL_GET_B_RGB888(pix)};
 
 			if (fwrite(buf, 3, 1, f) < 1)
 				return 1;
@@ -1034,8 +1034,8 @@ static int write_binary_ppm(FILE *f, GP_Pixmap *src)
 	return 0;
 }
 
-static int save_ascii_rgb888(GP_IO *io, const GP_Pixmap *pixmap,
-                             GP_LineConvert Convert, GP_ProgressCallback *cb)
+static int save_ascii_rgb888(gp_io *io, const gp_pixmap *pixmap,
+                             gp_line_convert convert, gp_progress_cb *cb)
 {
 	uint32_t x, y;
 	int ret = 0;
@@ -1045,8 +1045,8 @@ static int save_ascii_rgb888(GP_IO *io, const GP_Pixmap *pixmap,
 
 		addr = GP_PIXEL_ADDR(pixmap, 0, y);
 
-		if (Convert) {
-			Convert(addr, buf, pixmap->w);
+		if (convert) {
+			convert(addr, buf, pixmap->w);
 			addr = buf;
 		}
 
@@ -1061,67 +1061,67 @@ static int save_ascii_rgb888(GP_IO *io, const GP_Pixmap *pixmap,
 			addr+=3;
 		}
 
-		if (GP_ProgressCallbackReport(cb, y, pixmap->h, pixmap->w)) {
+		if (gp_progress_cb_report(cb, y, pixmap->h, pixmap->w)) {
 			GP_DEBUG(1, "Operation aborted");
 			return ECANCELED;
 		}
 
-		if (GP_IOPutC(io, '\n'))
+		if (gp_io_putc(io, '\n'))
 			return errno;
 	}
 
-	GP_ProgressCallbackDone(cb);
+	gp_progress_cb_done(cb);
 	return 0;
 }
 
-static GP_PixelType ppm_save_pixels[] = {
+static gp_pixel_type ppm_save_pixels[] = {
 	GP_PIXEL_RGB888,
 	GP_PIXEL_UNKNOWN,
 };
 
-int GP_WritePPM(const GP_Pixmap *src, GP_IO *io,
-                GP_ProgressCallback *callback)
+int gp_write_ppm(const gp_pixmap *src, gp_io *io,
+                gp_progress_cb *callback)
 {
-	GP_Pixel out_pix;
-	GP_LineConvert Convert;
-	GP_IO *bio;
+	gp_pixel out_pix;
+	gp_line_convert convert;
+	gp_io *bio;
 	int err = 0;
 
 	GP_DEBUG(1, "Writing PPM into I/O (%p)", io);
 
-	out_pix = GP_LineConvertible(src->pixel_type, ppm_save_pixels);
+	out_pix = gp_line_convertible(src->pixel_type, ppm_save_pixels);
 
 	if (out_pix == GP_PIXEL_UNKNOWN) {
 		GP_DEBUG(1, "Invalid pixel type '%s'",
-		         GP_PixelTypeName(src->pixel_type));
+		         gp_pixel_type_name(src->pixel_type));
 		errno = EINVAL;
 		return 1;
 	}
 
-	bio = GP_IOWBuffer(io, 0);
+	bio = gp_io_wbuffer(io, 0);
 	if (!bio)
 		return 1;
 
-	if (GP_IOPrintF(io, "P3\n%u %u\n255\n",
+	if (gp_io_printf(io, "P3\n%u %u\n255\n",
 	            (unsigned int) src->w, (unsigned int) src->h)) {
 		err = errno;
 		goto err;
 	}
 
-	Convert = GP_LineConvertGet(src->pixel_type, out_pix);
+	convert = gp_line_convert_get(src->pixel_type, out_pix);
 
-	if ((err = save_ascii_rgb888(bio, src, Convert, callback)))
+	if ((err = save_ascii_rgb888(bio, src, convert, callback)))
 		goto err;
 
-	return GP_IOClose(bio);
+	return gp_io_close(bio);
 err:
-	GP_IOClose(bio);
+	gp_io_close(bio);
 	errno = err;
 	return 1;
 }
 
-int GP_ReadPNMEx(GP_IO *io, GP_Pixmap **img, GP_DataStorage *storage,
-                 GP_ProgressCallback *callback)
+int gp_read_pnm_ex(gp_io *io, gp_pixmap **img, gp_storage *storage,
+                 gp_progress_cb *callback)
 {
 	struct pnm_header header;
 	DECLARE_BUFFER(buf, io);
@@ -1150,7 +1150,7 @@ int GP_ReadPNMEx(GP_IO *io, GP_Pixmap **img, GP_DataStorage *storage,
 	return ret;
 }
 
-static GP_PixelType pnm_save_pixels[] = {
+static gp_pixel_type pnm_save_pixels[] = {
 	GP_PIXEL_G1,
 	GP_PIXEL_G2,
 	GP_PIXEL_G4,
@@ -1159,123 +1159,59 @@ static GP_PixelType pnm_save_pixels[] = {
 	GP_PIXEL_UNKNOWN,
 };
 
-int GP_WritePNM(const GP_Pixmap *src, GP_IO *io,
-                GP_ProgressCallback *callback)
+int gp_write_pnm(const gp_pixmap *src, gp_io *io,
+                gp_progress_cb *callback)
 {
 	switch (src->pixel_type) {
 	case GP_PIXEL_G1:
 	case GP_PIXEL_G2:
 	case GP_PIXEL_G4:
 	case GP_PIXEL_G8:
-		return GP_WritePGM(src, io, callback);
+		return gp_write_pgm(src, io, callback);
 	case GP_PIXEL_RGB888:
-		return GP_WritePPM(src, io, callback);
+		return gp_write_ppm(src, io, callback);
 	default:
-		if (GP_LineConvertible(src->pixel_type, ppm_save_pixels))
-			return GP_WritePPM(src, io, callback);
+		if (gp_line_convertible(src->pixel_type, ppm_save_pixels))
+			return gp_write_ppm(src, io, callback);
 
 		errno = EINVAL;
 		return 1;
 	}
 }
 
-GP_Pixmap *GP_ReadPBM(GP_IO *io, GP_ProgressCallback *callback)
-{
-	return GP_LoaderReadImage(&GP_PBM, io, callback);
-}
-
-GP_Pixmap *GP_LoadPBM(const char *src_path, GP_ProgressCallback *callback)
-{
-	return GP_LoaderLoadImage(&GP_PBM, src_path, callback);
-}
-
-int GP_SavePBM(const GP_Pixmap *src, const char *dst_path,
-               GP_ProgressCallback *callback)
-{
-	return GP_LoaderSaveImage(&GP_PBM, src, dst_path, callback);
-}
-
-GP_Pixmap *GP_ReadPGM(GP_IO *io, GP_ProgressCallback *callback)
-{
-	return GP_LoaderReadImage(&GP_PGM, io, callback);
-}
-
-GP_Pixmap *GP_LoadPGM(const char *src_path, GP_ProgressCallback *callback)
-{
-	return GP_LoaderLoadImage(&GP_PGM, src_path, callback);
-}
-
-int GP_SavePGM(const GP_Pixmap *src, const char *dst_path,
-               GP_ProgressCallback *callback)
-{
-	return GP_LoaderSaveImage(&GP_PGM, src, dst_path, callback);
-}
-
-GP_Pixmap *GP_ReadPPM(GP_IO *io, GP_ProgressCallback *callback)
-{
-	return GP_LoaderReadImage(&GP_PPM, io, callback);
-}
-
-GP_Pixmap *GP_LoadPPM(const char *src_path, GP_ProgressCallback *callback)
-{
-	return GP_LoaderLoadImage(&GP_PPM, src_path, callback);
-}
-
-int GP_SavePPM(const GP_Pixmap *src, const char *dst_path,
-               GP_ProgressCallback *callback)
-{
-	return GP_LoaderSaveImage(&GP_PPM, src, dst_path, callback);
-}
-
-GP_Pixmap *GP_ReadPNM(GP_IO *io, GP_ProgressCallback *callback)
-{
-	return GP_LoaderReadImage(&GP_PNM, io, callback);
-}
-
-GP_Pixmap *GP_LoadPNM(const char *src_path, GP_ProgressCallback *callback)
-{
-	return GP_LoaderLoadImage(&GP_PNM, src_path, callback);
-}
-
-int GP_SavePNM(const GP_Pixmap *src, const char *dst_path,
-               GP_ProgressCallback *callback)
-{
-	return GP_LoaderSaveImage(&GP_PNM, src, dst_path, callback);
-}
-
-struct GP_Loader GP_PBM = {
-	.Read = GP_ReadPBMEx,
-	.Write = GP_WritePBM,
+const gp_loader gp_pbm = {
+	.Read = gp_read_pbm_ex,
+	.Write = gp_write_pbm,
 	.save_ptypes = pbm_save_pixels,
-	.Match = GP_MatchPBM,
+	.Match = gp_match_pbm,
 
 	.fmt_name = "Netpbm portable Bitmap",
 	.extensions = {"pbm", NULL},
 };
 
-struct GP_Loader GP_PGM = {
-	.Read = GP_ReadPGMEx,
-	.Write = GP_WritePGM,
+const gp_loader gp_pgm = {
+	.Read = gp_read_pgm_ex,
+	.Write = gp_write_pgm,
 	.save_ptypes = pgm_save_pixels,
-	.Match = GP_MatchPGM,
+	.Match = gp_match_pgm,
 
 	.fmt_name = "Netpbm portable Graymap",
 	.extensions = {"pgm", NULL},
 };
 
-struct GP_Loader GP_PPM = {
-	.Read = GP_ReadPPMEx,
-	.Write = GP_WritePPM,
+const gp_loader gp_ppm = {
+	.Read = gp_read_ppm_ex,
+	.Write = gp_write_ppm,
 	.save_ptypes = ppm_save_pixels,
-	.Match = GP_MatchPPM,
+	.Match = gp_match_ppm,
 
 	.fmt_name = "Netpbm portable Pixmap",
 	.extensions = {"ppm", NULL},
 };
 
-struct GP_Loader GP_PNM = {
-	.Read = GP_ReadPNMEx,
-	.Write = GP_WritePNM,
+const gp_loader gp_pnm = {
+	.Read = gp_read_pnm_ex,
+	.Write = gp_write_pnm,
 	.save_ptypes = pnm_save_pixels,
 	/*
 	 * Avoid double Match

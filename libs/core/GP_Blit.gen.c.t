@@ -21,20 +21,21 @@
 /*
  * TODO: this is used for same pixel but different offset, could still be optimized
  */
-static void blitXYXY_Naive_Raw(const GP_Pixmap *src,
-                        GP_Coord x0, GP_Coord y0, GP_Coord x1, GP_Coord y1,
-                        GP_Pixmap *dst, GP_Coord x2, GP_Coord y2)
+static void blit_xyxy_naive_raw(const gp_pixmap *src,
+                                gp_coord x0, gp_coord y0,
+				gp_coord x1, gp_coord y1,
+                                gp_pixmap *dst, gp_coord x2, gp_coord y2)
 {
-	GP_Coord x, y;
+	gp_coord x, y;
 
 	for (y = y0; y <= y1; y++) {
 		for (x = x0; x <= x1; x++) {
-			GP_Pixel p = GP_GetPixel_Raw(src, x, y);
+			gp_pixel p = gp_getpixel_raw(src, x, y);
 
 			if (src->pixel_type != dst->pixel_type)
-				p = GP_ConvertPixmapPixel(p, src, dst);
+				p = gp_convert_pixmap_pixel(p, src, dst);
 
-			GP_PutPixel_Raw(dst, x2 + (x - x0), y2 + (y - y0), p);
+			gp_putpixel_raw(dst, x2 + (x - x0), y2 + (y - y0), p);
 		}
 
 	}
@@ -44,13 +45,13 @@ static void blitXYXY_Naive_Raw(const GP_Pixmap *src,
 /*
  * Blit for equal pixel types {{ ps.suffix }}
  */
-static void blitXYXY_Raw_{{ ps.suffix }}(const GP_Pixmap *src,
-	GP_Coord x0, GP_Coord y0, GP_Coord x1, GP_Coord y1,
-	GP_Pixmap *dst, GP_Coord x2, GP_Coord y2)
+static void blitXYXY_Raw_{{ ps.suffix }}(const gp_pixmap *src,
+	gp_coord x0, gp_coord y0, gp_coord x1, gp_coord y1,
+	gp_pixmap *dst, gp_coord x2, gp_coord y2)
 {
 @     if not ps.needs_bit_endian():
 	/* memcpy() each horizontal line */
-	GP_Coord y;
+	gp_coord y;
 
 	for (y = 0; y <= (y1 - y0); y++)
 		memcpy(GP_PIXEL_ADDR_{{ ps.suffix }}(dst, x2, y2 + y),
@@ -76,7 +77,7 @@ static void blitXYXY_Raw_{{ ps.suffix }}(const GP_Pixmap *src,
 		uint8_t *end_p1 = (uint8_t *) GP_PIXEL_ADDR_{{ ps.suffix }}(src, x1, y0);
 		uint8_t *end_p2 = (uint8_t *) GP_PIXEL_ADDR_{{ ps.suffix }}(dst, x2, y2);
 
-		GP_Coord i;
+		gp_coord i;
 
 		for (i = 0; i < (y1 - y0 + 1); i++) {
 			if (al1 != 0)
@@ -91,7 +92,7 @@ static void blitXYXY_Raw_{{ ps.suffix }}(const GP_Pixmap *src,
 		}
 	} else /* Different bit-alignment, can't use memcpy() */
 #endif
-		blitXYXY_Naive_Raw(src, x0, y0, x1, y1, dst, x2, y2);
+		blit_xyxy_naive_raw(src, x0, y0, x1, y1, dst, x2, y2);
 @     end
 }
 
@@ -108,37 +109,37 @@ static void blitXYXY_Raw_{{ ps.suffix }}(const GP_Pixmap *src,
 /*
  * Blits {{ src.name }} to {{ dst.name }}
  */
-static void blitXYXY_Raw_{{ src.name }}_{{ dst.name }}(const GP_Pixmap *src,
-	GP_Coord x0, GP_Coord y0, GP_Coord x1, GP_Coord y1,
-	GP_Pixmap *dst, GP_Coord x2, GP_Coord y2)
+static void blitXYXY_Raw_{{ src.name }}_{{ dst.name }}(const gp_pixmap *src,
+	gp_coord x0, gp_coord y0, gp_coord x1, gp_coord y1,
+	gp_pixmap *dst, gp_coord x2, gp_coord y2)
 {
-	GP_Coord x, y, dx, dy;
+	gp_coord x, y, dx, dy;
 
 	for (y = y0; y <= y1; y++) {
 		for (x = x0; x <= x1; x++) {
 			dx = x2 + (x - x0);
 			dy = y2 + (y - y0);
 
-			GP_Pixel p1, p2 = 0, p3 = 0;
+			gp_pixel p1, p2 = 0, p3 = 0;
 
-			p1 = GP_GetPixel_Raw_{{ src.pixelsize.suffix }}(src, x, y);
+			p1 = gp_getpixel_raw_{{ src.pixelsize.suffix }}(src, x, y);
 @                     if src.is_alpha():
-			p2 = GP_GetPixel_Raw_{{ dst.pixelsize.suffix }}(dst, dx, dy);
-			p3 = GP_MixPixels_{{ src.name }}_{{ dst.name }}(p1, p2);
+			p2 = gp_getpixel_raw_{{ dst.pixelsize.suffix }}(dst, dx, dy);
+			p3 = gp_mix_pixels_{{ src.name }}_{{ dst.name }}(p1, p2);
 @                     else:
-			GP_Pixel_{{ src.name }}_TO_RGB888(p1, p2);
-			GP_Pixel_RGB888_TO_{{ dst.name }}(p2, p3);
+			GP_PIXEL_{{ src.name }}_TO_RGB888(p1, p2);
+			GP_PIXEL_RGB888_TO_{{ dst.name }}(p2, p3);
 @                     end
-			GP_PutPixel_Raw_{{ dst.pixelsize.suffix }}(dst, dx, dy, p3);
+			gp_putpixel_raw_{{ dst.pixelsize.suffix }}(dst, dx, dy, p3);
 		}
 	}
 }
 
 @ end
 
-void GP_BlitXYXY_Raw_Fast(const GP_Pixmap *src,
-                          GP_Coord x0, GP_Coord y0, GP_Coord x1, GP_Coord y1,
-                          GP_Pixmap *dst, GP_Coord x2, GP_Coord y2)
+void gp_blit_xyxy_raw_fast(const gp_pixmap *src,
+                           gp_coord x0, gp_coord y0, gp_coord x1, gp_coord y1,
+                           gp_pixmap *dst, gp_coord x2, gp_coord y2)
 {
 	/* Same pixel type, could be (mostly) optimized to memcpy() */
 	if (src->pixel_type == dst->pixel_type) {
@@ -162,13 +163,13 @@ void GP_BlitXYXY_Raw_Fast(const GP_Pixmap *src,
 @         end
 		default:
 			GP_ABORT("Invalid destination pixel %s",
-			         GP_PixelTypeName(dst->pixel_type));
+			         gp_pixel_type_name(dst->pixel_type));
 		}
 	break;
 @ end
 	default:
 		GP_ABORT("Invalid source pixel %s",
-		         GP_PixelTypeName(src->pixel_type));
+		         gp_pixel_type_name(src->pixel_type));
 	}
 }
 
@@ -183,24 +184,24 @@ void GP_BlitXYXY_Raw_Fast(const GP_Pixmap *src,
 /*
  * Blits {{ src.name }} to {{ dst.name }}
  */
-static void blitXYXY_{{ src.name }}_{{ dst.name }}(const GP_Pixmap *src,
-	GP_Coord x0, GP_Coord y0, GP_Coord x1, GP_Coord y1,
-	GP_Pixmap *dst, GP_Coord x2, GP_Coord y2)
+static void blitXYXY_{{ src.name }}_{{ dst.name }}(const gp_pixmap *src,
+	gp_coord x0, gp_coord y0, gp_coord x1, gp_coord y1,
+	gp_pixmap *dst, gp_coord x2, gp_coord y2)
 {
-	GP_Coord x, y, xt, yt;
+	gp_coord x, y, xt, yt;
 
 	for (y = y0; y <= y1; y++)
 		for (x = x0; x <= x1; x++) {
-			GP_Pixel p1, p2 = 0;
+			gp_pixel p1, p2 = 0;
 			xt = x; yt = y;
 			GP_TRANSFORM_POINT(src, xt, yt);
-			p1 = GP_GetPixel_Raw_{{ src.pixelsize.suffix }}(src, xt, yt);
-			GP_Pixel_{{ src.name }}_TO_RGB888(p1, p2);
-			GP_Pixel_RGB888_TO_{{ dst.name }}(p2, p1);
+			p1 = gp_getpixel_raw_{{ src.pixelsize.suffix }}(src, xt, yt);
+			GP_PIXEL_{{ src.name }}_TO_RGB888(p1, p2);
+			GP_PIXEL_RGB888_TO_{{ dst.name }}(p2, p1);
 			xt = x2 + (x - x0);
 			yt = y2 + (y - y0);
 			GP_TRANSFORM_POINT(dst, xt, yt);
-			GP_PutPixel_Raw_{{ dst.pixelsize.suffix }}(dst, xt, yt, p1);
+			gp_putpixel_raw_{{ dst.pixelsize.suffix }}(dst, xt, yt, p1);
 		}
 }
 
@@ -213,33 +214,33 @@ static void blitXYXY_{{ src.name }}_{{ dst.name }}(const GP_Pixmap *src,
 /*
  * Blits for same pixel type and bpp {{ ps.suffix }}
  */
-static void blitXYXY_{{ ps.suffix }}(const GP_Pixmap *src,
-	GP_Coord x0, GP_Coord y0, GP_Coord x1, GP_Coord y1,
-	GP_Pixmap *dst, GP_Coord x2, GP_Coord y2)
+static void blitXYXY_{{ ps.suffix }}(const gp_pixmap *src,
+	gp_coord x0, gp_coord y0, gp_coord x1, gp_coord y1,
+	gp_pixmap *dst, gp_coord x2, gp_coord y2)
 {
-	GP_Coord x, y, xt, yt;
+	gp_coord x, y, xt, yt;
 
 	for (y = y0; y <= y1; y++)
 		for (x = x0; x <= x1; x++) {
-			GP_Pixel p;
+			gp_pixel p;
 			xt = x; yt = y;
 			GP_TRANSFORM_POINT(src, xt, yt);
-			p = GP_GetPixel_Raw_{{ ps.suffix }}(src, xt, yt);
+			p = gp_getpixel_raw_{{ ps.suffix }}(src, xt, yt);
 			xt = x2 + (x - x0);
 			yt = y2 + (y - y0);
 			GP_TRANSFORM_POINT(dst, xt, yt);
-			GP_PutPixel_Raw_{{ ps.suffix }}(dst, xt, yt, p);
+			gp_putpixel_raw_{{ ps.suffix }}(dst, xt, yt, p);
 		}
 }
 @ end
 
-void GP_BlitXYXY_Fast(const GP_Pixmap *src,
-                      GP_Coord x0, GP_Coord y0, GP_Coord x1, GP_Coord y1,
-                      GP_Pixmap *dst, GP_Coord x2, GP_Coord y2)
+void gp_blit_xyxy_fast(const gp_pixmap *src,
+                       gp_coord x0, gp_coord y0, gp_coord x1, gp_coord y1,
+                       gp_pixmap *dst, gp_coord x2, gp_coord y2)
 {
 	GP_DEBUG(2, "Blitting %s -> %s",
-	         GP_PixelTypeName(src->pixel_type),
-	         GP_PixelTypeName(dst->pixel_type));
+	         gp_pixel_type_name(src->pixel_type),
+	         gp_pixel_type_name(dst->pixel_type));
 
 	/* Same pixel type */
 	if (src->pixel_type == dst->pixel_type) {
@@ -248,8 +249,8 @@ void GP_BlitXYXY_Fast(const GP_Pixmap *src,
 		return;
 	}
 
-	if (GP_PixmapRotationEqual(src, dst)) {
-		GP_BlitXYXY_Raw_Fast(src, x0, y0, x1, y1, dst, x2, y2);
+	if (gp_pixmap_rotation_equal(src, dst)) {
+		gp_blit_xyxy_raw_fast(src, x0, y0, x1, y1, dst, x2, y2);
 		return;
 	}
 
@@ -268,12 +269,12 @@ void GP_BlitXYXY_Fast(const GP_Pixmap *src,
 @         end
 		default:
 			GP_ABORT("Invalid destination pixel %s",
-			         GP_PixelTypeName(dst->pixel_type));
+			         gp_pixel_type_name(dst->pixel_type));
 		}
 	break;
 @ end
 	default:
 		GP_ABORT("Invalid source pixel %s",
-		         GP_PixelTypeName(src->pixel_type));
+		         gp_pixel_type_name(src->pixel_type));
 	}
 }

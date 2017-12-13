@@ -34,37 +34,37 @@
 #ifndef FILTERS_GP_MEDIAN_H
 #define FILTERS_GP_MEDIAN_H
 
-#include "GP_Filter.h"
+#include <filters/GP_Filter.h>
 
-int GP_FilterMedianEx(const GP_Pixmap *src,
-                      GP_Coord x_src, GP_Coord y_src,
-                      GP_Size w_src, GP_Size h_src,
-                      GP_Pixmap *dst,
-                      GP_Coord x_dst, GP_Coord y_dst,
-                      int xmed, int ymed,
-                      GP_ProgressCallback *callback);
+int gp_filter_median_ex(const gp_pixmap *src,
+                        gp_coord x_src, gp_coord y_src,
+                        gp_size w_src, gp_size h_src,
+                        gp_pixmap *dst,
+                        gp_coord x_dst, gp_coord y_dst,
+                        int xmed, int ymed,
+                        gp_progress_cb *callback);
 
-GP_Pixmap *GP_FilterMedianExAlloc(const GP_Pixmap *src,
-                                   GP_Coord x_src, GP_Coord y_src,
-                                   GP_Size w_src, GP_Size h_src,
+gp_pixmap *gp_filter_median_ex_alloc(const gp_pixmap *src,
+                                     gp_coord x_src, gp_coord y_src,
+                                     gp_size w_src, gp_size h_src,
+                                     int xmed, int ymed,
+                                     gp_progress_cb *callback);
+
+static inline int gp_filter_median(const gp_pixmap *src,
+                                   gp_pixmap *dst,
                                    int xmed, int ymed,
-                                   GP_ProgressCallback *callback);
-
-static inline int GP_FilterMedian(const GP_Pixmap *src,
-                                  GP_Pixmap *dst,
-                                  int xmed, int ymed,
-                                  GP_ProgressCallback *callback)
+                                   gp_progress_cb *callback)
 {
-	return GP_FilterMedianEx(src, 0, 0, src->w, src->h,
-	                         dst, 0, 0, xmed, ymed, callback);
+	return gp_filter_median_ex(src, 0, 0, src->w, src->h,
+	                           dst, 0, 0, xmed, ymed, callback);
 }
 
-static inline GP_Pixmap *GP_FilterMedianAlloc(const GP_Pixmap *src,
-                                               int xmed, int ymed,
-                                               GP_ProgressCallback *callback)
+static inline gp_pixmap *gp_filter_median_alloc(const gp_pixmap *src,
+                                                int xmed, int ymed,
+                                                gp_progress_cb *callback)
 {
-	return GP_FilterMedianExAlloc(src, 0, 0, src->w, src->h,
-	                              xmed, ymed, callback);
+	return gp_filter_median_ex_alloc(src, 0, 0, src->w, src->h,
+	                                 xmed, ymed, callback);
 }
 
 #endif /* FILTERS_GP_MEDIAN_H */

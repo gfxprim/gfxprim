@@ -159,21 +159,20 @@ static void x11_input_init(void)
 		}
 
 		GP_DEBUG(3, "Mapping Key '%s' KeySym '%s' (%u) to KeyCode %u",
-		         GP_EventKeyName(sym_to_key[i].key),
-				 XKeysymToString(sym_to_key[i].x_keysym),
-				 sym_to_key[i].x_keysym,
-				 keycode);
+		         gp_event_key_name(sym_to_key[i].key),
+			 XKeysymToString(sym_to_key[i].x_keysym),
+			 sym_to_key[i].x_keysym, keycode);
 
 		if (keycode - 9 >= GP_ARRAY_SIZE(keycode_table)) {
 			GP_WARN("Key '%s' keycode %u out of table",
-			        GP_EventKeyName(sym_to_key[i].key), keycode);
+			        gp_event_key_name(sym_to_key[i].key), keycode);
 			continue;
 		}
 
 		if (keycode_table[keycode - 9]) {
 			GP_WARN("Key '%s' keycode %u collides with key '%s'",
-			        GP_EventKeyName(sym_to_key[i].key), keycode,
-					GP_EventKeyName(keycode_table[keycode - 9]));
+			        gp_event_key_name(sym_to_key[i].key), keycode,
+				gp_event_key_name(keycode_table[keycode - 9]));
 			continue;
 		}
 
@@ -194,7 +193,7 @@ static unsigned int get_key(unsigned int xkey)
 	return key;
 }
 
-static void x11_input_event_put(struct GP_EventQueue *event_queue,
+static void x11_input_event_put(gp_event_queue *event_queue,
                                 XEvent *ev, int w, int h)
 {
 	int key = 0, press = 0;
@@ -216,12 +215,12 @@ static void x11_input_event_put(struct GP_EventQueue *event_queue,
 		/* Mouse wheel */
 		case 4:
 			if (press)
-				GP_EventQueuePush(event_queue, GP_EV_REL,
-				                  GP_EV_REL_WHEEL, 1, NULL);
+				gp_event_queue_push(event_queue, GP_EV_REL,
+				                    GP_EV_REL_WHEEL, 1, NULL);
 			return;
 		case 5:
 			if (press)
-				GP_EventQueuePush(event_queue, GP_EV_REL,
+				gp_event_queue_push(event_queue, GP_EV_REL,
 				                  GP_EV_REL_WHEEL, -1, NULL);
 			return;
 		}
@@ -232,10 +231,10 @@ static void x11_input_event_put(struct GP_EventQueue *event_queue,
 			return;
 		}
 
-		GP_EventQueuePush(event_queue, GP_EV_KEY, key, press, NULL);
+		gp_event_queue_push(event_queue, GP_EV_KEY, key, press, NULL);
 	break;
 	case ConfigureNotify:
-		GP_EventQueuePushResize(event_queue, ev->xconfigure.width,
+		gp_event_queue_push_resize(event_queue, ev->xconfigure.width,
 		                        ev->xconfigure.height, NULL);
 	break;
 	break;
@@ -245,7 +244,7 @@ static void x11_input_event_put(struct GP_EventQueue *event_queue,
 		    ev->xmotion.x > w || ev->xmotion.y > h)
 			return;
 
-		GP_EventQueuePushRelTo(event_queue,
+		gp_event_queue_push_rel_to(event_queue,
 		                       ev->xmotion.x, ev->xmotion.y, NULL);
 	break;
 	case KeyPress:
@@ -256,12 +255,12 @@ static void x11_input_event_put(struct GP_EventQueue *event_queue,
 		if (key == 0)
 			return;
 
-		GP_EventQueuePushKey(event_queue, key, press, NULL);
+		gp_event_queue_push_key(event_queue, key, press, NULL);
 	break;
 	/* events from WM */
 	case ClientMessage:
 		if ((Atom)ev->xclient.data.l[0] == x11_conn.A_WM_DELETE_WINDOW) {
-			GP_EventQueuePush(event_queue, GP_EV_SYS,
+			gp_event_queue_push(event_queue, GP_EV_SYS,
 			                  GP_EV_SYS_QUIT, 0, NULL);
 			return;
 		}

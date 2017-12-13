@@ -15,21 +15,21 @@
 
 #include "tst_test.h"
 
-typedef int (*Save)(const GP_Pixmap *src, const char *path, GP_ProgressCallback *callback);
+typedef int (*Save)(const gp_pixmap *src, const char *path, gp_progress_cb *callback);
 
-static int progress_callback(GP_ProgressCallback *self)
+static int progress_callback(gp_progress_cb *self)
 {
 	(void) self;
 	return 1;
 }
 
-static int test(Save Saver, GP_PixelType pixel_type)
+static int test(Save Saver, gp_pixel_type pixel_type)
 {
-	GP_Pixmap *src;
-	GP_ProgressCallback callback ={.callback = progress_callback};
+	gp_pixmap *src;
+	gp_progress_cb callback ={.callback = progress_callback};
 	int ret = TST_SUCCESS;
 
-	src = GP_PixmapAlloc(100, 100, pixel_type);
+	src = gp_pixmap_alloc(100, 100, pixel_type);
 
 	if (!src) {
 		tst_msg("Malloc failed");
@@ -68,7 +68,7 @@ static int test(Save Saver, GP_PixelType pixel_type)
 	}
 
 err:
-	GP_PixmapFree(src);
+	gp_pixmap_free(src);
 	return ret;
 }
 
@@ -77,7 +77,7 @@ err:
 @         if not pt.is_unknown():
 static int test_{{ fmt }}_{{ pt.name }}(void)
 {
-	return test(GP_Save{{ fmt }}, GP_PIXEL_{{ pt.name }});
+	return test(gp_save_{{ fmt }}, GP_PIXEL_{{ pt.name }});
 }
 
 @ end

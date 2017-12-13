@@ -28,43 +28,43 @@
 #ifndef FILTERS_GP_WEIGHTED_MEDIAN_H
 #define FILTERS_GP_WEIGHTED_MEDIAN_H
 
-#include "GP_Filter.h"
+#include <filters/GP_Filter.h>
 
-typedef struct GP_MedianWeights {
+typedef struct gp_median_weights {
 	unsigned int w;
 	unsigned int h;
 	unsigned int *weights;
-} GP_MedianWeights;
+} gp_median_weights;
 
-int GP_FilterWeightedMedianEx(const GP_Pixmap *src,
-                              GP_Coord x_src, GP_Coord y_src,
-                              GP_Size w_src, GP_Size h_src,
-                              GP_Pixmap *dst,
-                              GP_Coord x_dst, GP_Coord y_dst,
-                              GP_MedianWeights *weights,
-                              GP_ProgressCallback *callback);
+int gp_filter_weighted_median_ex(const gp_pixmap *src,
+                                 gp_coord x_src, gp_coord y_src,
+                                 gp_size w_src, gp_size h_src,
+                                 gp_pixmap *dst,
+                                 gp_coord x_dst, gp_coord y_dst,
+                                 gp_median_weights *weights,
+                                 gp_progress_cb *callback);
 
-GP_Pixmap *GP_FilterWeightedMedianExAlloc(const GP_Pixmap *src,
-                                           GP_Coord x_src, GP_Coord y_src,
-                                           GP_Size w_src, GP_Size h_src,
-                                           GP_MedianWeights *weights,
-                                           GP_ProgressCallback *callback);
+gp_pixmap *gp_filter_weighted_median_ex_alloc(const gp_pixmap *src,
+                                              gp_coord x_src, gp_coord y_src,
+                                              gp_size w_src, gp_size h_src,
+                                              gp_median_weights *weights,
+                                              gp_progress_cb *callback);
 
-static inline int GP_FilterWeightedMedian(const GP_Pixmap *src,
-                                          GP_Pixmap *dst,
-                                          GP_MedianWeights *weights,
-                                          GP_ProgressCallback *callback)
+static inline int gp_filter_weighted_median(const gp_pixmap *src,
+                                            gp_pixmap *dst,
+                                            gp_median_weights *weights,
+                                            gp_progress_cb *callback)
 {
-	return GP_FilterWeightedMedianEx(src, 0, 0, src->w, src->h,
-	                                 dst, 0, 0, weights, callback);
+	return gp_filter_weighted_median_ex(src, 0, 0, src->w, src->h,
+	                                    dst, 0, 0, weights, callback);
 }
 
-static inline GP_Pixmap *GP_FilterWeightedMedianAlloc(const GP_Pixmap *src,
-                                                       GP_MedianWeights *weights,
-                                                       GP_ProgressCallback *callback)
+static inline gp_pixmap *gp_filter_weighted_median_alloc(const gp_pixmap *src,
+                                                         gp_median_weights *weights,
+                                                         gp_progress_cb *callback)
 {
-	return GP_FilterWeightedMedianExAlloc(src, 0, 0, src->w, src->h,
-	                                      weights, callback);
+	return gp_filter_weighted_median_ex_alloc(src, 0, 0, src->w, src->h,
+	                                          weights, callback);
 }
 
 #endif /* FILTERS_GP_WEIGHTED_MEDIAN_H */

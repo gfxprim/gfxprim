@@ -8,8 +8,8 @@
 
 @     for pt in pixeltypes:
 @         if not pt.is_unknown():
-static int GP_Filter{{ name }}_{{ pt.name }}(const GP_Pixmap *src_a, const GP_Pixmap *src_b,
-	GP_Pixmap *dst, {{ maybe_opts_r(opts) }}GP_ProgressCallback *callback)
+static int filter_{{ name }}_{{ pt.name }}(const gp_pixmap *src_a, const gp_pixmap *src_b,
+	gp_pixmap *dst, {{ maybe_opts_r(opts) }}gp_progress_cb *callback)
 {
 	uint32_t x, y, w, h;
 
@@ -18,12 +18,12 @@ static int GP_Filter{{ name }}_{{ pt.name }}(const GP_Pixmap *src_a, const GP_Pi
 
 	for (y = 0; y < h; y++) {
 		for (x = 0; x < w; x++) {
-			GP_Pixel pix_a = GP_GetPixel_Raw_{{ pt.pixelsize.suffix }}(src_a, x, y);
-			GP_Pixel pix_b = GP_GetPixel_Raw_{{ pt.pixelsize.suffix }}(src_b, x, y);
+			gp_pixel pix_a = gp_getpixel_raw_{{ pt.pixelsize.suffix }}(src_a, x, y);
+			gp_pixel pix_b = gp_getpixel_raw_{{ pt.pixelsize.suffix }}(src_b, x, y);
 
 @             for c in pt.chanslist:
-			int32_t {{ c.name }}_A = GP_Pixel_GET_{{ c.name }}_{{ pt.name }}(pix_a);
-			int32_t {{ c.name }}_B = GP_Pixel_GET_{{ c.name }}_{{ pt.name }}(pix_b);
+			int32_t {{ c.name }}_A = GP_PIXEL_GET_{{ c.name }}_{{ pt.name }}(pix_a);
+			int32_t {{ c.name }}_B = GP_PIXEL_GET_{{ c.name }}_{{ pt.name }}(pix_b);
 @             end
 
 @             for c in pt.chanslist:
@@ -31,24 +31,24 @@ static int GP_Filter{{ name }}_{{ pt.name }}(const GP_Pixmap *src_a, const GP_Pi
 			{@ filter_op(c.name, c.size) @}
 @             end
 
-			GP_Pixel pix;
-			pix = GP_Pixel_CREATE_{{ pt.name }}({{ arr_to_params(pt.chan_names) }});
+			gp_pixel pix;
+			pix = GP_PIXEL_CREATE_{{ pt.name }}({{ arr_to_params(pt.chan_names) }});
 
-			GP_PutPixel_Raw_{{ pt.pixelsize.suffix }}(dst, x, y, pix);
+			gp_putpixel_raw_{{ pt.pixelsize.suffix }}(dst, x, y, pix);
 		}
 
-		if (GP_ProgressCallbackReport(callback, y, h, w))
+		if (gp_progress_cb_report(callback, y, h, w))
 			return 1;
 	}
 
-	GP_ProgressCallbackDone(callback);
+	gp_progress_cb_done(callback);
 	return 0;
 }
 
 @     end
 @
-int GP_Filter{{ name }}_Raw(const GP_Pixmap *src_a, const GP_Pixmap *src_b,
-	GP_Pixmap *dst{{ maybe_opts_l(opts) }}, GP_ProgressCallback *callback)
+int gp_filter_{{ name }}_raw(const gp_pixmap *src_a, const gp_pixmap *src_b,
+	gp_pixmap *dst{{ maybe_opts_l(opts) }}, gp_progress_cb *callback)
 {
 	GP_DEBUG(1, "Running filter {{ name }}");
 
@@ -56,7 +56,7 @@ int GP_Filter{{ name }}_Raw(const GP_Pixmap *src_a, const GP_Pixmap *src_b,
 @     for pt in pixeltypes:
 @         if not pt.is_unknown():
 	case GP_PIXEL_{{ pt.name }}:
-		return GP_Filter{{ name }}_{{ pt.name }}(src_a, src_b, dst{{ maybe_opts_l(params) }}, callback);
+		return filter_{{ name }}_{{ pt.name }}(src_a, src_b, dst{{ maybe_opts_l(params) }}, callback);
 @     end
 	default:
 	break;
@@ -65,19 +65,19 @@ int GP_Filter{{ name }}_Raw(const GP_Pixmap *src_a, const GP_Pixmap *src_b,
 	return 1;
 }
 
-int GP_Filter{{ name }}(const GP_Pixmap *src_a, const GP_Pixmap *src_b,
-                        GP_Pixmap *dst{{ maybe_opts_l(opts) }},
-                        GP_ProgressCallback *callback)
+int gp_filter_{{ name }}(const gp_pixmap *src_a, const gp_pixmap *src_b,
+                         gp_pixmap *dst{{ maybe_opts_l(opts) }},
+                         gp_progress_cb *callback)
 {
-	GP_Size w = GP_MIN(src_a->w, src_b->w);
-	GP_Size h = GP_MIN(src_a->h, src_b->h);
+	gp_size w = GP_MIN(src_a->w, src_b->w);
+	gp_size h = GP_MIN(src_a->h, src_b->h);
 
 	GP_ASSERT(src_a->pixel_type == dst->pixel_type,
 	          "The src and dst pixel types must match");
 	GP_ASSERT(w <= dst->w && h <= dst->h,
 	          "Destination is not big enough");
 
-	if (GP_Filter{{ name }}_Raw(src_a, src_b, dst{{ maybe_opts_l(params) }}, callback)) {
+	if (gp_filter_{{ name }}_raw(src_a, src_b, dst{{ maybe_opts_l(params) }}, callback)) {
 		GP_DEBUG(1, "Operation aborted");
 		return 1;
 	}
@@ -86,26 +86,26 @@ int GP_Filter{{ name }}(const GP_Pixmap *src_a, const GP_Pixmap *src_b,
 }
 
 
-GP_Pixmap *GP_Filter{{ name }}Alloc(const GP_Pixmap *src_a, const GP_Pixmap *src_b,
-	                            {{ maybe_opts_r(opts) }}GP_ProgressCallback *callback)
+gp_pixmap *gp_filter_{{ name }}_alloc(const gp_pixmap *src_a, const gp_pixmap *src_b,
+	                              {{ maybe_opts_r(opts) }}gp_progress_cb *callback)
 {
-	GP_Pixmap *res;
+	gp_pixmap *res;
 
 	GP_ASSERT(src_a->pixel_type == src_b->pixel_type,
 	          "Pixel types for sources must match.");
 
-	GP_Size w = GP_MIN(src_a->w, src_b->w);
-	GP_Size h = GP_MIN(src_a->h, src_b->h);
+	gp_size w = GP_MIN(src_a->w, src_b->w);
+	gp_size h = GP_MIN(src_a->h, src_b->h);
 
-	res = GP_PixmapAlloc(w, h, src_a->pixel_type);
+	res = gp_pixmap_alloc(w, h, src_a->pixel_type);
 
 	if (res == NULL)
 		return NULL;
 
-	if (GP_Filter{{ name }}_Raw(src_a, src_b, res{{ maybe_opts_l(params) }}, callback)) {
+	if (gp_filter_{{ name }}_raw(src_a, src_b, res{{ maybe_opts_l(params) }}, callback)) {
 		GP_DEBUG(1, "Operation aborted");
 
-		GP_PixmapFree(res);
+		gp_pixmap_free(res);
 
 		return NULL;
 	}

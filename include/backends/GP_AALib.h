@@ -23,13 +23,13 @@
 #ifndef BACKENDS_GP_AALIB_H
 #define BACKENDS_GP_AALIB_H
 
-#include "GP_Backend.h"
+#include <backends/GP_Backend.h>
 
 /*
  * Initalize AALib.
  *
  * TODO: add a way to pass aalib params
  */
-GP_Backend *GP_BackendAALibInit(void);
+gp_backend *gp_aalib_init(void);
 
 #endif /* BACKENDS_GP_AALIB_H */

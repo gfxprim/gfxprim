@@ -28,5 +28,5 @@ static uint8_t linear10_gamma8[] = {
 /*
  * Pointers to tables
  */
-uint16_t *GP_Gamma8_Linear10 = gamma8_linear10;
-uint8_t *GP_Linear10_Gamma8 = linear10_gamma8;
+uint16_t *gp_gamma8_linear10 = gamma8_linear10;
+uint8_t *gp_linear10_gamma8 = linear10_gamma8;

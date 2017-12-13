@@ -8,15 +8,13 @@
 #include <errno.h>
 #include <math.h>
 
-#include "core/GP_Pixmap.h"
-#include "core/GP_GetPutPixel.h"
-#include "core/GP_Gamma.h"
-#include "core/GP_Clamp.h"
-#include "core/GP_Debug.h"
-
+#include <core/GP_Pixmap.h>
+#include <core/GP_GetPutPixel.h>
+#include <core/GP_Gamma.h>
+#include <core/GP_Clamp.h>
+#include <core/GP_Debug.h>
+#include <filters/GP_Resize.h>
 #include "GP_Cubic.h"
-
-#include "GP_Resize.h"
 
 #define MUL 1024
 
@@ -32,8 +30,8 @@
 
 @ for pt in pixeltypes:
 @     if not pt.is_unknown() and not pt.is_palette():
-static int resize_cubic_{{ pt.name }}(const GP_Pixmap *src,
-	GP_Pixmap *dst, GP_ProgressCallback *callback)
+static int resize_cubic_{{ pt.name }}(const gp_pixmap *src,
+	gp_pixmap *dst, gp_progress_cb *callback)
 {
 @         for c in pt.chanslist:
 	int32_t col_{{ c.name }}[src->w];
@@ -94,18 +92,18 @@ static int resize_cubic_{{ pt.name }}(const GP_Pixmap *src,
 @         for c in pt.chanslist:
 			int32_t {{ c.name }}v[4];
 @         end
-			GP_Pixel pix[4];
+			gp_pixel pix[4];
 
-			pix[0] = GP_GetPixel_Raw_{{ pt.pixelsize.suffix }}(src, j, yi[0]);
-			pix[1] = GP_GetPixel_Raw_{{ pt.pixelsize.suffix }}(src, j, yi[1]);
-			pix[2] = GP_GetPixel_Raw_{{ pt.pixelsize.suffix }}(src, j, yi[2]);
-			pix[3] = GP_GetPixel_Raw_{{ pt.pixelsize.suffix }}(src, j, yi[3]);
+			pix[0] = gp_getpixel_raw_{{ pt.pixelsize.suffix }}(src, j, yi[0]);
+			pix[1] = gp_getpixel_raw_{{ pt.pixelsize.suffix }}(src, j, yi[1]);
+			pix[2] = gp_getpixel_raw_{{ pt.pixelsize.suffix }}(src, j, yi[2]);
+			pix[3] = gp_getpixel_raw_{{ pt.pixelsize.suffix }}(src, j, yi[3]);
 
 @         for c in pt.chanslist:
-			{{ c.name }}v[0] = GP_Pixel_GET_{{ c.name }}_{{ pt.name }}(pix[0]);
-			{{ c.name }}v[1] = GP_Pixel_GET_{{ c.name }}_{{ pt.name }}(pix[1]);
-			{{ c.name }}v[2] = GP_Pixel_GET_{{ c.name }}_{{ pt.name }}(pix[2]);
-			{{ c.name }}v[3] = GP_Pixel_GET_{{ c.name }}_{{ pt.name }}(pix[3]);
+			{{ c.name }}v[0] = GP_PIXEL_GET_{{ c.name }}_{{ pt.name }}(pix[0]);
+			{{ c.name }}v[1] = GP_PIXEL_GET_{{ c.name }}_{{ pt.name }}(pix[1]);
+			{{ c.name }}v[2] = GP_PIXEL_GET_{{ c.name }}_{{ pt.name }}(pix[2]);
+			{{ c.name }}v[3] = GP_PIXEL_GET_{{ c.name }}_{{ pt.name }}(pix[3]);
 @         end
 
 			if (src->gamma) {
@@ -161,22 +159,22 @@ static int resize_cubic_{{ pt.name }}(const GP_Pixmap *src,
 @         end
 			}
 
-			GP_Pixel pix = GP_Pixel_CREATE_{{ pt.name }}({{ arr_to_params(pt.chan_names, "(uint8_t)") }});
-			GP_PutPixel_Raw_{{ pt.pixelsize.suffix }}(dst, j, i, pix);
+			gp_pixel pix = GP_PIXEL_CREATE_{{ pt.name }}({{ arr_to_params(pt.chan_names, "(uint8_t)") }});
+			gp_putpixel_raw_{{ pt.pixelsize.suffix }}(dst, j, i, pix);
 		}
 
-		if (GP_ProgressCallbackReport(callback, i, dst->h, dst->w))
+		if (gp_progress_cb_report(callback, i, dst->h, dst->w))
 			return 1;
 	}
 
-	GP_ProgressCallbackDone(callback);
+	gp_progress_cb_done(callback);
 	return 0;
 }
 
 @ end
 @
-static int resize_cubic(const GP_Pixmap *src, GP_Pixmap *dst,
-                        GP_ProgressCallback *callback)
+static int resize_cubic(const gp_pixmap *src, gp_pixmap *dst,
+                        gp_progress_cb *callback)
 {
 	switch (src->pixel_type) {
 @ for pt in pixeltypes:
@@ -191,8 +189,8 @@ static int resize_cubic(const GP_Pixmap *src, GP_Pixmap *dst,
 	}
 }
 
-int GP_FilterResizeCubicInt(const GP_Pixmap *src, GP_Pixmap *dst,
-                            GP_ProgressCallback *callback)
+int gp_filter_resize_cubic_int(const gp_pixmap *src, gp_pixmap *dst,
+                               gp_progress_cb *callback)
 {
 	if (src->pixel_type != dst->pixel_type) {
 		GP_WARN("The src and dst pixel types must match");

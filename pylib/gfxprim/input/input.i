@@ -6,14 +6,14 @@
 #include "input/GP_Input.h"
 %}
 
-%extend GP_Event {
-        ~GP_Event() {
-                GP_DEBUG(2, "[wrapper] GP_Event free()");
+%extend gp_event {
+        ~gp_event() {
+                GP_DEBUG(2, "[wrapper] gp_event free()");
                 free($self);
         }
-        GP_Event() {
-                GP_DEBUG(2, "[wrapper] GP_Event malloc()");
-                return malloc(sizeof(GP_Event));
+        gp_event() {
+                GP_DEBUG(2, "[wrapper] gp_event malloc()");
+                return malloc(sizeof(gp_event));
         }
 };
 

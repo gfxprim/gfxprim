@@ -15,20 +15,20 @@
 
 @ for pt in pixeltypes:
 @     if not pt.is_unknown() and not pt.is_palette():
-static int apply_tables_{{ pt.name }}(const GP_Pixmap *const src,
-                                      GP_Coord x_src, GP_Coord y_src,
-                                      GP_Size w_src, GP_Size h_src,
-                                      GP_Pixmap *dst,
-                                      GP_Coord x_dst, GP_Coord y_dst,
-                                      const GP_FilterTables *const tables,
-                                      GP_ProgressCallback *callback)
+static int apply_tables_{{ pt.name }}(const gp_pixmap *const src,
+                                      gp_coord x_src, gp_coord y_src,
+                                      gp_size w_src, gp_size h_src,
+                                      gp_pixmap *dst,
+                                      gp_coord x_dst, gp_coord y_dst,
+                                      const gp_filter_tables *const tables,
+                                      gp_progress_cb *callback)
 {
 	GP_DEBUG(1, "Point filter %ux%u", w_src, h_src);
 
 	unsigned int x, y;
 
 @         for c in pt.chanslist:
-	GP_Pixel {{ c.name }};
+	gp_pixel {{ c.name }};
 @         end
 
 	for (y = 0; y < h_src; y++) {
@@ -38,37 +38,37 @@ static int apply_tables_{{ pt.name }}(const GP_Pixmap *const src,
 			unsigned int dst_x = x_dst + x;
 			unsigned int dst_y = y_dst + y;
 
-			GP_Pixel pix = GP_GetPixel_Raw_{{ pt.pixelsize.suffix }}(src, src_x, src_y);
+			gp_pixel pix = gp_getpixel_raw_{{ pt.pixelsize.suffix }}(src, src_x, src_y);
 
 @         for c in pt.chanslist:
-			{{ c.name }} = GP_Pixel_GET_{{ c[0] }}_{{ pt.name }}(pix);
+			{{ c.name }} = GP_PIXEL_GET_{{ c[0] }}_{{ pt.name }}(pix);
 			{{ c.name }} = tables->table[{{ c.idx }}][{{ c.name }}];
 @         end
 
-			pix = GP_Pixel_CREATE_{{ pt.name }}({{ arr_to_params(pt.chan_names) }});
-			GP_PutPixel_Raw_{{ pt.pixelsize.suffix }}(dst, dst_x, dst_y, pix);
+			pix = GP_PIXEL_CREATE_{{ pt.name }}({{ arr_to_params(pt.chan_names) }});
+			gp_putpixel_raw_{{ pt.pixelsize.suffix }}(dst, dst_x, dst_y, pix);
 		}
 
-		if (GP_ProgressCallbackReport(callback, y, h_src, w_src)) {
+		if (gp_progress_cb_report(callback, y, h_src, w_src)) {
 			errno = ECANCELED;
 			return 1;
 		}
 	}
 
-	GP_ProgressCallbackDone(callback);
+	gp_progress_cb_done(callback);
 
 	return 0;
 }
 
 @ end
 @
-int GP_FilterTablesApply(const GP_Pixmap *const src,
-                         GP_Coord x_src, GP_Coord y_src,
-                         GP_Size w_src, GP_Size h_src,
-                         GP_Pixmap *dst,
-                         GP_Coord x_dst, GP_Coord y_dst,
-                         const GP_FilterTables *const tables,
-                         GP_ProgressCallback *callback)
+int gp_filter_tables_apply(const gp_pixmap *const src,
+                           gp_coord x_src, gp_coord y_src,
+                           gp_size w_src, gp_size h_src,
+                           gp_pixmap *dst,
+                           gp_coord x_dst, gp_coord y_dst,
+                           const gp_filter_tables *const tables,
+                           gp_progress_cb *callback)
 {
 	GP_ASSERT(src->pixel_type == dst->pixel_type);
 	//TODO: Assert size

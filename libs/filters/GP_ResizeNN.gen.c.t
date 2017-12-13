@@ -7,22 +7,20 @@
 
 #include <errno.h>
 
-#include "core/GP_Pixmap.h"
-#include "core/GP_GetPutPixel.h"
-
-#include "core/GP_Debug.h"
-
-#include "GP_ResizeNN.h"
+#include <core/GP_Pixmap.h>
+#include <core/GP_GetPutPixel.h>
+#include <core/GP_Debug.h>
+#include <filters/GP_ResizeNN.h>
 
 @ for pt in pixeltypes:
 @     if not pt.is_unknown():
-static int resize_nn{{ pt.name }}(const GP_Pixmap *src, GP_Pixmap *dst,
-                                  GP_ProgressCallback *callback)
+static int resize_nn_{{ pt.name }}(const gp_pixmap *src, gp_pixmap *dst,
+                                   gp_progress_cb *callback)
 {
 	uint32_t xmap[dst->w];
 	uint32_t ymap[dst->h];
 	uint32_t i;
-	GP_Coord x, y;
+	gp_coord x, y;
 
 	GP_DEBUG(1, "Scaling image %ux%u -> %ux%u %2.2f %2.2f",
 	            src->w, src->h, dst->w, dst->h,
@@ -36,33 +34,33 @@ static int resize_nn{{ pt.name }}(const GP_Pixmap *src, GP_Pixmap *dst,
 		ymap[i] = ((((i * (src->h - 1))<<8) + (dst->h - 1)/2) / (dst->h - 1) + (1<<7))>>8;
 
 	/* Interpolate */
-	for (y = 0; y < (GP_Coord)dst->h; y++) {
-		for (x = 0; x < (GP_Coord)dst->w; x++) {
-			GP_Pixel pix = GP_GetPixel_Raw_{{ pt.pixelsize.suffix }}(src, xmap[x], ymap[y]);
+	for (y = 0; y < (gp_coord)dst->h; y++) {
+		for (x = 0; x < (gp_coord)dst->w; x++) {
+			gp_pixel pix = gp_getpixel_raw_{{ pt.pixelsize.suffix }}(src, xmap[x], ymap[y]);
 
-			GP_PutPixel_Raw_{{ pt.pixelsize.suffix }}(dst, x, y, pix);
+			gp_putpixel_raw_{{ pt.pixelsize.suffix }}(dst, x, y, pix);
 		}
 
-		if (GP_ProgressCallbackReport(callback, y, dst->h, dst->w)) {
+		if (gp_progress_cb_report(callback, y, dst->h, dst->w)) {
 			errno = ECANCELED;
 			return 1;
 		}
 	}
 
-	GP_ProgressCallbackDone(callback);
+	gp_progress_cb_done(callback);
 	return 0;
 }
 
 @ end
 @
-static int resize_nn(const GP_Pixmap *src, GP_Pixmap *dst,
-                     GP_ProgressCallback *callback)
+static int resize_nn(const gp_pixmap *src, gp_pixmap *dst,
+                     gp_progress_cb *callback)
 {
 	switch (src->pixel_type) {
 @ for pt in pixeltypes:
 @     if not pt.is_unknown():
 	case GP_PIXEL_{{ pt.name }}:
-		return resize_nn{{ pt.name }}(src, dst, callback);
+		return resize_nn_{{ pt.name }}(src, dst, callback);
 	break;
 @ end
 	default:
@@ -70,8 +68,8 @@ static int resize_nn(const GP_Pixmap *src, GP_Pixmap *dst,
 	}
 }
 
-int GP_FilterResizeNN(const GP_Pixmap *src, GP_Pixmap *dst,
-                           GP_ProgressCallback *callback)
+int gp_filter_resize_nn(const gp_pixmap *src, gp_pixmap *dst,
+                        gp_progress_cb *callback)
 {
 	if (src->pixel_type != dst->pixel_type) {
 		GP_WARN("The src and dst pixel types must match");

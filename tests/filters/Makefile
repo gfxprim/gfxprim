@@ -1,11 +1,11 @@
 TOPDIR=../..
 include $(TOPDIR)/pre.mk
 
-CSOURCES=FilterMirrorH.c common.c
+CSOURCES=FilterMirrorH.c common.c LinearConvolution.c
 
 GENSOURCES=APICoverage.gen.c FiltersCompare.gen.c
 
-APPS=FilterMirrorH APICoverage.gen FiltersCompare.gen
+APPS=FilterMirrorH APICoverage.gen FiltersCompare.gen LinearConvolution
 
 include ../tests.mk
 

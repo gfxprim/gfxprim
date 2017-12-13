@@ -28,9 +28,11 @@
  */
 void print_help(void);
 
+void print_man(void);
+
 /*
  * Draws help, waits for keypress.
  */
-void draw_help(GP_Backend *backend);
+void draw_help(gp_backend *backend);
 
 #endif /* __SPIV_HELP_H__ */

@@ -31,24 +31,24 @@
 #include <errno.h>
 #include <getopt.h>
 
-#include <GP.h>
+#include <gfxprim.h>
 
 static void usage_and_exit(int ret)
 {
 	int i;
 	printf("filter_symmetry [-d debug_level] -s {");
 
-	for (i = 0; GP_FilterSymmetryNames[i+1] != NULL; i++)
-		printf("%s, ", GP_FilterSymmetryNames[i]);
+	for (i = 0; gp_filter_symmetry_names[i+1] != NULL; i++)
+		printf("%s, ", gp_filter_symmetry_names[i]);
 
-	printf("%s} image_in image_out\n", GP_FilterSymmetryNames[i]);
+	printf("%s} image_in image_out\n", gp_filter_symmetry_names[i]);
 
 	exit(ret);
 }
 
 int main(int argc, char *argv[])
 {
-	GP_Pixmap *src, *res;
+	gp_pixmap *src, *res;
 	const char *symmetry = NULL;
 	int opt, sym, debug = 0;
 
@@ -70,7 +70,7 @@ int main(int argc, char *argv[])
 	}
 
 	/* Turn on debug messages */
-	GP_SetDebugLevel(debug);
+	gp_set_debug_level(debug);
 
 	if (symmetry == NULL) {
 		printf("Symmetry not specified\n");
@@ -82,7 +82,7 @@ int main(int argc, char *argv[])
 		usage_and_exit(1);
 	}
 
-	sym = GP_FilterSymmetryByName(symmetry);
+	sym = gp_filter_symmetry_by_name(symmetry);
 
 	if (sym < 0) {
 		printf("Invalid symmetry name '%s'\n", symmetry);
@@ -90,7 +90,7 @@ int main(int argc, char *argv[])
 	}
 
 	/* Load Image  */
-	src = GP_LoadImage(argv[optind], NULL);
+	src = gp_load_image(argv[optind], NULL);
 
 	if (src == NULL) {
 		fprintf(stderr, "Failed to load image '%s': %s\n",
@@ -99,18 +99,18 @@ int main(int argc, char *argv[])
 	}
 
 	/* Apply a symmetry filter */
-	res = GP_FilterSymmetryAlloc(src, sym, NULL);
+	res = gp_filter_symmetry_alloc(src, sym, NULL);
 
 	/* Save Image */
-	if (GP_SaveImage(res, argv[optind+1], NULL)) {
+	if (gp_save_image(res, argv[optind+1], NULL)) {
 		fprintf(stderr, "Failed to save image '%s': %s\n",
 		        argv[optind+1], strerror(errno));
 		return 1;
 	}
 
 	/* Cleanup */
-	GP_PixmapFree(src);
-	GP_PixmapFree(res);
+	gp_pixmap_free(src);
+	gp_pixmap_free(res);
 
 	return 0;
 }

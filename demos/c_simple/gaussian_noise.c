@@ -31,7 +31,7 @@
 #include <string.h>
 #include <errno.h>
 
-#include <GP.h>
+#include <gfxprim.h>
 
 static void help(const char *app)
 {
@@ -42,7 +42,7 @@ static void help(const char *app)
 
 int main(int argc, char *argv[])
 {
-	GP_Pixmap *img;
+	gp_pixmap *img;
 	float sigma = 0.1, mu = 0.1;
 	int opt;
 
@@ -65,7 +65,7 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 
-	img = GP_LoadImage(argv[optind], NULL);
+	img = gp_load_image(argv[optind], NULL);
 
 	if (img == NULL) {
 		fprintf(stderr, "Failed to load image '%s': %s\n",
@@ -73,9 +73,9 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 
-	GP_Pixmap *res = GP_FilterGaussianNoiseAddAlloc(img, sigma, mu, NULL);
+	gp_pixmap *res = gp_filter_gaussian_noise_add_alloc(img, sigma, mu, NULL);
 
-	if (GP_SaveImage(res, argv[optind + 1], NULL)) {
+	if (gp_save_image(res, argv[optind + 1], NULL)) {
 		fprintf(stderr, "Failed to save image '%s': %s",
 		        argv[optind + 1], strerror(errno));
 		return 1;

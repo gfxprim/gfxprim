@@ -26,15 +26,16 @@
 #ifndef TEXT_GP_TEXTSTYLE_H
 #define TEXT_GP_TEXTSTYLE_H
 
-#include "GP_Font.h"
-#include "GP_DefaultFont.h"
+#include <text/GP_Font.h>
+
+extern const gp_font_face gp_default_font;
 
 /*
  * This structure describes how a text should be rendered.
  * It includes a font, and its various variants and transformations.
  */
-typedef struct GP_TextStyle {
-	const struct GP_FontFace *font;
+typedef struct gp_text_style {
+	const struct gp_font_face *font;
 
 	/* Spacing between pixels (0 is the default, no spacing). */
 	int pixel_xspace, pixel_yspace;
@@ -44,11 +45,10 @@ typedef struct GP_TextStyle {
 
 	/* Extra spacing (in pixels) between characters. */
 	int char_xspace;
-
-} GP_TextStyle;
+} gp_text_style;
 
 #define GP_DEFAULT_TEXT_STYLE { \
-	.font = &GP_DefaultConsoleFont, \
+	.font = &gp_default_font, \
 	.pixel_xspace = 0, \
 	.pixel_yspace = 0, \
 	.pixel_xmul = 1, \

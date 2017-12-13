@@ -25,7 +25,7 @@
 
 #include "GP_Backend.h"
 
-enum GP_LinuxFBFlags {
+enum gp_linux_fb_flags {
 	/*
 	 * Use KBD to get input events
 	 */
@@ -46,13 +46,13 @@ enum GP_LinuxFBFlags {
  * The path should point to framebuffer device eg. "/dev/fb0" for first
  * framebuffer device.
  *
- * The GP_Backend structure is allocated and returned, the resources are
+ * The gp_backend structure is allocated and returned, the resources are
  * deinitalized and the structure is freed by backed->Exit(backend); call.
  *
  * Upon failure NULL is returned.
  *
  * If flag is set, the konsole kbd is used to push events into event queue.
  */
-GP_Backend *GP_BackendLinuxFBInit(const char *path, int flags);
+gp_backend *gp_linux_fb_init(const char *path, int flags);
 
 #endif /* BACKENDS_GP_FRAMEBUFFER_H */

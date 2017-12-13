@@ -44,8 +44,8 @@ static char *next_param(char *params)
 	}
 }
 
-static int parse_x11_params(char *params, GP_Size *w, GP_Size *h,
-                            enum GP_BackendX11Flags *flags)
+static int parse_x11_params(char *params, gp_size *w, gp_size *h,
+                            enum gp_x11_flags *flags)
 {
 	char *param;
 
@@ -100,19 +100,19 @@ static int parse_x11_params(char *params, GP_Size *w, GP_Size *h,
 	return 0;
 }
 
-static GP_Backend *x11_init(char *params, const char *caption)
+static gp_backend *x11_init(char *params, const char *caption)
 {
-	GP_Size w = 640, h = 480;
-	enum GP_BackendX11Flags flags = 0;
+	gp_size w = 640, h = 480;
+	enum gp_x11_flags flags = 0;
 
 	if (parse_x11_params(params, &w, &h, &flags))
 		return NULL;
 
-	return GP_BackendX11Init(NULL, 0, 0, w, h, caption, flags);
+	return gp_x11_init(NULL, 0, 0, w, h, caption, flags);
 }
 
-static int parse_sdl_params(char *params, GP_Size *w, GP_Size *h,
-                            GP_Size *bpp, uint8_t *flags)
+static int parse_sdl_params(char *params, gp_size *w, gp_size *h,
+                            gp_size *bpp, uint8_t *flags)
 {
 	char *param;
 
@@ -173,15 +173,15 @@ static int parse_sdl_params(char *params, GP_Size *w, GP_Size *h,
 	return 0;
 }
 
-static GP_Backend *sdl_init(char *params, const char *caption)
+static gp_backend *sdl_init(char *params, const char *caption)
 {
-	GP_Size w = 0, h = 0, bpp = 0;
+	gp_size w = 0, h = 0, bpp = 0;
 	uint8_t flags = GP_SDL_RESIZABLE;
 
 	if (parse_sdl_params(params, &w, &h, &bpp, &flags))
 		return NULL;
 
-	return GP_BackendSDLInit(w, h, bpp, flags, caption);
+	return gp_sdl_init(w, h, bpp, flags, caption);
 }
 
 static int parse_fb_params(char *params, int *flags, const char **fb)
@@ -219,7 +219,7 @@ static int parse_fb_params(char *params, int *flags, const char **fb)
 	return 0;
 }
 
-static GP_Backend *fb_init(char *params, const char *caption)
+static gp_backend *fb_init(char *params, const char *caption)
 {
 	const char *fb = "/dev/fb0";
 
@@ -229,25 +229,25 @@ static GP_Backend *fb_init(char *params, const char *caption)
 
 	parse_fb_params(params, &flags, &fb);
 
-	return GP_BackendLinuxFBInit(fb, flags);
+	return gp_linux_fb_init(fb, flags);
 }
 
-static GP_Backend *aa_init(char *params, const char *caption)
+static gp_backend *aa_init(char *params, const char *caption)
 {
 	(void) caption;
 	(void) params;
 
-	return GP_BackendAALibInit();
+	return gp_aalib_init();
 }
 
 struct backend_init {
 	const char *name;
-	GP_Backend *(*init)(char *params, const char *caption);
+	gp_backend *(*init)(char *params, const char *caption);
 	const char *usage;
 	const char *help[10];
 };
 
-static GP_Backend *do_help(char *params, const char *caption);
+static gp_backend *do_help(char *params, const char *caption);
 
 static struct backend_init backends[] = {
 	{.name  = "X11",
@@ -290,7 +290,7 @@ static struct backend_init backends[] = {
 	{.name = NULL}
 };
 
-static GP_Backend *do_help(char *params, const char *caption)
+static gp_backend *do_help(char *params, const char *caption)
 {
 	struct backend_init *i;
 	unsigned int j;
@@ -323,11 +323,11 @@ static struct backend_init *get_backend(const char *name)
 	return NULL;
 }
 
-static GP_Backend *init_backend(const char *name, char *params,
+static gp_backend *init_backend(const char *name, char *params,
                                 const char *caption)
 {
 	struct backend_init *init = get_backend(name);
-	GP_Backend *ret;
+	gp_backend *ret;
 
 	if (!init) {
 		GP_WARN("Invalid backend name '%s'", name);
@@ -340,7 +340,7 @@ static GP_Backend *init_backend(const char *name, char *params,
 	return ret;
 }
 
-GP_Backend *GP_BackendInit(const char *params, const char *caption)
+gp_backend *gp_backend_init(const char *params, const char *caption)
 {
 	if (params == NULL) {
 		do_help(NULL, NULL);

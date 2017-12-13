@@ -215,7 +215,7 @@ static int8_t c64_glyphs[] = {
 	               0x6c, 0xd8, 0x00, 0x00, 0x00, 0x00, 0x00,
 };
 
-static struct GP_FontFace c64 = {
+static struct gp_font_face c64 = {
 	.family_name = "C64",
 	.style_name = "Mono",
 	.charset = GP_CHARSET_7BIT,
@@ -228,4 +228,4 @@ static struct GP_FontFace c64 = {
 	.glyph_offsets = {12},
 };
 
-const struct GP_FontFace *GP_FontC64 = &c64;
+const struct gp_font_face *gp_font_c64 = &c64;

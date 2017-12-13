@@ -26,12 +26,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include <GP.h>
+#include <gfxprim.h>
 
-static GP_Backend *win;
+static gp_backend *win;
 
 /* Globally used colors. */
-static GP_Pixel white, black;
+static gp_pixel white, black;
 
 /* Holding flag (pauses drawing). */
 static int pause_flag = 0;
@@ -56,7 +56,7 @@ static int fill_flag = 1;
 /* Do a clipping test? */
 static int cliptest_flag = 0;
 
-void random_point(const GP_Pixmap *c, int *x, int *y)
+void random_point(const gp_pixmap *c, int *x, int *y)
 {
 	if (cliptest_flag) {
 		*x = random() % (3*c->w) - c->w;
@@ -67,26 +67,26 @@ void random_point(const GP_Pixmap *c, int *x, int *y)
 	}
 }
 
-void random_point_AA(const GP_Pixmap *c, int *x, int *y)
+void random_point_AA(const gp_pixmap *c, int *x, int *y)
 {
 	*x = random() % (c->w<<8);
 	*y = random() % (c->h<<8);
 }
 
-void draw_random_circle(GP_Pixel pixel)
+void draw_random_circle(gp_pixel pixel)
 {
 	int x, y;
 	random_point(win->pixmap, &x, &y);
 	int r = random() % 50;
 
 	if (fill_flag)
-		GP_FillCircle(win->pixmap, x, y, r, pixel);
+		gp_fill_circle(win->pixmap, x, y, r, pixel);
 
 	if (outline_flag)
-		GP_Circle(win->pixmap, x, y, r, white);
+		gp_circle(win->pixmap, x, y, r, white);
 }
 
-void draw_random_ellipse(GP_Pixel pixel)
+void draw_random_ellipse(gp_pixel pixel)
 {
 	int x, y;
 	random_point(win->pixmap, &x, &y);
@@ -94,13 +94,13 @@ void draw_random_ellipse(GP_Pixel pixel)
 	int ry = random() % 50;
 
 	if (fill_flag)
-		GP_FillEllipse(win->pixmap, x, y, rx, ry, pixel);
+		gp_fill_ellipse(win->pixmap, x, y, rx, ry, pixel);
 
 	if (outline_flag)
-		GP_Ellipse(win->pixmap, x, y, rx, ry, white);
+		gp_ellipse(win->pixmap, x, y, rx, ry, white);
 }
 
-void draw_random_triangle(GP_Pixel pixel)
+void draw_random_triangle(gp_pixel pixel)
 {
 	int x0, y0, x1, y1, x2, y2;
 	random_point(win->pixmap, &x0, &y0);
@@ -108,26 +108,26 @@ void draw_random_triangle(GP_Pixel pixel)
 	random_point(win->pixmap, &x2, &y2);
 
 	if (fill_flag)
-		GP_FillTriangle(win->pixmap, x0, y0, x1, y1, x2, y2, pixel);
+		gp_fill_triangle(win->pixmap, x0, y0, x1, y1, x2, y2, pixel);
 
 	if (outline_flag)
-		GP_Triangle(win->pixmap, x0, y0, x1, y1, x2, y2, white);
+		gp_triangle(win->pixmap, x0, y0, x1, y1, x2, y2, white);
 }
 
-void draw_random_rectangle(GP_Pixel pixel)
+void draw_random_rectangle(gp_pixel pixel)
 {
 	int x0, y0, x1, y1;
 	random_point(win->pixmap, &x0, &y0);
 	random_point(win->pixmap, &x1, &y1);
 
 	if (fill_flag)
-		GP_FillRect(win->pixmap, x0, y0, x1, y1, pixel);
+		gp_fill_rect(win->pixmap, x0, y0, x1, y1, pixel);
 
 	if (outline_flag)
-		GP_Rect(win->pixmap, x0, y0, x1, y1, white);
+		gp_rect(win->pixmap, x0, y0, x1, y1, white);
 }
 
-void draw_random_tetragon(GP_Pixel pixel)
+void draw_random_tetragon(gp_pixel pixel)
 {
 	int x0, y0, x1, y1, x2, y2, x3, y3;
 	random_point(win->pixmap, &x0, &y0);
@@ -136,28 +136,28 @@ void draw_random_tetragon(GP_Pixel pixel)
 	random_point(win->pixmap, &x3, &y3);
 
 	if (fill_flag)
-		GP_FillTetragon(win->pixmap, x0, y0, x1, y1, x2, y2, x3, y3, pixel);
+		gp_fill_tetragon(win->pixmap, x0, y0, x1, y1, x2, y2, x3, y3, pixel);
 
 	if (outline_flag)
-		GP_Tetragon(win->pixmap, x0, y0, x1, y1, x2, y2, x3, y3, pixel);
+		gp_tetragon(win->pixmap, x0, y0, x1, y1, x2, y2, x3, y3, pixel);
 }
 
-void draw_random_polygon(GP_Pixel pixel)
+void draw_random_polygon(gp_pixel pixel)
 {
-	GP_Coord xy[10];
+	gp_coord xy[10];
 	int i;
 
 	for (i = 0; i < 5; i++) {
 		random_point(win->pixmap, xy + 2*i, xy + 2*i + 1);
 	}
 
-	GP_FillPolygon_Raw(win->pixmap, 5, xy, pixel);
+	gp_fill_polygon_raw(win->pixmap, 5, xy, pixel);
 }
 
 void clear_screen(void)
 {
-	GP_Fill(win->pixmap, black);
-	GP_BackendFlip(win);
+	gp_fill(win->pixmap, black);
+	gp_backend_flip(win);
 }
 
 void redraw_screen(void)
@@ -166,8 +166,8 @@ void redraw_screen(void)
 		return;
 
 	/* Pick a random color for drawing. */
-	GP_Pixel pixel;
-	pixel = GP_RGBToPixel(random() % 256, random() % 256,
+	gp_pixel pixel;
+	pixel = gp_rgb_to_pixel(random() % 256, random() % 256,
 	                      random() % 256, win->pixmap->pixel_type);
 
 	switch (shape) {
@@ -194,9 +194,9 @@ void redraw_screen(void)
 
 void event_loop(void)
 {
-	GP_Event ev;
+	gp_event ev;
 
-	while (GP_BackendGetEvent(win, &ev)) {
+	while (gp_backend_get_event(win, &ev)) {
 		switch (ev.type) {
 		case GP_EV_KEY:
 			if (ev.code != GP_EV_KEY_DOWN)
@@ -230,16 +230,16 @@ void event_loop(void)
 				clear_screen();
 			break;
 			case GP_KEY_ESC:
-				GP_BackendExit(win);
+				gp_backend_exit(win);
 				exit(0);
 			break;
 			}
 		break;
 		case GP_EV_SYS:
 			if (ev.code == GP_EV_SYS_RESIZE) {
-				GP_BackendResizeAck(win);
+				gp_backend_resize_ack(win);
 				clear_screen();
-				GP_BackendFlip(win);
+				gp_backend_flip(win);
 			}
 		break;
 		}
@@ -250,7 +250,7 @@ int main(void)
 {
 	const char *backend_opts = "X11";
 
-	win = GP_BackendInit(backend_opts, "Random Shape Test");
+	win = gp_backend_init(backend_opts, "Random Shape Test");
 
 	if (win == NULL) {
 		fprintf(stderr, "Failed to initalize backend '%s'\n",
@@ -258,11 +258,11 @@ int main(void)
 		return 1;
 	}
 
-	white = GP_RGBToPixmapPixel(0xff, 0xff, 0xff, win->pixmap);
-	black = GP_RGBToPixmapPixel(0x00, 0x00, 0x00, win->pixmap);
+	white = gp_rgb_to_pixmap_pixel(0xff, 0xff, 0xff, win->pixmap);
+	black = gp_rgb_to_pixmap_pixel(0x00, 0x00, 0x00, win->pixmap);
 
 	for (;;) {
-		GP_BackendPoll(win);
+		gp_backend_poll(win);
 		event_loop();
 
 		usleep(20000);
@@ -271,7 +271,7 @@ int main(void)
 			continue;
 
 		redraw_screen();
-		GP_BackendFlip(win);
+		gp_backend_flip(win);
 	}
 }
 

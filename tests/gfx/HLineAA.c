@@ -33,21 +33,21 @@
 
 struct testcase {
 	/* line description */
-	GP_Coord x0;
-	GP_Coord x1;
-	GP_Coord y;
+	gp_coord x0;
+	gp_coord x1;
+	gp_coord y;
 
 	/* expected result */
-	GP_Size w, h;
+	gp_size w, h;
 	const char pixmap[];
 };
 
 static int test_line(const struct testcase *t)
 {
-	GP_Pixmap *c;
+	gp_pixmap *c;
 	int err;
 
-	c = GP_PixmapAlloc(t->w, t->h, GP_PIXEL_G8);
+	c = gp_pixmap_alloc(t->w, t->h, GP_PIXEL_G8);
 
 	if (c == NULL) {
 		tst_err("Failed to allocate pixmap");
@@ -56,7 +56,7 @@ static int test_line(const struct testcase *t)
 
 	/* zero the pixels buffer */
 	memset(c->pixels, 0, c->w * c->h);
-	GP_HLineAA(c, t->x0, t->x1, t->y, 0xff);
+	gp_hline_aa(c, t->x0, t->x1, t->y, 0xff);
 
 	err = compare_buffers(t->pixmap, c);
 

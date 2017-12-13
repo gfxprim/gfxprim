@@ -23,10 +23,10 @@
  */
 
 @ for ps in pixelsizes:
-void GP_Line_Raw_{{ ps.suffix }}(GP_Pixmap *pixmap, int x0, int y0,
-	int x1, int y1, GP_Pixel pixval)
+void gp_line_raw_{{ ps.suffix }}(gp_pixmap *pixmap, int x0, int y0,
+	int x1, int y1, gp_pixel pixval)
 {
-	if (!GP_LineClip(&x0, &y0, &x1, &y1, pixmap->w - 1, pixmap->h - 1))
+	if (!gp_line_clip(&x0, &y0, &x1, &y1, pixmap->w - 1, pixmap->h - 1))
 		return;
 
 	GP_ASSERT(x0 >= 0 && x0 <= (int) pixmap->w-1);
@@ -37,15 +37,15 @@ void GP_Line_Raw_{{ ps.suffix }}(GP_Pixmap *pixmap, int x0, int y0,
 	/* special cases: vertical line, horizontal line, single point */
 	if (x0 == x1) {
 		if (y0 == y1) {
-			GP_PutPixel_Raw_Clipped_{{ ps.suffix }}(pixmap,
+			gp_putpixel_raw_clipped_{{ ps.suffix }}(pixmap,
 					x0, y0, pixval);
 			return;
 		}
-		GP_VLine_Raw(pixmap, x0, y0, y1, pixval);
+		gp_vline_raw(pixmap, x0, y0, y1, pixval);
 		return;
 	}
 	if (y0 == y1) {
-		GP_HLine_Raw(pixmap, x0, x1, y0, pixval);
+		gp_hline_raw_{{ ps.suffix }}(pixmap, x0, x1, y0, pixval);
 		return;
 	}
 
@@ -79,10 +79,10 @@ void GP_Line_Raw_{{ ps.suffix }}(GP_Pixmap *pixmap, int x0, int y0,
 	for (x = x0; x <= x1; x++) {
 
 		if (steep)
-			GP_PutPixel_Raw_{{ ps.suffix }}(pixmap, y, x,
+			gp_putpixel_raw_{{ ps.suffix }}(pixmap, y, x,
 								pixval);
 		else
-			GP_PutPixel_Raw_{{ ps.suffix }}(pixmap, x, y,
+			gp_putpixel_raw_{{ ps.suffix }}(pixmap, x, y,
 								pixval);
 
 		error -= deltay;
@@ -95,22 +95,22 @@ void GP_Line_Raw_{{ ps.suffix }}(GP_Pixmap *pixmap, int x0, int y0,
 
 @ end
 
-void GP_Line_Raw(GP_Pixmap *pixmap, GP_Coord x0, GP_Coord y0,
-                 GP_Coord x1, GP_Coord y1, GP_Pixel pixel)
+void gp_line_raw(gp_pixmap *pixmap, gp_coord x0, gp_coord y0,
+                 gp_coord x1, gp_coord y1, gp_pixel pixel)
 {
 	GP_CHECK_PIXMAP(pixmap);
 
-	GP_FN_PER_BPP_PIXMAP(GP_Line_Raw, pixmap, pixmap, x0, y0, x1, y1,
-	                      pixel);
+	GP_FN_PER_BPP_PIXMAP(gp_line_raw, pixmap, pixmap, x0, y0, x1, y1,
+	                     pixel);
 }
 
-void GP_Line(GP_Pixmap *pixmap, GP_Coord x0, GP_Coord y0,
-             GP_Coord x1, GP_Coord y1, GP_Pixel pixel)
+void gp_line(gp_pixmap *pixmap, gp_coord x0, gp_coord y0,
+             gp_coord x1, gp_coord y1, gp_pixel pixel)
 {
 	GP_CHECK_PIXMAP(pixmap);
 
 	GP_TRANSFORM_POINT(pixmap, x0, y0);
 	GP_TRANSFORM_POINT(pixmap, x1, y1);
 
-	GP_Line_Raw(pixmap, x0, y0, x1, y1, pixel);
+	gp_line_raw(pixmap, x0, y0, x1, y1, pixel);
 }

@@ -30,40 +30,40 @@
 #ifndef FILTERS_GP_APPLY_TABLES_H
 #define FILTERS_GP_APPLY_TABLES_H
 
-#include "GP_Filter.h"
+#include <filters/GP_Filter.h>
 
 /*
  * Per-channel lookup tables.
  */
-typedef struct GP_FilterTables {
-	GP_Pixel *table[GP_PIXELTYPE_MAX_CHANNELS];
+typedef struct gp_filter_tables {
+	gp_pixel *table[GP_PIXELTYPE_MAX_CHANNELS];
 	int free_table:1;
-} GP_FilterTables;
+} gp_filter_tables;
 
 /*
  * Generic point filter, applies corresponding table on bitmap.
  */
-int GP_FilterTablesApply(const GP_Pixmap *const src,
-                         GP_Coord x_src, GP_Coord y_src,
-                         GP_Size w_src, GP_Size h_src,
-			 GP_Pixmap *dst,
-			 GP_Coord x_dst, GP_Coord y_dst,
-			 const GP_FilterTables *const tables,
-			 GP_ProgressCallback *callback);
+int gp_filter_tables_apply(const gp_pixmap *const src,
+                           gp_coord x_src, gp_coord y_src,
+                           gp_size w_src, gp_size h_src,
+			   gp_pixmap *dst,
+			   gp_coord x_dst, gp_coord y_dst,
+			   const gp_filter_tables *const tables,
+			   gp_progress_cb *callback);
 
 /*
  * Aloocates and initializes tables.
  */
-int GP_FilterTablesInit(GP_FilterTables *self, const GP_Pixmap *pixmap);
+int gp_filter_tables_init(gp_filter_tables *self, const gp_pixmap *pixmap);
 
 /*
  * Allocates and initializes table structure and tables.
  */
-GP_FilterTables *GP_FilterTablesAlloc(const GP_Pixmap *pixmap);
+gp_filter_tables *gp_filter_tables_alloc(const gp_pixmap *pixmap);
 
 /*
  * Frees point filter tables.
  */
-void GP_FilterTablesFree(GP_FilterTables *self);
+void gp_filter_tables_free(gp_filter_tables *self);
 
 #endif /* FILTERS_GP_APPLY_TABLES_H */

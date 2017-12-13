@@ -25,8 +25,8 @@
 
 #include <core/GP_Pixmap.h>
 
-void dump_buffers(const char *pattern, const GP_Pixmap *c);
+void dump_buffers(const char *pattern, const gp_pixmap *c);
 
-int compare_buffers(const char *pattern, const GP_Pixmap *c);
+int compare_buffers(const char *pattern, const gp_pixmap *c);
 
 #endif /* __COMMON_H__ */

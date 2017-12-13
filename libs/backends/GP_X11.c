@@ -25,8 +25,9 @@
 
 #include "../../config.h"
 
-#include "core/GP_Debug.h"
-#include "core/GP_Common.h"
+#include <core/GP_Debug.h>
+#include <core/GP_Common.h>
+#include <core/GP_Pixmap.h>
 
 #ifdef HAVE_LIBX11
 
@@ -47,8 +48,8 @@
 #include "GP_X11_Win.h"
 #include "GP_X11_Input.h"
 
-static int resize_ximage(GP_Backend *self, int w, int h);
-static int resize_shm_ximage(GP_Backend *self, int w, int h);
+static int resize_ximage(gp_backend *self, int w, int h);
+static int resize_shm_ximage(gp_backend *self, int w, int h);
 
 static void putimage(struct x11_win *win, int x0, int y0, int x1, int y1)
 {
@@ -62,8 +63,8 @@ static void putimage(struct x11_win *win, int x0, int y0, int x1, int y1)
 		          win->img, x0, y0, x0, y0, x1-x0+1, y1-y0+1);
 }
 
-static void x11_update_rect(GP_Backend *self, GP_Coord x0, GP_Coord y0,
-                            GP_Coord x1, GP_Coord y1)
+static void x11_update_rect(gp_backend *self, gp_coord x0, gp_coord y0,
+                            gp_coord x1, gp_coord y1)
 {
 	struct x11_win *win = GP_BACKEND_PRIV(self);
 
@@ -83,7 +84,7 @@ static void x11_update_rect(GP_Backend *self, GP_Coord x0, GP_Coord y0,
 	XUnlockDisplay(win->dpy);
 }
 
-static void x11_flip(GP_Backend *self)
+static void x11_flip(gp_backend *self)
 {
 	struct x11_win *win = GP_BACKEND_PRIV(self);
 	unsigned int w = self->pixmap->w;
@@ -123,7 +124,7 @@ static void x11_ev(XEvent *ev)
 
 	win = last_win;
 
-	struct GP_Backend *self = GP_CONTAINER_OF(win, struct GP_Backend, priv);
+	struct gp_backend *self = GP_CONTAINER_OF(win, gp_backend, priv);
 
 	switch (ev->type) {
 	case Expose:
@@ -175,7 +176,7 @@ static void x11_ev(XEvent *ev)
 	}
 }
 
-static void x11_poll(GP_Backend *self)
+static void x11_poll(gp_backend *self)
 {
 	struct x11_win *win = GP_BACKEND_PRIV(self);
 	XEvent ev;
@@ -192,14 +193,14 @@ static void x11_poll(GP_Backend *self)
 
 #include <poll.h>
 
-static void x11_wait(GP_Backend *self)
+static void x11_wait(gp_backend *self)
 {
 	struct pollfd fd = {.fd = self->fd, .events = POLLIN, .revents = 0};
 	poll(&fd, 1, -1);
 	x11_poll(self);
 }
 
-static int resize_buffer(struct GP_Backend *self, uint32_t w, uint32_t h)
+static int resize_buffer(struct gp_backend *self, uint32_t w, uint32_t h)
 {
 	struct x11_win *win = GP_BACKEND_PRIV(self);
 
@@ -214,7 +215,7 @@ static int resize_buffer(struct GP_Backend *self, uint32_t w, uint32_t h)
 	return 0;
 }
 
-static int x11_set_attributes(struct GP_Backend *self,
+static int x11_set_attributes(struct gp_backend *self,
                               uint32_t w, uint32_t h,
                               const char *caption)
 {
@@ -244,7 +245,7 @@ out:
 	return 0;
 }
 
-static int x11_resize_ack(struct GP_Backend *self)
+static int x11_resize_ack(struct gp_backend *self)
 {
 	struct x11_win *win = GP_BACKEND_PRIV(self);
 	int ret;
@@ -258,8 +259,8 @@ static int x11_resize_ack(struct GP_Backend *self)
 	win->resized_flag = 0;
 
 	if (!ret) {
-		GP_EventQueueSetScreenSize(&self->event_queue,
-		                           win->new_w, win->new_h);
+		gp_event_queue_set_screen_size(&self->event_queue,
+		                               win->new_w, win->new_h);
 	}
 
 	GP_DEBUG(3, "Done");
@@ -289,16 +290,16 @@ static const char *visual_class_name(int class)
 	return "Unknown";
 }
 
-static enum GP_PixelType match_pixel_type(struct x11_win *win)
+static enum gp_pixel_type match_pixel_type(struct x11_win *win)
 {
 	GP_DEBUG(1, "Matching image pixel type, visual=%s depth=%u",
 	         visual_class_name(win->vis->class), win->img->bits_per_pixel);
 
 	if (win->vis->class == DirectColor || win->vis->class == TrueColor) {
-		return GP_PixelRGBMatch(win->img->red_mask,
-		                        win->img->green_mask,
-		                        win->img->blue_mask,
-		                        0x0, win->img->bits_per_pixel);
+		return gp_pixel_rgb_match(win->img->red_mask,
+					  win->img->green_mask,
+					  win->img->blue_mask, 0x0,
+					  win->img->bits_per_pixel);
 	}
 
 	GP_FATAL("Unsupported visual %s", visual_class_name(win->vis->class));
@@ -307,10 +308,10 @@ static enum GP_PixelType match_pixel_type(struct x11_win *win)
 
 #ifdef HAVE_X_SHM
 
-static int create_shm_ximage(GP_Backend *self, GP_Size w, GP_Size h)
+static int create_shm_ximage(gp_backend *self, gp_size w, gp_size h)
 {
 	struct x11_win *win = GP_BACKEND_PRIV(self);
-	enum GP_PixelType pixel_type;
+	enum gp_pixel_type pixel_type;
 
 	if (XShmQueryExtension(win->dpy) == False) {
 		GP_DEBUG(1, "MIT SHM Extension not supported, "
@@ -366,7 +367,7 @@ static int create_shm_ximage(GP_Backend *self, GP_Size w, GP_Size h)
 		goto err2;
 	}
 
-	GP_PixmapInit(&win->pixmap, w, h, pixel_type, win->shminfo.shmaddr);
+	gp_pixmap_init(&win->pixmap, w, h, pixel_type, win->shminfo.shmaddr);
 	win->pixmap.bytes_per_row = win->img->bytes_per_line;
 
 	self->pixmap = &win->pixmap;
@@ -386,7 +387,7 @@ err0:
 	return 1;
 }
 
-static void destroy_shm_ximage(GP_Backend *self)
+static void destroy_shm_ximage(gp_backend *self)
 {
 	struct x11_win *win = GP_BACKEND_PRIV(self);
 
@@ -401,7 +402,7 @@ static void destroy_shm_ximage(GP_Backend *self)
 	XUnlockDisplay(win->dpy);
 }
 
-static int resize_shm_ximage(GP_Backend *self, int w, int h)
+static int resize_shm_ximage(gp_backend *self, int w, int h)
 {
 	struct x11_win *win = GP_BACKEND_PRIV(self);
 	int ret;
@@ -421,18 +422,18 @@ static int resize_shm_ximage(GP_Backend *self, int w, int h)
 
 #else
 
-static int create_shm_ximage(GP_Backend GP_UNUSED(*self),
-                             GP_Size GP_UNUSED(w), GP_Size GP_UNUSED(h))
+static int create_shm_ximage(gp_backend GP_UNUSED(*self),
+                             gp_size GP_UNUSED(w), gp_size GP_UNUSED(h))
 {
 	return 1;
 }
 
-static void destroy_shm_ximage(GP_Backend GP_UNUSED(*self))
+static void destroy_shm_ximage(gp_backend GP_UNUSED(*self))
 {
 	GP_WARN("Stub called");
 }
 
-static int resize_shm_ximage(GP_Backend GP_UNUSED(*self),
+static int resize_shm_ximage(gp_backend GP_UNUSED(*self),
                              int GP_UNUSED(w), int GP_UNUSED(h))
 {
 	GP_WARN("Stub called");
@@ -441,10 +442,10 @@ static int resize_shm_ximage(GP_Backend GP_UNUSED(*self),
 
 #endif /* HAVE_X_SHM */
 
-static int create_ximage(GP_Backend *self, GP_Size w, GP_Size h)
+static int create_ximage(gp_backend *self, gp_size w, gp_size h)
 {
 	struct x11_win *win = GP_BACKEND_PRIV(self);
-	enum GP_PixelType pixel_type;
+	enum gp_pixel_type pixel_type;
 	int depth;
 
 	/* Get depth similiar to the default visual depth */
@@ -479,7 +480,7 @@ static int create_ximage(GP_Backend *self, GP_Size w, GP_Size h)
 		goto err1;
 	}
 
-	self->pixmap = GP_PixmapAlloc(w, h, pixel_type);
+	self->pixmap = gp_pixmap_alloc(w, h, pixel_type);
 
 	if (self->pixmap == NULL) {
 		GP_DEBUG(1, "Malloc failed :(");
@@ -496,16 +497,16 @@ err0:
 	return 1;
 }
 
-static void destroy_ximage(GP_Backend *self)
+static void destroy_ximage(gp_backend *self)
 {
 	struct x11_win *win = GP_BACKEND_PRIV(self);
 
-	GP_PixmapFree(self->pixmap);
+	gp_pixmap_free(self->pixmap);
 	win->img->data = NULL;
 	XDestroyImage(win->img);
 }
 
-static int resize_ximage(GP_Backend *self, int w, int h)
+static int resize_ximage(gp_backend *self, int w, int h)
 {
 	struct x11_win *win = GP_BACKEND_PRIV(self);
 	XImage *img;
@@ -520,7 +521,7 @@ static int resize_ximage(GP_Backend *self, int w, int h)
 	}
 
 	/* Resize pixmap */
-	if (GP_PixmapResize(self->pixmap, w, h)) {
+	if (gp_pixmap_resize(self->pixmap, w, h)) {
 		XDestroyImage(img);
 		return 1;
 	}
@@ -536,7 +537,7 @@ static int resize_ximage(GP_Backend *self, int w, int h)
 	return 0;
 }
 
-static void window_close(GP_Backend *self)
+static void window_close(gp_backend *self)
 {
 	struct x11_win *win = GP_BACKEND_PRIV(self);
 
@@ -552,7 +553,7 @@ static void window_close(GP_Backend *self)
 	XUnlockDisplay(win->dpy);
 }
 
-static void x11_exit(GP_Backend *self)
+static void x11_exit(gp_backend *self)
 {
 	struct x11_win *win = GP_BACKEND_PRIV(self);
 
@@ -566,15 +567,15 @@ static void x11_exit(GP_Backend *self)
 	free(self);
 }
 
-GP_Backend *GP_BackendX11Init(const char *display, int x, int y,
-                              unsigned int w, unsigned int h,
-			      const char *caption,
-			      enum GP_BackendX11Flags flags)
+gp_backend *gp_x11_init(const char *display, int x, int y,
+                        unsigned int w, unsigned int h,
+                        const char *caption,
+                        enum gp_x11_flags flags)
 {
-	GP_Backend *backend;
+	gp_backend *backend;
 	struct x11_win *win;
 
-	backend = malloc(sizeof(GP_Backend) +
+	backend = malloc(sizeof(gp_backend) +
 	                 sizeof(struct x11_win));
 
 	if (backend == NULL)
@@ -608,7 +609,7 @@ GP_Backend *GP_BackendX11Init(const char *display, int x, int y,
 		x11_win_fullscreen(win, 1);
 
 	/* Init the event queue, once we know the window size */
-	GP_EventQueueInit(&backend->event_queue, wreq.w, wreq.h, 0);
+	gp_event_queue_init(&backend->event_queue, wreq.w, wreq.h, 0);
 
 	backend->pixmap = NULL;
 
@@ -622,16 +623,16 @@ GP_Backend *GP_BackendX11Init(const char *display, int x, int y,
 
 	win->resized_flag = 0;
 
-	backend->name          = "X11";
-	backend->Flip          = x11_flip;
-	backend->UpdateRect    = x11_update_rect;
-	backend->Exit          = x11_exit;
-	backend->Poll          = x11_poll;
-	backend->Wait          = x11_wait;
-	backend->SetAttributes = x11_set_attributes;
-	backend->ResizeAck     = x11_resize_ack;
-	backend->fd            = XConnectionNumber(win->dpy);
-	backend->timers        = NULL;
+	backend->name = "X11";
+	backend->flip = x11_flip;
+	backend->update_rect = x11_update_rect;
+	backend->exit = x11_exit;
+	backend->poll = x11_poll;
+	backend->wait = x11_wait;
+	backend->set_attrs = x11_set_attributes;
+	backend->resize_ack = x11_resize_ack;
+	backend->fd = XConnectionNumber(win->dpy);
+	backend->timers = NULL;
 
 	return backend;
 err1:
@@ -640,7 +641,7 @@ err1:
 	return NULL;
 }
 
-void GP_BackendX11RequestFullscreen(GP_Backend *self, int mode)
+void gp_x11_fullscreen(gp_backend *self, int mode)
 {
 	struct x11_win *win = GP_BACKEND_PRIV(self);
 
@@ -649,26 +650,27 @@ void GP_BackendX11RequestFullscreen(GP_Backend *self, int mode)
 
 #else
 
-#include "GP_Backend.h"
+#include <backends/GP_Backend.h>
 
-GP_Backend *GP_BackendX11Init(const char *GP_UNUSED(display),
-                              int GP_UNUSED(x), int GP_UNUSED(y),
-                              unsigned int GP_UNUSED(w),
-			      unsigned int GP_UNUSED(h),
-			      const char *GP_UNUSED(caption))
+gp_backend *gp_x11_init(const char *GP_UNUSED(display),
+                        int GP_UNUSED(x), int GP_UNUSED(y),
+                        unsigned int GP_UNUSED(w),
+                        unsigned int GP_UNUSED(h),
+                        const char *GP_UNUSED(caption))
 {
 	GP_FATAL("X11 support not compiled in");
 	return NULL;
 }
 
-void GP_BackendX11RequestFullscreen(GP_Backend *GP_UNUSED(self),
-                                    int GP_UNUSED(mode))
+void gp_x11_fullscreen(gp_backend *GP_UNUSED(self),
+                       int GP_UNUSED(mode))
 {
+	GP_FATAL("X11 support not compiled in");
 }
 
 #endif /* HAVE_LIBX11 */
 
-int GP_BackendIsX11(GP_Backend *self)
+int gp_backend_is_x11(gp_backend *self)
 {
 	return !strcmp(self->name, "X11");
 }

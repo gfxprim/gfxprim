@@ -5,20 +5,20 @@ This page describes RGB tripplet to pixels conversions.
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <GP.h>
+#include <gfxprim.h>
 /* or */
 #include <core/GP_Convert.h>
 
-GP_Pixel GP_RGBToPixel(uint8_t r, uint8_t g, uint8_t b, GP_PixelType type);
+gp_pixel gp_rgb_to_pixel(uint8_t r, uint8_t g, uint8_t b, gp_pixel_type type);
 
-GP_Pixel GP_RGBAToPixel(uint8_t r, uint8_t g, uint8_t b, uint8_t a,
-                        GP_PixelType type);
+gp_pixel gp_rgba_to_pixel(uint8_t r, uint8_t g, uint8_t b, uint8_t a,
+                          gp_pixel_type type);
 
-GP_Pixel GP_RGBToPixmapPixel(uint8_t r, uint8_t g, uint8_t b,
-                              const GP_Pixmap *pixmap);
+gp_pixel gp_rgb_to_pixmap_pixel(uint8_t r, uint8_t g, uint8_t b,
+                                const gp_pixmap *pixmap);
 
-GP_Pixel GP_RGBAToPixmapPixel(uint8_t r, uint8_t g, uint8_t b, uint8_t a,
-                               const GP_Pixmap *pixmap);
+gp_pixel gp_rgba_to_pixmap_pixel(uint8_t r, uint8_t g, uint8_t b, uint8_t a,
+                                 const gp_pixmap *pixmap);
 -------------------------------------------------------------------------------
 
 Simple functions to convert RGB or RGBA 8 bit values into the specific
@@ -26,11 +26,11 @@ link:pixels.html[pixel types].
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <GP.h>
+#include <gfxprim.h>
 /* or */
 #include <core/GP_Convert.h>
 
-GP_Pixel GP_ConvertPixel(GP_Pixel pixel, GP_PixelType from, GP_PixelType to);
+gp_pixel gp_convert_pixel(gp_pixel pixel, gp_pixel_type from, gp_pixel_type to);
 -------------------------------------------------------------------------------
 
 Converts pixel value. The conversion currently converts by converting the

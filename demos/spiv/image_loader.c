@@ -34,9 +34,9 @@
 
 static struct image_cache *img_cache;
 static struct image_list *img_list;
-static GP_Pixmap *cur_img;
-static GP_DataStorage *cur_meta_data;
-static GP_Container *cur_cont;
+static gp_pixmap *cur_img;
+static gp_storage *cur_meta_data;
+static gp_container *cur_cont;
 
 int image_loader_init(const char *args[], unsigned int cache_max_bytes)
 {
@@ -57,11 +57,11 @@ int image_loader_init(const char *args[], unsigned int cache_max_bytes)
 	return 0;
 }
 
-GP_Pixmap *image_loader_get_image(GP_ProgressCallback *callback, int elevate)
+gp_pixmap *image_loader_get_image(gp_progress_cb *callback, int elevate)
 {
 	struct cpu_timer timer;
 	const char *path;
-	GP_Pixmap *img;
+	gp_pixmap *img;
 	int err, ret;
 
 	if (cur_img)
@@ -69,8 +69,8 @@ GP_Pixmap *image_loader_get_image(GP_ProgressCallback *callback, int elevate)
 
 	if (cur_cont) {
 		cpu_timer_start(&timer, "Loading");
-		cur_meta_data = GP_DataStorageCreate();
-		GP_ContainerLoadEx(cur_cont, &cur_img, cur_meta_data, callback);
+		cur_meta_data = gp_storage_create();
+		gp_container_load_ex(cur_cont, &cur_img, cur_meta_data, callback);
 		cpu_timer_stop(&timer);
 		return cur_img;
 	}
@@ -82,9 +82,9 @@ GP_Pixmap *image_loader_get_image(GP_ProgressCallback *callback, int elevate)
 
 	cpu_timer_start(&timer, "Loading");
 
-	cur_meta_data = GP_DataStorageCreate();
+	cur_meta_data = gp_storage_create();
 
-	ret = GP_LoadImageEx(path, &img, cur_meta_data, callback);
+	ret = gp_load_image_ex(path, &img, cur_meta_data, callback);
 
 	if (ret) {
 		err = errno;
@@ -94,10 +94,10 @@ GP_Pixmap *image_loader_get_image(GP_ProgressCallback *callback, int elevate)
 		 *
 		 * TODO: How to cache container content?
 		 */
-		cur_cont = GP_OpenZip(path);
+		cur_cont = gp_open_zip(path);
 
 		if (cur_cont) {
-			GP_ContainerLoadEx(cur_cont, &img, cur_meta_data, callback);
+			gp_container_load_ex(cur_cont, &img, cur_meta_data, callback);
 
 			if (img) {
 				cur_img = img;
@@ -105,7 +105,7 @@ GP_Pixmap *image_loader_get_image(GP_ProgressCallback *callback, int elevate)
 				return img;
 			}
 
-			GP_ContainerClose(cur_cont);
+			gp_container_close(cur_cont);
 			cur_cont = NULL;
 		}
 
@@ -120,7 +120,7 @@ GP_Pixmap *image_loader_get_image(GP_ProgressCallback *callback, int elevate)
 	return img;
 }
 
-GP_DataStorage *image_loader_get_meta_data(void)
+gp_storage *image_loader_get_meta_data(void)
 {
 	return cur_meta_data;
 }
@@ -154,8 +154,8 @@ static void drop_cur_img(void)
 	 * Currently loaded image is too big to be cached -> free it.
 	 */
 	if (image_cache_get(img_cache, NULL, NULL, 0, path)) {
-		GP_PixmapFree(cur_img);
-		GP_DataStorageDestroy(cur_meta_data);
+		gp_pixmap_free(cur_img);
+		gp_storage_destroy(cur_meta_data);
 	}
 
 	cur_img = NULL;
@@ -172,7 +172,7 @@ void image_loader_seek(enum img_seek_offset offset, int whence)
 		case IMG_LAST:
 		//TODO  do something better for IMG_DIR
 		case IMG_DIR:
-			GP_ContainerClose(cur_cont);
+			gp_container_close(cur_cont);
 			cur_cont = NULL;
 			goto list_seek;
 		case IMG_CUR:
@@ -185,8 +185,8 @@ void image_loader_seek(enum img_seek_offset offset, int whence)
 		 *
 		 *       What about wrapping around?
 		 */
-		if (GP_ContainerSeek(cur_cont, whence, GP_CONT_CUR)) {
-			GP_ContainerClose(cur_cont);
+		if (gp_container_seek(cur_cont, whence, GP_CONT_CUR)) {
+			gp_container_close(cur_cont);
 			cur_cont = NULL;
 			goto list_seek;
 		}

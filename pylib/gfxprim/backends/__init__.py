@@ -9,25 +9,25 @@ end your (program's) world
 
 from . import c_backends
 
-# Pull GP_Backend
-Backend = c_backends.GP_Backend
+# Pull gp_backend
+backend = c_backends.gp_backend
 
 def _init(module):
 
-  # Extend GP_Backend with convenience methods
+  # Extend gp_backend with convenience methods
   from ._extend_backend import extend_backend
-  extend_backend(Backend)
+  extend_backend(backend)
 
   # Imports from the SWIG module
   import re
-  def strip_GP(s):
-    return re.sub('^GP_', '', s)
+  def strip_gp(s):
+    return re.sub('^gp_', '', s)
 
   # Import some members from the SWIG module
   from ..utils import import_members
-  import_members(c_backends, module, sub=strip_GP,
+  import_members(c_backends, module, sub=strip_gp,
     exclude=[
-      '^GP_Backend$',
+      '^gp_backend$',
       '^gfxprim$',
       '^\w+_swigregister$',
       '^_\w+$'])

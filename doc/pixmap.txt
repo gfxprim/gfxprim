@@ -1,7 +1,7 @@
 Drawing Pixmap
 ---------------
 
-The 'GP_Pixmap' structure describes an 'in memory' pixmap. The structure
+The 'gp_pixmap' structure describes an 'in memory' pixmap. The structure
 contains all metadata needed for drawing, loaders and filters.
 
 Data Structure
@@ -9,7 +9,7 @@ Data Structure
 
 [source,c]
 -------------------------------------------------------------------------------
-typedef struct GP_Pixmap {
+typedef struct gp_pixmap {
 	uint8_t *pixels;         /* pointer to image pixels */
 	uint8_t  bpp;            /* pixel length in bits */
 	uint32_t bytes_per_row;
@@ -22,19 +22,19 @@ typedef struct GP_Pixmap {
          */
         uint8_t offset;
 
-	enum GP_PixelType pixel_type; /* pixel format */
+	enum gp_pixel_type pixel_type; /* pixel format */
 
 	/*
          * Pointer to optional Gamma correction tables.
          */
-	struct GP_Gamma *gamma;
+	struct gp_gamma *gamma;
 
 	uint8_t axes_swap:1;         /* swap axes */
 	uint8_t x_swap:1;            /* mirror x */
 	uint8_t y_swap:1;            /* mirror y */
 	uint8_t bit_endian:1;        /* GP_BIT_ENDIAN */
-	uint8_t free_pixels:1;       /* if set GP_PixmapFree() calls free on pixmap->pixels */
-} GP_Pixmap;
+	uint8_t free_pixels:1;       /* if set gp_pixmap_free() calls free on pixmap->pixels */
+} gp_pixmap;
 -------------------------------------------------------------------------------
 
 The 'pixels' field points to the image data.
@@ -73,7 +73,7 @@ If you don't need this functionality just don't touch the flags the as
 overhead of these transformations is not measurable.
 
 If you really need drawing primitives that do not use the orientation flags,
-you could use variants with _Raw suffix (although this is not recommended).
+you could use variants with _raw suffix (although this is not recommended).
 
 There are various helper macros for transforming coordinates and sizes in
 'core/GP_Transform.h'. And pixmap helper functions to "rotate" the flags
@@ -84,7 +84,7 @@ when taking into the account the width and height.
 -------------------------------------------------------------------------------
 #include <core/GP_Transform.h>
 /* or */
-#include <GP.h>
+#include <gfxprim.h>
 
 /* Transforms point user coordinates to bitmap coordinates */
 GP_TRANSFORM_POINT(pixmap, x, y)
@@ -100,39 +100,39 @@ GP_RETRANSFORM_POINT(pixmap, x, y)
 ------------------------------------------------------------------------------
 #include <core/GP_Pixmap.h>
 /* or */
-#include <GP.h>
+#include <gfxprim.h>
 
 /*
  * Rotate pixmap flags clock wise.
  */
-void GP_PixmapRotateCW(GP_Pixmap *pixmap);
+void gp_pixmap_rotate_cw(gp_pixmap *pixmap);
 
 /*
  * Rotate pixmap flags counter clock wise.
  */
-void GP_PixmapRotateCCW(GP_Pixmap *pixmap);
+void gp_pixmap_rotate_ccw(gp_pixmap *pixmap);
 
 /*
  * Retruns 1 if rotation flags are equal.
  */
-int GP_PixmapRotationEqual(const GP_Pixmap *c1, const GP_Pixmap *c2);
+int gp_pixmap_rtation_equal(const gp_pixmap *c1, const gp_pixmap *c2);
 
 /*
  * Sets pixmap rotation flags.
  */
-void GP_PixmapSetRotation(GP_Pixmap *dst, int axes_swap,
-                           int x_swap, int y_swap);
+void gp_pixmap_set_rotation(gp_pixmap *dst, int axes_swap,
+                            int x_swap, int y_swap);
 
 /*
  * Copies rotation flags.
  */
-void GP_PixmapCopyRotation(const GP_Pixmap *src, GP_Pixmap *dst);
+void gp_pixmap_copy_rotation(const gp_pixmap *src, gp_pixmap *dst);
 
 /*
  * Returns pixmap width and height taking the rotation flags into the account.
  */
-GP_Size GP_PixmapW(const GP_Pixmap *pixmap);
-GP_Size GP_PixmapH(const GP_Pixmap *pixmap);
+gp_size gp_pixmap_w(const gp_pixmap *pixmap);
+gp_size gp_pixmap_h(const gp_pixmap *pixmap);
 -------------------------------------------------------------------------------
 
 Basic pixmap functions
@@ -142,10 +142,10 @@ Basic pixmap functions
 -------------------------------------------------------------------------------
 #include <core/GP_Pixmap.h>
 /* or */
-#include <GP.h>
+#include <gfxprim.h>
 
-GP_Pixmap *GP_PixmapInit(GP_Pixmap *pixmap, GP_Size w, GP_Size h,
-                           GP_PixelType type, void *pixels);
+gp_pixmap *gp_pixmap_init(gp_pixmap *pixmap, gp_size w, gp_size h,
+                          gp_pixel_type type, void *pixels);
 -------------------------------------------------------------------------------
 
 Initialize given pixmap accordingly to parameters, the rest of pixmap
@@ -163,12 +163,12 @@ pointer you passed as second argument).
 -------------------------------------------------------------------------------
 #include <core/GP_Pixmap.h>
 /* or */
-#include <GP.h>
+#include <gfxprim.h>
 
-GP_Pixmap *GP_PixmapAlloc(GP_Size w, GP_Size h, GP_PixelType type);
+gp_pixmap *gp_pixmap_alloc(gp_size w, gp_size h, gp_pixel_type type);
 -------------------------------------------------------------------------------
 
-The 'GP_PixmapAlloc()' allocates and initializes a pixmap.
+The 'gp_pixmap_alloc()' allocates and initializes a pixmap.
 
 The orientation flags are all set to zero, the 'free_pixels' flag is set and the
 rest of the metadata are calculated accordingly to width, height and
@@ -179,9 +179,9 @@ appropriate size; the initial contents of the bitmap are undefined.
 -------------------------------------------------------------------------------
 #include <core/GP_Pixmap.h>
 /* or */
-#include <GP.h>
+#include <gfxprim.h>
 
-enum GP_PixmapCopyFlags {
+enum gp_pixmap_copy_flags {
         /*
          * Copy bitmap pixels too. If not set pixels are uninitialized.
          */
@@ -192,10 +192,10 @@ enum GP_PixmapCopyFlags {
         GP_COPY_WITH_ROTATION = 0x02,
 };
 
-GP_Pixmap *GP_PixmapCopy(const GP_Pixmap *src, int flags);
+gp_pixmap *gp_pixmap_copy(const gp_pixmap *src, int flags);
 -------------------------------------------------------------------------------
 
-The 'GP_PixmapCopy()' allocates and initializes a copy of the pixmap passed
+The 'gp_pixmap_copy()' allocates and initializes a copy of the pixmap passed
 as arguments.
 
 The call returns pointer to newly allocated pixmap or in case of 'malloc()'
@@ -210,21 +210,21 @@ flags are set to zero.
 
 The 'free_pixels' flag for the resulting pixmap is set.
 
-[[PixmapFree]]
+[[pixmap_free]]
 [source,c]
 -------------------------------------------------------------------------------
 #include <core/GP_Pixmap.h>
 /* or */
-#include <GP.h>
+#include <gfxprim.h>
 
-void GP_PixmapFree(GP_Pixmap *pixmap);
+void gp_pixmap_free(gp_pixmap *pixmap);
 -------------------------------------------------------------------------------
 
 Frees the pixmap memory.
 
 If 'free_pixels' flag is set, the pixels buffer is freed too.
 
-If gamma pointer is not NULL the 'GP_GammaRelease()' is called.
+If gamma pointer is not NULL the 'gp_gamma_release()' is called.
 
 [[Sub_Pixmap]]
 Subpixmap
@@ -236,7 +236,7 @@ creation).
 
 WARNING: If you create overlaping subpixmaps the result is undefined.
 
-Calling 'GP_PixmapFree()' on a allocated subpixmap is safe; the bitmap is
+Calling 'gp_pixmap_free()' on a allocated subpixmap is safe; the bitmap is
 not freed as it belongs to another pixmap; it will be freed when the parent
 pixmap is freed (i.e. the 'free_pixels' flag is not set when creating
 subpixmap).
@@ -249,26 +249,26 @@ CAUTION: The subpixmap doesn't hold a reference to the original pixmap, so
 -------------------------------------------------------------------------------
 #include <core/GP_Pixmap.h>
 /* or */
-#include <GP.h>
+#include <gfxprim.h>
 
-GP_Pixmap *GP_SubPixmap(const GP_Pixmap *pixmap, GP_Pixmap *subpixmap,
-                          GP_Coord x, GP_Coord y, GP_Size w, GP_Size h);
+gp_pixmap *gp_sub_pixmap(const gp_pixmap *pixmap, gp_pixmap *subpixmap,
+                          gp_coord x, gp_coord y, gp_size w, gp_size h);
 
-GP_Pixmap *GP_SubPixmapAlloc(const GP_Pixmap *pixmap,
-                               GP_Coord x, GP_Coord y, GP_Size w, GP_Size h);
+gp_pixmap *gp_sub_pixmap_alloc(const gp_pixmap *pixmap,
+                             gp_coord x, gp_coord y, gp_size w, gp_size h);
 -------------------------------------------------------------------------------
 
 Creates subpixmap of a pixmap. The rectangular area must fit into the parent
 pixmap.
 
-The 'GP_SubPixmap()' function initializes the passed pointer as a subpixmap
+The 'gp_sub_pixmap()' function initializes the passed pointer as a subpixmap
 of a pixmap and returns pointer to the initialized subpixmap (i.e. the same
 pointer you passed as the subpixmap parameter).
 
-The 'GP_SubPixmapAlloc()' function allocates 'GP_Pixmap' structure and
+The 'gp_sub_pixmap_alloc()' function allocates 'gp_pixmap' structure and
 initializes it as a subpixmap. This function may return NULL in case of
 'malloc()' failure and the newly created pixmap should be later freed with
-'GP_PixmapFree()'.
+'gp_pixmap_free()'.
 
 Conversions
 ~~~~~~~~~~~
@@ -277,12 +277,12 @@ Conversions
 -------------------------------------------------------------------------------
 #include <core/GP_Pixmap.h>
 /* or */
-#include <GP.h>
+#include <gfxprim.h>
 
-GP_Pixmap *GP_PixmapConvertAlloc(const GP_Pixmap *src,
-                                   GP_PixelType dst_pixel_type);
+gp_pixmap *gp_pixmap_convert_alloc(const gp_pixmap *src,
+                                   gp_pixel_type dst_pixel_type);
 
-GP_Pixmap *GP_PixmapConvert(const GP_Pixmap *src, GP_Pixmap *dst);
+gp_pixmap *gp_pixmap_convert(const gp_pixmap *src, gp_pixmap *dst);
 
 -------------------------------------------------------------------------------
 
@@ -299,11 +299,11 @@ Misc
 -------------------------------------------------------------------------------
 #include <core/GP_Pixmap.h>
 /* or */
-#include <GP.h>
+#include <gfxprim.h>
 
-void GP_PixmapPrintInfo(const GP_Pixmap *self);
+void gp_pixmap_print_info(const gp_pixmap *self);
 -------------------------------------------------------------------------------
 
-This function prints the content of a 'GP_Pixmap' structure, in a readable
+This function prints the content of a 'gp_pixmap' structure, in a readable
 format, into the stdout.
 

@@ -32,26 +32,26 @@
 
 struct testcase {
 	/* VLine description */
-	GP_Coord x;
-	GP_Coord y0;
-	GP_Coord y1;
+	gp_coord x;
+	gp_coord y0;
+	gp_coord y1;
 
-	GP_Coord y;
-	GP_Size lh;
+	gp_coord y;
+	gp_size lh;
 
 	int flag;
 
 	/* expected result */
-	GP_Size w, h;
+	gp_size w, h;
 	const char pixmap[];
 };
 
 static int test_vline(struct testcase *t)
 {
-	GP_Pixmap *c;
+	gp_pixmap *c;
 	int err;
 
-	c = GP_PixmapAlloc(t->w, t->h, GP_PIXEL_G8);
+	c = gp_pixmap_alloc(t->w, t->h, GP_PIXEL_G8);
 
 	if (c == NULL) {
 		tst_err("Failed to allocate pixmap");
@@ -62,9 +62,9 @@ static int test_vline(struct testcase *t)
 	memset(c->pixels, 0, c->w * c->h);
 
 	if (t->flag)
-		GP_VLineXYH(c, t->x, t->y, t->lh, 1);
+		gp_vline_xyh(c, t->x, t->y, t->lh, 1);
 	else
-		GP_VLine(c, t->x, t->y0, t->y1, 1);
+		gp_vline(c, t->x, t->y0, t->y1, 1);
 
 	err = compare_buffers(t->pixmap, c);
 

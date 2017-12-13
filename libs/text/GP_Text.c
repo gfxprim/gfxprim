@@ -23,19 +23,21 @@
  *                                                                           *
  *****************************************************************************/
 
-#include "gfx/GP_Gfx.h"
-#include "core/GP_FnPerBpp.h"
-#include "core/GP_Debug.h"
-#include "GP_TextMetric.h"
-#include "GP_Text.h"
+#include <core/GP_FnPerBpp.h>
+#include <core/GP_Debug.h>
 
-GP_TextStyle GP_DefaultStyle = GP_DEFAULT_TEXT_STYLE;
+#include <gfx/GP_Rect.h>
 
-static int do_align(GP_Coord *topleft_x, GP_Coord *topleft_y, int align,
-                    GP_Coord x, GP_Coord y, const GP_TextStyle *style,
-                    GP_Size width)
+#include <text/GP_TextMetric.h>
+#include <text/GP_Text.h>
+
+gp_text_style gp_default_style = GP_DEFAULT_TEXT_STYLE;
+
+static int do_align(gp_coord *topleft_x, gp_coord *topleft_y, int align,
+                    gp_coord x, gp_coord y, const gp_text_style *style,
+                    gp_size width)
 {
-	GP_Size height = GP_TextHeight(style);
+	gp_size height = gp_text_height(style);
 
 	switch (align & 0x0f) {
 	case GP_ALIGN_LEFT:
@@ -60,7 +62,7 @@ static int do_align(GP_Coord *topleft_x, GP_Coord *topleft_y, int align,
 		*topleft_y = y - height/2;
 		break;
 	case GP_VALIGN_BASELINE:
-		*topleft_y = y - GP_TextAscent(style) + 1;
+		*topleft_y = y - gp_text_ascent(style) + 1;
 		break;
 	case GP_VALIGN_BELOW:
 		*topleft_y = y;
@@ -73,9 +75,9 @@ static int do_align(GP_Coord *topleft_x, GP_Coord *topleft_y, int align,
 	return 0;
 }
 
-void GP_Text(GP_Pixmap *pixmap, const GP_TextStyle *style,
-             GP_Coord x, GP_Coord y, int align,
-	     GP_Pixel fg_color, GP_Pixel bg_color,
+void gp_text(gp_pixmap *pixmap, const gp_text_style *style,
+             gp_coord x, gp_coord y, int align,
+	     gp_pixel fg_color, gp_pixel bg_color,
              const char *str)
 {
 	GP_CHECK_PIXMAP(pixmap);
@@ -84,22 +86,22 @@ void GP_Text(GP_Pixmap *pixmap, const GP_TextStyle *style,
 		return;
 
 	if (style == NULL)
-		style = &GP_DefaultStyle;
+		style = &gp_default_style;
 
-	GP_Coord topleft_x, topleft_y;
+	gp_coord topleft_x, topleft_y;
 
-	GP_Size w = GP_TextWidth(style, str);
+	gp_size w = gp_text_width(style, str);
 
 	GP_ASSERT(do_align(&topleft_x, &topleft_y, align, x, y, style, w) == 0,
 	         "Invalid aligment flags");
 
-	GP_Text_Raw(pixmap, style, topleft_x, topleft_y,
+	gp_text_raw(pixmap, style, topleft_x, topleft_y,
 	            align & GP_TEXT_NOBG, fg_color, bg_color, str);
 }
 
-GP_Size GP_VPrint(GP_Pixmap *pixmap, const GP_TextStyle *style,
-                  GP_Coord x, GP_Coord y, int align,
-                  GP_Pixel fg_color, GP_Pixel bg_color,
+gp_size gp_vprint(gp_pixmap *pixmap, const gp_text_style *style,
+                  gp_coord x, gp_coord y, int align,
+                  gp_pixel fg_color, gp_pixel bg_color,
                   const char *fmt, va_list va)
 {
 	va_list vac;
@@ -111,43 +113,43 @@ GP_Size GP_VPrint(GP_Pixmap *pixmap, const GP_TextStyle *style,
 	vsnprintf(buf, sizeof(buf), fmt, vac);
 	va_end(vac);
 
-	GP_Text(pixmap, style, x, y, align, fg_color, bg_color, buf);
+	gp_text(pixmap, style, x, y, align, fg_color, bg_color, buf);
 
-	return GP_TextWidth(style, buf);
+	return gp_text_width(style, buf);
 }
 
-GP_Size GP_Print(GP_Pixmap *pixmap, const GP_TextStyle *style,
-                 GP_Coord x, GP_Coord y, int align,
-                 GP_Pixel fg_color, GP_Pixel bg_color, const char *fmt, ...)
+gp_size gp_print(gp_pixmap *pixmap, const gp_text_style *style,
+                 gp_coord x, gp_coord y, int align,
+                 gp_pixel fg_color, gp_pixel bg_color, const char *fmt, ...)
 {
 	va_list va;
-	GP_Size ret;
+	gp_size ret;
 
 	va_start(va, fmt);
-	ret = GP_VPrint(pixmap, style, x, y, align,
+	ret = gp_vprint(pixmap, style, x, y, align,
 	                fg_color, bg_color, fmt, va);
 	va_end(va);
 
 	return ret;
 }
 
-void GP_TextClear(GP_Pixmap *pixmap, const GP_TextStyle *style,
-                  GP_Coord x, GP_Coord y, int align,
-		  GP_Pixel bg_color, GP_Size size)
+void gp_text_clear(gp_pixmap *pixmap, const gp_text_style *style,
+                  gp_coord x, gp_coord y, int align,
+		  gp_pixel bg_color, gp_size size)
 {
-	GP_Coord topleft_x, topleft_y;
+	gp_coord topleft_x, topleft_y;
 
 	GP_ASSERT(do_align(&topleft_x, &topleft_y, align, x, y, style, size) == 0,
 	         "Invalid aligment flags");
 
-	GP_FillRectXYWH(pixmap, topleft_x, topleft_y,
-	                size, GP_TextHeight(style), bg_color);
+	gp_fill_rect_xywh(pixmap, topleft_x, topleft_y,
+	                  size, gp_text_height(style), bg_color);
 }
 
-void GP_TextClearStr(GP_Pixmap *pixmap, const GP_TextStyle *style,
-                     GP_Coord x, GP_Coord y, int align,
-		     GP_Pixel bg_color, const char *str)
+void gp_text_clear_str(gp_pixmap *pixmap, const gp_text_style *style,
+                       gp_coord x, gp_coord y, int align,
+		       gp_pixel bg_color, const char *str)
 {
-	GP_TextClear(pixmap, style, x, y, align,
-	             bg_color, GP_TextWidth(style, str));
+	gp_text_clear(pixmap, style, x, y, align,
+	              bg_color, gp_text_width(style, str));
 }

@@ -32,9 +32,9 @@
 #ifndef INPUT_GP_EVENT_QUEUE_H
 #define INPUT_GP_EVENT_QUEUE_H
 
-#include "input/GP_Event.h"
+#include <input/GP_Event.h>
 
-typedef struct GP_EventQueue {
+struct gp_event_queue {
 	/* screen size */
 	unsigned int screen_w;
 	unsigned int screen_h;
@@ -43,12 +43,12 @@ typedef struct GP_EventQueue {
 	unsigned int queue_first;
 	unsigned int queue_last;
 	unsigned int queue_size;
-	struct GP_Event cur_state;
-	struct GP_Event events[GP_EVENT_QUEUE_SIZE];
-} GP_EventQueue;
+	gp_event cur_state;
+	gp_event events[GP_EVENT_QUEUE_SIZE];
+};
 
 #define GP_EVENT_QUEUE_DECLARE(name, scr_w, scr_h)   \
-	struct GP_EventQueue name = {                \
+	gp_event_queue name = {                \
 		.screen_w = scr_w,                   \
 		.screen_h = scr_h,                   \
 		                                     \
@@ -65,37 +65,37 @@ typedef struct GP_EventQueue {
  *
  * If queue_size is set to zero, default value is expected.
  */
-void GP_EventQueueInit(struct GP_EventQueue *self,
-                       unsigned int screen_w, unsigned int screen_h,
-                       unsigned int queue_size);
+void gp_event_queue_init(gp_event_queue *self,
+                         unsigned int screen_w, unsigned int screen_h,
+                         unsigned int queue_size);
 
 /*
  * Allocates and initializes event queue.
  *
  * If queue_size is set to zero, default value is used.
  */
-struct GP_EventQueue *GP_EventQueueAlloc(unsigned int screen_w,
-                                         unsigned int screen_h,
-                                         unsigned int queue_size);
+gp_event_queue *gp_event_queue_alloc(unsigned int screen_w,
+                                     unsigned int screen_h,
+                                     unsigned int queue_size);
 
-void GP_EventQueueFree(struct GP_EventQueue *self);
+void gp_event_queue_free(gp_event_queue *self);
 
 /*
  * Sets screen (window) size.
  */
-void GP_EventQueueSetScreenSize(struct GP_EventQueue *self,
-                                unsigned int w, unsigned int h);
+void gp_event_queue_set_screen_size(gp_event_queue *self,
+                                    unsigned int w, unsigned int h);
 
 /*
  * Sets cursor postion.
  */
-void GP_EventQueueSetCursorPosition(struct GP_EventQueue *self,
-                                    unsigned int x, unsigned int y);
+void gp_event_queue_set_cursor_pos(gp_event_queue *self,
+                                   unsigned int x, unsigned int y);
 
 /*
  * Returns number of events queued in the queue.
  */
-unsigned int GP_EventQueueEventsQueued(struct GP_EventQueue *self);
+unsigned int gp_event_queue_events_queued(gp_event_queue *self);
 
 /*
  * In case there are any events queued, the top event is removed from the
@@ -104,12 +104,12 @@ unsigned int GP_EventQueueEventsQueued(struct GP_EventQueue *self);
  *
  * If there are no events queued the call returns immediately with zero.
  */
-int GP_EventQueueGet(struct GP_EventQueue *self, struct GP_Event *ev);
+int gp_event_queue_get(gp_event_queue *self, gp_event *ev);
 
 /*
- * Same as GP_EventQueueGet but the event is not removed from the queue.
+ * Same as gp_event_queue_Get but the event is not removed from the queue.
  */
-int GP_EventQueuePeek(struct GP_EventQueue *self, struct GP_Event *ev);
+int gp_event_queue_peek(gp_event_queue *self, gp_event *ev);
 
 /*
  * Puts the event in the queue.
@@ -117,12 +117,12 @@ int GP_EventQueuePeek(struct GP_EventQueue *self, struct GP_Event *ev);
  * This is bare call that just copies the event into the queue. Use the calls
  * below instead.
  */
-void GP_EventQueuePut(struct GP_EventQueue *self, struct GP_Event *ev);
+void gp_event_queue_put(gp_event_queue *self, gp_event *ev);
 
 /*
  * Puts event to the top of the queue.
  */
-void GP_EventQueuePutBack(struct GP_EventQueue *self, struct GP_Event *ev);
+void gp_event_queue_put_back(gp_event_queue *self, gp_event *ev);
 
 struct timeval;
 
@@ -131,46 +131,46 @@ struct timeval;
  *
  * If timeval is NULL, current time is used.
  */
-void GP_EventQueuePushRel(struct GP_EventQueue *self,
-                          int32_t rx, int32_t ry, struct timeval *time);
+void gp_event_queue_push_rel(gp_event_queue *self,
+                             int32_t rx, int32_t ry, struct timeval *time);
 
 /*
  * Produces relative event that moves cursor to the point x, y.
  *
  * If timeval is NULL, current time is used.
  */
-void GP_EventQueuePushRelTo(struct GP_EventQueue *self,
-                            uint32_t x, uint32_t y, struct timeval *time);
+void gp_event_queue_push_rel_to(gp_event_queue *self,
+                               uint32_t x, uint32_t y, struct timeval *time);
 
 /*
  * Inject absolute event.
  *
  * If timeval is NULL, current time is used.
  */
-void GP_EventQueuePushAbs(struct GP_EventQueue *self,
-                          uint32_t x, uint32_t y, uint32_t pressure,
-                          uint32_t x_max, uint32_t y_max, uint32_t pressure_max,
-                          struct timeval *time);
+void gp_event_queue_push_abs(gp_event_queue *self,
+                             uint32_t x, uint32_t y, uint32_t pressure,
+                             uint32_t x_max, uint32_t y_max, uint32_t pressure_max,
+                             struct timeval *time);
 
 /*
  * Inject event that changes key state (i.e. press, release, repeat).
  *
  * If timeval is NULL, current time is used.
  */
-void GP_EventQueuePushKey(struct GP_EventQueue *self,
-                          uint32_t key, uint8_t code, struct timeval *time);
+void gp_event_queue_push_key(gp_event_queue *self,
+                             uint32_t key, uint8_t code, struct timeval *time);
 
 /*
  * Inject window resize event
  */
-void GP_EventQueuePushResize(struct GP_EventQueue *self,
-                             uint32_t w, uint32_t h, struct timeval *time);
+void gp_event_queue_push_resize(gp_event_queue *self,
+                                uint32_t w, uint32_t h, struct timeval *time);
 
 /*
  * Inject common event.
  */
-void GP_EventQueuePush(struct GP_EventQueue *self,
-                       uint16_t type, uint32_t code, int32_t value,
-                       struct timeval *time);
+void gp_event_queue_push(gp_event_queue *self,
+                         uint16_t type, uint32_t code, int32_t value,
+                         struct timeval *time);
 
 #endif /* INPUT_GP_EVENT_QUEUE_H */

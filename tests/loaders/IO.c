@@ -42,14 +42,14 @@ static const char *whence_name(int whence)
 	return "INVALID";
 }
 
-static int seek_and_tell(GP_IO *io, off_t off, int whence, off_t exp_off)
+static int seek_and_tell(gp_io *io, off_t off, int whence, off_t exp_off)
 {
-	if (GP_IOSeek(io, off, whence) == -1) {
+	if (gp_io_seek(io, off, whence) == -1) {
 		tst_msg("Failed to seek %zi %s", off, whence_name(whence));
 		return 1;
 	}
 
-	off = GP_IOTell(io);
+	off = gp_io_tell(io);
 
 	if (off != exp_off) {
 		tst_msg("Wrong offset %zi expected %zi", off, exp_off);
@@ -59,13 +59,13 @@ static int seek_and_tell(GP_IO *io, off_t off, int whence, off_t exp_off)
 	return 0;
 }
 
-static int seek_fail(GP_IO *io, off_t off, int whence)
+static int seek_fail(gp_io *io, off_t off, int whence)
 {
 	off_t ret, start, end;
 
-	start = GP_IOTell(io);
+	start = gp_io_tell(io);
 
-	ret = GP_IOSeek(io, off, whence);
+	ret = gp_io_seek(io, off, whence);
 
 	if (ret != -1) {
 		tst_msg("Seek succeded unexpectedly %zi %s",
@@ -73,7 +73,7 @@ static int seek_fail(GP_IO *io, off_t off, int whence)
 		return 1;
 	}
 
-	end = GP_IOTell(io);
+	end = gp_io_tell(io);
 
 	if (start != end) {
 		tst_msg("Seek %zi %s failed but offset changed %zi -> %zi",
@@ -88,7 +88,7 @@ static int seek_fail(GP_IO *io, off_t off, int whence)
  * Expects IO buffer filled with monotonically increasing bytes, i.e.
  * 0x00 0x01 0x02 ...
  */
-static int do_test(GP_IO *io, off_t io_size, int is_file)
+static int do_test(gp_io *io, off_t io_size, int is_file)
 {
 	int ret;
 	uint8_t buf[10];
@@ -96,14 +96,14 @@ static int do_test(GP_IO *io, off_t io_size, int is_file)
 	off_t off;
 	int failed = 0;
 
-	off = GP_IOTell(io);
+	off = gp_io_tell(io);
 
 	if (off != 0) {
 		tst_msg("Wrong offset before first read %zu", off);
 		return TST_FAILED;
 	}
 
-	ret = GP_IORead(io, buf, 10);
+	ret = gp_io_read(io, buf, 10);
 
 	if (ret != 10) {
 		tst_msg("First I/O read failed");
@@ -117,7 +117,7 @@ static int do_test(GP_IO *io, off_t io_size, int is_file)
 		}
 	}
 
-	off = GP_IOTell(io);
+	off = gp_io_tell(io);
 
 	if (off != 10) {
 		tst_msg("Have wrong offset %zu, after read 10", off);
@@ -125,7 +125,7 @@ static int do_test(GP_IO *io, off_t io_size, int is_file)
 	}
 
 
-	ret = GP_IORead(io, buf, 10);
+	ret = gp_io_read(io, buf, 10);
 
 	if (ret != 10) {
 		tst_msg("Second I/O read failed");
@@ -139,12 +139,12 @@ static int do_test(GP_IO *io, off_t io_size, int is_file)
 		}
 	}
 
-	if (GP_IORewind(io)) {
+	if (gp_io_rewind(io)) {
 		tst_msg("Failed to rewind to start");
 		return TST_FAILED;
 	}
 
-	ret = GP_IOTell(io);
+	ret = gp_io_tell(io);
 
 	if (ret != 0) {
 		tst_msg("Have wrong offset %u, after rewind", ret);
@@ -163,7 +163,7 @@ static int do_test(GP_IO *io, off_t io_size, int is_file)
 	uint8_t byte;
 	uint16_t val;
 
-	if (GP_IOReadF(io, header, &byte, &val) != 5) {
+	if (gp_io_readf(io, header, &byte, &val) != 5) {
 		tst_msg("Failed to ReadF from I/O");
 		return TST_FAILED;
 	}
@@ -228,13 +228,13 @@ static int test_IOMem(void)
 {
 	uint8_t buffer[128];
 	unsigned int i;
-	GP_IO *io;
+	gp_io *io;
 	int ret;
 
 	for (i = 0; i < sizeof(buffer); i++)
 		buffer[i] = i;
 
-	io = GP_IOMem(buffer, sizeof(buffer), NULL);
+	io = gp_io_mem(buffer, sizeof(buffer), NULL);
 
 	if (!io) {
 		tst_msg("Failed to initialize memory I/O");
@@ -243,11 +243,11 @@ static int test_IOMem(void)
 
 	ret = do_test(io, sizeof(buffer), 0);
 	if (ret) {
-		GP_IOClose(io);
+		gp_io_close(io);
 		return ret;
 	}
 
-	if (GP_IOClose(io)) {
+	if (gp_io_close(io)) {
 		tst_msg("Failed to close memory I/O");
 		return TST_FAILED;
 	}
@@ -262,12 +262,12 @@ static int test_IOFile(void)
 	uint8_t buffer[128];
 	unsigned int i;
 	int ret;
-	GP_IO *io;
+	gp_io *io;
 
 	for (i = 0; i < sizeof(buffer); i++)
 		buffer[i] = i;
 
-	io = GP_IOFile(TFILE, GP_IO_WRONLY);
+	io = gp_io_file(TFILE, GP_IO_WRONLY);
 
 	if (!io) {
 		tst_msg("Failed to open file I/O for writing: %s",
@@ -275,19 +275,19 @@ static int test_IOFile(void)
 		return TST_FAILED;
 	}
 
-	ret = GP_IOWrite(io, buffer, sizeof(buffer));
+	ret = gp_io_write(io, buffer, sizeof(buffer));
 
 	if (ret != sizeof(buffer)) {
 		tst_msg("Failed to write: %s", strerror(errno));
 		return TST_FAILED;
 	}
 
-	if (GP_IOClose(io)) {
+	if (gp_io_close(io)) {
 		tst_msg("Failed to close file I/O: %s", strerror(errno));
 		return TST_FAILED;
 	}
 
-	io = GP_IOFile(TFILE, GP_IO_RDONLY);
+	io = gp_io_file(TFILE, GP_IO_RDONLY);
 
 	if (!io) {
 		tst_msg("Failed to open file I/O for reading: %s",
@@ -297,11 +297,11 @@ static int test_IOFile(void)
 
 	ret = do_test(io, sizeof(buffer), 1);
 	if (ret) {
-		GP_IOClose(io);
+		gp_io_close(io);
 		return ret;
 	}
 
-	if (GP_IOClose(io)) {
+	if (gp_io_close(io)) {
 		tst_msg("Failed to close file I/O: %s", strerror(errno));
 		return TST_FAILED;
 	}
@@ -313,74 +313,74 @@ static int test_IOSubIO(void)
 {
 	uint8_t buffer[128];
 	unsigned int i;
-	GP_IO *io, *pio;
+	gp_io *io, *pio;
 	off_t off;
 	int ret;
 
 	for (i = 0; i < sizeof(buffer); i++)
 		buffer[i] = i;
 
-	pio = GP_IOMem(buffer, sizeof(buffer), NULL);
+	pio = gp_io_mem(buffer, sizeof(buffer), NULL);
 
 	if (!pio) {
 		tst_msg("Failed to initialize memory I/O");
 		return TST_FAILED;
 	}
 
-	io = GP_IOSubIO(pio, 100);
+	io = gp_io_sub_io(pio, 100);
 
 	if (!io) {
 		tst_msg("Failed to initialize sub I/O");
-		GP_IOClose(io);
+		gp_io_close(io);
 		return TST_FAILED;
 	}
 
 	ret = do_test(io, 100, 0);
 	if (ret) {
-		GP_IOClose(pio);
-		GP_IOClose(io);
+		gp_io_close(pio);
+		gp_io_close(io);
 		return ret;
 	}
 
-	if (GP_IOSeek(io, 0, GP_IO_SEEK_END) == (off_t)-1) {
+	if (gp_io_seek(io, 0, GP_IO_SEEK_END) == (off_t)-1) {
 		tst_msg("Failed to seek to the end of sub I/O: %s",
 		        tst_strerr(errno));
 		goto failed;
 	}
 
-	ret = GP_IORead(io, buffer, sizeof(buffer));
+	ret = gp_io_read(io, buffer, sizeof(buffer));
 
 	if (ret != 0) {
 		tst_msg("Read at the end of sub I/O returned %i", ret);
 		goto failed;
 	}
 
-	off = GP_IOTell(pio);
+	off = gp_io_tell(pio);
 
 	if (off != 100) {
 		tst_msg("Wrong offset at the parent I/O: %zu", off);
 		goto failed;
 	}
 
-	if (GP_IOClose(io)) {
+	if (gp_io_close(io)) {
 		tst_msg("Failed to close sub I/O");
-		GP_IOClose(pio);
+		gp_io_close(pio);
 		return TST_FAILED;
 	}
 
-	if (GP_IOClose(pio)) {
+	if (gp_io_close(pio)) {
 		tst_msg("Failed to close memory I/O");
 		return TST_FAILED;
 	}
 
 	return TST_SUCCESS;
 failed:
-	GP_IOClose(io);
-	GP_IOClose(pio);
+	gp_io_close(io);
+	gp_io_close(pio);
 	return TST_FAILED;
 }
 
-static ssize_t test_IOFill_read(GP_IO GP_UNUSED(*io), void *buf, size_t size)
+static ssize_t test_IOFill_read(gp_io GP_UNUSED(*io), void *buf, size_t size)
 {
 	ssize_t ret = GP_MIN(7u, size);
 
@@ -389,14 +389,14 @@ static ssize_t test_IOFill_read(GP_IO GP_UNUSED(*io), void *buf, size_t size)
 	return ret;
 }
 
-static int try_IOFill_and_check(GP_IO *io, unsigned int size)
+static int try_IOFill_and_check(gp_io *io, unsigned int size)
 {
 	uint8_t buf[125];
 	unsigned int i, fail = 0;
 
 	memset(buf, 0, sizeof(buf));
 
-	if (GP_IOFill(io, buf, size)) {
+	if (gp_io_fill(io, buf, size)) {
 		tst_msg("Failed to fill buffer size=%u: %s",
 		        size, strerror(errno));
 		return TST_FAILED;
@@ -424,7 +424,7 @@ static int try_IOFill_and_check(GP_IO *io, unsigned int size)
 
 static int test_IOFill(void)
 {
-	GP_IO io = {.Read = test_IOFill_read};
+	gp_io io = {.read = test_IOFill_read};
 	int ret = 0;
 
 	ret += try_IOFill_and_check(&io, 7);
@@ -440,7 +440,7 @@ static int test_IOFill(void)
 
 static size_t counter;
 
-static ssize_t flush_write(GP_IO GP_UNUSED(*io), void *buf, size_t size)
+static ssize_t flush_write(gp_io GP_UNUSED(*io), void *buf, size_t size)
 {
 	size_t to_write = GP_MIN(7u, size);
 
@@ -454,7 +454,7 @@ static ssize_t flush_write(GP_IO GP_UNUSED(*io), void *buf, size_t size)
 
 static int test_IOFlush(void)
 {
-	GP_IO io = {.Write = flush_write};
+	gp_io io = {.write = flush_write};
 	unsigned int i;
 	int fail = 0;
 	uint8_t buf[255];
@@ -464,9 +464,9 @@ static int test_IOFlush(void)
 
 	for (i = 1; i < 255; i++) {
 		counter = 0;
-		if (GP_IOFlush(&io, buf, i)) {
+		if (gp_io_flush(&io, buf, i)) {
 			if (!fail)
-				tst_msg("GP_IOFlush failed");
+				tst_msg("gp_io_flush failed");
 			fail++;
 		}
 
@@ -484,7 +484,7 @@ static int test_IOFlush(void)
 	return TST_SUCCESS;
 }
 
-static ssize_t wbuf_write(GP_IO GP_UNUSED(*io), void *buf, size_t size)
+static ssize_t wbuf_write(gp_io GP_UNUSED(*io), void *buf, size_t size)
 {
 	unsigned int i;
 
@@ -499,39 +499,39 @@ static ssize_t wbuf_write(GP_IO GP_UNUSED(*io), void *buf, size_t size)
 	return size;
 }
 
-static int wbuf_close(GP_IO GP_UNUSED(*io))
+static int wbuf_close(gp_io GP_UNUSED(*io))
 {
 	return 0;
 }
 
 static int test_IOWBuffer(void)
 {
-	GP_IO *bio;
+	gp_io *bio;
 	size_t cnt = 0;
 	unsigned int i;
-	GP_IO io = {
-		.Write = wbuf_write,
-		.Close = wbuf_close,
+	gp_io io = {
+		.write = wbuf_write,
+		.close = wbuf_close,
 	};
 
 	counter = 0;
 
-	bio = GP_IOWBuffer(&io, 100);
+	bio = gp_io_wbuffer(&io, 100);
 
 	if (!bio)
 		return TST_FAILED;
 
 	for (i = 0; i < 100; i++) {
 		size_t to_write = i % 10 + 1;
-		if (GP_IOFlush(bio, "aaaaaaaaaaa", to_write)) {
+		if (gp_io_flush(bio, "aaaaaaaaaaa", to_write)) {
 			tst_msg("Failed to write data: %s", tst_strerr(errno));
-			GP_IOClose(bio);
+			gp_io_close(bio);
 			return TST_FAILED;
 		}
 		cnt += to_write;
 	}
 
-	if (GP_IOClose(bio)) {
+	if (gp_io_close(bio)) {
 		tst_msg("Failed to close I/O: %s", tst_strerr(errno));
 		return TST_FAILED;
 	}

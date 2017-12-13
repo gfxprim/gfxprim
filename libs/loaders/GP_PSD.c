@@ -33,16 +33,16 @@
 #include <string.h>
 #include <errno.h>
 
-#include "core/GP_Debug.h"
-#include "core/GP_Common.h"
-#include "core/GP_GetPutPixel.h"
-#include "GP_JPG.h"
-#include "GP_PSD.h"
+#include <core/GP_Debug.h>
+#include <core/GP_Common.h>
+#include <core/GP_GetPutPixel.h>
+
+#include <loaders/GP_Loaders.gen.h>
 
 #define PSD_SIGNATURE "8BPS\x00\x01"
 #define PSD_SIGNATURE_LEN 6
 
-int GP_MatchPSD(const void *buf)
+int gp_match_psd(const void *buf)
 {
 	return !memcmp(buf, PSD_SIGNATURE, PSD_SIGNATURE_LEN);
 }
@@ -202,12 +202,12 @@ static const char *thumbnail_fmt_name(uint16_t fmt)
 
 #define THUMBNAIL50_HSIZE 28
 
-static GP_Pixmap *psd_thumbnail50(GP_IO *io, size_t size,
-                                   GP_ProgressCallback *callback)
+static gp_pixmap *psd_thumbnail50(gp_io *io, size_t size,
+                                   gp_progress_cb *callback)
 {
 	uint32_t fmt, w, h;
 	uint16_t bpp, nr_planes;
-	GP_Pixmap *res;
+	gp_pixmap *res;
 	int err;
 
 	uint16_t res_thumbnail_header[] = {
@@ -226,7 +226,7 @@ static GP_Pixmap *psd_thumbnail50(GP_IO *io, size_t size,
 		GP_IO_END,
 	};
 
-	if (GP_IOReadF(io, res_thumbnail_header, &fmt, &w, &h,
+	if (gp_io_readf(io, res_thumbnail_header, &fmt, &w, &h,
 	               &bpp, &nr_planes) != 8) {
 		GP_DEBUG(1, "Failed to read image thumbnail header");
 		return NULL;
@@ -247,26 +247,26 @@ static GP_Pixmap *psd_thumbnail50(GP_IO *io, size_t size,
 		return NULL;
 	}
 
-	GP_IO *sub_io = GP_IOSubIO(io, size - THUMBNAIL50_HSIZE);
+	gp_io *sub_io = gp_io_sub_io(io, size - THUMBNAIL50_HSIZE);
 
 	if (!sub_io)
 		return NULL;
 
-	res = GP_ReadJPG(sub_io, callback);
+	res = gp_read_jpg(sub_io, callback);
 	err = errno;
-	GP_IOClose(sub_io);
+	gp_io_close(sub_io);
 	errno = err;
 
 	return res;
 }
 
-static unsigned int read_unicode_string(GP_IO *io, char *str,
+static unsigned int read_unicode_string(gp_io *io, char *str,
                                         unsigned int size)
 {
 	uint8_t buf[size * 2];
 	unsigned int i;
 
-	if (GP_IOFill(io, buf, size * 2)) {
+	if (gp_io_fill(io, buf, size * 2)) {
 		GP_DEBUG(1, "Failed to read unicode string");
 		return 0;
 	}
@@ -283,7 +283,7 @@ static unsigned int read_unicode_string(GP_IO *io, char *str,
 	return size * 2;
 }
 
-static void psd_read_version_info(GP_IO *io)
+static void psd_read_version_info(gp_io *io)
 {
 	unsigned int size = 13;
 	uint32_t version, str_size;
@@ -295,7 +295,7 @@ static void psd_read_version_info(GP_IO *io)
 		GP_IO_END
 	};
 
-	if (GP_IOReadF(io, version_data, &version, &str_size) != 3) {
+	if (gp_io_readf(io, version_data, &version, &str_size) != 3) {
 		GP_DEBUG(1, "Failed to read version header");
 		return;
 	}
@@ -305,7 +305,7 @@ static void psd_read_version_info(GP_IO *io)
 
 	size += read_unicode_string(io, str, str_size);
 
-	if (GP_IOReadB4(io, &str_size)) {
+	if (gp_io_read_b4(io, &str_size)) {
 		GP_DEBUG(1, "Failed to read string size");
 		return;
 	}
@@ -318,8 +318,8 @@ static void psd_read_version_info(GP_IO *io)
 	         version, str, reader);
 }
 
-static unsigned int psd_next_img_res_block(GP_IO *io, GP_Pixmap **res,
-                                           GP_ProgressCallback *callback)
+static unsigned int psd_next_img_res_block(gp_io *io, gp_pixmap **res,
+                                           gp_progress_cb *callback)
 {
 	uint16_t res_id;
 	uint32_t res_size, seek_size;
@@ -334,7 +334,7 @@ static unsigned int psd_next_img_res_block(GP_IO *io, GP_Pixmap **res,
 		GP_IO_END,
 	};
 
-	if (GP_IOReadF(io, res_block_header, &res_id, &res_size) != 7) {
+	if (gp_io_readf(io, res_block_header, &res_id, &res_size) != 7) {
 		GP_DEBUG(1, "Failed to read image resource header");
 		return 0;
 	}
@@ -349,20 +349,20 @@ static unsigned int psd_next_img_res_block(GP_IO *io, GP_Pixmap **res,
 		GP_DEBUG(1, "Unsupported thumbnail version 4.0");
 	break;
 	case PSD_THUMBNAIL_RES50:
-		prev = GP_IOTell(io);
+		prev = gp_io_tell(io);
 		*res = psd_thumbnail50(io, res_size, callback);
-		after = GP_IOTell(io);
+		after = gp_io_tell(io);
 		seek_size -= (after - prev);
 	break;
 	case PSD_VERSION_INFO:
-		prev = GP_IOTell(io);
+		prev = gp_io_tell(io);
 		psd_read_version_info(io);
-		after = GP_IOTell(io);
+		after = gp_io_tell(io);
 		seek_size -= (after - prev);
 	break;
 	}
 
-	if (GP_IOSeek(io, seek_size, GP_IO_SEEK_CUR) == (off_t)-1) {
+	if (gp_io_seek(io, seek_size, GP_IO_SEEK_CUR) == (off_t)-1) {
 		GP_DEBUG(1, "Failed skip image resource");
 		return 0;
 	}
@@ -446,7 +446,7 @@ struct rle {
 	uint8_t val;
 
 	/* Source I/O stream */
-	GP_IO *io;
+	gp_io *io;
 
 	/* Read buffer */
 	ssize_t buf_fill;
@@ -459,7 +459,7 @@ static int rle_getc(struct rle *rle)
 	if (rle->buf_pos < rle->buf_fill)
 		return rle->buf[rle->buf_pos++];
 
-	rle->buf_fill = GP_IORead(rle->io, rle->buf, sizeof(rle->buf));
+	rle->buf_fill = gp_io_read(rle->io, rle->buf, sizeof(rle->buf));
 
 	if (rle->buf_fill <= 0)
 		return -1;
@@ -478,12 +478,12 @@ static int rle_readb(struct rle *rle, void *buf, size_t size)
 	rle->buf_pos += s;
 
 	if (s < size)
-		return GP_IOFill(rle->io, buf + s, size - s);
+		return gp_io_fill(rle->io, buf + s, size - s);
 
 	return 0;
 }
 
-static ssize_t rle_read(GP_IO *self, void *buf, size_t size)
+static ssize_t rle_read(gp_io *self, void *buf, size_t size)
 {
 	struct rle *rle = GP_IO_PRIV(self);
 	size_t read = 0, s;
@@ -528,15 +528,15 @@ static ssize_t rle_read(GP_IO *self, void *buf, size_t size)
 	return read;
 }
 
-static int rle_close(GP_IO *self)
+static int rle_close(gp_io *self)
 {
 	free(self);
 	return 0;
 }
 
-static GP_IO *rle(GP_IO *io)
+static gp_io *rle(gp_io *io)
 {
-	GP_IO *rle = malloc(sizeof(GP_IO) + sizeof(struct rle));
+	gp_io *rle = malloc(sizeof(gp_io) + sizeof(struct rle));
 
 	if (!rle)
 		return NULL;
@@ -548,10 +548,10 @@ static GP_IO *rle(GP_IO *io)
 	priv->buf_pos = 0;
 	priv->io = io;
 
-	rle->Read = rle_read;
-	rle->Write = NULL;
-	rle->Seek = NULL;
-	rle->Close = rle_close;
+	rle->read = rle_read;
+	rle->write = NULL;
+	rle->seek = NULL;
+	rle->close = rle_close;
 
 	return rle;
 }
@@ -559,8 +559,8 @@ static GP_IO *rle(GP_IO *io)
 /*
  * Data are in planar mode RRRRR... GGGGG... BBBBB... etc.
  */
-static int psd_load_rle_rgb(GP_IO *rle_io, GP_Pixmap *res,
-                            GP_ProgressCallback *callback)
+static int psd_load_rle_rgb(gp_io *rle_io, gp_pixmap *res,
+                            gp_progress_cb *callback)
 {
 	unsigned int x, y, c, p;
 	unsigned int chans = res->pixel_type == GP_PIXEL_RGB888 ? 3 : 4;
@@ -580,12 +580,12 @@ static int psd_load_rle_rgb(GP_IO *rle_io, GP_Pixmap *res,
 
 		for (y = 0; y < res->h; y++) {
 			bp = GP_PIXEL_ADDR(res, 0, y);
-			GP_IORead(rle_io, b, sizeof(b));
+			gp_io_read(rle_io, b, sizeof(b));
 
 			for (x = 0; x < res->w; x++)
 				bp[x * chans + p] = b[x];
 
-			if (GP_ProgressCallbackReport(callback, res->h * c + y,
+			if (gp_progress_cb_report(callback, res->h * c + y,
 			                              res->h * chans, res->w)) {
 				GP_DEBUG(1, "Operation aborted");
 				return ECANCELED;
@@ -593,13 +593,13 @@ static int psd_load_rle_rgb(GP_IO *rle_io, GP_Pixmap *res,
 		}
 	}
 
-	GP_ProgressCallbackDone(callback);
+	gp_progress_cb_done(callback);
 
 	return 0;
 }
 
-static int psd_load_rle_cmyk(GP_IO *rle_io, GP_Pixmap *res,
-                             GP_ProgressCallback *callback)
+static int psd_load_rle_cmyk(gp_io *rle_io, gp_pixmap *res,
+                             gp_progress_cb *callback)
 {
 	unsigned int x, y, c;
 	uint8_t b[res->w], *bp;
@@ -607,12 +607,12 @@ static int psd_load_rle_cmyk(GP_IO *rle_io, GP_Pixmap *res,
 	for (c = 0; c < 4; c++) {
 		for (y = 0; y < res->h; y++) {
 			bp = GP_PIXEL_ADDR(res, 0, y);
-			GP_IORead(rle_io, b, sizeof(b));
+			gp_io_read(rle_io, b, sizeof(b));
 
 			for (x = 0; x < res->w; x++)
 				bp[x * 4 + c] = 255 - b[x];
 
-			if (GP_ProgressCallbackReport(callback, res->h * c + y,
+			if (gp_progress_cb_report(callback, res->h * c + y,
 			                              4 * res->h, res->w)) {
 				GP_DEBUG(1, "Operation aborted");
 				return ECANCELED;
@@ -620,19 +620,19 @@ static int psd_load_rle_cmyk(GP_IO *rle_io, GP_Pixmap *res,
 		}
 	}
 
-	GP_ProgressCallbackDone(callback);
+	gp_progress_cb_done(callback);
 
 	return 0;
 }
 
-static int psd_combined_image(GP_IO *io, struct psd_header *header,
-                              GP_Pixmap **res, GP_ProgressCallback *callback)
+static int psd_combined_image(gp_io *io, struct psd_header *header,
+                              gp_pixmap **res, gp_progress_cb *callback)
 {
 	uint16_t compress;
-	GP_PixelType pixel_type = GP_PIXEL_UNKNOWN;
+	gp_pixel_type pixel_type = GP_PIXEL_UNKNOWN;
 	int ret;
 
-	if (GP_IOReadB2(io, &compress)) {
+	if (gp_io_read_b2(io, &compress)) {
 		GP_DEBUG(1, "Failed to read Combined Image compression");
 		return errno;
 	}
@@ -682,17 +682,17 @@ static int psd_combined_image(GP_IO *io, struct psd_header *header,
 	 *
 	 * Two bytes per channel per row
 	 */
-	if (GP_IOSeek(io, 2 * header->channels * header->h, GP_IO_SEEK_CUR) == (off_t)-1) {
+	if (gp_io_seek(io, 2 * header->channels * header->h, GP_IO_SEEK_CUR) == (off_t)-1) {
 		GP_DEBUG(1, "Failed to skip Line Bytes Counts");
 		return errno;
 	}
 
-	*res = GP_PixmapAlloc(header->w, header->h, pixel_type);
+	*res = gp_pixmap_alloc(header->w, header->h, pixel_type);
 
 	if (!*res)
 		return ENOMEM;
 
-	GP_IO *rle_io = rle(io);
+	gp_io *rle_io = rle(io);
 	if (!rle_io)
 		return ENOMEM;
 
@@ -702,29 +702,29 @@ static int psd_combined_image(GP_IO *io, struct psd_header *header,
 		ret = psd_load_rle_rgb(rle_io, *res, callback);
 
 	if (ret)
-		GP_PixmapFree(*res);
+		gp_pixmap_free(*res);
 
-	GP_IOClose(rle_io);
+	gp_io_close(rle_io);
 	return ret;
 }
 
-static void fill_metadata(struct psd_header *header, GP_DataStorage *storage)
+static void fill_metadata(struct psd_header *header, gp_storage *storage)
 {
-	GP_DataStorageAddInt(storage, NULL, "Width", header->w);
-	GP_DataStorageAddInt(storage, NULL, "Height", header->h);
-	GP_DataStorageAddInt(storage, NULL, "Samples per Pixel", header->channels);
-	GP_DataStorageAddInt(storage, NULL, "Bits per Sample", header->depth);
-	GP_DataStorageAddString(storage, NULL, "Color Mode",
+	gp_storage_add_int(storage, NULL, "Width", header->w);
+	gp_storage_add_int(storage, NULL, "Height", header->h);
+	gp_storage_add_int(storage, NULL, "Samples per Pixel", header->channels);
+	gp_storage_add_int(storage, NULL, "Bits per Sample", header->depth);
+	gp_storage_add_string(storage, NULL, "Color Mode",
 	                        psd_color_mode_name(header->color_mode));
 }
 
-int GP_ReadPSDEx(GP_IO *io, GP_Pixmap **img, GP_DataStorage *storage,
-                 GP_ProgressCallback *callback)
+int gp_read_psd_ex(gp_io *io, gp_pixmap **img, gp_storage *storage,
+                   gp_progress_cb *callback)
 {
 	int err;
 	uint32_t len, size, read_size = 0;
 	struct psd_header header;
-	GP_Pixmap *thumbnail = NULL;
+	gp_pixmap *thumbnail = NULL;
 
 	uint16_t psd_header[] = {
 	        '8', 'B', 'P', 'S',
@@ -739,7 +739,7 @@ int GP_ReadPSDEx(GP_IO *io, GP_Pixmap **img, GP_DataStorage *storage,
 		GP_IO_END
 	};
 
-	if (GP_IOReadF(io, psd_header, &header.channels, &header.h, &header.w,
+	if (gp_io_readf(io, psd_header, &header.channels, &header.h, &header.w,
 	               &header.depth, &header.color_mode, &len) != 13) {
 		GP_DEBUG(1, "Failed to read file header");
 		err = errno;
@@ -772,12 +772,12 @@ int GP_ReadPSDEx(GP_IO *io, GP_Pixmap **img, GP_DataStorage *storage,
 	}
 
 	/* Seek after the color mode data */
-	if (GP_IOSeek(io, len, GP_IO_SEEK_CUR) == (off_t)-1) {
+	if (gp_io_seek(io, len, GP_IO_SEEK_CUR) == (off_t)-1) {
 		GP_DEBUG(1, "Failed skip color mode data");
 		return 1;
 	}
 
-	if (GP_IOReadB4(io, &len)) {
+	if (gp_io_read_b4(io, &len)) {
 		GP_DEBUG(1, "Failed to load Image Resource Section Lenght");
 		return 1;
 	}
@@ -796,23 +796,23 @@ int GP_ReadPSDEx(GP_IO *io, GP_Pixmap **img, GP_DataStorage *storage,
 	} while (read_size < len);
 
 	/* Skip Layer and Mask information */
-	if (GP_IOReadB4(io, &size)) {
+	if (gp_io_read_b4(io, &size)) {
 		GP_DEBUG(1, "Failed to read Layer and Mask Section size");
 		err = errno;
 		goto err;
 	}
 
-	if (GP_IOSeek(io, size, GP_IO_SEEK_CUR) == (off_t)-1) {
+	if (gp_io_seek(io, size, GP_IO_SEEK_CUR) == (off_t)-1) {
 		GP_DEBUG(1, "Failed to seek to Image Data Section");
 		err = errno;
 		goto err;
 	}
 
-	GP_Pixmap *combined = NULL;
+	gp_pixmap *combined = NULL;
 	err = psd_combined_image(io, &header, &combined, callback);
 
 	if (!err) {
-		GP_PixmapFree(thumbnail);
+		gp_pixmap_free(thumbnail);
 		*img = combined;
 		return 0;
 	}
@@ -828,30 +828,14 @@ int GP_ReadPSDEx(GP_IO *io, GP_Pixmap **img, GP_DataStorage *storage,
 	errno = ENOSYS;
 	return 1;
 err:
-	GP_PixmapFree(thumbnail);
+	gp_pixmap_free(thumbnail);
 	errno = err;
 	return 1;
 }
 
-GP_Pixmap *GP_LoadPSD(const char *src_path, GP_ProgressCallback *callback)
-{
-	return GP_LoaderLoadImage(&GP_PSD, src_path, callback);
-}
-
-GP_Pixmap *GP_ReadPSD(GP_IO *io, GP_ProgressCallback *callback)
-{
-	return GP_LoaderReadImage(&GP_PSD, io, callback);
-}
-
-int GP_LoadPSDEx(const char *src_path, GP_Pixmap **img,
-		 GP_DataStorage *storage, GP_ProgressCallback *callback)
-{
-	return GP_LoaderLoadImageEx(&GP_PSD, src_path, img, storage, callback);
-}
-
-struct GP_Loader GP_PSD = {
-	.Read = GP_ReadPSDEx,
-	.Match = GP_MatchPSD,
+const gp_loader gp_psd = {
+	.Read = gp_read_psd_ex,
+	.Match = gp_match_psd,
 
 	.fmt_name = "Adobe Photoshop Image",
 	.extensions = {"psd", NULL},

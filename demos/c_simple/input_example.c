@@ -27,40 +27,40 @@
 #include <stdlib.h>
 #include <unistd.h>
 
-#include "GP.h"
+#include "gfxprim.h"
 
-static GP_Pixmap *win;
-static GP_Backend *backend;
+static gp_pixmap *win;
+static gp_backend *backend;
 
-static GP_Pixel red, green, white, black;
+static gp_pixel red, green, white, black;
 
-static void draw_event(GP_Event *ev)
+static void draw_event(gp_event *ev)
 {
-	static GP_Size size = 0;
+	static gp_size size = 0;
 
 	if (ev->type != GP_EV_KEY)
 		return;
 
 	int align = GP_ALIGN_RIGHT|GP_VALIGN_BOTTOM;
 
-	GP_TextClear(win, NULL, 20, 20, align, black, size);
-	size = GP_Print(win, NULL, 20, 20, align,
+	gp_text_clear(win, NULL, 20, 20, align, black, size);
+	size = gp_print(win, NULL, 20, 20, align,
 	                white, black, "Key=%s",
-			GP_EventKeyName(ev->val.key.key));
+			gp_event_key_name(ev->val.key.key));
 
-	GP_BackendFlip(backend);
+	gp_backend_flip(backend);
 }
 
 static void event_loop(void)
 {
 	for (;;) {
-		GP_BackendWait(backend);
+		gp_backend_wait(backend);
 
-		while (GP_BackendEventsQueued(backend)) {
-			GP_Event ev;
+		while (gp_backend_events_queued(backend)) {
+			gp_event ev;
 
-			GP_BackendGetEvent(backend, &ev);
-			GP_EventDump(&ev);
+			gp_backend_get_event(backend, &ev);
+			gp_event_dump(&ev);
 
 			switch (ev.type) {
 			case GP_EV_KEY:
@@ -68,17 +68,17 @@ static void event_loop(void)
 
 				switch (ev.val.key.key) {
 				case GP_KEY_ESC:
-					GP_BackendExit(backend);
+					gp_backend_exit(backend);
 					exit(0);
 				break;
 				case GP_BTN_LEFT:
-					GP_HLineXXY(win, ev.cursor_x - 3,
+					gp_hline_xxy(win, ev.cursor_x - 3,
 					            ev.cursor_x + 3,
 						    ev.cursor_y, red);
-					GP_VLineXYY(win, ev.cursor_x,
+					gp_vline_xyy(win, ev.cursor_x,
 					            ev.cursor_y - 3,
 						    ev.cursor_y + 3, red);
-					GP_BackendFlip(backend);
+					gp_backend_flip(backend);
 				break;
 				default:
 				break;
@@ -88,29 +88,30 @@ static void event_loop(void)
 				switch (ev.code) {
 				static int size = 0;
 				case GP_EV_REL_POS:
-					if (GP_EventGetKey(&ev, GP_BTN_LEFT)) {
-						GP_PutPixel(win, ev.cursor_x,
-						            ev.cursor_y, green);
+					if (gp_event_get_key(&ev, GP_BTN_LEFT)) {
+						gp_putpixel(win, ev.cursor_x,
+							    ev.cursor_y,
+							    green);
 					}
 					int align = GP_ALIGN_RIGHT|GP_VALIGN_BOTTOM;
 
-					GP_TextClear(win, NULL, 20, 40, align,
-					             black, size);
-					size = GP_Print(win, NULL, 20, 40, align,
+					gp_text_clear(win, NULL, 20, 40, align,
+					              black, size);
+					size = gp_print(win, NULL, 20, 40, align,
 					                white, black, "X=%3u Y=%3u dX=%3i dY=%3i",
 						        ev.cursor_x, ev.cursor_y,
 							ev.val.rel.rx, ev.val.rel.ry);
-					GP_BackendFlip(backend);
+					gp_backend_flip(backend);
 				break;
 				}
 			break;
 			case GP_EV_SYS:
 				switch (ev.code) {
 				case GP_EV_SYS_RESIZE:
-					GP_BackendResizeAck(backend);
+					gp_backend_resize_ack(backend);
 				break;
 				case GP_EV_SYS_QUIT:
-					GP_BackendExit(backend);
+					gp_backend_exit(backend);
 					exit(0);
 				break;
 				}
@@ -131,7 +132,7 @@ int main(int argc, char *argv[])
 			backend_opts = optarg;
 		break;
 		case 'h':
-			GP_BackendInit("help", NULL);
+			gp_backend_init("help", NULL);
 			return 0;
 		break;
 		default:
@@ -140,7 +141,7 @@ int main(int argc, char *argv[])
 		}
 	}
 
-	backend = GP_BackendInit(backend_opts, "Input Test");
+	backend = gp_backend_init(backend_opts, "Input Test");
 
 	if (backend == NULL) {
 		fprintf(stderr, "Failed to initalize backend '%s'\n",
@@ -150,16 +151,16 @@ int main(int argc, char *argv[])
 
 	win = backend->pixmap;
 
-	red   = GP_RGBToPixmapPixel(0xff, 0x00, 0x00, win);
-	green = GP_RGBToPixmapPixel(0x00, 0xff, 0x00, win);
-	white = GP_RGBToPixmapPixel(0xff, 0xff, 0xff, win);
-	black = GP_RGBToPixmapPixel(0x00, 0x00, 0x00, win);
+	red   = gp_rgb_to_pixmap_pixel(0xff, 0x00, 0x00, win);
+	green = gp_rgb_to_pixmap_pixel(0x00, 0xff, 0x00, win);
+	white = gp_rgb_to_pixmap_pixel(0xff, 0xff, 0xff, win);
+	black = gp_rgb_to_pixmap_pixel(0x00, 0x00, 0x00, win);
 
-	GP_Fill(win, black);
-	GP_BackendFlip(backend);
+	gp_fill(win, black);
+	gp_backend_flip(backend);
 
 	for (;;) {
-		GP_BackendWait(backend);
+		gp_backend_wait(backend);
 		event_loop();
 	}
 }

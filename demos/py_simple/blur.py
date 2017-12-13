@@ -13,11 +13,11 @@ def main():
     radii = float(sys.argv[1])
 
     # Load Image
-    img = loaders.Load(sys.argv[2])
+    img = loaders.load(sys.argv[2])
     # Do in-place gaussian blur
-    filters.GaussianBlur(img, img, radii, radii)
+    filters.gaussian_blur(img, img, radii, radii)
     # Save result
-    img.loaders.SaveJPG("out.jpg")
+    img.loaders.save_jpg("out.jpg")
 
 if __name__ == '__main__':
     main()

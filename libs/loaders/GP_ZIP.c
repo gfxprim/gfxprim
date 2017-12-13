@@ -55,7 +55,7 @@ struct zip_chunks_table {
 };
 
 struct zip_priv {
-	GP_IO *io;
+	gp_io *io;
 
 	/* Current position in zip continer counted in images we found */
 	unsigned int cur_pos;
@@ -148,14 +148,14 @@ static void print_flags(struct zip_local_header *header)
 		GP_DEBUG(2, "Filename and comment are encoded in UTF-8");
 }
 
-static int seek_bytes(GP_IO *io, uint32_t bytes)
+static int seek_bytes(gp_io *io, uint32_t bytes)
 {
 	if (bytes == 0)
 		return 0;
 
 	GP_DEBUG(4, "Moving forward by %"PRIu32" bytes", bytes);
 
-	if (GP_IOSeek(io, bytes, GP_IO_SEEK_CUR) == (off_t)-1) {
+	if (gp_io_seek(io, bytes, GP_IO_SEEK_CUR) == (off_t)-1) {
 		int err = errno;
 		GP_DEBUG(1, "Failed to seek: %s", strerror(errno));
 		return err;
@@ -164,7 +164,7 @@ static int seek_bytes(GP_IO *io, uint32_t bytes)
 	return 0;
 }
 
-static int zip_load_header(GP_IO *io, struct zip_local_header *header)
+static int zip_load_header(gp_io *io, struct zip_local_header *header)
 {
 	int ret;
 	uint8_t byte;
@@ -176,7 +176,7 @@ static int zip_load_header(GP_IO *io, struct zip_local_header *header)
 		GP_IO_END
 	};
 
-	if (GP_IOReadF(io, zip_header, &byte) != 3) {
+	if (gp_io_readf(io, zip_header, &byte) != 3) {
 		GP_DEBUG(1, "Failed to read header");
 		return EIO;
 	}
@@ -209,7 +209,7 @@ static int zip_load_header(GP_IO *io, struct zip_local_header *header)
 		GP_IO_END
 	};
 
-	ret = GP_IOReadF(io, zip_local_header,
+	ret = gp_io_readf(io, zip_local_header,
 	               &header->ver, &header->flags, &header->comp_type,
 		       &header->crc, &header->comp_size, &header->uncomp_size,
 	               &header->fname_len, &header->extf_len);
@@ -222,7 +222,7 @@ static int zip_load_header(GP_IO *io, struct zip_local_header *header)
 	return 0;
 }
 
-static int zip_read_data_desc(GP_IO *io, struct zip_local_header *header)
+static int zip_read_data_desc(gp_io *io, struct zip_local_header *header)
 {
 	uint16_t data_desc_header[] = {
 		'P', 'K', 0x07, 0x08, /* Data desc header */
@@ -232,7 +232,7 @@ static int zip_read_data_desc(GP_IO *io, struct zip_local_header *header)
 		GP_IO_END
 	};
 
-	if (GP_IOReadF(io, data_desc_header, &header->crc,
+	if (gp_io_readf(io, data_desc_header, &header->crc,
 	               &header->comp_size, &header->uncomp_size) != 7) {
 		GP_DEBUG(1, "Failed to read Data Description Header");
 		return 1;
@@ -241,14 +241,14 @@ static int zip_read_data_desc(GP_IO *io, struct zip_local_header *header)
 	return 0;
 }
 
-static int zip_next_file(struct zip_priv *priv, GP_Pixmap **img,
-                         GP_DataStorage *storage,
-                         GP_ProgressCallback *callback)
+static int zip_next_file(struct zip_priv *priv, gp_pixmap **img,
+                         gp_storage *storage,
+                         gp_progress_cb *callback)
 {
 	struct zip_local_header header = {.file_name = NULL};
 	int err = 0, res;
-	GP_Pixmap *ret = NULL;
-	GP_IO *io;
+	gp_pixmap *ret = NULL;
+	gp_io *io;
 
 	if ((err = zip_load_header(priv->io, &header)))
 		goto out;
@@ -279,7 +279,7 @@ static int zip_next_file(struct zip_priv *priv, GP_Pixmap **img,
 
 		header.file_name[header.fname_len] = '\0';
 		//FILL
-		if (GP_IORead(priv->io, header.file_name, header.fname_len) != header.fname_len) {
+		if (gp_io_read(priv->io, header.file_name, header.fname_len) != header.fname_len) {
 			GP_DEBUG(1, "Failed to read filename");
 			err = EIO;
 			goto out;
@@ -301,25 +301,25 @@ static int zip_next_file(struct zip_priv *priv, GP_Pixmap **img,
 			goto out;
 		}
 
-		GP_IOMark(priv->io, GP_IO_MARK);
+		gp_io_mark(priv->io, GP_IO_MARK);
 
-		res = GP_ReadImageEx(priv->io, &ret, storage, callback);
+		res = gp_read_image_ex(priv->io, &ret, storage, callback);
 		if (res && errno == ECANCELED)
 			err = errno;
 
-		GP_IOSeek(priv->io, priv->io->mark + header.comp_size, GP_IO_SEEK_SET);
+		gp_io_seek(priv->io, priv->io->mark + header.comp_size, GP_IO_SEEK_SET);
 
 		goto out;
 	break;
 	case COMPRESS_DEFLATE:
-		io = GP_IOZlib(priv->io, header.comp_size);
+		io = gp_io_zlib(priv->io, header.comp_size);
 		if (!io) {
 			err = errno;
 			goto out;
 		}
 
 		GP_DEBUG(1, "Reading image");
-		res = GP_ReadImageEx(io, &ret, storage, callback);
+		res = gp_read_image_ex(io, &ret, storage, callback);
 		if (res && errno == ECANCELED)
 			err = errno;
 
@@ -329,10 +329,10 @@ static int zip_next_file(struct zip_priv *priv, GP_Pixmap **img,
 		 * - File is not image -> need to get to the end of the record
 		 * - All image data were not consumed by loader (may happen)
 		 */
-		if (GP_IOSeek(io, 0, GP_IO_SEEK_END) == (off_t)-1)
+		if (gp_io_seek(io, 0, GP_IO_SEEK_END) == (off_t)-1)
 			GP_DEBUG(1, "Failed to seek Zlib IO");
 
-		GP_IOClose(io);
+		gp_io_close(io);
 
 		if (header.flags & FLAG_DATA_DESC_HEADER) {
 			if (zip_read_data_desc(priv->io, &header))
@@ -412,9 +412,9 @@ static void record_offset(struct zip_priv *priv, long offset)
  */
 }
 
-static int zip_load_next(GP_Container *self, GP_Pixmap **img,
-                         GP_DataStorage *storage,
-                         GP_ProgressCallback *callback)
+static int zip_load_next(gp_container *self, gp_pixmap **img,
+                         gp_storage *storage,
+                         gp_progress_cb *callback)
 {
 	struct zip_priv *priv = GP_CONTAINER_PRIV(self);
 	int err;
@@ -430,7 +430,7 @@ static int zip_load_next(GP_Container *self, GP_Pixmap **img,
 	if (err)
 		return 1;
 
-	record_offset(priv, GP_IOTell(priv->io));
+	record_offset(priv, gp_io_tell(priv->io));
 
 	priv->cur_pos++;
 	self->cur_img = priv->cur_pos;
@@ -438,9 +438,9 @@ static int zip_load_next(GP_Container *self, GP_Pixmap **img,
 	return 0;
 }
 
-static GP_Pixmap *load_next(GP_Container *self, GP_ProgressCallback *callback)
+static gp_pixmap *load_next(gp_container *self, gp_progress_cb *callback)
 {
-	GP_Pixmap *img = NULL;
+	gp_pixmap *img = NULL;
 
 	zip_load_next(self, &img, NULL, callback);
 
@@ -478,14 +478,14 @@ static void seek_cur_pos(struct zip_priv *priv)
 	GP_DEBUG(2, "Setting current position to %u (%li)",
 	         priv->cur_pos, priv->cur_table->offsets[cur_pos]);
 
-	GP_IOSeek(priv->io, priv->cur_table->offsets[cur_pos], GP_IO_SEEK_SET);
+	gp_io_seek(priv->io, priv->cur_table->offsets[cur_pos], GP_IO_SEEK_SET);
 }
 
 static int load_next_offset(struct zip_priv *priv)
 {
 	struct zip_local_header header = {.file_name = NULL};
 	int ret;
-	long offset = GP_IOTell(priv->io);
+	long offset = gp_io_tell(priv->io);
 
 	if ((ret = zip_load_header(priv->io, &header)))
 		return ret;
@@ -537,8 +537,8 @@ static int set_cur_pos(struct zip_priv *priv, unsigned int where)
 	return 0;
 }
 
-static int zip_seek(GP_Container *self, int offset,
-                    enum GP_ContainerWhence whence)
+static int zip_seek(gp_container *self, int offset,
+                    enum gp_container_whence whence)
 {
 	struct zip_priv *priv = GP_CONTAINER_PRIV(self);
 	unsigned int where;
@@ -570,8 +570,8 @@ static int zip_seek(GP_Container *self, int offset,
 	return ret;
 }
 
-static int zip_load(GP_Container *self, GP_Pixmap **img,
-                    GP_DataStorage *storage, GP_ProgressCallback *callback)
+static int zip_load(gp_container *self, gp_pixmap **img,
+                    gp_storage *storage, gp_progress_cb *callback)
 {
 	if (zip_load_next(self, img, storage, callback))
 		return 1;
@@ -581,7 +581,7 @@ static int zip_load(GP_Container *self, GP_Pixmap **img,
 	return 0;
 }
 
-static void zip_close(GP_Container *self)
+static void zip_close(gp_container *self)
 {
 	struct zip_priv *priv = GP_CONTAINER_PRIV(self);
 	struct zip_chunks_table *i, *j;
@@ -591,16 +591,16 @@ static void zip_close(GP_Container *self)
 	/* Free allocated offset tables */
 	for (i = priv->table.next; i != NULL; j = i, i = i->next, free(j));
 
-	GP_IOClose(priv->io);
+	gp_io_close(priv->io);
 	free(self);
 }
 
-static GP_IO *open_zip(const char *path)
+static gp_io *open_zip(const char *path)
 {
-	GP_IO *io;
+	gp_io *io;
 	int err = 0;
 
-	io = GP_IOFile(path, GP_IO_RDONLY);
+	io = gp_io_file(path, GP_IO_RDONLY);
 
 	if (!io) {
 		err = errno;
@@ -609,7 +609,7 @@ static GP_IO *open_zip(const char *path)
 	}
 
 	/* Check zip local file header and seek back */
-	if (GP_IOMark(io, GP_IO_MARK)) {
+	if (gp_io_mark(io, GP_IO_MARK)) {
 		err = errno;
 		goto err1;
 	}
@@ -622,38 +622,38 @@ static GP_IO *open_zip(const char *path)
 		GP_IO_END
 	};
 
-	if (GP_IOReadF(io, zip_header) != 4) {
+	if (gp_io_readf(io, zip_header) != 4) {
 		GP_DEBUG(1, "Invalid zip header");
 		err = EINVAL;
 		goto err1;
 	}
 
-	if (GP_IOMark(io, GP_IO_REWIND)) {
+	if (gp_io_mark(io, GP_IO_REWIND)) {
 		err = errno;
 		goto err1;
 	}
 
 	return io;
 err1:
-	GP_IOClose(io);
+	gp_io_close(io);
 err0:
 	errno = err;
 	return NULL;
 }
 
-static const struct GP_ContainerOps zip_ops = {
-	.LoadNext = load_next,
-	.LoadEx = zip_load,
-	.Close = zip_close,
-	.Seek = zip_seek,
+static const struct gp_container_ops zip_ops = {
+	.load_next = load_next,
+	.load_ex = zip_load,
+	.close = zip_close,
+	.seek = zip_seek,
 	.type = "ZIP",
 };
 
-GP_Container *GP_OpenZip(const char *path)
+gp_container *gp_open_zip(const char *path)
 {
 	struct zip_priv *priv;
-	GP_Container *ret;
-	GP_IO *io;
+	gp_container *ret;
+	gp_io *io;
 	int err;
 
 	io = open_zip(path);
@@ -661,7 +661,7 @@ GP_Container *GP_OpenZip(const char *path)
 	if (!io)
 		return NULL;
 
-	ret = malloc(sizeof(GP_Container) + sizeof(struct zip_priv));
+	ret = malloc(sizeof(gp_container) + sizeof(struct zip_priv));
 
 	if (!ret) {
 		err = ENOMEM;
@@ -695,14 +695,14 @@ GP_Container *GP_OpenZip(const char *path)
 
 	return ret;
 err0:
-	GP_IOClose(io);
+	gp_io_close(io);
 	errno = err;
 	return NULL;
 }
 
 #else
 
-GP_Container *GP_OpenZip(const char GP_UNUSED(*path))
+gp_container *gp_open_zip(const char GP_UNUSED(*path))
 {
 	GP_FATAL("zlib support not compiled in");
 	errno = ENOSYS;
@@ -711,7 +711,7 @@ GP_Container *GP_OpenZip(const char GP_UNUSED(*path))
 
 #endif /* HAVE_ZLIB */
 
-int GP_MatchZip(const char *buf)
+int gp_match_zip(const char *buf)
 {
 	return !memcmp("PK\03\04", buf, 4);
 }

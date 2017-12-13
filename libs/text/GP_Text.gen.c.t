@@ -7,16 +7,18 @@
  * Copyright (C) 2009-2014 Cyril Hrubis <metan@ucw.cz>
  */
 
-#include "core/GP_GetPutPixel.h"
-#include "core/GP_MixPixels.gen.h"
-#include "gfx/GP_HLine.h"
-#include "GP_TextStyle.h"
-#include "GP_Text.h"
-#include "GP_Font.h"
+#include <core/GP_GetPutPixel.h>
+#include <core/GP_MixPixels.gen.h>
+
+#include <gfx/GP_HLine.h>
+
+#include <text/GP_TextStyle.h>
+#include <text/GP_Font.h>
+#include <text/GP_Text.h>
 
 #define WIDTH_TO_1BPP_BPP(width) ((width)/8 + ((width)%8 != 0))
 
-static int get_width(const GP_TextStyle *style, int width)
+static int get_width(const gp_text_style *style, int width)
 {
 	return width * style->pixel_xmul + (width - 1) * style->pixel_xspace;
 }
@@ -24,19 +26,19 @@ static int get_width(const GP_TextStyle *style, int width)
 @ for pt in pixeltypes:
 @     if not pt.is_unknown():
 
-static void text_draw_1BPP_{{ pt.name }}(GP_Pixmap *pixmap, const GP_TextStyle *style,
-                                         GP_Coord x, GP_Coord y,
-				         GP_Pixel fg, const char *str)
+static void text_draw_1BPP_{{ pt.name }}(gp_pixmap *pixmap, const gp_text_style *style,
+                                         gp_coord x, gp_coord y,
+				         gp_pixel fg, const char *str)
 {
 	const char *p;
 
-	GP_Coord y0 = y;
+	gp_coord y0 = y;
 
 	for (p = str; *p != '\0'; p++) {
-		const GP_GlyphBitmap *glyph = GP_GetGlyphBitmap(style->font, *p);
+		const gp_glyph *glyph = gp_get_glyph(style->font, *p);
 
 		if (glyph == NULL)
-			glyph = GP_GetGlyphBitmap(style->font, ' ');
+			glyph = gp_get_glyph(style->font, ' ');
 
 		int i, j, k, l;
 
@@ -67,7 +69,7 @@ static void text_draw_1BPP_{{ pt.name }}(GP_Pixmap *pixmap, const GP_TextStyle *
 						int py = k;
 						GP_TRANSFORM_POINT(pixmap, px, py);
 						if (!GP_PIXEL_IS_CLIPPED(pixmap, px, py))
-							GP_PutPixel_Raw_{{ pt.pixelsize.suffix }}(pixmap, px, py, fg);
+							gp_putpixel_raw_{{ pt.pixelsize.suffix }}(pixmap, px, py, fg);
 					}
 				}
 			}
@@ -84,8 +86,8 @@ static void text_draw_1BPP_{{ pt.name }}(GP_Pixmap *pixmap, const GP_TextStyle *
 
 @ end
 
-static void text_draw_1BPP(GP_Pixmap *pixmap, const GP_TextStyle *style, int x, int y,
-                           GP_Pixel fg, const char *str)
+static void text_draw_1BPP(gp_pixmap *pixmap, const gp_text_style *style, int x, int y,
+                           gp_pixel fg, const char *str)
 {
 	switch (pixmap->pixel_type) {
 @ for pt in pixeltypes:
@@ -102,13 +104,13 @@ static void text_draw_1BPP(GP_Pixmap *pixmap, const GP_TextStyle *style, int x, 
 @ def text_8BPP(pt, use_bg):
 	const char *p;
 
-	GP_Coord y0 = y;
+	gp_coord y0 = y;
 
 	for (p = str; *p != '\0'; p++) {
-		const GP_GlyphBitmap *glyph = GP_GetGlyphBitmap(style->font, *p);
+		const gp_glyph *glyph = gp_get_glyph(style->font, *p);
 
 		if (glyph == NULL)
-			glyph = GP_GetGlyphBitmap(style->font, ' ');
+			glyph = gp_get_glyph(style->font, ' ');
 
 		int i, j, k;
 
@@ -133,7 +135,7 @@ static void text_draw_1BPP(GP_Pixmap *pixmap, const GP_TextStyle *style, int x, 
 
 				for (k = 0; k < style->pixel_ymul; k++) {
 @     if use_bg:
-					GP_HLine(pixmap, x_start, x_start + style->pixel_xmul - 1, cur_y + k,
+					gp_hline(pixmap, x_start, x_start + style->pixel_xmul - 1, cur_y + k,
 					GP_MIX_PIXELS_{{ pt.name }}(fg, bg, gray));
 @     else:
 					unsigned int l;
@@ -143,7 +145,7 @@ static void text_draw_1BPP(GP_Pixmap *pixmap, const GP_TextStyle *style, int x, 
 						unsigned int py = cur_y + k;
 						//TODO: optimize this
 						GP_TRANSFORM_POINT(pixmap, px, py);
-						GP_MixPixel_Raw_Clipped_{{ pt.name }}(pixmap, px, py, fg, gray);
+						gp_mix_pixel_raw_clipped_{{ pt.name }}(pixmap, px, py, fg, gray);
 					}
 @     end
 				}
@@ -162,25 +164,25 @@ static void text_draw_1BPP(GP_Pixmap *pixmap, const GP_TextStyle *style, int x, 
 @ for pt in pixeltypes:
 @     if not pt.is_unknown():
 
-static void text_8BPP_bg_{{ pt.name }}(GP_Pixmap *pixmap, const GP_TextStyle *style,
-                                       GP_Coord x, GP_Coord y,
-				       GP_Pixel fg, GP_Pixel bg, const char *str)
+static void text_8BPP_bg_{{ pt.name }}(gp_pixmap *pixmap, const gp_text_style *style,
+                                       gp_coord x, gp_coord y,
+				       gp_pixel fg, gp_pixel bg, const char *str)
 {
 @         text_8BPP(pt, True)
 }
 
-static void text_8BPP_{{ pt.name }}(GP_Pixmap *pixmap, const GP_TextStyle *style,
-                                    GP_Coord x, GP_Coord y,
-				    GP_Pixel fg, const char *str)
+static void text_8BPP_{{ pt.name }}(gp_pixmap *pixmap, const gp_text_style *style,
+                                    gp_coord x, gp_coord y,
+				    gp_pixel fg, const char *str)
 {
 @         text_8BPP(pt, False)
 }
 
 @ end
 
-static void text_8BPP_bg(GP_Pixmap *pixmap, const GP_TextStyle *style,
-                         GP_Coord x, GP_Coord y,
-                         GP_Pixel fg, GP_Pixel bg, const char *str)
+static void text_8BPP_bg(gp_pixmap *pixmap, const gp_text_style *style,
+                         gp_coord x, gp_coord y,
+                         gp_pixel fg, gp_pixel bg, const char *str)
 {
 	switch (pixmap->pixel_type) {
 @ for pt in pixeltypes:
@@ -194,9 +196,9 @@ static void text_8BPP_bg(GP_Pixmap *pixmap, const GP_TextStyle *style,
 	}
 }
 
-static void text_8BPP(GP_Pixmap *pixmap, const GP_TextStyle *style,
-                      GP_Coord x, GP_Coord y,
-                      GP_Pixel fg, const char *str)
+static void text_8BPP(gp_pixmap *pixmap, const gp_text_style *style,
+                      gp_coord x, gp_coord y,
+                      gp_pixel fg, const char *str)
 {
 	switch (pixmap->pixel_type) {
 @ for pt in pixeltypes:
@@ -210,9 +212,9 @@ static void text_8BPP(GP_Pixmap *pixmap, const GP_TextStyle *style,
 	}
 }
 
-void GP_Text_Raw(GP_Pixmap *pixmap, const GP_TextStyle *style,
-                 GP_Coord x, GP_Coord y, uint8_t flags,
-                 GP_Pixel fg, GP_Pixel bg, const char *str)
+void gp_text_raw(gp_pixmap *pixmap, const gp_text_style *style,
+                 gp_coord x, gp_coord y, uint8_t flags,
+                 gp_pixel fg, gp_pixel bg, const char *str)
 {
 	switch (style->font->glyph_bitmap_format) {
 	case GP_FONT_BITMAP_1BPP:

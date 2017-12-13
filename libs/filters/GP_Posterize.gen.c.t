@@ -10,4 +10,4 @@
 (({{ val }} + ({{ val_max }} / steps)/2) / ({{ val_max }} / steps)) * ({{ val_max }} / steps);
 @ end
 
-{@ filter_point('Posterize', filter_op_posterize, 'unsigned int steps', 'steps') @}
+{@ filter_point('posterize', filter_op_posterize, 'unsigned int steps', 'steps') @}

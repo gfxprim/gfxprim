@@ -14,7 +14,7 @@
 /*
  * A filled ellipse drawing algorithm.
  *
- * The algorithm is exactly the same as with GP_Ellipse() except that
+ * The algorithm is exactly the same as with gp_ellipse() except that
  * we draw a line between each two points at each side of the X axis;
  * therefore, we don't need to draw any points during iterations of X,
  * we just iterate X until Y reaches next line, and then draw the full line.
@@ -22,8 +22,8 @@
 
 @ for ps in pixelsizes:
 
-static void GP_FillEllipse_Raw_{{ ps.suffix }}(GP_Pixmap *pixmap, GP_Coord xcenter,
-		GP_Coord ycenter, GP_Size a, GP_Size b, GP_Pixel pixel)
+static void gp_fill_ellipse_raw_{{ ps.suffix }}(gp_pixmap *pixmap, gp_coord xcenter,
+		gp_coord ycenter, gp_size a, gp_size b, gp_pixel pixel)
 {
 	/* Precompute quadratic terms. */
 	int a2 = a*a;
@@ -31,7 +31,7 @@ static void GP_FillEllipse_Raw_{{ ps.suffix }}(GP_Pixmap *pixmap, GP_Coord xcent
 
 	/* Handle special case */
 	if (a == 0) {
-		GP_VLine_Raw_{{ ps.suffix }}(pixmap, xcenter, ycenter - b, ycenter + b, pixel);
+		gp_vline_raw_{{ ps.suffix }}(pixmap, xcenter, ycenter - b, ycenter + b, pixel);
 		return;
 	}
 
@@ -44,29 +44,29 @@ static void GP_FillEllipse_Raw_{{ ps.suffix }}(GP_Pixmap *pixmap, GP_Coord xcent
 		error += a2 * (-2*y + 1);
 
 		/* Draw two horizontal lines reflected across Y. */
-		GP_HLine_Raw_{{ ps.suffix }}(pixmap, xcenter-x+1, xcenter+x-1, ycenter-y, pixel);
-		GP_HLine_Raw_{{ ps.suffix }}(pixmap, xcenter-x+1, xcenter+x-1, ycenter+y, pixel);
+		gp_hline_raw_{{ ps.suffix }}(pixmap, xcenter-x+1, xcenter+x-1, ycenter-y, pixel);
+		gp_hline_raw_{{ ps.suffix }}(pixmap, xcenter-x+1, xcenter+x-1, ycenter+y, pixel);
 	}
 }
 
 @ end
 
-void GP_FillEllipse_Raw(GP_Pixmap *pixmap, GP_Coord xcenter, GP_Coord ycenter,
-	                GP_Size a, GP_Size b, GP_Pixel pixel)
+void gp_fill_ellipse_raw(gp_pixmap *pixmap, gp_coord xcenter, gp_coord ycenter,
+	                 gp_size a, gp_size b, gp_pixel pixel)
 {
 	GP_CHECK_PIXMAP(pixmap);
 
-	GP_FN_PER_BPP_PIXMAP(GP_FillEllipse_Raw, pixmap, pixmap,
-	                      xcenter, ycenter, a, b, pixel);
+	GP_FN_PER_BPP_PIXMAP(gp_fill_ellipse_raw, pixmap, pixmap,
+	                     xcenter, ycenter, a, b, pixel);
 }
 
-void GP_FillEllipse(GP_Pixmap *pixmap, GP_Coord xcenter, GP_Coord ycenter,
-                    GP_Size a, GP_Size b, GP_Pixel pixel)
+void gp_fill_ellipse(gp_pixmap *pixmap, gp_coord xcenter, gp_coord ycenter,
+                    gp_size a, gp_size b, gp_pixel pixel)
 {
 	GP_CHECK_PIXMAP(pixmap);
 
 	GP_TRANSFORM_POINT(pixmap, xcenter, ycenter);
 	GP_TRANSFORM_SWAP(pixmap, a, b);
 
-	GP_FillEllipse_Raw(pixmap, xcenter, ycenter, a, b, pixel);
+	gp_fill_ellipse_raw(pixmap, xcenter, ycenter, a, b, pixel);
 }

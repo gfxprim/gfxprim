@@ -2,7 +2,7 @@
 /*
  * Copyright (C) 2009-2014 Cyril Hrubis <metan@ucw.cz>
  *
- * Calls different API for the same filter (Alloc vs In-place, etc.) and copares
+ * Calls different API for the same filter (_alloc vs In-place, etc.) and copares
  * the results (which must be the same).
  */
 
@@ -22,111 +22,111 @@
 @ # All results from filters listed under one name are compared.
 @
 @ compare_list = [
-@                 ['Brightness',
-@                  ['Brightness', ['dst', 'dst', '0.1', 'NULL']],
-@                  ['BrightnessAlloc', ['src', '0.1', 'NULL']],
+@                 ['brightness',
+@                  ['brightness', ['dst', 'dst', '0.1', 'NULL']],
+@                  ['brightness_alloc', ['src', '0.1', 'NULL']],
 @                 ],
-@                 ['Contrast',
-@                  ['Contrast', ['dst', 'dst', '1.2', 'NULL']],
-@                  ['ContrastAlloc', ['src', '1.2', 'NULL']],
+@                 ['contrast',
+@                  ['contrast', ['dst', 'dst', '1.2', 'NULL']],
+@                  ['contrast_alloc', ['src', '1.2', 'NULL']],
 @                 ],
-@                 ['Invert',
-@                  ['Invert', ['dst', 'dst', 'NULL']],
-@                  ['InvertAlloc', ['src', 'NULL']],
+@                 ['invert',
+@                  ['invert', ['dst', 'dst', 'NULL']],
+@                  ['invert_alloc', ['src', 'NULL']],
 @                 ],
-@                 ['MirrorH',
-@                  ['MirrorH', ['dst', 'dst', 'NULL']],
-@                  ['MirrorHAlloc', ['src', 'NULL']],
-@                  ['Symmetry', ['dst', 'dst', 'GP_MIRROR_H', 'NULL']],
-@                  ['SymmetryAlloc', ['src', 'GP_MIRROR_H', 'NULL']],
+@                 ['mirror_h',
+@                  ['mirror_h', ['dst', 'dst', 'NULL']],
+@                  ['mirror_h_alloc', ['src', 'NULL']],
+@                  ['symmetry', ['dst', 'dst', 'GP_MIRROR_H', 'NULL']],
+@                  ['symmetry_alloc', ['src', 'GP_MIRROR_H', 'NULL']],
 @                 ],
-@                 ['MirrorV',
-@                  ['MirrorV', ['dst', 'dst', 'NULL']],
-@                  ['MirrorVAlloc', ['src', 'NULL']],
-@                  ['Symmetry', ['dst', 'dst', 'GP_MIRROR_V', 'NULL']],
-@                  ['SymmetryAlloc', ['src', 'GP_MIRROR_V', 'NULL']],
+@                 ['mirror_v',
+@                  ['mirror_v', ['dst', 'dst', 'NULL']],
+@                  ['mirror_v_alloc', ['src', 'NULL']],
+@                  ['symmetry', ['dst', 'dst', 'GP_MIRROR_V', 'NULL']],
+@                  ['symmetry_alloc', ['src', 'GP_MIRROR_V', 'NULL']],
 @                 ],
-@                 ['Rotate90',
-@                  ['Rotate90Alloc', ['src', 'NULL']],
-@                  ['SymmetryAlloc', ['src', 'GP_ROTATE_90', 'NULL']],
+@                 ['rotate_90',
+@                  ['rotate_90_alloc', ['src', 'NULL']],
+@                  ['symmetry_alloc', ['src', 'GP_ROTATE_90', 'NULL']],
 @                 ],
-@                 ['Rotate180',
-@                  ['Rotate180', ['src', 'dst', 'NULL']],
-@                  ['Rotate180Alloc', ['src', 'NULL']],
-@                  ['Symmetry', ['src', 'dst', 'GP_ROTATE_180', 'NULL']],
-@                  ['SymmetryAlloc', ['src', 'GP_ROTATE_180', 'NULL']],
+@                 ['rotate_180',
+@                  ['rotate_180', ['src', 'dst', 'NULL']],
+@                  ['rotate_180_alloc', ['src', 'NULL']],
+@                  ['symmetry', ['src', 'dst', 'GP_ROTATE_180', 'NULL']],
+@                  ['symmetry_alloc', ['src', 'GP_ROTATE_180', 'NULL']],
 @                 ],
-@                 ['Rotate270',
-@                  ['Rotate270Alloc', ['src', 'NULL']],
-@                  ['SymmetryAlloc', ['src', 'GP_ROTATE_270', 'NULL']],
+@                 ['rotate_270',
+@                  ['rotate_270_alloc', ['src', 'NULL']],
+@                  ['symmetry_alloc', ['src', 'GP_ROTATE_270', 'NULL']],
 @                 ],
-@                 ['ResizeNN',
-@                  ['Resize', ['dst', 'dst', 'GP_INTERP_NN', 'NULL']],
-@                  ['ResizeAlloc', ['src', 'src->w', 'src->h',
+@                 ['resize_nn',
+@                  ['resize', ['dst', 'dst', 'GP_INTERP_NN', 'NULL']],
+@                  ['resize_alloc', ['src', 'src->w', 'src->h',
 @                                   'GP_INTERP_NN', 'NULL']],
 @                 ],
-@                 ['ResizeLinearInt',
-@                  ['Resize', ['dst', 'dst', 'GP_INTERP_LINEAR_INT', 'NULL']],
-@                  ['ResizeAlloc', ['src', 'src->w', 'src->h',
+@                 ['resize_linear_int',
+@                  ['resize', ['dst', 'dst', 'GP_INTERP_LINEAR_INT', 'NULL']],
+@                  ['resize_alloc', ['src', 'src->w', 'src->h',
 @                                   'GP_INTERP_LINEAR_INT', 'NULL']],
 @                 ],
-@                 ['ResizeLinearLFInt',
-@                  ['Resize', ['dst', 'dst', 'GP_INTERP_LINEAR_LF_INT', 'NULL']],
-@                  ['ResizeAlloc', ['src', 'src->w', 'src->h',
+@                 ['resize_linear_lf_int',
+@                  ['resize', ['dst', 'dst', 'GP_INTERP_LINEAR_LF_INT', 'NULL']],
+@                  ['resize_alloc', ['src', 'src->w', 'src->h',
 @                                   'GP_INTERP_LINEAR_LF_INT', 'NULL']],
 @                 ],
-@                 ['ResizeCubicInt',
-@                  ['Resize', ['dst', 'dst', 'GP_INTERP_CUBIC_INT', 'NULL']],
-@                  ['ResizeAlloc', ['src', 'src->w', 'src->h',
+@                 ['resize_cubic_int',
+@                  ['resize', ['dst', 'dst', 'GP_INTERP_CUBIC_INT', 'NULL']],
+@                  ['resize_alloc', ['src', 'src->w', 'src->h',
 @                                   'GP_INTERP_CUBIC_INT', 'NULL']],
 @                 ],
-@                 ['ResizeCubic',
-@                  ['Resize', ['dst', 'dst', 'GP_INTERP_CUBIC', 'NULL']],
-@                  ['ResizeAlloc', ['src', 'src->w', 'src->h',
+@                 ['resize_cubic',
+@                  ['resize', ['dst', 'dst', 'GP_INTERP_CUBIC', 'NULL']],
+@                  ['resize_alloc', ['src', 'src->w', 'src->h',
 @                                   'GP_INTERP_CUBIC', 'NULL']],
 @                 ],
-@                 ['Laplace',
-@                  ['Laplace', ['src', 'dst', 'NULL']],
-@                  ['LaplaceAlloc', ['src', 'NULL']],
+@                 ['laplace',
+@                  ['laplace', ['src', 'dst', 'NULL']],
+@                  ['laplace_alloc', ['src', 'NULL']],
 @                 ],
-@                 ['EdgeSharpening',
-@                  ['EdgeSharpening', ['src', 'dst', '0.2', 'NULL']],
-@                  ['EdgeSharpeningAlloc', ['src', '0.2', 'NULL']],
+@                 ['edge_sharpening',
+@                  ['edge_sharpening', ['src', 'dst', '0.2', 'NULL']],
+@                  ['edge_sharpening_alloc', ['src', '0.2', 'NULL']],
 @                 ],
-@                 ['Median',
-@                  ['Median', ['src', 'dst', '3', '2', 'NULL']],
-@                  ['MedianAlloc', ['src', '3', '2', 'NULL']],
+@                 ['median',
+@                  ['median', ['src', 'dst', '3', '2', 'NULL']],
+@                  ['median_alloc', ['src', '3', '2', 'NULL']],
 @                 ],
-@                 ['Sigma',
-@                  ['Sigma', ['dst', 'dst', '3', '2', '4', '0.5', 'NULL']],
-@                  ['SigmaAlloc', ['src', '3', '2', '4', '0.5', 'NULL']],
+@                 ['sigma',
+@                  ['sigma', ['dst', 'dst', '3', '2', '4', '0.5', 'NULL']],
+@                  ['sigma_alloc', ['src', '3', '2', '4', '0.5', 'NULL']],
 @                 ],
-@                 ['GaussianBlur',
-@                  ['GaussianBlur', ['dst', 'dst', '10', '12', 'NULL']],
-@                  ['GaussianBlurAlloc', ['src', '10', '12', 'NULL']]
+@                 ['gaussian_blur',
+@                  ['gaussian_blur', ['dst', 'dst', '10', '12', 'NULL']],
+@                  ['gaussian_blur_alloc', ['src', '10', '12', 'NULL']]
 @                 ],
 @ ]
 @
 @ def apply_filter(filter):
 @     if 'dst' in filter[1]:
-	dst = GP_PixmapCopy(src, GP_COPY_WITH_PIXELS);
-	if (GP_Filter{{ filter[0] }}({{ arr_to_params(filter[1]) }})) {
+	dst = gp_pixmap_copy(src, GP_COPY_WITH_PIXELS);
+	if (gp_filter_{{ filter[0] }}({{ arr_to_params(filter[1]) }})) {
 		int err = errno;
-		GP_PixmapFree(dst);
+		gp_pixmap_free(dst);
 		dst = NULL;
 		errno = err;
 	}
 
 @     else:
-	dst = GP_Filter{{ filter[0] }}({{ arr_to_params(filter[1]) }});
+	dst = gp_filter_{{ filter[0] }}({{ arr_to_params(filter[1]) }});
 
 @ end
 @
 @ for fs in compare_list:
-static int compare_{{ fs[0] }}(GP_PixelType pt)
+static int compare_{{ fs[0] }}(gp_pixel_type pt)
 {
-	GP_Pixmap *src = GP_PixmapAlloc(134, 1072, pt);
-	GP_Pixmap *dst, *ref;
+	gp_pixmap *src = gp_pixmap_alloc(134, 1072, pt);
+	gp_pixmap *dst, *ref;
 	int fail = 0;
 
 	errno = 0;
@@ -137,14 +137,14 @@ static int compare_{{ fs[0] }}(GP_PixelType pt)
 	}
 
 	/* randomize pixmap content */
-	GP_FilterGaussianNoiseAdd(src, src, 10, 0, NULL);
+	gp_filter_gaussian_noise_add(src, src, 10, 0, NULL);
 
 	/* Create reference result */
 {@ apply_filter(fs[1]) @}
 	ref = dst;
 
 	if (ref == NULL) {
-		GP_PixmapFree(src);
+		gp_pixmap_free(src);
 		switch (errno) {
 		case ENOSYS:
 			tst_msg("Not implemented");
@@ -161,16 +161,16 @@ static int compare_{{ fs[0] }}(GP_PixelType pt)
 @     for i in fs[2:]:
 {@ apply_filter(i) @}
 
-	if (!GP_PixmapEqual(ref, dst)) {
+	if (!gp_pixmap_equal(ref, dst)) {
 		fail++;
 		tst_msg("Results for {{ fs[1][0] }} and {{ i[0] }} differs");
 	}
 
-	GP_PixmapFree(dst);
+	gp_pixmap_free(dst);
 @     end
 
-	GP_PixmapFree(src);
-	GP_PixmapFree(ref);
+	gp_pixmap_free(src);
+	gp_pixmap_free(ref);
 
 	if (fail) {
 		tst_msg("%i failure(s)", fail);

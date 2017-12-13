@@ -26,7 +26,7 @@
 #ifndef GFX_GP_CIRCLE_H
 #define GFX_GP_CIRCLE_H
 
-#include "core/GP_Pixmap.h"
+#include <core/GP_Types.h>
 
 /*
  * Quadrants in cartesian space the center is set in the middle of the circle.
@@ -41,7 +41,7 @@
  * So first segment is actually down right, second is down left, third is up
  * left, and fourth is up right.
  */
-enum GP_CircleSegments {
+enum gp_circle_segments {
 	GP_CIRCLE_SEG1 = 0x01, /* First Quadrant  */
 	GP_CIRCLE_SEG2 = 0x02, /* Second Quadrant */
 	GP_CIRCLE_SEG3 = 0x04, /* Third Quadrant  */
@@ -50,18 +50,18 @@ enum GP_CircleSegments {
 
 /* Circle Segment */
 
-void GP_CircleSeg(GP_Pixmap *pixmap, GP_Coord xcenter, GP_Coord ycenter,
-                  GP_Size r, uint8_t seg_flag, GP_Pixel pixel);
+void gp_circle_seg(gp_pixmap *pixmap, gp_coord xcenter, gp_coord ycenter,
+                   gp_size r, uint8_t seg_flag, gp_pixel pixel);
 
-void GP_CircleSeg_Raw(GP_Pixmap *pixmap, GP_Coord xcenter, GP_Coord ycenter,
-                      GP_Size r, uint8_t seg_flag, GP_Pixel pixel);
+void gp_circle_seg_raw(gp_pixmap *pixmap, gp_coord xcenter, gp_coord ycenter,
+                       gp_size r, uint8_t seg_flag, gp_pixel pixel);
 
 /* Filled Circle Segment */
 
-void GP_FillCircleSeg(GP_Pixmap *pixmap, GP_Coord xcenter, GP_Coord ycenter,
-                      GP_Size r, uint8_t seg_flag, GP_Pixel pixel);
+void gp_fill_circle_seg(gp_pixmap *pixmap, gp_coord xcenter, gp_coord ycenter,
+                        gp_size r, uint8_t seg_flag, gp_pixel pixel);
 
-void GP_FillCircleSeg_Raw(GP_Pixmap *pixmap, GP_Coord xcenter, GP_Coord ycenter,
-                          GP_Size r, uint8_t seg_flag, GP_Pixel pixel);
+void gp_fill_circle_seg_raw(gp_pixmap *pixmap, gp_coord xcenter, gp_coord ycenter,
+                            gp_size r, uint8_t seg_flag, gp_pixel pixel);
 
 #endif /* GFX_GP_CIRCLE_H */

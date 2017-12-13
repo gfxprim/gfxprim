@@ -26,43 +26,43 @@
 #ifndef TEXT_GP_TEXT_METRIC_H
 #define TEXT_GP_TEXT_METRIC_H
 
-#include "core/GP_Types.h"
-#include "GP_TextStyle.h"
+#include <core/GP_Types.h>
+#include <text/GP_TextStyle.h>
 
 /*
  * Calculates the width of the string drawn in the given style, in pixels.
  */
-GP_Size GP_TextLenWidth(const GP_TextStyle *style,
-                        const char *str, size_t len);
+gp_size gp_text_width_len(const gp_text_style *style,
+                          const char *str, size_t len);
 
-GP_Size GP_TextWidth(const GP_TextStyle *style, const char *str);
+gp_size gp_text_width(const gp_text_style *style, const char *str);
 
 /*
  * Maximal text width for string with len characters.
  */
-GP_Size GP_TextMaxWidth(const GP_TextStyle *style, unsigned int len);
+gp_size gp_text_max_width(const gp_text_style *style, unsigned int len);
 
 /*
  * Returns maximal width for text written with len characters from str.
  */
-GP_Size GP_TextMaxStrWidth(const GP_TextStyle *style, const char *str,
-                           unsigned int len);
+gp_size gp_text_max_width_chars(const gp_text_style *style, const char *chars,
+                                unsigned int len);
 
 /*
  * Returns maximal text height, in pixels.
  */
-GP_Size GP_TextHeight(const GP_TextStyle *style);
+gp_size gp_text_height(const gp_text_style *style);
 
 /*
  * Returns the ascent (height from the baseline to the top of characters),
  * for the given text style. (Result is in pixels.)
  */
-GP_Size GP_TextAscent(const GP_TextStyle *style);
+gp_size gp_text_ascent(const gp_text_style *style);
 
 /*
  * Returns the descent (height from the baseline to the bottom of characters),
  * for the given text style. (Result is in pixels.)
  */
-GP_Size GP_TextDescent(const GP_TextStyle *style);
+gp_size gp_text_descent(const gp_text_style *style);
 
 #endif /* TEXT_GP_TEXT_METRIC_H */

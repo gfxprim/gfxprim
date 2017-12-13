@@ -31,6 +31,6 @@
 
 #include <stdint.h>
 
-uint64_t GP_GetTimeStamp(void);
+uint64_t gp_time_stamp(void);
 
 #endif /* INPUT_GP_TIME_STAMP_H */

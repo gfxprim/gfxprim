@@ -22,12 +22,12 @@
 
 #include <stdarg.h>
 #include <string.h>
-#include <GP.h>
+#include <gfxprim.h>
 #include "image_cache.h"
 
 struct image {
-	GP_Pixmap *pixmap;
-	GP_DataStorage *meta_data;
+	gp_pixmap *pixmap;
+	gp_storage *meta_data;
 
 	struct image *prev;
 	struct image *next;
@@ -73,11 +73,11 @@ size_t image_cache_get_ram_size(void)
 /*
  * Reports correct image record size.
  */
-static size_t image_size2(GP_Pixmap *pixmap, GP_DataStorage *meta_data,
+static size_t image_size2(gp_pixmap *pixmap, gp_storage *meta_data,
                           const char *path)
 {
 	size_t meta_data_size = 0;
-	size_t pixmap_size = pixmap->bytes_per_row * pixmap->h + sizeof(GP_Pixmap);
+	size_t pixmap_size = pixmap->bytes_per_row * pixmap->h + sizeof(gp_pixmap);
 
 	//TODO! 4096 is a size of single block, data storage may have more blocks
 	if (meta_data)
@@ -135,8 +135,8 @@ static void remove_img_free(struct image_cache *self,
 	GP_DEBUG(2, "Freeing image '%s' size %zu", img->path, size);
 
 	remove_img(self, img, size);
-	GP_PixmapFree(img->pixmap);
-	GP_DataStorageDestroy(img->meta_data);
+	gp_pixmap_free(img->pixmap);
+	gp_storage_destroy(img->meta_data);
 	free(img);
 }
 
@@ -159,8 +159,8 @@ static void add_img(struct image_cache *self, struct image *img, size_t size)
 		self->end = img;
 }
 
-int image_cache_get(struct image_cache *self, GP_Pixmap **img,
-		    GP_DataStorage **meta_data, int elevate, const char *key)
+int image_cache_get(struct image_cache *self, gp_pixmap **img,
+		    gp_storage **meta_data, int elevate, const char *key)
 {
 	struct image *i;
 
@@ -197,7 +197,7 @@ int image_cache_get(struct image_cache *self, GP_Pixmap **img,
 	return 0;
 }
 
-GP_Pixmap *image_cache_get2(struct image_cache *self, int elevate,
+gp_pixmap *image_cache_get2(struct image_cache *self, int elevate,
                              const char *fmt, ...)
 {
 	va_list va;
@@ -283,8 +283,8 @@ static int assert_size(struct image_cache *self, size_t size)
 	return 0;
 }
 
-int image_cache_put(struct image_cache *self, GP_Pixmap *pixmap,
-                    GP_DataStorage *meta_data, const char *key)
+int image_cache_put(struct image_cache *self, gp_pixmap *pixmap,
+                    gp_storage *meta_data, const char *key)
 {
 	size_t size;
 
@@ -319,8 +319,8 @@ int image_cache_put(struct image_cache *self, GP_Pixmap *pixmap,
 	return 0;
 }
 
-int image_cache_put2(struct image_cache *self, GP_Pixmap *pixmap,
-                     GP_DataStorage *meta_data, const char *fmt, ...)
+int image_cache_put2(struct image_cache *self, gp_pixmap *pixmap,
+                     gp_storage *meta_data, const char *fmt, ...)
 {
 	size_t size, len;
 	va_list va;

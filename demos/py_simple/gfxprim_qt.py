@@ -6,10 +6,10 @@ import gfxprim.core as core
 import gfxprim.loaders as loaders
 
 def getpixmap(path):
-    img = loaders.Load(path)
+    img = loaders.load(path)
     if img.pixel_type != core.C.PIXEL_BGR888:
-        img = img.Convert(core.C.PIXEL_BGR888)
-    qt_img = QtGui.QImage(img.ToByteArray(), img.w, img.h,
+        img = img.convert(core.C.PIXEL_BGR888)
+    qt_img = QtGui.QImage(img.to_byte_array(), img.w, img.h,
                           img.bytes_per_row, QtGui.QImage.Format_RGB888)
     pix = QtGui.QPixmap.fromImage(qt_img)
     return pix

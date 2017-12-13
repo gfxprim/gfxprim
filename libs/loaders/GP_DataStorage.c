@@ -24,19 +24,18 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "core/GP_Debug.h"
-#include "core/GP_Common.h"
-
-#include "GP_DataStorage.h"
+#include <core/GP_Debug.h>
+#include <core/GP_Common.h>
+#include <loaders/GP_DataStorage.h>
 
 struct record {
-	GP_DataNode node;
+	gp_data_node node;
 	char id[];
 };
 
-struct GP_DataDict {
-	struct GP_DataNode *first;
-	struct GP_DataNode *last;
+struct gp_data_dict {
+	struct gp_data_node *first;
+	struct gp_data_node *last;
 };
 
 #define BLOCK_SIZE 4096
@@ -48,10 +47,10 @@ struct block {
 	char data[];
 };
 
-struct GP_DataStorage {
+struct gp_storage {
 	/* Root dictionary */
-	struct GP_DataNode root;
-	struct GP_DataDict dict;
+	struct gp_data_node root;
+	struct gp_data_dict dict;
 
 	/* Block allocator */
 	struct block *blocks;
@@ -66,7 +65,7 @@ static size_t align(size_t size)
 	return (size + mask) & ~mask;
 }
 
-static struct block *new_block(GP_DataStorage *self, size_t size)
+static struct block *new_block(gp_storage *self, size_t size)
 {
 	struct block *new = malloc(size);
 
@@ -83,7 +82,7 @@ static struct block *new_block(GP_DataStorage *self, size_t size)
 	return new;
 }
 
-static void *storage_alloc(GP_DataStorage *self, size_t size)
+static void *storage_alloc(gp_storage *self, size_t size)
 {
 	struct block *new;
 	void *ret;
@@ -114,7 +113,7 @@ static void *storage_alloc(GP_DataStorage *self, size_t size)
 	return ret;
 }
 
-static struct record *new_record(GP_DataStorage *self, GP_DataNode *node)
+static struct record *new_record(gp_storage *self, gp_data_node *node)
 {
 	size_t id_len = align(strlen(node->id) + 1);
 	size_t payload_len = 0;
@@ -126,7 +125,7 @@ static struct record *new_record(GP_DataStorage *self, GP_DataNode *node)
 		payload_len = align(strlen(node->value.str) + 1);
 	break;
 	case GP_DATA_DICT:
-		payload_len = sizeof(struct GP_DataDict);
+		payload_len = sizeof(struct gp_data_dict);
 	break;
 	default:
 	break;
@@ -162,9 +161,9 @@ static struct record *new_record(GP_DataStorage *self, GP_DataNode *node)
 	return new;
 }
 
-GP_DataStorage *GP_DataStorageCreate(void)
+gp_storage *gp_storage_create(void)
 {
-	GP_DataStorage *storage = malloc(sizeof(*storage));
+	gp_storage *storage = malloc(sizeof(*storage));
 
 	GP_DEBUG(1, "Creating data storage (%p)", storage);
 
@@ -187,7 +186,7 @@ GP_DataStorage *GP_DataStorageCreate(void)
 	return storage;
 }
 
-void GP_DataStorageDestroy(GP_DataStorage *self)
+void gp_storage_destroy(gp_storage *self)
 {
 	struct block *i, *j;
 
@@ -205,7 +204,7 @@ void GP_DataStorageDestroy(GP_DataStorage *self)
 	free(self);
 }
 
-void GP_DataStorageClear(GP_DataStorage *self)
+void gp_storage_clear(gp_storage *self)
 {
 	struct block *i, *j;
 
@@ -229,17 +228,17 @@ void GP_DataStorageClear(GP_DataStorage *self)
 	self->dict.last = NULL;
 }
 
-GP_DataNode *GP_DataStorageRoot(GP_DataStorage *self)
+gp_data_node *gp_storage_root(gp_storage *self)
 {
 	return &self->root;
 }
 
-GP_DataNode *GP_DataDictFirst(GP_DataNode *node)
+gp_data_node *gp_data_dict_first(gp_data_node *node)
 {
 	return node->value.dict->first;
 }
 
-static void dict_add(GP_DataDict *dict, GP_DataNode *node)
+static void dict_add(gp_data_dict *dict, gp_data_node *node)
 {
 	if (!dict->last) {
 		dict->first = node;
@@ -250,21 +249,21 @@ static void dict_add(GP_DataDict *dict, GP_DataNode *node)
 	}
 }
 
-GP_DataNode *GP_DataStorageAdd(GP_DataStorage *self,
-                               GP_DataNode *node, GP_DataNode *data)
+gp_data_node *gp_storage_add(gp_storage *self,
+                             gp_data_node *node, gp_data_node *data)
 {
 	struct record *rec;
-	struct GP_DataNode *dup;
+	struct gp_data_node *dup;
 
 	GP_DEBUG(2, "Adding '%s' to storage (%p)", data->id, self);
 
 	if (node && node->type != GP_DATA_DICT) {
 		GP_WARN("Trying to insert data into %s",
-		        GP_DataTypeName(node->type));
+		        gp_data_type_name(node->type));
 		return NULL;
 	}
 
-	dup = GP_DataStorageGet(self, node, data->id);
+	dup = gp_storage_get(self, node, data->id);
 
 	if (dup) {
 		GP_WARN("Trying to insert allready existing node '%s'",
@@ -278,23 +277,23 @@ GP_DataNode *GP_DataStorageAdd(GP_DataStorage *self,
 		return NULL;
 
 	if (!node)
-		node = GP_DataStorageRoot(self);
+		node = gp_storage_root(self);
 
 	dict_add(node->value.dict, &rec->node);
 
 	return &rec->node;
 }
 
-GP_DataNode *GP_DataStorageGet(GP_DataStorage *self,
-                               GP_DataNode *node,
-                               const char *id)
+gp_data_node *gp_storage_get(gp_storage *self,
+                             gp_data_node *node,
+                             const char *id)
 {
-	struct GP_DataNode *i;
+	struct gp_data_node *i;
 
 	if (!node)
-		node = GP_DataStorageRoot(self);
+		node = gp_storage_root(self);
 
-	for (i = GP_DataDictFirst(node); i; i = i->next) {
+	for (i = gp_data_dict_first(node); i; i = i->next) {
 		if (!strcmp(i->id, id))
 			return i;
 	}
@@ -302,15 +301,15 @@ GP_DataNode *GP_DataStorageGet(GP_DataStorage *self,
 	return NULL;
 }
 
-static struct GP_DataNode *lookup(GP_DataNode *node, const char *id,
-                                  const int id_len)
+static struct gp_data_node *lookup(gp_data_node *node, const char *id,
+                                   const int id_len)
 {
-	struct GP_DataNode *i;
+	struct gp_data_node *i;
 
 	if (!node)
 		return NULL;
 
-	for (i = GP_DataDictFirst(node); i; i = i->next) {
+	for (i = gp_data_dict_first(node); i; i = i->next) {
 		if (!strncmp(i->id, id, id_len))
 			return i;
 	}
@@ -318,7 +317,7 @@ static struct GP_DataNode *lookup(GP_DataNode *node, const char *id,
 	return NULL;
 }
 
-static struct GP_DataNode *get_by_path(GP_DataNode *node, const char *path)
+static struct gp_data_node *get_by_path(gp_data_node *node, const char *path)
 {
 	unsigned int i;
 
@@ -342,7 +341,7 @@ static struct GP_DataNode *get_by_path(GP_DataNode *node, const char *path)
 	return get_by_path(node, path);
 }
 
-GP_DataNode *GP_DataStorageGetByPath(GP_DataStorage *self, GP_DataNode *node,
+gp_data_node *gp_storage_get_by_path(gp_storage *self, gp_data_node *node,
                                      const char *path)
 {
 	GP_DEBUG(3, "Looking for '%s' in %p", path, node);
@@ -352,7 +351,7 @@ GP_DataNode *GP_DataStorageGetByPath(GP_DataStorage *self, GP_DataNode *node,
 		if (!self)
 			return NULL;
 
-		node = GP_DataStorageRoot(self);
+		node = gp_storage_root(self);
 		path++;
 	}
 
@@ -387,10 +386,10 @@ static void padd_printf(size_t padd, const char *id, size_t id_padd,
 }
 
 /* Must be called on data dict only */
-static size_t max_id_len(const GP_DataNode *node)
+static size_t max_id_len(const gp_data_node *node)
 {
 	size_t max = 0;
-	GP_DataNode *i;
+	gp_data_node *i;
 
 	for (i = node->value.dict->first; i; i = i->next)
 		max = GP_MAX(max, strlen(i->id));
@@ -398,10 +397,10 @@ static size_t max_id_len(const GP_DataNode *node)
 	return max;
 }
 
-static void data_print(const GP_DataNode *node,
+static void data_print(const gp_data_node *node,
 		       unsigned int padd, size_t id_padd)
 {
-	GP_DataNode *i;
+	gp_data_node *i;
 
 	if (!node) {
 		padd_printf(padd, NULL, 0, "(Empty)\n");
@@ -433,12 +432,12 @@ static void data_print(const GP_DataNode *node,
 	}
 }
 
-void GP_DataPrint(const GP_DataNode *node)
+void gp_data_print(const gp_data_node *node)
 {
 	data_print(node, 0, node->id ? strlen(node->id) : 0);
 }
 
-const char *GP_DataTypeName(enum GP_DataType type)
+const char *gp_data_type_name(enum gp_data_type type)
 {
 	switch (type) {
 	case GP_DATA_INT:
@@ -456,61 +455,61 @@ const char *GP_DataTypeName(enum GP_DataType type)
 	return "Invalid";
 }
 
-GP_DataNode *GP_DataStorageAddInt(GP_DataStorage *self, GP_DataNode *node,
-                                  const char *id, long i)
+gp_data_node *gp_storage_add_int(gp_storage *self, gp_data_node *node,
+                                 const char *id, long i)
 {
-	GP_DataNode data = {
+	gp_data_node data = {
 		.type = GP_DATA_INT,
 		.id = id,
 		.value.i = i,
 	};
 
-	return GP_DataStorageAdd(self, node, &data);
+	return gp_storage_add(self, node, &data);
 }
 
-GP_DataNode *GP_DataStorageAddString(GP_DataStorage *self, GP_DataNode *node,
-                                     const char *id, const char *str)
+gp_data_node *gp_storage_add_string(gp_storage *self, gp_data_node *node,
+                                    const char *id, const char *str)
 {
-	GP_DataNode data = {
+	gp_data_node data = {
 		.type = GP_DATA_STRING,
 		.id = id,
 		.value.str = str,
 	};
 
-	return GP_DataStorageAdd(self, node, &data);
+	return gp_storage_add(self, node, &data);
 }
 
-GP_DataNode *GP_DataStorageAddDouble(GP_DataStorage *self, GP_DataNode *node,
-                                     const char *id, double d)
+gp_data_node *gp_storage_add_double(gp_storage *self, gp_data_node *node,
+                                    const char *id, double d)
 {
-	GP_DataNode data = {
+	gp_data_node data = {
 		.type = GP_DATA_DOUBLE,
 		.id = id,
 		.value.d = d,
 	};
 
-	return GP_DataStorageAdd(self, node, &data);
+	return gp_storage_add(self, node, &data);
 }
 
-GP_DataNode *GP_DataStorageAddRational(GP_DataStorage *self, GP_DataNode *node,
-                                       const char *id, long num, long den)
+gp_data_node *gp_storage_add_rational(gp_storage *self, gp_data_node *node,
+                                      const char *id, long num, long den)
 {
-	GP_DataNode data = {
+	gp_data_node data = {
 		.type = GP_DATA_RATIONAL,
 		.id = id,
 		.value.rat = {.num = num, .den = den},
 	};
 
-	return GP_DataStorageAdd(self, node, &data);
+	return gp_storage_add(self, node, &data);
 }
 
-GP_DataNode *GP_DataStorageAddDict(GP_DataStorage *self, GP_DataNode *node,
-		                   const char *id)
+gp_data_node *gp_storage_add_dict(gp_storage *self, gp_data_node *node,
+                                  const char *id)
 {
-	GP_DataNode data = {
+	gp_data_node data = {
 		.type = GP_DATA_DICT,
 		.id = id,
 	};
 
-	return GP_DataStorageAdd(self, node, &data);
+	return gp_storage_add(self, node, &data);
 }

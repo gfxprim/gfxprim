@@ -6,6 +6,6 @@
  */
 
 @ for ps in pixelsizes:
-void GP_HLine_Raw_{{ ps.suffix }}(GP_Pixmap *pixmap, GP_Coord x0,
-			GP_Coord x1, GP_Coord y, GP_Pixel pixel);
+void gp_hline_raw_{{ ps.suffix }}(gp_pixmap *pixmap, gp_coord x0,
+			gp_coord x1, gp_coord y, gp_pixel pixel);
 

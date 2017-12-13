@@ -32,15 +32,15 @@
 #include <string.h>
 #include <errno.h>
 
-#include <GP.h>
+#include <gfxprim.h>
 
 /*
  * Saves 2 bpp grayscale image as ASCII Art
  */
-static int write_data(const GP_Pixmap *img, GP_IO *io,
-                      GP_ProgressCallback *callback)
+static int write_data(const gp_pixmap *img, gp_io *io,
+                      gp_progress_cb *callback)
 {
-	GP_IO *bio;
+	gp_io *bio;
 	int err;
 
 	if (img->pixel_type != GP_PIXEL_G2) {
@@ -49,7 +49,7 @@ static int write_data(const GP_Pixmap *img, GP_IO *io,
 	}
 
 	/* Create buffered I/O */
-	bio = GP_IOWBuffer(io, 0);
+	bio = gp_io_wbuffer(io, 0);
 
 	if (!bio)
 		return 1;
@@ -58,20 +58,20 @@ static int write_data(const GP_Pixmap *img, GP_IO *io,
 
 	for (j = 0; j < img->h; j++) {
 		for (i = 0; i < img->w; i++) {
-			GP_Pixel p = GP_GetPixel_Raw(img, i, j);
+			gp_pixel p = gp_getpixel_raw(img, i, j);
 
 			switch (p) {
 			case 0:
-				err = GP_IOFlush(bio, "  ", 2);
+				err = gp_io_flush(bio, "  ", 2);
 			break;
 			case 1:
-				err = GP_IOFlush(bio, "..", 2);
+				err = gp_io_flush(bio, "..", 2);
 			break;
 			case 2:
-				err = GP_IOFlush(bio, "()", 2);
+				err = gp_io_flush(bio, "()", 2);
 			break;
 			case 3:
-				err = GP_IOFlush(bio, "OO", 2);
+				err = gp_io_flush(bio, "OO", 2);
 			break;
 			}
 
@@ -79,25 +79,25 @@ static int write_data(const GP_Pixmap *img, GP_IO *io,
 				return 1;
 		}
 
-		if (GP_IOFlush(bio, "\n", 1))
+		if (gp_io_flush(bio, "\n", 1))
 			return 1;
 
-		if (GP_ProgressCallbackReport(callback, j, img->h, img->w)) {
+		if (gp_progress_cb_report(callback, j, img->h, img->w)) {
 			errno = ECANCELED;
 			return 1;
 		}
 	}
 
-	GP_ProgressCallbackDone(callback);
+	gp_progress_cb_done(callback);
 	return 0;
 }
 
-static GP_PixelType save_ptypes[] = {
+static gp_pixel_type save_ptypes[] = {
 	GP_PIXEL_G2,
 	GP_PIXEL_UNKNOWN,
 };
 
-GP_Loader loader = {
+const gp_loader loader = {
 	.Write = write_data,
 	.save_ptypes = save_ptypes,
 	.fmt_name = "ASCII Art",
@@ -106,12 +106,12 @@ GP_Loader loader = {
 
 int main(int argc, char *argv[])
 {
-	GP_Pixmap *c, *gc;
+	gp_pixmap *c, *gc;
 
-	GP_LoaderRegister(&loader);
+	gp_loader_register(&loader);
 
 	/* List all loaders */
-	GP_ListLoaders();
+	gp_loaders_lists();
 	printf("\n\n");
 
 	if (argc != 2) {
@@ -120,14 +120,14 @@ int main(int argc, char *argv[])
 	}
 
 	/* Now load image and save it using our loader */
-	c = GP_LoadImage(argv[1], NULL);
+	c = gp_load_image(argv[1], NULL);
 
 	if (c == NULL) {
 		fprintf(stderr, "Failed to load image: %s\n", strerror(errno));
 		return 1;
 	}
 
-	gc = GP_FilterFloydSteinbergAlloc(c, GP_PIXEL_G2, NULL);
+	gc = gp_filter_floyd_steinberg_alloc(c, GP_PIXEL_G2, NULL);
 
 	if (gc == NULL) {
 		fprintf(stderr, "FloydSteinberg: %s\n", strerror(errno));
@@ -136,7 +136,7 @@ int main(int argc, char *argv[])
 
 	printf("Saving to test.txt\n");
 
-	if (GP_SaveImage(gc, "test.txt", NULL)) {
+	if (gp_save_image(gc, "test.txt", NULL)) {
 		fprintf(stderr, "Failed to save image: %s\n", strerror(errno));
 		return 1;
 	}

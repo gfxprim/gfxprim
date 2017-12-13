@@ -7,7 +7,7 @@
 
 #include <stdint.h>
 
-int16_t GP_CubicTable[2047] = {
+int16_t gp_cubic_table[2047] = {
 @ A=0.5
 @ for i in range(0, 1023):
 @     x = i/1024

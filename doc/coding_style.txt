@@ -106,16 +106,16 @@ TIP: You can use Linux Kernel 'scripts/checkpatch.pl' to check your code.
 GFXprim Specific Rules
 ^^^^^^^^^^^^^^^^^^^^^^
 
-* Library external API uses CamelCase
-** Together with mandatory 'GP_' prefix.
-** For example 'GP_PixelType', 'GP_Pixmap', etc.
+* Library external API uses snake_case
+** Together with mandatory 'gp_' prefix.
+** For example 'gp_pixel_type', 'gp_pixmap', etc.
 ** We will not change that, get over it. (It could have been worse, trust me.)
 
 * Basic library types are typedefed
-** We have 'GP_Size' and 'GP_Coord' integer types to better distinguish
+** We have 'gp_size' and 'gp_coord' integer types to better distinguish
    roles of function parameters.
-** The basic structures are also typedefed so you can wite 'GP_Pixmap'
-   instead of 'struct GP_Pixmap'.
+** The basic structures are also typedefed so you can wite 'gp_pixmap'
+   instead of 'struct gp_pixmap'.
 ** Other uses of typedef are frowned upon.
 
 * When you add an externally visible symbol, i.e. new API function
@@ -131,9 +131,9 @@ link:http://www.python.org/dev/peps/pep-0008/[PEP 8].
 The major difference is that the default indent is 2 spaces.
 All files should be ASCII unless required otherwise.
 
-GFXPrim uses CamelCase as described in the C section.
+GFXPrim uses snake_case as described in the C section.
 The names are mostly derived from the corresponding C names without
-the 'GP_' prefix.
+the 'gp_' prefix.
 All wrapped symbols of a module are available in the SWIG modules 'foo.c_foo'
 (i.e. 'core.c_core').
 
@@ -143,5 +143,5 @@ All constants are available in 'foo.C' submodules (i.e. 'core.C')
 to avoid clutter.
 
 Where this makes sense, functions should be available as methods of
-an object (i.e. 'Pixmap.Copy()' rather than 'Copy(pixmap)'). Be Pythonic.
+an object (i.e. 'Pixmap.copy()' rather than 'copy(pixmap)'). Be Pythonic.
 

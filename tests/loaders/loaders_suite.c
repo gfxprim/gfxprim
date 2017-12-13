@@ -40,19 +40,19 @@ static const char *strfmt(enum fmt fmt)
 {
 	switch (fmt) {
 	case PNG:
-		return "PNG";
+		return "png";
 	case JPG:
-		return "JPG";
+		return "jpg";
 	case GIF:
 		return "GIF";
 	case BMP:
-		return "BMP";
+		return "bmp";
 	};
 
 	return "INVALID";
 }
 
-static int save_img(enum fmt fmt, const GP_Pixmap *img, const char *name)
+static int save_img(enum fmt fmt, const gp_pixmap *img, const char *name)
 {
 	char buf[256];
 
@@ -60,18 +60,18 @@ static int save_img(enum fmt fmt, const GP_Pixmap *img, const char *name)
 
 	switch (fmt) {
 	case PNG:
-		return GP_SavePNG(img, buf, NULL);
+		return gp_save_png(img, buf, NULL);
 	case JPG:
-		return GP_SaveJPG(img, buf, NULL);
+		return gp_save_jpg(img, buf, NULL);
 	case BMP:
-		return GP_SaveBMP(img, buf, NULL);
+		return gp_save_bmp(img, buf, NULL);
 	default:
 		tst_err("Trying to save %s image", strfmt(fmt));
 		exit(TST_UNTESTED);
 	}
 }
 
-static GP_Pixmap *load(enum fmt fmt, const char *name)
+static gp_pixmap *load(enum fmt fmt, const char *name)
 {
 	char buf[256];
 
@@ -79,27 +79,27 @@ static GP_Pixmap *load(enum fmt fmt, const char *name)
 
 	switch (fmt) {
 	case PNG:
-		return GP_LoadPNG(buf, NULL);
+		return gp_load_png(buf, NULL);
 	case JPG:
-		return GP_LoadJPG(buf, NULL);
+		return gp_load_jpg(buf, NULL);
 	case GIF:
-		return GP_LoadGIF(buf, NULL);
+		return gp_load_gif(buf, NULL);
 	case BMP:
-		return GP_LoadBMP(buf, NULL);
+		return gp_load_bmp(buf, NULL);
 	default:
 		tst_err("Trying to load %s image", strfmt(fmt));
 		exit(TST_UNTESTED);
 	}
 }
 
-static int save_load(enum fmt fmt, GP_Size w, GP_Size h)
+static int save_load(enum fmt fmt, gp_size w, gp_size h)
 {
-	GP_Pixmap *img, *res;
+	gp_pixmap *img, *res;
 
-	img = GP_PixmapAlloc(w, h, GP_PIXEL_RGB888);
+	img = gp_pixmap_alloc(w, h, GP_PIXEL_RGB888);
 
 	if (img == NULL) {
-		tst_warn("GP_PixmapAlloc failed");
+		tst_warn("gp_pixmap_alloc failed");
 		return TST_UNTESTED;
 	}
 
@@ -124,45 +124,45 @@ static int save_load(enum fmt fmt, GP_Size w, GP_Size h)
 		return TST_FAILED;
 	}
 
-	GP_PixmapFree(img);
-	GP_PixmapFree(res);
+	gp_pixmap_free(img);
+	gp_pixmap_free(res);
 
 	return TST_SUCCESS;
 }
 
-static int test_PNG_Save_Load(void)
+static int test_png_Save_Load(void)
 {
 	return save_load(PNG, 100, 100);
 }
 
-static int test_JPG_Save_Load(void)
+static int test_jpg_Save_Load(void)
 {
 	return save_load(JPG, 100, 100);
 }
 
-static int test_PNG_stress(void)
+static int test_png_stress(void)
 {
 	return save_load(PNG, 2000, 2000);
 }
 
-static int test_JPG_stress(void)
+static int test_jpg_stress(void)
 {
 	return save_load(JPG, 2000, 2000);
 }
 
-static int test_BMP_Save_Load(void)
+static int test_bmp_Save_Load(void)
 {
 	return save_load(BMP, 100, 100);
 }
 
-static int test_BMP_stress(void)
+static int test_bmp_stress(void)
 {
 	return save_load(BMP, 2000, 2000);
 }
 
 static int load_enoent(enum fmt fmt)
 {
-	GP_Pixmap *img;
+	gp_pixmap *img;
 
 	img = load(fmt, "nonexistent");
 
@@ -184,12 +184,12 @@ static int load_enoent(enum fmt fmt)
 	return TST_SUCCESS;
 }
 
-static int test_PNG_Load_ENOENT(void)
+static int test_png_Load_ENOENT(void)
 {
 	return load_enoent(PNG);
 }
 
-static int test_JPG_Load_ENOENT(void)
+static int test_jpg_Load_ENOENT(void)
 {
 	return load_enoent(JPG);
 }
@@ -199,7 +199,7 @@ static int test_GIF_Load_ENOENT(void)
 	return load_enoent(GIF);
 }
 
-static int test_BMP_Load_ENOENT(void)
+static int test_bmp_Load_ENOENT(void)
 {
 	return load_enoent(BMP);
 }
@@ -207,7 +207,7 @@ static int test_BMP_Load_ENOENT(void)
 static int load_eacces(enum fmt fmt)
 {
 	char buf[256];
-	GP_Pixmap *img;
+	gp_pixmap *img;
 
 	snprintf(buf, sizeof(buf), "test.%s", strfmt(fmt));
 
@@ -246,12 +246,12 @@ static int load_eacces(enum fmt fmt)
 	return TST_SUCCESS;
 }
 
-static int test_PNG_Load_EACCES(void)
+static int test_png_Load_EACCES(void)
 {
 	return load_eacces(PNG);
 }
 
-static int test_JPG_Load_EACCES(void)
+static int test_jpg_Load_EACCES(void)
 {
 	return load_eacces(JPG);
 }
@@ -261,7 +261,7 @@ static int test_GIF_Load_EACCES(void)
 	return load_eacces(GIF);
 }
 
-static int test_BMP_Load_EACCES(void)
+static int test_bmp_Load_EACCES(void)
 {
 	return load_eacces(BMP);
 }
@@ -269,7 +269,7 @@ static int test_BMP_Load_EACCES(void)
 static int load_eio(enum fmt fmt)
 {
 	char buf[256];
-	GP_Pixmap *img;
+	gp_pixmap *img;
 
 	snprintf(buf, sizeof(buf), "test.%s", strfmt(fmt));
 
@@ -303,12 +303,12 @@ static int load_eio(enum fmt fmt)
 	return TST_SUCCESS;
 }
 
-static int test_PNG_Load_EIO(void)
+static int test_png_Load_EIO(void)
 {
 	return load_eio(PNG);
 }
 
-static int test_JPG_Load_EIO(void)
+static int test_jpg_Load_EIO(void)
 {
 	return load_eio(JPG);
 }
@@ -318,7 +318,7 @@ static int test_GIF_Load_EIO(void)
 	return load_eio(GIF);
 }
 
-static int test_BMP_Load_EIO(void)
+static int test_bmp_Load_EIO(void)
 {
 	return load_eio(BMP);
 }
@@ -327,26 +327,26 @@ static int test_BMP_Load_EIO(void)
  * We test that a correct cleanup is done after aborting the image load from a
  * callback.
  */
-static int abort_callback(GP_ProgressCallback *self __attribute__((unused)))
+static int abort_callback(gp_progress_cb *self __attribute__((unused)))
 {
 	return 1;
 }
 
-static int test_PNG_Save_abort(void)
+static int test_png_Save_abort(void)
 {
-	GP_Pixmap *img;
+	gp_pixmap *img;
 
-	img = GP_PixmapAlloc(100, 100, GP_PIXEL_RGB888);
+	img = gp_pixmap_alloc(100, 100, GP_PIXEL_RGB888);
 
-	GP_ProgressCallback callback = {.callback = abort_callback};
+	gp_progress_cb callback = {.callback = abort_callback};
 
-	if (GP_SavePNG(img, "test.png", &callback) == 0) {
-		tst_msg("Failed to save PNG saving");
+	if (gp_save_png(img, "test.png", &callback) == 0) {
+		tst_msg("Failed to save png saving");
 		return TST_FAILED;
 	}
 
 	if (errno == ENOSYS) {
-		tst_msg("Load PNG: ENOSYS");
+		tst_msg("Load png: ENOSYS");
 		return TST_SKIPPED;
 	}
 
@@ -356,38 +356,38 @@ static int test_PNG_Save_abort(void)
 		return TST_FAILED;
 	}
 
-	GP_PixmapFree(img);
+	gp_pixmap_free(img);
 
 	return TST_SUCCESS;
 }
 
-static int test_PNG_Load_abort(void)
+static int test_png_Load_abort(void)
 {
-	GP_Pixmap *img;
+	gp_pixmap *img;
 
-	img = GP_PixmapAlloc(100, 100, GP_PIXEL_RGB888);
+	img = gp_pixmap_alloc(100, 100, GP_PIXEL_RGB888);
 
-	if (GP_SavePNG(img, "test.png", NULL)) {
+	if (gp_save_png(img, "test.png", NULL)) {
 
 		if (errno == ENOSYS) {
-			tst_msg("Save PNG: ENOSYS");
+			tst_msg("Save png: ENOSYS");
 			return TST_SKIPPED;
 		}
 
-		tst_msg("Failed to save PNG: %s", strerror(errno));
+		tst_msg("Failed to save png: %s", strerror(errno));
 		return TST_FAILED;
 	}
 
-	GP_PixmapFree(img);
+	gp_pixmap_free(img);
 
-	GP_ProgressCallback callback = {.callback = abort_callback};
+	gp_progress_cb callback = {.callback = abort_callback};
 
-	img = GP_LoadPNG("test.png", &callback);
+	img = gp_load_png("test.png", &callback);
 
 	int saved_errno = errno;
 
 	if (img != NULL) {
-		tst_msg("Failed to abort PNG loading");
+		tst_msg("Failed to abort png loading");
 		return TST_FAILED;
 	}
 
@@ -402,7 +402,7 @@ static int test_PNG_Load_abort(void)
 
 
 /*
- * Loaders test. Hammers the GP_LoadImage() interface with plenty of
+ * Loaders test. Hammers the gp_load_image() interface with plenty of
  * unexpected filenames.
  */
 struct file_testcase {
@@ -512,15 +512,15 @@ static int test_Load(void)
 	}
 
 	for (i = 0; file_testcases[i].filename != NULL; i++) {
-		GP_Pixmap *ret;
+		gp_pixmap *ret;
 		errno = 0;
 
-		ret = GP_LoadImage(file_testcases[i].filename, NULL);
+		ret = gp_load_image(file_testcases[i].filename, NULL);
 
 		int saved_errno = errno;
 
 		if (ret != NULL) {
-			tst_msg("GP_LoadImage('%s') succeeded unexpectedly",
+			tst_msg("gp_load_image('%s') succeeded unexpectedly",
 			        file_testcases[i].filename);
 			fail++;
 			continue;
@@ -555,11 +555,11 @@ static int test_Load(void)
 	return TST_SKIPPED;
 }
 
-static int test_load_BMP(const char *path)
+static int test_load_bmp(const char *path)
 {
-	GP_Pixmap *img;
+	gp_pixmap *img;
 
-	img = GP_LoadBMP(path, NULL);
+	img = gp_load_bmp(path, NULL);
 
 	if (img == NULL) {
 		switch (errno) {
@@ -576,58 +576,58 @@ static int test_load_BMP(const char *path)
 	 * TODO: check correct data.
 	 */
 
-	GP_PixmapFree(img);
+	gp_pixmap_free(img);
 
 	return TST_SUCCESS;
 }
 
 /* Basic loading tests */
 
-static int test_load_BMP_1bpp_1x1(void)
+static int test_load_bmp_1bpp_1x1(void)
 {
-	return test_load_BMP("1bpp-1x1.bmp");
+	return test_load_bmp("1bpp-1x1.bmp");
 }
 
-static int test_load_BMP_4bpp_1x1(void)
+static int test_load_bmp_4bpp_1x1(void)
 {
-	return test_load_BMP("4bpp-1x1.bmp");
+	return test_load_bmp("4bpp-1x1.bmp");
 }
 
-static int test_load_BMP_8bpp_1x1(void)
+static int test_load_bmp_8bpp_1x1(void)
 {
-	return test_load_BMP("8bpp-1x1.bmp");
+	return test_load_bmp("8bpp-1x1.bmp");
 }
 
-static int test_load_BMP_24bpp_1x1(void)
+static int test_load_bmp_24bpp_1x1(void)
 {
-	return test_load_BMP("24bpp-1x1.bmp");
+	return test_load_bmp("24bpp-1x1.bmp");
 }
 
-static int test_load_BMP_32bpp_1x1(void)
+static int test_load_bmp_32bpp_1x1(void)
 {
-	return test_load_BMP("32bpp-1x1.bmp");
+	return test_load_bmp("32bpp-1x1.bmp");
 }
 
-static int test_load_BMP_555_1x1(void)
+static int test_load_bmp_555_1x1(void)
 {
-	return test_load_BMP("555-1x1.bmp");
+	return test_load_bmp("555-1x1.bmp");
 }
 
-static int test_load_BMP_565_1x1(void)
+static int test_load_bmp_565_1x1(void)
 {
-	return test_load_BMP("565-1x1.bmp");
+	return test_load_bmp("565-1x1.bmp");
 }
 
-static int test_load_BMP_8bpp_1x64000(void)
+static int test_load_bmp_8bpp_1x64000(void)
 {
-	return test_load_BMP("8bpp-1x64000.bmp");
+	return test_load_bmp("8bpp-1x64000.bmp");
 }
 
 static int test_load_JPEG(const char *path)
 {
-	GP_Pixmap *img;
+	gp_pixmap *img;
 
-	img = GP_LoadJPG(path, NULL);
+	img = gp_load_jpg(path, NULL);
 
 	if (img == NULL) {
 		switch (errno) {
@@ -643,7 +643,7 @@ static int test_load_JPEG(const char *path)
 	/*
 	 * TODO: check correct data.
 	 */
-	GP_PixmapFree(img);
+	gp_pixmap_free(img);
 
 	return TST_SUCCESS;
 }
@@ -657,97 +657,97 @@ const struct tst_suite tst_suite = {
 	.suite_name = "Image Loaders testsuite",
 	.tests = {
 		/* Correct errno tests */
-		{.name = "PNG Load ENOENT", .tst_fn = test_PNG_Load_ENOENT,
+		{.name = "png Load ENOENT", .tst_fn = test_png_Load_ENOENT,
 		 .flags = TST_TMPDIR},
-		{.name = "JPG Load ENOENT", .tst_fn = test_JPG_Load_ENOENT,
+		{.name = "jpg Load ENOENT", .tst_fn = test_jpg_Load_ENOENT,
 		 .flags = TST_TMPDIR},
 		{.name = "GIF Load ENOENT", .tst_fn = test_GIF_Load_ENOENT,
 		 .flags = TST_TMPDIR},
-		{.name = "BMP Load ENOENT", .tst_fn = test_BMP_Load_ENOENT,
+		{.name = "bmp Load ENOENT", .tst_fn = test_bmp_Load_ENOENT,
 		 .flags = TST_TMPDIR},
 
-		{.name = "PNG Load EACCES", .tst_fn = test_PNG_Load_EACCES,
+		{.name = "png Load EACCES", .tst_fn = test_png_Load_EACCES,
 		 .flags = TST_TMPDIR},
-		{.name = "JPG Load EACCES", .tst_fn = test_JPG_Load_EACCES,
+		{.name = "jpg Load EACCES", .tst_fn = test_jpg_Load_EACCES,
 		 .flags = TST_TMPDIR},
 		{.name = "GIF Load EACCES", .tst_fn = test_GIF_Load_EACCES,
 		 .flags = TST_TMPDIR},
-		{.name = "BMP Load EACCES", .tst_fn = test_BMP_Load_EACCES,
+		{.name = "bmp Load EACCES", .tst_fn = test_bmp_Load_EACCES,
 		 .flags = TST_TMPDIR},
 
-		{.name = "PNG Load EIO", .tst_fn = test_PNG_Load_EIO,
+		{.name = "png Load EIO", .tst_fn = test_png_Load_EIO,
 		 .flags = TST_TMPDIR},
-		{.name = "JPG Load EIO", .tst_fn = test_JPG_Load_EIO,
+		{.name = "jpg Load EIO", .tst_fn = test_jpg_Load_EIO,
 		 .flags = TST_TMPDIR},
 		{.name = "GIF Load EIO", .tst_fn = test_GIF_Load_EIO,
 		 .flags = TST_TMPDIR},
-		{.name = "BMP Load EIO", .tst_fn = test_BMP_Load_EIO,
+		{.name = "bmp Load EIO", .tst_fn = test_bmp_Load_EIO,
 		 .flags = TST_TMPDIR},
 
-		/* Generic GP_LoadImage test */
+		/* Generic gp_load_image test */
 		{.name = "Image Load", .tst_fn = test_Load,
 		 .flags = TST_TMPDIR | TST_CHECK_MALLOC},
 
 		/* Callback abort tests */
-		{.name = "PNG Load abort", .tst_fn = test_PNG_Load_abort,
+		{.name = "png Load abort", .tst_fn = test_png_Load_abort,
 		 .flags = TST_TMPDIR | TST_CHECK_MALLOC},
-		{.name = "PNG Save abort", .tst_fn = test_PNG_Save_abort,
+		{.name = "png Save abort", .tst_fn = test_png_Save_abort,
 		 .flags = TST_TMPDIR | TST_CHECK_MALLOC},
 
 		/* Basic Save Load tests */
-		{.name = "PNG Save Load", .tst_fn = test_PNG_Save_Load,
+		{.name = "png Save Load", .tst_fn = test_png_Save_Load,
 		 .flags = TST_TMPDIR | TST_CHECK_MALLOC},
-		{.name = "JPG Save Load", .tst_fn = test_JPG_Save_Load,
+		{.name = "jpg Save Load", .tst_fn = test_jpg_Save_Load,
 		 .flags = TST_TMPDIR | TST_CHECK_MALLOC},
-		{.name = "BMP Save Load", .tst_fn = test_BMP_Save_Load,
+		{.name = "bmp Save Load", .tst_fn = test_bmp_Save_Load,
 		 .flags = TST_TMPDIR | TST_CHECK_MALLOC},
 
 		/* Stress Save Load tests */
-		{.name = "PNG Stress", .tst_fn = test_PNG_stress,
+		{.name = "png Stress", .tst_fn = test_png_stress,
 		 .flags = TST_TMPDIR | TST_CHECK_MALLOC},
-		{.name = "JPG Stress", .tst_fn = test_JPG_stress,
+		{.name = "jpg Stress", .tst_fn = test_jpg_stress,
 		 .flags = TST_TMPDIR | TST_CHECK_MALLOC},
-		{.name = "BMP Stress", .tst_fn = test_BMP_stress,
+		{.name = "bmp Stress", .tst_fn = test_bmp_stress,
 		 .flags = TST_TMPDIR | TST_CHECK_MALLOC},
 
 		/* BPM loader tests */
-		{.name = "BMP Load 1bpp 1x1",
-		 .tst_fn = test_load_BMP_1bpp_1x1,
+		{.name = "bmp Load 1bpp 1x1",
+		 .tst_fn = test_load_bmp_1bpp_1x1,
 		 .res_path = "data/bmp/bitmaps/valid/1bpp-1x1.bmp",
 		 .flags = TST_TMPDIR},
 
-		{.name = "BMP Load 4bpp 1x1",
-		 .tst_fn = test_load_BMP_4bpp_1x1,
+		{.name = "bmp Load 4bpp 1x1",
+		 .tst_fn = test_load_bmp_4bpp_1x1,
 		 .res_path = "data/bmp/bitmaps/valid/4bpp-1x1.bmp",
 		 .flags = TST_TMPDIR},
 
-		{.name = "BMP Load 8bpp 1x1",
-		 .tst_fn = test_load_BMP_8bpp_1x1,
+		{.name = "bmp Load 8bpp 1x1",
+		 .tst_fn = test_load_bmp_8bpp_1x1,
 		 .res_path = "data/bmp/bitmaps/valid/8bpp-1x1.bmp",
 		 .flags = TST_TMPDIR},
 
-		{.name = "BMP 24bpp 1x1",
-		 .tst_fn = test_load_BMP_24bpp_1x1,
+		{.name = "bmp 24bpp 1x1",
+		 .tst_fn = test_load_bmp_24bpp_1x1,
 		 .res_path = "data/bmp/bitmaps/valid/24bpp-1x1.bmp",
 		 .flags = TST_TMPDIR},
 
-		{.name = "BMP 32bpp 1x1",
-		 .tst_fn = test_load_BMP_32bpp_1x1,
+		{.name = "bmp 32bpp 1x1",
+		 .tst_fn = test_load_bmp_32bpp_1x1,
 		 .res_path = "data/bmp/bitmaps/valid/32bpp-1x1.bmp",
 		 .flags = TST_TMPDIR},
 
-		{.name = "BMP 555 1x1",
-		 .tst_fn = test_load_BMP_555_1x1,
+		{.name = "bmp 555 1x1",
+		 .tst_fn = test_load_bmp_555_1x1,
 		 .res_path = "data/bmp/bitmaps/valid/555-1x1.bmp",
 		 .flags = TST_TMPDIR},
 
-		{.name = "BMP 565 1x1",
-		 .tst_fn = test_load_BMP_565_1x1,
+		{.name = "bmp 565 1x1",
+		 .tst_fn = test_load_bmp_565_1x1,
 		 .res_path = "data/bmp/bitmaps/valid/565-1x1.bmp",
 		 .flags = TST_TMPDIR},
 
-		{.name = "BMP 8bpp 1x64000",
-		 .tst_fn = test_load_BMP_8bpp_1x64000,
+		{.name = "bmp 8bpp 1x64000",
+		 .tst_fn = test_load_bmp_8bpp_1x64000,
 		 .res_path = "data/bmp/bitmaps/valid/8bpp-1x64000.bmp",
 		 .flags = TST_TMPDIR},
 

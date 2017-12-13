@@ -40,13 +40,13 @@
 /*
  * Anti Aliased Horizontal Line respecting pixmap rotation flags and with clipping.
  */
-void GP_VLineAA(GP_Pixmap *pixmap, GP_Coord x, GP_Coord y0, GP_Coord y1,
-                GP_Pixel pixel);
+void gp_vline_aa(gp_pixmap *pixmap, gp_coord x, gp_coord y0, gp_coord y1,
+                gp_pixel pixel);
 
 /*
  * Horizontal Line without contect rotation flags.
  */
-void GP_VLineAA_Raw(GP_Pixmap *pixmap, GP_Coord x,
-                    GP_Coord y0, GP_Coord y1, GP_Pixel pixel);
+void gp_vline_aa_raw(gp_pixmap *pixmap, gp_coord x,
+                     gp_coord y0, gp_coord y1, gp_pixel pixel);
 
 #endif /* GFX_GP_VLINE_AA_H */

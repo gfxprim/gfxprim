@@ -37,13 +37,13 @@
 #include <stdint.h>
 #include <sys/time.h>
 
-#include "input/GP_Timer.h"
+#include <input/GP_Types.h>
 
 #define GP_EVENT_QUEUE_SIZE 32
 
 #define GP_EVENT_KEYMAP_BYTES 36
 
-enum GP_EventType {
+enum gp_event_type {
 	GP_EV_KEY = 1, /* key/button press event */
 	GP_EV_REL = 2, /* relative event */
 	GP_EV_ABS = 3, /* absolute event */
@@ -52,7 +52,7 @@ enum GP_EventType {
 	GP_EV_MAX = 5, /* maximum, greater values are free */
 };
 
-enum GP_EventKeyCode {
+enum gp_event_key_code {
 	GP_EV_KEY_UP     = 0,
 	GP_EV_KEY_DOWN   = 1,
 	GP_EV_KEY_REPEAT = 2,
@@ -61,7 +61,7 @@ enum GP_EventKeyCode {
 /*
  * This is 1:1 to linux kernel input subsystem.
  */
-enum GP_EventKeyValue {
+enum gp_event_key_value {
 	GP_KEY_ESC            =  1,
 	GP_KEY_1              =  2,
 	GP_KEY_2              =  3,
@@ -223,59 +223,59 @@ enum GP_EventKeyValue {
 	GP_BTN_PEN            = 0x14a,
 };
 
-enum GP_EventRelCode {
+enum gp_event_rel_code {
 	GP_EV_REL_POS   = 0,
 	GP_EV_REL_WHEEL = 8,
 };
 
-enum GP_EventAbsCode {
+enum gp_event_abs_code {
 	GP_EV_ABS_POS = 0,
 };
 
-enum GP_EventSysCode {
+enum gp_event_sys_code {
 	GP_EV_SYS_QUIT = 0,
 	GP_EV_SYS_RESIZE = 1,
 };
 
-struct GP_EventPosRel {
+struct gp_ev_pos_rel {
 	int32_t rx;
 	int32_t ry;
 };
 
-struct GP_EventPosAbs {
+struct gp_ev_pos_abs {
 	uint32_t x, x_max; /* the x is between 0 and x_max */
 	uint32_t y, y_max;
 	uint32_t pressure, pressure_max;
 };
 
-struct GP_EventKey {
+struct gp_ev_key {
 	uint32_t key;
 	char ascii;
 };
 
-struct GP_EventSys {
+struct gp_ev_sys {
 	uint32_t w, h;
 };
 
-union GP_EventValue {
+union gp_ev_val {
 	/* generic one integer value */
 	int32_t val;
 	/* key */
-	struct GP_EventKey key;
+	struct gp_ev_key key;
 	/* position */
-	struct GP_EventPosRel rel;
-	struct GP_EventPosAbs abs;
+	struct gp_ev_pos_rel rel;
+	struct gp_ev_pos_abs abs;
 	/* system event */
-	struct GP_EventSys sys;
+	struct gp_ev_sys sys;
 	/* timer event */
-	GP_Timer *tmr;
+	gp_timer *tmr;
 };
 
-typedef struct GP_Event {
+struct gp_event {
 	/* event */
 	uint16_t type;
 	uint32_t code;
-	union GP_EventValue val;
+	union gp_ev_val val;
 
 	/* input device id */
 	uint32_t dev_id;
@@ -295,23 +295,22 @@ typedef struct GP_Event {
 	 * accumulated for all input devices.
 	 */
 	uint8_t keys_pressed[GP_EVENT_KEYMAP_BYTES];
-} GP_Event;
+};
 
 /*
  * Dump event into stdout.
  */
-void GP_EventDump(struct GP_Event *ev);
+void gp_event_dump(gp_event *ev);
 
 /*
  * Returns human-readable key name.
  */
-const char *GP_EventKeyName(enum GP_EventKeyValue key);
+const char *gp_event_key_name(enum gp_event_key_value key);
 
 /*
  * Helpers for setting/getting key bits.
  */
-static inline void GP_EventSetKey(struct GP_Event *ev,
-                                  uint32_t key)
+static inline void gp_event_set_key(gp_event *ev, uint32_t key)
 {
 	if (key >= GP_EVENT_KEYMAP_BYTES * 8)
 		return;
@@ -319,8 +318,7 @@ static inline void GP_EventSetKey(struct GP_Event *ev,
 	ev->keys_pressed[(key)/8] |= 1<<((key)%8);
 }
 
-static inline int GP_EventGetKey(struct GP_Event *ev,
-                                 uint32_t key)
+static inline int gp_event_get_key(gp_event *ev, uint32_t key)
 {
 	if (key >= GP_EVENT_KEYMAP_BYTES * 8)
 		return 0;
@@ -328,8 +326,7 @@ static inline int GP_EventGetKey(struct GP_Event *ev,
 	return !!(ev->keys_pressed[(key)/8] & (1<<((key)%8)));
 }
 
-static inline void GP_EventResetKey(struct GP_Event *ev,
-                                    uint32_t key)
+static inline void gp_event_reset_key(gp_event *ev, uint32_t key)
 {
 	if (key >= GP_EVENT_KEYMAP_BYTES * 8)
 		return;

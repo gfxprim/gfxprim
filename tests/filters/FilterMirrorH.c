@@ -30,9 +30,9 @@
 #include "common.h"
 
 struct testcase {
-	GP_Size w, h;
+	gp_size w, h;
 
-	GP_PixelType pixel_type;
+	gp_pixel_type pixel_type;
 
 	uint8_t offset;
 
@@ -45,31 +45,31 @@ struct testcase {
 
 static int test_mirror_h(struct testcase *t)
 {
-	GP_Pixmap src, *c;
+	gp_pixmap src, *c;
 	int err;
 
 	/* Initialize source pixmap */
-	GP_PixmapInit(&src, t->w, t->h, t->pixel_type, t->src);
+	gp_pixmap_init(&src, t->w, t->h, t->pixel_type, t->src);
 
 	/* Set offset to emulate non-byte aligned subpixmaps */
 	src.offset = t->offset;
 
 	/* Test with allocated destination */
-	c = GP_PixmapAlloc(t->w, t->h, t->pixel_type);
+	c = gp_pixmap_alloc(t->w, t->h, t->pixel_type);
 
 	if (c == NULL) {
 		tst_err("Failed to allocate pixmap");
 		return TST_UNTESTED;
 	}
 
-	GP_FilterMirrorH(&src, c, NULL);
+	gp_filter_mirror_h(&src, c, NULL);
 
 	err = compare_buffers(t->res, c);
 
-	GP_PixmapFree(c);
+	gp_pixmap_free(c);
 
 	/* And with in-place variant */
-//	GP_FilterMirrorH(&src, &src, NULL);
+//	gp_filter_mirror_h(&src, &src, NULL);
 
 //	err |= compare_buffers(t->res, &src);
 
@@ -209,28 +209,28 @@ struct testcase testcase_G1_16x2 = {
 	}
 };
 
-static int abort_callback_fn(GP_ProgressCallback GP_UNUSED(*self))
+static int abort_callback_fn(gp_progress_cb GP_UNUSED(*self))
 {
 	return 1;
 }
 
-static GP_ProgressCallback abort_callback = {
+static gp_progress_cb abort_callback = {
 	.callback = abort_callback_fn,
 };
 
 static int test_abort(void)
 {
 	int ret;
-	GP_Pixmap *c;
+	gp_pixmap *c;
 
-	c = GP_PixmapAlloc(10, 10, GP_PIXEL_G8);
+	c = gp_pixmap_alloc(10, 10, GP_PIXEL_G8);
 
 	if (c == NULL) {
 		tst_err("Failed to allocate pixmap");
 		return TST_UNTESTED;
 	}
 
-	ret = GP_FilterMirrorH(c, c, &abort_callback);
+	ret = gp_filter_mirror_h(c, c, &abort_callback);
 
 	if (ret == 0) {
 		tst_msg("Aborted filter haven't returned non-zero");
@@ -247,63 +247,63 @@ static int test_abort(void)
 
 static int all_pixels(void)
 {
-	GP_Pixel pixel_type;
+	gp_pixel pixel_type;
 
 	for (pixel_type = 1; pixel_type < GP_PIXEL_MAX; pixel_type++) {
-		GP_Pixmap *c;
+		gp_pixmap *c;
 
-		tst_msg("Trying pixel %s", GP_PixelTypeName(pixel_type));
+		tst_msg("Trying pixel %s", gp_pixel_type_name(pixel_type));
 
-		c = GP_PixmapAlloc(10, 10, pixel_type);
+		c = gp_pixmap_alloc(10, 10, pixel_type);
 
 		if (c == NULL) {
 			tst_err("Failed to allocate pixmap");
 			return TST_UNTESTED;
 		}
 
-		GP_FilterMirrorH(c, c, NULL);
+		gp_filter_mirror_h(c, c, NULL);
 
-		GP_PixmapFree(c);
+		gp_pixmap_free(c);
 	}
 
 	return TST_SUCCESS;
 }
 
 const struct tst_suite tst_suite = {
-	.suite_name = "MirrorH Filter Testsuite",
+	.suite_name = "Mirror h Filter Testsuite",
 	.tests = {
-		{.name = "MirrorH 1x1",
+		{.name = "Mirror h 1x1",
 		 .tst_fn = test_mirror_h,
 		 .data = &testcase_1x1},
 
-		{.name = "MirrorH 2x2",
+		{.name = "Mirror h 2x2",
 		 .tst_fn = test_mirror_h,
 		 .data = &testcase_2x2},
 
-		{.name = "MirrorH 10x2",
+		{.name = "Mirror h 10x2",
 		 .tst_fn = test_mirror_h,
 		 .data = &testcase_10x2},
 
-		{.name = "MirrorH 2x3",
+		{.name = "Mirror h 2x3",
 		 .tst_fn = test_mirror_h,
 		 .data = &testcase_2x3},
 
-		{.name = "MirrorH 3x3",
+		{.name = "Mirror h 3x3",
 		 .tst_fn = test_mirror_h,
 		 .data = &testcase_3x3},
 
-		{.name = "MirrorH 4x4",
+		{.name = "Mirror h 4x4",
 		 .tst_fn = test_mirror_h,
 		 .data = &testcase_3x3},
 
-		{.name = "MirrorH G1 16x2",
+		{.name = "Mirror h G1 16x2",
 		 .tst_fn = test_mirror_h,
 		 .data = &testcase_G1_16x2},
 
-		{.name = "MirrorH Callback Abort",
+		{.name = "Mirror h Callback Abort",
 		 .tst_fn = test_abort},
 
-		{.name = "MirrorH x Pixels",
+		{.name = "Mirror h x Pixels",
 		 .tst_fn = all_pixels},
 
 		{.name = NULL}

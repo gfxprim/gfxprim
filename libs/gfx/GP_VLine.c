@@ -44,27 +44,27 @@
 	y1 = GP_MIN(y1, (int) pixmap->h - 1); \
 } while (0)
 
-void GP_VLineXYY_Raw(GP_Pixmap *pixmap, GP_Coord x, GP_Coord y0,
-                     GP_Coord y1, GP_Pixel pixel)
+void gp_vline_xyy_raw(gp_pixmap *pixmap, gp_coord x, gp_coord y0,
+                      gp_coord y1, gp_pixel pixel)
 {
 	GP_CHECK_PIXMAP(pixmap);
 
 	ORDER_AND_CLIP_COORDS;
 
-	GP_FN_PER_BPP_PIXMAP(GP_VLine_Raw, pixmap, pixmap, x, y0, y1, pixel);
+	GP_FN_PER_BPP_PIXMAP(gp_vline_raw, pixmap, pixmap, x, y0, y1, pixel);
 }
 
-void GP_VLineXYH_Raw(GP_Pixmap *pixmap, GP_Coord x, GP_Coord y, GP_Size h,
-                     GP_Pixel pixel)
+void gp_vline_xyh_raw(gp_pixmap *pixmap, gp_coord x, gp_coord y, gp_size h,
+                     gp_pixel pixel)
 {
 	if (h == 0)
 		return;
 
-	GP_VLineXYY(pixmap, x, y, y + h - 1, pixel);
+	gp_vline_xyy(pixmap, x, y, y + h - 1, pixel);
 }
 
-void GP_VLineXYY(GP_Pixmap *pixmap, GP_Coord x, GP_Coord y0,
-                  GP_Coord y1, GP_Pixel pixel)
+void gp_vline_xyy(gp_pixmap *pixmap, gp_coord x, gp_coord y0,
+                  gp_coord y1, gp_pixel pixel)
 {
 	GP_CHECK_PIXMAP(pixmap);
 
@@ -72,20 +72,20 @@ void GP_VLineXYY(GP_Pixmap *pixmap, GP_Coord x, GP_Coord y0,
 		GP_TRANSFORM_Y(pixmap, x);
 		GP_TRANSFORM_X(pixmap, y0);
 		GP_TRANSFORM_X(pixmap, y1);
-		GP_HLine_Raw(pixmap, y0, y1, x, pixel);
+		gp_hline_raw(pixmap, y0, y1, x, pixel);
 	} else {
 		GP_TRANSFORM_X(pixmap, x);
 		GP_TRANSFORM_Y(pixmap, y0);
 		GP_TRANSFORM_Y(pixmap, y1);
-		GP_VLine_Raw(pixmap, x, y0, y1, pixel);
+		gp_vline_raw(pixmap, x, y0, y1, pixel);
 	}
 }
 
-void GP_VLineXYH(GP_Pixmap *pixmap, GP_Coord x, GP_Coord y, GP_Size h,
-                 GP_Pixel pixel)
+void gp_vline_xyh(gp_pixmap *pixmap, gp_coord x, gp_coord y, gp_size h,
+                 gp_pixel pixel)
 {
 	if (h == 0)
 		return;
 
-	GP_VLineXYY(pixmap, x, y, y + h - 1, pixel);
+	gp_vline_xyy(pixmap, x, y, y + h - 1, pixel);
 }

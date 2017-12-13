@@ -33,22 +33,22 @@
 
 struct testcase {
 	/* cicle description */
-	GP_Coord x;
-	GP_Coord y;
-	GP_Size a;
-	GP_Size b;
+	gp_coord x;
+	gp_coord y;
+	gp_size a;
+	gp_size b;
 
 	/* expected result */
-	GP_Size w, h;
+	gp_size w, h;
 	const char pixmap[];
 };
 
 static int test_ellipse(const struct testcase *t)
 {
-	GP_Pixmap *c;
+	gp_pixmap *c;
 	int err;
 
-	c = GP_PixmapAlloc(t->w, t->h, GP_PIXEL_G8);
+	c = gp_pixmap_alloc(t->w, t->h, GP_PIXEL_G8);
 
 	if (c == NULL) {
 		tst_err("Failed to allocate pixmap");
@@ -58,7 +58,7 @@ static int test_ellipse(const struct testcase *t)
 	/* zero the pixels buffer */
 	memset(c->pixels, 0, c->w * c->h);
 
-	GP_Ellipse(c, t->x, t->y, t->a, t->b, 1);
+	gp_ellipse(c, t->x, t->y, t->a, t->b, 1);
 
 	err = compare_buffers(t->pixmap, c);
 

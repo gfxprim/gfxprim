@@ -31,7 +31,7 @@
 #include <string.h>
 #include <pthread.h>
 
-#include <GP.h>
+#include <gfxprim.h>
 
 #include "image_cache.h"
 #include "image_list.h"
@@ -41,11 +41,11 @@
 #include "spiv_config.h"
 #include "cpu_timer.h"
 
-static GP_Pixel black_pixel;
-static GP_Pixel white_pixel;
-static GP_Pixel gray_pixel;
+static gp_pixel black_pixel;
+static gp_pixel white_pixel;
+static gp_pixel gray_pixel;
 
-static GP_Backend *backend = NULL;
+static gp_backend *backend = NULL;
 
 /* image loader thread */
 static int abort_flag = 0;
@@ -78,10 +78,10 @@ struct loader_params {
 	struct image_cache *img_resized_cache;
 };
 
-static int image_loader_callback(GP_ProgressCallback *self)
+static int image_loader_callback(gp_progress_cb *self)
 {
-	static GP_Size size = 0;
-	GP_Pixmap *c = backend->pixmap;
+	static gp_size size = 0;
+	gp_pixmap *c = backend->pixmap;
 
 	if (abort_flag)
 		return 1;
@@ -96,25 +96,25 @@ static int image_loader_callback(GP_ProgressCallback *self)
 
 	int align = GP_ALIGN_CENTER|GP_VALIGN_ABOVE;
 
-	size = GP_TextWidth(config.style, buf);
+	size = gp_text_width(config.style, buf);
 
 	int start = c->w/2 - size/2 - 10;
 	int end   = c->w/2 + size/2 + 10;
 	int middle = start + (end - start) * self->percentage / 100;
-	int top = c->h - GP_TextHeight(config.style) - 11;
+	int top = c->h - gp_text_height(config.style) - 11;
 
-	GP_FillRectXYXY(c, start, c->h - 1, middle, top, gray_pixel);
-	GP_FillRectXYXY(c, middle, c->h - 1, end, top, black_pixel);
+	gp_fill_rect_xyxy(c, start, c->h - 1, middle, top, gray_pixel);
+	gp_fill_rect_xyxy(c, middle, c->h - 1, end, top, black_pixel);
 
-	GP_Text(c, config.style, c->w/2, c->h - 5, align,
+	gp_text(c, config.style, c->w/2, c->h - 5, align,
 	        white_pixel, black_pixel, buf);
 
-	GP_BackendUpdateRect(backend, start, c->h - 1, end, top);
+	gp_backend_update_rect(backend, start, c->h - 1, end, top);
 
 	return 0;
 }
 
-static GP_Pixmap *load_image(int elevate);
+static gp_pixmap *load_image(int elevate);
 
 static const char *img_name(const char *img_path)
 {
@@ -134,16 +134,16 @@ static void set_caption(const char *path, float rat)
 
 	snprintf(buf, sizeof(buf), "Spiv ~ %s 1:%3.3f", img_name(path), rat);
 
-	GP_BackendSetCaption(backend, buf);
+	gp_backend_set_caption(backend, buf);
 }
 
 /*
  * Loads image
  */
-static GP_Pixmap *load_image(int elevate)
+static gp_pixmap *load_image(int elevate)
 {
-	GP_Pixmap *img;
-	GP_ProgressCallback callback = {.callback = image_loader_callback,
+	gp_pixmap *img;
+	gp_progress_cb callback = {.callback = image_loader_callback,
 	                                .priv = "Loading image"};
 
 	img = image_loader_get_image(&callback, elevate);
@@ -151,16 +151,16 @@ static GP_Pixmap *load_image(int elevate)
 	if (img)
 		return img;
 
-	GP_Pixmap *pixmap = backend->pixmap;
+	gp_pixmap *pixmap = backend->pixmap;
 
-	GP_Fill(pixmap, black_pixel);
-	GP_Print(pixmap, config.style, pixmap->w/2, pixmap->h/2 - 10,
+	gp_fill(pixmap, black_pixel);
+	gp_print(pixmap, config.style, pixmap->w/2, pixmap->h/2 - 10,
 	         GP_ALIGN_CENTER|GP_VALIGN_CENTER, white_pixel, black_pixel,
 	         "'%s'", image_loader_img_path());
-	GP_Print(pixmap, config.style, pixmap->w/2, pixmap->h/2 + 10,
+	gp_print(pixmap, config.style, pixmap->w/2, pixmap->h/2 + 10,
 	         GP_ALIGN_CENTER|GP_VALIGN_CENTER, white_pixel, black_pixel,
 	         "Failed to load image :( (%s)", strerror(errno));
-	GP_BackendFlip(backend);
+	gp_backend_flip(backend);
 
 	return NULL;
 }
@@ -168,14 +168,14 @@ static GP_Pixmap *load_image(int elevate)
 /*
  * Fill pixmap with chessboard-like pattern.
  */
-static void pattern_fill(GP_Pixmap *pixmap, unsigned int x0, unsigned int y0,
+static void pattern_fill(gp_pixmap *pixmap, unsigned int x0, unsigned int y0,
                          unsigned int w, unsigned int h)
 {
 	unsigned int x, y, i, j = 0;
-	GP_Pixel col[2];
+	gp_pixel col[2];
 
-	col[0] = GP_RGBToPixmapPixel(0x64, 0x64, 0x64, pixmap);
-	col[1] = GP_RGBToPixmapPixel(0x80, 0x80, 0x80, pixmap);
+	col[0] = gp_rgb_to_pixmap_pixel(0x64, 0x64, 0x64, pixmap);
+	col[1] = gp_rgb_to_pixmap_pixel(0x80, 0x80, 0x80, pixmap);
 
 	unsigned int wm = w/20 < 5 ? 5 : w/20;
 	unsigned int hm = h/20 < 5 ? 5 : h/20;
@@ -184,18 +184,18 @@ static void pattern_fill(GP_Pixmap *pixmap, unsigned int x0, unsigned int y0,
 		i = j;
 		j = !j;
 		for (x = 0; x < w; x += wm) {
-			GP_FillRectXYWH(pixmap, x0 + x, y0 + y, wm, hm, col[i]);
+			gp_fill_rect_xywh(pixmap, x0 + x, y0 + y, wm, hm, col[i]);
 			i = !i;
 		}
 	}
 }
 
 
-static void info_printf(GP_Pixmap *pixmap, GP_Coord x, GP_Coord y,
+static void info_printf(gp_pixmap *pixmap, gp_coord x, gp_coord y,
                         const char *fmt, ...)
                         __attribute__ ((format (printf, 4, 5)));
 
-static void info_printf(GP_Pixmap *pixmap, GP_Coord x, GP_Coord y,
+static void info_printf(gp_pixmap *pixmap, gp_coord x, gp_coord y,
                         const char *fmt, ...)
 {
 	va_list va, vac;
@@ -203,23 +203,23 @@ static void info_printf(GP_Pixmap *pixmap, GP_Coord x, GP_Coord y,
 	va_start(va, fmt);
 
 	va_copy(vac, va);
-	GP_VPrint(pixmap, config.style, x-1, y-1, GP_ALIGN_RIGHT|GP_VALIGN_BOTTOM|GP_TEXT_NOBG,
+	gp_vprint(pixmap, config.style, x-1, y-1, GP_ALIGN_RIGHT|GP_VALIGN_BOTTOM|GP_TEXT_NOBG,
 	          black_pixel, white_pixel, fmt, vac);
 	va_end(vac);
 
-	GP_VPrint(pixmap, config.style, x, y, GP_ALIGN_RIGHT|GP_VALIGN_BOTTOM|GP_TEXT_NOBG,
+	gp_vprint(pixmap, config.style, x, y, GP_ALIGN_RIGHT|GP_VALIGN_BOTTOM|GP_TEXT_NOBG,
 	          white_pixel, black_pixel, fmt, va);
 
 	va_end(va);
 }
 
-static unsigned int print_meta_data(GP_DataNode *node, GP_Pixmap *pixmap,
+static unsigned int print_meta_data(gp_data_node *node, gp_pixmap *pixmap,
                                     unsigned int th, unsigned int y, int level)
 {
-	GP_DataNode *i;
+	gp_data_node *i;
 	unsigned int x;
 
-	for (i = GP_DataDictFirst(node); i; i = i->next) {
+	for (i = gp_data_dict_first(node); i; i = i->next) {
 		y += th;
 		x = th * level + 10;
 		switch (i->type) {
@@ -246,10 +246,10 @@ static unsigned int print_meta_data(GP_DataNode *node, GP_Pixmap *pixmap,
 	return y;
 }
 
-static void show_info(struct loader_params *params, GP_Pixmap *img,
-                      GP_Pixmap *orig_img)
+static void show_info(struct loader_params *params, gp_pixmap *img,
+                      gp_pixmap *orig_img)
 {
-	GP_Pixmap *pixmap = backend->pixmap;
+	gp_pixmap *pixmap = backend->pixmap;
 	const char *img_path = image_loader_img_path();
 
 	set_caption(img_path, params->zoom_rat);
@@ -257,11 +257,11 @@ static void show_info(struct loader_params *params, GP_Pixmap *img,
 	if (!config.show_info)
 		return;
 
-	GP_Size th = GP_TextHeight(config.style), y = 10;
+	gp_size th = gp_text_height(config.style), y = 10;
 
 	info_printf(pixmap, 10, y, "%ux%u (%ux%u) 1:%3.3f %3.1f%% %s",
 	         img->w, img->h, orig_img->w, orig_img->h, params->zoom_rat,
-		 params->zoom_rat * 100, GP_PixelTypeName(img->pixel_type));
+		 params->zoom_rat * 100, gp_pixel_type_name(img->pixel_type));
 	y += th + 2;
 
 	info_printf(pixmap, 10, y, "%s", img_name(img_path));
@@ -271,7 +271,7 @@ static void show_info(struct loader_params *params, GP_Pixmap *img,
 	if (params->zoom_rat != 1.00) {
 		info_printf(pixmap, 10, y, "%s%s",
 		            params->use_low_pass && params->zoom_rat < 1 ? "Gaussian LP + " : "",
-	                    GP_InterpolationTypeName(params->resampling_method));
+	                    gp_interpolation_type_name(params->resampling_method));
 		y += th + 2;
 	}
 
@@ -289,12 +289,12 @@ static void show_info(struct loader_params *params, GP_Pixmap *img,
 			    "%u of %u in directory", dir_pos, dir_count);
 	}
 
-	GP_DataStorage *meta_data = image_loader_get_meta_data();
+	gp_storage *meta_data = image_loader_get_meta_data();
 
 	if (!meta_data)
 		return;
 
-	GP_DataNode *node = GP_DataStorageRoot(meta_data);
+	gp_data_node *node = gp_storage_root(meta_data);
 
 	if (node->type != GP_DATA_DICT)
 		return;
@@ -302,27 +302,27 @@ static void show_info(struct loader_params *params, GP_Pixmap *img,
 	print_meta_data(node, pixmap, th + 2, y + th, 0);
 }
 
-static void update_display(struct loader_params *params, GP_Pixmap *img,
-                           GP_Pixmap *orig_img)
+static void update_display(struct loader_params *params, gp_pixmap *img,
+                           gp_pixmap *orig_img)
 {
-	GP_Pixmap *pixmap = backend->pixmap;
+	gp_pixmap *pixmap = backend->pixmap;
 	struct cpu_timer timer;
-	GP_ProgressCallback callback = {.callback = image_loader_callback};
+	gp_progress_cb callback = {.callback = image_loader_callback};
 
 	switch (config.combined_orientation) {
 	case ROTATE_0:
 	break;
 	case ROTATE_90:
 		callback.priv = "Rotating image (90)";
-		img = GP_FilterRotate90Alloc(img, &callback);
+		img = gp_filter_rotate_90_alloc(img, &callback);
 	break;
 	case ROTATE_180:
 		callback.priv = "Rotating image (180)";
-		img = GP_FilterRotate180Alloc(img, &callback);
+		img = gp_filter_rotate_180_alloc(img, &callback);
 	break;
 	case ROTATE_270:
 		callback.priv = "Rotating image (270)";
-		img = GP_FilterRotate270Alloc(img, &callback);
+		img = gp_filter_rotate_270_alloc(img, &callback);
 	break;
 	default:
 	break;
@@ -352,51 +352,51 @@ static void update_display(struct loader_params *params, GP_Pixmap *img,
 		cy = params->zoom_y_offset;
 	}
 
-	GP_Pixmap sub_display;
+	gp_pixmap sub_display;
 
 	cpu_timer_start(&timer, "Blitting");
 
 	if (config.floyd_steinberg) {
 		callback.priv = "Dithering";
-		GP_SubPixmap(pixmap, &sub_display, cx, cy, img->w, img->h);
-		GP_FilterFloydSteinberg(img, &sub_display, NULL);
-	//	GP_FilterHilbertPeano(img, &sub_display, NULL);
+		gp_sub_pixmap(pixmap, &sub_display, cx, cy, img->w, img->h);
+		gp_filter_floyd_steinberg(img, &sub_display, NULL);
+	//	gp_filter_hilbert_peano(img, &sub_display, NULL);
 	} else {
-		if (GP_PixelHasFlags(img->pixel_type, GP_PIXEL_HAS_ALPHA))
+		if (gp_pixel_has_flags(img->pixel_type, GP_PIXEL_HAS_ALPHA))
 			pattern_fill(pixmap, cx, cy, img->w, img->h);
-		GP_Blit_Clipped(img, 0, 0, img->w, img->h, pixmap, cx, cy);
+		gp_blit_clipped(img, 0, 0, img->w, img->h, pixmap, cx, cy);
 	}
 
 	cpu_timer_stop(&timer);
 
 	/* clean up the rest of the display */
-	GP_FillRectXYWH(pixmap, 0, 0, cx, pixmap->h, black_pixel);
-	GP_FillRectXYWH(pixmap, 0, 0, pixmap->w, cy, black_pixel);
+	gp_fill_rect_xywh(pixmap, 0, 0, cx, pixmap->h, black_pixel);
+	gp_fill_rect_xywh(pixmap, 0, 0, pixmap->w, cy, black_pixel);
 
 
 	int w = pixmap->w - img->w - cx;
 
 	if (w > 0)
-		GP_FillRectXYWH(pixmap, img->w + cx, 0, w, pixmap->h, black_pixel);
+		gp_fill_rect_xywh(pixmap, img->w + cx, 0, w, pixmap->h, black_pixel);
 
 	int h = pixmap->h - img->h - cy;
 
 	if (h > 0)
-		GP_FillRectXYWH(pixmap, 0, img->h + cy, pixmap->w, h, black_pixel);
+		gp_fill_rect_xywh(pixmap, 0, img->h + cy, pixmap->w, h, black_pixel);
 
 	show_info(params, img, orig_img);
 
 	if (config.combined_orientation)
-		GP_PixmapFree(img);
+		gp_pixmap_free(img);
 
-	GP_BackendFlip(backend);
+	gp_backend_flip(backend);
 }
 
-GP_Pixmap *load_resized_image(struct loader_params *params, GP_Size w, GP_Size h)
+gp_pixmap *load_resized_image(struct loader_params *params, gp_size w, gp_size h)
 {
-	GP_Pixmap *img, *res = NULL;
+	gp_pixmap *img, *res = NULL;
 	struct cpu_timer timer;
-	GP_ProgressCallback callback = {.callback = image_loader_callback};
+	gp_progress_cb callback = {.callback = image_loader_callback};
 
 	const char *img_path = image_loader_img_path();
 
@@ -414,10 +414,10 @@ GP_Pixmap *load_resized_image(struct loader_params *params, GP_Size w, GP_Size h
 
 	if (params->show_nn_first) {
 		/* Do simple interpolation and blit the result */
-		GP_Pixmap *nn = GP_FilterResizeNNAlloc(img, w, h, NULL);
+		gp_pixmap *nn = gp_filter_resize_nn_alloc(img, w, h, NULL);
 		if (nn != NULL) {
 			update_display(params, nn, img);
-			GP_PixmapFree(nn);
+			gp_pixmap_free(nn);
 		}
 	}
 
@@ -426,7 +426,7 @@ GP_Pixmap *load_resized_image(struct loader_params *params, GP_Size w, GP_Size h
 		cpu_timer_start(&timer, "Blur");
 		callback.priv = "Blurring Image";
 
-		res = GP_FilterGaussianBlurAlloc(img, 0.4/params->zoom_rat,
+		res = gp_filter_gaussian_blur_alloc(img, 0.4/params->zoom_rat,
 		                                 0.4/params->zoom_rat, &callback);
 
 		if (res == NULL)
@@ -437,11 +437,11 @@ GP_Pixmap *load_resized_image(struct loader_params *params, GP_Size w, GP_Size h
 		cpu_timer_stop(&timer);
 	}
 
-//	img->gamma = GP_GammaAcquire(img->pixel_type, 0.45);
+//	img->gamma = gp_gamma_acquire(img->pixel_type, 0.45);
 
 	cpu_timer_start(&timer, "Resampling");
 	callback.priv = "Resampling Image";
-	GP_Pixmap *i1 = GP_FilterResizeAlloc(img, w, h, params->resampling_method, &callback);
+	gp_pixmap *i1 = gp_filter_resize_alloc(img, w, h, params->resampling_method, &callback);
 	img = i1;
 	cpu_timer_stop(&timer);
 
@@ -449,13 +449,13 @@ GP_Pixmap *load_resized_image(struct loader_params *params, GP_Size w, GP_Size h
 	if (params->zoom_rat > 1.5) {
 		cpu_timer_start(&timer, "Sharpening");
 		callback.priv = "Sharpening";
-		GP_FilterEdgeSharpening(i1, i1, 0.1, &callback);
+		gp_filter_edge_sharpening(i1, i1, 0.1, &callback);
 		cpu_timer_stop(&timer);
 	}
 */
 
 	/* Free low passed pixmap if needed */
-	GP_PixmapFree(res);
+	gp_pixmap_free(res);
 
 	if (img == NULL)
 		return NULL;
@@ -469,14 +469,14 @@ GP_Pixmap *load_resized_image(struct loader_params *params, GP_Size w, GP_Size h
 
 static void exif_autorotate(void)
 {
-	GP_DataNode *orientation;
+	gp_data_node *orientation;
 
 	config.combined_orientation = config.orientation;
 
 	if (!config.exif_autorotate)
 		return;
 
-	orientation = GP_DataStorageGetByPath(image_loader_get_meta_data(),
+	orientation = gp_storage_get_by_path(image_loader_get_meta_data(),
 	                                      NULL, "/Exif/Orientation");
 	if (!orientation)
 		return;
@@ -528,10 +528,10 @@ static float calc_img_size(struct loader_params *params,
 			switch (config.combined_orientation) {
 			case ROTATE_90:
 			case ROTATE_270:
-				GP_BackendResize(backend, win_h, win_w);
+				gp_backend_resize(backend, win_h, win_w);
 			break;
 			default:
-				GP_BackendResize(backend, win_w, win_h);
+				gp_backend_resize(backend, win_w, win_h);
 			}
 		}
 		return params->zoom_rat;
@@ -567,10 +567,10 @@ static float calc_img_size(struct loader_params *params,
 		switch (config.combined_orientation) {
 		case ROTATE_90:
 		case ROTATE_270:
-			GP_BackendResize(backend, win_h, win_w);
+			gp_backend_resize(backend, win_h, win_w);
 		break;
 		default:
-			GP_BackendResize(backend, win_w, win_h);
+			gp_backend_resize(backend, win_w, win_h);
 		}
 	}
 
@@ -593,7 +593,7 @@ static void *image_loader(void *ptr)
 {
 	struct loader_params *params = ptr;
 	struct cpu_timer sum_timer;
-	GP_Pixmap *img, *orig_img, *pixmap = backend->pixmap;
+	gp_pixmap *img, *orig_img, *pixmap = backend->pixmap;
 
 	cpu_timer_start(&sum_timer, "sum");
 
@@ -606,7 +606,7 @@ static void *image_loader(void *ptr)
 	}
 
 	/* Figure zoom */
-	GP_Size w, h;
+	gp_size w, h;
 
 	params->zoom_rat = calc_img_size(params, orig_img->w, orig_img->h,
 	                                 pixmap->w, pixmap->h);
@@ -661,7 +661,7 @@ static void show_image(struct loader_params *params)
 
 	if (ret) {
 		fprintf(stderr, "Failed to start thread: %s\n", strerror(ret));
-		GP_BackendExit(backend);
+		gp_backend_exit(backend);
 		exit(1);
 	}
 }
@@ -704,7 +704,7 @@ static void zoom_set(struct loader_params *params, float mul)
 static void sighandler(int signo)
 {
 	if (backend != NULL)
-		GP_BackendExit(backend);
+		gp_backend_exit(backend);
 
 	fprintf(stderr, "Got signal %i\n", signo);
 
@@ -713,7 +713,7 @@ static void sighandler(int signo)
 
 static void init_backend(const char *backend_opts)
 {
-	backend = GP_BackendInit(backend_opts, "Spiv");
+	backend = gp_backend_init(backend_opts, "Spiv");
 
 	if (backend == NULL) {
 		fprintf(stderr, "Failed to initalize backend '%s'\n", backend_opts);
@@ -721,8 +721,8 @@ static void init_backend(const char *backend_opts)
 	}
 
 	if (config.full_screen) {
-		if (GP_BackendIsX11(backend))
-			GP_BackendX11RequestFullscreen(backend, 2);
+		if (gp_backend_is_x11(backend))
+			gp_x11_fullscreen(backend, 2);
 	}
 }
 
@@ -757,7 +757,7 @@ static int init_loader(struct loader_params *params, const char **argv)
 	return 0;
 }
 
-static uint32_t timer_callback(GP_Timer *self)
+static uint32_t timer_callback(gp_timer *self)
 {
 	struct loader_params *params = self->priv;
 	static int retries = 0;
@@ -788,7 +788,7 @@ static uint32_t timer_callback(GP_Timer *self)
 
 int main(int argc, char *argv[])
 {
-	GP_Pixmap *pixmap = NULL;
+	gp_pixmap *pixmap = NULL;
 	int shift_flag;
 	int opts;
 
@@ -849,34 +849,34 @@ int main(int argc, char *argv[])
 	init_backend(config.backend_init);
 
 	if (config.emul_type != GP_PIXEL_UNKNOWN) {
-		backend = GP_BackendVirtualInit(backend, config.emul_type,
-		                                GP_BACKEND_CALL_EXIT);
+		backend = gp_backend_virt_init(backend, config.emul_type,
+		                               GP_BACKEND_CALL_EXIT);
 	}
 
 	pixmap = backend->pixmap;
 
-	black_pixel = GP_RGBToPixmapPixel(0x00, 0x00, 0x00, pixmap);
-	white_pixel = GP_RGBToPixmapPixel(0xff, 0xff, 0xff, pixmap);
-	gray_pixel = GP_RGBToPixmapPixel(0x33, 0x33, 0x33, pixmap);
+	black_pixel = gp_rgb_to_pixmap_pixel(0x00, 0x00, 0x00, pixmap);
+	white_pixel = gp_rgb_to_pixmap_pixel(0xff, 0xff, 0xff, pixmap);
+	gray_pixel = gp_rgb_to_pixmap_pixel(0x33, 0x33, 0x33, pixmap);
 
-	GP_Fill(pixmap, black_pixel);
-	GP_BackendFlip(backend);
+	gp_fill(pixmap, black_pixel);
+	gp_backend_flip(backend);
 
 	params.show_progress_once = 1;
 	show_image(&params);
 
 	if (params.sleep_ms) {
 		timer.expires = params.sleep_ms;
-		GP_BackendAddTimer(backend, &timer);
+		gp_backend_add_timer(backend, &timer);
 	}
 
 	for (;;) {
-		GP_Event ev;
+		gp_event ev;
 
-		while (GP_BackendWaitEvent(backend, &ev)) {
+		while (gp_backend_wait_event(backend, &ev)) {
 
-			shift_flag = GP_EventGetKey(&ev, GP_KEY_LEFT_SHIFT) ||
-			             GP_EventGetKey(&ev, GP_KEY_RIGHT_SHIFT);
+			shift_flag = gp_event_get_key(&ev, GP_KEY_LEFT_SHIFT) ||
+			             gp_event_get_key(&ev, GP_KEY_RIGHT_SHIFT);
 
 			switch (ev.type) {
 			case GP_EV_REL:
@@ -889,7 +889,7 @@ int main(int argc, char *argv[])
 						goto prev;
 				break;
 				case GP_EV_REL_POS:
-					if (GP_EventGetKey(&ev, GP_BTN_LEFT))
+					if (gp_event_get_key(&ev, GP_BTN_LEFT))
 						set_zoom_offset(&params,
 						                ev.val.rel.rx,
 								ev.val.rel.ry);
@@ -906,8 +906,8 @@ int main(int argc, char *argv[])
 					show_image(&params);
 				break;
 				case GP_KEY_F:
-					if (GP_BackendIsX11(backend))
-						GP_BackendX11RequestFullscreen(backend, 2);
+					if (gp_backend_is_x11(backend))
+						gp_x11_fullscreen(backend, 2);
 				break;
 				case GP_KEY_I:
 				        config.show_info = !config.show_info;
@@ -938,11 +938,11 @@ int main(int argc, char *argv[])
 				break;
 				case GP_KEY_S:
 					if (params.sleep_ms) {
-						if (GP_BackendTimersInQueue(backend)) {
-							GP_BackendRemTimer(backend, &timer);
+						if (gp_backend_timers_in_queue(backend)) {
+							gp_backend_rem_timer(backend, &timer);
 						} else {
 							timer.expires = params.sleep_ms;
-							GP_BackendAddTimer(backend, &timer);
+							gp_backend_add_timer(backend, &timer);
 						}
 					}
 				break;
@@ -1013,7 +1013,7 @@ int main(int argc, char *argv[])
 					stop_loader();
 					image_cache_destroy(params.img_resized_cache);
 					image_loader_destroy();
-					GP_BackendExit(backend);
+					gp_backend_exit(backend);
 					return 0;
 				break;
 				case GP_KEY_PAGE_UP:
@@ -1114,13 +1114,13 @@ int main(int argc, char *argv[])
 				case GP_EV_SYS_RESIZE:
 					/* stop loader thread before resizing backend buffer */
 					stop_loader();
-					GP_BackendResizeAck(backend);
-					GP_Fill(backend->pixmap, 0);
+					gp_backend_resize_ack(backend);
+					gp_fill(backend->pixmap, 0);
 					params.show_progress_once = 1;
 					show_image(&params);
 				break;
 				case GP_EV_SYS_QUIT:
-					GP_BackendExit(backend);
+					gp_backend_exit(backend);
 					return 0;
 				break;
 				}

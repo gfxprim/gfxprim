@@ -76,8 +76,8 @@ typedef union v4f {
 		val = 255; \
 } while (0)
 
-int GP_FilterResizeCubic(const GP_Pixmap *src, GP_Pixmap *dst,
-                         GP_ProgressCallback *callback)
+int gp_filter_resize_cubic(const gp_pixmap *src, gp_pixmap *dst,
+                           gp_progress_cb *callback)
 {
 	float col_r[src->h], col_g[src->h], col_b[src->h];
 	uint32_t i, j;
@@ -118,27 +118,27 @@ int GP_FilterResizeCubic(const GP_Pixmap *src, GP_Pixmap *dst,
 		/* Generate interpolated column */
 		for (j = 0; j < src->h; j++) {
 			v4f rv, gv, bv;
-			GP_Pixel pix[4];
+			gp_pixel pix[4];
 
-			pix[0] = GP_GetPixel_Raw_24BPP(src, xi[0], j);
-			pix[1] = GP_GetPixel_Raw_24BPP(src, xi[1], j);
-			pix[2] = GP_GetPixel_Raw_24BPP(src, xi[2], j);
-			pix[3] = GP_GetPixel_Raw_24BPP(src, xi[3], j);
+			pix[0] = gp_getpixel_raw_24BPP(src, xi[0], j);
+			pix[1] = gp_getpixel_raw_24BPP(src, xi[1], j);
+			pix[2] = gp_getpixel_raw_24BPP(src, xi[2], j);
+			pix[3] = gp_getpixel_raw_24BPP(src, xi[3], j);
 
-			rv.f[0] = GP_Pixel_GET_R_RGB888(pix[0]);
-			rv.f[1] = GP_Pixel_GET_R_RGB888(pix[1]);
-			rv.f[2] = GP_Pixel_GET_R_RGB888(pix[2]);
-			rv.f[3] = GP_Pixel_GET_R_RGB888(pix[3]);
+			rv.f[0] = GP_PIXEL_GET_R_RGB888(pix[0]);
+			rv.f[1] = GP_PIXEL_GET_R_RGB888(pix[1]);
+			rv.f[2] = GP_PIXEL_GET_R_RGB888(pix[2]);
+			rv.f[3] = GP_PIXEL_GET_R_RGB888(pix[3]);
 
-			gv.f[0] = GP_Pixel_GET_G_RGB888(pix[0]);
-			gv.f[1] = GP_Pixel_GET_G_RGB888(pix[1]);
-			gv.f[2] = GP_Pixel_GET_G_RGB888(pix[2]);
-			gv.f[3] = GP_Pixel_GET_G_RGB888(pix[3]);
+			gv.f[0] = GP_PIXEL_GET_G_RGB888(pix[0]);
+			gv.f[1] = GP_PIXEL_GET_G_RGB888(pix[1]);
+			gv.f[2] = GP_PIXEL_GET_G_RGB888(pix[2]);
+			gv.f[3] = GP_PIXEL_GET_G_RGB888(pix[3]);
 
-			bv.f[0] = GP_Pixel_GET_B_RGB888(pix[0]);
-			bv.f[1] = GP_Pixel_GET_B_RGB888(pix[1]);
-			bv.f[2] = GP_Pixel_GET_B_RGB888(pix[2]);
-			bv.f[3] = GP_Pixel_GET_B_RGB888(pix[3]);
+			bv.f[0] = GP_PIXEL_GET_B_RGB888(pix[0]);
+			bv.f[1] = GP_PIXEL_GET_B_RGB888(pix[1]);
+			bv.f[2] = GP_PIXEL_GET_B_RGB888(pix[2]);
+			bv.f[3] = GP_PIXEL_GET_B_RGB888(pix[3]);
 
 			rv = MUL_V4SF(rv, cvx);
 			gv = MUL_V4SF(gv, cvx);
@@ -202,14 +202,14 @@ int GP_FilterResizeCubic(const GP_Pixmap *src, GP_Pixmap *dst,
 			CLAMP(g);
 			CLAMP(b);
 
-			GP_Pixel pix = GP_Pixel_CREATE_RGB888((uint8_t)r, (uint8_t)g, (uint8_t)b);
-			GP_PutPixel_Raw_24BPP(dst, i, j, pix);
+			gp_pixel pix = GP_PIXEL_CREATE_RGB888((uint8_t)r, (uint8_t)g, (uint8_t)b);
+			gp_putpixel_raw_24BPP(dst, i, j, pix);
 		}
 
-		if (GP_ProgressCallbackReport(callback, i, dst->w, dst->h))
+		if (gp_progress_cb_report(callback, i, dst->w, dst->h))
 			return 1;
 	}
 
-	GP_ProgressCallbackDone(callback);
+	gp_progress_cb_done(callback);
 	return 0;
 }

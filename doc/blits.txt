@@ -20,56 +20,56 @@ into destination pixel type to speed up the blitting.
 
 [source,c]
 --------------------------------------------------------------------------------
-#include <GP.h>
+#include <gfxprim.h>
 /* or */
-#include <core/GP_Blit.h>
+#include <core/gp_blit.h>
 
-void GP_Blit(const GP_Pixmap *src,
-             GP_Coord x0, GP_Coord y0, GP_Size w0, GP_Size h0,
-             GP_Pixmap *dst, GP_Coord x1, GP_Coord y1);
+void gp_blit(const gp_pixmap *src,
+             gp_coord x0, gp_coord y0, gp_size w0, gp_size h0,
+             gp_pixmap *dst, gp_coord x1, gp_coord y1);
 
-void GP_BlitXYWH(const GP_Pixmap *src,
-                 GP_Coord x0, GP_Coord y0, GP_Size w0, GP_Size h0,
-                 GP_Pixmap *dst, GP_Coord x1, GP_Coord y1);
+void gp_blit_xywh(const gp_pixmap *src,
+                  gp_coord x0, gp_coord y0, gp_size w0, gp_size h0,
+                  gp_pixmap *dst, gp_coord x1, gp_coord y1);
 
-void GP_BlitXYXY(const GP_Pixmap *src,
-                 GP_Coord x0, GP_Coord y0, GP_Coord x1, GP_Coord y1,
-                 GP_Pixmap *dst, GP_Coord x2, GP_Coord y2);
+void gp_blit_xyxy(const gp_pixmap *src,
+                  gp_coord x0, gp_coord y0, gp_coord x1, gp_coord y1,
+                  gp_pixmap *dst, gp_coord x2, gp_coord y2);
 --------------------------------------------------------------------------------
 
 Blit functions to copy rectangular area from source to destination.
 
-As you may see the 'GP_Blit()' function is just alias for 'GP_BlitXYWH()'.
+As you may see the 'gp_blit()' function is just alias for 'gp_blit_xywh()'.
 
 WARNING: For these functions the behavior is undefined when you pass
          coordinates or width or height outside of the source or destination
 	 pixmap. If you need safe variant that automatically clips the
 	 coordinates and rectangle to fit both the source and destination use
-	 the Clipped variants described below.
+	 the clipped variants described below.
 
 
 [source,c]
 --------------------------------------------------------------------------------
-#include <GP.h>
+#include <gfxprim.h>
 /* or */
-#include <core/GP_Blit.h>
+#include <core/gp_blit.h>
 
-void GP_BlitXYXY_Clipped(const GP_Pixmap *src,
-                         GP_Coord x0, GP_Coord y0, GP_Coord x1, GP_Coord y1,
-                         GP_Pixmap *dst, GP_Coord x2, GP_Coord y2);
+void gp_blit_xyxy_clipped(const gp_pixmap *src,
+                          gp_coord x0, gp_coord y0, gp_coord x1, gp_coord y1,
+                          gp_pixmap *dst, gp_coord x2, gp_coord y2);
 
 
-void GP_BlitXYWH_Clipped(const GP_Pixmap *src,
-                         GP_Coord x0, GP_Coord y0, GP_Size w0, GP_Size h0,
-                         GP_Pixmap *dst, GP_Coord x1, GP_Coord y1);
+void gp_blit_xywh_clipped(const gp_pixmap *src,
+                          gp_coord x0, gp_coord y0, gp_size w0, gp_size h0,
+                          gp_pixmap *dst, gp_coord x1, gp_coord y1);
 
-void GP_Blit_Clipped(const GP_Pixmap *src,
-                     GP_Coord x0, GP_Coord y0, GP_Size w0, GP_Size h0,
-                     GP_Pixmap *dst, GP_Coord x1, GP_Coord y1);
+void gp_blit_clipped(const gp_pixmap *src,
+                     gp_coord x0, gp_coord y0, gp_size w0, gp_size h0,
+                     gp_pixmap *dst, gp_coord x1, gp_coord y1);
 --------------------------------------------------------------------------------
 
 Blit functions to copy rectangular area from source to destination. Both
 source and destination coordinates and sizes are clipped to fit the pixmaps.
 
-As you may see the 'GP_Blit_Clipped()' function is just alias for
-'GP_BlitXYWH_Clipped()'.
+As you may see the 'gp_blit_clipped()' function is just alias for
+'gp_blit_xywh_clipped()'.

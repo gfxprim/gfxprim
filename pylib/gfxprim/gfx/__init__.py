@@ -36,16 +36,16 @@ def _init(module):
   import_members(c_gfx, C, include=const_regexes, sub=strip_GP)
 
   for name in [
-      'ArcSegment', 'Circle', 'Ellipse', 'FillCircle', 'FillEllipse',
-      'FillRect', 'FillRing',
-      'FillTetragon', 'FillTriangle', 'HLine', 'HLineAA', 'Line', 'LineAA',
-      'PutPixelAA', 'Rect', 'Ring', 'Tetragon',
-      'Triangle', 'VLine', 'VLineAA']:
-    extend_submodule(GfxSubmodule, name, c_gfx.__getattribute__('GP_' + name))
+      'arc_segment', 'circle', 'ellipse', 'fill_circle', 'fill_ellipse',
+      'fill_rect', 'fill_ring',
+      'fill_tetragon', 'fill_triangle', 'hline', 'hline_aa', 'line', 'line_aa',
+      'putpixel_aa', 'rect', 'ring', 'tetragon',
+      'triangle', 'vline', 'vline_aa']:
+    extend_submodule(GfxSubmodule, name, c_gfx.__getattribute__('gp_' + name))
 
   @extend(GfxSubmodule)
-  def Fill(self, color):
-      self.ctx.Fill(color)
+  def fill(self, color):
+      self.ctx.fill(color)
 
   def flatten_coords(points):
     "Helper for Polygon and FillPolygon coordinates"
@@ -60,26 +60,26 @@ def _init(module):
     return tuple(l)
 
   @extend(GfxSubmodule)
-  def Polygon(self, points, pixel):
+  def polygon(self, points, pixel):
     """
-    Polygon(pixmap, coordinates, pixel)
-    
+    polygon(pixmap, coordinates, pixel)
+
     Draw a polygon with color `pixel`.
     `coordinates` is either an iterable of `int` coordinates `(x0, y0, x1, y1, ...)`
     or an iterable of tuples `[(x0, y0), (x1, y1), ...]`.
     """
-    c_gfx.GP_Polygon_wrap(self.ctx, flatten_coords(points), pixel)
+    c_gfx.gp_polygon_wrap(self.ctx, flatten_coords(points), pixel)
 
   @extend(GfxSubmodule)
-  def FillPolygon(self, points, pixel):
+  def fill_polygon(self, points, pixel):
     """
-    FillPolygon(pixmap, coordinates, pixel)
-    
+    fill_polygon(pixmap, coordinates, pixel)
+
     Draw a filled polygon with color `pixel`.
     `coordinates` is either an iterable of `int` coordinates `(x0, y0, x1, y1, ...)`
     or an iterable of tuples `[(x0, y0), (x1, y1), ...]`.
     """
-    c_gfx.GP_FillPolygon_wrap(self.ctx, flatten_coords(points), pixel)
+    c_gfx.gp_fill_polygon_wrap(self.ctx, flatten_coords(points), pixel)
 
 _init(locals())
 del _init

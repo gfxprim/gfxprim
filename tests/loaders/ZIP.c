@@ -30,14 +30,14 @@
 #include "tst_test.h"
 
 struct test {
-	GP_Size w, h;
+	gp_size w, h;
 	const char *path;
 };
 
 static int test_load(struct test *test)
 {
-	GP_Container *zip = GP_OpenZip(test->path);
-	GP_Pixmap *img;
+	gp_container *zip = gp_open_zip(test->path);
+	gp_pixmap *img;
 	int ret = TST_SUCCESS;
 
 	if (!zip) {
@@ -45,7 +45,7 @@ static int test_load(struct test *test)
 		return TST_FAILED;
 	}
 
-	img = GP_ContainerLoad(zip, NULL);
+	img = gp_container_load(zip, NULL);
 
 	if (!img) {
 		tst_msg("Failed to load image");
@@ -58,8 +58,8 @@ static int test_load(struct test *test)
 		ret = TST_FAILED;
 	}
 
-	GP_PixmapFree(img);
-	GP_ContainerClose(zip);
+	gp_pixmap_free(img);
+	gp_container_close(zip);
 
 	return ret;
 }
@@ -87,8 +87,8 @@ struct test mixed_content = {
  */
 static int no_images(const char *path)
 {
-	GP_Container *zip = GP_OpenZip(path);
-	GP_Pixmap *img;
+	gp_container *zip = gp_open_zip(path);
+	gp_pixmap *img;
 	int ret = TST_SUCCESS;
 
 	if (!zip) {
@@ -96,7 +96,7 @@ static int no_images(const char *path)
 		return TST_FAILED;
 	}
 
-	img = GP_ContainerLoad(zip, NULL);
+	img = gp_container_load(zip, NULL);
 
 	if (img) {
 		tst_msg("Loaded image from zip without images");
@@ -108,7 +108,7 @@ static int no_images(const char *path)
 		ret = TST_FAILED;
 	}
 
-	GP_ContainerClose(zip);
+	gp_container_close(zip);
 
 	return ret;
 }

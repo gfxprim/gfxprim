@@ -22,7 +22,7 @@
 
 /*
 
-  Timers and priority queue implementation.
+  Timers and timer queue implementation.
 
  */
 
@@ -31,16 +31,18 @@
 
 #include <stdint.h>
 
-typedef struct GP_Timer {
+#include <input/GP_Types.h>
+
+struct gp_timer {
 	/* Heap pointers and number of sons */
-	struct GP_Timer *left;
-	struct GP_Timer *right;
+	gp_timer *left;
+	gp_timer *right;
 	unsigned int sons;
 
 	/* Expiration time */
 	uint64_t expires;
 	/*
-	 * If not zero return value from Callback is ignored and
+	 * If not zero return value from callback is ignored and
 	 * timer is rescheduled each time it expires.
 	 */
 	uint32_t period;
@@ -52,52 +54,52 @@ typedef struct GP_Timer {
 	void *_priv;
 
 	/*
-	 * Timer Callback
+	 * Timer callback
 	 *
 	 * If non-zero is returned, the timer is rescheduled to expire
 	 * return value from now.
 	 */
-	uint32_t (*Callback)(struct GP_Timer *self);
+	uint32_t (*callback)(struct gp_timer *self);
 	void *priv;
-} GP_Timer;
+};
 
-#define GP_TIMER_DECLARE(name, texpires, tperiod, tid, tCallback, tpriv) \
-	GP_Timer name = { \
+#define GP_TIMER_DECLARE(name, texpires, tperiod, tid, tcallback, tpriv) \
+	gp_timer name = { \
 		.expires = texpires, \
 		.period = tperiod, \
 		.id = tid, \
-		.Callback = tCallback, \
+		.callback = tcallback, \
 		.priv = tpriv \
 	}
 
 /*
  * Prints the structrue of binary heap into stdout, only for debugging.
  */
-void GP_TimerQueueDump(GP_Timer *queue);
+void gp_timer_queue_dump(gp_timer *queue);
 
 /*
  * Inserts timer into the timer priority queue.
  */
-void GP_TimerQueueInsert(GP_Timer **queue, uint64_t now, GP_Timer *timer);
+void gp_timer_queue_insert(gp_timer **queue, uint64_t now, gp_timer *timer);
 
 /*
  * Removes timer from timer queue.
  *
  * This operation (in contrast with insert and process) runs in O(n) time.
  */
-void GP_TimerQueueRemove(GP_Timer **queue, GP_Timer *timer);
+void gp_timer_queue_remove(gp_timer **queue, gp_timer *timer);
 
 /*
  * Processes queue, all timers with expires <= now are processed.
  *
  * Returns number of timers processed.
  */
-int GP_TimerQueueProcess(GP_Timer **queue, uint64_t now);
+int gp_timer_queue_process(gp_timer **queue, uint64_t now);
 
 /*
  * Returns size of the queue, i.e. number of timers.
  */
-static inline unsigned int GP_TimerQueueSize(GP_Timer *queue)
+static inline unsigned int gp_timer_queue_size(gp_timer *queue)
 {
 	return queue ? queue->sons + 1 : 0;
 }

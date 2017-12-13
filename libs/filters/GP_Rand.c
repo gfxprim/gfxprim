@@ -22,11 +22,10 @@
 
 #include <math.h>
 
-#include "core/GP_Common.h"
+#include <core/GP_Common.h>
+#include <filters/GP_Rand.h>
 
-#include "GP_Rand.h"
-
-void GP_NormInt(int *arr, unsigned int size, int sigma, int mu)
+void gp_norm_int(int *arr, unsigned int size, int sigma, int mu)
 {
 	unsigned int i = 0;
 	float a, b, rsq;

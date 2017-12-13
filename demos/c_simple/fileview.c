@@ -27,12 +27,12 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <GP.h>
+#include <gfxprim.h>
 
-static GP_Pixmap *win;
-static GP_Backend *backend;
+static gp_pixmap *win;
+static gp_backend *backend;
 
-static GP_Pixel white_pixel, gray_pixel, dark_gray_pixel, black_pixel,
+static gp_pixel white_pixel, gray_pixel, dark_gray_pixel, black_pixel,
 		red_pixel, blue_pixel;
 
 static int font_flag = 0;
@@ -41,38 +41,38 @@ static int tracking = 0;
 static int mul = 1;
 static int space = 0;
 
-static GP_FontFace *font;
+static gp_font_face *font;
 
-struct FileLine {
+struct file_line {
 	char *text;
-	struct FileLine *next;
-	struct FileLine *prev;
+	struct file_line *next;
+	struct file_line *prev;
 };
 
-struct FileLine *first_line = NULL;
-struct FileLine *last_line = NULL;
+struct file_line *first_line = NULL;
+struct file_line *last_line = NULL;
 
 void redraw_screen(void)
 {
-	GP_Fill(win, gray_pixel);
+	gp_fill(win, gray_pixel);
 
-	GP_TextStyle style = GP_DEFAULT_TEXT_STYLE;
+	gp_text_style style = GP_DEFAULT_TEXT_STYLE;
 
 	switch (font_flag) {
 	case 0:
-		style.font = &GP_DefaultConsoleFont;
+		style.font = gp_font_gfxprim_mono;
 	break;
 	case 1:
-		style.font = &GP_DefaultProportionalFont;
+		style.font = gp_font_gfxprim;
 	break;
 	case 2:
-		style.font = GP_FontTinyMono;
+		style.font = gp_font_tiny_mono;
 	break;
 	case 3:
-		style.font = GP_FontTiny;
+		style.font = gp_font_tiny;
 	break;
 	case 4:
-		style.font = GP_FontC64;
+		style.font = gp_font_c64;
 	break;
 	case 5:
 		style.font = font;
@@ -90,12 +90,12 @@ void redraw_screen(void)
 	 */
 	int align = GP_ALIGN_RIGHT|GP_VALIGN_BELOW;
 
-	struct FileLine *line = first_line;
+	struct file_line *line = first_line;
 	unsigned int i;
-	for (i = 0; i < win->h/GP_TextHeight(&style); i++) {
+	for (i = 0; i < win->h/gp_text_height(&style); i++) {
 		if (line == NULL)
 			break;
-		GP_Text(win, &style, 16, 16 + (1.0 * GP_TextHeight(&style))*i,
+		gp_text(win, &style, 16, 16 + (1.0 * gp_text_height(&style))*i,
 		        align, black_pixel, gray_pixel, line->text);
 		line = line->next;
 	}
@@ -108,7 +108,7 @@ static void warp_up(int lines)
 			first_line = first_line->prev;
 
 	redraw_screen();
-	GP_BackendFlip(backend);
+	gp_backend_flip(backend);
 }
 
 static void warp_down(int lines)
@@ -118,15 +118,15 @@ static void warp_down(int lines)
 			first_line = first_line->next;
 
 	redraw_screen();
-	GP_BackendFlip(backend);
+	gp_backend_flip(backend);
 }
 
 void event_loop(void)
 {
-	GP_Event ev;
+	gp_event ev;
 
 	for (;;) {
-		GP_BackendWaitEvent(backend, &ev);
+		gp_backend_wait_event(backend, &ev);
 
 		switch (ev.type) {
 		case GP_EV_KEY:
@@ -141,17 +141,17 @@ void event_loop(void)
 					font_flag = (font_flag + 1) % 5;
 
 				redraw_screen();
-				GP_BackendFlip(backend);
+				gp_backend_flip(backend);
 			break;
 			case GP_KEY_RIGHT:
 				tracking++;
 				redraw_screen();
-				GP_BackendFlip(backend);
+				gp_backend_flip(backend);
 			break;
 			case GP_KEY_LEFT:
 				tracking--;
 				redraw_screen();
-				GP_BackendFlip(backend);
+				gp_backend_flip(backend);
 			break;
 			case GP_KEY_UP:
 				warp_up(1);
@@ -162,23 +162,23 @@ void event_loop(void)
 			case GP_KEY_DOT:
 				space++;
 				redraw_screen();
-				GP_BackendFlip(backend);
+				gp_backend_flip(backend);
 			break;
 			case GP_KEY_COMMA:
 				space--;
 				redraw_screen();
-				GP_BackendFlip(backend);
+				gp_backend_flip(backend);
 			break;
 			case GP_KEY_RIGHT_BRACE:
 				mul++;
 				redraw_screen();
-				GP_BackendFlip(backend);
+				gp_backend_flip(backend);
 			break;
 			case GP_KEY_LEFT_BRACE:
 				if (mul > 0)
 					mul--;
 				redraw_screen();
-				GP_BackendFlip(backend);
+				gp_backend_flip(backend);
 			break;
 			case GP_KEY_PAGE_UP:
 				warp_up(30);
@@ -187,7 +187,7 @@ void event_loop(void)
 				warp_down(30);
 			break;
 			case GP_KEY_ESC:
-				GP_BackendExit(backend);
+				gp_backend_exit(backend);
 				exit(0);
 			break;
 			}
@@ -195,13 +195,13 @@ void event_loop(void)
 		case GP_EV_SYS:
 			switch(ev.code) {
 			case GP_EV_SYS_QUIT:
-				GP_BackendExit(backend);
+				gp_backend_exit(backend);
 				exit(0);
 			break;
 			case GP_EV_SYS_RESIZE:
-				GP_BackendResizeAck(backend);
+				gp_backend_resize_ack(backend);
 				redraw_screen();
-				GP_BackendFlip(backend);
+				gp_backend_flip(backend);
 			break;
 			}
 		break;
@@ -224,7 +224,7 @@ static int read_file_head(const char *filename)
 		if (fgets(buf, 511, f) == NULL)
 			break;
 
-		struct FileLine *line = malloc(sizeof(*line));
+		struct file_line *line = malloc(sizeof(*line));
 		line->text = strdup(buf);
 		line->next = NULL;
 		line->prev = NULL;
@@ -253,12 +253,12 @@ int main(int argc, char *argv[])
 	}
 
 	if (argc > 2)
-		font = GP_FontFaceLoad(argv[2], 0, 16);
+		font = gp_font_face_load(argv[2], 0, 16);
 
 	if (!read_file_head(argv[1]))
 		return 1;
 
-	backend = GP_BackendInit(backend_opts, "File View");
+	backend = gp_backend_init(backend_opts, "File View");
 
 	if (backend == NULL) {
 		fprintf(stderr, "Failed to initalize backend '%s'\n",
@@ -268,15 +268,15 @@ int main(int argc, char *argv[])
 
 	win = backend->pixmap;
 
-	white_pixel     = GP_RGBToPixmapPixel(0xff, 0xff, 0xff, win);
-	gray_pixel      = GP_RGBToPixmapPixel(0xbe, 0xbe, 0xbe, win);
-	dark_gray_pixel = GP_RGBToPixmapPixel(0x7f, 0x7f, 0x7f, win);
-	black_pixel     = GP_RGBToPixmapPixel(0x00, 0x00, 0x00, win);
-	red_pixel       = GP_RGBToPixmapPixel(0xff, 0x00, 0x00, win);
-	blue_pixel      = GP_RGBToPixmapPixel(0x00, 0x00, 0xff, win);
+	white_pixel     = gp_rgb_to_pixmap_pixel(0xff, 0xff, 0xff, win);
+	gray_pixel      = gp_rgb_to_pixmap_pixel(0xbe, 0xbe, 0xbe, win);
+	dark_gray_pixel = gp_rgb_to_pixmap_pixel(0x7f, 0x7f, 0x7f, win);
+	black_pixel     = gp_rgb_to_pixmap_pixel(0x00, 0x00, 0x00, win);
+	red_pixel       = gp_rgb_to_pixmap_pixel(0xff, 0x00, 0x00, win);
+	blue_pixel      = gp_rgb_to_pixmap_pixel(0x00, 0x00, 0xff, win);
 
 	redraw_screen();
-	GP_BackendFlip(backend);
+	gp_backend_flip(backend);
 
 	event_loop();
 

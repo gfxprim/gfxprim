@@ -30,19 +30,19 @@
 #ifndef BACKENDS_GP_BACKEND_VIRTUAL_H
 #define BACKENDS_GP_BACKEND_VIRTUAL_H
 
-#include "GP_Backend.h"
+#include <core/GP_Pixel.h>
+#include <backends/GP_Backend.h>
 
-enum GP_BackendVirtFlags {
-	/*
-	 * If set virtual backend exit calls 'parent' Exit as well.
-	 */
+enum gp_backend_virt_flags {
+	/* If set virtual backend exit calls 'parent' exit as well */
 	GP_BACKEND_CALL_EXIT = 0x01,
 };
 
 /*
  * Create an virtual backend on the top of the existing backend.
  */
-GP_Backend *GP_BackendVirtualInit(GP_Backend *backend,
-                                  GP_PixelType pixel_type, int flags);
+gp_backend *gp_backend_virt_init(gp_backend *backend,
+                                 gp_pixel_type pixel_type,
+				 enum gp_backend_virt_flags flags);
 
 #endif /* BACKENDS_GP_BACKEND_VIRTUAL_H */

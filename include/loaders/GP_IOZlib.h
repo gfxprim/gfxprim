@@ -40,13 +40,13 @@
  * However if end of compressed stream is reached the last read will attempt to
  * seek back by the number of extra buffered bytes.
  */
-GP_IO *GP_IOZlib(GP_IO *io, size_t comp_size);
+gp_io *gp_io_zlib(gp_io *io, size_t comp_size);
 
 /*
  * Repurposes existing Zlib stream for new decompression.
  *
  * Returns zero on success. Returns non-zero on failure and errno is set.
  */
-int GP_IOZlibReset(GP_IO *io, GP_IO *sub_io, size_t comp_size);
+int gp_io_zlib_reset(gp_io *io, gp_io *sub_io, size_t comp_size);
 
 #endif /* LOADERS_GP_IO_ZLIB_H */

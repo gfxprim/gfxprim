@@ -36,11 +36,10 @@
 #include <string.h>
 #include <stdio.h>
 
-#include "core/GP_Debug.h"
-#include "core/GP_Pixel.h"
-#include "core/GP_GetPutPixel.h"
-#include "GP_JPG.h"
-#include "GP_PSP.h"
+#include <core/GP_Debug.h>
+#include <core/GP_Pixel.h>
+#include <core/GP_GetPutPixel.h>
+#include <loaders/GP_Loaders.gen.h>
 
 #define PSP_SIGNATURE "Paint Shop Pro Image File\n\x1a\0\0\0\0\0\0\0\0"
 #define PSP_SIGNATURE_LEN 32
@@ -50,7 +49,7 @@ struct psp_version {
 	uint16_t minor;
 };
 
-int GP_MatchPSP(const void *buf)
+int gp_match_psp(const void *buf)
 {
 	return !memcmp(buf, PSP_SIGNATURE, PSP_SIGNATURE_LEN);
 }
@@ -172,21 +171,21 @@ struct psp_img_attrs {
 	int is_loaded:1;
 	uint8_t subblock;
 	void *priv;
-	GP_Pixmap *img;
-	GP_DataStorage *storage;
+	gp_pixmap *img;
+	gp_storage *storage;
 };
 
 static void fill_metadata(struct psp_img_attrs *attrs)
 {
-	GP_DataStorageAddInt(attrs->storage, NULL, "Width", attrs->w);
-	GP_DataStorageAddInt(attrs->storage, NULL, "Height", attrs->h);
-	GP_DataStorageAddString(attrs->storage, NULL, "Compression",
+	gp_storage_add_int(attrs->storage, NULL, "Width", attrs->w);
+	gp_storage_add_int(attrs->storage, NULL, "Height", attrs->h);
+	gp_storage_add_string(attrs->storage, NULL, "Compression",
 	                        psp_comp_type_name(attrs->comp_type));
-	GP_DataStorageAddInt(attrs->storage, NULL, "Bit Depth",
+	gp_storage_add_int(attrs->storage, NULL, "Bit Depth",
 	                     attrs->bit_depth);
 }
 
-static int psp_read_general_img_attr_chunk(GP_IO *io,
+static int psp_read_general_img_attr_chunk(gp_io *io,
                                            struct psp_img_attrs *attrs)
 {
 	int err;
@@ -214,7 +213,7 @@ static int psp_read_general_img_attr_chunk(GP_IO *io,
 		GP_IO_END
 	};
 
-	if (GP_IOReadF(io, general_image_info, &attrs->w, &attrs->h,
+	if (gp_io_readf(io, general_image_info, &attrs->w, &attrs->h,
 	               &attrs->res, &attrs->res_metric, &attrs->comp_type,
 		       &attrs->bit_depth, &attrs->plane_count,
 		       &attrs->color_count, &attrs->grayscale_flag,
@@ -241,11 +240,11 @@ static int psp_read_general_img_attr_chunk(GP_IO *io,
 	return 0;
 }
 
-static int psp_next_block(GP_IO *io, struct psp_img_attrs *attrs,
-                          GP_ProgressCallback *callback);
+static int psp_next_block(gp_io *io, struct psp_img_attrs *attrs,
+                          gp_progress_cb *callback);
 
-static int psp_read_layer_start_block(GP_IO *io, struct psp_img_attrs *attrs,
-                                      GP_ProgressCallback *callback)
+static int psp_read_layer_start_block(gp_io *io, struct psp_img_attrs *attrs,
+                                      gp_progress_cb *callback)
 {
 	int i;
 
@@ -265,8 +264,8 @@ static int psp_read_layer_start_block(GP_IO *io, struct psp_img_attrs *attrs,
 	return 0;
 }
 
-static int psp_read_composite_image_block(GP_IO *io, struct psp_img_attrs *attrs,
-                                          GP_ProgressCallback *callback)
+static int psp_read_composite_image_block(gp_io *io, struct psp_img_attrs *attrs,
+                                          gp_progress_cb *callback)
 {
 	uint32_t i, composite_image_count;
 	int err;
@@ -283,7 +282,7 @@ static int psp_read_composite_image_block(GP_IO *io, struct psp_img_attrs *attrs
 		GP_IO_END,
 	};
 
-	if (GP_IOReadF(io, composite_image, &composite_image_count) != 2) {
+	if (gp_io_readf(io, composite_image, &composite_image_count) != 2) {
 		err = errno;
 		GP_DEBUG(1, "Failed to read Composite Image Bank Info Chunk");
 		return err;
@@ -330,8 +329,8 @@ struct psp_comp_img_attr_info {
 	uint16_t comp_img_type;
 };
 
-static int psp_read_composite_attributes_block(GP_IO *io, struct psp_img_attrs *attrs,
-                                               GP_ProgressCallback *callback)
+static int psp_read_composite_attributes_block(gp_io *io, struct psp_img_attrs *attrs,
+                                               gp_progress_cb *callback)
 {
 	struct psp_comp_img_attr_info info;
 	int err;
@@ -348,7 +347,7 @@ static int psp_read_composite_attributes_block(GP_IO *io, struct psp_img_attrs *
 		GP_IO_END
 	};
 
-	if (GP_IOReadF(io, info_chunk, &info.w, &info.h, &info.bit_depth,
+	if (gp_io_readf(io, info_chunk, &info.w, &info.h, &info.bit_depth,
 	               &info.comp_type, &info.plane_count, &info.color_count,
 		       &info.comp_img_type) != 8) {
 		err = errno;
@@ -374,12 +373,12 @@ static int psp_read_composite_attributes_block(GP_IO *io, struct psp_img_attrs *
 	return 0;
 }
 
-static int psp_read_jpeg(GP_IO *io, struct psp_img_attrs *attrs,
-                         GP_ProgressCallback *callback)
+static int psp_read_jpeg(gp_io *io, struct psp_img_attrs *attrs,
+                         gp_progress_cb *callback)
 {
 	int err;
 
-	GP_IOSeek(io, 14, GP_IO_SEEK_CUR);
+	gp_io_seek(io, 14, GP_IO_SEEK_CUR);
 /*
 	if (fread(buf, sizeof(buf), 1, f) < 1) {
 		GP_DEBUG(1, "Failed to read JPEG Information Chunk");
@@ -390,7 +389,7 @@ static int psp_read_jpeg(GP_IO *io, struct psp_img_attrs *attrs,
 
 	GP_DEBUG(5, "JPEG Chunk");
 
-	attrs->img = GP_ReadJPG(io, callback);
+	attrs->img = gp_read_jpg(io, callback);
 
 	if (attrs->img == NULL) {
 		err = errno;
@@ -401,8 +400,8 @@ static int psp_read_jpeg(GP_IO *io, struct psp_img_attrs *attrs,
 	return 0;
 }
 
-static int psp_next_block(GP_IO *io, struct psp_img_attrs *attrs,
-                          GP_ProgressCallback *callback)
+static int psp_next_block(gp_io *io, struct psp_img_attrs *attrs,
+                          gp_progress_cb *callback)
 {
 	uint16_t block_id;
 	uint32_t block_size;
@@ -416,7 +415,7 @@ static int psp_next_block(GP_IO *io, struct psp_img_attrs *attrs,
 		GP_IO_END
 	};
 
-	if (GP_IOReadF(io, block_header, &block_id, &block_size) != 6) {
+	if (gp_io_readf(io, block_header, &block_id, &block_size) != 6) {
 		err = errno;
 		GP_DEBUG(1, "Failed to read block header: %s", strerror(errno));
 		return err;
@@ -425,7 +424,7 @@ static int psp_next_block(GP_IO *io, struct psp_img_attrs *attrs,
 	GP_DEBUG(2 + attrs->subblock, "%s Block size %u",
 	         psp_block_id_name(block_id), block_size);
 
-	offset = GP_IOTell(io) + block_size;
+	offset = gp_io_tell(io) + block_size;
 
 	switch (block_id) {
 	case PSP_IMAGE_BLOCK:
@@ -448,7 +447,7 @@ static int psp_next_block(GP_IO *io, struct psp_img_attrs *attrs,
 	if (err)
 		return err;
 
-	if (GP_IOSeek(io, offset, GP_IO_SEEK_SET) != offset) {
+	if (gp_io_seek(io, offset, GP_IO_SEEK_SET) != offset) {
 		err = errno;
 		GP_DEBUG(1, "Failed to seek to next block; %s",
 		         strerror(errno));
@@ -458,8 +457,8 @@ static int psp_next_block(GP_IO *io, struct psp_img_attrs *attrs,
 	return 0;
 }
 
-int GP_ReadPSPEx(GP_IO *io, GP_Pixmap **img, GP_DataStorage *storage,
-                 GP_ProgressCallback *callback)
+int gp_read_psp_ex(gp_io *io, gp_pixmap **img, gp_storage *storage,
+                   gp_progress_cb *callback)
 {
 	int err = 0;
 	struct psp_img_attrs attrs = {.is_loaded = 0, .subblock = 0,
@@ -478,7 +477,7 @@ int GP_ReadPSPEx(GP_IO *io, GP_Pixmap **img, GP_DataStorage *storage,
 		GP_IO_END
 	};
 
-	if (GP_IOReadF(io, psp_header, &version.major, &version.minor) != 34) {
+	if (gp_io_readf(io, psp_header, &version.major, &version.minor) != 34) {
 		GP_DEBUG(1, "Failed to read file header");
 		err = EIO;
 		goto err0;
@@ -488,8 +487,8 @@ int GP_ReadPSPEx(GP_IO *io, GP_Pixmap **img, GP_DataStorage *storage,
 	         version.major, version.minor);
 
 	if (storage) {
-		GP_DataStorageAddInt(storage, NULL, "Version Major", version.major);
-		GP_DataStorageAddInt(storage, NULL, "Version Minor", version.minor);
+		gp_storage_add_int(storage, NULL, "Version Major", version.major);
+		gp_storage_add_int(storage, NULL, "Version Minor", version.minor);
 	}
 
 	if (!img)
@@ -514,25 +513,9 @@ err0:
 	return 1;
 }
 
-GP_Pixmap *GP_LoadPSP(const char *src_path, GP_ProgressCallback *callback)
-{
-	return GP_LoaderLoadImage(&GP_PSP, src_path, callback);
-}
-
-GP_Pixmap *GP_ReadPSP(GP_IO *io, GP_ProgressCallback *callback)
-{
-	return GP_LoaderReadImage(&GP_PSP, io, callback);
-}
-
-int GP_LoadPSPEx(const char *src_path, GP_Pixmap **img,
-		 GP_DataStorage *storage, GP_ProgressCallback *callback)
-{
-	return GP_LoaderLoadImageEx(&GP_PSP, src_path, img, storage, callback);
-}
-
-struct GP_Loader GP_PSP = {
-	.Read = GP_ReadPSPEx,
-	.Match = GP_MatchPSP,
+const gp_loader gp_psp = {
+	.Read = gp_read_psp_ex,
+	.Match = gp_match_psp,
 	.fmt_name = "Paint Shop Pro Image",
 	.extensions = {"psp", "pspimage", NULL},
 };

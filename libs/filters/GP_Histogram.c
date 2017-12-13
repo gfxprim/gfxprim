@@ -24,23 +24,23 @@
 #include <errno.h>
 
 #include <core/GP_Debug.h>
-#include "GP_Stats.h"
+#include <filters/GP_Stats.h>
 
-GP_Histogram *GP_HistogramAlloc(GP_PixelType pixel_type)
+gp_histogram *gp_histogram_alloc(gp_pixel_type pixel_type)
 {
 	size_t hsize, size = 0;
 	unsigned int i;
-	GP_Histogram *hist;
+	gp_histogram *hist;
 
 	GP_DEBUG(1, "Allocating histogram for %s",
-	         GP_PixelTypeName(pixel_type));
+	         gp_pixel_type_name(pixel_type));
 
-	hsize = sizeof(GP_Histogram) +
-	        GP_PixelChannelCount(pixel_type) * sizeof(void*);
+	hsize = sizeof(gp_histogram) +
+	        gp_pixel_channel_count(pixel_type) * sizeof(void*);
 
-	for (i = 0; i < GP_PixelChannelCount(pixel_type); i++) {
-		size += sizeof(GP_HistogramChannel) +
-			sizeof(uint32_t) * (1<<GP_PixelChannelBits(pixel_type, i));
+	for (i = 0; i < gp_pixel_channel_count(pixel_type); i++) {
+		size += sizeof(gp_histogram_channel) +
+			sizeof(uint32_t) * (1<<gp_pixel_channel_bits(pixel_type, i));
 	}
 
 	hist = malloc(hsize + size);
@@ -52,27 +52,27 @@ GP_Histogram *GP_HistogramAlloc(GP_PixelType pixel_type)
 
 	hist->pixel_type = pixel_type;
 
-	for (i = 0; i < GP_PixelChannelCount(pixel_type); i++) {
-		size_t chan_size = 1<<GP_PixelChannelBits(pixel_type, i);
+	for (i = 0; i < gp_pixel_channel_count(pixel_type); i++) {
+		size_t chan_size = 1<<gp_pixel_channel_bits(pixel_type, i);
 
 		hist->channels[i] = (void*)hist + hsize;
 
-		hsize += sizeof(GP_HistogramChannel) +
+		hsize += sizeof(gp_histogram_channel) +
 			sizeof(uint32_t) * chan_size;
 
 		hist->channels[i]->len = chan_size;
-		hist->channels[i]->chan_name = GP_PixelChannelName(pixel_type, i);
+		hist->channels[i]->chan_name = gp_pixel_channel_name(pixel_type, i);
 	}
 
 	return hist;
 }
 
-GP_HistogramChannel *GP_HistogramChannelByName(GP_Histogram *self,
-		                               const char *name)
+gp_histogram_channel *gp_histogram_channel_by_name(gp_histogram *self,
+		                                   const char *name)
 {
 	unsigned int i;
 
-	for (i = 0; i < GP_PixelChannelCount(self->pixel_type); i++) {
+	for (i = 0; i < gp_pixel_channel_count(self->pixel_type); i++) {
 		if (!strcmp(self->channels[i]->chan_name, name))
 			return self->channels[i];
 	}
@@ -80,7 +80,7 @@ GP_HistogramChannel *GP_HistogramChannelByName(GP_Histogram *self,
 	return NULL;
 }
 
-void GP_HistogramFree(GP_Histogram *self)
+void gp_histogram_free(gp_histogram *self)
 {
 	GP_DEBUG(1, "Freeing histogram %p", self);
 	free(self);

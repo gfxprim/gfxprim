@@ -34,19 +34,19 @@
 struct testcase {
 	/* polygon description */
 	unsigned int edge_count;
-	GP_Coord edges[20];
+	gp_coord edges[20];
 
 	/* expected result */
-	GP_Size w, h;
+	gp_size w, h;
 	const char pixmap[];
 };
 
 static int test_polygon(struct testcase *t)
 {
-	GP_Pixmap *c;
+	gp_pixmap *c;
 	int err;
 
-	c = GP_PixmapAlloc(t->w, t->h, GP_PIXEL_G8);
+	c = gp_pixmap_alloc(t->w, t->h, GP_PIXEL_G8);
 
 	if (c == NULL) {
 		tst_err("Failed to allocate pixmap");
@@ -56,7 +56,7 @@ static int test_polygon(struct testcase *t)
 	/* zero the pixels buffer */
 	memset(c->pixels, 0, c->w * c->h);
 
-	GP_FillPolygon(c, t->edge_count, t->edges, 1);
+	gp_fill_polygon(c, t->edge_count, t->edges, 1);
 
 	err = compare_buffers(t->pixmap, c);
 

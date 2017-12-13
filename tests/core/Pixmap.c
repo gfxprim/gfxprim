@@ -22,7 +22,7 @@
 
 /*
 
-  Very basic GP_Pixmap tests.
+  Very basic gp_pixmap tests.
 
  */
 #include <errno.h>
@@ -36,12 +36,12 @@
  */
 static int Pixmap_Alloc_Free(void)
 {
-	GP_Pixmap *c;
+	gp_pixmap *c;
 
-	c = GP_PixmapAlloc(100, 200, GP_PIXEL_RGB888);
+	c = gp_pixmap_alloc(100, 200, GP_PIXEL_RGB888);
 
 	if (c == NULL) {
-		tst_msg("GP_PixmapAlloc() failed");
+		tst_msg("gp_pixmap_alloc() failed");
 		return TST_FAILED;
 	}
 
@@ -92,7 +92,7 @@ static int Pixmap_Alloc_Free(void)
 	*(char*)GP_PIXEL_ADDR(c, 0, 0) = 0;
 	*(char*)GP_PIXEL_ADDR(c, 100, 100) = 0;
 
-	GP_PixmapFree(c);
+	gp_pixmap_free(c);
 
 	return TST_SUCCESS;
 }
@@ -100,8 +100,8 @@ static int Pixmap_Alloc_Free(void)
 /*
  * Asserts that subpixmap structure is initialized correctly
  */
-static int subpixmap_assert(const GP_Pixmap *c, const GP_Pixmap *sc,
-                             GP_Size w, GP_Size h)
+static int subpixmap_assert(const gp_pixmap *c, const gp_pixmap *sc,
+                             gp_size w, gp_size h)
 {
 	if (c->bpp != sc->bpp) {
 		tst_msg("Pixmap->bpp != SubPixmap->bpp");
@@ -153,20 +153,20 @@ static int subpixmap_assert(const GP_Pixmap *c, const GP_Pixmap *sc,
 
 static int SubPixmap_Alloc_Free(void)
 {
-	GP_Pixmap *c, *sc;
+	gp_pixmap *c, *sc;
 	int ret;
 
-	c = GP_PixmapAlloc(300, 300, GP_PIXEL_RGB888);
+	c = gp_pixmap_alloc(300, 300, GP_PIXEL_RGB888);
 
 	if (c == NULL) {
-		tst_msg("GP_PixmapAlloc() failed");
+		tst_msg("gp_pixmap_alloc() failed");
 		return TST_UNTESTED;
 	}
 
-	sc = GP_SubPixmapAlloc(c, 100, 100, 100, 100);
+	sc = gp_sub_pixmap_alloc(c, 100, 100, 100, 100);
 
 	if (sc == NULL) {
-		GP_PixmapFree(c);
+		gp_pixmap_free(c);
 		return TST_FAILED;
 	}
 
@@ -175,41 +175,41 @@ static int SubPixmap_Alloc_Free(void)
 	if (ret)
 		return ret;
 
-	GP_PixmapFree(c);
-	GP_PixmapFree(sc);
+	gp_pixmap_free(c);
+	gp_pixmap_free(sc);
 
 	return TST_SUCCESS;
 }
 
 static int SubPixmap_Create(void)
 {
-	GP_Pixmap *c, sc;
+	gp_pixmap *c, sc;
 	int ret;
 
-	c = GP_PixmapAlloc(300, 300, GP_PIXEL_RGB888);
+	c = gp_pixmap_alloc(300, 300, GP_PIXEL_RGB888);
 
 	if (c == NULL) {
-		tst_msg("GP_PixmapAlloc() failed");
+		tst_msg("gp_pixmap_alloc() failed");
 		return TST_UNTESTED;
 	}
 
-	GP_SubPixmap(c, &sc, 100, 100, 100, 100);
+	gp_sub_pixmap(c, &sc, 100, 100, 100, 100);
 
 	ret = subpixmap_assert(c, &sc, 100, 100);
 
 	if (ret)
 		return ret;
 
-	GP_PixmapFree(c);
+	gp_pixmap_free(c);
 
 	return TST_SUCCESS;
 }
 
 static int pixmap_zero_w(void)
 {
-	GP_Pixmap *c;
+	gp_pixmap *c;
 
-	c = GP_PixmapAlloc(0, 200, GP_PIXEL_G8);
+	c = gp_pixmap_alloc(0, 200, GP_PIXEL_G8);
 
 	if (c != NULL) {
 		tst_msg("Pixmap with zero width successfuly allocated");
@@ -226,9 +226,9 @@ static int pixmap_zero_w(void)
 
 static int pixmap_zero_h(void)
 {
-	GP_Pixmap *c;
+	gp_pixmap *c;
 
-	c = GP_PixmapAlloc(200, 0, GP_PIXEL_G8);
+	c = gp_pixmap_alloc(200, 0, GP_PIXEL_G8);
 
 	if (c != NULL) {
 		tst_msg("Pixmap with zero height successfuly allocated");
@@ -245,9 +245,9 @@ static int pixmap_zero_h(void)
 
 static int pixmap_invalid_pixeltype1(void)
 {
-	GP_Pixmap *c;
+	gp_pixmap *c;
 
-	c = GP_PixmapAlloc(100, 100, -1);
+	c = gp_pixmap_alloc(100, 100, -1);
 
 	if (c != NULL) {
 		tst_msg("Pixmap with invalid pixel type (-1) succesfully allocated");
@@ -264,9 +264,9 @@ static int pixmap_invalid_pixeltype1(void)
 
 static int pixmap_invalid_pixeltype2(void)
 {
-	GP_Pixmap *c;
+	gp_pixmap *c;
 
-	c = GP_PixmapAlloc(100, 100, GP_PIXEL_MAX + 1000);
+	c = gp_pixmap_alloc(100, 100, GP_PIXEL_MAX + 1000);
 
 	if (c != NULL) {
 		tst_msg("Pixmap with invalid pixel type (-1) succesfully allocated");

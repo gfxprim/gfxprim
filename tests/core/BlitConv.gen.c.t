@@ -14,21 +14,21 @@
 
 #include "tst_test.h"
 
-static void fill_pixmap(GP_Pixmap *c, GP_Pixel p)
+static void fill_pixmap(gp_pixmap *c, gp_pixel p)
 {
-	GP_Coord x, y;
+	gp_coord x, y;
 
-	for (x = 0; x < (GP_Coord)c->w; x++)
-		for (y = 0; y < (GP_Coord)c->h; y++)
-			GP_PutPixel(c, x, y, p);
+	for (x = 0; x < (gp_coord)c->w; x++)
+		for (y = 0; y < (gp_coord)c->h; y++)
+			gp_putpixel(c, x, y, p);
 }
 
-static void mess_pixmap(GP_Pixmap *c)
+static void mess_pixmap(gp_pixmap *c)
 {
-	GP_Coord y;
+	gp_coord y;
 	unsigned int i;
 
-	for (y = 0; y < (GP_Coord)c->h; y++) {
+	for (y = 0; y < (gp_coord)c->h; y++) {
 		uint8_t *row = GP_PIXEL_ADDR(c, 0, y);
 		for (i = 0; i < c->bytes_per_row; i++) {
 			row[i] = y ^ i;
@@ -36,14 +36,14 @@ static void mess_pixmap(GP_Pixmap *c)
 	}
 }
 
-static int check_filled(GP_Pixmap *c, GP_Pixel p)
+static int check_filled(gp_pixmap *c, gp_pixel p)
 {
-	GP_Coord x, y;
-	GP_Pixel pc;
+	gp_coord x, y;
+	gp_pixel pc;
 
-	for (x = 0; x < (GP_Coord)c->w; x++) {
-		for (y = 0; y < (GP_Coord)c->h; y++) {
-			pc = GP_GetPixel(c, x, y);
+	for (x = 0; x < (gp_coord)c->w; x++) {
+		for (y = 0; y < (gp_coord)c->h; y++) {
+			pc = gp_getpixel(c, x, y);
 			if (p != pc) {
 				tst_msg("Pixels different %08x %08x", p, pc);
 				return 1;
@@ -54,37 +54,37 @@ static int check_filled(GP_Pixmap *c, GP_Pixel p)
 	return 0;
 }
 
-static GP_Pixel rgb_to_pixel(int r, int g, int b, GP_Pixmap *c)
+static gp_pixel rgb_to_pixel(int r, int g, int b, gp_pixmap *c)
 {
-	if (GP_PixelHasFlags(c->pixel_type, GP_PIXEL_HAS_ALPHA))
-		return GP_RGBAToPixmapPixel(r, g, b, 0xff, c);
+	if (gp_pixel_has_flags(c->pixel_type, GP_PIXEL_HAS_ALPHA))
+		return gp_rgba_to_pixmap_pixel(r, g, b, 0xff, c);
 
-	return GP_RGBToPixmapPixel(r, g, b, c);
+	return gp_rgb_to_pixmap_pixel(r, g, b, c);
 }
 
 @ def gen_blit(name, r, g, b, pt1, pt2):
 static int blit_{{ name }}_{{ pt1.name }}_to_{{ pt2.name }}(void)
 {
-	GP_Pixmap *src = GP_PixmapAlloc(100, 100, GP_PIXEL_{{ pt1.name }});
-	GP_Pixmap *dst = GP_PixmapAlloc(100, 100, GP_PIXEL_{{ pt2.name }});
+	gp_pixmap *src = gp_pixmap_alloc(100, 100, GP_PIXEL_{{ pt1.name }});
+	gp_pixmap *dst = gp_pixmap_alloc(100, 100, GP_PIXEL_{{ pt2.name }});
 
 	if (src == NULL || dst == NULL) {
-		GP_PixmapFree(src);
-		GP_PixmapFree(dst);
+		gp_pixmap_free(src);
+		gp_pixmap_free(dst);
 		tst_msg("Malloc failed :(");
 		return TST_UNTESTED;
 	}
 
 	/* Fill source with color, destination with pseudo random mess */
-	GP_Pixel pix_src = rgb_to_pixel({{ r }}, {{ g }}, {{ b }}, src);
-	GP_Pixel pix_dst = rgb_to_pixel({{ r }}, {{ g }}, {{ b }}, dst);
+	gp_pixel pix_src = rgb_to_pixel({{ r }}, {{ g }}, {{ b }}, src);
+	gp_pixel pix_dst = rgb_to_pixel({{ r }}, {{ g }}, {{ b }}, dst);
 
         tst_msg("pixel_src=%08x pixel_dst=%08x", pix_src, pix_dst);
 
 	fill_pixmap(src, pix_src);
 	mess_pixmap(dst);
 
-	GP_Blit(src, 0, 0, src->w, src->h, dst, 0, 0);
+	gp_blit(src, 0, 0, src->w, src->h, dst, 0, 0);
 
 	if (check_filled(dst, pix_dst))
 		return TST_FAILED;

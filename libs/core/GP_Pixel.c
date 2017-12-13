@@ -28,8 +28,8 @@
 #include "GP_Debug.h"
 #include "GP_Pixel.h"
 
-static const GP_PixelTypeChannel *
-get_channel(const GP_PixelTypeDescription *desc, const char *name)
+static const gp_pixel_channel *
+get_channel(const gp_pixel_type_desc *desc, const char *name)
 {
 	unsigned int i;
 
@@ -40,14 +40,14 @@ get_channel(const GP_PixelTypeDescription *desc, const char *name)
 	return NULL;
 }
 
-static int match(const GP_PixelTypeChannel *channel, GP_Pixel mask)
+static int match(const gp_pixel_channel *channel, gp_pixel mask)
 {
 	if (channel == NULL) {
 		GP_DEBUG(3, "%s gen %08x pass %08x", channel->name, 0, mask);
 		return !mask;
 	}
 
-	GP_Pixel chmask = ~0;
+	gp_pixel chmask = ~0;
 
 	chmask >>= (GP_PIXEL_BITS - channel->size);
 	chmask <<= channel->offset;
@@ -56,20 +56,20 @@ static int match(const GP_PixelTypeChannel *channel, GP_Pixel mask)
 	return (chmask == mask);
 }
 
-GP_PixelType GP_PixelTypeByName(const char *name)
+gp_pixel_type gp_pixel_type_by_name(const char *name)
 {
 	unsigned int i;
 
 	for (i = 0; i < GP_PIXEL_MAX; i++)
-		if (!strcasecmp(name, GP_PixelTypes[i].name))
+		if (!strcasecmp(name, gp_pixel_types[i].name))
 			return i;
 
 	return GP_PIXEL_UNKNOWN;
 }
 
-GP_PixelType GP_PixelRGBMatch(GP_Pixel rmask, GP_Pixel gmask,
-                              GP_Pixel bmask, GP_Pixel amask,
-			      uint8_t bits_per_pixel)
+gp_pixel_type gp_pixel_rgb_match(gp_pixel rmask, gp_pixel gmask,
+                                gp_pixel bmask, gp_pixel amask,
+			        uint8_t bits_per_pixel)
 {
 	unsigned int i;
 
@@ -78,21 +78,21 @@ GP_PixelType GP_PixelRGBMatch(GP_Pixel rmask, GP_Pixel gmask,
 
 	for (i = 0; i < GP_PIXEL_MAX; i++) {
 		int res;
-		const GP_PixelTypeChannel *r, *g, *b, *a;
+		const gp_pixel_channel *r, *g, *b, *a;
 
-		if (!GP_PixelHasFlags(i, GP_PIXEL_IS_RGB))
+		if (!gp_pixel_has_flags(i, GP_PIXEL_IS_RGB))
 			continue;
 
-		if (GP_PixelTypes[i].size != bits_per_pixel)
+		if (gp_pixel_types[i].size != bits_per_pixel)
 			continue;
 
-		r = get_channel(&GP_PixelTypes[i], "R");
-		g = get_channel(&GP_PixelTypes[i], "G");
-		b = get_channel(&GP_PixelTypes[i], "B");
-		a = get_channel(&GP_PixelTypes[i], "A");
+		r = get_channel(&gp_pixel_types[i], "R");
+		g = get_channel(&gp_pixel_types[i], "G");
+		b = get_channel(&gp_pixel_types[i], "B");
+		a = get_channel(&gp_pixel_types[i], "A");
 
 		GP_DEBUG(2, "Trying Pixel %s %u",
-		         GP_PixelTypes[i].name, bits_per_pixel);
+		         gp_pixel_types[i].name, bits_per_pixel);
 
 		if (r)
 			GP_DEBUG(3, "Matching R %i %i", r->size, r->offset);
@@ -111,8 +111,8 @@ GP_PixelType GP_PixelRGBMatch(GP_Pixel rmask, GP_Pixel gmask,
 
 		if (res) {
 			GP_DEBUG(1, "Pixel found type id %u name '%s'",
-			         GP_PixelTypes[i].type, GP_PixelTypes[i].name);
-			return GP_PixelTypes[i].type;
+			         gp_pixel_types[i].type, gp_pixel_types[i].name);
+			return gp_pixel_types[i].type;
 		}
 	}
 
@@ -120,11 +120,11 @@ GP_PixelType GP_PixelRGBMatch(GP_Pixel rmask, GP_Pixel gmask,
 }
 
 
-GP_PixelType GP_PixelRGBLookup(uint32_t rsize, uint32_t roff,
-                               uint32_t gsize, uint32_t goff,
-			       uint32_t bsize, uint32_t boff,
-			       uint32_t asize, uint32_t aoff,
-			       uint8_t bits_per_pixel)
+gp_pixel_type gp_pixel_rgb_lookup(uint32_t rsize, uint32_t roff,
+                                uint32_t gsize, uint32_t goff,
+			        uint32_t bsize, uint32_t boff,
+			        uint32_t asize, uint32_t aoff,
+			        uint8_t bits_per_pixel)
 {
 	unsigned int i;
 
@@ -133,21 +133,21 @@ GP_PixelType GP_PixelRGBLookup(uint32_t rsize, uint32_t roff,
 	             bits_per_pixel);
 
 	for (i = 0; i < GP_PIXEL_MAX; i++) {
-		const GP_PixelTypeChannel *r, *g, *b, *a;
+		const gp_pixel_channel *r, *g, *b, *a;
 
-		if (!GP_PixelHasFlags(i, GP_PIXEL_IS_RGB))
+		if (!gp_pixel_has_flags(i, GP_PIXEL_IS_RGB))
 			continue;
 
-		if (GP_PixelTypes[i].size != bits_per_pixel)
+		if (gp_pixel_types[i].size != bits_per_pixel)
 			continue;
 
 		GP_DEBUG(2, "Trying Pixel %s %u",
-		         GP_PixelTypes[i].name, bits_per_pixel);
+		         gp_pixel_types[i].name, bits_per_pixel);
 
-		r = get_channel(&GP_PixelTypes[i], "R");
-		g = get_channel(&GP_PixelTypes[i], "G");
-		b = get_channel(&GP_PixelTypes[i], "B");
-		a = get_channel(&GP_PixelTypes[i], "A");
+		r = get_channel(&gp_pixel_types[i], "R");
+		g = get_channel(&gp_pixel_types[i], "G");
+		b = get_channel(&gp_pixel_types[i], "B");
+		a = get_channel(&gp_pixel_types[i], "A");
 
 		if (a == NULL && asize != 0)
 			continue;
@@ -159,18 +159,19 @@ GP_PixelType GP_PixelRGBLookup(uint32_t rsize, uint32_t roff,
 		    g->offset == goff && g->size == gsize &&
 		    b->offset == boff && b->size == bsize) {
 			GP_DEBUG(1, "Pixel found type id %u name '%s'",
-			         GP_PixelTypes[i].type, GP_PixelTypes[i].name);
+			         gp_pixel_types[i].type,
+			         gp_pixel_types[i].name);
 
-			return GP_PixelTypes[i].type;
+			return gp_pixel_types[i].type;
 		 }
 	}
 
 	return GP_PIXEL_UNKNOWN;
 }
 
-int GP_PixelHasFlags(GP_PixelType pixel_type, GP_PixelFlags flags)
+int gp_pixel_has_flags(gp_pixel_type pixel_type, gp_pixel_flags flags)
 {
-	GP_PixelFlags my_flags = GP_PixelTypes[pixel_type].flags;
+	gp_pixel_flags my_flags = gp_pixel_types[pixel_type].flags;
 
 	return flags == (my_flags & flags);
 }

@@ -29,19 +29,19 @@
 #ifndef FILTERS_GP_HILBERT_CURVE_H
 #define FILTERS_GP_HILBERT_CURVE_H
 
-struct GP_CurveState {
+typedef struct gp_curve_state {
 	/* half of the number of bits of curve size */
 	unsigned int n;
 	/* coordinates */
 	unsigned int x, y;
 	/* current curve lenght */
 	unsigned int s;
-};
+} gp_curve_state;
 
 /*
  * Resets curve to initial state i.e. x = 0, y = 0, (length) s = 0.
  */
-static inline void GP_HilbertCurveInit(struct GP_CurveState *state, int n)
+static inline void gp_hilbert_curve_init(gp_curve_state *state, int n)
 {
 	state->n = n;
 	state->s = 0;
@@ -52,7 +52,7 @@ static inline void GP_HilbertCurveInit(struct GP_CurveState *state, int n)
 /*
  * Variant of Lam and Shapiro
  */
-static inline void GP_HilbertCurveGetXY(struct GP_CurveState *state)
+static inline void gp_hilbert_curve_getxy(gp_curve_state *state)
 {
 	int sa, sb;
 	/*
@@ -83,19 +83,19 @@ static inline void GP_HilbertCurveGetXY(struct GP_CurveState *state)
 /*
  * Finds next X and Y
  */
-static inline void GP_HilbertCurveNext(struct GP_CurveState *state)
+static inline void gp_hilbert_curve_next(gp_curve_state *state)
 {
 
 	/* increment length */
 	state->s++;
 	/* get X and Y */
-	GP_HilbertCurveGetXY(state);
+	gp_hilbert_curve_getxy(state);
 }
 
 /*
  * Returns true if we are not at curve endpoint
  */
-static inline int GP_HilbertCurveContinues(struct GP_CurveState *state)
+static inline int gp_hilbert_curve_continues(gp_curve_state *state)
 {
 	return state->s < (1U<<(2*state->n));
 }

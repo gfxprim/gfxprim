@@ -31,7 +31,7 @@
 
 #include <math.h>
 
-#include <GP.h>
+#include <gfxprim.h>
 
 #define TIMER_TICK 20000
 #define DISPLAY_W 640
@@ -39,21 +39,21 @@
 #define sqr(x) ((x)*(x))
 #define sgn(x) ((x)>0 ? 1 : -1)
 
-static GP_Backend *backend;
-static GP_Pixmap *pixmap;
+static gp_backend *backend;
+static gp_pixmap *pixmap;
 
 static int iter, l, way = 1, draw_edge = 1;
-static GP_Pixel black, blue, gray, red;
+static gp_pixel black, blue, gray, red;
 
 static void sierpinsky(double x1, double y1, double x4, double y4, int iter)
 {
 	double x2, y2, x3, y3, x5, y5;
-	GP_Pixel pixel;
-	pixel = GP_RGBToPixel(0, 0, 255-16*iter, pixmap->pixel_type);
+	gp_pixel pixel;
+	pixel = gp_rgb_to_pixel(0, 0, 255-16*iter, pixmap->pixel_type);
 
 	if (iter <= 0) {
 		if (draw_edge)
-			GP_Line(pixmap, x1, y1, x4, y4, black);
+			gp_line(pixmap, x1, y1, x4, y4, black);
 		return;
 	}
 
@@ -66,11 +66,11 @@ static void sierpinsky(double x1, double y1, double x4, double y4, int iter)
 	x5 = (x1+x4)/2 + (y2 - y3)*sqrt(3.00/4);
 	y5 = (y1+y4)/2 + (x3 - x2)*sqrt(3.00/4);
 
-	GP_FillTriangle(pixmap, x2, y2, x3, y3, x5, y5, pixel);
+	gp_fill_triangle(pixmap, x2, y2, x3, y3, x5, y5, pixel);
 
-	GP_PutPixel(pixmap, x2, y2, red);
-	GP_PutPixel(pixmap, x3, y3, red);
-	GP_PutPixel(pixmap, x5, y5, red);
+	gp_putpixel(pixmap, x2, y2, red);
+	gp_putpixel(pixmap, x3, y3, red);
+	gp_putpixel(pixmap, x5, y5, red);
 
 	sierpinsky(x1, y1, x2, y2, iter - 1);
 	sierpinsky(x2, y2, x5, y5, iter - 1);
@@ -95,15 +95,15 @@ static void draw(int x, int y, int l, int iter)
 	x3 = sin(1.00 * (iter+240)/57) * l + x;
 	y3 = cos(1.00 * (iter+240)/57) * l + y;
 
-	GP_Fill(pixmap, gray);
+	gp_fill(pixmap, gray);
 
-	GP_FillTriangle(pixmap, x1, y1, x2, y2, x3, y3, blue);
+	gp_fill_triangle(pixmap, x1, y1, x2, y2, x3, y3, blue);
 
 	sierpinsky(x1, y1, x2, y2, iter/60%6);
 	sierpinsky(x2, y2, x3, y3, iter/60%6);
 	sierpinsky(x3, y3, x1, y1, iter/60%6);
 
-	GP_BackendFlip(backend);
+	gp_backend_flip(backend);
 }
 
 static int paused = 0;
@@ -128,7 +128,7 @@ int main(void)
 {
 	const char *backend_opts = "X11";
 
-	backend = GP_BackendInit(backend_opts, "Koch");
+	backend = gp_backend_init(backend_opts, "Koch");
 
 	if (backend == NULL) {
 		fprintf(stderr, "Failed to initalize backend '%s'\n",
@@ -138,23 +138,23 @@ int main(void)
 
 	pixmap = backend->pixmap;
 
-	black = GP_RGBToPixmapPixel(0x00, 0x00, 0x00, pixmap);
-	blue  = GP_RGBToPixmapPixel(0x00, 0x00, 0xff, pixmap);
-	gray  = GP_RGBToPixmapPixel(0xbe, 0xbe, 0xbe, pixmap);
-	red   = GP_RGBToPixmapPixel(0xff, 0x00, 0x00, pixmap);
+	black = gp_rgb_to_pixmap_pixel(0x00, 0x00, 0x00, pixmap);
+	blue  = gp_rgb_to_pixmap_pixel(0x00, 0x00, 0xff, pixmap);
+	gray  = gp_rgb_to_pixmap_pixel(0xbe, 0xbe, 0xbe, pixmap);
+	red   = gp_rgb_to_pixmap_pixel(0xff, 0x00, 0x00, pixmap);
 
 	iter = 0;
 	draw(pixmap->w/2, pixmap->h/2, l, iter);
 
 	for (;;) {
-		GP_Event ev;
+		gp_event ev;
 
 		redraw();
 
-		GP_BackendPoll(backend);
+		gp_backend_poll(backend);
 
-		while (GP_BackendGetEvent(backend, &ev)) {
-			GP_EventDump(&ev);
+		while (gp_backend_get_event(backend, &ev)) {
+			gp_event_dump(&ev);
 
 			switch (ev.type) {
 			case GP_EV_KEY:
@@ -169,14 +169,14 @@ int main(void)
 					draw_edge = !draw_edge;
 				break;
 				case GP_KEY_ESC:
-					GP_BackendExit(backend);
+					gp_backend_exit(backend);
 					return 0;
 				break;
 				}
 			break;
 			case GP_EV_SYS:
 				if (ev.code == GP_EV_SYS_RESIZE)
-					GP_BackendResizeAck(backend);
+					gp_backend_resize_ack(backend);
 			}
 		}
 		usleep(TIMER_TICK);

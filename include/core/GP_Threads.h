@@ -31,12 +31,12 @@
 
 #include <pthread.h>
 
-#include "GP_ProgressCallback.h"
-#include "GP_Types.h"
+#include <core/GP_ProgressCallback.h>
+#include <core/GP_Types.h>
 
 /*
  * Sets default number of threads the library uses
- * (changes the behavior of GP_NrThreads()).
+ * (changes the behavior of gp_nr_threads()).
  *
  * 0 == auto
  *      Most of the time, if the image is not too small, this makes
@@ -54,21 +54,21 @@
  * Moreover the value may be changed for a single call by settings in progres
  * callback structure.
  */
-void GP_NrThreadsSet(unsigned int nr);
+void gp_nr_threads_set(unsigned int nr);
 
 /*
  * Returns a number of threads to use.
  */
-unsigned int GP_NrThreads(GP_Size w, GP_Size h, GP_ProgressCallback *callback);
+unsigned int gp_nr_threads(gp_size w, gp_size h, gp_progress_cb *callback);
 
 /*
  * Multithreaded progress callback priv data guarded by a mutex.
  */
-struct GP_ProgressCallbackMPPriv {
+struct gp_progress_cb_mp_priv {
 	float max;
 	int abort;
 	pthread_mutex_t mutex;
-	GP_ProgressCallback *orig_callback;
+	gp_progress_cb *orig_callback;
 };
 
 /*
@@ -84,17 +84,17 @@ struct GP_ProgressCallbackMPPriv {
  *	run_filter(..., callback ? &callback_mp : NULL);
  */
 #define GP_PROGRESS_CALLBACK_MP(name, callback)                        \
-	struct GP_ProgressCallbackMPPriv name_priv = {                 \
+	struct gp_progress_cb_mp_priv name_priv = {                 \
 		.max = 0,                                              \
 		.abort = 0,                                            \
 		.mutex = PTHREAD_MUTEX_INITIALIZER,                    \
 		.orig_callback = callback,                             \
 	};                                                             \
-	GP_PROGRESS_CALLBACK(name, GP_ProgressCallbackMP, &name_priv);
+	GP_PROGRESS_CALLBACK(name, gp_progress_cb_mp, &name_priv);
 
 /*
  * Multithreaded callback function itself.
  */
-int GP_ProgressCallbackMP(GP_ProgressCallback *self);
+int gp_progress_cb_mp(gp_progress_cb *self);
 
 #endif /* CORE_GP_THREADS_H */

@@ -1,6 +1,6 @@
 Text
 ----
-Text drawing is controlled by the <<TextStyle,GP_TextStyle>> structure. This
+Text drawing is controlled by the <<text_style,gp_text_style>> structure. This
 structure carries information about font, letter spacing and pixel
 multiplication and spacing. (If no font is specified, the default mono-space
 font is used.)
@@ -9,12 +9,12 @@ You may want to see the link:coordinate_system.html[coordinate system] first.
 
 [source,c]
 --------------------------------------------------------------------------------
-#include <GP.h>
+#include <gfxprim.h>
 /* or */
 #include <text/GP_Text.h>
 
 /* Where the text should be drawn relatively to the specified point */
-typedef enum GP_TextAlign {
+typedef enum gp_text_align {
         GP_ALIGN_LEFT = 0x01,           /* to the left from the point */
         GP_ALIGN_CENTER = 0x02,         /* centered on the point */
         GP_ALIGN_RIGHT = 0x03,          /* to the right from the point */
@@ -22,20 +22,20 @@ typedef enum GP_TextAlign {
         GP_VALIGN_CENTER = 0x20,        /* centered on the point */
         GP_VALIGN_BASELINE = 0x30,      /* baseline is on the point */
         GP_VALIGN_BELOW = 0x40          /* below the point */
-} GP_TextAlign;
+} gp_text_align;
 
-void GP_Text(GP_Pixmap *pixmap, const GP_TextStyle *style,
-             GP_Coord x, GP_Coord y, int align,
-             GP_Pixel fg, GP_Pixel bg, const char *str);
+void gp_text(gp_pixmap *pixmap, const gp_text_style *style,
+             gp_coord x, gp_coord y, int align,
+             gp_pixel fg, gp_pixel bg, const char *str);
 
 
-GP_Size GP_Print(GP_Pixmap *pixmap, const GP_TextStyle *style,
-                 GP_Coord x, GP_Coord y, int align,
-                 GP_Pixel fg, GP_Pixel bg, const char *fmt, ...);
+gp_size gp_print(gp_pixmap *pixmap, const gp_text_style *style,
+                 gp_coord x, gp_coord y, int align,
+                 gp_pixel fg, gp_pixel bg, const char *fmt, ...);
 
-GP_Size GP_VPrint(GP_Pixmap *pixmap, const GP_TextStyle *style,
-                  GP_Coord x, GP_Coord y, int align,
-                  GP_Pixel fg, GP_Pixel bg,
+gp_size gp_vprint(gp_pixmap *pixmap, const gp_text_style *style,
+                  gp_coord x, gp_coord y, int align,
+                  gp_pixel fg, gp_pixel bg,
                   const char *fmt, va_list va);
 --------------------------------------------------------------------------------
 
@@ -48,11 +48,11 @@ The text size can be computed by following functions:
 
 [source,c]
 --------------------------------------------------------------------------------
-#include <GP.h>
+#include <gfxprim.h>
 /* or */
 #include <text/GP_TextMetric.h>
 
-unsigned int GP_TextWidth(const GP_TextStyle *style, const char *str);
+unsigned int gp_text_width(const gp_text_style *style, const char *str);
 --------------------------------------------------------------------------------
 
 Returns the width (in pixels) that would be occupied by the string if rendered
@@ -66,11 +66,11 @@ terms used in this paragraph.
 
 [source,c]
 --------------------------------------------------------------------------------
-#include <GP.h>
+#include <gfxprim.h>
 /* or */
 #include <text/GP_TextMetric.h>
 
-unsigned int GP_TextMaxWidth(const GP_TextStyle *style, unsigned int len);
+unsigned int gp_text_max_width(const gp_text_style *style, unsigned int len);
 --------------------------------------------------------------------------------
 
 Returns maximum text width, in pixels, for string with 'len' letters.
@@ -81,12 +81,12 @@ than needed.
 
 [source,c]
 --------------------------------------------------------------------------------
-#include <GP.h>
+#include <gfxprim.h>
 /* or */
 #include <text/GP_TextMetric.h>
 
-GP_Size GP_TextMaxStrWidth(const GP_TextStyle *style, const char *str,
-                           unsigned int len);
+gp_size gp_text_max_str_width(const gp_text_style *style, const char *str,
+                              unsigned int len);
 --------------------------------------------------------------------------------
 
 Returns maximum text width, in pixels, for a string with 'len' letters that
@@ -97,11 +97,11 @@ This call simply computes width of a string rendered with largest letter from
 
 [source,c]
 --------------------------------------------------------------------------------
-#include <GP.h>
+#include <gfxprim.h>
 /* or */
 #include <text/GP_TextMetric.h>
 
-unsigned int GP_TextAscent(const GP_TextStyle *style);
+unsigned int gp_text_ascent(const gp_text_style *style);
 --------------------------------------------------------------------------------
 
 The Ascent is the height in pixels from the top to the baseline.
@@ -111,11 +111,11 @@ is usually height of capital letter, but it may be larger for certain fonts.
 
 [source,c]
 --------------------------------------------------------------------------------
-#include <GP.h>
+#include <gfxprim.h>
 /* or */
 #include <text/GP_TextMetric.h>
 
-unsigned int GP_TextDescent(const GP_TextStyle *style);
+unsigned int gp_text_descent(const gp_text_style *style);
 --------------------------------------------------------------------------------
 
 The Descent is the height in pixels from baseline to the bottom.
@@ -126,11 +126,11 @@ baseline, but it may be larger for certain fonts.
 
 [source,c]
 --------------------------------------------------------------------------------
-#include <GP.h>
+#include <gfxprim.h>
 /* or */
 #include <text/GP_TextMetric.h>
 
-unsigned int GP_TextHeight(const GP_TextStyle *style);
+unsigned int gp_text_height(const gp_text_style *style);
 --------------------------------------------------------------------------------
 
 The Height is size of the font from top to the bottom, i.e. equals exactly to
@@ -145,12 +145,12 @@ TextStyle
 
 [source,c]
 --------------------------------------------------------------------------------
-#include <GP.h>
+#include <gfxprim.h>
 /* or */
 #include <text/GP_TextStyle.h>
 
-typedef struct GP_TextStyle {
-	const struct GP_FontFace *font;
+typedef struct gp_text_style {
+	const struct gp_font_face *font;
 
 	/* Spacing between pixels (0 is the default, no spacing). */
 	int pixel_xspace, pixel_yspace;
@@ -161,7 +161,7 @@ typedef struct GP_TextStyle {
 	/* Extra spacing (in pixels) between characters. */
 	int char_xspace;
 
-} GP_TextStyle;
+} gp_text_style;
 --------------------------------------------------------------------------------
 
 The TextStyle structure describes the parameters for text rendering.
@@ -196,13 +196,13 @@ image::images/fonts/default_console_font.png["Default Console Font"]
 .Default Proportional Font
 image::images/fonts/default_proportional_font.png["Default Proportional Font"]
 
-.Font Tiny Mono (GP_FontTinyMono)
+.Font Tiny Mono (gp_font_tiny_mono)
 image::images/fonts/font_tiny_mono.png["Font Tiny Mono"]
 
-.Font Tiny (GP_FontTiny)
+.Font Tiny (gp_font_tiny)
 image::images/fonts/font_tiny.png["Font Tiny"]
 
-.Font C64 (GP_FontC64)
+.Font C64 (gp_font_c64)
 image::images/fonts/font_c64.png["Font C64"]
 
 TrueType Fonts
@@ -213,15 +213,15 @@ TrueType Fonts
 /*
  * Load font face from file.
  */
-GP_FontFace *GP_FontFaceLoad(const char *path, uint32_t width, uint32_t height);
+gp_font_face *gp_font_face_load(const char *path, uint32_t width, uint32_t height);
 
 /*
  * Free the font face.
  */
-void GP_FontFaceFree(GP_FontFace *self);
+void gp_font_face_free(gp_font_face *self);
 --------------------------------------------------------------------------------
 
-The 'GP_FontFaceLoad()' renders TrueType font using
+The 'gp_font_face_load()' renders TrueType font using
 link:http://www.freetype.org[FreeType] (currently printable ASCII only) into
 GFXprim font structures.
 
@@ -231,7 +231,7 @@ should be computed accordingly.
 NOTE: If you pass both 'width' and 'height' non-zero the resulting font may
       look strange as this action forced unnatural aspect ratio.
 
-The 'GP_FontFaceFree()' frees memory taken up by the rendered font. If self is
+The 'gp_font_face_free()' frees memory taken up by the rendered font. If self is
 NULL no operation is done.
 
-TIP: For Font and TextStyle handling see link:example_fonts.html[examples].
+TIP: For font and text_style handling see link:example_fonts.html[examples].

@@ -20,47 +20,47 @@
  *                                                                           *
  *****************************************************************************/
 
-#include "core/GP_Convert.h"
-#include "core/GP_Debug.h"
-
-#include "filters/GP_MultiTone.h"
+#include <core/GP_Convert.h>
+#include <core/GP_Debug.h>
+#include <filters/GP_MultiTone.h>
+#include <filters/GP_Sepia.h>
 
 #define PIX 3
 
-static void init_sepia_tones(GP_Pixel pixels[PIX], GP_PixelType pixel_type)
+static void init_sepia_tones(gp_pixel pixels[PIX], gp_pixel_type pixel_type)
 {
-//	pixels[0] = GP_RGBToPixel(56, 33, 10, pixel_type);
-//	pixels[1] = GP_RGBToPixel(255, 255, 255, pixel_type);
-	pixels[0] = GP_RGBToPixel(0, 0, 0, pixel_type);
-	pixels[1] = GP_RGBToPixel(162, 116, 70, pixel_type);
-	pixels[2] = GP_RGBToPixel(230, 230, 230, pixel_type);
+//	pixels[0] = gp_rgb_to_pixel(56, 33, 10, pixel_type);
+//	pixels[1] = gp_rgb_to_pixel(255, 255, 255, pixel_type);
+	pixels[0] = gp_rgb_to_pixel(0, 0, 0, pixel_type);
+	pixels[1] = gp_rgb_to_pixel(162, 116, 70, pixel_type);
+	pixels[2] = gp_rgb_to_pixel(230, 230, 230, pixel_type);
 }
 
-int GP_FilterSepiaEx(const GP_Pixmap *const src,
-                     GP_Coord x_src, GP_Coord y_src,
-                     GP_Size w_src, GP_Size h_src,
-                     GP_Pixmap *dst,
-                     GP_Coord x_dst, GP_Coord y_dst,
-                     GP_ProgressCallback *callback)
+int gp_filter_sepia_ex(const gp_pixmap *const src,
+                       gp_coord x_src, gp_coord y_src,
+                       gp_size w_src, gp_size h_src,
+                       gp_pixmap *dst,
+                       gp_coord x_dst, gp_coord y_dst,
+                       gp_progress_cb *callback)
 {
-	GP_Pixel pixels[PIX];
+	gp_pixel pixels[PIX];
 
 	init_sepia_tones(pixels, dst->pixel_type);
 
-	return GP_FilterMultiToneEx(src, x_src, y_src, w_src, h_src,
-	                            dst, x_dst, y_dst, pixels, PIX, callback);
+	return gp_filter_multitone_ex(src, x_src, y_src, w_src, h_src,
+	                              dst, x_dst, y_dst, pixels, PIX, callback);
 }
 
-GP_Pixmap *GP_FilterSepiaExAlloc(const GP_Pixmap *const src,
-                                  GP_Coord x_src, GP_Coord y_src,
-                                  GP_Size w_src, GP_Size h_src,
-                                  GP_PixelType dst_pixel_type,
-                                  GP_ProgressCallback *callback)
+gp_pixmap *gp_filter_sepia_ex_alloc(const gp_pixmap *const src,
+                                    gp_coord x_src, gp_coord y_src,
+                                    gp_size w_src, gp_size h_src,
+                                    gp_pixel_type dst_pixel_type,
+                                    gp_progress_cb *callback)
 {
-	GP_Pixel pixels[PIX];
+	gp_pixel pixels[PIX];
 
 	init_sepia_tones(pixels, dst_pixel_type);
 
-	return GP_FilterMultiToneExAlloc(src, x_src, y_src, w_src, h_src,
-	                                 dst_pixel_type, pixels, PIX, callback);
+	return gp_filter_multitone_ex_alloc(src, x_src, y_src, w_src, h_src,
+	                                    dst_pixel_type, pixels, PIX, callback);
 }

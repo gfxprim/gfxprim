@@ -1,7 +1,7 @@
 """
 Module extending the Pixmap class with .filter submodule.
 
-Use as in "import gfxprim.filters; pixmap_foo.filter.Resize(...)"
+Use as in "import gfxprim.filters; pixmap_foo.filter.resize(...)"
 """
 
 # Import the SWIG wrapper
@@ -20,30 +20,30 @@ def _init(module):
 
   _pixmap._submodules['filters'] = FiltersSubmodule
 
-  for name in ['Invert', 'InvertAlloc',
-               'Brightness', 'BrightnessAlloc',
-               'Contrast', 'ContrastAlloc',
-               'BrightnessContrast', 'BrightnessContrastAlloc',
-               'Posterize', 'PosterizeAlloc',
-               'Resize', 'ResizeAlloc',
-               'Rotate90', 'Rotate90Alloc',
-	       'Rotate180', 'Rotate180Alloc',
-	       'Rotate270', 'Rotate270Alloc',
-	       'MirrorH', 'MirrorHAlloc',
-	       'MirrorV', 'MirrorVAlloc',
-	       'Addition', 'Multiply', 'Difference', 'Max', 'Min',
-	       'GaussianBlur', 'GaussianBlurAlloc',
-	       'GaussianBlurEx', 'GaussianBlurExAlloc',
-	       'GaussianNoiseAdd', 'GaussianNoiseAddAlloc',
-	       'GaussianNoiseAddEx', 'GaussianNoiseAddExAlloc',
-	       'Laplace', 'LaplaceAlloc',
-	       'EdgeSharpening', 'EdgeSharpeningAlloc',
-	       'Median', 'MedianAlloc', 'MedianEx', 'MedianExAlloc',
-	       'Sigma', 'SigmaAlloc', 'SigmaEx', 'SigmaExAlloc',
-	       'FloydSteinberg', 'FloydSteinbergAlloc',
-	       'HilbertPeano', 'HilbertPeanoAlloc',
-	       'Sepia', 'SepiaAlloc', 'SepiaEx', 'SepiaExAlloc']:
-    extend_submodule(FiltersSubmodule, name, c_filters.__getattribute__('GP_Filter' + name))
+  for name in ['invert', 'invert_alloc',
+               'brightness', 'brightness_alloc',
+               'contrast', 'contrast_alloc',
+               'brightness_contrast', 'brightness_contrast_alloc',
+               'posterize', 'posterize_alloc',
+               'resize', 'resize_alloc',
+               'rotate_90', 'rotate_90_alloc',
+	       'rotate_180', 'rotate_180_alloc',
+	       'rotate_270', 'rotate_270_alloc',
+	       'mirror_h', 'mirror_h_alloc',
+	       'mirror_v', 'mirror_v_alloc',
+	       'add', 'mul', 'diff', 'max', 'min',
+	       'gaussian_blur', 'gaussian_blur_alloc',
+	       'gaussian_blur_ex', 'gaussian_blur_ex_alloc',
+	       'gaussian_noise_add', 'gaussian_noise_add_alloc',
+	       'gaussian_noise_add_ex', 'gaussian_noise_add_ex_alloc',
+	       'laplace', 'laplace_alloc',
+	       'edge_sharpening', 'edge_sharpening_alloc',
+	       'median', 'median_alloc', 'median_ex', 'median_ex_alloc',
+	       'sigma', 'sigma_alloc', 'sigma_ex', 'sigma_ex_alloc',
+	       'floyd_steinberg', 'floyd_steinberg_alloc',
+	       'hilbert_peano', 'hilbert_peano_alloc',
+	       'sepia', 'sepia_alloc', 'sepia_ex', 'sepia_ex_alloc']:
+    extend_submodule(FiltersSubmodule, name, c_filters.__getattribute__('gp_filter_' + name))
 
   def array_to_kern(kernel, kernel_div):
     h = len(kernel)
@@ -63,93 +63,93 @@ def _init(module):
       for j in range(0, w):
         c_filters.float_array_setitem(karr, i * w + j, kernel[i][j])
 
-    kern = c_filters.GP_FilterKernel2D(w, h, karr, kernel_div)
+    kern = c_filters.gp_filter_kernel_2d(w, h, karr, kernel_div)
 
     return kern
 
   def array_del(kern):
     c_filters.delete_float_array(kern.kernel)
 
-  def Convolution(src, dst, kernel, kernel_div, callback=None):
+  def convolution(src, dst, kernel, kernel_div, callback=None):
     """
-     Convolution(src, dst, kernel, kernel_div, callback=None)
+     convolution(src, dst, kernel, kernel_div, callback=None)
 
      Bilinear convolution. The kernel is two dimensional array of coefficients,
      kern_div is used to divide the kernel weigthed sum.
     """
     kern = array_to_kern(kernel, kernel_div)
-    ret = c_filters.GP_FilterConvolution(src, dst, kern, callback)
+    ret = c_filters.gp_filter_convolution(src, dst, kern, callback)
     array_del(kern)
     return ret
 
-  extend_submodule(FiltersSubmodule, 'Convolution', Convolution)
+  extend_submodule(FiltersSubmodule, 'convolution', convolution)
 
-  def ConvolutionEx(src, x_src, y_src, w_src, h_src, dst, x_dst, y_dst,
-                    kernel, kernel_div, callback=None):
+  def convolution_ex(src, x_src, y_src, w_src, h_src, dst, x_dst, y_dst,
+                     kernel, kernel_div, callback=None):
     """
-     ConvolutionEx(src, x_src, y_src, w_src, h_src, dst, x_dst, y_dst,
-                   kernel, kernel_div, callback=None)
+     convolution_ex(src, x_src, y_src, w_src, h_src, dst, x_dst, y_dst,
+                    kernel, kernel_div, callback=None)
 
      Bilinear convolution. The kernel is two dimensional array of coefficients,
      kern_div is used to divide the kernel weigthed sum.
     """
     kern = array_to_kern(kernel, kernel_div);
-    ret =  c_filters.GP_FilterConvolutionEx(src, x_src, y_src,
-                                            w_src, h_src, dst, x_dst, y_dst,
-                                            kern, callback)
+    ret =  c_filters.gp_filter_convolution_ex(src, x_src, y_src,
+                                              w_src, h_src, dst, x_dst, y_dst,
+                                              kern, callback)
     array_del(kern)
     return ret
 
-  extend_submodule(FiltersSubmodule, 'ConvolutionEx', ConvolutionEx)
+  extend_submodule(FiltersSubmodule, 'convolution_ex', convolution_ex)
 
-  def ConvolutionAlloc(src, kernel, kernel_div, callback=None):
+  def convolution_alloc(src, kernel, kernel_div, callback=None):
     """
-     ConvolutionAlloc(src, kernel, kernel_div, callback=None)
+     convolution_alloc(src, kernel, kernel_div, callback=None)
 
      Bilinear convolution. The kernel is two dimensional array of coefficients,
      kern_div is used to divide the kernel weigthed sum.
     """
     kern = array_to_kern(kernel, kernel_div);
-    ret = c_filters.GP_FilterConvolutionAlloc(src, kern, callback)
+    ret = c_filters.gp_filter_convolution_alloc(src, kern, callback)
     array_del(kern)
     return ret
 
-  extend_submodule(FiltersSubmodule, 'ConvolutionAlloc', ConvolutionAlloc)
+  extend_submodule(FiltersSubmodule, 'convolution_alloc', convolution_alloc)
 
-  def ConvolutionExAlloc(src, x_src, y_src, w_src, h_src,
-                         kernel, kernel_div, callback=None):
+  def convolution_ex_alloc(src, x_src, y_src, w_src, h_src,
+                           kernel, kernel_div, callback=None):
     """
-     ConvolutionExAlloc(src, x_src, y_src, w_src, h_src,
-                        kernel, kernel_div, callback=None)
+     convolution_ex_alloc(src, x_src, y_src, w_src, h_src,
+                          kernel, kernel_div, callback=None)
 
      Bilinear convolution. The kernel is two dimensional array of coefficients,
      kern_div is used to divide the kernel weigthed sum.
     """
     kern = array_to_kern(kernel, kernel_div);
-    ret = c_filters.GP_FilterConvolutionExAlloc(src, x_src, y_src,
-                                                w_src, h_src, kern, callback)
+    ret = c_filters.gp_filter_convolution_ex_alloc(src, x_src, y_src,
+                                                   w_src, h_src, kern, callback)
     array_del(kern)
     return ret
 
-  extend_submodule(FiltersSubmodule, 'ConvolutionExAlloc', ConvolutionExAlloc)
+  extend_submodule(FiltersSubmodule, 'convolution_ex_alloc', convolution_ex_alloc)
 
   # Imports from the SWIG module
   import re
-  def strip_GP_Filter(s):
-    return re.sub('^GP_Filter', '', s)
+  def strip_gp_filter(s):
+    return re.sub('^gp_filter_', '', s)
 
   # Import functions from the SWIG module
   from ..utils import import_members
-  import_members(c_filters, module, sub=strip_GP_Filter,
+  import_members(c_filters, module, sub=strip_gp_filter,
       include=[
-        '^GP_Filter.*Alloc',
-        '^GP_Filter[A-Za-z0-9]*$',
+        '^gp_filter.*alloc',
+        '^gp_filter[A-Za-z0-9]*$',
         ])
 
-  module['Convolution'] = Convolution
-  module['ConvolutionAlloc'] = ConvolutionAlloc
-  module['ConvolutionEx'] = ConvolutionEx
-  module['ConvolutionExAlloc'] = ConvolutionExAlloc
+  module['convolution'] = convolution
+  module['convolution_alloc'] = convolution_alloc
+  module['convolution_ex'] = convolution_ex
+  module['convolution_ex_alloc'] = convolution_ex_alloc
 
 
   #
@@ -173,42 +173,42 @@ def _init(module):
       for j in range(0, w):
         c_filters.uint_array_setitem(warr, i * w + j, weights[i][j])
 
-    ret = c_filters.GP_MedianWeights(w, h, warr)
+    ret = c_filters.gp_median_weights(w, h, warr)
 
     return ret
 
   def uint_arr_del(w):
     c_filters.delete_uint_array(w.weights)
 
-  def WeightedMedian(src, dst, weights, callback=None):
+  def weighted_median(src, dst, weights, callback=None):
     """
-     WeightedMedian(src, dst, weights, callback=None)
+     weighted_median(src, dst, weights, callback=None)
 
      Weighted variant of median filter. Weights is a two dimensional
      array of positive integers that describe weights for neighbour pixels.
     """
     w = array_to_weights(weights)
-    ret = c_filters.GP_FilterWeightedMedian(src, dst, w, callback)
+    ret = c_filters.gp_filter_weighted_median(src, dst, w, callback)
     uint_arr_del(w)
     return ret
 
-#  extend_submodule(FiltersSubmodule, 'WeightedMedian', WeightedMedian)
-#  module['WeightedMedian'] = WeightedMedian
+#  extend_submodule(FiltersSubmodule, 'weighted_median', weighted_median)
+#  module['weighted_median'] = weighted_median
 
-  def WeightedMedianAlloc(src, weights, callback=None):
+  def weighted_median_alloc(src, weights, callback=None):
     """
-     WeightedMedianAlloc(src, weights, callback=None)
+     weighted_median_alloc(src, weights, callback=None)
 
      Weighted variant of median filter. Weights is a two dimensional
      array of positive integers that describe weights for neighbour pixels.
     """
     w = array_to_weights(weights)
-    ret = c_filters.GP_FilterWeightedMedianAlloc(src, w, callback)
+    ret = c_filters.gp_filter_weighted_median_alloc(src, w, callback)
     uint_arr_del(w)
     return ret
 
-#  extend_submodule(FiltersSubmodule, 'WeightedMedianAlloc', WeightedMedianAlloc)
-#  module['WeightedMedianAlloc'] = WeightedMedianAlloc
+#  extend_submodule(FiltersSubmodule, 'weighted_median_alloc', weighted_median_alloc)
+#  module['weighted_median_alloc'] = weighted_median_alloc
 
 _init(locals())
 del _init

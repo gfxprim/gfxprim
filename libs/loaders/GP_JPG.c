@@ -37,9 +37,9 @@
 #include "../../config.h"
 #include "core/GP_Debug.h"
 
-#include "loaders/GP_Exif.h"
-#include "loaders/GP_LineConvert.h"
-#include "loaders/GP_JPG.h"
+#include <loaders/GP_Exif.h>
+#include <loaders/GP_LineConvert.h>
+#include <loaders/GP_Loaders.gen.h>
 
 /*
  * 0xff 0xd8 - start of image
@@ -48,7 +48,7 @@
 #define JPEG_SIGNATURE "\xff\xd8\xff"
 #define JPEG_SIGNATURE_LEN 3
 
-int GP_MatchJPG(const void *buf)
+int gp_match_jpg(const void *buf)
 {
 	return !memcmp(buf, JPEG_SIGNATURE, JPEG_SIGNATURE_LEN);
 }
@@ -93,8 +93,8 @@ static const char *get_colorspace(J_COLOR_SPACE color_space)
 	};
 }
 
-static int load(struct jpeg_decompress_struct *cinfo, GP_Pixmap *ret,
-                GP_ProgressCallback *callback)
+static int load(struct jpeg_decompress_struct *cinfo, gp_pixmap *ret,
+                gp_progress_cb *callback)
 {
 	while (cinfo->output_scanline < cinfo->output_height) {
 		uint32_t y = cinfo->output_scanline;
@@ -102,7 +102,7 @@ static int load(struct jpeg_decompress_struct *cinfo, GP_Pixmap *ret,
 
 		jpeg_read_scanlines(cinfo, &addr, 1);
 
-		if (GP_ProgressCallbackReport(callback, y, ret->h, ret->w)) {
+		if (gp_progress_cb_report(callback, y, ret->h, ret->w)) {
 			GP_DEBUG(1, "Operation aborted");
 			return ECANCELED;
 		}
@@ -111,8 +111,8 @@ static int load(struct jpeg_decompress_struct *cinfo, GP_Pixmap *ret,
 	return 0;
 }
 
-static int load_cmyk(struct jpeg_decompress_struct *cinfo, GP_Pixmap *ret,
-                       GP_ProgressCallback *callback)
+static int load_cmyk(struct jpeg_decompress_struct *cinfo, gp_pixmap *ret,
+                       gp_progress_cb *callback)
 {
 	while (cinfo->output_scanline < cinfo->output_height) {
 		uint32_t y = cinfo->output_scanline;
@@ -132,7 +132,7 @@ static int load_cmyk(struct jpeg_decompress_struct *cinfo, GP_Pixmap *ret,
 			buf[j+3] = 0xff - buf[j+3];
 		}
 
-		if (GP_ProgressCallbackReport(callback, y, ret->h, ret->w)) {
+		if (gp_progress_cb_report(callback, y, ret->h, ret->w)) {
 			GP_DEBUG(1, "Operation aborted");
 			return ECANCELED;
 		}
@@ -147,7 +147,7 @@ struct my_source_mgr {
 	int start_of_file;
 	void *buffer;
 	size_t size;
-	GP_IO *io;
+	gp_io *io;
 };
 
 static void dummy_src(j_decompress_ptr GP_UNUSED(cinfo))
@@ -159,7 +159,7 @@ static boolean fill_input_buffer(struct jpeg_decompress_struct *cinfo)
 	int ret;
 	struct my_source_mgr* src = (void*)cinfo->src;
 
-	ret = GP_IORead(src->io, src->buffer, src->size);
+	ret = gp_io_read(src->io, src->buffer, src->size);
 
 	if (ret <= 0) {
 		GP_WARN("Failed to fill buffer, IORead returned %i", ret);
@@ -193,7 +193,7 @@ static void skip_input_data(struct jpeg_decompress_struct *cinfo, long num_bytes
 	GP_DEBUG(3, "Skipping %li bytes", num_bytes);
 
 	if (src->mgr.bytes_in_buffer < (unsigned long)num_bytes) {
-		ret = GP_IOSeek(src->io, num_bytes - src->mgr.bytes_in_buffer, GP_IO_SEEK_CUR);
+		ret = gp_io_seek(src->io, num_bytes - src->mgr.bytes_in_buffer, GP_IO_SEEK_CUR);
 		//TODO: Call jpeg error
 		if (ret == (off_t)-1)
 			GP_FATAL("Failed to skip data: %s", strerror(errno));
@@ -204,7 +204,7 @@ static void skip_input_data(struct jpeg_decompress_struct *cinfo, long num_bytes
 	}
 }
 
-static inline void init_source_mgr(struct my_source_mgr *src, GP_IO *io,
+static inline void init_source_mgr(struct my_source_mgr *src, gp_io *io,
                                    void *buf, size_t buf_size)
 {
 	src->mgr.init_source = dummy_src;
@@ -223,14 +223,14 @@ static inline void init_source_mgr(struct my_source_mgr *src, GP_IO *io,
 #define JPEG_COM_MAX 128
 
 static void read_jpg_metadata(struct jpeg_decompress_struct *cinfo,
-                              GP_DataStorage *storage)
+                              gp_storage *storage)
 {
 	jpeg_saved_marker_ptr marker;
 
-	GP_DataStorageAddInt(storage, NULL, "Width", cinfo->image_width);
-	GP_DataStorageAddInt(storage, NULL, "Height", cinfo->image_height);
-	GP_DataStorageAddInt(storage, NULL, "Channels", cinfo->num_components);
-	GP_DataStorageAddString(storage, NULL, "Color Space",
+	gp_storage_add_int(storage, NULL, "Width", cinfo->image_width);
+	gp_storage_add_int(storage, NULL, "Height", cinfo->image_height);
+	gp_storage_add_int(storage, NULL, "Channels", cinfo->num_components);
+	gp_storage_add_string(storage, NULL, "Color Space",
 	                     get_colorspace(cinfo->out_color_space));
 
 	for (marker = cinfo->marker_list; marker != NULL; marker = marker->next) {
@@ -244,21 +244,19 @@ static void read_jpg_metadata(struct jpeg_decompress_struct *cinfo,
 
 			memcpy(buf, marker->data, marker->data_length);
 			buf[marker->data_length] = '\0';
-			GP_DataStorageAddString(storage, NULL, "Comment", buf);
-			//GP_MetaDataCreateString(data, "comment", (void*)marker->data,
-			//                        marker->data_length, 1);
+			gp_storage_add_string(storage, NULL, "Comment", buf);
 		} break;
 		case JPEG_APP0:
 			GP_TODO("JFIF");
 		break;
 		case JPEG_APP0 + 1: {
-			GP_IO *io = GP_IOMem(marker->data, marker->data_length, NULL);
+			gp_io *io = gp_io_mem(marker->data, marker->data_length, NULL);
 			if (!io) {
 				GP_WARN("Failed to create MemIO");
 				return;
 			}
-			GP_ReadExif(io, storage);
-			GP_IOClose(io);
+			gp_read_exif(io, storage);
+			gp_io_close(io);
 		} break;
 		}
 	}
@@ -276,13 +274,13 @@ static void save_jpg_markers(struct jpeg_decompress_struct *cinfo)
 	jpeg_save_markers(cinfo, JPEG_APP0 + 1, 0xffff);
 }
 
-int GP_ReadJPGEx(GP_IO *io, GP_Pixmap **img,
-		 GP_DataStorage *storage, GP_ProgressCallback *callback)
+int gp_read_jpg_ex(gp_io *io, gp_pixmap **img,
+		 gp_storage *storage, gp_progress_cb *callback)
 {
 	struct jpeg_decompress_struct cinfo;
 	struct my_source_mgr src;
 	struct my_jpg_err my_err;
-	GP_Pixmap *ret = NULL;
+	gp_pixmap *ret = NULL;
 	uint8_t buf[1024];
 	int err;
 
@@ -315,7 +313,7 @@ int GP_ReadJPGEx(GP_IO *io, GP_Pixmap **img,
 	if (!img)
 		goto exit;
 
-	GP_Pixel pixel_type;
+	gp_pixel pixel_type;
 
 	switch (cinfo.out_color_space) {
 	case JCS_GRAYSCALE:
@@ -338,8 +336,8 @@ int GP_ReadJPGEx(GP_IO *io, GP_Pixmap **img,
 		goto err1;
 	}
 
-	ret = GP_PixmapAlloc(cinfo.image_width, cinfo.image_height,
-	                      pixel_type);
+	ret = gp_pixmap_alloc(cinfo.image_width, cinfo.image_height,
+			      pixel_type);
 
 	if (ret == NULL) {
 		GP_DEBUG(1, "Malloc failed :(");
@@ -368,14 +366,14 @@ int GP_ReadJPGEx(GP_IO *io, GP_Pixmap **img,
 exit:
 	jpeg_destroy_decompress(&cinfo);
 
-	GP_ProgressCallbackDone(callback);
+	gp_progress_cb_done(callback);
 
 	if (img)
 		*img = ret;
 
 	return 0;
 err2:
-	GP_PixmapFree(ret);
+	gp_pixmap_free(ret);
 err1:
 	jpeg_destroy_decompress(&cinfo);
 	errno = err;
@@ -383,25 +381,25 @@ err1:
 }
 
 static int save_convert(struct jpeg_compress_struct *cinfo,
-                        const GP_Pixmap *src,
-                        GP_PixelType out_pix,
-                        GP_ProgressCallback *callback)
+                        const gp_pixmap *src,
+                        gp_pixel_type out_pix,
+                        gp_progress_cb *callback)
 {
-	uint8_t tmp[(src->w * GP_PixelSize(out_pix)) / 8 + 1];
-	GP_LineConvert Convert;
+	uint8_t tmp[(src->w * gp_pixel_size(out_pix)) / 8 + 1];
+	gp_line_convert convert;
 
-	Convert = GP_LineConvertGet(src->pixel_type, out_pix);
+	convert = gp_line_convert_get(src->pixel_type, out_pix);
 
 	while (cinfo->next_scanline < cinfo->image_height) {
 		uint32_t y = cinfo->next_scanline;
 		void *in = GP_PIXEL_ADDR(src, 0, y);
 
-		Convert(in, tmp, src->w);
+		convert(in, tmp, src->w);
 
 		JSAMPROW row = (void*)tmp;
 		jpeg_write_scanlines(cinfo, &row, 1);
 
-		if (GP_ProgressCallbackReport(callback, y, src->h, src->w)) {
+		if (gp_progress_cb_report(callback, y, src->h, src->w)) {
 			GP_DEBUG(1, "Operation aborted");
 			return ECANCELED;
 		}
@@ -411,8 +409,8 @@ static int save_convert(struct jpeg_compress_struct *cinfo,
 }
 
 static int save(struct jpeg_compress_struct *cinfo,
-                const GP_Pixmap *src,
-                GP_ProgressCallback *callback)
+                const gp_pixmap *src,
+                gp_progress_cb *callback)
 {
 	while (cinfo->next_scanline < cinfo->image_height) {
 		uint32_t y = cinfo->next_scanline;
@@ -420,7 +418,7 @@ static int save(struct jpeg_compress_struct *cinfo,
 		JSAMPROW row = (void*)GP_PIXEL_ADDR(src, 0, y);
 		jpeg_write_scanlines(cinfo, &row, 1);
 
-		if (GP_ProgressCallbackReport(callback, y, src->h, src->w)) {
+		if (gp_progress_cb_report(callback, y, src->h, src->w)) {
 			GP_DEBUG(1, "Operation aborted");
 			return ECANCELED;
 		}
@@ -433,7 +431,7 @@ struct my_dest_mgr {
 	struct jpeg_destination_mgr mgr;
 	void *buffer;
 	ssize_t size;
-	GP_IO *io;
+	gp_io *io;
 };
 
 static void dummy_dst(j_compress_ptr GP_UNUSED(cinfo))
@@ -444,7 +442,7 @@ static boolean empty_output_buffer(j_compress_ptr cinfo)
 {
 	struct my_dest_mgr *dest = (void*)cinfo->dest;
 
-	if (GP_IOWrite(dest->io, dest->buffer, dest->size) != dest->size) {
+	if (gp_io_write(dest->io, dest->buffer, dest->size) != dest->size) {
 		GP_DEBUG(1, "Failed to write JPEG buffer");
 		return FALSE;
 	}
@@ -461,7 +459,7 @@ static void term_destination(j_compress_ptr cinfo)
 	ssize_t to_write = dest->size - dest->mgr.free_in_buffer;
 
 	if (to_write > 0) {
-		if (GP_IOWrite(dest->io, dest->buffer, to_write) != to_write) {
+		if (gp_io_write(dest->io, dest->buffer, to_write) != to_write) {
 			GP_DEBUG(1, "Failed to write JPEG buffer");
 			//TODO: Error handling
 			return;
@@ -469,7 +467,7 @@ static void term_destination(j_compress_ptr cinfo)
 	}
 }
 
-static inline void init_dest_mgr(struct my_dest_mgr *dst, GP_IO *io,
+static inline void init_dest_mgr(struct my_dest_mgr *dst, gp_io *io,
                                  void *buf, size_t buf_size)
 {
 	dst->mgr.init_destination = dummy_dst;
@@ -483,17 +481,17 @@ static inline void init_dest_mgr(struct my_dest_mgr *dst, GP_IO *io,
 	dst->size = buf_size;
 }
 
-static GP_PixelType out_pixel_types[] = {
+static gp_pixel_type out_pixel_types[] = {
 	GP_PIXEL_BGR888,
 	GP_PIXEL_G8,
 	GP_PIXEL_UNKNOWN
 };
 
-int GP_WriteJPG(const GP_Pixmap *src, GP_IO *io,
-                GP_ProgressCallback *callback)
+int gp_write_jpg(const gp_pixmap *src, gp_io *io,
+                gp_progress_cb *callback)
 {
 	struct jpeg_compress_struct cinfo;
-	GP_PixelType out_pix;
+	gp_pixel_type out_pix;
 	struct my_jpg_err my_err;
 	struct my_dest_mgr dst;
 	uint8_t buf[1024];
@@ -501,11 +499,11 @@ int GP_WriteJPG(const GP_Pixmap *src, GP_IO *io,
 
 	GP_DEBUG(1, "Writing JPG Image to I/O (%p)", io);
 
-	out_pix = GP_LineConvertible(src->pixel_type, out_pixel_types);
+	out_pix = gp_line_convertible(src->pixel_type, out_pixel_types);
 
 	if (out_pix == GP_PIXEL_UNKNOWN) {
 		GP_DEBUG(1, "Unsupported pixel type %s",
-		         GP_PixelTypeName(src->pixel_type));
+		         gp_pixel_type_name(src->pixel_type));
 		errno = ENOSYS;
 		return 1;
 	}
@@ -558,22 +556,22 @@ int GP_WriteJPG(const GP_Pixmap *src, GP_IO *io,
 	jpeg_finish_compress(&cinfo);
 	jpeg_destroy_compress(&cinfo);
 
-	GP_ProgressCallbackDone(callback);
+	gp_progress_cb_done(callback);
 	return 0;
 }
 
 #else
 
-int GP_ReadJPGEx(GP_IO GP_UNUSED(*io), GP_Pixmap GP_UNUSED(**img),
-                 GP_DataStorage GP_UNUSED(*storage),
-                 GP_ProgressCallback GP_UNUSED(*callback))
+int gp_read_jpg_ex(gp_io GP_UNUSED(*io), gp_pixmap GP_UNUSED(**img),
+                 gp_storage GP_UNUSED(*storage),
+                 gp_progress_cb GP_UNUSED(*callback))
 {
 	errno = ENOSYS;
 	return 1;
 }
 
-int GP_WriteJPG(const GP_Pixmap GP_UNUSED(*src), GP_IO GP_UNUSED(*io),
-                GP_ProgressCallback GP_UNUSED(*callback))
+int gp_write_jpg(const gp_pixmap GP_UNUSED(*src), gp_io GP_UNUSED(*io),
+                gp_progress_cb GP_UNUSED(*callback))
 {
 	errno = ENOSYS;
 	return 1;
@@ -581,35 +579,13 @@ int GP_WriteJPG(const GP_Pixmap GP_UNUSED(*src), GP_IO GP_UNUSED(*io),
 
 #endif /* HAVE_JPEG */
 
-GP_Pixmap *GP_ReadJPG(GP_IO *io, GP_ProgressCallback *callback)
-{
-	return GP_LoaderReadImage(&GP_JPG, io, callback);
-}
-
-GP_Pixmap *GP_LoadJPG(const char *src_path, GP_ProgressCallback *callback)
-{
-	return GP_LoaderLoadImage(&GP_JPG, src_path, callback);
-}
-
-int GP_LoadJPGEx(const char *src_path, GP_Pixmap **img,
-                 GP_DataStorage *storage, GP_ProgressCallback *callback)
-{
-	return GP_LoaderLoadImageEx(&GP_JPG, src_path, img, storage, callback);
-}
-
-int GP_SaveJPG(const GP_Pixmap *src, const char *dst_path,
-               GP_ProgressCallback *callback)
-{
-	return GP_LoaderSaveImage(&GP_JPG, src, dst_path, callback);
-}
-
-struct GP_Loader GP_JPG = {
+const gp_loader gp_jpg = {
 #ifdef HAVE_JPEG
-	.Read = GP_ReadJPGEx,
-	.Write = GP_WriteJPG,
+	.Read = gp_read_jpg_ex,
+	.Write = gp_write_jpg,
 	.save_ptypes = out_pixel_types,
 #endif
-	.Match = GP_MatchJPG,
+	.Match = gp_match_jpg,
 
 	.fmt_name = "JPEG",
 	.extensions = {"jpg", "jpeg", NULL},

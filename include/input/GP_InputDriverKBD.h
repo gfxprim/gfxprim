@@ -29,12 +29,12 @@
 #ifndef INPUT_GP_INPUT_DRIVER_KBD_H
 #define INPUT_GP_INPUT_DRIVER_KBD_H
 
-struct GP_EventQueue;
+#include <input/GP_Types.h>
 
 /*
  * Converts KBD event to GFXprim event and puts it into the queue.
  */
-void GP_InputDriverKBDEventPut(struct GP_EventQueue *event_queue,
-                               unsigned char ev);
+void gp_input_driver_kbd_event_put(gp_event_queue *event_queue,
+                                   unsigned char ev);
 
 #endif /* INPUT_GP_INPUT_DRIVER_KBD_H */

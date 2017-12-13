@@ -44,7 +44,7 @@ static pthread_mutex_t aalib_mutex = PTHREAD_MUTEX_INITIALIZER;
 
 struct aalib_priv {
 	aa_context *c;
-	GP_Pixmap pixmap;
+	gp_pixmap pixmap;
 };
 
 /* ascii mapped keys */
@@ -90,7 +90,7 @@ static const uint16_t keymap2[] = {
 	GP_KEY_BACKSPACE, GP_KEY_ESC,
 };
 
-static void aalib_exit(GP_Backend *self)
+static void aalib_exit(gp_backend *self)
 {
 	struct aalib_priv *aa = GP_BACKEND_PRIV(self);
 
@@ -98,7 +98,7 @@ static void aalib_exit(GP_Backend *self)
 	aa_close(aa->c);
 }
 
-static void aalib_flip(GP_Backend *self)
+static void aalib_flip(gp_backend *self)
 {
 	struct aalib_priv *aa = GP_BACKEND_PRIV(self);
 
@@ -112,8 +112,8 @@ static void aalib_flip(GP_Backend *self)
 	pthread_mutex_unlock(&aalib_mutex);
 }
 
-static void aalib_update_rect(GP_Backend *self, GP_Coord x0, GP_Coord y0,
-                              GP_Coord x1, GP_Coord y1)
+static void aalib_update_rect(gp_backend *self, gp_coord x0, gp_coord y0,
+                              gp_coord x1, gp_coord y1)
 {
 	struct aalib_priv *aa = GP_BACKEND_PRIV(self);
 
@@ -133,7 +133,7 @@ static void aalib_update_rect(GP_Backend *self, GP_Coord x0, GP_Coord y0,
 	pthread_mutex_unlock(&aalib_mutex);
 }
 
-static int aalib_resize_ack(GP_Backend *self)
+static int aalib_resize_ack(gp_backend *self)
 {
 	struct aalib_priv *aa = GP_BACKEND_PRIV(self);
 
@@ -147,12 +147,12 @@ static int aalib_resize_ack(GP_Backend *self)
 
 	GP_DEBUG(1, "Reinitializing Pixmap %ix%i", w, h);
 
-	GP_PixmapInit(&aa->pixmap, w, h, GP_PIXEL_G8, aa_image(aa->c));
+	gp_pixmap_init(&aa->pixmap, w, h, GP_PIXEL_G8, aa_image(aa->c));
 
 	return 0;
 }
 
-static void parse_event(GP_Backend *self, int ev)
+static void parse_event(gp_backend *self, int ev)
 {
 	unsigned int key;
 
@@ -162,7 +162,7 @@ static void parse_event(GP_Backend *self, int ev)
 	if (ev == AA_RESIZE) {
 		GP_DEBUG(1, "Resize event");
 		//TODO: Can we get the new size somehow?
-		GP_EventQueuePushResize(&self->event_queue, 0, 0, NULL);
+		gp_event_queue_push_resize(&self->event_queue, 0, 0, NULL);
 		return;
 	}
 
@@ -178,11 +178,11 @@ static void parse_event(GP_Backend *self, int ev)
 	}
 
 	/* emulate keyup events */
-	GP_EventQueuePushKey(&self->event_queue, key, 1, NULL);
-	GP_EventQueuePushKey(&self->event_queue, key, 0, NULL);
+	gp_event_queue_push_key(&self->event_queue, key, 1, NULL);
+	gp_event_queue_push_key(&self->event_queue, key, 0, NULL);
 }
 
-static void aalib_poll(GP_Backend *self)
+static void aalib_poll(gp_backend *self)
 {
 	struct aalib_priv *aa = GP_BACKEND_PRIV(self);
 	int key;
@@ -194,26 +194,26 @@ static void aalib_poll(GP_Backend *self)
 	parse_event(self, key);
 }
 
-static void aalib_wait(GP_Backend *self)
+static void aalib_wait(gp_backend *self)
 {
 	/* We cannot wait due to possible lockup, so we poll */
 	for (;;) {
 		aalib_poll(self);
 
-		if (GP_EventQueueEventsQueued(&self->event_queue))
+		if (gp_event_queue_events_queued(&self->event_queue))
 			return;
 
 		usleep(10000);
 	}
 }
 
-GP_Backend *GP_BackendAALibInit(void)
+gp_backend *gp_aalib_init(void)
 {
-	GP_Backend *backend;
+	gp_backend *backend;
 	struct aalib_priv *aa;
 	int w, h;
 
-	backend = malloc(sizeof(GP_Backend) + sizeof(struct aalib_priv));
+	backend = malloc(sizeof(gp_backend) + sizeof(struct aalib_priv));
 
 	if (backend == NULL)
 		return NULL;
@@ -243,22 +243,19 @@ GP_Backend *GP_BackendAALibInit(void)
 
 	GP_DEBUG(1, "Initializing Pixmap %ix%i", w, h);
 
-	GP_PixmapInit(&aa->pixmap, w, h, GP_PIXEL_G8, aa_image(aa->c));
+	gp_pixmap_init(&aa->pixmap, w, h, GP_PIXEL_G8, aa_image(aa->c));
 
-	/* update API */
-	backend->name          = "AALib";
-	backend->pixmap       = &aa->pixmap;
-	backend->Flip          = aalib_flip;
-	backend->UpdateRect    = aalib_update_rect;
-	backend->Exit          = aalib_exit;
-	backend->SetAttributes = NULL;
-	backend->ResizeAck     = aalib_resize_ack;
-	backend->Poll          = aalib_poll;
-	backend->Wait          = aalib_wait;
-	backend->fd            = -1;
-	backend->timers        = NULL;
-
-	GP_EventQueueInit(&backend->event_queue, w, h, 0);
+	backend->pixmap = &aa->pixmap;
+	backend->name = "AALib";
+	backend->flip = aalib_flip;
+	backend->update_rect = aalib_update_rect;
+	backend->resize_ack = aalib_resize_ack;
+	backend->poll = aalib_poll;
+	backend->wait = aalib_wait;
+	backend->exit = aalib_exit;
+	backend->fd = -1;
+	backend->timers = NULL;
+	gp_event_queue_init(&backend->event_queue, w, h, 0);
 
 	return backend;
 err2:
@@ -270,7 +267,7 @@ err1:
 
 #else
 
-GP_Backend *GP_BackendAALibInit(void)
+gp_backend *gp_aa_lib_init(void)
 {
 	GP_FATAL("AALib support not compiled in!");
 	errno = ENOSYS;

@@ -30,7 +30,7 @@
 #include <string.h>
 #include <errno.h>
 
-#include <GP.h>
+#include <gfxprim.h>
 
 /* Set to 1 to use Anti Aliased drawing */
 static int aa_flag = 0;
@@ -41,7 +41,7 @@ static int aa_flag = 0;
  * We could do this only and only because the pixmap
  * pixel type is fixed to GP_PIXEL_RGB888.
  */
-static GP_Pixel do_color(int xc, int yc, float x, float y)
+static gp_pixel do_color(int xc, int yc, float x, float y)
 {
 	float dx = GP_ABS(1.00 * xc - x)/(2*xc);
 	float dy = GP_ABS(1.00 * yc - y)/(2*yc);
@@ -66,17 +66,17 @@ static GP_Pixel do_color(int xc, int yc, float x, float y)
 	return bmask | (gmask<<8) | (rmask << 16);
 }
 
-static void draw(GP_Pixmap *img, int level, float x0, float y0, float x1, float y1)
+static void draw(gp_pixmap *img, int level, float x0, float y0, float x1, float y1)
 {
 	if (level == 0) {
-		GP_Pixel pixel;
+		gp_pixel pixel;
 
 		pixel = do_color(img->w/2, img->h/2, 1.00 * (x0+x1)/2, 1.00 * (y0 + y1)/2);
 
 		if (aa_flag)
-			GP_LineAA(img, x0 * 256, y0 * 256, x1 * 256, y1 * 256, pixel);
+			gp_line_aa(img, x0 * 256, y0 * 256, x1 * 256, y1 * 256, pixel);
 		else
-			GP_Line(img, x0, y0, x1, y1, pixel);
+			gp_line(img, x0, y0, x1, y1, pixel);
 
 		return;
 	}
@@ -106,10 +106,10 @@ static void draw(GP_Pixmap *img, int level, float x0, float y0, float x1, float 
 
 int main(void)
 {
-	GP_Pixmap *img;
+	gp_pixmap *img;
 
 	/* Create RGB 24 bit image */
-	img = GP_PixmapAlloc(600, 600, GP_PIXEL_RGB888);
+	img = gp_pixmap_alloc(600, 600, GP_PIXEL_RGB888);
 
 	if (img == NULL) {
 		fprintf(stderr, "Failed to allocate pixmap");
@@ -117,19 +117,19 @@ int main(void)
 	}
 
 	/* Clean up the bitmap */
-	GP_Fill(img, 0);
+	gp_fill(img, 0);
 
 	/* Draw a fractal */
 	draw(img, 4, 0, 0, img->w - 1, img->h - 1);
 	draw(img, 4, 0, img->h - 1, img->w - 1, 0);
 
-	if (GP_SavePNG(img, "out.png", NULL)) {
+	if (gp_save_png(img, "out.png", NULL)) {
 		fprintf(stderr, "Failed to save image %s", strerror(errno));
 		return 1;
 	}
 
 	/* Cleanup */
-	GP_PixmapFree(img);
+	gp_pixmap_free(img);
 
 	return 0;
 }

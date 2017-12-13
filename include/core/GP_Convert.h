@@ -35,86 +35,86 @@
  * Generated function to convert RGB888 to any type.
  * Does not work with palette types.
  */
-GP_Pixel GP_RGB888ToPixel(GP_Pixel pixel, GP_PixelType type);
+gp_pixel gp_RGB888_to_pixel(gp_pixel pixel, gp_pixel_type type);
 
 /*
  * Generated function to convert RGBA8888 to any type.
  * Does not work with palette types.
  */
-GP_Pixel GP_RGBA8888ToPixel(GP_Pixel pixel, GP_PixelType type);
+gp_pixel gp_RGBA8888_to_pixel(gp_pixel pixel, gp_pixel_type type);
 
 /*
  * Generated function to convert to RGB888 from any type.
  * Does not work with palette types.
  */
-GP_Pixel GP_PixelToRGB888(GP_Pixel pixel, GP_PixelType type);
+gp_pixel gp_pixel_to_RGB888(gp_pixel pixel, gp_pixel_type type);
 
 /*
  * Generated function to convert to RGBA8888 from any type.
  * Does not work with palette types.
  */
-GP_Pixel GP_PixelToRGBA8888(GP_Pixel pixel, GP_PixelType type);
+gp_pixel gp_pixel_to_RGBA8888(gp_pixel pixel, gp_pixel_type type);
 
 /*
  * Converts a color specified by its R, G, B components to a specified type.
  */
-static inline GP_Pixel GP_RGBToPixel(uint8_t r, uint8_t g, uint8_t b,
-                                     GP_PixelType type)
+static inline gp_pixel gp_rgb_to_pixel(uint8_t r, uint8_t g, uint8_t b,
+                                       gp_pixel_type type)
 {
-	GP_Pixel p = GP_Pixel_CREATE_RGB888(r, g, b);
-	return GP_RGB888ToPixel(p, type);
+	gp_pixel p = GP_PIXEL_CREATE_RGB888(r, g, b);
+	return gp_RGB888_to_pixel(p, type);
 }
 
 /*
  * Converts a color specified by its R, G, B, A components to a specified type.
  */
-static inline GP_Pixel GP_RGBAToPixel(uint8_t r, uint8_t g, uint8_t b,
-                                      uint8_t a, GP_PixelType type)
+static inline gp_pixel gp_rgba_to_pixel(uint8_t r, uint8_t g, uint8_t b,
+                                        uint8_t a, gp_pixel_type type)
 {
-	GP_Pixel p = GP_Pixel_CREATE_RGBA8888(r, g, b, a);
-	return GP_RGBA8888ToPixel(p, type);
+	gp_pixel p = GP_PIXEL_CREATE_RGBA8888(r, g, b, a);
+	return gp_RGBA8888_to_pixel(p, type);
 }
 
 /*
  * Converts a color specified by its R, G, B components to a pixel value
  * compatible with the specified pixmap.
  */
-static inline GP_Pixel GP_RGBToPixmapPixel(uint8_t r, uint8_t g, uint8_t b,
-					    const GP_Pixmap *pixmap)
+static inline gp_pixel gp_rgb_to_pixmap_pixel(uint8_t r, uint8_t g, uint8_t b,
+				              const gp_pixmap *pixmap)
 {
-	return GP_RGBToPixel(r, g, b, pixmap->pixel_type);
+	return gp_rgb_to_pixel(r, g, b, pixmap->pixel_type);
 }
 
 /*
  * Converts a color specified by its R, G, B, A components to a pixel value
  * compatible with the specified pixmap.
  */
-static inline GP_Pixel GP_RGBAToPixmapPixel(uint8_t r, uint8_t g,
-                                             uint8_t b, uint8_t a,
-					     const GP_Pixmap *pixmap)
+static inline gp_pixel gp_rgba_to_pixmap_pixel(uint8_t r, uint8_t g,
+                                               uint8_t b, uint8_t a,
+					       const gp_pixmap *pixmap)
 {
-	return GP_RGBAToPixel(r, g, b, a, pixmap->pixel_type);
+	return gp_rgba_to_pixel(r, g, b, a, pixmap->pixel_type);
 }
 
 /*
  * Convert between any pixel types (excl. palette types) via RGBA8888
  */
-static inline GP_Pixel GP_ConvertPixel(GP_Pixel pixel, GP_PixelType from,
-                                       GP_PixelType to)
+static inline gp_pixel gp_convert_pixel(gp_pixel pixel, gp_pixel_type from,
+                                        gp_pixel_type to)
 {
-	return GP_RGBA8888ToPixel(GP_PixelToRGBA8888(pixel, from), to);
+	return gp_RGBA8888_to_pixel(gp_pixel_to_RGBA8888(pixel, from), to);
 }
 
 /*
  * Convert between pixel types of given pixmaps (excl. palette types) via
  * RGBA8888.
  */
-static inline GP_Pixel GP_ConvertPixmapPixel(GP_Pixel pixel,
-                                              const GP_Pixmap *from,
-					      const GP_Pixmap *to)
+static inline gp_pixel gp_convert_pixmap_pixel(gp_pixel pixel,
+                                               const gp_pixmap *from,
+					       const gp_pixmap *to)
 {
-	return GP_RGBA8888ToPixel(GP_PixelToRGBA8888(pixel, from->pixel_type),
-	                          to->pixel_type);
+	return gp_RGBA8888_to_pixel(gp_pixel_to_RGBA8888(pixel, from->pixel_type),
+	                            to->pixel_type);
 }
 
 #endif /* CORE_GP_CONVERT_H */

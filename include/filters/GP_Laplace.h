@@ -29,7 +29,7 @@
 #ifndef FILTERS_GP_LAPLACE_H
 #define FILTERS_GP_LAPLACE_H
 
-#include "GP_Filter.h"
+#include <filters/GP_Filter.h>
 
 /*
  * Discrete Laplace, second-derivative filter.
@@ -40,11 +40,11 @@
  *              [-2 ]
  *              [ 1 ]
  */
-int GP_FilterLaplace(const GP_Pixmap *src, GP_Pixmap *dst,
-                     GP_ProgressCallback *callback);
+int gp_filter_laplace(const gp_pixmap *src, gp_pixmap *dst,
+                      gp_progress_cb *callback);
 
-GP_Pixmap *GP_FilterLaplaceAlloc(const GP_Pixmap *src,
-                                  GP_ProgressCallback *callback);
+gp_pixmap *gp_filter_laplace_alloc(const gp_pixmap *src,
+                                   gp_progress_cb *callback);
 
 /*
  * Laplace based filter sharpening.
@@ -52,10 +52,10 @@ GP_Pixmap *GP_FilterLaplaceAlloc(const GP_Pixmap *src,
  * This filter substract result of Laplace filter weigted by w from the
  * original image which amplifies edges.
  */
-int GP_FilterEdgeSharpening(const GP_Pixmap *src, GP_Pixmap *dst,
-                            float w, GP_ProgressCallback *callback);
+int gp_filter_edge_sharpening(const gp_pixmap *src, gp_pixmap *dst,
+                              float w, gp_progress_cb *callback);
 
-GP_Pixmap *GP_FilterEdgeSharpeningAlloc(const GP_Pixmap *src, float w,
-                                         GP_ProgressCallback *callback);
+gp_pixmap *gp_filter_edge_sharpening_alloc(const gp_pixmap *src, float w,
+                                           gp_progress_cb *callback);
 
 #endif /* FILTERS_GP_LAPLACE_H */

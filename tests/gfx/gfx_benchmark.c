@@ -25,9 +25,9 @@
 
 #include "tst_test.h"
 
-static int bench_line(GP_PixelType type)
+static int bench_line(gp_pixel_type type)
 {
-	GP_Pixmap *img = GP_PixmapAlloc(800, 600, type);
+	gp_pixmap *img = gp_pixmap_alloc(800, 600, type);
 
 	if (img == NULL) {
 		tst_err("Malloc failed");
@@ -37,7 +37,7 @@ static int bench_line(GP_PixelType type)
 	unsigned int i;
 
 	for (i = 0; i < 100000; i++) {
-		GP_Line(img, 0 + i % 100, 0 - i % 100,
+		gp_line(img, 0 + i % 100, 0 - i % 100,
 		        800 - i%200, 600 + i%200, i % 0xff);
 	}
 
@@ -69,9 +69,9 @@ static int bench_line_32bpp(void)
 	return bench_line(GP_PIXEL_RGB888);
 }
 
-static int bench_circle(GP_PixelType type)
+static int bench_circle(gp_pixel_type type)
 {
-	GP_Pixmap *img = GP_PixmapAlloc(800, 600, type);
+	gp_pixmap *img = gp_pixmap_alloc(800, 600, type);
 
 	if (img == NULL) {
 		tst_err("Malloc failed");
@@ -81,7 +81,7 @@ static int bench_circle(GP_PixelType type)
 	unsigned int i;
 
 	for (i = 0; i < 100000; i++) {
-		GP_Circle(img, img->w/2, img->h/2, i % 1000, i%0xff);
+		gp_circle(img, img->w/2, img->h/2, i % 1000, i%0xff);
 	}
 
 	return TST_SUCCESS;

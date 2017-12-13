@@ -1,5 +1,5 @@
 Pixmap loaders
----------------
+--------------
 This part of GFXprim library implements API to load and save images for common
 image file formats.
 
@@ -19,8 +19,8 @@ to a file and one that reads data from an link:loaders_io.html[IO stream].
 All loading functions returns a pointer to newly allocated and loaded image or
 upon a failure NULL and errno is set.
 
-The link:pixmap.html[Pixmap] returned by the loaders should be later freed
-with link:pixmap.html#PixmapFree[GP_PixmapFree()].
+The link:pixmap.html[pixmap] returned by the loaders should be later freed
+with link:pixmap.html#pixmap_free[gp_pixmap_free()].
 
 All saving functions returns zero on success and non-zero on failure. If image
 saving is aborted by a callback, the opened file is closed and removed from a
@@ -53,11 +53,11 @@ General interface
 [[Load_Image]]
 [source,c]
 -------------------------------------------------------------------------------
-#include <loaders/GP_Loader.h>
+#include <loaders/gp_load_er.h>
 /* or */
-#include <GP.h>
+#include <gfxprim.h>
 
-GP_Pixmap *GP_LoadImage(const char *src_path, GP_ProgressCallback *callback);
+gp_pixmap *gp_load_image(const char *src_path, gp_progress_cb *callback);
 -------------------------------------------------------------------------------
 
 Loads an image from a file.
@@ -75,21 +75,21 @@ signature is recognized, image loader it is called and the result is returned.
 If file extension disagrees with file signature (which is quite common on the
 internet) a warning is printed into the stderr.
 
-The resulting link:pixmap.html[Pixmap] should be later freed with
-link:pixmap.html#PixmapFree[GP_PixmapFree()].
+The resulting link:pixmap.html[pixmap] should be later freed with
+link:pixmap.html#pixmap_free[gp_pixmap_free()].
 
 [[Save_Image]]
 [source,c]
 -------------------------------------------------------------------------------
-#include <loaders/GP_Loader.h>
+#include <loaders/gp_load_er.h>
 /* or */
-#include <GP.h>
+#include <gfxprim.h>
 
-int GP_SaveImage(GP_Pixmap *src, const char *dst_path,
-                 GP_ProgressCallback *callback);
+int gp_save_image(gp_pixmap *src, const char *dst_path,
+                  gp_progress_cb *callback);
 -------------------------------------------------------------------------------
 
-Saves a link:pixmap.html[Pixmap] into a file.
+Saves a link:pixmap.html[pixmap] into a file.
 
 The file format is matched accordingly to the file extension.
 
@@ -108,22 +108,22 @@ Advanced Interface
 
 [source,c]
 -------------------------------------------------------------------------------
-typedef struct GP_Loader {
+typedef struct gp_loader {
 	/*
 	 * Reads an image from an IO stream.
 	 *
 	 * Returns newly allocated pixmap cotaining the loaded image or in
 	 * case of failure NULL and errno is set.
 	 */
-	GP_Pixmap *(*Read)(GP_IO *io, GP_ProgressCallback *callback);
+	gp_pixmap *(*read)(gp_io *io, gp_progress_cb *callback);
 
 	/*
 	 * Save an image.
 	 *
 	 * Returns zero on success, non-zero on failure and errno must be set.
 	 */
-	int (*Save)(const GP_Pixmap *src, const char *dst_path,
-	            GP_ProgressCallback *callback);
+	int (*save)(const gp_pixmap *src, const char *dst_path,
+	            gp_progress_cb *callback);
 
 	/*
 	 * GP_PIXEL_UNKNOWN terminated array of formats loader supports for save.
@@ -131,13 +131,13 @@ typedef struct GP_Loader {
 	 * This is _NOT_ a complete list loaders is able to save, due to automatic
 	 * conversions (i.e. RGB888 vs BRG888).
 	 */
-	const GP_PixelType *save_ptypes;
+	const gp_pixel_type *save_ptypes;
 
 	/*
 	 * The buffer is filled with 32 bytes from an image start, returns 1 if
 	 * image signature was found zero otherwise.
 	 */
-	int (*Match)(const void *buf);
+	int (*match)(const void *buf);
 
 	/*
 	 * Short format name.
@@ -148,12 +148,12 @@ typedef struct GP_Loader {
 	 * NULL terminated array of file extensions.
 	 */
 	const char *extensions[];
-} GP_Loader;
+} gp_load_er;
 -------------------------------------------------------------------------------
 
-The 'GP_Loader' structure describes an image loader.
+The 'gp_loader' structure describes an image loader.
 
-The 'Read', 'Save' and 'Match' functions could be NULL if the particular
+The 'read', 'save' and 'match' functions could be NULL if the particular
 functionality is not implemented.
 
 The 'fmt_name' is a short string that describes the format. For example:
@@ -164,25 +164,25 @@ extensions that are commonly used for this image format.
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <loaders/GP_Loader.h>
+#include <loaders/gp_load_er.h>
 /* or */
-#include <GP.h>
+#include <gfxprim.h>
 
-void GP_ListLoaders(void);
+void gp_loaders_list(void);
 
-int GP_LoaderRegister(const GP_Loader *self);
+int gp_loader_register(const gp_loader *self);
 
-void GP_LoaderUnregister(const GP_Loader *self);
+void gp_loader_unregister(const gp_loader *self);
 -------------------------------------------------------------------------------
 
-The 'GP_ListLoaders()' function prints all currently registered loaders and
+The 'gp_loaders_list()' function prints all currently registered loaders and
 their capabilities into the stdout.
 
-You can register and unregister your own loader by 'GP_LoaderRegister()' and
-'GP_LoaderUnregister()'. Once image loader is registered it's automatically
+You can register and unregister your own loader by 'gp_loader_register()' and
+'gp_loader_unregister()'. Once image loader is registered it's automatically
 used by all loaders functions.
 
-The 'GP_LoaderRegister()' can fail (return non-zero) if you try to register
+The 'gp_loader_register()' can fail (return non-zero) if you try to register
 loader that is allready registered or if the loaders table is full (the table
 size is compile time constant and there should be space for at least fifty
 user defined loaders). I this cases the errno would be set to 'EEXIST' or
@@ -193,11 +193,11 @@ link:example_loader_registration.html[example].
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <loaders/GP_Loader.h>
+#include <loaders/gp_load_er.h>
 /* or */
-#include <GP.h>
+#include <gfxprim.h>
 
-const GP_Loader *GP_LoaderBySignature(const void *buf)
+const gp_loader *gp_loader_by_signature(const void *buf)
 -------------------------------------------------------------------------------
 
 Returns pointer to image loader accordingly to image signature or NULL if no
@@ -206,11 +206,11 @@ bytes long.
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <loaders/GP_Loader.h>
+#include <loaders/gp_load_er.h>
 /* or */
-#include <GP.h>
+#include <gfxprim.h>
 
-const GP_Loader *GP_LoaderByFilename(const char *path)
+const gp_loader *gp_loader_by_filename(const char *path)
 -------------------------------------------------------------------------------
 
 Matches loader by the file extension. This function does not check that the
@@ -220,20 +220,20 @@ against extensions defined by loaders.
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <loaders/GP_Loader.h>
+#include <loaders/gp_load_er.h>
 /* or */
-#include <GP.h>
+#include <gfxprim.h>
 
-GP_Pixmap *GP_LoaderLoadImage(const GP_Loader *self, const char *src_path,
-                               GP_ProgressCallback *callback);
+gp_pixmap *gp_loader_load_image(const gp_loader *self, const char *src_path,
+                                gp_progress_cb *callback);
 -------------------------------------------------------------------------------
 
 Loads an image given a loader structure.
 
 Returns NULL and sets errno to 'ENOSYS' loader 'Read()' callback is NULL.
 
-Otherwise prepares a link:loaders_io.html[GP_IO] from the 'src_path' file,
-calls the 'Read()' callbacks and closes the 'IO' before the call returns.
+Otherwise prepares a link:loaders_io.html[gp_io] from the 'src_path' file,
+calls the 'read()' callbacks and closes the 'IO' before the call returns.
 
 [[PNG]]
 PNG Loader
@@ -243,29 +243,29 @@ link:http://www.libpng.org/[libpng library].
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <loaders/GP_PNG.h>
+#include <loaders/gp_load_ers.h>
 /* or */
-#include <GP.h>
+#include <gfxprim.h>
 
-GP_Pixmap *GP_ReadPNG(GP_IO *io, GP_ProgressCallback *callback);
+gp_pixmap *gp_read_png(gp_io *io, gp_progress_cb *callback);
 -------------------------------------------------------------------------------
 
-Reads a 'PNG' image from readable 'GP_IO'. The link:loaders_io.html[IO stream]
+Reads a 'PNG' image from readable 'gp_io'. The link:loaders_io.html[IO stream]
 is expected to start exactly at the 'PNG' file signature.
 
 Returns newly allocated pixmap (containing decompressed image) or in case of
 failure NULL and errno is set.
 
-The resulting link:pixmap.html[Pixmap] should be later freed with
-link:pixmap.html#PixmapFree[GP_PixmapFree()].
+The resulting link:pixmap.html[pixmap] should be later freed with
+link:pixmap.html#pixmap_free[gp_pixmap_free()].
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <loaders/GP_PNG.h>
+#include <loaders/gp_load_ers.h>
 /* or */
-#include <GP.h>
+#include <gfxprim.h>
 
-GP_Pixmap *GP_LoadPNG(const char *src_path, GP_ProgressCallback *callback);
+gp_pixmap *gp_load_png(const char *src_path, gp_progress_cb *callback);
 -------------------------------------------------------------------------------
 
 Loads a 'PNG' image from a file.
@@ -273,20 +273,20 @@ Loads a 'PNG' image from a file.
 Returns a pointer to newly allocated loaded image, or in case of failure
 NULL and errno is set.
 
-The resulting link:pixmap.html[Pixmap] should be later freed with
-link:pixmap.html#PixmapFree[GP_PixmapFree()].
+The resulting link:pixmap.html[pixmap] should be later freed with
+link:pixmap.html#pixmap_free[gp_pixmap_free()].
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <loaders/GP_PNG.h>
+#include <loaders/gp_load_ers.h>
 /* or */
-#include <GP.h>
+#include <gfxprim.h>
 
-int GP_SavePNG(const GP_Pixmap *src, const char *dst_path,
-               GP_ProgressCallback *callback);
+int gp_save_png(const gp_pixmap *src, const char *dst_path,
+                gp_progress_cb *callback);
 -------------------------------------------------------------------------------
 
-Saves a link:pixmap.html[Pixmap] as a 'PNG' image, in case particular pixel
+Saves a link:pixmap.html[pixmap] as a 'PNG' image, in case particular pixel
 type is not supported non-zero is returned and errno is set to 'ENOSYS'.
 
 Supports 'G1', 'G2', 'G4', 'G8', 'G16', and 8-bit 'RGB' and 'RGBA' pixel
@@ -294,11 +294,11 @@ types.
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <loaders/GP_PNG.h>
+#include <loaders/gp_load_ers.h>
 /* or */
-#include <GP.h>
+#include <gfxprim.h>
 
-int GP_MatchPNG(const void *buf);
+int gp_match_png(const void *buf);
 -------------------------------------------------------------------------------
 
 Matches a 'PNG' link:signatures.html[file signature]. Returns non-zero if found.
@@ -310,29 +310,29 @@ The 'JPEG' image support is implemented by the jpeg library.
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <loaders/GP_JPG.h>
+#include <loaders/gp_load_ers.h>
 /* or */
-#include <GP.h>
+#include <gfxprim.h>
 
-GP_Pixmap *GP_ReadJPG(GP_IO *io, GP_ProgressCallback *callback);
+gp_pixmap *gp_read_jpg(gp_io *io, gp_progress_cb *callback);
 -------------------------------------------------------------------------------
 
-Reads a 'JPEG' image from readable 'GP_IO'. The link:loaders_io.html[IO
+Reads a 'JPEG' image from readable 'gp_io'. The link:loaders_io.html[IO
 stream] is expected to start exactly at the 'JPEG' file signature.
 
 Returns newly allocated pixmap (containing decompressed image) or in case of
 failure NULL and errno is set.
 
-The resulting link:pixmap.html[Pixmap] should be later freed with
-link:pixmap.html#PixmapFree[GP_PixmapFree()].
+The resulting link:pixmap.html[pixmap] should be later freed with
+link:pixmap.html#pixmap_free[gp_pixmap_free()].
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <loaders/GP_JPG.h>
+#include <loaders/gp_load_ers.h>
 /* or */
-#include <GP.h>
+#include <gfxprim.h>
 
-GP_Pixmap *GP_LoadJPG(const char *src_path, GP_ProgressCallback *callback);
+gp_pixmap *gp_load_jpg(const char *src_path, gp_progress_cb *callback);
 -------------------------------------------------------------------------------
 
 Loads a 'JPEG' image from a file.
@@ -340,30 +340,30 @@ Loads a 'JPEG' image from a file.
 Returns a pointer to newly allocated loaded image, or in case of failure
 NULL and errno is set.
 
-The resulting link:pixmap.html[Pixmap] should be later freed with
-link:pixmap.html#PixmapFree[GP_PixmapFree()].
+The resulting link:pixmap.html[pixmap] should be later freed with
+link:pixmap.html#pixmap_free[gp_pixmap_free()].
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <loaders/GP_JPG.h>
+#include <loaders/gp_load_ers.h>
 /* or */
-#include <GP.h>
+#include <gfxprim.h>
 
-int GP_SaveJPG(const GP_Pixmap *src, const char *dst_path,
-               GP_ProgressCallback *callback);
+int gp_save_jpg(const gp_pixmap *src, const char *dst_path,
+                gp_progress_cb *callback);
 -------------------------------------------------------------------------------
 
-Saves a link:pixmap.html[Pixmap] as a 'JPEG' image.
+Saves a link:pixmap.html[pixmap] as a 'JPEG' image.
 
 The 'JPEG' format could store either 'G8' or 8-bit 'RGB' pixel-types.
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <loaders/GP_JPG.h>
+#include <loaders/gp_load_ers.h>
 /* or */
-#include <GP.h>
+#include <gfxprim.h>
 
-int GP_MatchJPG(const void *buf);
+int gp_match_jpg(const void *buf);
 -------------------------------------------------------------------------------
 
 Matches a 'JPEG' link:signatures.html[file signature]. Returns non-zero if
@@ -376,47 +376,47 @@ The 'JPEG 2000' image support is implemented using the openjpeg library.
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <loaders/GP_JP2.h>
+#include <loaders/gp_load_ers.h>
 /* or */
-#include <GP.h>
+#include <gfxprim.h>
 
-GP_Pixmap *GP_ReadJP2(GP_IO *io, GP_ProgressCallback *callback);
+gp_pixmap *gp_read_jp2(gp_io *io, gp_progress_cb *callback);
 -------------------------------------------------------------------------------
 
-Reads a 'JPEG2000' image from readable 'GP_IO'. The link:loaders_io.html[IO
+Reads a 'JPEG2000' image from readable 'gp_io'. The link:loaders_io.html[IO
 stream] is expected to start exactly at the 'JPEG2000' file signature.
 
 Returns newly allocated pixmap (containing decompressed image) or in case of
 failure NULL and errno is set.
 
-The resulting link:pixmap.html[Pixmap] should be later freed with
-link:pixmap.html#PixmapFree[GP_PixmapFree()].
+The resulting link:pixmap.html[pixmap] should be later freed with
+link:pixmap.html#pixmap_free[gp_pixmap_free()].
 
 NOTE: Due to limitations of the openjpeg library progress callback does not work.
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <loaders/GP_JP2.h>
+#include <loaders/GP_Loaders.h>
 /* or */
-#include <GP.h>
+#include <gfxprim.h>
 
-GP_Pixmap *GP_LoadJP2(const char *src_path, GP_ProgressCallback *callback);
+gp_pixmap *gp_load_jp2(const char *src_path, gp_progress_cb *callback);
 -------------------------------------------------------------------------------
 
 Loads a 'JPEG2000' image from a file.
 
-The resulting link:pixmap.html[Pixmap] should be later freed with
-link:pixmap.html#PixmapFree[GP_PixmapFree()].
+The resulting link:pixmap.html[pixmap] should be later freed with
+link:pixmap.html#pixmap_free[gp_pixmap_free()].
 
 NOTE: Due to limitations of the openjpeg library progress callback does not work.
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <loaders/GP_JP2.h>
+#include <loaders/GP_Loaders.h>
 /* or */
-#include <GP.h>
+#include <gfxprim.h>
 
-int GP_MatchJP2(const void *buf);
+int gp_match_jp2(const void *buf);
 -------------------------------------------------------------------------------
 
 Matches a 'JPEG2000' link:signatures.html[file signature]. Returns non-zero if
@@ -431,45 +431,45 @@ link:http://sourceforge.net/projects/giflib/[giflib library].
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <loaders/GP_GIF.h>
+#include <loaders/GP_Loaders.h>
 /* or */
-#include <GP.h>
+#include <gfxprim.h>
 
-GP_Pixmap *GP_ReadGIF(GP_IO *io, GP_ProgressCallback *callback);
+gp_pixmap *gp_read_gif(gp_io *io, gp_progress_cb *callback);
 -------------------------------------------------------------------------------
 
-Reads a 'GIF' image from readable 'GP_IO'. The link:loaders_io.html[IO stream]
+Reads a 'GIF' image from readable 'gp_io'. The link:loaders_io.html[IO stream]
 is expected to start exactly at the 'GIF' file signature.
 
 Returns newly allocated pixmap (containing decompressed image) or in case of
 failure NULL and errno is set.
 
-The resulting link:pixmap.html[Pixmap] should be later freed with
-link:pixmap.html#PixmapFree[GP_PixmapFree()].
+The resulting link:pixmap.html[pixmap] should be later freed with
+link:pixmap.html#pixmap_free[gp_pixmap_free()].
 
 NOTE: Currently this function loads only first image from the 'GIF' container.
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <loaders/GP_GIF.h>
+#include <loaders/GP_Loaders.h>
 /* or */
-#include <GP.h>
+#include <gfxprim.h>
 
-GP_Pixmap *GP_LoadGIF(const char *src_path, GP_ProgressCallback *callback);
+gp_pixmap *gp_load_gif(const char *src_path, gp_progress_cb *callback);
 -------------------------------------------------------------------------------
 
 Loads a 'GIF' image from a file.
 
-The resulting link:pixmap.html[Pixmap] should be later freed with
-link:pixmap.html#PixmapFree[GP_PixmapFree()].
+The resulting link:pixmap.html[pixmap] should be later freed with
+link:pixmap.html#pixmap_free[gp_pixmap_free()].
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <loaders/GP_GIF.h>
+#include <loaders/GP_Loaders.h>
 /* or */
-#include <GP.h>
+#include <gfxprim.h>
 
-int GP_MatchGIF(const void *buf);
+int gp_match_gif(const void *buf);
 -------------------------------------------------------------------------------
 
 Matches a 'GIF' link:signatures.html[file signature]. Returns non-zero if
@@ -484,57 +484,57 @@ be exotic RGB compressions (RGB101010 for example) and RLE4 support.
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <loaders/GP_BMP.h>
+#include <loaders/GP_Loaders.h>
 /* or */
-#include <GP.h>
+#include <gfxprim.h>
 
-GP_Pixmap *GP_ReadBMP(GP_IO *io, GP_ProgressCallback *callback);
+gp_pixmap *gp_read_bmp(gp_io *io, gp_progress_cb *callback);
 -------------------------------------------------------------------------------
 
-Reads a 'BMP' image from readable 'GP_IO'. The link:loaders_io.html[IO stream]
+Reads a 'BMP' image from readable 'gp_io'. The link:loaders_io.html[IO stream]
 is expected to start exactly at the 'BMP' file signature.
 
 Returns newly allocated pixmap (containing decompressed image) or in case of
 failure NULL and errno is set.
 
-The resulting link:pixmap.html[Pixmap] should be later freed with
-link:pixmap.html#PixmapFree[GP_PixmapFree()].
+The resulting link:pixmap.html[pixmap] should be later freed with
+link:pixmap.html#pixmap_free[gp_pixmap_free()].
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <loaders/GP_BMP.h>
+#include <loaders/GP_Loaders.h>
 /* or */
-#include <GP.h>
+#include <gfxprim.h>
 
-GP_Pixmap *GP_LoadBMP(const char *src_path, GP_ProgressCallback *callback);
+gp_pixmap *gp_load_bmp(const char *src_path, gp_progress_cb *callback);
 -------------------------------------------------------------------------------
 
 Loads a 'BMP' image from a file.
 
-The resulting link:pixmap.html[Pixmap] should be later freed with
-link:pixmap.html#PixmapFree[GP_PixmapFree()].
+The resulting link:pixmap.html[pixmap] should be later freed with
+link:pixmap.html#pixmap_free[gp_pixmap_free()].
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <loaders/GP_BMP.h>
+#include <loaders/GP_Loaders.h>
 /* or */
-#include <GP.h>
+#include <gfxprim.h>
 
-int GP_SaveBMP(const GP_Pixmap *src, const char *dst_path,
-               GP_ProgressCallback *callback);
+int gp_save_bmp(const gp_pixmap *src, const char *dst_path,
+                gp_progress_cb *callback);
 -------------------------------------------------------------------------------
 
-Saves a link:pixmap.html[Pixmap] as a 'BMP' image.
+Saves a link:pixmap.html[pixmap] as a 'BMP' image.
 
 Currently only 8-bit 'RGB' pixel types are supported.
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <loaders/GP_BMP.h>
+#include <loaders/GP_Loaders.h>
 /* or */
-#include <GP.h>
+#include <gfxprim.h>
 
-int GP_MatchBMP(const void *buf);
+int gp_match_bmp(const void *buf);
 -------------------------------------------------------------------------------
 
 Matches a 'BMP' link:signatures.html[file signature]. Returns non-zero if
@@ -552,47 +552,47 @@ yet.
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <loaders/GP_TIFF.h>
+#include <loaders/GP_Loaders.h>
 /* or */
-#include <GP.h>
+#include <gfxprim.h>
 
-GP_Pixmap *GP_ReadTIFF(GP_IO *io, GP_ProgressCallback *callback);
+gp_pixmap *gp_read_tiff(gp_io *io, gp_progress_cb *callback);
 -------------------------------------------------------------------------------
 
-Reads a 'TIFF' image from readable 'GP_IO'. The link:loaders_io.html[IO stream]
+Reads a 'TIFF' image from readable 'gp_io'. The link:loaders_io.html[IO stream]
 is expected to start exactly at the 'TIFF' file signature.
 
 Returns newly allocated pixmap (containing decompressed image) or in case of
 failure NULL and errno is set.
 
-The resulting link:pixmap.html[Pixmap] should be later freed with
-link:pixmap.html#PixmapFree[GP_PixmapFree()].
+The resulting link:pixmap.html[pixmap] should be later freed with
+link:pixmap.html#pixmap_free[gp_pixmap_free()].
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <loaders/GP_TIFF.h>
+#include <loaders/GP_Loaders.h>
 /* or */
-#include <GP.h>
+#include <gfxprim.h>
 
-GP_Pixmap *GP_LoadTIFF(const char *src_path, GP_ProgressCallback *callback);
+gp_pixmap *gp_load_tiff(const char *src_path, gp_progress_cb *callback);
 -------------------------------------------------------------------------------
 
 Loads a 'TIFF' image from a file.
 
-The resulting link:pixmap.html[Pixmap] should be later freed with
-link:pixmap.html#PixmapFree[GP_PixmapFree()].
+The resulting link:pixmap.html[pixmap] should be later freed with
+link:pixmap.html#pixmap_free[gp_pixmap_free()].
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <loaders/GP_TIFF.h>
+#include <loaders/GP_Loaders.h>
 /* or */
-#include <GP.h>
+#include <gfxprim.h>
 
-int GP_SaveTIFF(const GP_Pixmap *src, const char *dst_path,
-                GP_ProgressCallback *callback);
+int gp_save_tiff(const gp_pixmap *src, const char *dst_path,
+                 gp_progress_cb *callback);
 -------------------------------------------------------------------------------
 
-Saves a link:pixmap.html[Pixmap] as a 'TIFF' image.
+Saves a link:pixmap.html[pixmap] as a 'TIFF' image.
 
 Supports 'G1', 'G2', 'G4' and 'G8' grayscale and 8-bit 'RGB' pixel types.
 
@@ -600,11 +600,11 @@ The image is saved in stripes.
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <loaders/GP_TIFF.h>
+#include <loaders/GP_Loaders.h>
 /* or */
-#include <GP.h>
+#include <gfxprim.h>
 
-int GP_MatchTIFF(const void *buf);
+int gp_match_tiff(const void *buf);
 -------------------------------------------------------------------------------
 
 Matches a 'TIFF' link:signatures.html[file signature]. Returns non-zero if
@@ -618,44 +618,44 @@ The 'PSP' loader can load a composite image from a Paint Shop Pro Image Files.
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <loaders/GP_PSP.h>
+#include <loaders/GP_Loaders.h>
 /* or */
-#include <GP.h>
+#include <gfxprim.h>
 
-GP_Pixmap *GP_ReadPSP(GP_IO *io, GP_ProgressCallback *callback);
+gp_pixmap *gp_read_psp(gp_io *io, gp_progress_cb *callback);
 -------------------------------------------------------------------------------
 
-Reads a 'PSP' composite image from readable 'GP_IO'. The
+Reads a 'PSP' composite image from readable 'gp_io'. The
 link:loaders_io.html[IO stream] is expected to start exactly at the 'PSP' file
 signature.
 
 Returns newly allocated pixmap (containing decompressed image) or in case of
 failure NULL and errno is set.
 
-The resulting link:pixmap.html[Pixmap] should be later freed with
-link:pixmap.html#PixmapFree[GP_PixmapFree()].
+The resulting link:pixmap.html[pixmap] should be later freed with
+link:pixmap.html#pixmap_free[gp_pixmap_free()].
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <loaders/GP_PSP.h>
+#include <loaders/GP_Loaders.h>
 /* or */
-#include <GP.h>
+#include <gfxprim.h>
 
-GP_Pixmap *GP_LoadPSP(const char *src_path, GP_ProgressCallback *callback);
+gp_pixmap *gp_load_psp(const char *src_path, gp_progress_cb *callback);
 -------------------------------------------------------------------------------
 
 Loads a composite image from a 'PSP' file.
 
-The resulting link:pixmap.html[Pixmap] should be later freed with
-link:pixmap.html#PixmapFree[GP_PixmapFree()].
+The resulting link:pixmap.html[pixmap] should be later freed with
+link:pixmap.html#pixmap_free[gp_pixmap_free()].
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <loaders/GP_PSP.h>
+#include <loaders/GP_Loaders.h>
 /* or */
-#include <GP.h>
+#include <gfxprim.h>
 
-int GP_MatchPSP(const void *buf);
+int gp_match_psp(const void *buf);
 -------------------------------------------------------------------------------
 
 Matches a 'PSP' link:signatures.html[file signature]. Returns non-zero if
@@ -672,29 +672,29 @@ RGB).
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <loaders/GP_PSD.h>
+#include <loaders/GP_Loaders.h>
 /* or */
-#include <GP.h>
+#include <gfxprim.h>
 
-GP_Pixmap *GP_ReadPSD(GP_IO *io, GP_ProgressCallback *callback);
+gp_pixmap *gp_read_psd(gp_io *io, gp_progress_cb *callback);
 -------------------------------------------------------------------------------
 
-Reads a 'PSD' image from readable 'GP_IO'. The link:loaders_io.html[IO stream]
+Reads a 'PSD' image from readable 'gp_io'. The link:loaders_io.html[IO stream]
 is expected to start exactly at the 'PSD' file signature.
 
 Returns newly allocated pixmap (containing decompressed image) or in case of
 failure NULL and errno is set.
 
-The resulting link:pixmap.html[Pixmap] should be later freed with
-link:pixmap.html#PixmapFree[GP_PixmapFree()].
+The resulting link:pixmap.html[pixmap] should be later freed with
+link:pixmap.html#pixmap_free[gp_pixmap_free()].
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <loaders/GP_PSD.h>
+#include <loaders/GP_Loaders.h>
 /* or */
-#include <GP.h>
+#include <gfxprim.h>
 
-GP_Pixmap *GP_LoadPSD(const char *src_path, GP_ProgressCallback *callback);
+gp_pixmap *gp_load_psd(const char *src_path, gp_progress_cb *callback);
 -------------------------------------------------------------------------------
 
 Loads a merged image (if present) from a 'PSD' file.
@@ -705,16 +705,16 @@ type.
 Returns NULL (TODO ERRNO) if merged image is not present/supported and
 thumbnail is not present either.
 
-The resulting link:pixmap.html[Pixmap] should be later freed with
-link:pixmap.html#PixmapFree[GP_PixmapFree()].
+The resulting link:pixmap.html[pixmap] should be later freed with
+link:pixmap.html#pixmap_free[gp_pixmap_free()].
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <loaders/GP_PSD.h>
+#include <loaders/GP_Loaders.h>
 /* or */
-#include <GP.h>
+#include <gfxprim.h>
 
-int GP_MatchPSD(const void *buf);
+int gp_match_psd(const void *buf);
 -------------------------------------------------------------------------------
 
 Matches a 'PSD' link:signatures.html[file signature]. Returns non-zero if
@@ -726,68 +726,68 @@ PNM Loaders
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <loaders/GP_PNM.h>
+#include <loaders/GP_Loaders.h>
 /* or */
-#include <GP.h>
+#include <gfxprim.h>
 
-GP_Pixmap *GP_ReadPBM(GP_IO *io, GP_ProgressCallback *callback);
+gp_pixmap *gp_read_pbm(gp_io *io, gp_progress_cb *callback);
 
-GP_Pixmap *GP_ReadPGM(GP_IO *io, GP_ProgressCallback *callback);
+gp_pixmap *gp_read_pgm(gp_io *io, gp_progress_cb *callback);
 
-GP_Pixmap *GP_ReadPPM(GP_IO *io, GP_ProgressCallback *callback);
+gp_pixmap *gp_read_ppm(gp_io *io, gp_progress_cb *callback);
 
-GP_Pixmap *GP_ReadPNM(GP_IO *io, GP_ProgressCallback *callback);
+gp_pixmap *gp_read_pnm(gp_io *io, gp_progress_cb *callback);
 -------------------------------------------------------------------------------
 
 Reads a ASCII or Rawbits (binary) 'PBM', 'PGM' and 'PPM' image from readable
-'GP_IO'. The link:loaders_io.html[IO stream] is expected to start exactly at
+'gp_io'. The link:loaders_io.html[IO stream] is expected to start exactly at
 the file signature.
 
-The resulting link:pixmap.html[Pixmap] should be later freed with
-link:pixmap.html#PixmapFree[GP_PixmapFree()].
+The resulting link:pixmap.html[pixmap] should be later freed with
+link:pixmap.html#pixmap_free[gp_pixmap_free()].
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <loaders/GP_PNM.h>
+#include <loaders/GP_Loaders.h>
 /* or */
-#include <GP.h>
+#include <gfxprim.h>
 
-GP_Pixmap *GP_LoadPBM(const char *src_path, GP_ProgressCallback *callback);
+gp_pixmap *gp_load_pbm(const char *src_path, gp_progress_cb *callback);
 
-GP_Pixmap *GP_LoadPGM(const char *src_path, GP_ProgressCallback *callback);
+gp_pixmap *gp_load_pgm(const char *src_path, gp_progress_cb *callback);
 
-GP_Pixmap *GP_LoadPPM(const char *src_path, GP_ProgressCallback *callback);
+gp_pixmap *gp_load_ppm(const char *src_path, gp_progress_cb *callback);
 
-GP_Pixmap *GP_LoadPNM(const char *src_path, GP_ProgressCallback *callback);
+gp_pixmap *gp_load_pnm(const char *src_path, gp_progress_cb *callback);
 -------------------------------------------------------------------------------
 
 Loads either ASCII or Rawbits (binary) 'PBM', 'PGM' and 'PPM'.
 
 The 'PNM' loader can load all of them i.e. 'PBM', 'PGM' and 'PPM'.
 
-The resulting link:pixmap.html[Pixmap] should be later freed with
-link:pixmap.html#PixmapFree[GP_PixmapFree()].
+The resulting link:pixmap.html[pixmap] should be later freed with
+link:pixmap.html#pixmap_free[gp_pixmap_free()].
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <loaders/GP_PNM.h>
+#include <loaders/GP_Loaders.h>
 /* or */
-#include <GP.h>
+#include <gfxprim.h>
 
-GP_Pixmap *GP_SavePBM(const GP_Pixmap *src, const char *dst_path,
-                       GP_ProgressCallback *callback);
+gp_pixmap *gp_save_pbm(const GP_pixmap *src, const char *dst_path,
+                       gp_progress_cb *callback);
 -------------------------------------------------------------------------------
 
 Saves 'G1' (1 bit grayscale) image as ASCII 'PBM'.
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <loaders/GP_PNM.h>
+#include <loaders/GP_Loaders.h>
 /* or */
-#include <GP.h>
+#include <gfxprim.h>
 
-GP_Pixmap *GP_SavePGM(const GP_Pixmap *src, const char *dst_path,
-                       GP_ProgressCallback *callback);
+gp_pixmap *gp_save_pgm(const GP_pixmap *src, const char *dst_path,
+                       gp_progress_cb *callback);
 -------------------------------------------------------------------------------
 
 Saves 'G1', 'G2', 'G4' and 'G8' (1, 2, 4 and 8 bit grayscale) image as ASCII
@@ -795,24 +795,24 @@ Saves 'G1', 'G2', 'G4' and 'G8' (1, 2, 4 and 8 bit grayscale) image as ASCII
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <loaders/GP_PNM.h>
+#include <loaders/GP_Loaders.h>
 /* or */
-#include <GP.h>
+#include <gfxprim.h>
 
-GP_Pixmap *GP_SavePPM(const GP_Pixmap *src, const char *dst_path,
-                       GP_ProgressCallback *callback);
+gp_pixmap *gp_save_ppm(const GP_pixmap *src, const char *dst_path,
+                       gp_progress_cb *callback);
 -------------------------------------------------------------------------------
 
 Saves 'RGB888' (24 bit RGB) image as ASCII 'PPM'.
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <loaders/GP_PNM.h>
+#include <loaders/GP_Loaders.h>
 /* or */
-#include <GP.h>
+#include <gfxprim.h>
 
-GP_Pixmap *GP_SavePNM(const GP_Pixmap *src, const char *dst_path,
-                       GP_ProgressCallback *callback);
+gp_pixmap *gp_save_pnm(const GP_pixmap *src, const char *dst_path,
+                       gp_progress_cb *callback);
 -------------------------------------------------------------------------------
 
 Saves 'G1', 'G2', 'G4' and 'G8' (1, 2, 4, 8 bit grayscale) or 'RGB888' (24 bit
@@ -820,17 +820,17 @@ RGB) image as ASCII 'PNM'.
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <loaders/GP_PNM.h>
+#include <loaders/GP_Loaders.h>
 /* or */
-#include <GP.h>
+#include <gfxprim.h>
 
-int GP_MatchPBM(const void *buf);
+int gp_match_pbm(const void *buf);
 
-int GP_MatchPGM(const void *buf);
+int gp_match_pgm(const void *buf);
 
-int GP_MatchPPM(const void *buf);
+int gp_match_ppm(const void *buf);
 
-int GP_MatchPNM(const void *buf);
+int gp_match_pnm(const void *buf);
 -------------------------------------------------------------------------------
 
 Matches either ASCII or Rawbits (binary) 'PBM', 'PGM' and 'PPM'
@@ -848,43 +848,43 @@ The 'PCX' loader can load ZSoft PCX images.
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <loaders/GP_PCX.h>
+#include <loaders/GP_Loaders.h>
 /* or */
-#include <GP.h>
+#include <gfxprim.h>
 
-GP_Pixmap *GP_ReadPCX(GP_IO *io, GP_ProgressCallback *callback);
+gp_pixmap *gp_read_pcx(gp_io *io, gp_progress_cb *callback);
 -------------------------------------------------------------------------------
 
-Reads a 'PCX' image from readable 'GP_IO'. The link:loaders_io.html[IO stream]
+Reads a 'PCX' image from readable 'gp_io'. The link:loaders_io.html[IO stream]
 is expected to start exactly at the 'PCX' file signature.
 
 Returns newly allocated pixmap (containing decompressed image) or in case of
 failure NULL and errno is set.
 
-The resulting link:pixmap.html[Pixmap] should be later freed with
-link:pixmap.html#PixmapFree[GP_PixmapFree()].
+The resulting link:pixmap.html[pixmap] should be later freed with
+link:pixmap.html#pixmap_free[gp_pixmap_free()].
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <loaders/GP_PCX.h>
+#include <loaders/GP_Loaders.h>
 /* or */
-#include <GP.h>
+#include <gfxprim.h>
 
-GP_Pixmap *GP_LoadPCX(const char *src_path, GP_ProgressCallback *callback);
+gp_pixmap *gp_load_pcx(const char *src_path, gp_progress_cb *callback);
 -------------------------------------------------------------------------------
 
 Loads a 'PCX' image from a file.
 
-The resulting link:pixmap.html[Pixmap] should be later freed with
-link:pixmap.html#PixmapFree[GP_PixmapFree()].
+The resulting link:pixmap.html[pixmap] should be later freed with
+link:pixmap.html#pixmap_free[gp_pixmap_free()].
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <loaders/GP_PCX.h>
+#include <loaders/GP_Loaders.h>
 /* or */
-#include <GP.h>
+#include <gfxprim.h>
 
-int GP_MatchPCX(const void *buf);
+int gp_match_pcx(const void *buf);
 -------------------------------------------------------------------------------
 
 Matches a 'PCX' link:signatures.html[file signature]. Returns non-zero if

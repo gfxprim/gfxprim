@@ -31,7 +31,11 @@
 
 #include <stdint.h>
 
-typedef struct GP_InputDriverLinux {
+#include <input/GP_Types.h>
+
+typedef struct gp_input_driver_linux gp_input_driver_linux;
+
+struct gp_input_driver_linux {
 	/* fd */
 	int fd;
 
@@ -53,26 +57,26 @@ typedef struct GP_InputDriverLinux {
 	uint8_t abs_flag_x:1;
 	uint8_t abs_flag_y:1;
 	uint8_t abs_pen_flag:1;
-} GP_InputDriverLinux;
+};
 
 /*
  * Initalize and allocate input driver.
  */
-struct GP_InputDriverLinux *GP_InputDriverLinuxOpen(const char *path);
+gp_input_driver_linux *gp_input_driver_linux_open(const char *path);
 
 /*
  * Close the fd, free memory.
  */
-void GP_InputDriverLinuxClose(struct GP_InputDriverLinux *self);
+void gp_input_driver_linux_close(gp_input_driver_linux *self);
 
 /*
  * Called when there are data ready on input device.
  *
- * May or may not generate GP_Event.
+ * May or may not generate gp_event.
  *
  * Returns 0 on succes -1 on error and errno is set.
  */
-int GP_InputDriverLinuxRead(struct GP_InputDriverLinux *self,
-                            struct GP_EventQueue *event_queue);
+int gp_input_driver_linux_read(gp_input_driver_linux *self,
+                               gp_event_queue *event_queue);
 
 #endif /* INPUT_GP_INPUT_DRIVER_LINUX_H */

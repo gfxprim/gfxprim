@@ -11,7 +11,7 @@ from . import C
 
 # Main Pixmap proxy (extended below)
 
-Pixmap = c_core.GP_Pixmap
+Pixmap = c_core.gp_pixmap
 
 
 def _init(module):
@@ -27,7 +27,7 @@ def _init(module):
 
   ### PixelTypeDescription
 
-  _ptdescr = c_core.GP_PixelTypeDescription
+  _ptdescr = c_core.gp_pixel_type_desc
 
   # String representation of a Pixmap
 
@@ -45,7 +45,7 @@ def _init(module):
   @extend(_pixmap, name='__str__')
   @extend(_pixmap, name='__repr__')
   def pixmap_str(self):
-    return "<Pixmap %dx%d %s (%dbpp), GP_Pixmap %sowned, %s parent>" % (
+    return "<Pixmap %dx%d %s (%dbpp), gp_pixmap %sowned, %s parent>" % (
       self.w, self.h, module['PixelTypes'][self.pixel_type].name, self.bpp,
       "" if self.thisown else "not ",
       "with" if self.parent else "no")
@@ -57,7 +57,7 @@ def _init(module):
     "Compare Pixmaps - pixel types, sizes and data must match (gamma ignored)."
     if not isinstance(other, _pixmap):
       raise TypeError("Can only compare two Pixmaps.")
-    return bool(c_core.GP_PixmapEqual(self, other))
+    return bool(c_core.gp_pixmap_equal(self, other))
 
   # Constructor
 
@@ -65,7 +65,7 @@ def _init(module):
     "Return pixel type number from the number or a PixelType instance"
     if isinstance(pixeltype, int):
       return pixeltype
-    if isinstance(pixeltype, c_core.GP_PixelTypeDescription):
+    if isinstance(pixeltype, c_core.gp_pixel_type_desc):
       return pixeltype.type
     raise TypeError("Not a PixelType instance or number: %r", pixeltype)
 
@@ -81,51 +81,51 @@ def _init(module):
   # New instance methods
 
   @extend(_pixmap)
-  def SubPixmap(self, x, y, w, h):
+  def sub_pixmap(self, x, y, w, h):
     "Create a subpixmap (a rectangular view)."
-    c = c_core.GP_SubPixmapAlloc(self, x, y, w, h)
+    c = c_core.gp_sub_pixmap_alloc(self, x, y, w, h)
     c.parent = self
     return c
 
   @extend(_pixmap)
-  def Copy(self, withdata):
+  def copy(self, withdata):
     "Copy the pixmap to a new pixmap. Pixel data are copie optionally."
     flags = c_core.GP_COPY_WITH_PIXELS if withdata else 0
-    return c_core.GP_PixmapCopy(self, flags)
+    return c_core.gp_pixmap_copy(self, flags)
 
   @extend(_pixmap)
-  def Convert(self, target_type):
+  def convert(self, target_type):
     """Converts pixmap to a different pixel type, allocates new pixmap.
-    See GP_PixmapConvertAlloc() for details."""
-    return c_core.GP_PixmapConvertAlloc(self, pixeltype_no(target_type))
+    See gp_pixmap_convert_alloc() for details."""
+    return c_core.gp_pixmap_convert_alloc(self, pixeltype_no(target_type))
 
   @extend(_pixmap)
-  def ToByteArray(self):
+  def to_byte_array(self):
     """Returns new Python ByteArray created from pixmap pixels. The
        array size is exactly pixmap.bytes_per_row * pixmap.h"""
-    return c_core.GP_PixmapToByteArray(self)
+    return c_core.gp_pixmap_to_byte_array(self)
 
   # Manipulation
 
-  extend_direct(_pixmap, "PutPixel", c_core.GP_PutPixel,
+  extend_direct(_pixmap, "putpixel", c_core.gp_putpixel,
       "Set a pixel value encoded according to pixmap PixelType. Clipped.")
 
-  extend_direct(_pixmap, "GetPixel", c_core.GP_GetPixel,
+  extend_direct(_pixmap, "getpixel", c_core.gp_getpixel,
       "Get a pixel value (encoded according to pixmap PixelType). Clipped.")
 
-  extend_direct(_pixmap, "RotateCW", c_core.GP_PixmapRotateCW,
+  extend_direct(_pixmap, "rotate_cw", c_core.gp_pixmap_rotate_cw,
       "Rotate Pixmap clockwise by changing the pixmap orientation.")
 
-  extend_direct(_pixmap, "RotateCCW", c_core.GP_PixmapRotateCCW,
+  extend_direct(_pixmap, "rotate_ccw", c_core.gp_pixmap_rotate_ccw,
       "Rotate Pixmap counter-clockwise by changing the pixmap orientation.")
 
-  extend_direct(_pixmap, "Resize", c_core.GP_PixmapResize,
+  extend_direct(_pixmap, "resize", c_core.gp_pixmap_resize,
       "Resize the pixmap bitmap (reallocate). Fails on subpixmaps.")
 
   # Blit
 
   @extend(_pixmap)
-  def Blit(self, sx, sy, target, tx, ty, w=None, h=None, sx2=None, sy2=None,
+  def blit(self, sx, sy, target, tx, ty, w=None, h=None, sx2=None, sy2=None,
            tx2=None, ty2=None):
     """Copy a rectangle from self to target. (sx,sy) and (tx,ty) define
     upper-left corners, rectangle size is given by (width, height), lower-right
@@ -142,24 +142,24 @@ def _init(module):
       h = max(0, ty2 - ty + 1)
     if (w < 0) or (h < 0):
       raise ValueError("Size of blit rect must be non-negative.")
-    return c_core.GP_BlitXYWH_Clipped(self, sx, sy, w, h, target, tx, ty)
+    return c_core.gp_blit_xywh_clipped(self, sx, sy, w, h, target, tx, ty)
 
   # Color conversions
 
   @extend(_pixmap)
-  def RGBToPixel(self, r, g, b):
+  def rgb_to_pixel(self, r, g, b):
     "Convert RGB888 (values 0-255) to pixmap pixel type."
-    return c_core.GP_RGBToPixel(int(r), int(g), int(b), self.pixel_type)
+    return c_core.gp_rgb_to_pixel(int(r), int(g), int(b), self.pixel_type)
 
   @extend(_pixmap)
-  def RGBAToPixel(self, r, g, b, a):
+  def rgba_to_pixel(self, r, g, b, a):
     "Convert RGBA8888 (values 0-255) to pixmap pixel type."
-    return c_core.GP_RGBAToPixel(int(r), int(g), int(b), int(a), self.pixel_type)
+    return c_core.gp_rgba_to_pixel(int(r), int(g), int(b), int(a), self.pixel_type)
 
   @extend(_pixmap)
-  def Fill(self, pixel):
+  def fill(self, pixel):
     "Fills pixmap with given pixel value."
-    return c_core.GP_Fill(self, pixel)
+    return c_core.gp_fill(self, pixel)
 
   # Handle submodule methods such as pixmap.gfx.Line(...)
   _available_submodules = frozenset(['gfx', 'loaders', 'text', 'filters'])
@@ -181,35 +181,35 @@ def _init(module):
   const_regexes = [
       '^GP_[A-Z0-9_]*$',
       '^GP_PIXEL_x[A-Z0-9_]*$']
-  def strip_GP(s):
-    return re.sub('^GP_', '', s)
-  import_members(c_core, C, include=const_regexes, sub=strip_GP)
+  def strip_gp(s):
+    return re.sub('^gp_|^GP_', '', s)
+  import_members(c_core, C, include=const_regexes, sub=strip_gp)
   # every Pixmap also points to C for convenience
   extend(_pixmap, name='C')(C)
 
   # Arrays with pixel type info
-  module['PixelTypes'] = [c_core.GP_PixelTypes_access(i)
+  module['pixel_types'] = [c_core.gp_pixel_types_access(i)
                               for i in range(C.PIXEL_MAX)]
 
-  module['PixelTypesDict'] = dict(((t.name, t) for t in module['PixelTypes']))
+  module['pixel_types_dict'] = dict(((t.name, t) for t in module['pixel_types']))
 
-  def PixelTypeByName(name):
-    "Return a PixelType descriptor by name, raise KeyError if no such type exists."
-    return module['PixelTypesDict'][name]
-  module['PixelTypeByName'] = PixelTypeByName
+  def pixel_type_by_name(name):
+    "Return a pixel_type descriptor by name, raise KeyError if no such type exists."
+    return module['pixel_types_dict'][name]
+  module['pixel_type_by_name'] = pixel_type_by_name
 
   # Bulk import of functions
-  import_members(c_core, module, sub=strip_GP,
+  import_members(c_core, module, sub=strip_gp,
       include=[
-        '^GP_Color.*$', # Might use trimming
-        '^GP_[GS]etDebugLevel$',
-        '^GP_PixelRGB.*$', # ...Lookup and ...Match
-        '^GP_PixelToRGB.*$', # Needs love
-        '^GP_RGB.*$', # Needs filtering
-        '^GP_Fill',
+        '^gp_color.*$', # Might use trimming
+        '^gp_[gs]et_debug_level$',
+        '^gp_pixel_rgb.*$', # ...Lookup and ...Match
+        '^gp_pixel_to_rgb.*$', # Needs love
+        '^gp_rgb.*$', # Needs filtering
+        '^gp_fill',
 	])
 
-  module['Convert'] = c_core.GP_PixmapConvertAlloc
+  module['Convert'] = c_core.gp_pixmap_convert_alloc
 
 _init(locals())
 del _init

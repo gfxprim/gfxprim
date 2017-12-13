@@ -195,7 +195,7 @@ static uint8_t font_glyphs[] = {
 			  0x60, 0x92, 0x0c,
 };
 
-static struct GP_FontFace font = {
+static struct gp_font_face font = {
 	.family_name = "HaxorNarrow17",
 	.style_name = "Mono",
 	.charset = GP_CHARSET_7BIT,
@@ -220,7 +220,8 @@ static struct GP_FontFace font = {
 	}
 };
 
-const struct GP_FontFace *GP_FontHaxorNarrow17 = &font;
+const struct gp_font_face *gp_font_haxor_narrow_17 = &font;
+
 static uint8_t font_bold_glyphs[] = {
 	/* ' ' */	  0,  0,  0,  0,  9,
 			  0x00, 0x00, 0x00,
@@ -414,7 +415,7 @@ static uint8_t font_bold_glyphs[] = {
 			  0x70, 0xdb, 0x0e,
 };
 
-static struct GP_FontFace font_bold = {
+static struct gp_font_face font_bold = {
 	.family_name = "HaxorNarrowBold17",
 	.style_name = "Mono",
 	.charset = GP_CHARSET_7BIT,
@@ -439,4 +440,4 @@ static struct GP_FontFace font_bold = {
 	}
 };
 
-const struct GP_FontFace *GP_FontHaxorNarrowBold17 = &font_bold;
+const struct gp_font_face *gp_font_haxor_narrow_bold_17 = &font_bold;

@@ -8,85 +8,85 @@ import gfxprim.backends as backends
 import gfxprim.input as input
 
 def fill(bk):
-    color = bk.pixmap.RGBToPixel(0xee, 0xee, 0xee)
-    bk.pixmap.gfx.Fill(color)
-    bk.Flip()
+    color = bk.pixmap.rgb_to_pixel(0xee, 0xee, 0xee)
+    bk.pixmap.gfx.fill(color)
+    bk.flip()
 
 def hline(bk):
-    fg = bk.pixmap.RGBToPixel(0xee, 0xee, 0xee)
-    bg = bk.pixmap.RGBToPixel(0, 0, 0);
+    fg = bk.pixmap.rgb_to_pixel(0xee, 0xee, 0xee)
+    bg = bk.pixmap.rgb_to_pixel(0, 0, 0);
 
-    bk.pixmap.gfx.Fill(bg)
+    bk.pixmap.gfx.fill(bg)
     for i in range(0, bk.pixmap.h, 10):
-        bk.pixmap.gfx.HLine(0, bk.pixmap.w, i, fg)
-    bk.Flip()
+        bk.pixmap.gfx.hline(0, bk.pixmap.w, i, fg)
+    bk.flip()
 
 def vline(bk):
-    fg = bk.pixmap.RGBToPixel(0xee, 0xee, 0xee)
-    bg = bk.pixmap.RGBToPixel(0, 0, 0);
+    fg = bk.pixmap.rgb_to_pixel(0xee, 0xee, 0xee)
+    bg = bk.pixmap.rgb_to_pixel(0, 0, 0);
 
-    bk.pixmap.gfx.Fill(bg)
+    bk.pixmap.gfx.fill(bg)
 
     for i in range(0, bk.pixmap.w, 10):
-        bk.pixmap.gfx.VLine(i, 0, bk.pixmap.h, fg)
+        bk.pixmap.gfx.vline(i, 0, bk.pixmap.h, fg)
 
-    bk.Flip()
+    bk.flip()
 
 def line(bk):
-    fg = bk.pixmap.RGBToPixel(0xee, 0xee, 0xee)
-    bg = bk.pixmap.RGBToPixel(0, 0, 0);
+    fg = bk.pixmap.rgb_to_pixel(0xee, 0xee, 0xee)
+    bg = bk.pixmap.rgb_to_pixel(0, 0, 0);
 
-    bk.pixmap.gfx.Fill(bg)
+    bk.pixmap.gfx.fill(bg)
 
     for i in range(0, 2 * max(bk.pixmap.w, bk.pixmap.h), 13):
-           bk.pixmap.gfx.Line(0, i, i, 0, fg)
+           bk.pixmap.gfx.line(0, i, i, 0, fg)
 
-    bk.Flip()
+    bk.flip()
 
 def rect(bk):
-    fg = bk.pixmap.RGBToPixel(0xee, 0xee, 0xee)
-    bg = bk.pixmap.RGBToPixel(0, 0, 0);
+    fg = bk.pixmap.rgb_to_pixel(0xee, 0xee, 0xee)
+    bg = bk.pixmap.rgb_to_pixel(0, 0, 0);
 
-    bk.pixmap.gfx.Fill(bg)
+    bk.pixmap.gfx.fill(bg)
 
     for i in range(10, 130, 10):
-        bk.pixmap.gfx.Rect(i, i, bk.pixmap.w - i, bk.pixmap.h - i, fg)
+        bk.pixmap.gfx.rect(i, i, bk.pixmap.w - i, bk.pixmap.h - i, fg)
 
-    bk.Flip()
+    bk.flip()
 
 def triangle(bk):
-    fg = bk.pixmap.RGBToPixel(0xee, 0xee, 0xee)
-    bg = bk.pixmap.RGBToPixel(0, 0, 0);
+    fg = bk.pixmap.rgb_to_pixel(0xee, 0xee, 0xee)
+    bg = bk.pixmap.rgb_to_pixel(0, 0, 0);
 
-    bk.pixmap.gfx.Fill(bg)
+    bk.pixmap.gfx.fill(bg)
 
     w = bk.pixmap.w
     h = bk.pixmap.h
 
     for i in range(10, 90, 10):
-        bk.pixmap.gfx.Triangle(2*i, i, w - 2*i, i, w//2, h - 2*i, fg)
+        bk.pixmap.gfx.triangle(2*i, i, w - 2*i, i, w//2, h - 2*i, fg)
 
-    bk.Flip()
+    bk.flip()
 
 def tetragon(bk):
-    fg = bk.pixmap.RGBToPixel(0xee, 0xee, 0xee)
-    bg = bk.pixmap.RGBToPixel(0, 0, 0);
+    fg = bk.pixmap.rgb_to_pixel(0xee, 0xee, 0xee)
+    bg = bk.pixmap.rgb_to_pixel(0, 0, 0);
 
-    bk.pixmap.gfx.Fill(bg)
+    bk.pixmap.gfx.fill(bg)
 
     w = bk.pixmap.w
     h = bk.pixmap.h
 
     for i in range(10, 70, 10):
-        bk.pixmap.gfx.Tetragon(i, i, w-2*i, i, w-i, h-i, 2*i, h-i, fg)
+        bk.pixmap.gfx.tetragon(i, i, w-2*i, i, w-i, h-i, 2*i, h-i, fg)
 
-    bk.Flip()
+    bk.flip()
 
 def polygon(bk):
-    fg = bk.pixmap.RGBToPixel(0xee, 0xee, 0xee)
-    bg = bk.pixmap.RGBToPixel(0, 0, 0);
+    fg = bk.pixmap.rgb_to_pixel(0xee, 0xee, 0xee)
+    bg = bk.pixmap.rgb_to_pixel(0, 0, 0);
 
-    bk.pixmap.gfx.Fill(bg)
+    bk.pixmap.gfx.fill(bg)
 
     w = bk.pixmap.w
     h = bk.pixmap.h
@@ -98,9 +98,9 @@ def polygon(bk):
                (w-10, (h-10)//3), (w-10, 10), (2*(w-10)//3, 10),
                ((w-10)//2, (h-10)//3), ((w-10)//3, 10)]
 
-    bk.pixmap.gfx.Polygon(polygon, fg)
+    bk.pixmap.gfx.polygon(polygon, fg)
 
-    bk.Flip()
+    bk.flip()
 
 def next(bk, i):
 
@@ -137,10 +137,10 @@ def next(bk, i):
 
 def main():
     # Create X11 window
-    bk = backends.BackendX11Init(None, 0, 0, 320, 240, "GFX demo", 0)
+    bk = backends.x11_init(None, 0, 0, 320, 240, "GFX demo", 0)
     assert(bk)
 
-    bk.Flip()
+    bk.flip()
 
     i = 0
 
@@ -148,9 +148,9 @@ def main():
 
     # Event loop
     while True:
-        ev = bk.WaitEvent()
+        ev = bk.wait_event()
 
-        input.EventDump(ev)
+        input.event_dump(ev)
 
         if (ev.type == input.EV_KEY and ev.code == input.EV_KEY_DOWN):
 
@@ -163,9 +163,9 @@ def main():
            if (ev.code == input.EV_SYS_QUIT):
                sys.exit(0)
            elif (ev.code == input.EV_SYS_RESIZE):
-               bk.ResizeAck()
+               bk.resize_ack()
                fill(bk)
-               bk.Flip()
+               bk.flip()
 
 if __name__ == '__main__':
     main()

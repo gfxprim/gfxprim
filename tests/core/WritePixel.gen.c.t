@@ -69,7 +69,7 @@ static int WritePixel{{ "_%i_%i_%i_%i" % (pixelsize, offset, len, aligment) }}(v
 	gen_buf[{{aligment + offset * pixelsize//8 + i * pixelsize//8 + j}}] = 0xff;
 @                     end
 
-	GP_WritePixels_{{ pixelsize }}BPP(write_buf + {{aligment + offset * pixelsize//8}}, {{ len }}, 0xffffffff>>{{32 - pixelsize}});
+	gp_write_pixels_{{ pixelsize }}BPP(write_buf + {{aligment + offset * pixelsize//8}}, {{ len }}, 0xffffffff>>{{32 - pixelsize}});
 
 	COMPARE_BUFFERS({{'"p=%i o=%i l=%i a=%i"' % (pixelsize, offset, len, aligment)}}, write_buf, gen_buf);
 }
@@ -94,7 +94,7 @@ static int WritePixel{{ "_%i_%i_%i_%i_alloc" % (pixelsize, offset, len, aligment
 
 	memset(write_buf, 0, {{ 25 * pixelsize//8 }});
 
-	GP_WritePixels_{{ pixelsize }}BPP(write_buf + {{aligment + offset * pixelsize//8}}, {{ len }}, 0xffffffff>>{{32 - pixelsize}});
+	gp_write_pixels_{{ pixelsize }}BPP(write_buf + {{aligment + offset * pixelsize//8}}, {{ len }}, 0xffffffff>>{{32 - pixelsize}});
 
 	COMPARE_BUFFERS({{'"p=%i o=%i l=%i a=%i"' % (pixelsize, offset, len, aligment)}}, write_buf, gen_buf);
 }

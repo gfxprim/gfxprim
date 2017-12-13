@@ -11,26 +11,26 @@
 /*
  * General grabber structure handling
  */
-%extend GP_Grabber {
-  ~GP_Grabber() {
-    GP_DEBUG(2, "[wrapper] GP_GrabberExit (%p)", $self);
-    GP_GrabberExit($self);
+%extend gp_grabber {
+  ~gp_grabber() {
+    GP_DEBUG(2, "[wrapper] gp_grabberExit (%p)", $self);
+    gp_grabber_exit($self);
   }
 };
 
-%ignore GP_Grabber::priv;
-%ignore GP_Grabber::fd;
+%ignore gp_grabber::priv;
+%ignore gp_grabber::fd;
 
-%ignore GP_Grabber::Start;
-%ignore GP_Grabber::Stop;
-%ignore GP_Grabber::Exit;
-%ignore GP_Grabber::Poll;
+%ignore gp_grabber::start;
+%ignore gp_grabber::stop;
+%ignore gp_grabber::exit;
+%ignore gp_grabber::poll;
 
 %include "GP_Grabber.h"
 
 /*
  * Particular grabbers.
  */
-ERROR_ON_NULL(GP_GrabberV4L2Init);
-%newobject GP_GrabberV4L2Init;
+ERROR_ON_NULL(gp_grabber_v4l2_init);
+%newobject gp_grabber_v4l2_init;
 %include "GP_V4L2.h"

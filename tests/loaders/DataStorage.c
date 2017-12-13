@@ -29,39 +29,39 @@
 
 static int create_destroy(void)
 {
-	GP_DataStorage *storage;
+	gp_storage *storage;
 
-	storage = GP_DataStorageCreate();
+	storage = gp_storage_create();
 
 	if (!storage)
 		return TST_FAILED;
 
-	GP_DataStorageDestroy(storage);
+	gp_storage_destroy(storage);
 
 	return TST_SUCCESS;
 }
 
 static int create_get_destroy(void)
 {
-	GP_DataStorage *storage;
+	gp_storage *storage;
 
-	storage = GP_DataStorageCreate();
+	storage = gp_storage_create();
 
 	if (!storage)
 		return TST_FAILED;
 
-	if (GP_DataStorageGet(storage, NULL, "nonexistent")) {
+	if (gp_storage_get(storage, NULL, "nonexistent")) {
 		tst_msg("DataStorageGet() returned nonexistent record");
-		GP_DataStorageDestroy(storage);
+		gp_storage_destroy(storage);
 		return TST_FAILED;
 	}
 
-	GP_DataStorageDestroy(storage);
+	gp_storage_destroy(storage);
 
 	return TST_SUCCESS;
 }
 
-static int records_are_equal(const GP_DataNode *a, const GP_DataNode *b)
+static int records_are_equal(const gp_data_node *a, const gp_data_node *b)
 {
 	if (strcmp(a->id, b->id)) {
 		tst_msg("Data id's do not match ('%s', '%s')", a->id, b->id);
@@ -70,7 +70,7 @@ static int records_are_equal(const GP_DataNode *a, const GP_DataNode *b)
 
 	if (a->type != b->type) {
 		tst_msg("Data types do no match (%s, %s)",
-		        GP_DataTypeName(a->type), GP_DataTypeName(b->type));
+		        gp_data_type_name(a->type), gp_data_type_name(b->type));
 		return 0;
 	}
 
@@ -92,188 +92,188 @@ static int records_are_equal(const GP_DataNode *a, const GP_DataNode *b)
 
 static int create_add_get_destroy(void)
 {
-	GP_DataStorage *storage;
-	const GP_DataNode *ret;
+	gp_storage *storage;
+	const gp_data_node *ret;
 
-	storage = GP_DataStorageCreate();
+	storage = gp_storage_create();
 
 	if (!storage)
 		return TST_FAILED;
 
-	GP_DataNode data = {
+	gp_data_node data = {
 		.type = GP_DATA_STRING,
 		.id = "string",
 		.value.str = "test string",
 	};
 
-	ret = GP_DataStorageAdd(storage, NULL, &data);
+	ret = gp_storage_add(storage, NULL, &data);
 
 	if (!ret) {
 		tst_msg("DataStorageAdd() failed");
-		GP_DataStorageDestroy(storage);
+		gp_storage_destroy(storage);
 		return TST_FAILED;
 	}
 
 	if (!records_are_equal(ret, &data)) {
-		GP_DataStorageDestroy(storage);
+		gp_storage_destroy(storage);
 		return TST_FAILED;
 	}
 
-	ret = GP_DataStorageGet(storage, NULL, "string");
+	ret = gp_storage_get(storage, NULL, "string");
 	if (!ret) {
 		tst_msg("DataStorageGet() failed for newly added data");
-		GP_DataStorageDestroy(storage);
+		gp_storage_destroy(storage);
 		return TST_FAILED;
 	}
 
 	if (!records_are_equal(ret, &data)) {
-		GP_DataStorageDestroy(storage);
+		gp_storage_destroy(storage);
 		return TST_FAILED;
 	}
 
-	GP_DataStorageDestroy(storage);
+	gp_storage_destroy(storage);
 
 	return TST_SUCCESS;
 }
 
 static int duplicit_id_add(void)
 {
-	GP_DataStorage *storage;
-	GP_DataNode *ret;
+	gp_storage *storage;
+	gp_data_node *ret;
 
-	storage = GP_DataStorageCreate();
+	storage = gp_storage_create();
 
 	if (!storage)
 		return TST_FAILED;
 
-	GP_DataNode data = {
+	gp_data_node data = {
 		.type = GP_DATA_STRING,
 		.id = "string",
 		.value.str = "test string",
 	};
 
-	ret = GP_DataStorageAdd(storage, NULL, &data);
+	ret = gp_storage_add(storage, NULL, &data);
 
 	if (!ret) {
 		tst_msg("DataStorageAdd() failed");
-		GP_DataStorageDestroy(storage);
+		gp_storage_destroy(storage);
 		return TST_FAILED;
 	}
 
-	ret = GP_DataStorageAdd(storage, NULL, &data);
+	ret = gp_storage_add(storage, NULL, &data);
 	if (ret) {
 		tst_msg("DataStorageAdd() added data with duplicit id");
-		GP_DataStorageDestroy(storage);
+		gp_storage_destroy(storage);
 		return TST_FAILED;
 	}
 
-	GP_DataStorageDestroy(storage);
+	gp_storage_destroy(storage);
 	return TST_SUCCESS;
 }
 
 static int wrong_type_add(void)
 {
-	GP_DataStorage *storage;
-	GP_DataNode *ret;
+	gp_storage *storage;
+	gp_data_node *ret;
 
-	storage = GP_DataStorageCreate();
+	storage = gp_storage_create();
 
 	if (!storage)
 		return TST_FAILED;
 
-	ret = GP_DataStorageAddInt(storage, NULL, "not-a-dict", 0);
+	ret = gp_storage_add_int(storage, NULL, "not-a-dict", 0);
 
 	if (!ret) {
 		tst_msg("DataStorageAdd() failed");
-		GP_DataStorageDestroy(storage);
+		gp_storage_destroy(storage);
 		return TST_FAILED;
 	}
 
-	ret = GP_DataStorageAddInt(storage, ret, "int", 0);
+	ret = gp_storage_add_int(storage, ret, "int", 0);
 	if (ret) {
 		tst_msg("DataStorageAdd() added data into Integer Node");
-		GP_DataStorageDestroy(storage);
+		gp_storage_destroy(storage);
 		return TST_FAILED;
 	}
 
-	GP_DataStorageDestroy(storage);
+	gp_storage_destroy(storage);
 	return TST_SUCCESS;
 }
 
 static int get_by_path(void)
 {
-	GP_DataStorage *storage;
-	GP_DataNode *ret, *res;
+	gp_storage *storage;
+	gp_data_node *ret, *res;
 	int fail = 0;
 
-	storage = GP_DataStorageCreate();
+	storage = gp_storage_create();
 
 	if (!storage)
 		return TST_FAILED;
 
-	GP_DataNode data = {
+	gp_data_node data = {
 		.type = GP_DATA_STRING,
 		.id = "string",
 		.value.str = "test string",
 	};
 
-	ret = GP_DataStorageAdd(storage, NULL, &data);
+	ret = gp_storage_add(storage, NULL, &data);
 
 	if (!ret) {
 		tst_msg("DataStorageAdd() failed");
-		GP_DataStorageDestroy(storage);
+		gp_storage_destroy(storage);
 		return TST_FAILED;
 	}
 
 	/* Global path */
-	res = GP_DataStorageGetByPath(storage, NULL, "/string");
+	res = gp_storage_get_by_path(storage, NULL, "/string");
 
 	if (res != ret) {
-		tst_msg("DataStorageGetByPath(storage, NULL, '/string')");
+		tst_msg("gp_storage_get_by_path(storage, NULL, '/string')");
 		fail++;
 	}
 
 	/* Local path */
-	res = GP_DataStorageGetByPath(NULL, GP_DataStorageRoot(storage), "string");
+	res = gp_storage_get_by_path(NULL, gp_storage_root(storage), "string");
 
 	if (res != ret) {
-		tst_msg("DataStorageGetByPath(NULL, root, 'string')");
+		tst_msg("gp_storage_get_by_path(NULL, root, 'string')");
 		fail++;
 	}
 
 	/* Non existing in global path */
-	res = GP_DataStorageGetByPath(storage, NULL, "/does-not-exist");
+	res = gp_storage_get_by_path(storage, NULL, "/does-not-exist");
 
 	if (res) {
-		tst_msg("DataStorageGetByPath(storage, NULL, '/does-not-exist')");
+		tst_msg("gp_storage_get_by_path(storage, NULL, '/does-not-exist')");
 		fail++;
 	}
 
 	/* Non existing in local path */
-	res = GP_DataStorageGetByPath(NULL, GP_DataStorageRoot(storage), "does-not-exist");
+	res = gp_storage_get_by_path(NULL, gp_storage_root(storage), "does-not-exist");
 
 	if (res) {
-		tst_msg("DataStorageGetByPath(NULL, root, 'does-not-exist')");
+		tst_msg("gp_storage_get_by_path(NULL, root, 'does-not-exist')");
 		fail++;
 	}
 
 	/* Empty dict for local path */
-	res = GP_DataStorageGetByPath(NULL, NULL, "does-not-exist");
+	res = gp_storage_get_by_path(NULL, NULL, "does-not-exist");
 
 	if (res) {
-		tst_msg("DataStorageGetByPath(NULL, NULL, 'does-not-exist')");
+		tst_msg("gp_storage_get_by_path(NULL, NULL, 'does-not-exist')");
 		fail++;
 	}
 
 	/* Empty storage for global path */
-	res = GP_DataStorageGetByPath(NULL, NULL, "/does-not-exist");
+	res = gp_storage_get_by_path(NULL, NULL, "/does-not-exist");
 
 	if (res) {
-		tst_msg("DataStorageGetByPath(NULL, NULL, '/does-not-exist')");
+		tst_msg("gp_storage_get_by_path(NULL, NULL, '/does-not-exist')");
 		fail++;
 	}
 
-	GP_DataStorageDestroy(storage);
+	gp_storage_destroy(storage);
 
 	if (fail)
 		return TST_FAILED;
@@ -304,7 +304,7 @@ const struct tst_suite tst_suite = {
 		 .tst_fn = wrong_type_add,
 		 .flags = TST_CHECK_MALLOC},
 
-		{.name = "GP_DataStorageGetByPath()",
+		{.name = "gp_storage_get_by_path()",
 		 .tst_fn = get_by_path,
 		 .flags = TST_CHECK_MALLOC},
 

@@ -33,38 +33,38 @@
 #ifndef FILTERS_GP_GAUSSIAN_NOISE_H
 #define FILTERS_GP_GAUSSIAN_NOISE_H
 
-#include "GP_Filter.h"
+#include <filters/GP_Filter.h>
 
-int GP_FilterGaussianNoiseAddEx(const GP_Pixmap *src,
-                                GP_Coord x_src, GP_Coord y_src,
-                                GP_Size w_src, GP_Size h_src,
-                                GP_Pixmap *dst,
-                                GP_Coord x_dst, GP_Coord y_dst,
-                                float sigma, float mu,
-                                GP_ProgressCallback *callback);
+int gp_filter_gaussian_noise_add_ex(const gp_pixmap *src,
+                                    gp_coord x_src, gp_coord y_src,
+                                    gp_size w_src, gp_size h_src,
+                                    gp_pixmap *dst,
+                                    gp_coord x_dst, gp_coord y_dst,
+                                    float sigma, float mu,
+                                    gp_progress_cb *callback);
 
-GP_Pixmap *GP_FilterGaussianNoiseAddExAlloc(const GP_Pixmap *src,
-                                             GP_Coord x_src, GP_Coord y_src,
-                                             GP_Size w_src, GP_Size h_src,
-                                             float sigma, float mu,
-                                             GP_ProgressCallback *callback);
+gp_pixmap *gp_filter_gaussian_noise_add_ex_alloc(const gp_pixmap *src,
+                                                 gp_coord x_src, gp_coord y_src,
+                                                 gp_size w_src, gp_size h_src,
+                                                 float sigma, float mu,
+                                                 gp_progress_cb *callback);
 
-static inline int GP_FilterGaussianNoiseAdd(const GP_Pixmap *src,
-                                            GP_Pixmap *dst,
-                                            float sigma, float mu,
-                                            GP_ProgressCallback *callback)
+static inline int gp_filter_gaussian_noise_add(const gp_pixmap *src,
+                                               gp_pixmap *dst,
+                                               float sigma, float mu,
+                                               gp_progress_cb *callback)
 {
-	return GP_FilterGaussianNoiseAddEx(src, 0, 0, src->w, src->h,
-	                                   dst, 0, 0, sigma, mu, callback);
+	return gp_filter_gaussian_noise_add_ex(src, 0, 0, src->w, src->h,
+	                                       dst, 0, 0, sigma, mu, callback);
 }
 
-static inline GP_Pixmap *
-GP_FilterGaussianNoiseAddAlloc(const GP_Pixmap *src,
-                               float sigma, float mu,
-                               GP_ProgressCallback *callback)
+static inline gp_pixmap *
+gp_filter_gaussian_noise_add_alloc(const gp_pixmap *src,
+                                  float sigma, float mu,
+                                  gp_progress_cb *callback)
 {
-	return GP_FilterGaussianNoiseAddExAlloc(src, 0, 0, src->w, src->h,
-	                                        sigma, mu, callback);
+	return gp_filter_gaussian_noise_add_ex_alloc(src, 0, 0, src->w, src->h,
+	                                             sigma, mu, callback);
 }
 
 #endif /* FILTERS_GP_GAUSSIAN_NOISE_H */

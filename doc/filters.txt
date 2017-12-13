@@ -1,7 +1,7 @@
 Pixmap filters
 ---------------
 
-Pixel filters for 'GP_Pixmap'.
+Pixel filters for 'gp_pixmap'.
 
 The pixmap filter is basically a function that operates on pixmap pixels.
 The result may be stored into a new bitmap or placed to bitmap passed as
@@ -35,22 +35,23 @@ The return value from such filter is either zero, in case of success, or
 non-zero when filter was interrupted by a callback.
 
 For filters that work 'in-place' (which is explicitly said for each filter)
-the source and the destination could be the same pixmap. Note that this is
-not expected to work if you do several overlapping sub-pixmaps and pass these
-as arguments.
+the source and the destination could be the same pixmap. Note that this is not
+expected to work if you do several overlapping sub-pixmaps and pass these as
+arguments. Filter used 'in-place' may also cause the filter to run
+single-threaded which is explicit limitation for all but point filters.
 
 [source,c]
 -------------------------------------------------------------------------------
 /*
  * Filter common API.
  */
-int GP_FilterFoo(const GP_Pixmap *src, GP_Pixmap *dst,
-                 foo params ...,
-                 GP_ProgressCallback *callback);
+int gp_filter_foo(const gp_pixmap *src, gp_pixmap *dst,
+                  foo params ...,
+                  gp_progress_cb *callback);
 
-GP_Pixmap *GP_FilterFooAlloc(const GP_Pixmap *src,
-                              foo params ...,
-                              GP_ProgressCallback *callback);
+gp_pixmap *gp_filter_foo_alloc(const gp_pixmap *src,
+                               foo params ...,
+                               gp_progress_cb *callback);
 -------------------------------------------------------------------------------
 
 
@@ -67,15 +68,15 @@ Invert
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <GP.h>
+#include <gfxprim.h>
 /* or */
 #include <filters/GP_Point.h>
 
-int GP_FilterInvert(const GP_Pixmap *src, GP_Pixmap *dst,
-                    GP_ProgressCallback *callback);
+int gp_filter_invert(const gp_pixmap *src, gp_pixmap *dst,
+                     gp_progress_cb *callback);
 
-GP_Pixmap *GP_FilterInvertAlloc(const GP_Pixmap *src,
-                                 GP_ProgressCallback *callback);
+gp_pixmap *gp_filter_invert_alloc(const gp_pixmap *src,
+                                  gp_progress_cb *callback);
 -------------------------------------------------------------------------------
 
 The pixel channel values are counted as +chann_max - val+.
@@ -87,15 +88,15 @@ Brightness
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <GP.h>
+#include <gfxprim.h>
 /* or */
 #include <filters/GP_Point.h>
 
-int GP_FilterBrightness(const GP_Pixmap *src, GP_Pixmap *dst,
-                        float p, GP_ProgressCallback *callback);
+int gp_filter_brightness(const gp_pixmap *src, gp_pixmap *dst,
+                         float p, gp_progress_cb *callback);
 
-GP_Pixmap *GP_FilterBrightnessAlloc(const GP_Pixmap *src, float p,
-                                     GP_ProgressCallback *callback);
+gp_pixmap *gp_filter_brightness_alloc(const gp_pixmap *src, float p,
+                                      gp_progress_cb *callback);
 -------------------------------------------------------------------------------
 
 The pixel channel values are counted as +val + chann_max * p+.
@@ -107,15 +108,15 @@ Contrast
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <GP.h>
+#include <gfxprim.h>
 /* or */
 #include <filters/GP_Point.h>
 
-int GP_FilterContrast(const GP_Pixmap *src, GP_Pixmap *dst,
-                      float p, GP_ProgressCallback *callback);
+int gp_filter_contrast(const gp_pixmap *src, gp_pixmap *dst,
+                       float p, gp_progress_cb *callback);
 
-GP_Pixmap *GP_FilterContrastAlloc(const GP_Pixmap *src, float p,
-                                   GP_ProgressCallback *callback);
+gp_pixmap *gp_filter_contrast_alloc(const gp_pixmap *src, float p,
+                                    gp_progress_cb *callback);
 -------------------------------------------------------------------------------
 
 The pixel channel values are counted as +val * p+.
@@ -127,17 +128,17 @@ BrightnessContrast
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <GP.h>
+#include <gfxprim.h>
 /* or */
 #include <filters/GP_Point.h>
 
-int GP_FilterBrightnessContrast(const GP_Pixmap *src, GP_Pixmap *dst,
+int gp_filter_brightness_contrast(const gp_pixmap *src, gp_pixmap *dst,
                                 float b, float c,
-                                GP_ProgressCallback *callback);
+                                gp_progress_cb *callback);
 
-GP_Pixmap *GP_FilterBrightnessContrastAlloc(const GP_Pixmap *src,
-                                             float b, float c,
-                                             GP_ProgressCallback *callback);
+gp_pixmap *gp_filter_brightness_contrast_alloc(const gp_pixmap *src,
+                                               float b, float c,
+                                               gp_progress_cb *callback);
 -------------------------------------------------------------------------------
 
 The pixel channel values are counted as +val * c + chann_max * b+.
@@ -149,15 +150,15 @@ Posterize
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <GP.h>
+#include <gfxprim.h>
 /* or */
 #include <filters/GP_Point.h>
 
-int GP_FilterPosterize(const GP_Pixmap *src, GP_Pixmap *dst,
-                       unsigned int levels, GP_ProgressCallback *callback);
+int gp_filter_posterize(const gp_pixmap *src, gp_pixmap *dst,
+                        unsigned int levels, gp_progress_cb *callback);
 
-GP_Pixmap *GP_FilterPosterizeAlloc(const GP_Pixmap *src, unsigned int levels,
-                                    GP_ProgressCallback *callback);
+gp_pixmap *gp_filter_posterize_alloc(const gp_pixmap *src, unsigned int levels,
+                                     gp_progress_cb *callback);
 -------------------------------------------------------------------------------
 
 The pixel channel values are quantized into number of levels.
@@ -170,33 +171,33 @@ Gaussian additive noise filter
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <GP_Filters.h>
+#include <gp_filter_s.h>
 /* or */
 #include <filters/GP_GaussianNoise.h>
 
-int GP_FilterGaussianNoiseAddEx(const GP_Pixmap *src,
-                                GP_Coord x_src, GP_Coord y_src,
-                                GP_Size w_src, GP_Size h_src,
-                                GP_Pixmap *dst,
-                                GP_Coord x_dst, GP_Coord y_dst,
-                                float sigma, float mu,
-                                GP_ProgressCallback *callback);
+int gp_filter_gaussian_noise_add_ex(const gp_pixmap *src,
+                                    gp_coord x_src, gp_coord y_src,
+                                    gp_size w_src, gp_size h_src,
+                                    gp_pixmap *dst,
+                                    gp_coord x_dst, gp_coord y_dst,
+                                    float sigma, float mu,
+                                    gp_progress_cb *callback);
 
-GP_Pixmap *GP_FilterGaussianNoiseAddExAlloc(const GP_Pixmap *src,
-                                             GP_Coord x_src, GP_Coord y_src,
-                                             GP_Size w_src, GP_Size h_src,
-                                             float sigma, float mu,
-                                             GP_ProgressCallback *callback);
+gp_pixmap *gp_filter_gaussian_noise_add_ex_alloc(const gp_pixmap *src,
+                                                 gp_coord x_src, gp_coord y_src,
+                                                 gp_size w_src, gp_size h_src,
+                                                 float sigma, float mu,
+                                                 gp_progress_cb *callback);
 
-static inline int GP_FilterGaussianNoiseAdd(const GP_Pixmap *src,
-                                            GP_Pixmap *dst,
-                                            float sigma, float mu,
-                                            GP_ProgressCallback *callback);
+static inline int gp_filter_gaussian_noise_add(const gp_pixmap *src,
+                                               gp_pixmap *dst,
+                                               float sigma, float mu,
+                                               gp_progress_cb *callback);
 
-static inline GP_Pixmap *
-GP_FilterGaussianNoiseAddAlloc(const GP_Pixmap *src,
-                               float sigma, float mu,
-                               GP_ProgressCallback *callback);
+static inline gp_pixmap *
+gp_filter_gaussian_noise_add_alloc(const gp_pixmap *src,
+                                   float sigma, float mu,
+                                   gp_progress_cb *callback);
 -------------------------------------------------------------------------------
 
 Gaussian additive noise filter adds gaussian distributed noise to an image
@@ -221,16 +222,16 @@ If size of the input pixmaps differs, minimum is used.
 -------------------------------------------------------------------------------
 #include <filters/GP_Arithmetic.h>
 /* or */
-#include <GP.h>
+#include <gfxprim.h>
 
-int GP_FilterAddition(const GP_Pixmap *src_a,
-                      const GP_Pixmap *src_b,
-                      GP_Pixmap *dst,
-                      GP_ProgressCallback *callback);
+int gp_filter_addition(const gp_pixmap *src_a,
+                       const gp_pixmap *src_b,
+                       gp_pixmap *dst,
+                       gp_progress_cb *callback);
 
-GP_Pixmap *GP_FilterAdditionAlloc(const GP_Pixmap *src_a,
-                                   const GP_Pixmap *src_b,
-                                   GP_ProgressCallback *callback);
+gp_pixmap *gp_filter_addition_alloc(const gp_pixmap *src_a,
+                                    const gp_pixmap *src_b,
+                                    gp_progress_cb *callback);
 -------------------------------------------------------------------------------
 
 Produces saturated (clamped) addition of two pixmaps.
@@ -239,16 +240,16 @@ Produces saturated (clamped) addition of two pixmaps.
 -------------------------------------------------------------------------------
 #include <filters/GP_Arithmetic.h>
 /* or */
-#include <GP.h>
+#include <gfxprim.h>
 
-int GP_FilterMultiply(const GP_Pixmap *src_a,
-                      const GP_Pixmap *src_b,
-                      GP_Pixmap *dst,
-                      GP_ProgressCallback *callback);
+int gp_filter_multiply(const gp_pixmap *src_a,
+                       const gp_pixmap *src_b,
+                       gp_pixmap *dst,
+                       gp_progress_cb *callback);
 
-GP_Pixmap *GP_FilterMultiplyAlloc(const GP_Pixmap *src_a,
-                                   const GP_Pixmap *src_b,
-                                   GP_ProgressCallback *callback);
+gp_pixmap *gp_filter_multiply_alloc(const gp_pixmap *src_a,
+                                    const gp_pixmap *src_b,
+                                    gp_progress_cb *callback);
 -------------------------------------------------------------------------------
 
 Produces saturated (clamped) multiplication of two pixmaps.
@@ -257,16 +258,16 @@ Produces saturated (clamped) multiplication of two pixmaps.
 -------------------------------------------------------------------------------
 #include <filters/GP_Arigthmetic.h>
 /* or */
-#include <GP.h>
+#include <gfxprim.h>
 
-int GP_FilterDifference(const GP_Pixmap *src_a,
-                        const GP_Pixmap *src_b,
-                        GP_Pixmap *dst,
-                        GP_ProgressCallback *callback);
+int gp_filter_difference(const gp_pixmap *src_a,
+                         const gp_pixmap *src_b,
+                         gp_pixmap *dst,
+                         gp_progress_cb *callback);
 
-GP_Pixmap *GP_FilterDifferenceAlloc(const GP_Pixmap *src_a,
-                                     const GP_Pixmap *src_b,
-                                     GP_ProgressCallback *callback);
+gp_pixmap *gp_filter_difference_alloc(const gp_pixmap *src_a,
+                                      const gp_pixmap *src_b,
+                                      gp_progress_cb *callback);
 
 -------------------------------------------------------------------------------
 
@@ -276,25 +277,25 @@ Produces symmetric difference (i.e. abs(a - b)).
 -------------------------------------------------------------------------------
 #include <filters/GP_Arigthmetic.h>
 /* or */
-#include <GP.h>
+#include <gfxprim.h>
 
-int GP_FilterMax(const GP_Pixmap *src_a,
-                 const GP_Pixmap *src_b,
-                 GP_Pixmap *dst,
-                 GP_ProgressCallback *callback);
+int gp_filter_max(const gp_pixmap *src_a,
+                  const gp_pixmap *src_b,
+                  gp_pixmap *dst,
+                  gp_progress_cb *callback);
 
-GP_Pixmap *GP_FilterMaxAlloc(const GP_Pixmap *src_a,
-                              const GP_Pixmap *src_b,
-                              GP_ProgressCallback *callback);
+gp_pixmap *gp_filter_max_alloc(const gp_pixmap *src_a,
+                               const gp_pixmap *src_b,
+                               gp_progress_cb *callback);
 
-int GP_FilterMin(const GP_Pixmap *src_a,
-                 const GP_Pixmap *src_b,
-                 GP_Pixmap *dst,
-                 GP_ProgressCallback *callback);
+int gp_filter_min(const gp_pixmap *src_a,
+                  const gp_pixmap *src_b,
+                  gp_pixmap *dst,
+                  gp_progress_cb *callback);
 
-GP_Pixmap *GP_FilterMinAlloc(const GP_Pixmap *src_a,
-                              const GP_Pixmap *src_b,
-                              GP_ProgressCallback *callback);
+gp_pixmap *gp_filter_min_alloc(const gp_pixmap *src_a,
+                               const gp_pixmap *src_b,
+                               gp_progress_cb *callback);
 -------------------------------------------------------------------------------
 
 Maximum and minimum filter.
@@ -306,13 +307,13 @@ Rotation and Symmetry filters
 -------------------------------------------------------------------------------
 #include <filters/GP_Rotate.h>
 /* or */
-#include <GP.h>
+#include <gfxprim.h>
 
-int GP_FilterMirrorH(const GP_Pixmap *src, GP_Pixmap *dst,
-                     GP_ProgressCallback *callback);
+int gp_filter_mirror_h(const gp_pixmap *src, gp_pixmap *dst,
+                       gp_progress_cb *callback);
 
-GP_Pixmap *GP_FilterMirrorHAlloc(const GP_Pixmap *src,
-                                   GP_ProgressCallback *callback);
+gp_pixmap *gp_filter_mirror_h_alloc(const gp_pixmap *src,
+                                    gp_progress_cb *callback);
 -------------------------------------------------------------------------------
 
 Mirrors pixmap horizontally.
@@ -328,13 +329,13 @@ include::images/mirror_h/images.txt[]
 -------------------------------------------------------------------------------
 #include <filters/GP_Rotate.h>
 /* or */
-#include <GP.h>
+#include <gfxprim.h>
 
-int GP_FilterMirrorV(const GP_Pixmap *src, GP_Pixmap *dst,
-                     GP_ProgressCallback *callback);
+int gp_filter_mirror_v(const gp_pixmap *src, gp_pixmap *dst,
+                       gp_progress_cb *callback);
 
-GP_Pixmap *GP_FilterMirrorVAlloc(const GP_Pixmap *src,
-                                   GP_ProgressCallback *callback);
+gp_pixmap *gp_filter_mirror_v_alloc(const gp_pixmap *src,
+                                    gp_progress_cb *callback);
 -------------------------------------------------------------------------------
 
 Mirrors pixmap vertically.
@@ -350,13 +351,13 @@ include::images/mirror_v/images.txt[]
 -------------------------------------------------------------------------------
 #include <filters/GP_Rotate.h>
 /* or */
-#include <GP.h>
+#include <gfxprim.h>
 
-int GP_FilterRotate90(const GP_Pixmap *src, GP_Pixmap *dst,
-                      GP_ProgressCallback *callback);
+int gp_filter_rotate_90(const gp_pixmap *src, gp_pixmap *dst,
+                        gp_progress_cb *callback);
 
-GP_Pixmap *GP_FilterRotate90Alloc(const GP_Pixmap *src,
-                                    GP_ProgressCallback *callback);
+gp_pixmap *gp_filter_rotate_90_alloc(const gp_pixmap *src,
+                                     gp_progress_cb *callback);
 -------------------------------------------------------------------------------
 
 Rotate pixmap by 90 degrees.
@@ -372,13 +373,13 @@ include::images/rotate_90/images.txt[]
 -------------------------------------------------------------------------------
 #include <filters/GP_Rotate.h>
 /* or */
-#include <GP.h>
+#include <gfxprim.h>
 
-int GP_FilterRotate180(const GP_Pixmap *src, GP_Pixmap *dst,
-                       GP_ProgressCallback *callback);
+int gp_filter_rotate_180(const gp_pixmap *src, gp_pixmap *dst,
+                         gp_progress_cb *callback);
 
-GP_Pixmap *GP_FilterRotate180Alloc(const GP_Pixmap *src,
-                                     GP_ProgressCallback *callback);
+gp_pixmap *gp_filter_rotate_180_alloc(const gp_pixmap *src,
+                                      gp_progress_cb *callback);
 -------------------------------------------------------------------------------
 
 Rotate pixmap by 180 degrees.
@@ -394,13 +395,13 @@ include::images/rotate_180/images.txt[]
 -------------------------------------------------------------------------------
 #include <filters/GP_Rotate.h>
 /* or */
-#include <GP.h>
+#include <gfxprim.h>
 
-int GP_FilterRotate270(const GP_Pixmap *src, GP_Pixmap *dst,
-                       GP_ProgressCallback *callback);
+int gp_filter_rotate_270(const gp_pixmap *src, gp_pixmap *dst,
+                         gp_progress_cb *callback);
 
-GP_Pixmap *GP_FilterRotate270Alloc(const GP_Pixmap *src,
-                                     GP_ProgressCallback *callback);
+gp_pixmap *gp_filter_rotate_270_alloc(const gp_pixmap *src,
+                                      gp_progress_cb *callback);
 -------------------------------------------------------------------------------
 
 Rotate pixmap by 270 degrees.
@@ -416,9 +417,9 @@ include::images/rotate_270/images.txt[]
 -------------------------------------------------------------------------------
 #include <filters/GP_Rotate.h>
 /* or */
-#include <GP.h>
+#include <gfxprim.h>
 
-typedef enum GP_FilterSymmetries {
+typedef enum gp_filter_symmetries {
         GP_ROTATE_90,
         GP_ROTATE_CW = GP_ROTATE_90,
         GP_ROTATE_180,
@@ -426,15 +427,15 @@ typedef enum GP_FilterSymmetries {
         GP_ROTATE_CCW = GP_ROTATE_270,
         GP_MIRROR_H,
         GP_MIRROR_V,
-} GP_FilterSymmetries;
+} gp_filter_symmetries;
 
-GP_Pixmap *GP_FilterSymmetry(const GP_Pixmap *src,
-                              GP_FilterSymmetries symmetry,
-                              GP_ProgressCallback *callback);
+gp_pixmap *gp_filter_symmetry_alloc(const gp_pixmap *src,
+                                    gp_filter_symmetries symmetry,
+                                    gp_progress_cb *callback);
 
-int GP_FilterSymmetry(const GP_Pixmap *src, GP_Pixmap *dst,
-                      GP_FilterSymmetries symmetry,
-                      GP_ProgressCallback *callback);
+int gp_filter_symmetry(const gp_pixmap *src, gp_pixmap *dst,
+                       gp_filter_symmetries symmetry,
+                       gp_progress_cb *callback);
 -------------------------------------------------------------------------------
 
 Catch all function for symmetry filters.
@@ -479,15 +480,15 @@ ready-to-use filters.
 -------------------------------------------------------------------------------
 #include <filters/GP_Linear.h>
 /* or */
-#include <GP.h>
+#include <gfxprim.h>
 
-int GP_FilterLinearConvolution_Raw(const GP_Pixmap *src,
-                                   GP_Coord x_src, GP_Coord y_src,
-                                   GP_Size w_src, GP_Size h_src,
-                                   GP_Pixmap *dst,
-                                   GP_Coord x_dst, GP_Coord y_dst,
-                                   float kernel[], uint32_t kw, uint32_t kh,
-                                   float kern_div, GP_ProgressCallback *callback);
+int gp_filter_linear_convolution_raw(const gp_pixmap *src,
+                                     gp_coord x_src, gp_coord y_src,
+                                     gp_size w_src, gp_size h_src,
+                                     gp_pixmap *dst,
+                                     gp_coord x_dst, gp_coord y_dst,
+                                     float kernel[], uint32_t kw, uint32_t kh,
+                                     float kern_div, gp_progress_cb *callback);
 -------------------------------------------------------------------------------
 
 Internal generic convolution filter, this is a base for all linear convolution
@@ -537,34 +538,34 @@ include::images/convolution/images.txt[]
 -------------------------------------------------------------------------------
 #include <filters/GP_Linear.h>
 /* or */
-#include <GP.h>
+#include <gfxprim.h>
 
-int GP_FilterHLinearConvolution_Raw(const GP_Pixmap *src,
-                                    GP_Coord x_src, GP_Coord y_src,
-                                    GP_Size w_src, GP_Size h_src,
-                                    GP_Pixmap *dst,
-                                    GP_Coord x_dst, GP_Coord y_dst,
-                                    float kernel[], uint32_t kw, float kern_div,
-                                    GP_ProgressCallback *callback);
+int gp_filter_hlinear_convolution_raw(const gp_pixmap *src,
+                                      gp_coord x_src, gp_coord y_src,
+                                      gp_size w_src, gp_size h_src,
+                                      gp_pixmap *dst,
+                                      gp_coord x_dst, gp_coord y_dst,
+                                      float kernel[], uint32_t kw, float kern_div,
+                                      gp_progress_cb *callback);
 
-int GP_FilterVLinearConvolution_Raw(const GP_Pixmap *src,
-                                    GP_Coord x_src, GP_Coord y_src,
-                                    GP_Size w_src, GP_Size h_src,
-                                    GP_Pixmap *dst,
-                                    GP_Coord x_dst, GP_Coord y_dst,
-                                    float kernel[], uint32_t kh, float kern_div,
-                                    GP_ProgressCallback *callback);
+int gp_filter_vlinear_convolution_raw(const gp_pixmap *src,
+                                      gp_coord x_src, gp_coord y_src,
+                                      gp_size w_src, gp_size h_src,
+                                      gp_pixmap *dst,
+                                      gp_coord x_dst, gp_coord y_dst,
+                                      float kernel[], uint32_t kh, float kern_div,
+                                      gp_progress_cb *callback);
 
-int GP_FilterVHLinearConvolution_Raw(const GP_Pixmap *src,
-                                     GP_Coord x_src, GP_Coord y_src,
-                                     GP_Size w_src, GP_Size h_src,
-                                     GP_Pixmap *dst,
-                                     GP_Coord x_dst, GP_Coord y_dst,
-                                     float hkernel[], uint32_t kw, float hkern_div,
-                                     float vkernel[], uint32_t kh, float vkern_div,
-                                     GP_ProgressCallback *callback);
+int gp_filter_vhlinear_convolution_raw(const gp_pixmap *src,
+                                       gp_coord x_src, gp_coord y_src,
+                                       gp_size w_src, gp_size h_src,
+                                       gp_pixmap *dst,
+                                       gp_coord x_dst, gp_coord y_dst,
+                                       float hkernel[], uint32_t kw, float hkern_div,
+                                       float vkernel[], uint32_t kh, float vkern_div,
+                                       gp_progress_cb *callback);
 
-void GP_FilterKernelPrint_Raw(float kernel[], int kw, int kh, float kern_div);
+void gp_filter_kernel_print_raw(float kernel[], int kw, int kh, float kern_div);
 -------------------------------------------------------------------------------
 
 Internal special functions for one dimensional vertical and horizontal
@@ -631,44 +632,44 @@ NOTE: The linear convolutions are internally implemented using integer
 -------------------------------------------------------------------------------
 #include <filters/GP_Convolution.h>
 /* or */
-#include <GP.h>
+#include <gfxprim.h>
 
-typedef struct GP_FilterKernel2D {
+typedef struct gp_filter_kernel_2d {
 	unsigned int w;
 	unsigned int h;
 	float div;
 	float *kernel;
-} GP_FilterKernel2D;
+} gp_filter_kernel_2d;
 
-int GP_FilterConvolutionEx(const GP_Pixmap *src,
-                           GP_Coord x_src, GP_Coord y_src,
-                           GP_Size w_src, GP_Coord h_src,
-                           GP_Pixmap *dst,
-                           GP_Coord x_dst, GP_Coord y_dst,
-                           const GP_FilterKernel2D *kernel,
-                           GP_ProgressCallback *callback);
+int gp_filter_convolution_ex(const gp_pixmap *src,
+                             gp_coord x_src, gp_coord y_src,
+                             gp_size w_src, gp_coord h_src,
+                             gp_pixmap *dst,
+                             gp_coord x_dst, gp_coord y_dst,
+                             const gp_filter_Kernel2D *kernel,
+                             gp_progress_cb *callback);
 
-GP_Pixmap *GP_FilterConvolutionExAlloc(const GP_Pixmap *src,
-                                        GP_Coord x_src, GP_Coord y_src,
-                                        GP_Size w_src, GP_Size h_src,
-                                        const GP_FilterKernel2D *kernel,
-                                        GP_ProgressCallback *callback);
+gp_pixmap *gp_filter_convolution_ex_alloc(const gp_pixmap *src,
+                                          gp_coord x_src, gp_coord y_src,
+                                          gp_size w_src, gp_size h_src,
+                                          const gp_filter_Kernel2D *kernel,
+                                          gp_progress_cb *callback);
 
-int GP_FilterConvolution(const GP_Pixmap *src, GP_Pixmap *dst,
-                         const GP_FilterKernel2D *kernel,
-                         GP_ProgressCallback *callback);
+int gp_filter_convolution(const gp_pixmap *src, gp_pixmap *dst,
+                          const gp_filter_Kernel2D *kernel,
+                          gp_progress_cb *callback);
 
-GP_Pixmap *GP_FilterConvolutionAlloc(const GP_Pixmap *src,
-                                      const GP_FilterKernel2D *kernel,
-                                      GP_ProgressCallback *callback);
+gp_pixmap *gp_filter_convolution_alloc(const gp_pixmap *src,
+                                       const gp_filter_Kernel2D *kernel,
+                                       gp_progress_cb *callback);
 
-void GP_FilterKernel2DPrint(const GP_FilterKernel2D *kernel);
+void gp_filter_kernel_2d_print(const gp_filter_kernel_2d *kernel);
 -------------------------------------------------------------------------------
 
 Linear convolution filters, you should preferably use this API over the _Raw
 variants.
 
-The Ex variants takes a rectangle on which the filter should operate as well
+The _ex variants takes a rectangle on which the filter should operate as well
 as offset into the destination. The destination must be large enough so that
 starting with offset there is at least w_dst and h_dst pixels.
 
@@ -685,12 +686,12 @@ WARNING: If filter is executed in-place the work cannot be distributed between
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <GP.h>
+#include <gfxprim.h>
 
 /*
- * Example box smoothing filter.
+ * _example box smoothing filter.
  */
-static void box_smoothing(GP_Pixmap *img)
+static void box_smoothing(gp_pixmap *img)
 {
 	float box_filter[] = {
 		1, 1, 1,
@@ -698,33 +699,33 @@ static void box_smoothing(GP_Pixmap *img)
 		1, 1, 1,
 	};
 
-	GP_FilterKernel2D box_kernel = {
+	gp_filter_kernel_2d box_kernel = {
 		.w = 3,
 		.h = 3,
 		.div = 9,
 		.kernel = box_filter,
 	};
 
-	GP_FilterConvolution(img, img, &box_kernel, NULL);
+	gp_filter_convolution(img, img, &box_kernel, NULL);
 }
 -------------------------------------------------------------------------------
 
-Example function that implements simple 'in-place' smoothing filter.
+_example function that implements simple 'in-place' smoothing filter.
 
 Laplace Filter
 ^^^^^^^^^^^^^^
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <GP_Filters.h>
+#include <gp_filter_s.h>
 /* or */
-#include <GP.h>
+#include <gfxprim.h>
 
-int GP_FilterLaplace(const GP_Pixmap *src, GP_Pixmap *dst,
-                     GP_ProgressCallback *callback);
+int gp_filter_laplace(const gp_pixmap *src, gp_pixmap *dst,
+                      gp_progress_cb *callback);
 
-GP_Pixmap *GP_FilterLaplaceAlloc(const GP_Pixmap *src,
-                                  GP_ProgressCallback *callback);
+gp_pixmap *gp_filter_laplace_alloc(const gp_pixmap *src,
+                                   gp_progress_cb *callback);
 -------------------------------------------------------------------------------
 
 Discrete Laplace filter that produces a second derivative of the original
@@ -763,15 +764,15 @@ Laplacian Edge Sharpening
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <GP_Filters.h>
+#include <gp_filter_s.h>
 /* or */
-#include <GP.h>
+#include <gfxprim.h>
 
-int GP_FilterEdgeSharpening(const GP_Pixmap *src, GP_Pixmap *dst,
-                            float w, GP_ProgressCallback *callback);
+int gp_filter_edge_sharpening(const gp_pixmap *src, gp_pixmap *dst,
+                              float w, gp_progress_cb *callback);
 
-GP_Pixmap *GP_FilterEdgeSharpeningAlloc(const GP_Pixmap *src, float w,
-                                         GP_ProgressCallback *callback);
+gp_pixmap *gp_filter_edge_sharpening_alloc(const gp_pixmap *src, float w,
+                                           gp_progress_cb *callback);
 -------------------------------------------------------------------------------
 
 Laplace based edge sharpening filter, subtracts weighted second derivative
@@ -796,29 +797,29 @@ Gaussian Blur
 -------------------------------------------------------------------------------
 #include <filters/GP_Blur.h>
 /* or */
-#include <GP.h>
+#include <gfxprim.h>
 
-int GP_FilterGaussianBlurEx(const GP_Pixmap *src,
-                            GP_Coord x_src, GP_Coord y_src,
-                            GP_Size w_src, GP_Size h_src,
-                            GP_Pixmap *dst,
-                            GP_Coord x_dst, GP_Coord y_dst,
+int gp_filter_gaussian_blur_ex(const gp_pixmap *src,
+                               gp_coord x_src, gp_coord y_src,
+                               gp_size w_src, gp_size h_src,
+                               gp_pixmap *dst,
+                               gp_coord x_dst, gp_coord y_dst,
+                               float x_sigma, float y_sigma,
+                               gp_progress_cb *callback);
+
+gp_pixmap *gp_filter_gaussian_blur_ex_alloc(const gp_pixmap *src,
+                                            gp_coord x_src, gp_coord y_src,
+                                            gp_size w_src, gp_size h_src,
+                                            float x_sigma, float y_sigma,
+                                            gp_progress_cb *callback);
+
+int gp_filter_gaussian_blur(const gp_pixmap *src, gp_pixmap *dst,
                             float x_sigma, float y_sigma,
-                            GP_ProgressCallback *callback);
+                            gp_progress_cb *callback)
 
-GP_Pixmap *GP_FilterGaussianBlurExAlloc(const GP_Pixmap *src,
-                                         GP_Coord x_src, GP_Coord y_src,
-                                         GP_Size w_src, GP_Size h_src,
+gp_pixmap *gp_filter_gaussian_blur_alloc(const gp_pixmap *src,
                                          float x_sigma, float y_sigma,
-                                         GP_ProgressCallback *callback);
-
-int GP_FilterGaussianBlur(const GP_Pixmap *src, GP_Pixmap *dst,
-                          float x_sigma, float y_sigma,
-                          GP_ProgressCallback *callback)
-
-GP_Pixmap *GP_FilterGaussianBlurAlloc(const GP_Pixmap *src,
-                                       float x_sigma, float y_sigma,
-                                       GP_ProgressCallback *callback)
+                                         gp_progress_cb *callback)
 -------------------------------------------------------------------------------
 
 Gaussian blur (low pass) filters implemented as bilinear separable
@@ -877,30 +878,30 @@ Median
 -------------------------------------------------------------------------------
 #include <filters/GP_Median.h>
 /* or */
-#include <GP.h>
+#include <gfxprim.h>
 
-int GP_FilterMedianEx(const GP_Pixmap *src,
-                      GP_Coord x_src, GP_Coord y_src,
-                      GP_Size w_src, GP_Size h_src,
-                      GP_Pixmap *dst,
-                      GP_Coord x_dst, GP_Coord y_dst,
-                      int xmed, int ymed,
-                      GP_ProgressCallback *callback);
+int gp_filter_median_ex(const gp_pixmap *src,
+                        gp_coord x_src, gp_coord y_src,
+                        gp_size w_src, gp_size h_src,
+                        gp_pixmap *dst,
+                        gp_coord x_dst, gp_coord y_dst,
+                        int xmed, int ymed,
+                        gp_progress_cb *callback);
 
-GP_Pixmap *GP_FilterMedianExAlloc(const GP_Pixmap *src,
-                                   GP_Coord x_src, GP_Coord y_src,
-                                   GP_Size w_src, GP_Size h_src,
-                                   int xmed, int ymed,
-                                   GP_ProgressCallback *callback);
+gp_pixmap *gp_filter_median_ex_alloc(const gp_pixmap *src,
+                                     gp_coord x_src, gp_coord y_src,
+                                     gp_size w_src, gp_size h_src,
+                                     int xmed, int ymed,
+                                     gp_progress_cb *callback);
 
-int GP_FilterMedian(const GP_Pixmap *src,
-                    GP_Pixmap *dst,
-                    int xmed, int ymed,
-                    GP_ProgressCallback *callback);
+int gp_filter_median(const gp_pixmap *src,
+                     gp_pixmap *dst,
+                     int xmed, int ymed,
+                     gp_progress_cb *callback);
 
-GP_Pixmap *GP_FilterMedianAlloc(const GP_Pixmap *src,
-                                 int xmed, int ymed,
-                                 GP_ProgressCallback *callback);
+gp_pixmap *gp_filter_median_alloc(const gp_pixmap *src,
+                                  int xmed, int ymed,
+                                  gp_progress_cb *callback);
 -------------------------------------------------------------------------------
 
 Constant time median filter (the computational complexity is independent of

@@ -23,9 +23,11 @@
 #ifndef CORE_GP_FILL_H
 #define CORE_GP_FILL_H
 
+#include <core/GP_Types.h>
+
 /*
  * Fills pixmap with givel pixel value
  */
-void GP_Fill(GP_Pixmap *pixmap, GP_Pixel val);
+void gp_fill(gp_pixmap *pixmap, gp_pixel val);
 
 #endif /* CORE_GP_FILL_H */

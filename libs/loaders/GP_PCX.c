@@ -35,7 +35,7 @@
 #include "core/GP_Debug.h"
 #include "core/GP_GetPutPixel.h"
 
-#include "GP_PCX.h"
+#include <loaders/GP_Loaders.gen.h>
 
 /*
  * PCX RLE I/O Stream
@@ -49,7 +49,7 @@ struct rle {
 	off_t pos;
 
 	/* Source I/O stream */
-	GP_IO *io;
+	gp_io *io;
 
 	/* Read buffer */
 	ssize_t buf_fill;
@@ -62,7 +62,7 @@ static int rle_getc(struct rle *rle)
 	if (rle->buf_pos < rle->buf_fill)
 		return rle->buf[rle->buf_pos++];
 
-	rle->buf_fill = GP_IORead(rle->io, rle->buf, sizeof(rle->buf));
+	rle->buf_fill = gp_io_read(rle->io, rle->buf, sizeof(rle->buf));
 
 	if (rle->buf_fill <= 0)
 		return -1;
@@ -80,7 +80,7 @@ static int rle_getc(struct rle *rle)
  *   forbids for RLE to span across pixel lines, but there are images that does
  *   so. This code only prints a warning in this case.
  */
-static ssize_t rle_read(GP_IO *self, void *buf, size_t size)
+static ssize_t rle_read(gp_io *self, void *buf, size_t size)
 {
 	struct rle *priv = GP_IO_PRIV(self);
 	unsigned int read = 0;
@@ -120,9 +120,9 @@ static ssize_t rle_read(GP_IO *self, void *buf, size_t size)
 }
 
 /*
- * Only seeks forward to skip padding also works for GP_IOTell().
+ * Only seeks forward to skip padding also works for gp_io_tell().
  */
-static off_t rle_seek(GP_IO *self, off_t off, enum GP_IOWhence whence)
+static off_t rle_seek(gp_io *self, off_t off, enum gp_io_whence whence)
 {
 	uint8_t b;
 	struct rle *priv = GP_IO_PRIV(self);
@@ -136,15 +136,15 @@ static off_t rle_seek(GP_IO *self, off_t off, enum GP_IOWhence whence)
 	return priv->pos;
 }
 
-static int rle_close(GP_IO *self)
+static int rle_close(gp_io *self)
 {
 	free(self);
 	return 0;
 }
 
-static GP_IO *rle(GP_IO *io)
+static gp_io *rle(gp_io *io)
 {
-	GP_IO *rle = malloc(sizeof(GP_IO) + sizeof(struct rle));
+	gp_io *rle = malloc(sizeof(gp_io) + sizeof(struct rle));
 
 	if (!rle)
 		return NULL;
@@ -156,10 +156,10 @@ static GP_IO *rle(GP_IO *io)
 	priv->buf_pos = 0;
 	priv->io = io;
 
-	rle->Read = rle_read;
-	rle->Write = NULL;
-	rle->Seek = rle_seek;
-	rle->Close = rle_close;
+	rle->read = rle_read;
+	rle->write = NULL;
+	rle->seek = rle_seek;
+	rle->close = rle_close;
 
 	return rle;
 }
@@ -169,7 +169,7 @@ static GP_IO *rle(GP_IO *io)
  * RLE:           0x01
  * BPP:           0x01, 0x02, 0x04, 0x08
  */
-int GP_MatchPCX(const void *buf)
+int gp_match_pcx(const void *buf)
 {
 	const uint8_t *b = buf;
 
@@ -217,8 +217,8 @@ struct pcx_header {
 
 #include "core/GP_BitSwap.h"
 
-static int read_g1(GP_IO *io, struct pcx_header *header,
-                   GP_Pixmap *res, GP_ProgressCallback *callback)
+static int read_g1(gp_io *io, struct pcx_header *header,
+                   gp_pixmap *res, gp_progress_cb *callback)
 {
 	uint32_t y;
 	int padd = (int)header->bytes_per_line - (int)res->bytes_per_row;
@@ -228,75 +228,75 @@ static int read_g1(GP_IO *io, struct pcx_header *header,
 		return EINVAL;
 	}
 
-	GP_IO *rle_io = rle(io);
+	gp_io *rle_io = rle(io);
 	if (!rle_io)
 		return errno;
 
 	for (y = 0; y < res->h; y++) {
 		uint8_t *addr = GP_PIXEL_ADDR(res, 0, y);
-		GP_IORead(rle_io, addr, res->bytes_per_row);
-		GP_IOSeek(rle_io, GP_IO_SEEK_CUR, padd);
+		gp_io_read(rle_io, addr, res->bytes_per_row);
+		gp_io_seek(rle_io, GP_IO_SEEK_CUR, padd);
 
 		//TODO: FIX Endians
-		GP_BitSwapRow_B1(addr, res->bytes_per_row);
+		gp_bit_swap_row_b1(addr, res->bytes_per_row);
 
-		if (GP_ProgressCallbackReport(callback, y, res->h, res->w)) {
+		if (gp_progress_cb_report(callback, y, res->h, res->w)) {
 			GP_DEBUG(1, "Operation aborted");
-			GP_IOClose(rle_io);
+			gp_io_close(rle_io);
 			return ECANCELED;
 		}
 	}
 
-	GP_IOClose(rle_io);
+	gp_io_close(rle_io);
 	return 0;
 }
 
-static int read_rgb888(GP_IO *io, struct pcx_header *header,
-                       GP_Pixmap *res, GP_ProgressCallback *callback)
+static int read_rgb888(gp_io *io, struct pcx_header *header,
+                       gp_pixmap *res, gp_progress_cb *callback)
 {
 	uint32_t x, y;
 	unsigned int bpr = header->bytes_per_line;
 	uint8_t b[3 * bpr];
 
-	GP_IO *rle_io = rle(io);
+	gp_io *rle_io = rle(io);
 	if (!rle_io)
 		return errno;
 
 	for (y = 0; y < res->h; y++) {
 		//readline(io, b, sizeof(b), 0);
 
-		GP_IORead(rle_io, b, sizeof(b));
+		gp_io_read(rle_io, b, sizeof(b));
 
 		for (x = 0; x < res->w; x++) {
-			GP_Pixel pix = GP_Pixel_CREATE_RGB888(b[x],
+			gp_pixel pix = GP_PIXEL_CREATE_RGB888(b[x],
 			                                      b[x+bpr],
 			                                      b[x+2*bpr]);
-			GP_PutPixel_Raw_24BPP(res, x, y, pix);
+			gp_putpixel_raw_24BPP(res, x, y, pix);
 		}
 
-		if (GP_ProgressCallbackReport(callback, y, res->h, res->w)) {
+		if (gp_progress_cb_report(callback, y, res->h, res->w)) {
 			GP_DEBUG(1, "Operation aborted");
-			GP_IOClose(rle_io);
+			gp_io_close(rle_io);
 			return ECANCELED;
 		}
 	}
 
-	GP_IOClose(rle_io);
+	gp_io_close(rle_io);
 	return 0;
 }
 
-static int read_16_palette(GP_IO *io, struct pcx_header *header,
-                           GP_Pixmap *res, GP_ProgressCallback *callback)
+static int read_16_palette(gp_io *io, struct pcx_header *header,
+                           gp_pixmap *res, gp_progress_cb *callback)
 {
 	uint32_t x, y;
 	unsigned int i;
 	uint8_t b[header->bytes_per_line];
-	GP_Pixel palette[16];
+	gp_pixel palette[16];
 	uint8_t idx = 0, mask, mod;
 
 	for (i = 0; i < 16; i++) {
-		palette[i] = (GP_Pixel)header->palette[3*i] << 16;
-		palette[i] |= (GP_Pixel)header->palette[3*i+1] << 8;
+		palette[i] = (gp_pixel)header->palette[3*i] << 16;
+		palette[i] |= (gp_pixel)header->palette[3*i+1] << 8;
 		palette[i] |= header->palette[3*i+2];
 	}
 
@@ -314,12 +314,12 @@ static int read_16_palette(GP_IO *io, struct pcx_header *header,
 		return EINVAL;
 	}
 
-	GP_IO *rle_io = rle(io);
+	gp_io *rle_io = rle(io);
 	if (!rle_io)
 		return errno;
 
 	for (y = 0; y < res->h; y++) {
-		GP_IORead(rle_io, b, sizeof(b));
+		gp_io_read(rle_io, b, sizeof(b));
 
 		i = 0;
 
@@ -328,37 +328,37 @@ static int read_16_palette(GP_IO *io, struct pcx_header *header,
 			if (!(x % mod))
 				idx = b[i++];
 
-			GP_PutPixel_Raw_24BPP(res, x, y, palette[(idx & mask) >> (8 - header->bpp)]);
+			gp_putpixel_raw_24BPP(res, x, y, palette[(idx & mask) >> (8 - header->bpp)]);
 			idx <<= header->bpp;
 		}
 
-		if (GP_ProgressCallbackReport(callback, y, res->h, res->w)) {
+		if (gp_progress_cb_report(callback, y, res->h, res->w)) {
 			GP_DEBUG(1, "Operation aborted");
-			GP_IOClose(rle_io);
+			gp_io_close(rle_io);
 			return ECANCELED;
 		}
 	}
 
-	GP_IOClose(rle_io);
+	gp_io_close(rle_io);
 	return 0;
 }
 
 #define PALETTE_SIZE (3 * 256 + 1)
 
-static int read_256_palette(GP_IO *io, struct pcx_header *header,
-                            GP_Pixmap *res, GP_ProgressCallback *callback)
+static int read_256_palette(gp_io *io, struct pcx_header *header,
+                            gp_pixmap *res, gp_progress_cb *callback)
 {
 	uint32_t x, y;
 	unsigned int i;
 	uint8_t buf[GP_MAX(PALETTE_SIZE, header->bytes_per_line)];
-	GP_Pixel palette[256];
+	gp_pixel palette[256];
 
-	if (GP_IOSeek(io, -769, GP_IO_SEEK_END) == (off_t)-1) {
+	if (gp_io_seek(io, -769, GP_IO_SEEK_END) == (off_t)-1) {
 		GP_DEBUG(1, "Failed to seek to palette: %s", strerror(errno));
 		return EIO;
 	}
 
-	if (GP_IOFill(io, buf, PALETTE_SIZE)) {
+	if (gp_io_fill(io, buf, PALETTE_SIZE)) {
 		GP_DEBUG(1, "Failed to read palette: %s", strerror(errno));
 		return EIO;
 	}
@@ -371,34 +371,34 @@ static int read_256_palette(GP_IO *io, struct pcx_header *header,
 	for (i = 0; i < 256; i++)
 		palette[i] = (buf[3*i+1]<<16) | (buf[3*i+2])<<8 | buf[3*i+3];
 
-	if (GP_IOSeek(io, 128, GP_IO_SEEK_SET) == (off_t)-1) {
+	if (gp_io_seek(io, 128, GP_IO_SEEK_SET) == (off_t)-1) {
 		GP_DEBUG(1, "Failed to seek to image data: %s",
 		         strerror(errno));
 		return EIO;
 	}
 
-	GP_IO *rle_io = rle(io);
+	gp_io *rle_io = rle(io);
 	if (!rle_io)
 		return errno;
 
 	for (y = 0; y < res->h; y++) {
-		GP_IORead(rle_io, buf, header->bytes_per_line);
+		gp_io_read(rle_io, buf, header->bytes_per_line);
 
 		for (x = 0; x < res->w; x++)
-			GP_PutPixel_Raw_24BPP(res, x, y, palette[buf[x]]);
+			gp_putpixel_raw_24BPP(res, x, y, palette[buf[x]]);
 
-		if (GP_ProgressCallbackReport(callback, y, res->h, res->w)) {
+		if (gp_progress_cb_report(callback, y, res->h, res->w)) {
 			GP_DEBUG(1, "Operation aborted");
-			GP_IOClose(rle_io);
+			gp_io_close(rle_io);
 			return ECANCELED;
 		}
 	}
 
-	GP_IOClose(rle_io);
+	gp_io_close(rle_io);
 	return 0;
 }
 
-static GP_PixelType match_pixel_type(struct pcx_header *header)
+static gp_pixel_type match_pixel_type(struct pcx_header *header)
 {
 	switch (header->nplanes) {
 	case 1:
@@ -424,8 +424,8 @@ static GP_PixelType match_pixel_type(struct pcx_header *header)
 	return GP_PIXEL_UNKNOWN;
 }
 
-static int read_image(GP_IO *io, struct pcx_header *header,
-                      GP_Pixmap *res, GP_ProgressCallback *callback)
+static int read_image(gp_io *io, struct pcx_header *header,
+                      gp_pixmap *res, gp_progress_cb *callback)
 {
 	switch (header->nplanes) {
 	case 1:
@@ -448,24 +448,24 @@ static int read_image(GP_IO *io, struct pcx_header *header,
 	}
 
 	GP_BUG("Have pixel type %s but cannot load image data",
-	       GP_PixelTypeName(res->pixel_type));
+	       gp_pixel_type_name(res->pixel_type));
 	return ENOSYS;
 }
 
-static void fill_metadata(struct pcx_header *header, GP_DataStorage *storage)
+static void fill_metadata(struct pcx_header *header, gp_storage *storage)
 {
-	GP_DataStorageAddInt(storage, NULL, "Width", header->xe - header->xs + 1);
-	GP_DataStorageAddInt(storage, NULL, "Height", header->ye - header->ys + 1);
-	GP_DataStorageAddInt(storage, NULL, "Version", header->ver);
-	GP_DataStorageAddInt(storage, NULL, "Bits per Sample", header->bpp);
-	GP_DataStorageAddInt(storage, NULL, "Samples per Pixel", header->nplanes);
+	gp_storage_add_int(storage, NULL, "Width", header->xe - header->xs + 1);
+	gp_storage_add_int(storage, NULL, "Height", header->ye - header->ys + 1);
+	gp_storage_add_int(storage, NULL, "Version", header->ver);
+	gp_storage_add_int(storage, NULL, "Bits per Sample", header->bpp);
+	gp_storage_add_int(storage, NULL, "Samples per Pixel", header->nplanes);
 }
 
-int GP_ReadPCXEx(GP_IO *io, GP_Pixmap **img, GP_DataStorage *storage,
-                 GP_ProgressCallback *callback)
+int gp_read_pcx_ex(gp_io *io, gp_pixmap **img, gp_storage *storage,
+                 gp_progress_cb *callback)
 {
-	GP_Pixmap *res = NULL;
-	GP_PixelType pixel_type;
+	gp_pixmap *res = NULL;
+	gp_pixel_type pixel_type;
 	struct pcx_header header;
 	unsigned int w, h;
 	int err = 0;
@@ -490,11 +490,11 @@ int GP_ReadPCXEx(GP_IO *io, GP_Pixmap **img, GP_DataStorage *storage,
 		GP_IO_END,
 	};
 
-	if (GP_IOReadF(io, pcx_header, &header.ver, &header.bpp,
-	               &header.xs, &header.ys, &header.xe, &header.ye,
-	               &header.hres, &header.vres,
-	               header.palette, &header.nplanes,
-	               &header.bytes_per_line, &header.pal_info) != 16) {
+	if (gp_io_readf(io, pcx_header, &header.ver, &header.bpp,
+	                &header.xs, &header.ys, &header.xe, &header.ye,
+	                &header.hres, &header.vres,
+	                header.palette, &header.nplanes,
+	                &header.bytes_per_line, &header.pal_info) != 16) {
 		GP_DEBUG(1, "Failed to read header: %s", strerror(errno));
 		return 1;
 	}
@@ -551,7 +551,7 @@ int GP_ReadPCXEx(GP_IO *io, GP_Pixmap **img, GP_DataStorage *storage,
 		w = max_w;
 	}
 
-	res = GP_PixmapAlloc(w, h, pixel_type);
+	res = gp_pixmap_alloc(w, h, pixel_type);
 
 	if (!res) {
 		GP_DEBUG(1, "Malloc failed :(");
@@ -562,36 +562,20 @@ int GP_ReadPCXEx(GP_IO *io, GP_Pixmap **img, GP_DataStorage *storage,
 	if ((err = read_image(io, &header, res, callback)))
 		goto err1;
 
-	GP_ProgressCallbackDone(callback);
+	gp_progress_cb_done(callback);
 
 	*img = res;
 	return 0;
 err1:
-	GP_PixmapFree(res);
+	gp_pixmap_free(res);
 err0:
 	errno = err;
 	return 1;
 }
 
-GP_Pixmap *GP_LoadPCX(const char *src_path, GP_ProgressCallback *callback)
-{
-	return GP_LoaderLoadImage(&GP_PCX, src_path, callback);
-}
-
-GP_Pixmap *GP_ReadPCX(GP_IO *io, GP_ProgressCallback *callback)
-{
-	return GP_LoaderReadImage(&GP_PCX, io, callback);
-}
-
-int GP_LoadPCXEx(const char *src_path, GP_Pixmap **img,
-                 GP_DataStorage *storage, GP_ProgressCallback *callback)
-{
-	return GP_LoaderLoadImageEx(&GP_PCX, src_path, img, storage, callback);
-}
-
-struct GP_Loader GP_PCX = {
-	.Read = GP_ReadPCXEx,
-	.Match = GP_MatchPCX,
+const gp_loader gp_pcx = {
+	.Read = gp_read_pcx_ex,
+	.Match = gp_match_pcx,
 
 	.fmt_name = "ZSoft PCX",
 	.extensions = {"pcx", NULL},

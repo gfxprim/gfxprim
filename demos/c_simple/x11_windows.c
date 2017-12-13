@@ -27,39 +27,39 @@
   */
 
 #include <stdio.h>
-#include <GP.h>
+#include <gfxprim.h>
 
-static void redraw(struct GP_Pixmap *pixmap)
+static void redraw(struct gp_pixmap *pixmap)
 {
-	GP_Pixel white_pixel, black_pixel;
+	gp_pixel white_pixel, black_pixel;
 
-	black_pixel = GP_RGBToPixmapPixel(0x00, 0x00, 0x00, pixmap);
-	white_pixel = GP_RGBToPixmapPixel(0xff, 0xff, 0xff, pixmap);
+	black_pixel = gp_rgb_to_pixmap_pixel(0x00, 0x00, 0x00, pixmap);
+	white_pixel = gp_rgb_to_pixmap_pixel(0xff, 0xff, 0xff, pixmap);
 
-	GP_Fill(pixmap, black_pixel);
-	GP_Line(pixmap, 0, 0, pixmap->w - 1, pixmap->h - 1, white_pixel);
-	GP_Line(pixmap, 0, pixmap->h - 1, pixmap->w - 1, 0, white_pixel);
+	gp_fill(pixmap, black_pixel);
+	gp_line(pixmap, 0, 0, pixmap->w - 1, pixmap->h - 1, white_pixel);
+	gp_line(pixmap, 0, pixmap->h - 1, pixmap->w - 1, 0, white_pixel);
 }
 
-static int ev_loop(struct GP_Backend *backend, const char *name)
+static int ev_loop(struct gp_backend *backend, const char *name)
 {
-	GP_Event ev;
+	gp_event ev;
 
 	if (backend == NULL)
 		return 0;
 
-	while (GP_BackendGetEvent(backend, &ev)) {
+	while (gp_backend_get_event(backend, &ev)) {
 
 		printf("-------------------------- %s\n", name);
 
-		GP_EventDump(&ev);
+		gp_event_dump(&ev);
 
 		switch (ev.type) {
 		case GP_EV_KEY:
 			switch (ev.val.val) {
 			case GP_KEY_ESC:
 			case GP_KEY_Q:
-				GP_BackendExit(backend);
+				gp_backend_exit(backend);
 				return 1;
 			break;
 			}
@@ -67,12 +67,12 @@ static int ev_loop(struct GP_Backend *backend, const char *name)
 		case GP_EV_SYS:
 			switch (ev.code) {
 			case GP_EV_SYS_RESIZE:
-				GP_BackendResizeAck(backend);
+				gp_backend_resize_ack(backend);
 				redraw(backend->pixmap);
-				GP_BackendFlip(backend);
+				gp_backend_flip(backend);
 			break;
 			case GP_EV_SYS_QUIT:
-				GP_BackendExit(backend);
+				gp_backend_exit(backend);
 				return 1;
 			break;
 			}
@@ -87,14 +87,14 @@ static int ev_loop(struct GP_Backend *backend, const char *name)
 
 int main(void)
 {
-	GP_Backend *win_1, *win_2;
+	gp_backend *win_1, *win_2;
 
-	win_1 = GP_BackendX11Init(NULL, 0, 0, 300, 300, "win 1", 0);
-	win_2 = GP_BackendX11Init(NULL, 0, 0, 300, 300, "win 2", 0);
+	win_1 = gp_x11_init(NULL, 0, 0, 300, 300, "win 1", 0);
+	win_2 = gp_x11_init(NULL, 0, 0, 300, 300, "win 2", 0);
 
 	if (win_1 == NULL || win_2 == NULL) {
-		GP_BackendExit(win_1);
-		GP_BackendExit(win_2);
+		gp_backend_exit(win_1);
+		gp_backend_exit(win_2);
 		return 1;
 	}
 
@@ -102,8 +102,8 @@ int main(void)
 	redraw(win_1->pixmap);
 	redraw(win_2->pixmap);
 
-	GP_BackendFlip(win_1);
-	GP_BackendFlip(win_2);
+	gp_backend_flip(win_1);
+	gp_backend_flip(win_2);
 
 	for (;;) {
 		/*
@@ -111,12 +111,12 @@ int main(void)
 		 *
 		 * Either window is fine as they share connection.
 		 */
-		GP_Backend *b = win_1 ? win_1 : win_2;
+		gp_backend *b = win_1 ? win_1 : win_2;
 
 		if (b == NULL)
 			return 0;
 
-		GP_BackendWait(b);
+		gp_backend_wait(b);
 
 		if (ev_loop(win_1, "win 1"))
 			win_1 = NULL;
@@ -125,8 +125,8 @@ int main(void)
 			win_2 = NULL;
 	}
 
-	GP_BackendExit(win_1);
-	GP_BackendExit(win_2);
+	gp_backend_exit(win_1);
+	gp_backend_exit(win_2);
 
 	return 0;
 }

@@ -22,31 +22,31 @@
 
 #include <errno.h>
 
-#include "core/GP_Debug.h"
-#include "loaders/GP_Container.h"
+#include <core/GP_Debug.h>
+#include <loaders/GP_Container.h>
 
-int GP_ContainerSeek(GP_Container *self, int offset,
-                     enum GP_ContainerWhence whence)
+int gp_container_seek(gp_container *self, int offset,
+                      enum gp_container_whence whence)
 {
-	if (!self->ops->Seek) {
+	if (!self->ops->seek) {
 		GP_DEBUG(1, "Seek not implemented in %s container",
 		         self->ops->type);
 		errno = ENOSYS;
 		return ENOSYS;
 	}
 
-	return self->ops->Seek(self, offset, whence);
+	return self->ops->seek(self, offset, whence);
 }
 
-int GP_ContainerLoadEx(GP_Container *self, GP_Pixmap **img,
-                       GP_DataStorage *storage, GP_ProgressCallback *callback)
+int gp_container_load_ex(gp_container *self, gp_pixmap **img,
+                         gp_storage *storage, gp_progress_cb *callback)
 {
-	if (!self->ops->LoadEx) {
+	if (!self->ops->load_ex) {
 		GP_DEBUG(1, "Load not implemented in %s container",
 		         self->ops->type);
 		errno = ENOSYS;
 		return ENOSYS;
 	}
 
-	return self->ops->LoadEx(self, img, storage, callback);
+	return self->ops->load_ex(self, img, storage, callback);
 }

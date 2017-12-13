@@ -48,7 +48,7 @@ static inline float cubic_float(float x)
 #include <stdint.h>
 
 /* Defined in GP_Cubic.gen.c */
-extern int16_t GP_CubicTable[];
+extern int16_t gp_cubic_table[];
 
 /*
  * Fixed point version of above.
@@ -63,7 +63,7 @@ static inline int cubic_int(int x)
 	if (x >= 2048)
 		return 0;
 
-	return GP_CubicTable[x];
+	return gp_cubic_table[x];
 }
 
 #endif /* FILTERS_GP_CUBIC_H */

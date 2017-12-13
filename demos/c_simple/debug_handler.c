@@ -27,7 +27,7 @@
  */
 
 #include <stdio.h>
-#include <GP.h>
+#include <gfxprim.h>
 
 static char level_to_c(int level)
 {
@@ -47,7 +47,7 @@ static char level_to_c(int level)
 	}
 }
 
-void debug_handler(const struct GP_DebugMsg *msg)
+void debug_handler(const struct gp_debug_msg *msg)
 {
 	printf("%c: %s->%s():%u: %s\n", level_to_c(msg->level), msg->file,
 	       msg->fn, msg->line, msg->msg);
@@ -56,20 +56,20 @@ void debug_handler(const struct GP_DebugMsg *msg)
 int main(void)
 {
 	/* Set custom debug handler */
-	GP_SetDebugHandler(debug_handler);
+	gp_set_debug_handler(debug_handler);
 
 	/* Print some debug messages */
 	GP_WARN("This is a warning");
 	GP_FATAL("This is a fatal condition");
 
 	/* Turn on verbose debug and call some library functions */
-	GP_SetDebugLevel(10);
+	gp_set_debug_level(10);
 
-	GP_Pixmap *pixmap = GP_PixmapAlloc(1000, 1000, 1);
+	gp_pixmap *pixmap = gp_pixmap_alloc(1000, 1000, 1);
 
-	GP_FilterGaussianBlur(pixmap, pixmap, 10, 10, NULL);
+	gp_filter_gaussian_blur(pixmap, pixmap, 10, 10, NULL);
 
-	GP_PixmapFree(pixmap);
+	gp_pixmap_free(pixmap);
 
 	return 0;
 }

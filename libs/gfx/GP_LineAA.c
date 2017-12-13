@@ -28,24 +28,13 @@
 
 #include "gfx/GP_LineAA.h"
 
-/*
-void GP_Line_Raw(GP_Pixmap *pixmap, GP_Coord x0, GP_Coord y0,
-                 GP_Coord x1, GP_Coord y1, GP_Pixel pixel)
-{
-	GP_CHECK_PIXMAP(pixmap);
-
-	GP_FN_PER_BPP_PIXMAP(GP_Line_Raw, pixmap, pixmap, x0, y0, x1, y1,
-	                      pixel);
-}
-*/
-
-void GP_LineAA(GP_Pixmap *pixmap, GP_Coord x0, GP_Coord y0,
-               GP_Coord x1, GP_Coord y1, GP_Pixel pixel)
+void gp_line_aa(gp_pixmap *pixmap, gp_coord x0, gp_coord y0,
+                gp_coord x1, gp_coord y1, gp_pixel pixel)
 {
 	GP_CHECK_PIXMAP(pixmap);
 
 	GP_TRANSFORM_POINT_FP(pixmap, x0, y0);
 	GP_TRANSFORM_POINT_FP(pixmap, x1, y1);
 
-	GP_LineAA_Raw(pixmap, x0, y0, x1, y1, pixel);
+	gp_line_aa_raw(pixmap, x0, y0, x1, y1, pixel);
 }

@@ -29,18 +29,18 @@
 #ifndef LOADERS_GP_EXIF_H
 #define LOADERS_GP_EXIF_H
 
-#include "loaders/GP_DataStorage.h"
-#include "loaders/GP_Loader.h"
+#include <loaders/GP_DataStorage.h>
+#include <loaders/GP_Loader.h>
 
 /*
  * Reads EXIF from an readable I/O stream and stores the values into storage.
  */
-int GP_ReadExif(GP_IO *io, GP_DataStorage *storage);
+int gp_read_exif(gp_io *io, gp_storage *storage);
 
 /*
  * Looks for EXIF file signature. Returns non-zero if found.
  */
-int GP_MatchExif(const void *buf);
+int gp_match_exif(const void *buf);
 
 /*
  * Defines position to 0,0 coordinate.

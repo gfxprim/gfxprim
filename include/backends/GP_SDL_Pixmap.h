@@ -32,9 +32,9 @@
  *
  * ...
  *
- * GP_Pixmap c;
+ * gp_pixmap c;
  *
- * if (GP_PixmapFromSDLSurface(&c, surface)) {
+ * if (gp_pixmap_from_sdl_surface(&c, surface)) {
  *	error("Failed to match PIXEL_TYPE for given surface");
  *	exit(1);
  * }
@@ -44,6 +44,6 @@
  * Now you have initialized pixmap that shares the pixel buffer with
  * the SDL surface.
  */
-int GP_PixmapFromSDLSurface(GP_Pixmap *c, const SDL_Surface *surf);
+int gp_pixmap_from_sdl_surface(gp_pixmap *c, const SDL_Surface *surf);
 
 #endif /* BACKENDS_GP_SDL_PIXMAP_H */

@@ -23,8 +23,8 @@
 #ifndef HISTOGRAM_H
 #define HISTOGRAM_H
 
-#include <GP.h>
+#include <gfxprim.h>
 
-void histogram_to_png(const GP_Pixmap *src, const char *filename);
+void histogram_to_png(const gp_pixmap *src, const char *filename);
 
 #endif /* HISTOGRAM_H */

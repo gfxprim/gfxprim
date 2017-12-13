@@ -17,12 +17,12 @@ Core
 Core of the library contains minimal amount of code to define interface that
 is shared between all parts of the library.
 
-The most important part of the core is link:pixmap.html[GP_Pixmap] structure
+The most important part of the core is link:pixmap.html[gp_pixmap] structure
 that represents in-memory pixmap.
 
 The Core also contains generated code for basic operations such as
-link:get_put_pixel.html[GP_GetPixel] and link:get_put_pixel.html[GP_PutPixel]
-and optimized functions for writing continous line of pixels 'GP_WritePixels'
+link:get_put_pixel.html[gp_get_pixel] and link:get_put_pixel.html[gp_put_pixel]
+and optimized functions for writing continous line of pixels 'gp_write_pixels'
 that are base for the more complex drawing primitives in GFX or for graphics
 operations in Filters.
 

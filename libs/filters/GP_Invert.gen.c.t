@@ -11,4 +11,4 @@
 {{ val_max }} - {{ val }}
 @ end
 
-{@ filter_point('Invert', filter_op_invert) @}
+{@ filter_point('invert', filter_op_invert) @}

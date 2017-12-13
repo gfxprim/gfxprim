@@ -26,23 +26,23 @@
 
   */
 
-#include <GP.h>
+#include <gfxprim.h>
 
 #include <input/GP_InputDriverLinux.h>
 
 int main(int argc, char *argv[])
 {
-	struct GP_InputDriverLinux *drv;
+	struct gp_input_driver_linux *drv;
 	GP_EVENT_QUEUE_DECLARE(event_queue, 640, 480);
 
-	GP_SetDebugLevel(2);
+	gp_set_debug_level(2);
 
 	if (argc != 2) {
 		printf("Usage: %s /dev/input/eventX\n", argv[0]);
 		return 1;
 	}
 
-	drv = GP_InputDriverLinuxOpen(argv[1]);
+	drv = gp_input_driver_linux_open(argv[1]);
 
 	if (drv == NULL) {
 		printf("Failed to open input device\n");
@@ -50,12 +50,12 @@ int main(int argc, char *argv[])
 	}
 
 	for (;;) {
-		while (GP_InputDriverLinuxRead(drv, &event_queue) >= 1);
-		
-		GP_Event ev;
+		while (gp_input_driver_linux_read(drv, &event_queue) >= 1);
 
-		while (GP_EventQueueGet(&event_queue, &ev))
-			GP_EventDump(&ev);
+		gp_event ev;
+
+		while (gp_event_queue_get(&event_queue, &ev))
+			gp_event_dump(&ev);
 
 		usleep(1000);
 	}

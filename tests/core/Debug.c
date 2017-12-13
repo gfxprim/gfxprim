@@ -33,7 +33,7 @@
 
 static int handler_called;
 
-static void debug_handler(const struct GP_DebugMsg *msg)
+static void debug_handler(const struct gp_debug_msg *msg)
 {
 	(void)msg;
 	handler_called = 1;
@@ -46,8 +46,8 @@ static void debug_handler(const struct GP_DebugMsg *msg)
  */
 static int DEBUG_preserves_errno(void)
 {
-	GP_SetDebugHandler(debug_handler);
-	GP_SetDebugLevel(1);
+	gp_set_debug_handler(debug_handler);
+	gp_set_debug_level(1);
 
 	handler_called = 0;
 	errno = 1;

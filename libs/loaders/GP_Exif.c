@@ -134,23 +134,23 @@ static const char *IFD_tag_name(const struct IFD_tags *taglist, uint16_t tag)
 #include "GP_ExifGPS.h"
 #include "GP_Exif.h"
 
-static int get_buf(GP_IO *io, off_t offset, char *buf, size_t len)
+static int get_buf(gp_io *io, off_t offset, char *buf, size_t len)
 {
 	off_t off;
 
-	off = GP_IOTell(io);
+	off = gp_io_tell(io);
 
-	if (GP_IOSeek(io, offset, GP_IO_SEEK_SET) == -1) {
+	if (gp_io_seek(io, offset, GP_IO_SEEK_SET) == -1) {
 		GP_WARN("Failed to seek to data");
 		return 1;
 	}
 
-	if (GP_IOFill(io, buf, len)) {
+	if (gp_io_fill(io, buf, len)) {
 		GP_WARN("Failed to read data");
 		return 1;
 	}
 
-	if (GP_IOSeek(io, off, GP_IO_SEEK_SET) == -1) {
+	if (gp_io_seek(io, off, GP_IO_SEEK_SET) == -1) {
 		GP_WARN("Failed to seek back");
 		return 1;
 	}
@@ -158,7 +158,7 @@ static int get_buf(GP_IO *io, off_t offset, char *buf, size_t len)
 	return 0;
 }
 
-static int load_string(GP_IO *io, GP_DataStorage *storage, GP_DataNode *node,
+static int load_string(gp_io *io, gp_storage *storage, gp_data_node *node,
                        const char *id, uint32_t num_comp, uint32_t *val)
 {
 	size_t max_len = GP_MIN(num_comp, 1024u);
@@ -180,10 +180,10 @@ static int load_string(GP_IO *io, GP_DataStorage *storage, GP_DataNode *node,
 add:
 	GP_DEBUG(2, "ASCII String value = '%s'", buf);
 
-	return GP_DataStorageAddString(storage, node, id, buf) != NULL;
+	return gp_storage_add_string(storage, node, id, buf) != NULL;
 }
 
-static int load_rat(GP_IO *io, GP_DataStorage *storage, GP_DataNode *node,
+static int load_rat(gp_io *io, gp_storage *storage, gp_data_node *node,
 		    const char *id, uint32_t num_comp, uint32_t val)
 {
 	size_t max_comps = GP_MIN(num_comp, 32u);
@@ -193,11 +193,11 @@ static int load_rat(GP_IO *io, GP_DataStorage *storage, GP_DataNode *node,
 		return 1;
 
 	//TODO: Data Storage needs array
-	return GP_DataStorageAddRational(storage, node, id, buf[0], buf[1]) != NULL;
+	return gp_storage_add_rational(storage, node, id, buf[0], buf[1]) != NULL;
 }
 
-static int load_tag(GP_IO *io, GP_DataStorage *storage,
-                    GP_DataNode* node, const struct IFD_tags *taglist,
+static int load_tag(gp_io *io, gp_storage *storage,
+                    gp_data_node* node, const struct IFD_tags *taglist,
 		    int endian, uint16_t tag, uint16_t format,
                     uint32_t num_comp, uint32_t val)
 {
@@ -233,7 +233,7 @@ static int load_tag(GP_IO *io, GP_DataStorage *storage,
 	case IFD_SIGNED_SHORT:
 	case IFD_UNSIGNED_SHORT:
 		if (num_comp == 1)
-			GP_DataStorageAddInt(storage, node, res->name, val);
+			gp_storage_add_int(storage, node, res->name, val);
 		else
 			goto unused;
 	break;
@@ -271,7 +271,7 @@ struct IFD_subrecord {
 	uint32_t offset;
 };
 
-static int load_IFD(GP_IO *io, GP_DataStorage *storage, GP_DataNode *node,
+static int load_IFD(gp_io *io, gp_storage *storage, gp_data_node *node,
                     const struct IFD_tags *taglist, uint32_t IFD_offset,
                     int endian)
 {
@@ -303,7 +303,7 @@ static int load_IFD(GP_IO *io, GP_DataStorage *storage, GP_DataNode *node,
 
 	uint16_t *IFD_rec_head = endian == 'I' ? IFD_record_LE : IFD_record_BE;
 
-	if (GP_IOReadF(io, IFD_header, &IFD_entries_count) != 2) {
+	if (gp_io_readf(io, IFD_header, &IFD_entries_count) != 2) {
 		GP_DEBUG(1, "Failed to read IFD entries count");
 		return 1;
 	}
@@ -318,7 +318,7 @@ static int load_IFD(GP_IO *io, GP_DataStorage *storage, GP_DataNode *node,
 		uint16_t tag, format;
 		uint32_t num_comp, val;
 
-		if (GP_IOReadF(io, IFD_rec_head, &tag, &format, &num_comp, &val) != 4) {
+		if (gp_io_readf(io, IFD_rec_head, &tag, &format, &num_comp, &val) != 4) {
 			GP_DEBUG(1, "Failed to read IFD record");
 			return 1;
 		}
@@ -348,9 +348,9 @@ static int load_IFD(GP_IO *io, GP_DataStorage *storage, GP_DataNode *node,
 	}
 
 	for (i = 0; i < subrec_cnt; i++) {
-		off_t cur_off = GP_IOTell(io);
+		off_t cur_off = gp_io_tell(io);
 		const struct IFD_tags *tags;
-		GP_DataNode *new_node;
+		gp_data_node *new_node;
 
 		GP_DEBUG(3, "-- Loading sub IFD %s --",
 		         IFD_tag_name(taglist, subrecs[i].tag));
@@ -362,11 +362,11 @@ static int load_IFD(GP_IO *io, GP_DataStorage *storage, GP_DataNode *node,
 		break;
 		case IFD_GPS_OFFSET:
 			tags = &IFD_GPS_tags;
-			new_node = GP_DataStorageAddDict(storage, node, "GPS");
+			new_node = gp_storage_add_dict(storage, node, "GPS");
 		break;
 		case IFD_INTEROPERABILITY_OFFSET:
 			tags = taglist;
-			new_node = GP_DataStorageAddDict(storage, node, "Interoperability");
+			new_node = gp_storage_add_dict(storage, node, "Interoperability");
 		break;
 		default:
 			GP_BUG("Invalid tag");
@@ -383,7 +383,7 @@ static int load_IFD(GP_IO *io, GP_DataStorage *storage, GP_DataNode *node,
 	return 0;
 }
 
-int GP_ReadExif(GP_IO *io, GP_DataStorage *storage)
+int gp_read_exif(gp_io *io, gp_storage *storage)
 {
 	static int swap = 0;
 	char b1, b2;
@@ -397,7 +397,7 @@ int GP_ReadExif(GP_IO *io, GP_DataStorage *storage)
 		GP_IO_END,
 	};
 
-	if (GP_IOReadF(io, exif_header, &b1, &b2, &IFD_offset) != 11) {
+	if (gp_io_readf(io, exif_header, &b1, &b2, &IFD_offset) != 11) {
 		GP_DEBUG(1, "Failed to read Exif header");
 		return 1;
 	}
@@ -424,7 +424,7 @@ int GP_ReadExif(GP_IO *io, GP_DataStorage *storage)
 		return 1;
 	}
 
-	GP_DataNode *exif_root = GP_DataStorageAddDict(storage, NULL, "Exif");
+	gp_data_node *exif_root = gp_storage_add_dict(storage, NULL, "Exif");
 
 	/* The offset starts from the II or MM */
 	return load_IFD(io, storage, exif_root, &IFD_EXIF_tags, IFD_offset - 8, b1);

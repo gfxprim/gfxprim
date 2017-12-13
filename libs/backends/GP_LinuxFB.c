@@ -35,12 +35,13 @@
 #include <linux/kd.h>
 #include <linux/vt.h>
 
-#include "core/GP_Debug.h"
-#include "input/GP_InputDriverKBD.h"
-#include "backends/GP_LinuxFB.h"
+#include <core/GP_Debug.h>
+#include <core/GP_Pixmap.h>
+#include <input/GP_InputDriverKBD.h>
+#include <backends/GP_LinuxFB.h>
 
 struct fb_priv {
-	GP_Pixmap pixmap;
+	gp_pixmap pixmap;
 	uint32_t bsize;
 	void *fb_mem;
 
@@ -217,7 +218,7 @@ static void free_console(struct fb_priv *fb)
 
 /* Backend API callbacks */
 
-static void fb_poll(GP_Backend *self)
+static void fb_poll(gp_backend *self)
 {
 	struct fb_priv *fb = GP_BACKEND_PRIV(self);
 	unsigned char buf[16];
@@ -226,10 +227,10 @@ static void fb_poll(GP_Backend *self)
 	res = read(fb->con_fd, buf, sizeof(buf));
 
 	for (i = 0; i < res; i++)
-		GP_InputDriverKBDEventPut(&self->event_queue, buf[i]);
+		gp_input_driver_kbd_event_put(&self->event_queue, buf[i]);
 }
 
-static void fb_wait(GP_Backend *self)
+static void fb_wait(gp_backend *self)
 {
 	struct fb_priv *fb = GP_BACKEND_PRIV(self);
 
@@ -241,7 +242,7 @@ static void fb_wait(GP_Backend *self)
 		GP_WARN("poll(): %s", strerror(errno));
 }
 
-static void fb_exit(GP_Backend *self)
+static void fb_exit(gp_backend *self)
 {
 	struct fb_priv *fb = GP_BACKEND_PRIV(self);
 
@@ -260,7 +261,7 @@ static void fb_exit(GP_Backend *self)
 	free(self);
 }
 
-static void fb_flip_shadow(GP_Backend *self)
+static void fb_flip_shadow(gp_backend *self)
 {
 	struct fb_priv *fb = GP_BACKEND_PRIV(self);
 
@@ -269,8 +270,8 @@ static void fb_flip_shadow(GP_Backend *self)
 	memcpy(fb->fb_mem, fb->pixmap.pixels, fb->bsize);
 }
 
-static void fb_update_rect_shadow(GP_Backend *self, GP_Coord x0, GP_Coord y0,
-                                  GP_Coord x1, GP_Coord y1)
+static void fb_update_rect_shadow(gp_backend *self, gp_coord x0, gp_coord y0,
+                                  gp_coord x1, gp_coord y1)
 {
 	struct fb_priv *fb = GP_BACKEND_PRIV(self);
 
@@ -287,15 +288,15 @@ static void fb_update_rect_shadow(GP_Backend *self, GP_Coord x0, GP_Coord y0,
 	}
 }
 
-GP_Backend *GP_BackendLinuxFBInit(const char *path, int flags)
+gp_backend *gp_linux_fb_init(const char *path, int flags)
 {
-	GP_Backend *backend;
+	gp_backend *backend;
 	struct fb_priv *fb;
 	struct fb_fix_screeninfo fscri;
 	struct fb_var_screeninfo vscri;
 	int fd;
 
-	backend = malloc(sizeof(GP_Backend) +
+	backend = malloc(sizeof(gp_backend) +
 	                 sizeof(struct fb_priv) + strlen(path) + 1);
 
 	if (backend == NULL)
@@ -344,12 +345,14 @@ GP_Backend *GP_BackendLinuxFBInit(const char *path, int flags)
 		goto err3;
 	}
 
-	enum GP_PixelType pixel_type;
-	pixel_type = GP_PixelRGBLookup(vscri.red.length,    vscri.red.offset,
-	                               vscri.green.length,  vscri.green.offset,
-	                               vscri.blue.length,   vscri.blue.offset,
-	                               vscri.transp.length, vscri.transp.offset,
-	                               vscri.bits_per_pixel);
+	enum gp_pixel_type pixel_type;
+	pixel_type = gp_pixel_rgb_lookup(vscri.red.length, vscri.red.offset,
+					 vscri.green.length,
+					 vscri.green.offset, vscri.blue.length,
+					 vscri.blue.offset,
+					 vscri.transp.length,
+					 vscri.transp.offset,
+					 vscri.bits_per_pixel);
 
 	if (pixel_type == GP_PIXEL_UNKNOWN) {
 		GP_DEBUG(1, "Unknown pixel type\n");
@@ -396,19 +399,19 @@ GP_Backend *GP_BackendLinuxFBInit(const char *path, int flags)
 	int kbd = flags & GP_FB_INPUT_KBD;
 
 	/* update API */
-	backend->name          = "Linux FB";
-	backend->pixmap       = &fb->pixmap;
-	backend->Flip          = shadow ? fb_flip_shadow : NULL;
-	backend->UpdateRect    = shadow ? fb_update_rect_shadow : NULL;
-	backend->Exit          = fb_exit;
-	backend->SetAttributes = NULL;
-	backend->ResizeAck     = NULL;
-	backend->Poll          = kbd ? fb_poll : NULL;
-	backend->Wait          = kbd ? fb_wait : NULL;
-	backend->fd            = fb->con_fd;
-	backend->timers        = NULL;
+	backend->name = "Linux FB";
+	backend->pixmap = &fb->pixmap;
+	backend->flip = shadow ? fb_flip_shadow : NULL;
+	backend->update_rect = shadow ? fb_update_rect_shadow : NULL;
+	backend->set_attrs = NULL;
+	backend->resize_ack = NULL;
+	backend->poll = kbd ? fb_poll : NULL;
+	backend->wait = kbd ? fb_wait : NULL;
+	backend->exit = fb_exit;
+	backend->fd = fb->con_fd;
+	backend->timers = NULL;
 
-	GP_EventQueueInit(&backend->event_queue, vscri.xres, vscri.yres, 0);
+	gp_event_queue_init(&backend->event_queue, vscri.xres, vscri.yres, 0);
 
 	return backend;
 err4:

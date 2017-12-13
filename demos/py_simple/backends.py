@@ -11,15 +11,15 @@ import gfxprim.input as input
 def redraw(bk):
     c = bk.pixmap
 
-    black = c.RGBToPixel(0, 0, 0)
-    white = c.RGBToPixel(0xff, 0xff, 0xff)
+    black = c.rgb_to_pixel(0, 0, 0)
+    white = c.rgb_to_pixel(0xff, 0xff, 0xff)
 
-    c.gfx.Fill(black)
+    c.gfx.fill(black)
 
     align = text.C.ALIGN_CENTER | text.C.VALIGN_CENTER
-    c.text.Text(None, c.w//2, c.h//2, align, white, black, "Hello World!")
+    c.text.text(None, c.w//2, c.h//2, align, white, black, "Hello World!")
 
-    bk.Flip()
+    bk.flip()
 
 def main():
     backend_string = "X11:100x100"
@@ -32,16 +32,16 @@ def main():
         sys.exit(1)
 
     # Create backend window
-    bk = backends.BackendInit(backend_string, "Backend Example")
+    bk = backends.backend_init(backend_string, "Backend Example")
     assert(bk)
 
     redraw(bk)
 
     # Event loop
     while True:
-        ev = bk.WaitEvent()
+        ev = bk.wait_event()
 
-        input.EventDump(ev)
+        input.event_dump(ev)
 
         if (ev.type == input.EV_KEY):
            sys.exit(0)
@@ -49,7 +49,7 @@ def main():
            if (ev.code == input.EV_SYS_QUIT):
                sys.exit(0)
            if (ev.code == input.EV_SYS_RESIZE):
-               bk.ResizeAck()
+               bk.resize_ack()
                redraw(bk)
 
 if __name__ == '__main__':

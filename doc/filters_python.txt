@@ -1,7 +1,7 @@
 Python Filters module
 ---------------------
 
-The python binding maps mostly to the C API with the 'GP_Filter' prefix
+The python binding maps mostly to the C API with the 'gp_filter_' prefix
 stripped.
 
 The filter functions could be called directly as +filters.Foo(img, ..)+ or

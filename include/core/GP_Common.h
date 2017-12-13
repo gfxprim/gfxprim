@@ -125,18 +125,23 @@
  * (for assert and check)
  */
 #define GP_INTERNAL_ABORT(...) do { \
-	GP_PrintAbortInfo(__FILE__, __FUNCTION__, __LINE__, __VA_ARGS__); \
+	gp_print_abort_info(__FILE__, __FUNCTION__, __LINE__, __VA_ARGS__); \
 	abort(); \
 } while (0)
+
+/*
+ * Prints C stacktrace.
+ */
+void gp_debug_print_cstack(void);
 
 /*
  * Print as much trace info as possible. Currently, the (C) call stack and
  * the Python stack if a Python interpreter is set up. In case more wrappers
  * are written, it should print a trace for the currently active.
  */
-void GP_PrintAbortInfo(const char *file, const char *function, unsigned int line,
-                       const char *msg, const char *fmt, ...)
-		       __attribute__ ((format (printf, 5, 6)));
+void gp_print_abort_info(const char *file, const char *function, unsigned int line,
+                         const char *msg, const char *fmt, ...)
+		         __attribute__ ((format (printf, 5, 6)));
 
 #define GP_GENERAL_CHECK(check_cond_, check_message_, ...) do { \
 	if (unlikely(!(check_cond_))) { \

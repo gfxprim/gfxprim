@@ -29,73 +29,73 @@
 #ifndef FILTERS_GP_ARITHMETIC_H
 #define FILTERS_GP_ARITHMETIC_H
 
-#include "GP_Filter.h"
+#include <filters/GP_Filter.h>
 
 /*
- * Addition filter.
+ * add filter.
  *
  * Produces saturated (clamped) addtion.
  */
-int GP_FilterAddition(const GP_Pixmap *src_a,
-                      const GP_Pixmap *src_b,
-                      GP_Pixmap *dst,
-                      GP_ProgressCallback *callback);
+int gp_filter_add(const gp_pixmap *src_a,
+                  const gp_pixmap *src_b,
+                  gp_pixmap *dst,
+                  gp_progress_cb *callback);
 
-GP_Pixmap *GP_FilterAdditionAlloc(const GP_Pixmap *src_a,
-                                   const GP_Pixmap *src_b,
-                                   GP_ProgressCallback *callback);
+gp_pixmap *gp_filter_add_alloc(const gp_pixmap *src_a,
+                               const gp_pixmap *src_b,
+                               gp_progress_cb *callback);
 
 /*
- * Multiply filter.
+ * mul filter.
  *
  * Produces saturated (clamped) multiplication.
  */
-int GP_FilterMultiply(const GP_Pixmap *src_a,
-                      const GP_Pixmap *src_b,
-                      GP_Pixmap *dst,
-                      GP_ProgressCallback *callback);
+int gp_filter_mul(const gp_pixmap *src_a,
+                  const gp_pixmap *src_b,
+                  gp_pixmap *dst,
+                  gp_progress_cb *callback);
 
-GP_Pixmap *GP_FilterMultiplyAlloc(const GP_Pixmap *src_a,
-                                   const GP_Pixmap *src_b,
-                                   GP_ProgressCallback *callback);
+gp_pixmap *gp_filter_mul_alloc(const gp_pixmap *src_a,
+                               const gp_pixmap *src_b,
+                               gp_progress_cb *callback);
 
 /*
- * Difference filter.
+ * diff filter.
  *
  * Produces symetric difference.
  * eg. dst = abs(src_a - src_b)
  */
-int GP_FilterDifference(const GP_Pixmap *src_a,
-                        const GP_Pixmap *src_b,
-                        GP_Pixmap *dst,
-                        GP_ProgressCallback *callback);
+int gp_filter_diff(const gp_pixmap *src_a,
+                   const gp_pixmap *src_b,
+                   gp_pixmap *dst,
+                   gp_progress_cb *callback);
 
-GP_Pixmap *GP_FilterDifferenceAlloc(const GP_Pixmap *src_a,
-                                     const GP_Pixmap *src_b,
-                                     GP_ProgressCallback *callback);
-
-/*
- * Maximum filter.
- */
-int GP_FilterMax(const GP_Pixmap *src_a,
-                 const GP_Pixmap *src_b,
-                 GP_Pixmap *dst,
-                 GP_ProgressCallback *callback);
-
-GP_Pixmap *GP_FilterMaxAlloc(const GP_Pixmap *src_a,
-                              const GP_Pixmap *src_b,
-                              GP_ProgressCallback *callback);
+gp_pixmap *gp_filter_diff_alloc(const gp_pixmap *src_a,
+                                const gp_pixmap *src_b,
+                                gp_progress_cb *callback);
 
 /*
- * Minimum filter.
+ * maximum filter.
  */
-int GP_FilterMin(const GP_Pixmap *src_a,
-                 const GP_Pixmap *src_b,
-                 GP_Pixmap *dst,
-                 GP_ProgressCallback *callback);
+int gp_filter_max(const gp_pixmap *src_a,
+                 const gp_pixmap *src_b,
+                 gp_pixmap *dst,
+                 gp_progress_cb *callback);
 
-GP_Pixmap *GP_FilterMinAlloc(const GP_Pixmap *src_a,
-                              const GP_Pixmap *src_b,
-                              GP_ProgressCallback *callback);
+gp_pixmap *gp_filter_max_alloc(const gp_pixmap *src_a,
+                               const gp_pixmap *src_b,
+                               gp_progress_cb *callback);
+
+/*
+ * minimum filter.
+ */
+int gp_filter_min(const gp_pixmap *src_a,
+                  const gp_pixmap *src_b,
+                  gp_pixmap *dst,
+                  gp_progress_cb *callback);
+
+gp_pixmap *gp_filter_min_alloc(const gp_pixmap *src_a,
+                               const gp_pixmap *src_b,
+                               gp_progress_cb *callback);
 
 #endif /* FILTERS_GP_ARITHMETIC_H */

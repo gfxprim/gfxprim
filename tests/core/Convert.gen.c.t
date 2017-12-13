@@ -12,7 +12,7 @@
 /*
  * Returns black color for particular pixel type.
  */
-static GP_Pixel get_black(GP_PixelType pixel_type)
+static gp_pixel get_black(gp_pixel_type pixel_type)
 {
 	switch (pixel_type) {
 @ for pt in pixeltypes:
@@ -37,7 +37,7 @@ static GP_Pixel get_black(GP_PixelType pixel_type)
 /*
  * Returns white color for particular pixel type.
  */
-static GP_Pixel get_white(GP_PixelType pixel_type)
+static gp_pixel get_white(gp_pixel_type pixel_type)
 {
 	switch (pixel_type) {
 @ for pt in pixeltypes:
@@ -69,7 +69,7 @@ static GP_Pixel get_white(GP_PixelType pixel_type)
 @         end
 @     else:
 		tst_msg("FIXME: Unsupported conversion to %s",
-		        GP_PixelTypeName(pixel_type));
+		        gp_pixel_type_name(pixel_type));
 		exit(TST_INTERR);
 @ end
 	default:
@@ -81,7 +81,7 @@ static GP_Pixel get_white(GP_PixelType pixel_type)
 /*
  * Returns red color for particular pixel type.
  */
-static GP_Pixel get_red(GP_PixelType pixel_type)
+static gp_pixel get_red(gp_pixel_type pixel_type)
 {
 	switch (pixel_type) {
 @ for pt in pixeltypes:
@@ -113,7 +113,7 @@ static GP_Pixel get_red(GP_PixelType pixel_type)
 @         end
 @     else:
 		tst_msg("FIXME: Unsupported conversion to %s",
-		        GP_PixelTypeName(pixel_type));
+		        gp_pixel_type_name(pixel_type));
 		exit(TST_INTERR);
 @ end
 	default:
@@ -125,13 +125,13 @@ static GP_Pixel get_red(GP_PixelType pixel_type)
 @ def gen_convert_and_check(test_name, in_name, out_name):
 static int convert_and_check_{{ test_name }}_{{ in_name }}_to_{{ out_name }}(void)
 {
-	GP_Pixel out = 0;
-	GP_Pixel in = get_{{ test_name }}(GP_PIXEL_{{ in_name }});
-	GP_Pixel out_exp = get_{{ test_name }}(GP_PIXEL_{{ out_name }});
+	gp_pixel out = 0;
+	gp_pixel in = get_{{ test_name }}(GP_PIXEL_{{ in_name }});
+	gp_pixel out_exp = get_{{ test_name }}(GP_PIXEL_{{ out_name }});
 
 	tst_msg("{{ in_name }} %08x -> {{ out_name }} %08x", in, out_exp);
 
-	GP_Pixel_{{ in_name }}_TO_{{ out_name }}(in, out);
+	GP_PIXEL_{{ in_name }}_TO_{{ out_name }}(in, out);
 
 	if (out_exp != out) {
 		tst_msg("Pixels are different have %08x, expected %08x",

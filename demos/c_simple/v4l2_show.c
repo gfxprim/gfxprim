@@ -30,12 +30,12 @@
 #include <string.h>
 #include <stdio.h>
 
-#include <GP.h>
+#include <gfxprim.h>
 
 int main(int argc, char *argv[])
 {
-	GP_Backend *backend;
-	GP_Grabber *grabber;
+	gp_backend *backend;
+	gp_grabber *grabber;
 	const char *v4l2_device = "/dev/video0";
 	unsigned int w = 640, h = 480;
 	int mode = 0;
@@ -53,7 +53,7 @@ int main(int argc, char *argv[])
 			h = atoi(optarg);
 		break;
 		case 'l':
-			GP_SetDebugLevel(atoi(optarg));
+			gp_set_debug_level(atoi(optarg));
 		break;
 		case 'h':
 			printf("Usage; %s opts\n", argv[0]);
@@ -70,7 +70,7 @@ int main(int argc, char *argv[])
 		}
 	}
 
-	grabber = GP_GrabberV4L2Init(v4l2_device, w, h);
+	grabber = gp_grabber_v4l2_init(v4l2_device, w, h);
 
 	if (grabber == NULL) {
 		fprintf(stderr, "Failed to initalize grabber '%s': %s\n",
@@ -78,59 +78,59 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 
-	backend = GP_BackendX11Init(NULL, 0, 0, grabber->frame->w,
+	backend = gp_x11_init(NULL, 0, 0, grabber->frame->w,
 	                            grabber->frame->h, "V4L2", 0);
 
 	if (backend == NULL) {
-		GP_GrabberExit(grabber);
+		gp_grabber_exit(grabber);
 		return 1;
 	}
 
-	if (GP_GrabberStart(grabber)) {
+	if (gp_grabber_start(grabber)) {
 		fprintf(stderr, "Failed to start grabber\n");
-		GP_BackendExit(backend);
-		GP_GrabberExit(grabber);
+		gp_backend_exit(backend);
+		gp_grabber_exit(grabber);
 		return 1;
 	}
 
 	printf("Press SPACE to change mode and Q to exit.\n");
 
 	for (;;) {
-		if (GP_GrabberPoll(grabber) > 0) {
-			GP_Pixmap *res, *img = grabber->frame;
+		if (gp_grabber_poll(grabber) > 0) {
+			gp_pixmap *res, *img = grabber->frame;
 
 			switch (mode) {
 			case 0:
 				res = img;
 			break;
 			case 1:
-			//	GP_FilterEdgePrewitt(img, &res, NULL, NULL);
-				GP_FilterEdgeSobel(img, &res, NULL, NULL);
+			//	gp_filter_edge_prewitt(img, &res, NULL, NULL);
+				gp_filter_edge_sobel(img, &res, NULL, NULL);
 			break;
 			case 2:
-				GP_FilterGaussianBlur(img, img, 1, 1, NULL);
-				res = GP_FilterFloydSteinbergAlloc(img, GP_PIXEL_G2, NULL);
+				gp_filter_gaussian_blur(img, img, 1, 1, NULL);
+				res = gp_filter_floyd_steinberg_alloc(img, GP_PIXEL_G2, NULL);
 			break;
 			}
 
 			unsigned int c_x = (backend->pixmap->w - res->w) / 2;
 			unsigned int c_y = (backend->pixmap->h - res->h) / 2;
 
-			GP_Blit_Clipped(res, 0, 0, res->w, res->h, backend->pixmap, c_x, c_y);
-			GP_BackendFlip(backend);
+			gp_blit_clipped(res, 0, 0, res->w, res->h, backend->pixmap, c_x, c_y);
+			gp_backend_flip(backend);
 
 			if (mode)
-				GP_PixmapFree(res);
+				gp_pixmap_free(res);
 		}
 
 		usleep(1000);
 
-		GP_BackendPoll(backend);
+		gp_backend_poll(backend);
 
 		/* Read and parse events */
-		GP_Event ev;
+		gp_event ev;
 
-		while (GP_BackendGetEvent(backend, &ev)) {
+		while (gp_backend_get_event(backend, &ev)) {
 			switch (ev.type) {
 			case GP_EV_KEY:
 
@@ -141,8 +141,8 @@ int main(int argc, char *argv[])
 				switch (ev.val.key.key) {
 				case GP_KEY_ESC:
 				case GP_KEY_Q:
-					GP_BackendExit(backend);
-					GP_GrabberExit(grabber);
+					gp_backend_exit(backend);
+					gp_grabber_exit(grabber);
 					return 0;
 				break;
 				case GP_KEY_SPACE:
@@ -156,15 +156,15 @@ int main(int argc, char *argv[])
 			break;
 			case GP_EV_SYS:
 				if (ev.code == GP_EV_SYS_RESIZE) {
-					GP_BackendResizeAck(backend);
-					GP_Fill(backend->pixmap, 0);
+					gp_backend_resize_ack(backend);
+					gp_fill(backend->pixmap, 0);
 				}
 			break;
 			}
 		}
 	}
 
-	GP_BackendExit(backend);
+	gp_backend_exit(backend);
 
 	return 0;
 }

@@ -31,7 +31,7 @@
 /*
  * Description of all known pixel types
  */
-const GP_PixelTypeDescription GP_PixelTypes [GP_PIXEL_MAX] = {
+const gp_pixel_type_desc gp_pixel_types[GP_PIXEL_MAX] = {
 @ for pt in pixeltypes:
 	/* GP_PIXEL_{{ pt.name }} */ {
 		.type	= GP_PIXEL_{{ pt.name }},
@@ -55,23 +55,23 @@ const GP_PixelTypeDescription GP_PixelTypes [GP_PIXEL_MAX] = {
 /*
  * snprintf a human readable value of pixel type {{pt.name}}
  */
-static void GP_PixelSNPrint_{{ pt.name }}(char *buf, size_t len, GP_Pixel p)
+static void pixel_snprint_{{ pt.name }}(char *buf, size_t len, gp_pixel p)
 {
 	snprintf(buf, len, "{{ pt.name }} 0x%0{{ (pt.pixelsize.size+3)//4 }}x {{ '=%d '.join(pt.chan_names) + '=%d' }}",
 		GP_GET_BITS(0, {{ pt.pixelsize.size }}, p),
-		{{ arr_to_params(pt.chan_names, 'GP_Pixel_GET_', '_' + pt.name + '(p)') }});
+		{{ arr_to_params(pt.chan_names, 'GP_PIXEL_GET_', '_' + pt.name + '(p)') }});
 }
 
 @ end
 
-void GP_PixelSNPrint(char *buf, size_t len, GP_Pixel p, GP_PixelType pixel_type)
+void gp_pixel_snprint(char *buf, size_t len, gp_pixel p, gp_pixel_type pixel_type)
 {
-	GP_FN_PER_PIXELTYPE(GP_PixelSNPrint, pixel_type, buf, len, p);
+	GP_FN_PER_PIXELTYPE(pixel_snprint, pixel_type, buf, len, p);
 }
 
-void GP_PixelPrint(GP_Pixel p, GP_PixelType pixel_type)
+void gp_pixel_print(gp_pixel p, gp_pixel_type pixel_type)
 {
 	char buf[256];
-	GP_PixelSNPrint(buf, sizeof(buf), p, pixel_type);
+	gp_pixel_snprint(buf, sizeof(buf), p, pixel_type);
 	puts(buf);
 }

@@ -28,21 +28,21 @@
 
 #include <signal.h>
 #include <string.h>
-#include <GP.h>
+#include <gfxprim.h>
 #include <backends/GP_Backends.h>
 
 #include "space.h"
 
-static GP_Pixel black_pixel;
-static GP_Pixel white_pixel;
+static gp_pixel black_pixel;
+static gp_pixel white_pixel;
 
-static GP_Backend *backend = NULL;
-static GP_Pixmap *pixmap = NULL;
+static gp_backend *backend = NULL;
+static gp_pixmap *pixmap = NULL;
 
 static void sighandler(int signo)
 {
 	if (backend != NULL)
-		GP_BackendExit(backend);
+		gp_backend_exit(backend);
 
 	fprintf(stderr, "Got signal %i\n", signo);
 
@@ -51,7 +51,7 @@ static void sighandler(int signo)
 
 static void init_backend(const char *backend_opts)
 {
-	backend = GP_BackendInit(backend_opts, "Particles");
+	backend = gp_backend_init(backend_opts, "Particles");
 
 	if (backend == NULL) {
 		fprintf(stderr, "Failed to initalize backend '%s'\n", backend_opts);
@@ -79,8 +79,6 @@ int main(int argc, char *argv[])
 		}
 	}
 
-//	GP_SetDebugLevel(10);
-
 	signal(SIGINT, sighandler);
 	signal(SIGSEGV, sighandler);
 	signal(SIGBUS, sighandler);
@@ -90,27 +88,27 @@ int main(int argc, char *argv[])
 
 	pixmap = backend->pixmap;
 
-	black_pixel = GP_RGBToPixmapPixel(0x00, 0x00, 0x00, pixmap);
-	white_pixel = GP_RGBToPixmapPixel(0xff, 0xff, 0xff, pixmap);
+	black_pixel = gp_rgb_to_pixmap_pixel(0x00, 0x00, 0x00, pixmap);
+	white_pixel = gp_rgb_to_pixmap_pixel(0xff, 0xff, 0xff, pixmap);
 
-	GP_Fill(pixmap, black_pixel);
-	GP_BackendFlip(backend);
+	gp_fill(pixmap, black_pixel);
+	gp_backend_flip(backend);
 
 	struct space *space;
 	space = space_create(particles, 10<<8, 10<<8, (pixmap->w - 10)<<8, (pixmap->h - 10)<<8);
 
 	for (;;) {
-		if (backend->Poll)
-			GP_BackendPoll(backend);
+		if (backend->poll)
+			gp_backend_poll(backend);
 
 		usleep(1000);
 
 		/* Read and parse events */
-		GP_Event ev;
+		gp_event ev;
 
-		while (GP_BackendGetEvent(backend, &ev)) {
+		while (gp_backend_get_event(backend, &ev)) {
 
-			GP_EventDump(&ev);
+			gp_event_dump(&ev);
 
 			switch (ev.type) {
 			case GP_EV_KEY:
@@ -121,7 +119,7 @@ int main(int argc, char *argv[])
 				case GP_KEY_ESC:
 				case GP_KEY_ENTER:
 				case GP_KEY_Q:
-					GP_BackendExit(backend);
+					gp_backend_exit(backend);
 					return 0;
 				break;
 				case GP_KEY_P:
@@ -138,11 +136,11 @@ int main(int argc, char *argv[])
 			case GP_EV_SYS:
 				switch(ev.code) {
 				case GP_EV_SYS_QUIT:
-					GP_BackendExit(backend);
+					gp_backend_exit(backend);
 					exit(0);
 				break;
 				case GP_EV_SYS_RESIZE:
-					GP_BackendResizeAck(backend);
+					gp_backend_resize_ack(backend);
 					space_destroy(space);
 					space = space_create(particles,
 					                     10<<8, 10<<8,
@@ -157,11 +155,11 @@ int main(int argc, char *argv[])
 		if (!pause_flag) {
 			space_time_tick(space, 1);
 			space_draw_particles(pixmap, space);
-			GP_BackendFlip(backend);
+			gp_backend_flip(backend);
 		}
 	}
 
-	GP_BackendExit(backend);
+	gp_backend_exit(backend);
 
 	return 0;
 }

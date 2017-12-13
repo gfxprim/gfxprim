@@ -25,17 +25,17 @@
 
 #include <math.h>
 
-#include <GP.h>
+#include <gfxprim.h>
 
 /* Values for color pixels in display format. */
-static GP_Pixel black, white;
+static gp_pixel black, white;
 
 static double start_angle = 0.0;
 
 static int aa_flag = 0;
 static int pause_flag = 0;
 
-static GP_Backend *win;
+static gp_backend *win;
 
 void redraw_screen(void)
 {
@@ -46,7 +46,7 @@ void redraw_screen(void)
 	int xcenter = w/2;
 	int ycenter = h/2;
 
-	GP_Fill(win->pixmap, black);
+	gp_fill(win->pixmap, black);
 
 	for (angle = 0.0; angle < 2*M_PI; angle += 0.1) {
 		x = (int) (w/2 * cos(start_angle + angle));
@@ -55,30 +55,30 @@ void redraw_screen(void)
 		int r = 127.0 + 127.0 * cos(start_angle + angle);
 		int b = 127.0 + 127.0 * sin(start_angle + angle);
 
-		GP_Pixel pixel;
-		pixel = GP_RGBToPixel(r, 0, b, win->pixmap->pixel_type);
+		gp_pixel pixel;
+		pixel = gp_rgb_to_pixel(r, 0, b, win->pixmap->pixel_type);
 
 		if (aa_flag) {
-			GP_LineAA_Raw(win->pixmap, GP_FP_FROM_INT(xcenter), GP_FP_FROM_INT(ycenter),
+			gp_line_aa_raw(win->pixmap, GP_FP_FROM_INT(xcenter), GP_FP_FROM_INT(ycenter),
 				GP_FP_FROM_INT(xcenter + x), GP_FP_FROM_INT(ycenter + y), pixel);
 		} else {
-			GP_Line(win->pixmap, xcenter + x, ycenter + y, xcenter, ycenter, pixel);
-			GP_Line(win->pixmap, xcenter, ycenter, xcenter + x, ycenter + y, pixel);
+			gp_line(win->pixmap, xcenter + x, ycenter + y, xcenter, ycenter, pixel);
+			gp_line(win->pixmap, xcenter, ycenter, xcenter + x, ycenter + y, pixel);
 		}
 	}
 
-	GP_BackendFlip(win);
+	gp_backend_flip(win);
 
 	/* axes */
-//	GP_HLineXYW(&pixmap, 0, ycenter, display->w, white);
-//	GP_VLineXYH(&pixmap, xcenter, 0, display->h, white);
+//	gp_hline_xyw(&pixmap, 0, ycenter, display->w, white);
+//	gp_vlineXYH(&pixmap, xcenter, 0, display->h, white);
 }
 
 void event_loop(void)
 {
-	GP_Event ev;
+	gp_event ev;
 
-	while (GP_BackendGetEvent(win, &ev)) {
+	while (gp_backend_get_event(win, &ev)) {
 		switch (ev.type) {
 		case GP_EV_KEY:
 			if (ev.code != GP_EV_KEY_DOWN)
@@ -89,7 +89,7 @@ void event_loop(void)
 				aa_flag = !aa_flag;
 			break;
 			case GP_KEY_ESC:
-				GP_BackendExit(win);
+				gp_backend_exit(win);
 				exit(0);
 			break;
 			case GP_KEY_P:
@@ -100,11 +100,11 @@ void event_loop(void)
 		case GP_EV_SYS:
 			switch(ev.code) {
 			case GP_EV_SYS_QUIT:
-				GP_BackendExit(win);
+				gp_backend_exit(win);
 				exit(0);
 			break;
 			case GP_EV_SYS_RESIZE:
-				GP_BackendResizeAck(win);
+				gp_backend_resize_ack(win);
 			break;
 			}
 		break;
@@ -127,7 +127,7 @@ int main(int argc, char *argv[])
 		}
 	}
 
-	win = GP_BackendInit(backend_opts, "Line Test");
+	win = gp_backend_init(backend_opts, "Line Test");
 
 	if (win == NULL) {
 		fprintf(stderr, "Failed to initalize backend '%s'\n",
@@ -135,13 +135,13 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 
-	white = GP_RGBToPixmapPixel(0xff, 0xff, 0xff, win->pixmap);
-	black = GP_RGBToPixmapPixel(0x00, 0x00, 0x00, win->pixmap);
+	white = gp_rgb_to_pixmap_pixel(0xff, 0xff, 0xff, win->pixmap);
+	black = gp_rgb_to_pixmap_pixel(0x00, 0x00, 0x00, win->pixmap);
 
 	redraw_screen();
 
 	for (;;) {
-		GP_BackendPoll(win);
+		gp_backend_poll(win);
 		event_loop();
 
 		usleep(20000);
@@ -150,7 +150,7 @@ int main(int argc, char *argv[])
 			continue;
 
 		redraw_screen();
-		GP_BackendFlip(win);
+		gp_backend_flip(win);
 
 		start_angle += 0.01;
 		if (start_angle > 2*M_PI) {

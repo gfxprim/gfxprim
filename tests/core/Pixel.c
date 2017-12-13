@@ -22,7 +22,7 @@
 
 /*
 
-  Very basic GP_Pixel tests.
+  Very basic gp_pixel tests.
 
  */
 #include <errno.h>
@@ -35,23 +35,22 @@ static int pixel_flags(void)
 {
 	int fail = 0;
 
-	if (!GP_PixelHasFlags(GP_PIXEL_RGB888, GP_PIXEL_IS_RGB)) {
+	if (!gp_pixel_has_flags(GP_PIXEL_RGB888, GP_PIXEL_IS_RGB)) {
 		tst_msg("RGB888 is RGB failed");
 		fail++;
 	}
 
-	if (GP_PixelHasFlags(GP_PIXEL_G1, GP_PIXEL_IS_RGB)) {
+	if (gp_pixel_has_flags(GP_PIXEL_G1, GP_PIXEL_IS_RGB)) {
 		tst_msg("G1 is RGB succeeded");
 		fail++;
 	}
 
-	if (!GP_PixelHasFlags(GP_PIXEL_RGBA8888, GP_PIXEL_HAS_ALPHA)) {
+	if (!gp_pixel_has_flags(GP_PIXEL_RGBA8888, GP_PIXEL_HAS_ALPHA)) {
 		tst_msg("RGBA8888 has Alpha failed");
 		fail++;
 	}
 
-	if (!GP_PixelHasFlags(GP_PIXEL_RGBA8888,
-	                      GP_PIXEL_HAS_ALPHA | GP_PIXEL_IS_RGB)) {
+	if (!gp_pixel_has_flags(GP_PIXEL_RGBA8888, GP_PIXEL_HAS_ALPHA | GP_PIXEL_IS_RGB)) {
 		tst_msg("RGBA8888 has Alpha and is RGB failed");
 		fail++;
 	}

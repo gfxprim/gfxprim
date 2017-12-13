@@ -23,7 +23,7 @@
 #ifndef __SPIV_CONFIG_H__
 #define __SPIV_CONFIG_H__
 
-#include <GP.h>
+#include <gfxprim.h>
 
 enum orientation {
 	ROTATE_0,
@@ -64,10 +64,10 @@ struct spiv_config {
 	int full_screen:1;
 	int exif_autorotate:1;
 	char backend_init[128];
-	GP_PixelType emul_type;
+	gp_pixel_type emul_type;
 
 	/* Font information */
-	GP_TextStyle *style;
+	gp_text_style *style;
 	char *font_path;
 	unsigned int font_height;
 };

@@ -20,8 +20,8 @@
 @                     '24BPP', '32BPP']
 @
 @ for ps in pixelsizes:
-void GP_HLine_Raw_{{ ps.suffix }}(GP_Pixmap *pixmap, int x0, int x1, int y,
-			       GP_Pixel pixel)
+void gp_hline_raw_{{ ps.suffix }}(gp_pixmap *pixmap, int x0, int x1, int y,
+			       gp_pixel pixel)
 {
 	/* draw always from left to right, swap coords if necessary */
 	if (x0 > x1)
@@ -42,12 +42,12 @@ void GP_HLine_Raw_{{ ps.suffix }}(GP_Pixmap *pixmap, int x0, int x1, int y,
 @         if ps.needs_bit_endian():
 	unsigned int offset = GP_PIXEL_ADDR_OFFSET_{{ ps.suffix }}(x0);
 
-	GP_WritePixels_{{ ps.suffix }}(start, offset, length, pixel);
+	gp_write_pixels_{{ ps.suffix }}(start, offset, length, pixel);
 @         else:
-	GP_WritePixels_{{ ps.suffix }}(start, length, pixel);
+	gp_write_pixels_{{ ps.suffix }}(start, length, pixel);
 @     else:
 	for (;x0 <= x1; x0++)
-		GP_PutPixel_Raw_{{ ps.suffix }}(pixmap, x0, y, pixel);
+		gp_putpixel_raw_{{ ps.suffix }}(pixmap, x0, y, pixel);
 @     end
 }
 

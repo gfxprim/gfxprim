@@ -29,44 +29,21 @@
 #include "gfx/GP_Polygon.h"
 #include "gfx/GP_Tetragon.h"
 
-void GP_Tetragon_Raw(GP_Pixmap *pixmap, GP_Coord x0, GP_Coord y0,
-                     GP_Coord x1, GP_Coord y1, GP_Coord x2, GP_Coord y2,
-                     GP_Coord x3, GP_Coord y3, GP_Pixel pixel)
+void gp_tetragon_raw(gp_pixmap *pixmap, gp_coord x0, gp_coord y0,
+                     gp_coord x1, gp_coord y1, gp_coord x2, gp_coord y2,
+                     gp_coord x3, gp_coord y3, gp_pixel pixel)
 {
 	GP_CHECK_PIXMAP(pixmap);
 
-	GP_Line_Raw(pixmap, x0, y0, x1, y1, pixel);
-	GP_Line_Raw(pixmap, x1, y1, x2, y2, pixel);
-	GP_Line_Raw(pixmap, x2, y2, x3, y3, pixel);
-	GP_Line_Raw(pixmap, x3, y3, x0, y0, pixel);
+	gp_line_raw(pixmap, x0, y0, x1, y1, pixel);
+	gp_line_raw(pixmap, x1, y1, x2, y2, pixel);
+	gp_line_raw(pixmap, x2, y2, x3, y3, pixel);
+	gp_line_raw(pixmap, x3, y3, x0, y0, pixel);
 }
 
-void GP_Tetragon(GP_Pixmap *pixmap, GP_Coord x0, GP_Coord y0,
-                 GP_Coord x1, GP_Coord y1, GP_Coord x2, GP_Coord y2,
-                 GP_Coord x3, GP_Coord y3, GP_Pixel pixel)
-{
-	GP_CHECK_PIXMAP(pixmap);
-
-	GP_TRANSFORM_POINT(pixmap, x0, y0);
-	GP_TRANSFORM_POINT(pixmap, x1, y1);
-	GP_TRANSFORM_POINT(pixmap, x2, y2);
-	GP_TRANSFORM_POINT(pixmap, x3, y3);
-
-	GP_Tetragon_Raw(pixmap, x0, y0, x1, y1, x2, y2, x3, y3, pixel);
-}
-
-void GP_FillTetragon_Raw(GP_Pixmap *pixmap, GP_Coord x0, GP_Coord y0,
-                         GP_Coord x1, GP_Coord y1, GP_Coord x2, GP_Coord y2,
-                         GP_Coord x3, GP_Coord y3, GP_Pixel pixel)
-{
-	const GP_Coord xy[8] = {x0, y0, x1, y1, x2, y2, x3, y3};
-
-	GP_FillPolygon_Raw(pixmap, 4, xy, pixel);
-}
-
-void GP_FillTetragon(GP_Pixmap* pixmap, GP_Coord x0, GP_Coord y0,
-                     GP_Coord x1, GP_Coord y1, GP_Coord x2, GP_Coord y2,
-                     GP_Coord x3, GP_Coord y3, GP_Pixel pixel)
+void gp_tetragon(gp_pixmap *pixmap, gp_coord x0, gp_coord y0,
+                 gp_coord x1, gp_coord y1, gp_coord x2, gp_coord y2,
+                 gp_coord x3, gp_coord y3, gp_pixel pixel)
 {
 	GP_CHECK_PIXMAP(pixmap);
 
@@ -75,7 +52,30 @@ void GP_FillTetragon(GP_Pixmap* pixmap, GP_Coord x0, GP_Coord y0,
 	GP_TRANSFORM_POINT(pixmap, x2, y2);
 	GP_TRANSFORM_POINT(pixmap, x3, y3);
 
-	const GP_Coord xy[8] = {x0, y0, x1, y1, x2, y2, x3, y3};
+	gp_tetragon_raw(pixmap, x0, y0, x1, y1, x2, y2, x3, y3, pixel);
+}
 
-	GP_FillPolygon_Raw(pixmap, 4, xy, pixel);
+void gp_fill_tetragon_raw(gp_pixmap *pixmap, gp_coord x0, gp_coord y0,
+                          gp_coord x1, gp_coord y1, gp_coord x2, gp_coord y2,
+                          gp_coord x3, gp_coord y3, gp_pixel pixel)
+{
+	const gp_coord xy[8] = {x0, y0, x1, y1, x2, y2, x3, y3};
+
+	gp_fill_polygon_raw(pixmap, 4, xy, pixel);
+}
+
+void gp_fill_tetragon(gp_pixmap *pixmap, gp_coord x0, gp_coord y0,
+                      gp_coord x1, gp_coord y1, gp_coord x2, gp_coord y2,
+                      gp_coord x3, gp_coord y3, gp_pixel pixel)
+{
+	GP_CHECK_PIXMAP(pixmap);
+
+	GP_TRANSFORM_POINT(pixmap, x0, y0);
+	GP_TRANSFORM_POINT(pixmap, x1, y1);
+	GP_TRANSFORM_POINT(pixmap, x2, y2);
+	GP_TRANSFORM_POINT(pixmap, x3, y3);
+
+	const gp_coord xy[8] = {x0, y0, x1, y1, x2, y2, x3, y3};
+
+	gp_fill_polygon_raw(pixmap, 4, xy, pixel);
 }

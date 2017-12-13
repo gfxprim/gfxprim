@@ -23,11 +23,11 @@ conditions, see below for more information.
 -------------------------------------------------------------------------------
 #include <core/GP_Debug.h>
 /* or */
-#include <GP.h>
+#include <gfxprim.h>
 
-void GP_SetDebugLevel(unsigned int level);
+void gp_set_debug_level(unsigned int level);
 
-unsigned int GP_GetDebugLevel(void);
+unsigned int gp_get_debug_level(void);
 -------------------------------------------------------------------------------
 
 Sets or gets library debug level. The default level is '0' at which only
@@ -50,7 +50,7 @@ first debug message is about to be printed.
 -------------------------------------------------------------------------------
 #include <core/GP_Debug.h>
 /* or */
-#include <GP.h>
+#include <gfxprim.h>
 
 GP_DEBUG(level, ...)
 
@@ -62,18 +62,18 @@ GP_BUG(...)
 
 GP_FATAL(...)
 
-void GP_DebugPrint(int level, const char *file, const char *function, int line,
+void gp_debug_print(int level, const char *file, const char *function, int line,
                    const char *fmt, ...);
 -------------------------------------------------------------------------------
 
 Printf-like macros used to print debug messages. All of them calls the
-'GP_DebugPrint()' function with slightly different parameters.
+'gp_debug_print()' function with slightly different parameters.
 
-NOTE: 'GP_DebugPrint()' function preserves errno.
+NOTE: 'gp_debug_print()' function preserves errno.
 
 [source,c]
 -------------------------------------------------------------------------------
-enum GP_DebugType {
+enum gp_debug_type {
 	GP_DEBUG_TODO  = -1,
 	GP_DEBUG_WARN  = -2,
 	GP_DEBUG_BUG   = -3,
@@ -83,7 +83,7 @@ enum GP_DebugType {
 /*
  * Custom debug message handler structure.
  */
-struct GP_DebugMsg {
+struct gp_debug_msg {
 	int level;
 	const char *file;
 	const char *fn;
@@ -97,7 +97,7 @@ struct GP_DebugMsg {
  * If NULL is passed, custom handler is disabled and debug messages are printed
  * into the stderr.
  */
-void GP_SetDebugHandler(void (*handler)(const struct GP_DebugMsg *msg));
+void gp_set_debug_handler(void (*handler)(const struct gp_debug_msg *msg));
 
 -------------------------------------------------------------------------------
 

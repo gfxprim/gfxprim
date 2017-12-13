@@ -24,11 +24,11 @@
 
 #include "filters/GP_ApplyTables.h"
 
-static GP_Pixel *create_table(const GP_PixelTypeChannel *chan)
+static gp_pixel *create_table(const gp_pixel_channel *chan)
 {
 	size_t table_size = (1 << chan->size);
-	GP_Pixel *table = malloc(table_size * sizeof(GP_Pixel));
-	GP_Pixel i;
+	gp_pixel *table = malloc(table_size * sizeof(gp_pixel));
+	gp_pixel i;
 
 	GP_DEBUG(2, "Table for channel '%s' size %zu (%p)",
 	         chan->name, table_size, table);
@@ -44,7 +44,7 @@ static GP_Pixel *create_table(const GP_PixelTypeChannel *chan)
 	return table;
 }
 
-static void free_tables(GP_FilterTables *self)
+static void free_tables(gp_filter_tables *self)
 {
 	unsigned int i;
 
@@ -58,18 +58,18 @@ static void free_tables(GP_FilterTables *self)
 	}
 }
 
-int GP_FilterTablesInit(GP_FilterTables *self, const GP_Pixmap *pixmap)
+int gp_filter_tables_init(gp_filter_tables *self, const gp_pixmap *pixmap)
 {
 	unsigned int i;
-	const GP_PixelTypeDescription *desc;
+	const gp_pixel_type_desc *desc;
 
 	GP_DEBUG(2, "Allocating tables for pixel %s",
-	         GP_PixelTypeName(pixmap->pixel_type));
+	         gp_pixel_type_name(pixmap->pixel_type));
 
 	for (i = 0; i < GP_PIXELTYPE_MAX_CHANNELS; i++)
 		self->table[i] = NULL;
 
-	desc = GP_PixelTypeDesc(pixmap->pixel_type);
+	desc = gp_pixel_desc(pixmap->pixel_type);
 
 	for (i = 0; i < desc->numchannels; i++) {
 		self->table[i] = create_table(&desc->channels[i]);
@@ -84,9 +84,9 @@ int GP_FilterTablesInit(GP_FilterTables *self, const GP_Pixmap *pixmap)
 	return 0;
 }
 
-GP_FilterTables *GP_FilterTablesAlloc(const GP_Pixmap *pixmap)
+gp_filter_tables *gp_filter_tables_alloc(const gp_pixmap *pixmap)
 {
-	GP_FilterTables *tables = malloc(sizeof(GP_FilterTables));
+	gp_filter_tables *tables = malloc(sizeof(gp_filter_tables));
 
 	GP_DEBUG(1, "Allocating point filter (%p)", tables);
 
@@ -95,7 +95,7 @@ GP_FilterTables *GP_FilterTablesAlloc(const GP_Pixmap *pixmap)
 		return NULL;
 	}
 
-	if (GP_FilterTablesInit(tables, pixmap)) {
+	if (gp_filter_tables_init(tables, pixmap)) {
 		free(tables);
 		return NULL;
 	}
@@ -105,7 +105,7 @@ GP_FilterTables *GP_FilterTablesAlloc(const GP_Pixmap *pixmap)
 	return tables;
 }
 
-void GP_FilterTablesFree(GP_FilterTables *self)
+void gp_filter_tables_free(gp_filter_tables *self)
 {
 	GP_DEBUG(1, "Freeing point filter and tables (%p)", self);
 

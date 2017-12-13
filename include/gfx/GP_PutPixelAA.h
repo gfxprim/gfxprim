@@ -40,18 +40,18 @@
 /*
  * Anti Aliased Put Pixel respecting pixmap rotation flags and with clipping.
  */
-void GP_PutPixelAA(GP_Pixmap *pixmap, GP_Coord x, GP_Coord y, GP_Pixel pixel);
+void gp_putpixel_aa(gp_pixmap *pixmap, gp_coord x, gp_coord y, gp_pixel pixel);
 
 /*
  * Anti Aliased Put Pixel with clipping.
  */
-void GP_PutPixelAA_Raw_Clipped(GP_Pixmap *pixmap, GP_Coord x, GP_Coord y,
-                               GP_Pixel pixel);
+void gp_putpixel_aa_raw_clipped(gp_pixmap *pixmap, gp_coord x, gp_coord y,
+                                gp_pixel pixel);
 
 /*
  * Raw Put Pixel.
  */
-void GP_PutPixelAA_Raw(GP_Pixmap *pixmap, GP_Coord x, GP_Coord y,
-                       GP_Pixel pixel);
+void gp_putpixel_aa_raw(gp_pixmap *pixmap, gp_coord x, gp_coord y,
+                        gp_pixel pixel);
 
 #endif /* GFX_GP_PUT_PIXEL_AA_H */

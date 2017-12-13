@@ -31,10 +31,10 @@
 #include "tst_test.h"
 
 static int load_resources(const char *path1, const char *path2,
-                          GP_Pixmap **c1, GP_Pixmap **c2)
+                          gp_pixmap **c1, gp_pixmap **c2)
 {
-	*c1 = GP_LoadImage(path1, NULL);
-	*c2 = GP_LoadImage(path2, NULL);
+	*c1 = gp_load_image(path1, NULL);
+	*c2 = gp_load_image(path2, NULL);
 
 	if (*c1 == NULL || *c2 == NULL) {
 		tst_err("Failed to load resource");
@@ -46,7 +46,7 @@ static int load_resources(const char *path1, const char *path2,
 
 static int test_lin_conv_box_3x3(void)
 {
-	GP_Pixmap *in, *out;
+	gp_pixmap *in, *out;
 	int ret;
 
 	ret = load_resources("in.pgm", "out.pgm", &in, &out);
@@ -61,14 +61,14 @@ static int test_lin_conv_box_3x3(void)
 		1, 1, 1,
 	};
 
-	GP_FilterKernel2D box_3x3_kernel = {
+	gp_filter_kernel_2d box_3x3_kernel = {
 		.w = 3,
 		.h = 3,
 		.div = 9,
 		.kernel = box_3x3,
 	};
 
-	if (GP_FilterConvolution(in, in, &box_3x3_kernel, NULL)) {
+	if (gp_filter_convolution(in, in, &box_3x3_kernel, NULL)) {
 		if (errno == ENOSYS)
 			return TST_SKIPPED;
 	}
@@ -81,7 +81,7 @@ static int test_lin_conv_box_3x3(void)
 
 static int test_h_lin_conv_box_3_raw(void)
 {
-	GP_Pixmap *in, *out;
+	gp_pixmap *in, *out;
 	int ret;
 
 	ret = load_resources("in.pgm", "out.pgm", &in, &out);
@@ -92,7 +92,7 @@ static int test_h_lin_conv_box_3_raw(void)
 	/* Apply the convolution */
 	float kernel[] = {1, 1, 1};
 
-	if (GP_FilterHLinearConvolution_Raw(in, 0, 0, in->w, in->h, in, 0, 0,
+	if (gp_filter_hlinear_convolution_raw(in, 0, 0, in->w, in->h, in, 0, 0,
 	                                kernel, 3, 3, NULL)) {
 		if (errno == ENOSYS)
 			return TST_SKIPPED;
@@ -106,7 +106,7 @@ static int test_h_lin_conv_box_3_raw(void)
 
 static int test_v_lin_conv_box_3_raw(void)
 {
-	GP_Pixmap *in, *out;
+	gp_pixmap *in, *out;
 	int ret;
 
 	ret = load_resources("in.pgm", "out.pgm", &in, &out);
@@ -114,12 +114,10 @@ static int test_v_lin_conv_box_3_raw(void)
 	if (ret != TST_SUCCESS)
 		return ret;
 
-//	GP_SetDebugLevel(10);
-
 	/* Apply the convolution */
 	float kernel[] = {1, 1, 1};
 
-	if (GP_FilterVLinearConvolution_Raw(in, 0, 0, in->w, in->h, in, 0, 0,
+	if (gp_filter_vlinear_convolution_raw(in, 0, 0, in->w, in->h, in, 0, 0,
 	                                kernel, 3, 3, NULL)) {
 		if (errno == ENOSYS)
 			return TST_SKIPPED;

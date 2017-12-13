@@ -30,9 +30,9 @@
 
 #include "tst_test.h"
 
-#define LOAD GP_LoadPPM
-#define SAVE GP_SavePPM
-#define READ GP_ReadPPM
+#define LOAD gp_load_ppm
+#define SAVE gp_save_ppm
+#define READ gp_read_ppm
 #include "Loader.h"
 #include "PPM.h"
 

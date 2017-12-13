@@ -22,29 +22,29 @@ def test_gfx_submodule_has_C():
 
 # These set the param types of the functions in GFX
 gfx_params = {
-    'ArcSegment': 'IIIIIFFP',
-    'Circle': 'IIIP',
-    'Ellipse': 'IIIIP',
-    'Fill': 'P',
-    'FillCircle': 'IIIP',
-    'FillEllipse': 'IIIIP',
-    'FillPolygon': ([(0,0),(1,1),(1,0)], 0, {}),
-    'FillRect': 'IIIIP',
-    'FillRing': 'IIIIP',
-    'FillTetragon': 'IIIIIIIIP',
-    'FillTriangle': 'IIIIIIP',
-    'HLine': 'IIIP',
-    'HLineAA': 'IIIP', # Fixpoint, originally 'FFFP'
-    'Line': 'IIIIP',
-    'LineAA': 'IIIIP', # Fixpoint, originally 'FFFFP'
-    'Polygon': ([(0,0),(1,1),(1,0)], 0, {}),
-    'PutPixelAA': 'IIP', # Fixpoint, originally 'FFP'
-    'Rect': 'IIIIP',
-    'Ring': 'IIIIP',
-    'Tetragon': 'IIIIIIIIP',
-    'Triangle': 'IIIIIIP',
-    'VLine': 'IIIP',
-    'VLineAA': 'IIIP', # Fixpoint, originally 'FFFP'
+    'arc_segment': 'IIIIIFFP',
+    'circle': 'IIIP',
+    'ellipse': 'IIIIP',
+    'fill': 'P',
+    'fill_circle': 'IIIP',
+    'fill_ellipse': 'IIIIP',
+    'fill_polygon': ([(0,0),(1,1),(1,0)], 0, {}),
+    'fill_rect': 'IIIIP',
+    'fill_ring': 'IIIIP',
+    'fill_tetragon': 'IIIIIIIIP',
+    'fill_triangle': 'IIIIIIP',
+    'hline': 'IIIP',
+    'hline_aa': 'IIIP', # Fixpoint, originally 'FFFP'
+    'line': 'IIIIP',
+    'line_aa': 'IIIIP', # Fixpoint, originally 'FFFFP'
+    'polygon': ([(0,0),(1,1),(1,0)], 0, {}),
+    'putpixel_aa': 'IIP', # Fixpoint, originally 'FFP'
+    'rect': 'IIIIP',
+    'ring': 'IIIIP',
+    'tetragon': 'IIIIIIIIP',
+    'triangle': 'IIIIIIP',
+    'vline': 'IIIP',
+    'vline_aa': 'IIIP', # Fixpoint, originally 'FFFP'
     }
 
 
@@ -97,8 +97,8 @@ def test_Polygon():
   c1 = PixmapRand(13, 12, core.C.PIXEL_RGB888, seed=42)
   c2 = PixmapRand(13, 12, core.C.PIXEL_RGB888, seed=42)
   assert c1 == c0
-  c1.gfx.Polygon([1,2,0,4,7,9,5,4,3,2], 43)
-  c2.gfx.Polygon([(1,2),(0,4),(7,9),(5,4),(3,2)], 43)
+  c1.gfx.polygon([1,2,0,4,7,9,5,4,3,2], 43)
+  c2.gfx.polygon([(1,2),(0,4),(7,9),(5,4),(3,2)], 43)
   assert c1 == c2
   assert c1 != c0
 
@@ -108,7 +108,7 @@ def test_FillPolygon():
   c1 = PixmapRand(13, 9, core.C.PIXEL_RGB888, seed=41)
   c2 = PixmapRand(13, 9, core.C.PIXEL_RGB888, seed=41)
   assert c1 == c0
-  c1.gfx.FillPolygon([1,2,0,4,7,9,5,4,3,2], 0)
-  c2.gfx.FillPolygon([(1,2),(0,4),(7,9),(5,4),(3,2)], 0)
+  c1.gfx.fill_polygon([1,2,0,4,7,9,5,4,3,2], 0)
+  c2.gfx.fill_polygon([(1,2),(0,4),(7,9),(5,4),(3,2)], 0)
   assert c1 == c2
   assert c1 != c0

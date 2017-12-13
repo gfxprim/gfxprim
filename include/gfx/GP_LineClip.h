@@ -26,6 +26,6 @@
 #ifndef GP_LINECLIP_H
 #define GP_LINECLIP_H
 
-int GP_LineClip(int *px0, int *py0, int *px1, int *py1, int xmax, int ymax);
+int gp_line_clip(int *px0, int *py0, int *px1, int *py1, int xmax, int ymax);
 
 #endif

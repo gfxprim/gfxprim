@@ -41,7 +41,7 @@
 
 static SDL_Surface *sdl_surface;
 static SDL_mutex *mutex;
-static GP_Pixmap pixmap;
+static gp_pixmap pixmap;
 
 static uint32_t sdl_flags = SDL_SWSURFACE;
 
@@ -49,9 +49,9 @@ static uint32_t sdl_flags = SDL_SWSURFACE;
 static unsigned int new_w, new_h;
 
 /* Backend API funcitons */
-static struct GP_Backend backend;
+static struct gp_backend backend;
 
-static void sdl_flip(struct GP_Backend *self __attribute__((unused)))
+static void sdl_flip(struct gp_backend *self __attribute__((unused)))
 {
 	SDL_mutexP(mutex);
 
@@ -61,8 +61,8 @@ static void sdl_flip(struct GP_Backend *self __attribute__((unused)))
 	SDL_mutexV(mutex);
 }
 
-static void sdl_update_rect(struct GP_Backend *self __attribute__((unused)),
-                            GP_Coord x0, GP_Coord y0, GP_Coord x1, GP_Coord y1)
+static void sdl_update_rect(struct gp_backend *self __attribute__((unused)),
+                            gp_coord x0, gp_coord y0, gp_coord x1, gp_coord y1)
 {
 	SDL_mutexP(mutex);
 
@@ -84,10 +84,10 @@ static void sdl_put_event(SDL_Event *ev)
 		new_h = ev->resize.h;
 	}
 
-	GP_InputDriverSDLEventPut(&backend.event_queue, ev);
+	gp_input_driver_sdl_event_put(&backend.event_queue, ev);
 }
 
-static void sdl_poll(struct GP_Backend *self __attribute__((unused)))
+static void sdl_poll(struct gp_backend *self __attribute__((unused)))
 {
 	SDL_Event ev;
 
@@ -99,7 +99,7 @@ static void sdl_poll(struct GP_Backend *self __attribute__((unused)))
 	SDL_mutexV(mutex);
 }
 
-static void sdl_wait(struct GP_Backend *self __attribute__((unused)))
+static void sdl_wait(struct gp_backend *self __attribute__((unused)))
 {
 	SDL_Event ev;
 
@@ -107,7 +107,7 @@ static void sdl_wait(struct GP_Backend *self __attribute__((unused)))
 	//sdl_put_event(&ev);
 
 	for (;;) {
-		if (GP_EventQueueEventsQueued(&self->event_queue))
+		if (gp_event_queue_events_queued(&self->event_queue))
 			return;
 
 		SDL_mutexP(mutex);
@@ -121,7 +121,7 @@ static void sdl_wait(struct GP_Backend *self __attribute__((unused)))
 	}
 }
 
-static int pixmap_from_surface(GP_Pixmap *pixmap, const SDL_Surface *surf)
+int gp_pixmap_from_sdl_surface(gp_pixmap *pixmap, const SDL_Surface *surf)
 {
 	/* sanity checks on the SDL surface */
 	if (surf->format->BytesPerPixel == 0) {
@@ -134,11 +134,11 @@ static int pixmap_from_surface(GP_Pixmap *pixmap, const SDL_Surface *surf)
 		return 1;
 	}
 
-	enum GP_PixelType pixeltype = GP_PixelRGBMatch(surf->format->Rmask,
-	                                               surf->format->Gmask,
-						       surf->format->Bmask,
-						       surf->format->Ashift,
-						       surf->format->BitsPerPixel);
+	enum gp_pixel_type pixeltype = gp_pixel_rgb_match(surf->format->Rmask,
+							  surf->format->Gmask,
+							  surf->format->Bmask,
+							  surf->format->Ashift,
+							  surf->format->BitsPerPixel);
 
 	if (pixeltype == GP_PIXEL_UNKNOWN)
 		return 1;
@@ -154,12 +154,7 @@ static int pixmap_from_surface(GP_Pixmap *pixmap, const SDL_Surface *surf)
 	return 0;
 }
 
-int GP_PixmapFromSDLSurface(GP_Pixmap *c, const SDL_Surface *surf)
-{
-	return pixmap_from_surface(c, surf);
-}
-
-static int sdl_set_attributes(struct GP_Backend *self,
+static int sdl_set_attributes(struct gp_backend *self,
                               uint32_t w, uint32_t h,
                               const char *caption)
 {
@@ -170,47 +165,45 @@ static int sdl_set_attributes(struct GP_Backend *self,
 
 	/* Send only resize event, the actual resize is done in resize_ack */
 	if (w != 0 && h != 0)
-		GP_EventQueuePushResize(&self->event_queue, w, h, NULL);
+		gp_event_queue_push_resize(&self->event_queue, w, h, NULL);
 
 	SDL_mutexV(mutex);
 
 	return 0;
 }
 
-static int sdl_resize_ack(struct GP_Backend *self __attribute__((unused)))
+static int sdl_resize_ack(struct gp_backend *self __attribute__((unused)))
 {
 	GP_DEBUG(2, "Resizing the buffer to %ux%u", new_w, new_h);
 
 	SDL_mutexP(mutex);
 
 	sdl_surface = SDL_SetVideoMode(new_w, new_h, 0, sdl_flags);
-	pixmap_from_surface(backend.pixmap, sdl_surface);
+	gp_pixmap_from_sdl_surface(backend.pixmap, sdl_surface);
 
-	GP_EventQueueSetScreenSize(&backend.event_queue,
-	                           backend.pixmap->w, backend.pixmap->h);
+	gp_event_queue_set_screen_size(&backend.event_queue,
+	                               backend.pixmap->w, backend.pixmap->h);
 
 	SDL_mutexV(mutex);
 
 	return 0;
 }
 
-static void sdl_exit(struct GP_Backend *self __attribute__((unused)));
+static void sdl_exit(struct gp_backend *self __attribute__((unused)));
 
-static struct GP_Backend backend = {
-	.name          = "SDL",
-	.pixmap       = NULL,
-	.Flip          = sdl_flip,
-	.UpdateRect    = sdl_update_rect,
-	.SetAttributes = sdl_set_attributes,
-	.ResizeAck     = sdl_resize_ack,
-	.Exit          = sdl_exit,
-	.fd            = -1,
-	.Poll          = sdl_poll,
-	.Wait          = sdl_wait,
-	.timers        = NULL,
+static struct gp_backend backend = {
+	.name = "SDL",
+	.flip = sdl_flip,
+	.update_rect = sdl_update_rect,
+	.set_attrs = sdl_set_attributes,
+	.resize_ack = sdl_resize_ack,
+	.exit = sdl_exit,
+	.fd = -1,
+	.poll = sdl_poll,
+	.wait = sdl_wait,
 };
 
-static void sdl_exit(struct GP_Backend *self __attribute__((unused)))
+static void sdl_exit(struct gp_backend *self __attribute__((unused)))
 {
 	SDL_mutexP(mutex);
 
@@ -221,8 +214,8 @@ static void sdl_exit(struct GP_Backend *self __attribute__((unused)))
 	backend.pixmap = NULL;
 }
 
-GP_Backend *GP_BackendSDLInit(GP_Size w, GP_Size h, uint8_t bpp, uint8_t flags,
-                              const char *caption)
+gp_backend *gp_sdl_init(gp_size w, gp_size h, uint8_t bpp, uint8_t flags,
+                        const char *caption)
 {
 	/* SDL was already initalized */
 	if (backend.pixmap != NULL)
@@ -252,7 +245,7 @@ GP_Backend *GP_BackendSDLInit(GP_Size w, GP_Size h, uint8_t bpp, uint8_t flags,
 
 	mutex = SDL_CreateMutex();
 
-	if (pixmap_from_surface(&pixmap, sdl_surface)) {
+	if (gp_pixmap_from_sdl_surface(&pixmap, sdl_surface)) {
 		GP_WARN("Failed to match pixel_type");
 		SDL_Quit();
 		return NULL;
@@ -261,7 +254,7 @@ GP_Backend *GP_BackendSDLInit(GP_Size w, GP_Size h, uint8_t bpp, uint8_t flags,
 	SDL_EnableKeyRepeat(SDL_DEFAULT_REPEAT_DELAY,
 	                    SDL_DEFAULT_REPEAT_INTERVAL);
 
-	GP_EventQueueInit(&backend.event_queue, w, h, 0);
+	gp_event_queue_init(&backend.event_queue, w, h, 0);
 
 	backend.pixmap = &pixmap;
 
@@ -270,13 +263,13 @@ GP_Backend *GP_BackendSDLInit(GP_Size w, GP_Size h, uint8_t bpp, uint8_t flags,
 
 #else
 
-#include "GP_Backend.h"
+#include <backends/GP_Backend.h>
 
-GP_Backend *GP_BackendSDLInit(GP_Size w __attribute__((unused)),
-                              GP_Size h __attribute__((unused)),
-			      uint8_t bpp __attribute__((unused)),
-			      uint8_t flags __attribute__((unused)),
-                              const char *caption __attribute__((unused)))
+gp_backend *gp_sdl_init(gp_size w __attribute__((unused)),
+                        gp_size h __attribute__((unused)),
+                        uint8_t bpp __attribute__((unused)),
+                        uint8_t flags __attribute__((unused)),
+                        const char *caption __attribute__((unused)))
 {
 	GP_FATAL("SDL support not compiled in.");
 	return NULL;

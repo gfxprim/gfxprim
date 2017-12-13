@@ -1,7 +1,7 @@
 """
 Module extending the Pixmap class with .text submodule and its text drawing functions.
 
-Use as in "import gfxprim.text; pixmap_foo.text.Text(...)"
+Use as in "import gfxprim.text; pixmap_foo.text.text(...)"
 """
 
 # Import the SWIG wrapper
@@ -12,7 +12,7 @@ from . import C
 
 def _init(module):
   "Extend pixmap with text submodule"
-  
+
   from ..utils import extend, add_swig_getmethod, add_swig_setmethod
   from ..core import Pixmap as _pixmap
 
@@ -28,7 +28,7 @@ def _init(module):
   from ..utils import import_members, extend_submodule
   import re
   def strip_GP(s):
-    return re.sub('^GP_', '', s)
+    return re.sub('^gp_|^GP_', '', s)
 
   const_regexes = [
     '^GP_[A-Z0-9_]*$',
@@ -37,8 +37,8 @@ def _init(module):
 
   import_members(c_text, module, sub=strip_GP)
 
-  for name in ['Text']:
-    extend_submodule(TextSubmodule, name, c_text.__getattribute__('GP_' + name))
+  for name in ['text']:
+    extend_submodule(TextSubmodule, name, c_text.__getattribute__('gp_' + name))
 
 _init(locals())
 del _init

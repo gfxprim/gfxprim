@@ -21,7 +21,7 @@
  *****************************************************************************/
 
 #include <stdio.h>
-#include <GP.h>
+#include <gfxprim.h>
 
 #include "spiv_config.h"
 #include "spiv_help.h"
@@ -232,56 +232,56 @@ void print_man(void)
 
 static int last_line;
 
-static int redraw_help(GP_Backend *backend, unsigned int loff, GP_Coord xoff)
+static int redraw_help(gp_backend *backend, unsigned int loff, gp_coord xoff)
 {
-	GP_Pixmap *c = backend->pixmap;
-	GP_Pixel black = GP_RGBToPixmapPixel(0x00, 0x00, 0x00, c);
-	GP_Pixel white = GP_RGBToPixmapPixel(0xff, 0xff, 0xff, c);
+	gp_pixmap *c = backend->pixmap;
+	gp_pixel black = gp_rgb_to_pixmap_pixel(0x00, 0x00, 0x00, c);
+	gp_pixel white = gp_rgb_to_pixmap_pixel(0xff, 0xff, 0xff, c);
 	int i;
 
-	int spacing = GP_TextHeight(config.style)/10 + 2;
-	int height = GP_TextHeight(config.style);
+	int spacing = gp_text_height(config.style)/10 + 2;
+	int height = gp_text_height(config.style);
 
-	GP_Fill(c, black);
+	gp_fill(c, black);
 
-	GP_Print(c, config.style, 20 + 10 * xoff, 2, GP_ALIGN_RIGHT|GP_VALIGN_BOTTOM,
+	gp_print(c, config.style, 20 + 10 * xoff, 2, GP_ALIGN_RIGHT|GP_VALIGN_BOTTOM,
 	         white, black, "%s", "Keyboard Controls:");
 
 	unsigned int max = 0;
 
 	for (i = 0; i < help_keys_len; i++)
-		max = GP_MAX(max, GP_TextWidth(config.style, help_keys[i].keys));
+		max = GP_MAX(max, gp_text_width(config.style, help_keys[i].keys));
 
 	for (i = loff; i < help_keys_len; i++) {
-		GP_Coord h = spacing + (i - loff + 1) * (height + spacing);
+		gp_coord h = spacing + (i - loff + 1) * (height + spacing);
 
-		if (h + height + spacing > (GP_Coord)c->h) {
+		if (h + height + spacing > (gp_coord)c->h) {
 			last_line = 0;
 			goto out;
 		}
 
-		GP_Print(c, config.style, 20 + 10 * xoff, h, GP_ALIGN_RIGHT|GP_VALIGN_BOTTOM,
+		gp_print(c, config.style, 20 + 10 * xoff, h, GP_ALIGN_RIGHT|GP_VALIGN_BOTTOM,
 		         white, black, "%s", help_keys[i].keys);
-		GP_Print(c, config.style, 20 + 10 * xoff + max, h, GP_ALIGN_RIGHT|GP_VALIGN_BOTTOM,
+		gp_print(c, config.style, 20 + 10 * xoff + max, h, GP_ALIGN_RIGHT|GP_VALIGN_BOTTOM,
 		         white, black, "  -  %s", help_keys[i].desc);
 		last_line = 1;
 	}
 
 out:
-	GP_BackendFlip(backend);
+	gp_backend_flip(backend);
 	return i;
 }
 
-void draw_help(GP_Backend *backend)
+void draw_help(gp_backend *backend)
 {
 	int loff = 0, last, xoff = 0;
 
 	last = redraw_help(backend, loff, xoff);
 
 	for (;;) {
-		GP_Event ev;
+		gp_event ev;
 
-		while (GP_BackendWaitEvent(backend, &ev)) {
+		while (gp_backend_wait_event(backend, &ev)) {
 			switch (ev.type) {
 			case GP_EV_KEY:
 				if (ev.code != GP_EV_KEY_DOWN)
@@ -326,11 +326,11 @@ void draw_help(GP_Backend *backend)
 			case GP_EV_SYS:
 				switch (ev.code) {
 				case GP_EV_SYS_RESIZE:
-					GP_BackendResizeAck(backend);
+					gp_backend_resize_ack(backend);
 					last = redraw_help(backend, loff, xoff);
 				break;
 				case GP_EV_SYS_QUIT:
-					GP_BackendPutEventBack(backend, &ev);
+					gp_backend_put_event_back(backend, &ev);
 					return;
 				}
 			}

@@ -30,22 +30,22 @@
 
 /* Triangle */
 
-void GP_Triangle(GP_Pixmap *pixmap, GP_Coord x0, GP_Coord y0,
-                 GP_Coord x1, GP_Coord y1,
-                 GP_Coord x2, GP_Coord y2, GP_Pixel pixel);
+void gp_triangle(gp_pixmap *pixmap, gp_coord x0, gp_coord y0,
+                 gp_coord x1, gp_coord y1,
+                 gp_coord x2, gp_coord y2, gp_pixel pixel);
 
-void GP_Triangle_Raw(GP_Pixmap *pixmap, GP_Coord x0, GP_Coord y0,
-                     GP_Coord x1, GP_Coord y1,
-                     GP_Coord x2, GP_Coord y2, GP_Pixel pixel);
+void gp_triangle_raw(gp_pixmap *pixmap, gp_coord x0, gp_coord y0,
+                     gp_coord x1, gp_coord y1,
+                     gp_coord x2, gp_coord y2, gp_pixel pixel);
 
 /* Filled Triangle */
 
-void GP_FillTriangle(GP_Pixmap *pixmap, GP_Coord x0, GP_Coord y0,
-                     GP_Coord x1, GP_Coord y1,
-                     GP_Coord x2, GP_Coord y2, GP_Pixel pixel);
+void gp_fill_triangle(gp_pixmap *pixmap, gp_coord x0, gp_coord y0,
+                      gp_coord x1, gp_coord y1,
+                      gp_coord x2, gp_coord y2, gp_pixel pixel);
 
-void GP_FillTriangle_Raw(GP_Pixmap *pixmap, GP_Coord x0, GP_Coord y0,
-                         GP_Coord x1, GP_Coord y1,
-                         GP_Coord x2, GP_Coord y2, GP_Pixel pixel);
+void gp_fill_triangle_raw(gp_pixmap *pixmap, gp_coord x0, gp_coord y0,
+                          gp_coord x1, gp_coord y1,
+                          gp_coord x2, gp_coord y2, gp_pixel pixel);
 
 #endif /* GP_TRIANGLE_H */

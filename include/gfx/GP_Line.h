@@ -28,10 +28,10 @@
 
 #include "core/GP_Pixmap.h"
 
-void GP_Line(GP_Pixmap *pixmap, GP_Coord x0, GP_Coord y0,
-              GP_Coord x1, GP_Coord y1, GP_Pixel pixel);
+void gp_line(gp_pixmap *pixmap, gp_coord x0, gp_coord y0,
+             gp_coord x1, gp_coord y1, gp_pixel pixel);
 
-void GP_Line_Raw(GP_Pixmap *pixmap, GP_Coord x0, GP_Coord y0,
-                 GP_Coord x1, GP_Coord y1, GP_Pixel pixel);
+void gp_line_raw(gp_pixmap *pixmap, gp_coord x0, gp_coord y0,
+                 gp_coord x1, gp_coord y1, gp_pixel pixel);
 
 #endif /* GP_LINE_H */

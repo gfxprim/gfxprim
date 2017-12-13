@@ -27,10 +27,10 @@
 #include <string.h>
 #include <linux/input.h>
 
-#include "core/GP_Debug.h"
+#include <core/GP_Debug.h>
 
-#include "input/GP_EventQueue.h"
-#include "input/GP_InputDriverLinux.h"
+#include <input/GP_EventQueue.h>
+#include <input/GP_InputDriverLinux.h>
 
 static int get_version(int fd)
 {
@@ -62,14 +62,14 @@ static void print_name(int fd)
 {
 	char name[64];
 
-	if (GP_GetDebugLevel() < 2)
+	if (gp_get_debug_level() < 2)
 		return;
 
 	if (get_name(fd, name, sizeof(name)) > 0)
 		GP_DEBUG(2, "Input device name '%s'", name);
 }
 
-static void try_load_callibration(struct GP_InputDriverLinux *self)
+static void try_load_callibration(gp_input_driver_linux *self)
 {
 	long bit = 0;
 	int abs[5];
@@ -100,10 +100,10 @@ static void try_load_callibration(struct GP_InputDriverLinux *self)
 	}
 }
 
-struct GP_InputDriverLinux *GP_InputDriverLinuxOpen(const char *path)
+gp_input_driver_linux *gp_input_driver_linux_open(const char *path)
 {
 	int fd;
-	struct GP_InputDriverLinux *ret;
+	gp_input_driver_linux *ret;
 
 	GP_DEBUG(2, "Opening '%s'", path);
 
@@ -121,7 +121,7 @@ struct GP_InputDriverLinux *GP_InputDriverLinuxOpen(const char *path)
 
 	print_name(fd);
 
-	ret = malloc(sizeof(struct GP_InputDriverLinux));
+	ret = malloc(sizeof(gp_input_driver_linux));
 
 	if (ret == NULL) {
 		GP_DEBUG(1, "Malloc failed :(");
@@ -147,7 +147,7 @@ struct GP_InputDriverLinux *GP_InputDriverLinuxOpen(const char *path)
 	return ret;
 }
 
-void GP_InputDriverLinuxClose(struct GP_InputDriverLinux *self)
+void gp_input_driver_linux_close(gp_input_driver_linux *self)
 {
 	GP_DEBUG(1, "Closing input device");
 	print_name(self->fd);
@@ -156,7 +156,7 @@ void GP_InputDriverLinuxClose(struct GP_InputDriverLinux *self)
 	free(self);
 }
 
-static void input_rel(struct GP_InputDriverLinux *self, struct input_event *ev)
+static void input_rel(gp_input_driver_linux *self, struct input_event *ev)
 {
 	GP_DEBUG(4, "Relative event");
 
@@ -174,7 +174,7 @@ static void input_rel(struct GP_InputDriverLinux *self, struct input_event *ev)
 	}
 }
 
-static void input_abs(struct GP_InputDriverLinux *self, struct input_event *ev)
+static void input_abs(gp_input_driver_linux *self, struct input_event *ev)
 {
 	GP_DEBUG(4, "Absolute event");
 
@@ -197,8 +197,8 @@ static void input_abs(struct GP_InputDriverLinux *self, struct input_event *ev)
 	}
 }
 
-static void input_key(struct GP_InputDriverLinux *self,
-                      struct GP_EventQueue *event_queue,
+static void input_key(gp_input_driver_linux *self,
+                      gp_event_queue *event_queue,
                       struct input_event *ev)
 {
 	GP_DEBUG(4, "Key event");
@@ -214,16 +214,16 @@ static void input_key(struct GP_InputDriverLinux *self,
 			return;
 	}
 
-	GP_EventQueuePushKey(event_queue, ev->code, ev->value, NULL);
+	gp_event_queue_push_key(event_queue, ev->code, ev->value, NULL);
 }
 
-static void do_sync(struct GP_InputDriverLinux *self,
-                    struct GP_EventQueue *event_queue)
+static void do_sync(gp_input_driver_linux *self,
+                    gp_event_queue *event_queue)
 {
 	if (self->rel_flag) {
 		self->rel_flag = 0;
-		GP_EventQueuePushRel(event_queue, self->rel_x,
-		                     self->rel_y, NULL);
+		gp_event_queue_push_rel(event_queue, self->rel_x,
+		                        self->rel_y, NULL);
 		self->rel_x = 0;
 		self->rel_y = 0;
 	}
@@ -259,20 +259,20 @@ static void do_sync(struct GP_InputDriverLinux *self,
 			self->abs_flag_y = 0;
 		}
 
-		GP_EventQueuePushAbs(event_queue, x, y, self->abs_press,
-		                     x_max, y_max, self->abs_press_max, NULL);
+		gp_event_queue_push_abs(event_queue, x, y, self->abs_press,
+		                        x_max, y_max, self->abs_press_max, NULL);
 
 		self->abs_press = 0;
 
 		if (self->abs_pen_flag) {
-			GP_EventQueuePushKey(event_queue, BTN_TOUCH, 1, NULL);
+			gp_event_queue_push_key(event_queue, BTN_TOUCH, 1, NULL);
 			self->abs_pen_flag = 0;
 		}
 	}
 }
 
-static void input_syn(struct GP_InputDriverLinux *self,
-                      struct GP_EventQueue *event_queue,
+static void input_syn(gp_input_driver_linux *self,
+                      gp_event_queue *event_queue,
                       struct input_event *ev)
 {
 	GP_DEBUG(4, "Sync event");
@@ -286,8 +286,8 @@ static void input_syn(struct GP_InputDriverLinux *self,
 	}
 }
 
-int GP_InputDriverLinuxRead(struct GP_InputDriverLinux *self,
-                            struct GP_EventQueue *event_queue)
+int gp_input_driver_linux_read(gp_input_driver_linux *self,
+                               gp_event_queue *event_queue)
 {
 	struct input_event ev;
 	int ret;

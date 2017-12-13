@@ -23,7 +23,10 @@
 #ifndef TEXT_GP_FONTS_H
 #define TEXT_GP_FONTS_H
 
-#include "GP_Font.h"
+#include <text/GP_Font.h>
+
+extern const gp_font_face *const gp_font_gfxprim_mono;
+extern const gp_font_face *const gp_font_gfxprim;
 
 /*
  * Monospace 7x6 font
@@ -32,28 +35,28 @@
  * Descent: 2
  * Width: 5 + 1
  */
-extern const GP_FontFace *GP_FontTinyMono;
+extern const gp_font_face *gp_font_tiny_mono;
 
 /*
  * Similar as FontTinyMono but proportional
  */
-extern const GP_FontFace *GP_FontTiny;
+extern const gp_font_face *gp_font_tiny;
 
 /*
  * Monospace 8x8 Commodore 64 like font.
  */
-extern const GP_FontFace *GP_FontC64;
+extern const gp_font_face *gp_font_c64;
 
 /*
  * HaxorNarrow family, converted from bdf fonts from:
  *
  * https://github.com/metan-ucw/fonts
  */
-extern const GP_FontFace *GP_FontHaxorNarrow15;
-extern const GP_FontFace *GP_FontHaxorNarrowBold15;
-extern const GP_FontFace *GP_FontHaxorNarrow16;
-extern const GP_FontFace *GP_FontHaxorNarrowBold16;
-extern const GP_FontFace *GP_FontHaxorNarrow17;
-extern const GP_FontFace *GP_FontHaxorNarrowBold17;
+extern const gp_font_face *gp_font_haxor_narrow_15;
+extern const gp_font_face *gp_font_haxor_narrow_bold_15;
+extern const gp_font_face *gp_font_haxor_narrow_16;
+extern const gp_font_face *gp_font_haxor_narrow_bold_16;
+extern const gp_font_face *gp_font_haxor_narrow_17;
+extern const gp_font_face *gp_font_haxor_narrow_bold_17;
 
 #endif /* TEXT_GP_FONTS_H */

@@ -35,33 +35,35 @@
 #ifndef CORE_GP_PROGRESSCALLBACK_H
 #define CORE_GP_PROGRESSCALLBACK_H
 
+#include <core/GP_Types.h>
+
 /*
  * Progress callback
  *
  * Non zero return value from callback will abort current operation
  * free memory and return NULL from filter/loader...
  */
-typedef struct GP_ProgressCallback {
+struct gp_progress_cb {
 	float percentage;
 
-	int (*callback)(struct GP_ProgressCallback *self);
+	int (*callback)(struct gp_progress_cb *self);
 	void *priv;
 
 	/*
 	 * Number of threads to use (if supported). This setting could be used
 	 * to override the default number of threads as returned by
-	 * GP_NrThreads().
+	 * gp_nr_threads().
 	 *
-	 * 0 == use number returned from GP_NrThreads().
+	 * 0 == use number returned from gp_nr_threads().
 	 *
 	 *   >= 1 use exactly n threads
 	 */
 	unsigned int threads;
-} GP_ProgressCallback;
+};
 
-static inline int GP_ProgressCallbackReport(GP_ProgressCallback *callback,
-                                            unsigned int val, unsigned int max,
-					    unsigned int mul __attribute__((unused)))
+static inline int gp_progress_cb_report(gp_progress_cb *callback,
+                                        unsigned int val, unsigned int max,
+					unsigned int mul __attribute__((unused)))
 {
 	if (callback == NULL)
 		return 0;
@@ -73,7 +75,7 @@ static inline int GP_ProgressCallbackReport(GP_ProgressCallback *callback,
 	return callback->callback(callback);
 }
 
-static inline void GP_ProgressCallbackDone(GP_ProgressCallback *callback)
+static inline void gp_progress_cb_done(gp_progress_cb *callback)
 {
 	if (callback == NULL)
 		return;
@@ -83,7 +85,7 @@ static inline void GP_ProgressCallbackDone(GP_ProgressCallback *callback)
 }
 
 #define GP_PROGRESS_CALLBACK(name, pcallback, ppriv) \
-	GP_ProgressCallback name = {                 \
+	gp_progress_cb name = {                 \
 		.callback = pcallback,               \
 		.priv = ppriv,                       \
 	};

@@ -26,24 +26,24 @@
 
 #include <core/GP_Pixmap.h>
 #include <core/GP_GetPutPixel.h>
-#include <loaders/GP_PCX.h>
+#include <loaders/GP_Loaders.h>
 
 #include "tst_test.h"
 
 struct testcase {
 	const char *path;
-	GP_Size w, h;
-	GP_PixelType pixel_type;
-	GP_Pixel pixel;
+	gp_size w, h;
+	gp_pixel_type pixel_type;
+	gp_pixel pixel;
 };
 
-static int test_load_PCX(struct testcase *test)
+static int test_load_pcx(struct testcase *test)
 {
-	GP_Pixmap *img;
+	gp_pixmap *img;
 
 	errno = 0;
 
-	img = GP_LoadPCX(test->path, NULL);
+	img = gp_load_pcx(test->path, NULL);
 
 	if (img == NULL) {
 		switch (errno) {
@@ -59,15 +59,15 @@ static int test_load_PCX(struct testcase *test)
 	if (img->w != test->w || img->h != test->h) {
 		tst_msg("Wrong size have %ux%u expected %ux%u",
 		        img->w, img->h, test->w, test->h);
-		GP_PixmapFree(img);
+		gp_pixmap_free(img);
 		return TST_FAILED;
 	}
 
 	if (img->pixel_type != test->pixel_type) {
 		tst_msg("Wrong pixel type have %s expected %s",
-		        GP_PixelTypeName(img->pixel_type),
-		        GP_PixelTypeName(test->pixel_type));
-		GP_PixmapFree(img);
+		        gp_pixel_type_name(img->pixel_type),
+		        gp_pixel_type_name(test->pixel_type));
+		gp_pixmap_free(img);
 		return TST_FAILED;
 	}
 
@@ -75,7 +75,7 @@ static int test_load_PCX(struct testcase *test)
 
 	for (x = 0; x < img->w; x++) {
 		for (y = 0; y < img->w; y++) {
-			GP_Pixel p = GP_GetPixel(img, x, y);
+			gp_pixel p = gp_getpixel(img, x, y);
 
 			if (p != test->pixel) {
 				if (!fail)
@@ -89,7 +89,7 @@ static int test_load_PCX(struct testcase *test)
 	if (!fail)
 		tst_msg("Pixmap pixels are correct");
 
-	GP_PixmapFree(img);
+	gp_pixmap_free(img);
 
 	if (fail)
 		return TST_FAILED;
@@ -146,40 +146,40 @@ static struct testcase v3_0_24bpp_10x10_white = {
 };
 
 const struct tst_suite tst_suite = {
-	.suite_name = "PCX",
+	.suite_name = "pcx",
 	.tests = {
-		{.name = "PCX Load ver3.0 1bpp 10x10 white",
-		 .tst_fn = test_load_PCX,
+		{.name = "pcx Load ver3.0 1bpp 10x10 white",
+		 .tst_fn = test_load_pcx,
 		 .res_path = "data/pcx/valid/ver3_0_palette_1bpp_10x10_white.pcx",
 		 .data = &v3_0_1bpp_10x10_white,
 		 .flags = TST_TMPDIR | TST_CHECK_MALLOC},
 
-		{.name = "PCX Load ver3.0 2bpp 10x10 white",
-		 .tst_fn = test_load_PCX,
+		{.name = "pcx Load ver3.0 2bpp 10x10 white",
+		 .tst_fn = test_load_pcx,
 		 .res_path = "data/pcx/valid/ver3_0_palette_2bpp_10x10_white.pcx",
 		 .data = &v3_0_2bpp_10x10_white,
 		 .flags = TST_TMPDIR | TST_CHECK_MALLOC},
 
-		{.name = "PCX Load ver3.0 4bpp 10x10 white",
-		 .tst_fn = test_load_PCX,
+		{.name = "pcx Load ver3.0 4bpp 10x10 white",
+		 .tst_fn = test_load_pcx,
 		 .res_path = "data/pcx/valid/ver3_0_palette_4bpp_10x10_white.pcx",
 		 .data = &v3_0_4bpp_10x10_white,
 		 .flags = TST_TMPDIR | TST_CHECK_MALLOC},
 
-		{.name = "PCX Load ver2.8 4bpp 10x10 white",
-		 .tst_fn = test_load_PCX,
+		{.name = "pcx Load ver2.8 4bpp 10x10 white",
+		 .tst_fn = test_load_pcx,
 		 .res_path = "data/pcx/valid/ver2_8_palette_4bpp_10x10_white.pcx",
 		 .data = &v2_8_4bpp_10x10_white,
 		 .flags = TST_TMPDIR | TST_CHECK_MALLOC},
 
-		{.name = "PCX Load ver3.0 8bpp 10x10 white",
-		 .tst_fn = test_load_PCX,
+		{.name = "pcx Load ver3.0 8bpp 10x10 white",
+		 .tst_fn = test_load_pcx,
 		 .res_path = "data/pcx/valid/ver3_0_palette_8bpp_10x10_white.pcx",
 		 .data = &v3_0_8bpp_10x10_white,
 		 .flags = TST_TMPDIR | TST_CHECK_MALLOC},
 
-		{.name = "PCX Load ver3.0 24bpp 10x10 white",
-		 .tst_fn = test_load_PCX,
+		{.name = "pcx Load ver3.0 24bpp 10x10 white",
+		 .tst_fn = test_load_pcx,
 		 .res_path = "data/pcx/valid/ver3_0_palette_24bpp_10x10_white.pcx",
 		 .data = &v3_0_24bpp_10x10_white,
 		 .flags = TST_TMPDIR | TST_CHECK_MALLOC},

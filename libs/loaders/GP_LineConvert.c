@@ -20,10 +20,10 @@
  *                                                                           *
  *****************************************************************************/
 
-#include "core/GP_Debug.h"
-#include "GP_LineConvert.h"
+#include <core/GP_Debug.h>
+#include <loaders/GP_LineConvert.h>
 
-static void ABC888_to_CBA888(const uint8_t *inbuf, uint8_t *outbuf,
+static void abc888_to_cba888(const uint8_t *inbuf, uint8_t *outbuf,
                              unsigned int len)
 {
 	unsigned int i;
@@ -38,7 +38,7 @@ static void ABC888_to_CBA888(const uint8_t *inbuf, uint8_t *outbuf,
 	}
 }
 
-static void xABC8888_to_ABC888(const uint8_t *inbuf, uint8_t *outbuf,
+static void xabc8888_to_abc888(const uint8_t *inbuf, uint8_t *outbuf,
                                unsigned int len)
 {
 	unsigned int i;
@@ -53,7 +53,7 @@ static void xABC8888_to_ABC888(const uint8_t *inbuf, uint8_t *outbuf,
 	}
 }
 
-static void xABC8888_to_CBA888(const uint8_t *inbuf, uint8_t *outbuf,
+static void xabc8888_to_cba888(const uint8_t *inbuf, uint8_t *outbuf,
                                unsigned int len)
 {
 	unsigned int i;
@@ -68,13 +68,13 @@ static void xABC8888_to_CBA888(const uint8_t *inbuf, uint8_t *outbuf,
 	}
 }
 
-GP_LineConvert GP_LineConvertGet(GP_PixelType in, GP_PixelType out)
+gp_line_convert gp_line_convert_get(gp_pixel_type in, gp_pixel_type out)
 {
 	switch (in) {
 	case GP_PIXEL_RGB888:
 		switch (out) {
 		case GP_PIXEL_BGR888:
-			return ABC888_to_CBA888;
+			return abc888_to_cba888;
 		break;
 		default:
 		break;
@@ -83,7 +83,7 @@ GP_LineConvert GP_LineConvertGet(GP_PixelType in, GP_PixelType out)
 	case GP_PIXEL_BGR888:
 		switch (out) {
 		case GP_PIXEL_RGB888:
-			return ABC888_to_CBA888;
+			return abc888_to_cba888;
 		break;
 		default:
 		break;
@@ -92,10 +92,10 @@ GP_LineConvert GP_LineConvertGet(GP_PixelType in, GP_PixelType out)
 	case GP_PIXEL_xRGB8888:
 		switch (out) {
 		case GP_PIXEL_RGB888:
-			return xABC8888_to_ABC888;
+			return xabc8888_to_abc888;
 		break;
 		case GP_PIXEL_BGR888:
-			return xABC8888_to_CBA888;
+			return xabc8888_to_cba888;
 		break;
 		default:
 		break;
@@ -108,24 +108,25 @@ GP_LineConvert GP_LineConvertGet(GP_PixelType in, GP_PixelType out)
 	return NULL;
 }
 
-GP_PixelType GP_LineConvertible(GP_PixelType in, GP_PixelType out[])
+gp_pixel_type gp_line_convertible(gp_pixel_type in, gp_pixel_type out[])
 {
 	unsigned int i;
 
-	GP_DEBUG(1, "Trying to find conversion for %s", GP_PixelTypeName(in));
+	GP_DEBUG(1, "Trying to find conversion for %s", gp_pixel_type_name(in));
 
 
 	for (i = 0; out[i] != GP_PIXEL_UNKNOWN; i++) {
 		if (out[i] == in) {
-			GP_DEBUG(1, "Found identity for %s", GP_PixelTypeName(in));
+			GP_DEBUG(1, "Found identity for %s",
+			         gp_pixel_type_name(in));
 			return in;
 		}
 	}
 
 	for (i = 0; out[i] != GP_PIXEL_UNKNOWN; i++) {
-		if (GP_LineConvertGet(in, out[i])) {
-			GP_DEBUG(1, "Found %s -> %s", GP_PixelTypeName(in),
-			         GP_PixelTypeName(out[i]));
+		if (gp_line_convert_get(in, out[i])) {
+			GP_DEBUG(1, "Found %s -> %s", gp_pixel_type_name(in),
+			         gp_pixel_type_name(out[i]));
 			return out[i];
 		}
 	}

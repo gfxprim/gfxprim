@@ -3,16 +3,16 @@ GetPixel and PutPixel
 
 [source,c]
 --------------------------------------------------------------------------------
-#include <GP.h>
+#include <gfxprim.h>
 /* or */
 #include <core/GP_GetPutPixel.h>
 
-GP_Pixel GP_GetPixel(const GP_Pixmap *pixmap, GP_Coord x, GP_Coord y);
+gp_pixel gp_get_pixel(const gp_pixmap *pixmap, gp_coord x, gp_coord y);
 
-void GP_PutPixel(GP_Pixmap *pixmap, GP_Coord x, GP_Coord y, GP_Pixel p);
+void gp_put_pixel(gp_pixmap *pixmap, gp_coord x, gp_coord y, gp_pixel p);
 --------------------------------------------------------------------------------
 
-Gets, puts a pixel value. GP_Pixel is a number which holds a pixel value.
+Gets, puts a pixel value. gp_pixel is a number which holds a pixel value.
 
 This functions are clipped, GetPixel outside of the pixmap returns zero,
 PutPixel outside the pixmap is no-op.
@@ -23,23 +23,23 @@ Generally these function are safe to use but rather slow in innner cycles.
 
 [source,c]
 --------------------------------------------------------------------------------
-#include <GP.h>
+#include <gfxprim.h>
 /* or */
 #include <core/GP_GetPutPixel.h>
 
-GP_Pixel GP_GetPixel_Raw(const GP_Pixmap *pixmap, GP_Coord x, GP_Coord y);
+gp_pixel gp_get_pixel_raw(const gp_pixmap *pixmap, gp_coord x, gp_coord y);
 
-void GP_PutPixel_Raw(GP_Pixmap *pixmap, GP_Coord x, GP_Coord y, GP_Pixel p);
+void gp_put_pixel_raw(gp_pixmap *pixmap, gp_coord x, gp_coord y, gp_pixel p);
 
 /*
  * Substitute {{ bpp }} for specific bits per pixel (1BPP_LE, 24BPP, ...)
  *
  * These macros are generated to core/GP_GetPutPixel.gen.h
  */
-GP_Pixel GP_GetPixel_Raw_{{ bpp }}(const GP_Pixmap *c, int x, int y);
+gp_pixel gp_get_pixel_raw_{{ bpp }}(const gp_pixmap *c, int x, int y);
 
-void GP_PutPixel_Raw_{{ bpp }}(GP_Pixmap *c, GP_Coord x, GP_Coord y,
-                               GP_Pixel p);
+void gp_put_pixel_raw_{{ bpp }}(gp_pixmap *c, gp_coord x, gp_coord y,
+                                gp_pixel p);
 --------------------------------------------------------------------------------
 
 These functions are generally fast, but does not honour pixmap rotation flags

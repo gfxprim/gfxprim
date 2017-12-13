@@ -6,70 +6,53 @@
 #include "loaders/GP_Loaders.h"
 %}
 
-%ignore GP_Loader;
+%ignore gp_loader;
 
 %import ../core/core.i
 
 /* TODO IO from fd */
 
 %define LOADER_FUNC(FMT)
-%newobject GP_Load ## FMT;
-ERROR_ON_NULL(GP_Load ## FMT);
-%newobject GP_Read ## FMT;
-ERROR_ON_NULL(GP_Read ## FMT);
+%newobject gp_load ## FMT;
+ERROR_ON_NULL(gp_load ## FMT);
+%newobject gp_read ## FMT;
+ERROR_ON_NULL(gp_read ## FMT);
 %enddef
 
-ERROR_ON_NULL(GP_LoadImage);
-ERROR_ON_NONZERO(GP_ReadImage);
-ERROR_ON_NONZERO(GP_SaveImage);
+ERROR_ON_NULL(gp_load_image);
+ERROR_ON_NONZERO(gp_read_image);
+ERROR_ON_NONZERO(gp_save_image);
 
-%newobject GP_LoadImage;
+%newobject gp_load_image;
 
 %include "GP_Loader.h"
 
-LOADER_FUNC(JPG);
-ERROR_ON_NONZERO(GP_SaveJPG);
+LOADER_FUNC(jpg);
+ERROR_ON_NONZERO(gp_save_jpg);
 
-%include "GP_JPG.h"
+LOADER_FUNC(bmp);
+ERROR_ON_NONZERO(gp_save_bmp);
 
-LOADER_FUNC(BMP);
-ERROR_ON_NONZERO(GP_SaveBMP);
+LOADER_FUNC(gif);
 
-%include "GP_BMP.h"
+LOADER_FUNC(png);
+ERROR_ON_NONZERO(gp_save_png);
 
-LOADER_FUNC(GIF);
+LOADER_FUNC(pbm);
+LOADER_FUNC(pgm);
+LOADER_FUNC(ppm);
+LOADER_FUNC(pnm);
+ERROR_ON_NONZERO(gp_save_pbm);
+ERROR_ON_NONZERO(gp_save_pgm);
+ERROR_ON_NONZERO(gp_save_ppm);
+ERROR_ON_NONZERO(gp_save_pnm);
 
-%include "GP_GIF.h"
+LOADER_FUNC(tiff);
+ERROR_ON_NONZERO(gp_save_tiff);
 
-LOADER_FUNC(PNG);
-ERROR_ON_NONZERO(GP_SavePNG);
+LOADER_FUNC(jp2);
+LOADER_FUNC(pcx);
+LOADER_FUNC(psp);
+LOADER_FUNC(psd);
 
-%include "GP_PNG.h"
-
-LOADER_FUNC(PBM);
-LOADER_FUNC(PGM);
-LOADER_FUNC(PPM);
-LOADER_FUNC(PNM);
-ERROR_ON_NONZERO(GP_SavePBM);
-ERROR_ON_NONZERO(GP_SavePGM);
-ERROR_ON_NONZERO(GP_SavePPM);
-ERROR_ON_NONZERO(GP_SavePNM);
-
-%include "GP_PNM.h"
-
-LOADER_FUNC(TIFF);
-ERROR_ON_NONZERO(GP_SaveTIFF);
-
-%include "GP_TIFF.h"
-
-LOADER_FUNC(PSP);
-
-%include "GP_PSP.h"
-
-LOADER_FUNC(JP2);
-
-%include "GP_JP2.h"
-
-LOADER_FUNC(PCX);
-
-%include "GP_PCX.h"
+%include "GP_Loaders.gen.h"

@@ -31,7 +31,7 @@
  * y_xBPP, resp y_xBPP_LE (or _BE; the bit-endian) for x<8.
  *
  * The functions branch either on bpp and bit_endian, type of given
- * GP_Pixmap or given GP_PixelType.
+ * gp_pixmap or given gp_pixel_type.
  *
  * Extra arguments are arguments to be passed to the function.
  * Note that if the function takes the pixmap/type/bpp as an argument,
@@ -47,27 +47,27 @@
 #include "GP_FnPerBpp.gen.h"
 
 /*
- * Branch on GP_Pixmap argument.
+ * Branch on gp_pixmap argument.
  */
 #define GP_FN_PER_BPP_PIXMAP(FN_NAME, pixmap, ...) \
 	GP_FN_PER_BPP(FN_NAME, (pixmap)->bpp, (pixmap)->bit_endian, __VA_ARGS__)
 
 /*
- * Branch on GP_PixelType argument.
+ * Branch on gp_pixel_type argument.
  */
 #define GP_FN_PER_BPP_PIXELTYPE(FN_NAME, type, ...) \
-	GP_FN_PER_BPP(FN_NAME, GP_PixelTypes[type].size, GP_PixelTypes[type].bit_endian, __VA_ARGS__)
+	GP_FN_PER_BPP(FN_NAME, gp_pixel_types[type].size, gp_pixel_types[type].bit_endian, __VA_ARGS__)
 /*
- * Branch on GP_Pixmap argument.
+ * Branch on gp_pixmap argument.
  */
 #define GP_FN_RET_PER_BPP_PIXMAP(FN_NAME, pixmap, ...) \
 	GP_FN_RET_PER_BPP(FN_NAME, (pixmap)->bpp, (pixmap)->bit_endian, __VA_ARGS__)
 
 /*
- * Branch on GP_PixelType argument.
+ * Branch on gp_pixel_type argument.
  */
 #define GP_FN_RET_PER_BPP_PIXELTYPE(FN_NAME, type, ...) \
-	GP_FN_RET_PER_BPP(FN_NAME, GP_PixelTypes[type].size, GP_PixelTypes[type].bit_endian, __VA_ARGS__)
+	GP_FN_RET_PER_BPP(FN_NAME, gp_pixel_types[type].size, gp_pixel_types[type].bit_endian, __VA_ARGS__)
 
 /*
  * Macros that gets MACRO template for drawing function and generates drawing
@@ -77,12 +77,12 @@
  * drawing function for all BPP Yay!
  */
 #define GP_DEF_DRAW_FN_PER_BPP(fname, MACRO_NAME) \
-	GP_DEF_FN_PER_BPP(fname, MACRO_NAME, GP_PutPixel_Raw_Clipped_)
+	GP_DEF_FN_PER_BPP(fname, MACRO_NAME, gp_putpixel_raw_clipped_)
 
 #define GP_DEF_FILL_FN_PER_BPP(fname, MACRO_NAME) \
-	GP_DEF_FN_PER_BPP(fname, MACRO_NAME, GP_HLine_Raw_)
+	GP_DEF_FN_PER_BPP(fname, MACRO_NAME, gp_hline_raw_)
 
 #define GP_DEF_FN_FOR_BPP(fname, MACRO_NAME, fdraw, bpp) \
-	MACRO_NAME(fname##_##bpp, GP_Pixmap *, GP_Pixel, fdraw##bpp)
+	MACRO_NAME(fname##_##bpp, gp_pixmap *, gp_pixel, fdraw##bpp)
 
 #endif /* GP_FN_PER_BPP_H */

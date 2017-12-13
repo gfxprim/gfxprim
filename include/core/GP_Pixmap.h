@@ -29,14 +29,12 @@
 #include <stdint.h>
 #include <unistd.h>
 
-#include "GP_Common.h"
-#include "GP_Types.h"
-#include "GP_Pixel.h"
-
-struct GP_Gamma;
+#include <core/GP_Common.h>
+#include <core/GP_Types.h>
+#include <core/GP_Pixel.h>
 
 /* This structure holds all information needed for drawing into an image. */
-typedef struct GP_Pixmap {
+struct gp_pixmap {
 	uint8_t *pixels;	 /* pointer to image pixels */
 	uint8_t bpp;		 /* pixel size in bits */
 	uint32_t bytes_per_row;
@@ -52,7 +50,7 @@ typedef struct GP_Pixmap {
 	/*
 	 * Pixel format. See GP_Pixel.gen.h and GP_Pixel.gen.c.
 	 */
-	enum GP_PixelType pixel_type;
+	enum gp_pixel_type pixel_type;
 
 	/*
 	 * Pointer to optional Gamma table.
@@ -61,7 +59,7 @@ typedef struct GP_Pixmap {
 	 *
 	 * See GP_GammaCorrection.h.
 	 */
-	struct GP_Gamma *gamma;
+	struct gp_gamma *gamma;
 
 	/*
 	 * Image orientation. Most common is landscape (0, 0, 0),
@@ -71,8 +69,8 @@ typedef struct GP_Pixmap {
 	uint8_t x_swap:1;	/* swap direction on x */
 	uint8_t y_swap:1;	/* swap direction on y */
 	uint8_t bit_endian:1;	/* GP_BIT_ENDIAN */
-	uint8_t free_pixels:1;  /* If set pixels are freed on GP_PixmapFree */
-} GP_Pixmap;
+	uint8_t free_pixels:1;  /* If set pixels are freed on gp_pixmap_free */
+};
 
 /* Determines the address of a pixel within the pixmap's image.
  * Rows and columns are specified in the image's orientation
@@ -83,8 +81,8 @@ typedef struct GP_Pixmap {
 	+ ((x) * (pixmap)->bpp) / 8)
 
 #define GP_CALC_ROW_SIZE(pixel_type, width) \
-	 ((GP_PixelSize(pixel_type) * width) / 8 + \
-	!!((GP_PixelSize(pixel_type) * width) % 8))
+	 ((gp_pixel_size(pixel_type) * width) / 8 + \
+	!!((gp_pixel_size(pixel_type) * width) % 8))
 
 /* Performs a series of sanity checks on pixmap, aborting if any fails. */
 #define GP_CHECK_PIXMAP(pixmap) do { \
@@ -104,23 +102,23 @@ typedef struct GP_Pixmap {
 /*
  * Allocate pixmap.
  *
- * The pixmap consists of two parts, the GP_Pixmap structure and pixels array.
+ * The pixmap consists of two parts, the gp_pixmap structure and pixels array.
  *
  * The rotation flags are set to (0, 0, 0).
  */
-GP_Pixmap *GP_PixmapAlloc(GP_Size w, GP_Size h, GP_PixelType type);
+gp_pixmap *gp_pixmap_alloc(gp_size w, gp_size h, gp_pixel_type type);
 
 /*
  * Sets gamma for the pixmap.
  */
-int GP_PixmapSetGamma(GP_Pixmap *self, float gamma);
+int gp_pixmap_set_gamma(gp_pixmap *self, float gamma);
 
 /*
  * Free pixmap.
  *
  * If pixmap->free_pixels, also free pixel data.
  */
-void GP_PixmapFree(GP_Pixmap *pixmap);
+void gp_pixmap_free(gp_pixmap *pixmap);
 
 /*
  * Initalize pixmap, pixels pointer is not dereferenced so it's safe to pass
@@ -128,8 +126,8 @@ void GP_PixmapFree(GP_Pixmap *pixmap);
  *
  * The returned pointer is the pointer you passed as first argument.
  */
-GP_Pixmap *GP_PixmapInit(GP_Pixmap *pixmap, GP_Size w, GP_Size h,
-                           GP_PixelType type, void *pixels);
+gp_pixmap *gp_pixmap_init(gp_pixmap *pixmap, gp_size w, gp_size h,
+                          gp_pixel_type type, void *pixels);
 
 /*
  * Resizes pixmap->pixels array and changes metadata to match the new size.
@@ -139,38 +137,34 @@ GP_Pixmap *GP_PixmapInit(GP_Pixmap *pixmap, GP_Size w, GP_Size h,
  * This call only resizes the pixel array. The pixel values, after resizing,
  * are __UNINITALIZED__ use resampling filters to resize image data.
  */
-int GP_PixmapResize(GP_Pixmap *pixmap, GP_Size w, GP_Size h);
+int gp_pixmap_resize(gp_pixmap *pixmap, gp_size w, gp_size h);
 
-enum GP_PixmapCopyFlags {
-	/*
-	 * Copy bitmap pixels too. If not set pixels are uninitalized.
-	 */
+enum gp_pixmap_copy_flags {
+	/* Copy bitmap pixels too. If not set pixels are uninitalized */
 	GP_COPY_WITH_PIXELS   = 0x01,
-	/*
-	 * Copy image rotation flags. If not set flags are set to (0, 0, 0).
-	 */
+	/* Copy image rotation flags. If not set flags are set to (0, 0, 0) */
 	GP_COPY_WITH_ROTATION = 0x02,
 };
 
 /*
  * Allocates a contex with exactly same values as source pixmap.
  */
-GP_Pixmap *GP_PixmapCopy(const GP_Pixmap *src, int flags);
+gp_pixmap *gp_pixmap_copy(const gp_pixmap *src, int flags);
 
 /*
  * Initalize subpixmap. The returned pointer points to passed subpixmap.
  */
-GP_Pixmap *GP_SubPixmap(const GP_Pixmap *pixmap, GP_Pixmap *subpixmap,
-                          GP_Coord x, GP_Coord y, GP_Size w, GP_Size h);
+gp_pixmap *gp_sub_pixmap(const gp_pixmap *pixmap, gp_pixmap *subpixmap,
+                         gp_coord x, gp_coord y, gp_size w, gp_size h);
 
 /*
  * Allocate and initalize subpixmap.
  *
  * The free_pixels flag is set to 0 upon subpixmap initalization so the
- * GP_PixmapFree() would not call free() upon the subpixmap->pixels pointer.
+ * gp_pixmap_free() would not call free() upon the subpixmap->pixels pointer.
  */
-GP_Pixmap *GP_SubPixmapAlloc(const GP_Pixmap *pixmap,
-                               GP_Coord x, GP_Coord y, GP_Size w, GP_Size h);
+gp_pixmap *gp_sub_pixmap_alloc(const gp_pixmap *pixmap,
+                               gp_coord x, gp_coord y, gp_size w, gp_size h);
 
 /*
  * Converts pixmap to a different pixel type.
@@ -179,8 +173,8 @@ GP_Pixmap *GP_SubPixmapAlloc(const GP_Pixmap *pixmap,
  * This is naive implementation that doesn't do any ditherings or error
  * diffusions.
  */
-GP_Pixmap *GP_PixmapConvertAlloc(const GP_Pixmap *src,
-                                   GP_PixelType dst_pixel_type);
+gp_pixmap *gp_pixmap_convert_alloc(const gp_pixmap *src,
+                                   gp_pixel_type dst_pixel_type);
 
 /*
  * Converts pixmap to a different pixel type.
@@ -188,28 +182,28 @@ GP_Pixmap *GP_PixmapConvertAlloc(const GP_Pixmap *src,
  * This is naive implementation that doesn't do any ditherings or error
  * diffusions.
  */
-GP_Pixmap *GP_PixmapConvert(const GP_Pixmap *src, GP_Pixmap *dst);
+gp_pixmap *gp_pixmap_convert(const gp_pixmap *src, gp_pixmap *dst);
 
 /*
  * Prints pixmap information into stdout.
  */
-void GP_PixmapPrintInfo(const GP_Pixmap *self);
+void gp_pixmap_print_info(const gp_pixmap *self);
 
 /*
  * Rotates pixmap flags clock wise.
  */
-void GP_PixmapRotateCW(GP_Pixmap *pixmap);
+void gp_pixmap_rotate_cw(gp_pixmap *pixmap);
 
 /*
  * Rotates pixmap flags counter clock wise.
  */
-void GP_PixmapRotateCCW(GP_Pixmap *pixmap);
+void gp_pixmap_rotate_ccw(gp_pixmap *pixmap);
 
 /*
  * Retruns 1 if rotation flags are equal.
  */
-static inline int GP_PixmapRotationEqual(const GP_Pixmap *c1,
-                                          const GP_Pixmap *c2)
+static inline int gp_pixmap_rotation_equal(const gp_pixmap *c1,
+                                           const gp_pixmap *c2)
 {
 	return c1->axes_swap == c2->axes_swap &&
 	       c1->x_swap == c2->x_swap &&
@@ -219,8 +213,8 @@ static inline int GP_PixmapRotationEqual(const GP_Pixmap *c1,
 /*
  * Sets rotation flags.
  */
-static inline void GP_PixmapSetRotation(GP_Pixmap *dst, int axes_swap,
-                                         int x_swap, int y_swap)
+static inline void gp_pixmap_set_rotation(gp_pixmap *dst, int axes_swap,
+                                          int x_swap, int y_swap)
 {
 	dst->axes_swap = axes_swap;
 	dst->x_swap = x_swap;
@@ -230,8 +224,8 @@ static inline void GP_PixmapSetRotation(GP_Pixmap *dst, int axes_swap,
 /*
  * Copies rotation flags.
  */
-static inline void GP_PixmapCopyRotation(const GP_Pixmap *src,
-                                          GP_Pixmap *dst)
+static inline void gp_pixmap_copy_rotation(const gp_pixmap *src,
+                                           gp_pixmap *dst)
 {
 	dst->axes_swap = src->axes_swap;
 	dst->x_swap = src->x_swap;
@@ -241,7 +235,7 @@ static inline void GP_PixmapCopyRotation(const GP_Pixmap *src,
 /*
  * Returns pixmap width and height taking the rotation flags into a account.
  */
-static inline GP_Size GP_PixmapW(const GP_Pixmap *pixmap)
+static inline gp_size gp_pixmap_w(const gp_pixmap *pixmap)
 {
 	if (pixmap->axes_swap)
 		return pixmap->h;
@@ -249,7 +243,7 @@ static inline GP_Size GP_PixmapW(const GP_Pixmap *pixmap)
 		return pixmap->w;
 }
 
-static inline GP_Size GP_PixmapH(const GP_Pixmap *pixmap)
+static inline gp_size gp_pixmap_h(const gp_pixmap *pixmap)
 {
 	if (pixmap->axes_swap)
 		return pixmap->w;
@@ -267,7 +261,7 @@ static inline GP_Size GP_PixmapH(const GP_Pixmap *pixmap)
  * TODO: speed up for same rotation and same bit-offset data (per-row memcpy).
  */
 
-int GP_PixmapEqual(const GP_Pixmap *pixmap1, const GP_Pixmap *pixmap2);
+int gp_pixmap_equal(const gp_pixmap *pixmap1, const gp_pixmap *pixmap2);
 
 #endif /* CORE_GP_PIXMAP_H */
 

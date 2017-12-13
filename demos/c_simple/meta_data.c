@@ -30,14 +30,14 @@
 #include <string.h>
 #include <errno.h>
 
-#include <GP.h>
+#include <gfxprim.h>
 
 #define SEP \
 "-----------------------------------------------------------------------------"
 
 int main(int argc, char *argv[])
 {
-	GP_DataStorage *storage;
+	gp_storage *storage;
 	int i;
 
 	if (argc < 2) {
@@ -45,7 +45,7 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 
-	storage = GP_DataStorageCreate();
+	storage = gp_storage_create();
 
 	if (!storage) {
 		fprintf(stderr, "Failed to create data storage\n");
@@ -56,13 +56,13 @@ int main(int argc, char *argv[])
 		puts(SEP);
 		printf("Opening '%s'\n", argv[i]);
 
-		GP_DataStorageClear(storage);
+		gp_storage_clear(storage);
 
-		if (GP_LoadMetaData(argv[i], storage)) {
+		if (gp_load_meta_data(argv[i], storage)) {
 			fprintf(stderr, "Failed to read '%s' meta-data: %s\n",
 			        argv[i], strerror(errno));
 		} else {
-			GP_DataStoragePrint(storage);
+			gp_storage_print(storage);
 		}
 	}
 
