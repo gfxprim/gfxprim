@@ -153,7 +153,7 @@ static struct testcase testcase_line_45 = {
 static struct testcase testcase_line_15 = {
 	.x0 = 0,
 	.y0 = 1,
-	.x1 = 11,
+	.x1 = 10,
 	.y1 = 6,
 
 	.w = 11,
@@ -163,10 +163,10 @@ static struct testcase testcase_line_15 = {
 		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 		1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 		0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0,
-		0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0,
+		0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0,
+		0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0,
 		0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0,
 		0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1,
-		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 	}
 };
@@ -205,6 +205,183 @@ static struct testcase testcase_line_large_xy = {
 	}
 };
 
+static struct testcase line_nearly_vertical = {
+	.x0 = 0,
+	.y0 = 0,
+	.x1 = 1,
+	.y1 = 9,
+
+	.w = 2,
+	.h = 10,
+
+	.pixmap = {
+		1, 0,
+		1, 0,
+		1, 0,
+		1, 0,
+		1, 0,
+		0, 1,
+		0, 1,
+		0, 1,
+		0, 1,
+		0, 1,
+	}
+};
+
+static struct testcase line_nearly_horizontal = {
+	.x0 = 0,
+	.y0 = 0,
+	.x1 = 9,
+	.y1 = 1,
+
+	.w = 10,
+	.h = 2,
+
+	.pixmap = {
+		1, 1, 1, 1, 1, 0, 0, 0, 0, 0,
+		0, 0, 0, 0, 0, 1, 1, 1, 1, 1,
+	}
+};
+
+static struct testcase line_0_0_1_2 = {
+	.x0 = 0,
+	.y0 = 0,
+	.x1 = 1,
+	.y1 = 2,
+
+	.w = 2,
+	.h = 3,
+
+	.pixmap = {
+		1, 0,
+		1, 1,
+		0, 1,
+	}
+};
+
+static struct testcase line_0_0_1_4 = {
+	.x0 = 0,
+	.y0 = 0,
+	.x1 = 1,
+	.y1 = 4,
+
+	.w = 2,
+	.h = 5,
+
+	.pixmap = {
+		1, 0,
+		1, 0,
+		1, 1,
+		0, 1,
+		0, 1,
+	}
+};
+
+static struct testcase line_0_0_2_1 = {
+	.x0 = 0,
+	.y0 = 0,
+	.x1 = 2,
+	.y1 = 1,
+
+	.w = 3,
+	.h = 2,
+
+	.pixmap = {
+		1, 1, 0,
+		0, 1, 1,
+	}
+};
+
+static struct testcase line_0_0_4_1 = {
+	.x0 = 0,
+	.y0 = 0,
+	.x1 = 4,
+	.y1 = 1,
+
+	.w = 5,
+	.h = 2,
+
+	.pixmap = {
+		1, 1, 1, 0, 0,
+		0, 0, 1, 1, 1,
+	}
+};
+
+static struct testcase line_0_0_2_4 = {
+	.x0 = 0,
+	.y0 = 0,
+	.x1 = 2,
+	.y1 = 4,
+
+	.w = 3,
+	.h = 5,
+
+	.pixmap = {
+		1, 0, 0,
+		1, 0, 0,
+		0, 1, 0,
+		0, 0, 1,
+		0, 0, 1,
+	}
+};
+
+static struct testcase line_0_0_4_2 = {
+	.x0 = 0,
+	.y0 = 0,
+	.x1 = 4,
+	.y1 = 2,
+
+	.w = 5,
+	.h = 3,
+
+	.pixmap = {
+		1, 1, 0, 0, 0,
+		0, 0, 1, 0, 0,
+		0, 0, 0, 1, 1,
+	}
+};
+
+static struct testcase line_0_0_8_4 = {
+	.x0 = 0,
+	.y0 = 0,
+	.x1 = 8,
+	.y1 = 4,
+
+	.w = 9,
+	.h = 5,
+
+	.pixmap = {
+		1, 1, 0, 0, 0, 0, 0, 0, 0,
+		0, 0, 1, 1, 0, 0, 0, 0, 0,
+		0, 0, 0, 0, 1, 0, 0, 0, 0,
+		0, 0, 0, 0, 0, 1, 1, 0, 0,
+		0, 0, 0, 0, 0, 0, 0, 1, 1,
+	}
+};
+
+static struct testcase line_0_0_4_8 = {
+	.x0 = 0,
+	.y0 = 0,
+	.x1 = 4,
+	.y1 = 8,
+
+	.w = 5,
+	.h = 9,
+
+	.pixmap = {
+		1, 0, 0, 0, 0,
+		1, 0, 0, 0, 0,
+		0, 1, 0, 0, 0,
+		0, 1, 0, 0, 0,
+		0, 0, 1, 0, 0,
+		0, 0, 0, 1, 0,
+		0, 0, 0, 1, 0,
+		0, 0, 0, 0, 1,
+		0, 0, 0, 0, 1,
+	}
+};
+
+
 const struct tst_suite tst_suite = {
 	.suite_name = "Line Testsuite",
 	.tests = {
@@ -227,6 +404,46 @@ const struct tst_suite tst_suite = {
 		{.name = "Line 15 degrees",
 		 .tst_fn = test_line,
 		 .data = &testcase_line_15},
+
+		{.name = "Line nearly vertical",
+		 .tst_fn = test_line,
+		 .data = &line_nearly_vertical},
+
+		{.name = "Line nearly horizontal",
+		 .tst_fn = test_line,
+		 .data = &line_nearly_horizontal},
+
+		{.name = "Line 0, 0, 1, 2",
+		 .tst_fn = test_line,
+		 .data = &line_0_0_1_2},
+
+		{.name = "line 0, 0, 1, 4",
+		 .tst_fn = test_line,
+		 .data = &line_0_0_1_4},
+
+		{.name = "Line 0, 0, 2, 1",
+		 .tst_fn = test_line,
+		 .data = &line_0_0_2_1},
+
+		{.name = "line 0, 0, 4, 1",
+		 .tst_fn = test_line,
+		 .data = &line_0_0_4_1},
+
+		{.name = "line 0, 0, 2, 4",
+		 .tst_fn = test_line,
+		 .data = &line_0_0_2_4},
+
+		{.name = "line 0, 0, 4, 2",
+		 .tst_fn = test_line,
+		 .data = &line_0_0_4_2},
+
+		{.name = "line 0, 0, 8, 4",
+		 .tst_fn = test_line,
+		 .data = &line_0_0_8_4},
+
+		{.name = "line 0, 0, 4, 8",
+		 .tst_fn = test_line,
+		 .data = &line_0_0_4_8},
 
 		{.name = "Line clipping",
 		 .tst_fn = test_line,

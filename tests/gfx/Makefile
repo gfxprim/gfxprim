@@ -2,10 +2,11 @@ TOPDIR=../..
 include $(TOPDIR)/pre.mk
 
 CSOURCES=$(filter-out $(wildcard *.gen.c),$(wildcard *.c))
-GENSOURCES=APICoverage.gen.c
+GENSOURCES=APICoverage.gen.c line_symmetry.gen.c
 
 APPS=gfx_benchmark Circle FillCircle Line CircleSeg Polygon Ellipse HLine\
-     VLine PutPixelAA HLineAA LineAA FillEllipse FillRect APICoverage.gen
+     VLine PutPixelAA HLineAA LineAA FillEllipse FillRect APICoverage.gen\
+     line_symmetry.gen
 
 Circle: common.o
 FillCircle: common.o

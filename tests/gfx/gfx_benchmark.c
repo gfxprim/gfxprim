@@ -36,7 +36,7 @@ static int bench_line(gp_pixel_type type)
 
 	unsigned int i;
 
-	for (i = 0; i < 100000; i++) {
+	for (i = 0; i < 20000; i++) {
 		gp_line(img, 0 + i % 100, 0 - i % 100,
 		        800 - i%200, 600 + i%200, i % 0xff);
 	}
@@ -80,7 +80,7 @@ static int bench_circle(gp_pixel_type type)
 
 	unsigned int i;
 
-	for (i = 0; i < 100000; i++) {
+	for (i = 0; i < 5000; i++) {
 		gp_circle(img, img->w/2, img->h/2, i % 1000, i%0xff);
 	}
 

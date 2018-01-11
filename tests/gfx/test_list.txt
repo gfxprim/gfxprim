@@ -5,6 +5,7 @@ APICoverage.gen
 HLine
 VLine
 Line
+line_symmetry.gen
 Circle
 FillCircle
 Ellipse

@@ -4,7 +4,7 @@
  *
  * Copyright (C) 2009-2012 Jiri "BlueBear" Dluhos
  *                         <jiri.bluebear.dluhos@gmail.com>
- * Copyright (C) 2009-2014 Cyril Hrubis <metan@ucw.cz>
+ * Copyright (C) 2009-2018 Cyril Hrubis <metan@ucw.cz>
  */
 
 #include "core/GP_Common.h"
@@ -23,6 +23,60 @@
  */
 
 @ for ps in pixelsizes:
+static void line_dy_{{ ps.suffix }}(gp_pixmap *pixmap, int x0, int y0, int x1, int y1, gp_pixel pixval)
+{
+	if (y0 > y1) {
+		GP_SWAP(y0, y1);
+		GP_SWAP(x0, x1);
+	}
+
+	int deltay = y1 - y0;
+	int deltax = GP_ABS(x1 - x0);
+
+	int error = deltay / 2;
+
+	int x = 0, y;
+	int xstep = (x0 < x1) ? 1 : -1;
+
+	for (y = 0; y <= deltay/2; y++) {
+		gp_putpixel_raw_{{ ps.suffix }}(pixmap, x0+x, y0+y, pixval);
+		gp_putpixel_raw_{{ ps.suffix }}(pixmap, x1-x, y1-y, pixval);
+
+		error -= deltax;
+		if (error < 0) {
+			x += xstep;
+			error += deltay;
+		}
+	}
+}
+
+static void line_dx_{{ ps.suffix }}(gp_pixmap *pixmap, int x0, int y0, int x1, int y1, gp_pixel pixval)
+{
+	if (x0 > x1) {
+		GP_SWAP(x0, x1);
+		GP_SWAP(y0, y1);
+	}
+
+	int deltax = x1 - x0;
+	int deltay = GP_ABS(y1 - y0);
+
+	int error = deltax/2;
+
+	int y = 0, x;
+	int ystep = (y0 < y1) ? 1 : -1;
+
+	for (x = 0; x <= deltax/2; x++) {
+		gp_putpixel_raw_{{ ps.suffix }}(pixmap, x0+x, y0+y, pixval);
+		gp_putpixel_raw_{{ ps.suffix }}(pixmap, x1-x, y1-y, pixval);
+
+		error -= deltay;
+		if (error < 0) {
+			y += ystep;
+			error += deltax;
+		}
+	}
+}
+
 void gp_line_raw_{{ ps.suffix }}(gp_pixmap *pixmap, int x0, int y0,
 	int x1, int y1, gp_pixel pixval)
 {
@@ -41,7 +95,7 @@ void gp_line_raw_{{ ps.suffix }}(gp_pixmap *pixmap, int x0, int y0,
 					x0, y0, pixval);
 			return;
 		}
-		gp_vline_raw(pixmap, x0, y0, y1, pixval);
+		gp_vline_raw_{{ ps.suffix }}(pixmap, x0, y0, y1, pixval);
 		return;
 	}
 	if (y0 == y1) {
@@ -53,44 +107,10 @@ void gp_line_raw_{{ ps.suffix }}(gp_pixmap *pixmap, int x0, int y0,
 	 * Which axis is longer? Swap the coordinates if necessary so
 	 * that the X axis is always the longer one and Y is shorter.
 	 */
-	int steep = abs(y1 - y0) / abs(x1 - x0);
-	if (steep) {
-		GP_SWAP(x0, y0);
-		GP_SWAP(x1, y1);
-	}
-	if (x0 > x1) {
-		GP_SWAP(x0, x1);
-		GP_SWAP(y0, y1);
-	}
-
-	/* iterate over the longer axis, calculate values on the shorter */
-	int deltax = x1 - x0;
-	int deltay = abs(y1 - y0);
-
-	/*
-	 * start with error of 0.5 (multiplied by deltax for integer-only math),
-	 * this reflects the fact that ideally, the coordinate should be
-	 * in the middle of the pixel
-	 */
-	int error = deltax / 2;
-
-	int y = y0, x;
-	int ystep = (y0 < y1) ? 1 : -1;
-	for (x = x0; x <= x1; x++) {
-
-		if (steep)
-			gp_putpixel_raw_{{ ps.suffix }}(pixmap, y, x,
-								pixval);
-		else
-			gp_putpixel_raw_{{ ps.suffix }}(pixmap, x, y,
-								pixval);
-
-		error -= deltay;
-		if (error < 0) {
-			y += ystep;	/* next step on the shorter axis */
-			error += deltax;
-		}
-	}
+	if ((y1 - y0) / (x1 - x0))
+		line_dy_{{ ps.suffix }}(pixmap, x0, y0, x1, y1, pixval);
+	else
+		line_dx_{{ ps.suffix }}(pixmap, x0, y0, x1, y1, pixval);
 }
 
 @ end
