@@ -16,50 +16,99 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2011 Jiri "BlueBear" Dluhos                            *
- *                         <jiri.bluebear.dluhos@gmail.com>                  *
- *                                                                           *
  * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
-#include "core/GP_Transform.h"
+#ifndef COMPARE_H__
+#define COMPARE_H__
 
-#include "gfx/GP_Line.h"
-#include "gfx/GP_Polygon.h"
-#include "gfx/GP_Triangle.h"
+#include <stdio.h>
+#include <core/GP_GetPutPixel.h>
 
-void gp_triangle_raw(gp_pixmap *pixmap, gp_coord x0, gp_coord y0,
-                     gp_coord x1, gp_coord y1,
-                     gp_coord x2, gp_coord y2, gp_pixel pixel)
+static inline void print_diff(gp_pixmap *p1, gp_pixmap *p2)
 {
-	gp_line_raw(pixmap, x0, y0, x1, y1, pixel);
-	gp_line_raw(pixmap, x0, y0, x2, y2, pixel);
-	gp_line_raw(pixmap, x1, y1, x2, y2, pixel);
+	gp_size x, y;
+
+	printf(" ");
+	for (x = 0; x < p1->w; x++)
+		printf("-");
+	printf("\n");
+
+	for (y = 0; y < p1->h; y++) {
+		printf("|");
+		for (x = 0; x < p1->w; x++) {
+			gp_pixel px1 = gp_getpixel_raw_8BPP(p1, x, y);
+			gp_pixel px2 = gp_getpixel_raw_8BPP(p2, x, y);
+
+			if (px1 == px2) {
+				if (px1)
+					printf("*");
+				else
+					printf(" ");
+			} else {
+				if (px1)
+					printf("1");
+				else
+					printf("2");
+			}
+		}
+		printf("|\n");
+	}
+
+	printf(" ");
+	for (x = 0; x < p1->w; x++)
+		printf("-");
+	printf("\n");
 }
 
-void gp_triangle(gp_pixmap *pixmap, gp_coord x0, gp_coord y0,
-                 gp_coord x1, gp_coord y1,
-                 gp_coord x2, gp_coord y2, gp_pixel pixel)
+static inline void print(gp_pixmap *p)
 {
-	GP_CHECK_PIXMAP(pixmap);
+	gp_size x, y;
 
-	GP_TRANSFORM_POINT(pixmap, x0, y0);
-	GP_TRANSFORM_POINT(pixmap, x1, y1);
-	GP_TRANSFORM_POINT(pixmap, x2, y2);
+	printf(" ");
+	for (x = 0; x < p->w; x++)
+		printf("-");
+	printf("\n");
 
-	gp_triangle_raw(pixmap, x0, y0, x1, y1, x2, y2, pixel);
+	for (y = 0; y < p->h; y++) {
+		printf("|");
+		for (x = 0; x < p->w; x++) {
+			gp_pixel px = gp_getpixel_raw_8BPP(p, x, y);
+
+			if (px)
+				printf("*");
+			else
+				printf(" ");
+		}
+		printf("|\n");
+	}
+
+	printf(" ");
+	for (x = 0; x < p->w; x++)
+		printf("-");
+	printf("\n");
 }
 
-void gp_fill_triangle(gp_pixmap *pixmap, gp_coord x0, gp_coord y0,
-                     gp_coord x1, gp_coord y1,
-                     gp_coord x2, gp_coord y2, gp_pixel pixel)
+static inline int compare_pixmaps(gp_pixmap *p1, gp_pixmap *p2)
 {
-	GP_CHECK_PIXMAP(pixmap);
+	gp_size x, y;
+	print(p1);
+	for (x = 0; x < p1->w; x++) {
+		for (y = 0; y < p1->h; y++) {
+			gp_pixel px1 = gp_getpixel_raw_8BPP(p1, x, y);
+			gp_pixel px2 = gp_getpixel_raw_8BPP(p2, x, y);
 
-	GP_TRANSFORM_POINT(pixmap, x0, y0);
-	GP_TRANSFORM_POINT(pixmap, x1, y1);
-	GP_TRANSFORM_POINT(pixmap, x2, y2);
+			if (px1 != px2) {
+				print(p1);
+				print(p2);
+				print_diff(p1, p2);
+				return TST_FAILED;
+			}
+		}
+	}
 
-	gp_fill_triangle_raw(pixmap, x0, y0, x1, y1, x2, y2, pixel);
+	return TST_SUCCESS;
 }
+
+#endif /* COMPARE_H__ */
