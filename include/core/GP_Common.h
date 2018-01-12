@@ -44,6 +44,16 @@
 })
 
 /*
+ * Returns maximum from three numbers.
+ */
+#define GP_MIN3(a, b, c) ({ \
+	typeof(a) _a = (a); \
+	typeof(b) _b = (b); \
+	typeof(c) _c = (c); \
+	_a < _b ? (_a < _c ? _a : _c) : (_b < _c ? _b : _c); \
+})
+
+/*
  * Returns a maximum of the two numbers.
  */
 #define GP_MAX(a, b) ({ \
