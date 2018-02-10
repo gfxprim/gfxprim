@@ -43,7 +43,7 @@ static int write_data(const gp_pixmap *img, gp_io *io,
 	gp_io *bio;
 	int err;
 
-	if (img->pixel_type != GP_PIXEL_G2) {
+	if (img->pixel_type != GP_PIXEL_G4) {
 		errno = ENOSYS;
 		return 1;
 	}
@@ -55,26 +55,14 @@ static int write_data(const gp_pixmap *img, gp_io *io,
 		return 1;
 
 	unsigned int i, j;
+	const char *const table[] = {" ", ".", ",", "-", "=", "#", "O", "$"};
 
 	for (j = 0; j < img->h; j++) {
 		for (i = 0; i < img->w; i++) {
 			gp_pixel p = gp_getpixel_raw(img, i, j);
+			const char *c = table[p>>1];
 
-			switch (p) {
-			case 0:
-				err = gp_io_flush(bio, "  ", 2);
-			break;
-			case 1:
-				err = gp_io_flush(bio, "..", 2);
-			break;
-			case 2:
-				err = gp_io_flush(bio, "()", 2);
-			break;
-			case 3:
-				err = gp_io_flush(bio, "OO", 2);
-			break;
-			}
-
+			err = gp_io_flush(bio, c, 1);
 			if (err)
 				return 1;
 		}
@@ -88,12 +76,13 @@ static int write_data(const gp_pixmap *img, gp_io *io,
 		}
 	}
 
+	gp_io_close(bio);
 	gp_progress_cb_done(callback);
 	return 0;
 }
 
 static gp_pixel_type save_ptypes[] = {
-	GP_PIXEL_G2,
+	GP_PIXEL_G4,
 	GP_PIXEL_UNKNOWN,
 };
 
@@ -106,7 +95,7 @@ const gp_loader loader = {
 
 int main(int argc, char *argv[])
 {
-	gp_pixmap *c, *gc;
+	gp_pixmap *c, *gc, *sc;
 
 	gp_loader_register(&loader);
 
@@ -121,13 +110,20 @@ int main(int argc, char *argv[])
 
 	/* Now load image and save it using our loader */
 	c = gp_load_image(argv[1], NULL);
-
 	if (c == NULL) {
 		fprintf(stderr, "Failed to load image: %s\n", strerror(errno));
 		return 1;
 	}
 
-	gc = gp_filter_floyd_steinberg_alloc(c, GP_PIXEL_G2, NULL);
+	/*
+	 * Font letters are not square resize the image so that it's twice it
+	 * original width.
+	 */
+	gp_size w = 120;
+	gp_size h = (w/2 * c->h + c->w/2)/c->w;
+
+	sc = gp_filter_resize_alloc(c, w, h, GP_INTERP_LINEAR_LF_INT, NULL);
+	gc = gp_filter_floyd_steinberg_alloc(sc, GP_PIXEL_G4, NULL);
 
 	if (gc == NULL) {
 		fprintf(stderr, "FloydSteinberg: %s\n", strerror(errno));
