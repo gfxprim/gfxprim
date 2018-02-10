@@ -46,7 +46,7 @@ static ssize_t file_read(gp_io *self, void *buf, size_t size)
 	return read(file_io->fd, buf, size);
 }
 
-static ssize_t file_write(gp_io *self, void *buf, size_t size)
+static ssize_t file_write(gp_io *self, const void *buf, size_t size)
 {
 	struct file_io *file_io = GP_IO_PRIV(self);
 
@@ -399,7 +399,7 @@ static int wbuf_close(gp_io *io)
 	return ret;
 }
 
-static ssize_t buf_write(gp_io *io, void *buf, size_t size)
+static ssize_t buf_write(gp_io *io, const void *buf, size_t size)
 {
 	struct buf_io *buf_io = GP_IO_PRIV(io);
 	size_t bfree = buf_io->bsize - buf_io->bpos;
@@ -519,7 +519,7 @@ int gp_io_fill(gp_io *io, void *buf, size_t size)
 	return 0;
 }
 
-int gp_io_flush(gp_io *io, void *buf, size_t size)
+int gp_io_flush(gp_io *io, const void *buf, size_t size)
 {
 	size_t wrote = 0;
 	int ret;

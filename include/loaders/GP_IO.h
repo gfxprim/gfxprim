@@ -45,7 +45,7 @@ typedef struct gp_io gp_io;
 
 struct gp_io {
 	ssize_t (*read)(gp_io *self, void *buf, size_t size);
-	ssize_t (*write)(gp_io *self, void *buf, size_t size);
+	ssize_t (*write)(gp_io *self, const void *buf, size_t size);
 	off_t (*seek)(gp_io *self, off_t off, enum gp_io_whence whence);
 	int (*close)(gp_io *self);
 
@@ -63,7 +63,7 @@ static inline ssize_t gp_io_read(gp_io *io, void *buf, size_t size)
 	return io->read(io, buf, size);
 }
 
-static inline ssize_t gp_io_write(gp_io *io, void *buf, size_t size)
+static inline ssize_t gp_io_write(gp_io *io, const void *buf, size_t size)
 {
 	return io->write(io, buf, size);
 }
@@ -121,7 +121,7 @@ int gp_io_fill(gp_io *io, void *buf, size_t size);
  *
  * Returns zero on succes non-zero on failure.
  */
-int gp_io_flush(gp_io *io, void *buf, size_t size);
+int gp_io_flush(gp_io *io, const void *buf, size_t size);
 
 /*
  * Marks a current position, returns to mark in I/O stream.
