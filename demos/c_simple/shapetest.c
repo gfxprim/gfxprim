@@ -240,11 +240,11 @@ void redraw_screen(void)
 
 	/* text style for the label */
 	gp_text_style style = {
-		.font = gp_font_gfxprim_mono,
-		.pixel_xmul = 2,
-		.pixel_ymul = 1,
-		.pixel_xspace = 0,
-		.pixel_yspace = 1,
+		.font = gp_font_tiny,
+		.pixel_xmul = 6,
+		.pixel_ymul = 6,
+		.pixel_xspace = 2,
+		.pixel_yspace = 2,
 	};
 
 	gp_fill(win, black);
@@ -302,7 +302,7 @@ void redraw_screen(void)
 	}
 
 	gp_text(win, &style, 16, 16, GP_ALIGN_RIGHT|GP_VALIGN_BELOW,
-	        white, black, title);
+	        yellow, black, title);
 
 	gp_backend_flip(backend);
 }
