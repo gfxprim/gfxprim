@@ -75,7 +75,7 @@ struct gp_container_ops {
 	const char *type;
 };
 
-typedef struct gp_container {
+struct gp_container {
 	/*
 	 * Image counter. This is set to number of images, or to -1 if number
 	 * of images in container is not known prior to parsing the whole
@@ -94,7 +94,7 @@ typedef struct gp_container {
 	const struct gp_container_ops *ops;
 
 	char priv[];
-} gp_container;
+};
 
 #define GP_CONTAINER_PRIV(c) ((void*)(c)->priv)
 
