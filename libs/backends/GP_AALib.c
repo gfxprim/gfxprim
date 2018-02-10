@@ -267,7 +267,7 @@ err1:
 
 #else
 
-gp_backend *gp_aa_lib_init(void)
+gp_backend *gp_aalib_init(void)
 {
 	GP_FATAL("AALib support not compiled in!");
 	errno = ENOSYS;
