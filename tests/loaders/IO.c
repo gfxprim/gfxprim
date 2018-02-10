@@ -440,7 +440,7 @@ static int test_IOFill(void)
 
 static size_t counter;
 
-static ssize_t flush_write(gp_io GP_UNUSED(*io), void *buf, size_t size)
+static ssize_t flush_write(gp_io GP_UNUSED(*io), const void *buf, size_t size)
 {
 	size_t to_write = GP_MIN(7u, size);
 
@@ -484,7 +484,7 @@ static int test_IOFlush(void)
 	return TST_SUCCESS;
 }
 
-static ssize_t wbuf_write(gp_io GP_UNUSED(*io), void *buf, size_t size)
+static ssize_t wbuf_write(gp_io GP_UNUSED(*io), const void *buf, size_t size)
 {
 	unsigned int i;
 
