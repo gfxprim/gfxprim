@@ -24,6 +24,10 @@
 %immutable gp_font_c64;
 %immutable gp_font_haxor_narrow_15;
 %immutable gp_font_haxor_narrow_bold_15;
+%immutable gp_font_haxor_narrow_16;
+%immutable gp_font_haxor_narrow_bold_16;
+%immutable gp_font_haxor_narrow_17;
+%immutable gp_font_haxor_narrow_bold_17;
 %include "GP_Fonts.h"
 
 /* GP_TextStyle wrappers */
