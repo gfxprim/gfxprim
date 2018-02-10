@@ -86,8 +86,21 @@ gp_pixmap *gp_filter_resize_alloc(const gp_pixmap *src,
                                   gp_interpolation_type type,
                                   gp_progress_cb *callback)
 {
-	gp_pixmap *res = gp_pixmap_alloc(w, h, src->pixel_type);
+	gp_pixmap *res;
 
+	if (!w && !h) {
+		GP_WARN("Invalid result size 0x0!");
+		errno = EINVAL;
+		return NULL;
+	}
+
+	if (!w)
+		w = (h * src->w + src->h/2) / src->h;
+
+	if (!h)
+		h = (w * src->h + src->w/2) / src->w;
+
+	res = gp_pixmap_alloc(w, h, src->pixel_type);
 	if (!res)
 		return NULL;
 
