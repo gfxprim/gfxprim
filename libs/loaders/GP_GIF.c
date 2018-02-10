@@ -334,7 +334,7 @@ int gp_read_gif_ex(gp_io *io, gp_pixmap **img,
 
 			unsigned int real_y = y;
 
-			if (gf->Image.Interlace == 64) {
+			if (gf->Image.Interlace) {
 				real_y = interlace_real_y(gf, y);
 				GP_DEBUG(3, "Interlace y -> real_y %u %u", y, real_y);
 			}
