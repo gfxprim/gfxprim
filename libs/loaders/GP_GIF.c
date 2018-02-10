@@ -357,7 +357,7 @@ int gp_read_gif_ex(gp_io *io, gp_pixmap **img,
 
 	} while (rec_type != TERMINATE_RECORD_TYPE);
 
-#if defined(GIFLIB_MAJOR) && GIFLIB_MAJOR >= 5
+#if defined(GIFLIB_MAJOR) && GIFLIB_MAJOR >= 5 && GIFLIB_MINOR >= 1
 	DGifCloseFile(gf, NULL);
 #else
 	DGifCloseFile(gf);
@@ -376,7 +376,7 @@ int gp_read_gif_ex(gp_io *io, gp_pixmap **img,
 err2:
 	gp_pixmap_free(res);
 err1:
-#if defined(GIFLIB_MAJOR) && GIFLIB_MAJOR >= 5
+#if defined(GIFLIB_MAJOR) && GIFLIB_MAJOR >= 5 && GIFLIB_MINOR >= 1
 	DGifCloseFile(gf, NULL);
 #else
 	DGifCloseFile(gf);
