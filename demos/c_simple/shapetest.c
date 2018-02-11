@@ -480,7 +480,7 @@ void print_instructions(void)
 	printf("    shift + up/down ..... increase/decrease vertical center\n");
 	printf("    PgUp/PgDn ........... increase/decrease both radii\n");
 	printf("    = ................... reset radii to the same value\n");
-	printf("    1/2/3 ............... choose shape variant (if applicable)\n");
+	printf("    1/2/3/4 ............. choose shape variant (if applicable)\n");
 }
 
 int main(int argc, char *argv[])
