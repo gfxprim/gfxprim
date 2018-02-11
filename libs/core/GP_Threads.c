@@ -28,7 +28,7 @@
 
 #include "GP_Threads.h"
 
-static unsigned int nr_threads = 1;
+static unsigned int nr_threads = 0;
 
 unsigned int gp_nr_threads(gp_size w, gp_size h, gp_progress_cb *callback)
 {
