@@ -393,11 +393,11 @@ int gp_match_gif(const void GP_UNUSED(*buf))
 	return -1;
 }
 
-gp_pixmap *gp_read_gif_ex(GP_IO GP_UNUSED(*io),
-                          gp_progress_cb GP_UNUSED(*callback))
+int gp_read_gif_ex(gp_io GP_UNUSED(*io), gp_pixmap GP_UNUSED(**img),
+                   gp_storage GP_UNUSED(*storage), gp_progress_cb GP_UNUSED(*callback))
 {
 	errno = ENOSYS;
-	return NULL;
+	return -1;
 }
 
 #endif /* HAVE_GIFLIB */
