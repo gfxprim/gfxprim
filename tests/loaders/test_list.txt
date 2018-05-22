@@ -1,5 +1,6 @@
 # Loaders testsuite
 loaders_suite
+line_convert
 PNG
 JPG
 GIF

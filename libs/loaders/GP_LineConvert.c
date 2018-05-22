@@ -44,9 +44,9 @@ static void xabc8888_to_abc888(const uint8_t *inbuf, uint8_t *outbuf,
 	unsigned int i;
 
 	for (i = 0; i < len; i++) {
-		outbuf[0] = inbuf[1];
-		outbuf[1] = inbuf[2];
-		outbuf[2] = inbuf[3];
+		outbuf[0] = inbuf[0];
+		outbuf[1] = inbuf[1];
+		outbuf[2] = inbuf[2];
 
 		outbuf+=3;
 		inbuf+=4;
@@ -59,9 +59,9 @@ static void xabc8888_to_cba888(const uint8_t *inbuf, uint8_t *outbuf,
 	unsigned int i;
 
 	for (i = 0; i < len; i++) {
-		outbuf[0] = inbuf[3];
-		outbuf[1] = inbuf[2];
-		outbuf[2] = inbuf[1];
+		outbuf[0] = inbuf[2];
+		outbuf[1] = inbuf[1];
+		outbuf[2] = inbuf[0];
 
 		outbuf+=3;
 		inbuf+=4;
