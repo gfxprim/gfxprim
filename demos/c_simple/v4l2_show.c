@@ -32,6 +32,16 @@
 
 #include <gfxprim.h>
 
+static void save_image(gp_pixmap *p)
+{
+	static unsigned int counter;
+	char fname[256];
+
+	snprintf(fname, sizeof(fname), "screenshot%u.jpg", counter++);
+
+	gp_save_jpg(p, fname, NULL);
+}
+
 int main(int argc, char *argv[])
 {
 	gp_backend *backend;
@@ -144,6 +154,9 @@ int main(int argc, char *argv[])
 					gp_backend_exit(backend);
 					gp_grabber_exit(grabber);
 					return 0;
+				break;
+				case GP_KEY_S:
+					save_image(backend->pixmap);
 				break;
 				case GP_KEY_SPACE:
 
