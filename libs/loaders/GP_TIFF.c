@@ -801,7 +801,7 @@ int gp_write_tiff(const gp_pixmap *src, gp_io *io,
 
 #else
 
-int gp_read_tiff_ex(GP_IO GP_UNUSED(*io), gp_pixmap GP_UNUSED(**img),
+int gp_read_tiff_ex(gp_io GP_UNUSED(*io), gp_pixmap GP_UNUSED(**img),
                   gp_storage GP_UNUSED(*storage),
                   gp_progress_cb GP_UNUSED(*callback))
 {
@@ -809,7 +809,7 @@ int gp_read_tiff_ex(GP_IO GP_UNUSED(*io), gp_pixmap GP_UNUSED(**img),
 	return 1;
 }
 
-int gp_write_tiff(const gp_pixmap GP_UNUSED(*src), GP_IO GP_UNUSED(*io),
+int gp_write_tiff(const gp_pixmap GP_UNUSED(*src), gp_io GP_UNUSED(*io),
                  gp_progress_cb GP_UNUSED(*callback))
 {
 	errno = ENOSYS;
