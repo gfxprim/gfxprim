@@ -78,7 +78,7 @@ void gp_backend_update_rect_xyxy(gp_backend *self,
 
 int gp_backend_resize(gp_backend *self, uint32_t w, uint32_t h)
 {
-	if (!self->set_attrs)
+	if (!self->set_attr)
 		return 1;
 
 	if (w == 0)
@@ -90,7 +90,9 @@ int gp_backend_resize(gp_backend *self, uint32_t w, uint32_t h)
 	if (self->pixmap->w == w && self->pixmap->h == h)
 		return 0;
 
-	return self->set_attrs(self, w, h, NULL);
+	int vals[] = {w, h};
+
+	return self->set_attr(self, GP_BACKEND_SIZE, vals);
 }
 
 int gp_backend_resize_ack(gp_backend *self)

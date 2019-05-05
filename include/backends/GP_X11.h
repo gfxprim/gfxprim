@@ -60,13 +60,4 @@ gp_backend *gp_x11_init(const char *display, int x, int y,
  */
 int gp_backend_is_x11(gp_backend *self);
 
-/*
- * Changes full screen mode.
- *
- * 0 = off
- * 1 = on
- * 2 = toggle
- */
-void gp_x11_fullscreen(gp_backend *self, int mode);
-
 #endif /* BACKENDS_GP_X11_H */

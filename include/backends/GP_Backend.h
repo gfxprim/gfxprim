@@ -49,6 +49,15 @@
 
 typedef struct gp_backend gp_backend;
 
+enum gp_backend_attrs {
+	/* window size */
+	GP_BACKEND_SIZE,
+	/* window title */
+	GP_BACKEND_TITLE,
+	/* fullscreen mode */
+	GP_BACKEND_FULLSCREEN,
+};
+
 struct gp_backend {
 	/*
 	 * Pointer to pixmap app should draw to.
@@ -81,19 +90,16 @@ struct gp_backend {
 	                    gp_coord x1, gp_coord y1);
 
 	/*
-	 * Callback to change attributes.
+	 * Attribute change callback.
 	 *
-	 * If w and h are zero, only caption is changed.
+	 * The vals is supposed to be:
 	 *
-	 * If w is set and h is zero, only w is changed and vice versa.
-	 *
-	 * If caption is NULL only w and h are changed.
-	 *
-	 * Use the inline wrappers instead.
+	 * GP_BACKEND_SIZE uint32_t vals[2];
+	 * GP_BACKEND_TITLE const char *title
+	 * GP_BACKEND_FULLSCREEN int *fs
 	 */
-	int (*set_attrs)(gp_backend *self,
-	                 uint32_t w, uint32_t h,
-	                 const char *caption);
+	int (*set_attr)(gp_backend *self, enum gp_backend_attrs attr,
+			const void *vals);
 
 	/*
 	 * Resize acknowledge callback. This must be called
@@ -224,10 +230,10 @@ static inline unsigned int gp_backend_timers_in_queue(gp_backend *self)
 static inline int gp_backend_set_caption(gp_backend *backend,
                                          const char *caption)
 {
-	if (!backend->set_attrs)
+	if (!backend->set_attr)
 		return 1;
 
-	return backend->set_attrs(backend, 0, 0, caption);
+	return backend->set_attr(backend, GP_BACKEND_TITLE, caption);
 }
 
 /*
@@ -242,6 +248,21 @@ static inline int gp_backend_set_caption(gp_backend *backend,
  */
 int gp_backend_resize(gp_backend *backend, uint32_t w, uint32_t h);
 
+/*
+ * Changes fullscreen mode.
+ *
+ * val 0 - turn off
+ *     1 - turn on
+ *     2 - toggle
+ *     3 - query
+ */
+static inline int gp_backend_fullscreen(gp_backend *backend, int val)
+{
+	if (!backend->set_attr)
+		return 0;
+
+	return backend->set_attr(backend, GP_BACKEND_FULLSCREEN, &val);
+}
 
 /*
  * Resize acknowledge. You must call this right after you application has

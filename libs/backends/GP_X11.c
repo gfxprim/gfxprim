@@ -567,6 +567,26 @@ static void x11_exit(gp_backend *self)
 	free(self);
 }
 
+static int x11_set_attr(gp_backend *self, enum gp_backend_attrs attr,
+                        const void *vals)
+{
+	struct x11_win *win = GP_BACKEND_PRIV(self);
+
+	switch (attr) {
+	case GP_BACKEND_FULLSCREEN:
+		x11_win_fullscreen(win, *(const int *)vals);
+	break;
+	case GP_BACKEND_TITLE:
+		x11_set_attributes(self, 0, 0, (const char *)vals);
+	break;
+	case GP_BACKEND_SIZE:
+		x11_set_attributes(self, ((const int*)vals)[0], ((const int*)vals)[1], NULL);
+	break;
+	}
+
+	return 0;
+}
+
 gp_backend *gp_x11_init(const char *display, int x, int y,
                         unsigned int w, unsigned int h,
                         const char *caption,
@@ -629,7 +649,7 @@ gp_backend *gp_x11_init(const char *display, int x, int y,
 	backend->exit = x11_exit;
 	backend->poll = x11_poll;
 	backend->wait = x11_wait;
-	backend->set_attrs = x11_set_attributes;
+	backend->set_attr = x11_set_attr;
 	backend->resize_ack = x11_resize_ack;
 	backend->fd = XConnectionNumber(win->dpy);
 	backend->timers = NULL;
@@ -639,13 +659,6 @@ err1:
 	x11_close();
 	free(backend);
 	return NULL;
-}
-
-void gp_x11_fullscreen(gp_backend *self, int mode)
-{
-	struct x11_win *win = GP_BACKEND_PRIV(self);
-
-	x11_win_fullscreen(win, mode);
 }
 
 #else
@@ -660,12 +673,6 @@ gp_backend *gp_x11_init(const char *GP_UNUSED(display),
 {
 	GP_FATAL("X11 support not compiled in");
 	return NULL;
-}
-
-void gp_x11_fullscreen(gp_backend *GP_UNUSED(self),
-                       int GP_UNUSED(mode))
-{
-	GP_FATAL("X11 support not compiled in");
 }
 
 #endif /* HAVE_LIBX11 */

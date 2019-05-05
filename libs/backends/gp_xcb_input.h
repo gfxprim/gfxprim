@@ -1,26 +1,11 @@
-/*****************************************************************************
- * This file is part of gfxprim library.                                     *
- *                                                                           *
- * Gfxprim is free software; you can redistribute it and/or                  *
- * modify it under the terms of the GNU Lesser General Public                *
- * License as published by the Free Software Foundation; either              *
- * version 2.1 of the License, or (at your option) any later version.        *
- *                                                                           *
- * Gfxprim is distributed in the hope that it will be useful,                *
- * but WITHOUT ANY WARRANTY; without even the implied warranty of            *
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU         *
- * Lesser General Public License for more details.                           *
- *                                                                           *
- * You should have received a copy of the GNU Lesser General Public          *
- * License along with gfxprim; if not, write to the Free Software            *
- * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
- * Boston, MA  02110-1301  USA                                               *
- *                                                                           *
- * Copyright (C) 2009-2013 Cyril Hrubis <metan@ucw.cz>                       *
- *                                                                           *
- *****************************************************************************/
+// SPDX-License-Identifier: GPL-2.1-or-later
+/*
+ * Copyright (C) 2009-2019 Cyril Hrubis <metan@ucw.cz>
+ */
 
-/* X11 keycodes */
+#include <xcb/xcb_keysyms.h>
+
+/* XCB keycodes */
 static uint16_t keycode_table[] = {
  0,                  GP_KEY_1,           GP_KEY_2,           GP_KEY_3,
  GP_KEY_4,           GP_KEY_5,           GP_KEY_6,           GP_KEY_7,
@@ -72,28 +57,32 @@ static uint16_t keycode_table[] = {
 
 #include "gp_x_keysyms.h"
 
-static void x11_input_init(void)
+static void xcb_input_init(xcb_connection_t *c)
 {
-	GP_DEBUG(1, "Initializing X11 KeyCode table");
+	GP_DEBUG(1, "Initializing XCB KeyCode table");
+
+	xcb_key_symbols_t *symtable = xcb_key_symbols_alloc(c);
 
 	unsigned int i;
 
 	for (i = 0; i < GP_ARRAY_SIZE(sym_to_key); i++) {
+		xcb_keycode_t *keycodes;
 		unsigned int keycode;
 
-		keycode = XKeysymToKeycode(x11_conn.dpy,
-		                           sym_to_key[i].x_keysym);
+		keycodes = xcb_key_symbols_get_keycode(symtable, sym_to_key[i].x_keysym);
+		keycode = keycodes[0];
+		free(keycodes);
 
-		if (keycode == 0) {
-			GP_DEBUG(1, "KeySym '%s' (%u) not defined",
-			         XKeysymToString(sym_to_key[i].x_keysym),
+		if (keycode == XCB_NO_SYMBOL) {
+			GP_DEBUG(1, "KeySym (%u) not defined",
 			         sym_to_key[i].x_keysym);
 			continue;
 		}
 
 		GP_DEBUG(3, "Mapping Key '%s' KeySym '%s' (%u) to KeyCode %u",
 		         gp_event_key_name(sym_to_key[i].key),
-			 XKeysymToString(sym_to_key[i].x_keysym),
+			// XKeysymToString(sym_to_key[i].x_keysym),
+			 "TODO",
 			 sym_to_key[i].x_keysym, keycode);
 
 		if (keycode - 9 >= GP_ARRAY_SIZE(keycode_table)) {
@@ -111,6 +100,8 @@ static void x11_input_init(void)
 
 		keycode_table[keycode - 9] = sym_to_key[i].key;
 	}
+
+	xcb_key_symbols_free(symtable);
 }
 
 static unsigned int get_key(unsigned int xkey)
@@ -121,21 +112,45 @@ static unsigned int get_key(unsigned int xkey)
 		key = keycode_table[xkey - 9];
 
 	if (key == 0)
-		GP_WARN("Unmapped X11 keycode 0x%02x %u", xkey, xkey);
+		GP_WARN("Unmapped X keycode 0x%02x %u", xkey, xkey);
 
 	return key;
 }
 
-static void x11_input_event_put(gp_event_queue *event_queue,
-                                XEvent *ev, int w, int h)
+#ifdef HAVE_XCB_UTIL_ERRORS
+# include <xcb/xcb_errors.h>
+#endif
+
+static void xcb_input_event_put(gp_event_queue *event_queue,
+                                xcb_generic_event_t *ev, int w, int h)
 {
 	int key = 0, press = 0;
+	int ev_type = ev->response_type & ~0x80;
 
-	switch (ev->type) {
-	case ButtonPress:
-		press = 1;
-	case ButtonRelease:
-		switch (ev->xbutton.button) {
+	switch (ev_type) {
+#ifdef HAVE_XCB_UTIL_ERRORS
+	case 0: {
+		xcb_generic_error_t *err = (xcb_generic_error_t*)ev;
+		xcb_errors_context_t *err_ctx;
+		xcb_errors_context_new(x_con.c, &err_ctx);
+		const char *major, *minor, *extension, *error;
+		major = xcb_errors_get_name_for_major_code(err_ctx, err->major_code);
+		minor = xcb_errors_get_name_for_minor_code(err_ctx, err->major_code, err->minor_code);
+		error = xcb_errors_get_name_for_error(err_ctx, err->error_code, &extension);
+		GP_WARN("XCB Error: %s:%s, %s:%s, resource %u sequence %u",
+			error, extension ? extension : "no_extension",
+			major, minor ? minor : "no_minor",
+			(unsigned int)err->resource_id,
+			(unsigned int)err->sequence);
+		xcb_errors_context_free(err_ctx);
+	} break;
+#endif
+	case XCB_BUTTON_PRESS:
+		press = 1; /* fallthru */
+	case XCB_BUTTON_RELEASE: {
+		xcb_button_press_event_t *bev = (xcb_button_press_event_t *)ev;
+
+		switch (bev->detail) {
 		case 1:
 			key = GP_BTN_LEFT;
 		break;
@@ -159,59 +174,73 @@ static void x11_input_event_put(gp_event_queue *event_queue,
 		}
 
 		if (key == 0) {
-			GP_WARN("Unmapped X11 button %02x",
-			        ev->xbutton.button);
+			GP_WARN("Unmapped X button %02x", bev->detail);
 			return;
 		}
 
 		gp_event_queue_push(event_queue, GP_EV_KEY, key, press, NULL);
+	} break;
+	case XCB_CONFIGURE_NOTIFY: {
+		xcb_configure_notify_event_t *cev = (xcb_configure_notify_event_t *)ev;
+		gp_event_queue_push_resize(event_queue, cev->width, cev->height, NULL);
+	}
 	break;
-	case ConfigureNotify:
-		gp_event_queue_push_resize(event_queue, ev->xconfigure.width,
-		                        ev->xconfigure.height, NULL);
 	break;
-	break;
-	case MotionNotify:
+	case XCB_MOTION_NOTIFY: {
+		xcb_motion_notify_event_t *mev = (xcb_motion_notify_event_t *)ev;
+
 		/* Ignore all pointer events that are out of the window */
-		if (ev->xmotion.x < 0 || ev->xmotion.y < 0 ||
-		    ev->xmotion.x > w || ev->xmotion.y > h)
+		if (mev->event_x < 0 || mev->event_y < 0 ||
+		    mev->event_x > w || mev->event_y > h)
 			return;
 
 		gp_event_queue_push_rel_to(event_queue,
-		                       ev->xmotion.x, ev->xmotion.y, NULL);
+		                           mev->event_x, mev->event_y, NULL);
+	}
 	break;
-	case KeyPress:
-		press = 1;
-	case KeyRelease:
-		key = get_key(ev->xkey.keycode);
+	case XCB_KEY_PRESS:
+		press = 1; /* fallthru */
+	case XCB_KEY_RELEASE: {
+		xcb_key_press_event_t *kev = (xcb_key_press_event_t *)ev;
+		key = get_key(kev->detail);
 
 		if (key == 0)
 			return;
 
 		gp_event_queue_push_key(event_queue, key, press, NULL);
-	break;
+	} break;
 	/* events from WM */
-	case ClientMessage:
-		if ((Atom)ev->xclient.data.l[0] == x11_conn.A_WM_DELETE_WINDOW) {
+	case XCB_CLIENT_MESSAGE: {
+		xcb_client_message_event_t *cev = (xcb_client_message_event_t*)ev;
+		if (cev->data.data32[0] == x_con.wm_delete_window) {
 			gp_event_queue_push(event_queue, GP_EV_SYS,
 			                  GP_EV_SYS_QUIT, 0, NULL);
 			return;
 		}
 		GP_WARN("Unknown X Client Message");
-	break;
-	case MapNotify:
+	} break;
+	case XCB_MAP_NOTIFY:
 		GP_DEBUG(1, "MapNotify event received");
 	break;
-	case ReparentNotify:
+	case XCB_REPARENT_NOTIFY:
 		GP_DEBUG(1, "ReparentNotify event received");
 	break;
-	case GravityNotify:
+	case XCB_GRAVITY_NOTIFY:
 		GP_DEBUG(1, "GravityNotify event received");
 	break;
-	case UnmapNotify:
+	case XCB_UNMAP_NOTIFY:
 		GP_DEBUG(1, "UnmapNotify event received");
 	break;
+	case XCB_NO_EXPOSURE:
+		GP_DEBUG(1, "NoExposure event received");
+	break;
 	default:
-		GP_WARN("Unhandled X11 event type %u", ev->type);
+		if (ev_type == x_con.shm_completion_ev) {
+			xcb_shm_completion_event_t *sev = (xcb_shm_completion_event_t*)ev;
+			GP_DEBUG(1, "SHM completion shmseg=%u", (unsigned int)sev->shmseg);
+			return;
+		}
+
+		GP_WARN("Unhandled X event type %u", ev->response_type & ~0x80);
 	}
 }

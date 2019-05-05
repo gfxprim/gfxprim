@@ -60,21 +60,21 @@ static void virt_update_rect(gp_backend *self, gp_coord x0, gp_coord y0,
 	virt->backend->update_rect(virt->backend, x0, y0, x1, y1);
 }
 
-static int virt_set_attrs(struct gp_backend *self,
-                          uint32_t w, uint32_t h,
-                          const char *caption)
+static int virt_set_attr(struct gp_backend *self,
+                         enum gp_backend_attrs attr,
+                         const void *vals)
 {
 	struct virt_priv *virt = GP_BACKEND_PRIV(self);
-	int ret;
 
-	ret = virt->backend->set_attrs(virt->backend, w, h, caption);
-
+	int ret = virt->backend->set_attr(virt->backend, attr, vals);
 	if (ret)
 		return ret;
 
-	/* If backend was resized, update our buffer as well */
-	if (h != 0 && w != 0)
-		gp_pixmap_resize(self->pixmap, w, h);
+	if (attr == GP_BACKEND_SIZE) {
+		gp_pixmap_resize(self->pixmap,
+		                 ((const uint32_t *)vals)[0],
+		                 ((const uint32_t *)vals)[1]);
+	}
 
 	return 0;
 }
@@ -160,7 +160,7 @@ gp_backend *gp_backend_virt_init(gp_backend *backend,
 	/* Initalize new backend */
 	self->update_rect = virt_update_rect;
 	self->resize_ack = virt_resize_ack;
-	self->set_attrs = backend->set_attrs ? virt_set_attrs : NULL;
+	self->set_attr = backend->set_attr ? virt_set_attr : NULL;
 	self->name = "Virtual Backend";
 	self->flip = virt_flip;
 	self->poll = backend->poll ? virt_poll : NULL;

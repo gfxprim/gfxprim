@@ -154,18 +154,25 @@ int gp_pixmap_from_sdl_surface(gp_pixmap *pixmap, const SDL_Surface *surf)
 	return 0;
 }
 
-static int sdl_set_attributes(struct gp_backend *self,
-                              uint32_t w, uint32_t h,
-                              const char *caption)
+static int sdl_set_attr(struct gp_backend *self, enum gp_backend_attrs attr,
+                        const void *vals)
 {
 	SDL_mutexP(mutex);
 
-	if (caption != NULL)
-		SDL_WM_SetCaption(caption, caption);
-
-	/* Send only resize event, the actual resize is done in resize_ack */
-	if (w != 0 && h != 0)
-		gp_event_queue_push_resize(&self->event_queue, w, h, NULL);
+	switch (attr) {
+	case GP_BACKEND_TITLE:
+		SDL_WM_SetCaption(vals, vals);
+	break;
+	case GP_BACKEND_SIZE: {
+		const int *size = vals;
+		/* Send only resize event, the actual resize is done in resize_ack */
+		gp_event_queue_push_resize(&self->event_queue, size[0], size[1], NULL);
+	}
+	break;
+	default:
+		GP_DEBUG(1, "Unimplemented backend attr %i", attr);
+	break;
+	}
 
 	SDL_mutexV(mutex);
 
@@ -195,7 +202,7 @@ static struct gp_backend backend = {
 	.name = "SDL",
 	.flip = sdl_flip,
 	.update_rect = sdl_update_rect,
-	.set_attrs = sdl_set_attributes,
+	.set_attr = sdl_set_attr,
 	.resize_ack = sdl_resize_ack,
 	.exit = sdl_exit,
 	.fd = -1,

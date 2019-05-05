@@ -164,10 +164,11 @@ class libraries:
     def write_config_h(self, f):
         for i in self.libraries:
             f.write("/*\n * %s\n */\n" % i[1])
+            s=i[0].upper().replace("-", "_")
             if self.results[i[0]]:
-                f.write("#define HAVE_%s\n" % i[0].upper())
+                f.write("#define HAVE_%s\n" % s)
             else:
-                f.write("//#define HAVE_%s\n" % i[0].upper())
+                f.write("//#define HAVE_%s\n" % s)
             f.write("\n")
 
     #
@@ -389,6 +390,12 @@ if __name__ ==  '__main__':
                    ["libX11",
                     "X11 library",
                     [header_exists, "X11/Xlib.h"], "", "-lX11", ["backends"]],
+                   ["libxcb",
+                    "XCB library",
+                    [header_exists, "xcb/xcb.h"], "", "-lxcb -lxcb-keysyms -lxcb-shm", ["backends"]],
+                   ["xcb-util-errors",
+                    "XCB errors library",
+                    [header_exists, "xcb/xcb_errors.h"], "", "-lxcb-errors", ["backends"]],
                    ["X_SHM",
                     "MIT-SHM X Extension",
                     [header_exists, "X11/extensions/XShm.h"], "", "-lXext", ["backends"]],

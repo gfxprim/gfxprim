@@ -403,7 +403,7 @@ gp_backend *gp_linux_fb_init(const char *path, int flags)
 	backend->pixmap = &fb->pixmap;
 	backend->flip = shadow ? fb_flip_shadow : NULL;
 	backend->update_rect = shadow ? fb_update_rect_shadow : NULL;
-	backend->set_attrs = NULL;
+	backend->set_attr = NULL;
 	backend->resize_ack = NULL;
 	backend->poll = kbd ? fb_poll : NULL;
 	backend->wait = kbd ? fb_wait : NULL;

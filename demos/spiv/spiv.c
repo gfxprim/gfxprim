@@ -731,10 +731,8 @@ static void init_backend(const char *backend_opts)
 		exit(1);
 	}
 
-	if (config.full_screen) {
-		if (gp_backend_is_x11(backend))
-			gp_x11_fullscreen(backend, 2);
-	}
+	if (config.full_screen)
+		gp_backend_fullscreen(backend, 2);
 }
 
 #define RESIZED_CACHE_MAX 400 * 1024
@@ -917,8 +915,7 @@ int main(int argc, char *argv[])
 					show_image(&params);
 				break;
 				case GP_KEY_F:
-					if (gp_backend_is_x11(backend))
-						gp_x11_fullscreen(backend, 2);
+					gp_backend_fullscreen(backend, 2);
 				break;
 				case GP_KEY_I:
 				        config.show_info = !config.show_info;

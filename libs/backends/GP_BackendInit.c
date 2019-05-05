@@ -175,7 +175,7 @@ static int parse_sdl_params(char *params, gp_size *w, gp_size *h,
 
 static gp_backend *sdl_init(char *params, const char *caption)
 {
-	gp_size w = 0, h = 0, bpp = 0;
+	gp_size w = 640, h = 480, bpp = 0;
 	uint8_t flags = GP_SDL_RESIZABLE;
 
 	if (parse_sdl_params(params, &w, &h, &bpp, &flags))
@@ -240,6 +240,47 @@ static gp_backend *aa_init(char *params, const char *caption)
 	return gp_aalib_init();
 }
 
+static int parse_xcb_params(char *params, gp_size *w, gp_size *h)
+{
+	char *param;
+
+	if (!params)
+		return 0;
+
+	do {
+		param = params;
+		params = next_param(params);
+
+		/*
+		 * Accepts only string with format "intxint" or "intXint"
+		 */
+		int sw, sh;
+		unsigned int n;
+
+		if (sscanf(param, "%i%*[xX]%i%n", &sw, &sh, &n) == 2 && n == strlen(param)) {
+			*w = sw;
+			*h = sh;
+			continue;
+		}
+
+		GP_WARN("XCB: Invalid parameters '%s'", param);
+		errno = EINVAL;
+		return 1;
+	} while (params);
+
+	return 0;
+}
+
+static gp_backend *xcb_init(char *params, const char *caption)
+{
+	gp_size w = 640, h = 480;
+
+	if (parse_xcb_params(params, &w, &h))
+		return NULL;
+
+	return gp_xcb_init(NULL, 0, 0, w, h, caption);
+}
+
 struct backend_init {
 	const char *name;
 	gp_backend *(*init)(char *params, const char *caption);
@@ -250,6 +291,11 @@ struct backend_init {
 static gp_backend *do_help(char *params, const char *caption);
 
 static struct backend_init backends[] = {
+	{.name  = "XCB",
+	 .init = xcb_init,
+	 .usage = "",
+	 .help = {NULL},
+	},
 	{.name  = "X11",
 	 .init  = x11_init,
 	 .usage = "X11:[WxH]:[use_root]:[create_root]:[disable_shm]",
