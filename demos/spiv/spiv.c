@@ -309,6 +309,9 @@ static void update_display(struct loader_params *params, gp_pixmap *img,
 	struct cpu_timer timer;
 	gp_progress_cb callback = {.callback = image_loader_callback};
 
+	if (abort_flag)
+		return;
+
 	switch (config.combined_orientation) {
 	case ROTATE_0:
 	break;
@@ -354,6 +357,9 @@ static void update_display(struct loader_params *params, gp_pixmap *img,
 
 	gp_pixmap sub_display;
 
+	if (abort_flag)
+		return;
+
 	cpu_timer_start(&timer, "Blitting");
 
 	if (config.floyd_steinberg) {
@@ -365,6 +371,7 @@ static void update_display(struct loader_params *params, gp_pixmap *img,
 		if (gp_pixel_has_flags(img->pixel_type, GP_PIXEL_HAS_ALPHA))
 			pattern_fill(pixmap, cx, cy, img->w, img->h);
 		gp_blit_clipped(img, 0, 0, img->w, img->h, pixmap, cx, cy);
+
 	}
 
 	cpu_timer_stop(&timer);
@@ -388,6 +395,10 @@ static void update_display(struct loader_params *params, gp_pixmap *img,
 
 	if (config.combined_orientation)
 		gp_pixmap_free(img);
+
+
+	if (abort_flag)
+		return;
 
 	gp_backend_flip(backend);
 }
