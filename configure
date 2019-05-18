@@ -339,6 +339,7 @@ if __name__ ==  '__main__':
     #
     cfg = {'CC'            : ['gcc', 'Path/name of the C compiler'],
            'CFLAGS'        : ['-W -Wall -Wextra -O2 -ggdb', 'C compiler flags'],
+           'LDFLAGS'       : ['', 'Linker flags'],
            'PYTHON_BIN'    : ['python', 'Path/name of python interpreter'],
            'SWIG'          : ['swig', 'Simplified Wrapper and Interface Generator'],
            'PYTHON_CONFIG' : ['python-config', 'Python config helper'],
