@@ -23,7 +23,8 @@
 #include <string.h>
 #include <errno.h>
 
-#include <core/GP_Debug.h>
+#include "core/gp_pixmap.h"
+#include <core/gp_debug.h>
 #include <filters/GP_Stats.h>
 
 gp_histogram *gp_histogram_alloc(gp_pixel_type pixel_type)

@@ -7,8 +7,8 @@
 
 #include <stdlib.h>
 #include <stdint.h>
-#include <core/GP_GetSetBits.h>
-#include <core/GP_Common.h>
+#include "core/gp_common.h"
+#include <core/gp_get_set_bits.h>
 #include "tst_test.h"
 
 static const uint32_t patterns[] = {

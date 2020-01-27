@@ -28,7 +28,7 @@
 
 #include <stdarg.h>
 
-#include <core/GP_Types.h>
+#include <core/gp_types.h>
 #include <text/GP_TextStyle.h>
 #include <text/GP_TextMetric.h>
 #include <text/GP_Fonts.h>

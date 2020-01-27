@@ -52,7 +52,7 @@
 #endif
 #include <stdlib.h>
 
-#include "core/GP_Common.h"
+#include "core/gp_common.h"
 
 #ifndef GP_ALLOCA_THRESHOLD
 # define GP_ALLOCA_THRESHOLD 2048

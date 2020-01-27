@@ -44,7 +44,7 @@
 #ifndef GP_FN_PER_BPP_H
 #define GP_FN_PER_BPP_H
 
-#include "GP_FnPerBpp.gen.h"
+#include <core/gp_fn_per_bpp.gen.h>
 
 /*
  * Branch on gp_pixmap argument.

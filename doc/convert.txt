@@ -7,7 +7,7 @@ This page describes RGB tripplet to pixels conversions.
 -------------------------------------------------------------------------------
 #include <gfxprim.h>
 /* or */
-#include <core/GP_Convert.h>
+#include <core/gp_convert.h>
 
 gp_pixel gp_rgb_to_pixel(uint8_t r, uint8_t g, uint8_t b, gp_pixel_type type);
 
@@ -28,7 +28,7 @@ link:pixels.html[pixel types].
 -------------------------------------------------------------------------------
 #include <gfxprim.h>
 /* or */
-#include <core/GP_Convert.h>
+#include <core/gp_convert.h>
 
 gp_pixel gp_convert_pixel(gp_pixel pixel, gp_pixel_type from, gp_pixel_type to);
 -------------------------------------------------------------------------------

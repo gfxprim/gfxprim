@@ -26,7 +26,7 @@
 
  */
 
-#include "core/GP_Fill.h"
+#include "core/gp_fill.h"
 
 enum RLE_state {
 	RLE_START,

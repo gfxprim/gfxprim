@@ -7,9 +7,11 @@
 #include <string.h>
 #include <errno.h>
 
-#include "core/GP_Core.h"
-#include "core/GP_Pixel.h"
-#include "core/GP_Clamp.h"
+#include <core/gp_debug.h>
+#include <core/gp_pixel.h>
+#include <core/gp_get_put_pixel.h>
+#include <core/gp_convert.h>
+#include "core/gp_clamp.h"
 #include "filters/GP_Filter.h"
 #include "filters/GP_Dither.h"
 

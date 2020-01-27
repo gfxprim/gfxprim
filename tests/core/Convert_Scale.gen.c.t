@@ -9,7 +9,7 @@
 #include <math.h>
 #include <stdint.h>
 
-#include <core/GP_Convert_Scale.gen.h>
+#include <core/gp_convert_scale.gen.h>
 
 #include "tst_test.h"
 

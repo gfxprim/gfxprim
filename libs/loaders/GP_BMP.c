@@ -36,10 +36,10 @@
 #include <string.h>
 #include <stdio.h>
 
-#include "core/GP_Debug.h"
-#include "core/GP_Pixel.h"
-#include "core/GP_GetPutPixel.h"
-#include "core/GP_TempAlloc.h"
+#include <core/gp_debug.h>
+#include <core/gp_pixel.h>
+#include <core/gp_get_put_pixel.h>
+#include <core/gp_temp_alloc.h>
 
 #include <loaders/GP_LineConvert.h>
 #include <loaders/GP_Loaders.gen.h>

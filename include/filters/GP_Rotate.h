@@ -29,7 +29,7 @@
 #ifndef FILTERS_GP_ROTATE_H
 #define FILTERS_GP_ROTATE_H
 
-#include <core/GP_Types.h>
+#include <core/gp_types.h>
 #include <filters/GP_Filter.h>
 
 /*

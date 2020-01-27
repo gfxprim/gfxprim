@@ -113,7 +113,7 @@
 
 #include <stdint.h>
 
-#include <core/GP_Pixmap.h>
+#include "core/gp_pixmap.h"
 
 typedef enum gp_correction_type {
 	/* Classical gamma correction */

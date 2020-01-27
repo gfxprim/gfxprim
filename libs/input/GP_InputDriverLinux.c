@@ -27,7 +27,7 @@
 #include <string.h>
 #include <linux/input.h>
 
-#include <core/GP_Debug.h>
+#include <core/gp_debug.h>
 
 #include <input/GP_EventQueue.h>
 #include <input/GP_InputDriverLinux.h>

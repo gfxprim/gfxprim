@@ -7,9 +7,9 @@
  * Copyright (C) 2009-2014 Cyril Hrubis <metan@ucw.cz>
  */
 
-#include "core/GP_GetPutPixel.h"
-#include "core/GP_Transform.h"
-#include "core/GP_FnPerBpp.h"
+#include <core/gp_get_put_pixel.h>
+#include <core/gp_transform.h>
+#include <core/gp_fn_per_bpp.h>
 #include "gfx/GP_HLine.h"
 #include "gfx/GP_Circle.h"
 #include "gfx/GP_CircleSeg.h"

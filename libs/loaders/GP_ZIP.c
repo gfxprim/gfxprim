@@ -34,8 +34,8 @@
 
 #endif /* HAVE_ZLIB */
 
-#include <core/GP_Common.h>
-#include <core/GP_Debug.h>
+#include "core/gp_common.h"
+#include <core/gp_debug.h>
 
 #include "loaders/GP_Loader.h"
 #include "loaders/GP_IOZlib.h"

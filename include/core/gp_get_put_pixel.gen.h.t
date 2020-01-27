@@ -1,7 +1,7 @@
 @ include header.t
 /*
  * Access pixel bytes, Get and PutPixel
- * Do not include directly, use GP_Pixel.h
+ * Do not include directly, use gp_pixel.h
  *
  * Copyright (C) 2011-2014 Cyril Hrubis <metan@ucw.cz>
  * Copyright (C) 2011      Tomas Gavenciak <gavento@ucw.cz>
@@ -48,8 +48,8 @@
 
  */
 
-#include "GP_GetSetBits.h"
-#include "GP_Pixmap.h"
+#include <core/gp_get_set_bits.h>
+#include "core/gp_pixmap.h"
 
 @ for ps in pixelsizes:
 /*

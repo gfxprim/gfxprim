@@ -23,8 +23,8 @@
 #include <inttypes.h>
 #include <string.h>
 
-#include <core/GP_Debug.h>
-#include <core/GP_Common.h>
+#include <core/gp_debug.h>
+#include "core/gp_common.h"
 #include <input/GP_Timer.h>
 
 static void dump_level(gp_timer *heap, unsigned int level, unsigned int cur)

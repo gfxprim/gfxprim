@@ -36,9 +36,9 @@
 
 #include <stdint.h>
 
-#include "core/GP_Pixmap.h"
+#include "core/gp_pixmap.h"
 
-#include "core/GP_Debug.h"
+#include <core/gp_debug.h>
 
 #include "../../config.h"
 

@@ -26,7 +26,7 @@
 #ifndef GP_LINE_H
 #define GP_LINE_H
 
-#include "core/GP_Pixmap.h"
+#include "core/gp_types.h"
 
 void gp_line(gp_pixmap *pixmap, gp_coord x0, gp_coord y0,
              gp_coord x1, gp_coord y1, gp_pixel pixel);

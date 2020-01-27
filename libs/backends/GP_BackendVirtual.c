@@ -22,9 +22,9 @@
 
 #include <string.h>
 
-#include "core/GP_Pixmap.h"
-#include "core/GP_Blit.h"
-#include "core/GP_Debug.h"
+#include "core/gp_pixmap.h"
+#include <core/gp_blit.h>
+#include <core/gp_debug.h>
 
 #include "GP_BackendVirtual.h"
 

@@ -30,9 +30,9 @@
 
 #include <stdint.h>
 
-#include <core/GP_Types.h>
-#include <core/GP_Common.h>
-#include <core/GP_FnPerBpp.h>
+#include "core/gp_types.h"
+#include "core/gp_common.h"
+#include <core/gp_fn_per_bpp.h>
 
 /*
  * gp_pixel_type is an enum of pixel types,
@@ -47,8 +47,8 @@
 #define GP_PIXEL_BITS (sizeof(gp_pixel) * 8)
 
 /* Generated header */
-#include "GP_Pixel.gen.h"
-#include "GP_GetSetBits.h"
+#include <core/gp_pixel.gen.h>
+#include <core/gp_get_set_bits.h>
 
 /*
  * Information about ordering of pixels in byte for 1, 2 and 4 bpp

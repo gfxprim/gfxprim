@@ -83,9 +83,9 @@
 
 @ end
 
-#include "GP_GetSetBits.h"
-#include "GP_Pixmap.h"
-#include "GP_Pixel.h"
+#include <core/gp_get_set_bits.h>
+#include "core/gp_pixmap.h"
+#include <core/gp_pixel.h>
 
 @
 @ # Loop around "central" pixel types

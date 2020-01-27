@@ -2,7 +2,7 @@
 %module(package="gfxprim.loaders") c_loaders
 
 %{
-#include "core/GP_Core.h"
+#include "core/gp_core.h"
 #include "loaders/GP_Loaders.h"
 %}
 

@@ -22,10 +22,10 @@
 
 #include <math.h>
 
-#include "GP_Pixel.h"
-#include "GP_Debug.h"
+#include <core/gp_pixel.h>
+#include <core/gp_debug.h>
 
-#include "GP_Gamma.h"
+#include <core/gp_gamma.h>
 
 static gp_gamma_table *tables = NULL;
 

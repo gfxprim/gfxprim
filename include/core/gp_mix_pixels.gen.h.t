@@ -5,10 +5,10 @@
  * Copyright (C) 2011-2014 Cyril Hrubis <metan@ucw.cz>
  */
 
-#include "core/GP_Pixmap.h"
-#include "core/GP_Pixel.h"
-#include "core/GP_GetPutPixel.h"
-#include "core/GP_GammaCorrection.h"
+#include "core/gp_pixmap.h"
+#include <core/gp_pixel.h>
+#include <core/gp_get_put_pixel.h>
+#include <core/gp_gamma_correction.h>
 
 @ for pt in pixeltypes:
 @     if not pt.is_unknown():

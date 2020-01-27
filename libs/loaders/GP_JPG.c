@@ -35,7 +35,7 @@
 #include <setjmp.h>
 
 #include "../../config.h"
-#include "core/GP_Debug.h"
+#include <core/gp_debug.h>
 
 #include <loaders/GP_Exif.h>
 #include <loaders/GP_LineConvert.h>

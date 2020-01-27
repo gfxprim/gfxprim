@@ -33,9 +33,9 @@
 #include <string.h>
 
 #include "../../config.h"
-#include "core/GP_ByteOrder.h"
-#include "core/GP_Debug.h"
-#include "core/GP_GammaCorrection.h"
+#include <core/gp_byte_order.h>
+#include <core/gp_debug.h>
+#include <core/gp_gamma_correction.h>
 
 #include <loaders/GP_Loaders.gen.h>
 
@@ -43,7 +43,7 @@
 
 #include <png.h>
 
-#include <core/GP_BitSwap.h>
+#include <core/gp_bit_swap.h>
 
 int gp_match_png(const void *buf)
 {

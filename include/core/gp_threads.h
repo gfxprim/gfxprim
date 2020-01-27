@@ -31,8 +31,8 @@
 
 #include <pthread.h>
 
-#include <core/GP_ProgressCallback.h>
-#include <core/GP_Types.h>
+#include <core/gp_progress_callback.h>
+#include <core/gp_types.h>
 
 /*
  * Sets default number of threads the library uses

@@ -22,8 +22,8 @@
 
 #include <errno.h>
 
-#include "core/GP_Debug.h"
-#include "core/GP_Pixmap.h"
+#include <core/gp_debug.h>
+#include "core/gp_pixmap.h"
 #include "backends/GP_AALib.h"
 #include "input/GP_Input.h"
 

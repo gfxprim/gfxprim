@@ -2,18 +2,17 @@
 %module(package="gfxprim.core") c_core
 
 %{
-#include "core/GP_Core.h"
+#include "core/gp_core.h"
 %}
 
 /*
  * Basic types and common methods
  */
 
-%include "GP_Core.h"
-%include "GP_Types.h"
-%include "GP_Transform.h"
-%include "GP_GetSetBits.h"
-%include "GP_Transform.h"
+%include "gp_core.h"
+%include "gp_types.h"
+%include "gp_transform.h"
+%include "gp_get_set_bits.h"
 
 /*
  * Make members of gp_debug_msg structure immutable
@@ -25,19 +24,19 @@
 %immutable gp_debug_msg::msg;
 %ignore gp_debug_print;
 
-%include "GP_Debug.h"
+%include "gp_debug.h"
 
 /*
  * Pixel types
  */
-%include "GP_Pixel.h"
-%include "GP_Pixel.gen.h" /* Includes enum gp_pixel_type definition */
-%include "GP_Convert.h"
-%import "GP_Convert.gen.h"
-%import "GP_Convert_Scale.gen.h"
+%include "gp_pixel.h"
+%include "gp_pixel.gen.h" /* Includes enum gp_pixel_type definition */
+%include "gp_convert.h"
+%import "gp_convert.gen.h"
+%import "gp_convert_scale.gen.h"
 
-%import "GP_FnPerBpp.h"
-%import "GP_FnPerBpp.gen.h"
+%import "gp_fn_per_bpp.h"
+%import "gp_fn_per_bpp.gen.h"
 
 %inline %{
 const gp_pixel_type_desc *gp_pixel_types_access(gp_pixel_type no)
@@ -115,13 +114,13 @@ ERROR_ON_NULL(gp_sub_pixmap_alloc);
 %newobject gp_pixmap_convert_alloc;
 %newobject gp_sub_pixmap_alloc;
 
-%include "GP_Pixmap.h"
+%include "gp_pixmap.h"
 
 /*
  * Pixmap manipulation
  */
-%include "GP_GetPutPixel.h"
-%import "GP_GetPutPixel.gen.h"
-%include "GP_WritePixel.h"
-%include "GP_Blit.h"
-%include "GP_Fill.h"
+%include "gp_get_put_pixel.h"
+%import "gp_get_put_pixel.gen.h"
+%include "gp_write_pixel.h"
+%include "gp_blit.h"
+%include "gp_fill.h"

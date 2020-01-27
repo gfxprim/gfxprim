@@ -27,9 +27,9 @@
  */
 #include <errno.h>
 
-#include <core/GP_Pixmap.h>
-#include <core/GP_Blit.h>
-#include <core/GP_Fill.h>
+#include <core/gp_pixmap.h>
+#include <core/gp_blit.h>
+#include <core/gp_fill.h>
 
 #include "tst_test.h"
 #include "tst_preload.h"

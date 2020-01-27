@@ -54,9 +54,9 @@
 
 #include <string.h>
 
-#include "core/GP_Debug.h"
-#include "core/GP_Pixmap.h"
-#include "core/GP_GetPutPixel.h"
+#include <core/gp_debug.h>
+#include "core/gp_pixmap.h"
+#include <core/gp_get_put_pixel.h>
 
 #include <loaders/GP_LineConvert.h>
 #include <loaders/GP_Loaders.gen.h>
@@ -390,7 +390,7 @@ static int load_ascii_g1_inv(struct buf *buf, gp_pixmap *pixmap,
 }
 
 //TODO: This is temporary till blit works with bitendian
-#include "core/GP_BitSwap.h"
+#include <core/gp_bit_swap.h>
 
 static int load_raw_g1_inv(struct buf *buf, gp_pixmap *pixmap,
                            gp_progress_cb *cb)

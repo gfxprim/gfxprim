@@ -4,7 +4,7 @@
 %{
 #include "text/GP_Text.h"
 #include "text/GP_Font.h"
-#include "core/GP_Debug.h"
+#include <core/gp_debug.h>
 %}
 
 %import ../core/core.i

@@ -23,9 +23,9 @@
 #include <stdarg.h>
 #include <errno.h>
 
-#include <core/GP_Version.h>
-#include <core/GP_Common.h>
-#include <core/GP_Debug.h>
+#include <core/gp_version.h>
+#include <core/gp_common.h>
+#include <core/gp_debug.h>
 
 static unsigned int debug_level = GP_DEFAULT_DEBUG_LEVEL;
 

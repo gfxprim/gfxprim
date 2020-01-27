@@ -28,8 +28,8 @@
 #ifndef CORE_GP_TRANSFORM_H
 #define CORE_GP_TRANSFORM_H
 
-#include "GP_Common.h"
-#include "GP_FixedPoint.h"
+#include "core/gp_common.h"
+#include <core/gp_fixed_point.h>
 
 /*
  * Flip a coordinate within pixmap according to pixmap transformation.

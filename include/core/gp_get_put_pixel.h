@@ -24,15 +24,15 @@
 #ifndef CORE_GP_GETPUTPIXEL_H
 #define CORE_GP_GETPUTPIXEL_H
 
-#include "GP_Pixmap.h"
-#include "GP_Transform.h"
-#include "GP_FnPerBpp.h"
-#include "GP_Pixel.h"
+#include "core/gp_pixmap.h"
+#include <core/gp_transform.h>
+#include <core/gp_fn_per_bpp.h>
+#include <core/gp_pixel.h>
 
 /*
  * Generated header
  */
-#include "GP_GetPutPixel.gen.h"
+#include <core/gp_get_put_pixel.gen.h>
 
 /*
  * GetPixel with pixmap transformations and clipping.

@@ -33,10 +33,10 @@
 #include <string.h>
 
 #include "../../config.h"
-#include "core/GP_Pixel.h"
-#include "core/GP_GetPutPixel.gen.h"
-#include "core/GP_Fill.h"
-#include "core/GP_Debug.h"
+#include <core/gp_pixel.h>
+#include <core/gp_get_put_pixel.gen.h>
+#include "core/gp_fill.h"
+#include <core/gp_debug.h>
 
 #include <loaders/GP_IO.h>
 #include <loaders/GP_Loaders.gen.h>

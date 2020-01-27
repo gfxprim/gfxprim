@@ -10,8 +10,8 @@
 #include <errno.h>
 #include <stdlib.h>
 
-#include <core/GP_Pixmap.h>
-#include <core/GP_GetPutPixel.h>
+#include <core/gp_pixmap.h>
+#include <core/gp_get_put_pixel.h>
 #include <loaders/GP_Loaders.h>
 
 #include "tst_test.h"

@@ -27,7 +27,7 @@
  */
 #include <errno.h>
 
-#include <core/GP_Debug.h>
+#include <core/gp_debug.h>
 
 #include "tst_test.h"
 

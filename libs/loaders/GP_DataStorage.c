@@ -24,8 +24,8 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <core/GP_Debug.h>
-#include <core/GP_Common.h>
+#include <core/gp_debug.h>
+#include "core/gp_common.h"
 #include <loaders/GP_DataStorage.h>
 
 struct record {

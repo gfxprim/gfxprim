@@ -7,8 +7,8 @@
  * Copyright (C) 2009-2014 Cyril Hrubis <metan@ucw.cz>
  */
 
-#include "core/GP_GetPutPixel.gen.h"
-#include "core/GP_WritePixel.h"
+#include <core/gp_get_put_pixel.gen.h>
+#include <core/gp_write_pixel.h>
 
 #include "gfx/GP_HLine.h"
 

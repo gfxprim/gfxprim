@@ -26,7 +26,7 @@
 #ifndef TEXT_GP_TEXT_METRIC_H
 #define TEXT_GP_TEXT_METRIC_H
 
-#include <core/GP_Types.h>
+#include <core/gp_types.h>
 #include <text/GP_TextStyle.h>
 
 /*

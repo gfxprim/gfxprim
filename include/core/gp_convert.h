@@ -23,13 +23,13 @@
 #ifndef CORE_GP_CONVERT_H
 #define CORE_GP_CONVERT_H
 
-#include "GP_Common.h"
-#include "GP_Pixmap.h"
-#include "GP_Pixel.h"
+#include "core/gp_common.h"
+#include "core/gp_pixmap.h"
+#include <core/gp_pixel.h>
 
 /* Generated headers */
-#include "GP_Convert.gen.h"
-#include "GP_Convert_Scale.gen.h"
+#include <core/gp_convert.gen.h>
+#include <core/gp_convert_scale.gen.h>
 
 /*
  * Generated function to convert RGB888 to any type.

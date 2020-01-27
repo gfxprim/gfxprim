@@ -5,7 +5,7 @@
  * Copyright (C) 2009-2014 Cyril Hrubis <metan@ucw.cz>
  */
 
-#include "core/GP_GetPutPixel.h"
+#include <core/gp_get_put_pixel.h>
 #include "gfx/GP_VLine.gen.h"
 
 @ for ps in pixelsizes:

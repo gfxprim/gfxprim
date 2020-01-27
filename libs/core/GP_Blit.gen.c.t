@@ -8,15 +8,15 @@
 
 #include <string.h>
 
-#include "core/GP_Pixel.h"
-#include "core/GP_GetPutPixel.h"
-#include "core/GP_Pixmap.h"
-#include "core/GP_Blit.h"
-#include "core/GP_Debug.h"
-#include "core/GP_Convert.h"
-#include "core/GP_Convert.gen.h"
-#include "core/GP_Convert_Scale.gen.h"
-#include "core/GP_MixPixels2.gen.h"
+#include <core/gp_pixel.h>
+#include <core/gp_get_put_pixel.h>
+#include "core/gp_pixmap.h"
+#include <core/gp_blit.h>
+#include <core/gp_debug.h>
+#include <core/gp_convert.h>
+#include <core/gp_convert.gen.h>
+#include <core/gp_convert_scale.gen.h>
+#include <core/gp_mix_pixels2.gen.h>
 
 /*
  * TODO: this is used for same pixel but different offset, could still be optimized

@@ -6,7 +6,7 @@
  */
 
 #include <core/GP_Types.h>
-#include <core/GP_GammaCorrection.h>
+#include <core/gp_gamma_correction.h>
 
 @ for pt in pixeltypes:
 @     if not pt.is_unknown() and not pt.is_palette():

@@ -2,7 +2,7 @@
 %module(package="gfxprim.input") c_input
 
 %{
-#include "core/GP_Debug.h"
+#include <core/gp_debug.h>
 #include "input/GP_Input.h"
 %}
 

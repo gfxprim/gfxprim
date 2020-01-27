@@ -7,8 +7,8 @@
 
 #include <stdio.h>
 
-#include <core/GP_Pixmap.h>
-#include <core/GP_GetPutPixel.h>
+#include <core/gp_pixmap.h>
+#include <core/gp_get_put_pixel.h>
 
 #include "tst_test.h"
 

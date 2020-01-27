@@ -82,7 +82,7 @@ when taking into the account the width and height.
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <core/GP_Transform.h>
+#include <core/gp_transform.h>
 /* or */
 #include <gfxprim.h>
 
@@ -98,7 +98,7 @@ GP_RETRANSFORM_POINT(pixmap, x, y)
 
 [source,c]
 ------------------------------------------------------------------------------
-#include <core/GP_Pixmap.h>
+#include <core/gp_pixmap.h>
 /* or */
 #include <gfxprim.h>
 
@@ -140,7 +140,7 @@ Basic pixmap functions
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <core/GP_Pixmap.h>
+#include <core/gp_pixmap.h>
 /* or */
 #include <gfxprim.h>
 
@@ -161,7 +161,7 @@ pointer you passed as second argument).
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <core/GP_Pixmap.h>
+#include <core/gp_pixmap.h>
 /* or */
 #include <gfxprim.h>
 
@@ -177,7 +177,7 @@ appropriate size; the initial contents of the bitmap are undefined.
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <core/GP_Pixmap.h>
+#include <core/gp_pixmap.h>
 /* or */
 #include <gfxprim.h>
 
@@ -213,7 +213,7 @@ The 'free_pixels' flag for the resulting pixmap is set.
 [[pixmap_free]]
 [source,c]
 -------------------------------------------------------------------------------
-#include <core/GP_Pixmap.h>
+#include <core/gp_pixmap.h>
 /* or */
 #include <gfxprim.h>
 
@@ -247,7 +247,7 @@ CAUTION: The subpixmap doesn't hold a reference to the original pixmap, so
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <core/GP_Pixmap.h>
+#include <core/gp_pixmap.h>
 /* or */
 #include <gfxprim.h>
 
@@ -275,7 +275,7 @@ Conversions
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <core/GP_Pixmap.h>
+#include <core/gp_pixmap.h>
 /* or */
 #include <gfxprim.h>
 
@@ -297,7 +297,7 @@ Misc
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <core/GP_Pixmap.h>
+#include <core/gp_pixmap.h>
 /* or */
 #include <gfxprim.h>
 

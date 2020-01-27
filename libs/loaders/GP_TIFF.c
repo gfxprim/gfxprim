@@ -34,9 +34,9 @@
 
 #include "../../config.h"
 
-#include "core/GP_Pixel.h"
-#include "core/GP_GetPutPixel.h"
-#include "core/GP_Debug.h"
+#include <core/gp_pixel.h>
+#include <core/gp_get_put_pixel.h>
+#include <core/gp_debug.h>
 
 #include <loaders/GP_Loaders.gen.h>
 
@@ -425,7 +425,7 @@ static int tiff_read_palette(TIFF *tiff, gp_pixmap *res,
 }
 
 //Temporary, the bitendians strikes again
-#include "core/GP_BitSwap.h"
+#include <core/gp_bit_swap.h>
 
 /*
  * Direct read -> data in image are in right format.

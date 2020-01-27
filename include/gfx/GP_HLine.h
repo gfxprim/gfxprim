@@ -26,7 +26,7 @@
 #ifndef GFX_GP_HLINE_H
 #define GFX_GP_HLINE_H
 
-#include "core/GP_Pixmap.h"
+#include "core/gp_types.h"
 
 /* Raw per BPP HLines */
 #include "gfx/GP_HLine.gen.h"

@@ -20,8 +20,8 @@
  *                                                                           *
  *****************************************************************************/
 
-#include <core/GP_Convert.h>
-#include <core/GP_Debug.h>
+#include <core/gp_convert.h>
+#include <core/gp_debug.h>
 #include <filters/GP_MultiTone.h>
 #include <filters/GP_Sepia.h>
 

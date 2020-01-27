@@ -24,9 +24,9 @@
 #include <errno.h>
 #include <sys/stat.h>
 
-#include <core/GP_Pixmap.h>
-#include <core/GP_Convert.h>
-#include <core/GP_GetPutPixel.h>
+#include <core/gp_pixmap.h>
+#include <core/gp_convert.h>
+#include <core/gp_get_put_pixel.h>
 #include <loaders/GP_Loaders.h>
 
 #include "tst_test.h"

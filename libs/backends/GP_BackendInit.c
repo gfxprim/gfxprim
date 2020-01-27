@@ -23,7 +23,7 @@
 #include <string.h>
 #include <errno.h>
 
-#include "core/GP_Debug.h"
+#include <core/gp_debug.h>
 
 #include "GP_Backends.h"
 #include "GP_BackendInit.h"

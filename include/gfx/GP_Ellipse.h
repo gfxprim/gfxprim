@@ -26,7 +26,7 @@
 #ifndef GP_ELLIPSE_H
 #define GP_ELLIPSE_H
 
-#include "core/GP_Pixmap.h"
+#include "core/gp_types.h"
 
 /* Ellipse */
 

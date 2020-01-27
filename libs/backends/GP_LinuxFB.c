@@ -35,8 +35,8 @@
 #include <linux/kd.h>
 #include <linux/vt.h>
 
-#include <core/GP_Debug.h>
-#include <core/GP_Pixmap.h>
+#include <core/gp_debug.h>
+#include "core/gp_pixmap.h"
 #include <input/GP_InputDriverKBD.h>
 #include <backends/GP_LinuxFB.h>
 

@@ -22,8 +22,7 @@
 
 #include <errno.h>
 
-#include <core/GP_Pixmap.h>
-#include <core/GP_Debug.h>
+#include <core/gp_debug.h>
 
 #include <loaders/GP_Loaders.h>
 

@@ -8,10 +8,10 @@
 #include <string.h>
 #include <errno.h>
 
-#include <core/GP_Pixmap.h>
-#include <core/GP_Pixel.h>
-#include <core/GP_GetPutPixel.h>
-#include <core/GP_Debug.h>
+#include <core/gp_pixmap.h>
+#include <core/gp_pixel.h>
+#include <core/gp_get_put_pixel.h>
+#include <core/gp_debug.h>
 #include <filters/GP_Filter.h>
 #include <filters/GP_Stats.h>
 

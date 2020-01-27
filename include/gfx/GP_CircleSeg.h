@@ -26,7 +26,7 @@
 #ifndef GFX_GP_CIRCLE_H
 #define GFX_GP_CIRCLE_H
 
-#include <core/GP_Types.h>
+#include <core/gp_types.h>
 
 /*
  * Quadrants in cartesian space the center is set in the middle of the circle.

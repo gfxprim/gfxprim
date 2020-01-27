@@ -36,9 +36,9 @@
 #include <string.h>
 #include <stdio.h>
 
-#include <core/GP_Debug.h>
-#include <core/GP_Pixel.h>
-#include <core/GP_GetPutPixel.h>
+#include <core/gp_debug.h>
+#include <core/gp_pixel.h>
+#include <core/gp_get_put_pixel.h>
 #include <loaders/GP_Loaders.gen.h>
 
 #define PSP_SIGNATURE "Paint Shop Pro Image File\n\x1a\0\0\0\0\0\0\0\0"

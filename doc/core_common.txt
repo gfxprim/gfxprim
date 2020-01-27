@@ -9,7 +9,7 @@ Common Macros and Inline Functions
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <core/GP_Common.h>
+#include <core/gp_common.h>
 /* or */
 #include <gfxprim.h>
 
@@ -88,7 +88,7 @@ NOTE: The allocator itself does not align the resulting blocks. It's your
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <core/GP_TempAlloc.h>
+#include <core/gp_temp_alloc.h>
 
 /*
  * A macro that creates block allocator.
@@ -115,7 +115,7 @@ Example usage of the allocator:
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <core/GP_TempAlloc.h>
+#include <core/gp_temp_alloc.h>
 
 int foo(...)
 {

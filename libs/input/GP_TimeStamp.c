@@ -24,8 +24,8 @@
 #include <string.h>
 #include <time.h>
 
-#include <core/GP_Common.h>
-#include <core/GP_Debug.h>
+#include "core/gp_common.h"
+#include <core/gp_debug.h>
 
 #include <input/GP_TimeStamp.h>
 

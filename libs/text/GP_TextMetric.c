@@ -23,7 +23,7 @@
  *                                                                           *
  *****************************************************************************/
 
-#include <core/GP_Common.h>
+#include "core/gp_common.h"
 #include <text/GP_TextMetric.h>
 
 extern gp_text_style gp_default_style;

@@ -27,7 +27,7 @@
 #define GFXPRIM_H__
 
 /* library core */
-#include "core/GP_Core.h"
+#include "core/gp_core.h"
 
 /* public drawing API */
 #include "gfx/GP_Gfx.h"

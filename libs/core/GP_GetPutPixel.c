@@ -21,8 +21,8 @@
  *                                                                           *
  *****************************************************************************/
 
-#include "GP_GetPutPixel.h"
-#include "GP_Transform.h"
+#include <core/gp_get_put_pixel.h>
+#include <core/gp_transform.h>
 
 gp_pixel gp_getpixel(const gp_pixmap *pixmap, gp_coord x, gp_coord y)
 {

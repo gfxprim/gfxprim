@@ -23,7 +23,7 @@
 #ifndef __COMMON_H__
 #define __COMMON_H__
 
-#include <core/GP_Pixmap.h>
+#include <core/gp_pixmap.h>
 
 void dump_buffers(const char *pattern, const gp_pixmap *c);
 

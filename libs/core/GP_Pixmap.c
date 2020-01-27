@@ -26,13 +26,13 @@
 #include <errno.h>
 #include <string.h>
 
-#include "GP_Debug.h"
-#include "GP_Transform.h"
-#include "GP_Pixel.h"
-#include "GP_GetPutPixel.h"
-#include "GP_Gamma.h"
-#include "GP_Pixmap.h"
-#include "GP_Blit.h"
+#include <core/gp_debug.h>
+#include <core/gp_transform.h>
+#include <core/gp_pixel.h>
+#include <core/gp_get_put_pixel.h>
+#include <core/gp_gamma.h>
+#include "core/gp_pixmap.h"
+#include <core/gp_blit.h>
 
 static uint32_t get_bpr(uint32_t bpp, uint32_t w)
 {

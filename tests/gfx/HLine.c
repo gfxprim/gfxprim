@@ -23,7 +23,7 @@
 #include <string.h>
 #include <errno.h>
 
-#include <core/GP_Pixmap.h>
+#include <core/gp_pixmap.h>
 #include <gfx/GP_HLine.h>
 
 #include "tst_test.h"

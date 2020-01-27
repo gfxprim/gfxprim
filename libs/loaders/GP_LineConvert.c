@@ -20,7 +20,7 @@
  *                                                                           *
  *****************************************************************************/
 
-#include <core/GP_Debug.h>
+#include <core/gp_debug.h>
 #include <loaders/GP_LineConvert.h>
 
 static void abc888_to_cba888(const uint8_t *inbuf, uint8_t *outbuf,

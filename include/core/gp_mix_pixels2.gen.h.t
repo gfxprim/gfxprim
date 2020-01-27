@@ -5,8 +5,8 @@
  * Copyright (C) 2009-2014 Cyril Hrubis <metan@ucw.cz>
  */
 
-#include "core/GP_GammaCorrection.h"
-#include "core/GP_Pixel.h"
+#include <core/gp_gamma_correction.h>
+#include <core/gp_pixel.h>
 
 //TODO: Fix blit where both source and destination have alpha channel
 

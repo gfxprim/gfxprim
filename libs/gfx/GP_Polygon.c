@@ -28,8 +28,8 @@
 #include <math.h>
 #include <limits.h>
 
-#include "core/GP_Transform.h"
-#include "core/GP_GetPutPixel.h"
+#include <core/gp_transform.h>
+#include <core/gp_get_put_pixel.h>
 
 #include "GP_Line.h"
 #include "GP_HLine.h"

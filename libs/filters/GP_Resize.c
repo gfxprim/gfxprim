@@ -22,8 +22,8 @@
 
 #include <errno.h>
 
-#include <core/GP_Pixmap.h>
-#include <core/GP_Debug.h>
+#include <core/gp_pixmap.h>
+#include <core/gp_debug.h>
 #include <filters/GP_ResizeNN.h>
 #include <filters/GP_ResizeLinear.h>
 #include <filters/GP_ResizeCubic.h>

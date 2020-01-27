@@ -24,7 +24,7 @@
 #include <errno.h>
 #include <sys/stat.h>
 
-#include <core/GP_Pixmap.h>
+#include <core/gp_pixmap.h>
 #include <gfx/GP_LineAA.h>
 
 #include "tst_test.h"

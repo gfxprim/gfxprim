@@ -30,7 +30,7 @@
 #ifndef BACKENDS_GP_BACKEND_VIRTUAL_H
 #define BACKENDS_GP_BACKEND_VIRTUAL_H
 
-#include <core/GP_Pixel.h>
+#include <core/gp_pixel.h>
 #include <backends/GP_Backend.h>
 
 enum gp_backend_virt_flags {

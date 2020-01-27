@@ -2,10 +2,10 @@ TOPDIR=../..
 
 include $(TOPDIR)/pre.mk
 
-GENHEADERS=GP_Convert_Scale.gen.h GP_Pixel.gen.h \
-           GP_GetPutPixel.gen.h GP_Convert.gen.h GP_FnPerBpp.gen.h \
-           GP_MixPixels.gen.h GP_GammaCorrection.gen.h GP_GammaPixel.gen.h \
-	   GP_WritePixel.gen.h GP_MixPixels2.gen.h
+GENHEADERS=gp_convert_scale.gen.h gp_pixel.gen.h \
+           gp_get_put_pixel.gen.h gp_convert.gen.h gp_fn_per_bpp.gen.h \
+           gp_mix_pixels.gen.h gp_gamma_correction.gen.h gp_gamma_pixel.gen.h \
+	   gp_write_pixel.gen.h gp_mix_pixels2.gen.h
 
 include $(TOPDIR)/gen.mk
 include $(TOPDIR)/post.mk

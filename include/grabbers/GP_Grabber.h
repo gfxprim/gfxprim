@@ -23,7 +23,7 @@
 #ifndef GP_GRABBERS_GRABBER_H
 #define GP_GRABBERS_GRABBER_H
 
-#include <core/GP_Types.h>
+#include <core/gp_types.h>
 
 typedef struct gp_grabber gp_grabber;
 

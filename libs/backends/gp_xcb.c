@@ -5,8 +5,8 @@
 
 #include "../../config.h"
 
-#include <core/GP_Debug.h>
-#include <core/GP_Common.h>
+#include <core/gp_debug.h>
+#include "core/gp_common.h"
 #include <GP_Backend.h>
 
 #ifdef HAVE_LIBXCB
@@ -16,7 +16,7 @@
 #include <xcb/xcb.h>
 #include <xcb/shm.h>
 
-#include <core/GP_Pixmap.h>
+#include <core/gp_pixmap.h>
 
 #include "gp_xcb_con.h"
 #include "gp_xcb_input.h"

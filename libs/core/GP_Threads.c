@@ -23,10 +23,10 @@
 #include <unistd.h>
 #include <stdlib.h>
 
-#include "GP_Common.h"
-#include "GP_Debug.h"
+#include "gp_common.h"
+#include <core/gp_debug.h>
 
-#include "GP_Threads.h"
+#include <core/gp_threads.h>
 
 static unsigned int nr_threads = 0;
 

@@ -5,8 +5,8 @@
  * Copyright (C) 2009-2014 Cyril Hrubis <metan@ucw.cz>
  */
 
-#include <core/GP_Debug.h>
-#include <core/GP_GetPutPixel.h>
+#include <core/gp_debug.h>
+#include <core/gp_get_put_pixel.h>
 #include <filters/GP_Rotate.h>
 
 @ for ps in pixelsizes:

@@ -25,8 +25,8 @@
 
 #include <string.h>
 
-#include "GP_Debug.h"
-#include "GP_Pixel.h"
+#include <core/gp_debug.h>
+#include <core/gp_pixel.h>
 
 static const gp_pixel_channel *
 get_channel(const gp_pixel_type_desc *desc, const char *name)

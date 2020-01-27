@@ -16,8 +16,8 @@
  * Python callback proxy. Calls a python function passed via self->priv
  */
 %{
-#include <core/GP_ProgressCallback.h>
-#include <core/GP_Debug.h>
+#include <core/gp_progress_callback.h>
+#include <core/gp_debug.h>
 
 struct gp_proxy_params {
         PyObject *callback;

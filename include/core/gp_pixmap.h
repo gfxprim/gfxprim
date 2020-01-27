@@ -29,9 +29,9 @@
 #include <stdint.h>
 #include <unistd.h>
 
-#include <core/GP_Common.h>
-#include <core/GP_Types.h>
-#include <core/GP_Pixel.h>
+#include "core/gp_common.h"
+#include "core/gp_types.h"
+#include <core/gp_pixel.h>
 
 /* This structure holds all information needed for drawing into an image. */
 struct gp_pixmap {

@@ -7,8 +7,8 @@
  */
 
 #include <stdio.h>
-#include "GP_Pixel.h"
-#include "GP_GetSetBits.h"
+#include <core/gp_pixel.h>
+#include <core/gp_get_set_bits.h>
 @
 @ def getflags(pt):
 @     flags = []

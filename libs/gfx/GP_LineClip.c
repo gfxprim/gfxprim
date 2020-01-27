@@ -23,8 +23,8 @@
  *                                                                           *
  *****************************************************************************/
 
-#include <core/GP_Common.h>
-#include <core/GP_Types.h>
+#include "core/gp_common.h"
+#include "core/gp_types.h"
 #include <gfx/GP_LineClip.h>
 
 int gp_line_clip(int *px0, int *py0, int *px1, int *py1, int xmax, int ymax)

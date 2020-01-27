@@ -35,7 +35,7 @@
 #ifndef CORE_GP_PROGRESSCALLBACK_H
 #define CORE_GP_PROGRESSCALLBACK_H
 
-#include <core/GP_Types.h>
+#include <core/gp_types.h>
 
 /*
  * Progress callback

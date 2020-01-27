@@ -24,9 +24,9 @@
 #include <pthread.h>
 #include <string.h>
 
-#include "core/GP_Common.h"
-#include "core/GP_Debug.h"
-#include "core/GP_Threads.h"
+#include "core/gp_common.h"
+#include <core/gp_debug.h>
+#include <core/gp_threads.h>
 
 #include "GP_Linear.h"
 #include "GP_LinearThreads.h"

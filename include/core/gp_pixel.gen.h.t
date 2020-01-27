@@ -1,7 +1,7 @@
 @ include header.t
 /*
  * Pixel type definitions and functions.
- * Do not include directly, use GP_Pixel.h
+ * Do not include directly, use gp_pixel.h
  *
  * Copyright (C) 2011      Tomas Gavenciak <gavento@ucw.cz>
  * Copyright (C) 2013-2014 Cyril Hrubis <metan@ucw.cz>

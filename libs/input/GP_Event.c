@@ -24,8 +24,8 @@
 #include <string.h>
 #include <stdlib.h>
 
-#include <core/GP_Debug.h>
-#include <core/GP_Common.h>
+#include <core/gp_debug.h>
+#include "core/gp_common.h"
 
 #include <input/GP_EventQueue.h>
 #include <input/GP_Timer.h>

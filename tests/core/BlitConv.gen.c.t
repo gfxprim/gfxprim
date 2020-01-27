@@ -7,10 +7,10 @@
 
 #include <stdio.h>
 
-#include <core/GP_Pixmap.h>
-#include <core/GP_Convert.h>
-#include <core/GP_GetPutPixel.h>
-#include <core/GP_Blit.h>
+#include <core/gp_pixmap.h>
+#include <core/gp_convert.h>
+#include <core/gp_get_put_pixel.h>
+#include <core/gp_blit.h>
 
 #include "tst_test.h"
 

@@ -29,6 +29,6 @@
 #include <stddef.h>
 #include <stdint.h>
 
-#include "core/GP_WritePixel.gen.h"
+#include <core/gp_write_pixel.gen.h>
 
 #endif /* CORE_GP_WRITEPIXEL_H */

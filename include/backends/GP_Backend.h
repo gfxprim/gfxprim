@@ -42,7 +42,7 @@
 #ifndef BACKENDS_GP_BACKEND_H
 #define BACKENDS_GP_BACKEND_H
 
-#include <core/GP_Types.h>
+#include <core/gp_types.h>
 
 #include <input/GP_EventQueue.h>
 #include <input/GP_Timer.h>

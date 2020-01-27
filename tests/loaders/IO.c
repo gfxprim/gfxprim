@@ -23,7 +23,7 @@
 #include <string.h>
 #include <errno.h>
 
-#include <core/GP_Common.h>
+#include "core/gp_common.h"
 #include <loaders/GP_IO.h>
 
 #include "tst_test.h"

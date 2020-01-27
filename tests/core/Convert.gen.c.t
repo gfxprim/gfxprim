@@ -5,7 +5,7 @@
  * Copyright (C) 2009-2014 Cyril Hrubis <metan@ucw.cz>
  */
 #include <stdio.h>
-#include <core/GP_Convert.h>
+#include <core/gp_convert.h>
 
 #include "tst_test.h"
 

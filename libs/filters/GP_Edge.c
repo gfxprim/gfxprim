@@ -22,8 +22,8 @@
 
 #include <math.h>
 
-#include "core/GP_Debug.h"
-#include "core/GP_GetPutPixel.h"
+#include <core/gp_debug.h>
+#include <core/gp_get_put_pixel.h>
 
 #include "filters/GP_Linear.h"
 #include "filters/GP_EdgeDetection.h"

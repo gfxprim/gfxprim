@@ -5,7 +5,7 @@
  * Copyright (C) 2012-2014 Cyril Hrubis <metan@ucw.cz>
  */
 
-#include <core/GP_Clamp.h>
+#include <core/gp_clamp.h>
 
 @ include arithmetic_filter.t
 @

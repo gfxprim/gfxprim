@@ -7,9 +7,9 @@
 
 #include <errno.h>
 
-#include "core/GP_Pixmap.h"
-#include "core/GP_GetPutPixel.h"
-#include "core/GP_Debug.h"
+#include <core/gp_pixmap.h>
+#include <core/gp_get_put_pixel.h>
+#include <core/gp_debug.h>
 
 #include "filters/GP_ApplyTables.h"
 

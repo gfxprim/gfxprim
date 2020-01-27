@@ -35,7 +35,7 @@
 #ifndef GFX_GP_PUT_PIXEL_AA_H
 #define GFX_GP_PUT_PIXEL_AA_H
 
-#include "core/GP_Pixmap.h"
+#include "core/gp_types.h"
 
 /*
  * Anti Aliased Put Pixel respecting pixmap rotation flags and with clipping.

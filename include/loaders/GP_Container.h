@@ -30,8 +30,8 @@
 #ifndef LOADERS_GP_CONTAINER_H
 #define LOADERS_GP_CONTAINER_H
 
-#include "core/GP_Pixmap.h"
-#include "core/GP_ProgressCallback.h"
+#include "core/gp_types.h"
+#include <core/gp_progress_callback.h>
 
 #include "loaders/GP_DataStorage.h"
 

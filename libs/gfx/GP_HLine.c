@@ -23,7 +23,8 @@
  *                                                                           *
  *****************************************************************************/
 
-#include "core/GP_Transform.h"
+#include "core/gp_pixmap.h"
+#include <core/gp_transform.h>
 
 #include "gfx/GP_HLine.h"
 #include "gfx/GP_VLine.h"

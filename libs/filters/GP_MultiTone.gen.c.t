@@ -7,11 +7,11 @@
 
 #include <errno.h>
 
-#include "core/GP_Pixmap.h"
-#include "core/GP_GetPutPixel.h"
-#include "core/GP_TempAlloc.h"
-#include "core/GP_MixPixels.h"
-#include "core/GP_Debug.h"
+#include "core/gp_pixmap.h"
+#include <core/gp_get_put_pixel.h>
+#include <core/gp_temp_alloc.h>
+#include <core/gp_mix_pixels.h>
+#include <core/gp_debug.h>
 
 #include "filters/GP_MultiTone.h"
 

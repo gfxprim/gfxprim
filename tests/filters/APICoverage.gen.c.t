@@ -14,7 +14,7 @@
 #include <string.h>
 #include <errno.h>
 
-#include <core/GP_Pixmap.h>
+#include <core/gp_pixmap.h>
 #include <filters/GP_Filters.h>
 
 #include "tst_test.h"

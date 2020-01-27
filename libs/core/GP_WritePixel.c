@@ -24,9 +24,8 @@
  *****************************************************************************/
 
 #include <string.h>
-
-#include "GP_Core.h"
-#include "GP_WritePixel.h"
+#include <core/gp_get_set_bits.h>
+#include <core/gp_write_pixel.h>
 
 static const uint8_t bytes_1BPP[] = {0x00, 0xff};
 

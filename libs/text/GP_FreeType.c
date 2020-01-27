@@ -21,7 +21,7 @@
  *****************************************************************************/
 
 #include "../../config.h"
-#include "core/GP_Debug.h"
+#include <core/gp_debug.h>
 #include "text/GP_Font.h"
 
 #ifdef HAVE_FREETYPE

@@ -31,8 +31,8 @@
 #ifndef __IMAGE_LOADER_H__
 #define __IMAGE_LOADER_H__
 
-#include <core/GP_Pixmap.h>
-#include <core/GP_ProgressCallback.h>
+#include <core/gp_pixmap.h>
+#include <core/gp_progress_callback.h>
 
 /*
  * Initialize image loader.

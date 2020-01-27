@@ -26,7 +26,7 @@
 #ifndef GFX_GP_POLYGON_H
 #define GFX_GP_POLYGON_H
 
-#include "core/GP_Pixmap.h"
+#include "core/gp_types.h"
 
 void gp_polygon(gp_pixmap *pixmap, unsigned int vertex_count,
                 const gp_coord *xy, gp_pixel pixel);

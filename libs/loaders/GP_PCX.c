@@ -32,8 +32,9 @@
 #include <stdint.h>
 #include <inttypes.h>
 
-#include "core/GP_Debug.h"
-#include "core/GP_GetPutPixel.h"
+#include <core/gp_debug.h>
+#include <core/gp_bit_swap.h>
+#include <core/gp_get_put_pixel.h>
 
 #include <loaders/GP_Loaders.gen.h>
 
@@ -214,8 +215,6 @@ struct pcx_header {
 	/* 16 RGB tripplets palette */
 	uint8_t palette[48];
 };
-
-#include "core/GP_BitSwap.h"
 
 static int read_g1(gp_io *io, struct pcx_header *header,
                    gp_pixmap *res, gp_progress_cb *callback)

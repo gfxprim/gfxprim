@@ -29,7 +29,7 @@
 #include <string.h>
 
 #include <loaders/GP_Loader.h>
-#include <core/GP_Debug.h>
+#include <core/gp_debug.h>
 
 #include "image_list.h"
 

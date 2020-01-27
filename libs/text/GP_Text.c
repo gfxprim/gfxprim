@@ -23,8 +23,9 @@
  *                                                                           *
  *****************************************************************************/
 
-#include <core/GP_FnPerBpp.h>
-#include <core/GP_Debug.h>
+#include <core/gp_pixmap.h>
+#include <core/gp_fn_per_bpp.h>
+#include <core/gp_debug.h>
 
 #include <gfx/GP_Rect.h>
 

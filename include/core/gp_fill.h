@@ -16,64 +16,18 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2010 Jiri "BlueBear" Dluhos                            *
- *                         <jiri.bluebear.dluhos@gmail.com>                  *
- *                                                                           *
- * Copyright (C) 2009-2014 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2013 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
+#ifndef CORE_GP_FILL_H
+#define CORE_GP_FILL_H
+
+#include <core/gp_types.h>
+
 /*
-
-  This is header file for public core API.
-
+ * Fills pixmap with givel pixel value
  */
+void gp_fill(gp_pixmap *pixmap, gp_pixel val);
 
-#ifndef GP_CORE_H
-#define GP_CORE_H
-
-/* Library verson */
-#include "core/GP_Version.h"
-
-/* Common building blocks */
-#include "core/GP_Common.h"
-
-/* Pixmap ... */
-#include "core/GP_Pixmap.h"
-
-/* ... and it's trasformations */
-#include "core/GP_Transform.h"
-
-/* Gamma */
-#include "core/GP_Gamma.h"
-
-/* Pixeltypes */
-#include "core/GP_Pixel.h"
-
-/* Pixel conversions */
-#include "core/GP_Convert.h"
-
-/* Individual pixel access */
-#include "core/GP_GetPutPixel.h"
-
-/* Writing pixel blocks */
-#include "GP_WritePixel.h"
-
-/* Blitting */
-#include "core/GP_Blit.h"
-
-/* Debug and debug level */
-#include "core/GP_Debug.h"
-
-/* Progress callback */
-#include "core/GP_ProgressCallback.h"
-
-/* Threads utils */
-#include "core/GP_Threads.h"
-
-/* Mix Pixel */
-#include "core/GP_MixPixels.h"
-
-#include "core/GP_Fill.h"
-
-#endif /* GP_CORE_H */
+#endif /* CORE_GP_FILL_H */

@@ -21,7 +21,7 @@ conditions, see below for more information.
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <core/GP_Debug.h>
+#include <core/gp_debug.h>
 /* or */
 #include <gfxprim.h>
 
@@ -48,7 +48,7 @@ first debug message is about to be printed.
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <core/GP_Debug.h>
+#include <core/gp_debug.h>
 /* or */
 #include <gfxprim.h>
 

@@ -23,8 +23,9 @@
  *                                                                           *
  *****************************************************************************/
 
-#include "core/GP_Transform.h"
-#include "core/GP_FnPerBpp.h"
+#include "core/gp_pixmap.h"
+#include <core/gp_transform.h>
+#include <core/gp_fn_per_bpp.h>
 
 #include "gfx/GP_LineAA.h"
 

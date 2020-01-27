@@ -98,7 +98,7 @@ Gamma low level API
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <core/GP_Gamma.h>
+#include <core/gp_gamma.h>
 /* or */
 #include <gfxprim.h>
 
@@ -113,7 +113,7 @@ May fail and return NULL if 'malloc()' has failed.
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <core/GP_Gamma.h>
+#include <core/gp_gamma.h>
 /* or */
 #include <gfxprim.h>
 
@@ -126,7 +126,7 @@ Can't fail.
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <core/GP_Gamma.h>
+#include <core/gp_gamma.h>
 /* or */
 #include <gfxprim.h>
 

@@ -5,7 +5,7 @@
  * Copyright (C) 2009-2014 Cyril Hrubis <metan@ucw.cz>
  */
 
-#include <core/GP_Clamp.h>
+#include <core/gp_clamp.h>
 
 @ include point_filter.t
 @ def filter_op_brightness_contrast(val, val_max):

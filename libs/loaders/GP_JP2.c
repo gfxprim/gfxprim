@@ -31,8 +31,8 @@
 #include <stdio.h>
 
 #include "../../config.h"
-#include "core/GP_Debug.h"
-#include "core/GP_GetPutPixel.h"
+#include <core/gp_debug.h>
+#include <core/gp_get_put_pixel.h>
 
 #include <loaders/GP_Loaders.gen.h>
 

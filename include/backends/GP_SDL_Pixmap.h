@@ -24,7 +24,7 @@
 #define BACKENDS_GP_SDL_PIXMAP_H
 
 #include <SDL/SDL.h>
-#include <core/GP_Pixmap.h>
+#include <core/gp_pixmap.h>
 
 /*
  * This function lets you use GFXprim together with SDL. All you need to do

@@ -20,8 +20,8 @@
  *                                                                           *
  *****************************************************************************/
 
-#include <core/GP_Pixmap.h>
-#include <core/GP_Debug.h>
+#include "core/gp_pixmap.h"
+#include <core/gp_debug.h>
 #include <filters/GP_Linear.h>
 
 static int h_callback(gp_progress_cb *self)

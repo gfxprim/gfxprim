@@ -6,11 +6,11 @@
  * Copyright (C) 2009-2014 Cyril Hrubis <metan@ucw.cz>
  */
 
-#include "core/GP_Pixmap.h"
-#include "core/GP_WritePixel.h"
-#include "core/GP_GetPutPixel.h"
-#include "core/GP_FnPerBpp.h"
-#include "core/GP_Fill.h"
+#include "core/gp_pixmap.h"
+#include <core/gp_write_pixel.h>
+#include <core/gp_get_put_pixel.h>
+#include <core/gp_fn_per_bpp.h>
+#include "core/gp_fill.h"
 
 @ for ps in pixelsizes:
 static void fill_{{ ps.suffix }}(gp_pixmap *ctx, gp_pixel val)

@@ -27,7 +27,7 @@
  */
 #include <errno.h>
 
-#include <core/GP_Pixel.h>
+#include <core/gp_pixel.h>
 
 #include "tst_test.h"
 

@@ -23,8 +23,9 @@
 #include <errno.h>
 #include <string.h>
 
-#include <core/GP_Core.h>
-#include <core/GP_FnPerBpp.h>
+#include <core/gp_clamp.h>
+#include <core/gp_debug.h>
+#include <core/gp_fn_per_bpp.h>
 #include <filters/GP_Rotate.h>
 
 int gp_filter_mirror_v_raw(const gp_pixmap *src, gp_pixmap *dst,

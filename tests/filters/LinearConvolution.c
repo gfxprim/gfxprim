@@ -24,7 +24,7 @@
 #include <errno.h>
 #include <sys/stat.h>
 
-#include <core/GP_Pixmap.h>
+#include <core/gp_pixmap.h>
 #include <loaders/GP_Loaders.h>
 #include <filters/GP_Convolution.h>
 

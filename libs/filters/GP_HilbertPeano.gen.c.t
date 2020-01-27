@@ -7,8 +7,9 @@
 
 #include <errno.h>
 
-#include "core/GP_Core.h"
-#include "core/GP_GetPutPixel.h"
+#include <core/gp_debug.h>
+#include <core/gp_get_put_pixel.h>
+#include <core/gp_convert.h>
 #include "filters/GP_HilbertCurve.h"
 #include "filters/GP_Filter.h"
 #include "filters/GP_Dither.h"

@@ -20,7 +20,8 @@
  *                                                                           *
  *****************************************************************************/
 
-#include "core/GP_Debug.h"
+#include <core/gp_clamp.h>
+#include <core/gp_debug.h>
 
 #include "filters/GP_ApplyTables.h"
 

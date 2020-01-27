@@ -24,7 +24,7 @@
 #define COMPARE_H__
 
 #include <stdio.h>
-#include <core/GP_GetPutPixel.h>
+#include <core/gp_get_put_pixel.h>
 
 static inline void print_diff(gp_pixmap *p1, gp_pixmap *p2)
 {

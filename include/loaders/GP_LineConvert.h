@@ -38,7 +38,7 @@
 #ifndef LOADERS_LINE_CONVERT_H
 #define LOADERS_LINE_CONVERT_H
 
-#include <core/GP_Pixel.h>
+#include <core/gp_pixel.h>
 
 typedef void (*gp_line_convert)(const uint8_t *in, uint8_t *out, unsigned int len);
 

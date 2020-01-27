@@ -6,7 +6,7 @@
  * Copyright (C) 2011-2014 Cyril Hrubis <metan@ucw.cz>
  */
 
-#include "GP_Convert.h"
+#include <core/gp_convert.h>
 @
 @ # Loop around pixel types central for the conversion.
 @ for pt in [pixeltypes_dict['RGB888'], pixeltypes_dict['RGBA8888']]:

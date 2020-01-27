@@ -4,7 +4,7 @@
 %{
 #include "GP_Backend.h"
 #include "GP_Backends.h"
-#include "core/GP_Debug.h"
+#include <core/gp_debug.h>
 %}
 
 %import ../core/core.i

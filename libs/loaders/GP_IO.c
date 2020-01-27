@@ -29,9 +29,9 @@
 #include <stdarg.h>
 #include <inttypes.h>
 
-#include <core/GP_ByteOrder.h>
-#include <core/GP_Debug.h>
-#include <core/GP_Common.h>
+#include <core/gp_byte_order.h>
+#include <core/gp_debug.h>
+#include "core/gp_common.h"
 
 #include "loaders/GP_IO.h"
 

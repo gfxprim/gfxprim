@@ -5,7 +5,7 @@ GetPixel and PutPixel
 --------------------------------------------------------------------------------
 #include <gfxprim.h>
 /* or */
-#include <core/GP_GetPutPixel.h>
+#include <core/gp_get_put_pixel.h>
 
 gp_pixel gp_get_pixel(const gp_pixmap *pixmap, gp_coord x, gp_coord y);
 
@@ -25,7 +25,7 @@ Generally these function are safe to use but rather slow in innner cycles.
 --------------------------------------------------------------------------------
 #include <gfxprim.h>
 /* or */
-#include <core/GP_GetPutPixel.h>
+#include <core/gp_get_put_pixel.h>
 
 gp_pixel gp_get_pixel_raw(const gp_pixmap *pixmap, gp_coord x, gp_coord y);
 

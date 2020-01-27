@@ -24,6 +24,6 @@
 #define CORE_GP_MIXPIXELS_H
 
 /* Generated header */
-#include "GP_MixPixels.gen.h"
+#include <core/gp_mix_pixels.gen.h>
 
 #endif /* CORE_GP_MIXPIXELS_H */

@@ -22,10 +22,10 @@
 
 /* Anti Aliased Line */
 
-#include "core/GP_Pixmap.h"
-#include "core/GP_MixPixels.h"
-#include "core/GP_FixedPoint.h"
-#include "core/GP_GammaCorrection.h"
+#include "core/gp_pixmap.h"
+#include <core/gp_mix_pixels.h>
+#include <core/gp_fixed_point.h>
+#include <core/gp_gamma_correction.h>
 
 #include "gfx/GP_HLineAA.h"
 #include "gfx/GP_VLineAA.h"

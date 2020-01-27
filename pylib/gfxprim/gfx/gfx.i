@@ -10,7 +10,7 @@
 %include "GP_Gfx.h"
 
 /* Listed in GP_Gfx.h: */
-%include "GP_Fill.h"
+%include "gp_fill.h"
 %include "GP_HLine.h"
 %include "GP_VLine.h"
 %include "GP_Line.h"

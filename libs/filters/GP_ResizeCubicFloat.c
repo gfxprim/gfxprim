@@ -23,11 +23,11 @@
 #include <math.h>
 #include <errno.h>
 
-#include "core/GP_Pixmap.h"
-#include "core/GP_GetPutPixel.h"
-#include "core/GP_Gamma.h"
+#include "core/gp_pixmap.h"
+#include <core/gp_get_put_pixel.h>
+#include <core/gp_gamma.h>
 
-#include "core/GP_Debug.h"
+#include <core/gp_debug.h>
 
 #include "GP_ResizeCubic.h"
 

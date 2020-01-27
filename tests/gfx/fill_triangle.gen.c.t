@@ -5,7 +5,7 @@
 
 #include <stdio.h>
 
-#include <core/GP_Pixmap.h>
+#include <core/gp_pixmap.h>
 #include <gfx/GP_Gfx.h>
 #include <filters/GP_Rotate.h>
 

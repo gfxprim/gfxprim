@@ -23,10 +23,10 @@
 #include <inttypes.h>
 #include <poll.h>
 
-#include <core/GP_Common.h>
-#include <core/GP_Transform.h>
-#include <core/GP_Pixmap.h>
-#include <core/GP_Debug.h>
+#include "core/gp_common.h"
+#include <core/gp_transform.h>
+#include "core/gp_pixmap.h"
+#include <core/gp_debug.h>
 
 #include <input/GP_EventQueue.h>
 #include <input/GP_TimeStamp.h>

@@ -5,8 +5,8 @@
  * Copyright (C) 2009-2014 Cyril Hrubis <metan@ucw.cz>
  */
 
-#include "core/GP_GetPutPixel.h"
-#include "core/GP_FnPerBpp.h"
+#include <core/gp_get_put_pixel.h>
+#include <core/gp_fn_per_bpp.h>
 #include "gfx/GP_HLine.h"
 #include "gfx/GP_VLine.h"
 #include "gfx/GP_Ellipse.h"

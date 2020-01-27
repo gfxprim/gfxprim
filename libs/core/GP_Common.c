@@ -36,7 +36,7 @@
 #include <dlfcn.h>
 #endif /* HAVE_DL */
 
-#include "core/GP_Common.h"
+#include "core/gp_common.h"
 
 #define GP_ABORT_INFO_TRACE_LEVELS 20
 

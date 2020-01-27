@@ -26,7 +26,7 @@
 #ifndef GP_RECT_H
 #define GP_RECT_H
 
-#include "core/GP_Pixmap.h"
+#include "core/gp_types.h"
 
 /* Rectangle */
 

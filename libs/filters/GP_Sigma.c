@@ -23,12 +23,12 @@
 #include <errno.h>
 #include <string.h>
 
-#include <core/GP_Pixmap.h>
-#include <core/GP_GetPutPixel.h>
-#include <core/GP_TempAlloc.h>
-#include <core/GP_Clamp.h>
-#include <core/GP_Common.h>
-#include <core/GP_Debug.h>
+#include <core/gp_common.h>
+#include <core/gp_pixmap.h>
+#include <core/gp_get_put_pixel.h>
+#include <core/gp_temp_alloc.h>
+#include <core/gp_clamp.h>
+#include <core/gp_debug.h>
 #include <filters/GP_Sigma.h>
 
 static int gp_filter_sigma_raw(const gp_pixmap *src,

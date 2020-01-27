@@ -23,8 +23,8 @@
  *                                                                           *
  *****************************************************************************/
 
-#include "core/GP_GetPutPixel.h"
-#include "core/GP_FnPerBpp.h"
+#include <core/gp_get_put_pixel.h>
+#include <core/gp_fn_per_bpp.h>
 
 #include "gfx/GP_Arc.h"
 

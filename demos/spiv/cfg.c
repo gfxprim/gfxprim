@@ -20,7 +20,7 @@
  *                                                                           *
  *****************************************************************************/
 
-#include <core/GP_Debug.h>
+#include <core/gp_debug.h>
 #include <string.h>
 #include <stdio.h>
 #include <errno.h>

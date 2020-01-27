@@ -8,11 +8,11 @@
 #include <errno.h>
 #include <math.h>
 
-#include <core/GP_Pixmap.h>
-#include <core/GP_GetPutPixel.h>
-#include <core/GP_Gamma.h>
-#include <core/GP_Clamp.h>
-#include <core/GP_Debug.h>
+#include <core/gp_pixmap.h>
+#include <core/gp_get_put_pixel.h>
+#include <core/gp_gamma.h>
+#include <core/gp_clamp.h>
+#include <core/gp_debug.h>
 #include <filters/GP_Resize.h>
 #include "GP_Cubic.h"
 

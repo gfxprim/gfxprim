@@ -26,7 +26,7 @@
 #ifndef GP_TETRAGON_H
 #define GP_TETRAGON_H
 
-#include "core/GP_Pixmap.h"
+#include "core/gp_types.h"
 
 /* Tetragon */
 

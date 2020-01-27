@@ -24,8 +24,8 @@
 #include <string.h>
 #include <errno.h>
 
-#include <core/GP_Common.h>
-#include <core/GP_Debug.h>
+#include "core/gp_common.h"
+#include <core/gp_debug.h>
 #include <loaders/GP_Exif.h>
 
 enum IFD_formats {
