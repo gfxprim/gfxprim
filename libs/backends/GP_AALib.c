@@ -252,6 +252,7 @@ gp_backend *gp_aalib_init(void)
 	backend->resize_ack = aalib_resize_ack;
 	backend->poll = aalib_poll;
 	backend->wait = aalib_wait;
+	backend->set_attr = NULL;
 	backend->exit = aalib_exit;
 	backend->fd = -1;
 	backend->timers = NULL;
