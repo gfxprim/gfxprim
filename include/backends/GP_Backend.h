@@ -223,6 +223,12 @@ static inline unsigned int gp_backend_timers_in_queue(gp_backend *self)
 }
 
 /*
+ * Returns a timeout to a closest timer in ms or -1. Can be passed directly to
+ * poll(2).
+ */
+int gp_backend_timer_timeout(gp_backend *self);
+
+/*
  * Sets backend caption, if supported.
  *
  * When setting caption is not possible/implemented non zero is returned.

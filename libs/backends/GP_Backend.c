@@ -133,6 +133,16 @@ void gp_backend_rem_timer(gp_backend *self, gp_timer *timer)
 	gp_timer_queue_remove(&self->timers, timer);
 }
 
+int gp_backend_timer_timeout(gp_backend *self)
+{
+	if (!self->timers)
+		return -1;
+
+	uint64_t now = gp_time_stamp();
+
+	return GP_MAX(0, self->timers->expires - now);
+}
+
 void gp_backend_poll(gp_backend *self)
 {
 	self->poll(self);
@@ -143,9 +153,7 @@ void gp_backend_poll(gp_backend *self)
 
 static void wait_timers_fd(gp_backend *self, uint64_t now)
 {
-	int timeout;
-
-	timeout = self->timers->expires - now;
+	int timeout = self->timers->expires - now;
 
 	struct pollfd fd = {.fd = self->fd, .events = POLLIN, fd.revents = 0};
 
