@@ -1,12 +1,10 @@
 gp_pixmap_convert
-gp_font_tiny_mono
 gp_sub_pixmap_alloc
 gp_write_pixels_16BPP
 gp_blit_xywh_clipped
 gp_filter_min
 gp_triangle_raw
 gp_hline_raw_32BPP
-gp_font_gfxprim
 gp_pixel_addr_offset
 gp_pixmap_alloc
 gp_tetragon_raw
@@ -34,7 +32,6 @@ gp_fill_circle_seg_raw
 gp_hline_raw_24BPP
 gp_filter_add_alloc
 gp_get_glyph_count
-gp_font_face_load
 gp_vline_aa_raw
 gp_pixmap_resize
 gp_pixmap_rotate_cw
@@ -57,13 +54,11 @@ gp_line_raw_8BPP
 gp_set_debug_handler
 gp_get_debug_level
 gp_line_raw_18BPP_LE
-gp_font_face_free
 gp_line_raw_2BPP_BE
 gp_pixel_to_RGBA8888
 gp_filter_hilbert_peano_alloc
 gp_filter_convolution_mp_raw
 gp_filter_median_ex_alloc
-gp_print
 gp_line_raw_24BPP
 gp_gamma_release
 gp_hline_raw_1BPP_LE
@@ -110,10 +105,7 @@ gp_filter_resize_cubic
 gp_filter_diff
 gp_text_descent
 gp_fill_tetragon_raw
-gp_font_haxor_narrow_15
-gp_font_haxor_narrow_16
 gp_event_queue_push_resize
-gp_font_haxor_narrow_17
 gp_event_queue_push_rel
 gp_filter_tables_init
 gp_text_width_len
@@ -124,7 +116,6 @@ gp_filter_contrast_ex_alloc
 gp_line_raw
 gp_filter_edge_sharpening
 gp_blit_xyxy_raw_fast
-gp_default_font
 gp_pixmap_rotate_ccw
 gp_fill_polygon
 gp_filter_min_raw
@@ -138,6 +129,7 @@ gp_vline_xyh
 gp_arc_segment
 gp_filter_tables_free
 gp_filter_convolution_ex_alloc
+gp_print
 gp_pixel_print
 gp_line_aa
 gp_RGBA8888_to_pixel
@@ -146,7 +138,6 @@ gp_line_raw_2BPP_LE
 gp_hline_aa_raw
 gp_print_abort_info
 gp_fill_circle_raw
-gp_font_c64
 gp_triangle
 gp_get_glyph
 gp_filter_laplace_alloc
@@ -265,10 +256,8 @@ gp_event_queue_peek
 gp_vline_raw_16BPP
 gp_filter_multitone_ex_alloc
 gp_hline_xyw
-gp_font_gfxprim_mono
 gp_filter_mirror_v
 gp_linear10_gamma8
-gp_font_tiny
 gp_write_pixels_4BPP_LE
 gp_hline_raw_4BPP_LE
 gp_fill
@@ -299,11 +288,8 @@ gp_temp_allocDestroy
 gp_filter_vhlinear_convolution_raw
 gp_filter_histogram
 gp_line
-gp_font_haxor_narrow_bold_15
 gp_hline_raw_1BPP_BE
 gp_write_pixels_1BPP_BE
-gp_font_haxor_narrow_bold_16
 gp_filter_resize_linear_int
-gp_font_haxor_narrow_bold_17
 gp_filter_invert_ex_alloc
 gp_filter_hconvolution_mp_raw
