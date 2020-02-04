@@ -27,7 +27,7 @@
 #define GFXPRIM_H__
 
 /* library core */
-#include "core/gp_core.h"
+#include <core/gp_core.h>
 
 /* public drawing API */
 #include "gfx/GP_Gfx.h"
@@ -36,7 +36,7 @@
 #include "text/GP_Text.h"
 
 /* backends */
-#include "backends/GP_Backends.h"
+#include <backends/gp_backends.h>
 
 /* input and events */
 #include "input/GP_Input.h"

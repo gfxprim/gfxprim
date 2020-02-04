@@ -16,20 +16,37 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2013 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
-#ifndef BACKENDS_GP_AALIB_H
-#define BACKENDS_GP_AALIB_H
+/*
 
-#include <backends/GP_Backend.h>
+  Catch all header for backends.
+
+ */
+
+#ifndef BACKENDS_GP_BACKENDS_H
+#define BACKENDS_GP_BACKENDS_H
 
 /*
- * Initalize AALib.
- *
- * TODO: add a way to pass aalib params
+ * Base backend definitions.
  */
-gp_backend *gp_aalib_init(void);
+#include <backends/gp_backend.h>
 
-#endif /* BACKENDS_GP_AALIB_H */
+/*
+ * Backends.
+ */
+#include <backends/gp_linux_fb.h>
+#include <backends/gp_sdl.h>
+#include <backends/gp_x11.h>
+#include "backends/gp_xcb.h"
+#include <backends/gp_aalib.h>
+#include <backends/gp_backend_virtual.h>
+
+/*
+ * Simplified backend initalization.
+ */
+#include <backends/gp_backend_init.h>
+
+#endif /* BACKENDS_GP_BACKENDS_H */

@@ -7,7 +7,7 @@
 
 #include <core/gp_debug.h>
 #include "core/gp_common.h"
-#include <GP_Backend.h>
+#include <backends/gp_backend.h>
 
 #ifdef HAVE_LIBXCB
 

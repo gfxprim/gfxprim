@@ -42,7 +42,7 @@
 #include <X11/extensions/XShm.h>
 #endif /* HAVE_X_SHM */
 
-#include "backends/GP_X11.h"
+#include <backends/gp_x11.h>
 
 #include "GP_X11_Conn.h"
 #include "GP_X11_Win.h"
@@ -663,7 +663,7 @@ err1:
 
 #else
 
-#include <backends/GP_Backend.h>
+#include <backends/gp_backend.h>
 
 gp_backend *gp_x11_init(const char *GP_UNUSED(display),
                         int GP_UNUSED(x), int GP_UNUSED(y),

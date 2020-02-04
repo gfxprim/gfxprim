@@ -22,31 +22,27 @@
 
 /*
 
-  Catch all header for backends.
+  Virtual backend, could emulate backed with any pixel type on the top of
+  initalized backend. Useful for testing.
 
  */
 
-#ifndef BACKENDS_GP_BACKENDS_H
-#define BACKENDS_GP_BACKENDS_H
+#ifndef BACKENDS_GP_BACKEND_VIRTUAL_H
+#define BACKENDS_GP_BACKEND_VIRTUAL_H
+
+#include <core/gp_pixel.h>
+#include <backends/gp_backend.h>
+
+enum gp_backend_virt_flags {
+	/* If set virtual backend exit calls 'parent' exit as well */
+	GP_BACKEND_CALL_EXIT = 0x01,
+};
 
 /*
- * Base backend definitions.
+ * Create an virtual backend on the top of the existing backend.
  */
-#include "backends/GP_Backend.h"
+gp_backend *gp_backend_virt_init(gp_backend *backend,
+                                 gp_pixel_type pixel_type,
+				 enum gp_backend_virt_flags flags);
 
-/*
- * Backends.
- */
-#include "backends/GP_LinuxFB.h"
-#include "backends/GP_SDL.h"
-#include "backends/GP_X11.h"
-#include "backends/gp_xcb.h"
-#include "backends/GP_AALib.h"
-#include "backends/GP_BackendVirtual.h"
-
-/*
- * Simplified backend initalization.
- */
-#include "backends/GP_BackendInit.h"
-
-#endif /* BACKENDS_GP_BACKENDS_H */
+#endif /* BACKENDS_GP_BACKEND_VIRTUAL_H */

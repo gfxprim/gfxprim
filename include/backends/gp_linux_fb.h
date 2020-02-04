@@ -16,33 +16,43 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2013 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
-/*
+#ifndef BACKENDS_GP_FRAMEBUFFER_H
+#define BACKENDS_GP_FRAMEBUFFER_H
 
-  Virtual backend, could emulate backed with any pixel type on the top of
-  initalized backend. Useful for testing.
+#include <backends/gp_backend.h>
 
- */
-
-#ifndef BACKENDS_GP_BACKEND_VIRTUAL_H
-#define BACKENDS_GP_BACKEND_VIRTUAL_H
-
-#include <core/gp_pixel.h>
-#include <backends/GP_Backend.h>
-
-enum gp_backend_virt_flags {
-	/* If set virtual backend exit calls 'parent' exit as well */
-	GP_BACKEND_CALL_EXIT = 0x01,
+enum gp_linux_fb_flags {
+	/*
+	 * Use KBD to get input events
+	 */
+	GP_FB_INPUT_KBD = 0x01,
+	/*
+	 * Use shadow framebuffer for drawing.
+	 */
+	GP_FB_SHADOW = 0x02,
+	/*
+	 * Allocate new console, if not set current is used.
+	 */
+	GP_FB_ALLOC_CON = 0x04,
 };
 
 /*
- * Create an virtual backend on the top of the existing backend.
+ * Initalize framebuffer.
+ *
+ * The path should point to framebuffer device eg. "/dev/fb0" for first
+ * framebuffer device.
+ *
+ * The gp_backend structure is allocated and returned, the resources are
+ * deinitalized and the structure is freed by backed->Exit(backend); call.
+ *
+ * Upon failure NULL is returned.
+ *
+ * If flag is set, the konsole kbd is used to push events into event queue.
  */
-gp_backend *gp_backend_virt_init(gp_backend *backend,
-                                 gp_pixel_type pixel_type,
-				 enum gp_backend_virt_flags flags);
+gp_backend *gp_linux_fb_init(const char *path, int flags);
 
-#endif /* BACKENDS_GP_BACKEND_VIRTUAL_H */
+#endif /* BACKENDS_GP_FRAMEBUFFER_H */

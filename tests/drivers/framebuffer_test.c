@@ -33,7 +33,7 @@
 #include <math.h>
 
 #include <gfxprim.h>
-#include <backends/GP_Backends.h>
+#include <backends/gp_backends.h>
 
 static void draw(gp_pixmap *pixmap, int x, int y, int l)
 {

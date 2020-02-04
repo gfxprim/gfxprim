@@ -24,7 +24,7 @@
 
 #include <core/gp_debug.h>
 #include "core/gp_pixmap.h"
-#include "backends/GP_AALib.h"
+#include <backends/gp_aalib.h>
 #include "input/GP_Input.h"
 
 #include "../config.h"

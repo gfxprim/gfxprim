@@ -38,7 +38,7 @@
 #include <core/gp_debug.h>
 #include "core/gp_pixmap.h"
 #include <input/GP_InputDriverKBD.h>
-#include <backends/GP_LinuxFB.h>
+#include <backends/gp_linux_fb.h>
 
 struct fb_priv {
 	gp_pixmap pixmap;

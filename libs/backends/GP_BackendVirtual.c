@@ -26,7 +26,7 @@
 #include <core/gp_blit.h>
 #include <core/gp_debug.h>
 
-#include "GP_BackendVirtual.h"
+#include <backends/gp_backend_virtual.h>
 
 struct virt_priv {
 	/* Original backend */

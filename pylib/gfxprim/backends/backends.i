@@ -2,8 +2,8 @@
 %module(package="gfxprim.backends") c_backends
 
 %{
-#include "GP_Backend.h"
-#include "GP_Backends.h"
+#include "gp_backend.h"
+#include "gp_backends.h"
 #include <core/gp_debug.h>
 %}
 
@@ -30,28 +30,28 @@
 ERROR_ON_NONZERO(gp_backend_set_caption);
 ERROR_ON_NONZERO(gp_backend_resize);
 
-%include "GP_Backend.h"
+%include "gp_backend.h"
 
 /*
  * Particular backends.
  */
 ERROR_ON_NULL(gp_backend_virtual_init);
 %newobject gp_backend_virtual_init;
-%include "GP_BackendVirtual.h"
+%include "gp_backend_virtual.h"
 
 ERROR_ON_NULL(gp_backend_linux_fb_init);
 %newobject GP_BackendLinuxFBInit;
-%include "GP_LinuxFB.h"
+%include "gp_linux_fb.h"
 
 ERROR_ON_NULL(gp_backend_sdl_init);
 %newobject GP_BackendSDLInit;
-%include "GP_SDL.h"
+%include "gp_sdl.h"
 
 ERROR_ON_NULL(gp_backend_x11_init);
 %newobject gp_backend_x11_init;
-%include "GP_X11.h"
+%include "gp_x11.h"
 
 %newobject gp_backend_init;
 ERROR_ON_NULL(gp_backend_init);
-%include "GP_BackendInit.h"
+%include "gp_backend_init.h"
 

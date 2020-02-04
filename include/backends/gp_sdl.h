@@ -24,7 +24,7 @@
 #define BACKENDS_GP_SDL_H
 
 #include <stdint.h>
-#include <backends/GP_Backend.h>
+#include <backends/gp_backend.h>
 
 enum gp_sdl_lags {
 	GP_SDL_FULLSCREEN = 0x01,

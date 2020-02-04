@@ -31,7 +31,7 @@
 #include <input/GP_EventQueue.h>
 #include <input/GP_TimeStamp.h>
 
-#include <backends/GP_Backend.h>
+#include <backends/gp_backend.h>
 
 void gp_backend_update_rect_xyxy(gp_backend *self,
                                  gp_coord x0, gp_coord y0,

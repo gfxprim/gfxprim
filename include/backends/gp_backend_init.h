@@ -16,48 +16,38 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2013 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
-#ifndef BACKENDS_GP_X11_H
-#define BACKENDS_GP_X11_H
+/*
 
-#include <backends/GP_Backend.h>
+  Simplified backend initalization interface good enough for most of the cases.
 
-enum gp_x11_flags {
-	/* When set, w and h is ignored and root window is used */
-	GP_X11_USE_ROOT_WIN = 0x01,
+ */
 
-	/* Create new borderless window above the root window */
-	GP_X11_CREATE_ROOT_WIN = 0x02,
+#ifndef BACKENDS_GP_BACKEND_INIT_H
+#define BACKENDS_GP_BACKEND_INIT_H
 
-	/* Start fullscreen */
-	GP_X11_FULLSCREEN = 0x04,
-
-	/* Do not use MIT SHM even if available */
-	GP_X11_DISABLE_SHM = 0x08,
-};
-
+#include <backends/gp_backend.h>
 
 /*
- * Initalize X11 backend.
+ * Initalize backend by a string.
  *
- * The display may be NULL for default display ($DISPLAY shell variable will
- * be used).
+ * The format is:
  *
- * The coordinates are position and geometry for newly created window.
+ * "backend_name:backend_params"
  *
- * Upon failure NULL is returned.
+ * For example "SDL:fs" is string for fullscreen SDL backend.
+ *
+ * The caption parameter may, or may not be used. For example in windowed
+ * enviroment caption will become caption of a window. When running on
+ * framebuffer it may be ignored completly.
+ *
+ * Returns initalized backend or NULL in case of failure.
+ *
+ * If help is passed as a backend name a help is printed into the stderr.
  */
-gp_backend *gp_x11_init(const char *display, int x, int y,
-                        unsigned int w, unsigned int h,
-			const char *caption,
-			enum gp_x11_flags flags);
+gp_backend *gp_backend_init(const char *params, const char *caption);
 
-/*
- * Returns non-zero if backend is X11 backend
- */
-int gp_backend_is_x11(gp_backend *self);
-
-#endif /* BACKENDS_GP_X11_H */
+#endif /* BACKENDS_GP_BACKEND_INIT_H */

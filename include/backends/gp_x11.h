@@ -16,43 +16,48 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2013 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
-#ifndef BACKENDS_GP_FRAMEBUFFER_H
-#define BACKENDS_GP_FRAMEBUFFER_H
+#ifndef BACKENDS_GP_X11_H
+#define BACKENDS_GP_X11_H
 
-#include "GP_Backend.h"
+#include <backends/gp_backend.h>
 
-enum gp_linux_fb_flags {
-	/*
-	 * Use KBD to get input events
-	 */
-	GP_FB_INPUT_KBD = 0x01,
-	/*
-	 * Use shadow framebuffer for drawing.
-	 */
-	GP_FB_SHADOW = 0x02,
-	/*
-	 * Allocate new console, if not set current is used.
-	 */
-	GP_FB_ALLOC_CON = 0x04,
+enum gp_x11_flags {
+	/* When set, w and h is ignored and root window is used */
+	GP_X11_USE_ROOT_WIN = 0x01,
+
+	/* Create new borderless window above the root window */
+	GP_X11_CREATE_ROOT_WIN = 0x02,
+
+	/* Start fullscreen */
+	GP_X11_FULLSCREEN = 0x04,
+
+	/* Do not use MIT SHM even if available */
+	GP_X11_DISABLE_SHM = 0x08,
 };
 
+
 /*
- * Initalize framebuffer.
+ * Initalize X11 backend.
  *
- * The path should point to framebuffer device eg. "/dev/fb0" for first
- * framebuffer device.
+ * The display may be NULL for default display ($DISPLAY shell variable will
+ * be used).
  *
- * The gp_backend structure is allocated and returned, the resources are
- * deinitalized and the structure is freed by backed->Exit(backend); call.
+ * The coordinates are position and geometry for newly created window.
  *
  * Upon failure NULL is returned.
- *
- * If flag is set, the konsole kbd is used to push events into event queue.
  */
-gp_backend *gp_linux_fb_init(const char *path, int flags);
+gp_backend *gp_x11_init(const char *display, int x, int y,
+                        unsigned int w, unsigned int h,
+			const char *caption,
+			enum gp_x11_flags flags);
 
-#endif /* BACKENDS_GP_FRAMEBUFFER_H */
+/*
+ * Returns non-zero if backend is X11 backend
+ */
+int gp_backend_is_x11(gp_backend *self);
+
+#endif /* BACKENDS_GP_X11_H */

@@ -25,8 +25,8 @@
 
 #include <core/gp_debug.h>
 
-#include "GP_Backends.h"
-#include "GP_BackendInit.h"
+#include <backends/gp_backends.h>
+#include <backends/gp_backend_init.h>
 
 static char *next_param(char *params)
 {

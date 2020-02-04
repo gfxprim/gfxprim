@@ -6,7 +6,7 @@
 #ifndef BACKENDS_GP_XCB_H
 #define BACKENDS_GP_XCB_H
 
-#include <backends/GP_Backend.h>
+#include <backends/gp_backend.h>
 
 /*
  * Initalize XCB backend.

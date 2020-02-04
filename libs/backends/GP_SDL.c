@@ -31,10 +31,10 @@
 
 #include "input/GP_Input.h"
 #include "GP_InputDriverSDL.h"
-#include "GP_Backend.h"
-#include "GP_SDL.h"
+#include <backends/gp_backend.h>
+#include <backends/gp_sdl.h>
 
-#include "GP_SDL_Pixmap.h"
+#include <backends/gp_sdl_pixmap.h>
 
 #include <SDL/SDL.h>
 #include <SDL/SDL_mutex.h>
@@ -270,7 +270,7 @@ gp_backend *gp_sdl_init(gp_size w, gp_size h, uint8_t bpp, uint8_t flags,
 
 #else
 
-#include <backends/GP_Backend.h>
+#include <backends/gp_backend.h>
 
 gp_backend *gp_sdl_init(gp_size w __attribute__((unused)),
                         gp_size h __attribute__((unused)),

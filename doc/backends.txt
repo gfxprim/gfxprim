@@ -80,7 +80,7 @@ window resizable.
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <backends/GP_SDL_Pixmap.h>
+#include <backends/gp_sdl_pixmap.h>
 
 int gp_pixmap_from_sdl_surface(gp_pixmap *c, const SDL_Surface *surf);
 -------------------------------------------------------------------------------
@@ -102,7 +102,7 @@ X Server
 -------------------------------------------------------------------------------
 #include <gfxprim.h>
 /* or */
-#include <backends/GP_X11.h>
+#include <backends/gp_x11.h>
 
 enum gp_x11_flags {
 	/* When set, w and h is ignored and root window is used */
@@ -143,7 +143,7 @@ gp_backend_is_x11
 -------------------------------------------------------------------------------
 #include <gfxprim.h>
 /* or */
-#include <backends/GP_X11.h>
+#include <backends/gp_x11.h>
 
 /*
  * Returns non-zero if backend is X11 backend
@@ -162,7 +162,7 @@ gp_x11_fullscreenn
 -------------------------------------------------------------------------------
 #include <gfxprim.h>
 /* or */
-#include <backends/GP_X11.h>
+#include <backends/gp_x11.h>
 
 /*
  * Changes full screen mode.
@@ -265,7 +265,7 @@ gp_backend_exit
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <backends/GP_Backend.h>
+#include <backends/gp_backend.h>
 /* or */
 #include <gfxprim.h>
 
@@ -289,7 +289,7 @@ gp_backend_flip
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <backends/GP_Backend.h>
+#include <backends/gp_backend.h>
 /* or */
 #include <gfxprim.h>
 
@@ -305,7 +305,7 @@ gp_backend_update_rect
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <backends/GP_Backend.h>
+#include <backends/gp_backend.h>
 /* or */
 #include <gfxprim.h>
 
@@ -322,7 +322,7 @@ gp_backend_poll
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <backends/GP_Backend.h>
+#include <backends/gp_backend.h>
 /* or */
 #include <gfxprim.h>
 
@@ -351,7 +351,7 @@ gp_backend_poll_event
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <backends/GP_Backend.h>
+#include <backends/gp_backend.h>
 /* or */
 #include <gfxprim.h>
 
@@ -391,7 +391,7 @@ gp_backend_wait
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <backends/GP_Backend.h>
+#include <backends/gp_backend.h>
 /* or */
 #include <gfxprim.h>
 
@@ -409,7 +409,7 @@ gp_backend_wait_event
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <backends/GP_Backend.h>
+#include <backends/gp_backend.h>
 /* or */
 #include <gfxprim.h>
 
@@ -446,7 +446,7 @@ gp_backend_add_timer
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <backends/GP_Backend.h>
+#include <backends/gp_backend.h>
 /* or */
 #include <gfxprim.h>
 
@@ -469,7 +469,7 @@ gp_backend_rem_timer
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <backends/GP_Backend.h>
+#include <backends/gp_backend.h>
 /* or */
 #include <gfxprim.h>
 
@@ -483,7 +483,7 @@ gp_backend_timers_in_queue
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <backends/GP_Backend.h>
+#include <backends/gp_backend.h>
 /* or */
 #include <gfxprim.h>
 
@@ -497,7 +497,7 @@ gp_backend_events_queued
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <backends/GP_Backend.h>
+#include <backends/gp_backend.h>
 /* or */
 #include <gfxprim.h>
 
@@ -513,7 +513,7 @@ gp_backend_get_event
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <backends/GP_Backend.h>
+#include <backends/gp_backend.h>
 /* or */
 #include <gfxprim.h>
 
@@ -536,7 +536,7 @@ gp_backend_peek_event
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <backends/GP_Backend.h>
+#include <backends/gp_backend.h>
 /* or */
 #include <gfxprim.h>
 
@@ -551,7 +551,7 @@ gp_backend_put_event_back
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <backends/GP_Backend.h>
+#include <backends/gp_backend.h>
 /* or */
 #include <gfxprim.h>
 
@@ -566,7 +566,7 @@ gp_backend_set_caption
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <backends/GP_Backend.h>
+#include <backends/gp_backend.h>
 /* or */
 #include <gfxprim.h>
 
@@ -583,7 +583,7 @@ gp_backend_resize
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <backends/GP_Backend.h>
+#include <backends/gp_backend.h>
 /* or */
 #include <gfxprim.h>
 
@@ -605,7 +605,7 @@ gp_backend_resize_ack
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <backends/GP_Backend.h>
+#include <backends/gp_backend.h>
 /* or */
 #include <gfxprim.h>
 

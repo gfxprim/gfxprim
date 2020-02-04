@@ -29,7 +29,6 @@
 #include <signal.h>
 #include <string.h>
 #include <gfxprim.h>
-#include <backends/GP_Backends.h>
 
 #include "space.h"
 
