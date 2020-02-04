@@ -22,11 +22,11 @@ def header_exists(cfg, *filenames):
             ret = False
     return ret
 
-def c_try_compile(cfg, code, msg):
+def c_try_compile(cfg, code, msg, cflags=""):
     sys.stderr.write(msg)
 
     ret = os.system("echo '%s' | %s %s -x c -o /dev/null - > /dev/null 2>&1" %
-                    (code, cfg['CC'][0], cfg['CFLAGS'][0]))
+                    (code, cfg['CC'][0], cfg['CFLAGS'][0]) + ' ' + cflags)
 
     if ret:
         sys.stderr.write("No\n")
@@ -49,6 +49,10 @@ def define_fortify_source(cfg):
                               " #error FORTIFY_SOURCE not usable\n" +
                               "#endif\n" +
                               "}", "Whether to define _FORTIFY_SOURCE ... ");
+
+def check_for_cflags(cfg, cflags):
+    return c_try_compile(cfg, "int main(void) { return 0; }",
+                         "Checking for %s ... " % cflags, cflags)
 
 def python_version(cfg):
     sys.stderr.write("Checking for python-config Python version ... ")
@@ -247,6 +251,9 @@ def basic_checks(cfg):
     if define_fortify_source(cfg):
         cfg['CFLAGS'][0] = cfg['CFLAGS'][0] + " -D_FORTIFY_SOURCE=2"
 
+    if check_for_cflags(cfg, "-Wimplicit-fallthrough=0"):
+        cfg['CFLAGS_WNIF'][0] = "-Wimplicit-fallthrough=0"
+
     cfg['PYTHON_VER'][0] = python_version(cfg)
 
     if cfg['libdir'][0] == '':
@@ -341,6 +348,7 @@ if __name__ ==  '__main__':
     #
     cfg = {'CC'            : ['gcc', 'Path/name of the C compiler'],
            'CFLAGS'        : ['-W -Wall -Wextra -O2 -ggdb', 'C compiler flags'],
+           'CFLAGS_WNIF'   : ['', 'Disable implicit fallthrough warnings'],
            'LDFLAGS'       : ['', 'Linker flags'],
            'PYTHON_BIN'    : ['python', 'Path/name of python interpreter'],
            'SWIG'          : ['swig', 'Simplified Wrapper and Interface Generator'],
