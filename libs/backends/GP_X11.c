@@ -168,6 +168,7 @@ static void x11_ev(XEvent *ev)
 
 		/*  Window has been resized, set flag. */
 		win->resized_flag = 1;
+	/* fallthrough */
 	default:
 		//TODO: More accurate window w and h?
 		x11_input_event_put(&self->event_queue, ev,
@@ -453,10 +454,13 @@ static int create_ximage(gp_backend *self, gp_size w, gp_size h)
 	case 32:
 	case 24:
 		depth = 32;
+	break;
 	case 16:
 		depth = 16;
+	break;
 	case 8:
 		depth = 8;
+	break;
 	default:
 		/* TODO: better default */
 		depth = 32;

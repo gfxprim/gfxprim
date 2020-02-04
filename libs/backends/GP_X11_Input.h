@@ -134,6 +134,7 @@ static void x11_input_event_put(gp_event_queue *event_queue,
 	switch (ev->type) {
 	case ButtonPress:
 		press = 1;
+	/* fallthrough */
 	case ButtonRelease:
 		switch (ev->xbutton.button) {
 		case 1:
@@ -170,7 +171,6 @@ static void x11_input_event_put(gp_event_queue *event_queue,
 		gp_event_queue_push_resize(event_queue, ev->xconfigure.width,
 		                        ev->xconfigure.height, NULL);
 	break;
-	break;
 	case MotionNotify:
 		/* Ignore all pointer events that are out of the window */
 		if (ev->xmotion.x < 0 || ev->xmotion.y < 0 ||
@@ -182,6 +182,7 @@ static void x11_input_event_put(gp_event_queue *event_queue,
 	break;
 	case KeyPress:
 		press = 1;
+	/* fallthrough */
 	case KeyRelease:
 		key = get_key(ev->xkey.keycode);
 
