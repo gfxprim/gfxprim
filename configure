@@ -127,21 +127,21 @@ class libraries:
 
         for i in cfg:
             value = cfg_get_value(i)
-            sys.stderr.write("%14s : '%s'\n" % (i, value))
-            sys.stderr.write("              - %s\n\n" % cfg[i][1])
+            sys.stderr.write("%16s : '%s'\n" % (i, value))
+            sys.stderr.write("                  - %s\n\n" % cfg[i][1])
 
         sys.stderr.write("Libraries to link against\n")
         sys.stderr.write("-------------------------\n")
 
         for i in self.libraries:
-            sys.stderr.write("%10s" % i[0])
+            sys.stderr.write("%16s" % i[0])
 
             if (self.results[i[0]]):
                 sys.stderr.write(" : Enabled\n")
             else:
                 sys.stderr.write(" : Disabled\n")
 
-            sys.stderr.write("          - %s\n\n" % i[1])
+            sys.stderr.write("                  - %s\n\n" % i[1])
     #
     # Enable/Disable library
     #
