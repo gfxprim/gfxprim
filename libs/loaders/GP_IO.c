@@ -712,6 +712,7 @@ int gp_io_readf(gp_io *self, uint16_t *types, ...)
 		case GP_IO_ARRAY:
 			ptr = va_arg(va, void*);
 			memcpy(ptr, buf, VAL(*types));
+		/* fallthrough */
 		case GP_IO_IGN:
 			buf += VAL(*types);
 		break;
