@@ -8,6 +8,7 @@ from optparse import OptionParser
 import subprocess
 
 def header_exists(cfg, *filenames):
+    ret = True;
     for filename in filenames:
         fpath = cfg['include_path'][0] + '/' + filename
 
@@ -16,10 +17,10 @@ def header_exists(cfg, *filenames):
         try:
             st = os.stat(fpath)
             sys.stderr.write("Yes\n")
-            return True
         except os.error:
             sys.stderr.write("No\n")
-    return False
+            ret = False
+    return ret
 
 def c_try_compile(cfg, code, msg):
     sys.stderr.write(msg)
@@ -392,7 +393,7 @@ if __name__ ==  '__main__':
                     [header_exists, "X11/Xlib.h"], "", "-lX11", ["backends"]],
                    ["libxcb",
                     "XCB library",
-                    [header_exists, "xcb/xcb.h"], "", "-lxcb -lxcb-keysyms -lxcb-shm", ["backends"]],
+                    [header_exists, "xcb/xcb.h", "xcb/xcb_keysyms.h"], "", "-lxcb -lxcb-keysyms -lxcb-shm", ["backends"]],
                    ["xcb-util-errors",
                     "XCB errors library",
                     [header_exists, "xcb/xcb_errors.h"], "", "-lxcb-errors", ["backends"]],
