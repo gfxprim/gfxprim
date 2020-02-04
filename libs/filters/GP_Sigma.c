@@ -105,9 +105,9 @@ static int gp_filter_sigma_raw(const gp_pixmap *src,
 	for (y = 0; y < (int)h_src; y++) {
 		for (x = 0; x < (int)w_src; x++) {
 			/* Get center pixel */
-			unsigned int R_center = R[yc * w + x + xrad];
-			unsigned int G_center = G[yc * w + x + xrad];
-			unsigned int B_center = B[yc * w + x + xrad];
+			int R_center = R[yc * w + x + xrad];
+			int G_center = G[yc * w + x + xrad];
+			int B_center = B[yc * w + x + xrad];
 
 			/* Reset sum counters */
 			R_sum = 0;
@@ -124,9 +124,9 @@ static int gp_filter_sigma_raw(const gp_pixmap *src,
 
 			for (x1 = 0; x1 < xdiam; x1++) {
 				for (y1 = 0; y1 < ydiam; y1++) {
-					unsigned int R_cur = R[y1 * w + x + x1];
-					unsigned int G_cur = G[y1 * w + x + x1];
-					unsigned int B_cur = B[y1 * w + x + x1];
+					int R_cur = R[y1 * w + x + x1];
+					int G_cur = G[y1 * w + x + x1];
+					int B_cur = B[y1 * w + x + x1];
 
 					R_sum += R_cur;
 					G_sum += G_cur;
