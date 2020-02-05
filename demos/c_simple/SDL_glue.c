@@ -33,7 +33,7 @@
 #include <stdlib.h>
 #include <SDL/SDL.h>
 #include <gfxprim.h>
-#include <backends/GP_SDL_Pixmap.h>
+#include <backends/gp_sdl_pixmap.h>
 
 #define W 320
 #define H 240
