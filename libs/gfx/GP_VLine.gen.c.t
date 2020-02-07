@@ -6,7 +6,7 @@
  */
 
 #include <core/gp_get_put_pixel.h>
-#include "gfx/GP_VLine.gen.h"
+#include <gfx/gp_vline.gen.h>
 
 @ for ps in pixelsizes:
 void gp_vline_raw_{{ ps.suffix }}(gp_pixmap *pixmap, gp_coord x,

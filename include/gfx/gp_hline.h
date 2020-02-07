@@ -23,37 +23,38 @@
  *                                                                           *
  *****************************************************************************/
 
-#ifndef GFX_GP_VLINE_H
-#define GFX_GP_VLINE_H
+#ifndef GFX_GP_HLINE_H
+#define GFX_GP_HLINE_H
 
 #include "core/gp_types.h"
 
 /* Raw per BPP HLines */
-#include "gfx/GP_VLine.gen.h"
+#include <gfx/gp_hline.gen.h>
 
-void gp_vline_xyy(gp_pixmap *pixmap, gp_coord x, gp_coord y0,
-                  gp_coord y1, gp_pixel pixel);
-
-void gp_vline_xyy_raw(gp_pixmap *pixmap, gp_coord x, gp_coord y0,
-                      gp_coord y1, gp_pixel pixel);
-
-void gp_vline_xyh(gp_pixmap *pixmap, gp_coord x, gp_coord y, gp_size h,
+/* Generic HLines */
+void gp_hline_xxy(gp_pixmap *pixmap, gp_coord x0, gp_coord x1, gp_coord y,
                   gp_pixel pixel);
 
-void gp_vline_xyh_raw(gp_pixmap *pixmap, gp_coord x, gp_coord y, gp_size h,
+void gp_hline_xxy_raw(gp_pixmap *pixmap, gp_coord x0, gp_coord x1,
+                      gp_coord y, gp_pixel pixel);
+
+void gp_hline_xyw(gp_pixmap *pixmap, gp_coord x, gp_coord y, gp_size w,
+                  gp_pixel pixel);
+
+void gp_hline_xyw_raw(gp_pixmap *pixmap, gp_coord x, gp_coord y, gp_size w,
                       gp_pixel pixel);
 
-/* default argument set is xyy */
-static inline void gp_vline(gp_pixmap *pixmap, gp_coord x,
-                            gp_coord y0, gp_coord y1, gp_pixel pixel)
+/* default argument set is xxy */
+static inline void gp_hline_raw(gp_pixmap *pixmap, gp_coord x0, gp_coord x1,
+                                gp_coord y, gp_pixel p)
 {
-	gp_vline_xyy(pixmap, x, y0, y1, pixel);
+	gp_hline_xxy_raw(pixmap, x0, x1, y, p);
 }
 
-static inline void gp_vline_raw(gp_pixmap *pixmap, gp_coord x,
-                                gp_coord y0, gp_coord y1, gp_pixel pixel)
+static inline void gp_hline(gp_pixmap *pixmap, gp_coord x0, gp_coord x1,
+                            gp_coord y, gp_pixel p)
 {
-	gp_vline_xyy_raw(pixmap, x, y0, y1, pixel);
+	gp_hline_xxy(pixmap, x0, x1, y, p);
 }
 
-#endif /* GFX_GP_VLINE_H */
+#endif /* GFX_GP_HLINE_H */

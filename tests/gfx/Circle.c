@@ -25,7 +25,7 @@
 #include <sys/stat.h>
 
 #include <core/gp_pixmap.h>
-#include <gfx/GP_Circle.h>
+#include <gfx/gp_circle.h>
 
 #include "tst_test.h"
 

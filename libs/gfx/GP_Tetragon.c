@@ -26,9 +26,9 @@
 #include "core/gp_pixmap.h"
 #include <core/gp_transform.h>
 
-#include "gfx/GP_Line.h"
-#include "gfx/GP_Polygon.h"
-#include "gfx/GP_Tetragon.h"
+#include <gfx/gp_line.h>
+#include <gfx/gp_polygon.h>
+#include <gfx/gp_tetragon.h>
 
 void gp_tetragon_raw(gp_pixmap *pixmap, gp_coord x0, gp_coord y0,
                      gp_coord x1, gp_coord y1, gp_coord x2, gp_coord y2,

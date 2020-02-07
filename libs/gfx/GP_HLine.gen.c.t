@@ -10,7 +10,7 @@
 #include <core/gp_get_put_pixel.gen.h>
 #include <core/gp_write_pixel.h>
 
-#include "gfx/GP_HLine.h"
+#include <gfx/gp_hline.h>
 
 @ # Explicit list of BPP that have optimized write pixel
 @ have_writepixels = ['1BPP_LE', '1BPP_BE',

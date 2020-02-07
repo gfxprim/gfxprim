@@ -27,8 +27,8 @@
 #include <core/gp_fixed_point.h>
 #include <core/gp_gamma_correction.h>
 
-#include "gfx/GP_HLine.h"
-#include "gfx/GP_VLine.h"
+#include <gfx/gp_hline.h>
+#include <gfx/gp_vline.h>
 
 #define FP_TO_PERC(a) (GP_FP_ROUND_TO_INT((a) * 255))
 

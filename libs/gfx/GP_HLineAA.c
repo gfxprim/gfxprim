@@ -24,8 +24,8 @@
 #include <core/gp_fn_per_bpp.h>
 #include <core/gp_transform.h>
 
-#include "gfx/GP_HLineAA.h"
-#include "gfx/GP_VLineAA.h"
+#include <gfx/gp_hline_aa.h>
+#include <gfx/gp_vline_aa.h>
 
 void gp_hline_aa(gp_pixmap *pixmap, gp_coord x0, gp_coord x1,
                  gp_coord y, gp_pixel pixel)

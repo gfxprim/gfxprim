@@ -27,7 +27,7 @@
 #include <core/gp_transform.h>
 #include <core/gp_fn_per_bpp.h>
 
-#include "gfx/GP_LineAA.h"
+#include <gfx/gp_line_aa.h>
 
 void gp_line_aa(gp_pixmap *pixmap, gp_coord x0, gp_coord y0,
                 gp_coord x1, gp_coord y1, gp_pixel pixel)

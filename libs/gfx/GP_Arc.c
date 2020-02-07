@@ -26,7 +26,7 @@
 #include <core/gp_get_put_pixel.h>
 #include <core/gp_fn_per_bpp.h>
 
-#include "gfx/GP_Arc.h"
+#include <gfx/gp_arc.h>
 
 #include "algo/Arc.algo.h"
 

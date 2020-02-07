@@ -10,7 +10,7 @@
 #include <core/gp_get_put_pixel.h>
 #include <core/gp_mix_pixels.gen.h>
 
-#include <gfx/GP_HLine.h>
+#include <gfx/gp_hline.h>
 
 #include <text/GP_TextStyle.h>
 #include <text/GP_Font.h>

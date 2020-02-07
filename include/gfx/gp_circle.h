@@ -23,21 +23,41 @@
  *                                                                           *
  *****************************************************************************/
 
-#ifndef GP_ARC_H
-#define GP_ARC_H
+#ifndef GP_CIRCLE_H
+#define GP_CIRCLE_H
 
-#include "core/gp_types.h"
+#include <core/gp_types.h>
 
-#include <math.h>
+/* Circle */
 
-void gp_arc_segment(gp_pixmap *pixmap, gp_coord xcenter, gp_coord ycenter,
-		    gp_size a, gp_size b, int direction,
-		    double start, double end,
-		    gp_pixel pixel);
+void gp_circle(gp_pixmap *pixmap, gp_coord xcenter, gp_coord ycenter,
+               gp_size r, gp_pixel pixel);
 
-void gp_arc_segment_raw(gp_pixmap *pixmap, gp_coord xcenter, gp_coord ycenter,
-		        gp_size a, gp_size b, int direction,
-		        double start, double end,
-		        gp_pixel pixel);
+void gp_circle_raw(gp_pixmap *pixmap, gp_coord xcenter, gp_coord ycenter,
+                   gp_size r, gp_pixel pixel);
 
-#endif /* GP_ARC_H */
+/* Filled Circle */
+
+void gp_fill_circle(gp_pixmap *pixmap, gp_coord xcenter, gp_coord ycenter,
+                    gp_size r, gp_pixel pixel);
+
+void gp_fill_circle_raw(gp_pixmap *pixmap, gp_coord xcenter, gp_coord ycenter,
+                        gp_size r, gp_pixel pixel);
+
+/* Ring */
+
+void gp_ring(gp_pixmap *pixmap, gp_coord xcenter, gp_coord ycenter,
+             gp_size r1, gp_size r2, gp_pixel pixel);
+
+void gp_ring_raw(gp_pixmap *pixmap, gp_coord xcenter, gp_coord ycenter,
+                 gp_size r1, gp_size r2, gp_pixel pixel);
+
+/* Filled Ring */
+
+void gp_fill_ring(gp_pixmap *pixmap, gp_coord xcenter, gp_coord ycenter,
+                  gp_size r1, gp_size r2, gp_pixel pixel);
+
+void gp_fill_ring_raw(gp_pixmap *pixmap, gp_coord xcenter, gp_coord ycenter,
+                      gp_size r1, gp_size r2, gp_pixel pixel);
+
+#endif /* GP_CIRCLE_H */

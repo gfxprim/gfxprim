@@ -16,45 +16,65 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2011 Jiri "BlueBear" Dluhos                            *
- *                         <jiri.bluebear.dluhos@gmail.com>                  *
- *                                                                           *
- * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2015 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
-#ifndef GFX_GP_HLINE_H
-#define GFX_GP_HLINE_H
+#include "core/gp_debug.h"
+#include "core/GP_TempAlloc2.h"
 
-#include "core/gp_types.h"
-
-/* Raw per BPP HLines */
-#include "gfx/GP_HLine.gen.h"
-
-/* Generic HLines */
-void gp_hline_xxy(gp_pixmap *pixmap, gp_coord x0, gp_coord x1, gp_coord y,
-                  gp_pixel pixel);
-
-void gp_hline_xxy_raw(gp_pixmap *pixmap, gp_coord x0, gp_coord x1,
-                      gp_coord y, gp_pixel pixel);
-
-void gp_hline_xyw(gp_pixmap *pixmap, gp_coord x, gp_coord y, gp_size w,
-                  gp_pixel pixel);
-
-void gp_hline_xyw_raw(gp_pixmap *pixmap, gp_coord x, gp_coord y, gp_size w,
-                      gp_pixel pixel);
-
-/* default argument set is xxy */
-static inline void gp_hline_raw(gp_pixmap *pixmap, gp_coord x0, gp_coord x1,
-                                gp_coord y, gp_pixel p)
+void *gp_temp_alloc_(gp_temp_alloc *self, size_t size)
 {
-	gp_hline_xxy_raw(pixmap, x0, x1, y, p);
+	void **ret = malloc(size + 2 * sizeof(void*));
+
+	if (!ret)
+		return NULL;
+
+	ret[0] = NULL;
+	ret[1] = self->last;
+
+	if (!self->first) {
+		self->first = ret;
+		self->last = ret;
+	} else {
+		void** last = self->last;
+		last[0] = ret;
+		self->last = ret;
+	}
+
+	return &ret[2];
 }
 
-static inline void gp_hline(gp_pixmap *pixmap, gp_coord x0, gp_coord x1,
-                            gp_coord y, gp_pixel p)
+void gp_temp_alloc_save(gp_temp_alloc *self,
+                        gp_temp_alloc_mark *mark)
 {
-	gp_hline_xxy(pixmap, x0, x1, y, p);
+	mark->stack_allocated = self->stack_allocated;
+	mark->last = self->last;
 }
 
-#endif /* GFX_GP_HLINE_H */
+void gp_temp_allocRestore(gp_temp_alloc *self,
+                          gp_temp_alloc_mark *mark)
+{
+	self->stack_allocated = mark->stack_allocated;
+	void **i, **j, **last = mark->last;
+
+	if (!last)
+		return;
+
+	i = *last;
+
+	while (i) {
+		j = *i;
+		free(i);
+		i = j;
+	}
+
+	last[0] = NULL;
+}
+
+void gp_temp_allocDestroy(gp_temp_alloc *self)
+{
+	gp_temp_alloc_mark mark = {.last = self->first};
+
+	gp_temp_allocRestore(self, &mark);
+}

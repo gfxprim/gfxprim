@@ -8,7 +8,7 @@
 #include "core/gp_common.h"
 #include <core/gp_get_put_pixel.h>
 #include <core/gp_fn_per_bpp.h>
-#include <gfx/GP_HLine.h>
+#include <gfx/gp_hline.h>
 
 typedef struct gp_line {
 	gp_coord x, dx, dy, error, xstep;

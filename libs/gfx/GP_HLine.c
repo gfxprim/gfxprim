@@ -26,8 +26,8 @@
 #include "core/gp_pixmap.h"
 #include <core/gp_transform.h>
 
-#include "gfx/GP_HLine.h"
-#include "gfx/GP_VLine.h"
+#include <gfx/gp_hline.h>
+#include <gfx/gp_vline.h>
 
 void gp_hline_xxy_raw(gp_pixmap *pixmap, gp_coord x0, gp_coord x1,
                      gp_coord y, gp_pixel pixel)

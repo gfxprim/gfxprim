@@ -11,10 +11,10 @@
 #include <core/gp_get_put_pixel.h>
 #include <core/gp_fn_per_bpp.h>
 
-#include "gfx/GP_VLine.h"
-#include "gfx/GP_HLine.h"
-#include "gfx/GP_Line.h"
-#include "gfx/GP_LineClip.h"
+#include <gfx/gp_vline.h>
+#include <gfx/gp_hline.h>
+#include <gfx/gp_line.h>
+#include <gfx/gp_line_clip.h>
 
 /*
  * The classical Bresenham line drawing algorithm.

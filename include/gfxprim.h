@@ -30,7 +30,7 @@
 #include <core/gp_core.h>
 
 /* public drawing API */
-#include "gfx/GP_Gfx.h"
+#include <gfx/gp_gfx.h>
 
 /* fonts and text drawing */
 #include "text/GP_Text.h"

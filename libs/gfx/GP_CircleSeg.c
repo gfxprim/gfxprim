@@ -25,8 +25,8 @@
 
 #include <core/gp_get_put_pixel.h>
 #include <core/gp_fn_per_bpp.h>
-#include "gfx/GP_CircleSeg.h"
-#include "gfx/GP_HLine.h"
+#include <gfx/gp_circle_seg.h>
+#include <gfx/gp_hline.h>
 
 #include "algo/CircleSeg.algo.h"
 

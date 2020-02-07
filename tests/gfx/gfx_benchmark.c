@@ -21,7 +21,7 @@
  *****************************************************************************/
 
 #include <core/gp_pixmap.h>
-#include <gfx/GP_Gfx.h>
+#include <gfx/gp_gfx.h>
 
 #include "tst_test.h"
 

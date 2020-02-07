@@ -27,7 +27,7 @@
 #include <core/gp_fn_per_bpp.h>
 #include <core/gp_debug.h>
 
-#include <gfx/GP_Rect.h>
+#include <gfx/gp_rect.h>
 
 #include <text/GP_TextMetric.h>
 #include <text/GP_Text.h>

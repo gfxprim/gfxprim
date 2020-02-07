@@ -27,8 +27,8 @@
 #include <core/gp_get_put_pixel.h>
 #include <core/gp_fn_per_bpp.h>
 
-#include "gfx/GP_VLine.h"
-#include "gfx/GP_HLine.h"
+#include <gfx/gp_vline.h>
+#include <gfx/gp_hline.h>
 
 /*
  * Ensures that coordinates are in correct order, and clips them.

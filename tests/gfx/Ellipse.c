@@ -25,7 +25,7 @@
 #include <sys/stat.h>
 
 #include <core/gp_pixmap.h>
-#include <gfx/GP_Ellipse.h>
+#include <gfx/gp_ellipse.h>
 
 #include "tst_test.h"
 

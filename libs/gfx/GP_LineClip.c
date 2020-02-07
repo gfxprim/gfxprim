@@ -25,7 +25,7 @@
 
 #include "core/gp_common.h"
 #include "core/gp_types.h"
-#include <gfx/GP_LineClip.h>
+#include <gfx/gp_line_clip.h>
 
 int gp_line_clip(int *px0, int *py0, int *px1, int *py1, int xmax, int ymax)
 {

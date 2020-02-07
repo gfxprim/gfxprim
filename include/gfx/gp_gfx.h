@@ -39,21 +39,21 @@
 #include "core/gp_fill.h"
 
 /* public drawing API */
-#include "GP_HLine.h"
-#include "GP_VLine.h"
-#include "GP_Line.h"
-#include "GP_Rect.h"
-#include "GP_Triangle.h"
-#include "GP_Tetragon.h"
-#include "GP_Circle.h"
-#include "GP_CircleSeg.h"
-#include "GP_Ellipse.h"
-#include "GP_Arc.h"
-#include "GP_Polygon.h"
+#include <gfx/gp_hline.h>
+#include <gfx/gp_vline.h>
+#include <gfx/gp_line.h>
+#include <gfx/gp_rect.h>
+#include <gfx/gp_triangle.h>
+#include <gfx/gp_tetragon.h>
+#include <gfx/gp_circle.h>
+#include <gfx/gp_circle_seg.h>
+#include <gfx/gp_ellipse.h>
+#include <gfx/gp_arc.h>
+#include <gfx/gp_polygon.h>
 
-#include "GP_PutPixelAA.h"
-#include "GP_VLineAA.h"
-#include "GP_HLineAA.h"
-#include "GP_LineAA.h"
+#include <gfx/gp_putpixel_aa.h>
+#include <gfx/gp_vline_aa.h>
+#include <gfx/gp_hline_aa.h>
+#include <gfx/gp_line_aa.h>
 
 #endif /* GP_GFX_H */

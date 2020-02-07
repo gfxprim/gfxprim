@@ -25,7 +25,7 @@
 #include <sys/stat.h>
 
 #include <core/gp_pixmap.h>
-#include <gfx/GP_HLineAA.h>
+#include <gfx/gp_hline_aa.h>
 
 #include "tst_test.h"
 

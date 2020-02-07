@@ -25,7 +25,7 @@
 #include <sys/stat.h>
 
 #include <core/gp_pixmap.h>
-#include <gfx/GP_Polygon.h>
+#include <gfx/gp_polygon.h>
 
 #include "tst_test.h"
 

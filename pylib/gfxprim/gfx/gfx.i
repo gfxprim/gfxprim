@@ -2,31 +2,31 @@
 %module(package="gfxprim.gfx") c_gfx
 
 %{
-#include "gfx/GP_Gfx.h"
+#include "gfx/gp_gfx.h"
 %}
 
 %import ../core/core.i
 
-%include "GP_Gfx.h"
+%include "gp_gfx.h"
 
 /* Listed in GP_Gfx.h: */
 %include "gp_fill.h"
-%include "GP_HLine.h"
-%include "GP_VLine.h"
-%include "GP_Line.h"
-%include "GP_Rect.h"
-%include "GP_Triangle.h"
-%include "GP_Tetragon.h"
-%include "GP_Circle.h"
+%include "gp_hline.h"
+%include "gp_vline.h"
+%include "gp_line.h"
+%include "gp_rect.h"
+%include "gp_triangle.h"
+%include "gp_tetragon.h"
+%include "gp_circle.h"
 /* %include "GP_CircleSeg.h"  -- missing symbols */
-%include "GP_Ellipse.h"
-%include "GP_Arc.h"
-%include "GP_Polygon.h"
+%include "gp_ellipse.h"
+%include "gp_arc.h"
+%include "gp_polygon.h"
 
-%include "GP_PutPixelAA.h"
-%include "GP_VLineAA.h"
-%include "GP_HLineAA.h"
-%include "GP_LineAA.h"
+%include "gp_putpixel_aa.h"
+%include "gp_vline_aa.h"
+%include "gp_hline_aa.h"
+%include "gp_line_aa.h"
 
 %inline %{
 static gp_coord *gp_polygon_unpack_coordinates(PyObject *coords)

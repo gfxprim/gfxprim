@@ -2,7 +2,7 @@ TOPDIR=../..
 
 include $(TOPDIR)/pre.mk
 
-GENHEADERS=GP_VLine.gen.h GP_HLine.gen.h
+GENHEADERS=gp_vline.gen.h gp_hline.gen.h
 
 include $(TOPDIR)/gen.mk
 include $(TOPDIR)/post.mk

@@ -7,9 +7,9 @@
 
 #include <core/gp_get_put_pixel.h>
 #include <core/gp_fn_per_bpp.h>
-#include "gfx/GP_HLine.h"
-#include "gfx/GP_VLine.h"
-#include "gfx/GP_Ellipse.h"
+#include <gfx/gp_hline.h>
+#include <gfx/gp_vline.h>
+#include <gfx/gp_ellipse.h>
 
 /*
  * A filled ellipse drawing algorithm.

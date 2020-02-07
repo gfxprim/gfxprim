@@ -16,30 +16,44 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
+ * Copyright (C) 2009-2011 Jiri "BlueBear" Dluhos                            *
+ *                         <jiri.bluebear.dluhos@gmail.com>                  *
+ *                                                                           *
  * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
-#include <core/gp_get_put_pixel.h>
-#include <core/gp_fn_per_bpp.h>
+#ifndef GFX_GP_VLINE_H
+#define GFX_GP_VLINE_H
 
-#include <gfx/gp_vline_aa.h>
-#include <gfx/gp_hline_aa.h>
+#include "core/gp_types.h"
 
-void gp_vline_aa(gp_pixmap *pixmap, gp_coord x, gp_coord y0,
-                gp_coord y1, gp_pixel pixel)
+/* Raw per BPP HLines */
+#include <gfx/gp_vline.gen.h>
+
+void gp_vline_xyy(gp_pixmap *pixmap, gp_coord x, gp_coord y0,
+                  gp_coord y1, gp_pixel pixel);
+
+void gp_vline_xyy_raw(gp_pixmap *pixmap, gp_coord x, gp_coord y0,
+                      gp_coord y1, gp_pixel pixel);
+
+void gp_vline_xyh(gp_pixmap *pixmap, gp_coord x, gp_coord y, gp_size h,
+                  gp_pixel pixel);
+
+void gp_vline_xyh_raw(gp_pixmap *pixmap, gp_coord x, gp_coord y, gp_size h,
+                      gp_pixel pixel);
+
+/* default argument set is xyy */
+static inline void gp_vline(gp_pixmap *pixmap, gp_coord x,
+                            gp_coord y0, gp_coord y1, gp_pixel pixel)
 {
-	GP_CHECK_PIXMAP(pixmap);
-
-	if (pixmap->axes_swap) {
-		GP_TRANSFORM_Y_FP(pixmap, x);
-		GP_TRANSFORM_X_FP(pixmap, y0);
-		GP_TRANSFORM_X_FP(pixmap, y1);
-		gp_hline_aa_raw(pixmap, y0, y1, x, pixel);
-	} else {
-		GP_TRANSFORM_X_FP(pixmap, x);
-		GP_TRANSFORM_Y_FP(pixmap, y0);
-		GP_TRANSFORM_Y_FP(pixmap, y1);
-		gp_vline_aa_raw(pixmap, x, y0, y1, pixel);
-	}
+	gp_vline_xyy(pixmap, x, y0, y1, pixel);
 }
+
+static inline void gp_vline_raw(gp_pixmap *pixmap, gp_coord x,
+                                gp_coord y0, gp_coord y1, gp_pixel pixel)
+{
+	gp_vline_xyy_raw(pixmap, x, y0, y1, pixel);
+}
+
+#endif /* GFX_GP_VLINE_H */

@@ -31,9 +31,9 @@
 #include <core/gp_transform.h>
 #include <core/gp_get_put_pixel.h>
 
-#include "GP_Line.h"
-#include "GP_HLine.h"
-#include "GP_Polygon.h"
+#include <gfx/gp_line.h>
+#include <gfx/gp_hline.h>
+#include <gfx/gp_polygon.h>
 
 /* A 2D point specified by gp_coord coordinates. */
 typedef struct {
