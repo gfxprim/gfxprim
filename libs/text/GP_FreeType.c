@@ -217,3 +217,54 @@ gp_font_face *gp_font_face_load(const char *path, uint32_t width, uint32_t heigh
 }
 
 #endif /* HAVE_FREETYPE */
+
+#ifdef HAVE_FONTCONFIG
+
+#include <fontconfig/fontconfig.h>
+
+gp_font_face *gp_font_face_fc_load(const char *family_name, uint32_t width, uint32_t height)
+{
+	gp_font_face *ret = NULL;
+	FcResult res;
+	FcChar8 *font_path;
+
+	FcPattern *pat = FcNameParse((const FcChar8*)family_name);
+	if (!pat)
+		goto exit1;
+
+	FcConfigSubstitute(NULL, pat, FcMatchPattern);
+	FcDefaultSubstitute(pat);
+
+	FcPattern *font = FcFontMatch(NULL, pat, &res);
+	if (!font)
+		goto exit2;
+
+	if (FcPatternGetString(font, FC_FILE, 0, &font_path) != FcResultMatch)
+		goto exit3;
+
+	GP_DEBUG(1, "Font '%s' path '%s'", family_name, (char*)font_path);
+
+	ret = gp_font_face_load((const char *)font_path, width, height);
+
+exit3:
+	FcPatternDestroy(font);
+exit2:
+	FcPatternDestroy(pat);
+exit1:
+	return ret;
+}
+
+#else
+
+gp_font_face *gp_font_face_fc_load(const char *family_name, uint32_t width, uint32_t height)
+{
+	(void)name;
+	(void)width;
+	(void)height;
+
+	GP_WARN("Fontconfig support not compiled in.");
+
+	return NULL;
+}
+
+#endif /* HAVE_FONTCONFIG */

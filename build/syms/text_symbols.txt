@@ -2,6 +2,7 @@ gp_font_square
 gp_font_tiny_mono
 gp_font_gfxprim
 gp_font_face_load
+gp_font_face_fc_load
 gp_font_face_free
 gp_font_haxor_narrow_15
 gp_font_haxor_narrow_16

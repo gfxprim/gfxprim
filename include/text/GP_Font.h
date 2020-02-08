@@ -189,6 +189,9 @@ gp_glyph *gp_get_glyph(const gp_font_face *font, int c);
 /* Loads font face from file  */
 gp_font_face *gp_font_face_load(const char *path, uint32_t width, uint32_t height);
 
+/* Uses fontconfig to lookup font file */
+gp_font_face *gp_font_face_fc_load(const char *name, uint32_t width, uint32_t height);
+
 /* Free the font face memory */
 void gp_font_face_free(gp_font_face *self);
 

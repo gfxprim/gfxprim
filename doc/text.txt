@@ -235,3 +235,22 @@ The 'gp_font_face_free()' frees memory taken up by the rendered font. If self is
 NULL no operation is done.
 
 TIP: For font and text_style handling see link:example_fonts.html[examples].
+
+[source,c]
+--------------------------------------------------------------------------------
+/*
+ * Load font face given Fontconfig font name
+ */
+gp_font_face *gp_font_face_fc_load(const char *family_name, uint32_t width, uint32_t height);
+--------------------------------------------------------------------------------
+
+Same as above but uses Fontconfig to get the path given a font family name.
+
+Example names:
+
+* "Mono:Bold" - default monospace bold font
+* "Sans" - default sans font
+* "LiberationSans:Italic" - liberation sans italic font
+
+NOTE: The match may not be exact, if for example LiberationSans is not present
+      on the system fontconfig will chose a different Sans font instead.
