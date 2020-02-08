@@ -258,7 +258,7 @@ exit1:
 
 gp_font_face *gp_font_face_fc_load(const char *family_name, uint32_t width, uint32_t height)
 {
-	(void)name;
+	(void)family_name;
 	(void)width;
 	(void)height;
 
