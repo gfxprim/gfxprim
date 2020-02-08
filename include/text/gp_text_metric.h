@@ -27,7 +27,7 @@
 #define TEXT_GP_TEXT_METRIC_H
 
 #include <core/gp_types.h>
-#include <text/GP_TextStyle.h>
+#include <text/gp_text_style.h>
 
 /*
  * Calculates the width of the string drawn in the given style, in pixels.

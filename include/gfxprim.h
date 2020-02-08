@@ -33,7 +33,7 @@
 #include <gfx/gp_gfx.h>
 
 /* fonts and text drawing */
-#include "text/GP_Text.h"
+#include <text/gp_text.h>
 
 /* backends */
 #include <backends/gp_backends.h>

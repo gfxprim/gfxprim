@@ -23,7 +23,7 @@
  *                                                                           *
  *****************************************************************************/
 
-#include <text/GP_Font.h>
+#include <text/gp_font.h>
 
 static int8_t default_console_glyphs[] = {
 	/* ' ' */	7, 11, 0, 9, 8,

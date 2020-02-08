@@ -22,7 +22,7 @@
 
 #include "../../config.h"
 #include <core/gp_debug.h>
-#include "text/GP_Font.h"
+#include <text/gp_font.h>
 
 #ifdef HAVE_FREETYPE
 

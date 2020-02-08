@@ -21,8 +21,8 @@
  *****************************************************************************/
 
 #include <stdlib.h>
-#include <text/GP_Font.h>
-#include <text/GP_Fonts.h>
+#include <text/gp_font.h>
+#include <text/gp_fonts.h>
 
 uint32_t gp_get_glyph_count(gp_char_set charset)
 {

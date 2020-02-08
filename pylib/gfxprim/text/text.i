@@ -2,8 +2,8 @@
 %module(package="gfxprim.text") c_text
 
 %{
-#include "text/GP_Text.h"
-#include "text/GP_Font.h"
+#include <text/gp_text.h>
+#include <text/gp_font.h>
 #include <core/gp_debug.h>
 %}
 
@@ -13,9 +13,9 @@
 %ignore gp_font_face::glyph_offsets;
 %ignore gp_print;
 %ignore gp_vprint;
-%include "GP_Text.h"
-%include "GP_Font.h"
-%include "GP_TextMetric.h"
+%include "gp_text.h"
+%include "gp_font.h"
+%include "gp_text_metric.h"
 
 %immutable gp_font_gfxprim;
 %immutable gp_font_gfxprim_mono;
@@ -28,9 +28,9 @@
 %immutable gp_font_haxor_narrow_bold_16;
 %immutable gp_font_haxor_narrow_17;
 %immutable gp_font_haxor_narrow_bold_17;
-%include "GP_Fonts.h"
+%include "gp_fonts.h"
 
-/* GP_TextStyle wrappers */
+/* gp_text_style wrappers */
 %extend gp_text_style {
   ~gp_text_style() {
     GP_DEBUG(2, "[wrapper] gp_text_style_free (%p)", $self);
@@ -56,4 +56,4 @@
   }
 }
 
-%include "GP_TextStyle.h"
+%include "gp_text_style.h"

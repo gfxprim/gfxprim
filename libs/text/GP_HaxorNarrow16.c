@@ -1,6 +1,6 @@
 /* Generated file, do not touch */
 
-#include <text/GP_Font.h>
+#include <text/gp_font.h>
 
 static uint8_t font_glyphs[] = {
 	/* ' ' */	  0,  0,  0,  0,  9,

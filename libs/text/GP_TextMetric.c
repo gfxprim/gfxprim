@@ -24,7 +24,7 @@
  *****************************************************************************/
 
 #include "core/gp_common.h"
-#include <text/GP_TextMetric.h>
+#include <text/gp_text_metric.h>
 
 extern gp_text_style gp_default_style;
 

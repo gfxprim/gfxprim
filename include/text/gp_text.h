@@ -29,9 +29,9 @@
 #include <stdarg.h>
 
 #include <core/gp_types.h>
-#include <text/GP_TextStyle.h>
-#include <text/GP_TextMetric.h>
-#include <text/GP_Fonts.h>
+#include <text/gp_text_style.h>
+#include <text/gp_text_metric.h>
+#include <text/gp_fonts.h>
 
 /* How the rendered text should be aligned.
  * For gp_text(), the alignment is relative to the specified point:

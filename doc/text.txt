@@ -11,7 +11,7 @@ You may want to see the link:coordinate_system.html[coordinate system] first.
 --------------------------------------------------------------------------------
 #include <gfxprim.h>
 /* or */
-#include <text/GP_Text.h>
+#include <text/gp_text.h>
 
 /* Where the text should be drawn relatively to the specified point */
 typedef enum gp_text_align {
@@ -50,7 +50,7 @@ The text size can be computed by following functions:
 --------------------------------------------------------------------------------
 #include <gfxprim.h>
 /* or */
-#include <text/GP_TextMetric.h>
+#include <text/gp_text_metric.h>
 
 unsigned int gp_text_width(const gp_text_style *style, const char *str);
 --------------------------------------------------------------------------------
@@ -68,7 +68,7 @@ terms used in this paragraph.
 --------------------------------------------------------------------------------
 #include <gfxprim.h>
 /* or */
-#include <text/GP_TextMetric.h>
+#include <text/gp_text_metric.h>
 
 unsigned int gp_text_max_width(const gp_text_style *style, unsigned int len);
 --------------------------------------------------------------------------------
@@ -83,7 +83,7 @@ than needed.
 --------------------------------------------------------------------------------
 #include <gfxprim.h>
 /* or */
-#include <text/GP_TextMetric.h>
+#include <text/gp_text_metric.h>
 
 gp_size gp_text_max_str_width(const gp_text_style *style, const char *str,
                               unsigned int len);
@@ -99,7 +99,7 @@ This call simply computes width of a string rendered with largest letter from
 --------------------------------------------------------------------------------
 #include <gfxprim.h>
 /* or */
-#include <text/GP_TextMetric.h>
+#include <text/gp_text_metric.h>
 
 unsigned int gp_text_ascent(const gp_text_style *style);
 --------------------------------------------------------------------------------
@@ -113,7 +113,7 @@ is usually height of capital letter, but it may be larger for certain fonts.
 --------------------------------------------------------------------------------
 #include <gfxprim.h>
 /* or */
-#include <text/GP_TextMetric.h>
+#include <text/gp_text_metric.h>
 
 unsigned int gp_text_descent(const gp_text_style *style);
 --------------------------------------------------------------------------------
@@ -128,7 +128,7 @@ baseline, but it may be larger for certain fonts.
 --------------------------------------------------------------------------------
 #include <gfxprim.h>
 /* or */
-#include <text/GP_TextMetric.h>
+#include <text/gp_text_metric.h>
 
 unsigned int gp_text_height(const gp_text_style *style);
 --------------------------------------------------------------------------------
@@ -147,7 +147,7 @@ TextStyle
 --------------------------------------------------------------------------------
 #include <gfxprim.h>
 /* or */
-#include <text/GP_TextStyle.h>
+#include <text/gp_text_style.h>
 
 typedef struct gp_text_style {
 	const struct gp_font_face *font;

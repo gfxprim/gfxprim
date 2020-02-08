@@ -16,44 +16,47 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2010 Jiri "BlueBear" Dluhos                            *
- *                         <jiri.bluebear.dluhos@gmail.com>                  *
- *                                                                           *
- * Copyright (C) 2009-2011 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2013 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
-#ifndef TEXT_GP_TEXTSTYLE_H
-#define TEXT_GP_TEXTSTYLE_H
+#ifndef TEXT_GP_FONTS_H
+#define TEXT_GP_FONTS_H
 
-#include <text/GP_Font.h>
+#include <text/gp_font.h>
 
-extern const gp_font_face gp_default_font;
+extern const gp_font_face *const gp_font_gfxprim_mono;
+extern const gp_font_face *const gp_font_gfxprim;
 
 /*
- * This structure describes how a text should be rendered.
- * It includes a font, and its various variants and transformations.
+ * Monospace 7x6 font
+ *
+ * Ascend: 5
+ * Descent: 2
+ * Width: 5 + 1
  */
-typedef struct gp_text_style {
-	const struct gp_font_face *font;
+extern const gp_font_face *gp_font_tiny_mono;
 
-	/* Spacing between pixels (0 is the default, no spacing). */
-	int pixel_xspace, pixel_yspace;
+/*
+ * Similar as FontTinyMono but proportional
+ */
+extern const gp_font_face *gp_font_tiny;
 
-	/* Multiplier of pixel width/height (1 is default). */
-	int pixel_xmul, pixel_ymul;
+/*
+ * Monospace 8x8 Commodore 64 like font.
+ */
+extern const gp_font_face *gp_font_c64;
 
-	/* Extra spacing (in pixels) between characters. */
-	int char_xspace;
-} gp_text_style;
+/*
+ * HaxorNarrow family, converted from bdf fonts from:
+ *
+ * https://github.com/metan-ucw/fonts
+ */
+extern const gp_font_face *gp_font_haxor_narrow_15;
+extern const gp_font_face *gp_font_haxor_narrow_bold_15;
+extern const gp_font_face *gp_font_haxor_narrow_16;
+extern const gp_font_face *gp_font_haxor_narrow_bold_16;
+extern const gp_font_face *gp_font_haxor_narrow_17;
+extern const gp_font_face *gp_font_haxor_narrow_bold_17;
 
-#define GP_DEFAULT_TEXT_STYLE { \
-	.font = &gp_default_font, \
-	.pixel_xspace = 0, \
-	.pixel_yspace = 0, \
-	.pixel_xmul = 1, \
-	.pixel_ymul = 1, \
-	.char_xspace = 0 \
-}
-
-#endif /* TEXT_GP_TEXTSTYLE_H */
+#endif /* TEXT_GP_FONTS_H */

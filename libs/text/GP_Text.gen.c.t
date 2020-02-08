@@ -12,9 +12,9 @@
 
 #include <gfx/gp_hline.h>
 
-#include <text/GP_TextStyle.h>
-#include <text/GP_Font.h>
-#include <text/GP_Text.h>
+#include <text/gp_text_style.h>
+#include <text/gp_font.h>
+#include <text/gp_text.h>
 
 #define WIDTH_TO_1BPP_BPP(width) ((width)/8 + ((width)%8 != 0))
 

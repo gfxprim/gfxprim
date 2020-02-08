@@ -29,8 +29,8 @@
 
 #include <gfx/gp_rect.h>
 
-#include <text/GP_TextMetric.h>
-#include <text/GP_Text.h>
+#include <text/gp_text_metric.h>
+#include <text/gp_text.h>
 
 gp_text_style gp_default_style = GP_DEFAULT_TEXT_STYLE;
 
