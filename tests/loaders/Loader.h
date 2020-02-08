@@ -23,7 +23,7 @@
 #ifndef TESTS_LOADER_H
 #define TESTS_LOADER_H
 
-#include <loaders/GP_IO.h>
+#include <loaders/gp_io.h>
 
 struct testcase {
 	gp_size w;

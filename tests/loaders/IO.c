@@ -24,7 +24,7 @@
 #include <errno.h>
 
 #include "core/gp_common.h"
-#include <loaders/GP_IO.h>
+#include <loaders/gp_io.h>
 
 #include "tst_test.h"
 

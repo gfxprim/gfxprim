@@ -32,8 +32,8 @@
 #include "core/gp_pixmap.h"
 #include <core/gp_progress_callback.h>
 
-#include <loaders/GP_IO.h>
-#include <loaders/GP_DataStorage.h>
+#include <loaders/gp_io.h>
+#include <loaders/gp_data_storage.h>
 
 /*
  * Reads an image from a I/O stream.

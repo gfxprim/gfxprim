@@ -38,8 +38,8 @@
 #include "core/gp_fill.h"
 #include <core/gp_debug.h>
 
-#include <loaders/GP_IO.h>
-#include <loaders/GP_Loaders.gen.h>
+#include <loaders/gp_io.h>
+#include <loaders/gp_loaders.gen.h>
 
 #ifdef HAVE_GIFLIB
 

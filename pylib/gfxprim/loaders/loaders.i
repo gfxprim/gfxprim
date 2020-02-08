@@ -2,8 +2,8 @@
 %module(package="gfxprim.loaders") c_loaders
 
 %{
-#include "core/gp_core.h"
-#include "loaders/GP_Loaders.h"
+#include <core/gp_core.h>
+#include <loaders/gp_loaders.h>
 %}
 
 %ignore gp_loader;
@@ -25,7 +25,7 @@ ERROR_ON_NONZERO(gp_save_image);
 
 %newobject gp_load_image;
 
-%include "GP_Loader.h"
+%include "gp_loader.h"
 
 LOADER_FUNC(jpg);
 ERROR_ON_NONZERO(gp_save_jpg);
@@ -55,4 +55,4 @@ LOADER_FUNC(pcx);
 LOADER_FUNC(psp);
 LOADER_FUNC(psd);
 
-%include "GP_Loaders.gen.h"
+%include "gp_loaders.gen.h"

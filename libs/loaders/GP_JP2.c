@@ -34,7 +34,7 @@
 #include <core/gp_debug.h>
 #include <core/gp_get_put_pixel.h>
 
-#include <loaders/GP_Loaders.gen.h>
+#include <loaders/gp_loaders.gen.h>
 
 #define JP2_SIG "\x00\x00\x00\x0cjP\x20\x20\x0d\x0a\x87\x0a"
 #define JP2_SIG_LEN 12

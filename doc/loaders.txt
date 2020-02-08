@@ -396,7 +396,7 @@ NOTE: Due to limitations of the openjpeg library progress callback does not work
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <loaders/GP_Loaders.h>
+#include <loaders/gp_loaders.h>
 /* or */
 #include <gfxprim.h>
 
@@ -412,7 +412,7 @@ NOTE: Due to limitations of the openjpeg library progress callback does not work
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <loaders/GP_Loaders.h>
+#include <loaders/gp_loaders.h>
 /* or */
 #include <gfxprim.h>
 
@@ -431,7 +431,7 @@ link:http://sourceforge.net/projects/giflib/[giflib library].
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <loaders/GP_Loaders.h>
+#include <loaders/gp_loaders.h>
 /* or */
 #include <gfxprim.h>
 
@@ -451,7 +451,7 @@ NOTE: Currently this function loads only first image from the 'GIF' container.
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <loaders/GP_Loaders.h>
+#include <loaders/gp_loaders.h>
 /* or */
 #include <gfxprim.h>
 
@@ -465,7 +465,7 @@ link:pixmap.html#pixmap_free[gp_pixmap_free()].
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <loaders/GP_Loaders.h>
+#include <loaders/gp_loaders.h>
 /* or */
 #include <gfxprim.h>
 
@@ -484,7 +484,7 @@ be exotic RGB compressions (RGB101010 for example) and RLE4 support.
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <loaders/GP_Loaders.h>
+#include <loaders/gp_loaders.h>
 /* or */
 #include <gfxprim.h>
 
@@ -502,7 +502,7 @@ link:pixmap.html#pixmap_free[gp_pixmap_free()].
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <loaders/GP_Loaders.h>
+#include <loaders/gp_loaders.h>
 /* or */
 #include <gfxprim.h>
 
@@ -516,7 +516,7 @@ link:pixmap.html#pixmap_free[gp_pixmap_free()].
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <loaders/GP_Loaders.h>
+#include <loaders/gp_loaders.h>
 /* or */
 #include <gfxprim.h>
 
@@ -530,7 +530,7 @@ Currently only 8-bit 'RGB' pixel types are supported.
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <loaders/GP_Loaders.h>
+#include <loaders/gp_loaders.h>
 /* or */
 #include <gfxprim.h>
 
@@ -552,7 +552,7 @@ yet.
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <loaders/GP_Loaders.h>
+#include <loaders/gp_loaders.h>
 /* or */
 #include <gfxprim.h>
 
@@ -570,7 +570,7 @@ link:pixmap.html#pixmap_free[gp_pixmap_free()].
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <loaders/GP_Loaders.h>
+#include <loaders/gp_loaders.h>
 /* or */
 #include <gfxprim.h>
 
@@ -584,7 +584,7 @@ link:pixmap.html#pixmap_free[gp_pixmap_free()].
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <loaders/GP_Loaders.h>
+#include <loaders/gp_loaders.h>
 /* or */
 #include <gfxprim.h>
 
@@ -600,7 +600,7 @@ The image is saved in stripes.
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <loaders/GP_Loaders.h>
+#include <loaders/gp_loaders.h>
 /* or */
 #include <gfxprim.h>
 
@@ -618,7 +618,7 @@ The 'PSP' loader can load a composite image from a Paint Shop Pro Image Files.
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <loaders/GP_Loaders.h>
+#include <loaders/gp_loaders.h>
 /* or */
 #include <gfxprim.h>
 
@@ -637,7 +637,7 @@ link:pixmap.html#pixmap_free[gp_pixmap_free()].
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <loaders/GP_Loaders.h>
+#include <loaders/gp_loaders.h>
 /* or */
 #include <gfxprim.h>
 
@@ -651,7 +651,7 @@ link:pixmap.html#pixmap_free[gp_pixmap_free()].
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <loaders/GP_Loaders.h>
+#include <loaders/gp_loaders.h>
 /* or */
 #include <gfxprim.h>
 
@@ -672,7 +672,7 @@ RGB).
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <loaders/GP_Loaders.h>
+#include <loaders/gp_loaders.h>
 /* or */
 #include <gfxprim.h>
 
@@ -690,7 +690,7 @@ link:pixmap.html#pixmap_free[gp_pixmap_free()].
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <loaders/GP_Loaders.h>
+#include <loaders/gp_loaders.h>
 /* or */
 #include <gfxprim.h>
 
@@ -710,7 +710,7 @@ link:pixmap.html#pixmap_free[gp_pixmap_free()].
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <loaders/GP_Loaders.h>
+#include <loaders/gp_loaders.h>
 /* or */
 #include <gfxprim.h>
 
@@ -726,7 +726,7 @@ PNM Loaders
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <loaders/GP_Loaders.h>
+#include <loaders/gp_loaders.h>
 /* or */
 #include <gfxprim.h>
 
@@ -748,7 +748,7 @@ link:pixmap.html#pixmap_free[gp_pixmap_free()].
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <loaders/GP_Loaders.h>
+#include <loaders/gp_loaders.h>
 /* or */
 #include <gfxprim.h>
 
@@ -770,7 +770,7 @@ link:pixmap.html#pixmap_free[gp_pixmap_free()].
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <loaders/GP_Loaders.h>
+#include <loaders/gp_loaders.h>
 /* or */
 #include <gfxprim.h>
 
@@ -782,7 +782,7 @@ Saves 'G1' (1 bit grayscale) image as ASCII 'PBM'.
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <loaders/GP_Loaders.h>
+#include <loaders/gp_loaders.h>
 /* or */
 #include <gfxprim.h>
 
@@ -795,7 +795,7 @@ Saves 'G1', 'G2', 'G4' and 'G8' (1, 2, 4 and 8 bit grayscale) image as ASCII
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <loaders/GP_Loaders.h>
+#include <loaders/gp_loaders.h>
 /* or */
 #include <gfxprim.h>
 
@@ -807,7 +807,7 @@ Saves 'RGB888' (24 bit RGB) image as ASCII 'PPM'.
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <loaders/GP_Loaders.h>
+#include <loaders/gp_loaders.h>
 /* or */
 #include <gfxprim.h>
 
@@ -820,7 +820,7 @@ RGB) image as ASCII 'PNM'.
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <loaders/GP_Loaders.h>
+#include <loaders/gp_loaders.h>
 /* or */
 #include <gfxprim.h>
 
@@ -848,7 +848,7 @@ The 'PCX' loader can load ZSoft PCX images.
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <loaders/GP_Loaders.h>
+#include <loaders/gp_loaders.h>
 /* or */
 #include <gfxprim.h>
 
@@ -866,7 +866,7 @@ link:pixmap.html#pixmap_free[gp_pixmap_free()].
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <loaders/GP_Loaders.h>
+#include <loaders/gp_loaders.h>
 /* or */
 #include <gfxprim.h>
 
@@ -880,7 +880,7 @@ link:pixmap.html#pixmap_free[gp_pixmap_free()].
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <loaders/GP_Loaders.h>
+#include <loaders/gp_loaders.h>
 /* or */
 #include <gfxprim.h>
 

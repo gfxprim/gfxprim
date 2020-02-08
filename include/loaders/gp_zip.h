@@ -32,7 +32,7 @@
 #include <core/gp_types.h>
 #include <core/gp_progress_callback.h>
 
-#include <loaders/GP_Container.h>
+#include <loaders/gp_container.h>
 
 gp_container *gp_open_zip(const char *path);
 

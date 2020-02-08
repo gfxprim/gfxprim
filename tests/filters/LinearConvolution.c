@@ -25,7 +25,7 @@
 #include <sys/stat.h>
 
 #include <core/gp_pixmap.h>
-#include <loaders/GP_Loaders.h>
+#include <loaders/gp_loaders.h>
 #include <filters/GP_Convolution.h>
 
 #include "tst_test.h"

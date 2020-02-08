@@ -39,7 +39,7 @@
 #include <core/gp_debug.h>
 #include <core/gp_pixel.h>
 #include <core/gp_get_put_pixel.h>
-#include <loaders/GP_Loaders.gen.h>
+#include <loaders/gp_loaders.gen.h>
 
 #define PSP_SIGNATURE "Paint Shop Pro Image File\n\x1a\0\0\0\0\0\0\0\0"
 #define PSP_SIGNATURE_LEN 32

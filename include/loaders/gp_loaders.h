@@ -16,40 +16,35 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
+ * Copyright (C) 2009-2010 Jiri "BlueBear" Dluhos                            *
+ *                         <jiri.bluebear.dluhos@gmail.com>                  *
+ *                                                                           *
  * Copyright (C) 2009-2014 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
  /*
 
-   EXIF parser.
+   Core include file for loaders API.
 
   */
 
-#ifndef LOADERS_GP_EXIF_H
-#define LOADERS_GP_EXIF_H
+#ifndef LOADERS_GP_LOADERS_H
+#define LOADERS_GP_LOADERS_H
 
-#include <loaders/GP_DataStorage.h>
-#include <loaders/GP_Loader.h>
+#include <core/gp_types.h>
+#include <core/gp_progress_callback.h>
 
-/*
- * Reads EXIF from an readable I/O stream and stores the values into storage.
- */
-int gp_read_exif(gp_io *io, gp_storage *storage);
+#include <loaders/gp_loaders.gen.h>
 
-/*
- * Looks for EXIF file signature. Returns non-zero if found.
- */
-int gp_match_exif(const void *buf);
+#include <loaders/gp_data_storage.h>
+#include <loaders/gp_exif.h>
 
-/*
- * Defines position to 0,0 coordinate.
- */
-enum GP_EXIF_ORIENTATION {
-	GP_EXIF_UPPER_LEFT = 1,
-	GP_EXIF_LOWER_RIGHT = 3,
-	GP_EXIF_UPPER_RIGHT = 6,
-	GP_EXIF_LOWER_LEFT = 8,
-};
+#include <loaders/gp_loader.h>
 
-#endif /* LOADERS_GP_EXIF_H */
+#include <loaders/gp_container.h>
+#include <loaders/gp_zip.h>
+
+#include <loaders/gp_io_zlib.h>
+
+#endif /* LOADERS_GP_LOADERS_H */

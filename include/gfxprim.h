@@ -42,7 +42,7 @@
 #include "input/gp_input.h"
 
 /* bitmap loaders */
-#include "loaders/GP_Loaders.h"
+#include "loaders/gp_loaders.h"
 
 /* bitmap filters */
 #include "filters/GP_Filters.h"

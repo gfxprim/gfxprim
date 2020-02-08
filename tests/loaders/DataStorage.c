@@ -23,7 +23,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <loaders/GP_DataStorage.h>
+#include <loaders/gp_data_storage.h>
 
 #include "tst_test.h"
 

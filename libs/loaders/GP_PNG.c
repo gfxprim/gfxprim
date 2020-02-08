@@ -37,7 +37,7 @@
 #include <core/gp_debug.h>
 #include <core/gp_gamma_correction.h>
 
-#include <loaders/GP_Loaders.gen.h>
+#include <loaders/gp_loaders.gen.h>
 
 #ifdef HAVE_LIBPNG
 

@@ -41,8 +41,8 @@
 #include <core/gp_get_put_pixel.h>
 #include <core/gp_temp_alloc.h>
 
-#include <loaders/GP_LineConvert.h>
-#include <loaders/GP_Loaders.gen.h>
+#include <loaders/gp_line_convert.h>
+#include <loaders/gp_loaders.gen.h>
 
 #define BMP_HEADER_OFFSET  0x0a       /* info header offset - 4 bytes */
 

@@ -37,9 +37,9 @@
 #include "core/gp_common.h"
 #include <core/gp_debug.h>
 
-#include "loaders/GP_Loader.h"
-#include "loaders/GP_IOZlib.h"
-#include "loaders/GP_ZIP.h"
+#include <loaders/gp_loader.h>
+#include <loaders/gp_io_zlib.h>
+#include <loaders/gp_zip.h>
 
 #ifdef HAVE_ZLIB
 

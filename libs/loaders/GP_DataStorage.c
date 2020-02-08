@@ -26,7 +26,7 @@
 
 #include <core/gp_debug.h>
 #include "core/gp_common.h"
-#include <loaders/GP_DataStorage.h>
+#include <loaders/gp_data_storage.h>
 
 struct record {
 	gp_data_node node;

@@ -33,7 +33,7 @@
 #include "core/gp_types.h"
 #include <core/gp_progress_callback.h>
 
-#include "loaders/GP_DataStorage.h"
+#include <loaders/gp_data_storage.h>
 
 typedef struct gp_container gp_container;
 

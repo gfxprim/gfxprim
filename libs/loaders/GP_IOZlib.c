@@ -26,7 +26,7 @@
 #include <stdint.h>
 #include <core/gp_debug.h>
 #include "core/gp_common.h"
-#include <loaders/GP_IOZlib.h>
+#include <loaders/gp_io_zlib.h>
 
 #ifdef HAVE_ZLIB
 

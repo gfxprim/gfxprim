@@ -23,7 +23,7 @@
 #include <errno.h>
 
 #include <core/gp_debug.h>
-#include <loaders/GP_Container.h>
+#include <loaders/gp_container.h>
 
 int gp_container_seek(gp_container *self, int offset,
                       enum gp_container_whence whence)

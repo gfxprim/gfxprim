@@ -37,9 +37,9 @@
 #include "../../config.h"
 #include <core/gp_debug.h>
 
-#include <loaders/GP_Exif.h>
-#include <loaders/GP_LineConvert.h>
-#include <loaders/GP_Loaders.gen.h>
+#include <loaders/gp_exif.h>
+#include <loaders/gp_line_convert.h>
+#include <loaders/gp_loaders.gen.h>
 
 /*
  * 0xff 0xd8 - start of image

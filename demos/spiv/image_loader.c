@@ -24,7 +24,7 @@
 
 #include <core/gp_debug.h>
 
-#include <loaders/GP_Loaders.h>
+#include <loaders/gp_loaders.h>
 
 #include "cpu_timer.h"
 #include "image_cache.h"

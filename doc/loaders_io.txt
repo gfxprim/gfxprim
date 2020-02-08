@@ -13,7 +13,7 @@ The I/O interface is defined by a structure with callbacks.
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <loaders/GP_IO.h>
+#include <loaders/gp_io.h>
 /* or */
 #include <gfxprim.h>
 
@@ -61,7 +61,7 @@ NOTE: Make sure errno is set if any of the operations has failed.
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <loaders/GP_IO.h>
+#include <loaders/gp_io.h>
 /* or */
 #include <gfxprim.h>
 
@@ -78,7 +78,7 @@ On failure negative value is returned and errno is set.
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <loaders/GP_IO.h>
+#include <loaders/gp_io.h>
 /* or */
 #include <gfxprim.h>
 
@@ -92,7 +92,7 @@ Returns zero on success and non-zero on failure.
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <loaders/GP_IO.h>
+#include <loaders/gp_io.h>
 /* or */
 #include <gfxprim.h>
 
@@ -109,7 +109,7 @@ On failure negative value is returned and errno is set.
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <loaders/GP_IO.h>
+#include <loaders/gp_io.h>
 /* or */
 #include <gfxprim.h>
 
@@ -122,7 +122,7 @@ Returns zero on success and non-zero on failure.
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <loaders/GP_IO.h>
+#include <loaders/gp_io.h>
 /* or */
 #include <gfxprim.h>
 
@@ -135,7 +135,7 @@ Returns zero on success and non-zero on failure.
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <loaders/GP_IO.h>
+#include <loaders/gp_io.h>
 /* or */
 #include <gfxprim.h>
 
@@ -152,7 +152,7 @@ Returns zero on success, non-zero on I/O failure and errno is set.
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <loaders/GP_IO.h>
+#include <loaders/gp_io.h>
 /* or */
 #include <gfxprim.h>
 
@@ -183,7 +183,7 @@ stream, to the end and forward.
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <loaders/GP_IO.h>
+#include <loaders/gp_io.h>
 /* or */
 #include <gfxprim.h>
 
@@ -195,7 +195,7 @@ Wrapper to 'GP_IOSeek()', returns current position in I/O stream.
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <loaders/GP_IO.h>
+#include <loaders/gp_io.h>
 /* or */
 #include <gfxprim.h>
 
@@ -209,7 +209,7 @@ Returns zero on success, non-zero on failure and errno is set.
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <loaders/GP_IO.h>
+#include <loaders/gp_io.h>
 /* or */
 #include <gfxprim.h>
 
@@ -230,7 +230,7 @@ TIP: See link:example_memory_io.html[memory I/O example].
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <loaders/GP_IO.h>
+#include <loaders/gp_io.h>
 /* or */
 #include <gfxprim.h>
 
@@ -250,7 +250,7 @@ errno is set.
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <loaders/GP_IO.h>
+#include <loaders/gp_io.h>
 /* or */
 #include <gfxprim.h>
 
@@ -277,7 +277,7 @@ WARNING: If you combine reading or seeking in the parent I/O and sub I/O the
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <loaders/GP_IO.h>
+#include <loaders/gp_io.h>
 /* or */
 #include <gfxprim.h>
 

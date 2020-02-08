@@ -26,7 +26,7 @@
 
 #include "core/gp_common.h"
 #include <core/gp_debug.h>
-#include <loaders/GP_Exif.h>
+#include <loaders/gp_exif.h>
 
 enum IFD_formats {
 	/* 1 bytes/components */

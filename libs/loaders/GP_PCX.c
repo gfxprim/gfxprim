@@ -36,7 +36,7 @@
 #include <core/gp_bit_swap.h>
 #include <core/gp_get_put_pixel.h>
 
-#include <loaders/GP_Loaders.gen.h>
+#include <loaders/gp_loaders.gen.h>
 
 /*
  * PCX RLE I/O Stream

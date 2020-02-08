@@ -4,7 +4,7 @@
  *
  * Copyright (C) 2017 Cyril Hrubis <metan@ucw.cz>
  */
-#include <loaders/GP_Loader.h>
+#include <loaders/gp_loader.h>
 
 @ def reader(fmt):
 /*** Function prototypes for {{fmt}} ***/

@@ -37,7 +37,7 @@
 #include "core/gp_common.h"
 #include <core/gp_get_put_pixel.h>
 
-#include <loaders/GP_Loaders.gen.h>
+#include <loaders/gp_loaders.gen.h>
 
 #define PSD_SIGNATURE "8BPS\x00\x01"
 #define PSD_SIGNATURE_LEN 6

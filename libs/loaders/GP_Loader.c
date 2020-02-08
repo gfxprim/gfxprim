@@ -36,8 +36,8 @@
 
 #include <core/gp_debug.h>
 
-#include <loaders/GP_Loaders.h>
-#include <loaders/GP_Loader.h>
+#include <loaders/gp_loaders.h>
+#include <loaders/gp_loader.h>
 
 #define MAX_LOADERS 64
 

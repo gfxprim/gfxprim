@@ -58,8 +58,8 @@
 #include "core/gp_pixmap.h"
 #include <core/gp_get_put_pixel.h>
 
-#include <loaders/GP_LineConvert.h>
-#include <loaders/GP_Loaders.gen.h>
+#include <loaders/gp_line_convert.h>
+#include <loaders/gp_loaders.gen.h>
 
 struct pnm_header {
 	char magic;

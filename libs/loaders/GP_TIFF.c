@@ -38,7 +38,7 @@
 #include <core/gp_get_put_pixel.h>
 #include <core/gp_debug.h>
 
-#include <loaders/GP_Loaders.gen.h>
+#include <loaders/gp_loaders.gen.h>
 
 #define TIFF_HEADER_LITTLE "II\x2a\0"
 #define TIFF_HEADER_BIG    "MM\0\x2a"

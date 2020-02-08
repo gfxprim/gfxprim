@@ -22,7 +22,7 @@
 
 #include <errno.h>
 #include "core/gp_common.h"
-#include <loaders/GP_Loaders.h>
+#include <loaders/gp_loaders.h>
 
 #include "tst_test.h"
 

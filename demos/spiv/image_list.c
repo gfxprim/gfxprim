@@ -28,7 +28,7 @@
 #include <errno.h>
 #include <string.h>
 
-#include <loaders/GP_Loader.h>
+#include <loaders/gp_loader.h>
 #include <core/gp_debug.h>
 
 #include "image_list.h"

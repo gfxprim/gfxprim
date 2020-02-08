@@ -29,7 +29,7 @@
 #ifndef LOADERS_GP_IO_ZLIB_H
 #define LOADERS_GP_IO_ZLIB_H
 
-#include <loaders/GP_IO.h>
+#include <loaders/gp_io.h>
 
 /*
  * Create an Zlib RAW inflate stream on the top of the existing I/O stream.

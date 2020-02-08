@@ -24,7 +24,7 @@
 #include <errno.h>
 #include <sys/stat.h>
 
-#include <loaders/GP_Exif.h>
+#include <loaders/gp_exif.h>
 
 #include "tst_test.h"
 
