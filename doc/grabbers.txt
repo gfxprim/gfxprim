@@ -48,7 +48,7 @@ if there is none.
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <grabbers/GP_Grabber.h>
+#include <grabbers/gp_grabber.h>
 /* or */
 #include <gfxprim.h>
 
@@ -60,7 +60,7 @@ descriptors etc...
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <grabbers/GP_Grabber.h>
+#include <grabbers/gp_grabber.h>
 /* or */
 #include <gfxprim.h>
 
@@ -74,7 +74,7 @@ Returns zero on success and non-zero on failure.
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <grabbers/GP_Grabber.h>
+#include <grabbers/gp_grabber.h>
 /* or */
 #include <gfxprim.h>
 
@@ -88,7 +88,7 @@ Returns zero on success and non-zero on failure.
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <grabbers/GP_Grabber.h>
+#include <grabbers/gp_grabber.h>
 /* or */
 #include <gfxprim.h>
 
@@ -107,7 +107,7 @@ Grabber Initializations
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <grabbers/GP_V4L2.h>
+#include <grabbers/gp_v4l2.h>
 /* or */
 #include <gfxprim.h>
 

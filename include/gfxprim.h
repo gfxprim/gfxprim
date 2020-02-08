@@ -48,6 +48,6 @@
 #include "filters/GP_Filters.h"
 
 /* grabbers */
-#include "grabbers/GP_Grabbers.h"
+#include "grabbers/gp_grabbers.h"
 
 #endif /* GFXPRIM_H__ */

@@ -46,8 +46,8 @@
 
 #include <linux/videodev2.h>
 
-#include "GP_Grabber.h"
-#include "GP_V4L2.h"
+#include <grabbers/gp_grabber.h>
+#include <grabbers/gp_v4l2.h>
 
 struct v4l2_priv {
 	int mode;

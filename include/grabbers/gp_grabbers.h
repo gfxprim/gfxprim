@@ -23,7 +23,7 @@
 #ifndef GP_GRABBERS_GRABBERS_H
 #define GP_GRABBERS_GRABBERS_H
 
-#include "grabbers/GP_Grabber.h"
-#include "grabbers/GP_V4L2.h"
+#include <grabbers/gp_grabber.h>
+#include <grabbers/gp_v4l2.h>
 
 #endif /* GP_GRABBERS_GRABBERS_H */

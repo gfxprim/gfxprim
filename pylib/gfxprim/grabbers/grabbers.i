@@ -2,7 +2,7 @@
 %module(package="gfxprim.grabbers") c_grabbers
 
 %{
-#include "GP_Grabbers.h"
+#include <grabbers/gp_grabbers.h>
 #include <core/gp_debug.h>
 %}
 
@@ -26,11 +26,11 @@
 %ignore gp_grabber::exit;
 %ignore gp_grabber::poll;
 
-%include "GP_Grabber.h"
+%include "gp_grabber.h"
 
 /*
  * Particular grabbers.
  */
 ERROR_ON_NULL(gp_grabber_v4l2_init);
 %newobject gp_grabber_v4l2_init;
-%include "GP_V4L2.h"
+%include "gp_v4l2.h"
