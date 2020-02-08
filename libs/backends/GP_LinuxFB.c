@@ -37,7 +37,7 @@
 
 #include <core/gp_debug.h>
 #include "core/gp_pixmap.h"
-#include <input/GP_InputDriverKBD.h>
+#include <input/gp_input_driver_kbd.h>
 #include <backends/gp_linux_fb.h>
 
 struct fb_priv {

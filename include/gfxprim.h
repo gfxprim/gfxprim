@@ -39,7 +39,7 @@
 #include <backends/gp_backends.h>
 
 /* input and events */
-#include "input/GP_Input.h"
+#include "input/gp_input.h"
 
 /* bitmap loaders */
 #include "loaders/GP_Loaders.h"

@@ -22,19 +22,61 @@
 
 /*
 
-  Legacy KBD input driver.
+  Linux input device driver.
 
  */
 
-#ifndef INPUT_GP_INPUT_DRIVER_KBD_H
-#define INPUT_GP_INPUT_DRIVER_KBD_H
+#ifndef INPUT_GP_INPUT_DRIVER_LINUX_H
+#define INPUT_GP_INPUT_DRIVER_LINUX_H
 
-#include <input/GP_Types.h>
+#include <stdint.h>
+
+#include <input/gp_types.h>
+
+typedef struct gp_input_driver_linux gp_input_driver_linux;
+
+struct gp_input_driver_linux {
+	/* fd */
+	int fd;
+
+	/* to store rel coordinates */
+	int rel_x;
+	int rel_y;
+
+	uint8_t rel_flag;
+
+	/* to store abs coordinates */
+	int abs_x;
+	int abs_y;
+	int abs_press;
+
+	int abs_x_max;
+	int abs_y_max;
+	int abs_press_max;
+
+	uint8_t abs_flag_x:1;
+	uint8_t abs_flag_y:1;
+	uint8_t abs_pen_flag:1;
+};
 
 /*
- * Converts KBD event to GFXprim event and puts it into the queue.
+ * Initalize and allocate input driver.
  */
-void gp_input_driver_kbd_event_put(gp_event_queue *event_queue,
-                                   unsigned char ev);
+gp_input_driver_linux *gp_input_driver_linux_open(const char *path);
 
-#endif /* INPUT_GP_INPUT_DRIVER_KBD_H */
+/*
+ * Close the fd, free memory.
+ */
+void gp_input_driver_linux_close(gp_input_driver_linux *self);
+
+/*
+ * Called when there are data ready on input device.
+ *
+ * May or may not generate gp_event.
+ *
+ * Returns 0 on succes -1 on error and errno is set.
+ */
+int gp_input_driver_linux_read(gp_input_driver_linux *self,
+                               gp_event_queue *event_queue);
+
+#endif /* INPUT_GP_INPUT_DRIVER_LINUX_H */

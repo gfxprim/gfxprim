@@ -27,7 +27,7 @@
 #include "core/gp_common.h"
 #include <core/gp_debug.h>
 
-#include <input/GP_EventQueue.h>
+#include <input/gp_event_queue.h>
 #include "GP_InputDriverSDL.h"
 
 /* SDL ascii mapped keys */

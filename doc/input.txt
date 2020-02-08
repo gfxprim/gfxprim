@@ -25,7 +25,7 @@ Event Structure Description
 -------------------------------------------------------------------------------
 #include <gfxprim.h>
 /* or */
-#include <input/GP_Event.h>
+#include <input/gp_event.h>
 
 typedef struct gp_event {
 	/* event */
@@ -186,7 +186,7 @@ Event API
 -------------------------------------------------------------------------------
 #include <gfxprim.h>
 /* or */
-#include <input/GP_Event.h>
+#include <input/gp_event.h>
 
 void gp_event_dump(struct gp_event *ev);
 -------------------------------------------------------------------------------
@@ -197,7 +197,7 @@ The 'gp_event_dump' dumps event in human-readable format into the stdout.
 -------------------------------------------------------------------------------
 #include <gfxprim.h>
 /* or */
-#include <input/GP_Event.h>
+#include <input/gp_event.h>
 
 const char *gp_event_key_name(enum gp_event_key_value key);
 -------------------------------------------------------------------------------
@@ -210,7 +210,7 @@ The returned string must not be modified.
 -------------------------------------------------------------------------------
 #include <gfxprim.h>
 /* or */
-#include <input/GP_Event.h>
+#include <input/gp_event.h>
 
 void gp_event_set_key(struct gp_event *ev, uint32_t key)
 
@@ -240,7 +240,7 @@ Wait or Poll functions).
 -------------------------------------------------------------------------------
 #include <gfxprim.h>
 /* or */
-#include <input/GP_Timer.h>
+#include <input/gp_timer.h>
 
 typedef struct gp_timer {
 	/* Heap pointers and number of sons */
@@ -290,7 +290,7 @@ variables corresponds to the structure members.
 -------------------------------------------------------------------------------
 #include <gfxprim.h>
 /* or */
-#include <input/GP_Timer.h>
+#include <input/gp_timer.h>
 
 void gp_timer_queue_dump(gp_timer *queue);
 -------------------------------------------------------------------------------
@@ -301,7 +301,7 @@ Prints the structure of binary heap into stdout, only for debugging.
 -------------------------------------------------------------------------------
 #include <gfxprim.h>
 /* or */
-#include <input/GP_Timer.h>
+#include <input/gp_timer.h>
 
 void gp_timer_queue_insert(gp_timer **queue, uint64_t now, gp_timer *timer);
 -------------------------------------------------------------------------------
@@ -313,7 +313,7 @@ at `now + timer->expire`.
 -------------------------------------------------------------------------------
 #include <gfxprim.h>
 /* or */
-#include <input/GP_Timer.h>
+#include <input/gp_timer.h>
 
 void gp_timer_queue_remove(gp_timer **queue, gp_timer *timer);
 -------------------------------------------------------------------------------
@@ -328,7 +328,7 @@ Runs in 'O(n)' time (the insert and process runs in 'O(nlog(n))').
 -------------------------------------------------------------------------------
 #include <gfxprim.h>
 /* or */
-#include <input/GP_Timer.h>
+#include <input/gp_timer.h>
 
 int gp_timer_queue_process(gp_timer **queue, uint64_t now);
 -------------------------------------------------------------------------------
@@ -344,7 +344,7 @@ Returns number of timers processed.
 -------------------------------------------------------------------------------
 #include <gfxprim.h>
 /* or */
-#include <input/GP_Timer.h>
+#include <input/gp_timer.h>
 
 unsigned int gp_timer_queue_size(gp_timer *queue);
 -------------------------------------------------------------------------------
@@ -363,7 +363,7 @@ Timestamp is used together with link:#Timers[timers].
 -------------------------------------------------------------------------------
 #include <gfxprim.h>
 /* or */
-#include <input/GP_TimeStamp.h>
+#include <input/gp_time_stamp.h>
 
 uint64_t gp_time_stamp(void);
 -------------------------------------------------------------------------------

@@ -25,7 +25,7 @@
 
 #include <core/gp_debug.h>
 #include "core/gp_common.h"
-#include <input/GP_Timer.h>
+#include <input/gp_timer.h>
 
 static void dump_level(gp_timer *heap, unsigned int level, unsigned int cur)
 {

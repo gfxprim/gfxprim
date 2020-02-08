@@ -28,7 +28,7 @@
 
 #include <string.h>
 #include <stdlib.h>
-#include <input/GP_Timer.h>
+#include <input/gp_timer.h>
 
 #include "tst_test.h"
 

@@ -25,7 +25,7 @@
 #include "core/gp_common.h"
 #include <core/gp_debug.h>
 
-#include <input/GP_EventQueue.h>
+#include <input/gp_event_queue.h>
 
 void gp_event_queue_init(gp_event_queue *self,
                          unsigned int screen_w, unsigned int screen_h,

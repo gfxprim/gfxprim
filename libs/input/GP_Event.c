@@ -27,9 +27,9 @@
 #include <core/gp_debug.h>
 #include "core/gp_common.h"
 
-#include <input/GP_EventQueue.h>
-#include <input/GP_Timer.h>
-#include <input/GP_Event.h>
+#include <input/gp_event_queue.h>
+#include <input/gp_timer.h>
+#include <input/gp_event.h>
 
 static char *key_names[] = {
  "Reserved",    "Escape",    "1",          "2",            "3",

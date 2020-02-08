@@ -3,7 +3,7 @@
 
 %{
 #include <core/gp_debug.h>
-#include "input/GP_Input.h"
+#include "input/gp_input.h"
 %}
 
 %extend gp_event {
@@ -17,4 +17,4 @@
         }
 };
 
-%include "GP_Event.h"
+%include "gp_event.h"

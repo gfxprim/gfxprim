@@ -13,7 +13,7 @@ Event Queue API
 -------------------------------------------------------------------------------
 #include <gfxprim.h>
 /* or */
-#include <input/GP_EventQueue.h>
+#include <input/gp_event_queue.h>
 
 #define GP_EVENT_QUEUE_DECLARE(name, scr_w, scr_h) ...;
 
@@ -57,7 +57,7 @@ failed NULL is returned.
 -------------------------------------------------------------------------------
 #include <gfxprim.h>
 /* or */
-#include <input/GP_EventQueue.h>
+#include <input/gp_event_queue.h>
 
 unsigned int gp_event_queue_events_queued(gp_event_queue *self);
 -------------------------------------------------------------------------------
@@ -68,7 +68,7 @@ This function returns number of queued events.
 -------------------------------------------------------------------------------
 #include <gfxprim.h>
 /* or */
-#include <input/GP_EventQueue.h>
+#include <input/gp_event_queue.h>
 
 int gp_event_queue_get(gp_event_queue *self, gp_event *ev);
 -------------------------------------------------------------------------------
@@ -83,7 +83,7 @@ If there are no events queued the call returns immediately with zero.
 -------------------------------------------------------------------------------
 #include <gfxprim.h>
 /* or */
-#include <input/GP_EventQueue.h>
+#include <input/gp_event_queue.h>
 
 int gp_event_queue_peek(gp_event_queue *self, gp_event *ev);
 -------------------------------------------------------------------------------
@@ -94,7 +94,7 @@ Same as +gp_event_queue_get()+ but the top event is not removed from the queue.
 -------------------------------------------------------------------------------
 #include <gfxprim.h>
 /* or */
-#include <input/GP_EventQueue.h>
+#include <input/gp_event_queue.h>
 
 void gp_event_queue_put_back(gp_event_queue *self, gp_event *ev);
 -------------------------------------------------------------------------------
@@ -106,7 +106,7 @@ been removed from the queue.
 -------------------------------------------------------------------------------
 #include <gfxprim.h>
 /* or */
-#include <input/GP_EventQueue.h>
+#include <input/gp_event_queue.h>
 
 /*
  * Inject event that moves cursor by rx and ry.

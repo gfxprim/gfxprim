@@ -32,7 +32,7 @@
 #ifndef INPUT_GP_EVENT_QUEUE_H
 #define INPUT_GP_EVENT_QUEUE_H
 
-#include <input/GP_Event.h>
+#include <input/gp_event.h>
 
 struct gp_event_queue {
 	/* screen size */

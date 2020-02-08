@@ -44,8 +44,8 @@
 
 #include <core/gp_types.h>
 
-#include <input/GP_EventQueue.h>
-#include <input/GP_Timer.h>
+#include <input/gp_event_queue.h>
+#include <input/gp_timer.h>
 
 typedef struct gp_backend gp_backend;
 

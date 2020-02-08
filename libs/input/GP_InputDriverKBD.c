@@ -23,8 +23,8 @@
 #include "core/gp_common.h"
 #include <core/gp_debug.h>
 
-#include <input/GP_EventQueue.h>
-#include <input/GP_InputDriverKBD.h>
+#include <input/gp_event_queue.h>
+#include <input/gp_input_driver_kbd.h>
 
 /* KBD raw mode keycodes */
 static uint16_t keycode_table[] = {

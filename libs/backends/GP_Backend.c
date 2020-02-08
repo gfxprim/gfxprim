@@ -28,8 +28,8 @@
 #include "core/gp_pixmap.h"
 #include <core/gp_debug.h>
 
-#include <input/GP_EventQueue.h>
-#include <input/GP_TimeStamp.h>
+#include <input/gp_event_queue.h>
+#include <input/gp_time_stamp.h>
 
 #include <backends/gp_backend.h>
 

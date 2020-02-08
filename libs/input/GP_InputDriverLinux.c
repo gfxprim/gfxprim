@@ -29,8 +29,8 @@
 
 #include <core/gp_debug.h>
 
-#include <input/GP_EventQueue.h>
-#include <input/GP_InputDriverLinux.h>
+#include <input/gp_event_queue.h>
+#include <input/gp_input_driver_linux.h>
 
 static int get_version(int fd)
 {

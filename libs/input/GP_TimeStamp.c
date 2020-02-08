@@ -27,7 +27,7 @@
 #include "core/gp_common.h"
 #include <core/gp_debug.h>
 
-#include <input/GP_TimeStamp.h>
+#include <input/gp_time_stamp.h>
 
 #define MS_IN_US 1000000
 

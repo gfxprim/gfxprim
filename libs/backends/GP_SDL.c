@@ -29,7 +29,7 @@
 
 #ifdef HAVE_LIBSDL
 
-#include "input/GP_Input.h"
+#include <input/gp_input.h>
 #include "GP_InputDriverSDL.h"
 #include <backends/gp_backend.h>
 #include <backends/gp_sdl.h>

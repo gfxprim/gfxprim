@@ -22,61 +22,86 @@
 
 /*
 
-  Linux input device driver.
+  Timers and timer queue implementation.
 
  */
 
-#ifndef INPUT_GP_INPUT_DRIVER_LINUX_H
-#define INPUT_GP_INPUT_DRIVER_LINUX_H
+#ifndef INPUT_GP_TIMER_H
+#define INPUT_GP_TIMER_H
 
 #include <stdint.h>
 
-#include <input/GP_Types.h>
+#include <input/gp_types.h>
 
-typedef struct gp_input_driver_linux gp_input_driver_linux;
+struct gp_timer {
+	/* Heap pointers and number of sons */
+	gp_timer *left;
+	gp_timer *right;
+	unsigned int sons;
 
-struct gp_input_driver_linux {
-	/* fd */
-	int fd;
+	/* Expiration time */
+	uint64_t expires;
+	/*
+	 * If not zero return value from callback is ignored and
+	 * timer is rescheduled each time it expires.
+	 */
+	uint32_t period;
 
-	/* to store rel coordinates */
-	int rel_x;
-	int rel_y;
+	/* Timer id, showed in debug messages */
+	const char *id;
 
-	uint8_t rel_flag;
+	/* Do not touch */
+	void *_priv;
 
-	/* to store abs coordinates */
-	int abs_x;
-	int abs_y;
-	int abs_press;
-
-	int abs_x_max;
-	int abs_y_max;
-	int abs_press_max;
-
-	uint8_t abs_flag_x:1;
-	uint8_t abs_flag_y:1;
-	uint8_t abs_pen_flag:1;
+	/*
+	 * Timer callback
+	 *
+	 * If non-zero is returned, the timer is rescheduled to expire
+	 * return value from now.
+	 */
+	uint32_t (*callback)(struct gp_timer *self);
+	void *priv;
 };
 
-/*
- * Initalize and allocate input driver.
- */
-gp_input_driver_linux *gp_input_driver_linux_open(const char *path);
+#define GP_TIMER_DECLARE(name, texpires, tperiod, tid, tcallback, tpriv) \
+	gp_timer name = { \
+		.expires = texpires, \
+		.period = tperiod, \
+		.id = tid, \
+		.callback = tcallback, \
+		.priv = tpriv \
+	}
 
 /*
- * Close the fd, free memory.
+ * Prints the structrue of binary heap into stdout, only for debugging.
  */
-void gp_input_driver_linux_close(gp_input_driver_linux *self);
+void gp_timer_queue_dump(gp_timer *queue);
 
 /*
- * Called when there are data ready on input device.
+ * Inserts timer into the timer priority queue.
+ */
+void gp_timer_queue_insert(gp_timer **queue, uint64_t now, gp_timer *timer);
+
+/*
+ * Removes timer from timer queue.
  *
- * May or may not generate gp_event.
- *
- * Returns 0 on succes -1 on error and errno is set.
+ * This operation (in contrast with insert and process) runs in O(n) time.
  */
-int gp_input_driver_linux_read(gp_input_driver_linux *self,
-                               gp_event_queue *event_queue);
+void gp_timer_queue_remove(gp_timer **queue, gp_timer *timer);
 
-#endif /* INPUT_GP_INPUT_DRIVER_LINUX_H */
+/*
+ * Processes queue, all timers with expires <= now are processed.
+ *
+ * Returns number of timers processed.
+ */
+int gp_timer_queue_process(gp_timer **queue, uint64_t now);
+
+/*
+ * Returns size of the queue, i.e. number of timers.
+ */
+static inline unsigned int gp_timer_queue_size(gp_timer *queue)
+{
+	return queue ? queue->sons + 1 : 0;
+}
+
+#endif /* INPUT_GP_TIMER_H */

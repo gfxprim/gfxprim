@@ -28,7 +28,7 @@
 
 #include <stdlib.h>
 #include <unistd.h>
-#include <input/GP_TimeStamp.h>
+#include <input/gp_time_stamp.h>
 
 #include "tst_test.h"
 

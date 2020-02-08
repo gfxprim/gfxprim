@@ -37,7 +37,7 @@
 #include <stdint.h>
 #include <sys/time.h>
 
-#include <input/GP_Types.h>
+#include <input/gp_types.h>
 
 #define GP_EVENT_QUEUE_SIZE 32
 
