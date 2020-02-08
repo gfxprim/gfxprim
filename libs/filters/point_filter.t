@@ -61,8 +61,8 @@ gp_pixmap *gp_filter_{{ op_name }}_ex_alloc(const gp_pixmap *const src,
 
 #include <core/gp_debug.h>
 
-#include <filters/GP_ApplyTables.h>
-#include <filters/GP_Point.h>
+#include <filters/gp_apply_tables.h>
+#include <filters/gp_point.h>
 
 {@ filter_point_ex(op_name, filter_op, fopts) @}
 {@ filter_point_ex_alloc(op_name, fopts, opts) @}

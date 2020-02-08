@@ -40,7 +40,7 @@
 #ifndef FILTERS_GP_SIGMA_H
 #define FILTERS_GP_SIGMA_H
 
-#include <filters/GP_Filter.h>
+#include <filters/gp_filter.h>
 
 int gp_filter_sigma_ex(const gp_pixmap *src,
                        gp_coord x_src, gp_coord y_src,

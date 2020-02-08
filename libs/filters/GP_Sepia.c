@@ -22,8 +22,8 @@
 
 #include <core/gp_convert.h>
 #include <core/gp_debug.h>
-#include <filters/GP_MultiTone.h>
-#include <filters/GP_Sepia.h>
+#include <filters/gp_multi_tone.h>
+#include <filters/gp_sepia.h>
 
 #define PIX 3
 

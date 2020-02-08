@@ -12,8 +12,8 @@
 #include <core/gp_pixel.h>
 #include <core/gp_get_put_pixel.h>
 #include <core/gp_debug.h>
-#include <filters/GP_Filter.h>
-#include <filters/GP_Stats.h>
+#include <filters/gp_filter.h>
+#include <filters/gp_stats.h>
 
 @ for pt in pixeltypes:
 @     if not pt.is_unknown() and not pt.is_palette():

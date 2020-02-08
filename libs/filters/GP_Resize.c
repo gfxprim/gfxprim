@@ -24,10 +24,10 @@
 
 #include <core/gp_pixmap.h>
 #include <core/gp_debug.h>
-#include <filters/GP_ResizeNN.h>
-#include <filters/GP_ResizeLinear.h>
-#include <filters/GP_ResizeCubic.h>
-#include <filters/GP_Resize.h>
+#include <filters/gp_resize_nn.h>
+#include <filters/gp_resize_linear.h>
+#include <filters/gp_resize_cubic.h>
+#include <filters/gp_resize.h>
 
 static const char *interp_types[] = {
 	"Nearest Neighbour",

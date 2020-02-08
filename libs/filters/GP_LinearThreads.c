@@ -28,8 +28,8 @@
 #include <core/gp_debug.h>
 #include <core/gp_threads.h>
 
-#include "GP_Linear.h"
-#include "GP_LinearThreads.h"
+#include <filters/gp_linear.h>
+#include <filters/gp_linear_threads.h>
 
 static void *h_linear_convolution(void *arg)
 {

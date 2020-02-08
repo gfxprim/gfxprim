@@ -12,8 +12,8 @@
 #include <core/gp_get_put_pixel.h>
 #include <core/gp_convert.h>
 #include "core/gp_clamp.h"
-#include "filters/GP_Filter.h"
-#include "filters/GP_Dither.h"
+#include <filters/gp_filter.h>
+#include <filters/gp_dither.h>
 
 @ def distribute_error(errors, x, y, w, err):
 if ({{ x }} + 1 < {{ w }})

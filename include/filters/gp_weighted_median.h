@@ -28,7 +28,7 @@
 #ifndef FILTERS_GP_WEIGHTED_MEDIAN_H
 #define FILTERS_GP_WEIGHTED_MEDIAN_H
 
-#include <filters/GP_Filter.h>
+#include <filters/gp_filter.h>
 
 typedef struct gp_median_weights {
 	unsigned int w;

@@ -3,8 +3,8 @@
 #include <core/gp_pixel.h>
 #include <core/gp_get_put_pixel.h>
 #include <core/gp_debug.h>
-#include "filters/GP_Filter.h"
-#include "filters/GP_Arithmetic.h"
+#include <filters/gp_filter.h>
+#include <filters/gp_arithmetic.h>
 
 @     for pt in pixeltypes:
 @         if not pt.is_unknown():

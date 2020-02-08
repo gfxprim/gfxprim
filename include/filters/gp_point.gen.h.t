@@ -4,7 +4,7 @@
  *
  * Copyright (C) 2018 Cyril Hrubis <metan@ucw.cz>
  */
-#include <filters/GP_Filter.h>
+#include <filters/gp_filter.h>
 
 @ def filter(name, args, params):
 /*** Function prototypes for {{name}} filter ***/

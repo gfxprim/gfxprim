@@ -25,7 +25,7 @@
 
 #include "core/gp_pixmap.h"
 #include <core/gp_debug.h>
-#include <filters/GP_Stats.h>
+#include <filters/gp_stats.h>
 
 gp_histogram *gp_histogram_alloc(gp_pixel_type pixel_type)
 {

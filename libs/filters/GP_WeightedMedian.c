@@ -28,7 +28,7 @@
 #include <core/gp_temp_alloc.h>
 #include <core/gp_clamp.h>
 #include <core/gp_debug.h>
-#include <filters/GP_WeightedMedian.h>
+#include <filters/gp_weighted_median.h>
 
 
 static unsigned int sum_weights(gp_median_weights *weights)

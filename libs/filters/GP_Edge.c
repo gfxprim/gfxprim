@@ -25,8 +25,8 @@
 #include <core/gp_debug.h>
 #include <core/gp_get_put_pixel.h>
 
-#include "filters/GP_Linear.h"
-#include "filters/GP_EdgeDetection.h"
+#include <filters/gp_linear.h>
+#include <filters/gp_edge_detection.h>
 
 /*
  * Apply prewitt operator.

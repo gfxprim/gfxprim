@@ -23,7 +23,7 @@
 #include <math.h>
 
 #include "core/gp_common.h"
-#include <filters/GP_Rand.h>
+#include <filters/gp_rand.h>
 
 void gp_norm_int(int *arr, unsigned int size, int sigma, int mu)
 {

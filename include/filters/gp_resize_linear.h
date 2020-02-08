@@ -3,7 +3,7 @@
  *                                                                           *
  * Gfxprim is free software; you can redistribute it and/or                  *
  * modify it under the terms of the GNU Lesser General Public                *
- * License as published by the _free Software Foundation; either              *
+ * License as published by the Free Software Foundation; either              *
  * version 2.1 of the License, or (at your option) any later version.        *
  *                                                                           *
  * Gfxprim is distributed in the hope that it will be useful,                *
@@ -12,49 +12,44 @@
  * Lesser General Public License for more details.                           *
  *                                                                           *
  * You should have received a copy of the GNU Lesser General Public          *
- * License along with gfxprim; if not, write to the _free Software            *
+ * License along with gfxprim; if not, write to the Free Software            *
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2015 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2013 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
 /*
 
-  Statistic filters.
+  Bilinear interpolation.
 
  */
 
-#ifndef FILTERS_GP_STATS_H
-#define FILTERS_GP_STATS_H
+#ifndef FILTERS_GP_RESIZE_LINEAR_H
+#define FILTERS_GP_RESIZE_LINEAR_H
 
-#include <filters/GP_Filter.h>
+#include <filters/gp_filter.h>
+#include <filters/gp_resize.h>
 
-typedef struct gp_histogram_channel {
-	const char *chan_name;
-	gp_pixel min;
-	gp_pixel max;
-	uint32_t len;
-	uint32_t hist[];
-} gp_histogram_channel;
+int gp_filter_resize_linear_int(const gp_pixmap *src, gp_pixmap *dst,
+                                gp_progress_cb *callback);
 
-typedef struct gp_histogram {
-	gp_pixel_type pixel_type;
-	gp_histogram_channel *channels[];
-} gp_histogram;
+int gp_filter_resize_linear_lf_int(const gp_pixmap *src, gp_pixmap *dst,
+                                   gp_progress_cb *callback);
 
-gp_histogram *gp_histogram_alloc(gp_pixel_type pixel_type);
+static inline gp_pixmap *gp_filter_resize_linear_int_alloc(const gp_pixmap *src,
+                                                           gp_size w, gp_size h,
+                                                           gp_progress_cb *callback)
+{
+	return gp_filter_resize_alloc(src, w, h, GP_INTERP_LINEAR_INT, callback);
+}
 
-void gp_histogram_free(gp_histogram *self);
+static inline gp_pixmap *gp_filter_resize_linear_lf_int_alloc(const gp_pixmap *src,
+                                                              gp_size w, gp_size h,
+                                                              gp_progress_cb *callback)
+{
+	return gp_filter_resize_alloc(src, w, h, GP_INTERP_LINEAR_LF_INT, callback);
+}
 
-gp_histogram_channel *gp_histogram_channel_by_name(gp_histogram *self,
-                                                   const char *name);
-
-/*
- * Computes histogram. Returns non-zero on failure (i.e. canceled by callback).
- */
-int gp_filter_histogram(gp_histogram *self, const gp_pixmap *src,
-                        gp_progress_cb *callback);
-
-#endif /* FILTERS_GP_STATS_H */
+#endif /* FILTERS_GP_RESIZE_LINEAR_H */

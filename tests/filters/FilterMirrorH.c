@@ -23,7 +23,7 @@
 #include <errno.h>
 
 #include <core/gp_pixmap.h>
-#include <filters/GP_Rotate.h>
+#include <filters/gp_rotate.h>
 
 #include "tst_test.h"
 

@@ -13,8 +13,8 @@
 #include <core/gp_clamp.h>
 #include <core/gp_debug.h>
 
-#include <filters/GP_Rand.h>
-#include <filters/GP_GaussianNoise.h>
+#include <filters/gp_rand.h>
+#include <filters/gp_gaussian_noise.h>
 
 @ for pt in pixeltypes:
 @     if not pt.is_unknown() and not pt.is_palette():

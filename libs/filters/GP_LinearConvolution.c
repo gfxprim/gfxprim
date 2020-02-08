@@ -22,7 +22,7 @@
 
 #include "core/gp_pixmap.h"
 #include <core/gp_debug.h>
-#include <filters/GP_Linear.h>
+#include <filters/gp_linear.h>
 
 static int h_callback(gp_progress_cb *self)
 {

@@ -16,72 +16,40 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2010 Jiri "BlueBear" Dluhos                            *
- *                         <jiri.bluebear.dluhos@gmail.com>                  *
- *                                                                           *
- * Copyright (C) 2009-2011 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2013 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
 /*
 
-  gp_pixmap filters.
+  Bicubic interpolation.
 
  */
 
-#ifndef FILTERS_GP_FILTERS_H
-#define FILTERS_GP_FILTERS_H
+#ifndef FILTERS_GP_RESIZE_CUBIC_H
+#define FILTERS_GP_RESIZE_CUBIC_H
 
-/* Point filters, brightness, contrast ... */
-#include "filters/GP_Point.h"
+#include <filters/gp_filter.h>
+#include <filters/gp_resize.h>
 
-/* Addition, difference, min, max ... */
-#include "filters/GP_Arithmetic.h"
+int gp_filter_resize_cubic_int(const gp_pixmap *src, gp_pixmap *dst,
+                               gp_progress_cb *callback);
 
-/* Histograms, ... */
-#include "filters/GP_Stats.h"
+int gp_filter_resize_cubic(const gp_pixmap *src, gp_pixmap *dst,
+                           gp_progress_cb *callback);
 
-/* Image rotations (90 180 270 grads) and mirroring */
-#include "filters/GP_Rotate.h"
+static inline gp_pixmap *gp_filter_resize_cubic_int_alloc(const gp_pixmap *src,
+                                                          gp_size w, gp_size h,
+                                                          gp_progress_cb *callback)
+{
+	return gp_filter_resize_alloc(src, w, h, GP_INTERP_CUBIC_INT, callback);
+}
 
-/* Linear convolution Raw API */
-#include "filters/GP_Linear.h"
+static inline gp_pixmap *gp_filter_resize_cubic_alloc(const gp_pixmap *src,
+                                                    gp_size w, gp_size h,
+                                                    gp_progress_cb *callback)
+{
+	return gp_filter_resize_alloc(src, w, h, GP_INTERP_CUBIC, callback);
+}
 
-/* Convolution filters */
-#include "filters/GP_Convolution.h"
-
-/* Blur filters */
-#include "filters/GP_Blur.h"
-
-/* Edge detection filters */
-#include "filters/GP_EdgeDetection.h"
-
-/* Image scaling (resampling) */
-#include "filters/GP_Resize.h"
-#include "filters/GP_ResizeNN.h"
-#include "filters/GP_ResizeLinear.h"
-#include "filters/GP_ResizeCubic.h"
-
-/* Bitmap dithering */
-#include "filters/GP_Dither.h"
-
-/* Laplace based filters */
-#include "filters/GP_Laplace.h"
-
-/* Median filter */
-#include "filters/GP_Median.h"
-
-/* Weighted Median filter */
-#include "filters/GP_WeightedMedian.h"
-
-/* Sigma Mean filter */
-#include "filters/GP_Sigma.h"
-
-/* Gaussian noise filter */
-#include "filters/GP_GaussianNoise.h"
-
-/* Multi tone point filters */
-#include "filters/GP_MultiTone.h"
-#include "filters/GP_Sepia.h"
-
-#endif /* FILTERS_GP_FILTERS_H */
+#endif /* FILTERS_GP_RESIZE_CUBIC_H */

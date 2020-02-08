@@ -7,7 +7,7 @@
 
 #include <core/gp_pixmap.h>
 #include <gfx/gp_gfx.h>
-#include <filters/GP_Rotate.h>
+#include <filters/gp_rotate.h>
 
 #include "tst_test.h"
 #include "compare.h"

@@ -70,7 +70,7 @@ Invert
 -------------------------------------------------------------------------------
 #include <gfxprim.h>
 /* or */
-#include <filters/GP_Point.h>
+#include <filters/gp_point.h>
 
 int gp_filter_invert(const gp_pixmap *src, gp_pixmap *dst,
                      gp_progress_cb *callback);
@@ -90,7 +90,7 @@ Brightness
 -------------------------------------------------------------------------------
 #include <gfxprim.h>
 /* or */
-#include <filters/GP_Point.h>
+#include <filters/gp_point.h>
 
 int gp_filter_brightness(const gp_pixmap *src, gp_pixmap *dst,
                          float p, gp_progress_cb *callback);
@@ -110,7 +110,7 @@ Contrast
 -------------------------------------------------------------------------------
 #include <gfxprim.h>
 /* or */
-#include <filters/GP_Point.h>
+#include <filters/gp_point.h>
 
 int gp_filter_contrast(const gp_pixmap *src, gp_pixmap *dst,
                        float p, gp_progress_cb *callback);
@@ -130,7 +130,7 @@ BrightnessContrast
 -------------------------------------------------------------------------------
 #include <gfxprim.h>
 /* or */
-#include <filters/GP_Point.h>
+#include <filters/gp_point.h>
 
 int gp_filter_brightness_contrast(const gp_pixmap *src, gp_pixmap *dst,
                                 float b, float c,
@@ -152,7 +152,7 @@ Posterize
 -------------------------------------------------------------------------------
 #include <gfxprim.h>
 /* or */
-#include <filters/GP_Point.h>
+#include <filters/gp_point.h>
 
 int gp_filter_posterize(const gp_pixmap *src, gp_pixmap *dst,
                         unsigned int levels, gp_progress_cb *callback);
@@ -173,7 +173,7 @@ Gaussian additive noise filter
 -------------------------------------------------------------------------------
 #include <gp_filter_s.h>
 /* or */
-#include <filters/GP_GaussianNoise.h>
+#include <filters/gp_gaussian_noise.h>
 
 int gp_filter_gaussian_noise_add_ex(const gp_pixmap *src,
                                     gp_coord x_src, gp_coord y_src,
@@ -220,7 +220,7 @@ If size of the input pixmaps differs, minimum is used.
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <filters/GP_Arithmetic.h>
+#include <filters/gp_arithmetic.h>
 /* or */
 #include <gfxprim.h>
 
@@ -238,7 +238,7 @@ Produces saturated (clamped) addition of two pixmaps.
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <filters/GP_Arithmetic.h>
+#include <filters/gp_arithmetic.h>
 /* or */
 #include <gfxprim.h>
 
@@ -305,7 +305,7 @@ Rotation and Symmetry filters
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <filters/GP_Rotate.h>
+#include <filters/gp_rotate.h>
 /* or */
 #include <gfxprim.h>
 
@@ -327,7 +327,7 @@ include::images/mirror_h/images.txt[]
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <filters/GP_Rotate.h>
+#include <filters/gp_rotate.h>
 /* or */
 #include <gfxprim.h>
 
@@ -349,7 +349,7 @@ include::images/mirror_v/images.txt[]
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <filters/GP_Rotate.h>
+#include <filters/gp_rotate.h>
 /* or */
 #include <gfxprim.h>
 
@@ -371,7 +371,7 @@ include::images/rotate_90/images.txt[]
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <filters/GP_Rotate.h>
+#include <filters/gp_rotate.h>
 /* or */
 #include <gfxprim.h>
 
@@ -393,7 +393,7 @@ include::images/rotate_180/images.txt[]
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <filters/GP_Rotate.h>
+#include <filters/gp_rotate.h>
 /* or */
 #include <gfxprim.h>
 
@@ -415,7 +415,7 @@ include::images/rotate_270/images.txt[]
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <filters/GP_Rotate.h>
+#include <filters/gp_rotate.h>
 /* or */
 #include <gfxprim.h>
 
@@ -478,7 +478,7 @@ ready-to-use filters.
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <filters/GP_Linear.h>
+#include <filters/gp_linear.h>
 /* or */
 #include <gfxprim.h>
 
@@ -536,7 +536,7 @@ include::images/convolution/images.txt[]
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <filters/GP_Linear.h>
+#include <filters/gp_linear.h>
 /* or */
 #include <gfxprim.h>
 
@@ -630,7 +630,7 @@ NOTE: The linear convolutions are internally implemented using integer
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <filters/GP_Convolution.h>
+#include <filters/gp_convolution.h>
 /* or */
 #include <gfxprim.h>
 
@@ -795,7 +795,7 @@ Gaussian Blur
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <filters/GP_Blur.h>
+#include <filters/gp_blur.h>
 /* or */
 #include <gfxprim.h>
 
@@ -876,7 +876,7 @@ Median
 
 [source,c]
 -------------------------------------------------------------------------------
-#include <filters/GP_Median.h>
+#include <filters/gp_median.h>
 /* or */
 #include <gfxprim.h>
 

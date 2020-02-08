@@ -20,26 +20,38 @@
  *                                                                           *
  *****************************************************************************/
 
-/*
+#ifndef FILTERS_GP_SEPIA_H
+#define FILTERS_GP_SEPIA_H
 
-  Nearest neighbour interpolation.
+#include <filters/gp_filter.h>
 
- */
+int gp_filter_sepia_ex(const gp_pixmap *const src,
+                       gp_coord x_src, gp_coord y_src,
+                       gp_size w_src, gp_size h_src,
+                       gp_pixmap *dst,
+                       gp_coord x_dst, gp_coord y_dst,
+                       gp_progress_cb *callback);
 
-#ifndef FILTERS_GP_RESIZE_NN_H
-#define FILTERS_GP_RESIZE_NN_H
-
-#include <filters/GP_Filter.h>
-#include <filters/GP_Resize.h>
-
-int gp_filter_resize_nn(const gp_pixmap *src, gp_pixmap *dst,
-                      gp_progress_cb *callback);
-
-static inline gp_pixmap *gp_filter_resize_nn_alloc(const gp_pixmap *src,
-                                   gp_size w, gp_size h,
-                                   gp_progress_cb *callback)
+static inline int gp_filter_sepia(const gp_pixmap *const src,
+                                 gp_pixmap *dst,
+                                 gp_progress_cb *callback)
 {
-	return gp_filter_resize_alloc(src, w, h, GP_INTERP_NN, callback);
+	return gp_filter_sepia_ex(src, 0, 0, src->w, src->h,
+	                          dst, 0, 0, callback);
 }
 
-#endif /* FILTERS_GP_RESIZE_NN_H */
+gp_pixmap *gp_filter_sepia_ex_alloc(const gp_pixmap *const src,
+                                    gp_coord x_src, gp_coord y_src,
+                                    gp_size w_src, gp_size h_src,
+                                    gp_pixel_type dst_pixel_type,
+                                    gp_progress_cb *callback);
+
+static inline gp_pixmap *gp_filter_sepia_alloc(const gp_pixmap *const src,
+                                               gp_pixel_type dst_pixel_type,
+                                               gp_progress_cb *callback)
+{
+	return gp_filter_sepia_ex_alloc(src, 0, 0, src->w, src->h,
+	                                dst_pixel_type, callback);
+}
+
+#endif /* FILTERS_GP_SEPIA_H */

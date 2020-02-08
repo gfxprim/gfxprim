@@ -7,7 +7,7 @@
 
 #include <core/gp_get_put_pixel.h>
 #include <core/gp_debug.h>
-#include <filters/GP_Rotate.h>
+#include <filters/gp_rotate.h>
 
 @ for ps in pixelsizes:
 static int mirror_h_raw_{{ ps.suffix }}(const gp_pixmap *src,

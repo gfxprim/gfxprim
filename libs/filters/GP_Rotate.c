@@ -26,7 +26,7 @@
 #include <core/gp_clamp.h>
 #include <core/gp_debug.h>
 #include <core/gp_fn_per_bpp.h>
-#include <filters/GP_Rotate.h>
+#include <filters/gp_rotate.h>
 
 int gp_filter_mirror_v_raw(const gp_pixmap *src, gp_pixmap *dst,
                            gp_progress_cb *callback)

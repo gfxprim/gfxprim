@@ -7,7 +7,7 @@
 
 #include <core/gp_debug.h>
 #include <core/gp_get_put_pixel.h>
-#include <filters/GP_Rotate.h>
+#include <filters/gp_rotate.h>
 
 @ for ps in pixelsizes:
 static int rotate_90_{{ ps.suffix }}(const gp_pixmap *src, gp_pixmap *dst,

@@ -13,7 +13,7 @@
 #include <core/gp_mix_pixels.h>
 #include <core/gp_debug.h>
 
-#include "filters/GP_MultiTone.h"
+#include <filters/gp_multi_tone.h>
 
 @ for pt in pixeltypes:
 @     if not pt.is_unknown() and not pt.is_palette():

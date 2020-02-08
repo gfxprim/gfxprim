@@ -54,7 +54,7 @@
 #ifndef FILTERS_GP_RESIZE_H
 #define FILTERS_GP_RESIZE_H
 
-#include <filters/GP_Filter.h>
+#include <filters/gp_filter.h>
 
 typedef enum gp_interpolation_type {
 	GP_INTERP_NN,            /* Nearest Neighbour                         */

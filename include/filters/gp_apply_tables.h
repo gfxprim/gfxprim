@@ -20,45 +20,50 @@
  *                                                                           *
  *****************************************************************************/
 
-#ifndef FILTERS_GP_MULTI_TONE_H
-#define FILTERS_GP_MULTI_TONE_H
+/*
 
-#include <filters/GP_Filter.h>
+  Applies per-channel tables on a pixmap pixels. Used for fast point filters
+  implementation.
 
-int gp_filter_multitone_ex(const gp_pixmap *const src,
+ */
+
+#ifndef FILTERS_GP_APPLY_TABLES_H
+#define FILTERS_GP_APPLY_TABLES_H
+
+#include <filters/gp_filter.h>
+
+/*
+ * Per-channel lookup tables.
+ */
+typedef struct gp_filter_tables {
+	gp_pixel *table[GP_PIXELTYPE_MAX_CHANNELS];
+	int free_table:1;
+} gp_filter_tables;
+
+/*
+ * Generic point filter, applies corresponding table on bitmap.
+ */
+int gp_filter_tables_apply(const gp_pixmap *const src,
                            gp_coord x_src, gp_coord y_src,
                            gp_size w_src, gp_size h_src,
-                           gp_pixmap *dst,
-                           gp_coord x_dst, gp_coord y_dst,
-                           gp_pixel pixels[], gp_size pixels_size,
-                           gp_progress_cb *callback);
+			   gp_pixmap *dst,
+			   gp_coord x_dst, gp_coord y_dst,
+			   const gp_filter_tables *const tables,
+			   gp_progress_cb *callback);
 
-static inline int gp_filter_multitone(const gp_pixmap *const src,
-                                      gp_pixmap *dst,
-                                      gp_pixel pixels[], gp_size pixels_size,
-                                      gp_progress_cb *callback)
-{
-	return gp_filter_multitone_ex(src, 0, 0, src->w, src->h, dst, 0, 0,
-	                              pixels, pixels_size, callback);
-}
+/*
+ * Aloocates and initializes tables.
+ */
+int gp_filter_tables_init(gp_filter_tables *self, const gp_pixmap *pixmap);
 
-gp_pixmap *gp_filter_multitone_ex_alloc(const gp_pixmap *const src,
-                                        gp_coord x_src, gp_coord y_src,
-                                        gp_size w_src, gp_size h_src,
-                                        gp_pixel_type dst_pixel_type,
-                                        gp_pixel pixels[], gp_size pixels_size,
-                                        gp_progress_cb *callback);
+/*
+ * Allocates and initializes table structure and tables.
+ */
+gp_filter_tables *gp_filter_tables_alloc(const gp_pixmap *pixmap);
 
-static inline gp_pixmap *gp_filter_multitone_alloc(const gp_pixmap *const src,
-                                                   gp_pixel_type dst_pixel_type,
-                                                   gp_pixel pixels[],
-						   gp_size pixels_size,
-                                                   gp_progress_cb *callback)
-{
-	return gp_filter_multitone_ex_alloc(src, 0, 0, src->w, src->h,
-	                                    dst_pixel_type,
+/*
+ * Frees point filter tables.
+ */
+void gp_filter_tables_free(gp_filter_tables *self);
 
-	                                    pixels, pixels_size, callback);
-}
-
-#endif /* FILTERS_GP_MULTI_TONE_H */
+#endif /* FILTERS_GP_APPLY_TABLES_H */

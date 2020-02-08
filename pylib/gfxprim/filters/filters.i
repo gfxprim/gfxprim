@@ -3,7 +3,7 @@
 %include "carrays.i"
 
 %{
-#include "filters/GP_Filters.h"
+#include <filters/gp_filters.h>
 #include <core/gp_debug.h>
 %}
 
@@ -23,7 +23,7 @@ FILTER_FUNC(brightness);
 FILTER_FUNC(contrast);
 FILTER_FUNC(brightness_contrast);
 FILTER_FUNC(posterize);
-%include "GP_Point.h"
+%include "gp_point.h"
 
 /* Arithmetic filters */
 FILTER_FUNC(addition);
@@ -31,7 +31,7 @@ FILTER_FUNC(multiply);
 FILTER_FUNC(difference);
 FILTER_FUNC(max);
 FILTER_FUNC(min);
-%include "GP_Arithmetic.h"
+%include "gp_arithmetic.h"
 
 /* TODO: Stats filters */
 
@@ -43,7 +43,7 @@ FILTER_FUNC(rotate_180);
 FILTER_FUNC(rotate_270);
 FILTER_FUNC(symmetry);
 %immutable gp_filter_symmetry_names;
-%include "GP_Rotate.h"
+%include "gp_rotate.h"
 
 /* Convolutions */
 FILTER_FUNC(convolution);
@@ -74,42 +74,42 @@ FILTER_FUNC(convolution_ex);
         }
 };
 
-%include "GP_Convolution.h"
+%include "gp_convolution.h"
 
 /* Blur */
 FILTER_FUNC(gaussian_blur_ex);
 FILTER_FUNC(gaussian_blur);
-%include "GP_Blur.h"
+%include "gp_blur.h"
 
 /* Resize filters */
 FILTER_FUNC(resize);
-%include "GP_Resize.h"
+%include "gp_resize.h"
 
 FILTER_FUNC(resize_nn);
-%include "GP_ResizeNN.h"
+%include "gp_resize_nn.h"
 
 FILTER_FUNC(resize_linear_int);
 FILTER_FUNC(resize_linear_lf_int);
-%include "GP_ResizeLinear.h"
+%include "gp_resize_linear.h"
 
 FILTER_FUNC(resize_cubic);
 FILTER_FUNC(resize_cubic_int);
-%include "GP_ResizeCubic.h"
+%include "gp_resize_cubic.h"
 
 /* Ditherings */
 FILTER_FUNC(floyd_steinberg);
 FILTER_FUNC(hilbert_peano);
-%include "GP_Dither.h"
+%include "gp_dither.h"
 
 /* Laplace and Laplace Edge Sharpening */
 FILTER_FUNC(laplace);
 FILTER_FUNC(edge_sharpening);
-%include "GP_Laplace.h"
+%include "gp_laplace.h"
 
 /* Median */
 FILTER_FUNC(median_ex);
 FILTER_FUNC(median);
-%include "GP_Median.h"
+%include "gp_median.h"
 
 /* Weighted Median */
 FILTER_FUNC(weighted_median_ex);
@@ -139,19 +139,19 @@ FILTER_FUNC(weighted_median);
         }
 };
 
-%include "GP_WeightedMedian.h"
+%include "gp_weighted_median.h"
 
 /* Sigma filter */
 FILTER_FUNC(sigma_ex);
 FILTER_FUNC(sigma);
-%include "GP_Sigma.h"
+%include "gp_sigma.h"
 
 /* Gaussian Noise */
 FILTER_FUNC(gaussian_noise_add_ex);
 FILTER_FUNC(gaussian_noise_add);
-%include "GP_GaussianNoise.h"
+%include "gp_gaussian_noise.h"
 
 /* Sepia */
 FILTER_FUNC(sepia);
 FILTER_FUNC(sepia_ex);
-%include "GP_Sepia.h"
+%include "gp_sepia.h"

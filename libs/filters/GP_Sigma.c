@@ -29,7 +29,7 @@
 #include <core/gp_temp_alloc.h>
 #include <core/gp_clamp.h>
 #include <core/gp_debug.h>
-#include <filters/GP_Sigma.h>
+#include <filters/gp_sigma.h>
 
 static int gp_filter_sigma_raw(const gp_pixmap *src,
                                gp_coord x_src, gp_coord y_src,

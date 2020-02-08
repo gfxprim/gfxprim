@@ -10,7 +10,7 @@
 #include <core/gp_pixmap.h>
 #include <core/gp_get_put_pixel.h>
 #include <core/gp_debug.h>
-#include <filters/GP_ResizeNN.h>
+#include <filters/gp_resize_nn.h>
 
 @ for pt in pixeltypes:
 @     if not pt.is_unknown():

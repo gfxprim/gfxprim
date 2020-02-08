@@ -21,8 +21,8 @@
  *****************************************************************************/
 
 #include <core/gp_debug.h>
-#include <filters/GP_Linear.h>
-#include <filters/GP_Convolution.h>
+#include <filters/gp_linear.h>
+#include <filters/gp_convolution.h>
 
 int gp_filter_convolution_ex(const gp_pixmap *src,
                              gp_coord x_src, gp_coord y_src,

@@ -29,7 +29,7 @@
 #ifndef FILTERS_GP_DITHER_H
 #define FILTERS_GP_DITHER_H
 
-#include <filters/GP_Filter.h>
+#include <filters/gp_filter.h>
 
 /*
  * Classical Floyd-Steinberg. Produces good results and is a little faster than

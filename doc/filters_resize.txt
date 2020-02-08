@@ -8,7 +8,7 @@ Common API
 -------------------------------------------------------------------------------
 #include <gfxprim.h>
 /* or */
-#include <filters/GP_Resize.h>
+#include <filters/gp_resize.h>
 
 typedef enum gp_interpolation_type {
         GP_INTERP_NN,            /* Nearest Neighbour                         */
@@ -59,7 +59,7 @@ Nearest Neighbour Interpolation
 -------------------------------------------------------------------------------
 #include <gfxprim.h>
 /* or */
-#include <filters/GP_ResizeNN.h>
+#include <filters/gp_resize_nn.h>
 
 int gp_filter_resize_nn(const gp_pixmap *src, gp_pixmap *dst,
                         gp_progress_cb *callback);
@@ -85,7 +85,7 @@ Bilinear Interpolation
 -------------------------------------------------------------------------------
 #include <gfxprim.h>
 /* or */
-#include <filters/GP_ResizeLinear.h>
+#include <filters/gp_resize_linear.h>
 
 int gp_filter_resize_linear_int(const gp_pixmap *src, gp_pixmap *dst,
                                 gp_progress_cb *callback);
@@ -113,7 +113,7 @@ Bicubic Interpolation
 -------------------------------------------------------------------------------
 #include <gfxprim.h>
 /* or */
-#include <filters/GP_ResizeCubic.h>
+#include <filters/gp_resize_cubic.h>
 
 int gp_filter_resize_cubic_int(const gp_pixmap *src, gp_pixmap *dst,
                                gp_progress_cb *callback);

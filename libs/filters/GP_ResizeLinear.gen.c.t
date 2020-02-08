@@ -12,7 +12,7 @@
 #include <core/gp_get_put_pixel.h>
 #include <core/gp_gamma.h>
 #include <core/gp_debug.h>
-#include <filters/GP_Resize.h>
+#include <filters/gp_resize.h>
 @
 @ def fetch_rows(pt, y):
 for (x = 0; x < src->w; x++) {

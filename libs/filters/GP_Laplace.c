@@ -22,8 +22,8 @@
 
 #include <core/gp_debug.h>
 #include <core/gp_get_put_pixel.h>
-#include <filters/GP_Linear.h>
-#include <filters/GP_Laplace.h>
+#include <filters/gp_linear.h>
+#include <filters/gp_laplace.h>
 
 int gp_filter_laplace(const gp_pixmap *src, gp_pixmap *dst,
 		      gp_progress_cb *callback)

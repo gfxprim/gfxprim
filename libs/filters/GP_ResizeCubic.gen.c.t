@@ -13,7 +13,7 @@
 #include <core/gp_gamma.h>
 #include <core/gp_clamp.h>
 #include <core/gp_debug.h>
-#include <filters/GP_Resize.h>
+#include <filters/gp_resize.h>
 #include "GP_Cubic.h"
 
 #define MUL 1024

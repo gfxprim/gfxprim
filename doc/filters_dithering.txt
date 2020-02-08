@@ -25,7 +25,7 @@ And is throwed away at the image borders.
 -------------------------------------------------------------------------------
 #include <gfxprim.h>
 /* or */
-#include <filters/GP_Dither.h>
+#include <filters/gp_dither.h>
 
 int gp_filter_floyd_steinberg(const gp_pixmap *src, gp_pixmap *dst,
                               gp_progress_cb *callback);
@@ -43,7 +43,7 @@ the function returns non-zero and sets errno to 'ENOSYS'.
 -------------------------------------------------------------------------------
 #include <gfxprim.h>
 /* or */
-#include <filters/GP_Dither.h>
+#include <filters/gp_dither.h>
 
 gp_pixmap *gp_filter_floyd_steinberg_alloc(const gp_pixmap *src,
                                            gp_pixel_type pixel_type,
@@ -73,7 +73,7 @@ edges tend to be less sharp.
 -------------------------------------------------------------------------------
 #include <gfxprim.h>
 /* or */
-#include <filters/GP_Dither.h>
+#include <filters/gp_dither.h>
 
 int gp_filter_hilbert_peano(const gp_pixmap *src, gp_pixmap *dst,
                             gp_progress_cb *callback);
@@ -91,7 +91,7 @@ the function returns NULL and sets errno to 'ENOSYS'.
 -------------------------------------------------------------------------------
 #include <gfxprim.h>
 /* or */
-#include <filters/GP_Dither.h>
+#include <filters/gp_dither.h>
 
 gp_pixmap *gp_filter_hilbert_peano_alloc(const gp_pixmap *src,
                                          gp_pixel_type pixel_type,

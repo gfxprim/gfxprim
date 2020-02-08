@@ -29,7 +29,7 @@
 
 #include <core/gp_debug.h>
 
-#include "GP_ResizeCubic.h"
+#include <filters/gp_resize_cubic.h>
 
 #define A 0.5
 

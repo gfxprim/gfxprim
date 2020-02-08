@@ -24,10 +24,10 @@
 
 #include <core/gp_debug.h>
 
-#include <filters/GP_Linear.h>
-#include <filters/GP_LinearThreads.h>
+#include <filters/gp_linear.h>
+#include <filters/gp_linear_threads.h>
 
-#include <filters/GP_Blur.h>
+#include <filters/gp_blur.h>
 
 static inline unsigned int gaussian_kernel_size(float sigma)
 {

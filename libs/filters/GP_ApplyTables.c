@@ -23,7 +23,7 @@
 #include <core/gp_clamp.h>
 #include <core/gp_debug.h>
 
-#include "filters/GP_ApplyTables.h"
+#include <filters/gp_apply_tables.h>
 
 static gp_pixel *create_table(const gp_pixel_channel *chan)
 {

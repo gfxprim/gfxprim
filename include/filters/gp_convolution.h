@@ -29,8 +29,8 @@
 #ifndef FILTERS_GP_CONVOLUTION_H
 #define FILTERS_GP_CONVOLUTION_H
 
-#include <filters/GP_Filter.h>
-#include <filters/GP_Linear.h>
+#include <filters/gp_filter.h>
+#include <filters/gp_linear.h>
 
 /*
  * 2D convolution kernel.

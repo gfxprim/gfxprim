@@ -28,7 +28,7 @@
 #include "core/gp_clamp.h"
 #include <core/gp_debug.h>
 
-#include <filters/GP_Median.h>
+#include <filters/gp_median.h>
 
 #include <string.h>
 

@@ -10,9 +10,9 @@
 #include <core/gp_debug.h>
 #include <core/gp_get_put_pixel.h>
 #include <core/gp_convert.h>
-#include "filters/GP_HilbertCurve.h"
-#include "filters/GP_Filter.h"
-#include "filters/GP_Dither.h"
+#include <filters/gp_hilbert_curve.h>
+#include <filters/gp_filter.h>
+#include <filters/gp_dither.h>
 
 /*
  * Returns closest greater square of two, used to determine the curve size.

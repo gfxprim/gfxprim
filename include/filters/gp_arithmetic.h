@@ -29,7 +29,7 @@
 #ifndef FILTERS_GP_ARITHMETIC_H
 #define FILTERS_GP_ARITHMETIC_H
 
-#include <filters/GP_Filter.h>
+#include <filters/gp_filter.h>
 
 /*
  * add filter.

@@ -16,42 +16,20 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2013 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
-#ifndef FILTERS_GP_SEPIA_H
-#define FILTERS_GP_SEPIA_H
+#ifndef FILTERS_GP_LINEAR_THREADS_H
+#define FILTERS_GP_LINEAR_THREADS_H
 
-#include <filters/GP_Filter.h>
+#include <filters/gp_filter.h>
+#include <filters/gp_linear.h>
 
-int gp_filter_sepia_ex(const gp_pixmap *const src,
-                       gp_coord x_src, gp_coord y_src,
-                       gp_size w_src, gp_size h_src,
-                       gp_pixmap *dst,
-                       gp_coord x_dst, gp_coord y_dst,
-                       gp_progress_cb *callback);
+int gp_filter_convolution_mp_raw(const gp_convolution_params *params);
 
-static inline int gp_filter_sepia(const gp_pixmap *const src,
-                                 gp_pixmap *dst,
-                                 gp_progress_cb *callback)
-{
-	return gp_filter_sepia_ex(src, 0, 0, src->w, src->h,
-	                          dst, 0, 0, callback);
-}
+int gp_filter_vconvolution_mp_raw(const gp_convolution_params *params);
 
-gp_pixmap *gp_filter_sepia_ex_alloc(const gp_pixmap *const src,
-                                    gp_coord x_src, gp_coord y_src,
-                                    gp_size w_src, gp_size h_src,
-                                    gp_pixel_type dst_pixel_type,
-                                    gp_progress_cb *callback);
+int gp_filter_hconvolution_mp_raw(const gp_convolution_params *params);
 
-static inline gp_pixmap *gp_filter_sepia_alloc(const gp_pixmap *const src,
-                                               gp_pixel_type dst_pixel_type,
-                                               gp_progress_cb *callback)
-{
-	return gp_filter_sepia_ex_alloc(src, 0, 0, src->w, src->h,
-	                                dst_pixel_type, callback);
-}
-
-#endif /* FILTERS_GP_SEPIA_H */
+#endif /* FILTERS_GP_LINEAR_THREADS_H */

@@ -16,40 +16,46 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor,                        *
  * Boston, MA  02110-1301  USA                                               *
  *                                                                           *
- * Copyright (C) 2009-2013 Cyril Hrubis <metan@ucw.cz>                       *
+ * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>                       *
  *                                                                           *
  *****************************************************************************/
 
 /*
 
-  Bicubic interpolation.
+  Laplace filter and Laplace-based filters.
 
  */
 
-#ifndef FILTERS_GP_RESIZE_CUBIC_H
-#define FILTERS_GP_RESIZE_CUBIC_H
+#ifndef FILTERS_GP_LAPLACE_H
+#define FILTERS_GP_LAPLACE_H
 
-#include <filters/GP_Filter.h>
-#include <filters/GP_Resize.h>
+#include <filters/gp_filter.h>
 
-int gp_filter_resize_cubic_int(const gp_pixmap *src, gp_pixmap *dst,
-                               gp_progress_cb *callback);
+/*
+ * Discrete Laplace, second-derivative filter.
+ *
+ * Implemented by separable linear convolution with kernels
+ *
+ * [1 -2 1] and [ 1 ]
+ *              [-2 ]
+ *              [ 1 ]
+ */
+int gp_filter_laplace(const gp_pixmap *src, gp_pixmap *dst,
+                      gp_progress_cb *callback);
 
-int gp_filter_resize_cubic(const gp_pixmap *src, gp_pixmap *dst,
-                           gp_progress_cb *callback);
+gp_pixmap *gp_filter_laplace_alloc(const gp_pixmap *src,
+                                   gp_progress_cb *callback);
 
-static inline gp_pixmap *gp_filter_resize_cubic_int_alloc(const gp_pixmap *src,
-                                                          gp_size w, gp_size h,
-                                                          gp_progress_cb *callback)
-{
-	return gp_filter_resize_alloc(src, w, h, GP_INTERP_CUBIC_INT, callback);
-}
+/*
+ * Laplace based filter sharpening.
+ *
+ * This filter substract result of Laplace filter weigted by w from the
+ * original image which amplifies edges.
+ */
+int gp_filter_edge_sharpening(const gp_pixmap *src, gp_pixmap *dst,
+                              float w, gp_progress_cb *callback);
 
-static inline gp_pixmap *gp_filter_resize_cubic_alloc(const gp_pixmap *src,
-                                                    gp_size w, gp_size h,
-                                                    gp_progress_cb *callback)
-{
-	return gp_filter_resize_alloc(src, w, h, GP_INTERP_CUBIC, callback);
-}
+gp_pixmap *gp_filter_edge_sharpening_alloc(const gp_pixmap *src, float w,
+                                           gp_progress_cb *callback);
 
-#endif /* FILTERS_GP_RESIZE_CUBIC_H */
+#endif /* FILTERS_GP_LAPLACE_H */

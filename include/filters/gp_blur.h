@@ -29,7 +29,7 @@
 #ifndef FILTERS_GP_BLUR_H
 #define FILTERS_GP_BLUR_H
 
-#include <filters/GP_Filter.h>
+#include <filters/gp_filter.h>
 
 /*
  * Gaussian blur implemented using linear separable convolution.

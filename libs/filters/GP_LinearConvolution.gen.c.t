@@ -13,7 +13,7 @@
 #include <core/gp_clamp.h>
 #include <core/gp_debug.h>
 
-#include "GP_Linear.h"
+#include <filters/gp_linear.h>
 
 #define MUL 1024
 

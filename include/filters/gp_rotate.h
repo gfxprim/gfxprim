@@ -30,7 +30,7 @@
 #define FILTERS_GP_ROTATE_H
 
 #include <core/gp_types.h>
-#include <filters/GP_Filter.h>
+#include <filters/gp_filter.h>
 
 /*
  * Mirrors bitmap horizontally.
