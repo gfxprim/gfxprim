@@ -122,6 +122,15 @@ void redraw_screen(void)
 		style.font = gp_font_c64;
 	break;
 	case 5:
+		style.font = gp_font_haxor_narrow_15;
+	break;
+	case 6:
+		style.font = gp_font_haxor_narrow_16;
+	break;
+	case 7:
+		style.font = gp_font_haxor_narrow_17;
+	break;
+	case 8:
 		style.font = font;
 	break;
 	}
@@ -156,8 +165,14 @@ void redraw_screen(void)
 			gp_font_height(style.font) + 1,
 			blue_pixel);
 
+		gp_hline_xyw(win->pixmap, 15,
+		             SPACING*i + 15 + gp_font_ascend(style.font),
+		             gp_text_max_width(&style, strlen(test_string)) + 1,
+		             blue_pixel);
+
 		gp_text(win->pixmap, &style, 16, SPACING*i + 16, align,
 		        white_pixel, dark_gray_pixel, test_string);
+
 
 		style.pixel_xmul = 2;
 		style.pixel_ymul = 2;
@@ -204,9 +219,9 @@ void event_loop(void)
 			switch (ev.val.key.key) {
 			case GP_KEY_SPACE:
 				if (font)
-					font_flag = (font_flag + 1) % 6;
+					font_flag = (font_flag + 1) % 9;
 				else
-					font_flag = (font_flag + 1) % 5;
+					font_flag = (font_flag + 1) % 8;
 
 				redraw_screen();
 				gp_backend_flip(win);
