@@ -58,8 +58,8 @@ static void text_draw_1BPP_{{ pt.name }}(gp_pixmap *pixmap, const gp_text_style 
 
 				int start_x = x + (i + glyph->bearing_x) * x_mul;
 
-				//if (p == str)
-				//	start_x -= glyph->bearing_x * x_mul;
+				if (p == str)
+					start_x -= glyph->bearing_x * x_mul;
 
 				int start_y = y - (glyph->bearing_y - style->font->ascend) * y_mul;
 
