@@ -40,7 +40,7 @@ static int do_align(gp_coord *topleft_x, gp_coord *topleft_y, int align,
 {
 	gp_size height = gp_text_height(style);
 
-	switch (align & 0x0f) {
+	switch (align & 0x03) {
 	case GP_ALIGN_LEFT:
 		*topleft_x = x - width + 1;
 		break;
@@ -97,7 +97,7 @@ void gp_text(gp_pixmap *pixmap, const gp_text_style *style,
 	         "Invalid aligment flags");
 
 	gp_text_raw(pixmap, style, topleft_x, topleft_y,
-	            align & GP_TEXT_NOBG, fg_color, bg_color, str);
+	            align, fg_color, bg_color, str);
 }
 
 gp_size gp_vprint(gp_pixmap *pixmap, const gp_text_style *style,

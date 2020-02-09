@@ -39,6 +39,7 @@
  *   - GP_ALIGN_LEFT draws the text to the left of the point,
  *   - GP_ALIGN_CENTER centers it at the point horizontally,
  *   - GP_ALIGN_RIGHT draws the text to the right of the point
+ *   - GP_TEXT_BEARING apply bearing at the start of the string
  *   - GP_VALIGN_ABOVE (or TOP) draws the text above the point
  *   - GP_VALIGN_CENTER centers the text vertically at the point
  *   - GP_VALIGN_BASELINE places the text baseline at the point
@@ -51,6 +52,7 @@ typedef enum gp_text_attr {
 	GP_ALIGN_LEFT = 0x01,
 	GP_ALIGN_CENTER = 0x02,
 	GP_ALIGN_RIGHT = 0x03,
+	GP_TEXT_BEARING = 0x04,
 	GP_VALIGN_ABOVE = 0x10,
 	GP_VALIGN_TOP = GP_VALIGN_ABOVE,
 	GP_VALIGN_CENTER = 0x20,
