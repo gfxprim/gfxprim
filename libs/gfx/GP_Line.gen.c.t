@@ -95,6 +95,8 @@ void gp_line_raw_{{ ps.suffix }}(gp_pixmap *pixmap, int x0, int y0,
 					x0, y0, pixval);
 			return;
 		}
+		if (y0 > y1)
+			GP_SWAP(y0, y1);
 		gp_vline_raw_{{ ps.suffix }}(pixmap, x0, y0, y1, pixval);
 		return;
 	}

@@ -84,7 +84,7 @@ static struct testcase testcase_line_1px = {
 	}
 };
 
-static struct testcase testcase_line_horiz = {
+static struct testcase testcase_line_horiz1 = {
 	.x0 = 2,
 	.y0 = 2,
 	.x1 = 8,
@@ -102,11 +102,53 @@ static struct testcase testcase_line_horiz = {
 	}
 };
 
-static struct testcase testcase_line_vert = {
+static struct testcase testcase_line_horiz2 = {
+	.x0 = 8,
+	.y0 = 2,
+	.x1 = 2,
+	.y1 = 2,
+
+	.w = 11,
+	.h = 5,
+
+	.pixmap = {
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+		0, 0, 1, 1, 1, 1, 1, 1, 1, 0, 0,
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+		0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+	}
+};
+
+static struct testcase testcase_line_vert1 = {
 	.x0 = 2,
 	.y0 = 2,
 	.x1 = 2,
 	.y1 = 8,
+
+	.w = 5,
+	.h = 11,
+
+	.pixmap = {
+		0, 0, 0, 0, 0,
+		0, 0, 0, 0, 0,
+		0, 0, 1, 0, 0,
+		0, 0, 1, 0, 0,
+		0, 0, 1, 0, 0,
+		0, 0, 1, 0, 0,
+		0, 0, 1, 0, 0,
+		0, 0, 1, 0, 0,
+		0, 0, 1, 0, 0,
+		0, 0, 0, 0, 0,
+		0, 0, 0, 0, 0,
+	}
+};
+
+static struct testcase testcase_line_vert2 = {
+	.x0 = 2,
+	.y0 = 8,
+	.x1 = 2,
+	.y1 = 2,
 
 	.w = 5,
 	.h = 11,
@@ -389,13 +431,21 @@ const struct tst_suite tst_suite = {
 		 .tst_fn = test_line,
 		 .data = &testcase_line_1px},
 
-		{.name = "Line Horizontal",
+		{.name = "Line Horizontal 1",
 		 .tst_fn = test_line,
-		 .data = &testcase_line_horiz},
+		 .data = &testcase_line_horiz1},
 
-		{.name = "Line Vertical",
+		{.name = "Line Horizontal 2",
 		 .tst_fn = test_line,
-		 .data = &testcase_line_vert},
+		 .data = &testcase_line_horiz2},
+
+		{.name = "Line Vertical 1",
+		 .tst_fn = test_line,
+		 .data = &testcase_line_vert1},
+
+		{.name = "Line Vertical 2",
+		 .tst_fn = test_line,
+		 .data = &testcase_line_vert2},
 
 		{.name = "Line 45 degrees",
 		 .tst_fn = test_line,
