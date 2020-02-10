@@ -20,6 +20,7 @@ Dependencies
 *Optinal Text rendering*
 
 * link:http://www.freetype.org/[FreeType]
+* link:https://www.freedesktop.org/wiki/Software/fontconfig/[Fontconfig]
 
 *Optional Backends*
 
@@ -27,6 +28,8 @@ Dependencies
 * link:http://aa-project.sourceforge.net/aalib/[AA-lib]
 * link:http://www.libsdl.org/[SDL] 1.2
   (not recomended, known to be slow and buggy)
+* link:https://xcb.freedesktop.org/[XCB]
+  (90% of code finished at this point)
 
 *Python Bindings*
 
@@ -82,12 +85,17 @@ zypper in libjpeg-devel libpng-devel giflib-devel libtiff-devel
 
 .Install FreeType devel library
 -------------------------------------------------------------------------------
-zypper in freetype-devel
+zypper in freetype-devel fontconfig-devel
 -------------------------------------------------------------------------------
 
 .Install X11 devel library
 -------------------------------------------------------------------------------
 zypper in libX11-devel libXext-devel
+-------------------------------------------------------------------------------
+
+.Install XCB devel library
+-------------------------------------------------------------------------------
+zypper in xcb-util-keysyms-devel
 -------------------------------------------------------------------------------
 
 .Install swig
@@ -98,7 +106,8 @@ zypper in swig python-devel
 .All in the one for the lazy
 -------------------------------------------------------------------------------
 zypper in gcc make libjpeg-devel libpng-devel giflib-devel libtiff-devel
-          freetype-devel libX11-devel libXext-devel swig python-devel
+          freetype-devel fontconfig-devel libX11-devel libXext-devel
+          xcb-util-keysyms-devel swig python-devel
 -------------------------------------------------------------------------------
 
 Debian
@@ -160,4 +169,6 @@ devel packages) by:
 
 Gentoo
 ~~~~~~
-GFXprim source contains ebuild in 'gentoo/' directory.
+
+Just use our official
+link:https://github.com/gfxprim/gfxprim-overlay[overlay].
