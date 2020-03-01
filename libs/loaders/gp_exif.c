@@ -131,8 +131,8 @@ static const char *IFD_tag_name(const struct IFD_tags *taglist, uint16_t tag)
 		return res->name;
 }
 
-#include "GP_ExifGPS.h"
-#include "GP_Exif.h"
+#include "gp_exif_gps.h"
+#include "gp_exif.h"
 
 static int get_buf(gp_io *io, off_t offset, char *buf, size_t len)
 {

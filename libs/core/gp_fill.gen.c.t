@@ -1,5 +1,5 @@
 @ include source.t
-@ include WritePixels.t
+@ include write_pixels.t
 /*
  * Optimized fill functions.
  *

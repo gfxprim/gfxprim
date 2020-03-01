@@ -28,7 +28,7 @@
 #include <core/gp_debug.h>
 
 #include <input/gp_event_queue.h>
-#include "GP_InputDriverSDL.h"
+#include "gp_input_driver_sdl.h"
 
 /* SDL ascii mapped keys */
 static uint16_t keysym_table1[] = {

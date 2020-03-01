@@ -47,7 +47,7 @@ static inline float cubic_float(float x)
 
 #include <stdint.h>
 
-/* Defined in GP_Cubic.gen.c */
+/* Defined in gp_cubic.gen.c */
 extern int16_t gp_cubic_table[];
 
 /*

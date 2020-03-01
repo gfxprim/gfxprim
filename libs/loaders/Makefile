@@ -6,7 +6,7 @@ INCLUDE=core
 LIBNAME=loaders
 BUILDLIB=yes
 
-GP_BMP.o: CFLAGS+=$(CFLAGS_WNIF)
+gp_bmp.o: CFLAGS+=$(CFLAGS_WNIF)
 
 include $(TOPDIR)/lib.mk
 include $(TOPDIR)/post.mk

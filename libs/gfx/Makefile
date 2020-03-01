@@ -2,9 +2,9 @@ TOPDIR=../..
 include $(TOPDIR)/pre.mk
 
 CSOURCES=$(filter-out $(wildcard *.gen.c),$(wildcard *.c))
-GENSOURCES=GP_Line.gen.c GP_HLine.gen.c GP_LineAA.gen.c GP_PutPixelAA.gen.c \
-	GP_HLineAA.gen.c GP_VLineAA.gen.c GP_FillCircle.gen.c GP_VLine.gen.c \
-	GP_FillEllipse.gen.c GP_FillTriangle.gen.c
+GENSOURCES=gp_line.gen.c gp_hline.gen.c gp_line_aa.gen.c gp_put_pixel_aa.gen.c \
+	gp_hline_aa.gen.c gp_vline_aa.gen.c gp_fill_circle.gen.c gp_vline.gen.c \
+	gp_fill_ellipse.gen.c gp_fill_triangle.gen.c
 LIBNAME=gfx
 
 include $(TOPDIR)/gen.mk

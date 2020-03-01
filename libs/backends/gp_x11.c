@@ -44,9 +44,9 @@
 
 #include <backends/gp_x11.h>
 
-#include "GP_X11_Conn.h"
-#include "GP_X11_Win.h"
-#include "GP_X11_Input.h"
+#include "gp_x11_conn.h"
+#include "gp_x11_win.h"
+#include "gp_x11_input.h"
 
 static int resize_ximage(gp_backend *self, int w, int h);
 static int resize_shm_ximage(gp_backend *self, int w, int h);

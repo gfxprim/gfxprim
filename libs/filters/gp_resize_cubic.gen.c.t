@@ -14,7 +14,7 @@
 #include <core/gp_clamp.h>
 #include <core/gp_debug.h>
 #include <filters/gp_resize.h>
-#include "GP_Cubic.h"
+#include "gp_cubic.h"
 
 #define MUL 1024
 

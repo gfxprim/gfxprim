@@ -502,7 +502,7 @@ static uint8_t get_idx(struct bitmap_info_header *header,
 	return 0;
 }
 
-#include "GP_BMP_RLE.h"
+#include "gp_bmp_rle.h"
 
 static int read_palette(gp_io *io, struct bitmap_info_header *header,
                         gp_pixmap *pixmap, gp_progress_cb *callback)

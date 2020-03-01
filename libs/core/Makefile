@@ -1,13 +1,13 @@
 TOPDIR=../..
 include $(TOPDIR)/pre.mk
 
-GENSOURCES=GP_Pixel.gen.c GP_Blit.gen.c GP_Convert.gen.c \
-           GP_GammaCorrection.gen.c GP_Fill.gen.c
+GENSOURCES=gp_pixel.gen.c gp_blit.gen.c gp_convert.gen.c \
+           gp_gamma_correction.gen.c gp_fill.gen.c
 
 CSOURCES=$(filter-out $(wildcard *.gen.c),$(wildcard *.c))
 LIBNAME=core
 
-GP_WritePixel.o: CFLAGS+=$(CFLAGS_WNIF)
+gp_write_pixel.o: CFLAGS+=$(CFLAGS_WNIF)
 
 include $(TOPDIR)/gen.mk
 include $(TOPDIR)/lib.mk
