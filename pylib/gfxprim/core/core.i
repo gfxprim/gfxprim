@@ -85,13 +85,13 @@ self.pixel_type: Pixmap pixel type (number)
 
 Some pixmap-related methods are provided as class members for convenience.
 
-gp_pixmap memory allocation is handled by gfxprim, deallocation by gp_pixmapFree().
+gp_pixmap memory allocation is handled by gfxprim, deallocation by gp_pixmap_free().
 The wrapper can be used without owning the gp_pixmap struct by setting self.this
 and self.thisown.") gp_pixmap;
 
 %extend gp_pixmap {
   ~gp_pixmap() {
-    GP_DEBUG(2, "[wrapper] gp_pixmapFree (%dx%d raw, %dbpp, free_pixels:%d)",
+    GP_DEBUG(2, "[wrapper] gp_pixmap_free (%dx%d raw, %dbpp, free_pixels:%d)",
       $self->w, $self->h, $self->bpp, $self->free_pixels);
     gp_pixmap_free($self);
   }
