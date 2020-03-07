@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: GPL-2.1-or-later
 /* Generated file, do not touch */
 
 #include <text/gp_font.h>
