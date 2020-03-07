@@ -70,9 +70,8 @@ struct gp_pixmap {
 /* Performs a series of sanity checks on pixmap, aborting if any fails. */
 #define GP_CHECK_PIXMAP(pixmap) do { \
 	GP_CHECK(pixmap, "NULL passed as pixmap"); \
-	GP_CHECK(pixmap->pixels, "invalid pixmap: NULL image pointer"); \
 	GP_CHECK(pixmap->bpp <= 32, "invalid pixmap: unsupported bits-per-pixel count"); \
-	GP_CHECK(pixmap->w > 0 && pixmap->h > 0, "invalid pixmap: invalid image size"); \
+	GP_CHECK(pixmap->pixels || pixmap->w == 0 || pixmap->h == 0, "invalid pixmap: pixels NULL on nonzero w h"); \
 } while (0)
 
 /*
