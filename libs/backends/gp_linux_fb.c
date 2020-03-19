@@ -260,7 +260,7 @@ static void fb_update_rect_shadow(gp_backend *self, gp_coord x0, gp_coord y0,
 
 	GP_DEBUG(2, "Flipping buffer");
 
-	size_t size = ((x1 - x0) * fb->pixmap.bpp) / 8;
+	size_t size = ((x1 - x0 + 1) * fb->pixmap.bpp) / 8;
 
 	for (;y0 <= y1; y0++) {
 		void *src = GP_PIXEL_ADDR(&fb->pixmap, x0, y0);
