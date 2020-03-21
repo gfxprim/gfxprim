@@ -1,0 +1,8 @@
+gp_htable_new
+gp_htable_free
+gp_htable_get
+gp_htable_put
+gp_vec_new
+gp_vec_free
+gp_vec_insert
+gp_vec_delete

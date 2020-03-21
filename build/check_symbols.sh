@@ -63,7 +63,7 @@ do_check()
 
 do_check libgfxprim.so syms/core_symbols.txt syms/input_symbols.txt \
                        syms/filters_symbols.txt syms/gfx_symbols.txt \
-                       syms/text_symbols.txt
+                       syms/text_symbols.txt syms/utils_symbols.txt
 
 do_check libgfxprim-backends.so syms/backend_symbols.txt
 
