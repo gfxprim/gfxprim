@@ -18,7 +18,8 @@ APPS=backend_example loaders_example loaders filters_symmetry gfx_koch\
      input_example fileview linetest randomshapetest fonttest\
      loaders_register blittest textaligntest x11_windows\
      debug_handler gaussian_noise version pretty_print timers\
-     zip_container backend_timers_example memory_io data_storage
+     zip_container backend_timers_example memory_io data_storage\
+     vector
 
 ifeq ($(HAVE_LIBSDL),yes)
 APPS+=SDL_glue
