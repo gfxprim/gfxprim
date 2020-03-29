@@ -85,6 +85,17 @@ static inline off_t gp_io_rewind(gp_io *io)
 	return io->seek(io, 0, GP_IO_SEEK_SET);
 }
 
+static inline off_t gp_io_peek(gp_io *io, void *buf, size_t size)
+{
+	off_t cur_off = gp_io_tell(io);
+
+	if (gp_io_read(io, buf, size) != (ssize_t)size)
+		return -1;
+
+	return gp_io_seek(io, cur_off, GP_IO_SEEK_SET);
+}
+
+
 /*
  * Returns I/O stream size.
  *
