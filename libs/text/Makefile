@@ -11,6 +11,6 @@ include $(TOPDIR)/lib.mk
 include $(TOPDIR)/post.mk
 
 ifeq ($(HAVE_FREETYPE),yes)
-gp_free_type.dep: CFLAGS+=`freetype-config --cflags`
-gp_free_type.o: CFLAGS+=`freetype-config --cflags`
+gp_free_type.dep: CFLAGS+=$(FREETYPE_CFLAGS)
+gp_free_type.o: CFLAGS+=$(FREETYPE_CFLAGS)
 endif
