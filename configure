@@ -7,20 +7,41 @@ import sys
 from optparse import OptionParser
 import subprocess
 
+include_search_paths = []
+
+def get_default_include_paths(cfg):
+    out = os.popen("%s -v -x c -E /dev/null 2>&1" % cfg['CC'][0], 'r', 1)
+    add = False
+    paths = []
+    for line in out.readlines():
+        if (line == "#include <...> search starts here:\n"):
+            add = True
+            continue
+
+        if (line == "End of search list.\n"):
+            add = False
+
+        if (add):
+            paths.append(line.rstrip().lstrip())
+
+    return paths
+
 def header_exists(cfg, *filenames):
     for filename in filenames:
-        fpath = cfg['include_path'][0] + '/' + filename
+        sys.stderr.write("Checking for '%s' ... " % filename)
+        for include_path in include_search_paths:
+            fpath =  include_path + '/' + filename
+            try:
+                st = os.stat(fpath)
+                sys.stderr.write("Yes\n")
+                sys.stderr.write(" (%s)\n\n" % fpath)
+                return True
+            except os.error:
+                pass
 
-        sys.stderr.write("Checking for '%s' ... " % fpath)
+        sys.stderr.write("No\n\n")
 
-        try:
-            st = os.stat(fpath)
-            sys.stderr.write("Yes\n")
-            return True
-        except os.error:
-            sys.stderr.write("No\n")
     return False
-
 
 def headers_exists(cfg, *filenames):
     for filename in filenames:
@@ -251,6 +272,21 @@ def basic_checks(cfg):
     if not c_compiler_exists(cfg):
         die_screaming("No C compiler found")
 
+    sys.stderr.write("\nInclude search paths\n");
+    sys.stderr.write("--------------------\n");
+
+    global include_search_paths
+
+
+    if (cfg['include_path'][0]):
+        include_search_paths.append(cfg['include_path'][0])
+    else:
+        include_search_paths = get_default_include_paths(cfg)
+
+    for path in include_search_paths:
+        sys.stderr.write(' "' + path + '"\n');
+    sys.stderr.write("\n");
+
     check_for_swig(cfg)
     check_for_python_config(cfg)
 
@@ -360,7 +396,7 @@ if __name__ ==  '__main__':
            'SWIG'          : ['swig', 'Simplified Wrapper and Interface Generator'],
            'PYTHON_CONFIG' : ['python-config', 'Python config helper'],
            'PYTHON_VER'    : ['', 'Python version (derived from python config)'],
-           'include_path'  : ['/usr/include', 'Path to the system headers'],
+           'include_path'  : ['', 'Path to the system headers'],
            'prefix'        : ['/usr/local/', 'Installation prefix'],
            'bindir'        : ['bin', 'Where to install binaries'],
            'libdir'        : ['', 'Where to install libraries'],
