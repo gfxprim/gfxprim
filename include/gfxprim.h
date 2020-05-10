@@ -12,6 +12,9 @@
 /* library core */
 #include <core/gp_core.h>
 
+/* utils */
+#include <utils/gp_utils.h>
+
 /* public drawing API */
 #include <gfx/gp_gfx.h>
 
