@@ -6,3 +6,7 @@ gp_vec_new
 gp_vec_free
 gp_vec_insert
 gp_vec_delete
+
+gp_fds_clear
+gp_fds_add
+gp_fds_poll
