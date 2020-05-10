@@ -23,8 +23,8 @@ int gp_fds_add(struct gp_fds *self, int fd, short events,
 	GP_DEBUG(2, "Adding fd %i event %p priv %p", fd, event, priv);
 
 	if (!self->fds) {
-		self->fds = gp_vec_new(1, sizeof(struct gp_fd));
-		self->pfds = gp_vec_new(1, sizeof(struct pollfd));
+		self->fds = gp_vec_new(1, sizeof(*self->fds));
+		self->pfds = gp_vec_new(1, sizeof(*self->pfds));
 
 		if (!self->fds || !self->pfds) {
 			gp_vec_free(self->fds);
@@ -91,7 +91,7 @@ int gp_fds_rem(struct gp_fds *self, int fd)
 int gp_fds_poll(struct gp_fds *self, int timeout)
 {
 	int ret;
-	size_t i, len = gp_vec_len(self->fds);
+	size_t i, len = gp_vec_len(self->pfds);
 
 	ret = poll(self->pfds, len, timeout);
 	if (ret <= 0)
@@ -101,8 +101,11 @@ int gp_fds_poll(struct gp_fds *self, int timeout)
 		if (self->pfds[i].revents) {
 			ret = self->fds[i].event(&self->fds[i], &self->pfds[i]);
 			self->pfds[i].revents = 0;
-			if (ret)
-				rem(self, i--);
+			if (ret) {
+				rem(self, i);
+				len--;
+				i--;
+			}
 		}
 	}
 
