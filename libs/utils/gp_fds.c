@@ -65,6 +65,29 @@ static void rem(struct gp_fds *self, size_t pos)
 	gp_vec_remove(self->pfds, 1);
 }
 
+static ssize_t fd_to_pos(struct gp_fds *self, int fd)
+{
+	size_t i;
+
+	for (i = 0; i < gp_vec_len(self->pfds); i++) {
+		if (self->pfds[i].fd == fd)
+			return i;
+	}
+
+	return -1;
+}
+
+int gp_fds_rem(struct gp_fds *self, int fd)
+{
+	ssize_t pos = fd_to_pos(self, fd);
+
+	if (pos < 0)
+		return 1;
+
+	rem(self, pos);
+	return 0;
+}
+
 int gp_fds_poll(struct gp_fds *self, int timeout)
 {
 	int ret;

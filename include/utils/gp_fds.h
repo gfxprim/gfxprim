@@ -47,6 +47,16 @@ int gp_fds_add(struct gp_fds *self, int fd, short events,
                int (*event)(struct gp_fd *self, struct pollfd *pfd), void *priv);
 
 /*
+ * Removes a file descriptor.
+ *
+ * @self The fds struct.
+ * @fd   File descriptor to be removed.
+ *
+ * Returns 0 on success and -1 if fd is not in fds.
+ */
+int gp_fds_rem(struct gp_fds *self, int fd);
+
+/*
  * Poll wrapper around the poll().
  *
  * Polls for file descriptors added by the gp_fds_add() function, calls event()
