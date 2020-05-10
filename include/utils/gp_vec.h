@@ -73,8 +73,25 @@ static inline size_t gp_vec_len(const void *self)
 void *gp_vec_insert(void *self, size_t i, size_t length);
 
 /*
+ * Appends length elements to the end of the vector.
+ */
+static inline void *gp_vec_append(void *self, size_t lenght)
+{
+	return gp_vec_insert(self, gp_vec_len(self), lenght);
+}
+
+/*
  * Deletes a range from the vector.
  */
 void *gp_vec_delete(void *self, size_t i, size_t lenght);
+
+/*
+ * Revoves length elements from the end of the vector.
+ */
+static inline void *gp_vec_remove(void *self, size_t length)
+{
+	return gp_vec_delete(self, gp_vec_len(self) - length, length);
+}
+
 
 #endif	/* GP_VEC_H__ */
