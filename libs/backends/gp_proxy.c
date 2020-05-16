@@ -36,7 +36,7 @@ static int proxy_set_attr(gp_backend *self, enum gp_backend_attrs attr, void *va
 {
 	switch (attr) {
 	case GP_BACKEND_TITLE:
-		gp_proxy_send(self->fd, GP_PROXY_NAME, vals);
+//		gp_proxy_send(self->fd, GP_PROXY_NAME, vals);
 	break;
 	default:
 	break;
@@ -240,9 +240,6 @@ gp_backend *gp_proxy_init(const char *path, const char *title)
 	gp_event_queue_init(&ret->event_queue, 1, 1, 0);
 
 	ret->pixmap = &priv->dummy;
-	ret->pixmap->w = 0;
-	ret->pixmap->h = 0;
-	ret->pixmap->pixels = NULL;
 	ret->pixmap->pixel_type = 0;
 
 	gp_proxy_send(fd, GP_PROXY_NAME, title);
@@ -250,6 +247,8 @@ gp_backend *gp_proxy_init(const char *path, const char *title)
 	/* Wait for the pixel type */
 	while (!priv->dummy.pixel_type)
 		proxy_wait(ret);
+
+	gp_pixmap_init(&priv->dummy, 0, 0, priv->dummy.pixel_type, NULL);
 
 	return ret;
 }
