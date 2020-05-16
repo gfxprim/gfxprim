@@ -100,13 +100,18 @@ int main(int argc, char *argv[])
 	const char *backend_opts = "X11";
 	int opt;
 
-	while ((opt = getopt(argc, argv, "b:")) != -1) {
+	while ((opt = getopt(argc, argv, "b:h")) != -1) {
 		switch (opt) {
 		case 'b':
 			backend_opts = optarg;
 		break;
+		case 'h':
+			printf("Usage: %s [-b backend]\n\n", argv[0]);
+			gp_backend_init(NULL, NULL);
+			return 0;
 		default:
 			fprintf(stderr, "Invalid paramter '%c'\n", opt);
+			return 1;
 		}
 	}
 

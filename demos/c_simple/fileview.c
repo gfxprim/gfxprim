@@ -12,7 +12,6 @@
 
 #include <gfxprim.h>
 
-static gp_pixmap *win;
 static gp_backend *backend;
 
 static gp_pixel white_pixel, gray_pixel, dark_gray_pixel, black_pixel,
@@ -37,6 +36,8 @@ struct file_line *last_line = NULL;
 
 void redraw_screen(void)
 {
+	gp_pixmap *win = backend->pixmap;
+
 	gp_fill(win, gray_pixel);
 
 	gp_text_style style = GP_DEFAULT_TEXT_STYLE;
@@ -86,9 +87,10 @@ void redraw_screen(void)
 
 static void warp_up(int lines)
 {
-	while (lines-- > 0)
+	while (lines-- > 0) {
 		if (first_line->prev != NULL)
 			first_line = first_line->prev;
+	}
 
 	redraw_screen();
 	gp_backend_flip(backend);
@@ -96,9 +98,10 @@ static void warp_up(int lines)
 
 static void warp_down(int lines)
 {
-	while (lines-- > 0)
+	while (lines-- > 0) {
 		if (first_line->next != NULL)
 			first_line = first_line->next;
+	}
 
 	redraw_screen();
 	gp_backend_flip(backend);
@@ -229,16 +232,34 @@ static int read_file_head(const char *filename)
 int main(int argc, char *argv[])
 {
 	const char *backend_opts = "X11";
+	const char *font_face = NULL;
+	int opt;
 
-	if (argc == 1) {
-		fprintf(stderr, "No file specified\n");
-		return 1;
+	while ((opt = getopt(argc, argv, "b:f:h")) != -1) {
+		switch (opt) {
+		case 'b':
+			backend_opts = optarg;
+		break;
+		case 'f':
+			font_face = optarg;
+		break;
+		case 'h':
+			printf("Usage: %s [-b backend] [-f font_face] filename\n\n", argv[0]);
+			gp_backend_init(NULL, NULL);
+			return 0;
+		default:
+			fprintf(stderr, "Invalid paramter '%c'\n", opt);
+			return 1;
+		}
 	}
 
-	if (argc > 2)
-		font = gp_font_face_load(argv[2], 0, 16);
+	if (font_face)
+		font = gp_font_face_load(font_face, 0, 16);
 
-	if (!read_file_head(argv[1]))
+	if (optind >= argc)
+		fprintf(stderr, "Expected filename\n");
+
+	if (!read_file_head(argv[optind]))
 		return 1;
 
 	backend = gp_backend_init(backend_opts, "File View");
@@ -249,7 +270,7 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 
-	win = backend->pixmap;
+	gp_pixmap *win = backend->pixmap;
 
 	white_pixel     = gp_rgb_to_pixmap_pixel(0xff, 0xff, 0xff, win);
 	gray_pixel      = gp_rgb_to_pixmap_pixel(0xbe, 0xbe, 0xbe, win);

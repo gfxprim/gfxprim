@@ -136,12 +136,27 @@ void print_instructions(void)
 	printf("    P ............... pause\n");
 }
 
-int main(void)
+int main(int argc, char *argv[])
 {
 	const char *sprite = "ball.ppm";
 	const char *backend_opts = "X11";
+	int opt;
 
 	print_instructions();
+
+	while ((opt = getopt(argc, argv, "b:h")) != -1) {
+		switch (opt) {
+		case 'b':
+			backend_opts = optarg;
+		break;
+		case 'h':
+			gp_backend_init(NULL, NULL);
+			return 0;
+		default:
+			fprintf(stderr, "Invalid paramter '%c'\n", opt);
+			return 1;
+		}
+	}
 
 	bitmap_raw = gp_load_image(sprite, NULL);
 

@@ -23,13 +23,13 @@
 #define sgn(x) ((x)>0 ? 1 : -1)
 
 static gp_backend *backend;
-static gp_pixmap *pixmap;
 
 static int iter, l, way = 1, draw_edge = 1;
 static gp_pixel black, blue, gray, red;
 
 static void sierpinsky(double x1, double y1, double x4, double y4, int iter)
 {
+	gp_pixmap *pixmap = backend->pixmap;
 	double x2, y2, x3, y3, x5, y5;
 	gp_pixel pixel;
 	pixel = gp_rgb_to_pixel(0, 0, 255-16*iter, pixmap->pixel_type);
@@ -63,6 +63,7 @@ static void sierpinsky(double x1, double y1, double x4, double y4, int iter)
 
 static void draw(int x, int y, int l, int iter)
 {
+	gp_pixmap *pixmap = backend->pixmap;
 	double x1, y1, x2, y2, x3, y3;
 	int w = pixmap->w;
 	int h = pixmap->h;
@@ -93,6 +94,8 @@ static int paused = 0;
 
 void redraw(void)
 {
+	gp_pixmap *pixmap = backend->pixmap;
+
 	if (paused)
 		return;
 
@@ -107,9 +110,25 @@ void redraw(void)
 	draw(pixmap->w/2, pixmap->h/2, l, iter);
 }
 
-int main(void)
+int main(int argc, char *argv[])
 {
 	const char *backend_opts = "X11";
+	int opt;
+
+	while ((opt = getopt(argc, argv, "b:h")) != -1) {
+		switch (opt) {
+		case 'b':
+			backend_opts = optarg;
+		break;
+		case 'h':
+			printf("Usage: %s [-b backend]\n\n", argv[0]);
+			gp_backend_init(NULL, NULL);
+			return 0;
+		default:
+			fprintf(stderr, "Invalid paramter '%c'\n", opt);
+			return 1;
+		}
+	}
 
 	backend = gp_backend_init(backend_opts, "Koch");
 
@@ -119,7 +138,7 @@ int main(void)
 		return 1;
 	}
 
-	pixmap = backend->pixmap;
+	gp_pixmap *pixmap = backend->pixmap;
 
 	black = gp_rgb_to_pixmap_pixel(0x00, 0x00, 0x00, pixmap);
 	blue  = gp_rgb_to_pixmap_pixel(0x00, 0x00, 0xff, pixmap);

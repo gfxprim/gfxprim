@@ -12,13 +12,13 @@
 
 #include "gfxprim.h"
 
-static gp_pixmap *win;
 static gp_backend *backend;
 
 static gp_pixel red, green, white, black;
 
 static void draw_event(gp_event *ev)
 {
+	gp_pixmap *win = backend->pixmap;
 	static gp_size size = 0;
 
 	if (ev->type != GP_EV_KEY)
@@ -36,6 +36,8 @@ static void draw_event(gp_event *ev)
 
 static void event_loop(void)
 {
+	gp_pixmap *win = backend->pixmap;
+
 	for (;;) {
 		gp_backend_wait(backend);
 
@@ -92,6 +94,7 @@ static void event_loop(void)
 				switch (ev.code) {
 				case GP_EV_SYS_RESIZE:
 					gp_backend_resize_ack(backend);
+					gp_fill(win, black);
 				break;
 				case GP_EV_SYS_QUIT:
 					gp_backend_exit(backend);
@@ -115,9 +118,8 @@ int main(int argc, char *argv[])
 			backend_opts = optarg;
 		break;
 		case 'h':
-			gp_backend_init("help", NULL);
+			gp_backend_init(NULL, NULL);
 			return 0;
-		break;
 		default:
 			fprintf(stderr, "Invalid paramter '%c'\n", opt);
 			return 1;
@@ -132,7 +134,7 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 
-	win = backend->pixmap;
+	gp_pixmap *win = backend->pixmap;
 
 	red   = gp_rgb_to_pixmap_pixel(0xff, 0x00, 0x00, win);
 	green = gp_rgb_to_pixmap_pixel(0x00, 0xff, 0x00, win);

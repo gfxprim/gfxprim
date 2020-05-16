@@ -155,11 +155,31 @@ void print_instructions(void)
 int main(int argc, char *argv[])
 {
 	const char *backend_opts = "X11";
-
-	if (argc > 1)
-		font = gp_font_face_load(argv[1], 0, 20);
+	const char *font_face = NULL;
+	int opt;
 
 	print_instructions();
+
+	while ((opt = getopt(argc, argv, "b:f:h")) != -1) {
+		switch (opt) {
+		case 'b':
+			backend_opts = optarg;
+		break;
+		case 'f':
+			font_face = optarg;
+		break;
+		case 'h':
+			printf("Usage: %s [-b backend] [-f font_face] filename\n\n", argv[0]);
+			gp_backend_init(NULL, NULL);
+			return 0;
+		default:
+			fprintf(stderr, "Invalid paramter '%c'\n", opt);
+			return 1;
+		}
+	}
+
+	if (font_face)
+		font = gp_font_face_load(font_face, 0, 20);
 
 	win = gp_backend_init(backend_opts, "Font Align Test");
 

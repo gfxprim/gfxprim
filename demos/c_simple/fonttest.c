@@ -268,13 +268,32 @@ void print_instructions(void)
 int main(int argc, char *argv[])
 {
 	const char *backend_opts = "X11";
+	const char *font_face = NULL;
+	int opt;
 
 	print_instructions();
 
-	if (argc > 1) {
-		font_path = argv[1];
-		fprintf(stderr, "\nLoading font '%s'\n", argv[1]);
-		font = gp_font_face_load(argv[1], 0, font_h);
+	while ((opt = getopt(argc, argv, "b:f:h")) != -1) {
+		switch (opt) {
+		case 'b':
+			backend_opts = optarg;
+		break;
+		case 'f':
+			font_face = optarg;
+		break;
+		case 'h':
+			printf("\nUsage: %s [-b backend] [-f font_face]\n\n", argv[0]);
+			gp_backend_init(NULL, NULL);
+			return 0;
+		default:
+			fprintf(stderr, "Invalid paramter '%c'\n", opt);
+			return 1;
+		}
+	}
+
+	if (font_face) {
+		fprintf(stderr, "\nLoading font '%s'\n", font_face);
+		font = gp_font_face_load(font_face, 0, font_h);
 	}
 
 	win = gp_backend_init(backend_opts, "Font Test");
