@@ -26,6 +26,7 @@
 #include "backends/gp_xcb.h"
 #include <backends/gp_aalib.h>
 #include <backends/gp_backend_virtual.h>
+#include <backends/gp_proxy.h>
 
 /*
  * Simplified backend initalization.

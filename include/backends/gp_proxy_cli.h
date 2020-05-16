@@ -1,0 +1,80 @@
+//SPDX-License-Identifier: LGPL-2.0-or-later
+/*
+
+   Copyright (c) 2019-2020 Cyril Hrubis <metan@ucw.cz>
+
+ */
+
+#ifndef GP_PROXY_CLI_H__
+#define GP_PROXY_CLI_H__
+
+#include <utils/gp_fds.h>
+#include <backends/gp_proxy_proto.h>
+
+struct gp_event;
+
+struct gp_proxy_cli {
+	int fd;
+
+	char *name;
+
+	/* Double linked list of clients */
+	struct gp_proxy_cli *next;
+	struct gp_proxy_cli *prev;
+
+	/* Connection buffer */
+	struct gp_proxy_buf buf;
+};
+
+static inline void gp_proxy_cli_show(struct gp_proxy_cli *self)
+{
+        if (!self)
+                return;
+
+        gp_proxy_send(self->fd, GP_PROXY_SHOW, NULL);
+}
+
+static inline void gp_proxy_cli_hide(struct gp_proxy_cli *self)
+{
+        if (!self)
+                return;
+
+        gp_proxy_send(self->fd, GP_PROXY_HIDE, NULL);
+}
+
+static inline void gp_proxy_cli_event(struct gp_proxy_cli *self, gp_event *ev)
+{
+        if (gp_proxy_send(self->fd, GP_PROXY_EVENT, ev))
+                GP_WARN("Dropping event");
+}
+
+struct gp_proxy_cli_ops {
+	void (*update)(struct gp_proxy_cli *self, gp_coord x, gp_coord y, gp_size w, gp_size h);
+};
+
+/*
+ * Has to be called when there are data ready at cli->fd.
+ *
+ * @self Pointer to a client.
+ * @return Zero on success, non-zero otherwise.
+ */
+int gp_proxy_cli_read(struct gp_proxy_cli *self, struct gp_proxy_cli_ops *ops);
+
+/*
+ * Adds a new client to the clients list pointed by root pointer.
+ *
+ * @root Root of double linked list of connected clients.
+ * @cli_fd Client file descriptor.
+ * @return A pointer to a newly allocated client.
+ */
+struct gp_proxy_cli *gp_proxy_cli_add(struct gp_proxy_cli **root, int cli_fd);
+
+/*
+ * Removes client from a list of clients.
+ *
+ * @root Root of double linked list of connected clients.
+ * @self A client to be removed.
+ */
+void gp_proxy_cli_rem(struct gp_proxy_cli **root, struct gp_proxy_cli *self);
+
+#endif /* GP_PROXY_CLI_H__ */

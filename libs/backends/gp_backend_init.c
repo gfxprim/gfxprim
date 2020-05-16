@@ -264,6 +264,11 @@ static gp_backend *xcb_init(char *params, const char *caption)
 	return gp_xcb_init(NULL, 0, 0, w, h, caption);
 }
 
+static gp_backend *proxy_init(char *params, const char *caption)
+{
+	return gp_proxy_init(params, caption);
+}
+
 struct backend_init {
 	const char *name;
 	gp_backend *(*init)(char *params, const char *caption);
@@ -274,6 +279,11 @@ struct backend_init {
 static gp_backend *do_help(char *params, const char *caption);
 
 static struct backend_init backends[] = {
+	{.name = "proxy",
+	 .init = proxy_init,
+	 .usage = "path",
+	 .help = {"path - Path to an UNIX socket"}
+	},
 	{.name  = "XCB",
 	 .init = xcb_init,
 	 .usage = "",
