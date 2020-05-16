@@ -125,6 +125,9 @@ static int backend_event(struct gp_fd *self, struct pollfd *pfd)
 			    !gp_event_get_key(&ev, GP_KEY_RIGHT_CTRL))
 				goto to_cli;
 
+			if (ev.code != GP_EV_KEY_DOWN)
+				goto to_cli;
+
 			switch (ev.val.val) {
 			case GP_KEY_ESC:
 				do_exit();
