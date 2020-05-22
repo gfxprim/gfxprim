@@ -9,11 +9,13 @@
 # Uncomment this to turn on verbose mode.
 #export DH_VERBOSE=1
 
+DEB_HOST_MULTIARCH ?= $(shell dpkg-architecture -qDEB_HOST_MULTIARCH)
+
 %:
 	dh $@
 
 override_dh_auto_configure:
-	./configure --prefix=/usr
+	./configure --prefix=/usr --libdir=lib/$(DEB_HOST_MULTIARCH)
 
 override_dh_auto_build-indep:
 	$(MAKE) doc

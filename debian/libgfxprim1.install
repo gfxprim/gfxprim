@@ -1,2 +1,1 @@
-usr/lib/lib*.so.*
-usr/bin/gfxprim-config
+usr/lib/*/lib*.so.*
