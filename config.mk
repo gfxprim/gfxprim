@@ -1,4 +1,4 @@
-include $(TOPDIR)/config.gen.mk
+-include $(TOPDIR)/config.gen.mk
 
 CFLAGS+=-fPIC -pthread
 CFLAGS+=-I$(TOPDIR)/include/

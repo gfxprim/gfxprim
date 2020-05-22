@@ -20,10 +20,10 @@ GENFILES=config.h config.gen.mk gfxprim-config
 
 distclean:
 ifdef VERBOSE
-	rm $(GENFILES)
+	rm -f $(GENFILES)
 else
 	@echo "RM   $(GENFILES)"
-	@rm $(GENFILES)
+	@rm -f $(GENFILES)
 endif
 
 HEADER_LOC=/usr/include/
