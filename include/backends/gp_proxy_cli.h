@@ -50,6 +50,10 @@ static inline void gp_proxy_cli_event(struct gp_proxy_cli *self, gp_event *ev)
 
 struct gp_proxy_cli_ops {
 	void (*update)(struct gp_proxy_cli *self, gp_coord x, gp_coord y, gp_size w, gp_size h);
+	void (*on_unmap)(struct gp_proxy_cli *self);
+	void (*on_map)(struct gp_proxy_cli *self);
+	void (*on_hide)(struct gp_proxy_cli *self);
+	void (*on_show)(struct gp_proxy_cli *self);
 };
 
 /*

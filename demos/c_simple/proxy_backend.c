@@ -52,7 +52,7 @@ static void redraw(void)
 	gp_backend_flip(backend);
 }
 
-void shm_update(struct gp_proxy_cli *self, gp_coord x, gp_coord y, gp_size w, gp_size h)
+static void shm_update(struct gp_proxy_cli *self, gp_coord x, gp_coord y, gp_size w, gp_size h)
 {
 	gp_size screen_h = backend->pixmap->h;
 
@@ -64,21 +64,40 @@ void shm_update(struct gp_proxy_cli *self, gp_coord x, gp_coord y, gp_size w, gp
 		h = screen_h;
 	}
 
+	printf("%i %i %u %u\n", x, y, w, h);
+
 	//TODO: Check SIZE!!!
 	gp_blit_xywh_clipped(&shm->pixmap, x, y, w, h, backend->pixmap, x, y);
 
 	gp_backend_update_rect_xywh(backend, x, y, w, h);
 }
 
-struct gp_proxy_cli_ops cli_ops = {
-	.update = shm_update,
-};
-
 static void do_exit(void)
 {
 	gp_backend_exit(backend);
 	exit(0);
 }
+
+/*
+ * App resize handler, we have to wait for the client to unmap the memory
+ * before we resize it, hence we have to wait for the application to ack the resize.
+ */
+static void on_unmap(struct gp_proxy_cli *self)
+{
+	if (self == cli_shown) {
+		if (gp_proxy_shm_resize(shm, backend->pixmap->w, backend->pixmap->h) < 0)
+			do_exit();
+
+		gp_proxy_send(cli_shown->fd, GP_PROXY_MAP, &shm->path);
+		gp_proxy_send(cli_shown->fd, GP_PROXY_PIXMAP, &shm->pixmap);
+		gp_proxy_send(cli_shown->fd, GP_PROXY_SHOW, NULL);
+	}
+}
+
+struct gp_proxy_cli_ops cli_ops = {
+	.update = shm_update,
+	.on_unmap = on_unmap,
+};
 
 static void hide_client(void)
 {
@@ -109,6 +128,17 @@ static void show_client(int i)
 	gp_proxy_send(cli->fd, GP_PROXY_SHOW, NULL);
 
 	cli_shown = cli;
+}
+
+static void resize_shown_client(void)
+{
+	if (!cli_shown) {
+		if (gp_proxy_shm_resize(shm, backend->pixmap->w, backend->pixmap->h) < 0)
+			do_exit();
+		return;
+	}
+
+	gp_proxy_send(cli_shown->fd, GP_PROXY_UNMAP, NULL);
 }
 
 static int backend_event(struct gp_fd *self, struct pollfd *pfd)
@@ -150,9 +180,16 @@ static int backend_event(struct gp_fd *self, struct pollfd *pfd)
 
 		break;
 		case GP_EV_SYS:
-			switch (ev.type) {
+			switch (ev.code) {
 			case GP_EV_SYS_QUIT:
 				do_exit();
+			break;
+			case GP_EV_SYS_RESIZE:
+				gp_backend_resize_ack(b);
+				redraw();
+				gp_backend_flip(b);
+				resize_shown_client();
+				return 0;
 			break;
 			}
 		break;

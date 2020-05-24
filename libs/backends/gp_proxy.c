@@ -77,35 +77,8 @@ static void map_buffer(gp_backend *self, union gp_proxy_msg *msg)
 
 	priv->map = p;
 	priv->map_size = msg->map.size;
-}
 
-static void unmap_buffer(gp_backend *self)
-{
-	struct proxy_priv *priv = GP_BACKEND_PRIV(self);
-
-	munmap(priv->map, priv->map_size);
-
-	priv->map = NULL;
-	priv->map_size = 0;
-}
-
-static void init_pixmap(gp_backend *self, union gp_proxy_msg *msg)
-{
-	struct proxy_priv *priv = GP_BACKEND_PRIV(self);
-
-	if (!priv->map) {
-		GP_WARN("Buffer not mapped!");
-		return;
-	}
-
-	priv->shm_pixmap = msg->pix.pix;
-	priv->shm_pixmap.pixels = priv->map;
-
-	GP_DEBUG(1, "Pixmap %ux%u initialized", msg->pix.pix.w, msg->pix.pix.h);
-
-	//TODO: check that the buffer is large enough!
-
-	gp_event_queue_set_screen_size(&self->event_queue, msg->pix.pix.w, msg->pix.pix.h);
+	gp_proxy_send(self->fd, GP_PROXY_MAP, NULL);
 }
 
 static void visible(gp_backend *self)
@@ -128,6 +101,40 @@ static void hidden(gp_backend *self)
 	priv->visible = 0;
 
 	self->pixmap = &priv->dummy;
+}
+
+
+static void unmap_buffer(gp_backend *self)
+{
+	struct proxy_priv *priv = GP_BACKEND_PRIV(self);
+
+	munmap(priv->map, priv->map_size);
+
+	priv->map = NULL;
+	priv->map_size = 0;
+
+//	hidden(self);
+
+	gp_proxy_send(self->fd, GP_PROXY_UNMAP, NULL);
+}
+
+static void init_pixmap(gp_backend *self, union gp_proxy_msg *msg)
+{
+	struct proxy_priv *priv = GP_BACKEND_PRIV(self);
+
+	if (!priv->map) {
+		GP_WARN("Buffer not mapped!");
+		return;
+	}
+
+	priv->shm_pixmap = msg->pix.pix;
+	priv->shm_pixmap.pixels = priv->map;
+
+	GP_DEBUG(1, "Pixmap %ux%u initialized", msg->pix.pix.w, msg->pix.pix.h);
+
+	//TODO: check that the buffer is large enough!
+
+	gp_event_queue_set_screen_size(&self->event_queue, msg->pix.pix.w, msg->pix.pix.h);
 }
 
 static void proxy_poll(gp_backend *self)

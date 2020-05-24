@@ -5,6 +5,7 @@
 
  */
 
+#define _GNU_SOURCE
 #include <string.h>
 #include <sys/mman.h>
 #include <sys/types.h>
@@ -13,6 +14,20 @@
 #include <errno.h>
 #include <core/gp_debug.h>
 #include <backends/gp_proxy_shm.h>
+
+static size_t round_to_page_size(size_t size)
+{
+	static size_t page_mask;
+
+	if (!page_mask)
+		page_mask = getpagesize() - 1;
+
+	size_t ret = (size + page_mask) & (~page_mask);
+
+	GP_DEBUG(2, "Rounding %zu to %zu", size, ret);
+
+	return ret;
+}
 
 struct gp_proxy_shm *gp_proxy_shm_init(const char *path, gp_size w, gp_size h, gp_pixel_type type)
 {
@@ -34,7 +49,7 @@ struct gp_proxy_shm *gp_proxy_shm_init(const char *path, gp_size w, gp_size h, g
 
 	gp_pixmap_init(&ret->pixmap, w, h, type, NULL);
 
-	size_t size = ret->pixmap.bytes_per_row * h;
+	size_t size = round_to_page_size(ret->pixmap.bytes_per_row * h);
 
 	unlink(path);
 
@@ -45,14 +60,13 @@ struct gp_proxy_shm *gp_proxy_shm_init(const char *path, gp_size w, gp_size h, g
 	}
 
 	if (ftruncate(fd, size)) {
-		GP_WARN("Truncate failed: %s", strerror(errno));
+		GP_WARN("ftruncate() failed: %s", strerror(errno));
 		goto err1;
 	}
 
 	void *p = mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
-
 	if (p == MAP_FAILED) {
-		GP_WARN("Map failed: %s", strerror(errno));
+		GP_WARN("mmap() failed: %s", strerror(errno));
 		goto err1;
 	}
 
@@ -73,6 +87,36 @@ err0:
 
 int gp_proxy_shm_resize(struct gp_proxy_shm *self, gp_size w, gp_size h)
 {
+	gp_pixmap new;
+	gp_pixel_type ptype = self->pixmap.pixel_type;
+
+	gp_pixmap_init(&new, w, h, ptype, NULL);
+
+	size_t new_size = round_to_page_size(new.bytes_per_row * h);
+
+	if (self->size == new_size) {
+		gp_pixmap_init(&self->pixmap, w, h, ptype, self->pixmap.pixels);
+		return 0;
+	}
+
+	if (ftruncate(self->fd, new_size)) {
+		GP_WARN("ftruncate() failed: %s", strerror(errno));
+		return -1;
+	}
+
+	void *p = mremap(self->pixmap.pixels, self->size, new_size, MREMAP_MAYMOVE, NULL);
+
+	if (!p) {
+		GP_WARN("mremap() failed: %s", strerror(errno));
+		return -1;
+	}
+
+	GP_DEBUG(1, "remapped buffer to %zu bytes", new_size);
+
+	self->size = new_size;
+	self->path.size = new_size;
+	gp_pixmap_init(&self->pixmap, w, h, ptype, p);
+	return 1;
 }
 
 void gp_proxy_shm_exit(struct gp_proxy_shm *self)
@@ -82,5 +126,3 @@ void gp_proxy_shm_exit(struct gp_proxy_shm *self)
 	unlink(self->path.path);
 	free(self);
 }
-
-

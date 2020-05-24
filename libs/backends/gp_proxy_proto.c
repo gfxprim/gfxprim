@@ -76,6 +76,8 @@ static const char *msg_type_name(enum gp_proxy_msg_types type)
 	switch (type) {
 	case GP_PROXY_NAME:
 		return "GP_PROXY_NAME";
+	case GP_PROXY_EXIT:
+		return "GP_PROXY_EXIT";
 	case GP_PROXY_PIXEL_TYPE:
 		return "GP_PROXY_PIXEL_TYPE";
 	case GP_PROXY_EVENT:

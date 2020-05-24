@@ -72,6 +72,22 @@ static int parse(struct gp_proxy_cli *self, struct gp_proxy_cli_ops *ops)
 			ops->update(self, msg->rect.rect.x, msg->rect.rect.y,
 			                  msg->rect.rect.w, msg->rect.rect.h);
 		break;
+		case GP_PROXY_MAP:
+			if (ops->on_map)
+				ops->on_map(self);
+		break;
+		case GP_PROXY_UNMAP:
+			if (ops->on_unmap)
+				ops->on_unmap(self);
+		break;
+		case GP_PROXY_SHOW:
+			if (ops->on_show)
+				ops->on_show(self);
+		break;
+		case GP_PROXY_HIDE:
+			if (ops->on_hide)
+				ops->on_hide(self);
+		break;
 		default:
 			GP_DEBUG(1, "Client (%p) fd (%i) invalid request %i",
 			         self, self->fd, msg->type);

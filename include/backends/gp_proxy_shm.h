@@ -28,6 +28,10 @@ struct gp_proxy_shm *gp_proxy_shm_init(const char *path, gp_size w, gp_size h, g
 /*
  * Resizes SHM image, all clients has to avoid working with the buffer once
  * this call is called and have to remap the shm before they attempt to use it again.
+ *
+ * @returns 0 if shm buffer haven't needed to be resized, only pixmap size has been changed
+ *          1 if buffer was resized
+ *          -1 on failure
  */
 int gp_proxy_shm_resize(struct gp_proxy_shm *self, gp_size w, gp_size h);
 
