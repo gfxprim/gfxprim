@@ -366,18 +366,11 @@ def write_gfxprim_config(cfg, libs):
     f.write('\t--list-modules) echo "%s"; exit 0;;\n' % ' '.join(modules))
     f.write('\t--cflags) echo -n "-I%s/include/gfxprim/%s";;\n' %
             (cfg['prefix'][0], libs.get_cflags('core')))
-    f.write('\t--libs) echo -n "-lgfxprim -lrt -lm %s ";;\n' % libs.get_linker_flags('core'))
+    f.write('\t--libs) echo -n "-pthread -lgfxprim ";;\n')
 
     # ldflags for specific modules
     for i in modules:
-        ldflags = ''
-        if i == 'backends':
-            ldflags += '-lgfxprim-backends '
-        if i == 'grabbers':
-            ldflags += '-lgfxprim-grabbers '
-        if i == 'loaders':
-            ldflags += '-lgfxprim-loaders '
-        ldflags += libs.get_linker_flags(i)
+        ldflags = '-lgfxprim-' + i
         f.write('\t--libs-%s) echo -n "%s ";;\n' % (i, ldflags))
 
     f.write('\t*) echo "Invalid option \'$1\'"; echo $USAGE; exit 1;;\n')

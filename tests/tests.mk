@@ -2,7 +2,7 @@
 
 LDFLAGS+=-L../framework/ -L$(TOPDIR)/build/
 LDLIBS+=$(shell $(TOPDIR)/gfxprim-config --libs --libs-loaders)
-LDLIBS+=-ltst_preload -ldl -ltst -lrt
+LDLIBS+=-ltst_preload -lm -ldl -ltst -lrt
 CFLAGS+=-I../framework/
 
 $(APPS): ../framework/libtst.a
