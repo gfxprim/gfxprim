@@ -27,6 +27,7 @@
 static const gp_loader *loaders[MAX_LOADERS] = {
 	&gp_jpg,
 	&gp_png,
+	&gp_webp,
 	&gp_tiff,
 	&gp_gif,
 	&gp_bmp,
