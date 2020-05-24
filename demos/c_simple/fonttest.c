@@ -245,6 +245,10 @@ void event_loop(void)
 		break;
 		case GP_EV_SYS:
 			switch(ev.code) {
+			case GP_EV_SYS_QUIT:
+				gp_backend_exit(win);
+				exit(0);
+			break;
 			case GP_EV_SYS_RESIZE:
 				gp_backend_resize_ack(win);
 				redraw_screen();
