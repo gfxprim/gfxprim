@@ -111,6 +111,8 @@ int gp_read_webp_ex(gp_io *io, gp_pixmap **img, gp_storage *storage,
 		if (status != VP8_STATUS_OK && status != VP8_STATUS_SUSPENDED)
 		    break;
 
+		int sy = ly;
+
 		WebPIDecGetRGB(idec, &ly, NULL, NULL, NULL);
 		if (gp_progress_cb_report(callback, ly, out->h, out->w)) {
 			GP_DEBUG(1, "Operation aborted");
@@ -118,6 +120,20 @@ int gp_read_webp_ex(gp_io *io, gp_pixmap **img, gp_storage *storage,
 			goto err2;
 		}
 
+		//TODO ugly!
+		if (features.has_alpha) {
+			gp_size x, y;
+			for (y = sy; y < (gp_size)ly; y++) {
+				uint8_t *buf = GP_PIXEL_ADDR(out, 0, y);
+
+				for (x = 0; x < out->w; x++) {
+					gp_size xo = 4 * x;
+					GP_SWAP(buf[xo + 0], buf[xo + 3]);
+					GP_SWAP(buf[xo + 1], buf[xo + 3]);
+					GP_SWAP(buf[xo + 2], buf[xo + 3]);
+				}
+			}
+		}
 	} while ((ret = gp_io_read(io, buf, sizeof(buf))));
 
 	WebPIDelete(idec);
