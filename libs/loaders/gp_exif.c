@@ -368,19 +368,16 @@ static int load_IFD(gp_io *io, gp_storage *storage, gp_data_node *node,
 
 int gp_read_exif(gp_io *io, gp_storage *storage)
 {
-	static int swap = 0;
 	char b1, b2;
 	uint32_t IFD_offset;
 
 	uint16_t exif_header[] = {
 		'E', 'x', 'i', 'f', 0, 0, /* EXIF signature */
 		GP_IO_BYTE, GP_IO_BYTE,   /* Endianity markers II or MM */
-		0x2a, 0x00,               /* TIFF tag */
-		GP_IO_L4,                 /* IFD offset */
 		GP_IO_END,
 	};
 
-	if (gp_io_readf(io, exif_header, &b1, &b2, &IFD_offset) != 11) {
+	if (gp_io_readf(io, exif_header, &b1, &b2, &IFD_offset) != 8) {
 		GP_DEBUG(1, "Failed to read Exif header");
 		return 1;
 	}
@@ -391,12 +388,25 @@ int gp_read_exif(gp_io *io, gp_storage *storage)
 		return 1;
 	}
 
-	swap = (b1 == 'M');
+	GP_DEBUG(2, "TIFF header endianity is '%c%c'", b1, b1);
 
-	GP_DEBUG(2, "TIFF aligment is '%c%c' swap = %i", b1, b1, swap);
+	uint16_t tiff_header_LE[] = {
+		0x2a, 0x00,               /* TIFF tag */
+		GP_IO_L4,                 /* IFD offset */
+		GP_IO_END,
+	};
 
-	if (swap) {
-		//SWAP IFD_offset
+	uint16_t tiff_header_BE[] = {
+		0x00, 0x2a,               /* TIFF tag */
+		GP_IO_B4,                 /* IFD offset */
+		GP_IO_END,
+	};
+
+	uint16_t *tiff_header = b1 == 'I' ? tiff_header_LE : tiff_header_BE;
+
+	if (gp_io_readf(io, tiff_header,  &IFD_offset) != 3) {
+		GP_DEBUG(1, "Failed to read TIFF header");
+		return 1;
 	}
 
 	GP_DEBUG(2, "IFD offset is 0x%08x", IFD_offset);
