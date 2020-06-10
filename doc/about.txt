@@ -94,6 +94,10 @@ images into various standard formats (PNG, JPEG, GIF, TIFF, BMP, PNM, etc...).
   [green]#Most of the Palette, RGB and Grayscale works (no tiles yet)# |
   [green]#RGB888 and Grayscale#
 
+| WEBP ||
+  [green]*Yes* |
+  [black]*No*
+
 | PSP |
   Paint Shop Pro Image |
   [green]#Composite image only for newer formats than 3.0# |

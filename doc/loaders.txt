@@ -3,9 +3,9 @@ Pixmap loaders
 This part of GFXprim library implements API to load and save images for common
 image file formats.
 
-Currently we support <<JPEG>>, <<PNG>>, <<BMP>>, <<TIFF>> and <<PNM>> images for
-loading and saving and <<GIF>>, <<JPEG2000>>, <<PCX>>, 'CBZ', <<PSD>> and
-<<PSP>> for loading.
+Currently we support <<JPEG>>, <<PNG>>, <<BMP>>, <<TIFF>> and <<PNM>> images
+for loading and saving and <<GIF>>, <<WEBP>>, <<JPEG2000>>, <<PCX>>, <<CBZ>>,
+<<PSD>> and <<PSP>> for loading.
 
 Have a look at the link:about.html#Loaders[supported formats] for more
 detailed information.

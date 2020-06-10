@@ -14,6 +14,7 @@ Dependencies
 * link:http://www.libpng.org/[libpng]
 * link:http://sourceforge.net/projects/giflib/[giflib]
 * link:http://www.remotesensing.org/libtiff/[libtiff]
+* link:https://developers.google.com/speed/webp/[libwebp]
 * link:http://code.google.com/p/openjpeg/[openjpeg] >= 2.0.0
 * link:http://www.zlib.net/[zlib] (usually installed as libpng dependency)
 
@@ -123,7 +124,7 @@ apt-get install gcc make
 
 .Install image devel libraries
 -------------------------------------------------------------------------------
-apt-get install libjpeg-dev libpng-dev libgif-dev libtiff-dev
+apt-get install libjpeg-dev libpng-dev libgif-dev libtiff-dev libwebp-dev
 -------------------------------------------------------------------------------
 
 .Install FreeType devel library
@@ -144,7 +145,8 @@ apt-get install swig python-dev
 .All in the one for the lazy
 -------------------------------------------------------------------------------
 apt-get install gcc make libjpeg-dev libpng-dev libgif-dev libtiff-dev
-                libfreetype6-dev libx11-dev libxext-dev swig python-dev
+                libwebp-dev libfreetype6-dev libx11-dev libxext-dev
+                swig python-dev
 -------------------------------------------------------------------------------
 
 Packages
