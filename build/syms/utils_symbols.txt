@@ -10,3 +10,4 @@ gp_vec_delete
 gp_fds_clear
 gp_fds_add
 gp_fds_poll
+gp_fds_rem

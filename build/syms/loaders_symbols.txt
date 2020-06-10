@@ -98,3 +98,6 @@ gp_container_seek
 gp_io_size
 gp_storage_add_double
 gp_io_fill
+gp_webp
+gp_match_webp
+gp_read_webp_ex
