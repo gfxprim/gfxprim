@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-2.1-or-later
 /*
- * Copyright (C) 2009-2013 Cyril Hrubis <metan@ucw.cz>
+ * Copyright (C) 2009-2020 Cyril Hrubis <metan@ucw.cz>
  */
 
 #include <sys/types.h>
@@ -8,9 +8,11 @@
 #include <fcntl.h>
 #include <errno.h>
 #include <string.h>
+#include <dirent.h>
 #include <linux/input.h>
 
 #include <core/gp_debug.h>
+#include <core/gp_common.h>
 
 #include <input/gp_event_queue.h>
 #include <input/gp_input_driver_linux.h>
@@ -83,19 +85,50 @@ static void try_load_callibration(gp_input_driver_linux *self)
 	}
 }
 
-gp_input_driver_linux *gp_input_driver_linux_open(const char *path)
+static int input_by_name(const char *dev_name)
 {
-	int fd;
-	gp_input_driver_linux *ret;
+	DIR *input = opendir("/dev/input");
+	struct dirent *ent;
+	char name[128];
 
-	GP_DEBUG(2, "Opening '%s'", path);
-
-	fd = open(path, O_RDONLY | O_NONBLOCK);
-
-	if (fd < 0) {
-		GP_DEBUG(1, "Failed to open '%s': %s", path, strerror(errno));
-		return NULL;
+	if (!input) {
+		GP_WARN("Failed to open '/dev/input': %s", strerror(errno));
+		return -1;
 	}
+
+	while ((ent = readdir(input))) {
+		if (!strcmp(ent->d_name, ".") || !strcmp(ent->d_name, ".."))
+			continue;
+
+		int fd = open(ent->d_name, O_RDONLY | O_NONBLOCK);
+
+		if (fd < 0) {
+			GP_WARN("Failed to open '%s': %s", ent->d_name, strerror(errno));
+			continue;
+		}
+
+		int ret = get_name(fd, name, sizeof(name));
+
+		if (ret < 0 || ret >= (int)sizeof(name)) {
+			GP_WARN("Failed to get '%s' device name", ent->d_name);
+			continue;
+		}
+
+		if (!strcmp(name, dev_name)) {
+			GP_DEBUG(1, "Found device name='%s' dev='%s'", name, ent->d_name);
+			return fd;
+		}
+
+		close(fd);
+	}
+
+	GP_DEBUG(1, "No input device name='%s' found", dev_name);
+	return -1;
+}
+
+static gp_input_driver_linux *new_input_driver(int fd)
+{
+	gp_input_driver_linux *ret;
 
 	if (get_version(fd)) {
 		GP_DEBUG(1, "Failed ioctl(), not a input device?");
@@ -125,9 +158,37 @@ gp_input_driver_linux *gp_input_driver_linux_open(const char *path)
 	ret->abs_flag_y = 0;
 	ret->abs_pen_flag = 1;
 
+	ret->abs_swap = 0;
+	ret->abs_mirror_x = 0;
+	ret->abs_mirror_y = 0;
+
 	try_load_callibration(ret);
 
 	return ret;
+}
+
+gp_input_driver_linux *gp_input_driver_linux_by_name(const char *name)
+{
+	int fd = input_by_name(name);
+
+	if (fd < 0)
+		return NULL;
+
+	return new_input_driver(fd);
+}
+
+gp_input_driver_linux *gp_input_driver_linux_open(const char *path)
+{
+	GP_DEBUG(2, "Opening '%s'", path);
+
+	int fd = open(path, O_RDONLY | O_NONBLOCK);
+
+	if (fd < 0) {
+		GP_DEBUG(1, "Failed to open '%s': %s", path, strerror(errno));
+		return NULL;
+	}
+
+	return new_input_driver(fd);
 }
 
 void gp_input_driver_linux_close(gp_input_driver_linux *self)
@@ -241,6 +302,17 @@ static void do_sync(gp_input_driver_linux *self,
 
 			self->abs_flag_y = 0;
 		}
+
+		if (self->abs_swap) {
+			GP_SWAP(x, y);
+			GP_SWAP(x_max, y_max);
+		}
+
+		if (self->abs_mirror_x)
+			x = x_max - x;
+
+		if (self->abs_mirror_y)
+			y = y_max - y;
 
 		gp_event_queue_push_abs(event_queue, x, y, self->abs_press,
 		                        x_max, y_max, self->abs_press_max, NULL);

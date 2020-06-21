@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-2.1-or-later
 /*
- * Copyright (C) 2009-2013 Cyril Hrubis <metan@ucw.cz>
+ * Copyright (C) 2009-2020 Cyril Hrubis <metan@ucw.cz>
  */
 
 /*
@@ -40,12 +40,21 @@ struct gp_input_driver_linux {
 	uint8_t abs_flag_x:1;
 	uint8_t abs_flag_y:1;
 	uint8_t abs_pen_flag:1;
+
+	uint8_t abs_swap:1;
+	uint8_t abs_mirror_x:1;
+	uint8_t abs_mirror_y:1;
 };
 
 /*
  * Initalize and allocate input driver.
  */
 gp_input_driver_linux *gp_input_driver_linux_open(const char *path);
+
+/*
+ * Scans the input device for a device with attribute name, returns on first match.
+ */
+gp_input_driver_linux *gp_input_driver_linux_by_name(const char *name);
 
 /*
  * Close the fd, free memory.
