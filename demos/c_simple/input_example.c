@@ -12,7 +12,10 @@
 
 #include "gfxprim.h"
 
+#include <input/gp_input_driver_linux.h>
+
 static gp_backend *backend;
+static gp_input_driver_linux *input;
 
 static gp_pixel red, green, white, black;
 
@@ -39,7 +42,8 @@ static void event_loop(void)
 	gp_pixmap *win = backend->pixmap;
 
 	for (;;) {
-		gp_backend_wait(backend);
+		gp_backend_poll(backend);
+		gp_input_driver_linux_read(input, &backend->event_queue);
 
 		while (gp_backend_events_queued(backend)) {
 			gp_event ev;
@@ -90,6 +94,14 @@ static void event_loop(void)
 				break;
 				}
 			break;
+			case GP_EV_ABS:
+				case GP_EV_ABS_POS:
+					gp_putpixel(win, ev.cursor_x,
+						    ev.cursor_y,
+						    green);
+					gp_backend_flip(backend);
+				break;
+			break;
 			case GP_EV_SYS:
 				switch (ev.code) {
 				case GP_EV_SYS_RESIZE:
@@ -104,6 +116,8 @@ static void event_loop(void)
 			break;
 			}
 		}
+
+		usleep(100);
 	}
 }
 
@@ -112,12 +126,23 @@ int main(int argc, char *argv[])
 	const char *backend_opts = "X11";
 	int opt;
 
-	while ((opt = getopt(argc, argv, "b:h")) != -1) {
+	while ((opt = getopt(argc, argv, "b:hi:")) != -1) {
 		switch (opt) {
 		case 'b':
 			backend_opts = optarg;
 		break;
+		case 'i':
+			input = gp_input_driver_linux_open(optarg);
+			if (!input) {
+				fprintf(stderr, "Cannot initialize '%s'\n", optarg);
+				return 1;
+			}
+		break;
 		case 'h':
+			printf("Options\n-------\n\n");
+			printf("-i /dev/input/eventX\n");
+			printf("-b backend\n\n");
+			printf("Backends\n--------\n\n");
 			gp_backend_init(NULL, NULL);
 			return 0;
 		default:
@@ -128,7 +153,7 @@ int main(int argc, char *argv[])
 
 	backend = gp_backend_init(backend_opts, "Input Test");
 
-	if (backend == NULL) {
+	if (!backend) {
 		fprintf(stderr, "Failed to initalize backend '%s'\n",
 		        backend_opts);
 		return 1;
@@ -144,8 +169,5 @@ int main(int argc, char *argv[])
 	gp_fill(win, black);
 	gp_backend_flip(backend);
 
-	for (;;) {
-		gp_backend_wait(backend);
-		event_loop();
-	}
+	event_loop();
 }
