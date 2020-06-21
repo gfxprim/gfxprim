@@ -153,7 +153,6 @@ gp_rect_xywh
 gp_line_raw_4BPP_LE
 gp_blit_xyxy_raw
 gp_filter_gaussian_noise_add_ex_alloc
-gp_input_driver_linux_read
 gp_filter_mirror_h_alloc
 gp_gamma_print
 gp_write_pixels_8BPP
@@ -203,7 +202,6 @@ gp_filter_median_ex
 gp_putpixel_aa_raw
 gp_temp_allocRestore
 gp_filter_invert_ex
-gp_input_driver_linux_open
 gp_pixmap_copy
 gp_fill_ring
 gp_text_width
@@ -239,10 +237,8 @@ gp_histogram_channel_by_name
 gp_write_pixels_2BPP_LE
 gp_arc_segment_raw
 gp_ring
-gp_input_driver_linux_close
 gp_filter_gaussian_noise_add_raw
 gp_filter_add_raw
-gp_input_driver_kbd_event_put
 gp_circle_raw
 gp_timer_queue_remove
 gp_filter_sigma_ex

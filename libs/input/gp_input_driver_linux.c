@@ -54,7 +54,7 @@ static void print_name(int fd)
 		GP_DEBUG(2, "Input device name '%s'", name);
 }
 
-static void try_load_callibration(gp_input_driver_linux *self)
+static void try_load_callibration(gp_input_linux *self)
 {
 	long bit = 0;
 	int abs[5];
@@ -126,9 +126,9 @@ static int input_by_name(const char *dev_name)
 	return -1;
 }
 
-static gp_input_driver_linux *new_input_driver(int fd)
+static gp_input_linux *new_input_driver(int fd)
 {
-	gp_input_driver_linux *ret;
+	gp_input_linux *ret;
 
 	if (get_version(fd)) {
 		GP_DEBUG(1, "Failed ioctl(), not a input device?");
@@ -137,7 +137,7 @@ static gp_input_driver_linux *new_input_driver(int fd)
 
 	print_name(fd);
 
-	ret = malloc(sizeof(gp_input_driver_linux));
+	ret = malloc(sizeof(gp_input_linux));
 
 	if (ret == NULL) {
 		GP_DEBUG(1, "Malloc failed :(");
@@ -167,7 +167,7 @@ static gp_input_driver_linux *new_input_driver(int fd)
 	return ret;
 }
 
-gp_input_driver_linux *gp_input_driver_linux_by_name(const char *name)
+gp_input_linux *gp_input_linux_by_name(const char *name)
 {
 	int fd = input_by_name(name);
 
@@ -177,7 +177,7 @@ gp_input_driver_linux *gp_input_driver_linux_by_name(const char *name)
 	return new_input_driver(fd);
 }
 
-gp_input_driver_linux *gp_input_driver_linux_open(const char *path)
+gp_input_linux *gp_input_linux_open(const char *path)
 {
 	GP_DEBUG(2, "Opening '%s'", path);
 
@@ -191,7 +191,7 @@ gp_input_driver_linux *gp_input_driver_linux_open(const char *path)
 	return new_input_driver(fd);
 }
 
-void gp_input_driver_linux_close(gp_input_driver_linux *self)
+void gp_input_linux_close(gp_input_linux *self)
 {
 	GP_DEBUG(1, "Closing input device");
 	print_name(self->fd);
@@ -200,7 +200,7 @@ void gp_input_driver_linux_close(gp_input_driver_linux *self)
 	free(self);
 }
 
-static void input_rel(gp_input_driver_linux *self, struct input_event *ev)
+static void input_rel(gp_input_linux *self, struct input_event *ev)
 {
 	GP_DEBUG(4, "Relative event");
 
@@ -218,7 +218,7 @@ static void input_rel(gp_input_driver_linux *self, struct input_event *ev)
 	}
 }
 
-static void input_abs(gp_input_driver_linux *self, struct input_event *ev)
+static void input_abs(gp_input_linux *self, struct input_event *ev)
 {
 	GP_DEBUG(4, "Absolute event");
 
@@ -241,7 +241,7 @@ static void input_abs(gp_input_driver_linux *self, struct input_event *ev)
 	}
 }
 
-static void input_key(gp_input_driver_linux *self,
+static void input_key(gp_input_linux *self,
                       gp_event_queue *event_queue,
                       struct input_event *ev)
 {
@@ -261,7 +261,7 @@ static void input_key(gp_input_driver_linux *self,
 	gp_event_queue_push_key(event_queue, ev->code, ev->value, NULL);
 }
 
-static void do_sync(gp_input_driver_linux *self,
+static void do_sync(gp_input_linux *self,
                     gp_event_queue *event_queue)
 {
 	if (self->rel_flag) {
@@ -326,7 +326,7 @@ static void do_sync(gp_input_driver_linux *self,
 	}
 }
 
-static void input_syn(gp_input_driver_linux *self,
+static void input_syn(gp_input_linux *self,
                       gp_event_queue *event_queue,
                       struct input_event *ev)
 {
@@ -341,7 +341,7 @@ static void input_syn(gp_input_driver_linux *self,
 	}
 }
 
-int gp_input_driver_linux_read(gp_input_driver_linux *self,
+int gp_input_linux_read(gp_input_linux *self,
                                gp_event_queue *event_queue)
 {
 	struct input_event ev;

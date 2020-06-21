@@ -16,9 +16,9 @@
 
 #include <input/gp_types.h>
 
-typedef struct gp_input_driver_linux gp_input_driver_linux;
+typedef struct gp_input_linux gp_input_linux;
 
-struct gp_input_driver_linux {
+struct gp_input_linux {
 	/* fd */
 	int fd;
 
@@ -49,17 +49,17 @@ struct gp_input_driver_linux {
 /*
  * Initalize and allocate input driver.
  */
-gp_input_driver_linux *gp_input_driver_linux_open(const char *path);
+gp_input_linux *gp_input_linux_open(const char *path);
 
 /*
  * Scans the input device for a device with attribute name, returns on first match.
  */
-gp_input_driver_linux *gp_input_driver_linux_by_name(const char *name);
+gp_input_linux *gp_input_linux_by_name(const char *name);
 
 /*
  * Close the fd, free memory.
  */
-void gp_input_driver_linux_close(gp_input_driver_linux *self);
+void gp_input_linux_close(gp_input_linux *self);
 
 /*
  * Called when there are data ready on input device.
@@ -68,7 +68,7 @@ void gp_input_driver_linux_close(gp_input_driver_linux *self);
  *
  * Returns 0 on succes -1 on error and errno is set.
  */
-int gp_input_driver_linux_read(gp_input_driver_linux *self,
-                               gp_event_queue *event_queue);
+int gp_input_linux_read(gp_input_linux *self,
+                        gp_event_queue *event_queue);
 
 #endif /* INPUT_GP_INPUT_DRIVER_LINUX_H */

@@ -15,7 +15,7 @@
 #include <input/gp_input_driver_linux.h>
 
 static gp_backend *backend;
-static gp_input_driver_linux *input;
+static gp_input_linux *input;
 
 static gp_pixel red, green, white, black;
 
@@ -43,7 +43,7 @@ static void event_loop(void)
 
 	for (;;) {
 		gp_backend_poll(backend);
-		gp_input_driver_linux_read(input, &backend->event_queue);
+		gp_input_linux_read(input, &backend->event_queue);
 
 		while (gp_backend_events_queued(backend)) {
 			gp_event ev;
@@ -132,7 +132,7 @@ int main(int argc, char *argv[])
 			backend_opts = optarg;
 		break;
 		case 'i':
-			input = gp_input_driver_linux_open(optarg);
+			input = gp_input_linux_open(optarg);
 			if (!input) {
 				fprintf(stderr, "Cannot initialize '%s'\n", optarg);
 				return 1;
