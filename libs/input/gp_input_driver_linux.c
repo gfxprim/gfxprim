@@ -69,12 +69,14 @@ static void try_load_callibration(gp_input_linux *self)
 	if (!ioctl(self->fd, EVIOCGABS(ABS_X), abs)) {
 		GP_DEBUG(3, "ABS X = <%i,%i> Fuzz %i Flat %i",
                             abs[1], abs[2], abs[3], abs[4]);
+		self->abs_x_min = abs[1];
 		self->abs_x_max = abs[2];
 	}
 
 	if (!ioctl(self->fd, EVIOCGABS(ABS_Y), abs)) {
 		GP_DEBUG(3, "ABS Y = <%i,%i> Fuzz %i Flat %i",
                             abs[1], abs[2], abs[3], abs[4]);
+		self->abs_y_min = abs[1];
 		self->abs_y_max = abs[2];
 	}
 
@@ -280,11 +282,11 @@ static void do_sync(gp_input_linux *self,
 			if (self->abs_x > self->abs_x_max)
 				self->abs_x = self->abs_x_max;
 
-			if (self->abs_x < 0)
-				self->abs_x = 0;
+			if (self->abs_x < self->abs_x_min)
+				self->abs_x = self->abs_x_min;
 
-			x     = self->abs_x;
-			x_max = self->abs_x_max;
+			x     = self->abs_x - self->abs_x_min;
+			x_max = self->abs_x_max - self->abs_x_min;
 
 			self->abs_flag_x = 0;
 		}
@@ -294,11 +296,11 @@ static void do_sync(gp_input_linux *self,
 			if (self->abs_y > self->abs_y_max)
 				self->abs_y = self->abs_y_max;
 
-			if (self->abs_y < 0)
-				self->abs_y = 0;
+			if (self->abs_y < self->abs_y_min)
+				self->abs_y = self->abs_y_min;
 
-			y     = self->abs_y;
-			y_max = self->abs_y_max;
+			y     = self->abs_y - self->abs_y_min;
+			y_max = self->abs_y_max - self->abs_y_min;
 
 			self->abs_flag_y = 0;
 		}

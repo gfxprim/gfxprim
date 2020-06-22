@@ -33,8 +33,10 @@ struct gp_input_linux {
 	int abs_y;
 	int abs_press;
 
+	int abs_x_min;
 	int abs_x_max;
 	int abs_y_max;
+	int abs_y_min;
 	int abs_press_max;
 
 	uint8_t abs_flag_x:1;
