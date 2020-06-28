@@ -42,30 +42,52 @@ typedef struct gp_vec {
 } gp_vec;
 
 /*
- * Allocate a new vec and return a pointer to the data.
+ * @brief  Allocates a new vector.
+ *
+ * @lenght A lenght of the vector.
+ * @unit   A size of a vector element.
+ *
+ * @return Returns a pointer to the vector data.
  */
 void *gp_vec_new(size_t length, size_t unit);
 
 /*
- * Free the vec.
+ * @brief Frees the vector.
+ *
+ * @self A vector.
  */
 void gp_vec_free(void *self);
 
 /*
- * Resize vector.
+ * @brief Resize vector.
+ *
+ * @self   A vector.
+ * @length A new vector lenght.
+ *
+ * @return Returns a pointer to the vector, possibly a different from the
+ *         previous one. May return NULL if vector grows and underlying call to
+ *         realloc() has failed.
  */
 void *gp_vec_resize(void *self, size_t length);
 
 /*
- * Get the number of elements in a vec from a pointer to its data.
+ * @brief Returns vector lenght.
+ *
+ * @self A vector.
+ *
+ * @return A number of elements in the vector.
  */
 static inline size_t gp_vec_len(const void *self)
 {
 	return GP_VEC(self)->length;
 }
 
-/* Insert a gap into the vec of new elements, reallocating the underlying
- * memory if more capacity is needed.
+/* @brief Insert a gap into the vec of new elements, reallocating the
+ *        underlying memory if more capacity is needed.
+ *
+ * @self A vector.
+ * @off  An offset in the vector.
+ * @length A number of elements to instert.
  *
  * If more capacity is required, then this will reallocate the gp_vec thus
  * invalidating *self. Therefor the caller should update any pointers it has
@@ -73,12 +95,25 @@ static inline size_t gp_vec_len(const void *self)
  *
  * Newly allocated capacity, which is not within the gap, will be set to
  * 0xff. The memory within the gap will be zeroed. If allocation fails or i is
- * invalid this will return 0. The index 'i' should be <= length.
+ * invalid this will return 0. The offset 'off' should be <= length.
+ *
+ * @return Returns a pointer to the vector, possibly a different from the
+ *         previous one. May return NULL if underlying call to realloc() has
+ *         failed or if off is outside of the vector.
  */
-void *gp_vec_insert(void *self, size_t i, size_t length);
+void *gp_vec_insert(void *self, size_t off, size_t length);
 
 /*
- * Appends length elements to the end of the vector.
+ * @breif Appends length elements to the end of the vector.
+ *
+ * @self A vector.
+ * @length A number of elements to append.
+ *
+ * Calls gp_vec_insert() with an offset equal to vector length.
+ *
+ * @return Returns a pointer to the vector, possibly a different from the
+ *         previous one. May return NULL if underlying call to realloc() has
+ *         failed.
  */
 static inline void *gp_vec_append(void *self, size_t lenght)
 {
@@ -86,17 +121,29 @@ static inline void *gp_vec_append(void *self, size_t lenght)
 }
 
 /*
- * Deletes a range from the vector.
+ * @brief Deletes a range from the vector.
+ *
+ * @self A vector.
+ * @off An offset in the vector.
+ * @length A number of elements to delete.
+ *
+ * @return Returns a pointer to the vector, possibly a different from the
+ *         previous one. May return NULL if off is outside of the vector.
  */
-void *gp_vec_delete(void *self, size_t i, size_t lenght);
+void *gp_vec_delete(void *self, size_t off, size_t lenght);
 
 /*
- * Revoves length elements from the end of the vector.
+ * @brief Removes length elements from the end of the vector.
+ *
+ * @self A vector.
+ * @length A number of elemements to remove.
+ *
+ * @return Returns a pointer to the vector, possibly a different from the
+ *         previous one.
  */
 static inline void *gp_vec_remove(void *self, size_t length)
 {
 	return gp_vec_delete(self, gp_vec_len(self) - length, length);
 }
-
 
 #endif	/* GP_VEC_H__ */
