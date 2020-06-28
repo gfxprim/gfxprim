@@ -9,6 +9,7 @@
 #define GP_UTILS__
 
 #include <utils/gp_vec.h>
+#include <utils/gp_vec_str.h>
 #include <utils/gp_htable.h>
 #include <utils/gp_fds.h>
 
