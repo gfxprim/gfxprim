@@ -215,6 +215,17 @@ static int v4l2_stop(gp_grabber *self)
 	return 0;
 }
 
+static char *pixelformat_name(uint32_t ptype, char buf[])
+{
+	buf[0] = (ptype>>24) & 0xff;
+	buf[1] = (ptype>>16) & 0xff;
+	buf[2] = (ptype>>8) & 0xff;
+	buf[3] = (ptype>>0) & 0xff;
+	buf[4] = 0;
+
+	return buf;
+}
+
 gp_grabber *gp_grabber_v4l2_init(const char *device,
                                  unsigned int preferred_width,
 				 unsigned int preferred_height)
@@ -301,6 +312,16 @@ gp_grabber *gp_grabber_v4l2_init(const char *device,
 	if (ioctl(fd, VIDIOC_S_FMT, &fmt)) {
 		err = errno;
 		GP_WARN("Failed to set video format for device '%s'", device);
+		goto err0;
+	}
+
+	if (fmt.fmt.pix.pixelformat != V4L2_PIX_FMT_YUYV) {
+		char pfmt[5];
+
+		GP_WARN("Failed to set format to YUYV got %s",
+		        pixelformat_name(fmt.fmt.pix.pixelformat, pfmt));
+
+		err = ENOSYS;
 		goto err0;
 	}
 
