@@ -164,6 +164,26 @@ static int test_vec_insert(struct insert_test *tst)
 	return TST_SUCCESS;
 }
 
+static int test_vec_resize(struct insert_test *tst)
+{
+	char *vec = gp_vec_new(tst->len, 1);
+	unsigned int i;
+
+	gp_vec_resize(vec, 10);
+
+	if (gp_vec_len(vec) != 10) {
+		tst_msg("Got wrong vector size");
+		return TST_FAILED;
+	}
+
+	for (i = 0; i < 10; i++)
+		vec[i] = 0xff;
+
+	gp_vec_free(vec);
+
+	return TST_SUCCESS;
+}
+
 static struct insert_test test1 = {
 	.len = 1,
 	.off = 0,
@@ -197,6 +217,18 @@ static struct insert_test test_fail1 = {
 	.off = 3,
 	.cnt = 5,
 	.fail = 1,
+};
+
+static struct insert_test resize1 = {
+	.len = 1,
+};
+
+static struct insert_test resize2 = {
+	.len = 10,
+};
+
+static struct insert_test resize3 = {
+	.len = 100,
 };
 
 const struct tst_suite tst_suite = {
@@ -237,6 +269,21 @@ const struct tst_suite tst_suite = {
 		{.name = "insert test after end",
 		 .tst_fn = test_vec_insert,
 		 .data = &test_fail1,
+		 .flags = TST_CHECK_MALLOC},
+
+		{.name = "resize test 1 -> 10",
+		 .tst_fn = test_vec_resize,
+		 .data = &resize1,
+		 .flags = TST_CHECK_MALLOC},
+
+		{.name = "resize test 10 -> 10",
+		 .tst_fn = test_vec_resize,
+		 .data = &resize2,
+		 .flags = TST_CHECK_MALLOC},
+
+		{.name = "resize test 100 -> 10",
+		 .tst_fn = test_vec_resize,
+		 .data = &resize3,
 		 .flags = TST_CHECK_MALLOC},
 
 		{}

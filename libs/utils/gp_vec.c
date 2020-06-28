@@ -72,6 +72,19 @@ void gp_vec_free(void *self)
 	free(vec);
 }
 
+void *gp_vec_resize(void *self, size_t length)
+{
+	gp_vec *vec = GP_VEC(self);
+
+	if (vec->length == length)
+		return self;
+
+	if (vec->length < length)
+		return gp_vec_append(self, length - vec->length);
+
+	return gp_vec_remove(self, vec->length - length);
+}
+
 void *gp_vec_insert(void *self, size_t i, size_t length)
 {
 	gp_vec *vec = GP_VEC(self);

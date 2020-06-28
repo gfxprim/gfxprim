@@ -52,6 +52,11 @@ void *gp_vec_new(size_t length, size_t unit);
 void gp_vec_free(void *self);
 
 /*
+ * Resize vector.
+ */
+void *gp_vec_resize(void *self, size_t length);
+
+/*
  * Get the number of elements in a vec from a pointer to its data.
  */
 static inline size_t gp_vec_len(const void *self)
