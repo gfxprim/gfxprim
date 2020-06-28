@@ -33,10 +33,10 @@ struct gp_input_linux {
 	int abs_y;
 	int abs_press;
 
-	int abs_x_min;
-	int abs_x_max;
-	int abs_y_max;
-	int abs_y_min;
+	int abs_min_x;
+	int abs_max_x;
+	int abs_max_y;
+	int abs_min_y;
 	int abs_press_max;
 
 	uint8_t abs_flag_x:1;
@@ -57,6 +57,33 @@ gp_input_linux *gp_input_linux_open(const char *path);
  * Scans the input device for a device with attribute name, returns on first match.
  */
 gp_input_linux *gp_input_linux_by_name(const char *name);
+
+/*
+ * Opens a input device by description string.
+ *
+ * The string may include callibration data and other values as well.
+ *
+ * The format of the string is list of a key value pairs divided by a colons.
+ *
+ * The first pair has to describe a device to be opened which is one of:
+ *  - name=device name
+ *  - path=/dev/input/eventX
+ *
+ * Which may be followed by callibration such as:
+ *
+ * - abs_swap
+ * - abs_mirror_x
+ * - abs_mirror_y
+ * - abs_min_x=VAL
+ * - abs_max_x=VAL
+ * - abs_min_y=VAL
+ * - abs_max_y=VAL
+ *
+ * Example devstr:
+ *
+ * "path=/dev/input/event3:abs_swap:abs_mirror_x:abs_min_x=234:abs_max_x=3920:abs_min_y=322:abs_max_y=3249"
+ */
+gp_input_linux *gp_input_linux_by_devstr(const char *devstr);
 
 /*
  * Close the fd, free memory.

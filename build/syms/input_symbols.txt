@@ -3,3 +3,4 @@ gp_input_linux_by_name
 gp_input_linux_read
 gp_input_linux_close
 gp_input_driver_kbd_event_put
+gp_input_linux_by_devstr

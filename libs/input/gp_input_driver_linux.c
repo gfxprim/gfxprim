@@ -69,15 +69,15 @@ static void try_load_callibration(gp_input_linux *self)
 	if (!ioctl(self->fd, EVIOCGABS(ABS_X), abs)) {
 		GP_DEBUG(3, "ABS X = <%i,%i> Fuzz %i Flat %i",
                             abs[1], abs[2], abs[3], abs[4]);
-		self->abs_x_min = abs[1];
-		self->abs_x_max = abs[2];
+		self->abs_min_x = abs[1];
+		self->abs_max_x = abs[2];
 	}
 
 	if (!ioctl(self->fd, EVIOCGABS(ABS_Y), abs)) {
 		GP_DEBUG(3, "ABS Y = <%i,%i> Fuzz %i Flat %i",
                             abs[1], abs[2], abs[3], abs[4]);
-		self->abs_y_min = abs[1];
-		self->abs_y_max = abs[2];
+		self->abs_min_y = abs[1];
+		self->abs_max_y = abs[2];
 	}
 
 	if (!ioctl(self->fd, EVIOCGABS(ABS_PRESSURE), abs)) {
@@ -167,6 +167,87 @@ static gp_input_linux *new_input_driver(int fd)
 	try_load_callibration(ret);
 
 	return ret;
+}
+
+struct devstr_params {
+	char *dev_name;
+	char *dev_path;
+
+	int abs_swap;
+	int abs_mirror_x;
+	int abs_mirror_y;
+
+	int abs_min_x;
+	int abs_max_x;
+	int abs_min_y;
+	int abs_max_y;
+};
+
+gp_input_linux *gp_input_linux_by_devstr(const char *devstr)
+{
+	gp_input_linux *ret = NULL;
+	char *str = strdup(devstr);
+	char *tok, *s, *save;
+
+	if (!str) {
+		GP_WARN("Malloc failed :-(");
+		return NULL;
+	}
+
+	s = str;
+
+	while ((tok = strtok_r(s, ":", &save))) {
+		char *tsave, *tid = strtok_r(tok, "=", &tsave);
+
+		if (!strcmp(tid, "name")) {
+			if (!ret)
+				ret = gp_input_linux_by_name(tsave);
+		} if (!strcmp(tid, "path")) {
+			if (!ret)
+				ret = gp_input_linux_open(tsave);
+		} else if (!strcmp(tid, "abs_swap")) {
+			if (!ret)
+				goto nodev;
+			ret->abs_swap = 1;
+		} else if (!strcmp(tid, "abs_mirror_x")) {
+			if (!ret)
+				goto nodev;
+			ret->abs_mirror_x = 1;
+		} else if (!strcmp(tid, "abs_mirror_y")) {
+			if (!ret)
+				goto nodev;
+			ret->abs_mirror_y = 1;
+		} else if (!strcmp(tid, "abs_min_x")) {
+			if (!ret)
+				goto nodev;
+			ret->abs_min_x = atoi(tsave);
+		} else if (!strcmp(tid, "abs_max_x")) {
+			if (!ret)
+				goto nodev;
+			ret->abs_max_x = atoi(tsave);
+		} else if (!strcmp(tid, "abs_min_y")) {
+			if (!ret)
+				goto nodev;
+			ret->abs_min_y = atoi(tsave);
+		} else if (!strcmp(tid, "abs_max_y")) {
+			if (!ret)
+				goto nodev;
+			ret->abs_max_y = atoi(tsave);
+		} else {
+			GP_WARN("Invalid key '%s'", tok);
+			goto exit;
+		}
+
+		s = NULL;
+	}
+
+exit:
+	free(str);
+	return ret;
+nodev:
+	free(str);
+	GP_WARN("No device open");
+	return NULL;
 }
 
 gp_input_linux *gp_input_linux_by_name(const char *name)
@@ -279,28 +360,28 @@ static void do_sync(gp_input_linux *self,
 
 		if (self->abs_flag_x) {
 			/* clipping */
-			if (self->abs_x > self->abs_x_max)
-				self->abs_x = self->abs_x_max;
+			if (self->abs_x > self->abs_max_x)
+				self->abs_x = self->abs_max_x;
 
-			if (self->abs_x < self->abs_x_min)
-				self->abs_x = self->abs_x_min;
+			if (self->abs_x < self->abs_min_x)
+				self->abs_x = self->abs_min_x;
 
-			x     = self->abs_x - self->abs_x_min;
-			x_max = self->abs_x_max - self->abs_x_min;
+			x     = self->abs_x - self->abs_min_x;
+			x_max = self->abs_max_x - self->abs_min_x;
 
 			self->abs_flag_x = 0;
 		}
 
 		if (self->abs_flag_y) {
 			/* clipping */
-			if (self->abs_y > self->abs_y_max)
-				self->abs_y = self->abs_y_max;
+			if (self->abs_y > self->abs_max_y)
+				self->abs_y = self->abs_max_y;
 
-			if (self->abs_y < self->abs_y_min)
-				self->abs_y = self->abs_y_min;
+			if (self->abs_y < self->abs_min_y)
+				self->abs_y = self->abs_min_y;
 
-			y     = self->abs_y - self->abs_y_min;
-			y_max = self->abs_y_max - self->abs_y_min;
+			y     = self->abs_y - self->abs_min_y;
+			y_max = self->abs_max_y - self->abs_min_y;
 
 			self->abs_flag_y = 0;
 		}
