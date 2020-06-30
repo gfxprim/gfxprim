@@ -28,12 +28,12 @@ static int get_width(const gp_text_style *style, int width)
 
 static void text_draw_1BPP_{{ pt.name }}(gp_pixmap *pixmap, const gp_text_style *style,
                                          uint8_t bearing, gp_coord x, gp_coord y,
-				         gp_pixel fg, const char *str)
+				         gp_pixel fg, const char *str, size_t max_chars)
 {
 	const char *p;
 	gp_coord y0 = y;
 
-	for (p = str; *p != '\0'; p++) {
+	for (p = str; *p != '\0' && (size_t)(p - str) < max_chars; p++) {
 		const gp_glyph *glyph = gp_get_glyph(style->font, *p);
 
 		if (glyph == NULL)
@@ -87,13 +87,13 @@ static void text_draw_1BPP_{{ pt.name }}(gp_pixmap *pixmap, const gp_text_style 
 
 static void text_draw_1BPP(gp_pixmap *pixmap, const gp_text_style *style,
                            uint8_t bearing, int x, int y,
-                           gp_pixel fg, const char *str)
+                           gp_pixel fg, const char *str, size_t max_chars)
 {
 	switch (pixmap->pixel_type) {
 @ for pt in pixeltypes:
 @     if not pt.is_unknown():
 	case GP_PIXEL_{{ pt.name }}:
-		text_draw_1BPP_{{ pt.name }}(pixmap, style, bearing, x, y, fg, str);
+		text_draw_1BPP_{{ pt.name }}(pixmap, style, bearing, x, y, fg, str, max_chars);
 	break;
 @ end
 	default:
@@ -106,7 +106,7 @@ static void text_draw_1BPP(gp_pixmap *pixmap, const gp_text_style *style,
 
 	gp_coord y0 = y;
 
-	for (p = str; *p != '\0'; p++) {
+	for (p = str; *p != '\0' && (size_t)(p - str) < max_chars; p++) {
 		const gp_glyph *glyph = gp_get_glyph(style->font, *p);
 
 		if (glyph == NULL)
@@ -166,14 +166,15 @@ static void text_draw_1BPP(gp_pixmap *pixmap, const gp_text_style *style,
 
 static void text_8BPP_bg_{{ pt.name }}(gp_pixmap *pixmap, const gp_text_style *style,
                                        uint8_t bearing, gp_coord x, gp_coord y,
-				       gp_pixel fg, gp_pixel bg, const char *str)
+				       gp_pixel fg, gp_pixel bg,
+                                       const char *str, size_t max_chars)
 {
 @         text_8BPP(pt, True)
 }
 
 static void text_8BPP_{{ pt.name }}(gp_pixmap *pixmap, const gp_text_style *style,
                                     uint8_t bearing, gp_coord x, gp_coord y,
-				    gp_pixel fg, const char *str)
+				    gp_pixel fg, const char *str, size_t max_chars)
 {
 @         text_8BPP(pt, False)
 }
@@ -182,13 +183,14 @@ static void text_8BPP_{{ pt.name }}(gp_pixmap *pixmap, const gp_text_style *styl
 
 static void text_8BPP_bg(gp_pixmap *pixmap, const gp_text_style *style,
                          uint8_t bearing, gp_coord x, gp_coord y,
-                         gp_pixel fg, gp_pixel bg, const char *str)
+                         gp_pixel fg, gp_pixel bg,
+                         const char *str, size_t max_chars)
 {
 	switch (pixmap->pixel_type) {
 @ for pt in pixeltypes:
 @     if not pt.is_unknown():
 	case GP_PIXEL_{{ pt.name }}:
-		text_8BPP_bg_{{ pt.name }}(pixmap, style, bearing, x, y, fg, bg, str);
+		text_8BPP_bg_{{ pt.name }}(pixmap, style, bearing, x, y, fg, bg, str, max_chars);
 	break;
 @ end
 	default:
@@ -198,13 +200,13 @@ static void text_8BPP_bg(gp_pixmap *pixmap, const gp_text_style *style,
 
 static void text_8BPP(gp_pixmap *pixmap, const gp_text_style *style,
                       uint8_t bearing, gp_coord x, gp_coord y,
-                      gp_pixel fg, const char *str)
+                      gp_pixel fg, const char *str, size_t max_chars)
 {
 	switch (pixmap->pixel_type) {
 @ for pt in pixeltypes:
 @     if not pt.is_unknown():
 	case GP_PIXEL_{{ pt.name }}:
-		text_8BPP_{{ pt.name }}(pixmap, style, bearing, x, y, fg, str);
+		text_8BPP_{{ pt.name }}(pixmap, style, bearing, x, y, fg, str, max_chars);
 	break;
 @ end
 	default:
@@ -214,19 +216,20 @@ static void text_8BPP(gp_pixmap *pixmap, const gp_text_style *style,
 
 void gp_text_raw(gp_pixmap *pixmap, const gp_text_style *style,
                  gp_coord x, gp_coord y, uint8_t flags,
-                 gp_pixel fg, gp_pixel bg, const char *str)
+                 gp_pixel fg, gp_pixel bg,
+		 const char *str, size_t max_chars)
 {
 	uint8_t bearing = flags & GP_TEXT_BEARING;
 
 	switch (style->font->glyph_bitmap_format) {
 	case GP_FONT_BITMAP_1BPP:
-		text_draw_1BPP(pixmap, style, bearing, x, y, fg, str);
+		text_draw_1BPP(pixmap, style, bearing, x, y, fg, str, max_chars);
 	break;
 	case GP_FONT_BITMAP_8BPP:
 		if (flags & GP_TEXT_NOBG)
-			text_8BPP(pixmap, style, bearing, x, y, fg, str);
+			text_8BPP(pixmap, style, bearing, x, y, fg, str, max_chars);
 		else
-			text_8BPP_bg(pixmap, style, bearing, x, y, fg, bg, str);
+			text_8BPP_bg(pixmap, style, bearing, x, y, fg, bg, str, max_chars);
 	break;
 	default:
 		GP_ABORT("Invalid font glyph bitmap format");

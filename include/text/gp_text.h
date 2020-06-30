@@ -54,7 +54,7 @@ typedef enum gp_text_attr {
 void gp_text_raw(gp_pixmap *pixmap, const gp_text_style *style,
                  gp_coord x, gp_coord y, uint8_t flags,
                  gp_pixel fg_color, gp_pixel bg_color,
-		 const char *str);
+		 const char *str, size_t max_chars);
 
 /*
  * Draws a string.
@@ -67,6 +67,14 @@ void gp_text_raw(gp_pixmap *pixmap, const gp_text_style *style,
 void gp_text(gp_pixmap *pixmap, const gp_text_style *style,
              gp_coord x, gp_coord y, int align,
              gp_pixel fg_color, gp_pixel bg_color, const char *str);
+
+/*
+ * Same as the gp_text() but the number of characters can be limited.
+ */
+void gp_text_ext(gp_pixmap *pixmap, const gp_text_style *style,
+                 gp_coord x, gp_coord y, int align,
+                 gp_pixel fg_color, gp_pixel bg_color,
+		 const char *str, size_t max_chars);
 
 /*
  * Same as above, but printf like and returns text width in pixels.

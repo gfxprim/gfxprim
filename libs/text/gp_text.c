@@ -64,6 +64,14 @@ void gp_text(gp_pixmap *pixmap, const gp_text_style *style,
 	     gp_pixel fg_color, gp_pixel bg_color,
              const char *str)
 {
+	gp_text_ext(pixmap, style, x, y, align, fg_color, bg_color, str, SIZE_MAX);
+}
+
+void gp_text_ext(gp_pixmap *pixmap, const gp_text_style *style,
+                 gp_coord x, gp_coord y, int align,
+	         gp_pixel fg_color, gp_pixel bg_color,
+                 const char *str, size_t max_chars)
+{
 	GP_CHECK_PIXMAP(pixmap);
 
 	if (str == NULL)
@@ -80,7 +88,7 @@ void gp_text(gp_pixmap *pixmap, const gp_text_style *style,
 	         "Invalid aligment flags");
 
 	gp_text_raw(pixmap, style, topleft_x, topleft_y,
-	            align, fg_color, bg_color, str);
+	            align, fg_color, bg_color, str, max_chars);
 }
 
 gp_size gp_vprint(gp_pixmap *pixmap, const gp_text_style *style,

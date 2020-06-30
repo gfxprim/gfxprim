@@ -248,6 +248,7 @@ gp_write_pixels_32BPP
 gp_event_queue_push
 gp_line_raw_1BPP_LE
 gp_text
+gp_text_ext
 gp_event_queue_peek
 gp_vline_raw_16BPP
 gp_filter_multitone_ex_alloc
