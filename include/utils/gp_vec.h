@@ -41,6 +41,28 @@ typedef struct gp_vec {
 	char payload[];
 } gp_vec;
 
+/* @brief Expands vector length; does not touch vector data.
+ *
+ * This is internal rutine, handle with care!
+ *
+ * @self   Pointer to the vector structure.
+ * @lenght How many units should be added to vector length.
+ *
+ * @return A pointer to a vector data.
+ */
+void *gp_vec_expand(gp_vec *self, size_t length);
+
+/* @brief Shirnks vector length; does not touch vector data.
+ *
+ * This is internal rutine, handle with care!
+ *
+ * @self   Pointer to the vector structure.
+ * @lenght How many units should be removed from vector length.
+ *
+ * @return A pointer to a vector data.
+ */
+void *gp_vec_shrink(gp_vec *self, size_t length);
+
 /*
  * @brief  Allocates a new vector.
  *

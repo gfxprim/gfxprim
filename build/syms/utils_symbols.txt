@@ -2,11 +2,17 @@ gp_htable_new
 gp_htable_free
 gp_htable_get
 gp_htable_put
+
 gp_vec_new
 gp_vec_free
 gp_vec_insert
 gp_vec_delete
 gp_vec_resize
+gp_vec_shrink
+gp_vec_expand
+
+gp_matrix_delete_rows
+gp_matrix_insert_rows
 
 gp_fds_clear
 gp_fds_add

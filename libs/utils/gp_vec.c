@@ -21,7 +21,7 @@ static size_t new_capacity(size_t length, size_t cur_capacity)
 	return capacity;
 }
 
-static void *expand(gp_vec *self, size_t length)
+void *gp_vec_expand(gp_vec *self, size_t length)
 {
 	size_t capacity;
 
@@ -95,7 +95,7 @@ void *gp_vec_insert(void *self, size_t i, size_t length)
 		return NULL;
 	}
 
-	vec = expand(vec, length);
+	vec = gp_vec_expand(vec, length);
 	if (!vec)
 		return NULL;
 
@@ -111,23 +111,8 @@ out:
 	return (void *)vec->payload;
 }
 
-void *gp_vec_delete(void *self, size_t i, size_t length)
+void *gp_vec_shrink(gp_vec *vec, size_t length)
 {
-	gp_vec *vec = GP_VEC(self);
-
-	if (length == 0)
-		return self;
-
-	if (i + length > vec->length) {
-		GP_WARN("Block (%zu-%zu) out of vector %p size %zu",
-		        i, length, self, vec->length);
-		return NULL;
-	}
-
-	memmove(vec->payload + i * vec->unit,
-		vec->payload + (i + length) * vec->unit,
-		(vec->length - length - i) * vec->unit);
-
 	memset(vec->payload + (vec->length - length) * vec->unit,
 	       0xff, length * vec->unit);
 
@@ -150,4 +135,24 @@ void *gp_vec_delete(void *self, size_t i, size_t length)
 
 ret:
 	return (void *)vec->payload;
+}
+
+void *gp_vec_delete(void *self, size_t i, size_t length)
+{
+	gp_vec *vec = GP_VEC(self);
+
+	if (length == 0)
+		return self;
+
+	if (i + length > vec->length) {
+		GP_WARN("Block (%zu-%zu) out of vector %p size %zu",
+		        i, length, self, vec->length);
+		return NULL;
+	}
+
+	memmove(vec->payload + i * vec->unit,
+		vec->payload + (i + length) * vec->unit,
+		(vec->length - length - i) * vec->unit);
+
+	return gp_vec_shrink(vec, length);
 }
