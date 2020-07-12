@@ -12,6 +12,7 @@
 #include <utils/gp_vec_str.h>
 #include <utils/gp_matrix.h>
 #include <utils/gp_htable.h>
+#include <utils/gp_block_alloc.h>
 #include <utils/gp_fds.h>
 
 #endif /* GP_UTILS__ */
