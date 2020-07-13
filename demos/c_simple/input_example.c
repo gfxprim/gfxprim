@@ -43,7 +43,8 @@ static void event_loop(void)
 
 	for (;;) {
 		gp_backend_poll(backend);
-		gp_input_linux_read(input, &backend->event_queue);
+		if (input)
+			gp_input_linux_read(input, &backend->event_queue);
 
 		while (gp_backend_events_queued(backend)) {
 			gp_event ev;
