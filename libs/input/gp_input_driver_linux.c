@@ -57,7 +57,7 @@ static void print_name(int fd)
 static void try_load_callibration(gp_input_linux *self)
 {
 	long bit = 0;
-	int abs[5];
+	int abs[6];
 
 	ioctl(self->fd, EVIOCGBIT(EV_ABS, EV_ABS), &bit);
 
