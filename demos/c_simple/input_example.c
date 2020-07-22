@@ -171,4 +171,5 @@ int main(int argc, char *argv[])
 	gp_backend_flip(backend);
 
 	event_loop();
+	return 0;
 }
