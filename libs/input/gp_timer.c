@@ -221,13 +221,9 @@ static gp_timer *pre_rem(gp_timer *heap, gp_timer *timer)
 	 */
 	heap = rem_last(heap, &last);
 
-	if (!heap) {
-		if (timer == last)
-			return NULL;
-
-		GP_WARN("Timer %s not found (queue has one timer)", timer->id);
-		return last;
-	}
+	/* We found it already */
+	if (timer == last)
+		return heap;
 
 	heap = rem(heap, timer, last, &flag);
 

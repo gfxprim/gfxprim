@@ -174,6 +174,31 @@ static int periodic_timers(void)
 	return TST_SUCCESS;
 }
 
+/*
+ * Special case where we remove a timer with the highest value, there was a bug
+ * in the library heap that caused crash with this.
+ */
+static int rem_regression(void)
+{
+	GP_TIMER_DECLARE(timer1, 0, 10, "Timer1", NULL, NULL);
+	GP_TIMER_DECLARE(timer2, 0, 20, "Timer2", NULL, NULL);
+	gp_timer *head = NULL;
+
+	gp_timer_queue_insert(&head, 10, &timer1);
+	gp_timer_queue_insert(&head, 10, &timer2);
+
+	gp_timer_queue_remove(&head, &timer2);
+
+	if (head->sons) {
+		tst_msg("Failed to remove timer");
+		return TST_FAILED;
+	}
+
+	tst_msg("Timer removed correctly");
+
+	return TST_SUCCESS;
+}
+
 const struct tst_suite tst_suite = {
 	.suite_name = "Timer Testsuite",
 	.tests = {
@@ -185,6 +210,8 @@ const struct tst_suite tst_suite = {
 		 .tst_fn = expirations_sorted},
 		{.name = "Periodic timers",
 		 .tst_fn = periodic_timers},
+		{.name = "Removal regression",
+		 .tst_fn = rem_regression},
 		{.name = NULL},
 	}
 };
