@@ -175,8 +175,11 @@ gp_size gp_text_max_width_chars(const gp_text_style *style, const char *chars,
 {
 	style = assert_style(style);
 
-	if (len == 0 || chars == NULL)
+	if (len == 0)
 		return 0;
+
+	if (!chars)
+		return gp_text_max_width(style, len);
 
 	return len * max_glyph_advance_x(style, chars) +
 	       (len - 1) * style->char_xspace;
