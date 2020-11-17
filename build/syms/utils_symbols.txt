@@ -20,3 +20,6 @@ gp_fds_clear
 gp_fds_add
 gp_fds_poll
 gp_fds_rem
+
+gp_block_alloc
+gp_block_free
