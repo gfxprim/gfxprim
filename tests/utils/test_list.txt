@@ -1,3 +1,4 @@
 # Utils testsuite
 vec
+vec_str
 matrix

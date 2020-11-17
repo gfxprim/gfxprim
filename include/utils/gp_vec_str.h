@@ -132,5 +132,16 @@ static inline char *gp_vec_strclr(char *self)
 	return ret;
 }
 
+/*
+ * @brief Printf into a string vector.
+ *
+ * @self A string vector.
+ * @fmt Printf format string.
+ * @... Printf parameters.
+ *
+ * @return A new vector size or -1 on allocation failure.
+ */
+char *gp_vec_printf(char *self, const char *fmt, ...)
+                    __attribute__((format (printf, 2, 3)));
 
 #endif	/* GP_VEC_STR_H__ */
