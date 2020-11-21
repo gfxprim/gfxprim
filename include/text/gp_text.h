@@ -51,10 +51,10 @@ typedef enum gp_text_attr {
  * If flags are set to GP_TEXT_NOBG the the bg_color is ignored and
  * the pixmap pixels are used for alpha mixing.
  */
-void gp_text_raw(gp_pixmap *pixmap, const gp_text_style *style,
-                 gp_coord x, gp_coord y, uint8_t flags,
-                 gp_pixel fg_color, gp_pixel bg_color,
-		 const char *str, size_t max_chars);
+gp_size gp_text_raw(gp_pixmap *pixmap, const gp_text_style *style,
+                    gp_coord x, gp_coord y, uint8_t flags,
+                    gp_pixel fg_color, gp_pixel bg_color,
+                    const char *str, size_t max_chars);
 
 /*
  * Draws a string.
@@ -64,17 +64,17 @@ void gp_text_raw(gp_pixmap *pixmap, const gp_text_style *style,
  *
  * The background color is ignored for 1bpp font formats.
  */
-void gp_text(gp_pixmap *pixmap, const gp_text_style *style,
-             gp_coord x, gp_coord y, int align,
-             gp_pixel fg_color, gp_pixel bg_color, const char *str);
+gp_size gp_text(gp_pixmap *pixmap, const gp_text_style *style,
+                gp_coord x, gp_coord y, int align,
+                gp_pixel fg_color, gp_pixel bg_color, const char *str);
 
 /*
  * Same as the gp_text() but the number of characters can be limited.
  */
-void gp_text_ext(gp_pixmap *pixmap, const gp_text_style *style,
-                 gp_coord x, gp_coord y, int align,
-                 gp_pixel fg_color, gp_pixel bg_color,
-		 const char *str, size_t max_chars);
+gp_size gp_text_ext(gp_pixmap *pixmap, const gp_text_style *style,
+                    gp_coord x, gp_coord y, int align,
+                    gp_pixel fg_color, gp_pixel bg_color,
+                    const char *str, size_t max_chars);
 
 /*
  * Same as above, but printf like and returns text width in pixels.

@@ -59,23 +59,23 @@ static int do_align(gp_coord *topleft_x, gp_coord *topleft_y, int align,
 	return 0;
 }
 
-void gp_text(gp_pixmap *pixmap, const gp_text_style *style,
-             gp_coord x, gp_coord y, int align,
-	     gp_pixel fg_color, gp_pixel bg_color,
-             const char *str)
+gp_size gp_text(gp_pixmap *pixmap, const gp_text_style *style,
+               gp_coord x, gp_coord y, int align,
+	       gp_pixel fg_color, gp_pixel bg_color,
+               const char *str)
 {
-	gp_text_ext(pixmap, style, x, y, align, fg_color, bg_color, str, SIZE_MAX);
+	return gp_text_ext(pixmap, style, x, y, align, fg_color, bg_color, str, SIZE_MAX);
 }
 
-void gp_text_ext(gp_pixmap *pixmap, const gp_text_style *style,
-                 gp_coord x, gp_coord y, int align,
-	         gp_pixel fg_color, gp_pixel bg_color,
-                 const char *str, size_t max_chars)
+gp_size gp_text_ext(gp_pixmap *pixmap, const gp_text_style *style,
+                    gp_coord x, gp_coord y, int align,
+	            gp_pixel fg_color, gp_pixel bg_color,
+                    const char *str, size_t max_chars)
 {
 	GP_CHECK_PIXMAP(pixmap);
 
 	if (str == NULL)
-		return;
+		return 0;
 
 	if (style == NULL)
 		style = &gp_default_style;
@@ -87,8 +87,8 @@ void gp_text_ext(gp_pixmap *pixmap, const gp_text_style *style,
 	GP_ASSERT(do_align(&topleft_x, &topleft_y, align, x, y, style, w) == 0,
 	         "Invalid aligment flags");
 
-	gp_text_raw(pixmap, style, topleft_x, topleft_y,
-	            align, fg_color, bg_color, str, max_chars);
+	return gp_text_raw(pixmap, style, topleft_x, topleft_y,
+	                   align, fg_color, bg_color, str, max_chars);
 }
 
 gp_size gp_vprint(gp_pixmap *pixmap, const gp_text_style *style,
@@ -105,9 +105,7 @@ gp_size gp_vprint(gp_pixmap *pixmap, const gp_text_style *style,
 	vsnprintf(buf, sizeof(buf), fmt, vac);
 	va_end(vac);
 
-	gp_text(pixmap, style, x, y, align, fg_color, bg_color, buf);
-
-	return gp_text_width(style, buf);
+	return gp_text(pixmap, style, x, y, align, fg_color, bg_color, buf);
 }
 
 gp_size gp_print(gp_pixmap *pixmap, const gp_text_style *style,

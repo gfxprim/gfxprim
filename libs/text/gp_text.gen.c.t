@@ -214,10 +214,10 @@ static void text_8BPP(gp_pixmap *pixmap, const gp_text_style *style,
 	}
 }
 
-void gp_text_raw(gp_pixmap *pixmap, const gp_text_style *style,
-                 gp_coord x, gp_coord y, uint8_t flags,
-                 gp_pixel fg, gp_pixel bg,
-		 const char *str, size_t max_chars)
+gp_size gp_text_raw(gp_pixmap *pixmap, const gp_text_style *style,
+                    gp_coord x, gp_coord y, uint8_t flags,
+                    gp_pixel fg, gp_pixel bg,
+                    const char *str, size_t max_chars)
 {
 	uint8_t bearing = flags & GP_TEXT_BEARING;
 
@@ -234,4 +234,6 @@ void gp_text_raw(gp_pixmap *pixmap, const gp_text_style *style,
 	default:
 		GP_ABORT("Invalid font glyph bitmap format");
 	}
+
+	return gp_text_width_len(style, str, max_chars);
 }
