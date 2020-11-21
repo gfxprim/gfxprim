@@ -246,7 +246,7 @@ static int RLE8_next(struct RLE *rle)
 	}
 }
 
-static int read_RLE8(gp_io *io, struct bitmap_info_header *header,
+static int read_RLE8(gp_io *io, struct gp_bmp_info_header *header,
                      gp_pixmap *pixmap, gp_progress_cb *callback)
 {
 	uint32_t palette_size = get_palette_size(header);
