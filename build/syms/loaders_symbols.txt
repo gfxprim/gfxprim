@@ -106,3 +106,7 @@ gp_bmp_match_pixel_type
 gp_bmp_palette_size
 gp_bmp_read_pixels
 gp_bmp_read_info_header
+
+gp_read_ico_ex
+gp_match_ico
+gp_ico

@@ -40,5 +40,5 @@ static inline int gp_save_{{fmt}}(const gp_pixmap *src, const char *dst_path,
 	return gp_loader_save_image(&gp_{{fmt}}, src, dst_path, callback);
 }
 
-@ for fmt in ['webp', 'jp2', 'pcx', 'gif', 'psp', 'psd']:
+@ for fmt in ['ico', 'webp', 'jp2', 'pcx', 'gif', 'psp', 'psd']:
 {@ reader(fmt) @}
