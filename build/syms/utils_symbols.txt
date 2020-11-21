@@ -12,6 +12,7 @@ gp_vec_shrink
 gp_vec_expand
 
 gp_vec_printf
+gp_vec_vprintf
 
 gp_matrix_delete_rows
 gp_matrix_insert_rows

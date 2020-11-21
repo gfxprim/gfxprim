@@ -10,14 +10,14 @@
 #include <stdarg.h>
 #include <utils/gp_vec_str.h>
 
-char *gp_vec_printf(char *self, const char *fmt, ...)
+char *gp_vec_vprintf(char *self, const char *fmt, va_list va)
 {
-	va_list ap;
 	size_t len;
+	va_list cpy;
 
-	va_start(ap, fmt);
-	len = vsnprintf(NULL, 0, fmt, ap);
-	va_end(ap);
+	va_copy(cpy, va);
+	len = vsnprintf(NULL, 0, fmt, cpy);
+	va_end(cpy);
 
 	if (!self)
 		self = gp_vec_new(len + 1, 1);
@@ -27,8 +27,17 @@ char *gp_vec_printf(char *self, const char *fmt, ...)
 	if (!self)
 		return NULL;
 
+	vsprintf(self, fmt, va);
+
+	return self;
+}
+
+char *gp_vec_printf(char *self, const char *fmt, ...)
+{
+	va_list ap;
+
 	va_start(ap, fmt);
-	vsprintf(self, fmt, ap);
+	self = gp_vec_vprintf(self, fmt, ap);
 	va_end(ap);
 
 	return self;

@@ -144,4 +144,15 @@ static inline char *gp_vec_strclr(char *self)
 char *gp_vec_printf(char *self, const char *fmt, ...)
                     __attribute__((format (printf, 2, 3)));
 
+/*
+ * @brief Printf va_list into a string vector.
+ *
+ * @self A string vector.
+ * @fmt Printf format string.
+ * @va  A va list.
+ *
+ * @return A new vector size or -1 on allocation failure.
+ */
+char *gp_vec_vprintf(char *self, const char *fmt, va_list va);
+
 #endif	/* GP_VEC_STR_H__ */
