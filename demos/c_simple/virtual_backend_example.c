@@ -140,7 +140,7 @@ int main(int argc, char *argv[])
 
 			switch (ev.type) {
 			case GP_EV_KEY:
-				switch (ev.val.key.key) {
+				switch (ev.key.key) {
 				case GP_KEY_ESC:
 				case GP_KEY_Q:
 					gp_backend_exit(backend);

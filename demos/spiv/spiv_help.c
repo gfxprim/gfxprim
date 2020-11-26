@@ -270,7 +270,7 @@ void draw_help(gp_backend *backend)
 				if (ev.code != GP_EV_KEY_DOWN)
 					continue;
 
-				switch (ev.val.key.key) {
+				switch (ev.key.key) {
 				case GP_KEY_DOWN:
 					if (last < help_keys_len)
 						last = redraw_help(backend, ++loff, xoff);

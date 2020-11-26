@@ -240,25 +240,23 @@ struct gp_ev_sys {
 	uint32_t w, h;
 };
 
-union gp_ev_val {
-	/* generic one integer value */
-	int32_t val;
-	/* key */
-	struct gp_ev_key key;
-	/* position */
-	struct gp_ev_pos_rel rel;
-	struct gp_ev_pos_abs abs;
-	/* system event */
-	struct gp_ev_sys sys;
-	/* timer event */
-	gp_timer *tmr;
-};
-
 struct gp_event {
 	/* event */
 	uint16_t type;
 	uint32_t code;
-	union gp_ev_val val;
+	union {
+		/* generic one integer value */
+		int32_t val;
+		/* key */
+		struct gp_ev_key key;
+		/* position */
+		struct gp_ev_pos_rel rel;
+		struct gp_ev_pos_abs abs;
+		/* system event */
+		struct gp_ev_sys sys;
+		/* timer event */
+		gp_timer *tmr;
+	};
 
 	/* input device id */
 	uint32_t dev_id;

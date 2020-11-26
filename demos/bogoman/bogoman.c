@@ -58,7 +58,7 @@ static void event_loop(struct bogoman_render *render, gp_backend *backend)
 			if (ev.code != GP_EV_KEY_DOWN)
 				break;
 
-			switch (ev.val.val) {
+			switch (ev.val) {
 			case GP_KEY_ESC:
 				gp_backend_exit(backend);
 				exit(0);

@@ -51,7 +51,7 @@ int main(int argc, char *argv[])
 
 		gp_backend_wait_event(backend, &ev);
 
-		if (ev.type == GP_EV_KEY && ev.val.val == GP_KEY_Q) {
+		if (ev.type == GP_EV_KEY && ev.val == GP_KEY_Q) {
 			gp_backend_exit(backend);
 			return 0;
 		}

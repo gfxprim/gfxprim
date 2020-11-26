@@ -77,7 +77,7 @@ static void event_loop(void)
 			if (ev.code != GP_EV_KEY_DOWN)
 				continue;
 
-			switch (ev.val.key.key) {
+			switch (ev.key.key) {
 			case GP_KEY_X:
 				win->pixmap->x_swap = !win->pixmap->x_swap;
 			break;

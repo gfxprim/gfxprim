@@ -92,7 +92,7 @@ int main(int argc, char *argv[])
 			if (!(ev.code == GP_EV_KEY_DOWN))
 				continue;
 
-			switch (ev.val.val) {
+			switch (ev.val) {
 			case GP_KEY_Q:
 				gp_backend_exit(backend);
 				return 0;

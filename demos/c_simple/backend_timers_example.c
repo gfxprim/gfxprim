@@ -72,7 +72,7 @@ int main(void)
 
 		switch (ev.type) {
 		case GP_EV_KEY:
-			switch (ev.val.val) {
+			switch (ev.val) {
 			case GP_KEY_ESC:
 			case GP_KEY_Q:
 				gp_backend_exit(backend);

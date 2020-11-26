@@ -32,7 +32,7 @@ static void draw_event(gp_event *ev)
 	gp_text_clear(win, NULL, 20, 20, align, black, size);
 	size = gp_print(win, NULL, 20, 20, align,
 	                white, black, "Key=%s",
-			gp_event_key_name(ev->val.key.key));
+			gp_event_key_name(ev->key.key));
 
 	gp_backend_flip(backend);
 }
@@ -56,7 +56,7 @@ static void event_loop(void)
 			case GP_EV_KEY:
 				draw_event(&ev);
 
-				switch (ev.val.key.key) {
+				switch (ev.key.key) {
 				case GP_KEY_ESC:
 					gp_backend_exit(backend);
 					exit(0);
@@ -90,7 +90,7 @@ static void event_loop(void)
 					size = gp_print(win, NULL, 20, 40, align,
 					                white, black, "X=%3u Y=%3u dX=%3i dY=%3i",
 						        ev.cursor_x, ev.cursor_y,
-							ev.val.rel.rx, ev.val.rel.ry);
+							ev.rel.rx, ev.rel.ry);
 					gp_backend_flip(backend);
 				break;
 				}

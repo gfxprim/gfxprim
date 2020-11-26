@@ -76,20 +76,20 @@ static void dump_rel(gp_event *ev)
 	case GP_EV_REL_POS:
 		printf("Position %u %u dx=%i dy=%i\n",
 		       ev->cursor_x, ev->cursor_y,
-		       ev->val.rel.rx, ev->val.rel.ry);
+		       ev->rel.rx, ev->rel.ry);
 	break;
 	case GP_EV_REL_WHEEL:
-		printf("Wheel %i\n", ev->val.val);
+		printf("Wheel %i\n", ev->val);
 	break;
 	}
 }
 
 static void dump_key(gp_event *ev)
 {
-	const char *name = gp_event_key_name(ev->val.key.key);
+	const char *name = gp_event_key_name(ev->key.key);
 
 	printf("Key %i (Key%s) %s\n",
-	       ev->val.key.key, name, ev->code ? "down" : "up");
+	       ev->key.key, name, ev->code ? "down" : "up");
 }
 
 static void dump_abs(gp_event *ev)
@@ -97,7 +97,7 @@ static void dump_abs(gp_event *ev)
 	switch (ev->code) {
 	case GP_EV_ABS_POS:
 		printf("Position %u %u %u\n",
-		       ev->cursor_x, ev->cursor_y, ev->val.abs.pressure);
+		       ev->cursor_x, ev->cursor_y, ev->abs.pressure);
 	break;
 	}
 }
@@ -109,7 +109,7 @@ static void dump_sys(gp_event *ev)
 		printf("Sys Quit\n");
 	break;
 	case GP_EV_SYS_RESIZE:
-		printf("Sys Resize %ux%u\n", ev->val.sys.w, ev->val.sys.h);
+		printf("Sys Resize %ux%u\n", ev->sys.w, ev->sys.h);
 	break;
 	}
 }
@@ -132,7 +132,7 @@ void gp_event_dump(gp_event *ev)
 		dump_sys(ev);
 	break;
 	case GP_EV_TMR:
-		printf("Timer %s expired\n", ev->val.tmr->id);
+		printf("Timer %s expired\n", ev->tmr->id);
 	break;
 	default:
 		printf("Unknown %u\n", ev->type);

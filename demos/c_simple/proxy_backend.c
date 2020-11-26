@@ -158,7 +158,7 @@ static int backend_event(struct gp_fd *self, struct pollfd *pfd)
 			if (ev.code != GP_EV_KEY_DOWN)
 				goto to_cli;
 
-			switch (ev.val.val) {
+			switch (ev.val) {
 			case GP_KEY_ESC:
 				do_exit();
 			break;
@@ -171,7 +171,7 @@ static int backend_event(struct gp_fd *self, struct pollfd *pfd)
 				redraw();
 			break;
 			case GP_KEY_1 ... GP_KEY_9:
-				show_client(ev.val.val - GP_KEY_1 + 1);
+				show_client(ev.val - GP_KEY_1 + 1);
 			break;
 			case GP_KEY_0:
 				show_client(0);

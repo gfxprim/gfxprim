@@ -338,7 +338,7 @@ void event_loop(void)
 			if (ev.code != GP_EV_KEY_DOWN)
 				continue;
 
-			switch (ev.val.key.key) {
+			switch (ev.key.key) {
 			case GP_KEY_X:
 				win->x_swap = !win->x_swap;
 			break;

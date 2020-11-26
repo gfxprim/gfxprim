@@ -874,17 +874,17 @@ int main(int argc, char *argv[])
 			case GP_EV_REL:
 				switch (ev.code) {
 				case GP_EV_REL_WHEEL:
-					if (ev.val.val > 0)
+					if (ev.val > 0)
 						goto next;
 
-					if (ev.val.val < 0)
+					if (ev.val < 0)
 						goto prev;
 				break;
 				case GP_EV_REL_POS:
 					if (gp_event_get_key(&ev, GP_BTN_LEFT))
 						set_zoom_offset(&params,
-						                ev.val.rel.rx,
-								ev.val.rel.ry);
+						                ev.rel.rx,
+								ev.rel.ry);
 				break;
 				}
 			break;
@@ -892,7 +892,7 @@ int main(int argc, char *argv[])
 				if (ev.code != GP_EV_KEY_DOWN)
 					continue;
 
-				switch (ev.val.key.key) {
+				switch (ev.key.key) {
 				case GP_KEY_H:
 					draw_help(backend);
 					show_image(&params);
@@ -1065,7 +1065,7 @@ int main(int argc, char *argv[])
 						image_seek(&params, IMG_CUR, -1);
 				break;
 				case GP_KEY_1 ... GP_KEY_9: {
-					float val = ev.val.key.key - GP_KEY_1 + 1;
+					float val = ev.key.key - GP_KEY_1 + 1;
 
 					if (!shift_flag)
 						val = 1/val;
@@ -1095,7 +1095,7 @@ int main(int argc, char *argv[])
 						zoom_mul(&params, 1/1.5);
 				break;
 				case GP_KEY_F1 ... GP_KEY_F10:
-					image_action_run(ev.val.key.key - GP_KEY_F1 + 1,
+					image_action_run(ev.key.key - GP_KEY_F1 + 1,
 					                 image_loader_img_path());
 				break;
 				}

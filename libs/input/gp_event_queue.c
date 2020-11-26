@@ -184,8 +184,8 @@ void gp_event_queue_push_rel(gp_event_queue *self,
 	self->cur_state.type = GP_EV_REL;
 	self->cur_state.code = GP_EV_REL_POS;
 
-	self->cur_state.val.rel.rx = rx;
-	self->cur_state.val.rel.ry = ry;
+	self->cur_state.rel.rx = rx;
+	self->cur_state.rel.ry = ry;
 
 	set_time(self, time);
 
@@ -221,12 +221,12 @@ void gp_event_queue_push_abs(gp_event_queue *self,
 	/* event header */
 	self->cur_state.type = GP_EV_ABS;
 	self->cur_state.code = GP_EV_ABS_POS;
-	self->cur_state.val.abs.x = x;
-	self->cur_state.val.abs.y = y;
-	self->cur_state.val.abs.pressure = pressure;
-	self->cur_state.val.abs.x_max = x_max;
-	self->cur_state.val.abs.y_max = y_max;
-	self->cur_state.val.abs.pressure_max = pressure_max;
+	self->cur_state.abs.x = x;
+	self->cur_state.abs.y = y;
+	self->cur_state.abs.pressure = pressure;
+	self->cur_state.abs.x_max = x_max;
+	self->cur_state.abs.y_max = y_max;
+	self->cur_state.abs.pressure_max = pressure_max;
 
 	set_time(self, time);
 
@@ -273,17 +273,17 @@ static char keys_to_ascii_shift[] = {
  */
 static void key_to_ascii(gp_event *ev)
 {
-	unsigned int key = ev->val.key.key;
+	unsigned int key = ev->key.key;
 
-	ev->val.key.ascii = 0;
+	ev->key.ascii = 0;
 
 	if (gp_event_get_key(ev, GP_KEY_LEFT_SHIFT) ||
 	    gp_event_get_key(ev, GP_KEY_RIGHT_SHIFT)) {
-		if (ev->val.key.key < sizeof(keys_to_ascii_shift))
-			ev->val.key.ascii = keys_to_ascii_shift[key];
+		if (ev->key.key < sizeof(keys_to_ascii_shift))
+			ev->key.ascii = keys_to_ascii_shift[key];
 	} else {
-		if (ev->val.key.key < sizeof(keys_to_ascii))
-			ev->val.key.ascii = keys_to_ascii[key];
+		if (ev->key.key < sizeof(keys_to_ascii))
+			ev->key.ascii = keys_to_ascii[key];
 	}
 }
 
@@ -307,7 +307,7 @@ void gp_event_queue_push_key(gp_event_queue *self,
 	/* event header */
 	self->cur_state.type = GP_EV_KEY;
 	self->cur_state.code = code;
-	self->cur_state.val.key.key = key;
+	self->cur_state.key.key = key;
 
 	key_to_ascii(&self->cur_state);
 
@@ -324,8 +324,8 @@ void gp_event_queue_push_resize(gp_event_queue *self,
 	self->cur_state.type = GP_EV_SYS;
 	self->cur_state.code = GP_EV_SYS_RESIZE;
 
-	self->cur_state.val.sys.w = w;
-	self->cur_state.val.sys.h = h;
+	self->cur_state.sys.w = w;
+	self->cur_state.sys.h = h;
 
 	set_time(self, time);
 
@@ -344,7 +344,7 @@ void gp_event_queue_push(gp_event_queue *self,
 	default:
 		self->cur_state.type = type;
 		self->cur_state.code = code;
-		self->cur_state.val.val = value;
+		self->cur_state.val = value;
 
 		set_time(self, time);
 

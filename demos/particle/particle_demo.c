@@ -97,7 +97,7 @@ int main(int argc, char *argv[])
 				if (ev.code != GP_EV_KEY_DOWN)
 					continue;
 
-				switch (ev.val.key.key) {
+				switch (ev.key.key) {
 				case GP_KEY_ESC:
 				case GP_KEY_ENTER:
 				case GP_KEY_Q:
