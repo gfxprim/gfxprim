@@ -119,7 +119,7 @@ and other Debian based distributions.
 
 .Install basic tools
 -------------------------------------------------------------------------------
-apt-get install gcc make
+apt-get install gcc make pkg-config
 -------------------------------------------------------------------------------
 
 .Install image devel libraries
@@ -129,7 +129,7 @@ apt-get install libjpeg-dev libpng-dev libgif-dev libtiff-dev libwebp-dev
 
 .Install FreeType devel library
 -------------------------------------------------------------------------------
-apt-get install libfreetype6-dev
+apt-get install libfreetype6-dev libfontconfig-dev
 -------------------------------------------------------------------------------
 
 .Install X11 devel library
@@ -144,9 +144,9 @@ apt-get install swig python-dev
 
 .All in the one for the lazy
 -------------------------------------------------------------------------------
-apt-get install gcc make libjpeg-dev libpng-dev libgif-dev libtiff-dev
-                libwebp-dev libfreetype6-dev libx11-dev libxext-dev
-                swig python-dev
+apt-get install gcc make pkg-config libjpeg-dev libpng-dev libgif-dev
+                libtiff-dev libwebp-dev libfreetype6-dev libfontconfig-dev
+                libx11-dev libxext-dev swig python-dev
 -------------------------------------------------------------------------------
 
 Packages
