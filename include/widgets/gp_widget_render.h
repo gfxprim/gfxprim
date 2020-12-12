@@ -14,6 +14,7 @@
 #include <text/gp_text.h>
 #include <input/gp_timer.h>
 #include <utils/gp_bbox.h>
+#include <utils/gp_fds.h>
 
 #include <widgets/gp_widget.h>
 
