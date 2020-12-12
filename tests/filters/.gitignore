@@ -1,3 +1,4 @@
-/APICoverage.gen
-/FilterMirrorH
-/FiltersCompare.gen
+api_coverage.gen
+filter_mirror_h
+filters_compare.gen
+linear_convolution
