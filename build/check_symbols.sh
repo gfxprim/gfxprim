@@ -71,6 +71,8 @@ do_check libgfxprim-grabbers.so syms/grabbers_symbols.txt
 
 do_check libgfxprim-loaders.so syms/loaders_symbols.txt
 
+do_check libgfxprim-widgets.so syms/widget_symbols.txt
+
 if [ -n "$FOUND" ]; then
 	echo
 	echo "Set them static or update lists of exported functions in syms/foo_symbols.txt"

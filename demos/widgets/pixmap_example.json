@@ -1,0 +1,43 @@
+{
+ "cols": 3,
+ "widgets": [
+  {
+   "cols": 2,
+   "rows": 2,
+   "widgets": [
+    {
+     "type": "label",
+     "text": "fg:"
+    },
+    {
+     "type": "label",
+     "text": "bg:"
+    },
+    {
+     "type": "textbox",
+     "text": "ffffff",
+     "max_size" : 6,
+     "on_event": "set_fg_color"
+    },
+    {
+     "type": "textbox",
+     "text": "000000",
+     "max_size" : 6,
+     "on_event": "set_bg_color"
+    }
+   ]
+  },
+  {
+   "type": "pixmap",
+   "w": 100,
+   "h": 100,
+   "on_event": "pixmap_on_event",
+   "uid": "pixmap"
+  },
+  {
+   "type": "button",
+   "label": "clear",
+   "on_event": "button_on_event"
+  }
+ ]
+}

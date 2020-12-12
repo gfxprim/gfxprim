@@ -1,0 +1,21 @@
+{
+ "widgets": [
+  {
+   "type": "tabs",
+   "labels": [
+    "1",
+    "2"
+   ],
+   "widgets": [
+    {
+     "type": "button",
+     "label": "Button"
+    },
+    {
+     "type": "button",
+     "label": "Button"
+    }
+   ]
+  }
+ ]
+}

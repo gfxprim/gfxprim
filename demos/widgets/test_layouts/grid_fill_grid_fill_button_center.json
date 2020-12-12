@@ -1,0 +1,17 @@
+{
+ "align": "fill",
+ "widgets": [
+  {
+   "align": "fill",
+   "rows": 3,
+   "widgets": [
+    {
+      "type": "button",
+      "label": "Button",
+      "on_event": "on_event",
+      "align": "center"
+    }
+   ]
+  }
+ ]
+}

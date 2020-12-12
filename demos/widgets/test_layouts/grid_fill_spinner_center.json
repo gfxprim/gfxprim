@@ -1,0 +1,13 @@
+{
+ "align": "fill",
+ "widgets": [
+  {
+   "type": "spinner",
+   "min": 0,
+   "max": 10,
+   "val": 0,
+   "on_event": "on_event",
+   "align": "center"
+  }
+ ]
+}

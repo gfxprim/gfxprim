@@ -1,0 +1,11 @@
+{
+ "align": "fill",
+ "widgets": [
+  {
+   "type": "checkbox",
+   "label": "Checkbox",
+   "on_event": "on_event",
+   "align": "center"
+  }
+ ]
+}

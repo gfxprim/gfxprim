@@ -1,0 +1,12 @@
+{
+ "align": "fill",
+ "widgets": [
+  {
+   "align": "hfill",
+   "type": "slider",
+   "min": 0,
+   "max": 100,
+   "val": 50
+  }
+ ]
+}

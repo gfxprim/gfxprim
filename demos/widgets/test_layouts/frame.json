@@ -1,0 +1,17 @@
+{
+  "type": "frame",
+  "label": "Frame Label",
+  "widget": {
+   "cols": 2,
+   "widgets": [
+     {
+       "type": "label",
+       "text": "Label:"
+     },
+     {
+      "type": "textbox",
+      "size": 10
+     }
+   ]
+  }
+}

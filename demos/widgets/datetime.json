@@ -1,0 +1,78 @@
+{
+  "rows": 3,
+  "widgets": [
+    {
+      "type": "frame",
+      "label": "Date",
+      "align": "fill",
+      "widget":
+        {
+          "cols": 3,
+          "widgets": [
+            {
+              "type": "spinner",
+              "min": 1,
+              "max": 31,
+	      "uid": "day"
+            },
+            {
+              "type": "spinner",
+              "min": 1,
+              "max": 12,
+              "uid": "mon",
+              "on_event": "mon_year_on_event"
+            },
+            {
+              "type": "spinner",
+              "min": 1900,
+              "max": 3000,
+              "uid": "year",
+              "on_event": "mon_year_on_event"
+            }
+          ]
+       }
+    },
+    {
+      "type": "frame",
+      "label": "Time",
+      "align": "fill",
+      "widget":
+        {
+          "cols": 5,
+          "widgets": [
+            {
+              "type": "spinner",
+              "min": 0,
+              "max": 23,
+              "uid": "hour"
+           },
+           {
+              "type": "label",
+              "text": ":"
+           },
+           {
+              "type": "spinner",
+              "min": 0,
+              "max": 59,
+              "uid": "min"
+           },
+           {
+             "type": "label",
+             "text": ":"
+           },
+           {
+             "type": "spinner",
+             "min": 0,
+             "max": 59,
+             "uid": "sec"
+           }
+         ]
+      }
+    },
+    {
+      "type": "button",
+      "label": "Load",
+      "on_event": "load_sys_time"
+    }
+  ]
+}

@@ -1,0 +1,24 @@
+Widgets login window
+--------------------
+
+This is a simple example widget application that renders a login like dialog.
+The layout is loaded from a JSON file and there are two different example
+layouts that can be loaded and will change the application look without any
+changes to the C source code.
+
+[source,c]
+------------------------------------------------------------------
+include::../demos/widgets/login_example.c[]
+------------------------------------------------------------------
+
+[source,json]
+------------------------------------------------------------------
+include::../demos/widgets/login_example_1.json[]
+------------------------------------------------------------------
+image::login_example_1.png[Login example 1]
+
+[source,json]
+------------------------------------------------------------------
+include::../demos/widgets/login_example_2.json[]
+------------------------------------------------------------------
+image::login_example_2.png[Login example 2]

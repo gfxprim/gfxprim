@@ -1,0 +1,16 @@
+Widgets pixmap
+--------------
+
+Simple application that draws into a pixmap.
+
+[source,c]
+------------------------------------------------------------------
+include::../demos/widgets/pixmap_example.c[]
+------------------------------------------------------------------
+
+[source,json]
+------------------------------------------------------------------
+include::../demos/widgets/pixmap_example.json[]
+------------------------------------------------------------------
+
+image::example_widgets_pixmap.png[Pixmap example]

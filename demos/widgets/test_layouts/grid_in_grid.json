@@ -1,0 +1,12 @@
+{
+ "widgets": [
+  {
+   "widgets": [
+    {
+     "type": "button",
+     "label": "button"
+    }
+   ]
+  }
+ ]
+}

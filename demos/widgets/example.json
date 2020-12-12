@@ -1,0 +1,49 @@
+{
+  "rows": 8,
+  "widgets": [
+    {
+      "type": "label",
+      "text": "Label"
+    },
+    {
+      "type": "checkbox",
+      "label": "Check Box",
+      "set": 1
+    },
+    {
+      "type": "progressbar",
+      "val": 50.1
+    },
+    {
+      "type": "textbox",
+      "text": "Text Box",
+      "size": 10
+    },
+    {
+      "type": "textbox",
+      "size": 10,
+      "hidden": true,
+      "uid": "passwd"
+    },
+    {
+      "type": "spinner",
+      "min": 0,
+      "max": 10,
+      "val": 5
+    },
+    {
+      "type": "radiobutton",
+      "buttons": [
+        "First",
+	"Second",
+	"Third"
+      ],
+      "selected": 1
+    },
+    {
+      "type": "button",
+      "label": "Button",
+      "on_event": "button_callback"
+    }
+  ]
+}

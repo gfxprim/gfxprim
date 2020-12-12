@@ -1,0 +1,14 @@
+{
+ "align": "fill",
+ "widgets": [
+  {
+   "align": "fill",
+   "widgets": [
+    {
+     "type": "button",
+     "label": "button"
+    }
+   ]
+  }
+ ]
+}

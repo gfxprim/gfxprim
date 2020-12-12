@@ -371,6 +371,11 @@ def write_gfxprim_config(cfg, libs):
     # ldflags for specific modules
     for i in modules:
         ldflags = '-lgfxprim-' + i
+
+        if i == "widgets":
+            f.write('\t--cflags-widgets) echo -n "-rdynamic";;\n')
+            ldflags += " -lgfxprim-backends"
+
         f.write('\t--libs-%s) echo -n "%s ";;\n' % (i, ldflags))
 
     f.write('\t*) echo "Invalid option \'$1\'"; echo $USAGE; exit 1;;\n')
@@ -505,6 +510,10 @@ if __name__ ==  '__main__':
                     "A library for configuring and customizing font access",
                     [header_exists, "fontconfig/fontconfig.h"],
                     "", "-lfontconfig", ["core"]],
+                   ["json-c",
+                    "A JSON implementation in C",
+                    [header_exists, "json-c/json.h"],
+                    "", "-ljson-c", ["widgets"]],
                    ["dl",
                     "Dynamic linker",
                     [header_exists, "dlfcn.h"], "", "-ldl", ["core"]],

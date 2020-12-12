@@ -36,4 +36,6 @@
 /* grabbers */
 #include "grabbers/gp_grabbers.h"
 
+#include "widgets/gp_widgets.h"
+
 #endif /* GFXPRIM_H__ */

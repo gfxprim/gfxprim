@@ -8,7 +8,7 @@ SOURCES=index.html about.txt pixmap.txt loaders.txt filters.txt \
 	get_put_pixel.txt blits.txt progress_callback.txt text.txt \
 	event_queue.txt compilation.txt filters_resize.txt \
 	filters_dithering.txt filters_python.txt spiv.txt core_common.txt \
-	convert.txt news_1_0_0-rc1.txt loaders_io.txt signatures.txt
+	convert.txt news_1_0_0-rc1.txt loaders_io.txt signatures.txt widgets.txt
 
 SOURCES+=core_python.txt gfx_python.txt loaders_python.txt backends_python.txt
 
@@ -52,10 +52,10 @@ toolcheck:
 		echo "ERROR: Could not find 'source-highlight'" ; exit 127 ; fi
 	@if [ ! -d "/usr/share/graphviz" ] ; then \
 		echo "ERROR: Could not find 'graphviz'" ; exit 127 ; fi
-	@if [ -z `which latex 2>/dev/null` ] ; then \
-		echo "error: could not find 'latex'" ; exit 127 ; fi
-	@if [ -z `which dvipng 2>/dev/null` ] ; then \
-		echo "error: could not find 'dvipng'" ; exit 127 ; fi
+#	@if [ -z `which latex 2>/dev/null` ] ; then \
+#		echo "error: could not find 'latex'" ; exit 127 ; fi
+#	@if [ -z `which dvipng 2>/dev/null` ] ; then \
+#		echo "error: could not find 'dvipng'" ; exit 127 ; fi
 
 #
 # Create page for each part of API description

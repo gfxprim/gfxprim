@@ -1,0 +1,8 @@
+{
+  "type": "frame",
+  "widget":
+    {
+      "type": "label",
+      "text": "Frame without label"
+    }
+}
