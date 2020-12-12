@@ -104,7 +104,8 @@ void gp_widgets_register_callback(int (*on_event)(gp_event *));
  * @argv A main() argv.
  */
 void gp_widgets_main_loop(struct gp_widget *layout, const char *label,
-                          void (*init)(void), int argc, char *argv[]);
+                          void (*init)(void), int argc, char *argv[])
+                          __attribute__((noreturn));
 
 /**
  * @brief Replace a application layout.
