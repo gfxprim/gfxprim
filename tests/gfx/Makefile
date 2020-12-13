@@ -5,7 +5,7 @@ CSOURCES=$(filter-out $(wildcard *.gen.c),$(wildcard *.c))
 GENSOURCES=APICoverage.gen.c line_symmetry.gen.c fill_triangle.gen.c
 
 APPS=gfx_benchmark Circle FillCircle Line CircleSeg Polygon Ellipse HLine\
-     VLine PutPixelAA HLineAA LineAA FillEllipse FillRect APICoverage.gen\
+     VLine FillEllipse FillRect APICoverage.gen\
      line_symmetry.gen fill_triangle.gen fill_triangle
 
 Circle: common.o

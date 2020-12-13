@@ -15,9 +15,6 @@
 
 #include <gfxprim.h>
 
-/* Set to 1 to use Anti Aliased drawing */
-static int aa_flag = 0;
-
 /*
  * Generate color depending on distance from center
  *
@@ -56,10 +53,7 @@ static void draw(gp_pixmap *img, int level, float x0, float y0, float x1, float 
 
 		pixel = do_color(img->w/2, img->h/2, 1.00 * (x0+x1)/2, 1.00 * (y0 + y1)/2);
 
-		if (aa_flag)
-			gp_line_aa(img, x0 * 256, y0 * 256, x1 * 256, y1 * 256, pixel);
-		else
-			gp_line(img, x0, y0, x1, y1, pixel);
+		gp_line(img, x0, y0, x1, y1, pixel);
 
 		return;
 	}

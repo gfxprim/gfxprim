@@ -15,7 +15,6 @@ static gp_pixel black, white;
 
 static double start_angle = 0.0;
 
-static int aa_flag = 0;
 static int pause_flag = 0;
 
 static gp_backend *win;
@@ -41,13 +40,8 @@ void redraw_screen(void)
 		gp_pixel pixel;
 		pixel = gp_rgb_to_pixel(r, 0, b, win->pixmap->pixel_type);
 
-		if (aa_flag) {
-			gp_line_aa_raw(win->pixmap, GP_FP_FROM_INT(xcenter), GP_FP_FROM_INT(ycenter),
-				GP_FP_FROM_INT(xcenter + x), GP_FP_FROM_INT(ycenter + y), pixel);
-		} else {
-			gp_line(win->pixmap, xcenter + x, ycenter + y, xcenter, ycenter, pixel);
-			gp_line(win->pixmap, xcenter, ycenter, xcenter + x, ycenter + y, pixel);
-		}
+		gp_line(win->pixmap, xcenter + x, ycenter + y, xcenter, ycenter, pixel);
+		gp_line(win->pixmap, xcenter, ycenter, xcenter + x, ycenter + y, pixel);
 	}
 
 	gp_backend_flip(win);
@@ -68,9 +62,6 @@ void event_loop(void)
 				continue;
 
 			switch (ev.key.key) {
-			case GP_KEY_A:
-				aa_flag = !aa_flag;
-			break;
 			case GP_KEY_ESC:
 				gp_backend_exit(win);
 				exit(0);

@@ -61,19 +61,10 @@ void space_draw_particles(gp_pixmap *pixmap, struct space *space)
 
 		gp_coord x = space->particles[i].x;
 		gp_coord y = space->particles[i].y;
-		gp_coord a1 = GP_FP_1 * 4;
-		gp_coord a2 = GP_FP_1_2 * 2;
-
-/*
-		if (i == 0) {
-			x = GP_FP_1 * 10 + GP_FP_1_2;
-			y = GP_FP_1 * 10 + GP_FP_1_2;
-		}
-*/
 
 		color = gp_rgb_to_pixmap_pixel(0xee, 0xee, 0xee, pixmap);
 
-		gp_putpixel_aa(pixmap, x, y, color);
+		gp_putpixel(pixmap, x>>8, y>>8, color);
 
 		int val = SQUARE(space->particles[i].vx) + SQUARE(space->particles[i].vy);
 
@@ -84,28 +75,7 @@ void space_draw_particles(gp_pixmap *pixmap, struct space *space)
 
 		color = gp_rgb_to_pixmap_pixel(val, val, 0x40, pixmap);
 
-		/* Hexagons */
-		gp_line_aa(pixmap, x - a2, y - a1, x + a2, y - a1, color);
-	//	gp_line_aa(pixmap, x + a2, y - a1, x + a1, y - a2, color);
-		gp_line_aa(pixmap, x + a1, y - a2, x + a1, y + a2, color);
-	//	gp_line_aa(pixmap, x + a1, y + a2, x + a2, y + a1, color);
-		gp_line_aa(pixmap, x + a2, y + a1, x - a2, y + a1, color);
-	//	gp_line_aa(pixmap, x - a2, y + a1, x - a1, y + a2, color);
-		gp_line_aa(pixmap, x - a1, y + a2, x - a1, y - a2, color);
-	//	gp_line_aa(pixmap, x - a1, y - a2, x - a2, y - a1, color);
-/*
-		gp_putpixel_aa(pixmap, x + a2, y - a1, 0xffffff);
-		gp_putpixel_aa(pixmap, x + a1, y - a2, 0xffffff);
-
-		gp_putpixel_aa(pixmap, x + a1, y + a2, 0xffffff);
-		gp_putpixel_aa(pixmap, x + a2, y + a1, 0xffffff);
-
-		gp_putpixel_aa(pixmap, x - a2, y + a1, 0xffffff);
-		gp_putpixel_aa(pixmap, x - a1, y + a2, 0xffffff);
-
-		gp_putpixel_aa(pixmap, x - a1, y - a2, 0xffffff);
-		gp_putpixel_aa(pixmap, x - a2, y - a1, 0xffffff);
-*/
+		gp_circle(pixmap, x>>8, y>>8, 3, color);
 	}
 }
 

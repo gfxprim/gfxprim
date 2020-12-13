@@ -34,9 +34,4 @@
 #include <gfx/gp_arc.h>
 #include <gfx/gp_polygon.h>
 
-#include <gfx/gp_putpixel_aa.h>
-#include <gfx/gp_vline_aa.h>
-#include <gfx/gp_hline_aa.h>
-#include <gfx/gp_line_aa.h>
-
 #endif /* GP_GFX_H */

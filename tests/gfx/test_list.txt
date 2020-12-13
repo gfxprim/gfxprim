@@ -14,9 +14,5 @@ CircleSeg
 Polygon
 FillRect
 
-PutPixelAA
-HLineAA
-LineAA
-
 fill_triangle
 fill_triangle.gen

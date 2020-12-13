@@ -23,11 +23,6 @@
 %include "gp_arc.h"
 %include "gp_polygon.h"
 
-%include "gp_putpixel_aa.h"
-%include "gp_vline_aa.h"
-%include "gp_hline_aa.h"
-%include "gp_line_aa.h"
-
 %inline %{
 static gp_coord *gp_polygon_unpack_coordinates(PyObject *coords)
 {
