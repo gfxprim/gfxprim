@@ -12,30 +12,6 @@
 #include <gfx/gp_circle.h>
 #include <gfx/gp_hline.h>
 
-#include "algo/Circle.algo.h"
-
-/* Generate drawing functions for various bit depths. */
-GP_DEF_DRAW_FN_PER_BPP(gp_circle_raw, DEF_CIRCLE_FN)
-
-void gp_circle_raw(gp_pixmap *pixmap, gp_coord xcenter, gp_coord ycenter,
-                   gp_size r, gp_pixel pixel)
-{
-	GP_CHECK_PIXMAP(pixmap);
-
-	GP_FN_PER_BPP_PIXMAP(gp_circle_raw, pixmap, pixmap,
-	                      xcenter, ycenter, r, pixel);
-}
-
-void gp_circle(gp_pixmap *pixmap, gp_coord xcenter, gp_coord ycenter,
-               gp_size r, gp_pixel pixel)
-{
-	GP_CHECK_PIXMAP(pixmap);
-
-	GP_TRANSFORM_POINT(pixmap, xcenter, ycenter);
-
-	gp_circle_raw(pixmap, xcenter, ycenter, r, pixel);
-}
-
 void gp_ring_raw(gp_pixmap *pixmap, gp_coord xcenter, gp_coord ycenter,
                  gp_size r1, gp_size r2, gp_pixel pixel)
 {
