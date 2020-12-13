@@ -30,7 +30,7 @@ static void fill_circle_{{ ps.suffix }}(gp_pixmap *pixmap,
 {
 	/* for r == 0, circle degenerates to a point */
 	if (r == 0) {
-		gp_putpixel_raw_{{ ps.suffix }}(pixmap, xcenter, ycenter, pixel);
+		gp_putpixel_raw_clipped_{{ ps.suffix }}(pixmap, xcenter, ycenter, pixel);
 		return;
 	}
 
