@@ -19,6 +19,7 @@ hline: common.o
 vline: common.o
 fill_rect: common.o
 fill_triangle: common.o
+api_coverage.gen: common.o
 
 include ../tests.mk
 

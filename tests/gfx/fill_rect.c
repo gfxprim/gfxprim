@@ -31,19 +31,16 @@ static int test_rect(const struct testcase *t)
 	gp_pixmap *c;
 	int err;
 
-	c = gp_pixmap_alloc(t->w, t->h, GP_PIXEL_G8);
+	c = pixmap_alloc_canary(t->w, t->h, GP_PIXEL_G8);
 
-	if (c == NULL) {
+	if (!c) {
 		tst_err("Failed to allocate pixmap");
 		return TST_UNTESTED;
 	}
 
-	/* zero the pixels buffer */
-	memset(c->pixels, 0, c->w * c->h);
-
 	gp_fill_rect(c, t->x1, t->y1, t->x2, t->y2, 1);
 
-	err = compare_buffers(t->pixmap, c);
+	err = compare_buffers(t->pixmap, c) || check_canary(c);
 
 	if (err)
 		return TST_FAILED;

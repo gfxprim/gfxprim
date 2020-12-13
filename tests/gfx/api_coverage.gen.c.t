@@ -11,6 +11,7 @@
 #include <core/gp_pixmap.h>
 #include <gfx/gp_gfx.h>
 
+#include "common.h"
 #include "tst_test.h"
 
 @ API_List = [
@@ -54,7 +55,7 @@
 @ ]
 @
 @ def prep_pixmap(id, pt):
-gp_pixmap *{{ id }} = gp_pixmap_alloc(331, 331, GP_PIXEL_{{ pt.name }});
+gp_pixmap *{{ id }} = pixmap_alloc_canary(331, 331, GP_PIXEL_{{ pt.name }});
 @ end
 @
 @ def prep_int(id):
@@ -70,6 +71,12 @@ int {{ id }} = 2;
 {@ prep_int(param.split(':', 1)[1]) @}
 @ end
 @
+@ def check_canary(param):
+@     if (param.split(':', 1)[0] == 'gp_pixmap'):
+if (check_canary({{ param.split(':', 1)[1] }}))
+	return TST_FAILED;
+@ end
+@
 @ def get_param(param):
 @    if len(param.split(':', 1)) == 1:
 @         return 'NULL'
@@ -80,13 +87,17 @@ int {{ id }} = 2;
 @ for fn in API_List:
 @     for pt in pixeltypes:
 @         if not pt.is_unknown():
-static int Gfx_{{ fn[0]}}_{{ pt.name }}(void)
+static int gfx_{{ fn[0]}}_{{ pt.name }}(void)
 {
 @             for param in fn[1:]:
 	{@ prep_param(param, pt) @}
 @             end
 
 	gp_{{ fn[0] }}({{ ', '.join(map(get_param, fn[1:])) }});
+
+@             for param in fn[1:]:
+	{@ check_canary(param) @}
+@             end
 
 	return TST_SUCCESS;
 }
@@ -100,7 +111,7 @@ const struct tst_suite tst_suite = {
 @     for pt in pixeltypes:
 @         if not pt.is_unknown():
 		{.name = "{{ fn[0] }} {{ pt.name }}",
-		 .tst_fn = Gfx_{{ fn[0] }}_{{ pt.name }}},
+		 .tst_fn = gfx_{{ fn[0] }}_{{ pt.name }}},
 @ end
 		{.name = NULL}
 	}

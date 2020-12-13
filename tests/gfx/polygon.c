@@ -29,9 +29,9 @@ static int test_polygon(struct testcase *t)
 	gp_pixmap *c;
 	int err;
 
-	c = gp_pixmap_alloc(t->w, t->h, GP_PIXEL_G8);
+	c = pixmap_alloc_canary(t->w, t->h, GP_PIXEL_G8);
 
-	if (c == NULL) {
+	if (!c) {
 		tst_err("Failed to allocate pixmap");
 		return TST_UNTESTED;
 	}
@@ -41,7 +41,7 @@ static int test_polygon(struct testcase *t)
 
 	gp_fill_polygon(c, t->edge_count, t->edges, 1);
 
-	err = compare_buffers(t->pixmap, c);
+	err = compare_buffers(t->pixmap, c) || check_canary(c);
 
 	if (err) {
 		tst_msg("Patterns are different");

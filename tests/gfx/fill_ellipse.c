@@ -31,19 +31,16 @@ static int test_ellipse(const struct testcase *t)
 	gp_pixmap *c;
 	int err;
 
-	c = gp_pixmap_alloc(t->w, t->h, GP_PIXEL_G8);
+	c = pixmap_alloc_canary(t->w, t->h, GP_PIXEL_G8);
 
-	if (c == NULL) {
+	if (!c) {
 		tst_err("Failed to allocate pixmap");
 		return TST_UNTESTED;
 	}
 
-	/* zero the pixels buffer */
-	memset(c->pixels, 0, c->w * c->h);
-
 	gp_fill_ellipse(c, t->x, t->y, t->a, t->b, 1);
 
-	err = compare_buffers(t->pixmap, c);
+	err = compare_buffers(t->pixmap, c) || check_canary(c);
 
 	if (err)
 		return TST_FAILED;
@@ -249,6 +246,18 @@ static struct testcase testcase_ellipse_a3_b3 = {
 	}
 };
 
+static struct testcase testcase_ellipse_a0_b0_clip = {
+	.x = 2,
+	.y = 2,
+	.a = 0,
+	.b = 0,
+
+	.w = 1,
+	.h = 1,
+
+	.pixmap = { 0 }
+};
+
 static struct testcase testcase_ellipse_a6_b6_clip = {
 	.x = 0,
 	.y = 0,
@@ -336,6 +345,10 @@ const struct tst_suite tst_suite = {
 		{.name = "FillEllipse a=3 b=3",
 		 .tst_fn = test_ellipse,
 		 .data = &testcase_ellipse_a3_b3},
+
+		{.name = "FillEllipse a=0 b=0 clipped",
+		 .tst_fn = test_ellipse,
+		 .data = &testcase_ellipse_a0_b0_clip},
 
 		{.name = "FillEllipse a=5 b=5 clipped",
 		 .tst_fn = test_ellipse,

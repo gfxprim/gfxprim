@@ -4,6 +4,7 @@
  */
 
 #include <stdio.h>
+#include <string.h>
 
 #include "common.h"
 
@@ -67,4 +68,52 @@ int compare_buffers(const char *pattern, const gp_pixmap *c)
 		dump_buffers(pattern, c);
 
 	return err;
+}
+
+#define CANARY_BYTES 100
+
+gp_pixmap *pixmap_alloc_canary(gp_size w, gp_size h, gp_pixel_type ptype)
+{
+	gp_pixmap *ret = gp_pixmap_alloc(w, h, ptype);
+
+	if (!ret)
+		return NULL;
+
+	free(ret->pixels);
+
+	size_t size = ret->bytes_per_row * h;
+
+	ret->pixels = malloc(size + 2 * CANARY_BYTES);
+	if (!ret->pixels) {
+		free(ret);
+		return NULL;
+	}
+
+	memset(ret->pixels, 0, size + 2 * CANARY_BYTES);
+	ret->pixels += CANARY_BYTES;
+
+	return ret;
+}
+
+int check_canary(gp_pixmap *pixmap)
+{
+	unsigned int i, ret = 0;
+	unsigned char *sc = pixmap->pixels - CANARY_BYTES;
+	unsigned char *ec = pixmap->pixels + pixmap->bytes_per_row * pixmap->h;
+
+	for (i = 0; i < CANARY_BYTES; i++) {
+		if (sc[i]) {
+			printf("Corrupted memmory %i bytes before pixmap\n", -(i - 50));
+			ret = 1;
+		}
+	}
+
+	for (i = 0; i < CANARY_BYTES; i++) {
+		if (ec[i]) {
+			printf("Corrupted memmory %i bytes after pixmap\n", i);
+			ret = 1;
+		}
+	}
+
+	return ret;
 }

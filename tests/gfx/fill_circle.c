@@ -30,19 +30,16 @@ static int test_circle(const struct testcase *t)
 	gp_pixmap *c;
 	int err;
 
-	c = gp_pixmap_alloc(t->w, t->h, GP_PIXEL_G8);
+	c = pixmap_alloc_canary(t->w, t->h, GP_PIXEL_G8);
 
-	if (c == NULL) {
+	if (!c) {
 		tst_err("Failed to allocate pixmap");
 		return TST_UNTESTED;
 	}
 
-	/* zero the pixels buffer */
-	memset(c->pixels, 0, c->w * c->h);
-
 	gp_fill_circle(c, t->x, t->y, t->r, 1);
 
-	err = compare_buffers(t->pixmap, c);
+	err = compare_buffers(t->pixmap, c) || check_canary(c);
 
 	if (err)
 		return TST_FAILED;
@@ -147,6 +144,17 @@ struct testcase testcase_circle_r_4 = {
 	}
 };
 
+struct testcase testcase_circle_r_0_clip = {
+	.x = 2,
+	.y = 2,
+	.r = 0,
+
+	.w = 1,
+	.h = 1,
+
+	.pixmap = { 0 }
+};
+
 struct testcase testcase_circle_r_5_clip = {
 	.x = 0,
 	.y = 5,
@@ -212,6 +220,10 @@ const struct tst_suite tst_suite = {
 		{.name = "FillCircle r=4",
 		 .tst_fn = test_circle,
 		 .data = &testcase_circle_r_4},
+
+		{.name = "FillCircle r=0 + clipping",
+		 .tst_fn = test_circle,
+		 .data = &testcase_circle_r_0_clip},
 
 		{.name = "FillCircle r=5 + clipping",
 		 .tst_fn = test_circle,

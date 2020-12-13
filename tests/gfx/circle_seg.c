@@ -146,9 +146,9 @@ static int test_circle(const char *pattern, gp_size w, gp_size h,
 	gp_pixmap *c;
 	int err;
 
-	c = gp_pixmap_alloc(w, h, GP_PIXEL_G8);
+	c = pixmap_alloc_canary(w, h, GP_PIXEL_G8);
 
-	if (c == NULL) {
+	if (!c) {
 		tst_err("Failed to allocate pixmap");
 		return TST_UNTESTED;
 	}
@@ -158,7 +158,7 @@ static int test_circle(const char *pattern, gp_size w, gp_size h,
 
 	gp_circle_seg(c, x, y, r, seg_flag, 1);
 
-	err = compare_buffers(pattern, c);
+	err = compare_buffers(pattern, c) || check_canary(c);
 
 	if (err) {
 		tst_msg("Patterns are different");

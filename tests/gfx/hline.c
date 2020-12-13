@@ -34,22 +34,19 @@ static int test_hline(struct testcase *t)
 	gp_pixmap *c;
 	int err;
 
-	c = gp_pixmap_alloc(t->w, t->h, GP_PIXEL_G8);
+	c = pixmap_alloc_canary(t->w, t->h, GP_PIXEL_G8);
 
-	if (c == NULL) {
+	if (!c) {
 		tst_err("Failed to allocate pixmap");
 		return TST_UNTESTED;
 	}
-
-	/* zero the pixels buffer */
-	memset(c->pixels, 0, c->w * c->h);
 
 	if (t->flag)
 		gp_hline_xyw(c, t->x, t->y, t->lw, 1);
 	else
 		gp_hline(c, t->x0, t->x1, t->y, 1);
 
-	err = compare_buffers(t->pixmap, c);
+	err = compare_buffers(t->pixmap, c) || check_canary(c);
 
 	if (err) {
 		tst_msg("Patterns are different");
