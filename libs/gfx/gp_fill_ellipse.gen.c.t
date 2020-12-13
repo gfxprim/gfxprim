@@ -31,7 +31,7 @@ static void gp_fill_ellipse_raw_{{ ps.suffix }}(gp_pixmap *pixmap, gp_coord xcen
 
 	/* Handle special case */
 	if (a == 0) {
-		gp_vline_raw_{{ ps.suffix }}(pixmap, xcenter, ycenter - b, ycenter + b, pixel);
+		gp_vline_raw(pixmap, xcenter, ycenter - b, ycenter + b, pixel);
 		return;
 	}
 
