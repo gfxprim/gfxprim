@@ -6,6 +6,7 @@
 #include <unistd.h>
 #include <pthread.h>
 #include <string.h>
+#include <errno.h>
 
 #include "core/gp_common.h"
 #include <core/gp_debug.h>
@@ -17,8 +18,10 @@
 static void *h_linear_convolution(void *arg)
 {
 	struct gp_convolution_params *params = arg;
+	long ret = 0;
 
-	long ret = gp_filter_hconvolution_raw(params);
+	if (gp_filter_hconvolution_raw(params))
+		ret = errno;
 
 	return (void*)ret;
 }
@@ -26,8 +29,10 @@ static void *h_linear_convolution(void *arg)
 static void *v_linear_convolution(void *arg)
 {
 	struct gp_convolution_params *params = arg;
+	long ret = 0;
 
-	long ret = gp_filter_vconvolution_raw(params);
+	if (gp_filter_vconvolution_raw(params))
+		ret = errno;
 
 	return (void*)ret;
 }
@@ -35,8 +40,10 @@ static void *v_linear_convolution(void *arg)
 static void *linear_convolution(void *arg)
 {
 	struct gp_convolution_params *params = arg;
+	long ret = 0;
 
-	long ret = gp_filter_convolution_raw(params);
+	if (gp_filter_convolution_raw(params))
+		ret = errno;
 
 	return (void*)ret;
 }
@@ -74,21 +81,25 @@ int gp_filter_hconvolution_mp_raw(const gp_convolution_params *params)
 		convs[i].h_src = h_src_2;
 		convs[i].y_dst = y_dst_2;
 		convs[i].callback = params->callback ? &callback_mp : NULL;
-
 		pthread_create(&threads[i], NULL, h_linear_convolution, &convs[i]);
 	}
 
-	int ret = 0;
+	int err = 0;
 
 	for (i = 0; i < t; i++) {
 		long r;
-
 		pthread_join(threads[i], (void*)&r);
 
-		ret |= (int)r;
+		if (r)
+			err = r;
 	}
 
-	return ret;
+	if (err) {
+		errno = err;
+		return -1;
+	}
+
+	return 0;
 }
 
 
@@ -129,16 +140,22 @@ int gp_filter_vconvolution_mp_raw(const gp_convolution_params *params)
 		pthread_create(&threads[i], NULL, v_linear_convolution, &convs[i]);
 	}
 
-	int ret = 0;
+	int err = 0;
 
 	for (i = 0; i < t; i++) {
 		long r;
 		pthread_join(threads[i], (void*)&r);
 
-		ret |= (int)r;
+		if (r)
+			err = r;
 	}
 
-	return ret;
+	if (err) {
+		errno = err;
+		return -1;
+	}
+
+	return 0;
 }
 
 
@@ -179,14 +196,20 @@ int gp_filter_convolution_mp_raw(const gp_convolution_params *params)
 		pthread_create(&threads[i], NULL, linear_convolution, &convs[i]);
 	}
 
-	int ret = 0;
+	int err = 0;
 
 	for (i = 0; i < t; i++) {
 		long r;
 		pthread_join(threads[i], (void*)&r);
 
-		ret |= (int)r;
+		if (r)
+			err = r;
 	}
 
-	return ret;
+	if (err) {
+		errno = err;
+		return -1;
+	}
+
+	return 0;
 }
