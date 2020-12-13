@@ -243,6 +243,11 @@ the resizable fill is accounted for when leftover space is being distributed.
 
 image:grid.png[Grid widget]
 
+[source,json]
+------------------------------------------------------------------
+include::../demos/widgets/test_layouts/test_align.json[]
+------------------------------------------------------------------
+
 .Grid JSON attributes
 [cols=",,,3",options="header"]
 |==============================================================================
