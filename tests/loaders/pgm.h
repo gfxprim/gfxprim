@@ -3,7 +3,7 @@
  * Copyright (C) 2009-2014 Cyril Hrubis <metan@ucw.cz>
  */
 
-#include "Loader.h"
+#include "loader.h"
 
 static struct testcase PGM_ascii_1x1_1bpp_black = {
 	.w = 1,

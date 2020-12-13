@@ -14,10 +14,10 @@
 #include "tst_test.h"
 
 #define READ gp_read_pnm
-#include "Loader.h"
-#include "PBM.h"
-#include "PGM.h"
-#include "PPM.h"
+#include "loader.h"
+#include "pbm.h"
+#include "pgm.h"
+#include "ppm.h"
 
 const struct tst_suite tst_suite = {
 	.suite_name = "PNM",

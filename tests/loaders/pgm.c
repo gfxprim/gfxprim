@@ -16,8 +16,8 @@
 #define LOAD gp_load_pgm
 #define SAVE gp_save_pgm
 #define READ gp_read_pgm
-#include "Loader.h"
-#include "PGM.h"
+#include "loader.h"
+#include "pgm.h"
 
 struct testcase black_1x1_1bpp = {
 	.w = 1,

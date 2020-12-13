@@ -16,8 +16,8 @@
 #define LOAD gp_load_ppm
 #define SAVE gp_save_ppm
 #define READ gp_read_ppm
-#include "Loader.h"
-#include "PPM.h"
+#include "loader.h"
+#include "ppm.h"
 
 static struct testcase PPM_black_1x1 = {
 	.w = 1,

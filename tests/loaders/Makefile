@@ -1,13 +1,13 @@
 TOPDIR=../..
 include $(TOPDIR)/pre.mk
 
-CSOURCES=loaders_suite.c PNG.c PBM.c PGM.c PPM.c ZIP.c GIF.c IO.c PNM.c PCX.c\
-         JPG.c Loader.c DataStorage.c Exif.c line_convert.c
+CSOURCES=loaders_suite.c png.c pbm.c pgm.c ppm.c zip.c gif.c io.c pnm.c pcx.c\
+         jpg.c loader.c data_storage.c exif.c line_convert.c
 
-GENSOURCES=SaveLoad.gen.c SaveAbort.gen.c
+GENSOURCES=save_load.gen.c save_abort.gen.c
 
-APPS=loaders_suite PNG PBM PGM PPM PNM SaveLoad.gen SaveAbort.gen ZIP GIF PCX\
-     IO JPG Loader DataStorage Exif line_convert
+APPS=loaders_suite png pbm pgm ppm pnm save_load.gen save_abort.gen zip gif pcx\
+     io jpg loader data_storage exif line_convert
 
 include ../tests.mk
 
