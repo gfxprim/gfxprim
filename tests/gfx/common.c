@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "tst_test.h"
 #include "common.h"
 
 static void dump_buffer(const char *pattern, int w, int h)
@@ -103,14 +104,14 @@ int check_canary(gp_pixmap *pixmap)
 
 	for (i = 0; i < CANARY_BYTES; i++) {
 		if (sc[i]) {
-			printf("Corrupted memmory %i bytes before pixmap\n", -(i - 50));
+			tst_msg("Corrupted memmory %i bytes before pixmap", -(i - 50));
 			ret = 1;
 		}
 	}
 
 	for (i = 0; i < CANARY_BYTES; i++) {
 		if (ec[i]) {
-			printf("Corrupted memmory %i bytes after pixmap\n", i);
+			tst_msg("Corrupted memmory %i bytes after pixmap", i);
 			ret = 1;
 		}
 	}
