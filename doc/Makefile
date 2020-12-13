@@ -52,10 +52,10 @@ toolcheck:
 		echo "ERROR: Could not find 'source-highlight'" ; exit 127 ; fi
 	@if [ ! -d "/usr/share/graphviz" ] ; then \
 		echo "ERROR: Could not find 'graphviz'" ; exit 127 ; fi
-#	@if [ -z `which latex 2>/dev/null` ] ; then \
-#		echo "error: could not find 'latex'" ; exit 127 ; fi
-#	@if [ -z `which dvipng 2>/dev/null` ] ; then \
-#		echo "error: could not find 'dvipng'" ; exit 127 ; fi
+	@if [ -z `which latex 2>/dev/null` ] ; then \
+		echo "error: could not find 'latex'" ; exit 127 ; fi
+	@if [ -z `which dvipng 2>/dev/null` ] ; then \
+		echo "error: could not find 'dvipng'" ; exit 127 ; fi
 
 #
 # Create page for each part of API description
