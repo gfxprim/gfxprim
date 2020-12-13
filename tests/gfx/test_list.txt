@@ -1,18 +1,18 @@
 # GFX test list
 
-APICoverage.gen
+api_coverage.gen
 
-HLine
-VLine
-Line
+hline
+vline
+line
 line_symmetry.gen
-Circle
-FillCircle
-Ellipse
-FillEllipse
-CircleSeg
-Polygon
-FillRect
+circle
+fill_circle
+ellipse
+fill_ellipse
+circle_seg
+polygon
+fill_rect
 
 fill_triangle
 fill_triangle.gen
