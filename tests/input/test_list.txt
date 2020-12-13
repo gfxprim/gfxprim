@@ -1,4 +1,4 @@
 # Input test list
 
-Timer
-TimeStamp
+timer
+time_stamp
