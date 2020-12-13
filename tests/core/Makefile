@@ -2,13 +2,13 @@ TOPDIR=../..
 
 include $(TOPDIR)/pre.mk
 
-CSOURCES=Pixmap.c Pixel.c BlitClipped.c Debug.c
+CSOURCES=pixmap.c pixel.c blit_clipped.c debug.c
 
-GENSOURCES+=WritePixel.gen.c GetPutPixel.gen.c Convert.gen.c BlitConv.gen.c \
-            Convert_Scale.gen.c GetSetBits.gen.c
+GENSOURCES+=write_pixel.gen.c get_put_pixel.gen.c convert.gen.c blit_conv.gen.c \
+            convert_scale.gen.c get_set_bits.gen.c
 
-APPS=WritePixel.gen Pixel Pixmap GetPutPixel.gen Convert.gen BlitConv.gen \
-     Convert_Scale.gen GetSetBits.gen BlitClipped Debug
+APPS=write_pixel.gen pixel pixmap get_put_pixel.gen convert.gen blit_conv.gen \
+     convert_scale.gen get_set_bits.gen blit_clipped debug
 
 include ../tests.mk
 

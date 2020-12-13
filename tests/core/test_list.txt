@@ -1,11 +1,11 @@
 # Core testsuite
-WritePixel.gen
-Pixmap
-Pixel
-GetSetBits.gen
-GetPutPixel.gen
-Convert.gen
-Convert_Scale.gen
-BlitConv.gen
-BlitClipped
-Debug
+write_pixel.gen
+pixmap
+pixel
+get_set_bits.gen
+get_put_pixel.gen
+convert.gen
+convert_scale.gen
+blit_conv.gen
+blit_clipped
+debug
