@@ -54,8 +54,28 @@
  * error(y-1) from error(y).
  */
 
-@ for ps in pixelsizes:
+@ def circle(ps, putpixel):
+	int x, y, error;
+	for (x = 0, error = -r, y = r; y >= 0; y--) {
+		/* Iterate X until we can pass to the next line. */
+		while (error < 0) {
+			error += 2*x + 1;
+			x++;
+			{{ putpixel }}{{ ps.suffix }}(pixmap, xcenter-x+1, ycenter-y, pixel);
+			{{ putpixel }}{{ ps.suffix }}(pixmap, xcenter+x-1, ycenter-y, pixel);
+			{{ putpixel }}{{ ps.suffix }}(pixmap, xcenter-x+1, ycenter+y, pixel);
+			{{ putpixel }}{{ ps.suffix }}(pixmap, xcenter+x-1, ycenter+y, pixel);
+		}
 
+		/* Enough changes accumulated, go to next line. */
+		error += -2*y + 1;
+		{{ putpixel }}{{ ps.suffix }}(pixmap, xcenter-x+1, ycenter-y, pixel);
+		{{ putpixel }}{{ ps.suffix }}(pixmap, xcenter+x-1, ycenter-y, pixel);
+		{{ putpixel }}{{ ps.suffix }}(pixmap, xcenter-x+1, ycenter+y, pixel);
+		{{ putpixel }}{{ ps.suffix }}(pixmap, xcenter+x-1, ycenter+y, pixel);
+	}
+@ end
+@ for ps in pixelsizes:
 static void circle_{{ ps.suffix }}(gp_pixmap *pixmap,
 	gp_coord xcenter, gp_coord ycenter, gp_size r, gp_pixel pixel)
 {
@@ -65,27 +85,14 @@ static void circle_{{ ps.suffix }}(gp_pixmap *pixmap,
 		return;
 	}
 
-	int x, y, error;
-	for (x = 0, error = -r, y = r; y >= 0; y--) {
-		/* Iterate X until we can pass to the next line. */
-		while (error < 0) {
-			error += 2*x + 1;
-			x++;
-			gp_putpixel_raw_clipped_{{ ps.suffix }}(pixmap, xcenter-x+1, ycenter-y, pixel);
-			gp_putpixel_raw_clipped_{{ ps.suffix }}(pixmap, xcenter+x-1, ycenter-y, pixel);
-			gp_putpixel_raw_clipped_{{ ps.suffix }}(pixmap, xcenter-x+1, ycenter+y, pixel);
-			gp_putpixel_raw_clipped_{{ ps.suffix }}(pixmap, xcenter+x-1, ycenter+y, pixel);
-		}
-
-		/* Enough changes accumulated, go to next line. */
-		error += -2*y + 1;
-		gp_putpixel_raw_clipped_{{ ps.suffix }}(pixmap, xcenter-x+1, ycenter-y, pixel);
-		gp_putpixel_raw_clipped_{{ ps.suffix }}(pixmap, xcenter+x-1, ycenter-y, pixel);
-		gp_putpixel_raw_clipped_{{ ps.suffix }}(pixmap, xcenter-x+1, ycenter+y, pixel);
-		gp_putpixel_raw_clipped_{{ ps.suffix }}(pixmap, xcenter+x-1, ycenter+y, pixel);
+	if (xcenter < 0 || ycenter < 0 ||
+	    (gp_size)xcenter < r || (gp_size)ycenter < r ||
+	    xcenter + r >= pixmap->w || ycenter + r >= pixmap->h) {
+	{@ circle(ps, "gp_putpixel_raw_clipped_") @}
+	} else {
+	{@ circle(ps, "gp_putpixel_raw_") @}
 	}
 }
-
 @ end
 
 void gp_circle_raw(gp_pixmap *pixmap, gp_coord xcenter, gp_coord ycenter,
