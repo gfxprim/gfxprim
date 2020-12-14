@@ -6,12 +6,9 @@
  * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>
  */
 
-#include <core/gp_get_put_pixel.h>
-#include <core/gp_fn_per_bpp.h>
+#include <core/gp_pixmap.h>
+#include <core/gp_transform.h>
 #include <gfx/gp_circle_seg.h>
-#include <gfx/gp_hline.h>
-
-#include "algo/CircleSeg.algo.h"
 
 static uint8_t transform_segments(gp_pixmap *pixmap, uint8_t seg_flags)
 {
@@ -39,18 +36,6 @@ static uint8_t transform_segments(gp_pixmap *pixmap, uint8_t seg_flags)
 	seg4 = seg4 ? GP_CIRCLE_SEG4 : 0;
 
 	return seg1|seg2|seg3|seg4;
-}
-
-/* Generate drawing functions for various bit depths. */
-GP_DEF_DRAW_FN_PER_BPP(circle_seg, DEF_CIRCLE_SEG_FN)
-
-void gp_circle_seg_raw(gp_pixmap *pixmap, gp_coord xcenter, gp_coord ycenter,
-                       gp_size r, uint8_t seg_flag, gp_pixel pixel)
-{
-	GP_CHECK_PIXMAP(pixmap);
-
-	GP_FN_PER_BPP_PIXMAP(circle_seg, pixmap, pixmap,
-	                     xcenter, ycenter, r, seg_flag, pixel);
 }
 
 void gp_circle_seg(gp_pixmap *pixmap, gp_coord xcenter, gp_coord ycenter,
