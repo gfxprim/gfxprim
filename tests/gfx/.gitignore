@@ -9,7 +9,7 @@ hline
 line
 polygon
 vline
-gfx_benchmark
+gfx_benchmark.gen
 line_symmetry.gen
 fill_triangle
 fill_triangle.gen
