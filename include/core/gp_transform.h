@@ -28,19 +28,6 @@
 } while (0)
 
 /*
- * Fixed point variants.
- */
-#define GP_TRANSFORM_X_FP(pixmap, x) do {                \
-	if ((pixmap)->x_swap)                            \
-		x = GP_FP_FROM_INT((pixmap)->w - 1) - x; \
-} while (0)
-
-#define GP_TRANSFORM_Y_FP(pixmap, y) do {                \
-	if ((pixmap)->y_swap)                            \
-		y = GP_FP_FROM_INT((pixmap)->h - 1) - y; \
-} while (0)
-
-/*
  * Swap coordinates (axes) according to pixmap transformation.
  */
 #define GP_TRANSFORM_SWAP(pixmap, x, y) do { \
