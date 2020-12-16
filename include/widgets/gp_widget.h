@@ -12,17 +12,16 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <widgets/gp_common.h>
+#include <widgets/gp_widget_types.h>
 
-struct gp_widget_event;
-
-typedef struct gp_widget {
+struct gp_widget {
 	unsigned int type;
-	struct gp_widget *parent;
+	gp_widget *parent;
 
 	/*
 	 * Widget event handler.
 	 */
-	int (*on_event)(struct gp_widget_event *);
+	int (*on_event)(gp_widget_event *);
 
 	/*
 	 * User provided pointer to arbitrary data; useful for event handlers
@@ -102,7 +101,7 @@ typedef struct gp_widget {
 		void *payload;
 	};
 	char buf[];
-} gp_widget;
+};
 
 enum gp_widget_type {
 	GP_WIDGET_GRID,
@@ -185,7 +184,7 @@ void gp_widget_set_parent(gp_widget *self, gp_widget *parent);
  * @priv An user pointer stored in the widget.
  */
 static inline void gp_widget_event_handler_set(gp_widget *self,
-                                               int (*on_event)(struct gp_widget_event *),
+                                               int (*on_event)(gp_widget_event *),
                                                void *priv)
 {
 	self->on_event = on_event;

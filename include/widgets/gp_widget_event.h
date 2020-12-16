@@ -16,6 +16,7 @@
 #define GP_WIDGET_EVENT_H__
 
 #include <stdarg.h>
+#include <widgets/gp_widget_types.h>
 
 /**
  * @brief Widget event type.
@@ -79,7 +80,7 @@ const char *gp_widget_event_type_name(enum gp_widget_event_type ev_type);
  *
  *
  */
-typedef struct gp_widget_event {
+struct gp_widget_event {
 	struct gp_widget *self;
 	enum gp_widget_event_type type;
 	/* internal DO NOT TOUCH */
@@ -89,7 +90,7 @@ typedef struct gp_widget_event {
 		long val;
 		struct gp_event *input_ev;
 	};
-} gp_widget_event;
+};
 
 /**
  * @brief Prints event details into stdout.
