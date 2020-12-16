@@ -269,6 +269,43 @@ static gp_backend *proxy_init(char *params, const char *caption)
 	return gp_proxy_init(params, caption);
 }
 
+static gp_backend *init_backend(const char *name, char *params,
+                                const char *caption);
+
+static gp_backend *virt_init(char *params, const char *caption)
+{
+	char *pixel, *backend_name;
+	gp_backend *backend;
+	gp_pixel_type pixel_type;
+
+	if (!params)
+		return NULL;
+
+	pixel = params;
+	params = next_param(params);
+
+	pixel_type = gp_pixel_type_by_name(pixel);
+
+	if (pixel_type == GP_PIXEL_UNKNOWN) {
+		GP_WARN("Invalid pixel type '%s'", pixel);
+		return NULL;
+	}
+
+	if (!params) {
+		GP_WARN("Missing backend");
+		return NULL;
+	}
+
+	backend_name = params;
+	params = next_param(params);
+
+	backend = init_backend(backend_name, params, caption);
+	if (!backend)
+		return NULL;
+
+	return gp_backend_virt_init(backend, pixel_type, GP_BACKEND_CALL_EXIT);
+}
+
 struct backend_init {
 	const char *name;
 	gp_backend *(*init)(char *params, const char *caption);
@@ -299,6 +336,16 @@ static struct backend_init backends[] = {
 	           "disable_shm - disable MIT SHM even if available",
 	           "fs          - start fullscreen",
 	           NULL}
+	},
+	{
+	 .name = "virt",
+	 .init = virt_init,
+	 .usage = "virt:pixel_type:backend...",
+	 .help = {"pixel_type  - pixel type to be emulated by the backend",
+		  "              e.g. G4 or RGB565",
+		  "backend     - another backend to be initialized",
+		  "              e.g. X11",
+		  NULL}
 	},
 	{.name  = "SDL",
 	 .init  = sdl_init,
