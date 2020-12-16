@@ -125,17 +125,6 @@ struct gp_widget_ops gp_widget_label_ops = {
 	.id = "label",
 };
 
-static void try_resize(gp_widget *self)
-{
-	const gp_widget_render_ctx *ctx = gp_widgets_render_ctx();
-
-	if (self->min_w < min_w(self, ctx)) {
-		GP_DEBUG(0, "Resizing widget label (%p) %i -> %i",
-		         self, self->min_w, min_w(self, ctx));
-		gp_widget_resize(self);
-	}
-}
-
 /*
  * Do not shrink by default so that the layout will not jump up and down all
  * the time.
@@ -154,7 +143,7 @@ void gp_widget_label_set(gp_widget *self, const char *text)
 	if (self->label->width)
 		return;
 
-	try_resize(self);
+	gp_widget_resize(self);
 }
 
 gp_widget *gp_widget_label_new(const char *text, unsigned int width, int bold)
@@ -172,6 +161,7 @@ gp_widget *gp_widget_label_new(const char *text, unsigned int width, int bold)
 
 	ret->label->bold = !!bold;
 	ret->label->width = width;
+	ret->no_shrink = 1;
 
 	return ret;
 }
@@ -220,7 +210,7 @@ int gp_widget_label_printf(gp_widget *self, const char *fmt, ...)
 	self->label->text = gp_vec_vprintf(self->label->text, fmt, ap);
 	va_end(ap);
 
-	try_resize(self);
+	gp_widget_resize(self);
 
 	return 0;
 }

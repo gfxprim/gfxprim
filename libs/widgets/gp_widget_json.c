@@ -28,6 +28,8 @@ gp_widget *gp_widget_from_json(json_object *json, void **uids)
 	char *uid_key = NULL;
 	unsigned int halign = 0;
 	unsigned int valign = 0;
+	unsigned int shrink_set = 0;
+	unsigned int shrink;
 	int (*on_event)(gp_widget_event *) = NULL;
 
 	if (json_object_object_length(json) == 0)
@@ -149,6 +151,16 @@ gp_widget *gp_widget_from_json(json_object *json, void **uids)
 		json_object_object_del(json, "on_event");
 	}
 
+	if (json_object_object_get_ex(json, "shrink", &json_type)) {
+		shrink = json_object_get_boolean(json_type);
+
+		GP_DEBUG(2, "Widget '%s' shrink '%i'", type, shrink);
+
+		shrink_set = 1;
+
+		json_object_object_del(json, "shrink");
+	}
+
 	const struct gp_widget_ops *ops = gp_widget_ops_by_id(type);
 
 	if (!ops) {
@@ -178,8 +190,10 @@ gp_widget *gp_widget_from_json(json_object *json, void **uids)
 	}
 
 	wid->align = halign | valign;
-
 	wid->on_event = on_event;
+
+	if (shrink_set)
+		wid->no_shrink = !shrink;
 
 	gp_widget_send_event(wid, GP_WIDGET_EVENT_NEW);
 

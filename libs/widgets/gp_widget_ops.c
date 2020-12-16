@@ -105,9 +105,33 @@ void gp_widget_free(gp_widget *self)
 		ops->free(self);
 }
 
+static unsigned int widget_min_w(gp_widget *self, const gp_widget_render_ctx *ctx)
+{
+	const struct gp_widget_ops *ops = gp_widget_ops(self);
+
+	if (!ops->min_w) {
+		GP_WARN("%s->min_w() not implemented!", ops->id);
+		return 0;
+	}
+
+	return ops->min_w(self, ctx);
+}
+
+static unsigned int widget_min_h(gp_widget *self, const gp_widget_render_ctx *ctx)
+{
+	const struct gp_widget_ops *ops = gp_widget_ops(self);
+
+	if (!ops->min_h) {
+		GP_WARN("%s->min_h() not implemented!", ops->id);
+		return 0;
+	}
+
+	return ops->min_h(self, ctx);
+}
+
 unsigned int gp_widget_min_w(gp_widget *self, const gp_widget_render_ctx *ctx)
 {
-	const struct gp_widget_ops *ops;
+	unsigned int new_min_w;
 
 	if (!self)
 		return 0;
@@ -115,19 +139,17 @@ unsigned int gp_widget_min_w(gp_widget *self, const gp_widget_render_ctx *ctx)
 	if (self->no_resize)
 		return self->min_w;
 
-	ops = gp_widget_ops(self);
-	if (!ops->min_w) {
-		GP_WARN("%s->min_w() not implemented!", ops->id);
-		return 0;
-	}
+	new_min_w = widget_min_w(self, ctx);
 
-	self->min_w = ops->min_w(self, ctx);
+	if (!self->no_shrink || new_min_w > self->min_w)
+		self->min_w = new_min_w;
+
 	return self->min_w;
 }
 
 unsigned int gp_widget_min_h(gp_widget *self, const gp_widget_render_ctx *ctx)
 {
-	const struct gp_widget_ops *ops;
+	unsigned int new_min_h;
 
 	if (!self)
 		return 0;
@@ -135,13 +157,11 @@ unsigned int gp_widget_min_h(gp_widget *self, const gp_widget_render_ctx *ctx)
 	if (self->no_resize)
 		return self->min_h;
 
-	ops = gp_widget_ops(self);
-	if (!ops->min_h) {
-		GP_WARN("%s->min_h() not implemented!", ops->id);
-		return 0;
-	}
+	new_min_h = widget_min_h(self, ctx);
 
-	self->min_h = ops->min_h(self, ctx);
+	if (!self->no_shrink || new_min_h > self->min_h)
+		self->min_h = new_min_h;
+
 	return self->min_h;
 }
 
@@ -594,6 +614,13 @@ void gp_widget_redraw_children(gp_widget *self)
 	gp_widget_redraw_child(self);
 }
 
+static inline int has_children(gp_widget *self)
+{
+	const struct gp_widget_ops *ops = gp_widget_ops(self);
+
+	return ops->distribute_size != NULL;
+}
+
 void gp_widget_resize(gp_widget *self)
 {
 	if (!self)
@@ -601,6 +628,27 @@ void gp_widget_resize(gp_widget *self)
 
 	if (!self->no_resize)
 		return;
+
+	const gp_widget_render_ctx *ctx = gp_widgets_render_ctx();
+	unsigned int new_min_w = widget_min_w(self, ctx);
+	unsigned int new_min_h = widget_min_h(self, ctx);
+
+	if (!has_children(self)) {
+		if (new_min_w == self->min_w && new_min_h == self->min_h) {
+			GP_DEBUG(3, "Skipping %p (%s) widget resize, size haven't changed",
+				 self, gp_widget_type_id(self));
+			return;
+		}
+
+		if (self->no_shrink) {
+			if (widget_min_w(self, ctx) < self->min_w ||
+			    widget_min_h(self, ctx) < self->min_h) {
+				GP_DEBUG(3, "Skipping %p (%s) resize to avoid shrinking",
+				         self, gp_widget_type_id(self));
+				return;
+			}
+		}
+	}
 
 	GP_DEBUG(3, "Widget %p (%s) no_resize=0", self, gp_widget_type_id(self));
 

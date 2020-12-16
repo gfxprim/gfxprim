@@ -161,14 +161,6 @@ static void render(gp_widget *self, const gp_offset *offset,
 	}
 }
 
-static void try_resize(gp_widget *self)
-{
-	const gp_widget_render_ctx *ctx = gp_widgets_render_ctx();
-
-	if (self->min_w < min_w(self, ctx))
-		gp_widget_resize(self);
-}
-
 void gp_widget_markup_refresh(gp_widget *self)
 {
 	unsigned int var_id = 0;
@@ -184,8 +176,7 @@ void gp_widget_markup_refresh(gp_widget *self)
 		e->var = self->markup->get(var_id++, e->var);
 	}
 
-	try_resize(self);
-
+	gp_widget_resize(self);
 	gp_widget_redraw(self);
 }
 
@@ -242,6 +233,8 @@ gp_widget *gp_widget_markup_new(const char *markup_str,
 	ret->markup->get = get;
 	ret->markup->markup = markup;
 
+	ret->no_shrink = 1;
+
 	return ret;
 }
 
@@ -280,7 +273,6 @@ void gp_widget_markup_set_var(gp_widget *self, unsigned int var_id, const char *
 	var->var = gp_vec_vprintf(var->var, fmt, va);
 	va_end(va);
 
-	try_resize(self);
-
+	gp_widget_resize(self);
 	gp_widget_redraw(self);
 }

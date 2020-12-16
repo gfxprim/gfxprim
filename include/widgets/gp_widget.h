@@ -46,6 +46,14 @@ struct gp_widget {
 	unsigned int min_w, min_h;
 
 	unsigned int align:16;
+	/*
+	 * If set widget will not shrink, i.e. will be resized only when the
+	 * new minimal size is bigger than the previous one.
+	 *
+	 * By default this is set to 0.
+	 */
+	unsigned int no_shrink:1;
+
 	unsigned int no_resize:1;
 	/*
 	 * If set the widget_ops_render() is called next time layout is repainted.
