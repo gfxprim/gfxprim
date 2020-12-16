@@ -1,5 +1,7 @@
 gp_aprintf
 
+gp_app_layout_load
+
 gp_dir_cache_free
 gp_dir_cache_get_filtered
 gp_dir_cache_inotify
