@@ -345,7 +345,7 @@ static int focus(gp_widget *self, int sel)
 static void focus_tab(gp_widget *self, const gp_widget_render_ctx *ctx,
                        unsigned int x)
 {
-	unsigned int i, cx = self->x;
+	unsigned int i, cx = 0;
 
 	for (i = 0; i < self->tabs->count; i++) {
 		unsigned int w = tab_w(self, ctx, i);
@@ -396,8 +396,8 @@ static int focus_widget(gp_widget *self, const gp_widget_render_ctx *ctx,
 static int focus_xy(gp_widget *self, const gp_widget_render_ctx *ctx,
                     unsigned int x, unsigned int y)
 {
-	if (y > self->y + title_h(self, ctx))
-		return focus_widget(self, ctx, x - payload_x(self, ctx), y - payload_y(self, ctx));
+	if (y > title_h(self, ctx))
+		return focus_widget(self, ctx, x - payload_x(self, ctx) + self->x, y - payload_y(self, ctx) + self->y);
 
 	return focus_title(self, ctx, x);
 }
