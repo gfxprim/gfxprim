@@ -27,11 +27,43 @@ Event Structure Description
 /* or */
 #include <input/gp_event.h>
 
+struct gp_event_pos_rel {
+	int32_t rx;
+	int32_t ry;
+};
+
+struct gp_event_pos_abs {
+	uint32_t x, x_max; /* the x is between 0 and x_max */
+	uint32_t y, y_max;
+	uint32_t pressure, pressure_max;
+};
+
+struct gp_event_key {
+	uint32_t key;
+	char ascii;
+};
+
+struct gp_event_sys {
+	uint32_t w, h;
+};
+
 typedef struct gp_event {
 	/* event */
 	uint16_t type;
 	uint32_t code;
-	union gp_event_value val;
+	union {
+		/* generic one integer value */
+		int32_t val;
+		/* key */
+		struct gp_event_key key;
+		/* position */
+		struct gp_event_pos_rel rel;
+		struct gp_event_pos_abs abs;
+		/* system event */
+		struct gp_event_sys sys;
+		/* timer event */
+		gp_timer *tmr;
+	};
 
 	/* input device id */
 	uint32_t dev_id;
@@ -105,59 +137,22 @@ enum gp_event_sys_code {
 The event 'code' specifies the event nature more closely, it has different
 meaning for each event type. The names are (hopefully) self explanatory.
 
-[source,c]
--------------------------------------------------------------------------------
-union gp_event_value {
-	/* generic one integer value */
-	int32_t val;
-	/* key */
-	struct gp_event_key key;
-	/* position */
-	struct gp_event_pos_rel rel;
-	struct gp_event_pos_abs abs;
-	/* system event */
-	struct gp_event_sys sys;
-	/* timer event */
-	gp_timer *tmr;
-};
-
-struct gp_event_pos_rel {
-	int32_t rx;
-	int32_t ry;
-};
-
-struct gp_event_pos_abs {
-	uint32_t x, x_max; /* the x is between 0 and x_max */
-	uint32_t y, y_max;
-	uint32_t pressure, pressure_max;
-};
-
-struct gp_event_key {
-	uint32_t key;
-	char ascii;
-};
-
-struct gp_event_sys {
-	uint32_t w, h;
-};
--------------------------------------------------------------------------------
-
 The event 'value' is a union that could hold different information. The right
 format of the data is known from the 'type' and 'code'. Some types of the
 events has no value at all.
 
-* The relative coordinates are used for 'GP_EV_REL_POS' and absolute coordinates
-  for 'GP_EV_ABS_POS'.
+Relative coordinates are used for 'GP_EV_REL_POS' and absolute coordinates for
+'GP_EV_ABS_POS'.
 
-* The key event value is used for key-presses, additionally it holds the key
-  value mapped to ASCII if conversion is applicable otherwise it's set to
-  zero. You should consult the header 'input/GP_Event.h' for the comprehensive
-  list of key values.
-+
-This image shows GFXprim key names without the 'GP_KEY_' prefix (Click for a
-higher resolution). So for example 'LEFTSHIFT' on the image is
+The key event value is used for key-presses, additionally it holds the key
+value mapped to ASCII if conversion is applicable otherwise it's set to zero.
+You should consult the header 'input/gp_event.h' for the comprehensive list of
+key values.
+
+Following image shows GFXprim key names without the 'GP_KEY_' prefix (Click
+for a higher resolution). So for example 'LEFTSHIFT' on the image is
 'GP_KEY_LEFT_SHIFT'.
-+
+
 [[Keyboard Layout]]
 .GFXprim key names without the 'GP_KEY_' prefix.
 image::keyboard.svg["Keyboard Layout",width=800,link="keyboard.svg"]
