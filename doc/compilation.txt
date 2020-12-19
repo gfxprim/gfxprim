@@ -76,7 +76,7 @@ Instruction to install required packages on
 link:http://www.opensuse.org/[OpenSUSE].
 
 Works for link:http://www.fedoraproject.org/[Fedora] too if you substitute
-+zypper in+ with +yum install+.
++zypper in+ with +yum install+ and +libjson-c-devel+ with +json-c-devel+.
 
 .Install basic tools
 -------------------------------------------------------------------------------
@@ -105,7 +105,10 @@ zypper in xcb-util-keysyms-devel
 
 .Install JSON devel library
 -------------------------------------------------------------------------------
+# SUSE
 zypper in libjson-c-devel
+# Fedora
+yum install json-c-devel
 -------------------------------------------------------------------------------
 
 .Install swig
@@ -168,7 +171,7 @@ devel packages) by:
 
 .Building debian packages
 -------------------------------------------------------------------------------
-# apt-get install devscripts
-# cd gfxprim
-# debuild -i -us -uc
+apt-get install devscripts
+cd gfxprim
+debuild -i -us -uc
 -------------------------------------------------------------------------------
