@@ -8,7 +8,8 @@ SOURCES=index.html about.txt pixmap.txt loaders.txt filters.txt \
 	get_put_pixel.txt blits.txt progress_callback.txt text.txt \
 	event_queue.txt compilation.txt filters_resize.txt \
 	filters_dithering.txt filters_python.txt spiv.txt core_common.txt \
-	convert.txt news_1_0_0-rc1.txt loaders_io.txt signatures.txt widgets.txt
+	convert.txt news_1_0_0-rc1.txt loaders_io.txt signatures.txt widgets.txt \
+	packages.txt
 
 SOURCES+=core_python.txt gfx_python.txt loaders_python.txt backends_python.txt
 

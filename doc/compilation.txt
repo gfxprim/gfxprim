@@ -163,16 +163,6 @@ apt-get install gcc make pkg-config libjpeg-dev libpng-dev libgif-dev
                 libx11-dev libxext-dev libjson-c-dev swig python-dev
 -------------------------------------------------------------------------------
 
-Packages
---------
-
-RPM
-~~~
-RPM packages as well as specfile are available in
-link:https://build.opensuse.org/package/show/home:metan/gfxprim[build service].
-
-Deb
-~~~
 Deb packages can be build from the GFXprim source (after installing necessary
 devel packages) by:
 
@@ -182,9 +172,3 @@ devel packages) by:
 # cd gfxprim
 # debuild -i -us -uc
 -------------------------------------------------------------------------------
-
-Gentoo
-~~~~~~
-
-Just use our official
-link:https://github.com/gfxprim/gfxprim-overlay[overlay].

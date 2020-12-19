@@ -1,0 +1,51 @@
+Packages
+--------
+
+RPM
+~~~
+
+Packages are build for:
+
+* Fedore 25, 26, 27, 28
+* OpenSUSE Leap 15.0, 15.1, 15.2, 42.2 and Tumbleweed
+
+RPM packages for SUSE and Fedora as well as specfile are available in the
+link:https://build.opensuse.org/package/show/home:metan/gfxprim[build service].
+
+Deb
+~~~
+
+Packages are build for:
+
+* Raspbian 9.0 and 10.0
+* Debian 8.0, 9.0 and 10.0
+* Ubuntu 20.04 and 20.10
+
+The packages are build in the
+link:https://build.opensuse.org/package/show/home:metan/gfxprim-debian[build service].
+
+.Install apt key
+-------------------------------------------------------------------------------
+wget http://download.opensuse.org/repositories/home:/metan/$DISTRO/Release.key
+apt-key add Release.key
+-------------------------------------------------------------------------------
+
+.Add repository
+-------------------------------------------------------------------------------
+echo "http://download.opensuse.org/repositories/home:/metan/$DISTRO ./" >> /etc/apt/sources.list
+-------------------------------------------------------------------------------
+
+.Install packages
+-------------------------------------------------------------------------------
+apt-get update
+apt-get install spiv
+# for development
+apt-get install libgfxprim-dev
+-------------------------------------------------------------------------------
+
+Gentoo
+~~~~~~
+
+Just use our official
+link:https://github.com/gfxprim/gfxprim-overlay[overlay]. Follow the instruction
+in the README.

@@ -12,6 +12,9 @@ outgrew the initial purpose and became main topic of the development.
 GFXprim is not tied to a specific graphic system (such as X11) but on the
 other hand provides means to interact with them.
 
+GFXprim also includes a simple widget library that could be used to create
+user interfaces just in a couple lines of C code.
+
 GFXprim can load and save images in variety of formats, operate on the data on
 a pixel level, run image filters, render basic shapes or text, open and manage
 X11 windows, draw on Linux framebuffer and more.
