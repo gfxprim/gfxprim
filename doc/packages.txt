@@ -26,13 +26,17 @@ link:https://build.opensuse.org/package/show/home:metan/gfxprim-debian[build ser
 
 .Install apt key
 -------------------------------------------------------------------------------
+# The $DISTRO is a distribution name as in the build service
+
 wget http://download.opensuse.org/repositories/home:/metan/$DISTRO/Release.key
 apt-key add Release.key
 -------------------------------------------------------------------------------
 
 .Add repository
 -------------------------------------------------------------------------------
-echo "http://download.opensuse.org/repositories/home:/metan/$DISTRO ./" >> /etc/apt/sources.list
+# The $DISTRO is a distribution name as in the build service
+
+echo "deb http://download.opensuse.org/repositories/home:/metan/$DISTRO ./" >> /etc/apt/sources.list
 -------------------------------------------------------------------------------
 
 .Install packages
