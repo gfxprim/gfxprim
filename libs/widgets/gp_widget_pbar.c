@@ -27,6 +27,11 @@ static unsigned int pbar_min_h(gp_widget *self, const gp_widget_render_ctx *ctx)
 	return 2 * ctx->padd + gp_text_ascent(ctx->font);
 }
 
+unsigned int secs_rem(float sec)
+{
+	return (unsigned int)(sec + 0.5) % 60;
+}
+
 static void pbar_render(gp_widget *self, const gp_offset *offset,
                         const gp_widget_render_ctx *ctx, int flags)
 {
@@ -69,8 +74,8 @@ static void pbar_render(gp_widget *self, const gp_offset *offset,
 		         100 * val / self->pbar->max);
 	break;
 	case GP_WIDGET_PBAR_SECONDS:
-		snprintf(buf, sizeof(buf), "%.0fm %.0fs",
-		         val/60, fmodf(val, 60));
+		snprintf(buf, sizeof(buf), "%.0fm %us",
+		         val/60, secs_rem(val));
 	break;
 	}
 
