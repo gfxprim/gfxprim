@@ -28,7 +28,7 @@ done
 echo "INSTALL libraries ($LIB_LOC)"
 install -m 775 -d "$LIB_LOC"
 
-for i in build/*.so build/*.so.* build/*.a; do
+for i in build/*.so build/*.so.*; do
 	if [ -L "$i" ]; then
 	        TARGET=`basename "$i"`
 		SOURCE=`readlink "$i"`
@@ -36,6 +36,10 @@ for i in build/*.so build/*.so.* build/*.a; do
 	else
 		install "$i" "$LIB_LOC"
 	fi
+done
+
+for i in build/*.a; do
+	install -m 644 "$i" "$LIB_LOC"
 done
 
 # Binaries
