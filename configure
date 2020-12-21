@@ -373,7 +373,7 @@ def write_gfxprim_config(cfg, libs):
         ldflags = '-lgfxprim-' + i
 
         if i == "widgets":
-            ldflags += " -ldl -lgfxprim-backends -rdynamic"
+            ldflags += " -lgfxprim-backends -rdynamic"
 
         f.write('\t--libs-%s) echo -n "%s ";;\n' % (i, ldflags))
 
@@ -515,7 +515,7 @@ if __name__ ==  '__main__':
                     "", "-ljson-c", ["widgets"]],
                    ["dl",
                     "Dynamic linker",
-                    [header_exists, "dlfcn.h"], "", "-ldl", ["core"]],
+                    [header_exists, "dlfcn.h"], "", "-ldl", ["core", "widgets"]],
                    ["V4L2",
                     "Video for linux 2",
                     [header_exists, "linux/videodev2.h"], "", "", ["grabbers"]],
