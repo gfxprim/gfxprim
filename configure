@@ -373,7 +373,7 @@ def write_gfxprim_config(cfg, libs):
         ldflags = '-lgfxprim-' + i
 
         if i == "widgets":
-            ldflags += " -lgfxprim-backends -rdynamic"
+            ldflags += " -ldl -lgfxprim-backends -rdynamic"
 
         f.write('\t--libs-%s) echo -n "%s ";;\n' % (i, ldflags))
 
