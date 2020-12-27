@@ -474,6 +474,18 @@ static void free_(gp_widget *self)
 		gp_widget_free(self->tabs->widgets[i]);
 }
 
+static void for_each_child(gp_widget *self, void (*func)(gp_widget *child))
+{
+	unsigned int i;
+
+	for (i = 0; i < self->tabs->count; i++) {
+		gp_widget *child = self->tabs->widgets[i];
+
+		if (child)
+			func(child);
+	}
+}
+
 struct gp_widget_ops gp_widget_tabs_ops = {
 	.min_w = min_w,
 	.min_h = min_h,
@@ -483,6 +495,7 @@ struct gp_widget_ops gp_widget_tabs_ops = {
 	.focus = focus,
 	.focus_xy = focus_xy,
 	.distribute_size = distribute_size,
+	.for_each_child = for_each_child,
 	.from_json = json_to_tabs,
 	.id = "tabs",
 };

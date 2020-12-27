@@ -167,6 +167,18 @@ static void free_(gp_widget *self)
 	gp_vec_free(o->stack);
 }
 
+static void for_each_child(gp_widget *self, void (*func)(gp_widget *child))
+{
+	unsigned int i;
+
+	for (i = 0; i < gp_widget_overlay_stack_size(self); i++) {
+		gp_widget *child = self->overlay->stack[i].widget;
+
+		if (child)
+			func(child);
+	}
+}
+
 static int focus(gp_widget *self, int sel)
 {
 	int i;
@@ -206,6 +218,7 @@ struct gp_widget_ops gp_widget_overlay_ops = {
 	.min_w = min_w,
 	.min_h = min_h,
 	.distribute_size = distribute_size,
+	.for_each_child = for_each_child,
 	.event = event,
 	.focus = focus,
 	.focus_xy = focus_xy,

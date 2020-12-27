@@ -38,6 +38,13 @@ enum gp_widget_render_flags {
 };
 
 struct gp_widget_ops {
+	/**
+	 * @brief Frees any additional memory a widget has allocated.
+	 *
+	 * If defined this function is called before widget itself is freed.
+	 *
+	 * @self A widget.
+	 */
 	void (*free)(gp_widget *self);
 
 	/**
@@ -86,6 +93,14 @@ struct gp_widget_ops {
 	void (*distribute_size)(gp_widget *self,
 	                        const gp_widget_render_ctx *ctx,
 	                        int new_wh);
+
+	/**
+	 * @brief A callback to iterate over all widget children.
+	 *
+	 * @self A widget.
+	 * @func A function to be called on each child widget.
+	 */
+	void (*for_each_child)(gp_widget *self, void (*func)(gp_widget *child));
 
 	/*
 	 * json_object -> widget converter.
@@ -171,6 +186,18 @@ int gp_widget_ops_render_focus_xy(gp_widget *self, const gp_widget_render_ctx *c
 void gp_widget_ops_distribute_size(gp_widget *self, const gp_widget_render_ctx *ctx,
                                    unsigned int w, unsigned int h, int new_wh);
 
+/**
+ * @brief Calls a callback on each child widget.
+ *
+ * All non-leaf widgets must implement for_each_child() callback in its ops
+ * which is then called by this function.
+ *
+ * This function is no-op for NULL self and non-leaf widgets.
+ *
+ * @self A widget.
+ * @func A function callback
+ */
+void gp_widget_ops_for_each_child(gp_widget *self, void (*func)(gp_widget *child));
 
 /**
  * @brief Marks an area to be blit on the screen from a buffer.

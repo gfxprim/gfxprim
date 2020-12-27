@@ -931,6 +931,21 @@ static void free_(gp_widget *self)
 	free(self);
 }
 
+static void for_each_child(gp_widget *self, void (*func)(gp_widget *child))
+{
+	unsigned int x, y;
+	struct gp_widget_grid *grid = self->grid;
+
+	for (y = 0; y < grid->rows; y++) {
+		for (x = 0; x < grid->cols; x++) {
+			gp_widget *child = widget_grid_get(self, x, y);
+
+			if (child)
+				func(child);
+		}
+	}
+}
+
 struct gp_widget_ops gp_widget_grid_ops = {
 	.min_w = min_w,
 	.min_h = min_h,
@@ -940,6 +955,7 @@ struct gp_widget_ops gp_widget_grid_ops = {
 	.focus = focus,
 	.focus_xy = focus_xy,
 	.distribute_size = distribute_size,
+	.for_each_child = for_each_child,
 	.from_json = json_to_grid,
 	.id = "grid",
 };

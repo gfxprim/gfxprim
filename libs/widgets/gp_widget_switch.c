@@ -141,6 +141,18 @@ static void free_(gp_widget *self)
 	gp_vec_free(s->layouts);
 }
 
+static void for_each_child(gp_widget *self, void (*func)(gp_widget *child))
+{
+	unsigned int i;
+
+	for (i = 0; i < gp_widget_switch_layouts(self); i++) {
+		gp_widget *child = self->switch_->layouts[i];
+
+		if (child)
+			func(child);
+	}
+}
+
 static int focus(gp_widget *self, int sel)
 {
 	return gp_widget_ops_render_focus(gp_widget_switch_active(self), sel);
@@ -156,6 +168,7 @@ struct gp_widget_ops gp_widget_switch_ops = {
 	.min_w = min_w,
 	.min_h = min_h,
 	.distribute_size = distribute_size,
+	.for_each_child = for_each_child,
 	.event = event,
 	.focus = focus,
 	.focus_xy = focus_xy,

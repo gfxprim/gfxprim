@@ -91,20 +91,6 @@ const char *gp_widget_type_name(enum gp_widget_type type)
 	return widget_ops[type]->id;
 }
 
-void gp_widget_free(gp_widget *self)
-{
-	const struct gp_widget_ops *ops;
-
-	if (!self)
-		return;
-
-	ops = gp_widget_ops(self);
-	if (!ops->free)
-		free(self);
-	else
-		ops->free(self);
-}
-
 static unsigned int widget_min_w(gp_widget *self, const gp_widget_render_ctx *ctx)
 {
 	const struct gp_widget_ops *ops = gp_widget_ops(self);
@@ -292,6 +278,21 @@ void gp_widget_ops_distribute_size(gp_widget *self, const gp_widget_render_ctx *
 
 	if (ops->distribute_size)
 		ops->distribute_size(self, ctx, 1);
+}
+
+void gp_widget_ops_for_each_child(gp_widget *self, void (*func)(gp_widget *child))
+{
+	const struct gp_widget_ops *ops;
+
+	if (!self)
+		return;
+
+	ops = gp_widget_ops(self);
+
+	if (!ops->for_each_child)
+		return;
+
+	ops->for_each_child(self, func);
 }
 
 void gp_widget_calc_size(gp_widget *self, const gp_widget_render_ctx *ctx,
