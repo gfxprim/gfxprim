@@ -466,14 +466,6 @@ static gp_widget *json_to_tabs(json_object *json, void **uids)
 	return ret;
 }
 
-static void free_(gp_widget *self)
-{
-	unsigned int i;
-
-	for (i = 0; i < self->tabs->count; i++)
-		gp_widget_free(self->tabs->widgets[i]);
-}
-
 static void for_each_child(gp_widget *self, void (*func)(gp_widget *child))
 {
 	unsigned int i;
@@ -491,7 +483,6 @@ struct gp_widget_ops gp_widget_tabs_ops = {
 	.min_h = min_h,
 	.render = render,
 	.event = event,
-	.free = free_,
 	.focus = focus,
 	.focus_xy = focus_xy,
 	.distribute_size = distribute_size,

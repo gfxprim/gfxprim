@@ -132,13 +132,7 @@ static gp_widget *json_to_switch(json_object *json, void **uids)
 
 static void free_(gp_widget *self)
 {
-	unsigned int i;
-	struct gp_widget_switch *s = self->switch_;
-
-	for (i = 0; i < gp_widget_switch_layouts(self); i++)
-		gp_widget_free(s->layouts[i]);
-
-	gp_vec_free(s->layouts);
+	gp_vec_free(self->switch_->layouts);
 }
 
 static void for_each_child(gp_widget *self, void (*func)(gp_widget *child))

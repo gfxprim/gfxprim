@@ -26,6 +26,8 @@
 enum gp_widget_event_type {
 	/** Send right after widget has been allocated and initalized. */
 	GP_WIDGET_EVENT_NEW,
+	/** Send before widget is freed. */
+	GP_WIDGET_EVENT_FREE,
 	/** Commonly event for default widget action, e.g. button press. */
 	GP_WIDGET_EVENT_ACTION,
 	GP_WIDGET_EVENT_EDIT,
@@ -42,6 +44,7 @@ enum gp_widget_event_type {
 
 #define GP_WIDGET_DEFAULT_EVENT_MASK ( \
 	(1<<GP_WIDGET_EVENT_NEW) |     \
+	(1<<GP_WIDGET_EVENT_FREE) |    \
 	(1<<GP_WIDGET_EVENT_ACTION) |  \
 	(1<<GP_WIDGET_EVENT_EDIT) |    \
 	(1<<GP_WIDGET_EVENT_FILTER)    \

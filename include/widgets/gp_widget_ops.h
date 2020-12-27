@@ -119,8 +119,6 @@ const char *gp_widget_type_id(gp_widget *self);
 
 const char *gp_widget_type_name(enum gp_widget_type type);
 
-void gp_widget_free(gp_widget *self);
-
 unsigned int gp_widget_min_w(gp_widget *self, const gp_widget_render_ctx *ctx);
 
 unsigned int gp_widget_min_h(gp_widget *self, const gp_widget_render_ctx *ctx);

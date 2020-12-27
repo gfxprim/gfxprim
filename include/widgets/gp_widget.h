@@ -174,6 +174,20 @@ gp_widget *gp_widget_new(enum gp_widget_type type, size_t payload_size);
 	} while (0)
 
 /**
+ * @brief Frees widget memory.
+ *
+ * Following actions are done when widget is being freed:
+ *
+ *  - if widget has event handler GP_WIDGET_EVENT_FREE is send
+ *  - if needed gp_widget_free() is called recursively for all children widgets
+ *  - if widget type defines free() in it's ops it's called
+ *  - widget memory is finally freed
+ *
+ * @self A widget.
+ */
+void gp_widget_free(gp_widget *self);
+
+/**
  * @brief Sets widget parent.
  *
  * @self A widget.

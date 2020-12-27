@@ -45,3 +45,21 @@ void gp_widget_set_parent(gp_widget *self, gp_widget *parent)
 
 	self->parent = parent;
 }
+
+void gp_widget_free(gp_widget *self)
+{
+	const struct gp_widget_ops *ops;
+
+	if (!self)
+		return;
+
+	gp_widget_send_event(self, GP_WIDGET_EVENT_FREE);
+
+	gp_widget_ops_for_each_child(self, gp_widget_free);
+
+	ops = gp_widget_ops(self);
+	if (ops->free)
+		ops->free(self);
+
+	free(self);
+}

@@ -927,8 +927,6 @@ static void free_(gp_widget *self)
 	gp_vec_free(self->grid->row_pfills);
 	gp_vec_free(self->grid->col_fills);
 	gp_vec_free(self->grid->row_fills);
-
-	free(self);
 }
 
 static void for_each_child(gp_widget *self, void (*func)(gp_widget *child))

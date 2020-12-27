@@ -158,13 +158,7 @@ static gp_widget *focus_widget_by_xy(gp_widget *self, unsigned int x, unsigned i
 
 static void free_(gp_widget *self)
 {
-	unsigned int i;
-	struct gp_widget_overlay *o = self->overlay;
-
-	for (i = 0; i < gp_widget_overlay_stack_size(self); i++)
-		gp_widget_free(o->stack[i].widget);
-
-	gp_vec_free(o->stack);
+	gp_vec_free(self->overlay->stack);
 }
 
 static void for_each_child(gp_widget *self, void (*func)(gp_widget *child))
