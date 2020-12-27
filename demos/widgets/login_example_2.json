@@ -21,14 +21,14 @@
        "halign": "right"
      },
      {
-       "type": "textbox",
+       "type": "tbox",
        "text": "admin",
        "size": 10,
        "uid": "uname",
        "on_event": "login_callback"
      },
      {
-       "type": "textbox",
+       "type": "tbox",
        "size": 10,
        "hidden": true,
        "uid": "pass",

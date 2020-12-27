@@ -300,7 +300,7 @@ static int event(gp_widget *self, const gp_widget_render_ctx *ctx, gp_event *ev)
 	return 0;
 }
 
-static gp_widget *json_to_textbox(json_object *json, void **uid)
+static gp_widget *json_to_tbox(json_object *json, void **uid)
 {
 	gp_widget *ret;
 	const char *text = NULL;
@@ -316,11 +316,11 @@ static gp_widget *json_to_textbox(json_object *json, void **uid)
 		else if (!strcmp(key, "size"))
 			size = json_object_get_int(val);
 		else if (!strcmp(key, "hidden"))
-			flags |= json_object_get_boolean(val) ? GP_WIDGET_TEXT_BOX_HIDDEN : 0;
+			flags |= json_object_get_boolean(val) ? GP_WIDGET_TBOX_HIDDEN : 0;
 		else if (!strcmp(key, "max_size"))
 			max_size = json_object_get_int(val);
 		else
-			GP_WARN("Invalid textbox key '%s'", key);
+			GP_WARN("Invalid tbox key '%s'", key);
 	}
 
 	if (size <= 0 && !text) {
@@ -340,28 +340,28 @@ static gp_widget *json_to_textbox(json_object *json, void **uid)
 	if (text && max_size)
 		max_size = GP_MAX(max_size, (int)strlen(text));
 
-	ret = gp_widget_textbox_new(text, size, NULL, NULL, NULL, flags);
+	ret = gp_widget_tbox_new(text, size, NULL, NULL, NULL, flags);
 
 	ret->tbox->max_size = max_size;
 
 	return ret;
 }
 
-struct gp_widget_ops gp_widget_textbox_ops = {
+struct gp_widget_ops gp_widget_tbox_ops = {
 	.min_w = min_w,
 	.min_h = min_h,
 	.render = render,
 	.event = event,
-	.from_json = json_to_textbox,
-	.id = "textbox",
+	.from_json = json_to_tbox,
+	.id = "tbox",
 };
 
-struct gp_widget *gp_widget_textbox_new(const char *text, unsigned int size,
+struct gp_widget *gp_widget_tbox_new(const char *text, unsigned int size,
                                         const char *filter,
                                         int (*on_event)(gp_widget_event *),
                                         void *priv, int flags)
 {
-	gp_widget *ret = gp_widget_new(GP_WIDGET_TEXTBOX, sizeof(struct gp_widget_textbox));
+	gp_widget *ret = gp_widget_new(GP_WIDGET_TBOX, sizeof(struct gp_widget_tbox));
 	if (!ret)
 		return NULL;
 
@@ -370,7 +370,7 @@ struct gp_widget *gp_widget_textbox_new(const char *text, unsigned int size,
 	ret->tbox->size = size ? size : strlen(text);
 	ret->tbox->filter = filter;
 
-	if (flags & GP_WIDGET_TEXT_BOX_HIDDEN)
+	if (flags & GP_WIDGET_TBOX_HIDDEN)
 		ret->tbox->hidden = 1;
 
 	if (text) {
@@ -393,12 +393,12 @@ err:
 	return NULL;
 }
 
-int gp_widget_textbox_printf(gp_widget *self, const char *fmt, ...)
+int gp_widget_tbox_printf(gp_widget *self, const char *fmt, ...)
 {
 	va_list ap;
 	int len;
 
-	GP_WIDGET_ASSERT(self, GP_WIDGET_TEXTBOX, -1);
+	GP_WIDGET_ASSERT(self, GP_WIDGET_TBOX, -1);
 
 	va_start(ap, fmt);
 	len = vsnprintf(NULL, 0, fmt, ap)+1;
@@ -419,9 +419,9 @@ int gp_widget_textbox_printf(gp_widget *self, const char *fmt, ...)
 	return len;
 }
 
-void gp_widget_textbox_clear(gp_widget *self)
+void gp_widget_tbox_clear(gp_widget *self)
 {
-	GP_WIDGET_ASSERT(self, GP_WIDGET_TEXTBOX, );
+	GP_WIDGET_ASSERT(self, GP_WIDGET_TBOX, );
 
 	self->tbox->buf = gp_vec_strclr(self->tbox->buf);
 	self->tbox->cur_pos = 0;
@@ -431,9 +431,9 @@ void gp_widget_textbox_clear(gp_widget *self)
 	gp_widget_redraw(self);
 }
 
-const char *gp_widget_textbox_str(gp_widget *self)
+const char *gp_widget_tbox_str(gp_widget *self)
 {
-	GP_WIDGET_ASSERT(self, GP_WIDGET_TEXTBOX, NULL);
+	GP_WIDGET_ASSERT(self, GP_WIDGET_TBOX, NULL);
 
 	return self->tbox->buf;
 }

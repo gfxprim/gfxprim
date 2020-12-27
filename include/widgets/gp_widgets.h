@@ -21,7 +21,7 @@
 #include <widgets/gp_widget_label.h>
 #include <widgets/gp_widget_int.h>
 #include <widgets/gp_widget_slider.h>
-#include <widgets/gp_widget_textbox.h>
+#include <widgets/gp_widget_tbox.h>
 #include <widgets/gp_widget_choice.h>
 #include <widgets/gp_widget_table.h>
 #include <widgets/gp_widget_pbar.h>

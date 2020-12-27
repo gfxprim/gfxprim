@@ -15,8 +15,8 @@ int login_callback(gp_widget_event *ev)
 	if (ev->type != GP_WIDGET_EVENT_ACTION)
 		return 0;
 
-	gp_widget *pass = gp_widget_by_uid(uids, "pass", GP_WIDGET_TEXTBOX);
-	gp_widget *uname = gp_widget_by_uid(uids, "uname", GP_WIDGET_TEXTBOX);
+	gp_widget *pass = gp_widget_by_uid(uids, "pass", GP_WIDGET_TBOX);
+	gp_widget *uname = gp_widget_by_uid(uids, "uname", GP_WIDGET_TBOX);
 
 	if (uname)
 		printf("Username: '%s'\n", uname->tbox->buf);
@@ -37,7 +37,7 @@ int cancel_callback(gp_widget_event *ev)
 
 int show_password(gp_widget_event *ev)
 {
-	gp_widget *pass = gp_widget_by_uid(uids, "pass", GP_WIDGET_TEXTBOX);
+	gp_widget *pass = gp_widget_by_uid(uids, "pass", GP_WIDGET_TBOX);
 
 	if (ev->self->b->val)
 		pass->tbox->hidden = 0;

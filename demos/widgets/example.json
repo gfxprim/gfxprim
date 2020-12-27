@@ -15,12 +15,12 @@
       "val": 50.1
     },
     {
-      "type": "textbox",
+      "type": "tbox",
       "text": "Text Box",
       "size": 10
     },
     {
-      "type": "textbox",
+      "type": "tbox",
       "size": 10,
       "hidden": true,
       "uid": "passwd"

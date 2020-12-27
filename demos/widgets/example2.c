@@ -27,7 +27,7 @@ int btn_cancel_callback(gp_widget_event *ev)
 	return 0;
 }
 
-int textbox_filter(gp_widget_event *ev)
+int tbox_filter(gp_widget_event *ev)
 {
 	if (ev->type != GP_WIDGET_EVENT_FILTER)
 		return 0;

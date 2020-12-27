@@ -10,7 +10,7 @@
    ],
    "widgets": [
     {
-     "type": "textbox",
+     "type": "tbox",
      "size": 10,
      "on_event": "callback"
     },

@@ -88,7 +88,7 @@ struct gp_widget {
 		struct gp_widget_int *spin;
 		struct gp_widget_int *slider;
 
-		struct gp_widget_textbox *tbox;
+		struct gp_widget_tbox *tbox;
 
 		struct gp_widget_choice *choice;
 
@@ -120,7 +120,7 @@ enum gp_widget_type {
 	GP_WIDGET_PROGRESSBAR,
 	GP_WIDGET_SPINNER,
 	GP_WIDGET_SLIDER,
-	GP_WIDGET_TEXTBOX,
+	GP_WIDGET_TBOX,
 	GP_WIDGET_RADIOBUTTON,
 	GP_WIDGET_TABLE,
 	GP_WIDGET_PIXMAP,

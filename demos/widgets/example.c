@@ -15,7 +15,7 @@ int button_callback(gp_widget_event *ev)
 	if (ev->type == GP_WIDGET_EVENT_NEW)
 		return 0;
 
-	gp_widget *pass = gp_widget_by_uid(uids, "passwd", GP_WIDGET_TEXTBOX);
+	gp_widget *pass = gp_widget_by_uid(uids, "passwd", GP_WIDGET_TBOX);
 
 	if (pass)
 		printf("Password: %s\n", pass->tbox->buf);

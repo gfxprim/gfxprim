@@ -16,9 +16,9 @@
       "set": true
     },
     {
-      "type": "textbox",
+      "type": "tbox",
       "text": "0123456789",
-      "on_event": "textbox_filter"
+      "on_event": "tbox_filter"
     },
     {
       "type": "radiobutton",

@@ -74,7 +74,7 @@ int set_fg_color(gp_widget_event *ev)
 
 	switch (ev->type) {
 	case GP_WIDGET_EVENT_NEW:
-		ev->self->tbox->filter = GP_TEXT_BOX_FILTER_HEX;
+		ev->self->tbox->filter = GP_TBOX_FILTER_HEX;
 		/* fall through */
 	case GP_WIDGET_EVENT_EDIT:
 		fg_rgb = strtol(ev->self->tbox->buf, NULL, 16);
@@ -95,7 +95,7 @@ int set_bg_color(gp_widget_event *ev)
 
 	switch (ev->type) {
 	case GP_WIDGET_EVENT_NEW:
-		ev->self->tbox->filter = GP_TEXT_BOX_FILTER_HEX;
+		ev->self->tbox->filter = GP_TBOX_FILTER_HEX;
 	/* fall through */
 	case GP_WIDGET_EVENT_EDIT:
 		bg_rgb = strtol(ev->self->tbox->buf, NULL, 16);

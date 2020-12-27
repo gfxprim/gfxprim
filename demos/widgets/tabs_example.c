@@ -14,7 +14,7 @@ int callback(gp_widget_event *ev)
 		return 0;
 
 	switch (ev->self->type) {
-	case GP_WIDGET_TEXTBOX:
+	case GP_WIDGET_TBOX:
 		if (ev->type == GP_WIDGET_EVENT_EDIT)
 			printf("Text box edit '%s'\n", ev->self->tbox->buf);
 

@@ -14,13 +14,13 @@
      "text": "bg:"
     },
     {
-     "type": "textbox",
+     "type": "tbox",
      "text": "ffffff",
      "max_size" : 6,
      "on_event": "set_fg_color"
     },
     {
-     "type": "textbox",
+     "type": "tbox",
      "text": "000000",
      "max_size" : 6,
      "on_event": "set_bg_color"
