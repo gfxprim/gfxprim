@@ -29,4 +29,6 @@ typedef struct gp_gamma gp_gamma;
 /* Progress callback */
 typedef struct gp_progress_cb gp_progress_cb;
 
+#include <core/gp_seek.h>
+
 #endif /* CORE_GP_TYPES_H */

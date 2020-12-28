@@ -7,4 +7,5 @@ debug
 get_put_pixel.gen
 get_set_bits.gen
 pixel
+seek
 write_pixel.gen
