@@ -9,6 +9,8 @@
 #ifndef GP_WIDGET_TBOX_H__
 #define GP_WIDGET_TBOX_H__
 
+#include <core/gp_seek.h>
+
 struct gp_widget_tbox {
 	/*
 	 * If not NULL the tbox can contain only characters from this
@@ -73,7 +75,6 @@ int gp_widget_tbox_printf(gp_widget *self, const char *fmt, ...)
  */
 void gp_widget_tbox_clear(gp_widget *self);
 
-
 /**
  * @brief Returns a tbox string.
  *
@@ -81,5 +82,60 @@ void gp_widget_tbox_clear(gp_widget *self);
  * @return Texbox widget string.
  */
 const char *gp_widget_tbox_str(gp_widget *self);
+
+/**
+ * @brief Returns current cursor postion.
+ *
+ * @self A tbox widget.
+ * @return Current cursor position.
+ */
+size_t gp_widget_tbox_cursor_get(gp_widget *self);
+
+/**
+ * @brief Moves a cursor to a defined position.
+ *
+ * The whence works exactly as it would have for lseek(2). E.g. to move the
+ * cursor one character back the whence would be set to GP_SEEK_CUR and off
+ * to -1.
+ *
+ * @self A tbox widget.
+ * @off An offset.
+ * @whence Whence for the offset.
+ */
+void gp_widget_tbox_cursor_set(gp_widget *self, ssize_t off,
+                               enum gp_seek_whence whence);
+
+/**
+ * @brief Inserts a string into a tbox.
+ *
+ * The whence works exactly as it would have for lseek(2).
+ *
+ * If we are inserting a text before cursor, the cursor moves as well. If text
+ * is inserted after cursor, the cursor stays on its position.
+ *
+ * @self A tbox widget.
+ * @off An offset.
+ * @whence A whence for the offset.
+ * @str A string.
+ */
+void gp_widget_tbox_ins(gp_widget *self, ssize_t off,
+                        enum gp_seek_whence whence, const char *str);
+
+
+/**
+ * @brief Deletes a len characters from a tbox.
+ *
+ * The whence works exactly as it would have for lseek(2).
+ *
+ * If we are deleting a text before cursor, the cursor moves as well. If text
+ * is deleted after cursor, the cursor stays on its position.
+ *
+ * @self A tbox widget.
+ * @off An offset.
+ * @whence A whence for the offset.
+ * @len A number of characters to delete.
+ */
+void gp_widget_tbox_del(gp_widget *self, ssize_t off,
+                        enum gp_seek_whence whence, size_t len);
 
 #endif /* GP_WIDGET_TBOX_H__ */

@@ -437,3 +437,71 @@ const char *gp_widget_tbox_str(gp_widget *self)
 
 	return self->tbox->buf;
 }
+
+size_t gp_widget_tbox_cursor_get(gp_widget *self)
+{
+	GP_WIDGET_ASSERT(self, GP_WIDGET_TBOX, 0);
+
+	return self->tbox->cur_pos;
+}
+
+void gp_widget_tbox_cursor_set(gp_widget *self, ssize_t off,
+                               enum gp_seek_whence whence)
+{
+	GP_WIDGET_ASSERT(self, GP_WIDGET_TBOX, );
+
+	size_t max_pos = gp_vec_strlen(self->tbox->buf);
+	size_t cur_pos = gp_seek_off(off, whence, self->tbox->cur_pos, max_pos);
+
+	self->tbox->cur_pos = cur_pos;
+
+	if (self->focused)
+		gp_widget_redraw(self);
+}
+
+void gp_widget_tbox_ins(gp_widget *self, ssize_t off,
+                        enum gp_seek_whence whence, const char *str)
+{
+	GP_WIDGET_ASSERT(self, GP_WIDGET_TBOX, );
+
+	size_t max_pos = gp_vec_strlen(self->tbox->buf);
+	size_t ins_pos = gp_seek_off(off, whence, self->tbox->cur_pos, max_pos);
+
+	char *new_buf = gp_vec_strins(self->tbox->buf, ins_pos, str);
+
+	if (!new_buf)
+		return;
+
+	self->tbox->buf = new_buf;
+
+	if (ins_pos < self->tbox->cur_pos)
+		self->tbox->cur_pos += strlen(str);
+
+	gp_widget_redraw(self);
+}
+
+void gp_widget_tbox_del(gp_widget *self, ssize_t off,
+                        enum gp_seek_whence whence, size_t len)
+{
+	GP_WIDGET_ASSERT(self, GP_WIDGET_TBOX, );
+
+	size_t max_pos = gp_vec_strlen(self->tbox->buf);
+	size_t del_pos = gp_seek_off(off, whence, self->tbox->cur_pos, max_pos);
+	size_t del_size = GP_MIN(len, max_pos - del_pos);
+
+	char *new_buf = gp_vec_strdel(self->tbox->buf, del_pos, del_size);
+
+	if (!new_buf)
+		return;
+
+	self->tbox->buf = new_buf;
+
+	if (del_pos < self->tbox->cur_pos) {
+		if (self->tbox->cur_pos < del_pos + del_size)
+			self->tbox->cur_pos = del_pos;
+		else
+			self->tbox->cur_pos -= del_size;
+	}
+
+	gp_widget_redraw(self);
+}
