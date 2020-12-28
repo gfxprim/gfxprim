@@ -244,6 +244,37 @@ static int tbox_del(void)
 	return TST_SUCCESS;
 }
 
+static int tbox_printf(void)
+{
+	gp_widget *tbox;
+	const char *str;
+	size_t cur_pos;
+
+	tbox = gp_widget_tbox_new("hello world", 10, NULL, NULL, NULL, 0);
+	if (!tbox) {
+		tst_msg("Allocation failure");
+		return TST_FAILED;
+	}
+
+	gp_widget_tbox_printf(tbox, "%i", 666);
+
+	cur_pos = gp_widget_tbox_cursor_get(tbox);
+	if (cur_pos != 3) {
+		tst_msg("Wrong cursor position %zu expected 3", cur_pos);
+		return TST_FAILED;
+	}
+
+	str = gp_widget_tbox_str(tbox);
+	if (strcmp(str, "666")) {
+		tst_msg("Got wrong string: '%s'", str);
+		return TST_FAILED;
+	}
+
+	gp_widget_free(tbox);
+
+	return TST_SUCCESS;
+}
+
 const struct tst_suite tst_suite = {
 	.suite_name = "tbox testsuite",
 	.tests = {
@@ -265,6 +296,9 @@ const struct tst_suite tst_suite = {
 
 		{.name = "tbox delete",
 		 .tst_fn = tbox_del},
+
+		{.name = "tbox printf",
+		 .tst_fn = tbox_printf},
 
 		{.name = NULL},
 	}

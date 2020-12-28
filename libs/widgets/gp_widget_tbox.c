@@ -404,15 +404,16 @@ int gp_widget_tbox_printf(gp_widget *self, const char *fmt, ...)
 	len = vsnprintf(NULL, 0, fmt, ap)+1;
 	va_end(ap);
 
-	char *tmp = gp_vec_resize(self->tbox->buf, len + 1);
-	if (!tmp)
+	char *new_buf = gp_vec_resize(self->tbox->buf, len);
+	if (!new_buf)
 		return -1;
 
 	va_start(ap, fmt);
-	vsprintf(tmp, fmt, ap);
+	vsprintf(new_buf, fmt, ap);
 	va_end(ap);
 
-	self->tbox->buf = tmp;
+	self->tbox->buf = new_buf;
+	self->tbox->cur_pos = gp_vec_strlen(new_buf);
 
 	gp_widget_redraw(self);
 
