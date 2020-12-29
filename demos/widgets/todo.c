@@ -45,7 +45,7 @@ static int on_new(gp_widget_event *ev)
 	int i = 0;
 	todo *t;
 
-	if (ev->type != GP_WIDGET_EVENT_ACTION)
+	if (ev->type != GP_WIDGET_EVENT_WIDGET)
 		return 0;
 
 	while (todos[i].active)

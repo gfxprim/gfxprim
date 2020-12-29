@@ -68,6 +68,12 @@ int pixmap_on_event(gp_widget_event *ev)
 	return 0;
 }
 
+static void set_color(gp_pixel *col, const char *val, const char *name)
+{
+	*col = strtol(val, NULL, 16);
+	printf("%s = 0x%x\n", name, *col);
+}
+
 int set_fg_color(gp_widget_event *ev)
 {
 	gp_widget_event_dump(ev);
@@ -75,10 +81,12 @@ int set_fg_color(gp_widget_event *ev)
 	switch (ev->type) {
 	case GP_WIDGET_EVENT_NEW:
 		ev->self->tbox->filter = GP_TBOX_FILTER_HEX;
-		/* fall through */
-	case GP_WIDGET_EVENT_EDIT:
-		fg_rgb = strtol(ev->self->tbox->buf, NULL, 16);
-		printf("fg_color = 0x%x\n", fg_rgb);
+		set_color(&fg_rgb, gp_widget_tbox_str(ev->self), "fg_color");
+	break;
+	case GP_WIDGET_EVENT_WIDGET:
+		if (ev->sub_type != GP_WIDGET_TBOX_EDIT)
+			return 0;
+		set_color(&fg_rgb, gp_widget_tbox_str(ev->self), "fg_color");
 	break;
 	default:
 	break;
@@ -96,17 +104,21 @@ int set_bg_color(gp_widget_event *ev)
 	switch (ev->type) {
 	case GP_WIDGET_EVENT_NEW:
 		ev->self->tbox->filter = GP_TBOX_FILTER_HEX;
-	/* fall through */
-	case GP_WIDGET_EVENT_EDIT:
-		bg_rgb = strtol(ev->self->tbox->buf, NULL, 16);
-		printf("bg_color = 0x%06x\n", bg_rgb);
+		set_color(&bg_rgb, gp_widget_tbox_str(ev->self), "bg_color");
 	break;
-	case GP_WIDGET_EVENT_ACTION:
-		pixmap = gp_widget_by_uid(uids, "pixmap", GP_WIDGET_PIXMAP);
+	case GP_WIDGET_EVENT_WIDGET:
+		switch (ev->sub_type) {
+		case GP_WIDGET_TBOX_EDIT:
+			set_color(&bg_rgb, gp_widget_tbox_str(ev->self), "bg_color");
+		break;
+		case GP_WIDGET_TBOX_TRIGGER:
+			pixmap = gp_widget_by_uid(uids, "pixmap", GP_WIDGET_PIXMAP);
 
-		if (pixmap) {
-			fill_pixmap(pixmap->pixmap->pixmap);
-			gp_widget_redraw(pixmap);
+			if (pixmap) {
+				fill_pixmap(pixmap->pixmap->pixmap);
+				gp_widget_redraw(pixmap);
+			}
+		break;
 		}
 	break;
 	default:
@@ -120,7 +132,7 @@ int button_on_event(gp_widget_event *ev)
 {
 	gp_widget_event_dump(ev);
 
-	if (ev->type != GP_WIDGET_EVENT_ACTION)
+	if (ev->type != GP_WIDGET_EVENT_WIDGET)
 		return 0;
 
 	gp_widget *pixmap = gp_widget_by_uid(uids, "pixmap", GP_WIDGET_PIXMAP);

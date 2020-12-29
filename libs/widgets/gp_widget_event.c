@@ -13,9 +13,8 @@
 
 static const char *ev_names[] = {
 	[GP_WIDGET_EVENT_NEW] = "new",
-	[GP_WIDGET_EVENT_ACTION] = "enter",
-	[GP_WIDGET_EVENT_EDIT] = "edit",
-	[GP_WIDGET_EVENT_FILTER] = "filter",
+	[GP_WIDGET_EVENT_FREE] = "free",
+	[GP_WIDGET_EVENT_WIDGET] = "widget",
 	[GP_WIDGET_EVENT_INPUT] = "input",
 	[GP_WIDGET_EVENT_REDRAW] = "redraw",
 	[GP_WIDGET_EVENT_RESIZE] = "resize",
@@ -54,14 +53,12 @@ const char *gp_widget_event_type_name(enum gp_widget_event_type ev_type)
 
 void gp_widget_event_dump(gp_widget_event *ev)
 {
-	printf("Event type %s for widget %p type %s\n",
+	printf("Event type %s for widget %p type %s sub_type %u\n",
 		gp_widget_event_type_name(ev->type),
-		ev->self, gp_widget_type_id(ev->self));
+		ev->self, gp_widget_type_id(ev->self),
+		(unsigned int) ev->sub_type);
 
 	switch (ev->type) {
-	case GP_WIDGET_EVENT_FILTER:
-		printf(" Character to be insterted '%c'\n", (char)ev->val);
-	break;
 	case GP_WIDGET_EVENT_INPUT:
 		gp_event_dump(ev->input_ev);
 	break;

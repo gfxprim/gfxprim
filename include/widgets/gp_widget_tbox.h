@@ -32,6 +32,18 @@ struct gp_widget_tbox {
 	char payload[];
 };
 
+/**
+ * @brief Event sub_type for tbox widget events.
+ */
+enum gp_widget_tbox_event_type {
+	/** Emitted when enter is presseed */
+	GP_WIDGET_TBOX_TRIGGER,
+	/** Emitted before text is entered into the textbox */
+	GP_WIDGET_TBOX_FILTER,
+	/** Emitted after text is entered */
+	GP_WIDGET_TBOX_EDIT,
+};
+
 enum gp_widget_tbox_flags {
 	GP_WIDGET_TBOX_HIDDEN = 0x01,
 };

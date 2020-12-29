@@ -48,7 +48,7 @@ int mon_year_on_event(gp_widget_event *ev)
 {
 	int days;
 
-	if (ev->type != GP_WIDGET_EVENT_ACTION)
+	if (ev->type != GP_WIDGET_EVENT_WIDGET)
 		return 0;
 
 	days = days_in_mon(gp_widget_int_get(wmon), gp_widget_int_get(wyear));

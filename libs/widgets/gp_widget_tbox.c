@@ -135,7 +135,7 @@ static void clear_alert(gp_widget *self)
 static void send_edit_event(gp_widget *self)
 {
 	clear_alert(self);
-	gp_widget_send_event(self, GP_WIDGET_EVENT_EDIT);
+	gp_widget_send_widget_event(self, GP_WIDGET_TBOX_EDIT);
 }
 
 static int filter(const char *filter, char ch)
@@ -159,7 +159,7 @@ static void ascii_key(gp_widget *self, char ch)
 		return;
 	}
 
-	int ret = gp_widget_send_event(self, GP_WIDGET_EVENT_FILTER, (long)ch);
+	int ret = gp_widget_send_widget_event(self, GP_WIDGET_TBOX_FILTER, (long)ch);
 
 	if (ret || filter(self->tbox->filter, ch)) {
 		schedule_alert(self);
@@ -263,7 +263,7 @@ static int event(gp_widget *self, const gp_widget_render_ctx *ctx, gp_event *ev)
 		switch (ev->val) {
 		case GP_KEY_ENTER:
 			if (ev->code == GP_EV_KEY_DOWN)
-				gp_widget_send_event(self, GP_WIDGET_EVENT_ACTION);
+				gp_widget_send_widget_event(self, GP_WIDGET_TBOX_TRIGGER);
 			return 1;
 		case GP_KEY_LEFT:
 			key_left(self);

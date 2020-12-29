@@ -130,7 +130,7 @@ Widgets
 [cols=",,,3",options="header"]
 |==============================================================================
 |  Attribute |  Type  | Default  | Description
-|   +uid+    | string |          | Widget universal id
+|   +uid+    | string |          | Widget universal id. Must be unique.
 |   +align+  |  enum  | +center+ | Sets both +haling+ and +valign+ {+center+, +fill+}
 |  +haling+  |  enum  | +center+ | Horizontal alignment {+center+, +left+, +right+, +fill+}
 |  +valing+  |  enum  | +center+ | Vertical alignment {+center+, +top+, +bottom+, +fill+}
@@ -142,8 +142,7 @@ Widget events
 
 Widget events is how the library interacts with the application code, e.g. if
 button is pressed the button `on_event` callback handler is called with the
-`gp_widget_event` structure pointer that holds the information about the event
-type.
+`gp_widget_event` structure pointer that holds information about the event.
 
 .Widget event handle and event structure
 [source,c]
@@ -158,7 +157,8 @@ struct gp_widget {
 
 struct gp_widget_event {
 	gp_widget *self;
-	enum gp_widget_event_type type;
+	uint16_t type;
+	uint16_t sub_type;
 	union {
 		void *ptr;
 		long val;
@@ -171,15 +171,54 @@ The event handler is part of the widget structure, the `priv` field is a user
 pointer that is not touched by the widget library.
 
 The event handler is passed `gp_widget_event` structure and returns integer, in
-most cases the value is not used though.
+most cases the value is not used and it's customary to return 0 in these
+cases.
 
-.Generic widget events
-[cols=",3",options="header"]
+Each widget also has a event mask that can be used to enable or disable
+particular events. There is also a default mask new widgets are initialized
+with.
+
+.Functions to manipulate widget event mask
+[source,c]
+-------------------------------------------------------------------------------
+void gp_widget_event_mask(gp_widget *self, enum gp_widget_event_type ev_type);
+
+void gp_widget_event_unmask(gp_widget *self, enum gp_widget_event_type ev_type);
+-------------------------------------------------------------------------------
+
+.Widget events
+[cols=",,3",options="header"]
 |============================================================================
-| Event name | Description
-|     NEW    | Emitted after widget has been created from a json description.
-|   ACTION   | Default action, e.g. button pressed, checkbox changed, etc.
+|        Event name      | Unmasked | Description
+| GP_WIDGET_EVENT_NEW    |   Yes    | Emitted after widget has been created from a json description.
+| GP_WIDGET_EVENT_FREE   |   Yes    | Emitted before widget is freed.
+| GP_WIDGET_EVENT_WIDGET |   Yes    | Default action, e.g. button pressed, checkbox changed, etc.
+| GP_WIDGET_EVENT_RESIZE |    No    | Emitted when widget is resized.
+| GP_WIDGET_EVENT_INPUT  |    No    | Can be used to redirect unused input events.
 |============================================================================
+
+The 'GP_WIDGET_EVENT_NEW' is send when widget is created from the JSON
+description. It's mainly used to set properties that cannot be known, or
+shouldn't be set in the JSON itself.
+
+The 'GP_WIDGET_EVENT_FREE' is send before widget is freed, it can be used for
+a cleanup.
+
+The 'GP_WIDGET_EVENT_WIDGET' is a widget specific event, e.g. button has been
+pressed, or text was appended into a textbox. In this case the event sub_type
+may be set. In most of the cases though widget has only one type of event to
+send and in this case the sub_type is set to zero.
+
+The 'GP_WIDGET_EVENT_RESIZE' is mainly used for the pixmap widget, where the
+resized pixmap has tobe repainted by the user code. It can be enabled for any
+widget though.
+
+The 'GP_WIDGET_EVENT_INPUT' can be used to redirect unused input events, i.e.
+when widget is focused and gets input events, unhandled events can be send to
+the widget event handler. In this case the return value from the handler is
+important. If input event was used by the handler it should return 1 and zero
+should be returned otherwise, so that the library knows if the event should be
+propagated to the upper layers or not.
 
 Label widget
 ~~~~~~~~~~~~

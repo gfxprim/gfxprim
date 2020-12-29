@@ -25,7 +25,7 @@ static char *get(unsigned int var_id, char *buf)
 
 static int button_callback(gp_widget_event *ev)
 {
-	if (ev->type != GP_WIDGET_EVENT_ACTION)
+	if (ev->type != GP_WIDGET_EVENT_WIDGET)
 		return -1;
 
 	gp_widget_markup_refresh(ev->self->priv);

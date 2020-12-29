@@ -10,7 +10,7 @@
 
 static int set_layout0(gp_widget_event *ev)
 {
-	if (ev->type != GP_WIDGET_EVENT_ACTION)
+	if (ev->type != GP_WIDGET_EVENT_WIDGET)
 		return 0;
 
 	gp_widget_switch_layout(ev->self->priv, 0);
@@ -19,7 +19,7 @@ static int set_layout0(gp_widget_event *ev)
 
 static int set_layout1(gp_widget_event *ev)
 {
-	if (ev->type != GP_WIDGET_EVENT_ACTION)
+	if (ev->type != GP_WIDGET_EVENT_WIDGET)
 		return 0;
 
 	gp_widget_switch_layout(ev->self->priv, 1);
@@ -28,7 +28,7 @@ static int set_layout1(gp_widget_event *ev)
 
 static int set_layout2(gp_widget_event *ev)
 {
-	if (ev->type != GP_WIDGET_EVENT_ACTION)
+	if (ev->type != GP_WIDGET_EVENT_WIDGET)
 		return 0;
 
 	gp_widget_switch_layout(ev->self->priv, 2);

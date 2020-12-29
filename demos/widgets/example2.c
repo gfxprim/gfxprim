@@ -29,7 +29,10 @@ int btn_cancel_callback(gp_widget_event *ev)
 
 int tbox_filter(gp_widget_event *ev)
 {
-	if (ev->type != GP_WIDGET_EVENT_FILTER)
+	if (ev->type != GP_WIDGET_EVENT_WIDGET)
+		return 0;
+
+	if (ev->sub_type != GP_WIDGET_TBOX_FILTER)
 		return 0;
 
 	char ch = ev->val;

@@ -91,7 +91,7 @@ static void select_choice(gp_widget *self, unsigned int select)
 
 	gp_widget_redraw(self);
 
-	gp_widget_send_event(self, GP_WIDGET_EVENT_ACTION);
+	gp_widget_send_widget_event(self, 0);
 }
 
 static void key_up(gp_widget *self)

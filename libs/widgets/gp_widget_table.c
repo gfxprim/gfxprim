@@ -372,7 +372,7 @@ static int enter(gp_widget *self)
 	if (!tbl->row_focused)
 		return 0;
 
-	gp_widget_send_event(self, GP_WIDGET_EVENT_ACTION);
+	gp_widget_send_widget_event(self, 0);
 
 	return 1;
 }

@@ -34,7 +34,8 @@ static int ev_handler(gp_widget_event *ev)
 {
 	int *flag = ev->self->priv;
 
-	if (ev->type == GP_WIDGET_EVENT_ACTION) {
+	if (ev->type == GP_WIDGET_EVENT_WIDGET &&
+	    ev->sub_type == GP_WIDGET_TBOX_TRIGGER) {
 		tst_msg("Got action event");
 		*flag = 1;
 	}

@@ -80,7 +80,7 @@ static void set(gp_widget *self, int val)
 
 	gp_widget_redraw(self);
 
-	gp_widget_send_event(self, GP_WIDGET_EVENT_ACTION);
+	gp_widget_send_widget_event(self, 0);
 }
 
 static void toggle(gp_widget *self)
