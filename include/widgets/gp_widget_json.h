@@ -24,6 +24,16 @@ struct json_object;
 gp_widget *gp_widget_from_json(struct json_object *json, void **uids);
 
 /**
+ * @brief Loads a widget layout given a string with JSON layout.
+ *
+ * @str A string with a JSON layout.
+ * @uids A pointer to a hash table to store widget pointers by UIDs.
+ *
+ * @return A widget layout or a NULL in case of a failure.
+ */
+gp_widget *gp_widget_from_json_str(const char *str, void **uids);
+
+/**
  * @brief Loads a widget layout given a path to a JSON layout description.
  *
  * @fname A path to a JSON layout file.

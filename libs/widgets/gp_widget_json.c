@@ -346,6 +346,48 @@ err:
 	return ret;
 }
 
+gp_widget *gp_widget_from_json_str(const char *str, void **uids)
+{
+	struct json_tokener *tok;
+	json_object *json = NULL;
+	enum json_tokener_error err;
+	size_t size = strlen(str);
+	gp_widget *ret = NULL;
+
+	tok = json_tokener_new();
+	if (!tok) {
+		GP_WARN("json_tokener_new() failed :-(");
+		return NULL;
+	}
+
+	json = json_tokener_parse_ex(tok, str, size);
+	err = json_tokener_get_error(tok);
+
+	switch (err) {
+	case json_tokener_continue:
+		GP_WARN("Unfinished JSON layout string");
+		goto err;
+	break;
+	case json_tokener_success:
+		if ((size_t)tok->char_offset != size) {
+			GP_WARN("Garbage after JSON string end");
+			goto err;
+		}
+	break;
+	default:
+		GP_WARN("JSON error %s", json_tokener_error_desc(err));
+		goto err;
+	}
+
+	ret = gp_widgets_from_json(json, uids);
+err:
+	if (json)
+		json_object_put(json);
+
+	json_tokener_free(tok);
+	return ret;
+}
+
 gp_widget *gp_widget_by_uid(void *uids, const char *uid, enum gp_widget_type type)
 {
 	gp_widget *ret = gp_htable_get(uids, uid);
