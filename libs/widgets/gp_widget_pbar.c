@@ -27,7 +27,7 @@ static unsigned int pbar_min_h(gp_widget *self, const gp_widget_render_ctx *ctx)
 	return 2 * ctx->padd + gp_text_ascent(ctx->font);
 }
 
-unsigned int secs_rem(float sec)
+static unsigned int secs_rem(float sec)
 {
 	return (unsigned int)(sec + 0.5) % 60;
 }
