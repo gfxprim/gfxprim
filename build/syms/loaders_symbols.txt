@@ -64,12 +64,10 @@ gp_storage_add_string
 gp_loader_load_image_ex
 gp_read_exif
 gp_read_pnm_ex
-gp_bmp
 gp_storage_add_rational
 gp_io_readf
 gp_storage_get
 gp_read_tiff_ex
-gp_write_bmp
 gp_read_pgm_ex
 gp_match_pbm
 gp_psd
@@ -92,7 +90,6 @@ gp_loader_load_image
 gp_psp
 gp_write_ppm
 gp_io_file
-gp_read_bmp_ex
 gp_read_image
 gp_container_seek
 gp_io_size
@@ -102,10 +99,14 @@ gp_webp
 gp_match_webp
 gp_read_webp_ex
 
+gp_bmp
 gp_bmp_match_pixel_type
 gp_bmp_palette_size
 gp_bmp_read_pixels
 gp_bmp_read_info_header
+gp_read_bmp_ex
+gp_write_bmp
+gp_bmp_pixel_type
 
 gp_read_ico_ex
 gp_match_ico

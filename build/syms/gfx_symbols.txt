@@ -1,0 +1,14 @@
+gp_vline_raw_24BPP_clip
+gp_vline_raw_18BPP_LE_clip
+gp_vline_raw_1BPP_BE_clip
+gp_vline_raw_2BPP_LE_clip
+gp_vline_raw_4BPP_LE_clip
+gp_vline_raw_8BPP_clip
+gp_vline_raw_32BPP_clip
+gp_vline_raw_2BPP_BE_clip
+gp_vline_raw_16BPP_clip
+gp_vline_raw_4BPP_BE_clip
+gp_vline_raw_1BPP_LE_clip
+
+gp_symbol
+gp_symbol_raw
