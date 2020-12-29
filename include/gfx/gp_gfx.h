@@ -33,5 +33,6 @@
 #include <gfx/gp_ellipse.h>
 #include <gfx/gp_arc.h>
 #include <gfx/gp_polygon.h>
+#include <gfx/gp_symbol.h>
 
 #endif /* GP_GFX_H */
