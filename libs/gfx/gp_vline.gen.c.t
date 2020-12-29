@@ -18,3 +18,15 @@ void gp_vline_raw_{{ ps.suffix }}(gp_pixmap *pixmap, gp_coord x,
 		gp_putpixel_raw_{{ ps.suffix }}(pixmap, x, y, pixel);
 }
 
+void gp_vline_raw_{{ ps.suffix }}_clip(gp_pixmap *pixmap, gp_coord x,
+                                       gp_coord y0, gp_coord y1, gp_pixel pixel)
+{
+	if (x < 0 || x >= (gp_coord) pixmap->w ||
+	    y1 < 0 || y0 >= (gp_coord) pixmap->h)
+		return;
+
+	y0 = GP_MAX(y0, 0);
+	y1 = GP_MIN(y1, (gp_coord) pixmap->h - 1);
+
+	gp_vline_raw_{{ ps.suffix }}_clip(pixmap, x, y0, y1, pixel);
+}
