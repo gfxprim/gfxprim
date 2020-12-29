@@ -29,9 +29,9 @@ typedef struct gp_widget_table {
 	unsigned int *col_min_sizes;
 	unsigned char *col_fills;
 
-	unsigned int focused_row;
+	unsigned int selected_row;
 	unsigned int sorted_by_col;
-	int row_focused:1;
+	int row_selected:1;
 	int sorted_desc:1;
 
 	unsigned int start_row;
