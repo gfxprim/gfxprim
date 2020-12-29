@@ -208,8 +208,8 @@ static void spin_render(gp_widget *self, const gp_offset *offset,
 	gp_vline_xyh(ctx->buf, rx-1, y, h, color);
 	gp_hline_xyw(ctx->buf, rx, y + h/2, s, color);
 
-	gp_triangle_up(ctx->buf, x + w - s/2 - 1, y + h/4, s/2, ctx->text_color);
-	gp_triangle_down(ctx->buf, x + w - s/2 - 1, y + (h/4) * 3, s/2, ctx->text_color);
+	gp_symbol(ctx->buf, x + w - s/2 - 1, y + h/4, s/4, s/4, GP_TRIANGLE_UP, ctx->text_color);
+	gp_symbol(ctx->buf, x + w - s/2 - 1, y + (3*h)/4, s/4, s/4, GP_TRIANGLE_DOWN, ctx->text_color);
 }
 
 static void schedule_alert(gp_widget *self)

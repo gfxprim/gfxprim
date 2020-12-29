@@ -115,17 +115,18 @@ static void header_render(gp_widget *self, gp_coord x, gp_coord y,
 
 	for (i = 0; i < tbl->cols; i++) {
 		if (tbl->headers[i].sortable) {
-			gp_size symbol_size = text_a/1.5;
+			gp_size sym_size = text_a/3;
 			gp_size sx = cx + tbl->cols_w[i] - ctx->padd;
 			gp_size sy = cy + text_a/2;
 
 			if (i == tbl->sorted_by_col) {
 				if (tbl->sorted_desc)
-					gp_triangle_down(ctx->buf, sx, sy, symbol_size, ctx->text_color);
+					gp_symbol(ctx->buf, sx, sy, sym_size, sym_size, GP_TRIANGLE_DOWN, ctx->text_color);
 				else
-					gp_triangle_up(ctx->buf, sx, sy, symbol_size, ctx->text_color);
+					gp_symbol(ctx->buf, sx, sy, sym_size, sym_size, GP_TRIANGLE_UP, ctx->text_color);
 			} else {
-				gp_triangle_updown(ctx->buf, sx, sy, symbol_size, ctx->text_color);
+				gp_symbol(ctx->buf, sx, sy - sym_size, sym_size, sym_size/2, GP_TRIANGLE_UP, ctx->text_color);
+				gp_symbol(ctx->buf, sx, sy + sym_size, sym_size, sym_size/2, GP_TRIANGLE_DOWN, ctx->text_color);
 			}
 		}
 

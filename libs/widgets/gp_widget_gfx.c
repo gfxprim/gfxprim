@@ -110,28 +110,3 @@ void gp_fill_rrect_xywh(gp_pixmap *pix, gp_coord x, gp_coord y, gp_size w, gp_si
 	gp_vline_xyy(pix, x, uy, dy, fr_color);
 	gp_vline_xyy(pix, x+w-1, uy, dy, fr_color);
 }
-
-void gp_triangle_up(gp_pixmap *pix, gp_coord x_center, gp_coord y_center,
-                    gp_size base, gp_pixel color)
-{
-	gp_fill_triangle(pix, x_center, y_center - base/2,
-		         x_center + base/2, y_center + base/2,
-			 x_center - base/2, y_center + base/2, color);
-}
-
-void gp_triangle_down(gp_pixmap *pix, gp_coord x_center, gp_coord y_center,
-                      gp_size base, gp_pixel color)
-{
-	gp_fill_triangle(pix, x_center, y_center + base/2,
-		         x_center + base/2, y_center - base/2,
-			 x_center - base/2, y_center - base/2, color);
-}
-
-void gp_triangle_updown(gp_pixmap *pix, gp_coord x_center, gp_coord y_center,
-                        gp_size base, gp_pixel color)
-{
-	gp_tetragon(pix, x_center, y_center + base/2,
-			 x_center - base/2, y_center,
-		         x_center, y_center - base/2,
-			 x_center + base/2, y_center, color);
-}
