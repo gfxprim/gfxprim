@@ -475,7 +475,7 @@ void gp_widget_tbox_ins(gp_widget *self, ssize_t off,
 
 	self->tbox->buf = new_buf;
 
-	if (ins_pos < self->tbox->cur_pos)
+	if (ins_pos <= self->tbox->cur_pos)
 		self->tbox->cur_pos += strlen(str);
 
 	gp_widget_redraw(self);

@@ -185,12 +185,25 @@ static int tbox_ins(void)
 		return TST_FAILED;
 	}
 
-	gp_widget_tbox_cursor_set(tbox, 0, GP_SEEK_SET);
+	gp_widget_tbox_ins(tbox, 0, GP_SEEK_END, "s");
+	cur_pos = gp_widget_tbox_cursor_get(tbox);
+	if (cur_pos != 12) {
+		tst_msg("Wrong cursor position %zu expected 12", cur_pos);
+		return TST_FAILED;
+	}
+
+	str = gp_widget_tbox_str(tbox);
+	if (strcmp(str, "hello worlds")) {
+		tst_msg("Got wrong string: '%s'", str);
+		return TST_FAILED;
+	}
+
+	gp_widget_tbox_cursor_set(tbox, -1, GP_SEEK_CUR);
 	gp_widget_tbox_ins(tbox, 0, GP_SEEK_END, " ");
 
 	cur_pos = gp_widget_tbox_cursor_get(tbox);
-	if (cur_pos != 0) {
-		tst_msg("Wrong cursor position %zu expected 0", cur_pos);
+	if (cur_pos != 11) {
+		tst_msg("Wrong cursor position %zu expected 11", cur_pos);
 		return TST_FAILED;
 	}
 
