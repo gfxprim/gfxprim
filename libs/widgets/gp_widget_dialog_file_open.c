@@ -207,6 +207,8 @@ static void exit_dialog(struct file_dialog *dialog, int retval)
 {
 	gp_widget_dialog *wd = GP_CONTAINER_OF(dialog, gp_widget_dialog, payload);
 
+	free_dir_cache(dialog->file_table->tbl->priv);
+
 	wd->dialog_exit = retval;
 }
 
