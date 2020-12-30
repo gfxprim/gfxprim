@@ -117,10 +117,16 @@ static gp_widget *json_to_label(json_object *json, void **uids)
 	return ret;
 }
 
+static void free_(gp_widget *self)
+{
+	gp_vec_free(self->label->text);
+}
+
 struct gp_widget_ops gp_widget_label_ops = {
 	.min_w = min_w,
 	.min_h = min_h,
 	.render = render,
+	.free = free_,
 	.from_json = json_to_label,
 	.id = "label",
 };

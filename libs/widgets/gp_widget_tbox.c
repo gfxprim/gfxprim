@@ -347,11 +347,17 @@ static gp_widget *json_to_tbox(json_object *json, void **uid)
 	return ret;
 }
 
+static void free_(gp_widget *self)
+{
+	gp_vec_free(self->tbox->buf);
+}
+
 struct gp_widget_ops gp_widget_tbox_ops = {
 	.min_w = min_w,
 	.min_h = min_h,
 	.render = render,
 	.event = event,
+	.free = free_,
 	.from_json = json_to_tbox,
 	.id = "tbox",
 };
