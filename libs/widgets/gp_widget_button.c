@@ -120,6 +120,11 @@ static gp_widget *json_to_button(json_object *json, void **uids)
 			GP_WARN("Invalid button key '%s'", key);
 	}
 
+	if (!label) {
+		GP_WARN("Button without label!");
+		label = "Unlabeled";
+	}
+
 	return gp_widget_button_new(label, NULL, NULL);
 }
 
