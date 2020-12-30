@@ -357,7 +357,7 @@ gp_widget_dialog *gp_widget_dialog_file_open_new(const char *path)
 	if (dialog->filter)
 		gp_widget_event_handler_set(dialog->filter, redraw_table, dialog);
 
-	gp_widget_tbox_printf(dialog->dir_path, get_path(path));
+	gp_widget_tbox_printf(dialog->dir_path, "%s", get_path(path));
 
 	gp_widget *table = gp_widget_table_new(3, 25, headers, set_row, get_elem);
 	if (!table)
