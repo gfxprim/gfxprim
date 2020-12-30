@@ -28,9 +28,8 @@ gp_font_face *gp_font_face_load(const char *path, uint32_t width, uint32_t heigh
 	err = FT_New_Face(library, path, 0, &face);
 
 	if (err) {
-		//TODO: FT_Exit_FreeType() ?
 		GP_DEBUG(1, "Failed to open font '%s'", path);
-		return NULL;
+		goto err1;
 	}
 
 	GP_DEBUG(1, "Opened font '%s'", path);
@@ -42,10 +41,9 @@ gp_font_face *gp_font_face_load(const char *path, uint32_t width, uint32_t heigh
 
 	//TODO: not scalable fonts?
 	err = FT_Set_Pixel_Sizes(face, width, height);
-
 	if (err) {
 		GP_DEBUG(1, "Failed to set pixel size");
-		return NULL;
+		goto err2;
 	}
 
 	/* Allocate font face structure */
@@ -56,9 +54,9 @@ gp_font_face *gp_font_face_load(const char *path, uint32_t width, uint32_t heigh
 
 	gp_font_face *font = malloc(font_face_size);
 
-	if (font == NULL) {
+	if (!font) {
 		GP_DEBUG(1, "Malloc failed :(");
-		goto err1;
+		goto err2;
 	}
 
 	/* Copy font metadata */
@@ -83,14 +81,14 @@ gp_font_face *gp_font_face_load(const char *path, uint32_t width, uint32_t heigh
 
 		if (err) {
 			GP_DEBUG(1, "Failed to load glyph '%c'", i);
-			goto err2;
+			goto err3;
 		}
 
 		err = FT_Render_Glyph(face->glyph, FT_RENDER_MODE_NORMAL);
 
 		if (err) {
 			GP_DEBUG(1, "Failed to render glyph '%c'", i);
-			goto err2;
+			goto err3;
 		}
 
 		FT_Bitmap *bitmap = &face->glyph->bitmap;
@@ -111,9 +109,9 @@ gp_font_face *gp_font_face_load(const char *path, uint32_t width, uint32_t heigh
 
 	font->glyphs = malloc(glyph_table_size);
 
-	if (font->glyphs == NULL) {
+	if (!font->glyphs) {
 		GP_DEBUG(1, "Malloc failed :(");
-		goto err2;
+		goto err3;
 	}
 
 	font->max_glyph_width = 0;
@@ -130,14 +128,14 @@ gp_font_face *gp_font_face_load(const char *path, uint32_t width, uint32_t heigh
 
 		if (err) {
 			GP_DEBUG(1, "Failed to load glyph '%c'", i);
-			goto err3;
+			goto err4;
 		}
 
 		err = FT_Render_Glyph(face->glyph, FT_RENDER_MODE_NORMAL);
 
 		if (err) {
 			GP_DEBUG(1, "Failed to render glyph '%c'", i);
-			goto err3;
+			goto err4;
 		}
 
 		gp_glyph *glyph_bitmap = gp_get_glyph(font, i);
@@ -176,13 +174,18 @@ gp_font_face *gp_font_face_load(const char *path, uint32_t width, uint32_t heigh
 		}
 	}
 
+	FT_Done_Face(face);
+	FT_Done_FreeType(library);
+
 	return font;
-err3:
+err4:
 	free(font->glyphs);
-err2:
+err3:
 	free(font);
+err2:
+	FT_Done_Face(face);
 err1:
-	//TODO FREETYPE CLEANUP
+	FT_Done_FreeType(library);
 	return NULL;
 }
 
