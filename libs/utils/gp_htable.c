@@ -88,13 +88,12 @@ void gp_htable_free(void *table)
 {
 	htable *self = table;
 
-	if (self->flags & GP_HTABLE_COPY_KEY) {
+	if (self->flags & GP_HTABLE_COPY_KEY ||
+	    self->flags & GP_HTABLE_FREE_KEY) {
 		unsigned int i;
 
-		for (i = 0; i < self->size; i++) {
-			if (self->elems[i].key)
-				free(self->elems[i].key);
-		}
+		for (i = 0; i < self->size; i++)
+			free(self->elems[i].key);
 	}
 
 	free(self->elems);

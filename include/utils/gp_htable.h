@@ -13,6 +13,7 @@
 
 enum gp_htable_flags {
 	GP_HTABLE_COPY_KEY = 0x01,
+	GP_HTABLE_FREE_KEY = 0x02,
 };
 
 /**
