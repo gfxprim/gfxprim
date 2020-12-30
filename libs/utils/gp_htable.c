@@ -60,11 +60,12 @@ typedef struct {
 
 void *gp_htable_new(unsigned int order, int flags)
 {
+	order = GP_MIN(order, GP_ARRAY_SIZE(primes));
+
 	size_t size = primes[order] * sizeof(htable_elem);
 	htable_elem *elems = malloc(size);
 	htable *table = malloc(sizeof(htable));
 
-	order = GP_MIN(order, GP_ARRAY_SIZE(primes));
 
 	GP_DEBUG(1, "Allocating hash table order %u", order);
 
