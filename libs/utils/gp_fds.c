@@ -48,6 +48,8 @@ int gp_fds_add(struct gp_fds *self, int fd, short events,
 	self->pfds[last].events = events;
 	self->pfds[last].revents = 0;
 
+	self->modified = 1;
+
 	return 0;
 }
 
@@ -85,6 +87,9 @@ int gp_fds_rem(struct gp_fds *self, int fd)
 		return 1;
 
 	rem(self, pos);
+
+	self->modified = 1;
+
 	return 0;
 }
 
@@ -97,6 +102,8 @@ int gp_fds_poll(struct gp_fds *self, int timeout)
 	if (ret <= 0)
 		return ret;
 
+	self->modified = 0;
+
 	for (i = 0; i < len; i++) {
 		if (self->pfds[i].revents) {
 			ret = self->fds[i].event(&self->fds[i], &self->pfds[i]);
@@ -106,6 +113,18 @@ int gp_fds_poll(struct gp_fds *self, int timeout)
 				len--;
 				i--;
 			}
+		}
+
+		/*
+		 * Restart the loop if table is modified from the callbacks.
+		 *
+		 * We do clear the revents when events are handled so all
+		 * callbacks will be called only once.
+		 */
+		if (self->modified) {
+			self->modified = 0;
+			len = gp_vec_len(self->pfds);
+			i = 0;
 		}
 	}
 

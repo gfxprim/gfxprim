@@ -17,6 +17,7 @@
 struct gp_fds {
 	struct gp_fd *fds;
 	struct pollfd *pfds;
+	int modified:1;
 };
 
 struct gp_fd {
