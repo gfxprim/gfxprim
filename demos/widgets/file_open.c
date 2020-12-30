@@ -17,7 +17,8 @@ int open_file(gp_widget_event *ev)
 
 	dialog = gp_widget_dialog_file_open_new(NULL);
 
-	gp_widget_dialog_run(dialog);
+	if (gp_widget_dialog_run(dialog) == GP_WIDGET_DIALOG_PATH)
+		printf("Selected path '%s'\n", gp_widget_dialog_file_open_path(dialog));
 
 	gp_widget_dialog_free(dialog);
 

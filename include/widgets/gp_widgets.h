@@ -9,6 +9,8 @@
 #ifndef GP_WIDGETS_H__
 #define GP_WIDGETS_H__
 
+#include <utils/gp_htable.h>
+
 #include <widgets/gp_widget_ops.h>
 #include <widgets/gp_widget.h>
 #include <widgets/gp_widget_render.h>

@@ -14,13 +14,13 @@
 #include <stdlib.h>
 #include <time.h>
 
-#include <gfxprim.h>
-#include <gp_string.h>
-#include <gp_widgets.h>
-#include <gp_dir_cache.h>
-#include <gp_date_time.h>
-#include <gp_file_size.h>
+#include <utils/gp_vec_str.h>
 
+#include <widgets/gp_widgets.h>
+#include <widgets/gp_string.h>
+#include <widgets/gp_dir_cache.h>
+#include <widgets/gp_date_time.h>
+#include <widgets/gp_file_size.h>
 #include <widgets/gp_widget_dialog.h>
 #include <widgets/gp_widget_dialog_file_open.h>
 
@@ -31,6 +31,8 @@ struct file_dialog {
 	gp_widget *filter;
 	gp_widget *dir_path;
 	gp_widget *file_table;
+
+	char *file_path;
 };
 
 static int redraw_table(gp_widget_event *ev)
@@ -206,8 +208,16 @@ static const char *get_elem(gp_widget *self, unsigned int col)
 static void exit_dialog(struct file_dialog *dialog, int retval)
 {
 	gp_widget_dialog *wd = GP_CONTAINER_OF(dialog, gp_widget_dialog, payload);
+	gp_dir_cache *cache = dialog->file_table->tbl->priv;
+	gp_widget *table = dialog->file_table;
 
-	free_dir_cache(dialog->file_table->tbl->priv);
+	if (table->tbl->row_selected) {
+		const char *dir = dialog->dir_path->tbox->buf;
+		gp_dir_entry *entry = gp_dir_cache_get_filtered(cache, table->tbl->selected_row);
+		dialog->file_path = gp_vec_printf(dialog->file_path, "%s/%s", dir, entry->name);
+	}
+
+	free_dir_cache(cache);
 
 	wd->dialog_exit = retval;
 }
@@ -379,4 +389,11 @@ err1:
 err0:
 	gp_widget_free(layout);
 	return NULL;
+}
+
+const char *gp_widget_dialog_file_open_path(gp_widget_dialog *self)
+{
+	struct file_dialog *dialog = (void*)self->payload;
+
+	return dialog->file_path;
 }
