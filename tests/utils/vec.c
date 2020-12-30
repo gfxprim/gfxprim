@@ -184,6 +184,33 @@ static int test_vec_resize(struct insert_test *tst)
 	return TST_SUCCESS;
 }
 
+static int test_vec_remove(void)
+{
+	int *vec = gp_vec_new(10, sizeof(int));
+	int i, j;
+
+	for (i = 0; i < 10; i++)
+		vec[i] = i + 1;
+
+	for (i = 9; i > 0; i--) {
+		vec = gp_vec_remove(vec, 1);
+
+		if (gp_vec_len(vec) != (size_t)i) {
+			tst_msg("Got wrong vector size %zu", gp_vec_len(vec));
+			return TST_FAILED;
+		}
+
+		for (j = 0; j < i; j++) {
+			if (vec[j] != j + 1) {
+				tst_msg("Got wrong vector value %i at %i", vec[j], j);
+				return TST_FAILED;
+			}
+		}
+	}
+
+	return TST_SUCCESS;
+}
+
 static struct insert_test test1 = {
 	.len = 1,
 	.off = 0,
@@ -244,6 +271,10 @@ const struct tst_suite tst_suite = {
 
 		{.name = "vector zero size",
 		 .tst_fn = test_vec_zero_size,
+		 .flags = TST_CHECK_MALLOC},
+
+		{.name = "vector remove",
+		 .tst_fn = test_vec_remove,
 		 .flags = TST_CHECK_MALLOC},
 
 		{.name = "insert test start",
