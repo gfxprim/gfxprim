@@ -36,6 +36,7 @@ gp_widget_free
 gp_widget_input_event
 gp_widget_layout_json
 gp_widget_from_json
+gp_widget_from_json_str
 gp_widget_layout_replace
 gp_widget_min_h
 gp_widget_min_w
@@ -178,3 +179,8 @@ gp_widget_tbox_del
 gp_widget_tbox_printf
 gp_widget_tbox_new
 gp_widget_tbox_ops
+
+gp_widget_dialog_free
+gp_widget_dialog_new
+gp_widget_dialog_run
+gp_widget_dialog_file_open_new

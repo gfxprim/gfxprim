@@ -17,6 +17,7 @@
 #include <gp_widget_render.h>
 #include <gp_widget_ops.h>
 #include <gp_key_repeat_timer.h>
+#include <widgets/gp_widget_dialog.h>
 
 static struct gp_text_style font = {
 	.pixel_xmul = 1,
@@ -500,6 +501,34 @@ static int input_event(struct gp_fd *self, struct pollfd *pfd)
 static struct gp_fds fds = GP_FDS_INIT;
 
 struct gp_fds *gp_widgets_fds = &fds;
+
+int gp_widget_dialog_run(gp_widget_dialog *dialog)
+{
+	gp_widget *saved = gp_widget_layout_replace(dialog->layout);
+
+	dialog->dialog_exit = 0;
+
+	for (;;) {
+		int ret = gp_fds_poll(&fds, gp_backend_timer_timeout(backend));
+		/* handle timers */
+		if (ret == 0) {
+			gp_backend_poll(backend);
+			gp_widgets_process_events(dialog->layout);
+		}
+
+		if (dialog->dialog_exit) {
+			//TODO: this will flicker
+			gp_fill(backend->pixmap, fill_color);
+			gp_backend_flip(backend);
+
+			gp_widget_layout_replace(saved);
+
+			return dialog->dialog_exit;
+		}
+
+		gp_widgets_redraw(dialog->layout);
+	}
+}
 
 void gp_widgets_main_loop(gp_widget *layout, const char *label,
                           void (*init)(void), int argc, char *argv[])

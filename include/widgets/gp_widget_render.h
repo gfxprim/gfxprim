@@ -16,7 +16,7 @@
 #include <utils/gp_bbox.h>
 #include <utils/gp_fds.h>
 
-#include <widgets/gp_widget.h>
+#include <widgets/gp_widget_types.h>
 
 typedef struct gp_widget_render_ctx {
 	/* colors */
@@ -116,6 +116,8 @@ void gp_widgets_main_loop(struct gp_widget *layout, const char *label,
  * @return An old application layout.
  */
 gp_widget *gp_widget_layout_replace(gp_widget *layout);
+
+int gp_widget_dialog_run(gp_widget_dialog *dialog);
 
 /*
  * TODO: Obsolete?
