@@ -590,6 +590,8 @@ gp_backend *gp_x11_init(const char *display, int x, int y,
 
 	win = GP_BACKEND_PRIV(backend);
 
+	memset(win, 0, sizeof(struct x11_win));
+
 	//XSynchronize(win->dpy, True);
 
 	/* Pack parameters and open window */
