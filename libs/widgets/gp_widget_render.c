@@ -253,6 +253,8 @@ void gp_widget_render_timer_cancel(gp_widget *self)
 	}
 }
 
+static int in_dialog;
+
 void gp_widgets_redraw(struct gp_widget *layout)
 {
 	if (!layout) {
@@ -277,6 +279,9 @@ void gp_widgets_redraw(struct gp_widget *layout)
 	ctx.flip = &flip;
 	gp_widget_render(layout, &ctx, 0);
 	ctx.flip = NULL;
+
+	if (in_dialog)
+		gp_rect_xywh(ctx.buf, layout->x, layout->y, layout->w, layout->h, ctx.text_color);
 
 	if (gp_bbox_empty(flip))
 		return;
@@ -507,6 +512,7 @@ int gp_widget_dialog_run(gp_widget_dialog *dialog)
 	gp_widget *saved = gp_widget_layout_replace(dialog->layout);
 
 	dialog->dialog_exit = 0;
+	in_dialog = 1;
 
 	for (;;) {
 		int ret = gp_fds_poll(&fds, gp_backend_timer_timeout(backend));
@@ -520,6 +526,8 @@ int gp_widget_dialog_run(gp_widget_dialog *dialog)
 			//TODO: this will flicker
 			gp_fill(backend->pixmap, fill_color);
 			gp_backend_flip(backend);
+
+			in_dialog = 0;
 
 			gp_widget_layout_replace(saved);
 
