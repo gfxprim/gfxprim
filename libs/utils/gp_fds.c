@@ -61,8 +61,8 @@ static void rem(struct gp_fds *self, size_t pos)
 	self->fds[pos] = self->fds[len-1];
 	self->pfds[pos] = self->pfds[len-1];
 
-	gp_vec_remove(self->fds, 1);
-	gp_vec_remove(self->pfds, 1);
+	self->fds = gp_vec_remove(self->fds, 1);
+	self->pfds = gp_vec_remove(self->pfds, 1);
 }
 
 static ssize_t fd_to_pos(struct gp_fds *self, int fd)
