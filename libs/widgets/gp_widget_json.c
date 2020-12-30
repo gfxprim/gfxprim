@@ -181,7 +181,7 @@ gp_widget *gp_widget_from_json(json_object *json, void **uids)
 
 	if (uid_key) {
 		if (!*uids) {
-			*uids = gp_htable_new(0, 0);
+			*uids = gp_htable_new(0, GP_HTABLE_FREE_KEY);
 			if (!*uids)
 				goto err;
 		}
