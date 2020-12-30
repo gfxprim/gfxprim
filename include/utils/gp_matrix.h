@@ -58,6 +58,8 @@ static inline size_t gp_matrix_idx(size_t rows, size_t col, size_t row)
  * @return Returns a pointer to the matrix data.
  */
 static inline void *gp_matrix_insert_cols(void *self, size_t rows, size_t col, size_t length)
+	__attribute__((warn_unused_result));
+static inline void *gp_matrix_insert_cols(void *self, size_t rows, size_t col, size_t length)
 {
 	return gp_vec_insert(self, col * rows, length * rows);
 }
@@ -72,6 +74,8 @@ static inline void *gp_matrix_insert_cols(void *self, size_t rows, size_t col, s
  *
  * @return Returns a pointer to the matrix data.
  */
+static inline void *gp_matrix_delete_cols(void *self, size_t rows, size_t col, size_t length)
+	__attribute__((warn_unused_result));
 static inline void *gp_matrix_delete_cols(void *self, size_t rows, size_t col, size_t length)
 {
 	return gp_vec_delete(self, col * rows, length * rows);
@@ -88,7 +92,8 @@ static inline void *gp_matrix_delete_cols(void *self, size_t rows, size_t col, s
  *
  * @return Returns a pointer to the matrix data.
  */
-void *gp_matrix_insert_rows(void *self, size_t cols, size_t rows, size_t row, size_t length);
+void *gp_matrix_insert_rows(void *self, size_t cols, size_t rows, size_t row, size_t length)
+	__attribute__((warn_unused_result));
 
 /*
  * @brief Deletes length rows at the offset col from the matrix.
@@ -101,7 +106,8 @@ void *gp_matrix_insert_rows(void *self, size_t cols, size_t rows, size_t row, si
  *
  * @return Returns a pointer to the matrix data.
  */
-void *gp_matrix_delete_rows(void *self, size_t cols, size_t rows, size_t row, size_t length);
+void *gp_matrix_delete_rows(void *self, size_t cols, size_t rows, size_t row, size_t length)
+	__attribute__((warn_unused_result));
 
 /*
  * @brief Frees the matrix.

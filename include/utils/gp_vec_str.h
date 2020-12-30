@@ -69,6 +69,8 @@ static inline char *gp_vec_strdup(const char *src)
  * @return A string vector or a NULL in a case of allocation failure.
  */
 static inline char *gp_vec_strins(char *self, size_t off, const char *src)
+	__attribute__((warn_unused_result));
+static inline char *gp_vec_strins(char *self, size_t off, const char *src)
 {
 	char *ret = gp_vec_insert(self, off, strlen(src));
 
@@ -89,6 +91,8 @@ static inline char *gp_vec_strins(char *self, size_t off, const char *src)
  *
  * @return A string vector or a NULL in a case of allocation failure.
  */
+static inline char *gp_vec_chins(char *self, size_t off, char ch)
+	__attribute__((warn_unused_result));
 static inline char *gp_vec_chins(char *self, size_t off, char ch)
 {
 	char *ret = gp_vec_insert(self, off, 1);
@@ -112,6 +116,8 @@ static inline char *gp_vec_chins(char *self, size_t off, char ch)
  *         vector is untouched. Othervise modified string vector is returned.
  */
 static inline char *gp_vec_strdel(char *self, size_t off, size_t len)
+	__attribute__((warn_unused_result));
+static inline char *gp_vec_strdel(char *self, size_t off, size_t len)
 {
 	return gp_vec_delete(self, off, len);
 }
@@ -123,6 +129,8 @@ static inline char *gp_vec_strdel(char *self, size_t off, size_t len)
  *
  * @return An empty string vector.
  */
+static inline char *gp_vec_strclr(char *self)
+	__attribute__((warn_unused_result));
 static inline char *gp_vec_strclr(char *self)
 {
 	char *ret = gp_vec_resize(self, 1);
@@ -142,7 +150,8 @@ static inline char *gp_vec_strclr(char *self)
  * @return A new vector size or -1 on allocation failure.
  */
 char *gp_vec_printf(char *self, const char *fmt, ...)
-                    __attribute__((format (printf, 2, 3)));
+                    __attribute__((format (printf, 2, 3)))
+                    __attribute__((warn_unused_result));
 
 /*
  * @brief Printf va_list into a string vector.
@@ -153,6 +162,7 @@ char *gp_vec_printf(char *self, const char *fmt, ...)
  *
  * @return A new vector size or -1 on allocation failure.
  */
-char *gp_vec_vprintf(char *self, const char *fmt, va_list va);
+char *gp_vec_vprintf(char *self, const char *fmt, va_list va)
+                    __attribute__((warn_unused_result));
 
 #endif	/* GP_VEC_STR_H__ */

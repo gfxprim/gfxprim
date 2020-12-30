@@ -50,7 +50,8 @@ typedef struct gp_vec {
  *
  * @return A pointer to a vector data.
  */
-void *gp_vec_expand(gp_vec *self, size_t length);
+void *gp_vec_expand(gp_vec *self, size_t length)
+	__attribute__((warn_unused_result));
 
 /* @brief Shirnks vector length; does not touch vector data.
  *
@@ -61,7 +62,8 @@ void *gp_vec_expand(gp_vec *self, size_t length);
  *
  * @return A pointer to a vector data.
  */
-void *gp_vec_shrink(gp_vec *self, size_t length);
+void *gp_vec_shrink(gp_vec *self, size_t length)
+	__attribute__((warn_unused_result));
 
 /*
  * @brief  Allocates a new vector.
@@ -90,7 +92,8 @@ void gp_vec_free(void *self);
  *         previous one. May return NULL if vector grows and underlying call to
  *         realloc() has failed.
  */
-void *gp_vec_resize(void *self, size_t length);
+void *gp_vec_resize(void *self, size_t length)
+	__attribute__((warn_unused_result));
 
 /*
  * @brief Returns vector lenght.
@@ -123,7 +126,8 @@ static inline size_t gp_vec_len(const void *self)
  *         previous one. May return NULL if underlying call to realloc() has
  *         failed or if off is outside of the vector.
  */
-void *gp_vec_insert(void *self, size_t off, size_t length);
+void *gp_vec_insert(void *self, size_t off, size_t length)
+	__attribute__((warn_unused_result));
 
 /*
  * @breif Appends length elements to the end of the vector.
@@ -137,6 +141,8 @@ void *gp_vec_insert(void *self, size_t off, size_t length);
  *         previous one. May return NULL if underlying call to realloc() has
  *         failed.
  */
+static inline void *gp_vec_append(void *self, size_t lenght)
+	__attribute__((warn_unused_result));
 static inline void *gp_vec_append(void *self, size_t lenght)
 {
 	return gp_vec_insert(self, gp_vec_len(self), lenght);
@@ -152,7 +158,8 @@ static inline void *gp_vec_append(void *self, size_t lenght)
  * @return Returns a pointer to the vector, possibly a different from the
  *         previous one. May return NULL if off is outside of the vector.
  */
-void *gp_vec_delete(void *self, size_t off, size_t lenght);
+void *gp_vec_delete(void *self, size_t off, size_t lenght)
+	__attribute__((warn_unused_result));
 
 /*
  * @brief Removes length elements from the end of the vector.
@@ -163,6 +170,8 @@ void *gp_vec_delete(void *self, size_t off, size_t lenght);
  * @return Returns a pointer to the vector, possibly a different from the
  *         previous one.
  */
+static inline void *gp_vec_remove(void *self, size_t length)
+	__attribute__((warn_unused_result));
 static inline void *gp_vec_remove(void *self, size_t length)
 {
 	return gp_vec_delete(self, gp_vec_len(self) - length, length);
