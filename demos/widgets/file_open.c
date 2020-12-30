@@ -29,7 +29,7 @@ int do_exit(gp_widget_event *ev)
 	if (ev->type != GP_WIDGET_EVENT_WIDGET)
 		return 0;
 
-	exit(0);
+	gp_widgets_exit(0);
 }
 
 int main(int argc, char *argv[])

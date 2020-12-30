@@ -562,3 +562,16 @@ void gp_widgets_main_loop(gp_widget *layout, const char *label,
 		gp_widgets_redraw(win_layout);
 	}
 }
+
+void gp_widgets_exit(int exit_value)
+{
+	gp_widget_free(win_layout);
+	gp_backend_exit(backend);
+	gp_font_face_free(render_font);
+	gp_font_face_free(render_font_bold);
+	gp_font_face_free(render_font_big);
+	gp_font_face_free(render_font_big_bold);
+	gp_fds_clear(gp_widgets_fds);
+
+	exit(exit_value);
+}

@@ -109,6 +109,13 @@ void gp_widgets_main_loop(struct gp_widget *layout, const char *label,
                           __attribute__((noreturn));
 
 /**
+ * @brief Exits the appliaction.
+ *
+ * @exit_value Exit value passed to exit().
+ */
+void gp_widgets_exit(int exit_value) __attribute__((noreturn));
+
+/**
  * @brief Replace a application layout.
  *
  * @layout New application widget layout.
