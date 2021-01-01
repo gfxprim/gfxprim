@@ -474,6 +474,13 @@ gp_widget *gp_widget_layout_replace(gp_widget *layout)
 {
 	gp_widget *ret = win_layout;
 
+	gp_widget_calc_size(layout, &ctx, 0, 0, 1);
+
+	if (gp_pixmap_w(backend->pixmap) < layout->w ||
+	    gp_pixmap_h(backend->pixmap) < layout->h) {
+		gp_backend_resize(backend, layout->w, layout->h);
+	}
+
 	gp_widget_resize(layout);
 	gp_widget_redraw(layout);
 
