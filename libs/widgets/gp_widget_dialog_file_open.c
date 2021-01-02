@@ -130,9 +130,10 @@ next:
 static int notify_callback(struct gp_fd *self, struct pollfd *pfd)
 {
 	(void) pfd;
+	struct file_dialog *dialog = self->priv;
 
-	if (gp_dir_cache_inotify(self->priv))
-		redraw_table(NULL);
+	if (gp_dir_cache_inotify(dialog->file_table->tbl->priv))
+		gp_widget_redraw(dialog->file_table);
 
 	return 0;
 }
@@ -142,7 +143,7 @@ static gp_dir_cache *load_dir_cache(struct file_dialog *dialog)
 	gp_dir_cache *cache = gp_dir_cache_new(dialog->dir_path->tbox->buf);
 
 	if (cache->inotify_fd > 0)
-		gp_fds_add(gp_widgets_fds, cache->inotify_fd, POLLIN, notify_callback, cache);
+		gp_fds_add(gp_widgets_fds, cache->inotify_fd, POLLIN, notify_callback, dialog);
 
 	return cache;
 }
