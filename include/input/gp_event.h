@@ -289,6 +289,15 @@ void gp_event_dump(gp_event *ev);
 const char *gp_event_key_name(enum gp_event_key_value key);
 
 /*
+ * Retruns difference between two timeval structures in miliseconds
+ */
+static inline int gp_timeval_diff_ms(struct timeval a, struct timeval b)
+{
+	return (a.tv_sec - b.tv_sec) * 1000 +
+	       (a.tv_usec - b.tv_usec + 500) / 1000;
+}
+
+/*
  * Helpers for setting/getting key bits.
  */
 static inline void gp_event_set_key(gp_event *ev, uint32_t key)
