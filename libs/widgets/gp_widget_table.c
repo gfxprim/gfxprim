@@ -349,12 +349,21 @@ static int row_click(gp_widget *self, const gp_widget_render_ctx *ctx, gp_event 
 	unsigned int row = ev->cursor_y - header_h(self, ctx);
 
 	row /= row_h(ctx) + tbl->start_row;
-	tbl->selected_row = row;
 
+	if (tbl->row_selected && tbl->selected_row == row) {
+		if (gp_timeval_diff_ms(ev->time, tbl->last_ev) < ctx->dclick_ms)
+			gp_widget_send_widget_event(self, 0);
+		goto ret;
+	}
+
+	tbl->selected_row = row;
 	if (!tbl->row_selected)
 		tbl->row_selected = 1;
 
 	gp_widget_redraw(self);
+
+ret:
+	tbl->last_ev = ev->time;
 	return 1;
 }
 
