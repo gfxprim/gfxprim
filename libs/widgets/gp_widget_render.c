@@ -54,6 +54,7 @@ static struct gp_widget_render_ctx ctx = {
 	.font_big = &font_big,
 	.font_big_bold = &font_big_bold,
 	.padd = 4,
+	.dclick_ms = 500,
 };
 
 static gp_pixel fill_color;

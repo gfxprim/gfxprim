@@ -19,6 +19,8 @@
 #include <widgets/gp_widget_types.h>
 
 typedef struct gp_widget_render_ctx {
+	gp_pixmap *buf;
+
 	/* colors */
 	gp_pixel text_color;
 	gp_pixel bg_color;
@@ -46,7 +48,8 @@ typedef struct gp_widget_render_ctx {
 	/* passed down if only part of the layout has to be rendered */
 	gp_bbox *bbox;
 
-	gp_pixmap *buf;
+	/* maximal delay between two clicks for a double click */
+	int dclick_ms;
 } gp_widget_render_ctx;
 
 void gp_widget_render_init(void);
