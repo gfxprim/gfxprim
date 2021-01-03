@@ -176,6 +176,8 @@ static int set_row(gp_widget *self, int op, unsigned int pos)
 				return 0;
 		}
 	break;
+	case GP_TABLE_ROW_TELL:
+		return -1;
 	}
 
 	if (self->tbl->row_idx < cache->used)

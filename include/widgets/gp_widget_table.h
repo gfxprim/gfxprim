@@ -12,6 +12,7 @@
 enum gp_widget_table_row_op {
 	GP_TABLE_ROW_RESET,
 	GP_TABLE_ROW_ADVANCE,
+	GP_TABLE_ROW_TELL,
 };
 
 typedef struct gp_widget_table_header {
@@ -37,7 +38,7 @@ typedef struct gp_widget_table {
 	struct timeval last_ev;
 
 	unsigned int start_row;
-	unsigned int last_max_row;
+	unsigned int last_rows;
 
 	unsigned int *cols_w;
 

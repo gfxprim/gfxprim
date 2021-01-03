@@ -161,6 +161,31 @@ static void align_text(gp_pixmap *buf, gp_widget_table *tbl,
 	           ctx->text_color, bg, str);
 }
 
+static unsigned int last_row(gp_widget *self)
+{
+	int ret;
+
+	ret = self->tbl->row(self, GP_TABLE_ROW_TELL, 0);
+	if (ret >= 0)
+		return ret;
+
+	ret = 0;
+
+	if (!self->tbl->row(self, GP_TABLE_ROW_RESET, 0))
+		return 0;
+
+	while (self->tbl->row(self, GP_TABLE_ROW_ADVANCE, 1))
+		ret++;
+
+	return ret + 1;
+}
+
+static void fix_selected_row(gp_widget_table *tbl)
+{
+	if (tbl->selected_row >= tbl->last_rows)
+		tbl->selected_row = tbl->last_rows - 1;
+}
+
 static void render(gp_widget *self, const gp_offset *offset,
                    const gp_widget_render_ctx *ctx, int flags)
 {
@@ -184,6 +209,9 @@ static void render(gp_widget *self, const gp_offset *offset,
 		header_render(self, x, y, ctx);
 		cy += header_h(self, ctx);
 	}
+
+	tbl->last_rows = last_row(self);
+	fix_selected_row(tbl);
 
 	tbl->row(self, GP_TABLE_ROW_RESET, 0);
 	tbl->row(self, GP_TABLE_ROW_ADVANCE, tbl->start_row);
@@ -212,19 +240,21 @@ static void render(gp_widget *self, const gp_offset *offset,
 					text_a + ctx->padd-1, bg_col);
 		}
 
-		for (j = 0; j < tbl->cols; j++) {
-			const char *str = tbl->get(self, j);
+		if (cur_row < tbl->last_rows) {
+			for (j = 0; j < tbl->cols; j++) {
+				const char *str = tbl->get(self, j);
 
-			align_text(ctx->buf, tbl, ctx, cx, cy, j, bg_col, str);
+				align_text(ctx->buf, tbl, ctx, cx, cy, j, bg_col, str);
 
-			cx += tbl->cols_w[j] + ctx->padd;
+				cx += tbl->cols_w[j] + ctx->padd;
 
-		//	if (j < tbl->cols - 1) {
-		//		gp_vline_xyh(ctx->buf, cx, cy,
-		//			    text_a, ctx->text_color);
-		//	}
+			//	if (j < tbl->cols - 1) {
+			//		gp_vline_xyh(ctx->buf, cx, cy,
+			//			    text_a, ctx->text_color);
+			//	}
 
-			cx += ctx->padd;
+				cx += ctx->padd;
+			}
 		}
 
 		cy += text_a + ctx->padd;
@@ -234,17 +264,6 @@ static void render(gp_widget *self, const gp_offset *offset,
 
 		gp_hline_xyw(ctx->buf, x+1, cy - ctx->padd/2, w-2, ctx->bg_color);
 	}
-
-	while (tbl->row(self, GP_TABLE_ROW_ADVANCE, 1))
-		cur_row++;
-
-	tbl->last_max_row = cur_row;
-}
-
-static void fix_selected_row(gp_widget_table *tbl)
-{
-	if (tbl->selected_row >= tbl->last_max_row)
-		tbl->selected_row = tbl->last_max_row - 1;
 }
 
 static int move_down(gp_widget *self, const gp_widget_render_ctx *ctx,
@@ -261,7 +280,7 @@ static int move_down(gp_widget *self, const gp_widget_render_ctx *ctx,
 		goto redraw;
 	}
 
-	if (tbl->selected_row < tbl->last_max_row) {
+	if (tbl->selected_row < tbl->last_rows) {
 		tbl->selected_row += rows;
 
 		fix_selected_row(tbl);
