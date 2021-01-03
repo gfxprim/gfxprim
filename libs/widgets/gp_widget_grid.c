@@ -682,6 +682,28 @@ static void set_border_fill(gp_widget *self, uint8_t border)
 	set_hborder_fill(self, border);
 }
 
+static void set_rpad(gp_widget *self, uint8_t pad)
+{
+	unsigned int i;
+
+	for (i = 1; i < self->grid->rows; i++)
+		self->grid->row_padds[i] = pad;
+}
+
+static void set_cpad(gp_widget *self, uint8_t pad)
+{
+	unsigned int i;
+
+	for (i = 1; i < self->grid->cols; i++)
+		self->grid->col_padds[i] = pad;
+}
+
+static void set_pad(gp_widget *self, uint8_t pad)
+{
+	set_rpad(self, pad);
+	set_cpad(self, pad);
+}
+
 static int get_uint8(const char *str, uint8_t *val, char **end,
                      const char *sarray, const char *name)
 {
@@ -800,7 +822,7 @@ static void parse_strarray(const char *sarray, uint8_t *array, unsigned int len,
 
 static gp_widget *json_to_grid(json_object *json, void **uids)
 {
-	int cols = 0, rows = 0, frame = 0;
+	int cols = 0, rows = 0, frame = 0, pad = -1;
 	json_object *widgets = NULL;
 	const char *border = NULL;
 	const char *cpad = NULL;
@@ -820,6 +842,8 @@ static gp_widget *json_to_grid(json_object *json, void **uids)
 			widgets = val;
 		else if (!strcmp(key, "border"))
 			border = json_object_get_string(val);
+		else if (!strcmp(key, "pad"))
+			pad = json_object_get_int(val);
 		else if (!strcmp(key, "cpad"))
 			cpad = json_object_get_string(val);
 		else if (!strcmp(key, "rpad"))
@@ -857,6 +881,9 @@ static gp_widget *json_to_grid(json_object *json, void **uids)
 
 	grid->grid->frame = frame;
 	grid->grid->uniform = uniform;
+
+	if (pad >= 0)
+		set_pad(grid, pad);
 
 	parse_strarray(cpad, grid->grid->col_padds, cols+1, "Grid cpad");
 	parse_strarray(rpad, grid->grid->row_padds, rows+1, "Grid rpad");

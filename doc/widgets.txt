@@ -300,11 +300,13 @@ include::../demos/widgets/test_layouts/test_align.json[]
 |  +rpadf+  | string | all +0+  | Vertical border and padding fill coeficients.
 |  +cfill+  | string | all +1+  | Horizontal cell fill coeficients.
 |  +rfill+  | string | all +1+  | Vertical cell fill coeficients.
-|  +padd+   |  uint  |   +1+    | Horizontal and vertical padding size multiples.
+|   +pad+   |  uint  |   +1+    | Horizontal and vertical padding size multiples.
 | +frame+   |  bool  |  false   | Draws frame around grid.
 | +uniform+ |  bool  |  false   | The minimal sizes are distributed uniformly.
 | +widgets+ |  json  |          | +cols+ * +rows+ widgets.
 |==============================================================================
+
+The +pad+ attribute is set before the +cpad+ and +rpad+.
 
 Padding and fill string
 ^^^^^^^^^^^^^^^^^^^^^^^
