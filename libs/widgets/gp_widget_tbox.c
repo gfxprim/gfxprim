@@ -458,7 +458,12 @@ void gp_widget_tbox_cursor_set(gp_widget *self, ssize_t off,
 	GP_WIDGET_ASSERT(self, GP_WIDGET_TBOX, );
 
 	size_t max_pos = gp_vec_strlen(self->tbox->buf);
-	size_t cur_pos = gp_seek_off(off, whence, self->tbox->cur_pos, max_pos);
+	size_t cur_pos = self->tbox->cur_pos;
+
+	if (gp_seek_off(off, whence, &cur_pos, max_pos)) {
+		schedule_alert(self);
+		return;
+	}
 
 	self->tbox->cur_pos = cur_pos;
 
@@ -472,7 +477,12 @@ void gp_widget_tbox_ins(gp_widget *self, ssize_t off,
 	GP_WIDGET_ASSERT(self, GP_WIDGET_TBOX, );
 
 	size_t max_pos = gp_vec_strlen(self->tbox->buf);
-	size_t ins_pos = gp_seek_off(off, whence, self->tbox->cur_pos, max_pos);
+	size_t ins_pos = self->tbox->cur_pos;
+
+	if (gp_seek_off(off, whence, &ins_pos, max_pos)) {
+		schedule_alert(self);
+		return;
+	}
 
 	char *new_buf = gp_vec_strins(self->tbox->buf, ins_pos, str);
 
@@ -493,8 +503,13 @@ void gp_widget_tbox_del(gp_widget *self, ssize_t off,
 	GP_WIDGET_ASSERT(self, GP_WIDGET_TBOX, );
 
 	size_t max_pos = gp_vec_strlen(self->tbox->buf);
-	size_t del_pos = gp_seek_off(off, whence, self->tbox->cur_pos, max_pos);
+	size_t del_pos = self->tbox->cur_pos;
 	size_t del_size = GP_MIN(len, max_pos - del_pos);
+
+	if (gp_seek_off(off, whence, &del_pos, max_pos)) {
+		schedule_alert(self);
+		return;
+	}
 
 	char *new_buf = gp_vec_strdel(self->tbox->buf, del_pos, del_size);
 

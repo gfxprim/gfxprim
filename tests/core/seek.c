@@ -7,14 +7,20 @@
 #include <core/gp_seek.h>
 #include "tst_test.h"
 
-static int test_seek(enum gp_seek_whence whence, ssize_t off,
-                     size_t cur_pos, size_t max_pos, size_t exp_pos)
+static int test_seek(enum gp_seek_whence whence, ssize_t off, size_t cur_pos,
+                     size_t max_pos, int exp_ret, size_t exp_pos)
 {
-	size_t pos = gp_seek_off(off, whence, cur_pos, max_pos);
+	int ret = gp_seek_off(off, whence, &cur_pos, max_pos);
 
-	if (pos != exp_pos) {
+	if (ret != exp_ret) {
+		tst_msg("Wrong return for %i off=%zi cur=%zu max=%zu expected %i got %i",
+			whence, off, cur_pos, max_pos, exp_ret, ret);
+		return 1;
+	}
+
+	if (cur_pos != exp_pos) {
 		tst_msg("Wrong offset for %i off=%zi cur=%zu max=%zu expected %zu got %zu",
-			whence, off, cur_pos, max_pos, pos, exp_pos);
+			whence, off, cur_pos, max_pos, cur_pos, exp_pos);
 		return 1;
 	}
 
@@ -25,13 +31,13 @@ static int seek_cur(void)
 {
 	int ret = TST_SUCCESS;
 
-	if (test_seek(GP_SEEK_CUR, -1, 1, 1, 0))
+	if (test_seek(GP_SEEK_CUR, -1, 1, 1, 0, 0))
 		ret = TST_FAILED;
 
-	if (test_seek(GP_SEEK_CUR, 10, 0, 1, 1))
+	if (test_seek(GP_SEEK_CUR, 10, 0, 1, 1, 0))
 		ret = TST_FAILED;
 
-	if (test_seek(GP_SEEK_CUR, 5, 0, 10, 5))
+	if (test_seek(GP_SEEK_CUR, 5, 0, 10, 0, 5))
 		ret = TST_FAILED;
 
 	return ret;
@@ -41,13 +47,13 @@ static int seek_set(void)
 {
 	int ret = TST_SUCCESS;
 
-	if (test_seek(GP_SEEK_SET, -1, 0, 1, 0))
+	if (test_seek(GP_SEEK_SET, -1, 0, 1, -1, 0))
 		ret = TST_FAILED;
 
-	if (test_seek(GP_SEEK_SET, 10, 0, 1, 1))
+	if (test_seek(GP_SEEK_SET, 10, 0, 1, 1, 0))
 		ret = TST_FAILED;
 
-	if (test_seek(GP_SEEK_SET, 5, 0, 10, 5))
+	if (test_seek(GP_SEEK_SET, 5, 0, 10, 0, 5))
 		ret = TST_FAILED;
 
 	return ret;
@@ -57,13 +63,13 @@ static int seek_end(void)
 {
 	int ret = TST_SUCCESS;
 
-	if (test_seek(GP_SEEK_END, -2, 0, 1, 0))
+	if (test_seek(GP_SEEK_END, -2, 0, 1, -1, 0))
 		ret = TST_FAILED;
 
-	if (test_seek(GP_SEEK_END, 1, 0, 1, 1))
+	if (test_seek(GP_SEEK_END, 1, 0, 1, 1, 0))
 		ret = TST_FAILED;
 
-	if (test_seek(GP_SEEK_END, -1, 0, 6, 5))
+	if (test_seek(GP_SEEK_END, -1, 0, 6, 0, 5))
 		ret = TST_FAILED;
 
 	return ret;
