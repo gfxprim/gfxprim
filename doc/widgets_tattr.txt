@@ -1,0 +1,32 @@
+Text Attributes
+---------------
+
+Text attributes describe text font, size, etc. Attributes can be either passed
+down as a C constants, e.g. `GP_TATTR_BOLD | GP_TATTR_LARGE` or parsed from a
+string from JSON e.g. `"bold|large"`.
+
+Functions
+---------
+
+[source,c]
+-------------------------------------------------------------------------------
+int gp_widget_tattr_parse(const char *attrs, gp_widget_tattr *tattr);
+-------------------------------------------------------------------------------
+
+Parses text attribute string, returns zero on success.
+
+[source,c]
+-------------------------------------------------------------------------------
+const gp_text_style *gp_widget_tattr_font(gp_widget_tattr attr, const gp_widget_render_ctx *ctx)
+-------------------------------------------------------------------------------
+
+Returns a font based on the attributes and render context, this is supposed to
+be used in widgets for size computation and rendering.
+
+.Text attributes
+[options="header"]
+|=========================================================
+|      enum      | string  | Description
+| GP_TATTR_BOLD  | "bold"  | Enables bold text.
+| GP_TATTR_LARGE | "large" | Enables large text.
+|=========================================================

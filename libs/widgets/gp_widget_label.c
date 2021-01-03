@@ -15,15 +15,10 @@
 #include <gp_widget_ops.h>
 #include <gp_widget_render.h>
 
-static const gp_text_style *label_font(gp_widget *self, const gp_widget_render_ctx *ctx)
-{
-	return self->label->bold ? ctx->font_bold : ctx->font;
-}
-
 static unsigned int min_w(gp_widget *self, const gp_widget_render_ctx *ctx)
 {
 	unsigned int max_width;
-	const gp_text_style *font = label_font(self, ctx);
+	const gp_text_style *font = gp_widget_tattr_font(self->label->tattr, ctx);
 
 	if (self->label->width)
 		max_width = gp_text_max_width_chars(font, self->label->set, self->label->width);
@@ -38,8 +33,9 @@ static unsigned int min_w(gp_widget *self, const gp_widget_render_ctx *ctx)
 
 static unsigned int min_h(gp_widget *self, const gp_widget_render_ctx *ctx)
 {
-	(void) self;
-	return 2 * ctx->padd + gp_text_ascent(ctx->font);
+	const gp_text_style *font = gp_widget_tattr_font(self->label->tattr, ctx);
+
+	return 2 * ctx->padd + gp_text_ascent(font);
 }
 
 static void render(gp_widget *self, const gp_offset *offset,
@@ -55,7 +51,7 @@ static void render(gp_widget *self, const gp_offset *offset,
 
 	gp_widget_ops_blit(ctx, x, y, w, h);
 
-	gp_text_style *font = self->label->bold ? ctx->font_bold : ctx->font;
+	const gp_text_style *font = gp_widget_tattr_font(self->label->tattr, ctx);
 
 	if (self->label->frame) {
 		gp_fill_rrect_xywh(ctx->buf, x, y, w, h, ctx->bg_color,
@@ -82,18 +78,19 @@ static void render(gp_widget *self, const gp_offset *offset,
 static gp_widget *json_to_label(json_object *json, void **uids)
 {
 	const char *label = NULL;
-	int bold = 0;
+	const char *strattr = NULL;
 	int size = 0;
 	int ralign = 0;
 	int frame = 0;
+	gp_widget_tattr attr = 0;
 
 	(void)uids;
 
 	json_object_object_foreach(json, key, val) {
 		if (!strcmp(key, "text"))
 			label = json_object_get_string(val);
-		else if (!strcmp(key, "bold"))
-			bold = json_object_get_boolean(val);
+		else if (!strcmp(key, "tattr"))
+			strattr = json_object_get_string(val);
 		else if (!strcmp(key, "size"))
 			size = json_object_get_int(val);
 		else if (!strcmp(key, "ralign"))
@@ -109,7 +106,10 @@ static gp_widget *json_to_label(json_object *json, void **uids)
 		label = "Missing label";
 	}
 
-	gp_widget *ret = gp_widget_label_new(label, size, bold);
+	if (gp_widget_tattr_parse(strattr, &attr))
+		GP_WARN("Invalid text attribute '%s'", strattr);
+
+	gp_widget *ret = gp_widget_label_new(label, attr, size);
 
 	ret->label->ralign = ralign;
 	ret->label->frame = frame;
@@ -152,7 +152,7 @@ void gp_widget_label_set(gp_widget *self, const char *text)
 	gp_widget_resize(self);
 }
 
-gp_widget *gp_widget_label_new(const char *text, unsigned int width, int bold)
+gp_widget *gp_widget_label_new(const char *text, gp_widget_tattr tattr, unsigned int width)
 {
 	gp_widget *ret;
 
@@ -165,7 +165,7 @@ gp_widget *gp_widget_label_new(const char *text, unsigned int width, int bold)
 	else
 		ret->label->text = gp_vec_str_new();
 
-	ret->label->bold = !!bold;
+	ret->label->tattr = tattr;
 	ret->label->width = width;
 	ret->no_shrink = 1;
 
@@ -192,7 +192,7 @@ static char *vasprintf(const char *fmt, va_list ap)
 	return buf;
 }
 
-gp_widget *gp_widget_label_printf_new(int bold, const char *fmt, ...)
+gp_widget *gp_widget_label_printf_new(gp_widget_tattr tattr, const char *fmt, ...)
 {
 	va_list ap;
 	char *buf;
@@ -201,7 +201,7 @@ gp_widget *gp_widget_label_printf_new(int bold, const char *fmt, ...)
 	buf = vasprintf(fmt, ap);
 	va_end(ap);
 
-	gp_widget *ret = gp_widget_label_new(buf, 0, bold);
+	gp_widget *ret = gp_widget_label_new(buf, 0, tattr);
 
 	free(buf);
 

@@ -75,8 +75,8 @@ int main(int argc, char *argv[])
 
 	grid->align = GP_HFILL | GP_TOP;
 
-	gp_widget_grid_put(grid, 0, 0, gp_widget_label_new("Description", 0, 1));
-	gp_widget_grid_put(grid, 1, 0, gp_widget_label_new("Done?", 0, 1));
+	gp_widget_grid_put(grid, 0, 0, gp_widget_label_new("Description", GP_TATTR_BOLD, 0));
+	gp_widget_grid_put(grid, 1, 0, gp_widget_label_new("Done?", GP_TATTR_BOLD, 0));
 
 	for (i = 0; todos[i].active; i++)
 		widget_todo_add(i);

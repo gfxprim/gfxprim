@@ -16,8 +16,9 @@ struct gp_widget_label {
 	/* widget size hints */
 	const char *set;
 	unsigned int width:8;
+	/* text attributes */
+	gp_widget_tattr tattr;
 	/* attributes */
-	unsigned int bold:1;
 	unsigned int ralign:1;
 	unsigned int frame:1;
 };
@@ -25,14 +26,14 @@ struct gp_widget_label {
 /**
  * @brief Sets the label text.
  *
- * @param self Pointer to a label widget.
+ * @self A label widget.
  * @param text New widget label text.
  */
 void gp_widget_label_set(gp_widget *self, const char *text);
 
 /**
  * @brief Printf-like function to set label text.
- * @param self Pointer to a label widget.
+ * @self A label widget.
  * @param fmt  Printf formatting string.
  * @param ...  Printf parameters.
  * @return Number of characters printed.
@@ -41,13 +42,16 @@ int gp_widget_label_printf(gp_widget *self, const char *fmt, ...)
                            __attribute__((format (printf, 2, 3)));
 
 /**
- * @brief Turns on-off bold text attribute.
+ * @brief Changes text attributes.
+ *
+ * @self A label widget.
+ * @tattr New text attributes.
  */
-static inline void gp_widget_label_bold(gp_widget *self, int bold)
+static inline void gp_widget_label_tattr_set(gp_widget *self, gp_widget_tattr tattr)
 {
 	GP_WIDGET_ASSERT(self, GP_WIDGET_LABEL, );
 
-	self->label->bold = bold;
+	self->label->tattr = tattr;
 
 	gp_widget_redraw(self);
 }
@@ -85,22 +89,22 @@ static inline void gp_widget_label_set_width(gp_widget *self, unsigned int width
  *   changes. You can manually trigger shrinking by calling gp_widget_resize().
  *
  * @param text A label text.
+ * @param tattr Text attributes, e.g. bold.
  * @param width Maximal expected text width, if set to non-zero it's used to
  *              callculate the label size.
- * @param bold Sets the bold text attribute.
  * @return Newly allocated label widget.
  */
-gp_widget *gp_widget_label_new(const char *text, unsigned int width, int bold);
+gp_widget *gp_widget_label_new(const char *text, gp_widget_tattr tattr, unsigned int width);
 
 /**
  * @brief Printf-like function to create a label widget.
  *
- * @param bold Sets the bold text attribute.
+ * @param tattr Text attributes, e.g. bold.
  * @param fmt Printf formatting string.
  * @param ... Printf parameters.
  * @return Newly allocated label widget.
  */
-gp_widget *gp_widget_label_printf_new(int bold, const char *fmt, ...)
+gp_widget *gp_widget_label_printf_new(gp_widget_tattr tattr, const char *fmt, ...)
                                       __attribute__((format (printf, 2, 3)));
 
 #endif /* GP_WIDGET_LABEL_H__ */

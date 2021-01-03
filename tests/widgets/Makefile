@@ -2,9 +2,9 @@ TOPDIR=../..
 
 include $(TOPDIR)/pre.mk
 
-CSOURCES=tbox.c
+CSOURCES=tbox.c tattr.c
 
-APPS=tbox
+APPS=tbox tattr
 
 LDLIBS+=$(shell $(TOPDIR)/gfxprim-config --libs-widgets)
 

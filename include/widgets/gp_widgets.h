@@ -36,6 +36,8 @@
 
 #include <widgets/gp_widget_app.h>
 
+#include <widgets/gp_widget_tattr.h>
+
 #include <widgets/gp_widget_json.h>
 #include <widgets/gp_widget_timer.h>
 #include <widgets/gp_file_size.h>
