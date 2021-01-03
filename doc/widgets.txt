@@ -220,98 +220,10 @@ important. If input event was used by the handler it should return 1 and zero
 should be returned otherwise, so that the library knows if the event should be
 propagated to the upper layers or not.
 
-Label widget
-~~~~~~~~~~~~
+Individual widgets documentation
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Label widget is just a piece of text.
-
-The `struct gp_widget_label` can be accessed as `widget->label`.
-
-The widget size can either fit to the text passed to it on initialization or
-can be set to hold size characters, note that for proportional fonts this would
-be measured as size multiplied by maximal character width.
-
-In case that widget was created with non-zero width parameter the text is
-always stored internally in the widget!
-
-image:label.png[Label widget]
-
-.Label JSON attributes
-[cols=",,,3",options="header"]
-|===================================================
-| Attribute |  Type  | Default | Description
-|  +text+   | string |         | Label text
-|  +bold+   |  bool  | +false+ | Bold text attribute
-|===================================================
-
-Button widget
-~~~~~~~~~~~~~
-
-Button is a button with a label.
-
-Button is one of the boolean widgets the `struct gp_widget_bool` can be accessed as `widget->btn`.
-
-image:button.png[Button widget]
-
-.Button JSON attributes
-[cols=",,,3",options="header"]
-|===================================================
-| Attribute |  Type  | Default | Description
-|  +label+  | string |         | Button label
-|===================================================
-
-.Button widget events
-[cols=",3",options="header"]
-|===================================================
-| Event name | Description
-|   ACTION   | Emitted on button press.
-|===================================================
-
-Grid widget
-~~~~~~~~~~~
-
-By far the most complex widget is the grid widget which is basically a table to
-organize widgets.
-
-Grid widget distributes the space evenly, i.e. all cells in a given row have
-the same height as well as all cells in a given column have the same width. The
-grid can have border around it and padding between cells. The border and
-padding consists of a constant part called padd and resizable part called fill.
-The constant padding is accounted for in the grid widget minimal size, while
-the resizable fill is accounted for when leftover space is being distributed.
-
-image:grid.png[Grid widget]
-
-[source,json]
-------------------------------------------------------------------
-include::../demos/widgets/test_layouts/test_align.json[]
-------------------------------------------------------------------
-
-.Grid JSON attributes
-[cols=",,,3",options="header"]
-|==============================================================================
-| Attribute |  Type  | Default  | Description
-|  +cols+   |  uint  |   +1+    | Number of columns
-|  +rows+   |  uint  |   +1+    | Number of rows
-|  +border+ | string |  +all+   | Border one of +horiz+, +vert+, +none+, +all+.
-|  +cpad+   | string | all +1+  | Horizontal border and padding size multiples.
-|  +rpad+   | string | all +1+  | Vertical border and padding size multiples.
-|  +cpadf+  | string | all +0+  | Horizontal border and padding fill coeficients.
-|  +rpadf+  | string | all +0+  | Vertical border and padding fill coeficients.
-|  +cfill+  | string | all +1+  | Horizontal cell fill coeficients.
-|  +rfill+  | string | all +1+  | Vertical cell fill coeficients.
-|   +pad+   |  uint  |   +1+    | Horizontal and vertical padding size multiples.
-| +frame+   |  bool  |  false   | Draws frame around grid.
-| +uniform+ |  bool  |  false   | The minimal sizes are distributed uniformly.
-| +widgets+ |  json  |          | +cols+ * +rows+ widgets.
-|==============================================================================
-
-The +pad+ attribute is set before the +cpad+ and +rpad+.
-
-Padding and fill string
-^^^^^^^^^^^^^^^^^^^^^^^
-
-* Numbers are divided with comma (,)
-* Repetition can be done with number and asterisk (*)
-
-For example "1, 1, 1" is the same as "3 * 1"
+* link:widget_label.html[Label widget]
+* link:widget_button.html[Button widget]
+* link:widget_grid.html[Grid widget]
+* link:widget_table.html[Table widget]

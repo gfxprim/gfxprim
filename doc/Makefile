@@ -13,6 +13,8 @@ SOURCES=index.html about.txt pixmap.txt loaders.txt filters.txt \
 
 SOURCES+=core_python.txt gfx_python.txt loaders_python.txt backends_python.txt
 
+SOURCES+=widget_grid.txt widget_table.txt widget_button.txt widget_label.txt
+
 EXAMPLE_SOURCES=$(wildcard example_*.txt)
 
 ASCIIDOC_PARAMS=--conf-file asciidoc.conf

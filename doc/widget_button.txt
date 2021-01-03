@@ -1,0 +1,22 @@
+Button widget
+-------------
+
+Button is a button with a label.
+
+Button is one of the boolean widgets the `struct gp_widget_bool` can be accessed as `widget->btn`.
+
+image:button.png[Button widget]
+
+.Button JSON attributes
+[cols=",,,3",options="header"]
+|===================================================
+| Attribute |  Type  | Default | Description
+|  +label+  | string |         | Button label
+|===================================================
+
+.Button widget events
+[cols=",3",options="header"]
+|===================================================
+| Widget event value | Description
+|         0          | Emitted on button press.
+|===================================================

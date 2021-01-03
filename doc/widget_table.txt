@@ -1,0 +1,56 @@
+Table widget
+------------
+
+Table widget is a widget that shows a table possibly sortable by its elements.
+
+The table content is not stored in the widget, instead there are two callbacks
+that are called by the widget table code when rendering.
+
+.Table widget callbacks
+[source,c]
+-------------------------------------------------------------------------------
+enum gp_widget_table_row_op {
+        GP_TABLE_ROW_RESET,
+        GP_TABLE_ROW_ADVANCE,
+        GP_TABLE_ROW_TELL,
+};
+
+...
+        /* iterator based API */
+        union {
+                void *row_priv;
+                unsigned long row_idx;
+        };
+        int (*row)(struct gp_widget *self, int op, unsigned int pos);
+        const char *(*get)(struct gp_widget *self, unsigned int col);
+
+        void (*sort)(struct gp_widget *self, unsigned int col, int desc);
+...
+-------------------------------------------------------------------------------
+
+.row() callback ops
+[options="header"]
+|==============================================================================
+| enum gp_widget_table_row_op | Description
+| GP_TABLE_ROW_RESET
+| This op has to reset the current row to 0, it has to return non-zero if the
+  row is valid i.e. exists, and zero otherwise. The pos parameter is not used in
+  this case.
+|GP_TABLE_ROW_ADVANCE
+|This op moves the current row by the op elements forward. The return value is
+ the same as for `GP_TABLE_ROW_RESET`, i.e. non-zero if resulting row is valid
+ and zero if not.
+| GP_TABLE_ROW_TELL
+| This op is used to request current number of elements. The return value is
+  either number of rows, or -1. If -1 is returned the number of rows is counted
+  in the widget code.
+|==============================================================================
+
+The `row()` callback is called by the table code to set the current row, then
+the `get()` callback is used to get content for each column.
+
+Sorting
+~~~~~~~
+
+If any of the table columns is sortable, the `sort()` function must be
+implemented.

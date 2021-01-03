@@ -1,0 +1,48 @@
+Grid widget
+-----------
+
+By far the most complex widget is the grid widget which is basically a table to
+organize widgets.
+
+Grid widget distributes the space evenly, i.e. all cells in a given row have
+the same height as well as all cells in a given column have the same width. The
+grid can have border around it and padding between cells. The border and
+padding consists of a constant part called padd and resizable part called fill.
+The constant padding is accounted for in the grid widget minimal size, while
+the resizable fill is accounted for when leftover space is being distributed.
+
+image:grid.png[Grid widget]
+
+[source,json]
+------------------------------------------------------------------
+include::../demos/widgets/test_layouts/test_align.json[]
+------------------------------------------------------------------
+
+.Grid JSON attributes
+[cols=",,,3",options="header"]
+|==============================================================================
+| Attribute |  Type  | Default  | Description
+|  +cols+   |  uint  |   +1+    | Number of columns
+|  +rows+   |  uint  |   +1+    | Number of rows
+|  +border+ | string |  +all+   | Border one of +horiz+, +vert+, +none+, +all+.
+|  +cpad+   | string | all +1+  | Horizontal border and padding size multiples.
+|  +rpad+   | string | all +1+  | Vertical border and padding size multiples.
+|  +cpadf+  | string | all +0+  | Horizontal border and padding fill coeficients.
+|  +rpadf+  | string | all +0+  | Vertical border and padding fill coeficients.
+|  +cfill+  | string | all +1+  | Horizontal cell fill coeficients.
+|  +rfill+  | string | all +1+  | Vertical cell fill coeficients.
+|   +pad+   |  uint  |   +1+    | Horizontal and vertical padding size multiples.
+| +frame+   |  bool  |  false   | Draws frame around grid.
+| +uniform+ |  bool  |  false   | The minimal sizes are distributed uniformly.
+| +widgets+ |  json  |          | +cols+ * +rows+ widgets.
+|==============================================================================
+
+The +pad+ attribute is set before the +cpad+ and +rpad+.
+
+Padding and fill string
+~~~~~~~~~~~~~~~~~~~~~~~
+
+* Numbers are divided with comma (,)
+* Repetition can be done with number and asterisk (*)
+
+For example "1, 1, 1" is the same as "3 * 1"
