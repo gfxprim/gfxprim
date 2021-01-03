@@ -426,11 +426,10 @@ static int event(gp_widget *self, const gp_widget_render_ctx *ctx, gp_event *ev)
 
 			return move_up(self, ctx, 1);
 		break;
-		//TODO: Better page up/down
 		case GP_KEY_PAGE_UP:
-			return move_up(self, ctx, 10);
+			return move_up(self, ctx, display_rows(self, ctx));
 		case GP_KEY_PAGE_DOWN:
-			return move_down(self, ctx, 10);
+			return move_down(self, ctx, display_rows(self, ctx));
 		case GP_BTN_LEFT:
 			return click(self, ctx, ev);
 		case GP_KEY_ENTER:
