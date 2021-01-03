@@ -293,7 +293,7 @@ static int move_down(gp_widget *self, const gp_widget_render_ctx *ctx,
 redraw:
 	rows = display_rows(self, ctx);
 
-	if (tbl->selected_row > tbl->start_row + rows)
+	if (tbl->selected_row >= tbl->start_row + rows)
 		tbl->start_row = tbl->selected_row - rows + 1;
 
 	gp_widget_redraw(self);
