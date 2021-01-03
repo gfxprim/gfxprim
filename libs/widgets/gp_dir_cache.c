@@ -2,7 +2,7 @@
 
 /*
 
-   Copyright (c) 2014-2020 Cyril Hrubis <metan@ucw.cz>
+   Copyright (c) 2014-2021 Cyril Hrubis <metan@ucw.cz>
 
  */
 
@@ -323,6 +323,7 @@ gp_dir_cache *gp_dir_cache_new(const char *path)
 	ret->dirfd = dirfd;
 	ret->size = MIN_SIZE;
 	ret->used = 0;
+	ret->filtered = 0;
 	ret->allocator = NULL;
 	ret->sort_type = 0;
 

@@ -2,7 +2,7 @@
 
 /*
 
-   Copyright (c) 2014-2020 Cyril Hrubis <metan@ucw.cz>
+   Copyright (c) 2014-2021 Cyril Hrubis <metan@ucw.cz>
 
  */
 
@@ -25,6 +25,7 @@ typedef struct gp_dir_cache {
 	int inotify_fd;
 	int sort_type;
 	struct gp_block *allocator;
+	size_t filtered;
 	size_t size;
 	size_t used;
 	struct gp_dir_entry **entries;
@@ -63,17 +64,41 @@ static inline gp_dir_entry *gp_dir_cache_get(gp_dir_cache *self,
 static inline void gp_dir_cache_set_filter(gp_dir_cache *self, unsigned int pos,
                                            int filter)
 {
+	if (self->entries[pos]->filtered == !!filter)
+		return;
+
 	self->entries[pos]->filtered = !!filter;
+	self->filtered += filter ? 1 : -1;
+}
+
+/*
+ * @brief Returns number of entries.
+ *
+ * @return A number of entries.
+ */
+static inline size_t gp_dir_cache_entries(gp_dir_cache *self)
+{
+	return self->used;
+}
+
+/*
+ * @brief Returns number of not-filtered entries.
+ *
+ * @return A number of entries.
+ */
+static inline size_t gp_dir_cache_entries_filter(gp_dir_cache *self)
+{
+	return self->used - self->filtered;
 }
 
 /*
  * Returns entry on position pos ignoring filtered out elements.
  *
- * @self struct gp_dir_cache
+ * @self A dir cache.
  * @pos position of the element
+ * @return A dir cache entry or NULL if position is not occupied.
  */
 gp_dir_entry *gp_dir_cache_get_filtered(gp_dir_cache *self, unsigned int pos);
-
 
 /*
  * Inotify handler, should be called when there are data to be read on inotify_fd.
