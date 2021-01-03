@@ -271,9 +271,15 @@ static void table_event(gp_widget *self)
 	char *dpath = gp_aprintf("%s/%s", dialog->dir_path->tbox->buf, entry->name);
 	char *dir = realpath(dpath, NULL);
 
+	free(dpath);
+
+	if (access(dir, X_OK)) {
+		free(dir);
+		return;
+	}
+
 	gp_widget_tbox_printf(dialog->dir_path, "%s", dir);
 
-	free(dpath);
 	free(dir);
 
 	free_dir_cache(dialog->file_table->tbl->priv);
