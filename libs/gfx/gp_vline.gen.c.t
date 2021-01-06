@@ -28,5 +28,5 @@ void gp_vline_raw_{{ ps.suffix }}_clip(gp_pixmap *pixmap, gp_coord x,
 	y0 = GP_MAX(y0, 0);
 	y1 = GP_MIN(y1, (gp_coord) pixmap->h - 1);
 
-	gp_vline_raw_{{ ps.suffix }}_clip(pixmap, x, y0, y1, pixel);
+	gp_vline_raw_{{ ps.suffix }}(pixmap, x, y0, y1, pixel);
 }
