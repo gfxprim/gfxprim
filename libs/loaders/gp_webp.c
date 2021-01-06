@@ -72,7 +72,8 @@ int gp_read_webp_ex(gp_io *io, gp_pixmap **img, gp_storage *storage,
 		return 1;
 	}
 
-	fill_metadata(storage, features.width, features.height);
+	if (storage)
+		fill_metadata(storage, features.width, features.height);
 
 	if (!img)
 		return 0;
