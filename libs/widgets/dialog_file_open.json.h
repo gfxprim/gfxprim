@@ -1,5 +1,6 @@
 static const char *dialog_file_open = "\
 { \
+  \"version\": 1, \
   \"rows\": 3, \
   \"widgets\": [ \
     { \

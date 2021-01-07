@@ -1,6 +1,6 @@
 {
+  "version": 1,
   "rows": 3,
-  "align": "fill",
   "widgets": [
   {
    "type": "label",

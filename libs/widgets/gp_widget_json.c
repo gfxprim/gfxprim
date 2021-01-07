@@ -227,6 +227,22 @@ void *gp_widget_callback_addr(const char *fn_name)
 static gp_widget *gp_widgets_from_json(json_object *json, void **uids)
 {
 	gp_widget *ret;
+	json_object *json_version;
+	int version = 0;
+
+	if (json_object_object_get_ex(json, "version", &json_version)) {
+		version = json_object_get_int(json_version);
+		GP_DEBUG(1, "Loading JSON layout version %i", version);
+		json_object_object_del(json, "version");
+
+		if (version != 1) {
+			GP_WARN("Unknown version %i\n", version);
+			return NULL;
+		}
+	} else {
+		GP_WARN("Missing JSON layout version");
+		return NULL;
+	}
 
 	ld_handle = dlopen(NULL, RTLD_LAZY);
 
