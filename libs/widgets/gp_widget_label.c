@@ -70,9 +70,9 @@ static void render(gp_widget *self, const gp_offset *offset,
 		align = GP_ALIGN_RIGHT;
 	}
 
-	gp_text(ctx->buf, font, x, y + ctx->padd,
-		align|GP_VALIGN_BELOW,
-		ctx->text_color, ctx->bg_color, self->label->text);
+	gp_text_fit(ctx->buf, font, x, y + ctx->padd, w,
+	            align|GP_VALIGN_BELOW,
+	            ctx->text_color, ctx->bg_color, self->label->text);
 }
 
 static gp_widget *json_to_label(json_object *json, void **uids)
