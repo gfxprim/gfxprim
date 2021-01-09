@@ -13,6 +13,18 @@ gp_widget *gp_widget_label_new(const char *text, gp_widget_tattr tattr, unsigned
 gp_widget *gp_widget_label_printf_new(gp_widget_tattr tattr, const char *fmt, ...);
 -------------------------------------------------------------------------------
 
+The link:widgets_tattr.html[gp_widget_attr] parameter sets the text attributes
+such as bold, etc.
+
+The width parameter, if non-zero, causes the widget to be be able to fit width
+characters in size, in other words the widget size is set into a stone and
+will not change. However keep in mind that it will fit exactly width
+characters only for monospace fonts.
+
+If width parameter is set to zero the widget width is variable, but by default
+will not shrink.
+
+The printf-like constructor sets the width to a zero internally.
 
 .Functions to set label text
 [source,c]
@@ -22,10 +34,12 @@ void gp_widget_label_set(gp_widget *self, const char *text);
 int gp_widget_label_printf(gp_widget *self, const char *fmt, ...);
 -------------------------------------------------------------------------------
 
-By default label widget does not shrink when its text is changed, if this
-wasn't the case layout size that periodically changes a label value would jump
-up and down. This can be disabled either by setting the widget `no_shrink`
-bitflags or by calling `gp_widget_resize()` after label text has been changed.
+If widget was created with variable width, it does not shrink, by default,
+when its text is changed. If this wasn't the case layout size that
+periodically changes a label value would jump up and down, since it would be
+resized regulary. This can be disabled either by clearing the widget
+`no_shrink` attribute or by calling `gp_widget_resize()` after label text has
+been changed.
 
 .Functions to manipulate text attributes
 [source,c]
