@@ -246,7 +246,7 @@ static ssize_t sub_read(gp_io *io, void *buf, size_t size)
 
 	if (sub_io->cur > sub_io->end) {
 		GP_BUG("Current offset (%zi) is after the end (%zi)",
-		       sub_io->cur, sub_io->end);
+		       (ssize_t)sub_io->cur, (ssize_t)sub_io->end);
 		errno = EINVAL;
 		return 0;
 	}

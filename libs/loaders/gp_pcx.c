@@ -81,7 +81,7 @@ static ssize_t rle_read(gp_io *self, void *buf, size_t size)
 			priv->pos += read;
 			if (priv->cnt)
 				GP_WARN("Nonzero repeat count (%u) %02x at %zi",
-				        priv->cnt, priv->val, priv->pos);
+				        priv->cnt, priv->val, (ssize_t)priv->pos);
 			//priv->cnt = 0;
 			return read;
 		}

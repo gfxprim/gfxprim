@@ -28,14 +28,16 @@ static const char *whence_name(int whence)
 static int seek_and_tell(gp_io *io, off_t off, int whence, off_t exp_off)
 {
 	if (gp_io_seek(io, off, whence) == -1) {
-		tst_msg("Failed to seek %zi %s", off, whence_name(whence));
+		tst_msg("Failed to seek %zi %s",
+			(ssize_t)off, whence_name(whence));
 		return 1;
 	}
 
 	off = gp_io_tell(io);
 
 	if (off != exp_off) {
-		tst_msg("Wrong offset %zi expected %zi", off, exp_off);
+		tst_msg("Wrong offset %zi expected %zi",
+		        (ssize_t)off, (ssize_t)exp_off);
 		return 1;
 	}
 
@@ -52,7 +54,7 @@ static int seek_fail(gp_io *io, off_t off, int whence)
 
 	if (ret != -1) {
 		tst_msg("Seek succeded unexpectedly %zi %s",
-		        off, whence_name(whence));
+		        (ssize_t)off, whence_name(whence));
 		return 1;
 	}
 
@@ -60,7 +62,8 @@ static int seek_fail(gp_io *io, off_t off, int whence)
 
 	if (start != end) {
 		tst_msg("Seek %zi %s failed but offset changed %zi -> %zi",
-		        off, whence_name(whence), start, end);
+		        (ssize_t)off, whence_name(whence),
+		        (ssize_t)start, (ssize_t)end);
 		return 1;
 	}
 
@@ -82,7 +85,7 @@ static int do_test(gp_io *io, off_t io_size, int is_file)
 	off = gp_io_tell(io);
 
 	if (off != 0) {
-		tst_msg("Wrong offset before first read %zu", off);
+		tst_msg("Wrong offset before first read %zu", (ssize_t)off);
 		return TST_FAILED;
 	}
 
@@ -103,7 +106,7 @@ static int do_test(gp_io *io, off_t io_size, int is_file)
 	off = gp_io_tell(io);
 
 	if (off != 10) {
-		tst_msg("Have wrong offset %zu, after read 10", off);
+		tst_msg("Have wrong offset %zu, after read 10", (ssize_t)off);
 		return TST_FAILED;
 	}
 
@@ -341,7 +344,7 @@ static int test_IOSubIO(void)
 	off = gp_io_tell(pio);
 
 	if (off != 100) {
-		tst_msg("Wrong offset at the parent I/O: %zu", off);
+		tst_msg("Wrong offset at the parent I/O: %zu", (ssize_t)off);
 		goto failed;
 	}
 
