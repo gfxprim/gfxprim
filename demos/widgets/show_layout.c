@@ -16,18 +16,20 @@ int on_event(gp_widget_event *ev)
 
 int main(int argc, char *argv[])
 {
-	if (argc != 2) {
-		fprintf(stderr, "usage: %s test_layouts/foo.json\n", argv[0]);
+	gp_widgets_getopt(&argc, &argv);
+
+	if (!argv[0]) {
+		fprintf(stderr, "usage: show_layout test_layouts/foo.json\n");
 		return 1;
 	}
 
-	gp_widget *layout = gp_widget_layout_json(argv[1], NULL);
+	gp_widget *layout = gp_widget_layout_json(argv[0], NULL);
 	if (!layout) {
 		fprintf(stderr, "Layout cannot be loaded!\n");
 		return 1;
 	}
 
-	gp_widgets_main_loop(layout, "Layout", NULL, argc, argv);
+	gp_widgets_main_loop(layout, "Layout", NULL, 0, NULL);
 
 	return 0;
 }
