@@ -136,8 +136,14 @@ static void init_fonts(void)
 			return;
 		}
 
-		GP_WARN("Inavlid font '%s'!", arg_fonts);
-		return;
+		int size = atoi(arg_fonts);
+
+		if (size < 0 || size > 200) {
+			GP_WARN("Inavlid font '%s'!", arg_fonts);
+			return;
+		}
+
+		font_size = size;
 	}
 
 	gp_font_face *ffont = gp_font_face_fc_load("DroidSans", 0, font_size);
@@ -438,6 +444,7 @@ static void print_options(int exit_val)
 	printf("Options:\n--------\n");
 	printf("\t-b backend init string (pass -b help for options)\n");
 	printf("\t-f fonts\n\t\tdefault\n\t\thaxor-15\n\t\thaxor-16\n\t\thaxor-17\n");
+	printf("\t-f uint\n\t\tsets the true-type font size\n");
 	printf("\t-i input_string\n");
 	exit(exit_val);
 }
