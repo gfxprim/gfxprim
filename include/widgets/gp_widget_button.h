@@ -16,6 +16,8 @@ enum gp_widget_button_type {
 
 	GP_BUTTON_OK,
 	GP_BUTTON_CANCEL,
+	GP_BUTTON_OPEN,
+	GP_BUTTON_SAVE,
 
 	GP_BUTTON_PREV,
 	GP_BUTTON_NEXT,

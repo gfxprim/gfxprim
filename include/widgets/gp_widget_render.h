@@ -28,6 +28,7 @@ typedef struct gp_widget_render_ctx {
 	gp_pixel fg2_color;
 	gp_pixel sel_color;
 	gp_pixel alert_color;
+	gp_pixel accept_color;
 
 	/* fonts */
 	gp_text_style *font;

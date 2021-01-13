@@ -47,11 +47,13 @@ static const char *dialog_file_open = "\
 	{ \
           \"type\": \"button\", \
           \"label\": \"Cancel\", \
+	  \"btype\": \"cancel\", \
 	  \"uid\": \"cancel\" \
         }, \
         { \
           \"type\": \"button\", \
           \"label\": \"Open\", \
+	  \"btype\": \"open\", \
 	  \"uid\": \"open\" \
         } \
       ] \

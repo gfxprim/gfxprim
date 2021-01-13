@@ -70,7 +70,7 @@ static void render(gp_widget *self, const gp_offset *offset,
 
 	gp_fill_rrect_xywh(ctx->buf, x, y, w, h, ctx->bg_color, bg_color, fr_color);
 
-	unsigned int asc = GP_ODD_UP(gp_text_ascent(ctx->font));
+	unsigned int asc = gp_text_ascent(ctx->font);
 	unsigned int asc_half = asc/2;
 	unsigned int sym_r = asc_half - asc_half/4;
 	unsigned int cx = x + self->w/2;
@@ -89,7 +89,7 @@ static void render(gp_widget *self, const gp_offset *offset,
 		}
 
 		len = gp_text(ctx->buf, ctx->font,
-			tcx, cy - (asc - asc_half), GP_ALIGN_CENTER|GP_VALIGN_BELOW,
+			tcx, cy-(asc-asc_half), GP_ALIGN_CENTER|GP_VALIGN_BELOW,
 			ctx->text_color, bg_color, self->b->label);
 
 		if (self->b->type & GP_BUTTON_TEXT_LEFT)
@@ -105,29 +105,48 @@ static void render(gp_widget *self, const gp_offset *offset,
 		gp_fill_tetragon(ctx->buf, cx + sym_r, cy - sym_r,
 		                 cx, cy + sym_r,
 				 cx, cy + sym_r - 2 * (asc_half/3),
-				 cx + sym_r - asc_half/3, cy - sym_r, ctx->text_color);
+				 cx + sym_r - asc_half/3, cy - sym_r,
+				 ctx->accept_color);
 
 		gp_fill_tetragon(ctx->buf, cx - sym_r, cy,
 				 cx, cy + sym_r,
 				 cx, cy + sym_r - (asc_half/3),
-				 cx - sym_r + (asc_half/3), cy, ctx->text_color);
-
-		for (i = 0; i <= asc_half/4; i++) {
-		//	gp_line(ctx->buf, cx + sym_r - i, cy - sym_r, cx, cy + sym_r - 2 * i, ctx->text_color);
-		//	gp_line(ctx->buf, cx - sym_r + i, cy, cx, cy + sym_r - i, ctx->text_color);
-		}
+				 cx - sym_r + (asc_half/3), cy,
+				 ctx->accept_color);
 	break;
 	case GP_BUTTON_CANCEL:
 		for (i = 0; i <= asc_half/4; i++) {
 			gp_line(ctx->buf, cx - sym_r + i, cy - sym_r,
-			        cx + sym_r, cy + sym_r - i, ctx->text_color);
+			        cx + sym_r, cy + sym_r - i, ctx->alert_color);
 			gp_line(ctx->buf, cx - sym_r, cy - sym_r + i,
-				cx + sym_r - i, cy + sym_r, ctx->text_color);
+				cx + sym_r - i, cy + sym_r, ctx->alert_color);
 			gp_line(ctx->buf, cx - sym_r + i, cy + sym_r,
-			        cx + sym_r, cy - sym_r + i, ctx->text_color);
+			        cx + sym_r, cy - sym_r + i, ctx->alert_color);
 			gp_line(ctx->buf, cx - sym_r, cy + sym_r - i,
-			        cx + sym_r - i, cy - sym_r, ctx->text_color);
+			        cx + sym_r - i, cy - sym_r, ctx->alert_color);
 		}
+	break;
+	case GP_BUTTON_OPEN:
+		gp_fill_rect(ctx->buf, cx - sym_r, cy - sym_r,
+		             cx, cy - sym_r/2, ctx->sel_color);
+
+		for (i = 0; i <= asc_half/4; i++) {
+			gp_rect(ctx->buf, cx - sym_r + i, cy - sym_r/2 + i,
+			        cx + sym_r - i, cy + sym_r - i, ctx->sel_color);
+		}
+	break;
+	case GP_BUTTON_SAVE:
+		for (i = 0; i <= asc_half/4; i++) {
+			gp_rect(ctx->buf, cx - sym_r + i, cy - sym_r + i,
+			        cx + sym_r - i, cy + sym_r - i, ctx->sel_color);
+		}
+
+		gp_fill_rect(ctx->buf, cx - sym_r/2, cy - sym_r + asc_half/2,
+		             cx + sym_r/2, cy - sym_r, ctx->text_color);
+
+		gp_hline(ctx->buf, cx - sym_r/2, cx + sym_r/2, cy + sym_r/3, ctx->sel_color);
+		if (sym_r/2 - sym_r/3 > 1)
+			gp_hline(ctx->buf, cx - sym_r/2, cx + sym_r/2, cy, ctx->sel_color);
 	break;
 	case GP_BUTTON_PLAY:
 	case GP_BUTTON_NEXT:
@@ -177,7 +196,7 @@ static void render(gp_widget *self, const gp_offset *offset,
 		             ctx->text_color);
 	break;
 	case GP_BUTTON_REC:
-		gp_fill_circle(ctx->buf, cx, cy, sym_r, ctx->text_color);
+		gp_fill_circle(ctx->buf, cx, cy, sym_r, ctx->alert_color);
 	break;
 	case GP_BUTTON_FFORWARD:
 		gp_symbol(ctx->buf, cx-(sym_r - sym_r/2)+asc_half/4, cy,
@@ -231,7 +250,6 @@ static void render(gp_widget *self, const gp_offset *offset,
 		             ctx->text_color);
 	/* fallthrough */
 	case GP_BUTTON_ZOOM_OUT:
-
 		gp_fill_rect(ctx->buf, cx - sym_r/2, cy - asc/14,
 		             cx + sym_r/2, cy + asc/14,
 		             ctx->text_color);
@@ -311,6 +329,8 @@ static struct btn_type_names {
 } type_names[] = {
 	{"ok", GP_BUTTON_OK | GP_BUTTON_TEXT_RIGHT},
 	{"cancel", GP_BUTTON_CANCEL | GP_BUTTON_TEXT_RIGHT},
+	{"open", GP_BUTTON_OPEN | GP_BUTTON_TEXT_RIGHT},
+	{"save", GP_BUTTON_SAVE | GP_BUTTON_TEXT_RIGHT},
 	{"prev", GP_BUTTON_PREV | GP_BUTTON_TEXT_RIGHT},
 	{"next", GP_BUTTON_NEXT | GP_BUTTON_TEXT_LEFT},
 	{"first", GP_BUTTON_FIRST | GP_BUTTON_TEXT_RIGHT},

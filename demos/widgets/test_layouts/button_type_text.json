@@ -35,12 +35,24 @@
    ]
   },
   {
-   "cols": 2,
+   "cols": 4,
    "widgets": [
     {
      "type": "button",
      "btype": "ok",
      "label": "OK",
+     "align": "fill"
+    },
+    {
+     "type": "button",
+     "btype": "open",
+     "label": "Open",
+     "align": "fill"
+    },
+    {
+     "type": "button",
+     "btype": "save",
+     "label": "Save",
      "align": "fill"
     },
     {

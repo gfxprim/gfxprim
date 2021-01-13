@@ -1,6 +1,6 @@
 {
  "version": 1,
- "cols": 8,
+ "cols": 10,
  "rows": 6,
  "align": "fill",
  "widgets": [
@@ -183,12 +183,8 @@
    "text": "ZOOM_NORMAL"
   },
   {
-   "type": "label",
-   "text": "OK"
   },
   {
-   "type": "label",
-   "text": "CANCEL"
   },
   {
    "type": "button",
@@ -211,6 +207,34 @@
    "align": "fill"
   },
   {
+  },
+  {
+  },
+  {
+   "type": "label",
+   "text": "OK"
+  },
+  {
+   "type": "label",
+   "text": "CANCEL"
+  },
+  {
+   "type": "label",
+   "text": "OPEN"
+  },
+  {
+   "type": "label",
+   "text": "SAVE"
+  },
+  {
+   "type": "label",
+   "text": ""
+  },
+  {
+   "type": "label",
+   "text": ""
+  },
+  {
    "type": "button",
    "btype": "ok",
    "align": "fill"
@@ -218,6 +242,16 @@
   {
    "type": "button",
    "btype": "cancel",
+   "align": "fill"
+  },
+  {
+   "type": "button",
+   "btype": "open",
+   "align": "fill"
+  },
+  {
+   "type": "button",
+   "btype": "save",
    "align": "fill"
   }
  ]
