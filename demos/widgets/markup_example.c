@@ -45,7 +45,7 @@ int main(int argc, char *argv[])
 {
 	gp_widget *layout = gp_widget_grid_new(1, 3);
 	gp_widget *markup = gp_widget_markup_new(MARKUP_STRING, get);
-	gp_widget *button = gp_widget_button_new("Refresh", button_callback, layout);
+	gp_widget *button = gp_widget_button_new("Refresh", 0, button_callback, layout);
 
 	gp_widget_grid_put(layout, 0, 0, markup);
         gp_widget_grid_put(layout, 0, 1, gp_widget_markup_new("#Markup \\#2#", NULL));

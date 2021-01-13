@@ -53,8 +53,8 @@ int main(int argc, char *argv[])
 	gp_widget *markup_grid = gp_widget_grid_new(1, 1);
 
 	//gp_widget_grid_border_set(btn_grid, 0, 0);
-	gp_widget_grid_put(btn_grid, 0, 0, gp_widget_button_new("< Prev", NULL, NULL));
-	gp_widget_grid_put(btn_grid, 1, 0, gp_widget_button_new("Next >", NULL, NULL));
+	gp_widget_grid_put(btn_grid, 0, 0, gp_widget_button_new("prev", GP_BUTTON_PREV, NULL, NULL));
+	gp_widget_grid_put(btn_grid, 1, 0, gp_widget_button_new("next", GP_BUTTON_NEXT, NULL, NULL));
 	btn_grid->align = GP_BOTTOM;
 
 	gp_widget_grid_put(markup_grid, 0, 0, markup);

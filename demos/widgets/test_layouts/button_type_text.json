@@ -1,0 +1,55 @@
+{
+ "version": 1,
+ "rows": 2,
+ "align": "fill",
+ "widgets": [
+  {
+   "cols": 4,
+   "uniform": "true",
+   "align": "fill",
+   "widgets": [
+    {
+     "type": "button",
+     "btype": "first",
+     "label": "First",
+     "align": "fill"
+    },
+    {
+     "type": "button",
+     "btype": "prev",
+     "label": "Prev",
+     "align": "fill"
+    },
+    {
+     "type": "button",
+     "btype": "next",
+     "label": "Next",
+     "align": "fill"
+    },
+    {
+     "type": "button",
+     "btype": "last",
+     "label": "Last",
+     "align": "fill"
+    }
+   ]
+  },
+  {
+   "cols": 2,
+   "widgets": [
+    {
+     "type": "button",
+     "btype": "ok",
+     "label": "OK",
+     "align": "fill"
+    },
+    {
+     "type": "button",
+     "btype": "cancel",
+     "label": "Cancel",
+     "align": "fill"
+    }
+   ]
+  }
+ ]
+}

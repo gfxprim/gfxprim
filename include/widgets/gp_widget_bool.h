@@ -12,6 +12,7 @@
 struct gp_widget_bool {
 	const char *label;
 	int val;
+	int type;
 	char payload[];
 };
 

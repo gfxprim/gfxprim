@@ -1,0 +1,224 @@
+{
+ "version": 1,
+ "cols": 8,
+ "rows": 6,
+ "align": "fill",
+ "widgets": [
+  {
+   "type": "label",
+   "text": "PREV"
+  },
+  {
+   "type": "label",
+   "text": "NEXT"
+  },
+  {
+   "type": "label",
+   "text": "FIRST"
+  },
+  {
+   "type": "label",
+   "text": "LAST"
+  },
+  {
+   "type": "label",
+   "text": "TOP"
+  },
+  {
+   "type": "label",
+   "text": "BOTTOM"
+  },
+  {
+   "type": "button",
+   "btype": "prev",
+   "align": "fill"
+  },
+  {
+   "type": "button",
+   "btype": "next",
+   "align": "fill"
+  },
+  {
+   "type": "button",
+   "btype": "first",
+   "align": "fill"
+  },
+  {
+   "type": "button",
+   "btype": "last",
+   "align": "fill"
+  },
+  {
+   "type": "button",
+   "btype": "top",
+   "align": "fill"
+  },
+  {
+   "type": "button",
+   "btype": "bottom",
+   "align": "fill"
+  },
+  {
+   "type": "label",
+   "text": "ADD"
+  },
+  {
+   "type": "label",
+   "text": "REM"
+  },
+  {
+   "type": "label",
+   "text": "UP"
+  },
+  {
+   "type": "label",
+   "text": "DOWN"
+  },
+  {
+   "type": "label",
+   "text": "LEFT"
+  },
+  {
+   "type": "label",
+   "text": "RIGHT"
+  },
+  {
+   "type": "button",
+   "btype": "add",
+   "align": "fill"
+  },
+  {
+   "type": "button",
+   "btype": "rem",
+   "align": "fill"
+  },
+  {
+   "type": "button",
+   "btype": "up",
+   "align": "fill"
+  },
+  {
+   "type": "button",
+   "btype": "down",
+   "align": "fill"
+  },
+  {
+   "type": "button",
+   "btype": "left",
+   "align": "fill"
+  },
+  {
+   "type": "button",
+   "btype": "right",
+   "align": "fill"
+  },
+  {
+   "type": "label",
+   "text": "PLAY"
+  },
+  {
+   "type": "label",
+   "text": "PAUSE"
+  },
+  {
+   "type": "label",
+   "text": "STOP"
+  },
+  {
+   "type": "label",
+   "text": "REC"
+  },
+  {
+   "type": "label",
+   "text": "FFORWARD"
+  },
+  {
+   "type": "label",
+   "text": "FBACKWARD"
+  },
+  {
+   "type": "button",
+   "btype": "play",
+   "align": "fill"
+  },
+  {
+   "type": "button",
+   "btype": "pause",
+   "align": "fill"
+  },
+  {
+   "type": "button",
+   "btype": "stop",
+   "align": "fill"
+  },
+  {
+   "type": "button",
+   "btype": "rec",
+   "align": "fill"
+  },
+  {
+   "type": "button",
+   "btype": "fforward",
+   "align": "fill"
+  },
+  {
+   "type": "button",
+   "btype": "fbackward",
+   "align": "fill"
+  },
+  {
+   "type": "label",
+   "text": "ZOOM_IN"
+  },
+  {
+   "type": "label",
+   "text": "ZOOM_OUT"
+  },
+  {
+   "type": "label",
+   "text": "ZOOM_FIT"
+  },
+  {
+   "type": "label",
+   "text": "ZOOM_NORMAL"
+  },
+  {
+   "type": "label",
+   "text": "OK"
+  },
+  {
+   "type": "label",
+   "text": "CANCEL"
+  },
+  {
+   "type": "button",
+   "btype": "zoom_in",
+   "align": "fill"
+  },
+  {
+   "type": "button",
+   "btype": "zoom_out",
+   "align": "fill"
+  },
+  {
+   "type": "button",
+   "btype": "zoom_fit",
+   "align": "fill"
+  },
+  {
+   "type": "button",
+   "btype": "zoom_normal",
+   "align": "fill"
+  },
+  {
+   "type": "button",
+   "btype": "ok",
+   "align": "fill"
+  },
+  {
+   "type": "button",
+   "btype": "cancel",
+   "align": "fill"
+  }
+ ]
+}

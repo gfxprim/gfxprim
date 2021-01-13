@@ -5,6 +5,15 @@ Button is a button with a label.
 
 Button is one of the boolean widgets the `struct gp_widget_bool` can be accessed as `widget->btn`.
 
+.Button widget constructors
+[source,c]
+-------------------------------------------------------------------------------
+gp_widget *gp_widget_button_new(const char *label,
+                                enum gp_widget_button_type type,
+                                int (*on_event)(gp_widget_event *ev),
+                                void *priv);
+-------------------------------------------------------------------------------
+
 image:button.png[Button widget]
 
 .Button JSON attributes

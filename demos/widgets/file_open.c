@@ -35,8 +35,8 @@ int do_exit(gp_widget_event *ev)
 
 int main(int argc, char *argv[])
 {
-	gp_widget *btn1 = gp_widget_button_new("Load File", open_file, NULL);
-	gp_widget *btn2 = gp_widget_button_new("Exit", do_exit, NULL);
+	gp_widget *btn1 = gp_widget_button_new("Load File", 0, open_file, NULL);
+	gp_widget *btn2 = gp_widget_button_new("Exit", 0, do_exit, NULL);
 	gp_widget *grid = gp_widget_grid_new(2, 1);
 
 	gp_widget_grid_put(grid, 0, 0, btn1);

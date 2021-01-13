@@ -68,7 +68,7 @@ int main(int argc, char *argv[])
 
 	outer->align = GP_HFILL | GP_TOP;
 
-	gp_widget_grid_put(outer, 0, 0, gp_widget_button_new("New", on_new, NULL));
+	gp_widget_grid_put(outer, 0, 0, gp_widget_button_new("New", 0, on_new, NULL));
 
 	grid = gp_widget_grid_new(2, 1);
 	gp_widget_grid_put(outer, 0, 1, grid);
