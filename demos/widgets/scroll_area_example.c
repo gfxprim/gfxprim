@@ -20,7 +20,7 @@ int button_event(gp_widget_event *ev)
 	gp_coord dx = 0;
 	gp_coord dy = 0;
 
-	switch (ev->self->btn->label[0]) {
+	switch (ev->self->button->label[0]) {
 	case '^':
 		dy = -1;
 	break;

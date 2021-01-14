@@ -78,7 +78,7 @@ struct gp_widget {
 		struct gp_widget_tabs *tabs;
 
 		struct gp_widget_bool *b;
-		struct gp_widget_bool *btn;
+		struct gp_widget_bool *button;
 		struct gp_widget_bool *chbox;
 
 		struct gp_widget_label *label;

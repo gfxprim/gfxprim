@@ -456,11 +456,11 @@ gp_widget *gp_widget_button_new(const char *label,
 		return NULL;
 
 	if (label) {
-		ret->btn->label = ret->btn->payload;
-		strcpy(ret->btn->payload, label);
+		ret->button->label = ret->button->payload;
+		strcpy(ret->button->payload, label);
 	}
 
-	ret->btn->type = align_for_type(type);
+	ret->button->type = align_for_type(type);
 
 	gp_widget_event_handler_set(ret, on_event, priv);
 
