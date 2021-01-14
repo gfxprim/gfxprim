@@ -42,7 +42,7 @@ const char *gp_str_time_diff(char *buf, size_t buf_len, time_t time, time_t now)
 		return "Minute";
 
 	if (diff < 60 * 60) {
-		snprintf(buf, buf_len, "%li Minutes", diff/60);
+		snprintf(buf, buf_len, "%li Minutes", (diff+30)/60);
 		return buf;
 	}
 
@@ -50,15 +50,15 @@ const char *gp_str_time_diff(char *buf, size_t buf_len, time_t time, time_t now)
 		return "Hour";
 
 	if (diff < 60 * 60 * 24) {
-		snprintf(buf, buf_len, "%li Hours", diff/3600);
+		snprintf(buf, buf_len, "%li Hours", (diff+1800)/3600);
 		return buf;
 	}
 
 	if (diff < 60 * 60 * 24)
-		return "Yesterday";
+		return "Day";
 
 	if (diff < 60 * 60 * 24 * 30) {
-		snprintf(buf, buf_len, "%li Days ago", diff/(3600 * 24));
+		snprintf(buf, buf_len, "%li Days", (diff + 3600 * 12)/(3600 * 24));
 		return buf;
 	}
 
