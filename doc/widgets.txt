@@ -225,5 +225,6 @@ Individual widgets documentation
 
 * link:widget_label.html[Label widget]
 * link:widget_button.html[Button widget]
+* link:widget_checkbox.html[Checkbox widget]
 * link:widget_grid.html[Grid widget]
 * link:widget_table.html[Table widget]

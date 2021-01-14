@@ -1,0 +1,40 @@
+Checkbox widget
+---------------
+
+.A checkbox widget
+image:checkbox.png[Checkbox widget]
+
+Checkbox attributes can be accessed as `widget->chbox`.
+
+.Checkbox widget constructor
+[source,c]
+-------------------------------------------------------------------------------
+gp_widget *gp_widget_checkbox_new(const char *label, int val,
+                                  int on_event(gp_widget_event *ev),
+                                  void *priv);
+-------------------------------------------------------------------------------
+
+Creates a checkbox widget, label can be NULL.
+
+.Function to change checkbox value
+[source,c]
+-------------------------------------------------------------------------------
+void gp_widget_checkbox_set(gp_widget *self, int val);
+
+void gp_widget_checkbox_toggle(gp_widget *self);
+-------------------------------------------------------------------------------
+
+.Checkbox JSON attributes
+[cols=",,,3",options="header"]
+|===================================================
+| Attribute     |  Type  | Default | Description
+|    +label+    | string |         | Checkbox label
+|    +set+      |  bool  |  False  | Initial value
+|===================================================
+
+.Checkbox widget events
+[cols=",3",options="header"]
+|===================================================
+| Widget event value | Description
+|         0          | Emitted on checkbox value change.
+|===================================================
