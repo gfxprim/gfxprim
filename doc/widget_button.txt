@@ -1,27 +1,52 @@
 Button widget
 -------------
 
-Button is a button with a label.
+Button is a widget that emits event when pressed, buttons can have label or
+type or both, see below.
 
-Button is one of the boolean widgets the `struct gp_widget_bool` can be accessed as `widget->btn`.
+.A button widget
+image:button.png[Button widget]
+
+Button attributes can be accessed as `widget->button`.
 
 .Button widget constructors
 [source,c]
 -------------------------------------------------------------------------------
 gp_widget *gp_widget_button_new(const char *label,
-                                enum gp_widget_button_type type,
+                                enum gp_widget_button_type btype,
                                 int (*on_event)(gp_widget_event *ev),
                                 void *priv);
 -------------------------------------------------------------------------------
 
-image:button.png[Button widget]
+Creates a button widget, at least one of the 'label' or 'btype' has to be set.
+
+If button type is set the button will be rendered with a small picture that
+describes the action, e.g. floppy for 'GP_BUTTON_SAVE'. If label is also set
+the button will have both icon and label. The type picture will be positioned
+either on the left or on the right side of the label and the default position
+could be overriden by bit-or of 'GP_BUTTON_TEXT_LEFT' or
+'GP_BUTTON_TEXT_RIGHT' with the button type.
+
+Buttons with just a label are created with 'btype' set to 'GP_BUTTON_LABEL'
+which is equal to '0'.
+
+.Button types
+image:button_types.png[Button types]
+
+.Example buttons with type and label
+image:button_types_label.png[Button with type and label]
 
 .Button JSON attributes
 [cols=",,,3",options="header"]
 |===================================================
-| Attribute |  Type  | Default | Description
-|  +label+  | string |         | Button label
+| Attribute     |  Type  | Default | Description
+|    +label+    | string |         | Button label
+|    +btype+    | string | "label" | Button type
+|  +text_align+ | string | depends | Button text align
 |===================================================
+
+The 'text_align' can be either 'left' or 'right' and the default value depends
+on the 'btype'.
 
 .Button widget events
 [cols=",3",options="header"]
