@@ -285,7 +285,7 @@ static void table_event(gp_widget *self)
 	free_dir_cache(dialog->file_table->tbl->priv);
 	dialog->file_table->tbl->priv = load_dir_cache(self->priv);
 	gp_widget_tbox_clear(dialog->filter);
-	gp_widget_redraw(dialog->file_table);
+	gp_widget_table_set_offset(dialog->file_table, 0);
 }
 
 static int table_on_event(gp_widget_event *ev)
