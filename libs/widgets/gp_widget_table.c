@@ -300,6 +300,45 @@ redraw:
 	return 1;
 }
 
+static int scroll_down(gp_widget *self, const gp_widget_render_ctx *ctx,
+                       unsigned int rows)
+{
+	gp_widget_table *tbl = self->tbl;
+	unsigned int disp_rows = display_rows(self, ctx);
+
+	if (tbl->last_rows < disp_rows)
+		return 0;
+
+	unsigned int hidden_rows = tbl->last_rows - disp_rows;
+
+	if (tbl->start_row >= hidden_rows)
+		return 0;
+
+	if (tbl->start_row + rows >= hidden_rows)
+		tbl->start_row = hidden_rows;
+	else
+		tbl->start_row += rows;
+
+	gp_widget_redraw(self);
+	return 1;
+}
+
+static int scroll_up(gp_widget *self, unsigned int rows)
+{
+	gp_widget_table *tbl = self->tbl;
+
+	if (!tbl->start_row)
+		return 0;
+
+	if (rows > tbl->start_row)
+		tbl->start_row = 0;
+	else
+		tbl->start_row -= rows;
+
+	gp_widget_redraw(self);
+	return 1;
+}
+
 static int move_up(gp_widget *self, const gp_widget_render_ctx *ctx, unsigned int rows)
 {
 	gp_widget_table *tbl = self->tbl;
@@ -436,6 +475,16 @@ static int event(gp_widget *self, const gp_widget_render_ctx *ctx, gp_event *ev)
 		case GP_KEY_ENTER:
 			return enter(self);
 		}
+	break;
+	case GP_EV_REL:
+		if (ev->code != GP_EV_REL_WHEEL)
+			return 0;
+
+		if (ev->val < 0)
+			scroll_down(self, ctx, -ev->val);
+		else
+			scroll_up(self, ev->val);
+	break;
 	}
 
 	return 0;
