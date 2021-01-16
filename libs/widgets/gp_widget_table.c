@@ -367,7 +367,8 @@ static int row_click(gp_widget *self, const gp_widget_render_ctx *ctx, gp_event 
 	gp_widget_table *tbl = self->tbl;
 	unsigned int row = ev->cursor_y - header_h(self, ctx);
 
-	row /= row_h(ctx) + tbl->start_row;
+	row /= row_h(ctx);
+	row += tbl->start_row;
 
 	if (tbl->row_selected && tbl->selected_row == row) {
 		if (gp_timeval_diff_ms(ev->time, tbl->last_ev) < ctx->dclick_ms)
