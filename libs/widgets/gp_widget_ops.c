@@ -506,6 +506,12 @@ static int handle_focus(gp_widget *self, const gp_widget_render_ctx *ctx, gp_eve
 			return 1;
 		}
 	break;
+	case GP_EV_REL:
+		if (ev->code == GP_EV_REL_WHEEL) {
+			gp_widget_ops_render_focus_xy(self, ctx, ev->cursor_x, ev->cursor_y);
+			return 0;
+		}
+	break;
 	}
 
 	return 0;
