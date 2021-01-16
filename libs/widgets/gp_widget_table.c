@@ -213,6 +213,9 @@ static void render(gp_widget *self, const gp_offset *offset,
 	tbl->last_rows = last_row(self);
 	fix_selected_row(tbl);
 
+	if (tbl->start_row > tbl->last_rows)
+		tbl->start_row = 0;
+
 	tbl->row(self, GP_TABLE_ROW_RESET, 0);
 	tbl->row(self, GP_TABLE_ROW_ADVANCE, tbl->start_row);
 
