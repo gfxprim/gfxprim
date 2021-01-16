@@ -69,4 +69,12 @@ gp_widget *gp_widget_table_new(unsigned int cols, unsigned int min_rows,
  */
 void gp_widget_table_refresh(gp_widget *self);
 
+/*
+ * @brief Sets first row that should be shown by the table.
+ *
+ * @self A table widget.
+ * @off A row offset.
+ */
+void gp_widget_table_set_offset(gp_widget *self, unsigned int off);
+
 #endif /* GP_WIDGET_TABLE_H__ */

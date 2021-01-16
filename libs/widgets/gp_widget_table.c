@@ -650,3 +650,12 @@ void gp_widget_table_refresh(gp_widget *self)
 {
 	gp_widget_redraw(self);
 }
+
+void gp_widget_table_set_offset(gp_widget *self, unsigned int off)
+{
+	GP_WIDGET_ASSERT(self, GP_WIDGET_TABLE, );
+
+	self->tbl->start_row = off;
+
+	gp_widget_redraw(self);
+}
