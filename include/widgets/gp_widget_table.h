@@ -16,19 +16,18 @@ enum gp_widget_table_row_op {
 };
 
 typedef struct gp_widget_table_header {
-	const char *text;
+	char *label;
 	int text_align:8;
 	int sortable:1;
+	unsigned int col_min_size;
+	unsigned int col_fill;
 } gp_widget_table_header;
 
 typedef struct gp_widget_table {
 	unsigned int cols;
 	unsigned int min_rows;
 
-	const gp_widget_table_header *headers;
-
-	unsigned int *col_min_sizes;
-	unsigned char *col_fills;
+	const gp_widget_table_header *header;
 
 	unsigned int selected_row;
 	unsigned int sorted_by_col;
@@ -53,6 +52,8 @@ typedef struct gp_widget_table {
 	const char *(*get)(struct gp_widget *self, unsigned int col);
 
 	void (*sort)(struct gp_widget *self, unsigned int col, int desc);
+
+	void *free;
 
 	char buf[];
 } gp_widget_table;

@@ -17,10 +17,13 @@ static unsigned int header_min_w(gp_widget_table *tbl,
                                  const gp_widget_render_ctx *ctx,
                                  unsigned int col)
 {
-	const char *text = tbl->headers[col].text;
-	unsigned int text_size = gp_text_width(ctx->font_bold, text);
+	const char *label = tbl->header[col].label;
+	unsigned int text_size = 0;
 
-	if (tbl->headers[col].sortable)
+	if (label)
+		text_size += gp_text_width(ctx->font_bold, label);
+
+	if (tbl->header[col].sortable)
 		text_size += ctx->padd + gp_text_ascent(ctx->font);
 
 	return text_size;
@@ -31,14 +34,14 @@ static unsigned int min_w(gp_widget *self, const gp_widget_render_ctx *ctx)
 	struct gp_widget_table *tbl = self->tbl;
 	unsigned int i, sum_cols_w = 0;
 
-	if (tbl->headers) {
+	if (tbl->header) {
 		for (i = 0; i < tbl->cols; i++)
 			tbl->cols_w[i] = header_min_w(tbl, ctx, i);
 	}
 
 	for (i = 0; i < tbl->cols; i++) {
 		unsigned int col_size;
-		col_size = gp_text_max_width(ctx->font, tbl->col_min_sizes[i]);
+		col_size = gp_text_max_width(ctx->font, tbl->header[i].col_min_size);
 		tbl->cols_w[i] = GP_MAX(tbl->cols_w[i], col_size);
 		sum_cols_w += tbl->cols_w[i];
 	}
@@ -50,7 +53,7 @@ static unsigned int header_h(gp_widget *self, const gp_widget_render_ctx *ctx)
 {
 	unsigned int text_a = gp_text_ascent(ctx->font);
 
-	if (!self->tbl->headers)
+	if (!self->tbl->header)
 		return 0;
 
 	return text_a + 2 * ctx->padd;
@@ -67,7 +70,7 @@ static unsigned int min_h(gp_widget *self, const gp_widget_render_ctx *ctx)
 {
 	unsigned int h = row_h(ctx) * self->tbl->min_rows;
 
-	if (self->tbl->headers)
+	if (self->tbl->header)
 		h += header_h(self, ctx);
 
 	return h;
@@ -90,7 +93,7 @@ static void distribute_size(gp_widget *self, const gp_widget_render_ctx *ctx, in
 
 	for (i = 0; i < tbl->cols; i++) {
 		sum_cols_w += tbl->cols_w[i];
-		sum_fills += tbl->col_fills[i];
+		sum_fills += tbl->header[i].col_fill;
 	}
 
 	if (!sum_fills)
@@ -100,21 +103,38 @@ static void distribute_size(gp_widget *self, const gp_widget_render_ctx *ctx, in
 	unsigned int diff = self->w - table_w;
 
 	for (i = 0; i < tbl->cols; i++)
-		tbl->cols_w[i] += tbl->col_fills[i] * (diff/sum_fills);
+		tbl->cols_w[i] += tbl->header[i].col_fill * (diff/sum_fills);
 }
 
-static void header_render(gp_widget *self, gp_coord x, gp_coord y,
-                          const gp_widget_render_ctx *ctx)
+static unsigned int header_render(gp_widget *self, gp_coord x, gp_coord y,
+                                  const gp_widget_render_ctx *ctx)
 {
 	gp_widget_table *tbl = self->tbl;
-	const gp_widget_table_header *headers = tbl->headers;
+	const gp_widget_table_header *header = tbl->header;
 	unsigned int text_a = gp_text_ascent(ctx->font);
 	unsigned int cx = x + ctx->padd;
 	unsigned int cy = y + ctx->padd;
 	unsigned int i;
 
+	int render_header = 0;
+
 	for (i = 0; i < tbl->cols; i++) {
-		if (tbl->headers[i].sortable) {
+		if (tbl->header[i].label) {
+			render_header = 1;
+			break;
+		}
+
+		if (tbl->header[i].sortable) {
+			render_header = 1;
+			break;
+		}
+	}
+
+	if (!render_header)
+		return 0;
+
+	for (i = 0; i < tbl->cols; i++) {
+		if (tbl->header[i].sortable) {
 			gp_size sym_size = text_a/3;
 			gp_size sx = cx + tbl->cols_w[i] - ctx->padd;
 			gp_size sy = cy + text_a/2;
@@ -130,9 +150,11 @@ static void header_render(gp_widget *self, gp_coord x, gp_coord y,
 			}
 		}
 
-		gp_print(ctx->buf, ctx->font_bold, cx, cy,
-			GP_ALIGN_RIGHT|GP_VALIGN_BELOW,
-			ctx->text_color, ctx->bg_color, "%s", headers[i].text);
+		if (header[i].label) {
+			gp_print(ctx->buf, ctx->font_bold, cx, cy,
+				GP_ALIGN_RIGHT|GP_VALIGN_BELOW,
+				ctx->text_color, ctx->bg_color, "%s", header[i].label);
+		}
 
 		cx += tbl->cols_w[i] + ctx->padd;
 
@@ -149,6 +171,8 @@ static void header_render(gp_widget *self, gp_coord x, gp_coord y,
 	gp_pixel color = self->focused ? ctx->sel_color : ctx->text_color;
 
 	gp_hline_xyw(ctx->buf, x, cy, self->w, color);
+
+	return header_h(self, ctx);
 }
 
 static void align_text(gp_pixmap *buf, gp_widget_table *tbl,
@@ -205,10 +229,7 @@ static void render(gp_widget *self, const gp_offset *offset,
 	gp_pixel color = self->focused ? ctx->sel_color : ctx->text_color;
 	gp_fill_rrect_xywh(ctx->buf, x, y, w, h, ctx->bg_color, ctx->fg_color, color);
 
-	if (tbl->headers) {
-		header_render(self, x, y, ctx);
-		cy += header_h(self, ctx);
-	}
+	cy += header_render(self, x, y, ctx);
 
 	tbl->last_rows = last_row(self);
 	fix_selected_row(tbl);
@@ -385,7 +406,7 @@ static int header_click(gp_widget *self, const gp_widget_render_ctx *ctx, unsign
 			break;
 	}
 
-	if (!tbl->headers[i].sortable)
+	if (!tbl->header[i].sortable)
 		return 0;
 
 	if (!tbl->sort) {
@@ -493,6 +514,16 @@ static int event(gp_widget *self, const gp_widget_render_ctx *ctx, gp_event *ev)
 	return 0;
 }
 
+static void free_header(gp_widget_table_header *header, unsigned int cols)
+{
+	unsigned int i;
+
+	for (i = 0; i < cols; i++)
+		free(header[i].label);
+
+	free(header);
+}
+
 static gp_widget_table_header *parse_header(json_object *json, int *cols)
 {
 	gp_widget_table_header *header;
@@ -517,32 +548,41 @@ static gp_widget_table_header *parse_header(json_object *json, int *cols)
 	if (!header)
 		return NULL;
 
+	memset(header, 0, sizeof(*header) * (*cols));
+
 	for (i = 0; i < *cols; i++) {
 		json_object *elem = json_object_array_get_idx(json, i);
-		json_object *tmp;
+		const char *label = NULL;
+		unsigned int min_size = 0;
+		unsigned int fill = 0;
 
 		if (!elem) {
 			GP_WARN("Table header parse error!");
 			goto err;
 		}
 
-		tmp = json_object_object_get(elem, "label");
-		if (!tmp) {
-			GP_WARN("Table header %i is missing label", i);
-			goto err;
+		json_object_object_foreach(elem, key, val) {
+			if (!strcmp(key, "label"))
+				label = json_object_get_string(val);
+			else if (!strcmp(key, "min_size"))
+				min_size = json_object_get_int(val);
+			else if (!strcmp(key, "fill"))
+				fill = json_object_get_int(val);
+			else
+				GP_WARN("Invalid table header key %s", key);
 		}
 
-		header[i].text = strdup(json_object_get_string(tmp));
+		if (label)
+			header[i].label = strdup(label);
 
-		if ((tmp = json_object_object_get(elem, "sortable")))
-			header[i].sortable = json_object_get_boolean(tmp);
-
+		header[i].col_min_size = min_size;
+		header[i].col_fill = fill;
 		header[i].text_align = 0;
 	}
 
 	return header;
 err:
-	free(header);
+	free_header(header, *cols);
 	return NULL;
 }
 
@@ -573,6 +613,8 @@ static gp_widget *json_to_table(json_object *json, void **uids)
 	}
 
 	table_header = parse_header(header, &cols);
+	if (!table_header)
+		return NULL;
 
 	if (cols < 0) {
 		GP_WARN("Invalid or missing cols");
@@ -595,14 +637,23 @@ static gp_widget *json_to_table(json_object *json, void **uids)
 	}
 
 	gp_widget *table = gp_widget_table_new(cols, min_rows, table_header, set_row, get_elem);
-
-	//TODO: Free header
-	if (!table)
+	if (!table) {
+		free_header(table_header, cols);
 		return NULL;
+	}
 
+	table->tbl->free = table_header;
 	table->tbl->sort = sort;
 
 	return table;
+}
+
+static void _free(gp_widget *self)
+{
+	if (!self->tbl->free)
+		return;
+
+	free_header(self->tbl->free, self->tbl->cols);
 }
 
 struct gp_widget_ops gp_widget_table_ops = {
@@ -612,11 +663,12 @@ struct gp_widget_ops gp_widget_table_ops = {
 	.render = render,
 	.event = event,
 	.from_json = json_to_table,
+	.free = _free,
 	.id = "table",
 };
 
 gp_widget *gp_widget_table_new(unsigned int cols, unsigned int min_rows,
-                               const gp_widget_table_header *headers,
+                               const gp_widget_table_header *header,
                                int (*row)(struct gp_widget *self,
                                           int op, unsigned int pos),
                                const char *(get)(struct gp_widget *self,
@@ -625,7 +677,6 @@ gp_widget *gp_widget_table_new(unsigned int cols, unsigned int min_rows,
 	gp_widget *ret;
 	size_t size = sizeof(struct gp_widget_table);
 
-	size += 2 * cols * sizeof(unsigned int);
 	size += cols;
 
 	ret = gp_widget_new(GP_WIDGET_TABLE, size);
@@ -636,9 +687,7 @@ gp_widget *gp_widget_table_new(unsigned int cols, unsigned int min_rows,
 	ret->tbl->min_rows = min_rows;
 	ret->tbl->start_row = 0;
 	ret->tbl->cols_w = (void*)ret->tbl->buf;
-	ret->tbl->col_min_sizes = (void*)(ret->tbl->buf + cols * sizeof(unsigned int));
-	ret->tbl->col_fills = (void*)(ret->tbl->buf + 2 * cols * sizeof(unsigned int));
-	ret->tbl->headers = headers;
+	ret->tbl->header = header;
 
 	ret->tbl->get = get;
 	ret->tbl->row = row;

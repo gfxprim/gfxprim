@@ -47,12 +47,6 @@ static int redraw_table(gp_widget_event *ev)
 	return 0;
 }
 
-static const gp_widget_table_header headers[] = {
-	{.text = "File", .sortable = 1},
-	{.text = "Size", .sortable = 1},
-	{.text = "Modified", .sortable = 1},
-};
-
 static void sort_file_table(gp_widget *self, unsigned int col, int desc)
 {
 	int sort_type = 0;
@@ -322,6 +316,12 @@ static const char *get_path(const char *path)
 	return ".";
 }
 
+static const gp_widget_table_header header[] = {
+	{.label = "File", .sortable = 1, .col_min_size = 20, .col_fill = 1},
+	{.label = "Size", .sortable = 1, .col_min_size = 7},
+	{.label = "Modified", .sortable = 1, .col_min_size = 7},
+};
+
 gp_widget_dialog *gp_widget_dialog_file_open_new(const char *path)
 {
 	void *uids = NULL;
@@ -368,7 +368,7 @@ gp_widget_dialog *gp_widget_dialog_file_open_new(const char *path)
 
 	gp_widget_tbox_printf(dialog->dir_path, "%s", get_path(path));
 
-	gp_widget *table = gp_widget_table_new(3, 25, headers, set_row, get_elem);
+	gp_widget *table = gp_widget_table_new(3, 25, header, set_row, get_elem);
 	if (!table)
 		goto err1;
 
@@ -376,11 +376,6 @@ gp_widget_dialog *gp_widget_dialog_file_open_new(const char *path)
 
 	//TODO: Move to JSON!
 	table->align = GP_FILL;
-	table->tbl->col_fills[0] = 1;
-	table->tbl->col_min_sizes[0] = 20;
-	table->tbl->col_min_sizes[1] = 7;
-	table->tbl->col_min_sizes[2] = 7;
-
 	table->tbl->priv = NULL;
 
 	table->input_events = 1;
