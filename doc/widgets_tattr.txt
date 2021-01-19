@@ -29,4 +29,9 @@ be used in widgets for size computation and rendering.
 |      enum      | string  | Description
 | GP_TATTR_BOLD  | "bold"  | Enables bold text.
 | GP_TATTR_LARGE | "large" | Enables large text.
+| GP_TATTR_MONO  | "mono"  | Monospace font.
 |=========================================================
+
+.Labels with different text attributes
+image:tattr_example.png[Label examples]
+

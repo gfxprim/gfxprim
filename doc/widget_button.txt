@@ -9,7 +9,7 @@ image:button.png[Button widget]
 
 Button attributes can be accessed as `widget->button`.
 
-.Button widget constructors
+.Button widget constructor
 [source,c]
 -------------------------------------------------------------------------------
 gp_widget *gp_widget_button_new(const char *label,

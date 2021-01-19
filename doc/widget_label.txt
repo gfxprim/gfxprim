@@ -3,6 +3,9 @@ Label widget
 
 Label widget is a piece of text.
 
+.A label widget
+image:label.png[Label widget]
+
 The `struct gp_widget_label` can be accessed as `widget->label`.
 
 .Label widget constructors
@@ -52,9 +55,6 @@ NOTE: Since widget label size will not shrink (see above) you should call
       font.
 
 Sets a label link:widgets_tattr.html[text attributes].
-
-.A label widget
-image:label.png[Label widget]
 
 .Label JSON attributes
 [cols=",,,3",options="header"]

@@ -4,7 +4,7 @@ Checkbox widget
 .A checkbox widget
 image:checkbox.png[Checkbox widget]
 
-Checkbox attributes can be accessed as `widget->chbox`.
+Checkbox attributes can be accessed as `widget->checkbox`.
 
 .Checkbox widget constructor
 [source,c]
@@ -16,13 +16,21 @@ gp_widget *gp_widget_checkbox_new(const char *label, int val,
 
 Creates a checkbox widget, label can be NULL.
 
-.Function to change checkbox value
+.Function to access and change checkbox value
 [source,c]
 -------------------------------------------------------------------------------
 void gp_widget_checkbox_set(gp_widget *self, int val);
 
 void gp_widget_checkbox_toggle(gp_widget *self);
+
+int gp_widget_checkbox_get(gp_widget *self);
 -------------------------------------------------------------------------------
+
+There is a difference between calling the `gp_widget_checkbox_get()` function
+and getting the value directly as `widget->checkbox->val`. The function call
+is type-safe, which means that the function will return -1 if the widget type
+is not checkbox, while the direct access will possibly cause undefined
+behavior if the widget type is not correct.
 
 .Checkbox JSON attributes
 [cols=",,,3",options="header"]
