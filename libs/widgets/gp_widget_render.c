@@ -53,6 +53,7 @@ static struct gp_widget_render_ctx ctx = {
 	.font_bold = &font_bold,
 	.font_big = &font_big,
 	.font_big_bold = &font_big_bold,
+	.font_mono = &font,
 	.padd = 4,
 	.dclick_ms = 500,
 };
@@ -64,6 +65,7 @@ static gp_font_face *render_font;
 static gp_font_face *render_font_bold;
 static gp_font_face *render_font_big;
 static gp_font_face *render_font_big_bold;
+static gp_font_face *render_font_mono;
 
 static const char *arg_fonts;
 static const char *input_str;
@@ -150,12 +152,14 @@ static void init_fonts(void)
 	gp_font_face *ffont_bold = gp_font_face_fc_load("DroidSans:Bold", 0, font_size);
 	gp_font_face *ffont_big = gp_font_face_fc_load("DroidSans", 0, 1.8 * font_size);
 	gp_font_face *ffont_big_bold = gp_font_face_fc_load("DroidSans:Bold", 0, 1.8 * font_size);
+	gp_font_face *ffont_mono = gp_font_face_fc_load("DroidSansMono", 0, font_size);
 
-	if (!ffont || !ffont_bold || !ffont_big || !ffont_big_bold) {
+	if (!ffont || !ffont_bold || !ffont_big || !ffont_big_bold || !ffont_mono) {
 		gp_font_face_free(ffont);
 		gp_font_face_free(ffont_bold);
 		gp_font_face_free(ffont_big);
 		gp_font_face_free(ffont_big_bold);
+		gp_font_face_free(ffont_mono);
 		set_default_font();
 		return;
 	}
@@ -164,16 +168,19 @@ static void init_fonts(void)
 	gp_font_face_free(render_font_bold);
 	gp_font_face_free(render_font_big);
 	gp_font_face_free(render_font_big_bold);
+	gp_font_face_free(render_font_mono);
 
 	render_font = ffont;
 	render_font_bold = ffont_bold;
 	render_font_big = ffont_big;
 	render_font_big_bold = ffont_big_bold;
+	render_font_mono = ffont_mono;
 
 	ctx.font->font = ffont;
 	ctx.font_bold->font = ffont_bold;
 	ctx.font_big->font = ffont_big;
 	ctx.font_big_bold->font = ffont_big_bold;
+	ctx.font_mono->font = ffont_mono;
 	set_big_font(1);
 }
 

@@ -33,6 +33,8 @@ int gp_widget_tattr_parse(const char *attrs, gp_widget_tattr *tattr)
 			ret |= GP_TATTR_BOLD;
 		else if (!strncmp(attrs, "large", len))
 			ret |= GP_TATTR_LARGE;
+		else if (!strncmp(attrs, "mono", len))
+			ret |= GP_TATTR_MONO;
 		else
 			return 1;
 

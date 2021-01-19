@@ -1,26 +1,36 @@
 {
-  "version": 1,
-  "cols": 2,
-  "rows": 2,
-  "widgets": [
+ "version": 1,
+ "cols": 2,
+ "widgets": [
+  {
+   "rows": 2,
+   "cols": 2,
+   "widgets": [
     {
-      "type": "label",
-      "text": "normal"
+     "type": "label",
+     "text": "normal"
     },
     {
-      "type": "label",
-      "text": "bold",
-      "tattr": "bold"
+     "type": "label",
+     "text": "bold",
+     "tattr": "bold"
     },
     {
-      "type": "label",
-      "text": "large",
-      "tattr": "large"
+     "type": "label",
+     "text": "large",
+     "tattr": "large"
     },
     {
-      "type": "label",
-      "text": "large bold",
-      "tattr": "large|bold"
+     "type": "label",
+     "text": "large|bold",
+     "tattr": "large|bold"
     }
-  ]
+   ]
+  },
+  {
+   "type": "label",
+   "text": "mono",
+   "tattr": "mono"
+  }
+ ]
 }

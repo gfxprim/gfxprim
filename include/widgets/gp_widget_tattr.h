@@ -15,6 +15,8 @@
 enum gp_widget_tattr {
 	GP_TATTR_BOLD  = 0x01,
 	GP_TATTR_LARGE = 0x02,
+	/* Monospace does not support bold or large */
+	GP_TATTR_MONO  = 0x04,
 };
 
 /*
@@ -22,6 +24,9 @@ enum gp_widget_tattr {
  */
 static inline const gp_text_style *gp_widget_tattr_font(gp_widget_tattr attr, const gp_widget_render_ctx *ctx)
 {
+	if (attr & GP_TATTR_MONO)
+		return ctx->font_mono;
+
 	if (attr & GP_TATTR_BOLD) {
 		if (attr & GP_TATTR_LARGE)
 			return ctx->font_big_bold;
