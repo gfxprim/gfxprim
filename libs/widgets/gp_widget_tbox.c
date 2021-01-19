@@ -504,12 +504,14 @@ void gp_widget_tbox_del(gp_widget *self, ssize_t off,
 
 	size_t max_pos = gp_vec_strlen(self->tbox->buf);
 	size_t del_pos = self->tbox->cur_pos;
-	size_t del_size = GP_MIN(len, max_pos - del_pos);
+	size_t del_size;
 
 	if (gp_seek_off(off, whence, &del_pos, max_pos)) {
 		schedule_alert(self);
 		return;
 	}
+
+	del_size = GP_MIN(len, max_pos - del_pos);
 
 	char *new_buf = gp_vec_strdel(self->tbox->buf, del_pos, del_size);
 
