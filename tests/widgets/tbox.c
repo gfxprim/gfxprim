@@ -134,7 +134,7 @@ static int tbox_cursor(void)
 		return TST_FAILED;
 	}
 
-	gp_widget_tbox_cursor_set(tbox, -6, GP_SEEK_CUR);
+	gp_widget_tbox_cursor_set(tbox, -5, GP_SEEK_CUR);
 
 	cur_pos = gp_widget_tbox_cursor_get(tbox);
 	if (cur_pos != 0) {
@@ -228,7 +228,7 @@ static int tbox_del(void)
 	gp_widget_tbox_del(tbox, 0, GP_SEEK_SET, 6);
 	cur_pos = gp_widget_tbox_cursor_get(tbox);
 	if (cur_pos != 5) {
-		tst_msg("Wrong cursor position %zu expected 11", cur_pos);
+		tst_msg("Wrong cursor position %zu expected 5 '%s'", cur_pos, tbox->tbox->buf);
 		return TST_FAILED;
 	}
 
