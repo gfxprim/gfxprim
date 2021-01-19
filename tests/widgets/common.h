@@ -3,7 +3,7 @@
  * Copyright (C) 2020 Cyril Hrubis <metan@ucw.cz>
  */
 
-static void send_keypress(gp_widget *widget, int value, char ascii)
+static inline void send_keypress(gp_widget *widget, int value, char ascii)
 {
 	gp_event ev_down = {
 		.type = GP_EV_KEY,
@@ -41,7 +41,7 @@ static int ascii_to_key(char ch)
 	return ascii_to_keys[ch - 'a'];
 }
 
-static void type_string(gp_widget *widget, const char *ch)
+static inline void type_string(gp_widget *widget, const char *ch)
 {
 	while (*ch) {
 		int key = ascii_to_key(*ch);
