@@ -38,4 +38,15 @@ void gp_widget_checkbox_set(gp_widget *self, int val);
  */
 void gp_widget_checkbox_toggle(gp_widget *self);
 
+
+/**
+ * @brief Returns a checkbox value.
+ *
+ * @self A checkbox widget.
+ *
+ * @return Returns checkbox value i.e. 1 or 0. If widget passes as self is not
+ *         checkbox -1 is returned.
+ */
+int gp_widget_checkbox_get(gp_widget *self);
+
 #endif /* GP_WIDGET_CHECKBOX_H__ */

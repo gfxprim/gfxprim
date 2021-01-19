@@ -28,7 +28,7 @@ int callback(gp_widget_event *ev)
 		printf("Button pressed!\n");
 	break;
 	case GP_WIDGET_CHECKBOX:
-		printf("Checkbox set to %i\n", ev->self->chbox->val);
+		printf("Checkbox set to %i\n", ev->self->checkbox->val);
 	break;
 	}
 

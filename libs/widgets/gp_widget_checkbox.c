@@ -160,7 +160,7 @@ void gp_widget_checkbox_set(gp_widget *self, int val)
 
 	val = !!val;
 
-	if (self->chbox->val == val)
+	if (self->checkbox->val == val)
 		return;
 
 	set(self, val);
@@ -171,6 +171,13 @@ void gp_widget_checkbox_toggle(gp_widget *self)
 	GP_WIDGET_ASSERT(self, GP_WIDGET_CHECKBOX, );
 
 	toggle(self);
+}
+
+int gp_widget_checkbox_get(gp_widget *self)
+{
+	GP_WIDGET_ASSERT(self, GP_WIDGET_CHECKBOX, -1);
+
+	return self->checkbox->val;
 }
 
 gp_widget *gp_widget_checkbox_new(const char *label, int val,

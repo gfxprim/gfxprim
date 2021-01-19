@@ -76,7 +76,7 @@ static int dialog_show_hidden(struct file_dialog *dialog)
 	if (!dialog->show_hidden)
 		return 0;
 
-	return dialog->show_hidden->chbox->val;
+	return dialog->show_hidden->checkbox->val;
 }
 
 static char *dialog_filter(struct file_dialog *dialog)
