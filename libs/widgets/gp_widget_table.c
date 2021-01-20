@@ -677,7 +677,7 @@ gp_widget *gp_widget_table_new(unsigned int cols, unsigned int min_rows,
 	gp_widget *ret;
 	size_t size = sizeof(struct gp_widget_table);
 
-	size += cols;
+	size += cols * sizeof(unsigned int);
 
 	ret = gp_widget_new(GP_WIDGET_TABLE, size);
 	if (!ret)
