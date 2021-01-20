@@ -118,12 +118,17 @@ void gp_backend_rem_timer(gp_backend *self, gp_timer *timer)
 
 int gp_backend_timer_timeout(gp_backend *self)
 {
+	uint64_t now;
+
 	if (!self->timers)
 		return -1;
 
-	uint64_t now = gp_time_stamp();
+	now = gp_time_stamp();
 
-	return GP_MAX((uint64_t)0, self->timers->expires - now);
+	if (now > self->timers->expires)
+		return 0;
+
+	return self->timers->expires - now;
 }
 
 void gp_backend_poll(gp_backend *self)
