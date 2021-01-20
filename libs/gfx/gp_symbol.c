@@ -12,16 +12,16 @@ static enum gp_symbol_type transform_symbol(gp_pixmap *pixmap, enum gp_symbol_ty
 	if (pixmap->axes_swap) {
 		switch (stype) {
 		case GP_TRIANGLE_UP:
-			stype = GP_TRIANGLE_RIGHT;
-		break;
-		case GP_TRIANGLE_DOWN:
 			stype = GP_TRIANGLE_LEFT;
 		break;
+		case GP_TRIANGLE_DOWN:
+			stype = GP_TRIANGLE_RIGHT;
+		break;
 		case GP_TRIANGLE_LEFT:
-			stype = GP_TRIANGLE_DOWN;
+			stype = GP_TRIANGLE_UP;
 		break;
 		case GP_TRIANGLE_RIGHT:
-			stype = GP_TRIANGLE_UP;
+			stype = GP_TRIANGLE_DOWN;
 		break;
 		}
 	}
