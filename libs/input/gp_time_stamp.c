@@ -57,7 +57,7 @@ static int choose_clock(clockid_t *clock)
 		return 1;
 	}
 
-	GP_WARN("Timers running with %lims granularity\n",
+	GP_WARN("Timers running with %lims granularity",
                 ts.tv_nsec/MS_IN_US);
 
 	*clock = CLOCK_MONOTONIC;
