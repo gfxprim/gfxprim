@@ -101,6 +101,11 @@ typedef struct gp_font_face {
 	uint16_t max_glyph_advance;
 
 	/*
+	 * Average glyph advance.
+	 */
+	uint16_t avg_glyph_advance;
+
+	/*
 	 * Bitmap format for all glyphs
 	 */
 	gp_font_bitmap_format glyph_bitmap_format;
@@ -146,6 +151,15 @@ static inline unsigned int gp_font_max_width(const gp_font_face *font)
 
 static inline unsigned int gp_font_max_advance_x(const gp_font_face *font)
 {
+	return font->max_glyph_advance;
+}
+
+static inline unsigned int gp_font_avg_advance_x(const gp_font_face *font)
+{
+	if (font->avg_glyph_advance)
+		return font->avg_glyph_advance;
+
+	/* For monospace bitmap fonts the avg == max */
 	return font->max_glyph_advance;
 }
 

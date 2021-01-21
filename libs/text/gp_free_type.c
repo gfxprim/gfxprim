@@ -119,6 +119,8 @@ gp_font_face *gp_font_face_load(const char *path, uint32_t width, uint32_t heigh
 	font->ascend  = 0;
 	font->descend = 0;
 
+	uint64_t avg_advance = 0;
+
 	for (i = 0x20; i < 0x7f; i++) {
 		FT_UInt glyph_idx = FT_Get_Char_Index(face, i);
 
@@ -147,6 +149,8 @@ gp_font_face *gp_font_face_load(const char *path, uint32_t width, uint32_t heigh
 		glyph_bitmap->bearing_y = glyph->bitmap_top;
 		glyph_bitmap->advance_x = (glyph->advance.x + 32)>>6;
 
+		avg_advance += glyph->advance.x;
+
 		int16_t width = glyph_bitmap->bearing_x + glyph_bitmap->width;
 		int16_t ascend = glyph_bitmap->bearing_y;
 		int16_t descend = glyph_bitmap->height - ascend;
@@ -173,6 +177,8 @@ gp_font_face *gp_font_face_load(const char *path, uint32_t width, uint32_t heigh
 			}
 		}
 	}
+
+	font->avg_glyph_advance = (((avg_advance + 32)>>6) + 47) / 95;
 
 	FT_Done_Face(face);
 	FT_Done_FreeType(library);

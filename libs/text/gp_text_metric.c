@@ -153,9 +153,6 @@ unsigned int gp_text_width(const gp_text_style *style, const char *str)
 	return gp_text_width_len(style, str, SIZE_MAX);
 }
 
-/*
- * Return max advance now. We will do something better maybe.
- */
 gp_size gp_text_max_width(const gp_text_style *style, unsigned int len)
 {
 	style = assert_style(style);
@@ -164,6 +161,17 @@ gp_size gp_text_max_width(const gp_text_style *style, unsigned int len)
 		return 0;
 
 	return multiply_width(style, len * style->font->max_glyph_advance) +
+	       (len - 1) * style->char_xspace;
+}
+
+gp_size gp_text_avg_width(const gp_text_style *style, unsigned int len)
+{
+	style = assert_style(style);
+
+	if (len == 0)
+		return 0;
+
+	return multiply_width(style, len * gp_font_avg_advance_x(style->font)) +
 	       (len - 1) * style->char_xspace;
 }
 

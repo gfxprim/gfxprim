@@ -70,6 +70,8 @@ static void print_font_properties(const gp_font_face *font)
 			gp_font_ascend(font), gp_font_descend(font));
 	fprintf(stderr, "    Max advance_x: %u\n",
 	                gp_font_max_advance_x(font));
+	fprintf(stderr, "    Average advance_x: %u\n",
+			gp_font_avg_advance_x(font));
 	fprintf(stderr, "    Glyph bitmap format: %s\n",
 	                glyph_bitmap_format_name(font->glyph_bitmap_format));
 	fprintf(stderr, "    Bounding box width: %d, heigth: %d\n",

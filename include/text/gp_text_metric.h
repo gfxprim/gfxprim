@@ -26,6 +26,11 @@ gp_size gp_text_width(const gp_text_style *style, const char *str);
 gp_size gp_text_max_width(const gp_text_style *style, unsigned int len);
 
 /*
+ * Returns average width for len characters.
+ */
+gp_size gp_text_avg_width(const gp_text_style *style, unsigned int len);
+
+/*
  * Returns maximal width for text written with len characters from str.
  */
 gp_size gp_text_max_width_chars(const gp_text_style *style, const char *chars,
