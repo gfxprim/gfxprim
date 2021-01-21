@@ -56,7 +56,9 @@ The text size can be computed by following functions:
 /* or */
 #include <text/gp_text_metric.h>
 
-unsigned int gp_text_width(const gp_text_style *style, const char *str);
+gp_size gp_text_width(const gp_text_style *style, const char *str);
+
+gp_size gp_text_width_len(const gp_text_style *style, const char *str, size_t len);
 --------------------------------------------------------------------------------
 
 Returns the width (in pixels) that would be occupied by the string if rendered
@@ -74,7 +76,7 @@ terms used in this paragraph.
 /* or */
 #include <text/gp_text_metric.h>
 
-unsigned int gp_text_max_width(const gp_text_style *style, unsigned int len);
+gp_size gp_text_max_width(const gp_text_style *style, unsigned int len);
 --------------------------------------------------------------------------------
 
 Returns maximum text width, in pixels, for string with 'len' letters.
@@ -82,6 +84,32 @@ Returns maximum text width, in pixels, for string with 'len' letters.
 This call simply computes width of a string rendered with 'len' largest glyphs
 (letters) in the font. Because of this the resulting size is often much larger
 than needed.
+
+[source,c]
+--------------------------------------------------------------------------------
+#include <gfxprim.h>
+/* or */
+#include <text/gp_text_metric.h>
+
+gp_size gp_text_max_width_chars(const gp_text_style *style, const char *chars, unsigned int len);
+--------------------------------------------------------------------------------
+
+Returns maximum text width, in pixels, for string composing letters only from
+'chars' string with 'len' letters.
+
+This call simply computes width of a string rendered with 'len' largest glyphs
+(letters) from the chars string given a font.
+
+[source,c]
+--------------------------------------------------------------------------------
+#include <gfxprim.h>
+/* or */
+#include <text/gp_text_metric.h>
+
+gp_size gp_text_avg_width(const gp_text_style *style, unsigned int len);
+--------------------------------------------------------------------------------
+
+Returns average text width, in pixels, for string with 'len' letters.
 
 [source,c]
 --------------------------------------------------------------------------------
