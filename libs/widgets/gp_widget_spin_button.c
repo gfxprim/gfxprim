@@ -94,20 +94,22 @@ static void select_choice(gp_widget *self, unsigned int select)
 	gp_widget_send_widget_event(self, 0);
 }
 
-static void key_up(gp_widget *self)
+static int key_up(gp_widget *self)
 {
 	if (self->choice->sel == 0)
-		return;
+		return 0;
 
 	select_choice(self, self->choice->sel - 1);
+	return 1;
 }
 
-static void key_down(gp_widget *self)
+static int key_down(gp_widget *self)
 {
 	if (self->choice->sel + 1 >= self->choice->max)
-		return;
+		return 0;
 
 	select_choice(self, self->choice->sel + 1);
+	return 1;
 }
 
 static void click(gp_widget *self, const gp_widget_render_ctx *ctx, gp_event *ev)
@@ -155,6 +157,17 @@ static int event(gp_widget *self, const gp_widget_render_ctx *ctx, gp_event *ev)
 			select_choice(self, self->choice->max - 1);
 			return 1;
 		}
+	break;
+	case GP_EV_REL:
+		if (ev->code != GP_EV_REL_WHEEL)
+			return 0;
+
+		if (ev->val < 0)
+			return key_down(self);
+
+		if (ev->val > 0)
+			return key_up(self);
+	break;
 	}
 
 	return 0;
