@@ -14,4 +14,9 @@
 	x__ + !(x__%2);    \
 })
 
+#define GP_EVEN_UP(x) ({    \
+	typeof(x) x__ = x;  \
+	x__ + (x__%2);      \
+})
+
 #endif /* GP_COMMON_H__ */

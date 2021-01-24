@@ -14,6 +14,11 @@
 #include <gp_widget_render.h>
 #include <gp_string.h>
 
+static unsigned int buttons_width(const gp_widget_render_ctx *ctx)
+{
+	return GP_EVEN_UP(((3 * ctx->padd + gp_text_ascent(ctx->font))/2));
+}
+
 static unsigned int min_w(gp_widget *self, const gp_widget_render_ctx *ctx)
 {
 	unsigned int i, max_len = 0;
@@ -23,7 +28,7 @@ static unsigned int min_w(gp_widget *self, const gp_widget_render_ctx *ctx)
 		max_len = GP_MAX(max_len, len);
 	}
 
-	return 2 * ctx->padd + max_len + GP_ODD_UP(gp_text_max_width(ctx->font, 1));
+	return 2 * ctx->padd + max_len + buttons_width(ctx);
 }
 
 static unsigned int min_h(gp_widget *self, const gp_widget_render_ctx *ctx)
@@ -40,7 +45,9 @@ static void render(gp_widget *self, const gp_offset *offset,
 	unsigned int y = self->y + offset->y;
 	unsigned int w = self->w;
 	unsigned int h = self->h;
-	unsigned int s = GP_ODD_UP(gp_text_max_width(ctx->font, 1));
+	unsigned int s = buttons_width(ctx);
+	unsigned int sx = (gp_text_ascent(ctx->font)/2 + ctx->padd)/3;
+	unsigned int sy = (gp_text_ascent(ctx->font)/2 + ctx->padd)/5;
 
 	(void)flags;
 
@@ -65,14 +72,14 @@ static void render(gp_widget *self, const gp_offset *offset,
 	else
 		color = ctx->text_color;
 
-	gp_symbol(ctx->buf, x + w - s/2 - 1, y + h/4, s/4, s/4, GP_TRIANGLE_UP, color);
+	gp_symbol(ctx->buf, x + w - s/2 - 1, y + h/4, sx, sy, GP_TRIANGLE_UP, color);
 
 	if (self->choice->sel + 1 >= self->choice->max)
 		color = ctx->bg_color;
 	else
 		color = ctx->text_color;
 
-	gp_symbol(ctx->buf, x + w - s/2 - 1, y + (3*h)/4, s/4, s/4, GP_TRIANGLE_DOWN, color);
+	gp_symbol(ctx->buf, x + w - s/2 - 1, y + (3*h)/4, sx, sy, GP_TRIANGLE_DOWN, color);
 }
 
 static void select_choice(gp_widget *self, unsigned int select)
@@ -105,7 +112,7 @@ static void key_down(gp_widget *self)
 
 static void click(gp_widget *self, const gp_widget_render_ctx *ctx, gp_event *ev)
 {
-	unsigned int s = gp_text_max_width(ctx->font, 1);
+	unsigned int s = buttons_width(ctx);
 	unsigned int min_x = self->w - s;
 	unsigned int max_x = self->w;
 	unsigned int max_y = self->h;

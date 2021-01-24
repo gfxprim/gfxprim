@@ -153,6 +153,11 @@ static gp_widget *json_to_int(enum gp_widget_type type, json_object *json, void 
 	return ret;
 }
 
+static unsigned int spin_buttons_width(const gp_widget_render_ctx *ctx)
+{
+	return GP_EVEN_UP(((3 * ctx->padd + gp_text_ascent(ctx->font))/2));
+}
+
 static unsigned int spin_min_w(gp_widget *self, const gp_widget_render_ctx *ctx)
 {
 	unsigned int min_digits = snprintf(NULL, 0, "%i", self->spin->min);
@@ -163,7 +168,7 @@ static unsigned int spin_min_w(gp_widget *self, const gp_widget_render_ctx *ctx)
 	ret += gp_text_max_width_chars(ctx->font, "-0123456789",
 			               GP_MAX(min_digits, max_digits));
 
-	ret += GP_ODD_UP(gp_text_max_width(ctx->font, 1));
+	ret += spin_buttons_width(ctx);
 
 	return ret;
 }
@@ -182,7 +187,9 @@ static void spin_render(gp_widget *self, const gp_offset *offset,
 	unsigned int y = self->y + offset->y;
 	unsigned int w = self->w;
 	unsigned int h = self->h;
-	unsigned int s = GP_ODD_UP(gp_text_max_width(ctx->font, 1));
+	unsigned int s = spin_buttons_width(ctx);
+	unsigned int sx = (gp_text_ascent(ctx->font)/2 + ctx->padd)/3;
+	unsigned int sy = (gp_text_ascent(ctx->font)/2 + ctx->padd)/5;
 
 	(void)flags;
 
@@ -208,8 +215,8 @@ static void spin_render(gp_widget *self, const gp_offset *offset,
 	gp_vline_xyh(ctx->buf, rx-1, y, h, color);
 	gp_hline_xyw(ctx->buf, rx, y + h/2, s, color);
 
-	gp_symbol(ctx->buf, x + w - s/2 - 1, y + h/4, s/4, s/4, GP_TRIANGLE_UP, ctx->text_color);
-	gp_symbol(ctx->buf, x + w - s/2 - 1, y + (3*h)/4, s/4, s/4, GP_TRIANGLE_DOWN, ctx->text_color);
+	gp_symbol(ctx->buf, x + w - s/2 - 1, y + h/4, sx, sy, GP_TRIANGLE_UP, ctx->text_color);
+	gp_symbol(ctx->buf, x + w - s/2 - 1, y + (3*h)/4, sx, sy, GP_TRIANGLE_DOWN, ctx->text_color);
 }
 
 static void schedule_alert(gp_widget *self)
@@ -246,7 +253,7 @@ static void spin_dec(gp_widget *self)
 
 static void spin_click(gp_widget *self, const gp_widget_render_ctx *ctx, gp_event *ev)
 {
-	unsigned int s = gp_text_max_width(ctx->font, 1);
+	unsigned int s = spin_buttons_width(ctx);
 	unsigned int min_x = self->w - s;
 	unsigned int max_x = self->w;
 	unsigned int max_y = self->h;
