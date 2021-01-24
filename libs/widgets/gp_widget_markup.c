@@ -224,7 +224,7 @@ gp_widget *gp_widget_markup_new(const char *markup_str,
 	if (!markup)
 		return NULL;
 
-	ret = gp_widget_new(GP_WIDGET_MARKUP, payload_size);
+	ret = gp_widget_new(GP_WIDGET_MARKUP, GP_WIDGET_CLASS_NONE, payload_size);
 	if (!ret) {
 		gp_markup_free(markup);
 		return NULL;

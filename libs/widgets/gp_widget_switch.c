@@ -176,7 +176,7 @@ gp_widget *gp_widget_switch_new(unsigned int layouts)
 {
 	gp_widget *ret;
 
-	ret = gp_widget_new(GP_WIDGET_SWITCH, sizeof(struct gp_widget_switch));
+	ret = gp_widget_new(GP_WIDGET_SWITCH, GP_WIDGET_CLASS_NONE, sizeof(struct gp_widget_switch));
 	if (!ret)
 		return NULL;
 

@@ -679,7 +679,7 @@ gp_widget *gp_widget_table_new(unsigned int cols, unsigned int min_rows,
 
 	size += cols * sizeof(unsigned int);
 
-	ret = gp_widget_new(GP_WIDGET_TABLE, size);
+	ret = gp_widget_new(GP_WIDGET_TABLE, GP_WIDGET_CLASS_NONE, size);
 	if (!ret)
 		return NULL;
 

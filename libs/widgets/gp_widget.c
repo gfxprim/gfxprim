@@ -12,13 +12,32 @@
 #include <gp_widget.h>
 #include <gp_widget_ops.h>
 
-gp_widget *gp_widget_new(enum gp_widget_type type, size_t payload_size)
+const char *gp_widget_class_name(enum gp_widget_class widget_class)
+{
+	switch (widget_class) {
+	case GP_WIDGET_CLASS_NONE:
+		return "none";
+	case GP_WIDGET_CLASS_BOOL:
+		return "bool";
+	case GP_WIDGET_CLASS_INT:
+		return "int";
+	case GP_WIDGET_CLASS_CHOICE:
+		return "choice";
+	default:
+		return "???";
+	}
+}
+
+gp_widget *gp_widget_new(enum gp_widget_type type,
+                         enum gp_widget_class widget_class,
+                         size_t payload_size)
 {
 	size_t size = sizeof(gp_widget) + payload_size;
 	gp_widget *ret = malloc(size);
 
-	GP_DEBUG(1, "Allocating widget %s payload_size=%zu size=%zu",
-	         gp_widget_type_name(type), payload_size, size);
+	GP_DEBUG(1, "Allocating widget %s class %s payload_size=%zu size=%zu",
+	         gp_widget_type_name(type), gp_widget_class_name(widget_class),
+	         payload_size, size);
 
 	if (!ret) {
 		GP_WARN("Malloc failed :-(");
@@ -28,6 +47,7 @@ gp_widget *gp_widget_new(enum gp_widget_type type, size_t payload_size)
 	memset(ret, 0, size);
 	ret->payload = ret->buf;
 	ret->type = type;
+	ret->widget_class = widget_class;
 
 	ret->event_mask = GP_WIDGET_DEFAULT_EVENT_MASK;
 

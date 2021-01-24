@@ -498,7 +498,7 @@ gp_widget *gp_widget_tabs_new(unsigned int tabs, unsigned int active_tab,
 
 	size += gp_string_arr_size(tab_labels, tabs);
 
-	gp_widget *ret = gp_widget_new(GP_WIDGET_TABS, size);
+	gp_widget *ret = gp_widget_new(GP_WIDGET_TABS, GP_WIDGET_CLASS_NONE, size);
 	if (!ret)
 		return NULL;
 

@@ -45,7 +45,7 @@ static gp_widget *widget_int_new(enum gp_widget_type type,
 	if (check_val(min, max, val))
 		return NULL;
 
-	ret = gp_widget_new(type, sizeof(struct gp_widget_int));
+	ret = gp_widget_new(type, GP_WIDGET_CLASS_INT, sizeof(struct gp_widget_int));
 	if (!ret)
 		return NULL;
 

@@ -367,7 +367,7 @@ struct gp_widget *gp_widget_tbox_new(const char *text, unsigned int size,
                                         int (*on_event)(gp_widget_event *),
                                         void *priv, int flags)
 {
-	gp_widget *ret = gp_widget_new(GP_WIDGET_TBOX, sizeof(struct gp_widget_tbox));
+	gp_widget *ret = gp_widget_new(GP_WIDGET_TBOX, GP_WIDGET_CLASS_NONE, sizeof(struct gp_widget_tbox));
 	if (!ret)
 		return NULL;
 

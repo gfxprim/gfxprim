@@ -156,7 +156,7 @@ gp_widget *gp_widget_label_new(const char *text, gp_widget_tattr tattr, unsigned
 {
 	gp_widget *ret;
 
-	ret = gp_widget_new(GP_WIDGET_LABEL, sizeof(struct gp_widget_label));
+	ret = gp_widget_new(GP_WIDGET_LABEL, GP_WIDGET_CLASS_NONE, sizeof(struct gp_widget_label));
 	if (!ret)
 		return NULL;
 

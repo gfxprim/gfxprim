@@ -24,7 +24,11 @@
 #include <widgets/gp_widget_int.h>
 #include <widgets/gp_widget_slider.h>
 #include <widgets/gp_widget_tbox.h>
+
+/* Choice widget and subclasses */
 #include <widgets/gp_widget_choice.h>
+#include <widgets/gp_widget_radiobutton.h>
+
 #include <widgets/gp_widget_table.h>
 #include <widgets/gp_widget_pbar.h>
 #include <widgets/gp_widget_pixmap.h>

@@ -189,7 +189,7 @@ gp_widget *gp_widget_checkbox_new(const char *label, int val,
 
 	size += label ? strlen(label) + 1 : 0;
 
-	ret = gp_widget_new(GP_WIDGET_CHECKBOX, size);
+	ret = gp_widget_new(GP_WIDGET_CHECKBOX, GP_WIDGET_CLASS_BOOL, size);
 	if (!ret)
 		return NULL;
 

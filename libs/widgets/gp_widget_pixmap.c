@@ -127,7 +127,7 @@ struct gp_widget *gp_widget_pixmap_new(unsigned int w, unsigned int h,
 {
 	gp_widget *ret;
 
-	ret = gp_widget_new(GP_WIDGET_PIXMAP, sizeof(struct gp_widget_pixmap));
+	ret = gp_widget_new(GP_WIDGET_PIXMAP, GP_WIDGET_CLASS_NONE, sizeof(struct gp_widget_pixmap));
 	if (!ret)
 		return NULL;
 

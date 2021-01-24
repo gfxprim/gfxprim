@@ -990,7 +990,7 @@ gp_widget *gp_widget_grid_new(unsigned int cols, unsigned int rows)
 	unsigned int i;
 	gp_widget *ret;
 
-	ret = gp_widget_new(GP_WIDGET_GRID, sizeof(struct gp_widget_grid));
+	ret = gp_widget_new(GP_WIDGET_GRID, GP_WIDGET_CLASS_NONE, sizeof(struct gp_widget_grid));
 	if (!ret)
 		return NULL;
 

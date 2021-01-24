@@ -164,7 +164,7 @@ gp_widget *gp_widget_pbar_new(float val, float max, enum gp_widget_pbar_type typ
 	if (check_val(val, max))
 		val = 0;
 
-	ret = gp_widget_new(GP_WIDGET_PROGRESSBAR, sizeof(struct gp_widget_pbar));
+	ret = gp_widget_new(GP_WIDGET_PROGRESSBAR, GP_WIDGET_CLASS_NONE, sizeof(struct gp_widget_pbar));
 	if (!ret)
 		return NULL;
 

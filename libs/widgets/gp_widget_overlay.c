@@ -226,7 +226,7 @@ gp_widget *gp_widget_overlay_new(unsigned int stack_size)
 {
 	gp_widget *ret;
 
-	ret = gp_widget_new(GP_WIDGET_OVERLAY, sizeof(struct gp_widget_overlay));
+	ret = gp_widget_new(GP_WIDGET_OVERLAY, GP_WIDGET_CLASS_NONE, sizeof(struct gp_widget_overlay));
 	if (!ret)
 		return NULL;
 

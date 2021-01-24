@@ -211,7 +211,7 @@ gp_widget *gp_widget_frame_new(const char *label, int bold, gp_widget *child)
 	if (label)
 		size += strlen(label) + 1;
 
-	ret = gp_widget_new(GP_WIDGET_FRAME, size);
+	ret = gp_widget_new(GP_WIDGET_FRAME, GP_WIDGET_CLASS_NONE, size);
 	if (!ret)
 		return NULL;
 

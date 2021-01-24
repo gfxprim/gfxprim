@@ -2,7 +2,7 @@
 
 /*
 
-   Copyright (c) 2014-2020 Cyril Hrubis <metan@ucw.cz>
+   Copyright (c) 2014-2021 Cyril Hrubis <metan@ucw.cz>
 
  */
 
@@ -201,7 +201,9 @@ static gp_widget *json_to_radiobutton(json_object *json, void **uids)
 			GP_WARN("Button %i must be string!", i);
 	}
 
-	return gp_widget_choice_new(labels_arr, label_cnt, sel_label, NULL, NULL);
+	return gp_widget_choice_new(GP_WIDGET_RADIOBUTTON,
+	                            labels_arr, label_cnt, sel_label,
+	                            NULL, NULL);
 }
 
 struct gp_widget_ops gp_widget_radio_button_ops = {
@@ -212,44 +214,3 @@ struct gp_widget_ops gp_widget_radio_button_ops = {
 	.from_json = json_to_radiobutton,
 	.id = "radiobutton",
 };
-
-struct gp_widget *gp_widget_choice_new(const char *choices[],
-                                       unsigned int choice_cnt,
-                                       unsigned int selected,
-				       int (*on_event)(gp_widget_event *self),
-				       void *priv)
-{
-	size_t size = sizeof(struct gp_widget_choice)
-	              + gp_string_arr_size(choices, choice_cnt);
-
-	gp_widget *ret = gp_widget_new(GP_WIDGET_RADIOBUTTON, size);
-	if (!ret)
-		return NULL;
-
-	ret->choice->sel = selected;
-	ret->choice->choices = gp_string_arr_copy(choices, choice_cnt, ret->choice->payload);
-	ret->choice->max = choice_cnt;
-
-	gp_widget_event_handler_set(ret, on_event, priv);
-
-	return ret;
-}
-
-void gp_widget_choice_set(gp_widget *self, unsigned int sel)
-{
-	GP_WIDGET_ASSERT(self, GP_WIDGET_RADIOBUTTON, );
-
-	if (self->choice->sel == sel)
-		return;
-
-	self->choice->sel = sel;
-
-	gp_widget_redraw(self);
-}
-
-unsigned int gp_widget_choice_get(gp_widget *self)
-{
-	GP_WIDGET_ASSERT(self, GP_WIDGET_RADIOBUTTON, 0);
-
-	return self->choice->sel;
-}

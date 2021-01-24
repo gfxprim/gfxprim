@@ -16,6 +16,7 @@
 
 struct gp_widget {
 	unsigned int type;
+	unsigned int widget_class;
 	gp_widget *parent;
 
 	/*
@@ -132,6 +133,19 @@ enum gp_widget_type {
 	GP_WIDGET_MAX,
 };
 
+enum gp_widget_class {
+	GP_WIDGET_CLASS_NONE = 0,
+	GP_WIDGET_CLASS_BOOL,
+	GP_WIDGET_CLASS_INT,
+	GP_WIDGET_CLASS_CHOICE,
+	GP_WIDGET_CLASS_MAX,
+};
+
+/**
+ * @brief Returns widget class name.
+ */
+const char *gp_widget_class_name(enum gp_widget_class widget_class);
+
 enum gp_widget_alignment {
 	/** Default overridable alignment. */
 	GP_HCENTER_WEAK = 0x00,
@@ -156,11 +170,26 @@ enum gp_widget_alignment {
  * @brief Internal function to allocate a widget.
  *
  * @type A widget type.
+ * @class A widget class.
  * @payload_size A widet payload size.
  *
  * @return Newly allocated and initialized widget.
  */
-gp_widget *gp_widget_new(enum gp_widget_type type, size_t payload_size);
+gp_widget *gp_widget_new(enum gp_widget_type type,
+                         enum gp_widget_class widget_class,
+                         size_t payload_size);
+
+#define GP_WIDGET_CLASS_ASSERT(self, wclass, ret) do {                  \
+		if (!self) {                                            \
+			GP_BUG("NULL widget!");                         \
+			return ret;                                     \
+		}                                                       \
+                if (self->widget_class != wclass) {                     \
+			GP_BUG("Invalid widget (%p) class %u != %u",    \
+			       self, self->widget_class, wclass);       \
+			return ret;                                     \
+		}                                                       \
+	} while (0)
 
 #define GP_WIDGET_ASSERT(self, wtype, ret) do { \
 		if (!self) {\

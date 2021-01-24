@@ -2,7 +2,7 @@
 
 /*
 
-   Copyright (c) 2014-2020 Cyril Hrubis <metan@ucw.cz>
+   Copyright (c) 2014-2021 Cyril Hrubis <metan@ucw.cz>
 
  */
 
@@ -20,6 +20,7 @@ struct gp_widget_choice {
 /**
  * @brief Allocates and initializes new choice widget.
  *
+ * @type A widget type.
  * @choices An array of strings describing available choices.
  * @choice_cnt Size of the choices array.
  * @selected Initially selected choice.
@@ -28,7 +29,8 @@ struct gp_widget_choice {
  *
  * @return A choice widget.
  */
-gp_widget *gp_widget_choice_new(const char *choices[],
+gp_widget *gp_widget_choice_new(unsigned int type,
+                                const char *choices[],
                                 unsigned int choice_cnt,
                                 unsigned int selected,
                                 int (*on_event)(gp_widget_event *self),

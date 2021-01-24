@@ -528,7 +528,7 @@ gp_widget *gp_widget_scroll_area_new(gp_size min_w, gp_size min_h, gp_widget *ch
 {
 	gp_widget *ret;
 
-	ret = gp_widget_new(GP_WIDGET_SCROLL_AREA, sizeof(struct gp_widget_scroll_area));
+	ret = gp_widget_new(GP_WIDGET_SCROLL_AREA, GP_WIDGET_CLASS_NONE, sizeof(struct gp_widget_scroll_area));
 	if (!ret)
 		return NULL;
 

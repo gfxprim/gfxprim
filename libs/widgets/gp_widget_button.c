@@ -451,7 +451,7 @@ gp_widget *gp_widget_button_new(const char *label,
 	if (label)
 		size += strlen(label) + 1;
 
-	ret = gp_widget_new(GP_WIDGET_BUTTON, size);
+	ret = gp_widget_new(GP_WIDGET_BUTTON, GP_WIDGET_CLASS_NONE, size);
 	if (!ret)
 		return NULL;
 
