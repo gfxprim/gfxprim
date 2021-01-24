@@ -1,0 +1,65 @@
+Choice widget
+-------------
+
+A choice widget is a class of widgets that allows to select exactly one choice
+from a given set.
+
+The widget class allows to get values and modify widget state by an unified
+API.
+
+.Choice class API functions
+[source,c]
+-------------------------------------------------------------------------------
+void gp_widget_choice_set(gp_widget *self, unsigned int sel);
+
+unsigned int gp_widget_choice_get(gp_widget *self);
+-------------------------------------------------------------------------------
+
+Spinbutton
+~~~~~~~~~~
+
+[source,c]
+-------------------------------------------------------------------------------
+gp_widget *gp_widget_spinbutton_new(const char *choices[],
+                                    unsigned int choice_cnt,
+                                    unsigned int selected,
+                                    int (*on_event)(gp_widget_event *self),
+                                    void *priv)
+-------------------------------------------------------------------------------
+
+Spinbutton is parsed from JSON with when type equals to "spinbutton".
+
+.Spinbutton
+image:spinbutton.png[Spinbutton]
+
+Radiobutton
+~~~~~~~~~~~
+
+[source,c]
+-------------------------------------------------------------------------------
+gp_widget *gp_widget_radiobutton_new(const char *choices[],
+                                     unsigned int choice_cnt,
+                                     unsigned int selected,
+                                     int (*on_event)(gp_widget_event *self),
+                                     void *priv)
+-------------------------------------------------------------------------------
+
+Radiobutton is parsed from JSON with when type equals to "radiobutton".
+
+.Radiobutton
+image:radiobutton.png[Radiobutton]
+
+.Choice class JSON attributes
+[cols=",,,3",options="header"]
+|===================================================
+|  Attribute  |     Type     | Default | Description
+|  +choices+  | string array |         | List of choices
+|  +selected+ |     uint     |    0    | Currently selected choice
+|===================================================
+
+.Choice class widget events
+[cols=",3",options="header"]
+|===================================================
+| Widget event value | Description
+|         0          | Emitted on selection change.
+|===================================================
