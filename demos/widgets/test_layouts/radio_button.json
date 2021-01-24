@@ -1,0 +1,13 @@
+{
+ "version": 1,
+ "widgets": [
+   {
+    "type": "radiobutton",
+    "choices": [
+     "Choice A",
+     "Choice B",
+     "Choice C"
+    ]
+  }
+ ]
+}

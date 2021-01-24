@@ -34,7 +34,7 @@
     },
     {
       "type": "radiobutton",
-      "buttons": [
+      "choices": [
         "First",
 	"Second",
 	"Third"

@@ -1,0 +1,14 @@
+{
+ "version": 1,
+ "widgets": [
+  {
+   "type": "spinbutton",
+   "choices": [
+    "Choice A",
+    "Choice B",
+    "Choice C",
+    "Short"
+   ]
+  }
+ ]
+}

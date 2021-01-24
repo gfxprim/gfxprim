@@ -161,52 +161,10 @@ static int event(gp_widget *self, const gp_widget_render_ctx *ctx, gp_event *ev)
 
 static gp_widget *json_to_radiobutton(json_object *json, void **uids)
 {
-	json_object *labels = NULL;
-	int sel_label = 0;
-
-	(void)uids;
-
-	json_object_object_foreach(json, key, val) {
-		if (!strcmp(key, "buttons"))
-			labels = val;
-		else if (!strcmp(key, "selected"))
-			sel_label = json_object_get_int(val);
-		else
-			GP_WARN("Invalid radiobutton key '%s'", key);
-	}
-
-	if (!labels) {
-		GP_WARN("Missing labels array!");
-		return NULL;
-	}
-
-	if (!json_object_is_type(labels, json_type_array)) {
-		GP_WARN("Buttons has to be array of strings!");
-		return NULL;
-	}
-
-	unsigned int i, label_cnt = json_object_array_length(labels);
-	const char *labels_arr[label_cnt];
-
-	if (sel_label < 0 || (unsigned int)sel_label >= label_cnt) {
-		GP_WARN("Invalid selected button %i", sel_label);
-		sel_label = 0;
-	}
-
-	for (i = 0; i < label_cnt; i++) {
-		json_object *label = json_object_array_get_idx(labels, i);
-		labels_arr[i] = json_object_get_string(label);
-
-		if (!labels_arr[i])
-			GP_WARN("Button %i must be string!", i);
-	}
-
-	return gp_widget_choice_new(GP_WIDGET_RADIOBUTTON,
-	                            labels_arr, label_cnt, sel_label,
-	                            NULL, NULL);
+	return gp_widget_choice_from_json(GP_WIDGET_RADIOBUTTON, json, uids);
 }
 
-struct gp_widget_ops gp_widget_radio_button_ops = {
+struct gp_widget_ops gp_widget_radiobutton_ops = {
 	.min_w = min_w,
 	.min_h = min_h,
 	.render = render,

@@ -28,6 +28,7 @@
 /* Choice widget and subclasses */
 #include <widgets/gp_widget_choice.h>
 #include <widgets/gp_widget_radiobutton.h>
+#include <widgets/gp_widget_spinbutton.h>
 
 #include <widgets/gp_widget_table.h>
 #include <widgets/gp_widget_pbar.h>

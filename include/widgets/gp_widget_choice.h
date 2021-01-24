@@ -9,6 +9,8 @@
 #ifndef GP_WIDGET_CHOICE_H__
 #define GP_WIDGET_CHOICE_H__
 
+#include <json-c/json.h>
+
 struct gp_widget_choice {
 	unsigned int sel;
 	unsigned int max;
@@ -20,7 +22,7 @@ struct gp_widget_choice {
 /**
  * @brief Allocates and initializes new choice widget.
  *
- * @type A widget type.
+ * @widget_type A widget type.
  * @choices An array of strings describing available choices.
  * @choice_cnt Size of the choices array.
  * @selected Initially selected choice.
@@ -29,7 +31,7 @@ struct gp_widget_choice {
  *
  * @return A choice widget.
  */
-gp_widget *gp_widget_choice_new(unsigned int type,
+gp_widget *gp_widget_choice_new(unsigned int widget_type,
                                 const char *choices[],
                                 unsigned int choice_cnt,
                                 unsigned int selected,
@@ -52,5 +54,17 @@ void gp_widget_choice_set(gp_widget *self, unsigned int sel);
  * @return Currently selected choice widget.
  */
 unsigned int gp_widget_choice_get(gp_widget *self);
+
+/**
+ * @brief Parses JSON into a choice widget.
+ *
+ * @widget_type A widget type.
+ * @json A JSON widget.
+ * @uids A pointer to a hash table.
+ *
+ * @return A choice widget.
+ */
+gp_widget *gp_widget_choice_from_json(unsigned int widget_type,
+                                      json_object *json, void **uids);
 
 #endif /* GP_WIDGET_CHOICE_H__ */
