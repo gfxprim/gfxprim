@@ -63,6 +63,17 @@ void *gp_widget_callback_addr(const char *fn_name);
  *
  * @return A widget pointer or NULL if not found.
  */
-gp_widget *gp_widget_by_uid(void *uids, const char *id, enum gp_widget_type type);
+gp_widget *gp_widget_by_uid(void *uids, const char *uid, enum gp_widget_type type);
+
+/**
+ * @brief Gets a widget pointer given UIDs hash, an id and widget_class.
+ *
+ * @uids And UIDs hash filled in the JSON parser.
+ * @id A widget ID.
+ * @widget_class Widget class.
+ *
+ * @return A widget pointer or NULL if not found.
+ */
+gp_widget *gp_widget_by_cuid(void *uids, const char *uid, enum gp_widget_class widget_class);
 
 #endif /* GP_WIDGET_JSON_H__ */

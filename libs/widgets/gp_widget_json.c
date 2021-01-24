@@ -412,8 +412,26 @@ gp_widget *gp_widget_by_uid(void *uids, const char *uid, enum gp_widget_type typ
 		return NULL;
 
 	if (ret->type != type) {
-		GP_WARN("Unexpected widget (uid='%s') type %i expected %i",
-		        uid, ret->type, type);
+		GP_WARN("Unexpected widget (uid='%s') type %s expected %s",
+		        uid, gp_widget_type_name(ret->type),
+		        gp_widget_type_name(type));
+		return NULL;
+	}
+
+	return ret;
+}
+
+gp_widget *gp_widget_by_cuid(void *uids, const char *uid, enum gp_widget_class widget_class)
+{
+	gp_widget *ret = gp_htable_get(uids, uid);
+
+	if (!ret)
+		return NULL;
+
+	if (ret->widget_class != widget_class) {
+		GP_WARN("Unexpected widget (uid='%s') class %s expected %s",
+		        uid, gp_widget_class_name(ret->widget_class),
+		        gp_widget_class_name(widget_class));
 		return NULL;
 	}
 
