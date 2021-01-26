@@ -568,6 +568,8 @@ static gp_widget_table_header *parse_header(json_object *json, int *cols)
 				min_size = json_object_get_int(val);
 			else if (!strcmp(key, "fill"))
 				fill = json_object_get_int(val);
+			else if (!strcmp(key, "sortable"))
+				header[i].sortable = json_object_get_boolean(val);
 			else
 				GP_WARN("Invalid table header key %s", key);
 		}
