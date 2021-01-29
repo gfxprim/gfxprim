@@ -175,12 +175,13 @@ static unsigned int header_render(gp_widget *self, gp_coord x, gp_coord y,
 	return header_h(self, ctx);
 }
 
-static void align_text(gp_pixmap *buf, gp_widget_table *tbl,
+static void align_text(gp_pixmap *buf, gp_text_style *font,
+                       gp_widget_table *tbl,
                        const gp_widget_render_ctx *ctx,
 		       unsigned int x, unsigned int y,
 		       unsigned int col, gp_pixel bg, const char *str)
 {
-	gp_text_fit(buf, ctx->font, x, y, tbl->cols_w[col],
+	gp_text_fit(buf, font, x, y, tbl->cols_w[col],
 	           GP_ALIGN_RIGHT|GP_VALIGN_BELOW,
 	           ctx->text_color, bg, str);
 }
@@ -266,9 +267,10 @@ static void render(gp_widget *self, const gp_offset *offset,
 
 		if (cur_row < tbl->last_rows) {
 			for (j = 0; j < tbl->cols; j++) {
-				const char *str = tbl->get(self, j);
+				gp_widget_table_cell *cell = tbl->get(self, j);
+				gp_text_style *font = cell->bold ? ctx->font_bold : ctx->font;
 
-				align_text(ctx->buf, tbl, ctx, cx, cy, j, bg_col, str);
+				align_text(ctx->buf, font, tbl, ctx, cx, cy, j, bg_col, cell->text);
 
 				cx += tbl->cols_w[j] + ctx->padd;
 
@@ -673,8 +675,8 @@ gp_widget *gp_widget_table_new(unsigned int cols, unsigned int min_rows,
                                const gp_widget_table_header *header,
                                int (*row)(struct gp_widget *self,
                                           int op, unsigned int pos),
-                               const char *(get)(struct gp_widget *self,
-                                                 unsigned int col))
+                               gp_widget_table_cell *(get)(struct gp_widget *self,
+                                                           unsigned int col))
 {
 	gp_widget *ret;
 	size_t size = sizeof(struct gp_widget_table);

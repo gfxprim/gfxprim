@@ -23,6 +23,11 @@ typedef struct gp_widget_table_header {
 	unsigned int col_fill;
 } gp_widget_table_header;
 
+typedef struct gp_widget_table_cell {
+	const char *text;
+	int bold:1;
+} gp_widget_table_cell;
+
 typedef struct gp_widget_table {
 	unsigned int cols;
 	unsigned int min_rows;
@@ -49,7 +54,7 @@ typedef struct gp_widget_table {
 		unsigned long row_idx;
 	};
 	int (*row)(struct gp_widget *self, int op, unsigned int pos);
-	const char *(*get)(struct gp_widget *self, unsigned int col);
+	gp_widget_table_cell *(*get)(struct gp_widget *self, unsigned int col);
 
 	void (*sort)(struct gp_widget *self, unsigned int col, int desc);
 
@@ -62,8 +67,8 @@ gp_widget *gp_widget_table_new(unsigned int cols, unsigned int min_rows,
                                const gp_widget_table_header *headers,
                                int (*row)(struct gp_widget *self,
                                           int op, unsigned int pos),
-                               const char *(get)(struct gp_widget *self,
-                                                 unsigned int col));
+                               gp_widget_table_cell *(get)(struct gp_widget *self,
+                                                           unsigned int col));
 
 /*
  * Called when table content has changed and table needs to be rerendered.

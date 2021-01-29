@@ -180,26 +180,33 @@ static int set_row(gp_widget *self, int op, unsigned int pos)
 	return 0;
 }
 
-static const char *get_elem(gp_widget *self, unsigned int col)
+static gp_widget_table_cell *get_elem(gp_widget *self, unsigned int col)
 {
 	static char buf[100];
+	static gp_widget_table_cell cell = {
+		.text = "",
+	};
+
 	gp_dir_cache *cache = self->tbl->priv;
 
 	gp_dir_entry *ent = gp_dir_cache_get(cache, self->tbl->row_idx);
 
 	if (!ent)
-		return "";
+		return &cell;
 
 	switch (col) {
 	case 0:
-		return ent->name;
+		cell.text = ent->name;
+	break;
 	case 1:
-		return gp_str_file_size(buf, sizeof(buf), ent->size);
+		cell.text = gp_str_file_size(buf, sizeof(buf), ent->size);
+	break;
 	case 2:
-		return gp_str_time_diff(buf, sizeof(buf), ent->mtime, time(NULL));
+		cell.text = gp_str_time_diff(buf, sizeof(buf), ent->mtime, time(NULL));
+	break;
 	}
 
-	return "";
+	return &cell;
 }
 
 static void exit_dialog(struct file_dialog *dialog, int retval)
