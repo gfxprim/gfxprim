@@ -72,7 +72,7 @@ static void render(gp_widget *self, const gp_offset *offset,
 
 	unsigned int asc = gp_text_ascent(ctx->font);
 	unsigned int asc_half = asc/2;
-	unsigned int sym_r = asc_half - asc_half/4;
+	unsigned int sym_r = GP_EVEN_UP(9 * asc_half/10);
 	unsigned int cx = x + self->w/2;
 	unsigned int cy = y + self->h/2;
 	unsigned int i;
@@ -182,36 +182,40 @@ static void render(gp_widget *self, const gp_offset *offset,
 		             cx-sym_r, cy+sym_r, ctx->text_color);
 	break;
 	case GP_BUTTON_PAUSE:
-		gp_fill_rect(ctx->buf, cx - asc/4 - asc/6,
-		             cy - sym_r, cx - asc/6, cy + sym_r,
+		i = sym_r;
+
+		gp_fill_rect(ctx->buf, cx - i,
+		             cy - i, cx - asc/5, cy + i,
 		             ctx->text_color);
-		gp_fill_rect(ctx->buf, cx + asc/4 + asc/6,
-		             cy - sym_r, cx + asc/6, cy + sym_r,
+		gp_fill_rect(ctx->buf, cx + i,
+		             cy - i, cx + asc/5, cy + i,
 		             ctx->text_color);
 	break;
 	case GP_BUTTON_STOP:
+		i = sym_r - asc_half/8;
+
 		gp_fill_rect(ctx->buf,
-		             cx - sym_r, cy - sym_r,
-		             cx + sym_r, cy + sym_r,
+		             cx - i, cy - i,
+		             cx + i, cy + i,
 		             ctx->text_color);
 	break;
 	case GP_BUTTON_REC:
-		gp_fill_circle(ctx->buf, cx, cy, sym_r, ctx->alert_color);
+		gp_fill_circle(ctx->buf, cx, cy, sym_r - asc_half/8, ctx->alert_color);
 	break;
 	case GP_BUTTON_FFORWARD:
 		gp_symbol(ctx->buf, cx-(sym_r - sym_r/2)+asc_half/4, cy,
-		          sym_r - sym_r/2, sym_r,
+		          sym_r/2, sym_r,
 		          GP_TRIANGLE_RIGHT, ctx->text_color);
 		gp_symbol(ctx->buf, cx+(sym_r - sym_r/2)+asc_half/4, cy,
-		          sym_r - sym_r/2, sym_r,
+		          sym_r/2, sym_r,
 		          GP_TRIANGLE_RIGHT, ctx->text_color);
 	break;
 	case GP_BUTTON_FBACKWARD:
 		gp_symbol(ctx->buf, cx-(sym_r - sym_r/2)-asc_half/4, cy,
-		          sym_r - sym_r/2, sym_r,
+		          sym_r/2, sym_r,
 		          GP_TRIANGLE_LEFT, ctx->text_color);
 		gp_symbol(ctx->buf, cx+(sym_r - sym_r/2)-asc_half/4, cy,
-		          sym_r - sym_r/2, sym_r,
+		          sym_r/2, sym_r,
 		          GP_TRIANGLE_LEFT, ctx->text_color);
 	break;
 	case GP_BUTTON_UP:
