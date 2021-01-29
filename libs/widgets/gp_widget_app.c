@@ -62,3 +62,24 @@ ret:
 	gp_vec_free(pathname);
 	return layout;
 }
+
+static struct gp_app app = {
+	.ev_mask = GP_APP_DEFAULT_EVENT_MASK,
+};
+
+const struct gp_app *gp_app = &app;
+
+void gp_app_event_mask(enum gp_widget_event_type ev_type)
+{
+	app.ev_mask &= ~ev_type;
+}
+
+void gp_app_event_unmask(enum gp_widget_event_type ev_type)
+{
+	app.ev_mask |= ev_type;
+}
+
+void gp_app_event_handler_set(int (*on_event)(gp_widget_event *ev))
+{
+	app.on_event = on_event;
+}

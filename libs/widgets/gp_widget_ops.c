@@ -13,6 +13,7 @@
 #include <gp_widget_event.h>
 #include <gp_widget_ops.h>
 #include <gp_widget_render.h>
+#include <gp_widget_app.h>
 
 extern struct gp_widget_ops gp_widget_grid_ops;
 extern struct gp_widget_ops gp_widget_tabs_ops;
@@ -522,10 +523,16 @@ static int handle_focus(gp_widget *self, const gp_widget_render_ctx *ctx, gp_eve
 int gp_widget_input_event(gp_widget *self, const gp_widget_render_ctx *ctx,
                           gp_event *ev)
 {
+	int handled;
+
 	if (handle_focus(self, ctx, ev))
 		return 1;
 
-	return gp_widget_ops_event(self, ctx, ev);
+	handled = gp_widget_ops_event(self, ctx, ev);
+	if (handled)
+		return handled;
+
+	return gp_app_send_event(GP_WIDGET_EVENT_INPUT, ev);
 }
 
 int gp_widget_ops_event(gp_widget *self, const gp_widget_render_ctx *ctx, gp_event *ev)

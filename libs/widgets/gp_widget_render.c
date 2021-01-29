@@ -18,6 +18,7 @@
 #include <gp_widget_ops.h>
 #include <gp_key_repeat_timer.h>
 #include <widgets/gp_widget_dialog.h>
+#include <widgets/gp_widget_app.h>
 
 static struct gp_text_style font = {
 	.pixel_xmul = 1,
@@ -438,10 +439,8 @@ int gp_widgets_process_events(gp_widget *layout)
 	while (gp_backend_poll_event(backend, &ev)) {
 		//gp_event_dump(&ev);
 		//fflush(stdout);
-		if (gp_widgets_event(&ev, layout)) {
-			gp_backend_exit(backend);
-			exit(0);
-		}
+		if (gp_widgets_event(&ev, layout))
+			gp_widgets_exit(0);
 	}
 
 	return 0;
@@ -596,6 +595,8 @@ void gp_widgets_main_loop(gp_widget *layout, const char *label,
 
 void gp_widgets_exit(int exit_value)
 {
+	gp_app_send_event(GP_WIDGET_EVENT_FREE);
+
 	gp_widget_free(win_layout);
 	gp_backend_exit(backend);
 	gp_font_face_free(render_font);
