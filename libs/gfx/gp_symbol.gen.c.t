@@ -18,6 +18,11 @@ static void triangle_up_{{ ps.suffix }}(gp_pixmap *pixmap,
 {
 	gp_coord y;
 
+	if (ry == 0) {
+		gp_vline_raw_{{ ps.suffix }}_clip(pixmap, xcenter - rx, xcenter + rx, ry, pixel);
+		return;
+	}
+
 	for (y = 0; y <= 2 * (gp_coord)ry; y++) {
 		gp_coord len = (y * rx) / (2  * ry);
 		gp_hline_raw_{{ ps.suffix }}(pixmap, xcenter + len, xcenter - len, ycenter + y - ry, pixel);
@@ -30,6 +35,11 @@ static void triangle_down_{{ ps.suffix }}(gp_pixmap *pixmap,
                                           gp_pixel pixel)
 {
 	gp_coord y;
+
+	if (ry == 0) {
+		gp_vline_raw_{{ ps.suffix }}_clip(pixmap, xcenter - rx, xcenter + rx, ry, pixel);
+		return;
+	}
 
 	for (y = 0; y <= 2 * (gp_coord)ry; y++) {
 		gp_coord len = (y * rx) / (2  * ry);
@@ -44,6 +54,11 @@ static void triangle_left_{{ ps.suffix }}(gp_pixmap *pixmap,
 {
 	gp_coord x;
 
+	if (rx == 0) {
+		gp_hline_raw_{{ ps.suffix }}(pixmap, xcenter, ycenter - ry, ycenter + ry, pixel);
+		return;
+	}
+
 	for (x = 0; x <= 2 * (gp_coord)rx; x++) {
 		gp_coord len = (x * ry) / (2 * rx);
 		gp_vline_raw_{{ ps.suffix }}_clip(pixmap, xcenter + x - rx, ycenter - len, ycenter + len, pixel);
@@ -56,6 +71,11 @@ static void triangle_right_{{ ps.suffix }}(gp_pixmap *pixmap,
                                            gp_pixel pixel)
 {
 	gp_coord x;
+
+	if (rx == 0) {
+		gp_hline_raw_{{ ps.suffix }}(pixmap, xcenter, ycenter - ry, ycenter + ry, pixel);
+		return;
+	}
 
 	for (x = 0; x <= 2 * (gp_coord)rx; x++) {
 		gp_coord len = (x * ry) / (2 * rx);
