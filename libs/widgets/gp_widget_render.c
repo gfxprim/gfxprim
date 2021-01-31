@@ -48,13 +48,19 @@ static struct gp_text_style font_big_bold = {
 	.font = &gp_default_font,
 };
 
+static struct gp_text_style font_mono = {
+	.pixel_xmul = 1,
+	.pixel_ymul = 1,
+	.font = &gp_default_font,
+};
+
 static struct gp_widget_render_ctx ctx = {
 	.text_color = 0,
 	.font = &font,
 	.font_bold = &font_bold,
 	.font_big = &font_big,
 	.font_big_bold = &font_big_bold,
-	.font_mono = &font,
+	.font_mono = &font_mono,
 	.padd = 4,
 	.dclick_ms = 500,
 };
@@ -117,6 +123,7 @@ static void init_fonts(void)
 			font_bold.font = gp_font_haxor_narrow_bold_15;
 			font_big.font = gp_font_haxor_narrow_15;
 			font_big_bold.font = gp_font_haxor_narrow_bold_15;
+			font_mono.font = gp_font_haxor_narrow_15;
 			set_big_font(2);
 			return;
 		}
@@ -126,6 +133,7 @@ static void init_fonts(void)
 			font_bold.font = gp_font_haxor_narrow_bold_16;
 			font_big.font = gp_font_haxor_narrow_16;
 			font_big_bold.font = gp_font_haxor_narrow_bold_16;
+			font_mono.font = gp_font_haxor_narrow_16;
 			set_big_font(2);
 			return;
 		}
@@ -135,6 +143,7 @@ static void init_fonts(void)
 			font_bold.font = gp_font_haxor_narrow_bold_17;
 			font_big.font = gp_font_haxor_narrow_17;
 			font_big_bold.font = gp_font_haxor_narrow_bold_17;
+			font_mono.font = gp_font_haxor_narrow_17;
 			set_big_font(2);
 			return;
 		}
@@ -153,7 +162,7 @@ static void init_fonts(void)
 	gp_font_face *ffont_bold = gp_font_face_fc_load("DroidSans:Bold", 0, font_size);
 	gp_font_face *ffont_big = gp_font_face_fc_load("DroidSans", 0, 1.8 * font_size);
 	gp_font_face *ffont_big_bold = gp_font_face_fc_load("DroidSans:Bold", 0, 1.8 * font_size);
-	gp_font_face *ffont_mono = gp_font_face_fc_load("DroidSansMono", 0, font_size);
+	gp_font_face *ffont_mono = gp_font_face_fc_load("Monospace", 0, font_size);
 
 	if (!ffont || !ffont_bold || !ffont_big || !ffont_big_bold || !ffont_mono) {
 		gp_font_face_free(ffont);
