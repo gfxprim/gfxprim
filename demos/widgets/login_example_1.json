@@ -26,13 +26,13 @@
     },
     {
       "type": "tbox",
-      "size": 10,
+      "len": 18,
       "uid": "uname",
       "on_event": "login_callback"
     },
     {
       "type": "tbox",
-      "size": 10,
+      "len": 18,
       "hidden": true,
       "uid": "pass",
       "on_event": "login_callback"

@@ -10,8 +10,8 @@
        "text": "Label:"
      },
      {
-      "type": "textbox",
-      "size": 10
+      "type": "tbox",
+      "len": 10
      }
    ]
   }

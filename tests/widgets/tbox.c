@@ -13,7 +13,7 @@ static int tbox_new(void)
 	gp_widget *tbox;
 	size_t cur_pos;
 
-	tbox = gp_widget_tbox_new("", 10, NULL, NULL, NULL, 0);
+	tbox = gp_widget_tbox_new("", 0, 10, 0, NULL, 0, NULL, NULL);
 	if (!tbox) {
 		tst_msg("Allocation failure");
 		return TST_FAILED;
@@ -48,7 +48,7 @@ static int tbox_event_action(void)
 	gp_widget *tbox;
 	int flag = 0;
 
-	tbox = gp_widget_tbox_new("", 10, NULL, ev_handler, &flag, 0);
+	tbox = gp_widget_tbox_new("", 0, 10, 0, NULL, 0, ev_handler, &flag);
 	if (!tbox) {
 		tst_msg("Allocation failure");
 		return TST_FAILED;
@@ -67,7 +67,7 @@ static int tbox_typing(void)
 	gp_widget *tbox;
 	const char *str;
 
-	tbox = gp_widget_tbox_new("", 10, NULL, NULL, NULL, 0);
+	tbox = gp_widget_tbox_new("", 0, 10, 0, NULL, 0, NULL, NULL);
 	if (!tbox) {
 		tst_msg("Allocation failure");
 		return TST_FAILED;
@@ -75,7 +75,7 @@ static int tbox_typing(void)
 
 	type_string(tbox, "hello world");
 
-	str = gp_widget_tbox_str(tbox);
+	str = gp_widget_tbox_text(tbox);
 	if (strcmp(str, "hello world")) {
 		tst_msg("Got wrong string: '%s'", str);
 		return TST_FAILED;
@@ -89,7 +89,7 @@ static int tbox_typing(void)
 	send_keypress(tbox, GP_KEY_LEFT, 0);
 	send_keypress(tbox, GP_KEY_BACKSPACE, 0);
 
-	str = gp_widget_tbox_str(tbox);
+	str = gp_widget_tbox_text(tbox);
 	if (strcmp(str, "hell world")) {
 		tst_msg("Got wrong string: '%s'", str);
 		return TST_FAILED;
@@ -97,7 +97,7 @@ static int tbox_typing(void)
 
 	type_string(tbox, "ish");
 
-	str = gp_widget_tbox_str(tbox);
+	str = gp_widget_tbox_text(tbox);
 	if (strcmp(str, "hellish world")) {
 		tst_msg("Got wrong string: '%s'", str);
 		return TST_FAILED;
@@ -105,7 +105,7 @@ static int tbox_typing(void)
 
 	gp_widget_tbox_clear(tbox);
 
-	str = gp_widget_tbox_str(tbox);
+	str = gp_widget_tbox_text(tbox);
 	if (strcmp(str, "")) {
 		tst_msg("Got wrong string: '%s'", str);
 		return TST_FAILED;
@@ -122,7 +122,7 @@ static int tbox_cursor(void)
 	const char *str;
 	size_t cur_pos;
 
-	tbox = gp_widget_tbox_new("world", 10, NULL, NULL, NULL, 0);
+	tbox = gp_widget_tbox_new("world", 0, 10, 0, NULL, 0, NULL, NULL);
 	if (!tbox) {
 		tst_msg("Allocation failure");
 		return TST_FAILED;
@@ -150,7 +150,7 @@ static int tbox_cursor(void)
 		return TST_FAILED;
 	}
 
-	str = gp_widget_tbox_str(tbox);
+	str = gp_widget_tbox_text(tbox);
 	if (strcmp(str, "hello world")) {
 		tst_msg("Got wrong string: '%s'", str);
 		return TST_FAILED;
@@ -167,7 +167,7 @@ static int tbox_ins(void)
 	const char *str;
 	size_t cur_pos;
 
-	tbox = gp_widget_tbox_new("world", 10, NULL, NULL, NULL, 0);
+	tbox = gp_widget_tbox_new("world", 0, 10, 0, NULL, 0, NULL, NULL);
 	if (!tbox) {
 		tst_msg("Allocation failure");
 		return TST_FAILED;
@@ -180,7 +180,7 @@ static int tbox_ins(void)
 		return TST_FAILED;
 	}
 
-	str = gp_widget_tbox_str(tbox);
+	str = gp_widget_tbox_text(tbox);
 	if (strcmp(str, "hello world")) {
 		tst_msg("Got wrong string: '%s'", str);
 		return TST_FAILED;
@@ -193,7 +193,7 @@ static int tbox_ins(void)
 		return TST_FAILED;
 	}
 
-	str = gp_widget_tbox_str(tbox);
+	str = gp_widget_tbox_text(tbox);
 	if (strcmp(str, "hello worlds")) {
 		tst_msg("Got wrong string: '%s'", str);
 		return TST_FAILED;
@@ -219,7 +219,7 @@ static int tbox_del(void)
 	const char *str;
 	size_t cur_pos;
 
-	tbox = gp_widget_tbox_new("hello world", 10, NULL, NULL, NULL, 0);
+	tbox = gp_widget_tbox_new("hello world", 0, 10, 0, NULL, 0, NULL, NULL);
 	if (!tbox) {
 		tst_msg("Allocation failure");
 		return TST_FAILED;
@@ -232,7 +232,7 @@ static int tbox_del(void)
 		return TST_FAILED;
 	}
 
-	str = gp_widget_tbox_str(tbox);
+	str = gp_widget_tbox_text(tbox);
 	if (strcmp(str, "world")) {
 		tst_msg("Got wrong string: '%s'", str);
 		return TST_FAILED;
@@ -247,7 +247,7 @@ static int tbox_del(void)
 		return TST_FAILED;
 	}
 
-	str = gp_widget_tbox_str(tbox);
+	str = gp_widget_tbox_text(tbox);
 	if (strcmp(str, "")) {
 		tst_msg("Got wrong string: '%s'", str);
 		return TST_FAILED;
@@ -264,7 +264,7 @@ static int tbox_printf(void)
 	const char *str;
 	size_t cur_pos;
 
-	tbox = gp_widget_tbox_new("hello world", 10, NULL, NULL, NULL, 0);
+	tbox = gp_widget_tbox_new("hello world", 0, 10, 0, NULL, 0, NULL, NULL);
 	if (!tbox) {
 		tst_msg("Allocation failure");
 		return TST_FAILED;
@@ -278,7 +278,7 @@ static int tbox_printf(void)
 		return TST_FAILED;
 	}
 
-	str = gp_widget_tbox_str(tbox);
+	str = gp_widget_tbox_text(tbox);
 	if (strcmp(str, "666")) {
 		tst_msg("Got wrong string: '%s'", str);
 		return TST_FAILED;

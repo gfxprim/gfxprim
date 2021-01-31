@@ -18,11 +18,11 @@
     {
       "type": "tbox",
       "text": "Text Box",
-      "size": 10
+      "len": 18
     },
     {
       "type": "tbox",
-      "size": 10,
+      "len": 18,
       "hidden": true,
       "uid": "passwd"
     },

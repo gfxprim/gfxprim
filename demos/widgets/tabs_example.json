@@ -12,7 +12,7 @@
    "widgets": [
     {
      "type": "tbox",
-     "size": 10,
+     "len": 15,
      "on_event": "callback"
     },
     {

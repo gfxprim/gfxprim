@@ -1,0 +1,107 @@
+Tbox widget
+-----------
+
+Tbox is a single line text edit widget.
+
+.A tbox widget
+image:tbox.png[Tbox widget]
+
+Tbox attributes can be accessed as `widget->tbox`.
+
+.Tbox widget constructor
+[source,c]
+-------------------------------------------------------------------------------
+gp_widget *gp_widget_tbox_new(const char *text, gp_widget_tattr tattr,
+                              unsigned int len, unsigned int max_len,
+			      const char *filter, int flags,
+                              int (*on_event)(gp_widget_event *),
+                              void *priv);
+-------------------------------------------------------------------------------
+
+The `text` is the initial textbox text, could be NULL if textbox starts empty.
+
+The `tattr` is link:widgets_tattr.html[text attribute].
+
+The textbox width is computed so that it can hold `len` average font
+characters. `Len` could be set to zero if non-NULL `text` is passed, then
+`len` is computed from the `text` length.
+
+The `max_len` can be used to limit maximal number of characters that can be
+input to the textbox.
+
+The `filter` can be used to limit which characters can be entered into the
+textbox, there are also pre-defined filters such as `GP_TBOX_FILTER_HEX` that
+limits the characters only to numbers and characters from `a` to `f`. If
+`filter` is passed the widget width is computed so that it can fit `len`
+characters from the `filter` set.
+
+The `on_event` and `priv` are explained in the
+link:widgets_events.html[widgets event].
+
+The `flags` could be currently used to hide the textbox text with
+`GP_WIDGET_TBOX_HIDDEN` flag.
+
+.Text tbox functions
+[source,c]
+-------------------------------------------------------------------------------
+/*
+ * Returns textbox text.
+ */
+const char *gp_widget_tbox_text(gp_widget *self);
+
+
+/*
+ * Sets tbox text with a printf()-like syntax.
+ */
+int gp_widget_tbox_printf(gp_widget *self, const char *fmt, ...)
+                          __attribute__((format (printf, 2, 3)));
+
+/*
+ * Sets tbox text to an empty string.
+ */
+void gp_widget_tbox_clear(gp_widget *self);
+
+/*
+ * Insert text at offset relative to whence.
+ */
+void gp_widget_tbox_ins(gp_widget *self, ssize_t off,
+                        enum gp_seek_whence whence, const char *str);
+
+/*
+ * Deletes text at offset relative to whence.
+ */
+void gp_widget_tbox_del(gp_widget *self, ssize_t off,
+                        enum gp_seek_whence whence, size_t len);
+-------------------------------------------------------------------------------
+
+.Cursor tbox functions
+[source,c]
+-------------------------------------------------------------------------------
+size_t gp_widget_tbox_cursor_get(gp_widget *self);
+
+void gp_widget_tbox_cursor_set(gp_widget *self, ssize_t off,
+                               enum gp_seek_whence whence);
+-------------------------------------------------------------------------------
+
+.Tbox JSON attributes
+[cols=",,,3",options="header"]
+|===================================================
+| Attribute     |  Type  | Default | Description
+| text          | string |    ""   | Initial textbox text.
+| hidden        |  bool  |  False  | Hides the text, e.g. password.
+| len           |  uint  |         | Number of characters the texbox should fit.
+| max_len       |  uint  |         | Maximal number of characters.
+| tattr         |  tattr |  normal | link:widgets_tattr.html[Text attribute].
+|===================================================
+
+.Tbox widget events
+[cols=",3",options="header"]
+|===================================================
+|   Widget event value   | Description
+| GP_WIDGET_TBOX_TRIGGER | Emitted on pressing enter.
+| GP_WIDGET_TBOX_FILTER  | Emitted before text is modified.
+| GP_WIDGET_TBOX_EDIT    | Emitted after text is modified.
+|===================================================
+
+In the case of the `GP_WIDGET_TBOX_FILTER` non-zero output from the event
+handler will filter out the change, e.g. a character will will not be appended.

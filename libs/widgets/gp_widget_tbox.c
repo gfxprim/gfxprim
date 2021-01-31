@@ -20,20 +20,21 @@ static unsigned int min_w(gp_widget *self, const gp_widget_render_ctx *ctx)
 	unsigned int ret = 2 * ctx->padd;
 	const char *filter = self->tbox->filter;
 	size_t text_len = self->tbox->size;
+	const gp_text_style *font = gp_widget_tattr_font(self->tbox->tattr, ctx);
 
 	if (filter)
-		ret += gp_text_max_width_chars(ctx->font, filter, text_len);
+		ret += gp_text_max_width_chars(font, filter, text_len);
 	else
-		ret += gp_text_max_width(ctx->font, text_len);
+		ret += gp_text_avg_width(font, text_len);
 
 	return ret;
 }
 
 static unsigned int min_h(gp_widget *self, const gp_widget_render_ctx *ctx)
 {
-	(void)self;
+	const gp_text_style *font = gp_widget_tattr_font(self->tbox->tattr, ctx);
 
-	return 2 * ctx->padd + gp_text_ascent(ctx->font);
+	return 2 * ctx->padd + gp_text_ascent(font);
 }
 
 static const char *hidden_str(const char *buf)
@@ -50,12 +51,12 @@ static const char *hidden_str(const char *buf)
 static void render(gp_widget *self, const gp_offset *offset,
                    const gp_widget_render_ctx *ctx, int flags)
 {
+	const gp_text_style *font = gp_widget_tattr_font(self->tbox->tattr, ctx);
 	unsigned int x = self->x + offset->x;
 	unsigned int y = self->y + offset->y;
 	unsigned int w = self->w;
 	unsigned int h = self->h;
 	const char *str;
-
 	(void)flags;
 
 	gp_widget_ops_blit(ctx, x, y, w, h);
@@ -77,7 +78,7 @@ static void render(gp_widget *self, const gp_offset *offset,
 	size_t left = GP_MIN(self->tbox->off_left, self->tbox->cur_pos);
 	size_t right = gp_vec_strlen(self->tbox->buf);
 
-	while (gp_text_width_len(ctx->font, str+left, right - left) > self->w - 2 * ctx->padd) {
+	while (gp_text_width_len(font, str+left, right - left) > self->w - 2 * ctx->padd) {
 		if (right > self->tbox->cur_pos)
 			right--;
 		else
@@ -86,7 +87,7 @@ static void render(gp_widget *self, const gp_offset *offset,
 
 	self->tbox->off_left = left;
 
-	gp_coord cy = y + ctx->padd + (gp_text_ascent(ctx->font)+1)/2;
+	gp_coord cy = y + ctx->padd + (gp_text_ascent(font)+1)/2;
 	gp_coord s = ctx->padd/4;
 
 	if (left) {
@@ -105,14 +106,14 @@ static void render(gp_widget *self, const gp_offset *offset,
 
 	if (self->focused) {
 		unsigned int cursor_x = x + ctx->padd;
-		cursor_x += gp_text_width_len(ctx->font, str + left,
+		cursor_x += gp_text_width_len(font, str + left,
 		                              self->tbox->cur_pos - left);
 		gp_vline_xyh(ctx->buf, cursor_x, y + ctx->padd,
-			     gp_text_ascent(ctx->font), ctx->text_color);
+			     gp_text_ascent(font), ctx->text_color);
 	}
 
 	str += left;
-	gp_text_ext(ctx->buf, ctx->font,
+	gp_text_ext(ctx->buf, font,
 		    x + ctx->padd, y + ctx->padd,
 		    GP_ALIGN_RIGHT|GP_VALIGN_BELOW,
 		    ctx->text_color, ctx->bg_color, str, right - left);
@@ -302,49 +303,44 @@ static int event(gp_widget *self, const gp_widget_render_ctx *ctx, gp_event *ev)
 
 static gp_widget *json_to_tbox(json_object *json, void **uid)
 {
-	gp_widget *ret;
 	const char *text = NULL;
+	const char *strattr = NULL;
 	int flags = 0;
-	int size = 0;
-	int max_size = 0;
+	int len = 0;
+	int max_len = 0;
+	gp_widget_tattr attr;
 
 	(void)uid;
 
 	json_object_object_foreach(json, key, val) {
 		if (!strcmp(key, "text"))
 			text = json_object_get_string(val);
-		else if (!strcmp(key, "size"))
-			size = json_object_get_int(val);
+		else if (!strcmp(key, "len"))
+			len = json_object_get_int(val);
 		else if (!strcmp(key, "hidden"))
 			flags |= json_object_get_boolean(val) ? GP_WIDGET_TBOX_HIDDEN : 0;
-		else if (!strcmp(key, "max_size"))
-			max_size = json_object_get_int(val);
+		else if (!strcmp(key, "max_len"))
+			max_len = json_object_get_int(val);
+		else if (!strcmp(key, "tattr"))
+			strattr = json_object_get_string(val);
 		else
 			GP_WARN("Invalid tbox key '%s'", key);
 	}
 
-	if (size <= 0 && !text) {
+	if (len <= 0 && !text) {
 		GP_WARN("At least one of size or text has to be set!");
 		return NULL;
 	}
 
-	if (max_size < 0) {
+	if (max_len < 0) {
 		GP_WARN("max_size must be >= 0");
 		return NULL;
 	}
 
-	if (size <= 0)
-		size = strlen(text);
+	if (gp_widget_tattr_parse(strattr, &attr))
+		GP_WARN("Invalid text attribute '%s'", strattr);
 
-
-	if (text && max_size)
-		max_size = GP_MAX(max_size, (int)strlen(text));
-
-	ret = gp_widget_tbox_new(text, size, NULL, NULL, NULL, flags);
-
-	ret->tbox->max_size = max_size;
-
-	return ret;
+	return gp_widget_tbox_new(text, attr, len, max_len, NULL, flags, NULL, NULL);
 }
 
 static void free_(gp_widget *self)
@@ -362,19 +358,25 @@ struct gp_widget_ops gp_widget_tbox_ops = {
 	.id = "tbox",
 };
 
-struct gp_widget *gp_widget_tbox_new(const char *text, unsigned int size,
-                                        const char *filter,
-                                        int (*on_event)(gp_widget_event *),
-                                        void *priv, int flags)
+gp_widget *gp_widget_tbox_new(const char *text, gp_widget_tattr tattr,
+                              unsigned int len, unsigned int max_len,
+                              const char *filter, int flags,
+                              int (*on_event)(gp_widget_event *),
+                              void *priv)
 {
 	gp_widget *ret = gp_widget_new(GP_WIDGET_TBOX, GP_WIDGET_CLASS_NONE, sizeof(struct gp_widget_tbox));
 	if (!ret)
 		return NULL;
 
+	if (text && max_len)
+		max_len = GP_MAX(max_len, strlen(text));
+
 	ret->on_event = on_event;
 	ret->priv = priv;
-	ret->tbox->size = size ? size : strlen(text);
+	ret->tbox->max_size = max_len;
+	ret->tbox->size = len ? len : strlen(text);
 	ret->tbox->filter = filter;
+	ret->tbox->tattr = tattr;
 
 	if (flags & GP_WIDGET_TBOX_HIDDEN)
 		ret->tbox->hidden = 1;
@@ -438,7 +440,7 @@ void gp_widget_tbox_clear(gp_widget *self)
 	gp_widget_redraw(self);
 }
 
-const char *gp_widget_tbox_str(gp_widget *self)
+const char *gp_widget_tbox_text(gp_widget *self)
 {
 	GP_WIDGET_ASSERT(self, GP_WIDGET_TBOX, NULL);
 

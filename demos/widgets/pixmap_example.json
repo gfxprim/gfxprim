@@ -17,13 +17,15 @@
     {
      "type": "tbox",
      "text": "ffffff",
-     "max_size" : 6,
+     "max_len" : 6,
+     "tattr": "mono",
      "on_event": "set_fg_color"
     },
     {
      "type": "tbox",
      "text": "000000",
-     "max_size" : 6,
+     "max_len" : 6,
+     "tattr": "mono",
      "on_event": "set_bg_color"
     }
    ]

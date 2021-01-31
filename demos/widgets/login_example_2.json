@@ -23,13 +23,13 @@
      {
        "type": "tbox",
        "text": "admin",
-       "size": 10,
+       "len": 15,
        "uid": "uname",
        "on_event": "login_callback"
      },
      {
        "type": "tbox",
-       "size": 10,
+       "len": 15,
        "hidden": true,
        "uid": "pass",
        "on_event": "login_callback"

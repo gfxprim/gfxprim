@@ -81,12 +81,12 @@ int set_fg_color(gp_widget_event *ev)
 	switch (ev->type) {
 	case GP_WIDGET_EVENT_NEW:
 		ev->self->tbox->filter = GP_TBOX_FILTER_HEX;
-		set_color(&fg_rgb, gp_widget_tbox_str(ev->self), "fg_color");
+		set_color(&fg_rgb, gp_widget_tbox_text(ev->self), "fg_color");
 	break;
 	case GP_WIDGET_EVENT_WIDGET:
 		if (ev->sub_type != GP_WIDGET_TBOX_EDIT)
 			return 0;
-		set_color(&fg_rgb, gp_widget_tbox_str(ev->self), "fg_color");
+		set_color(&fg_rgb, gp_widget_tbox_text(ev->self), "fg_color");
 	break;
 	default:
 	break;
@@ -104,12 +104,12 @@ int set_bg_color(gp_widget_event *ev)
 	switch (ev->type) {
 	case GP_WIDGET_EVENT_NEW:
 		ev->self->tbox->filter = GP_TBOX_FILTER_HEX;
-		set_color(&bg_rgb, gp_widget_tbox_str(ev->self), "bg_color");
+		set_color(&bg_rgb, gp_widget_tbox_text(ev->self), "bg_color");
 	break;
 	case GP_WIDGET_EVENT_WIDGET:
 		switch (ev->sub_type) {
 		case GP_WIDGET_TBOX_EDIT:
-			set_color(&bg_rgb, gp_widget_tbox_str(ev->self), "bg_color");
+			set_color(&bg_rgb, gp_widget_tbox_text(ev->self), "bg_color");
 		break;
 		case GP_WIDGET_TBOX_TRIGGER:
 			pixmap = gp_widget_by_uid(uids, "pixmap", GP_WIDGET_PIXMAP);

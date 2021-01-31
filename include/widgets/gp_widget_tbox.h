@@ -27,6 +27,8 @@ struct gp_widget_tbox {
 	size_t size;
 	char *buf;
 
+	gp_widget_tattr tattr;
+
 	size_t off_left;
 
 	char payload[];
@@ -55,7 +57,8 @@ enum gp_widget_tbox_flags {
  * @brief Allocate and initialize a tbox widget.
  *
  * @text     Initial tbox text.
- * @length   Expected text length, used for widget computation.
+ * @len      Expected text length, used for widget size computation.
+ * @max_len  Maximal number of characters, can be used as a limit.
  * @filter   If set only characters from the string can be typed into the tbox.
  * @on_event Callback called on tbox event, e.g. key press.
  * @priv     User private pointer.
@@ -63,10 +66,11 @@ enum gp_widget_tbox_flags {
  *
  * @returns A tbox widget.
  */
-gp_widget *gp_widget_tbox_new(const char *text, unsigned int length,
-                                 const char *filter,
-                                 int (*on_event)(gp_widget_event *),
-                                 void *priv, int flags);
+gp_widget *gp_widget_tbox_new(const char *text, gp_widget_tattr tattr,
+                              unsigned int len, unsigned int max_len,
+			      const char *filter, int flags,
+                              int (*on_event)(gp_widget_event *),
+                              void *priv);
 
 /**
  * @brief A printf-like function to set a tbox value.
@@ -93,7 +97,7 @@ void gp_widget_tbox_clear(gp_widget *self);
  * @self A tbox widget.
  * @return Texbox widget string.
  */
-const char *gp_widget_tbox_str(gp_widget *self);
+const char *gp_widget_tbox_text(gp_widget *self);
 
 /**
  * @brief Returns current cursor postion.

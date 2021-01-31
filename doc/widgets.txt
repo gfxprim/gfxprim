@@ -149,3 +149,4 @@ Individual widgets documentation
 * link:widget_table.html[Table widget]
 * link:widget_choice.html[Radiobutton widget]
 * link:widget_choice.html[Spinbutton widget]
+* link:widget_tbox.html[Tbox widget]

@@ -15,7 +15,7 @@ static const char *dialog_file_open = "\
 	}, \
 	{ \
 	  \"type\": \"tbox\", \
-	  \"size\": 40, \
+	  \"len\": 75, \
 	  \"halign\": \"fill\", \
 	  \"uid\": \"path\" \
 	} \
@@ -27,7 +27,7 @@ static const char *dialog_file_open = "\
       \"cols\": 5, \
       \"border\": \"none\", \
       \"halign\": \"fill\", \
-      \"cfill\": \"5 * 0\", \
+      \"cfill\": \"0, 8, 0, 0, 0\", \
       \"cpadf\": \"0, 0, 1, 1, 0, 0\", \
       \"widgets\": [ \
         { \
@@ -36,8 +36,9 @@ static const char *dialog_file_open = "\
         }, \
         { \
 	  \"type\": \"tbox\", \
-	  \"size\": 20, \
-	  \"uid\": \"filter\" \
+	  \"len\": 20, \
+	  \"uid\": \"filter\", \
+	  \"halign\": \"fill\" \
         }, \
 	{ \
 	 \"type\": \"checkbox\", \
