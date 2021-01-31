@@ -1,0 +1,75 @@
+Widget JSON
+-----------
+
+Widget layout can be loaded from a JSON description. The application can
+resolve widgets by unique id and event handlers are resolved from the
+application binary at runtime.
+
+.Function to load an application JSON layout
+[source,c]
+-------------------------------------------------------------------------------
+gp_widget *gp_app_layout_load(const char *app_name, void **uids);
+-------------------------------------------------------------------------------
+
+Attempts to load an application layout based on `app_name`. The library first
+looks for a layout into a user directory and if there is no layout there
+system directory is used instead. This means that user can override system
+application layout by creating one in the user home directory.
+
+The `uids` is an pointer to store the hash table of mappings between widget
+unique ids and pointers to.
+
+The function returns NULL if no layout has been found or if it couldn't be
+parsed.
+
+.Function to load an JSON layout
+[source,c]
+-------------------------------------------------------------------------------
+gp_widget *gp_widget_from_json_str(const char *str, void **uids);
+
+gp_widget *gp_widget_layout_json(const char *fname, void **uids);
+-------------------------------------------------------------------------------
+
+JSON layout can be also loaded from a file or C string.
+
+.Example JSON layout
+[source,json]
+-------------------------------------------------------------------------------
+{
+ "version": 1,
+ "widgets": [
+  "type": "button",
+  "label": "Button",
+  "on_event": "button_event"
+ ]
+}
+-------------------------------------------------------------------------------
+
+A JSON layout always starts with a version, currently version is set to 1 and
+the number will be increased if there are incompatible changes done in the
+format in a subsequent releases.
+
+The widget `type` defaults to `grid` and `cols` and `rows` default to 1 for a
+grid widget so the outer widget is a grid with exactly one cell.
+
+The inner widget `type` is a link:widget_button.html[button] and as such it
+should have either `btype` or `label`, in this case we have a button with a
+`label`.
+
+The button `on_event` link:widgets_events.html[callback] is set to
+`button_event` which means that, at runtime, fuction with this name will be
+resolved by the dynamic linker and called when the button has been pressed.
+
+.Generic widget JSON attributes
+[cols=",,,3",options="header"]
+|==============================================================================
+|  Attribute |  Type  | Default  | Description
+|   +uid+    | string |          | Widget universal id. Must be unique.
+|   +type+   | string |   grid   | Widget type, e.g. button.
+|   +align+  |  enum  | +center+ | Sets both +haling+ and +valign+ {+center+, +fill+}
+|  +haling+  |  enum  | +center+ | Horizontal alignment {+center+, +left+, +right+, +fill+}
+|  +valing+  |  enum  | +center+ | Vertical alignment {+center+, +top+, +bottom+, +fill+}
+| +on_event+ | string |          | Widget event handler function name.
+|==============================================================================
+
+The `on_event` function is a widget link:widgets_events.html[event handler].

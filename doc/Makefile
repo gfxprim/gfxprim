@@ -14,7 +14,8 @@ SOURCES=index.html about.txt pixmap.txt loaders.txt filters.txt \
 SOURCES+=core_python.txt gfx_python.txt loaders_python.txt backends_python.txt
 
 SOURCES+=widget_grid.txt widget_table.txt widget_button.txt widget_label.txt widgets_tattr.txt\
-	 widget_checkbox.txt widget_choice.txt widgets_events.txt widget_tbox.txt
+	 widget_checkbox.txt widget_choice.txt widgets_events.txt widget_tbox.txt widgets_json.txt\
+	 widgets_alignment.txt
 
 EXAMPLE_SOURCES=$(wildcard example_*.txt)
 

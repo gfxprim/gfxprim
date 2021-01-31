@@ -1,0 +1,87 @@
+Alignment and fill
+------------------
+
+Another common functionality implemented in widget structure is alignment and
+fill. In order to explain these we have to introduce how widgets are structured
+in an layout.
+
+The widgets are organized in a two dimensional tree where each widget/layer is
+an rectangle in a plane. The rectanles on a given tree layer are distinct and
+the rectanle on an upper layer contains all rectangles on lower layer.
+
+The widget layout is computed in two steps, first minimal size is computed
+recursively from the top level widget down to the leaf widgets, then if the
+window is bigger than the minimal needed size, the leftover space is being
+distributed between the widgets.
+
+In order for a widget to take more space than the minimal size, i.e. be
+resizable the horizontal and/or vertical alignment has to be set to fill. Which
+especially means that layout can be resized only and only if the top level
+layout widget is resizable. Apart from fill each widget can be set to be
+positioned top/center/bottom vertically as well as left/center/right
+horizontally.
+
+Examples
+~~~~~~~~
+
+Grid horizontal and vertical alignment set to fill button to center.
+
+image:grid_fill_button_center.png[Grid set to fill button to center]
+
+.Widget layout in JSON
+[source,json]
+-------------------------------------------------------------------------------
+{
+ "align": "fill",
+ "widgets": [
+  {
+   "type": "button",
+   "label": "Button",
+   "on_event": "on_event",
+   "align": "center"
+  }
+ ]
+}
+-------------------------------------------------------------------------------
+
+Horizontal and vertical alignment set to fill for both.
+
+image:grid_fill_button_fill.png[Both grid and button set to fill]
+
+.Widget layout in JSON
+[source,json]
+-------------------------------------------------------------------------------
+{
+ "version": 1,
+ "align": "fill",
+ "widgets": [
+  {
+   "type": "button",
+   "label": "Button",
+   "on_event": "on_event",
+   "align": "fill"
+  }
+ ]
+}
+-------------------------------------------------------------------------------
+
+Horizontal and vertical alignment set to center for grid, button alignment does
+not matter in this case.
+
+image:grid_center_button.png[Grid set to center]
+
+.Widget layout in JSON
+[source,json]
+-------------------------------------------------------------------------------
+{
+ "version": 1,
+ "align": "center",
+ "widgets": [
+  {
+   "type": "button",
+   "label": "Button",
+   "on_event": "on_event",
+  }
+ ]
+}
+-------------------------------------------------------------------------------
