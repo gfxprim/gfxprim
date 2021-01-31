@@ -178,7 +178,8 @@ gp_font_face *gp_font_face_load(const char *path, uint32_t width, uint32_t heigh
 		}
 	}
 
-	font->avg_glyph_advance = (((avg_advance + 32)>>6) + 47) / 95;
+	avg_advance = (((avg_advance + 32)>>6) + 47) / 95;
+	font->avg_glyph_advance = (avg_advance + (avg_advance+5)/10);
 
 	FT_Done_Face(face);
 	FT_Done_FreeType(library);
