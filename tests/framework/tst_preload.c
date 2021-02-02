@@ -200,11 +200,10 @@ void tst_malloc_check_stop(void)
 	}
 }
 
-static void *(*real_malloc)(size_t) = NULL;
-
-void *malloc___(size_t size)
+void *malloc(size_t size)
 {
 	void *ptr;
+	static void *(*real_malloc)(size_t);
 
 	if (!real_malloc)
 		real_malloc = dlsym(RTLD_NEXT, "malloc");
@@ -234,30 +233,47 @@ void *malloc___(size_t size)
 	return ptr;
 }
 
-void *calloc___(size_t nmemb, size_t size)
+static void *temp_calloc(size_t nmemb, size_t size)
 {
-	static int been_here = 0;
+	(void) nmemb;
+	(void) size;
+	return NULL;
+}
+
+void *calloc(size_t nmemb, size_t size)
+{
+	static void *(*real_calloc)(size_t, size_t);
 	void *ptr;
 
-	/*
-	 * Fail calloc() before dlsym(RTLD_NEXT, "calloc") returns.
-	 *
-	 * The glibc seems to work with this failure just fine.
-	 */
-	if (!real_malloc && been_here)
+	if (!real_calloc) {
+		real_calloc = (void*)temp_calloc;
+		/*
+		 * If you remove this printf, the store above will be optimized
+		 * out and tests will crash since the dlsym() calls calloc()!
+		 */
+		if (verbose > 1)
+			fprintf(stderr, "Dummy calloc set!");
+		real_calloc = dlsym(RTLD_NEXT, "calloc");
+	}
+
+	switch (malloc_canary) {
+	case MALLOC_CANARY_OFF:
+		ptr = real_calloc(nmemb, size);
+	break;
+	case MALLOC_CANARY_BEGIN:
+		ptr = tst_malloc_canary_left(nmemb * size);
+	break;
+	case MALLOC_CANARY_END:
+		ptr = tst_malloc_canary_right(nmemb * size);
+	break;
+	default:
 		return NULL;
-
-	been_here = 1;
-
-	ptr = malloc(nmemb * size);
-
-	if (ptr)
-		memset(ptr, 0, nmemb * size);
+	}
 
 	return ptr;
 }
 
-void free___(void *ptr)
+void free(void *ptr)
 {
 	static void (*real_free)(void *) = NULL;
 	struct chunk *chunk;
@@ -296,7 +312,7 @@ void free___(void *ptr)
 
 #define min(a, b) (((a) < (b)) ? (a) : (b))
 
-void *realloc___(void *optr, size_t size)
+void *realloc(void *optr, size_t size)
 {
 	static void *(*real_realloc)(void*, size_t) = NULL;
 	void *ptr;
@@ -327,7 +343,6 @@ void *realloc___(void *optr, size_t size)
 	}
 
 	ptr = malloc(size);
-
 	if (!ptr)
 		return NULL;
 
