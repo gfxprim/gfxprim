@@ -9,15 +9,18 @@
 #ifndef GP_WIDGET_TABS_H__
 #define GP_WIDGET_TABS_H__
 
+struct gp_widget_tab {
+	char *label;
+	gp_widget *widget;
+};
+
 struct gp_widget_tabs {
 	unsigned int active_tab;
-	unsigned int count;
 
 	int title_focused:1;
 	int widget_focused:1;
 
-	char **labels;
-	struct gp_widget **widgets;
+	struct gp_widget_tab *tabs;
 
 	char payload[];
 };
@@ -45,5 +48,53 @@ gp_widget *gp_widget_tabs_new(unsigned int tabs, unsigned int active_tab,
  */
 gp_widget *gp_widget_tabs_put(gp_widget *self, unsigned int tab,
                               gp_widget *child);
+
+/**
+ * @brief Adds a tab at an offset.
+ *
+ * @self A tabs widget.
+ * @off An offset.
+ * @label Tabs label.
+ * @child A tab child, may be NULL.
+ */
+void gp_widget_tabs_add(gp_widget *self, unsigned int off,
+                        const char *label, gp_widget *child);
+
+/**
+ * @brief Appends a tab.
+ *
+ * @self A tabs widget.
+ * @label Tabs label.
+ * @child A tab child, may be NULL.
+ */
+void gp_widget_tabs_append(gp_widget *self,
+                           const char *label, gp_widget *child);
+
+/**
+ * @brief Remove a tab at an offset.
+ *
+ * The tabs child widget is destroyed by gp_widget_free().
+ *
+ * @self A tabs widget.
+ * @off An offset.
+ */
+void gp_widget_tabs_rem(gp_widget *self, unsigned int off);
+
+/**
+ * @brief Returns active tab index.
+ *
+ * @self A tabs widget.
+ *
+ * @return An active tab index.
+ */
+unsigned int gp_widget_tabs_get_active(gp_widget *self);
+
+/**
+ * @brief Set active tab.
+ *
+ * @self A tabs widget.
+ * @tab A tab index.
+ */
+void gp_widget_tabs_set_active(gp_widget *self, unsigned int tab);
 
 #endif /* GP_WIDGET_TABS_H__ */

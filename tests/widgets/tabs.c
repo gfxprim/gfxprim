@@ -1,0 +1,156 @@
+// SPDX-License-Identifier: GPL-2.1-or-later
+/*
+ * Copyright (C) 2021 Cyril Hrubis <metan@ucw.cz>
+ */
+
+#include <string.h>
+#include <widgets/gp_widgets.h>
+#include "tst_test.h"
+#include "common.h"
+
+static int tabs_new_free(void)
+{
+	gp_widget *tabs;
+	const char *labels[] = {
+		"label #1",
+		"label #2",
+	};
+
+	tabs = gp_widget_tabs_new(2, 0, labels);
+	if (!tabs) {
+		tst_msg("Allocation failure");
+		return TST_FAILED;
+	}
+
+	gp_widget_free(tabs);
+
+	return TST_SUCCESS;
+}
+
+static int tabs_add_rem(void)
+{
+	gp_widget *tabs;
+
+	tabs = gp_widget_tabs_new(0, 0, NULL);
+	if (!tabs) {
+		tst_msg("Allocation failure");
+		return TST_FAILED;
+	}
+
+	if (gp_widget_tabs_get_active(tabs) != 0) {
+		tst_msg("Active tab %u expected 0",
+		        gp_widget_tabs_get_active(tabs));
+		return TST_FAILED;
+	}
+
+	gp_widget_tabs_append(tabs, "tab", NULL);
+
+	if (gp_widget_tabs_get_active(tabs) != 0) {
+		tst_msg("Active tab %u expected 0",
+		        gp_widget_tabs_get_active(tabs));
+		return TST_FAILED;
+	}
+
+	gp_widget_tabs_rem(tabs, 0);
+
+	gp_widget_free(tabs);
+
+	return TST_SUCCESS;
+}
+
+static int tabs_active_tab(void)
+{
+	gp_widget *tabs;
+	const char *labels[] = {
+		"label #1",
+		"label #2",
+		"label #3",
+		"label #4",
+	};
+
+	tabs = gp_widget_tabs_new(4, 1, labels);
+	if (!tabs) {
+		tst_msg("Allocation failure");
+		return TST_FAILED;
+	}
+
+	if (gp_widget_tabs_get_active(tabs) != 1) {
+		tst_msg("Active tab %u expected 1",
+		        gp_widget_tabs_get_active(tabs));
+		return TST_FAILED;
+	}
+
+	tst_msg("Removing tab 0");
+
+	gp_widget_tabs_rem(tabs, 0);
+
+	if (gp_widget_tabs_get_active(tabs) != 0) {
+		tst_msg("Active tab %u expected 0",
+		        gp_widget_tabs_get_active(tabs));
+		return TST_FAILED;
+	}
+
+	tst_msg("Setting active tab 1");
+
+	gp_widget_tabs_set_active(tabs, 1);
+
+	if (gp_widget_tabs_get_active(tabs) != 1) {
+		tst_msg("Active tab %u expected 1",
+		        gp_widget_tabs_get_active(tabs));
+		return TST_FAILED;
+	}
+
+	tst_msg("Removing tab 1");
+
+	gp_widget_tabs_rem(tabs, 1);
+
+	if (gp_widget_tabs_get_active(tabs) != 0) {
+		tst_msg("Active tab %u expected 0",
+		        gp_widget_tabs_get_active(tabs));
+		return TST_FAILED;
+	}
+
+	tst_msg("Setting active tab 1");
+
+	gp_widget_tabs_set_active(tabs, 1);
+
+	tst_msg("Removing tab 0");
+
+	gp_widget_tabs_rem(tabs, 0);
+
+	if (gp_widget_tabs_get_active(tabs) != 0) {
+		tst_msg("Active tab %u expected 0",
+		        gp_widget_tabs_get_active(tabs));
+		return TST_FAILED;
+	}
+
+	tst_msg("Add tab to 0");
+
+	gp_widget_tabs_add(tabs, 0, "new tab #1", NULL);
+
+	if (gp_widget_tabs_get_active(tabs) != 1) {
+		tst_msg("Active tab %u expected 1",
+		        gp_widget_tabs_get_active(tabs));
+		return TST_FAILED;
+	}
+
+	return TST_SUCCESS;
+}
+
+const struct tst_suite tst_suite = {
+	.suite_name = "tabs testsuite",
+	.tests = {
+		{.name = "tabs new free",
+		 .tst_fn = tabs_new_free,
+		 .flags = TST_CHECK_MALLOC},
+
+		{.name = "tabs add rem free",
+		 .tst_fn = tabs_add_rem,
+		 .flags = TST_CHECK_MALLOC},
+
+		{.name = "tabs active tab",
+		 .tst_fn = tabs_active_tab},
+
+		{.name = NULL},
+	}
+};
