@@ -579,7 +579,7 @@ void gp_widget_tabs_add(gp_widget *self, unsigned int off,
 {
 	GP_WIDGET_ASSERT(self, GP_WIDGET_TABS, );
 
-	GP_DEBUG(2, "Adding tab '%s' (%p) offset %u to tabs (%p)",
+	GP_DEBUG(3, "Adding tab '%s' child %p at offset %u, tabs widget %p",
 	         label, child, off, self);
 
 	struct gp_widget_tab *tabs = gp_vec_insert(self->tabs->tabs, off, 1);
@@ -599,6 +599,7 @@ void gp_widget_tabs_add(gp_widget *self, unsigned int off,
 	gp_widget_set_parent(child, self);
 
 	gp_widget_resize(self);
+	gp_widget_redraw(self);
 
 	if (self->tabs->active_tab >= off &&
 	    gp_vec_len(self->tabs->tabs) > self->tabs->active_tab + 1) {
@@ -614,18 +615,22 @@ void gp_widget_tabs_append(gp_widget *self,
 	gp_widget_tabs_add(self, gp_vec_len(self->tabs->tabs), label, child);
 }
 
-void gp_widget_tabs_rem(gp_widget *self, unsigned int off)
+gp_widget *gp_widget_tabs_rem(gp_widget *self, unsigned int off)
 {
-	GP_WIDGET_ASSERT(self, GP_WIDGET_TABS, );
+	GP_WIDGET_ASSERT(self, GP_WIDGET_TABS, NULL);
 
 	if (off >= gp_vec_len(self->tabs->tabs)) {
 		GP_BUG("Invalid tab index %u tabs (%p) count %zu",
 		       off, self, gp_vec_len(self->tabs->tabs));
-		return;
+		return NULL;
 	}
 
+	gp_widget *ret = self->tabs->tabs[off].widget;
+
+	GP_DEBUG(3, "Removing tab %u (%s) child %p, tabs widget %p",
+	         off, self->tabs->tabs[off].label, ret, self);
+
 	free(self->tabs->tabs[off].label);
-	gp_widget_free(self->tabs->tabs[off].widget);
 
 	self->tabs->tabs = gp_vec_delete(self->tabs->tabs, off, 1);
 
@@ -635,6 +640,13 @@ void gp_widget_tabs_rem(gp_widget *self, unsigned int off)
 	}
 
 	gp_widget_redraw(self);
+
+	return ret;
+}
+
+void gp_widget_tabs_del(gp_widget *self, unsigned int off)
+{
+	gp_widget_free(gp_widget_tabs_rem(self, off));
 }
 
 unsigned int gp_widget_tabs_get_active(gp_widget *self)
@@ -658,4 +670,18 @@ void gp_widget_tabs_set_active(gp_widget *self, unsigned int tab)
 
 	self->tabs->active_tab = tab;
 	gp_widget_redraw(self);
+}
+
+int gp_widget_tabs_tab_by_child(gp_widget *self, gp_widget *child)
+{
+	unsigned int i;
+
+	GP_WIDGET_ASSERT(self, GP_WIDGET_TABS, -1);
+
+	for (i = 0; i < gp_vec_len(self->tabs->tabs); i++) {
+		if (self->tabs->tabs[i].widget == child)
+			return i;
+	}
+
+	return -1;
 }
