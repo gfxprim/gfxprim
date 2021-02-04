@@ -83,6 +83,21 @@ static inline char *gp_vec_strins(char *self, size_t off, const char *src)
 }
 
 /*
+ * @brief Appends a string to a string vector.
+ *
+ * @self A string vector.
+ * @str A string to append.
+ *
+ * @return A string vector or a NULL in case of an allocation failure.
+ */
+static inline char *gp_vec_str_append(char *self, const char *str)
+	__attribute__((warn_unused_result));
+static inline char *gp_vec_str_append(char *self, const char *str)
+{
+	return gp_vec_strins(self, gp_vec_len(self)-1, str);
+}
+
+/*
  * @brief Inserts a string into a string vector at a given offset.
  *
  * @self A string vector.
