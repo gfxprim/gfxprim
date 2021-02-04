@@ -15,5 +15,6 @@
 #include <utils/gp_block_alloc.h>
 #include <utils/gp_fds.h>
 #include <utils/gp_bbox.h>
+#include <utils/gp_list.h>
 
 #endif /* GP_UTILS__ */

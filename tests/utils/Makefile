@@ -1,7 +1,7 @@
 TOPDIR=../..
 include $(TOPDIR)/pre.mk
 
-APPS=vec matrix vec_str
+APPS=vec matrix vec_str list
 
 include ../tests.mk
 
