@@ -131,10 +131,16 @@ struct gp_widget_ops gp_widget_label_ops = {
 	.id = "label",
 };
 
-/*
- * Do not shrink by default so that the layout will not jump up and down all
- * the time.
- */
+static void redraw_resize(gp_widget *self)
+{
+	gp_widget_redraw(self);
+
+	if (self->label->width)
+		return;
+
+	gp_widget_resize(self);
+}
+
 void gp_widget_label_set(gp_widget *self, const char *text)
 {
 	GP_WIDGET_ASSERT(self, GP_WIDGET_LABEL, );
@@ -144,12 +150,23 @@ void gp_widget_label_set(gp_widget *self, const char *text)
 
 	self->label->text = gp_vec_printf(self->label->text, "%s", text);
 
-	gp_widget_redraw(self);
+	redraw_resize(self);
+}
 
-	if (self->label->width)
+void gp_widget_label_append(gp_widget *self, const char *text)
+{
+	GP_WIDGET_ASSERT(self, GP_WIDGET_LABEL, );
+
+	GP_DEBUG(3, "Appending to label widget (%p) '%s' += '%s'",
+		 self, self->label->text, text);
+
+	char *new_text = gp_vec_str_append(self->label->text, text);
+	if (!new_text)
 		return;
 
-	gp_widget_resize(self);
+	self->label->text = new_text;
+
+	redraw_resize(self);
 }
 
 gp_widget *gp_widget_label_new(const char *text, gp_widget_tattr tattr, unsigned int width)
@@ -216,7 +233,7 @@ int gp_widget_label_printf(gp_widget *self, const char *fmt, ...)
 	self->label->text = gp_vec_vprintf(self->label->text, fmt, ap);
 	va_end(ap);
 
-	gp_widget_resize(self);
+	redraw_resize(self);
 
 	return 0;
 }

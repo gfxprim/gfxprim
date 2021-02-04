@@ -32,6 +32,14 @@ struct gp_widget_label {
 void gp_widget_label_set(gp_widget *self, const char *text);
 
 /**
+ * @brief Appends text to the label.
+ *
+ * @self A label widget.
+ * @param text Text to be appended.
+ */
+void gp_widget_label_append(gp_widget *self, const char *text);
+
+/**
  * @brief Printf-like function to set label text.
  * @self A label widget.
  * @param fmt  Printf formatting string.
