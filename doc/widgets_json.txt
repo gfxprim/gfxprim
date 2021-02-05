@@ -16,7 +16,7 @@ looks for a layout into a user directory and if there is no layout there
 system directory is used instead. This means that user can override system
 application layout by creating one in the user home directory.
 
-The `uids` is an pointer to store the hash table of mappings between widget
+The `uids` is a pointer to store the hash table of mappings between widget
 unique ids and pointers to.
 
 The function returns NULL if no layout has been found or if it couldn't be
@@ -38,9 +38,11 @@ JSON layout can be also loaded from a file or C string.
 {
  "version": 1,
  "widgets": [
-  "type": "button",
-  "label": "Button",
-  "on_event": "button_event"
+  {
+   "type": "button",
+   "label": "Button",
+   "on_event": "button_event"
+  }
  ]
 }
 -------------------------------------------------------------------------------
