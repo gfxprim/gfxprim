@@ -412,14 +412,22 @@ static gp_widget *json_to_tabs(json_object *json, void **uids)
 {
 	json_object *widgets = NULL;
 	json_object *labels = NULL;
+	int active = 0;
 
 	json_object_object_foreach(json, key, val) {
 		if (!strcmp(key, "labels"))
 			labels = val;
 		else if (!strcmp(key, "widgets"))
 			widgets = val;
+		else if (!strcmp(key, "active"))
+			active = json_object_get_int(val);
 		else
 			GP_WARN("Invalid tabs key '%s'", key);
+	}
+
+	if (active < 0) {
+		GP_WARN("Active widget must be >= 0");
+		active = 0;
 	}
 
 	if (!labels) {
@@ -453,7 +461,7 @@ static gp_widget *json_to_tabs(json_object *json, void **uids)
 			GP_WARN("Tab title %i must be string!", i);
 	}
 
-	gp_widget *ret = gp_widget_tabs_new(tab_count, 0, tab_labels);
+	gp_widget *ret = gp_widget_tabs_new(tab_count, active, tab_labels);
 
 	for (i = 0; i < tab_count; i++) {
 		json_object *json_widget = json_object_array_get_idx(widgets, i);
