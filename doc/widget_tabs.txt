@@ -1,0 +1,73 @@
+Tabs widget
+-----------
+
+Tabs widget is a widget that switches between different layouts based on
+active tab on the tab header.
+
+.A tabs widget
+image:tabs.png[Tabs widget]
+
+Tabs attributes can be accessed as `widget->tabs`.
+
+.Tabs widget constructor
+[source,c]
+-------------------------------------------------------------------------------
+gp_widget *gp_widget_tabs_new(unsigned int tabs, unsigned int active_tab,
+                              const char *tab_labels[]);
+-------------------------------------------------------------------------------
+
+.Function to set tab child
+[source,c]
+-------------------------------------------------------------------------------
+gp_widget *gp_widget_tabs_put(gp_widget *self, unsigned int tab,
+                              gp_widget *child);
+-------------------------------------------------------------------------------
+
+Returns previous tabs child.
+
+.Fucntions to add and remove tabs
+[source,c]
+-------------------------------------------------------------------------------
+void gp_widget_tabs_add(gp_widget *self, unsigned int off,
+                        const char *label, gp_widget *child);
+
+void gp_widget_tabs_append(gp_widget *self,
+                           const char *label, gp_widget *child);
+
+gp_widget *gp_widget_tabs_rem(gp_widget *self, unsigned int pos);
+
+void gp_widget_tabs_del(gp_widget *self, unsigned int pos);
+-------------------------------------------------------------------------------
+
+The `gp_widget_tabs_rem()` functions return the tab child widget while the
+`gp_widget_tabs_del()` frees the child with `gp_widget_free()` instead.
+
+
+.Functions to set and get active tab
+[source,c]
+-------------------------------------------------------------------------------
+unsigned int gp_widget_tabs_get_active(gp_widget *self);
+
+void gp_widget_tabs_set_active(gp_widget *self, unsigned int tab);
+-------------------------------------------------------------------------------
+
+.A lookup function to get tab index by a child widget
+[source,c]
+-------------------------------------------------------------------------------
+int gp_widget_tabs_tab_by_child(gp_widget *self, gp_widget *child);
+-------------------------------------------------------------------------------
+
+.Tabs JSON attributes
+[cols=",,,3",options="header"]
+|===================================================
+| Attribute     |  Type  | Default | Description
+|   +labels+    |  array |         | Array of string labels.
+|   +widgets+   |  array |         | Array of child widgets.
+|   +active+    |  uint  |    0    | Active tab.
+|===================================================
+
+.Tabs widget events
+[cols=",3",options="header"]
+|===================================================
+| Widget event value | Description
+|===================================================

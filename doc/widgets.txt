@@ -18,6 +18,9 @@ expressed in JSON and loaded from a file. It does not matter where the GUI
 elements are put as far as the `on_event()` callbacks and widgets `uid` match.
 An link:example_widgets_login.html[example code] is worth of thousands words.
 
+Also if you ever wondered how widget library written by kernel devloper would
+look like this is probably as close as you can get...
+
 Widgets generic documetation
 ----------------------------
 
@@ -37,3 +40,4 @@ Individual widgets documentation
 * link:widget_choice.html[Radiobutton widget]
 * link:widget_choice.html[Spinbutton widget]
 * link:widget_tbox.html[Tbox widget]
+* link:widget_tabs.html[Tabs widget]
