@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: GPL-2.1-or-later
+// SPDX-License-Identifier: LGPL-2.1-or-later
 /*
  * Copyright (C) 2009-2013 Cyril Hrubis <metan@ucw.cz>
  */

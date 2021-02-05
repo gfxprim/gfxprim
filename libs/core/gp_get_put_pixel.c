@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: GPL-2.1-or-later
+// SPDX-License-Identifier: LGPL-2.1-or-later
 /*
  * Copyright (C) 2011      Tomas Gavenciak <gavento@ucw.cz>
  * Copyright (C) 2012      Cyril Hrubis <metan@ucw.cz>
