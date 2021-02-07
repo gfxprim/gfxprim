@@ -6,8 +6,8 @@
 
  */
 
-#ifndef GP_WIDGET_DIALOG_H__
-#define GP_WIDGET_DIALOG_H__
+#ifndef GP_WIDGET_DIALOG_H
+#define GP_WIDGET_DIALOG_H
 
 #include <widgets/gp_widget.h>
 #include <widgets/gp_widget_types.h>
@@ -51,4 +51,4 @@ void gp_widget_dialog_free(gp_widget_dialog *self);
  */
 gp_widget *gp_dialog_layout_load(const char *dialog_name, const char *fallback_json, void **uids);
 
-#endif /* GP_WIDGET_DIALOG_H__ */
+#endif /* GP_WIDGET_DIALOG_H */

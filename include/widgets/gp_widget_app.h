@@ -6,8 +6,8 @@
 
  */
 
-#ifndef GP_WIDGET_APP_H__
-#define GP_WIDGET_APP_H__
+#ifndef GP_WIDGET_APP_H
+#define GP_WIDGET_APP_H
 
 #include <widgets/gp_widget_types.h>
 
@@ -89,4 +89,4 @@ static inline int gp_app_send_event(enum gp_widget_event_type ev_type, ...)
 	return gp_app->on_event(&ev);
 }
 
-#endif /* GP_WIDGET_APP_H__ */
+#endif /* GP_WIDGET_APP_H */

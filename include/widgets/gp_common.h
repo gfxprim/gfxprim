@@ -6,8 +6,8 @@
 
  */
 
-#ifndef GP_COMMON_H__
-#define GP_COMMON_H__
+#ifndef GP_COMMON_H
+#define GP_COMMON_H
 
 #define GP_ODD_UP(x) ({    \
 	typeof(x) x__ = x; \
@@ -19,4 +19,4 @@
 	x__ + (x__%2);      \
 })
 
-#endif /* GP_COMMON_H__ */
+#endif /* GP_COMMON_H */

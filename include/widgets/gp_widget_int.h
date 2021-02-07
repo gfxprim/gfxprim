@@ -6,8 +6,8 @@
 
  */
 
-#ifndef GP_WIDGET_INT_H__
-#define GP_WIDGET_INT_H__
+#ifndef GP_WIDGET_INT_H
+#define GP_WIDGET_INT_H
 
 enum gp_widget_int_flags {
 	GP_WIDGET_HORIZ = 0,
@@ -33,4 +33,4 @@ void gp_widget_int_set_max(gp_widget *self, int max);
 
 void gp_widget_int_set_min(gp_widget *self, int min);
 
-#endif /* GP_WIDGET_INT_H__ */
+#endif /* GP_WIDGET_INT_H */

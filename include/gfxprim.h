@@ -6,8 +6,8 @@
  * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>
  */
 
-#ifndef GFXPRIM_H__
-#define GFXPRIM_H__
+#ifndef GFXPRIM_H
+#define GFXPRIM_H
 
 /* library core */
 #include <core/gp_core.h>
@@ -38,4 +38,4 @@
 
 #include "widgets/gp_widgets.h"
 
-#endif /* GFXPRIM_H__ */
+#endif /* GFXPRIM_H */

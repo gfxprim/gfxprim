@@ -16,8 +16,8 @@
 
 #include <utils/gp_vec.h>
 
-#ifndef GP_MATRIX_H__
-#define GP_MATRIX_H__
+#ifndef GP_MATRIX_H
+#define GP_MATRIX_H
 
 /*
  * @brief Allocates a matrix.
@@ -119,4 +119,4 @@ static inline void gp_matrix_free(void *self)
 	gp_vec_free(self);
 }
 
-#endif	/* GP_MATRIX_H__ */
+#endif	/* GP_MATRIX_H */

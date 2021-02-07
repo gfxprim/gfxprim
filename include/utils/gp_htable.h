@@ -8,8 +8,8 @@
 
  */
 
-#ifndef GP_HTABLE_H__
-#define GP_HTABLE_H__
+#ifndef GP_HTABLE_H
+#define GP_HTABLE_H
 
 enum gp_htable_flags {
 	GP_HTABLE_COPY_KEY = 0x01,
@@ -50,4 +50,4 @@ void gp_htable_put(void *table, void *val, char *key);
  */
 void *gp_htable_get(void *table, const char *key);
 
-#endif /* GP_HTABLE_H__ */
+#endif /* GP_HTABLE_H */

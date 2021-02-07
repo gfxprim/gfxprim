@@ -11,8 +11,8 @@
 
  */
 
-#ifndef GP_BMP_H__
-#define GP_BMP_H__
+#ifndef GP_BMP_H
+#define GP_BMP_H
 
 /*
  * Sometimes called a DIB header as well.
@@ -119,4 +119,4 @@ uint32_t gp_bmp_palette_size(struct gp_bmp_info_header *header);
 int gp_bmp_read_pixels(gp_io *io, struct gp_bmp_info_header *header,
                        gp_pixmap *pixmap, gp_progress_cb *callback);
 
-#endif /* GP_BMP_H__ */
+#endif /* GP_BMP_H */

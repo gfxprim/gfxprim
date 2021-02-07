@@ -6,8 +6,8 @@
 
  */
 
-#ifndef GP_WIDGET_BOOL_H__
-#define GP_WIDGET_BOOL_H__
+#ifndef GP_WIDGET_BOOL_H
+#define GP_WIDGET_BOOL_H
 
 struct gp_widget_bool {
 	const char *label;
@@ -16,4 +16,4 @@ struct gp_widget_bool {
 	char payload[];
 };
 
-#endif /* GP_WIDGET_BOOL_H__ */
+#endif /* GP_WIDGET_BOOL_H */

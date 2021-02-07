@@ -6,8 +6,8 @@
 
  */
 
-#ifndef GP_WIDGET_TIMER_H__
-#define GP_WIDGET_TIMER_H__
+#ifndef GP_WIDGET_TIMER_H
+#define GP_WIDGET_TIMER_H
 
 /**
  * @brief Inserts a timer into the widgets timer queue.
@@ -27,4 +27,4 @@ void gp_widgets_timer_ins(gp_timer *timer);
  */
 void gp_widgets_timer_rem(gp_timer *timer);
 
-#endif /* GP_WIDGET_TIMER_H__ */
+#endif /* GP_WIDGET_TIMER_H */

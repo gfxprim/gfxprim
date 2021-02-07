@@ -6,12 +6,12 @@
 
  */
 
-#ifndef GP_WIDGET_TYPES_H__
-#define GP_WIDGET_TYPES_H__
+#ifndef GP_WIDGET_TYPES_H
+#define GP_WIDGET_TYPES_H
 
 typedef struct gp_widget_event gp_widget_event;
 typedef struct gp_widget gp_widget;
 typedef struct gp_widget_dialog gp_widget_dialog;
 typedef uint32_t gp_widget_tattr;
 
-#endif /* GP_WIDGET_TYPES_H__ */
+#endif /* GP_WIDGET_TYPES_H */

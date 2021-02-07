@@ -5,8 +5,8 @@
 
  */
 
-#ifndef GP_PROXY_GP_PROXY_H__
-#define GP_PROXY_GP_PROXY_H__
+#ifndef GP_PROXY_PROTO_H
+#define GP_PROXY_PROTO_H
 
 #include <core/gp_pixmap.h>
 #include <core/gp_pixel.h>
@@ -134,4 +134,4 @@ int gp_proxy_buf_recv(int fd, struct gp_proxy_buf *buf);
  */
 int gp_proxy_send(int fd, enum gp_proxy_msg_types type, void *payload);
 
-#endif /* GP_PROXY_GP_PROXY_H__ */
+#endif /* GP_PROXY_PROTO_H */

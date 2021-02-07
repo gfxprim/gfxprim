@@ -6,8 +6,8 @@
 
  */
 
-#ifndef GP_LIST_H__
-#define GP_LIST_H__
+#ifndef GP_LIST_H
+#define GP_LIST_H
 
 #include <core/gp_common.h>
 
@@ -325,4 +325,4 @@ static inline void gp_dlist_sort(gp_dlist *list,
 	list->tail = i;
 }
 
-#endif /* GP_LIST_H__ */
+#endif /* GP_LIST_H */

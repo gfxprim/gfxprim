@@ -6,8 +6,8 @@
 
  */
 
-#ifndef GP_WIDGET_BUTTON_H__
-#define GP_WIDGET_BUTTON_H__
+#ifndef GP_WIDGET_BUTTON_H
+#define GP_WIDGET_BUTTON_H
 
 #include <widgets/gp_widget_bool.h>
 
@@ -69,4 +69,4 @@ gp_widget *gp_widget_button_new(const char *label,
                                 int (*on_event)(gp_widget_event *ev),
                                 void *priv);
 
-#endif /* GP_WIDGET_BUTTON_H__ */
+#endif /* GP_WIDGET_BUTTON_H */

@@ -5,8 +5,8 @@
 
  */
 
-#ifndef GP_WIDGET_OVERLAY_H__
-#define GP_WIDGET_OVERLAY_H__
+#ifndef GP_WIDGET_OVERLAY_H
+#define GP_WIDGET_OVERLAY_H
 
 /*
  * Overlay widget is a widget that allows widgets to be stack on the top of
@@ -70,4 +70,4 @@ unsigned int gp_widget_overlay_stack_size(gp_widget *self);
 gp_widget *gp_widget_overlay_put(gp_widget *self, unsigned int stack_pos,
                                  gp_widget *child);
 
-#endif /* GP_WIDGET_OVERLAY_H__ */
+#endif /* GP_WIDGET_OVERLAY_H */

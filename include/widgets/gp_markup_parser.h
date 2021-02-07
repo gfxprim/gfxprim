@@ -21,8 +21,8 @@
 
  */
 
-#ifndef GP_MARKUP_PARSER_H__
-#define GP_MARKUP_PARSER_H__
+#ifndef GP_MARKUP_PARSER_H
+#define GP_MARKUP_PARSER_H
 
 enum gp_markup_elem_type {
 	GP_MARKUP_END,
@@ -99,4 +99,4 @@ static inline gp_markup_elem *gp_markup_next_line(gp_markup_elem *elem)
 
 void gp_markup_free(gp_markup *self);
 
-#endif /* GP_MARKUP_PARSER_H__ */
+#endif /* GP_MARKUP_PARSER_H */

@@ -6,11 +6,11 @@
 
  */
 
-#ifndef GP_DATE_TIME_H__
-#define GP_DATE_TIME_H__
+#ifndef GP_DATE_TIME_H
+#define GP_DATE_TIME_H
 
 #include <time.h>
 
 const char *gp_str_time_diff(char *buf, size_t buf_len, time_t time, time_t now);
 
-#endif /* GP_TIME_DATE_H__ */
+#endif /* GP_TIME_DATE_H */

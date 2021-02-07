@@ -5,8 +5,8 @@
 
  */
 
-#ifndef GP_SEEK_H__
-#define GP_SEEK_H__
+#ifndef GP_SEEK_H
+#define GP_SEEK_H
 
 #include <sys/types.h>
 #include <stddef.h>
@@ -71,4 +71,4 @@ static inline int gp_seek_off(ssize_t off, enum gp_seek_whence whence, size_t *c
 	return -1;
 }
 
-#endif /* GP_SEEK_H__ */
+#endif /* GP_SEEK_H */

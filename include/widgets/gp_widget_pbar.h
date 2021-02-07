@@ -6,8 +6,8 @@
 
  */
 
-#ifndef GP_WIDGET_PBAR_H__
-#define GP_WIDGET_PBAR_H__
+#ifndef GP_WIDGET_PBAR_H
+#define GP_WIDGET_PBAR_H
 
 enum gp_widget_pbar_type {
 	GP_WIDGET_PBAR_NONE,
@@ -50,4 +50,4 @@ void gp_widget_pbar_set(gp_widget *self, float val);
  */
 void gp_widget_pbar_set_max(gp_widget *self, float max);
 
-#endif /* GP_WIDGET_PBAR_H__ */
+#endif /* GP_WIDGET_PBAR_H */

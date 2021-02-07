@@ -13,8 +13,8 @@
  * framebuffer.
  */
 
-#ifndef GP_PROXY_H__
-#define GP_PROXY_H__
+#ifndef GP_PROXY_H
+#define GP_PROXY_H
 
 #include <backends/gp_backend.h>
 
@@ -26,4 +26,4 @@
  */
 gp_backend *gp_proxy_init(const char *path, const char *title);
 
-#endif /* GP_PROXY_H__ */
+#endif /* GP_PROXY_H */

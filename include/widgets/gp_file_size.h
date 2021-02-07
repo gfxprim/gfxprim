@@ -6,9 +6,9 @@
 
  */
 
-#ifndef GP_FILE_SIZE_H__
-#define GP_FILE_SIZE_H__
+#ifndef GP_FILE_SIZE_H
+#define GP_FILE_SIZE_H
 
 const char *gp_str_file_size(char *buf, size_t buf_len, size_t size);
 
-#endif /* GP_FILE_SIZE_H__ */
+#endif /* GP_FILE_SIZE_H */

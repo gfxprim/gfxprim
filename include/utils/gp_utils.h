@@ -5,8 +5,8 @@
 
  */
 
-#ifndef GP_UTILS__
-#define GP_UTILS__
+#ifndef GP_UTILS_H
+#define GP_UTILS_H
 
 #include <utils/gp_vec.h>
 #include <utils/gp_vec_str.h>
@@ -17,4 +17,4 @@
 #include <utils/gp_bbox.h>
 #include <utils/gp_list.h>
 
-#endif /* GP_UTILS__ */
+#endif /* GP_UTILS_H */

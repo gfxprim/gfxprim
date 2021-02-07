@@ -6,8 +6,8 @@
 
  */
 
-#ifndef GP_WIDGETS_H__
-#define GP_WIDGETS_H__
+#ifndef GP_WIDGETS_H
+#define GP_WIDGETS_H
 
 #include <utils/gp_htable.h>
 
@@ -50,4 +50,4 @@
 #include <widgets/gp_widget_dialog.h>
 #include <widgets/gp_widget_dialog_file_open.h>
 
-#endif /* GP_WIDGETS_H__ */
+#endif /* GP_WIDGETS_H */

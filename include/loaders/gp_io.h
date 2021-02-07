@@ -224,4 +224,4 @@ gp_io *gp_io_sub_io(gp_io *pio, size_t size);
  */
 gp_io *gp_io_wbuffer(gp_io *pio, size_t bsize);
 
-#endif /* LOADERS_gp_io_H */
+#endif /* LOADERS_GP_IO_H */

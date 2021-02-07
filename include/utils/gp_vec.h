@@ -9,8 +9,8 @@
 #include <stddef.h>
 #include <core/gp_common.h>
 
-#ifndef GP_VEC_H__
-#define GP_VEC_H__
+#ifndef GP_VEC_H
+#define GP_VEC_H
 
 /* Get a pointer to the outer gp_vec struct from a pointer to the (start of)
  * its data.
@@ -177,4 +177,4 @@ static inline void *gp_vec_remove(void *self, size_t length)
 	return gp_vec_delete(self, gp_vec_len(self) - length, length);
 }
 
-#endif	/* GP_VEC_H__ */
+#endif	/* GP_VEC_H */

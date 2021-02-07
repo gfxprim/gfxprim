@@ -5,8 +5,8 @@
 
  */
 
-#ifndef GP_WIDGET_TATTR_H__
-#define GP_WIDGET_TATTR_H__
+#ifndef GP_WIDGET_TATTR_H
+#define GP_WIDGET_TATTR_H
 
 #include <text/gp_text.h>
 #include <widgets/gp_widget_types.h>
@@ -51,4 +51,4 @@ static inline const gp_text_style *gp_widget_tattr_font(gp_widget_tattr attr, co
  */
 int gp_widget_tattr_parse(const char *attrs, gp_widget_tattr *tattr);
 
-#endif /* GP_WIDGET_TATTR_H__ */
+#endif /* GP_WIDGET_TATTR_H */

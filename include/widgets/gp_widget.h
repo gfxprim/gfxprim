@@ -6,8 +6,8 @@
 
  */
 
-#ifndef GP_WIDGET_H__
-#define GP_WIDGET_H__
+#ifndef GP_WIDGET_H
+#define GP_WIDGET_H
 
 #include <stdlib.h>
 #include <stdint.h>
@@ -245,4 +245,4 @@ static inline void gp_widget_event_handler_set(gp_widget *self,
 
 #include <widgets/gp_widget_event.h>
 
-#endif /* GP_WIDGET_H__ */
+#endif /* GP_WIDGET_H */

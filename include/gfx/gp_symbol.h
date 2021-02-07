@@ -3,8 +3,8 @@
  * Copyright (C) 2020 Cyril Hrubis <metan@ucw.cz>
  */
 
-#ifndef GP_SYMBOL_H__
-#define GP_SYMBOL_H__
+#ifndef GP_SYMBOL_H
+#define GP_SYMBOL_H
 
 #include "core/gp_types.h"
 
@@ -21,4 +21,4 @@ void gp_symbol(gp_pixmap *pixmap, gp_coord x_center, gp_coord y_center,
 void gp_symbol_raw(gp_pixmap *pixmap, gp_coord x_center, gp_coord y_center,
                    gp_size rx, gp_size ry, enum gp_symbol_type stype, gp_pixel pixel);
 
-#endif /* GP_SYMBOL_H__ */
+#endif /* GP_SYMBOL_H */

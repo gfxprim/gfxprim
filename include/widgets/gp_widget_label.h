@@ -5,8 +5,8 @@
 
  */
 
-#ifndef GP_WIDGET_LABEL_H__
-#define GP_WIDGET_LABEL_H__
+#ifndef GP_WIDGET_LABEL_H
+#define GP_WIDGET_LABEL_H
 
 #include <stdlib.h>
 
@@ -115,4 +115,4 @@ gp_widget *gp_widget_label_new(const char *text, gp_widget_tattr tattr, unsigned
 gp_widget *gp_widget_label_printf_new(gp_widget_tattr tattr, const char *fmt, ...)
                                       __attribute__((format (printf, 2, 3)));
 
-#endif /* GP_WIDGET_LABEL_H__ */
+#endif /* GP_WIDGET_LABEL_H */

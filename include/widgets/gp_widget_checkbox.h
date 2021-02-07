@@ -6,8 +6,8 @@
 
  */
 
-#ifndef GP_WIDGET_CHECKBOX_H__
-#define GP_WIDGET_CHECKBOX_H__
+#ifndef GP_WIDGET_CHECKBOX_H
+#define GP_WIDGET_CHECKBOX_H
 
 #include <widgets/gp_widget_bool.h>
 
@@ -49,4 +49,4 @@ void gp_widget_checkbox_toggle(gp_widget *self);
  */
 int gp_widget_checkbox_get(gp_widget *self);
 
-#endif /* GP_WIDGET_CHECKBOX_H__ */
+#endif /* GP_WIDGET_CHECKBOX_H */

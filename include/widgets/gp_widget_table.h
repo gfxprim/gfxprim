@@ -6,8 +6,8 @@
 
  */
 
-#ifndef GP_WIDGET_TABLE_H__
-#define GP_WIDGET_TABLE_H__
+#ifndef GP_WIDGET_TABLE_H
+#define GP_WIDGET_TABLE_H
 
 enum gp_widget_table_row_op {
 	GP_TABLE_ROW_RESET,
@@ -83,4 +83,4 @@ void gp_widget_table_refresh(gp_widget *self);
  */
 void gp_widget_table_set_offset(gp_widget *self, unsigned int off);
 
-#endif /* GP_WIDGET_TABLE_H__ */
+#endif /* GP_WIDGET_TABLE_H */

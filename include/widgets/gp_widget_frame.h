@@ -6,8 +6,8 @@
 
  */
 
-#ifndef GP_WIDGET_FRAME_H__
-#define GP_WIDGET_FRAME_H__
+#ifndef GP_WIDGET_FRAME_H
+#define GP_WIDGET_FRAME_H
 
 struct gp_widget_frame {
 	gp_widget *child;
@@ -35,4 +35,4 @@ gp_widget *gp_widget_frame_new(const char *label, int bold, gp_widget *child);
  */
 gp_widget *gp_widget_frame_put(gp_widget *self, gp_widget *child);
 
-#endif /* GP_WIDGET_FRAME_H__ */
+#endif /* GP_WIDGET_FRAME_H */

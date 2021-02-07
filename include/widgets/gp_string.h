@@ -6,8 +6,8 @@
 
  */
 
-#ifndef GP_STRING_H__
-#define GP_STRING_H__
+#ifndef GP_STRING_H
+#define GP_STRING_H
 
 /**
  * @brief Computes sum of sizes needed for a deep copy of an array of strings.
@@ -36,6 +36,6 @@ char **gp_string_arr_copy(const char *strings[], unsigned int len, void *buf);
  * @param ... parameters
  * @return Newly allocated string that should be freed later on.
  */
-char *gp_aprintf(const char *fmt, ...) __attribute__ ((format (printf, 1, 2))); 
+char *gp_aprintf(const char *fmt, ...) __attribute__ ((format (printf, 1, 2)));
 
-#endif /* GP_STRING_H__ */
+#endif /* GP_STRING_H */

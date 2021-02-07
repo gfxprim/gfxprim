@@ -6,8 +6,8 @@
 
  */
 
-#ifndef GP_WIDGET_RADIOBUTTON_H__
-#define GP_WIDGET_RADIOBUTTON_H__
+#ifndef GP_WIDGET_RADIOBUTTON_H
+#define GP_WIDGET_RADIOBUTTON_H
 
 #include <widgets/gp_widget_choice.h>
 
@@ -35,4 +35,4 @@ static inline gp_widget *gp_widget_radiobutton_new(const char *choices[],
 	                            selected, on_event, priv);
 }
 
-#endif /* GP_WIDGET_RADIOBUTTON_H__ */
+#endif /* GP_WIDGET_RADIOBUTTON_H */

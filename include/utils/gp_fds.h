@@ -9,8 +9,8 @@
  * Simple wrapper around poll and gp_vec.
  */
 
-#ifndef GP_FDS__
-#define GP_FDS__
+#ifndef GP_FDS
+#define GP_FDS
 
 #include <poll.h>
 
@@ -68,4 +68,4 @@ int gp_fds_rem(struct gp_fds *self, int fd);
  */
 int gp_fds_poll(struct gp_fds *self, int timeout);
 
-#endif /* GP_FDS__ */
+#endif /* GP_FDS */

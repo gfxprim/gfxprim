@@ -5,8 +5,8 @@
 
  */
 
-#ifndef GP_PROXY_CONN_H__
-#define GP_PROXY_CONN_H__
+#ifndef GP_PROXY_CONN_H
+#define GP_PROXY_CONN_H
 
 /*
  * Creates a UNIX socket and starts listening for connections.
@@ -24,4 +24,4 @@ int gp_proxy_server_init(const char *conn_path);
  */
 int gp_proxy_client_connect(const char *conn_path);
 
-#endif /* GP_PROXY_CONN_H__ */
+#endif /* GP_PROXY_CONN_H */

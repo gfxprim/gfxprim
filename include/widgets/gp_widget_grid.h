@@ -6,8 +6,8 @@
 
  */
 
-#ifndef GP_WIDGET_GRID_H__
-#define GP_WIDGET_GRID_H__
+#ifndef GP_WIDGET_GRID_H
+#define GP_WIDGET_GRID_H
 
 #include <stdint.h>
 
@@ -144,4 +144,4 @@ void gp_widget_grid_hborder_set(gp_widget *self, unsigned int padd, unsigned int
  */
 void gp_widget_grid_vborder_set(gp_widget *self, unsigned int padd, unsigned int fill);
 
-#endif /* GP_WIDGET_GRID_H__ */
+#endif /* GP_WIDGET_GRID_H */

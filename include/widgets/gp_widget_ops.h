@@ -6,8 +6,8 @@
 
  */
 
-#ifndef GP_WIDGET_OPS_H__
-#define GP_WIDGET_OPS_H__
+#ifndef GP_WIDGET_OPS_H
+#define GP_WIDGET_OPS_H
 
 #include <input/gp_event.h>
 #include <utils/gp_bbox.h>
@@ -279,4 +279,4 @@ void gp_widget_redraw_children(gp_widget *self);
  */
 void gp_widget_render(gp_widget *self, const gp_widget_render_ctx *ctx, int new_wh);
 
-#endif /* GP_WIDGET_OPS_H__ */
+#endif /* GP_WIDGET_OPS_H */

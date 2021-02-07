@@ -6,8 +6,8 @@
 
  */
 
-#ifndef GP_WIDGET_SCROLL_AREA_H__
-#define GP_WIDGET_SCROLL_AREA_H__
+#ifndef GP_WIDGET_SCROLL_AREA_H
+#define GP_WIDGET_SCROLL_AREA_H
 
 struct gp_widget_scroll_area {
 	/* offset for the layout inside */
@@ -61,4 +61,4 @@ int gp_widget_scroll_area_move(gp_widget *self, gp_coord x_off, gp_coord y_off);
  */
 gp_widget *gp_widget_scroll_area_put(gp_widget *self, gp_widget *child);
 
-#endif /* GP_WIDGET_SCROLL_AREA_H__ */
+#endif /* GP_WIDGET_SCROLL_AREA_H */

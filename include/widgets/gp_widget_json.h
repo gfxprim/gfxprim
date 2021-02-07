@@ -6,8 +6,8 @@
 
  */
 
-#ifndef GP_WIDGET_JSON_H__
-#define GP_WIDGET_JSON_H__
+#ifndef GP_WIDGET_JSON_H
+#define GP_WIDGET_JSON_H
 
 #include <widgets/gp_widget.h>
 
@@ -76,4 +76,4 @@ gp_widget *gp_widget_by_uid(void *uids, const char *uid, enum gp_widget_type typ
  */
 gp_widget *gp_widget_by_cuid(void *uids, const char *uid, enum gp_widget_class widget_class);
 
-#endif /* GP_WIDGET_JSON_H__ */
+#endif /* GP_WIDGET_JSON_H */

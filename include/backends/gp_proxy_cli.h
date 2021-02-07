@@ -5,8 +5,8 @@
 
  */
 
-#ifndef GP_PROXY_CLI_H__
-#define GP_PROXY_CLI_H__
+#ifndef GP_PROXY_CLI_H
+#define GP_PROXY_CLI_H
 
 #include <utils/gp_fds.h>
 #include <backends/gp_proxy_proto.h>
@@ -81,4 +81,4 @@ struct gp_proxy_cli *gp_proxy_cli_add(struct gp_proxy_cli **root, int cli_fd);
  */
 void gp_proxy_cli_rem(struct gp_proxy_cli **root, struct gp_proxy_cli *self);
 
-#endif /* GP_PROXY_CLI_H__ */
+#endif /* GP_PROXY_CLI_H */

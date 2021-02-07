@@ -6,8 +6,8 @@
 
  */
 
-#ifndef GP_WIDGET_TBOX_H__
-#define GP_WIDGET_TBOX_H__
+#ifndef GP_WIDGET_TBOX_H
+#define GP_WIDGET_TBOX_H
 
 #include <core/gp_seek.h>
 
@@ -154,4 +154,4 @@ void gp_widget_tbox_ins(gp_widget *self, ssize_t off,
 void gp_widget_tbox_del(gp_widget *self, ssize_t off,
                         enum gp_seek_whence whence, size_t len);
 
-#endif /* GP_WIDGET_TBOX_H__ */
+#endif /* GP_WIDGET_TBOX_H */

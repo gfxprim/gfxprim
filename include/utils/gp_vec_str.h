@@ -5,8 +5,8 @@
 
 */
 
-#ifndef GP_VEC_STR_H__
-#define GP_VEC_STR_H__
+#ifndef GP_VEC_STR_H
+#define GP_VEC_STR_H
 
 #include <string.h>
 #include <utils/gp_vec.h>
@@ -180,4 +180,4 @@ char *gp_vec_printf(char *self, const char *fmt, ...)
 char *gp_vec_vprintf(char *self, const char *fmt, va_list va)
                     __attribute__((warn_unused_result));
 
-#endif	/* GP_VEC_STR_H__ */
+#endif	/* GP_VEC_STR_H */

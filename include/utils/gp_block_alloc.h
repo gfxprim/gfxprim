@@ -10,8 +10,8 @@
 
  */
 
-#ifndef GP_BLOCK_ALLOC_H__
-#define GP_BLOCK_ALLOC_H__
+#ifndef GP_BLOCK_ALLOC_H
+#define GP_BLOCK_ALLOC_H
 
 typedef struct gp_block {
 	struct gp_block *next;
@@ -38,4 +38,4 @@ void *gp_block_alloc(gp_block **self, size_t size);
  */
 void gp_block_free(gp_block **self);
 
-#endif /* GP_BLOCK_ALLOC_H__ */
+#endif /* GP_BLOCK_ALLOC_H */

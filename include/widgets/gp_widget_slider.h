@@ -6,8 +6,8 @@
 
  */
 
-#ifndef GP_WIDGET_SLIDER_H__
-#define GP_WIDGET_SLIDER_H__
+#ifndef GP_WIDGET_SLIDER_H
+#define GP_WIDGET_SLIDER_H
 
 /**
  * @brief Allocate and initialize a slider widget.
@@ -41,4 +41,4 @@ void gp_widget_slider_set(gp_widget *self, int val);
  */
 int gp_widget_slider_get(gp_widget *self);
 
-#endif /* GP_WIDGET_SLIDER_H__ */
+#endif /* GP_WIDGET_SLIDER_H */

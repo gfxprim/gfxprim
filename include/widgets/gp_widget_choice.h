@@ -6,8 +6,8 @@
 
  */
 
-#ifndef GP_WIDGET_CHOICE_H__
-#define GP_WIDGET_CHOICE_H__
+#ifndef GP_WIDGET_CHOICE_H
+#define GP_WIDGET_CHOICE_H
 
 struct gp_widget_choice {
 	unsigned int sel;
@@ -67,4 +67,4 @@ struct json_object;
 gp_widget *gp_widget_choice_from_json(unsigned int widget_type,
                                       struct json_object *json, void **uids);
 
-#endif /* GP_WIDGET_CHOICE_H__ */
+#endif /* GP_WIDGET_CHOICE_H */

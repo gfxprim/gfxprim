@@ -6,8 +6,8 @@
 
  */
 
-#ifndef GP_DIR_CACHE_H__
-#define GP_DIR_CACHE_H__
+#ifndef GP_DIR_CACHE_H
+#define GP_DIR_CACHE_H
 
 #include <time.h>
 
@@ -108,4 +108,4 @@ gp_dir_entry *gp_dir_cache_get_filtered(gp_dir_cache *self, unsigned int pos);
  */
 int gp_dir_cache_inotify(gp_dir_cache *self);
 
-#endif /* GP_DIR_CACHE_H__ */
+#endif /* GP_DIR_CACHE_H */

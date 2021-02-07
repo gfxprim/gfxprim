@@ -6,8 +6,8 @@
 
  */
 
-#ifndef GP_BBOX_H__
-#define GP_BBOX_H__
+#ifndef GP_BBOX_H
+#define GP_BBOX_H
 
 #include <core/gp_types.h>
 #include <core/gp_common.h>
@@ -80,4 +80,4 @@ static inline int gp_bbox_intersects(gp_bbox box1, gp_bbox box2)
 #define GP_BBOX_FMT "[%i, %i] w=%u h=%u"
 #define GP_BBOX_PARS(bbox) (bbox).x, (bbox).y, (bbox).w, (bbox).h
 
-#endif /* GP_BBOX_H__ */
+#endif /* GP_BBOX_H */

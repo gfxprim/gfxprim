@@ -5,8 +5,8 @@
 
  */
 
-#ifndef GP_WIDGET_SWITCH_H__
-#define GP_WIDGET_SWITCH_H__
+#ifndef GP_WIDGET_SWITCH_H
+#define GP_WIDGET_SWITCH_H
 
 struct gp_widget_switch {
 	unsigned int active_layout;
@@ -67,4 +67,4 @@ gp_widget *gp_widget_switch_active(gp_widget *self);
 gp_widget *gp_widget_switch_put(gp_widget *self, unsigned int layout_nr,
                                 gp_widget *child);
 
-#endif /* GP_WIDGET_SWITCH_H__ */
+#endif /* GP_WIDGET_SWITCH_H */

@@ -6,8 +6,8 @@
 
  */
 
-#ifndef GP_WIDGET_TABS_H__
-#define GP_WIDGET_TABS_H__
+#ifndef GP_WIDGET_TABS_H
+#define GP_WIDGET_TABS_H
 
 struct gp_widget_tab {
 	char *label;
@@ -117,4 +117,4 @@ void gp_widget_tabs_set_active(gp_widget *self, unsigned int tab);
  */
 int gp_widget_tabs_tab_by_child(gp_widget *self, gp_widget *child);
 
-#endif /* GP_WIDGET_TABS_H__ */
+#endif /* GP_WIDGET_TABS_H */

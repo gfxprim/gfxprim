@@ -12,8 +12,8 @@
  * has only one event callback and sends a subset of event types.
  */
 
-#ifndef GP_WIDGET_EVENT_H__
-#define GP_WIDGET_EVENT_H__
+#ifndef GP_WIDGET_EVENT_H
+#define GP_WIDGET_EVENT_H
 
 #include <stdarg.h>
 #include <widgets/gp_widget_types.h>
@@ -166,4 +166,4 @@ static inline int gp_widget_send_widget_event(gp_widget *self,
 	return self->on_event(&ev);
 }
 
-#endif /* GP_WIDGET_EVENT_H__ */
+#endif /* GP_WIDGET_EVENT_H */

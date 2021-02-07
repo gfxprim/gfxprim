@@ -21,8 +21,8 @@
 
  */
 
-#ifndef GP_WIDGET_MARKUP_H__
-#define GP_WIDGET_MARKUP_H__
+#ifndef GP_WIDGET_MARKUP_H
+#define GP_WIDGET_MARKUP_H
 
 struct gp_markup;
 
@@ -67,4 +67,4 @@ void gp_widget_markup_set_var(gp_widget *self, unsigned int var_id, const char *
  */
 void gp_widget_markup_refresh(gp_widget *self);
 
-#endif /* GP_WIDGET_MARKUP_H__ */
+#endif /* GP_WIDGET_MARKUP_H */

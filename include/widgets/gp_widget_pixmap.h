@@ -6,8 +6,8 @@
 
  */
 
-#ifndef GP_WIDGET_PIXMAP_H__
-#define GP_WIDGET_PIXMAP_H__
+#ifndef GP_WIDGET_PIXMAP_H
+#define GP_WIDGET_PIXMAP_H
 
 struct gp_widget_pixmap {
 	unsigned int min_w, min_h;
@@ -56,4 +56,4 @@ static inline void gp_widget_pixmap_update(gp_widget *self)
 	self->pixmap->update = 1;
 }
 
-#endif /* GP_WIDGET_PIXMAP_H__ */
+#endif /* GP_WIDGET_PIXMAP_H */

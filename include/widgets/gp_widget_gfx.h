@@ -6,8 +6,8 @@
 
  */
 
-#ifndef GP_WIDGET_GFX_H__
-#define GP_WIDGET_GFX_H__
+#ifndef GP_WIDGET_GFX_H
+#define GP_WIDGET_GFX_H
 
 #include <core/gp_core.h>
 #include <gfx/gp_gfx.h>
@@ -32,4 +32,4 @@ void gp_triangle_down(gp_pixmap *pix, gp_coord x_center, gp_coord y_center,
 void gp_triangle_updown(gp_pixmap *pix, gp_coord x_center, gp_coord y_center,
                         gp_size base, gp_pixel color);
 
-#endif /* GP_WIDGET_GFX_H__ */
+#endif /* GP_WIDGET_GFX_H */

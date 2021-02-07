@@ -6,8 +6,8 @@
 
  */
 
-#ifndef GP_WIDGET_DIALOG_FILE_OPEN_H__
-#define GP_WIDGET_DIALOG_FILE_OPEN_H__
+#ifndef GP_WIDGET_DIALOG_FILE_OPEN_H
+#define GP_WIDGET_DIALOG_FILE_OPEN_H
 
 #include <widgets/gp_widget_types.h>
 
@@ -20,4 +20,4 @@ gp_widget_dialog *gp_widget_dialog_file_open_new(const char *path);
 
 const char *gp_widget_dialog_file_open_path(gp_widget_dialog *self);
 
-#endif /* GP_WIDGET_DIALOG_FILE_OPEN_H__ */
+#endif /* GP_WIDGET_DIALOG_FILE_OPEN_H */

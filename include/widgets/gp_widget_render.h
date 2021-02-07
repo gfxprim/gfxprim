@@ -6,8 +6,8 @@
 
  */
 
-#ifndef GP_WIDGET_RENDER_H__
-#define GP_WIDGET_RENDER_H__
+#ifndef GP_WIDGET_RENDER_H
+#define GP_WIDGET_RENDER_H
 
 #include <core/gp_core.h>
 #include <gfx/gp_gfx.h>
@@ -156,4 +156,4 @@ void gp_widgets_layout_init(gp_widget *layout, const char *win_tittle);
  */
 void gp_widget_render_zoom(int zoom_inc);
 
-#endif /* GP_WIDGET_RENDER_H__ */
+#endif /* GP_WIDGET_RENDER_H */

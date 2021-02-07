@@ -5,8 +5,8 @@
 
  */
 
-#ifndef GP_PROXY_SHM_H__
-#define GP_PROXY_SHM_H__
+#ifndef GP_PROXY_SHM_H
+#define GP_PROXY_SHM_H
 
 #include <backends/gp_proxy_proto.h>
 #include <core/gp_pixmap.h>
@@ -37,4 +37,4 @@ int gp_proxy_shm_resize(struct gp_proxy_shm *self, gp_size w, gp_size h);
 
 void gp_proxy_shm_exit(struct gp_proxy_shm *self);
 
-#endif /* GP_PROXY_SHM_H__ */
+#endif /* GP_PROXY_SHM_H */
