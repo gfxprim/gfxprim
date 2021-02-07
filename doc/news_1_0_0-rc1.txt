@@ -20,7 +20,7 @@ Loaders
 ~~~~~~~
 
 * LineConvert was written for automatic conversions of pixel types
-  with exacly same channels but different orgaization
+  with exactly same channels but different organization
  (such as between RGB888, BGR888 and xRGB888).
 * BMP loader gained support for less common formats such as RGB555, RLE8
 * PNM loaders were rewritten from scratch
