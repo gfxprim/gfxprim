@@ -11,8 +11,8 @@
 
 struct gp_widget_frame {
 	gp_widget *child;
+	gp_widget_tattr tattr;
 	uint8_t has_label:1;
-	uint8_t bold:1;
 	char label[];
 };
 
@@ -23,7 +23,7 @@ struct gp_widget_frame {
  * @bold: If non-zero frame label test is bold.
  * @child: Frame widget child widget.
  */
-gp_widget *gp_widget_frame_new(const char *label, int bold, gp_widget *child);
+gp_widget *gp_widget_frame_new(const char *label, gp_widget_tattr tattr, gp_widget *child);
 
 /**
  * @brief Puts a child widget into a frame widget.

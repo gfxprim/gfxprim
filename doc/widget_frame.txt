@@ -1,0 +1,39 @@
+Frame widget
+------------
+
+Frame is a widget that visually groups a set of widgets.
+
+.A frame widget
+image:frame.png[Frame widget]
+
+Frame attributes can be accessed as `widget->frame`.
+
+.Frame widget constructor
+[source,c]
+-------------------------------------------------------------------------------
+gp_widget *gp_widget_frame_new(const char *label, gp_widget_tattr tattr, gp_widget *child);
+-------------------------------------------------------------------------------
+
+.Sets a frame child
+[source,c]
+-------------------------------------------------------------------------------
+gp_widget *gp_widget_frame_put(gp_widget *self, gp_widget *child);
+-------------------------------------------------------------------------------
+
+Returns old frame child.
+
+.Frame JSON attributes
+[cols=",,,3",options="header"]
+|===================================================
+| Attribute |  Type  | Default | Description
+|  +label+  | string |         | Frame label
+|  +tattr+  |  tattr |  NULL   | link:widgets_tattr.html[Text attribute], e.g. bold.
+|  +widget+ |        |         | Frame child widget
+|===================================================
+
+
+.Frame widget events
+[cols=",3",options="header"]
+|===================================================
+| Widget event value | Description
+|===================================================

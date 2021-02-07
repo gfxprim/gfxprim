@@ -23,9 +23,10 @@ static unsigned int frame_w(const gp_widget_render_ctx *ctx)
 
 static unsigned int frame_h(gp_widget *self, const gp_widget_render_ctx *ctx)
 {
+	const gp_text_style *font = gp_widget_tattr_font(self->frame->tattr, ctx);
+
 	if (self->frame->has_label) {
-		return ctx->padd +
-		       gp_text_height(self->frame->bold ? ctx->font_bold : ctx->font);
+		return ctx->padd + gp_text_height(font);
 	}
 
 	return 2 * ctx->padd;
@@ -38,16 +39,21 @@ static unsigned int payload_off_x(const gp_widget_render_ctx *ctx)
 
 static unsigned int payload_off_y(gp_widget *self, const gp_widget_render_ctx *ctx)
 {
+	const gp_text_style *font = gp_widget_tattr_font(self->frame->tattr, ctx);
+
 	if (self->frame->has_label)
-		return gp_text_height(ctx->font);
+		return gp_text_height(font);
 
 	return ctx->padd;
 }
 
 static unsigned int min_w(gp_widget *self, const gp_widget_render_ctx *ctx)
 {
-	unsigned int min_w = GP_MAX(gp_text_width(ctx->font, self->frame->label) + 2 * ctx->padd,
-		                    gp_widget_min_w(self->frame->child, ctx));
+	const gp_text_style *font = gp_widget_tattr_font(self->frame->tattr, ctx);
+	unsigned int min_w;
+
+	min_w = GP_MAX(gp_text_width(font, self->frame->label) + 2 * ctx->padd,
+		       gp_widget_min_w(self->frame->child, ctx));
 
 	return frame_w(ctx) + min_w;
 }
@@ -75,6 +81,7 @@ static void render(gp_widget *self, const gp_offset *offset,
 	unsigned int h = self->h;
 	struct gp_widget_frame *frame = self->frame;
 	struct gp_widget *payload = frame->child;
+	const gp_text_style *font = gp_widget_tattr_font(self->frame->tattr, ctx);
 
 	if (gp_widget_should_redraw(self, flags)) {
 		gp_widget_ops_blit(ctx, x, y, w, h);
@@ -119,7 +126,6 @@ static void render(gp_widget *self, const gp_offset *offset,
 		              h - ctx->padd/2 - payload_off_y(self, ctx)/2, ctx->text_color);
 
 		if (frame->has_label) {
-			gp_text_style *font = self->frame->bold ? ctx->font_bold : ctx->font;
 			unsigned int sw = gp_text_width(font, self->frame->label) + ctx->padd;
 
 			gp_fill_rect_xywh(ctx->buf, x + ctx->padd + ctx->padd/2, y,
@@ -165,22 +171,26 @@ static int focus(gp_widget *self, int sel)
 static gp_widget *json_to_frame(json_object *json, void **uids)
 {
 	const char *label = NULL;
-	json_object *jwidget = NULL;
-	int bold = 0;
+	json_object *json_child = NULL;
+	const char *strattr = NULL;
+	gp_widget_tattr tattr = 0;
 
 	json_object_object_foreach(json, key, val) {
 		if (!strcmp(key, "label"))
 			label = json_object_get_string(val);
 		else if (!strcmp(key, "widget"))
-			jwidget = val;
-		else if (!strcmp(key, "bold"))
-			bold = 1;
+			json_child = val;
+		else if (!strcmp(key, "tattr"))
+			strattr = json_object_get_string(val);
 		else
 			GP_WARN("Invalid frame key '%s'", key);
 	}
 
-	gp_widget *child = gp_widget_from_json(jwidget, uids);
-	gp_widget *ret = gp_widget_frame_new(label, bold, child);
+	if (gp_widget_tattr_parse(strattr, &tattr))
+		GP_WARN("Invalid text attribute '%s'", strattr);
+
+	gp_widget *child = gp_widget_from_json(json_child, uids);
+	gp_widget *ret = gp_widget_frame_new(label, tattr, child);
 
 	if (!ret)
 		gp_widget_free(child);
@@ -200,12 +210,13 @@ struct gp_widget_ops gp_widget_frame_ops = {
 	.id = "frame",
 };
 
-gp_widget *gp_widget_frame_new(const char *label, int bold, gp_widget *child)
+gp_widget *gp_widget_frame_new(const char *label, gp_widget_tattr tattr,
+                               gp_widget *child)
 {
 	gp_widget *ret;
 	size_t size = sizeof(struct gp_widget_frame);
 
-	if (bold && !label)
+	if (tattr && !label)
 		GP_WARN("Bold set for a frame without a label!");
 
 	if (label)
@@ -216,7 +227,7 @@ gp_widget *gp_widget_frame_new(const char *label, int bold, gp_widget *child)
 		return NULL;
 
 	ret->frame->child = child;
-	ret->frame->bold = bold;
+	ret->frame->tattr = tattr;
 
 	if (label) {
 		ret->frame->has_label = 1;

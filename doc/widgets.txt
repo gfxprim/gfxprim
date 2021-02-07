@@ -41,3 +41,4 @@ Individual widgets documentation
 * link:widget_choice.html[Spinbutton widget]
 * link:widget_tbox.html[Tbox widget]
 * link:widget_tabs.html[Tabs widget]
+* link:widget_frame.html[Frame widget]
