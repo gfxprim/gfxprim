@@ -32,6 +32,11 @@ gp_widget *gp_widget_from_json(json_object *json, void **uids)
 	unsigned int shrink;
 	int (*on_event)(gp_widget_event *) = NULL;
 
+	if (!json_object_is_type(json, json_type_object)) {
+		GP_WARN("Widget must be JSON object!");
+		return NULL;
+	}
+
 	if (json_object_object_length(json) == 0)
 		return NULL;
 
