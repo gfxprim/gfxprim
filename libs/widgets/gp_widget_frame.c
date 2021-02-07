@@ -173,7 +173,7 @@ static gp_widget *json_to_frame(json_object *json, void **uids)
 	const char *label = NULL;
 	json_object *json_child = NULL;
 	const char *strattr = NULL;
-	gp_widget_tattr tattr = 0;
+	gp_widget_tattr tattr = GP_TATTR_BOLD;
 
 	json_object_object_foreach(json, key, val) {
 		if (!strcmp(key, "label"))
@@ -186,7 +186,7 @@ static gp_widget *json_to_frame(json_object *json, void **uids)
 			GP_WARN("Invalid frame key '%s'", key);
 	}
 
-	if (gp_widget_tattr_parse(strattr, &tattr))
+	if (strattr && gp_widget_tattr_parse(strattr, &tattr))
 		GP_WARN("Invalid text attribute '%s'", strattr);
 
 	gp_widget *child = gp_widget_from_json(json_child, uids);

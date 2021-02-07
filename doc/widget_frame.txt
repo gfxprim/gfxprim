@@ -27,7 +27,7 @@ Returns old frame child.
 |===================================================
 | Attribute |  Type  | Default | Description
 |  +label+  | string |         | Frame label
-|  +tattr+  |  tattr |  NULL   | link:widgets_tattr.html[Text attribute], e.g. bold.
+|  +tattr+  |  tattr | "bold"  | link:widgets_tattr.html[Text attribute], e.g. bold.
 |  +widget+ |        |         | Frame child widget
 |===================================================
 
