@@ -695,12 +695,20 @@ static void zoom_set(struct loader_params *params, float mul)
 	show_image(params);
 }
 
+#define PRINT(msg) do { \
+	if (write(STDERR_FILENO, msg, sizeof(msg) - 1)) { \
+		/* gcc silencer */ \
+	} \
+} while (0)
+
 static void sighandler(int signo)
 {
-	if (backend != NULL)
+	(void) signo;
+
+	if (backend)
 		gp_backend_exit(backend);
 
-	fprintf(stderr, "Got signal %i\n", signo);
+	PRINT("Got signal\n");
 
 	_exit(1);
 }
