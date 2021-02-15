@@ -3,7 +3,7 @@ Blits
 
 NOTE: You may want to see the link:coordinate_system.html[coordinate system] first.
 
-Blit copies a rectangular area from one pixmap into the another one. Blits can
+Blit copies a rectangular area from one pixmap to another. Blits can
 do automatic pixel conversion i.e. swap R a B in blit from RGB888 to BGR888 or
 even convert RGB image into grayscale.
 

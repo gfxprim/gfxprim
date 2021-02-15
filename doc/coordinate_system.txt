@@ -4,12 +4,12 @@ Coordinate System
 Coordinates
 ~~~~~~~~~~~
 
-GFXprim uses Cartesian coordinate system. The pixel '(0, 0)' lies at the upper
-left corner of the bitmap and coordinates grows to the right and to the
+GFXprim uses a Cartesian coordinate system. The pixel '(0, 0)' lies at the upper
+left corner of the bitmap and coordinates increase to the right and to the
 bottom. The last valid pixel, that still lies in the bitmap of size 'w' and
 'h', occupies coordinate '(w-1,h-1)'. The precise position of the point with
-integer coordinates is in the middle of the pixel (and borders between the
-pixels lies are integers + 0.5).
+integer coordinates is in the middle of the pixel (and the border is equidistant
+between the pixel centers i.e. +/-0.5).
 
 [[Coordinates]]
 .GFXprim coordinate system and gp_line_xyxy(5, 3, 9, 3)
@@ -18,11 +18,11 @@ image::coordinates-1.svg["Coordinate system"]
 Width and Height
 ~~~~~~~~~~~~~~~~
 
-The width and height, when passed as an argument, are interpreted as number of
-pixels to draw (rather than lengt from one pixel center to another pixel
-center). Which means that for rectangle of size '(w,h)' starting at '(x,y)'
-first pixel to draw would be '(x,y)' and last one would be '(x+w-1,y+h-1)'.
-Especially when 'w' or 'h' is less than or equal to zero no action is taken.
+The width and height, when passed as an argument, are interpreted as the number of
+pixels to draw (rather than the length from one pixel center to another pixel
+center). Which means that for a rectangle of size '(w,h)' starting at '(x,y)'
+the first pixel to draw would be '(x,y)' and last one would be '(x+w-1,y+h-1)'.
+In the degenerate case, when 'w' or 'h' is less than or equal to zero, no action is taken.
 
 [[Coordinates_Rectangle]]
 .gp_rectangle_xywh(2, 1, 8, 4)

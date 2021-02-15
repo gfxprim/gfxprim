@@ -27,59 +27,61 @@ formats is just a matter of typing +make rebuild+.
 Core
 ----
 
-Core of the library contains minimal amount of code to define interface that
-is shared between all parts of the library.
+The Core of the library contains a minimal amount of code to define
+interfaces that are shared between all parts of the library.
 
-The most important part of the core is link:pixmap.html[gp_pixmap] structure
-that represents in-memory pixmap.
+The most important part of the core is the link:pixmap.html[gp_pixmap]
+structure that represents an in-memory pixmap.
 
 The Core also contains generated code for basic operations such as
-link:get_put_pixel.html[gp_get_pixel] and link:get_put_pixel.html[gp_put_pixel]
-and optimized functions for writing continous line of pixels 'gp_write_pixels'
-that are base for the more complex drawing primitives in GFX or for graphics
-operations in Filters.
+link:get_put_pixel.html[gp_get_pixel], link:get_put_pixel.html[gp_put_pixel]
+and optimized functions for writing continous lines of pixels 'gp_write_pixels'
+that are a base for the more complex drawing primitives in GFX or for the
+graphics operations in Filters.
 
 link:blits.html[Blits] are functions used to copy part of one bitmap into
 another bitmap. The blits be also used for primitive bitmap pixel type
 conversions (i.e. RGB888 vs BGR888).
 
-link:progress_callback.html[Progress Callback] is an interface that allows you
-to monitor progress of an operation it is mainly used in loaders and filters.
-Generally any operation that is not really quick takes optional pointer to
-progress callback that allows your program to monitor and possibly abort the
-operation.
+link:progress_callback.html[Progress Callback] is an interface that
+allows you to monitor progress of an operation. It is mainly used in
+loaders and filters. Generally, any operation that is not very quick
+takes an optional pointer to a progress-callback that allows your
+program to monitor and possibly abort the operation.
 
-link:debug.html[Debug] interface is used as unified facility to print debug
-messages, control debug level, etc.
+The link:debug.html[Debug] interface is used as a unified facility to
+print debug messages, control debug level, etc.
 
 There is also support for link:gamma.html[Gamma] correction. Unfortunatelly
 not all parts of library use it at the moment.
 
-And last but not least Core is a home for some link:core.html[common macros]
+And last but not least: Core is a home for some link:core.html[common macros]
 that are used from different parts of the library.
 
 Gfx
 ---
 
 link:gfx.html[Gfx] is part of the library that implements basic
-graphics primitives such as lines, circles, polygons, etc. Clasicall
-primitives are nearly finished. Work on anti aliased primitives has been
+graphics primitives such as lines, circles, polygons, etc. Classical
+primitives are nearly finished. Work on anti-aliased primitives has been
 started.
 
 Text
 ----
 
-link:text.html[Text] part of the library implements basic support for
-printing text into the bitmap. There are two bitmap fonts compiled directly
-into the library and we support True Type fonts through
-link:http://freetype.org[FreeType] (so far ASCII printable characters only).
+The link:text.html[Text] part of the library implements basic support
+for printing text into a bitmap. There are two bitmap fonts compiled
+directly into the library and we support True Type fonts through
+link:http://freetype.org[FreeType] (so far ASCII printable characters
+only).
 
 [[Loaders]]
 Loaders
 -------
 
-link:loaders.html[Loaders] are part that is resposible for loading and saving
-images into various standard formats (PNG, JPEG, GIF, TIFF, BMP, PNM, etc...).
+link:loaders.html[Loaders] are the part that is resposible for loading
+and saving images into various standard formats (PNG, JPEG, GIF, TIFF,
+BMP, PNM, etc...).
 
 .Currently supported formats
 [width="100%",options="header"]
@@ -147,8 +149,8 @@ images into various standard formats (PNG, JPEG, GIF, TIFF, BMP, PNM, etc...).
 Filters
 -------
 
-link:filters.html[Filters] are part of the library that implements bitmap
-image filters.
+link:filters.html[Filters] are the part of the library that implements
+bitmap image filters.
 
 .Currently Implemented Point Filters
 [width="100%",options="header"]
@@ -224,18 +226,18 @@ image filters.
 Backends
 --------
 
-link:backends.html[Backends] together with link:input.html[Input] are API for
-drawing on screen (or into a window) and for getting keystrokes/mouse
-coordinates. So far we support X11, linux framebuffer, SDL and AALib as a
-graphics backend.
+link:backends.html[Backends] together with link:input.html[Input] form
+an API for drawing on screen (or into a window) and for getting
+keystrokes/mouse coordinates. So far we support X11, the Linux
+framebuffer, SDL and AALib as graphics backends.
 
-There is also a virtual backend used for testing that allows you to create a
-backend of any pixel type on the top of other backends.
+There is also a virtual backend used for testing. This allows you to
+create a backend of any pixel type on the top of other backends.
 
 Python bindings
 ---------------
 
-Python bindings currently covers most of the library, there is (work in
+Python bindings currently cover most of the library, there is (work in
 progress) documentation for link:core_python.html[Core],
 link:gfx_python.html[Gfx], link:loaders_python.html[Loaders],
 link:filters_python.html[Filters] and link:backends_python.html[Backends].

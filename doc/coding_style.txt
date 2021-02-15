@@ -6,7 +6,7 @@ This document defines coding style for GFXprim.
 C Coding Style
 ~~~~~~~~~~~~~~
 
-GFXprim is written in C. There is no C++ code in and I mean it. A few headers
+GFXprim is written in C. There is no C++ code and I mean it. A few headers
 do contain '#ifndef __cplusplus' so that you can interface GFXprim headers as
 'extern C' without problems. If this doesn't work, let us know.
 

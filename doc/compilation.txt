@@ -18,7 +18,7 @@ Dependencies
 * link:http://code.google.com/p/openjpeg/[openjpeg] >= 2.0.0
 * link:http://www.zlib.net/[zlib] (usually installed as libpng dependency)
 
-*Optinal Text rendering*
+*Optional Text rendering*
 
 * link:http://www.freetype.org/[FreeType]
 * link:https://www.freedesktop.org/wiki/Software/fontconfig/[Fontconfig]

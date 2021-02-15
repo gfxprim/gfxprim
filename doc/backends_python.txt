@@ -1,17 +1,18 @@
 Python Backends module
 ----------------------
 
-The python binding maps mostly to the C API with the 'GP_' prefix stripped.
+The Python binding mostly maps to the C API with the 'GP_' prefix stripped.
 
 Backend Initialization
 ~~~~~~~~~~~~~~~~~~~~~~
 
-Instead of having one unified initialization interface each backend has it's
-specific function and semantics but once backend is initialized the backend
-structure provides unified API for controlling the drawing.
+Instead of having one unified initialization interface, each backend
+has it's specific function and semantics. Still, once a backend is
+initialized, the backend structure provides a unified API for
+controlling the drawing.
 
-There is however generic backend initialization function that takes a string
-as a parameter that may contain backend-specific settings.
+There is however, a generic backend initialization function that takes
+a string as a parameter that may contain backend-specific settings.
 
 
 BackendX11Init

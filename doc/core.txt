@@ -1,20 +1,20 @@
 Library Core
 ------------
 
-Library core contains all basic data structures and functions that forms the
+The Library core contains all basic data structures and functions that form the
 glue which holds the GFXprim libraries together.
 
-The most important data structure is a link:pixmap.html[Pixmap] which
-describes in-memory pixmap which is used extensively in all parts of the
+The most important data structure is link:pixmap.html[Pixmap] which
+describes an in-memory pixmap which is used extensively in all parts of the
 library.
 
 Core also contains link:gen.html[generated] code for basic pixel manipulations
-such as link:get_put_pixel.html[GetPixel and PutPixel] as well as
+such as link:get_put_pixel.html[GetPixel and PutPixel] in addition to the
 link:blits.html[Blits] implementation.
 
 Library Core is a place to implement common functinonality that is used from
 the rest of the GFXprim modules, for example the link:debug.html[Debug layer]
-or link:progress_callback.html[Progress callback].
+or the link:progress_callback.html[Progress callback].
 
 .Main Core library parts
 [grid="rows"]
