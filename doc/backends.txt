@@ -1,10 +1,11 @@
 Drawing Backends
 ----------------
 
-Drawing backends provide means to draw on computer screen or into a window.
-Instead of having one unified initialization interface each backend has it's
-specific function and semantics but once backend is initialized the backend
-structure provides unified API for controlling the drawing.
+The Drawing backends provide means to draw on to a computer screen or
+into a window. Instead of having one unified initialization interface,
+each backend has its specific function and semantics. However, once a
+backend is initialized, the backend structure provides a unified API
+for controlling the drawing.
 
 TIP: For example usage see backend link:example_backend.html[example].
 
@@ -34,8 +35,8 @@ enum gp_linux_fb_flags {
 gp_backend *gp_linux_fb_init(const char *path, int flags);
 -------------------------------------------------------------------------------
 
-Initializes mmaped frame-buffer backend. The path is path to the frame-buffer
-device i.e. '/dev/fbX'.
+Initializes a memory mapped frame-buffer backend. The path is path to
+the frame-buffer device i.e. '/dev/fbX'.
 
 If 'GP_FB_INPUT_KBD' flag is set console KBD driver is used to feed keystrokes
 into the event queue, otherwise no events are generated and you are expected to
