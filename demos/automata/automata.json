@@ -1,0 +1,101 @@
+{
+    "version": 1,
+    "cols": 1,
+    "rows": 4,
+    "align": "fill",
+    "rfill": "98, 1, 1, 1",
+    "widgets": [
+	{
+	    "type": "pixmap",
+	    "on_event": "pixmap_on_event",
+	    "align": "fill",
+	    "w": 64,
+	    "h": 64,
+	    "uid": "pixmap"
+ 	},
+	{
+	    "align": "center",
+	    "cols": 8,
+	    "widgets": [
+		{
+		    "type": "tbox",
+		    "on_event": "rule_widget_on_event",
+		    "len": 3,
+		    "max_len": 3,
+		    "text": "110",
+		},
+		{
+		    "type": "label",
+		    "text": "Rule No.",
+		    "halign": "left",
+		},
+		{
+		    "type": "checkbox",
+		    "label": "Reversible?",
+		    "on_event": "rule_widget_on_event",
+		},
+		{
+		    "type": "tbox",
+		    "len": 2,
+		    "max_len": 2,
+		    "text": "1",
+		    "on_event": "width_widget_on_event",
+		},
+		{
+		    "type": "label",
+		    "text": "Width X 64",
+		},
+		{
+		    "type": "tbox",
+		    "len": 4,
+		    "max_len": 4,
+		    "text": "64",
+		    "on_event": "height_widget_on_event",
+		},
+		{
+		    "type": "label",
+		    "text": "Height",
+		},
+	    ]
+	},
+	{
+	    "align": "center",
+	    "cols": 2,
+	    "widgets": [
+		{
+		    "type": "tbox",
+		    "uid": "init",
+		    "on_event": "init_widget_on_event",
+		    "len": 40,
+		},
+		{
+		    "type": "label",
+		    "text": "Initial Conditions"
+		}
+	    ]
+	},
+	{
+	    "align": "center",
+	    "cols": 3,
+	    "widgets": [
+		{
+		    "type": "button",
+		    "btype": "open",
+		    "label": "Select Dir",
+		    "on_event": "select_dir_on_event",
+		},
+		{
+		    "type": "tbox",
+		    "uid": "file path",
+		    "len": 40,
+		},
+		{
+		    "type": "button",
+		    "btype": "save",
+		    "label": "Save",
+		    "on_event": "save_on_event",
+		}
+	    ]
+	},
+    ]
+}
