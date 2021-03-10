@@ -70,13 +70,11 @@ int main(void)
 	gp_backend_flip(b);
 
 	for (;;) {
-		gp_event ev;
+		gp_event *ev = gp_backend_wait_event(b);
 
-		gp_backend_wait_event(b, &ev);
-
-		switch (ev.type) {
+		switch (ev->type) {
 		case GP_EV_KEY:
-			switch (ev.val) {
+			switch (ev->val) {
 			case GP_KEY_ESC:
 			case GP_KEY_Q:
 				gp_backend_exit(b);
@@ -85,7 +83,7 @@ int main(void)
 			}
 		break;
 		case GP_EV_SYS:
-			switch (ev.code) {
+			switch (ev->code) {
 			case GP_EV_SYS_RESIZE:
 			case GP_EV_SYS_QUIT:
 				gp_backend_exit(b);

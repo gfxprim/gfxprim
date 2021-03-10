@@ -90,7 +90,7 @@ static void sdl_wait(struct gp_backend *self __attribute__((unused)))
 	//sdl_put_event(&ev);
 
 	for (;;) {
-		if (gp_event_queue_events_queued(&self->event_queue))
+		if (gp_event_queue_events(&self->event_queue))
 			return;
 
 		SDL_mutexP(mutex);

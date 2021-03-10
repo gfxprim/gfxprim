@@ -166,7 +166,7 @@ static void wait_timers_poll(gp_backend *self)
 
 		self->poll(self);
 
-		if (gp_backend_events_queued(self))
+		if (gp_backend_events(self))
 			return;
 
 		usleep(10000);
@@ -194,29 +194,29 @@ void gp_backend_wait(gp_backend *self)
 	self->wait(self);
 }
 
-int gp_backend_wait_event(gp_backend *self, gp_event *ev)
+gp_event *gp_backend_wait_event(gp_backend *self)
 {
-	int ret;
+	gp_event *ev;
 
 	for (;;) {
-		if ((ret = gp_backend_get_event(self, ev)))
-			return ret;
+		if ((ev = gp_backend_get_event(self)))
+			return ev;
 
 		gp_backend_wait(self);
 	}
 }
 
-int gp_backend_poll_event(gp_backend *self, gp_event *ev)
+gp_event *gp_backend_poll_event(gp_backend *self)
 {
-	int ret;
+	gp_event *ev;
 
-	if ((ret = gp_backend_get_event(self, ev)))
-		return ret;
+	if ((ev = gp_backend_get_event(self)))
+		return ev;
 
 	gp_backend_poll(self);
 
-	if ((ret = gp_backend_get_event(self, ev)))
-		return ret;
+	if ((ev = gp_backend_get_event(self)))
+		return ev;
 
-	return 0;
+	return NULL;
 }

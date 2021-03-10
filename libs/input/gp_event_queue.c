@@ -25,33 +25,8 @@ void gp_event_queue_init(gp_event_queue *self,
 	self->queue_first = 0;
 	self->queue_last = 0;
 	self->queue_size = queue_size ? queue_size : GP_EVENT_QUEUE_SIZE;
-}
 
-gp_event_queue *gp_event_queue_alloc(unsigned int screen_w,
-                                     unsigned int screen_h,
-                                     unsigned int queue_size)
-{
-	size_t size;
-	gp_event_queue *new;
-
-	size = sizeof(gp_event_queue) +
-	       (queue_size - GP_EVENT_QUEUE_SIZE) * sizeof(gp_event);
-
-	new = malloc(size);
-
-	if (new == NULL) {
-		GP_WARN("Malloc failed :(");
-		return NULL;
-	}
-
-	gp_event_queue_init(new, screen_w, screen_h, queue_size);
-
-	return new;
-}
-
-void gp_event_queue_free(gp_event_queue *self)
-{
-	free(self);
+	memset(&self->state, 0, sizeof(self->state));
 }
 
 void gp_event_queue_set_screen_size(gp_event_queue *self,
@@ -83,7 +58,7 @@ void gp_event_queue_set_cursor_pos(gp_event_queue *self,
 	self->cur_state.cursor_y = y;
 }
 
-unsigned int gp_event_queue_events_queued(gp_event_queue *self)
+unsigned int gp_event_queue_events(gp_event_queue *self)
 {
 	if (self->queue_first <= self->queue_last)
 		return self->queue_last - self->queue_first;
@@ -91,28 +66,83 @@ unsigned int gp_event_queue_events_queued(gp_event_queue *self)
 	return self->queue_size - (self->queue_last - self->queue_first);
 }
 
-int gp_event_queue_get(gp_event_queue *self, gp_event *ev)
+static char keys_to_ascii[] = {
+	   0x00, 0x1b,  '1',  '2',  '3',  '4',  '5',  '6',  '7',  '8',
+	    '9',  '0',  '-',  '=', 0x08, '\t',  'q',  'w',  'e',  'r',
+	    't',  'y',  'u',  'i',  'o',  'p',  '[',  ']', '\n', 0x00,
+	    'a',  's',  'd',  'f',  'g',  'h',  'j',  'k',  'l',  ';',
+	   '\'',  '`', 0x00, '\\',  'z',  'x',  'c',  'v',  'b',  'n',
+	    'm',  ',',  '.',  '/', 0x00,  '*', 0x00,  ' ', 0x00, 0x00,
+	   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+	   0x00,  '7',  '8',  '9',  '-',  '4',  '5',  '6',  '+',  '1',
+	    '2',  '3',  '0',  '.'
+};
+
+static char keys_to_ascii_shift[] = {
+	   0x00, 0x1b,  '!',  '@',  '#',  '$',  '%',  '^',  '&',  '*',
+	    '(',  ')',  '_',  '+', 0x08, '\t',  'Q',  'W',  'E',  'R',
+	    'T',  'Y',  'U',  'I',  'O',  'P',  '{',  '}', '\n', 0x00,
+	    'A',  'S',  'D',  'F',  'G',  'H',  'J',  'K',  'L',  ':',
+	    '"',  '~', 0x00,  '|',  'Z',  'X',  'C',  'V',  'B',  'N',
+	    'M',  '<',  '>',  '?', 0x00,  '*', 0x00,  ' ', 0x00, 0x00,
+	   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+	   0x00,  '7',  '8',  '9',  '-',  '4',  '5',  '6',  '+',  '1',
+	    '2',  '3',  '0',  '.'
+};
+
+static void key_to_ascii(gp_event_queue *self, gp_event *ev)
+{
+	unsigned int key = ev->key.key;
+
+	ev->key.ascii = 0;
+
+	if (gp_event_key_state_pressed(&self->state, GP_KEY_LEFT_SHIFT) ||
+	    gp_event_key_state_pressed(&self->state, GP_KEY_RIGHT_SHIFT)) {
+		if (ev->key.key < sizeof(keys_to_ascii_shift))
+			ev->key.ascii = keys_to_ascii_shift[key];
+	} else {
+		if (ev->key.key < sizeof(keys_to_ascii))
+			ev->key.ascii = keys_to_ascii[key];
+	}
+}
+
+gp_event *gp_event_queue_get(gp_event_queue *self)
 {
 	if (self->queue_first == self->queue_last)
-		return 0;
+		return NULL;
 
-	*ev = self->events[self->queue_first];
+	gp_event *event = &self->events[self->queue_first];
 
 	self->queue_first = (self->queue_first + 1) % self->queue_size;
 
-	return 1;
+	if (event->type == GP_EV_KEY) {
+		switch (event->code) {
+		case GP_EV_KEY_UP:
+			gp_event_key_state_release(&self->state, event->val);
+		break;
+		case GP_EV_KEY_DOWN:
+			gp_event_key_state_press(&self->state, event->val);
+		break;
+		}
+
+		key_to_ascii(self, event);
+	}
+
+	return event;
 }
 
-int gp_event_queue_peek(gp_event_queue *self, gp_event *ev)
+gp_event *gp_event_queue_peek(gp_event_queue *self)
 {
 	if (self->queue_first == self->queue_last)
-		return 0;
+		return NULL;
 
-	*ev = self->events[self->queue_first];
-
-	return 1;
+	return &(self->events[self->queue_first]);
 }
 
+/*
+ * We avoid overriding an position before the queue_first since that may have
+ * been returned by gp_event_get() previously.
+ */
 static void event_put(gp_event_queue *self, gp_event *ev)
 {
 	unsigned int next = (self->queue_last + 1) % self->queue_size;
@@ -244,58 +274,13 @@ void gp_event_queue_push_abs(gp_event_queue *self,
 	event_put(self, &self->cur_state);
 }
 
-static char keys_to_ascii[] = {
-	   0x00, 0x1b,  '1',  '2',  '3',  '4',  '5',  '6',  '7',  '8',
-	    '9',  '0',  '-',  '=', 0x08, '\t',  'q',  'w',  'e',  'r',
-	    't',  'y',  'u',  'i',  'o',  'p',  '[',  ']', '\n', 0x00,
-	    'a',  's',  'd',  'f',  'g',  'h',  'j',  'k',  'l',  ';',
-	   '\'',  '`', 0x00, '\\',  'z',  'x',  'c',  'v',  'b',  'n',
-	    'm',  ',',  '.',  '/', 0x00,  '*', 0x00,  ' ', 0x00, 0x00,
-	   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-	   0x00,  '7',  '8',  '9',  '-',  '4',  '5',  '6',  '+',  '1',
-	    '2',  '3',  '0',  '.'
-};
-
-static char keys_to_ascii_shift[] = {
-	   0x00, 0x1b,  '!',  '@',  '#',  '$',  '%',  '^',  '&',  '*',
-	    '(',  ')',  '_',  '+', 0x08, '\t',  'Q',  'W',  'E',  'R',
-	    'T',  'Y',  'U',  'I',  'O',  'P',  '{',  '}', '\n', 0x00,
-	    'A',  'S',  'D',  'F',  'G',  'H',  'J',  'K',  'L',  ':',
-	    '"',  '~', 0x00,  '|',  'Z',  'X',  'C',  'V',  'B',  'N',
-	    'M',  '<',  '>',  '?', 0x00,  '*', 0x00,  ' ', 0x00, 0x00,
-	   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-	   0x00,  '7',  '8',  '9',  '-',  '4',  '5',  '6',  '+',  '1',
-	    '2',  '3',  '0',  '.'
-};
-
-/*
- * Fills key ascii value accordingly to keys pressed.
- */
-static void key_to_ascii(gp_event *ev)
-{
-	unsigned int key = ev->key.key;
-
-	ev->key.ascii = 0;
-
-	if (gp_event_get_key(ev, GP_KEY_LEFT_SHIFT) ||
-	    gp_event_get_key(ev, GP_KEY_RIGHT_SHIFT)) {
-		if (ev->key.key < sizeof(keys_to_ascii_shift))
-			ev->key.ascii = keys_to_ascii_shift[key];
-	} else {
-		if (ev->key.key < sizeof(keys_to_ascii))
-			ev->key.ascii = keys_to_ascii[key];
-	}
-}
-
 void gp_event_queue_push_key(gp_event_queue *self,
                              uint32_t key, uint8_t code, struct timeval *time)
 {
 	switch (code) {
 	case GP_EV_KEY_UP:
-		gp_event_reset_key(&self->cur_state, key);
 	break;
 	case GP_EV_KEY_DOWN:
-		gp_event_set_key(&self->cur_state, key);
 	break;
 	case GP_EV_KEY_REPEAT:
 	break;
@@ -308,8 +293,6 @@ void gp_event_queue_push_key(gp_event_queue *self,
 	self->cur_state.type = GP_EV_KEY;
 	self->cur_state.code = code;
 	self->cur_state.key.key = key;
-
-	key_to_ascii(&self->cur_state);
 
 	set_time(self, time);
 

@@ -384,7 +384,7 @@ int gp_widgets_event(gp_event *ev, gp_widget *layout)
 
 	switch (ev->type) {
 	case GP_EV_KEY:
-		if (gp_event_get_key(ev, GP_KEY_LEFT_CTRL) &&
+		if (gp_widget_event_key_pressed(ev, GP_KEY_LEFT_CTRL) &&
 		    ev->code == GP_EV_KEY_DOWN) {
 			switch (ev->val) {
 			case GP_KEY_UP:
@@ -397,8 +397,8 @@ int gp_widgets_event(gp_event *ev, gp_widget *layout)
 			break;
 			}
 		}
-		if ((gp_event_get_key(ev, GP_KEY_LEFT_ALT) ||
-		     gp_event_get_key(ev, GP_KEY_LEFT_ALT)) &&
+		if ((gp_widget_event_key_pressed(ev, GP_KEY_LEFT_ALT) ||
+		     gp_widget_event_key_pressed(ev, GP_KEY_LEFT_ALT)) &&
 		     ev->code == GP_EV_KEY_DOWN) {
 			switch (ev->val) {
 			case GP_KEY_F4:
@@ -443,16 +443,25 @@ int gp_widgets_event(gp_event *ev, gp_widget *layout)
 
 int gp_widgets_process_events(gp_widget *layout)
 {
-	gp_event ev;
+	gp_event *ev;
 
-	while (gp_backend_poll_event(backend, &ev)) {
+	while ((ev = gp_backend_poll_event(backend))) {
 		//gp_event_dump(&ev);
 		//fflush(stdout);
-		if (gp_widgets_event(&ev, layout))
+		ev->priv = &backend->event_queue.state;
+		if (gp_widgets_event(ev, layout))
 			gp_widgets_exit(0);
 	}
 
 	return 0;
+}
+
+int gp_widget_event_key_pressed(gp_event *ev, uint32_t key)
+{
+	if (!ev->priv)
+		return 0;
+
+	return gp_event_key_state_pressed(ev->priv, key);
 }
 
 static void print_options(int exit_val)

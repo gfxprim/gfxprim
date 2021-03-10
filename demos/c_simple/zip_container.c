@@ -83,16 +83,14 @@ int main(int argc, char *argv[])
 
 	/* Wait for events  */
 	for (;;) {
-		gp_event ev;
+		gp_event *ev = gp_backend_wait_event(backend);
 
-		gp_backend_wait_event(backend, &ev);
-
-		switch (ev.type) {
+		switch (ev->type) {
 		case GP_EV_KEY:
-			if (!(ev.code == GP_EV_KEY_DOWN))
+			if (!(ev->code == GP_EV_KEY_DOWN))
 				continue;
 
-			switch (ev.val) {
+			switch (ev->val) {
 			case GP_KEY_Q:
 				gp_backend_exit(backend);
 				return 0;
@@ -103,7 +101,7 @@ int main(int argc, char *argv[])
 			}
 		break;
 		case GP_EV_SYS:
-			if (ev.code == GP_EV_SYS_RESIZE) {
+			if (ev->code == GP_EV_SYS_RESIZE) {
 				gp_backend_resize_ack(backend);
 				gp_blit_clipped(image, 0, 0, image->w, image->h,
 				        backend->pixmap, 0, 0);

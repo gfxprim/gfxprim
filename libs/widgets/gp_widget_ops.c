@@ -477,8 +477,8 @@ static int handle_focus(gp_widget *self, const gp_widget_render_ctx *ctx, gp_eve
 
 		switch (ev->val) {
 		case GP_KEY_TAB:
-			if (gp_event_get_key(ev, GP_KEY_LEFT_SHIFT) ||
-			    gp_event_get_key(ev, GP_KEY_RIGHT_SHIFT))
+			if (gp_widget_event_key_pressed(ev, GP_KEY_LEFT_SHIFT) ||
+			    gp_widget_event_key_pressed(ev, GP_KEY_RIGHT_SHIFT))
 				gp_widget_ops_render_focus(self, GP_FOCUS_PREV);
 			else
 				gp_widget_ops_render_focus(self, GP_FOCUS_NEXT);
@@ -490,8 +490,8 @@ static int handle_focus(gp_widget *self, const gp_widget_render_ctx *ctx, gp_eve
 			return 0;
 		}
 
-		if (!gp_event_get_key(ev, GP_KEY_LEFT_SHIFT) &&
-		    !gp_event_get_key(ev, GP_KEY_RIGHT_SHIFT))
+		if (!gp_widget_event_key_pressed(ev, GP_KEY_LEFT_SHIFT) &&
+		    !gp_widget_event_key_pressed(ev, GP_KEY_RIGHT_SHIFT))
 			return 0;
 
 		switch (ev->val) {

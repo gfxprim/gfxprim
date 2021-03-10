@@ -177,15 +177,15 @@ void redraw_screen(void)
 
 void event_loop(void)
 {
-	gp_event ev;
+	gp_event *ev;
 
-	while (gp_backend_get_event(win, &ev)) {
-		switch (ev.type) {
+	while ((ev = gp_backend_get_event(win))) {
+		switch (ev->type) {
 		case GP_EV_KEY:
-			if (ev.code != GP_EV_KEY_DOWN)
+			if (ev->code != GP_EV_KEY_DOWN)
 				continue;
 
-			switch (ev.key.key) {
+			switch (ev->key.key) {
 			case GP_KEY_SPACE:
 				shape++;
 				if (shape > SHAPE_LAST)
@@ -219,7 +219,7 @@ void event_loop(void)
 			}
 		break;
 		case GP_EV_SYS:
-			if (ev.code == GP_EV_SYS_RESIZE) {
+			if (ev->code == GP_EV_SYS_RESIZE) {
 				gp_backend_resize_ack(win);
 				clear_screen();
 				gp_backend_flip(win);

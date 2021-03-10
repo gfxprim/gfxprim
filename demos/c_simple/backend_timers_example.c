@@ -64,15 +64,13 @@ int main(void)
 
 	/* Handle events */
 	for (;;) {
-		gp_event ev;
+		gp_event *ev = gp_backend_wait_event(backend);
 
-		gp_backend_wait_event(backend, &ev);
+		gp_event_dump(ev);
 
-		gp_event_dump(&ev);
-
-		switch (ev.type) {
+		switch (ev->type) {
 		case GP_EV_KEY:
-			switch (ev.val) {
+			switch (ev->val) {
 			case GP_KEY_ESC:
 			case GP_KEY_Q:
 				gp_backend_exit(backend);
@@ -81,7 +79,7 @@ int main(void)
 			}
 		break;
 		case GP_EV_SYS:
-			switch (ev.code) {
+			switch (ev->code) {
 			case GP_EV_SYS_RESIZE:
 				gp_backend_resize_ack(backend);
 				redraw(backend);

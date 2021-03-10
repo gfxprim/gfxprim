@@ -323,22 +323,18 @@ void event_loop(void)
 {
 	int shift_pressed;
 
-	gp_event ev;
-
 	for (;;) {
-		gp_backend_wait_event(backend, &ev);
+		gp_event *ev = gp_backend_wait_event(backend);
 
-		//gp_eventDump(&ev);
+		shift_pressed = gp_backend_key_pressed(backend, GP_KEY_LEFT_SHIFT) ||
+		                gp_backend_key_pressed(backend, GP_KEY_RIGHT_SHIFT);
 
-		shift_pressed = gp_event_get_key(&ev, GP_KEY_LEFT_SHIFT) ||
-		                gp_event_get_key(&ev, GP_KEY_RIGHT_SHIFT);
-
-		switch (ev.type) {
+		switch (ev->type) {
 		case GP_EV_KEY:
-			if (ev.code != GP_EV_KEY_DOWN)
+			if (ev->code != GP_EV_KEY_DOWN)
 				continue;
 
-			switch (ev.key.key) {
+			switch (ev->key.key) {
 			case GP_KEY_X:
 				win->x_swap = !win->x_swap;
 			break;
@@ -427,7 +423,7 @@ void event_loop(void)
 			}
 		break;
 		case GP_EV_SYS:
-			switch(ev.code) {
+			switch(ev->code) {
 			case GP_EV_SYS_QUIT:
 				gp_backend_exit(backend);
 				exit(0);

@@ -430,7 +430,7 @@ static void slider_set_val(gp_widget *self, unsigned int ascent, gp_event *ev)
 	int val = 0;
 	int coord;
 
-	if (ev->type == GP_EV_REL && !gp_event_get_key(ev, GP_BTN_LEFT))
+	if (ev->type == GP_EV_REL && !gp_widget_event_key_pressed(ev, GP_BTN_LEFT))
 		return;
 
 	if (ev->cursor_x > self->w)

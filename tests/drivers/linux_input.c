@@ -15,8 +15,10 @@
 
 int main(int argc, char *argv[])
 {
-	struct gp_input_driver_linux *drv;
-	GP_EVENT_QUEUE_DECLARE(event_queue, 640, 480);
+	gp_input_linux *drv;
+	gp_event_queue event_queue;
+
+	gp_event_queue_init(&event_queue, 640, 480, 0);
 
 	gp_set_debug_level(2);
 
@@ -25,20 +27,20 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 
-	drv = gp_input_driver_linux_open(argv[1]);
+	drv = gp_input_linux_open(argv[1]);
 
-	if (drv == NULL) {
+	if (!drv) {
 		printf("Failed to open input device\n");
 		return 1;
 	}
 
 	for (;;) {
-		while (gp_input_driver_linux_read(drv, &event_queue) >= 1);
+		while (gp_input_linux_read(drv, &event_queue) >= 1);
 
-		gp_event ev;
+		gp_event *ev;
 
-		while (gp_event_queue_get(&event_queue, &ev))
-			gp_event_dump(&ev);
+		while ((ev = gp_event_queue_get(&event_queue)))
+			gp_event_dump(ev);
 
 		usleep(1000);
 	}

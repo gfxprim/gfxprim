@@ -132,15 +132,15 @@ int main(int argc, char *argv[])
 		usleep(1000);
 
 		/* Read and parse events */
-		gp_event ev;
+		gp_event *ev;
 
-		while (gp_backend_get_event(backend, &ev)) {
+		while ((ev = gp_backend_get_event(backend))) {
 
-			gp_event_dump(&ev);
+			gp_event_dump(ev);
 
-			switch (ev.type) {
+			switch (ev->type) {
 			case GP_EV_KEY:
-				switch (ev.key.key) {
+				switch (ev->key.key) {
 				case GP_KEY_ESC:
 				case GP_KEY_Q:
 					gp_backend_exit(backend);
@@ -149,7 +149,7 @@ int main(int argc, char *argv[])
 				}
 			break;
 			case GP_EV_SYS:
-				switch(ev.code) {
+				switch(ev->code) {
 				case GP_EV_SYS_RESIZE:
 					gp_backend_resize_ack(backend);
 					redraw(backend);

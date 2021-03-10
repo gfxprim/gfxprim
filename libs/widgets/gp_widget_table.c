@@ -481,13 +481,13 @@ static int event(gp_widget *self, const gp_widget_render_ctx *ctx, gp_event *ev)
 
 		switch (ev->val) {
 		case GP_KEY_DOWN:
-			if (gp_event_get_key(ev, GP_KEY_LEFT_SHIFT))
+			if (gp_widget_event_key_pressed(ev, GP_KEY_LEFT_SHIFT))
 				return move_down(self, ctx, 10);
 
 			return move_down(self, ctx, 1);
 		break;
 		case GP_KEY_UP:
-			if (gp_event_get_key(ev, GP_KEY_LEFT_SHIFT))
+			if (gp_widget_event_key_pressed(ev, GP_KEY_LEFT_SHIFT))
 				return move_up(self, ctx, 10);
 
 			return move_up(self, ctx, 1);

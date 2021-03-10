@@ -191,17 +191,15 @@ void redraw_screen(void)
 
 void event_loop(void)
 {
-	gp_event ev;
-
 	for (;;) {
-		gp_backend_wait_event(win, &ev);
+		gp_event *ev = gp_backend_wait_event(win);
 
-		switch (ev.type) {
+		switch (ev->type) {
 		case GP_EV_KEY:
-			if (ev.code != GP_EV_KEY_DOWN)
+			if (ev->code != GP_EV_KEY_DOWN)
 				continue;
 
-			switch (ev.key.key) {
+			switch (ev->key.key) {
 			case GP_KEY_SPACE:
 				if (font)
 					font_flag = (font_flag + 1) % 9;
@@ -246,7 +244,7 @@ void event_loop(void)
 			}
 		break;
 		case GP_EV_SYS:
-			switch(ev.code) {
+			switch(ev->code) {
 			case GP_EV_SYS_QUIT:
 				gp_backend_exit(win);
 				exit(0);

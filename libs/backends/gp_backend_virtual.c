@@ -68,10 +68,10 @@ static void virt_poll(gp_backend *self)
 
 	virt->backend->poll(virt->backend);
 
-	gp_event ev;
+	gp_event *ev;
 
-	while (gp_backend_get_event(virt->backend, &ev))
-		gp_event_queue_put(&self->event_queue, &ev);
+	while ((ev = gp_backend_get_event(virt->backend)))
+		gp_event_queue_put(&self->event_queue, ev);
 }
 
 static void virt_wait(gp_backend *self)
@@ -80,10 +80,10 @@ static void virt_wait(gp_backend *self)
 
 	virt->backend->wait(virt->backend);
 
-	gp_event ev;
+	gp_event *ev;
 
-	while (gp_backend_get_event(virt->backend, &ev))
-		gp_event_queue_put(&self->event_queue, &ev);
+	while ((ev = gp_backend_get_event(virt->backend)))
+		gp_event_queue_put(&self->event_queue, ev);
 }
 
 static void virt_exit(gp_backend *self)

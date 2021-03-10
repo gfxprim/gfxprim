@@ -183,7 +183,7 @@ static void aalib_wait(gp_backend *self)
 	for (;;) {
 		aalib_poll(self);
 
-		if (gp_event_queue_events_queued(&self->event_queue))
+		if (gp_event_queue_events(&self->event_queue))
 			return;
 
 		usleep(10000);

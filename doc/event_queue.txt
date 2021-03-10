@@ -15,8 +15,6 @@ Event Queue API
 /* or */
 #include <input/gp_event_queue.h>
 
-#define GP_EVENT_QUEUE_DECLARE(name, scr_w, scr_h) ...;
-
 /*
  * Initializes event queue passed as a pointer. The events array must be
  * queue_size long.
@@ -26,32 +24,21 @@ Event Queue API
 void gp_event_queue_init(gp_event_queue *self,
                          unsigned int screen_w, unsigned int screen_h,
                          unsigned int queue_size);
-
-/*
- * Allocates and initializes event queue.
- *
- * If queue_size is set to zero, default value is used.
- */
-gp_event_queue *gp_event_queue_alloc(unsigned int screen_w,
-                                     unsigned int screen_h,
-                                     unsigned int queue_size);
-
-/*
- * Free the queue.
- */
-void gp_event_queue_free(gp_event_queue *self);
 -------------------------------------------------------------------------------
-
-These functions are used to create an event queue.
-
-The 'GP_EVENT_QUEUE_DECLARE' is a macro that takes name and screen size and
-declares and initializes an event queue structure.
 
 The initialization functions takes pointer to a memory large enough to hold an
 event queue structure and array of queue_size events.
 
-The last function allocates and initializes an event queue. If allocation has
-failed NULL is returned.
+[source,c]
+-------------------------------------------------------------------------------
+#include <gfxprim.h>
+/* or */
+#include <input/gp_event_queue.h>
+
+unsigned int gp_event_queue_events(gp_event_queue *self);
+-------------------------------------------------------------------------------
+
+Returns number of queued events.
 
 [source,c]
 -------------------------------------------------------------------------------
@@ -59,10 +46,15 @@ failed NULL is returned.
 /* or */
 #include <input/gp_event_queue.h>
 
-unsigned int gp_event_queue_events_queued(gp_event_queue *self);
+gp_event *gp_event_queue_get(gp_event_queue *self);
 -------------------------------------------------------------------------------
 
-This function returns number of queued events.
+In case there are any events queued a pointer to a top event in the queue is
+returned. The pointer is valid until next call to +gp_event_queue_get()+.
+
+The pointer is also invalidated by a call to +gp_event_queue_put_back()+.
+
+If there are no events queued the call returns NULL.
 
 [source,c]
 -------------------------------------------------------------------------------
@@ -70,22 +62,7 @@ This function returns number of queued events.
 /* or */
 #include <input/gp_event_queue.h>
 
-int gp_event_queue_get(gp_event_queue *self, gp_event *ev);
--------------------------------------------------------------------------------
-
-In case there are any events queued, the top event is removed from the
-queue, copied into the event structure that is passed as argument and
-non-zero is returned.
-
-If there are no events queued the call returns immediately with zero.
-
-[source,c]
--------------------------------------------------------------------------------
-#include <gfxprim.h>
-/* or */
-#include <input/gp_event_queue.h>
-
-int gp_event_queue_peek(gp_event_queue *self, gp_event *ev);
+gp_event *gp_event_queue_peek(gp_event_queue *self);
 -------------------------------------------------------------------------------
 
 Same as +gp_event_queue_get()+ but the top event is not removed from the queue.
@@ -157,6 +134,24 @@ void gp_event_queue_push(gp_event_queue *self,
 
 -------------------------------------------------------------------------------
 
-Following functions are used for puting events into the event queue. If
-pointer to the timeval structure is NULL the event 'time' will be filled
-with exact time the event was added to the queue.
+These functions are used for puting events into the event queue. If pointer to
+the timeval structure is NULL the event 'time' will be filled with exact time
+the event was added to the queue.
+
+
+Event Queue Key State
+~~~~~~~~~~~~~~~~~~~~~
+
+Event queue also maintains a keyboard state, i.e. which keys are pressed. The
+state is valid for the last even returned by the +gp_event_queue_get()+.
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <gfxprim.h>
+/* or */
+#include <input/gp_event_queue.h>
+
+int gp_event_queue_key_pressed(gp_event_queue *self, uint32_t key);
+-------------------------------------------------------------------------------
+
+Returns non-zero if key is being currently hold down.

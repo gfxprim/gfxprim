@@ -356,30 +356,22 @@ gp_backend_poll_event
 /* or */
 #include <gfxprim.h>
 
-int gp_backend_poll_event(gp_backend *self, gp_event *ev);
+gp_event *gp_backend_poll_event(gp_backend *self);
 -------------------------------------------------------------------------------
 
 Combines the 'gp_backend_poll()' with 'gp_backend_get_event()'.
 
-If there are any events in the backend event queue, the top event is removed
-from the queue and copied into the memory pointed by 'ev' and the call returns
-immediately.
-
-If backend event queue is empty 'gp_backend_poll()' is called. Then again the
-backend event queue is checked and if an event is found it's removed from the
-queue and copied into the 'ev'.
-
-Returns non-zero if event was copied into the memory pointed by 'ev', zero
-otherwise.
+If there are any events in the backend event queue, the top event is returned,
+if none are queued NULL is returned.
 
 .Example 'gp_backend_poll_event()' usage.
 [source,c]
 -------------------------------------------------------------------------------
         /* Called either repeatedly or when data are ready on backend fd */
 
-	gp_event ev;
+	gp_event *ev;
 
-	while (gp_backend_poll_event(backend, &ev) {
+	while ((ev = gp_backend_poll_event(backend))) {
 
 		/* process events */
 
@@ -414,27 +406,25 @@ gp_backend_wait_event
 /* or */
 #include <gfxprim.h>
 
-void gp_backend_wait_event(gp_backend *self, gp_event *ev);
+gp_event *gp_backend_wait_event(gp_backend *self);
 -------------------------------------------------------------------------------
 
 Combines the 'gp_backend_wait()' with 'gp_backend_get_event()'.
 
-If there are any events in the backend event queue, the top event is removed
-from the queue and copied into the memory pointed by 'ev' and the call returns
-immediately.
+If there are any events in the backend event queue, the top event is returned
+and the call returns immediately.
 
-If backend event queue is empty 'gp_backend_wait()' is called until there are
-any events in the backend event queue. Then the top event is removed from the
-queue and the call returns.
+If backend event queue is empty 'gp_backend_wait()' is called, possibly
+repeatedly, until there is at least one event in the backend event queue.
 
 .Example 'gp_backend_wait_event()' usage.
 [source,c]
 -------------------------------------------------------------------------------
 	/* This is the main program loop */
-	gp_event ev;
+	gp_event *ev;
 
 	for (;;) {
-		gp_backend_wait_event(backend, &ev);
+		ev = gp_backend_wait_event(backend);
 
 		/* process events */
 
@@ -493,8 +483,8 @@ void gp_backend_timers_in_queue(gp_backend *self);
 
 Returns number of timers scheduled in backend timer queue.
 
-gp_backend_events_queued
-^^^^^^^^^^^^^^^^^^^^^^^^
+gp_backend_events
+^^^^^^^^^^^^^^^^^
 
 [source,c]
 -------------------------------------------------------------------------------
@@ -502,12 +492,10 @@ gp_backend_events_queued
 /* or */
 #include <gfxprim.h>
 
-unsigned int gp_backend_events_queued(gp_backend *self);
+unsigned int gp_backend_events(gp_backend *self);
 -------------------------------------------------------------------------------
 
 Returns number of events queued in the backend event queue.
-
-
 
 gp_backend_get_event
 ^^^^^^^^^^^^^^^^^^^^
@@ -518,15 +506,15 @@ gp_backend_get_event
 /* or */
 #include <gfxprim.h>
 
-int gp_backend_get_event(gp_backend *self, gp_event *ev);
+gp_event *gp_backend_get_event(gp_backend *self);
 -------------------------------------------------------------------------------
 
-In case there are any events queued, the top event is removed from the queue,
-copied into the event structure that is passed as argument and non-zero is
-returned.
+In case there are any events queued a pointer to a top event in the queue is
+returned. The pointer is valid until next call to +gp_backend_get_event()+.
 
-If there are no events queued the call returns immediately with zero return
-value.
+The pointer is also invalidated by a call to +gp_backend_put_event_back()+.
+
+If there are no events queued the call returns NULL.
 
 TIP: For more information on events see link:input.html[input events]
      documentation.
@@ -541,10 +529,10 @@ gp_backend_peek_event
 /* or */
 #include <gfxprim.h>
 
-int gp_backend_peek_event(gp_backend *self, gp_event *ev);
+gp_event *gp_backend_peek_event(gp_backend *self);
 -------------------------------------------------------------------------------
 
-Same as +gp_backend_peek_event()+ but the top event is not removed from the
+Same as +gp_backend_get_event()+ but the top event is not removed from the
 queue.
 
 gp_backend_put_event_back
@@ -561,6 +549,24 @@ void gp_backend_put_event_back(gp_backend *self, gp_event *ev);
 
 Puts event to the top of the queue. May be useful for putting back events that
 were removed from the queue.
+
+gp_backend_key_pressed
+^^^^^^^^^^^^^^^^^^^^^^
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <backends/gp_backend.h>
+/* or */
+#include <gfxprim.h>
+
+int gp_backend_key_pressed(gp_backend *self, uint32_t key);
+-------------------------------------------------------------------------------
+
+The backend event queue also maintains a keyboard state, i.e. which keys are
+pressed. The state is valid for the last even returned by the
++gp_backend_get_event()+.
+
+Returns non-zero if key is being currently hold down.
 
 gp_backend_set_caption
 ^^^^^^^^^^^^^^^^^^^^^^

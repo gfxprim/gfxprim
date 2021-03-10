@@ -144,21 +144,21 @@ static void resize_shown_client(void)
 static int backend_event(struct gp_fd *self, struct pollfd *pfd)
 {
 	gp_backend *b = self->priv;
-	gp_event ev;
+	gp_event *ev;
 
 	(void) pfd;
 
-	while (gp_backend_poll_event(b, &ev)) {
-		switch (ev.type) {
+	while ((ev = gp_backend_poll_event(b))) {
+		switch (ev->type) {
 		case GP_EV_KEY:
-			if (!gp_event_get_key(&ev, GP_KEY_LEFT_CTRL) &&
-			    !gp_event_get_key(&ev, GP_KEY_RIGHT_CTRL))
+			if (!gp_backend_key_pressed(b, GP_KEY_LEFT_CTRL) &&
+			    !gp_backend_key_pressed(b, GP_KEY_RIGHT_CTRL))
 				goto to_cli;
 
-			if (ev.code != GP_EV_KEY_DOWN)
+			if (ev->code != GP_EV_KEY_DOWN)
 				goto to_cli;
 
-			switch (ev.val) {
+			switch (ev->val) {
 			case GP_KEY_ESC:
 				do_exit();
 			break;
@@ -171,7 +171,7 @@ static int backend_event(struct gp_fd *self, struct pollfd *pfd)
 				redraw();
 			break;
 			case GP_KEY_1 ... GP_KEY_9:
-				show_client(ev.val - GP_KEY_1 + 1);
+				show_client(ev->val - GP_KEY_1 + 1);
 			break;
 			case GP_KEY_0:
 				show_client(0);
@@ -180,7 +180,7 @@ static int backend_event(struct gp_fd *self, struct pollfd *pfd)
 
 		break;
 		case GP_EV_SYS:
-			switch (ev.code) {
+			switch (ev->code) {
 			case GP_EV_SYS_QUIT:
 				do_exit();
 			break;
@@ -196,7 +196,7 @@ static int backend_event(struct gp_fd *self, struct pollfd *pfd)
 		}
 to_cli:
 		if (cli_shown)
-			gp_proxy_cli_event(cli_shown, &ev);
+			gp_proxy_cli_event(cli_shown, ev);
 		else
 			redraw();
 	}

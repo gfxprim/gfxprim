@@ -170,7 +170,7 @@ void gp_backend_poll(gp_backend *self);
 /*
  * Poll and GetEvent combined.
  */
-int gp_backend_poll_event(gp_backend *self, gp_event *ev);
+gp_event *gp_backend_poll_event(gp_backend *self);
 
 /*
  * Waits for backend events.
@@ -180,7 +180,7 @@ void gp_backend_wait(gp_backend *self);
 /*
  * Wait and GetEvent combined.
  */
-int gp_backend_wait_event(gp_backend *self, gp_event *ev);
+gp_event *gp_backend_wait_event(gp_backend *self);
 
 /*
  * Adds timer to backend.
@@ -269,24 +269,29 @@ int gp_backend_resize_ack(gp_backend *self);
 /*
  * Event Queue functions.
  */
-static inline unsigned int gp_backend_events_queued(gp_backend *self)
+static inline unsigned int gp_backend_events(gp_backend *self)
 {
-	return gp_event_queue_events_queued(&self->event_queue);
+	return gp_event_queue_events(&self->event_queue);
 }
 
-static inline int gp_backend_get_event(gp_backend *self, gp_event *ev)
+static inline gp_event *gp_backend_get_event(gp_backend *self)
 {
-	return gp_event_queue_get(&self->event_queue, ev);
+	return gp_event_queue_get(&self->event_queue);
 }
 
-static inline int gp_backend_peek_event(gp_backend *self, gp_event *ev)
+static inline gp_event *gp_backend_peek_event(gp_backend *self)
 {
-	return gp_event_queue_peek(&self->event_queue, ev);
+	return gp_event_queue_peek(&self->event_queue);
 }
 
 static inline void gp_backend_put_event_back(gp_backend *self, gp_event *ev)
 {
 	gp_event_queue_put_back(&self->event_queue, ev);
+}
+
+static inline int gp_backend_key_pressed(gp_backend *self, uint32_t key)
+{
+	return gp_event_queue_key_pressed(&self->event_queue, key);
 }
 
 #endif /* BACKENDS_GP_BACKEND_H */

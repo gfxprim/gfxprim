@@ -46,28 +46,27 @@ static void event_loop(void)
 		if (input)
 			gp_input_linux_read(input, &backend->event_queue);
 
-		while (gp_backend_events_queued(backend)) {
-			gp_event ev;
+		while (gp_backend_events(backend)) {
+			gp_event *ev = gp_backend_get_event(backend);
 
-			gp_backend_get_event(backend, &ev);
-			gp_event_dump(&ev);
+			gp_event_dump(ev);
 
-			switch (ev.type) {
+			switch (ev->type) {
 			case GP_EV_KEY:
-				draw_event(&ev);
+				draw_event(ev);
 
-				switch (ev.key.key) {
+				switch (ev->key.key) {
 				case GP_KEY_ESC:
 					gp_backend_exit(backend);
 					exit(0);
 				break;
 				case GP_BTN_LEFT:
-					gp_hline_xxy(win, ev.cursor_x - 3,
-					            ev.cursor_x + 3,
-						    ev.cursor_y, red);
-					gp_vline_xyy(win, ev.cursor_x,
-					            ev.cursor_y - 3,
-						    ev.cursor_y + 3, red);
+					gp_hline_xxy(win, ev->cursor_x - 3,
+					            ev->cursor_x + 3,
+						    ev->cursor_y, red);
+					gp_vline_xyy(win, ev->cursor_x,
+					            ev->cursor_y - 3,
+						    ev->cursor_y + 3, red);
 					gp_backend_flip(backend);
 				break;
 				default:
@@ -75,12 +74,11 @@ static void event_loop(void)
 				}
 			break;
 			case GP_EV_REL:
-				switch (ev.code) {
+				switch (ev->code) {
 				static int size = 0;
 				case GP_EV_REL_POS:
-					if (gp_event_get_key(&ev, GP_BTN_LEFT)) {
-						gp_putpixel(win, ev.cursor_x,
-							    ev.cursor_y,
+					if (gp_backend_key_pressed(backend, GP_BTN_LEFT)) {
+						gp_putpixel(win, ev->cursor_x, ev->cursor_y,
 							    green);
 					}
 					int align = GP_ALIGN_RIGHT|GP_VALIGN_BOTTOM;
@@ -89,22 +87,22 @@ static void event_loop(void)
 					              black, size);
 					size = gp_print(win, NULL, 20, 40, align,
 					                white, black, "X=%3u Y=%3u dX=%3i dY=%3i",
-						        ev.cursor_x, ev.cursor_y,
-							ev.rel.rx, ev.rel.ry);
+						        ev->cursor_x, ev->cursor_y,
+							ev->rel.rx, ev->rel.ry);
 					gp_backend_flip(backend);
 				break;
 				}
 			break;
 			case GP_EV_ABS:
 				case GP_EV_ABS_POS:
-					gp_putpixel(win, ev.cursor_x,
-						    ev.cursor_y,
+					gp_putpixel(win, ev->cursor_x,
+					            ev->cursor_y,
 						    green);
 					gp_backend_flip(backend);
 				break;
 			break;
 			case GP_EV_SYS:
-				switch (ev.code) {
+				switch (ev->code) {
 				case GP_EV_SYS_RESIZE:
 					gp_backend_resize_ack(backend);
 					gp_fill(win, black);

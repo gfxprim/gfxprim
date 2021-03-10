@@ -26,20 +26,20 @@ static void redraw(struct gp_pixmap *pixmap)
 
 static int ev_loop(struct gp_backend *backend, const char *name)
 {
-	gp_event ev;
+	gp_event *ev;
 
 	if (backend == NULL)
 		return 0;
 
-	while (gp_backend_get_event(backend, &ev)) {
+	while ((ev = gp_backend_get_event(backend))) {
 
 		printf("-------------------------- %s\n", name);
 
-		gp_event_dump(&ev);
+		gp_event_dump(ev);
 
-		switch (ev.type) {
+		switch (ev->type) {
 		case GP_EV_KEY:
-			switch (ev.val) {
+			switch (ev->val) {
 			case GP_KEY_ESC:
 			case GP_KEY_Q:
 				gp_backend_exit(backend);
@@ -48,7 +48,7 @@ static int ev_loop(struct gp_backend *backend, const char *name)
 			}
 		break;
 		case GP_EV_SYS:
-			switch (ev.code) {
+			switch (ev->code) {
 			case GP_EV_SYS_RESIZE:
 				gp_backend_resize_ack(backend);
 				redraw(backend->pixmap);

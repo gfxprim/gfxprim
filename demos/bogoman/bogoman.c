@@ -48,17 +48,15 @@ static void event_loop(struct bogoman_render *render, gp_backend *backend)
 	char path[128];
 	static int screenshots;
 
-	while (gp_backend_events_queued(backend)) {
-		gp_event ev;
+	while (gp_backend_events(backend)) {
+		gp_event *ev = gp_backend_get_event(backend);
 
-		gp_backend_get_event(backend, &ev);
-
-		switch (ev.type) {
+		switch (ev->type) {
 		case GP_EV_KEY:
-			if (ev.code != GP_EV_KEY_DOWN)
+			if (ev->code != GP_EV_KEY_DOWN)
 				break;
 
-			switch (ev.val) {
+			switch (ev->val) {
 			case GP_KEY_ESC:
 				gp_backend_exit(backend);
 				exit(0);
@@ -84,7 +82,7 @@ static void event_loop(struct bogoman_render *render, gp_backend *backend)
 			bogoman_render(render, BOGOMAN_RENDER_DIRTY);
 		break;
 		case GP_EV_SYS:
-			switch (ev.code) {
+			switch (ev->code) {
 			case GP_EV_SYS_RESIZE:
 				gp_backend_resize_ack(backend);
 				render->pixmap = backend->pixmap;

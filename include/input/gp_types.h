@@ -16,6 +16,7 @@
 #define INPUT_GP_TYPES_H
 
 typedef struct gp_event_queue gp_event_queue;
+typedef struct gp_event_key_state gp_event_key_state;
 typedef struct gp_event gp_event;
 typedef struct gp_timer gp_timer;
 

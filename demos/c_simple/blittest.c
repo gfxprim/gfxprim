@@ -76,17 +76,17 @@ static void change_bitmap(void)
 
 void event_loop(void)
 {
-	gp_event ev;
+	gp_event *ev;
 
-	while (gp_backend_get_event(win, &ev)) {
-		gp_event_dump(&ev);
+	while ((ev = gp_backend_get_event(win))) {
+		gp_event_dump(ev);
 
-		switch (ev.type) {
+		switch (ev->type) {
 		case GP_EV_KEY:
-			if (ev.code != GP_EV_KEY_DOWN)
+			if (ev->code != GP_EV_KEY_DOWN)
 				continue;
 
-			switch (ev.key.key) {
+			switch (ev->key.key) {
 			case GP_KEY_X:
 				bitmap->x_swap = !bitmap->x_swap;
 			break;
@@ -109,7 +109,7 @@ void event_loop(void)
 			}
 		break;
 		case GP_EV_SYS:
-			switch(ev.code) {
+			switch(ev->code) {
 			case GP_EV_SYS_QUIT:
 				gp_backend_exit(win);
 				exit(0);

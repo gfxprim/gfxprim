@@ -149,21 +149,21 @@ int main(int argc, char *argv[])
 	draw(pixmap->w/2, pixmap->h/2, l, iter);
 
 	for (;;) {
-		gp_event ev;
+		gp_event *ev;
 
 		redraw();
 
 		gp_backend_poll(backend);
 
-		while (gp_backend_get_event(backend, &ev)) {
-			gp_event_dump(&ev);
+		while ((ev = gp_backend_get_event(backend))) {
+			gp_event_dump(ev);
 
-			switch (ev.type) {
+			switch (ev->type) {
 			case GP_EV_KEY:
-				if (ev.code != GP_EV_KEY_DOWN)
+				if (ev->code != GP_EV_KEY_DOWN)
 					continue;
 
-				switch (ev.key.key) {
+				switch (ev->key.key) {
 				case GP_KEY_P:
 					paused = !paused;
 				break;
@@ -177,7 +177,7 @@ int main(int argc, char *argv[])
 				}
 			break;
 			case GP_EV_SYS:
-				if (ev.code == GP_EV_SYS_RESIZE)
+				if (ev->code == GP_EV_SYS_RESIZE)
 					gp_backend_resize_ack(backend);
 			}
 		}

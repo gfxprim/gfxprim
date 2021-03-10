@@ -48,11 +48,12 @@ struct gp_event_sys {
 };
 
 typedef struct gp_event {
-	/* event */
+	/** enum gp_event_type */
 	uint16_t type;
-	uint32_t code;
+        /** enum gp_event_*_code */
+        uint16_t code;
 	union {
-		/* generic one integer value */
+		/* generic integer value */
 		int32_t val;
 		/* key */
 		struct gp_event_key key;
@@ -65,9 +66,6 @@ typedef struct gp_event {
 		gp_timer *tmr;
 	};
 
-	/* input device id */
-	uint32_t dev_id;
-
 	/* event timestamp */
 	struct timeval time;
 
@@ -78,11 +76,7 @@ typedef struct gp_event {
 	uint32_t cursor_x;
 	uint32_t cursor_y;
 
-	/*
-	 * Bitmap of pressed keys including mouse buttons
-	 * accumulated for all input devices.
-	 */
-	uint8_t keys_pressed[GP_EVENT_KEYMAP_BYTES];
+	void *priv;
 } gp_event;
 -------------------------------------------------------------------------------
 
@@ -198,28 +192,6 @@ const char *gp_event_key_name(enum gp_event_key_value key);
 -------------------------------------------------------------------------------
 
 Returns human-readable key name.
-
-The returned string must not be modified.
-
-[source,c]
--------------------------------------------------------------------------------
-#include <gfxprim.h>
-/* or */
-#include <input/gp_event.h>
-
-void gp_event_set_key(struct gp_event *ev, uint32_t key)
-
-gp_event_get_key(struct gp_event *ev, uint32_t key)
-
-gp_event_reset_key(struct gp_event *ev, uint32_t key)
--------------------------------------------------------------------------------
-
-These functions are helpers for setting/getting key pressed bits in the
-'keys_pressed' bit array.
-
-You will mostly need the 'gp_event_get_key' function to figure out if some of
-the modificator keys (such as Ctrl or Shift) was pressed at the time the event
-was received.
 
 [[Timers]]
 Timers

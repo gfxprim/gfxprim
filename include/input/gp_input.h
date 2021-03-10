@@ -6,19 +6,9 @@
 #ifndef INPUT_GP_INPUT_H
 #define INPUT_GP_INPUT_H
 
-/*
- * Base gp_event definitions.
- */
 #include <input/gp_event.h>
-
-/*
- * Timers and priority queue
- */
+#include <input/gp_event_queue.h>
 #include <input/gp_timer.h>
-
-/*
- * Timestamp.
- */
 #include <input/gp_time_stamp.h>
 
 #endif /* INPUT_GP_INPUT_H */

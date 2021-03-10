@@ -147,7 +147,7 @@ libgfxprim.so.1 libgfxprim1 #MINVER#
  gp_event_dump@Base 1.0.0-rc0-1
  gp_event_key_name@Base 1.0.0-rc0-1
  gp_event_queue_alloc@Base 1.0.0-rc0-1
- gp_event_queue_events_queued@Base 1.0.0-rc0-1
+ gp_event_queue_events@Base 1.0.0-rc0-1
  gp_event_queue_free@Base 1.0.0-rc0-1
  gp_event_queue_get@Base 1.0.0-rc0-1
  gp_event_queue_init@Base 1.0.0-rc0-1

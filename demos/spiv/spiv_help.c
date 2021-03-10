@@ -262,15 +262,15 @@ void draw_help(gp_backend *backend)
 	last = redraw_help(backend, loff, xoff);
 
 	for (;;) {
-		gp_event ev;
+		gp_event *ev;
 
-		while (gp_backend_wait_event(backend, &ev)) {
-			switch (ev.type) {
+		while ((ev = gp_backend_wait_event(backend))) {
+			switch (ev->type) {
 			case GP_EV_KEY:
-				if (ev.code != GP_EV_KEY_DOWN)
+				if (ev->code != GP_EV_KEY_DOWN)
 					continue;
 
-				switch (ev.key.key) {
+				switch (ev->key.key) {
 				case GP_KEY_DOWN:
 					if (last < help_keys_len)
 						last = redraw_help(backend, ++loff, xoff);
@@ -307,13 +307,13 @@ void draw_help(gp_backend *backend)
 				}
 			break;
 			case GP_EV_SYS:
-				switch (ev.code) {
+				switch (ev->code) {
 				case GP_EV_SYS_RESIZE:
 					gp_backend_resize_ack(backend);
 					last = redraw_help(backend, loff, xoff);
 				break;
 				case GP_EV_SYS_QUIT:
-					gp_backend_put_event_back(backend, &ev);
+					gp_backend_put_event_back(backend, ev);
 					return;
 				}
 			}

@@ -212,7 +212,7 @@ gp_vline_raw_4BPP_BE
 gp_timer_queue_insert
 gp_blit_xyxy_clipped
 gp_event_queue_set_cursor_pos
-gp_event_queue_events_queued
+gp_event_queue_events
 gp_event_queue_push_rel_to
 gp_fill_rect_xywh
 gp_filter_vlinear_convolution_raw

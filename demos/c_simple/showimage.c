@@ -47,16 +47,14 @@ int main(int argc, char *argv[])
 
 	/* Wait for events  */
 	for (;;) {
-		gp_event ev;
+		gp_event *ev = gp_backend_wait_event(backend);
 
-		gp_backend_wait_event(backend, &ev);
-
-		if (ev.type == GP_EV_KEY && ev.val == GP_KEY_Q) {
+		if (ev->type == GP_EV_KEY && ev->val == GP_KEY_Q) {
 			gp_backend_exit(backend);
 			return 0;
 		}
 
-		if (ev.type == GP_EV_SYS && ev.code == GP_EV_SYS_RESIZE) {
+		if (ev->type == GP_EV_SYS && ev->code == GP_EV_SYS_RESIZE) {
 			int cx, cy;
 
 			gp_backend_resize_ack(backend);

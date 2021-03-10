@@ -871,36 +871,37 @@ int main(int argc, char *argv[])
 	}
 
 	for (;;) {
-		gp_event ev;
+		gp_event *ev;
 
-		while (gp_backend_wait_event(backend, &ev)) {
+		while ((ev = gp_backend_wait_event(backend))) {
 
-			shift_flag = gp_event_get_key(&ev, GP_KEY_LEFT_SHIFT) ||
-			             gp_event_get_key(&ev, GP_KEY_RIGHT_SHIFT);
+			shift_flag = gp_backend_key_pressed(backend, GP_KEY_LEFT_SHIFT) ||
+			             gp_backend_key_pressed(backend, GP_KEY_RIGHT_SHIFT);
 
-			switch (ev.type) {
+			switch (ev->type) {
 			case GP_EV_REL:
-				switch (ev.code) {
+				switch (ev->code) {
 				case GP_EV_REL_WHEEL:
-					if (ev.val > 0)
+					if (ev->val > 0)
 						goto next;
 
-					if (ev.val < 0)
+					if (ev->val < 0)
 						goto prev;
 				break;
 				case GP_EV_REL_POS:
-					if (gp_event_get_key(&ev, GP_BTN_LEFT))
+					if (gp_backend_key_pressed(backend, GP_BTN_LEFT)) {
 						set_zoom_offset(&params,
-						                ev.rel.rx,
-								ev.rel.ry);
+						                ev->rel.rx,
+								ev->rel.ry);
+					}
 				break;
 				}
 			break;
 			case GP_EV_KEY:
-				if (ev.code != GP_EV_KEY_DOWN)
+				if (ev->code != GP_EV_KEY_DOWN)
 					continue;
 
-				switch (ev.key.key) {
+				switch (ev->key.key) {
 				case GP_KEY_H:
 					draw_help(backend);
 					show_image(&params);
@@ -1073,7 +1074,7 @@ int main(int argc, char *argv[])
 						image_seek(&params, IMG_CUR, -1);
 				break;
 				case GP_KEY_1 ... GP_KEY_9: {
-					float val = ev.key.key - GP_KEY_1 + 1;
+					float val = ev->key.key - GP_KEY_1 + 1;
 
 					if (!shift_flag)
 						val = 1/val;
@@ -1103,13 +1104,13 @@ int main(int argc, char *argv[])
 						zoom_mul(&params, 1/1.5);
 				break;
 				case GP_KEY_F1 ... GP_KEY_F10:
-					image_action_run(ev.key.key - GP_KEY_F1 + 1,
+					image_action_run(ev->key.key - GP_KEY_F1 + 1,
 					                 image_loader_img_path());
 				break;
 				}
 			break;
 			case GP_EV_SYS:
-				switch (ev.code) {
+				switch (ev->code) {
 				case GP_EV_SYS_RESIZE:
 					/* stop loader thread before resizing backend buffer */
 					stop_loader();

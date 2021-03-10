@@ -17,6 +17,42 @@
 
 #include <input/gp_event.h>
 
+#define GP_EVENT_KEY_BITMAP_BYTES 36
+
+struct gp_event_key_state {
+	/** Bitmap of pressed keys including mouse buttons. */
+	uint8_t keys_pressed[GP_EVENT_KEY_BITMAP_BYTES];
+};
+
+/*
+ * Helpers for setting/getting key bits.
+ */
+static inline void gp_event_key_state_press(gp_event_key_state *self, uint32_t key)
+{
+	if (key >= GP_EVENT_KEY_BITMAP_BYTES * 8)
+		return;
+
+	self->keys_pressed[(key)/8] |= 1<<((key)%8);
+}
+
+static inline int gp_event_key_state_pressed(gp_event_key_state *self, uint32_t key)
+{
+	if (key >= GP_EVENT_KEY_BITMAP_BYTES * 8)
+		return 0;
+
+	return !!(self->keys_pressed[(key)/8] & (1<<((key)%8)));
+}
+
+static inline void gp_event_key_state_release(gp_event_key_state *self, uint32_t key)
+{
+	if (key >= GP_EVENT_KEY_BITMAP_BYTES * 8)
+		return;
+
+	self->keys_pressed[(key)/8] &= ~(1<<((key)%8));
+}
+
+#define GP_EVENT_QUEUE_SIZE 32
+
 struct gp_event_queue {
 	/* screen size */
 	unsigned int screen_w;
@@ -26,21 +62,16 @@ struct gp_event_queue {
 	unsigned int queue_first;
 	unsigned int queue_last;
 	unsigned int queue_size;
+
 	gp_event cur_state;
 	gp_event events[GP_EVENT_QUEUE_SIZE];
-};
 
-#define GP_EVENT_QUEUE_DECLARE(name, scr_w, scr_h)   \
-	gp_event_queue name = {                \
-		.screen_w = scr_w,                   \
-		.screen_h = scr_h,                   \
-		                                     \
-		.queue_first = 0,                    \
-		.queue_last = 0,                     \
-		.queue_size = GP_EVENT_QUEUE_SIZE,   \
-		.cur_state = {.cursor_x = scr_w / 2, \
-		              .cursor_y = scr_h / 2} \
-	}
+	/*
+	 * Accumulated keyboard state, valid only for event removed by the last
+	 * gp_event_queue_get().
+	 */
+	gp_event_key_state state;
+};
 
 /*
  * Initializes event queue passed as a pointer. The events array must be
@@ -51,17 +82,6 @@ struct gp_event_queue {
 void gp_event_queue_init(gp_event_queue *self,
                          unsigned int screen_w, unsigned int screen_h,
                          unsigned int queue_size);
-
-/*
- * Allocates and initializes event queue.
- *
- * If queue_size is set to zero, default value is used.
- */
-gp_event_queue *gp_event_queue_alloc(unsigned int screen_w,
-                                     unsigned int screen_h,
-                                     unsigned int queue_size);
-
-void gp_event_queue_free(gp_event_queue *self);
 
 /*
  * Sets screen (window) size.
@@ -78,21 +98,27 @@ void gp_event_queue_set_cursor_pos(gp_event_queue *self,
 /*
  * Returns number of events queued in the queue.
  */
-unsigned int gp_event_queue_events_queued(gp_event_queue *self);
+unsigned int gp_event_queue_events(gp_event_queue *self);
 
 /*
- * In case there are any events queued, the top event is removed from the
- * queue, copied into the event structure that is passed as argument and
- * non-zero is returned.
+ * In case there are any events queued a pointer to a top event in the queue is
+ * returned. The pointer is valid until next call to gp_event_queue_get().
  *
- * If there are no events queued the call returns immediately with zero.
+ * The pointer is also invalidated by a call to gp_event_queue_put_back().
+ *
+ * If there are no events queued the call returns NULL.
  */
-int gp_event_queue_get(gp_event_queue *self, gp_event *ev);
+gp_event *gp_event_queue_get(gp_event_queue *self);
 
 /*
- * Same as gp_event_queue_Get but the event is not removed from the queue.
+ * Same as gp_event_queue_get() but the event is not removed from the queue.
+ * The pointer is valid until a call to gp_event_queue_get().
+ *
+ * If there are no events queued the calll returns NULL.
+ *
+ * The keyboard state bitmask is _NOT_ modified.
  */
-int gp_event_queue_peek(gp_event_queue *self, gp_event *ev);
+gp_event *gp_event_queue_peek(gp_event_queue *self);
 
 /*
  * Puts the event in the queue.
@@ -103,7 +129,8 @@ int gp_event_queue_peek(gp_event_queue *self, gp_event *ev);
 void gp_event_queue_put(gp_event_queue *self, gp_event *ev);
 
 /*
- * Puts event to the top of the queue.
+ * Puts event to the top of the queue, i.e. this event is going to be returned
+ * by a next call to gp_event_queue_get().
  */
 void gp_event_queue_put_back(gp_event_queue *self, gp_event *ev);
 
@@ -155,5 +182,10 @@ void gp_event_queue_push_resize(gp_event_queue *self,
 void gp_event_queue_push(gp_event_queue *self,
                          uint16_t type, uint32_t code, int32_t value,
                          struct timeval *time);
+
+static inline int gp_event_queue_key_pressed(gp_event_queue *self, uint32_t key)
+{
+	return gp_event_key_state_pressed(&self->state, key);
+}
 
 #endif /* INPUT_GP_EVENT_QUEUE_H */

@@ -121,17 +121,17 @@ int main(int argc, char *argv[])
 		gp_backend_poll(backend);
 
 		/* Read and parse events */
-		gp_event ev;
+		gp_event *ev;
 
-		while (gp_backend_get_event(backend, &ev)) {
-			switch (ev.type) {
+		while ((ev = gp_backend_get_event(backend))) {
+			switch (ev->type) {
 			case GP_EV_KEY:
 
 				/* ignore key up events */
-				if (!ev.code)
+				if (!ev->code)
 					continue;
 
-				switch (ev.key.key) {
+				switch (ev->key.key) {
 				case GP_KEY_ESC:
 				case GP_KEY_Q:
 					gp_backend_exit(backend);
@@ -151,7 +151,7 @@ int main(int argc, char *argv[])
 				}
 			break;
 			case GP_EV_SYS:
-				if (ev.code == GP_EV_SYS_RESIZE) {
+				if (ev->code == GP_EV_SYS_RESIZE) {
 					gp_backend_resize_ack(backend);
 					gp_fill(backend->pixmap, 0);
 				}
