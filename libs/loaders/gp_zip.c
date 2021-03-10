@@ -17,7 +17,8 @@
 
 #endif /* HAVE_ZLIB */
 
-#include "core/gp_common.h"
+#include <utils/gp_vec.h>
+#include <core/gp_common.h>
 #include <core/gp_debug.h>
 
 #include <loaders/gp_loader.h>
@@ -26,33 +27,14 @@
 
 #ifdef HAVE_ZLIB
 
-#define ZIP_CHUNKS_IN_TABLE 128
-
-/*
- * Table used for seeks, populated on the go
- */
-struct zip_chunks_table {
-	long offsets[ZIP_CHUNKS_IN_TABLE];
-	struct zip_chunks_table *next;
-	struct zip_chunks_table *prev;
-};
-
 struct zip_priv {
 	gp_io *io;
 
 	/* Current position in zip continer counted in images we found */
 	unsigned int cur_pos;
 
-	/* Current table */
-	unsigned int cur_table_pos;
-	struct zip_chunks_table *cur_table;
-
-	/* Last table and index into it, this is used for addition */
-	unsigned int tables_used;
-	unsigned int table_used;
-	struct zip_chunks_table *last_table;
-
-	struct zip_chunks_table table;
+	/* Offsets to zip local headers */
+	long *offsets;
 };
 
 struct zip_local_header {
@@ -221,6 +203,8 @@ static int zip_read_data_desc(gp_io *io, struct zip_local_header *header)
 		return 1;
 	}
 
+	GP_DEBUG(1, "Read Data Description Header");
+
 	return 0;
 }
 
@@ -338,61 +322,29 @@ out:
 	return err;
 }
 
-static unsigned int last_offset_idx(struct zip_priv *priv)
+static void record_offset(struct zip_priv *priv, size_t pos, long offset)
 {
-	return priv->table_used + priv->tables_used * ZIP_CHUNKS_IN_TABLE;
-}
+	size_t last_off = gp_vec_len(priv->offsets);
+	long *offsets;
 
-static long last_recorded_offset(struct zip_priv *priv)
-{
-	const unsigned int last_idx = ZIP_CHUNKS_IN_TABLE - 1;
-
-	if (priv->table_used == 0) {
-		if (priv->last_table->prev)
-			return priv->last_table->prev->offsets[last_idx];
-
-		return -1;
-	}
-
-	return priv->last_table->offsets[priv->table_used - 1];
-}
-
-static void record_offset(struct zip_priv *priv, long offset)
-{
-	if (offset <= last_recorded_offset(priv))
+	if (pos < last_off)
 		return;
 
-	GP_DEBUG(2, "Recording offset to %i image (%li)",
-	         last_offset_idx(priv), offset);
-
-	if (priv->table_used >= ZIP_CHUNKS_IN_TABLE) {
-		struct zip_chunks_table *new_table;
-
-		GP_DEBUG(1, "Allocating chunks table (table nr. %u) (size %i)",
-		         priv->tables_used+1, ZIP_CHUNKS_IN_TABLE);
-
-		new_table = malloc(sizeof(struct zip_chunks_table));
-
-		if (!new_table) {
-			GP_WARN("Malloc failed :(");
-			return;
-		}
-
-		priv->tables_used++;
-		priv->table_used = 0;
-		new_table->prev = priv->last_table;
-		new_table->next = NULL;
-		priv->last_table->next = new_table;
-		priv->last_table = new_table;
+	if (pos != last_off) {
+		GP_ABORT("Invalid offset");
+		return;
 	}
 
-	priv->last_table->offsets[priv->table_used++] = offset;
-/*
-	printf("OFFSET table\n");
-	unsigned int i;
-	for (i = 0; i < priv->table_used; i++)
-		printf("** %u -> %li\n", i, priv->last_table->offsets[i]);
- */
+	GP_DEBUG(2, "Recording offset to %zu image (%li)", pos, offset);
+
+	offsets = gp_vec_append(priv->offsets, 1);
+	if (!offsets) {
+		GP_WARN("Failed to grow offsets vector");
+		return;
+	}
+
+	priv->offsets = offsets;
+	offsets[pos] = offset;
 }
 
 static int zip_load_next(gp_container *self, gp_pixmap **img,
@@ -413,10 +365,10 @@ static int zip_load_next(gp_container *self, gp_pixmap **img,
 	if (err)
 		return 1;
 
-	record_offset(priv, gp_io_tell(priv->io));
-
 	priv->cur_pos++;
 	self->cur_img = priv->cur_pos;
+
+	record_offset(priv, priv->cur_pos, gp_io_tell(priv->io));
 
 	return 0;
 }
@@ -433,35 +385,17 @@ static gp_pixmap *load_next(gp_container *self, gp_progress_cb *callback)
 /* Seek to the current position */
 static void seek_cur_pos(struct zip_priv *priv)
 {
-	unsigned int cur_table = priv->cur_pos / ZIP_CHUNKS_IN_TABLE;
-	unsigned int cur_pos;
+	size_t last_off = gp_vec_len(priv->offsets);
 
-	if (priv->cur_table_pos != cur_table) {
-		unsigned int i;
-
-		GP_DEBUG(3, "cur_pos %u out of cur table %u",
-		         priv->cur_pos, priv->cur_table_pos);
-
-		priv->cur_table = &priv->table;
-
-		for (i = 0; i < cur_table; i++) {
-			if (priv->cur_table->next)
-				priv->cur_table = priv->cur_table->next;
-			else
-				GP_WARN("The cur_pos points after last table");
-		}
-
-		priv->cur_table_pos = cur_table;
+	if (priv->cur_pos >= last_off) {
+		GP_WARN("Attempt to seek out of the offsets table");
+		return;
 	}
 
-	//TODO: Asert that we are not in last table and cur_pos < table_used
-
-	cur_pos = priv->cur_pos % ZIP_CHUNKS_IN_TABLE;
-
 	GP_DEBUG(2, "Setting current position to %u (%li)",
-	         priv->cur_pos, priv->cur_table->offsets[cur_pos]);
+	         priv->cur_pos, priv->offsets[priv->cur_pos]);
 
-	gp_io_seek(priv->io, priv->cur_table->offsets[cur_pos], GP_IO_SEEK_SET);
+	gp_io_seek(priv->io, priv->offsets[priv->cur_pos], GP_IO_SEEK_SET);
 }
 
 static int load_next_offset(struct zip_priv *priv)
@@ -474,7 +408,10 @@ static int load_next_offset(struct zip_priv *priv)
 		return ret;
 
 	//TODO: Match image extension and signature
-	record_offset(priv, offset);
+	record_offset(priv, priv->cur_pos + 1, offset);
+
+	if (!header.fname_len || !header.extf_len)
+		GP_WARN("Wrong header size!");
 
 	/* Seek to the next local header */
 	seek_bytes(priv->io, (uint32_t)header.fname_len +
@@ -489,19 +426,19 @@ static int load_next_offset(struct zip_priv *priv)
  */
 static int set_cur_pos(struct zip_priv *priv, unsigned int where)
 {
-	unsigned int max = last_offset_idx(priv);
+	size_t last_off = gp_vec_len(priv->offsets)-1;
 	int err;
 
-	GP_DEBUG(2, "where %u max %u", where, max);
+	GP_DEBUG(2, "where %u max %zu", where, last_off);
 
 	/* Move to the max and beyond */
-	if (where >= max) {
-		if (max == 0) {
+	if (where > last_off) {
+		if (last_off == 0) {
 			if ((err = load_next_offset(priv)))
 				return err;
 			priv->cur_pos = 0;
 		} else {
-			priv->cur_pos = max - 1;
+			priv->cur_pos = last_off - 1;
 			seek_cur_pos(priv);
 		}
 
@@ -567,13 +504,10 @@ static int zip_load(gp_container *self, gp_pixmap **img,
 static void zip_close(gp_container *self)
 {
 	struct zip_priv *priv = GP_CONTAINER_PRIV(self);
-	struct zip_chunks_table *i, *j;
 
 	GP_DEBUG(1, "Closing ZIP container");
 
-	/* Free allocated offset tables */
-	for (i = priv->table.next; i != NULL; j = i, i = i->next, free(j));
-
+	gp_vec_free(priv->offsets);
 	gp_io_close(priv->io);
 	free(self);
 }
@@ -638,6 +572,7 @@ gp_container *gp_open_zip(const char *path)
 	gp_container *ret;
 	gp_io *io;
 	int err;
+	long *offsets;
 
 	io = open_zip(path);
 
@@ -645,9 +580,12 @@ gp_container *gp_open_zip(const char *path)
 		return NULL;
 
 	ret = malloc(sizeof(gp_container) + sizeof(struct zip_priv));
+	offsets = gp_vec_new(1, sizeof(long));
 
-	if (!ret) {
+	if (!ret || !offsets) {
 		err = ENOMEM;
+		free(ret);
+		gp_vec_free(offsets);
 		goto err0;
 	}
 
@@ -660,21 +598,8 @@ gp_container *gp_open_zip(const char *path)
 	priv = GP_CONTAINER_PRIV(ret);
 
 	priv->io = io;
-
-	priv->table.next = NULL;
-	priv->table.prev = NULL;
-
-	/* Cache for current table for seeks */
-	priv->cur_table = &priv->table;
-	priv->cur_table_pos = 0;
-
-	/* Current position */
 	priv->cur_pos = 0;
-
-	/* Last table, used for insertion */
-	priv->tables_used = 0;
-	priv->table_used = 0;
-	priv->last_table = &priv->table;
+	priv->offsets = offsets;
 
 	return ret;
 err0:
