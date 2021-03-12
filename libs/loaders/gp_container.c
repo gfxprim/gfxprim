@@ -20,6 +20,8 @@ static const gp_container_ops *const containers[MAX_CONTAINERS] = {
 int gp_container_seek(gp_container *self, ssize_t offset,
                       enum gp_seek_whence whence)
 {
+	int err;
+
 	if (!self->ops->seek) {
 		GP_DEBUG(1, "Seek not implemented in %s container",
 		         self->ops->fmt_name);
@@ -27,7 +29,13 @@ int gp_container_seek(gp_container *self, ssize_t offset,
 		return ENOSYS;
 	}
 
-	return self->ops->seek(self, offset, whence);
+	err = self->ops->seek(self, offset, whence);
+	if (err) {
+		errno = err;
+		return 1;
+	}
+
+	return 0;
 }
 
 int gp_container_load_ex(gp_container *self, gp_pixmap **img,
