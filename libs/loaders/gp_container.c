@@ -10,11 +10,13 @@
 #include <loaders/gp_container.h>
 #include <loaders/gp_io.h>
 #include <loaders/gp_zip.h>
+#include <loaders/gp_rar.h>
 
 #define MAX_CONTAINERS 64
 
 static const gp_container_ops *const containers[MAX_CONTAINERS] = {
 	&gp_zip_ops,
+	&gp_rar_ops,
 };
 
 int gp_container_seek(gp_container *self, ssize_t offset,
