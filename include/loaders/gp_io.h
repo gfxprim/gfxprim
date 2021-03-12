@@ -14,6 +14,7 @@
 
 #include <stdint.h>
 #include <sys/types.h>
+#include <loaders/gp_types.h>
 
 /*
  * Values are 1:1 with constants passed to lseek()
@@ -23,8 +24,6 @@ enum gp_io_whence {
 	GP_IO_SEEK_CUR = 1,
 	GP_IO_SEEK_END = 2,
 };
-
-typedef struct gp_io gp_io;
 
 struct gp_io {
 	ssize_t (*read)(gp_io *self, void *buf, size_t size);

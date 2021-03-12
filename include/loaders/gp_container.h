@@ -13,12 +13,11 @@
 #ifndef LOADERS_GP_CONTAINER_H
 #define LOADERS_GP_CONTAINER_H
 
-#include "core/gp_types.h"
+#include <core/gp_types.h>
 #include <core/gp_progress_callback.h>
+#include <loaders/gp_types.h>
 
 #include <loaders/gp_data_storage.h>
-
-typedef struct gp_container gp_container;
 
 enum gp_container_whence {
 	GP_CONT_FIRST,
@@ -52,10 +51,19 @@ struct gp_container_ops {
 	int (*seek)(gp_container *self, int offset,
 	            enum gp_container_whence whence);
 
+
+	int (*match)(const void *buf);
+
 	/*
-	 * Container type name.
+	 * Initializes container.
 	 */
-	const char *type;
+	gp_container *(*init)(gp_io *io);
+
+	/* Short format name */
+	const char *fmt_name;
+
+	/* NULL terminated list of file extensions */
+	const char *const extensions[];
 };
 
 struct gp_container {
@@ -113,5 +121,7 @@ static inline void gp_container_close(gp_container *self)
 {
 	self->ops->close(self);
 }
+
+gp_container *gp_container_open(const char *path);
 
 #endif /* LOADERS_GP_CONTAINER_H */

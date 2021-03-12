@@ -558,26 +558,12 @@ err0:
 	return NULL;
 }
 
-static const struct gp_container_ops zip_ops = {
-	.load_next = load_next,
-	.load_ex = zip_load,
-	.close = zip_close,
-	.seek = zip_seek,
-	.type = "ZIP",
-};
-
-gp_container *gp_open_zip(const char *path)
+gp_container *gp_init_zip(gp_io *io)
 {
 	struct zip_priv *priv;
 	gp_container *ret;
-	gp_io *io;
 	int err;
 	long *offsets;
-
-	io = open_zip(path);
-
-	if (!io)
-		return NULL;
 
 	ret = malloc(sizeof(gp_container) + sizeof(struct zip_priv));
 	offsets = gp_vec_new(1, sizeof(long));
@@ -593,7 +579,7 @@ gp_container *gp_open_zip(const char *path)
 
 	ret->img_count = -1;
 	ret->cur_img = 0;
-	ret->ops = &zip_ops;
+	ret->ops = &gp_zip_ops;
 
 	priv = GP_CONTAINER_PRIV(ret);
 
@@ -608,6 +594,26 @@ err0:
 	return NULL;
 }
 
+gp_container *gp_open_zip(const char *path)
+{
+	gp_container *ret;
+	gp_io *io;
+
+	io = open_zip(path);
+	if (!io)
+		return NULL;
+
+	ret = gp_init_zip(io);
+	if (!ret) {
+		int err = errno;
+		gp_io_close(io);
+		errno = err;
+		return NULL;
+	}
+
+	return ret;
+}
+
 #else
 
 gp_container *gp_open_zip(const char GP_UNUSED(*path))
@@ -617,9 +623,29 @@ gp_container *gp_open_zip(const char GP_UNUSED(*path))
 	return NULL;
 }
 
+gp_container *gp_init_zip(gp_io GP_UNUSED(*io))
+{
+	GP_FATAL("zlib support not compiled in");
+	errno = ENOSYS;
+	return NULL;
+}
+
 #endif /* HAVE_ZLIB */
 
-int gp_match_zip(const char *buf)
+int gp_match_zip(const void *buf)
 {
 	return !memcmp("PK\03\04", buf, 4);
 }
+
+const gp_container_ops gp_zip_ops = {
+#ifdef HAVE_ZLIB
+	.load_next = load_next,
+	.load_ex = zip_load,
+	.close = zip_close,
+	.seek = zip_seek,
+#endif /* HAVE_ZLIB */
+	.init = gp_init_zip,
+	.match = gp_match_zip,
+	.fmt_name = "ZIP",
+	.extensions = {"zip", "cbz", NULL}
+};

@@ -76,7 +76,7 @@ gp_pixmap *image_loader_get_image(gp_progress_cb *callback, int elevate)
 		 *
 		 * TODO: How to cache container content?
 		 */
-		cur_cont = gp_open_zip(path);
+		cur_cont = gp_container_open(path);
 
 		if (cur_cont) {
 			gp_container_load_ex(cur_cont, &img, cur_meta_data, callback);

@@ -32,7 +32,7 @@ static void load_next(void)
 
 	image = gp_container_load_next(container, NULL);
 
-	if (image == NULL)
+	if (!image)
 		return;
 
 	if (image->w != backend->pixmap->w ||
@@ -47,16 +47,14 @@ static void load_next(void)
 
 int main(int argc, char *argv[])
 {
-
 	if (argc != 2) {
 		fprintf(stderr, "Takes path to zip or cbz as an argument\n");
 		return 1;
 	}
 
-	/* Open zip container */
-	container = gp_open_zip(argv[1]);
+	container = gp_container_open(argv[1]);
 
-	if (container == NULL) {
+	if (!container) {
 		fprintf(stderr, "Failed to open container: %s\n", strerror(errno));
 		return 1;
 	}
