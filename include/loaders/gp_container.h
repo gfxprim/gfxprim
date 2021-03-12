@@ -14,16 +14,11 @@
 #define LOADERS_GP_CONTAINER_H
 
 #include <core/gp_types.h>
+#include <core/gp_seek.h>
 #include <core/gp_progress_callback.h>
 #include <loaders/gp_types.h>
 
 #include <loaders/gp_data_storage.h>
-
-enum gp_container_whence {
-	GP_CONT_FIRST,
-	GP_CONT_LAST,
-	GP_CONT_CUR,
-};
 
 struct gp_container_ops {
 	/*
@@ -48,8 +43,8 @@ struct gp_container_ops {
 	 *
 	 * Returns 0 on success, errno on failure.
 	 */
-	int (*seek)(gp_container *self, int offset,
-	            enum gp_container_whence whence);
+	int (*seek)(gp_container *self, ssize_t offset,
+	            enum gp_seek_whence whence);
 
 
 	int (*match)(const void *buf);
@@ -114,8 +109,8 @@ static inline gp_pixmap *gp_container_load(gp_container *self,
 	return ret;
 }
 
-int gp_container_seek(gp_container *self, int offset,
-                      enum gp_container_whence whence);
+int gp_container_seek(gp_container *self, ssize_t offset,
+                      enum gp_seek_whence whence);
 
 static inline void gp_container_close(gp_container *self)
 {

@@ -345,7 +345,7 @@ static unsigned int psd_next_img_res_block(gp_io *io, gp_pixmap **res,
 	break;
 	}
 
-	if (gp_io_seek(io, seek_size, GP_IO_SEEK_CUR) == (off_t)-1) {
+	if (gp_io_seek(io, seek_size, GP_SEEK_CUR) == (off_t)-1) {
 		GP_DEBUG(1, "Failed skip image resource");
 		return 0;
 	}
@@ -665,7 +665,7 @@ static int psd_combined_image(gp_io *io, struct psd_header *header,
 	 *
 	 * Two bytes per channel per row
 	 */
-	if (gp_io_seek(io, 2 * header->channels * header->h, GP_IO_SEEK_CUR) == (off_t)-1) {
+	if (gp_io_seek(io, 2 * header->channels * header->h, GP_SEEK_CUR) == (off_t)-1) {
 		GP_DEBUG(1, "Failed to skip Line Bytes Counts");
 		return errno;
 	}
@@ -755,7 +755,7 @@ int gp_read_psd_ex(gp_io *io, gp_pixmap **img, gp_storage *storage,
 	}
 
 	/* Seek after the color mode data */
-	if (gp_io_seek(io, len, GP_IO_SEEK_CUR) == (off_t)-1) {
+	if (gp_io_seek(io, len, GP_SEEK_CUR) == (off_t)-1) {
 		GP_DEBUG(1, "Failed skip color mode data");
 		return 1;
 	}
@@ -785,7 +785,7 @@ int gp_read_psd_ex(gp_io *io, gp_pixmap **img, gp_storage *storage,
 		goto err;
 	}
 
-	if (gp_io_seek(io, size, GP_IO_SEEK_CUR) == (off_t)-1) {
+	if (gp_io_seek(io, size, GP_SEEK_CUR) == (off_t)-1) {
 		GP_DEBUG(1, "Failed to seek to Image Data Section");
 		err = errno;
 		goto err;

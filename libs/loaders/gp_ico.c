@@ -95,7 +95,7 @@ int gp_read_ico_ex(gp_io *io, gp_pixmap **img,
 		 ie.w, ie.h, ie.data_size, ie.data_offset,
 		 ie.bits_per_pixel, ie.palette_colors, ie.color_planes);
 
-	if (gp_io_seek(io, ie.data_offset, GP_IO_SEEK_SET) == -1) {
+	if (gp_io_seek(io, ie.data_offset, GP_SEEK_SET) == -1) {
 		GP_DEBUG(1, "Failed to seek to image data");
 		return EIO;
 	}

@@ -243,7 +243,7 @@ int gp_read_image_ex(gp_io *io, gp_pixmap **img, gp_storage *meta_data,
 		return 1;
 	}
 
-	if (gp_io_seek(io, start, GP_IO_SEEK_SET) != start) {
+	if (gp_io_seek(io, start, GP_SEEK_SET) != start) {
 		GP_DEBUG(1, "Failed to seek at the start of the stream: %s",
 		         strerror(errno));
 		return 1;

@@ -14,21 +14,13 @@
 
 #include <stdint.h>
 #include <sys/types.h>
+#include <core/gp_seek.h>
 #include <loaders/gp_types.h>
-
-/*
- * Values are 1:1 with constants passed to lseek()
- */
-enum gp_io_whence {
-	GP_IO_SEEK_SET = 0,
-	GP_IO_SEEK_CUR = 1,
-	GP_IO_SEEK_END = 2,
-};
 
 struct gp_io {
 	ssize_t (*read)(gp_io *self, void *buf, size_t size);
 	ssize_t (*write)(gp_io *self, const void *buf, size_t size);
-	off_t (*seek)(gp_io *self, off_t off, enum gp_io_whence whence);
+	off_t (*seek)(gp_io *self, off_t off, enum gp_seek_whence whence);
 	int (*close)(gp_io *self);
 
 	off_t mark;
@@ -55,7 +47,7 @@ static inline int gp_io_close(gp_io *io)
 	return io->close(io);
 }
 
-static inline off_t gp_io_seek(gp_io *io, off_t off, enum gp_io_whence whence)
+static inline off_t gp_io_seek(gp_io *io, off_t off, enum gp_seek_whence whence)
 {
 	return io->seek(io, off, whence);
 }
@@ -73,7 +65,7 @@ static inline int gp_io_putc(gp_io *io, char c)
  */
 static inline off_t gp_io_tell(gp_io *io)
 {
-	return io->seek(io, 0, GP_IO_SEEK_CUR);
+	return io->seek(io, 0, GP_SEEK_CUR);
 }
 
 /*
@@ -81,7 +73,7 @@ static inline off_t gp_io_tell(gp_io *io)
  */
 static inline off_t gp_io_rewind(gp_io *io)
 {
-	return io->seek(io, 0, GP_IO_SEEK_SET);
+	return io->seek(io, 0, GP_SEEK_SET);
 }
 
 static inline off_t gp_io_peek(gp_io *io, void *buf, size_t size)
@@ -91,7 +83,7 @@ static inline off_t gp_io_peek(gp_io *io, void *buf, size_t size)
 	if (gp_io_read(io, buf, size) != (ssize_t)size)
 		return -1;
 
-	return gp_io_seek(io, cur_off, GP_IO_SEEK_SET);
+	return gp_io_seek(io, cur_off, GP_SEEK_SET);
 }
 
 

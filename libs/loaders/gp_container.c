@@ -17,8 +17,8 @@ static const gp_container_ops *const containers[MAX_CONTAINERS] = {
 	&gp_zip_ops,
 };
 
-int gp_container_seek(gp_container *self, int offset,
-                      enum gp_container_whence whence)
+int gp_container_seek(gp_container *self, ssize_t offset,
+                      enum gp_seek_whence whence)
 {
 	if (!self->ops->seek) {
 		GP_DEBUG(1, "Seek not implemented in %s container",

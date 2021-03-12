@@ -36,14 +36,14 @@ static ssize_t file_write(gp_io *self, const void *buf, size_t size)
 	return write(file_io->fd, buf, size);
 }
 
-static off_t file_seek(gp_io *self, off_t off, enum gp_io_whence whence)
+static off_t file_seek(gp_io *self, off_t off, enum gp_seek_whence whence)
 {
 	struct file_io *file_io = GP_IO_PRIV(self);
 
 	switch (whence) {
-	case GP_IO_SEEK_SET:
-	case GP_IO_SEEK_CUR:
-	case GP_IO_SEEK_END:
+	case GP_SEEK_SET:
+	case GP_SEEK_CUR:
+	case GP_SEEK_END:
 	break;
 	default:
 		GP_WARN("Invalid whence");
@@ -150,12 +150,12 @@ static ssize_t mem_read(gp_io *io, void *buf, size_t size)
 	return ret;
 }
 
-static off_t mem_seek(gp_io *io, off_t off, enum gp_io_whence whence)
+static off_t mem_seek(gp_io *io, off_t off, enum gp_seek_whence whence)
 {
 	struct mem_io *mem_io = GP_IO_PRIV(io);
 
 	switch (whence) {
-	case GP_IO_SEEK_CUR:
+	case GP_SEEK_CUR:
 		if (-off > (off_t)mem_io->pos ||
 		     off + mem_io->pos > mem_io->size) {
 			errno = EINVAL;
@@ -164,14 +164,14 @@ static off_t mem_seek(gp_io *io, off_t off, enum gp_io_whence whence)
 
 		mem_io->pos += off;
 	break;
-	case GP_IO_SEEK_SET:
+	case GP_SEEK_SET:
 		if (off < 0 || off > (off_t)mem_io->size) {
 			errno = EINVAL;
 			return -1;
 		}
 		mem_io->pos = off;
 	break;
-	case GP_IO_SEEK_END:
+	case GP_SEEK_END:
 		if (off > 0 || off + (off_t)mem_io->size < 0) {
 			errno = EINVAL;
 			return -1;
@@ -267,13 +267,13 @@ static ssize_t sub_read(gp_io *io, void *buf, size_t size)
 	return ret;
 }
 
-static off_t sub_seek(gp_io *io, off_t off, enum gp_io_whence whence)
+static off_t sub_seek(gp_io *io, off_t off, enum gp_seek_whence whence)
 {
 	struct sub_io *sub_io = GP_IO_PRIV(io);
 	off_t io_size, ret, poff;
 
 	switch (whence) {
-	case GP_IO_SEEK_CUR:
+	case GP_SEEK_CUR:
 		//TODO: Overflow
 		poff = sub_io->cur + off;
 
@@ -284,7 +284,7 @@ static off_t sub_seek(gp_io *io, off_t off, enum gp_io_whence whence)
 
 		ret = gp_io_seek(sub_io->io, off, whence);
 	break;
-	case GP_IO_SEEK_SET:
+	case GP_SEEK_SET:
 		io_size = sub_io->end - sub_io->start;
 
 		if (off > io_size || off < 0) {
@@ -294,7 +294,7 @@ static off_t sub_seek(gp_io *io, off_t off, enum gp_io_whence whence)
 
 		ret = gp_io_seek(sub_io->io, sub_io->start + off, whence);
 	break;
-	case GP_IO_SEEK_END:
+	case GP_SEEK_END:
 		io_size = sub_io->end - sub_io->start;
 
 		if (off + io_size < 0 || off > 0) {
@@ -302,7 +302,7 @@ static off_t sub_seek(gp_io *io, off_t off, enum gp_io_whence whence)
 			return -1;
 		}
 
-		ret = gp_io_seek(sub_io->io, sub_io->end + off, GP_IO_SEEK_SET);
+		ret = gp_io_seek(sub_io->io, sub_io->end + off, GP_SEEK_SET);
 	break;
 	default:
 		GP_WARN("Invalid whence");
@@ -441,7 +441,7 @@ int gp_io_mark(gp_io *self, enum gp_io_mark_types type)
 
 	switch (type) {
 	case GP_IO_MARK:
-		ret = gp_io_seek(self, 0, GP_IO_SEEK_CUR);
+		ret = gp_io_seek(self, 0, GP_SEEK_CUR);
 	break;
 	case GP_IO_REWIND:
 		ret = gp_io_seek(self, self->mark, SEEK_SET);
@@ -465,12 +465,12 @@ off_t gp_io_size(gp_io *io)
 	off_t cur = gp_io_tell(io);
 	off_t ret;
 
-	ret = gp_io_seek(io, 0, GP_IO_SEEK_END);
+	ret = gp_io_seek(io, 0, GP_SEEK_END);
 
 	if (ret == -1)
 		return ret;
 
-	gp_io_seek(io, cur, GP_IO_SEEK_SET);
+	gp_io_seek(io, cur, GP_SEEK_SET);
 
 	GP_DEBUG(2, "I/O Size = %lli", (long long)ret);
 

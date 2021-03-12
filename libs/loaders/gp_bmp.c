@@ -325,7 +325,7 @@ static int read_bitmap_palette(gp_io *io, struct gp_bmp_info_header *header,
 	            "pixel size %"PRIu8"bytes",
 		    palette_offset, palette_offset, pixel_size);
 
-	if (gp_io_seek(io, palette_offset, GP_IO_SEEK_SET) != palette_offset) {
+	if (gp_io_seek(io, palette_offset, GP_SEEK_SET) != palette_offset) {
 		err = errno;
 		GP_DEBUG(1, "Seek to 0x%02x failed: '%s'",
 		            BMP_HEADER_OFFSET, strerror(errno));
@@ -363,7 +363,7 @@ static int seek_pixels_offset(gp_io *io, struct gp_bmp_info_header *header)
 	GP_DEBUG(2, "Offset to BMP pixels is 0x%x (%ubytes)",
 	            header->pixel_offset, header->pixel_offset);
 
-	if (gp_io_seek(io, header->pixel_offset, GP_IO_SEEK_SET) != header->pixel_offset) {
+	if (gp_io_seek(io, header->pixel_offset, GP_SEEK_SET) != header->pixel_offset) {
 		err = errno;
 		GP_DEBUG(1, "Seek to 0x%02x failed: %s",
 		            header->pixel_offset, strerror(err));
@@ -577,7 +577,7 @@ static int read_bitfields_or_rgb(gp_io *io, struct gp_bmp_info_header *header,
 		}
 
 		if (row_padd) {
-			if (gp_io_seek(io, row_padd, GP_IO_SEEK_CUR) == (off_t)-1) {
+			if (gp_io_seek(io, row_padd, GP_SEEK_CUR) == (off_t)-1) {
 				err = errno;
 				GP_DEBUG(1, "Failed to seek row %"PRId32": %s",
 				         y, strerror(err));

@@ -14,11 +14,11 @@
 static const char *whence_name(int whence)
 {
 	switch (whence) {
-	case GP_IO_SEEK_SET:
+	case GP_SEEK_SET:
 		return "SEEK_SET";
-	case GP_IO_SEEK_CUR:
+	case GP_SEEK_CUR:
 		return "SEEK_CUR";
-	case GP_IO_SEEK_END:
+	case GP_SEEK_END:
 		return "SEEK_END";
 	}
 
@@ -165,40 +165,40 @@ static int do_test(gp_io *io, off_t io_size, int is_file)
 	}
 
 	/* Seek tests */
-	if (seek_and_tell(io, 0, GP_IO_SEEK_END, io_size))
+	if (seek_and_tell(io, 0, GP_SEEK_END, io_size))
 		failed++;
 
-	if (seek_and_tell(io, -io_size, GP_IO_SEEK_END, 0))
+	if (seek_and_tell(io, -io_size, GP_SEEK_END, 0))
 		failed++;
 
-	if (seek_and_tell(io, io_size, GP_IO_SEEK_SET, io_size))
+	if (seek_and_tell(io, io_size, GP_SEEK_SET, io_size))
 		failed++;
 
-	if (seek_and_tell(io, 0, GP_IO_SEEK_SET, 0))
+	if (seek_and_tell(io, 0, GP_SEEK_SET, 0))
 		failed++;
 
-	if (seek_and_tell(io, io_size, GP_IO_SEEK_CUR, io_size))
+	if (seek_and_tell(io, io_size, GP_SEEK_CUR, io_size))
 		failed++;
 
-	if (seek_and_tell(io, -io_size, GP_IO_SEEK_CUR, 0))
+	if (seek_and_tell(io, -io_size, GP_SEEK_CUR, 0))
 		failed++;
 
-	if (seek_fail(io, -1, GP_IO_SEEK_CUR))
+	if (seek_fail(io, -1, GP_SEEK_CUR))
 		failed++;
 
-	if (!is_file && seek_fail(io, io_size+1, GP_IO_SEEK_CUR))
+	if (!is_file && seek_fail(io, io_size+1, GP_SEEK_CUR))
 		failed++;
 
-	if (seek_fail(io, -1, GP_IO_SEEK_SET))
+	if (seek_fail(io, -1, GP_SEEK_SET))
 		failed++;
 
-	if (!is_file && seek_fail(io, io_size + 1, GP_IO_SEEK_SET))
+	if (!is_file && seek_fail(io, io_size + 1, GP_SEEK_SET))
 		failed++;
 
-	if (!is_file && seek_fail(io, 1, GP_IO_SEEK_END))
+	if (!is_file && seek_fail(io, 1, GP_SEEK_END))
 		failed++;
 
-	if (seek_fail(io, -io_size - 1, GP_IO_SEEK_END))
+	if (seek_fail(io, -io_size - 1, GP_SEEK_END))
 		failed++;
 
 	if (seek_fail(io, 0, 100))
@@ -328,7 +328,7 @@ static int test_IOSubIO(void)
 		return ret;
 	}
 
-	if (gp_io_seek(io, 0, GP_IO_SEEK_END) == (off_t)-1) {
+	if (gp_io_seek(io, 0, GP_SEEK_END) == (off_t)-1) {
 		tst_msg("Failed to seek to the end of sub I/O: %s",
 		        tst_strerr(errno));
 		goto failed;

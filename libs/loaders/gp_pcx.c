@@ -106,12 +106,12 @@ static ssize_t rle_read(gp_io *self, void *buf, size_t size)
 /*
  * Only seeks forward to skip padding also works for gp_io_tell().
  */
-static off_t rle_seek(gp_io *self, off_t off, enum gp_io_whence whence)
+static off_t rle_seek(gp_io *self, off_t off, enum gp_seek_whence whence)
 {
 	uint8_t b;
 	struct rle *priv = GP_IO_PRIV(self);
 
-	if (whence != GP_IO_SEEK_CUR || off < 0)
+	if (whence != GP_SEEK_CUR || off < 0)
 		return EINVAL;
 
 	while (off--)
@@ -217,7 +217,7 @@ static int read_g1(gp_io *io, struct pcx_header *header,
 	for (y = 0; y < res->h; y++) {
 		uint8_t *addr = GP_PIXEL_ADDR(res, 0, y);
 		gp_io_read(rle_io, addr, res->bytes_per_row);
-		gp_io_seek(rle_io, GP_IO_SEEK_CUR, padd);
+		gp_io_seek(rle_io, GP_SEEK_CUR, padd);
 
 		//TODO: FIX Endians
 		gp_bit_swap_row_b1(addr, res->bytes_per_row);
@@ -335,7 +335,7 @@ static int read_256_palette(gp_io *io, struct pcx_header *header,
 	uint8_t buf[GP_MAX(PALETTE_SIZE, header->bytes_per_line)];
 	gp_pixel palette[256];
 
-	if (gp_io_seek(io, -769, GP_IO_SEEK_END) == (off_t)-1) {
+	if (gp_io_seek(io, -769, GP_SEEK_END) == (off_t)-1) {
 		GP_DEBUG(1, "Failed to seek to palette: %s", strerror(errno));
 		return EIO;
 	}
@@ -353,7 +353,7 @@ static int read_256_palette(gp_io *io, struct pcx_header *header,
 	for (i = 0; i < 256; i++)
 		palette[i] = (buf[3*i+1]<<16) | (buf[3*i+2])<<8 | buf[3*i+3];
 
-	if (gp_io_seek(io, 128, GP_IO_SEEK_SET) == (off_t)-1) {
+	if (gp_io_seek(io, 128, GP_SEEK_SET) == (off_t)-1) {
 		GP_DEBUG(1, "Failed to seek to image data: %s",
 		         strerror(errno));
 		return EIO;

@@ -167,7 +167,7 @@ void image_loader_seek(enum img_seek_offset offset, int whence)
 		 *
 		 *       What about wrapping around?
 		 */
-		if (gp_container_seek(cur_cont, whence, GP_CONT_CUR)) {
+		if (gp_container_seek(cur_cont, whence, GP_SEEK_CUR)) {
 			gp_container_close(cur_cont);
 			cur_cont = NULL;
 			goto list_seek;

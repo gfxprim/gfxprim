@@ -361,7 +361,7 @@ static int psp_read_jpeg(gp_io *io, struct psp_img_attrs *attrs,
 {
 	int err;
 
-	gp_io_seek(io, 14, GP_IO_SEEK_CUR);
+	gp_io_seek(io, 14, GP_SEEK_CUR);
 /*
 	if (fread(buf, sizeof(buf), 1, f) < 1) {
 		GP_DEBUG(1, "Failed to read JPEG Information Chunk");
@@ -430,7 +430,7 @@ static int psp_next_block(gp_io *io, struct psp_img_attrs *attrs,
 	if (err)
 		return err;
 
-	if (gp_io_seek(io, offset, GP_IO_SEEK_SET) != offset) {
+	if (gp_io_seek(io, offset, GP_SEEK_SET) != offset) {
 		err = errno;
 		GP_DEBUG(1, "Failed to seek to next block; %s",
 		         strerror(errno));

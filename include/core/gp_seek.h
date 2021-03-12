@@ -11,10 +11,13 @@
 #include <sys/types.h>
 #include <stddef.h>
 
+/*
+ * Values are 1:1 with constants passed to lseek()
+ */
 enum gp_seek_whence {
-	GP_SEEK_SET,
-	GP_SEEK_CUR,
-	GP_SEEK_END,
+	GP_SEEK_SET = 0,
+	GP_SEEK_CUR = 1,
+	GP_SEEK_END = 2,
 };
 
 /**

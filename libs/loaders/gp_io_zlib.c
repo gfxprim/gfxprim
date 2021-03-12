@@ -91,7 +91,7 @@ static ssize_t zlib_read(gp_io *io, void *buf, size_t size)
 			/* Attempt to seek back in the parent I/O stream */
 			if (priv->strm.avail_in) {
 				GP_DEBUG(1, "Seeking back by %zu", (size_t)priv->strm.avail_in);
-				gp_io_seek(priv->io, -(int)priv->strm.avail_in, GP_IO_SEEK_CUR);
+				gp_io_seek(priv->io, -(int)priv->strm.avail_in, GP_SEEK_CUR);
 			}
 
 			goto out;
@@ -143,14 +143,14 @@ static off_t zlib_seek_end(gp_io *io)
 	return priv->bytes_read;
 }
 
-static off_t zlib_seek(gp_io *io, off_t offset, enum gp_io_whence whence)
+static off_t zlib_seek(gp_io *io, off_t offset, enum gp_seek_whence whence)
 {
 	struct priv *priv = GP_IO_PRIV(io);
 	off_t ret;
 
 	GP_DEBUG(3, "Seek %li %u", (long)offset, whence);
 
-	if (whence == GP_IO_SEEK_CUR) {
+	if (whence == GP_SEEK_CUR) {
 		if (offset == 0)
 			return priv->bytes_read;
 		if (offset < 0)
@@ -161,8 +161,8 @@ static off_t zlib_seek(gp_io *io, off_t offset, enum gp_io_whence whence)
 		return priv->bytes_read;
 	}
 
-	if (whence == GP_IO_SEEK_SET && offset == 0) {
-		ret = gp_io_seek(priv->io, priv->io_start, GP_IO_SEEK_SET);
+	if (whence == GP_SEEK_SET && offset == 0) {
+		ret = gp_io_seek(priv->io, priv->io_start, GP_SEEK_SET);
 
 		if (ret == (off_t)-1)
 			return ret;
@@ -173,7 +173,7 @@ static off_t zlib_seek(gp_io *io, off_t offset, enum gp_io_whence whence)
 		return 0;
 	}
 
-	if (whence == GP_IO_SEEK_END && offset == 0)
+	if (whence == GP_SEEK_END && offset == 0)
 		return zlib_seek_end(io);
 
 out:

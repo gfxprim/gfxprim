@@ -123,7 +123,7 @@ static int get_buf(gp_io *io, off_t offset, char *buf, size_t len)
 
 	off = gp_io_tell(io);
 
-	if (gp_io_seek(io, offset, GP_IO_SEEK_SET) == -1) {
+	if (gp_io_seek(io, offset, GP_SEEK_SET) == -1) {
 		GP_WARN("Failed to seek to data");
 		return 1;
 	}
@@ -133,7 +133,7 @@ static int get_buf(gp_io *io, off_t offset, char *buf, size_t len)
 		return 1;
 	}
 
-	if (gp_io_seek(io, off, GP_IO_SEEK_SET) == -1) {
+	if (gp_io_seek(io, off, GP_SEEK_SET) == -1) {
 		GP_WARN("Failed to seek back");
 		return 1;
 	}

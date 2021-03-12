@@ -120,7 +120,7 @@ static int seek_bytes(gp_io *io, uint32_t bytes)
 
 	GP_DEBUG(4, "Moving forward by %"PRIu32" bytes", bytes);
 
-	if (gp_io_seek(io, bytes, GP_IO_SEEK_CUR) == (off_t)-1) {
+	if (gp_io_seek(io, bytes, GP_SEEK_CUR) == (off_t)-1) {
 		int err = errno;
 		GP_DEBUG(1, "Failed to seek: %s", strerror(errno));
 		return err;
@@ -274,7 +274,7 @@ static int zip_next_file(struct zip_priv *priv, gp_pixmap **img,
 		if (res && errno == ECANCELED)
 			err = errno;
 
-		gp_io_seek(priv->io, priv->io->mark + header.comp_size, GP_IO_SEEK_SET);
+		gp_io_seek(priv->io, priv->io->mark + header.comp_size, GP_SEEK_SET);
 
 		goto out;
 	break;
@@ -296,7 +296,7 @@ static int zip_next_file(struct zip_priv *priv, gp_pixmap **img,
 		 * - File is not image -> need to get to the end of the record
 		 * - All image data were not consumed by loader (may happen)
 		 */
-		if (gp_io_seek(io, 0, GP_IO_SEEK_END) == (off_t)-1)
+		if (gp_io_seek(io, 0, GP_SEEK_END) == (off_t)-1)
 			GP_DEBUG(1, "Failed to seek Zlib IO");
 
 		gp_io_close(io);
@@ -395,7 +395,7 @@ static void seek_cur_pos(struct zip_priv *priv)
 	GP_DEBUG(2, "Setting current position to %u (%li)",
 	         priv->cur_pos, priv->offsets[priv->cur_pos]);
 
-	gp_io_seek(priv->io, priv->offsets[priv->cur_pos], GP_IO_SEEK_SET);
+	gp_io_seek(priv->io, priv->offsets[priv->cur_pos], GP_SEEK_SET);
 }
 
 static int load_next_offset(struct zip_priv *priv)
@@ -457,26 +457,26 @@ static int set_cur_pos(struct zip_priv *priv, unsigned int where)
 	return 0;
 }
 
-static int zip_seek(gp_container *self, int offset,
-                    enum gp_container_whence whence)
+static int zip_seek(gp_container *self, ssize_t offset,
+                    enum gp_seek_whence whence)
 {
 	struct zip_priv *priv = GP_CONTAINER_PRIV(self);
-	unsigned int where;
+	ssize_t where;
 	int ret;
 
-	GP_DEBUG(1, "Seek offset=%i whence=%i", offset, whence);
+	GP_DEBUG(1, "Seek offset=%zi whence=%i", offset, whence);
 
 	switch (whence) {
-	case GP_CONT_CUR:
+	case GP_SEEK_CUR:
 		if (offset < 0 && priv->cur_pos < (unsigned int)-offset) {
-			GP_WARN("Current position %u offset %i",
+			GP_WARN("Current position %u offset %zi",
 			        priv->cur_pos, offset);
 			where = 0;
 		} else {
 			where = priv->cur_pos + offset;
 		}
 	break;
-	case GP_CONT_FIRST:
+	case GP_SEEK_SET:
 		where = offset;
 	break;
 	default:
@@ -496,7 +496,7 @@ static int zip_load(gp_container *self, gp_pixmap **img,
 	if (zip_load_next(self, img, storage, callback))
 		return 1;
 
-	zip_seek(self, -1, GP_CONT_CUR);
+	zip_seek(self, -1, GP_SEEK_CUR);
 
 	return 0;
 }
