@@ -118,8 +118,19 @@ static off_t entry_seek(gp_io *self, off_t off, enum gp_seek_whence whence)
 	struct entry_io *eio = GP_CONTAINER_OF(self, struct entry_io, io);
 	off_t ret;
 
-	if ((ret = archive_seek_data(eio->a, off, whence)) < 0)
+	if ((ret = archive_seek_data(eio->a, off, whence)) < 0) {
+		switch (ret) {
+		case ARCHIVE_FATAL:
+			errno = ENOSYS;
+		break;
+		case ARCHIVE_FAILED:
+			errno = EINVAL;
+		break;
+		}
+
 		GP_DEBUG(1, "libarchive seek: %s", strerror(errno));
+		return (off_t)-1;
+	}
 
 	return ret;
 }
