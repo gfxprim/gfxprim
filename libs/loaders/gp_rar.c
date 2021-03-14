@@ -97,9 +97,40 @@ gp_container *gp_init_rar(gp_io *io)
 	return ret;
 }
 
+static int rar_reopen(struct rar_priv *priv)
+{
+	GP_DEBUG(1, "Reopening RAR archive");
+
+	if (gp_io_rewind(priv->io))
+		return errno;
+
+	archive_read_free(priv->a);
+	priv->a = new_archive(priv);
+
+	return 0;
+}
+
+static int rar_move_forward(struct rar_priv *priv, size_t forward)
+{
+	struct archive_entry *a_entry;
+	size_t i;
+
+	GP_DEBUG(1, "Moving forward %zu", forward);
+
+	for (i = 0; i < forward; i++) {
+		if (archive_read_next_header(priv->a, &a_entry) != ARCHIVE_OK) {
+			GP_DEBUG(1, "libarchive: %s", archive_error_string(priv->a));
+			return EIO;
+		}
+	}
+
+	return 0;
+}
+
 struct entry_io {
 	gp_io io;
-	struct archive *a;
+	struct rar_priv *priv;
+	size_t pos;
 };
 
 static ssize_t entry_read(gp_io *self, void *buf, size_t size)
@@ -107,10 +138,84 @@ static ssize_t entry_read(gp_io *self, void *buf, size_t size)
 	struct entry_io *eio = GP_CONTAINER_OF(self, struct entry_io, io);
 	ssize_t ret;
 
-	if ((ret = archive_read_data(eio->a, buf, size)) < 0)
+	if ((ret = archive_read_data(eio->priv->a, buf, size)) < 0)
 		GP_DEBUG(1, "libarchive read: %s", strerror(errno));
 
+	if (ret > 0)
+		eio->pos += ret;
+
 	return ret;
+}
+
+static int entry_rewind(struct rar_priv *priv)
+{
+	int ret;
+
+	ret = rar_reopen(priv);
+	if (ret) {
+		errno = ret;
+		return (off_t)-1;
+	}
+
+	ret = rar_move_forward(priv, priv->pos);
+	if (ret) {
+		errno = ret;
+		return (off_t)-1;
+	}
+
+	return 0;
+}
+
+static int entry_fake_seek_forward(struct rar_priv *priv, size_t len)
+{
+	char buf[1024];
+
+	GP_DEBUG(1, "Faking seek forward %zu by read", len);
+
+	while (len) {
+		size_t size = len > sizeof(buf) ? sizeof(buf) : len;
+		ssize_t ret;
+
+		ret = archive_read_data(priv->a, buf, size);
+		if (ret < 0) {
+			errno = EIO;
+			return -1;
+		}
+
+		len -= ret;
+	}
+
+	return 0;
+}
+
+static off_t fake_entry_seek(struct entry_io *eio, off_t off, enum gp_seek_whence whence)
+{
+	size_t where = eio->pos;
+
+	GP_DEBUG(1, "Faking seek in rar5 pos=%zi off=%zi whence=%i",
+	         eio->pos, off, whence);
+
+	if (off == 0 && whence == GP_SEEK_CUR) {
+		GP_DEBUG(1, "Faking gp_io_tell() = %zi", eio->pos);
+		return eio->pos;
+	}
+
+	if (gp_seek_off(off, whence, &where, SIZE_MAX)) {
+		GP_DEBUG(1, "Attempt to seek outside of entry");
+		return (off_t)-1;
+	}
+
+	if (where < eio->pos) {
+		if (entry_rewind(eio->priv) == (off_t)-1)
+			return (off_t)-1;
+
+		eio->pos = 0;
+	}
+
+	if (entry_fake_seek_forward(eio->priv, where - eio->pos))
+		return (off_t)-1;
+
+	return where;
 }
 
 static off_t entry_seek(gp_io *self, off_t off, enum gp_seek_whence whence)
@@ -118,7 +223,7 @@ static off_t entry_seek(gp_io *self, off_t off, enum gp_seek_whence whence)
 	struct entry_io *eio = GP_CONTAINER_OF(self, struct entry_io, io);
 	off_t ret;
 
-	if ((ret = archive_seek_data(eio->a, off, whence)) < 0) {
+	if ((ret = archive_seek_data(eio->priv->a, off, whence)) < 0) {
 		switch (ret) {
 		case ARCHIVE_FATAL:
 			errno = ENOSYS;
@@ -127,6 +232,9 @@ static off_t entry_seek(gp_io *self, off_t off, enum gp_seek_whence whence)
 			errno = EINVAL;
 		break;
 		}
+
+		if (archive_format(eio->priv->a) == ARCHIVE_FORMAT_RAR_V5)
+			return fake_entry_seek(eio, off, whence);
 
 		GP_DEBUG(1, "libarchive seek: %s", strerror(errno));
 		return (off_t)-1;
@@ -152,7 +260,7 @@ static int load_next(gp_container *self, gp_pixmap **img,
 			.read = entry_read,
 			.seek = entry_seek
 		},
-		.a = priv->a
+		.priv = priv,
 	};
 
 	GP_DEBUG(1, "Loading image '%s'", archive_entry_pathname(a_entry));
@@ -166,32 +274,22 @@ static int load_next(gp_container *self, gp_pixmap **img,
 static int rar_seek_to(gp_container *self, size_t where)
 {
 	struct rar_priv *priv = GP_CONTAINER_PRIV(self);
-	struct archive_entry *a_entry;
-	size_t i, forward;
+	size_t forward;
+	int ret;
 
 	if (where < priv->pos) {
-		GP_DEBUG(1, "Reopening RAR archive");
-
-		if (gp_io_rewind(priv->io))
-			return errno;
-
-		archive_read_free(priv->a);
-
-		priv->a = new_archive(priv);
+		ret = rar_reopen(priv);
+		if (ret)
+			return ret;
 
 		forward = where;
 	} else {
 		forward = where - priv->pos;
 	}
 
-	GP_DEBUG(1, "Moving forward %zu", forward);
-
-	for (i = 0; i < forward; i++) {
-		if (archive_read_next_header(priv->a, &a_entry) != ARCHIVE_OK) {
-			GP_DEBUG(1, "libarchive: %s", archive_error_string(priv->a));
-			return EIO;
-		}
-	}
+	ret = rar_move_forward(priv, forward);
+	if (ret)
+		return ret;
 
 	priv->pos = where;
 	self->cur_img = where;
