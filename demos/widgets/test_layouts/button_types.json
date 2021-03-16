@@ -183,6 +183,8 @@
    "text": "ZOOM_NORMAL"
   },
   {
+   "type": "label",
+   "text": "CLEAR"
   },
   {
   },
@@ -207,6 +209,9 @@
    "align": "fill"
   },
   {
+   "type": "button",
+   "btype": "clear",
+   "align": "fill"
   },
   {
   },
