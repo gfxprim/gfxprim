@@ -257,7 +257,7 @@ static void render(gp_widget *self, const gp_offset *offset,
 		             ctx->text_color);
 	break;
 	case GP_BUTTON_CLEAR:
-		cross(ctx->buf, cx, cy, sym_r, asc_half/4, ctx->text_color);
+		cross(ctx->buf, cx, cy, sym_r-sym_r/6, 2 * (asc/8)-asc/16, ctx->text_color);
 	break;
 	case GP_BUTTON_ZOOM_IN:
 		gp_fill_rect(ctx->buf, cx - asc/14, cy - sym_r/2,
