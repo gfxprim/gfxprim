@@ -564,11 +564,11 @@ int gp_write_jpg(const gp_pixmap GP_UNUSED(*src), gp_io GP_UNUSED(*io),
 
 const gp_loader gp_jpg = {
 #ifdef HAVE_JPEG
-	.Read = gp_read_jpg_ex,
-	.Write = gp_write_jpg,
+	.read = gp_read_jpg_ex,
+	.write = gp_write_jpg,
 	.save_ptypes = out_pixel_types,
 #endif
-	.Match = gp_match_jpg,
+	.match = gp_match_jpg,
 
 	.fmt_name = "JPEG",
 	.extensions = {"jpg", "jpeg", NULL},

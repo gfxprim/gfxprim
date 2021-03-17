@@ -1163,44 +1163,44 @@ int gp_write_pnm(const gp_pixmap *src, gp_io *io,
 }
 
 const gp_loader gp_pbm = {
-	.Read = gp_read_pbm_ex,
-	.Write = gp_write_pbm,
+	.read = gp_read_pbm_ex,
+	.write = gp_write_pbm,
 	.save_ptypes = pbm_save_pixels,
-	.Match = gp_match_pbm,
+	.match = gp_match_pbm,
 
 	.fmt_name = "Netpbm portable Bitmap",
 	.extensions = {"pbm", NULL},
 };
 
 const gp_loader gp_pgm = {
-	.Read = gp_read_pgm_ex,
-	.Write = gp_write_pgm,
+	.read = gp_read_pgm_ex,
+	.write = gp_write_pgm,
 	.save_ptypes = pgm_save_pixels,
-	.Match = gp_match_pgm,
+	.match = gp_match_pgm,
 
 	.fmt_name = "Netpbm portable Graymap",
 	.extensions = {"pgm", NULL},
 };
 
 const gp_loader gp_ppm = {
-	.Read = gp_read_ppm_ex,
-	.Write = gp_write_ppm,
+	.read = gp_read_ppm_ex,
+	.write = gp_write_ppm,
 	.save_ptypes = ppm_save_pixels,
-	.Match = gp_match_ppm,
+	.match = gp_match_ppm,
 
 	.fmt_name = "Netpbm portable Pixmap",
 	.extensions = {"ppm", NULL},
 };
 
 const gp_loader gp_pnm = {
-	.Read = gp_read_pnm_ex,
-	.Write = gp_write_pnm,
+	.read = gp_read_pnm_ex,
+	.write = gp_write_pnm,
 	.save_ptypes = pnm_save_pixels,
 	/*
 	 * Avoid double Match
 	 * This format is covered by PBM, PGM and PPM
 	 */
-	.Match = NULL,
+	.match = NULL,
 
 	.fmt_name = "Netpbm portable Anymap",
 	.extensions = {"pnm", NULL},

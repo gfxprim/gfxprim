@@ -147,8 +147,8 @@ int gp_read_ico_ex(gp_io *io, gp_pixmap **img,
 }
 
 const gp_loader gp_ico = {
-	.Read = gp_read_ico_ex,
-	.Match = gp_match_ico,
+	.read = gp_read_ico_ex,
+	.match = gp_match_ico,
 	.fmt_name = "ICO",
 	.extensions = {"ico", NULL},
 };

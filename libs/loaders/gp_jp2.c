@@ -261,9 +261,9 @@ int gp_read_jp2_ex(gp_io GP_UNUSED(*io), gp_pixmap GP_UNUSED(**img),
 
 const gp_loader gp_jp2 = {
 #ifdef HAVE_OPENJPEG
-	.Read = gp_read_jp2_ex,
+	.read = gp_read_jp2_ex,
 #endif /* HAVE_OPENJPEG */
-	.Match = gp_match_jp2,
+	.match = gp_match_jp2,
 
 	.fmt_name = "JPEG 2000",
 	.extensions = {"jp2", "jpx", NULL},

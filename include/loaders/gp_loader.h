@@ -71,7 +71,7 @@ struct gp_loader {
 	/*
 	 * Reads image and/or metadata from an I/O stream.
 	 */
-	int (*Read)(gp_io *io, gp_pixmap **img, gp_storage *storage,
+	int (*read)(gp_io *io, gp_pixmap **img, gp_storage *storage,
                     gp_progress_cb *callback);
 
 	/*
@@ -79,7 +79,7 @@ struct gp_loader {
 	 *
 	 * Returns zero on success, non-zero on failure and errno must be set.
 	 */
-	int (*Write)(const gp_pixmap *src, gp_io *io,
+	int (*write)(const gp_pixmap *src, gp_io *io,
 	             gp_progress_cb *callback);
 
 	/*
@@ -94,7 +94,7 @@ struct gp_loader {
 	 * The buffer is filled with 32 bytes from an image start, returns 1 if
 	 * image signature was found zero otherwise.
 	 */
-	int (*Match)(const void *buf);
+	int (*match)(const void *buf);
 
 	/*
 	 * Short format name.
@@ -183,6 +183,6 @@ int gp_loader_save_image(const gp_loader *self, const gp_pixmap *src,
 /*
  * List loaders into the stdout
  */
-void gp_loaders_lists(void);
+void gp_loaders_list(void);
 
 #endif /* LOADERS_GP_LOADER_H */

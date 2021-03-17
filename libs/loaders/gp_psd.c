@@ -817,8 +817,8 @@ err:
 }
 
 const gp_loader gp_psd = {
-	.Read = gp_read_psd_ex,
-	.Match = gp_match_psd,
+	.read = gp_read_psd_ex,
+	.match = gp_match_psd,
 
 	.fmt_name = "Adobe Photoshop Image",
 	.extensions = {"psd", NULL},

@@ -81,7 +81,7 @@ gp_data_dict_first
 gp_write_pgm
 gp_io_zlib_reset
 gp_storage_add
-gp_loaders_lists
+gp_loaders_list
 gp_match_pnm
 gp_ppm
 gp_jp2

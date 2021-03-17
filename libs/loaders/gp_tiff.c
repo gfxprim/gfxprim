@@ -803,11 +803,11 @@ int gp_write_tiff(const gp_pixmap GP_UNUSED(*src), gp_io GP_UNUSED(*io),
 
 const struct gp_loader gp_tiff = {
 #ifdef HAVE_TIFF
-	.Read = gp_read_tiff_ex,
-	.Write = gp_write_tiff,
+	.read = gp_read_tiff_ex,
+	.write = gp_write_tiff,
 	.save_ptypes = save_ptypes,
 #endif
-	.Match = gp_match_tiff,
+	.match = gp_match_tiff,
 
 	.fmt_name = "Tag Image File Format",
 	.extensions = {"tif", "tiff", NULL},

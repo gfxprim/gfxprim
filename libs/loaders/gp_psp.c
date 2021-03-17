@@ -497,8 +497,8 @@ err0:
 }
 
 const gp_loader gp_psp = {
-	.Read = gp_read_psp_ex,
-	.Match = gp_match_psp,
+	.read = gp_read_psp_ex,
+	.match = gp_match_psp,
 	.fmt_name = "Paint Shop Pro Image",
 	.extensions = {"psp", "pspimage", NULL},
 };

@@ -70,7 +70,7 @@ static gp_pixel_type save_ptypes[] = {
 };
 
 const gp_loader loader = {
-	.Write = write_data,
+	.write = write_data,
 	.save_ptypes = save_ptypes,
 	.fmt_name = "ASCII Art",
 	.extensions = {"txt", NULL},
@@ -83,7 +83,7 @@ int main(int argc, char *argv[])
 	gp_loader_register(&loader);
 
 	/* List all loaders */
-	gp_loaders_lists();
+	gp_loaders_list();
 	printf("\n\n");
 
 	if (argc != 2) {

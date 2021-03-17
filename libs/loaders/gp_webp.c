@@ -168,9 +168,9 @@ int gp_read_webp_ex(gp_io GP_UNUSED(*io), gp_pixmap GP_UNUSED(**img),
 
 const gp_loader gp_webp = {
 #ifdef HAVE_WEBP
-	.Read = gp_read_webp_ex,
+	.read = gp_read_webp_ex,
 #endif /* HAVE_WEBP */
-	.Match = gp_match_webp,
+	.match = gp_match_webp,
 
 	.fmt_name = "webp",
 	.extensions = {"webp", NULL},

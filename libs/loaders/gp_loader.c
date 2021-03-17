@@ -104,14 +104,14 @@ void gp_loader_unregister(const gp_loader *self)
 	GP_WARN("Loader '%s' (%p) wasn't registered", self->fmt_name, self);
 }
 
-void gp_loaders_lists(void)
+void gp_loaders_list(void)
 {
 	unsigned int i, j;
 
 	for (i = 0; loaders[i]; i++) {
 		printf("Format: %s\n", loaders[i]->fmt_name);
-		printf("Read:\t%s\n", loaders[i]->Read ? "Yes" : "No");
-		printf("Write:\t%s\n", loaders[i]->Write ? "Yes" : "No");
+		printf("Read:\t%s\n", loaders[i]->read ? "Yes" : "No");
+		printf("Write:\t%s\n", loaders[i]->write ? "Yes" : "No");
 		if (loaders[i]->save_ptypes) {
 			printf("Write Pixel Types: ");
 			for (j = 0; loaders[i]->save_ptypes[j]; j++) {
@@ -120,7 +120,7 @@ void gp_loaders_lists(void)
 			}
 			printf("\n");
 		}
-		printf("Match:\t%s\n", loaders[i]->Match ? "Yes" : "No");
+		printf("Match:\t%s\n", loaders[i]->match ? "Yes" : "No");
 		printf("Extensions: ");
 		for (j = 0; loaders[i]->extensions[j]; j++)
 			printf("%s ", loaders[i]->extensions[j]);
@@ -260,14 +260,14 @@ int gp_read_image_ex(gp_io *io, gp_pixmap **img, gp_storage *meta_data,
 		return 1;
 	}
 
-	if (!loader->Read) {
+	if (!loader->read) {
 		GP_DEBUG(1, "Loader for '%s' does not support reading",
 		         loader->fmt_name);
 		errno = ENOSYS;
 		return 1;
 	}
 
-	return loader->Read(io, img, meta_data, callback);
+	return loader->read(io, img, meta_data, callback);
 }
 
 int gp_loader_load_image_ex(const gp_loader *self, const char *src_path,
@@ -279,7 +279,7 @@ int gp_loader_load_image_ex(const gp_loader *self, const char *src_path,
 
 	GP_DEBUG(1, "Loading Image '%s'", src_path);
 
-	if (!self->Read) {
+	if (!self->read) {
 		errno = ENOSYS;
 		return ENOSYS;
 	}
@@ -288,7 +288,7 @@ int gp_loader_load_image_ex(const gp_loader *self, const char *src_path,
 	if (!io)
 		return 1;
 
-	ret = self->Read(io, img, storage, callback);
+	ret = self->read(io, img, storage, callback);
 
 	err = errno;
 	gp_io_close(io);
@@ -324,12 +324,12 @@ int gp_loader_read_image_ex(const gp_loader *self, gp_io *io,
 {
 	GP_DEBUG(1, "Reading image (I/O %p)", io);
 
-	if (!self->Read) {
+	if (!self->read) {
 		errno = ENOSYS;
 		return ENOSYS;
 	}
 
-	return self->Read(io, img, data, callback);
+	return self->read(io, img, data, callback);
 }
 
 gp_pixmap *gp_load_image(const char *src_path, gp_progress_cb *callback)
@@ -452,7 +452,7 @@ int gp_loader_save_image(const gp_loader *self, const gp_pixmap *src,
 
 	GP_DEBUG(1, "Saving image '%s' format %s", dst_path, self->fmt_name);
 
-	if (!self->Write) {
+	if (!self->write) {
 		errno = ENOSYS;
 		return 1;
 	}
@@ -462,7 +462,7 @@ int gp_loader_save_image(const gp_loader *self, const gp_pixmap *src,
 	if (!io)
 		return 1;
 
-	if (self->Write(src, io, callback)) {
+	if (self->write(src, io, callback)) {
 		gp_io_close(io);
 		unlink(dst_path);
 		return 1;
@@ -494,7 +494,7 @@ const gp_loader *gp_loader_by_signature(const void *buf)
 	unsigned int i;
 
 	for (i = 0; loaders[i]; i++) {
-		if (loaders[i]->Match && loaders[i]->Match(buf) == 1) {
+		if (loaders[i]->match && loaders[i]->match(buf) == 1) {
 			GP_DEBUG(1, "Found loader '%s'", loaders[i]->fmt_name);
 			return loaders[i];
 		}

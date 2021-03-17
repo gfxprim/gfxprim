@@ -872,10 +872,10 @@ err:
 }
 
 const struct gp_loader gp_bmp = {
-	.Read = gp_read_bmp_ex,
-	.Write = gp_write_bmp,
+	.read = gp_read_bmp_ex,
+	.write = gp_write_bmp,
 	.save_ptypes = out_pixel_types,
-	.Match = gp_match_bmp,
+	.match = gp_match_bmp,
 
 	.fmt_name = "BMP",
 	.extensions = {"bmp", "dib", NULL},

@@ -35,7 +35,7 @@ static int register_max_loaders(void)
 	tst_msg("Registered %u loaders", cnt);
 
 	/* Let's provoke SEGFAULT by walking the loaders list */
-	gp_loaders_lists();
+	gp_loaders_list();
 
 	for (i = 0; i < cnt; i++)
 		gp_loader_unregister(&dummy_loaders[i]);

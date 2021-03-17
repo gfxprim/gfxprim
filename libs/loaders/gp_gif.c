@@ -387,9 +387,9 @@ int gp_read_gif_ex(gp_io GP_UNUSED(*io), gp_pixmap GP_UNUSED(**img),
 
 const gp_loader gp_gif = {
 #ifdef HAVE_GIFLIB
-	.Read = gp_read_gif_ex,
+	.read = gp_read_gif_ex,
 #endif
-	.Match = gp_match_gif,
+	.match = gp_match_gif,
 
 	.fmt_name = "Graphics Interchange Format",
 	.extensions = {"gif", NULL},

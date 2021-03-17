@@ -556,8 +556,8 @@ err0:
 }
 
 const gp_loader gp_pcx = {
-	.Read = gp_read_pcx_ex,
-	.Match = gp_match_pcx,
+	.read = gp_read_pcx_ex,
+	.match = gp_match_pcx,
 
 	.fmt_name = "ZSoft PCX",
 	.extensions = {"pcx", NULL},

@@ -649,11 +649,11 @@ int gp_write_png(const gp_pixmap *src, GP_IO GP_UNUSED(*io),
 
 const gp_loader gp_png = {
 #ifdef HAVE_LIBPNG
-	.Read = gp_read_png_ex,
-	.Write = gp_write_png,
+	.read = gp_read_png_ex,
+	.write = gp_write_png,
 	.save_ptypes = save_ptypes,
 #endif
-	.Match = gp_match_png,
+	.match = gp_match_png,
 
 	.fmt_name = "Portable Network Graphics",
 	.extensions = {"png", NULL},
