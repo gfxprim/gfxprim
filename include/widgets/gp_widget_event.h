@@ -145,7 +145,7 @@ static inline int gp_widget_send_event(gp_widget *self,
  * @return The return value from application event handler.
  */
 static inline int gp_widget_send_widget_event(gp_widget *self,
-				              uint16_t sub_type,
+				              unsigned int sub_type,
 				              ...)
 {
 	if (!self->on_event)
