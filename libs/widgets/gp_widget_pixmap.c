@@ -121,9 +121,9 @@ struct gp_widget_ops gp_widget_pixmap_ops = {
 	.id = "pixmap",
 };
 
-struct gp_widget *gp_widget_pixmap_new(unsigned int w, unsigned int h,
-                                       int (*on_event)(gp_widget_event *ev),
-                                       void *priv)
+gp_widget *gp_widget_pixmap_new(unsigned int w, unsigned int h,
+                                int (*on_event)(gp_widget_event *ev),
+                                void *priv)
 {
 	gp_widget *ret;
 

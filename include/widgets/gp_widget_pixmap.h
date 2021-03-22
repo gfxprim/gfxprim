@@ -39,9 +39,9 @@ struct gp_widget_pixmap {
  *
  * @return A pixmap widget
  */
-struct gp_widget *gp_widget_pixmap_new(unsigned int min_w, unsigned int min_h,
-                                       int (*on_event)(gp_widget_event *ev),
-                                       void *priv);
+gp_widget *gp_widget_pixmap_new(unsigned int min_w, unsigned int min_h,
+                                int (*on_event)(gp_widget_event *ev),
+                                void *priv);
 
 /**
  * @brief Sets a bitmap widget to unbuffered mode.
