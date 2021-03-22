@@ -75,6 +75,7 @@ int pixmap_on_event(gp_widget_event *ev)
 	switch (ev->type) {
 	case GP_WIDGET_EVENT_REDRAW:
 		draw(ev->self, ev->ctx);
+		printf("BBOX " GP_BBOX_FMT "\n", GP_BBOX_PARS((*ev->bbox)));
 		return 1;
 	default:
 		return 0;
@@ -97,13 +98,17 @@ static gp_timer tmr = {
 
 int main(int argc, char *argv[])
 {
-	gp_widget *layout = gp_widget_pixmap_new(100, 100, pixmap_on_event, NULL);
+	gp_widget *layout = gp_widget_grid_new(1, 1);
+	gp_widget *pixmap = gp_widget_pixmap_new(100, 100, pixmap_on_event, NULL);
+
+	gp_widget_grid_put(layout, 0, 0, pixmap);
 
 	layout->align = GP_FILL;
+	pixmap->align = GP_FILL;
 
-	tmr.priv = layout;
+	tmr.priv = pixmap;
 
-	gp_widget_event_unmask(layout, GP_WIDGET_EVENT_REDRAW);
+	gp_widget_event_unmask(pixmap, GP_WIDGET_EVENT_REDRAW);
 
 	gp_widgets_timer_ins(&tmr);
 
