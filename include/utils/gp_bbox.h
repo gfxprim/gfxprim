@@ -77,6 +77,11 @@ static inline int gp_bbox_intersects(gp_bbox box1, gp_bbox box2)
 	return 1;
 }
 
+static inline gp_bbox gp_bbox_move(gp_bbox box, gp_coord x, gp_coord y)
+{
+	return gp_bbox_pack(box.x + x, box.y + y, box.w, box.h);
+}
+
 #define GP_BBOX_FMT "[%i, %i] w=%u h=%u"
 #define GP_BBOX_PARS(bbox) (bbox).x, (bbox).y, (bbox).w, (bbox).h
 
