@@ -9,13 +9,14 @@ SOURCES=index.html about.txt pixmap.txt loaders.txt filters.txt \
 	event_queue.txt compilation.txt filters_resize.txt \
 	filters_dithering.txt filters_python.txt spiv.txt core_common.txt \
 	convert.txt news_1_0_0-rc1.txt loaders_io.txt signatures.txt widgets.txt \
-	packages.txt
+	packages.txt bbox.txt
 
 SOURCES+=core_python.txt gfx_python.txt loaders_python.txt backends_python.txt
 
 SOURCES+=widget_grid.txt widget_table.txt widget_button.txt widget_label.txt widgets_tattr.txt\
 	 widget_checkbox.txt widget_choice.txt widgets_events.txt widget_tbox.txt widgets_json.txt\
-	 widgets_alignment.txt widget_tabs.txt widget_frame.txt
+	 widgets_alignment.txt widget_tabs.txt widget_frame.txt widget_pixmap.txt \
+	 widgets_render_context.txt
 
 EXAMPLE_SOURCES=$(wildcard example_*.txt)
 

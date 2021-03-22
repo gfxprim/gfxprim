@@ -1,0 +1,76 @@
+Pixmap widget
+-------------
+
+Pixmap widget is a widget that can show a picture.
+
+The `struct gp_widget_pixmap` can be accessed as `widget->pixmap`.
+
+.Pixmap widget constructor
+[source,c]
+-------------------------------------------------------------------------------
+gp_widget *gp_widget_pixmap_new(unsigned int w, unsigned int h,
+                                int (*on_event)(gp_widget_event *ev),
+                                void *priv);
+-------------------------------------------------------------------------------
+
+Pixmap repaint modes
+~~~~~~~~~~~~~~~~~~~~
+
+The pixmap widget is allocated as an empty container and there are two
+different repaint strategies for pixmap widget.
+
+Buffered mode
+^^^^^^^^^^^^^
+
+In this mode a pixmap in the size of the widget is allocated, by the
+application, before any drawing is done. The content of the pixmap is
+preserved i.e. not modified by the library.
+
+The allocation is deffered for when the application has been started and the
+pixel format, we are using for drawing, is known. Only then the library will
+call the pixmap event handler with a resize event and
+link:widgets_render_context.html[render context] pointer, which could be used
+to allocate right backing link:pixmap.html[pixmap] and set the pixmap pointer
+in the `struct gp_widget_pixmap`.
+
+NOTE: The pixmap has to be resized properly on each resize event as well.
+
+IMPORTANT: The `GP_WIDGET_EVENT_RESIZE` has to be enabled manually in the
+           pixmap link:widgets_events.html[event mask] before the application
+	   starts.
+
+See link:example_widgets_pixmap.html[example].
+
+Unbuffered mode
+^^^^^^^^^^^^^^^
+
+In this mode the application is passed a temporary buffer in the size of the
+widget and a link:bbox.html[bouding box] that describes an inner rectangle
+that has to be repainted. To pass the pointer the `pixmap` member in `struct
+gp_widget_pixmap` is set temporarily, for the duration of the event handler,
+and the link:bbox.html[bounding box] is passed down in the `bbox` member of
+the link:widgets_events.html[widget event] structure.
+
+The application is free to ignore the bounding box and repaint the whole
+pixmap.
+
+NOTE: The content of the pixmap buffer is not preserved between calls in this
+      case so this is only useful when pixmap is repainted periodically and
+      the data is not worth caching.
+
+IMPORTANT: The `GP_WIDGET_EVENT_REDRAW` has to be enabled manually in the
+           pixmap link:widgets_events.html[event mask] before the application
+	   starts.
+
+You may as well enable the `GP_WIDGET_EVENT_RESIZE` if you want to be notified
+when the pixmap is resized.
+
+See link:example_widgets_pixmap2.html[example].
+
+.Pixmap JSON attributes
+[cols=",,,3",options="header"]
+|=========================================================
+| Attribute |  Type  | Default | Description
+|    +w+    |  uint  |         | Pixmap width
+|    +h+    |  uint  |         | Pixmap height
+|=========================================================

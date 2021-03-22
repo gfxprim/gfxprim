@@ -23,6 +23,7 @@ struct gp_widget_event {
 	union {
 		void *ptr;
 		long val;
+		gp_bbox *bbox;
 		gp_event *input_ev;
 	};
 };
@@ -62,8 +63,9 @@ void gp_widget_event_unmask(gp_widget *self, enum gp_widget_event_type ev_type);
 | GP_WIDGET_EVENT_NEW    |   Yes    | Emitted after widget has been created from a json description.
 | GP_WIDGET_EVENT_FREE   |   Yes    | Emitted before widget is freed.
 | GP_WIDGET_EVENT_WIDGET |   Yes    | Default action, e.g. button pressed, checkbox changed, etc.
-| GP_WIDGET_EVENT_RESIZE |    No    | Emitted when widget is resized.
 | GP_WIDGET_EVENT_INPUT  |    No    | Can be used to redirect unused input events.
+| GP_WIDGET_EVENT_REDRAW |    No    | Emitted when widget needs to be repainted.
+| GP_WIDGET_EVENT_RESIZE |    No    | Emitted when widget is resized.
 |============================================================================
 
 The 'GP_WIDGET_EVENT_NEW' is send when widget is created from the JSON
@@ -88,7 +90,6 @@ the widget event handler. In this case the return value from the handler is
 important. If input event was used by the handler it should return 1 and zero
 should be returned otherwise, so that the library knows if the event should be
 propagated to the upper layers or not.
-
 
 Application events
 ------------------

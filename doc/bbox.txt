@@ -1,0 +1,36 @@
+Bounding box
+-------------
+
+Bounding box is an rectangle combine with an offset.
+
+.Bounding box
+[source,c]
+-------------------------------------------------------------------------------
+#include <utils/gp_bbox.h>
+
+typedef struct gp_bbox {
+	gp_coord x;
+	gp_coord y;
+	gp_size w;
+	gp_size h;
+} gp_bbox;
+
+int gp_bbox_empty(gp_bbox box);
+
+gp_bbox gp_bbox_pack(gp_coord x, gp_coord y, gp_coord w, gp_coord h);
+
+gp_bbox_merge(gp_bbox box1, gp_bbox box2);
+
+gp_bbox_intersection(gp_bbox box1, gp_bbox box2);
+
+gp_bbox_intersects(gp_bbox box1, gp_bbox box2);
+-------------------------------------------------------------------------------
+
+Bounding box is an absctraction for union and intersection of rectangles on a
+plane. This is mostly used by the widget library at the moment.
+
+.Bounding box example code
+[source,c]
+-------------------------------------------------------------------------------
+include::../demos/c_simple/bbox.c[]
+-------------------------------------------------------------------------------

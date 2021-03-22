@@ -28,6 +28,7 @@ Widgets generic documetation
 * link:widgets_events.html[Event handlers]
 * link:widgets_alignment.html[Alignment and fill]
 * link:widgets_tattr.html[Text attributes]
+* link:widgets_render_context.html[Render context]
 
 Individual widgets documentation
 --------------------------------
@@ -35,10 +36,11 @@ Individual widgets documentation
 * link:widget_label.html[Label widget]
 * link:widget_button.html[Button widget]
 * link:widget_checkbox.html[Checkbox widget]
-* link:widget_grid.html[Grid widget]
-* link:widget_table.html[Table widget]
 * link:widget_choice.html[Radiobutton widget]
 * link:widget_choice.html[Spinbutton widget]
 * link:widget_tbox.html[Tbox widget]
+* link:widget_pixmap.html[Pixmap widget]
+* link:widget_grid.html[Grid widget]
+* link:widget_table.html[Table widget]
 * link:widget_tabs.html[Tabs widget]
 * link:widget_frame.html[Frame widget]

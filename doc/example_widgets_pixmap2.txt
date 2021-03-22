@@ -1,0 +1,9 @@
+Widgets pixmap
+--------------
+
+Simple clock application that renders into pixmap widget without a buffer.
+
+[source,c]
+------------------------------------------------------------------
+include::../demos/widgets/clock.c[]
+------------------------------------------------------------------

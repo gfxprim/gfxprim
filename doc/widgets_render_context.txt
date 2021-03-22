@@ -1,0 +1,46 @@
+Render context
+--------------
+
+Render context is a structure that holds colors, sizes, and fonts that are
+used for widget rendering.
+
+.Render context
+[source,c]
+-------------------------------------------------------------------------------
+struct gp_widget_render_ctx {
+        ...
+
+        /* colors */
+        gp_pixel text_color;
+        gp_pixel bg_color;
+        gp_pixel fg_color;
+        gp_pixel fg2_color;
+        gp_pixel sel_color;
+        gp_pixel alert_color;
+        gp_pixel accept_color;
+
+        /* fonts */
+        gp_text_style *font;
+        gp_text_style *font_bold;
+
+        gp_text_style *font_big;
+        gp_text_style *font_big_bold;
+
+        gp_text_style *font_mono;
+
+        /* pixel type used for drawing */
+        gp_pixel_type pixel_type;
+
+        /* padding between widgets */
+        unsigned int padd;
+
+        /* maximal delay between two clicks for a double click */
+        int dclick_ms;
+};
+
+const gp_widget_render_ctx *gp_widgets_render_ctx(void);
+-------------------------------------------------------------------------------
+
+Sometimes pointer to this structure is needed in the appliaction code, for
+instance in the link:widget_pixmap.html[pixmap widget] in order to allocate
+right backing pixmap or to get right background color.
