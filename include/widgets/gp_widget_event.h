@@ -88,6 +88,7 @@ struct gp_widget_event {
 	union {
 		void *ptr;
 		long val;
+		struct gp_bbox *bbox;
 		struct gp_event *input_ev;
 	};
 };

@@ -48,14 +48,14 @@ static void render(gp_widget *self, const gp_offset *offset,
 	if (ctx->bbox)
 		box = gp_bbox_intersection(box, *ctx->bbox);
 
-
 	if (!self->pixmap->pixmap) {
 		gp_pixmap pix;
+		gp_bbox sbox = gp_bbox_pack(box.x - x, box.y - y, w, h);
 
-		gp_sub_pixmap(ctx->buf, &pix, box.x, box.y, box.w, box.h);
+		gp_sub_pixmap(ctx->buf, &pix, x, y, w, h);
 		self->pixmap->pixmap = &pix;
 
-		gp_widget_send_event(self, GP_WIDGET_EVENT_REDRAW, ctx, &off);
+		gp_widget_send_event(self, GP_WIDGET_EVENT_REDRAW, ctx, &sbox);
 
 		//TODO: Let the application fill it in?
 		gp_widget_ops_blit(ctx, x, y, w, h);
