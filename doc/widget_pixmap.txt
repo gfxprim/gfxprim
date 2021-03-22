@@ -39,6 +39,25 @@ IMPORTANT: The `GP_WIDGET_EVENT_RESIZE` has to be enabled manually in the
            pixmap link:widgets_events.html[event mask] before the application
 	   starts.
 
+[source,c]
+-------------------------------------------------------------------------------
+void gp_widget_pixmap_redraw(gp_widget *self,
+                             gp_coord x, gp_coord y,
+                             gp_size w, gp_size h);
+-------------------------------------------------------------------------------
+
+Requests a partiall update of the pixmap widget. The position is relative to
+the top left corner of the pixmap widget and the rectangle is clipped to the
+actuall widget size so it's safe to pass values outside of the widget itself.
+
+[source,c]
+-------------------------------------------------------------------------------
+void gp_widget_pixmap_redraw_all(gp_widget *self);
+-------------------------------------------------------------------------------
+
+Requests full update of the pixmap widget. Can be used to override previous
+partiall update.
+
 See link:example_widgets_pixmap.html[example].
 
 Unbuffered mode

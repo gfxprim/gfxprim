@@ -30,7 +30,9 @@ static void draw(gp_widget *pixmap, gp_event *ev)
 
 	gp_putpixel(p, x, y, col);
 	gp_circle(p, x, y, 10, col);
-	gp_widget_redraw(pixmap);
+
+	/* Request partiall update */
+	gp_widget_pixmap_redraw(pixmap, x - 10, y - 10, 20, 20);
 }
 
 static void fill_pixmap(gp_pixmap *p)
