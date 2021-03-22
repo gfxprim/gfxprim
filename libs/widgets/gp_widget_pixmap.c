@@ -64,11 +64,6 @@ static void render(gp_widget *self, const gp_offset *offset,
 		return;
 	}
 
-	if (self->pixmap->update) {
-		self->pixmap->update = 0;
-		gp_widget_send_event(self, GP_WIDGET_EVENT_REDRAW, ctx);
-	}
-
 	gp_blit_xywh(self->pixmap->pixmap, off.x, off.y,
 	             box.w, box.h, ctx->buf, box.x, box.y);
 

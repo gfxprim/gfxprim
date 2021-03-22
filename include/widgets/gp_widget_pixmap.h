@@ -11,10 +11,6 @@
 
 struct gp_widget_pixmap {
 	unsigned int min_w, min_h;
-	/*
-	 * If set redraw event is send once on when widget is rendered.
-	 */
-	int update:1;
 	gp_pixmap *pixmap;
 };
 
@@ -42,18 +38,5 @@ struct gp_widget_pixmap {
 gp_widget *gp_widget_pixmap_new(unsigned int min_w, unsigned int min_h,
                                 int (*on_event)(gp_widget_event *ev),
                                 void *priv);
-
-/**
- * @brief Sets a bitmap widget to unbuffered mode.
- *
- * When called GP_WIDGET_EVENT_REDRAW is send before pixmap is blit on the
- * screen for the buffered case.
- *
- * @self A pixmap widget.
- */
-static inline void gp_widget_pixmap_update(gp_widget *self)
-{
-	self->pixmap->update = 1;
-}
 
 #endif /* GP_WIDGET_PIXMAP_H */
