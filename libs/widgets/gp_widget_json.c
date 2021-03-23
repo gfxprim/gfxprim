@@ -191,6 +191,9 @@ gp_widget *gp_widget_from_json(json_object *json, void **uids)
 				goto err;
 		}
 
+		if (gp_htable_get(*uids, uid_key))
+			GP_WARN("Duplicit widget uid '%s'", uid_key);
+
 		gp_htable_put(*uids, wid, uid_key);
 	}
 
