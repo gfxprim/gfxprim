@@ -72,6 +72,41 @@ static void distribute_size(gp_widget *self, const gp_widget_render_ctx *ctx, in
 		gp_widget_ops_distribute_size(self->frame->child, ctx, w, h, new_wh);
 }
 
+static void draw_bg_around_payload(gp_widget *self, const gp_widget_render_ctx *ctx,
+                                   gp_coord x, gp_coord y, gp_size w, gp_size h)
+{
+	gp_widget *payload = self->frame->child;
+
+	gp_fill_rect_xywh(ctx->buf, x, y, w, payload_off_y(self, ctx), ctx->bg_color);
+	gp_fill_rect_xywh(ctx->buf, x, y+h-ctx->padd, w, ctx->padd, ctx->bg_color);
+
+	unsigned int padd_w = ctx->padd + payload->x;
+
+	gp_fill_rect_xywh(ctx->buf, x, y + payload_off_y(self, ctx), padd_w,
+			  h-ctx->padd - payload_off_y(self, ctx), ctx->bg_color);
+
+	unsigned int padd_x = x + padd_w;
+	padd_w = ctx->padd;
+
+	padd_x += payload->w;
+	padd_w += w - payload->x - payload->w - 2 * ctx->padd;
+
+	gp_fill_rect_xywh(ctx->buf, padd_x, y + payload_off_y(self, ctx),
+	                  padd_w, h - ctx->padd - payload_off_y(self, ctx), ctx->bg_color);
+
+	gp_fill_rect_xywh(ctx->buf,
+	                  x + payload->x + payload_off_x(ctx),
+			  y + payload_off_y(self, ctx),
+			  payload->w,
+			  payload->y, ctx->bg_color);
+
+	gp_fill_rect_xywh(ctx->buf,
+	                  x + payload->x + payload_off_x(ctx),
+	                  y + payload_off_y(self, ctx) + payload->y,
+			  payload->w,
+			  h - payload_off_y(self, ctx) - payload->y - ctx->padd, ctx->bg_color);
+}
+
 static void render(gp_widget *self, const gp_offset *offset,
                    const gp_widget_render_ctx *ctx, int flags)
 {
@@ -86,41 +121,10 @@ static void render(gp_widget *self, const gp_offset *offset,
 	if (gp_widget_should_redraw(self, flags)) {
 		gp_widget_ops_blit(ctx, x, y, w, h);
 
-		gp_fill_rect_xywh(ctx->buf, x, y, w, payload_off_y(self, ctx), ctx->bg_color);
-		gp_fill_rect_xywh(ctx->buf, x, y+h-ctx->padd, w, ctx->padd, ctx->bg_color);
-
-		unsigned int padd_w = ctx->padd;
-
 		if (payload)
-			padd_w += payload->x;
-
-		gp_fill_rect_xywh(ctx->buf, x, y + payload_off_y(self, ctx), padd_w,
-				  h-ctx->padd - payload_off_y(self, ctx), ctx->bg_color);
-
-		unsigned int padd_x = x + padd_w;
-		padd_w = ctx->padd;
-
-		if (payload) {
-			padd_x += payload->w;
-			padd_w += w - payload->x - payload->w - 2 * ctx->padd;
-		}
-
-		gp_fill_rect_xywh(ctx->buf, padd_x, y + payload_off_y(self, ctx),
-		                  padd_w, h - ctx->padd - payload_off_y(self, ctx), ctx->bg_color);
-
-		if (payload) {
-			gp_fill_rect_xywh(ctx->buf,
-			                  x + payload->x + payload_off_x(ctx),
-					  y + payload_off_y(self, ctx),
-					  payload->w,
-					  payload->y, ctx->bg_color);
-
-			gp_fill_rect_xywh(ctx->buf,
-			                  x + payload->x + payload_off_x(ctx),
-			                  y + payload_off_y(self, ctx) + payload->y,
-					  payload->w,
-					  h - payload_off_y(self, ctx) - payload->y - ctx->padd, ctx->bg_color);
-		}
+			draw_bg_around_payload(self, ctx, x, y, w, h);
+		else
+			gp_fill_rect_xywh(ctx->buf, x, y, w, h, ctx->bg_color);
 
 		gp_rrect_xywh(ctx->buf, x + ctx->padd/2, y + payload_off_y(self, ctx)/2, w - ctx->padd,
 		              h - ctx->padd/2 - payload_off_y(self, ctx)/2, ctx->text_color);
@@ -136,7 +140,7 @@ static void render(gp_widget *self, const gp_offset *offset,
 		}
 	}
 
-	if (!self->frame->child)
+	if (!payload)
 		return;
 
 	gp_offset widget_offset = {
