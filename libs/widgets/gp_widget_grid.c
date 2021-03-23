@@ -1042,7 +1042,7 @@ static int assert_col_row(gp_widget *self, unsigned int col, unsigned int row)
 }
 
 gp_widget *gp_widget_grid_put(gp_widget *self, unsigned int col, unsigned int row,
-                            gp_widget *widget)
+                              gp_widget *widget)
 {
 	gp_widget *ret;
 
@@ -1056,6 +1056,7 @@ gp_widget *gp_widget_grid_put(gp_widget *self, unsigned int col, unsigned int ro
 		ret->parent = NULL;
 
 	gp_widget_resize(self);
+	gp_widget_redraw(widget);
 
 	return ret;
 }
@@ -1120,6 +1121,7 @@ gp_widget *gp_widget_grid_rem(gp_widget *self, unsigned int col, unsigned int ro
 	}
 
 	gp_widget_resize(self);
+	gp_widget_redraw(self);
 
 	return ret;
 }
