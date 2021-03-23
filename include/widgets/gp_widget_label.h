@@ -70,7 +70,7 @@ static inline void gp_widget_label_tattr_set(gp_widget *self, gp_widget_tattr ta
  * @self Pointer to a label widget.
  * @width New label width, the unit for the width is font characters.
  */
-static inline void gp_widget_label_set_width(gp_widget *self, unsigned int width)
+static inline void gp_widget_label_width_set(gp_widget *self, unsigned int width)
 {
 	self->label->width = width;
 	gp_widget_resize(self);
