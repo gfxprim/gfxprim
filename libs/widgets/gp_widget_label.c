@@ -218,7 +218,7 @@ gp_widget *gp_widget_label_printf_new(gp_widget_tattr tattr, const char *fmt, ..
 	buf = vasprintf(fmt, ap);
 	va_end(ap);
 
-	gp_widget *ret = gp_widget_label_new(buf, 0, tattr);
+	gp_widget *ret = gp_widget_label_new(buf, tattr, 0);
 
 	free(buf);
 
