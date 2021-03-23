@@ -16,11 +16,11 @@ struct gp_widget_label {
 	/* widget size hints */
 	const char *set;
 	unsigned int width:8;
-	/* text attributes */
-	gp_widget_tattr tattr;
 	/* attributes */
 	unsigned int ralign:1;
 	unsigned int frame:1;
+	/* text attributes */
+	gp_widget_tattr tattr;
 };
 
 /**
