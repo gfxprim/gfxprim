@@ -95,6 +95,13 @@ static inline void gp_widget_grid_add_row(gp_widget *self)
 	gp_widget_grid_add_rows(self, 1);
 }
 
+void gp_widget_grid_rem_rows(gp_widget *self, unsigned int row, unsigned int rows);
+
+static inline void gp_widget_rem_row(gp_widget *self, unsigned int row)
+{
+	gp_widget_grid_rem_rows(self, row, 1);
+}
+
 /**
  * @brief Removes child widget at col, row from a grid.
  *

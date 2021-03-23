@@ -1063,14 +1063,13 @@ gp_widget *gp_widget_grid_put(gp_widget *self, unsigned int col, unsigned int ro
 
 void gp_widget_grid_insert_rows(gp_widget *self, unsigned int row, unsigned int rows)
 {
-	size_t i;
-
 	GP_WIDGET_ASSERT(self, GP_WIDGET_GRID, );
 
+	size_t i;
 	struct gp_widget_grid *g = self->grid;
 
 	if (row > g->rows) {
-		GP_WARN("Invalid grid (%p) row %u (rows %u)", self, row, g->rows);
+		GP_WARN("Row %u out of grid (%p rows %u)", row, self, g->rows);
 		return;
 	}
 
@@ -1093,6 +1092,42 @@ void gp_widget_grid_insert_rows(gp_widget *self, unsigned int row, unsigned int 
 	gp_widget_resize(self);
 }
 
+void gp_widget_grid_rem_rows(gp_widget *self, unsigned int row, unsigned int rows)
+{
+	GP_WIDGET_ASSERT(self, GP_WIDGET_GRID, );
+
+	size_t r, c;
+	struct gp_widget_grid *g = self->grid;
+
+	if (row >= g->rows) {
+		GP_WARN("Row %u out of grid (%p rows %u)", row, self, g->rows);
+		return;
+	}
+
+	if (row + rows > g->rows) {
+		GP_WARN("Block %u at row %u out of grid (%p rows %u)",
+		        rows, row, self, g->rows);
+		return;
+	}
+
+	for (r = row; r < rows; r++) {
+		for (c = 0; c < g->cols; c++)
+			gp_widget_free(g->widgets[gp_matrix_idx(g->rows, r, c)]);
+	}
+
+	g->widgets = gp_matrix_delete_rows(g->widgets, g->cols, g->rows, row, rows);
+
+	g->rows_h = gp_vec_delete(g->rows_h, row, rows);
+	g->rows_off = gp_vec_delete(g->rows_off, row, rows);
+	g->row_padds = gp_vec_delete(g->row_padds, row, rows);
+	g->row_pfills = gp_vec_delete(g->row_pfills, row, rows);
+	g->row_fills = gp_vec_delete(g->row_fills, row, rows);
+
+	g->rows -= rows;
+
+	gp_widget_resize(self);
+	gp_widget_redraw(self);
+}
 
 void gp_widget_grid_add_rows(gp_widget *self, unsigned int rows)
 {
