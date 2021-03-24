@@ -178,7 +178,7 @@ void gp_gamma_release(gp_gamma *self)
 
 	GP_DEBUG(1, "Releasing Gamma table %s gamma %f", gp_pixel_type_name(self->pixel_type), self->tables[0]->gamma);
 
-	for (i = 0; i < channels; i++)
+	for (i = 0; i < 2 * channels; i++)
 		put_table(self->tables[i]);
 
 	if (--self->ref_count == 0) {
