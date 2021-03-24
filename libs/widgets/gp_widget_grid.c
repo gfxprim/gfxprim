@@ -1110,9 +1110,9 @@ void gp_widget_grid_rem_rows(gp_widget *self, unsigned int row, unsigned int row
 		return;
 	}
 
-	for (r = row; r < rows; r++) {
+	for (r = 0; r < rows; r++) {
 		for (c = 0; c < g->cols; c++)
-			gp_widget_free(g->widgets[gp_matrix_idx(g->rows, r, c)]);
+			gp_widget_free(g->widgets[gp_matrix_idx(g->rows, c, r + row)]);
 	}
 
 	g->widgets = gp_matrix_delete_rows(g->widgets, g->cols, g->rows, row, rows);
