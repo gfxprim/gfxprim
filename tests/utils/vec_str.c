@@ -34,7 +34,7 @@ static int test_printf(void)
 }
 
 const struct tst_suite tst_suite = {
-	.suite_name = "vector testsuite",
+	.suite_name = "vector string testsuite",
 	.tests = {
 		{.name = "gp_vec_printf()",
 		 .tst_fn = test_printf,
