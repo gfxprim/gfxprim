@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-2.1-or-later
 /*
- * Copyright (C) 2009-2015 Cyril Hrubis <metan@ucw.cz>
+ * Copyright (C) 2009-2021 Cyril Hrubis <metan@ucw.cz>
  */
 
 #define _GNU_SOURCE
@@ -30,7 +30,7 @@ static unsigned int max_chunks = 0;
 
 void tst_malloc_check_start(void)
 {
-	void  *buf[1];
+	void *buf[1];
 	char *str_verbose;
 
 	/*
@@ -49,11 +49,14 @@ void tst_malloc_check_start(void)
 	struct tm tm;
 	mktime(&tm);
 
-	check_malloc = 1;
-
 	str_verbose = getenv("TST_MALLOC_VERBOSE");
 	if (str_verbose)
 		verbose = atoi(str_verbose);
+
+	if (verbose)
+		fprintf(stderr, "\n--- Starting malloc tracking ---\n\n");
+
+	check_malloc = 1;
 }
 
 static void print_c_trace(void)
@@ -70,14 +73,17 @@ static void print_c_trace(void)
 void tst_malloc_canaries_set(enum tst_malloc_canary canary)
 {
 	if (!check_malloc) {
-		tst_warn("Cannot turn canaries on when checking is off");
+		fprintf(stderr, "Cannot turn canaries on when checking is off");
 		return;
 	}
 
 	if (canary > MALLOC_CANARY_END) {
-		tst_warn("Invalid canary type");
+		fprintf(stderr, "Invalid canary type");
 		return;
 	}
+
+	if (verbose)
+		fprintf(stderr, "--- Setting malloc canaries %i ---\n", canary);
 
 	malloc_canary = canary;
 }
@@ -122,16 +128,13 @@ static struct chunk *get_chunk(void *ptr)
 static void add_chunk(size_t size, void *ptr)
 {
 	if (chunks_top >= MAX_CHUNKS) {
-		tst_warn("Not enough chunks (%i) for malloc() tracing",
+		fprintf(stderr, "Not enough chunks (%i) for malloc() tracing",
 		         MAX_CHUNKS);
 		return;
 	}
 
 	if (get_chunk(ptr))
-		tst_warn("Duplicate chunk addres added %p\n", ptr);
-
-	if (verbose > 1)
-		fprintf(stderr, " (adding chunk %p %6zu %i)\n", ptr, size, chunks_top);
+		fprintf(stderr, "Duplicate chunk addres added %p\n", ptr);
 
 	/* Store chunk */
 	chunks[chunks_top].size = size;
@@ -156,9 +159,6 @@ static void rem_chunk(void *ptr)
 {
 	unsigned int i;
 
-	if (verbose > 1)
-		fprintf(stderr, " (removing chunk %p)\n", ptr);
-
 	for (i = 0; i < chunks_top; i++) {
 		if (chunks[i].ptr == ptr) {
 			/* Update global stats */
@@ -172,7 +172,7 @@ static void rem_chunk(void *ptr)
 		}
 	}
 
-	tst_warn("Chunk passed to free not found (%p)", ptr);
+	fprintf(stderr, "Chunk not found (%p)", ptr);
 }
 
 void tst_malloc_check_stop(void)
@@ -184,7 +184,7 @@ void tst_malloc_check_stop(void)
 	 * sizes for free and realloc.
 	 */
 	if (malloc_canary != MALLOC_CANARY_OFF) {
-		tst_warn("Cannot turn malloc checks off when canaries are on");
+		fprintf(stderr, "Cannot turn malloc checks off when canaries are on");
 		return;
 	}
 
@@ -222,21 +222,22 @@ void *malloc(size_t size)
 		return NULL;
 	}
 
-	if (check_malloc && ptr) {
-		if (verbose)
-			fprintf(stderr, "MALLOC %p\n", ptr);
-		if (verbose > 1)
-			print_c_trace();
+	if (verbose)
+		fprintf(stderr, "MALLOC %p %zu\n", ptr, size);
+
+	if (verbose > 1)
+		print_c_trace();
+
+	if (check_malloc && ptr)
 		add_chunk(size, ptr);
-	}
 
 	return ptr;
 }
 
 static void *temp_calloc(size_t nmemb, size_t size)
 {
-	(void) nmemb;
-	(void) size;
+	(void)nmemb;
+	(void)size;
 	return NULL;
 }
 
@@ -262,13 +263,26 @@ void *calloc(size_t nmemb, size_t size)
 	break;
 	case MALLOC_CANARY_BEGIN:
 		ptr = tst_malloc_canary_left(nmemb * size);
+		memset(ptr, 0, nmemb * size);
 	break;
 	case MALLOC_CANARY_END:
 		ptr = tst_malloc_canary_right(nmemb * size);
+		memset(ptr, 0, nmemb * size);
 	break;
 	default:
 		return NULL;
 	}
+
+	if (verbose) {
+		fprintf(stderr, "CALLOC %p %zu * %zu = %zu\n",
+		        ptr, nmemb, size, nmemb * size);
+	}
+
+	if (verbose > 1)
+		print_c_trace();
+
+	if (check_malloc && ptr)
+		add_chunk(nmemb * size, ptr);
 
 	return ptr;
 }
@@ -284,10 +298,16 @@ void free(void *ptr)
 	if (!ptr)
 		return;
 
+	if (verbose > 1)
+		fprintf(stderr, "FREE: Looking for chunk %p\n", ptr);
+
 	chunk = get_chunk(ptr);
 
 	/* Was allocated before malloc checking was turned on */
 	if (!chunk) {
+		if (verbose)
+			fprintf(stderr, "FREE: Chunk %p not found!\n", ptr);
+
 		real_free(ptr);
 		return;
 	}
@@ -304,8 +324,13 @@ void free(void *ptr)
 	break;
 	}
 
-	if (verbose)
-		fprintf(stderr, "FREE %p\n", ptr);
+	if (verbose) {
+		fprintf(stderr, "FREE: Removing chunk %p %zu\n",
+		        ptr, chunk->size);
+	}
+
+	if (verbose > 1)
+		print_c_trace();
 
 	rem_chunk(ptr);
 }
@@ -320,6 +345,12 @@ void *realloc(void *optr, size_t size)
 
 	if (!real_realloc)
 		real_realloc = dlsym(RTLD_NEXT, "realloc");
+
+	if (verbose)
+		fprintf(stderr, "REALLOC: %p %zu\n", optr, size);
+
+	if (verbose > 1)
+		print_c_trace();
 
 	if (!optr)
 		return malloc(size);
@@ -350,6 +381,17 @@ void *realloc(void *optr, size_t size)
 	free(optr);
 
 	return ptr;
+}
+
+void *reallocarray(void *optr, size_t nmemb, size_t size)
+{
+	if (verbose)
+		fprintf(stderr, "REALLOCARRAY: %p %zu %zu\n", optr, nmemb, size);
+
+	if (verbose > 1)
+		print_c_trace();
+
+	return realloc(optr, nmemb * size);
 }
 
 void tst_malloc_print(const struct malloc_stats *stats)
