@@ -169,7 +169,7 @@ static int test_vec_resize(struct insert_test *tst)
 	char *vec = gp_vec_new(tst->len, 1);
 	unsigned int i;
 
-	gp_vec_resize(vec, 10);
+	vec = gp_vec_resize(vec, 10);
 
 	if (gp_vec_len(vec) != 10) {
 		tst_msg("Got wrong vector size");
@@ -207,6 +207,8 @@ static int test_vec_remove(void)
 			}
 		}
 	}
+
+	gp_vec_free(vec);
 
 	return TST_SUCCESS;
 }
