@@ -32,7 +32,7 @@ static gp_widget *widget_grid_get(gp_widget *self,
 
 static gp_widget *widget_grid_focused(gp_widget *self)
 {
-	if (!self->focused)
+	if (!self->grid->cols || !self->grid->rows)
 		return NULL;
 
 	return widget_grid_get(self,
