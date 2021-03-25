@@ -171,6 +171,7 @@ gp_widget_table_refresh
 gp_widget_tabs_new
 gp_widget_tabs_ops
 gp_widget_tabs_put
+gp_widget_tabs_get
 
 gp_widget_tbox_cursor_set
 gp_widget_tbox_str

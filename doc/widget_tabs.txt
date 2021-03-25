@@ -16,16 +16,22 @@ gp_widget *gp_widget_tabs_new(unsigned int tabs, unsigned int active_tab,
                               const char *tab_labels[]);
 -------------------------------------------------------------------------------
 
-.Function to set tab child
+.Child widget manipulation
 [source,c]
 -------------------------------------------------------------------------------
 gp_widget *gp_widget_tabs_put(gp_widget *self, unsigned int tab,
                               gp_widget *child);
+
+gp_widget *gp_widget_tabs_get(gp_widget *self, unsigned int tab);
 -------------------------------------------------------------------------------
 
-Returns previous tabs child.
+The `gp_widget_tabs_put()` puts a `child` to the `tab` and returns a child
+previously occupying the tab or NULL if it was empty.
 
-.Fucntions to add and remove tabs
+The `gp_widget_tabs_get()` returns a pointer to a `child` widget in `tab` or
+NULL if it's empty.
+
+.Functions to add and remove tabs
 [source,c]
 -------------------------------------------------------------------------------
 void gp_widget_tabs_add(gp_widget *self, unsigned int off,

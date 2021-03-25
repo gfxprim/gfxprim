@@ -50,6 +50,16 @@ gp_widget *gp_widget_tabs_put(gp_widget *self, unsigned int tab,
                               gp_widget *child);
 
 /**
+ * @brief Returns a pointer to a child in a tab.
+ *
+ * @self A tabs widget.
+ * @tab Index of tab to put the child into.
+ *
+ * @return A child widget ocupying the slot or NULL if it's empty.
+ */
+gp_widget *gp_widget_tabs_get(gp_widget *self, unsigned int tab);
+
+/**
  * @brief Adds a tab at an offset.
  *
  * @self A tabs widget.

@@ -582,6 +582,18 @@ gp_widget *gp_widget_tabs_put(gp_widget *self, unsigned int tab,
 	return ret;
 }
 
+gp_widget *gp_widget_tabs_get(gp_widget *self, unsigned int tab)
+{
+	GP_WIDGET_ASSERT(self, GP_WIDGET_TABS, NULL);
+
+	if (tab >= gp_vec_len(self->tabs->tabs)) {
+		GP_WARN("Invalid tabs index %u", tab);
+		return NULL;
+	}
+
+	return self->tabs->tabs[tab].widget;
+}
+
 void gp_widget_tabs_add(gp_widget *self, unsigned int off,
                         const char *label, gp_widget *child)
 {
