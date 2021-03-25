@@ -52,7 +52,7 @@ int pixmap_on_event(gp_widget_event *ev)
 
 int main(int argc, char *argv[])
 {
-	gp_widget *layout = gp_widget_grid_new(1, 1);
+	gp_widget *layout = gp_widget_grid_new(1, 1, 0);
 	gp_widget *area = gp_widget_scroll_area_new(320, 240, NULL);
 	gp_size w = 320, h = 240;
 

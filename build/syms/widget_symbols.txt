@@ -106,8 +106,10 @@ gp_widget_grid_ops
 gp_widget_grid_put
 gp_widget_grid_rem
 gp_widget_grid_vborder_set
-gp_widget_grid_add_rows
-gp_widget_grid_insert_rows
+gp_widget_grid_rows_append
+gp_widget_grid_rows_prepend
+gp_widget_grid_rows_ins
+gp_widget_grid_rows_del
 
 gp_widget_int_set
 gp_widget_int_set_max

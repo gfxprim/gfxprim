@@ -12,7 +12,7 @@ static int grid_new_free(void)
 {
 	gp_widget *grid, *ret;
 
-	grid = gp_widget_grid_new(1, 1);
+	grid = gp_widget_grid_new(1, 1, 0);
 	if (!grid) {
 		tst_msg("Allocation failure");
 		return TST_FAILED;
@@ -34,7 +34,7 @@ static int grid_free_children(void)
 	gp_widget *grid;
 	gp_widget *label;
 
-	grid = gp_widget_grid_new(1, 1);
+	grid = gp_widget_grid_new(1, 1, 0);
 	label = gp_widget_label_new("Label", 0, 0);
 	if (!grid || !label) {
 		free(grid);
@@ -55,7 +55,7 @@ static int grid_ins_rem_rows(void)
 	gp_widget *grid, *ret, *l;
 	unsigned int c, r;
 
-	grid = gp_widget_grid_new(2, 2);
+	grid = gp_widget_grid_new(2, 2, 0);
 	if (!grid) {
 		free(grid);
 		tst_msg("Allocation failure");
@@ -77,7 +77,7 @@ static int grid_ins_rem_rows(void)
 	}
 
 	/* Insert row and check if everything is fine */
-	gp_widget_grid_insert_rows(grid, 1, 1);
+	gp_widget_grid_rows_ins(grid, 1, 1);
 
 	if (grid->grid->rows != 3) {
 		tst_msg("Wrong number of rows after insert %u expected 3",
@@ -104,8 +104,8 @@ static int grid_ins_rem_rows(void)
 		return TST_FAILED;
 	}
 
-	/* Remove the inserted row & free the widget put into the row */
-	gp_widget_grid_rem_rows(grid, 1, 1);
+	/* Delete the inserted row & free the widget put into the row */
+	gp_widget_grid_rows_del(grid, 1, 1);
 
 	if (grid->grid->rows != 2) {
 		tst_msg("Wrong number of rows after insert %u expected 2",
@@ -138,6 +138,73 @@ static int grid_ins_rem_rows(void)
 	return TST_SUCCESS;
 }
 
+static int grid_put_get_rem_del(void)
+{
+	gp_widget *grid, *label, *ret;
+
+	grid = gp_widget_grid_new(1, 1, 0);
+	label = gp_widget_label_new("Label", 0, 0);
+	if (!grid || !label) {
+		free(grid);
+		free(label);
+		tst_msg("Allocation failure");
+		return TST_FAILED;
+	}
+
+	/* attempt to crash by row/col out of the grid */
+	gp_widget_grid_put(grid, 1, 0, label);
+	gp_widget_grid_put(grid, 0, 1, label);
+	gp_widget_grid_get(grid, 2, 0);
+	gp_widget_grid_rem(grid, 0, 2);
+	gp_widget_grid_del(grid, 2, 2);
+
+	if (gp_widget_grid_get(grid, 0, 0)) {
+		tst_msg("Something got inserted!");
+		return TST_FAILED;
+	}
+
+	ret = gp_widget_grid_put(grid, 0, 0, label);
+	if (ret) {
+		tst_msg("Non NULL returned by initial put");
+		return TST_FAILED;
+	}
+
+	ret = gp_widget_grid_get(grid, 0, 0);
+	if (ret != label) {
+		tst_msg("Wrong widget inserted!?");
+		return TST_FAILED;
+	}
+
+	if (label->parent != grid) {
+		tst_msg("Label parent not set!");
+		return TST_FAILED;
+	}
+
+	ret = gp_widget_grid_rem(grid, 0, 0);
+	if (ret != label) {
+		tst_msg("Wrong pointer returned by rem");
+		return TST_FAILED;
+	}
+
+	if (label->parent) {
+		tst_msg("Parent pointer not cleared");
+		return TST_FAILED;
+	}
+
+	ret = gp_widget_grid_put(grid, 0, 0, label);
+	if (ret) {
+		tst_msg("Non NULL returned by second put");
+		return TST_FAILED;
+	}
+
+	/* make sure delete frees the widget */
+	gp_widget_grid_del(grid, 0, 0);
+
+	gp_widget_free(grid);
+
+	return TST_SUCCESS;
+}
+
 const struct tst_suite tst_suite = {
 	.suite_name = "grid testsuite",
 	.tests = {
@@ -151,6 +218,10 @@ const struct tst_suite tst_suite = {
 
 		{.name = "grid ins rem rows",
 		 .tst_fn = grid_ins_rem_rows,
+		 .flags = TST_CHECK_MALLOC},
+
+		{.name = "grid put get rem del",
+		 .tst_fn = grid_put_get_rem_del,
 		 .flags = TST_CHECK_MALLOC},
 
 		{.name = NULL},

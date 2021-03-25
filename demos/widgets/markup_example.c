@@ -43,7 +43,7 @@ static int button_callback(gp_widget_event *ev)
 
 int main(int argc, char *argv[])
 {
-	gp_widget *layout = gp_widget_grid_new(1, 3);
+	gp_widget *layout = gp_widget_grid_new(1, 3, 0);
 	gp_widget *markup = gp_widget_markup_new(MARKUP_STRING, get);
 	gp_widget *button = gp_widget_button_new("Refresh", 0, button_callback, layout);
 

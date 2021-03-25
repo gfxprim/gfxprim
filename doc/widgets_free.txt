@@ -1,0 +1,48 @@
+Widget destructor
+-----------------
+
+[source,c]
+-------------------------------------------------------------------------------
+void gp_widget_free(gp_widget *self);
+-------------------------------------------------------------------------------
+
+Frees all memory allocated by the widget.
+
+For container widgets, i.e. widgets with children, all child widgets are freed
+recursively as well.
+
+If widget has link:widgets_events.html[event handler] it's called with
+`GP_WIDGET_EVENT_FREE` before widget is being freed. This can be used to free
+any user data pointed by the `widget->priv` pointer.
+
+.Example user data desctructor
+[source,c]
+-------------------------------------------------------------------------------
+static int event_handler(gp_widget_event *ev)
+{
+	if (ev->type == GP_WIDGET_FREE) {
+		free(ev->self->priv);
+		return 0;
+	}
+
+	...
+}
+
+int main(void)
+{
+	...
+
+	void *data = malloc(...);
+
+	...
+
+	gp_widget_event_handler_set(widget, event_handler, data);
+
+	...
+
+	/* the event handler calls free on data here */
+	gp_widget_free(widget);
+
+	...
+}
+-------------------------------------------------------------------------------

@@ -64,9 +64,9 @@ int main(int argc, char *argv[])
 {
 	gp_widget *layout = gp_widget_switch_new(3);
 	gp_widget *markup = gp_widget_markup_new("#Layout \\#2#\n\nThere is nothing on the next one.\nUse arrow keys to move.", NULL);
-	gp_widget *markup_grid = gp_widget_grid_new(1, 2);
+	gp_widget *markup_grid = gp_widget_grid_new(1, 2, 0);
 
-	gp_widget *btn_grid = gp_widget_grid_new(2, 1);
+	gp_widget *btn_grid = gp_widget_grid_new(2, 1, 0);
 	gp_widget_grid_border_set(btn_grid, 0, 0);
 	gp_widget_grid_put(btn_grid, 0, 0, gp_widget_button_new("Prev", GP_BUTTON_PREV, set_layout0, layout));
 	gp_widget_grid_put(btn_grid, 1, 0, gp_widget_button_new("Next", GP_BUTTON_NEXT, set_layout2, layout));

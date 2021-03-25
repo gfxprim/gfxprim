@@ -33,7 +33,7 @@ static gp_widget *grid;
 
 static void widget_todo_add(int t)
 {
-	gp_widget_grid_add_row(grid);
+	gp_widget_grid_row_append(grid);
 	gp_widget_grid_put(grid, 0, 1 + t,
 			   gp_widget_tbox_new(todos[t].text, 0, TODO_MAX - 1, TODO_MAX - 1, 0, 0, 0, 0));
 	gp_widget_grid_put(grid, 1, 1 + t,
@@ -64,13 +64,13 @@ static int on_new(gp_widget_event *ev)
 int main(int argc, char *argv[])
 {
 	int i;
-	gp_widget *outer = gp_widget_grid_new(1, 2);
+	gp_widget *outer = gp_widget_grid_new(1, 2, 0);
 
 	outer->align = GP_HFILL | GP_TOP;
 
 	gp_widget_grid_put(outer, 0, 0, gp_widget_button_new("New", 0, on_new, NULL));
 
-	grid = gp_widget_grid_new(2, 1);
+	grid = gp_widget_grid_new(2, 1, 0);
 	gp_widget_grid_put(outer, 0, 1, grid);
 
 	grid->align = GP_HFILL | GP_TOP;

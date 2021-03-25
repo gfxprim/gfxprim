@@ -29,6 +29,7 @@ Widgets generic documetation
 * link:widgets_alignment.html[Alignment and fill]
 * link:widgets_tattr.html[Text attributes]
 * link:widgets_render_context.html[Render context]
+* link:widgets_free.html[Widget destructor]
 
 Individual widgets documentation
 --------------------------------

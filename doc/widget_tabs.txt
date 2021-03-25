@@ -40,8 +40,8 @@ void gp_widget_tabs_del(gp_widget *self, unsigned int pos);
 -------------------------------------------------------------------------------
 
 The `gp_widget_tabs_rem()` functions return the tab child widget while the
-`gp_widget_tabs_del()` frees the child with `gp_widget_free()` instead.
-
+`gp_widget_tabs_del()` frees the child recursively with
+link:widgets_free.html[`gp_widget_free()`] instead.
 
 .Functions to set and get active tab
 [source,c]

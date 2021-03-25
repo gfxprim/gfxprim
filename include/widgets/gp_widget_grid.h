@@ -2,7 +2,7 @@
 
 /*
 
-   Copyright (c) 2014-2020 Cyril Hrubis <metan@ucw.cz>
+   Copyright (c) 2014-2021 Cyril Hrubis <metan@ucw.cz>
 
  */
 
@@ -10,6 +10,13 @@
 #define GP_WIDGET_GRID_H
 
 #include <stdint.h>
+
+enum gp_widget_grid_flags {
+	/** Draw a frame around the grid */
+	GP_WIDGET_GRID_FRAME = 0x01,
+	/** Make the cells uniform i.e. same size */
+	GP_WIDGET_GRID_UNIFORM = 0x02,
+};
 
 struct gp_widget_grid {
 	unsigned int cols, rows;
@@ -50,10 +57,11 @@ struct gp_widget_grid {
  *
  * @cols Number of grid columns.
  * @rows Number of grid rows.
+ * @flags Bitwise or of the enum gp_widget_grid_flags.
  *
  * @return A widget grid.
  */
-gp_widget *gp_widget_grid_new(unsigned int cols, unsigned int rows);
+gp_widget *gp_widget_grid_new(unsigned int cols, unsigned int rows, int flags);
 
 /**
  * @brief Puts a child widget into a frame widget.
@@ -67,40 +75,6 @@ gp_widget *gp_widget_grid_new(unsigned int cols, unsigned int rows);
  */
 gp_widget *gp_widget_grid_put(gp_widget *self, unsigned int col, unsigned int row,
 		              gp_widget *child);
-
-/**
- * @brief Add a new (empty) rows at the end of the grid.
- *
- * @self A grid widget.
- * @rows How many rows to add.
- */
-void gp_widget_grid_add_rows(gp_widget *self, unsigned int rows);
-
-/**
- * @brief Inserts new (empty) rows to the grid.
- *
- * @self A grid widget.
- * @row Where to insert rows.
- * @rows How many rows to insert.
- */
-void gp_widget_grid_insert_rows(gp_widget *self, unsigned int row, unsigned int rows);
-
-/**
- * @brief Add a new (empty) row at the end of the grid.
- *
- * @self A grid widget.
- */
-static inline void gp_widget_grid_add_row(gp_widget *self)
-{
-	gp_widget_grid_add_rows(self, 1);
-}
-
-void gp_widget_grid_rem_rows(gp_widget *self, unsigned int row, unsigned int rows);
-
-static inline void gp_widget_rem_row(gp_widget *self, unsigned int row)
-{
-	gp_widget_grid_rem_rows(self, row, 1);
-}
 
 /**
  * @brief Removes child widget at col, row from a grid.
@@ -123,6 +97,106 @@ gp_widget *gp_widget_grid_rem(gp_widget *self, unsigned int col, unsigned int ro
  * @return A child widget occupying the slot or NULL if it's empty.
  */
 gp_widget *gp_widget_grid_get(gp_widget *self, unsigned int col, unsigned int row);
+
+/**
+ * @brief Deletes a child widget at col, row from a grid.
+ *
+ * @self A grid widget.
+ * @col Grid column.
+ * @row Grid row.
+ */
+static inline void gp_widget_grid_del(gp_widget *self, unsigned col, unsigned int row)
+{
+	gp_widget *ret = gp_widget_grid_rem(self, col, row);
+
+	gp_widget_free(ret);
+}
+
+/**
+ * @brief Appends a new (empty) rows at the bottom of the grid.
+ *
+ * @self A grid widget.
+ * @rows How many rows to append.
+ *
+ * @return A row index to the first appended row.
+ */
+unsigned int gp_widget_grid_rows_append(gp_widget *self, unsigned int rows);
+
+/**
+ * @brief Appends a new (empty) row at the bottom of the grid.
+ *
+ * @self A grid widget.
+ *
+ * @return A row index to the appended row.
+ */
+static inline unsigned int gp_widget_grid_row_append(gp_widget *self)
+{
+	return gp_widget_grid_rows_append(self, 1);
+}
+
+/**
+ * @brief Prepends a new (empty) rows at the top of the grid.
+ *
+ * @self A grid widget.
+ * @rows How many rows to append.
+ */
+void gp_widget_grid_rows_prepend(gp_widget *self, unsigned int rows);
+
+/**
+ * @brief Prepends a new (empty) row at the top of the grid.
+ *
+ * @self A grid widget.
+ */
+static inline void gp_widget_grid_row_prepend(gp_widget *self)
+{
+	return gp_widget_grid_rows_prepend(self, 1);
+}
+
+/**
+ * @brief Inserts new (empty) rows to the grid.
+ *
+ * @self A grid widget.
+ * @row Where to insert rows.
+ * @rows How many rows to insert.
+ */
+void gp_widget_grid_rows_ins(gp_widget *self, unsigned int row, unsigned int rows);
+
+/**
+ * @brief Inserts new (empty) row to the grid.
+ *
+ * @self A grid widget.
+ * @row Where to insert row.
+ */
+static inline void gp_widget_grid_row_ins(gp_widget *self, unsigned int row)
+{
+	gp_widget_grid_rows_ins(self, row, 1);
+}
+
+/**
+ * @brief Delete rows from the grid.
+ *
+ * If there are any widgets in the deleted rows they are freed with
+ * gp_widget_free().
+ *
+ * @self A grid widget.
+ * @row Where to delete rows.
+ * @rows How may rows to delete.
+ */
+void gp_widget_grid_rows_del(gp_widget *self, unsigned int row, unsigned int rows);
+
+/**
+ * @brief Removes row from the grid.
+ *
+ * If there are any widgets in the deleted rows they are freed with
+ * gp_widget_free().
+ *
+ * @self A grid widget.
+ * @row Where to delete row.
+ */
+static inline void gp_widget_grid_row_del(gp_widget *self, unsigned int row)
+{
+	gp_widget_grid_rows_del(self, row, 1);
+}
 
 /**
  * @brief Sets both horizontal and vertical border padding and filling coeficients.

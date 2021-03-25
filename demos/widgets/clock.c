@@ -98,7 +98,7 @@ static gp_timer tmr = {
 
 int main(int argc, char *argv[])
 {
-	gp_widget *layout = gp_widget_grid_new(1, 1);
+	gp_widget *layout = gp_widget_grid_new(1, 1, 0);
 	gp_widget *pixmap = gp_widget_pixmap_new(100, 100, pixmap_on_event, NULL);
 
 	gp_widget_grid_put(layout, 0, 0, pixmap);

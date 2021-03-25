@@ -822,7 +822,7 @@ static void parse_strarray(const char *sarray, uint8_t *array, unsigned int len,
 
 static gp_widget *json_to_grid(json_object *json, void **uids)
 {
-	int cols = 0, rows = 0, frame = 0, pad = -1;
+	int cols = 0, rows = 0, pad = -1;
 	json_object *widgets = NULL;
 	const char *border = NULL;
 	const char *cpad = NULL;
@@ -831,7 +831,7 @@ static gp_widget *json_to_grid(json_object *json, void **uids)
 	const char *rpadf = NULL;
 	const char *cfill = NULL;
 	const char *rfill = NULL;
-	int uniform = 0;
+	int flags = 0;
 
 	json_object_object_foreach(json, key, val) {
 		if (!strcmp(key, "cols"))
@@ -856,11 +856,13 @@ static gp_widget *json_to_grid(json_object *json, void **uids)
 			cfill = json_object_get_string(val);
 		else if (!strcmp(key, "rfill"))
 			rfill = json_object_get_string(val);
-		else if (!strcmp(key, "frame"))
-			frame = !!json_object_get_int(val);
-		else if (!strcmp(key, "uniform"))
-			uniform = 1;
-		else
+		else if (!strcmp(key, "frame")) {
+			if (json_object_get_int(val))
+				flags |= GP_WIDGET_GRID_FRAME;
+		} else if (!strcmp(key, "uniform")) {
+			if (json_object_get_int(val))
+				flags |= GP_WIDGET_GRID_UNIFORM;
+		} else
 			GP_WARN("Invalid grid key '%s'", key);
 	}
 
@@ -875,12 +877,9 @@ static gp_widget *json_to_grid(json_object *json, void **uids)
 		return NULL;
 	}
 
-	gp_widget *grid = gp_widget_grid_new(cols, rows);
+	gp_widget *grid = gp_widget_grid_new(cols, rows, flags);
 	if (!grid)
 		return NULL;
-
-	grid->grid->frame = frame;
-	grid->grid->uniform = uniform;
 
 	if (pad >= 0)
 		set_pad(grid, pad);
@@ -985,14 +984,25 @@ struct gp_widget_ops gp_widget_grid_ops = {
 	.id = "grid",
 };
 
-gp_widget *gp_widget_grid_new(unsigned int cols, unsigned int rows)
+gp_widget *gp_widget_grid_new(unsigned int cols, unsigned int rows, int flags)
 {
 	unsigned int i;
 	gp_widget *ret;
 
+	if (flags & ~(GP_WIDGET_GRID_FRAME | GP_WIDGET_GRID_UNIFORM)) {
+		GP_WARN("Invalid flags 0x%x", flags);
+		return NULL;
+	}
+
 	ret = gp_widget_new(GP_WIDGET_GRID, GP_WIDGET_CLASS_NONE, sizeof(struct gp_widget_grid));
 	if (!ret)
 		return NULL;
+
+	if (flags & GP_WIDGET_GRID_FRAME)
+		ret->grid->frame = 1;
+
+	if (flags & GP_WIDGET_GRID_UNIFORM)
+		ret->grid->uniform = 1;
 
 	ret->grid->cols = cols;
 	ret->grid->rows = rows;
@@ -1042,26 +1052,29 @@ static int assert_col_row(gp_widget *self, unsigned int col, unsigned int row)
 }
 
 gp_widget *gp_widget_grid_put(gp_widget *self, unsigned int col, unsigned int row,
-                              gp_widget *widget)
+                              gp_widget *child)
 {
 	gp_widget *ret;
+
+	if (!child)
+		return gp_widget_grid_rem(self, col, row);
 
 	GP_WIDGET_ASSERT(self, GP_WIDGET_GRID, NULL);
 
 	if (assert_col_row(self, col, row))
 		return NULL;
 
-	ret = widget_grid_put(self, widget, col, row);
+	ret = widget_grid_put(self, child, col, row);
 	if (ret)
 		ret->parent = NULL;
 
 	gp_widget_resize(self);
-	gp_widget_redraw(widget);
+	gp_widget_redraw(child);
 
 	return ret;
 }
 
-void gp_widget_grid_insert_rows(gp_widget *self, unsigned int row, unsigned int rows)
+void gp_widget_grid_rows_ins(gp_widget *self, unsigned int row, unsigned int rows)
 {
 	GP_WIDGET_ASSERT(self, GP_WIDGET_GRID, );
 
@@ -1092,7 +1105,7 @@ void gp_widget_grid_insert_rows(gp_widget *self, unsigned int row, unsigned int 
 	gp_widget_resize(self);
 }
 
-void gp_widget_grid_rem_rows(gp_widget *self, unsigned int row, unsigned int rows)
+void gp_widget_grid_rows_del(gp_widget *self, unsigned int row, unsigned int rows)
 {
 	GP_WIDGET_ASSERT(self, GP_WIDGET_GRID, );
 
@@ -1129,11 +1142,22 @@ void gp_widget_grid_rem_rows(gp_widget *self, unsigned int row, unsigned int row
 	gp_widget_redraw(self);
 }
 
-void gp_widget_grid_add_rows(gp_widget *self, unsigned int rows)
+unsigned int gp_widget_grid_rows_append(gp_widget *self, unsigned int rows)
+{
+	GP_WIDGET_ASSERT(self, GP_WIDGET_GRID, (unsigned int)-1);
+
+	unsigned int ret = self->grid->rows;
+
+	gp_widget_grid_rows_ins(self, self->grid->rows, rows);
+
+	return ret;
+}
+
+void gp_widget_grid_rows_prepend(gp_widget *self, unsigned int rows)
 {
 	GP_WIDGET_ASSERT(self, GP_WIDGET_GRID, );
 
-	gp_widget_grid_insert_rows(self, self->grid->rows, rows);
+	gp_widget_grid_rows_ins(self, 0, rows);
 }
 
 gp_widget *gp_widget_grid_rem(gp_widget *self, unsigned int col, unsigned int row)

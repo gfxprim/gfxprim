@@ -11,6 +11,127 @@ padding consists of a constant part called padd and resizable part called fill.
 The constant padding is accounted for in the grid widget minimal size, while
 the resizable fill is accounted for when leftover space is being distributed.
 
+.Grid widget constructor
+[source,c]
+-------------------------------------------------------------------------------
+enum gp_widget_grid_flags {
+        /** Draw a frame around the grid */
+        GP_WIDGET_GRID_FRAME = 0x01,
+        /** Make the cells uniform i.e. same size */
+        GP_WIDGET_GRID_UNIFORM = 0x02,
+};
+
+gp_widget *gp_widget_grid_new(unsigned int cols, unsigned int rows, int flags);
+-------------------------------------------------------------------------------
+
+Creates a new grid widget, both the `cols` and `rows` could be 0 as the grid
+can be resized later.
+
+The flags argument can be passed a bitwise or of the `enum
+gp_widget_grid_flags`.
+
+Child widget manipulation
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+[source,c]
+-------------------------------------------------------------------------------
+gp_widget *gp_widget_grid_put(gp_widget *self,
+                              unsigned int col, unsigned int row,
+                              gp_widget *child);
+-------------------------------------------------------------------------------
+
+Inserts a child widget at specified column and row into the grid and returns
+previous child occupying the slot. Passing a NULL `child` pointer makes the
+call equivalent to the `gp_widget_grid_rem()`.
+
+[source,c]
+-------------------------------------------------------------------------------
+gp_widget *gp_widget_grid_get(gp_widget *self, unsigned int col, unsigned int row);
+-------------------------------------------------------------------------------
+
+Returns a pointer to a child occupying slot at the column and row. If slot is
+empty NULL is returned.
+
+[source,c]
+-------------------------------------------------------------------------------
+gp_widget *gp_widget_grid_rem(gp_widget *self, unsigned int col, unsigned int row);
+-------------------------------------------------------------------------------
+
+Removes and returns a pointer to a child widget at the column and row.
+
+[source,c]
+-------------------------------------------------------------------------------
+void gp_widget_grid_del(gp_widget *self, unsigned int col, unsigned int row);
+-------------------------------------------------------------------------------
+
+Removes widget from the slot at the column and row and frees it with
+link:widgets_free.html[`gp_widget_free()`].
+
+.Inserting rows
+[source,c]
+-------------------------------------------------------------------------------
+void gp_widget_grid_rows_ins(gp_widget *self, unsigned int row, unsigned int rows);
+
+void gp_widget_grid_row_ins(gp_widget *self, unsigned int row);
+-------------------------------------------------------------------------------
+
+These two functions insert empty row(s) at a given offset to the grid.
+
+Rows indexes start at 0 and the last valid row index is `self->grid->rows - 1`.
+
+.Appending rows
+[source,c]
+-------------------------------------------------------------------------------
+unsigned int gp_widget_grid_rows_append(gp_widget *self, unsigned int rows);
+
+unsigned int gp_widget_grid_row_append(gp_widget *self);
+-------------------------------------------------------------------------------
+
+These two functions append empty row(s) at the bottom of the grid and return
+an index to the first appended row.
+
+.Prepending rows
+[source,c]
+-------------------------------------------------------------------------------
+void gp_widget_grid_rows_prepend(gp_widget *self, unsigned int rows);
+
+void gp_widget_grid_row_prepend(gp_widget *self);
+-------------------------------------------------------------------------------
+
+These two functions prepend empty row(s) at the top of the grid.
+
+.Removing rows
+[source,c]
+-------------------------------------------------------------------------------
+void gp_widget_grid_rows_del(gp_widget *self, unsigned int row, unsigned int rows);
+
+void gp_widget_grid_row_del(gp_widget *self, unsigned int row);
+-------------------------------------------------------------------------------
+
+These two functions delete row(s) at given offset from the grid. All widgets
+in the deleted rows are freed recursively with
+link:widgets_free.html[`gp_widget_free()`].
+
+Rows indexes start at 0 and the last valid row index is `self->grid->rows - 1`.
+
+.Border padding and fill
+[source,c]
+-------------------------------------------------------------------------------
+void gp_widget_grid_border_set(gp_widget *self, unsigned int padd, unsigned int fill);
+
+void gp_widget_grid_hborder_set(gp_widget *self, unsigned int padd, unsigned int fill);
+
+void gp_widget_grid_vborder_set(gp_widget *self, unsigned int padd, unsigned int fill);
+-------------------------------------------------------------------------------
+
+Sets a grid border padding and fill coeficients, most common usage is to make
+the grid borderless with passing 0 for both `padd` and `fill`.
+
+See the detailed description below on padding and fill.
+
+Grid JSON Example
+~~~~~~~~~~~~~~~~~
+
 image:grid.png[Grid widget]
 
 [source,json]

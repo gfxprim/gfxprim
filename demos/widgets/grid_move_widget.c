@@ -26,7 +26,7 @@ static int button_callback(gp_widget_event *ev)
 
 int main(int argc, char *argv[])
 {
-	gp_widget *layout = gp_widget_grid_new(2, 2);
+	gp_widget *layout = gp_widget_grid_new(2, 2, 0);
 
 	layout->align = GP_FILL;
 
