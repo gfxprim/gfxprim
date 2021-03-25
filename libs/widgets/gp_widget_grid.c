@@ -32,6 +32,9 @@ static gp_widget *widget_grid_get(gp_widget *self,
 
 static gp_widget *widget_grid_focused(gp_widget *self)
 {
+	if (!self->focused)
+		return NULL;
+
 	return widget_grid_get(self,
 	                       self->grid->focused_col,
 	                       self->grid->focused_row);
@@ -822,7 +825,7 @@ static void parse_strarray(const char *sarray, uint8_t *array, unsigned int len,
 
 static gp_widget *json_to_grid(json_object *json, void **uids)
 {
-	int cols = 0, rows = 0, pad = -1;
+	int cols = 1, rows = 1, pad = -1;
 	json_object *widgets = NULL;
 	const char *border = NULL;
 	const char *cpad = NULL;
@@ -866,14 +869,9 @@ static gp_widget *json_to_grid(json_object *json, void **uids)
 			GP_WARN("Invalid grid key '%s'", key);
 	}
 
-	if (!cols)
-		cols = 1;
-
-	if (!rows)
-		rows = 1;
-
-	if (cols <= 0 || rows <= 0 || !widgets) {
-		GP_WARN("Invalid grid widget!");
+	if (cols < 0 || rows < 0) {
+		GP_WARN("Invalid grid widget cols = %i or rows = %i",
+		        cols, rows);
 		return NULL;
 	}
 
@@ -910,8 +908,8 @@ static gp_widget *json_to_grid(json_object *json, void **uids)
 		}
 	}
 
-	if (!json_object_is_type(widgets, json_type_array)) {
-		GP_WARN("Grid key widgets has to be array!");
+	if (widgets && !json_object_is_type(widgets, json_type_array)) {
+		GP_WARN("Grid widgets must be array!");
 		return grid;
 	}
 
@@ -933,7 +931,7 @@ static gp_widget *json_to_grid(json_object *json, void **uids)
 		}
 	}
 
-	if (json_object_array_get_idx(widgets, cols * rows))
+	if (widgets && json_object_array_get_idx(widgets, cols * rows))
 		GP_WARN("Too many widgets in grid!");
 
 	return grid;
