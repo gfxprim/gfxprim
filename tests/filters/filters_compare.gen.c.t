@@ -11,6 +11,7 @@
 #include <string.h>
 
 #include <core/gp_pixmap.h>
+#include <core/gp_threads.h>
 #include <filters/gp_filters.h>
 
 #include "tst_test.h"
@@ -128,6 +129,9 @@ static int compare_{{ fs[0] }}(gp_pixel_type pt)
 	gp_pixmap *src = gp_pixmap_alloc(134, 1072, pt);
 	gp_pixmap *dst, *ref;
 	int fail = 0;
+
+	/* disable threads, causes memleaks due to glibc tls caching */
+	gp_nr_threads_set(1);
 
 	errno = 0;
 
