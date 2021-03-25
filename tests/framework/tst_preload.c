@@ -53,6 +53,12 @@ void tst_malloc_check_start(void)
 	if (str_verbose)
 		verbose = atoi(str_verbose);
 
+	/*
+	 * Trigger stdout and stderr buffer allocation.
+	 */
+	printf("              \r");
+	fprintf(stderr, "              \r");
+
 	if (verbose)
 		fprintf(stderr, "\n--- Starting malloc tracking ---\n\n");
 
