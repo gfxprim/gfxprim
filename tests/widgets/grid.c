@@ -205,6 +205,93 @@ static int grid_put_get_rem_del(void)
 	return TST_SUCCESS;
 }
 
+static int check_hborder(gp_widget *grid, uint8_t exp_padd, uint8_t exp_fill)
+{
+	struct gp_widget_grid_border *b = grid->grid->col_b;
+
+	if (b[0].fill != exp_fill || b[2].fill != exp_fill) {
+		tst_msg("Wrong column border fill %u %u expected %u %u",
+		        b[0].fill, b[2].fill, exp_fill, exp_fill);
+		return TST_FAILED;
+	}
+
+	if (b[0].padd != exp_padd || b[2].padd != exp_padd) {
+		tst_msg("Wrong column border padd %u %u expected %u %u",
+		        b[0].padd, b[2].padd, exp_padd, exp_padd);
+		return TST_FAILED;
+	}
+
+	return TST_SUCCESS;
+}
+
+static int check_vborder(gp_widget *grid, uint8_t exp_padd, uint8_t exp_fill)
+{
+	struct gp_widget_grid_border *b = grid->grid->row_b;
+
+	if (b[0].fill != exp_fill || b[2].fill != exp_fill) {
+		tst_msg("Wrong row border fill %u %u expected %u %u",
+		        b[0].fill, b[2].fill, exp_fill, exp_fill);
+		return TST_FAILED;
+	}
+
+	if (b[0].padd != exp_padd || b[2].padd != exp_padd) {
+		tst_msg("Wrong row border padd %u %u expected %u %u",
+		        b[0].padd, b[2].padd, exp_padd, exp_padd);
+		return TST_FAILED;
+	}
+
+	return TST_SUCCESS;
+}
+
+static int check_border(gp_widget *grid, uint8_t exp_padd, uint8_t exp_fill)
+{
+	if (check_vborder(grid, exp_padd, exp_fill))
+		return TST_FAILED;
+
+	if (check_hborder(grid, exp_padd, exp_fill))
+		return TST_FAILED;
+
+	return TST_SUCCESS;
+}
+
+static int grid_border_check_set(void)
+{
+	gp_widget *grid;
+
+	grid = gp_widget_grid_new(2, 2, 0);
+	if (!grid) {
+		free(grid);
+		tst_msg("Allocation failure");
+		return TST_FAILED;
+	}
+
+	if (check_border(grid, 1, 0))
+		return TST_FAILED;
+
+	gp_widget_grid_border_set(grid, 10, 20);
+
+	if (check_border(grid, 10, 20))
+		return TST_FAILED;
+
+	gp_widget_grid_hborder_set(grid, 1, 2);
+
+	if (check_hborder(grid, 1, 2))
+		return TST_FAILED;
+
+	if (check_vborder(grid, 10, 20))
+		return TST_FAILED;
+
+	gp_widget_grid_vborder_set(grid, 3, 4);
+
+	if (check_vborder(grid, 3, 4))
+		return TST_FAILED;
+
+	if (check_hborder(grid, 1, 2))
+		return TST_FAILED;
+
+	return TST_SUCCESS;
+}
+
 const struct tst_suite tst_suite = {
 	.suite_name = "grid testsuite",
 	.tests = {
@@ -223,6 +310,9 @@ const struct tst_suite tst_suite = {
 		{.name = "grid put get rem del",
 		 .tst_fn = grid_put_get_rem_del,
 		 .flags = TST_CHECK_MALLOC},
+
+		{.name = "border check set",
+		 .tst_fn = grid_border_check_set},
 
 		{.name = NULL},
 	}

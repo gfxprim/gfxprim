@@ -18,6 +18,19 @@ enum gp_widget_grid_flags {
 	GP_WIDGET_GRID_UNIFORM = 0x02,
 };
 
+/* row/column cell sizes, offsets and fill coefs */
+struct gp_widget_grid_cell {
+	unsigned int size;
+	unsigned int off;
+	uint8_t fill;
+};
+
+/* row/column border padding and fill coefs */
+struct gp_widget_grid_border {
+	uint8_t padd;
+	uint8_t fill;
+};
+
 struct gp_widget_grid {
 	unsigned int cols, rows;
 
@@ -31,23 +44,15 @@ struct gp_widget_grid {
 	/* if set the grid all columns and all rows have the same size */
 	int uniform:1;
 
-	/** column/row sizes */
-	unsigned int *cols_w;
-	unsigned int *rows_h;
+	/* cell column sizes offsets and fill coefs */
+	struct gp_widget_grid_cell *col_s;
+	/* cell row sizes offsets and fill coefs */
+	struct gp_widget_grid_cell *row_s;
 
-	/** column/row offsets */
-	unsigned int *cols_off;
-	unsigned int *rows_off;
-
-	/* padding and padding fills */
-	uint8_t *col_padds;
-	uint8_t *row_padds;
-	uint8_t *col_pfills;
-	uint8_t *row_pfills;
-
-	/* cell fill coeficients */
-	uint8_t *col_fills;
-	uint8_t *row_fills;
+	/* column border padding and fill coefs */
+	struct gp_widget_grid_border *col_b;
+	/* row border padding and fill coefs */
+	struct gp_widget_grid_border *row_b;
 
 	gp_widget **widgets;
 };

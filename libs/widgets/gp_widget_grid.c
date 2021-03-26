@@ -2,7 +2,7 @@
 
 /*
 
-   Copyright (c) 2014-2020 Cyril Hrubis <metan@ucw.cz>
+   Copyright (c) 2014-2021 Cyril Hrubis <metan@ucw.cz>
 
  */
 
@@ -41,10 +41,10 @@ static gp_widget *widget_grid_focused(gp_widget *self)
 }
 
 static void widget_grid_focused_offset(gp_widget *self,
-                                        gp_offset *offset)
+                                       gp_offset *offset)
 {
-	offset->x = self->grid->cols_off[self->grid->focused_col];
-	offset->y = self->grid->rows_off[self->grid->focused_row];
+	offset->x = self->grid->col_s[self->grid->focused_col].off;
+	offset->y = self->grid->row_s[self->grid->focused_row].off;
 }
 
 static struct gp_widget *widget_grid_put(gp_widget *self, gp_widget *new,
@@ -70,7 +70,7 @@ static unsigned int padd_size(const gp_widget_render_ctx *ctx, int padd)
 static unsigned int min_w_uniform(gp_widget *self, const gp_widget_render_ctx *ctx)
 {
 	struct gp_widget_grid *grid = self->grid;
-	unsigned int x, sum_min_w = padd_size(ctx, grid->col_padds[0]);
+	unsigned int x, sum_min_w = padd_size(ctx, grid->col_b[0].padd);
 	unsigned int max_cols_w = 0;
 
 	for (x = 0; x < grid->cols; x++) {
@@ -81,7 +81,7 @@ static unsigned int min_w_uniform(gp_widget *self, const gp_widget_render_ctx *c
 			max_cols_w = GP_MAX(max_cols_w, min_w);
 		}
 
-		sum_min_w += padd_size(ctx, grid->col_padds[x+1]);
+		sum_min_w += padd_size(ctx, grid->col_b[x+1].padd);
 	}
 
 	return sum_min_w + grid->cols * max_cols_w;
@@ -90,7 +90,7 @@ static unsigned int min_w_uniform(gp_widget *self, const gp_widget_render_ctx *c
 static unsigned int min_w_(gp_widget *self, const gp_widget_render_ctx *ctx)
 {
 	struct gp_widget_grid *grid = self->grid;
-	unsigned int x, sum_min_w = padd_size(ctx, grid->col_padds[0]);
+	unsigned int x, sum_min_w = padd_size(ctx, grid->col_b[0].padd);
 
 	for (x = 0; x < grid->cols; x++) {
 		unsigned int y, max_col_w = 0;
@@ -101,7 +101,7 @@ static unsigned int min_w_(gp_widget *self, const gp_widget_render_ctx *ctx)
 		}
 
 		sum_min_w += max_col_w;
-		sum_min_w += padd_size(ctx, grid->col_padds[x+1]);
+		sum_min_w += padd_size(ctx, grid->col_b[x+1].padd);
 	}
 
 	return sum_min_w;
@@ -118,7 +118,7 @@ static unsigned int min_w(gp_widget *self, const gp_widget_render_ctx *ctx)
 static unsigned int min_h_uniform(gp_widget *self, const gp_widget_render_ctx *ctx)
 {
 	struct gp_widget_grid *grid = self->grid;
-	unsigned int y, sum_min_h = padd_size(ctx, grid->row_padds[0]);
+	unsigned int y, sum_min_h = padd_size(ctx, grid->row_b[0].padd);
 	unsigned int max_rows_h = 0;
 
 	for (y = 0; y < grid->rows; y++) {
@@ -129,7 +129,7 @@ static unsigned int min_h_uniform(gp_widget *self, const gp_widget_render_ctx *c
 			max_rows_h = GP_MAX(max_rows_h, min_h);
 		}
 
-		sum_min_h += padd_size(ctx, grid->row_padds[y+1]);
+		sum_min_h += padd_size(ctx, grid->row_b[y+1].padd);
 	}
 
 	return sum_min_h + grid->rows * max_rows_h;
@@ -138,7 +138,7 @@ static unsigned int min_h_uniform(gp_widget *self, const gp_widget_render_ctx *c
 static unsigned int min_h_(gp_widget *self, const gp_widget_render_ctx *ctx)
 {
 	struct gp_widget_grid *grid = self->grid;
-	unsigned int y, sum_min_h = padd_size(ctx, grid->row_padds[0]);
+	unsigned int y, sum_min_h = padd_size(ctx, grid->row_b[0].padd);
 
 	for (y = 0; y < grid->rows; y++) {
 		unsigned int x, max_row_h = 0;
@@ -149,7 +149,7 @@ static unsigned int min_h_(gp_widget *self, const gp_widget_render_ctx *ctx)
 		}
 
 		sum_min_h += max_row_h;
-		sum_min_h += padd_size(ctx, grid->row_padds[y+1]);
+		sum_min_h += padd_size(ctx, grid->row_b[y+1].padd);
 	}
 
 	return sum_min_h;
@@ -169,17 +169,17 @@ static void compute_cols_rows_min_wh(struct gp_widget_grid *grid,
 	unsigned int x, y;
 
 	for (y = 0; y < grid->rows; y++)
-		grid->rows_h[y] = 0;
+		grid->row_s[y].size = 0;
 
 	for (x = 0; x < grid->cols; x++)
-		grid->cols_w[x] = 0;
+		grid->col_s[x].size = 0;
 
 	for (y = 0; y < grid->rows; y++) {
 		for (x = 0; x < grid->cols; x++) {
-			struct gp_widget *widget = widget_grid_grid_get(grid, x, y);
+			gp_widget *widget = widget_grid_grid_get(grid, x, y);
 
-			grid->cols_w[x] = GP_MAX(grid->cols_w[x], gp_widget_min_w(widget, ctx));
-			grid->rows_h[y] = GP_MAX(grid->rows_h[y], gp_widget_min_h(widget, ctx));
+			grid->col_s[x].size = GP_MAX(grid->col_s[x].size, gp_widget_min_w(widget, ctx));
+			grid->row_s[y].size = GP_MAX(grid->row_s[y].size, gp_widget_min_h(widget, ctx));
 		}
 	}
 }
@@ -200,10 +200,10 @@ static void compute_cols_rows_min_uniform_wh(struct gp_widget_grid *grid,
 	}
 
 	for (x = 0; x < grid->cols; x++)
-		grid->cols_w[x] = min_cols_w;
+		grid->col_s[x].size = min_cols_w;
 
 	for (y = 0; y < grid->rows; y++)
-		grid->rows_h[y] = min_rows_h;
+		grid->row_s[y].size = min_rows_h;
 }
 
 static void distribute_size(gp_widget *self, const gp_widget_render_ctx *ctx, int new_wh)
@@ -221,17 +221,17 @@ static void distribute_size(gp_widget *self, const gp_widget_render_ctx *ctx, in
 
 	/* cell fills */
 	for (y = 0; y < grid->rows; y++)
-		sum_row_fills += grid->row_fills[y];
+		sum_row_fills += grid->row_s[y].fill;
 
 	for (x = 0; x < grid->cols; x++)
-		sum_col_fills += grid->col_fills[x];
+		sum_col_fills += grid->col_s[x].fill;
 
 	/* padding fills */
 	for (y = 0; y <= grid->rows; y++)
-		sum_row_fills += grid->row_pfills[y];
+		sum_row_fills += grid->row_b[y].fill;
 
 	for (x = 0; x <= grid->cols; x++)
-		sum_col_fills += grid->col_pfills[x];
+		sum_col_fills += grid->col_b[x].fill;
 
 	/* size to be distributed */
 	unsigned int dx = self->w - self->min_w;
@@ -239,46 +239,46 @@ static void distribute_size(gp_widget *self, const gp_widget_render_ctx *ctx, in
 
 	if (sum_col_fills) {
 		for (x = 0; x < grid->cols; x++)
-			grid->cols_w[x] += dx * grid->col_fills[x] / sum_col_fills;
+			grid->col_s[x].size += dx * grid->col_s[x].fill / sum_col_fills;
 	}
 
 	if (sum_row_fills) {
 		for (y = 0; y < grid->rows; y++)
-			grid->rows_h[y] += dy * grid->row_fills[y] / sum_row_fills;
+			grid->row_s[y].size += dy * grid->row_s[y].fill / sum_row_fills;
 	}
 
 	/* Compute colum/row offsets */
-	unsigned int cur_x = self->x + padd_size(ctx, grid->col_padds[0]);
+	unsigned int cur_x = self->x + padd_size(ctx, grid->col_b[0].padd);
 	if (sum_col_fills)
-		cur_x += dx * grid->col_pfills[0] / sum_col_fills;
+		cur_x += dx * grid->col_b[0].fill / sum_col_fills;
 
 	for (x = 0; x < grid->cols; x++) {
-		grid->cols_off[x] = cur_x;
-		cur_x += grid->cols_w[x] + padd_size(ctx, grid->col_padds[x+1]);
+		grid->col_s[x].off = cur_x;
+		cur_x += grid->col_s[x].size + padd_size(ctx, grid->col_b[x+1].padd);
 		if (sum_col_fills)
-			cur_x += dx * grid->col_pfills[x+1] / sum_col_fills;
+			cur_x += dx * grid->col_b[x+1].fill / sum_col_fills;
 	}
 
-	unsigned int cur_y = self->y + padd_size(ctx, grid->row_padds[0]);
+	unsigned int cur_y = self->y + padd_size(ctx, grid->row_b[0].padd);
 	if (sum_row_fills)
-		cur_y += dy * grid->row_pfills[0] / sum_row_fills;
+		cur_y += dy * grid->row_b[0].fill / sum_row_fills;
 
 	for (y = 0; y < grid->rows; y++) {
-		grid->rows_off[y] = cur_y;
-		cur_y += grid->rows_h[y] + padd_size(ctx, grid->row_padds[y+1]);
+		grid->row_s[y].off = cur_y;
+		cur_y += grid->row_s[y].size + padd_size(ctx, grid->row_b[y+1].padd);
 		if (sum_row_fills)
-			cur_y += dy * grid->row_pfills[y+1] / sum_row_fills;
+			cur_y += dy * grid->row_b[y+1].fill / sum_row_fills;
 	}
 
 	/* Place the widgets */
 	for (y = 0; y < grid->rows; y++) {
 		for (x = 0; x < grid->cols; x++) {
-			struct gp_widget *widget = widget_grid_get(self, x, y);
+			gp_widget *widget = widget_grid_get(self, x, y);
 
 			if (widget) {
 				gp_widget_ops_distribute_size(widget, ctx,
-				                              grid->cols_w[x],
-				                              grid->rows_h[y],
+				                              grid->col_s[x].size,
+				                              grid->row_s[y].size,
 				                              new_wh);
 			}
 		}
@@ -300,11 +300,11 @@ static void fill_padding(gp_widget *self, const gp_offset *offset,
 	unsigned int y, cur_y = y_off;
 	for (y = 0; y < grid->rows; y++) {
 		gp_fill_rect_xyxy(ctx->buf, x_off, cur_y,
-		                  end_x, offset->y + grid->rows_off[y] - 1,
+		                  end_x, offset->y + grid->row_s[y].off - 1,
 				  ctx->bg_color);
 
 		if (y < grid->rows)
-			cur_y = grid->rows_h[y] + grid->rows_off[y] + offset->y;
+			cur_y = grid->row_s[y].size + grid->row_s[y].off + offset->y;
 	}
 
 	gp_fill_rect_xyxy(ctx->buf, x_off, cur_y,
@@ -312,14 +312,14 @@ static void fill_padding(gp_widget *self, const gp_offset *offset,
 
 	unsigned int x, cur_x = x_off;
 	for (x = 0; x < grid->cols; x++) {
-		if (grid->cols_off[x]) {
+		if (grid->col_s[x].off) {
 			gp_fill_rect_xyxy(ctx->buf, cur_x, y_off,
-			                  offset->x + grid->cols_off[x] - 1, end_y,
+			                  offset->x + grid->col_s[x].off - 1, end_y,
 					  ctx->bg_color);
 		}
 
 		if (x < grid->cols)
-			cur_x = grid->cols_off[x] + grid->cols_w[x] + offset->x;
+			cur_x = grid->col_s[x].off + grid->col_s[x].size + offset->x;
 	}
 
 	gp_fill_rect_xyxy(ctx->buf, cur_x, y_off,
@@ -382,17 +382,17 @@ static void render(gp_widget *self, const gp_offset *offset,
 	}
 
 	for (y = 0; y < grid->rows; y++) {
-		cur_y = grid->rows_off[y] + offset->y;
+		cur_y = grid->row_s[y].off + offset->y;
 
 		for (x = 0; x < grid->cols; x++) {
-			cur_x = grid->cols_off[x] + offset->x;
+			cur_x = grid->col_s[x].off + offset->x;
 
 			struct gp_widget *widget = widget_grid_get(self, x, y);
 
 			if (!widget) {
 				if (gp_widget_should_redraw(self, flags)) {
 					gp_fill_rect_xywh(ctx->buf, cur_x, cur_y,
-							  grid->cols_w[x], grid->rows_h[y],
+							  grid->col_s[x].size, grid->row_s[y].size,
 							  ctx->bg_color);
 				}
 				continue;
@@ -400,7 +400,7 @@ static void render(gp_widget *self, const gp_offset *offset,
 
 			if (gp_widget_should_redraw(self, flags)) {
 				fill_unused(widget, ctx, cur_x, cur_y,
-				            grid->cols_w[x], grid->rows_h[y]);
+				            grid->col_s[x].size, grid->row_s[y].size);
 			}
 
 			if (!widget->redraw_child &&
@@ -418,25 +418,26 @@ static void render(gp_widget *self, const gp_offset *offset,
 			gp_widget_ops_render(widget, &child_offset, ctx, flags);
 		}
 	}
-/*
+
+	/*
 	gp_pixel col = random();
 
-	unsigned int sx = grid->cols_off[0] + offset->x;
-	unsigned int ex = grid->cols_off[grid->cols-1] + grid->cols_w[grid->cols-1] + offset->x;
+	unsigned int sx = grid->col_s[0].off + offset->x;
+	unsigned int ex = grid->col_s[grid->cols-1].off + grid->col_s[grid->cols-1].size + offset->x;
 
 	for (y = 0; y < grid->rows; y++) {
-		gp_hline_xxy(ctx->buf, sx, ex, grid->rows_off[y] + offset->y, col);
-		gp_hline_xxy(ctx->buf, sx, ex, grid->rows_off[y] + grid->rows_h[y] + offset->y, col);
+		gp_hline_xxy(ctx->buf, sx, ex, grid->row_s[y].off + offset->y, col);
+		gp_hline_xxy(ctx->buf, sx, ex, grid->row_s[y].off + grid->row_s[y].size + offset->y, col);
 	}
 
-	unsigned int sy = grid->rows_off[0] + offset->y;
-	unsigned int ey = grid->rows_off[grid->rows-1] + grid->rows_h[grid->rows-1] + offset->y;
+	unsigned int sy = grid->row_s[0].off + offset->y;
+	unsigned int ey = grid->row_s[grid->rows-1].off + grid->row_s[grid->rows-1].size + offset->y;
 
 	for (x = 0; x < grid->cols; x++) {
-		gp_vline_xyy(ctx->buf, grid->cols_off[x] + offset->x, sy, ey, col);
-		gp_vline_xyy(ctx->buf, grid->cols_off[x] + grid->cols_w[x] + offset->x, sy, ey, col);
+		gp_vline_xyy(ctx->buf, grid->col_s[x].off + offset->x, sy, ey, col);
+		gp_vline_xyy(ctx->buf, grid->col_s[x].off + grid->col_s[x].size + offset->x, sy, ey, col);
 	}
-*/
+	*/
 }
 
 static int event(gp_widget *self, const gp_widget_render_ctx *ctx, gp_event *ev)
@@ -605,17 +606,17 @@ static int focus(gp_widget *self, int sel)
 }
 
 static int coord_search(unsigned int coord,
-                        unsigned int *sizes, unsigned int *offsets,
+                        struct gp_widget_grid_cell *cells,
                         unsigned int len)
 {
 	unsigned int i;
 
-	if (coord < offsets[0])
+	if (coord < cells[0].off)
 		return -1;
 
 	//TODO interval divison?
 	for (i = 0; i < len; i++) {
-		if (coord >= offsets[i] && coord <= offsets[i] + sizes[i])
+		if (coord >= cells[i].off && coord <= cells[i].off + cells[i].size)
 			return i;
 	}
 
@@ -628,14 +629,14 @@ static int focus_xy(gp_widget *self, const gp_widget_render_ctx *ctx,
 	int col, row;
 	struct gp_widget_grid *grid = self->grid;
 
-	col = coord_search(x + self->x, grid->cols_w, grid->cols_off, grid->cols);
-	row = coord_search(y + self->y, grid->rows_h, grid->rows_off, grid->rows);
+	col = coord_search(x + self->x, grid->col_s, grid->cols);
+	row = coord_search(y + self->y, grid->row_s, grid->rows);
 
 	if (col < 0 || row < 0)
 		return 0;
 
-	x -= self->grid->cols_off[col] - self->x;
-	y -= self->grid->rows_off[row] - self->y;
+	x -= self->grid->col_s[col].off - self->x;
+	y -= self->grid->row_s[row].off - self->y;
 
 	if (!gp_widget_ops_render_focus_xy(widget_grid_get(self, col, row), ctx, x, y))
 		return 0;
@@ -651,14 +652,14 @@ static int focus_xy(gp_widget *self, const gp_widget_render_ctx *ctx,
 
 static void set_hborder_padd(gp_widget *self, uint8_t border)
 {
-	self->grid->col_padds[0] = border;
-	self->grid->col_padds[self->grid->cols] = border;
+	self->grid->col_b[0].padd = border;
+	self->grid->col_b[self->grid->cols].padd = border;
 }
 
 static void set_vborder_padd(gp_widget *self, uint8_t border)
 {
-	self->grid->row_padds[0] = border;
-	self->grid->row_padds[self->grid->rows] = border;
+	self->grid->row_b[0].padd = border;
+	self->grid->row_b[self->grid->rows].padd = border;
 }
 
 static void set_border_padd(gp_widget *self, uint8_t border)
@@ -669,14 +670,14 @@ static void set_border_padd(gp_widget *self, uint8_t border)
 
 static void set_hborder_fill(gp_widget *self, uint8_t border)
 {
-	self->grid->col_fills[0] = border;
-	self->grid->col_fills[self->grid->cols] = border;
+	self->grid->col_b[0].fill = border;
+	self->grid->col_b[self->grid->cols].fill = border;
 }
 
 static void set_vborder_fill(gp_widget *self, uint8_t border)
 {
-	self->grid->row_fills[0] = border;
-	self->grid->row_fills[self->grid->rows] = border;
+	self->grid->row_b[0].fill = border;
+	self->grid->row_b[self->grid->rows].fill = border;
 }
 
 static void set_border_fill(gp_widget *self, uint8_t border)
@@ -690,7 +691,7 @@ static void set_rpad(gp_widget *self, uint8_t pad)
 	unsigned int i;
 
 	for (i = 1; i < self->grid->rows; i++)
-		self->grid->row_padds[i] = pad;
+		self->grid->row_b[i].padd = pad;
 }
 
 static void set_cpad(gp_widget *self, uint8_t pad)
@@ -698,7 +699,7 @@ static void set_cpad(gp_widget *self, uint8_t pad)
 	unsigned int i;
 
 	for (i = 1; i < self->grid->cols; i++)
-		self->grid->col_padds[i] = pad;
+		self->grid->col_b[i].padd = pad;
 }
 
 static void set_pad(gp_widget *self, uint8_t pad)
@@ -729,7 +730,8 @@ static int get_uint8(const char *str, uint8_t *val, char **end,
 	return 0;
 }
 
-static void parse_strarray(const char *sarray, uint8_t *array, unsigned int len,
+static void parse_strarray(const char *sarray, void *array, unsigned int len,
+                           void (*put)(void *array, unsigned int pos, uint8_t val),
                            const char *name)
 {
 	const char *str = sarray;
@@ -757,7 +759,7 @@ static void parse_strarray(const char *sarray, uint8_t *array, unsigned int len,
 				        name, sarray, (long)(str - sarray));
 				return;
 			}
-			array[i++] = val;
+			put(array, i++, val);
 			str++;
 			continue;
 		break;
@@ -770,7 +772,7 @@ static void parse_strarray(const char *sarray, uint8_t *array, unsigned int len,
 				return;
 			}
 
-			array[i++] = val;
+			put(array, i++, val);
 
 			if (i != len) {
 				GP_WARN("%s: Array too short expected %u numbers.",
@@ -797,7 +799,7 @@ static void parse_strarray(const char *sarray, uint8_t *array, unsigned int len,
 			                name, sarray, (long)(str - sarray));
 				return;
 			}
-			array[i++] = val;
+			put(array, i++, val);
 		}
 
 		str = end;
@@ -821,6 +823,27 @@ static void parse_strarray(const char *sarray, uint8_t *array, unsigned int len,
 
 		str++;
 	}
+}
+
+static void put_grid_cell_fill(void *array, unsigned int pos, uint8_t val)
+{
+	struct gp_widget_grid_cell *cell = array;
+
+	cell[pos].fill = val;
+}
+
+static void put_grid_border_fill(void *array, unsigned int pos, uint8_t val)
+{
+	struct gp_widget_grid_border *border = array;
+
+	border[pos].fill = val;
+}
+
+static void put_grid_border_padd(void *array, unsigned int pos, uint8_t val)
+{
+	struct gp_widget_grid_border *border = array;
+
+	border[pos].fill = val;
 }
 
 static gp_widget *json_to_grid(json_object *json, void **uids)
@@ -882,12 +905,12 @@ static gp_widget *json_to_grid(json_object *json, void **uids)
 	if (pad >= 0)
 		set_pad(grid, pad);
 
-	parse_strarray(cpad, grid->grid->col_padds, cols+1, "Grid cpad");
-	parse_strarray(rpad, grid->grid->row_padds, rows+1, "Grid rpad");
-	parse_strarray(cpadf, grid->grid->col_pfills, cols+1, "Grid cpadf");
-	parse_strarray(rpadf, grid->grid->row_pfills, rows+1, "Grid rpadf");
-	parse_strarray(cfill, grid->grid->col_fills, cols, "Grid cfill");
-	parse_strarray(rfill, grid->grid->row_fills, rows, "Grid rfill");
+	parse_strarray(cpad, grid->grid->col_b, cols+1, put_grid_border_padd, "Grid cpad");
+	parse_strarray(rpad, grid->grid->row_b, rows+1, put_grid_border_padd, "Grid rpad");
+	parse_strarray(cpadf, grid->grid->col_b, cols+1, put_grid_border_fill, "Grid cpadf");
+	parse_strarray(rpadf, grid->grid->row_b, rows+1, put_grid_border_fill, "Grid rpadf");
+	parse_strarray(cfill, grid->grid->col_s, cols, put_grid_cell_fill, "Grid cfill");
+	parse_strarray(rfill, grid->grid->row_s, rows, put_grid_cell_fill, "Grid rfill");
 
 	if (border) {
 		if (!strcmp(border, "horiz")) {
@@ -941,16 +964,11 @@ static void free_(gp_widget *self)
 {
 	gp_matrix_free(self->grid->widgets);
 
-	gp_vec_free(self->grid->cols_w);
-	gp_vec_free(self->grid->rows_h);
-	gp_vec_free(self->grid->cols_off);
-	gp_vec_free(self->grid->rows_off);
-	gp_vec_free(self->grid->col_padds);
-	gp_vec_free(self->grid->row_padds);
-	gp_vec_free(self->grid->col_pfills);
-	gp_vec_free(self->grid->row_pfills);
-	gp_vec_free(self->grid->col_fills);
-	gp_vec_free(self->grid->row_fills);
+	gp_vec_free(self->grid->col_b);
+	gp_vec_free(self->grid->row_b);
+
+	gp_vec_free(self->grid->col_s);
+	gp_vec_free(self->grid->row_s);
 }
 
 static void for_each_child(gp_widget *self, void (*func)(gp_widget *child))
@@ -982,9 +1000,30 @@ struct gp_widget_ops gp_widget_grid_ops = {
 	.id = "grid",
 };
 
-gp_widget *gp_widget_grid_new(unsigned int cols, unsigned int rows, int flags)
+static void init_rows(struct gp_widget_grid *grid, unsigned int row, unsigned int rows, int flag)
 {
 	unsigned int i;
+
+	for (i = row; i < row + rows + flag; i++)
+		grid->row_b[i].padd = 1;
+
+	for (i = row; i < row + rows; i++)
+		grid->row_s[i].fill = 1;
+}
+
+static void init_cols(struct gp_widget_grid *grid, unsigned int col, unsigned int cols, int flag)
+{
+	unsigned int i;
+
+	for (i = col; i < cols + flag; i++)
+		grid->col_b[i].padd = 1;
+
+	for (i = col; i < cols; i++)
+		grid->col_s[i].fill = 1;
+}
+
+gp_widget *gp_widget_grid_new(unsigned int cols, unsigned int rows, int flags)
+{
 	gp_widget *ret;
 
 	if (flags & ~(GP_WIDGET_GRID_FRAME | GP_WIDGET_GRID_UNIFORM)) {
@@ -1004,30 +1043,17 @@ gp_widget *gp_widget_grid_new(unsigned int cols, unsigned int rows, int flags)
 
 	ret->grid->cols = cols;
 	ret->grid->rows = rows;
+
 	ret->grid->widgets = gp_matrix_new(cols, rows, sizeof(gp_widget*));
 
-	ret->grid->cols_w = gp_vec_new(cols, sizeof(unsigned int));
-	ret->grid->rows_h = gp_vec_new(rows, sizeof(unsigned int));
-	ret->grid->cols_off = gp_vec_new(cols, sizeof(unsigned int));
-	ret->grid->rows_off = gp_vec_new(rows, sizeof(unsigned int));
-	ret->grid->col_padds = gp_vec_new(cols + 1, sizeof(uint8_t));
-	ret->grid->row_padds = gp_vec_new(rows + 1, sizeof(uint8_t));
-	ret->grid->col_pfills = gp_vec_new(cols + 1, sizeof(uint8_t));
-	ret->grid->row_pfills = gp_vec_new(rows + 1, sizeof(uint8_t));
-	ret->grid->col_fills = gp_vec_new(cols, sizeof(uint8_t));
-	ret->grid->row_fills = gp_vec_new(rows, sizeof(uint8_t));
+	ret->grid->col_s = gp_vec_new(cols, sizeof(struct gp_widget_grid_cell));
+	ret->grid->row_s = gp_vec_new(rows, sizeof(struct gp_widget_grid_cell));
 
-	for (i = 0; i <= cols; i++)
-		ret->grid->col_padds[i] = 1;
+	ret->grid->col_b = gp_vec_new(cols + 1, sizeof(struct gp_widget_grid_border));
+	ret->grid->row_b = gp_vec_new(rows + 1, sizeof(struct gp_widget_grid_border));
 
-	for (i = 0; i < cols; i++)
-		ret->grid->col_fills[i] = 1;
-
-	for (i = 0; i <= rows; i++)
-		ret->grid->row_padds[i] = 1;
-
-	for (i = 0; i < rows; i++)
-		ret->grid->row_fills[i] = 1;
+	init_cols(ret->grid, 0, cols, 1);
+	init_rows(ret->grid, 0, rows, 1);
 
 	return ret;
 }
@@ -1076,7 +1102,6 @@ void gp_widget_grid_rows_ins(gp_widget *self, unsigned int row, unsigned int row
 {
 	GP_WIDGET_ASSERT(self, GP_WIDGET_GRID, );
 
-	size_t i;
 	struct gp_widget_grid *g = self->grid;
 
 	if (row > g->rows) {
@@ -1086,17 +1111,10 @@ void gp_widget_grid_rows_ins(gp_widget *self, unsigned int row, unsigned int row
 
 	g->widgets = gp_matrix_insert_rows(g->widgets, g->cols, g->rows, row, rows);
 
-	g->rows_h = gp_vec_insert(g->rows_h, row, rows);
-	g->rows_off = gp_vec_insert(g->rows_off, row, rows);
-	g->row_padds = gp_vec_insert(g->row_padds, row, rows);
-	g->row_pfills = gp_vec_insert(g->row_pfills, row, rows);
-	g->row_fills = gp_vec_insert(g->row_fills, row, rows);
+	g->row_s = gp_vec_insert(g->row_s, row, rows);
+	g->row_b = gp_vec_insert(g->row_b, row, rows);
 
-	for (i = row; i < row + rows; i++)
-		g->row_padds[i] = 1;
-
-	for (i = row; i < row + rows; i++)
-		g->row_fills[i] = 1;
+	init_rows(g, row, rows, 0);
 
 	g->rows += rows;
 
@@ -1128,11 +1146,8 @@ void gp_widget_grid_rows_del(gp_widget *self, unsigned int row, unsigned int row
 
 	g->widgets = gp_matrix_delete_rows(g->widgets, g->cols, g->rows, row, rows);
 
-	g->rows_h = gp_vec_delete(g->rows_h, row, rows);
-	g->rows_off = gp_vec_delete(g->rows_off, row, rows);
-	g->row_padds = gp_vec_delete(g->row_padds, row, rows);
-	g->row_pfills = gp_vec_delete(g->row_pfills, row, rows);
-	g->row_fills = gp_vec_delete(g->row_fills, row, rows);
+	g->row_s = gp_vec_delete(g->row_s, row, rows);
+	g->row_b = gp_vec_delete(g->row_b, row, rows);
 
 	g->rows -= rows;
 
