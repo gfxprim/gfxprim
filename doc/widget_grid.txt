@@ -67,6 +67,9 @@ void gp_widget_grid_del(gp_widget *self, unsigned int col, unsigned int row);
 Removes widget from the slot at the column and row and frees it with
 link:widgets_free.html[`gp_widget_free()`].
 
+Row manipulation
+~~~~~~~~~~~~~~~~
+
 .Inserting rows
 [source,c]
 -------------------------------------------------------------------------------
@@ -77,7 +80,7 @@ void gp_widget_grid_row_ins(gp_widget *self, unsigned int row);
 
 These two functions insert empty row(s) at a given offset to the grid.
 
-Rows indexes start at 0 and the last valid row index is `self->grid->rows - 1`.
+Row indexes start at 0 and the last valid row index is `self->grid->rows - 1`.
 
 .Appending rows
 [source,c]
@@ -112,9 +115,61 @@ These two functions delete row(s) at given offset from the grid. All widgets
 in the deleted rows are freed recursively with
 link:widgets_free.html[`gp_widget_free()`].
 
-Rows indexes start at 0 and the last valid row index is `self->grid->rows - 1`.
+Row indexes start at 0 and the last valid row index is `self->grid->rows - 1`.
 
-.Border padding and fill
+Column manipulation
+~~~~~~~~~~~~~~~~~~~
+
+.Inserting columns
+[source,c]
+-------------------------------------------------------------------------------
+void gp_widget_grid_cols_ins(gp_widget *self, unsigned int col, unsigned int cols);
+
+void gp_widget_grid_col_ins(gp_widget *self, unsigned int col);
+-------------------------------------------------------------------------------
+
+These two functions insert empty column(s) at a given offset to the grid.
+
+Column indexes start at 0 and the last valid column index is `self->grid->cols - 1`.
+
+.Appending columns
+[source,c]
+-------------------------------------------------------------------------------
+unsigned int gp_widget_grid_cols_append(gp_widget *self, unsigned int cols);
+
+unsigned int gp_widget_grid_col_append(gp_widget *self);
+-------------------------------------------------------------------------------
+
+These two functions append empty column(s) at the right side of the grid and
+return an index to the first appended column.
+
+.Prepending columns
+[source,c]
+-------------------------------------------------------------------------------
+void gp_widget_grid_cols_prepend(gp_widget *self, unsigned int cols);
+
+void gp_widget_grid_col_prepend(gp_widget *self);
+-------------------------------------------------------------------------------
+
+These two functions prepend empty column(s) at the left side of the grid.
+
+.Removing columns
+[source,c]
+-------------------------------------------------------------------------------
+void gp_widget_grid_cols_del(gp_widget *self, unsigned int col, unsigned int cols);
+
+void gp_widget_grid_col_del(gp_widget *self, unsigned int col);
+-------------------------------------------------------------------------------
+
+These two functions delete column(s) at given offset from the grid. All widgets
+in the deleted columns are freed recursively with
+link:widgets_free.html[`gp_widget_free()`].
+
+Column indexes start at 0 and the last valid column index is `self->grid->cols - 1`.
+
+Border padding and fill
+~~~~~~~~~~~~~~~~~~~~~~~
+
 [source,c]
 -------------------------------------------------------------------------------
 void gp_widget_grid_border_set(gp_widget *self, unsigned int padd, unsigned int fill);

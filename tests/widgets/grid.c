@@ -138,6 +138,94 @@ static int grid_ins_rem_rows(void)
 	return TST_SUCCESS;
 }
 
+static int grid_ins_rem_cols(void)
+{
+	gp_widget *grid, *ret, *l;
+	unsigned int c, r;
+
+	grid = gp_widget_grid_new(2, 2, 0);
+	if (!grid) {
+		free(grid);
+		tst_msg("Allocation failure");
+		return TST_FAILED;
+	}
+
+	/* Fill the grid with widgets */
+	for (c = 0; c < 2; c++) {
+		for (r = 0; r < 2; r++) {
+			l = gp_widget_label_printf_new(0, "Label %ux%u", c, r);
+
+			ret = gp_widget_grid_put(grid, c, r, l);
+
+			if (ret) {
+				tst_msg("gp_widget_grid_put(%u,%u) returned %p", c, r, ret);
+				return TST_FAILED;
+			}
+		}
+	}
+
+	/* Insert column and check if everything is fine */
+	gp_widget_grid_cols_ins(grid, 1, 1);
+
+	if (grid->grid->cols != 3) {
+		tst_msg("Wrong number of rows after insert %u expected 3",
+		        grid->grid->cols);
+		return TST_FAILED;
+	}
+
+	for (r = 0; r < 2; r++) {
+		ret = gp_widget_grid_get(grid, 1, r);
+
+		if (ret) {
+			tst_msg("Non-NULL pointer in inserted row 1x%u %p",
+			        r, ret);
+			return TST_FAILED;
+		}
+	}
+
+	/* Insert widget into the newly added row */
+	l = gp_widget_label_new("Label in new column", 0, 0);
+
+	ret = gp_widget_grid_put(grid, 1, 0, l);
+	if (ret) {
+		tst_msg("gp_widget_grid_put(1, 0) returned %p", ret);
+		return TST_FAILED;
+	}
+
+	/* Delete the inserted row & free the widget put into the row */
+	gp_widget_grid_cols_del(grid, 1, 1);
+
+	if (grid->grid->cols != 2) {
+		tst_msg("Wrong number of rows after insert %u expected 2",
+		        grid->grid->cols);
+		return TST_FAILED;
+	}
+
+	/* Check that the grid is correct */
+	for (c = 0; c < 2; c++) {
+		for (r = 0; r < 2; r++) {
+			char buf[64];
+			l = gp_widget_grid_get(grid, c, r);
+
+			if (!l) {
+				tst_msg("NULL widget at %u,%u", c, r);
+				return TST_FAILED;
+			}
+
+			snprintf(buf, sizeof(buf), "Label %ux%u", c, r);
+
+			if (strcmp(l->label->text, buf)) {
+				tst_msg("Wrong widget at %u,%u", c, r);
+				return TST_FAILED;
+			}
+		}
+	}
+
+	gp_widget_free(grid);
+
+	return TST_SUCCESS;
+}
+
 static int grid_put_get_rem_del(void)
 {
 	gp_widget *grid, *label, *ret;
@@ -305,6 +393,10 @@ const struct tst_suite tst_suite = {
 
 		{.name = "grid ins rem rows",
 		 .tst_fn = grid_ins_rem_rows,
+		 .flags = TST_CHECK_MALLOC},
+
+		{.name = "grid ins rem cols",
+		 .tst_fn = grid_ins_rem_cols,
 		 .flags = TST_CHECK_MALLOC},
 
 		{.name = "grid put get rem del",

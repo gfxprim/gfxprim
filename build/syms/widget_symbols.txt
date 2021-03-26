@@ -110,6 +110,10 @@ gp_widget_grid_rows_append
 gp_widget_grid_rows_prepend
 gp_widget_grid_rows_ins
 gp_widget_grid_rows_del
+gp_widget_grid_cols_prepend
+gp_widget_grid_cols_ins
+gp_widget_grid_cols_append
+gp_widget_grid_cols_del
 
 gp_widget_int_set
 gp_widget_int_set_max

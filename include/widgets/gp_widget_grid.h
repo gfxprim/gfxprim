@@ -118,6 +118,26 @@ static inline void gp_widget_grid_del(gp_widget *self, unsigned col, unsigned in
 }
 
 /**
+ * @brief Inserts new (empty) rows to the grid.
+ *
+ * @self A grid widget.
+ * @row Where to insert rows.
+ * @rows How many rows to insert.
+ */
+void gp_widget_grid_rows_ins(gp_widget *self, unsigned int row, unsigned int rows);
+
+/**
+ * @brief Inserts new (empty) row to the grid.
+ *
+ * @self A grid widget.
+ * @row Where to insert row.
+ */
+static inline void gp_widget_grid_row_ins(gp_widget *self, unsigned int row)
+{
+	gp_widget_grid_rows_ins(self, row, 1);
+}
+
+/**
  * @brief Appends a new (empty) rows at the bottom of the grid.
  *
  * @self A grid widget.
@@ -158,26 +178,6 @@ static inline void gp_widget_grid_row_prepend(gp_widget *self)
 }
 
 /**
- * @brief Inserts new (empty) rows to the grid.
- *
- * @self A grid widget.
- * @row Where to insert rows.
- * @rows How many rows to insert.
- */
-void gp_widget_grid_rows_ins(gp_widget *self, unsigned int row, unsigned int rows);
-
-/**
- * @brief Inserts new (empty) row to the grid.
- *
- * @self A grid widget.
- * @row Where to insert row.
- */
-static inline void gp_widget_grid_row_ins(gp_widget *self, unsigned int row)
-{
-	gp_widget_grid_rows_ins(self, row, 1);
-}
-
-/**
  * @brief Delete rows from the grid.
  *
  * If there are any widgets in the deleted rows they are freed with
@@ -201,6 +201,92 @@ void gp_widget_grid_rows_del(gp_widget *self, unsigned int row, unsigned int row
 static inline void gp_widget_grid_row_del(gp_widget *self, unsigned int row)
 {
 	gp_widget_grid_rows_del(self, row, 1);
+}
+
+/**
+ * @brief Inserts new (empty) columns to the grid.
+ *
+ * @self A grid widget.
+ * @col Where to insert columns.
+ * @cols How many columns to insert.
+ */
+void gp_widget_grid_cols_ins(gp_widget *self, unsigned int col, unsigned int cols);
+
+/**
+ * @brief Inserts new (empty) column to the grid.
+ *
+ * @self A grid widget.
+ * @col Where to insert column.
+ */
+static inline void gp_widget_grid_col_ins(gp_widget *self, unsigned int col)
+{
+	gp_widget_grid_cols_ins(self, col, 1);
+}
+
+/**
+ * @brief Appends a new (empty) colums at the right side of the grid.
+ *
+ * @self A grid widget.
+ * @rows How many columns to append.
+ *
+ * @return A column index to the first appended column.
+ */
+unsigned int gp_widget_grid_cols_append(gp_widget *self, unsigned int cols);
+
+/**
+ * @brief Appends a new (empty) colum at the right side of the grid.
+ *
+ * @self A grid widget.
+ *
+ * @return A column index to the appended column.
+ */
+static inline unsigned int gp_widget_grid_col_append(gp_widget *self)
+{
+	return gp_widget_grid_cols_append(self, 1);
+}
+
+/**
+ * @brief Prepends a new (empty) columns at the left side of the grid.
+ *
+ * @self A grid widget.
+ * @rows How many columns to append.
+ */
+void gp_widget_grid_cols_prepend(gp_widget *self, unsigned int cols);
+
+/**
+ * @brief Prepends a new (empty) column at the left side of the grid.
+ *
+ * @self A grid widget.
+ */
+static inline void gp_widget_grid_col_prepend(gp_widget *self)
+{
+	return gp_widget_grid_cols_prepend(self, 1);
+}
+
+/**
+ * @brief Delete columns from the grid.
+ *
+ * If there are any widgets in the deleted columns they are freed with
+ * gp_widget_free().
+ *
+ * @self A grid widget.
+ * @col Where to delete columns.
+ * @cols How may columns to delete.
+ */
+void gp_widget_grid_cols_del(gp_widget *self, unsigned int col, unsigned int cols);
+
+/**
+ * @brief Delete column from the grid.
+ *
+ * If there are any widgets in the deleted rows they are freed with
+ * gp_widget_free().
+ *
+ * @self A grid widget.
+ * @col Where to delete column.
+ */
+static inline void gp_widget_grid_col_del(gp_widget *self, unsigned int col)
+{
+	gp_widget_grid_cols_del(self, col, 1);
 }
 
 /**
