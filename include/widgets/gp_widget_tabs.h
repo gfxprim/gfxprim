@@ -2,7 +2,7 @@
 
 /*
 
-   Copyright (c) 2014-2020 Cyril Hrubis <metan@ucw.cz>
+   Copyright (c) 2014-2021 Cyril Hrubis <metan@ucw.cz>
 
  */
 
@@ -34,8 +34,17 @@ struct gp_widget_tabs {
  *
  * @return A tabs widget.
  */
-gp_widget *gp_widget_tabs_new(unsigned int tabs, unsigned int active_tab,
-                              const char *tab_labels[]);
+gp_widget *gp_widget_tabs_new(unsigned int tabs_cnt, unsigned int active_tab,
+                              const char *tab_labels[], int flags);
+
+/**
+ * @brief Returns number of tabs.
+ *
+ * @self A tabs widget.
+ *
+ * @return A number of tabs.
+ */
+unsigned int gp_widget_tabs_cnt(gp_widget *self);
 
 /**
  * @brief Puts a child into a tab.
@@ -50,6 +59,19 @@ gp_widget *gp_widget_tabs_put(gp_widget *self, unsigned int tab,
                               gp_widget *child);
 
 /**
+ * @brief Removes child from a tab and returns pointer to it.
+ *
+ * @self A tabs widget.
+ * @tab Tab position.
+ *
+ * @return A child widget ocupying the slot or NULL if it's empty.
+ */
+static inline gp_widget *gp_widget_tabs_rem(gp_widget *self, unsigned int tab)
+{
+	return gp_widget_tabs_put(self, tab, NULL);
+}
+
+/**
  * @brief Returns a pointer to a child in a tab.
  *
  * @self A tabs widget.
@@ -59,26 +81,49 @@ gp_widget *gp_widget_tabs_put(gp_widget *self, unsigned int tab,
  */
 gp_widget *gp_widget_tabs_get(gp_widget *self, unsigned int tab);
 
+static inline void gp_widget_tabs_del(gp_widget *self, unsigned int tab)
+{
+	gp_widget *ret = gp_widget_tabs_rem(self, tab);
+
+	gp_widget_free(ret);
+}
+
 /**
  * @brief Adds a tab at an offset.
  *
  * @self A tabs widget.
- * @off An offset.
+ * @tab An offset.
  * @label Tabs label.
  * @child A tab child, may be NULL.
  */
-void gp_widget_tabs_add(gp_widget *self, unsigned int off,
-                        const char *label, gp_widget *child);
+void gp_widget_tabs_tab_ins(gp_widget *self, unsigned int tab,
+                            const char *label, gp_widget *child);
 
 /**
- * @brief Appends a tab.
+ * @brief Appends a tab at the end.
+ *
+ * @self A tabs widget.
+ * @label Tabs label.
+ * @child A tab child, may be NULL.
+ *
+ * @return Index of the appended tab.
+ */
+unsigned int gp_widget_tabs_tab_append(gp_widget *self,
+                                       const char *label, gp_widget *child);
+
+/**
+ * @brief Appends a tab at the begining.
  *
  * @self A tabs widget.
  * @label Tabs label.
  * @child A tab child, may be NULL.
  */
-void gp_widget_tabs_append(gp_widget *self,
-                           const char *label, gp_widget *child);
+static inline void gp_widget_tabs_tab_prepend(gp_widget *self,
+                                              const char *label,
+                                              gp_widget *child)
+{
+	return gp_widget_tabs_tab_ins(self, 0, label, child);
+}
 
 /**
  * @brief Remove a tab at position.
@@ -88,7 +133,7 @@ void gp_widget_tabs_append(gp_widget *self,
  *
  * @return A tab child.
  */
-gp_widget *gp_widget_tabs_rem(gp_widget *self, unsigned int pos);
+gp_widget *gp_widget_tabs_tab_rem(gp_widget *self, unsigned int tab);
 
 /**
  * @brief Delete a tab at position.
@@ -98,7 +143,12 @@ gp_widget *gp_widget_tabs_rem(gp_widget *self, unsigned int pos);
  * @self A tabs widget.
  * @off An offset.
  */
-void gp_widget_tabs_del(gp_widget *self, unsigned int pos);
+static inline void gp_widget_tabs_tab_del(gp_widget *self, unsigned int tab)
+{
+	gp_widget *ret = gp_widget_tabs_tab_rem(self, tab);
+
+	gp_widget_free(ret);
+}
 
 /**
  * @brief Returns active tab index.
@@ -107,7 +157,7 @@ void gp_widget_tabs_del(gp_widget *self, unsigned int pos);
  *
  * @return An active tab index.
  */
-unsigned int gp_widget_tabs_get_active(gp_widget *self);
+unsigned int gp_widget_tabs_active_get(gp_widget *self);
 
 /**
  * @brief Set active tab.
@@ -115,7 +165,7 @@ unsigned int gp_widget_tabs_get_active(gp_widget *self);
  * @self A tabs widget.
  * @tab A tab index.
  */
-void gp_widget_tabs_set_active(gp_widget *self, unsigned int tab);
+void gp_widget_tabs_active_set(gp_widget *self, unsigned int tab);
 
 /**
  * @brief Returns tab idx by child pointer.

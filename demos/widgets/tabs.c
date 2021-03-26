@@ -20,7 +20,7 @@ static int button_add_callback(gp_widget_event *ev)
 
 	snprintf(buf, sizeof(buf), "#New Tab %u#\nThis is dynamically craeted tab!", counter++);
 
-	gp_widget_tabs_append(tabs, "Label", gp_widget_markup_new(buf, NULL));
+	gp_widget_tabs_tab_append(tabs, "Label", gp_widget_markup_new(buf, NULL));
 
 	return 0;
 }
@@ -30,7 +30,7 @@ static int button_rem_callback(gp_widget_event *ev)
 	if (ev->type != GP_WIDGET_EVENT_WIDGET)
 		return 0;
 
-	gp_widget_tabs_rem(tabs, 0);
+	gp_widget_tabs_tab_del(tabs, 0);
 
 	return 0;
 }
@@ -42,7 +42,7 @@ int main(int argc, char *argv[])
 
 	gp_widget_grid_border_set(buttons, 0, 0);
 
-	tabs = gp_widget_tabs_new(0, 0, NULL);
+	tabs = gp_widget_tabs_new(0, 0, NULL, 0);
 
 	gp_widget_grid_put(layout, 0, 0, tabs);
 	gp_widget_grid_put(layout, 0, 1, buttons);

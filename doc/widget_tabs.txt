@@ -9,59 +9,134 @@ image:tabs.png[Tabs widget]
 
 Tabs attributes can be accessed as `widget->tabs`.
 
+Tabs are indexed by an integers, first tab starts at `0` and last valid index
+is `tabs_cnt - 1`.
+
 .Tabs widget constructor
 [source,c]
 -------------------------------------------------------------------------------
-gp_widget *gp_widget_tabs_new(unsigned int tabs, unsigned int active_tab,
-                              const char *tab_labels[]);
+gp_widget *gp_widget_tabs_new(unsigned int tabs_cnt, unsigned int active_tab,
+                              const char *tab_labels[], int flags);
 -------------------------------------------------------------------------------
 
-.Child widget manipulation
+Creates a tabs widget with `tabs_cnt` tabs `tab_labels[]` for the tab labels.
+
+The `flags` parameter is currently unused and must be 0.
+
+Child widget manipulation
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
 [source,c]
 -------------------------------------------------------------------------------
 gp_widget *gp_widget_tabs_put(gp_widget *self, unsigned int tab,
                               gp_widget *child);
+-------------------------------------------------------------------------------
 
+Inserts a `child` widget to the `tab` and returns a child previously occupying
+the tab or NULL if it was empty.
+
+Passing a NULL `child` pointer makes the call equivalent to the
+`gp_widget_tabs_rem()`.
+
+[source,c]
+-------------------------------------------------------------------------------
 gp_widget *gp_widget_tabs_get(gp_widget *self, unsigned int tab);
 -------------------------------------------------------------------------------
 
-The `gp_widget_tabs_put()` puts a `child` to the `tab` and returns a child
-previously occupying the tab or NULL if it was empty.
+Returns a pointer to a child widget occupying the `tab` or NULL if it's
+empty.
 
-The `gp_widget_tabs_get()` returns a pointer to a `child` widget in `tab` or
-NULL if it's empty.
-
-.Functions to add and remove tabs
 [source,c]
 -------------------------------------------------------------------------------
-void gp_widget_tabs_add(gp_widget *self, unsigned int off,
-                        const char *label, gp_widget *child);
-
-void gp_widget_tabs_append(gp_widget *self,
-                           const char *label, gp_widget *child);
-
-gp_widget *gp_widget_tabs_rem(gp_widget *self, unsigned int pos);
-
-void gp_widget_tabs_del(gp_widget *self, unsigned int pos);
+gp_widget *gp_widget_tabs_rem(gp_widget *self, unsigned int tab)
 -------------------------------------------------------------------------------
 
-The `gp_widget_tabs_rem()` functions return the tab child widget while the
-`gp_widget_tabs_del()` frees the child recursively with
-link:widgets_free.html[`gp_widget_free()`] instead.
+Removes and returns a pointer to a child widget in `tab`. Returns NULL if tab
+was empty.
 
-.Functions to set and get active tab
 [source,c]
 -------------------------------------------------------------------------------
-unsigned int gp_widget_tabs_get_active(gp_widget *self);
-
-void gp_widget_tabs_set_active(gp_widget *self, unsigned int tab);
+gp_widget *gp_widget_tabs_del(gp_widget *self, unsigned int tab)
 -------------------------------------------------------------------------------
 
-.A lookup function to get tab index by a child widget
+Remove and frees, with a link:widgets_free.html[`gp_widget_free()`], child
+widget in `tab`. It's no-op if the tab was empty.
+
+Functions to manipulate and query tabs
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+[source,c]
+-------------------------------------------------------------------------------
+unsigned int gp_widget_tabs_cnt(gp_widget *self);
+-------------------------------------------------------------------------------
+
+Returns number of tabs. The tab indexes are in range `0` and `tabs_cnt - 1`.
+
+[source,c]
+-------------------------------------------------------------------------------
+unsigned int gp_widget_tabs_active_get(gp_widget *self);
+
+void gp_widget_tabs_active_set(gp_widget *self, unsigned int tab);
+-------------------------------------------------------------------------------
+
+Sets and gets the currently active tab.
+
 [source,c]
 -------------------------------------------------------------------------------
 int gp_widget_tabs_tab_by_child(gp_widget *self, gp_widget *child);
 -------------------------------------------------------------------------------
+
+A lookup function to get tab index by a child widget pointer.
+
+Function to add and remove tabs
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+[source,c]
+-------------------------------------------------------------------------------
+void gp_widget_tabs_tab_ins(gp_widget *self, unsigned int tab,
+                            const char *label, gp_widget *child);
+-------------------------------------------------------------------------------
+
+Inserts a tab at a given position.
+
+Note that indexes of tabs on the right from the given position will increase.
+One of the possibilities on how to uniquely identify tabs when inserting in
+the middle is by child widgets with `gp_widget_tabs_tab_by_child()`.
+
+[source,c]
+-------------------------------------------------------------------------------
+unsigned int gp_widget_tabs_tab_append(gp_widget *self,
+                                       const char *label, gp_widget *child);
+-------------------------------------------------------------------------------
+
+Appends a tab at the end, i.e. to be the most right tab. Returns position of
+the newly insterted tab.
+
+[source,c]
+-------------------------------------------------------------------------------
+unsigned int gp_widget_tabs_tab_prepend(gp_widget *self,
+                                        const char *label, gp_widget *child);
+-------------------------------------------------------------------------------
+
+Prepends a tab at the begining, i.e. to be the most left tab. The tab is
+inserted at position `0`.
+
+Note that all the indexes of already existing tabs increase.
+
+[source,c]
+-------------------------------------------------------------------------------
+gp_widget *gp_widget_tabs_tab_rem(gp_widget *self, unsigned int tab);
+-------------------------------------------------------------------------------
+
+Removes a tab at a given position and returns a pointer to the child widget.
+
+[source,c]
+-------------------------------------------------------------------------------
+gp_widget *gp_widget_tabs_tab_del(gp_widget *self, unsigned int tab);
+-------------------------------------------------------------------------------
+
+Removes a tab at a given position and frees the child with
+link:widgets_free.html[`gp_widget_free()`].
 
 .Tabs JSON attributes
 [cols=",,,3",options="header"]

@@ -461,7 +461,7 @@ static gp_widget *json_to_tabs(json_object *json, void **uids)
 			GP_WARN("Tab title %i must be string!", i);
 	}
 
-	gp_widget *ret = gp_widget_tabs_new(tab_count, active, tab_labels);
+	gp_widget *ret = gp_widget_tabs_new(tab_count, active, tab_labels, 0);
 
 	for (i = 0; i < tab_count; i++) {
 		json_object *json_widget = json_object_array_get_idx(widgets, i);
@@ -517,9 +517,14 @@ struct gp_widget_ops gp_widget_tabs_ops = {
 };
 
 gp_widget *gp_widget_tabs_new(unsigned int tabs, unsigned int active_tab,
-                              const char *tab_labels[])
+                              const char *tab_labels[], int flags)
 {
 	size_t i, size = sizeof(struct gp_widget_tabs);
+
+	if (flags) {
+		GP_WARN("flags has to be 0");
+		return NULL;
+	}
 
 	gp_widget *ret = gp_widget_new(GP_WIDGET_TABS, GP_WIDGET_CLASS_NONE, size);
 	if (!ret)
@@ -558,6 +563,13 @@ err:
 	return NULL;
 }
 
+unsigned int gp_widget_tabs_cnt(gp_widget *self)
+{
+	GP_WIDGET_ASSERT(self, GP_WIDGET_TABS, 0);
+
+	return gp_vec_len(self->tabs->tabs);
+}
+
 gp_widget *gp_widget_tabs_put(gp_widget *self, unsigned int tab,
                               gp_widget *child)
 {
@@ -594,68 +606,72 @@ gp_widget *gp_widget_tabs_get(gp_widget *self, unsigned int tab)
 	return self->tabs->tabs[tab].widget;
 }
 
-void gp_widget_tabs_add(gp_widget *self, unsigned int off,
-                        const char *label, gp_widget *child)
+void gp_widget_tabs_tab_ins(gp_widget *self, unsigned int tab,
+                            const char *label, gp_widget *child)
 {
 	GP_WIDGET_ASSERT(self, GP_WIDGET_TABS, );
 
 	GP_DEBUG(3, "Adding tab '%s' child %p at offset %u, tabs widget %p",
-	         label, child, off, self);
+	         label, child, tab, self);
 
-	struct gp_widget_tab *tabs = gp_vec_insert(self->tabs->tabs, off, 1);
+	struct gp_widget_tab *tabs = gp_vec_insert(self->tabs->tabs, tab, 1);
 	if (!tabs)
 		return;
 
 	self->tabs->tabs = tabs;
 
-	self->tabs->tabs[off].label = strdup(label);
-	if (!self->tabs->tabs[off].label) {
-		self->tabs->tabs = gp_vec_delete(self->tabs->tabs, off, 1);
+	self->tabs->tabs[tab].label = strdup(label);
+	if (!self->tabs->tabs[tab].label) {
+		self->tabs->tabs = gp_vec_delete(self->tabs->tabs, tab, 1);
 		return;
 	}
 
-	self->tabs->tabs[off].widget = child;
+	self->tabs->tabs[tab].widget = child;
 
 	gp_widget_set_parent(child, self);
 
 	gp_widget_resize(self);
 	gp_widget_redraw(self);
 
-	if (self->tabs->active_tab >= off &&
+	if (self->tabs->active_tab >= tab &&
 	    gp_vec_len(self->tabs->tabs) > self->tabs->active_tab + 1) {
 		self->tabs->active_tab++;
 	}
 }
 
-void gp_widget_tabs_append(gp_widget *self,
-                           const char *label, gp_widget *child)
+unsigned int gp_widget_tabs_tab_append(gp_widget *self,
+                                       const char *label, gp_widget *child)
 {
-	GP_WIDGET_ASSERT(self, GP_WIDGET_TABS, );
+	GP_WIDGET_ASSERT(self, GP_WIDGET_TABS, (unsigned int)-1);
 
-	gp_widget_tabs_add(self, gp_vec_len(self->tabs->tabs), label, child);
+	unsigned int ret = gp_vec_len(self->tabs->tabs);
+
+	gp_widget_tabs_tab_ins(self, ret, label, child);
+
+	return ret;
 }
 
-gp_widget *gp_widget_tabs_rem(gp_widget *self, unsigned int off)
+gp_widget *gp_widget_tabs_tab_rem(gp_widget *self, unsigned int tab)
 {
 	GP_WIDGET_ASSERT(self, GP_WIDGET_TABS, NULL);
 
-	if (off >= gp_vec_len(self->tabs->tabs)) {
+	if (tab >= gp_vec_len(self->tabs->tabs)) {
 		GP_BUG("Invalid tab index %u tabs (%p) count %zu",
-		       off, self, gp_vec_len(self->tabs->tabs));
+		       tab, self, gp_vec_len(self->tabs->tabs));
 		return NULL;
 	}
 
-	gp_widget *ret = self->tabs->tabs[off].widget;
+	gp_widget *ret = self->tabs->tabs[tab].widget;
 
 	GP_DEBUG(3, "Removing tab %u (%s) child %p, tabs widget %p",
-	         off, self->tabs->tabs[off].label, ret, self);
+	         tab, self->tabs->tabs[tab].label, ret, self);
 
-	free(self->tabs->tabs[off].label);
+	free(self->tabs->tabs[tab].label);
 
-	self->tabs->tabs = gp_vec_delete(self->tabs->tabs, off, 1);
+	self->tabs->tabs = gp_vec_delete(self->tabs->tabs, tab, 1);
 
 	if (self->tabs->active_tab &&
-	    self->tabs->active_tab >= off) {
+	    self->tabs->active_tab >= tab) {
 		self->tabs->active_tab--;
 	}
 
@@ -664,19 +680,14 @@ gp_widget *gp_widget_tabs_rem(gp_widget *self, unsigned int off)
 	return ret;
 }
 
-void gp_widget_tabs_del(gp_widget *self, unsigned int off)
-{
-	gp_widget_free(gp_widget_tabs_rem(self, off));
-}
-
-unsigned int gp_widget_tabs_get_active(gp_widget *self)
+unsigned int gp_widget_tabs_active_get(gp_widget *self)
 {
 	GP_WIDGET_ASSERT(self, GP_WIDGET_TABS, 0);
 
 	return self->tabs->active_tab;
 }
 
-void gp_widget_tabs_set_active(gp_widget *self, unsigned int tab)
+void gp_widget_tabs_active_set(gp_widget *self, unsigned int tab)
 {
 	GP_WIDGET_ASSERT(self, GP_WIDGET_TABS, );
 
