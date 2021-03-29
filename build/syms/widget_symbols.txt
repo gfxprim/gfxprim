@@ -123,6 +123,7 @@ gp_widget_int_set_min
 gp_widget_label_new
 gp_widget_label_ops
 gp_widget_label_printf
+gp_widget_label_vprintf
 gp_widget_label_printf_new
 gp_widget_label_set
 

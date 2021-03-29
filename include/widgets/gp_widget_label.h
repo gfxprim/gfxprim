@@ -50,6 +50,14 @@ int gp_widget_label_printf(gp_widget *self, const char *fmt, ...)
                            __attribute__((format (printf, 2, 3)));
 
 /**
+ * @brief VPrintf-like function to set label text.
+ * @self A label widget.
+ * @param fmt  Printf formatting string.
+ * @param ...  Printf parameters.
+ */
+void gp_widget_label_vprintf(gp_widget *self, const char *fmt, va_list ap);
+
+/**
  * @brief Changes text attributes.
  *
  * @self A label widget.

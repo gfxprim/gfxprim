@@ -35,6 +35,8 @@ The printf-like constructor sets the width to a zero internally.
 void gp_widget_label_set(gp_widget *self, const char *text);
 
 int gp_widget_label_printf(gp_widget *self, const char *fmt, ...);
+
+void gp_widget_label_vprintf(gp_widget *self, const char *fmt, va_list ap);
 -------------------------------------------------------------------------------
 
 If widget was created with variable width, it does not shrink, by default,

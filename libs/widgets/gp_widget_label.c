@@ -237,3 +237,9 @@ int gp_widget_label_printf(gp_widget *self, const char *fmt, ...)
 
 	return 0;
 }
+
+void gp_widget_label_vprintf(gp_widget *self, const char *fmt, va_list ap)
+{
+	self->label->text = gp_vec_vprintf(self->label->text, fmt, ap);
+	redraw_resize(self);
+}
