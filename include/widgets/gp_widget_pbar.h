@@ -2,14 +2,14 @@
 
 /*
 
-   Copyright (c) 2014-2020 Cyril Hrubis <metan@ucw.cz>
+   Copyright (c) 2014-2021 Cyril Hrubis <metan@ucw.cz>
 
  */
 
 #ifndef GP_WIDGET_PBAR_H
 #define GP_WIDGET_PBAR_H
 
-enum gp_widget_pbar_type {
+enum gp_widget_pbar_unit {
 	GP_WIDGET_PBAR_NONE,
 	GP_WIDGET_PBAR_PERCENTS,
 	GP_WIDGET_PBAR_SECONDS,
@@ -20,7 +20,7 @@ enum gp_widget_pbar_type {
 struct gp_widget_pbar {
 	float max;
 	float val;
-	enum gp_widget_pbar_type type;
+	enum gp_widget_pbar_unit unit;
 };
 
 /**
@@ -32,7 +32,7 @@ struct gp_widget_pbar {
  *
  * @return A progress bar widget.
  */
-gp_widget *gp_widget_pbar_new(float val, float max, enum gp_widget_pbar_type type);
+gp_widget *gp_widget_pbar_new(float val, float max, enum gp_widget_pbar_unit unit);
 
 /**
  * @brief Sets a progress bar value.

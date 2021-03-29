@@ -2,7 +2,7 @@
 
 /*
 
-   Copyright (c) 2014-2020 Cyril Hrubis <metan@ucw.cz>
+   Copyright (c) 2014-2021 Cyril Hrubis <metan@ucw.cz>
 
  */
 
@@ -27,9 +27,19 @@ static unsigned int pbar_min_h(gp_widget *self, const gp_widget_render_ctx *ctx)
 	return 2 * ctx->padd + gp_text_ascent(ctx->font);
 }
 
-static unsigned int secs_rem(float sec)
+static unsigned int val_to_secs(float sec)
 {
 	return (unsigned int)(sec + 0.5) % 60;
+}
+
+static unsigned int val_to_mins(float sec)
+{
+	return ((unsigned int)sec/60) % 60;
+}
+
+static unsigned int val_to_hours(float sec)
+{
+	return ((unsigned int)sec/3600) % 60;
 }
 
 static void pbar_render(gp_widget *self, const gp_offset *offset,
@@ -63,10 +73,12 @@ static void pbar_render(gp_widget *self, const gp_offset *offset,
 	char buf[64];
 	float val = self->pbar->val;
 
-	if (self->pbar->type & GP_WIDGET_PBAR_INVERSE)
+	unsigned int hours, mins, secs;
+
+	if (self->pbar->unit & GP_WIDGET_PBAR_INVERSE)
 		val = self->pbar->max - val;
 
-	switch (self->pbar->type & GP_WIDGET_PBAR_TMASK) {
+	switch (self->pbar->unit & GP_WIDGET_PBAR_TMASK) {
 	case GP_WIDGET_PBAR_NONE:
 		return;
 	case GP_WIDGET_PBAR_PERCENTS:
@@ -74,8 +86,18 @@ static void pbar_render(gp_widget *self, const gp_offset *offset,
 		         100 * val / self->pbar->max);
 	break;
 	case GP_WIDGET_PBAR_SECONDS:
-		snprintf(buf, sizeof(buf), "%.0fm %us",
-		         val/60, secs_rem(val));
+		hours = val_to_hours(val);
+		mins = val_to_mins(val);
+		secs = val_to_secs(val);
+		if (hours) {
+			snprintf(buf, sizeof(buf), "%uh %um %us",
+			         hours, mins, secs);
+		} else if (mins) {
+			snprintf(buf, sizeof(buf), "%um %us",
+			         mins, secs);
+		} else {
+			snprintf(buf, sizeof(buf), "%us", secs);
+		}
 	break;
 	}
 
@@ -108,7 +130,7 @@ static gp_widget *json_to_pbar(json_object *json, void **uids)
 {
 	double val = 0, max = 100;
 	const char *type = NULL;
-	enum gp_widget_pbar_type ptype = GP_WIDGET_PBAR_PERCENTS;
+	enum gp_widget_pbar_unit unit = GP_WIDGET_PBAR_PERCENTS;
 	int inverse = 0;
 
 	(void)uids;
@@ -116,7 +138,7 @@ static gp_widget *json_to_pbar(json_object *json, void **uids)
 	json_object_object_foreach(json, key, jval) {
 		if (!strcmp(key, "val"))
 			val = json_object_get_double(jval);
-		else if (!strcmp(key, "ptype"))
+		else if (!strcmp(key, "unit"))
 			type = json_object_get_string(jval);
 		else if (!strcmp(key, "max"))
 			max = json_object_get_double(jval);
@@ -134,19 +156,19 @@ static gp_widget *json_to_pbar(json_object *json, void **uids)
 
 	if (type) {
 		if (!strcmp(type, "none"))
-			ptype = GP_WIDGET_PBAR_NONE;
+			unit = GP_WIDGET_PBAR_NONE;
 		else if (!strcmp(type, "percents"))
-			ptype = GP_WIDGET_PBAR_PERCENTS;
+			unit = GP_WIDGET_PBAR_PERCENTS;
 		else if (!strcmp(type, "seconds"))
-			ptype = GP_WIDGET_PBAR_SECONDS;
+			unit = GP_WIDGET_PBAR_SECONDS;
 		else
 			GP_WARN("Invalid type '%s'", type);
 	}
 
 	if (inverse)
-		ptype |= GP_WIDGET_PBAR_INVERSE;
+		unit |= GP_WIDGET_PBAR_INVERSE;
 
-	return gp_widget_pbar_new(val, max, ptype);
+	return gp_widget_pbar_new(val, max, unit);
 }
 
 struct gp_widget_ops gp_widget_pbar_ops = {
@@ -154,22 +176,23 @@ struct gp_widget_ops gp_widget_pbar_ops = {
 	.min_h = pbar_min_h,
 	.render = pbar_render,
 	.from_json = json_to_pbar,
-	.id = "progressbar",
+	.id = "pbar",
 };
 
-gp_widget *gp_widget_pbar_new(float val, float max, enum gp_widget_pbar_type type)
+gp_widget *gp_widget_pbar_new(float val, float max, enum gp_widget_pbar_unit unit)
 {
+	size_t size = sizeof(struct gp_widget_pbar);
 	gp_widget *ret;
 
 	if (check_val(val, max))
 		val = 0;
 
-	ret = gp_widget_new(GP_WIDGET_PROGRESSBAR, GP_WIDGET_CLASS_NONE, sizeof(struct gp_widget_pbar));
+	ret = gp_widget_new(GP_WIDGET_PROGRESSBAR, GP_WIDGET_CLASS_NONE, size);
 	if (!ret)
 		return NULL;
 
 	ret->pbar->val = val;
-	ret->pbar->type = type;
+	ret->pbar->unit = unit;
 	ret->pbar->max = max;
 
 	return ret;
@@ -202,7 +225,6 @@ void gp_widget_pbar_set_max(gp_widget *self, float max)
 		return;
 
 	self->pbar->val = GP_MIN(self->pbar->val, max);
-
 	self->pbar->max = max;
 
 	gp_widget_redraw(self);

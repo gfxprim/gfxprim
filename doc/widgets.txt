@@ -40,6 +40,7 @@ Individual widgets documentation
 * link:widget_choice.html[Radiobutton widget]
 * link:widget_choice.html[Spinbutton widget]
 * link:widget_tbox.html[Tbox widget]
+* link:widget_pbar.html[Progressbar widget]
 * link:widget_pixmap.html[Pixmap widget]
 * link:widget_grid.html[Grid widget]
 * link:widget_table.html[Table widget]

@@ -12,7 +12,7 @@
       "set": 1
     },
     {
-      "type": "progressbar",
+      "type": "pbar",
       "val": 50.1
     },
     {

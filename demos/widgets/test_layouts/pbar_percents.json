@@ -1,0 +1,11 @@
+{
+ "version": 1,
+ "align": "fill",
+ "widgets": [
+  {
+   "type": "pbar",
+   "max": 100,
+   "val": 50
+  }
+ ]
+}
