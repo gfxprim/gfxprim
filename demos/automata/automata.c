@@ -260,19 +260,18 @@ static void ca1d_run(void)
  * use putpixel_raw because it is inlined and we know x and y are
  * inside the pixmap.
  */
-static inline void shade_pixel(gp_pixmap *p, gp_coord x, gp_coord y,
+static inline void shade_pixel(gp_pixmap *p,
+			       float pw, float ph,
+			       uint32_t x, uint32_t y,
 			       gp_pixel bg, gp_pixel fg)
 {
-	gp_pixel px;
-	size_t i = (x * (64 * width)) / p->w;
-	size_t j = (y * height) / p->h;
+	size_t i = (float)x * pw;
+	size_t j = (float)y * ph;
 	size_t k = 63 - (i & 63);
 	uint64_t c = steps[gp_matrix_idx(width, j, i >> 6)];
 
 	c = BIT_TO_MAX(c, k);
-	px = (fg & c) | (bg & ~c);
-
-	gp_putpixel_raw(p, x, y, px);
+	gp_putpixel_raw(p, x, y, (fg & c) | (bg & ~c));
 }
 
 static void fill_pixmap(gp_pixmap *p)
@@ -300,10 +299,13 @@ static void fill_pixmap(gp_pixmap *p)
 		return;
 	}
 
+	float pw = (float)(64 * width) / (float)p->w;
+	float ph = (float)height / (float)p->h;
+
 	s = gp_time_stamp();
-	for (x = 0; x < p->w; x++) {
-		for (y = 0; y < p->h; y++)
-			shade_pixel(p, x, y, bg, fg);
+	for (y = 0; y < p->h; y++) {
+		for (x = 0; x < p->w; x++)
+			shade_pixel(p, pw, ph, x, y, bg, fg);
 	}
 	t = gp_time_stamp();
 
