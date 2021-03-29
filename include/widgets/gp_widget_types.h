@@ -9,6 +9,8 @@
 #ifndef GP_WIDGET_TYPES_H
 #define GP_WIDGET_TYPES_H
 
+#include <stdint.h>
+
 typedef struct gp_widget_event gp_widget_event;
 typedef struct gp_widget gp_widget;
 typedef struct gp_widget_dialog gp_widget_dialog;
