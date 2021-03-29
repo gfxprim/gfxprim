@@ -225,6 +225,12 @@ const struct tst_suite tst_suite = {
 		 .tst_fn = test_save_PNG,
 		 .data = (void*)GP_PIXEL_G16,
 		 .flags = TST_CHECK_MALLOC},
+
+		{.name = "PNG Save 100x100 xRGB8888",
+		 .tst_fn = test_save_PNG,
+		 .data = (void*)GP_PIXEL_xRGB8888,
+		 .flags = TST_CHECK_MALLOC},
+
 		{.name = NULL},
 	}
 };

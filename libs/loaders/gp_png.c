@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 /*
- * Copyright (C) 2009-2014 Cyril Hrubis <metan@ucw.cz>
+ * Copyright (C) 2009-2021 Cyril Hrubis <metan@ucw.cz>
  */
 
 /*
@@ -20,6 +20,7 @@
 #include <core/gp_debug.h>
 #include <core/gp_gamma_correction.h>
 
+#include <loaders/gp_line_convert.h>
 #include <loaders/gp_loaders.gen.h>
 
 #ifdef HAVE_LIBPNG
@@ -430,12 +431,13 @@ static gp_pixel_type save_ptypes[] = {
 /*
  * Maps gfxprim Pixel Type to the PNG format
  */
-static int prepare_png_header(const gp_pixmap *src, png_structp png,
-                              png_infop png_info, int *bit_endian_flag)
+static int prepare_png_header(gp_pixel_type ptype, gp_size w, gp_size h, int bit_endian,
+                              png_structp png, png_infop png_info,
+                              int *bit_endian_flag)
 {
 	int bit_depth, color_type;
 
-	switch (src->pixel_type) {
+	switch (ptype) {
 	case GP_PIXEL_BGR888:
 	case GP_PIXEL_RGB888:
 		bit_depth = 8;
@@ -473,10 +475,10 @@ static int prepare_png_header(const gp_pixmap *src, png_structp png,
 	}
 
 	/* If pointers weren't passed, just return it is okay */
-	if (png == NULL || png_info == NULL)
+	if (!png || !png_info)
 		return 0;
 
-	png_set_IHDR(png, png_info, src->w, src->h, bit_depth, color_type,
+	png_set_IHDR(png, png_info, w, h, bit_depth, color_type,
 	             PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_DEFAULT,
 		     PNG_FILTER_TYPE_DEFAULT);
 
@@ -486,7 +488,7 @@ static int prepare_png_header(const gp_pixmap *src, png_structp png,
 	//png_set_packing(png);
 
 	/* prepare for format conversions */
-	switch (src->pixel_type) {
+	switch (ptype) {
 	case GP_PIXEL_RGB888:
 		png_set_bgr(png);
 	break;
@@ -497,7 +499,7 @@ static int prepare_png_header(const gp_pixmap *src, png_structp png,
 	case GP_PIXEL_G1:
 	case GP_PIXEL_G2:
 	case GP_PIXEL_G4:
-		*bit_endian_flag = !src->bit_endian;
+		*bit_endian_flag = !bit_endian;
 	break;
 	default:
 	break;
@@ -549,6 +551,29 @@ static int write_png_data(const gp_pixmap *src, png_structp png,
 	return 0;
 }
 
+static int convert_write_png_data(const gp_pixmap *src, gp_pixel_type out_pix,
+                                  png_structp png, gp_progress_cb *callback)
+{
+        uint8_t out[(src->w * gp_pixel_size(out_pix)) / 8 + 1];
+        gp_line_convert convert = gp_line_convert_get(src->pixel_type, out_pix);
+
+	unsigned int y;
+
+	for (y = 0; y < src->h; y++) {
+		void *in = GP_PIXEL_ADDR(src, 0, y);
+
+		convert(in, out, src->w);
+		png_write_row(png, out);
+
+		if (gp_progress_cb_report(callback, y, src->h, src->w)) {
+			GP_DEBUG(1, "Operation aborted");
+			return ECANCELED;
+		}
+	}
+
+	return 0;
+}
+
 static void write_data(png_structp png_ptr, png_bytep data, png_size_t len)
 {
 	gp_io *io = png_get_io_ptr(png_ptr);
@@ -568,19 +593,24 @@ int gp_write_png(const gp_pixmap *src, gp_io *io,
 	png_structp png;
 	png_infop png_info = NULL;
 	int err;
+	gp_pixel_type out_pix = src->pixel_type;
 
 	GP_DEBUG(1, "Writing PNG Image to I/O (%p)", io);
 
-	if (prepare_png_header(src, NULL, NULL, NULL)) {
-		GP_DEBUG(1, "Can't save png with %s pixel type",
-		         gp_pixel_type_name(src->pixel_type));
-		errno = ENOSYS;
-		return 1;
+	if (prepare_png_header(src->pixel_type, 0, 0, 0, NULL, NULL, NULL)) {
+		out_pix = gp_line_convertible(src->pixel_type, save_ptypes);
+
+		if (out_pix == GP_PIXEL_UNKNOWN) {
+			GP_DEBUG(1, "Can't save png with %s pixel type",
+			         gp_pixel_type_name(src->pixel_type));
+			errno = ENOSYS;
+			return 1;
+		}
 	}
 
 	png = png_create_write_struct(PNG_LIBPNG_VER_STRING, NULL, NULL, NULL);
 
-	if (png == NULL) {
+	if (!png) {
 		GP_DEBUG(1, "Failed to allocate PNG write buffer");
 		errno = ENOMEM;
 		return 1;
@@ -605,11 +635,17 @@ int gp_write_png(const gp_pixmap *src, gp_io *io,
 
 	int bit_endian_flag = 0;
 	/* Fill png header and prepare for data */
-	prepare_png_header(src, png, png_info, &bit_endian_flag);
+	prepare_png_header(out_pix, src->w, src->h, src->bit_endian,
+	                   png, png_info, &bit_endian_flag);
 
 	/* Write bitmap buffer */
-	if ((err = write_png_data(src, png, callback, bit_endian_flag)))
-		goto err;
+	if (src->pixel_type == out_pix) {
+		if ((err = write_png_data(src, png, callback, bit_endian_flag)))
+			goto err;
+	} else {
+		if ((err = convert_write_png_data(src, out_pix, png, callback)))
+			goto err;
+	}
 
 	png_write_end(png, png_info);
 	png_destroy_write_struct(&png, &png_info);
