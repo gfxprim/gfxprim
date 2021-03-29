@@ -2,7 +2,7 @@
 
 /*
 
-   Copyright (c) 2014-2020 Cyril Hrubis <metan@ucw.cz>
+   Copyright (c) 2014-2021 Cyril Hrubis <metan@ucw.cz>
 
  */
 
@@ -22,6 +22,20 @@
  * @return An application widget layout or NULL in a case of failure.
  */
 gp_widget *gp_app_layout_load(const char *app_name, void **uids);
+
+/**
+ * @brief Loads an application fragment given application name and fragment name.
+ *
+ * Looks for the layout fragment in /etc/ and $HOME/.config/
+ *
+ * @app_name An application name, usually the same as the binary name.
+ * @fragment_name A fragment name.
+ * @uids An pointer to store the hash table of UIDs to.
+ *
+ * @return An application widget layout or NULL in a case of failure.
+ */
+gp_widget *gp_app_layout_fragment_load(const char *app_name,
+                                       const char *fragment_name, void *uids);
 
 /**
  * @brief Sets an application event hanlder.
