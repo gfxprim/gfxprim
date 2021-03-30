@@ -41,8 +41,10 @@ static gp_widget *load_from_json(const char *type, json_object *json, void **uid
 	unsigned int i;
 
 	for (i = 0; i < GP_ARRAY_SIZE(from_json_loaders); i++) {
-		if (!strcmp(from_json_loaders[i].type, type))
+		if (!strcmp(from_json_loaders[i].type, type)) {
+			json_object_object_del(json, "type");
 			return from_json_loaders[i].from_json(json, uids);
+		}
 	}
 
 	return NULL;
@@ -51,8 +53,6 @@ static gp_widget *load_from_json(const char *type, json_object *json, void **uid
 static gp_widget *load_widget_by_type(const char *type, json_object *json, void **uids)
 {
 	const struct gp_widget_ops *ops = gp_widget_ops_by_id(type);
-
-	json_object_object_del(json, "type");
 
 	if (!ops) {
 		gp_widget *ret = load_from_json(type, json, uids);
@@ -67,6 +67,8 @@ static gp_widget *load_widget_by_type(const char *type, json_object *json, void 
 		GP_WARN("Unimplemented from_json for widget '%s'", type);
 		return NULL;
 	}
+
+	json_object_object_del(json, "type");
 
 	return ops->from_json(json, uids);
 }
