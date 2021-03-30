@@ -21,8 +21,8 @@
 #include <widgets/gp_dir_cache.h>
 #include <widgets/gp_date_time.h>
 #include <widgets/gp_file_size.h>
-#include <widgets/gp_widget_dialog.h>
-#include <widgets/gp_widget_dialog_file_open.h>
+#include <widgets/gp_dialog.h>
+#include <widgets/gp_dialog_file.h>
 
 #include "dialog_file_open.json.h"
 
@@ -211,7 +211,7 @@ static gp_widget_table_cell *get_elem(gp_widget *self, unsigned int col)
 
 static void exit_dialog(struct file_dialog *dialog, int retval)
 {
-	gp_widget_dialog *wd = GP_CONTAINER_OF(dialog, gp_widget_dialog, payload);
+	gp_dialog *wd = GP_CONTAINER_OF(dialog, gp_dialog, payload);
 	gp_dir_cache *cache = dialog->file_table->tbl->priv;
 	gp_widget *table = dialog->file_table;
 
@@ -329,18 +329,18 @@ static const gp_widget_table_header header[] = {
 	{.label = "Modified", .sortable = 1, .col_min_size = 7},
 };
 
-gp_widget_dialog *gp_widget_dialog_file_open_new(const char *path)
+gp_dialog *gp_dialog_file_open_new(const char *path)
 {
 	void *uids = NULL;
 	gp_widget *layout, *w;
-	gp_widget_dialog *ret;
+	gp_dialog *ret;
 	struct file_dialog *dialog;
 
 	layout = gp_dialog_layout_load("file_open", dialog_file_open, &uids);
 	if (!layout)
 		return NULL;
 
-	ret = gp_widget_dialog_new(sizeof(struct file_dialog));
+	ret = gp_dialog_new(sizeof(struct file_dialog));
 	if (!ret)
 		goto err0;
 
@@ -402,7 +402,7 @@ err0:
 	return NULL;
 }
 
-const char *gp_widget_dialog_file_open_path(gp_widget_dialog *self)
+const char *gp_dialog_file_open_path(gp_dialog *self)
 {
 	struct file_dialog *dialog = (void*)self->payload;
 

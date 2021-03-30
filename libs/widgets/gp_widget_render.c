@@ -17,7 +17,7 @@
 #include <gp_widget_render.h>
 #include <gp_widget_ops.h>
 #include <gp_key_repeat_timer.h>
-#include <widgets/gp_widget_dialog.h>
+#include <widgets/gp_dialog.h>
 #include <widgets/gp_widget_app.h>
 
 static struct gp_text_style font = {
@@ -559,7 +559,7 @@ static struct gp_fds fds = GP_FDS_INIT;
 
 struct gp_fds *gp_widgets_fds = &fds;
 
-int gp_widget_dialog_run(gp_widget_dialog *dialog)
+int gp_dialog_run(gp_dialog *dialog)
 {
 	gp_widget *saved = gp_widget_layout_replace(dialog->layout);
 

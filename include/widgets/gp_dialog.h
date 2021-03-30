@@ -2,17 +2,17 @@
 
 /*
 
-   Copyright (c) 2014-2020 Cyril Hrubis <metan@ucw.cz>
+   Copyright (c) 2014-2021 Cyril Hrubis <metan@ucw.cz>
 
  */
 
-#ifndef GP_WIDGET_DIALOG_H
-#define GP_WIDGET_DIALOG_H
+#ifndef GP_DIALOG_H
+#define GP_DIALOG_H
 
 #include <widgets/gp_widget.h>
 #include <widgets/gp_widget_types.h>
 
-struct gp_widget_dialog {
+struct gp_dialog {
 	/** A wiget layout representing the dialog */
 	gp_widget *layout;
 	/** Set to non-zero on dialog exit, holds dialog return value */
@@ -26,7 +26,7 @@ struct gp_widget_dialog {
  * @payload Payload size.
  * @return A newly allocated dialog.
  */
-gp_widget_dialog *gp_widget_dialog_new(size_t payload);
+gp_dialog *gp_dialog_new(size_t payload);
 
 /**
  * @brief Frees a dialog.
@@ -35,7 +35,7 @@ gp_widget_dialog *gp_widget_dialog_new(size_t payload);
  *
  * @self A dialog.
  */
-void gp_widget_dialog_free(gp_widget_dialog *self);
+void gp_dialog_free(gp_dialog *self);
 
 /**
  * @brief Loads a dialog layout given a dialog name.

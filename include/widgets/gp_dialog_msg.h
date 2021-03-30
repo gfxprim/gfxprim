@@ -24,8 +24,7 @@ enum gp_dialog_exit {
 	GP_DIALOG_ERR = 99,
 };
 
-gp_widget_dialog *gp_dialog_msg_new(enum gp_dialog_msg_type type,
-                                    const char *msg);
+gp_dialog *gp_dialog_msg_new(enum gp_dialog_msg_type type, const char *msg);
 
 int gp_dialog_msg_run(enum gp_dialog_msg_type type, const char *msg);
 

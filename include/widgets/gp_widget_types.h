@@ -2,7 +2,7 @@
 
 /*
 
-   Copyright (c) 2014-2020 Cyril Hrubis <metan@ucw.cz>
+   Copyright (c) 2014-2021 Cyril Hrubis <metan@ucw.cz>
 
  */
 
@@ -13,7 +13,7 @@
 
 typedef struct gp_widget_event gp_widget_event;
 typedef struct gp_widget gp_widget;
-typedef struct gp_widget_dialog gp_widget_dialog;
+typedef struct gp_dialog gp_dialog;
 typedef uint32_t gp_widget_tattr;
 
 #endif /* GP_WIDGET_TYPES_H */

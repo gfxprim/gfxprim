@@ -196,7 +196,12 @@ gp_widget_tbox_printf
 gp_widget_tbox_new
 gp_widget_tbox_ops
 
-gp_widget_dialog_free
-gp_widget_dialog_new
-gp_widget_dialog_run
-gp_widget_dialog_file_open_new
+gp_dialog_free
+gp_dialog_new
+gp_dialog_run
+gp_dialog_file_open_new
+gp_dialog_file_open_path
+gp_dialog_msg_new
+gp_dialog_layout_load
+gp_dialog_msg_run
+gp_dialog_msg_printf_run

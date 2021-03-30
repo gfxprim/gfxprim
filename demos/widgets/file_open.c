@@ -10,17 +10,17 @@
 
 int open_file(gp_widget_event *ev)
 {
-	gp_widget_dialog *dialog;
+	gp_dialog *dialog;
 
 	if (ev->type != GP_WIDGET_EVENT_WIDGET)
 		return 0;
 
-	dialog = gp_widget_dialog_file_open_new(NULL);
+	dialog = gp_dialog_file_open_new(NULL);
 
-	if (gp_widget_dialog_run(dialog) == GP_WIDGET_DIALOG_PATH)
-		printf("Selected path '%s'\n", gp_widget_dialog_file_open_path(dialog));
+	if (gp_dialog_run(dialog) == GP_WIDGET_DIALOG_PATH)
+		printf("Selected path '%s'\n", gp_dialog_file_open_path(dialog));
 
-	gp_widget_dialog_free(dialog);
+	gp_dialog_free(dialog);
 
 	return 0;
 }

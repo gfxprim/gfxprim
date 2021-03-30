@@ -140,7 +140,16 @@ void gp_widgets_exit(int exit_value) __attribute__((noreturn));
  */
 gp_widget *gp_widget_layout_replace(gp_widget *layout);
 
-int gp_widget_dialog_run(gp_widget_dialog *dialog);
+/**
+ * @brief Runs a dialog.
+ *
+ * Temporarily replaces layout shown on the screen with a dialog.
+ *
+ * @dialog A dialog to be shown to the user.
+ *
+ * @return A return value from a dialog.
+ */
+int gp_dialog_run(gp_dialog *dialog);
 
 /*
  * TODO: Obsolete?

@@ -14,7 +14,7 @@
 
 static int do_exit(gp_widget_event *ev)
 {
-	gp_widget_dialog *wd = ev->self->priv;
+	gp_dialog *wd = ev->self->priv;
 
 	if (ev->type != GP_WIDGET_EVENT_WIDGET)
 		return 0;
@@ -24,13 +24,13 @@ static int do_exit(gp_widget_event *ev)
 	return 0;
 }
 
-static gp_widget_dialog *dialog_msg_new(enum gp_dialog_msg_type type, gp_widget **label)
+static gp_dialog *dialog_msg_new(enum gp_dialog_msg_type type, gp_widget **label)
 {
-	gp_widget_dialog *ret;
+	gp_dialog *ret;
 	gp_widget *w;
 	void *uids = NULL;
 
-	ret = gp_widget_dialog_new(0);
+	ret = gp_dialog_new(0);
 	if (!ret)
 		return NULL;
 
@@ -46,7 +46,7 @@ static gp_widget_dialog *dialog_msg_new(enum gp_dialog_msg_type type, gp_widget 
 	break;
 	default:
 		GP_WARN("Invalid dialog type %i", type);
-		gp_widget_dialog_free(ret);
+		gp_dialog_free(ret);
 		return NULL;
 	}
 
@@ -61,11 +61,11 @@ static gp_widget_dialog *dialog_msg_new(enum gp_dialog_msg_type type, gp_widget 
 	return ret;
 }
 
-gp_widget_dialog *gp_dialog_msg_new(enum gp_dialog_msg_type type,
+gp_dialog *gp_dialog_msg_new(enum gp_dialog_msg_type type,
                                     const char *msg)
 {
 	gp_widget *label = NULL;
-	gp_widget_dialog *dialog = dialog_msg_new(type, &label);
+	gp_dialog *dialog = dialog_msg_new(type, &label);
 
 	if (label)
 		gp_widget_label_set(label, msg);
@@ -73,18 +73,18 @@ gp_widget_dialog *gp_dialog_msg_new(enum gp_dialog_msg_type type,
 	return dialog;
 }
 
-static int dialog_run_free(gp_widget_dialog *dialog)
+static int dialog_run_free(gp_dialog *dialog)
 {
-	int ret = gp_widget_dialog_run(dialog);
+	int ret = gp_dialog_run(dialog);
 
-	gp_widget_dialog_free(dialog);
+	gp_dialog_free(dialog);
 
 	return ret;
 }
 
 int gp_dialog_msg_run(enum gp_dialog_msg_type type, const char *msg)
 {
-	gp_widget_dialog *dialog = gp_dialog_msg_new(type, msg);
+	gp_dialog *dialog = gp_dialog_msg_new(type, msg);
 
 	if (!dialog)
 		return GP_DIALOG_ERR;
@@ -96,7 +96,7 @@ int gp_dialog_msg_printf_run(enum gp_dialog_msg_type type, const char *fmt, ...)
 {
 	va_list ap;
 	gp_widget *label = NULL;
-	gp_widget_dialog *dialog = dialog_msg_new(type, &label);
+	gp_dialog *dialog = dialog_msg_new(type, &label);
 
 	if (!dialog)
 		return GP_DIALOG_ERR;

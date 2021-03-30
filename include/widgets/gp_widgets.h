@@ -49,8 +49,9 @@
 
 #include <widgets/gp_widget_stock.h>
 
-#include <widgets/gp_widget_dialog.h>
+/* Dialogs */
+#include <widgets/gp_dialog.h>
 #include <widgets/gp_dialog_msg.h>
-#include <widgets/gp_widget_dialog_file_open.h>
+#include <widgets/gp_dialog_file.h>
 
 #endif /* GP_WIDGETS_H */

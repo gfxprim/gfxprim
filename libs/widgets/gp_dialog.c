@@ -2,7 +2,7 @@
 
 /*
 
-   Copyright (c) 2014-2020 Cyril Hrubis <metan@ucw.cz>
+   Copyright (c) 2014-2021 Cyril Hrubis <metan@ucw.cz>
 
  */
 
@@ -10,12 +10,12 @@
 #include <core/gp_debug.h>
 #include <utils/gp_vec_str.h>
 #include <widgets/gp_widget_json.h>
-#include <widgets/gp_widget_dialog.h>
+#include <widgets/gp_dialog.h>
 
-gp_widget_dialog *gp_widget_dialog_new(size_t payload_size)
+gp_dialog *gp_dialog_new(size_t payload_size)
 {
-	size_t size = sizeof(gp_widget_dialog) + payload_size;
-	gp_widget_dialog *ret = malloc(size);
+	size_t size = sizeof(gp_dialog) + payload_size;
+	gp_dialog *ret = malloc(size);
 
 	if (!ret) {
 		GP_WARN("Malloc failed :-(");
@@ -29,7 +29,7 @@ gp_widget_dialog *gp_widget_dialog_new(size_t payload_size)
 	return ret;
 }
 
-void gp_widget_dialog_free(gp_widget_dialog *self)
+void gp_dialog_free(gp_dialog *self)
 {
 	GP_DEBUG(1, "Destroying dialog %p", self);
 
