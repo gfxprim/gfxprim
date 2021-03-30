@@ -1,0 +1,29 @@
+Message dialogs
+---------------
+
+Message dialogs shows an user a message with a 'OK' button.
+
+[source,c]
+-------------------------------------------------------------------------------
+enum gp_dialog_msg_type {
+        GP_DIALOG_MSG_INFO,
+        GP_DIALOG_MSG_WARN,
+        GP_DIALOG_MSG_ERR,
+};
+
+int gp_dialog_msg_run(enum gp_dialog_msg_type type, const char *msg);
+
+int gp_dialog_msg_printf_run(enum gp_dialog_msg_type type, const char *fmt, ...)
+                             __attribute__((format (printf, 2, 3)));
+--------------------------------------------------------------------------------
+
+Creates and runs a message dialog.
+
+.An info dialog
+image:dialog_msg_info.png[Info message dialog]
+
+.A warning dialog
+image:dialog_msg_warn.png[Warning message dialog]
+
+.An error dialog
+image:dialog_msg_err.png[Error message dialog]

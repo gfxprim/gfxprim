@@ -223,7 +223,7 @@ static void exit_dialog(struct file_dialog *dialog, int retval)
 
 	free_dir_cache(cache);
 
-	wd->dialog_exit = retval;
+	wd->retval = retval;
 }
 
 static int do_open(gp_widget_event *ev)

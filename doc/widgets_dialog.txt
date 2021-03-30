@@ -1,0 +1,42 @@
+Dialogs
+-------
+
+A dialog is an interface that communicates information and prompts a response.
+
+[source,c]
+-------------------------------------------------------------------------------
+struct gp_dialog {
+	gp_widget *layout;
+	long retval;
+};
+-------------------------------------------------------------------------------
+
+Dialog is implemented as a widget layout i.e. pointer to a widget along with a
+return value.
+
+.Dialog run function
+[source,c]
+-------------------------------------------------------------------------------
+long gp_dialog_run(gp_dialog *self);
+-------------------------------------------------------------------------------
+
+Dialog is shown to the user by calling this function that temporarily replaces
+the layout that is shown to the user. The dialog runs, i.e. is shown on the
+screen and processes input events, until the dialog `retval` is set to
+non-zero.
+
+Dialog layout load
+~~~~~~~~~~~~~~~~~~
+
+[source,c]
+-------------------------------------------------------------------------------
+gp_widget *gp_dialog_layout_load(const char *dialog_name, const char *fallback_json, void **uids);
+-------------------------------------------------------------------------------
+
+Loads a dialog layout given a dialog name.
+
+The dialog layout looked up in this order:
+
+* A user directory `~/.config/gfxprim/dialogs/${dialog_name}.json`
+* A system directory `/etc/gfxprim/dialogs/${dialog_name}.json`
+* And lastly it uses the fallback json string

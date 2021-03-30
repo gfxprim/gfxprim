@@ -24,7 +24,7 @@ static const char *dialog_err = "\
      }, \
      { \
       \"type\": \"button\", \
-      \"label\": \"Ok\", \
+      \"label\": \"OK\", \
       \"uid\": \"btn_ok\" \
      } \
     ] \

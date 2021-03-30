@@ -24,7 +24,7 @@ static const char *dialog_warn = "\
      }, \
      { \
       \"type\": \"button\", \
-      \"label\": \"Ok\", \
+      \"label\": \"OK\", \
       \"uid\": \"btn_ok\" \
      } \
     ] \

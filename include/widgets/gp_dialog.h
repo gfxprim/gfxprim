@@ -15,8 +15,8 @@
 struct gp_dialog {
 	/** A wiget layout representing the dialog */
 	gp_widget *layout;
-	/** Set to non-zero on dialog exit, holds dialog return value */
-	int dialog_exit;
+	/** Set to non-zero to exit the dialog */
+	long retval;
 	char payload[];
 };
 
@@ -51,4 +51,4 @@ void gp_dialog_free(gp_dialog *self);
  */
 gp_widget *gp_dialog_layout_load(const char *dialog_name, const char *fallback_json, void **uids);
 
-#endif /* GP_WIDGET_DIALOG_H */
+#endif /* GP_DIALOG_H */

@@ -16,7 +16,7 @@ static int err_dialog(gp_widget_event *ev)
 		return 0;
 
 	gp_dialog_msg_printf_run(GP_DIALOG_MSG_ERR,
-	                         "Failed to save file 'pict.bmp': %s",
+	                         "Fatal error: %s",
 	                         strerror(ENOSYS));
 
 	return 0;
@@ -27,7 +27,7 @@ static int info_dialog(gp_widget_event *ev)
 	if (ev->type != GP_WIDGET_EVENT_WIDGET)
 		return 0;
 
-	gp_dialog_msg_run(GP_DIALOG_MSG_INFO, "Press Ok to continue...");
+	gp_dialog_msg_run(GP_DIALOG_MSG_INFO, "Press OK to continue.");
 
 	return 0;
 }

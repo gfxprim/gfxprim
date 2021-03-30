@@ -46,3 +46,9 @@ Individual widgets documentation
 * link:widget_table.html[Table widget]
 * link:widget_tabs.html[Tabs widget]
 * link:widget_frame.html[Frame widget]
+
+Dialog documentation
+--------------------
+
+* link:widgets_dialog.html[Dialog implementation]
+* link:dialog_msg.html[Message dialogs]

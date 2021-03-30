@@ -559,22 +559,23 @@ static struct gp_fds fds = GP_FDS_INIT;
 
 struct gp_fds *gp_widgets_fds = &fds;
 
-int gp_dialog_run(gp_dialog *dialog)
+long gp_dialog_run(gp_dialog *dialog)
 {
 	gp_widget *saved = gp_widget_layout_replace(dialog->layout);
 
-	dialog->dialog_exit = 0;
+	dialog->retval = 0;
 	in_dialog = 1;
 
 	for (;;) {
 		int ret = gp_fds_poll(&fds, gp_backend_timer_timeout(backend));
+
 		/* handle timers */
 		if (ret == 0) {
 			gp_backend_poll(backend);
 			gp_widgets_process_events(dialog->layout);
 		}
 
-		if (dialog->dialog_exit) {
+		if (dialog->retval) {
 			//TODO: this will flicker
 			gp_fill(backend->pixmap, fill_color);
 			gp_backend_flip(backend);
@@ -583,7 +584,7 @@ int gp_dialog_run(gp_dialog *dialog)
 
 			gp_widget_layout_replace(saved);
 
-			return dialog->dialog_exit;
+			return dialog->retval;
 		}
 
 		gp_widgets_redraw(dialog->layout);

@@ -149,7 +149,7 @@ gp_widget *gp_widget_layout_replace(gp_widget *layout);
  *
  * @return A return value from a dialog.
  */
-int gp_dialog_run(gp_dialog *dialog);
+long gp_dialog_run(gp_dialog *dialog);
 
 /*
  * TODO: Obsolete?

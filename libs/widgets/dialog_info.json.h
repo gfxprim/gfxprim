@@ -24,7 +24,7 @@ static const char *dialog_info = "\
      }, \
      { \
       \"type\": \"button\", \
-      \"label\": \"Ok\", \
+      \"label\": \"OK\", \
       \"uid\": \"btn_ok\" \
      } \
     ] \
