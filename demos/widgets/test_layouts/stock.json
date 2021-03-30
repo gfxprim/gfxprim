@@ -1,0 +1,38 @@
+{
+ "version": 1,
+ "cols": 2,
+ "rows": 4,
+ "widgets": [
+  {
+   "type": "stock",
+   "stock": "err"
+  },
+  {
+   "type": "stock",
+   "stock": "warn"
+  },
+  {
+   "type": "stock",
+   "stock": "info"
+  },
+  {
+  },
+  {
+   "type": "label",
+   "text": "STOCK_ERR",
+   "halign": "left"
+  },
+  {
+   "type": "label",
+   "text": "STOCK_WARN",
+   "halign": "left"
+  },
+  {
+   "type": "label",
+   "text": "STOCK_INFO",
+   "halign": "left"
+  },
+  {
+  }
+ ]
+}

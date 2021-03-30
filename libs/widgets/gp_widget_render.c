@@ -338,8 +338,9 @@ void gp_widgets_layout_init(gp_widget *layout, const char *win_tittle)
 	ctx.fg_color = gp_rgb_to_pixmap_pixel(0xee, 0xee, 0xee, ctx.buf);
 	ctx.fg2_color = gp_rgb_to_pixmap_pixel(0x77, 0xbb, 0xff, ctx.buf);
 	ctx.sel_color = gp_rgb_to_pixmap_pixel(0x11, 0x99, 0xff, ctx.buf);
-	ctx.alert_color = gp_rgb_to_pixmap_pixel(0xff, 0x55, 0x55, ctx.buf);
+	ctx.alert_color = gp_rgb_to_pixmap_pixel(0xff, 0x55, 0x00, ctx.buf);
 	ctx.accept_color = gp_rgb_to_pixmap_pixel(0x00, 0xbb, 0x00, ctx.buf);
+	ctx.warn_color = gp_rgb_to_pixmap_pixel(0xfc, 0xd1, 0x2a, ctx.buf);
 	fill_color = gp_rgb_to_pixmap_pixel(0x44, 0x44, 0x44, ctx.buf);
 
 	gp_widget_calc_size(layout, &ctx, 0, 0, 1);

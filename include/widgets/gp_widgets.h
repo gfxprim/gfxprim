@@ -47,6 +47,8 @@
 #include <widgets/gp_widget_timer.h>
 #include <widgets/gp_file_size.h>
 
+#include <widgets/gp_widget_stock.h>
+
 #include <widgets/gp_widget_dialog.h>
 #include <widgets/gp_dialog_msg.h>
 #include <widgets/gp_widget_dialog_file_open.h>

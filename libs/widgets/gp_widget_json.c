@@ -20,6 +20,57 @@
 #include <widgets/gp_widgets.h>
 #include <widgets/gp_widget_ops.h>
 
+/*
+ * This implements loading widgets that are build on top of existing widgets
+ * and hence does not have widget ops registered. Which allows us to construct
+ * anything from json description as long as we have a function that takes json
+ * and returns a widget.
+ */
+
+gp_widget *gp_widget_stock_from_json(json_object *json, void **uids);
+
+static struct from_json {
+	const char *type;
+	gp_widget *(*from_json)(json_object *json, void **uids);
+} from_json_loaders[] = {
+	{"stock", gp_widget_stock_from_json}
+};
+
+static gp_widget *load_from_json(const char *type, json_object *json, void **uids)
+{
+	unsigned int i;
+
+	for (i = 0; i < GP_ARRAY_SIZE(from_json_loaders); i++) {
+		if (!strcmp(from_json_loaders[i].type, type))
+			return from_json_loaders[i].from_json(json, uids);
+	}
+
+	return NULL;
+}
+
+static gp_widget *load_widget_by_type(const char *type, json_object *json, void **uids)
+{
+	const struct gp_widget_ops *ops = gp_widget_ops_by_id(type);
+
+	json_object_object_del(json, "type");
+
+	if (!ops) {
+		gp_widget *ret = load_from_json(type, json, uids);
+
+		if (!ret)
+			GP_WARN("Invalid widget type '%s'", type);
+
+		return ret;
+	}
+
+	if (!ops->from_json) {
+		GP_WARN("Unimplemented from_json for widget '%s'", type);
+		return NULL;
+	}
+
+	return ops->from_json(json, uids);
+}
+
 gp_widget *gp_widget_from_json(json_object *json, void **uids)
 {
 	json_object *json_type;
@@ -166,21 +217,7 @@ gp_widget *gp_widget_from_json(json_object *json, void **uids)
 		json_object_object_del(json, "shrink");
 	}
 
-	const struct gp_widget_ops *ops = gp_widget_ops_by_id(type);
-
-	if (!ops) {
-		GP_WARN("Invalid widget type '%s'", type);
-		goto err;
-	}
-
-	if (!ops->from_json) {
-		GP_WARN("Unimplemented from_json for widget '%s'", type);
-		goto err;
-	}
-
-	json_object_object_del(json, "type");
-
-	gp_widget *wid = ops->from_json(json, uids);
+	gp_widget *wid = load_widget_by_type(type, json, uids);
 	if (!wid)
 		goto err;
 
@@ -198,7 +235,8 @@ gp_widget *gp_widget_from_json(json_object *json, void **uids)
 	}
 
 	wid->align = halign | valign;
-	wid->on_event = on_event;
+	if (on_event)
+		wid->on_event = on_event;
 
 	if (shrink_set)
 		wid->no_shrink = !shrink;
