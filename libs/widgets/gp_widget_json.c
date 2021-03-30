@@ -276,6 +276,8 @@ static gp_widget *gp_widgets_from_json(json_object *json, void **uids)
 	json_object *json_version;
 	int version = 0;
 
+	gp_widget_render_ctx_init();
+
 	if (json_object_object_get_ex(json, "version", &json_version)) {
 		version = json_object_get_int(json_version);
 		GP_DEBUG(1, "Loading JSON layout version %i", version);

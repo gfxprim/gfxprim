@@ -194,11 +194,22 @@ static void init_fonts(void)
 	set_big_font(1);
 }
 
-void gp_widget_render_init(void)
+static void render_ctx_init(void)
 {
 	init_fonts();
-
 	ctx.padd = 2 * gp_text_descent(ctx.font);
+}
+
+void gp_widget_render_ctx_init(void)
+{
+	static uint8_t initialized;
+
+	if (initialized)
+		return;
+
+	GP_DEBUG(1, "Initializing fonts and padding");
+	render_ctx_init();
+	initialized = 1;
 }
 
 static gp_backend *backend;
@@ -211,7 +222,7 @@ void gp_widget_render_zoom(int zoom_inc)
 
 	font_size += zoom_inc;
 
-	gp_widget_render_init();
+	render_ctx_init();
 	gp_widget_resize(app_layout);
 	gp_widget_redraw(app_layout);
 }
@@ -321,7 +332,7 @@ void gp_widget_timer_queue_switch(gp_timer **);
 
 void gp_widgets_layout_init(gp_widget *layout, const char *win_tittle)
 {
-	gp_widget_render_init();
+	gp_widget_render_ctx_init();
 
 	backend = gp_backend_init(backend_init_str, win_tittle);
 	if (!backend)

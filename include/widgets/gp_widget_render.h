@@ -28,6 +28,7 @@ typedef struct gp_widget_render_ctx {
 	gp_pixel fg2_color;
 	gp_pixel sel_color;
 	gp_pixel alert_color;
+	gp_pixel warn_color;
 	gp_pixel accept_color;
 
 	/* fonts */
@@ -55,7 +56,14 @@ typedef struct gp_widget_render_ctx {
 	int dclick_ms;
 } gp_widget_render_ctx;
 
-void gp_widget_render_init(void);
+
+/*
+ * @brief Initializes render context fonts and padding.
+ *
+ * Colors are not initialized until we have a pixmap to render to since we do
+ * not know the pixel format until that time.
+ */
+void gp_widget_render_ctx_init(void);
 
 typedef struct gp_widget_timer {
 	uint32_t (*callback)(void *priv);
