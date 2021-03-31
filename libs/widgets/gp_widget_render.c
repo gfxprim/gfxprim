@@ -289,6 +289,7 @@ void gp_widget_render_timer_cancel(gp_widget *self)
 }
 
 static int in_dialog;
+static int back_from_dialog;
 
 void gp_widgets_redraw(struct gp_widget *layout)
 {
@@ -300,9 +301,19 @@ void gp_widgets_redraw(struct gp_widget *layout)
 	if (!layout->redraw && !layout->redraw_child)
 		return;
 
+	if (back_from_dialog) {
+		back_from_dialog = 0;
+		if (gp_pixmap_w(backend->pixmap) != layout->w ||
+		    gp_pixmap_h(backend->pixmap) != layout->h) {
+			gp_backend_resize(backend, layout->w, layout->h);
+			return;
+		}
+	}
+
 	if (gp_pixmap_w(backend->pixmap) < layout->w ||
 	    gp_pixmap_h(backend->pixmap) < layout->h) {
 		gp_backend_resize(backend, layout->w, layout->h);
+		return;
 	}
 
 	if (gp_pixmap_w(backend->pixmap) == 0 ||
@@ -521,10 +532,9 @@ gp_widget *gp_widget_layout_replace(gp_widget *layout)
 
 	gp_widget_calc_size(layout, &ctx, 0, 0, 1);
 
-	if (gp_pixmap_w(backend->pixmap) < layout->w ||
-	    gp_pixmap_h(backend->pixmap) < layout->h) {
-		gp_backend_resize(backend, layout->w, layout->h);
-	}
+	GP_DEBUG(1, "Replacing layout %p %ux%u with %p %ux%u",
+	         win_layout, win_layout->w, win_layout->h,
+	         layout, layout->w, layout->h);
 
 	gp_widget_resize(layout);
 	gp_widget_redraw(layout);
@@ -576,13 +586,11 @@ long gp_dialog_run(gp_dialog *dialog)
 		}
 
 		if (dialog->retval) {
-			//TODO: this will flicker
-			gp_fill(backend->pixmap, fill_color);
-			gp_backend_flip(backend);
-
 			in_dialog = 0;
 
 			gp_widget_layout_replace(saved);
+
+			back_from_dialog = 1;
 
 			return dialog->retval;
 		}
