@@ -47,4 +47,12 @@ void gp_fill_circle_seg(gp_pixmap *pixmap, gp_coord xcenter, gp_coord ycenter,
 void gp_fill_circle_seg_raw(gp_pixmap *pixmap, gp_coord xcenter, gp_coord ycenter,
                             gp_size r, uint8_t seg_flag, gp_pixel pixel);
 
+/* Filled Ring Segment */
+
+void gp_fill_ring_seg(gp_pixmap *pixmap, gp_coord xcenter, gp_coord ycenter,
+                      gp_size r1, gp_size r2, uint8_t seg_flag, gp_pixel pixel);
+
+void gp_fill_ring_seg_raw(gp_pixmap *pixmap, gp_coord xcenter, gp_coord ycenter,
+                          gp_size r1, gp_size r2, uint8_t seg_flag, gp_pixel pixel);
+
 #endif /* GFX_GP_CIRCLE_H */

@@ -12,3 +12,6 @@ gp_vline_raw_1BPP_LE_clip
 
 gp_symbol
 gp_symbol_raw
+
+gp_fill_ring_seg
+gp_fill_ring_seg_raw
