@@ -3,7 +3,7 @@
  * Copyright (C) 2009-2010 Jiri "BlueBear" Dluhos
  *                         <jiri.bluebear.dluhos@gmail.com>
  *
- * Copyright (C) 2009-2013 Cyril Hrubis <metan@ucw.cz>
+ * Copyright (C) 2009-2021 Cyril Hrubis <metan@ucw.cz>
  */
 
 #include <stdio.h>
@@ -31,16 +31,18 @@ static int fill = 1;
 static int show_axes = 1;
 
 /* Shape to be drawn */
-#define SHAPE_FIRST	1
-#define SHAPE_TRIANGLE	1
-#define SHAPE_CIRCLE    2
-#define SHAPE_RING	3
-#define SHAPE_ELLIPSE	4
-#define SHAPE_RECTANGLE	5
-#define SHAPE_TETRAGON  6
-#define SHAPE_POLYGON   7
-#define SHAPE_ARC	8
-#define SHAPE_LAST	8
+#define SHAPE_FIRST	 1
+#define SHAPE_TRIANGLE	 1
+#define SHAPE_CIRCLE     2
+#define SHAPE_CIRCLE_SEG 3
+#define SHAPE_RING	 4
+#define SHAPE_RING_SEG   5
+#define SHAPE_ELLIPSE	 6
+#define SHAPE_RECTANGLE	 7
+#define SHAPE_TETRAGON   8
+#define SHAPE_POLYGON    9
+#define SHAPE_ARC	10
+#define SHAPE_LAST	10
 static int shape = SHAPE_FIRST;
 
 /* Variants in coordinates, if applicable */
@@ -119,8 +121,38 @@ void draw_testing_circle(int x, int y, int xradius,
 		gp_circle(win, x, y, xradius, white);
 }
 
-void draw_testing_ring(int x, int y, int xradius,
+static uint8_t variant_to_segment(void)
+{
+	switch (variant) {
+	case 1:
+		return GP_CIRCLE_SEG1;
+	case 2:
+		return GP_CIRCLE_SEG2;
+	case 3:
+		return GP_CIRCLE_SEG3;
+	case 4:
+	default:
+		return GP_CIRCLE_SEG4;
+	}
+}
+
+void draw_testing_circle_seg(int x, int y, int xradius,
 			__attribute__((unused)) int yradius)
+{
+	uint8_t seg = variant_to_segment();
+
+	if (outline == 1)
+		gp_circle_seg(win, x, y, xradius, seg, yellow);
+
+	if (fill)
+		gp_fill_circle_seg(win, x, y, xradius, seg, red);
+
+	if (outline == 2)
+		gp_circle_seg(win, x, y, xradius, seg, white);
+}
+
+
+void draw_testing_ring(int x, int y, int xradius, int yradius)
 {
 	if (outline == 1)
 		gp_ring(win, x, y, xradius, yradius, yellow);
@@ -130,6 +162,24 @@ void draw_testing_ring(int x, int y, int xradius,
 
 	if (outline == 2)
 		gp_ring(win, x, y, xradius, yradius, white);
+}
+
+void draw_testing_ring_seg(int x, int y, int xradius, int yradius)
+{
+	uint8_t seg = variant_to_segment();
+
+	if (outline == 1) {
+		gp_circle_seg(win, x, y, xradius, seg, yellow);
+		gp_circle_seg(win, x, y, yradius, seg, yellow);
+	}
+
+	if (fill)
+		gp_fill_ring_seg(win, x, y, xradius, yradius, seg, red);
+
+	if (outline == 2) {
+		gp_circle_seg(win, x, y, xradius, seg, yellow);
+		gp_circle_seg(win, x, y, yradius, seg, yellow);
+	}
 }
 
 void draw_testing_ellipse(int x, int y, int xradius, int yradius)
@@ -258,9 +308,17 @@ void redraw_screen(void)
 		draw_testing_circle(center_x, center_y, xradius, yradius);
 		title = "CIRCLE";
 	break;
+	case SHAPE_CIRCLE_SEG:
+		draw_testing_circle_seg(center_x, center_y, xradius, yradius);
+		title = "CIRCLE SEGMENT";
+	break;
 	case SHAPE_RING:
 		draw_testing_ring(center_x, center_y, xradius, yradius);
 		title = "RING";
+	break;
+	case SHAPE_RING_SEG:
+		draw_testing_ring_seg(center_x, center_y, xradius, yradius);
+		title = "RING SEGMENT";
 	break;
 	case SHAPE_ELLIPSE:
 		draw_testing_ellipse(center_x, center_y, xradius, yradius);
