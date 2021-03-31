@@ -2,7 +2,7 @@
 
 /*
 
-   Copyright (c) 2014-2020 Cyril Hrubis <metan@ucw.cz>
+   Copyright (c) 2014-2021 Cyril Hrubis <metan@ucw.cz>
 
  */
 
@@ -25,7 +25,7 @@ static unsigned int frame_h(gp_widget *self, const gp_widget_render_ctx *ctx)
 {
 	const gp_text_style *font = gp_widget_tattr_font(self->frame->tattr, ctx);
 
-	if (self->frame->has_label) {
+	if (self->frame->title) {
 		return ctx->padd + gp_text_height(font);
 	}
 
@@ -41,7 +41,7 @@ static unsigned int payload_off_y(gp_widget *self, const gp_widget_render_ctx *c
 {
 	const gp_text_style *font = gp_widget_tattr_font(self->frame->tattr, ctx);
 
-	if (self->frame->has_label)
+	if (self->frame->title)
 		return gp_text_height(font);
 
 	return ctx->padd;
@@ -52,7 +52,7 @@ static unsigned int min_w(gp_widget *self, const gp_widget_render_ctx *ctx)
 	const gp_text_style *font = gp_widget_tattr_font(self->frame->tattr, ctx);
 	unsigned int min_w;
 
-	min_w = GP_MAX(gp_text_width(font, self->frame->label) + 2 * ctx->padd,
+	min_w = GP_MAX(gp_text_width(font, self->frame->title) + 2 * ctx->padd,
 		       gp_widget_min_w(self->frame->child, ctx));
 
 	return frame_w(ctx) + min_w;
@@ -129,14 +129,14 @@ static void render(gp_widget *self, const gp_offset *offset,
 		gp_rrect_xywh(ctx->buf, x + ctx->padd/2, y + payload_off_y(self, ctx)/2, w - ctx->padd,
 		              h - ctx->padd/2 - payload_off_y(self, ctx)/2, ctx->text_color);
 
-		if (frame->has_label) {
-			unsigned int sw = gp_text_width(font, self->frame->label) + ctx->padd;
+		if (frame->title) {
+			unsigned int sw = gp_text_width(font, self->frame->title) + ctx->padd;
 
 			gp_fill_rect_xywh(ctx->buf, x + ctx->padd + ctx->padd/2, y,
 			                  sw, gp_text_height(font), ctx->bg_color);
 
 			gp_text(ctx->buf, font, x + 2 * ctx->padd, y, GP_ALIGN_RIGHT|GP_VALIGN_BELOW,
-				ctx->text_color, ctx->bg_color, self->frame->label);
+				ctx->text_color, ctx->bg_color, self->frame->title);
 		}
 	}
 
@@ -174,14 +174,14 @@ static int focus(gp_widget *self, int sel)
 
 static gp_widget *json_to_frame(json_object *json, void **uids)
 {
-	const char *label = NULL;
+	const char *title = NULL;
 	json_object *json_child = NULL;
 	const char *strattr = NULL;
 	gp_widget_tattr tattr = GP_TATTR_BOLD;
 
 	json_object_object_foreach(json, key, val) {
-		if (!strcmp(key, "label"))
-			label = json_object_get_string(val);
+		if (!strcmp(key, "title"))
+			title = json_object_get_string(val);
 		else if (!strcmp(key, "widget"))
 			json_child = val;
 		else if (!strcmp(key, "tattr"))
@@ -194,7 +194,7 @@ static gp_widget *json_to_frame(json_object *json, void **uids)
 		GP_WARN("Invalid text attribute '%s'", strattr);
 
 	gp_widget *child = gp_widget_from_json(json_child, uids);
-	gp_widget *ret = gp_widget_frame_new(label, tattr, child);
+	gp_widget *ret = gp_widget_frame_new(title, tattr, child);
 
 	if (!ret)
 		gp_widget_free(child);
@@ -202,11 +202,17 @@ static gp_widget *json_to_frame(json_object *json, void **uids)
 	return ret;
 }
 
+static void frame_free(gp_widget *self)
+{
+	free(self->frame->title);
+}
+
 struct gp_widget_ops gp_widget_frame_ops = {
 	.min_w = min_w,
 	.min_h = min_h,
 	.render = render,
 	.event = event,
+	.free = frame_free,
 	.focus_xy = focus_xy,
 	.focus = focus,
 	.distribute_size = distribute_size,
@@ -214,17 +220,11 @@ struct gp_widget_ops gp_widget_frame_ops = {
 	.id = "frame",
 };
 
-gp_widget *gp_widget_frame_new(const char *label, gp_widget_tattr tattr,
+gp_widget *gp_widget_frame_new(const char *title, gp_widget_tattr tattr,
                                gp_widget *child)
 {
 	gp_widget *ret;
 	size_t size = sizeof(struct gp_widget_frame);
-
-	if (tattr && !label)
-		GP_WARN("Bold set for a frame without a label!");
-
-	if (label)
-		size += strlen(label) + 1;
 
 	ret = gp_widget_new(GP_WIDGET_FRAME, GP_WIDGET_CLASS_NONE, size);
 	if (!ret)
@@ -233,10 +233,8 @@ gp_widget *gp_widget_frame_new(const char *label, gp_widget_tattr tattr,
 	ret->frame->child = child;
 	ret->frame->tattr = tattr;
 
-	if (label) {
-		ret->frame->has_label = 1;
-		strcpy(ret->frame->label, label);
-	}
+	if (title)
+		ret->frame->title = strdup(title);
 
 	gp_widget_set_parent(child, ret);
 
@@ -257,4 +255,23 @@ gp_widget *gp_widget_frame_put(gp_widget *self, gp_widget *child)
 	gp_widget_resize(self);
 
 	return ret;
+}
+
+void gp_widget_frame_title_set(gp_widget *self, const char *title)
+{
+	char *dup = NULL;
+
+	GP_WIDGET_ASSERT(self, GP_WIDGET_FRAME, );
+
+	if (title) {
+		dup = strdup(title);
+		if (!dup)
+			return;
+	}
+
+	free(self->frame->title);
+	self->frame->title = dup;
+
+	gp_widget_resize(self);
+	gp_widget_redraw(self);
 }

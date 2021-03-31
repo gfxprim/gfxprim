@@ -14,7 +14,7 @@ Frame attributes can be accessed as `widget->frame`.
 gp_widget *gp_widget_frame_new(const char *label, gp_widget_tattr tattr, gp_widget *child);
 -------------------------------------------------------------------------------
 
-.Sets a frame child
+.Sets frame child
 [source,c]
 -------------------------------------------------------------------------------
 gp_widget *gp_widget_frame_put(gp_widget *self, gp_widget *child);
@@ -22,11 +22,18 @@ gp_widget *gp_widget_frame_put(gp_widget *self, gp_widget *child);
 
 Returns old frame child.
 
+.Sets frame title
+[source,c]
+-------------------------------------------------------------------------------
+void gp_widget_frame_title_set(gp_widget *self, const char *title);
+-------------------------------------------------------------------------------
+
+
 .Frame JSON attributes
 [cols=",,,3",options="header"]
 |===================================================
 | Attribute |  Type  | Default | Description
-|  +label+  | string |         | Frame label
+|  +title+  | string |         | Frame title
 |  +tattr+  |  tattr | "bold"  | link:widgets_tattr.html[Text attribute], e.g. bold.
 |  +widget+ |        |         | Frame child widget
 |===================================================

@@ -1,7 +1,7 @@
 {
   "version": 1,
   "type": "frame",
-  "label": "Frame Label",
+  "title": "Frame Title",
   "widget": {
    "cols": 2,
    "widgets": [

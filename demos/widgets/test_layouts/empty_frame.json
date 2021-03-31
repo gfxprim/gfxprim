@@ -1,7 +1,7 @@
 {
   "version": 1,
   "type": "frame",
-  "label": "Empty Frame Label",
+  "title": "Empty Frame Title",
   "widget":
   {
   }

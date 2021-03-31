@@ -4,7 +4,7 @@
   "widgets": [
     {
       "type": "frame",
-      "label": "Date",
+      "title": "Date",
       "align": "fill",
       "widget":
         {
@@ -35,7 +35,7 @@
     },
     {
       "type": "frame",
-      "label": "Time",
+      "title": "Time",
       "align": "fill",
       "widget":
         {

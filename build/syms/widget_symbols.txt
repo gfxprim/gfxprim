@@ -98,6 +98,7 @@ gp_widget_choice_set
 gp_widget_frame_new
 gp_widget_frame_ops
 gp_widget_frame_put
+gp_widget_frame_title_set
 
 gp_widget_grid_new
 gp_widget_grid_border_set

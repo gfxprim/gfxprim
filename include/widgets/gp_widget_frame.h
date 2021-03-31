@@ -2,7 +2,7 @@
 
 /*
 
-   Copyright (c) 2014-2020 Cyril Hrubis <metan@ucw.cz>
+   Copyright (c) 2014-2021 Cyril Hrubis <metan@ucw.cz>
 
  */
 
@@ -12,18 +12,27 @@
 struct gp_widget_frame {
 	gp_widget *child;
 	gp_widget_tattr tattr;
-	uint8_t has_label:1;
-	char label[];
+	char *title;
 };
 
 /**
  * @brief Allocates and initializes a new frame label.
  *
- * @label: A frame label.
- * @bold: If non-zero frame label test is bold.
- * @child: Frame widget child widget.
+ * @label A frame label.
+ * @bold If non-zero frame label test is bold.
+ * @child Frame widget child widget.
+ *
+ * @return A frame widget.
  */
-gp_widget *gp_widget_frame_new(const char *label, gp_widget_tattr tattr, gp_widget *child);
+gp_widget *gp_widget_frame_new(const char *title, gp_widget_tattr tattr, gp_widget *child);
+
+/**
+ * @brief Sets a frame title.
+ *
+ * @label A frame label.
+ * @title New title.
+ */
+void gp_widget_frame_title_set(gp_widget *self, const char *title);
 
 /**
  * @brief Puts a child widget into a frame widget.
