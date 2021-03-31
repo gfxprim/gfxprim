@@ -301,7 +301,7 @@ static int event(gp_widget *self, const gp_widget_render_ctx *ctx, gp_event *ev)
 	return 0;
 }
 
-static gp_widget *json_to_tbox(json_object *json, void **uid)
+static gp_widget *json_to_tbox(json_object *json, gp_htable **uids)
 {
 	const char *text = NULL;
 	const char *strattr = NULL;
@@ -310,7 +310,7 @@ static gp_widget *json_to_tbox(json_object *json, void **uid)
 	int max_len = 0;
 	gp_widget_tattr attr;
 
-	(void)uid;
+	(void)uids;
 
 	json_object_object_foreach(json, key, val) {
 		if (!strcmp(key, "text"))

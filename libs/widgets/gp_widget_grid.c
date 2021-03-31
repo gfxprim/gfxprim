@@ -846,7 +846,7 @@ static void put_grid_border_padd(void *array, unsigned int pos, uint8_t val)
 	border[pos].fill = val;
 }
 
-static gp_widget *json_to_grid(json_object *json, void **uids)
+static gp_widget *json_to_grid(json_object *json, gp_htable **uids)
 {
 	int cols = 1, rows = 1, pad = -1;
 	json_object *widgets = NULL;

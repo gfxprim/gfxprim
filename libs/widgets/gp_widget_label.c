@@ -75,7 +75,7 @@ static void render(gp_widget *self, const gp_offset *offset,
 	            ctx->text_color, ctx->bg_color, self->label->text);
 }
 
-static gp_widget *json_to_label(json_object *json, void **uids)
+static gp_widget *json_to_label(json_object *json, gp_htable **uids)
 {
 	const char *label = NULL;
 	const char *strattr = NULL;

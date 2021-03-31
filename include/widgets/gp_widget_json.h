@@ -21,7 +21,7 @@ struct json_object;
  *
  * @return A widget layout or a NULL in case of a failure.
  */
-gp_widget *gp_widget_from_json(struct json_object *json, void **uids);
+gp_widget *gp_widget_from_json(struct json_object *json, gp_htable **uids);
 
 /**
  * @brief Loads a widget layout given a string with JSON layout.
@@ -31,7 +31,7 @@ gp_widget *gp_widget_from_json(struct json_object *json, void **uids);
  *
  * @return A widget layout or a NULL in case of a failure.
  */
-gp_widget *gp_widget_from_json_str(const char *str, void **uids);
+gp_widget *gp_widget_from_json_str(const char *str, gp_htable **uids);
 
 /**
  * @brief Loads a widget layout given a path to a JSON layout description.
@@ -41,7 +41,7 @@ gp_widget *gp_widget_from_json_str(const char *str, void **uids);
  *
  * @return A widget layout or a NULL in case of a failure.
  */
-gp_widget *gp_widget_layout_json(const char *fname, void **uids);
+gp_widget *gp_widget_layout_json(const char *fname, gp_htable **uids);
 
 /**
  * @brief Attempts to get a pointer to a function given it's name.

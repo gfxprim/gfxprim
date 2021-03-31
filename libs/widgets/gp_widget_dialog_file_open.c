@@ -331,7 +331,7 @@ static const gp_widget_table_header header[] = {
 
 gp_dialog *gp_dialog_file_open_new(const char *path)
 {
-	void *uids = NULL;
+	gp_htable *uids = NULL;
 	gp_widget *layout, *w;
 	gp_dialog *ret;
 	struct file_dialog *dialog;

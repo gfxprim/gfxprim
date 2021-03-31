@@ -172,7 +172,7 @@ static int focus(gp_widget *self, int sel)
 	return gp_widget_ops_render_focus(self->frame->child, sel);
 }
 
-static gp_widget *json_to_frame(json_object *json, void **uids)
+static gp_widget *json_to_frame(json_object *json, gp_htable **uids)
 {
 	const char *title = NULL;
 	json_object *json_child = NULL;

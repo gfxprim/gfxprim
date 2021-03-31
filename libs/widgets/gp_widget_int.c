@@ -108,7 +108,7 @@ void gp_widget_int_set_min(gp_widget *self, int min)
 }
 
 
-static gp_widget *json_to_int(enum gp_widget_type type, json_object *json, void **uids)
+static gp_widget *json_to_int(enum gp_widget_type type, json_object *json, gp_htable **uids)
 {
 	const char *dir = NULL;
 	int min = 0, max = 0, ival = 0, val_set = 0;
@@ -320,7 +320,7 @@ static int spin_event(gp_widget *self, const gp_widget_render_ctx *ctx, gp_event
 	return 0;
 }
 
-static gp_widget *json_to_spin(json_object *json, void **uids)
+static gp_widget *json_to_spin(json_object *json, gp_htable **uids)
 {
 	return json_to_int(GP_WIDGET_SPINNER, json, uids);
 }
@@ -503,7 +503,7 @@ static int slider_event(gp_widget *self, const gp_widget_render_ctx *ctx, gp_eve
 	return 0;
 }
 
-static gp_widget *json_to_slider(json_object *json, void **uids)
+static gp_widget *json_to_slider(json_object *json, gp_htable **uids)
 {
 	return json_to_int(GP_WIDGET_SLIDER, json, uids);
 }

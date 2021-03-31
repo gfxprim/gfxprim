@@ -91,7 +91,7 @@ int load_sys_time(gp_widget_event *ev)
 
 int main(int argc, char *argv[])
 {
-	static void *uids;
+	static gp_htable *uids;
 
 	gp_widget *layout = gp_widget_layout_json("datetime.json", &uids);
 	if (!layout)

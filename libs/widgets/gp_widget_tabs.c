@@ -408,7 +408,7 @@ static int focus_xy(gp_widget *self, const gp_widget_render_ctx *ctx,
 	return focus_title(self, ctx, x);
 }
 
-static gp_widget *json_to_tabs(json_object *json, void **uids)
+static gp_widget *json_to_tabs(json_object *json, gp_htable **uids)
 {
 	json_object *widgets = NULL;
 	json_object *labels = NULL;

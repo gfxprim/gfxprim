@@ -157,7 +157,7 @@ static int gp_widget_stock_type_from_str(const char *type)
 	return -1;
 }
 
-gp_widget *gp_widget_stock_from_json(json_object *json, void **uids)
+gp_widget *gp_widget_stock_from_json(json_object *json, gp_htable **uids)
 {
 	const char *stock = NULL;
 	int type;

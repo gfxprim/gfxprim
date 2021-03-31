@@ -105,7 +105,7 @@ struct gp_widget_ops {
 	/*
 	 * json_object -> widget converter.
 	 */
-	gp_widget *(*from_json)(struct json_object *json, void **uids);
+	gp_widget *(*from_json)(struct json_object *json, gp_htable **uids);
 
 	/* id used for debugging */
 	const char *id;

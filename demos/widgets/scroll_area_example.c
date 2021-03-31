@@ -8,7 +8,7 @@
 
 #include <widgets/gp_widgets.h>
 
-static void *uids;
+static gp_htable *uids;
 
 int button_event(gp_widget_event *ev)
 {

@@ -590,7 +590,7 @@ err:
 	return NULL;
 }
 
-static gp_widget *json_to_table(json_object *json, void **uids)
+static gp_widget *json_to_table(json_object *json, gp_htable **uids)
 {
 	int cols = -1, min_rows = -1;
 	void *set_row = NULL, *get_elem = NULL, *sort = NULL;

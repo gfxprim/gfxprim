@@ -472,7 +472,7 @@ static void distribute_size(gp_widget *self, const gp_widget_render_ctx *ctx, in
 	gp_widget_ops_distribute_size(area->child, ctx, child_w, child_h, new_wh);
 }
 
-static gp_widget *json_to_scroll(json_object *json, void **uids)
+static gp_widget *json_to_scroll(json_object *json, gp_htable **uids)
 {
 	json_object *childjs = NULL;
 	int min_w = 0;

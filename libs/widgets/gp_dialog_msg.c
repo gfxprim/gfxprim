@@ -41,7 +41,7 @@ static gp_widget *load_layout(enum gp_dialog_msg_type type, const char *title,
                               gp_dialog *dialog, gp_widget **label)
 {
 	gp_widget *ret, *w;
-	void *uids = NULL;
+	gp_htable *uids = NULL;
 
 	switch (type) {
 	case GP_DIALOG_MSG_INFO:

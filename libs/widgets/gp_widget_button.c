@@ -405,7 +405,7 @@ static enum gp_widget_button_type align_for_type(enum gp_widget_button_type type
 	return type;
 }
 
-static gp_widget *json_to_button(json_object *json, void **uids)
+static gp_widget *json_to_button(json_object *json, gp_htable **uids)
 {
 	const char *label = NULL;
 	const char *type = NULL;

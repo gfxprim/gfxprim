@@ -8,7 +8,7 @@
 
 #include <gfxprim.h>
 
-static void *uids;
+static gp_htable *uids;
 
 static gp_pixel fg_rgb;
 static gp_pixel bg_rgb;

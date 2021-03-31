@@ -11,6 +11,7 @@
 
 #include <stdlib.h>
 #include <stdint.h>
+#include <utils/gp_types.h>
 #include <widgets/gp_common.h>
 #include <widgets/gp_widget_types.h>
 

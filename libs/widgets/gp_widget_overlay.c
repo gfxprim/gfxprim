@@ -97,7 +97,7 @@ static void render(gp_widget *self, const gp_offset *offset,
 	}
 }
 
-static gp_widget *json_to_overlay(json_object *json, void **uids)
+static gp_widget *json_to_overlay(json_object *json, gp_htable **uids)
 {
 	json_object *widgets = NULL;
 

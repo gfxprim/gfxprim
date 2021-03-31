@@ -27,16 +27,16 @@
  * and returns a widget.
  */
 
-gp_widget *gp_widget_stock_from_json(json_object *json, void **uids);
+gp_widget *gp_widget_stock_from_json(json_object *json, gp_htable **uids);
 
 static struct from_json {
 	const char *type;
-	gp_widget *(*from_json)(json_object *json, void **uids);
+	gp_widget *(*from_json)(json_object *json, gp_htable **uids);
 } from_json_loaders[] = {
 	{"stock", gp_widget_stock_from_json}
 };
 
-static gp_widget *load_from_json(const char *type, json_object *json, void **uids)
+static gp_widget *load_from_json(const char *type, json_object *json, gp_htable **uids)
 {
 	unsigned int i;
 
@@ -50,7 +50,7 @@ static gp_widget *load_from_json(const char *type, json_object *json, void **uid
 	return NULL;
 }
 
-static gp_widget *load_widget_by_type(const char *type, json_object *json, void **uids)
+static gp_widget *load_widget_by_type(const char *type, json_object *json, gp_htable **uids)
 {
 	const struct gp_widget_ops *ops = gp_widget_ops_by_id(type);
 
@@ -73,7 +73,7 @@ static gp_widget *load_widget_by_type(const char *type, json_object *json, void 
 	return ops->from_json(json, uids);
 }
 
-gp_widget *gp_widget_from_json(json_object *json, void **uids)
+gp_widget *gp_widget_from_json(json_object *json, gp_htable **uids)
 {
 	json_object *json_type;
 	const char *type = "grid";
@@ -272,7 +272,7 @@ void *gp_widget_callback_addr(const char *fn_name)
 	return addr;
 }
 
-static gp_widget *gp_widgets_from_json(json_object *json, void **uids)
+static gp_widget *gp_widgets_from_json(json_object *json, gp_htable **uids)
 {
 	gp_widget *ret;
 	json_object *json_version;
@@ -353,7 +353,7 @@ err:
 	GP_WARN("json_tokener_parse_ex(): %s: %zu", err, bytes_consumed);
 }
 
-gp_widget *gp_widget_layout_json(const char *path, void **uids)
+gp_widget *gp_widget_layout_json(const char *path, gp_htable **uids)
 {
 	struct json_tokener *tok;
 	int fd;
@@ -412,7 +412,7 @@ err:
 	return ret;
 }
 
-gp_widget *gp_widget_from_json_str(const char *str, void **uids)
+gp_widget *gp_widget_from_json_str(const char *str, gp_htable **uids)
 {
 	struct json_tokener *tok;
 	json_object *json = NULL;

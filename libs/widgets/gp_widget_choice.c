@@ -12,7 +12,7 @@
 #include <gp_string.h>
 
 gp_widget *gp_widget_choice_from_json(unsigned int widget_type,
-                                      json_object *json, void **uids)
+                                      json_object *json, gp_htable **uids)
 {
 	json_object *labels = NULL;
 	int sel_label = 0;

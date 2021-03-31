@@ -49,6 +49,6 @@ void gp_dialog_free(gp_dialog *self);
  *
  * @return A widget layout or NULL in a case of a failure.
  */
-gp_widget *gp_dialog_layout_load(const char *dialog_name, const char *fallback_json, void **uids);
+gp_widget *gp_dialog_layout_load(const char *dialog_name, const char *fallback_json, gp_htable **uids);
 
 #endif /* GP_DIALOG_H */

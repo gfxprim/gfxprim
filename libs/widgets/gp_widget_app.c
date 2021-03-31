@@ -12,7 +12,7 @@
 #include <widgets/gp_widget_json.h>
 #include <widgets/gp_widget_app.h>
 
-static gp_widget *try_load_layout(const char *pathname, void **uids)
+static gp_widget *try_load_layout(const char *pathname, gp_htable **uids)
 {
 	if (access(pathname, R_OK)) {
 		GP_DEBUG(3, "File '%s' does not exists or is not readable", pathname);
@@ -24,7 +24,7 @@ static gp_widget *try_load_layout(const char *pathname, void **uids)
 	return gp_widget_layout_json(pathname, uids);
 }
 
-static gp_widget *layout_load(const char *app_name, const char *json_name, void **uids)
+static gp_widget *layout_load(const char *app_name, const char *json_name, gp_htable **uids)
 {
 	gp_widget *layout;
 	char *pathname;
@@ -69,7 +69,7 @@ ret:
 	return layout;
 }
 
-gp_widget *gp_app_layout_load(const char *app_name, void **uids)
+gp_widget *gp_app_layout_load(const char *app_name, gp_htable **uids)
 {
 	return layout_load(app_name, "layout", uids);
 }

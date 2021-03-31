@@ -180,7 +180,7 @@ void gp_widget_markup_refresh(gp_widget *self)
 	gp_widget_redraw(self);
 }
 
-static gp_widget *json_to_markup(json_object *json, void **uids)
+static gp_widget *json_to_markup(json_object *json, gp_htable **uids)
 {
 	const char *markup = NULL;
 	char *(*get)(unsigned int var_id, char *old_val) = NULL;

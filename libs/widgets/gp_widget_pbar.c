@@ -126,7 +126,7 @@ static int check_max(double max)
 	return 0;
 }
 
-static gp_widget *json_to_pbar(json_object *json, void **uids)
+static gp_widget *json_to_pbar(json_object *json, gp_htable **uids)
 {
 	double val = 0, max = 100;
 	const char *type = NULL;

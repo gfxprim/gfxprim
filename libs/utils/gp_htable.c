@@ -51,20 +51,20 @@ typedef struct {
 	void *val;
 } htable_elem;
 
-typedef struct {
+struct gp_htable {
 	htable_elem *elems;
 	unsigned int size;
 	unsigned int used;
 	int flags;
-} htable;
+};
 
-void *gp_htable_new(unsigned int order, int flags)
+gp_htable *gp_htable_new(unsigned int order, int flags)
 {
 	order = GP_MIN(order, GP_ARRAY_SIZE(primes));
 
 	size_t size = primes[order] * sizeof(htable_elem);
 	htable_elem *elems = malloc(size);
-	htable *table = malloc(sizeof(htable));
+	gp_htable *table = malloc(sizeof(gp_htable));
 
 
 	GP_DEBUG(1, "Allocating hash table order %u", order);
@@ -85,10 +85,8 @@ void *gp_htable_new(unsigned int order, int flags)
 	return table;
 }
 
-void gp_htable_free(void *table)
+void gp_htable_free(gp_htable *self)
 {
-	htable *self = table;
-
 	if (self->flags & GP_HTABLE_COPY_KEY ||
 	    self->flags & GP_HTABLE_FREE_KEY) {
 		unsigned int i;
@@ -113,7 +111,7 @@ static void put(htable_elem *elems, unsigned int size,
 	elems[h].key = key;
 }
 
-static void rehash(htable *self)
+static void rehash(gp_htable *self)
 {
 	unsigned int i, order = 0;
 
@@ -146,10 +144,8 @@ static void rehash(htable *self)
 	self->size = size;
 }
 
-void gp_htable_put(void *table, void *val, char *key)
+void gp_htable_put(gp_htable *self, void *val, char *key)
 {
-	htable *self = table;
-
 	if (self->flags & GP_HTABLE_COPY_KEY)
 		key = strdup(key);
 
@@ -164,12 +160,11 @@ void gp_htable_put(void *table, void *val, char *key)
 	put(self->elems, self->size, val, key);
 }
 
-void *gp_htable_get(void *table, const char *key)
+void *gp_htable_get(gp_htable *self, const char *key)
 {
-	if (!table)
+	if (!self)
 		return NULL;
 
-	htable *self = table;
 	unsigned int h = hash(key, self->size);
 
 	while (self->elems[h].val) {

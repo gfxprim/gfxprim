@@ -92,7 +92,7 @@ static void render(gp_widget *self, const gp_offset *offset,
 	gp_widget_ops_render(layout, &child_offset, ctx, flags);
 }
 
-static gp_widget *json_to_switch(json_object *json, void **uids)
+static gp_widget *json_to_switch(json_object *json, gp_htable **uids)
 {
 	json_object *widgets = NULL;
 

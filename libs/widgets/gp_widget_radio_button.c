@@ -159,7 +159,7 @@ static int event(gp_widget *self, const gp_widget_render_ctx *ctx, gp_event *ev)
 	return 0;
 }
 
-static gp_widget *json_to_radiobutton(json_object *json, void **uids)
+static gp_widget *json_to_radiobutton(json_object *json, gp_htable **uids)
 {
 	return gp_widget_choice_from_json(GP_WIDGET_RADIOBUTTON, json, uids);
 }

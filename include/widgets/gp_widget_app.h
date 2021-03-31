@@ -21,7 +21,7 @@
  *
  * @return An application widget layout or NULL in a case of failure.
  */
-gp_widget *gp_app_layout_load(const char *app_name, void **uids);
+gp_widget *gp_app_layout_load(const char *app_name, gp_htable **uids);
 
 /**
  * @brief Loads an application fragment given application name and fragment name.

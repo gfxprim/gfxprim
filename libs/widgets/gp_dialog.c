@@ -37,7 +37,7 @@ void gp_dialog_free(gp_dialog *self)
 	free(self);
 }
 
-static gp_widget *try_load_layout(const char *pathname, void **uids)
+static gp_widget *try_load_layout(const char *pathname, gp_htable **uids)
 {
 	if (access(pathname, R_OK)) {
 		GP_DEBUG(3, "File '%s' does not exists or is not readable", pathname);
@@ -50,7 +50,7 @@ static gp_widget *try_load_layout(const char *pathname, void **uids)
 }
 
 gp_widget *gp_dialog_layout_load(const char *dialog_name,
-                                 const char *fallback_json, void **uids)
+                                 const char *fallback_json, gp_htable **uids)
 {
 	gp_widget *layout;
 	char *pathname = NULL;
