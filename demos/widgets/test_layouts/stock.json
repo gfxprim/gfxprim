@@ -16,6 +16,8 @@
    "stock": "info"
   },
   {
+   "type": "stock",
+   "stock": "question"
   },
   {
    "type": "label",
@@ -33,6 +35,9 @@
    "halign": "left"
   },
   {
+   "type": "label",
+   "text": "STOCK_QUESTION",
+   "halign": "left"
   }
  ]
 }

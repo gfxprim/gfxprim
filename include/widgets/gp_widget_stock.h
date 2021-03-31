@@ -13,6 +13,7 @@ enum gp_widget_stock_types {
 	GP_WIDGET_STOCK_ERR,
 	GP_WIDGET_STOCK_WARN,
 	GP_WIDGET_STOCK_INFO,
+	GP_WIDGET_STOCK_QUESTION,
 };
 
 gp_widget *gp_widget_stock_new(enum gp_widget_stock_types type);

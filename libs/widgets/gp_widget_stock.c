@@ -76,6 +76,33 @@ static int redraw_stock_info(gp_widget_event *ev)
 	return 1;
 }
 
+static int redraw_stock_question(gp_widget_event *ev)
+{
+	gp_pixmap *pix = ev->self->pixmap->pixmap;
+	const gp_widget_render_ctx *ctx = ev->ctx;
+
+	if (ev->type != GP_WIDGET_EVENT_REDRAW)
+		return 0;
+
+	gp_coord cx = pix->w / 2;
+	gp_coord cy = pix->h / 2;
+	gp_size c = pix->w/2 - 2;
+	gp_size r = c/5;
+
+	gp_fill_rrect_xywh(pix, 0, 0, pix->w, pix->h, ctx->bg_color, ctx->sel_color, ctx->text_color);
+
+	if (r > 1)
+		gp_fill_circle(pix, cx, cy+cy/2+r, r, ctx->text_color);
+	else
+		gp_fill_rect_xyxy(pix, cx-r, cy+cy/2, cx+r, cy+cy/2+2*r, ctx->text_color);
+
+	gp_fill_rect_xyxy(pix, cx-r, cy-cy/2+3*r, cx+r, cy+2*r, ctx->text_color);
+	gp_fill_ring_seg(pix, cx, cy-cy/2 + r, r, 3*r, GP_CIRCLE_SEG1 | GP_CIRCLE_SEG2 |GP_CIRCLE_SEG4, ctx->text_color);
+	gp_fill_triangle(pix, cx-r, cy-cy/2+3*r, cx, cy-r+1, cx, cy, ctx->text_color);
+
+	return 1;
+}
+
 gp_widget *gp_widget_stock_new(enum gp_widget_stock_types type)
 {
 	const gp_widget_render_ctx *ctx = gp_widgets_render_ctx();
@@ -91,6 +118,9 @@ gp_widget *gp_widget_stock_new(enum gp_widget_stock_types type)
 	break;
 	case GP_WIDGET_STOCK_INFO:
 		ret = gp_widget_pixmap_new(w, w, redraw_stock_info, NULL);
+	break;
+	case GP_WIDGET_STOCK_QUESTION:
+		ret = gp_widget_pixmap_new(w, w, redraw_stock_question, NULL);
 	break;
 	default:
 		GP_WARN("Invalid stock type %i\n", type);
@@ -111,7 +141,8 @@ static struct stock_types {
 } stock_types[] = {
 	{"err", GP_WIDGET_STOCK_ERR},
 	{"warn", GP_WIDGET_STOCK_WARN},
-	{"info", GP_WIDGET_STOCK_INFO}
+	{"info", GP_WIDGET_STOCK_INFO},
+	{"question", GP_WIDGET_STOCK_QUESTION}
 };
 
 static int gp_widget_stock_type_from_str(const char *type)
