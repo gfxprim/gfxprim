@@ -4,7 +4,7 @@ static const char *dialog_warn = "\
  \"widgets\": [ \
   { \
    \"type\": \"frame\", \
-   \"label\": \"Warning\", \
+   \"uid\": \"title\", \
    \"widget\": { \
     \"rows\": 2, \
     \"widgets\": [ \

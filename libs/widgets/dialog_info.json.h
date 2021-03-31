@@ -4,7 +4,7 @@ static const char *dialog_info = "\
  \"widgets\": [ \
   { \
    \"type\": \"frame\", \
-   \"label\": \"Info\", \
+   \"uid\": \"title\", \
    \"widget\": { \
     \"rows\": 2, \
     \"widgets\": [ \

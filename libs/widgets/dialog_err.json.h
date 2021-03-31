@@ -4,7 +4,7 @@ static const char *dialog_err = "\
  \"widgets\": [ \
   { \
    \"type\": \"frame\", \
-   \"label\": \"Error\", \
+   \"uid\": \"title\", \
    \"widget\": { \
     \"rows\": 2, \
     \"widgets\": [ \

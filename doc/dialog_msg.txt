@@ -1,7 +1,8 @@
 Message dialogs
 ---------------
 
-Message dialogs shows an user a message with a 'OK' button.
+Message dialogs shows an user a message with a 'OK' button or buttons to
+confirm or cancel an action.
 
 [source,c]
 -------------------------------------------------------------------------------
@@ -9,15 +10,29 @@ enum gp_dialog_msg_type {
         GP_DIALOG_MSG_INFO,
         GP_DIALOG_MSG_WARN,
         GP_DIALOG_MSG_ERR,
+	GP_DIALOG_MSG_QUESTION,
 };
 
-int gp_dialog_msg_run(enum gp_dialog_msg_type type, const char *msg);
+enum gp_dialog_msg_retval {
+	GP_DIALOG_EXIT,
+	GP_DIALOG_YES,
+	GP_DIALOG_NO,
+	GP_DIALOG_ERR,
+};
 
-int gp_dialog_msg_printf_run(enum gp_dialog_msg_type type, const char *fmt, ...)
-                             __attribute__((format (printf, 2, 3)));
+int gp_dialog_msg_run(enum gp_dialog_msg_type type, const char *title, const char *msg);
+
+int gp_dialog_msg_printf_run(enum gp_dialog_msg_type type, const char *title, const char *fmt, ...)
 --------------------------------------------------------------------------------
 
-Creates and runs a message dialog.
+Creates and runs a message dialog. The `title` is the dialog
+link:widget_frame.html[frame] title. The `msg` is the dialog message.
+
+Message dialogs return either 'GP_DIALOG_EXIT' or in a case of internal error
+'GP_DIALOG_ERR' i.e. allocation failure, JSON layout couldn't be loaded, etc.
+
+Question dialog returns 'GP_DIALOG_YES', 'GP_DIALOG_NO' or 'GP_DIALOG_ERR' in
+a case of an internal error.
 
 .An info dialog
 image:dialog_msg_info.png[Info message dialog]
@@ -27,3 +42,6 @@ image:dialog_msg_warn.png[Warning message dialog]
 
 .An error dialog
 image:dialog_msg_err.png[Error message dialog]
+
+.A question dialog
+image:dialog_question.png[Question dialog]

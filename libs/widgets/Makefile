@@ -4,7 +4,8 @@ include $(TOPDIR)/pre.mk
 CSOURCES=$(shell ls *.c)
 LIBNAME=widgets
 BUILDLIB=yes
-DIALOGS=dialog_err.json.h dialog_info.json.h dialog_warn.json.h dialog_file_open.json.h
+DIALOGS=dialog_err.json.h dialog_info.json.h dialog_warn.json.h \
+	dialog_question.json.h dialog_file_open.json.h
 
 $(DIALOGS): %.json.h: %.json
 	@echo "J2H  $@"
