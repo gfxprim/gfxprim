@@ -118,6 +118,7 @@ static void render(gp_widget *self, const gp_offset *offset,
 	switch (self->b->type & GP_BUTTON_TYPE_MASK) {
 	case GP_BUTTON_LABEL:
 	break;
+	case GP_BUTTON_YES:
 	case GP_BUTTON_OK:
 		gp_fill_tetragon(ctx->buf, cx + sym_r, cy - sym_r,
 		                 cx, cy + sym_r,
@@ -131,6 +132,7 @@ static void render(gp_widget *self, const gp_offset *offset,
 				 cx - sym_r + (asc_half/3), cy,
 				 ctx->accept_color);
 	break;
+	case GP_BUTTON_NO:
 	case GP_BUTTON_CANCEL:
 		cross(ctx->buf, cx, cy, sym_r, asc_half/4, ctx->alert_color);
 	break;
@@ -344,6 +346,8 @@ static struct btn_type_names {
 } type_names[] = {
 	{"ok", GP_BUTTON_OK | GP_BUTTON_TEXT_RIGHT},
 	{"cancel", GP_BUTTON_CANCEL | GP_BUTTON_TEXT_RIGHT},
+	{"yes", GP_BUTTON_YES | GP_BUTTON_TEXT_RIGHT},
+	{"no", GP_BUTTON_NO | GP_BUTTON_TEXT_RIGHT},
 	{"open", GP_BUTTON_OPEN | GP_BUTTON_TEXT_RIGHT},
 	{"save", GP_BUTTON_SAVE | GP_BUTTON_TEXT_RIGHT},
 	{"prev", GP_BUTTON_PREV | GP_BUTTON_TEXT_RIGHT},
