@@ -1,0 +1,11 @@
+Utils
+-----
+
+Utils is core part of the library that implements generic data structures
+such as vector, matrix, link list or hash table.
+
+
+Data Structures
+~~~~~~~~~~~~~~~
+
+* link:hash_table.html[Hash table]

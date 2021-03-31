@@ -1,0 +1,48 @@
+Hash table
+----------
+
+Hash table implements fast mapping between strings and pointers.
+
+.Hash table constructor and destructor
+[source,c]
+-------------------------------------------------------------------------------
+enum gp_htable_flags {
+        GP_HTABLE_COPY_KEY = 0x01,
+        GP_HTABLE_FREE_KEY = 0x02,
+};
+
+gp_htable *gp_htable_new(unsigned int order, int flags);
+
+void gp_htable_free(gp_htable *self);
+-------------------------------------------------------------------------------
+
+Allocates and frees a hash table.
+
+The `order` can be used to pass a hint on number of expected records that are
+going to be put into the table, which can save rehasing operations. Order 0
+table is expected to hold aprox. 5 entries and the size aproximetly doubles
+with each order increase.
+
+The `GP_HTABLE_COPY_KEY` can be used request to `strdup()` the string key on
+`gp_htable_put()`, if not set the table just stores pointer to the key
+instead.
+
+Similarily the `GP_HTABLE_FREE_KEY` can be passed to `free()` the key when
+table is being freed.
+
+NOTE: `GP_HTABLE_COPY_KEY` implies `GP_HTABLE_FREE_KEY`.
+
+.Hash table put
+[source,c]
+-------------------------------------------------------------------------------
+void gp_htable_put(gp_htable *self, void *val, char *key);
+-------------------------------------------------------------------------------
+
+Puts an record to the hash table.
+
+[source,c]
+-------------------------------------------------------------------------------
+void *gp_htable_get(void *self, const char *key);
+-------------------------------------------------------------------------------
+
+Returns a record from a table or NULL if not found.
