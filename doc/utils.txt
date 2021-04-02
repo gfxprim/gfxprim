@@ -8,5 +8,7 @@ such as vector, matrix, link list or hash table.
 Data Structures
 ~~~~~~~~~~~~~~~
 
+* link:vector.html[Vector]
+* link:matrix.html[Matrix]
 * link:hash_table.html[Hash table]
 * link:linked_list.html[Linked list]

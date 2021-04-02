@@ -1,0 +1,148 @@
+Vector
+------
+
+Vector is a resizeable C array.
+
+Vector expects a frequent resizes hence it keeps the underlying memory size
+slightly bigger than actual size in order to keep the memory reallocations at
+minimum.
+
+NOTE: See also link:example_vector.html[vector example usage].
+
+.Vector allocation
+[source,c]
+-------------------------------------------------------------------------------
+void *gp_vec_new(size_t length, size_t unit);
+
+/* Example usage */
+struct user_struct {
+	...
+};
+
+void func(...)
+{
+	struct user_struct *array = gp_vec_new(10, sizeof(struct user_struct));
+
+	if (!array)
+		return;
+
+	array[0].foo = 123;
+
+	...
+
+	gp_vec_free(array);
+}
+-------------------------------------------------------------------------------
+
+Allocates a new vector of initial `length` and for elements of size `unit`.
+
+Initial length can be 0 as vector can be resized later.
+
+Returns NULL on allocation failure.
+
+.Vector free
+[source,c]
+-------------------------------------------------------------------------------
+void gp_vec_free(void *self);
+-------------------------------------------------------------------------------
+
+Frees the vector. Passing NULL as `self` is no-op.
+
+.Vector lenght and unit
+[source,c]
+-------------------------------------------------------------------------------
+size_t gp_vec_len(const void *self);
+
+size_t gp_vec_unit(const void *self);
+-------------------------------------------------------------------------------
+
+The `gp_vec_len()` returns vector length i.e. number of elements in the vector.
+
+The `gp_vec_size()` returns vector element size i.e. number of bytes each
+vector element occupies.
+
+.Vector resize
+[source,c]
+-------------------------------------------------------------------------------
+void *gp_vec_resize(void *self, size_t length);
+
+void *gp_vec_append(void *self, size_t lenght);
+
+/* Example usage */
+int *func(int *array, int append)
+{
+	size_t last = gp_vec_len(array);
+
+	int *new = gp_vec_append(self, 1);
+	if (!new)
+		return NULL;
+
+	new[last] = append;
+
+	return new;
+}
+-------------------------------------------------------------------------------
+
+Resizes a vector.
+
+If space was added after the vector it's filled with zeroes.
+
+The call may return NULL if we attempted to add space to the vector and
+allocation has failed, in this case the original vector is kept untouched.
+
+Vector shrinking cannot fail.
+
+WARNING: Returns a new pointer to the vector!
+
+.Vector insert
+[source,c]
+-------------------------------------------------------------------------------
+void *gp_vec_ins(void *self, size_t off, size_t length);
+
+/* Example usage */
+int *func(int *array, int prepend)
+{
+	int *new = gp_vec_ins(self, 0, 1);
+	if (!new)
+		return NULL;
+
+	new[0] = prepend;
+
+	return new;
+}
+-------------------------------------------------------------------------------
+
+Inserts a gap into the vector, the newly inserted gap is filled with zeroes.
+
+The call may return NULL if underlying memory allocation has failed, in this
+case the original vector is kept untouched.
+
+Returns NULL if `off` is outside of the vector.
+
+WARNING: Returns a new pointer to the vector!
+
+.Vector delete
+[source,c]
+-------------------------------------------------------------------------------
+void *gp_vec_del(void *self, size_t off, size_t length);
+
+/* Example usage */
+int *func(int *array, int *pop)
+{
+	int *new;
+
+	*pop = array[0];
+
+	new = gp_vec_del(self, 0, 1);
+	if (!new)
+		return NULL;
+
+	return new;
+}
+-------------------------------------------------------------------------------
+
+Removes a range from the vector.
+
+Returns NULL if the block is outside of the vector.
+
+WARNING: Returns a new pointer to the vector!

@@ -1,0 +1,9 @@
+Matrix example
+--------------
+
+See also link:matrix.html[matrix] documentation.
+
+[source,c]
+------------------------------------------------------------------
+include::../demos/c_simple/matrix.c[]
+------------------------------------------------------------------
