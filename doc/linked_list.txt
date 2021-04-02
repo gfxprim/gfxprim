@@ -1,0 +1,139 @@
+Linked List
+-----------
+
+Linked list implements both double and single linked lists with variety of
+operations including fast sort.
+
+
+.Linked list structures
+[source,c]
+-------------------------------------------------------------------------------
+typedef struct gp_list_head {
+        struct gp_list_head *next;
+} gp_list_head;
+
+typedef struct gp_dlist_head {
+        struct gp_dlist_head *next;
+        struct gp_dlist_head *prev;
+} gp_dlist_head;
+
+typedef struct gp_list {
+        gp_list_head *head;
+        gp_list_head *tail;
+        size_t cnt;
+} gp_list;
+
+typedef struct gp_dlist {
+        gp_dlist_head *head;
+        gp_dlist_head *tail;
+        size_t cnt;
+} gp_dlist;
+
+
+/* Structure to be used with a single linked list */
+struct user_struct {
+	...
+	gp_list_head lh;
+	...
+};
+-------------------------------------------------------------------------------
+
+Linked list is created by embedding one of the list head strucures into a user
+structure.
+
+The pointers to the list are managed in the list structures.
+
+.Utility macros
+[source,c]
+-------------------------------------------------------------------------------
+#define gp_list_entry(ptr, structure, member) ...
+
+#define gp_list_foreach(list, entry) ...
+
+#define gp_dlist_rev_foreach(list, entry) ...
+
+/* Example macro usage */
+void func(...)
+{
+	gp_list list = {};
+	gp_list_head *i;
+	...
+
+	gp_list_foreach(&list, i) {
+		struct user_struct *u = gp_list_entry(i, struct user_struct, lh);
+		/* process the entry here */
+	}
+}
+-------------------------------------------------------------------------------
+
+These three utility macros implements looping over the list members.
+
+.Functions to push elements to the list
+[source,c]
+-------------------------------------------------------------------------------
+void gp_list_push_head(gp_list *list, gp_list_head *entry);
+void gp_list_push_tail(gp_list *list, gp_list_head *entry);
+
+void gp_dlist_push_head(gp_dlist *list, gp_dlist_head *entry);
+void gp_dlist_push_tail(gp_dlist *list, gp_dlist_head *entry);
+
+/* Example usage */
+void func(gp_list *list)
+{
+	struct user_struct *u = malloc(...);
+
+	...
+
+	gp_list_push_tail(list, &(u->lh));
+}
+-------------------------------------------------------------------------------
+
+These functions push elements to the head/tail of the list and update the list
+counter.
+
+.Functions to remove elements from the list
+[source,c]
+-------------------------------------------------------------------------------
+gp_list_head *gp_list_pop_head(gp_list *list);
+
+gp_dlist_head *gp_dlist_pop_head(gp_dlist *list);
+gp_dlist_head *gp_dlist_pop_tail(gp_dlist *list);
+void gp_dlist_rem(gp_dlist *list, gp_dlist_head *entry);
+
+/* Example usage */
+struct user_struct *func(gp_list *list)
+{
+	gp_list_head *ret = gp_list_pop_head(list);
+
+	if (!ret)
+		return NULL;
+
+	return gp_list_entry(ret, sturct user_struct, lh);
+}
+-------------------------------------------------------------------------------
+
+These functions remove elements from list and update the list counter.
+
+.List sort
+[source,c]
+-------------------------------------------------------------------------------
+void gp_list_sort(gp_list *list, int (*cmp)(const void *, const void *));
+
+void gp_dlist_sort(gp_list *list, int (*cmp)(const void *, const void *));
+
+/* Example usage */
+static int cmp(const void *a, const void *b)
+{
+        struct user_entry *ua = gp_list_entry(a, struct user_entry, lh);
+        struct user_entry *ub = gp_list_entry(b, struct user_entry, lh);
+
+        return ua->int_val - ub->int_val;
+}
+
+...
+	gp_list_sort(list, cmp);
+...
+-------------------------------------------------------------------------------
+
+Sorts a linked list, the sorting function is implemented as a merge sort that
+runs in O(n * log(n)).
