@@ -85,7 +85,7 @@ void *gp_vec_resize(void *self, size_t length)
 	return gp_vec_remove(self, vec->length - length);
 }
 
-void *gp_vec_insert(void *self, size_t i, size_t length)
+void *gp_vec_ins(void *self, size_t i, size_t length)
 {
 	gp_vec *vec = GP_VEC(self);
 
@@ -137,7 +137,7 @@ ret:
 	return (void *)vec->payload;
 }
 
-void *gp_vec_delete(void *self, size_t i, size_t length)
+void *gp_vec_del(void *self, size_t i, size_t length)
 {
 	gp_vec *vec = GP_VEC(self);
 

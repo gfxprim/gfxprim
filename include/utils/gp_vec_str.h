@@ -72,7 +72,7 @@ static inline char *gp_vec_strins(char *self, size_t off, const char *src)
 	__attribute__((warn_unused_result));
 static inline char *gp_vec_strins(char *self, size_t off, const char *src)
 {
-	char *ret = gp_vec_insert(self, off, strlen(src));
+	char *ret = gp_vec_ins(self, off, strlen(src));
 
 	if (!ret)
 		return NULL;
@@ -110,7 +110,7 @@ static inline char *gp_vec_chins(char *self, size_t off, char ch)
 	__attribute__((warn_unused_result));
 static inline char *gp_vec_chins(char *self, size_t off, char ch)
 {
-	char *ret = gp_vec_insert(self, off, 1);
+	char *ret = gp_vec_ins(self, off, 1);
 
 	if (!ret)
 		return NULL;
@@ -134,7 +134,7 @@ static inline char *gp_vec_strdel(char *self, size_t off, size_t len)
 	__attribute__((warn_unused_result));
 static inline char *gp_vec_strdel(char *self, size_t off, size_t len)
 {
-	return gp_vec_delete(self, off, len);
+	return gp_vec_del(self, off, len);
 }
 
 /*

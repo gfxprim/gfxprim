@@ -59,8 +59,8 @@ struct insert_test {
 	size_t cols;
 	size_t rows;
 
-	int ins_cols;
-	int ins_rows;
+	int cols_ins;
+	int rows_ins;
 
 	ssize_t off;
 	size_t len;
@@ -88,8 +88,8 @@ static int test_matrix_insert(struct insert_test *tst)
 			matrix[gp_matrix_idx(rows, col, row)] = i++;
 	}
 
-	if (tst->ins_cols) {
-		int *new = gp_matrix_insert_cols(matrix, rows, tst->off, tst->len);
+	if (tst->cols_ins) {
+		int *new = gp_matrix_cols_ins(matrix, rows, tst->off, tst->len);
 
 		if (tst->fail) {
 			if (new) {
@@ -108,8 +108,8 @@ static int test_matrix_insert(struct insert_test *tst)
 		}
 	}
 
-	if (tst->ins_rows) {
-		int *new = gp_matrix_insert_rows(matrix, cols, rows, tst->off, tst->len);
+	if (tst->rows_ins) {
+		int *new = gp_matrix_rows_ins(matrix, cols, rows, tst->off, tst->len);
 
 		if (tst->fail) {
 			if (new) {
@@ -137,7 +137,7 @@ static int test_matrix_insert(struct insert_test *tst)
 		return TST_FAILED;
 	}
 
-	if (tst->ins_cols) {
+	if (tst->cols_ins) {
 		int failed = 0;
 		for (col = tst->off; col < tst->len; col++) {
 			for (row = 0; row < rows; row++) {
@@ -153,7 +153,7 @@ static int test_matrix_insert(struct insert_test *tst)
 		}
 	}
 
-	if (tst->ins_rows) {
+	if (tst->rows_ins) {
 		int failed = 0;
 		for (col = 0; col < cols; col++) {
 			for (row = tst->off; row < tst->len; row++) {
@@ -169,8 +169,8 @@ static int test_matrix_insert(struct insert_test *tst)
 		}
 	}
 
-	if (tst->ins_cols) {
-		matrix = gp_matrix_delete_cols(matrix, rows, tst->off, tst->len);
+	if (tst->cols_ins) {
+		matrix = gp_matrix_cols_del(matrix, rows, tst->off, tst->len);
 		if (!matrix) {
 			tst_msg("Delete rows failed");
 			return TST_FAILED;
@@ -178,8 +178,8 @@ static int test_matrix_insert(struct insert_test *tst)
 		cols -= tst->len;
 	}
 
-	if (tst->ins_rows) {
-		matrix = gp_matrix_delete_rows(matrix, cols, rows, tst->off, tst->len);
+	if (tst->rows_ins) {
+		matrix = gp_matrix_rows_del(matrix, cols, rows, tst->off, tst->len);
 		if (!matrix) {
 			tst_msg("Delete columns failed");
 			return TST_FAILED;
@@ -211,8 +211,8 @@ static struct insert_test test_start = {
 	.rows = 5,
 	.off = 0,
 	.len = 3,
-	.ins_cols = 1,
-	.ins_rows = 1,
+	.cols_ins = 1,
+	.rows_ins = 1,
 	.fail = 0,
 };
 
@@ -221,7 +221,7 @@ static struct insert_test test_start_c = {
 	.rows = 5,
 	.off = 0,
 	.len = 3,
-	.ins_rows = 1,
+	.rows_ins = 1,
 	.fail = 0,
 };
 
@@ -230,7 +230,7 @@ static struct insert_test test_start_r = {
 	.rows = 5,
 	.off = 0,
 	.len = 3,
-	.ins_rows = 1,
+	.rows_ins = 1,
 	.fail = 0,
 };
 
@@ -239,8 +239,8 @@ static struct insert_test test_mid = {
 	.rows = 5,
 	.off = 1,
 	.len = 7,
-	.ins_cols = 1,
-	.ins_rows = 1,
+	.cols_ins = 1,
+	.rows_ins = 1,
 	.fail = 0,
 };
 
@@ -249,7 +249,7 @@ static struct insert_test test_mid_c = {
 	.rows = 5,
 	.off = 1,
 	.len = 7,
-	.ins_cols = 1,
+	.cols_ins = 1,
 	.fail = 0,
 };
 
@@ -258,7 +258,7 @@ static struct insert_test test_mid_r = {
 	.rows = 5,
 	.off = 1,
 	.len = 7,
-	.ins_rows = 1,
+	.rows_ins = 1,
 	.fail = 0,
 };
 
@@ -267,8 +267,8 @@ static struct insert_test test_end = {
 	.rows = 3,
 	.off = 3,
 	.len = 2,
-	.ins_cols = 1,
-	.ins_rows = 1,
+	.cols_ins = 1,
+	.rows_ins = 1,
 	.fail = 0,
 };
 
@@ -277,7 +277,7 @@ static struct insert_test test_end_c = {
 	.rows = 3,
 	.off = 3,
 	.len = 2,
-	.ins_rows = 1,
+	.rows_ins = 1,
 	.fail = 0,
 };
 
@@ -286,7 +286,7 @@ static struct insert_test test_end_r = {
 	.rows = 3,
 	.off = 3,
 	.len = 2,
-	.ins_rows = 1,
+	.rows_ins = 1,
 	.fail = 0,
 };
 

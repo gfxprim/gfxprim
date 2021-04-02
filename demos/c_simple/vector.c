@@ -38,7 +38,7 @@ int main(void)
 	printf("Initial range (1,10): ");
 	print_int_vec(ints);
 
-	ints = gp_vec_insert(ints, 0, 1);
+	ints = gp_vec_ins(ints, 0, 1);
 	ints[0] = 0;
 
 	printf("\nInsert 0: ");
@@ -49,30 +49,30 @@ int main(void)
 	printf("\nPush 11: ");
 	print_int_vec(ints);
 
-	ints = gp_vec_insert(ints, 4, 1);
+	ints = gp_vec_ins(ints, 4, 1);
 	ints[4] = -1;
 
 	printf("\nInsert -1 at 4: ");
 	print_int_vec(ints);
 
-	ints = gp_vec_insert(ints, 5, 3);
+	ints = gp_vec_ins(ints, 5, 3);
 
 	printf("\nInsert 3 of 0 at 5: ");
 	print_int_vec(ints);
 
-	ints = gp_vec_delete(ints, 5, 3);
+	ints = gp_vec_del(ints, 5, 3);
 	printf("\nDelete 3 of 0 at 5: ");
 	print_int_vec(ints);
 
-	ints = gp_vec_delete(ints, 4, 1);
+	ints = gp_vec_del(ints, 4, 1);
 	printf("\nDelete -1 at 4: ");
 	print_int_vec(ints);
 
-	ints = gp_vec_delete(ints, 11, 1);
+	ints = gp_vec_del(ints, 11, 1);
 	printf("\nDelete 11 at 11: ");
 	print_int_vec(ints);
 
-	ints = gp_vec_delete(ints, 0, 1);
+	ints = gp_vec_del(ints, 0, 1);
 	printf("\nDelete 0 at 0: ");
 	print_int_vec(ints);
 

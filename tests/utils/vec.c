@@ -105,7 +105,7 @@ static int test_vec_insert(struct insert_test *tst)
 	for (i = 0; i < gp_vec_len(vec); i++)
 		vec[i] = i;
 
-	int *new_vec = gp_vec_insert(vec, tst->off, tst->cnt);
+	int *new_vec = gp_vec_ins(vec, tst->off, tst->cnt);
 
 	if (tst->fail) {
 		if (new_vec) {
@@ -138,7 +138,7 @@ static int test_vec_insert(struct insert_test *tst)
 		}
 	}
 
-	vec = gp_vec_delete(vec, tst->off, tst->cnt);
+	vec = gp_vec_del(vec, tst->off, tst->cnt);
 
 	if (!vec) {
 		tst_msg("Delete failed");

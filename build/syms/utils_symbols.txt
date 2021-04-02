@@ -5,8 +5,8 @@ gp_htable_put
 
 gp_vec_new
 gp_vec_free
-gp_vec_insert
-gp_vec_delete
+gp_vec_ins
+gp_vec_del
 gp_vec_resize
 gp_vec_shrink
 gp_vec_expand
@@ -14,8 +14,8 @@ gp_vec_expand
 gp_vec_printf
 gp_vec_vprintf
 
-gp_matrix_delete_rows
-gp_matrix_insert_rows
+gp_matrix_rows_del
+gp_matrix_rows_ins
 
 gp_fds_clear
 gp_fds_add

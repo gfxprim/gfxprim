@@ -1,7 +1,7 @@
 //SPDX-License-Identifier: LGPL-2.0-or-later
 /*
 
-  Copyright (C) 2020 Cyril Hrubis <metan@ucw.cz>
+  Copyright (C) 2020-2021 Cyril Hrubis <metan@ucw.cz>
 
 */
 
@@ -11,7 +11,7 @@
 #include <utils/gp_vec.h>
 #include <utils/gp_matrix.h>
 
-void *gp_matrix_insert_rows(void *self, size_t cols, size_t rows, size_t row, size_t length)
+void *gp_matrix_rows_ins(void *self, size_t cols, size_t rows, size_t row, size_t length)
 {
 	gp_vec *vec = GP_VEC(self);
 	size_t col;
@@ -41,7 +41,7 @@ void *gp_matrix_insert_rows(void *self, size_t cols, size_t rows, size_t row, si
 }
 
 
-void *gp_matrix_delete_rows(void *self, size_t cols, size_t rows, size_t row, size_t length)
+void *gp_matrix_rows_del(void *self, size_t cols, size_t rows, size_t row, size_t length)
 {
 	gp_vec *vec = GP_VEC(self);
 	size_t col;

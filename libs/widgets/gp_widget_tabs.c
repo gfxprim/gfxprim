@@ -614,7 +614,7 @@ void gp_widget_tabs_tab_ins(gp_widget *self, unsigned int tab,
 	GP_DEBUG(3, "Adding tab '%s' child %p at offset %u, tabs widget %p",
 	         label, child, tab, self);
 
-	struct gp_widget_tab *tabs = gp_vec_insert(self->tabs->tabs, tab, 1);
+	struct gp_widget_tab *tabs = gp_vec_ins(self->tabs->tabs, tab, 1);
 	if (!tabs)
 		return;
 
@@ -622,7 +622,7 @@ void gp_widget_tabs_tab_ins(gp_widget *self, unsigned int tab,
 
 	self->tabs->tabs[tab].label = strdup(label);
 	if (!self->tabs->tabs[tab].label) {
-		self->tabs->tabs = gp_vec_delete(self->tabs->tabs, tab, 1);
+		self->tabs->tabs = gp_vec_del(self->tabs->tabs, tab, 1);
 		return;
 	}
 
@@ -668,7 +668,7 @@ gp_widget *gp_widget_tabs_tab_rem(gp_widget *self, unsigned int tab)
 
 	free(self->tabs->tabs[tab].label);
 
-	self->tabs->tabs = gp_vec_delete(self->tabs->tabs, tab, 1);
+	self->tabs->tabs = gp_vec_del(self->tabs->tabs, tab, 1);
 
 	if (self->tabs->active_tab &&
 	    self->tabs->active_tab >= tab) {

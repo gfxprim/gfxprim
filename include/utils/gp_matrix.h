@@ -57,11 +57,11 @@ static inline size_t gp_matrix_idx(size_t rows, size_t col, size_t row)
  *
  * @return Returns a pointer to the matrix data.
  */
-static inline void *gp_matrix_insert_cols(void *self, size_t rows, size_t col, size_t length)
+static inline void *gp_matrix_cols_ins(void *self, size_t rows, size_t col, size_t length)
 	__attribute__((warn_unused_result));
-static inline void *gp_matrix_insert_cols(void *self, size_t rows, size_t col, size_t length)
+static inline void *gp_matrix_cols_ins(void *self, size_t rows, size_t col, size_t length)
 {
-	return gp_vec_insert(self, col * rows, length * rows);
+	return gp_vec_ins(self, col * rows, length * rows);
 }
 
 /*
@@ -74,11 +74,11 @@ static inline void *gp_matrix_insert_cols(void *self, size_t rows, size_t col, s
  *
  * @return Returns a pointer to the matrix data.
  */
-static inline void *gp_matrix_delete_cols(void *self, size_t rows, size_t col, size_t length)
+static inline void *gp_matrix_cols_del(void *self, size_t rows, size_t col, size_t length)
 	__attribute__((warn_unused_result));
-static inline void *gp_matrix_delete_cols(void *self, size_t rows, size_t col, size_t length)
+static inline void *gp_matrix_cols_del(void *self, size_t rows, size_t col, size_t length)
 {
-	return gp_vec_delete(self, col * rows, length * rows);
+	return gp_vec_del(self, col * rows, length * rows);
 }
 
 /*
@@ -92,7 +92,7 @@ static inline void *gp_matrix_delete_cols(void *self, size_t rows, size_t col, s
  *
  * @return Returns a pointer to the matrix data.
  */
-void *gp_matrix_insert_rows(void *self, size_t cols, size_t rows, size_t row, size_t length)
+void *gp_matrix_rows_ins(void *self, size_t cols, size_t rows, size_t row, size_t length)
 	__attribute__((warn_unused_result));
 
 /*
@@ -106,7 +106,7 @@ void *gp_matrix_insert_rows(void *self, size_t cols, size_t rows, size_t row, si
  *
  * @return Returns a pointer to the matrix data.
  */
-void *gp_matrix_delete_rows(void *self, size_t cols, size_t rows, size_t row, size_t length)
+void *gp_matrix_rows_del(void *self, size_t cols, size_t rows, size_t row, size_t length)
 	__attribute__((warn_unused_result));
 
 /*

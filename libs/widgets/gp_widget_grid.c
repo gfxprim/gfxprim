@@ -1109,10 +1109,10 @@ void gp_widget_grid_rows_ins(gp_widget *self, unsigned int row, unsigned int row
 		return;
 	}
 
-	g->widgets = gp_matrix_insert_rows(g->widgets, g->cols, g->rows, row, rows);
+	g->widgets = gp_matrix_rows_ins(g->widgets, g->cols, g->rows, row, rows);
 
-	g->row_s = gp_vec_insert(g->row_s, row, rows);
-	g->row_b = gp_vec_insert(g->row_b, row, rows);
+	g->row_s = gp_vec_ins(g->row_s, row, rows);
+	g->row_b = gp_vec_ins(g->row_b, row, rows);
 
 	init_rows(g, row, rows, 0);
 
@@ -1162,10 +1162,10 @@ void gp_widget_grid_rows_del(gp_widget *self, unsigned int row, unsigned int row
 			gp_widget_free(g->widgets[gp_matrix_idx(g->rows, c, r + row)]);
 	}
 
-	g->widgets = gp_matrix_delete_rows(g->widgets, g->cols, g->rows, row, rows);
+	g->widgets = gp_matrix_rows_del(g->widgets, g->cols, g->rows, row, rows);
 
-	g->row_s = gp_vec_delete(g->row_s, row, rows);
-	g->row_b = gp_vec_delete(g->row_b, row, rows);
+	g->row_s = gp_vec_del(g->row_s, row, rows);
+	g->row_b = gp_vec_del(g->row_b, row, rows);
 
 	g->rows -= rows;
 
@@ -1184,10 +1184,10 @@ void gp_widget_grid_cols_ins(gp_widget *self, unsigned int col, unsigned int col
 		return;
 	}
 
-	g->widgets = gp_matrix_insert_cols(g->widgets, g->rows, col, cols);
+	g->widgets = gp_matrix_cols_ins(g->widgets, g->rows, col, cols);
 
-	g->col_s = gp_vec_insert(g->col_s, col, cols);
-	g->col_b = gp_vec_insert(g->col_b, col, cols);
+	g->col_s = gp_vec_ins(g->col_s, col, cols);
+	g->col_b = gp_vec_ins(g->col_b, col, cols);
 
 	init_cols(g, col, cols, 0);
 
@@ -1237,10 +1237,10 @@ void gp_widget_grid_cols_del(gp_widget *self, unsigned int col, unsigned int col
 			gp_widget_free(g->widgets[gp_matrix_idx(g->rows, c + col, r)]);
 	}
 
-	g->widgets = gp_matrix_delete_cols(g->widgets, g->rows, col, cols);
+	g->widgets = gp_matrix_cols_del(g->widgets, g->rows, col, cols);
 
-	g->col_s = gp_vec_delete(g->col_s, col, cols);
-	g->col_b = gp_vec_delete(g->col_b, col, cols);
+	g->col_s = gp_vec_del(g->col_s, col, cols);
+	g->col_b = gp_vec_del(g->col_b, col, cols);
 
 	g->cols -= cols;
 

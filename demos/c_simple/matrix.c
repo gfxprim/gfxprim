@@ -39,27 +39,27 @@ int main(void)
 	print_int_matrix(ints, cols, rows);
 
 	printf("Inserted 2 columns at 1: ");
-	ints = gp_matrix_insert_cols(ints, rows, 1, 2);
+	ints = gp_matrix_cols_ins(ints, rows, 1, 2);
 	cols += 2;
 	print_int_matrix(ints, cols, rows);
 
 	printf("Deleted 1 column at 1: ");
-	ints = gp_matrix_delete_cols(ints, rows, 1, 1);
+	ints = gp_matrix_cols_del(ints, rows, 1, 1);
 	cols -= 1;
 	print_int_matrix(ints, cols, rows);
 
 	printf("Inserted 2 rows at 1: ");
-	ints = gp_matrix_insert_rows(ints, cols, rows, 1, 2);
+	ints = gp_matrix_rows_ins(ints, cols, rows, 1, 2);
 	rows += 2;
 	print_int_matrix(ints, cols, rows);
 
 	printf("Deleted 1 column at 1: ");
-	ints = gp_matrix_delete_cols(ints, rows, 1, 1);
+	ints = gp_matrix_cols_del(ints, rows, 1, 1);
 	cols -= 1;
 	print_int_matrix(ints, cols, rows);
 
 	printf("Deleted 2 rows at 1: ");
-	ints = gp_matrix_delete_rows(ints, cols, rows, 1, 2);
+	ints = gp_matrix_rows_del(ints, cols, rows, 1, 2);
 	rows -= 2;
 	print_int_matrix(ints, cols, rows);
 

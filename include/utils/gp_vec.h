@@ -24,7 +24,7 @@
  */
 #define GP_VEC_PUSH(ptr, elem) ({                          \
 	typeof(elem) *gp_ret__;                            \
-	gp_ret__ = gp_vec_insert(ptr, gp_vec_len(ptr), 1); \
+	gp_ret__ = gp_vec_ins(ptr, gp_vec_len(ptr), 1); \
 	gp_ret__[gp_vec_len(gp_ret__) - 1] = elem;         \
 	gp_ret__;                                          \
 })
@@ -107,6 +107,18 @@ static inline size_t gp_vec_len(const void *self)
 	return GP_VEC(self)->length;
 }
 
+/*
+ * @brief Returns vector unit.
+ *
+ * @self A vector.
+ *
+ * @return A vector unit, i.e. size of a vector element.
+ */
+static inline size_t gp_vec_unit(const void *self)
+{
+	return GP_VEC(self)->unit;
+}
+
 /* @brief Insert a gap into the vec of new elements, reallocating the
  *        underlying memory if more capacity is needed.
  *
@@ -126,7 +138,7 @@ static inline size_t gp_vec_len(const void *self)
  *         previous one. May return NULL if underlying call to realloc() has
  *         failed or if off is outside of the vector.
  */
-void *gp_vec_insert(void *self, size_t off, size_t length)
+void *gp_vec_ins(void *self, size_t off, size_t length)
 	__attribute__((warn_unused_result));
 
 /*
@@ -135,7 +147,7 @@ void *gp_vec_insert(void *self, size_t off, size_t length)
  * @self A vector.
  * @length A number of elements to append.
  *
- * Calls gp_vec_insert() with an offset equal to vector length.
+ * Calls gp_vec_ins() with an offset equal to vector length.
  *
  * @return Returns a pointer to the vector, possibly a different from the
  *         previous one. May return NULL if underlying call to realloc() has
@@ -145,7 +157,7 @@ static inline void *gp_vec_append(void *self, size_t lenght)
 	__attribute__((warn_unused_result));
 static inline void *gp_vec_append(void *self, size_t lenght)
 {
-	return gp_vec_insert(self, gp_vec_len(self), lenght);
+	return gp_vec_ins(self, gp_vec_len(self), lenght);
 }
 
 /*
@@ -156,9 +168,9 @@ static inline void *gp_vec_append(void *self, size_t lenght)
  * @length A number of elements to delete.
  *
  * @return Returns a pointer to the vector, possibly a different from the
- *         previous one. May return NULL if off is outside of the vector.
+ *         previous one. May return NULL if block is outside of the vector.
  */
-void *gp_vec_delete(void *self, size_t off, size_t lenght)
+void *gp_vec_del(void *self, size_t off, size_t lenght)
 	__attribute__((warn_unused_result));
 
 /*
@@ -174,7 +186,7 @@ static inline void *gp_vec_remove(void *self, size_t length)
 	__attribute__((warn_unused_result));
 static inline void *gp_vec_remove(void *self, size_t length)
 {
-	return gp_vec_delete(self, gp_vec_len(self) - length, length);
+	return gp_vec_del(self, gp_vec_len(self) - length, length);
 }
 
 #endif	/* GP_VEC_H */
