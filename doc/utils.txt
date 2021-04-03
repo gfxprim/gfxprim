@@ -12,3 +12,9 @@ Data Structures
 * link:matrix.html[Matrix]
 * link:hash_table.html[Hash table]
 * link:linked_list.html[Linked list]
+
+
+Allocators
+~~~~~~~~~~
+
+* link:block_alloc.html[Block allocator]

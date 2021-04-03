@@ -1,0 +1,47 @@
+Block allocator
+---------------
+
+Block allocator is an allocator that allocates memory from a single pool that
+is going to be freed all at once.
+
+Block allocator is for example used for a directory cache where we free all
+entries in the cache when dir cache is destroyed.
+
+[source,c]
+-------------------------------------------------------------------------------
+void *gp_block_alloc(gp_block **self, size_t size);
+
+
+/* Example usage */
+void func(...)
+{
+	gp_block *pool = NULL;
+	char *d1, d2;
+
+	d1 = gp_block_alloc(&pool, size);
+	d2 = gp_block_alloc(&pool, size);
+
+	if (!d1 || !d2)
+		goto err;
+	....
+
+	/* Free all allocated memory here */
+	gp_block_free(&pool);
+}
+-------------------------------------------------------------------------------
+
+Allocates `size` memory from the block allocator pointed by `self`. The `self`
+pointer may change upon return of this function.
+
+When initializing new pool the `self` pointer must be set to NULL.
+
+May return NULL if underlying call to `mmap()` has failed.
+
+[source,c]
+-------------------------------------------------------------------------------
+void gp_block_free(gp_block **self);
+-------------------------------------------------------------------------------
+
+Frees all memory allocated by the allocator.
+
+The `self` pointer is set to NULL.
