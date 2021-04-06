@@ -469,6 +469,14 @@ static int slider_event(gp_widget *self, const gp_widget_render_ctx *ctx, gp_eve
 
 	switch (ev->type) {
 	case GP_EV_REL:
+		if (ev->code == GP_EV_REL_WHEEL) {
+			if (ev->val < 0)
+				spin_dec(self);
+			else
+				spin_inc(self);
+			return 1;
+		}
+		/* fallthrough */
 	case GP_EV_ABS:
 		slider_set_val(self, asc, ev);
 	break;
