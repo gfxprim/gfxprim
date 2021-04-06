@@ -26,14 +26,10 @@
  * anything from json description as long as we have a function that takes json
  * and returns a widget.
  */
-
-gp_widget *gp_widget_stock_from_json(json_object *json, gp_htable **uids);
-
 static struct from_json {
 	const char *type;
 	gp_widget *(*from_json)(json_object *json, gp_htable **uids);
 } from_json_loaders[] = {
-	{"stock", gp_widget_stock_from_json}
 };
 
 static gp_widget *load_from_json(const char *type, json_object *json, gp_htable **uids)

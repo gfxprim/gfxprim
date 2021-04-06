@@ -98,6 +98,8 @@ struct gp_widget {
 
 		struct gp_widget_pixmap *pixmap;
 
+		struct gp_widget_stock *stock;
+
 		struct gp_widget_scroll_area *scroll;
 
 		struct gp_widget_frame *frame;
@@ -127,6 +129,7 @@ enum gp_widget_type {
 	GP_WIDGET_SPINBUTTON,
 	GP_WIDGET_TABLE,
 	GP_WIDGET_PIXMAP,
+	GP_WIDGET_STOCK,
 	GP_WIDGET_SCROLL_AREA,
 	GP_WIDGET_FRAME,
 	GP_WIDGET_MARKUP,

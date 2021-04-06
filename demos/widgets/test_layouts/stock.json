@@ -1,6 +1,6 @@
 {
  "version": 1,
- "cols": 2,
+ "cols": 4,
  "rows": 4,
  "widgets": [
   {
@@ -37,6 +37,42 @@
   {
    "type": "label",
    "text": "STOCK_QUESTION",
+   "halign": "left"
+  },
+  {
+   "type": "stock",
+   "stock": "speaker_min"
+  },
+  {
+   "type": "stock",
+   "stock": "speaker_mid"
+  },
+  {
+   "type": "stock",
+   "stock": "speaker_max"
+  },
+  {
+   "type": "stock",
+   "stock": "speaker_mute"
+  },
+  {
+   "type": "label",
+   "text": "STOCK_SPEAKER_MIN",
+   "halign": "left"
+  },
+  {
+   "type": "label",
+   "text": "STOCK_SPEAKER_MID",
+   "halign": "left"
+  },
+  {
+   "type": "label",
+   "text": "STOCK_SPEAKER_MAX",
+   "halign": "left"
+  },
+  {
+   "type": "label",
+   "text": "STOCK_SPEAKER_MUTE",
    "halign": "left"
   }
  ]
