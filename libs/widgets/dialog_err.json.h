@@ -10,7 +10,6 @@ static const char *dialog_err = "\
     \"widgets\": [ \
      { \
       \"cols\": 2, \
-      \"frame\": \"none\", \
       \"widgets\": [ \
        { \
         \"type\": \"stock\", \

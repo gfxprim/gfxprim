@@ -10,7 +10,6 @@ static const char *dialog_question = "\
     \"widgets\": [ \
      { \
       \"cols\": 2, \
-      \"frame\": \"none\", \
       \"widgets\": [ \
        { \
         \"type\": \"stock\", \
@@ -25,9 +24,9 @@ static const char *dialog_question = "\
      { \
       \"cols\": 2, \
       \"halign\": \"fill\", \
-      \"frame\": \"none\", \
       \"cpadf\": \"1, 1, 1\", \
       \"cfill\": \"0, 0\", \
+      \"border\": \"none\", \
       \"uniform\": 1, \
       \"widgets\": [ \
        { \
