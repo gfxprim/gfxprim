@@ -71,7 +71,6 @@ struct gp_widget {
 	 */
 	unsigned int redraw_children:1;
 	unsigned int focused:1;
-	unsigned int input_events:1;
 
 	uint32_t event_mask;
 

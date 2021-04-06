@@ -385,8 +385,6 @@ gp_dialog *gp_dialog_file_open_new(const char *path)
 	table->align = GP_FILL;
 	table->tbl->priv = NULL;
 
-	table->input_events = 1;
-
 	table->tbl->sort = sort_file_table;
 
 	gp_widget_event_handler_set(table, table_on_event, dialog);
