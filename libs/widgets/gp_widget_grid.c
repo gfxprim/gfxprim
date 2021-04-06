@@ -843,7 +843,7 @@ static void put_grid_border_padd(void *array, unsigned int pos, uint8_t val)
 {
 	struct gp_widget_grid_border *border = array;
 
-	border[pos].fill = val;
+	border[pos].padd = val;
 }
 
 static gp_widget *json_to_grid(json_object *json, gp_htable **uids)
@@ -883,10 +883,10 @@ static gp_widget *json_to_grid(json_object *json, gp_htable **uids)
 		else if (!strcmp(key, "rfill"))
 			rfill = json_object_get_string(val);
 		else if (!strcmp(key, "frame")) {
-			if (json_object_get_int(val))
+			if (json_object_get_boolean(val))
 				flags |= GP_WIDGET_GRID_FRAME;
 		} else if (!strcmp(key, "uniform")) {
-			if (json_object_get_int(val))
+			if (json_object_get_boolean(val))
 				flags |= GP_WIDGET_GRID_UNIFORM;
 		} else
 			GP_WARN("Invalid grid key '%s'", key);
