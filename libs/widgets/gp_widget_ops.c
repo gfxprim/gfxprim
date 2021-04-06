@@ -423,6 +423,9 @@ int gp_widget_ops_render_focus_xy(gp_widget *self, const gp_widget_render_ctx *c
 	if (!self)
 		return 0;
 
+	if (self->no_events)
+		return 0;
+
 	ops = gp_widget_ops(self);
 	if (!ops->event)
 		return 0;
@@ -450,8 +453,10 @@ int gp_widget_ops_render_focus(gp_widget *self, int focus_dir)
 	if (!self)
 		return 0;
 
-	ops = gp_widget_ops(self);
+	if (self->no_events)
+		return 0;
 
+	ops = gp_widget_ops(self);
 	if (!ops->event)
 		return 0;
 
@@ -543,6 +548,9 @@ int gp_widget_ops_event(gp_widget *self, const gp_widget_render_ctx *ctx, gp_eve
 	int handled;
 
 	if (!self)
+		return 0;
+
+	if (self->no_events)
 		return 0;
 
 	ops = gp_widget_ops(self);

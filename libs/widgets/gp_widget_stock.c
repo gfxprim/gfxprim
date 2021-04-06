@@ -92,9 +92,10 @@ static void render_stock_question(const gp_widget_render_ctx *ctx,
 
 static void render_stock_speaker(const gp_widget_render_ctx *ctx,
                                  gp_coord cx, gp_coord cy, gp_coord r,
-                                 enum gp_widget_stock_type type)
+                                 gp_widget *self)
 {
 	gp_pixmap *pix = ctx->buf;
+	gp_pixel col = self->focused ? ctx->sel_color : ctx->text_color;
 
 	gp_coord poly[] = {
 		cx-2*(r/2), cy-2*r/3,
@@ -107,7 +108,7 @@ static void render_stock_speaker(const gp_widget_render_ctx *ctx,
 		cx-r/4, cy-3*(r/2),
 	};
 
-	gp_fill_polygon(pix, GP_ARRAY_SIZE(poly)/2, poly, ctx->text_color);
+	gp_fill_polygon(pix, GP_ARRAY_SIZE(poly)/2, poly, col);
 
 	gp_coord rd = r/3;
 	gp_coord i;
@@ -115,7 +116,7 @@ static void render_stock_speaker(const gp_widget_render_ctx *ctx,
 	if (rd < 1)
 		cx++;
 
-	switch (type) {
+	switch (self->stock->type) {
 	case GP_WIDGET_STOCK_SPEAKER_MUTE:
 		for (i = 0; i <= (rd+1)/2; i++) {
 			gp_line(pix, cx+r/2+i, cy-r/2, cx+3*(r/2), cy+r/2-i, ctx->alert_color);
@@ -127,10 +128,10 @@ static void render_stock_speaker(const gp_widget_render_ctx *ctx,
 	case GP_WIDGET_STOCK_SPEAKER_MIN:
 	break;
 	case GP_WIDGET_STOCK_SPEAKER_MAX:
-		gp_fill_ring_seg(pix, cx+r/2, cy, 2*(r/2)+1, 2*(r/2)+1+rd, GP_CIRCLE_SEG1 | GP_CIRCLE_SEG4, ctx->text_color);
+		gp_fill_ring_seg(pix, cx+r/2, cy, 2*(r/2)+1, 2*(r/2)+1+rd, GP_CIRCLE_SEG1 | GP_CIRCLE_SEG4, col);
 	/* fallthrough */
 	case GP_WIDGET_STOCK_SPEAKER_MID:
-		gp_fill_ring_seg(pix, cx+r/2, cy, r/3, r/3+rd, GP_CIRCLE_SEG1 | GP_CIRCLE_SEG4, ctx->text_color);
+		gp_fill_ring_seg(pix, cx+r/2, cy, r/3, r/3+rd, GP_CIRCLE_SEG1 | GP_CIRCLE_SEG4, col);
 	break;
 	default:
 	break;
@@ -154,7 +155,7 @@ static void stock_render(gp_widget *self, const gp_offset *offset,
 	case GP_WIDGET_STOCK_SPEAKER_MID:
 	case GP_WIDGET_STOCK_SPEAKER_MUTE:
 		gp_fill_rect_xywh(ctx->buf, x, y, self->w, self->h, ctx->bg_color);
-		render_stock_speaker(ctx, cx, cy, r/2, self->stock->type);
+		render_stock_speaker(ctx, cx, cy, r/2, self);
 	break;
 	case GP_WIDGET_STOCK_INFO:
 		render_stock_info(ctx, x, y, self->w, self->h);
@@ -242,10 +243,32 @@ static gp_widget *stock_from_json(json_object *json, gp_htable **uids)
 	return gp_widget_stock_new(type, min_size);
 }
 
+static int stock_event(gp_widget *self, const gp_widget_render_ctx *ctx, gp_event *ev)
+{
+	(void) ctx;
+
+	if (ev->type != GP_EV_KEY)
+		return 0;
+
+	if (ev->code == GP_EV_KEY_UP)
+		return 0;
+
+	switch (ev->val) {
+	case GP_BTN_LEFT:
+	case GP_BTN_PEN:
+	case GP_KEY_ENTER:
+	        gp_widget_send_widget_event(self, 0);
+		return 1;
+	}
+
+	return 0;
+}
+
 struct gp_widget_ops gp_widget_stock_ops = {
 	.min_w = stock_min_w,
 	.min_h = stock_min_h,
 	.render = stock_render,
+	.event = stock_event,
 	.from_json = stock_from_json,
 	.id = "stock",
 };
@@ -270,6 +293,7 @@ gp_widget *gp_widget_stock_new(enum gp_widget_stock_type type, int min_size)
 		ret->stock->min_size = GP_ODD_UP((gp_text_ascent(ctx->font) + 4) * min_size);
 
 	ret->stock->type = type;
+	ret->no_events = 1;
 
 	return ret;
 }

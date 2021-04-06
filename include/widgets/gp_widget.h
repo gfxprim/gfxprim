@@ -72,6 +72,12 @@ struct gp_widget {
 	unsigned int redraw_children:1;
 	unsigned int focused:1;
 
+	/*
+	 * If set the widget cannot get focused and get events even if
+	 * ops->event is implemented.
+	 */
+	unsigned int no_events:1;
+
 	uint32_t event_mask;
 
 	union {
@@ -244,6 +250,7 @@ static inline void gp_widget_event_handler_set(gp_widget *self,
 {
 	self->on_event = on_event;
 	self->priv = priv;
+	self->no_events = 0;
 }
 
 #include <widgets/gp_widget_event.h>

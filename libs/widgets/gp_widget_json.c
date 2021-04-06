@@ -234,7 +234,7 @@ gp_widget *gp_widget_from_json(json_object *json, gp_htable **uids)
 
 	wid->align = halign | valign;
 	if (on_event)
-		wid->on_event = on_event;
+		gp_widget_event_handler_set(wid, on_event, NULL);
 
 	if (shrink_set)
 		wid->no_shrink = !shrink;
