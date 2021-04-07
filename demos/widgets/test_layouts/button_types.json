@@ -187,6 +187,8 @@
    "text": "CLEAR"
   },
   {
+   "type": "label",
+   "text": "BACKSPACE"
   },
   {
    "type": "button",
@@ -214,6 +216,9 @@
    "align": "fill"
   },
   {
+   "type": "button",
+   "btype": "backspace",
+   "align": "fill"
   },
   {
    "type": "label",

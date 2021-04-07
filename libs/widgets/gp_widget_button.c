@@ -70,6 +70,21 @@ static void cross(gp_pixmap *buf, gp_coord cx, gp_coord cy,
 	}
 }
 
+static void backspace(gp_pixmap *pix, gp_coord cx, gp_coord cy,
+                      gp_size sym_r, gp_pixel fg, gp_pixel bg)
+{
+	gp_coord poly[] = {
+		cx + sym_r, cy-sym_r/2-sym_r/4,
+		cx + sym_r, cy+sym_r/2+sym_r/4,
+		cx - sym_r/2+sym_r/8, cy+sym_r/2+sym_r/4,
+		cx - sym_r, cy,
+		cx - sym_r/2+sym_r/8, cy-sym_r/2-sym_r/4,
+	};
+
+	gp_fill_polygon(pix, GP_ARRAY_SIZE(poly)/2, poly, fg);
+	cross(pix, cx+sym_r/4, cy, sym_r/3, sym_r/7, bg);
+}
+
 static void render(gp_widget *self, const gp_offset *offset,
                    const gp_widget_render_ctx *ctx, int flags)
 {
@@ -261,6 +276,9 @@ static void render(gp_widget *self, const gp_offset *offset,
 	case GP_BUTTON_CLEAR:
 		cross(ctx->buf, cx, cy, sym_r-sym_r/6, 2 * (asc/8)-asc/16, ctx->text_color);
 	break;
+	case GP_BUTTON_BACKSPACE:
+		backspace(ctx->buf, cx-sym_r/5, cy, sym_r+sym_r/2, ctx->text_color, ctx->bg_color);
+	break;
 	case GP_BUTTON_ZOOM_IN:
 		gp_fill_rect(ctx->buf, cx - asc/14, cy - sym_r/2,
 		             cx + asc/14, cy + sym_r/2,
@@ -369,6 +387,7 @@ static struct btn_type_names {
 	{"add", GP_BUTTON_ADD | GP_BUTTON_TEXT_RIGHT},
 	{"rem", GP_BUTTON_REM | GP_BUTTON_TEXT_RIGHT},
 	{"clear", GP_BUTTON_CLEAR | GP_BUTTON_TEXT_RIGHT},
+	{"backspace", GP_BUTTON_BACKSPACE | GP_BUTTON_TEXT_RIGHT},
 	{"zoom_in", GP_BUTTON_ZOOM_IN | GP_BUTTON_TEXT_RIGHT},
 	{"zoom_out", GP_BUTTON_ZOOM_OUT | GP_BUTTON_TEXT_RIGHT},
 	{"zoom_fit", GP_BUTTON_ZOOM_FIT | GP_BUTTON_TEXT_RIGHT},

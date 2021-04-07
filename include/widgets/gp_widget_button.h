@@ -46,6 +46,7 @@ enum gp_widget_button_type {
 	GP_BUTTON_REM,
 
 	GP_BUTTON_CLEAR,
+	GP_BUTTON_BACKSPACE,
 
 	GP_BUTTON_ZOOM_IN,
 	GP_BUTTON_ZOOM_OUT,
