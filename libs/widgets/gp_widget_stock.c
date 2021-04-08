@@ -65,6 +65,10 @@ static void render_stock_info(const gp_widget_render_ctx *ctx,
 		gp_fill_rect_xyxy(pix, cx-r, cy-h/4-r, cx+r, cy-h/4+r, ctx->text_color);
 
 	gp_fill_rect_xyxy(pix, cx-r, cy+h/4, cx+r, cy-r, ctx->text_color);
+
+	gp_fill_rect_xyxy(pix, cx-2*r, cy+h/4, cx+2*r, cy+h/4+r/2, ctx->text_color);
+
+	gp_fill_rect_xyxy(pix, cx-2*r, cy-r, cx, cy-r+r/2, ctx->text_color);
 }
 
 static void render_stock_question(const gp_widget_render_ctx *ctx,
@@ -86,8 +90,10 @@ static void render_stock_question(const gp_widget_render_ctx *ctx,
 		gp_fill_rect_xyxy(pix, cx-r, cy+h/4, cx+r, cy+h/4+2*r, ctx->text_color);
 
 	gp_fill_rect_xyxy(pix, cx-r, cy-h/4+3*r, cx+r, cy+2*r, ctx->text_color);
+
 	gp_fill_ring_seg(pix, cx, cy-h/4 + r, r, 3*r, GP_CIRCLE_SEG1 | GP_CIRCLE_SEG2 |GP_CIRCLE_SEG4, ctx->text_color);
-	gp_fill_triangle(pix, cx-r, cy-h/4+3*r, cx, cy-r+1, cx, cy, ctx->text_color);
+
+	gp_fill_triangle(pix, cx-r, cy-h/4+3*r, cx, cy-h/4+2*r, cx, cy-h/4+3*r, ctx->text_color);
 }
 
 static void render_stock_speaker(const gp_widget_render_ctx *ctx,
