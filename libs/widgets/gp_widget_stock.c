@@ -138,6 +138,44 @@ static void render_stock_speaker(const gp_widget_render_ctx *ctx,
 	}
 }
 
+static void render_stock_hardware(const gp_widget_render_ctx *ctx,
+                                  gp_coord x, gp_coord y,
+                                  gp_size w, gp_size h)
+{
+	gp_pixmap *pix = ctx->buf;
+	gp_coord cx = x + w/2;
+	gp_coord cy = y + h/2;
+	gp_size c = GP_MIN(w, h)/3;
+	gp_size dc = c/2;
+
+	gp_coord l_end = GP_MIN(w, h)/2-c;
+	gp_coord l_start = dc/10+2;
+	gp_coord l_size = 1 + c/9;
+	gp_coord sp_size = 1 + c/20;
+	gp_coord c_sp_size = 1 + c/8;
+	gp_coord legs = (2*c - 2*c_sp_size + sp_size)/(l_size + sp_size);
+	gp_coord i;
+
+	gp_fill_rect_xywh(pix, x, y, w, h, ctx->bg_color);
+
+	gp_fill_rect_xyxy(pix, cx-c, cy-c, cx+c, cy+c, ctx->text_color);
+
+	gp_fill_circle(pix, cx-c+c/2, cy-c+c/2, c/8, ctx->bg_color);
+
+	c_sp_size = (2*c - legs*l_size - (legs-1) * sp_size+1)/2;
+
+
+	for (i = 0; i < legs; i++) {
+		gp_coord off = -c + c_sp_size + i * (l_size + sp_size);
+
+		gp_fill_rect_xyxy(pix, cx+off, cy-c-l_start, cx+off+l_size-1, cy-c-l_end, ctx->text_color);
+		gp_fill_rect_xyxy(pix, cx+off, cy+c+l_start, cx+off+l_size-1, cy+c+l_end, ctx->text_color);
+
+		gp_fill_rect_xyxy(pix, cx-c-l_start, cy+off, cx-c-l_end, cy+off+l_size-1, ctx->text_color);
+		gp_fill_rect_xyxy(pix, cx+c+l_start, cy+off, cx+c+l_end, cy+off+l_size-1, ctx->text_color);
+	}
+}
+
 static void stock_render(gp_widget *self, const gp_offset *offset,
                          const gp_widget_render_ctx *ctx, int flags)
 {
@@ -169,6 +207,9 @@ static void stock_render(gp_widget *self, const gp_offset *offset,
 	case GP_WIDGET_STOCK_QUESTION:
 		render_stock_question(ctx, x, y, self->w, self->h);
 	break;
+	case GP_WIDGET_STOCK_HARDWARE:
+		render_stock_hardware(ctx, x, y, self->w, self->h);
+	break;
 	}
 
 	gp_widget_ops_blit(ctx, x, y, self->w, self->h);
@@ -187,6 +228,8 @@ static struct stock_types {
 	{"speaker_mid", GP_WIDGET_STOCK_SPEAKER_MID},
 	{"speaker_max", GP_WIDGET_STOCK_SPEAKER_MAX},
 	{"speaker_mute", GP_WIDGET_STOCK_SPEAKER_MUTE},
+
+	{"hardware", GP_WIDGET_STOCK_HARDWARE},
 };
 
 static int gp_widget_stock_type_from_str(const char *type)

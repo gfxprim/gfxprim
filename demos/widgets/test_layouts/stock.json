@@ -1,6 +1,6 @@
 {
  "version": 1,
- "cols": 4,
+ "cols": 6,
  "rows": 4,
  "widgets": [
   {
@@ -74,6 +74,26 @@
    "type": "label",
    "text": "STOCK_SPEAKER_MUTE",
    "halign": "left"
+  },
+  {
+   "type": "stock",
+   "stock": "hardware"
+  },
+  {
+  },
+  {
+  },
+  {
+  },
+  {
+   "type": "label",
+   "text": "STOCK_HARDWARE"
+  },
+  {
+  },
+  {
+  },
+  {
   }
  ]
 }

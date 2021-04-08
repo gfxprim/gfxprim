@@ -20,6 +20,9 @@ enum gp_widget_stock_type {
 	GP_WIDGET_STOCK_SPEAKER_MIN,
 	GP_WIDGET_STOCK_SPEAKER_MID,
 	GP_WIDGET_STOCK_SPEAKER_MAX,
+
+	/* Misc */
+	GP_WIDGET_STOCK_HARDWARE,
 };
 
 struct gp_widget_stock {
