@@ -23,6 +23,8 @@ enum gp_widget_stock_type {
 
 	/* Misc */
 	GP_WIDGET_STOCK_HARDWARE,
+	GP_WIDGET_STOCK_SOFTWARE,
+
 };
 
 struct gp_widget_stock {

@@ -80,6 +80,8 @@
    "stock": "hardware"
   },
   {
+   "type": "stock",
+   "stock": "software"
   },
   {
   },
@@ -90,6 +92,8 @@
    "text": "STOCK_HARDWARE"
   },
   {
+   "type": "label",
+   "text": "STOCK_SOFTWARE"
   },
   {
   },

@@ -176,6 +176,32 @@ static void render_stock_hardware(const gp_widget_render_ctx *ctx,
 	}
 }
 
+static void render_stock_software(const gp_widget_render_ctx *ctx,
+                                  gp_coord x, gp_coord y,
+                                  gp_size w, gp_size h)
+{
+	gp_pixmap *pix = ctx->buf;
+	gp_coord cx = x + w/2;
+	gp_coord cy = y + h/2;
+	gp_size c = GP_MIN(w, h)/3;
+	gp_size dc = GP_ODD_UP(c/4)+2;
+	gp_coord i;
+
+	gp_fill_rect_xywh(pix, x, y, w, h, ctx->bg_color);
+
+	gp_fill_rect_xyxy(pix, cx-c, cy-c, cx+c, cy+c, ctx->text_color);
+	gp_hline_xxy(pix, cx-c, cx+c, cy-c+dc, ctx->fg_color);
+
+	gp_size r = dc/2-1-dc/6;
+
+	for (i = 0; i < 3; i++) {
+		gp_size roff = r ? dc/2 : 1;
+		gp_size off = r ? 3*r+1 : 2;
+
+		gp_fill_circle(pix, cx+c-roff-i*off, cy-c+dc/2, r, ctx->bg_color);
+	}
+}
+
 static void stock_render(gp_widget *self, const gp_offset *offset,
                          const gp_widget_render_ctx *ctx, int flags)
 {
@@ -210,6 +236,9 @@ static void stock_render(gp_widget *self, const gp_offset *offset,
 	case GP_WIDGET_STOCK_HARDWARE:
 		render_stock_hardware(ctx, x, y, self->w, self->h);
 	break;
+	case GP_WIDGET_STOCK_SOFTWARE:
+		render_stock_software(ctx, x, y, self->w, self->h);
+	break;
 	}
 
 	gp_widget_ops_blit(ctx, x, y, self->w, self->h);
@@ -230,6 +259,7 @@ static struct stock_types {
 	{"speaker_mute", GP_WIDGET_STOCK_SPEAKER_MUTE},
 
 	{"hardware", GP_WIDGET_STOCK_HARDWARE},
+	{"software", GP_WIDGET_STOCK_SOFTWARE},
 };
 
 static int gp_widget_stock_type_from_str(const char *type)
