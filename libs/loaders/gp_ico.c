@@ -127,8 +127,15 @@ int gp_read_ico_ex(gp_io *io, gp_pixmap **img,
 	header.pixel_offset = ie.data_offset + header.header_size;
 
 	/* Since there is no offset to pixel data we assume that it follows palette */
-	if (header.palette_colors)
+	switch (header.bpp) {
+	case 1:
+	case 2:
+	case 3:
+	case 4:
+	case 8:
 		header.pixel_offset += gp_bmp_palette_size(&header);
+	break;
+	}
 
 	res = gp_pixmap_alloc(header.w, header.h, ptype);
 	if (!res) {
