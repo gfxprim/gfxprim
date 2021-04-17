@@ -1,7 +1,7 @@
 {
  "version": 1,
  "cols": 6,
- "rows": 4,
+ "rows": 6,
  "widgets": [
   {
    "type": "stock",
@@ -18,6 +18,10 @@
   {
    "type": "stock",
    "stock": "question"
+  },
+  {
+  },
+  {
   },
   {
    "type": "label",
@@ -40,6 +44,10 @@
    "halign": "left"
   },
   {
+  },
+  {
+  },
+  {
    "type": "stock",
    "stock": "speaker_min"
   },
@@ -54,6 +62,14 @@
   {
    "type": "stock",
    "stock": "speaker_mute"
+  },
+  {
+   "type": "stock",
+   "stock": "speaker_inc"
+  },
+  {
+   "type": "stock",
+   "stock": "speaker_dec"
   },
   {
    "type": "label",
@@ -76,12 +92,28 @@
    "halign": "left"
   },
   {
+   "type": "label",
+   "text": "STOCK_SPEAKER_INC",
+   "halign": "left"
+  },
+  {
+   "type": "label",
+   "text": "STOCK_SPEAKER_DEC",
+   "halign": "left"
+  },
+  {
    "type": "stock",
    "stock": "hardware"
   },
   {
    "type": "stock",
    "stock": "software"
+  },
+  {
+   "type": "stock",
+   "stock": "file"
+  },
+  {
   },
   {
   },
@@ -94,6 +126,12 @@
   {
    "type": "label",
    "text": "STOCK_SOFTWARE"
+  },
+  {
+   "type": "label",
+   "text": "STOCK_FILE"
+  },
+  {
   },
   {
   },
