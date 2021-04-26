@@ -10,6 +10,8 @@
 #include <core/gp_pixmap.h>
 #include <gfx/gp_polygon.h>
 
+#include <gfx/gp_line.h>
+
 #include "tst_test.h"
 
 #include "common.h"
@@ -40,7 +42,19 @@ static int test_polygon(struct testcase *t)
 	memset(c->pixels, 0, c->w * c->h);
 
 	gp_fill_polygon(c, t->edge_count, t->edges, 1);
+/*
+	int lx = t->edges[2*t->edge_count-2];
+	int ly = t->edges[2*t->edge_count-1];
 
+	for (int i = 0; i < t->edge_count; i++) {
+		int x = t->edges[2*i];
+		int y = t->edges[2*i+1];
+
+		gp_line(c, lx, ly, x, y, 1);
+		lx=x;
+		ly=y;
+	}
+*/
 	err = compare_buffers(t->pixmap, c) || check_canary(c);
 
 	if (err) {
@@ -104,7 +118,7 @@ struct testcase testcase_line_horiz_3px = {
 	.edge_count = 2,
 	.edges = {
 		3, 1,
-		1, 0,
+		1, 1,
 	},
 	.w = 5,
 	.h = 5,
@@ -255,14 +269,13 @@ struct testcase testcase_triangle_1 = {
 	.pixmap = {
 		0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 		0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-		0, 0, 0, 0, 0, 0, 0, 0, 1, 0,
-		0, 0, 0, 0, 0, 1, 1, 1, 0, 0,
-		0, 0, 1, 1, 1, 1, 1, 1, 0, 0,
-		0, 0, 0, 1, 1, 1, 1, 0, 0, 0,
-		0, 0, 0, 1, 1, 1, 0, 0, 0, 0,
-		0, 0, 0, 1, 1, 0, 0, 0, 0, 0,
-		0, 0, 0, 1, 0, 0, 0, 0, 0, 0,
-		0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+		0, 0, 0, 0, 0, 0, 0, 1, 1, 0,
+		0, 0, 0, 1, 1, 1, 1, 1, 0, 0,
+		0, 1, 1, 1, 1, 1, 1, 0, 0, 0,
+		0, 1, 1, 1, 1, 1, 0, 0, 0, 0,
+		0, 1, 1, 1, 1, 0, 0, 0, 0, 0,
+		0, 0, 1, 1, 0, 0, 0, 0, 0, 0,
+		0, 0, 1, 0, 0, 0, 0, 0, 0, 0,
 		0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 	}
 };
