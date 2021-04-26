@@ -39,7 +39,7 @@ typedef struct {
 /* Working record about an edge. */
 struct edge {
 	int state;	/* edge state */
-	float x;		/* X coordinate of the working point */
+	float x;	/* X coordinate of the working point */
 	int y;		/* Y coordinate of the working point */
 	int dy;		/* vertical size */
 	float dxy;	/* dx/dy */
@@ -60,10 +60,10 @@ static void init_edge(struct edge *e, gp_point start, gp_point end)
 
 	/* initialize the working point to the top point of the edge */
 	if (start.y < end.y) {
-		e->x = (float) start.x;
+		e->x = (float) start.x+0.5;
 		e->y = start.y;
 	} else {
-		e->x = (float) end.x;
+		e->x = (float) end.x+0.5;
 		e->y = end.y;
 	}
 
@@ -128,8 +128,16 @@ void gp_fill_polygon_raw(gp_pixmap *pixmap, unsigned int nvert,
 	unsigned int i;
 	struct edge *e;
 
-	if (nvert < 3)
-		return;		/* not enough vertices */
+	switch (nvert) {
+	case 1:
+		gp_putpixel(pixmap, xy[0], xy[1], pixel);
+		return;
+	case 2:
+		gp_line(pixmap, xy[0], xy[1], xy[2], xy[3], pixel);
+		return;
+	default:
+	break;
+	}
 
 	gp_point const *vert = (gp_point const *) xy;
 
@@ -171,7 +179,6 @@ void gp_fill_polygon_raw(gp_pixmap *pixmap, unsigned int nvert,
 	unsigned int ninter;
 	int y;
 	for (y = ymin; y <= ymax; y++) {
-
 		/* mark edges we have just reached as active */
 		for (i = 0; i < nedges; i++) {
 			e = edges + i;
@@ -186,9 +193,8 @@ void gp_fill_polygon_raw(gp_pixmap *pixmap, unsigned int nvert,
 		ninter = 0;
 		for (i = 0; i < nedges; i++) {
 			e = edges + i;
-			if (e->state == EDGE_ACTIVE) {
+			if (e->state == EDGE_ACTIVE)
 				inter[ninter++] = e->x;
-			}
 		}
 
 		/* draw each even range between intersections */
@@ -200,6 +206,7 @@ void gp_fill_polygon_raw(gp_pixmap *pixmap, unsigned int nvert,
 				break;
 
 			float end = inter[i+1];
+
 			gp_hline_raw(pixmap, start, end, y, pixel);
 		}
 
@@ -226,6 +233,19 @@ void gp_fill_polygon_raw(gp_pixmap *pixmap, unsigned int nvert,
 			gp_hline_raw(pixmap, e->x, e->x + e->dxy, e->y,
 				     pixel);
 		}
+	}
+
+	/* HACK we do not track lines on edges correcly so we just draw lines around to fix this for now */
+	gp_coord lx = xy[2*nvert-2];
+	gp_coord ly = xy[2*nvert-1];
+
+	for (i = 0; i < nvert; i++) {
+		gp_coord x = xy[2*i];
+		gp_coord y = xy[2*i+1];
+
+		gp_line(pixmap, x, y, lx, ly, pixel);
+
+		lx = x; ly = y;
 	}
 }
 
