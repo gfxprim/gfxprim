@@ -1,6 +1,6 @@
 {
  "version": 1,
- "cols": 6,
+ "cols": 8,
  "rows": 6,
  "widgets": [
   {
@@ -111,31 +111,99 @@
   },
   {
    "type": "stock",
+   "stock": "settings"
+  },
+  {
+   "type": "stock",
    "stock": "file"
   },
   {
-  },
-  {
+   "type": "stock",
+   "stock": "refresh"
   },
   {
   },
   {
    "type": "label",
-   "text": "STOCK_HARDWARE"
+   "text": "STOCK_HARDWARE",
+   "halign": "left"
   },
   {
    "type": "label",
-   "text": "STOCK_SOFTWARE"
+   "text": "STOCK_SOFTWARE",
+   "halign": "left"
   },
   {
    "type": "label",
-   "text": "STOCK_FILE"
+   "text": "STOCK_SETTINGS",
+   "halign": "left"
+  },
+  {
+   "type": "label",
+   "text": "STOCK_FILE",
+   "halign": "left"
+  },
+  {
+   "type": "label",
+   "text": "STOCK_REFRESH",
+   "halign": "left"
   },
   {
   },
+
   {
+   "type": "stock",
+   "stock": "arrow_up"
   },
   {
+   "type": "stock",
+   "stock": "arrow_down"
+  },
+  {
+   "type": "stock",
+   "stock": "arrow_left"
+  },
+  {
+   "type": "stock",
+   "stock": "arrow_right"
+  },
+  {
+   "type": "stock",
+   "stock": "shuffle_on"
+  },
+  {
+   "type": "stock",
+   "stock": "shuffle_off"
+  },
+  {
+   "type": "label",
+   "text": "STOCK_ARROW_UP",
+   "halign": "left"
+  },
+  {
+   "type": "label",
+   "text": "STOCK_ARROW_DOWN",
+   "halign": "left"
+  },
+  {
+   "type": "label",
+   "text": "STOCK_ARROW_LEFT",
+   "halign": "left"
+  },
+  {
+   "type": "label",
+   "text": "STOCK_ARROW_RIGHT",
+   "halign": "left"
+  },
+  {
+   "type": "label",
+   "text": "STOCK_SHUFFLE_ON",
+   "halign": "left"
+  },
+  {
+   "type": "label",
+   "text": "STOCK_SHUFFLE_OFF",
+   "halign": "left"
   }
  ]
 }
