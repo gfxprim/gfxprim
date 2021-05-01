@@ -84,14 +84,14 @@ def check_for_cflags(cfg, cflags):
 def python_version(cfg):
     sys.stderr.write("Checking for python-config Python version ... ")
 
-    if (cfg['PYTHON_CONFIG'][0] is ''):
+    if (cfg['PYTHON_CONFIG'][0] == ''):
         sys.stderr.write('NA\n')
         return ''
 
-    cmd = subprocess.Popen([cfg['PYTHON_CONFIG'][0], '--ldflags'],
+    cmd = subprocess.Popen([cfg['PYTHON_CONFIG'][0], '--configdir'],
                            stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     res = str(cmd.communicate())
-    res = res[res.find('-lpython')+8:]
+    res = res[res.find('/python')+7:]
     res = res[:3]
 
     sys.stderr.write("%s\n" % res)
