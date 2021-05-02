@@ -269,7 +269,7 @@ struct testcase testcase_triangle_1 = {
 	.pixmap = {
 		0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 		0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-		0, 0, 0, 0, 0, 0, 0, 1, 1, 0,
+		0, 0, 0, 0, 0, 0, 1, 1, 1, 0,
 		0, 0, 0, 1, 1, 1, 1, 1, 0, 0,
 		0, 1, 1, 1, 1, 1, 1, 0, 0, 0,
 		0, 1, 1, 1, 1, 1, 0, 0, 0, 0,
@@ -279,6 +279,24 @@ struct testcase testcase_triangle_1 = {
 		0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 	}
 };
+
+struct testcase testcase_triangle_2 = {
+	.edge_count = 3,
+	.edges = {
+		1, 2,
+		7, 2,
+		7, 1,
+	},
+	.w = 9,
+	.h = 4,
+	.pixmap = {
+		0, 0, 0, 0, 0, 0, 0, 0, 0,
+		0, 0, 0, 0, 1, 1, 1, 1, 0,
+		0, 1, 1, 1, 1, 1, 1, 1, 0,
+		0, 0, 0, 0, 0, 0, 0, 0, 0,
+	}
+};
+
 
 struct testcase testcase_bow_4edges_7px = {
 	.edge_count = 4,
@@ -296,6 +314,68 @@ struct testcase testcase_bow_4edges_7px = {
 		0, 1, 1, 1, 0,
 		0, 1, 0, 1, 0,
 		0, 0, 0, 0, 0,
+	}
+};
+
+struct testcase testcase_square_45_1 = {
+	.edge_count = 4,
+	.edges = {
+		1, 2,
+		2, 1,
+		3, 2,
+		2, 3,
+	},
+	.w = 5,
+	.h = 5,
+	.pixmap = {
+		0, 0, 0, 0, 0,
+		0, 0, 1, 0, 0,
+		0, 1, 1, 1, 0,
+		0, 0, 1, 0, 0,
+		0, 0, 0, 0, 0,
+	}
+};
+
+struct testcase testcase_square_45_2 = {
+	.edge_count = 4,
+	.edges = {
+		1, 3,
+		3, 1,
+		5, 3,
+		3, 5,
+	},
+	.w = 7,
+	.h = 7,
+	.pixmap = {
+		0, 0, 0, 0, 0, 0, 0,
+		0, 0, 0, 1, 0, 0, 0,
+		0, 0, 1, 1, 1, 0, 0,
+		0, 1, 1, 1, 1, 1, 0,
+		0, 0, 1, 1, 1, 0, 0,
+		0, 0, 0, 1, 0, 0, 0,
+		0, 0, 0, 0, 0, 0, 0,
+	}
+};
+
+struct testcase testcase_square_45_cut = {
+	.edge_count = 5,
+	.edges = {
+		1, 3,
+		3, 1,
+		5, 3,
+		3, 5,
+		3, 3,
+	},
+	.w = 7,
+	.h = 7,
+	.pixmap = {
+		0, 0, 0, 0, 0, 0, 0,
+		0, 0, 0, 1, 0, 0, 0,
+		0, 0, 1, 1, 1, 0, 0,
+		0, 1, 1, 1, 1, 1, 0,
+		0, 0, 0, 1, 1, 0, 0,
+		0, 0, 0, 1, 0, 0, 0,
+		0, 0, 0, 0, 0, 0, 0,
 	}
 };
 
@@ -350,9 +430,25 @@ const struct tst_suite tst_suite = {
 		 .tst_fn = test_polygon,
 		 .data = &testcase_triangle_1},
 
+		{.name = "Triangle 2. Polygon",
+		 .tst_fn = test_polygon,
+		 .data = &testcase_triangle_2},
+
 		{.name = "Bow 4edges 7px",
 		 .tst_fn = test_polygon,
 		 .data = &testcase_bow_4edges_7px},
+
+		{.name = "Square rotated by 45 1",
+		 .tst_fn = test_polygon,
+		 .data = &testcase_square_45_1},
+
+		{.name = "Square rotated by 45 2",
+		 .tst_fn = test_polygon,
+		 .data = &testcase_square_45_2},
+
+		{.name = "Square rotated by 45 cut",
+		 .tst_fn = test_polygon,
+		 .data = &testcase_square_45_cut},
 
 		{.name = NULL}
 	}

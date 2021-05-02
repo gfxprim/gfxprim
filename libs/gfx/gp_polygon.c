@@ -4,8 +4,6 @@
  * Copyright (C) 2009 - 2012 Cyril Hrubis <metan@ucw.cz>
  */
 
-#define _ISOC99_SOURCE
-
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
@@ -18,115 +16,190 @@
 #include <gfx/gp_hline.h>
 #include <gfx/gp_polygon.h>
 
-/* A 2D point specified by gp_coord coordinates. */
-typedef struct {
-	gp_coord x, y;
-} gp_point;
-
-/* "almost equality" for float coordinates */
-#define GP_COORDS_ALMOST_EQUAL(a,b)	(fabsf((a)-(b)) < 0.0001f)
-
 /*
- * Edge state. Every edge proceeds from READY to ACTIVE and then FINISHED.
- * HORIZONTAL is special (horizontal edges are handled separately).
- * Numeric values reflect sorting priority (ACTIVE is foremost).
+ * Line endpoints and slope dx/dy.
  */
-#define EDGE_HORIZONTAL	3
-#define EDGE_FINISHED	2
-#define EDGE_READY	1
-#define EDGE_ACTIVE	0
-
-/* Working record about an edge. */
-struct edge {
-	int state;	/* edge state */
-	float x;	/* X coordinate of the working point */
-	int y;		/* Y coordinate of the working point */
-	int dy;		/* vertical size */
-	float dxy;	/* dx/dy */
+struct gp_line {
+	gp_coord y1, y2;
+	gp_coord x1, x2;
+	gp_coord dx;
+	gp_coord dy;
 };
 
-/* Initializes the edge structure. */
-static void init_edge(struct edge *e, gp_point start, gp_point end)
+static inline gp_coord get_x(const gp_coord *points, unsigned int i)
 {
-	/* horizontal edges are a special case */
-	if (start.y == end.y) {
-		e->dy = 0;
-		e->x = start.x;
-		e->y = start.y;
-		e->dxy = end.x - start.x;
-		e->state = EDGE_HORIZONTAL;
-		return;
-	}
-
-	/* initialize the working point to the top point of the edge */
-	if (start.y < end.y) {
-		e->x = (float) start.x+0.5;
-		e->y = start.y;
-	} else {
-		e->x = (float) end.x+0.5;
-		e->y = end.y;
-	}
-
-	e->dy = GP_ABS(end.y - start.y);
-
-	e->dxy = (float)(end.x - start.x)/(end.y - start.y);
-	e->state = EDGE_READY;
-
-	/* Shorten each edge by one pixel at the bottom. This prevents
-	 * every vertex point to be reported as two intersections.
-	 * This also means causes all horizontal edges cut by one pixel,
-	 * but we will fix this at the end by drawing them separately.
-	 */
-	e->dy--;
+	return points[2*i];
 }
 
-/* Type of a callback function to be passed to qsort(). */
-typedef int (*gp_sort_callback)(const void *, const void *);
-
-/*
- * Compares two edges. Used for initial sorting of the edges.
- * Edges are sorted by Y first, then by X, then by DXY.
- * Returns -1 if e1<e2, +1 if e1>e2, 0 if e1==e2.
- */
-static int edges_compare_initial(struct edge *e1, struct edge *e2)
+static inline gp_coord get_y(const gp_coord *points, unsigned int i)
 {
-	if (e1->y < e2->y) return -1;
-	if (e1->y > e2->y) return 1;
-
-	if (e1->x < e2->x) return -1;
-	if (e1->x > e2->x) return 1;
-
-	if (e1->dxy < e2->dxy) return -1;
-	if (e1->dxy > e2->dxy) return 1;
-
-	return 0;
+	return points[2*i+1];
 }
 
 /*
- * Compares two edges. Used for in-run sorting.
- * Edges are sorted by state (ACTIVE < READY < FINISHED), then by X,
- * then by DXY.
- * Returns -1 if e1<e2, +1 if e1>e2, 0 if e1==e2.
+ * We shorten all lines but the ones that end on ymax by 1 on Y in order to
+ * avoid odd number of intersections.
  */
-static int edges_compare_runtime(struct edge *e1, struct edge *e2)
+static unsigned int init_lines(const gp_coord *points, unsigned int nvert,
+                               struct gp_line *lines, gp_coord ymax)
 {
-	if (e1->state < e2->state) return -1;
-	if (e1->state > e2->state) return 1;
+	gp_coord lx = get_x(points, nvert-1);
+	gp_coord ly = get_y(points, nvert-1);
+	unsigned int i, c = 0;
 
-	if (e1->x < e2->x) return -1;
-	if (e1->x > e2->x) return 1;
+	for (i = 0; i < nvert; i++) {
+		gp_coord cx = get_x(points, i);
+		gp_coord cy = get_y(points, i);
 
-	if (e1->dxy < e2->dxy) return -1;
-	if (e1->dxy > e2->dxy) return 1;
+		if (cy == ly)
+			goto next;
 
-	return 0;
+		if (cy > ly) {
+			lines[c].y1 = ly;
+			lines[c].y2 = cy;
+
+			lines[c].x1 = lx;
+			lines[c].x2 = cx;
+
+			lines[c].dx = cx - lx;
+			lines[c].dy = cy - ly;
+		} else {
+			lines[c].y1 = cy;
+			lines[c].y2 = ly;
+
+			lines[c].x1 = cx;
+			lines[c].x2 = lx;
+
+			lines[c].dx = lx - cx;
+			lines[c].dy = ly - cy;
+		}
+
+		if (lines[c].y2 != ymax)
+			lines[c].y2--;
+
+		c++;
+	next:
+		lx = cx;
+		ly = cy;
+	}
+
+	return c;
+}
+
+struct hline {
+	gp_coord lx;
+	gp_coord rx;
+};
+
+/*
+ * Algorithm to find intersections for a given set of lines.
+ *
+ * For each line we find left and right intersection on a given y.
+ *
+ * This is easily computed as:
+ *
+ * - find Y relative to the line start
+ * - for a given line we increase and decrease the Y by a bit less than 0.5
+ *   which yiels two points on Y that are then mapped to two points on a line on X
+ */
+static unsigned int find_intersections(const struct gp_line *lines, unsigned int nvert, gp_coord y, struct hline *hlines)
+{
+	unsigned int i;
+	unsigned int c = 0;
+
+	for (i = 0; i < nvert; i++) {
+
+		if (y < lines[i].y1 || y > lines[i].y2)
+			continue;
+
+		gp_coord ry = y - lines[i].y1;
+		gp_coord lx, rx;
+
+		lx = lines[i].x1 + 1.00 * lines[i].dx * (ry - 0.49) / lines[i].dy + 0.5;
+		rx = lines[i].x1 + 1.00 * lines[i].dx * (ry + 0.49) / lines[i].dy + 0.5;
+
+		if (lx < rx) {
+			hlines[c].lx = lx;
+			hlines[c].rx = rx;
+		} else {
+			hlines[c].lx = rx;
+			hlines[c].rx = lx;
+		}
+
+		c++;
+	}
+
+	return c;
+}
+
+struct scanline {
+	gp_coord lx;
+	gp_coord rx;
+};
+
+static unsigned int compute_scanlines(const struct gp_line *lines, unsigned int nvert, gp_coord y, struct scanline *scanlines)
+{
+	struct hline hlines[nvert];
+	unsigned int i, j, cnt = find_intersections(lines, nvert, y, hlines);
+/*
+	printf("HLINES ");
+	for (i = 0; i < cnt; i++)
+		printf("%i-%i ", hlines[i].lx, hlines[i].rx);
+	printf("\n");
+*/
+	/* Bubble sort */
+	for (i = 0; i < cnt; i++) {
+		for (j = i+1; j < cnt; j++) {
+			if (hlines[i].lx > hlines[j].lx) {
+				struct hline l = hlines[i];
+				hlines[i] = hlines[j];
+				hlines[j] = l;
+			}
+		}
+	}
+
+	if (!cnt)
+		return 0;
+
+	unsigned int c = 0;
+
+	for (i = 0; i < cnt-1; i+=2) {
+		scanlines[c].lx = hlines[i].lx;
+		scanlines[c].rx = hlines[i+1].rx;
+		c++;
+	}
+
+	return c;
+}
+
+/*
+ * We remove horizontal lines from the list, so have to draw them separately.
+ */
+static void draw_hlines(gp_pixmap *pixmap, const gp_coord *points,
+                        unsigned int nvert, gp_pixel pixel)
+{
+	gp_coord lx = get_x(points, nvert-1);
+	gp_coord ly = get_y(points, nvert-1);
+	unsigned int i;
+
+	for (i = 0; i < nvert; i++) {
+		gp_coord cx = get_x(points, i);
+		gp_coord cy = get_y(points, i);
+
+		if (cy == ly)
+			gp_hline_raw(pixmap, cx, lx, cy, pixel);
+
+		lx = cx;
+		ly = cy;
+	}
 }
 
 void gp_fill_polygon_raw(gp_pixmap *pixmap, unsigned int nvert,
                          const gp_coord *xy, gp_pixel pixel)
 {
 	unsigned int i;
-	struct edge *e;
+	struct gp_line lines[nvert];
+	gp_coord y;
 
 	switch (nvert) {
 	case 1:
@@ -139,114 +212,30 @@ void gp_fill_polygon_raw(gp_pixmap *pixmap, unsigned int nvert,
 	break;
 	}
 
-	gp_point const *vert = (gp_point const *) xy;
+	draw_hlines(pixmap, xy, nvert, pixel);
 
-	/* find first and last scanline */
 	gp_coord ymin = INT_MAX, ymax = -INT_MAX;
 	for (i = 0; i < nvert; i++) {
-		ymax = GP_MAX(ymax, vert[i].y);
-		ymin = GP_MIN(ymin, vert[i].y);
+		ymax = GP_MAX(ymax, get_y(xy, i));
+		ymin = GP_MIN(ymin, get_y(xy, i));
 	}
 
-	/* build a list of edges */
-	struct edge edges[nvert];
-	unsigned int nedges = 0;		/* number of edges in list */
-	for (i = 0; i < nvert; i++) {
+	unsigned int nlines = init_lines(xy, nvert, lines, ymax);
 
-		/*
-		 * next vertex index (wraps to 0 at end to connect
-		 * the last vertex with the first one)
-		 */
-		unsigned int nexti = (i+1) % nvert;
-
-		/* add new edge record */
-		e = edges + nedges++;
-		init_edge(e, vert[i], vert[nexti]);
-	}
-
-	if (nedges < 2)
-		return;		/* not really a polygon */
-
-	/* initially sort edges by Y, then X */
-	qsort(edges, nedges, sizeof(struct edge),
-	      (gp_sort_callback) edges_compare_initial);
-
-	/*
-	 * for each scanline, compute intersections with all edges
-	 * and draw a horizontal line segment between the intersections.
-	 */
-	float inter[nedges];
-	unsigned int ninter;
-	int y;
 	for (y = ymin; y <= ymax; y++) {
-		/* mark edges we have just reached as active */
-		for (i = 0; i < nedges; i++) {
-			e = edges + i;
-			if (e->state == EDGE_READY && (y == e->y)) {
-				e->state = EDGE_ACTIVE;
-			}
+		struct scanline scanlines[nlines];
+		unsigned int cnt;
+
+		cnt = compute_scanlines(lines, nlines, y, scanlines);
+
+		for (i = 0; i < cnt; i++) {
+//			printf("%i-%i ", scanlines[i].lx, scanlines[i].rx);
+			gp_hline_raw(pixmap, scanlines[i].lx, scanlines[i].rx, y, pixel);
 		}
-		qsort(edges, nedges, sizeof(struct edge),
-		      (gp_sort_callback) edges_compare_runtime);
-
-		/* record intersections with active edges */
-		ninter = 0;
-		for (i = 0; i < nedges; i++) {
-			e = edges + i;
-			if (e->state == EDGE_ACTIVE)
-				inter[ninter++] = e->x;
-		}
-
-		/* draw each even range between intersections */
-		for (i = 0; i < ninter; i += 2) {
-			float start = inter[i];
-
-			/* odd number of intersections - skip last */
-			if (i+1 == ninter)
-				break;
-
-			float end = inter[i+1];
-
-			gp_hline_raw(pixmap, start, end, y, pixel);
-		}
-
-		/* update active edges for next step */
-		for (i = 0; i < nedges; i++) {
-			e = edges + i;
-			if (e->state == EDGE_ACTIVE) {
-				if (e->dy == 0) {
-					e->state = EDGE_FINISHED;
-				} else {
-					e->x += e->dxy;
-					e->dy--;
-				}
-			}
-		}
+//		printf("\n");
 	}
 
-	/* finishing touch: draw all horizontal edges that were skipped
-	 * in the main loop
-	 */
-	for (i = 0; i < nedges; i++) {
-		e = edges + i;
-		if (e->state == EDGE_HORIZONTAL) {
-			gp_hline_raw(pixmap, e->x, e->x + e->dxy, e->y,
-				     pixel);
-		}
-	}
-
-	/* HACK we do not track lines on edges correcly so we just draw lines around to fix this for now */
-	gp_coord lx = xy[2*nvert-2];
-	gp_coord ly = xy[2*nvert-1];
-
-	for (i = 0; i < nvert; i++) {
-		gp_coord x = xy[2*i];
-		gp_coord y = xy[2*i+1];
-
-		gp_line(pixmap, x, y, lx, ly, pixel);
-
-		lx = x; ly = y;
-	}
+//	printf("\n\n\n");
 }
 
 void gp_fill_polygon(gp_pixmap *pixmap, unsigned int vertex_count,
