@@ -154,6 +154,32 @@ static void render_stock_speaker(const gp_widget_render_ctx *ctx,
 	}
 }
 
+static void render_text_lines(const gp_widget_render_ctx *ctx,
+                              gp_coord x0, gp_coord y0,
+                              gp_coord x1, gp_coord y1,
+			      gp_pixel col)
+{
+	gp_pixmap *pix = ctx->buf;
+	gp_size dy = (y1 - y0)+1;
+	gp_size ls = dy/10;
+	gp_size sp;
+
+	if (dy < 5)
+		sp = dy - 2*(ls + 1);
+	else
+		sp = (dy - 3*(ls + 1))/2+1;
+
+	gp_fill_rect_xyxy(pix, x0, y1, x1, y1-ls, col);
+	y1-=sp+ls;
+	gp_fill_rect_xyxy(pix, x0, y1, x1, y1-ls, col);
+
+	if (dy < 5)
+		return;
+
+	y1-=sp+ls;
+	gp_fill_rect_xyxy(pix, x0, y1, x1, y1-ls, col);
+}
+
 static void render_stock_hardware(const gp_widget_render_ctx *ctx,
                                   gp_coord x, gp_coord y,
                                   gp_size w, gp_size h)
@@ -202,24 +228,27 @@ static void render_stock_software(const gp_widget_render_ctx *ctx,
 	gp_coord cy = y + h/2;
 	gp_coord i;
 
-	gp_size iw = 7*w/16;
-	gp_size ih = GP_MIN(iw, 3*h/8);
-	gp_size th = ((iw+5)/6);
+	gp_size iw = w/2;
+	gp_size ih = GP_MIN(iw, 7*h/16);
+	gp_size th = GP_MIN(3*w/8, 3*h/8)/8;
 
-	gp_size header = GP_ODD_UP(2*th);
+	gp_size header = GP_ODD_UP(ih/2);
 
 	gp_fill_rect_xywh(pix, x, y, w, h, ctx->bg_color);
 
 	gp_fill_rect_xyxy(pix, cx-iw, cy-ih, cx+iw, cy+ih, ctx->text_color);
-	gp_fill_rect_xyxy(pix, cx-iw+th, cy-ih+header, cx+iw-th, cy+ih-th, ctx->fg_color);
+	gp_fill_rect_xyxy(pix, cx-iw+th+1, cy-ih+header, cx+iw-th-1, cy+ih-th-1, ctx->fg_color);
 
-	gp_size r = th/3;
-	gp_size off = th + r/2;
+	gp_size r = header/8;
+	gp_size off = th + 1 + r;
 
 	for (i = 0; i < 3; i++) {
 		gp_fill_circle(pix, cx+iw-off, cy-ih+header/2, r, ctx->fg_color);
 		off += r ? 3*r+1 : 2;
 	}
+
+	render_text_lines(ctx, cx-iw+th+ih/2+1, cy-ih+header+ih/3+1,
+                          cx+iw-th-ih/2-1, cy+ih-th-1-ih/3-1, ctx->sel_color);
 }
 
 #define ROTATE(s, c, cx, x, cy, y) (1.00 * (cx) + (x)*(c) - (y)*(s) + 0.5), (1.00 * (cy) + (x)*(s) + (y)*(c) + 0.5)
@@ -280,10 +309,65 @@ static void render_stock_settings(const gp_widget_render_ctx *ctx,
 	gp_fill_polygon(pix, GP_ARRAY_SIZE(poly)/2, poly, ctx->text_color);
 
 	gp_fill_circle(pix, cx, cy, cc, ctx->fg_color);
-
-//	for (int i = 0; i < GP_ARRAY_SIZE(poly)/2; i++)
-//		gp_putpixel(pix, poly[2*i], poly[2*i+1], 0xff0000);
 }
+
+static void render_stock_save(const gp_widget_render_ctx *ctx,
+                              gp_coord x, gp_coord y,
+                              gp_size w, gp_size h)
+{
+	gp_pixmap *pix = ctx->buf;
+	gp_coord cx = x + w/2;
+	gp_coord cy = y + h/2;
+	gp_coord sh = GP_MIN(7*w/16, 7*h/16);
+	gp_size th = GP_MIN(3*w/8, 3*h/8)/8;
+	gp_size cs = sh/3;
+	gp_size cvr_s = (2 * sh - 2 * th) / 4;
+	gp_size cvr_d = 3 * cvr_s / 2+1;
+
+	gp_fill_rect_xywh(pix, x, y, w, h, ctx->bg_color);
+
+	gp_coord poly[] = {
+		cx - sh, cy - sh,
+		cx - sh + th, cy - sh,
+		/* inner polygon starts here */
+		cx - sh + th, cy + sh - th,
+		cx + sh - th, cy + sh - th,
+		cx + sh - th, cy - sh + th + cs,
+		cx + sh - th - cs, cy - sh + th,
+		/* cover start */
+		cx + cvr_s, cy - sh + th,
+		cx + cvr_s, cy - sh + th + cvr_d,
+		cx - cvr_s, cy - sh + th + cvr_d,
+		cx - cvr_s, cy - sh + th,
+		/* cover end */
+		cx - sh + th, cy - sh + th,
+		/* inner polygon ends here */
+		cx - sh + th, cy - sh,
+		cx + sh - cs - th/2, cy - sh,
+		cx + sh, cy - sh + cs + th/2,
+		cx + sh, cy + sh,
+		cx - sh, cy + sh,
+		cx - sh, cy - sh,
+	};
+
+	/* fills inner part of floppy */
+	gp_fill_polygon(pix, 9, poly + 2, ctx->warn_color);
+	/* draws border and cover */
+	gp_fill_polygon(pix, GP_ARRAY_SIZE(poly)/2, poly, ctx->text_color);
+	/* window in the cover */
+	gp_fill_rect_xyxy(pix, cx+cvr_s-1-cvr_s/4, cy - sh + th+1 + cvr_d/5,
+			       cx+cvr_s-1-2*(cvr_s/4), cy - sh + th+cvr_d-1 - cvr_d/5,
+			       ctx->warn_color);
+
+	/* label */
+	gp_coord lx0 = cx - sh + th + sh/3;
+	gp_coord ly0 = cy - sh + th + cvr_d + sh/3;
+	gp_coord lx1 = cx + sh - th - sh/3;
+	gp_coord ly1 = cy + sh - th - sh/3;
+
+	render_text_lines(ctx, lx0, ly0, lx1, ly1, ctx->text_color);
+}
+
 
 static void render_stock_file(const gp_widget_render_ctx *ctx,
                               gp_coord x, gp_coord y,
@@ -292,39 +376,56 @@ static void render_stock_file(const gp_widget_render_ctx *ctx,
 	gp_pixmap *pix = ctx->buf;
 	gp_coord cx = x + w/2;
 	gp_coord cy = y + h/2;
-	gp_size ih = 3*h/8;
-	gp_size corner = ih/2;
-	gp_size iw = GP_MIN(3*ih/4, w/3);
-	gp_size th = ih/6;
+	gp_size sh = 7*h/16;
+	gp_size cs = sh/2;
+	gp_size sw = GP_MIN(5*h/16, 3*w/4);
+	gp_size th = GP_MIN(3*w/8, 3*h/8)/8;
 
 	gp_fill_rect_xywh(pix, x, y, w, h, ctx->bg_color);
 
-	gp_fill_rect_xyxy(pix, cx-iw+2*th, cy-ih+corner+2*th, cx+iw-2*th, cy+ih-2*th, ctx->fg_color);
-	gp_fill_rect_xyxy(pix, cx-iw+2*th, cy-ih+2*th, cx+iw-corner-2*th, cy-ih+corner+3*th, ctx->fg_color);
-
-	gp_fill_rect_xyxy(pix, cx-iw, cy-ih, cx-iw+th, cy+ih, ctx->text_color);
-	gp_fill_rect_xyxy(pix, cx+iw, cy-ih+corner, cx+iw-th, cy+ih, ctx->text_color);
-	gp_fill_rect_xyxy(pix, cx-iw, cy+ih, cx+iw, cy+ih-th, ctx->text_color);
-	gp_fill_rect_xyxy(pix, cx-iw, cy-ih, cx+iw-corner, cy-ih+th, ctx->text_color);
-	gp_fill_rect_xyxy(pix, cx+iw-corner-th, cy-ih, cx+iw-corner, cy-ih+corner+th, ctx->text_color);
-	gp_fill_rect_xyxy(pix, cx+iw, cy-ih+corner+th, cx+iw-corner, cy-ih+corner, ctx->text_color);
-
 	gp_coord poly[] = {
-		cx+iw-corner, cy-ih+th,
-		cx+iw-corner, cy-ih,
-		cx+iw, cy-ih + corner,
-		cx+iw-th, cy-ih + corner+1,
+		cx - sw, cy - sh,
+		cx - sw + th, cy - sh,
+		/* inner polygon starts here */
+		cx - sw + th, cy + sh - th,
+		cx + sw - th, cy + sh - th,
+		/* corner start */
+		cx + sw - th, cy - sh + 2*th + cs,
+		cx + sw - cs - 2*th, cy - sh + 2*th + cs,
+		cx + sw - cs - 2*th, cy - sh + th,
+		cx + sw - cs - th, cy - sh + th,
+		cx + sw - cs - th, cy - sh + th + cs,
+		cx + sw - th, cy - sh + th + cs,
+		/* corner end */
+		cx + sw - th - cs, cy - sh + th,
+		cx - sw + th, cy - sh + th,
+		/* inner polygon ends here */
+		cx - sw + th, cy - sh,
+		cx + sw - cs - th/2, cy - sh,
+		cx + sw, cy - sh + cs + th/2,
+		cx + sw, cy + sh,
+		cx - sw, cy + sh,
+		cx - sw, cy - sh,
 	};
 
+	gp_coord in_poly[] = {
+		cx - sw + th, cy + sh - th,
+		cx + sw - th, cy + sh - th,
+		cx + sw - th, cy - sh + th + cs,
+		cx + sw - th - cs, cy - sh + th,
+		cx - sw + th, cy - sh + th,
+	};
+
+	gp_fill_polygon(pix, GP_ARRAY_SIZE(in_poly)/2, in_poly, ctx->fg_color);
 	gp_fill_polygon(pix, GP_ARRAY_SIZE(poly)/2, poly, ctx->text_color);
 
-	gp_coord i;
-	cy -= (corner-1)/3;
+	/* text */
+	gp_coord lx0 = cx - sw + th + sh/3;
+	gp_coord ly0 = cy - sh + cs + th + sh/3+1;
+	gp_coord lx1 = cx + sw - th - sh/3;
+	gp_coord ly1 = cy + sh - th - sh/3-1;
 
-	for (i = 0; i < 3; i++) {
-		gp_fill_rect_xyxy(pix, cx-2*iw/3+1, cy+th/2, cx+2*iw/3-1, cy-th/2, ctx->sel_color);
-		cy+=ih/3;
-	}
+	render_text_lines(ctx, lx0, ly0, lx1, ly1, ctx->sel_color);
 }
 
 static void render_stock_arrow(const gp_widget_render_ctx *ctx,
@@ -540,6 +641,9 @@ static void stock_render(gp_widget *self, const gp_offset *offset,
 	case GP_WIDGET_STOCK_SETTINGS:
 		render_stock_settings(ctx, x, y, self->w, self->h);
 	break;
+	case GP_WIDGET_STOCK_SAVE:
+		render_stock_save(ctx, x, y, self->w, self->h);
+	break;
 	case GP_WIDGET_STOCK_FILE:
 		render_stock_file(ctx, x, y, self->w, self->h);
 	break;
@@ -582,6 +686,7 @@ static struct stock_types {
 	{"hardware", GP_WIDGET_STOCK_HARDWARE},
 	{"software", GP_WIDGET_STOCK_SOFTWARE},
 	{"settings", GP_WIDGET_STOCK_SETTINGS},
+	{"save", GP_WIDGET_STOCK_SAVE},
 	{"file", GP_WIDGET_STOCK_FILE},
 
 	{"refresh", GP_WIDGET_STOCK_REFRESH},

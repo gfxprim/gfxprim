@@ -115,13 +115,15 @@
   },
   {
    "type": "stock",
+   "stock": "save"
+  },
+  {
+   "type": "stock",
    "stock": "file"
   },
   {
    "type": "stock",
    "stock": "refresh"
-  },
-  {
   },
   {
    "type": "label",
@@ -140,6 +142,11 @@
   },
   {
    "type": "label",
+   "text": "STOCK_SAVE",
+   "halign": "left"
+  },
+  {
+   "type": "label",
    "text": "STOCK_FILE",
    "halign": "left"
   },
@@ -147,8 +154,6 @@
    "type": "label",
    "text": "STOCK_REFRESH",
    "halign": "left"
-  },
-  {
   },
 
   {
