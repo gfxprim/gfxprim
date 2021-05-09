@@ -71,7 +71,9 @@ int main(int argc, char *argv[])
 		}
 	}
 
-	gp_widget *pixmap = gp_widget_pixmap_new(w, h, pixmap_on_event, NULL);
+	gp_widget *pixmap = gp_widget_pixmap_new(GP_WIDGET_SIZE(w, 0, 0),
+	                                         GP_WIDGET_SIZE(h, 0, 0),
+	                                         pixmap_on_event, NULL);
 
 	gp_widget_event_unmask(pixmap, GP_WIDGET_EVENT_REDRAW);
 

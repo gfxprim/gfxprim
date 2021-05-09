@@ -16,16 +16,12 @@
 
 static unsigned int min_w(gp_widget *self, const gp_widget_render_ctx *ctx)
 {
-	(void)ctx;
-
-	return self->pixmap->min_w;
+	return gp_widget_size_units_get(&self->pixmap->min_w, ctx);
 }
 
 static unsigned int min_h(gp_widget *self, const gp_widget_render_ctx *ctx)
 {
-	(void)ctx;
-
-	return self->pixmap->min_h;
+	return gp_widget_size_units_get(&self->pixmap->min_h, ctx);
 }
 
 static inline void redraw_passthrough(gp_widget *self,
@@ -154,23 +150,29 @@ static int event(gp_widget *self, const gp_widget_render_ctx *ctx, gp_event *ev)
 
 static gp_widget *json_to_pixmap(json_object *json, gp_htable **uids)
 {
-	unsigned int w = 0;
-	unsigned int h = 0;
-
+	gp_widget_size w = {};
+	gp_widget_size h = {};
+	const char *str_w = NULL;
+	const char *str_h = NULL;
 	(void)uids;
 
 	json_object_object_foreach(json, key, val) {
 		if (!strcmp(key, "w"))
-			w = json_object_get_int(val);
+			str_w = json_object_get_string(val);
 		else if (!strcmp(key, "h"))
-			h = json_object_get_int(val);
+			str_h = json_object_get_string(val);
 		else
 			GP_WARN("Invalid pixmap key '%s'", key);
 	}
 
-	if (w <= 0 || h <= 0) {
-		GP_WARN("Invalid pixmap size %ux%u\n", w, h);
-		return NULL;
+	if (str_w) {
+		if (gp_widget_size_units_parse(str_w, &w))
+			return NULL;
+	}
+
+	if (str_h) {
+		if (gp_widget_size_units_parse(str_h, &h))
+			return NULL;
 	}
 
 	return gp_widget_pixmap_new(w, h, NULL, NULL);
@@ -185,7 +187,7 @@ struct gp_widget_ops gp_widget_pixmap_ops = {
 	.id = "pixmap",
 };
 
-gp_widget *gp_widget_pixmap_new(unsigned int w, unsigned int h,
+gp_widget *gp_widget_pixmap_new(gp_widget_size w, gp_widget_size h,
                                 int (*on_event)(gp_widget_event *ev),
                                 void *priv)
 {

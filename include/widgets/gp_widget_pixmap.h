@@ -9,8 +9,11 @@
 #ifndef GP_WIDGET_PIXMAP_H
 #define GP_WIDGET_PIXMAP_H
 
+#include <widgets/gp_widget_size_units.h>
+
 struct gp_widget_pixmap {
-	unsigned int min_w, min_h;
+	gp_widget_size min_w;
+	gp_widget_size min_h;
 	gp_pixmap *pixmap;
 	int bbox_set:1;
 	int redraw_all:1;
@@ -38,7 +41,7 @@ struct gp_widget_pixmap {
  *
  * @return A pixmap widget
  */
-gp_widget *gp_widget_pixmap_new(unsigned int min_w, unsigned int min_h,
+gp_widget *gp_widget_pixmap_new(gp_widget_size min_w, gp_widget_size min_h,
                                 int (*on_event)(gp_widget_event *ev),
                                 void *priv);
 
