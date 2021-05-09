@@ -9,6 +9,8 @@
 #ifndef GP_WIDGET_STOCK_H
 #define GP_WIDGET_STOCK_H
 
+#include <widgets/gp_widget_size_units.h>
+
 enum gp_widget_stock_type {
 	/* Messages */
 	GP_WIDGET_STOCK_ERR,
@@ -45,10 +47,10 @@ enum gp_widget_stock_type {
 
 struct gp_widget_stock {
 	enum gp_widget_stock_type type;
-	unsigned int min_size;
+	gp_widget_size min_size;
 };
 
-gp_widget *gp_widget_stock_new(enum gp_widget_stock_type type, int min_size);
+gp_widget *gp_widget_stock_new(enum gp_widget_stock_type type, gp_widget_size min_size);
 
 void gp_widget_stock_type_set(gp_widget *self, enum gp_widget_stock_type type);
 

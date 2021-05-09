@@ -13,16 +13,12 @@
 
 static unsigned int stock_min_w(gp_widget *self, const gp_widget_render_ctx *ctx)
 {
-	(void)ctx;
-
-	return self->stock->min_size;
+	return GP_ODD_UP(gp_widget_size_units_get(&self->stock->min_size, ctx));
 }
 
 static unsigned int stock_min_h(gp_widget *self, const gp_widget_render_ctx *ctx)
 {
-	(void)ctx;
-
-	return self->stock->min_size;
+	return GP_ODD_UP(gp_widget_size_units_get(&self->stock->min_size, ctx));
 }
 
 static void render_stock_err_warn(const gp_widget_render_ctx *ctx,
@@ -727,7 +723,9 @@ static const char *gp_widget_stock_type_name(enum gp_widget_stock_type type)
 static gp_widget *stock_from_json(json_object *json, gp_htable **uids)
 {
 	const char *stock = NULL;
-	int type, min_size = -1;
+	const char *min_size_str = NULL;
+	gp_widget_size min_size = GP_WIDGET_SIZE_DEFAULT;
+	int type;
 
 	(void)uids;
 
@@ -735,7 +733,7 @@ static gp_widget *stock_from_json(json_object *json, gp_htable **uids)
 		if (!strcmp(key, "stock"))
 			stock = json_object_get_string(val);
 		else if (!strcmp(key, "min_size"))
-			min_size = json_object_get_int(val);
+			min_size_str = json_object_get_string(val);
 		else
 			GP_WARN("Invalid stock key '%s'", key);
 	}
@@ -749,6 +747,11 @@ static gp_widget *stock_from_json(json_object *json, gp_htable **uids)
 	if (type < 0) {
 		GP_WARN("Unknown stock '%s'", stock);
 		return NULL;
+	}
+
+	if (min_size_str) {
+		if (gp_widget_size_units_parse(min_size_str, &min_size))
+			return NULL;
 	}
 
 	return gp_widget_stock_new(type, min_size);
@@ -784,7 +787,7 @@ struct gp_widget_ops gp_widget_stock_ops = {
 	.id = "stock",
 };
 
-gp_widget *gp_widget_stock_new(enum gp_widget_stock_type type, int min_size)
+gp_widget *gp_widget_stock_new(enum gp_widget_stock_type type, gp_widget_size min_size)
 {
 	const gp_widget_render_ctx *ctx = gp_widgets_render_ctx();
 	gp_widget *ret;
@@ -798,10 +801,12 @@ gp_widget *gp_widget_stock_new(enum gp_widget_stock_type type, int min_size)
 	if (!ret)
 		return NULL;
 
-	if (min_size < 0)
-		ret->stock->min_size = GP_ODD_UP(gp_text_ascent(ctx->font) + 2 * ctx->padd);
+		GP_ODD_UP(gp_text_ascent(ctx->font) + 2 * ctx->padd);
+
+	if (GP_WIDGET_SIZE_EQ(min_size, GP_WIDGET_SIZE_DEFAULT))
+		ret->stock->min_size = GP_WIDGET_SIZE(0, 2, 1);
 	else
-		ret->stock->min_size = GP_ODD_UP((gp_text_ascent(ctx->font) + 4) * min_size);
+		ret->stock->min_size = min_size;
 
 	ret->stock->type = type;
 	ret->no_events = 1;
