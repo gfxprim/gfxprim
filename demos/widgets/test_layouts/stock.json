@@ -1,7 +1,7 @@
 {
  "version": 1,
  "cols": 8,
- "rows": 6,
+ "rows": 8,
  "widgets": [
   {
    "type": "stock",
@@ -18,6 +18,10 @@
   {
    "type": "stock",
    "stock": "question"
+  },
+  {
+  },
+  {
   },
   {
   },
@@ -48,6 +52,10 @@
   {
   },
   {
+  },
+  {
+  },
+  {
    "type": "stock",
    "stock": "speaker_min"
   },
@@ -70,6 +78,10 @@
   {
    "type": "stock",
    "stock": "speaker_dec"
+  },
+  {
+  },
+  {
   },
   {
    "type": "label",
@@ -102,6 +114,10 @@
    "halign": "left"
   },
   {
+  },
+  {
+  },
+  {
    "type": "stock",
    "stock": "hardware"
   },
@@ -123,7 +139,13 @@
   },
   {
    "type": "stock",
+   "stock": "dir"
+  },
+  {
+   "type": "stock",
    "stock": "refresh"
+  },
+  {
   },
   {
    "type": "label",
@@ -152,8 +174,15 @@
   },
   {
    "type": "label",
+   "text": "STOCK_DIR",
+   "halign": "left"
+  },
+  {
+   "type": "label",
    "text": "STOCK_REFRESH",
    "halign": "left"
+  },
+  {
   },
 
   {
@@ -179,6 +208,10 @@
   {
    "type": "stock",
    "stock": "shuffle_off"
+  },
+  {
+  },
+  {
   },
   {
    "type": "label",
@@ -209,6 +242,10 @@
    "type": "label",
    "text": "STOCK_SHUFFLE_OFF",
    "halign": "left"
+  },
+  {
+  },
+  {
   }
  ]
 }
