@@ -6,7 +6,7 @@
 
 #define _GNU_SOURCE
 
-#ifndef NO_CONFIG
+#ifndef GFXPRIM_NO_CONFIG
 #include "../config.h"
 #endif
 

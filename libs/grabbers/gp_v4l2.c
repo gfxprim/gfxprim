@@ -23,7 +23,7 @@
 
 #include <core/gp_debug.h>
 
-#ifndef NO_CONFIG
+#ifndef GFXPRIM_NO_CONFIG
 #include "../../config.h"
 #endif
 

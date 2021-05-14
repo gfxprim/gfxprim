@@ -16,7 +16,7 @@
 #include <string.h>
 
 
-#ifndef NO_CONFIG
+#ifndef GFXPRIM_NO_CONFIG
 #include "../../config.h"
 #endif
 #include <core/gp_pixel.h>

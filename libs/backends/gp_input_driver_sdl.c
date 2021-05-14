@@ -3,7 +3,7 @@
  * Copyright (C) 2009-2013 Cyril Hrubis <metan@ucw.cz>
  */
 
-#ifndef NO_CONFIG
+#ifndef GFXPRIM_NO_CONFIG
 #include "../../config.h"
 #endif
 

@@ -10,7 +10,7 @@
 #include <backends/gp_aalib.h>
 #include <input/gp_input.h>
 
-#ifndef NO_CONFIG
+#ifndef GFXPRIM_NO_CONFIG
 #include "../config.h"
 #endif
 

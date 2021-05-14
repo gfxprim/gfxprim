@@ -9,7 +9,7 @@
 #include <stdint.h>
 #include <inttypes.h>
 
-#ifndef NO_CONFIG
+#ifndef GFXPRIM_NO_CONFIG
 #include "../../config.h"
 #endif
 
