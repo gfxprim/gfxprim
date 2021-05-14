@@ -23,7 +23,9 @@
 
 #include <core/gp_debug.h>
 
+#ifndef NO_CONFIG
 #include "../../config.h"
+#endif
 
 #ifdef HAVE_V4L2
 

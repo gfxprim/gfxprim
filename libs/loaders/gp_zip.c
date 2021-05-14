@@ -9,7 +9,9 @@
 #include <stdint.h>
 #include <inttypes.h>
 
+#ifndef NO_CONFIG
 #include "../../config.h"
+#endif
 
 #ifdef HAVE_ZLIB
 

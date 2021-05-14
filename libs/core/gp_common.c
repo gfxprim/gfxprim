@@ -6,7 +6,9 @@
 
 #define _GNU_SOURCE
 
+#ifndef NO_CONFIG
 #include "../config.h"
+#endif
 
 #include <stdio.h>
 #include <stdarg.h>

@@ -3,7 +3,9 @@
  * Copyright (C) 2009-2013 Cyril Hrubis <metan@ucw.cz>
  */
 
+#ifndef NO_CONFIG
 #include "../../config.h"
+#endif
 
 #ifdef HAVE_LIBSDL
 

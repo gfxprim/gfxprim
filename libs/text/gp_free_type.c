@@ -3,7 +3,9 @@
  * Copyright (C) 2009-2012 Cyril Hrubis <metan@ucw.cz>
  */
 
+#ifndef NO_CONFIG
 #include "../../config.h"
+#endif
 #include <core/gp_debug.h>
 #include <text/gp_font.h>
 

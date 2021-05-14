@@ -6,7 +6,9 @@
 #include <string.h>
 #include <errno.h>
 
+#ifndef NO_CONFIG
 #include "../../config.h"
+#endif
 
 #include <core/gp_debug.h>
 #include "core/gp_common.h"

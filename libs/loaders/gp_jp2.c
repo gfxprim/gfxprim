@@ -13,7 +13,9 @@
 #include <string.h>
 #include <stdio.h>
 
+#ifndef NO_CONFIG
 #include "../../config.h"
+#endif
 #include <core/gp_debug.h>
 #include <core/gp_get_put_pixel.h>
 

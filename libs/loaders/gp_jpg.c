@@ -17,7 +17,9 @@
 #include <stdio.h>
 #include <setjmp.h>
 
+#ifndef NO_CONFIG
 #include "../../config.h"
+#endif
 #include <core/gp_debug.h>
 
 #include <loaders/gp_exif.h>

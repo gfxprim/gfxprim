@@ -15,7 +15,9 @@
 #include <errno.h>
 #include <string.h>
 
+#ifndef NO_CONFIG
 #include "../../config.h"
+#endif
 #include <core/gp_byte_order.h>
 #include <core/gp_debug.h>
 #include <core/gp_gamma_correction.h>

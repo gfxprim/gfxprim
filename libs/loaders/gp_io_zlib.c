@@ -3,7 +3,9 @@
  * Copyright (C) 2009-2014 Cyril Hrubis <metan@ucw.cz>
  */
 
+#ifndef NO_CONFIG
 #include "../../config.h"
+#endif
 
 #include <errno.h>
 #include <stdint.h>

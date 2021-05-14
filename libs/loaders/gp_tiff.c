@@ -15,7 +15,9 @@
 #include <errno.h>
 #include <string.h>
 
+#ifndef NO_CONFIG
 #include "../../config.h"
+#endif
 
 #include <core/gp_pixel.h>
 #include <core/gp_get_put_pixel.h>

@@ -6,7 +6,9 @@
 #include <errno.h>
 #include <string.h>
 
+#ifndef NO_CONFIG
 #include "../../config.h"
+#endif
 
 #ifdef HAVE_LIBARCHIVE
 # include <archive.h>
