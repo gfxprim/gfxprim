@@ -13,9 +13,9 @@
 #include <core/gp_common.h>
 #include <utils/gp_vec.h>
 
-#include <gp_widgets.h>
-#include <gp_widget_ops.h>
-#include <gp_string.h>
+#include <widgets/gp_widgets.h>
+#include <widgets/gp_widget_ops.h>
+#include <widgets/gp_string.h>
 
 static gp_size tab_w(gp_widget *self, const gp_widget_render_ctx *ctx,
                      unsigned int tab)
