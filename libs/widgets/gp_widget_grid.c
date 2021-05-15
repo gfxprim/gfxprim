@@ -14,9 +14,9 @@
 #include <core/gp_common.h>
 #include <utils/gp_vec.h>
 #include <utils/gp_matrix.h>
-#include <gp_widgets.h>
-#include <gp_widget_ops.h>
-#include <gp_widget_json.h>
+#include <widgets/gp_widgets.h>
+#include <widgets/gp_widget_ops.h>
+#include <widgets/gp_widget_json.h>
 
 static gp_widget *widget_grid_grid_get(struct gp_widget_grid *grid,
                                        unsigned int col, unsigned int row)
