@@ -9,9 +9,9 @@
 #include <string.h>
 #include <json-c/json.h>
 
-#include <gp_widgets.h>
-#include <gp_widget_ops.h>
-#include <gp_widget_render.h>
+#include <widgets/gp_widgets.h>
+#include <widgets/gp_widget_ops.h>
+#include <widgets/gp_widget_render.h>
 
 static int check_val(int min, int max, int val)
 {
