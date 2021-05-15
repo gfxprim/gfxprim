@@ -11,10 +11,10 @@
 
 #include <core/gp_common.h>
 
-#include <gp_widgets.h>
-#include <gp_widget_ops.h>
-#include <gp_widget_render.h>
-#include <gp_widget_json.h>
+#include <widgets/gp_widgets.h>
+#include <widgets/gp_widget_ops.h>
+#include <widgets/gp_widget_render.h>
+#include <widgets/gp_widget_json.h>
 
 static unsigned int frame_w(const gp_widget_render_ctx *ctx)
 {
