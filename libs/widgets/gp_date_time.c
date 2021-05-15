@@ -9,7 +9,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#include <gp_date_time.h>
+#include <widgets/gp_date_time.h>
 
 static const char *const months[] = {
 	"Jan",
