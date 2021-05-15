@@ -6,7 +6,7 @@
 #include <unistd.h>
 #include <stdlib.h>
 
-#include "gp_common.h"
+#include <core/gp_common.h>
 #include <core/gp_debug.h>
 
 #include <core/gp_threads.h>
