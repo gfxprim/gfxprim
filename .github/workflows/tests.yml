@@ -1,0 +1,36 @@
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build-without-libs:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: configure
+      run: ./configure
+    - name: make
+      run: make
+
+  build-with-libs:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: install-image-libs
+      run: sudo apt-get install libjpeg-dev libpng-dev libgif-dev libtiff-dev libwebp-dev
+    - name: install-freetype-libs
+      run: sudo apt-get install libfreetype6-dev libfontconfig-dev
+    - name: install-x11-libs
+      run: sudo apt-get install libx11-dev libxext-dev
+    - name: install-json-libs
+      run: sudo apt-get install libjson-c-dev
+    - name: install-swig
+      run: sudo apt-get install swig python-dev
+    - name: configure
+      run: ./configure
+    - name: make
+      run: make
