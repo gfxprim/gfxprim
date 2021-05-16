@@ -15,7 +15,7 @@ jobs:
       - name: install-json-libs
         run: sudo apt-get install libjson-c-dev
       - name: configure
-        run: ./configure -d V4L2 -d libpng -d jpeg -d tiff -d zlib -d libX11 -d freetype -d fontconfig -d dl -d pthread -d backtrace
+        run: ./configure -d V4L2 -d libpng -d jpeg -d tiff -d zlib -d libX11 -d freetype -d fontconfig -d pthread -d backtrace
       - name: make
         run: make
 
