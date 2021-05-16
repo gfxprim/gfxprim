@@ -11,9 +11,9 @@
 
 #include <utils/gp_vec.h>
 
-#include <gp_widgets.h>
-#include <gp_widget_ops.h>
-#include <gp_widget_render.h>
+#include <widgets/gp_widgets.h>
+#include <widgets/gp_widget_ops.h>
+#include <widgets/gp_widget_render.h>
 
 static unsigned int min_w(gp_widget *self, const gp_widget_render_ctx *ctx)
 {

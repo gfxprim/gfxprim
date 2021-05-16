@@ -8,8 +8,8 @@
 
 #include <string.h>
 #include <json-c/json.h>
-#include <gp_widgets.h>
-#include <gp_string.h>
+#include <widgets/gp_widgets.h>
+#include <widgets/gp_string.h>
 
 gp_widget *gp_widget_choice_from_json(unsigned int widget_type,
                                       json_object *json, gp_htable **uids)

@@ -11,10 +11,10 @@
 
 #include <utils/gp_vec_str.h>
 
-#include <gp_widgets.h>
-#include <gp_widget_ops.h>
-#include <gp_widget_render.h>
-#include <gp_markup_parser.h>
+#include <widgets/gp_widgets.h>
+#include <widgets/gp_widget_ops.h>
+#include <widgets/gp_widget_render.h>
+#include <widgets/gp_markup_parser.h>
 
 static gp_text_style *get_font(const gp_widget_render_ctx *ctx, int attrs)
 {

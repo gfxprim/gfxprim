@@ -11,7 +11,7 @@
 #include <stdarg.h>
 
 #include <core/gp_debug.h>
-#include <gp_string.h>
+#include <widgets/gp_string.h>
 
 size_t gp_string_arr_size(const char *strings[], unsigned int len)
 {

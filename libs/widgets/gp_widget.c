@@ -9,8 +9,8 @@
 #include <string.h>
 #include <core/gp_debug.h>
 #include <core/gp_common.h>
-#include <gp_widget.h>
-#include <gp_widget_ops.h>
+#include <widgets/gp_widget.h>
+#include <widgets/gp_widget_ops.h>
 
 const char *gp_widget_class_name(enum gp_widget_class widget_class)
 {
