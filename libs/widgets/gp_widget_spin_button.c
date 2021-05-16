@@ -9,10 +9,10 @@
 #include <string.h>
 #include <json-c/json.h>
 
-#include <gp_widgets.h>
-#include <gp_widget_ops.h>
-#include <gp_widget_render.h>
-#include <gp_string.h>
+#include <widgets/gp_widgets.h>
+#include <widgets/gp_widget_ops.h>
+#include <widgets/gp_widget_render.h>
+#include <widgets/gp_string.h>
 
 static unsigned int buttons_width(const gp_widget_render_ctx *ctx)
 {

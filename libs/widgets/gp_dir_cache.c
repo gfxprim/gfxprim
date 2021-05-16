@@ -19,7 +19,7 @@
 
 #include <core/gp_debug.h>
 #include <utils/gp_block_alloc.h>
-#include <gp_dir_cache.h>
+#include <widgets/gp_dir_cache.h>
 
 static gp_dir_entry *new_entry(gp_dir_cache *self, size_t size,
                                const char *name, mode_t mode, time_t mtime)

@@ -10,7 +10,7 @@
 #include <core/gp_common.h>
 #include <input/gp_timer.h>
 #include <input/gp_time_stamp.h>
-#include <gp_widget_timer.h>
+#include <widgets/gp_widget_timer.h>
 
 static gp_timer *temp_queue;
 static gp_timer **queue = &temp_queue;

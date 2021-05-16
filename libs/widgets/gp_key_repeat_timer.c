@@ -19,7 +19,7 @@
 #include <input/gp_timer.h>
 #include <input/gp_event_queue.h>
 #include <input/gp_time_stamp.h>
-#include <gp_widget_timer.h>
+#include <widgets/gp_widget_timer.h>
 
 static struct gp_event_queue *event_queue;
 static gp_timer **timer_queue;
