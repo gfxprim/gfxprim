@@ -27,6 +27,7 @@ option(GFXPRIM_DISABLE_DL "Disable Dynamic Linker" OFF)
 option(GFXPRIM_DISABLE_V4L2 "Disable video for Linux 2" OFF)
 option(GFXPRIM_DISABLE_PTHREAD "Disable Posix Threads" OFF)
 option(GFXPRIM_DISABLE_BACKTRACE "Disable C stack trace writeout" OFF)
+option(GFXPRIM_BUILD_TEMPLATES "Build Templates" ON)
 
 # Variables
 set(GFXPRIM_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/libs)
@@ -58,7 +59,7 @@ if(NOT GFXPRIM_DISABLE_PNG)
         list(APPEND GFXPRIM_INCLUDE_DIRS ${PNG_INCLUDE_DIR})
         message(STATUS "GFXprim: [x] png " ${PNG_VERSION_STRING})
     else()
-        message(STATUS "GFXprim: [ ] png not found")
+        message(STATUS "GFXprim: [ ] png")
     endif()
 endif()
 
@@ -70,7 +71,7 @@ if(NOT GFXPRIM_DISABLE_SDL)
         list(APPEND GFXPRIM_INCLUDE_DIRS ${SDL_INCLUDE_DIRS})
         message(STATUS "GFXprim: [x] sdl " ${SDL_VERSION})
     else()
-        message(STATUS "GFXprim: [ ] sdl not found")
+        message(STATUS "GFXprim: [ ] sdl")
     endif()
 endif()
 
@@ -82,7 +83,7 @@ if(NOT GFXPRIM_DISABLE_JPEG)
         list(APPEND GFXPRIM_INCLUDE_DIRS ${JPEG_INCLUDE_DIRS})
         message(STATUS "GFXprim: [x] jpeg " ${JPEG_VERSION})
     else()
-        message(STATUS "GFXprim: [ ] jpeg not found")
+        message(STATUS "GFXprim: [ ] jpeg")
     endif()
 endif()
 
@@ -95,7 +96,7 @@ if(NOT GFXPRIM_DISABLE_WEBP)
         list(APPEND GFXPRIM_COMPILE_OPTIONS ${WebP_COMPILE_OPTIONS})
         message(STATUS "GFXprim: [x] webp " ${WebP_VERSION})
     else()
-        message(STATUS "GFXprim: [ ] webp not found")
+        message(STATUS "GFXprim: [ ] webp")
     endif()
 endif()
 
@@ -107,7 +108,7 @@ if(NOT GFXPRIM_DISABLE_OPENJPEG)
         list(APPEND GFXPRIM_INCLUDE_DIRS ${OPENJPEG_INCLUDE_DIRS})
         message(STATUS "GFXprim: [x] openjpeg " ${OpenJPEG_VERSION})
     else()
-        message(STATUS "GFXprim: [ ] openjpeg not found")
+        message(STATUS "GFXprim: [ ] openjpeg")
     endif()
 endif()
 
@@ -119,7 +120,7 @@ if(NOT GFXPRIM_DISABLE_GIFLIB)
         list(APPEND GFXPRIM_INCLUDE_DIRS ${GIF_INCLUDE_DIR})
         message(STATUS "GFXprim: [x] giflib " ${GIF_VERSION})
     else()
-        message(STATUS "GFXprim: [ ] giflib not found")
+        message(STATUS "GFXprim: [ ] giflib")
     endif()
 endif()
 
@@ -129,9 +130,9 @@ if(NOT GFXPRIM_DISABLE_TIFF)
         list(APPEND GFXPRIM_DEFINES HAVE_TIFF)
         list(APPEND GFXPRIM_LIBRARIES ${TIFF_LIBRARIES})
         list(APPEND GFXPRIM_INCLUDE_DIRS ${TIFF_INCLUDE_DIRS})
-        message(STATUS "GFXprim: [x] tiff enabled")
+        message(STATUS "GFXprim: [x] tiff")
     else()
-        message(STATUS "GFXprim: [ ] tiff not found")
+        message(STATUS "GFXprim: [ ] tiff")
     endif()
 endif()
 
@@ -143,7 +144,7 @@ if(NOT GFXPRIM_DISABLE_ZLIB)
         list(APPEND GFXPRIM_INCLUDE_DIRS ${ZLIB_INCLUDE_DIRS})
         message(STATUS "GFXprim: [x] zlib " ${ZLIB_VERSION_STRING})
     else()
-        message(STATUS "GFXprim: [ ] zlib not found")
+        message(STATUS "GFXprim: [ ] zlib")
     endif()
 endif()
 
@@ -155,7 +156,7 @@ if(NOT GFXPRIM_DISABLE_LIBARCHIVE)
         list(APPEND GFXPRIM_INCLUDE_DIRS ${LibArchive_INCLUDE_DIRS})
         message(STATUS "GFXprim: [x] libarchive " ${LibArchive_VERSION})
     else()
-        message(STATUS "GFXprim: [ ] libarchive not found")
+        message(STATUS "GFXprim: [ ] libarchive")
     endif()
 endif()
 
@@ -169,7 +170,7 @@ if(NOT GFXPRIM_DISABLE_LIBXCB)
         list(APPEND GFXPRIM_DEFINES HAVE_XCB_UTIL_ERRORS)
         message(STATUS "GFXprim: [x] xcb " ${XCB_VERSION})
     else()
-        message(STATUS "GFXprim: [ ] xcb not found")
+        message(STATUS "GFXprim: [ ] xcb")
     endif()
 endif()
 
@@ -179,9 +180,9 @@ if(NOT GFXPRIM_DISABLE_X_SHM)
         list(APPEND GFXPRIM_DEFINES HAVE_X_SHM)
         list(APPEND GFXPRIM_LIBRARIES ${X11_LIBRARIES})
         list(APPEND GFXPRIM_INCLUDE_DIRS ${X11_INCLUDE_DIR} ${X11_XShm_INCLUDE_PATH})
-        message(STATUS "GFXprim: [x] x_shm enabled")
+        message(STATUS "GFXprim: [x] x_shm")
     else()
-        message(STATUS "GFXprim: [ ] x_shm not found")
+        message(STATUS "GFXprim: [ ] x_shm")
     endif()
 endif()
 
@@ -192,7 +193,7 @@ if(NOT GFXPRIM_DISABLE_AALIB)
         list(APPEND GFXPRIM_DEFINES HAVE_AALIB)
         message(STATUS "GFXprim: [x] aalib " ${AALib_VERSION})
     else()
-        message(STATUS "GFXprim: [ ] aalib not found")
+        message(STATUS "GFXprim: [ ] aalib")
     endif()
 endif()
 
@@ -204,7 +205,7 @@ if(NOT GFXPRIM_DISABLE_FREETYPE)
         list(APPEND GFXPRIM_INCLUDE_DIRS PUBLIC ${FREETYPE_INCLUDE_DIRS})
         message(STATUS "GFXprim: [x] freetype " ${FREETYPE_VERSION_STRING})
     else()
-        message(STATUS "GFXprim: [ ] freetype not found")
+        message(STATUS "GFXprim: [ ] freetype")
     endif()
 endif()
 
@@ -215,9 +216,9 @@ if(NOT GFXPRIM_DISABLE_JSON)
         file(GLOB GFXPRIM_SOURCES_WIDGET ${GFXPRIM_SOURCE_DIR}/widgets/*.c)
         list(APPEND GFXPRIM_SOURCES_WIDGET)
         list(APPEND GFXPRIM_LIBRARIES json-c)
-        message(STATUS "GFXprim: [x] json-c enabled")
+        message(STATUS "GFXprim: [x] json-c")
     else()
-        message(STATUS "GFXprim: [ ] json-c not found")
+        message(STATUS "GFXprim: [ ] json-c")
     endif()
 endif()
 
@@ -225,18 +226,18 @@ if(NOT GFXPRIM_DISABLE_DL)
     if(CMAKE_DL_LIBS)
         list(APPEND GFXPRIM_LIBRARIES ${CMAKE_DL_LIBS})
         list(APPEND GFXPRIM_DEFINES HAVE_DL)
-        message(STATUS "GFXprim: [x] dl enabled")
+        message(STATUS "GFXprim: [x] dl")
     else()
-        message(STATUS "GFXprim: [ ] dl disabled")
+        message(STATUS "GFXprim: [ ] dl")
     endif()
 endif()
 
 if(NOT GFXPRIM_DISABLE_V4L2)
     if(UNIX)
         list(APPEND GFXPRIM_DEFINES HAVE_V4L2)
-        message(STATUS "GFXprim: [x] v4l2 enabled")
+        message(STATUS "GFXprim: [x] v4l2")
     else()
-        message(STATUS "GFXprim: [ ] v4l2 disabled")
+        message(STATUS "GFXprim: [ ] v4l2")
     endif()
 endif()
 
@@ -245,9 +246,9 @@ if(NOT GFXPRIM_DISABLE_PTHREAD)
     if(Threads_FOUND)
         list(APPEND GFXPRIM_LIBRARIES Threads::Threads)
         list(APPEND GFXPRIM_DEFINES HAVE_PTHREAD)
-        message(STATUS "GFXprim: [x] pthread enabled")
+        message(STATUS "GFXprim: [x] pthread")
     else()
-        message(STATUS "GFXprim: [ ] pthread not found")
+        message(STATUS "GFXprim: [ ] pthread")
     endif()
 endif()
 
@@ -256,14 +257,52 @@ if(NOT GFXPRIM_DISABLE_BACKTRACE)
     if(Backtrace_FOUND)
         list(APPEND GFXPRIM_INCLUDE_DIRS ${Backtrace_INCLUDE_DIRS})
         list(APPEND GFXPRIM_LIBRARIES ${Backtrace_LIBRARIES})
-        message(STATUS "GFXprim: [x] backtrace enabled")
+        message(STATUS "GFXprim: [x] backtrace")
     else()
-        message(STATUS "GFXprim: [ ] backtrace not found")
+        message(STATUS "GFXprim: [ ] backtrace")
     endif()
 endif()
 
-# config.h dummy file
+# Config
 file(WRITE ${CMAKE_CURRENT_SOURCE_DIR}/config.h "// Empty config file generated by CMake.")
+
+# Templates
+if(GFXPRIM_BUILD_TEMPLATES)
+    find_package(Python QUIET)
+    if(Python_FOUND)
+        message(STATUS "GFXprim: [x] python " ${Python_VERSION})
+
+        set(GFXPRIM_CCT ${CMAKE_CURRENT_SOURCE_DIR}/gen/bin/cct.py)
+        set(GFXPRIM_CCT_INCLUDE ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/gen/include)
+        file(GLOB GFXPRIM_T_FILES
+            libs/backends/*.gen.c.t
+            libs/core/*.gen.c.t
+            libs/filters/*.gen.c.t
+            libs/gfx/*.gen.c.t
+            libs/grabbers/*.gen.c.t
+            libs/input/*.gen.c.t
+            libs/loaders/*.gen.c.t
+            libs/text/*.gen.c.t
+            libs/utils/*.gen.c.t
+            libs/widgets/*.gen.c.t
+            include/backends/*.gen.h.t
+            include/core/*.gen.h.t
+            include/filters/*.gen.h.t
+            include/gfx/*.gen.h.t
+            include/grabbers/*.gen.h.t
+            include/input/*.gen.h.t
+            include/loaders/*.gen.h.t
+            include/text/*.gen.h.t
+            include/utils/*.gen.h.t
+            include/widgets/*.gen.h.t
+        )
+        foreach(file ${GFXPRIM_T_FILES})
+            message(STATUS "Need to build: " ${file})
+        endforeach()
+    else()
+        message(STATUS "GFXprim: [ ] python")
+    endif()
+endif()
 
 # Static Build
 if(GFXPRIM_BUILD_STATIC)
