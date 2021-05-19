@@ -7,7 +7,7 @@
  */
 
 #include <stdio.h>
-#include <gp_file_size.h>
+#include <widgets/gp_file_size.h>
 
 const char *gp_str_file_size(char *buf, size_t buf_len, size_t size)
 {

@@ -8,7 +8,7 @@
 
 import re
 import getopt
-from sys import argv, exit
+from sys import argv, executable, exit
 from os import path, remove, system
 
 def perror(filename, line, lineno, row, error):
@@ -288,7 +288,7 @@ def main():
                 # and executing it because the error trace
                 # from exec() tends to be less informative
                 write_script(script_name, t)
-                system('python ' + script_name)
+                system(executable + ' ' + script_name)
                 remove(script_name)
                 exit(1)
         else:

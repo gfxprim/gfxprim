@@ -25,8 +25,8 @@ get_channel(const gp_pixel_type_desc *desc, const char *name)
 
 static int match(const gp_pixel_channel *channel, gp_pixel mask)
 {
-	if (channel == NULL) {
-		GP_DEBUG(3, "%s gen %08x pass %08x", channel->name, 0, mask);
+	if (!channel) {
+		GP_DEBUG(3, "NULL gen %08x pass %08x", 0, mask);
 		return !mask;
 	}
 

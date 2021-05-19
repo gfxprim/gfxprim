@@ -9,11 +9,11 @@
 #include <string.h>
 #include <core/gp_debug.h>
 #include <core/gp_common.h>
-#include <gp_widget.h>
-#include <gp_widget_event.h>
-#include <gp_widget_ops.h>
-#include <gp_widget_render.h>
-#include <gp_widget_app.h>
+#include <widgets/gp_widget.h>
+#include <widgets/gp_widget_event.h>
+#include <widgets/gp_widget_ops.h>
+#include <widgets/gp_widget_render.h>
+#include <widgets/gp_widget_app.h>
 
 extern struct gp_widget_ops gp_widget_grid_ops;
 extern struct gp_widget_ops gp_widget_tabs_ops;

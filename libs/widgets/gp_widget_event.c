@@ -8,8 +8,8 @@
 
 #include <stdio.h>
 #include <string.h>
-#include <gp_widget_ops.h>
-#include <gp_widget_event.h>
+#include <widgets/gp_widget_ops.h>
+#include <widgets/gp_widget_event.h>
 
 static const char *ev_names[] = {
 	[GP_WIDGET_EVENT_NEW] = "new",

@@ -9,7 +9,7 @@
 #include <string.h>
 #include <json-c/json.h>
 
-#include <gp_widgets.h>
+#include <widgets/gp_widgets.h>
 
 static unsigned int stock_min_w(gp_widget *self, const gp_widget_render_ctx *ctx)
 {

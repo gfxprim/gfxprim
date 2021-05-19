@@ -9,7 +9,7 @@
 #include <string.h>
 
 #include <core/gp_debug.h>
-#include <gp_markup_parser.h>
+#include <widgets/gp_markup_parser.h>
 
 static char *strcopy(char **buf, const char *str, size_t len)
 {

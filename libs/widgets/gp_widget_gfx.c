@@ -7,7 +7,7 @@
  */
 
 #include <string.h>
-#include <gp_widget_gfx.h>
+#include <widgets/gp_widget_gfx.h>
 
 static gp_size text_size(gp_size add_size, const gp_text_style *style,
                          const char *str, size_t len)
