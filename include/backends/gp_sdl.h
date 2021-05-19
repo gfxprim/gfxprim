@@ -9,7 +9,7 @@
 #include <stdint.h>
 #include <backends/gp_backend.h>
 
-enum gp_sdl_lags {
+enum gp_sdl_flags {
 	GP_SDL_FULLSCREEN = 0x01,
 	GP_SDL_RESIZABLE  = 0x02,
 };
