@@ -13,7 +13,7 @@
 #ifdef HAVE_LIBSDL
 
 #include <input/gp_input.h>
-#include "gp_input_driver_sdl.h"
+#include <backends/gp_input_driver_sdl.h>
 #include <backends/gp_backend.h>
 #include <backends/gp_sdl.h>
 
