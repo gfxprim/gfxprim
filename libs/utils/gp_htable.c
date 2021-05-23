@@ -87,6 +87,9 @@ gp_htable *gp_htable_new(unsigned int order, int flags)
 
 void gp_htable_free(gp_htable *self)
 {
+	if (!self)
+		return;
+
 	if (self->flags & GP_HTABLE_COPY_KEY ||
 	    self->flags & GP_HTABLE_FREE_KEY) {
 		unsigned int i;
