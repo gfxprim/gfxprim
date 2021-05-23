@@ -79,7 +79,7 @@ static gp_widget *json_to_label(json_object *json, gp_htable **uids)
 {
 	const char *label = NULL;
 	const char *strattr = NULL;
-	int size = 0;
+	int width = 0;
 	int ralign = 0;
 	int frame = 0;
 	gp_widget_tattr attr = 0;
@@ -91,8 +91,8 @@ static gp_widget *json_to_label(json_object *json, gp_htable **uids)
 			label = json_object_get_string(val);
 		else if (!strcmp(key, "tattr"))
 			strattr = json_object_get_string(val);
-		else if (!strcmp(key, "size"))
-			size = json_object_get_int(val);
+		else if (!strcmp(key, "width"))
+			width = json_object_get_int(val);
 		else if (!strcmp(key, "ralign"))
 			ralign = json_object_get_boolean(val);
 		else if (!strcmp(key, "frame"))
@@ -109,7 +109,7 @@ static gp_widget *json_to_label(json_object *json, gp_htable **uids)
 	if (gp_widget_tattr_parse(strattr, &attr))
 		GP_WARN("Invalid text attribute '%s'", strattr);
 
-	gp_widget *ret = gp_widget_label_new(label, attr, size);
+	gp_widget *ret = gp_widget_label_new(label, attr, width);
 
 	ret->label->ralign = ralign;
 	ret->label->frame = frame;
