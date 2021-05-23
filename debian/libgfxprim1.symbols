@@ -15,6 +15,7 @@ libgfxprim-backends.so.1 libgfxprim1 #MINVER#
  gp_backend_wait_event@Base 1.0.0-rc0-1
  gp_linux_fb_init@Base 1.0.0-rc0-1
  gp_sdl_init@Base 1.0.0-rc0-1
+ gp_sdl2_init@Base 1.0.0-rc0-1
  gp_x11_init@Base 1.0.0-rc0-1
  gp_xcb_init@Base 1.0.0-rc0-1
 libgfxprim-grabbers.so.1 libgfxprim1 #MINVER#

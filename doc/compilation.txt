@@ -27,7 +27,7 @@ Dependencies
 
 * X11
 * link:http://aa-project.sourceforge.net/aalib/[AA-lib]
-* link:http://www.libsdl.org/[SDL] 1.2
+* link:http://www.libsdl.org/[SDL] 1.2 or 2.x
   (not recomended, known to be slow and buggy)
 * link:https://xcb.freedesktop.org/[XCB]
   (90% of code finished at this point)

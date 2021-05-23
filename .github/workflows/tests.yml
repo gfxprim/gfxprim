@@ -29,7 +29,7 @@ jobs:
       - name: install-freetype-libs
         run: sudo apt-get install libfreetype6-dev libfontconfig-dev
       - name: install-backend-libs
-        run: sudo apt-get install libx11-dev libxext-dev libsdl-dev libaa1-dev libxcb1-dev libxcb-keysyms1-dev libxcb-shm0-dev
+        run: sudo apt-get install libx11-dev libxext-dev libsdl-dev libsdl2-dev libaa1-dev libxcb1-dev libxcb-keysyms1-dev libxcb-shm0-dev
       - name: install-json-libs
         run: sudo apt-get install libjson-c-dev
       - name: install-swig

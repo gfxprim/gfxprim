@@ -47,6 +47,10 @@ ERROR_ON_NULL(gp_backend_sdl_init);
 %newobject GP_BackendSDLInit;
 %include "gp_sdl.h"
 
+ERROR_ON_NULL(gp_backend_sdl2_init);
+%newobject GP_BackendSDL2Init;
+%include "gp_sdl2.h"
+
 ERROR_ON_NULL(gp_backend_x11_init);
 %newobject gp_backend_x11_init;
 %include "gp_x11.h"

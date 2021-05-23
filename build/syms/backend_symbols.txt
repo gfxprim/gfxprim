@@ -10,12 +10,14 @@ gp_backend_update_rect_xyxy
 gp_backend_wait_event
 gp_x11_fullscreen
 gp_sdl_init
+gp_sdl2_init
 gp_backend_wait
 gp_backend_add_timer
 gp_x11_init
 gp_backend_resize_ack
 gp_backend_timer_timeout
 gp_pixmap_from_sdl_surface
+gp_pixmap_from_sdl2_surface
 gp_backend_is_x11
 gp_aalib_init
 gp_xcb_init

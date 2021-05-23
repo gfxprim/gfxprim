@@ -229,7 +229,7 @@ Backends
 link:backends.html[Backends] together with link:input.html[Input] form
 an API for drawing on screen (or into a window) and for getting
 keystrokes/mouse coordinates. So far we support X11, the Linux
-framebuffer, SDL and AALib as graphics backends.
+framebuffer, SDL (1/2), and AALib as graphics backends.
 
 There is also a virtual backend used for testing. This allows you to
 create a backend of any pixel type on the top of other backends.

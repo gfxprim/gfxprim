@@ -13,7 +13,7 @@ Supported backends
 ------------------
 
 * Linux mmaped 'frame-buffer'
-* link:http://www.libsdl.org/[SDL]
+* link:http://www.libsdl.org/[SDL] (1/2)
 * 'X Window System'
 * link:http://aa-project.sourceforge.net/aalib/[AA-lib]
 
@@ -70,6 +70,32 @@ operations are guarded by locks.
 You can't initialize more than one backend at a time, which is inherited 'SDL'
 limitation. If you call the initialization for a second time, you will get a
 pointer to already running backend.
+
+If w, h and/or bpp are zero 'SDL' tries to do a guess, most of the time wrong
+for w and h though.
+
+The caption is window caption.
+
+And finally flags may change the 'SDL' to go to full-screen mode or make the
+window resizable.
+
+SDL2
+~~~~
+
+[source,c]
+-------------------------------------------------------------------------------
+enum gp_sdl2_flags {
+        GP_SDL_FULLSCREEN = 0x01,
+        GP_SDL_RESIZABLE  = 0x02,
+};
+
+gp_backend *gp_sdl2_init(gp_size w, gp_size h,
+                        uint8_t bpp, uint8_t flags,
+                        const char *caption);
+-------------------------------------------------------------------------------
+
+Initialize 'SDL2' as a backend driver. The backend is thread safe as all the
+operations are guarded by locks.
 
 If w, h and/or bpp are zero 'SDL' tries to do a guess, most of the time wrong
 for w and h though.

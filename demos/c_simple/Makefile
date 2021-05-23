@@ -1,12 +1,14 @@
 TOPDIR=../..
 include $(TOPDIR)/pre.mk
 
-SOURCES=$(shell echo *.c)
+CSOURCES=$(shell echo *.c)
 
 ifneq ($(HAVE_LIBSDL),yes)
-CSOURCES=$(filter-out SDL_glue.c,$(SOURCES))
-else
-CSOURCES=$(SOURCES)
+CSOURCES:=$(filter-out SDL_glue.c,$(CSOURCES))
+endif
+
+ifneq ($(HAVE_LIBSDL2),yes)
+CSOURCES:=$(filter-out SDL2_glue.c,$(CSOURCES))
 endif
 
 INCLUDE=
@@ -25,6 +27,12 @@ ifeq ($(HAVE_LIBSDL),yes)
 APPS+=SDL_glue
 
 SDL_glue: LDLIBS+=$(shell sdl-config --libs) -lgfxprim-backends
+endif
+
+ifeq ($(HAVE_LIBSDL2),yes)
+APPS+=SDL2_glue
+
+SDL2_glue: LDLIBS+=$(shell sdl2-config --libs) -lgfxprim-backends
 endif
 
 proxy_backend: LDLIBS+=-lgfxprim-backends

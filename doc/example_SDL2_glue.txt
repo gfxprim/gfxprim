@@ -1,0 +1,10 @@
+SDL2 Glue
+--------
+
+You can easily mix SDL2 and GFXprim code using 'gp_pixmap_from_sdl2_surface()'
+function.
+
+[source,c]
+------------------------------------------------------------------
+include::../demos/c_simple/SDL2_glue.c[]
+------------------------------------------------------------------

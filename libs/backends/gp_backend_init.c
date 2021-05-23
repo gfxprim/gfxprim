@@ -160,9 +160,15 @@ static gp_backend *sdl_init(char *params, const char *caption)
 {
 	gp_size w = 640, h = 480, bpp = 0;
 	uint8_t flags = GP_SDL_RESIZABLE;
+	gp_backend *output;
 
 	if (parse_sdl_params(params, &w, &h, &bpp, &flags))
 		return NULL;
+
+	/* Atttempt to load with SDL2 first */
+	output = gp_sdl2_init(w, h, bpp, flags, caption);
+	if (output != NULL)
+		return output;
 
 	return gp_sdl_init(w, h, bpp, flags, caption);
 }
