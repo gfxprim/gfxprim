@@ -64,6 +64,6 @@ Sets a label link:widgets_tattr.html[text attributes].
 | Attribute |  Type  | Default | Description
 |  +text+   | string |         | Label text
 |  +tattr+  |  tattr |  NULL   | Text attributes e.g. bold
-|  +size+   |   int  |    0    | Label text size
+|  +width+  |   int  |    0    | Label text size
 |  +frame+  |  bool  |  false  | Draw frame around label
 |=========================================================
