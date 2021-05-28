@@ -40,6 +40,12 @@ const struct tst_suite tst_suite = {
 		 .flags = TST_TMPDIR | TST_CHECK_MALLOC,
 	         .bench_iter = 5000},
 
+		{.name = "tabs", .tst_fn = load_json,
+		 .res_path = "data/json/tabs.json",
+		 .data = "tabs.json",
+		 .flags = TST_TMPDIR | TST_CHECK_MALLOC,
+	         .bench_iter = 50000},
+
 		{.name = NULL},
 	}
 };
