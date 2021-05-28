@@ -9,7 +9,7 @@
     {
       "type": "checkbox",
       "label": "Check Box",
-      "set": 1
+      "set": true
     },
     {
       "type": "pbar",
