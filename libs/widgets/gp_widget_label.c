@@ -7,7 +7,6 @@
  */
 
 #include <string.h>
-#include <json-c/json.h>
 
 #include <utils/gp_vec_str.h>
 
@@ -75,10 +74,30 @@ static void render(gp_widget *self, const gp_offset *offset,
 	            ctx->text_color, ctx->bg_color, self->label->text);
 }
 
-static gp_widget *json_to_label(json_object *json, gp_htable **uids)
+enum keys {
+	FRAME,
+	RALIGN,
+	TATTR,
+	TEXT,
+	WIDTH
+};
+
+static const gp_json_obj_attr attrs[] = {
+	GP_JSON_OBJ_ATTR("frame", GP_JSON_BOOL),
+	GP_JSON_OBJ_ATTR("ralign", GP_JSON_BOOL),
+	GP_JSON_OBJ_ATTR("tattr", GP_JSON_STR),
+	GP_JSON_OBJ_ATTR("text", GP_JSON_STR),
+	GP_JSON_OBJ_ATTR("width", GP_JSON_INT),
+};
+
+static const gp_json_obj obj_filter = {
+	.attrs = attrs,
+	.attr_cnt = GP_ARRAY_SIZE(attrs),
+};
+
+static gp_widget *json_to_label(gp_json_buf *json, gp_json_val *val, gp_htable **uids)
 {
-	const char *label = NULL;
-	const char *strattr = NULL;
+	char *label = NULL;
 	int width = 0;
 	int ralign = 0;
 	int frame = 0;
@@ -86,33 +105,33 @@ static gp_widget *json_to_label(json_object *json, gp_htable **uids)
 
 	(void)uids;
 
-	json_object_object_foreach(json, key, val) {
-		if (!strcmp(key, "text"))
-			label = json_object_get_string(val);
-		else if (!strcmp(key, "tattr"))
-			strattr = json_object_get_string(val);
-		else if (!strcmp(key, "width"))
-			width = json_object_get_int(val);
-		else if (!strcmp(key, "ralign"))
-			ralign = json_object_get_boolean(val);
-		else if (!strcmp(key, "frame"))
-			frame = json_object_get_boolean(val);
-		else
-			GP_WARN("Invalid label key '%s'", key);
+	GP_JSON_OBJ_FILTER(json, val, &obj_filter, gp_widget_json_attrs) {
+		switch (val->idx) {
+		case FRAME:
+			frame = val->val_bool;
+		break;
+		case RALIGN:
+			ralign = val->val_bool;
+		break;
+		case TATTR:
+			if (gp_widget_tattr_parse(val->val_str, &attr))
+				gp_json_warn(json, "Invalid text attribute '%s'", val->val_str);
+		break;
+		case TEXT:
+			label = strdup(val->val_str);
+		break;
+		case WIDTH:
+			width = val->val_int;
+		break;
+		}
 	}
-
-	if (!label) {
-		GP_WARN("Missing label");
-		label = "Missing label";
-	}
-
-	if (gp_widget_tattr_parse(strattr, &attr))
-		GP_WARN("Invalid text attribute '%s'", strattr);
 
 	gp_widget *ret = gp_widget_label_new(label, attr, width);
 
 	ret->label->ralign = ralign;
 	ret->label->frame = frame;
+
+	free(label);
 
 	return ret;
 }

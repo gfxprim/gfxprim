@@ -16,5 +16,6 @@
 #include <utils/gp_fds.h>
 #include <utils/gp_bbox.h>
 #include <utils/gp_list.h>
+#include <utils/gp_json.h>
 
 #endif /* GP_UTILS_H */

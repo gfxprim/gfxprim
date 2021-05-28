@@ -7,7 +7,6 @@
  */
 
 #include <string.h>
-#include <json-c/json.h>
 
 #include <widgets/gp_widgets.h>
 #include <widgets/gp_widget_ops.h>
@@ -173,9 +172,9 @@ static int event(gp_widget *self, const gp_widget_render_ctx *ctx, gp_event *ev)
 	return 0;
 }
 
-static gp_widget *json_to_spinbutton(json_object *json, gp_htable **uids)
+static gp_widget *json_to_spinbutton(gp_json_buf *json, gp_json_val *val, gp_htable **uids)
 {
-	return gp_widget_choice_from_json(GP_WIDGET_SPINBUTTON, json, uids);
+	return gp_widget_choice_from_json(GP_WIDGET_SPINBUTTON, json, val, uids);
 }
 
 struct gp_widget_ops gp_widget_spinbutton_ops = {

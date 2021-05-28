@@ -2,12 +2,11 @@
 
 /*
 
-   Copyright (c) 2014-2020 Cyril Hrubis <metan@ucw.cz>
+   Copyright (c) 2014-2021 Cyril Hrubis <metan@ucw.cz>
 
  */
 
 #include <string.h>
-#include <json-c/json.h>
 
 #include <utils/gp_vec_str.h>
 
@@ -180,28 +179,45 @@ void gp_widget_markup_refresh(gp_widget *self)
 	gp_widget_redraw(self);
 }
 
-static gp_widget *json_to_markup(json_object *json, gp_htable **uids)
+enum keys {
+	GET,
+	TEXT,
+};
+
+static const gp_json_obj_attr attrs[] = {
+	GP_JSON_OBJ_ATTR("get", GP_JSON_STR),
+	GP_JSON_OBJ_ATTR("text", GP_JSON_STR),
+};
+
+static const gp_json_obj obj_filter = {
+	.attrs = attrs,
+	.attr_cnt = GP_ARRAY_SIZE(attrs),
+};
+
+static gp_widget *json_to_markup(gp_json_buf *json, gp_json_val *val, gp_htable **uids)
 {
-	const char *markup = NULL;
 	char *(*get)(unsigned int var_id, char *old_val) = NULL;
+	gp_widget *ret = NULL;
 
 	(void)uids;
 
-	json_object_object_foreach(json, key, val) {
-		if (!strcmp(key, "text"))
-			markup = json_object_get_string(val);
-		else if (!strcmp(key, "get"))
-			get = gp_widget_callback_addr(json_object_get_string(val));
-		else
-			GP_WARN("Invalid markup key '%s'", key);
+	GP_JSON_OBJ_FILTER(json, val, &obj_filter, gp_widget_json_attrs) {
+		switch (val->idx) {
+		case GET:
+			get = gp_widget_callback_addr(val->val_str);
+		break;
+		case TEXT:
+			ret = gp_widget_markup_new(val->val_str, NULL);
+		break;
+		}
 	}
 
-	if (!markup) {
+	if (!ret) {
 		GP_WARN("Missing markup");
-		markup = "Missing markup";
+		return NULL;
 	}
 
-	gp_widget *ret = gp_widget_markup_new(markup, get);
+	ret->markup->get = get;
 
 	return ret;
 }

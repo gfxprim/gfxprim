@@ -2,12 +2,11 @@
 
 /*
 
-   Copyright (c) 2014-2020 Cyril Hrubis <metan@ucw.cz>
+   Copyright (c) 2014-2021 Cyril Hrubis <metan@ucw.cz>
 
  */
 
 #include <string.h>
-#include <json-c/json.h>
 
 #include <widgets/gp_widgets.h>
 #include <widgets/gp_widget_ops.h>
@@ -472,38 +471,57 @@ static void distribute_size(gp_widget *self, const gp_widget_render_ctx *ctx, in
 	gp_widget_ops_distribute_size(area->child, ctx, child_w, child_h, new_wh);
 }
 
-static gp_widget *json_to_scroll(json_object *json, gp_htable **uids)
+enum keys {
+	MIN_H,
+	MIN_W,
+	WIDGET,
+};
+
+static const gp_json_obj_attr attrs[] = {
+	GP_JSON_OBJ_ATTR("min_h", GP_JSON_INT),
+	GP_JSON_OBJ_ATTR("min_w", GP_JSON_INT),
+	GP_JSON_OBJ_ATTR("widget", GP_JSON_OBJ),
+};
+
+static const gp_json_obj obj_filter = {
+	.attrs = attrs,
+	.attr_cnt = GP_ARRAY_SIZE(attrs),
+};
+
+static gp_widget *json_to_scroll(gp_json_buf *json, gp_json_val *val, gp_htable **uids)
 {
-	json_object *childjs = NULL;
 	int min_w = 0;
 	int min_h = 0;
+	gp_widget *child = NULL, *ret;
 
-        json_object_object_foreach(json, key, val) {
-		if (!strcmp(key, "min_w")) {
-			min_w = json_object_get_int(val);
-		} else if (!strcmp(key, "min_h")) {
-			min_h = json_object_get_int(val);
-		} else if (!strcmp(key, "widget")) {
-			childjs = val;
-		} else
-			GP_WARN("Invalid scroll area key '%s'", key);
-	}
-
-	if (min_w < 0 || min_h < 0) {
-		GP_WARN("min_w and min_h must be >= 0");
-		return NULL;
+	GP_JSON_OBJ_FILTER(json, val, &obj_filter, gp_widget_json_attrs) {
+		switch (val->idx) {
+		case MIN_W:
+			if (val->val_int < 0)
+				gp_json_warn(json, "Size must be > 0!");
+			else
+				min_w = val->val_int;
+		break;
+		case MIN_H:
+			if (val->val_int < 0)
+				gp_json_warn(json, "Size must be > 0!");
+			else
+				min_h = val->val_int;
+		break;
+		case WIDGET:
+			if (child)
+				gp_json_err(json, "Duplicit widget key!");
+			else
+				child = gp_widget_from_json(json, val, uids);
+		break;
+		}
 	}
 
 	if (min_w == 0 && min_h == 0) {
-		GP_WARN("At least one of min_w and min_h must be > 0");
+		gp_json_warn(json, "At least one of min_w and min_h must be > 0");
+		gp_widget_free(child);
 		return NULL;
 	}
-
-	gp_widget *child = NULL;
-	gp_widget *ret;
-
-	if (childjs)
-		child = gp_widget_from_json(childjs, uids);
 
 	ret = gp_widget_scroll_area_new(min_w, min_h, child);
 	if (!ret)

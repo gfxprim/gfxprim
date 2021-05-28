@@ -2,12 +2,11 @@
 
 /*
 
-   Copyright (c) 2014-2020 Cyril Hrubis <metan@ucw.cz>
+   Copyright (c) 2014-2021 Cyril Hrubis <metan@ucw.cz>
 
  */
 
 #include <string.h>
-#include <json-c/json.h>
 
 #include <widgets/gp_widgets.h>
 #include <widgets/gp_widget_ops.h>
@@ -526,25 +525,49 @@ static void free_header(gp_widget_table_header *header, unsigned int cols)
 	free(header);
 }
 
-static gp_widget_table_header *parse_header(json_object *json, int *cols)
+enum header_keys {
+	FILL,
+	LABEL,
+	MIN_SIZE,
+	SORTABLE
+};
+
+static const gp_json_obj_attr header_attrs[] = {
+	GP_JSON_OBJ_ATTR("fill", GP_JSON_INT),
+	GP_JSON_OBJ_ATTR("label", GP_JSON_STR),
+	GP_JSON_OBJ_ATTR("min_size", GP_JSON_ARR),
+	GP_JSON_OBJ_ATTR("sortable", GP_JSON_ARR),
+};
+
+static const gp_json_obj header_obj_filter = {
+	.attrs = header_attrs,
+	.attr_cnt = GP_ARRAY_SIZE(header_attrs),
+};
+
+static gp_widget_table_header *parse_header(gp_json_buf *json, gp_json_val *val, int *cols)
 {
+	gp_json_state state = gp_json_state_start(json);
 	gp_widget_table_header *header;
-	int i;
+	int cnt = 0;
 
-	if (!json)
-		return NULL;
+	GP_JSON_ARR_FOREACH(json, val) {
+		switch (val->type) {
+		case GP_JSON_OBJ:
+			cnt++;
+			gp_json_obj_skip(json);
+		break;
+		default:
+			gp_json_warn(json, "Invalid table header type!");
+			//TODO skip array
+		}
+	}
 
-	if (!json_object_is_type(json, json_type_array)) {
-		GP_WARN("Table header must be array!");
+	if (*cols != -1 && *cols != cnt) {
+		gp_json_warn(json, "Table header size is not equal to number of columns");
 		return NULL;
 	}
 
-	if (*cols == -1) {
-		*cols = json_object_array_length(json);
-	} else if (json_object_array_length(json) != (size_t)(*cols)) {
-		GP_WARN("Table header is not equal to number of columns!");
-		return NULL;
-	}
+	*cols = cnt;
 
 	header = malloc(sizeof(*header) * (*cols));
 	if (!header)
@@ -552,104 +575,125 @@ static gp_widget_table_header *parse_header(json_object *json, int *cols)
 
 	memset(header, 0, sizeof(*header) * (*cols));
 
-	for (i = 0; i < *cols; i++) {
-		json_object *elem = json_object_array_get_idx(json, i);
-		const char *label = NULL;
-		unsigned int min_size = 0;
-		unsigned int fill = 0;
+	gp_json_state_load(json, state);
 
-		if (!elem) {
-			GP_WARN("Table header parse error!");
-			goto err;
+	cnt = 0;
+
+	GP_JSON_ARR_FOREACH(json, val) {
+		//TODO SKIP ARR
+		if (val->type != GP_JSON_OBJ)
+			continue;
+
+		GP_JSON_OBJ_FILTER(json, val, &header_obj_filter, NULL) {
+			switch (val->idx) {
+			case FILL:
+				header[cnt].col_fill = val->val_int;
+			break;
+			case LABEL:
+				header[cnt].label = strdup(val->val_str);
+			break;
+			case MIN_SIZE:
+				header[cnt].col_min_size = val->val_int;
+			break;
+			case SORTABLE:
+				header[cnt].sortable = val->val_bool;
+			break;
+			}
 		}
-
-		json_object_object_foreach(elem, key, val) {
-			if (!strcmp(key, "label"))
-				label = json_object_get_string(val);
-			else if (!strcmp(key, "min_size"))
-				min_size = json_object_get_int(val);
-			else if (!strcmp(key, "fill"))
-				fill = json_object_get_int(val);
-			else if (!strcmp(key, "sortable"))
-				header[i].sortable = json_object_get_boolean(val);
-			else
-				GP_WARN("Invalid table header key %s", key);
-		}
-
-		if (label)
-			header[i].label = strdup(label);
-
-		header[i].col_min_size = min_size;
-		header[i].col_fill = fill;
-		header[i].text_align = 0;
+		cnt++;
 	}
 
 	return header;
-err:
-	free_header(header, *cols);
-	return NULL;
 }
 
-static gp_widget *json_to_table(json_object *json, gp_htable **uids)
+enum keys {
+	COLS,
+	GET_ELEM,
+	HEADER,
+	MIN_ROWS,
+	SET_ROW,
+	SORT,
+};
+
+static const gp_json_obj_attr attrs[] = {
+	GP_JSON_OBJ_ATTR("cols", GP_JSON_INT),
+	GP_JSON_OBJ_ATTR("get_elem", GP_JSON_STR),
+	GP_JSON_OBJ_ATTR("header", GP_JSON_ARR),
+	GP_JSON_OBJ_ATTR("min_rows", GP_JSON_STR),
+	GP_JSON_OBJ_ATTR("set_row", GP_JSON_STR),
+	GP_JSON_OBJ_ATTR("sort", GP_JSON_STR),
+};
+
+static const gp_json_obj obj_filter = {
+	.attrs = attrs,
+	.attr_cnt = GP_ARRAY_SIZE(attrs),
+};
+
+static gp_widget *json_to_table(gp_json_buf *json, gp_json_val *val, gp_htable **uids)
 {
 	int cols = -1, min_rows = -1;
 	void *set_row = NULL, *get_elem = NULL, *sort = NULL;
-	json_object *header = NULL;
-	gp_widget_table_header *table_header;
+	gp_widget_table_header *table_header = NULL;
 
 	(void)uids;
 
-	json_object_object_foreach(json, key, val) {
-		if (!strcmp(key, "cols"))
-			cols = json_object_get_int(val);
-		else if (!strcmp(key, "min_rows"))
-			min_rows = json_object_get_int(val);
-		else if (!strcmp(key, "set_row"))
-			set_row = gp_widget_callback_addr(json_object_get_string(val));
-		else if (!strcmp(key, "get_elem"))
-			get_elem = gp_widget_callback_addr(json_object_get_string(val));
-		else if (!strcmp(key, "sort"))
-			sort = gp_widget_callback_addr(json_object_get_string(val));
-		else if (!strcmp(key, "header"))
-			header = val;
-		else
-			GP_WARN("Invalid table key '%s'", key);
+	GP_JSON_OBJ_FILTER(json, val, &obj_filter, gp_widget_json_attrs) {
+		switch (val->idx) {
+		case COLS:
+			cols = val->val_int;
+		break;
+		case MIN_ROWS:
+			min_rows = val->val_int;
+		break;
+		case SET_ROW:
+			set_row = gp_widget_callback_addr(val->val_str);
+		break;
+		case GET_ELEM:
+			get_elem = gp_widget_callback_addr(val->val_str);
+		break;
+		case SORT:
+			sort = gp_widget_callback_addr(val->val_str);
+		break;
+		case HEADER:
+			table_header = parse_header(json, val, &cols);
+		break;
+		}
 	}
 
-	table_header = parse_header(header, &cols);
 	if (!table_header)
 		return NULL;
 
 	if (cols < 0) {
-		GP_WARN("Invalid or missing cols");
-		return NULL;
+		gp_json_warn(json, "Invalid or missing cols!");
+		goto err;
 	}
 
 	if (min_rows < 0) {
-		GP_WARN("Invalid or missing min_rows");
-		return NULL;
+		gp_json_warn(json, "Invalid or missing min_rows!");
+		goto err;
 	}
 
 	if (!set_row) {
-		GP_WARN("Invalid or missing set_row callback");
-		return NULL;
+		gp_json_warn(json, "Invalid or missing set_row callback!");
+		goto err;
 	}
 
 	if (!get_elem) {
-		GP_WARN("Invalid or missing get_elem callback");
-		return NULL;
+		gp_json_warn(json, "Invalid or missing get_elem callback!");
+		goto err;
 	}
 
 	gp_widget *table = gp_widget_table_new(cols, min_rows, table_header, set_row, get_elem);
-	if (!table) {
-		free_header(table_header, cols);
-		return NULL;
-	}
+	if (!table)
+		goto err;
 
 	table->tbl->free = table_header;
 	table->tbl->sort = sort;
 
 	return table;
+err:
+	free_header(table_header, cols);
+	return NULL;
 }
 
 static void _free(gp_widget *self)

@@ -9,6 +9,7 @@
 #include <string.h>
 #include <core/gp_debug.h>
 #include <core/gp_common.h>
+#include <utils/gp_json.h>
 #include <widgets/gp_widget.h>
 #include <widgets/gp_widget_ops.h>
 

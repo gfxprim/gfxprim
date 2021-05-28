@@ -65,6 +65,7 @@ struct json_object;
  * @return A choice widget.
  */
 gp_widget *gp_widget_choice_from_json(unsigned int widget_type,
-                                      struct json_object *json, gp_htable **uids);
+                                      gp_json_buf *json, gp_json_val *val,
+                                      gp_htable **uids);
 
 #endif /* GP_WIDGET_CHOICE_H */

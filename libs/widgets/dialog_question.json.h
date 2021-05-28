@@ -1,53 +1,53 @@
 static const char *dialog_question = "\
-{ \
- \"version\": 1, \
- \"widgets\": [ \
-  { \
-   \"type\": \"frame\", \
-   \"uid\": \"title\", \
-   \"widget\": { \
-    \"rows\": 2, \
-    \"widgets\": [ \
-     { \
-      \"cols\": 2, \
-      \"widgets\": [ \
-       { \
-        \"type\": \"stock\", \
-        \"stock\": \"question\" \
-       }, \
-       { \
-        \"type\": \"label\", \
-        \"uid\": \"text\" \
-       } \
-      ] \
-     }, \
-     { \
-      \"cols\": 2, \
-      \"halign\": \"fill\", \
-      \"cpadf\": \"1, 1, 1\", \
-      \"cfill\": \"0, 0\", \
-      \"border\": \"none\", \
-      \"uniform\": 1, \
-      \"widgets\": [ \
-       { \
-        \"type\": \"button\", \
-	\"halign\": \"fill\", \
-        \"label\": \"No\", \
-	\"btype\": \"cancel\", \
-        \"uid\": \"btn_no\" \
-       }, \
-       { \
-        \"type\": \"button\", \
-	\"halign\": \"fill\", \
-        \"label\": \"Yes\", \
-	\"btype\": \"ok\", \
-        \"uid\": \"btn_yes\" \
-       } \
-      ] \
-     } \
-    ] \
-   } \
-  } \
- ] \
-} \
+{ \n\
+ \"version\": 1, \n\
+ \"widgets\": [ \n\
+  { \n\
+   \"type\": \"frame\", \n\
+   \"uid\": \"title\", \n\
+   \"widget\": { \n\
+    \"rows\": 2, \n\
+    \"widgets\": [ \n\
+     { \n\
+      \"cols\": 2, \n\
+      \"widgets\": [ \n\
+       { \n\
+        \"type\": \"stock\", \n\
+        \"stock\": \"question\" \n\
+       }, \n\
+       { \n\
+        \"type\": \"label\", \n\
+        \"uid\": \"text\" \n\
+       } \n\
+      ] \n\
+     }, \n\
+     { \n\
+      \"cols\": 2, \n\
+      \"halign\": \"fill\", \n\
+      \"cpadf\": \"1, 1, 1\", \n\
+      \"cfill\": \"0, 0\", \n\
+      \"border\": \"none\", \n\
+      \"uniform\": true, \n\
+      \"widgets\": [ \n\
+       { \n\
+        \"type\": \"button\", \n\
+	\"halign\": \"fill\", \n\
+        \"label\": \"No\", \n\
+	\"btype\": \"cancel\", \n\
+        \"uid\": \"btn_no\" \n\
+       }, \n\
+       { \n\
+        \"type\": \"button\", \n\
+	\"halign\": \"fill\", \n\
+        \"label\": \"Yes\", \n\
+	\"btype\": \"ok\", \n\
+        \"uid\": \"btn_yes\" \n\
+       } \n\
+      ] \n\
+     } \n\
+    ] \n\
+   } \n\
+  } \n\
+ ] \n\
+} \n\
 ";

@@ -38,6 +38,7 @@ gp_widget_input_event
 gp_widget_layout_json
 gp_widget_from_json
 gp_widget_from_json_str
+gp_widget_json_attrs
 gp_widget_layout_replace
 gp_widget_min_h
 gp_widget_min_w

@@ -2,12 +2,11 @@
 
 /*
 
-   Copyright (c) 2014-2020 Cyril Hrubis <metan@ucw.cz>
+   Copyright (c) 2014-2021 Cyril Hrubis <metan@ucw.cz>
 
  */
 
 #include <string.h>
-#include <json-c/json.h>
 
 #include <widgets/gp_widgets.h>
 #include <widgets/gp_widget_ops.h>
@@ -107,27 +106,54 @@ void gp_widget_int_set_min(gp_widget *self, int min)
 		gp_widget_int_set(self, min);
 }
 
+enum keys {
+	DIR,
+	MAX,
+	MIN,
+	VAL,
+};
 
-static gp_widget *json_to_int(enum gp_widget_type type, json_object *json, gp_htable **uids)
+static const gp_json_obj_attr attrs[] = {
+	GP_JSON_OBJ_ATTR("dir", GP_JSON_STR),
+	GP_JSON_OBJ_ATTR("max", GP_JSON_INT),
+	GP_JSON_OBJ_ATTR("min", GP_JSON_INT),
+	GP_JSON_OBJ_ATTR("val", GP_JSON_INT),
+};
+
+static const gp_json_obj obj_filter = {
+	.attrs = attrs,
+	.attr_cnt = GP_ARRAY_SIZE(attrs),
+};
+
+static gp_widget *json_to_int(enum gp_widget_type type, gp_json_buf *json,
+                              gp_json_val *val, gp_htable **uids)
 {
-	const char *dir = NULL;
-	int min = 0, max = 0, ival = 0, val_set = 0;
+	int min = 0, max = 0, ival = 0, val_set = 0, dir = 0;
 	gp_widget *ret;
 
 	(void)uids;
 
-	json_object_object_foreach(json, key, val) {
-		if (!strcmp(key, "min"))
-			min = json_object_get_int(val);
-		else if (!strcmp(key, "max"))
-			max = json_object_get_int(val);
-		else if (!strcmp(key, "val")) {
-			ival = json_object_get_int(val);
+	GP_JSON_OBJ_FILTER(json, val, &obj_filter, gp_widget_json_attrs) {
+		switch (val->idx) {
+		case DIR:
+			if (!strcmp(val->val_str, "horiz"))
+				dir = GP_WIDGET_HORIZ;
+			else if (!strcmp(val->val_str, "vert"))
+				dir = GP_WIDGET_VERT;
+			else
+				gp_json_warn(json, "Expected one of 'horiz' or 'vert'!");
+		break;
+		case MAX:
+			max = val->val_int;
+		break;
+		case MIN:
+			min = val->val_int;
+		break;
+		case VAL:
+			ival = val->val_int;
 			val_set = 1;
-		} else if (!strcmp(key, "dir") && type == GP_WIDGET_SLIDER)
-			dir = json_object_get_string(val);
-		else
-			GP_WARN("Invalid int key '%s'", key);
+		break;
+		}
 	}
 
 	if (!val_set)
@@ -141,14 +167,8 @@ static gp_widget *json_to_int(enum gp_widget_type type, json_object *json, gp_ht
 
 	ret = widget_int_new(type, min, max, ival, NULL, NULL);
 
-	if (dir) {
-		if (!strcmp(dir, "horiz"))
-			ret->i->dir = GP_WIDGET_HORIZ;
-		else if (!strcmp(dir, "vert"))
-			ret->i->dir = GP_WIDGET_VERT;
-		else
-			GP_WARN("Invalid direction '%s'", dir);
-	}
+	if (ret)
+		ret->i->dir = dir;
 
 	return ret;
 }
@@ -320,9 +340,9 @@ static int spin_event(gp_widget *self, const gp_widget_render_ctx *ctx, gp_event
 	return 0;
 }
 
-static gp_widget *json_to_spin(json_object *json, gp_htable **uids)
+static gp_widget *json_to_spin(gp_json_buf *json, gp_json_val *val, gp_htable **uids)
 {
-	return json_to_int(GP_WIDGET_SPINNER, json, uids);
+	return json_to_int(GP_WIDGET_SPINNER, json, val, uids);
 }
 
 struct gp_widget_ops gp_widget_spinner_ops = {
@@ -511,9 +531,9 @@ static int slider_event(gp_widget *self, const gp_widget_render_ctx *ctx, gp_eve
 	return 0;
 }
 
-static gp_widget *json_to_slider(json_object *json, gp_htable **uids)
+static gp_widget *json_to_slider(gp_json_buf *json, gp_json_val *val, gp_htable **uids)
 {
-	return json_to_int(GP_WIDGET_SLIDER, json, uids);
+	return json_to_int(GP_WIDGET_SLIDER, json, val, uids);
 }
 
 struct gp_widget_ops gp_widget_slider_ops = {
