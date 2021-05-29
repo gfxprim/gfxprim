@@ -619,7 +619,7 @@ static const gp_json_obj_attr attrs[] = {
 	GP_JSON_OBJ_ATTR("cols", GP_JSON_INT),
 	GP_JSON_OBJ_ATTR("get_elem", GP_JSON_STR),
 	GP_JSON_OBJ_ATTR("header", GP_JSON_ARR),
-	GP_JSON_OBJ_ATTR("min_rows", GP_JSON_STR),
+	GP_JSON_OBJ_ATTR("min_rows", GP_JSON_INT),
 	GP_JSON_OBJ_ATTR("set_row", GP_JSON_STR),
 	GP_JSON_OBJ_ATTR("sort", GP_JSON_STR),
 };
