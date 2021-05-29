@@ -535,8 +535,8 @@ enum header_keys {
 static const gp_json_obj_attr header_attrs[] = {
 	GP_JSON_OBJ_ATTR("fill", GP_JSON_INT),
 	GP_JSON_OBJ_ATTR("label", GP_JSON_STR),
-	GP_JSON_OBJ_ATTR("min_size", GP_JSON_ARR),
-	GP_JSON_OBJ_ATTR("sortable", GP_JSON_ARR),
+	GP_JSON_OBJ_ATTR("min_size", GP_JSON_INT),
+	GP_JSON_OBJ_ATTR("sortable", GP_JSON_BOOL),
 };
 
 static const gp_json_obj header_obj_filter = {
