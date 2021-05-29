@@ -1,5 +1,5 @@
 TOPDIR=..
-SUBDIRS=core utils gfx text loaders filters input backends grabbers
+SUBDIRS=core utils gfx text loaders filters input backends grabbers widgets
 
 include $(TOPDIR)/config.mk
 
