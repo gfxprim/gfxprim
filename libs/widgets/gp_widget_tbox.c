@@ -327,7 +327,7 @@ static gp_widget *json_to_tbox(gp_json_buf *json, gp_json_val *val, gp_htable **
 	int flags = 0;
 	int len = 0;
 	int max_len = 0;
-	gp_widget_tattr attr;
+	gp_widget_tattr attr = 0;
 	gp_widget *ret;
 
 	(void)uids;
