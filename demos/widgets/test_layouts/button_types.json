@@ -265,6 +265,9 @@
    "align": "fill"
   },
   {
+   "type": "button",
+   "btype": "randomize",
+   "align": "fill"
   },
   {
   }

@@ -242,6 +242,14 @@ static void render(gp_widget *self, const gp_offset *offset,
 		          sym_r/2, sym_r,
 		          GP_TRIANGLE_LEFT, ctx->text_color);
 	break;
+	case GP_BUTTON_RANDOMIZE:
+		gp_fill_rrect_xywh(ctx->buf, cx-sym_r, cy-sym_r, 2*sym_r+1, 2*sym_r+1, ctx->bg_color, ctx->text_color, ctx->text_color);
+		i = sym_r/2;
+		gp_fill_circle(ctx->buf, cx-i, cy-i, sym_r/5, ctx->fg_color);
+		gp_fill_circle(ctx->buf, cx+i, cy+i, sym_r/5, ctx->fg_color);
+		gp_fill_circle(ctx->buf, cx-i, cy+i, sym_r/5, ctx->fg_color);
+		gp_fill_circle(ctx->buf, cx+i, cy-i, sym_r/5, ctx->fg_color);
+	break;
 	case GP_BUTTON_UP:
 		gp_symbol(ctx->buf, cx, cy-asc_half/5,
 		          sym_r, sym_r-sym_r/4,
@@ -379,6 +387,7 @@ static struct btn_type_names {
 	{"rec", GP_BUTTON_REC | GP_BUTTON_TEXT_RIGHT},
 	{"fforward", GP_BUTTON_FFORWARD | GP_BUTTON_TEXT_RIGHT},
 	{"fbackward", GP_BUTTON_FBACKWARD | GP_BUTTON_TEXT_RIGHT},
+	{"randomize", GP_BUTTON_RANDOMIZE | GP_BUTTON_TEXT_RIGHT},
 	{"up", GP_BUTTON_UP | GP_BUTTON_TEXT_RIGHT},
 	{"down", GP_BUTTON_DOWN | GP_BUTTON_TEXT_RIGHT},
 	{"left", GP_BUTTON_LEFT | GP_BUTTON_TEXT_RIGHT},
