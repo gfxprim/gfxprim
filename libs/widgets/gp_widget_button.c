@@ -443,7 +443,7 @@ static const gp_json_obj obj_filter = {
 static gp_widget *json_to_button(gp_json_buf *json, gp_json_val *val, gp_htable **uids)
 {
 	char *label = NULL;
-	enum gp_widget_button_type t = GP_BUTTON_LABEL;
+	int t = GP_BUTTON_LABEL;
 
 	(void)uids;
 
@@ -452,7 +452,7 @@ static gp_widget *json_to_button(gp_json_buf *json, gp_json_val *val, gp_htable 
 		case BTYPE:
 			t = type_from_str(val->val_str);
 			if (t < 0) {
-				GP_WARN("Invalid button type '%s'", val->val_str);
+				gp_json_warn(json, "Invalid button type!");
 				t = GP_BUTTON_LABEL;
 			}
 		break;
@@ -467,14 +467,14 @@ static gp_widget *json_to_button(gp_json_buf *json, gp_json_val *val, gp_htable 
 			else if (!strcmp(val->val_str, "right"))
 				t |= GP_BUTTON_TEXT_RIGHT;
 			else
-				GP_WARN("Invalid text align '%s'", val->val_str);
+				gp_json_warn(json, "Invalid text align!");
 		break;
 		}
 	}
 
 	if (t == GP_BUTTON_LABEL && !label) {
-		GP_WARN("Labeled button without label!");
-		label = "Unlabeled";
+		gp_json_warn(json, "Labeled button without label!");
+		return NULL;
 	}
 
 	gp_widget *ret = gp_widget_button_new(label, t, NULL, NULL);
