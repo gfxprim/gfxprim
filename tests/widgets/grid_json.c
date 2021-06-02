@@ -123,12 +123,12 @@ static struct tcase grid_1x1_2_children = {
 };
 
 static struct tcase grid_2x2 = {
-	.json = "{\"version\": 1, \"cols\": 2, \"rows\": 2, \"widgets\": ["
-	          "{\"widgets\":[{}]},"
-		  "{\"type\": \"button\", \"label\": \"ok\"},"
-	          "{\"widgets\":[{}]},"
-	          "{\"widgets\":[{}]},"
-                "]}",
+	.json = "{\"version\": 1, \"cols\": 2, \"rows\": 2, \"widgets\": [\n"
+	        " {\"widgets\":[{}]},\n"
+		" {\"type\": \"button\", \"label\": \"ok\"},\n"
+	        " {\"widgets\":[{}]},\n"
+	        " {\"widgets\":[{}]}\n"
+                "]}\n",
 	.cols = 2,
 	.rows = 2,
 	.children = {
@@ -151,7 +151,7 @@ static struct tcase grid_3x1 = {
 };
 
 static struct tcase grid_uniform = {
-	.json = "{\"version\": 1, \"cols\": 1, \"rows\": 1, \"uniform\": 1, \"widgets\": [{}]}",
+	.json = "{\"version\": 1, \"cols\": 1, \"rows\": 1, \"uniform\": true, \"widgets\": [{}]}",
 	.cols = 1,
 	.rows = 1,
 	.uniform = 1,
@@ -161,7 +161,7 @@ static struct tcase grid_uniform = {
 };
 
 static struct tcase grid_frame = {
-	.json = "{\"version\": 1, \"cols\": 1, \"rows\": 1, \"frame\": 1, \"widgets\": [{}]}",
+	.json = "{\"version\": 1, \"cols\": 1, \"rows\": 1, \"frame\": true, \"widgets\": [{}]}",
 	.cols = 1,
 	.rows = 1,
 	.frame = 1,

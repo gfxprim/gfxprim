@@ -1,11 +1,7 @@
 TOPDIR=..
 include $(TOPDIR)/pre.mk
 
-SUBDIRS=core framework loaders gfx filters input utils
-
-ifeq ($(HAVE_JSON-C),yes)
-SUBDIRS+=widgets
-endif
+SUBDIRS=core framework loaders gfx filters input utils widgets
 
 loaders: framework
 gfx: framework

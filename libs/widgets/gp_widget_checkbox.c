@@ -2,12 +2,11 @@
 
 /*
 
-   Copyright (c) 2014-2020 Cyril Hrubis <metan@ucw.cz>
+   Copyright (c) 2014-2021 Cyril Hrubis <metan@ucw.cz>
 
  */
 
 #include <string.h>
-#include <json-c/json.h>
 
 #include <widgets/gp_widgets.h>
 #include <widgets/gp_widget_ops.h>
@@ -126,23 +125,45 @@ static int event(gp_widget *self, const gp_widget_render_ctx *ctx, gp_event *ev)
 	return 0;
 }
 
-static gp_widget *json_to_checkbox(json_object *json, gp_htable **uids)
+static const gp_json_obj_attr attrs[] = {
+	GP_JSON_OBJ_ATTR("label", GP_JSON_STR),
+	GP_JSON_OBJ_ATTR("set", GP_JSON_BOOL),
+};
+
+enum keys {
+	LABEL,
+	SET,
+};
+
+static const gp_json_obj obj_filter = {
+	.attrs = attrs,
+	.attr_cnt = GP_ARRAY_SIZE(attrs),
+};
+
+static gp_widget *json_to_checkbox(gp_json_buf *json, gp_json_val *val, gp_htable **uids)
 {
-	const char *label = NULL;
+	gp_widget *ret;
+	char *label = NULL;
 	int set = 0;
 
 	(void)uids;
 
-	json_object_object_foreach(json, key, val) {
-		if (!strcmp(key, "label"))
-			label = json_object_get_string(val);
-		else if (!strcmp(key, "set"))
-			set = json_object_get_boolean(val);
-		else
-			GP_WARN("Invalid checkbox key '%s'", key);
+	GP_JSON_OBJ_FILTER(json, val, &obj_filter, gp_widget_json_attrs) {
+		switch (val->idx) {
+		case LABEL:
+			label = strdup(val->val_str);
+		break;
+		case SET:
+			set = val->val_bool;
+		break;
+		}
 	}
 
-	return gp_widget_checkbox_new(label, set, NULL, NULL);
+	ret = gp_widget_checkbox_new(label, set, NULL, NULL);
+
+	free(label);
+
+	return ret;
 }
 
 struct gp_widget_ops gp_widget_checkbox_ops = {

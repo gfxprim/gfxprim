@@ -2,16 +2,17 @@
 
 /*
 
-   Copyright (c) 2014-2020 Cyril Hrubis <metan@ucw.cz>
+   Copyright (c) 2014-2021 Cyril Hrubis <metan@ucw.cz>
 
  */
 
 #ifndef GP_WIDGET_JSON_H
 #define GP_WIDGET_JSON_H
 
+#include <utils/gp_json.h>
 #include <widgets/gp_widget.h>
 
-struct json_object;
+extern const gp_json_obj *gp_widget_json_attrs;
 
 /**
  * @brief Loads a widget layout given a JSON object.
@@ -21,7 +22,7 @@ struct json_object;
  *
  * @return A widget layout or a NULL in case of a failure.
  */
-gp_widget *gp_widget_from_json(struct json_object *json, gp_htable **uids);
+gp_widget *gp_widget_from_json(gp_json_buf *json, gp_json_val *val, gp_htable **uids);
 
 /**
  * @brief Loads a widget layout given a string with JSON layout.

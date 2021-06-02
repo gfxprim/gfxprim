@@ -4,7 +4,7 @@ Maintainer: Petr Baudis <pasky@ucw.cz>
 Build-Depends: debhelper (>= 8.1.3), libjpeg-dev, libpng-dev, libgif-dev,
                libtiff-dev, libwebp-dev, libfreetype6-dev, libfontconfig-dev,
                libx11-dev, libxext-dev, asciidoc, source-highlight, dvipng,
-               graphviz, pkg-config, libjson-c-dev
+               graphviz, pkg-config
 Standards-Version: 3.9.3
 Section: libs
 Homepage: http://gfxprim.ucw.cz/

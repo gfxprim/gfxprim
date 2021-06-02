@@ -7,7 +7,6 @@
  */
 
 #include <string.h>
-#include <json-c/json.h>
 
 #include <widgets/gp_widgets.h>
 
@@ -801,38 +800,45 @@ static const char *gp_widget_stock_type_name(enum gp_widget_stock_type type)
 	return NULL;
 }
 
-static gp_widget *stock_from_json(json_object *json, gp_htable **uids)
+enum keys {
+	MIN_SIZE,
+	STOCK,
+};
+
+static const gp_json_obj_attr attrs[] = {
+	GP_JSON_OBJ_ATTR("min_size", GP_JSON_STR),
+	GP_JSON_OBJ_ATTR("stock", GP_JSON_STR),
+};
+
+static const gp_json_obj obj_filter = {
+	.attrs = attrs,
+	.attr_cnt = GP_ARRAY_SIZE(attrs),
+};
+
+static gp_widget *json_to_stock(gp_json_buf *json, gp_json_val *val, gp_htable **uids)
 {
-	const char *stock = NULL;
-	const char *min_size_str = NULL;
 	gp_widget_size min_size = GP_WIDGET_SIZE_DEFAULT;
-	int type;
+	int type = -1;
 
 	(void)uids;
 
-	json_object_object_foreach(json, key, val) {
-		if (!strcmp(key, "stock"))
-			stock = json_object_get_string(val);
-		else if (!strcmp(key, "min_size"))
-			min_size_str = json_object_get_string(val);
-		else
-			GP_WARN("Invalid stock key '%s'", key);
+	GP_JSON_OBJ_FILTER(json, val, &obj_filter, gp_widget_json_attrs) {
+		switch (val->idx) {
+		case MIN_SIZE:
+			if (gp_widget_size_units_parse(val->val_str, &min_size))
+				gp_json_warn(json, "Invalid size string!");
+		break;
+		case STOCK:
+			type = gp_widget_stock_type_from_str(val->val_str);
+			if (type < 0)
+				gp_json_warn(json, "Unknown stock type!");
+		break;
+		}
 	}
 
-	if (!stock) {
-		GP_WARN("Missing stock type");
-		return NULL;
-	}
-
-	type = gp_widget_stock_type_from_str(stock);
 	if (type < 0) {
-		GP_WARN("Unknown stock '%s'", stock);
+		gp_json_warn(json, "Missing stock type!");
 		return NULL;
-	}
-
-	if (min_size_str) {
-		if (gp_widget_size_units_parse(min_size_str, &min_size))
-			return NULL;
 	}
 
 	return gp_widget_stock_new(type, min_size);
@@ -864,7 +870,7 @@ struct gp_widget_ops gp_widget_stock_ops = {
 	.min_h = stock_min_h,
 	.render = stock_render,
 	.event = stock_event,
-	.from_json = stock_from_json,
+	.from_json = json_to_stock,
 	.id = "stock",
 };
 

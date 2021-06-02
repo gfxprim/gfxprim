@@ -12,8 +12,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-      - name: install-json-libs
-        run: sudo apt-get install libjson-c-dev
       - name: configure
         run: ./configure -d V4L2 -d libpng -d jpeg -d tiff -d zlib -d libX11 -d freetype -d fontconfig -d pthread -d backtrace
       - name: make
@@ -30,8 +28,6 @@ jobs:
         run: sudo apt-get install libfreetype6-dev libfontconfig-dev
       - name: install-backend-libs
         run: sudo apt-get install libx11-dev libxext-dev libsdl-dev libsdl2-dev libaa1-dev libxcb1-dev libxcb-keysyms1-dev libxcb-shm0-dev
-      - name: install-json-libs
-        run: sudo apt-get install libjson-c-dev
       - name: install-swig
         run: sudo apt-get install swig python-dev
       - name: configure

@@ -11,6 +11,7 @@
 
 #include <input/gp_event.h>
 #include <utils/gp_bbox.h>
+#include <utils/gp_json.h>
 #include <widgets/gp_widget.h>
 #include <widgets/gp_widget_render.h>
 
@@ -105,9 +106,9 @@ struct gp_widget_ops {
 	/*
 	 * json_object -> widget converter.
 	 */
-	gp_widget *(*from_json)(struct json_object *json, gp_htable **uids);
+	gp_widget *(*from_json)(gp_json_buf *json, gp_json_val *val, gp_htable **uids);
 
-	/* id used for debugging */
+	/* id used for JSON loader */
 	const char *id;
 };
 

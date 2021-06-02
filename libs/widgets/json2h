@@ -3,5 +3,5 @@
 NAME=$(basename $1 .json)
 
 echo "static const char *$NAME = \"\\"
-awk '{ gsub("\"", "\\\"", $0); print $0,"\\" }' $1
+awk '{ gsub("\"", "\\\"", $0); print $0,"\\n\\" }' $1
 echo "\";"

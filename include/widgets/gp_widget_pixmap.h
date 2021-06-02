@@ -64,6 +64,28 @@ void gp_widget_pixmap_redraw(gp_widget *self,
                              gp_size w, gp_size h);
 
 /**
+ * @brief Returns pixmap width in pixels.
+ *
+ * @self A pixmap widget.
+ * @return A pixmap width.
+ */
+static inline gp_size gp_widget_pixmap_w(gp_widget *self)
+{
+	return self->w;
+}
+
+/**
+ * @brief Returns pixmap height in pixels.
+ *
+ * @self A pixmap widget.
+ * @return A pixmap height.
+ */
+static inline gp_size gp_widget_pixmap_h(gp_widget *self)
+{
+	return self->h;
+}
+
+/**
  * @brief Marks the whole pixmap to be repainted.
  *
  * @self A pixmap widget.

@@ -10,6 +10,7 @@
 #define GP_WIDGETS_H
 
 #include <utils/gp_htable.h>
+#include <utils/gp_json.h>
 
 #include <widgets/gp_widget_ops.h>
 #include <widgets/gp_widget.h>

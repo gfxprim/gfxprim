@@ -32,10 +32,6 @@ Dependencies
 * link:https://xcb.freedesktop.org/[XCB]
   (90% of code finished at this point)
 
-*Optional Widgets*
-
-* link:https://github.com/json-c/json-c/wiki[json-c]
-
 *Python Bindings*
 
 * link:http://www.swig.org/[Swig]
@@ -76,7 +72,7 @@ Instruction to install required packages on
 link:http://www.opensuse.org/[OpenSUSE].
 
 Works for link:http://www.fedoraproject.org/[Fedora] too if you substitute
-+zypper in+ with +yum install+ and +libjson-c-devel+ with +json-c-devel+.
++zypper in+ with +yum install+.
 
 .Install basic tools
 -------------------------------------------------------------------------------
@@ -103,14 +99,6 @@ zypper in libX11-devel libXext-devel
 zypper in xcb-util-keysyms-devel
 -------------------------------------------------------------------------------
 
-.Install JSON devel library
--------------------------------------------------------------------------------
-# SUSE
-zypper in libjson-c-devel
-# Fedora
-yum install json-c-devel
--------------------------------------------------------------------------------
-
 .Install swig
 -------------------------------------------------------------------------------
 zypper in swig python-devel
@@ -120,7 +108,7 @@ zypper in swig python-devel
 -------------------------------------------------------------------------------
 zypper in gcc make libjpeg-devel libpng-devel giflib-devel libtiff-devel
           freetype-devel fontconfig-devel libX11-devel libXext-devel
-          xcb-util-keysyms-devel libjson-c-devel swig python-devel
+          xcb-util-keysyms-devel swig python-devel
 -------------------------------------------------------------------------------
 
 Debian
@@ -149,11 +137,6 @@ apt-get install libfreetype6-dev libfontconfig-dev
 apt-get install libx11-dev libxext-dev
 -------------------------------------------------------------------------------
 
-.Install JSON devel library
--------------------------------------------------------------------------------
-apt-get install libjson-c-dev
--------------------------------------------------------------------------------
-
 .Install swig
 -------------------------------------------------------------------------------
 apt-get install swig python-dev
@@ -163,7 +146,7 @@ apt-get install swig python-dev
 -------------------------------------------------------------------------------
 apt-get install gcc make pkg-config libjpeg-dev libpng-dev libgif-dev
                 libtiff-dev libwebp-dev libfreetype6-dev libfontconfig-dev
-                libx11-dev libxext-dev libjson-c-dev swig python-dev
+                libx11-dev libxext-dev swig python-dev
 -------------------------------------------------------------------------------
 
 Deb packages can be build from the GFXprim source (after installing necessary

@@ -37,7 +37,7 @@ int callback(gp_widget_event *ev)
 
 int main(int argc, char *argv[])
 {
-	gp_widget *layout = gp_app_layout_load("tabs_example", NULL);
+	gp_widget *layout = gp_widget_layout_json("tabs_example.json", NULL);
 	if (!layout)
 		return 0;
 
