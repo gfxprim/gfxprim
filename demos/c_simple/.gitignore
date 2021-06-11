@@ -1,4 +1,5 @@
-/SDL_glue
+SDL_glue
+SDL2_glue
 /backend_example
 /backend_timers_example
 /blittest

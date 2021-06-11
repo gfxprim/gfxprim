@@ -7,6 +7,12 @@
 
 #ifdef HAVE_LIBSDL
 
+#if LIBSDL_VERSION == 1
+# include <SDL/SDL.h>
+#elif LIBSDL_VERSION == 2
+# include <SDL2/SDL.h>
+#endif
+
 #include "core/gp_common.h"
 #include <core/gp_debug.h>
 
@@ -128,10 +134,20 @@ void gp_input_driver_sdl_event_put(gp_event_queue *event_queue, SDL_Event *ev)
 
 		gp_event_queue_push_key(event_queue, key, ev->key.state, NULL);
 	break;
+#if LIBSDL_VERSION == 1
 	case SDL_VIDEORESIZE:
 		gp_event_queue_push_resize(event_queue, ev->resize.w,
-		                        ev->resize.h, NULL);
+		                           ev->resize.h, NULL);
 	break;
+#elif LIBSDL_VERSION == 2
+	case SDL_WINDOWEVENT:
+		if (ev->window.event == SDL_WINDOWEVENT_SIZE_CHANGED ||
+		    ev->window.event == SDL_WINDOWEVENT_RESIZED) {
+			gp_event_queue_push_resize(event_queue, ev->window.data1,
+			                           ev->window.data2, NULL);
+		}
+	break;
+#endif
 	case SDL_QUIT:
 		gp_event_queue_push(event_queue, GP_EV_SYS,
 		                  GP_EV_SYS_QUIT, 0, NULL);

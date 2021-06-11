@@ -193,9 +193,9 @@ class libraries:
                 # Resolve dynamic CFLAGS && LDFLAGS
                 if self.results[i[0]]:
                     if hasattr(i[3], '__call__'):
-                        i[3] = i[3]()
+                        i[3] = i[3](self.cfg)
                     if hasattr(i[4], '__call__'):
-                        i[4] = i[4]()
+                        i[4] = i[4](self.cfg)
         sys.stderr.write("\n")
     #
     # Writes '#define HAVE_XXX_H' into passed file
@@ -209,6 +209,9 @@ class libraries:
             else:
                 f.write("//#define HAVE_%s\n" % s)
             f.write("\n")
+
+        f.write("/* %s */\n" % self.cfg['LIBSDL_VERSION'][1])
+        f.write("#define LIBSDL_VERSION %s\n\n" % self.cfg['LIBSDL_VERSION'][0])
 
     #
     # Writes LDLIBS and CFLAGS into passed file
@@ -404,7 +407,7 @@ def cmd_output(cmds):
 
     return None
 
-def freetype_libs():
+def freetype_libs(cfg):
     cmds = [
         'freetype-config --libs 2> /dev/null',
         'pkg-config --libs freetype2 2> /dev/null'
@@ -417,7 +420,7 @@ def freetype_libs():
 
     die_screaming("Cannot get freetype LDFLAGS")
 
-def freetype_cflags():
+def freetype_cflags(cfg):
     cmds = [
         'freetype-config --cflags 2> /dev/null',
         'pkg-config --cflags freetype2 2> /dev/null'
@@ -430,6 +433,25 @@ def freetype_cflags():
 
     die_screaming("Cannot get Freetype CFLAGS")
 
+def sdl_exists(cfg):
+    if (cfg['LIBSDL_VERSION'][0] == '' or cfg['LIBSDL_VERSION'][0] == '2'):
+        if (header_exists(cfg, "SDL2/SDL.h")):
+            cfg['LIBSDL_VERSION'][0] = '2'
+            return True;
+
+    if (cfg['LIBSDL_VERSION'][0] == '' or cfg['LIBSDL_VERSION'][0] == '1'):
+        if (header_exists(cfg, "SDL/SDL.h")):
+            cfg['LIBSDL_VERSION'][0] = '1'
+            return True
+
+    return False;
+
+def sdl_libs(cfg):
+    if (cfg['LIBSDL_VERSION'][0] == '2'):
+        return '`sdl2-config --libs`'
+
+    return '`sdl-config --libs`'
+
 if __name__ ==  '__main__':
     #
     # Dictionary for default configuration parameters
@@ -438,6 +460,7 @@ if __name__ ==  '__main__':
            'CFLAGS'        : ['-W -Wall -Wextra -O2 -ggdb', 'C compiler flags'],
            'CFLAGS_WNIF'   : ['', 'Disable implicit fallthrough warnings'],
            'LDFLAGS'       : ['', 'Linker flags'],
+           'LIBSDL_VERSION': ['', 'Version of the SDL library "1" or "2"'],
            'PYTHON_BIN'    : ['python', 'Path/name of python interpreter'],
            'SWIG'          : ['swig', 'Simplified Wrapper and Interface Generator'],
            'PYTHON_CONFIG' : ['python-config', 'Python config helper'],
@@ -468,7 +491,7 @@ if __name__ ==  '__main__':
                     [header_exists, "png.h"], "", "-lpng", ["loaders"]],
                    ["libsdl",
                     "Simple Direct Media Layer",
-                    [header_exists, "SDL/SDL.h"], "", "`sdl-config --libs`", ["backends"]],
+                    [sdl_exists], "", sdl_libs, ["backends"]],
                    ["jpeg",
                     "Library to load, handle and manipulate images in the JPEG format",
                     [header_exists, "jpeglib.h"], "", "-ljpeg", ["loaders"]],

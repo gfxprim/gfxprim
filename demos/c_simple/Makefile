@@ -3,11 +3,18 @@ include $(TOPDIR)/pre.mk
 
 SOURCES=$(shell echo *.c)
 
-ifneq ($(HAVE_LIBSDL),yes)
-CSOURCES=$(filter-out SDL_glue.c,$(SOURCES))
-else
-CSOURCES=$(SOURCES)
+SDL2_CONFIG=$(shell which sdl2-config 2>/dev/null)
+SDL_CONFIG=$(shell which sdl-config 2>/dev/null)
+
+ifeq ($(SDL_CONFIG),)
+FILTER_OUT+=SDL_glue
 endif
+
+ifeq ($(SDL2_CONFIG),)
+FILTER_OUT+=SDL2_glue
+endif
+
+CSOURCES=$(filter-out $FILTER_OUT, $(SOURCES))
 
 INCLUDE=
 LDLIBS+=-lrt -lgfxprim
@@ -21,10 +28,14 @@ APPS=backend_example loaders_example loaders filters_symmetry gfx_koch\
      zip_container backend_timers_example memory_io data_storage\
      vector matrix proxy_backend bbox task_example
 
-ifeq ($(HAVE_LIBSDL),yes)
+ifneq ($(SDL_CONFIG),)
 APPS+=SDL_glue
+SDL_glue: LDLIBS+=$(shell sdl-config --libs)
+endif
 
-SDL_glue: LDLIBS+=$(shell sdl-config --libs) -lgfxprim-backends
+ifneq ($(SDL2_CONFIG),)
+APPS+=SDL2_glue
+SDL2_glue: LDLIBS+=$(shell sdl2-config --libs)
 endif
 
 task_example: LDLIBS+=-lgfxprim-backends

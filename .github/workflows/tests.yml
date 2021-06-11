@@ -29,9 +29,23 @@ jobs:
       - name: install-freetype-libs
         run: sudo apt-get install libfreetype6-dev libfontconfig-dev
       - name: install-backend-libs
-        run: sudo apt-get install libx11-dev libxext-dev libsdl-dev libaa1-dev libxcb1-dev libxcb-keysyms1-dev libxcb-shm0-dev
+        run: sudo apt-get install libx11-dev libxext-dev libsdl2-dev libaa1-dev libxcb1-dev libxcb-keysyms1-dev libxcb-shm0-dev
       - name: install-swig
         run: sudo apt-get install swig python-dev
+      - name: configure
+        run: ./configure
+      - name: make
+        run: make
+
+  build-with-sdl-1-2:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: update-apt-db
+        run: sudo apt-get update
+      - name: install-sdl-1-2
+        run: sudo apt-get install libsdl-dev
       - name: configure
         run: ./configure
       - name: make

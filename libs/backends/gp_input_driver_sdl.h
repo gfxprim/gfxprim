@@ -13,7 +13,6 @@
 #define INPUT_GP_INPUT_DRIVER_SDL_H
 
 #include <stdint.h>
-#include <SDL/SDL.h>
 
 /*
  * Converts SDL event to GFXprim evevt and puts it into the queue.
