@@ -213,6 +213,38 @@ static int test_vec_remove(void)
 	return TST_SUCCESS;
 }
 
+static int test_vec_dup(void)
+{
+	int *vec = gp_vec_new(10, sizeof(int));
+	int i;
+
+	if (!vec) {
+		tst_msg("Malloc failed");
+		return TST_UNTESTED;
+	}
+
+	for (i = 0; i < 10; i++)
+		vec[i] = i+1;
+
+	int *copy = gp_vec_dup(vec);
+	if (!copy) {
+		tst_msg("Malloc failed");
+		return TST_UNTESTED;
+	}
+
+	for (i = 0; i < 10; i++) {
+		if (copy[i] != i + 1) {
+			tst_msg("Wrong data in vector!");
+			return TST_FAILED;
+		}
+	}
+
+	gp_vec_free(vec);
+	gp_vec_free(copy);
+
+	return TST_SUCCESS;
+}
+
 static struct insert_test test1 = {
 	.len = 1,
 	.off = 0,
@@ -269,6 +301,10 @@ const struct tst_suite tst_suite = {
 
 		{.name = "vector free on NULL",
 		 .tst_fn = test_vec_free,
+		 .flags = TST_CHECK_MALLOC},
+
+		{.name = "vector dup",
+		 .tst_fn = test_vec_dup,
 		 .flags = TST_CHECK_MALLOC},
 
 		{.name = "vector zero size",

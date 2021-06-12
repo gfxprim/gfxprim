@@ -76,6 +76,17 @@ void *gp_vec_shrink(gp_vec *self, size_t length)
 void *gp_vec_new(size_t length, size_t unit);
 
 /*
+ * @brief Creates a duplicate of a vector.
+ *
+ * Creates a new vector with the exact same data.
+ *
+ * @self Vector to be duplicated.
+ *
+ * @return Returns a pointer to a new vector.
+ */
+void *gp_vec_dup(void *self);
+
+/*
  * @brief Frees the vector.
  *
  * @self A vector.

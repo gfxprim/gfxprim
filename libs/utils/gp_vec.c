@@ -62,6 +62,19 @@ void *gp_vec_new(size_t length, size_t unit)
 	return (void *)self->payload;
 }
 
+void *gp_vec_dup(void *self)
+{
+	gp_vec *vec = GP_VEC(self);
+
+	void *copy = gp_vec_new(vec->length, vec->unit);
+	if (!copy)
+		return NULL;
+
+	memcpy(copy, self, vec->length * vec->unit);
+
+	return copy;
+}
+
 void gp_vec_free(void *self)
 {
 	if (!self)
