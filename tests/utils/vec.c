@@ -232,6 +232,16 @@ static int test_vec_dup(void)
 		return TST_UNTESTED;
 	}
 
+	if (gp_vec_len(copy) != 10) {
+		tst_msg("Wrong vector length %zu", gp_vec_len(copy));
+		return TST_FAILED;
+	}
+
+	if (gp_vec_unit(copy) != sizeof(int)) {
+		tst_msg("Wrong vector unit %zu", gp_vec_unit(copy));
+		return TST_FAILED;
+	}
+
 	for (i = 0; i < 10; i++) {
 		if (copy[i] != i + 1) {
 			tst_msg("Wrong data in vector!");
