@@ -190,4 +190,10 @@ void *gp_vec_del(void *self, size_t off, size_t length)
 void *gp_vec_shrink(void *self, size_t length)
 	__attribute__((warn_unused_result));
 
+/*
+ * Vector iterator.
+ */
+#define gp_vec_foreach(self, type, iterator) \
+	for (type *iterator = (self); iterator < (self) + gp_vec_len(self); iterator++)
+
 #endif	/* GP_VEC_H */
