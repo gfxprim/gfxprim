@@ -22,7 +22,7 @@ void *gp_matrix_rows_ins(void *self, size_t cols, size_t rows, size_t row, size_
 		return NULL;
 	}
 
-	vec = gp_vec_expand(vec, length * cols);
+	vec = gp_vec_expand_(vec, length * cols);
 	if (!vec)
 		return NULL;
 
@@ -65,5 +65,5 @@ void *gp_matrix_rows_del(void *self, size_t cols, size_t rows, size_t row, size_
 			(rows - row - length) * vec->unit);
 	}
 
-	return gp_vec_shrink(vec, length * cols);
+	return gp_vec_shrink_(vec, length * cols);
 }

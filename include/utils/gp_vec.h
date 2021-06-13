@@ -50,7 +50,7 @@ typedef struct gp_vec {
  *
  * @return A pointer to a vector data.
  */
-void *gp_vec_expand(gp_vec *self, size_t length)
+void *gp_vec_expand_(gp_vec *self, size_t length)
 	__attribute__((warn_unused_result));
 
 /* @brief Shirnks vector length; does not touch vector data.
@@ -62,7 +62,7 @@ void *gp_vec_expand(gp_vec *self, size_t length)
  *
  * @return A pointer to a vector data.
  */
-void *gp_vec_shrink(gp_vec *self, size_t length)
+void *gp_vec_shrink_(gp_vec *self, size_t length)
 	__attribute__((warn_unused_result));
 
 /*

@@ -21,7 +21,7 @@ static size_t new_capacity(size_t length, size_t cur_capacity)
 	return capacity;
 }
 
-void *gp_vec_expand(gp_vec *self, size_t length)
+void *gp_vec_expand_(gp_vec *self, size_t length)
 {
 	size_t capacity;
 
@@ -108,7 +108,7 @@ void *gp_vec_ins(void *self, size_t i, size_t length)
 		return NULL;
 	}
 
-	vec = gp_vec_expand(vec, length);
+	vec = gp_vec_expand_(vec, length);
 	if (!vec)
 		return NULL;
 
@@ -124,7 +124,7 @@ out:
 	return (void *)vec->payload;
 }
 
-void *gp_vec_shrink(gp_vec *vec, size_t length)
+void *gp_vec_shrink_(gp_vec *vec, size_t length)
 {
 	memset(vec->payload + (vec->length - length) * vec->unit,
 	       0xff, length * vec->unit);
@@ -167,5 +167,5 @@ void *gp_vec_del(void *self, size_t i, size_t length)
 		vec->payload + (i + length) * vec->unit,
 		(vec->length - length - i) * vec->unit);
 
-	return gp_vec_shrink(vec, length);
+	return gp_vec_shrink_(vec, length);
 }
