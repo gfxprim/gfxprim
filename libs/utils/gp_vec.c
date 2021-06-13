@@ -2,7 +2,7 @@
 /*
 
   Copyright (C) 2020 Richard Palethorpe <richiejp@f-m.fm>
-  Copyright (C) 2020 Cyril Hrubis <metan@ucw.cz>
+  Copyright (C) 2020-2021 Cyril Hrubis <metan@ucw.cz>
 
 */
 
@@ -21,7 +21,7 @@ static size_t new_capacity(size_t length, size_t cur_capacity)
 	return capacity;
 }
 
-void *gp_vec_expand_(gp_vec *self, size_t length)
+gp_vec *gp_vec_expand_(gp_vec *self, size_t length)
 {
 	size_t capacity;
 
@@ -42,6 +42,17 @@ ret:
 	self->length += length;
 
 	return self;
+}
+
+void *gp_vec_expand(void *self, size_t length)
+{
+	gp_vec *ret;
+
+	ret = gp_vec_expand_(GP_VEC(self), length);
+	if (!ret)
+		return NULL;
+
+	return (void*)ret->payload;
 }
 
 void *gp_vec_new(size_t length, size_t unit)
@@ -93,9 +104,9 @@ void *gp_vec_resize(void *self, size_t length)
 		return self;
 
 	if (vec->length < length)
-		return gp_vec_append(self, length - vec->length);
+		return gp_vec_expand(self, length - vec->length);
 
-	return gp_vec_remove(self, vec->length - length);
+	return gp_vec_shrink(self, vec->length - length);
 }
 
 void *gp_vec_ins(void *self, size_t i, size_t length)
@@ -124,7 +135,7 @@ out:
 	return (void *)vec->payload;
 }
 
-void *gp_vec_shrink_(gp_vec *vec, size_t length)
+gp_vec *gp_vec_shrink_(gp_vec *vec, size_t length)
 {
 	memset(vec->payload + (vec->length - length) * vec->unit,
 	       0xff, length * vec->unit);
@@ -140,14 +151,28 @@ void *gp_vec_shrink_(gp_vec *vec, size_t length)
 		goto ret;
 
 	gp_vec *rvec = realloc(vec, sizeof(*vec) + capacity * vec->unit);
-
 	if (rvec) {
 		vec = rvec;
 		vec->capacity = capacity;
 	}
 
 ret:
-	return (void *)vec->payload;
+	return vec;
+}
+
+void *gp_vec_shrink(void *self, size_t length)
+{
+	gp_vec *vec = GP_VEC(self);
+
+	if (length > vec->length) {
+		GP_WARN("Vector too short %zu shrink %zu",
+			vec->length, length);
+		return NULL;
+	}
+
+	vec = gp_vec_shrink_(vec, length);
+
+	return (void*)vec->payload;
 }
 
 void *gp_vec_del(void *self, size_t i, size_t length)
@@ -167,5 +192,7 @@ void *gp_vec_del(void *self, size_t i, size_t length)
 		vec->payload + (i + length) * vec->unit,
 		(vec->length - length - i) * vec->unit);
 
-	return gp_vec_shrink_(vec, length);
+	vec = gp_vec_shrink_(vec, length);
+
+	return (void*)vec->payload;
 }

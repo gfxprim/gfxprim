@@ -127,7 +127,7 @@ static gp_widget *json_to_overlay(gp_json_buf *json, gp_json_val *val, gp_htable
 				if (!child)
 					continue;
 
-				tmp = gp_vec_append(ret->overlay->stack, 1);
+				tmp = gp_vec_expand(ret->overlay->stack, 1);
 				if (!tmp) {
 					gp_widget_free(child);
 					continue;

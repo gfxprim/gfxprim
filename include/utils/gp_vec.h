@@ -50,7 +50,7 @@ typedef struct gp_vec {
  *
  * @return A pointer to a vector data.
  */
-void *gp_vec_expand_(gp_vec *self, size_t length)
+gp_vec *gp_vec_expand_(gp_vec *self, size_t length)
 	__attribute__((warn_unused_result));
 
 /* @brief Shirnks vector length; does not touch vector data.
@@ -62,7 +62,7 @@ void *gp_vec_expand_(gp_vec *self, size_t length)
  *
  * @return A pointer to a vector data.
  */
-void *gp_vec_shrink_(gp_vec *self, size_t length)
+gp_vec *gp_vec_shrink_(gp_vec *self, size_t length)
 	__attribute__((warn_unused_result));
 
 /*
@@ -153,23 +153,17 @@ void *gp_vec_ins(void *self, size_t off, size_t length)
 	__attribute__((warn_unused_result));
 
 /*
- * @breif Appends length elements to the end of the vector.
+ * @breif Expands vector by length elements at the end of the vector.
  *
  * @self A vector.
  * @length A number of elements to append.
- *
- * Calls gp_vec_ins() with an offset equal to vector length.
  *
  * @return Returns a pointer to the vector, possibly a different from the
  *         previous one. May return NULL if underlying call to realloc() has
  *         failed.
  */
-static inline void *gp_vec_append(void *self, size_t lenght)
+void *gp_vec_expand(void *self, size_t length)
 	__attribute__((warn_unused_result));
-static inline void *gp_vec_append(void *self, size_t lenght)
-{
-	return gp_vec_ins(self, gp_vec_len(self), lenght);
-}
 
 /*
  * @brief Deletes a range from the vector.
@@ -181,11 +175,11 @@ static inline void *gp_vec_append(void *self, size_t lenght)
  * @return Returns a pointer to the vector, possibly a different from the
  *         previous one. May return NULL if block is outside of the vector.
  */
-void *gp_vec_del(void *self, size_t off, size_t lenght)
+void *gp_vec_del(void *self, size_t off, size_t length)
 	__attribute__((warn_unused_result));
 
 /*
- * @brief Removes length elements from the end of the vector.
+ * @brief Shrinks vector by length elements at the end of the vector.
  *
  * @self A vector.
  * @length A number of elemements to remove.
@@ -193,11 +187,7 @@ void *gp_vec_del(void *self, size_t off, size_t lenght)
  * @return Returns a pointer to the vector, possibly a different from the
  *         previous one.
  */
-static inline void *gp_vec_remove(void *self, size_t length)
+void *gp_vec_shrink(void *self, size_t length)
 	__attribute__((warn_unused_result));
-static inline void *gp_vec_remove(void *self, size_t length)
-{
-	return gp_vec_del(self, gp_vec_len(self) - length, length);
-}
 
 #endif	/* GP_VEC_H */

@@ -337,7 +337,7 @@ static void record_offset(struct zip_priv *priv, size_t pos, long offset)
 
 	GP_DEBUG(2, "Recording offset to %zu image (%li)", pos, offset);
 
-	offsets = gp_vec_append(priv->offsets, 1);
+	offsets = gp_vec_expand(priv->offsets, 1);
 	if (!offsets) {
 		GP_WARN("Failed to grow offsets vector");
 		return;
