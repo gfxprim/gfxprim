@@ -44,12 +44,22 @@ enum gp_widget_stock_type {
 	GP_WIDGET_STOCK_ARROW_DOWN,
 	GP_WIDGET_STOCK_ARROW_LEFT,
 	GP_WIDGET_STOCK_ARROW_RIGHT,
+
+	/* Flags */
+	GP_WIDGET_STOCK_FOCUSED = 0x8000,
 };
+
+#define GP_WIDGET_STOCK_TYPE_MASK (~(GP_WIDGET_STOCK_FOCUSED))
+#define GP_WIDGET_STOCK_TYPE(type) ((type) & GP_WIDGET_STOCK_TYPE_MASK)
 
 struct gp_widget_stock {
 	enum gp_widget_stock_type type;
 	gp_widget_size min_size;
 };
+
+void gp_widget_stock_render(gp_pixmap *pix, enum gp_widget_stock_type type,
+                            gp_coord x, gp_coord y, gp_size w, gp_size h,
+                            gp_pixel bg_col, const gp_widget_render_ctx *ctx);
 
 gp_widget *gp_widget_stock_new(enum gp_widget_stock_type type, gp_widget_size min_size);
 
