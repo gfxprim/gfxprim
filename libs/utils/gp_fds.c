@@ -32,8 +32,8 @@ int gp_fds_add(struct gp_fds *self, int fd, short events,
 			return 1;
 		}
 	} else {
-		self->fds = gp_vec_append(self->fds, 1);
-		self->pfds = gp_vec_append(self->pfds, 1);
+		self->fds = gp_vec_expand(self->fds, 1);
+		self->pfds = gp_vec_expand(self->pfds, 1);
 
 		if (!self->fds || !self->pfds)
 			return 1;
@@ -63,8 +63,8 @@ static void rem(struct gp_fds *self, size_t pos)
 	self->fds[pos] = self->fds[len-1];
 	self->pfds[pos] = self->pfds[len-1];
 
-	self->fds = gp_vec_remove(self->fds, 1);
-	self->pfds = gp_vec_remove(self->pfds, 1);
+	self->fds = gp_vec_shrink(self->fds, 1);
+	self->pfds = gp_vec_shrink(self->pfds, 1);
 }
 
 static ssize_t fd_to_pos(struct gp_fds *self, int fd)

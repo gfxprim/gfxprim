@@ -40,6 +40,17 @@ Initial length can be 0 as vector can be resized later.
 
 Returns NULL on allocation failure.
 
+.Vector copy
+[source,c]
+-------------------------------------------------------------------------------
+void *gp_vec_dup(void *self);
+-------------------------------------------------------------------------------
+
+Allocates a new vector of the same size and unit as `self` and copies the
+data.
+
+Returns copy of a vector on NULL on allocation failure.
+
 .Vector free
 [source,c]
 -------------------------------------------------------------------------------
@@ -66,7 +77,9 @@ vector element occupies.
 -------------------------------------------------------------------------------
 void *gp_vec_resize(void *self, size_t length);
 
-void *gp_vec_append(void *self, size_t lenght);
+void *gp_vec_expand(void *self, size_t lenght);
+
+void *gp_vec_shrink(void *self, size_t lenght);
 
 /* Example usage */
 int *func(int *array, int append)

@@ -459,7 +459,7 @@ static int parse_labels(gp_json_buf *json, gp_json_val *val, struct gp_widget_ta
 		switch (val->type) {
 		case GP_JSON_STR:
 			idx = gp_vec_len(*tabs);
-			tmp = gp_vec_append(*tabs, 1);
+			tmp = gp_vec_expand(*tabs, 1);
 			if (!tmp) {
 				gp_json_err(json, "Allocation failure");
 				return 1;
