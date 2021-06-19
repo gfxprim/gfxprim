@@ -85,8 +85,8 @@ SDL2
 [source,c]
 -------------------------------------------------------------------------------
 enum gp_sdl2_flags {
-        GP_SDL_FULLSCREEN = 0x01,
-        GP_SDL_RESIZABLE  = 0x02,
+        GP_SDL2_FULLSCREEN = 0x01,
+        GP_SDL2_RESIZABLE  = 0x02,
 };
 
 gp_backend *gp_sdl2_init(gp_size w, gp_size h,

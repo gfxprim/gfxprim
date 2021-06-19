@@ -10,8 +10,8 @@
 #include <backends/gp_backend.h>
 
 enum gp_sdl2_flags {
-	GP_SDL2_FULLSCREEN = 0x01,
-	GP_SDL2_RESIZABLE  = 0x02,
+       GP_SDL2_FULLSCREEN = 0x01,
+       GP_SDL2_RESIZABLE  = 0x02,
 };
 
 /*

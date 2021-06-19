@@ -165,12 +165,19 @@ static gp_backend *sdl_init(char *params, const char *caption)
 	if (parse_sdl_params(params, &w, &h, &bpp, &flags))
 		return NULL;
 
-	/* Atttempt to load with SDL2 first */
-	output = gp_sdl2_init(w, h, bpp, flags, caption);
-	if (output != NULL)
-		return output;
-
 	return gp_sdl_init(w, h, bpp, flags, caption);
+}
+
+static gp_backend *sdl2_init(char *params, const char *caption)
+{
+	gp_size w = 640, h = 480, bpp = 0;
+	uint8_t flags = GP_SDL_RESIZABLE;
+	gp_backend *output;
+
+	if (parse_sdl_params(params, &w, &h, &bpp, &flags))
+		return NULL;
+
+	return gp_sdl2_init(w, h, bpp, flags, caption);
 }
 
 static int parse_fb_params(char *params, int *flags, const char **fb)
@@ -355,6 +362,17 @@ static struct backend_init backends[] = {
 	},
 	{.name  = "SDL",
 	 .init  = sdl_init,
+	 .usage = "SDL:[fs]:[8]:[16]:[24]:[32]:[WxH]",
+	 .help  = {"fs  - Full Screen mode",
+	           "8   - Sets 8bpp",
+	           "16  - Sets 16bpp",
+	           "24  - Sets 24bpp",
+	           "32  - Sets 32bpp",
+	           "WxH - Display Size",
+	           NULL}
+	},
+	{.name  = "SDL2",
+	 .init  = sdl2_init,
 	 .usage = "SDL:[fs]:[8]:[16]:[24]:[32]:[WxH]",
 	 .help  = {"fs  - Full Screen mode",
 	           "8   - Sets 8bpp",

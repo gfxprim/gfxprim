@@ -8,7 +8,7 @@
 
  /*
 
-   This example shows how to mix SDL with GFXprim.
+   This example shows how to mix SDL 2 with GFXprim.
 
   */
 
@@ -99,6 +99,7 @@ int main(void)
 		SDL_FreeSurface(surface);
 		SDL_DestroyWindow(window);
 		SDL_Quit();
+		return 1;
 	}
 
 	gp_pixmap_from_sdl2_surface(&pixmap, surface);
@@ -111,7 +112,6 @@ int main(void)
 	SDL_UpdateWindowSurface(window);
 
 	event_loop();
-
 
 	SDL_FreeSurface(surface);
 	SDL_DestroyWindow(window);

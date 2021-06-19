@@ -16,7 +16,6 @@
 #include "gp_input_driver_sdl2.h"
 #include <backends/gp_backend.h>
 #include <backends/gp_sdl2.h>
-
 #include <backends/gp_sdl2_pixmap.h>
 
 #include <SDL2/SDL.h>
