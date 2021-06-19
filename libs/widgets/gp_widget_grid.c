@@ -8,7 +8,6 @@
 
 #include <string.h>
 #include <ctype.h>
-#include <json-c/json.h>
 
 #include <core/gp_debug.h>
 #include <core/gp_common.h>
@@ -846,118 +845,222 @@ static void put_grid_border_padd(void *array, unsigned int pos, uint8_t val)
 	border[pos].padd = val;
 }
 
-static gp_widget *json_to_grid(json_object *json, gp_htable **uids)
+static int alloc_grid(gp_widget **grid, unsigned int cols, unsigned int rows)
 {
-	int cols = 1, rows = 1, pad = -1;
-	json_object *widgets = NULL;
-	const char *border = NULL;
-	const char *cpad = NULL;
-	const char *rpad = NULL;
-	const char *cpadf = NULL;
-	const char *rpadf = NULL;
-	const char *cfill = NULL;
-	const char *rfill = NULL;
-	int flags = 0;
+	if (*grid)
+		return 0;
 
-	json_object_object_foreach(json, key, val) {
-		if (!strcmp(key, "cols"))
-			cols = json_object_get_int(val);
-		else if (!strcmp(key, "rows"))
-			rows = json_object_get_int(val);
-		else if (!strcmp(key, "widgets"))
-			widgets = val;
-		else if (!strcmp(key, "border"))
-			border = json_object_get_string(val);
-		else if (!strcmp(key, "pad"))
-			pad = json_object_get_int(val);
-		else if (!strcmp(key, "cpad"))
-			cpad = json_object_get_string(val);
-		else if (!strcmp(key, "rpad"))
-			rpad = json_object_get_string(val);
-		else if (!strcmp(key, "cpadf"))
-			cpadf = json_object_get_string(val);
-		else if (!strcmp(key, "rpadf"))
-			rpadf = json_object_get_string(val);
-		else if (!strcmp(key, "cfill"))
-			cfill = json_object_get_string(val);
-		else if (!strcmp(key, "rfill"))
-			rfill = json_object_get_string(val);
-		else if (!strcmp(key, "frame")) {
-			if (json_object_get_boolean(val))
-				flags |= GP_WIDGET_GRID_FRAME;
-		} else if (!strcmp(key, "uniform")) {
-			if (json_object_get_boolean(val))
-				flags |= GP_WIDGET_GRID_UNIFORM;
-		} else
-			GP_WARN("Invalid grid key '%s'", key);
+	*grid = gp_widget_grid_new(cols, rows, 0);
+	if (!*grid)
+		return 1;
+
+	return 0;
+}
+
+static void set_border(gp_json_buf *json, gp_widget *grid, gp_json_val *val)
+{
+	if (val->type == GP_JSON_INT) {
+		if (val->val_int < 0)
+			gp_json_warn(json, "Border must be >= 0!");
+		else
+			set_border_padd(grid, val->val_int);
+		return;
 	}
 
-	if (cols < 0 || rows < 0) {
-		GP_WARN("Invalid grid widget cols = %i or rows = %i",
-		        cols, rows);
-		return NULL;
+	if (val->type != GP_JSON_STR) {
+		gp_json_warn(json, "Invalid type, expected int or string!");
+		return;
 	}
 
-	gp_widget *grid = gp_widget_grid_new(cols, rows, flags);
-	if (!grid)
-		return NULL;
-
-	if (pad >= 0)
-		set_pad(grid, pad);
-
-	parse_strarray(cpad, grid->grid->col_b, cols+1, put_grid_border_padd, "Grid cpad");
-	parse_strarray(rpad, grid->grid->row_b, rows+1, put_grid_border_padd, "Grid rpad");
-	parse_strarray(cpadf, grid->grid->col_b, cols+1, put_grid_border_fill, "Grid cpadf");
-	parse_strarray(rpadf, grid->grid->row_b, rows+1, put_grid_border_fill, "Grid rpadf");
-	parse_strarray(cfill, grid->grid->col_s, cols, put_grid_cell_fill, "Grid cfill");
-	parse_strarray(rfill, grid->grid->row_s, rows, put_grid_cell_fill, "Grid rfill");
-
-	if (border) {
-		if (!strcmp(border, "horiz")) {
-			set_vborder_padd(grid, 0);
-		} else if (!strcmp(border, "vert")) {
-			set_hborder_padd(grid, 0);
-		} else if (!strcmp(border, "none")) {
-			set_border_padd(grid, 0);
-		} else if (!strcmp(border, "all")) {
-			//default
-		} else {
-			int b = atoi(border);
-
-			if (b > 0)
-				set_border_padd(grid, b);
-			else
-				GP_WARN("Invalid border '%s'", border);
-		}
+	if (!strcmp(val->val_str, "horiz")) {
+		set_vborder_padd(grid, 0);
+	} else if (!strcmp(val->val_str, "vert")) {
+		set_hborder_padd(grid, 0);
+	} else if (!strcmp(val->val_str, "none")) {
+		set_border_padd(grid, 0);
+	} else if (!strcmp(val->val_str, "all")) {
+		//default
+	} else {
+		gp_json_warn(json, "Invalid border value!");
 	}
+}
 
-	if (widgets && !json_object_is_type(widgets, json_type_array)) {
-		GP_WARN("Grid widgets must be array!");
-		return grid;
-	}
+enum keys {
+	BORDER,
+	CFILL,
+	COLS,
+	CPAD,
+	CPADF,
+	FRAME,
+	PAD,
+	RFILL,
+	ROWS,
+	RPAD,
+	RPADF,
+	UNIFORM,
+	WIDGETS,
+};
 
-	int col, row;
+static const gp_json_obj_attr attrs[] = {
+	GP_JSON_OBJ_ATTR("border", GP_JSON_VOID),
+	GP_JSON_OBJ_ATTR("cfill", GP_JSON_STR),
+	GP_JSON_OBJ_ATTR("cols", GP_JSON_INT),
+	GP_JSON_OBJ_ATTR("cpad", GP_JSON_STR),
+	GP_JSON_OBJ_ATTR("cpadf", GP_JSON_STR),
+	GP_JSON_OBJ_ATTR("frame", GP_JSON_BOOL),
+	GP_JSON_OBJ_ATTR("pad", GP_JSON_INT),
+	GP_JSON_OBJ_ATTR("rfill", GP_JSON_STR),
+	GP_JSON_OBJ_ATTR("rows", GP_JSON_INT),
+	GP_JSON_OBJ_ATTR("rpad", GP_JSON_STR),
+	GP_JSON_OBJ_ATTR("rpadf", GP_JSON_STR),
+	GP_JSON_OBJ_ATTR("uniform", GP_JSON_BOOL),
+	GP_JSON_OBJ_ATTR("widgets", GP_JSON_ARR),
+};
 
-	for (col = 0; col < cols; col++) {
-		for (row = 0; row < rows; row++) {
-			json_object *json_widget = json_object_array_get_idx(widgets, col * rows + row);
+static const gp_json_obj obj_filter = {
+	.attrs = attrs,
+	.attr_cnt = GP_ARRAY_SIZE(attrs),
+};
 
-			if (!json_widget) {
-				GP_WARN("Not enough widgets to fill grid!");
-				return grid;
+static gp_widget *json_to_grid(gp_json_buf *json, gp_json_val *val, gp_htable **uids)
+{
+	int cols = 1, rows = 1;
+	int frame = 0, uniform = 0;
+	gp_widget *grid = NULL;
+
+	gp_json_state obj_start = gp_json_state_start(json);
+
+	GP_JSON_OBJ_FILTER(json, val, &obj_filter, gp_widget_json_attrs) {
+		switch (val->idx) {
+		case BORDER:
+			if (alloc_grid(&grid, cols, rows))
+				goto skip;
+
+			set_border(json, grid, val);
+		break;
+		case CFILL:
+			if (alloc_grid(&grid, cols, rows))
+				goto skip;
+
+			parse_strarray(val->val_str, grid->grid->col_s, cols, put_grid_cell_fill, "Grid cfill");
+		break;
+		case COLS:
+			if (val->val_int < 0) {
+				gp_json_warn(json, "grid cols must be a positive number!");
+				goto skip;
 			}
 
-			gp_widget *widget = gp_widget_from_json(json_widget, uids);
+			if (grid) {
+				gp_json_warn(json, "grid cols must be set before widgets!");
+				goto free_skip;
+			}
 
-			if (widget)
-				gp_widget_grid_put(grid, col, row, widget);
+			cols = val->val_int;
+		break;
+		case CPAD:
+			if (alloc_grid(&grid, cols, rows))
+				goto skip;
+
+			parse_strarray(val->val_str, grid->grid->col_b, cols+1, put_grid_border_padd, "Grid cpad");
+		break;
+		case CPADF:
+			if (alloc_grid(&grid, cols, rows))
+				goto skip;
+
+			parse_strarray(val->val_str, grid->grid->col_b, cols+1, put_grid_border_fill, "Grid cpadf");
+		break;
+		case FRAME:
+			frame = val->val_bool;
+		break;
+		case PAD:
+			if (alloc_grid(&grid, cols, rows))
+				goto skip;
+
+			if (val->val_int < 0)
+				gp_json_warn(json, "padd must be >= 0!");
+			else
+				set_pad(grid, val->val_int);
+		break;
+		case RFILL:
+			if (alloc_grid(&grid, cols, rows))
+				goto skip;
+
+			parse_strarray(val->val_str, grid->grid->row_s, rows, put_grid_cell_fill, "Grid rfill");
+		break;
+		case ROWS:
+			if (val->val_int < 0) {
+				gp_json_warn(json, "grid rows must be a positive number!");
+				goto skip;
+			}
+
+			if (grid) {
+				gp_json_warn(json, "grid rows must be set before widgets!");
+				goto free_skip;
+			}
+
+			rows = val->val_int;
+		break;
+		case RPAD:
+			if (alloc_grid(&grid, cols, rows))
+				goto skip;
+
+			parse_strarray(val->val_str, grid->grid->row_b, rows+1, put_grid_border_padd, "Grid rpad");
+		break;
+		case RPADF:
+			if (alloc_grid(&grid, cols, rows))
+				goto skip;
+
+			parse_strarray(val->val_str, grid->grid->row_b, rows+1, put_grid_border_fill, "Grid rpadf");
+		break;
+		case UNIFORM:
+			uniform = val->val_bool;
+		break;
+		case WIDGETS:
+			if (alloc_grid(&grid, cols, rows))
+				goto skip;
+
+			if (val->type != GP_JSON_ARR) {
+				gp_json_warn(json, "grid widgets must be an array!");
+				goto skip;
+			}
+
+			int widgets = 0, warned = 0;
+
+			GP_JSON_ARR_FOREACH(json, val) {
+				if (widgets >= cols * rows) {
+					if (!warned) {
+						warned = 1;
+						gp_json_warn(json, "Too many widgets!");
+					}
+					gp_json_obj_skip(json);
+					continue;
+				}
+
+				gp_widget *child = gp_widget_from_json(json, val, uids);
+				gp_widget_grid_put(grid, widgets/rows, widgets%rows, child);
+
+				widgets++;
+			}
+
+			if (widgets < cols * rows)
+				gp_json_warn(json, "Not enough widgets to fill grid!");
+		break;
 		}
 	}
 
-	if (widgets && json_object_array_get_idx(widgets, cols * rows))
-		GP_WARN("Too many widgets in grid!");
+	if (alloc_grid(&grid, cols, rows))
+		goto skip;
+
+	grid->grid->uniform = uniform;
+	grid->grid->frame = frame;
 
 	return grid;
+free_skip:
+	gp_widget_free(grid);
+skip:
+	gp_json_state_load(json, obj_start);
+	gp_json_obj_skip(json);
+	return NULL;
 }
 
 static void free_(gp_widget *self)

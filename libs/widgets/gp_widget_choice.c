@@ -7,56 +7,118 @@
  */
 
 #include <string.h>
-#include <json-c/json.h>
 #include <widgets/gp_widgets.h>
 #include <widgets/gp_string.h>
 
-gp_widget *gp_widget_choice_from_json(unsigned int widget_type,
-                                      json_object *json, gp_htable **uids)
+enum keys {
+	CHOICES,
+	SELECTED,
+};
+
+static const gp_json_obj_attr attrs[] = {
+	GP_JSON_OBJ_ATTR("choices", GP_JSON_ARR),
+	GP_JSON_OBJ_ATTR("selected", GP_JSON_INT),
+};
+
+static const gp_json_obj obj_filter = {
+	.attrs = attrs,
+	.attr_cnt = GP_ARRAY_SIZE(attrs),
+};
+
+static gp_widget *alloc_choice(unsigned int widget_type,
+                               size_t payload_size, unsigned int choice_cnt)
 {
-	json_object *labels = NULL;
-	int sel_label = 0;
+	size_t size = sizeof(struct gp_widget_choice) + payload_size;
+	gp_widget *ret;
+
+	ret = gp_widget_new(widget_type, GP_WIDGET_CLASS_CHOICE, size);
+	if (!ret)
+		return NULL;
+
+	ret->choice->max = choice_cnt;
+	ret->choice->choices = (void*)ret->choice->payload;
+	ret->choice->sel = 0;
+
+	return ret;
+}
+
+static gp_widget *parse_choices(unsigned int widget_type,
+                                gp_json_buf *json, gp_json_val *val)
+{
+	gp_json_state state = gp_json_state_start(json);
+	gp_widget *ret;
+	size_t size = 0;
+	unsigned int cnt = 0;
+
+	GP_JSON_ARR_FOREACH(json, val) {
+		if (val->type == GP_JSON_STR) {
+			size += strlen(val->val_str) + 1 + sizeof(void*);
+			cnt++;
+		} else {
+			gp_json_warn(json, "Invalid choice type!");
+		}
+	}
+
+	ret = alloc_choice(widget_type, size, cnt);
+	if (!ret)
+		return NULL;
+
+	gp_json_state_load(json, state);
+
+	char *save = val->buf;
+
+	val->buf = (void*)ret->choice->payload + cnt * sizeof(void*);
+
+	cnt = 0;
+
+	GP_JSON_ARR_FOREACH(json, val) {
+		if (val->type != GP_JSON_STR)
+			continue;
+
+		ret->choice->choices[cnt++] = val->buf;
+		val->buf += strlen(val->buf) + 1;
+	}
+
+
+	val->buf = save;
+
+	return ret;
+}
+
+gp_widget *gp_widget_choice_from_json(unsigned int widget_type,
+                                      gp_json_buf *json, gp_json_val *val,
+                                      gp_htable **uids)
+{
+	unsigned int sel = 0;
+	gp_widget *ret = NULL;
 
 	(void)uids;
 
-	json_object_object_foreach(json, key, val) {
-		if (!strcmp(key, "choices"))
-			labels = val;
-		else if (!strcmp(key, "selected"))
-			sel_label = json_object_get_int(val);
-		else
-			GP_WARN("Invalid radiobutton key '%s'", key);
+	GP_JSON_OBJ_FILTER(json, val, &obj_filter, gp_widget_json_attrs) {
+		switch (val->idx) {
+		case CHOICES:
+			ret = parse_choices(widget_type, json, val);
+		break;
+		case SELECTED:
+			if (val->val_int < 0)
+				gp_json_warn(json, "Invalid value!");
+			else
+				sel = val->val_int;
+		break;
+		}
 	}
 
-	if (!labels) {
-		GP_WARN("Missing labels array!");
+	if (!ret) {
+		gp_json_warn(json, "Missing choices array!");
 		return NULL;
 	}
 
-	if (!json_object_is_type(labels, json_type_array)) {
-		GP_WARN("Buttons has to be array of strings!");
-		return NULL;
-	}
+	if (sel >= ret->choice->max)
+		gp_json_warn(json, "Invalid selected label %i", sel);
+	else
+		ret->choice->sel = sel;
 
-	unsigned int i, label_cnt = json_object_array_length(labels);
-	const char *labels_arr[label_cnt];
-
-	if (sel_label < 0 || (unsigned int)sel_label >= label_cnt) {
-		GP_WARN("Invalid selected button %i", sel_label);
-		sel_label = 0;
-	}
-
-	for (i = 0; i < label_cnt; i++) {
-		json_object *label = json_object_array_get_idx(labels, i);
-		labels_arr[i] = json_object_get_string(label);
-
-		if (!labels_arr[i])
-			GP_WARN("Button %i must be string!", i);
-	}
-
-	return gp_widget_choice_new(widget_type,
-	                            labels_arr, label_cnt, sel_label,
-	                            NULL, NULL);
+	return ret;
 }
 
 gp_widget *gp_widget_choice_new(unsigned int widget_type,
@@ -66,16 +128,19 @@ gp_widget *gp_widget_choice_new(unsigned int widget_type,
 				int (*on_event)(gp_widget_event *self),
 				void *priv)
 {
-	size_t size = sizeof(struct gp_widget_choice)
-	              + gp_string_arr_size(choices, choice_cnt);
+	gp_widget *ret;
+	size_t payload_size = gp_string_arr_size(choices, choice_cnt);
 
-	gp_widget *ret = gp_widget_new(widget_type, GP_WIDGET_CLASS_CHOICE, size);
+	ret = alloc_choice(widget_type, payload_size, choice_cnt);
 	if (!ret)
 		return NULL;
 
-	ret->choice->sel = selected;
-	ret->choice->choices = gp_string_arr_copy(choices, choice_cnt, ret->choice->payload);
-	ret->choice->max = choice_cnt;
+	gp_string_arr_copy(choices, choice_cnt, ret->choice->payload);
+
+	if (selected >= choice_cnt)
+		GP_WARN("Invalid selected choice %u, max=%u", selected, choice_cnt);
+	else
+		ret->choice->sel = selected;
 
 	gp_widget_event_handler_set(ret, on_event, priv);
 

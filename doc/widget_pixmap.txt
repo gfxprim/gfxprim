@@ -58,6 +58,14 @@ void gp_widget_pixmap_redraw_all(gp_widget *self);
 Requests full update of the pixmap widget. Can be used to override previous
 partiall update.
 
+[source,c]
+-------------------------------------------------------------------------------
+gp_size gp_widget_pixmap_w(gp_widget *self);
+gp_size gp_widget_pixmap_h(gp_widget *self);
+-------------------------------------------------------------------------------
+
+Returns pixmap width and height.
+
 See link:example_widgets_pixmap.html[example].
 
 Unbuffered mode

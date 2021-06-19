@@ -2,12 +2,11 @@
 
 /*
 
-   Copyright (c) 2014-2020 Cyril Hrubis <metan@ucw.cz>
+   Copyright (c) 2014-2021 Cyril Hrubis <metan@ucw.cz>
 
  */
 
 #include <string.h>
-#include <json-c/json.h>
 
 #include <utils/gp_vec.h>
 
@@ -92,39 +91,49 @@ static void render(gp_widget *self, const gp_offset *offset,
 	gp_widget_ops_render(layout, &child_offset, ctx, flags);
 }
 
-static gp_widget *json_to_switch(json_object *json, gp_htable **uids)
+enum keys {
+	WIDGETS,
+};
+
+static const gp_json_obj_attr attrs[] = {
+	GP_JSON_OBJ_ATTR("widgets", GP_JSON_ARR),
+};
+
+static const gp_json_obj obj_filter = {
+	.attrs = attrs,
+	.attr_cnt = GP_ARRAY_SIZE(attrs),
+};
+
+static gp_widget *json_to_switch(gp_json_buf *json, gp_json_val *val, gp_htable **uids)
 {
-	json_object *widgets = NULL;
+	gp_widget *ret, *child;
+	unsigned int cnt = 0;
+	void *tmp;
 
-	json_object_object_foreach(json, key, val) {
-		if (!strcmp(key, "widgets"))
-			widgets = val;
-		else
-			GP_WARN("Invalid switch key '%s'", key);
-	}
-
-	if (!widgets) {
-		GP_WARN("Missing widgets array!");
-		return NULL;
-	}
-
-	if (!json_object_is_type(widgets, json_type_array)) {
-		GP_WARN("Widgets has to be array of strings!");
-		return NULL;
-	}
-
-	unsigned int i, layouts = json_object_array_length(widgets);
-
-	gp_widget *ret = gp_widget_switch_new(layouts);
+	ret = gp_widget_switch_new(0);
 	if (!ret)
 		return NULL;
 
-	for (i = 0; i < layouts; i++) {
-		json_object *json_widget = json_object_array_get_idx(widgets, i);
+	GP_JSON_OBJ_FILTER(json, val, &obj_filter, gp_widget_json_attrs) {
+		switch (val->idx) {
+		case WIDGETS:
+			GP_JSON_ARR_FOREACH(json, val) {
+				child = gp_widget_from_json(json, val, uids);
+				if (!child)
+					continue;
 
-		ret->switch_->layouts[i] = gp_widget_from_json(json_widget, uids);
+				tmp = gp_vec_expand(ret->switch_->layouts, 1);
+				if (!tmp) {
+					gp_widget_free(child);
+					continue;
+				}
 
-		gp_widget_set_parent(ret->switch_->layouts[i], ret);
+				ret->switch_->layouts = tmp;
+				ret->switch_->layouts[cnt++] = child;
+				gp_widget_set_parent(child, ret);
+			}
+		break;
+		}
 	}
 
 	return ret;

@@ -2,12 +2,11 @@
 
 /*
 
-   Copyright (c) 2014-2020 Cyril Hrubis <metan@ucw.cz>
+   Copyright (c) 2014-2021 Cyril Hrubis <metan@ucw.cz>
 
  */
 
 #include <string.h>
-#include <json-c/json.h>
 
 #include <widgets/gp_widgets.h>
 #include <widgets/gp_widget_ops.h>
@@ -148,31 +147,62 @@ static int event(gp_widget *self, const gp_widget_render_ctx *ctx, gp_event *ev)
 	return 0;
 }
 
-static gp_widget *json_to_pixmap(json_object *json, gp_htable **uids)
+enum keys {
+	H,
+	W,
+};
+
+static const gp_json_obj_attr attrs[] = {
+	GP_JSON_OBJ_ATTR("h", GP_JSON_VOID),
+	GP_JSON_OBJ_ATTR("w", GP_JSON_VOID),
+};
+
+static const gp_json_obj obj_filter = {
+	.attrs = attrs,
+	.attr_cnt = GP_ARRAY_SIZE(attrs),
+};
+
+static gp_widget *json_to_pixmap(gp_json_buf *json, gp_json_val *val, gp_htable **uids)
 {
 	gp_widget_size w = {};
 	gp_widget_size h = {};
-	const char *str_w = NULL;
-	const char *str_h = NULL;
 	(void)uids;
 
-	json_object_object_foreach(json, key, val) {
-		if (!strcmp(key, "w"))
-			str_w = json_object_get_string(val);
-		else if (!strcmp(key, "h"))
-			str_h = json_object_get_string(val);
-		else
-			GP_WARN("Invalid pixmap key '%s'", key);
-	}
-
-	if (str_w) {
-		if (gp_widget_size_units_parse(str_w, &w))
-			return NULL;
-	}
-
-	if (str_h) {
-		if (gp_widget_size_units_parse(str_h, &h))
-			return NULL;
+	GP_JSON_OBJ_FILTER(json, val, &obj_filter, gp_widget_json_attrs) {
+		switch (val->idx) {
+		case H:
+			switch (val->type) {
+			case GP_JSON_INT:
+				if (val->val_int < 0)
+					gp_json_warn(json, "Size must be > 0!");
+				else
+					h.px = val->val_int;
+			break;
+			case GP_JSON_STR:
+				if (gp_widget_size_units_parse(val->val_str, &h))
+					gp_json_warn(json, "Invalid size!");
+			break;
+			default:
+				gp_json_warn(json, "Invalid size type!");
+			}
+		break;
+		case W:
+			switch (val->type) {
+			case GP_JSON_INT:
+				if (val->val_int < 0)
+					gp_json_warn(json, "Size must be > 0!");
+				else
+					w.px = val->val_int;
+			break;
+			case GP_JSON_STR:
+				if (gp_widget_size_units_parse(val->val_str, &w))
+					gp_json_warn(json, "Invalid size!");
+			break;
+			default:
+				gp_json_warn(json, "Invalid size type!");
+			}
+		break;
+		}
 	}
 
 	return gp_widget_pixmap_new(w, h, NULL, NULL);

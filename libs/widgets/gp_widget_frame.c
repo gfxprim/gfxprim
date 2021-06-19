@@ -7,7 +7,6 @@
  */
 
 #include <string.h>
-#include <json-c/json.h>
 
 #include <core/gp_common.h>
 
@@ -172,32 +171,49 @@ static int focus(gp_widget *self, int sel)
 	return gp_widget_ops_render_focus(self->frame->child, sel);
 }
 
-static gp_widget *json_to_frame(json_object *json, gp_htable **uids)
-{
-	const char *title = NULL;
-	json_object *json_child = NULL;
-	const char *strattr = NULL;
-	gp_widget_tattr tattr = GP_TATTR_BOLD;
+enum keys {
+	TATTR,
+	TITLE,
+	WIDGET,
+};
 
-	json_object_object_foreach(json, key, val) {
-		if (!strcmp(key, "title"))
-			title = json_object_get_string(val);
-		else if (!strcmp(key, "widget"))
-			json_child = val;
-		else if (!strcmp(key, "tattr"))
-			strattr = json_object_get_string(val);
-		else
-			GP_WARN("Invalid frame key '%s'", key);
+static const gp_json_obj_attr attrs[] = {
+	GP_JSON_OBJ_ATTR("tattr", GP_JSON_STR),
+	GP_JSON_OBJ_ATTR("title", GP_JSON_STR),
+	GP_JSON_OBJ_ATTR("widget", GP_JSON_OBJ),
+};
+
+static const gp_json_obj obj_filter = {
+	.attrs = attrs,
+	.attr_cnt = GP_ARRAY_SIZE(attrs),
+};
+
+static gp_widget *json_to_frame(gp_json_buf *json, gp_json_val *val, gp_htable **uids)
+{
+	char *title = NULL;
+	gp_widget_tattr tattr = GP_TATTR_BOLD;
+	gp_widget *child = NULL;
+
+	GP_JSON_OBJ_FILTER(json, val, &obj_filter, gp_widget_json_attrs) {
+		switch (val->idx) {
+		case TATTR:
+			if (gp_widget_tattr_parse(val->val_str, &tattr))
+				gp_json_warn(json, "Invalid text attribute");
+		break;
+		case TITLE:
+			title = strdup(val->val_str);
+		break;
+		case WIDGET:
+			child = gp_widget_from_json(json, val, uids);
+		break;
+		}
 	}
 
-	if (strattr && gp_widget_tattr_parse(strattr, &tattr))
-		GP_WARN("Invalid text attribute '%s'", strattr);
-
-	gp_widget *child = gp_widget_from_json(json_child, uids);
 	gp_widget *ret = gp_widget_frame_new(title, tattr, child);
-
 	if (!ret)
 		gp_widget_free(child);
+
+	free(title);
 
 	return ret;
 }

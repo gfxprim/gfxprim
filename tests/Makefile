@@ -1,17 +1,9 @@
 TOPDIR=..
 include $(TOPDIR)/pre.mk
 
-SUBDIRS=core framework loaders gfx filters input utils
+SUBDIRS=core framework loaders gfx filters input utils widgets
+TEST_DIRS=$(filter-out framework, $(SUBDIRS))
 
-ifeq ($(HAVE_JSON-C),yes)
-SUBDIRS+=widgets
-endif
-
-loaders: framework
-gfx: framework
-core: framework
-filters: framework
-input: framework
-widgets: framework
+$(TEST_DIRS): framework
 
 include $(TOPDIR)/post.mk

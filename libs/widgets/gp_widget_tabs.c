@@ -2,12 +2,11 @@
 
 /*
 
-   Copyright (c) 2014-2020 Cyril Hrubis <metan@ucw.cz>
+   Copyright (c) 2014-2021 Cyril Hrubis <metan@ucw.cz>
 
  */
 
 #include <string.h>
-#include <json-c/json.h>
 
 #include <core/gp_debug.h>
 #include <core/gp_common.h>
@@ -408,76 +407,153 @@ static int focus_xy(gp_widget *self, const gp_widget_render_ctx *ctx,
 	return focus_title(self, ctx, x);
 }
 
-static gp_widget *json_to_tabs(json_object *json, gp_htable **uids)
+static void tabs_free(struct gp_widget_tab *tabs)
 {
-	json_object *widgets = NULL;
-	json_object *labels = NULL;
-	int active = 0;
+	size_t i;
 
-	json_object_object_foreach(json, key, val) {
-		if (!strcmp(key, "labels"))
-			labels = val;
-		else if (!strcmp(key, "widgets"))
-			widgets = val;
-		else if (!strcmp(key, "active"))
-			active = json_object_get_int(val);
-		else
-			GP_WARN("Invalid tabs key '%s'", key);
+	for (i = 0; i < gp_vec_len(tabs); i++) {
+		free(tabs->label);
+		gp_widget_free(tabs->widget);
+	}
+}
+
+static gp_widget *tabs_new(struct gp_widget_tab *tabs, unsigned int active_tab)
+{
+	size_t size = sizeof(struct gp_widget_tabs);
+
+	gp_widget *ret = gp_widget_new(GP_WIDGET_TABS, GP_WIDGET_CLASS_NONE, size);
+	if (!ret) {
+		tabs_free(tabs);
+		return NULL;
 	}
 
-	if (active < 0) {
-		GP_WARN("Active widget must be >= 0");
+	ret->tabs->tabs = tabs;
+	ret->tabs->active_tab = active_tab;
+
+	return ret;
+}
+
+enum keys {
+	ACTIVE,
+	LABELS,
+	WIDGETS,
+};
+
+static const gp_json_obj_attr attrs[] = {
+	GP_JSON_OBJ_ATTR("active", GP_JSON_INT),
+	GP_JSON_OBJ_ATTR("labels", GP_JSON_ARR),
+	GP_JSON_OBJ_ATTR("widgets", GP_JSON_ARR),
+};
+
+static const gp_json_obj obj_filter = {
+	.attrs = attrs,
+	.attr_cnt = GP_ARRAY_SIZE(attrs),
+};
+
+static int parse_labels(gp_json_buf *json, gp_json_val *val, struct gp_widget_tab **tabs)
+{
+	struct gp_widget_tab *tmp;
+	size_t idx;
+
+	GP_JSON_ARR_FOREACH(json, val) {
+		switch (val->type) {
+		case GP_JSON_STR:
+			idx = gp_vec_len(*tabs);
+			tmp = gp_vec_expand(*tabs, 1);
+			if (!tmp) {
+				gp_json_err(json, "Allocation failure");
+				return 1;
+			}
+			*tabs = tmp;
+			tmp[idx].label = strdup(val->val_str);
+		break;
+		default:
+			gp_json_err(json, "Invalid label type");
+			return 1;
+		}
+	}
+
+	return 0;
+}
+
+static int parse_widgets(gp_json_buf *json, gp_json_val *val, struct gp_widget_tab *tabs, gp_htable **uids)
+{
+	size_t idx = 0;
+	int warned = 0;
+
+	GP_JSON_ARR_FOREACH(json, val) {
+		switch (val->type) {
+		case GP_JSON_OBJ:
+			if (idx >= gp_vec_len(tabs)) {
+				if (!warned) {
+					gp_json_warn(json, "Too many widgets!");
+					warned = 1;
+				}
+
+				gp_json_obj_skip(json);
+			} else {
+				tabs[idx++].widget = gp_widget_from_json(json, val, uids);
+			}
+		break;
+		default:
+			gp_json_warn(json, "Invalid widget, must be object type!");
+		}
+	}
+
+	if (idx < gp_vec_len(tabs))
+		gp_json_warn(json, "Not enough widgets!");
+
+	return 0;
+}
+
+static gp_widget *json_to_tabs(gp_json_buf *json, gp_json_val *val, gp_htable **uids)
+{
+	int active = 0;
+	struct gp_widget_tab *tabs;
+	gp_widget *ret;
+	size_t i;
+
+	tabs = gp_vec_new(0, sizeof(struct gp_widget_tab));
+	if (!tabs)
+		return NULL;
+
+	GP_JSON_OBJ_FILTER(json, val, &obj_filter, gp_widget_json_attrs) {
+		switch (val->idx) {
+		case LABELS:
+			if (parse_labels(json, val, &tabs))
+				goto free;
+		break;
+		case WIDGETS:
+			if (!gp_vec_len(tabs)) {
+				gp_json_err(json, "Label array has to precede widgets array");
+				goto free;
+			}
+
+			if (parse_widgets(json, val, tabs, uids))
+				goto free;
+		break;
+		case ACTIVE:
+			active = val->val_int;
+		break;
+		}
+	}
+
+	if (active < 0 || (size_t)active >= gp_vec_len(tabs)) {
+		gp_json_warn(json, "Active widget must be a valid tab index");
 		active = 0;
 	}
 
-	if (!labels) {
-		GP_WARN("Missing tabs array!");
+	ret = tabs_new(tabs, active);
+	if (!ret)
 		return NULL;
-	}
 
-	if (!widgets) {
-		GP_WARN("Missing widgets array!");
-		return NULL;
-	}
-
-	if (!json_object_is_type(labels, json_type_array)) {
-		GP_WARN("Tabs has to be array of strings!");
-		return NULL;
-	}
-
-	if (!json_object_is_type(widgets, json_type_array)) {
-		GP_WARN("Tabs has to be array of strings!");
-		return NULL;
-	}
-
-	unsigned int i, tab_count = json_object_array_length(labels);
-	const char *tab_labels[tab_count];
-
-	for (i = 0; i < tab_count; i++) {
-		json_object *label = json_object_array_get_idx(labels, i);
-		tab_labels[i] = json_object_get_string(label);
-
-		if (!tab_labels[i])
-			GP_WARN("Tab title %i must be string!", i);
-	}
-
-	gp_widget *ret = gp_widget_tabs_new(tab_count, active, tab_labels, 0);
-
-	for (i = 0; i < tab_count; i++) {
-		json_object *json_widget = json_object_array_get_idx(widgets, i);
-
-		if (!json_widget) {
-			GP_WARN("Not enough widgets to fill tabs!");
-			return ret;
-		}
-
-		ret->tabs->tabs[i].widget = gp_widget_from_json(json_widget, uids);
-
-		gp_widget_set_parent(ret->tabs->tabs[i].widget, ret);
-	}
-
+	for (i = 0; i < gp_vec_len(tabs); i++)
+		gp_widget_set_parent(tabs[i].widget, ret);
 
 	return ret;
+free:
+	tabs_free(tabs);
+	return NULL;
 }
 
 static void for_each_child(gp_widget *self, void (*func)(gp_widget *child))
@@ -516,50 +592,36 @@ struct gp_widget_ops gp_widget_tabs_ops = {
 	.id = "tabs",
 };
 
-gp_widget *gp_widget_tabs_new(unsigned int tabs, unsigned int active_tab,
+gp_widget *gp_widget_tabs_new(unsigned int tab_cnt, unsigned int active_tab,
                               const char *tab_labels[], int flags)
 {
-	size_t i, size = sizeof(struct gp_widget_tabs);
+	struct gp_widget_tab *tabs;
+	size_t i;
 
 	if (flags) {
 		GP_WARN("flags has to be 0");
 		return NULL;
 	}
 
-	gp_widget *ret = gp_widget_new(GP_WIDGET_TABS, GP_WIDGET_CLASS_NONE, size);
-	if (!ret)
+	tabs = gp_vec_new(tab_cnt, sizeof(struct gp_widget_tab));
+	if (!tabs)
 		return NULL;
 
-	ret->tabs->tabs = gp_vec_new(tabs, sizeof(struct gp_widget_tab));
-
-	if (!ret->tabs->tabs) {
-		free(ret);
-		return NULL;
-	}
-
-	for (i = 0; i < tabs; i++) {
-		ret->tabs->tabs[i].label = strdup(tab_labels[i]);
-		if (!ret->tabs->tabs[i].label)
+	for (i = 0; i < tab_cnt; i++) {
+		tabs[i].label = strdup(tab_labels[i]);
+		if (!tabs[i].label)
 			goto err;
 	}
 
-	if (active_tab >= tabs) {
-		if (tabs)
-			GP_WARN("Active tab %u >= tabs %u", active_tab, tabs);
+	if (active_tab >= tab_cnt) {
+		if (tab_cnt)
+			GP_WARN("Active tab %u >= tabs %u", active_tab, tab_cnt);
 		active_tab = 0;
 	}
 
-	ret->tabs->active_tab = active_tab;
-
-	return ret;
+	return tabs_new(tabs, active_tab);
 err:
-	for (i = 0; i < tabs; i++)
-		free(ret->tabs->tabs[i].label);
-
-	gp_vec_free(ret->tabs->tabs);
-
-	free(ret);
-
+	tabs_free(tabs);
 	return NULL;
 }
 

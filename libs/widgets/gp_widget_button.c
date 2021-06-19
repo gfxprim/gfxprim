@@ -2,12 +2,11 @@
 
 /*
 
-   Copyright (c) 2014-2020 Cyril Hrubis <metan@ucw.cz>
+   Copyright (c) 2014-2021 Cyril Hrubis <metan@ucw.cz>
 
  */
 
 #include <string.h>
-#include <json-c/json.h>
 
 #include <widgets/gp_widgets.h>
 #include <widgets/gp_widget_ops.h>
@@ -243,6 +242,14 @@ static void render(gp_widget *self, const gp_offset *offset,
 		          sym_r/2, sym_r,
 		          GP_TRIANGLE_LEFT, ctx->text_color);
 	break;
+	case GP_BUTTON_RANDOMIZE:
+		gp_fill_rrect_xywh(ctx->buf, cx-sym_r, cy-sym_r, 2*sym_r+1, 2*sym_r+1, ctx->bg_color, ctx->text_color, ctx->text_color);
+		i = sym_r/2;
+		gp_fill_circle(ctx->buf, cx-i, cy-i, sym_r/5, ctx->fg_color);
+		gp_fill_circle(ctx->buf, cx+i, cy+i, sym_r/5, ctx->fg_color);
+		gp_fill_circle(ctx->buf, cx-i, cy+i, sym_r/5, ctx->fg_color);
+		gp_fill_circle(ctx->buf, cx+i, cy-i, sym_r/5, ctx->fg_color);
+	break;
 	case GP_BUTTON_UP:
 		gp_symbol(ctx->buf, cx, cy-asc_half/5,
 		          sym_r, sym_r-sym_r/4,
@@ -380,6 +387,7 @@ static struct btn_type_names {
 	{"rec", GP_BUTTON_REC | GP_BUTTON_TEXT_RIGHT},
 	{"fforward", GP_BUTTON_FFORWARD | GP_BUTTON_TEXT_RIGHT},
 	{"fbackward", GP_BUTTON_FBACKWARD | GP_BUTTON_TEXT_RIGHT},
+	{"randomize", GP_BUTTON_RANDOMIZE | GP_BUTTON_TEXT_RIGHT},
 	{"up", GP_BUTTON_UP | GP_BUTTON_TEXT_RIGHT},
 	{"down", GP_BUTTON_DOWN | GP_BUTTON_TEXT_RIGHT},
 	{"left", GP_BUTTON_LEFT | GP_BUTTON_TEXT_RIGHT},
@@ -424,50 +432,63 @@ static enum gp_widget_button_type align_for_type(enum gp_widget_button_type type
 	return type;
 }
 
-static gp_widget *json_to_button(json_object *json, gp_htable **uids)
+enum keys {
+	BTYPE,
+	LABEL,
+	TEXT_ALIGN,
+};
+
+static const gp_json_obj_attr attrs[] = {
+	GP_JSON_OBJ_ATTR("btype", GP_JSON_STR),
+	GP_JSON_OBJ_ATTR("label", GP_JSON_STR),
+	GP_JSON_OBJ_ATTR("text_align", GP_JSON_STR),
+};
+
+static const gp_json_obj obj_filter = {
+	.attrs = attrs,
+	.attr_cnt = GP_ARRAY_SIZE(attrs),
+};
+
+static gp_widget *json_to_button(gp_json_buf *json, gp_json_val *val, gp_htable **uids)
 {
-	const char *label = NULL;
-	const char *type = NULL;
-	const char *text_align = NULL;
-	enum gp_widget_button_type t = GP_BUTTON_LABEL;
+	char *label = NULL;
+	int t = GP_BUTTON_LABEL;
 
 	(void)uids;
 
-	json_object_object_foreach(json, key, val) {
-		if (!strcmp(key, "label"))
-			label = json_object_get_string(val);
-		else if (!strcmp(key, "btype"))
-			type = json_object_get_string(val);
-		else if (!strcmp(key, "text_align"))
-			text_align = json_object_get_string(val);
-		else
-			GP_WARN("Invalid button key '%s'", key);
-	}
+	GP_JSON_OBJ_FILTER(json, val, &obj_filter, gp_widget_json_attrs) {
+		switch (val->idx) {
+		case BTYPE:
+			t = type_from_str(val->val_str);
+			if (t < 0) {
+				gp_json_warn(json, "Invalid button type!");
+				t = GP_BUTTON_LABEL;
+			}
+		break;
+		case LABEL:
+			label = strdup(val->val_str);
+		break;
+		case TEXT_ALIGN:
+			t &= ~GP_BUTTON_ALIGN_MASK;
 
-	if (type)
-		t = type_from_str(type);
-
-	if (t < 0) {
-		GP_WARN("Invalid button type '%s'", type);
-		t = GP_BUTTON_LABEL;
-	}
-
-	if (text_align) {
-		t &= ~GP_BUTTON_ALIGN_MASK;
-		if (!strcmp(text_align, "left"))
-			t |= GP_BUTTON_TEXT_LEFT;
-		else if (!strcmp(text_align, "right"))
-			t |= GP_BUTTON_TEXT_RIGHT;
-		else
-			GP_WARN("Invalid text align '%s'", text_align);
+			if (!strcmp(val->val_str, "left"))
+				t |= GP_BUTTON_TEXT_LEFT;
+			else if (!strcmp(val->val_str, "right"))
+				t |= GP_BUTTON_TEXT_RIGHT;
+			else
+				gp_json_warn(json, "Invalid text align!");
+		break;
+		}
 	}
 
 	if (t == GP_BUTTON_LABEL && !label) {
-		GP_WARN("Labeled button without label!");
-		label = "Unlabeled";
+		gp_json_warn(json, "Labeled button without label!");
+		return NULL;
 	}
 
-	return gp_widget_button_new(label, t, NULL, NULL);
+	gp_widget *ret = gp_widget_button_new(label, t, NULL, NULL);
+	free(label);
+	return ret;
 }
 
 struct gp_widget_ops gp_widget_button_ops = {

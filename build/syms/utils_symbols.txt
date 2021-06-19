@@ -4,6 +4,7 @@ gp_htable_get
 gp_htable_put
 
 gp_vec_new
+gp_vec_dup
 gp_vec_free
 gp_vec_ins
 gp_vec_del
@@ -24,3 +25,21 @@ gp_fds_rem
 
 gp_block_alloc
 gp_block_free
+
+gp_json_obj_first_filter
+gp_json_obj_next
+gp_json_obj_skip
+gp_json_err_print
+gp_json_arr_first
+gp_json_arr_next
+gp_json_load
+gp_json_free
+gp_json_next_type
+gp_json_arr_skip
+gp_json_start
+gp_json_warn
+gp_json_obj_next_filter
+gp_json_arr_lookup
+gp_json_type_name
+gp_json_obj_first
+gp_json_err

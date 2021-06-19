@@ -184,7 +184,7 @@ static int test_vec_resize(struct insert_test *tst)
 	return TST_SUCCESS;
 }
 
-static int test_vec_remove(void)
+static int test_vec_shrink(void)
 {
 	int *vec = gp_vec_new(10, sizeof(int));
 	int i, j;
@@ -193,7 +193,7 @@ static int test_vec_remove(void)
 		vec[i] = i + 1;
 
 	for (i = 9; i > 0; i--) {
-		vec = gp_vec_remove(vec, 1);
+		vec = gp_vec_shrink(vec, 1);
 
 		if (gp_vec_len(vec) != (size_t)i) {
 			tst_msg("Got wrong vector size %zu", gp_vec_len(vec));
@@ -209,6 +209,48 @@ static int test_vec_remove(void)
 	}
 
 	gp_vec_free(vec);
+
+	return TST_SUCCESS;
+}
+
+static int test_vec_dup(void)
+{
+	int *vec = gp_vec_new(10, sizeof(int));
+	int i;
+
+	if (!vec) {
+		tst_msg("Malloc failed");
+		return TST_UNTESTED;
+	}
+
+	for (i = 0; i < 10; i++)
+		vec[i] = i+1;
+
+	int *copy = gp_vec_dup(vec);
+	if (!copy) {
+		tst_msg("Malloc failed");
+		return TST_UNTESTED;
+	}
+
+	if (gp_vec_len(copy) != 10) {
+		tst_msg("Wrong vector length %zu", gp_vec_len(copy));
+		return TST_FAILED;
+	}
+
+	if (gp_vec_unit(copy) != sizeof(int)) {
+		tst_msg("Wrong vector unit %zu", gp_vec_unit(copy));
+		return TST_FAILED;
+	}
+
+	for (i = 0; i < 10; i++) {
+		if (copy[i] != i + 1) {
+			tst_msg("Wrong data in vector!");
+			return TST_FAILED;
+		}
+	}
+
+	gp_vec_free(vec);
+	gp_vec_free(copy);
 
 	return TST_SUCCESS;
 }
@@ -271,12 +313,16 @@ const struct tst_suite tst_suite = {
 		 .tst_fn = test_vec_free,
 		 .flags = TST_CHECK_MALLOC},
 
+		{.name = "vector dup",
+		 .tst_fn = test_vec_dup,
+		 .flags = TST_CHECK_MALLOC},
+
 		{.name = "vector zero size",
 		 .tst_fn = test_vec_zero_size,
 		 .flags = TST_CHECK_MALLOC},
 
 		{.name = "vector remove",
-		 .tst_fn = test_vec_remove,
+		 .tst_fn = test_vec_shrink,
 		 .flags = TST_CHECK_MALLOC},
 
 		{.name = "insert test start",

@@ -14,10 +14,10 @@
 
 */
 
-#include <utils/gp_vec.h>
-
 #ifndef GP_MATRIX_H
 #define GP_MATRIX_H
+
+#include <utils/gp_vec.h>
 
 /*
  * @brief Allocates a matrix.

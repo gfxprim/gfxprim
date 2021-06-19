@@ -7,7 +7,6 @@
  */
 
 #include <string.h>
-#include <json-c/json.h>
 
 #include <widgets/gp_widgets.h>
 #include <widgets/gp_widget_ops.h>
@@ -126,49 +125,67 @@ static int check_max(double max)
 	return 0;
 }
 
-static gp_widget *json_to_pbar(json_object *json, gp_htable **uids)
+enum keys {
+	INVERSE,
+	MAX,
+	UNIT,
+	VAL,
+};
+
+static const gp_json_obj_attr attrs[] = {
+	GP_JSON_OBJ_ATTR("inverse", GP_JSON_BOOL),
+	GP_JSON_OBJ_ATTR("max", GP_JSON_FLOAT),
+	GP_JSON_OBJ_ATTR("unit", GP_JSON_STR),
+	GP_JSON_OBJ_ATTR("val", GP_JSON_FLOAT),
+};
+
+static const gp_json_obj obj_filter = {
+	.attrs = attrs,
+	.attr_cnt = GP_ARRAY_SIZE(attrs),
+};
+
+static gp_widget *json_to_pbar(gp_json_buf *json, gp_json_val *val, gp_htable **uids)
 {
-	double val = 0, max = 100;
-	const char *type = NULL;
+	double pbval = 0, max = 100;
 	enum gp_widget_pbar_unit unit = GP_WIDGET_PBAR_PERCENTS;
 	int inverse = 0;
 
 	(void)uids;
 
-	json_object_object_foreach(json, key, jval) {
-		if (!strcmp(key, "val"))
-			val = json_object_get_double(jval);
-		else if (!strcmp(key, "unit"))
-			type = json_object_get_string(jval);
-		else if (!strcmp(key, "max"))
-			max = json_object_get_double(jval);
-		else if (!strcmp(key, "inverse"))
-			inverse = json_object_get_boolean(jval);
-		else
-			GP_WARN("Invalid int pbar '%s'", key);
+	GP_JSON_OBJ_FILTER(json, val, &obj_filter, gp_widget_json_attrs) {
+		switch (val->idx) {
+		case INVERSE:
+			inverse = val->val_bool;
+		break;
+		case MAX:
+			max = val->val_float;
+		break;
+		case UNIT:
+			if (!strcmp(val->val_str, "none"))
+				unit = GP_WIDGET_PBAR_NONE;
+			else if (!strcmp(val->val_str, "percents"))
+				unit = GP_WIDGET_PBAR_PERCENTS;
+			else if (!strcmp(val->val_str, "seconds"))
+				unit = GP_WIDGET_PBAR_SECONDS;
+			else
+				gp_json_warn(json, "Invalid unit!");
+		break;
+		case VAL:
+			pbval = val->val_float;
+		break;
+		}
 	}
 
 	if (check_max(max))
 		max = 100;
 
-	if (check_val(val, max))
-		val = 0;
-
-	if (type) {
-		if (!strcmp(type, "none"))
-			unit = GP_WIDGET_PBAR_NONE;
-		else if (!strcmp(type, "percents"))
-			unit = GP_WIDGET_PBAR_PERCENTS;
-		else if (!strcmp(type, "seconds"))
-			unit = GP_WIDGET_PBAR_SECONDS;
-		else
-			GP_WARN("Invalid type '%s'", type);
-	}
+	if (check_val(pbval, max))
+		pbval = 0;
 
 	if (inverse)
 		unit |= GP_WIDGET_PBAR_INVERSE;
 
-	return gp_widget_pbar_new(val, max, unit);
+	return gp_widget_pbar_new(pbval, max, unit);
 }
 
 struct gp_widget_ops gp_widget_pbar_ops = {

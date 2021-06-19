@@ -2,7 +2,7 @@
 
 /*
 
-   Copyright (c) 2014-2020 Cyril Hrubis <metan@ucw.cz>
+   Copyright (c) 2014-2021 Cyril Hrubis <metan@ucw.cz>
 
  */
 
@@ -12,226 +12,193 @@
 #include <sys/types.h>
 #include <fcntl.h>
 
-#include <json-c/json.h>
-
 #include <utils/gp_htable.h>
 
 #include <widgets/gp_widget.h>
 #include <widgets/gp_widgets.h>
 #include <widgets/gp_widget_ops.h>
 
-/*
- * This implements loading widgets that are build on top of existing widgets
- * and hence does not have widget ops registered. Which allows us to construct
- * anything from json description as long as we have a function that takes json
- * and returns a widget.
- */
-static struct from_json {
-	const char *type;
-	gp_widget *(*from_json)(json_object *json, gp_htable **uids);
-} from_json_loaders[] = {
-};
-
-static gp_widget *load_from_json(const char *type, json_object *json, gp_htable **uids)
+static gp_widget *load_widget_by_ops(const struct gp_widget_ops *ops,
+                                     gp_json_buf *json, gp_json_val *val, gp_htable **uids)
 {
-	unsigned int i;
-
-	for (i = 0; i < GP_ARRAY_SIZE(from_json_loaders); i++) {
-		if (!strcmp(from_json_loaders[i].type, type)) {
-			json_object_object_del(json, "type");
-			return from_json_loaders[i].from_json(json, uids);
-		}
-	}
-
-	return NULL;
-}
-
-static gp_widget *load_widget_by_type(const char *type, json_object *json, gp_htable **uids)
-{
-	const struct gp_widget_ops *ops = gp_widget_ops_by_id(type);
-
-	if (!ops) {
-		gp_widget *ret = load_from_json(type, json, uids);
-
-		if (!ret)
-			GP_WARN("Invalid widget type '%s'", type);
-
-		return ret;
-	}
-
 	if (!ops->from_json) {
-		GP_WARN("Unimplemented from_json for widget '%s'", type);
+		GP_WARN("Unimplemented from_json for widget '%s'", ops->id);
 		return NULL;
 	}
 
-	json_object_object_del(json, "type");
-
-	return ops->from_json(json, uids);
+	return ops->from_json(json, val, uids);
 }
 
-gp_widget *gp_widget_from_json(json_object *json, gp_htable **uids)
+enum keys {
+	ALIGN,
+	HALIGN,
+	ON_EVENT,
+	SHRINK,
+	TYPE,
+	UID,
+	VALIGN,
+	VERSION,
+};
+
+static const gp_json_obj_attr attrs[] = {
+	GP_JSON_OBJ_ATTR("align", GP_JSON_STR),
+	GP_JSON_OBJ_ATTR("halign", GP_JSON_STR),
+	GP_JSON_OBJ_ATTR("on_event", GP_JSON_STR),
+	GP_JSON_OBJ_ATTR("shrink", GP_JSON_BOOL),
+	GP_JSON_OBJ_ATTR("type", GP_JSON_VOID),
+	GP_JSON_OBJ_ATTR("uid", GP_JSON_VOID),
+	GP_JSON_OBJ_ATTR("valign", GP_JSON_STR),
+	GP_JSON_OBJ_ATTR("version", GP_JSON_INT),
+};
+
+static const gp_json_obj obj_filter = {
+	.attrs = attrs,
+	.attr_cnt = GP_ARRAY_SIZE(attrs),
+};
+
+const gp_json_obj *gp_widget_json_attrs = &obj_filter;
+
+extern struct gp_widget_ops gp_widget_grid_ops;
+
+gp_widget *gp_widget_from_json(gp_json_buf *json, gp_json_val *val,
+                               gp_htable **uids)
 {
-	json_object *json_type;
-	const char *type = "grid";
-	const char *uid;
-	char *uid_key = NULL;
+	const struct gp_widget_ops *ops = &gp_widget_grid_ops;
+	char *uid = NULL;
 	unsigned int halign = 0;
 	unsigned int valign = 0;
 	unsigned int shrink_set = 0;
 	unsigned int shrink;
 	int (*on_event)(gp_widget_event *) = NULL;
 
-	if (!json_object_is_type(json, json_type_object)) {
-		GP_WARN("Widget must be JSON object!");
+	if (val->type == GP_JSON_NULL)
+		return NULL;
+
+	if (gp_json_next_type(json) != GP_JSON_OBJ) {
+		gp_json_warn(json, "Widget must be JSON object!");
 		return NULL;
 	}
 
-	if (json_object_object_length(json) == 0)
+	gp_json_state obj_start = gp_json_state_start(json);
+
+	if (!gp_json_obj_first(json, val))
 		return NULL;
 
-	if (json_object_object_get_ex(json, "call", &json_type)) {
-		const char *func_name = json_object_get_string(json_type);
+	gp_json_state_load(json, obj_start);
 
-		if (!func_name) {
-			GP_WARN("Invalid call");
-			return NULL;
+	GP_JSON_OBJ_FILTER(json, val, &obj_filter, NULL) {
+		switch (val->idx) {
+		case ALIGN:
+			if (!strcmp(val->val_str, "center")) {
+				halign = GP_HCENTER;
+				valign = GP_VCENTER;
+			} else if (!strcmp(val->val_str, "fill")) {
+				halign = GP_HFILL;
+				valign = GP_VFILL;
+			} else if (!strcmp(val->val_str, "hfill")) {
+				halign = GP_HFILL;
+			} else if (!strcmp(val->val_str, "vfill")) {
+				valign = GP_VFILL;
+			} else {
+				gp_json_warn(json,
+				             "Invalid align='%s'",
+				             val->val_str);
+			}
+		break;
+		case HALIGN:
+			if (halign)
+				GP_WARN("Only one of halign and align can be defined!");
+
+			if (!strcmp(val->val_str, "center"))
+				halign = GP_HCENTER;
+			else if (!strcmp(val->val_str, "left"))
+				halign = GP_LEFT;
+			else if (!strcmp(val->val_str, "right"))
+				halign = GP_RIGHT;
+			else if (!strcmp(val->val_str, "fill"))
+				halign = GP_HFILL;
+			else
+				gp_json_warn(json, "Invalid halign='%s'", val->val_str);
+		break;
+		case ON_EVENT:
+			on_event = gp_widget_callback_addr(val->val_str);
+			if (!on_event)
+				gp_json_warn(json, "No on_event function '%s' defined", val->val_str);
+		break;
+		case SHRINK:
+			shrink = val->val_bool;
+
+			GP_DEBUG(2, "Widget shrink '%i'", shrink);
+
+			shrink_set = 1;
+		break;
+		case TYPE:
+			if (val->type != GP_JSON_STR) {
+				gp_json_warn(json, "Invalid 'type' type expected string");
+				goto skip;
+			}
+
+			ops = gp_widget_ops_by_id(val->val_str);
+
+			if (!ops) {
+				GP_WARN("Invalid widget type '%s'", val->val_str);
+				goto skip;
+			}
+		break;
+		case UID:
+			if (val->type != GP_JSON_STR) {
+				gp_json_warn(json, "Invalid 'uid' type expected string");
+				goto skip;
+			}
+
+			if (uids)
+				uid = strdup(val->val_str);
+
+			GP_DEBUG(2, "Widget uid '%s'", val->val_str);
+		break;
+		case VALIGN:
+			if (valign)
+				GP_WARN("Only one of valign and align can be defined!");
+
+			if (!strcmp(val->val_str, "center"))
+				valign = GP_VCENTER;
+			else if (!strcmp(val->val_str, "top"))
+				valign = GP_TOP;
+			else if (!strcmp(val->val_str, "bottom"))
+				valign = GP_BOTTOM;
+			else if (!strcmp(val->val_str, "fill"))
+				valign = GP_VFILL;
+			else
+				GP_WARN("Invalid valign=%s.", val->val_str);
+		break;
 		}
-
-		gp_widget *(*func)(void) = gp_widget_callback_addr(func_name);
-
-		if (!func) {
-			GP_WARN("Function call '%s' does not exist!", func_name);
-			return NULL;
-		}
-
-		GP_DEBUG(1, "Calling '%s'", func_name);
-
-		return func();
 	}
 
-	if (json_object_object_get_ex(json, "type", &json_type)) {
-		type = json_object_get_string(json_type);
+	if (gp_json_is_err(json))
+		return NULL;
 
-		if (!type) {
-			GP_WARN("Invalid type");
-			return NULL;
-		}
-	}
+	gp_json_state_load(json, obj_start);
 
-	if (json_object_object_get_ex(json, "uid", &json_type)) {
-		uid = json_object_get_string(json_type);
-
-		if (!uid) {
-			GP_WARN("Invalid uid");
-			return NULL;
-		}
-
-		if (uids)
-			uid_key = strdup(uid);
-
-		GP_DEBUG(2, "Widget '%s' uid '%s'", type, uid);
-
-		json_object_object_del(json, "uid");
-	}
-
-	if (json_object_object_get_ex(json, "align", &json_type)) {
-		const char *align_str = json_object_get_string(json_type);
-
-		if (!strcmp(align_str, "center")) {
-			halign = GP_HCENTER;
-			valign = GP_VCENTER;
-		} else if (!strcmp(align_str, "fill")) {
-			halign = GP_HFILL;
-			valign = GP_VFILL;
-		} else if (!strcmp(align_str, "hfill")) {
-			halign = GP_HFILL;
-		} else if (!strcmp(align_str, "vfill")) {
-			valign = GP_VFILL;
-		} else {
-			GP_WARN("Invalid align=%s.", align_str);
-		}
-
-		json_object_object_del(json, "align");
-	}
-
-	if (json_object_object_get_ex(json, "halign", &json_type)) {
-		const char *halign_str = json_object_get_string(json_type);
-
-		if (halign)
-			GP_WARN("Only one of halign and align can be defined!");
-
-		if (!strcmp(halign_str, "center"))
-			halign = GP_HCENTER;
-		else if (!strcmp(halign_str, "left"))
-			halign = GP_LEFT;
-		else if (!strcmp(halign_str, "right"))
-			halign = GP_RIGHT;
-		else if (!strcmp(halign_str, "fill"))
-			halign = GP_HFILL;
-		else
-			GP_WARN("Invalid halign=%s.", halign_str);
-
-		json_object_object_del(json, "halign");
-	}
-
-	if (json_object_object_get_ex(json, "valign", &json_type)) {
-		const char *valign_str = json_object_get_string(json_type);
-
-		if (valign)
-			GP_WARN("Only one of valign and align can be defined!");
-
-		if (!strcmp(valign_str, "center"))
-			valign = GP_VCENTER;
-		else if (!strcmp(valign_str, "top"))
-			valign = GP_TOP;
-		else if (!strcmp(valign_str, "bottom"))
-			valign = GP_BOTTOM;
-		else if (!strcmp(valign_str, "fill"))
-			valign = GP_VFILL;
-		else
-			GP_WARN("Invalid valign=%s.", valign_str);
-
-		json_object_object_del(json, "valign");
-	}
-
-	if (json_object_object_get_ex(json, "on_event", &json_type)) {
-		const char *on_event_str = json_object_get_string(json_type);
-
-		on_event = gp_widget_callback_addr(on_event_str);
-
-		if (!on_event)
-			GP_WARN("No on_event function '%s' defined", on_event_str);
-
-		json_object_object_del(json, "on_event");
-	}
-
-	if (json_object_object_get_ex(json, "shrink", &json_type)) {
-		shrink = json_object_get_boolean(json_type);
-
-		GP_DEBUG(2, "Widget '%s' shrink '%i'", type, shrink);
-
-		shrink_set = 1;
-
-		json_object_object_del(json, "shrink");
-	}
-
-	gp_widget *wid = load_widget_by_type(type, json, uids);
+	gp_widget *wid = load_widget_by_ops(ops, json, val, uids);
 	if (!wid)
-		goto err;
+		return NULL;
 
-	if (uid_key) {
+	if (uid) {
 		if (!*uids) {
 			*uids = gp_htable_new(0, GP_HTABLE_FREE_KEY);
-			if (!*uids)
-				goto err;
+			if (!*uids) {
+				GP_WARN("Malloc failed :(");
+				free(uid);
+				goto ret;
+			}
 		}
 
-		if (gp_htable_get(*uids, uid_key))
-			GP_WARN("Duplicit widget uid '%s'", uid_key);
+		if (gp_htable_get(*uids, uid))
+			GP_WARN("Duplicit widget uid '%s'", uid);
 
-		gp_htable_put(*uids, wid, uid_key);
+		gp_htable_put(*uids, wid, uid);
 	}
-
+ret:
 	wid->align = halign | valign;
 	if (on_event)
 		gp_widget_event_handler_set(wid, on_event, NULL);
@@ -242,8 +209,9 @@ gp_widget *gp_widget_from_json(json_object *json, gp_htable **uids)
 	gp_widget_send_event(wid, GP_WIDGET_EVENT_NEW);
 
 	return wid;
-err:
-	free(uid_key);
+skip:
+	gp_json_state_load(json, obj_start);
+	gp_json_obj_skip(json);
 	return NULL;
 }
 
@@ -254,46 +222,56 @@ void *gp_widget_callback_addr(const char *fn_name)
 	if (!ld_handle)
 		return NULL;
 
-	dlerror();
+	//dlerror();
 
 	void *addr = dlsym(ld_handle, fn_name);
+	//const char *err = dlerror();
 
 	GP_DEBUG(3, "Function '%s' address is %p", fn_name, addr);
 
-	const char *err = dlerror();
-
-	if (err)
-		GP_WARN("%s", err);
+//	if (err)
+//		GP_WARN("%s", err);
 
 	return addr;
 }
 
-static gp_widget *gp_widgets_from_json(json_object *json, gp_htable **uids)
+static gp_widget *gp_widgets_from_json(gp_json_buf *json, gp_htable **uids)
 {
 	gp_widget *ret;
-	json_object *json_version;
-	int version = 0;
+	char buf[32];
+	gp_json_val val = {.buf = buf, .buf_size = sizeof(buf)};
 
-	if (json_object_object_get_ex(json, "version", &json_version)) {
-		version = json_object_get_int(json_version);
-		GP_DEBUG(1, "Loading JSON layout version %i", version);
-		json_object_object_del(json, "version");
+	if (gp_json_next_type(json) != GP_JSON_OBJ) {
+		gp_json_err(json, "Widget must be a JSON object!");
+		return NULL;
+	}
 
-		if (version != 1) {
-			GP_WARN("Unknown version %i\n", version);
-			return NULL;
-		}
-	} else {
-		GP_WARN("Missing JSON layout version");
+	gp_json_state obj_start = gp_json_state_start(json);
+
+	if (!gp_json_obj_first(json, &val) ||
+	    strcmp(val.id, "version") ||
+	    val.type != GP_JSON_INT) {
+		gp_json_err(json, "JSON layout must start with a version number!");
+		return NULL;
+	}
+
+	GP_DEBUG(1, "Loading JSON layout version %li", val.val_int);
+
+	if (val.val_int != 1) {
+		gp_json_err(json, "Unknown version number %li", val.val_int);
 		return NULL;
 	}
 
 	ld_handle = dlopen(NULL, RTLD_LAZY);
-
 	if (!ld_handle)
 		GP_WARN("Failed to dlopen()");
 
-	ret = gp_widget_from_json(json, uids);
+	if (!gp_json_obj_next(json, &val))
+		return NULL;
+
+	gp_json_state_load(json, obj_start);
+
+	ret = gp_widget_from_json(json, &val, uids);
 
 	dlclose(ld_handle);
 
@@ -302,149 +280,52 @@ static gp_widget *gp_widgets_from_json(json_object *json, gp_htable **uids)
 	return ret;
 }
 
-static void print_err(const char *path, const char *err, size_t bytes_consumed)
-{
-	FILE *f;
-	char line[2048];
-	size_t off = 0, lineno = 0, errlineno = 0;
-
-	f = fopen(path, "r");
-	if (!f)
-		goto err;
-
-	for (;;) {
-		if (!fgets(line, sizeof(line), f))
-			goto err;
-
-		off += strlen(line);
-		errlineno++;
-
-		if (off >= bytes_consumed)
-			break;
-	}
-
-	rewind(f);
-
-	fprintf(stderr, "%s:\n\n", path);
-
-	for (;;) {
-		if (!fgets(line, sizeof(line), f))
-			goto err;
-
-		lineno++;
-
-		if (lineno + 5 > errlineno)
-			fprintf(stderr, "%3zu: %s", lineno, line);
-
-		if (lineno == errlineno)
-			break;
-	}
-
-	fprintf(stderr, "\nerror: %zu: %s\n\n", errlineno, err);
-	return;
-err:
-	fclose(f);
-	GP_WARN("json_tokener_parse_ex(): %s: %zu", err, bytes_consumed);
-}
-
 gp_widget *gp_widget_layout_json(const char *path, gp_htable **uids)
 {
-	struct json_tokener *tok;
-	int fd;
-	json_object *json = NULL;
-	char buf[2048];
-	size_t size, bytes_consumed = 0;
 	gp_widget *ret = NULL;
+	gp_json_buf *json;
 
 	if (uids)
 		*uids = NULL;
 
-	fd = open(path, O_RDONLY);
-	if (fd < 0) {
-		GP_WARN("Failed to open '%s': %s", path, strerror(errno));
-		goto err;
-	}
+	json = gp_json_load(path);
+	if (!json)
+		return NULL;
 
-	tok = json_tokener_new();
-	if (!tok) {
-		GP_WARN("json_tokener_new() failed :-(");
-		goto err1;
-	}
+	json->msgf = stderr;
 
-	while ((size = read(fd, buf, sizeof(buf))) > 0) {
-		enum json_tokener_error err;
-		json = json_tokener_parse_ex(tok, buf, size);
-		err = json_tokener_get_error(tok);
-
-		bytes_consumed += tok->char_offset;
-
-		switch (err) {
-		case json_tokener_continue:
-		break;
-		case json_tokener_success:
-			if ((size_t)tok->char_offset != size) {
-				print_err(path, "garbage after end", bytes_consumed + 1);
-				goto err2;
-			}
-
-			goto done;
-		default:
-			print_err(path, json_tokener_error_desc(err), bytes_consumed);
-			goto err2;
-		}
-	}
-done:
 	ret = gp_widgets_from_json(json, uids);
-err2:
-	if (json)
-		json_object_put(json);
 
-	json_tokener_free(tok);
-err1:
-	close(fd);
-err:
+	if (gp_json_is_err(json))
+		gp_json_err_print(json);
+	else if (!gp_json_empty(json))
+		gp_json_warn(json, "Garbage after JSON string!");
+
+	gp_json_free(json);
+
 	return ret;
 }
 
 gp_widget *gp_widget_from_json_str(const char *str, gp_htable **uids)
 {
-	struct json_tokener *tok;
-	json_object *json = NULL;
-	enum json_tokener_error err;
-	size_t size = strlen(str);
 	gp_widget *ret = NULL;
+	gp_json_buf json = {
+		.json = str,
+		.len = strlen(str),
+		.max_depth = GP_JSON_RECURSION_MAX,
+		.msgf = stderr,
+	};
 
-	tok = json_tokener_new();
-	if (!tok) {
-		GP_WARN("json_tokener_new() failed :-(");
-		return NULL;
-	}
+	if (uids)
+		*uids = NULL;
 
-	json = json_tokener_parse_ex(tok, str, size);
-	err = json_tokener_get_error(tok);
+	ret = gp_widgets_from_json(&json, uids);
 
-	switch (err) {
-	case json_tokener_continue:
-		GP_WARN("Unfinished JSON layout string");
-		goto err;
-	break;
-	case json_tokener_success:
-		if ((size_t)tok->char_offset != size) {
-			GP_WARN("Garbage after JSON string end");
-			goto err;
-		}
-	break;
-	default:
-		GP_WARN("JSON error %s", json_tokener_error_desc(err));
-		goto err;
-	}
+	if (gp_json_is_err(&json))
+		gp_json_err_print(&json);
+	else if (!gp_json_empty(&json))
+		gp_json_warn(&json, "Garbage after JSON string!");
 
-	ret = gp_widgets_from_json(json, uids);
-err:
-	if (json)
-		json_object_put(json);
-
-	json_tokener_free(tok);
 	return ret;
 }
 

@@ -107,7 +107,7 @@ void tst_malloc_check_report(struct malloc_stats *stats)
 	stats->lost_chunks = cur_chunks;
 }
 
-#define MAX_CHUNKS 100
+#define MAX_CHUNKS 1000
 
 struct chunk {
 	void *ptr;
@@ -134,7 +134,7 @@ static struct chunk *get_chunk(void *ptr)
 static void add_chunk(size_t size, void *ptr)
 {
 	if (chunks_top >= MAX_CHUNKS) {
-		fprintf(stderr, "Not enough chunks (%i) for malloc() tracing",
+		fprintf(stderr, "Not enough chunks (%i) for malloc() tracing\n",
 		         MAX_CHUNKS);
 		return;
 	}

@@ -25,7 +25,7 @@ int button_callback(gp_widget_event *ev)
 
 int main(int argc, char *argv[])
 {
-	gp_widget *layout = gp_app_layout_load("example", &uids);
+	gp_widget *layout = gp_widget_layout_json("example.json", &uids);
 	if (!layout)
 		return 0;
 

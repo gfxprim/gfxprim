@@ -2,12 +2,11 @@
 
 /*
 
-   Copyright (c) 2014-2020 Cyril Hrubis <metan@ucw.cz>
+   Copyright (c) 2014-2021 Cyril Hrubis <metan@ucw.cz>
 
  */
 
 #include <string.h>
-#include <json-c/json.h>
 
 #include <utils/gp_vec_str.h>
 
@@ -301,30 +300,63 @@ static int event(gp_widget *self, const gp_widget_render_ctx *ctx, gp_event *ev)
 	return 0;
 }
 
-static gp_widget *json_to_tbox(json_object *json, gp_htable **uids)
+enum keys {
+	HIDDEN,
+	LEN,
+	MAX_LEN,
+	TATTR,
+	TEXT,
+};
+
+static const gp_json_obj_attr attrs[] = {
+	GP_JSON_OBJ_ATTR("hidden", GP_JSON_BOOL),
+	GP_JSON_OBJ_ATTR("len", GP_JSON_INT),
+	GP_JSON_OBJ_ATTR("max_len", GP_JSON_INT),
+	GP_JSON_OBJ_ATTR("tattr", GP_JSON_STR),
+	GP_JSON_OBJ_ATTR("text", GP_JSON_STR),
+};
+
+static const gp_json_obj obj_filter = {
+	.attrs = attrs,
+	.attr_cnt = GP_ARRAY_SIZE(attrs),
+};
+
+static gp_widget *json_to_tbox(gp_json_buf *json, gp_json_val *val, gp_htable **uids)
 {
-	const char *text = NULL;
-	const char *strattr = NULL;
+	char *text = NULL;
 	int flags = 0;
 	int len = 0;
 	int max_len = 0;
-	gp_widget_tattr attr;
+	gp_widget_tattr attr = 0;
+	gp_widget *ret;
 
 	(void)uids;
 
-	json_object_object_foreach(json, key, val) {
-		if (!strcmp(key, "text"))
-			text = json_object_get_string(val);
-		else if (!strcmp(key, "len"))
-			len = json_object_get_int(val);
-		else if (!strcmp(key, "hidden"))
-			flags |= json_object_get_boolean(val) ? GP_WIDGET_TBOX_HIDDEN : 0;
-		else if (!strcmp(key, "max_len"))
-			max_len = json_object_get_int(val);
-		else if (!strcmp(key, "tattr"))
-			strattr = json_object_get_string(val);
-		else
-			GP_WARN("Invalid tbox key '%s'", key);
+	GP_JSON_OBJ_FILTER(json, val, &obj_filter, gp_widget_json_attrs) {
+		switch (val->idx) {
+		case HIDDEN:
+			flags |= val->val_bool ? GP_WIDGET_TBOX_HIDDEN : 0;
+		break;
+		case LEN:
+			if (val->val_int <= 0)
+				gp_json_warn(json, "Invalid lenght!");
+			else
+				len = val->val_int;
+		break;
+		case MAX_LEN:
+			if (val->val_int <= 0)
+				gp_json_warn(json, "Invalid lenght!");
+			else
+				max_len = val->val_int;
+		break;
+		case TATTR:
+			if (gp_widget_tattr_parse(val->val_str, &attr))
+				gp_json_warn(json, "Invalid text attribute!");
+		break;
+		case TEXT:
+			text = strdup(val->val_str);
+		break;
+		}
 	}
 
 	if (len <= 0 && !text) {
@@ -332,15 +364,11 @@ static gp_widget *json_to_tbox(json_object *json, gp_htable **uids)
 		return NULL;
 	}
 
-	if (max_len < 0) {
-		GP_WARN("max_size must be >= 0");
-		return NULL;
-	}
+	ret = gp_widget_tbox_new(text, attr, len, max_len, NULL, flags, NULL, NULL);
 
-	if (gp_widget_tattr_parse(strattr, &attr))
-		GP_WARN("Invalid text attribute '%s'", strattr);
+	free(text);
 
-	return gp_widget_tbox_new(text, attr, len, max_len, NULL, flags, NULL, NULL);
+	return ret;
 }
 
 static void free_(gp_widget *self)
