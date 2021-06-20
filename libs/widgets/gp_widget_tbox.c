@@ -360,7 +360,7 @@ static gp_widget *json_to_tbox(gp_json_buf *json, gp_json_val *val, gp_htable **
 	}
 
 	if (len <= 0 && !text) {
-		GP_WARN("At least one of size or text has to be set!");
+		GP_WARN("At least one of len or text has to be set!");
 		return NULL;
 	}
 
