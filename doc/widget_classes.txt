@@ -1,0 +1,41 @@
+Widget class
+------------
+
+A widget class implements a common interface for widgets that share a common
+type of value, e.g. boolean value. The advantage of widget classes is that the
+application code does not need to know how exactly the widget on the screen
+looks like as long as it matches the expected class.
+
+.Widget classes
+[source,c]
+-------------------------------------------------------------------------------
+enum gp_widget_class {
+        GP_WIDGET_CLASS_NONE = 0,
+        GP_WIDGET_CLASS_BOOL,
+        GP_WIDGET_CLASS_INT,
+        GP_WIDGET_CLASS_CHOICE,
+        GP_WIDGET_CLASS_MAX,
+};
+-------------------------------------------------------------------------------
+
+There are currently three widget classes apart from NONE class that is used by
+widgets that does not implement any class interface.
+
+.JSON loader by class and UID
+[source,c]
+-------------------------------------------------------------------------------
+gp_widget *gp_widget_by_cuid(gp_htable *uids, const char *uid, enum gp_widget_class widget_class);
+-------------------------------------------------------------------------------
+
+Widgets can be loaded from JSON hash table by class.
+
+
+.Boolean class
+[source,c]
+-------------------------------------------------------------------------------
+int gp_widget_class_bool_get(gp_widget *self);
+void gp_widget_class_bool_set(gp_widget *self, int val);
+void gp_widget_class_bool_toggle(gp_widget *self);
+-------------------------------------------------------------------------------
+
+Boolean class implements three functions for manipulating the boolean value.
