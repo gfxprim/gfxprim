@@ -288,7 +288,7 @@ void gp_widget_render_timer_cancel(gp_widget *self)
 	}
 }
 
-static int in_dialog;
+static gp_dialog *cur_dialog;
 static int back_from_dialog;
 
 void gp_widgets_redraw(struct gp_widget *layout)
@@ -326,7 +326,7 @@ void gp_widgets_redraw(struct gp_widget *layout)
 	gp_widget_render(layout, &ctx, 0);
 	ctx.flip = NULL;
 
-	if (in_dialog)
+	if (cur_dialog)
 		gp_rect_xywh(ctx.buf, layout->x, layout->y, layout->w, layout->h, ctx.text_color);
 
 	if (gp_bbox_empty(flip))
@@ -463,8 +463,13 @@ int gp_widgets_event(gp_event *ev, gp_widget *layout)
 	if (handled)
 		return 0;
 
-	if (app_event_callback)
-		app_event_callback(ev);
+	if (cur_dialog) {
+		if (cur_dialog->input_event)
+			cur_dialog->input_event(cur_dialog, ev);
+	} else {
+		if (app_event_callback)
+			app_event_callback(ev);
+	}
 
 	return 0;
 }
@@ -579,7 +584,7 @@ long gp_dialog_run(gp_dialog *dialog)
 	gp_widget *saved = gp_widget_layout_replace(dialog->layout);
 
 	dialog->retval = 0;
-	in_dialog = 1;
+	cur_dialog = dialog;
 
 	for (;;) {
 		int ret = gp_fds_poll(&fds, gp_backend_timer_timeout(backend));
@@ -591,7 +596,7 @@ long gp_dialog_run(gp_dialog *dialog)
 		}
 
 		if (dialog->retval) {
-			in_dialog = 0;
+			cur_dialog = NULL;
 
 			gp_widget_layout_replace(saved);
 
