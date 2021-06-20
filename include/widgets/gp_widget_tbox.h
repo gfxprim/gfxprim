@@ -99,6 +99,23 @@ void gp_widget_tbox_clear(gp_widget *self);
  */
 const char *gp_widget_tbox_text(gp_widget *self);
 
+
+/**
+ * @brief Returns if tbox is empty.
+ *
+ * @self A tbox widget.
+ * @return Non-zero if tbox is empty zero otherwise.
+ */
+static inline int gp_widget_tbox_is_empty(gp_widget *self)
+{
+	const char *text = gp_widget_tbox_text(self);
+
+	if (!text || !text[0])
+		return 1;
+
+	return 0;
+}
+
 /**
  * @brief Returns current cursor postion.
  *
