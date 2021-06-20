@@ -367,9 +367,14 @@ void gp_widgets_layout_init(gp_widget *layout, const char *win_tittle)
 
 	gp_widget_calc_size(layout, &ctx, 0, 0, 1);
 
+	app_layout = layout;
+
 	gp_backend_resize(backend, layout->w, layout->h);
 
-	app_layout = layout;
+	if (gp_pixmap_w(backend->pixmap) < layout->w ||
+	    gp_pixmap_h(backend->pixmap) < layout->h) {
+		return;
+	}
 
 	int flag = 0;
 
