@@ -2,7 +2,7 @@
 
 /*
 
-   Copyright (c) 2014-2020 Cyril Hrubis <metan@ucw.cz>
+   Copyright (c) 2014-2021 Cyril Hrubis <metan@ucw.cz>
 
  */
 
@@ -299,13 +299,18 @@ static int table_on_event(gp_widget_event *ev)
 		return 0;
 	case GP_WIDGET_EVENT_INPUT:
 		if (ev->input_ev->type == GP_EV_KEY &&
-		    ev->input_ev->val == GP_KEY_ESC) {
+		    ev->input_ev->val == GP_KEY_ESC &&
+		    ev->input_ev->code == GP_EV_KEY_DOWN) {
+
+			if (gp_widget_tbox_is_empty(dialog->filter))
+				return 0;
+
 			gp_widget_tbox_clear(dialog->filter);
 			gp_widget_redraw(ev->self);
 			return 1;
 		}
 
-		return gp_widget_ops_event(dialog->filter, ev->ctx, ev->input_ev);
+		return 0;
 	default:
 		return 0;
 	}
@@ -329,6 +334,23 @@ static const gp_widget_table_header header[] = {
 	{.label = "Modified", .sortable = 1, .col_min_size = 7},
 };
 
+static int file_open_input_event(gp_dialog *self, gp_event *ev)
+{
+	struct file_dialog *dialog = (void*)self->payload;
+
+	if (ev->type == GP_EV_KEY &&
+	    ev->val == GP_KEY_ESC &&
+	    ev->code == GP_EV_KEY_DOWN) {
+		exit_dialog(dialog, GP_WIDGET_DIALOG_CANCEL);
+		return 1;
+	}
+
+	if (ev->type == GP_EV_KEY)
+		return gp_widget_ops_event(dialog->filter, gp_widgets_render_ctx(), ev);
+
+	return 0;
+}
+
 gp_dialog *gp_dialog_file_open_new(const char *path)
 {
 	gp_htable *uids = NULL;
@@ -345,6 +367,7 @@ gp_dialog *gp_dialog_file_open_new(const char *path)
 		goto err0;
 
 	ret->layout = layout;
+	ret->input_event = file_open_input_event;
 
 	dialog = (void*)ret->payload;
 
