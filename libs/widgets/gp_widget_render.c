@@ -2,7 +2,7 @@
 
 /*
 
-   Copyright (c) 2014-2020 Cyril Hrubis <metan@ucw.cz>
+   Copyright (c) 2014-2021 Cyril Hrubis <metan@ucw.cz>
 
  */
 
@@ -19,6 +19,7 @@
 #include <widgets/gp_key_repeat_timer.h>
 #include <widgets/gp_dialog.h>
 #include <widgets/gp_widget_app.h>
+#include <widgets/gp_widgets_task.h>
 
 static struct gp_text_style font = {
 	.pixel_xmul = 1,
@@ -390,6 +391,18 @@ void gp_widgets_layout_init(gp_widget *layout, const char *win_tittle)
 
 	gp_widget_render(layout, &ctx, flag);
 	gp_backend_flip(backend);
+}
+
+void gp_widgets_task_ins(gp_task *task)
+{
+	if (backend)
+		gp_backend_task_ins(backend, task);
+}
+
+void gp_widgets_task_rem(gp_task *task)
+{
+	if (backend)
+		gp_backend_task_rem(backend, task);
 }
 
 const gp_widget_render_ctx *gp_widgets_render_ctx(void)
