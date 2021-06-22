@@ -10,5 +10,6 @@
 #include <input/gp_event_queue.h>
 #include <input/gp_timer.h>
 #include <input/gp_time_stamp.h>
+#include <input/gp_task.h>
 
 #endif /* INPUT_GP_INPUT_H */
