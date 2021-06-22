@@ -29,6 +29,7 @@
 
 #include <input/gp_event_queue.h>
 #include <input/gp_timer.h>
+#include <input/gp_task.h>
 
 typedef struct gp_backend gp_backend;
 
@@ -124,7 +125,10 @@ struct gp_backend {
 	gp_event_queue event_queue;
 
 	/* Priority queue for timers. */
-	struct gp_timer *timers;
+	gp_timer *timers;
+
+	/* Task queue */
+	gp_dlist task_queue;
 
 	/* Backed private data */
 	char priv[];
@@ -265,6 +269,13 @@ static inline int gp_backend_fullscreen(gp_backend *backend, int val)
  * may be in undefined state).
  */
 int gp_backend_resize_ack(gp_backend *self);
+
+/*
+ * Task API.
+ */
+void gp_backend_task_ins(gp_backend *self, gp_task *task);
+
+void gp_backend_task_rem(gp_backend *self, gp_task *task);
 
 /*
  * Event Queue functions.

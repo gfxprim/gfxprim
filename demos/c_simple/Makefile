@@ -19,7 +19,7 @@ APPS=backend_example loaders_example loaders filters_symmetry gfx_koch\
      loaders_register blittest textaligntest x11_windows\
      debug_handler gaussian_noise version pretty_print timers\
      zip_container backend_timers_example memory_io data_storage\
-     vector matrix proxy_backend bbox
+     vector matrix proxy_backend bbox task_example
 
 ifeq ($(HAVE_LIBSDL),yes)
 APPS+=SDL_glue
@@ -27,6 +27,7 @@ APPS+=SDL_glue
 SDL_glue: LDLIBS+=$(shell sdl-config --libs) -lgfxprim-backends
 endif
 
+task_example: LDLIBS+=-lgfxprim-backends
 proxy_backend: LDLIBS+=-lgfxprim-backends
 showimage: LDLIBS+=-lgfxprim-backends -lgfxprim-loaders
 backend_example: LDLIBS+=-lgfxprim-backends
