@@ -195,18 +195,19 @@ gp_backend *gp_aalib_init(void)
 	gp_backend *backend;
 	struct aalib_priv *aa;
 	int w, h;
+	size_t size = sizeof(gp_backend) + sizeof(struct aalib_priv);
 
-	backend = malloc(sizeof(gp_backend) + sizeof(struct aalib_priv));
-
-	if (backend == NULL)
+	backend = malloc(size);
+	if (!backend)
 		return NULL;
+
+	memset(backend, 0, size);
 
 	aa = GP_BACKEND_PRIV(backend);
 
 	GP_DEBUG(1, "Initializing aalib");
 
 	aa->c = aa_autoinit(&aa_defparams);
-
 	if (!aa->c) {
 		GP_DEBUG(1, "Failed to initialize aalib");
 		goto err1;
@@ -235,10 +236,8 @@ gp_backend *gp_aalib_init(void)
 	backend->resize_ack = aalib_resize_ack;
 	backend->poll = aalib_poll;
 	backend->wait = aalib_wait;
-	backend->set_attr = NULL;
 	backend->exit = aalib_exit;
 	backend->fd = -1;
-	backend->timers = NULL;
 	gp_event_queue_init(&backend->event_queue, w, h, 0);
 
 	return backend;

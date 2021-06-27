@@ -403,7 +403,7 @@ static int get_float(struct gp_json_buf *buf, struct gp_json_val *res)
 
 	tmp[len] = 0;
 
-	res->val_float = atof(tmp);
+	res->val_float = strtod(tmp, NULL);
 
 	return 0;
 }

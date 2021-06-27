@@ -116,6 +116,50 @@ static inline void gp_dlist_push_tail(gp_dlist *list, gp_dlist_head *entry)
 }
 
 /*
+ * @brief Pushes an entry into a double linked list after an entry.
+ *
+ * @list A double linked list.
+ * @after The entry to be pushed after.
+ * @entry An entry to be pushed.
+ */
+static inline void gp_dlist_push_after(gp_dlist *list, gp_dlist_head *after, gp_dlist_head *entry)
+{
+	entry->prev = after;
+	entry->next = after->next;
+
+	if (after->next)
+		after->next->prev = entry;
+	else
+		list->tail = entry;
+
+	after->next = entry;
+
+	list->cnt++;
+}
+
+/*
+ * @brief Pushes an entry into a double linked list before an entry.
+ *
+ * @list A double linked list.
+ * @before The entry to be pushed before.
+ * @entry An entry to be pushed.
+ */
+static inline void gp_dlist_push_before(gp_dlist *list, gp_dlist_head *before, gp_dlist_head *entry)
+{
+	entry->next = before;
+	entry->prev = before->prev;
+
+	if (before->prev)
+		before->prev->next = entry;
+	else
+		list->head = entry;
+
+	before->prev = entry;
+
+	list->cnt++;
+}
+
+/*
  * @brief Pops from a head of a linked list.
  *
  * The returned pointer has to be converted to a structure by gp_list_entry().

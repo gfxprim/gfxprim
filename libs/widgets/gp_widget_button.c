@@ -129,6 +129,12 @@ static void render(gp_widget *self, const gp_offset *offset,
 			cx -= len/2 + spc/2;
 	}
 
+	gp_size sw = GP_ODD_UP(gp_text_ascent(ctx->font));
+	gp_size sh = sw;
+
+	gp_size sx = cx - sw/2;
+	gp_coord sy = cy - (sh+1)/2;
+
 	switch (self->b->type & GP_BUTTON_TYPE_MASK) {
 	case GP_BUTTON_LABEL:
 	break;
@@ -151,26 +157,14 @@ static void render(gp_widget *self, const gp_offset *offset,
 		cross(ctx->buf, cx, cy, sym_r, asc_half/4, ctx->alert_color);
 	break;
 	case GP_BUTTON_OPEN:
-		gp_fill_rect(ctx->buf, cx - sym_r, cy - sym_r,
-		             cx, cy - sym_r/2, ctx->sel_color);
-
-		for (i = 0; i <= asc_half/4; i++) {
-			gp_rect(ctx->buf, cx - sym_r + i, cy - sym_r/2 + i,
-			        cx + sym_r - i, cy + sym_r - i, ctx->sel_color);
-		}
+		gp_widget_stock_render(ctx->buf, GP_WIDGET_STOCK_DIR,
+		                       sx, sy, sw, sh,
+		                       bg_color, ctx);
 	break;
 	case GP_BUTTON_SAVE:
-		for (i = 0; i <= asc_half/4; i++) {
-			gp_rect(ctx->buf, cx - sym_r + i, cy - sym_r + i,
-			        cx + sym_r - i, cy + sym_r - i, ctx->sel_color);
-		}
-
-		gp_fill_rect(ctx->buf, cx - sym_r/2, cy - sym_r + asc_half/2,
-		             cx + sym_r/2, cy - sym_r, ctx->text_color);
-
-		gp_hline(ctx->buf, cx - sym_r/2, cx + sym_r/2, cy + sym_r/3, ctx->sel_color);
-		if (sym_r/2 - sym_r/3 > 1)
-			gp_hline(ctx->buf, cx - sym_r/2, cx + sym_r/2, cy, ctx->sel_color);
+		gp_widget_stock_render(ctx->buf, GP_WIDGET_STOCK_SAVE,
+		                       sx, sy, sw, sh,
+				       bg_color, ctx);
 	break;
 	case GP_BUTTON_PLAY:
 	case GP_BUTTON_NEXT:
@@ -251,24 +245,20 @@ static void render(gp_widget *self, const gp_offset *offset,
 		gp_fill_circle(ctx->buf, cx+i, cy-i, sym_r/5, ctx->fg_color);
 	break;
 	case GP_BUTTON_UP:
-		gp_symbol(ctx->buf, cx, cy-asc_half/5,
-		          sym_r, sym_r-sym_r/4,
-		          GP_TRIANGLE_UP, ctx->text_color);
+		gp_widget_stock_render(ctx->buf, GP_WIDGET_STOCK_ARROW_UP,
+		                       sx, sy, sw, sh, bg_color, ctx);
 	break;
 	case GP_BUTTON_DOWN:
-		gp_symbol(ctx->buf, cx, cy+asc_half/5,
-		          sym_r, sym_r-sym_r/4,
-		          GP_TRIANGLE_DOWN, ctx->text_color);
+		gp_widget_stock_render(ctx->buf, GP_WIDGET_STOCK_ARROW_DOWN,
+		                       sx, sy, sw, sh, bg_color, ctx);
 	break;
 	case GP_BUTTON_LEFT:
-		gp_symbol(ctx->buf, cx-asc_half/5, cy,
-		          sym_r - sym_r/4, sym_r,
-		          GP_TRIANGLE_LEFT, ctx->text_color);
+		gp_widget_stock_render(ctx->buf, GP_WIDGET_STOCK_ARROW_LEFT,
+		                       sx, sy, sw, sh, bg_color, ctx);
 	break;
 	case GP_BUTTON_RIGHT:
-		gp_symbol(ctx->buf, cx+asc_half/5, cy,
-		          sym_r - sym_r/4, sym_r,
-		          GP_TRIANGLE_RIGHT, ctx->text_color);
+		gp_widget_stock_render(ctx->buf, GP_WIDGET_STOCK_ARROW_RIGHT,
+		                       sx, sy, sw, sh, bg_color, ctx);
 	break;
 	case GP_BUTTON_ADD:
 		gp_fill_rect(ctx->buf, cx - asc/8,

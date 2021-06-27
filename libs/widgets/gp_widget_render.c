@@ -2,7 +2,7 @@
 
 /*
 
-   Copyright (c) 2014-2020 Cyril Hrubis <metan@ucw.cz>
+   Copyright (c) 2014-2021 Cyril Hrubis <metan@ucw.cz>
 
  */
 
@@ -14,11 +14,12 @@
 #include <utils/gp_fds.h>
 #include <backends/gp_backends.h>
 #include <input/gp_input_driver_linux.h>
-#include <gp_widget_render.h>
-#include <gp_widget_ops.h>
-#include <gp_key_repeat_timer.h>
+#include <widgets/gp_widget_render.h>
+#include <widgets/gp_widget_ops.h>
+#include <widgets/gp_key_repeat_timer.h>
 #include <widgets/gp_dialog.h>
 #include <widgets/gp_widget_app.h>
+#include <widgets/gp_widgets_task.h>
 
 static struct gp_text_style font = {
 	.pixel_xmul = 1,
@@ -288,7 +289,7 @@ void gp_widget_render_timer_cancel(gp_widget *self)
 	}
 }
 
-static int in_dialog;
+static gp_dialog *cur_dialog;
 static int back_from_dialog;
 
 void gp_widgets_redraw(struct gp_widget *layout)
@@ -326,7 +327,7 @@ void gp_widgets_redraw(struct gp_widget *layout)
 	gp_widget_render(layout, &ctx, 0);
 	ctx.flip = NULL;
 
-	if (in_dialog)
+	if (cur_dialog)
 		gp_rect_xywh(ctx.buf, layout->x, layout->y, layout->w, layout->h, ctx.text_color);
 
 	if (gp_bbox_empty(flip))
@@ -367,9 +368,14 @@ void gp_widgets_layout_init(gp_widget *layout, const char *win_tittle)
 
 	gp_widget_calc_size(layout, &ctx, 0, 0, 1);
 
+	app_layout = layout;
+
 	gp_backend_resize(backend, layout->w, layout->h);
 
-	app_layout = layout;
+	if (gp_pixmap_w(backend->pixmap) < layout->w ||
+	    gp_pixmap_h(backend->pixmap) < layout->h) {
+		return;
+	}
 
 	int flag = 0;
 
@@ -385,6 +391,18 @@ void gp_widgets_layout_init(gp_widget *layout, const char *win_tittle)
 
 	gp_widget_render(layout, &ctx, flag);
 	gp_backend_flip(backend);
+}
+
+void gp_widgets_task_ins(gp_task *task)
+{
+	if (backend)
+		gp_backend_task_ins(backend, task);
+}
+
+void gp_widgets_task_rem(gp_task *task)
+{
+	if (backend)
+		gp_backend_task_rem(backend, task);
 }
 
 const gp_widget_render_ctx *gp_widgets_render_ctx(void)
@@ -458,8 +476,13 @@ int gp_widgets_event(gp_event *ev, gp_widget *layout)
 	if (handled)
 		return 0;
 
-	if (app_event_callback)
-		app_event_callback(ev);
+	if (cur_dialog) {
+		if (cur_dialog->input_event)
+			cur_dialog->input_event(cur_dialog, ev);
+	} else {
+		if (app_event_callback)
+			app_event_callback(ev);
+	}
 
 	return 0;
 }
@@ -574,7 +597,7 @@ long gp_dialog_run(gp_dialog *dialog)
 	gp_widget *saved = gp_widget_layout_replace(dialog->layout);
 
 	dialog->retval = 0;
-	in_dialog = 1;
+	cur_dialog = dialog;
 
 	for (;;) {
 		int ret = gp_fds_poll(&fds, gp_backend_timer_timeout(backend));
@@ -586,7 +609,7 @@ long gp_dialog_run(gp_dialog *dialog)
 		}
 
 		if (dialog->retval) {
-			in_dialog = 0;
+			cur_dialog = NULL;
 
 			gp_widget_layout_replace(saved);
 

@@ -49,6 +49,10 @@ The `flags` could be currently used to hide the textbox text with
  */
 const char *gp_widget_tbox_text(gp_widget *self);
 
+/*
+ * Retruns non-zero if textbox is empty.
+ */
+int gp_widget_tbox_is_empty(gp_widget *self);
 
 /*
  * Sets tbox text with a printf()-like syntax.

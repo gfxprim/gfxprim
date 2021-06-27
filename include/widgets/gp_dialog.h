@@ -9,12 +9,15 @@
 #ifndef GP_DIALOG_H
 #define GP_DIALOG_H
 
+#include <input/gp_types.h>
 #include <widgets/gp_widget.h>
 #include <widgets/gp_widget_types.h>
 
 struct gp_dialog {
 	/** A wiget layout representing the dialog */
 	gp_widget *layout;
+	/** A dialog event handler input events not handled by widgets are passed here */
+	int (*input_event)(gp_dialog *self, gp_event *ev);
 	/** Set to non-zero to exit the dialog */
 	long retval;
 	char payload[];

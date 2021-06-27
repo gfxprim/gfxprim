@@ -5,7 +5,7 @@
  "widgets": [
   {
    "cols": 4,
-   "uniform": "true",
+   "uniform": true,
    "align": "fill",
    "widgets": [
     {

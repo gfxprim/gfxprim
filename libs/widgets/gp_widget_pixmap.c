@@ -67,7 +67,6 @@ static inline void redraw_buffered(gp_widget *self,
 	/* Complete redraw requested by the application */
 	if (self->pixmap->redraw_all) {
 		box = gp_bbox_pack(x, y, w, h);
-		self->pixmap->redraw_all = 0;
 		goto redraw;
 	}
 
@@ -78,7 +77,6 @@ static inline void redraw_buffered(gp_widget *self,
 		//TODO check where this comes from
 		box.w += 1;
 		box.h += 1;
-		self->pixmap->bbox_set = 0;
 	}
 
 	/* Complete redraw requested by the library */
@@ -133,6 +131,9 @@ static void render(gp_widget *self, const gp_offset *offset,
 		redraw_passthrough(self, ctx, x, y, w, h);
 	else
 		redraw_buffered(self, ctx, x, y, w, h, flags);
+
+	self->pixmap->redraw_all = 0;
+	self->pixmap->bbox_set = 0;
 }
 
 /*

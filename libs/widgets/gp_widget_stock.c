@@ -20,18 +20,17 @@ static unsigned int stock_min_h(gp_widget *self, const gp_widget_render_ctx *ctx
 	return GP_ODD_UP(gp_widget_size_units_get(&self->stock->min_size, ctx));
 }
 
-static void render_stock_err_warn(const gp_widget_render_ctx *ctx,
+static void render_stock_err_warn(gp_pixmap *pix,
                                   gp_coord x, gp_coord y,
-                                  gp_size w, gp_size h, gp_pixel color)
+                                  gp_size w, gp_size h, gp_pixel color, gp_pixel bg_col,
+                                  const gp_widget_render_ctx *ctx)
 {
-	gp_pixmap *pix = ctx->buf;
-
 	gp_coord cx = x + w/2;
 	gp_coord cy = y + h/2;
 	gp_size c = GP_MIN(w, h)/2 - 2;
 	gp_size r = c/5;
 
-	gp_fill_rrect_xywh(pix, x, y, w, h, ctx->bg_color, color, ctx->text_color);
+	gp_fill_rrect_xywh(pix, x, y, w, h, bg_col, color, ctx->text_color);
 
 	if (r > 1)
 		gp_fill_circle(pix, cx, cy+h/4, r, ctx->text_color);
@@ -42,18 +41,17 @@ static void render_stock_err_warn(const gp_widget_render_ctx *ctx,
 
 }
 
-static void render_stock_info(const gp_widget_render_ctx *ctx,
+static void render_stock_info(gp_pixmap *pix,
                               gp_coord x, gp_coord y,
-                              gp_size w, gp_size h)
+                              gp_size w, gp_size h,
+                              gp_pixel bg_col, const gp_widget_render_ctx *ctx)
 {
-	gp_pixmap *pix = ctx->buf;
-
 	gp_size c = GP_MIN(w, h)/2 - 2;
 	gp_size r = c/5;
 	gp_coord cx = x + w/2;
 	gp_coord cy = y + h/2;
 
-	gp_fill_rrect_xywh(pix, x, y, w, h, ctx->bg_color, ctx->sel_color, ctx->text_color);
+	gp_fill_rrect_xywh(pix, x, y, w, h, bg_col, ctx->sel_color, ctx->text_color);
 
 	if (r > 1)
 		gp_fill_circle(pix, cx, cy-h/4, r, ctx->text_color);
@@ -67,18 +65,17 @@ static void render_stock_info(const gp_widget_render_ctx *ctx,
 	gp_fill_rect_xyxy(pix, cx-2*r, cy-r, cx, cy-r+r/2, ctx->text_color);
 }
 
-static void render_stock_question(const gp_widget_render_ctx *ctx,
+static void render_stock_question(gp_pixmap *pix,
                                   gp_coord x, gp_coord y,
-                                  gp_size w, gp_size h)
+                                  gp_size w, gp_size h, gp_pixel bg_col,
+				  const gp_widget_render_ctx *ctx)
 {
-	gp_pixmap *pix = ctx->buf;
-
 	gp_coord cx = x + w/2;
 	gp_coord cy = y + h/2;
 	gp_size c = GP_MIN(w, h)/2 - 2;
 	gp_size r = c/5;
 
-	gp_fill_rrect_xywh(pix, x, y, w, h, ctx->bg_color, ctx->sel_color, ctx->text_color);
+	gp_fill_rrect_xywh(pix, x, y, w, h, bg_col, ctx->sel_color, ctx->text_color);
 
 	if (r > 1)
 		gp_fill_circle(pix, cx, cy+h/4+r, r, ctx->text_color);
@@ -92,69 +89,83 @@ static void render_stock_question(const gp_widget_render_ctx *ctx,
 	gp_fill_triangle(pix, cx-r, cy-h/4+3*r, cx, cy-h/4+2*r, cx, cy-h/4+3*r, ctx->text_color);
 }
 
-static void render_stock_speaker(const gp_widget_render_ctx *ctx,
-                                 gp_coord cx, gp_coord cy, gp_coord r,
-                                 gp_widget *self)
+static void render_stock_speaker(gp_pixmap *pix,
+                                 gp_coord x, gp_coord y, gp_size w, gp_size h,
+                                 enum gp_widget_stock_type type,
+                                 const gp_widget_render_ctx *ctx)
 {
-	gp_pixmap *pix = ctx->buf;
-	gp_pixel col = self->focused ? ctx->sel_color : ctx->text_color;
+	gp_pixel col = type & GP_WIDGET_STOCK_FOCUSED ? ctx->sel_color : ctx->text_color;
+	gp_coord cx = x + w/2;
+	gp_coord cy = y + h/2;
+
+	gp_size rx = w/4;
+	gp_size ry = h/2 - rx - h/10;
+	gp_size edge = rx/3;
 
 	gp_coord poly[] = {
-		cx-2*(r/2), cy-2*r/3,
-		cx-4*(r/2), cy-2*r/3,
-		cx-4*(r/2), cy+2*r/3,
-		cx-2*(r/2), cy+2*r/3,
-		cx-r/4, cy+3*(r/2),
-		cx, cy+3*(r/2),
-		cx, cy-3*(r/2),
-		cx-r/4, cy-3*(r/2),
+		cx-rx-edge, cy-ry,
+		x, cy-ry,
+		x, cy+ry,
+		cx-rx-edge, cy+ry,
+		cx-edge, cy+rx+ry,
+		cx, cy+rx+ry,
+		cx, cy-rx-ry,
+		cx-edge, cy-rx-ry,
 	};
 
 	gp_fill_polygon(pix, GP_ARRAY_SIZE(poly)/2, poly, col);
 
-	gp_coord rd = r/3;
-	gp_coord i;
+	/* space between speaker and symbol */
+	gp_size sp = GP_MAX(1u, rx/2);
+	/* (half of) symbol size */
+	gp_size swh = w/4 - (sp+1)/2;
+	gp_size sw = 2*swh;
+	/* most left x coordinate of symbol */
+	gp_coord sx = cx + sp;
+	/* line width */
+	gp_size lw = (w)/16;
+	/* ring radius */
+	gp_size r1 = (rx + ry)-1;
+	/* circle radius */
+	gp_size r2 = r1/2-lw;
 
-	if (rd < 1)
-		cx++;
+	gp_size i;
 
-	/* Line thickness */
-	gp_coord lt = (rd)/2;
+	gp_coord scx = cx + (sp+1)/2 + 1;
 
-	switch (self->stock->type) {
+	switch (GP_WIDGET_STOCK_TYPE(type)) {
 	case GP_WIDGET_STOCK_SPEAKER_MUTE:
-		for (i = 0; i <= (rd+1)/2; i++) {
-			gp_line(pix, cx+r/2+i, cy-r/2, cx+3*(r/2), cy+r/2-i, ctx->alert_color);
-			gp_line(pix, cx+r/2, cy-r/2+i, cx+3*(r/2)-i, cy+r/2, ctx->alert_color);
-			gp_line(pix, cx+r/2+i, cy+r/2, cx+3*(r/2), cy-r/2+i, ctx->alert_color);
-			gp_line(pix, cx+r/2, cy+r/2-i, cx+3*(r/2)-i, cy-r/2, ctx->alert_color);
+		for (i = 0; i <= (7*lw+2)/5; i++) {
+			gp_line(pix, sx+i, cy-swh, sx+sw, cy+swh-i, ctx->alert_color);
+			gp_line(pix, sx, cy-swh+i, sx+sw-i, cy+swh, ctx->alert_color);
+			gp_line(pix, sx+i, cy+swh, sx+sw, cy-swh+i, ctx->alert_color);
+			gp_line(pix, sx, cy+swh-i, sx+sw-i, cy-swh, ctx->alert_color);
 		}
 	break;
 	case GP_WIDGET_STOCK_SPEAKER_MIN:
 	break;
 	case GP_WIDGET_STOCK_SPEAKER_MAX:
-		gp_fill_ring_seg(pix, cx+r/2, cy, 2*(r/2)+1, 2*(r/2)+1+rd, GP_CIRCLE_SEG1 | GP_CIRCLE_SEG4, col);
+		gp_fill_ring_seg(pix, scx, cy, r1-2*lw, r1, GP_CIRCLE_SEG1 | GP_CIRCLE_SEG4, col);
 	/* fallthrough */
 	case GP_WIDGET_STOCK_SPEAKER_MID:
-		gp_fill_ring_seg(pix, cx+r/2, cy, r/3, r/3+rd, GP_CIRCLE_SEG1 | GP_CIRCLE_SEG4, col);
+		gp_fill_circle_seg(pix, scx, cy, r2, GP_CIRCLE_SEG1 | GP_CIRCLE_SEG4, col);
 	break;
 	case GP_WIDGET_STOCK_SPEAKER_INC:
-		gp_fill_rect(pix, cx+2*(r/2)-lt, cy-r/2, cx+2*(r/2)+lt, cy+r/2, col);
+		gp_fill_rect(pix, sx+swh-lw, cy-swh, sx+swh+lw, cy+swh, col);
 	/* fallthrough */
 	case GP_WIDGET_STOCK_SPEAKER_DEC:
-		gp_fill_rect(pix, cx+r/2, cy-lt, cx+3*(r/2), cy+lt, col);
+		gp_fill_rect(pix, sx, cy-lw, sx+sw, cy+lw, col);
 	break;
 	default:
 	break;
 	}
 }
 
-static void render_text_lines(const gp_widget_render_ctx *ctx,
+static void render_text_lines(gp_pixmap *pix,
                               gp_coord x0, gp_coord y0,
                               gp_coord x1, gp_coord y1,
-			      gp_pixel col)
+                              gp_pixel col)
 {
-	gp_pixmap *pix = ctx->buf;
 	gp_size dy = (y1 - y0)+1;
 	gp_size ls = dy/10;
 	gp_size sp;
@@ -175,11 +186,11 @@ static void render_text_lines(const gp_widget_render_ctx *ctx,
 	gp_fill_rect_xyxy(pix, x0, y1, x1, y1-ls, col);
 }
 
-static void render_stock_hardware(const gp_widget_render_ctx *ctx,
+static void render_stock_hardware(gp_pixmap *pix,
                                   gp_coord x, gp_coord y,
-                                  gp_size w, gp_size h)
+                                  gp_size w, gp_size h, gp_pixel bg_col,
+                                  const gp_widget_render_ctx *ctx)
 {
-	gp_pixmap *pix = ctx->buf;
 	gp_coord cx = x + w/2;
 	gp_coord cy = y + h/2;
 	gp_size c = GP_MIN(w, h)/3;
@@ -193,7 +204,7 @@ static void render_stock_hardware(const gp_widget_render_ctx *ctx,
 	gp_coord legs = (2*c - 2*c_sp_size + sp_size)/(l_size + sp_size);
 	gp_coord i;
 
-	gp_fill_rect_xywh(pix, x, y, w, h, ctx->bg_color);
+	gp_fill_rect_xywh(pix, x, y, w, h, bg_col);
 
 	gp_fill_rect_xyxy(pix, cx-c, cy-c, cx+c, cy+c, ctx->text_color);
 	gp_fill_rect_xyxy(pix, cx-c/3, cy-c/3, cx+c/3, cy+c/3, ctx->fg_color);
@@ -214,11 +225,11 @@ static void render_stock_hardware(const gp_widget_render_ctx *ctx,
 	}
 }
 
-static void render_stock_software(const gp_widget_render_ctx *ctx,
+static void render_stock_software(gp_pixmap *pix,
                                   gp_coord x, gp_coord y,
-                                  gp_size w, gp_size h)
+                                  gp_size w, gp_size h, gp_pixel bg_col,
+                                  const gp_widget_render_ctx *ctx)
 {
-	gp_pixmap *pix = ctx->buf;
 	gp_coord cx = x + w/2;
 	gp_coord cy = y + h/2;
 	gp_coord i;
@@ -229,7 +240,7 @@ static void render_stock_software(const gp_widget_render_ctx *ctx,
 
 	gp_size header = GP_ODD_UP(ih/2);
 
-	gp_fill_rect_xywh(pix, x, y, w, h, ctx->bg_color);
+	gp_fill_rect_xywh(pix, x, y, w, h, bg_col);
 
 	gp_fill_rect_xyxy(pix, cx-iw, cy-ih, cx+iw, cy+ih, ctx->text_color);
 	gp_fill_rect_xyxy(pix, cx-iw+th+1, cy-ih+header, cx+iw-th-1, cy+ih-th-1, ctx->fg_color);
@@ -242,7 +253,7 @@ static void render_stock_software(const gp_widget_render_ctx *ctx,
 		off += r ? 3*r+1 : 2;
 	}
 
-	render_text_lines(ctx, cx-iw+th+ih/2+1, cy-ih+header+ih/3+1,
+	render_text_lines(pix, cx-iw+th+ih/2+1, cy-ih+header+ih/3+1,
                           cx+iw-th-ih/2-1, cy+ih-th-1-ih/3-1, ctx->sel_color);
 }
 
@@ -251,11 +262,11 @@ static void render_stock_software(const gp_widget_render_ctx *ctx,
 #define ROT_1_PI_8(cx, x, cy, y) ROTATE(0.38268343, 0.92387953, cx, x, cy, y)
 #define ROT_3_PI_8(cx, x, cy, y) ROTATE(0.92387953, 0.38268343, cx, x, cy, y)
 
-static void render_stock_settings(const gp_widget_render_ctx *ctx,
+static void render_stock_settings(gp_pixmap *pix,
                                   gp_coord x, gp_coord y,
-                                  gp_size w, gp_size h)
+                                  gp_size w, gp_size h, gp_pixel bg_col,
+                                  const gp_widget_render_ctx *ctx)
 {
-	gp_pixmap *pix = ctx->buf;
 	gp_coord cx = x + w/2;
 	gp_coord cy = y + h/2;
 
@@ -264,7 +275,7 @@ static void render_stock_settings(const gp_widget_render_ctx *ctx,
 	gp_coord cc = GP_MIN(w/6, h/6);
 	gp_coord tw = co/11;
 
-	gp_fill_rect_xywh(pix, x, y, w, h, ctx->bg_color);
+	gp_fill_rect_xywh(pix, x, y, w, h, bg_col);
 
 	gp_coord poly[] = {
 		cx - co, cy + tw,
@@ -306,20 +317,20 @@ static void render_stock_settings(const gp_widget_render_ctx *ctx,
 	gp_fill_circle(pix, cx, cy, cc, ctx->fg_color);
 }
 
-static void render_stock_save(const gp_widget_render_ctx *ctx,
+static void render_stock_save(gp_pixmap *pix,
                               gp_coord x, gp_coord y,
-                              gp_size w, gp_size h)
+                              gp_size w, gp_size h, gp_pixel bg_col,
+                              const gp_widget_render_ctx *ctx)
 {
-	gp_pixmap *pix = ctx->buf;
 	gp_coord cx = x + w/2;
 	gp_coord cy = y + h/2;
-	gp_coord sh = GP_MIN(7*w/16, 7*h/16);
+	gp_coord sh = GP_MIN(w/2, h/2);
 	gp_size th = GP_MIN(3*w/8, 3*h/8)/8;
 	gp_size cs = sh/3;
 	gp_size cvr_s = (2 * sh - 2 * th) / 4;
 	gp_size cvr_d = 3 * cvr_s / 2+1;
 
-	gp_fill_rect_xywh(pix, x, y, w, h, ctx->bg_color);
+	gp_fill_rect_xywh(pix, x, y, w, h, bg_col);
 
 	gp_coord poly[] = {
 		cx - sh, cy - sh,
@@ -356,7 +367,7 @@ static void render_stock_save(const gp_widget_render_ctx *ctx,
 
 	gp_fill_rect_xyxy(pix, lx0, ly0, lx1, cy+sh, ctx->fg_color);
 
-	render_text_lines(ctx, lx0, ly0, lx1, ly1, ctx->text_color);
+	render_text_lines(pix, lx0, ly0, lx1, ly1, ctx->text_color);
 
 	/* draws border and cover */
 	gp_fill_polygon(pix, GP_ARRAY_SIZE(poly)/2, poly, ctx->text_color);
@@ -366,19 +377,19 @@ static void render_stock_save(const gp_widget_render_ctx *ctx,
 			       ctx->fg_color);
 }
 
-static void render_stock_file(const gp_widget_render_ctx *ctx,
+static void render_stock_file(gp_pixmap *pix,
                               gp_coord x, gp_coord y,
-                              gp_size w, gp_size h)
+                              gp_size w, gp_size h, gp_pixel bg_col,
+                              const gp_widget_render_ctx *ctx)
 {
-	gp_pixmap *pix = ctx->buf;
 	gp_coord cx = x + w/2;
 	gp_coord cy = y + h/2;
-	gp_size sh = 7*h/16;
+	gp_size sh = h/2;
 	gp_size cs = sh/2;
 	gp_size sw = GP_MIN(5*h/16, 3*w/4);
 	gp_size th = GP_MIN(3*w/8, 3*h/8)/8;
 
-	gp_fill_rect_xywh(pix, x, y, w, h, ctx->bg_color);
+	gp_fill_rect_xywh(pix, x, y, w, h, bg_col);
 
 	gp_coord poly[] = {
 		cx - sw, cy - sh,
@@ -422,124 +433,168 @@ static void render_stock_file(const gp_widget_render_ctx *ctx,
 	gp_coord lx1 = cx + sw - th - sh/3;
 	gp_coord ly1 = cy + sh - th - sh/3-1;
 
-	render_text_lines(ctx, lx0, ly0, lx1, ly1, ctx->sel_color);
+	render_text_lines(pix, lx0, ly0, lx1, ly1, ctx->sel_color);
 }
 
-static void render_stock_dir(const gp_widget_render_ctx *ctx,
+static void render_stock_dir(gp_pixmap *pix,
                              gp_coord x, gp_coord y,
-                             gp_size w, gp_size h)
+                             gp_size w, gp_size h, gp_pixel bg_col,
+                             const gp_widget_render_ctx *ctx)
 {
-	gp_pixmap *pix = ctx->buf;
 	gp_coord cx = x + w/2;
 	gp_coord cy = y + h/2;
-	gp_coord sw = GP_MIN(7*w/16, 7*h/16);
-	gp_coord sh = GP_MIN(7*w/16, 7*h/16);
+	gp_size w2 = w/2;
+	gp_size h2 = h/2;
 	gp_size th = GP_MIN(3*w/8, 3*h/8)/8;
-	gp_size cs = GP_MAX(2, sw/4);
-	gp_size cw = sw;
+	gp_size cs = GP_MAX(2u, w/8);
+	gp_size cw = w2;
 	/* corner "roundess" */
-	gp_size r = sw/10;
+	gp_size r = w2/10;
 	gp_size fw = th+2;
 
-	gp_fill_rect_xywh(pix, x, y, w, h, ctx->bg_color);
+	gp_fill_rect_xywh(pix, x, y, w, h, bg_col);
 
 	gp_coord poly[] = {
-		cx - sw, cy - sh + r,
-		cx - sw + th, cy - sh,
-		cx - sw + th, cy - sh + th + cs,
-		cx - sw + th, cy - sh + th + cs,
+		cx - w2, cy - h2 + r,
+		cx - w2 + th, cy - h2,
+		cx - w2 + th, cy - h2 + th + cs,
+		cx - w2 + th, cy - h2 + th + cs,
 
-		cx - sw + th, cy + sh - th,
+		cx - w2 + th, cy + h2 - th,
 
-		cx + sw - fw - th, cy + sh - th,
-		cx + sw - th, cy + sh - th,
+		cx + w2 - fw - th, cy + h2 - th,
+		cx + w2 - th, cy + h2 - th,
 
-		cx + sw - th, cy - sh + cs + 2*th+fw,
+		cx + w2 - th, cy - h2 + cs + 2*th+fw,
 		/* inner part starts here */
-		cx + sw - th, cy - sh + cs + fw + th,
-		cx + sw - th, cy - sh + cs + th,
-		cx - sw + th + cw, cy - sh + th + cs,
-		cx - sw + th + cw, cy - sh + th,
-		cx - sw + th, cy - sh + th,
+		cx + w2 - th, cy - h2 + cs + fw + th,
+		cx + w2 - th, cy - h2 + cs + th,
+		cx - w2 + th + cw, cy - h2 + th + cs,
+		cx - w2 + th + cw, cy - h2 + th,
+		cx - w2 + th, cy - h2 + th,
 		/* inner part ends here */
-		cx - sw + th, cy - sh,
-		cx - sw + 2*th + cw-r, cy - sh,
-		cx - sw + 2*th + cw, cy - sh+r,
-		cx - sw + 2*th + cw, cy - sh + cs,
+		cx - w2 + th, cy - h2,
+		cx - w2 + 2*th + cw-r, cy - h2,
+		cx - w2 + 2*th + cw, cy - h2 + r,
+		cx - w2 + 2*th + cw, cy - h2 + cs,
 
-		cx + sw - r, cy - sh + cs,
-		cx + sw, cy - sh + cs+r,
+		cx + w2 - r, cy - h2 + cs,
+		cx + w2, cy - h2 + cs+r,
 
 
-		cx + sw, cy + sh,
-		cx - sw, cy + sh,
-		cx - sw, cy - sh + cs,
+		cx + w2, cy + h2,
+		cx - w2, cy + h2,
+		cx - w2, cy - h2 + cs,
 	};
 
 	gp_coord in_poly[] = {
-		cx + sw - th, cy - sh + cs + fw + th,
-		cx + sw - th, cy - sh + cs + th,
-		cx - sw + th + cw, cy - sh + th + cs,
-		cx - sw + th + cw, cy - sh + th,
-		cx - sw + th, cy - sh + th,
-		cx - sw + th, cy - sh + cs + fw + th,
+		cx + w2 - th, cy - h2 + cs + fw + th,
+		cx + w2 - th, cy - h2 + cs + th,
+		cx - w2 + th + cw, cy - h2 + th + cs,
+		cx - w2 + th + cw, cy - h2 + th,
+		cx - w2 + th, cy - h2 + th,
+		cx - w2 + th, cy - h2 + cs + fw + th,
 	};
 
 	/* fill the innter parts */
-	gp_fill_rect_xyxy(pix, cx - sw + th, cy - sh + cs + th + fw,
-	                       cx + sw - th, cy + sh - th, ctx->sel_color);
+	gp_fill_rect_xyxy(pix, cx - w2 + th, cy - h2 + cs + th + fw,
+	                       cx + w2 - th, cy + h2 - th, ctx->sel_color);
 	gp_fill_polygon(pix, GP_ARRAY_SIZE(in_poly)/2, in_poly, ctx->fg_color);
 
 	/* draw the lines */
 	gp_fill_polygon(pix, GP_ARRAY_SIZE(poly)/2, poly, ctx->text_color);
-	gp_hline_xxy(pix, cx-sw+th+1, cx+sw-th-1, cy-sh+cs+fw+th, ctx->text_color);
+	gp_hline_xxy(pix, cx-w2+th+1, cx+w2-th-1, cy-h2+cs+fw+th, ctx->text_color);
 
 	/* final touch for low res */
-	gp_putpixel(pix, cx + sw, cy - sh + cs, ctx->bg_color);
-	gp_putpixel(pix, cx - sw, cy - sh, ctx->bg_color);
-	gp_putpixel(pix, cx - sw + 2*th + cw, cy - sh, ctx->bg_color);
+	gp_putpixel(pix, cx + w2, cy - h2 + cs, bg_col);
+	gp_putpixel(pix, cx - w2, cy - h2, bg_col);
+	gp_putpixel(pix, cx - w2 + 2*th + cw, cy - h2, bg_col);
 }
 
-static void render_stock_arrow(const gp_widget_render_ctx *ctx,
+static void render_stock_arrow(gp_pixmap *pix,
                                int type,
                                gp_coord x, gp_coord y,
-                               gp_size w, gp_size h)
+                               gp_size w, gp_size h, gp_pixel bg_col,
+                               const gp_widget_render_ctx *ctx)
 {
-	gp_pixmap *pix = ctx->buf;
-	gp_coord cx = x + w/2;
-	gp_coord cy = y + h/2;
+	gp_fill_rect_xywh(pix, x, y, w, h, bg_col);
 
-	gp_size th = GP_MAX(GP_MIN(w, h)/10, 1u);
-	gp_size rh = h/3;
-	gp_size wh = w/3;
+	h--;
+	w--;
 
-	gp_fill_rect_xywh(pix, x, y, w, h, ctx->bg_color);
+	gp_coord up_poly[] = {
+		x + w/2, y,
+		x + (w+1)/2, y,
+		x+w, y+h/2,
+		x+w, y+(h+1)/2,
+		x+w-3*w/8, y+(h+1)/2,
+		x+w-3*w/8, y+h,
+		x+3*w/8, y+h,
+		x+3*w/8, y+(h+1)/2,
+		x, y+(h+1)/2,
+		x, y+h/2,
+	};
 
-	switch (type) {
+	gp_coord down_poly[] = {
+		x + w/2, y+h,
+		x + (w+1)/2, y+h,
+		x+w, y+(h+1)/2,
+		x+w, y+h/2,
+		x+w-3*w/8, y+h/2,
+		x+w-3*w/8, y,
+		x+3*w/8, y,
+		x+3*w/8, y+h/2,
+		x, y+h/2,
+		x, y+(h+1)/2,
+	};
+
+	gp_coord left_poly[] = {
+		x, y + h/2,
+		x, y + (h+1)/2,
+		x + w/2, y + h,
+		x + (w+1)/2, y + h,
+		x + (w+1)/2, y + h - 3*h/8,
+		x + w, y + h - 3*h/8,
+		x + w, y + 3*h/8,
+		x + (w+1)/2, y + 3*h/8,
+		x + (w+1)/2, y,
+		x + w/2, y,
+	};
+
+	gp_coord right_poly[] = {
+		x + w, y + h/2,
+		x + w, y + (h+1)/2,
+		x + (w+1)/2, y + h,
+		x + w/2, y + h,
+		x + w/2, y + h - 3*h/8,
+		x, y + h - 3*h/8,
+		x, y + 3*h/8,
+		x + w/2, y + 3*h/8,
+		x + w/2, y,
+		x + (w+1)/2, y,
+	};
+
+	switch (GP_WIDGET_STOCK_TYPE(type)) {
 	case GP_WIDGET_STOCK_ARROW_UP:
-		gp_fill_rect_xyxy(pix, cx-th, cy-rh+2*th, cx+th, cy+rh, ctx->text_color);
-		gp_symbol(pix, cx, cy-rh+2*th, 4*th, 2*th, GP_TRIANGLE_UP, ctx->text_color);
+		gp_fill_polygon(pix, GP_ARRAY_SIZE(up_poly)/2, up_poly, ctx->text_color);
 	break;
 	case GP_WIDGET_STOCK_ARROW_DOWN:
-		gp_fill_rect_xyxy(pix, cx-th, cy-rh, cx+th, cy+rh-2*th, ctx->text_color);
-		gp_symbol(pix, cx, cy+rh-2*th, 4*th, 2*th, GP_TRIANGLE_DOWN, ctx->text_color);
+		gp_fill_polygon(pix, GP_ARRAY_SIZE(down_poly)/2, down_poly, ctx->text_color);
 	break;
 	case GP_WIDGET_STOCK_ARROW_LEFT:
-		gp_fill_rect_xyxy(pix, cx-wh+2*th, cy-th, cx+wh, cy+th, ctx->text_color);
-		gp_symbol(pix, cx-wh+2*th, cy, 2*th, 4*th, GP_TRIANGLE_LEFT, ctx->text_color);
+		gp_fill_polygon(pix, GP_ARRAY_SIZE(left_poly)/2, left_poly, ctx->text_color);
 	break;
 	case GP_WIDGET_STOCK_ARROW_RIGHT:
-		gp_fill_rect_xyxy(pix, cx-wh, cy-th, cx+wh-2*th, cy+th, ctx->text_color);
-		gp_symbol(pix, cx+wh-2*th, cy, 2*th, 4*th, GP_TRIANGLE_RIGHT, ctx->text_color);
+		gp_fill_polygon(pix, GP_ARRAY_SIZE(right_poly)/2, right_poly, ctx->text_color);
 	break;
 	}
 }
 
-static void render_stock_refresh(const gp_widget_render_ctx *ctx,
+static void render_stock_refresh(gp_pixmap *pix,
                                  gp_coord x, gp_coord y,
-                                 gp_size w, gp_size h)
+                                 gp_size w, gp_size h, gp_pixel bg_col,
+                                 const gp_widget_render_ctx *ctx)
 {
-	gp_pixmap *pix = ctx->buf;
 	gp_coord cx = x + w/2;
 	gp_coord cy = y + h/2;
 
@@ -547,7 +602,7 @@ static void render_stock_refresh(const gp_widget_render_ctx *ctx,
 	gp_size s = GP_MAX(GP_MIN(w, h)/5, 1u);
 	gp_size r = GP_MIN(w, h)/2-s;
 
-	gp_fill_rect_xywh(pix, x, y, w, h, ctx->bg_color);
+	gp_fill_rect_xywh(pix, x, y, w, h, bg_col);
 
 	gp_fill_ring_seg(pix, cx, cy, r - th, r + th,
 	                 GP_CIRCLE_SEG2|GP_CIRCLE_SEG3|GP_CIRCLE_SEG4,
@@ -566,11 +621,11 @@ static void render_stock_refresh(const gp_widget_render_ctx *ctx,
 	gp_fill_polygon(pix, GP_ARRAY_SIZE(poly_1)/2, poly_1, ctx->text_color);
 }
 
-static void render_stock_shuffle_off(const gp_widget_render_ctx *ctx,
+static void render_stock_shuffle_off(gp_pixmap *pix,
                                      gp_coord x, gp_coord y,
-                                     gp_size w, gp_size h)
+                                     gp_size w, gp_size h, gp_pixel bg_col,
+                                     const gp_widget_render_ctx *ctx)
 {
-	gp_pixmap *pix = ctx->buf;
 	gp_coord cx = x + w/2;
 	gp_coord cy = y + h/2;
 
@@ -578,7 +633,7 @@ static void render_stock_shuffle_off(const gp_widget_render_ctx *ctx,
 
 	gp_size th = GP_MIN(w, h)/16;
 
-	gp_fill_rect_xywh(pix, x, y, w, h, ctx->bg_color);
+	gp_fill_rect_xywh(pix, x, y, w, h, bg_col);
 
 	gp_size yd = h/4;
 
@@ -611,11 +666,11 @@ static void render_stock_shuffle_off(const gp_widget_render_ctx *ctx,
 	gp_fill_polygon(pix, GP_ARRAY_SIZE(poly_2)/2, poly_2, ctx->text_color);
 }
 
-static void render_stock_shuffle_on(const gp_widget_render_ctx *ctx,
+static void render_stock_shuffle_on(gp_pixmap *pix,
                                     gp_coord x, gp_coord y,
-                                    gp_size w, gp_size h)
+                                    gp_size w, gp_size h, gp_pixel bg_col,
+                                    const gp_widget_render_ctx *ctx)
 {
-	gp_pixmap *pix = ctx->buf;
 	gp_coord cx = x + w/2;
 	gp_coord cy = y + h/2;
 
@@ -623,7 +678,7 @@ static void render_stock_shuffle_on(const gp_widget_render_ctx *ctx,
 
 	gp_size th = GP_MIN(w, h)/16;
 
-	gp_fill_rect_xywh(pix, x, y, w, h, ctx->bg_color);
+	gp_fill_rect_xywh(pix, x, y, w, h, bg_col);
 
 	gp_size yd = h/4;
 
@@ -671,75 +726,111 @@ static void render_stock_shuffle_on(const gp_widget_render_ctx *ctx,
 	gp_fill_polygon(pix, GP_ARRAY_SIZE(poly_2)/2, poly_2, ctx->text_color);
 }
 
-static void stock_render(gp_widget *self, const gp_offset *offset,
-                         const gp_widget_render_ctx *ctx, int flags)
+static void widget_stock_render(gp_pixmap *pix, enum gp_widget_stock_type type,
+                                gp_coord x, gp_coord y, gp_size w, gp_size h,
+                                gp_pixel bg_col, const gp_widget_render_ctx *ctx)
 {
-	gp_coord x = self->x + offset->x;
-	gp_coord y = self->y + offset->y;
-	gp_coord cx = x + self->w/2;
-	gp_coord cy = y + self->h/2;
-	gp_coord r = GP_MIN(self->w/2, self->h/2);
-
-	(void)flags;
-
-	switch (self->stock->type) {
+	switch (GP_WIDGET_STOCK_TYPE(type)) {
 	case GP_WIDGET_STOCK_SPEAKER_MIN:
 	case GP_WIDGET_STOCK_SPEAKER_MAX:
 	case GP_WIDGET_STOCK_SPEAKER_MID:
 	case GP_WIDGET_STOCK_SPEAKER_MUTE:
 	case GP_WIDGET_STOCK_SPEAKER_INC:
 	case GP_WIDGET_STOCK_SPEAKER_DEC:
-		gp_fill_rect_xywh(ctx->buf, x, y, self->w, self->h, ctx->bg_color);
-		render_stock_speaker(ctx, cx, cy, r/2, self);
+		render_stock_speaker(pix, x, y, w, h, type, ctx);
 	break;
 	case GP_WIDGET_STOCK_INFO:
-		render_stock_info(ctx, x, y, self->w, self->h);
+		render_stock_info(pix, x, y, w, h, bg_col, ctx);
 	break;
 	case GP_WIDGET_STOCK_WARN:
-		render_stock_err_warn(ctx, x, y, self->w, self->h, ctx->warn_color);
+		render_stock_err_warn(pix, x, y, w, h, ctx->warn_color, bg_col, ctx);
 	break;
 	case GP_WIDGET_STOCK_ERR:
-		render_stock_err_warn(ctx, x, y, self->w, self->h, ctx->alert_color);
+		render_stock_err_warn(pix, x, y, w, h, ctx->alert_color, bg_col, ctx);
 	break;
 	case GP_WIDGET_STOCK_QUESTION:
-		render_stock_question(ctx, x, y, self->w, self->h);
+		render_stock_question(pix, x, y, w, h, bg_col, ctx);
 	break;
 	case GP_WIDGET_STOCK_HARDWARE:
-		render_stock_hardware(ctx, x, y, self->w, self->h);
+		render_stock_hardware(pix, x, y, w, h, bg_col, ctx);
 	break;
 	case GP_WIDGET_STOCK_SOFTWARE:
-		render_stock_software(ctx, x, y, self->w, self->h);
+		render_stock_software(pix, x, y, w, h, bg_col, ctx);
 	break;
 	case GP_WIDGET_STOCK_SETTINGS:
-		render_stock_settings(ctx, x, y, self->w, self->h);
+		render_stock_settings(pix, x, y, w, h, bg_col, ctx);
 	break;
 	case GP_WIDGET_STOCK_SAVE:
-		render_stock_save(ctx, x, y, self->w, self->h);
+		render_stock_save(pix, x, y, w, h, bg_col, ctx);
 	break;
 	case GP_WIDGET_STOCK_FILE:
-		render_stock_file(ctx, x, y, self->w, self->h);
+		render_stock_file(pix, x, y, w, h, bg_col, ctx);
 	break;
 	case GP_WIDGET_STOCK_DIR:
-		render_stock_dir(ctx, x, y, self->w, self->h);
+		render_stock_dir(pix, x, y, w, h, bg_col, ctx);
 	break;
 	case GP_WIDGET_STOCK_REFRESH:
-		render_stock_refresh(ctx, x, y, self->w, self->h);
+		render_stock_refresh(pix, x, y, w, h, bg_col, ctx);
 	break;
 	case GP_WIDGET_STOCK_ARROW_UP:
 	case GP_WIDGET_STOCK_ARROW_DOWN:
 	case GP_WIDGET_STOCK_ARROW_LEFT:
 	case GP_WIDGET_STOCK_ARROW_RIGHT:
-		render_stock_arrow(ctx, self->stock->type, x, y, self->w, self->h);
+		render_stock_arrow(pix, type, x, y, w, h, bg_col, ctx);
 	break;
 	case GP_WIDGET_STOCK_SHUFFLE_ON:
-		render_stock_shuffle_on(ctx, x, y, self->w, self->h);
+		render_stock_shuffle_on(pix, x, y, w, h, bg_col, ctx);
 	break;
 	case GP_WIDGET_STOCK_SHUFFLE_OFF:
-		render_stock_shuffle_off(ctx, x, y, self->w, self->h);
+		render_stock_shuffle_off(pix, x, y, w, h, bg_col, ctx);
 	break;
 	}
 
-	gp_widget_ops_blit(ctx, x, y, self->w, self->h);
+}
+
+void gp_widget_stock_render(gp_pixmap *pix, enum gp_widget_stock_type type,
+                            gp_coord x, gp_coord y, gp_size w, gp_size h,
+			    gp_pixel bg_col, const gp_widget_render_ctx *ctx)
+{
+	gp_fill_rect_xywh(pix, x, y, w, h, bg_col);
+
+	widget_stock_render(pix, type, x, y, w, h, bg_col, ctx);
+}
+
+static void stock_render(gp_widget *self, const gp_offset *offset,
+                         const gp_widget_render_ctx *ctx, int flags)
+{
+	gp_coord x = self->x + offset->x;
+	gp_coord y = self->y + offset->y;
+	gp_coord w = self->w;
+	gp_coord h = self->h;
+
+	gp_size off;
+
+	switch (self->stock->type) {
+	case GP_WIDGET_STOCK_ARROW_UP:
+	case GP_WIDGET_STOCK_ARROW_DOWN:
+	case GP_WIDGET_STOCK_ARROW_LEFT:
+	case GP_WIDGET_STOCK_ARROW_RIGHT:
+		off = GP_MAX(1u, (gp_size)GP_MIN(w/6, h/6));
+	break;
+	default:
+		off = 0;
+	break;
+	}
+
+	enum gp_widget_stock_type type = self->stock->type;
+
+	if (self->focused)
+		type |= GP_WIDGET_STOCK_FOCUSED;
+
+	gp_fill_rect_xywh(ctx->buf, x, y, w, h, ctx->bg_color);
+
+	gp_widget_stock_render(ctx->buf, type,
+	                       x+off, y+off, w-2*off, h-2*off,
+	                       ctx->bg_color, ctx);
+
+	gp_widget_ops_blit(ctx, x, y, w, h);
 }
 
 static struct stock_types {

@@ -30,6 +30,7 @@ Widgets generic documetation
 * link:widgets_tattr.html[Text attributes]
 * link:widgets_render_context.html[Render context]
 * link:widgets_free.html[Widget destructor]
+* link:widget_classes.html[Widget classes]
 
 Individual widgets documentation
 --------------------------------

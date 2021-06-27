@@ -279,11 +279,14 @@ gp_backend *gp_linux_fb_init(const char *path, int flags)
 	struct fb_var_screeninfo vscri;
 	int fd;
 
-	backend = malloc(sizeof(gp_backend) +
-	                 sizeof(struct fb_priv) + strlen(path) + 1);
+	size_t size = sizeof(gp_backend) +
+	              sizeof(struct fb_priv) + strlen(path) + 1;
 
-	if (backend == NULL)
+	backend = malloc(size);
+	if (!backend)
 		return NULL;
+
+	memset(backend, 0, size);
 
 	fb = GP_BACKEND_PRIV(backend);
 
@@ -386,13 +389,10 @@ gp_backend *gp_linux_fb_init(const char *path, int flags)
 	backend->pixmap = &fb->pixmap;
 	backend->flip = shadow ? fb_flip_shadow : NULL;
 	backend->update_rect = shadow ? fb_update_rect_shadow : NULL;
-	backend->set_attr = NULL;
-	backend->resize_ack = NULL;
 	backend->poll = kbd ? fb_poll : NULL;
 	backend->wait = kbd ? fb_wait : NULL;
 	backend->exit = fb_exit;
 	backend->fd = fb->con_fd;
-	backend->timers = NULL;
 
 	gp_event_queue_init(&backend->event_queue, vscri.xres, vscri.yres, 0);
 
