@@ -215,14 +215,16 @@ static void proxy_flip(gp_backend *self)
 gp_backend *gp_proxy_init(const char *path, const char *title)
 {
 	int fd;
-	gp_backend *ret = malloc(sizeof(gp_backend) + sizeof(struct proxy_priv));
+	gp_backend *ret;
+	size_t size = sizeof(gp_backend) + sizeof(struct proxy_priv);
 
+	ret = malloc(size);
 	if (!ret) {
 		GP_WARN("Malloc failed :-(");
 		return NULL;
 	}
 
-	memset(ret, 0, sizeof(*ret));
+	memset(ret, 0, size);
 
 	fd = gp_proxy_client_connect(NULL);
 	if (fd < 0) {

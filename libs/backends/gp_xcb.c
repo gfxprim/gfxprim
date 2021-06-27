@@ -572,23 +572,21 @@ gp_backend *gp_xcb_init(const char *display, int x, int y, int w, int h,
 {
 	gp_backend *backend;
 	struct win *win;
+	size_t size = sizeof(gp_backend) + sizeof(struct win);
 
-	backend = malloc(sizeof(gp_backend) +
-	                 sizeof(struct win));
-
-	if (backend == NULL)
+	backend = malloc(size);
+	if (!backend)
 		return NULL;
+
+	memset(backend, 0, size);
 
 	if (!x_connect(display))
 		goto err;
 
 	win = GP_BACKEND_PRIV(backend);
 
-	memset(win, 0, sizeof(*win));
-
 	if (create_window(backend, win, x, y, w, h, caption))
 		goto err;
-
 
 	backend->name = "XCB";
 	backend->flip = x_flip;
@@ -599,7 +597,6 @@ gp_backend *gp_xcb_init(const char *display, int x, int y, int w, int h,
 	backend->set_attr = x_set_attr;
 	backend->resize_ack = x_resize_ack;
 	backend->fd = xcb_get_file_descriptor(x_con.c);
-	backend->timers = NULL;
 
 	return backend;
 err:

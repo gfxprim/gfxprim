@@ -118,16 +118,15 @@ gp_backend *gp_backend_virt_init(gp_backend *backend,
 {
 	gp_backend *self;
 	struct virt_priv *virt;
+	size_t size = sizeof(gp_backend) + sizeof(struct virt_priv);
 
-	self = malloc(sizeof(gp_backend) +
-	              sizeof(struct virt_priv));
-
-	if (self == NULL) {
+	self = malloc(size);
+	if (!self) {
 		GP_DEBUG(1, "Malloc failed :(");
 		return NULL;
 	}
 
-	memset(self, 0, sizeof(gp_backend));
+	memset(self, 0, size);
 
 	/* Create new buffer with different pixmap type */
 	self->pixmap = gp_pixmap_alloc(backend->pixmap->w, backend->pixmap->h,
@@ -149,7 +148,6 @@ gp_backend *gp_backend_virt_init(gp_backend *backend,
 	self->poll = backend->poll ? virt_poll : NULL;
 	self->wait = backend->wait ? virt_wait : NULL;
 	self->exit = virt_exit;
-	self->timers = NULL;
 	self->fd = backend->fd;
 
 	gp_event_queue_init(&self->event_queue, backend->pixmap->w,

@@ -581,16 +581,15 @@ gp_backend *gp_x11_init(const char *display, int x, int y,
 {
 	gp_backend *backend;
 	struct x11_win *win;
+	size_t size = sizeof(gp_backend) + sizeof(struct x11_win);
 
-	backend = malloc(sizeof(gp_backend) +
-	                 sizeof(struct x11_win));
-
-	if (backend == NULL)
+	backend = malloc(size);
+	if (!backend)
 		return NULL;
 
-	win = GP_BACKEND_PRIV(backend);
+	memset(backend, 0, size);
 
-	memset(win, 0, sizeof(struct x11_win));
+	win = GP_BACKEND_PRIV(backend);
 
 	//XSynchronize(win->dpy, True);
 
@@ -641,7 +640,6 @@ gp_backend *gp_x11_init(const char *display, int x, int y,
 	backend->set_attr = x11_set_attr;
 	backend->resize_ack = x11_resize_ack;
 	backend->fd = XConnectionNumber(win->dpy);
-	backend->timers = NULL;
 
 	return backend;
 err1:
