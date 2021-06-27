@@ -62,7 +62,7 @@ typedef struct gp_json_val {
 		const char *val_str;
 	};
 
-	float val_float;
+	double val_float;
 
 	/** An ID for object values */
 	char id[GP_JSON_ID_MAX];
