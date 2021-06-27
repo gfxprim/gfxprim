@@ -197,7 +197,7 @@ gp_backend *gp_aalib_init(void)
 	int w, h;
 	size_t size = sizeof(gp_backend) + sizeof(struct aalib_priv);
 
-	backend = malloc(size)
+	backend = malloc(size);
 	if (!backend)
 		return NULL;
 
