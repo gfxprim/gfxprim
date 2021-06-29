@@ -139,8 +139,8 @@ static int periodic_timers(void)
 	}
 
 	/* check that there are two timers in the queue */
-	if (head->sons != 1) {
-		tst_msg("Queue head has wrong number of sons %u", head->sons);
+	if (head->heap.children != 1) {
+		tst_msg("Queue head has wrong number of children %u", head->heap.children);
 		fail++;
 	}
 
@@ -163,8 +163,8 @@ static int periodic_timers(void)
 	}
 
 	/* check that there are two timers in the queue */
-	if (head->sons != 1) {
-		tst_msg("Queue head has wrong number of sons %u", head->sons);
+	if (head->heap.children != 1) {
+		tst_msg("Queue head has wrong number of children %u", head->heap.children);
 		fail++;
 	}
 
@@ -189,7 +189,7 @@ static int rem_regression(void)
 
 	gp_timer_queue_remove(&head, &timer2);
 
-	if (head->sons) {
+	if (head->heap.children) {
 		tst_msg("Failed to remove timer");
 		return TST_FAILED;
 	}

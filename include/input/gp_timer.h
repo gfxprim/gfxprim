@@ -13,14 +13,11 @@
 #define INPUT_GP_TIMER_H
 
 #include <stdint.h>
-
+#include <utils/gp_types.h>
 #include <input/gp_types.h>
 
 struct gp_timer {
-	/* Heap pointers and number of sons */
-	gp_timer *left;
-	gp_timer *right;
-	unsigned int sons;
+	gp_heap_head heap;
 
 	/* Expiration time */
 	uint64_t expires;
@@ -84,7 +81,7 @@ int gp_timer_queue_process(gp_timer **queue, uint64_t now);
  */
 static inline unsigned int gp_timer_queue_size(gp_timer *queue)
 {
-	return queue ? queue->sons + 1 : 0;
+	return queue ? queue->heap.children + 1 : 0;
 }
 
 #endif /* INPUT_GP_TIMER_H */

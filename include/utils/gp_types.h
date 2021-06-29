@@ -2,8 +2,6 @@
 
 /*
 
-   Simple hash table implementation.
-
    Copyright (c) 2014-2021 Cyril Hrubis <metan@ucw.cz>
 
  */
@@ -12,5 +10,12 @@
 #define UTILS_GP_TYPES_H
 
 typedef struct gp_htable gp_htable;
+typedef struct gp_heap_head gp_heap_head;
+
+struct gp_heap_head {
+	gp_heap_head *left;
+	gp_heap_head *right;
+	unsigned int children;
+};
 
 #endif /* UTILS_GP_TYPES_H */
