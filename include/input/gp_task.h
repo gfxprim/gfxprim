@@ -30,7 +30,8 @@ struct gp_task_queue {
 
 struct gp_task {
 	gp_dlist_head head;
-	unsigned int prio;
+	unsigned int prio:3;
+	unsigned int queued:1;
 	char *id;
 	int (*callback)(gp_task *self);
 	void *priv;

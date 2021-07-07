@@ -67,11 +67,16 @@ void gp_task_queue_ins(gp_task_queue *self, gp_task *task)
 {
 	gp_dlist *queue;
 
+	if (task->queued) {
+		GP_DEBUG(1, "Task '%s' prio %u already queued", task->id, task->prio);
+		return;
+	}
+
 	queue = queue_by_prio_check(self, task->prio);
 	if (!queue)
 		return;
 
-	GP_DEBUG(3, "Inserting task '%s' prio %i", task->id, task->prio);
+	GP_DEBUG(3, "Inserting task '%s' prio %u", task->id, task->prio);
 
 	gp_dlist_push_tail(queue, &task->head);
 
@@ -80,12 +85,19 @@ void gp_task_queue_ins(gp_task_queue *self, gp_task *task)
 	if (self->min_prio == GP_TASK_NONE_PRIO)
 		self->min_prio = task->prio;
 	else
-		self->min_prio = GP_MIN(self->min_prio, task->prio);
+		self->min_prio = GP_MIN(self->min_prio, (unsigned int)task->prio);
+
+	task->queued = 1;
 }
 
 void gp_task_queue_rem(gp_task_queue *self, gp_task *task)
 {
 	gp_dlist *queue;
+
+	if (!task->queued) {
+		GP_DEBUG(1, "Task '%s' prio %u is not queued", task->id, task->prio);
+		return;
+	}
 
 	queue = queue_by_prio_check(self, task->prio);
 	if (!queue)
@@ -96,8 +108,9 @@ void gp_task_queue_rem(gp_task_queue *self, gp_task *task)
 	gp_dlist_rem(&self->queues[task->prio], &task->head);
 
 	self->task_cnt--;
-
 	self->min_prio = find_queue_min_prio(self);
+
+	task->queued = 0;
 }
 
 int gp_task_queue_process(gp_task_queue *self)
@@ -118,6 +131,7 @@ int gp_task_queue_process(gp_task_queue *self)
 	} else {
 		self->task_cnt--;
 		self->min_prio = find_queue_min_prio(self);
+		task->queued = 0;
 	}
 
 	return 1;
