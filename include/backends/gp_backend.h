@@ -128,7 +128,7 @@ struct gp_backend {
 	gp_timer *timers;
 
 	/* Task queue */
-	gp_dlist task_queue;
+	gp_task_queue task_queue;
 
 	/* Backed private data */
 	char priv[];
