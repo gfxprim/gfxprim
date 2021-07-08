@@ -435,7 +435,7 @@ if __name__ ==  '__main__':
     # Dictionary for default configuration parameters
     #
     cfg = {'CC'            : ['gcc', 'Path/name of the C compiler'],
-           'CFLAGS'        : ['-W -Wall -Wextra -O2 -std=gnu99 -ggdb', 'C compiler flags'],
+           'CFLAGS'        : ['-W -Wall -Wextra -O2 -ggdb', 'C compiler flags'],
            'CFLAGS_WNIF'   : ['', 'Disable implicit fallthrough warnings'],
            'LDFLAGS'       : ['', 'Linker flags'],
            'PYTHON_BIN'    : ['python', 'Path/name of python interpreter'],
@@ -567,6 +567,8 @@ if __name__ ==  '__main__':
     cfg_parse_args(cfg, args)
 
     basic_checks(cfg);
+
+    cfg['CFLAGS'][0] += " -std=gnu99";
 
     l.check()
     l.print_summary()
