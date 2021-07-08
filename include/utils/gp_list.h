@@ -32,13 +32,13 @@ typedef struct gp_dlist {
 	size_t cnt;
 } gp_dlist;
 
-#define gp_list_entry(ptr, structure, member) \
+#define GP_LIST_ENTRY(ptr, structure, member) \
 	GP_CONTAINER_OF(ptr, structure, member)
 
-#define gp_list_foreach(list, entry) \
+#define GP_LIST_FOREACH(list, entry) \
 	for (entry = (list)->head; entry; entry = entry->next)
 
-#define gp_dlist_rev_foreach(list, entry) \
+#define GP_DLIST_REV_FOREACH(list, entry) \
 	for (entry = (list)->tail; entry; entry = entry->prev)
 
 /*

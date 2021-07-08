@@ -20,8 +20,8 @@ void gp_task_queue_dump(gp_task_queue *self)
 	printf("Total tasks %u min_prio %u", self->task_cnt, self->min_prio);
 
 	for (prio = GP_TASK_MIN_PRIO; prio <= GP_TASK_MAX_PRIO; prio++) {
-		gp_list_foreach(queue_by_prio(self, prio), i) {
-			gp_task *t = gp_list_entry(i, gp_task, head);
+		GP_LIST_FOREACH(queue_by_prio(self, prio), i) {
+			gp_task *t = GP_LIST_ENTRY(i, gp_task, head);
 
 			printf("Task '%s' prio %i callback %p priv %p\n",
 			       t->id, t->prio, t->callback, t->priv);
@@ -120,7 +120,7 @@ int gp_task_queue_process(gp_task_queue *self)
 
 	gp_dlist *task_list = queue_by_prio(self, self->min_prio);
 	gp_dlist_head *task_head = gp_dlist_pop_head(task_list);
-	gp_task *task = gp_list_entry(task_head, gp_task, head);
+	gp_task *task = GP_LIST_ENTRY(task_head, gp_task, head);
 
 	GP_DEBUG(3, "Running task '%s' prio %i", task->id, task->prio);
 

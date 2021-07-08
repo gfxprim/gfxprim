@@ -193,7 +193,7 @@ void *gp_vec_shrink(void *self, size_t length)
 /*
  * Vector iterator.
  */
-#define gp_vec_foreach(self, type, iterator) \
+#define GP_VEC_FOREACH(self, type, iterator) \
 	for (type *iterator = (self); iterator < (self) + gp_vec_len(self); iterator++)
 
 #endif	/* GP_VEC_H */

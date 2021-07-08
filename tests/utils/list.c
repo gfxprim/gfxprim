@@ -16,16 +16,16 @@ struct list_item {
 
 static int list_cmp(const void *a, const void *b)
 {
-	const struct list_item *la = gp_list_entry(a, struct list_item, head);
-	const struct list_item *lb = gp_list_entry(b, struct list_item, head);
+	const struct list_item *la = GP_LIST_ENTRY(a, struct list_item, head);
+	const struct list_item *lb = GP_LIST_ENTRY(b, struct list_item, head);
 
 	return la->i < lb->i;
 }
 
 static int list_cmp_rev(const void *a, const void *b)
 {
-	const struct list_item *la = gp_list_entry(a, struct list_item, head);
-	const struct list_item *lb = gp_list_entry(b, struct list_item, head);
+	const struct list_item *la = GP_LIST_ENTRY(a, struct list_item, head);
+	const struct list_item *lb = GP_LIST_ENTRY(b, struct list_item, head);
 
 	return la->i > lb->i;
 }
@@ -34,8 +34,8 @@ static void dump_list(gp_list *list)
 {
 	gp_list_head *i;
 
-	gp_list_foreach(list, i) {
-		struct list_item *j = gp_list_entry(i, struct list_item, head);
+	GP_LIST_FOREACH(list, i) {
+		struct list_item *j = GP_LIST_ENTRY(i, struct list_item, head);
 
 		printf("%i ", j->i);
 	}
@@ -69,8 +69,8 @@ int list_test(void)
 
 	i = 0;
 
-	gp_list_foreach(&list, j) {
-		struct list_item *it = gp_list_entry(j, struct list_item, head);
+	GP_LIST_FOREACH(&list, j) {
+		struct list_item *it = GP_LIST_ENTRY(j, struct list_item, head);
 
 		if (it->i != i) {
 			tst_msg("Wrong item %i, expected %i", it->i, i);
@@ -92,8 +92,8 @@ int list_test(void)
 
 	i = 1;
 
-	gp_list_foreach(&list, j) {
-		struct list_item *it = gp_list_entry(j, struct list_item, head);
+	GP_LIST_FOREACH(&list, j) {
+		struct list_item *it = GP_LIST_ENTRY(j, struct list_item, head);
 
 		if (it->i != i) {
 			tst_msg("Wrong item %i, expected %i", it->i, i);
@@ -120,8 +120,8 @@ int list_test(void)
 
 	i = 0;
 
-	gp_list_foreach(&list, j) {
-		struct list_item *it = gp_list_entry(j, struct list_item, head);
+	GP_LIST_FOREACH(&list, j) {
+		struct list_item *it = GP_LIST_ENTRY(j, struct list_item, head);
 
 		if (it->i != i) {
 			tst_msg("Wrong item %i, expected %i", it->i, i);
@@ -153,7 +153,7 @@ int list_test(void)
 	i = 9;
 
 	while ((j = gp_list_pop_head(&list))) {
-		struct list_item *it = gp_list_entry(j, struct list_item, head);
+		struct list_item *it = GP_LIST_ENTRY(j, struct list_item, head);
 
 		if (it->i != i) {
 			tst_msg("Wrong item %i, expected %i", it->i, i);
@@ -186,7 +186,7 @@ int list_test(void)
 	i = 9;
 
 	while ((j = gp_list_pop_head(&list))) {
-		struct list_item *it = gp_list_entry(j, struct list_item, head);
+		struct list_item *it = GP_LIST_ENTRY(j, struct list_item, head);
 
 		if (it->i != i) {
 			tst_msg("Wrong item %i, expected %i", it->i, i);
@@ -238,8 +238,8 @@ int dlist_test(void)
 
 	i = 0;
 
-	gp_list_foreach(&list, j) {
-		struct dlist_item *it = gp_list_entry(j, struct dlist_item, head);
+	GP_LIST_FOREACH(&list, j) {
+		struct dlist_item *it = GP_LIST_ENTRY(j, struct dlist_item, head);
 
 		if (it->i != i) {
 			tst_msg("Wrong item %i, expected %i", it->i, i);
@@ -252,8 +252,8 @@ int dlist_test(void)
 
 	i = 9;
 
-	gp_dlist_rev_foreach(&list, j) {
-		struct dlist_item *it = gp_list_entry(j, struct dlist_item, head);
+	GP_DLIST_REV_FOREACH(&list, j) {
+		struct dlist_item *it = GP_LIST_ENTRY(j, struct dlist_item, head);
 
 		if (it->i != i) {
 			tst_msg("Wrong item %i, expected %i", it->i, i);
@@ -269,8 +269,8 @@ int dlist_test(void)
 
 	i = 0;
 
-	gp_dlist_rev_foreach(&list, j) {
-		struct dlist_item *it = gp_list_entry(j, struct dlist_item, head);
+	GP_DLIST_REV_FOREACH(&list, j) {
+		struct dlist_item *it = GP_LIST_ENTRY(j, struct dlist_item, head);
 
 		if (it->i != i) {
 			tst_msg("Wrong item %i, expected %i", it->i, i);
@@ -286,7 +286,7 @@ int dlist_test(void)
 	i = 9;
 
 	while ((j = gp_dlist_pop_head(&list))) {
-		struct dlist_item *it = gp_list_entry(j, struct dlist_item, head);
+		struct dlist_item *it = GP_LIST_ENTRY(j, struct dlist_item, head);
 
 		if (it->i != i) {
 			tst_msg("Wrong item %i, expected %i", it->i, i);
@@ -314,7 +314,7 @@ int dlist_test(void)
 	i = 0;
 
 	while ((j = gp_dlist_pop_tail(&list))) {
-		struct dlist_item *it = gp_list_entry(j, struct dlist_item, head);
+		struct dlist_item *it = GP_LIST_ENTRY(j, struct dlist_item, head);
 
 		if (it->i != i) {
 			tst_msg("Wrong item %i, expected %i", it->i, i);

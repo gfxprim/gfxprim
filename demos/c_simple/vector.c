@@ -86,10 +86,10 @@ int main(void)
 	}
 
 	printf("\nVec of string vecs: \n");
-	gp_vec_foreach(strs, char*, str)
+	GP_VEC_FOREACH(strs, char*, str)
 		printf("%s\n", *str);
 
-	gp_vec_foreach(strs, char*, str)
+	GP_VEC_FOREACH(strs, char*, str)
 		gp_vec_free(*str);
 
 	gp_vec_free(strs);
