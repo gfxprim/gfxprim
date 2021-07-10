@@ -52,6 +52,9 @@ static void perp_dy_{{ ps.suffix }}(gp_pixmap *pixmap, int x0, int y0,
 		err += 2*dx;
 		x+=xstep;
 		l += 2*dy;
+
+		if (GP_PIXEL_IS_CLIPPED(pixmap, x, y))
+			break;
 	}
 
 	x = x0;
@@ -69,6 +72,9 @@ static void perp_dy_{{ ps.suffix }}(gp_pixmap *pixmap, int x0, int y0,
 		err += 2*dx;
 		x-=xstep;
 		l += 2*dy;
+
+		if (GP_PIXEL_IS_CLIPPED(pixmap, x, y))
+			break;
 	}
 }
 
@@ -134,6 +140,9 @@ static void perp_dx_{{ ps.suffix }}(gp_pixmap *pixmap, int x0, int y0,
 		err += 2*dy;
 		y+=ystep;
 		l += 2*dx;
+
+		if (GP_PIXEL_IS_CLIPPED(pixmap, x, y))
+			break;
 	}
 
 	x = x0;
@@ -151,6 +160,9 @@ static void perp_dx_{{ ps.suffix }}(gp_pixmap *pixmap, int x0, int y0,
 		err += 2*dy;
 		y-=ystep;
 		l += 2*dx;
+
+		if (GP_PIXEL_IS_CLIPPED(pixmap, x, y))
+			break;
 	}
 }
 
