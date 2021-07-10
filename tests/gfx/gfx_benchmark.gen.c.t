@@ -9,7 +9,7 @@ static int bench_line(gp_pixel_type type)
 {
 	gp_pixmap *img = gp_pixmap_alloc(800, 600, type);
 
-	if (img == NULL) {
+	if (!img) {
 		tst_err("Malloc failed");
 		return TST_UNTESTED;
 	}
@@ -19,6 +19,25 @@ static int bench_line(gp_pixel_type type)
 	for (i = 0; i < 20000; i++) {
 		gp_line(img, 0 + i % 100, 0 - i % 100,
 		        800 - i%200, 600 + i%200, i % 0xff);
+	}
+
+	return TST_SUCCESS;
+}
+
+static int bench_line_th(gp_pixel_type type)
+{
+	gp_pixmap *img = gp_pixmap_alloc(820, 620, type);
+
+	if (!img) {
+		tst_err("Malloc failed");
+		return TST_UNTESTED;
+	}
+
+	unsigned int i;
+
+	for (i = 0; i < 1000; i++) {
+		gp_line_th(img, 0 + i % 100, 0 - i % 100,
+		        800 - i%200, 600 + i%200, i%5, i % 0xff);
 	}
 
 	return TST_SUCCESS;
@@ -175,7 +194,7 @@ static int bench_fill_polygon_17(gp_pixel_type type)
 @         ["24BPP", "GP_PIXEL_RGB888"],
 @         ["32BPP", "GP_PIXEL_xRGB8888"]]
 @
-@ prims = ["line", "circle", "circle_seg", "fill_circle", "fill_polygon_4", "fill_polygon_9", "fill_polygon_17"]
+@ prims = ["line", "line_th", "circle", "circle_seg", "fill_circle", "fill_polygon_4", "fill_polygon_9", "fill_polygon_17"]
 @
 @ def bench(prim, bpp, pixel_type):
 static int bench_{{ prim }}_{{ bpp }}(void)
