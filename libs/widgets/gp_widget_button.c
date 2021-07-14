@@ -154,7 +154,9 @@ static void render(gp_widget *self, const gp_offset *offset,
 	break;
 	case GP_BUTTON_NO:
 	case GP_BUTTON_CANCEL:
-		cross(ctx->buf, cx, cy, sym_r, asc_half/4, ctx->alert_color);
+		gp_widget_stock_render(ctx->buf, GP_WIDGET_STOCK_CLOSE,
+		                       sx, sy, sw, sh,
+		                       bg_color, ctx);
 	break;
 	case GP_BUTTON_OPEN:
 		gp_widget_stock_render(ctx->buf, GP_WIDGET_STOCK_DIR,

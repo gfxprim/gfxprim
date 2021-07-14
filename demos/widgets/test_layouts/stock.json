@@ -145,8 +145,7 @@
    "type": "stock",
    "stock": "refresh"
   },
-  {
-  },
+  {"type": "stock", "stock": "close"},
   {
    "type": "label",
    "text": "STOCK_HARDWARE",
@@ -182,8 +181,7 @@
    "text": "STOCK_REFRESH",
    "halign": "left"
   },
-  {
-  },
+  {"type": "label", "text": "STOCK_CLOSE", "halign": "left"},
 
   {
    "type": "stock",

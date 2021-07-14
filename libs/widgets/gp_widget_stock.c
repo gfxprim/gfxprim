@@ -511,6 +511,46 @@ static void render_stock_dir(gp_pixmap *pix,
 	gp_putpixel(pix, cx - w2 + 2*th + cw, cy - h2, bg_col);
 }
 
+static void render_stock_close(gp_pixmap *pix,
+                               gp_coord x, gp_coord y,
+                               gp_size w, gp_size h, gp_pixel bg_col,
+                               const gp_widget_render_ctx *ctx)
+{
+	gp_size a = GP_MAX((gp_size)1, GP_MIN(w/6, h/6));
+
+	gp_fill_rect_xywh(pix, x, y, w, h, bg_col);
+
+	w--; h--;
+
+	gp_size bw = (w-2*a)/2;
+	gp_size bh = (h-2*a)/2;
+
+	gp_coord poly[] = {
+		x, y,
+		x + a, y,
+		x + w/2, y + bh,
+		x + w/2 + w%2, y + bh,
+		x + w - a, y,
+		x + w, y,
+		x + w, y + a,
+		x + w - bw, y + h/2,
+		x + w - bw, y + h/2 + h%2,
+		x + w, y + h - a,
+		x + w, y + h,
+		x + w - a, y + h,
+		x + w/2 + w%2, y + h - bh,
+		x + w/2, y + h - bh,
+		x + a, y + h,
+		x, y + h,
+		x, y + h - a,
+		x + bw, y + h/2 + h%2,
+		x + bw, y + h/2,
+		x, y + a,
+	};
+
+	gp_fill_polygon(pix, GP_ARRAY_SIZE(poly)/2, poly, ctx->alert_color);
+}
+
 static void render_stock_arrow(gp_pixmap *pix,
                                int type,
                                gp_coord x, gp_coord y,
@@ -769,6 +809,9 @@ static void widget_stock_render(gp_pixmap *pix, enum gp_widget_stock_type type,
 	case GP_WIDGET_STOCK_DIR:
 		render_stock_dir(pix, x, y, w, h, bg_col, ctx);
 	break;
+	case GP_WIDGET_STOCK_CLOSE:
+		render_stock_close(pix, x, y, w, h, bg_col, ctx);
+	break;
 	case GP_WIDGET_STOCK_REFRESH:
 		render_stock_refresh(pix, x, y, w, h, bg_col, ctx);
 	break;
@@ -855,6 +898,7 @@ static struct stock_types {
 	{"save", GP_WIDGET_STOCK_SAVE},
 	{"file", GP_WIDGET_STOCK_FILE},
 	{"dir", GP_WIDGET_STOCK_DIR},
+	{"close", GP_WIDGET_STOCK_CLOSE},
 
 	{"refresh", GP_WIDGET_STOCK_REFRESH},
 
