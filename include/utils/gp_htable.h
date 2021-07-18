@@ -11,6 +11,8 @@
 #ifndef GP_HTABLE_H
 #define GP_HTABLE_H
 
+#include <stddef.h>
+#include <string.h>
 #include <utils/gp_types.h>
 
 enum gp_htable_flags {
@@ -18,38 +20,96 @@ enum gp_htable_flags {
 	GP_HTABLE_FREE_KEY = 0x02,
 };
 
+struct gp_htable_rec {
+	void *key;
+	void *val;
+};
+
+struct gp_htable {
+	struct gp_htable_rec *recs;
+        size_t size;
+        size_t used;
+        int flags;
+};
+
+#define GP_HTABLE_FOREACH(table, var) \
+	for (struct gp_htable_rec *var = (table)->recs; var < &((table)->recs[(table)->size]); var++) \
+		if (var->key)
+
 /**
  * @brief Allocates a hash table.
  *
- * @param order Hint of log2(size) for expected number of hash elements, if unsure pass 0.
- * @param flags See gp_htable_flags.
- * @return Newly allocated hash table or NULL in a case of a failure.
+ * @order Hint of log2(size) for expected number of hash elements, if unsure pass 0.
+ * @flags See enum gp_htable_flags.
+ *
+ * @return Newly allocated hash table or NULL in a case of a malloc failure.
  */
 gp_htable *gp_htable_new(unsigned int order, int flags);
 
 /**
  * @brief Frees a hash table.
  *
- * @param table The table to be freed.
+ * @self The table to be freed.
  */
 void gp_htable_free(gp_htable *self);
 
 /**
+ * @brief A string hashing function.
+ *
+ * @key A string.
+ * @htable_size A hash table size.
+ */
+static inline size_t gp_htable_strhash(const void *key, size_t htable_size)
+{
+        unsigned int h = 0;
+	const char *str = key;
+
+        while (*str)
+                h = (h * 151 + *str++) % htable_size;
+
+        return h;
+}
+
+/**
+ * @brief A string matching function.
+ *
+ * @key1 A string.
+ * @key2 A string.
+ *
+ * @return Non-zero if keys are equal.
+ */
+static inline int gp_htable_strcmp(const void *key1, const void *key2)
+{
+	return !strcmp(key1, key2);
+}
+
+/**
  * @brief Adds a pointer to a hash table.
  *
- * @param Hash table.
- * @param ptr A value.
- * @param key A string key.
+ * @self Hash table.
+ * @val A value.
+ * @key A string key.
  */
 void gp_htable_put(gp_htable *self, void *val, char *key);
 
 /**
  * @brief Search for an element given a string key.
  *
- * @param Hash table.
- * @param key A string key.
- * @return A value pointer if found or NULL.
+ * @self A hash table.
+ * @key A string key.
+ *
+ * @return A value if found or NULL.
  */
 void *gp_htable_get(gp_htable *self, const char *key);
+
+/**
+ * @brief Removes an entry from a hash table.
+ *
+ * @self A Hash table.
+ * @key A string key.
+ *
+ * @return A value for removed key or NULL if not found.
+ */
+void *gp_htable_rem(gp_htable *self, const char *key);
 
 #endif /* GP_HTABLE_H */
