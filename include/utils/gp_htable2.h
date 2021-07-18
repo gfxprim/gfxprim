@@ -114,20 +114,18 @@ static inline void *gp_htable_rem2(gp_htable *self,
 				gp_htable_rehash(self, gp_htable_tsize(self->used), hash);
 			} else {
 				for (;;) {
-					size_t e = h;
-
 					h = (h+1) % self->size;
 
 					if (!self->recs[h].key)
 						break;
 
-					if (h == hash(self->recs[h].key, self->size))
-						break;
-
-					self->recs[e] = self->recs[h];
+					void *key = self->recs[h].key;
+					void *val = self->recs[h].val;
 
 					self->recs[h].key = NULL;
 					self->recs[h].val = NULL;
+
+					gp_htable_put_(self->recs, hash, self->size, val, key);
 				}
 			}
 

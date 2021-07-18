@@ -178,6 +178,32 @@ static int collision_test(void)
 	return TST_SUCCESS;
 }
 
+static int double_collision_test(void)
+{
+	gp_htable *table = gp_htable_new(0, 0);
+
+	if (!table) {
+		tst_msg("Malloc failed :-(");
+		return TST_FAILED;
+	}
+
+	tst_msg("Inserting 'aa-key' size=%zu", table->size);
+	gp_htable_put2(table, stupid_hash, "aa", "aa-key");
+	tst_msg("Inserting 'ba-key' size=%zu", table->size);
+	gp_htable_put2(table, stupid_hash, "ba", "ba-key");
+	tst_msg("Inserting 'ab-key' size=%zu", table->size);
+	gp_htable_put2(table, stupid_hash, "ab", "ab-key");
+	tst_msg("Removing 'aa-key'");
+	gp_htable_rem2(table, stupid_hash, gp_htable_strcmp, "aa-key");
+
+	if (lookup_success(table, "ab-key", "ab"))
+		return TST_FAILED;
+
+	gp_htable_free(table);
+
+	return TST_SUCCESS;
+}
+
 static int check_size(gp_htable *table, size_t exp_size)
 {
 	if (table->size != exp_size) {
@@ -274,6 +300,10 @@ const struct tst_suite tst_suite = {
 
 		{.name = "htable collision test",
 		 .tst_fn = collision_test,
+		 .flags = TST_CHECK_MALLOC},
+
+		{.name = "htable double collision test",
+		 .tst_fn = double_collision_test,
 		 .flags = TST_CHECK_MALLOC},
 
 		{.name = "htable size test",
