@@ -113,19 +113,33 @@ static inline void *gp_htable_rem2(gp_htable *self,
 			if (--self->used < self->size/8) {
 				gp_htable_rehash(self, gp_htable_tsize(self->used), hash);
 			} else {
+				size_t i = h;
+				size_t j = h;
 				for (;;) {
-					h = (h+1) % self->size;
+					i = (i+1)%self->size;
 
-					if (!self->recs[h].key)
+					if (!self->recs[i].key)
 						break;
 
-					void *key = self->recs[h].key;
-					void *val = self->recs[h].val;
+					h = hash(self->recs[i].key, self->size);
 
-					self->recs[h].key = NULL;
-					self->recs[h].val = NULL;
+					/* record at i can't be moved to the empty slot j */
+					if (i >= h && h > j)
+						continue;
 
-					gp_htable_put_(self->recs, hash, self->size, val, key);
+					/* the same but i has overflown over self->size */
+					if (i < j && h <= i)
+						continue;
+
+					if (i < j && h > j)
+						continue;
+
+					self->recs[j] = self->recs[i];
+
+					self->recs[i].key = NULL;
+					self->recs[i].val = NULL;
+
+					j = i;
 				}
 			}
 
