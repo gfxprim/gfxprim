@@ -17,9 +17,12 @@
 #include <utils/gp_fds.h>
 
 #include <widgets/gp_widget_types.h>
+#include <widgets/gp_widgets_color_scheme.h>
 
-typedef struct gp_widget_render_ctx {
+struct gp_widget_render_ctx {
 	gp_pixmap *buf;
+
+	enum gp_widgets_color_scheme color_scheme;
 
 	/* colors */
 	gp_pixel text_color;
@@ -54,8 +57,7 @@ typedef struct gp_widget_render_ctx {
 
 	/* maximal delay between two clicks for a double click */
 	int dclick_ms;
-} gp_widget_render_ctx;
-
+};
 
 /*
  * @brief Initializes render context fonts and padding.

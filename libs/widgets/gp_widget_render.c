@@ -21,6 +21,8 @@
 #include <widgets/gp_widget_app.h>
 #include <widgets/gp_widgets_task.h>
 
+#include "gp_widgets_internal.h"
+
 static struct gp_text_style font = {
 	.pixel_xmul = 1,
 	.pixel_ymul = 1,
@@ -55,7 +57,7 @@ static struct gp_text_style font_mono = {
 	.font = &gp_default_font,
 };
 
-static struct gp_widget_render_ctx ctx = {
+struct gp_widget_render_ctx __attribute__((visibility ("hidden"))) ctx = {
 	.text_color = 0,
 	.font = &font,
 	.font_bold = &font_bold,
@@ -215,6 +217,32 @@ void gp_widget_render_ctx_init(void)
 
 static gp_backend *backend;
 static gp_widget *app_layout;
+static gp_dialog *cur_dialog;
+static int back_from_dialog;
+
+static void render_and_flip(gp_widget *layout, int render_flags)
+{
+	gp_bbox flip = {};
+
+	ctx.flip = &flip;
+	gp_widget_render(layout, &ctx, render_flags);
+	ctx.flip = NULL;
+
+	if (cur_dialog)
+		gp_rect_xywh(ctx.buf, layout->x, layout->y, layout->w, layout->h, ctx.text_color);
+
+	if (gp_bbox_empty(flip))
+		return;
+
+	GP_DEBUG(1, "Updating area " GP_BBOX_FMT, GP_BBOX_PARS(flip));
+
+	gp_backend_update_rect_xywh(backend, flip.x, flip.y, flip.w, flip.h);
+}
+
+void __attribute__ ((visibility ("hidden"))) widget_render_refresh(void)
+{
+	render_and_flip(app_layout, GP_WIDGET_REDRAW);
+}
 
 void gp_widget_render_zoom(int zoom_inc)
 {
@@ -289,9 +317,6 @@ void gp_widget_render_timer_cancel(gp_widget *self)
 	}
 }
 
-static gp_dialog *cur_dialog;
-static int back_from_dialog;
-
 void gp_widgets_redraw(struct gp_widget *layout)
 {
 	if (!layout) {
@@ -321,21 +346,7 @@ void gp_widgets_redraw(struct gp_widget *layout)
 	    gp_pixmap_h(backend->pixmap) == 0)
 		return;
 
-	gp_bbox flip = {};
-
-	ctx.flip = &flip;
-	gp_widget_render(layout, &ctx, 0);
-	ctx.flip = NULL;
-
-	if (cur_dialog)
-		gp_rect_xywh(ctx.buf, layout->x, layout->y, layout->w, layout->h, ctx.text_color);
-
-	if (gp_bbox_empty(flip))
-		return;
-
-	GP_DEBUG(1, "Updating area " GP_BBOX_FMT, GP_BBOX_PARS(flip));
-
-	gp_backend_update_rect_xywh(backend, flip.x, flip.y, flip.w, flip.h);
+	render_and_flip(layout, 0);
 }
 
 static char *backend_init_str = "x11";
@@ -357,13 +368,10 @@ void gp_widgets_layout_init(gp_widget *layout, const char *win_tittle)
 	ctx.buf = backend->pixmap;
 	ctx.pixel_type = backend->pixmap->pixel_type;
 
-	ctx.bg_color = gp_rgb_to_pixmap_pixel(0xdd, 0xdd, 0xdd, ctx.buf);
-	ctx.fg_color = gp_rgb_to_pixmap_pixel(0xee, 0xee, 0xee, ctx.buf);
-	ctx.fg2_color = gp_rgb_to_pixmap_pixel(0x77, 0xbb, 0xff, ctx.buf);
-	ctx.sel_color = gp_rgb_to_pixmap_pixel(0x11, 0x99, 0xff, ctx.buf);
-	ctx.alert_color = gp_rgb_to_pixmap_pixel(0xff, 0x55, 0x00, ctx.buf);
-	ctx.accept_color = gp_rgb_to_pixmap_pixel(0x00, 0xbb, 0x00, ctx.buf);
-	ctx.warn_color = gp_rgb_to_pixmap_pixel(0xfc, 0xd1, 0x2a, ctx.buf);
+	ctx.color_scheme = GP_WIDGET_COLOR_SCHEME_DEFAULT;
+
+	widgets_color_scheme_load();
+
 	fill_color = gp_rgb_to_pixmap_pixel(0x44, 0x44, 0x44, ctx.buf);
 
 	gp_widget_calc_size(layout, &ctx, 0, 0, 1);
@@ -434,6 +442,10 @@ int gp_widgets_event(gp_event *ev, gp_widget *layout)
 			break;
 			case GP_KEY_DOWN:
 				gp_widget_render_zoom(-1);
+				handled = 1;
+			break;
+			case GP_KEY_SPACE:
+				gp_widgets_color_scheme_toggle();
 				handled = 1;
 			break;
 			}

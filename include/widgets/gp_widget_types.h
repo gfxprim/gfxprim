@@ -15,6 +15,7 @@ typedef struct gp_widget_event gp_widget_event;
 typedef struct gp_widget gp_widget;
 typedef struct gp_dialog gp_dialog;
 typedef struct gp_widget_size gp_widget_size;
+typedef struct gp_widget_render_ctx gp_widget_render_ctx;
 typedef uint32_t gp_widget_tattr;
 
 #endif /* GP_WIDGET_TYPES_H */
