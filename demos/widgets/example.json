@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "rows": 8,
+  "rows": 9,
   "widgets": [
     {
       "type": "label",
@@ -41,6 +41,7 @@
       ],
       "selected": 1
     },
+    {"type": "color_scheme_switch"},
     {
       "type": "button",
       "label": "Button",

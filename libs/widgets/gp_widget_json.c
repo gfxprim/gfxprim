@@ -18,15 +18,39 @@
 #include <widgets/gp_widgets.h>
 #include <widgets/gp_widget_ops.h>
 
-static gp_widget *load_widget_by_ops(const struct gp_widget_ops *ops,
-                                     gp_json_buf *json, gp_json_val *val, gp_htable **uids)
+static gp_widget *color_scheme_switch_from_json(gp_json_buf *json, gp_json_val *val, gp_htable **uids)
 {
-	if (!ops->from_json) {
-		GP_WARN("Unimplemented from_json for widget '%s'", ops->id);
-		return NULL;
+	(void) uids;
+
+	GP_JSON_OBJ_FILTER(json, val, NULL, gp_widget_json_attrs) {
 	}
 
-	return ops->from_json(json, val, uids);
+	return gp_widget_color_scheme_switch();
+}
+
+/*
+ * This implements loading widgets that are build on top of existing widgets
+ * and hence does not have widget ops registered. Which allows us to construct
+ * anything from json description as long as we have a function that takes json
+ * and returns a widget.
+ */
+static struct from_json {
+	const char *type;
+	gp_widget *(*from_json)(gp_json_buf *json, gp_json_val *val, gp_htable **uids);
+} json_loaders[] = {
+	{"color_scheme_switch", color_scheme_switch_from_json}
+};
+
+static void *json_loader_by_type(const char *type)
+{
+	unsigned int i;
+
+	for (i = 0; i < GP_ARRAY_SIZE(json_loaders); i++) {
+		if (!strcmp(type, json_loaders[i].type))
+			return json_loaders[i].from_json;
+	}
+
+	return NULL;
 }
 
 enum keys {
@@ -63,13 +87,14 @@ extern struct gp_widget_ops gp_widget_grid_ops;
 gp_widget *gp_widget_from_json(gp_json_buf *json, gp_json_val *val,
                                gp_htable **uids)
 {
-	const struct gp_widget_ops *ops = &gp_widget_grid_ops;
+	const struct gp_widget_ops *ops;
 	char *uid = NULL;
 	unsigned int halign = 0;
 	unsigned int valign = 0;
 	unsigned int shrink_set = 0;
 	unsigned int shrink;
 	int (*on_event)(gp_widget_event *) = NULL;
+	gp_widget *(*from_json)(gp_json_buf *, gp_json_val *, gp_htable **) = gp_widget_grid_ops.from_json;
 
 	if (val->type == GP_JSON_NULL)
 		return NULL;
@@ -139,10 +164,20 @@ gp_widget *gp_widget_from_json(gp_json_buf *json, gp_json_val *val,
 			}
 
 			ops = gp_widget_ops_by_id(val->val_str);
+			if (ops) {
+				from_json = ops->from_json;
 
-			if (!ops) {
-				GP_WARN("Invalid widget type '%s'", val->val_str);
-				goto skip;
+				if (!from_json) {
+					GP_WARN("Unimplemented from_json for widget '%s'", ops->id);
+					goto skip;
+				}
+			} else {
+				from_json = json_loader_by_type(val->val_str);
+
+				if (!from_json) {
+					GP_WARN("Invalid widget type '%s'", val->val_str);
+					goto skip;
+				}
 			}
 		break;
 		case UID:
@@ -179,7 +214,10 @@ gp_widget *gp_widget_from_json(gp_json_buf *json, gp_json_val *val,
 
 	gp_json_state_load(json, obj_start);
 
-	gp_widget *wid = load_widget_by_ops(ops, json, val, uids);
+	if (!from_json)
+		return NULL;
+
+	gp_widget *wid = from_json(json, val, uids);
 	if (!wid)
 		return NULL;
 
