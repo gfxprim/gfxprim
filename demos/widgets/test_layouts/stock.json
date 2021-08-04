@@ -207,10 +207,8 @@
    "type": "stock",
    "stock": "shuffle_off"
   },
-  {
-  },
-  {
-  },
+  {"type": "stock", "stock": "day"},
+  {"type": "stock", "stock": "night"},
   {
    "type": "label",
    "text": "STOCK_ARROW_UP",
@@ -241,9 +239,7 @@
    "text": "STOCK_SHUFFLE_OFF",
    "halign": "left"
   },
-  {
-  },
-  {
-  }
+  {"type": "label", "text": "STOCK_DAY", "halign": "left"},
+  {"type": "label", "text": "STOCK_NIGHT", "halign": "left"}
  ]
 }

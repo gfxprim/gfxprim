@@ -766,6 +766,74 @@ static void render_stock_shuffle_on(gp_pixmap *pix,
 	gp_fill_polygon(pix, GP_ARRAY_SIZE(poly_2)/2, poly_2, ctx->text_color);
 }
 
+static void render_stock_day(gp_pixmap *pix,
+                             gp_coord x, gp_coord y,
+                             gp_size w, gp_size h, gp_pixel bg_col,
+                             enum gp_widget_stock_type type,
+                             const gp_widget_render_ctx *ctx)
+{
+	gp_pixel col = type & GP_WIDGET_STOCK_FOCUSED ? ctx->sel_color : ctx->text_color;
+	gp_coord cx = x + w/2;
+	gp_coord cy = y + h/2;
+	gp_size sp = GP_MAX(4u, GP_MIN(w, h)/8);
+
+	gp_size r = (GP_MIN(w, h)+2)/4;
+	gp_size r2 = (GP_MIN(w, h) - 2*r - 2*sp + 3)/4;
+	gp_size l = r + sp + (r2+1)/2;
+
+	if (r2 <= 1)
+		l--;
+
+	gp_fill_rect_xywh(pix, x, y, w, h, bg_col);
+
+	gp_fill_circle(pix, cx, cy, r-1, col);
+
+	gp_fill_circle(pix, cx+l, cy, r2, col);
+	gp_fill_circle(pix, cx+l-1, cy, r2, col);
+
+	gp_fill_circle(pix, cx-l, cy, r2, col);
+	gp_fill_circle(pix, cx-l+1, cy, r2, col);
+
+	gp_fill_circle(pix, cx, cy+l, r2, col);
+	gp_fill_circle(pix, cx, cy+l-1, r2, col);
+
+	gp_fill_circle(pix, cx, cy-l, r2, col);
+	gp_fill_circle(pix, cx, cy-l+1, r2, col);
+
+	gp_size lxy = l/1.41 + 0.5;
+
+	gp_fill_circle(pix, cx+lxy-1, cy+lxy-1, r2, col);
+	gp_fill_circle(pix, cx+lxy, cy+lxy, r2, col);
+
+	gp_fill_circle(pix, cx-lxy+1, cy+lxy-1, r2, col);
+	gp_fill_circle(pix, cx-lxy, cy+lxy, r2, col);
+
+	gp_fill_circle(pix, cx+lxy-1, cy-lxy+1, r2, col);
+	gp_fill_circle(pix, cx+lxy, cy-lxy, r2, col);
+
+	gp_fill_circle(pix, cx-lxy+1, cy-lxy+1, r2, col);
+	gp_fill_circle(pix, cx-lxy, cy-lxy, r2, col);
+}
+
+static void render_stock_night(gp_pixmap *pix,
+                               gp_coord x, gp_coord y,
+                               gp_size w, gp_size h, gp_pixel bg_col,
+                               enum gp_widget_stock_type type,
+                               const gp_widget_render_ctx *ctx)
+{
+	gp_pixel col = type & GP_WIDGET_STOCK_FOCUSED ? ctx->sel_color : ctx->text_color;
+
+	gp_coord cx = x + w/2;
+	gp_coord cy = y + h/2;
+
+	gp_size r = 2*GP_MIN(w, h)/5;
+
+	gp_fill_rect_xywh(pix, x, y, w, h, bg_col);
+
+	gp_fill_circle(pix, cx, cy, r, col);
+	gp_fill_circle_seg(pix, cx+r, cy, r, GP_CIRCLE_SEG2 | GP_CIRCLE_SEG3, bg_col);
+}
+
 static void widget_stock_render(gp_pixmap *pix, enum gp_widget_stock_type type,
                                 gp_coord x, gp_coord y, gp_size w, gp_size h,
                                 gp_pixel bg_col, const gp_widget_render_ctx *ctx)
@@ -826,6 +894,12 @@ static void widget_stock_render(gp_pixmap *pix, enum gp_widget_stock_type type,
 	break;
 	case GP_WIDGET_STOCK_SHUFFLE_OFF:
 		render_stock_shuffle_off(pix, x, y, w, h, bg_col, ctx);
+	break;
+	case GP_WIDGET_STOCK_DAY:
+		render_stock_day(pix, x, y, w, h, bg_col, type, ctx);
+	break;
+	case GP_WIDGET_STOCK_NIGHT:
+		render_stock_night(pix, x, y, w, h, bg_col, type, ctx);
 	break;
 	}
 
@@ -909,6 +983,9 @@ static struct stock_types {
 	{"arrow_down", GP_WIDGET_STOCK_ARROW_DOWN},
 	{"arrow_left", GP_WIDGET_STOCK_ARROW_LEFT},
 	{"arrow_right", GP_WIDGET_STOCK_ARROW_RIGHT},
+
+	{"day", GP_WIDGET_STOCK_DAY},
+	{"night", GP_WIDGET_STOCK_NIGHT},
 };
 
 static int gp_widget_stock_type_from_str(const char *type)
