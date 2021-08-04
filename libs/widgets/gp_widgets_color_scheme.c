@@ -9,8 +9,12 @@
 #include <core/gp_debug.h>
 #include <widgets/gp_widget_render.h>
 #include <widgets/gp_widgets_color_scheme.h>
+#include <widgets/gp_widget.h>
+#include <widgets/gp_widget_stock.h>
 
 #include "gp_widgets_internal.h"
+
+static gp_widget *theme_switch;
 
 struct color {
 	uint8_t r, g, b;
@@ -83,6 +87,29 @@ void __attribute__((visibility ("hidden"))) widgets_color_scheme_load(void)
 	RGB_TO_COLOR(ctx, scheme, warn_color);
 }
 
+static enum gp_widget_stock_type scheme_to_type(void)
+{
+	switch (ctx.color_scheme) {
+	case GP_WIDGET_COLOR_SCHEME_DEFAULT:
+	case GP_WIDGET_COLOR_SCHEME_LIGHT:
+		return GP_WIDGET_STOCK_DAY;
+	break;
+	case GP_WIDGET_COLOR_SCHEME_DARK:
+		return GP_WIDGET_STOCK_NIGHT;
+	break;
+	default:
+		return GP_WIDGET_STOCK_ERR;
+	}
+}
+
+static void theme_switch_update(void)
+{
+	if (!theme_switch)
+		return;
+
+	gp_widget_stock_type_set(theme_switch, scheme_to_type());
+}
+
 void gp_widgets_color_scheme_toggle(void)
 {
 	if (ctx.color_scheme == GP_WIDGET_COLOR_SCHEME_LIGHT)
@@ -90,6 +117,7 @@ void gp_widgets_color_scheme_toggle(void)
 	else
 		ctx.color_scheme = GP_WIDGET_COLOR_SCHEME_LIGHT;
 
+	theme_switch_update();
 	widgets_color_scheme_load();
 	widget_render_refresh();
 }
@@ -116,4 +144,36 @@ void gp_widgets_color_scheme_set(enum gp_widgets_color_scheme color_scheme)
 enum gp_widgets_color_scheme gp_widgets_color_scheme_get(void)
 {
 	return ctx.color_scheme;
+}
+
+static int theme_switch_on_event(gp_widget_event *ev)
+{
+	switch (ev->type) {
+	case GP_WIDGET_EVENT_WIDGET:
+		gp_widgets_color_scheme_toggle();
+	break;
+	case GP_WIDGET_EVENT_FREE:
+		theme_switch = NULL;
+	break;
+	}
+
+	return 0;
+}
+
+gp_widget *gp_widget_color_scheme_switch(void)
+{
+	gp_widget *ret;
+
+	if (theme_switch)
+		return NULL;
+
+	ret = gp_widget_stock_new(scheme_to_type(), GP_WIDGET_SIZE_DEFAULT);
+	if (!ret)
+		return NULL;
+
+	gp_widget_event_handler_set(ret, theme_switch_on_event, NULL);
+
+	theme_switch = ret;
+
+	return ret;
 }

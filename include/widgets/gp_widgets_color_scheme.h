@@ -37,4 +37,9 @@ void gp_widgets_color_scheme_set(enum gp_widgets_color_scheme color_scheme);
  */
 enum gp_widgets_color_scheme gp_widgets_color_scheme_get(void);
 
+/*
+ * Creates a new color scheme switch widget.
+ */
+gp_widget *gp_widget_color_scheme_switch(void);
+
 #endif /* GP_WIDGETS_COLOR_SCHEME_H */
