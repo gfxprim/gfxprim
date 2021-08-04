@@ -753,7 +753,7 @@ static int obj_next_filter(struct gp_json_buf *buf, struct gp_json_val *res,
 		if (copy_id_str(buf, res->id, sizeof(res->id)))
 			return 0;
 
-		res->idx = gp_json_obj_lookup(obj, res->id);
+		res->idx = obj ? gp_json_obj_lookup(obj, res->id) : (size_t)-1;
 
 		if (res->idx != (size_t)-1) {
 			if (!get_value(buf, res))
