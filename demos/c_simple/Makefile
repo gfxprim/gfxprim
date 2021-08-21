@@ -7,14 +7,16 @@ SDL2_CONFIG=$(shell which sdl2-config 2>/dev/null)
 SDL_CONFIG=$(shell which sdl-config 2>/dev/null)
 
 ifeq ($(SDL_CONFIG),)
-FILTER_OUT+=SDL_glue
+FILTER_OUT+=SDL_glue.c
+$(info Disabling SDL_glue)
 endif
 
 ifeq ($(SDL2_CONFIG),)
-FILTER_OUT+=SDL2_glue
+FILTER_OUT+=SDL2_glue.c
+$(info Disabling SDL2_glue)
 endif
 
-CSOURCES=$(filter-out $FILTER_OUT, $(SOURCES))
+CSOURCES=$(filter-out $(FILTER_OUT), $(SOURCES))
 
 INCLUDE=
 LDLIBS+=-lrt -lgfxprim
