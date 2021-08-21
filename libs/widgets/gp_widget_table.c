@@ -421,9 +421,48 @@ static int header_click(gp_widget *self, const gp_widget_render_ctx *ctx, unsign
 		tbl->sorted_by_col = i;
 
 	tbl->sort(self, tbl->sorted_by_col, tbl->sorted_desc);
-
 	gp_widget_redraw(self);
+
 	return 1;
+}
+
+void gp_widget_table_sort_by(gp_widget *self, unsigned int col, int desc)
+{
+	GP_WIDGET_ASSERT(self, GP_WIDGET_TABLE, );
+
+	gp_widget_table *tbl = self->tbl;
+
+	int sort = 0;
+
+	if (col >= tbl->cols) {
+		GP_WARN("Column %u out of table, max = %u", col, tbl->cols);
+		return;
+	}
+
+	if (!tbl->header[col].sortable) {
+		GP_WARN("Column %u not sortable", col);
+		return;
+	}
+
+	if (!tbl->sort) {
+		GP_WARN("No sort function defined!");
+		return;
+	}
+
+	if (tbl->sorted_by_col != col) {
+		tbl->sorted_by_col = col;
+		sort = 1;
+	}
+
+	if (tbl->sorted_desc != !!desc) {
+		tbl->sorted_desc = !!desc;
+		sort = 1;
+	}
+
+	if (sort) {
+		tbl->sort(self, tbl->sorted_by_col, tbl->sorted_desc);
+		gp_widget_redraw(self);
+	}
 }
 
 static int row_click(gp_widget *self, const gp_widget_render_ctx *ctx, gp_event *ev)
@@ -606,6 +645,45 @@ static gp_widget_table_header *parse_header(gp_json_buf *json, gp_json_val *val,
 	return header;
 }
 
+enum sort_keys {
+	COL,
+	ORDER,
+};
+
+static const gp_json_obj_attr sort_attrs[] = {
+	GP_JSON_OBJ_ATTR("col", GP_JSON_INT),
+	GP_JSON_OBJ_ATTR("order", GP_JSON_STR),
+};
+
+static const gp_json_obj sort_obj_filter = {
+	.attrs = sort_attrs,
+	.attr_cnt = GP_ARRAY_SIZE(sort_attrs),
+};
+
+static void parse_sort_by(gp_json_buf *json, gp_json_val *val,
+                          int *sort_by_col, int *desc)
+{
+	GP_JSON_OBJ_FILTER(json, val, &sort_obj_filter, NULL) {
+		switch (val->idx) {
+		case COL:
+			if (val->val_int < 0)
+				gp_json_warn(json, "Column must be >= 0");
+			else
+				*sort_by_col = val->val_int;
+		break;
+		case ORDER:
+			if (!strcmp(val->val_str, "asc")) {
+				*desc = 0;
+			} else if (!strcmp(val->val_str, "desc")) {
+				*desc = 1;
+			} else {
+				gp_json_warn(json, "Wrong order expected 'asc' or 'desc'");
+			}
+		break;
+		}
+	}
+}
+
 enum keys {
 	COLS,
 	GET_ELEM,
@@ -613,6 +691,7 @@ enum keys {
 	MIN_ROWS,
 	SET_ROW,
 	SORT,
+	SORT_BY,
 };
 
 static const gp_json_obj_attr attrs[] = {
@@ -622,6 +701,7 @@ static const gp_json_obj_attr attrs[] = {
 	GP_JSON_OBJ_ATTR("min_rows", GP_JSON_INT),
 	GP_JSON_OBJ_ATTR("set_row", GP_JSON_STR),
 	GP_JSON_OBJ_ATTR("sort", GP_JSON_STR),
+	GP_JSON_OBJ_ATTR("sort_by", GP_JSON_OBJ),
 };
 
 static const gp_json_obj obj_filter = {
@@ -634,6 +714,7 @@ static gp_widget *json_to_table(gp_json_buf *json, gp_json_val *val, gp_htable *
 	int cols = -1, min_rows = -1;
 	void *set_row = NULL, *get_elem = NULL, *sort = NULL;
 	gp_widget_table_header *table_header = NULL;
+	int sort_by_col = -1, desc = 0;
 
 	(void)uids;
 
@@ -653,6 +734,9 @@ static gp_widget *json_to_table(gp_json_buf *json, gp_json_val *val, gp_htable *
 		break;
 		case SORT:
 			sort = gp_widget_callback_addr(val->val_str);
+		break;
+		case SORT_BY:
+			parse_sort_by(json, val, &sort_by_col, &desc);
 		break;
 		case HEADER:
 			table_header = parse_header(json, val, &cols);
@@ -689,6 +773,9 @@ static gp_widget *json_to_table(gp_json_buf *json, gp_json_val *val, gp_htable *
 
 	table->tbl->free = table_header;
 	table->tbl->sort = sort;
+
+	if (sort_by_col >= 0)
+		gp_widget_table_sort_by(table, sort_by_col, desc);
 
 	return table;
 err:

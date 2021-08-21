@@ -70,6 +70,8 @@ gp_widget *gp_widget_table_new(unsigned int cols, unsigned int min_rows,
                                gp_widget_table_cell *(get)(struct gp_widget *self,
                                                            unsigned int col));
 
+void gp_widget_table_sort_by(gp_widget *self, unsigned int col, int desc);
+
 /*
  * Called when table content has changed and table needs to be rerendered.
  */
