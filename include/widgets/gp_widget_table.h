@@ -15,18 +15,19 @@ enum gp_widget_table_row_op {
 	GP_TABLE_ROW_TELL,
 };
 
-typedef struct gp_widget_table_header {
-	char *label;
-	int sortable:1;
-	gp_widget_tattr tattr;
-	unsigned int col_min_size;
-	unsigned int col_fill;
-} gp_widget_table_header;
-
 typedef struct gp_widget_table_cell {
 	const char *text;
 	gp_widget_tattr tattr;
 } gp_widget_table_cell;
+
+typedef struct gp_widget_table_header {
+	char *label;
+	gp_widget_tattr tattr;
+	unsigned int col_min_size;
+	unsigned int col_fill;
+	int (*get)(gp_widget *self, gp_widget_table_cell *cell);
+	void (*sort)(struct gp_widget *self, int desc);
+} gp_widget_table_header;
 
 typedef struct gp_widget_table {
 	unsigned int cols;
@@ -53,10 +54,8 @@ typedef struct gp_widget_table {
 		void *row_priv;
 		unsigned long row_idx;
 	};
-	int (*row)(struct gp_widget *self, int op, unsigned int pos);
-	gp_widget_table_cell *(*get)(struct gp_widget *self, unsigned int col);
 
-	void (*sort)(struct gp_widget *self, unsigned int col, int desc);
+	int (*seek_row)(struct gp_widget *self, int op, unsigned int pos);
 
 	void *free;
 
@@ -65,10 +64,8 @@ typedef struct gp_widget_table {
 
 gp_widget *gp_widget_table_new(unsigned int cols, unsigned int min_rows,
                                const gp_widget_table_header *headers,
-                               int (*row)(struct gp_widget *self,
-                                          int op, unsigned int pos),
-                               gp_widget_table_cell *(get)(struct gp_widget *self,
-                                                           unsigned int col));
+                               int (*seek_row)(struct gp_widget *self,
+                                               int op, unsigned int pos));
 
 void gp_widget_table_sort_by(gp_widget *self, unsigned int col, int desc);
 

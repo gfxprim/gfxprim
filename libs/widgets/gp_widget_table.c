@@ -23,7 +23,7 @@ static unsigned int header_min_w(gp_widget_table *tbl,
 	if (label)
 		text_size += gp_text_width(font, label);
 
-	if (tbl->header[col].sortable)
+	if (tbl->header[col].sort)
 		text_size += ctx->padd + gp_text_ascent(ctx->font);
 
 	return text_size;
@@ -125,7 +125,7 @@ static unsigned int header_render(gp_widget *self, gp_coord x, gp_coord y,
 			break;
 		}
 
-		if (tbl->header[i].sortable) {
+		if (tbl->header[i].sort) {
 			render_header = 1;
 			break;
 		}
@@ -137,7 +137,7 @@ static unsigned int header_render(gp_widget *self, gp_coord x, gp_coord y,
 	for (i = 0; i < tbl->cols; i++) {
 		unsigned int ex = cx + tbl->cols_w[i];
 
-		if (tbl->header[i].sortable) {
+		if (tbl->header[i].sort) {
 			gp_size sym_size = text_a/3;
 			gp_size sx = cx + tbl->cols_w[i] - ctx->padd;
 			gp_size sy = cy + text_a/2;
@@ -189,16 +189,16 @@ static unsigned int last_row(gp_widget *self)
 {
 	int ret;
 
-	ret = self->tbl->row(self, GP_TABLE_ROW_TELL, 0);
+	ret = self->tbl->seek_row(self, GP_TABLE_ROW_TELL, 0);
 	if (ret >= 0)
 		return ret;
 
 	ret = 0;
 
-	if (!self->tbl->row(self, GP_TABLE_ROW_RESET, 0))
+	if (!self->tbl->seek_row(self, GP_TABLE_ROW_RESET, 0))
 		return 0;
 
-	while (self->tbl->row(self, GP_TABLE_ROW_ADVANCE, 1))
+	while (self->tbl->seek_row(self, GP_TABLE_ROW_ADVANCE, 1))
 		ret++;
 
 	return ret + 1;
@@ -237,8 +237,8 @@ static void render(gp_widget *self, const gp_offset *offset,
 	if (tbl->start_row > tbl->last_rows)
 		tbl->start_row = 0;
 
-	tbl->row(self, GP_TABLE_ROW_RESET, 0);
-	tbl->row(self, GP_TABLE_ROW_ADVANCE, tbl->start_row);
+	tbl->seek_row(self, GP_TABLE_ROW_RESET, 0);
+	tbl->seek_row(self, GP_TABLE_ROW_ADVANCE, tbl->start_row);
 
 	unsigned int cur_row = tbl->start_row;
 	unsigned int rows = display_rows(self, ctx);
@@ -266,16 +266,25 @@ static void render(gp_widget *self, const gp_offset *offset,
 
 		if (cur_row < tbl->last_rows) {
 			for (j = 0; j < tbl->cols; j++) {
-				gp_widget_table_cell *cell = tbl->get(self, j);
-				const gp_text_style *font = gp_widget_tattr_font(cell->tattr & ~GP_TATTR_LARGE, ctx);
-				int halign = gp_widget_tattr_halign(cell->tattr);
+				const gp_text_style *font;
+				int halign;
+				gp_widget_table_cell cell = {};
+
+				if (!tbl->header[j].get)
+					continue;
+
+				if (!tbl->header[j].get(self, &cell))
+					continue;
+
+				font = gp_widget_tattr_font(cell.tattr & ~GP_TATTR_LARGE, ctx);
+				halign = gp_widget_tattr_halign(cell.tattr);
 
 				if (!halign)
 					halign = GP_ALIGN_LEFT;
 
 				gp_text_fit(ctx->buf, font, cx, cy, tbl->cols_w[j],
 				            halign|GP_VALIGN_BELOW,
-					    ctx->text_color, bg_col, cell->text);
+					    ctx->text_color, bg_col, cell.text);
 
 				cx += tbl->cols_w[j] + ctx->padd;
 
@@ -290,7 +299,7 @@ static void render(gp_widget *self, const gp_offset *offset,
 
 		cy += text_a + ctx->padd;
 
-		tbl->row(self, GP_TABLE_ROW_ADVANCE, 1);
+		tbl->seek_row(self, GP_TABLE_ROW_ADVANCE, 1);
 		cur_row++;
 
 		gp_hline_xyw(ctx->buf, x+1, cy - ctx->padd/2, w-2, ctx->bg_color);
@@ -413,20 +422,15 @@ static int header_click(gp_widget *self, const gp_widget_render_ctx *ctx, unsign
 			break;
 	}
 
-	if (!tbl->header[i].sortable)
+	if (!tbl->header[i].sort)
 		return 0;
-
-	if (!tbl->sort) {
-		GP_BUG("No sort fuction defined!");
-		return 1;
-	}
 
 	if (tbl->sorted_by_col == i)
 		tbl->sorted_desc = !tbl->sorted_desc;
 	else
 		tbl->sorted_by_col = i;
 
-	tbl->sort(self, tbl->sorted_by_col, tbl->sorted_desc);
+	tbl->header[i].sort(self, tbl->sorted_desc);
 	gp_widget_redraw(self);
 
 	return 1;
@@ -445,13 +449,8 @@ void gp_widget_table_sort_by(gp_widget *self, unsigned int col, int desc)
 		return;
 	}
 
-	if (!tbl->header[col].sortable) {
+	if (!tbl->header[col].sort) {
 		GP_WARN("Column %u not sortable", col);
-		return;
-	}
-
-	if (!tbl->sort) {
-		GP_WARN("No sort function defined!");
 		return;
 	}
 
@@ -466,7 +465,7 @@ void gp_widget_table_sort_by(gp_widget *self, unsigned int col, int desc)
 	}
 
 	if (sort) {
-		tbl->sort(self, tbl->sorted_by_col, tbl->sorted_desc);
+		tbl->header[col].sort(self, tbl->sorted_desc);
 		gp_widget_redraw(self);
 	}
 }
@@ -572,26 +571,47 @@ static void free_header(gp_widget_table_header *header, unsigned int cols)
 
 enum header_keys {
 	FILL,
+	GET,
 	LABEL,
 	MIN_SIZE,
-	SORTABLE,
+	ORDER,
+	SORT,
 	TATTR
 };
 
 static const gp_json_obj_attr header_attrs[] = {
 	GP_JSON_OBJ_ATTR("fill", GP_JSON_INT),
+	GP_JSON_OBJ_ATTR("get", GP_JSON_STR),
 	GP_JSON_OBJ_ATTR("label", GP_JSON_STR),
 	GP_JSON_OBJ_ATTR("min_size", GP_JSON_INT),
-	GP_JSON_OBJ_ATTR("sortable", GP_JSON_BOOL),
+	GP_JSON_OBJ_ATTR("order", GP_JSON_STR),
+	GP_JSON_OBJ_ATTR("sort", GP_JSON_STR),
 	GP_JSON_OBJ_ATTR("tattr", GP_JSON_STR),
 };
+
+static int parse_order(gp_json_buf *json, gp_json_val *val, int *desc)
+{
+	if (!strcmp(val->val_str, "asc")) {
+		*desc = 0;
+		return 1;
+	}
+
+	if (!strcmp(val->val_str, "desc")) {
+		*desc = 1;
+		return 1;
+	}
+
+	gp_json_warn(json, "Wrong order expected 'asc' or 'desc'");
+	return 0;
+}
 
 static const gp_json_obj header_obj_filter = {
 	.attrs = header_attrs,
 	.attr_cnt = GP_ARRAY_SIZE(header_attrs),
 };
 
-static gp_widget_table_header *parse_header(gp_json_buf *json, gp_json_val *val, int *cols)
+static gp_widget_table_header *parse_header(gp_json_buf *json, gp_json_val *val,
+                                            int *cols, int *sort_by_col, int *desc)
 {
 	gp_json_state state = gp_json_state_start(json);
 	gp_widget_table_header *header;
@@ -638,14 +658,25 @@ static gp_widget_table_header *parse_header(gp_json_buf *json, gp_json_val *val,
 			case FILL:
 				header[cnt].col_fill = val->val_int;
 			break;
+			case GET:
+				header[cnt].get = gp_widget_callback_addr(val->val_str);
+			break;
 			case LABEL:
 				header[cnt].label = strdup(val->val_str);
 			break;
 			case MIN_SIZE:
 				header[cnt].col_min_size = val->val_int;
 			break;
-			case SORTABLE:
-				header[cnt].sortable = val->val_bool;
+			case SORT:
+				header[cnt].sort = gp_widget_callback_addr(val->val_str);
+			break;
+			case ORDER:
+				if (*sort_by_col != -1) {
+					gp_json_warn(json, "Default sort column already set");
+				} else {
+					if (parse_order(json, val, desc))
+						*sort_by_col = cnt;
+				}
 			break;
 			case TATTR:
 				if (gp_widget_tattr_parse(val->val_str, &header[cnt].tattr, ~GP_TATTR_LARGE & (GP_TATTR_FONT | GP_TATTR_HALIGN)))
@@ -660,63 +691,18 @@ static gp_widget_table_header *parse_header(gp_json_buf *json, gp_json_val *val,
 	return header;
 }
 
-enum sort_keys {
-	COL,
-	ORDER,
-};
-
-static const gp_json_obj_attr sort_attrs[] = {
-	GP_JSON_OBJ_ATTR("col", GP_JSON_INT),
-	GP_JSON_OBJ_ATTR("order", GP_JSON_STR),
-};
-
-static const gp_json_obj sort_obj_filter = {
-	.attrs = sort_attrs,
-	.attr_cnt = GP_ARRAY_SIZE(sort_attrs),
-};
-
-static void parse_sort_by(gp_json_buf *json, gp_json_val *val,
-                          int *sort_by_col, int *desc)
-{
-	GP_JSON_OBJ_FILTER(json, val, &sort_obj_filter, NULL) {
-		switch (val->idx) {
-		case COL:
-			if (val->val_int < 0)
-				gp_json_warn(json, "Column must be >= 0");
-			else
-				*sort_by_col = val->val_int;
-		break;
-		case ORDER:
-			if (!strcmp(val->val_str, "asc")) {
-				*desc = 0;
-			} else if (!strcmp(val->val_str, "desc")) {
-				*desc = 1;
-			} else {
-				gp_json_warn(json, "Wrong order expected 'asc' or 'desc'");
-			}
-		break;
-		}
-	}
-}
-
 enum keys {
 	COLS,
-	GET_ELEM,
 	HEADER,
 	MIN_ROWS,
 	SET_ROW,
-	SORT,
-	SORT_BY,
 };
 
 static const gp_json_obj_attr attrs[] = {
 	GP_JSON_OBJ_ATTR("cols", GP_JSON_INT),
-	GP_JSON_OBJ_ATTR("get_elem", GP_JSON_STR),
 	GP_JSON_OBJ_ATTR("header", GP_JSON_ARR),
 	GP_JSON_OBJ_ATTR("min_rows", GP_JSON_INT),
 	GP_JSON_OBJ_ATTR("set_row", GP_JSON_STR),
-	GP_JSON_OBJ_ATTR("sort", GP_JSON_STR),
-	GP_JSON_OBJ_ATTR("sort_by", GP_JSON_OBJ),
 };
 
 static const gp_json_obj obj_filter = {
@@ -727,7 +713,7 @@ static const gp_json_obj obj_filter = {
 static gp_widget *json_to_table(gp_json_buf *json, gp_json_val *val, gp_htable **uids)
 {
 	int cols = -1, min_rows = -1;
-	void *set_row = NULL, *get_elem = NULL, *sort = NULL;
+	void *set_row = NULL;
 	gp_widget_table_header *table_header = NULL;
 	int sort_by_col = -1, desc = 0;
 
@@ -744,17 +730,8 @@ static gp_widget *json_to_table(gp_json_buf *json, gp_json_val *val, gp_htable *
 		case SET_ROW:
 			set_row = gp_widget_callback_addr(val->val_str);
 		break;
-		case GET_ELEM:
-			get_elem = gp_widget_callback_addr(val->val_str);
-		break;
-		case SORT:
-			sort = gp_widget_callback_addr(val->val_str);
-		break;
-		case SORT_BY:
-			parse_sort_by(json, val, &sort_by_col, &desc);
-		break;
 		case HEADER:
-			table_header = parse_header(json, val, &cols);
+			table_header = parse_header(json, val, &cols, &sort_by_col, &desc);
 		break;
 		}
 	}
@@ -777,17 +754,11 @@ static gp_widget *json_to_table(gp_json_buf *json, gp_json_val *val, gp_htable *
 		goto err;
 	}
 
-	if (!get_elem) {
-		gp_json_warn(json, "Invalid or missing get_elem callback!");
-		goto err;
-	}
-
-	gp_widget *table = gp_widget_table_new(cols, min_rows, table_header, set_row, get_elem);
+	gp_widget *table = gp_widget_table_new(cols, min_rows, table_header, set_row);
 	if (!table)
 		goto err;
 
 	table->tbl->free = table_header;
-	table->tbl->sort = sort;
 
 	if (sort_by_col >= 0)
 		gp_widget_table_sort_by(table, sort_by_col, desc);
@@ -819,10 +790,8 @@ struct gp_widget_ops gp_widget_table_ops = {
 
 gp_widget *gp_widget_table_new(unsigned int cols, unsigned int min_rows,
                                const gp_widget_table_header *header,
-                               int (*row)(struct gp_widget *self,
-                                          int op, unsigned int pos),
-                               gp_widget_table_cell *(get)(struct gp_widget *self,
-                                                           unsigned int col))
+                               int (*seek_row)(struct gp_widget *self,
+                                               int op, unsigned int pos))
 {
 	gp_widget *ret;
 	size_t size = sizeof(struct gp_widget_table);
@@ -839,8 +808,7 @@ gp_widget *gp_widget_table_new(unsigned int cols, unsigned int min_rows,
 	ret->tbl->cols_w = (void*)ret->tbl->buf;
 	ret->tbl->header = header;
 
-	ret->tbl->get = get;
-	ret->tbl->row = row;
+	ret->tbl->seek_row = seek_row;
 
 	return ret;
 }

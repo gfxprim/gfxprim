@@ -47,21 +47,33 @@ static int redraw_table(gp_widget_event *ev)
 	return 0;
 }
 
-static void sort_file_table(gp_widget *self, unsigned int col, int desc)
+static void sort_by_file_name(gp_widget *self, int desc)
 {
-	int sort_type = 0;
+	int sort_type = GP_DIR_SORT_BY_NAME;
 
-	switch (col) {
-	case 0:
-		sort_type = GP_DIR_SORT_BY_NAME;
-	break;
-	case 1:
-		sort_type = GP_DIR_SORT_BY_SIZE;
-	break;
-	case 2:
-		sort_type = GP_DIR_SORT_BY_MTIME;
-	break;
-	}
+	if (desc)
+		sort_type |= GP_DIR_SORT_DESC;
+	else
+		sort_type |= GP_DIR_SORT_ASC;
+
+	gp_dir_cache_sort(self->tbl->priv, sort_type);
+}
+
+static void sort_by_file_size(gp_widget *self, int desc)
+{
+	int sort_type = GP_DIR_SORT_BY_SIZE;
+
+	if (desc)
+		sort_type |= GP_DIR_SORT_DESC;
+	else
+		sort_type |= GP_DIR_SORT_ASC;
+
+	gp_dir_cache_sort(self->tbl->priv, sort_type);
+}
+
+static void sort_by_file_mtime(gp_widget *self, int desc)
+{
+	int sort_type = GP_DIR_SORT_BY_MTIME;
 
 	if (desc)
 		sort_type |= GP_DIR_SORT_DESC;
@@ -180,36 +192,53 @@ static int set_row(gp_widget *self, int op, unsigned int pos)
 	return 0;
 }
 
-static gp_widget_table_cell *get_elem(gp_widget *self, unsigned int col)
+enum file_attr {
+	FILE_NAME,
+	FILE_SIZE,
+	FILE_MOD_TIME,
+};
+
+static int get_elem(gp_widget *self, gp_widget_table_cell *cell, unsigned int col)
 {
 	static char buf[100];
-	static gp_widget_table_cell cell = {
-		.text = "",
-	};
-
 	gp_dir_cache *cache = self->tbl->priv;
 
 	gp_dir_entry *ent = gp_dir_cache_get(cache, self->tbl->row_idx);
 
 	if (!ent)
-		return &cell;
+		return 0;
 
 	switch (col) {
-	case 0:
-		cell.text = ent->name;
-		cell.tattr = GP_TATTR_LEFT;
+	case FILE_NAME:
+		cell->text = ent->name;
+		cell->tattr = GP_TATTR_LEFT;
 	break;
-	case 1:
-		cell.text = gp_str_file_size(buf, sizeof(buf), ent->size);
-		cell.tattr = GP_TATTR_RIGHT | GP_TATTR_MONO;
+	case FILE_SIZE:
+		cell->text = gp_str_file_size(buf, sizeof(buf), ent->size);
+		cell->tattr = GP_TATTR_RIGHT | GP_TATTR_MONO;
 	break;
-	case 2:
-		cell.text = gp_str_time_diff(buf, sizeof(buf), ent->mtime, time(NULL));
-		cell.tattr = GP_TATTR_LEFT;
+	case FILE_MOD_TIME:
+		cell->text = gp_str_time_diff(buf, sizeof(buf), ent->mtime, time(NULL));
+		cell->tattr = GP_TATTR_LEFT;
 	break;
 	}
 
-	return &cell;
+	return 1;
+}
+
+static int get_file_name(gp_widget *self, gp_widget_table_cell *cell)
+{
+	return get_elem(self, cell, FILE_NAME);
+}
+
+static int get_file_size(gp_widget *self, gp_widget_table_cell *cell)
+{
+	return get_elem(self, cell, FILE_SIZE);
+}
+
+static int get_file_mtime(gp_widget *self, gp_widget_table_cell *cell)
+{
+	return get_elem(self, cell, FILE_MOD_TIME);
 }
 
 static void exit_dialog(struct file_dialog *dialog, int retval)
@@ -332,9 +361,9 @@ static const char *get_path(const char *path)
 }
 
 static const gp_widget_table_header header[] = {
-	{.label = "File", .sortable = 1, .col_min_size = 20, .col_fill = 1},
-	{.label = "Size", .sortable = 1, .col_min_size = 7},
-	{.label = "Modified", .sortable = 1, .col_min_size = 7},
+	{.label = "File", .get = get_file_name, .sort = sort_by_file_name, .col_min_size = 20, .col_fill = 1},
+	{.label = "Size", .get = get_file_size, .sort = sort_by_file_size, .col_min_size = 7},
+	{.label = "Modified", .get = get_file_mtime, .sort = sort_by_file_mtime, .col_min_size = 7},
 };
 
 static int file_open_input_event(gp_dialog *self, gp_event *ev)
@@ -401,7 +430,7 @@ gp_dialog *gp_dialog_file_open_new(const char *path)
 
 	gp_widget_tbox_printf(dialog->dir_path, "%s", get_path(path));
 
-	gp_widget *table = gp_widget_table_new(3, 25, header, set_row, get_elem);
+	gp_widget *table = gp_widget_table_new(3, 25, header, set_row);
 	if (!table)
 		goto err1;
 
@@ -410,8 +439,6 @@ gp_dialog *gp_dialog_file_open_new(const char *path)
 	//TODO: Move to JSON!
 	table->align = GP_FILL;
 	table->tbl->priv = NULL;
-
-	table->tbl->sort = sort_file_table;
 
 	gp_widget_event_handler_set(table, table_on_event, dialog);
 
