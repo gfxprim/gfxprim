@@ -210,6 +210,20 @@ static void fix_selected_row(gp_widget_table *tbl)
 		tbl->selected_row = tbl->last_rows - 1;
 }
 
+static void render_cell(gp_widget_table_cell *cell, const gp_widget_render_ctx *ctx,
+                        gp_coord x, gp_coord y, gp_size w, gp_pixel bg_col)
+{
+	const gp_text_style *font = gp_widget_tattr_font(cell->tattr & ~GP_TATTR_LARGE, ctx);
+	int halign = gp_widget_tattr_halign(cell->tattr);
+
+	if (!halign)
+		halign = GP_ALIGN_LEFT;
+
+	gp_text_fit(ctx->buf, font, x, y, w,
+	            halign|GP_VALIGN_BELOW, ctx->text_color, bg_col, cell->text);
+
+}
+
 static void render(gp_widget *self, const gp_offset *offset,
                    const gp_widget_render_ctx *ctx, int flags)
 {
@@ -266,25 +280,12 @@ static void render(gp_widget *self, const gp_offset *offset,
 
 		if (cur_row < tbl->last_rows) {
 			for (j = 0; j < tbl->cols; j++) {
-				const gp_text_style *font;
-				int halign;
 				gp_widget_table_cell cell = {};
 
-				if (!tbl->header[j].get)
-					continue;
-
-				if (!tbl->header[j].get(self, &cell))
-					continue;
-
-				font = gp_widget_tattr_font(cell.tattr & ~GP_TATTR_LARGE, ctx);
-				halign = gp_widget_tattr_halign(cell.tattr);
-
-				if (!halign)
-					halign = GP_ALIGN_LEFT;
-
-				gp_text_fit(ctx->buf, font, cx, cy, tbl->cols_w[j],
-				            halign|GP_VALIGN_BELOW,
-					    ctx->text_color, bg_col, cell.text);
+				if (tbl->header[j].get &&
+				    tbl->header[j].get(self, &cell)) {
+					render_cell(&cell, ctx, cx, cy, tbl->cols_w[j], bg_col);
+				}
 
 				cx += tbl->cols_w[j] + ctx->padd;
 
