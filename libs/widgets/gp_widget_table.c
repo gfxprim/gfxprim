@@ -268,9 +268,13 @@ static void render(gp_widget *self, const gp_offset *offset,
 			for (j = 0; j < tbl->cols; j++) {
 				gp_widget_table_cell *cell = tbl->get(self, j);
 				const gp_text_style *font = gp_widget_tattr_font(cell->tattr & ~GP_TATTR_LARGE, ctx);
+				int halign = gp_widget_tattr_halign(cell->tattr);
+
+				if (!halign)
+					halign = GP_ALIGN_LEFT;
 
 				gp_text_fit(ctx->buf, font, cx, cy, tbl->cols_w[j],
-				            gp_widget_tattr_halign(cell->tattr)|GP_VALIGN_BELOW,
+				            halign|GP_VALIGN_BELOW,
 					    ctx->text_color, bg_col, cell->text);
 
 				cx += tbl->cols_w[j] + ctx->padd;
