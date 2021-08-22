@@ -661,6 +661,8 @@ static gp_widget_table_header *parse_header(gp_json_buf *json, gp_json_val *val,
 			break;
 			case GET:
 				header[cnt].get = gp_widget_callback_addr(val->val_str);
+				if (!header[cnt].get)
+					gp_json_warn(json, "Callback not resolved");
 			break;
 			case LABEL:
 				header[cnt].label = strdup(val->val_str);
@@ -670,6 +672,8 @@ static gp_widget_table_header *parse_header(gp_json_buf *json, gp_json_val *val,
 			break;
 			case SORT:
 				header[cnt].sort = gp_widget_callback_addr(val->val_str);
+				if (!header[cnt].sort)
+					gp_json_warn(json, "Callback not resolved");
 			break;
 			case ORDER:
 				if (*sort_by_col != -1) {
