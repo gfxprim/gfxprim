@@ -17,10 +17,11 @@ static unsigned int header_min_w(gp_widget_table *tbl,
                                  unsigned int col)
 {
 	const char *label = tbl->header[col].label;
+	const gp_text_style *font = gp_widget_tattr_font(tbl->header[col].tattr, ctx);
 	unsigned int text_size = 0;
 
 	if (label)
-		text_size += gp_text_width(ctx->font_bold, label);
+		text_size += gp_text_width(font, label);
 
 	if (tbl->header[col].sortable)
 		text_size += ctx->padd + gp_text_ascent(ctx->font);
@@ -50,6 +51,7 @@ static unsigned int min_w(gp_widget *self, const gp_widget_render_ctx *ctx)
 
 static unsigned int header_h(gp_widget *self, const gp_widget_render_ctx *ctx)
 {
+	//TODO: Proper font handling!
 	unsigned int text_a = gp_text_ascent(ctx->font);
 
 	if (!self->tbl->header)
@@ -133,6 +135,8 @@ static unsigned int header_render(gp_widget *self, gp_coord x, gp_coord y,
 		return 0;
 
 	for (i = 0; i < tbl->cols; i++) {
+		unsigned int ex = cx + tbl->cols_w[i];
+
 		if (tbl->header[i].sortable) {
 			gp_size sym_size = text_a/3;
 			gp_size sx = cx + tbl->cols_w[i] - ctx->padd;
@@ -147,12 +151,16 @@ static unsigned int header_render(gp_widget *self, gp_coord x, gp_coord y,
 				gp_symbol(ctx->buf, sx, sy - sym_size, sym_size, sym_size/2, GP_TRIANGLE_UP, ctx->text_color);
 				gp_symbol(ctx->buf, sx, sy + sym_size, sym_size, sym_size/2, GP_TRIANGLE_DOWN, ctx->text_color);
 			}
+
+			ex -= gp_text_ascent(ctx->font) + ctx->padd;
 		}
 
 		if (header[i].label) {
-			gp_print(ctx->buf, ctx->font_bold, cx, cy,
-				GP_ALIGN_RIGHT|GP_VALIGN_BELOW,
-				ctx->text_color, ctx->bg_color, "%s", header[i].label);
+			const gp_text_style *font = gp_widget_tattr_font(tbl->header[i].tattr, ctx);
+			int halign = gp_widget_tattr_halign(tbl->header[i].tattr);
+
+			gp_text_xxy(ctx->buf, font, cx, ex, cy,
+			            halign | GP_VALIGN_BELOW, ctx->text_color, ctx->bg_color, header[i].label);
 		}
 
 		cx += tbl->cols_w[i] + ctx->padd;
@@ -568,7 +576,8 @@ enum header_keys {
 	FILL,
 	LABEL,
 	MIN_SIZE,
-	SORTABLE
+	SORTABLE,
+	TATTR
 };
 
 static const gp_json_obj_attr header_attrs[] = {
@@ -576,6 +585,7 @@ static const gp_json_obj_attr header_attrs[] = {
 	GP_JSON_OBJ_ATTR("label", GP_JSON_STR),
 	GP_JSON_OBJ_ATTR("min_size", GP_JSON_INT),
 	GP_JSON_OBJ_ATTR("sortable", GP_JSON_BOOL),
+	GP_JSON_OBJ_ATTR("tattr", GP_JSON_STR),
 };
 
 static const gp_json_obj header_obj_filter = {
@@ -623,6 +633,8 @@ static gp_widget_table_header *parse_header(gp_json_buf *json, gp_json_val *val,
 		if (val->type != GP_JSON_OBJ)
 			continue;
 
+		header[cnt].tattr = GP_TATTR_BOLD;
+
 		GP_JSON_OBJ_FILTER(json, val, &header_obj_filter, NULL) {
 			switch (val->idx) {
 			case FILL:
@@ -637,8 +649,16 @@ static gp_widget_table_header *parse_header(gp_json_buf *json, gp_json_val *val,
 			case SORTABLE:
 				header[cnt].sortable = val->val_bool;
 			break;
+			case TATTR:
+				if (gp_widget_tattr_parse(val->val_str, &header[cnt].tattr, ~GP_TATTR_LARGE & (GP_TATTR_FONT | GP_TATTR_HALIGN)))
+					gp_json_warn(json, "Invalid text attribute");
+			break;
 			}
 		}
+
+		if (!gp_widget_tattr_halign(header[cnt].tattr))
+			header[cnt].tattr |= GP_TATTR_LEFT;
+
 		cnt++;
 	}
 

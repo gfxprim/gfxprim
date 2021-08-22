@@ -17,8 +17,8 @@ enum gp_widget_table_row_op {
 
 typedef struct gp_widget_table_header {
 	char *label;
-	int text_align:8;
 	int sortable:1;
+	gp_widget_tattr tattr;
 	unsigned int col_min_size;
 	unsigned int col_fill;
 } gp_widget_table_header;
