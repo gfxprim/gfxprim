@@ -42,6 +42,7 @@ struct gp_widget_render_ctx {
 	gp_text_style *font_big_bold;
 
 	gp_text_style *font_mono;
+	gp_text_style *font_mono_bold;
 
 	/* pixel type used for drawing */
 	gp_pixel_type pixel_type;

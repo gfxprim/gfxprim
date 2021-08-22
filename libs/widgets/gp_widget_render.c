@@ -57,6 +57,13 @@ static struct gp_text_style font_mono = {
 	.font = &gp_default_font,
 };
 
+static struct gp_text_style font_mono_bold = {
+	.pixel_xmul = 2,
+	.pixel_ymul = 2,
+	.pixel_xspace = -1,
+	.pixel_yspace = -1,
+};
+
 struct gp_widget_render_ctx __attribute__((visibility ("hidden"))) ctx = {
 	.text_color = 0,
 	.font = &font,
@@ -64,6 +71,7 @@ struct gp_widget_render_ctx __attribute__((visibility ("hidden"))) ctx = {
 	.font_big = &font_big,
 	.font_big_bold = &font_big_bold,
 	.font_mono = &font_mono,
+	.font_mono_bold = &font_mono_bold,
 	.padd = 4,
 	.dclick_ms = 500,
 };
@@ -76,6 +84,7 @@ static gp_font_face *render_font_bold;
 static gp_font_face *render_font_big;
 static gp_font_face *render_font_big_bold;
 static gp_font_face *render_font_mono;
+static gp_font_face *render_font_mono_bold;
 
 static const char *arg_fonts;
 static const char *input_str;
@@ -90,6 +99,11 @@ static void set_big_font(int mul)
 	font_bold.pixel_xspace = 0;
 	font_bold.pixel_yspace = 0;
 
+	font_mono_bold.pixel_xmul = 1;
+	font_mono_bold.pixel_ymul = 1;
+	font_mono_bold.pixel_xspace = 0;
+	font_mono_bold.pixel_yspace = 0;
+
 	font_big_bold.pixel_xmul = mul;
 	font_big_bold.pixel_ymul = mul;
 	font_big_bold.pixel_xspace = 0;
@@ -103,6 +117,11 @@ static void set_default_font(void)
 	font_bold.pixel_ymul = 2;
 	font_bold.pixel_xspace = -1;
 	font_bold.pixel_yspace = -1;
+
+	font_mono_bold.pixel_xmul = 2,
+	font_mono_bold.pixel_ymul = 2,
+	font_mono_bold.pixel_xspace = -1,
+	font_mono_bold.pixel_yspace = -1,
 
 	font_big.pixel_xmul = 2;
 	font_big.pixel_ymul = 2;
@@ -127,6 +146,7 @@ static void init_fonts(void)
 			font_big.font = gp_font_haxor_narrow_15;
 			font_big_bold.font = gp_font_haxor_narrow_bold_15;
 			font_mono.font = gp_font_haxor_narrow_15;
+			font_mono_bold.font = gp_font_haxor_narrow_15;
 			set_big_font(2);
 			return;
 		}
@@ -137,6 +157,7 @@ static void init_fonts(void)
 			font_big.font = gp_font_haxor_narrow_16;
 			font_big_bold.font = gp_font_haxor_narrow_bold_16;
 			font_mono.font = gp_font_haxor_narrow_16;
+			font_mono_bold.font = gp_font_haxor_narrow_16;
 			set_big_font(2);
 			return;
 		}
@@ -147,6 +168,7 @@ static void init_fonts(void)
 			font_big.font = gp_font_haxor_narrow_17;
 			font_big_bold.font = gp_font_haxor_narrow_bold_17;
 			font_mono.font = gp_font_haxor_narrow_17;
+			font_mono_bold.font = gp_font_haxor_narrow_17;
 			set_big_font(2);
 			return;
 		}
@@ -166,13 +188,15 @@ static void init_fonts(void)
 	gp_font_face *ffont_big = gp_font_face_fc_load("DroidSans", 0, 1.8 * font_size);
 	gp_font_face *ffont_big_bold = gp_font_face_fc_load("DroidSans:Bold", 0, 1.8 * font_size);
 	gp_font_face *ffont_mono = gp_font_face_fc_load("Monospace", 0, font_size);
+	gp_font_face *ffont_mono_bold = gp_font_face_fc_load("Monospace:Bold", 0, font_size);
 
-	if (!ffont || !ffont_bold || !ffont_big || !ffont_big_bold || !ffont_mono) {
+	if (!ffont || !ffont_bold || !ffont_big || !ffont_big_bold || !ffont_mono || !ffont_mono_bold) {
 		gp_font_face_free(ffont);
 		gp_font_face_free(ffont_bold);
 		gp_font_face_free(ffont_big);
 		gp_font_face_free(ffont_big_bold);
 		gp_font_face_free(ffont_mono);
+		gp_font_face_free(ffont_mono_bold);
 		set_default_font();
 		return;
 	}
@@ -182,18 +206,21 @@ static void init_fonts(void)
 	gp_font_face_free(render_font_big);
 	gp_font_face_free(render_font_big_bold);
 	gp_font_face_free(render_font_mono);
+	gp_font_face_free(render_font_mono_bold);
 
 	render_font = ffont;
 	render_font_bold = ffont_bold;
 	render_font_big = ffont_big;
 	render_font_big_bold = ffont_big_bold;
 	render_font_mono = ffont_mono;
+	render_font_mono_bold = ffont_mono_bold;
 
 	ctx.font->font = ffont;
 	ctx.font_bold->font = ffont_bold;
 	ctx.font_big->font = ffont_big;
 	ctx.font_big_bold->font = ffont_big_bold;
 	ctx.font_mono->font = ffont_mono;
+	ctx.font_mono_bold->font = ffont_mono_bold;
 	set_big_font(1);
 }
 
