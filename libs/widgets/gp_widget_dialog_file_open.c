@@ -197,12 +197,15 @@ static gp_widget_table_cell *get_elem(gp_widget *self, unsigned int col)
 	switch (col) {
 	case 0:
 		cell.text = ent->name;
+		cell.tattr = GP_TATTR_LEFT;
 	break;
 	case 1:
 		cell.text = gp_str_file_size(buf, sizeof(buf), ent->size);
+		cell.tattr = GP_TATTR_RIGHT | GP_TATTR_MONO;
 	break;
 	case 2:
 		cell.text = gp_str_time_diff(buf, sizeof(buf), ent->mtime, time(NULL));
+		cell.tattr = GP_TATTR_LEFT;
 	break;
 	}
 

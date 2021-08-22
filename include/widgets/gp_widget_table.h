@@ -25,7 +25,7 @@ typedef struct gp_widget_table_header {
 
 typedef struct gp_widget_table_cell {
 	const char *text;
-	int bold:1;
+	gp_widget_tattr tattr;
 } gp_widget_table_cell;
 
 typedef struct gp_widget_table {

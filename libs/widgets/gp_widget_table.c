@@ -159,6 +159,9 @@ static unsigned int header_render(gp_widget *self, gp_coord x, gp_coord y,
 			const gp_text_style *font = gp_widget_tattr_font(tbl->header[i].tattr, ctx);
 			int halign = gp_widget_tattr_halign(tbl->header[i].tattr);
 
+			if (!halign)
+				halign = GP_ALIGN_LEFT;
+
 			gp_text_xxy(ctx->buf, font, cx, ex, cy,
 			            halign | GP_VALIGN_BELOW, ctx->text_color, ctx->bg_color, header[i].label);
 		}
@@ -180,17 +183,6 @@ static unsigned int header_render(gp_widget *self, gp_coord x, gp_coord y,
 	gp_hline_xyw(ctx->buf, x, cy, self->w, color);
 
 	return header_h(self, ctx);
-}
-
-static void align_text(gp_pixmap *buf, gp_text_style *font,
-                       gp_widget_table *tbl,
-                       const gp_widget_render_ctx *ctx,
-		       unsigned int x, unsigned int y,
-		       unsigned int col, gp_pixel bg, const char *str)
-{
-	gp_text_fit(buf, font, x, y, tbl->cols_w[col],
-	           GP_ALIGN_RIGHT|GP_VALIGN_BELOW,
-	           ctx->text_color, bg, str);
 }
 
 static unsigned int last_row(gp_widget *self)
@@ -275,9 +267,11 @@ static void render(gp_widget *self, const gp_offset *offset,
 		if (cur_row < tbl->last_rows) {
 			for (j = 0; j < tbl->cols; j++) {
 				gp_widget_table_cell *cell = tbl->get(self, j);
-				gp_text_style *font = cell->bold ? ctx->font_bold : ctx->font;
+				const gp_text_style *font = gp_widget_tattr_font(cell->tattr & ~GP_TATTR_LARGE, ctx);
 
-				align_text(ctx->buf, font, tbl, ctx, cx, cy, j, bg_col, cell->text);
+				gp_text_fit(ctx->buf, font, cx, cy, tbl->cols_w[j],
+				            gp_widget_tattr_halign(cell->tattr)|GP_VALIGN_BELOW,
+					    ctx->text_color, bg_col, cell->text);
 
 				cx += tbl->cols_w[j] + ctx->padd;
 
@@ -655,9 +649,6 @@ static gp_widget_table_header *parse_header(gp_json_buf *json, gp_json_val *val,
 			break;
 			}
 		}
-
-		if (!gp_widget_tattr_halign(header[cnt].tattr))
-			header[cnt].tattr |= GP_TATTR_LEFT;
 
 		cnt++;
 	}
