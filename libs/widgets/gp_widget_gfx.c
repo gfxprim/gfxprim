@@ -46,6 +46,9 @@ void gp_text_fit(gp_pixmap *pix, const gp_text_style *style,
 	if (text_w > w) {
 		int chars = max_chars(style, w, str);
 
+		align &= ~GP_ALIGN_HORIZ;
+		align |= GP_ALIGN_RIGHT;
+
 		gp_print(pix, style, x, y, align, fg_color, bg_color,
 			 "%.*s...", chars, str);
 		//gp_hline_xyw(pix, x, y, w, 0xff0000);
