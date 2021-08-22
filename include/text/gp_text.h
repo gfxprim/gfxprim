@@ -35,6 +35,7 @@ typedef enum gp_text_attr {
 	GP_ALIGN_LEFT = 0x01,
 	GP_ALIGN_CENTER = 0x02,
 	GP_ALIGN_RIGHT = 0x03,
+	GP_ALIGN_HORIZ = 0x03,
 	GP_TEXT_BEARING = 0x04,
 	GP_VALIGN_ABOVE = 0x10,
 	GP_VALIGN_TOP = GP_VALIGN_ABOVE,
@@ -69,6 +70,45 @@ gp_size gp_text(gp_pixmap *pixmap, const gp_text_style *style,
                 gp_pixel fg_color, gp_pixel bg_color, const char *str);
 
 /*
+ * Aligns a string between x1 and x2 based ond horizontal aligment flags. The
+ * caller must make sure that the string will fit horizontally between x1 and x2.
+ */
+static inline gp_size gp_text_xxy(gp_pixmap *pixmap, const gp_text_style *style,
+                                  gp_coord x1, gp_coord x2, gp_coord y, int align,
+                                  gp_pixel fg_color, gp_pixel bg_color, const char *str)
+{
+	gp_coord x, len;
+
+	if (x1 < x2) {
+		x = x1;
+		len = x2 - x1;
+	} else {
+		x = x2;
+		len = x1 - x2;
+	}
+
+	int halign = align & GP_ALIGN_HORIZ;
+
+	align &= ~GP_ALIGN_HORIZ;
+
+	switch (halign) {
+	case GP_ALIGN_LEFT:
+		align |= GP_ALIGN_RIGHT;
+	break;
+	case GP_ALIGN_CENTER:
+		x += len/2;
+		align |= GP_ALIGN_CENTER;
+	break;
+	case GP_ALIGN_RIGHT:
+		x += len;
+		align |= GP_ALIGN_LEFT;
+	break;
+	}
+
+	return gp_text(pixmap, style, x, y, align, fg_color, bg_color, str);
+}
+
+/*
  * Same as the gp_text() but the number of characters can be limited.
  */
 gp_size gp_text_ext(gp_pixmap *pixmap, const gp_text_style *style,
@@ -84,10 +124,54 @@ gp_size gp_print(gp_pixmap *pixmap, const gp_text_style *style,
 	         gp_pixel fg_color, gp_pixel bg_color, const char *fmt, ...)
 	         __attribute__ ((format (printf, 8, 9)));
 
+
 gp_size gp_vprint(gp_pixmap *pixmap, const gp_text_style *style,
                   gp_coord x, gp_coord y, int align,
 	          gp_pixel fg_color, gp_pixel bg_color,
                   const char *fmt, va_list va);
+
+__attribute__ ((format (printf, 9, 10)))
+static inline gp_size gp_print_xxy(gp_pixmap *pixmap, const gp_text_style *style,
+                                   gp_coord x1, gp_coord x2, gp_coord y, int align,
+				   gp_pixel fg_color, gp_pixel bg_color, const char *fmt, ...)
+{
+	gp_coord x, len;
+	gp_size ret;
+	va_list va;
+
+	if (x1 < x2) {
+		x = x1;
+		len = x2 - x1;
+	} else {
+		x = x2;
+		len = x1 - x2;
+	}
+
+	int halign = align & GP_ALIGN_HORIZ;
+
+	align &= ~GP_ALIGN_HORIZ;
+
+	switch (halign) {
+	case GP_ALIGN_LEFT:
+		align |= GP_ALIGN_RIGHT;
+	break;
+	case GP_ALIGN_CENTER:
+		x += len/2;
+		align |= GP_ALIGN_CENTER;
+	break;
+	case GP_ALIGN_RIGHT:
+		x += len;
+		align |= GP_ALIGN_LEFT;
+	break;
+	}
+
+	va_start(va, fmt);
+	ret = gp_vprint(pixmap, style, x, y, align, fg_color, bg_color, fmt, va);
+	va_end(va);
+
+	return ret;
+}
+
 /*
  * Clears rectangle that would be used to draw text of size pixels.
  */
