@@ -114,7 +114,7 @@ static gp_widget *json_to_label(gp_json_buf *json, gp_json_val *val, gp_htable *
 			ralign = val->val_bool;
 		break;
 		case TATTR:
-			if (gp_widget_tattr_parse(val->val_str, &attr))
+			if (gp_widget_tattr_parse(val->val_str, &attr, GP_TATTR_FONT))
 				gp_json_warn(json, "Invalid text attribute '%s'", val->val_str);
 		break;
 		case TEXT:

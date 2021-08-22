@@ -10,10 +10,15 @@ Functions
 
 [source,c]
 -------------------------------------------------------------------------------
-int gp_widget_tattr_parse(const char *attrs, gp_widget_tattr *tattr);
+int gp_widget_tattr_parse(const char *attrs, gp_widget_tattr *tattr, int flags);
 -------------------------------------------------------------------------------
 
 Parses text attribute string, returns zero on success.
+
+The flags can be used to select which attributes should be enabled in the
+parser. Passing 'GP_TATTR_FONT' enables font parsing and 'GP_TATTR_HALIGN'
+enables horizontal alignment flags, both can be enabled by passing a bitwise
+or i.e. 'GP_TATTR_FONT | GP_TATTR_HALIGN'.
 
 [source,c]
 -------------------------------------------------------------------------------
@@ -26,10 +31,13 @@ be used in widgets for size computation and rendering.
 .Text attributes
 [options="header"]
 |=========================================================
-|      enum      | string  | Description
-| GP_TATTR_BOLD  | "bold"  | Enables bold text.
-| GP_TATTR_LARGE | "large" | Enables large text.
-| GP_TATTR_MONO  | "mono"  | Monospace font.
+|      enum       | string   | Description
+| GP_TATTR_BOLD   | "bold"   | Enables bold text.
+| GP_TATTR_LARGE  | "large"  | Enables large text.
+| GP_TATTR_MONO   | "mono"   | Monospace font.
+| GP_TATTR_LEFT   | "left"   | Align text to the left.
+| GP_TATTR_CENTER | "center" | Center text horizontally.
+| GP_TATTR_RIGHT  | "right"  | Align text to the right.
 |=========================================================
 
 .Labels with different text attributes

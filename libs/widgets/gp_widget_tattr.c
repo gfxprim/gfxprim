@@ -18,7 +18,7 @@ static size_t attr_len(const char *attrs)
 	return len;
 }
 
-int gp_widget_tattr_parse(const char *attrs, gp_widget_tattr *tattr)
+int gp_widget_tattr_parse(const char *attrs, gp_widget_tattr *tattr, int flags)
 {
 	size_t len;
 	gp_widget_tattr ret = 0;
@@ -29,12 +29,18 @@ int gp_widget_tattr_parse(const char *attrs, gp_widget_tattr *tattr)
 	}
 
 	while ((len = attr_len(attrs))) {
-		if (!strncmp(attrs, "bold", len))
+		if ((flags & GP_TATTR_BOLD) && !strncmp(attrs, "bold", len))
 			ret |= GP_TATTR_BOLD;
-		else if (!strncmp(attrs, "large", len))
+		else if ((flags & GP_TATTR_LARGE) && !strncmp(attrs, "large", len))
 			ret |= GP_TATTR_LARGE;
-		else if (!strncmp(attrs, "mono", len))
+		else if ((flags & GP_TATTR_MONO) && !strncmp(attrs, "mono", len))
 			ret |= GP_TATTR_MONO;
+		else if ((flags & GP_TATTR_LEFT) && !strncmp(attrs, "left", len))
+			ret |= GP_TATTR_LEFT;
+		else if ((flags & GP_TATTR_CENTER) && !strncmp(attrs, "center", len))
+			ret |= GP_TATTR_CENTER;
+		else if ((flags & GP_TATTR_RIGHT) && !strncmp(attrs, "right", len))
+			ret |= GP_TATTR_RIGHT;
 		else
 			return 1;
 

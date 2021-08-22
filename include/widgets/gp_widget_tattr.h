@@ -13,10 +13,18 @@
 #include <widgets/gp_widget_render.h>
 
 enum gp_widget_tattr {
-	GP_TATTR_BOLD  = 0x01,
-	GP_TATTR_LARGE = 0x02,
+	/* Fonts */
+	GP_TATTR_BOLD  = 0x10,
+	GP_TATTR_LARGE = 0x20,
 	/* Monospace does not support bold or large */
-	GP_TATTR_MONO  = 0x04,
+	GP_TATTR_MONO  = 0x40,
+	GP_TATTR_FONT = 0x70,
+
+	/* Horizontal alignment */
+	GP_TATTR_LEFT = 0x01,
+	GP_TATTR_CENTER = 0x02,
+	GP_TATTR_RIGHT = 0x03,
+	GP_TATTR_HALIGN = 0x03,
 };
 
 /*
@@ -40,15 +48,22 @@ static inline const gp_text_style *gp_widget_tattr_font(gp_widget_tattr attr, co
 	return ctx->font;
 }
 
+static inline int gp_widget_tattr_halign(gp_widget_tattr attr)
+{
+	return attr & GP_TATTR_HALIGN;
+}
+
 /*
  * @brief Parses an attributes encoded in a string into attribute bitflags.
  *
  * The attributes are separated by | e.g. valid attributes string is "bold|large".
  *
  * @attrs Text attributes description string.
- * @tattr A pointe to tattr to be filled in.
+ * @tattr A pointer to tattr to be filled in.
+ * @flags A bitwise or of GP_TATTR_FONT and GP_TATTR_HALIGN that enables
+ *        parsing font and/or alignment.
  * @return Zero on success, non-zero on parsing failure.
  */
-int gp_widget_tattr_parse(const char *attrs, gp_widget_tattr *tattr);
+int gp_widget_tattr_parse(const char *attrs, gp_widget_tattr *tattr, int flags);
 
 #endif /* GP_WIDGET_TATTR_H */

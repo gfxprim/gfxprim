@@ -10,13 +10,15 @@
 struct tcase {
 	const char *str;
 	int exp_ret;
+	int enable_valign;
 	gp_widget_tattr exp_attr;
 };
 
 static int test_tattr(struct tcase *a)
 {
 	gp_widget_tattr attr = 0;
-	int ret = gp_widget_tattr_parse(a->str, &attr);
+	int flags = GP_TATTR_FONT | (a->enable_valign ? GP_TATTR_HALIGN : 0);
+	int ret = gp_widget_tattr_parse(a->str, &attr, flags);
 
 	if (ret != a->exp_ret) {
 		tst_msg("Wrong return for '%s' got %i expected %i",
@@ -43,6 +45,18 @@ static struct tcase bold_large = {
 	.str = "bold|large",
 	.exp_ret = 0,
 	.exp_attr = GP_TATTR_BOLD | GP_TATTR_LARGE,
+};
+
+static struct tcase bold_left = {
+	.str = "bold|left",
+	.exp_ret = 0,
+	.enable_valign = 1,
+	.exp_attr = GP_TATTR_BOLD | GP_TATTR_LEFT,
+};
+
+static struct tcase right_no_valign = {
+	.str = "right",
+	.exp_ret = 1,
 };
 
 static struct tcase invalid = {
@@ -85,6 +99,14 @@ const struct tst_suite tst_suite = {
 		{.name = "bold large",
 		 .tst_fn = test_tattr,
 		 .data = &bold_large},
+
+		{.name = "bold left",
+		 .tst_fn = test_tattr,
+		 .data = &bold_left},
+
+		{.name = "right no valign",
+		 .tst_fn = test_tattr,
+		 .data = &right_no_valign},
 
 		{.name = "invalid",
 		 .tst_fn = test_tattr,

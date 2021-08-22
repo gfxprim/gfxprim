@@ -350,7 +350,7 @@ static gp_widget *json_to_tbox(gp_json_buf *json, gp_json_val *val, gp_htable **
 				max_len = val->val_int;
 		break;
 		case TATTR:
-			if (gp_widget_tattr_parse(val->val_str, &attr))
+			if (gp_widget_tattr_parse(val->val_str, &attr, GP_TATTR_FONT))
 				gp_json_warn(json, "Invalid text attribute!");
 		break;
 		case TEXT:

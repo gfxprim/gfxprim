@@ -197,7 +197,7 @@ static gp_widget *json_to_frame(gp_json_buf *json, gp_json_val *val, gp_htable *
 	GP_JSON_OBJ_FILTER(json, val, &obj_filter, gp_widget_json_attrs) {
 		switch (val->idx) {
 		case TATTR:
-			if (gp_widget_tattr_parse(val->val_str, &tattr))
+			if (gp_widget_tattr_parse(val->val_str, &tattr, GP_TATTR_FONT))
 				gp_json_warn(json, "Invalid text attribute");
 		break;
 		case TITLE:
