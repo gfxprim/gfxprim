@@ -13,7 +13,6 @@ struct tcase {
 	const char *text;
 	gp_widget_tattr tattr;
 	int frame;
-	int ralign;
 	int width;
 };
 
@@ -39,11 +38,6 @@ static int label_json_load(struct tcase *t)
 
 	if (t->frame != !!label->label->frame) {
 		tst_msg("Wrong frame expected %i!", t->frame);
-		return TST_FAILED;
-	}
-
-	if (t->ralign != !!label->label->ralign) {
-		tst_msg("Wrong ralign expected %i!", t->ralign);
 		return TST_FAILED;
 	}
 
@@ -79,10 +73,10 @@ static struct tcase label_frame = {
 	.frame = 1,
 };
 
-static struct tcase label_ralign = {
-	.json = "{\"version\": 1, \"type\": \"label\", \"ralign\": true, \"text\": \"Label!\"}",
+static struct tcase label_align = {
+	.json = "{\"version\": 1, \"type\": \"label\", \"tattr\": \"right\", \"text\": \"Label!\"}",
 	.text = "Label!",
-	.ralign = 1,
+	.tattr = GP_TATTR_RIGHT,
 };
 
 static struct tcase label_width = {
@@ -109,9 +103,9 @@ const struct tst_suite tst_suite = {
 		 .data = &label_frame,
 		 .flags = TST_CHECK_MALLOC},
 
-		{.name = "label ralign",
+		{.name = "label align",
 		 .tst_fn = label_json_load,
-		 .data = &label_ralign,
+		 .data = &label_align,
 		 .flags = TST_CHECK_MALLOC},
 
 		{.name = "label width",

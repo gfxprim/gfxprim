@@ -41,7 +41,6 @@ static void render(gp_widget *self, const gp_offset *offset,
                    const gp_widget_render_ctx *ctx, int flags)
 {
 	(void) flags;
-	unsigned int align;
 
 	unsigned int x = self->x + offset->x;
 	unsigned int y = self->y + offset->y;
@@ -62,12 +61,10 @@ static void render(gp_widget *self, const gp_offset *offset,
 		gp_fill_rect_xywh(ctx->buf, x, y, w, h, ctx->bg_color);
 	}
 
-	if (self->label->ralign) {
-		x += w - 1;
-		align = GP_ALIGN_LEFT;
-	} else {
+	int align = gp_widget_tattr_halign(self->label->tattr);
+
+	if (!align)
 		align = GP_ALIGN_RIGHT;
-	}
 
 	gp_text_fit(ctx->buf, font, x, y + ctx->padd, w,
 	            align|GP_VALIGN_BELOW,
@@ -76,7 +73,6 @@ static void render(gp_widget *self, const gp_offset *offset,
 
 enum keys {
 	FRAME,
-	RALIGN,
 	TATTR,
 	TEXT,
 	WIDTH
@@ -84,7 +80,6 @@ enum keys {
 
 static const gp_json_obj_attr attrs[] = {
 	GP_JSON_OBJ_ATTR("frame", GP_JSON_BOOL),
-	GP_JSON_OBJ_ATTR("ralign", GP_JSON_BOOL),
 	GP_JSON_OBJ_ATTR("tattr", GP_JSON_STR),
 	GP_JSON_OBJ_ATTR("text", GP_JSON_STR),
 	GP_JSON_OBJ_ATTR("width", GP_JSON_INT),
@@ -99,7 +94,6 @@ static gp_widget *json_to_label(gp_json_buf *json, gp_json_val *val, gp_htable *
 {
 	char *label = NULL;
 	int width = 0;
-	int ralign = 0;
 	int frame = 0;
 	gp_widget_tattr attr = 0;
 
@@ -110,11 +104,8 @@ static gp_widget *json_to_label(gp_json_buf *json, gp_json_val *val, gp_htable *
 		case FRAME:
 			frame = val->val_bool;
 		break;
-		case RALIGN:
-			ralign = val->val_bool;
-		break;
 		case TATTR:
-			if (gp_widget_tattr_parse(val->val_str, &attr, GP_TATTR_FONT))
+			if (gp_widget_tattr_parse(val->val_str, &attr, GP_TATTR_FONT | GP_TATTR_HALIGN))
 				gp_json_warn(json, "Invalid text attribute '%s'", val->val_str);
 		break;
 		case TEXT:
@@ -128,7 +119,6 @@ static gp_widget *json_to_label(gp_json_buf *json, gp_json_val *val, gp_htable *
 
 	gp_widget *ret = gp_widget_label_new(label, attr, width);
 
-	ret->label->ralign = ralign;
 	ret->label->frame = frame;
 
 	free(label);

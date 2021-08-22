@@ -52,7 +52,7 @@ void gp_text_fit(gp_pixmap *pix, const gp_text_style *style,
 		return;
 	}
 
-	gp_text(pix, style, x, y, align, fg_color, bg_color, str);
+	gp_text_xxy(pix, style, x, x+w-1, y, align, fg_color, bg_color, str);
 }
 
 void gp_rrect_xywh(gp_pixmap *pix, gp_coord x, gp_coord y,
