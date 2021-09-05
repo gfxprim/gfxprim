@@ -56,7 +56,7 @@ static int peek_test(void)
 	for (i = 0; i < GP_EVENT_QUEUE_SIZE-2; i++)
 		gp_event_queue_push_key(&queue, GP_KEY_SPACE, GP_EV_KEY_DOWN, NULL);
 
-	if (gp_event_queue_key_pressed(&queue, GP_KEY_ENTER)) {
+	if (gp_events_state_pressed(&queue.state, GP_KEY_ENTER)) {
 		tst_msg("Key enter is pressed");
 		return TST_FAILED;
 	}
@@ -75,7 +75,7 @@ static int peek_test(void)
 		return TST_FAILED;
 	}
 
-	if (gp_event_queue_key_pressed(&queue, GP_KEY_ENTER)) {
+	if (gp_events_state_pressed(&queue.state, GP_KEY_ENTER)) {
 		tst_msg("Key enter is pressed after peek");
 		return TST_FAILED;
 	}
@@ -102,20 +102,72 @@ static int key_state_test(void)
 	while ((ev = gp_event_queue_get(&queue))) {
 		switch (ev->code) {
 		case GP_EV_KEY_UP:
-			if (gp_event_queue_key_pressed(&queue, ev->key.key)) {
+			if (gp_events_state_pressed(&queue.state, ev->key.key)) {
 				tst_msg("Key %s pressed after keyup",
 				        gp_event_key_name(ev->key.key));
 				fail++;
 			}
 		break;
 		case GP_EV_KEY_DOWN:
-			if (!gp_event_queue_key_pressed(&queue, ev->key.key)) {
+			if (!gp_events_state_pressed(&queue.state, ev->key.key)) {
 				tst_msg("Key %s released after keydown",
 				        gp_event_key_name(ev->key.key));
 				fail++;
 			}
 		break;
 		}
+	}
+
+	if (fail)
+		return TST_FAILED;
+
+	return TST_SUCCESS;
+}
+
+static int cursor_state_test(void)
+{
+	gp_event_queue queue;
+	int fail = 0;
+	gp_event *ev;
+
+	gp_event_queue_init(&queue, 10, 10, 0);
+
+	if (queue.state.cursor_x != 5 || queue.state.cursor_y != 5) {
+		tst_msg("Wrong cursor after init %ux%u expected 5x5",
+			(unsigned)queue.state.cursor_x, (unsigned)queue.state.cursor_y);
+		fail++;
+	}
+
+	gp_event_queue_push_rel(&queue, -10, 1, NULL);
+
+	if (queue.state.cursor_x != 5 || queue.state.cursor_y != 5) {
+		tst_msg("Wrong cursor after push_rel() %ux%u expected 5x5",
+			(unsigned)queue.state.cursor_x, (unsigned)queue.state.cursor_y);
+		fail++;
+	}
+
+	ev = gp_event_queue_get(&queue);
+
+	if (ev->st->cursor_x != 0 || ev->st->cursor_y != 6) {
+		tst_msg("Wrong cursor after push_rel() in ev->st %ux%u expected 0x6",
+			(unsigned)ev->st->cursor_x, (unsigned)ev->st->cursor_y);
+		fail++;
+	}
+
+	gp_event_queue_push_abs(&queue, 5, 0, 0, 10, 10, 10, NULL);
+
+	if (queue.state.cursor_x != 0 || queue.state.cursor_y != 6) {
+		tst_msg("Wrong cursor after push_abs() %ux%u expected 0x6",
+			(unsigned)queue.state.cursor_x, (unsigned)queue.state.cursor_y);
+		fail++;
+	}
+
+	ev = gp_event_queue_get(&queue);
+
+	if (ev->st->cursor_x != 4 || ev->st->cursor_y != 0) {
+		tst_msg("Wrong cursor after push_abs() in ev->st %ux%u expected 4x0",
+			(unsigned)ev->st->cursor_x, (unsigned)ev->st->cursor_y);
+		fail++;
 	}
 
 	if (fail)
@@ -142,7 +194,7 @@ static int queue_init_test(void)
 	}
 
 	for (i = 0; i < 1000; i++) {
-		if (gp_event_queue_key_pressed(&queue, i)) {
+		if (gp_events_state_pressed(&queue.state, i)) {
 			tst_msg("Key %u pressed after init", i);
 			return TST_FAILED;
 		}
@@ -160,6 +212,8 @@ const struct tst_suite tst_suite = {
 		 .tst_fn = peek_test},
 		{.name = "Key state",
 		 .tst_fn = key_state_test},
+		{.name = "Cursor state",
+		 .tst_fn = cursor_state_test},
 		{.name = "Pointer from get is preserved",
 		 .tst_fn = get_pointer_preserved},
 		{.name = NULL},

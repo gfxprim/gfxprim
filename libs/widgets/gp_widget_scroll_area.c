@@ -291,7 +291,7 @@ static void scrollbar_event_y(gp_widget *self, const gp_widget_render_ctx *ctx, 
 {
 	gp_size asc = gp_text_ascent(ctx->font);
 	gp_size gh = scrollbar_h(self, ctx) - asc;
-	gp_coord y = ev->cursor_y - asc/2;
+	gp_coord y = ev->st->cursor_y - asc/2;
 
 	if (y < 0)
 		y = 0;
@@ -306,7 +306,7 @@ static void scrollbar_event_x(gp_widget *self, const gp_widget_render_ctx *ctx, 
 {
 	gp_size asc = gp_text_ascent(ctx->font);
 	gp_size gw = scrollbar_w(self, ctx) - asc;
-	gp_coord x = ev->cursor_x - asc/2;
+	gp_coord x = ev->st->cursor_x - asc/2;
 
 	if (x < 0)
 		x = 0;
@@ -321,16 +321,16 @@ static int event(gp_widget *self, const gp_widget_render_ctx *ctx, gp_event *ev)
 {
 	struct gp_widget_scroll_area *area = self->scroll;
 
-	if (is_in_scrollbar_y(self, ctx, ev->cursor_y)) {
-		if (gp_widget_event_key_pressed(ev, GP_BTN_LEFT) ||
+	if (is_in_scrollbar_y(self, ctx, ev->st->cursor_y)) {
+		if (gp_event_key_pressed(ev, GP_BTN_LEFT) ||
 		    ev->type == GP_EV_ABS) {
 			scrollbar_event_x(self, ctx, ev);
 			return 1;
 		}
 	}
 
-	if (is_in_scrollbar_x(self, ctx, ev->cursor_x)) {
-		if (gp_widget_event_key_pressed(ev, GP_BTN_LEFT) ||
+	if (is_in_scrollbar_x(self, ctx, ev->st->cursor_x)) {
+		if (gp_event_key_pressed(ev, GP_BTN_LEFT) ||
 		    ev->type == GP_EV_ABS) {
 			scrollbar_event_y(self, ctx, ev);
 			return 1;

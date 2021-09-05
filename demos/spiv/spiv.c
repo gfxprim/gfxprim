@@ -875,8 +875,9 @@ int main(int argc, char *argv[])
 
 		while ((ev = gp_backend_wait_event(backend))) {
 
-			shift_flag = gp_backend_key_pressed(backend, GP_KEY_LEFT_SHIFT) ||
-			             gp_backend_key_pressed(backend, GP_KEY_RIGHT_SHIFT);
+			shift_flag = gp_event_any_key_pressed(ev,
+			                                      GP_KEY_LEFT_SHIFT,
+			                                      GP_KEY_RIGHT_SHIFT);
 
 			switch (ev->type) {
 			case GP_EV_REL:
@@ -889,7 +890,7 @@ int main(int argc, char *argv[])
 						goto prev;
 				break;
 				case GP_EV_REL_POS:
-					if (gp_backend_key_pressed(backend, GP_BTN_LEFT)) {
+					if (gp_event_key_pressed(ev, GP_BTN_LEFT)) {
 						set_zoom_offset(&params,
 						                ev->rel.rx,
 								ev->rel.ry);

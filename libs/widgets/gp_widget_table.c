@@ -474,7 +474,7 @@ void gp_widget_table_sort_by(gp_widget *self, unsigned int col, int desc)
 static int row_click(gp_widget *self, const gp_widget_render_ctx *ctx, gp_event *ev)
 {
 	gp_widget_table *tbl = self->tbl;
-	unsigned int row = ev->cursor_y - header_h(self, ctx);
+	unsigned int row = ev->st->cursor_y - header_h(self, ctx);
 
 	row /= row_h(ctx);
 	row += tbl->start_row;
@@ -498,8 +498,8 @@ ret:
 
 static int click(gp_widget *self, const gp_widget_render_ctx *ctx, gp_event *ev)
 {
-	if (ev->cursor_y <= header_h(self, ctx))
-		return header_click(self, ctx, ev->cursor_x);
+	if (ev->st->cursor_y <= header_h(self, ctx))
+		return header_click(self, ctx, ev->st->cursor_x);
 
 	return row_click(self, ctx, ev);
 }
@@ -525,13 +525,13 @@ static int event(gp_widget *self, const gp_widget_render_ctx *ctx, gp_event *ev)
 
 		switch (ev->val) {
 		case GP_KEY_DOWN:
-			if (gp_widget_event_key_pressed(ev, GP_KEY_LEFT_SHIFT))
+			if (gp_event_key_pressed(ev, GP_KEY_LEFT_SHIFT))
 				return move_down(self, ctx, 10);
 
 			return move_down(self, ctx, 1);
 		break;
 		case GP_KEY_UP:
-			if (gp_widget_event_key_pressed(ev, GP_KEY_LEFT_SHIFT))
+			if (gp_event_key_pressed(ev, GP_KEY_LEFT_SHIFT))
 				return move_up(self, ctx, 10);
 
 			return move_up(self, ctx, 1);

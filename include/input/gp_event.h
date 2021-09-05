@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 /*
- * Copyright (C) 2009-2013 Cyril Hrubis <metan@ucw.cz>
+ * Copyright (C) 2009-2021 Cyril Hrubis <metan@ucw.cz>
  */
 
 /*
@@ -71,6 +71,17 @@ struct gp_ev_sys {
 	uint32_t w, h;
 };
 
+#define GP_EVENT_KEY_BITMAP_BYTES 40
+
+struct gp_events_state {
+	/** Bitmap of pressed keys including mouse buttons. */
+	uint8_t keys_pressed[GP_EVENT_KEY_BITMAP_BYTES];
+
+	/** Cursor coordinates */
+	uint32_t cursor_x;
+	uint32_t cursor_y;
+};
+
 struct gp_event {
 	/** enum gp_event_type  */
 	uint16_t type;
@@ -93,18 +104,60 @@ struct gp_event {
 	/* event timestamp */
 	struct timeval time;
 
-	/*
-	 * Cursor position, position on screen accumulated
-	 * from all pointer devices
-	 */
-	uint32_t cursor_x;
-	uint32_t cursor_y;
-
-	void *priv;
+	/** Pointer to overall state, pressed keys, cursor position etc. */
+	struct gp_events_state *st;
 };
 
 /*
- * Dump event into stdout.
+ * Helpers for setting/getting key bits.
+ */
+static inline void gp_events_state_press(gp_events_state *self, uint32_t key)
+{
+	if (key >= GP_EVENT_KEY_BITMAP_BYTES * 8)
+		return;
+
+	self->keys_pressed[(key)/8] |= 1<<((key)%8);
+}
+
+static inline int gp_events_state_pressed(gp_events_state *self, uint32_t key)
+{
+	if (key >= GP_EVENT_KEY_BITMAP_BYTES * 8)
+		return 0;
+
+	return !!(self->keys_pressed[(key)/8] & (1<<((key)%8)));
+}
+
+static inline void gp_events_state_release(gp_events_state *self, uint32_t key)
+{
+	if (key >= GP_EVENT_KEY_BITMAP_BYTES * 8)
+		return;
+
+	self->keys_pressed[(key)/8] &= ~(1<<((key)%8));
+}
+
+static inline int gp_event_key_pressed(gp_event *ev, uint32_t key)
+{
+	if (!ev->st)
+		return 0;
+
+	return gp_events_state_pressed(ev->st, key);
+}
+
+#define gp_event_any_key_pressed(ev, ...) gp_event_any_key_pressed_(ev, __VA_ARGS__, 0)
+#define gp_event_all_keys_pressed(ev, ...) gp_event_all_keys_pressed_(ev, __VA_ARGS__, 0)
+
+/**
+ * Returns non-zero if any key from a list is pressed.
+ */
+int gp_event_any_key_pressed_(gp_event *ev, ...);
+
+/**
+ * Returns non-zero if all keys from a list are pressed.
+ */
+int gp_event_all_keys_pressed_(gp_event *ev, ...);
+
+/*
+ * Dumps event into stdout.
  */
 void gp_event_dump(gp_event *ev);
 

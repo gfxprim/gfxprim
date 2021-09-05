@@ -318,10 +318,10 @@ static void set(gp_widget *self)
 
 static void click(gp_widget *self, gp_event *ev)
 {
-	if (ev->cursor_x > self->w)
+	if (ev->st->cursor_x > self->w)
 		return;
 
-	if (ev->cursor_y > self->h)
+	if (ev->st->cursor_y > self->h)
 		return;
 
 	set(self);

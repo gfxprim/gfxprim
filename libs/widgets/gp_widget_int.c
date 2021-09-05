@@ -279,13 +279,13 @@ static void spin_click(gp_widget *self, const gp_widget_render_ctx *ctx, gp_even
 	unsigned int max_y = self->h;
 	unsigned int mid_y = max_y / 2;
 
-	if (ev->cursor_x < min_x || ev->cursor_x > max_x)
+	if (ev->st->cursor_x < min_x || ev->st->cursor_x > max_x)
 		return;
 
-	if (ev->cursor_y > max_y)
+	if (ev->st->cursor_y > max_y)
 		return;
 
-	if (ev->cursor_y < mid_y)
+	if (ev->st->cursor_y < mid_y)
 		spin_inc(self);
 	else
 		spin_dec(self);
@@ -450,22 +450,22 @@ static void slider_set_val(gp_widget *self, unsigned int ascent, gp_event *ev)
 	int val = 0;
 	int coord;
 
-	if (ev->type == GP_EV_REL && !gp_widget_event_key_pressed(ev, GP_BTN_LEFT))
+	if (ev->type == GP_EV_REL && !gp_event_key_pressed(ev, GP_BTN_LEFT))
 		return;
 
-	if (ev->cursor_x > self->w)
+	if (ev->st->cursor_x > self->w)
 		return;
 
-	if (ev->cursor_y > self->h)
+	if (ev->st->cursor_y > self->h)
 		return;
 
 	switch (self->slider->dir) {
 	case GP_WIDGET_HORIZ:
-		coord = (int)ev->cursor_x;
+		coord = (int)ev->st->cursor_x;
 		val = coord_to_val(self, coord, ascent, self->w);
 	break;
 	case GP_WIDGET_VERT:
-		coord = (int)self->h - ((int)ev->cursor_y);
+		coord = (int)self->h - ((int)ev->st->cursor_y);
 		val = coord_to_val(self, coord, ascent, self->h);
 	break;
 	}

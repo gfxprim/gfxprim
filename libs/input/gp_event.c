@@ -1,14 +1,15 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 /*
- * Copyright (C) 2009-2013 Cyril Hrubis <metan@ucw.cz>
+ * Copyright (C) 2009-2021 Cyril Hrubis <metan@ucw.cz>
  */
 
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <stdarg.h>
 
 #include <core/gp_debug.h>
-#include "core/gp_common.h"
+#include <core/gp_common.h>
 
 #include <input/gp_event_queue.h>
 #include <input/gp_timer.h>
@@ -68,6 +69,50 @@ const char *gp_event_key_name(enum gp_event_key_value key)
 	};
 }
 
+int gp_event_any_key_pressed_(gp_event *ev, ...)
+{
+	va_list ap;
+	uint32_t key;
+
+	va_start(ap, ev);
+
+	for (;;) {
+		key = va_arg(ap, uint32_t);
+
+		if (!key) {
+			va_end(ap);
+			return 0;
+		}
+
+		if (gp_event_key_pressed(ev, key)) {
+			va_end(ap);
+			return 1;
+		}
+	}
+}
+
+int gp_event_all_keys_pressed_(gp_event *ev, ...)
+{
+	va_list ap;
+	uint32_t key;
+
+	va_start(ap, ev);
+
+	for (;;) {
+		key = va_arg(ap, uint32_t);
+
+		if (!key) {
+			va_end(ap);
+			return 1;
+		}
+
+		if (!gp_event_key_pressed(ev, key)) {
+			va_end(ap);
+			return 0;
+		}
+	}
+}
+
 static void dump_rel(gp_event *ev)
 {
 	printf("Rel ");
@@ -75,7 +120,7 @@ static void dump_rel(gp_event *ev)
 	switch (ev->code) {
 	case GP_EV_REL_POS:
 		printf("Position %u %u dx=%i dy=%i\n",
-		       ev->cursor_x, ev->cursor_y,
+		       ev->st->cursor_x, ev->st->cursor_y,
 		       ev->rel.rx, ev->rel.ry);
 	break;
 	case GP_EV_REL_WHEEL:
@@ -97,7 +142,7 @@ static void dump_abs(gp_event *ev)
 	switch (ev->code) {
 	case GP_EV_ABS_POS:
 		printf("Position %u %u %u\n",
-		       ev->cursor_x, ev->cursor_y, ev->abs.pressure);
+		       ev->st->cursor_x, ev->st->cursor_y, ev->abs.pressure);
 	break;
 	}
 }

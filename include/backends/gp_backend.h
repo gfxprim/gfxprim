@@ -300,9 +300,4 @@ static inline void gp_backend_put_event_back(gp_backend *self, gp_event *ev)
 	gp_event_queue_put_back(&self->event_queue, ev);
 }
 
-static inline int gp_backend_key_pressed(gp_backend *self, uint32_t key)
-{
-	return gp_event_queue_key_pressed(&self->event_queue, key);
-}
-
 #endif /* BACKENDS_GP_BACKEND_H */

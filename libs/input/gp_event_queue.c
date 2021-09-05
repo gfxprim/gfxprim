@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 /*
- * Copyright (C) 2009-2013 Cyril Hrubis <metan@ucw.cz>
+ * Copyright (C) 2009-2021 Cyril Hrubis <metan@ucw.cz>
  */
 
 #include <string.h>
 
-#include "core/gp_common.h"
+#include <core/gp_common.h>
 #include <core/gp_debug.h>
 
 #include <input/gp_event_queue.h>
@@ -17,16 +17,14 @@ void gp_event_queue_init(gp_event_queue *self,
 	self->screen_w = screen_w;
 	self->screen_h = screen_h;
 
-	memset(&self->cur_state, 0, sizeof(self->cur_state));
+	memset(&self->state, 0, sizeof(self->state));
 
-	self->cur_state.cursor_x = screen_w / 2;
-	self->cur_state.cursor_y = screen_h / 2;
+	self->state.cursor_x = screen_w / 2;
+	self->state.cursor_y = screen_h / 2;
 
 	self->queue_first = 0;
 	self->queue_last = 0;
 	self->queue_size = queue_size ? queue_size : GP_EVENT_QUEUE_SIZE;
-
-	memset(&self->state, 0, sizeof(self->state));
 }
 
 void gp_event_queue_set_screen_size(gp_event_queue *self,
@@ -38,11 +36,11 @@ void gp_event_queue_set_screen_size(gp_event_queue *self,
 	self->screen_h = h;
 
 	/* clip cursor */
-	if (self->cur_state.cursor_x >= w)
-		self->cur_state.cursor_x = w - 1;
+	if (self->state.cursor_x >= w)
+		self->state.cursor_x = w - 1;
 
-	if (self->cur_state.cursor_y >= h)
-		self->cur_state.cursor_y = h - 1;
+	if (self->state.cursor_y >= h)
+		self->state.cursor_y = h - 1;
 }
 
 void gp_event_queue_set_cursor_pos(gp_event_queue *self,
@@ -54,8 +52,8 @@ void gp_event_queue_set_cursor_pos(gp_event_queue *self,
 		return;
 	}
 
-	self->cur_state.cursor_x = x;
-	self->cur_state.cursor_y = y;
+	self->state.cursor_x = x;
+	self->state.cursor_y = y;
 }
 
 unsigned int gp_event_queue_events(gp_event_queue *self)
@@ -96,8 +94,8 @@ static void key_to_ascii(gp_event_queue *self, gp_event *ev)
 
 	ev->key.ascii = 0;
 
-	if (gp_event_key_state_pressed(&self->state, GP_KEY_LEFT_SHIFT) ||
-	    gp_event_key_state_pressed(&self->state, GP_KEY_RIGHT_SHIFT)) {
+	if (gp_events_state_pressed(&self->state, GP_KEY_LEFT_SHIFT) ||
+	    gp_events_state_pressed(&self->state, GP_KEY_RIGHT_SHIFT)) {
 		if (ev->key.key < sizeof(keys_to_ascii_shift))
 			ev->key.ascii = keys_to_ascii_shift[key];
 	} else {
@@ -106,29 +104,72 @@ static void key_to_ascii(gp_event_queue *self, gp_event *ev)
 	}
 }
 
+static uint32_t clip_rel(uint32_t val, uint32_t max, int32_t rel)
+{
+	if (rel < 0) {
+		if (val < GP_ABS(rel))
+			return 0;
+		else
+			return val + rel;
+	}
+
+	if (val + rel >= max)
+		return max - 1;
+
+	return val + rel;
+}
+
 gp_event *gp_event_queue_get(gp_event_queue *self)
 {
 	if (self->queue_first == self->queue_last)
 		return NULL;
 
-	gp_event *event = &self->events[self->queue_first];
+	gp_event *ev = &self->events[self->queue_first];
 
 	self->queue_first = (self->queue_first + 1) % self->queue_size;
 
-	if (event->type == GP_EV_KEY) {
-		switch (event->code) {
+	switch (ev->type) {
+	case GP_EV_KEY:
+		/* Update bitmap of pressed keys */
+		switch (ev->code) {
 		case GP_EV_KEY_UP:
-			gp_event_key_state_release(&self->state, event->val);
+			gp_events_state_release(&self->state, ev->val);
 		break;
 		case GP_EV_KEY_DOWN:
-			gp_event_key_state_press(&self->state, event->val);
+			gp_events_state_press(&self->state, ev->val);
 		break;
 		}
 
-		key_to_ascii(self, event);
+		key_to_ascii(self, ev);
+	break;
+	case GP_EV_REL:
+		/* Move the global cursor */
+		if (ev->code == GP_EV_REL_POS) {
+			self->state.cursor_x = clip_rel(self->state.cursor_x,
+					                self->screen_w, ev->rel.rx);
+			self->state.cursor_y = clip_rel(self->state.cursor_y,
+				                        self->screen_h, ev->rel.ry);
+		}
+	break;
+	case GP_EV_ABS:
+		/* Move the global cursor */
+		if (ev->code == GP_EV_ABS_POS) {
+			/*
+			 * Set global cursor, the packet could be partial, eg. update only x or
+			 * only y. In such case x_max or y_max is zero.
+			 */
+			if (ev->abs.x_max != 0)
+				self->state.cursor_x = ev->abs.x * (self->screen_w - 1) / ev->abs.x_max;
+
+			if (ev->abs.y_max != 0)
+				self->state.cursor_y = ev->abs.y * (self->screen_h - 1) / ev->abs.y_max;
+		}
+	break;
 	}
 
-	return event;
+	ev->st = &self->state;
+
+	return ev;
 }
 
 gp_event *gp_event_queue_peek(gp_event_queue *self)
@@ -184,49 +225,26 @@ void gp_event_queue_put_back(gp_event_queue *self, gp_event *ev)
 	event_put_back(self, ev);
 }
 
-static void set_time(gp_event_queue *self, struct timeval *time)
+static void set_time(gp_event *ev, struct timeval *time)
 {
-	if (time == NULL)
-		gettimeofday(&self->cur_state.time, NULL);
+	if (!time)
+		gettimeofday(&ev->time, NULL);
 	else
-		self->cur_state.time = *time;
-}
-
-static uint32_t clip_rel(uint32_t val, uint32_t max, int32_t rel)
-{
-	if (rel < 0) {
-		if (val < GP_ABS(rel))
-			return 0;
-		else
-			return val + rel;
-	}
-
-	if (val + rel >= max)
-		return max - 1;
-
-	return val + rel;
+		ev->time = *time;
 }
 
 void gp_event_queue_push_rel(gp_event_queue *self,
                              int32_t rx, int32_t ry, struct timeval *time)
 {
-	/* event header */
-	self->cur_state.type = GP_EV_REL;
-	self->cur_state.code = GP_EV_REL_POS;
+	gp_event ev = {
+		.type = GP_EV_REL,
+		.code = GP_EV_REL_POS,
+		.rel = {.rx = rx, ry = ry},
+	};
 
-	self->cur_state.rel.rx = rx;
-	self->cur_state.rel.ry = ry;
+	set_time(&ev, time);
 
-	set_time(self, time);
-
-	/* move the global cursor */
-	self->cur_state.cursor_x = clip_rel(self->cur_state.cursor_x,
-	                                    self->screen_w, rx);
-	self->cur_state.cursor_y = clip_rel(self->cur_state.cursor_y,
-	                                    self->screen_h, ry);
-
-	/* put it into queue */
-	event_put(self, &self->cur_state);
+	event_put(self, &ev);
 }
 
 void gp_event_queue_push_rel_to(gp_event_queue *self,
@@ -237,8 +255,8 @@ void gp_event_queue_push_rel_to(gp_event_queue *self,
 		return;
 	}
 
-	int32_t rx = x - self->cur_state.cursor_x;
-	int32_t ry = y - self->cur_state.cursor_y;
+	int32_t rx = x - self->state.cursor_x;
+	int32_t ry = y - self->state.cursor_y;
 
 	gp_event_queue_push_rel(self, rx, ry, time);
 }
@@ -248,30 +266,22 @@ void gp_event_queue_push_abs(gp_event_queue *self,
                              uint32_t x_max, uint32_t y_max, uint32_t pressure_max,
                              struct timeval *time)
 {
-	/* event header */
-	self->cur_state.type = GP_EV_ABS;
-	self->cur_state.code = GP_EV_ABS_POS;
-	self->cur_state.abs.x = x;
-	self->cur_state.abs.y = y;
-	self->cur_state.abs.pressure = pressure;
-	self->cur_state.abs.x_max = x_max;
-	self->cur_state.abs.y_max = y_max;
-	self->cur_state.abs.pressure_max = pressure_max;
+	gp_event ev = {
+		.type = GP_EV_ABS,
+		.code = GP_EV_ABS_POS,
+		.abs = {
+			.x = x,
+			.y = y,
+			.pressure = pressure,
+			.x_max = x_max,
+			.y_max = y_max,
+			.pressure_max = pressure_max,
+		}
+	};
 
-	set_time(self, time);
+	set_time(&ev, time);
 
-	/*
-	 * Set global cursor, the packet could be partial, eg. update only x or
-	 * only y. In such case x_max or y_max is zero.
-	 */
-	if (x_max != 0)
-		self->cur_state.cursor_x = x * (self->screen_w - 1) / x_max;
-
-	if (y_max != 0)
-		self->cur_state.cursor_y = y * (self->screen_h - 1) / y_max;
-
-	/* put it into queue */
-	event_put(self, &self->cur_state);
+	event_put(self, &ev);
 }
 
 void gp_event_queue_push_key(gp_event_queue *self,
@@ -289,48 +299,47 @@ void gp_event_queue_push_key(gp_event_queue *self,
 		return;
 	}
 
-	/* event header */
-	self->cur_state.type = GP_EV_KEY;
-	self->cur_state.code = code;
-	self->cur_state.key.key = key;
+	gp_event ev = {
+		.type = GP_EV_KEY,
+		.code = code,
+		.key = {.key = key},
+	};
 
-	set_time(self, time);
+	set_time(&ev, time);
 
-	/* put it into queue  */
-	event_put(self, &self->cur_state);
+	event_put(self, &ev);
 }
 
 void gp_event_queue_push_resize(gp_event_queue *self,
                                 uint32_t w, uint32_t h, struct timeval *time)
 {
-	/* event header */
-	self->cur_state.type = GP_EV_SYS;
-	self->cur_state.code = GP_EV_SYS_RESIZE;
+	gp_event ev = {
+		.type = GP_EV_SYS,
+		.code = GP_EV_SYS_RESIZE,
+		.sys = {.w = w, .h = h},
+	};
 
-	self->cur_state.sys.w = w;
-	self->cur_state.sys.h = h;
+	set_time(&ev, time);
 
-	set_time(self, time);
-
-	/* put it into queue */
-	event_put(self, &self->cur_state);
+	event_put(self, &ev);
 }
 
 void gp_event_queue_push(gp_event_queue *self,
                          uint16_t type, uint32_t code, int32_t value,
                          struct timeval *time)
 {
-	switch (type) {
-	case GP_EV_KEY:
+	if (type == GP_EV_KEY) {
 		gp_event_queue_push_key(self, code, value, time);
-	break;
-	default:
-		self->cur_state.type = type;
-		self->cur_state.code = code;
-		self->cur_state.val = value;
-
-		set_time(self, time);
-
-		event_put(self, &self->cur_state);
+		return;
 	}
+
+	gp_event ev = {
+		.type = type,
+		.code = code,
+		.val = value,
+	};
+
+	set_time(&ev, time);
+
+	event_put(self, &ev);
 }

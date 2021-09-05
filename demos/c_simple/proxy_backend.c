@@ -151,9 +151,11 @@ static int backend_event(struct gp_fd *self, struct pollfd *pfd)
 	while ((ev = gp_backend_poll_event(b))) {
 		switch (ev->type) {
 		case GP_EV_KEY:
-			if (!gp_backend_key_pressed(b, GP_KEY_LEFT_CTRL) &&
-			    !gp_backend_key_pressed(b, GP_KEY_RIGHT_CTRL))
+			if (!gp_event_any_key_pressed(ev,
+			                              GP_KEY_LEFT_CTRL,
+			                              GP_KEY_RIGHT_CTRL)) {
 				goto to_cli;
+			}
 
 			if (ev->code != GP_EV_KEY_DOWN)
 				goto to_cli;

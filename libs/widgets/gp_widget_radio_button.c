@@ -117,13 +117,13 @@ static void radio_click(gp_widget *self, const gp_widget_render_ctx *ctx, gp_eve
 	unsigned int max_y = self->h - ctx->padd;
 	unsigned int text_h = gp_text_ascent(ctx->font) + ctx->padd;
 
-	if (ev->cursor_x < min_x || ev->cursor_x > max_x)
+	if (ev->st->cursor_x < min_x || ev->st->cursor_x > max_x)
 		return;
 
-	if (ev->cursor_y < min_y || ev->cursor_y > max_y)
+	if (ev->st->cursor_y < min_y || ev->st->cursor_y > max_y)
 		return;
 
-	unsigned int select = (ev->cursor_y - min_y) / text_h;
+	unsigned int select = (ev->st->cursor_y - min_y) / text_h;
 
 	select_choice(self, select);
 }

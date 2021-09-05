@@ -61,12 +61,12 @@ static void event_loop(void)
 					exit(0);
 				break;
 				case GP_BTN_LEFT:
-					gp_hline_xxy(win, ev->cursor_x - 3,
-					            ev->cursor_x + 3,
-						    ev->cursor_y, red);
-					gp_vline_xyy(win, ev->cursor_x,
-					            ev->cursor_y - 3,
-						    ev->cursor_y + 3, red);
+					gp_hline_xxy(win, ev->st->cursor_x - 3,
+					            ev->st->cursor_x + 3,
+						    ev->st->cursor_y, red);
+					gp_vline_xyy(win, ev->st->cursor_x,
+					            ev->st->cursor_y - 3,
+						    ev->st->cursor_y + 3, red);
 					gp_backend_flip(backend);
 				break;
 				default:
@@ -77,8 +77,8 @@ static void event_loop(void)
 				switch (ev->code) {
 				static int size = 0;
 				case GP_EV_REL_POS:
-					if (gp_backend_key_pressed(backend, GP_BTN_LEFT)) {
-						gp_putpixel(win, ev->cursor_x, ev->cursor_y,
+					if (gp_event_key_pressed(ev, GP_BTN_LEFT)) {
+						gp_putpixel(win, ev->st->cursor_x, ev->st->cursor_y,
 							    green);
 					}
 					int align = GP_ALIGN_RIGHT|GP_VALIGN_BOTTOM;
@@ -87,7 +87,7 @@ static void event_loop(void)
 					              black, size);
 					size = gp_print(win, NULL, 20, 40, align,
 					                white, black, "X=%3u Y=%3u dX=%3i dY=%3i",
-						        ev->cursor_x, ev->cursor_y,
+						        ev->st->cursor_x, ev->st->cursor_y,
 							ev->rel.rx, ev->rel.ry);
 					gp_backend_flip(backend);
 				break;
@@ -95,8 +95,8 @@ static void event_loop(void)
 			break;
 			case GP_EV_ABS:
 				case GP_EV_ABS_POS:
-					gp_putpixel(win, ev->cursor_x,
-					            ev->cursor_y,
+					gp_putpixel(win, ev->st->cursor_x,
+					            ev->st->cursor_y,
 						    green);
 					gp_backend_flip(backend);
 				break;

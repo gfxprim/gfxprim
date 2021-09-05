@@ -137,21 +137,3 @@ void gp_event_queue_push(gp_event_queue *self,
 These functions are used for puting events into the event queue. If pointer to
 the timeval structure is NULL the event 'time' will be filled with exact time
 the event was added to the queue.
-
-
-Event Queue Key State
-~~~~~~~~~~~~~~~~~~~~~
-
-Event queue also maintains a keyboard state, i.e. which keys are pressed. The
-state is valid for the last even returned by the +gp_event_queue_get()+.
-
-[source,c]
--------------------------------------------------------------------------------
-#include <gfxprim.h>
-/* or */
-#include <input/gp_event_queue.h>
-
-int gp_event_queue_key_pressed(gp_event_queue *self, uint32_t key);
--------------------------------------------------------------------------------
-
-Returns non-zero if key is being currently hold down.

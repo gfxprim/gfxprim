@@ -32,7 +32,7 @@ static int event_handler(gp_widget_event *ev)
 	if (ev->input_ev->type == GP_EV_KEY)
 		return 0;
 
-	if (ev->input_ev->cursor_y < ev->self->y + ev->self->h/2)
+	if (ev->input_ev->st->cursor_y < ev->self->y + ev->self->h/2)
 		return 0;
 
 	gp_widget_overlay_show(ev->self, 1);

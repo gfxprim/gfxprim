@@ -119,13 +119,13 @@ static void click(gp_widget *self, const gp_widget_render_ctx *ctx, gp_event *ev
 	unsigned int max_y = self->h;
 	unsigned int mid_y = max_y / 2;
 
-	if (ev->cursor_x < min_x || ev->cursor_x > max_x)
+	if (ev->st->cursor_x < min_x || ev->st->cursor_x > max_x)
 		return;
 
-	if (ev->cursor_y > max_y)
+	if (ev->st->cursor_y > max_y)
 		return;
 
-	if (ev->cursor_y < mid_y)
+	if (ev->st->cursor_y < mid_y)
 		key_up(self);
 	else
 		key_down(self);

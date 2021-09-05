@@ -84,8 +84,6 @@ extern struct gp_fds *gp_widgets_fds;
 void gp_widget_render_timer(gp_widget *self, int flags, unsigned int timeout_ms);
 void gp_widget_render_timer_cancel(gp_widget *self);
 
-int gp_widget_event_key_pressed(gp_event *ev, uint32_t key);
-
 /**
  * @brief Returns a pointer to the current render context.
  *

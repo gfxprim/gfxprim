@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 /*
- * Copyright (C) 2009-2013 Cyril Hrubis <metan@ucw.cz>
+ * Copyright (C) 2009-2021 Cyril Hrubis <metan@ucw.cz>
  */
 
 /*
@@ -17,40 +17,6 @@
 
 #include <input/gp_event.h>
 
-#define GP_EVENT_KEY_BITMAP_BYTES 36
-
-struct gp_event_key_state {
-	/** Bitmap of pressed keys including mouse buttons. */
-	uint8_t keys_pressed[GP_EVENT_KEY_BITMAP_BYTES];
-};
-
-/*
- * Helpers for setting/getting key bits.
- */
-static inline void gp_event_key_state_press(gp_event_key_state *self, uint32_t key)
-{
-	if (key >= GP_EVENT_KEY_BITMAP_BYTES * 8)
-		return;
-
-	self->keys_pressed[(key)/8] |= 1<<((key)%8);
-}
-
-static inline int gp_event_key_state_pressed(gp_event_key_state *self, uint32_t key)
-{
-	if (key >= GP_EVENT_KEY_BITMAP_BYTES * 8)
-		return 0;
-
-	return !!(self->keys_pressed[(key)/8] & (1<<((key)%8)));
-}
-
-static inline void gp_event_key_state_release(gp_event_key_state *self, uint32_t key)
-{
-	if (key >= GP_EVENT_KEY_BITMAP_BYTES * 8)
-		return;
-
-	self->keys_pressed[(key)/8] &= ~(1<<((key)%8));
-}
-
 #define GP_EVENT_QUEUE_SIZE 32
 
 struct gp_event_queue {
@@ -63,14 +29,14 @@ struct gp_event_queue {
 	unsigned int queue_last;
 	unsigned int queue_size;
 
-	gp_event cur_state;
-	gp_event events[GP_EVENT_QUEUE_SIZE];
-
 	/*
-	 * Accumulated keyboard state, valid only for event removed by the last
-	 * gp_event_queue_get().
+	 * Accumulated state, pressed keys, cursor position, etc.
+	 *
+	 * Valid only for event removed by the last gp_event_queue_get().
 	 */
-	gp_event_key_state state;
+	gp_events_state state;
+
+	gp_event events[GP_EVENT_QUEUE_SIZE];
 };
 
 /*
@@ -182,10 +148,5 @@ void gp_event_queue_push_resize(gp_event_queue *self,
 void gp_event_queue_push(gp_event_queue *self,
                          uint16_t type, uint32_t code, int32_t value,
                          struct timeval *time);
-
-static inline int gp_event_queue_key_pressed(gp_event_queue *self, uint32_t key)
-{
-	return gp_event_key_state_pressed(&self->state, key);
-}
 
 #endif /* INPUT_GP_EVENT_QUEUE_H */

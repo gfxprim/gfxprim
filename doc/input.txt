@@ -47,6 +47,15 @@ struct gp_event_sys {
 	uint32_t w, h;
 };
 
+struct gp_events_state {
+	/** Bitmap of pressed keys including mouse buttons. */
+	uint8_t keys_pressed[GP_EVENT_KEY_BITMAP_BYTES];
+
+	/** Cursor coordinates */
+	uint32_t cursor_x;
+	uint32_t cursor_y;
+};
+
 typedef struct gp_event {
 	/** enum gp_event_type */
 	uint16_t type;
@@ -69,14 +78,8 @@ typedef struct gp_event {
 	/* event timestamp */
 	struct timeval time;
 
-	/*
-	 * Cursor position, position on screen accumulated
-	 * from all pointer devices
-	 */
-	uint32_t cursor_x;
-	uint32_t cursor_y;
-
-	void *priv;
+	/* overall accumulated state, pressed keys, cursor, etc. */
+	gp_events_state *st;
 } gp_event;
 -------------------------------------------------------------------------------
 
@@ -156,17 +159,14 @@ image::keyboard.svg["Keyboard Layout",width=800,link="keyboard.svg"]
 
 * The value of timer event is simply pointer to the expired link:#Timers[Timer].
 
-The 'dev_id' is not used at the moment and may be removed.
-
 The timeval structure 'time' holds time when the event was created (or
 received by GFXprim input driver).
 
-The 'cursor_x' and 'cursor_y' holds current pointer coordinates. (All relative
-and absolute events are mixed together to compute current cursor position.)
+The 'st' pointer points to a global accumulated event queue state, i.e. bitmap
+of currently pressed keys and overall cursor position.
 
-The 'key_pressed' is bitflag array of currently pressed keys which is useful
-for using keys as modificators. The array always holds state of the standard
-keyboard keys and mouse buttons.
+WARNING: The values in the global state are valid only for the last event removed
+         from the queue by 'gp_event_queue_get()'.
 
 Event API
 ~~~~~~~~~
@@ -192,6 +192,33 @@ const char *gp_event_key_name(enum gp_event_key_value key);
 -------------------------------------------------------------------------------
 
 Returns human-readable key name.
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <gfxprim.h>
+/* or */
+#include <input/gp_event.h>
+
+int gp_event_key_pressed(gp_event *ev, uint32_t key);
+-------------------------------------------------------------------------------
+
+A shortcut for 'gp_events_state_pressed(ev->st, GP_KEY_FOO)' that also returns
+0 if 'ev->st' is NULL.
+
+[source,c]
+-------------------------------------------------------------------------------
+#include <gfxprim.h>
+/* or */
+#include <input/gp_event.h>
+
+int gp_event_any_key_pressed(gp_event *ev, ...);
+
+int gp_event_all_keys_pressed(gp_event *ev, ...);
+-------------------------------------------------------------------------------
+
+These functions do logical or/and on the list of keys passed as arguments.
+
+Use it as: 'gp_event_any_key_pressed(ev, GP_KEY_LEFT_ALT, GP_KEY_RIGHT_ALT)'
 
 [[Timers]]
 Timers

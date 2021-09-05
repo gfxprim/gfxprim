@@ -484,8 +484,7 @@ static int handle_focus(gp_widget *self, const gp_widget_render_ctx *ctx, gp_eve
 
 		switch (ev->val) {
 		case GP_KEY_TAB:
-			if (gp_widget_event_key_pressed(ev, GP_KEY_LEFT_SHIFT) ||
-			    gp_widget_event_key_pressed(ev, GP_KEY_RIGHT_SHIFT))
+			if (gp_event_any_key_pressed(ev, GP_KEY_LEFT_SHIFT, GP_KEY_RIGHT_SHIFT))
 				gp_widget_ops_render_focus(self, GP_FOCUS_PREV);
 			else
 				gp_widget_ops_render_focus(self, GP_FOCUS_NEXT);
@@ -493,12 +492,11 @@ static int handle_focus(gp_widget *self, const gp_widget_render_ctx *ctx, gp_eve
 			return 1;
 		case GP_BTN_PEN:
 		case GP_BTN_LEFT:
-			gp_widget_ops_render_focus_xy(self, ctx, ev->cursor_x, ev->cursor_y);
+			gp_widget_ops_render_focus_xy(self, ctx, ev->st->cursor_x, ev->st->cursor_y);
 			return 0;
 		}
 
-		if (!gp_widget_event_key_pressed(ev, GP_KEY_LEFT_SHIFT) &&
-		    !gp_widget_event_key_pressed(ev, GP_KEY_RIGHT_SHIFT))
+		if (!gp_event_any_key_pressed(ev, GP_KEY_LEFT_SHIFT, GP_KEY_RIGHT_SHIFT))
 			return 0;
 
 		switch (ev->val) {
@@ -518,7 +516,7 @@ static int handle_focus(gp_widget *self, const gp_widget_render_ctx *ctx, gp_eve
 	break;
 	case GP_EV_REL:
 		if (ev->code == GP_EV_REL_WHEEL) {
-			gp_widget_ops_render_focus_xy(self, ctx, ev->cursor_x, ev->cursor_y);
+			gp_widget_ops_render_focus_xy(self, ctx, ev->st->cursor_x, ev->st->cursor_y);
 			return 0;
 		}
 	break;
@@ -558,15 +556,15 @@ int gp_widget_ops_event(gp_widget *self, const gp_widget_render_ctx *ctx, gp_eve
 		return 0;
 
 	GP_DEBUG(3, "Event widget %p (%s) (cursor %ux%u)",
-	         self, ops->id, ev->cursor_x, ev->cursor_y);
+	         self, ops->id, ev->st->cursor_x, ev->st->cursor_y);
 
-	ev->cursor_x -= self->x;
-	ev->cursor_y -= self->y;
+	ev->st->cursor_x -= self->x;
+	ev->st->cursor_y -= self->y;
 
 	handled = ops->event(self, ctx, ev);
 
-	ev->cursor_x += self->x;
-	ev->cursor_y += self->y;
+	ev->st->cursor_x += self->x;
+	ev->st->cursor_y += self->y;
 
 	if (!handled)
 		handled = gp_widget_send_event(self, GP_WIDGET_EVENT_INPUT, ctx, ev);
@@ -577,11 +575,11 @@ int gp_widget_ops_event(gp_widget *self, const gp_widget_render_ctx *ctx, gp_eve
 int gp_widget_ops_event_offset(gp_widget *self, const gp_widget_render_ctx *ctx,
                                gp_event *ev, gp_size off_x, gp_size off_y)
 {
-	ev->cursor_x -= off_x;
-	ev->cursor_y -= off_y;
+	ev->st->cursor_x -= off_x;
+	ev->st->cursor_y -= off_y;
 	int ret = gp_widget_ops_event(self, ctx, ev);
-	ev->cursor_x += off_x;
-	ev->cursor_y += off_y;
+	ev->st->cursor_x += off_x;
+	ev->st->cursor_y += off_y;
 
 	return ret;
 }
