@@ -55,6 +55,17 @@ struct gp_proxy_ptype {
 	gp_pixel_type ptype;
 };
 
+struct gp_proxy_coord {
+	uint32_t x;
+	uint32_t y;
+};
+
+struct gp_proxy_cursor {
+	uint32_t type;
+	uint32_t size;
+	struct gp_proxy_coord pos;
+};
+
 union gp_proxy_msg {
 	struct {
 		uint32_t type;
@@ -66,6 +77,7 @@ union gp_proxy_msg {
 	struct gp_proxy_pixmap pix;
 	struct gp_proxy_rect rect;
 	struct gp_proxy_ptype ptype;
+	struct gp_proxy_cursor cursor;
 };
 
 enum gp_proxy_msg_types {
@@ -87,6 +99,8 @@ enum gp_proxy_msg_types {
 	GP_PROXY_HIDE,
 	/* Update rect on screen */
 	GP_PROXY_UPDATE,
+	/* Sets a cursor position */
+	GP_PROXY_CURSOR_POS,
 	GP_PROXY_MAX,
 };
 

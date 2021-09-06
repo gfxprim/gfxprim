@@ -167,6 +167,11 @@ static void proxy_poll(gp_backend *self)
 			case GP_PROXY_HIDE:
 				hidden(self);
 			break;
+			case GP_PROXY_CURSOR_POS:
+				gp_event_queue_set_cursor_pos(&self->event_queue,
+				                              msg->cursor.pos.x,
+				                              msg->cursor.pos.y);
+			break;
 			case GP_PROXY_EXIT:
 				gp_event_queue_push(&self->event_queue, GP_EV_SYS,
 				                    GP_EV_SYS_QUIT, 0, NULL);

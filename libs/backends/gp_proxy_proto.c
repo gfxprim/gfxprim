@@ -128,6 +128,9 @@ int gp_proxy_send(int fd, enum gp_proxy_msg_types type, void *payload)
 	case GP_PROXY_UPDATE:
 		payload_size = sizeof(struct gp_proxy_rect_);
 	break;
+	case GP_PROXY_CURSOR_POS:
+		payload_size = sizeof(struct gp_proxy_coord);
+	break;
 	default:
 	break;
 	}
