@@ -276,7 +276,7 @@ void *gp_widget_callback_addr(const char *fn_name)
 static gp_widget *gp_widgets_from_json(gp_json_buf *json, gp_htable **uids)
 {
 	gp_widget *ret;
-	char buf[32];
+	char buf[128];
 	gp_json_val val = {.buf = buf, .buf_size = sizeof(buf)};
 
 	if (gp_json_next_type(json) != GP_JSON_OBJ) {
