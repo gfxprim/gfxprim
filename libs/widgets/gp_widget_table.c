@@ -220,7 +220,7 @@ static void render_cell(gp_widget_table_cell *cell, const gp_widget_render_ctx *
 		halign = GP_ALIGN_LEFT;
 
 	gp_text_fit(ctx->buf, font, x, y, w,
-	            halign|GP_VALIGN_BELOW, ctx->text_color, bg_col, cell->text);
+	            halign|GP_VALIGN_BASELINE, ctx->text_color, bg_col, cell->text);
 
 }
 
@@ -284,7 +284,8 @@ static void render(gp_widget *self, const gp_offset *offset,
 
 				if (tbl->header[j].get &&
 				    tbl->header[j].get(self, &cell)) {
-					render_cell(&cell, ctx, cx, cy, tbl->cols_w[j], bg_col);
+					unsigned int by = cy + text_a - ctx->padd/4;
+					render_cell(&cell, ctx, cx, by, tbl->cols_w[j], bg_col);
 				}
 
 				cx += tbl->cols_w[j] + ctx->padd;
