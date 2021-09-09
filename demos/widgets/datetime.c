@@ -63,7 +63,8 @@ int load_sys_time(gp_widget_event *ev)
 	struct tm tm;
 	time_t t;
 
-	(void)ev;
+	if (ev->type != GP_WIDGET_EVENT_WIDGET)
+		return 0;
 
 	time(&t);
 	localtime_r(&t, &tm);
