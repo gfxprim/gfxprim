@@ -12,6 +12,7 @@
 struct gp_widget_frame {
 	gp_widget *child;
 	gp_widget_tattr tattr;
+	int light_bg:1;
 	char *title;
 };
 
