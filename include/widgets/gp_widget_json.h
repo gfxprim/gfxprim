@@ -56,6 +56,17 @@ gp_widget *gp_widget_layout_json(const char *fname, gp_htable **uids);
 void *gp_widget_callback_addr(const char *fn_name);
 
 /**
+ * @brief Attempts to get a pointer to a structure given it's name.
+ *
+ * This function is used to resolve structures from a JSON layout.
+ *
+ * @struct_name A structure name.
+ *
+ * @return A structure pointer.
+ */
+void *gp_widget_struct_addr(const char *struct_name);
+
+/**
  * @brief Gets a widget pointer given UIDs hash, an id and type.
  *
  * @uids And UIDs hash filled in the JSON parser.

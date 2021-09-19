@@ -273,6 +273,18 @@ void *gp_widget_callback_addr(const char *fn_name)
 	return addr;
 }
 
+void *gp_widget_struct_addr(const char *struct_name)
+{
+	if (!ld_handle)
+		return NULL;
+
+	void *addr = dlsym(ld_handle, struct_name);
+
+	GP_DEBUG(3, "Structure '%s' address is %p", struct_name, addr);
+
+	return addr;
+}
+
 static gp_widget *gp_widgets_from_json(gp_json_buf *json, gp_htable **uids)
 {
 	gp_widget *ret;
