@@ -93,10 +93,10 @@ gp_font_face *gp_font_face_load(const char *path, uint32_t width, uint32_t heigh
 
 		FT_Bitmap *bitmap = &face->glyph->bitmap;
 
-		GP_DEBUG(2, "Glyph '%c' bitmap rows=%i width=%i pitch=%i",
+		GP_DEBUG(4, "Glyph '%c' bitmap rows=%i width=%i pitch=%i",
 		         i, bitmap->rows, bitmap->width, bitmap->pitch);
 
-		GP_DEBUG(2, " bitmap top=%i left=%i",
+		GP_DEBUG(4, " bitmap top=%i left=%i",
 			 face->glyph->bitmap_top, face->glyph->bitmap_left);
 
 		/* count glyph table size and fill offset table */
@@ -126,7 +126,7 @@ gp_font_face *gp_font_face_load(const char *path, uint32_t width, uint32_t heigh
 
 		err = FT_Load_Glyph(face, glyph_idx, FT_LOAD_DEFAULT);
 
-		GP_DEBUG(2, "Loading and rendering glyph '%c'", i);
+		GP_DEBUG(4, "Loading and rendering glyph '%c'", i);
 
 		if (err) {
 			GP_DEBUG(1, "Failed to load glyph '%c'", i);
