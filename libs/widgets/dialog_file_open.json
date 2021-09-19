@@ -8,19 +8,21 @@
       "border": "none",
       "cfill": "0, 1",
       "widgets": [
-	{
-	  "type": "label",
-	  "text": "Directory:"
-	},
-	{
-	  "type": "tbox",
-	  "len": 75,
-	  "halign": "fill",
-	  "uid": "path"
-	}
+	{"type": "label", "text": "Directory:"},
+	{"type": "tbox", "len": 75, "halign": "fill", "uid": "path"}
       ]
     },
     {
+     "type": "table",
+     "align": "fill",
+     "min_rows": 25,
+     "uid": "files",
+     "col_ops": "gp_dialog_files_col_ops",
+     "header": [
+      {"label": "File", "id": "name", "min_size": 20, "fill": 1},
+      {"label": "Size", "id": "size", "min_size": 7},
+      {"label": "Modified", "id": "mod_time", "min_size": 7}
+     ]
     },
     {
       "cols": 5,
@@ -29,10 +31,7 @@
       "cfill": "0, 8, 0, 0, 0",
       "cpadf": "0, 0, 1, 1, 0, 0",
       "widgets": [
-        {
-          "type": "label",
-          "text": "Filter:"
-        },
+        {"type": "label", "text": "Filter:"},
         {
 	  "type": "tbox",
 	  "len": 20,

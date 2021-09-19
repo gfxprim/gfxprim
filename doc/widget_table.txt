@@ -1,10 +1,12 @@
 Table widget
 ------------
 
-Table widget is a widget that shows a table possibly sortable by its elements.
+Table widget is a widget that shows a table.
 
-The table content is not stored in the widget, instead there are two callbacks
-that are called by the widget table code when rendering.
+The table content is not stored in the widget, instead there are callbacks
+that are called to get the cells content when table is being rendered.
+
+See link:example_widgets_table.html[table widget example code].
 
 .Table widget callbacks
 [source,c]
@@ -15,42 +17,50 @@ enum gp_widget_table_row_op {
         GP_TABLE_ROW_TELL,
 };
 
-...
-        /* iterator based API */
-        union {
-                void *row_priv;
-                unsigned long row_idx;
-        };
-        int (*row)(struct gp_widget *self, int op, unsigned int pos);
-        const char *(*get)(struct gp_widget *self, unsigned int col);
+typedef struct gp_widget_table_col_dsc {
+	/** Column human readable ID */
+	const char *id;
+	/** An index to map the human readable ID to */
+	unsigned long idx;
+	/** If sort is not set this describes if column is sortable */
+	int sortable:1;
+} gp_widget_table_col_dsc;
 
-        void (*sort)(struct gp_widget *self, unsigned int col, int desc);
-...
+typedef struct gp_widget_table_col_ops {
+	int (*seek_row)(gp_widget *self, int op, unsigned int pos);
+	int (*get_cell)(gp_widget *self, gp_widget_table_cell *cell, unsigned int col_idx);
+	void (*sort)(gp_widget *self, int desc, unsigned int col_idx);
+
+	/** NULL id terminated column map array */
+	gp_widget_table_col_dsc col_map[];
+} gp_widget_table_col_ops;
 -------------------------------------------------------------------------------
 
-.row() callback ops
+The 'gp_widget_table_col_dsc' structure describes a column and the
+'gp_widget_table_col_ops' describes all possible columns along with callbacks
+to get table cells and possibly sort table by a column.
+
+What user sees on the screen is described by an array of
+'gp_widget_table_header' structures which is usually loaded from a JSON
+description.
+
+.seek_row() callback ops
 [options="header"]
 |==============================================================================
 | enum gp_widget_table_row_op | Description
 | GP_TABLE_ROW_RESET
-| This op has to reset the current row to 0, it has to return non-zero if the
-  row is valid i.e. exists, and zero otherwise. The pos parameter is not used in
-  this case.
-|GP_TABLE_ROW_ADVANCE
-|This op moves the current row by the op elements forward. The return value is
- the same as for `GP_TABLE_ROW_RESET`, i.e. non-zero if resulting row is valid
- and zero if not.
-| GP_TABLE_ROW_TELL
-| This op is used to request current number of elements. The return value is
-  either number of rows, or -1. If -1 is returned the number of rows is counted
-  in the widget code.
+| Sets the current row to 0 i.e. the first row in the table.
+| GP_TABLE_ROW_ADVANCE
+| Moves the current row by the op parameter elements forward. Returns
+  non-zero if resulting row is valid and zero if not.
+| GP_TABLE_ROW_MAX
+| Returns the number of rows in a table i.e. max_index + 1, or -1 if unknown
+  at the time of the call.
 |==============================================================================
-
-The `row()` callback is called by the table code to set the current row, then
-the `get()` callback is used to get content for each column.
 
 Sorting
 ~~~~~~~
 
-If any of the table columns is sortable, the `sort()` function must be
-implemented.
+If any of the table columns is sortable the 'sortable' flag has to be set in
+the corresponding column description and the 'col_ops->sort()' callback must
+be implemented for the particular column.

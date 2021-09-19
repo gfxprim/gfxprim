@@ -1,0 +1,15 @@
+{
+ "version": 1,
+ "widgets": [
+  {
+   "type": "table",
+   "min_rows": 4,
+   "col_ops": "table_col_ops",
+   "on_event": "table_on_event",
+   "header": [
+    {"label": "Object", "min_size": 8, "id": "object"},
+    {"label": "Fruit?", "min_size": 3, "id": "is_fruit"}
+   ]
+  }
+ ]
+}

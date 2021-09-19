@@ -2,7 +2,7 @@
 
 /*
 
-   Copyright (c) 2014-2020 Cyril Hrubis <metan@ucw.cz>
+   Copyright (c) 2014-2021 Cyril Hrubis <metan@ucw.cz>
 
  */
 
@@ -10,9 +10,12 @@
 #define GP_WIDGET_TABLE_H
 
 enum gp_widget_table_row_op {
+	/** Sets current row to 0 */
 	GP_TABLE_ROW_RESET,
+	/** Moves forward by pos parameter */
 	GP_TABLE_ROW_ADVANCE,
-	GP_TABLE_ROW_TELL,
+	/** Returns number of rows or -1 if not implemented */
+	GP_TABLE_ROW_MAX
 };
 
 typedef struct gp_widget_table_cell {
@@ -20,20 +23,63 @@ typedef struct gp_widget_table_cell {
 	gp_widget_tattr tattr;
 } gp_widget_table_cell;
 
+/**
+ * A table column description.
+ *
+ * Describes:
+ * - an human readable id to index mapping
+ * - sortable flag, set if column could be sorted by ops->sort()
+ */
+typedef struct gp_widget_table_col_dsc {
+	/** Column human readable ID */
+	const char *id;
+	/** An index to map the human readable ID to */
+	unsigned long idx;
+	/** If sort is not set this describes if column is sortable */
+	int sortable:1;
+} gp_widget_table_col_dsc;
+
+/**
+ * Table operations, defined by the application.
+ *
+ * This defines operations for all possible columns in the table. The table
+ * header then chooses which columns to display based on this description.
+ */
+typedef struct gp_widget_table_col_ops {
+	int (*seek_row)(gp_widget *self, int op, unsigned int pos);
+	int (*get_cell)(gp_widget *self, gp_widget_table_cell *cell, unsigned int col_idx);
+	void (*sort)(gp_widget *self, int desc, unsigned int col_idx);
+
+	/** NULL id terminated column map array */
+	gp_widget_table_col_dsc col_map[];
+} gp_widget_table_col_ops;
+
+/**
+ * Table header, defines which coluns are shown to the user.
+ */
 typedef struct gp_widget_table_header {
+	/** Pointer to a table column descriptor */
+	gp_widget_table_col_dsc *col_dsc;
+
+	/** Column label, may be NULL */
 	char *label;
+
+	/** Label text attributes */
 	gp_widget_tattr tattr;
+
+	/** Column size and fill */
 	unsigned int col_min_size;
 	unsigned int col_fill;
-	int (*get)(gp_widget *self, gp_widget_table_cell *cell);
-	void (*sort)(struct gp_widget *self, int desc);
 } gp_widget_table_header;
 
 typedef struct gp_widget_table {
 	unsigned int cols;
 	unsigned int min_rows;
 
+	/** Header defines columns show to the user */
 	const gp_widget_table_header *header;
+	/** Defines all possible columns */
+	gp_widget_table_col_ops col_ops;
 
 	unsigned int selected_row;
 	unsigned int sorted_by_col;
@@ -55,19 +101,16 @@ typedef struct gp_widget_table {
 		unsigned long row_idx;
 	};
 
-	int (*seek_row)(struct gp_widget *self, int op, unsigned int pos);
-
 	void *free;
 
 	char buf[];
 } gp_widget_table;
 
 gp_widget *gp_widget_table_new(unsigned int cols, unsigned int min_rows,
-                               const gp_widget_table_header *headers,
-                               int (*seek_row)(struct gp_widget *self,
-                                               int op, unsigned int pos));
+                               const gp_widget_table_col_ops *col_ops,
+                               const gp_widget_table_header *header);
 
-void gp_widget_table_sort_by(gp_widget *self, unsigned int col, int desc);
+void gp_widget_table_sort_by(gp_widget *self, int desc, unsigned int col);
 
 /*
  * Called when table content has changed and table needs to be rerendered.

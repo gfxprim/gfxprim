@@ -20,4 +20,7 @@ gp_dialog *gp_dialog_file_open_new(const char *path);
 
 const char *gp_dialog_file_open_path(gp_dialog *self);
 
-#endif /* GP_WIDGET_DIALOG_FILE_OPEN_H */
+gp_dialog *gp_dialog_file_save_new(const char *path,
+                                   const char *const ext_hints[]);
+
+#endif /* GP_WIDGET_DIALOG_FILE_H */

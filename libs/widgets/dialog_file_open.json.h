@@ -9,19 +9,21 @@ static const char *dialog_file_open = "\
       \"border\": \"none\", \n\
       \"cfill\": \"0, 1\", \n\
       \"widgets\": [ \n\
-	{ \n\
-	  \"type\": \"label\", \n\
-	  \"text\": \"Directory:\" \n\
-	}, \n\
-	{ \n\
-	  \"type\": \"tbox\", \n\
-	  \"len\": 75, \n\
-	  \"halign\": \"fill\", \n\
-	  \"uid\": \"path\" \n\
-	} \n\
+	{\"type\": \"label\", \"text\": \"Directory:\"}, \n\
+	{\"type\": \"tbox\", \"len\": 75, \"halign\": \"fill\", \"uid\": \"path\"} \n\
       ] \n\
     }, \n\
     { \n\
+     \"type\": \"table\", \n\
+     \"align\": \"fill\", \n\
+     \"min_rows\": 25, \n\
+     \"uid\": \"files\", \n\
+     \"col_ops\": \"gp_dialog_files_col_ops\", \n\
+     \"header\": [ \n\
+      {\"label\": \"File\", \"id\": \"name\", \"min_size\": 20, \"fill\": 1}, \n\
+      {\"label\": \"Size\", \"id\": \"size\", \"min_size\": 7}, \n\
+      {\"label\": \"Modified\", \"id\": \"mod_time\", \"min_size\": 7} \n\
+     ] \n\
     }, \n\
     { \n\
       \"cols\": 5, \n\
@@ -30,10 +32,7 @@ static const char *dialog_file_open = "\
       \"cfill\": \"0, 8, 0, 0, 0\", \n\
       \"cpadf\": \"0, 0, 1, 1, 0, 0\", \n\
       \"widgets\": [ \n\
-        { \n\
-          \"type\": \"label\", \n\
-          \"text\": \"Filter:\" \n\
-        }, \n\
+        {\"type\": \"label\", \"text\": \"Filter:\"}, \n\
         { \n\
 	  \"type\": \"tbox\", \n\
 	  \"len\": 20, \n\

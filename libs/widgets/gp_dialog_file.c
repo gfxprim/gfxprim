@@ -47,42 +47,6 @@ static int redraw_table(gp_widget_event *ev)
 	return 0;
 }
 
-static void sort_by_file_name(gp_widget *self, int desc)
-{
-	int sort_type = GP_DIR_SORT_BY_NAME;
-
-	if (desc)
-		sort_type |= GP_DIR_SORT_DESC;
-	else
-		sort_type |= GP_DIR_SORT_ASC;
-
-	gp_dir_cache_sort(self->tbl->priv, sort_type);
-}
-
-static void sort_by_file_size(gp_widget *self, int desc)
-{
-	int sort_type = GP_DIR_SORT_BY_SIZE;
-
-	if (desc)
-		sort_type |= GP_DIR_SORT_DESC;
-	else
-		sort_type |= GP_DIR_SORT_ASC;
-
-	gp_dir_cache_sort(self->tbl->priv, sort_type);
-}
-
-static void sort_by_file_mtime(gp_widget *self, int desc)
-{
-	int sort_type = GP_DIR_SORT_BY_MTIME;
-
-	if (desc)
-		sort_type |= GP_DIR_SORT_DESC;
-	else
-		sort_type |= GP_DIR_SORT_ASC;
-
-	gp_dir_cache_sort(self->tbl->priv, sort_type);
-}
-
 static int dialog_show_hidden(struct file_dialog *dialog)
 {
 	if (!dialog->show_hidden)
@@ -162,7 +126,7 @@ static void free_dir_cache(gp_dir_cache *self)
 	gp_dir_cache_free(self);
 }
 
-static int set_row(gp_widget *self, int op, unsigned int pos)
+static int files_seek_row(gp_widget *self, int op, unsigned int pos)
 {
 	gp_dir_cache *cache = self->tbl->priv;
 	unsigned int i;
@@ -182,7 +146,7 @@ static int set_row(gp_widget *self, int op, unsigned int pos)
 				return 0;
 		}
 	break;
-	case GP_TABLE_ROW_TELL:
+	case GP_TABLE_ROW_MAX:
 		return -1;
 	}
 
@@ -198,7 +162,7 @@ enum file_attr {
 	FILE_MOD_TIME,
 };
 
-static int get_elem(gp_widget *self, gp_widget_table_cell *cell, unsigned int col)
+static int files_get_cell(gp_widget *self, gp_widget_table_cell *cell, unsigned int col)
 {
 	static char buf[100];
 	gp_dir_cache *cache = self->tbl->priv;
@@ -226,19 +190,28 @@ static int get_elem(gp_widget *self, gp_widget_table_cell *cell, unsigned int co
 	return 1;
 }
 
-static int get_file_name(gp_widget *self, gp_widget_table_cell *cell)
+static void files_sort(gp_widget *self, int desc, unsigned int col)
 {
-	return get_elem(self, cell, FILE_NAME);
-}
+	int sort_type = 0;
 
-static int get_file_size(gp_widget *self, gp_widget_table_cell *cell)
-{
-	return get_elem(self, cell, FILE_SIZE);
-}
+	switch (col) {
+	case FILE_NAME:
+		sort_type = GP_DIR_SORT_BY_NAME;
+	break;
+	case FILE_SIZE:
+		sort_type = GP_DIR_SORT_BY_SIZE;
+	break;
+	case FILE_MOD_TIME:
+		sort_type = GP_DIR_SORT_BY_MTIME;
+	break;
+	}
 
-static int get_file_mtime(gp_widget *self, gp_widget_table_cell *cell)
-{
-	return get_elem(self, cell, FILE_MOD_TIME);
+	if (desc)
+		sort_type |= GP_DIR_SORT_DESC;
+	else
+		sort_type |= GP_DIR_SORT_ASC;
+
+	gp_dir_cache_sort(self->tbl->priv, sort_type);
 }
 
 static void exit_dialog(struct file_dialog *dialog, int retval)
@@ -360,10 +333,16 @@ static const char *get_path(const char *path)
 	return ".";
 }
 
-static const gp_widget_table_header header[] = {
-	{.label = "File", .get = get_file_name, .sort = sort_by_file_name, .col_min_size = 20, .col_fill = 1},
-	{.label = "Size", .get = get_file_size, .sort = sort_by_file_size, .col_min_size = 7},
-	{.label = "Modified", .get = get_file_mtime, .sort = sort_by_file_mtime, .col_min_size = 7},
+const gp_widget_table_col_ops gp_dialog_files_col_ops = {
+	.get_cell = files_get_cell,
+	.sort = files_sort,
+	.seek_row = files_seek_row,
+	.col_map = {
+		{.id = "name", .idx = FILE_NAME, .sortable = 1},
+		{.id = "size", .idx = FILE_SIZE, .sortable = 1},
+		{.id = "mod_time", .idx = FILE_MOD_TIME, .sortable = 1},
+		{}
+	}
 };
 
 static int file_open_input_event(gp_dialog *self, gp_event *ev)
@@ -406,6 +385,15 @@ gp_dialog *gp_dialog_file_open_new(const char *path)
 	dialog->show_hidden = gp_widget_by_uid(uids, "hidden", GP_WIDGET_CHECKBOX);
 	dialog->filter = gp_widget_by_uid(uids, "filter", GP_WIDGET_TBOX);
 	dialog->dir_path = gp_widget_by_uid(uids, "path", GP_WIDGET_TBOX);
+	dialog->file_table = gp_widget_by_uid(uids, "files", GP_WIDGET_TABLE);
+
+	if (!dialog->file_table) {
+		GP_WARN("No file table defined!");
+		goto err1;
+	}
+
+	gp_widget_event_handler_set(dialog->file_table, table_on_event, dialog);
+	gp_widget_event_unmask(dialog->file_table, GP_WIDGET_EVENT_INPUT);
 
 	w = gp_widget_by_uid(uids, "open", GP_WIDGET_BUTTON);
 	if (w)
@@ -429,21 +417,6 @@ gp_dialog *gp_dialog_file_open_new(const char *path)
 		gp_widget_event_handler_set(dialog->filter, redraw_table, dialog);
 
 	gp_widget_tbox_printf(dialog->dir_path, "%s", get_path(path));
-
-	gp_widget *table = gp_widget_table_new(3, 25, header, set_row);
-	if (!table)
-		goto err1;
-
-	dialog->file_table = table;
-
-	//TODO: Move to JSON!
-	table->align = GP_FILL;
-	table->tbl->priv = NULL;
-
-	gp_widget_event_handler_set(table, table_on_event, dialog);
-
-	gp_widget_event_unmask(table, GP_WIDGET_EVENT_INPUT);
-        gp_widget_grid_put(layout, 0, 1, table);
 
 	return ret;
 err1:

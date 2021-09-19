@@ -12,6 +12,44 @@
 #include <widgets/gp_widget_ops.h>
 #include <widgets/gp_widget_render.h>
 
+static int col_is_sortable(gp_widget_table *tbl, unsigned int head_idx)
+{
+	gp_widget_table_col_dsc *col = tbl->header[head_idx].col_dsc;
+
+	if (!col)
+		return 0;
+
+	return col->sortable;
+}
+
+static void sort_by_col(gp_widget *self, int desc, unsigned int head_idx)
+{
+	gp_widget_table_col_dsc *col = self->tbl->header[head_idx].col_dsc;
+
+	if (!col)
+		return;
+
+	if (!col->sortable)
+		return;
+
+	self->tbl->col_ops.sort(self, desc, col->idx);
+}
+
+static inline int get_cell(gp_widget *self, gp_widget_table_cell *ret, unsigned int head_idx)
+{
+	gp_widget_table_col_dsc *col = self->tbl->header[head_idx].col_dsc;
+
+	if (!col)
+		return 0;
+
+	return self->tbl->col_ops.get_cell(self, ret, col->idx);
+}
+
+static inline int seek_row(gp_widget *self, int op, unsigned int pos)
+{
+	return self->tbl->col_ops.seek_row(self, op, pos);
+}
+
 static unsigned int header_min_w(gp_widget_table *tbl,
                                  const gp_widget_render_ctx *ctx,
                                  unsigned int col)
@@ -23,7 +61,7 @@ static unsigned int header_min_w(gp_widget_table *tbl,
 	if (label)
 		text_size += gp_text_width(font, label);
 
-	if (tbl->header[col].sort)
+	if (col_is_sortable(tbl, col))
 		text_size += ctx->padd + gp_text_ascent(ctx->font);
 
 	return text_size;
@@ -125,7 +163,7 @@ static unsigned int header_render(gp_widget *self, gp_coord x, gp_coord y,
 			break;
 		}
 
-		if (tbl->header[i].sort) {
+		if (col_is_sortable(tbl, i)) {
 			render_header = 1;
 			break;
 		}
@@ -137,7 +175,7 @@ static unsigned int header_render(gp_widget *self, gp_coord x, gp_coord y,
 	for (i = 0; i < tbl->cols; i++) {
 		unsigned int ex = cx + tbl->cols_w[i];
 
-		if (tbl->header[i].sort) {
+		if (col_is_sortable(tbl, i)) {
 			gp_size sym_size = text_a/3;
 			gp_size sx = cx + tbl->cols_w[i] - ctx->padd;
 			gp_size sy = cy + text_a/2;
@@ -189,16 +227,16 @@ static unsigned int last_row(gp_widget *self)
 {
 	int ret;
 
-	ret = self->tbl->seek_row(self, GP_TABLE_ROW_TELL, 0);
+	ret = seek_row(self, GP_TABLE_ROW_MAX, 0);
 	if (ret >= 0)
 		return ret;
 
 	ret = 0;
 
-	if (!self->tbl->seek_row(self, GP_TABLE_ROW_RESET, 0))
+	if (!seek_row(self, GP_TABLE_ROW_RESET, 0))
 		return 0;
 
-	while (self->tbl->seek_row(self, GP_TABLE_ROW_ADVANCE, 1))
+	while (seek_row(self, GP_TABLE_ROW_ADVANCE, 1))
 		ret++;
 
 	return ret + 1;
@@ -251,8 +289,8 @@ static void render(gp_widget *self, const gp_offset *offset,
 	if (tbl->start_row > tbl->last_rows)
 		tbl->start_row = 0;
 
-	tbl->seek_row(self, GP_TABLE_ROW_RESET, 0);
-	tbl->seek_row(self, GP_TABLE_ROW_ADVANCE, tbl->start_row);
+	seek_row(self, GP_TABLE_ROW_RESET, 0);
+	seek_row(self, GP_TABLE_ROW_ADVANCE, tbl->start_row);
 
 	unsigned int cur_row = tbl->start_row;
 	unsigned int rows = display_rows(self, ctx);
@@ -282,8 +320,7 @@ static void render(gp_widget *self, const gp_offset *offset,
 			for (j = 0; j < tbl->cols; j++) {
 				gp_widget_table_cell cell = {};
 
-				if (tbl->header[j].get &&
-				    tbl->header[j].get(self, &cell)) {
+				if (get_cell(self, &cell, j)) {
 					unsigned int by = cy + text_a - ctx->padd/4;
 					render_cell(&cell, ctx, cx, by, tbl->cols_w[j], bg_col);
 				}
@@ -301,7 +338,7 @@ static void render(gp_widget *self, const gp_offset *offset,
 
 		cy += text_a + ctx->padd;
 
-		tbl->seek_row(self, GP_TABLE_ROW_ADVANCE, 1);
+		seek_row(self, GP_TABLE_ROW_ADVANCE, 1);
 		cur_row++;
 
 		gp_hline_xyw(ctx->buf, x+1, cy - ctx->padd/2, w-2, ctx->bg_color);
@@ -424,7 +461,7 @@ static int header_click(gp_widget *self, const gp_widget_render_ctx *ctx, unsign
 			break;
 	}
 
-	if (!tbl->header[i].sort)
+	if (!col_is_sortable(tbl, i))
 		return 0;
 
 	if (tbl->sorted_by_col == i)
@@ -432,13 +469,13 @@ static int header_click(gp_widget *self, const gp_widget_render_ctx *ctx, unsign
 	else
 		tbl->sorted_by_col = i;
 
-	tbl->header[i].sort(self, tbl->sorted_desc);
+	sort_by_col(self, tbl->sorted_desc, i);
 	gp_widget_redraw(self);
 
 	return 1;
 }
 
-void gp_widget_table_sort_by(gp_widget *self, unsigned int col, int desc)
+void gp_widget_table_sort_by(gp_widget *self, int desc, unsigned int col)
 {
 	GP_WIDGET_ASSERT(self, GP_WIDGET_TABLE, );
 
@@ -451,7 +488,7 @@ void gp_widget_table_sort_by(gp_widget *self, unsigned int col, int desc)
 		return;
 	}
 
-	if (!tbl->header[col].sort) {
+	if (!col_is_sortable(tbl, col)) {
 		GP_WARN("Column %u not sortable", col);
 		return;
 	}
@@ -467,7 +504,7 @@ void gp_widget_table_sort_by(gp_widget *self, unsigned int col, int desc)
 	}
 
 	if (sort) {
-		tbl->header[col].sort(self, tbl->sorted_desc);
+		sort_by_col(self, tbl->sorted_desc, col);
 		gp_widget_redraw(self);
 	}
 }
@@ -573,7 +610,7 @@ static void free_header(gp_widget_table_header *header, unsigned int cols)
 
 enum header_keys {
 	FILL,
-	GET,
+	ID,
 	LABEL,
 	MIN_SIZE,
 	ORDER,
@@ -583,11 +620,10 @@ enum header_keys {
 
 static const gp_json_obj_attr header_attrs[] = {
 	GP_JSON_OBJ_ATTR("fill", GP_JSON_INT),
-	GP_JSON_OBJ_ATTR("get", GP_JSON_STR),
+	GP_JSON_OBJ_ATTR("id", GP_JSON_STR),
 	GP_JSON_OBJ_ATTR("label", GP_JSON_STR),
 	GP_JSON_OBJ_ATTR("min_size", GP_JSON_INT),
 	GP_JSON_OBJ_ATTR("order", GP_JSON_STR),
-	GP_JSON_OBJ_ATTR("sort", GP_JSON_STR),
 	GP_JSON_OBJ_ATTR("tattr", GP_JSON_STR),
 };
 
@@ -607,12 +643,26 @@ static int parse_order(gp_json_buf *json, gp_json_val *val, int *desc)
 	return 0;
 }
 
+static gp_widget_table_col_dsc *table_col_map_get(gp_widget_table_col_dsc *col_map, const char *id)
+{
+	if (!col_map)
+		return NULL;
+
+	for (;col_map->id; col_map++) {
+		if (!strcmp(col_map->id, id))
+			return col_map;
+	}
+
+	return NULL;
+}
+
 static const gp_json_obj header_obj_filter = {
 	.attrs = header_attrs,
 	.attr_cnt = GP_ARRAY_SIZE(header_attrs),
 };
 
 static gp_widget_table_header *parse_header(gp_json_buf *json, gp_json_val *val,
+                                            gp_widget_table_col_dsc *col_map,
                                             int *cols, int *sort_by_col, int *desc)
 {
 	gp_json_state state = gp_json_state_start(json);
@@ -639,8 +689,10 @@ static gp_widget_table_header *parse_header(gp_json_buf *json, gp_json_val *val,
 	*cols = cnt;
 
 	header = malloc(sizeof(*header) * (*cols));
-	if (!header)
+	if (!header) {
+		GP_WARN("Malloc failed :(");
 		return NULL;
+	}
 
 	memset(header, 0, sizeof(*header) * (*cols));
 
@@ -660,21 +712,17 @@ static gp_widget_table_header *parse_header(gp_json_buf *json, gp_json_val *val,
 			case FILL:
 				header[cnt].col_fill = val->val_int;
 			break;
-			case GET:
-				header[cnt].get = gp_widget_callback_addr(val->val_str);
-				if (!header[cnt].get)
-					gp_json_warn(json, "Callback not resolved");
+			case ID:
+				header[cnt].col_dsc = table_col_map_get(col_map, val->val_str);
+
+				if (col_map && !header[cnt].col_dsc)
+					gp_json_warn(json, "col_dsc for id '%s' not found", val->val_str);
 			break;
 			case LABEL:
 				header[cnt].label = strdup(val->val_str);
 			break;
 			case MIN_SIZE:
 				header[cnt].col_min_size = val->val_int;
-			break;
-			case SORT:
-				header[cnt].sort = gp_widget_callback_addr(val->val_str);
-				if (!header[cnt].sort)
-					gp_json_warn(json, "Callback not resolved");
 			break;
 			case ORDER:
 				if (*sort_by_col != -1) {
@@ -698,17 +746,17 @@ static gp_widget_table_header *parse_header(gp_json_buf *json, gp_json_val *val,
 }
 
 enum keys {
+	COL_OPS,
 	COLS,
 	HEADER,
 	MIN_ROWS,
-	SET_ROW,
 };
 
 static const gp_json_obj_attr attrs[] = {
+	GP_JSON_OBJ_ATTR("col_ops", GP_JSON_STR),
 	GP_JSON_OBJ_ATTR("cols", GP_JSON_INT),
 	GP_JSON_OBJ_ATTR("header", GP_JSON_ARR),
 	GP_JSON_OBJ_ATTR("min_rows", GP_JSON_INT),
-	GP_JSON_OBJ_ATTR("set_row", GP_JSON_STR),
 };
 
 static const gp_json_obj obj_filter = {
@@ -719,25 +767,33 @@ static const gp_json_obj obj_filter = {
 static gp_widget *json_to_table(gp_json_buf *json, gp_json_val *val, gp_htable **uids)
 {
 	int cols = -1, min_rows = -1;
-	void *set_row = NULL;
 	gp_widget_table_header *table_header = NULL;
 	int sort_by_col = -1, desc = 0;
+	gp_widget_table_col_ops *col_ops = NULL;
+	gp_widget_table_col_dsc *col_map = NULL;
 
 	(void)uids;
 
 	GP_JSON_OBJ_FILTER(json, val, &obj_filter, gp_widget_json_attrs) {
 		switch (val->idx) {
+		case COL_OPS:
+			col_ops = gp_widget_struct_addr(val->val_str);
+			if (col_ops)
+				col_map = col_ops->col_map;
+			else
+				gp_json_warn(json, "No structure '%s' defined", val->val_str);
+		break;
 		case COLS:
 			cols = val->val_int;
 		break;
 		case MIN_ROWS:
 			min_rows = val->val_int;
 		break;
-		case SET_ROW:
-			set_row = gp_widget_callback_addr(val->val_str);
-		break;
 		case HEADER:
-			table_header = parse_header(json, val, &cols, &sort_by_col, &desc);
+			if (!col_map)
+				gp_json_warn(json, "col_ops must be defined before header!");
+
+			table_header = parse_header(json, val, col_map, &cols, &sort_by_col, &desc);
 		break;
 		}
 	}
@@ -755,19 +811,24 @@ static gp_widget *json_to_table(gp_json_buf *json, gp_json_val *val, gp_htable *
 		goto err;
 	}
 
-	if (!set_row) {
-		gp_json_warn(json, "Invalid or missing set_row callback!");
+	if (!col_ops) {
+		gp_json_warn(json, "No col_ops set!");
 		goto err;
 	}
 
-	gp_widget *table = gp_widget_table_new(cols, min_rows, table_header, set_row);
+	if (!col_ops->seek_row) {
+		gp_json_warn(json, "col_ops->seek_row() callback not set!");
+		goto err;
+	}
+
+	gp_widget *table = gp_widget_table_new(cols, min_rows, col_ops, table_header);
 	if (!table)
 		goto err;
 
 	table->tbl->free = table_header;
 
 	if (sort_by_col >= 0)
-		gp_widget_table_sort_by(table, sort_by_col, desc);
+		gp_widget_table_sort_by(table, desc, sort_by_col);
 
 	return table;
 err:
@@ -795,12 +856,11 @@ struct gp_widget_ops gp_widget_table_ops = {
 };
 
 gp_widget *gp_widget_table_new(unsigned int cols, unsigned int min_rows,
-                               const gp_widget_table_header *header,
-                               int (*seek_row)(struct gp_widget *self,
-                                               int op, unsigned int pos))
+			       const gp_widget_table_col_ops *col_ops,
+                               const gp_widget_table_header *header)
 {
-	gp_widget *ret;
 	size_t size = sizeof(struct gp_widget_table);
+	gp_widget *ret;
 
 	size += cols * sizeof(unsigned int);
 
@@ -811,10 +871,12 @@ gp_widget *gp_widget_table_new(unsigned int cols, unsigned int min_rows,
 	ret->tbl->cols = cols;
 	ret->tbl->min_rows = min_rows;
 	ret->tbl->start_row = 0;
-	ret->tbl->cols_w = (void*)ret->tbl->buf;
 	ret->tbl->header = header;
+	ret->tbl->cols_w = (void*)ret->tbl->buf;
 
-	ret->tbl->seek_row = seek_row;
+	ret->tbl->col_ops.sort = col_ops->sort;
+	ret->tbl->col_ops.get_cell = col_ops->get_cell;
+	ret->tbl->col_ops.seek_row = col_ops->seek_row;
 
 	return ret;
 }

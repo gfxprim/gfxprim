@@ -1,0 +1,16 @@
+Table widget example
+--------------------
+
+This is a simple example how to render a table widget. The table columns are
+exported by the application in the col_ops structure and the header in the
+json describes which columns and how are rendered on the screen.
+
+[source,c]
+------------------------------------------------------------------
+include::../demos/widgets/table_example.c[]
+------------------------------------------------------------------
+
+[source,json]
+------------------------------------------------------------------
+include::../demos/widgets/table_example.json[]
+------------------------------------------------------------------
