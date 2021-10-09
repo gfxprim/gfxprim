@@ -1,0 +1,32 @@
+{
+ "version": 1,
+ "widgets": [
+  {
+   "type": "frame",
+   "uid": "title",
+   "widget": {
+    "rows": 2,
+    "widgets": [
+     {
+      "cols": 2,
+      "widgets": [
+       {"type": "stock", "uid": "stock", "stock": "question"},
+       {"type": "tbox", "uid": "input", "len": 15}
+      ]
+     },
+     {"cols": 2,
+      "halign": "fill",
+      "cpadf": "1, 1, 1",
+      "cfill": "0, 0",
+      "border": "none",
+      "uniform": true,
+      "widgets": [
+       {"type": "button", "halign": "fill", "label": "Cancel", "btype": "cancel", "uid": "btn_cancel"},
+       {"type": "button", "halign": "fill", "label": "OK", "btype": "ok", "uid": "btn_ok"}
+      ]
+     }
+    ]
+   }
+  }
+ ]
+}

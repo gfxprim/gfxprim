@@ -55,6 +55,7 @@
 /* Dialogs */
 #include <widgets/gp_dialog.h>
 #include <widgets/gp_dialog_msg.h>
+#include <widgets/gp_dialog_input.h>
 #include <widgets/gp_dialog_file.h>
 
 #endif /* GP_WIDGETS_H */
