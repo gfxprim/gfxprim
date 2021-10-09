@@ -375,6 +375,8 @@ redraw:
 	if (tbl->selected_row >= tbl->start_row + rows)
 		tbl->start_row = tbl->selected_row - rows + 1;
 
+	gp_widget_send_widget_event(self, GP_WIDGET_TABLE_SELECT, (long)tbl->selected_row);
+
 	gp_widget_redraw(self);
 	return 1;
 }
@@ -443,6 +445,8 @@ static int move_up(gp_widget *self, const gp_widget_render_ctx *ctx, unsigned in
 redraw:
 	if (tbl->selected_row < tbl->start_row)
 		tbl->start_row = tbl->selected_row;
+
+	gp_widget_send_widget_event(self, GP_WIDGET_TABLE_SELECT, (long)tbl->selected_row);
 
 	gp_widget_redraw(self);
 	return 1;
@@ -519,13 +523,15 @@ static int row_click(gp_widget *self, const gp_widget_render_ctx *ctx, gp_event 
 
 	if (tbl->row_selected && tbl->selected_row == row) {
 		if (gp_timeval_diff_ms(ev->time, tbl->last_ev) < ctx->dclick_ms)
-			gp_widget_send_widget_event(self, 0);
+			gp_widget_send_widget_event(self, GP_WIDGET_TABLE_TRIGGER);
 		goto ret;
 	}
 
 	tbl->selected_row = row;
 	if (!tbl->row_selected)
 		tbl->row_selected = 1;
+
+	gp_widget_send_widget_event(self, GP_WIDGET_TABLE_SELECT, (long)tbl->selected_row);
 
 	gp_widget_redraw(self);
 
@@ -549,7 +555,7 @@ static int enter(gp_widget *self)
 	if (!tbl->row_selected)
 		return 0;
 
-	gp_widget_send_widget_event(self, 0);
+	gp_widget_send_widget_event(self, GP_WIDGET_TABLE_TRIGGER);
 
 	return 1;
 }

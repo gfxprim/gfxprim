@@ -64,3 +64,15 @@ Sorting
 If any of the table columns is sortable the 'sortable' flag has to be set in
 the corresponding column description and the 'col_ops->sort()' callback must
 be implemented for the particular column.
+
+
+Table widget events
+~~~~~~~~~~~~~~~~~~~
+
+.Table widget events
+[cols=",3",options="header"]
+|===================================================
+|   Widget event value    | Description
+| GP_WIDGET_TABLE_TRIGGER | Emitted on pressing enter or double click.
+| GP_WIDGET_TABLE_SELECT  | Emitted when table entry is selected.
+|===================================================

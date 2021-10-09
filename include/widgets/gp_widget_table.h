@@ -106,6 +106,16 @@ typedef struct gp_widget_table {
 	char buf[];
 } gp_widget_table;
 
+/**
+ * @brief Event sub_type for table widget events.
+ */
+enum gp_widget_table_event_type {
+	/** Emitted on enter or double click presseed */
+	GP_WIDGET_TABLE_TRIGGER,
+	/** Emitted when table entry is selected */
+	GP_WIDGET_TABLE_SELECT,
+};
+
 gp_widget *gp_widget_table_new(unsigned int cols, unsigned int min_rows,
                                const gp_widget_table_col_ops *col_ops,
                                const gp_widget_table_header *header);
