@@ -892,11 +892,26 @@ void gp_widget_table_refresh(gp_widget *self)
 	gp_widget_redraw(self);
 }
 
-void gp_widget_table_set_offset(gp_widget *self, unsigned int off)
+void gp_widget_table_off_set(gp_widget *self, unsigned int off)
 {
 	GP_WIDGET_ASSERT(self, GP_WIDGET_TABLE, );
 
 	self->tbl->start_row = off;
+
+	gp_widget_redraw(self);
+}
+
+void gp_widget_table_sel_set(gp_widget *self, unsigned int row)
+{
+	GP_WIDGET_ASSERT(self, GP_WIDGET_TABLE, );
+
+	gp_widget_table *tbl = self->tbl;
+
+	tbl->selected_row = row;
+	if (!tbl->row_selected)
+		tbl->row_selected = 1;
+
+	gp_widget_send_widget_event(self, GP_WIDGET_TABLE_SELECT, (long)tbl->selected_row);
 
 	gp_widget_redraw(self);
 }

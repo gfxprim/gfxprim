@@ -133,6 +133,14 @@ void gp_widget_table_refresh(gp_widget *self);
  * @self A table widget.
  * @off A row offset.
  */
-void gp_widget_table_set_offset(gp_widget *self, unsigned int off);
+void gp_widget_table_off_set(gp_widget *self, unsigned int off);
+
+/*
+ * @brief Sets selected row.
+ *
+ * @self A table widget.
+ * @off A row.
+ */
+void gp_widget_table_sel_set(gp_widget *self, unsigned int row);
 
 #endif /* GP_WIDGET_TABLE_H */
