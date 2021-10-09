@@ -1,22 +1,24 @@
 // SPDX-License-Identifier: GPL-2.1-or-later
 /*
- * Copyright (C) 2020 Cyril Hrubis <metan@ucw.cz>
+ * Copyright (C) 2020-2021 Cyril Hrubis <metan@ucw.cz>
  */
 
 static inline void send_keypress(gp_widget *widget, int value, char ascii)
 {
+	gp_events_state st = {};
+
 	gp_event ev_down = {
 		.type = GP_EV_KEY,
 		.code = GP_EV_KEY_DOWN,
-		.key = {.key = value,
-			.ascii = ascii}
+		.key = {.key = value, .ascii = ascii},
+		.st = &st,
 	};
 
 	gp_event ev_up = {
 		.type = GP_EV_KEY,
 		.code = GP_EV_KEY_UP,
-		.key = {.key = value,
-			.ascii = ascii}
+		.key = {.key = value, .ascii = ascii},
+		.st = &st,
 	};
 
 	gp_widget_ops_event(widget, NULL, &ev_down);
