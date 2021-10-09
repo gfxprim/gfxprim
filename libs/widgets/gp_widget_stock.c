@@ -436,7 +436,7 @@ static void render_stock_file(gp_pixmap *pix,
 	render_text_lines(pix, lx0, ly0, lx1, ly1, ctx->sel_color);
 }
 
-static void render_stock_dir(gp_pixmap *pix,
+static void render_stock_dir(gp_pixmap *pix, int new,
                              gp_coord x, gp_coord y,
                              gp_size w, gp_size h, gp_pixel bg_col,
                              const gp_widget_render_ctx *ctx)
@@ -500,6 +500,31 @@ static void render_stock_dir(gp_pixmap *pix,
 	gp_fill_rect_xyxy(pix, cx - w2 + th, cy - h2 + cs + th + fw,
 	                       cx + w2 - th, cy + h2 - th, ctx->sel_color);
 	gp_fill_polygon(pix, GP_ARRAY_SIZE(in_poly)/2, in_poly, ctx->fg_color);
+
+	if (new) {
+		gp_size ps = w/5;
+		gp_size pt = th;//GP_MAX(1u, th);
+		gp_coord px = cx;
+		gp_coord py = cy + cs;
+
+		gp_coord plus_poly[] = {
+			px + ps, py + pt,
+			px + pt, py + pt,
+			px + pt, py + ps,
+			px - pt, py + ps,
+			px - pt, py + pt,
+			px - ps, py + pt,
+			px - ps, py - pt,
+			px - pt, py - pt,
+			px - pt, py - ps,
+			px + pt, py - ps,
+			px + pt, py - pt,
+			px + ps, py - pt,
+		};
+
+		gp_fill_polygon(pix, GP_ARRAY_SIZE(plus_poly)/2, plus_poly, ctx->accept_color);
+		gp_polygon(pix, GP_ARRAY_SIZE(plus_poly)/2, plus_poly, ctx->text_color);
+	}
 
 	/* draw the lines */
 	gp_fill_polygon(pix, GP_ARRAY_SIZE(poly)/2, poly, ctx->text_color);
@@ -875,7 +900,10 @@ static void widget_stock_render(gp_pixmap *pix, enum gp_widget_stock_type type,
 		render_stock_file(pix, x, y, w, h, bg_col, ctx);
 	break;
 	case GP_WIDGET_STOCK_DIR:
-		render_stock_dir(pix, x, y, w, h, bg_col, ctx);
+		render_stock_dir(pix, 0, x, y, w, h, bg_col, ctx);
+	break;
+	case GP_WIDGET_STOCK_NEW_DIR:
+		render_stock_dir(pix, 1, x, y, w, h, bg_col, ctx);
 	break;
 	case GP_WIDGET_STOCK_CLOSE:
 		render_stock_close(pix, x, y, w, h, bg_col, ctx);
@@ -972,6 +1000,7 @@ static struct stock_types {
 	{"save", GP_WIDGET_STOCK_SAVE},
 	{"file", GP_WIDGET_STOCK_FILE},
 	{"dir", GP_WIDGET_STOCK_DIR},
+	{"new_dir", GP_WIDGET_STOCK_NEW_DIR},
 	{"close", GP_WIDGET_STOCK_CLOSE},
 
 	{"refresh", GP_WIDGET_STOCK_REFRESH},

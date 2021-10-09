@@ -21,6 +21,7 @@ enum gp_widget_button_type {
 
 	GP_BUTTON_OPEN,
 	GP_BUTTON_SAVE,
+	GP_BUTTON_NEW_DIR,
 
 	GP_BUTTON_PREV,
 	GP_BUTTON_NEXT,

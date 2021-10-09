@@ -163,6 +163,11 @@ static void render(gp_widget *self, const gp_offset *offset,
 		                       sx, sy, sw, sh,
 		                       bg_color, ctx);
 	break;
+	case GP_BUTTON_NEW_DIR:
+		gp_widget_stock_render(ctx->buf, GP_WIDGET_STOCK_NEW_DIR,
+		                       sx, sy, sw, sh,
+		                       bg_color, ctx);
+	break;
 	case GP_BUTTON_SAVE:
 		gp_widget_stock_render(ctx->buf, GP_WIDGET_STOCK_SAVE,
 		                       sx, sy, sw, sh,
@@ -367,6 +372,7 @@ static struct btn_type_names {
 	{"no", GP_BUTTON_NO | GP_BUTTON_TEXT_RIGHT},
 	{"open", GP_BUTTON_OPEN | GP_BUTTON_TEXT_RIGHT},
 	{"save", GP_BUTTON_SAVE | GP_BUTTON_TEXT_RIGHT},
+	{"new_dir", GP_BUTTON_NEW_DIR | GP_BUTTON_TEXT_RIGHT},
 	{"prev", GP_BUTTON_PREV | GP_BUTTON_TEXT_RIGHT},
 	{"next", GP_BUTTON_NEXT | GP_BUTTON_TEXT_LEFT},
 	{"first", GP_BUTTON_FIRST | GP_BUTTON_TEXT_RIGHT},
