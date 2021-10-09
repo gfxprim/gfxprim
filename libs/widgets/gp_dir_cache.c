@@ -40,10 +40,11 @@ static gp_dir_entry *new_entry(gp_dir_cache *self, size_t size,
 
 	entry->size = size;
 	entry->is_dir = is_dir;
-	sprintf(entry->name, "%s%s", name, is_dir ? "/" : "");
+	entry->name_len = name_len;
 	entry->mtime = mtime;
+	sprintf(entry->name, "%s%s", name, is_dir ? "/" : "");
 
-	GP_DEBUG(3, "Dir Cache %p new entry '%s'", self, entry->name);
+	GP_DEBUG(3, "Dir Cache %p new entry '%s' size %zuB", self, entry->name, size);
 
 	return entry;
 }
@@ -238,7 +239,7 @@ static void append_slash(struct inotify_event *ev)
 	ev->name[len+1] = 0;
 }
 
-int gp_dir_cache_inotify(gp_dir_cache *self)
+static int dir_cache_inotify(gp_dir_cache *self, const char *new_dir)
 {
 	long buf[1024];
 	struct inotify_event *ev = (void*)buf;
@@ -252,7 +253,7 @@ int gp_dir_cache_inotify(gp_dir_cache *self)
 		case IN_DELETE:
 			if (!rem_entry_by_name(self, ev->name)) {
 				GP_DEBUG(1, "Deleted '%s'", ev->name);
-				sort = 1;
+				sort |= 1;
 				break;
 			}
 		/*
@@ -268,13 +269,16 @@ int gp_dir_cache_inotify(gp_dir_cache *self)
 			if (rem_entry_by_name(self, ev->name))
 				GP_WARN("Failed to remove '%s'", ev->name);
 
-			sort = 1;
+			sort |= 1;
 		break;
-		case IN_CREATE:
 		case IN_CREATE | IN_ISDIR:
+			if (new_dir && !strcmp(new_dir, ev->name))
+				sort |= 2;
+		/* fallthrough */
+		case IN_CREATE:
 			GP_DEBUG(1, "Created '%s'", ev->name);
 			add_entry(self, ev->name);
-			sort = 1;
+			sort |= 1;
 		break;
 		}
 	}
@@ -283,6 +287,20 @@ int gp_dir_cache_inotify(gp_dir_cache *self)
 		gp_dir_cache_sort(self, self->sort_type);
 
 	return sort;
+}
+
+int gp_dir_cache_inotify(gp_dir_cache *self)
+{
+	return dir_cache_inotify(self, NULL);
+}
+
+void gp_dir_cache_new_dir(gp_dir_cache *self, const char *dirname)
+{
+	if (gp_dir_cache_inotify(self) & 2)
+		return;
+
+	/* Fallback when inotify is not enabled */
+	add_entry(self, dirname);
 }
 
 #define MIN_SIZE 25
@@ -371,4 +389,23 @@ gp_dir_entry *gp_dir_cache_get_filtered(gp_dir_cache *self, unsigned int pos)
 	}
 
 	return NULL;
+}
+
+unsigned int gp_dir_cache_pos_by_name_filtered(gp_dir_cache *self, const char *name)
+{
+	unsigned int n, cur_pos = 0;
+	size_t len = strlen(name);
+
+	for (n = 0; n < self->used; n++) {
+		if (self->entries[n]->filtered)
+			continue;
+
+		if (len == self->entries[n]->name_len &&
+		    !strncmp(self->entries[n]->name, name, len))
+			return cur_pos;
+
+		cur_pos++;
+	}
+
+	return (unsigned int)-1;
 }

@@ -14,6 +14,7 @@
 typedef struct gp_dir_entry {
 	size_t size;
 	time_t mtime;
+	unsigned int name_len;
 	int is_dir:1;
 	int filtered:1;
 	char name[];
@@ -107,5 +108,15 @@ gp_dir_entry *gp_dir_cache_get_filtered(gp_dir_cache *self, unsigned int pos);
  * @return Returns non-zeor if cache content changed.
  */
 int gp_dir_cache_inotify(gp_dir_cache *self);
+
+/*
+ * Request update when directory was created in the cache directory.
+ *
+ * @self A dir cache.
+ * @dirname A name of a directory that was created.
+ */
+void gp_dir_cache_new_dir(gp_dir_cache *self, const char *dirname);
+
+unsigned int gp_dir_cache_pos_by_name_filtered(gp_dir_cache *self, const char *name);
 
 #endif /* GP_DIR_CACHE_H */
