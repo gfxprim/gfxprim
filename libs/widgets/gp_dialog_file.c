@@ -13,6 +13,8 @@
 #include <dirent.h>
 #include <stdlib.h>
 #include <time.h>
+#include <fcntl.h>
+#include <errno.h>
 
 #include <utils/gp_vec_str.h>
 
@@ -25,14 +27,14 @@
 #include <widgets/gp_dialog_file.h>
 
 #include "dialog_file_open.json.h"
+#include "dialog_file_save.json.h"
 
 struct file_dialog {
 	gp_widget *show_hidden;
 	gp_widget *filter;
 	gp_widget *dir_path;
+	gp_widget *filename;
 	gp_widget *file_table;
-
-	char *file_path;
 };
 
 static int redraw_table(gp_widget_event *ev)
@@ -219,11 +221,20 @@ static void exit_dialog(struct file_dialog *dialog, int retval)
 	gp_dialog *wd = GP_CONTAINER_OF(dialog, gp_dialog, payload);
 	gp_dir_cache *cache = dialog->file_table->tbl->priv;
 	gp_widget *table = dialog->file_table;
+	gp_widget *path = dialog->dir_path;
 
-	if (table->tbl->row_selected) {
-		const char *dir = dialog->dir_path->tbox->buf;
+	/* Append selected entry to the directory -> file_open */
+	if (!dialog->filename && table->tbl->row_selected) {
 		gp_dir_entry *entry = gp_dir_cache_get_filtered(cache, table->tbl->selected_row);
-		dialog->file_path = gp_vec_printf(dialog->file_path, "%s/%s", dir, entry->name);
+
+		gp_widget_tbox_append(path, "/");
+		gp_widget_tbox_append(path, entry->name);
+	}
+
+	/* Append filename textbox -> file_save */
+	if (dialog->filename) {
+		gp_widget_tbox_append(path, "/");
+		gp_widget_tbox_append(path, gp_widget_tbox_text(dialog->filename));
 	}
 
 	free_dir_cache(cache);
@@ -231,7 +242,7 @@ static void exit_dialog(struct file_dialog *dialog, int retval)
 	wd->retval = retval;
 }
 
-static int do_open(gp_widget_event *ev)
+static int open_on_event(gp_widget_event *ev)
 {
 	struct file_dialog *dialog = ev->self->priv;
 
@@ -247,7 +258,21 @@ static int do_open(gp_widget_event *ev)
 	return 0;
 }
 
-static int do_cancel(gp_widget_event *ev)
+static int save_on_event(gp_widget_event *ev)
+{
+	if (ev->type != GP_WIDGET_EVENT_WIDGET)
+		return 0;
+
+	if (ev->sub_type)
+		return 0;
+
+	//TODO: Disable the save button when filename is empty?
+	exit_dialog(ev->self->priv, GP_WIDGET_DIALOG_PATH);
+
+	return 0;
+}
+
+static int cancel_on_event(gp_widget_event *ev)
 {
 	if (ev->type != GP_WIDGET_EVENT_WIDGET)
 		return 0;
@@ -290,8 +315,24 @@ static void table_event(gp_widget *self)
 
 	free_dir_cache(dialog->file_table->tbl->priv);
 	dialog->file_table->tbl->priv = load_dir_cache(self->priv);
-	gp_widget_tbox_clear(dialog->filter);
-	gp_widget_table_set_offset(dialog->file_table, 0);
+	if (dialog->filter)
+		gp_widget_tbox_clear(dialog->filter);
+	gp_widget_table_off_set(dialog->file_table, 0);
+}
+
+static void set_filename(struct file_dialog *dialog, gp_widget_event *ev)
+{
+	gp_dir_cache *cache = dialog->file_table->tbl->priv;
+
+	if (!dialog->filename)
+		return;
+
+	gp_dir_entry *ent = gp_dir_cache_get_filtered(cache, ev->val);
+
+	if (ent->is_dir)
+		return;
+
+	gp_widget_tbox_set(dialog->filename, ent->name);
 }
 
 static int table_on_event(gp_widget_event *ev)
@@ -300,7 +341,14 @@ static int table_on_event(gp_widget_event *ev)
 
 	switch (ev->type) {
 	case GP_WIDGET_EVENT_WIDGET:
-		table_event(ev->self);
+		switch (ev->sub_type) {
+		case GP_WIDGET_TABLE_TRIGGER:
+			table_event(ev->self);
+		break;
+		case GP_WIDGET_TABLE_SELECT:
+			set_filename(dialog, ev);
+		break;
+		}
 		return 0;
 	case GP_WIDGET_EVENT_INPUT:
 		if (ev->input_ev->type == GP_EV_KEY &&
@@ -362,6 +410,108 @@ static int file_open_input_event(gp_dialog *self, gp_event *ev)
 	return 0;
 }
 
+static int new_dir_on_event(gp_widget_event *ev)
+{
+	struct file_dialog *dialog = ev->self->priv;
+	gp_dir_cache *cache = dialog->file_table->tbl->priv;
+	char *dir_name;
+	unsigned int pos;
+
+	if (ev->type != GP_WIDGET_EVENT_WIDGET)
+		return 0;
+
+	dir_name = gp_dialog_input_run("Enter directory name");
+	if (!dir_name)
+		return 0;
+
+	if (mkdirat(cache->dirfd, dir_name, 0755)) {
+		gp_dialog_msg_printf_run(GP_DIALOG_MSG_ERR,
+		                        "Failed to create directory",
+		                        "%s", strerror(errno));
+		goto exit;
+	}
+
+	gp_dir_cache_new_dir(cache, dir_name);
+
+	pos = gp_dir_cache_pos_by_name_filtered(cache, dir_name);
+
+	gp_widget_table_off_set(dialog->file_table, pos);
+	gp_widget_table_sel_set(dialog->file_table, pos);
+
+	gp_widget_redraw(dialog->file_table);
+
+	//TODO: focus the table here
+
+exit:
+	free(dir_name);
+
+	return 0;
+}
+
+gp_dialog *gp_dialog_file_save_new(const char *path,
+                                   const char *const ext_hints[])
+{
+	gp_htable *uids = NULL;
+	gp_widget *layout, *w;
+	gp_dialog *ret;
+	struct file_dialog *dialog;
+
+	layout = gp_dialog_layout_load("file_save", dialog_file_save, &uids);
+	if (!layout)
+		return NULL;
+
+	ret = gp_dialog_new(sizeof(struct file_dialog));
+	if (!ret)
+		goto err0;
+
+	ret->layout = layout;
+	ret->input_event = file_open_input_event;
+
+	dialog = (void*)ret->payload;
+
+	dialog->show_hidden = gp_widget_by_uid(uids, "hidden", GP_WIDGET_CHECKBOX);
+	dialog->filename = gp_widget_by_uid(uids, "filename", GP_WIDGET_TBOX);
+	dialog->dir_path = gp_widget_by_uid(uids, "path", GP_WIDGET_TBOX);
+	dialog->file_table = gp_widget_by_uid(uids, "files", GP_WIDGET_TABLE);
+
+	gp_widget_event_handler_set(dialog->file_table, table_on_event, dialog);
+	gp_widget_event_unmask(dialog->file_table, GP_WIDGET_EVENT_INPUT);
+
+	w = gp_widget_by_uid(uids, "save", GP_WIDGET_BUTTON);
+	if (w)
+		gp_widget_event_handler_set(w, save_on_event, dialog);
+
+	w = gp_widget_by_uid(uids, "cancel", GP_WIDGET_BUTTON);
+	if (w)
+		gp_widget_event_handler_set(w, cancel_on_event, dialog);
+
+	w = gp_widget_by_uid(uids, "new_dir", GP_WIDGET_BUTTON);
+	if (w)
+		gp_widget_event_handler_set(w, new_dir_on_event, dialog);
+
+	gp_htable_free(uids);
+
+	if (!dialog->dir_path) {
+		GP_WARN("Missing path widget!");
+		goto err1;
+	}
+
+	if (dialog->show_hidden)
+		gp_widget_event_handler_set(dialog->show_hidden, redraw_table, dialog);
+
+	if (dialog->filename)
+		gp_widget_event_handler_set(dialog->filename, save_on_event, dialog);
+
+	gp_widget_tbox_printf(dialog->dir_path, "%s", get_path(path));
+
+	return ret;
+err1:
+	free(ret);
+err0:
+	gp_widget_free(layout);
+	return NULL;
+}
+
 gp_dialog *gp_dialog_file_open_new(const char *path)
 {
 	gp_htable *uids = NULL;
@@ -397,11 +547,11 @@ gp_dialog *gp_dialog_file_open_new(const char *path)
 
 	w = gp_widget_by_uid(uids, "open", GP_WIDGET_BUTTON);
 	if (w)
-		gp_widget_event_handler_set(w, do_open, dialog);
+		gp_widget_event_handler_set(w, open_on_event, dialog);
 
 	w = gp_widget_by_uid(uids, "cancel", GP_WIDGET_BUTTON);
 	if (w)
-		gp_widget_event_handler_set(w, do_cancel, dialog);
+		gp_widget_event_handler_set(w, cancel_on_event, dialog);
 
 	gp_htable_free(uids);
 
@@ -426,9 +576,9 @@ err0:
 	return NULL;
 }
 
-const char *gp_dialog_file_open_path(gp_dialog *self)
+const char *gp_dialog_file_path(gp_dialog *self)
 {
 	struct file_dialog *dialog = (void*)self->payload;
 
-	return dialog->file_path;
+	return gp_widget_tbox_text(dialog->dir_path);
 }

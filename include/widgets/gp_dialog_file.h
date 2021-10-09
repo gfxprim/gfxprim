@@ -16,10 +16,28 @@ enum gp_dialog_file_open_exit {
 	GP_WIDGET_DIALOG_CANCEL = 2,
 };
 
+/**
+ * @brief Creates a file open dialog.
+ *
+ * @path An initial path for the dialog, set it to NULL for default.
+ * @return Newly allocated dialog that can be executed by gp_dialog_run();
+ */
 gp_dialog *gp_dialog_file_open_new(const char *path);
 
-const char *gp_dialog_file_open_path(gp_dialog *self);
+/**
+ * @brief Returns a file path for the file dalogs.
+ *
+ * @self A file open or file save dialog.
+ * @return A string that is valid until dialog is destroyed.
+ */
+const char *gp_dialog_file_path(gp_dialog *self);
 
+/**
+ * @brief Creates a file save dialog.
+ *
+ * @path An initial path for the dialog, set it to NULL for default.
+ * @return Newly allocated dialog that can be executed by gp_dialog_run();
+ */
 gp_dialog *gp_dialog_file_save_new(const char *path,
                                    const char *const ext_hints[]);
 

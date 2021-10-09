@@ -1,0 +1,39 @@
+{
+  "version": 1,
+  "rows": 3,
+  "widgets": [
+    {
+      "cols": 3,
+      "halign": "fill",
+      "border": "none",
+      "cfill": "0, 1, 0",
+      "widgets": [
+	{"type": "label", "text": "Directory:"},
+	{"type": "tbox", "len": 75, "halign": "fill", "uid": "path"},
+	{"type": "button", "btype": "new_dir", "label": "New dir", "uid": "new_dir"}
+      ]
+    },
+    {"type": "table", "align": "fill", "min_rows": 25, "uid": "files",
+     "col_ops": "gp_dialog_files_col_ops",
+     "header": [
+      {"label": "File", "id": "name", "min_size": 20, "fill": 1},
+      {"label": "Size", "id": "size", "min_size": 7},
+      {"label": "Modified", "id": "mod_time", "min_size": 7}
+     ]
+    },
+    {
+      "cols": 5,
+      "border": "none",
+      "halign": "fill",
+      "cfill": "0, 8, 0, 0, 0",
+      "cpadf": "0, 0, 1, 1, 0, 0",
+      "widgets": [
+        {"type": "label", "text": "Filename:"},
+        {"type": "tbox", "len": 20, "uid": "filename", "halign": "fill"},
+	{"type": "checkbox", "label": "Show Hidden", "uid": "hidden"},
+	{"type": "button", "label": "Cancel", "btype": "cancel", "uid": "cancel"},
+        {"type": "button", "label": "Save", "btype": "save", "uid": "save"}
+      ]
+    }
+  ]
+}
