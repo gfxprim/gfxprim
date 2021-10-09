@@ -429,6 +429,18 @@ err:
 	return NULL;
 }
 
+static int resize_buffer(gp_widget *self, size_t len)
+{
+	char *new_buf = gp_vec_resize(self->tbox->buf, len+1);
+	if (!new_buf)
+		return 1;
+
+	self->tbox->buf = new_buf;
+	self->tbox->cur_pos = len;
+
+	return 0;
+}
+
 int gp_widget_tbox_printf(gp_widget *self, const char *fmt, ...)
 {
 	va_list ap;
@@ -437,23 +449,35 @@ int gp_widget_tbox_printf(gp_widget *self, const char *fmt, ...)
 	GP_WIDGET_ASSERT(self, GP_WIDGET_TBOX, -1);
 
 	va_start(ap, fmt);
-	len = vsnprintf(NULL, 0, fmt, ap)+1;
+	len = vsnprintf(NULL, 0, fmt, ap);
 	va_end(ap);
 
-	char *new_buf = gp_vec_resize(self->tbox->buf, len);
-	if (!new_buf)
+	if (resize_buffer(self, len))
 		return -1;
 
 	va_start(ap, fmt);
-	vsprintf(new_buf, fmt, ap);
+	vsprintf(self->tbox->buf, fmt, ap);
 	va_end(ap);
 
-	self->tbox->buf = new_buf;
-	self->tbox->cur_pos = gp_vec_strlen(new_buf);
-
+	send_edit_event(self);
 	gp_widget_redraw(self);
 
 	return len;
+}
+
+void gp_widget_tbox_set(gp_widget *self, const char *str)
+{
+	GP_WIDGET_ASSERT(self, GP_WIDGET_TBOX, );
+
+	size_t len = strlen(str);
+
+	if (resize_buffer(self, len))
+		return;
+
+	strcpy(self->tbox->buf, str);
+
+	send_edit_event(self);
+	gp_widget_redraw(self);
 }
 
 void gp_widget_tbox_clear(gp_widget *self)
@@ -464,7 +488,6 @@ void gp_widget_tbox_clear(gp_widget *self)
 	self->tbox->cur_pos = 0;
 
 	send_edit_event(self);
-
 	gp_widget_redraw(self);
 }
 

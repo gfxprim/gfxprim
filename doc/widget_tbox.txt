@@ -55,6 +55,11 @@ const char *gp_widget_tbox_text(gp_widget *self);
 int gp_widget_tbox_is_empty(gp_widget *self);
 
 /*
+ * Sets tbox text.
+ */
+ void gp_widget_tbox_set(gp_widget *self, const char *str);
+
+/*
  * Sets tbox text with a printf()-like syntax.
  */
 int gp_widget_tbox_printf(gp_widget *self, const char *fmt, ...)
@@ -70,6 +75,11 @@ void gp_widget_tbox_clear(gp_widget *self);
  */
 void gp_widget_tbox_ins(gp_widget *self, ssize_t off,
                         enum gp_seek_whence whence, const char *str);
+
+/*
+ * Shorthand for gp_widget_tbox_ins(self, 0, GP_SEEK_CUR, str);
+ */
+void gp_widget_tbox_append(gp_widget *self, const char *str);
 
 /*
  * Deletes text at offset relative to whence.

@@ -84,6 +84,15 @@ gp_widget *gp_widget_tbox_new(const char *text, gp_widget_tattr tattr,
 int gp_widget_tbox_printf(gp_widget *self, const char *fmt, ...)
                           __attribute__((format (printf, 2, 3)));
 
+
+/**
+ * @brief Sets a tbox text.
+ *
+ * @self A tbox widget.
+ * @str A string.
+ */
+void gp_widget_tbox_set(gp_widget *self, const char *str);
+
 /**
  * @brief Clears the tbox text.
  *
@@ -154,6 +163,16 @@ void gp_widget_tbox_cursor_set(gp_widget *self, ssize_t off,
 void gp_widget_tbox_ins(gp_widget *self, ssize_t off,
                         enum gp_seek_whence whence, const char *str);
 
+/**
+ * @brief Appends a string to the textbox.
+ *
+ * @self A tbox widget.
+ * @str A string to append.
+ */
+static inline void gp_widget_tbox_append(gp_widget *self, const char *str)
+{
+	gp_widget_tbox_ins(self, 0, GP_SEEK_CUR, str);
+}
 
 /**
  * @brief Deletes a len characters from a tbox.
