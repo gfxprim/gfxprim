@@ -294,13 +294,19 @@ int gp_dir_cache_inotify(gp_dir_cache *self)
 	return dir_cache_inotify(self, NULL);
 }
 
-void gp_dir_cache_new_dir(gp_dir_cache *self, const char *dirname)
+int gp_dir_cache_mkdir(gp_dir_cache *self, const char *dirname)
 {
+	if (mkdirat(self->dirfd, dirname, 0755))
+		return errno;
+
+	/* Make sure the directory is in the case upon fucntion exit */
 	if (gp_dir_cache_inotify(self) & 2)
-		return;
+		return 0;
 
 	/* Fallback when inotify is not enabled */
 	add_entry(self, dirname);
+
+	return 0;
 }
 
 #define MIN_SIZE 25

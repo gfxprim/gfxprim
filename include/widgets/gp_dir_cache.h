@@ -109,13 +109,14 @@ gp_dir_entry *gp_dir_cache_get_filtered(gp_dir_cache *self, unsigned int pos);
  */
 int gp_dir_cache_inotify(gp_dir_cache *self);
 
-/*
- * Request update when directory was created in the cache directory.
+/**
+ * Creates a directory and updates the cache.
  *
  * @self A dir cache.
- * @dirname A name of a directory that was created.
+ * @dirname A directory name.
+ * @return Returns an errno on a failure.
  */
-void gp_dir_cache_new_dir(gp_dir_cache *self, const char *dirname);
+int gp_dir_cache_mkdir(gp_dir_cache *self, const char *dirname);
 
 /**
  * Looks up for a file in the cache and returns an position. Note that the

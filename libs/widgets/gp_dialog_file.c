@@ -439,6 +439,7 @@ static int new_dir_on_event(gp_widget_event *ev)
 	gp_dir_cache *cache = dialog->file_table->tbl->priv;
 	char *dir_name;
 	unsigned int pos;
+	int err;
 
 	if (ev->type != GP_WIDGET_EVENT_WIDGET)
 		return 0;
@@ -447,14 +448,13 @@ static int new_dir_on_event(gp_widget_event *ev)
 	if (!dir_name)
 		return 0;
 
-	if (mkdirat(cache->dirfd, dir_name, 0755)) {
+	err = gp_dir_cache_mkdir(cache, dir_name);
+	if (err) {
 		gp_dialog_msg_printf_run(GP_DIALOG_MSG_ERR,
 		                        "Failed to create directory",
-		                        "%s", strerror(errno));
+		                        "%s", strerror(err));
 		goto exit;
 	}
-
-	gp_dir_cache_new_dir(cache, dir_name);
 
 	pos = gp_dir_cache_pos_by_name_filtered(cache, dir_name);
 
