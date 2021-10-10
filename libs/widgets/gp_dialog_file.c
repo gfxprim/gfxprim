@@ -233,6 +233,29 @@ static void exit_dialog(struct file_dialog *dialog, int retval)
 
 	/* Append filename textbox -> file_save */
 	if (dialog->filename) {
+		enum gp_dir_cache_type type;
+		const char *name = gp_widget_tbox_text(dialog->filename);
+		int retval;
+
+		type = gp_dir_cache_lookup(cache, name);
+
+		switch (type) {
+		case GP_DIR_CACHE_FILE:
+			retval = gp_dialog_msg_printf_run(GP_DIALOG_MSG_QUESTION,
+			                                  "File already exists",
+			                                  "Overwrite '%s'?", name);
+
+			if (retval != GP_DIALOG_YES)
+				return;
+		break;
+		case GP_DIR_CACHE_DIR:
+			gp_dialog_msg_printf_run(GP_DIALOG_MSG_WARN,
+			                         "Directory exists",
+			                         "Directory '%s' already exits!", name);
+			return;
+		break;
+		}
+
 		gp_widget_tbox_append(path, "/");
 		gp_widget_tbox_append(path, gp_widget_tbox_text(dialog->filename));
 	}
