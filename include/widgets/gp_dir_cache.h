@@ -117,6 +117,27 @@ int gp_dir_cache_inotify(gp_dir_cache *self);
  */
 void gp_dir_cache_new_dir(gp_dir_cache *self, const char *dirname);
 
+/**
+ * Looks up for a file in the cache and returns an position. Note that the
+ * position is not stable and will change on sort!
+ *
+ * @self A dir cache.
+ * @name A directory or file name.
+ */
 unsigned int gp_dir_cache_pos_by_name_filtered(gp_dir_cache *self, const char *name);
+
+enum gp_dir_cache_type {
+	GP_DIR_CACHE_NONE = 0,
+	GP_DIR_CACHE_FILE = 1,
+	GP_DIR_CACHE_DIR = 2,
+};
+
+/**
+ * Looks for a file in the directory the cache operates in.
+ *
+ * @self A dir cache.
+ * @name A filename.
+ */
+enum gp_dir_cache_type gp_dir_cache_lookup(gp_dir_cache *self, const char *name);
 
 #endif /* GP_DIR_CACHE_H */

@@ -409,3 +409,20 @@ unsigned int gp_dir_cache_pos_by_name_filtered(gp_dir_cache *self, const char *n
 
 	return (unsigned int)-1;
 }
+
+enum gp_dir_cache_type gp_dir_cache_lookup(gp_dir_cache *self, const char *name)
+{
+	struct stat buf;
+
+	if (fstatat(self->dirfd, name, &buf, 0)) {
+		if (errno != ENOENT)
+			GP_DEBUG(3, "stat(%s): %s", name, strerror(errno));
+
+		return GP_DIR_CACHE_NONE;
+	}
+
+	if ((buf.st_mode & S_IFMT) == S_IFDIR)
+		return GP_DIR_CACHE_DIR;
+
+	return GP_DIR_CACHE_FILE;
+}
