@@ -198,7 +198,7 @@ static uint8_t square_glyphs[] = {
 
 static struct gp_font_face square = {
 	.family_name = "square",
-	.style_name = "Mono",
+	.style = GP_FONT_MONO,
 	.charset = GP_CHARSET_7BIT,
 	.ascend = 7,
 	.descend = 1,

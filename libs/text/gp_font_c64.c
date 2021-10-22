@@ -200,7 +200,7 @@ static int8_t c64_glyphs[] = {
 
 static struct gp_font_face c64 = {
 	.family_name = "C64",
-	.style_name = "Mono",
+	.style = GP_FONT_MONO,
 	.charset = GP_CHARSET_7BIT,
 	.ascend  = 7,
 	.descend = 2,
@@ -212,3 +212,11 @@ static struct gp_font_face c64 = {
 };
 
 const struct gp_font_face *gp_font_c64 = &c64;
+
+const gp_font_family __attribute__((visibility ("hidden"))) font_family_c64 = {
+	.family_name = "c64",
+	.fonts = {
+		&c64,
+		NULL
+	}
+};

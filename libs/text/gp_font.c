@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 /*
- * Copyright (C) 2009-2014 Cyril Hrubis <metan@ucw.cz>
+ * Copyright (C) 2009-2021 Cyril Hrubis <metan@ucw.cz>
  */
 
 #include <stdlib.h>
@@ -40,6 +40,30 @@ gp_glyph *gp_get_glyph(const gp_font_face *font, int c)
 		offset = font->glyph_offsets[0] * i;
 
 	return (gp_glyph*)(font->glyphs + offset);
+}
+
+const char *gp_font_style_name(uint8_t style)
+{
+	switch (GP_FONT_STYLE(style)) {
+	case GP_FONT_REGULAR:
+		return "Regular";
+	case GP_FONT_REGULAR|GP_FONT_BOLD:
+		return "Regular:Bold";
+	case GP_FONT_REGULAR|GP_FONT_ITALIC:
+		return "Regular:Italic";
+	case GP_FONT_REGULAR|GP_FONT_BOLD|GP_FONT_ITALIC:
+		return "Regular:Bold:Italic";
+	case GP_FONT_MONO:
+		return "Monospace";
+	case GP_FONT_MONO|GP_FONT_BOLD:
+		return "Monospace:Bold";
+	case GP_FONT_MONO|GP_FONT_ITALIC:
+		return "Monospace:Italic";
+	case GP_FONT_MONO|GP_FONT_BOLD|GP_FONT_ITALIC:
+		return "Monospace:Bold:Italic";
+	default:
+		return "???";
+	}
 }
 
 void gp_font_face_free(gp_font_face *self)

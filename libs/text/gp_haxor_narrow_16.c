@@ -198,7 +198,7 @@ static uint8_t font_glyphs[] = {
 
 static struct gp_font_face font = {
 	.family_name = "HaxorNarrow16",
-	.style_name = "Mono",
+	.style = GP_FONT_MONO,
 	.charset = GP_CHARSET_7BIT,
 	.ascend = 13,
 	.descend = 3,
@@ -418,7 +418,7 @@ static uint8_t font_bold_glyphs[] = {
 
 static struct gp_font_face font_bold = {
 	.family_name = "HaxorNarrowBold16",
-	.style_name = "Mono",
+	.style = GP_FONT_MONO | GP_FONT_BOLD,
 	.charset = GP_CHARSET_7BIT,
 	.ascend = 13,
 	.descend = 3,
@@ -442,3 +442,12 @@ static struct gp_font_face font_bold = {
 };
 
 const struct gp_font_face *gp_font_haxor_narrow_bold_16 = &font_bold;
+
+const gp_font_family __attribute__((visibility ("hidden"))) haxor_narrow_16 = {
+        .family_name = "haxor-narrow-16",
+        .fonts = {
+		&font,
+                &font_bold,
+                NULL
+        }
+};

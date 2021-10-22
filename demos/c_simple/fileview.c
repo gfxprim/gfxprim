@@ -17,13 +17,14 @@ static gp_backend *backend;
 static gp_pixel white_pixel, gray_pixel, dark_gray_pixel, black_pixel,
 		red_pixel, blue_pixel;
 
-static int font_flag = 0;
 static int tracking = 0;
 
 static int mul = 1;
 static int space = 0;
 
+static const char *font_face;
 static gp_font_face *font;
+static gp_text_style style = GP_DEFAULT_TEXT_STYLE;
 
 struct file_line {
 	char *text;
@@ -39,29 +40,6 @@ void redraw_screen(void)
 	gp_pixmap *win = backend->pixmap;
 
 	gp_fill(win, gray_pixel);
-
-	gp_text_style style = GP_DEFAULT_TEXT_STYLE;
-
-	switch (font_flag) {
-	case 0:
-		style.font = gp_font_gfxprim_mono;
-	break;
-	case 1:
-		style.font = gp_font_gfxprim;
-	break;
-	case 2:
-		style.font = gp_font_tiny_mono;
-	break;
-	case 3:
-		style.font = gp_font_tiny;
-	break;
-	case 4:
-		style.font = gp_font_c64;
-	break;
-	case 5:
-		style.font = font;
-	break;
-	}
 
 	style.pixel_xmul = mul;
 	style.pixel_ymul = mul;
@@ -107,6 +85,26 @@ static void warp_down(int lines)
 	gp_backend_flip(backend);
 }
 
+static void next_font(int dir)
+{
+	static gp_fonts_iter iter;
+	const gp_font_family *family;
+	int wrap = font ? style.font == font : 1;
+
+	style.font = gp_fonts_iter_font(&iter, wrap, dir);
+
+	if (!style.font) {
+		style.font = font;
+		printf("Font: '%s'\n", font_face);
+		return;
+	}
+
+	family = gp_fonts_iter_family(&iter, 0, GP_FONTS_ITER_NOP);
+
+	printf("Font family: '%s' Font style: '%s'\n",
+	       family->family_name, gp_font_style_name(style.font->style));
+}
+
 void event_loop(void)
 {
 	for (;;) {
@@ -119,11 +117,12 @@ void event_loop(void)
 
 			switch (ev->key.key) {
 			case GP_KEY_SPACE:
-				if (font)
-					font_flag = (font_flag + 1) % 6;
-				else
-					font_flag = (font_flag + 1) % 5;
-
+				next_font(GP_FONTS_ITER_NEXT);
+				redraw_screen();
+				gp_backend_flip(backend);
+			break;
+			case GP_KEY_BACKSPACE:
+				next_font(GP_FONTS_ITER_PREV);
 				redraw_screen();
 				gp_backend_flip(backend);
 			break;
@@ -230,7 +229,6 @@ static int read_file_head(const char *filename)
 int main(int argc, char *argv[])
 {
 	const char *backend_opts = "X11";
-	const char *font_face = NULL;
 	int opt;
 
 	while ((opt = getopt(argc, argv, "b:f:h")) != -1) {
@@ -276,6 +274,8 @@ int main(int argc, char *argv[])
 	black_pixel     = gp_rgb_to_pixmap_pixel(0x00, 0x00, 0x00, win);
 	red_pixel       = gp_rgb_to_pixmap_pixel(0xff, 0x00, 0x00, win);
 	blue_pixel      = gp_rgb_to_pixmap_pixel(0x00, 0x00, 0xff, win);
+
+	next_font(GP_FONTS_ITER_FIRST);
 
 	redraw_screen();
 	gp_backend_flip(backend);

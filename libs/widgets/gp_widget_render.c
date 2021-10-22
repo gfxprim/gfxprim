@@ -86,97 +86,67 @@ static gp_font_face *render_font_big_bold;
 static gp_font_face *render_font_mono;
 static gp_font_face *render_font_mono_bold;
 
-static const char *arg_fonts;
+static const char *str_font_size;
+static const char *font_family;
 static const char *input_str;
 
-static void set_big_font(int mul)
+static int try_compiled_in_font_family(const char *family_name)
 {
-	font_big.pixel_xmul = mul;
-	font_big.pixel_ymul = mul;
+	const gp_font_family *family;
+	const gp_font_face *regular, *regular_bold, *mono, *mono_bold;
 
-	font_bold.pixel_xmul = 1;
-	font_bold.pixel_ymul = 1;
-	font_bold.pixel_xspace = 0;
-	font_bold.pixel_yspace = 0;
+	family = gp_font_family_lookup(family_name);
+	if (!family)
+		return 0;
 
-	font_mono_bold.pixel_xmul = 1;
-	font_mono_bold.pixel_ymul = 1;
-	font_mono_bold.pixel_xspace = 0;
-	font_mono_bold.pixel_yspace = 0;
+	regular = gp_font_family_face_lookup(family, GP_FONT_REGULAR);
+	regular_bold = gp_font_family_face_lookup(family, GP_FONT_REGULAR | GP_FONT_BOLD);
+	mono = gp_font_family_face_lookup(family, GP_FONT_MONO);
+	mono_bold = gp_font_family_face_lookup(family, GP_FONT_MONO | GP_FONT_BOLD);
 
-	font_big_bold.pixel_xmul = mul;
-	font_big_bold.pixel_ymul = mul;
-	font_big_bold.pixel_xspace = 0;
-	font_big_bold.pixel_yspace = 0;
+	/* Fallback to monospace if regular is not present */
+	if (!regular) {
+		regular = mono;
+		regular_bold = mono_bold;
+	}
+
+	if (!regular || !mono)
+		return 0;
+
+	gp_text_style_normal(&font, regular);
+	gp_text_style_normal(&font_mono, mono);
+	gp_text_style_double(&font_big, regular);
+
+	if (!regular_bold) {
+		gp_text_style_embold(&font_bold, regular);
+		gp_text_style_embold_double(&font_big_bold, regular);
+	} else {
+		gp_text_style_normal(&font_bold, regular_bold);
+		gp_text_style_double(&font_big_bold, regular_bold);
+	}
+
+	if (!mono_bold)
+		gp_text_style_embold(&font_mono_bold, mono);
+	else
+		gp_text_style_normal(&font_mono_bold, mono_bold);
+
+	return 1;
 }
 
-static void set_default_font(void)
-{
-	/* Embolding */
-	font_bold.pixel_xmul = 2;
-	font_bold.pixel_ymul = 2;
-	font_bold.pixel_xspace = -1;
-	font_bold.pixel_yspace = -1;
-
-	font_mono_bold.pixel_xmul = 2,
-	font_mono_bold.pixel_ymul = 2,
-	font_mono_bold.pixel_xspace = -1,
-	font_mono_bold.pixel_yspace = -1,
-
-	font_big.pixel_xmul = 2;
-	font_big.pixel_ymul = 2;
-
-	font_big_bold.pixel_xmul = 3;
-	font_big_bold.pixel_ymul = 3;
-	font_big_bold.pixel_xspace = -1;
-	font_big_bold.pixel_yspace = -1;
-}
 
 static void init_fonts(void)
 {
-	if (arg_fonts) {
-		if (!strcmp(arg_fonts, "default")) {
-			set_default_font();
-			return;
-		}
+	if (font_family) {
+		if (!try_compiled_in_font_family(font_family))
+			GP_WARN("Failed to load compiled in font '%s'", font_family);
+		return;
+	}
 
-		if (!strcmp(arg_fonts, "haxor-15")) {
-			font.font = gp_font_haxor_narrow_15;
-			font_bold.font = gp_font_haxor_narrow_bold_15;
-			font_big.font = gp_font_haxor_narrow_15;
-			font_big_bold.font = gp_font_haxor_narrow_bold_15;
-			font_mono.font = gp_font_haxor_narrow_15;
-			font_mono_bold.font = gp_font_haxor_narrow_15;
-			set_big_font(2);
-			return;
-		}
+	if (str_font_size) {
+		int size = atoi(str_font_size);
 
-		if (!strcmp(arg_fonts, "haxor-16")) {
-			font.font = gp_font_haxor_narrow_16;
-			font_bold.font = gp_font_haxor_narrow_bold_16;
-			font_big.font = gp_font_haxor_narrow_16;
-			font_big_bold.font = gp_font_haxor_narrow_bold_16;
-			font_mono.font = gp_font_haxor_narrow_16;
-			font_mono_bold.font = gp_font_haxor_narrow_16;
-			set_big_font(2);
-			return;
-		}
-
-		if (!strcmp(arg_fonts, "haxor-17")) {
-			font.font = gp_font_haxor_narrow_17;
-			font_bold.font = gp_font_haxor_narrow_bold_17;
-			font_big.font = gp_font_haxor_narrow_17;
-			font_big_bold.font = gp_font_haxor_narrow_bold_17;
-			font_mono.font = gp_font_haxor_narrow_17;
-			font_mono_bold.font = gp_font_haxor_narrow_17;
-			set_big_font(2);
-			return;
-		}
-
-		int size = atoi(arg_fonts);
-
-		if (size < 0 || size > 200) {
-			GP_WARN("Inavlid font '%s'!", arg_fonts);
+		if (size <= 0 || size > 200) {
+			GP_WARN("Inavlid font size '%s'!", str_font_size);
 			return;
 		}
 
@@ -197,7 +167,7 @@ static void init_fonts(void)
 		gp_font_face_free(ffont_big_bold);
 		gp_font_face_free(ffont_mono);
 		gp_font_face_free(ffont_mono_bold);
-		set_default_font();
+		try_compiled_in_font_family("gfxprim");
 		return;
 	}
 
@@ -215,13 +185,12 @@ static void init_fonts(void)
 	render_font_mono = ffont_mono;
 	render_font_mono_bold = ffont_mono_bold;
 
-	ctx.font->font = ffont;
-	ctx.font_bold->font = ffont_bold;
-	ctx.font_big->font = ffont_big;
-	ctx.font_big_bold->font = ffont_big_bold;
-	ctx.font_mono->font = ffont_mono;
-	ctx.font_mono_bold->font = ffont_mono_bold;
-	set_big_font(1);
+	gp_text_style_normal(ctx.font, ffont);
+	gp_text_style_normal(ctx.font_bold, ffont_bold);
+	gp_text_style_normal(ctx.font_big, ffont_big);
+	gp_text_style_normal(ctx.font_big_bold, ffont_big_bold);
+	gp_text_style_normal(ctx.font_mono, ffont_mono);
+	gp_text_style_normal(ctx.font_mono_bold, ffont_mono_bold);
 }
 
 static void render_ctx_init(void)
@@ -541,10 +510,19 @@ int gp_widgets_process_events(gp_widget *layout)
 
 static void print_options(int exit_val)
 {
+	gp_fonts_iter i;
+	const gp_font_family *f;
+
 	printf("Options:\n--------\n");
 	printf("\t-b backend init string (pass -b help for options)\n");
 	printf("\t-f fonts\n\t\tdefault\n\t\thaxor-15\n\t\thaxor-16\n\t\thaxor-17\n");
 	printf("\t-f uint\n\t\tsets the true-type font size\n");
+	printf("\t-F font\n\t\tsets compiled-in font\n");
+	printf("\t\tAvailable fonts:\n");
+
+	GP_FONT_FAMILY_FOREACH(&i, f)
+		printf("\t\t - %s\n", f->family_name);
+
 	printf("\t-i input_string\n");
 	exit(exit_val);
 }
@@ -553,7 +531,7 @@ void gp_widgets_getopt(int *argc, char **argv[])
 {
 	int opt;
 
-	while ((opt = getopt(*argc, *argv, "b:f:hi:")) != -1) {
+	while ((opt = getopt(*argc, *argv, "b:f:F:hi:")) != -1) {
 		switch (opt) {
 		case 'b':
 			backend_init_str = optarg;
@@ -562,7 +540,10 @@ void gp_widgets_getopt(int *argc, char **argv[])
 			print_options(0);
 		break;
 		case 'f':
-			arg_fonts = optarg;
+			str_font_size = optarg;
+		break;
+		case 'F':
+			font_family = optarg;
 		break;
 		case 'i':
 			input_str = optarg;

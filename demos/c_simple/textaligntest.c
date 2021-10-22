@@ -12,13 +12,12 @@
 static gp_pixel black_pixel, red_pixel, yellow_pixel, green_pixel, blue_pixel,
 		darkgray_pixel, white_pixel;
 
-static int font_flag = 0;
-
 static int X = 640;
 static int Y = 480;
 
-static gp_font_face *font = NULL;
+static gp_font_face *font;
 static gp_text_style style = GP_DEFAULT_TEXT_STYLE;
+static const char *font_face;
 
 static gp_backend *win;
 
@@ -29,27 +28,6 @@ void redraw_screen(void)
 	/* draw axes intersecting in the middle, where text should be shown */
 	gp_hline(win->pixmap, 0, X, Y/2, darkgray_pixel);
 	gp_vline(win->pixmap, X/2, 0, Y, darkgray_pixel);
-
-	switch (font_flag) {
-	case 0:
-		style.font = gp_font_gfxprim;
-	break;
-	case 1:
-		style.font = gp_font_gfxprim_mono;
-	break;
-	case 2:
-		style.font = gp_font_tiny_mono;
-	break;
-	case 3:
-		style.font = gp_font_tiny;
-	break;
-	case 4:
-		style.font = gp_font_c64;
-	break;
-	case 5:
-		style.font = font;
-	break;
-	}
 
 	gp_text(win->pixmap, &style, X/2, Y/2, GP_ALIGN_LEFT|GP_VALIGN_BELOW,
 	        yellow_pixel, black_pixel, "bottom left");
@@ -63,6 +41,26 @@ void redraw_screen(void)
 	gp_hline(win->pixmap, 0, X, Y/3, darkgray_pixel);
 	gp_text(win->pixmap, &style, X/2, Y/3, GP_ALIGN_CENTER|GP_VALIGN_BASELINE,
 	        white_pixel, black_pixel, "x center y baseline");
+}
+
+static void next_font(int dir)
+{
+	static gp_fonts_iter iter;
+	const gp_font_family *family;
+	int wrap = font ? style.font == font : 1;
+
+	style.font = gp_fonts_iter_font(&iter, wrap, dir);
+
+	if (!style.font) {
+		style.font = font;
+		printf("Font: '%s'\n", font_face);
+		return;
+	}
+
+	family = gp_fonts_iter_family(&iter, 0, GP_FONTS_ITER_NOP);
+
+	printf("Font family: '%s' Font style: '%s'\n",
+	       family->family_name, gp_font_style_name(style.font->style));
 }
 
 static void event_loop(void)
@@ -87,15 +85,10 @@ static void event_loop(void)
 				GP_SWAP(X, Y);
 			break;
 			case GP_KEY_SPACE:
-				font_flag++;
-
-				if (font) {
-					if (font_flag > 5)
-						font_flag = 0;
-				} else {
-					if (font_flag > 4)
-						font_flag = 0;
-				}
+				next_font(GP_FONTS_ITER_NEXT);
+			break;
+			case GP_KEY_BACKSPACE:
+				next_font(GP_FONTS_ITER_PREV);
 			break;
 			case GP_KEY_UP:
 				style.pixel_xspace++;
@@ -153,7 +146,6 @@ void print_instructions(void)
 int main(int argc, char *argv[])
 {
 	const char *backend_opts = "X11";
-	const char *font_face = NULL;
 	int opt;
 
 	print_instructions();
@@ -194,6 +186,8 @@ int main(int argc, char *argv[])
 	yellow_pixel   = gp_rgb_to_pixmap_pixel(0xff, 0xff, 0x00, win->pixmap);
 	white_pixel   = gp_rgb_to_pixmap_pixel(0xff, 0xff, 0xff, win->pixmap);
 	darkgray_pixel = gp_rgb_to_pixmap_pixel(0x7f, 0x7f, 0x7f, win->pixmap);
+
+	next_font(GP_FONTS_ITER_FIRST);
 
 	redraw_screen();
 	gp_backend_flip(win);

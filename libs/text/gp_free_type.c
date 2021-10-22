@@ -63,9 +63,17 @@ gp_font_face *gp_font_face_load(const char *path, uint32_t width, uint32_t heigh
 	strncpy(font->family_name, face->family_name,
 	        sizeof(font->family_name));
 	font->family_name[GP_FONT_NAME_MAX - 1] = '\0';
-	strncpy(font->style_name, face->style_name,
-	        sizeof(font->style_name));
-	font->style_name[GP_FONT_NAME_MAX - 1] = '\0';
+
+	if (FT_IS_FIXED_WIDTH(face))
+		font->style = GP_FONT_MONO;
+	else
+		font->style = GP_FONT_REGULAR;
+
+	if (face->style_flags & FT_STYLE_FLAG_BOLD)
+		font->style |= GP_FONT_BOLD;
+
+	if (face->style_flags & FT_STYLE_FLAG_ITALIC)
+		font->style |= GP_FONT_ITALIC;
 
 	font->glyph_bitmap_format = GP_FONT_BITMAP_8BPP;
 	font->charset = GP_CHARSET_7BIT;

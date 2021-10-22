@@ -6,6 +6,7 @@
 #ifndef TEXT_GP_FONT_H
 #define TEXT_GP_FONT_H
 
+#include <stddef.h>
 #include <stdint.h>
 
 #define GP_FONT_NAME_MAX 64
@@ -72,12 +73,30 @@ typedef enum gp_font_bitmap_format {
 	GP_FONT_BITMAP_8BPP,
 } gp_font_bitmap_format;
 
+/*
+ * Font style bitflags.
+ */
+typedef enum gp_font_style {
+	GP_FONT_REGULAR = 0x00,
+	GP_FONT_MONO = 0x01,
+	GP_FONT_BOLD = 0x02,
+	GP_FONT_ITALIC = 0x04,
+	GP_FONT_STYLE_MASK = 0x0f,
+	/*
+	 * If passed make sure we return something
+	 * possibly the default compiled-in font
+	 */
+	GP_FONT_FALLBACK = 0x10,
+} gp_font_style;
+
+#define GP_FONT_STYLE(x) ((x) & GP_FONT_STYLE_MASK)
+
 typedef struct gp_font_face {
 	/* Font family name - eg. Sans, Serif ... */
 	char family_name[GP_FONT_NAME_MAX];
 
-	/* Font style name - Medium, Bold, Italic ... */
-	char style_name[GP_FONT_NAME_MAX];
+	/* Font style flags */
+	uint8_t style;
 
 	/* Enum for supported charsets */
 	uint8_t charset;
@@ -127,6 +146,17 @@ typedef struct gp_font_face {
 } gp_font_face;
 
 /*
+ * Font family is a group of fonts of the same family and size but different
+ * style i.e. monospace, bold, italic...
+ *
+ * The fonts array is NULL terminated.
+ */
+typedef struct gp_font_family {
+	const char *family_name;
+	const gp_font_face *const fonts[];
+} gp_font_family;
+
+/*
  * Returns font height eg. ascend + descend
  */
 static inline unsigned int gp_font_height(const gp_font_face *font)
@@ -163,15 +193,12 @@ static inline unsigned int gp_font_avg_advance_x(const gp_font_face *font)
 	return font->max_glyph_advance;
 }
 
-static inline const char *gp_font_family(const gp_font_face *font)
+static inline const char *gp_font_family_name(const gp_font_face *font)
 {
 	return font->family_name;
 }
 
-static inline const char *gp_font_style(const gp_font_face *font)
-{
-	return font->style_name;
-}
+const char *gp_font_style_name(uint8_t style);
 
 /*
  * Returns glyph count for charset.

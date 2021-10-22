@@ -14,7 +14,7 @@
 
 static gp_backend *win;
 
-static const char *font_path = NULL;
+static const char *font_path;
 static unsigned int font_h = 16;
 
 static gp_pixel white_pixel, gray_pixel, dark_gray_pixel, black_pixel,
@@ -27,9 +27,10 @@ static const char *test_strings[] = {
 	"Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor..."
 };
 
-static int font_flag = 0;
 static int tracking = 0;
-static gp_font_face *font = NULL;
+static gp_font_face *font;
+static gp_text_style style = GP_DEFAULT_TEXT_STYLE;
+static const char *font_face;
 
 static const char *glyph_bitmap_format_name(const gp_font_bitmap_format format)
 {
@@ -65,7 +66,7 @@ static void print_character_metadata(const gp_font_face *font, int c)
 static void print_font_properties(const gp_font_face *font)
 {
 	fprintf(stderr, "Font '%s %s' properties:\n",
-	                gp_font_family(font), gp_font_style(font));
+	                gp_font_family_name(font), gp_font_style_name(font->style));
 	fprintf(stderr, "    Height: ascend: %d, descend: %d\n",
 			gp_font_ascend(font), gp_font_descend(font));
 	fprintf(stderr, "    Max advance_x: %u\n",
@@ -87,38 +88,6 @@ static void print_font_properties(const gp_font_face *font)
 void redraw_screen(void)
 {
 	gp_fill(win->pixmap, black_pixel);
-
-	gp_text_style style = GP_DEFAULT_TEXT_STYLE;
-
-	switch (font_flag) {
-	case 0:
-		style.font = gp_font_gfxprim;
-	break;
-	case 1:
-		style.font = gp_font_gfxprim_mono;
-	break;
-	case 2:
-		style.font = gp_font_tiny;
-	break;
-	case 3:
-		style.font = gp_font_tiny_mono;
-	break;
-	case 4:
-		style.font = gp_font_c64;
-	break;
-	case 5:
-		style.font = gp_font_haxor_narrow_15;
-	break;
-	case 6:
-		style.font = gp_font_haxor_narrow_16;
-	break;
-	case 7:
-		style.font = gp_font_haxor_narrow_17;
-	break;
-	case 8:
-		style.font = font;
-	break;
-	}
 
 	print_font_properties(style.font);
 
@@ -176,17 +145,37 @@ void redraw_screen(void)
 		style.pixel_xspace = 1;
 		style.pixel_yspace = 1;
 
-		if (font_flag == 2 || font_flag == 3) {
-			style.pixel_xmul = 2;
-			style.pixel_ymul = 5;
+//		if (font_flag == 2 || font_flag == 3) {
+//			style.pixel_xmul = 2;
+//			style.pixel_ymul = 5;
 
-			style.pixel_xspace = 2;
-			style.pixel_yspace = 2;
-		}
+//			style.pixel_xspace = 2;
+//			style.pixel_yspace = 2;
+//		}
 
 		gp_text(win->pixmap, &style, 64, SPACING*i + 88, align,
 		        dark_gray_pixel, black_pixel, test_string);
 	}
+}
+
+static void next_font(int dir)
+{
+	static gp_fonts_iter iter;
+	const gp_font_family *family;
+	int wrap = font ? style.font == font : 1;
+
+	style.font = gp_fonts_iter_font(&iter, wrap, dir);
+
+	if (!style.font) {
+		style.font = font;
+		printf("Font: '%s'\n", font_face);
+		return;
+	}
+
+	family = gp_fonts_iter_family(&iter, 0, GP_FONTS_ITER_NOP);
+
+	printf("Font family: '%s' Font style: '%s'\n",
+	       family->family_name, gp_font_style_name(style.font->style));
 }
 
 void event_loop(void)
@@ -201,11 +190,12 @@ void event_loop(void)
 
 			switch (ev->key.key) {
 			case GP_KEY_SPACE:
-				if (font)
-					font_flag = (font_flag + 1) % 9;
-				else
-					font_flag = (font_flag + 1) % 8;
-
+				next_font(GP_FONTS_ITER_NEXT);
+				redraw_screen();
+				gp_backend_flip(win);
+			break;
+			case GP_KEY_BACKSPACE:
+				next_font(GP_FONTS_ITER_PREV);
 				redraw_screen();
 				gp_backend_flip(win);
 			break;
@@ -272,7 +262,6 @@ void print_instructions(void)
 int main(int argc, char *argv[])
 {
 	const char *backend_opts = "X11";
-	const char *font_face = NULL;
 	int opt;
 
 	print_instructions();
@@ -314,6 +303,8 @@ int main(int argc, char *argv[])
 	black_pixel     = gp_rgb_to_pixmap_pixel(0x00, 0x00, 0x00, win->pixmap);
 	red_pixel       = gp_rgb_to_pixmap_pixel(0xff, 0x00, 0x00, win->pixmap);
 	blue_pixel      = gp_rgb_to_pixmap_pixel(0x00, 0x00, 0xff, win->pixmap);
+
+	next_font(GP_FONTS_ITER_FIRST);
 
 	redraw_screen();
 	gp_backend_flip(win);

@@ -30,6 +30,13 @@ static int fill = 1;
 /* Show axes? */
 static int show_axes = 1;
 
+static gp_text_style font = {
+	.pixel_xmul = 6,
+	.pixel_ymul = 6,
+	.pixel_xspace = 2,
+	.pixel_yspace = 2,
+};
+
 /* Shape to be drawn */
 #define SHAPE_FIRST	 1
 #define SHAPE_TRIANGLE	 1
@@ -270,16 +277,6 @@ void draw_testing_polygon(int x, int y, int xradius, int yradius)
 
 void redraw_screen(void)
 {
-
-	/* text style for the label */
-	gp_text_style style = {
-		.font = gp_font_tiny,
-		.pixel_xmul = 6,
-		.pixel_ymul = 6,
-		.pixel_xspace = 2,
-		.pixel_yspace = 2,
-	};
-
 	gp_fill(win, black);
 
 	/* axes */
@@ -342,7 +339,7 @@ void redraw_screen(void)
 	break;
 	}
 
-	gp_text(win, &style, 16, 16, GP_ALIGN_RIGHT|GP_VALIGN_BELOW,
+	gp_text(win, &font, 16, 16, GP_ALIGN_RIGHT|GP_VALIGN_BELOW,
 	        yellow, black, title);
 
 	gp_backend_flip(backend);
@@ -557,6 +554,8 @@ int main(int argc, char *argv[])
 	red      = gp_rgb_to_pixmap_pixel(0xff, 0x00, 0x00, win);
 	gray     = gp_rgb_to_pixmap_pixel(0xbe, 0xbe, 0xbe, win);
 	darkgray = gp_rgb_to_pixmap_pixel(0x7f, 0x7f, 0x7f, win);
+
+	font.font = gp_font_face_lookup("tiny", GP_FONT_REGULAR | GP_FONT_FALLBACK);
 
 	print_instructions();
 	redraw_screen();

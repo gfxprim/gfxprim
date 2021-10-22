@@ -202,8 +202,8 @@ static int8_t default_console_glyphs[] = {
 };
 
 const struct gp_font_face gp_default_font = {
-	.family_name = "Gfxprim",
-	.style_name = "Mono",
+	.family_name = "gfxprim",
+	.style = GP_FONT_MONO,
 	.charset = GP_CHARSET_7BIT,
 	.ascend  = 9,
 	.descend = 2,
@@ -410,8 +410,8 @@ static uint8_t default_proportional_glyphs[] = {
 };
 
 static struct gp_font_face font_gfxprim = {
-	.family_name = "Gfxprim",
-	.style_name = "Proportional",
+	.family_name = "gfxprim",
+	.style = GP_FONT_REGULAR,
 	.charset = GP_CHARSET_7BIT,
 	.ascend  = 9,
 	.descend = 2,
@@ -423,3 +423,14 @@ static struct gp_font_face font_gfxprim = {
 };
 
 const gp_font_face *gp_font_gfxprim = &font_gfxprim;
+
+const gp_font_family __attribute__((visibility ("hidden"))) font_family_gfxprim = {
+	.family_name = "gfxprim",
+	.fonts = {
+		&font_gfxprim,
+		&gp_default_font,
+		NULL
+	}
+};
+
+const gp_font_family *gp_font_family_default = &font_family_gfxprim;

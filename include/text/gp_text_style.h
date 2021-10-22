@@ -18,7 +18,7 @@ extern const gp_font_face gp_default_font;
  * It includes a font, and its various variants and transformations.
  */
 typedef struct gp_text_style {
-	const struct gp_font_face *font;
+	const gp_font_face *font;
 
 	/* Spacing between pixels (0 is the default, no spacing). */
 	int pixel_xspace, pixel_yspace;
@@ -37,6 +37,45 @@ typedef struct gp_text_style {
 	.pixel_xmul = 1, \
 	.pixel_ymul = 1, \
 	.char_xspace = 0 \
+}
+
+static inline void gp_text_style_normal(gp_text_style *style, const gp_font_face *font)
+{
+	style->pixel_xspace = 0;
+	style->pixel_yspace = 0;
+	style->pixel_xmul = 1;
+	style->pixel_ymul = 1;
+	style->font = font;
+}
+
+/*
+ * Creates a bold variant of a bitmap font on the expense of slower rendering.
+ */
+static inline void gp_text_style_embold(gp_text_style *style, const gp_font_face *font)
+{
+	style->pixel_xspace = -1;
+	style->pixel_yspace = -1;
+	style->pixel_xmul = 2;
+	style->pixel_ymul = 2;
+	style->font = font;
+}
+
+static inline void gp_text_style_double(gp_text_style *style, const gp_font_face *font)
+{
+	style->pixel_xspace = 0;
+	style->pixel_yspace = 0;
+	style->pixel_xmul = 2;
+	style->pixel_ymul = 2;
+	style->font = font;
+}
+
+static inline void gp_text_style_embold_double(gp_text_style *style, const gp_font_face *font)
+{
+	style->pixel_xspace = -1;
+	style->pixel_yspace = -1;
+	style->pixel_xmul = 3;
+	style->pixel_ymul = 3;
+	style->font = font;
 }
 
 #endif /* TEXT_GP_TEXTSTYLE_H */
