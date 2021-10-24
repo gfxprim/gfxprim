@@ -172,9 +172,9 @@ static int event(gp_widget *self, const gp_widget_render_ctx *ctx, gp_event *ev)
 	return 0;
 }
 
-static gp_widget *json_to_spinbutton(gp_json_buf *json, gp_json_val *val, gp_htable **uids)
+static gp_widget *json_to_spinbutton(gp_json_buf *json, gp_json_val *val, gp_widget_json_ctx *ctx)
 {
-	return gp_widget_choice_from_json(GP_WIDGET_SPINBUTTON, json, val, uids);
+	return gp_widget_choice_from_json(GP_WIDGET_SPINBUTTON, json, val, ctx);
 }
 
 struct gp_widget_ops gp_widget_spinbutton_ops = {

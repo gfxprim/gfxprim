@@ -321,7 +321,7 @@ static const gp_json_obj obj_filter = {
 	.attr_cnt = GP_ARRAY_SIZE(attrs),
 };
 
-static gp_widget *json_to_tbox(gp_json_buf *json, gp_json_val *val, gp_htable **uids)
+static gp_widget *json_to_tbox(gp_json_buf *json, gp_json_val *val, gp_widget_json_ctx *ctx)
 {
 	char *text = NULL;
 	int flags = 0;
@@ -330,7 +330,7 @@ static gp_widget *json_to_tbox(gp_json_buf *json, gp_json_val *val, gp_htable **
 	gp_widget_tattr attr = 0;
 	gp_widget *ret;
 
-	(void)uids;
+	(void)ctx;
 
 	GP_JSON_OBJ_FILTER(json, val, &obj_filter, gp_widget_json_attrs) {
 		switch (val->idx) {

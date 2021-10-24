@@ -443,12 +443,9 @@ int gp_widget_ops_render_focus_xy(gp_widget *self, const gp_widget_render_ctx *c
 	return 1;
 }
 
-int gp_widget_ops_render_focus(gp_widget *self, int focus_dir)
+static int widget_focusable(gp_widget *self)
 {
 	const struct gp_widget_ops *ops;
-
-	GP_DEBUG(3, "focus event %p (%s) %s",
-		 self, gp_widget_type_id(self), focus_to_str(focus_dir));
 
 	if (!self)
 		return 0;
@@ -460,6 +457,75 @@ int gp_widget_ops_render_focus(gp_widget *self, int focus_dir)
 	if (!ops->event)
 		return 0;
 
+	return 1;
+}
+
+static int focus_parent_widget(gp_widget *self)
+{
+	const struct gp_widget_ops *ops;
+	gp_widget *parent = self->parent;
+
+	if (!parent)
+		return 1;
+
+	GP_DEBUG(4, "Focusing parent %p (%s)",
+	         parent, gp_widget_type_id(parent));
+
+	ops = gp_widget_ops(parent);
+	if (!ops->focus_child) {
+		GP_WARN("Unimplemented focus_child()!");
+		return 0;
+	}
+
+	if (!ops->focus_child(parent, self))
+		return 0;
+
+	if (parent->focused)
+		return 1;
+
+	focus_widget(parent, 1);
+
+	return focus_parent_widget(parent);
+}
+
+int gp_widget_ops_focus_widget(gp_widget *self)
+{
+	if (!self)
+		return 1;
+
+	if (!widget_focusable(self)) {
+		GP_WARN("Widget %p (%s) not fucusable",
+			self, gp_widget_type_id(self));
+		return 0;
+	}
+
+	focus_widget(self, 1);
+	return focus_parent_widget(self);
+}
+
+int gp_widget_focus_set(gp_widget *self)
+{
+	GP_DEBUG(3, "Focusing widget %p (%s)", self, gp_widget_type_id(self));
+
+	if (!self) {
+		GP_WARN("Attempting to focus NULL widget!");
+		return 0;
+	}
+
+	return gp_widget_ops_focus_widget(self);
+}
+
+int gp_widget_ops_render_focus(gp_widget *self, int focus_dir)
+{
+	const struct gp_widget_ops *ops;
+
+	GP_DEBUG(3, "Focus event %p (%s) %s",
+		 self, gp_widget_type_id(self), focus_to_str(focus_dir));
+
+	if (!widget_focusable(self))
+		return 0;
+
+	ops = gp_widget_ops(self);
 	if (ops->focus)
 		return ops->focus(self, focus_dir);
 

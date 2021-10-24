@@ -87,12 +87,12 @@ static gp_widget *parse_choices(unsigned int widget_type,
 
 gp_widget *gp_widget_choice_from_json(unsigned int widget_type,
                                       gp_json_buf *json, gp_json_val *val,
-                                      gp_htable **uids)
+                                      gp_widget_json_ctx *ctx)
 {
 	unsigned int sel = 0;
 	gp_widget *ret = NULL;
 
-	(void)uids;
+	(void)ctx;
 
 	GP_JSON_OBJ_FILTER(json, val, &obj_filter, gp_widget_json_attrs) {
 		switch (val->idx) {

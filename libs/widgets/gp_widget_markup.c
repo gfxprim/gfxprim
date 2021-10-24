@@ -194,12 +194,12 @@ static const gp_json_obj obj_filter = {
 	.attr_cnt = GP_ARRAY_SIZE(attrs),
 };
 
-static gp_widget *json_to_markup(gp_json_buf *json, gp_json_val *val, gp_htable **uids)
+static gp_widget *json_to_markup(gp_json_buf *json, gp_json_val *val, gp_widget_json_ctx *ctx)
 {
 	char *(*get)(unsigned int var_id, char *old_val) = NULL;
 	gp_widget *ret = NULL;
 
-	(void)uids;
+	(void)ctx;
 
 	GP_JSON_OBJ_FILTER(json, val, &obj_filter, gp_widget_json_attrs) {
 		switch (val->idx) {

@@ -431,6 +431,15 @@ static int focus(gp_widget *self, int sel)
 	return 0;
 }
 
+static int focus_child(gp_widget *self, gp_widget *child)
+{
+	if (self->scroll->child != child)
+		return 0;
+
+	focus_out(self);
+	return 1;
+}
+
 static void distribute_size(gp_widget *self, const gp_widget_render_ctx *ctx, int new_wh)
 {
 	struct gp_widget_scroll_area *area = self->scroll;
@@ -488,7 +497,7 @@ static const gp_json_obj obj_filter = {
 	.attr_cnt = GP_ARRAY_SIZE(attrs),
 };
 
-static gp_widget *json_to_scroll(gp_json_buf *json, gp_json_val *val, gp_htable **uids)
+static gp_widget *json_to_scroll(gp_json_buf *json, gp_json_val *val, gp_widget_json_ctx *ctx)
 {
 	int min_w = 0;
 	int min_h = 0;
@@ -512,7 +521,7 @@ static gp_widget *json_to_scroll(gp_json_buf *json, gp_json_val *val, gp_htable 
 			if (child)
 				gp_json_err(json, "Duplicit widget key!");
 			else
-				child = gp_widget_from_json(json, val, uids);
+				child = gp_widget_from_json(json, val, ctx);
 		break;
 		}
 	}
@@ -537,6 +546,7 @@ struct gp_widget_ops gp_widget_scroll_area_ops = {
 	.event = event,
 	.focus_xy = focus_xy,
 	.focus = focus,
+	.focus_child = focus_child,
 	.distribute_size = distribute_size,
 	.from_json = json_to_scroll,
 	.id = "scroll area",

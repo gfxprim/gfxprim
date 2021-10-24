@@ -383,17 +383,35 @@ static int focus_title(gp_widget *self, const gp_widget_render_ctx *ctx,
 	return 1;
 }
 
+static void unfocus_title(gp_widget *self)
+{
+	if (!self->tabs->title_focused)
+		return;
+
+	self->tabs->title_focused = 0;
+	gp_widget_redraw(self);
+}
+
 static int focus_widget(gp_widget *self, const gp_widget_render_ctx *ctx,
                          unsigned int x, unsigned int y)
 {
 	if (!gp_widget_ops_render_focus_xy(active_tab_widget(self), ctx, x, y))
 		return 0;
 
-	if (self->tabs->title_focused) {
-		self->tabs->title_focused = 0;
-		gp_widget_redraw(self);
-	}
+	unfocus_title(self);
+	self->tabs->widget_focused = 1;
 
+	return 1;
+}
+
+static int focus_child(gp_widget *self, gp_widget *child)
+{
+	gp_widget *active = active_tab_widget(self);
+
+	if (child != active)
+		return 0;
+
+	unfocus_title(self);
 	self->tabs->widget_focused = 1;
 	return 1;
 }
@@ -476,7 +494,8 @@ static int parse_labels(gp_json_buf *json, gp_json_val *val, struct gp_widget_ta
 	return 0;
 }
 
-static int parse_widgets(gp_json_buf *json, gp_json_val *val, struct gp_widget_tab *tabs, gp_htable **uids)
+static int parse_widgets(gp_json_buf *json, gp_json_val *val,
+                         struct gp_widget_tab *tabs, gp_widget_json_ctx *ctx)
 {
 	size_t idx = 0;
 	int warned = 0;
@@ -492,7 +511,7 @@ static int parse_widgets(gp_json_buf *json, gp_json_val *val, struct gp_widget_t
 
 				gp_json_obj_skip(json);
 			} else {
-				tabs[idx++].widget = gp_widget_from_json(json, val, uids);
+				tabs[idx++].widget = gp_widget_from_json(json, val, ctx);
 			}
 		break;
 		default:
@@ -506,7 +525,7 @@ static int parse_widgets(gp_json_buf *json, gp_json_val *val, struct gp_widget_t
 	return 0;
 }
 
-static gp_widget *json_to_tabs(gp_json_buf *json, gp_json_val *val, gp_htable **uids)
+static gp_widget *json_to_tabs(gp_json_buf *json, gp_json_val *val, gp_widget_json_ctx *ctx)
 {
 	int active = 0;
 	struct gp_widget_tab *tabs;
@@ -529,7 +548,7 @@ static gp_widget *json_to_tabs(gp_json_buf *json, gp_json_val *val, gp_htable **
 				goto free;
 			}
 
-			if (parse_widgets(json, val, tabs, uids))
+			if (parse_widgets(json, val, tabs, ctx))
 				goto free;
 		break;
 		case ACTIVE:
@@ -585,6 +604,7 @@ struct gp_widget_ops gp_widget_tabs_ops = {
 	.event = event,
 	.focus = focus,
 	.focus_xy = focus_xy,
+	.focus_child = focus_child,
 	.distribute_size = distribute_size,
 	.for_each_child = for_each_child,
 	.free = free_,
@@ -627,7 +647,7 @@ err:
 
 unsigned int gp_widget_tabs_cnt(gp_widget *self)
 {
-	GP_WIDGET_ASSERT(self, GP_WIDGET_TABS, 0);
+		GP_WIDGET_ASSERT(self, GP_WIDGET_TABS, 0);
 
 	return gp_vec_len(self->tabs->tabs);
 }

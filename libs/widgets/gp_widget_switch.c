@@ -104,7 +104,7 @@ static const gp_json_obj obj_filter = {
 	.attr_cnt = GP_ARRAY_SIZE(attrs),
 };
 
-static gp_widget *json_to_switch(gp_json_buf *json, gp_json_val *val, gp_htable **uids)
+static gp_widget *json_to_switch(gp_json_buf *json, gp_json_val *val, gp_widget_json_ctx *ctx)
 {
 	gp_widget *ret, *child;
 	unsigned int cnt = 0;
@@ -118,7 +118,7 @@ static gp_widget *json_to_switch(gp_json_buf *json, gp_json_val *val, gp_htable 
 		switch (val->idx) {
 		case WIDGETS:
 			GP_JSON_ARR_FOREACH(json, val) {
-				child = gp_widget_from_json(json, val, uids);
+				child = gp_widget_from_json(json, val, ctx);
 				if (!child)
 					continue;
 
@@ -167,6 +167,11 @@ static int focus_xy(gp_widget *self, const gp_widget_render_ctx *ctx,
 	return gp_widget_ops_render_focus_xy(gp_widget_switch_active(self), ctx, x, y);
 }
 
+static int focus_child(gp_widget *self, gp_widget *child)
+{
+	return child == gp_widget_switch_active(self);
+}
+
 struct gp_widget_ops gp_widget_switch_ops = {
 	.min_w = min_w,
 	.min_h = min_h,
@@ -175,6 +180,7 @@ struct gp_widget_ops gp_widget_switch_ops = {
 	.event = event,
 	.focus = focus,
 	.focus_xy = focus_xy,
+	.focus_child = focus_child,
 	.free = free_,
 	.render = render,
 	.from_json = json_to_switch,

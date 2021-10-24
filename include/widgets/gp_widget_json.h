@@ -15,6 +15,19 @@
 extern const gp_json_obj *gp_widget_json_attrs;
 
 /**
+ * Context to propagate values top down and bottom up.
+ *
+ * @uids A hash table to store the id -> widget mapping to. Passed down from
+ *       the application.
+ * @focused A widget that should be focused when layout is loaded. Passed up
+ *          from the json loader.
+ */
+struct gp_widget_json_ctx {
+	gp_htable **uids;
+	gp_widget *focused;
+};
+
+/**
  * @brief Loads a widget layout given a JSON object.
  *
  * @json A json object.
@@ -22,7 +35,7 @@ extern const gp_json_obj *gp_widget_json_attrs;
  *
  * @return A widget layout or a NULL in case of a failure.
  */
-gp_widget *gp_widget_from_json(gp_json_buf *json, gp_json_val *val, gp_htable **uids);
+gp_widget *gp_widget_from_json(gp_json_buf *json, gp_json_val *val, gp_widget_json_ctx *ctx);
 
 /**
  * @brief Loads a widget layout given a string with JSON layout.

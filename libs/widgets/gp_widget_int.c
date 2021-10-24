@@ -126,12 +126,12 @@ static const gp_json_obj obj_filter = {
 };
 
 static gp_widget *json_to_int(enum gp_widget_type type, gp_json_buf *json,
-                              gp_json_val *val, gp_htable **uids)
+                              gp_json_val *val, gp_widget_json_ctx *ctx)
 {
 	int min = 0, max = 0, ival = 0, val_set = 0, dir = 0;
 	gp_widget *ret;
 
-	(void)uids;
+	(void)ctx;
 
 	GP_JSON_OBJ_FILTER(json, val, &obj_filter, gp_widget_json_attrs) {
 		switch (val->idx) {
@@ -340,9 +340,9 @@ static int spin_event(gp_widget *self, const gp_widget_render_ctx *ctx, gp_event
 	return 0;
 }
 
-static gp_widget *json_to_spin(gp_json_buf *json, gp_json_val *val, gp_htable **uids)
+static gp_widget *json_to_spin(gp_json_buf *json, gp_json_val *val, gp_widget_json_ctx *ctx)
 {
-	return json_to_int(GP_WIDGET_SPINNER, json, val, uids);
+	return json_to_int(GP_WIDGET_SPINNER, json, val, ctx);
 }
 
 struct gp_widget_ops gp_widget_spinner_ops = {
@@ -531,9 +531,9 @@ static int slider_event(gp_widget *self, const gp_widget_render_ctx *ctx, gp_eve
 	return 0;
 }
 
-static gp_widget *json_to_slider(gp_json_buf *json, gp_json_val *val, gp_htable **uids)
+static gp_widget *json_to_slider(gp_json_buf *json, gp_json_val *val, gp_widget_json_ctx *ctx)
 {
-	return json_to_int(GP_WIDGET_SLIDER, json, val, uids);
+	return json_to_int(GP_WIDGET_SLIDER, json, val, ctx);
 }
 
 struct gp_widget_ops gp_widget_slider_ops = {

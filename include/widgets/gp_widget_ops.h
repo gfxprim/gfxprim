@@ -77,6 +77,16 @@ struct gp_widget_ops {
 	                 unsigned int x, unsigned int y);
 
 	/*
+	 * @brief Sets/moves focus to a child specific child widget.
+	 *
+	 * @self A container widget.
+	 * @child A child widget to be focused.
+	 *
+	 * @return Non-zero if widget was focused successfuly.
+	 */
+	int (*focus_child)(gp_widget *self, gp_widget *child);
+
+	/*
 	 * Called once to calculate minimal widget sizes.
 	 */
 	unsigned int (*min_w)(gp_widget *self, const gp_widget_render_ctx *ctx);
@@ -106,7 +116,7 @@ struct gp_widget_ops {
 	/*
 	 * json_object -> widget converter.
 	 */
-	gp_widget *(*from_json)(gp_json_buf *json, gp_json_val *val, gp_htable **uids);
+	gp_widget *(*from_json)(gp_json_buf *json, gp_json_val *val, gp_widget_json_ctx *ctx);
 
 	/* id used for JSON loader */
 	const char *id;
@@ -181,6 +191,17 @@ int gp_widget_ops_render_focus(gp_widget *self, int focus_dir);
  */
 int gp_widget_ops_render_focus_xy(gp_widget *self, const gp_widget_render_ctx *ctx,
                                   unsigned int x, unsigned int y);
+
+/**
+ * @brief Moves focus to a particular widget.
+ *
+ * Traverses the widget layout tree to the top and sets the focus accordingly.
+ *
+ * @self A widget to be focused.
+ *
+ * @return Zero if focus couldn't be changed, non-zero otherwise.
+ */
+int gp_widget_ops_focus_widget(gp_widget *self);
 
 void gp_widget_ops_distribute_size(gp_widget *self, const gp_widget_render_ctx *ctx,
                                    unsigned int w, unsigned int h, int new_wh);

@@ -66,6 +66,6 @@ struct json_object;
  */
 gp_widget *gp_widget_choice_from_json(unsigned int widget_type,
                                       gp_json_buf *json, gp_json_val *val,
-                                      gp_htable **uids);
+                                      gp_widget_json_ctx *ctx);
 
 #endif /* GP_WIDGET_CHOICE_H */

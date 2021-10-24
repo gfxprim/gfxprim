@@ -46,6 +46,20 @@ static void widget_grid_focused_offset(gp_widget *self,
 	offset->y = self->grid->row_s[self->grid->focused_row].off;
 }
 
+static int widget_grid_child_pos(gp_widget *self, gp_widget *child,
+                                 unsigned int *col, unsigned int *row)
+{
+	for (*col = 0; *col < self->grid->cols; (*col)++) {
+		for (*row = 0; *row < self->grid->rows; (*row)++) {
+			if (child == widget_grid_get(self, *col, *row))
+				return 1;
+		}
+	}
+
+	return 0;
+
+}
+
 static struct gp_widget *widget_grid_put(gp_widget *self, gp_widget *new,
 		                         unsigned int x, unsigned int y)
 {
@@ -649,6 +663,25 @@ static int focus_xy(gp_widget *self, const gp_widget_render_ctx *ctx,
 	return 1;
 }
 
+static int focus_child(gp_widget *self, gp_widget *child)
+{
+	unsigned int col, row;
+	struct gp_widget_grid *grid = self->grid;
+
+	if (!widget_grid_child_pos(self, child, &col, &row))
+		return 0;
+
+	if (grid->focused_col == col && grid->focused_row == row)
+		return 1;
+
+	gp_widget_ops_render_focus(widget_grid_focused(self), GP_FOCUS_OUT);
+
+	grid->focused_col = col;
+	grid->focused_row = row;
+
+	return 1;
+}
+
 static void set_hborder_padd(gp_widget *self, uint8_t border)
 {
 	self->grid->col_b[0].padd = border;
@@ -922,7 +955,7 @@ static const gp_json_obj obj_filter = {
 	.attr_cnt = GP_ARRAY_SIZE(attrs),
 };
 
-static gp_widget *json_to_grid(gp_json_buf *json, gp_json_val *val, gp_htable **uids)
+static gp_widget *json_to_grid(gp_json_buf *json, gp_json_val *val, gp_widget_json_ctx *ctx)
 {
 	int cols = 1, rows = 1;
 	int frame = 0, uniform = 0;
@@ -1036,7 +1069,7 @@ static gp_widget *json_to_grid(gp_json_buf *json, gp_json_val *val, gp_htable **
 					continue;
 				}
 
-				gp_widget *child = gp_widget_from_json(json, val, uids);
+				gp_widget *child = gp_widget_from_json(json, val, ctx);
 				gp_widget_grid_put(grid, widgets/rows, widgets%rows, child);
 
 				widgets++;
@@ -1097,6 +1130,7 @@ struct gp_widget_ops gp_widget_grid_ops = {
 	.free = free_,
 	.focus = focus,
 	.focus_xy = focus_xy,
+	.focus_child = focus_child,
 	.distribute_size = distribute_size,
 	.for_each_child = for_each_child,
 	.from_json = json_to_grid,

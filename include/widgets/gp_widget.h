@@ -235,6 +235,18 @@ void gp_widget_free(gp_widget *self);
 void gp_widget_set_parent(gp_widget *self, gp_widget *parent);
 
 /**
+ * @brief Sets focus to a particular widget.
+ *
+ * Traverses the widget layout tree to the top and sets the focus accordingly.
+ *
+ * @self A widget to be focused.
+ *
+ * @return Zero if focus couldn't be changed, non-zero otherwise.
+ */
+int gp_widget_focus_set(gp_widget *self);
+
+
+/**
  * @brief Sets widget event handler.
  *
  * Note that even after setting event handler certain widget events has to be

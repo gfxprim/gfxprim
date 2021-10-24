@@ -770,7 +770,7 @@ static const gp_json_obj obj_filter = {
 	.attr_cnt = GP_ARRAY_SIZE(attrs),
 };
 
-static gp_widget *json_to_table(gp_json_buf *json, gp_json_val *val, gp_htable **uids)
+static gp_widget *json_to_table(gp_json_buf *json, gp_json_val *val, gp_widget_json_ctx *ctx)
 {
 	int cols = -1, min_rows = -1;
 	gp_widget_table_header *table_header = NULL;
@@ -778,7 +778,7 @@ static gp_widget *json_to_table(gp_json_buf *json, gp_json_val *val, gp_htable *
 	gp_widget_table_col_ops *col_ops = NULL;
 	gp_widget_table_col_dsc *col_map = NULL;
 
-	(void)uids;
+	(void)ctx;
 
 	GP_JSON_OBJ_FILTER(json, val, &obj_filter, gp_widget_json_attrs) {
 		switch (val->idx) {

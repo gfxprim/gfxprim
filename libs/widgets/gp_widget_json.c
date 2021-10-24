@@ -18,9 +18,9 @@
 #include <widgets/gp_widgets.h>
 #include <widgets/gp_widget_ops.h>
 
-static gp_widget *color_scheme_switch_from_json(gp_json_buf *json, gp_json_val *val, gp_htable **uids)
+static gp_widget *color_scheme_switch_from_json(gp_json_buf *json, gp_json_val *val, gp_widget_json_ctx *ctx)
 {
-	(void) uids;
+	(void) ctx;
 
 	GP_JSON_OBJ_FILTER(json, val, NULL, gp_widget_json_attrs) {
 	}
@@ -36,7 +36,7 @@ static gp_widget *color_scheme_switch_from_json(gp_json_buf *json, gp_json_val *
  */
 static struct from_json {
 	const char *type;
-	gp_widget *(*from_json)(gp_json_buf *json, gp_json_val *val, gp_htable **uids);
+	gp_widget *(*from_json)(gp_json_buf *json, gp_json_val *val, gp_widget_json_ctx *ctx);
 } json_loaders[] = {
 	{"color_scheme_switch", color_scheme_switch_from_json}
 };
@@ -55,6 +55,7 @@ static void *json_loader_by_type(const char *type)
 
 enum keys {
 	ALIGN,
+	FOCUS,
 	HALIGN,
 	ON_EVENT,
 	SHRINK,
@@ -66,6 +67,7 @@ enum keys {
 
 static const gp_json_obj_attr attrs[] = {
 	GP_JSON_OBJ_ATTR("align", GP_JSON_STR),
+	GP_JSON_OBJ_ATTR("focused", GP_JSON_BOOL),
 	GP_JSON_OBJ_ATTR("halign", GP_JSON_STR),
 	GP_JSON_OBJ_ATTR("on_event", GP_JSON_STR),
 	GP_JSON_OBJ_ATTR("shrink", GP_JSON_BOOL),
@@ -84,8 +86,7 @@ const gp_json_obj *gp_widget_json_attrs = &obj_filter;
 
 extern struct gp_widget_ops gp_widget_grid_ops;
 
-gp_widget *gp_widget_from_json(gp_json_buf *json, gp_json_val *val,
-                               gp_htable **uids)
+gp_widget *gp_widget_from_json(gp_json_buf *json, gp_json_val *val, gp_widget_json_ctx *ctx)
 {
 	const struct gp_widget_ops *ops;
 	char *uid = NULL;
@@ -93,8 +94,10 @@ gp_widget *gp_widget_from_json(gp_json_buf *json, gp_json_val *val,
 	unsigned int valign = 0;
 	unsigned int shrink_set = 0;
 	unsigned int shrink;
+	gp_htable **uids = ctx->uids;
+	int focus = 0;
 	int (*on_event)(gp_widget_event *) = NULL;
-	gp_widget *(*from_json)(gp_json_buf *, gp_json_val *, gp_htable **) = gp_widget_grid_ops.from_json;
+	gp_widget *(*from_json)(gp_json_buf *, gp_json_val *, gp_widget_json_ctx *) = gp_widget_grid_ops.from_json;
 
 	if (val->type == GP_JSON_NULL)
 		return NULL;
@@ -129,6 +132,9 @@ gp_widget *gp_widget_from_json(gp_json_buf *json, gp_json_val *val,
 				             "Invalid align='%s'",
 				             val->val_str);
 			}
+		break;
+		case FOCUS:
+			focus = val->val_bool;
 		break;
 		case HALIGN:
 			if (halign)
@@ -217,9 +223,18 @@ gp_widget *gp_widget_from_json(gp_json_buf *json, gp_json_val *val,
 	if (!from_json)
 		return NULL;
 
-	gp_widget *wid = from_json(json, val, uids);
+	gp_widget *wid = from_json(json, val, ctx);
 	if (!wid)
 		return NULL;
+
+	if (focus) {
+		if (ctx->focused) {
+			GP_WARN("Widget %p (%s) is already focused!",
+				ctx->focused, gp_widget_type_id(ctx->focused));
+		} else {
+			ctx->focused = wid;
+		}
+	}
 
 	if (uid) {
 		if (!*uids) {
@@ -287,6 +302,7 @@ void *gp_widget_struct_addr(const char *struct_name)
 
 static gp_widget *gp_widgets_from_json(gp_json_buf *json, gp_htable **uids)
 {
+	gp_widget_json_ctx ctx = {.uids = uids};
 	gp_widget *ret;
 	char buf[128];
 	gp_json_val val = {.buf = buf, .buf_size = sizeof(buf)};
@@ -321,7 +337,13 @@ static gp_widget *gp_widgets_from_json(gp_json_buf *json, gp_htable **uids)
 
 	gp_json_state_load(json, obj_start);
 
-	ret = gp_widget_from_json(json, &val, uids);
+	ret = gp_widget_from_json(json, &val, &ctx);
+	if (ret && ctx.focused) {
+		if (!gp_widget_focus_set(ctx.focused)) {
+			GP_WARN("Failed to focus %p (%s)",
+			        ctx.focused, gp_widget_type_id(ctx.focused));
+		}
+	}
 
 	dlclose(ld_handle);
 

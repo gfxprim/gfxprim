@@ -140,13 +140,13 @@ static const gp_json_obj obj_filter = {
 	.attr_cnt = GP_ARRAY_SIZE(attrs),
 };
 
-static gp_widget *json_to_checkbox(gp_json_buf *json, gp_json_val *val, gp_htable **uids)
+static gp_widget *json_to_checkbox(gp_json_buf *json, gp_json_val *val, gp_widget_json_ctx *ctx)
 {
 	gp_widget *ret;
 	char *label = NULL;
 	int set = 0;
 
-	(void)uids;
+	(void)ctx;
 
 	GP_JSON_OBJ_FILTER(json, val, &obj_filter, gp_widget_json_attrs) {
 		switch (val->idx) {

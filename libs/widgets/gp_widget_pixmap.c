@@ -163,11 +163,12 @@ static const gp_json_obj obj_filter = {
 	.attr_cnt = GP_ARRAY_SIZE(attrs),
 };
 
-static gp_widget *json_to_pixmap(gp_json_buf *json, gp_json_val *val, gp_htable **uids)
+static gp_widget *json_to_pixmap(gp_json_buf *json, gp_json_val *val, gp_widget_json_ctx *ctx)
 {
 	gp_widget_size w = {};
 	gp_widget_size h = {};
-	(void)uids;
+
+	(void)ctx;
 
 	GP_JSON_OBJ_FILTER(json, val, &obj_filter, gp_widget_json_attrs) {
 		switch (val->idx) {
