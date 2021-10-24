@@ -12,7 +12,7 @@ static const char *dialog_input = "\
       \"cols\": 2, \n\
       \"widgets\": [ \n\
        {\"type\": \"stock\", \"uid\": \"stock\", \"stock\": \"question\"}, \n\
-       {\"type\": \"tbox\", \"uid\": \"input\", \"len\": 15} \n\
+       {\"type\": \"tbox\", \"uid\": \"input\", \"len\": 15, \"focused\": true} \n\
       ] \n\
      }, \n\
      {\"cols\": 2, \n\

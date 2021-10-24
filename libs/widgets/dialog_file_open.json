@@ -14,6 +14,7 @@
     },
     {
      "type": "table",
+     "focused": true,
      "align": "fill",
      "min_rows": 25,
      "uid": "files",

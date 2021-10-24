@@ -11,7 +11,7 @@
       "cols": 2,
       "widgets": [
        {"type": "stock", "uid": "stock", "stock": "question"},
-       {"type": "tbox", "uid": "input", "len": 15}
+       {"type": "tbox", "uid": "input", "len": 15, "focused": true}
       ]
      },
      {"cols": 2,

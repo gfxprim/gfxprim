@@ -40,7 +40,8 @@
 	"halign": "fill",
         "label": "Yes",
 	"btype": "ok",
-        "uid": "btn_yes"
+        "uid": "btn_yes",
+	"focused": true
        }
       ]
      }

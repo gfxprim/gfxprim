@@ -15,6 +15,7 @@ static const char *dialog_file_open = "\
     }, \n\
     { \n\
      \"type\": \"table\", \n\
+     \"focused\": true, \n\
      \"align\": \"fill\", \n\
      \"min_rows\": 25, \n\
      \"uid\": \"files\", \n\

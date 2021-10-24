@@ -446,14 +446,14 @@ static int new_dir_on_event(gp_widget_event *ev)
 
 	dir_name = gp_dialog_input_run("Enter directory name");
 	if (!dir_name)
-		return 0;
+		goto ret0;
 
 	err = gp_dir_cache_mkdir(cache, dir_name);
 	if (err) {
 		gp_dialog_msg_printf_run(GP_DIALOG_MSG_ERR,
 		                        "Failed to create directory",
 		                        "%s", strerror(err));
-		goto exit;
+		goto ret1;
 	}
 
 	pos = gp_dir_cache_pos_by_name_filtered(cache, dir_name);
@@ -463,10 +463,11 @@ static int new_dir_on_event(gp_widget_event *ev)
 
 	gp_widget_redraw(dialog->file_table);
 
-	//TODO: focus the table here
-
-exit:
+ret1:
 	free(dir_name);
+ret0:
+	//TODO: Should we save and restore focus?
+	gp_widget_focus_set(dialog->file_table);
 
 	return 0;
 }

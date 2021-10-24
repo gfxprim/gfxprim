@@ -21,11 +21,7 @@ static const char *dialog_info = "\
        } \n\
       ] \n\
      }, \n\
-     { \n\
-      \"type\": \"button\", \n\
-      \"label\": \"OK\", \n\
-      \"uid\": \"btn_ok\" \n\
-     } \n\
+     {\"type\": \"button\", \"label\": \"OK\", \"uid\": \"btn_ok\", \"focused\": true} \n\
     ] \n\
    } \n\
   } \n\

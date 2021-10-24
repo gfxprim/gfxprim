@@ -41,7 +41,8 @@ static const char *dialog_question = "\
 	\"halign\": \"fill\", \n\
         \"label\": \"Yes\", \n\
 	\"btype\": \"ok\", \n\
-        \"uid\": \"btn_yes\" \n\
+        \"uid\": \"btn_yes\", \n\
+	\"focused\": true \n\
        } \n\
       ] \n\
      } \n\

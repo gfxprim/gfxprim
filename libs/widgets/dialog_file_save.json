@@ -29,7 +29,7 @@
       "cpadf": "0, 0, 1, 1, 0, 0",
       "widgets": [
         {"type": "label", "text": "Filename:"},
-        {"type": "tbox", "len": 20, "uid": "filename", "halign": "fill"},
+        {"type": "tbox", "len": 20, "uid": "filename", "halign": "fill", "focused": true},
 	{"type": "checkbox", "label": "Show Hidden", "uid": "hidden"},
 	{"type": "button", "label": "Cancel", "btype": "cancel", "uid": "cancel"},
         {"type": "button", "label": "Save", "btype": "save", "uid": "save"}
