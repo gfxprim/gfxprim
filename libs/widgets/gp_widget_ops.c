@@ -562,7 +562,7 @@ static int handle_focus(gp_widget *self, const gp_widget_render_ctx *ctx, gp_eve
 			return 0;
 		}
 
-		if (!gp_event_any_key_pressed(ev, GP_KEY_LEFT_SHIFT, GP_KEY_RIGHT_SHIFT))
+		if (!gp_event_any_key_pressed(ev, GP_KEY_LEFT_ALT, GP_KEY_RIGHT_ALT))
 			return 0;
 
 		switch (ev->val) {
