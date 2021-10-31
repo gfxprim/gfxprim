@@ -2,7 +2,7 @@
 
 /*
 
-   Copyright (c) 2014-2020 Cyril Hrubis <metan@ucw.cz>
+   Copyright (c) 2014-2021 Cyril Hrubis <metan@ucw.cz>
 
  */
 
@@ -26,6 +26,10 @@ struct gp_widget_tbox {
 	size_t cur_pos;
 	size_t size;
 	char *buf;
+
+	/* Selection */
+	size_t sel_off;
+	size_t sel_len;
 
 	gp_widget_tattr tattr;
 
@@ -189,5 +193,71 @@ static inline void gp_widget_tbox_append(gp_widget *self, const char *str)
  */
 void gp_widget_tbox_del(gp_widget *self, ssize_t off,
                         enum gp_seek_whence whence, size_t len);
+
+/**
+ * @brief Sets selection.
+ *
+ * When selection is set the cursor is moved to the end of the selection.
+ *
+ * @self A tbox widget.
+ * @off An offset.
+ * @whence A whence for the offset.
+ * @len A selection length.
+ */
+void gp_widget_tbox_sel_set(gp_widget *self, ssize_t off,
+                            enum gp_seek_whence whence, size_t len);
+
+/**
+ * @brief Selects whole textbox text.
+ *
+ * When selection is set the cursor is moved to the end of the selection.
+ *
+ * @self A tbox widget.
+ */
+void gp_widget_tbox_sel_all(gp_widget *self);
+
+/**
+ * @brief Clears selection.
+ *
+ * @self A tbox widget.
+ */
+void gp_widget_tbox_sel_clr(gp_widget *self);
+
+/**
+ * @brief Deletes selected characters.
+ *
+ * @self A tbox widget.
+ */
+void gp_widget_tbox_sel_del(gp_widget *self);
+
+/**
+ * @brief Returns selection lenght.
+ *
+ * Returns 0 when no text is selected.
+ *
+ * @self A tbox widget.
+ * @return A selection length.
+ */
+size_t gp_widget_tbox_sel_len(gp_widget *self);
+
+/**
+ * @brief Returns selection offset, i.e. first character.
+ *
+ * Returns 0 when no text is selected.
+ *
+ * @self A tbox widget.
+ * @return A selection offset.
+ */
+size_t gp_widget_tbox_sel_off(gp_widget *self);
+
+/**
+ * @brief Returns if text is selected.
+ *
+ * @return Non-zero if text is selected.
+ */
+static inline int gp_widget_tbox_sel(gp_widget *self)
+{
+	return !!gp_widget_tbox_sel_len(self);
+}
 
 #endif /* GP_WIDGET_TBOX_H */

@@ -47,9 +47,15 @@ static const char *hidden_str(const char *buf)
 	return s + sizeof(s) - len - 1;
 }
 
+static int in_selection(gp_widget *self)
+{
+	return self->tbox->sel_len;
+}
+
 static void render(gp_widget *self, const gp_offset *offset,
                    const gp_widget_render_ctx *ctx, int flags)
 {
+	struct gp_widget_tbox *tbox = self->tbox;
 	const gp_text_style *font = gp_widget_tattr_font(self->tbox->tattr, ctx);
 	unsigned int x = self->x + offset->x;
 	unsigned int y = self->y + offset->y;
@@ -60,31 +66,31 @@ static void render(gp_widget *self, const gp_offset *offset,
 
 	gp_widget_ops_blit(ctx, x, y, w, h);
 
-	if (self->tbox->hidden)
+	if (tbox->hidden)
 		str = hidden_str(self->tbox->buf);
 	else
 		str = self->tbox->buf;
 
 	gp_pixel color = self->focused ? ctx->sel_color : ctx->text_color;
 
-	if (self->tbox->alert) {
+	if (tbox->alert) {
 		color = ctx->alert_color;
 		gp_widget_render_timer(self, GP_TIMER_RESCHEDULE, 500);
 	}
 
 	gp_fill_rrect_xywh(ctx->buf, x, y, w, h, ctx->bg_color, ctx->fg_color, color);
 
-	size_t left = GP_MIN(self->tbox->off_left, self->tbox->cur_pos);
-	size_t right = gp_vec_strlen(self->tbox->buf);
+	size_t left = GP_MIN(tbox->off_left, tbox->cur_pos);
+	size_t right = gp_vec_strlen(tbox->buf);
 
 	while (gp_text_width_len(font, str+left, right - left) > self->w - 2 * ctx->padd) {
-		if (right > self->tbox->cur_pos)
+		if (right > tbox->cur_pos)
 			right--;
 		else
 			left++;
 	}
 
-	self->tbox->off_left = left;
+	tbox->off_left = left;
 
 	gp_coord cy = y + ctx->padd + (gp_text_ascent(font)+1)/2;
 	gp_coord s = ctx->padd/4;
@@ -96,17 +102,17 @@ static void render(gp_widget *self, const gp_offset *offset,
 		gp_line(ctx->buf, cx-s, cy, cx, cy+s, ctx->text_color);
 	}
 
-	if (right < gp_vec_strlen(self->tbox->buf)) {
+	if (right < gp_vec_strlen(tbox->buf)) {
 		gp_coord cx = x + w - 1 - ctx->padd/2;
 
 		gp_line(ctx->buf, cx+s, cy, cx, cy-s, ctx->text_color);
 		gp_line(ctx->buf, cx+s, cy, cx, cy+s, ctx->text_color);
 	}
 
-	if (self->focused) {
+	if (self->focused && !in_selection(self)) {
 		unsigned int cursor_x = x + ctx->padd;
 		cursor_x += gp_text_width_len(font, str + left,
-		                              self->tbox->cur_pos - left);
+		                              tbox->cur_pos - left);
 		gp_vline_xyh(ctx->buf, cursor_x, y + ctx->padd,
 			     gp_text_ascent(font), ctx->text_color);
 	}
@@ -116,6 +122,30 @@ static void render(gp_widget *self, const gp_offset *offset,
 		    x + ctx->padd, y + ctx->padd,
 		    GP_ALIGN_RIGHT|GP_VALIGN_BELOW,
 		    ctx->text_color, ctx->bg_color, str, right - left);
+
+
+	if (!tbox->sel_len)
+		return;
+
+	size_t sel_left = GP_MAX(tbox->sel_off, left);
+	size_t sel_right = GP_MIN(tbox->sel_off + tbox->sel_len, right);
+	size_t sel_len = sel_right - sel_left;
+
+	if (sel_left >= sel_right)
+		return;
+
+	gp_coord sel_x_off = x + ctx->padd + gp_text_width_len(font, str, sel_left);
+
+	str += sel_left;
+
+	gp_fill_rect_xywh(ctx->buf, sel_x_off, y + ctx->padd,
+	                  gp_text_width_len(font, str, sel_len),
+	                  gp_text_height(font), ctx->sel_color);
+
+	gp_text_ext(ctx->buf, font, sel_x_off, y + ctx->padd,
+	            GP_ALIGN_RIGHT | GP_VALIGN_BELOW,
+	            ctx->text_color, ctx->sel_color, str,
+		    sel_right - sel_left);
 }
 
 static void schedule_alert(gp_widget *self)
@@ -151,8 +181,129 @@ static int filter(const char *filter, char ch)
 	return 1;
 }
 
+static int sel_clr(gp_widget *self)
+{
+	if (!in_selection(self))
+		return 0;
+
+	self->tbox->sel_len = 0;
+	self->tbox->sel_off = 0;
+
+	return 1;
+}
+
+static int sel_clr_left(gp_widget *self)
+{
+	if (!in_selection(self))
+		return 0;
+
+	self->tbox->cur_pos = self->tbox->sel_off;
+	sel_clr(self);
+
+	return 1;
+}
+
+static int sel_clr_right(gp_widget *self)
+{
+	if (!in_selection(self))
+		return 0;
+
+	self->tbox->cur_pos = self->tbox->sel_off + self->tbox->sel_len;
+	sel_clr(self);
+
+	return 1;
+}
+
+static int sel_del(gp_widget *self)
+{
+	if (!in_selection(self))
+		return 0;
+
+	gp_widget_tbox_del(self, self->tbox->sel_off,
+	                   GP_SEEK_SET, self->tbox->sel_len);
+	sel_clr(self);
+
+	return 1;
+}
+
+static size_t buflen(gp_widget *self)
+{
+	return gp_vec_strlen(self->tbox->buf);
+}
+
+static int cursor_at_end(gp_widget *self)
+{
+	return self->tbox->cur_pos == gp_vec_strlen(self->tbox->buf);
+}
+
+static int sel_all(gp_widget *self)
+{
+	size_t len = buflen(self);
+
+	if (self->tbox->sel_len == len)
+		return 0;
+
+	self->tbox->sel_off = 0;
+	self->tbox->sel_len = len;
+	self->tbox->cur_pos = len;
+
+	return 1;
+}
+
+static void sel_right(gp_widget *self, int end)
+{
+	struct gp_widget_tbox *tbox = self->tbox;
+
+	if (!tbox->sel_len) {
+		if (cursor_at_end(self))
+			return;
+
+		if (end) {
+			tbox->sel_off = tbox->cur_pos;
+			tbox->sel_len = buflen(self) - tbox->cur_pos;
+		} else {
+			tbox->sel_off = tbox->cur_pos;
+			tbox->sel_len = 1;
+		}
+
+		return;
+	}
+
+	if (tbox->sel_len + tbox->sel_off >= buflen(self))
+		return;
+
+	tbox->sel_len++;
+}
+
+static void sel_left(gp_widget *self, int home)
+{
+	struct gp_widget_tbox *tbox = self->tbox;
+
+	if (!tbox->sel_len) {
+		if (!tbox->cur_pos)
+			return;
+
+		if (home) {
+			tbox->sel_off = 0;
+			tbox->sel_len = tbox->cur_pos;
+		} else {
+			tbox->sel_off = tbox->cur_pos - 1;
+			tbox->sel_len = 1;
+		}
+		return;
+	}
+
+	if (!tbox->sel_off)
+		return;
+
+	tbox->sel_off--;
+	tbox->sel_len++;
+}
+
 static void ascii_key(gp_widget *self, char ch)
 {
+	sel_del(self);
+
 	if (self->tbox->max_size &&
 	    gp_vec_strlen(self->tbox->buf) >= self->tbox->max_size) {
 		schedule_alert(self);
@@ -180,71 +331,94 @@ static void ascii_key(gp_widget *self, char ch)
 
 static void key_backspace(gp_widget *self)
 {
+	if (sel_del(self))
+		goto ret;
+
 	if (self->tbox->cur_pos <= 0) {
 		schedule_alert(self);
 		return;
 	}
 
 	self->tbox->cur_pos--;
-
 	self->tbox->buf = gp_vec_strdel(self->tbox->buf, self->tbox->cur_pos, 1);
-
+ret:
 	send_edit_event(self);
-
 	gp_widget_redraw(self);
 }
 
 static void key_delete(gp_widget *self)
 {
-	if (self->tbox->cur_pos == gp_vec_strlen(self->tbox->buf)) {
+	if (sel_del(self))
+		goto ret;
+
+	if (cursor_at_end(self)) {
 		schedule_alert(self);
 		return;
 	}
 
 	self->tbox->buf = gp_vec_strdel(self->tbox->buf, self->tbox->cur_pos, 1);
-
+ret:
 	send_edit_event(self);
-
 	gp_widget_redraw(self);
 }
 
-static void key_left(gp_widget *self)
+static void key_left(gp_widget *self, int shift)
 {
 	if (self->tbox->cur_pos > 0) {
-		self->tbox->cur_pos--;
+		if (shift) {
+			sel_left(self, 0);
+		} else {
+			if (!sel_clr_left(self))
+				self->tbox->cur_pos--;
+		}
 		gp_widget_redraw(self);
 	}
 
 	clear_alert(self);
 }
 
-static void key_right(gp_widget *self)
+static void key_right(gp_widget *self, int shift)
 {
-	if (self->tbox->cur_pos < gp_vec_strlen(self->tbox->buf)) {
-		self->tbox->cur_pos++;
+	if (!cursor_at_end(self)) {
+		if (shift) {
+			sel_right(self, 0);
+		} else {
+			if (!sel_clr_right(self))
+				self->tbox->cur_pos++;
+		}
 		gp_widget_redraw(self);
 	}
 
 	clear_alert(self);
 }
 
-static void key_home(gp_widget *self)
+static void key_home(gp_widget *self, int shift)
 {
 	clear_alert(self);
 
 	if (self->tbox->cur_pos == 0)
 		return;
 
+	if (shift)
+		sel_left(self, 1);
+	else
+		sel_clr(self);
+
 	self->tbox->cur_pos = 0;
 	gp_widget_redraw(self);
 }
 
-static void key_end(gp_widget *self)
+static void key_end(gp_widget *self, int shift)
 {
 	clear_alert(self);
 
 	if (!self->tbox->buf[self->tbox->cur_pos])
 		return;
+
+	if (shift)
+		sel_right(self, 1);
+	else
+		sel_clr(self);
 
 	self->tbox->cur_pos = gp_vec_strlen(self->tbox->buf);
 	gp_widget_redraw(self);
@@ -253,6 +427,8 @@ static void key_end(gp_widget *self)
 static int event(gp_widget *self, const gp_widget_render_ctx *ctx, gp_event *ev)
 {
 	(void)ctx;
+	int shift = gp_event_any_key_pressed(ev, GP_KEY_LEFT_SHIFT, GP_KEY_RIGHT_SHIFT);
+	int ctrl = gp_event_any_key_pressed(ev, GP_KEY_LEFT_CTRL, GP_KEY_RIGHT_CTRL);
 
 	switch (ev->type) {
 	//TODO: Mouse clicks
@@ -266,16 +442,16 @@ static int event(gp_widget *self, const gp_widget_render_ctx *ctx, gp_event *ev)
 				gp_widget_send_widget_event(self, GP_WIDGET_TBOX_TRIGGER);
 			return 1;
 		case GP_KEY_LEFT:
-			key_left(self);
+			key_left(self, shift);
 			return 1;
 		case GP_KEY_RIGHT:
-			key_right(self);
+			key_right(self, shift);
 			return 1;
 		case GP_KEY_HOME:
-			key_home(self);
+			key_home(self, shift);
 			return 1;
 		case GP_KEY_END:
-			key_end(self);
+			key_end(self, shift);
 			return 1;
 		case GP_KEY_BACKSPACE:
 			key_backspace(self);
@@ -283,6 +459,36 @@ static int event(gp_widget *self, const gp_widget_render_ctx *ctx, gp_event *ev)
 		case GP_KEY_DELETE:
 			key_delete(self);
 			return 1;
+		case GP_KEY_ESC:
+			if (sel_clr(self))
+				gp_widget_redraw(self);
+			return 1;
+		}
+
+		if (ctrl) {
+			switch (ev->val) {
+			case GP_KEY_A:
+				if (sel_all(self)) {
+					gp_widget_redraw(self);
+					return 1;
+				}
+			break;
+			case GP_KEY_X:
+				//TODO: Clipboard
+				if (sel_del(self)) {
+					gp_widget_redraw(self);
+					return 1;
+				}
+			break;
+			case GP_KEY_V:
+				//TODO: Clipboard
+			break;
+			case GP_KEY_C:
+				//TODO: Clipboard
+			break;
+			}
+
+			return 0;
 		}
 
 		if (ev->key.ascii) {
@@ -581,4 +787,67 @@ void gp_widget_tbox_del(gp_widget *self, ssize_t off,
 	}
 
 	gp_widget_redraw(self);
+}
+
+void gp_widget_tbox_sel_set(gp_widget *self, ssize_t off,
+                            enum gp_seek_whence whence, size_t len)
+{
+	GP_WIDGET_ASSERT(self, GP_WIDGET_TBOX, );
+
+	size_t max_pos = gp_vec_strlen(self->tbox->buf);
+	size_t sel_pos = self->tbox->cur_pos;
+
+	if (gp_seek_off(off, whence, &sel_pos, max_pos)) {
+		GP_WARN("Selection start out of tbox text!");
+		return;
+	}
+
+	if (max_pos - sel_pos < len) {
+		GP_WARN("Selection length out of tbox text!");
+		return;
+	}
+
+	self->tbox->sel_off = sel_pos;
+	self->tbox->sel_len = len;
+	self->tbox->cur_pos = sel_pos + len;
+
+	gp_widget_redraw(self);
+}
+
+void gp_widget_tbox_sel_all(gp_widget *self)
+{
+	GP_WIDGET_ASSERT(self, GP_WIDGET_TBOX, );
+
+	if (sel_all(self))
+		gp_widget_redraw(self);
+}
+
+void gp_widget_tbox_sel_clr(gp_widget *self)
+{
+	GP_WIDGET_ASSERT(self, GP_WIDGET_TBOX, );
+
+	if (sel_clr(self))
+		gp_widget_redraw(self);
+}
+
+void gp_widget_tbox_sel_del(gp_widget *self)
+{
+	GP_WIDGET_ASSERT(self, GP_WIDGET_TBOX, );
+
+	if (sel_del(self))
+		gp_widget_redraw(self);
+}
+
+size_t gp_widget_tbox_sel_len(gp_widget *self)
+{
+	GP_WIDGET_ASSERT(self, GP_WIDGET_TBOX, 0);
+
+	return self->tbox->sel_len;
+}
+
+size_t gp_widget_tbox_sel_off(gp_widget *self)
+{
+	GP_WIDGET_ASSERT(self, GP_WIDGET_TBOX, 0);
+
+	return self->tbox->sel_off;
 }
