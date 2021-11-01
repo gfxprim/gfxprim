@@ -21,6 +21,7 @@
 
 #include <input/gp_input.h>
 #include <backends/gp_backend.h>
+#include <backends/gp_clipboard.h>
 #include <backends/gp_sdl.h>
 
 #include <backends/gp_sdl_pixmap.h>
@@ -173,6 +174,37 @@ static int sdl_resize_ack(struct gp_backend *self __attribute__((unused)))
 	return 0;
 }
 
+#if LIBSDL_VERSION == 2
+static int sdl_clipboard(gp_backend *self, gp_clipboard *op)
+{
+	char *tmp;
+
+	switch (op->op) {
+	case GP_CLIPBOARD_SET:
+		if (op->len) {
+			tmp = strndup(op->str, op->len);
+			if (!tmp)
+				return 1;
+			SDL_SetClipboardText(tmp);
+			free(tmp);
+		} else {
+			SDL_SetClipboardText(op->str);
+		}
+	break;
+	case GP_CLIPBOARD_REQUEST:
+		gp_backend_clipboard_ready(self);
+	break;
+	case GP_CLIPBOARD_GET:
+		op->ret = SDL_GetClipboardText();
+	break;
+	case GP_CLIPBOARD_CLEAR:
+	break;
+	}
+
+	return 0;
+}
+#endif
+
 static void sdl_exit(struct gp_backend *self __attribute__((unused)));
 
 static struct gp_backend backend = {
@@ -181,6 +213,9 @@ static struct gp_backend backend = {
 	.update_rect = sdl_update_rect,
 	.set_attr = sdl_set_attr,
 	.resize_ack = sdl_resize_ack,
+#if LIBSDL_VERSION == 2
+	.clipboard = sdl_clipboard,
+#endif
 	.exit = sdl_exit,
 	.fd = -1,
 	.poll = sdl_poll,
