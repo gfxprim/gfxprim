@@ -179,6 +179,16 @@ char *gp_widgets_clipboard_get(void);
  */
 void gp_widgets_clipboard_request(gp_widget *self);
 
+/**
+ * @brief Cancel clipboard data request.
+ *
+ * Call this to cancel clipboard requests, this is useful when widget that may
+ * have in-flight clipboard request is being destroyed.
+ *
+ * @self A widget which cancels the request.
+ */
+void gp_widgets_clipboard_request_cancel(gp_widget *self);
+
 /*
  * TODO: Obsolete?
  */

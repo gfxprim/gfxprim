@@ -440,6 +440,12 @@ void gp_widgets_clipboard_request(gp_widget *self)
 	gp_backend_clipboard_request(backend);
 }
 
+void gp_widgets_clipboard_request_cancel(gp_widget *self)
+{
+	if (clipboard_requester == self)
+		clipboard_requester = NULL;
+}
+
 static void clipboard_event(gp_event *ev)
 {
 	if (!clipboard_requester) {

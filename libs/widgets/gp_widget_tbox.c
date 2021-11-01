@@ -609,6 +609,8 @@ static gp_widget *json_to_tbox(gp_json_buf *json, gp_json_val *val, gp_widget_js
 
 static void free_(gp_widget *self)
 {
+	gp_widgets_clipboard_request_cancel(self);
+
 	gp_vec_free(self->tbox->buf);
 }
 
