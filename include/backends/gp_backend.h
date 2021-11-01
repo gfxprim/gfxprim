@@ -31,7 +31,7 @@
 #include <input/gp_timer.h>
 #include <input/gp_task.h>
 
-typedef struct gp_backend gp_backend;
+#include <backends/gp_types.h>
 
 enum gp_backend_attrs {
 	/* window size */
@@ -97,13 +97,17 @@ struct gp_backend {
 	 */
 	void (*exit)(gp_backend *self);
 
-
 	/*
 	 * Non-blocking event loop.
 	 *
 	 * The events are filled into the event queue see GP_Input.h.
 	 */
 	void (*poll)(gp_backend *self);
+
+	/*
+	 * Clipboard handler.
+	 */
+	int (*clipboard)(gp_backend *self, gp_clipboard *op);
 
 	/*
 	 * Blocking event loop. Blocks until events are ready.
@@ -129,6 +133,8 @@ struct gp_backend {
 
 	/* Task queue */
 	gp_task_queue task_queue;
+
+	void *clipboard_data;
 
 	/* Backed private data */
 	char priv[];
@@ -160,11 +166,7 @@ static inline void gp_backend_update_rect_xywh(gp_backend *self,
 	gp_backend_update_rect_xyxy(self, x, y, x + w - 1, y + h - 1);
 }
 
-static inline void gp_backend_exit(gp_backend *self)
-{
-	if (self)
-		self->exit(self);
-}
+void gp_backend_exit(gp_backend *self);
 
 /*
  * Polls backend, the events are filled into event queue.

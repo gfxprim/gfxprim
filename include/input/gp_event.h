@@ -49,6 +49,8 @@ enum gp_event_abs_code {
 enum gp_event_sys_code {
 	GP_EV_SYS_QUIT = 0,
 	GP_EV_SYS_RESIZE = 1,
+	/* clipboard request is ready */
+	GP_EV_SYS_CLIPBOARD = 2,
 };
 
 struct gp_ev_pos_rel {

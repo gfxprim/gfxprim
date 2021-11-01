@@ -156,6 +156,9 @@ static void dump_sys(gp_event *ev)
 	case GP_EV_SYS_RESIZE:
 		printf("Sys Resize %ux%u\n", ev->sys.w, ev->sys.h);
 	break;
+	case GP_EV_SYS_CLIPBOARD:
+		printf("Clipboard data ready\n");
+	break;
 	}
 }
 

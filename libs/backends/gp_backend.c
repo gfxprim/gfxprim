@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 /*
- * Copyright (C) 2009-2013 Cyril Hrubis <metan@ucw.cz>
+ * Copyright (C) 2009-2021 Cyril Hrubis <metan@ucw.cz>
  */
 
 #include <inttypes.h>
@@ -15,6 +15,7 @@
 #include <input/gp_time_stamp.h>
 
 #include <backends/gp_backend.h>
+#include <backends/gp_clipboard.h>
 
 void gp_backend_update_rect_xyxy(gp_backend *self,
                                  gp_coord x0, gp_coord y0,
@@ -257,4 +258,16 @@ gp_event *gp_backend_poll_event(gp_backend *self)
 		return ev;
 
 	return NULL;
+}
+
+void gp_backend_exit(gp_backend *self)
+{
+	struct gp_clipboard op = {.op = GP_CLIPBOARD_CLEAR};
+
+	if (!self)
+		return;
+
+	gp_backend_clipboard(self, &op);
+
+	self->exit(self);
 }
