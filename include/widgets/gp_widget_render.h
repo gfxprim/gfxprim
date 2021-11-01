@@ -152,6 +152,33 @@ gp_widget *gp_widget_layout_replace(gp_widget *layout);
  */
 long gp_dialog_run(gp_dialog *dialog);
 
+/**
+ * @brief Sets the clipboard data.
+ *
+ * @str A clipboard string.
+ * @len Optional size limit, if set to 0 whole string is used.
+ */
+void gp_widgets_clipboard_set(const char *str, size_t len);
+
+/**
+ * @brief Returns clipboard data.
+ *
+ * Returns valid data only after GP_EV_SYS_CLIPBOARD event has been received.
+ *
+ * @reuturn A clipboad data buffer allocated by malloc(), has to be freed by
+ * the caller.
+ */
+char *gp_widgets_clipboard_get(void);
+
+/**
+ * @brief Request clipboard data.
+ *
+ * When data are ready the widget gets GP_EV_SYS_CLIPBOARD event.
+ *
+ * @self A widget which requests clipboard data.
+ */
+void gp_widgets_clipboard_request(gp_widget *self);
+
 /*
  * TODO: Obsolete?
  */

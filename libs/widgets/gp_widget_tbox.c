@@ -424,6 +424,30 @@ static void key_end(gp_widget *self, int shift)
 	gp_widget_redraw(self);
 }
 
+static void selection_to_clipboard(gp_widget *self)
+{
+	struct gp_widget_tbox *tbox = self->tbox;
+
+	if (!in_selection(self))
+		return;
+
+	gp_widgets_clipboard_set(tbox->buf + tbox->sel_off, tbox->sel_len);
+}
+
+static void clipboard_event(gp_widget *self)
+{
+	char *clip;
+
+	sel_del(self);
+
+	clip = gp_widgets_clipboard_get();
+	if (!clip)
+		return;
+
+	gp_widget_tbox_ins(self, 0, GP_SEEK_CUR, clip);
+	free(clip);
+}
+
 static int event(gp_widget *self, const gp_widget_render_ctx *ctx, gp_event *ev)
 {
 	(void)ctx;
@@ -474,17 +498,17 @@ static int event(gp_widget *self, const gp_widget_render_ctx *ctx, gp_event *ev)
 				}
 			break;
 			case GP_KEY_X:
-				//TODO: Clipboard
+				selection_to_clipboard(self);
 				if (sel_del(self)) {
 					gp_widget_redraw(self);
 					return 1;
 				}
 			break;
 			case GP_KEY_V:
-				//TODO: Clipboard
+				gp_widgets_clipboard_request(self);
 			break;
 			case GP_KEY_C:
-				//TODO: Clipboard
+				selection_to_clipboard(self);
 			break;
 			}
 
@@ -500,6 +524,12 @@ static int event(gp_widget *self, const gp_widget_render_ctx *ctx, gp_event *ev)
 		self->tbox->alert = 0;
 		gp_widget_redraw(self);
 		return 1;
+	break;
+	case GP_EV_SYS:
+		if (ev->code == GP_EV_SYS_CLIPBOARD) {
+			clipboard_event(self);
+			return 1;
+		}
 	break;
 	}
 

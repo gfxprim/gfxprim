@@ -421,6 +421,37 @@ void gp_widgets_register_callback(int (*event_callback)(gp_event *))
 	app_event_callback = event_callback;
 }
 
+static gp_widget *clipboard_requester;
+
+void gp_widgets_clipboard_set(const char *str, size_t len)
+{
+	gp_backend_clipboard_set(backend, str, len);
+}
+
+char *gp_widgets_clipboard_get(void)
+{
+	return gp_backend_clipboard_get(backend);
+}
+
+void gp_widgets_clipboard_request(gp_widget *self)
+{
+	clipboard_requester = self;
+
+	gp_backend_clipboard_request(backend);
+}
+
+static void clipboard_event(gp_event *ev)
+{
+	if (!clipboard_requester) {
+		GP_WARN("Stray clipboard request!?");
+		return;
+	}
+
+	gp_widget_input_event(clipboard_requester, &ctx, ev);
+
+	clipboard_requester = NULL;
+}
+
 int gp_widgets_event(gp_event *ev, gp_widget *layout)
 {
 	int handled = 0;
@@ -466,6 +497,10 @@ int gp_widgets_event(gp_event *ev, gp_widget *layout)
 		break;
 		case GP_EV_SYS_QUIT:
 			return 1;
+		break;
+		case GP_EV_SYS_CLIPBOARD:
+			clipboard_event(ev);
+			handled = 1;
 		break;
 		}
 	break;
