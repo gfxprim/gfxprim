@@ -240,6 +240,9 @@ static int sel_all(gp_widget *self)
 {
 	size_t len = buflen(self);
 
+	if (self->tbox->hidden)
+		return 0;
+
 	if (self->tbox->sel_len == len)
 		return 0;
 
@@ -253,6 +256,9 @@ static int sel_all(gp_widget *self)
 static void sel_right(gp_widget *self, int end)
 {
 	struct gp_widget_tbox *tbox = self->tbox;
+
+	if (tbox->hidden)
+		return;
 
 	if (!tbox->sel_len) {
 		if (cursor_at_end(self))
@@ -278,6 +284,9 @@ static void sel_right(gp_widget *self, int end)
 static void sel_left(gp_widget *self, int home)
 {
 	struct gp_widget_tbox *tbox = self->tbox;
+
+	if (tbox->hidden)
+		return;
 
 	if (!tbox->sel_len) {
 		if (!tbox->cur_pos)
@@ -829,6 +838,11 @@ void gp_widget_tbox_sel_set(gp_widget *self, ssize_t off,
 	size_t max_pos = gp_vec_strlen(self->tbox->buf);
 	size_t sel_pos = self->tbox->cur_pos;
 
+	if (self->tbox->hidden) {
+		GP_WARN("Attempt to select hidden text!");
+		return;
+	}
+
 	if (gp_seek_off(off, whence, &sel_pos, max_pos)) {
 		GP_WARN("Selection start out of tbox text!");
 		return;
@@ -849,6 +863,11 @@ void gp_widget_tbox_sel_set(gp_widget *self, ssize_t off,
 void gp_widget_tbox_sel_all(gp_widget *self)
 {
 	GP_WIDGET_ASSERT(self, GP_WIDGET_TBOX, );
+
+	if (self->tbox->hidden) {
+		GP_WARN("Attempt to select hidden text!");
+		return;
+	}
 
 	if (sel_all(self))
 		gp_widget_redraw(self);

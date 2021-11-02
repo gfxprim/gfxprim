@@ -615,6 +615,60 @@ static int tbox_sel_key_left(void)
 	return TST_SUCCESS;
 }
 
+static int tbox_hidden_no_sel(void)
+{
+	gp_widget *tbox;
+
+	tbox = gp_widget_tbox_new("hello world", 0, 10, 0, NULL,
+	                          GP_WIDGET_TBOX_HIDDEN, NULL, NULL);
+	if (!tbox) {
+		tst_msg("Allocation failure");
+		return TST_FAILED;
+	}
+
+	gp_widget_tbox_cursor_set(tbox, 2, GP_SEEK_SET);
+
+	state_press(GP_KEY_LEFT_SHIFT);
+
+	send_keypress(tbox, GP_KEY_LEFT, 0);
+	if (gp_widget_tbox_sel(tbox)) {
+		tst_msg("Hidden text was selected with KEY_LEFT");
+		return TST_FAILED;
+	}
+
+	send_keypress(tbox, GP_KEY_RIGHT, 0);
+	if (gp_widget_tbox_sel(tbox)) {
+		tst_msg("Hidden text was selected with KEY_RIGHT");
+		return TST_FAILED;
+	}
+
+	send_keypress(tbox, GP_KEY_HOME, 0);
+	if (gp_widget_tbox_sel(tbox)) {
+		tst_msg("Hidden text was selected with KEY_HOME");
+		return TST_FAILED;
+	}
+
+	send_keypress(tbox, GP_KEY_END, 0);
+	if (gp_widget_tbox_sel(tbox)) {
+		tst_msg("Hidden text was selected with KEY_END");
+		return TST_FAILED;
+	}
+
+	gp_widget_tbox_sel_all(tbox);
+	if (gp_widget_tbox_sel(tbox)) {
+		tst_msg("Hidden text was selected with sel_all()");
+		return TST_FAILED;
+	}
+
+	gp_widget_tbox_sel_set(tbox, 0, GP_SEEK_SET, 2);
+	if (gp_widget_tbox_sel(tbox)) {
+		tst_msg("Hidden text was selected with sel_set()");
+		return TST_FAILED;
+	}
+
+	return TST_SUCCESS;
+}
+
 const struct tst_suite tst_suite = {
 	.suite_name = "tbox testsuite",
 	.tests = {
@@ -666,6 +720,9 @@ const struct tst_suite tst_suite = {
 
 		{.name = "tbox sel key left",
 		 .tst_fn = tbox_sel_key_left},
+
+		{.name = "tbox hidden no sel",
+		 .tst_fn = tbox_hidden_no_sel},
 
 		{.name = NULL},
 	}
