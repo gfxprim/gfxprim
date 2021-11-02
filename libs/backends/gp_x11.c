@@ -30,6 +30,7 @@
 #include "gp_x11_conn.h"
 #include "gp_x11_win.h"
 #include "gp_x11_input.h"
+#include "gp_x11_clipboard.h"
 
 static int resize_ximage(gp_backend *self, int w, int h);
 static int resize_shm_ximage(gp_backend *self, int w, int h);
@@ -134,6 +135,15 @@ static void x11_ev(XEvent *ev)
 		x11_update_rect(self, ev->xexpose.x, ev->xexpose.y,
 		                ev->xexpose.x + ev->xexpose.width - 1,
 				ev->xexpose.y + ev->xexpose.height - 1);
+	break;
+	case SelectionRequest:
+		x11_selection_request(self, ev);
+	break;
+	case SelectionClear:
+		x11_selection_clear(self, ev);
+	break;
+	case SelectionNotify:
+		x11_selection_notify(self, ev);
 	break;
 	case ConfigureNotify:
 		if (ev->xconfigure.width == (int)self->pixmap->w &&
@@ -638,6 +648,7 @@ gp_backend *gp_x11_init(const char *display, int x, int y,
 	backend->poll = x11_poll;
 	backend->wait = x11_wait;
 	backend->set_attr = x11_set_attr;
+	backend->clipboard = x11_clipboard;
 	backend->resize_ack = x11_resize_ack;
 	backend->fd = XConnectionNumber(win->dpy);
 

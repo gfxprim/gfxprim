@@ -16,6 +16,15 @@ struct x11_conn {
 	Atom A__NET_WM_STATE;
 	Atom A__NET_WM_STATE_FULLSCREEN;
 
+	/* Clipboard Atoms */
+	Atom A_CLIPBOARD;
+	Atom A_TARGETS;
+	Atom A_UTF8_STRING;
+	Atom A_STRING;
+	Atom A_TEXT;
+	Atom A_ATOM;
+	Atom A_XSEL_DATA;
+
 	/* Bitflags for supported Atoms */
 	int S__NET_WM_STATE:1;
 	int S__NET_WM_STATE_FULLSCREEN:1;
@@ -67,6 +76,14 @@ static void x11_detect_wm_features(void)
 	INIT_ATOM(WM_DELETE_WINDOW);
 	INIT_ATOM(_NET_WM_STATE);
 	INIT_ATOM(_NET_WM_STATE_FULLSCREEN);
+
+	INIT_ATOM(CLIPBOARD);
+	INIT_ATOM(TARGETS);
+	INIT_ATOM(TEXT);
+	INIT_ATOM(STRING);
+	INIT_ATOM(UTF8_STRING);
+	INIT_ATOM(ATOM);
+	INIT_ATOM(XSEL_DATA);
 
 	at = XInternAtom(x11_conn.dpy, "_NET_SUPPORTED", True);
 
