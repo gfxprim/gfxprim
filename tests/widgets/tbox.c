@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: GPL-2.1-or-later
 /*
- * Copyright (C) 2020 Cyril Hrubis <metan@ucw.cz>
+ * Copyright (C) 2020-2021 Cyril Hrubis <metan@ucw.cz>
  */
 
 #include <string.h>
@@ -43,6 +43,9 @@ static int ev_handler(gp_widget_event *ev)
 	return 0;
 }
 
+/*
+ * Checks that pressing enter triggers widget event handler.
+ */
 static int tbox_event_action(void)
 {
 	gp_widget *tbox;
@@ -62,6 +65,9 @@ static int tbox_event_action(void)
 	return TST_FAILED;
 }
 
+/*
+ * Check that typing inserts text and backspace and delete removes it.
+ */
 static int tbox_typing(void)
 {
 	gp_widget *tbox;
@@ -103,6 +109,14 @@ static int tbox_typing(void)
 		return TST_FAILED;
 	}
 
+	send_keypress(tbox, GP_KEY_DELETE, 0);
+
+	str = gp_widget_tbox_text(tbox);
+	if (strcmp(str, "hellishworld")) {
+		tst_msg("Got wrong string: '%s'", str);
+		return TST_FAILED;
+	}
+
 	gp_widget_tbox_clear(tbox);
 
 	str = gp_widget_tbox_text(tbox);
@@ -116,6 +130,9 @@ static int tbox_typing(void)
 	return TST_SUCCESS;
 }
 
+/*
+ * Checks that cursor is set properly by gp_widget_tbox_cursor_set()
+ */
 static int tbox_cursor(void)
 {
 	gp_widget *tbox;
@@ -161,6 +178,9 @@ static int tbox_cursor(void)
 	return TST_SUCCESS;
 }
 
+/*
+ * Check that text is inserted properly by gp_widget_tbox_ins()
+ */
 static int tbox_ins(void)
 {
 	gp_widget *tbox;
@@ -213,6 +233,9 @@ static int tbox_ins(void)
 	return TST_SUCCESS;
 }
 
+/*
+ * Checks that text is deleted properly by gp_widget_tbox_del()
+ */
 static int tbox_del(void)
 {
 	gp_widget *tbox;
@@ -258,6 +281,9 @@ static int tbox_del(void)
 	return TST_SUCCESS;
 }
 
+/*
+ * Checks that buffer is replaced properly by gp_widget_tbox_printf().
+ */
 static int tbox_printf(void)
 {
 	gp_widget *tbox;
@@ -388,6 +414,9 @@ static int tbox_sel_set(void)
 	return TST_SUCCESS;
 }
 
+/*
+ * Test for gp_widget_tbox_sel_del() function.
+ */
 static int tbox_sel_del(void)
 {
 	gp_widget *tbox;
@@ -429,6 +458,9 @@ static int tbox_sel_del(void)
 	return TST_SUCCESS;
 }
 
+/*
+ * Check that selection is replaced when we start typing.
+ */
 static int tbox_sel_keys_ascii(void)
 {
 	gp_widget *tbox;
@@ -465,10 +497,87 @@ static int tbox_sel_keys_ascii(void)
 	return TST_SUCCESS;
 }
 
+static int sel_whole_left(gp_widget *tbox)
+{
+	gp_widget_tbox_cursor_set(tbox, 0, GP_SEEK_END);
+	state_press(GP_KEY_LEFT_SHIFT);
+	send_keypress(tbox, GP_KEY_HOME, 0);
+
+	if (!gp_widget_tbox_sel(tbox)) {
+		tst_msg("Text not selected after KEY_HOME + SHIFT");
+		return TST_FAILED;
+	}
+
+	state_release(GP_KEY_LEFT_SHIFT);
+
+	tst_msg("Selecting whole buffer from left");
+
+	return TST_SUCCESS;
+}
+
+static int sel_whole_right(gp_widget *tbox)
+{
+	gp_widget_tbox_cursor_set(tbox, 0, GP_SEEK_SET);
+	state_press(GP_KEY_LEFT_SHIFT);
+	send_keypress(tbox, GP_KEY_END, 0);
+
+	if (!gp_widget_tbox_sel(tbox)) {
+		tst_msg("Text not selected after KEY_END + SHIFT");
+		return TST_FAILED;
+	}
+
+	state_release(GP_KEY_LEFT_SHIFT);
+
+	tst_msg("Selecting whole buffer from right");
+
+	return TST_SUCCESS;
+}
+
+static int check_cleared(gp_widget *tbox, const char *op, size_t cur_pos)
+{
+	size_t val;
+
+	if (gp_widget_tbox_sel(tbox)) {
+		tst_msg("Selection not cleared by %s!", op);
+		return TST_FAILED;
+	}
+
+	val = gp_widget_tbox_cursor_get(tbox);
+	if (val != cur_pos) {
+		tst_msg("Wrong cursor %zu ater %s expected %zu!", val, op, cur_pos);
+		return TST_FAILED;
+	}
+
+	return TST_SUCCESS;
+}
+
+static int check_selected(gp_widget *tbox, const char *op, size_t sel_off, size_t sel_len)
+{
+	size_t val;
+
+	val = gp_widget_tbox_sel_len(tbox);
+	if (val != sel_len) {
+		tst_msg("Wrong selection after %s lenght %zu expected %zu",
+		        op, val, sel_len);
+		return TST_FAILED;
+	}
+
+	val = gp_widget_tbox_sel_off(tbox);
+	if (val != sel_off) {
+		tst_msg("Wrong selection after %s offset %zu expected %zu",
+		        op, val, sel_off);
+		return TST_FAILED;
+	}
+
+	return TST_SUCCESS;
+}
+
+/*
+ * Check that cursor movement clears selection.
+ */
 static int tbox_sel_keys_clear(void)
 {
 	gp_widget *tbox;
-	size_t val;
 
 	tbox = gp_widget_tbox_new("hello world", 0, 10, 0, NULL, 0, NULL, NULL);
 	if (!tbox) {
@@ -478,59 +587,150 @@ static int tbox_sel_keys_clear(void)
 
 	gp_widget_tbox_sel_set(tbox, 1, GP_SEEK_SET, 1);
 	send_keypress(tbox, GP_KEY_LEFT, 0);
-	if (gp_widget_tbox_sel(tbox)) {
-		tst_msg("Selection not cleared by KEY_LEFT!");
+	if (check_cleared(tbox, "KEY_LEFT", 1))
 		return TST_FAILED;
-	}
-
-	val = gp_widget_tbox_cursor_get(tbox);
-	if (val != 1) {
-		tst_msg("Wrong cursor %zu ater KEY_LEFT!", val);
-		return TST_FAILED;
-	}
 
 	gp_widget_tbox_sel_set(tbox, 1, GP_SEEK_SET, 1);
 	send_keypress(tbox, GP_KEY_RIGHT, 0);
-	if (gp_widget_tbox_sel(tbox)) {
-		tst_msg("Selection not cleared by KEY_RIGHT!");
+	if (check_cleared(tbox, "KEY_RIGHT", 2))
 		return TST_FAILED;
-	}
-
-	val = gp_widget_tbox_cursor_get(tbox);
-	if (val != 2) {
-		tst_msg("Wrong cursor %zu ater KEY_RIGHT!", val);
-		return TST_FAILED;
-	}
 
 	gp_widget_tbox_sel_set(tbox, 1, GP_SEEK_SET, 1);
 	send_keypress(tbox, GP_KEY_HOME, 0);
-	if (gp_widget_tbox_sel(tbox)) {
-		tst_msg("Selection not cleared by KEY_HOME!");
+	if (check_cleared(tbox, "KEY_HOME", 0))
 		return TST_FAILED;
-	}
-
-	val = gp_widget_tbox_cursor_get(tbox);
-	if (val != 0) {
-		tst_msg("Wrong cursor %zu ater KEY_HOME!", val);
-		return TST_FAILED;
-	}
 
 	gp_widget_tbox_sel_set(tbox, 1, GP_SEEK_SET, 1);
 	send_keypress(tbox, GP_KEY_END, 0);
-	if (gp_widget_tbox_sel(tbox)) {
-		tst_msg("Selection not cleared by KEY_END!");
+	if (check_cleared(tbox, "KEY_END", 11))
 		return TST_FAILED;
-	}
 
-	val = gp_widget_tbox_cursor_get(tbox);
-	if (val != 11) {
-		tst_msg("Wrong cursor %zu ater KEY_END!", val);
+	gp_widget_tbox_sel_all(tbox);
+	gp_widget_tbox_cursor_set(tbox, 5, GP_SEEK_SET);
+	if (check_cleared(tbox, "gp_widget_tbox_cursor_set()", 5))
 		return TST_FAILED;
-	}
 
 	return TST_SUCCESS;
 }
 
+/*
+ * Check that functions that modify the buffer clears the selection.
+ */
+static int tbox_sel_change_clear(void)
+{
+	gp_widget *tbox;
+
+	tbox = gp_widget_tbox_new("hello world", 0, 10, 0, NULL, 0, NULL, NULL);
+	if (!tbox) {
+		tst_msg("Allocation failure");
+		return TST_FAILED;
+	}
+
+	gp_widget_tbox_sel_all(tbox);
+	gp_widget_tbox_printf(tbox, "new text");
+	if (check_cleared(tbox, "gp_widget_tbox_printf()", 8))
+		return TST_FAILED;
+
+	gp_widget_tbox_sel_all(tbox);
+	gp_widget_tbox_ins(tbox, 3, GP_SEEK_SET, "ins");
+	if (check_cleared(tbox, "gp_widget_tbox_ins()", 11))
+		return TST_FAILED;
+
+	gp_widget_tbox_sel_all(tbox);
+	gp_widget_tbox_del(tbox, 3, GP_SEEK_SET, 3);
+	if (check_cleared(tbox, "gp_widget_tbox_del()", 8))
+		return TST_FAILED;
+
+	gp_widget_tbox_sel_all(tbox);
+	gp_widget_tbox_clear(tbox);
+	if (check_cleared(tbox, "gp_widget_tbox_clear()", 0))
+		return TST_FAILED;
+
+	return TST_SUCCESS;
+}
+
+/*
+ * Check that selection is cleared as well when a key to move cursor is pressed
+ * but cursor cannot move. In this case the whole buffer is selected and as the
+ * cursor can be either at left side of the selection or at a right side of it
+ * it cannot move in half of the cases.
+ */
+static int tbox_sel_keys_clear_end(void)
+{
+	gp_widget *tbox;
+
+	tbox = gp_widget_tbox_new("hello world", 0, 10, 0, NULL, 0, NULL, NULL);
+	if (!tbox) {
+		tst_msg("Allocation failure");
+		return TST_FAILED;
+	}
+
+	/* Select from left attempt to move left */
+	if (sel_whole_left(tbox))
+		return TST_FAILED;
+
+	send_keypress(tbox, GP_KEY_LEFT, 0);
+	if (check_cleared(tbox, "KEY_LEFT", 0))
+		return TST_FAILED;
+
+	if (sel_whole_left(tbox))
+		return TST_FAILED;
+
+	send_keypress(tbox, GP_KEY_HOME, 0);
+	if (check_cleared(tbox, "KEY_HOME", 0))
+		return TST_FAILED;
+
+	/* Select from left attempt to move right */
+	if (sel_whole_left(tbox))
+		return TST_FAILED;
+
+	send_keypress(tbox, GP_KEY_RIGHT, 0);
+	if (check_cleared(tbox, "KEY_RIGHT", 11))
+		return TST_FAILED;
+
+	if (sel_whole_left(tbox))
+		return TST_FAILED;
+
+	send_keypress(tbox, GP_KEY_END, 0);
+	if (check_cleared(tbox, "KEY_END", 11))
+		return TST_FAILED;
+
+	/* Select from right attempt to move left */
+	if (sel_whole_right(tbox))
+		return TST_FAILED;
+
+	send_keypress(tbox, GP_KEY_LEFT, 0);
+	if (check_cleared(tbox, "KEY_LEFT", 0))
+		return TST_FAILED;
+
+	if (sel_whole_right(tbox))
+		return TST_FAILED;
+
+	send_keypress(tbox, GP_KEY_HOME, 0);
+	if (check_cleared(tbox, "KEY_HOME", 0))
+		return TST_FAILED;
+
+	/* Select from right attempt to move right */
+	if (sel_whole_right(tbox))
+		return TST_FAILED;
+
+	send_keypress(tbox, GP_KEY_RIGHT, 0);
+	if (check_cleared(tbox, "KEY_RIGHT", 11))
+		return TST_FAILED;
+
+	if (sel_whole_right(tbox))
+		return TST_FAILED;
+
+	send_keypress(tbox, GP_KEY_END, 0);
+	if (check_cleared(tbox, "KEY_END", 11))
+		return TST_FAILED;
+
+	return TST_SUCCESS;
+}
+
+/*
+ * Check that backspace and delete removed selected text.
+ */
 static int tbox_sel_key_del_backspace(int key)
 {
 	gp_widget *tbox;
@@ -615,6 +815,37 @@ static int tbox_sel_key_left(void)
 	return TST_SUCCESS;
 }
 
+/*
+ * Check that Ctrl+a select whole buffer and esc clears the selection.
+ */
+static int tbox_sel_ctrl_a_esc(void)
+{
+	gp_widget *tbox;
+
+	tbox = gp_widget_tbox_new("hello world", 0, 10, 0, NULL, 0, NULL, NULL);
+	if (!tbox) {
+		tst_msg("Allocation failure");
+		return TST_FAILED;
+	}
+
+	state_press(GP_KEY_LEFT_CTRL);
+	send_keypress(tbox, GP_KEY_A, 'a');
+	state_release(GP_KEY_LEFT_CTRL);
+
+	if (check_selected(tbox, "KEY_CTRL + KEY_A", 0, 11))
+		return TST_FAILED;
+
+	send_keypress(tbox, GP_KEY_ESC, 0);
+
+	if (check_cleared(tbox, "KEY_ESC", 11))
+		return TST_FAILED;
+
+	return TST_SUCCESS;
+}
+
+/*
+ * Check that when hidden text flag is on text cannot be selected.
+ */
 static int tbox_hidden_no_sel(void)
 {
 	gp_widget *tbox;
@@ -711,6 +942,15 @@ const struct tst_suite tst_suite = {
 
 		{.name = "tbox sel keys clear",
 		 .tst_fn = tbox_sel_keys_clear},
+
+		{.name = "tbox sel change clear",
+		 .tst_fn = tbox_sel_change_clear},
+
+		{.name = "tbox sel keys clear end",
+		 .tst_fn = tbox_sel_keys_clear_end},
+
+		{.name = "tbox sel ctrl a + esc",
+		 .tst_fn = tbox_sel_ctrl_a_esc},
 
 		{.name = "tbox sel key del",
 		 .tst_fn = tbox_sel_key_del},
