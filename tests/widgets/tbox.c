@@ -555,17 +555,17 @@ static int check_selected(gp_widget *tbox, const char *op, size_t sel_off, size_
 {
 	size_t val;
 
-	val = gp_widget_tbox_sel_len(tbox);
-	if (val != sel_len) {
-		tst_msg("Wrong selection after %s lenght %zu expected %zu",
-		        op, val, sel_len);
-		return TST_FAILED;
-	}
-
 	val = gp_widget_tbox_sel_off(tbox);
 	if (val != sel_off) {
 		tst_msg("Wrong selection after %s offset %zu expected %zu",
 		        op, val, sel_off);
+		return TST_FAILED;
+	}
+
+	val = gp_widget_tbox_sel_len(tbox);
+	if (val != sel_len) {
+		tst_msg("Wrong selection after %s lenght %zu expected %zu",
+		        op, val, sel_len);
 		return TST_FAILED;
 	}
 
@@ -771,10 +771,14 @@ static int tbox_sel_key_backspace(void)
 	return tbox_sel_key_del_backspace(GP_KEY_BACKSPACE);
 }
 
-static int tbox_sel_key_left(void)
+/*
+ * Check that sequence of SHIFT + LEFT, SHIFT + RIGHT and the other way around
+ * actually clears the selection.
+ */
+static int tbox_sel_key_forth_back(void)
 {
 	gp_widget *tbox;
-	size_t val;
+	size_t cursor = 5;
 
 	tbox = gp_widget_tbox_new("hello world", 0, 10, 0, NULL, 0, NULL, NULL);
 	if (!tbox) {
@@ -782,35 +786,138 @@ static int tbox_sel_key_left(void)
 		return TST_FAILED;
 	}
 
-	gp_widget_tbox_cursor_set(tbox, 2, GP_SEEK_SET);
+	gp_widget_tbox_cursor_set(tbox, cursor, GP_SEEK_SET);
 	state_press(GP_KEY_LEFT_SHIFT);
+
 	send_keypress(tbox, GP_KEY_LEFT, 0);
-
-	val = gp_widget_tbox_sel_len(tbox);
-	if (val != 1) {
-		tst_msg("Wrong selection lenght %zu expected 1", val);
+	if (check_selected(tbox, "KEY_LEFT", cursor - 1, 1))
 		return TST_FAILED;
-	}
-
-	val = gp_widget_tbox_sel_off(tbox);
-	if (val != 1) {
-		tst_msg("Wrong selection offset %zu expected 1", val);
-		return TST_FAILED;
-	}
 
 	send_keypress(tbox, GP_KEY_RIGHT, 0);
+	if (check_cleared(tbox, "KEY_RIGHT", cursor))
+		return TST_FAILED;
 
-	val = gp_widget_tbox_sel_len(tbox);
-	if (val) {
-		tst_msg("Selection should have been cleared!");
+	send_keypress(tbox, GP_KEY_RIGHT, 0);
+	if (check_selected(tbox, "KEY_RIGHT", cursor, 1))
+		return TST_FAILED;
+
+	send_keypress(tbox, GP_KEY_LEFT, 0);
+	if (check_cleared(tbox, "KEY_LEFT", cursor))
+		return TST_FAILED;
+
+	return TST_SUCCESS;
+}
+
+/*
+ * Checks that comibination of shift+left and shift+end selects from selection
+ * starting point not from cursor.
+ */
+static int tbox_sel_key_left_end(void)
+{
+	gp_widget *tbox;
+	size_t cursor = 5;
+
+	tbox = gp_widget_tbox_new("hello world", 0, 10, 0, NULL, 0, NULL, NULL);
+	if (!tbox) {
+		tst_msg("Allocation failure");
 		return TST_FAILED;
 	}
 
-	val = gp_widget_tbox_cursor_get(tbox);
-	if (val != 2) {
-		tst_msg("Wrong cursor position %zu expected 2", val);
+	gp_widget_tbox_cursor_set(tbox, cursor, GP_SEEK_SET);
+	state_press(GP_KEY_LEFT_SHIFT);
+
+	send_keypress(tbox, GP_KEY_LEFT, 0);
+	if (check_selected(tbox, "KEY_LEFT", cursor - 1, 1))
+		return TST_FAILED;
+
+	send_keypress(tbox, GP_KEY_END, 0);
+	if (check_selected(tbox, "KEY_END", cursor, 6))
+		return TST_FAILED;
+
+	return TST_SUCCESS;
+}
+
+/*
+ * Checks that comibination of shift+left and shift+home extends selection.
+ */
+static int tbox_sel_key_left_home(void)
+{
+	gp_widget *tbox;
+	size_t cursor = 5;
+
+	tbox = gp_widget_tbox_new("hello world", 0, 10, 0, NULL, 0, NULL, NULL);
+	if (!tbox) {
+		tst_msg("Allocation failure");
 		return TST_FAILED;
 	}
+
+	gp_widget_tbox_cursor_set(tbox, cursor, GP_SEEK_SET);
+	state_press(GP_KEY_LEFT_SHIFT);
+
+	send_keypress(tbox, GP_KEY_LEFT, 0);
+	if (check_selected(tbox, "KEY_LEFT", cursor - 1, 1))
+		return TST_FAILED;
+
+	send_keypress(tbox, GP_KEY_HOME, 0);
+	if (check_selected(tbox, "KEY_HOME", 0, cursor))
+		return TST_FAILED;
+
+	return TST_SUCCESS;
+}
+
+/*
+ * Checks that comibination of shift+right and shift+home selects from selection
+ * starting point not from cursor.
+ */
+static int tbox_sel_key_right_home(void)
+{
+	gp_widget *tbox;
+	size_t cursor = 5;
+
+	tbox = gp_widget_tbox_new("hello world", 0, 10, 0, NULL, 0, NULL, NULL);
+	if (!tbox) {
+		tst_msg("Allocation failure");
+		return TST_FAILED;
+	}
+
+	gp_widget_tbox_cursor_set(tbox, cursor, GP_SEEK_SET);
+	state_press(GP_KEY_LEFT_SHIFT);
+
+	send_keypress(tbox, GP_KEY_RIGHT, 0);
+	if (check_selected(tbox, "KEY_RIGHT", cursor, 1))
+		return TST_FAILED;
+
+	send_keypress(tbox, GP_KEY_HOME, 0);
+	if (check_selected(tbox, "KEY_HOME", 0, 5))
+		return TST_FAILED;
+
+	return TST_SUCCESS;
+}
+
+/*
+ * Checks that comibination of shift+right and shift+end extends selection.
+ */
+static int tbox_sel_key_right_end(void)
+{
+	gp_widget *tbox;
+	size_t cursor = 5;
+
+	tbox = gp_widget_tbox_new("hello world", 0, 10, 0, NULL, 0, NULL, NULL);
+	if (!tbox) {
+		tst_msg("Allocation failure");
+		return TST_FAILED;
+	}
+
+	gp_widget_tbox_cursor_set(tbox, cursor, GP_SEEK_SET);
+	state_press(GP_KEY_LEFT_SHIFT);
+
+	send_keypress(tbox, GP_KEY_RIGHT, 0);
+	if (check_selected(tbox, "KEY_RIGHT", cursor, 1))
+		return TST_FAILED;
+
+	send_keypress(tbox, GP_KEY_END, 0);
+	if (check_selected(tbox, "KEY_END", cursor, 6))
+		return TST_FAILED;
 
 	return TST_SUCCESS;
 }
@@ -958,8 +1065,20 @@ const struct tst_suite tst_suite = {
 		{.name = "tbox sel key backspace",
 		 .tst_fn = tbox_sel_key_backspace},
 
-		{.name = "tbox sel key left",
-		 .tst_fn = tbox_sel_key_left},
+		{.name = "tbox sel key forth back",
+		 .tst_fn = tbox_sel_key_forth_back},
+
+		{.name = "tbox sel key left end",
+		 .tst_fn = tbox_sel_key_left_end},
+
+		{.name = "tbox sel key left home",
+		 .tst_fn = tbox_sel_key_left_home},
+
+		{.name = "tbox sel key right home",
+		 .tst_fn = tbox_sel_key_right_home},
+
+		{.name = "tbox sel key right end",
+		 .tst_fn = tbox_sel_key_right_end},
 
 		{.name = "tbox hidden no sel",
 		 .tst_fn = tbox_hidden_no_sel},
