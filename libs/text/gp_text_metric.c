@@ -141,7 +141,6 @@ gp_size gp_text_width_len(const gp_text_style *style, enum gp_text_len_type type
 
 	/* middle letters */
 	for (i = 1; i + 1 < len && str[i+1]; i++) {
-		ret += glyph_bearing_x(style, str[i]);
 		ret += glyph_advance_x(style, str[i]);
 		ret += style->char_xspace;
 	}
