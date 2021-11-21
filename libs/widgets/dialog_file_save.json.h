@@ -10,7 +10,7 @@ static const char *dialog_file_save = "\
       \"cfill\": \"0, 1, 0\", \n\
       \"widgets\": [ \n\
 	{\"type\": \"label\", \"text\": \"Directory:\"}, \n\
-	{\"type\": \"tbox\", \"len\": 75, \"halign\": \"fill\", \"uid\": \"path\"}, \n\
+	{\"type\": \"tbox\", \"len\": 75, \"halign\": \"fill\", \"uid\": \"path\", \"ttype\": \"path\"}, \n\
 	{\"type\": \"button\", \"btype\": \"new_dir\", \"label\": \"New dir\", \"uid\": \"new_dir\"} \n\
       ] \n\
     }, \n\
@@ -30,7 +30,7 @@ static const char *dialog_file_save = "\
       \"cpadf\": \"0, 0, 1, 1, 0, 0\", \n\
       \"widgets\": [ \n\
         {\"type\": \"label\", \"text\": \"Filename:\"}, \n\
-        {\"type\": \"tbox\", \"len\": 20, \"uid\": \"filename\", \"halign\": \"fill\", \"focused\": true}, \n\
+        {\"type\": \"tbox\", \"len\": 20, \"uid\": \"filename\", \"halign\": \"fill\", \"focused\": true, \"ttype\": \"filename\"}, \n\
 	{\"type\": \"checkbox\", \"label\": \"Show Hidden\", \"uid\": \"hidden\"}, \n\
 	{\"type\": \"button\", \"label\": \"Cancel\", \"btype\": \"cancel\", \"uid\": \"cancel\"}, \n\
         {\"type\": \"button\", \"label\": \"Save\", \"btype\": \"save\", \"uid\": \"save\"} \n\

@@ -10,7 +10,7 @@ static const char *dialog_file_open = "\
       \"cfill\": \"0, 1\", \n\
       \"widgets\": [ \n\
 	{\"type\": \"label\", \"text\": \"Directory:\"}, \n\
-	{\"type\": \"tbox\", \"len\": 75, \"halign\": \"fill\", \"uid\": \"path\"} \n\
+	{\"type\": \"tbox\", \"len\": 75, \"halign\": \"fill\", \"uid\": \"path\", \"ttype\": \"path\"} \n\
       ] \n\
     }, \n\
     { \n\
