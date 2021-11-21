@@ -56,19 +56,46 @@ The text size can be computed by following functions:
 /* or */
 #include <text/gp_text_metric.h>
 
-gp_size gp_text_width(const gp_text_style *style, const char *str);
+enum gp_text_len_type {
+	/*
+	 * Return bounding box, i.e. for the last letter return the greater of
+	 * advance and letter width. This makes sure that the resulting size
+	 * will fit the text.
+	 */
+	GP_TEXT_LEN_BBOX,
+	/*
+	 * Returns advance, i.e. where next letter would start after a string
+	 * would have been printed. This may return slightly less than the
+	 * GP_TEXT_LEN_BBOX.
+	 */
+	GP_TEXT_LEN_ADVANCE,
+};
 
-gp_size gp_text_width_len(const gp_text_style *style, const char *str, size_t len);
+gp_size gp_text_width_len(const gp_text_style *style, enum gp_text_len_type type,
+                          const char *str, size_t len);
+
+gp_size gp_text_wbbox_len(const gp_text_style *style, const char *str, size_t len);
+
+gp_size gp_text_width(const gp_text_style *style, enum gp_text_len_type type, const char *str);
+
+gp_size gp_text_wbbox(const gp_text_style *style, const char *str)
 --------------------------------------------------------------------------------
 
 Returns the width (in pixels) that would be occupied by the string if rendered
 using the specified style.
 
 Computing a length of a given string is more complicated than it appears to
-be. The first letter needs 'advance - bearing' pixels, the middle letters
-needs 'advance' pixels and the last letter needs 'bearing + width' pixel. See
+be. The first letter needs 'advance - bearing' pixels. The middle letters
+needs 'advance' pixels and 'bearing' of the previous one. The last letter
+needs different treatement based on if we need a bounding box, or advance i.e.
+exact place where the next letter should start at.
+
+See
 link:images/fonts/glyph_metrics.png[Glyph Metrics] for a description of the
 terms used in this paragraph.
+
+The 'gp_text_wbbox*()' functions are shortand for 'gp_text_width*()' with
+'GP_TEXT_LEN_BBOX'.
 
 [source,c]
 --------------------------------------------------------------------------------
