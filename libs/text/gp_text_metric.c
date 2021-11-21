@@ -236,3 +236,29 @@ gp_size gp_text_descent(const gp_text_style *style)
 
 	return multiply_height(style, style->font->descend);
 }
+
+gp_size gp_text_cur_pos(const gp_text_style *style, const char *str, gp_coord x_off)
+{
+	size_t len = 0;
+	gp_size last_advance = 0;
+
+	if (x_off <= 0)
+		return 0;
+
+	//TODO: Faster!
+	while (str[len]) {
+		gp_size advance, half;
+
+		advance = gp_text_width_len(style, GP_TEXT_LEN_ADVANCE, str, len+1);
+
+		half = (advance - last_advance)/2;
+
+		if (last_advance + half > (gp_size)x_off)
+			break;
+
+		len++;
+		last_advance = advance;
+	}
+
+	return len;
+}

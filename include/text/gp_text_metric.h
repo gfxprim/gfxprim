@@ -111,4 +111,19 @@ gp_size gp_text_ascent(const gp_text_style *style);
  */
 gp_size gp_text_descent(const gp_text_style *style);
 
+
+/**
+ * @brief Returns position between string characters given an x pixel coordinate
+ *        from the start of the rendered string. The return value is between
+ *        [0, strlen(str)], where 0 means cursor before string and strlen(str)
+ *        cursor after string.
+ *
+ * @style A text style + font formatting.
+ * @str A string.
+ * @x_off Horizontal offset in the rendered string in pixel.
+ *
+ * @return A cursor position in the string.
+ */
+gp_size gp_text_cur_pos(const gp_text_style *style, const char *str, gp_coord x_off);
+
 #endif /* TEXT_GP_TEXT_METRIC_H */
