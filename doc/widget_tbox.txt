@@ -97,6 +97,44 @@ void gp_widget_tbox_cursor_set(gp_widget *self, ssize_t off,
                                enum gp_seek_whence whence);
 -------------------------------------------------------------------------------
 
+.Selection tbox functions
+[source,c]
+-------------------------------------------------------------------------------
+/*
+ * Sets selection.
+ */
+void gp_widget_tbox_sel_set(gp_widget *self, ssize_t off,
+                            enum gp_seek_whence whence, size_t len);
+/*
+ * Select whole text buffer.
+ */
+void gp_widget_tbox_sel_all(gp_widget *self);
+
+/*
+ * Clears textbox selection.
+ */
+void gp_widget_tbox_sel_clr(gp_widget *self);
+
+/*
+ * Delete selected text.
+ */
+void gp_widget_tbox_sel_del(gp_widget *self);
+
+/*
+ * Returns selection offset and length.
+ */
+size_t gp_widget_tbox_sel_len(gp_widget *self);
+size_t gp_widget_tbox_sel_off(gp_widget *self);
+
+/*
+ * Returns non-zero when text is selected.
+ */
+void gp_widget_tbox_sel_all(gp_widget *self);
+-------------------------------------------------------------------------------
+
+Note also that all operations that modify text buffer or cursor position clear
+the selection as well.
+
 .Tbox JSON attributes
 [cols=",,,3",options="header"]
 |===================================================
