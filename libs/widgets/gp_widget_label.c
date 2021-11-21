@@ -22,7 +22,7 @@ static unsigned int min_w(gp_widget *self, const gp_widget_render_ctx *ctx)
 	if (self->label->width)
 		max_width = gp_text_max_width_chars(font, self->label->set, self->label->width);
 	else
-		max_width = gp_text_width(font, self->label->text);
+		max_width = gp_text_wbbox(font, self->label->text);
 
 	if (self->label->frame)
 		max_width += 2 * ctx->padd;

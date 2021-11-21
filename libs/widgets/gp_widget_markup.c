@@ -41,7 +41,7 @@ static unsigned int min_w(gp_widget *self, const gp_widget_render_ctx *ctx)
 		const char *str = gp_markup_elem_str(e);
 
 		if (str)
-			width += gp_text_width(font, str);
+			width += gp_text_wbbox(font, str);
 
 		if (e->type == GP_MARKUP_NEWLINE) {
 			max_width = GP_MAX(max_width, width);
@@ -88,7 +88,7 @@ static void line_bbox(const gp_markup_elem *e, const gp_widget_render_ctx *ctx,
 		const char *str = gp_markup_elem_str(e);
 
 		if (str)
-			width += gp_text_width(font, str);
+			width += gp_text_wbbox(font, str);
 
 		height = GP_MAX(height, gp_text_ascent(font));
 
@@ -139,7 +139,7 @@ static void render(gp_widget *self, const gp_offset *offset,
 
 			if (e->attrs & GP_MARKUP_INVERSE) {
 				unsigned int str_h = gp_text_ascent(font) + ctx->padd;
-				unsigned int str_w = gp_text_width(font, str);
+				unsigned int str_w = gp_text_wbbox(font, str);
 				unsigned int str_y = cur_y + ctx->padd - str_h;
 
 				GP_SWAP(fg, bg);

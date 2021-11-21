@@ -3,7 +3,7 @@
  * Copyright (C) 2009-2010 Jiri "BlueBear" Dluhos
  *                         <jiri.bluebear.dluhos@gmail.com>
  *
- * Copyright (C) 2009-2011 Cyril Hrubis <metan@ucw.cz>
+ * Copyright (C) 2009-2021 Cyril Hrubis <metan@ucw.cz>
  */
 
 #ifndef TEXT_GP_TEXT_METRIC_H
@@ -12,13 +12,71 @@
 #include <core/gp_types.h>
 #include <text/gp_text_style.h>
 
-/*
- * Calculates the width of the string drawn in the given style, in pixels.
+enum gp_text_len_type {
+	/*
+	 * Return bounding box, i.e. for the last letter return the greater of
+	 * advance and letter width. This makes sure that the resulting size
+	 * will fit the text.
+	 */
+	GP_TEXT_LEN_BBOX,
+	/*
+	 * Returns advance, i.e. where next letter would start after a string
+	 * would have been printed. This may return slightly less than the
+	 * GP_TEXT_LEN_BBOX.
+	 */
+	GP_TEXT_LEN_ADVANCE,
+};
+
+/**
+ * @brief Calculates the width of the string drawn in the given style.
+ *
+ * @style A text style + font formatting.
+ * @type Select if we want a bounding box or advance.
+ * @str A string.
+ * @len Maximal lenght of the string.
+ *
+ * @return Width in pixels.
  */
-gp_size gp_text_width_len(const gp_text_style *style,
+gp_size gp_text_width_len(const gp_text_style *style, enum gp_text_len_type type,
                           const char *str, size_t len);
 
-gp_size gp_text_width(const gp_text_style *style, const char *str);
+/**
+ * @brief Calculates bounding box width of the string drawn in the given style.
+ *
+ * @style A text style + font formatting.
+ * @str A string.
+ * @len Maximal lenght of the string.
+ *
+ * @return Width in pixels.
+ */
+static inline gp_size gp_text_wbbox_len(const gp_text_style *style, const char *str, size_t len)
+{
+	return gp_text_width_len(style, GP_TEXT_LEN_BBOX, str, len);
+}
+
+/**
+ * @brief Calculates the width of the string drawn in the given style.
+ *
+ * @style A text style + font formatting.
+ * @type Select if we want a bounding box or advance.
+ * @str A string.
+ *
+ * @return Width in pixels.
+ */
+gp_size gp_text_width(const gp_text_style *style, enum gp_text_len_type type, const char *str);
+
+/**
+ * @brief Calculates bounding box width of the string drawn in the given style.
+ *
+ * @style A text style + font formatting.
+ * @str A string.
+ *
+ * @return Width in pixels.
+ */
+static inline gp_size gp_text_wbbox(const gp_text_style *style, const char *str)
+{
+	return gp_text_width(style, GP_TEXT_LEN_BBOX, str);
+}
 
 /*
  * Maximal text width for string with len characters.

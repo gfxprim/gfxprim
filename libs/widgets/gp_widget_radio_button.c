@@ -20,7 +20,7 @@ static unsigned int min_w(gp_widget *self, const gp_widget_render_ctx *ctx)
 	unsigned int i, w;
 
 	for (i = 0; i < self->choice->max; i++) {
-		w = gp_text_width(ctx->font, self->choice->choices[i]);
+		w = gp_text_wbbox(ctx->font, self->choice->choices[i]);
 		text_w = GP_MAX(text_w, w);
 	}
 

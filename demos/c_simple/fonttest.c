@@ -109,7 +109,7 @@ void redraw_screen(void)
 
 		gp_fill_rect_xywh(win->pixmap,
 			16, SPACING*i + 16,
-			gp_text_width(&style, test_string),
+			gp_text_wbbox(&style, test_string),
 			gp_font_height(style.font),
 			dark_gray_pixel);
 
@@ -136,7 +136,7 @@ void redraw_screen(void)
 		        white_pixel, black_pixel, test_string);
 
 		gp_rect_xywh(win->pixmap, 33, SPACING * i + 43,
-		             gp_text_width(&style, test_string) + 1,
+		             gp_text_wbbox(&style, test_string) + 1,
 			     gp_text_height(&style) + 1, dark_gray_pixel);
 
 		style.pixel_xmul = 4;

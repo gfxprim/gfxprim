@@ -83,7 +83,7 @@ static void render(gp_widget *self, const gp_offset *offset,
 	size_t left = GP_MIN(tbox->off_left, tbox->cur_pos);
 	size_t right = gp_vec_strlen(tbox->buf);
 
-	while (gp_text_width_len(font, str+left, right - left) > self->w - 2 * ctx->padd) {
+	while (gp_text_wbbox_len(font, str+left, right - left) > self->w - 2 * ctx->padd) {
 		if (right > tbox->cur_pos)
 			right--;
 		else
@@ -111,7 +111,7 @@ static void render(gp_widget *self, const gp_offset *offset,
 
 	if (self->focused && !in_selection(self)) {
 		unsigned int cursor_x = x + ctx->padd;
-		cursor_x += gp_text_width_len(font, str + left,
+		cursor_x += gp_text_wbbox_len(font, str + left,
 		                              tbox->cur_pos - left);
 		gp_vline_xyh(ctx->buf, cursor_x, y + ctx->padd,
 			     gp_text_ascent(font), ctx->text_color);
@@ -134,12 +134,14 @@ static void render(gp_widget *self, const gp_offset *offset,
 	if (sel_left >= sel_right)
 		return;
 
-	gp_coord sel_x_off = x + ctx->padd + gp_text_width_len(font, str, sel_left);
+	gp_coord sel_x_off = x + ctx->padd + gp_text_width_len(font, GP_TEXT_LEN_ADVANCE, str, sel_left);
+
+	printf("%u %u\n", gp_text_width_len(font, GP_TEXT_LEN_BBOX, str, sel_left), gp_text_width_len(font, GP_TEXT_LEN_ADVANCE, str, sel_left));
 
 	str += sel_left;
 
 	gp_fill_rect_xywh(ctx->buf, sel_x_off, y + ctx->padd,
-	                  gp_text_width_len(font, str, sel_len),
+	                  gp_text_wbbox_len(font, str, sel_len),
 	                  gp_text_height(font), ctx->sel_color);
 
 	gp_text_ext(ctx->buf, font, sel_x_off, y + ctx->padd,

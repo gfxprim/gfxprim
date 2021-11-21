@@ -233,7 +233,7 @@ static int redraw_help(gp_backend *backend, unsigned int loff, gp_coord xoff)
 	unsigned int max = 0;
 
 	for (i = 0; i < help_keys_len; i++)
-		max = GP_MAX(max, gp_text_width(config.style, help_keys[i].keys));
+		max = GP_MAX(max, gp_text_wbbox(config.style, help_keys[i].keys));
 
 	for (i = loff; i < help_keys_len; i++) {
 		gp_coord h = spacing + (i - loff + 1) * (height + spacing);

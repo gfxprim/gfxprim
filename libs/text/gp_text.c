@@ -3,7 +3,7 @@
  * Copyright (C) 2009-2011 Jiri "BlueBear" Dluhos
  *                         <jiri.bluebear.dluhos@gmail.com>
  *
- * Copyright (C) 2009-2014 Cyril Hrubis <metan@ucw.cz>
+ * Copyright (C) 2009-2021 Cyril Hrubis <metan@ucw.cz>
  */
 
 #include <core/gp_pixmap.h>
@@ -82,7 +82,7 @@ gp_size gp_text_ext(gp_pixmap *pixmap, const gp_text_style *style,
 
 	gp_coord topleft_x, topleft_y;
 
-	gp_size w = gp_text_width(style, str);
+	gp_size w = gp_text_width(style, GP_TEXT_LEN_BBOX, str);
 
 	GP_ASSERT(do_align(&topleft_x, &topleft_y, align, x, y, style, w) == 0,
 	         "Invalid aligment flags");
@@ -141,5 +141,5 @@ void gp_text_clear_str(gp_pixmap *pixmap, const gp_text_style *style,
 		       gp_pixel bg_color, const char *str)
 {
 	gp_text_clear(pixmap, style, x, y, align,
-	              bg_color, gp_text_width(style, str));
+	              bg_color, gp_text_width(style, GP_TEXT_LEN_BBOX, str));
 }

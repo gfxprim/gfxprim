@@ -18,7 +18,7 @@ static unsigned int min_w(gp_widget *self, const gp_widget_render_ctx *ctx)
 	unsigned int text_w = 0;
 
 	if (self->b->label)
-		text_w = gp_text_width(ctx->font, self->b->label) + ctx->padd;
+		text_w = gp_text_wbbox(ctx->font, self->b->label) + ctx->padd;
 
 	return text_a + text_w;
 }

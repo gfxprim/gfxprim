@@ -79,7 +79,7 @@ static int image_loader_callback(gp_progress_cb *self)
 
 	int align = GP_ALIGN_CENTER|GP_VALIGN_ABOVE;
 
-	size = gp_text_width(config.style, buf);
+	size = gp_text_wbbox(config.style, buf);
 
 	int start = c->w/2 - size/2 - 10;
 	int end   = c->w/2 + size/2 + 10;

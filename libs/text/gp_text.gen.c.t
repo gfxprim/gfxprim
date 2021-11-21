@@ -235,5 +235,5 @@ gp_size gp_text_raw(gp_pixmap *pixmap, const gp_text_style *style,
 		GP_ABORT("Invalid font glyph bitmap format");
 	}
 
-	return gp_text_width_len(style, str, max_chars);
+	return gp_text_width_len(style, GP_TEXT_LEN_BBOX, str, max_chars);
 }

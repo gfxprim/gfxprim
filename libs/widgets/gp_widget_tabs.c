@@ -21,7 +21,7 @@ static gp_size tab_w(gp_widget *self, const gp_widget_render_ctx *ctx,
 {
 	const char *label = self->tabs->tabs[tab].label;
 
-	return gp_text_width(ctx->font_bold, label) + 2 * ctx->padd;
+	return gp_text_wbbox(ctx->font_bold, label) + 2 * ctx->padd;
 }
 
 static unsigned int min_w(gp_widget *self, const gp_widget_render_ctx *ctx)
@@ -140,7 +140,7 @@ static void render(gp_widget *self, const gp_offset *offset,
 		int is_active = self->tabs->active_tab == i;
 		gp_text_style *font = is_active ? ctx->font_bold : ctx->font;
 
-		unsigned int w = gp_text_width(ctx->font_bold, label) + 2 * ctx->padd;
+		unsigned int w = gp_text_wbbox(ctx->font_bold, label) + 2 * ctx->padd;
 
 		if (is_active) {
 			act_x = cur_x;

@@ -50,7 +50,7 @@ static unsigned int min_w(gp_widget *self, const gp_widget_render_ctx *ctx)
 	const gp_text_style *font = gp_widget_tattr_font(self->frame->tattr, ctx);
 	unsigned int min_w;
 
-	min_w = GP_MAX(gp_text_width(font, self->frame->title) + 2 * ctx->padd,
+	min_w = GP_MAX(gp_text_wbbox(font, self->frame->title) + 2 * ctx->padd,
 		       gp_widget_min_w(self->frame->child, ctx));
 
 	return frame_w(ctx) + min_w;
@@ -92,7 +92,7 @@ static void render(gp_widget *self, const gp_offset *offset,
 		              h - payload_off_y(self, ctx)/2, ctx->bg_color, fg_color, ctx->text_color);
 
 		if (frame->title) {
-			unsigned int sw = gp_text_width(font, self->frame->title) + ctx->padd;
+			unsigned int sw = gp_text_wbbox(font, self->frame->title) + ctx->padd;
 
 			gp_hline_xyw(ctx->buf, x + ctx->padd + ctx->padd/2, y + payload_off_y(self, ctx)/2, sw, fg_color);
 

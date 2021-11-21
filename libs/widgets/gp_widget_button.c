@@ -18,13 +18,13 @@ static unsigned int min_w(gp_widget *self, const gp_widget_render_ctx *ctx)
 	unsigned int ret = 2 * ctx->padd;
 
 	if (self->b->label)
-		ret += gp_text_width(ctx->font, self->b->label);
+		ret += gp_text_wbbox(ctx->font, self->b->label);
 
 	if (self->b->type & GP_BUTTON_TYPE_MASK)
 		ret += GP_ODD_UP(gp_text_ascent(ctx->font));
 
 	if (self->b->label && self->b->type & GP_BUTTON_TYPE_MASK)
-		ret += gp_text_width(ctx->font, " ");
+		ret += gp_text_wbbox(ctx->font, " ");
 
 	return ret;
 }
@@ -110,7 +110,7 @@ static void render(gp_widget *self, const gp_offset *offset,
 
 	if (self->b->label) {
 		unsigned int tcx = cx, len;
-		unsigned int spc = gp_text_width(ctx->font, " ");
+		unsigned int spc = gp_text_wbbox(ctx->font, " ");
 
 		if (self->b->type & GP_BUTTON_TYPE_MASK) {
 			if (self->b->type & GP_BUTTON_TEXT_LEFT)

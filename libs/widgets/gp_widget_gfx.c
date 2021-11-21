@@ -12,12 +12,12 @@
 static gp_size text_size(gp_size add_size, const gp_text_style *style,
                          const char *str, size_t len)
 {
-	return add_size + gp_text_width_len(style, str, len);
+	return add_size + gp_text_wbbox_len(style, str, len);
 }
 
 static size_t max_chars(const gp_text_style *style, gp_size w, const char *str)
 {
-	gp_size dots_size = gp_text_width(style, "...");
+	gp_size dots_size = gp_text_wbbox(style, "...");
 	size_t left = 0, right = strlen(str);
 
 	for (;;) {
@@ -41,7 +41,7 @@ void gp_text_fit(gp_pixmap *pix, const gp_text_style *style,
                 gp_coord x, gp_coord y, gp_size w, int align,
 		gp_pixel fg_color, gp_pixel bg_color, const char *str)
 {
-	gp_size text_w = gp_text_width(style, str);
+	gp_size text_w = gp_text_wbbox(style, str);
 
 	if (text_w > w) {
 		int chars = max_chars(style, w, str);

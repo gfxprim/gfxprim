@@ -59,7 +59,7 @@ static unsigned int header_min_w(gp_widget_table *tbl,
 	unsigned int text_size = 0;
 
 	if (label)
-		text_size += gp_text_width(font, label);
+		text_size += gp_text_wbbox(font, label);
 
 	if (col_is_sortable(tbl, col))
 		text_size += ctx->padd + gp_text_ascent(ctx->font);
