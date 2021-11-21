@@ -10,7 +10,7 @@
 
 static gp_htable *uids;
 
-int button_callback(gp_widget_event *ev)
+int button_on_event(gp_widget_event *ev)
 {
 	if (ev->type == GP_WIDGET_EVENT_NEW)
 		return 0;
@@ -21,6 +21,14 @@ int button_callback(gp_widget_event *ev)
 		printf("Password: %s\n", pass->tbox->buf);
 
 	return 1;
+}
+
+int url_on_event(gp_widget_event *ev)
+{
+	if (ev->type == GP_WIDGET_EVENT_NEW)
+		ev->self->tbox->delim = "/";
+
+	return 0;
 }
 
 int main(int argc, char *argv[])

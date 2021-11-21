@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "rows": 9,
+  "rows": 10,
   "widgets": [
     {
       "type": "label",
@@ -27,6 +27,11 @@
       "uid": "passwd"
     },
     {
+     "type": "tbox",
+     "text": "http://example.com/index.html",
+     "on_event": "url_on_event"
+    },
+    {
       "type": "spinner",
       "min": 0,
       "max": 10,
@@ -45,7 +50,7 @@
     {
       "type": "button",
       "label": "Button",
-      "on_event": "button_callback"
+      "on_event": "button_on_event"
     }
   ]
 }

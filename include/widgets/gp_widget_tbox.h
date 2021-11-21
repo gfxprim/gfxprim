@@ -19,6 +19,13 @@ struct gp_widget_tbox {
 	 */
 	const char *filter;
 
+	/*
+	 * Delimiter list for double click selection.
+	 *
+	 * If NULL defaults to whitespaces.
+	 */
+	const char *delim;
+
 	int hidden:1; /* password prompt */
 	int alert:1;
 
@@ -34,6 +41,9 @@ struct gp_widget_tbox {
 	gp_widget_tattr tattr;
 
 	size_t off_left;
+
+	//TODO: Move to event state
+	struct timeval last_click;
 
 	char payload[];
 };

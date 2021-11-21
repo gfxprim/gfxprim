@@ -7,6 +7,7 @@
  */
 
 #include <string.h>
+#include <ctype.h>
 
 #include <utils/gp_vec_str.h>
 
@@ -47,9 +48,17 @@ static const char *hidden_str(const char *buf)
 	return s + sizeof(s) - len - 1;
 }
 
-static int in_selection(gp_widget *self)
+static int is_sel(gp_widget *self)
 {
 	return self->tbox->sel_len;
+}
+
+static const char *tbox_visible_str(struct gp_widget_tbox *tbox)
+{
+	if (tbox->hidden)
+		return hidden_str(tbox->buf);
+
+	return tbox->buf;
 }
 
 static void render(gp_widget *self, const gp_offset *offset,
@@ -61,15 +70,10 @@ static void render(gp_widget *self, const gp_offset *offset,
 	unsigned int y = self->y + offset->y;
 	unsigned int w = self->w;
 	unsigned int h = self->h;
-	const char *str;
+	const char *str = tbox_visible_str(tbox);
 	(void)flags;
 
 	gp_widget_ops_blit(ctx, x, y, w, h);
-
-	if (tbox->hidden)
-		str = hidden_str(self->tbox->buf);
-	else
-		str = self->tbox->buf;
 
 	gp_pixel color = self->focused ? ctx->sel_color : ctx->text_color;
 
@@ -109,11 +113,11 @@ static void render(gp_widget *self, const gp_offset *offset,
 		gp_line(ctx->buf, cx+s, cy, cx, cy+s, ctx->text_color);
 	}
 
-	if (self->focused && !in_selection(self)) {
+	if (self->focused && !is_sel(self)) {
 		unsigned int cursor_x = x + ctx->padd;
 		cursor_x += gp_text_wbbox_len(font, str + left,
 		                              tbox->cur_pos - left);
-		gp_vline_xyh(ctx->buf, cursor_x, y + ctx->padd,
+		gp_vline_xyh(ctx->buf, cursor_x-1, y + ctx->padd,
 			     gp_text_ascent(font), ctx->text_color);
 	}
 
@@ -135,8 +139,6 @@ static void render(gp_widget *self, const gp_offset *offset,
 		return;
 
 	gp_coord sel_x_off = x + ctx->padd + gp_text_width_len(font, GP_TEXT_LEN_ADVANCE, str, sel_left);
-
-	printf("%u %u\n", gp_text_width_len(font, GP_TEXT_LEN_BBOX, str, sel_left), gp_text_width_len(font, GP_TEXT_LEN_ADVANCE, str, sel_left));
 
 	str += sel_left;
 
@@ -185,7 +187,7 @@ static int filter(const char *filter, char ch)
 
 static int sel_clr(gp_widget *self)
 {
-	if (!in_selection(self))
+	if (!is_sel(self))
 		return 0;
 
 	self->tbox->sel_len = 0;
@@ -196,7 +198,7 @@ static int sel_clr(gp_widget *self)
 
 static int sel_clr_left(gp_widget *self)
 {
-	if (!in_selection(self))
+	if (!is_sel(self))
 		return 0;
 
 	self->tbox->cur_pos = self->tbox->sel_off;
@@ -207,7 +209,7 @@ static int sel_clr_left(gp_widget *self)
 
 static int sel_clr_right(gp_widget *self)
 {
-	if (!in_selection(self))
+	if (!is_sel(self))
 		return 0;
 
 	self->tbox->cur_pos = self->tbox->sel_off + self->tbox->sel_len;
@@ -218,7 +220,7 @@ static int sel_clr_right(gp_widget *self)
 
 static int sel_del(gp_widget *self)
 {
-	if (!in_selection(self))
+	if (!is_sel(self))
 		return 0;
 
 	gp_widget_tbox_del(self, self->tbox->sel_off,
@@ -259,6 +261,13 @@ static int sel_all(gp_widget *self)
 
 	return 1;
 }
+
+static int is_all_sel(gp_widget *self)
+{
+	return self->tbox->sel_off == 0 &&
+	       self->tbox->sel_len == buflen(self);
+}
+
 
 static int sel_end(gp_widget *self)
 {
@@ -500,7 +509,7 @@ static void selection_to_clipboard(gp_widget *self)
 {
 	struct gp_widget_tbox *tbox = self->tbox;
 
-	if (!in_selection(self))
+	if (!is_sel(self))
 		return;
 
 	gp_widgets_clipboard_set(tbox->buf + tbox->sel_off, tbox->sel_len);
@@ -520,6 +529,66 @@ static void clipboard_event(gp_widget *self)
 	free(clip);
 }
 
+static int is_delim(struct gp_widget_tbox *tbox, char c)
+{
+	if (tbox->delim)
+		return !filter(tbox->delim, c);
+
+	return isspace(c);
+}
+
+static void mouse_dclick(gp_widget *self, size_t cur_pos)
+{
+	size_t left = cur_pos, right = cur_pos;
+	struct gp_widget_tbox *tbox = self->tbox;
+
+	if (tbox->hidden)
+		return;
+
+	if (is_all_sel(self)) {
+		sel_clr(self);
+		tbox->cur_pos = cur_pos;
+		return;
+	}
+
+	if (is_sel(self)) {
+		sel_all(self);
+		return;
+	}
+
+	while (left > 0 && !is_delim(tbox, tbox->buf[left-1]))
+		left--;
+
+	while (tbox->buf[right] && !is_delim(tbox, tbox->buf[right]))
+		right++;
+
+	tbox->cur_pos = right;
+	tbox->sel_off = left;
+	tbox->sel_len = right - left;
+}
+
+static int mouse_click(gp_widget *self, const gp_widget_render_ctx *ctx, gp_event *ev)
+{
+	struct gp_widget_tbox *tbox = self->tbox;
+	const gp_text_style *font = gp_widget_tattr_font(tbox->tattr, ctx);
+	const char *str = tbox_visible_str(tbox);
+	size_t cur_pos;
+
+	cur_pos = tbox->off_left + gp_text_cur_pos(font, str, ev->st->cursor_x - ctx->padd);
+
+	if (gp_timeval_diff_ms(ev->time, tbox->last_click) < ctx->dclick_ms) {
+		mouse_dclick(self, cur_pos);
+	} else {
+		sel_clr(self);
+		tbox->cur_pos = cur_pos;
+	}
+
+	tbox->last_click = ev->time;
+	gp_widget_redraw(self);
+
+	return 1;
+}
+
 static int event(gp_widget *self, const gp_widget_render_ctx *ctx, gp_event *ev)
 {
 	(void)ctx;
@@ -527,7 +596,6 @@ static int event(gp_widget *self, const gp_widget_render_ctx *ctx, gp_event *ev)
 	int ctrl = gp_event_any_key_pressed(ev, GP_KEY_LEFT_CTRL, GP_KEY_RIGHT_CTRL);
 
 	switch (ev->type) {
-	//TODO: Mouse clicks
 	case GP_EV_KEY:
 		if (ev->code == GP_EV_KEY_UP)
 			return 0;
@@ -559,6 +627,8 @@ static int event(gp_widget *self, const gp_widget_render_ctx *ctx, gp_event *ev)
 			if (sel_clr(self))
 				gp_widget_redraw(self);
 			return 1;
+		case GP_BTN_LEFT:
+			return mouse_click(self, ctx, ev);
 		}
 
 		if (ctrl) {
