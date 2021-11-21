@@ -12,7 +12,7 @@ static gp_htable *uids;
 
 int button_on_event(gp_widget_event *ev)
 {
-	if (ev->type == GP_WIDGET_EVENT_NEW)
+	if (ev->type != GP_WIDGET_EVENT_WIDGET)
 		return 0;
 
 	gp_widget *pass = gp_widget_by_uid(uids, "passwd", GP_WIDGET_TBOX);
@@ -21,14 +21,6 @@ int button_on_event(gp_widget_event *ev)
 		printf("Password: %s\n", pass->tbox->buf);
 
 	return 1;
-}
-
-int url_on_event(gp_widget_event *ev)
-{
-	if (ev->type == GP_WIDGET_EVENT_NEW)
-		ev->self->tbox->delim = "/";
-
-	return 0;
 }
 
 int main(int argc, char *argv[])

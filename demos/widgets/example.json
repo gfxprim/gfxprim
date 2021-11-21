@@ -23,13 +23,13 @@
     {
       "type": "tbox",
       "len": 18,
-      "hidden": true,
+      "ttype": "hidden",
       "uid": "passwd"
     },
     {
      "type": "tbox",
      "text": "http://example.com/index.html",
-     "on_event": "url_on_event"
+     "ttype": "URL"
     },
     {
       "type": "spinner",

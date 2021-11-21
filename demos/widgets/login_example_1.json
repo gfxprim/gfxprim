@@ -33,7 +33,7 @@
     {
       "type": "tbox",
       "len": 18,
-      "hidden": true,
+      "ttype": "hidden",
       "uid": "pass",
       "on_event": "login_callback"
     },

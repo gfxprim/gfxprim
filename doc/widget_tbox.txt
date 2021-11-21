@@ -11,9 +11,11 @@ Tbox attributes can be accessed as `widget->tbox`.
 .Tbox widget constructor
 [source,c]
 -------------------------------------------------------------------------------
+
+
 gp_widget *gp_widget_tbox_new(const char *text, gp_widget_tattr tattr,
                               unsigned int len, unsigned int max_len,
-			      const char *filter, int flags,
+			      const char *filter, enum gp_widget_tbox_type type,
                               int (*on_event)(gp_widget_event *),
                               void *priv);
 -------------------------------------------------------------------------------
@@ -37,9 +39,6 @@ characters from the `filter` set.
 
 The `on_event` and `priv` are explained in the
 link:widgets_events.html[widgets event].
-
-The `flags` could be currently used to hide the textbox text with
-`GP_WIDGET_TBOX_HIDDEN` flag.
 
 .Text tbox functions
 [source,c]
@@ -135,15 +134,33 @@ void gp_widget_tbox_sel_all(gp_widget *self);
 Note also that all operations that modify text buffer or cursor position clear
 the selection as well.
 
+[source,c]
+-------------------------------------------------------------------------------
+/*
+ * Sets selection delimiters.
+ */
+void gp_widget_tbox_sel_delim_set(gp_widget *self, const char *delim);
+-------------------------------------------------------------------------------
+
+Selection delimiters are used on double click to select continous substring.
+
+If not set the default delimiters are whitespaces.
+
+NOTE: If textbox contains URL or Path the delimiters should be set by setting
+      the right textbox type.
+
 .Tbox JSON attributes
 [cols=",,,3",options="header"]
 |===================================================
-| Attribute     |  Type  | Default | Description
-| text          | string |    ""   | Initial textbox text.
-| hidden        |  bool  |  False  | Hides the text, e.g. password.
-| len           |  uint  |         | Number of characters the texbox should fit.
-| max_len       |  uint  |         | Maximal number of characters.
-| tattr         |  tattr |  normal | link:widgets_tattr.html[Text attribute].
+| Attribute     |  Type  |   Default   | Description
+| text          | string |     ""      | Initial textbox text.
+| ttype         | string |    "none"   | A textbox type valid are:
+                                         {"none", "hidden", "URL", "path", "filename"}
+| len           |  uint  |             | Number of characters the texbox should fit.
+| max_len       |  uint  |             | Maximal number of characters.
+| tattr         |  tattr |    normal   | link:widgets_tattr.html[Text attribute].
+| sel_delim     | string | whitespaces | If set any character from the string is
+                                         selection delimiter.
 |===================================================
 
 .Tbox widget events

@@ -498,6 +498,12 @@ gp_dialog *gp_dialog_file_save_new(const char *path,
 	dialog->dir_path = gp_widget_by_uid(uids, "path", GP_WIDGET_TBOX);
 	dialog->file_table = gp_widget_by_uid(uids, "files", GP_WIDGET_TABLE);
 
+	if (dialog->dir_path)
+		gp_widget_tbox_sel_delim_set(dialog->dir_path, "/");
+
+	if (dialog->filename)
+		gp_widget_tbox_sel_delim_set(dialog->filename, ".");
+
 	gp_widget_event_handler_set(dialog->file_table, table_on_event, dialog);
 	gp_widget_event_unmask(dialog->file_table, GP_WIDGET_EVENT_INPUT);
 
@@ -560,6 +566,9 @@ gp_dialog *gp_dialog_file_open_new(const char *path)
 	dialog->filter = gp_widget_by_uid(uids, "filter", GP_WIDGET_TBOX);
 	dialog->dir_path = gp_widget_by_uid(uids, "path", GP_WIDGET_TBOX);
 	dialog->file_table = gp_widget_by_uid(uids, "files", GP_WIDGET_TABLE);
+
+	if (dialog->dir_path)
+		gp_widget_tbox_sel_delim_set(dialog->dir_path, "/");
 
 	if (!dialog->file_table) {
 		GP_WARN("No file table defined!");

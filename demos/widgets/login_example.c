@@ -40,9 +40,9 @@ int show_password(gp_widget_event *ev)
 	gp_widget *pass = gp_widget_by_uid(uids, "pass", GP_WIDGET_TBOX);
 
 	if (ev->self->b->val)
-		pass->tbox->hidden = 0;
+		gp_widget_tbox_type_set(pass, GP_WIDGET_TBOX_NONE);
 	else
-		pass->tbox->hidden = 1;
+		gp_widget_tbox_type_set(pass, GP_WIDGET_TBOX_HIDDEN);
 
 	gp_widget_redraw(pass);
 

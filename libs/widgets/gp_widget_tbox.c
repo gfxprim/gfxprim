@@ -53,9 +53,14 @@ static int is_sel(gp_widget *self)
 	return self->tbox->sel_len;
 }
 
+static int is_hidden(struct gp_widget_tbox *tbox)
+{
+	return tbox->type == GP_WIDGET_TBOX_HIDDEN;
+}
+
 static const char *tbox_visible_str(struct gp_widget_tbox *tbox)
 {
-	if (tbox->hidden)
+	if (is_hidden(tbox))
 		return hidden_str(tbox->buf);
 
 	return tbox->buf;
@@ -249,7 +254,7 @@ static int sel_all(gp_widget *self)
 {
 	size_t len = buflen(self);
 
-	if (self->tbox->hidden)
+	if (is_hidden(self->tbox))
 		return 0;
 
 	if (self->tbox->sel_len == len)
@@ -273,7 +278,7 @@ static int sel_end(gp_widget *self)
 {
 	struct gp_widget_tbox *tbox = self->tbox;
 
-	if (tbox->hidden)
+	if (is_hidden(tbox))
 		return 0;
 
 	if (cursor_at_end(self))
@@ -293,7 +298,7 @@ static int sel_right(gp_widget *self)
 {
 	struct gp_widget_tbox *tbox = self->tbox;
 
-	if (tbox->hidden)
+	if (is_hidden(tbox))
 		return 0;
 
 	if (!tbox->sel_len) {
@@ -322,7 +327,7 @@ static int sel_home(gp_widget *self)
 {
 	struct gp_widget_tbox *tbox = self->tbox;
 
-	if (tbox->hidden)
+	if (is_hidden(tbox))
 		return 0;
 
 	if (cursor_at_home(self))
@@ -343,7 +348,7 @@ static int sel_left(gp_widget *self)
 {
 	struct gp_widget_tbox *tbox = self->tbox;
 
-	if (tbox->hidden)
+	if (is_hidden(tbox))
 		return 0;
 
 	if (!tbox->sel_len) {
@@ -542,7 +547,7 @@ static void mouse_dclick(gp_widget *self, size_t cur_pos)
 	size_t left = cur_pos, right = cur_pos;
 	struct gp_widget_tbox *tbox = self->tbox;
 
-	if (tbox->hidden)
+	if (is_hidden(tbox))
 		return;
 
 	if (is_all_sel(self)) {
@@ -678,20 +683,42 @@ static int event(gp_widget *self, const gp_widget_render_ctx *ctx, gp_event *ev)
 	return 0;
 }
 
+static enum gp_widget_tbox_type type_by_name(const char *type_name)
+{
+	if (!strcmp(type_name, "none"))
+		return GP_WIDGET_TBOX_NONE;
+
+	if (!strcmp(type_name, "hidden"))
+		return GP_WIDGET_TBOX_HIDDEN;
+
+	if (!strcmp(type_name, "URL"))
+		return GP_WIDGET_TBOX_URL;
+
+	if (!strcmp(type_name, "path"))
+		return GP_WIDGET_TBOX_PATH;
+
+	if (!strcmp(type_name, "filename"))
+		return GP_WIDGET_TBOX_FILENAME;
+
+	return GP_WIDGET_TBOX_MAX;
+}
+
 enum keys {
-	HIDDEN,
 	LEN,
 	MAX_LEN,
+	SEL_DELIM,
 	TATTR,
 	TEXT,
+	TTYPE,
 };
 
 static const gp_json_obj_attr attrs[] = {
-	GP_JSON_OBJ_ATTR("hidden", GP_JSON_BOOL),
 	GP_JSON_OBJ_ATTR("len", GP_JSON_INT),
 	GP_JSON_OBJ_ATTR("max_len", GP_JSON_INT),
+	GP_JSON_OBJ_ATTR("sel_delim", GP_JSON_STR),
 	GP_JSON_OBJ_ATTR("tattr", GP_JSON_STR),
 	GP_JSON_OBJ_ATTR("text", GP_JSON_STR),
+	GP_JSON_OBJ_ATTR("ttype", GP_JSON_STR),
 };
 
 static const gp_json_obj obj_filter = {
@@ -701,20 +728,17 @@ static const gp_json_obj obj_filter = {
 
 static gp_widget *json_to_tbox(gp_json_buf *json, gp_json_val *val, gp_widget_json_ctx *ctx)
 {
-	char *text = NULL;
-	int flags = 0;
+	char *text = NULL, *sel_delim = NULL;
 	int len = 0;
 	int max_len = 0;
 	gp_widget_tattr attr = 0;
 	gp_widget *ret;
+	enum gp_widget_tbox_type type = GP_WIDGET_TBOX_NONE;
 
 	(void)ctx;
 
 	GP_JSON_OBJ_FILTER(json, val, &obj_filter, gp_widget_json_attrs) {
 		switch (val->idx) {
-		case HIDDEN:
-			flags |= val->val_bool ? GP_WIDGET_TBOX_HIDDEN : 0;
-		break;
 		case LEN:
 			if (val->val_int <= 0)
 				gp_json_warn(json, "Invalid lenght!");
@@ -727,12 +751,22 @@ static gp_widget *json_to_tbox(gp_json_buf *json, gp_json_val *val, gp_widget_js
 			else
 				max_len = val->val_int;
 		break;
+		case SEL_DELIM:
+			sel_delim = strdup(val->val_str);
+		break;
 		case TATTR:
 			if (gp_widget_tattr_parse(val->val_str, &attr, GP_TATTR_FONT))
 				gp_json_warn(json, "Invalid text attribute!");
 		break;
 		case TEXT:
 			text = strdup(val->val_str);
+		break;
+		case TTYPE:
+			type = type_by_name(val->val_str);
+			if (type == GP_WIDGET_TBOX_MAX) {
+				gp_json_warn(json, "Invalid type!");
+				type = GP_WIDGET_TBOX_NONE;
+			}
 		break;
 		}
 	}
@@ -742,7 +776,15 @@ static gp_widget *json_to_tbox(gp_json_buf *json, gp_json_val *val, gp_widget_js
 		return NULL;
 	}
 
-	ret = gp_widget_tbox_new(text, attr, len, max_len, NULL, flags, NULL, NULL);
+	ret = gp_widget_tbox_new(text, attr, len, max_len, NULL, type, NULL, NULL);
+
+	//TODO: leak on tbox free
+	if (sel_delim) {
+		if (ret)
+			gp_widget_tbox_sel_delim_set(ret, sel_delim);
+		else
+			free(sel_delim);
+	}
 
 	free(text);
 
@@ -766,9 +808,56 @@ struct gp_widget_ops gp_widget_tbox_ops = {
 	.id = "tbox",
 };
 
+static const char *type_name(enum gp_widget_tbox_type type)
+{
+	switch (type) {
+	case GP_WIDGET_TBOX_NONE:
+		return "none";
+	case GP_WIDGET_TBOX_HIDDEN:
+		return "hidden";
+	case GP_WIDGET_TBOX_URL:
+		return "URL";
+	case GP_WIDGET_TBOX_PATH:
+		return "path";
+	case GP_WIDGET_TBOX_FILENAME:
+		return "filename";
+	case GP_WIDGET_TBOX_MAX:
+	break;
+	}
+
+	return "invalid!";
+}
+
+static void set_type(gp_widget *self, enum gp_widget_tbox_type type)
+{
+	struct gp_widget_tbox *tbox = self->tbox;
+
+	switch (type) {
+	case GP_WIDGET_TBOX_HIDDEN:
+	case GP_WIDGET_TBOX_NONE:
+		tbox->delim = NULL;
+	break;
+	case GP_WIDGET_TBOX_PATH:
+	case GP_WIDGET_TBOX_URL:
+		tbox->delim = "/";
+	break;
+	case GP_WIDGET_TBOX_FILENAME:
+		tbox->delim = ".";
+	break;
+	default:
+		GP_WARN("Invalid textbox type %i!", type);
+		return;
+	}
+
+	GP_DEBUG(2, "Setting tbox (%p) type to '%s' delim '%s'",
+	         self, type_name(type), tbox->delim);
+
+	tbox->type = type;
+}
+
 gp_widget *gp_widget_tbox_new(const char *text, gp_widget_tattr tattr,
                               unsigned int len, unsigned int max_len,
-                              const char *filter, int flags,
+                              const char *filter, enum gp_widget_tbox_type type,
                               int (*on_event)(gp_widget_event *),
                               void *priv)
 {
@@ -786,8 +875,7 @@ gp_widget *gp_widget_tbox_new(const char *text, gp_widget_tattr tattr,
 	ret->tbox->filter = filter;
 	ret->tbox->tattr = tattr;
 
-	if (flags & GP_WIDGET_TBOX_HIDDEN)
-		ret->tbox->hidden = 1;
+	set_type(ret, type);
 
 	if (text) {
 		ret->tbox->buf = gp_vec_strdup(text);
@@ -981,7 +1069,7 @@ void gp_widget_tbox_sel_set(gp_widget *self, ssize_t off,
 	size_t max_pos = gp_vec_strlen(self->tbox->buf);
 	size_t sel_pos = self->tbox->cur_pos;
 
-	if (self->tbox->hidden) {
+	if (is_hidden(self->tbox)) {
 		GP_WARN("Attempt to select hidden text!");
 		return;
 	}
@@ -1007,7 +1095,7 @@ void gp_widget_tbox_sel_all(gp_widget *self)
 {
 	GP_WIDGET_ASSERT(self, GP_WIDGET_TBOX, );
 
-	if (self->tbox->hidden) {
+	if (is_hidden(self->tbox)) {
 		GP_WARN("Attempt to select hidden text!");
 		return;
 	}
@@ -1044,4 +1132,18 @@ size_t gp_widget_tbox_sel_off(gp_widget *self)
 	GP_WIDGET_ASSERT(self, GP_WIDGET_TBOX, 0);
 
 	return self->tbox->sel_off;
+}
+
+void gp_widget_tbox_sel_delim_set(gp_widget *self, const char *delim)
+{
+	GP_WIDGET_ASSERT(self, GP_WIDGET_TBOX, );
+
+	self->tbox->delim = delim;
+}
+
+void gp_widget_tbox_type_set(gp_widget *self, enum gp_widget_tbox_type type)
+{
+	GP_WIDGET_ASSERT(self, GP_WIDGET_TBOX, );
+
+	set_type(self, type);
 }

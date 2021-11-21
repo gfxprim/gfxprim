@@ -11,6 +11,21 @@
 
 #include <core/gp_seek.h>
 
+enum gp_widget_tbox_type {
+	/* default */
+	GP_WIDGET_TBOX_NONE,
+	/* hidden text, e.g. password */
+	GP_WIDGET_TBOX_HIDDEN,
+	/* URL */
+	GP_WIDGET_TBOX_URL,
+	/* Filesystem path */
+	GP_WIDGET_TBOX_PATH,
+	/* File name */
+	GP_WIDGET_TBOX_FILENAME,
+	/* Terminator */
+	GP_WIDGET_TBOX_MAX,
+};
+
 struct gp_widget_tbox {
 	/*
 	 * If not NULL the tbox can contain only characters from this
@@ -23,11 +38,15 @@ struct gp_widget_tbox {
 	 * Delimiter list for double click selection.
 	 *
 	 * If NULL defaults to whitespaces.
+	 *
+	 * This is set automatically by a certain tbox types.
 	 */
 	const char *delim;
 
-	int hidden:1; /* password prompt */
-	int alert:1;
+	/* enum gp_widget_tbox_type */
+	uint16_t type;
+
+	uint16_t alert:1;
 
 	size_t max_size;
 	size_t cur_pos;
@@ -60,10 +79,6 @@ enum gp_widget_tbox_event_type {
 	GP_WIDGET_TBOX_EDIT,
 };
 
-enum gp_widget_tbox_flags {
-	GP_WIDGET_TBOX_HIDDEN = 0x01,
-};
-
 #define GP_TBOX_FILTER_INT "0123456789"
 #define GP_TBOX_FILTER_HEX "0123456789abcdefABCDEF"
 
@@ -76,13 +91,13 @@ enum gp_widget_tbox_flags {
  * @filter   If set only characters from the string can be typed into the tbox.
  * @on_event Callback called on tbox event, e.g. key press.
  * @priv     User private pointer.
- * @flags    Mask of enum gp_widget_tbox_flags.
+ * @type     Text box type.
  *
  * @returns A tbox widget.
  */
 gp_widget *gp_widget_tbox_new(const char *text, gp_widget_tattr tattr,
                               unsigned int len, unsigned int max_len,
-			      const char *filter, int flags,
+			      const char *filter, enum gp_widget_tbox_type type,
                               int (*on_event)(gp_widget_event *),
                               void *priv);
 
@@ -269,5 +284,31 @@ static inline int gp_widget_tbox_sel(gp_widget *self)
 {
 	return !!gp_widget_tbox_sel_len(self);
 }
+
+/**
+ * @brief Sets textbox selection delimiters.
+ *
+ * Any of the characters from delim will limit selection on double click.
+ *
+ * Default delimiters are whitespaces, but the delimiter string is also set
+ * when widget type has been selected.
+ *
+ * @self A tbox widget.
+ * @delim A string containing delimiters.
+ */
+void gp_widget_tbox_sel_delim_set(gp_widget *self, const char *delim);
+
+/**
+ * @brief Sets textbox type.
+ *
+ * Textbox type changes default behaviors, if type is set to hidden asterisks
+ * are shown instead of letters.
+ *
+ * Other types set the selection delimiter lists, etc.
+ *
+ * @self A tbox widget.
+ * @type A tbox type.
+ */
+void gp_widget_tbox_type_set(gp_widget *self, enum gp_widget_tbox_type type);
 
 #endif /* GP_WIDGET_TBOX_H */
