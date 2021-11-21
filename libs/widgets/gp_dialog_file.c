@@ -223,6 +223,9 @@ static void exit_dialog(struct file_dialog *dialog, int retval)
 	gp_widget *table = dialog->file_table;
 	gp_widget *path = dialog->dir_path;
 
+	if (retval == GP_WIDGET_DIALOG_CANCEL)
+		goto exit;
+
 	/* Append selected entry to the directory -> file_open */
 	if (!dialog->filename && table->tbl->row_selected) {
 		gp_dir_entry *entry = gp_dir_cache_get_filtered(cache, table->tbl->selected_row);
@@ -260,8 +263,8 @@ static void exit_dialog(struct file_dialog *dialog, int retval)
 		gp_widget_tbox_append(path, gp_widget_tbox_text(dialog->filename));
 	}
 
+exit:
 	free_dir_cache(cache);
-
 	wd->retval = retval;
 }
 
