@@ -117,7 +117,7 @@ static void render(gp_widget *self, const gp_offset *offset,
 		unsigned int cursor_x = x + ctx->padd;
 		cursor_x += gp_text_wbbox_len(font, str + left,
 		                              tbox->cur_pos - left);
-		gp_vline_xyh(ctx->buf, cursor_x-1, y + ctx->padd,
+		gp_vline_xyh(ctx->buf, cursor_x, y + ctx->padd,
 			     gp_text_ascent(font), ctx->text_color);
 	}
 
@@ -138,9 +138,9 @@ static void render(gp_widget *self, const gp_offset *offset,
 	if (sel_left >= sel_right)
 		return;
 
-	gp_coord sel_x_off = x + ctx->padd + gp_text_width_len(font, GP_TEXT_LEN_ADVANCE, str, sel_left);
+	gp_coord sel_x_off = x + ctx->padd + gp_text_width_len(font, GP_TEXT_LEN_ADVANCE, str, sel_left - left);
 
-	str += sel_left;
+	str += sel_left - left;
 
 	gp_fill_rect_xywh(ctx->buf, sel_x_off, y + ctx->padd,
 	                  gp_text_wbbox_len(font, str, sel_len),
