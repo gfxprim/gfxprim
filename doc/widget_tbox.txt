@@ -11,7 +11,18 @@ Tbox attributes can be accessed as `widget->tbox`.
 .Tbox widget constructor
 [source,c]
 -------------------------------------------------------------------------------
-
+enum gp_widget_tbox_type {
+        /* default */
+        GP_WIDGET_TBOX_NONE,
+        /* hidden text, e.g. password */
+        GP_WIDGET_TBOX_HIDDEN,
+        /* URL */
+        GP_WIDGET_TBOX_URL,
+        /* Filesystem path */
+        GP_WIDGET_TBOX_PATH,
+        /* File name */
+        GP_WIDGET_TBOX_FILENAME,
+};
 
 gp_widget *gp_widget_tbox_new(const char *text, gp_widget_tattr tattr,
                               unsigned int len, unsigned int max_len,
@@ -37,12 +48,21 @@ limits the characters only to numbers and characters from `a` to `f`. If
 `filter` is passed the widget width is computed so that it can fit `len`
 characters from the `filter` set.
 
+The `type` determines a textbox behavior, the 'HIDDEN' type replaces the
+string shown to user with asterisks. The rests of the types changes the
+textbox behavior for example when user is selecting text.
+
 The `on_event` and `priv` are explained in the
 link:widgets_events.html[widgets event].
 
 .Text tbox functions
 [source,c]
 -------------------------------------------------------------------------------
+/*
+ * Sets textbox type.
+ */
+void gp_widget_tbox_type_set(gp_widget *self, enum gp_widget_tbox_type type);
+
 /*
  * Returns textbox text.
  */
