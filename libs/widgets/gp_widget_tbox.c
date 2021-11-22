@@ -542,7 +542,7 @@ static int is_delim(struct gp_widget_tbox *tbox, char c)
 	return isspace(c);
 }
 
-static void mouse_dclick(gp_widget *self, size_t cur_pos)
+static void sel_substr_cycle(gp_widget *self, size_t cur_pos, int cur_save_restore)
 {
 	size_t left = cur_pos, right = cur_pos;
 	struct gp_widget_tbox *tbox = self->tbox;
@@ -552,7 +552,12 @@ static void mouse_dclick(gp_widget *self, size_t cur_pos)
 
 	if (is_all_sel(self)) {
 		sel_clr(self);
-		tbox->cur_pos = cur_pos;
+
+		if (cur_save_restore)
+			tbox->cur_pos = tbox->cur_pos_saved;
+		else
+			tbox->cur_pos = cur_pos;
+
 		return;
 	}
 
@@ -566,6 +571,9 @@ static void mouse_dclick(gp_widget *self, size_t cur_pos)
 
 	while (tbox->buf[right] && !is_delim(tbox, tbox->buf[right]))
 		right++;
+
+	if (cur_save_restore)
+		tbox->cur_pos_saved = tbox->cur_pos;
 
 	tbox->cur_pos = right;
 	tbox->sel_off = left;
@@ -582,7 +590,7 @@ static int mouse_click(gp_widget *self, const gp_widget_render_ctx *ctx, gp_even
 	cur_pos = tbox->off_left + gp_text_cur_pos(font, str, ev->st->cursor_x - ctx->padd);
 
 	if (gp_timeval_diff_ms(ev->time, tbox->last_click) < ctx->dclick_ms) {
-		mouse_dclick(self, cur_pos);
+		sel_substr_cycle(self, cur_pos, 0);
 	} else {
 		sel_clr(self);
 		tbox->cur_pos = cur_pos;
@@ -634,6 +642,13 @@ static int event(gp_widget *self, const gp_widget_render_ctx *ctx, gp_event *ev)
 			return 1;
 		case GP_BTN_LEFT:
 			return mouse_click(self, ctx, ev);
+		case GP_KEY_SPACE:
+			if (shift) {
+				sel_substr_cycle(self, self->tbox->cur_pos, 1);
+				gp_widget_redraw(self);
+				return 1;
+			}
+		break;
 		}
 
 		if (ctrl) {

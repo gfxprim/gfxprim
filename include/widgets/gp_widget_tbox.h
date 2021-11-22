@@ -50,6 +50,7 @@ struct gp_widget_tbox {
 
 	size_t max_size;
 	size_t cur_pos;
+	size_t cur_pos_saved;
 	size_t size;
 	char *buf;
 
