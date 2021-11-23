@@ -580,7 +580,7 @@ static void sel_substr_cycle(gp_widget *self, size_t cur_pos, int cur_save_resto
 	tbox->sel_len = right - left;
 }
 
-static int mouse_click(gp_widget *self, const gp_widget_render_ctx *ctx, gp_event *ev)
+static int mouse_click(gp_widget *self, const gp_widget_render_ctx *ctx, int shift, gp_event *ev)
 {
 	struct gp_widget_tbox *tbox = self->tbox;
 	const gp_text_style *font = gp_widget_tattr_font(tbox->tattr, ctx);
@@ -592,7 +592,26 @@ static int mouse_click(gp_widget *self, const gp_widget_render_ctx *ctx, gp_even
 	if (gp_timeval_diff_ms(ev->time, tbox->last_click) < ctx->dclick_ms) {
 		sel_substr_cycle(self, cur_pos, 0);
 	} else {
-		sel_clr(self);
+		if (shift) {
+			size_t sel_origin, sel_end;
+
+			if (!is_sel(self)) {
+				sel_origin = tbox->cur_pos;
+			} else {
+				if (tbox->cur_pos == tbox->sel_off)
+					sel_origin = tbox->sel_off + tbox->sel_len;
+				else
+					sel_origin = tbox->sel_off;
+			}
+
+			sel_end = GP_MAX(sel_origin, cur_pos);
+
+			tbox->sel_off = GP_MIN(sel_origin, cur_pos);
+			tbox->sel_len = sel_end - tbox->sel_off;
+		} else {
+			sel_clr(self);
+		}
+
 		tbox->cur_pos = cur_pos;
 	}
 
@@ -641,7 +660,7 @@ static int event(gp_widget *self, const gp_widget_render_ctx *ctx, gp_event *ev)
 				gp_widget_redraw(self);
 			return 1;
 		case GP_BTN_LEFT:
-			return mouse_click(self, ctx, ev);
+			return mouse_click(self, ctx, shift, ev);
 		case GP_KEY_SPACE:
 			if (shift) {
 				sel_substr_cycle(self, self->tbox->cur_pos, 1);
