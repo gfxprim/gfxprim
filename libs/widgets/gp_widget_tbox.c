@@ -621,6 +621,26 @@ static int mouse_click(gp_widget *self, const gp_widget_render_ctx *ctx, int shi
 	return 1;
 }
 
+static int mouse_drag(gp_widget *self, const gp_widget_render_ctx *ctx, gp_event *ev)
+{
+	struct gp_widget_tbox *tbox = self->tbox;
+	const gp_text_style *font = gp_widget_tattr_font(tbox->tattr, ctx);
+	const char *str = tbox_visible_str(tbox);
+	size_t cur_pos;
+
+	cur_pos = tbox->off_left + gp_text_cur_pos(font, str, ev->st->cursor_x - ctx->padd);
+
+	if (cur_pos == tbox->sel_off + tbox->sel_len)
+		return 1;
+
+	tbox->sel_off = GP_MIN(tbox->cur_pos, cur_pos);
+	tbox->sel_len = GP_MAX(tbox->cur_pos, cur_pos) - tbox->sel_off;
+
+	gp_widget_redraw(self);
+
+	return 1;
+}
+
 static int event(gp_widget *self, const gp_widget_render_ctx *ctx, gp_event *ev)
 {
 	(void)ctx;
@@ -660,7 +680,9 @@ static int event(gp_widget *self, const gp_widget_render_ctx *ctx, gp_event *ev)
 				gp_widget_redraw(self);
 			return 1;
 		case GP_BTN_LEFT:
-			return mouse_click(self, ctx, shift, ev);
+			if (ev->code != GP_EV_KEY_REPEAT)
+				return mouse_click(self, ctx, shift, ev);
+		break;
 		case GP_KEY_SPACE:
 			if (shift) {
 				sel_substr_cycle(self, self->tbox->cur_pos, 1);
@@ -711,6 +733,10 @@ static int event(gp_widget *self, const gp_widget_render_ctx *ctx, gp_event *ev)
 			clipboard_event(self);
 			return 1;
 		}
+	break;
+	case GP_EV_REL:
+		if (gp_event_key_pressed(ev, GP_BTN_LEFT))
+			mouse_drag(self, ctx, ev);
 	break;
 	}
 
