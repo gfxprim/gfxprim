@@ -615,6 +615,8 @@ static int mouse_click(gp_widget *self, const gp_widget_render_ctx *ctx, int shi
 		tbox->cur_pos = cur_pos;
 	}
 
+
+	tbox->click_cursor_x = ev->st->cursor_x;
 	tbox->last_click = ev->time;
 	gp_widget_redraw(self);
 
@@ -627,6 +629,10 @@ static int mouse_drag(gp_widget *self, const gp_widget_render_ctx *ctx, gp_event
 	const gp_text_style *font = gp_widget_tattr_font(tbox->tattr, ctx);
 	const char *str = tbox_visible_str(tbox);
 	size_t cur_pos;
+
+	//TODO: Get font minimal character size
+	if (GP_ABS_DIFF(ev->st->cursor_x, tbox->click_cursor_x) <= gp_text_wbbox(font, " ")/2)
+		return 1;
 
 	cur_pos = tbox->off_left + gp_text_cur_pos(font, str, ev->st->cursor_x - ctx->padd);
 
@@ -680,6 +686,7 @@ static int event(gp_widget *self, const gp_widget_render_ctx *ctx, gp_event *ev)
 				gp_widget_redraw(self);
 			return 1;
 		case GP_BTN_LEFT:
+		case GP_BTN_PEN:
 			if (ev->code != GP_EV_KEY_REPEAT)
 				return mouse_click(self, ctx, shift, ev);
 		break;
@@ -735,8 +742,10 @@ static int event(gp_widget *self, const gp_widget_render_ctx *ctx, gp_event *ev)
 		}
 	break;
 	case GP_EV_REL:
-		if (gp_event_key_pressed(ev, GP_BTN_LEFT))
-			mouse_drag(self, ctx, ev);
+	case GP_EV_ABS:
+		if (!gp_event_any_key_pressed(ev, GP_BTN_PEN, GP_BTN_LEFT))
+			return 0;
+		return mouse_drag(self, ctx, ev);
 	break;
 	}
 
