@@ -73,7 +73,7 @@ struct gp_ev_sys {
 	uint32_t w, h;
 };
 
-#define GP_EVENT_KEY_BITMAP_BYTES 40
+#define GP_EVENT_KEY_BITMAP_BYTES 56
 
 struct gp_events_state {
 	/** Bitmap of pressed keys including mouse buttons. */
