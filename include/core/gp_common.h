@@ -64,6 +64,15 @@
 })
 
 /*
+ * Returns absolute value of difference.
+ */
+#define GP_ABS_DIFF(a, b) ({ \
+	typeof(a) gp_a__ = a; \
+	typeof(b) gp_b__ = b; \
+	gp_a__ > gp_b__ ? gp_a__ - gp_b__ : gp_b__ - gp_a__; \
+})
+
+/*
  * Aligns value to be even
  */
 #define GP_ALIGN2(a) ({   \
