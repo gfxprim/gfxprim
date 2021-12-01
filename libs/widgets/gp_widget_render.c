@@ -556,7 +556,6 @@ static void print_options(int exit_val)
 
 	printf("Options:\n--------\n");
 	printf("\t-b backend init string (pass -b help for options)\n");
-	printf("\t-f fonts\n\t\tdefault\n\t\thaxor-15\n\t\thaxor-16\n\t\thaxor-17\n");
 	printf("\t-f uint\n\t\tsets the true-type font size\n");
 	printf("\t-F font\n\t\tsets compiled-in font\n");
 	printf("\t\tAvailable fonts:\n");
