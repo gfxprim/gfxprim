@@ -90,7 +90,7 @@ static const char *str_font_size;
 static const char *font_family;
 static const char *input_str;
 
-static int try_compiled_in_font_family(const char *family_name)
+static int try_compiled_in_font_family(const char *family_name, unsigned int mul)
 {
 	const gp_font_family *family;
 	const gp_font_face *regular, *regular_bold, *mono, *mono_bold;
@@ -113,22 +113,22 @@ static int try_compiled_in_font_family(const char *family_name)
 	if (!regular || !mono)
 		return 0;
 
-	gp_text_style_normal(&font, regular);
-	gp_text_style_normal(&font_mono, mono);
-	gp_text_style_double(&font_big, regular);
+	gp_text_style_normal(&font, regular, mul);
+	gp_text_style_normal(&font_mono, mono, mul);
+	gp_text_style_normal(&font_big, regular, 2 * mul);
 
 	if (!regular_bold) {
-		gp_text_style_embold(&font_bold, regular);
-		gp_text_style_embold_double(&font_big_bold, regular);
+		gp_text_style_embold(&font_bold, regular, mul);
+		gp_text_style_embold(&font_big_bold, regular, 2 * mul);
 	} else {
-		gp_text_style_normal(&font_bold, regular_bold);
-		gp_text_style_double(&font_big_bold, regular_bold);
+		gp_text_style_normal(&font_bold, regular_bold, mul);
+		gp_text_style_normal(&font_big_bold, regular_bold, 2 * mul);
 	}
 
 	if (!mono_bold)
-		gp_text_style_embold(&font_mono_bold, mono);
+		gp_text_style_embold(&font_mono_bold, mono, mul);
 	else
-		gp_text_style_normal(&font_mono_bold, mono_bold);
+		gp_text_style_normal(&font_mono_bold, mono_bold, mul);
 
 	return 1;
 }
@@ -136,14 +136,10 @@ static int try_compiled_in_font_family(const char *family_name)
 
 static void init_fonts(void)
 {
-	if (font_family) {
-		if (!try_compiled_in_font_family(font_family))
-			GP_WARN("Failed to load compiled in font '%s'", font_family);
-		return;
-	}
+	int size = 1;
 
 	if (str_font_size) {
-		int size = atoi(str_font_size);
+		size = atoi(str_font_size);
 
 		if (size <= 0 || size > 200) {
 			GP_WARN("Inavlid font size '%s'!", str_font_size);
@@ -151,6 +147,12 @@ static void init_fonts(void)
 		}
 
 		font_size = size;
+	}
+
+	if (font_family) {
+		if (!try_compiled_in_font_family(font_family, size))
+			GP_WARN("Failed to load compiled in font '%s'", font_family);
+		return;
 	}
 
 	gp_font_face *ffont = gp_font_face_fc_load("DroidSans", 0, font_size);
@@ -167,7 +169,7 @@ static void init_fonts(void)
 		gp_font_face_free(ffont_big_bold);
 		gp_font_face_free(ffont_mono);
 		gp_font_face_free(ffont_mono_bold);
-		try_compiled_in_font_family("gfxprim");
+		try_compiled_in_font_family("gfxprim", size);
 		return;
 	}
 
@@ -185,12 +187,12 @@ static void init_fonts(void)
 	render_font_mono = ffont_mono;
 	render_font_mono_bold = ffont_mono_bold;
 
-	gp_text_style_normal(ctx.font, ffont);
-	gp_text_style_normal(ctx.font_bold, ffont_bold);
-	gp_text_style_normal(ctx.font_big, ffont_big);
-	gp_text_style_normal(ctx.font_big_bold, ffont_big_bold);
-	gp_text_style_normal(ctx.font_mono, ffont_mono);
-	gp_text_style_normal(ctx.font_mono_bold, ffont_mono_bold);
+	gp_text_style_normal(ctx.font, ffont, size);
+	gp_text_style_normal(ctx.font_bold, ffont_bold, size);
+	gp_text_style_normal(ctx.font_big, ffont_big, size);
+	gp_text_style_normal(ctx.font_big_bold, ffont_big_bold, size);
+	gp_text_style_normal(ctx.font_mono, ffont_mono, size);
+	gp_text_style_normal(ctx.font_mono_bold, ffont_mono_bold, size);
 }
 
 static void render_ctx_init(void)

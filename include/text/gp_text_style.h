@@ -39,42 +39,24 @@ typedef struct gp_text_style {
 	.char_xspace = 0 \
 }
 
-static inline void gp_text_style_normal(gp_text_style *style, const gp_font_face *font)
+static inline void gp_text_style_normal(gp_text_style *style, const gp_font_face *font, int mul)
 {
 	style->pixel_xspace = 0;
 	style->pixel_yspace = 0;
-	style->pixel_xmul = 1;
-	style->pixel_ymul = 1;
+	style->pixel_xmul = mul;
+	style->pixel_ymul = mul;
 	style->font = font;
 }
 
 /*
  * Creates a bold variant of a bitmap font on the expense of slower rendering.
  */
-static inline void gp_text_style_embold(gp_text_style *style, const gp_font_face *font)
+static inline void gp_text_style_embold(gp_text_style *style, const gp_font_face *font, int mul)
 {
 	style->pixel_xspace = -1;
 	style->pixel_yspace = -1;
-	style->pixel_xmul = 2;
-	style->pixel_ymul = 2;
-	style->font = font;
-}
-
-static inline void gp_text_style_double(gp_text_style *style, const gp_font_face *font)
-{
-	style->pixel_xspace = 0;
-	style->pixel_yspace = 0;
-	style->pixel_xmul = 2;
-	style->pixel_ymul = 2;
-	style->font = font;
-}
-
-static inline void gp_text_style_embold_double(gp_text_style *style, const gp_font_face *font)
-{
-	style->pixel_xspace = -1;
-	style->pixel_yspace = -1;
-	style->pixel_xmul = 3;
-	style->pixel_ymul = 3;
+	style->pixel_xmul = mul + 1;
+	style->pixel_ymul = mul + 1;
 	style->font = font;
 }
 
