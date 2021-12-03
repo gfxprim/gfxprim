@@ -17,7 +17,6 @@ struct testcase {
 	const char *path;
 	gp_size w, h;
 	gp_pixel_type pixel_type;
-	gp_pixel pixel;
 };
 
 static int test_load_ico(struct testcase *test)
@@ -54,15 +53,34 @@ static int test_load_ico(struct testcase *test)
 	}
 
 	unsigned int x, y, fail = 0;
-/*
+
+	gp_pixel val_mask = gp_pixel_chan_mask(test->pixel_type, "R") |
+	                    gp_pixel_chan_mask(test->pixel_type, "G") |
+	                    gp_pixel_chan_mask(test->pixel_type, "B");
+	gp_pixel alpha_mask = gp_pixel_chan_mask(test->pixel_type, "A");
+
 	for (x = 0; x < img->w; x++) {
 		for (y = 0; y < img->w; y++) {
 			gp_pixel p = gp_getpixel(img, x, y);
+			int do_fail = 0;
 
-			if (p != test->pixel) {
+			//Test images have black diagonal cross and white background
+			if (x == y || x == (img->h - y-1)) {
+				if ((p & val_mask) != 0)
+					do_fail = 1;
+			} else {
+				if ((p & val_mask) != val_mask)
+					do_fail = 1;
+			}
+
+			//And alpha is set to 100% if present
+			if ((p & alpha_mask) != alpha_mask)
+				do_fail = 1;
+
+			if (do_fail) {
 				if (!fail)
-					tst_msg("First failed at %u,%u %x %x",
-					        x, y, p, test->pixel);
+					tst_msg("First failed at %u,%u %x",
+					        x, y, p);
 				fail = 1;
 			}
 		}
@@ -70,7 +88,7 @@ static int test_load_ico(struct testcase *test)
 
 	if (!fail)
 		tst_msg("Pixmap pixels are correct");
-*/
+
 	gp_pixmap_free(img);
 
 	if (fail)
