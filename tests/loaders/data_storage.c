@@ -67,10 +67,10 @@ static int records_are_equal(const gp_data_node *a, const gp_data_node *b)
 	case GP_DATA_RATIONAL:
 		return a->value.rat.num == b->value.rat.num &&
 		       a->value.rat.den == b->value.rat.den;
+	default:
+		tst_msg("Unknown data type %i", a->type);
+		return 0;
 	}
-
-	tst_msg("Unknown data type %i", a->type);
-	return 0;
 }
 
 static int create_add_get_destroy(void)
