@@ -194,4 +194,14 @@ gp_pixel_type gp_pixel_rgb_lookup(uint32_t rsize, uint32_t rof,
  */
 int gp_pixel_has_flags(gp_pixel_type pixel_type, gp_pixel_flags flags);
 
+/**
+ * @brief Returns channel mask for a given pixel type and channel name.
+ *
+ * @pixel_type A pixel type.
+ * @chan_name A channel name, e.g. "R" or "A".
+ *
+ * @return A channel mask or zero if channel is not present.
+ */
+gp_pixel gp_pixel_chan_mask(gp_pixel_type pixel_type, const char *chan_name);
+
 #endif /* CORE_GP_PIXEL_H */

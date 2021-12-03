@@ -23,6 +23,16 @@ get_channel(const gp_pixel_type_desc *desc, const char *name)
 	return NULL;
 }
 
+static gp_pixel get_channel_mask(const gp_pixel_channel *channel)
+{
+	gp_pixel chmask = ~0;
+
+	chmask >>= (GP_PIXEL_BITS - channel->size);
+	chmask <<= channel->offset;
+
+	return chmask;
+}
+
 static int match(const gp_pixel_channel *channel, gp_pixel mask)
 {
 	if (!channel) {
@@ -30,10 +40,8 @@ static int match(const gp_pixel_channel *channel, gp_pixel mask)
 		return !mask;
 	}
 
-	gp_pixel chmask = ~0;
+	gp_pixel chmask = get_channel_mask(channel);
 
-	chmask >>= (GP_PIXEL_BITS - channel->size);
-	chmask <<= channel->offset;
 	GP_DEBUG(3, "%s gen %08x pass %08x", channel->name, chmask, mask);
 
 	return (chmask == mask);
@@ -157,4 +165,26 @@ int gp_pixel_has_flags(gp_pixel_type pixel_type, gp_pixel_flags flags)
 	gp_pixel_flags my_flags = gp_pixel_types[pixel_type].flags;
 
 	return flags == (my_flags & flags);
+}
+
+gp_pixel gp_pixel_chan_mask(gp_pixel_type pixel_type, const char *chan_name)
+{
+	const gp_pixel_type_desc *pixel_type_desc;
+	unsigned int i;
+
+	pixel_type_desc = gp_pixel_desc(pixel_type);
+	if (!pixel_type_desc) {
+		GP_WARN("Invalid pixel type %u?", pixel_type);
+		return 0;
+	}
+
+	for (i = 0; i < pixel_type_desc->numchannels; i++) {
+		if (!strcmp(pixel_type_desc->channels[i].name, chan_name))
+			return get_channel_mask(&pixel_type_desc->channels[i]);
+	}
+
+	GP_DEBUG(1, "Pixel type '%s' does not have channel '%s'",
+	         pixel_type_desc->name, chan_name);
+
+	return 0;
 }
