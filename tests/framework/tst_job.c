@@ -45,7 +45,7 @@ static void remove_tmpdir(const char *path)
 	}
 
 	//TODO: Cleaner solution?
-	char buf[256];
+	char buf[310];
 	int ret;
 
 	snprintf(buf, sizeof(buf), "rm -rf '%s'", path);
@@ -62,6 +62,7 @@ static void prepare_tmpdir(const char *name, const char *res_path,
                           char *template, size_t size)
 {
 	char tmp[256];
+	char cmd[1024];
 	int ret;
 
 	/* Fix any funny characters in the test name */
@@ -102,10 +103,10 @@ static void prepare_tmpdir(const char *name, const char *res_path,
 		if (S_ISDIR(st.st_mode))
 			p = "/*";
 
-		snprintf(tmp, sizeof(tmp), "cp -r '%s'%s '%s'",
+		snprintf(cmd, sizeof(cmd), "cp -r '%s'%s '%s'",
 		         res_path, p, template);
 
-		ret = system(tmp);
+		ret = system(cmd);
 
 		if (ret) {
 			tst_warn("failed to copy resource '%s'", res_path);
@@ -113,7 +114,6 @@ static void prepare_tmpdir(const char *name, const char *res_path,
 			exit(TST_INTERR);
 		}
 	}
-
 
 	if (chdir(template)) {
 		tst_warn("chdir(%s) failed: %s", template, strerror(errno));
@@ -329,7 +329,7 @@ static int tst_job_benchmark(struct tst_job *job)
 void tst_job_run(struct tst_job *job)
 {
 	int ret;
-	char template[256];
+	char template[300];
 	int pipefd[2];
 
 	/* Write down starting time of the test */
