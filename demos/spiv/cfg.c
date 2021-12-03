@@ -228,6 +228,7 @@ static int read_key(struct parser_state *state)
 		switch (c) {
 		case '\n':
 			state->lineno++;
+		/* fallthrough */
 		case EOF:
 		case ' ':
 		case '\t':
