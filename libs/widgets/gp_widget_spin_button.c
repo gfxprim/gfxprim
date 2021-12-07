@@ -12,6 +12,7 @@
 #include <widgets/gp_widget_ops.h>
 #include <widgets/gp_widget_render.h>
 #include <widgets/gp_string.h>
+#include "gp_widget_choice_priv.h"
 
 static unsigned int buttons_width(const gp_widget_render_ctx *ctx)
 {
@@ -22,8 +23,8 @@ static unsigned int min_w(gp_widget *self, const gp_widget_render_ctx *ctx)
 {
 	unsigned int i, max_len = 0;
 
-	for (i = 0; i < self->choice->max; i++) {
-		unsigned int len = gp_text_wbbox(ctx->font, self->choice->choices[i]);
+	for (i = 0; i < gp_widget_choice_cnt_get(self); i++) {
+		unsigned int len = gp_text_wbbox(ctx->font, self->choice->ops->get_choice(self, i));
 		max_len = GP_MAX(max_len, len);
 	}
 
@@ -59,7 +60,8 @@ static void render(gp_widget *self, const gp_offset *offset,
 
 	gp_print(ctx->buf, ctx->font, x + ctx->padd, y + ctx->padd,
 		 GP_ALIGN_RIGHT | GP_VALIGN_BELOW,
-		 ctx->text_color, ctx->bg_color, "%s", self->choice->choices[self->choice->sel]);
+		 ctx->text_color, ctx->bg_color, "%s",
+		 self->choice->ops->get_choice(self, self->choice->sel));
 
 	gp_coord rx = x + w - s;
 
@@ -73,7 +75,7 @@ static void render(gp_widget *self, const gp_offset *offset,
 
 	gp_symbol(ctx->buf, x + w - s/2 - 1, y + h/4, sx, sy, GP_TRIANGLE_UP, color);
 
-	if (self->choice->sel + 1 >= self->choice->max)
+	if (self->choice->sel + 1 >= gp_widget_choice_cnt_get(self))
 		color = ctx->bg_color;
 	else
 		color = ctx->text_color;
@@ -81,15 +83,10 @@ static void render(gp_widget *self, const gp_offset *offset,
 	gp_symbol(ctx->buf, x + w - s/2 - 1, y + (3*h)/4, sx, sy, GP_TRIANGLE_DOWN, color);
 }
 
-static void select_choice(gp_widget *self, unsigned int select)
+static void select_choice(gp_widget *self, unsigned int sel)
 {
-	if (self->choice->sel == select)
-		return;
-
-	self->choice->sel = select;
-
+	gp_widget_choice_sel_set_(self, sel);
 	gp_widget_redraw(self);
-
 	gp_widget_send_widget_event(self, 0);
 }
 
@@ -104,7 +101,7 @@ static int key_up(gp_widget *self)
 
 static int key_down(gp_widget *self)
 {
-	if (self->choice->sel + 1 >= self->choice->max)
+	if (self->choice->sel + 1 >= gp_widget_choice_cnt_get(self))
 		return 0;
 
 	select_choice(self, self->choice->sel + 1);
@@ -153,7 +150,7 @@ static int event(gp_widget *self, const gp_widget_render_ctx *ctx, gp_event *ev)
 			select_choice(self, 0);
 			return 1;
 		case GP_KEY_END:
-			select_choice(self, self->choice->max - 1);
+			select_choice(self, gp_widget_choice_cnt_get(self) - 1);
 			return 1;
 		}
 	break;

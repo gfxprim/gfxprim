@@ -42,7 +42,7 @@ static int spinbutton_json_load(struct tcase *t)
 	}
 
 	for (i = 0; i < t->cnt; i++) {
-		const char *val = gp_widget_choice_val_get(spinbutton, i);
+		const char *val = gp_widget_choice_name_get(spinbutton, i);
 
 		if (strcmp(val, t->choices[i])) {
 			tst_msg("Wrong choice value at %zu", i);
@@ -54,6 +54,59 @@ static int spinbutton_json_load(struct tcase *t)
 
 	return TST_SUCCESS;
 }
+
+static int spinbutton_json_fail(struct tcase *t)
+{
+	gp_widget *spinbutton;
+
+	spinbutton = gp_widget_from_json_str(t->json, NULL);
+	if (spinbutton) {
+		tst_msg("Loaded broken JSON");
+		return TST_FAILED;
+	}
+
+	return TST_SUCCESS;
+}
+
+static const char *get_choice(gp_widget *self, size_t idx)
+{
+	(void) self;
+
+	switch (idx) {
+	case 0:
+		return "a";
+	case 1:
+		return "b";
+	default:
+		return NULL;
+	}
+}
+
+static void set(gp_widget *self, enum gp_widget_choice_op op, size_t val)
+{
+	if (op != GP_WIDGET_CHOICE_OP_SEL)
+		return;
+
+	self->choice->sel = val;
+}
+
+static size_t get(gp_widget *self, enum gp_widget_choice_op op)
+{
+	switch (op) {
+	case GP_WIDGET_CHOICE_OP_SEL:
+		return self->choice->sel;
+	case GP_WIDGET_CHOICE_OP_CNT:
+		return 2;
+	}
+
+	return 0;
+}
+
+struct gp_widget_choice_ops choice_ops = {
+	.get_choice = get_choice,
+	.get = get,
+	.set = set
+};
 
 static struct tcase spinbutton = {
 	.json = "{\"version\": 1, \"type\": \"spinbutton\", \"choices\": [\"a\", \"b\"]}",
@@ -74,6 +127,24 @@ static struct tcase sel_spinbutton = {
 	}
 };
 
+static struct tcase ops_spinbutton = {
+	.json = "{\"version\": 1, \"type\": \"spinbutton\", \"ops\": \"choice_ops\"}",
+	.cnt = 2,
+	.sel = 0,
+	.choices = (const char *const []) {
+		"a",
+		"b",
+	}
+};
+
+static struct tcase empty_spinbutton = {
+	.json = "{\"version\": 1, \"type\": \"spinbutton\"}"
+};
+
+static struct tcase missing_ops_spinbutton = {
+	.json = "{\"version\": 1, \"type\": \"spinbutton\", \"ops\": \"does_not_exist\"}"
+};
+
 const struct tst_suite tst_suite = {
 	.suite_name = "spinbutton JSON testsuite",
 	.tests = {
@@ -85,6 +156,21 @@ const struct tst_suite tst_suite = {
 		{.name = "sel spinbutton",
 		 .tst_fn = spinbutton_json_load,
 		 .data = &sel_spinbutton,
+		 .flags = TST_CHECK_MALLOC},
+
+		{.name = "ops spinbutton",
+		 .tst_fn = spinbutton_json_load,
+		 .data = &ops_spinbutton,
+		 .flags = TST_CHECK_MALLOC},
+
+		{.name = "empty spinbutton",
+		 .tst_fn = spinbutton_json_fail,
+		 .data = &empty_spinbutton,
+		 .flags = TST_CHECK_MALLOC},
+
+		{.name = "missing ops spinbutton",
+		 .tst_fn = spinbutton_json_fail,
+		 .data = &missing_ops_spinbutton,
 		 .flags = TST_CHECK_MALLOC},
 
 		{.name = NULL},

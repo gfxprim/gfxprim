@@ -4,16 +4,54 @@ Choice widget
 A choice widget is a class of widgets that allows to select exactly one choice
 from a given set.
 
+There are two different choices application APIs, the choices can either be
+static initialized by an string array, or dynamic backed by an structure with
+callbacks.
+
 The widget class allows to get values and modify widget state by an unified
 API.
 
 .Choice class API functions
 [source,c]
 -------------------------------------------------------------------------------
-void gp_widget_choice_set(gp_widget *self, unsigned int sel);
+void gp_widget_choice_sel_set(gp_widget *self, size_t sel);
 
-unsigned int gp_widget_choice_get(gp_widget *self);
+size_t gp_widget_choice_sel_get(gp_widget *self);
+
+size_t gp_widget_choice_cnt_get(gp_widget *self);
+
+const char *gp_widget_choice_name_get(gp_widget *self, size_t idx);
 -------------------------------------------------------------------------------
+
+Functions to get and set the selected choice, the choices count and particular
+choice name.
+
+.Choices callback API
+[source,c]
+-------------------------------------------------------------------------------
+enum gp_widget_choice_op {
+        GP_WIDGET_CHOICE_OP_SEL,
+        GP_WIDGET_CHOICE_OP_CNT,
+};
+
+struct gp_widget_choice_ops {
+        const char *(*get_choice)(gp_widget *self, size_t idx);
+        size_t (*get)(gp_widget *self, enum gp_widget_choice_op op);
+        void (*set)(gp_widget *self, enum gp_widget_choice_op op, size_t val);
+};
+
+void gp_widget_choice_refresh(gp_widget *self);
+-------------------------------------------------------------------------------
+
+The ops structure implements callbacks to get choice count and selected
+choice, set selected choice and get choice name.
+
+The refresh function must be called by the application every time the choices
+do change since the widget will cache some of the data returned by these
+callbacks. The refresh function will re-read the data and also check if the
+widget needs to be resized.
+
+See link:example_widgets_choice.html[choice ops API example].
 
 Spinbutton
 ~~~~~~~~~~
@@ -22,9 +60,7 @@ Spinbutton
 -------------------------------------------------------------------------------
 gp_widget *gp_widget_spinbutton_new(const char *choices[],
                                     unsigned int choice_cnt,
-                                    unsigned int selected,
-                                    int (*on_event)(gp_widget_event *self),
-                                    void *priv)
+                                    unsigned int selected);
 -------------------------------------------------------------------------------
 
 Spinbutton is parsed from JSON with when type equals to "spinbutton".
@@ -39,9 +75,7 @@ Radiobutton
 -------------------------------------------------------------------------------
 gp_widget *gp_widget_radiobutton_new(const char *choices[],
                                      unsigned int choice_cnt,
-                                     unsigned int selected,
-                                     int (*on_event)(gp_widget_event *self),
-                                     void *priv)
+                                     unsigned int selected);
 -------------------------------------------------------------------------------
 
 Radiobutton is parsed from JSON with when type equals to "radiobutton".
@@ -54,6 +88,7 @@ image:radiobutton.png[Radiobutton]
 |===================================================
 |  Attribute  |     Type     | Default | Description
 |  +choices+  | string array |         | List of choices
+|  +ops+      |    string    |         | The ops structure id
 |  +selected+ |     uint     |    0    | Currently selected choice
 |===================================================
 

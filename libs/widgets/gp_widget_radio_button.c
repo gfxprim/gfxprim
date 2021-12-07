@@ -12,6 +12,7 @@
 #include <widgets/gp_widget_ops.h>
 #include <widgets/gp_widget_render.h>
 #include <widgets/gp_string.h>
+#include "gp_widget_choice_priv.h"
 
 static unsigned int min_w(gp_widget *self, const gp_widget_render_ctx *ctx)
 {
@@ -19,8 +20,8 @@ static unsigned int min_w(gp_widget *self, const gp_widget_render_ctx *ctx)
 	unsigned int text_w = 0;
 	unsigned int i, w;
 
-	for (i = 0; i < self->choice->max; i++) {
-		w = gp_text_wbbox(ctx->font, self->choice->choices[i]);
+	for (i = 0; i < gp_widget_choice_cnt_get(self); i++) {
+		w = gp_text_wbbox(ctx->font, self->choice->ops->get_choice(self, i));
 		text_w = GP_MAX(text_w, w);
 	}
 
@@ -30,7 +31,7 @@ static unsigned int min_w(gp_widget *self, const gp_widget_render_ctx *ctx)
 static unsigned int min_h(gp_widget *self, const gp_widget_render_ctx *ctx)
 {
 	return ctx->padd +
-	       self->choice->max * (gp_text_ascent(ctx->font) + ctx->padd);
+	       gp_widget_choice_cnt_get(self) * (gp_text_ascent(ctx->font) + ctx->padd);
 }
 
 static void render(gp_widget *self, const gp_offset *offset,
@@ -51,7 +52,7 @@ static void render(gp_widget *self, const gp_offset *offset,
 
 	y += ctx->padd;
 
-	for (i = 0; i < self->choice->max; i++) {
+	for (i = 0; i < gp_widget_choice_cnt_get(self); i++) {
 		unsigned int r = text_a/2;
 		unsigned int cy = y + r;
 		unsigned int cx = x + r;
@@ -69,27 +70,16 @@ static void render(gp_widget *self, const gp_offset *offset,
 			x + ctx->padd + text_a, y,
 		        GP_ALIGN_RIGHT|GP_VALIGN_BELOW,
                         ctx->text_color, ctx->bg_color,
-			self->choice->choices[i]);
+			self->choice->ops->get_choice(self, i));
 
 		y += text_a + ctx->padd;
 	}
 }
 
-static void select_choice(gp_widget *self, unsigned int select)
+static void select_choice(gp_widget *self, unsigned int sel)
 {
-	if (self->choice->sel == select)
-		return;
-
-	if (select >= self->choice->max) {
-		GP_BUG("Widget %p trying to select %i max %i",
-			self, select, self->choice->max);
-		return;
-	}
-
-	self->choice->sel = select;
-
+	gp_widget_choice_sel_set_(self, sel);
 	gp_widget_redraw(self);
-
 	gp_widget_send_widget_event(self, 0);
 }
 
@@ -98,12 +88,12 @@ static void key_up(gp_widget *self)
 	if (self->choice->sel > 0)
 		select_choice(self, self->choice->sel - 1);
 	else
-		select_choice(self, self->choice->max - 1);
+		select_choice(self, gp_widget_choice_cnt_get(self) - 1);
 }
 
 static void key_down(gp_widget *self)
 {
-	if (self->choice->sel + 1 >= self->choice->max)
+	if (self->choice->sel + 1 >= gp_widget_choice_cnt_get(self))
 		select_choice(self, 0);
 	else
 		select_choice(self, self->choice->sel + 1);
@@ -150,7 +140,7 @@ static int event(gp_widget *self, const gp_widget_render_ctx *ctx, gp_event *ev)
 			select_choice(self, 0);
 			return 1;
 		case GP_KEY_END:
-			select_choice(self, self->choice->max - 1);
+			select_choice(self, gp_widget_choice_cnt_get(self) - 1);
 			return 1;
 		}
 	}

@@ -17,22 +17,15 @@
  * Radiobutton is a subclass of the choice widget.
  *
  * @choices An array of strings describing available choices.
- * @choice_cnt Size of the choices array.
- * @selected Initially selected choice.
- * @on_event An event handler.
- * @priv An user private pointer.
+ * @cnt Size of the choices array.
+ * @sel Initially selected choice.
  *
  * @return A radiobutton widget.
  */
 static inline gp_widget *gp_widget_radiobutton_new(const char *choices[],
-                                                   unsigned int choice_cnt,
-                                                   unsigned int selected,
-                                                   int (*on_event)(gp_widget_event *self),
-                                                   void *priv)
+                                                   size_t cnt, size_t sel)
 {
-	return gp_widget_choice_new(GP_WIDGET_RADIOBUTTON,
-	                            choices, choice_cnt,
-	                            selected, on_event, priv);
+	return gp_widget_choice_new(GP_WIDGET_RADIOBUTTON, choices, cnt, sel);
 }
 
 #endif /* GP_WIDGET_RADIOBUTTON_H */
