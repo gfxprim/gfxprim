@@ -51,9 +51,9 @@ int mon_year_on_event(gp_widget_event *ev)
 	if (ev->type != GP_WIDGET_EVENT_WIDGET)
 		return 0;
 
-	days = days_in_mon(gp_widget_int_get(wmon), gp_widget_int_get(wyear));
+	days = days_in_mon(gp_widget_int_val_get(wmon), gp_widget_int_val_get(wyear));
 
-	gp_widget_int_set_max(wday, days);
+	gp_widget_int_max_set(wday, days);
 
 	return 0;
 }
@@ -70,22 +70,22 @@ int load_sys_time(gp_widget_event *ev)
 	localtime_r(&t, &tm);
 
 	if (wsec)
-		gp_widget_int_set(wsec, tm.tm_sec);
+		gp_widget_int_val_set(wsec, tm.tm_sec);
 
 	if (wmin)
-		gp_widget_int_set(wmin, tm.tm_min);
+		gp_widget_int_val_set(wmin, tm.tm_min);
 
 	if (whour)
-		gp_widget_int_set(whour, tm.tm_hour);
+		gp_widget_int_val_set(whour, tm.tm_hour);
 
 	if (wday)
-		gp_widget_int_set(wday, tm.tm_mday);
+		gp_widget_int_val_set(wday, tm.tm_mday);
 
 	if (wmon)
-		gp_widget_int_set(wmon, tm.tm_mon + 1);
+		gp_widget_int_val_set(wmon, tm.tm_mon + 1);
 
 	if (wyear)
-		gp_widget_int_set(wyear, tm.tm_year + 1900);
+		gp_widget_int_val_set(wyear, tm.tm_year + 1900);
 
 	return 0;
 }

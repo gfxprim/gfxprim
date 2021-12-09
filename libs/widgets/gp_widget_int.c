@@ -24,7 +24,7 @@ static int check_val(int min, int max, int val)
 
 static int check_min_max(int min, int max)
 {
-	if (min >= max) {
+	if (min > max) {
 		GP_WARN("Min %i > Max %i", min, max);
 		return 1;
 	}
@@ -33,8 +33,7 @@ static int check_min_max(int min, int max)
 }
 
 static gp_widget *widget_int_new(enum gp_widget_type type,
-                                 int min, int max, int val,
-                                 int (*on_event)(gp_widget_event *), void *priv)
+                                 int min, int max, int val)
 {
 	gp_widget *ret;
 
@@ -52,15 +51,38 @@ static gp_widget *widget_int_new(enum gp_widget_type type,
 	ret->i->max = max;
 	ret->i->val = val;
 
-	ret->priv = priv;
-	ret->on_event = on_event;
-
 	return ret;
 }
 
-void gp_widget_int_set(gp_widget *self, int val)
+void gp_widget_int_set(gp_widget *self, int min, int max, int val)
 {
-	//TODO: Check widget type!
+	GP_WIDGET_CLASS_ASSERT(self, GP_WIDGET_CLASS_INT, );
+
+	if (min > max) {
+		GP_WARN("Widget %s (%p) new min %i > new max %i",
+			gp_widget_type_name(self->type), self, min, max);
+		return;
+	}
+
+	if (val < min || val > max) {
+		GP_WARN("Widget %s (%p) val %i outside of min %i, max %i",
+			gp_widget_type_name(self->type), self, val, min, max);
+	}
+
+	if (self->i->min == min && self->i->max == max && self->i->val == val)
+		return;
+
+	self->i->min = min;
+	self->i->max = max;
+	self->i->val = val;
+
+	//TODO: Resize on bounds change?
+	gp_widget_redraw(self);
+}
+
+void gp_widget_int_val_set(gp_widget *self, int val)
+{
+	GP_WIDGET_CLASS_ASSERT(self, GP_WIDGET_CLASS_INT, );
 
 	if (check_val(self->i->min, self->i->max, val))
 		return;
@@ -72,9 +94,9 @@ void gp_widget_int_set(gp_widget *self, int val)
 }
 
 
-void gp_widget_int_set_max(gp_widget *self, int max)
+void gp_widget_int_max_set(gp_widget *self, int max)
 {
-	//TODO: Check widget type!
+	GP_WIDGET_CLASS_ASSERT(self, GP_WIDGET_CLASS_INT, );
 
 	if (max < self->i->min) {
 		GP_WARN("Widget %s (%p) max (%i) < min (%i)",
@@ -86,12 +108,14 @@ void gp_widget_int_set_max(gp_widget *self, int max)
 	self->i->max = max;
 
 	if (self->i->val > max)
-		gp_widget_int_set(self, max);
+		self->i->val = max;
+
+	gp_widget_redraw(self);
 }
 
-void gp_widget_int_set_min(gp_widget *self, int min)
+void gp_widget_int_min_set(gp_widget *self, int min)
 {
-	//TODO: Check widget type!
+	GP_WIDGET_CLASS_ASSERT(self, GP_WIDGET_CLASS_INT, );
 
 	if (min > self->i->max) {
 		GP_WARN("Widget %s (%p) min (%i) > max (%i)",
@@ -103,7 +127,9 @@ void gp_widget_int_set_min(gp_widget *self, int min)
 	self->i->min = min;
 
 	if (self->i->val < min)
-		gp_widget_int_set(self, min);
+		self->i->val = min;
+
+	gp_widget_redraw(self);
 }
 
 enum keys {
@@ -128,7 +154,7 @@ static const gp_json_obj obj_filter = {
 static gp_widget *json_to_int(enum gp_widget_type type, gp_json_buf *json,
                               gp_json_val *val, gp_widget_json_ctx *ctx)
 {
-	int min = 0, max = 0, ival = 0, val_set = 0, dir = 0;
+	int min = 0, max = 0, ival = 0, dir = 0, val_set = 0;
 	gp_widget *ret;
 
 	(void)ctx;
@@ -151,7 +177,6 @@ static gp_widget *json_to_int(enum gp_widget_type type, gp_json_buf *json,
 		break;
 		case VAL:
 			ival = val->val_int;
-			val_set = 1;
 		break;
 		}
 	}
@@ -165,10 +190,14 @@ static gp_widget *json_to_int(enum gp_widget_type type, gp_json_buf *json,
 	if (check_val(min, max, ival))
 		return NULL;
 
-	ret = widget_int_new(type, min, max, ival, NULL, NULL);
+	ret = gp_widget_new(type, GP_WIDGET_CLASS_INT, sizeof(struct gp_widget_int));
+	if (!ret)
+		return NULL;
 
-	if (ret)
-		ret->i->dir = dir;
+	ret->i->min = min;
+	ret->i->max = max;
+	ret->i->val = ival;
+	ret->i->dir = dir;
 
 	return ret;
 }
@@ -356,7 +385,7 @@ struct gp_widget_ops gp_widget_spinner_ops = {
 
 gp_widget *gp_widget_spinner_new(int min, int max, int val)
 {
-	return widget_int_new(GP_WIDGET_SPINNER, min, max, val, NULL, NULL);
+	return widget_int_new(GP_WIDGET_SPINNER, min, max, val);
 }
 
 /* slider */
@@ -545,31 +574,15 @@ struct gp_widget_ops gp_widget_slider_ops = {
 	.id = "slider",
 };
 
-gp_widget *gp_widget_slider_new(int min, int max, int val, int dir,
-                                int (*on_event)(gp_widget_event *ev),
-                                void *priv)
+gp_widget *gp_widget_slider_new(int min, int max, int val, int dir)
 {
 	gp_widget *ret;
 
-	ret = widget_int_new(GP_WIDGET_SLIDER, min, max, val, on_event, priv);
+	ret = widget_int_new(GP_WIDGET_SLIDER, min, max, val);
 	if (!ret)
 		return NULL;
 
 	ret->i->dir = dir;
 
 	return ret;
-}
-
-void gp_widget_slider_set(gp_widget *self, int val)
-{
-	GP_WIDGET_ASSERT(self, GP_WIDGET_SLIDER, );
-
-	gp_widget_int_set(self, val);
-}
-
-int gp_widget_slider_get(gp_widget *self)
-{
-	GP_WIDGET_ASSERT(self, GP_WIDGET_SLIDER, 0);
-
-	return self->i->val;
 }

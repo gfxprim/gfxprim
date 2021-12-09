@@ -39,3 +39,20 @@ void gp_widget_class_bool_toggle(gp_widget *self);
 -------------------------------------------------------------------------------
 
 Boolean class implements three functions for manipulating the boolean value.
+
+
+.Integer class
+[source,c]
+-------------------------------------------------------------------------------
+int gp_widget_int_val_get(gp_widget *self);
+
+void gp_widget_int_set(gp_widget *self, int min, int max, int val);
+
+void gp_widget_int_val_set(gp_widget *self, int val);
+
+void gp_widget_int_max_set(gp_widget *self, int max);
+
+void gp_widget_int_min_set(gp_widget *self, int min);
+-------------------------------------------------------------------------------
+
+Integer class functions to manipulate the value and bounds.

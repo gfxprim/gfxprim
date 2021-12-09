@@ -16,29 +16,9 @@
  * @max Slider maximum.
  * @val Initial slider value.
  * @dir Slider direction.
- * @on_event Slider event handler.
- * @priv User private pointer.
  *
  * @return A slider widget.
  */
-gp_widget *gp_widget_slider_new(int min, int max, int val, int dir,
-                                int (*on_event)(gp_widget_event *ev),
-                                void *priv);
-
-/**
- * @brief Sets a slider widget value.
- *
- * @self A slider widget.
- * @val New slider value.
- */
-void gp_widget_slider_set(gp_widget *self, int val);
-
-/**
- * @brief Returns slider value.
- *
- * @self A slider widget.
- * @return Slider value.
- */
-int gp_widget_slider_get(gp_widget *self);
+gp_widget *gp_widget_slider_new(int min, int max, int val, int dir);
 
 #endif /* GP_WIDGET_SLIDER_H */
