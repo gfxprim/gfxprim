@@ -144,8 +144,9 @@ struct gp_backend {
 
 static inline void gp_backend_flip(gp_backend *self)
 {
-	if (self->flip)
-		self->flip(self);
+	if (self)
+		if (self->flip)
+			self->flip(self);
 }
 
 void gp_backend_update_rect_xyxy(gp_backend *self,
