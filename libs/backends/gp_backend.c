@@ -172,6 +172,9 @@ void gp_backend_task_rem(gp_backend *self, gp_task *task)
 
 void gp_backend_poll(gp_backend *self)
 {
+	if (!self)
+		return;
+
 	self->poll(self);
 
 	if (self->timers)
