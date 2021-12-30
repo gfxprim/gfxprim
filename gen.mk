@@ -19,6 +19,8 @@ CSOURCES+=$(GENSOURCES)
 #
 ALL+=$(GENHEADERS) $(GENSOURCES)
 
+gen: $(GENHEADERS) $(GENSOURCES)
+
 #
 # Base common templates location
 #

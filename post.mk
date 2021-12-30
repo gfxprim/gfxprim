@@ -12,6 +12,7 @@ clean: $(SUBDIRS)
 distclean: $(SUBDIRS)
 rebuild: $(SUBDIRS)
 install: $(SUBDIRS)
+gen: $(SUBDIRS)
 
 help:
 	@echo "***        Available targets        ***"
