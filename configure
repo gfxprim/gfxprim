@@ -548,7 +548,11 @@ if __name__ ==  '__main__':
                    ["backtrace",
                     "C stack trace writeout",
                     [c_try_compile, "#include <execinfo.h>\nint main(void) { backtrace(0, 0); }",
-                      "Checking for backtrace() ... "], "", "", ["core"]]], cfg)
+                      "Checking for backtrace() ... "], "", "", ["core"]],
+                   ["stb_image",
+                    "STB Image",
+                    [header_exists, "stdlib.h"], "", "", ["loaders"]]
+                    ], cfg)
 
     parser = OptionParser();
 

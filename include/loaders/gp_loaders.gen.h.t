@@ -28,7 +28,7 @@ static inline gp_pixmap *gp_read_{{fmt}}(gp_io *io, gp_progress_cb *callback)
 }
 @ end
 
-@ for fmt in ['bmp', 'jpg', 'png', 'tiff', 'pbm', 'pgm', 'ppm', 'pnm']:
+@ for fmt in ['bmp', 'jpg', 'png', 'tiff', 'pbm', 'pgm', 'ppm', 'pnm', 'stb_image']:
 {@ reader(fmt) @}
 
 int gp_write_{{fmt}}(const gp_pixmap *src, gp_io *io,
