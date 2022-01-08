@@ -144,20 +144,32 @@ Basic pixmap functions
 /* or */
 #include <gfxprim.h>
 
+enum gp_pixmap_init_flags {
+        GP_PIXMAP_FREE_PIXELS = 0x01, /* If set the pixmap->pixels is freed on gp_pixmap_free() */
+};
+
 gp_pixmap *gp_pixmap_init(gp_pixmap *pixmap, gp_size w, gp_size h,
-                          gp_pixel_type type, void *pixels);
+                          gp_pixel_type type, void *pixels,
+                          enum gp_pixmap_init_flags flags);
+
+gp_pixmap *gp_pixmap_from_data(gp_size w, gp_size h,
+                               gp_pixel_type type, void *pixels,
+                               enum gp_pixmap_init_flags flags);
 -------------------------------------------------------------------------------
 
 Initialize given pixmap accordingly to parameters, the rest of pixmap
 parameters are set to the default values (i.e. rotation flags are all set to
-zero, 'free_pixels' flag is not set). Number of bits per pixel and
-bytes per row are computed from the given pixel type and size.
+zero). Number of bits per pixel and bytes per row are computed from the given
+pixel type and size.
 
-The 'pixels' pointer can be NULL and can be changed later manually (the call
-will *not* try to allocate the pixel memory automatically).
+The 'pixels' pointer can be NULL and can be changed later (the call will *not*
+try to allocate the pixel memory automatically).
 
 The function returns a pointer to the initialized pixmap (i.e. the same
 pointer you passed as second argument).
+
+The 'gp_pixmap_from_data()' is a shorthand for allocating the pixmap structure
+and calling the 'gp_pixmap_init()'.
 
 [source,c]
 -------------------------------------------------------------------------------

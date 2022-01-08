@@ -266,7 +266,7 @@ gp_backend *gp_proxy_init(const char *path, const char *title)
 	while (!priv->dummy.pixel_type)
 		proxy_wait(ret);
 
-	gp_pixmap_init(&priv->dummy, 0, 0, priv->dummy.pixel_type, NULL);
+	gp_pixmap_init(&priv->dummy, 0, 0, priv->dummy.pixel_type, NULL, 0);
 
 	return ret;
 }

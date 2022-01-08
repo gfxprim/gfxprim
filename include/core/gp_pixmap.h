@@ -102,14 +102,58 @@ int gp_pixmap_set_gamma(gp_pixmap *self, float gamma);
  */
 void gp_pixmap_free(gp_pixmap *pixmap);
 
-/*
- * Initalize pixmap, pixels pointer is not dereferenced so it's safe to pass
- * NULL there and allocate it later with size pixmap->bpr * pixmap->h.
+enum gp_pixmap_init_flags {
+	GP_PIXMAP_FREE_PIXELS = 0x01, /* If set the pixmap->pixels is freed on gp_pixmap_free() */
+};
+
+/**
+ * @brief Initializes allocated pixmap structure.
  *
- * The returned pointer is the pointer you passed as first argument.
+ * Initalize pixmap structure, pixels pointer is not dereferenced so it's safe
+ * to pass NULL there and allocate it later with size pixmap->bpr * pixmap->h.
+ *
+ * BEWARE: The user has to make sure that the pixels array has correct size and
+ *         format.
+ *
+ * @pixmap A pointer to a pixmap structure to be initialized with a data.
+ * @w Pixmap width
+ * @h Pixmap height
+ * @type A pixel type, describes how pixels are organized in the data buffer.
+ * @data A pointer to data buffer with the pixel data.
+ * @flags A bitmask or of the enum gp_pixmap_init_flags
+ *
+ * @return Returns pointer to pixmap that is passed as first argument.
  */
 gp_pixmap *gp_pixmap_init(gp_pixmap *pixmap, gp_size w, gp_size h,
-                          gp_pixel_type type, void *pixels);
+                          gp_pixel_type type, void *pixels,
+                          enum gp_pixmap_init_flags flags);
+
+/*
+ * Creates a pixmap from a buffer allocated by malloc().
+ *
+ * This is actually shorthand for allocating the gp_pixmap structure and
+ * calling gp_pixmap_init() on the resulting pointer.
+ *
+ * BEWARE: The user has to make sure that the pixels array has correct size and
+ * format.
+ *
+ * @w Pixmap width
+ * @h Pixmap height
+ * @type A pixel type, describes how pixels are organized in the data buffer.
+ * @data A pointer to data buffer with the pixel data.
+ * @flags A bitmask or of the enum gp_pixmap_init_flags
+ */
+static inline gp_pixmap *gp_pixmap_from_data(gp_size w, gp_size h,
+                                             gp_pixel_type type, void *pixels,
+					     enum gp_pixmap_init_flags flags)
+{
+	gp_pixmap *ret = malloc(sizeof(gp_pixmap));
+
+	if (!ret)
+		return NULL;
+
+	return gp_pixmap_init(ret, w, h, type, pixels, flags);
+}
 
 /*
  * Resizes pixmap->pixels array and changes metadata to match the new size.

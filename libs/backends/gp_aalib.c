@@ -130,7 +130,7 @@ static int aalib_resize_ack(gp_backend *self)
 
 	GP_DEBUG(1, "Reinitializing Pixmap %ix%i", w, h);
 
-	gp_pixmap_init(&aa->pixmap, w, h, GP_PIXEL_G8, aa_image(aa->c));
+	gp_pixmap_init(&aa->pixmap, w, h, GP_PIXEL_G8, aa_image(aa->c), 0);
 
 	return 0;
 }
@@ -227,7 +227,7 @@ gp_backend *gp_aalib_init(void)
 
 	GP_DEBUG(1, "Initializing Pixmap %ix%i", w, h);
 
-	gp_pixmap_init(&aa->pixmap, w, h, GP_PIXEL_G8, aa_image(aa->c));
+	gp_pixmap_init(&aa->pixmap, w, h, GP_PIXEL_G8, aa_image(aa->c), 0);
 
 	backend->pixmap = &aa->pixmap;
 	backend->name = "AALib";

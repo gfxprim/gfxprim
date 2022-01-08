@@ -47,7 +47,7 @@ struct gp_proxy_shm *gp_proxy_shm_init(const char *path, gp_size w, gp_size h, g
 
 	strcpy(ret->path.path, path);
 
-	gp_pixmap_init(&ret->pixmap, w, h, type, NULL);
+	gp_pixmap_init(&ret->pixmap, w, h, type, NULL, 0);
 
 	size_t size = round_to_page_size(ret->pixmap.bytes_per_row * h);
 
@@ -90,12 +90,12 @@ int gp_proxy_shm_resize(struct gp_proxy_shm *self, gp_size w, gp_size h)
 	gp_pixmap new;
 	gp_pixel_type ptype = self->pixmap.pixel_type;
 
-	gp_pixmap_init(&new, w, h, ptype, NULL);
+	gp_pixmap_init(&new, w, h, ptype, NULL, 0);
 
 	size_t new_size = round_to_page_size(new.bytes_per_row * h);
 
 	if (self->size == new_size) {
-		gp_pixmap_init(&self->pixmap, w, h, ptype, self->pixmap.pixels);
+		gp_pixmap_init(&self->pixmap, w, h, ptype, self->pixmap.pixels, 0);
 		return 0;
 	}
 
@@ -115,7 +115,7 @@ int gp_proxy_shm_resize(struct gp_proxy_shm *self, gp_size w, gp_size h)
 
 	self->size = new_size;
 	self->path.size = new_size;
-	gp_pixmap_init(&self->pixmap, w, h, ptype, p);
+	gp_pixmap_init(&self->pixmap, w, h, ptype, p, 0);
 	return 1;
 }
 

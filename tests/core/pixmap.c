@@ -9,9 +9,9 @@
 
  */
 #include <errno.h>
-
+#include <string.h>
 #include <core/gp_pixmap.h>
-
+#include <core/gp_get_put_pixel.h>
 #include "tst_test.h"
 
 /*
@@ -264,6 +264,51 @@ static int pixmap_invalid_pixeltype2(void)
 	return TST_SUCCESS;
 }
 
+static int pixmap_from_data(void)
+{
+	gp_pixmap *p;
+	unsigned char *data = malloc(100);
+	unsigned int i, j;
+
+	memset(data, 127, 100);
+
+	p = gp_pixmap_from_data(10, 10, GP_PIXEL_G8, data, GP_PIXMAP_FREE_PIXELS);
+	if (!p) {
+		tst_msg("Malloc failed :(");
+		return TST_FAILED;
+	}
+
+	for (i = 0; i < 10; i++) {
+		for (j = 0; j < 10; j++) {
+			if (gp_getpixel(p, i, j) != 127) {
+				tst_msg("Wrong data in pixmap at %u, %u!", i, j);
+				return TST_FAILED;
+			}
+		}
+	}
+
+	gp_pixmap_free(p);
+	return TST_SUCCESS;
+}
+
+static int pixmap_from_static_data(void)
+{
+	gp_pixmap *p;
+	unsigned char data[] = {0, 0, 0,
+	                        0, 1, 0,
+	                        0, 0, 0};
+
+	p = gp_pixmap_from_data(3, 3, GP_PIXEL_G8, data, 0);
+
+	if (gp_getpixel(p, 1, 1) != 1) {
+		tst_msg("Wrong data at 1, 1");
+		return TST_FAILED;
+	}
+
+	gp_pixmap_free(p);
+	return TST_SUCCESS;
+}
+
 const struct tst_suite tst_suite = {
 	.suite_name = "Pixmap Testsuite",
 	.tests = {
@@ -271,6 +316,12 @@ const struct tst_suite tst_suite = {
 		 .flags = TST_CHECK_MALLOC},
 		{.name = "SubPixmap Alloc Free",
 		 .tst_fn = SubPixmap_Alloc_Free,
+		 .flags = TST_CHECK_MALLOC},
+		{.name = "pixmap from data",
+		 .tst_fn = pixmap_from_data,
+		 .flags = TST_CHECK_MALLOC},
+		{.name = "pixmap from static data",
+		 .tst_fn = pixmap_from_static_data,
 		 .flags = TST_CHECK_MALLOC},
 		{.name = "SubPixmap Create",
 		 .tst_fn = SubPixmap_Create},
