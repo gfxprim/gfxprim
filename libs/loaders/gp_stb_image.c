@@ -27,7 +27,11 @@
 #define STBI_NO_STDIO
 #define STBI_NO_THREAD_LOCALS
 #define STBI_NO_LINEAR
+// Disable a few already implemented formats.
 #define STBI_NO_HDR
+#define STBI_NO_PSD
+#define STBI_NO_BMP
+#define STBI_NO_PNM
 #define STBI_ASSERT(x) GP_ASSERT(x, "stb_image.h assertion")
 #include <loaders/stb/stb_image.h>
 
@@ -43,7 +47,7 @@ int gp_match_stb_image(const void *buf) {
     return 1;
 }
 
-int gp_read_stb_image_ex(gp_io *io, gp_pixmap **img, gp_storage *storage,
+int gp_read_stb_image_ex(gp_io *io, gp_pixmap **img, gp_storage * GP_UNUSED(storage),
                    gp_progress_cb *callback) {
     // Allocate the buffer.
     off_t size = gp_io_size(io);
@@ -65,26 +69,23 @@ int gp_read_stb_image_ex(gp_io *io, gp_pixmap **img, gp_storage *storage,
     int width;
     int height;
     int components;
-    stbi_uc* data = stbi_load_from_memory(buffer, (int)size, &width, &height, &components, (*img)->bpp);
+    // TODO: Support adaptive components per pixel by passing 0 instead of 4.
+    stbi_uc* data = stbi_load_from_memory(buffer, (int)size, &width, &height, &components, 4);
     if (!data) {
-        GP_DEBUG(1, "Failed to read STB Image");
+        GP_DEBUG(1, "Failed to read STB Image: %s", stbi_failure_reason());
 		errno = EIO;
         return 1;
     }
 
-    // Ensure the destination has the correct image size.
-    if (gp_pixmap_resize(*img, width, height) != 0) {
-        free(data);
-        GP_DEBUG(1, "Failed to resize image to correct STB Image size");
-		errno = ENOSYS;
+    gp_pixmap* ret = gp_pixmap_from_data(width, height, GP_PIXEL_RGBA8888, data, GP_PIXMAP_FREE_PIXELS);
+    if (!ret) {
+        GP_DEBUG(1, "Failed to create gp_pixmap from data");
+		errno = EIO;
         return 1;
     }
 
-    // Set the pixmap data.
-    free((*img)->pixels);
-    (*img)->pixels = data;
-
     // Finish up.
+    *img = ret;
     gp_progress_cb_done(callback);
 
     return 0;
