@@ -32,7 +32,7 @@ static int test_mirror_h(struct testcase *t)
 	int err;
 
 	/* Initialize source pixmap */
-	gp_pixmap_init(&src, t->w, t->h, t->pixel_type, t->src);
+	gp_pixmap_init(&src, t->w, t->h, t->pixel_type, t->src, 0);
 
 	/* Set offset to emulate non-byte aligned subpixmaps */
 	src.offset = t->offset;

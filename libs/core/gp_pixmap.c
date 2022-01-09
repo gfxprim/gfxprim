@@ -123,7 +123,8 @@ void gp_pixmap_free(gp_pixmap *pixmap)
 }
 
 gp_pixmap *gp_pixmap_init(gp_pixmap *pixmap, gp_size w, gp_size h,
-                          gp_pixel_type type, void *pixels)
+                          gp_pixel_type type, void *pixels,
+			  enum gp_pixmap_init_flags flags)
 {
 	uint32_t bpp = gp_pixel_size(type);
 	uint32_t bpr = get_bpr(bpp, w);
@@ -144,7 +145,7 @@ gp_pixmap *gp_pixmap_init(gp_pixmap *pixmap, gp_size w, gp_size h,
 	/* rotation and mirroring */
 	gp_pixmap_set_rotation(pixmap, 0, 0, 0);
 
-	pixmap->free_pixels = 0;
+	pixmap->free_pixels = !!(flags & GP_PIXMAP_FREE_PIXELS);
 
 	return pixmap;
 }

@@ -121,7 +121,7 @@ static int resize_shm_pixmap(struct gp_backend *self, xcb_connection_t *c)
 		return 1;
 
 	gp_pixmap_init(self->pixmap, win->new_w, win->new_h,
-	               self->pixmap->pixel_type, shm_addr);
+	               self->pixmap->pixel_type, shm_addr, 0);
 
 	return 0;
 }
@@ -374,7 +374,7 @@ static int create_shm_backing_pixmap(struct gp_backend *self, xcb_connection_t *
 		return 1;
 	}
 
-	gp_pixmap_init(self->pixmap, w, h, pixel_type, shm_addr);
+	gp_pixmap_init(self->pixmap, w, h, pixel_type, shm_addr, 0);
 
 	return 0;
 }

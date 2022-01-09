@@ -361,7 +361,7 @@ static int create_shm_ximage(gp_backend *self, gp_size w, gp_size h)
 		goto err2;
 	}
 
-	gp_pixmap_init(&win->pixmap, w, h, pixel_type, win->shminfo.shmaddr);
+	gp_pixmap_init(&win->pixmap, w, h, pixel_type, win->shminfo.shmaddr, 0);
 	win->pixmap.bytes_per_row = win->img->bytes_per_line;
 
 	self->pixmap = &win->pixmap;
