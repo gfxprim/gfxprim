@@ -134,9 +134,7 @@ int main(int argc, char *argv[])
 				switch (ev->key.key) {
 				case GP_KEY_ESC:
 				case GP_KEY_Q:
-					gp_backend_exit(backend);
-					gp_grabber_exit(grabber);
-					return 0;
+					goto exit;
 				break;
 				case GP_KEY_S:
 					save_image(backend->pixmap);
@@ -151,16 +149,23 @@ int main(int argc, char *argv[])
 				}
 			break;
 			case GP_EV_SYS:
-				if (ev->code == GP_EV_SYS_RESIZE) {
+				switch (ev->code) {
+				case GP_EV_SYS_RESIZE:
 					gp_backend_resize_ack(backend);
 					gp_fill(backend->pixmap, 0);
+				break;
+				case GP_EV_SYS_QUIT:
+					goto exit;
+				break;
 				}
 			break;
 			}
 		}
 	}
 
+exit:
 	gp_backend_exit(backend);
+	gp_grabber_exit(grabber);
 
 	return 0;
 }
