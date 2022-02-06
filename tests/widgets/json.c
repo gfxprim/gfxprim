@@ -20,7 +20,7 @@ static int invalid_empty(struct tcase *t)
 {
 	gp_widget *ret;
 
-	ret = gp_widget_from_json_str(t->json, NULL);
+	ret = gp_widget_from_json_str(t->json, NULL, NULL);
 	if (ret) {
 		tst_msg("Parser was successful!");
 		return TST_FAILED;
@@ -47,7 +47,7 @@ static int load_json(struct tcase *t)
 
 	ev_type = 0;
 
-	ret = gp_widget_from_json_str(t->json, &uids);
+	ret = gp_widget_from_json_str(t->json, NULL, &uids);
 	if (!ret) {
 		tst_msg("Parser failed!");
 		return TST_FAILED;

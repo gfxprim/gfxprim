@@ -81,7 +81,7 @@ int main(int argc, char *argv[])
 {
 	gp_htable *uids;
 
-	gp_widget *layout = gp_widget_layout_json("choice.json", &uids);
+	gp_widget *layout = gp_widget_layout_json("choice.json", NULL, &uids);
 	if (!layout)
 		return 0;
 

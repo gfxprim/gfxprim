@@ -2,7 +2,7 @@
 
 /*
 
-   Copyright (c) 2014-2021 Cyril Hrubis <metan@ucw.cz>
+   Copyright (c) 2014-2022 Cyril Hrubis <metan@ucw.cz>
 
  */
 
@@ -47,11 +47,14 @@ void gp_dialog_free(gp_dialog *self);
  * parse layout from fallback JSON string.
  *
  * @dialog_name Dialog name.
+ * @callbacks Structure with NULL terminated array of dialog callbacks.
  * @fallback_json Fallback dialog JSON layout.
  * @uids An pointer to store the has table UIDs to. Must be initialized to NULL.
  *
  * @return A widget layout or NULL in a case of a failure.
  */
-gp_widget *gp_dialog_layout_load(const char *dialog_name, const char *fallback_json, gp_htable **uids);
+gp_widget *gp_dialog_layout_load(const char *dialog_name,
+                                 const gp_widget_json_callbacks *const callbacks,
+                                 const char *fallback_json, gp_htable **uids);
 
 #endif /* GP_DIALOG_H */

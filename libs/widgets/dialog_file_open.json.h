@@ -19,7 +19,7 @@ static const char *dialog_file_open = "\
      \"align\": \"fill\", \n\
      \"min_rows\": 25, \n\
      \"uid\": \"files\", \n\
-     \"col_ops\": \"gp_dialog_files_col_ops\", \n\
+     \"col_ops\": \"file_table\", \n\
      \"header\": [ \n\
       {\"label\": \"File\", \"id\": \"name\", \"min_size\": 20, \"fill\": 1}, \n\
       {\"label\": \"Size\", \"id\": \"size\", \"min_size\": 7}, \n\
@@ -34,29 +34,10 @@ static const char *dialog_file_open = "\
       \"cpadf\": \"0, 0, 1, 1, 0, 0\", \n\
       \"widgets\": [ \n\
         {\"type\": \"label\", \"text\": \"Filter:\"}, \n\
-        { \n\
-	  \"type\": \"tbox\", \n\
-	  \"len\": 20, \n\
-	  \"uid\": \"filter\", \n\
-	  \"halign\": \"fill\" \n\
-        }, \n\
-	{ \n\
-	 \"type\": \"checkbox\", \n\
-	 \"label\": \"Show Hidden\", \n\
-	 \"uid\": \"hidden\" \n\
-	}, \n\
-	{ \n\
-          \"type\": \"button\", \n\
-          \"label\": \"Cancel\", \n\
-	  \"btype\": \"cancel\", \n\
-	  \"uid\": \"cancel\" \n\
-        }, \n\
-        { \n\
-          \"type\": \"button\", \n\
-          \"label\": \"Open\", \n\
-	  \"btype\": \"open\", \n\
-	  \"uid\": \"open\" \n\
-        } \n\
+        {\"type\": \"tbox\", \"len\": 20, \"uid\": \"filter\", \"halign\": \"fill\"}, \n\
+	{\"type\": \"checkbox\", \"label\": \"Show Hidden\", \"uid\": \"hidden\"}, \n\
+	{\"type\": \"button\", \"label\": \"Cancel\", \"btype\": \"cancel\", \"on_event\": \"cancel\"}, \n\
+        {\"type\": \"button\", \"label\": \"Open\", \"btype\": \"open\", \"on_event\": \"open\"} \n\
       ] \n\
     } \n\
   ] \n\

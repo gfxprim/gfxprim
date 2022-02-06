@@ -2,7 +2,7 @@
 
 /*
 
-   Copyright (c) 2014-2021 Cyril Hrubis <metan@ucw.cz>
+   Copyright (c) 2014-2022 Cyril Hrubis <metan@ucw.cz>
 
  */
 
@@ -37,24 +37,37 @@ static int do_yes(gp_widget_event *ev)
 	return 0;
 }
 
+static const gp_widget_json_addr addrs[] = {
+	{.id = "cancel", .on_event = do_no},
+	{.id = "no", .on_event = do_no},
+	{.id = "ok", .on_event = do_yes},
+	{.id = "yes", .on_event = do_yes},
+	{}
+};
+
 static gp_widget *load_layout(enum gp_dialog_msg_type type, const char *title,
                               gp_dialog *dialog, gp_widget **label)
 {
 	gp_widget *ret, *w;
 	gp_htable *uids = NULL;
 
+	gp_widget_json_callbacks callbacks = {
+		.default_priv = dialog,
+		.addrs = addrs,
+	};
+
 	switch (type) {
 	case GP_DIALOG_MSG_INFO:
-		ret = gp_dialog_layout_load("msg_info", dialog_info, &uids);
+		ret = gp_dialog_layout_load("msg_info", &callbacks, dialog_info, &uids);
 	break;
 	case GP_DIALOG_MSG_WARN:
-		ret = gp_dialog_layout_load("msg_warn", dialog_warn, &uids);
+		ret = gp_dialog_layout_load("msg_warn", &callbacks, dialog_warn, &uids);
 	break;
 	case GP_DIALOG_MSG_ERR:
-		ret = gp_dialog_layout_load("msg_err", dialog_err, &uids);
+		ret = gp_dialog_layout_load("msg_err", &callbacks, dialog_err, &uids);
 	break;
 	case GP_DIALOG_MSG_QUESTION:
-		ret = gp_dialog_layout_load("msg_question", dialog_question, &uids);
+		ret = gp_dialog_layout_load("msg_question", &callbacks, dialog_question, &uids);
 	break;
 	default:
 		GP_WARN("Invalid dialog type %i", type);
@@ -67,20 +80,6 @@ static gp_widget *load_layout(enum gp_dialog_msg_type type, const char *title,
 	if (title) {
 		w = gp_widget_by_uid(uids, "title", GP_WIDGET_FRAME);
 		gp_widget_frame_title_set(w, title);
-	}
-
-	if (type == GP_DIALOG_MSG_QUESTION) {
-		w = gp_widget_by_uid(uids, "btn_no", GP_WIDGET_BUTTON);
-		if (w)
-			gp_widget_event_handler_set(w, do_no, dialog);
-
-		w = gp_widget_by_uid(uids, "btn_yes", GP_WIDGET_BUTTON);
-		if (w)
-			gp_widget_event_handler_set(w, do_yes, dialog);
-	} else {
-		w = gp_widget_by_uid(uids, "btn_ok", GP_WIDGET_BUTTON);
-		if (w)
-			gp_widget_event_handler_set(w, do_yes, dialog);
 	}
 
 	*label = gp_widget_by_uid(uids, "text", GP_WIDGET_LABEL);

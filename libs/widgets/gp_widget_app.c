@@ -2,7 +2,7 @@
 
 /*
 
-   Copyright (c) 2014-2021 Cyril Hrubis <metan@ucw.cz>
+   Copyright (c) 2014-2022 Cyril Hrubis <metan@ucw.cz>
 
  */
 
@@ -21,7 +21,7 @@ static gp_widget *try_load_layout(const char *pathname, gp_htable **uids)
 
 	GP_DEBUG(3, "Trying '%s'", pathname);
 
-	return gp_widget_layout_json(pathname, uids);
+	return gp_widget_layout_json(pathname, NULL, uids);
 }
 
 static gp_widget *layout_load(const char *app_name, const char *json_name, gp_htable **uids)

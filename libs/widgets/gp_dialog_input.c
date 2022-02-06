@@ -2,7 +2,7 @@
 
 /*
 
-   Copyright (c) 2014-2021 Cyril Hrubis <metan@ucw.cz>
+   Copyright (c) 2014-2022 Cyril Hrubis <metan@ucw.cz>
 
  */
 
@@ -47,12 +47,24 @@ static int input_on_event(gp_widget_event *ev)
 	return 0;
 }
 
+static const gp_widget_json_addr addrs[] = {
+	{.id = "cancel", .on_event = cancel_on_event},
+	{.id = "input", .on_event = input_on_event},
+	{.id = "ok", .on_event = ok_on_event},
+	{}
+};
+
 static gp_widget *load_layout(const char *title, gp_dialog *dialog, gp_widget **input)
 {
 	gp_widget *ret, *w;
 	gp_htable *uids = NULL;
 
-	ret = gp_dialog_layout_load("text_input", dialog_input, &uids);
+	gp_widget_json_callbacks callbacks = {
+		.default_priv = dialog,
+		.addrs = addrs,
+	};
+
+	ret = gp_dialog_layout_load("text_input", &callbacks, dialog_input, &uids);
 	if (!ret)
 		return NULL;
 
@@ -61,17 +73,7 @@ static gp_widget *load_layout(const char *title, gp_dialog *dialog, gp_widget **
 		gp_widget_frame_title_set(w, title);
 	}
 
-	w = gp_widget_by_uid(uids, "btn_ok", GP_WIDGET_BUTTON);
-	if (w)
-		gp_widget_event_handler_set(w, ok_on_event, dialog);
-
-	w = gp_widget_by_uid(uids, "btn_cancel", GP_WIDGET_BUTTON);
-	if (w)
-		gp_widget_event_handler_set(w, cancel_on_event, dialog);
-
 	*input = gp_widget_by_uid(uids, "input", GP_WIDGET_TBOX);
-	if (*input)
-		gp_widget_event_handler_set(*input, input_on_event, dialog);
 
 	gp_htable_free(uids);
 
@@ -80,8 +82,8 @@ static gp_widget *load_layout(const char *title, gp_dialog *dialog, gp_widget **
 
 char *gp_dialog_input_run(const char *title)
 {
-	gp_widget *input = NULL;
 	gp_dialog dialog = {};
+	gp_widget *input = NULL;
 	char *ret = NULL;
 
 	dialog.layout = load_layout(title, &dialog, &input);
@@ -95,6 +97,7 @@ char *gp_dialog_input_run(const char *title)
 
 	if (gp_dialog_run(&dialog) == GP_DIALOG_YES)
 		ret = strdup(gp_widget_tbox_text(input));
+
 ret:
 	gp_widget_free(dialog.layout);
 	return ret;

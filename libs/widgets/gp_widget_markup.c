@@ -204,7 +204,7 @@ static gp_widget *json_to_markup(gp_json_buf *json, gp_json_val *val, gp_widget_
 	GP_JSON_OBJ_FILTER(json, val, &obj_filter, gp_widget_json_attrs) {
 		switch (val->idx) {
 		case GET:
-			get = gp_widget_callback_addr(val->val_str);
+			get = gp_widget_callback_addr(val->val_str, ctx);
 		break;
 		case TEXT:
 			ret = gp_widget_markup_new(val->val_str, NULL);

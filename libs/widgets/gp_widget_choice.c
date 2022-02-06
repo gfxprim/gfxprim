@@ -154,7 +154,7 @@ gp_widget *gp_widget_choice_from_json(unsigned int widget_type,
 				continue;
 			}
 
-			ops = gp_widget_struct_addr(val->val_str);
+			ops = gp_widget_struct_addr(val->val_str, ctx);
                         if (!ops) {
 	                        gp_json_warn(json, "No ops structure '%s' defined", val->val_str);
 				continue;

@@ -18,7 +18,7 @@ static int button_json_load(struct tcase *t)
 {
 	gp_widget *button;
 
-	button = gp_widget_from_json_str(t->json, NULL);
+	button = gp_widget_from_json_str(t->json, NULL, NULL);
 	if (!button) {
 		tst_msg("Failed to load JSON");
 		return TST_FAILED;

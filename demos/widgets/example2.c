@@ -69,7 +69,7 @@ int slider_event(gp_widget_event *ev)
 
 int main(int argc, char *argv[])
 {
-	gp_widget *layout = gp_widget_layout_json("example2.json", NULL);
+	gp_widget *layout = gp_widget_layout_json("example2.json", NULL, NULL);
 	if (!layout)
 		return 0;
 

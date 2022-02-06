@@ -2,7 +2,7 @@
 
 /*
 
-   Copyright (c) 2014-2021 Cyril Hrubis <metan@ucw.cz>
+   Copyright (c) 2014-2022 Cyril Hrubis <metan@ucw.cz>
 
  */
 
@@ -17,6 +17,7 @@ typedef struct gp_dialog gp_dialog;
 typedef struct gp_widget_size gp_widget_size;
 typedef struct gp_widget_render_ctx gp_widget_render_ctx;
 typedef struct gp_widget_json_ctx gp_widget_json_ctx;
+typedef struct gp_widget_json_callbacks gp_widget_json_callbacks;
 
 typedef uint32_t gp_widget_tattr;
 

@@ -54,7 +54,7 @@ int inner_button_event(gp_widget_event *ev)
 
 int main(int argc, char *argv[])
 {
-	gp_widget *layout = gp_widget_layout_json("scroll_area_example.json", &uids);
+	gp_widget *layout = gp_widget_layout_json("scroll_area_example.json", NULL, &uids);
 	if (!layout)
 		return 0;
 

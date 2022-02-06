@@ -2,7 +2,7 @@
 
 /*
 
-   Copyright (c) 2014-2021 Cyril Hrubis <metan@ucw.cz>
+   Copyright (c) 2014-2022 Cyril Hrubis <metan@ucw.cz>
 
  */
 
@@ -475,26 +475,40 @@ ret0:
 	return 0;
 }
 
+static const gp_widget_json_addr addrs[] = {
+	{.id = "cancel", .on_event = cancel_on_event},
+	{.id = "file_table", .table_col_ops = &gp_dialog_files_col_ops},
+	{.id = "new_dir", .on_event = new_dir_on_event},
+	{.id = "open", .on_event = open_on_event},
+	{.id = "save", .on_event = save_on_event},
+	{}
+};
+
 gp_dialog *gp_dialog_file_save_new(const char *path,
                                    const char *const ext_hints[])
 {
 	gp_htable *uids = NULL;
-	gp_widget *layout, *w;
+	gp_widget *layout;
 	gp_dialog *ret;
 	struct file_dialog *dialog;
 
-	layout = gp_dialog_layout_load("file_save", dialog_file_save, &uids);
-	if (!layout)
-		return NULL;
-
 	ret = gp_dialog_new(sizeof(struct file_dialog));
 	if (!ret)
+		return NULL;
+
+	dialog = (void*)ret->payload;
+
+	gp_widget_json_callbacks callbacks = {
+		.default_priv = dialog,
+		.addrs = addrs,
+	};
+
+	layout = gp_dialog_layout_load("file_save", &callbacks, dialog_file_save, &uids);
+	if (!layout)
 		goto err0;
 
 	ret->layout = layout;
 	ret->input_event = file_open_input_event;
-
-	dialog = (void*)ret->payload;
 
 	dialog->show_hidden = gp_widget_by_uid(uids, "hidden", GP_WIDGET_CHECKBOX);
 	dialog->filename = gp_widget_by_uid(uids, "filename", GP_WIDGET_TBOX);
@@ -509,18 +523,6 @@ gp_dialog *gp_dialog_file_save_new(const char *path,
 
 	gp_widget_event_handler_set(dialog->file_table, table_on_event, dialog);
 	gp_widget_event_unmask(dialog->file_table, GP_WIDGET_EVENT_INPUT);
-
-	w = gp_widget_by_uid(uids, "save", GP_WIDGET_BUTTON);
-	if (w)
-		gp_widget_event_handler_set(w, save_on_event, dialog);
-
-	w = gp_widget_by_uid(uids, "cancel", GP_WIDGET_BUTTON);
-	if (w)
-		gp_widget_event_handler_set(w, cancel_on_event, dialog);
-
-	w = gp_widget_by_uid(uids, "new_dir", GP_WIDGET_BUTTON);
-	if (w)
-		gp_widget_event_handler_set(w, new_dir_on_event, dialog);
 
 	gp_htable_free(uids);
 
@@ -539,31 +541,36 @@ gp_dialog *gp_dialog_file_save_new(const char *path,
 
 	return ret;
 err1:
-	free(ret);
-err0:
 	gp_widget_free(layout);
+err0:
+	free(ret);
 	return NULL;
 }
 
 gp_dialog *gp_dialog_file_open_new(const char *path)
 {
 	gp_htable *uids = NULL;
-	gp_widget *layout, *w;
+	gp_widget *layout;
 	gp_dialog *ret;
 	struct file_dialog *dialog;
 
-	layout = gp_dialog_layout_load("file_open", dialog_file_open, &uids);
-	if (!layout)
-		return NULL;
-
 	ret = gp_dialog_new(sizeof(struct file_dialog));
 	if (!ret)
+		return NULL;
+
+	dialog = (void*)ret->payload;
+
+	gp_widget_json_callbacks callbacks = {
+		.default_priv = dialog,
+		.addrs = addrs,
+	};
+
+	layout = gp_dialog_layout_load("file_open", &callbacks, dialog_file_open, &uids);
+	if (!layout)
 		goto err0;
 
 	ret->layout = layout;
 	ret->input_event = file_open_input_event;
-
-	dialog = (void*)ret->payload;
 
 	dialog->show_hidden = gp_widget_by_uid(uids, "hidden", GP_WIDGET_CHECKBOX);
 	dialog->filter = gp_widget_by_uid(uids, "filter", GP_WIDGET_TBOX);
@@ -580,14 +587,6 @@ gp_dialog *gp_dialog_file_open_new(const char *path)
 
 	gp_widget_event_handler_set(dialog->file_table, table_on_event, dialog);
 	gp_widget_event_unmask(dialog->file_table, GP_WIDGET_EVENT_INPUT);
-
-	w = gp_widget_by_uid(uids, "open", GP_WIDGET_BUTTON);
-	if (w)
-		gp_widget_event_handler_set(w, open_on_event, dialog);
-
-	w = gp_widget_by_uid(uids, "cancel", GP_WIDGET_BUTTON);
-	if (w)
-		gp_widget_event_handler_set(w, cancel_on_event, dialog);
 
 	gp_htable_free(uids);
 
@@ -606,9 +605,9 @@ gp_dialog *gp_dialog_file_open_new(const char *path)
 
 	return ret;
 err1:
-	free(ret);
-err0:
 	gp_widget_free(layout);
+err0:
+	free(ret);
 	return NULL;
 }
 

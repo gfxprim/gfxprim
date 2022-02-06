@@ -12,7 +12,7 @@ static const char *dialog_input = "\
       \"cols\": 2, \n\
       \"widgets\": [ \n\
        {\"type\": \"stock\", \"uid\": \"stock\", \"stock\": \"question\"}, \n\
-       {\"type\": \"tbox\", \"uid\": \"input\", \"len\": 15, \"focused\": true} \n\
+       {\"type\": \"tbox\", \"on_event\": \"input\", \"len\": 15, \"focused\": true, \"uid\": \"input\"} \n\
       ] \n\
      }, \n\
      {\"cols\": 2, \n\
@@ -22,8 +22,8 @@ static const char *dialog_input = "\
       \"border\": \"none\", \n\
       \"uniform\": true, \n\
       \"widgets\": [ \n\
-       {\"type\": \"button\", \"halign\": \"fill\", \"label\": \"Cancel\", \"btype\": \"cancel\", \"uid\": \"btn_cancel\"}, \n\
-       {\"type\": \"button\", \"halign\": \"fill\", \"label\": \"OK\", \"btype\": \"ok\", \"uid\": \"btn_ok\"} \n\
+       {\"type\": \"button\", \"halign\": \"fill\", \"label\": \"Cancel\", \"btype\": \"cancel\", \"on_event\": \"cancel\"}, \n\
+       {\"type\": \"button\", \"halign\": \"fill\", \"label\": \"OK\", \"btype\": \"ok\", \"on_event\": \"ok\"} \n\
       ] \n\
      } \n\
     ] \n\

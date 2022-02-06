@@ -1,23 +1,15 @@
 {
  "version": 1,
  "widgets": [
-  {
-   "type": "frame",
-   "uid": "title",
+  {"type": "frame", "uid": "title",
    "widget": {
     "rows": 2,
     "widgets": [
      {
       "cols": 2,
       "widgets": [
-       {
-        "type": "stock",
-        "stock": "question"
-       },
-       {
-        "type": "label",
-        "uid": "text"
-       }
+       {"type": "stock", "stock": "question"},
+       {"type": "label", "uid": "text"}
       ]
      },
      {
@@ -33,14 +25,14 @@
 	"halign": "fill",
         "label": "No",
 	"btype": "cancel",
-        "uid": "btn_no"
+        "on_event": "no"
        },
        {
         "type": "button",
 	"halign": "fill",
         "label": "Yes",
 	"btype": "ok",
-        "uid": "btn_yes",
+        "on_event": "yes",
 	"focused": true
        }
       ]

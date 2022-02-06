@@ -9,7 +9,7 @@
 
 static int load_json(const char *path)
 {
-	gp_widget *layout = gp_widget_layout_json(path, NULL);
+	gp_widget *layout = gp_widget_layout_json(path, NULL, NULL);
 
 	if (!layout)
 		return TST_UNTESTED;

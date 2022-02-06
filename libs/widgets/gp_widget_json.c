@@ -2,7 +2,7 @@
 
 /*
 
-   Copyright (c) 2014-2021 Cyril Hrubis <metan@ucw.cz>
+   Copyright (c) 2014-2022 Cyril Hrubis <metan@ucw.cz>
 
  */
 
@@ -86,6 +86,111 @@ const gp_json_obj *gp_widget_json_attrs = &obj_filter;
 
 extern struct gp_widget_ops gp_widget_grid_ops;
 
+static void *ld_handle;
+
+struct on_event_addr {
+	int (*on_event)(gp_widget_event *ev);
+	void *priv;
+};
+
+static void on_event_from_callbacks(const char *name,
+                                    const gp_widget_json_callbacks *const callbacks,
+                                    struct on_event_addr *ret)
+{
+	size_t i;
+
+	//TODO: Interval divison!
+	for (i = 0; callbacks->addrs[i].id; i++) {
+		if (!strcmp(callbacks->addrs[i].id, name)) {
+			GP_DEBUG(3, "Function '%s' addres is %p", name , callbacks->addrs[i].addr);
+			ret->on_event = callbacks->addrs[i].addr;
+			ret->priv = callbacks->default_priv;
+			return;
+		}
+	}
+
+	GP_WARN("Failed to lookup %s in callbacks", name);
+}
+
+static void *struct_from_callbacks(const char *name,
+                                   const gp_widget_json_callbacks *const callbacks)
+{
+	size_t i;
+
+	//TODO: Interval divison!
+	for (i = 0; callbacks->addrs[i].id; i++) {
+		if (!strcmp(callbacks->addrs[i].id, name)) {
+			GP_DEBUG(3, "Structure '%s' addres is %p", name , callbacks->addrs[i].addr);
+			return callbacks->addrs[i].addr;
+		}
+	}
+
+	GP_WARN("Failed to lookup %s in structures", name);
+
+	return NULL;
+}
+
+void gp_widget_on_event_addr(const char *fn_name,
+                             const gp_widget_json_ctx *ctx,
+			     struct on_event_addr *ret)
+{
+	if (ctx && ctx->callbacks) {
+		on_event_from_callbacks(fn_name, ctx->callbacks, ret);
+		return;
+	}
+
+	if (!ld_handle)
+		return;
+
+	ret->on_event = dlsym(ld_handle, fn_name);
+
+	GP_DEBUG(3, "Function '%s' address is %p", fn_name, ret->on_event);
+}
+
+void *gp_widget_callback_addr(const char *fn_name,
+                              const gp_widget_json_ctx *ctx)
+{
+	struct on_event_addr addr = {};
+
+	gp_widget_on_event_addr(fn_name, ctx, &addr);
+
+	return addr.on_event;
+}
+
+static void *addr_from_callbacks(const char *struct_name,
+                                const gp_widget_json_ctx *ctx)
+{
+	void *ret;
+
+	if (ctx && ctx->callbacks)
+		return struct_from_callbacks(struct_name, ctx->callbacks);
+
+	if (!ld_handle)
+		return NULL;
+
+	ret = dlsym(ld_handle, struct_name);
+
+	GP_DEBUG(3, "Structure '%s' address is %p", struct_name, ret);
+
+	return ret;
+}
+
+void *gp_widget_struct_addr(const char *struct_name,
+                            const gp_widget_json_ctx *ctx)
+{
+	if (ctx && ctx->callbacks)
+		return addr_from_callbacks(struct_name, ctx);
+
+	if (!ld_handle)
+		return NULL;
+
+	void *addr = dlsym(ld_handle, struct_name);
+
+	GP_DEBUG(3, "Structure '%s' address is %p", struct_name, addr);
+
+	return addr;
+}
+
 gp_widget *gp_widget_from_json(gp_json_buf *json, gp_json_val *val, gp_widget_json_ctx *ctx)
 {
 	const struct gp_widget_ops *ops;
@@ -96,7 +201,7 @@ gp_widget *gp_widget_from_json(gp_json_buf *json, gp_json_val *val, gp_widget_js
 	unsigned int shrink;
 	gp_htable **uids = ctx->uids;
 	int focus = 0;
-	int (*on_event)(gp_widget_event *) = NULL;
+	struct on_event_addr on_event = {};
 	gp_widget *(*from_json)(gp_json_buf *, gp_json_val *, gp_widget_json_ctx *) = gp_widget_grid_ops.from_json;
 
 	if (val->type == GP_JSON_NULL)
@@ -152,8 +257,8 @@ gp_widget *gp_widget_from_json(gp_json_buf *json, gp_json_val *val, gp_widget_js
 				gp_json_warn(json, "Invalid halign='%s'", val->val_str);
 		break;
 		case ON_EVENT:
-			on_event = gp_widget_callback_addr(val->val_str);
-			if (!on_event)
+			gp_widget_on_event_addr(val->val_str, ctx, &on_event);
+			if (!on_event.on_event)
 				gp_json_warn(json, "No on_event function '%s' defined", val->val_str);
 		break;
 		case SHRINK:
@@ -253,8 +358,8 @@ gp_widget *gp_widget_from_json(gp_json_buf *json, gp_json_val *val, gp_widget_js
 	}
 ret:
 	wid->align = halign | valign;
-	if (on_event)
-		gp_widget_event_handler_set(wid, on_event, NULL);
+	if (on_event.on_event)
+		gp_widget_event_handler_set(wid, on_event.on_event, on_event.priv);
 
 	if (shrink_set)
 		wid->no_shrink = !shrink;
@@ -268,44 +373,42 @@ skip:
 	return NULL;
 }
 
-static void *ld_handle;
-
-void *gp_widget_callback_addr(const char *fn_name)
+static void check_callback_addrs_sorted(const gp_widget_json_callbacks *const callbacks)
 {
-	if (!ld_handle)
-		return NULL;
+	size_t i;
 
-	//dlerror();
+	if (!callbacks)
+		return;
 
-	void *addr = dlsym(ld_handle, fn_name);
-	//const char *err = dlerror();
+	if (!callbacks->addrs[1].id)
+		return;
 
-	GP_DEBUG(3, "Function '%s' address is %p", fn_name, addr);
+	for (i = 1; callbacks->addrs[i].id; i++) {
+		int cmp;
 
-//	if (err)
-//		GP_WARN("%s", err);
+		cmp = strcmp(callbacks->addrs[i-1].id, callbacks->addrs[i].id);
 
-	return addr;
+		if (!cmp)
+			GP_ABORT("Duplicate id '%s'!", callbacks->addrs[i].id);
+
+		if (cmp > 0) {
+			GP_ABORT("Wrong order of '%s' and '%s'",
+			         callbacks->addrs[i-1].id,
+			         callbacks->addrs[i].id);
+		}
+	}
 }
 
-void *gp_widget_struct_addr(const char *struct_name)
+static gp_widget *gp_widgets_from_json(gp_json_buf *json,
+                                       const gp_widget_json_callbacks *const callbacks,
+                                       gp_htable **uids)
 {
-	if (!ld_handle)
-		return NULL;
-
-	void *addr = dlsym(ld_handle, struct_name);
-
-	GP_DEBUG(3, "Structure '%s' address is %p", struct_name, addr);
-
-	return addr;
-}
-
-static gp_widget *gp_widgets_from_json(gp_json_buf *json, gp_htable **uids)
-{
-	gp_widget_json_ctx ctx = {.uids = uids};
+	gp_widget_json_ctx ctx = {.uids = uids, .callbacks = callbacks};
 	gp_widget *ret;
 	char buf[128];
 	gp_json_val val = {.buf = buf, .buf_size = sizeof(buf)};
+
+	check_callback_addrs_sorted(callbacks);
 
 	if (gp_json_next_type(json) != GP_JSON_OBJ) {
 		gp_json_err(json, "Widget must be a JSON object!");
@@ -352,7 +455,9 @@ static gp_widget *gp_widgets_from_json(gp_json_buf *json, gp_htable **uids)
 	return ret;
 }
 
-gp_widget *gp_widget_layout_json(const char *path, gp_htable **uids)
+gp_widget *gp_widget_layout_json(const char *path,
+                                 const gp_widget_json_callbacks *const callbacks,
+                                 gp_htable **uids)
 {
 	gp_widget *ret = NULL;
 	gp_json_buf *json;
@@ -366,7 +471,7 @@ gp_widget *gp_widget_layout_json(const char *path, gp_htable **uids)
 
 	json->msgf = stderr;
 
-	ret = gp_widgets_from_json(json, uids);
+	ret = gp_widgets_from_json(json, callbacks, uids);
 
 	if (gp_json_is_err(json))
 		gp_json_err_print(json);
@@ -378,7 +483,9 @@ gp_widget *gp_widget_layout_json(const char *path, gp_htable **uids)
 	return ret;
 }
 
-gp_widget *gp_widget_from_json_str(const char *str, gp_htable **uids)
+gp_widget *gp_widget_from_json_str(const char *str,
+                                   const gp_widget_json_callbacks *const callbacks,
+                                   gp_htable **uids)
 {
 	gp_widget *ret = NULL;
 	gp_json_buf json = {
@@ -391,7 +498,7 @@ gp_widget *gp_widget_from_json_str(const char *str, gp_htable **uids)
 	if (uids)
 		*uids = NULL;
 
-	ret = gp_widgets_from_json(&json, uids);
+	ret = gp_widgets_from_json(&json, callbacks, uids);
 
 	if (gp_json_is_err(&json))
 		gp_json_err_print(&json);

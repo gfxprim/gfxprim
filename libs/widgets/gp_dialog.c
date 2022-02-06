@@ -2,7 +2,7 @@
 
 /*
 
-   Copyright (c) 2014-2021 Cyril Hrubis <metan@ucw.cz>
+   Copyright (c) 2014-2022 Cyril Hrubis <metan@ucw.cz>
 
  */
 
@@ -37,7 +37,9 @@ void gp_dialog_free(gp_dialog *self)
 	free(self);
 }
 
-static gp_widget *try_load_layout(const char *pathname, gp_htable **uids)
+static gp_widget *try_load_layout(const char *pathname,
+                                  const gp_widget_json_callbacks *const callbacks,
+                                  gp_htable **uids)
 {
 	if (access(pathname, R_OK)) {
 		GP_DEBUG(3, "File '%s' does not exists or is not readable", pathname);
@@ -46,10 +48,11 @@ static gp_widget *try_load_layout(const char *pathname, gp_htable **uids)
 
 	GP_DEBUG(3, "Trying '%s'", pathname);
 
-	return gp_widget_layout_json(pathname, uids);
+	return gp_widget_layout_json(pathname, callbacks, uids);
 }
 
 gp_widget *gp_dialog_layout_load(const char *dialog_name,
+                                 const gp_widget_json_callbacks *const callbacks,
                                  const char *fallback_json, gp_htable **uids)
 {
 	gp_widget *layout;
@@ -61,7 +64,7 @@ gp_widget *gp_dialog_layout_load(const char *dialog_name,
 		if (!pathname)
 			return NULL;
 
-		layout = try_load_layout(pathname, uids);
+		layout = try_load_layout(pathname, callbacks, uids);
 		if (layout)
 			goto ret;
 	}
@@ -70,11 +73,11 @@ gp_widget *gp_dialog_layout_load(const char *dialog_name,
 	if (!pathname)
 		return NULL;
 
-	layout = try_load_layout(pathname, uids);
+	layout = try_load_layout(pathname, callbacks, uids);
 	if (layout)
 		goto ret;
 
-	layout = gp_widget_from_json_str(fallback_json, uids);
+	layout = gp_widget_from_json_str(fallback_json, callbacks, uids);
 ret:
 	gp_vec_free(pathname);
 	return layout;

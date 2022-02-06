@@ -23,7 +23,7 @@ int main(int argc, char *argv[])
 		return 1;
 	}
 
-	gp_widget *layout = gp_widget_layout_json(argv[0], NULL);
+	gp_widget *layout = gp_widget_layout_json(argv[0], NULL, NULL);
 	if (!layout) {
 		fprintf(stderr, "Layout cannot be loaded!\n");
 		return 1;

@@ -58,7 +58,7 @@ int main(int argc, char *argv[])
 	if (argv[0])
 		layout_path = "login_example_2.json";
 
-	gp_widget *layout = gp_widget_layout_json(layout_path, &uids);
+	gp_widget *layout = gp_widget_layout_json(layout_path, NULL, &uids);
 	if (!layout)
 		return 0;
 

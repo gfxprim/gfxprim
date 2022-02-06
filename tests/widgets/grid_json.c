@@ -25,7 +25,7 @@ static int grid_json_load(struct tcase *t)
 {
 	gp_widget *grid;
 
-	grid = gp_widget_from_json_str(t->json, NULL);
+	grid = gp_widget_from_json_str(t->json, NULL, NULL);
 	if (!grid) {
 		tst_msg("Failed to load JSON");
 		return TST_FAILED;

@@ -20,7 +20,7 @@ static int label_json_load(struct tcase *t)
 {
 	gp_widget *label;
 
-	label = gp_widget_from_json_str(t->json, NULL);
+	label = gp_widget_from_json_str(t->json, NULL, NULL);
 	if (!label) {
 		tst_msg("Failed to load JSON");
 		return TST_FAILED;

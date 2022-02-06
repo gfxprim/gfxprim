@@ -11,11 +11,11 @@ static const char *dialog_file_save = "\
       \"widgets\": [ \n\
 	{\"type\": \"label\", \"text\": \"Directory:\"}, \n\
 	{\"type\": \"tbox\", \"len\": 75, \"halign\": \"fill\", \"uid\": \"path\", \"ttype\": \"path\"}, \n\
-	{\"type\": \"button\", \"btype\": \"new_dir\", \"label\": \"New dir\", \"uid\": \"new_dir\"} \n\
+	{\"type\": \"button\", \"btype\": \"new_dir\", \"label\": \"New dir\", \"on_event\": \"new_dir\"} \n\
       ] \n\
     }, \n\
     {\"type\": \"table\", \"align\": \"fill\", \"min_rows\": 25, \"uid\": \"files\", \n\
-     \"col_ops\": \"gp_dialog_files_col_ops\", \n\
+     \"col_ops\": \"file_table\", \n\
      \"header\": [ \n\
       {\"label\": \"File\", \"id\": \"name\", \"min_size\": 20, \"fill\": 1}, \n\
       {\"label\": \"Size\", \"id\": \"size\", \"min_size\": 7}, \n\
@@ -32,8 +32,8 @@ static const char *dialog_file_save = "\
         {\"type\": \"label\", \"text\": \"Filename:\"}, \n\
         {\"type\": \"tbox\", \"len\": 20, \"uid\": \"filename\", \"halign\": \"fill\", \"focused\": true, \"ttype\": \"filename\"}, \n\
 	{\"type\": \"checkbox\", \"label\": \"Show Hidden\", \"uid\": \"hidden\"}, \n\
-	{\"type\": \"button\", \"label\": \"Cancel\", \"btype\": \"cancel\", \"uid\": \"cancel\"}, \n\
-        {\"type\": \"button\", \"label\": \"Save\", \"btype\": \"save\", \"uid\": \"save\"} \n\
+	{\"type\": \"button\", \"label\": \"Cancel\", \"btype\": \"cancel\", \"on_event\": \"cancel\"}, \n\
+        {\"type\": \"button\", \"label\": \"Save\", \"btype\": \"save\", \"on_event\": \"save\"} \n\
       ] \n\
     } \n\
   ] \n\

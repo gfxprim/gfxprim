@@ -151,7 +151,7 @@ int button_on_event(gp_widget_event *ev)
 
 int main(int argc, char *argv[])
 {
-	gp_widget *layout = gp_widget_layout_json("pixmap_example.json", &uids);
+	gp_widget *layout = gp_widget_layout_json("pixmap_example.json", NULL, &uids);
 	if (!layout)
 		return 0;
 

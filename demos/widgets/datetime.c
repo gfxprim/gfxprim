@@ -94,7 +94,7 @@ int main(int argc, char *argv[])
 {
 	static gp_htable *uids;
 
-	gp_widget *layout = gp_widget_layout_json("datetime.json", &uids);
+	gp_widget *layout = gp_widget_layout_json("datetime.json", NULL, &uids);
 	if (!layout)
 		return 0;
 

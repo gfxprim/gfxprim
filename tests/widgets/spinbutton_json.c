@@ -20,7 +20,7 @@ static int spinbutton_json_load(struct tcase *t)
 	gp_widget *spinbutton;
 	size_t i;
 
-	spinbutton = gp_widget_from_json_str(t->json, NULL);
+	spinbutton = gp_widget_from_json_str(t->json, NULL, NULL);
 	if (!spinbutton) {
 		tst_msg("Failed to load JSON");
 		return TST_FAILED;
@@ -59,7 +59,7 @@ static int spinbutton_json_fail(struct tcase *t)
 {
 	gp_widget *spinbutton;
 
-	spinbutton = gp_widget_from_json_str(t->json, NULL);
+	spinbutton = gp_widget_from_json_str(t->json, NULL, NULL);
 	if (spinbutton) {
 		tst_msg("Loaded broken JSON");
 		return TST_FAILED;

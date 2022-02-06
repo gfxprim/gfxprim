@@ -2,7 +2,7 @@
 
 /*
 
-   Copyright (c) 2014-2021 Cyril Hrubis <metan@ucw.cz>
+   Copyright (c) 2014-2022 Cyril Hrubis <metan@ucw.cz>
 
  */
 
@@ -783,7 +783,7 @@ static gp_widget *json_to_table(gp_json_buf *json, gp_json_val *val, gp_widget_j
 	GP_JSON_OBJ_FILTER(json, val, &obj_filter, gp_widget_json_attrs) {
 		switch (val->idx) {
 		case COL_OPS:
-			col_ops = gp_widget_struct_addr(val->val_str);
+			col_ops = gp_widget_struct_addr(val->val_str, ctx);
 			if (col_ops)
 				col_map = col_ops->col_map;
 			else

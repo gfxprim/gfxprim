@@ -8,8 +8,8 @@
       "border": "none",
       "cfill": "0, 1",
       "widgets": [
-	{"type": "label", "text": "Directory:"},
-	{"type": "tbox", "len": 75, "halign": "fill", "uid": "path", "ttype": "path"}
+        {"type": "label", "text": "Directory:"},
+        {"type": "tbox", "len": 75, "halign": "fill", "uid": "path", "ttype": "path"}
       ]
     },
     {
@@ -18,7 +18,7 @@
      "align": "fill",
      "min_rows": 25,
      "uid": "files",
-     "col_ops": "gp_dialog_files_col_ops",
+     "col_ops": "file_table",
      "header": [
       {"label": "File", "id": "name", "min_size": 20, "fill": 1},
       {"label": "Size", "id": "size", "min_size": 7},
@@ -33,29 +33,10 @@
       "cpadf": "0, 0, 1, 1, 0, 0",
       "widgets": [
         {"type": "label", "text": "Filter:"},
-        {
-	  "type": "tbox",
-	  "len": 20,
-	  "uid": "filter",
-	  "halign": "fill"
-        },
-	{
-	 "type": "checkbox",
-	 "label": "Show Hidden",
-	 "uid": "hidden"
-	},
-	{
-          "type": "button",
-          "label": "Cancel",
-	  "btype": "cancel",
-	  "uid": "cancel"
-        },
-        {
-          "type": "button",
-          "label": "Open",
-	  "btype": "open",
-	  "uid": "open"
-        }
+        {"type": "tbox", "len": 20, "uid": "filter", "halign": "fill"},
+        {"type": "checkbox", "label": "Show Hidden", "uid": "hidden"},
+        {"type": "button", "label": "Cancel", "btype": "cancel", "on_event": "cancel"},
+        {"type": "button", "label": "Open", "btype": "open", "on_event": "open"}
       ]
     }
   ]
