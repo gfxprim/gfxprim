@@ -160,7 +160,7 @@ int gp_json_obj_next(struct gp_json_buf *buf, struct gp_json_val *res);
 	for (gp_json_obj_first(buf, res); gp_json_valid(res); gp_json_obj_next(buf, res))
 
 /*
- * @brief Utility function for n*log(n) lookup in a sorted array.
+ * @brief Utility function for log(n) lookup in a sorted array.
  *
  * @list Analphabetically sorted array.
  * @list_len Array length.
