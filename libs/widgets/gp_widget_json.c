@@ -142,9 +142,11 @@ void gp_widget_on_event_addr(const char *fn_name,
 	if (!ld_handle)
 		return;
 
+#ifdef HAVE_DL
 	ret->on_event = dlsym(ld_handle, fn_name);
 
 	GP_DEBUG(3, "Function '%s' address is %p", fn_name, ret->on_event);
+#endif
 }
 
 void *gp_widget_callback_addr(const char *fn_name,
@@ -168,9 +170,11 @@ static void *addr_from_callbacks(const char *struct_name,
 	if (!ld_handle)
 		return NULL;
 
+#ifdef HAVE_DL
 	ret = dlsym(ld_handle, struct_name);
 
 	GP_DEBUG(3, "Structure '%s' address is %p", struct_name, ret);
+#endif
 
 	return ret;
 }
@@ -184,11 +188,15 @@ void *gp_widget_struct_addr(const char *struct_name,
 	if (!ld_handle)
 		return NULL;
 
+#ifndef HAVE_DL
+	return NULL;
+#else
 	void *addr = dlsym(ld_handle, struct_name);
 
 	GP_DEBUG(3, "Structure '%s' address is %p", struct_name, addr);
 
 	return addr;
+#endif
 }
 
 gp_widget *gp_widget_from_json(gp_json_buf *json, gp_json_val *val, gp_widget_json_ctx *ctx)
@@ -431,6 +439,9 @@ static gp_widget *gp_widgets_from_json(gp_json_buf *json,
 		return NULL;
 	}
 
+#ifndef HAVE_DL
+	return NULL;
+#else
 	ld_handle = dlopen(NULL, RTLD_LAZY);
 	if (!ld_handle)
 		GP_WARN("Failed to dlopen()");
@@ -453,6 +464,7 @@ static gp_widget *gp_widgets_from_json(gp_json_buf *json,
 	ld_handle = NULL;
 
 	return ret;
+#endif
 }
 
 gp_widget *gp_widget_layout_json(const char *path,
