@@ -6,6 +6,7 @@
 
  */
 
+#include "../../config.h"
 #include <dlfcn.h>
 #include <errno.h>
 #include <string.h>
@@ -142,9 +143,11 @@ void gp_widget_on_event_addr(const char *fn_name,
 	if (!ld_handle)
 		return;
 
+#ifdef HAVE_DL
 	ret->on_event = dlsym(ld_handle, fn_name);
 
 	GP_DEBUG(3, "Function '%s' address is %p", fn_name, ret->on_event);
+#endif
 }
 
 void *gp_widget_callback_addr(const char *fn_name,
@@ -160,19 +163,21 @@ void *gp_widget_callback_addr(const char *fn_name,
 static void *addr_from_callbacks(const char *struct_name,
                                 const gp_widget_json_ctx *ctx)
 {
-	void *ret;
-
 	if (ctx && ctx->callbacks)
 		return struct_from_callbacks(struct_name, ctx->callbacks);
 
 	if (!ld_handle)
 		return NULL;
 
-	ret = dlsym(ld_handle, struct_name);
+#ifdef HAVE_DL
+	void *ret = dlsym(ld_handle, struct_name);
 
 	GP_DEBUG(3, "Structure '%s' address is %p", struct_name, ret);
 
 	return ret;
+#else
+	return NULL;
+#endif
 }
 
 void *gp_widget_struct_addr(const char *struct_name,
@@ -184,11 +189,15 @@ void *gp_widget_struct_addr(const char *struct_name,
 	if (!ld_handle)
 		return NULL;
 
+#ifdef HAVE_DL
 	void *addr = dlsym(ld_handle, struct_name);
 
 	GP_DEBUG(3, "Structure '%s' address is %p", struct_name, addr);
 
 	return addr;
+#else
+	return NULL;
+#endif
 }
 
 gp_widget *gp_widget_from_json(gp_json_buf *json, gp_json_val *val, gp_widget_json_ctx *ctx)
@@ -431,9 +440,11 @@ static gp_widget *gp_widgets_from_json(gp_json_buf *json,
 		return NULL;
 	}
 
+#ifdef HAVE_DL
 	ld_handle = dlopen(NULL, RTLD_LAZY);
 	if (!ld_handle)
 		GP_WARN("Failed to dlopen()");
+#endif
 
 	if (!gp_json_obj_next(json, &val))
 		return NULL;
@@ -448,9 +459,10 @@ static gp_widget *gp_widgets_from_json(gp_json_buf *json,
 		}
 	}
 
+#ifdef HAVE_DL
 	dlclose(ld_handle);
-
 	ld_handle = NULL;
+#endif
 
 	return ret;
 }
