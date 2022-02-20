@@ -6,7 +6,8 @@
  * Copyright (C) 2009-2021 Cyril Hrubis <metan@ucw.cz>
  */
 
-#include "core/gp_common.h"
+#include <string.h>
+#include <core/gp_common.h>
 #include <text/gp_text_metric.h>
 
 extern gp_text_style gp_default_style;
@@ -234,6 +235,41 @@ gp_size gp_text_descent(const gp_text_style *style)
 	style = assert_style(style);
 
 	return multiply_height(style, style->font->descend);
+}
+
+size_t gp_text_fit_width(const gp_text_style *style, const char *str,
+                         gp_size width)
+{
+	size_t left = 0, right = strlen(str);
+	size_t mid = right;
+	gp_size wmid = gp_text_width_len(style, GP_TEXT_LEN_BBOX, str, right);
+
+	//TODO: special case for monospace
+
+	if (wmid <= width)
+		return mid;
+
+	while (right - left > 1) {
+		mid = (left + right)/2;
+		wmid = gp_text_width_len(style, GP_TEXT_LEN_BBOX, str, mid);
+
+		if (wmid < width)
+			left = mid;
+		else
+			right = mid;
+	}
+
+	if (mid == right) {
+		if (wmid <= width)
+			return right;
+		else
+			return left;
+	} else {
+		if (wmid >= width)
+			return left;
+		else
+			return right;
+	}
 }
 
 gp_size gp_text_cur_pos(const gp_text_style *style, const char *str, gp_coord x_off)

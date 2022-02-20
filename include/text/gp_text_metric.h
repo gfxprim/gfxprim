@@ -111,6 +111,15 @@ gp_size gp_text_ascent(const gp_text_style *style);
  */
 gp_size gp_text_descent(const gp_text_style *style);
 
+/**
+ * @brief Returns how many characters will fit into a width pixels.
+ *
+ * @style A text style.
+ * @chars A string.
+ * @width Width in pixels.
+ */
+size_t gp_text_fit_width(const gp_text_style *style, const char *str,
+                         gp_size width);
 
 /**
  * @brief Returns position between string characters given an x pixel coordinate
