@@ -62,7 +62,7 @@ int main(int argc, char *argv[])
 	gp_widget_overlay_put(layout, 0, markup_grid);
 	gp_widget_overlay_put(layout, 1, btn_grid);
 
-	gp_widget_event_handler_set(layout, event_handler, layout);
+	gp_widget_on_event_set(layout, event_handler, layout);
 	gp_widget_event_unmask(layout, GP_WIDGET_EVENT_INPUT);
 
 	tmr.priv = layout;

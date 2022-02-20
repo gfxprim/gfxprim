@@ -50,7 +50,7 @@ gp_widget *gp_widget_new(enum gp_widget_type type,
 	ret->type = type;
 	ret->widget_class = widget_class;
 
-	ret->event_mask = GP_WIDGET_DEFAULT_EVENT_MASK;
+	ret->event_mask = GP_WIDGET_EVENT_DEFAULT_MASK;
 
 	return ret;
 }

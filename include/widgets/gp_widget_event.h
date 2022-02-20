@@ -40,7 +40,7 @@ enum gp_widget_event_type {
 	GP_WIDGET_EVENT_MAX,
 };
 
-#define GP_WIDGET_DEFAULT_EVENT_MASK ( \
+#define GP_WIDGET_EVENT_DEFAULT_MASK ( \
 	(1<<GP_WIDGET_EVENT_NEW) |     \
 	(1<<GP_WIDGET_EVENT_FREE) |    \
 	(1<<GP_WIDGET_EVENT_WIDGET)  \

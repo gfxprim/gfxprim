@@ -24,8 +24,8 @@ int main(int argc, char *argv[])
 	gp_widget *btn2 = gp_widget_button_new("Move focus", 0, NULL, NULL);
 	gp_widget *grid = gp_widget_grid_new(2, 1, 0);
 
-	gp_widget_event_handler_set(btn1, move_focus, btn2);
-	gp_widget_event_handler_set(btn2, move_focus, btn1);
+	gp_widget_on_event_set(btn1, move_focus, btn2);
+	gp_widget_on_event_set(btn2, move_focus, btn1);
 
 	gp_widget_grid_put(grid, 0, 0, btn1);
 	gp_widget_grid_put(grid, 1, 0, btn2);

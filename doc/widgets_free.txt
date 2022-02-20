@@ -36,7 +36,7 @@ int main(void)
 
 	...
 
-	gp_widget_event_handler_set(widget, event_handler, data);
+	gp_widget_on_event_set(widget, event_handler, data);
 
 	...
 

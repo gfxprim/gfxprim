@@ -359,7 +359,7 @@ gp_widget *gp_widget_from_json(gp_json_buf *json, gp_json_val *val, gp_widget_js
 ret:
 	wid->align = halign | valign;
 	if (on_event.on_event)
-		gp_widget_event_handler_set(wid, on_event.on_event, on_event.priv);
+		gp_widget_on_event_set(wid, on_event.on_event, on_event.priv);
 
 	if (shrink_set)
 		wid->no_shrink = !shrink;

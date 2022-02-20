@@ -43,9 +43,9 @@ with.
 .Function to set a widget handler and priv pointer
 [source,c]
 -------------------------------------------------------------------------------
-void gp_widget_event_handler_set(gp_widget *self,
-                                 int (*on_event)(gp_widget_event *),
-                                 void *priv);
+void gp_widget_on_event_set(gp_widget *self,
+                            int (*on_event)(gp_widget_event *),
+                            void *priv);
 -------------------------------------------------------------------------------
 
 .Functions to manipulate widget event mask
@@ -99,7 +99,7 @@ propagate event such as application exit to the application code.
 
 [source,c]
 -------------------------------------------------------------------------------
-void gp_app_event_handler_set(int (*on_event)(gp_widget_event *ev));
+void gp_app_on_event_set(int (*on_event)(gp_widget_event *ev));
 -------------------------------------------------------------------------------
 
 Sets an application event handler. The handler then will be called on

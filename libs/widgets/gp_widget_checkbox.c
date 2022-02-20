@@ -221,7 +221,7 @@ gp_widget *gp_widget_checkbox_new(const char *label, int val,
 
 	ret->b->val = !!val;
 
-	gp_widget_event_handler_set(ret, on_event, priv);
+	gp_widget_on_event_set(ret, on_event, priv);
 
 	return ret;
 }

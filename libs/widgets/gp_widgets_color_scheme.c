@@ -171,7 +171,7 @@ gp_widget *gp_widget_color_scheme_switch(void)
 	if (!ret)
 		return NULL;
 
-	gp_widget_event_handler_set(ret, theme_switch_on_event, NULL);
+	gp_widget_on_event_set(ret, theme_switch_on_event, NULL);
 
 	theme_switch = ret;
 

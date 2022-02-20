@@ -77,7 +77,7 @@ int main(int argc, char *argv[])
 	gp_widget_switch_put(layout, 0, gp_widget_button_new("Switch layout", 0, set_layout1, layout));
         gp_widget_switch_put(layout, 1, markup_grid);
 
-	gp_widget_event_handler_set(layout, keypress_handler, layout);
+	gp_widget_on_event_set(layout, keypress_handler, layout);
 	gp_widget_event_unmask(layout, GP_WIDGET_EVENT_INPUT);
 
 	gp_widgets_main_loop(layout, "Layout switch test", NULL, argc, argv);

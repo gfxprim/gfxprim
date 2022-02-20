@@ -520,7 +520,7 @@ gp_widget *gp_widget_button_new(const char *label,
 
 	ret->button->type = align_for_type(type);
 
-	gp_widget_event_handler_set(ret, on_event, priv);
+	gp_widget_on_event_set(ret, on_event, priv);
 
 	return ret;
 }

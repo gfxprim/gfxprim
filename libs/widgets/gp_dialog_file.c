@@ -521,7 +521,7 @@ gp_dialog *gp_dialog_file_save_new(const char *path,
 	if (dialog->filename)
 		gp_widget_tbox_sel_delim_set(dialog->filename, ".");
 
-	gp_widget_event_handler_set(dialog->file_table, table_on_event, dialog);
+	gp_widget_on_event_set(dialog->file_table, table_on_event, dialog);
 	gp_widget_event_unmask(dialog->file_table, GP_WIDGET_EVENT_INPUT);
 
 	gp_htable_free(uids);
@@ -532,10 +532,10 @@ gp_dialog *gp_dialog_file_save_new(const char *path,
 	}
 
 	if (dialog->show_hidden)
-		gp_widget_event_handler_set(dialog->show_hidden, redraw_table, dialog);
+		gp_widget_on_event_set(dialog->show_hidden, redraw_table, dialog);
 
 	if (dialog->filename)
-		gp_widget_event_handler_set(dialog->filename, save_on_event, dialog);
+		gp_widget_on_event_set(dialog->filename, save_on_event, dialog);
 
 	gp_widget_tbox_printf(dialog->dir_path, "%s", get_path(path));
 
@@ -585,7 +585,7 @@ gp_dialog *gp_dialog_file_open_new(const char *path)
 		goto err1;
 	}
 
-	gp_widget_event_handler_set(dialog->file_table, table_on_event, dialog);
+	gp_widget_on_event_set(dialog->file_table, table_on_event, dialog);
 	gp_widget_event_unmask(dialog->file_table, GP_WIDGET_EVENT_INPUT);
 
 	gp_htable_free(uids);
@@ -596,10 +596,10 @@ gp_dialog *gp_dialog_file_open_new(const char *path)
 	}
 
 	if (dialog->show_hidden)
-		gp_widget_event_handler_set(dialog->show_hidden, redraw_table, dialog);
+		gp_widget_on_event_set(dialog->show_hidden, redraw_table, dialog);
 
 	if (dialog->filter)
-		gp_widget_event_handler_set(dialog->filter, redraw_table, dialog);
+		gp_widget_on_event_set(dialog->filter, redraw_table, dialog);
 
 	gp_widget_tbox_printf(dialog->dir_path, "%s", get_path(path));
 
