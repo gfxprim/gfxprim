@@ -25,6 +25,7 @@
 #include <widgets/gp_widget_int.h>
 #include <widgets/gp_widget_slider.h>
 #include <widgets/gp_widget_tbox.h>
+#include <widgets/gp_widget_tbox.h>
 
 /* Choice widget and subclasses */
 #include <widgets/gp_widget_choice.h>
@@ -39,6 +40,7 @@
 #include <widgets/gp_widget_markup.h>
 #include <widgets/gp_widget_switch.h>
 #include <widgets/gp_widget_overlay.h>
+#include <widgets/gp_widget_log.h>
 
 #include <widgets/gp_widget_app.h>
 

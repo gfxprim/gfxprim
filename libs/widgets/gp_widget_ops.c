@@ -34,6 +34,7 @@ extern struct gp_widget_ops gp_widget_markup_ops;
 extern struct gp_widget_ops gp_widget_switch_ops;
 extern struct gp_widget_ops gp_widget_overlay_ops;
 extern struct gp_widget_ops gp_widget_stock_ops;
+extern struct gp_widget_ops gp_widget_log_ops;
 
 static struct gp_widget_ops *widget_ops[] = {
 	[GP_WIDGET_GRID]        = &gp_widget_grid_ops,
@@ -55,6 +56,7 @@ static struct gp_widget_ops *widget_ops[] = {
 	[GP_WIDGET_MARKUP]      = &gp_widget_markup_ops,
 	[GP_WIDGET_SWITCH]      = &gp_widget_switch_ops,
 	[GP_WIDGET_OVERLAY]     = &gp_widget_overlay_ops,
+	[GP_WIDGET_LOG]         = &gp_widget_log_ops,
 };
 
 const struct gp_widget_ops *gp_widget_ops(gp_widget *self)
