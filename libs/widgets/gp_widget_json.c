@@ -466,8 +466,10 @@ gp_widget *gp_widget_layout_json(const char *path,
 		*uids = NULL;
 
 	json = gp_json_load(path);
-	if (!json)
+	if (!json) {
+		GP_WARN("Failed to load '%s': %s", path, strerror(errno));
 		return NULL;
+	}
 
 	json->msgf = stderr;
 
