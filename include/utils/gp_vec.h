@@ -196,4 +196,16 @@ void *gp_vec_shrink(void *self, size_t length)
 #define GP_VEC_FOREACH(self, type, iterator) \
 	for (type *iterator = (self); iterator < (self) + gp_vec_len(self); iterator++)
 
+/*
+ * Appends single element to a vector.
+ */
+#define GP_VEC_APPEND(vec, val) ({ \
+	typeof(vec) gp_ret__ = gp_vec_expand(vec, 1); \
+	if (gp_ret__) { \
+		gp_ret__[gp_vec_len(gp_ret__)-1] = val; \
+		vec = gp_ret__; \
+	} \
+	gp_ret__; \
+})
+
 #endif	/* GP_VEC_H */
