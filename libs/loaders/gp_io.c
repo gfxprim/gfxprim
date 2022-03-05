@@ -557,7 +557,7 @@ int gp_io_printf(gp_io *io, const char *fmt, ...)
 #define TYPE(x) ((x) & GP_IO_TYPE_MASK)
 #define VAL(x) ((x) & ~GP_IO_TYPE_MASK)
 
-static void readf_size(uint16_t *types,
+static void readf_size(const uint16_t *types,
                        unsigned int *min_size, unsigned int *max_size)
 {
 	unsigned int min = 0;
@@ -627,7 +627,7 @@ static void write_str(uint16_t type, uint8_t *dest,
 	dest[i] = '\0';
 }
 
-int gp_io_readf(gp_io *self, uint16_t *types, ...)
+int gp_io_readf(gp_io *self, const uint16_t *types, ...)
 {
 	unsigned int read_size, buf_size, size;
 	int ret;
@@ -727,7 +727,7 @@ end:
 	return ret;
 }
 
-int gp_io_writef(gp_io *io, uint16_t *types, ...)
+int gp_io_writef(gp_io *io, const uint16_t *types, ...)
 {
 	va_list va;
 	uint8_t *ptr, t;

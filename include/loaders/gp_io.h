@@ -60,6 +60,16 @@ static inline int gp_io_putc(gp_io *io, char c)
 	return io->write(io, &c, 1) != 1;
 }
 
+static inline int gp_io_getb(gp_io *io)
+{
+	unsigned char c;
+
+	if (io->read(io, &c, 1) != 1)
+		return -1;
+
+	return c;
+}
+
 /*
  * Returns current offset
  */
@@ -158,9 +168,9 @@ enum gp_io_fmt_types {
 
 #define GP_IO_TYPE_MASK 0xff00
 
-int gp_io_readf(gp_io *self, uint16_t *types, ...);
+int gp_io_readf(gp_io *self, const uint16_t *types, ...);
 
-int gp_io_writef(gp_io *self, uint16_t *types, ...);
+int gp_io_writef(gp_io *self, const uint16_t *types, ...);
 
 /*
  * Printf like function.
