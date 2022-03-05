@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 /*
- * Copyright (C) 2009-2021 Cyril Hrubis <metan@ucw.cz>
+ * Copyright (C) 2009-2022 Cyril Hrubis <metan@ucw.cz>
  */
 
 /*
 
-  PNG image support using libpng.
+  PNG image support.
 
  */
 
@@ -24,6 +24,29 @@
 #include <loaders/gp_line_convert.h>
 #include <loaders/gp_loaders.gen.h>
 
+enum color_types {
+	COLOR_MASK_PALETTE = 0x01,
+	COLOR_MASK_COLOR = 0x02,
+	COLOR_MASK_ALPHA = 0x04,
+};
+
+enum interlace_methods {
+	INTERLACE_NONE = 0,
+	INTERLACE_ADAM7 = 1,
+};
+
+static const char *interlace_type_name(uint8_t interlace_method)
+{
+	switch (interlace_method) {
+	case INTERLACE_NONE:
+		return "none";
+	case INTERLACE_ADAM7:
+		return "adam7";
+	default:
+		return "unknown/invalid";
+	}
+}
+
 #ifdef HAVE_LIBPNG
 
 #include <png.h>
@@ -33,18 +56,6 @@
 int gp_match_png(const void *buf)
 {
 	return !png_sig_cmp(buf, 0, 8);
-}
-
-static const char *interlace_type_name(int interlace)
-{
-	switch (interlace) {
-	case PNG_INTERLACE_NONE:
-		return "none";
-	case PNG_INTERLACE_ADAM7:
-		return "adam7";
-	default:
-		return "unknown";
-	}
 }
 
 static void read_data(png_structp png_ptr, png_bytep data, png_size_t len)
@@ -67,7 +78,7 @@ static void load_meta_data(png_structp png, png_infop png_info,
 	             &color_type, &interlace_type, &compr_method, NULL);
 
 	gp_storage_add_string(storage, NULL, "Interlace Type",
-	                        interlace_type_name(interlace_type));
+	                      interlace_type_name(interlace_type));
 
 
 	gp_storage_add_int(storage, NULL, "Width", w);
@@ -661,22 +672,430 @@ err:
 
 #else
 
-int gp_match_png(const void GP_UNUSED(*buf))
+#include <loaders/gp_io_zlib.h>
+
+enum comp_methods {
+	COMP_METHOD_ZLIB = 0,
+};
+
+enum filter_methods {
+	FILTER_METHOD_NONE = 0,
+	FILTER_METHOD_SUB = 1,
+	FILTER_METHOD_UP = 2,
+	FILTER_METHOD_AVG = 3,
+	FILTER_METHOD_PAETH = 4,
+	FILTER_METHOD_LAST = 4,
+};
+
+static const char *filter_method_name(uint8_t filter_method)
 {
-	errno = ENOSYS;
+	switch (filter_method) {
+	case FILTER_METHOD_NONE:
+		return "none";
+	case FILTER_METHOD_SUB:
+		return "sub";
+	case FILTER_METHOD_UP:
+		return "up";
+	case FILTER_METHOD_AVG:
+		return "avg";
+	case FILTER_METHOD_PAETH:
+		return "paeth";
+	default:
+		return "unknown/invalid";
+	}
+}
+
+int gp_match_png(const void *buf)
+{
+	const char *header = "\x89PNG\r\n\x1a\n";
+
+	return !memcmp(buf, header, 8);
+}
+
+struct IHDR_chunk {
+	uint32_t size;
+	uint32_t width;
+	uint32_t height;
+	uint8_t bit_depth;
+	uint8_t color_type;
+	uint8_t compress_method;
+	uint8_t filter_method;
+	uint8_t interlace_method;
+};
+
+static inline uint8_t paeth(int a, int b, int c)
+{
+	int p = a + b - c;
+	int pa = GP_ABS(p - a);
+	int pb = GP_ABS(p - b);
+	int pc = GP_ABS(p - c);
+
+	if (pa <= pb && pa <= pc)
+		return a;
+
+	if (pb <= pc)
+		return b;
+
+	return c;
+}
+
+static void decode_filter(uint8_t *scanline, uint8_t *prev_scanline,
+                          int scanline_len, uint8_t filter_method,
+			  uint8_t stride)
+{
+	int i;
+
+	GP_DEBUG(5, "Scanline filter method %s first pixel [%i,%i,%i]",
+	         filter_method_name(filter_method),
+	         (int)scanline[0], (int)scanline[1], (int)scanline[2]);
+
+	switch (filter_method) {
+	case FILTER_METHOD_NONE:
+	break;
+	case FILTER_METHOD_SUB:
+		for (i = 0; i < scanline_len; i++)
+			scanline[i] += scanline[i-stride];
+	break;
+	case FILTER_METHOD_UP:
+		for (i = 0; i < scanline_len; i++)
+			scanline[i] += prev_scanline[i];
+	break;
+	case FILTER_METHOD_AVG:
+		for (i = 0; i < scanline_len; i++)
+			scanline[i] += (scanline[i-stride] + prev_scanline[i])/2;
+	break;
+	case FILTER_METHOD_PAETH:
+		for (i = 0; i < scanline_len; i++)
+			scanline[i] += paeth(scanline[i-stride], prev_scanline[i], prev_scanline[i-stride]);
+	break;
+	}
+}
+
+static int load_rgb888_image(gp_io *zlib_io, struct IHDR_chunk *IHDR, gp_pixmap **ret, gp_progress_cb *callback)
+{
+	uint32_t x, y;
+	uint32_t width = IHDR->width;
+	uint32_t scanline_len = 3 * width;
+	uint8_t scanline1[scanline_len + 3];
+	uint8_t scanline2[scanline_len + 3];
+	uint8_t *prev_scanline = scanline1 + 2;
+	uint8_t *cur_scanline = scanline2 + 2;
+	int err;
+	gp_pixmap *res;
+
+	memset(scanline1, 0, scanline_len + 3);
+	memset(scanline2, 0, scanline_len + 3);
+
+	res = gp_pixmap_alloc(IHDR->width, IHDR->height, GP_PIXEL_RGB888);
+	if (!res)
+		return errno;
+
+	for (y = 0; y < IHDR->height; y++) {
+		if (gp_io_fill(zlib_io, cur_scanline, scanline_len+1)) {
+			GP_DEBUG(1, "Failed to read scanline %u", (unsigned int)y);
+			err = errno;
+			goto err;
+		}
+
+		uint8_t filter_method = cur_scanline[0];
+
+		cur_scanline[0] = 0;
+
+		if (filter_method > FILTER_METHOD_LAST) {
+			GP_DEBUG(1, "Invalid filter method %i", (int)filter_method);
+			err = EINVAL;
+			goto err;
+		}
+
+		decode_filter(cur_scanline+1, prev_scanline+1, scanline_len, filter_method, 3);
+
+		uint8_t *row = GP_PIXEL_ADDR(res, 0, y);
+
+		for (x = 0; x < IHDR->width; x++) {
+			row[3 * x + 2] = cur_scanline[3 * x + 1];
+			row[3 * x + 1] = cur_scanline[3 * x + 2];
+			row[3 * x + 0] = cur_scanline[3 * x + 3];
+		}
+
+		GP_SWAP(cur_scanline, prev_scanline);
+
+		if (gp_progress_cb_report(callback, y, res->h, res->w)) {
+			GP_DEBUG(1, "Operation aborted");
+			err = ECANCELED;
+			goto err;
+		}
+	}
+
+	*ret = res;
+	return 0;
+err:
+	gp_pixmap_free(res);
+	return err;
+}
+
+#define CHUNK_ID_TO_INT(c1, c2, c3, c4) (((uint32_t)c1) |       \
+		                         (((uint32_t)c2)<<8) |  \
+		                         (((uint32_t)c2)<<16) | \
+		                         (((uint32_t)c2)<<24))
+
+#define CHUNK_ID_HEADER_TO_INT(chunk_header) \
+	CHUNK_ID_TO_INT((chunk_header)->id[0], \
+	                (chunk_header)->id[1], \
+	                (chunk_header)->id[2], \
+	                (chunk_header)->id[3])
+
+struct chunk_header {
+	char id[5];
+	uint32_t size;
+};
+
+static int next_chunk(gp_io *io, struct chunk_header *chunk_header)
+{
+	const uint16_t chunk[] = {
+		GP_IO_B4,   /* Lenght */
+		GP_IO_BYTE, /* Chunk ID */
+		GP_IO_BYTE,
+		GP_IO_BYTE,
+		GP_IO_BYTE,
+		GP_IO_END
+	};
+
+	if (gp_io_readf(io, chunk, &chunk_header->size,
+			&chunk_header->id[0], &chunk_header->id[1],
+	                &chunk_header->id[2], &chunk_header->id[3]) != 5) {
+		GP_DEBUG(1, "Failed to read next chunk!");
+		return EINVAL;
+	}
+
+	return 0;
+}
+
+/* Creates a single continous IO stream from PNG IDAT chunks */
+
+struct idat_io {
+	struct gp_io out_io;
+	gp_io *in_io;
+	struct chunk_header *chunk_header;
+	size_t chunk_read;
+};
+
+static ssize_t idat_read(gp_io *self, void *buf, size_t size)
+{
+	struct idat_io *idat_io = GP_CONTAINER_OF(self, struct idat_io, out_io);
+	ssize_t read;
+	size_t avail;
+
+	avail = idat_io->chunk_header->size - idat_io->chunk_read;
+
+	if (avail <= 0) {
+		/* Skip CRC */
+		gp_io_seek(idat_io->in_io, 4, GP_SEEK_CUR);
+
+		int err = next_chunk(idat_io->in_io, idat_io->chunk_header);
+		if (err) {
+			errno = err;
+			return -1;
+		}
+
+		switch (CHUNK_ID_HEADER_TO_INT(idat_io->chunk_header)) {
+		case CHUNK_ID_TO_INT('I', 'D', 'A', 'T'):
+			idat_io->chunk_read = 0;
+			avail = idat_io->chunk_header->size - idat_io->chunk_read;
+		break;
+		default:
+			return 0;
+		}
+	}
+
+	read = gp_io_read(idat_io->in_io, buf, GP_MIN(size, avail));
+	if (read > 0)
+		idat_io->chunk_read += read;
+
+	return read;
+}
+
+static off_t idat_seek(gp_io *self, off_t off, enum gp_seek_whence whence)
+{
+	(void) self;
+
+	GP_DEBUG(1, "Dummy seek called off=%lu whence=%i", (long unsigned)off, whence);
+
+	return 0;
+}
+
+static int load_image(gp_io *io, struct IHDR_chunk *IHDR,
+                      struct chunk_header *chunk_header,
+                      gp_pixmap **img, gp_progress_cb *callback)
+{
+	gp_io *zlib_io;
+	uint8_t zlib_comp_method;
+	uint8_t flags;
+	int err = 0;
+
+	zlib_comp_method = gp_io_getb(io);
+	flags = gp_io_getb(io);
+
+	GP_DEBUG(1, "Zlib comp method %u flags %u", zlib_comp_method, flags);
+
+	struct idat_io idat_io = {
+		.out_io = {
+			.read = idat_read,
+			.seek = idat_seek,
+		},
+		.in_io = io,
+		.chunk_header = chunk_header,
+		.chunk_read = 2,
+	};
+
+	zlib_io = gp_io_zlib(&idat_io.out_io, 0);
+	if (!zlib_io)
+		return errno;
+
+	switch (IHDR->color_type) {
+	case COLOR_MASK_COLOR:
+		err = load_rgb888_image(zlib_io, IHDR, img, callback);
+		if (err)
+			goto ret;
+	break;
+	}
+
+ret:
+	gp_io_close(zlib_io);
+
+	return err;
+}
+
+int gp_read_png_ex(gp_io *io, gp_pixmap **img,
+                   gp_storage GP_UNUSED(*storage),
+                   gp_progress_cb *callback)
+{
+	struct IHDR_chunk IHDR;
+	struct chunk_header chunk_header = {};
+	int ret, err;
+
+	const uint16_t header[] = {
+		0x89,
+		'P',
+		'N',
+		'G',
+		'\r',
+		'\n',
+		0x1a,
+		'\n',
+		GP_IO_B4,
+		'I',
+		'H',
+		'D',
+		'R',
+		GP_IO_B4,
+		GP_IO_B4,
+		GP_IO_BYTE,
+		GP_IO_BYTE,
+		GP_IO_BYTE,
+		GP_IO_BYTE,
+		GP_IO_BYTE,
+		GP_IO_END,
+	};
+
+	ret = gp_io_readf(io, header, &IHDR.size, &IHDR.width, &IHDR.height,
+	                  &IHDR.bit_depth, &IHDR.color_type,
+	                  &IHDR.compress_method,
+	                  &IHDR.filter_method,
+			  &IHDR.interlace_method);
+
+	if (ret != GP_ARRAY_SIZE(header) - 1) {
+		GP_DEBUG(1, "Failed to read IHDR chunk");
+		errno = EINVAL;
+		return 1;
+	}
+
+	GP_DEBUG(2, "Interlace=%s%s %s PNG%s size %ux%u depth %i",
+	         interlace_type_name(IHDR.interlace_method),
+	         IHDR.color_type & COLOR_MASK_PALETTE ? " pallete" : "",
+	         IHDR.color_type & COLOR_MASK_COLOR ? "color" : "gray",
+		 IHDR.color_type & COLOR_MASK_ALPHA ? " with alpha channel" : "",
+		 (unsigned int)IHDR.width, (unsigned int)IHDR.height, IHDR.bit_depth);
+
+	switch (IHDR.compress_method) {
+	case COMP_METHOD_ZLIB:
+	break;
+	default:
+		GP_DEBUG(1, "Unknown/invalid compression method %u",
+		         (unsigned int)IHDR.compress_method);
+		err = EINVAL;
+		goto err;
+	}
+
+	switch (IHDR.interlace_method) {
+	case INTERLACE_NONE:
+	break;
+	case INTERLACE_ADAM7:
+		GP_DEBUG(1, "Adam7 interalce not supported");
+		err = ENOSYS;
+		goto err;
+	break;
+	default:
+		GP_DEBUG(1, "Unknown/invalid interalce method");
+		err = EINVAL;
+		goto err;
+	break;
+	}
+
+	if (IHDR.filter_method != 0) {
+		GP_DEBUG(1, "Unknown/invalid filter method");
+		err = EINVAL;
+		goto err;
+	}
+
+	switch (IHDR.color_type) {
+	case COLOR_MASK_COLOR:
+	break;
+	default:
+		GP_DEBUG(1, "Unsupported color type");
+		err = ENOSYS;
+		goto err;
+	}
+
+	/* skip CRC and get right to the next chunk */
+	gp_io_seek(io, IHDR.size - 13 + 4, GP_SEEK_CUR);
+
+	for (;;) {
+		err = next_chunk(io, &chunk_header);
+		if (err)
+			goto err;
+
+		GP_DEBUG(3, "Have chunk '%s' size %u",
+		         chunk_header.id, (unsigned int)chunk_header.size);
+
+		switch (CHUNK_ID_HEADER_TO_INT(&chunk_header)) {
+		case CHUNK_ID_TO_INT('I', 'E', 'N', 'D'):
+			goto ret;
+		case CHUNK_ID_TO_INT('I', 'D', 'A', 'T'):
+			err = load_image(io, &IHDR, &chunk_header, img, callback);
+			if (err)
+				goto err;
+		break;
+		default:
+			GP_DEBUG(1, "Skipping chunk '%s'", chunk_header.id);
+			gp_io_seek(io, chunk_header.size, GP_SEEK_CUR);
+		}
+
+		/* Skip CRC */
+		gp_io_seek(io, 4, GP_SEEK_CUR);
+	}
+
+ret:
+	if (*img)
+		return 0;
+
+	err = ENOSYS;
+err:
+	errno = err;
 	return 1;
 }
 
-int gp_read_png_ex(gp_io GP_UNUSED(*io), gp_pixmap GP_UNUSED(**img),
-                 gp_storage GP_UNUSED(*storage),
-                 gp_progress_cb GP_UNUSED(*callback))
-{
-	errno = ENOSYS;
-	return 1;
-}
-
-int gp_write_png(const gp_pixmap *src, gp_io GP_UNUSED(*io),
-                gp_progress_cb *callback)
+int gp_write_png(const gp_pixmap GP_UNUSED(*src), gp_io GP_UNUSED(*io),
+                gp_progress_cb GP_UNUSED(*callback))
 {
 	errno = ENOSYS;
 	return 1;
@@ -686,10 +1105,10 @@ int gp_write_png(const gp_pixmap *src, gp_io GP_UNUSED(*io),
 
 const gp_loader gp_png = {
 #ifdef HAVE_LIBPNG
-	.read = gp_read_png_ex,
 	.write = gp_write_png,
 	.save_ptypes = save_ptypes,
 #endif
+	.read = gp_read_png_ex,
 	.match = gp_match_png,
 
 	.fmt_name = "Portable Network Graphics",
