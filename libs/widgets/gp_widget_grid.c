@@ -337,11 +337,6 @@ static void fill_padding(gp_widget *self, const gp_offset *offset,
 
 	gp_fill_rect_xyxy(ctx->buf, cur_x, y_off,
 		          end_x, end_y, ctx->bg_color);
-
-	if (grid->frame) {
-		gp_rrect_xywh(ctx->buf, x_off, y_off,
-			      self->w, self->h, ctx->text_color);
-	}
 }
 
 /* Fill unused space between grid and widget */
@@ -430,6 +425,11 @@ static void render(gp_widget *self, const gp_offset *offset,
 
 			gp_widget_ops_render(widget, &child_offset, ctx, flags);
 		}
+	}
+
+	if (grid->frame) {
+		gp_rrect_xywh(ctx->buf, self->x + offset->x, self->y + offset->y,
+			      self->w, self->h, ctx->text_color);
 	}
 
 	/*
