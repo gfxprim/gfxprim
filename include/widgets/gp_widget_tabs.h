@@ -191,4 +191,24 @@ void gp_widget_tabs_active_set(gp_widget *self, unsigned int tab);
  */
 int gp_widget_tabs_tab_by_child(gp_widget *self, gp_widget *child);
 
+
+/**
+ * @brief Returns a tab label.
+ *
+ * @self A tabs widget.
+ * @tab A tab index.
+ *
+ * @return A tab label or NULL if tab is out of range.
+ */
+const char *gp_widget_tabs_label_get(gp_widget *self, unsigned int tab);
+
+/**
+ * @brief Returns active tab label.
+ *
+ * @self A tabs widget.
+ *
+ * @return An active tab label.
+ */
+const char *gp_widget_tabs_active_label_get(gp_widget *self);
+
 #endif /* GP_WIDGET_TABS_H */

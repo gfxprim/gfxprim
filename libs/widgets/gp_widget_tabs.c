@@ -820,3 +820,26 @@ int gp_widget_tabs_tab_by_child(gp_widget *self, gp_widget *child)
 
 	return -1;
 }
+
+const char *gp_widget_tabs_label_get(gp_widget *self, unsigned int tab)
+{
+	GP_WIDGET_ASSERT(self, GP_WIDGET_TABS, NULL);
+
+	if (tab >= gp_vec_len(self->tabs->tabs)) {
+		GP_WARN("Invalid tab index %u tabs (%p) count %zu",
+			tab, self, gp_vec_len(self->tabs->tabs));
+		return NULL;
+	}
+
+	return self->tabs->tabs[tab].label;
+}
+
+const char *gp_widget_tabs_active_label_get(gp_widget *self)
+{
+	GP_WIDGET_ASSERT(self, GP_WIDGET_TABS, NULL);
+
+	if (!gp_vec_len(self->tabs->tabs))
+		return NULL;
+
+	return self->tabs->tabs[self->tabs->active_tab].label;
+}

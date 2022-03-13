@@ -48,6 +48,15 @@ empty.
 
 [source,c]
 -------------------------------------------------------------------------------
+const char *gp_widget_tabs_label_get(gp_widget *self, unsigned int tab);
+
+const char *gp_widget_tabs_active_label_get(gp_widget *self);
+-------------------------------------------------------------------------------
+
+Returns tab and active tab label.
+
+[source,c]
+-------------------------------------------------------------------------------
 gp_widget *gp_widget_tabs_rem(gp_widget *self, unsigned int tab)
 -------------------------------------------------------------------------------
 
