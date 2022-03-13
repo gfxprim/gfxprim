@@ -151,6 +151,12 @@ link:widgets_free.html[`gp_widget_free()`].
 
 .Tabs widget events
 [cols=",3",options="header"]
-|===================================================
-| Widget event value | Description
-|===================================================
+|=============================================================================
+| Widget event value         | Description
+| GP_WIDGET_TABS_DEACTIVATED | Currently active tab is going to be deactivated
+| GP_WIDGET_TABS_ACTIVATED   | A new active tab was set
+|=============================================================================
+
+The deactivation event is send before the action is done, i.e. while the old
+active tab is still active and the activation event is send after the action
+was done, i.e. after the active tab has changed.

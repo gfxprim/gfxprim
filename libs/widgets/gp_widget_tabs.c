@@ -201,7 +201,10 @@ static void set_tab(gp_widget *self, unsigned int tab)
 	if (tab == self->tabs->active_tab)
 		return;
 
+	gp_widget_send_widget_event(self, GP_WIDGET_TABS_DEACTIVATED);
 	self->tabs->active_tab = tab;
+	gp_widget_send_widget_event(self, GP_WIDGET_TABS_ACTIVATED);
+
 	gp_widget_redraw(self);
 	gp_widget_redraw_children(self);
 }
@@ -447,6 +450,8 @@ static gp_widget *tabs_new(struct gp_widget_tab *tabs, unsigned int active_tab)
 
 	ret->tabs->tabs = tabs;
 	ret->tabs->active_tab = active_tab;
+
+	gp_widget_send_widget_event(ret, GP_WIDGET_TABS_ACTIVATED);
 
 	return ret;
 }
@@ -752,10 +757,18 @@ gp_widget *gp_widget_tabs_tab_rem(gp_widget *self, unsigned int tab)
 
 	self->tabs->tabs = gp_vec_del(self->tabs->tabs, tab, 1);
 
+	int was_active = self->tabs->active_tab == tab;
+
+	if (was_active)
+		gp_widget_send_widget_event(self, GP_WIDGET_TABS_DEACTIVATED);
+
 	if (self->tabs->active_tab &&
 	    self->tabs->active_tab >= tab) {
 		self->tabs->active_tab--;
 	}
+
+	if (was_active)
+		gp_widget_send_widget_event(self, GP_WIDGET_TABS_ACTIVATED);
 
 	gp_widget_redraw(self);
 
@@ -791,8 +804,7 @@ void gp_widget_tabs_active_set(gp_widget *self, unsigned int tab)
 		       tab, self, gp_vec_len(self->tabs->tabs));
 	}
 
-	self->tabs->active_tab = tab;
-	gp_widget_redraw(self);
+	set_tab(self, tab);
 }
 
 int gp_widget_tabs_tab_by_child(gp_widget *self, gp_widget *child)

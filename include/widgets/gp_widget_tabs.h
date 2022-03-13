@@ -25,6 +25,11 @@ struct gp_widget_tabs {
 	char payload[];
 };
 
+enum gp_widget_tabs_event_type {
+	GP_WIDGET_TABS_DEACTIVATED, /* A tab is deactivated */
+	GP_WIDGET_TABS_ACTIVATED, /* A tab activated */
+};
+
 /**
  * @brief Allocate and initialize new tabs widget.
  *
