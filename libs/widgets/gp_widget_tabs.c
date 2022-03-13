@@ -738,16 +738,8 @@ unsigned int gp_widget_tabs_tab_append(gp_widget *self,
 	return ret;
 }
 
-gp_widget *gp_widget_tabs_tab_rem(gp_widget *self, unsigned int tab)
+static gp_widget *tab_rem(gp_widget *self, unsigned int tab)
 {
-	GP_WIDGET_ASSERT(self, GP_WIDGET_TABS, NULL);
-
-	if (tab >= gp_vec_len(self->tabs->tabs)) {
-		GP_BUG("Invalid tab index %u tabs (%p) count %zu",
-		       tab, self, gp_vec_len(self->tabs->tabs));
-		return NULL;
-	}
-
 	gp_widget *ret = self->tabs->tabs[tab].widget;
 
 	GP_DEBUG(3, "Removing tab %u (%s) child %p, tabs widget %p",
@@ -773,6 +765,19 @@ gp_widget *gp_widget_tabs_tab_rem(gp_widget *self, unsigned int tab)
 	gp_widget_redraw(self);
 
 	return ret;
+}
+
+gp_widget *gp_widget_tabs_tab_rem(gp_widget *self, unsigned int tab)
+{
+	GP_WIDGET_ASSERT(self, GP_WIDGET_TABS, NULL);
+
+	if (tab >= gp_vec_len(self->tabs->tabs)) {
+		GP_BUG("Invalid tab index %u tabs (%p) count %zu",
+		       tab, self, gp_vec_len(self->tabs->tabs));
+		return NULL;
+	}
+
+	return tab_rem(self, tab);
 }
 
 unsigned int gp_widget_tabs_active_get(gp_widget *self)
@@ -807,11 +812,14 @@ void gp_widget_tabs_active_set(gp_widget *self, unsigned int tab)
 	set_tab(self, tab);
 }
 
-int gp_widget_tabs_tab_by_child(gp_widget *self, gp_widget *child)
+static int child_to_tab(gp_widget *self, gp_widget *child)
 {
 	unsigned int i;
 
-	GP_WIDGET_ASSERT(self, GP_WIDGET_TABS, -1);
+	if (child->parent != self) {
+		GP_WARN("Child (%p) parent %p does not match self (%p)",
+			child, child->parent, self);
+	}
 
 	for (i = 0; i < gp_vec_len(self->tabs->tabs); i++) {
 		if (self->tabs->tabs[i].widget == child)
@@ -819,6 +827,27 @@ int gp_widget_tabs_tab_by_child(gp_widget *self, gp_widget *child)
 	}
 
 	return -1;
+}
+
+int gp_widget_tabs_tab_by_child(gp_widget *self, gp_widget *child)
+{
+	GP_WIDGET_ASSERT(self, GP_WIDGET_TABS, -1);
+
+	return child_to_tab(self, child);
+}
+
+int gp_widget_tabs_tab_rem_by_child(gp_widget *self, gp_widget *child)
+{
+	GP_WIDGET_ASSERT(self, GP_WIDGET_TABS, -1);
+
+	int tab = child_to_tab(self, child);
+
+	if (tab < 0)
+		return 1;
+
+	tab_rem(self, tab);
+
+	return 0;
 }
 
 const char *gp_widget_tabs_label_get(gp_widget *self, unsigned int tab)

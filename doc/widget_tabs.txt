@@ -137,17 +137,26 @@ Note that all the indexes of already existing tabs increase.
 [source,c]
 -------------------------------------------------------------------------------
 gp_widget *gp_widget_tabs_tab_rem(gp_widget *self, unsigned int tab);
+
+int gp_widget_tabs_tab_rem_by_child(gp_widget *self, gp_widget *child)
 -------------------------------------------------------------------------------
 
 Removes a tab at a given position and returns a pointer to the child widget.
 
+The `by_child` variant looks up the tab by the child pointer and returns zero
+on success.
+
 [source,c]
 -------------------------------------------------------------------------------
 gp_widget *gp_widget_tabs_tab_del(gp_widget *self, unsigned int tab);
+
+int gp_widget_tabs_tab_del_by_child(gp_widget *self, gp_widget *child);
 -------------------------------------------------------------------------------
 
-Removes a tab at a given position and frees the child with
-link:widgets_free.html[`gp_widget_free()`].
+The `by_child` variant looks up the tab by the child pointer and returns zero
+on success.
+
+These functions remove and free a child widget with link:widgets_free.html[`gp_widget_free()`].
 
 .Tabs JSON attributes
 [cols=",,,3",options="header"]

@@ -141,6 +141,36 @@ static inline void gp_widget_tabs_tab_prepend(gp_widget *self,
 gp_widget *gp_widget_tabs_tab_rem(gp_widget *self, unsigned int tab);
 
 /**
+ * @brief Remove a tab identified by a child widget.
+ *
+ * @self A tabs widget.
+ * @off A tab child widget.
+ *
+ * @return Zero on success non-zero if child was not found.
+ */
+int gp_widget_tabs_tab_rem_by_child(gp_widget *self, gp_widget *child);
+
+/**
+ * @brief Delete a tab identified by a child widget.
+ *
+ * @self A tabs widget.
+ * @off A tab child widget.
+ *
+ * On successful deletion child is freed as well.
+ *
+ * @return Zero on success non-zero if child was not found.
+ */
+static inline int gp_widget_tabs_tab_del_by_child(gp_widget *self, gp_widget *child)
+{
+	if (!gp_widget_tabs_tab_rem_by_child(self, child))
+		return 1;
+
+	gp_widget_free(child);
+
+	return 0;
+}
+
+/**
  * @brief Delete a tab at position.
  *
  * Removes a tab and frees the child widget.
