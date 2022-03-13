@@ -676,7 +676,7 @@ gp_widget *gp_widget_tabs_put(gp_widget *self, unsigned int tab,
 	return ret;
 }
 
-gp_widget *gp_widget_tabs_get(gp_widget *self, unsigned int tab)
+gp_widget *gp_widget_tabs_child_get(gp_widget *self, unsigned int tab)
 {
 	GP_WIDGET_ASSERT(self, GP_WIDGET_TABS, NULL);
 
@@ -767,6 +767,16 @@ unsigned int gp_widget_tabs_active_get(gp_widget *self)
 	GP_WIDGET_ASSERT(self, GP_WIDGET_TABS, 0);
 
 	return self->tabs->active_tab;
+}
+
+gp_widget *gp_widget_tabs_active_child_get(gp_widget *self)
+{
+	GP_WIDGET_ASSERT(self, GP_WIDGET_TABS, NULL);
+
+	if (!gp_vec_len(self->tabs->tabs))
+		return NULL;
+
+	return active_tab_widget(self);
 }
 
 void gp_widget_tabs_active_set(gp_widget *self, unsigned int tab)

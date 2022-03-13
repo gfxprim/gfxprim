@@ -79,7 +79,7 @@ static inline gp_widget *gp_widget_tabs_rem(gp_widget *self, unsigned int tab)
  *
  * @return A child widget ocupying the slot or NULL if it's empty.
  */
-gp_widget *gp_widget_tabs_get(gp_widget *self, unsigned int tab);
+gp_widget *gp_widget_tabs_child_get(gp_widget *self, unsigned int tab);
 
 static inline void gp_widget_tabs_del(gp_widget *self, unsigned int tab)
 {
@@ -158,6 +158,15 @@ static inline void gp_widget_tabs_tab_del(gp_widget *self, unsigned int tab)
  * @return An active tab index.
  */
 unsigned int gp_widget_tabs_active_get(gp_widget *self);
+
+/**
+ * @brief Returns active tab child widget.
+ *
+ * @self A tabs widget.
+ *
+ * @return An active tab child widget.
+ */
+gp_widget *gp_widget_tabs_active_child_get(gp_widget *self);
 
 /**
  * @brief Set active tab.

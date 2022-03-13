@@ -35,15 +35,20 @@ static int tabs_new_free(void)
 		return TST_FAILED;
 	}
 
-	ret = gp_widget_tabs_get(tabs, 0);
+	ret = gp_widget_tabs_child_get(tabs, 0);
 	if (ret) {
-		tst_msg("gp_widget_tabs_get(0) returned %p expected NULL", ret);
+		tst_msg("gp_widget_tabs_child_get(0) returned %p expected NULL", ret);
 		return TST_FAILED;
 	}
 
-	ret = gp_widget_tabs_get(tabs, 1);
+	ret = gp_widget_tabs_child_get(tabs, 1);
 	if (ret) {
-		tst_msg("gp_widget_tabs_get(1) returned %p expected NULL", ret);
+		tst_msg("gp_widget_tabs_child_get(1) returned %p expected NULL", ret);
+		return TST_FAILED;
+	}
+
+	if (ret != gp_widget_tabs_active_child_get(tabs)) {
+		tst_msg("gp_widget_tabs_active_child_get() returned wrong data");
 		return TST_FAILED;
 	}
 

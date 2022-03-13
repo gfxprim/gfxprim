@@ -40,7 +40,7 @@ Passing a NULL `child` pointer makes the call equivalent to the
 
 [source,c]
 -------------------------------------------------------------------------------
-gp_widget *gp_widget_tabs_get(gp_widget *self, unsigned int tab);
+gp_widget *gp_widget_tabs_child_get(gp_widget *self, unsigned int tab);
 -------------------------------------------------------------------------------
 
 Returns a pointer to a child widget occupying the `tab` or NULL if it's
@@ -75,6 +75,8 @@ Returns number of tabs. The tab indexes are in range `0` and `tabs_cnt - 1`.
 [source,c]
 -------------------------------------------------------------------------------
 unsigned int gp_widget_tabs_active_get(gp_widget *self);
+
+gp_widget *gp_widget_tabs_active_child_get(gp_widget *self);
 
 void gp_widget_tabs_active_set(gp_widget *self, unsigned int tab);
 -------------------------------------------------------------------------------
