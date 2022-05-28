@@ -97,6 +97,13 @@ static inline char *gp_vec_str_append(char *self, const char *str)
 	return gp_vec_strins(self, gp_vec_len(self)-1, str);
 }
 
+#define GP_VEC_STR_APPEND(self, str) ({\
+		char *gp_ret__ = gp_vec_str_append(self, str); \
+		if (gp_ret__) \
+			self = gp_ret__; \
+		gp_ret__; \
+	})
+
 /*
  * @brief Inserts a string into a string vector at a given offset.
  *
