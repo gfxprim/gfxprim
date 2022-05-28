@@ -170,8 +170,8 @@ static void free_(gp_widget *self)
 	if (!self->log->logs)
 		return;
 
-	GP_VEC_FOREACH(self->log->logs, const char *, log)
-		free(log);
+	GP_VEC_FOREACH(self->log->logs, char *, log)
+		free(*log);
 
 	gp_vec_free(self->log->logs);
 }
