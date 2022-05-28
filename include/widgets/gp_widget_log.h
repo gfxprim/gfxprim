@@ -14,7 +14,7 @@ struct gp_widget_log {
 	gp_widget_tattr tattr;
 	unsigned int min_width;
 	unsigned int min_lines;
-	const char **logs;
+	char **logs;
 };
 
 /**
