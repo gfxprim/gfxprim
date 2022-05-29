@@ -207,3 +207,7 @@ gp_dialog_msg_new
 gp_dialog_layout_load
 gp_dialog_msg_run
 gp_dialog_msg_printf_run
+
+
+gp_widget_cfg_path
+gp_widget_cfg_mkpath

@@ -13,3 +13,4 @@ label
 label_json
 grid
 grid_json
+cfg
