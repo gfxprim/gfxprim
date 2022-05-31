@@ -185,12 +185,12 @@ static void init_fonts(void)
 	render_font_mono = ffont_mono;
 	render_font_mono_bold = ffont_mono_bold;
 
-	gp_text_style_normal(ctx.font, ffont, size);
-	gp_text_style_normal(ctx.font_bold, ffont_bold, size);
-	gp_text_style_normal(ctx.font_big, ffont_big, size);
-	gp_text_style_normal(ctx.font_big_bold, ffont_big_bold, size);
-	gp_text_style_normal(ctx.font_mono, ffont_mono, size);
-	gp_text_style_normal(ctx.font_mono_bold, ffont_mono_bold, size);
+	gp_text_style_normal(ctx.font, ffont, 1);
+	gp_text_style_normal(ctx.font_bold, ffont_bold, 1);
+	gp_text_style_normal(ctx.font_big, ffont_big, 1);
+	gp_text_style_normal(ctx.font_big_bold, ffont_big_bold, 1);
+	gp_text_style_normal(ctx.font_mono, ffont_mono, 1);
+	gp_text_style_normal(ctx.font_mono_bold, ffont_mono_bold, 1);
 }
 
 static void render_ctx_init(void)
