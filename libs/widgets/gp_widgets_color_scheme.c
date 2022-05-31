@@ -29,28 +29,31 @@ struct color_scheme {
 	struct color alert_color;
 	struct color warn_color;
 	struct color accept_color;
+	struct color fill_color;
 };
 
 static struct color_scheme dark_scheme = {
 	.text_color   = {0xf0, 0xf3, 0xf6},
-	.bg_color     = {0x0a, 0x0c, 0x10},
-	.fg_color     = {0x27, 0x2b, 0x33},
-	.fg2_color    = {0x29, 0x4d, 0x75},
-	.sel_color    = {0x40, 0x9e, 0xff},
-	.alert_color  = {0xff, 0x55, 0x00},
+	.fg_color     = {0x00, 0x00, 0x00},
+	.bg_color     = {0x0d, 0x10, 0x1a},
+	.fg2_color    = {0x10, 0x1a, 0x50},
+	.sel_color    = {0x20, 0x50, 0x88},
+	.alert_color  = {0xbb, 0x30, 0x00},
 	.accept_color = {0x00, 0xbb, 0x00},
-	.warn_color   = {0xfc, 0xd1, 0x2a},
+	.warn_color   = {0x90, 0x80, 0x00},
+	.fill_color   = {0x00, 0x00, 0x00},
 };
 
 static struct color_scheme light_scheme = {
 	.text_color   = {0x00, 0x00, 0x00},
 	.bg_color     = {0xdd, 0xdd, 0xdd},
 	.fg_color     = {0xee, 0xee, 0xee},
-	.fg2_color    = {0x77, 0xbb, 0xff},
+	.fg2_color    = {0x66, 0xaa, 0xee},
 	.sel_color    = {0x11, 0x99, 0xff},
 	.alert_color  = {0xff, 0x55, 0x00},
 	.accept_color = {0x00, 0xbb, 0x00},
 	.warn_color   = {0xfc, 0xd1, 0x2a},
+	.fill_color   = {0x44, 0x44, 0x44},
 };
 
 #define RGB_TO_COLOR(ctx, scheme, color_name) \
@@ -85,6 +88,7 @@ void __attribute__((visibility ("hidden"))) widgets_color_scheme_load(void)
 	RGB_TO_COLOR(ctx, scheme, alert_color);
 	RGB_TO_COLOR(ctx, scheme, accept_color);
 	RGB_TO_COLOR(ctx, scheme, warn_color);
+	RGB_TO_COLOR(ctx, scheme, fill_color);
 }
 
 static enum gp_widget_stock_type scheme_to_type(void)

@@ -33,6 +33,7 @@ struct gp_widget_render_ctx {
 	gp_pixel alert_color;
 	gp_pixel warn_color;
 	gp_pixel accept_color;
+	gp_pixel fill_color;
 
 	/* fonts */
 	gp_text_style *font;

@@ -76,8 +76,6 @@ struct gp_widget_render_ctx __attribute__((visibility ("hidden"))) ctx = {
 	.dclick_ms = 500,
 };
 
-static gp_pixel fill_color;
-
 static int font_size = 16;
 static gp_font_face *render_font;
 static gp_font_face *render_font_bold;
@@ -370,8 +368,6 @@ void gp_widgets_layout_init(gp_widget *layout, const char *win_tittle)
 
 	widgets_color_scheme_load();
 
-	fill_color = gp_rgb_to_pixmap_pixel(0x44, 0x44, 0x44, ctx.buf);
-
 	gp_widget_calc_size(layout, &ctx, 0, 0, 1);
 
 	app_layout = layout;
@@ -387,7 +383,7 @@ void gp_widgets_layout_init(gp_widget *layout, const char *win_tittle)
 
 	if (layout->w != gp_pixmap_w(backend->pixmap) ||
 	    layout->h != gp_pixmap_h(backend->pixmap)) {
-		gp_fill(backend->pixmap, fill_color);
+		gp_fill(backend->pixmap, ctx.fill_color);
 		flag = 1;
 	}
 
@@ -498,7 +494,7 @@ int gp_widgets_event(gp_event *ev, gp_widget *layout)
 		case GP_EV_SYS_RESIZE:
 			gp_backend_resize_ack(backend);
 			ctx.buf = backend->pixmap;
-			gp_fill(backend->pixmap, fill_color);
+			gp_fill(backend->pixmap, ctx.fill_color);
 			gp_widget_render(layout, &ctx, 1);
 			gp_backend_flip(backend);
 			handled = 1;
