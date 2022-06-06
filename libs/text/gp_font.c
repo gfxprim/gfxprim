@@ -7,39 +7,38 @@
 #include <text/gp_font.h>
 #include <text/gp_fonts.h>
 
-uint32_t gp_get_glyph_count(gp_char_set charset)
+static gp_glyph *get_glyph_from_table(const gp_glyphs *glyphs, uint32_t pos)
 {
-	switch (charset) {
-	case GP_CHARSET_7BIT:
-		return 0x7f - 0x20 + 1;
-	break;
-	default:
-		return 0;
+	uint32_t offset;
+
+	if (!glyphs->offsets) {
+		offset = glyphs->offset * pos;
+	} else {
+		offset = glyphs->offsets[pos];
+
+		if (offset == GP_NOGLYPH)
+			return NULL;
 	}
+
+	return (gp_glyph*)(glyphs->glyphs + offset);
 }
 
 gp_glyph *gp_get_glyph(const gp_font_face *font, int c)
 {
-	int i;
+	uint8_t i;
 
-	switch (font->charset) {
-	case GP_CHARSET_7BIT:
-		if (c < 0x20 || c > 0x7f)
-			return NULL;
-		i = c - ' ';
-	break;
-	default:
-		return NULL;
+	if (c >= 0x20 && c <= 0x7f)
+		return get_glyph_from_table(font->glyphs, c - 0x20);
+
+	for (i = 1; i < font->glyph_tables; i++) {
+		uint32_t min_glyph = font->glyphs[i].min_glyph;
+		uint32_t max_glyph = font->glyphs[i].max_glyph;
+
+		if (c >= min_glyph && c <= max_glyph)
+			return get_glyph_from_table(font->glyphs + i, c - min_glyph);
 	}
 
-	uint32_t offset;
-
-	if (font->glyph_offsets[0] == 0)
-		offset = font->glyph_offsets[i];
-	else
-		offset = font->glyph_offsets[0] * i;
-
-	return (gp_glyph*)(font->glyphs + offset);
+	return NULL;
 }
 
 const char *gp_font_style_name(uint8_t style)
@@ -68,9 +67,15 @@ const char *gp_font_style_name(uint8_t style)
 
 void gp_font_face_free(gp_font_face *self)
 {
+	size_t i;
+
 	if (!self)
 		return;
 
-	free(self->glyphs);
+	for (i = 0; i < self->glyph_tables; i++) {
+		free(self->glyphs[i].offsets);
+		free(self->glyphs[i].glyphs);
+	}
+
 	free(self);
 }

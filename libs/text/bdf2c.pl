@@ -74,7 +74,7 @@ sub load_glyph
 
 sub load_font
 {
-	my ($path) = @_;
+	my ($path, $ascend) = @_;
 	my @glyphs;
 	my %font;
 	my $run = 1;
@@ -94,11 +94,13 @@ sub load_font
 			$glyphs[$glyph->{"code"}] = $glyph;
 		}
 
-		$font{"ascent"} = $1 if ($line =~ /FONT_ASCENT\s(\d*)/);
+		$font{"ascend"} = $1 if ($line =~ /FONT_ASCENT\s(\d*)/);
 		$font{"descent"} = $1 if ($line =~ /FONT_DESCENT\s(\d*)/);
 	}
 
 	$font{"glyphs"} = \@glyphs;
+
+	$font{"ascend"} = $ascend if $ascend;
 
 	return \%font;
 }
@@ -206,39 +208,48 @@ sub convert_font
 
 		print("\n");
 	}
-	print("};\n\n");
+	print("\n};\n\n");
 
 	# offsets[len] == glyphs array size
 	push(@offsets, $offset);
+
+	print("static gp_glyph_offset ${font_id}_offsets[] = {");
+	for (my $i = 0; defined $offsets[$i]; $i++) {
+		print("\n\t") if (!($i % 8));
+		printf("0x%04x,", $offsets[$i]);
+		print(" ") if ($i % 8 != 7);
+	}
+	print("\n};\n\n");
+
 
 	print("static struct gp_font_face $font_id = {\n");
 	print("\t.family_name = \"$name\",\n");
 
 	if ($bold) {
-		print("\t.style = GP_FONT_MONO|GP_FONT_BOLD,\n");
+		print("\t.style = GP_FONT_MONO | GP_FONT_BOLD,\n");
 	} else {
 		print("\t.style = GP_FONT_MONO,\n");
 	}
 
-	print("\t.charset = GP_CHARSET_7BIT,\n");
-	printf("\t.ascend = %i,\n", $font->{'ascent'});
+	printf("\t.ascend = %i,\n", $font->{'ascend'});
 	printf("\t.descend = %i,\n", $font->{'descent'});
 	print("\t.max_glyph_width = $max_width,\n");
 	print("\t.max_glyph_advance = $max_advance,\n");
-	print("\t.glyphs = &${font_id}_glyphs,\n");
-	print("\t.glyph_offsets = {");
-
-	for (my $i = 0; defined $offsets[$i]; $i++) {
-		print("\n\t\t") if (!($i % 8));
-		printf("0x%04x,", $offsets[$i]);
-		print(" ") if ($i % 8 != 7);
-	}
-
+	print("\t.glyph_tables = 1,\n");
+	print("\t.glyphs = {\n");
+	print("\t\t{\n");
+	print("\t\t\t.glyphs = ${font_id}_glyphs,\n");
+	print("\t\t\t.offsets = ${font_id}_offsets,\n");
+	print("\t\t\t.min_glyph = 0x20,\n");
+	print("\t\t\t.max_glyph = 0x7f,\n");
+	print("\t\t}\n");
 	printf("\n\t}\n");
 	print("};\n\n");
 }
 
-my $font = load_font($ARGV[0]);
+my $font = load_font($ARGV[0], $ARGV[3]);
+
+print("// $ENV{'LICENSE'}\n") if $ENV{'LICENSE'};
 
 printf("/* Generated file, do not touch */\n\n");
 printf("#include <text/gp_font.h>\n\n");
@@ -247,8 +258,8 @@ convert_font($font, $ARGV[1], 0);
 print("\n");
 convert_font($font, $ARGV[1] . "_bold", 1);
 
-print("const gp_font_family __attribute__((visibility (\"hidden\"))) ff_$ARGV[1] = {\n");
-print("\t.family_name = \"$ARGV[1]\",\n");
+print("const gp_font_family __attribute__((visibility (\"hidden\"))) font_family_$ARGV[1] = {\n");
+print("\t.family_name = \"$ARGV[2]\",\n");
 print("\t.fonts = {\n");
 print("\t\t&font,\n");
 print("\t\t&font_bold,\n");

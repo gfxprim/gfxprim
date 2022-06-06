@@ -204,17 +204,20 @@ static int8_t default_console_glyphs[] = {
 const struct gp_font_face gp_default_font = {
 	.family_name = "gfxprim",
 	.style = GP_FONT_MONO,
-	.charset = GP_CHARSET_7BIT,
 	.ascend  = 9,
 	.descend = 2,
 	.max_glyph_width = 8,
 	.max_glyph_advance = 8,
 	.glyph_bitmap_format = GP_FONT_BITMAP_1BPP,
-	.glyphs = default_console_glyphs,
-	.glyph_offsets = {16},
+	.glyphs = {
+		{
+			.min_glyph = 0x20,
+			.max_glyph = 0x7f,
+			.glyphs = default_console_glyphs,
+			.offset = 16,
+		}
+	}
 };
-
-const gp_font_face *const gp_font_gfxprim_mono = &gp_default_font;
 
 static uint8_t default_proportional_glyphs[] = {
 	/* ' ' */	6, 11, 0, 9, 7,
@@ -412,17 +415,20 @@ static uint8_t default_proportional_glyphs[] = {
 static struct gp_font_face font_gfxprim = {
 	.family_name = "gfxprim",
 	.style = GP_FONT_REGULAR,
-	.charset = GP_CHARSET_7BIT,
 	.ascend  = 9,
 	.descend = 2,
 	.max_glyph_width = 9,
 	.max_glyph_advance = 9,
 	.glyph_bitmap_format = GP_FONT_BITMAP_1BPP,
-	.glyphs = default_proportional_glyphs,
-	.glyph_offsets = {16},
+	.glyphs = {
+		{
+			.min_glyph = 0x20,
+			.max_glyph = 0x7f,
+			.glyphs = default_proportional_glyphs,
+			.offset = 16,
+		}
+	}
 };
-
-const gp_font_face *gp_font_gfxprim = &font_gfxprim;
 
 const gp_font_family __attribute__((visibility ("hidden"))) font_family_gfxprim = {
 	.family_name = "gfxprim",

@@ -46,23 +46,24 @@ gp_font_face *gp_font_face_load(const char *path, uint32_t width, uint32_t heigh
 		goto err2;
 	}
 
-	/* Allocate font face structure */
-	unsigned int font_face_size;
-
-	font_face_size = sizeof(gp_font_face) +
-	                 sizeof(uint32_t) * gp_get_glyph_count(GP_CHARSET_7BIT);
-
-	gp_font_face *font = malloc(font_face_size);
-
+	gp_font_face *font = malloc(sizeof(gp_font_face) + sizeof(gp_glyphs));
 	if (!font) {
 		GP_DEBUG(1, "Malloc failed :(");
 		goto err2;
+	}
+
+	font->glyphs[0].offsets = malloc(sizeof(gp_glyph_offset) * (0x7f-0x20));
+	if (!font->glyphs[0].offsets) {
+		GP_DEBUG(1, "Malloc failed :(");
+		goto err3;
 	}
 
 	/* Copy font metadata */
 	strncpy(font->family_name, face->family_name,
 	        sizeof(font->family_name));
 	font->family_name[GP_FONT_NAME_MAX - 1] = '\0';
+
+	font->glyph_tables = 1;
 
 	if (FT_IS_FIXED_WIDTH(face))
 		font->style = GP_FONT_MONO;
@@ -76,7 +77,6 @@ gp_font_face *gp_font_face_load(const char *path, uint32_t width, uint32_t heigh
 		font->style |= GP_FONT_ITALIC;
 
 	font->glyph_bitmap_format = GP_FONT_BITMAP_8BPP;
-	font->charset = GP_CHARSET_7BIT;
 
 	/* Count glyph data size */
 	unsigned int i;
@@ -108,18 +108,17 @@ gp_font_face *gp_font_face_load(const char *path, uint32_t width, uint32_t heigh
 			 face->glyph->bitmap_top, face->glyph->bitmap_left);
 
 		/* count glyph table size and fill offset table */
-		font->glyph_offsets[i - 0x20] = glyph_table_size;
+		font->glyphs[0].offsets[i - 0x20] = glyph_table_size;
 		glyph_table_size += sizeof(gp_glyph) +
 		                    bitmap->rows * bitmap->pitch;
 	}
 
 	GP_DEBUG(2, "Glyph table size %u bytes", glyph_table_size);
 
-	font->glyphs = malloc(glyph_table_size);
-
-	if (!font->glyphs) {
+	font->glyphs[0].glyphs = malloc(glyph_table_size);
+	if (!font->glyphs[0].glyphs) {
 		GP_DEBUG(1, "Malloc failed :(");
-		goto err3;
+		goto err4;
 	}
 
 	font->max_glyph_width = 0;
@@ -145,7 +144,7 @@ gp_font_face *gp_font_face_load(const char *path, uint32_t width, uint32_t heigh
 
 		if (err) {
 			GP_DEBUG(1, "Failed to render glyph '%c'", i);
-			goto err4;
+			goto err5;
 		}
 
 		gp_glyph *glyph_bitmap = gp_get_glyph(font, i);
@@ -193,8 +192,10 @@ gp_font_face *gp_font_face_load(const char *path, uint32_t width, uint32_t heigh
 	FT_Done_FreeType(library);
 
 	return font;
+err5:
+	free(font->glyphs[0].glyphs);
 err4:
-	free(font->glyphs);
+	free(font->glyphs[0].offsets);
 err3:
 	free(font);
 err2:

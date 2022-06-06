@@ -201,17 +201,20 @@ static int8_t c64_glyphs[] = {
 static struct gp_font_face c64 = {
 	.family_name = "C64",
 	.style = GP_FONT_MONO,
-	.charset = GP_CHARSET_7BIT,
 	.ascend  = 7,
 	.descend = 2,
 	.max_glyph_width = 8,
 	.max_glyph_advance = 9,
 	.glyph_bitmap_format = GP_FONT_BITMAP_1BPP,
-	.glyphs = c64_glyphs,
-	.glyph_offsets = {12},
+	.glyphs = {
+		{
+			.min_glyph = 0x20,
+			.max_glyph = 0x7f,
+			.glyphs = c64_glyphs,
+			.offset = 12,
+		}
+	}
 };
-
-const struct gp_font_face *gp_font_c64 = &c64;
 
 const gp_font_family __attribute__((visibility ("hidden"))) font_family_c64 = {
 	.family_name = "c64",

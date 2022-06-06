@@ -201,17 +201,20 @@ static int8_t tiny_glyphs[] = {
 static struct gp_font_face tiny = {
 	.family_name = "Tiny",
 	.style = GP_FONT_REGULAR,
-	.charset = GP_CHARSET_7BIT,
 	.ascend  = 5,
 	.descend = 3,
 	.max_glyph_width = 5,
 	.max_glyph_advance = 6,
 	.glyph_bitmap_format = GP_FONT_BITMAP_1BPP,
-	.glyphs = tiny_glyphs,
-	.glyph_offsets = {12},
+	.glyphs = {
+		{
+			.min_glyph = 0x20,
+			.max_glyph = 0x7f,
+			.glyphs = tiny_glyphs,
+			.offset = 12,
+		}
+	}
 };
-
-struct gp_font_face *gp_font_tiny = &tiny;
 
 static int8_t tiny_mono_glyphs[] = {
 	/* ' ' */	5, 5, 0, 5, 6,
@@ -409,17 +412,20 @@ static int8_t tiny_mono_glyphs[] = {
 static struct gp_font_face tiny_mono = {
 	.family_name = "Tiny",
 	.style = GP_FONT_MONO,
-	.charset = GP_CHARSET_7BIT,
 	.ascend  = 5,
 	.descend = 3,
 	.max_glyph_width = 5,
 	.max_glyph_advance = 6,
 	.glyph_bitmap_format = GP_FONT_BITMAP_1BPP,
-	.glyphs = tiny_mono_glyphs,
-	.glyph_offsets = {12},
+	.glyphs = {
+		{
+			.min_glyph = 0x20,
+			.max_glyph = 0x7f,
+			.glyphs = tiny_mono_glyphs,
+			.offset = 12,
+		}
+	}
 };
-
-struct gp_font_face *gp_font_tiny_mono = &tiny_mono;
 
 const gp_font_family __attribute__((visibility ("hidden"))) font_family_tiny = {
 	.family_name = "tiny",

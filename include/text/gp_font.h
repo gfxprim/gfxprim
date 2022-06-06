@@ -57,10 +57,6 @@ typedef struct gp_glyph {
 	uint8_t bitmap[];
 } gp_glyph;
 
-typedef enum gp_char_set {
-	GP_CHARSET_7BIT,
-} gp_char_set;
-
 /*
  * Glyph bitmap data format.
  *
@@ -91,6 +87,31 @@ typedef enum gp_font_style {
 
 #define GP_FONT_STYLE(x) ((x) & GP_FONT_STYLE_MASK)
 
+typedef uint16_t gp_glyph_offset;
+#define GP_NOGLYPH UINT16_MAX
+
+typedef struct gp_glyphs {
+	/* Pointer to glyph bitmap buffer */
+	void *glyphs;
+
+	/*
+	 * Offsets to the glyph data.
+	 *
+	 * If offsets is NULL offset is the same for all glyphs and saved in
+	 * offset instead.
+	 */
+	gp_glyph_offset *offsets;
+	gp_glyph_offset offset;
+
+	/*
+	 * First and last character in glyphs table
+	 *
+	 * For table 0 which is ASCII this is set to 0x20 and 0x7f
+	 */
+	uint32_t min_glyph;
+	uint32_t max_glyph;
+} gp_glyphs;
+
 typedef struct gp_font_face {
 	/* Font family name - eg. Sans, Serif ... */
 	char family_name[GP_FONT_NAME_MAX];
@@ -98,8 +119,8 @@ typedef struct gp_font_face {
 	/* Font style flags */
 	uint8_t style;
 
-	/* Enum for supported charsets */
-	uint8_t charset;
+	/* Size of the glyphs array */
+	uint8_t glyph_tables;
 
 	/* Maximal height of font glyph from baseline to the top. */
 	uint16_t ascend;
@@ -129,20 +150,12 @@ typedef struct gp_font_face {
 	 */
 	gp_font_bitmap_format glyph_bitmap_format;
 
-	/* Pointer to glyph bitmap buffer */
-	void *glyphs;
-
-	/*
-	 * Offsets to the glyph data.
+	/* Glyphs tables
 	 *
-	 * If glyph_offset[0] == 0, the table glyph_offsets holds offsets for
-	 * all characters in glyphs, the last offset i.e. offsets[len] holds
-	 * the size of glyphs array.
-	 *
-	 * If glyph_offset[0] != 0 the glyph_offset[0] defines step in the
-	 * glyph table.
+	 * NULL terminated array of glyph tables sorted by the max_glyph, i.e.
+	 * the ASCII which ends at 0x7f should be first.
 	 */
-	uint32_t glyph_offsets[];
+	gp_glyphs glyphs[];
 } gp_font_face;
 
 /*
@@ -199,11 +212,6 @@ static inline const char *gp_font_family_name(const gp_font_face *font)
 }
 
 const char *gp_font_style_name(uint8_t style);
-
-/*
- * Returns glyph count for charset.
- */
-uint32_t gp_get_glyph_count(gp_char_set charset);
 
 /*
  * Returns glyph mapping

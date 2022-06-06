@@ -11,21 +11,23 @@
 extern const gp_font_face gp_default_font;
 
 extern const gp_font_family font_family_gfxprim;
-extern const gp_font_family haxor_narrow_15;
-extern const gp_font_family haxor_narrow_16;
-extern const gp_font_family haxor_narrow_17;
-extern const gp_font_family ff_haxor_narrow_18;
+extern const gp_font_family font_family_haxor_narrow_15;
+extern const gp_font_family font_family_haxor_narrow_16;
+extern const gp_font_family font_family_haxor_narrow_17;
+extern const gp_font_family font_family_haxor_narrow_18;
 extern const gp_font_family font_family_c64;
 extern const gp_font_family font_family_tiny;
+extern const gp_font_family font_family_square;
 
 static const gp_font_family *const font_families[] = {
 	&font_family_gfxprim,
-	&haxor_narrow_15,
-	&haxor_narrow_16,
-	&haxor_narrow_17,
-	&ff_haxor_narrow_18,
+	&font_family_haxor_narrow_15,
+	&font_family_haxor_narrow_16,
+	&font_family_haxor_narrow_17,
+	&font_family_haxor_narrow_18,
 	&font_family_c64,
 	&font_family_tiny,
+	&font_family_square,
 };
 
 #define FONT_FAMILIES_LAST_IDX (GP_ARRAY_SIZE(font_families) - 1)

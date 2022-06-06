@@ -14,3 +14,13 @@ ifeq ($(HAVE_FREETYPE),yes)
 gp_free_type.dep: CFLAGS+=$(FREETYPE_CFLAGS)
 gp_free_type.o: CFLAGS+=$(FREETYPE_CFLAGS)
 endif
+
+FONTS_DIR="../../../fonts/"
+
+fonts:
+	export LICENSE="SPDX-License-Identifier: LGPL-2.1-or-later" && \
+	./bdf2c.pl $(FONTS_DIR)/HaxorNarrow-15.bdf haxor_narrow_15 haxor-narrow-15 12 > gp_haxor_narrow_15.c && \
+	./bdf2c.pl $(FONTS_DIR)/HaxorNarrow-16.bdf haxor_narrow_16 haxor-narrow-16 13 > gp_haxor_narrow_16.c && \
+	./bdf2c.pl $(FONTS_DIR)/HaxorNarrow-17.bdf haxor_narrow_17 haxor-narrow-17 14 > gp_haxor_narrow_17.c && \
+	./bdf2c.pl $(FONTS_DIR)/HaxorNarrow-18.bdf haxor_narrow_18 haxor-narrow-18 18 > gp_font_haxor_narrow_18.c && \
+	./bdf2c.pl $(FONTS_DIR)/HaxorSquare-8x8.bdf square square > gp_haxor_square_8x8.c
