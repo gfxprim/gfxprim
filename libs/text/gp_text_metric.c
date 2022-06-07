@@ -8,19 +8,10 @@
 
 #include <string.h>
 #include <core/gp_common.h>
+#include <utils/gp_utf.h>
 #include <text/gp_text_metric.h>
 
 extern gp_text_style gp_default_style;
-
-static const gp_glyph *get_glyph(const gp_text_style *style, int c)
-{
-	const gp_glyph *glyph = gp_get_glyph(style->font, c);
-
-	if (glyph == NULL)
-		glyph = gp_get_glyph(style->font, ' ');
-
-	return glyph;
-}
 
 static unsigned int multiply_width(const gp_text_style *style, unsigned int w)
 {
@@ -30,9 +21,9 @@ static unsigned int multiply_width(const gp_text_style *style, unsigned int w)
 /*
  * Returns glyph advance.
  */
-static unsigned int glyph_advance_x(const gp_text_style *style, int ch)
+static unsigned int glyph_advance_x(const gp_text_style *style, uint32_t ch)
 {
-	const gp_glyph *glyph = get_glyph(style, ch);
+	const gp_glyph *glyph = gp_get_glyph(style->font, ch);
 
 	return multiply_width(style, glyph->advance_x);
 }
@@ -40,9 +31,9 @@ static unsigned int glyph_advance_x(const gp_text_style *style, int ch)
 /*
  * Returns glyph bearing.
  */
-static unsigned int glyph_bearing_x(const gp_text_style *style, int ch)
+static unsigned int glyph_bearing_x(const gp_text_style *style, uint32_t ch)
 {
-	const gp_glyph *glyph = get_glyph(style, ch);
+	const gp_glyph *glyph = gp_get_glyph(style->font, ch);
 
 	return multiply_width(style, glyph->bearing_x);
 }
@@ -65,11 +56,11 @@ static unsigned int max_glyph_advance_x(const gp_text_style *style,
  * Returns _SINGLE_ glyph size, not including the bearing_x and including space
  * occupied by the glyph bitmap if the bitmap width overflows glyph advance_x.
  */
-static unsigned int glyph_width(const gp_text_style *style, int c)
+static unsigned int glyph_width(const gp_text_style *style, uint32_t ch)
 {
 	unsigned int size, advance;
 
-	const gp_glyph *glyph = get_glyph(style, c);
+	const gp_glyph *glyph = gp_get_glyph(style->font, ch);
 
 	advance = multiply_width(style, glyph->advance_x - glyph->bearing_x);
 	size    = multiply_width(style, glyph->width);
@@ -87,11 +78,11 @@ static unsigned int glyph_width(const gp_text_style *style, int c)
  * the exact size of the glyph itself without advance before and space after is
  * not known), so we likely return some more pixels than is needed.
  */
-static unsigned int last_glyph_width(const gp_text_style *style, int c)
+static unsigned int last_glyph_width(const gp_text_style *style, uint32_t ch)
 {
 	unsigned int size, advance;
 
-	const gp_glyph *glyph = get_glyph(style, c);
+	const gp_glyph *glyph = gp_get_glyph(style->font, ch);
 
 	advance = multiply_width(style, glyph->advance_x);
 	size = multiply_width(style, glyph->width + glyph->bearing_x);
@@ -106,9 +97,9 @@ static unsigned int last_glyph_width(const gp_text_style *style, int c)
  * bouding box and even in case it's possitive the returned size would be
  * slightly bigger.
  */
-static unsigned int first_glyph_width(const gp_text_style *style, int c)
+static unsigned int first_glyph_width(const gp_text_style *style, uint32_t ch)
 {
-	const gp_glyph *glyph = get_glyph(style, c);
+	const gp_glyph *glyph = gp_get_glyph(style->font, ch);
 
 	return multiply_width(style, glyph->advance_x - glyph->bearing_x);
 }
@@ -126,36 +117,48 @@ static const gp_text_style *assert_style(const gp_text_style *style)
 gp_size gp_text_width_len(const gp_text_style *style, enum gp_text_len_type type,
                           const char *str, size_t len)
 {
-	unsigned int i, ret;
+	size_t ret, cnt = 0;
+	uint32_t ch;
 
 	style = assert_style(style);
 
-	if (!str || !str[0] || !len)
+	if (!str || !*str || !len)
 		return 0;
 
+	ch = gp_utf8_next(&str);
+
 	/* special case, single letter */
-	if (str[1] == '\0' || len == 1)
-		return glyph_width(style, str[0]);
+	if (!*str || len == 1)
+		return glyph_width(style, ch);
 
 	/* first letter */
-	ret = first_glyph_width(style, str[0]) + style->char_xspace;
+	ret = first_glyph_width(style, ch) + style->char_xspace;
+
+	cnt++;
 
 	/* middle letters */
-	for (i = 1; i + 1 < len && str[i+1]; i++) {
-		ret += glyph_advance_x(style, str[i]);
+	for (;;) {
+		ch = gp_utf8_next(&str);
+
+		if (!*str || cnt++ >= len)
+			break;
+
+		ret += glyph_advance_x(style, ch);
 		ret += style->char_xspace;
 	}
 
 	/* last letter */
 	switch (type) {
 	case GP_TEXT_LEN_BBOX:
-		ret += last_glyph_width(style, str[i]);
+		ret += last_glyph_width(style, ch);
 	break;
 	case GP_TEXT_LEN_ADVANCE:
-		ret += glyph_advance_x(style, str[i]) + style->char_xspace;
+		ret += glyph_advance_x(style, ch) + style->char_xspace;
 
-		if (str[i+1])
-			ret += glyph_bearing_x(style, str[i+1]);
+		if (*str) {
+			ch = gp_utf8_next(&str);
+			ret += glyph_bearing_x(style, ch);
+		}
 	break;
 	}
 

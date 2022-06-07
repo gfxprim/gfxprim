@@ -24,7 +24,8 @@ static const char *test_strings[] = {
 	" !\"#$%&\047()*+,-./0123456789:;<=>?@",
 	"ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`",
 	"abcdefghijklmnopqrstuvwxyz{|}~",
-	"Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor..."
+	"Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor...",
+	"\u010cesk\u00e9 znaky \u00e1\u00e9\u011b\u00ed\u00fd\u00f3\u00fa\u016f\u017e\u0161\u010d\u0159\u010f\u0165\u0148",
 };
 
 static int tracking = 0;
@@ -115,13 +116,13 @@ void redraw_screen(void)
 
 		gp_rect_xywh(win->pixmap,
 			15, SPACING*i + 15,
-			gp_text_max_width(&style, strlen(test_string)) + 1,
+			gp_text_max_width(&style, gp_utf8_strlen(test_string)) + 1,
 			gp_font_height(style.font) + 1,
 			blue_pixel);
 
 		gp_hline_xyw(win->pixmap, 15,
 		             SPACING*i + 15 + gp_font_ascend(style.font),
-		             gp_text_max_width(&style, strlen(test_string)) + 1,
+		             gp_text_max_width(&style, gp_utf8_strlen(test_string)) + 1,
 		             blue_pixel);
 
 		gp_text(win->pixmap, &style, 16, SPACING*i + 16, align,
@@ -261,7 +262,7 @@ void print_instructions(void)
 
 int main(int argc, char *argv[])
 {
-	const char *backend_opts = "X11";
+	const char *backend_opts = "X11:800x600";
 	int opt;
 
 	print_instructions();

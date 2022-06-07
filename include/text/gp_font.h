@@ -216,7 +216,7 @@ const char *gp_font_style_name(uint8_t style);
 /*
  * Returns glyph mapping
  */
-gp_glyph *gp_get_glyph(const gp_font_face *font, int c);
+gp_glyph *gp_get_glyph(const gp_font_face *font, uint32_t ch);
 
 /* Loads font face from file  */
 gp_font_face *gp_font_face_load(const char *path, uint32_t width, uint32_t height);

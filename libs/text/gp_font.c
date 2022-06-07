@@ -4,6 +4,7 @@
  */
 
 #include <stdlib.h>
+#include <utils/gp_utf.h>
 #include <text/gp_font.h>
 #include <text/gp_fonts.h>
 
@@ -23,7 +24,7 @@ static gp_glyph *get_glyph_from_table(const gp_glyphs *glyphs, uint32_t pos)
 	return (gp_glyph*)(glyphs->glyphs + offset);
 }
 
-gp_glyph *gp_get_glyph(const gp_font_face *font, int c)
+static gp_glyph *get_glyph(const gp_font_face *font, uint32_t c)
 {
 	uint8_t i;
 
@@ -39,6 +40,23 @@ gp_glyph *gp_get_glyph(const gp_font_face *font, int c)
 	}
 
 	return NULL;
+}
+
+gp_glyph *gp_get_glyph(const gp_font_face *font, uint32_t ch)
+{
+	gp_glyph *glyph = get_glyph(font, ch);
+
+	if (!glyph && ch > 0x7f) {
+		uint32_t fb = gp_utf_fallback(ch);
+
+		if (fb != ch)
+			glyph = get_glyph(font, fb);
+	}
+
+	if (!glyph)
+		glyph = get_glyph(font, '?');
+
+	return glyph;
 }
 
 const char *gp_font_style_name(uint8_t style)

@@ -96,6 +96,8 @@ sub load_font
 
 		$font{"ascend"} = $1 if ($line =~ /FONT_ASCENT\s(\d*)/);
 		$font{"descent"} = $1 if ($line =~ /FONT_DESCENT\s(\d*)/);
+		$font{"registry"} = $1 if ($line =~ /CHARSET_REGISTRY\s"(.*)"/);
+		$font{"encoding"} = $1 if ($line =~ /CHARSET_ENCODING\s"(.*)"/);
 	}
 
 	$font{"glyphs"} = \@glyphs;
@@ -156,36 +158,44 @@ sub embold
 	return \%ret;
 }
 
-sub convert_font
+sub gen_glyph_table
 {
-	my ($font, $name, $bold) = @_;
-	my $glyphs = $font->{"glyphs"};
+	my ($glyphs, $first, $last, $max_width, $font_id, $embold, $map) = @_;
+
 	my @offsets = ();
 	my $offset = 0;
-	my $max_width = 0;
-	my $max_advance = 0;
-
-	my $font_id = $bold ? "font_bold" : "font";
 
 	print("static uint8_t ${font_id}_glyphs[] = {\n");
 
-	for (my $i = 32; $i <= 126; $i++) {
-		my $glyph = $glyphs->[$i];
+	for (my $i = $first; $i <= $last; $i++) {
+		my $idx = $i;
 
-		$max_width = max($max_width, $glyph->{'w'});
-		$max_advance = max($max_advance, $glyph->{'x_advance'});
-	}
+		$idx = $map->($i) if $map;
+		if ($idx < 0) {
+			push(@offsets, -1);
+			next;
+		}
 
-	for (my $i = 32; $i <= 126; $i++) {
-		my $glyph = $glyphs->[$i];
+		my $glyph = $glyphs->[$idx];
 
-		$glyph = embold($glyph, $max_width) if $bold;
-
-		die "missing glyph $i" if !$glyph;
+		if ($map && !$glyph) {
+			push(@offsets, -1);
+			next;
+		} else {
+			die "missing glyph $i" if !$glyph;
+		}
 
 		push(@offsets, $offset);
 
-		printf("\t/* '%c' */\t %2i, %2i, %2i, %2i, %2i,\n", $i,
+		$glyph = embold($glyph, $max_width) if $embold;
+
+		if ($i < 0x7f) {
+			printf("\t/* '%c' */", $i);
+		} else {
+			printf("\t/* 0x%0x '%c%c' */", $i, 0xc0 | ($i>>6), 0x80 | ($i & 0x3f));
+		}
+
+		printf("\t %2i, %2i, %2i, %2i, %2i,\n",
 		      $glyph->{'w'}, $glyph->{"h"}, $glyph->{"x_off"},
 		      $glyph->{"h"} + $glyph->{"y_off"}, $glyph->{'x_advance'});
 
@@ -216,11 +226,149 @@ sub convert_font
 	print("static gp_glyph_offset ${font_id}_offsets[] = {");
 	for (my $i = 0; defined $offsets[$i]; $i++) {
 		print("\n\t") if (!($i % 8));
-		printf("0x%04x,", $offsets[$i]);
+		if ($offsets[$i] == -1) {
+			printf("GP_NOGLYPH,");
+		} else {
+			printf("    0x%04x,", $offsets[$i]);
+		}
 		print(" ") if ($i % 8 != 7);
 	}
 	print("\n};\n\n");
+}
 
+sub utf_to_iso8859_2
+{
+	my ($utf) = @_;
+
+	return 0xa1 if $utf == 0x104;
+	return 0xa2 if $utf == 0x2d8;
+	return 0xa3 if $utf == 0x141;
+	return 0xa4 if $utf == 0x0a4;
+	return 0xa5 if $utf == 0x13d;
+	return 0xa6 if $utf == 0x15a;
+	return 0xa7 if $utf == 0x0a7;
+	return 0xa8 if $utf == 0x0a8;
+	return 0xa9 if $utf == 0x160;
+	return 0xaa if $utf == 0x15e;
+	return 0xab if $utf == 0x164;
+	return 0xac if $utf == 0x179;
+	return 0xad if $utf == 0x0ad;
+	return 0xae if $utf == 0x17d;
+	return 0xaf if $utf == 0x17b;
+
+	return 0xb0 if $utf == 0x0b0;
+	return 0xb1 if $utf == 0x105;
+	return 0xb2 if $utf == 0x2db;
+	return 0xb3 if $utf == 0x142;
+	return 0xb4 if $utf == 0x0b4;
+	return 0xb5 if $utf == 0x13e;
+	return 0xb6 if $utf == 0x15b;
+	return 0xb7 if $utf == 0x2c7;
+	return 0xb8 if $utf == 0x0b8;
+	return 0xb9 if $utf == 0x161;
+	return 0xba if $utf == 0x15f;
+	return 0xbb if $utf == 0x165;
+	return 0xbc if $utf == 0x17a;
+	return 0xbd if $utf == 0x2dd;
+	return 0xbe if $utf == 0x17e;
+	return 0xbf if $utf == 0x17c;
+
+	return 0xc0 if $utf == 0x154;
+	return 0xc1 if $utf == 0x0c1;
+	return 0xc2 if $utf == 0x0c2;
+	return 0xc3 if $utf == 0x102;
+	return 0xc4 if $utf == 0x0c4;
+	return 0xc5 if $utf == 0x139;
+	return 0xc6 if $utf == 0x106;
+	return 0xc7 if $utf == 0x0c7;
+	return 0xc8 if $utf == 0x10c;
+	return 0xc9 if $utf == 0x0c9;
+	return 0xca if $utf == 0x118;
+	return 0xcb if $utf == 0x0cb;
+	return 0xcc if $utf == 0x11a;
+	return 0xcd if $utf == 0x0cd;
+	return 0xce if $utf == 0x0ce;
+	return 0xcf if $utf == 0x10e;
+
+	return 0xd0 if $utf == 0x110;
+	return 0xd1 if $utf == 0x143;
+	return 0xd2 if $utf == 0x147;
+	return 0xd3 if $utf == 0x0d3;
+	return 0xd4 if $utf == 0x0d4;
+	return 0xd5 if $utf == 0x150;
+	return 0xd6 if $utf == 0x0d6;
+	return 0xd7 if $utf == 0x0d7;
+	return 0xd8 if $utf == 0x158;
+	return 0xd9 if $utf == 0x16e;
+	return 0xda if $utf == 0x0da;
+	return 0xdb if $utf == 0x170;
+	return 0xdc if $utf == 0x0dc;
+	return 0xdd if $utf == 0x0dd;
+	return 0xde if $utf == 0x162;
+	return 0xdf if $utf == 0x0df;
+
+	return 0xe0 if $utf == 0x155;
+	return 0xe1 if $utf == 0x0e1;
+	return 0xe2 if $utf == 0x0e2;
+	return 0xe3 if $utf == 0x103;
+	return 0xe4 if $utf == 0x0e4;
+	return 0xe5 if $utf == 0x13a;
+	return 0xe6 if $utf == 0x107;
+	return 0xe7 if $utf == 0x0e7;
+	return 0xe8 if $utf == 0x10d;
+	return 0xe9 if $utf == 0x0e9;
+	return 0xea if $utf == 0x119;
+	return 0xeb if $utf == 0x0eb;
+	return 0xec if $utf == 0x11b;
+	return 0xed if $utf == 0x0ed;
+	return 0xee if $utf == 0x0ee;
+	return 0xef if $utf == 0x10f;
+
+	return 0xf0 if $utf == 0x111;
+	return 0xf1 if $utf == 0x144;
+	return 0xf2 if $utf == 0x148;
+	return 0xf3 if $utf == 0x0f3;
+	return 0xf4 if $utf == 0x0f4;
+	return 0xf5 if $utf == 0x151;
+	return 0xf6 if $utf == 0x0f6;
+	return 0xf7 if $utf == 0x0f7;
+	return 0xf8 if $utf == 0x159;
+	return 0xf9 if $utf == 0x16f;
+	return 0xfa if $utf == 0x0fa;
+	return 0xfb if $utf == 0x171;
+	return 0xfc if $utf == 0x0fc;
+	return 0xfd if $utf == 0x0fd;
+	return 0xfe if $utf == 0x163;
+	return 0xff if $utf == 0x2d9;
+
+	return -1;
+}
+
+sub convert_font
+{
+	my ($font, $name, $bold) = @_;
+	my $glyphs = $font->{"glyphs"};
+	my $max_width = 0;
+	my $max_advance = 0;
+	my $font_id = $bold ? "font_bold" : "font";
+	my $enc = $font->{'registry'} . "-" . $font->{'encoding'};
+	my $last = 0x7f;
+
+	$last = 0xff if ($enc eq "iso8859-2");
+	for (my $i = 0x20; $i <= $last; $i++) {
+		my $glyph = $glyphs->[$i];
+
+		next if !$glyph;
+
+		$max_width = max($max_width, $glyph->{'w'});
+		$max_advance = max($max_advance, $glyph->{'x_advance'});
+	}
+
+	gen_glyph_table($glyphs, 0x20, 0x7e, $max_width, $font_id, $bold);
+
+	if ($enc eq "iso8859-2") {
+		gen_glyph_table($glyphs, 0xa4, 0x17e, $max_width, $font_id . "_latin_ext", $bold, \&utf_to_iso8859_2);
+	}
 
 	print("static struct gp_font_face $font_id = {\n");
 	print("\t.family_name = \"$name\",\n");
@@ -231,18 +379,30 @@ sub convert_font
 		print("\t.style = GP_FONT_MONO,\n");
 	}
 
+	my $glyph_tables = 1;
+
+	$glyph_tables = 2 if ($enc eq "iso8859-2");
+
 	printf("\t.ascend = %i,\n", $font->{'ascend'});
 	printf("\t.descend = %i,\n", $font->{'descent'});
 	print("\t.max_glyph_width = $max_width,\n");
 	print("\t.max_glyph_advance = $max_advance,\n");
-	print("\t.glyph_tables = 1,\n");
+	print("\t.glyph_tables = $glyph_tables,\n");
 	print("\t.glyphs = {\n");
 	print("\t\t{\n");
 	print("\t\t\t.glyphs = ${font_id}_glyphs,\n");
 	print("\t\t\t.offsets = ${font_id}_offsets,\n");
 	print("\t\t\t.min_glyph = 0x20,\n");
 	print("\t\t\t.max_glyph = 0x7f,\n");
-	print("\t\t}\n");
+	print("\t\t},\n");
+	if ($enc eq "iso8859-2") {
+		print("\t\t{\n");
+		print("\t\t\t.glyphs = ${font_id}_latin_ext_glyphs,\n");
+		print("\t\t\t.offsets = ${font_id}_latin_ext_offsets,\n");
+		print("\t\t\t.min_glyph = 0xa4,\n");
+		print("\t\t\t.max_glyph = 0x17e,\n");
+		print("\t\t},\n");
+	}
 	printf("\n\t}\n");
 	print("};\n\n");
 }

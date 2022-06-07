@@ -12,6 +12,8 @@
 
 #include <gfx/gp_hline.h>
 
+#include <utils/gp_utf.h>
+
 #include <text/gp_text_style.h>
 #include <text/gp_font.h>
 #include <text/gp_text.h>
@@ -30,14 +32,12 @@ static void text_draw_1BPP_{{ pt.name }}(gp_pixmap *pixmap, const gp_text_style 
                                          uint8_t bearing, gp_coord x, gp_coord y,
 				         gp_pixel fg, const char *str, size_t max_chars)
 {
-	const char *p;
 	gp_coord y0 = y;
+	uint32_t ch;
+	size_t pos;
 
-	for (p = str; *p != '\0' && (size_t)(p - str) < max_chars; p++) {
-		const gp_glyph *glyph = gp_get_glyph(style->font, *p);
-
-		if (glyph == NULL)
-			glyph = gp_get_glyph(style->font, ' ');
+	for (pos = 0; pos < max_chars && (ch = gp_utf8_next(&str)); pos++) {
+		const gp_glyph *glyph = gp_get_glyph(style->font, ch);
 
 		int i, j, k, l;
 
@@ -57,7 +57,7 @@ static void text_draw_1BPP_{{ pt.name }}(gp_pixmap *pixmap, const gp_text_style 
 
 				int start_x = x + (i + glyph->bearing_x) * x_mul;
 
-				if (!bearing && p == str)
+				if (!bearing && !pos)
 					start_x -= glyph->bearing_x * x_mul;
 
 				int start_y = y - (glyph->bearing_y - style->font->ascend) * y_mul;
@@ -78,7 +78,7 @@ static void text_draw_1BPP_{{ pt.name }}(gp_pixmap *pixmap, const gp_text_style 
 
 		x += get_width(style, glyph->advance_x) + style->char_xspace;
 
-		if (!bearing && p == str)
+		if (!bearing && !pos)
 			x -= get_width(style, glyph->bearing_x);
 	}
 }
@@ -102,15 +102,12 @@ static void text_draw_1BPP(gp_pixmap *pixmap, const gp_text_style *style,
 }
 
 @ def text_8BPP(pt, use_bg):
-	const char *p;
-
 	gp_coord y0 = y;
+	uint32_t ch;
+	size_t pos;
 
-	for (p = str; *p != '\0' && (size_t)(p - str) < max_chars; p++) {
-		const gp_glyph *glyph = gp_get_glyph(style->font, *p);
-
-		if (glyph == NULL)
-			glyph = gp_get_glyph(style->font, ' ');
+	for (pos = 0; pos < max_chars && (ch = gp_utf8_next(&str)); pos++) {
+		const gp_glyph *glyph = gp_get_glyph(style->font, ch);
 
 		int i, j, k;
 
@@ -125,7 +122,7 @@ static void text_draw_1BPP(gp_pixmap *pixmap, const gp_text_style *style,
 
 				unsigned int x_start = x + (i + glyph->bearing_x) * x_mul;
 
-				if (!bearing && p == str)
+				if (!bearing && !pos)
 					x_start -= glyph->bearing_x * x_mul;
 
 				if (!gray)
@@ -156,7 +153,7 @@ static void text_draw_1BPP(gp_pixmap *pixmap, const gp_text_style *style,
 
 		x += get_width(style, glyph->advance_x) + style->char_xspace;
 
-		if (!bearing && p == str)
+		if (!bearing && !pos)
 			x -= get_width(style, glyph->bearing_x);
 	}
 @ end
