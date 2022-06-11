@@ -1,0 +1,49 @@
+Color schemes
+-------------
+
+Currently two color schemes are implemented light scheme and dark scheme.
+
+You can switch between schemes on runtime by pressing 'Ctrl + Spacebar'.
+
+The default theme is light.
+
+.Functions to query and manipulate color schemes from a running application.
+[source,c]
+-------------------------------------------------------------------------------
+enum gp_widgets_color_scheme {
+        GP_WIDGET_COLOR_SCHEME_DEFAULT,
+        GP_WIDGET_COLOR_SCHEME_LIGHT,
+        GP_WIDGET_COLOR_SCHEME_DARK,
+};
+
+void gp_widgets_color_scheme_toggle(void);
+
+void gp_widgets_color_scheme_set(enum gp_widgets_color_scheme color_scheme);
+
+enum gp_widgets_color_scheme gp_widgets_color_scheme_get(void);
+-------------------------------------------------------------------------------
+
+The function 'gp_widgets_color_scheme_get()' returns either light or dark,
+default is never returned.
+
+All applications should adjust background pixmap color either by using the
+default bacground color, which is set accordingly to the theme, or by querying
+the color scheme and adjusting the colors accordingly.
+
+[source,c]
+-------------------------------------------------------------------------------
+gp_widget *gp_widget_color_scheme_switch(void);
+-------------------------------------------------------------------------------
+
+Returns a pointer to a singleton widget that can be added to GUI to switch the
+color scheme.
+
+[source,json]
+-------------------------------------------------------------------------------
+...
+    {"type": "color_scheme_switch"},
+...
+-------------------------------------------------------------------------------
+
+The color scheme switch widget can be also initialized in a json layout with
+the 'color_scheme_switch' widget type.

@@ -25,15 +25,20 @@ struct gp_widget_render_ctx {
 	enum gp_widgets_color_scheme color_scheme;
 
 	/* colors */
-	gp_pixel text_color;
-	gp_pixel bg_color;
-	gp_pixel fg_color;
-	gp_pixel fg2_color;
-	gp_pixel sel_color;
-	gp_pixel alert_color;
-	gp_pixel warn_color;
-	gp_pixel accept_color;
-	gp_pixel fill_color;
+	union {
+		gp_pixel colors[GP_WIDGETS_THEME_COLORS];
+		struct {
+			gp_pixel text_color;
+			gp_pixel fg_color;
+			gp_pixel bg_color;
+			gp_pixel hl_color;
+			gp_pixel sel_color;
+			gp_pixel alert_color;
+			gp_pixel warn_color;
+			gp_pixel accept_color;
+			gp_pixel fill_color;
+		};
+	};
 
 	/* fonts */
 	gp_text_style *font;

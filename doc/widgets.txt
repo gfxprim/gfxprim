@@ -31,6 +31,8 @@ Widgets generic documetation
 * link:widgets_render_context.html[Render context]
 * link:widgets_free.html[Widget destructor]
 * link:widget_classes.html[Widget classes]
+* link:widgets_color_scheme.html[Widget color scheme]
+* link:widgets_colors.html[Widget colors]
 
 Individual widgets documentation
 --------------------------------

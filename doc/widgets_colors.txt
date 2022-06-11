@@ -1,0 +1,74 @@
+Colors
+------
+
+Certain widget colors can be set, for instance you can set both foreground and
+background for a label widget.
+
+.JSON Theme colors
+|===
+| "text"      | Text color
+| "fg"        | Foreground color
+| "bg         | Background color
+| "highlight" | Highlighted background
+| "alert"     | Alert (error) color, usually red
+| "warn"      | Warning color, usually yellow
+| "accept"    | Accept color, usually green
+|===
+
+.JSON 16 colors
+|===
+| "black"        | "red"            | "green"        | "yellow"
+| "blue"         | "magenta"        | "cyan"         | "gray"
+| "bright black" | "bright red"     | "bright green" | "bright yellow",
+| "bright blue"  | "bright magenta" | "bright cyan"  | "white"
+|===
+
+Internal colors impementation
+-----------------------------
+
+[source,c]
+-------------------------------------------------------------------------------
+enum gp_widgets_color {
+	/* theme colors */
+	GP_WIDGETS_COL_TEXT,
+	GP_WIDGETS_COL_FG,
+	GP_WIDGETS_COL_BG,
+	GP_WIDGETS_COL_HIGHLIGHT,
+	GP_WIDGETS_COL_SELECT,
+	GP_WIDGETS_COL_ALERT,
+	GP_WIDGETS_COL_WARN,
+	GP_WIDGETS_COL_ACCEPT,
+	GP_WIDGETS_COL_FILL,
+
+	/* 16 colors */
+	GP_WIDGETS_COL_BLACK,
+	GP_WIDGETS_COL_RED,
+	GP_WIDGETS_COL_GREEN,
+	GP_WIDGETS_COL_YELLOW,
+	GP_WIDGETS_COL_BLUE,
+	GP_WIDGETS_COL_MAGENTA,
+	GP_WIDGETS_COL_CYAN,
+	GP_WIDGETS_COL_GRAY,
+	GP_WIDGETS_COL_BR_BLACK,
+        GP_WIDGETS_COL_BR_RED,
+        GP_WIDGETS_COL_BR_GREEN,
+        GP_WIDGETS_COL_BR_YELLOW,
+        GP_WIDGETS_COL_BR_BLUE,
+        GP_WIDGETS_COL_BR_MAGENTA,
+        GP_WIDGETS_COL_BR_CYAN,
+        GP_WIDGETS_COL_WHITE,
+};
+
+enum gp_widgets_color gp_widgets_color_name_idx(const char *name);
+
+gp_pixel gp_widgets_color(enum gp_widgets_color color);
+-------------------------------------------------------------------------------
+
+The approach to colors in widgets is similar to a paletted pixmap. Each time a
+widget needs a color to draw on the screen it fetches the real pixel colors
+from this palette. Note that these colors can change when theme changes so we
+have to fetch them each time widget is repainted.
+
+The 'gp_widgets_color_name_idx()' converts a string color name into a the
+color table index. This function is used when colors are parsed from a JSON
+layout.

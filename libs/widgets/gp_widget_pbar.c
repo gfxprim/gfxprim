@@ -60,7 +60,7 @@ static void pbar_render(gp_widget *self, const gp_offset *offset,
 	gp_sub_pixmap(ctx->buf, &p, x, y, wd, h);
 	if (p.w > 0) {
 		gp_fill_rrect_xywh(&p, 0, 0, w, h, ctx->bg_color,
-		                   ctx->fg2_color, ctx->text_color);
+		                   ctx->hl_color, ctx->text_color);
 	}
 
 	gp_sub_pixmap(ctx->buf, &p, x+wd, y, w-wd, h);
