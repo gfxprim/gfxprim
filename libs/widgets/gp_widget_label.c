@@ -2,7 +2,7 @@
 
 /*
 
-   Copyright (c) 2014-2020 Cyril Hrubis <metan@ucw.cz>
+   Copyright (c) 2014-2022 Cyril Hrubis <metan@ucw.cz>
 
  */
 
@@ -24,10 +24,10 @@ static unsigned int min_w(gp_widget *self, const gp_widget_render_ctx *ctx)
 	else
 		max_width = gp_text_wbbox(font, self->label->text);
 
-	if (self->label->frame)
+	if (self->label->frame && !self->label->padd)
 		max_width += 2 * ctx->padd;
 
-	return max_width;
+	return max_width + 2 * ctx->padd * self->label->padd;
 }
 
 static unsigned int min_h(gp_widget *self, const gp_widget_render_ctx *ctx)
@@ -46,6 +46,8 @@ static void render(gp_widget *self, const gp_offset *offset,
 	unsigned int y = self->y + offset->y;
 	unsigned int w = self->w;
 	unsigned int h = self->h;
+	gp_pixel bg_color = gp_widgets_color(self->label->bg_color);
+	gp_pixel text_color = gp_widgets_color(self->label->text_color);
 
 	gp_widget_ops_blit(ctx, x, y, w, h);
 
@@ -53,12 +55,20 @@ static void render(gp_widget *self, const gp_offset *offset,
 
 	if (self->label->frame) {
 		gp_fill_rrect_xywh(ctx->buf, x, y, w, h, ctx->bg_color,
-		                   ctx->fg_color, ctx->text_color);
+		                   bg_color, ctx->text_color);
 
+	} else {
+		gp_fill_rect_xywh(ctx->buf, x, y, w, h, bg_color);
+	}
+
+	if (self->label->frame && !self->label->padd) {
 		x += ctx->padd;
 		w -= 2 * ctx->padd;
-	} else {
-		gp_fill_rect_xywh(ctx->buf, x, y, w, h, ctx->bg_color);
+	}
+
+	if (self->label->padd) {
+		x += ctx->padd * self->label->padd;
+		w -= 2 * ctx->padd * self->label->padd;
 	}
 
 	int align = gp_widget_tattr_halign(self->label->tattr);
@@ -68,20 +78,28 @@ static void render(gp_widget *self, const gp_offset *offset,
 
 	gp_text_fit(ctx->buf, font, x, y + ctx->padd, w,
 	            align|GP_VALIGN_BELOW,
-	            ctx->text_color, ctx->bg_color, self->label->text);
+	            text_color, bg_color, self->label->text);
 }
 
 enum keys {
+	BG_COLOR,
 	FRAME,
+	PADD,
+	REVERSE_COLORS,
 	TATTR,
 	TEXT,
+	TEXT_COLOR,
 	WIDTH
 };
 
 static const gp_json_obj_attr attrs[] = {
+	GP_JSON_OBJ_ATTR("bg_color", GP_JSON_STR),
 	GP_JSON_OBJ_ATTR("frame", GP_JSON_BOOL),
+	GP_JSON_OBJ_ATTR("padd", GP_JSON_INT),
+	GP_JSON_OBJ_ATTR("reverse_colors", GP_JSON_BOOL),
 	GP_JSON_OBJ_ATTR("tattr", GP_JSON_STR),
 	GP_JSON_OBJ_ATTR("text", GP_JSON_STR),
+	GP_JSON_OBJ_ATTR("text_color", GP_JSON_STR),
 	GP_JSON_OBJ_ATTR("width", GP_JSON_INT),
 };
 
@@ -95,14 +113,34 @@ static gp_widget *json_to_label(gp_json_buf *json, gp_json_val *val, gp_widget_j
 	char *label = NULL;
 	int width = 0;
 	int frame = 0;
+	int bg_color = GP_WIDGETS_COL_BG;
+	int text_color = GP_WIDGETS_COL_TEXT;
+	int padd = 0;
+	int reverse_colors = 0;
 	gp_widget_tattr attr = 0;
 
 	(void)ctx;
 
 	GP_JSON_OBJ_FILTER(json, val, &obj_filter, gp_widget_json_attrs) {
 		switch (val->idx) {
+		case BG_COLOR:
+			bg_color = gp_widgets_color_name_idx(val->val_str);
+			if (bg_color < 0) {
+				gp_json_warn(json, "Invalid background color name '%s'", val->val_str);
+				bg_color = GP_WIDGETS_COL_BG;
+			}
+		break;
 		case FRAME:
 			frame = val->val_bool;
+		break;
+		case REVERSE_COLORS:
+			reverse_colors = val->val_bool;
+		break;
+		case PADD:
+			if (padd < 0 || padd > UINT8_MAX)
+				gp_json_warn(json, "Padding out of range %i", padd);
+			else
+				padd = val->val_int;
 		break;
 		case TATTR:
 			if (gp_widget_tattr_parse(val->val_str, &attr, GP_TATTR_FONT | GP_TATTR_HALIGN))
@@ -111,15 +149,28 @@ static gp_widget *json_to_label(gp_json_buf *json, gp_json_val *val, gp_widget_j
 		case TEXT:
 			label = strdup(val->val_str);
 		break;
+		case TEXT_COLOR:
+			text_color = gp_widgets_color_name_idx(val->val_str);
+			if (text_color < 0) {
+				gp_json_warn(json, "Invalid text color name '%s'", val->val_str);
+				text_color = GP_WIDGETS_COL_TEXT;
+			}
+		break;
 		case WIDTH:
 			width = val->val_int;
 		break;
 		}
 	}
 
+	if (reverse_colors)
+		GP_SWAP(bg_color, text_color);
+
 	gp_widget *ret = gp_widget_label_new(label, attr, width);
 
 	ret->label->frame = frame;
+	ret->label->padd = padd;
+	ret->label->bg_color = bg_color;
+	ret->label->text_color = text_color;
 
 	free(label);
 

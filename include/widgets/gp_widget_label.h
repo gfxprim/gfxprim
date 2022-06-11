@@ -15,9 +15,13 @@ struct gp_widget_label {
 	char *text;
 	/* widget size hints */
 	const char *set;
-	unsigned int width:8;
+	uint8_t width;
 	/* attributes */
-	unsigned int frame:1;
+	uint8_t padd;
+	uint16_t frame:1;
+	/* colors */
+	uint8_t text_color;
+	uint8_t bg_color;
 	/* text attributes */
 	gp_widget_tattr tattr;
 };

@@ -1,0 +1,22 @@
+{
+ "version": 1,
+ "rows": 6,
+ "widgets": [
+  {"type": "label", "align": "hfill", "padd": 1,
+   "bg_color": "highlight", "tattr": "center",
+   "text": "bg_color=highlight"},
+  {"type": "label", "align": "hfill", "padd": 1,
+   "bg_color": "text", "tattr": "center", "text_color": "bg",
+   "text": "bg_color=text, text_color=bg"},
+  {"type": "label", "padd": 1,
+   "text_color": "alert", "text": "text_color=alert"},
+  {"type": "label", "padd": 1,
+   "text_color": "warn", "text": "text_color=warn"},
+  {"type": "label", "padd": 1,
+   "bg_color": "alert", "reverse_colors": true,
+   "text": "bg_color=alert, reverse_colors=true"},
+  {"type": "label", "align": "hfill", "padd": 1,
+   "bg_color": "black", "text_color": "green", "tattr": "center",
+   "text": "bg_color=black, text_color=green"}
+ ]
+}

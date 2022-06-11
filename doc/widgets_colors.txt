@@ -23,6 +23,16 @@ background for a label widget.
 | "bright blue"  | "bright magenta" | "bright cyan"  | "white"
 |===
 
+Label colors example
+--------------------
+
+image:label_colors.png[Label colors]
+
+[source,c]
+------------------------------------------------------------------
+include::../demos/widgets/test_layouts/label_colors.json[]
+------------------------------------------------------------------
+
 Internal colors impementation
 -----------------------------
 
