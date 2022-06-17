@@ -85,7 +85,7 @@ enum gp_widgets_color gp_widgets_color_name_idx(const char *name);
  * @color A color index.
  * @return A pixel value.
  */
-gp_pixel gp_widgets_color(enum gp_widgets_color color);
+gp_pixel gp_widgets_color(const gp_widget_render_ctx *ctx, enum gp_widgets_color color);
 
 /*
  * Toggles current color scheme, reloads colors, redraws application.

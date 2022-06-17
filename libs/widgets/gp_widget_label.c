@@ -46,8 +46,8 @@ static void render(gp_widget *self, const gp_offset *offset,
 	unsigned int y = self->y + offset->y;
 	unsigned int w = self->w;
 	unsigned int h = self->h;
-	gp_pixel bg_color = gp_widgets_color(self->label->bg_color);
-	gp_pixel text_color = gp_widgets_color(self->label->text_color);
+	gp_pixel bg_color = gp_widgets_color(ctx, self->label->bg_color);
+	gp_pixel text_color = gp_widgets_color(ctx, self->label->text_color);
 
 	gp_widget_ops_blit(ctx, x, y, w, h);
 

@@ -110,7 +110,7 @@ enum gp_widgets_color gp_widgets_color_name_idx(const char *name)
 	return -1;
 }
 
-gp_pixel gp_widgets_color(enum gp_widgets_color color)
+gp_pixel gp_widgets_color(const gp_widget_render_ctx *ctx, enum gp_widgets_color color)
 {
 	if (color < 0 || color >= GP_WIDGETS_COL_CNT) {
 		GP_WARN("Invalid color index %i\n", color);
@@ -118,7 +118,7 @@ gp_pixel gp_widgets_color(enum gp_widgets_color color)
 	}
 
 	if (color < GP_WIDGETS_THEME_COLORS)
-		return ctx.colors[color];
+		return ctx->colors[color];
 
 	return colors_16[color-GP_WIDGETS_THEME_COLORS];
 }
