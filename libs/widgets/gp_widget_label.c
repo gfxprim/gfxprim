@@ -246,6 +246,9 @@ gp_widget *gp_widget_label_new(const char *text, gp_widget_tattr tattr, unsigned
 	ret->label->width = width;
 	ret->no_shrink = 1;
 
+	ret->label->bg_color = GP_WIDGETS_COL_BG;
+	ret->label->text_color = GP_WIDGETS_COL_TEXT;
+
 	return ret;
 }
 
