@@ -151,55 +151,73 @@ static void text_draw_1BPP(gp_pixmap *pixmap, const gp_text_style *style,
 	}
 }
 
-@ def text_8BPP(pt, use_bg):
-	gp_coord y0 = y;
-	uint32_t ch;
-	size_t pos;
+@ def glyph_8BPP(pt, bg):
+static void draw_8BPP_glyph{{ bg }}_{{ pt.name }}(gp_pixmap *pixmap, const gp_text_style *style,
+                                          gp_coord x, gp_coord y,
+					  gp_pixel fg, gp_pixel bg,
+					  const gp_glyph *glyph)
+{
+	gp_coord i, j, k;
 
-	for (pos = 0; pos < max_chars && (ch = gp_utf8_next(&str)); pos++) {
-		const gp_glyph *glyph = gp_get_glyph(style->font, ch);
+@     if bg != '_bg':
+	(void) bg;
+@     end
 
-		int i, j, k;
+	unsigned int x_mul = style->pixel_xmul + style->pixel_xspace;
+	unsigned int y_mul = style->pixel_ymul + style->pixel_yspace;
 
-		unsigned int x_mul = style->pixel_xmul + style->pixel_xspace;
-		unsigned int y_mul = style->pixel_ymul + style->pixel_yspace;
+	x += glyph->bearing_x * x_mul;
+	y -= (glyph->bearing_y - style->font->ascend) * y_mul;
 
-		y = y0;
+	gp_coord x0 = x;
 
-		for (j = 0; j < glyph->height; j++) {
-			for (i = 0; i < glyph->width; i++) {
-				uint8_t gray = glyph->bitmap[i + j * glyph->width];
+	for (j = 0; j < glyph->height; j++) {
+		for (i = 0; i < glyph->width; i++) {
+			uint8_t gray = glyph->bitmap[i + j * glyph->width];
 
-				unsigned int x_start = x + (i + glyph->bearing_x) * x_mul;
+			x += x_mul;
 
-				if (!bearing && !pos)
-					x_start -= glyph->bearing_x * x_mul;
+			if (!gray)
+				continue;
 
-				if (!gray)
-					continue;
-
-				int cur_y = y - (glyph->bearing_y - style->font->ascend) * y_mul;
-
-				for (k = 0; k < style->pixel_ymul; k++) {
-@     if use_bg:
-					gp_hline(pixmap, x_start, x_start + style->pixel_xmul - 1, cur_y + k,
+			for (k = 0; k < style->pixel_ymul; k++) {
+@     if bg == '_bg':
+					gp_hline(pixmap, x, x + style->pixel_xmul - 1, y + k,
 					GP_MIX_PIXELS_{{ pt.name }}(fg, bg, gray));
 @     else:
-					unsigned int l;
+					gp_coord l;
 
-					for (l = x_start; l < x_start + style->pixel_xmul; l++) {
+					for (l = x; l < x + style->pixel_xmul; l++) {
 						unsigned int px = l;
-						unsigned int py = cur_y + k;
+						unsigned int py = y + k;
 						//TODO: optimize this
 						GP_TRANSFORM_POINT(pixmap, px, py);
 						gp_mix_pixel_raw_clipped_{{ pt.name }}(pixmap, px, py, fg, gray);
 					}
 @     end
-				}
 			}
-
-			y += style->pixel_ymul + style->pixel_yspace;
 		}
+
+		x = x0;
+		y += style->pixel_ymul + style->pixel_yspace;
+	}
+}
+@ end
+
+@ def text_8BPP(pt, bg):
+	uint32_t ch;
+	size_t pos;
+
+	unsigned int x_mul = style->pixel_xmul + style->pixel_xspace;
+
+	for (pos = 0; pos < max_chars && (ch = gp_utf8_next(&str)); pos++) {
+		const gp_glyph *glyph = gp_get_glyph(style->font, ch);
+		gp_coord gx = x;
+
+		if (!bearing && !pos)
+			gx -= glyph->bearing_x * x_mul;
+
+		draw_8BPP_glyph{{ bg }}_{{ pt.name }}(pixmap, style, gx, y, fg, bg, glyph);
 
 		x += get_width(style, glyph->advance_x) + style->char_xspace;
 
@@ -211,19 +229,24 @@ static void text_draw_1BPP(gp_pixmap *pixmap, const gp_text_style *style,
 @ for pt in pixeltypes:
 @     if not pt.is_unknown():
 
+@         glyph_8BPP(pt, "_bg")
+
+@         glyph_8BPP(pt, "")
+
 static void text_8BPP_bg_{{ pt.name }}(gp_pixmap *pixmap, const gp_text_style *style,
                                        uint8_t bearing, gp_coord x, gp_coord y,
 				       gp_pixel fg, gp_pixel bg,
                                        const char *str, size_t max_chars)
 {
-@         text_8BPP(pt, True)
+@         text_8BPP(pt, "_bg")
 }
 
 static void text_8BPP_{{ pt.name }}(gp_pixmap *pixmap, const gp_text_style *style,
                                     uint8_t bearing, gp_coord x, gp_coord y,
-				    gp_pixel fg, const char *str, size_t max_chars)
+				    gp_pixel fg, gp_pixel bg,
+				    const char *str, size_t max_chars)
 {
-@         text_8BPP(pt, False)
+@         text_8BPP(pt, "")
 }
 
 @ end
@@ -247,13 +270,13 @@ static void text_8BPP_bg(gp_pixmap *pixmap, const gp_text_style *style,
 
 static void text_8BPP(gp_pixmap *pixmap, const gp_text_style *style,
                       uint8_t bearing, gp_coord x, gp_coord y,
-                      gp_pixel fg, const char *str, size_t max_chars)
+                      gp_pixel fg, gp_pixel bg, const char *str, size_t max_chars)
 {
 	switch (pixmap->pixel_type) {
 @ for pt in pixeltypes:
 @     if not pt.is_unknown():
 	case GP_PIXEL_{{ pt.name }}:
-		text_8BPP_{{ pt.name }}(pixmap, style, bearing, x, y, fg, str, max_chars);
+		text_8BPP_{{ pt.name }}(pixmap, style, bearing, x, y, fg, bg, str, max_chars);
 	break;
 @ end
 	default:
@@ -274,7 +297,7 @@ gp_size gp_text_raw(gp_pixmap *pixmap, const gp_text_style *style,
 	break;
 	case GP_FONT_BITMAP_8BPP:
 		if (flags & GP_TEXT_NOBG)
-			text_8BPP(pixmap, style, bearing, x, y, fg, str, max_chars);
+			text_8BPP(pixmap, style, bearing, x, y, fg, bg, str, max_chars);
 		else
 			text_8BPP_bg(pixmap, style, bearing, x, y, fg, bg, str, max_chars);
 	break;
