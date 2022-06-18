@@ -106,7 +106,7 @@ static void render(gp_widget *self, const gp_offset *offset,
 	unsigned int sym_r = GP_EVEN_UP(9 * asc_half/10);
 	unsigned int cx = x + self->w/2;
 	unsigned int cy = y + self->h/2;
-	unsigned int i;
+	unsigned int i, spc;
 
 	if (self->b->label) {
 		unsigned int tcx = cx, len;
@@ -240,6 +240,32 @@ static void render(gp_widget *self, const gp_offset *offset,
 		          sym_r/2, sym_r,
 		          GP_TRIANGLE_LEFT, ctx->text_color);
 		gp_symbol(ctx->buf, cx+(sym_r - sym_r/2)-asc_half/4, cy,
+		          sym_r/2, sym_r,
+		          GP_TRIANGLE_LEFT, ctx->text_color);
+	break;
+	case GP_BUTTON_STEP_FORWARD:
+		spc = GP_MAX(1u, sym_r/6);
+
+		gp_fill_rect(ctx->buf, cx-spc, cy-sym_r,
+		             cx-spc-sym_r/4, cy+sym_r, ctx->text_color);
+
+		gp_fill_rect(ctx->buf, cx-3*spc-sym_r/4, cy-sym_r,
+		             cx-3*spc-2*(sym_r/4), cy+sym_r, ctx->text_color);
+
+		gp_symbol(ctx->buf, cx+(sym_r - sym_r/2)+spc, cy,
+		          sym_r/2, sym_r,
+		          GP_TRIANGLE_RIGHT, ctx->text_color);
+	break;
+	case GP_BUTTON_STEP_BACKWARD:
+		spc = GP_MAX(1u, sym_r/6);
+
+		gp_fill_rect(ctx->buf, cx+spc, cy-sym_r,
+		             cx+spc+sym_r/4, cy+sym_r, ctx->text_color);
+
+		gp_fill_rect(ctx->buf, cx+3*spc+sym_r/4, cy-sym_r,
+		             cx+3*spc+2*(sym_r/4), cy+sym_r, ctx->text_color);
+
+		gp_symbol(ctx->buf, cx-(sym_r - sym_r/2)-spc, cy,
 		          sym_r/2, sym_r,
 		          GP_TRIANGLE_LEFT, ctx->text_color);
 	break;
@@ -385,6 +411,8 @@ static struct btn_type_names {
 	{"rec", GP_BUTTON_REC | GP_BUTTON_TEXT_RIGHT},
 	{"fforward", GP_BUTTON_FFORWARD | GP_BUTTON_TEXT_RIGHT},
 	{"fbackward", GP_BUTTON_FBACKWARD | GP_BUTTON_TEXT_RIGHT},
+	{"step_forward", GP_BUTTON_STEP_FORWARD | GP_BUTTON_TEXT_RIGHT},
+	{"step_backward", GP_BUTTON_STEP_BACKWARD | GP_BUTTON_TEXT_RIGHT},
 	{"randomize", GP_BUTTON_RANDOMIZE | GP_BUTTON_TEXT_RIGHT},
 	{"up", GP_BUTTON_UP | GP_BUTTON_TEXT_RIGHT},
 	{"down", GP_BUTTON_DOWN | GP_BUTTON_TEXT_RIGHT},

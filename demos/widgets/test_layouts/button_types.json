@@ -1,7 +1,7 @@
 {
  "info": {"version": 1, "license": "GPL-2.0-or-later"},
  "layout": {
-  "cols": 10,
+  "cols": 12,
   "rows": 6,
   "align": "fill",
   "widgets": [
@@ -41,6 +41,20 @@
    {"type": "button", "btype": "rec", "align": "fill"},
    {"type": "button", "btype": "fforward", "align": "fill"},
    {"type": "button", "btype": "fbackward", "align": "fill"},
+
+   {"type": "label", "text": "STEP_FORWARD"},
+   {"type": "label", "text": "STEP_BACKWARD"},
+   {},
+   {},
+   {},
+   {},
+   {"type": "button", "btype": "step_forward", "align": "fill"},
+   {"type": "button", "btype": "step_backward", "align": "fill"},
+   {},
+   {},
+   {},
+   {},
+
    {"type": "label", "text": "ZOOM_IN"},
    {"type": "label", "text": "ZOOM_OUT"},
    {"type": "label", "text": "ZOOM_FIT"},
