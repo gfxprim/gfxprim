@@ -25,6 +25,10 @@ static int get_width(const gp_text_style *style, int width)
 	return width * style->pixel_xmul + (width - 1) * style->pixel_xspace;
 }
 
+static uint16_t bit_lookup[] = {
+	0x80, 0x40, 0x20, 0x10, 0x08, 0x04, 0x02, 0x01,
+};
+
 @ for pt in pixeltypes:
 @     if not pt.is_unknown():
 
@@ -50,7 +54,7 @@ static void text_draw_1BPP_{{ pt.name }}(gp_pixmap *pixmap, const gp_text_style 
 
 		for (j = 0; j < glyph->height; j++) {
 			for (i = 0; i < glyph->width; i++) {
-				uint8_t bit = (glyph->bitmap[i/8 + j * bpp]) & (0x80>>(i%8));
+				uint8_t bit = (glyph->bitmap[i/8 + j * bpp]) & bit_lookup[i%8];
 
 				if (!bit)
 					continue;
