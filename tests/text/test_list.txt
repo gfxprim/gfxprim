@@ -1,0 +1,2 @@
+# Text testsuite
+text_benchmark
