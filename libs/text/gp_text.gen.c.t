@@ -175,10 +175,10 @@ static void draw_8BPP_glyph{{ bg }}_{{ pt.name }}(gp_pixmap *pixmap, const gp_te
 		for (i = 0; i < glyph->width; i++) {
 			uint8_t gray = glyph->bitmap[i + j * glyph->width];
 
-			x += x_mul;
-
-			if (!gray)
+			if (!gray) {
+				x += x_mul;
 				continue;
+			}
 
 			for (k = 0; k < style->pixel_ymul; k++) {
 @     if bg == '_bg':
@@ -196,6 +196,7 @@ static void draw_8BPP_glyph{{ bg }}_{{ pt.name }}(gp_pixmap *pixmap, const gp_te
 					}
 @     end
 			}
+			x += x_mul;
 		}
 
 		x = x0;
