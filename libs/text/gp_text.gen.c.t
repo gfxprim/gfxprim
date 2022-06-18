@@ -4,7 +4,7 @@
  *
  * Copyright (C) 2009-2011 Jiri "BlueBear" Dluhos
  *                         <jiri.bluebear.dluhos@gmail.com>
- * Copyright (C) 2009-2020 Cyril Hrubis <metan@ucw.cz>
+ * Copyright (C) 2009-2022 Cyril Hrubis <metan@ucw.cz>
  */
 
 #include <core/gp_get_put_pixel.h>
@@ -32,53 +32,94 @@ static uint16_t bit_lookup[] = {
 @ for pt in pixeltypes:
 @     if not pt.is_unknown():
 
+static void draw_1BPP_glyph_{{ pt.name }}(gp_pixmap *pixmap, const gp_text_style *style,
+                                          gp_coord x, gp_coord y, gp_pixel fg, const gp_glyph *glyph)
+{
+	int i, j, k, l;
+
+	unsigned int bpp = WIDTH_TO_1BPP_BPP(glyph->width);
+
+	unsigned int x_mul = style->pixel_xmul + style->pixel_xspace;
+	unsigned int y_mul = style->pixel_ymul + style->pixel_yspace;
+
+	x += glyph->bearing_x * x_mul;
+	y -= (glyph->bearing_y - style->font->ascend) * y_mul;
+
+	for (j = 0; j < glyph->height; j++) {
+		for (i = 0; i < glyph->width; i++) {
+			uint8_t bit = (glyph->bitmap[i/8 + j * bpp]) & bit_lookup[i%8];
+
+			if (!bit)
+				continue;
+
+			gp_coord px = x + i * x_mul;
+
+			for (k = y; k < y + style->pixel_ymul; k++) {
+				for (l = px; l < px + style->pixel_xmul; l++) {
+					gp_coord sx = l;
+					gp_coord sy = k;
+					GP_TRANSFORM_POINT(pixmap, sx, sy);
+					if (!GP_PIXEL_IS_CLIPPED(pixmap, sx, sy))
+						gp_putpixel_raw_{{ pt.pixelsize.suffix }}(pixmap, sx, sy, fg);
+				}
+			}
+		}
+		y += y_mul;
+	}
+}
+
+static void draw_1BPP_glyph_nomul_{{ pt.name }}(gp_pixmap *pixmap, const gp_text_style *style,
+                                                gp_coord x, gp_coord y, gp_pixel fg, const gp_glyph *glyph)
+{
+	int i, j;
+
+	unsigned int bpp = WIDTH_TO_1BPP_BPP(glyph->width);
+
+	x += glyph->bearing_x;
+	y -= (glyph->bearing_y - style->font->ascend);
+
+	for (j = 0; j < glyph->height; j++) {
+		for (i = 0; i < glyph->width; i++) {
+			uint8_t bit = (glyph->bitmap[i/8 + j * bpp]) & bit_lookup[i%8];
+
+			if (!bit)
+				continue;
+
+			gp_coord px = x + i;
+			gp_coord py = y;
+
+			GP_TRANSFORM_POINT(pixmap, px, py);
+			if (!GP_PIXEL_IS_CLIPPED(pixmap, px, py))
+				gp_putpixel_raw_{{ pt.pixelsize.suffix }}(pixmap, px, py, fg);
+		}
+		y += 1;
+	}
+}
+
 static void text_draw_1BPP_{{ pt.name }}(gp_pixmap *pixmap, const gp_text_style *style,
                                          uint8_t bearing, gp_coord x, gp_coord y,
 				         gp_pixel fg, const char *str, size_t max_chars)
 {
-	gp_coord y0 = y;
 	uint32_t ch;
 	size_t pos;
+
+	unsigned int x_mul = style->pixel_xmul + style->pixel_xspace;
+
+	int nomul = style->pixel_xmul == 1 && style->pixel_ymul == 1 &&
+                    style->pixel_xspace == 0 && style->pixel_yspace == 0;
 
 	for (pos = 0; pos < max_chars && (ch = gp_utf8_next(&str)); pos++) {
 		const gp_glyph *glyph = gp_get_glyph(style->font, ch);
 
-		int i, j, k, l;
+		gp_coord gx = x;
 
-		unsigned int x_mul = style->pixel_xmul + style->pixel_xspace;
-		unsigned int y_mul = style->pixel_ymul + style->pixel_yspace;
+		if (!bearing && !pos)
+			gx -= glyph->bearing_x * x_mul;
 
-		unsigned int bpp = WIDTH_TO_1BPP_BPP(glyph->width);
-
-		y = y0;
-
-		for (j = 0; j < glyph->height; j++) {
-			for (i = 0; i < glyph->width; i++) {
-				uint8_t bit = (glyph->bitmap[i/8 + j * bpp]) & bit_lookup[i%8];
-
-				if (!bit)
-					continue;
-
-				int start_x = x + (i + glyph->bearing_x) * x_mul;
-
-				if (!bearing && !pos)
-					start_x -= glyph->bearing_x * x_mul;
-
-				int start_y = y - (glyph->bearing_y - style->font->ascend) * y_mul;
-
-				for (k = start_y; k < start_y + style->pixel_ymul; k++) {
-					for (l = start_x; l < start_x + style->pixel_xmul; l++) {
-						int px = l;
-						int py = k;
-						GP_TRANSFORM_POINT(pixmap, px, py);
-						if (!GP_PIXEL_IS_CLIPPED(pixmap, px, py))
-							gp_putpixel_raw_{{ pt.pixelsize.suffix }}(pixmap, px, py, fg);
-					}
-				}
-			}
-
-			y += style->pixel_ymul + style->pixel_yspace;
-		}
+		if (nomul)
+			draw_1BPP_glyph_nomul_{{ pt.name }}(pixmap, style, gx, y, fg, glyph);
+		else
+			draw_1BPP_glyph_{{ pt.name }}(pixmap, style, gx, y, fg, glyph);
 
 		x += get_width(style, glyph->advance_x) + style->char_xspace;
 
