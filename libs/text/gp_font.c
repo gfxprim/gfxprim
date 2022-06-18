@@ -46,6 +46,9 @@ gp_glyph *gp_get_glyph(const gp_font_face *font, uint32_t ch)
 {
 	gp_glyph *glyph = get_glyph(font, ch);
 
+	if (!glyph && font->ops && font->ops->glyph_load)
+		glyph = font->ops->glyph_load(font, ch);
+
 	if (!glyph && ch > 0x7f) {
 		uint32_t fb = gp_utf_fallback(ch);
 
@@ -85,15 +88,11 @@ const char *gp_font_style_name(uint8_t style)
 
 void gp_font_face_free(gp_font_face *self)
 {
-	size_t i;
-
 	if (!self)
 		return;
 
-	for (i = 0; i < self->glyph_tables; i++) {
-		free(self->glyphs[i].offsets);
-		free(self->glyphs[i].glyphs);
-	}
+	if (!self->ops->font_free)
+		return;
 
-	free(self);
+	self->ops->font_free(self);
 }

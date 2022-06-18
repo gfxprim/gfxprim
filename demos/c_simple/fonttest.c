@@ -288,6 +288,8 @@ int main(int argc, char *argv[])
 	if (font_face) {
 		fprintf(stderr, "\nLoading font '%s'\n", font_face);
 		font = gp_font_face_load(font_face, 0, font_h);
+		if (!font)
+			fprintf(stderr, "Failed to load font!\n");
 	}
 
 	win = gp_backend_init(backend_opts, "Font Test");

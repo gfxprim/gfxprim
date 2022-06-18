@@ -112,7 +112,17 @@ typedef struct gp_glyphs {
 	uint32_t max_glyph;
 } gp_glyphs;
 
-typedef struct gp_font_face {
+typedef struct gp_font_face gp_font_face;
+
+/**
+ * font may introduce a "lazy" loader that will load glyphs 'on demand'.
+ */
+typedef struct gp_font_face_ops {
+	gp_glyph *(*glyph_load)(const gp_font_face *self, uint32_t ch);
+	void (*font_free)(gp_font_face *self);
+} gp_font_face_ops;
+
+struct gp_font_face {
 	/* Font family name - eg. Sans, Serif ... */
 	char family_name[GP_FONT_NAME_MAX];
 
@@ -150,13 +160,19 @@ typedef struct gp_font_face {
 	 */
 	gp_font_bitmap_format glyph_bitmap_format;
 
+	/*
+	 * "Lazy" loader used for non-ascii unicode glyphs
+	 */
+	const gp_font_face_ops *ops;
+	void *priv;
+
 	/* Glyphs tables
 	 *
 	 * NULL terminated array of glyph tables sorted by the max_glyph, i.e.
 	 * the ASCII which ends at 0x7f should be first.
 	 */
 	gp_glyphs glyphs[];
-} gp_font_face;
+};
 
 /*
  * Font family is a group of fonts of the same family and size but different
