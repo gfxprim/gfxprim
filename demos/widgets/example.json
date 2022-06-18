@@ -1,56 +1,24 @@
 {
-  "version": 1,
+ "info": {"version": 1, "license": "GPL-2.0-or-later"},
+ "layout": {
   "rows": 10,
   "widgets": [
-    {
-      "type": "label",
-      "text": "Label"
-    },
-    {
-      "type": "checkbox",
-      "label": "Check Box",
-      "set": true
-    },
-    {
-      "type": "pbar",
-      "val": 50.1
-    },
-    {
-      "type": "tbox",
-      "text": "Text Box",
-      "len": 18
-    },
-    {
-      "type": "tbox",
-      "len": 18,
-      "ttype": "hidden",
-      "uid": "passwd"
-    },
-    {
-     "type": "tbox",
-     "text": "http://example.com/index.html",
-     "ttype": "URL"
-    },
-    {
-      "type": "spinner",
-      "min": 0,
-      "max": 10,
-      "val": 5
-    },
-    {
-      "type": "radiobutton",
-      "choices": [
-        "First",
-	"Second",
-	"Third"
-      ],
-      "selected": 1
-    },
-    {"type": "color_scheme_switch"},
-    {
-      "type": "button",
-      "label": "Button",
-      "on_event": "button_on_event"
-    }
+   {"type": "label", "text": "Label", "tattr": "large"},
+   {"type": "checkbox", "label": "Check Box", "set": true},
+   {"type": "pbar", "val": 50.1},
+   {"type": "tbox", "text": "Text Box", "len": 18},
+   {"type": "tbox", "len": 18, "ttype": "hidden", "uid": "passwd"},
+   {"type": "tbox", "text": "http://example.com/index.html", "ttype": "URL"},
+   {"type": "spinner", "min": 0, "max": 10, "val": 5},
+   {"type": "radiobutton",
+    "choices": [
+     "First",
+     "Second",
+     "Third"
+    ],
+    "selected": 1},
+   {"type": "color_scheme_switch"},
+   {"type": "button", "label": "Button", "on_event": "button_on_event"}
   ]
+ }
 }

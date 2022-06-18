@@ -1,8 +1,10 @@
 {
- "version": 1,
- "rows": 2,
- "widgets": [
-  {"type": "spinbutton", "ops": "choices_ops", "uid": "choice"},
-  {"type": "spinner", "on_event": "spinner_on_event"}
- ]
+ "info": {"version": 1, "license": "GPL-2.0-or-later"},
+ "layout": {
+  "rows": 2,
+  "widgets": [
+   {"type": "spinbutton", "ops": "choices_ops", "uid": "choice"},
+   {"type": "spinner", "on_event": "spinner_on_event"}
+  ]
+ }
 }

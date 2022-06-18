@@ -52,24 +52,28 @@ static int button_json_load(struct tcase *t)
 }
 
 static struct tcase labeled_button = {
-	.json = "{\"version\": 1, \"type\": \"button\", \"label\": \"Label!\"}",
+	.json = "{\"info\": {\"version\": 1, \"license\": \"GPL-2.1-or-later\"},\n"
+	        " \"layout\": {\"type\": \"button\", \"label\": \"Label!\"}}",
 	.label = "Label!",
 };
 
 static struct tcase stock_button = {
-	.json = "{\"version\": 1, \"type\": \"button\", \"btype\": \"cancel\"}",
+	.json = "{\"info\": {\"version\": 1, \"license\": \"GPL-2.1-or-later\"},\n"
+	        " \"layout\": {\"type\": \"button\", \"btype\": \"cancel\"}}",
 	.type = GP_BUTTON_CANCEL | GP_BUTTON_TEXT_RIGHT,
 };
 
 static struct tcase stock_label_button = {
-	.json = "{\"version\": 1, \"type\": \"button\", \"label\": \"Label!\", \"btype\": \"ok\"}",
+	.json = "{\"info\": {\"version\": 1, \"license\": \"GPL-2.1-or-later\"},\n"
+	        " \"layout\": {\"type\": \"button\", \"label\": \"Label!\", \"btype\": \"ok\"}}",
 	.label = "Label!",
 	.type = GP_BUTTON_OK | GP_BUTTON_TEXT_RIGHT,
 };
 
 static struct tcase text_align_button = {
-	.json = "{\"version\": 1, \"type\": \"button\", \"label\": \"Label!\","
-		" \"btype\": \"ok\", \"text_align\": \"left\"}",
+	.json = "{\"info\": {\"version\": 1, \"license\": \"GPL-2.1-or-later\"},\n"
+	        " \"layout\": {\"type\": \"button\", \"label\": \"Label!\","
+		"              \"btype\": \"ok\", \"text_align\": \"left\"}}",
 	.label = "Label!",
 	.type = GP_BUTTON_OK | GP_BUTTON_TEXT_LEFT,
 };

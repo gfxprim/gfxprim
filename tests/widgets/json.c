@@ -100,20 +100,24 @@ static int load_json(struct tcase *t)
 	return TST_SUCCESS;
 }
 
-static struct tcase missing_version = {
+static struct tcase missing_info = {
 	.json = "{}",
 };
 
+static struct tcase missing_version = {
+	.json = "{\"info\":{}}",
+};
+
 static struct tcase invalid_version = {
-	.json = "{\"version\": -42}",
+	.json = "{\"info\": {\"version\": -42}}",
 };
 
 static struct tcase version_not_number = {
-	.json = "{\"version\": \"hello world\"}",
+	.json = "{\"info\": {\"version\": \"hello world\"}}",
 };
 
 static struct tcase empty = {
-	.json = "{\"version\": 1}",
+	.json = "{\"info\": {\"version\": 1}}",
 };
 
 static struct tcase not_object = {
@@ -121,58 +125,73 @@ static struct tcase not_object = {
 };
 
 static struct tcase invalid_widget_type = {
-	.json = "{\"version\": 1, \"type\": \"this_is_not_a_widget_type\"}",
+	.json = "{\"info\": {\"version\": 1, \"license\": \"GPL-2.1-or-later\"},\n"
+		" \"layout\": {\"type\": \"this_is_not_a_widget_type\"}}",
 };
 
 static struct tcase widget_type_not_string = {
-	.json = "{\"version\": 1, \"type\": 3.14}",
+	.json = "{\"info\": {\"version\": 1, \"license\": \"GPL-2.1-or-later\"},\n"
+		" \"layout\": {\"type\": 3.14}}",
 };
 
 static struct tcase widget_uid_not_string = {
-	.json = "{\"version\": 1, \"uid\": 3.14}",
+	.json = "{\"info\": {\"version\": 1, \"license\": \"GPL-2.1-or-later\"},\n"
+		" \"layout\": {\"uid\": 3.14}}",
 };
 
 static struct tcase widget_default_align = {
-	.json = "{\"version\": 1, \"widgets\": [{}]}",
+	.json = "{\"info\": {\"version\": 1, \"license\": \"GPL-2.1-or-later\"},\n"
+		" \"layout\": {\"widgets\": [{}]}}",
 };
 
 static struct tcase widget_align_fill = {
-	.json = "{\"version\": 1, \"align\": \"fill\", \"widgets\": [{}]}",
+	.json = "{\"info\": {\"version\": 1, \"license\": \"GPL-2.1-or-later\"},\n"
+	        " \"layout\": {\"align\": \"fill\", \"widgets\": [{}]}}",
 	.align = GP_HFILL | GP_VFILL,
 };
 
 static struct tcase widget_align_left = {
-	.json = "{\"version\": 1, \"halign\": \"left\", \"widgets\": [{}]}",
+	.json = "{\"info\": {\"version\": 1, \"license\": \"GPL-2.1-or-later\"},\n"
+	        " \"layout\": {\"halign\": \"left\", \"widgets\": [{}]}}",
 	.align = GP_LEFT,
 };
 
 static struct tcase widget_align_bottom = {
-	.json = "{\"version\": 1, \"valign\": \"bottom\", \"widgets\": [{}]}",
+	.json = "{\"info\": {\"version\": 1, \"license\": \"GPL-2.1-or-later\"},\n"
+	        " \"layout\": {\"valign\": \"bottom\", \"widgets\": [{}]}}",
 	.align = GP_BOTTOM,
 };
 
 static struct tcase widget_uid = {
-	.json = "{\"version\": 1, \"uid\": \"this_is_uid\", \"widgets\": [{}]}",
+	.json = "{\"info\": {\"version\": 1, \"license\": \"GPL-2.1-or-later\"},\n"
+	        " \"layout\": {\"uid\": \"this_is_uid\", \"widgets\": [{}]}}",
 	.uid = "this_is_uid"
 };
 
 static struct tcase widget_missing_on_event = {
-	.json = "{\"version\": 1, \"on_event\": \"on_event_does_not_exists\", \"widgets\": [{}]}",
+	.json = "{\"info\": {\"version\": 1, \"license\": \"GPL-2.1-or-later\"},\n"
+	        " \"layout\": {\"on_event\": \"on_event_does_not_exists\", \"widgets\": [{}]}}",
 };
 
 static struct tcase widget_on_event = {
-	.json = "{\"version\": 1, \"on_event\": \"on_event_fn\", \"widgets\": [{}]}",
+	.json = "{\"info\": {\"version\": 1, \"license\": \"GPL-2.1-or-later\"},\n"
+	        " \"layout\": {\"on_event\": \"on_event_fn\", \"widgets\": [{}]}}",
 	.on_event = 1,
 };
 
 static struct tcase widget_no_shrink = {
-	.json = "{\"version\": 1, \"shrink\": false, \"widgets\": [{}]}",
+	.json = "{\"info\": {\"version\": 1, \"license\": \"GPL-2.1-or-later\"},\n"
+	        " \"layout\": {\"shrink\": false, \"widgets\": [{}]}}",
 	.no_shrink = 1,
 };
 
 const struct tst_suite tst_suite = {
 	.suite_name = "widget JSON testsuite",
 	.tests = {
+		{.name = "missing info",
+		 .tst_fn = invalid_empty,
+		 .data = &missing_info},
+
 		{.name = "missing version",
 		 .tst_fn = invalid_empty,
 		 .data = &missing_version},

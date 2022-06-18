@@ -1,5 +1,6 @@
 {
-  "version": 1,
+ "info": {"version": 1, "license": "LGPL-2.0-or-later", "author": "Cyril Hrubis <metan@ucw.cz>"},
+ "layout": {
   "rows": 3,
   "widgets": [
     {
@@ -40,4 +41,5 @@
       ]
     }
   ]
+ }
 }

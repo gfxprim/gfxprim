@@ -1,13 +1,15 @@
 {
- "version": 1,
- "widgets": [
-   {
-    "type": "radiobutton",
-    "choices": [
-     "Choice A",
-     "Choice B",
-     "Choice C"
-    ]
-  }
- ]
+ "info": {"version": 1, "license": "GPL-2.0-or-later"},
+ "layout": {
+  "widgets": [
+    {
+     "type": "radiobutton",
+     "choices": [
+      "Choice A",
+      "Choice B",
+      "Choice C"
+     ]
+   }
+  ]
+ }
 }

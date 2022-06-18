@@ -52,16 +52,19 @@ static int checkbox_json_load(struct tcase *t)
 }
 
 static struct tcase checkbox = {
-	.json = "{\"version\": 1, \"type\": \"checkbox\"}",
+	.json = "{\"info\": {\"version\": 1, \"license\": \"GPL-2.1-or-later\"},\n"
+	        " \"layout\": {\"type\": \"checkbox\"}}",
 };
 
 static struct tcase set_checkbox = {
-	.json = "{\"version\": 1, \"type\": \"checkbox\", \"set\": true}",
+	.json = "{\"info\": {\"version\": 1, \"license\": \"GPL-2.1-or-later\"},\n"
+	        " \"layout\": {\"type\": \"checkbox\", \"set\": true}}",
 	.val = 1,
 };
 
 static struct tcase labeled_checkbox = {
-	.json = "{\"version\": 1, \"type\": \"checkbox\", \"label\": \"Label!\"}",
+	.json = "{\"info\": {\"version\": 1, \"license\": \"GPL-2.1-or-later\"},\n"
+	        " \"layout\": {\"type\": \"checkbox\", \"label\": \"Label!\"}}",
 	.label = "Label!",
 };
 

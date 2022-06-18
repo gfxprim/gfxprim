@@ -1,14 +1,16 @@
 {
- "version": 1,
- "widgets": [
-  {
-   "type": "spinbutton",
-   "choices": [
-    "Choice A",
-    "Choice B",
-    "Choice C",
-    "Short"
-   ]
-  }
- ]
+ "info": {"version": 1, "license": "GPL-2.0-or-later"},
+ "layout": {
+  "widgets": [
+   {
+    "type": "spinbutton",
+    "choices": [
+     "Choice A",
+     "Choice B",
+     "Choice C",
+     "Short"
+    ]
+   }
+  ]
+ }
 }

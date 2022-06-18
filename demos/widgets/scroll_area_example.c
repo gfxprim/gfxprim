@@ -20,17 +20,17 @@ int button_event(gp_widget_event *ev)
 	gp_coord dx = 0;
 	gp_coord dy = 0;
 
-	switch (ev->self->button->label[0]) {
-	case '^':
+	switch (ev->self->button->type) {
+	case GP_BUTTON_UP:
 		dy = -1;
 	break;
-	case 'v':
+	case GP_BUTTON_DOWN:
 		dy = 1;
 	break;
-	case '<':
+	case GP_BUTTON_LEFT:
 		dx = -1;
 	break;
-	case '>':
+	case GP_BUTTON_RIGHT:
 		dx = 1;
 	break;
 	}

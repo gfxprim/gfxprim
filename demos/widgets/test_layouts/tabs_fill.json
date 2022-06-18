@@ -1,24 +1,26 @@
 {
- "version": 1,
- "align": "fill",
- "widgets": [
-  {
-   "type": "tabs",
-   "align": "fill",
-   "labels": [
-    "1",
-    "2"
-   ],
-   "widgets": [
-    {
-     "type": "button",
-     "label": "Button"
-    },
-    {
-     "type": "button",
-     "label": "Button"
-    }
-   ]
-  }
- ]
+ "info": {"version": 1, "license": "GPL-2.0-or-later"},
+ "layout": {
+  "align": "fill",
+  "widgets": [
+   {
+    "type": "tabs",
+    "align": "fill",
+    "labels": [
+     "1",
+     "2"
+    ],
+    "widgets": [
+     {
+      "type": "button",
+      "label": "Button"
+     },
+     {
+      "type": "button",
+      "label": "Button"
+     }
+    ]
+   }
+  ]
+ }
 }

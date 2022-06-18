@@ -1,25 +1,13 @@
 {
-  "version": 1,
+ "info": {"version": 1, "license": "GPL-2.0-or-later"},
+ "layout": {
   "rows": 3,
   "widgets": [
-  {
-   "type": "label",
-   "text": "Please log in."
-  },
-  {
-   "cols": 2,
-   "rows": 2,
-   "widgets": [
-     {
-       "type": "label",
-       "text": "Username:",
-       "halign": "right"
-     },
-     {
-       "type": "label",
-       "text": "Password:",
-       "halign": "right"
-     },
+   {"type": "label", "text": "Please log in."},
+   {"cols": 2, "rows": 2,
+    "widgets": [
+     {"type": "label", "text": "Username:", "halign": "right"},
+     {"type": "label", "text": "Password:", "halign": "right"},
      {
        "type": "tbox",
        "text": "admin",
@@ -34,12 +22,9 @@
        "uid": "pass",
        "on_event": "login_callback"
      }
-   ]
-  },
-  {
-    "type": "button",
-    "label": "Ok",
-    "on_event": "login_callback"
-  }
- ]
+    ]
+   },
+   {"type": "button", "label": "Ok", "on_event": "login_callback"}
+  ]
+ }
 }

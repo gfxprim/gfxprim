@@ -63,7 +63,6 @@ enum keys {
 	TYPE,
 	UID,
 	VALIGN,
-	VERSION,
 };
 
 static const gp_json_obj_attr attrs[] = {
@@ -75,7 +74,6 @@ static const gp_json_obj_attr attrs[] = {
 	GP_JSON_OBJ_ATTR("type", GP_JSON_VOID),
 	GP_JSON_OBJ_ATTR("uid", GP_JSON_VOID),
 	GP_JSON_OBJ_ATTR("valign", GP_JSON_STR),
-	GP_JSON_OBJ_ATTR("version", GP_JSON_INT),
 };
 
 static const gp_json_obj obj_filter = {
@@ -408,6 +406,50 @@ static void check_callback_addrs_sorted(const gp_widget_json_callbacks *const ca
 	}
 }
 
+enum info_keys {
+	INFO_AUTHOR,
+	INFO_LICENSE,
+	INFO_VERSION,
+};
+
+static const gp_json_obj_attr info_attrs[] = {
+	GP_JSON_OBJ_ATTR("author", GP_JSON_STR),
+	GP_JSON_OBJ_ATTR("license", GP_JSON_STR),
+	GP_JSON_OBJ_ATTR("version", GP_JSON_INT),
+};
+
+static const gp_json_obj info_obj_filter = {
+	.attrs = info_attrs,
+	.attr_cnt = GP_ARRAY_SIZE(info_attrs),
+};
+
+static long parse_info_block(gp_json_buf *json, gp_json_val *val)
+{
+	long version = -1;
+	int license_set = 0;
+
+	GP_JSON_OBJ_FILTER(json, val, &info_obj_filter, NULL) {
+		switch (val->idx) {
+		case INFO_AUTHOR:
+			GP_DEBUG(1, "Layout author: %s", val->val_str);
+		break;
+		case INFO_LICENSE:
+			GP_DEBUG(1, "Layout license: %s", val->val_str);
+			license_set = 1;
+		break;
+		case INFO_VERSION:
+			GP_DEBUG(1, "Layout version: %li", val->val_int);
+			version = val->val_int;
+		break;
+		}
+	}
+
+	if (!license_set)
+		gp_json_err(json, "Layout license missing!");
+
+	return version;
+}
+
 static gp_widget *gp_widgets_from_json(gp_json_buf *json,
                                        const gp_widget_json_callbacks *const callbacks,
                                        gp_htable **uids)
@@ -419,24 +461,16 @@ static gp_widget *gp_widgets_from_json(gp_json_buf *json,
 
 	check_callback_addrs_sorted(callbacks);
 
-	if (gp_json_next_type(json) != GP_JSON_OBJ) {
-		gp_json_err(json, "Widget must be a JSON object!");
-		return NULL;
-	}
-
-	gp_json_state obj_start = gp_json_state_start(json);
-
 	if (!gp_json_obj_first(json, &val) ||
-	    strcmp(val.id, "version") ||
-	    val.type != GP_JSON_INT) {
-		gp_json_err(json, "JSON layout must start with a version number!");
+	    strcmp(val.id, "info") ||
+	    val.type != GP_JSON_OBJ) {
+		gp_json_err(json, "JSON layout must start with a info block!");
 		return NULL;
 	}
 
-	GP_DEBUG(1, "Loading JSON layout version %li", val.val_int);
-
-	if (val.val_int != 1) {
-		gp_json_err(json, "Unknown version number %li", val.val_int);
+	long version = parse_info_block(json, &val);
+	if (version != 1) {
+		gp_json_err(json, "Unknown version number %li", version);
 		return NULL;
 	}
 
@@ -446,10 +480,12 @@ static gp_widget *gp_widgets_from_json(gp_json_buf *json,
 		GP_WARN("Failed to dlopen()");
 #endif
 
-	if (!gp_json_obj_next(json, &val))
+	if (!gp_json_obj_next(json, &val) ||
+	    strcmp(val.id, "layout") ||
+	    val.type != GP_JSON_OBJ) {
+		gp_json_err(json, "Expected 'layout' block!");
 		return NULL;
-
-	gp_json_state_load(json, obj_start);
+	}
 
 	ret = gp_widget_from_json(json, &val, &ctx);
 	if (ret && ctx.focused) {
@@ -458,6 +494,9 @@ static gp_widget *gp_widgets_from_json(gp_json_buf *json,
 			        ctx.focused, gp_widget_type_id(ctx.focused));
 		}
 	}
+
+	if (gp_json_obj_next(json, &val))
+		gp_json_warn(json, "Unexpected JSON key '%s'", val.id);
 
 #ifdef HAVE_DL
 	dlclose(ld_handle);
@@ -486,11 +525,12 @@ gp_widget *gp_widget_layout_json(const char *path,
 	json->msgf = stderr;
 
 	ret = gp_widgets_from_json(json, callbacks, uids);
-
 	if (gp_json_is_err(json))
 		gp_json_err_print(json);
 	else if (!gp_json_empty(json))
 		gp_json_warn(json, "Garbage after JSON string!");
+
+
 
 	gp_json_free(json);
 

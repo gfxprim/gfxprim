@@ -1,6 +1,8 @@
 {
- "version": 1,
- "align": "fill",
- "cols": 0,
- "rows": 0
+ "info": {"version": 1, "license": "GPL-2.0-or-later"},
+ "layout": {
+  "align": "fill",
+  "cols": 0,
+  "rows": 0
+ }
 }

@@ -36,23 +36,25 @@ JSON layout can be also loaded from a file or C string.
 [source,json]
 -------------------------------------------------------------------------------
 {
- "version": 1,
- "widgets": [
-  {
-   "type": "button",
-   "label": "Button",
-   "on_event": "button_event"
-  }
- ]
+ "info": {"version": 1, "license": "GPL-2.0-or-later", "author": "Joe Programmer"},
+ "layout": {
+  "widgets": [
+   {"type": "button", "label": "Button", "on_event": "button_event"}
+  ]
+ }
 }
 -------------------------------------------------------------------------------
 
-A JSON layout always starts with a version, currently version is set to 1 and
-the number will be increased if there are incompatible changes done in the
-format in a subsequent releases.
+A JSON layout always starts with an info block. The required parameters in the
+info block are license and version number. The license should be a SPDX
+licence identifier. Currently the version is set to 1 and the number will be
+increased if there are incompatible changes done in the format in a subsequent
+releases.
 
-The widget `type` defaults to `grid` and `cols` and `rows` default to 1 for a
-grid widget so the outer widget is a grid with exactly one cell.
+The inflo block is followed by a layout block, which describes the widgets.
+
+Widget `type` defaults to `grid` and `cols` and `rows` default to 1 for a grid
+widget so the outer widget is a grid with exactly one cell.
 
 The inner widget `type` is a link:widget_button.html[button] and as such it
 should have either `btype` or `label`, in this case we have a button with a

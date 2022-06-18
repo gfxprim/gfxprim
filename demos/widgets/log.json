@@ -1,9 +1,11 @@
 {
-  "version": 1,
+ "info": {"version": 1, "license": "GPL-2.0-or-later"},
+ "layout": {
   "rows": 3,
   "widgets": [
-    {"type": "log", "uid": "logs", "min_width": 20, "min_lines": 10, "tattr": "mono"},
-    {"type": "tbox", "text": "To be appended", "uid": "text", "halign": "fill"},
-    {"type": "button", "label": "append", "on_event": "button_append"}
+   {"type": "log", "uid": "logs", "min_width": 20, "min_lines": 10, "tattr": "mono"},
+   {"type": "tbox", "text": "To be appended", "uid": "text", "halign": "fill"},
+   {"type": "button", "label": "append", "on_event": "button_append"}
   ]
+ }
 }

@@ -1,18 +1,14 @@
 {
-  "version": 1,
+ "info": {"version": 1, "license": "GPL-2.0-or-later"},
+ "layout": {
   "type": "frame",
   "title": "Frame Title",
   "widget": {
    "cols": 2,
    "widgets": [
-     {
-       "type": "label",
-       "text": "Label:"
-     },
-     {
-      "type": "tbox",
-      "len": 10
-     }
+    {"type": "label", "text": "Label:"},
+    {"type": "tbox","len": 10}
    ]
   }
+ }
 }

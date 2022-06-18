@@ -1,32 +1,34 @@
 {
- "version": 1,
- "widgets": [
-  {
-   "type": "frame",
-   "uid": "title",
-   "widget": {
-    "rows": 2,
-    "widgets": [
-     {
-      "cols": 2,
-      "widgets": [
-       {"type": "stock", "uid": "stock", "stock": "question"},
-       {"type": "tbox", "on_event": "input", "len": 15, "focused": true, "uid": "input"}
-      ]
-     },
-     {"cols": 2,
-      "halign": "fill",
-      "cpadf": "1, 1, 1",
-      "cfill": "0, 0",
-      "border": "none",
-      "uniform": true,
-      "widgets": [
-       {"type": "button", "halign": "fill", "label": "Cancel", "btype": "cancel", "on_event": "cancel"},
-       {"type": "button", "halign": "fill", "label": "OK", "btype": "ok", "on_event": "ok"}
-      ]
-     }
-    ]
+ "info": {"version": 1, "license": "LGPL-2.0-or-later", "author": "Cyril Hrubis <metan@ucw.cz>"},
+ "layout": {
+  "widgets": [
+   {
+    "type": "frame",
+    "uid": "title",
+    "widget": {
+     "rows": 2,
+     "widgets": [
+      {
+       "cols": 2,
+       "widgets": [
+        {"type": "stock", "uid": "stock", "stock": "question"},
+        {"type": "tbox", "on_event": "input", "len": 15, "focused": true, "uid": "input"}
+       ]
+      },
+      {"cols": 2,
+       "halign": "fill",
+       "cpadf": "1, 1, 1",
+       "cfill": "0, 0",
+       "border": "none",
+       "uniform": true,
+       "widgets": [
+        {"type": "button", "halign": "fill", "label": "Cancel", "btype": "cancel", "on_event": "cancel"},
+        {"type": "button", "halign": "fill", "label": "OK", "btype": "ok", "on_event": "ok"}
+       ]
+      }
+     ]
+    }
    }
-  }
- ]
+  ]
+ }
 }

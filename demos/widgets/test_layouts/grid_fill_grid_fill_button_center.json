@@ -1,18 +1,19 @@
 {
- "version": 1,
- "align": "fill",
- "widgets": [
-  {
-   "align": "fill",
-   "rows": 3,
-   "widgets": [
-    {
+ "info": {"version": 1, "license": "GPL-2.0-or-later"},
+ "layout": {
+  "align": "fill",
+  "widgets": [
+   {
+    "align": "fill",
+    "widgets": [
+     {
       "type": "button",
       "label": "Button",
       "on_event": "on_event",
       "align": "center"
-    }
-   ]
-  }
- ]
+     }
+    ]
+   }
+  ]
+ }
 }

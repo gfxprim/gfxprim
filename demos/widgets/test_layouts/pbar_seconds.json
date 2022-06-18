@@ -1,12 +1,14 @@
 {
- "version": 1,
- "align": "fill",
- "widgets": [
-  {
-   "type": "pbar",
-   "unit": "seconds",
-   "max": 120,
-   "val": 100
-  }
- ]
+ "info": {"version": 1, "license": "GPL-2.0-or-later"},
+ "layout": {
+  "align": "fill",
+  "widgets": [
+   {
+    "type": "pbar",
+    "unit": "seconds",
+    "max": 120,
+    "val": 100
+   }
+  ]
+ }
 }

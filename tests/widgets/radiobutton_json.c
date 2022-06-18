@@ -109,7 +109,8 @@ struct gp_widget_choice_ops choice_ops = {
 };
 
 static struct tcase radiobutton = {
-	.json = "{\"version\": 1, \"type\": \"radiobutton\", \"choices\": [\"a\", \"b\"]}",
+	.json = "{\"info\": {\"version\": 1, \"license\": \"GPL-2.1-or-later\"},\n"
+	        " \"layout\": {\"type\": \"radiobutton\", \"choices\": [\"a\", \"b\"]}}",
 	.cnt = 2,
 	.choices = (const char *const []) {
 		"a",
@@ -118,7 +119,8 @@ static struct tcase radiobutton = {
 };
 
 static struct tcase sel_radiobutton = {
-	.json = "{\"version\": 1, \"type\": \"radiobutton\", \"choices\": [\"a\", \"b\"], \"selected\": 1}",
+	.json = "{\"info\": {\"version\": 1, \"license\": \"GPL-2.1-or-later\"},\n"
+	        " \"layout\": {\"type\": \"radiobutton\", \"choices\": [\"a\", \"b\"], \"selected\": 1}}",
 	.cnt = 2,
 	.sel = 1,
 	.choices = (const char *const []) {
@@ -128,7 +130,8 @@ static struct tcase sel_radiobutton = {
 };
 
 static struct tcase ops_radiobutton = {
-	.json = "{\"version\": 1, \"type\": \"radiobutton\", \"ops\": \"choice_ops\"}",
+	.json = "{\"info\": {\"version\": 1, \"license\": \"GPL-2.1-or-later\"},\n"
+	        " \"layout\": {\"type\": \"radiobutton\", \"ops\": \"choice_ops\"}}",
 	.cnt = 2,
 	.sel = 0,
 	.choices = (const char *const []) {
@@ -138,11 +141,13 @@ static struct tcase ops_radiobutton = {
 };
 
 static struct tcase empty_radiobutton = {
-	.json = "{\"version\": 1, \"type\": \"radiobutton\"}"
+	.json = "{\"info\": {\"version\": 1, \"license\": \"GPL-2.1-or-later\"},\n"
+	        " \"layout\": {\"type\": \"radiobutton\"}}"
 };
 
 static struct tcase missing_ops_radiobutton = {
-	.json = "{\"version\": 1, \"type\": \"radiobutton\", \"ops\": \"does_not_exist\"}"
+	.json = "{\"info\": {\"version\": 1, \"license\": \"GPL-2.1-or-later\"},\n"
+	        " \"layout\": {\"type\": \"radiobutton\", \"ops\": \"does_not_exist\"}}"
 };
 
 const struct tst_suite tst_suite = {

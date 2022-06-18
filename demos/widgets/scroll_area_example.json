@@ -1,73 +1,54 @@
 {
- "version": 1,
- "rows": 2,
- "widgets": [
-  {
-   "type": "scroll area",
-   "min_h": 50,
-   "min_w": 0,
-   "uid": "area",
-   "widget":
+ "info": {"version": 1, "license": "GPL-2.0-or-later"},
+ "layout": {
+  "rows": 2,
+  "widgets": [
    {
-    "rows": 4,
+    "type": "scroll area",
+    "min_h": 50,
+    "min_w": 0,
+    "uid": "area",
+    "widget":
+    {
+     "rows": 4,
+     "widgets": [
+      {
+       "type": "label",
+       "text": "Hello world!"
+      },
+      {
+       "type": "button",
+       "label": "Click me!",
+       "on_event": "inner_button_event"
+      },
+      {
+       "type": "label",
+       "text": "hidden"
+      },
+      {
+       "type": "button",
+       "label": "Hidden",
+       "on_event": "inner_button_event"
+      }
+     ]
+    }
+   },
+   {
+    "rows": 3,
+    "cols": 3,
+    "border": "none",
     "widgets": [
-     {
-      "type": "label",
-      "text": "Hello world!"
-     },
-     {
-      "type": "button",
-      "label": "Click me!",
-      "on_event": "inner_button_event"
-     },
-     {
-      "type": "label",
-      "text": "hidden"
-     },
-     {
-      "type": "button",
-      "label": "Hidden",
-      "on_event": "inner_button_event"
-     }
+     {},
+     {"type": "button", "btype": "left", "on_event": "button_event"},
+     {},
+     {"type": "button", "btype": "up", "on_event": "button_event"},
+     {},
+     {"type": "button", "btype": "down", "on_event": "button_event"},
+     {},
+     {"type": "button", "btype": "right", "on_event": "button_event"},
+     {}
     ]
    }
-  },
-  {
-   "rows": 3,
-   "cols": 3,
-   "border": "none",
-   "widgets": [
-    {
-    },
-    {
-      "type": "button",
-      "label": "<",
-      "on_event": "button_event"
-    },
-    {
-    },
-    {
-      "type": "button",
-      "label": "^",
-      "on_event": "button_event"
-    },
-    {
-    },
-    {
-      "type": "button",
-      "label": "v",
-      "on_event": "button_event"
-    },
-    {
-    },
-    {
-      "type": "button",
-      "label": ">",
-      "on_event": "button_event"
-    },
-    {
-    }
-   ]
-  }
- ]
+  ]
+ }
 }

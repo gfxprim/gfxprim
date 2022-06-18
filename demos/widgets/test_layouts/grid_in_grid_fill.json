@@ -1,15 +1,14 @@
 {
- "version": 1,
- "align": "fill",
- "widgets": [
-  {
-   "align": "fill",
-   "widgets": [
-    {
-     "type": "button",
-     "label": "button"
-    }
-   ]
-  }
- ]
+ "info": {"version": 1, "license": "GPL-2.0-or-later"},
+ "layout": {
+  "align": "fill",
+  "widgets": [
+   {
+    "align": "fill",
+    "widgets": [
+     {"type": "button", "label": "button"}
+    ]
+   }
+  ]
+ }
 }

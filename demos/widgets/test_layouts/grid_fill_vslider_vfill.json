@@ -1,15 +1,17 @@
 {
- "version": 1,
- "align": "fill",
- "widgets": [
-  {
-   "type": "slider",
-   "min": 0,
-   "max": 20,
-   "val": 10,
-   "dir": "vert",
-   "on_event": "on_event",
-   "align": "vfill"
-  }
- ]
+ "info": {"version": 1, "license": "GPL-2.0-or-later"},
+ "layout": {
+  "align": "fill",
+  "widgets": [
+   {
+    "type": "slider",
+    "min": 0,
+    "max": 20,
+    "val": 10,
+    "dir": "vert",
+    "on_event": "on_event",
+    "align": "vfill"
+   }
+  ]
+ }
 }

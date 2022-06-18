@@ -1,13 +1,15 @@
 {
- "version": 1,
- "widgets": [
-  {
-   "widgets": [
-    {
-     "type": "button",
-     "label": "button"
-    }
-   ]
-  }
- ]
+ "info": {"version": 1, "license": "GPL-2.0-or-later"},
+ "layout": {
+  "widgets": [
+   {
+    "widgets": [
+     {
+      "type": "button",
+      "label": "button"
+     }
+    ]
+   }
+  ]
+ }
 }

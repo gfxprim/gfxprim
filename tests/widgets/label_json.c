@@ -57,30 +57,35 @@ static int label_json_load(struct tcase *t)
 }
 
 static struct tcase label = {
-	.json = "{\"version\": 1, \"type\": \"label\", \"text\": \"Label!\"}",
+	.json = "{\"info\": {\"version\": 1, \"license\": \"GPL-2.1-or-later\"},\n"
+	        "\"layout\": {\"type\": \"label\", \"text\": \"Label!\"}}",
 	.text = "Label!",
 };
 
 static struct tcase label_bold = {
-	.json = "{\"version\": 1, \"type\": \"label\", \"tattr\": \"bold\", \"text\": \"Label!\"}",
+	.json = "{\"info\": {\"version\": 1, \"license\": \"GPL-2.1-or-later\"},\n"
+	        "\"layout\": {\"type\": \"label\", \"tattr\": \"bold\", \"text\": \"Label!\"}}",
 	.text = "Label!",
 	.tattr = GP_TATTR_BOLD,
 };
 
 static struct tcase label_frame = {
-	.json = "{\"version\": 1, \"type\": \"label\", \"frame\": true, \"text\": \"Label!\"}",
+	.json = "{\"info\": {\"version\": 1, \"license\": \"GPL-2.1-or-later\"},\n"
+	        "\"layout\": {\"type\": \"label\", \"frame\": true, \"text\": \"Label!\"}}",
 	.text = "Label!",
 	.frame = 1,
 };
 
 static struct tcase label_align = {
-	.json = "{\"version\": 1, \"type\": \"label\", \"tattr\": \"right\", \"text\": \"Label!\"}",
+	.json = "{\"info\": {\"version\": 1, \"license\": \"GPL-2.1-or-later\"},\n"
+	        "\"layout\": {\"type\": \"label\", \"tattr\": \"right\", \"text\": \"Label!\"}}",
 	.text = "Label!",
 	.tattr = GP_TATTR_RIGHT,
 };
 
 static struct tcase label_width = {
-	.json = "{\"version\": 1, \"type\": \"label\", \"width\": 10, \"text\": \"Label!\"}",
+	.json = "{\"info\": {\"version\": 1, \"license\": \"GPL-2.1-or-later\"},\n"
+	        "\"layout\": {\"type\": \"label\", \"width\": 10, \"text\": \"Label!\"}}",
 	.text = "Label!",
 	.width = 10,
 };

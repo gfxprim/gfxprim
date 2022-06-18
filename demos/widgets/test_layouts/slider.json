@@ -1,13 +1,15 @@
 {
- "version": 1,
- "align": "fill",
- "widgets": [
-  {
-   "align": "hfill",
-   "type": "slider",
-   "min": 0,
-   "max": 100,
-   "val": 50
-  }
- ]
+ "info": {"version": 1, "license": "GPL-2.0-or-later"},
+ "layout": {
+  "align": "fill",
+  "widgets": [
+   {
+    "align": "hfill",
+    "type": "slider",
+    "min": 0,
+    "max": 100,
+    "val": 50
+   }
+  ]
+ }
 }

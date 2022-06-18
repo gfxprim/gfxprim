@@ -1,50 +1,51 @@
 {
- "version": 1,
- "cols": 2,
- "rows": 3,
- "align": "fill",
- "cfill": "2 * 1",
- "rfill": "1, 2, 1",
- "widgets": [
-  {
-   "align": "fill",
-   "widgets": [
-    {
-     "type": "button",
-     "label": "right-bottom",
-     "halign": "right",
-     "valign": "bottom"
-    }
-   ]
-  },
-  {
-   "type": "button",
-   "label": "left-bottom",
-   "halign": "left",
-   "valign": "bottom"
-  },
-  {
-   "type": "button",
-   "label": "left-top",
-   "halign": "left",
-   "valign": "top"
-  },
-  {
-   "type": "button",
-   "label": "right-top",
-   "halign": "right",
-   "valign": "top"
-  },
-  {
-   "type": "button",
-   "label": "fill",
-   "align": "fill"
-  },
-  {
-   "type": "button",
-   "label": "vfill-right",
-   "halign": "right",
-   "valign": "fill"
-  }
- ]
+ "info": {"version": 1, "license": "GPL-2.0-or-later"},
+ "layout": {
+  "cols": 2, "rows": 3,
+  "align": "fill",
+  "cfill": "2 * 1",
+  "rfill": "1, 2, 1",
+  "widgets": [
+   {
+    "align": "fill",
+    "widgets": [
+     {
+      "type": "button",
+      "label": "right-bottom",
+      "halign": "right",
+      "valign": "bottom"
+     }
+    ]
+   },
+   {
+    "type": "button",
+    "label": "left-bottom",
+    "halign": "left",
+    "valign": "bottom"
+   },
+   {
+    "type": "button",
+    "label": "left-top",
+    "halign": "left",
+    "valign": "top"
+   },
+   {
+    "type": "button",
+    "label": "right-top",
+    "halign": "right",
+    "valign": "top"
+   },
+   {
+    "type": "button",
+    "label": "fill",
+    "align": "fill"
+   },
+   {
+    "type": "button",
+    "label": "vfill-right",
+    "halign": "right",
+    "valign": "fill"
+   }
+  ]
+ }
 }

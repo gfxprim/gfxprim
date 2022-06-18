@@ -1,44 +1,40 @@
 {
- "version": 1,
- "widgets": [
-  {
-   "type": "tabs",
-   "labels": [
-    "First",
-    "Second",
-    "Third",
-    "Fourth"
-   ],
-   "widgets": [
-    {
-     "type": "tbox",
-     "len": 15,
-     "on_event": "callback"
-    },
-    {
-     "type": "button",
-     "label": "Button",
-     "on_event": "callback"
-    },
-    {
-     "type": "checkbox",
-     "label": "Check Box",
-     "on_event": "callback"
-    },
-    {
-     "rows": 2,
-     "widgets": [
-      {
-       "type": "label",
-       "text": "Text 1"
-      },
-      {
-       "type": "label",
-       "text": "Text 2"
-      }
-     ]
-    }
-   ]
-  }
- ]
+ "info": {"version": 1, "license": "GPL-2.0-or-later"},
+ "layout": {
+  "widgets": [
+   {
+    "type": "tabs",
+    "labels": [
+     "First",
+     "Second",
+     "Third",
+     "Fourth"
+    ],
+    "widgets": [
+     {
+      "type": "tbox",
+      "len": 15,
+      "on_event": "callback"
+     },
+     {
+      "type": "button",
+      "label": "Button",
+      "on_event": "callback"
+     },
+     {
+      "type": "checkbox",
+      "label": "Check Box",
+      "on_event": "callback"
+     },
+     {
+      "rows": 2,
+      "widgets": [
+       {"type": "label", "text": "Text 1"},
+       {"type": "label", "text": "Text 2"}
+      ]
+     }
+    ]
+   }
+  ]
+ }
 }

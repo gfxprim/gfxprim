@@ -1,9 +1,8 @@
 {
- "version": 1,
- "widgets": [
-  {
-   "type": "tbox",
-   "text": "Textbox"
-  }
- ]
+ "info": {"version": 1, "license": "GPL-2.0-or-later"},
+ "layout": {
+  "widgets": [
+   {"type": "tbox", "text": "Textbox"}
+  ]
+ }
 }

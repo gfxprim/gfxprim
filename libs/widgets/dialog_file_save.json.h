@@ -1,6 +1,7 @@
 static const char *dialog_file_save = "\
 { \n\
-  \"version\": 1, \n\
+ \"info\": {\"version\": 1, \"license\": \"LGPL-2.0-or-later\", \"author\": \"Cyril Hrubis <metan@ucw.cz>\"}, \n\
+ \"layout\": { \n\
   \"rows\": 3, \n\
   \"widgets\": [ \n\
     { \n\
@@ -37,5 +38,6 @@ static const char *dialog_file_save = "\
       ] \n\
     } \n\
   ] \n\
+ } \n\
 } \n\
 ";

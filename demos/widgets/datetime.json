@@ -1,5 +1,6 @@
 {
-  "version": 1,
+ "info": {"version": 1, "license": "GPL-2.0-or-later"},
+ "layout": {
   "rows": 3,
   "widgets": [
     {
@@ -38,42 +39,43 @@
       "title": "Time",
       "align": "fill",
       "widget":
-        {
-          "cols": 5,
-          "widgets": [
-            {
-              "type": "spinner",
-              "min": 0,
-              "max": 23,
-              "uid": "hour"
-           },
-           {
-              "type": "label",
-              "text": ":"
-           },
-           {
-              "type": "spinner",
-              "min": 0,
-              "max": 59,
-              "uid": "min"
-           },
-           {
-             "type": "label",
-             "text": ":"
-           },
+       {
+         "cols": 5,
+         "widgets": [
            {
              "type": "spinner",
              "min": 0,
+             "max": 23,
+             "uid": "hour"
+          },
+          {
+             "type": "label",
+             "text": ":"
+          },
+          {
+             "type": "spinner",
+             "min": 0,
              "max": 59,
-             "uid": "sec"
-           }
-         ]
-      }
-    },
-    {
-      "type": "button",
-      "label": "Load",
-      "on_event": "load_sys_time"
-    }
+             "uid": "min"
+          },
+          {
+            "type": "label",
+            "text": ":"
+          },
+          {
+            "type": "spinner",
+            "min": 0,
+            "max": 59,
+            "uid": "sec"
+          }
+        ]
+     }
+   },
+   {
+     "type": "button",
+     "label": "Load",
+     "on_event": "load_sys_time"
+   }
   ]
+ }
 }

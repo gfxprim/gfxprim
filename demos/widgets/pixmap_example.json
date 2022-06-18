@@ -1,46 +1,37 @@
 {
- "version": 1,
- "cols": 3,
- "widgets": [
-  {
-   "cols": 2,
-   "rows": 2,
-   "widgets": [
-    {
-     "type": "label",
-     "text": "fg:"
-    },
-    {
-     "type": "label",
-     "text": "bg:"
-    },
-    {
-     "type": "tbox",
-     "text": "ffffff",
-     "max_len" : 6,
-     "tattr": "mono",
-     "on_event": "set_fg_color"
-    },
-    {
-     "type": "tbox",
-     "text": "000000",
-     "max_len" : 6,
-     "tattr": "mono",
-     "on_event": "set_bg_color"
-    }
-   ]
-  },
-  {
-   "type": "pixmap",
-   "w": 100,
-   "h": 100,
-   "on_event": "pixmap_on_event",
-   "uid": "pixmap"
-  },
-  {
-   "type": "button",
-   "label": "clear",
-   "on_event": "button_on_event"
-  }
- ]
+ "info": {"version": 1, "license": "GPL-2.0-or-later"},
+ "layout": {
+  "cols": 3,
+  "widgets": [
+   {"cols": 2, "rows": 2,
+    "widgets": [
+     {"type": "label", "text": "fg:"},
+     {"type": "label", "text": "bg:"},
+     {
+      "type": "tbox",
+      "text": "ffffff",
+      "max_len" : 6,
+      "tattr": "mono",
+      "on_event": "set_fg_color"},
+     {
+      "type": "tbox",
+      "text": "000000",
+      "max_len" : 6,
+      "tattr": "mono",
+      "on_event": "set_bg_color"}
+    ]
+   },
+   {
+    "type": "pixmap",
+    "w": 100, "h": 100,
+    "on_event": "pixmap_on_event",
+    "uid": "pixmap"
+   },
+   {
+    "type": "button",
+    "label": "clear",
+    "on_event": "button_on_event"
+   }
+  ]
+ }
 }

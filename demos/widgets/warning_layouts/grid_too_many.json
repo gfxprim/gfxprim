@@ -1,11 +1,10 @@
 {
- "version": 1,
- "widgets": [
-  {
-  },
-  {
-  },
-  {
-  }
- ]
+ "info": {"version": 1, "license": "GPL-2.0-or-later"},
+ "layout": {
+  "widgets": [
+   null,
+   null,
+   null
+  ]
+ }
 }

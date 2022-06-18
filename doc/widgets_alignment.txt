@@ -32,15 +32,18 @@ image:grid_fill_button_center.png[Grid set to fill button to center]
 [source,json]
 -------------------------------------------------------------------------------
 {
- "align": "fill",
- "widgets": [
-  {
-   "type": "button",
-   "label": "Button",
-   "on_event": "on_event",
-   "align": "center"
-  }
- ]
+ "info": {"version": 1, "license": "GPL-2.0-or-later"},
+ "layout": {
+  "align": "fill",
+  "widgets": [
+   {
+    "type": "button",
+    "label": "Button",
+    "on_event": "on_event",
+    "align": "center"
+   }
+  ]
+ }
 }
 -------------------------------------------------------------------------------
 
@@ -52,16 +55,18 @@ image:grid_fill_button_fill.png[Both grid and button set to fill]
 [source,json]
 -------------------------------------------------------------------------------
 {
- "version": 1,
- "align": "fill",
- "widgets": [
-  {
-   "type": "button",
-   "label": "Button",
-   "on_event": "on_event",
-   "align": "fill"
-  }
- ]
+ "info": {"version": 1, "license": "GPL-2.0-or-later"},
+ "layout": {
+  "align": "fill",
+  "widgets": [
+   {
+    "type": "button",
+    "label": "Button",
+    "on_event": "on_event",
+    "align": "fill"
+   }
+  ]
+ }
 }
 -------------------------------------------------------------------------------
 
@@ -74,14 +79,16 @@ image:grid_center_button.png[Grid set to center]
 [source,json]
 -------------------------------------------------------------------------------
 {
- "version": 1,
- "align": "center",
- "widgets": [
-  {
-   "type": "button",
-   "label": "Button",
-   "on_event": "on_event",
-  }
- ]
+ "info": {"version": 1, "license": "GPL-2.0-or-later"},
+ "layout": {
+  "align": "center",
+  "widgets": [
+   {
+    "type": "button",
+    "label": "Button",
+    "on_event": "on_event",
+   }
+  ]
+ }
 }
 -------------------------------------------------------------------------------

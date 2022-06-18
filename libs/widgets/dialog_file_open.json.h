@@ -1,6 +1,7 @@
 static const char *dialog_file_open = "\
 { \n\
-  \"version\": 1, \n\
+ \"info\": {\"version\": 1, \"license\": \"LGPL-2.0-or-later\", \"author\": \"Cyril Hrubis <metan@ucw.cz>\"}, \n\
+ \"layout\": { \n\
   \"rows\": 3, \n\
   \"widgets\": [ \n\
     { \n\
@@ -9,8 +10,8 @@ static const char *dialog_file_open = "\
       \"border\": \"none\", \n\
       \"cfill\": \"0, 1\", \n\
       \"widgets\": [ \n\
-	{\"type\": \"label\", \"text\": \"Directory:\"}, \n\
-	{\"type\": \"tbox\", \"len\": 75, \"halign\": \"fill\", \"uid\": \"path\", \"ttype\": \"path\"} \n\
+        {\"type\": \"label\", \"text\": \"Directory:\"}, \n\
+        {\"type\": \"tbox\", \"len\": 75, \"halign\": \"fill\", \"uid\": \"path\", \"ttype\": \"path\"} \n\
       ] \n\
     }, \n\
     { \n\
@@ -35,11 +36,12 @@ static const char *dialog_file_open = "\
       \"widgets\": [ \n\
         {\"type\": \"label\", \"text\": \"Filter:\"}, \n\
         {\"type\": \"tbox\", \"len\": 20, \"uid\": \"filter\", \"halign\": \"fill\"}, \n\
-	{\"type\": \"checkbox\", \"label\": \"Show Hidden\", \"uid\": \"hidden\"}, \n\
-	{\"type\": \"button\", \"label\": \"Cancel\", \"btype\": \"cancel\", \"on_event\": \"cancel\"}, \n\
+        {\"type\": \"checkbox\", \"label\": \"Show Hidden\", \"uid\": \"hidden\"}, \n\
+        {\"type\": \"button\", \"label\": \"Cancel\", \"btype\": \"cancel\", \"on_event\": \"cancel\"}, \n\
         {\"type\": \"button\", \"label\": \"Open\", \"btype\": \"open\", \"on_event\": \"open\"} \n\
       ] \n\
     } \n\
   ] \n\
+ } \n\
 } \n\
 ";

@@ -1,5 +1,4 @@
 {
- "version": 1,
- "type": "button",
- "label": "Button"
+ "info": {"version": 1, "license": "GPL-2.0-or-later"},
+ "layout": {"type": "button", "label": "Button"}
 }

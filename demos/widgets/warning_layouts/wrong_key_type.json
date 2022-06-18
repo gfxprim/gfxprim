@@ -1,6 +1,8 @@
 {
- "version": 1,
- "cols": true,
- "widgets": [
- ]
+ "info": {"version": 1, "license": "GPL-2.0-or-later"},
+ "layout": {
+  "cols": true,
+  "widgets": [
+  ]
+ }
 }

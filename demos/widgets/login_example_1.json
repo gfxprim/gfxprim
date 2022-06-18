@@ -1,66 +1,48 @@
 {
-  "version": 1,
+ "info": {"version": 1, "license": "GPL-2.0-or-later"},
+ "layout": {
   "rows": 3,
   "border": 2,
   "widgets": [
-  {
-   "type": "label",
-   "text": "Enter your login information."
-  },
-  {
-   "cols": 2,
-   "rows": 3,
-   "border": "vert",
-   "widgets": [
-    {
-      "type": "label",
-      "text": "Username:",
-      "halign": "right"
-    },
-    {
-      "type": "label",
-      "text": "Password:",
-      "halign": "right"
-    },
-    {
-    },
-    {
+   {"type": "label", "text": "Enter your login information."},
+   {
+    "cols": 2,
+    "rows": 3,
+    "border": "vert",
+    "widgets": [
+     {"type": "label", "text": "Username:", "halign": "right"},
+     {"type": "label", "text": "Password:", "halign": "right"},
+     {},
+     {
       "type": "tbox",
       "len": 18,
       "uid": "uname",
       "on_event": "login_callback"
-    },
-    {
+     },
+     {
       "type": "tbox",
       "len": 18,
       "ttype": "hidden",
       "uid": "pass",
       "on_event": "login_callback"
-    },
-    {
-     "type": "checkbox",
-     "label": "Show password",
-     "halign": "left",
-     "on_event": "show_password"
-    }
-   ]
-  },
-  {
-   "cols": 2,
-   "border": "none",
-   "halign": "right",
-   "widgets": [
-    {
-      "type": "button",
-      "label": "Ok",
-      "on_event": "login_callback"
-    },
-    {
-      "type": "button",
-      "label": "Cancel",
-      "on_event": "cancel_callback"
-    }
-   ]
-  }
- ]
+     },
+     {
+      "type": "checkbox",
+      "label": "Show password",
+      "halign": "left",
+      "on_event": "show_password"
+     }
+    ]
+   },
+   {
+    "cols": 2,
+    "border": "none",
+    "halign": "right",
+    "widgets": [
+     {"type": "button", "label": "Ok", "on_event": "login_callback"},
+     {"type": "button", "label": "Cancel", "on_event": "cancel_callback"}
+    ]
+   }
+  ]
+ }
 }
