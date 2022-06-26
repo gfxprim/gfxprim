@@ -270,6 +270,8 @@ gp_backend *gp_sdl_init(gp_size w, gp_size h, uint8_t bpp, uint8_t flags,
 		SDL_Quit();
 		return NULL;
 	}
+
+	SDL_EnableUNICODE(1);
 #elif LIBSDL_VERSION == 2
 	window = SDL_CreateWindow(caption, SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, w, h, sdl_flags);
 	if (!window) {
@@ -300,7 +302,13 @@ gp_backend *gp_sdl_init(gp_size w, gp_size h, uint8_t bpp, uint8_t flags,
 	                    SDL_DEFAULT_REPEAT_INTERVAL);
 #endif
 
-	gp_event_queue_init(&backend.event_queue, w, h, 0);
+	gp_event_queue_init(&backend.event_queue, w, h, 0,
+#if LIBSDL_VERSION == 1
+			0
+#else
+			GP_EVENT_QUEUE_LOAD_KEYMAP
+#endif
+			);
 
 	backend.pixmap = &pixmap;
 

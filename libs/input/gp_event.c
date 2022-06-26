@@ -182,6 +182,9 @@ void gp_event_dump(gp_event *ev)
 	case GP_EV_TMR:
 		printf("Timer %s expired\n", ev->tmr->id);
 	break;
+	case GP_EV_UTF:
+		printf("Unicode char %04x\n", ev->utf.ch);
+	break;
 	default:
 		printf("Unknown %u\n", ev->type);
 	}

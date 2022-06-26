@@ -15,7 +15,7 @@ static int get_pointer_preserved(void)
 	gp_event_queue queue;
 	gp_event *ev;
 
-	gp_event_queue_init(&queue, 1, 1, 0);
+	gp_event_queue_init(&queue, 1, 1, 0, 0);
 
 	gp_event_queue_push_key(&queue, GP_KEY_ENTER, GP_EV_KEY_DOWN, NULL);
 
@@ -48,7 +48,7 @@ static int peek_test(void)
 	gp_event_queue queue;
 	gp_event *ev;
 
-	gp_event_queue_init(&queue, 1, 1, 0);
+	gp_event_queue_init(&queue, 1, 1, 0, 0);
 
 	gp_event_queue_push_key(&queue, GP_KEY_A, GP_EV_KEY_DOWN, NULL);
 	gp_event_queue_push_key(&queue, GP_KEY_ENTER, GP_EV_KEY_DOWN, NULL);
@@ -89,7 +89,7 @@ static int key_state_test(void)
 	gp_event *ev;
 	int fail = 0;
 
-	gp_event_queue_init(&queue, 1, 1, 0);
+	gp_event_queue_init(&queue, 1, 1, 0, 0);
 
 	gp_event_queue_push_key(&queue, GP_KEY_A, GP_EV_KEY_DOWN, NULL);
 	gp_event_queue_push_key(&queue, GP_KEY_A, GP_EV_KEY_UP, NULL);
@@ -130,7 +130,7 @@ static int cursor_state_test(void)
 	int fail = 0;
 	gp_event *ev;
 
-	gp_event_queue_init(&queue, 10, 10, 0);
+	gp_event_queue_init(&queue, 10, 10, 0, 0);
 
 	if (queue.state.cursor_x != 5 || queue.state.cursor_y != 5) {
 		tst_msg("Wrong cursor after init %ux%u expected 5x5",
@@ -181,7 +181,7 @@ static int queue_init_test(void)
 	unsigned int i;
 	gp_event_queue queue;
 
-	gp_event_queue_init(&queue, 1, 1, 0);
+	gp_event_queue_init(&queue, 1, 1, 0, 0);
 
 	if (gp_event_queue_events(&queue)) {
 		tst_msg("Events queued after init");

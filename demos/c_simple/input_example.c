@@ -22,17 +22,25 @@ static gp_pixel red, green, white, black;
 static void draw_event(gp_event *ev)
 {
 	gp_pixmap *win = backend->pixmap;
-	static gp_size size = 0;
-
-	if (ev->type != GP_EV_KEY)
-		return;
-
+	static gp_size ksize = 0, usize = 0;
 	int align = GP_ALIGN_RIGHT|GP_VALIGN_BOTTOM;
 
-	gp_text_clear(win, NULL, 20, 20, align, black, size);
-	size = gp_print(win, NULL, 20, 20, align,
-	                white, black, "Key=%s",
-			gp_event_key_name(ev->key.key));
+	switch (ev->type) {
+	case GP_EV_KEY:
+		gp_text_clear(win, NULL, 20, 20, align, black, ksize);
+		ksize = gp_print(win, NULL, 20, 20, align,
+		                 white, black, "Key=%s",
+				 gp_event_key_name(ev->key.key));
+	break;
+	case GP_EV_UTF:
+		gp_text_clear(win, NULL, 20, 40, align, black, usize);
+		usize = gp_print(win, NULL, 20, 40, align,
+		                 white, black, "UTF=%04x",
+				 ev->utf.ch);
+	break;
+	default:
+		return;
+	}
 
 	gp_backend_flip(backend);
 }
@@ -52,6 +60,9 @@ static void event_loop(void)
 			gp_event_dump(ev);
 
 			switch (ev->type) {
+			case GP_EV_UTF:
+				draw_event(ev);
+			break;
 			case GP_EV_KEY:
 				draw_event(ev);
 
@@ -83,9 +94,9 @@ static void event_loop(void)
 					}
 					int align = GP_ALIGN_RIGHT|GP_VALIGN_BOTTOM;
 
-					gp_text_clear(win, NULL, 20, 40, align,
+					gp_text_clear(win, NULL, 20, 60, align,
 					              black, size);
-					size = gp_print(win, NULL, 20, 40, align,
+					size = gp_print(win, NULL, 20, 60, align,
 					                white, black, "X=%3u Y=%3u dX=%3i dY=%3i",
 						        ev->st->cursor_x, ev->st->cursor_y,
 							ev->rel.rx, ev->rel.ry);

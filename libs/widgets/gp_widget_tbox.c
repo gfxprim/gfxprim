@@ -40,7 +40,7 @@ static unsigned int min_h(gp_widget *self, const gp_widget_render_ctx *ctx)
 static const char *hidden_str(const char *buf)
 {
 	static const char s[] = "********************************************";
-	unsigned int len = strlen(buf);
+	unsigned int len = gp_utf8_strlen(buf);
 
 	if (len >= sizeof(s) - 1)
 		return s;
@@ -376,7 +376,7 @@ static int sel_left(gp_widget *self)
 	return 1;
 }
 
-static void ascii_key(gp_widget *self, char ch)
+static void utf_key(gp_widget *self, uint32_t ch)
 {
 	sel_del(self);
 
@@ -393,12 +393,12 @@ static void ascii_key(gp_widget *self, char ch)
 		return;
 	}
 
-	char *tmp = gp_vec_chins(self->tbox->buf, self->tbox->cur_pos, ch);
+	char *tmp = gp_vec_ins_utf8(self->tbox->buf, self->tbox->cur_pos, ch);
 	if (!tmp)
 		return;
 
 	self->tbox->buf = tmp;
-	self->tbox->cur_pos++;
+	self->tbox->cur_pos += gp_utf8_bytes(ch);
 
 	send_edit_event(self);
 
@@ -725,10 +725,6 @@ static int event(gp_widget *self, const gp_widget_render_ctx *ctx, gp_event *ev)
 			return 0;
 		}
 
-		if (ev->key.ascii) {
-			ascii_key(self, ev->key.ascii);
-			return 1;
-		}
 	break;
 	case GP_EV_TMR:
 		self->tbox->alert = 0;
@@ -746,6 +742,10 @@ static int event(gp_widget *self, const gp_widget_render_ctx *ctx, gp_event *ev)
 		if (!gp_event_any_key_pressed(ev, GP_BTN_PEN, GP_BTN_LEFT))
 			return 0;
 		return mouse_drag(self, ctx, ev);
+	break;
+	case GP_EV_UTF:
+		utf_key(self, ev->utf.ch);
+		return 1;
 	break;
 	}
 

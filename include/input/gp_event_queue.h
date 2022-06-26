@@ -29,6 +29,9 @@ struct gp_event_queue {
 	unsigned int queue_last;
 	unsigned int queue_size;
 
+	/* keymap needed only for framebuffer */
+	gp_keymap *keymap;
+
 	/*
 	 * Accumulated state, pressed keys, cursor position, etc.
 	 *
@@ -39,6 +42,10 @@ struct gp_event_queue {
 	gp_event events[GP_EVENT_QUEUE_SIZE];
 };
 
+enum gp_event_queue_flags {
+	GP_EVENT_QUEUE_LOAD_KEYMAP = 0x01,
+};
+
 /*
  * Initializes event queue passed as a pointer. The events array must be
  * queue_size long.
@@ -47,7 +54,7 @@ struct gp_event_queue {
  */
 void gp_event_queue_init(gp_event_queue *self,
                          unsigned int screen_w, unsigned int screen_h,
-                         unsigned int queue_size);
+                         unsigned int queue_size, int flags);
 
 /*
  * Sets screen (window) size.
@@ -131,10 +138,24 @@ void gp_event_queue_push_abs(gp_event_queue *self,
 /*
  * Inject event that changes key state (i.e. press, release, repeat).
  *
- * If timeval is NULL, current time is used.
+ * @key  Physical key pressed on keyboard
+ * @code Action press/release/repeat
+ * @utf An UTF32 mapping, if available, pass zero if none
+ * @timeval A timestamp; if NULL current time is used
  */
 void gp_event_queue_push_key(gp_event_queue *self,
-                             uint32_t key, uint8_t code, struct timeval *time);
+                             uint32_t key, uint8_t code,
+                             struct timeval *time);
+
+/**
+ * @brief Injects an unicode character typed on keyboard
+ *
+ * @self An input queue.
+ * @utf_ch An unicode character.
+ * @timeval A timestamp; if NULL current time is used
+ */
+void gp_event_queue_push_utf(gp_event_queue *self, uint32_t utf_ch,
+                             struct timeval *time);
 
 /*
  * Inject window resize event

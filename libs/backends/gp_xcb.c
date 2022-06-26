@@ -532,7 +532,8 @@ static int create_window(struct gp_backend *self, struct win *win,
 
 	set_title(c, win->win, caption);
 
-	gp_event_queue_init(&self->event_queue, w, h, 0);
+	//TODO: XCB key handling!!!
+	gp_event_queue_init(&self->event_queue, w, h, 0, GP_EVENT_QUEUE_LOAD_KEYMAP);
 
 	/* Get pixel format */
 	int depth;

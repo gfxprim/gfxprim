@@ -394,7 +394,7 @@ gp_backend *gp_linux_fb_init(const char *path, int flags)
 	backend->exit = fb_exit;
 	backend->fd = fb->con_fd;
 
-	gp_event_queue_init(&backend->event_queue, vscri.xres, vscri.yres, 0);
+	gp_event_queue_init(&backend->event_queue, vscri.xres, vscri.yres, 0, GP_EVENT_QUEUE_LOAD_KEYMAP);
 
 	return backend;
 err4:

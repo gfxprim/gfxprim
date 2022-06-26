@@ -3,6 +3,8 @@
  * Copyright (C) 2009-2013 Cyril Hrubis <metan@ucw.cz>
  */
 
+#include <utils/gp_utf.h>
+
 /* X11 keycodes */
 static uint16_t keycode_table[] = {
  0,                  GP_KEY_1,           GP_KEY_2,           GP_KEY_3,
@@ -54,6 +56,49 @@ static uint16_t keycode_table[] = {
 };
 
 #include "gp_x_keysyms.h"
+
+static void x11_input_init_im(struct x11_win *win)
+{
+	setlocale(LC_ALL, "");
+
+	if (!XSupportsLocale()) {
+		GP_WARN("Locale not supported!");
+		return;
+	}
+
+	XSetLocaleModifiers("");
+
+	win->xim = XOpenIM(win->dpy, 0, 0, 0);
+
+	if (!win->xim) {
+		GP_DEBUG(1, "Falling back to @im=none");
+		XSetLocaleModifiers("@im=none");
+		win->xim = XOpenIM(win->dpy, 0, 0, 0);
+	}
+
+	if (!win->xim) {
+		GP_WARN("Failed to open XIM");
+		return;
+	}
+
+	win->xic = XCreateIC(win->xim,
+	                     XNInputStyle, XIMPreeditNothing | XIMStatusNothing,
+			     XNClientWindow, win->win,
+	                     NULL);
+	if (!win->xic) {
+		GP_WARN("Failed to initialize XIC");
+		XCloseIM(win->xim);
+		return;
+	}
+
+	XSetICFocus(win->xic);
+}
+
+static void x11_input_exit_im(struct x11_win *win)
+{
+	XDestroyIC(win->xic);
+	XCloseIM(win->xim);
+}
 
 static void x11_input_init(void)
 {
@@ -110,9 +155,13 @@ static unsigned int get_key(unsigned int xkey)
 }
 
 static void x11_input_event_put(gp_event_queue *event_queue,
-                                XEvent *ev, int w, int h)
+                                XEvent *ev, struct x11_win *win, int w, int h)
 {
 	int key = 0, press = 0;
+	KeySym keysym;
+	Status status;
+	uint32_t unicode = 0;
+	char str[32];
 
 	switch (ev->type) {
 	case ButtonPress:
@@ -165,6 +214,20 @@ static void x11_input_event_put(gp_event_queue *event_queue,
 	break;
 	case KeyPress:
 		press = 1;
+
+		if (!XFilterEvent(ev, None)) {
+
+			Xutf8LookupString(win->xic, &ev->xkey, str, sizeof(str)-1, &keysym, &status);
+
+			if (status == XLookupChars || status == XLookupBoth) {
+				const char *s = str;
+				unicode = gp_utf8_next(&s);
+
+				/* strip controll characters */
+				if (unicode >= 0x20)
+					gp_event_queue_push_utf(event_queue, unicode, NULL);
+			}
+		}
 	/* fallthrough */
 	case KeyRelease:
 		key = get_key(ev->xkey.keycode);

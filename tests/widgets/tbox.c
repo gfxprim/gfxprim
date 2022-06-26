@@ -57,7 +57,7 @@ static int tbox_event_action(void)
 		return TST_FAILED;
 	}
 
-	send_keypress(tbox, GP_KEY_ENTER, 0);
+	send_keypress(tbox, GP_KEY_ENTER);
 
 	if (flag)
 		return TST_SUCCESS;
@@ -87,13 +87,13 @@ static int tbox_typing(void)
 		return TST_FAILED;
 	}
 
-	send_keypress(tbox, GP_KEY_LEFT, 0);
-	send_keypress(tbox, GP_KEY_LEFT, 0);
-	send_keypress(tbox, GP_KEY_LEFT, 0);
-	send_keypress(tbox, GP_KEY_LEFT, 0);
-	send_keypress(tbox, GP_KEY_LEFT, 0);
-	send_keypress(tbox, GP_KEY_LEFT, 0);
-	send_keypress(tbox, GP_KEY_BACKSPACE, 0);
+	send_keypress(tbox, GP_KEY_LEFT);
+	send_keypress(tbox, GP_KEY_LEFT);
+	send_keypress(tbox, GP_KEY_LEFT);
+	send_keypress(tbox, GP_KEY_LEFT);
+	send_keypress(tbox, GP_KEY_LEFT);
+	send_keypress(tbox, GP_KEY_LEFT);
+	send_keypress(tbox, GP_KEY_BACKSPACE);
 
 	str = gp_widget_tbox_text(tbox);
 	if (strcmp(str, "hell world")) {
@@ -109,7 +109,7 @@ static int tbox_typing(void)
 		return TST_FAILED;
 	}
 
-	send_keypress(tbox, GP_KEY_DELETE, 0);
+	send_keypress(tbox, GP_KEY_DELETE);
 
 	str = gp_widget_tbox_text(tbox);
 	if (strcmp(str, "hellishworld")) {
@@ -501,7 +501,7 @@ static int sel_whole_left(gp_widget *tbox)
 {
 	gp_widget_tbox_cursor_set(tbox, 0, GP_SEEK_END);
 	state_press(GP_KEY_LEFT_SHIFT);
-	send_keypress(tbox, GP_KEY_HOME, 0);
+	send_keypress(tbox, GP_KEY_HOME);
 
 	if (!gp_widget_tbox_sel(tbox)) {
 		tst_msg("Text not selected after KEY_HOME + SHIFT");
@@ -519,7 +519,7 @@ static int sel_whole_right(gp_widget *tbox)
 {
 	gp_widget_tbox_cursor_set(tbox, 0, GP_SEEK_SET);
 	state_press(GP_KEY_LEFT_SHIFT);
-	send_keypress(tbox, GP_KEY_END, 0);
+	send_keypress(tbox, GP_KEY_END);
 
 	if (!gp_widget_tbox_sel(tbox)) {
 		tst_msg("Text not selected after KEY_END + SHIFT");
@@ -586,22 +586,22 @@ static int tbox_sel_keys_clear(void)
 	}
 
 	gp_widget_tbox_sel_set(tbox, 1, GP_SEEK_SET, 1);
-	send_keypress(tbox, GP_KEY_LEFT, 0);
+	send_keypress(tbox, GP_KEY_LEFT);
 	if (check_cleared(tbox, "KEY_LEFT", 1))
 		return TST_FAILED;
 
 	gp_widget_tbox_sel_set(tbox, 1, GP_SEEK_SET, 1);
-	send_keypress(tbox, GP_KEY_RIGHT, 0);
+	send_keypress(tbox, GP_KEY_RIGHT);
 	if (check_cleared(tbox, "KEY_RIGHT", 2))
 		return TST_FAILED;
 
 	gp_widget_tbox_sel_set(tbox, 1, GP_SEEK_SET, 1);
-	send_keypress(tbox, GP_KEY_HOME, 0);
+	send_keypress(tbox, GP_KEY_HOME);
 	if (check_cleared(tbox, "KEY_HOME", 0))
 		return TST_FAILED;
 
 	gp_widget_tbox_sel_set(tbox, 1, GP_SEEK_SET, 1);
-	send_keypress(tbox, GP_KEY_END, 0);
+	send_keypress(tbox, GP_KEY_END);
 	if (check_cleared(tbox, "KEY_END", 11))
 		return TST_FAILED;
 
@@ -669,14 +669,14 @@ static int tbox_sel_keys_clear_end(void)
 	if (sel_whole_left(tbox))
 		return TST_FAILED;
 
-	send_keypress(tbox, GP_KEY_LEFT, 0);
+	send_keypress(tbox, GP_KEY_LEFT);
 	if (check_cleared(tbox, "KEY_LEFT", 0))
 		return TST_FAILED;
 
 	if (sel_whole_left(tbox))
 		return TST_FAILED;
 
-	send_keypress(tbox, GP_KEY_HOME, 0);
+	send_keypress(tbox, GP_KEY_HOME);
 	if (check_cleared(tbox, "KEY_HOME", 0))
 		return TST_FAILED;
 
@@ -684,14 +684,14 @@ static int tbox_sel_keys_clear_end(void)
 	if (sel_whole_left(tbox))
 		return TST_FAILED;
 
-	send_keypress(tbox, GP_KEY_RIGHT, 0);
+	send_keypress(tbox, GP_KEY_RIGHT);
 	if (check_cleared(tbox, "KEY_RIGHT", 11))
 		return TST_FAILED;
 
 	if (sel_whole_left(tbox))
 		return TST_FAILED;
 
-	send_keypress(tbox, GP_KEY_END, 0);
+	send_keypress(tbox, GP_KEY_END);
 	if (check_cleared(tbox, "KEY_END", 11))
 		return TST_FAILED;
 
@@ -699,14 +699,14 @@ static int tbox_sel_keys_clear_end(void)
 	if (sel_whole_right(tbox))
 		return TST_FAILED;
 
-	send_keypress(tbox, GP_KEY_LEFT, 0);
+	send_keypress(tbox, GP_KEY_LEFT);
 	if (check_cleared(tbox, "KEY_LEFT", 0))
 		return TST_FAILED;
 
 	if (sel_whole_right(tbox))
 		return TST_FAILED;
 
-	send_keypress(tbox, GP_KEY_HOME, 0);
+	send_keypress(tbox, GP_KEY_HOME);
 	if (check_cleared(tbox, "KEY_HOME", 0))
 		return TST_FAILED;
 
@@ -714,14 +714,14 @@ static int tbox_sel_keys_clear_end(void)
 	if (sel_whole_right(tbox))
 		return TST_FAILED;
 
-	send_keypress(tbox, GP_KEY_RIGHT, 0);
+	send_keypress(tbox, GP_KEY_RIGHT);
 	if (check_cleared(tbox, "KEY_RIGHT", 11))
 		return TST_FAILED;
 
 	if (sel_whole_right(tbox))
 		return TST_FAILED;
 
-	send_keypress(tbox, GP_KEY_END, 0);
+	send_keypress(tbox, GP_KEY_END);
 	if (check_cleared(tbox, "KEY_END", 11))
 		return TST_FAILED;
 
@@ -744,7 +744,7 @@ static int tbox_sel_key_del_backspace(int key)
 	}
 
 	gp_widget_tbox_sel_set(tbox, 2, GP_SEEK_SET, 7);
-	send_keypress(tbox, key, 0);
+	send_keypress(tbox, key);
 
 	str = gp_widget_tbox_text(tbox);
 	if (strcmp(str, "held")) {
@@ -789,19 +789,19 @@ static int tbox_sel_key_forth_back(void)
 	gp_widget_tbox_cursor_set(tbox, cursor, GP_SEEK_SET);
 	state_press(GP_KEY_LEFT_SHIFT);
 
-	send_keypress(tbox, GP_KEY_LEFT, 0);
+	send_keypress(tbox, GP_KEY_LEFT);
 	if (check_selected(tbox, "KEY_LEFT", cursor - 1, 1))
 		return TST_FAILED;
 
-	send_keypress(tbox, GP_KEY_RIGHT, 0);
+	send_keypress(tbox, GP_KEY_RIGHT);
 	if (check_cleared(tbox, "KEY_RIGHT", cursor))
 		return TST_FAILED;
 
-	send_keypress(tbox, GP_KEY_RIGHT, 0);
+	send_keypress(tbox, GP_KEY_RIGHT);
 	if (check_selected(tbox, "KEY_RIGHT", cursor, 1))
 		return TST_FAILED;
 
-	send_keypress(tbox, GP_KEY_LEFT, 0);
+	send_keypress(tbox, GP_KEY_LEFT);
 	if (check_cleared(tbox, "KEY_LEFT", cursor))
 		return TST_FAILED;
 
@@ -826,11 +826,11 @@ static int tbox_sel_key_left_end(void)
 	gp_widget_tbox_cursor_set(tbox, cursor, GP_SEEK_SET);
 	state_press(GP_KEY_LEFT_SHIFT);
 
-	send_keypress(tbox, GP_KEY_LEFT, 0);
+	send_keypress(tbox, GP_KEY_LEFT);
 	if (check_selected(tbox, "KEY_LEFT", cursor - 1, 1))
 		return TST_FAILED;
 
-	send_keypress(tbox, GP_KEY_END, 0);
+	send_keypress(tbox, GP_KEY_END);
 	if (check_selected(tbox, "KEY_END", cursor, 6))
 		return TST_FAILED;
 
@@ -854,11 +854,11 @@ static int tbox_sel_key_left_home(void)
 	gp_widget_tbox_cursor_set(tbox, cursor, GP_SEEK_SET);
 	state_press(GP_KEY_LEFT_SHIFT);
 
-	send_keypress(tbox, GP_KEY_LEFT, 0);
+	send_keypress(tbox, GP_KEY_LEFT);
 	if (check_selected(tbox, "KEY_LEFT", cursor - 1, 1))
 		return TST_FAILED;
 
-	send_keypress(tbox, GP_KEY_HOME, 0);
+	send_keypress(tbox, GP_KEY_HOME);
 	if (check_selected(tbox, "KEY_HOME", 0, cursor))
 		return TST_FAILED;
 
@@ -883,11 +883,11 @@ static int tbox_sel_key_right_home(void)
 	gp_widget_tbox_cursor_set(tbox, cursor, GP_SEEK_SET);
 	state_press(GP_KEY_LEFT_SHIFT);
 
-	send_keypress(tbox, GP_KEY_RIGHT, 0);
+	send_keypress(tbox, GP_KEY_RIGHT);
 	if (check_selected(tbox, "KEY_RIGHT", cursor, 1))
 		return TST_FAILED;
 
-	send_keypress(tbox, GP_KEY_HOME, 0);
+	send_keypress(tbox, GP_KEY_HOME);
 	if (check_selected(tbox, "KEY_HOME", 0, 5))
 		return TST_FAILED;
 
@@ -911,11 +911,11 @@ static int tbox_sel_key_right_end(void)
 	gp_widget_tbox_cursor_set(tbox, cursor, GP_SEEK_SET);
 	state_press(GP_KEY_LEFT_SHIFT);
 
-	send_keypress(tbox, GP_KEY_RIGHT, 0);
+	send_keypress(tbox, GP_KEY_RIGHT);
 	if (check_selected(tbox, "KEY_RIGHT", cursor, 1))
 		return TST_FAILED;
 
-	send_keypress(tbox, GP_KEY_END, 0);
+	send_keypress(tbox, GP_KEY_END);
 	if (check_selected(tbox, "KEY_END", cursor, 6))
 		return TST_FAILED;
 
@@ -936,13 +936,13 @@ static int tbox_sel_ctrl_a_esc(void)
 	}
 
 	state_press(GP_KEY_LEFT_CTRL);
-	send_keypress(tbox, GP_KEY_A, 'a');
+	send_keypress(tbox, GP_KEY_A);
 	state_release(GP_KEY_LEFT_CTRL);
 
 	if (check_selected(tbox, "KEY_CTRL + KEY_A", 0, 11))
 		return TST_FAILED;
 
-	send_keypress(tbox, GP_KEY_ESC, 0);
+	send_keypress(tbox, GP_KEY_ESC);
 
 	if (check_cleared(tbox, "KEY_ESC", 11))
 		return TST_FAILED;
@@ -968,25 +968,25 @@ static int tbox_hidden_no_sel(void)
 
 	state_press(GP_KEY_LEFT_SHIFT);
 
-	send_keypress(tbox, GP_KEY_LEFT, 0);
+	send_keypress(tbox, GP_KEY_LEFT);
 	if (gp_widget_tbox_sel(tbox)) {
 		tst_msg("Hidden text was selected with KEY_LEFT");
 		return TST_FAILED;
 	}
 
-	send_keypress(tbox, GP_KEY_RIGHT, 0);
+	send_keypress(tbox, GP_KEY_RIGHT);
 	if (gp_widget_tbox_sel(tbox)) {
 		tst_msg("Hidden text was selected with KEY_RIGHT");
 		return TST_FAILED;
 	}
 
-	send_keypress(tbox, GP_KEY_HOME, 0);
+	send_keypress(tbox, GP_KEY_HOME);
 	if (gp_widget_tbox_sel(tbox)) {
 		tst_msg("Hidden text was selected with KEY_HOME");
 		return TST_FAILED;
 	}
 
-	send_keypress(tbox, GP_KEY_END, 0);
+	send_keypress(tbox, GP_KEY_END);
 	if (gp_widget_tbox_sel(tbox)) {
 		tst_msg("Hidden text was selected with KEY_END");
 		return TST_FAILED;

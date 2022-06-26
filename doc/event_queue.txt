@@ -23,7 +23,7 @@ Event Queue API
  */
 void gp_event_queue_init(gp_event_queue *self,
                          unsigned int screen_w, unsigned int screen_h,
-                         unsigned int queue_size);
+                         unsigned int queue_size, int flags);
 -------------------------------------------------------------------------------
 
 The initialization functions takes pointer to a memory large enough to hold an

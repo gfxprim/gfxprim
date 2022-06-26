@@ -12,5 +12,6 @@ typedef struct gp_event gp_event;
 typedef struct gp_timer gp_timer;
 typedef struct gp_task gp_task;
 typedef struct gp_task_queue gp_task_queue;
+typedef struct gp_keymap gp_keymap;
 
 #endif /* INPUT_GP_TYPES_H */

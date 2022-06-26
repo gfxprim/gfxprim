@@ -8,11 +8,12 @@
 #include <core/gp_common.h>
 #include <core/gp_debug.h>
 
+#include <input/gp_keymap.h>
 #include <input/gp_event_queue.h>
 
 void gp_event_queue_init(gp_event_queue *self,
                          unsigned int screen_w, unsigned int screen_h,
-                         unsigned int queue_size)
+                         unsigned int queue_size, int flags)
 {
 	self->screen_w = screen_w;
 	self->screen_h = screen_h;
@@ -25,6 +26,9 @@ void gp_event_queue_init(gp_event_queue *self,
 	self->queue_first = 0;
 	self->queue_last = 0;
 	self->queue_size = queue_size ? queue_size : GP_EVENT_QUEUE_SIZE;
+
+	if (flags & GP_EVENT_QUEUE_LOAD_KEYMAP)
+		self->keymap = gp_keymap_load(NULL);
 }
 
 void gp_event_queue_set_screen_size(gp_event_queue *self,
@@ -64,46 +68,6 @@ unsigned int gp_event_queue_events(gp_event_queue *self)
 	return self->queue_size - (self->queue_last - self->queue_first);
 }
 
-static char keys_to_ascii[] = {
-	   0x00, 0x1b,  '1',  '2',  '3',  '4',  '5',  '6',  '7',  '8',
-	    '9',  '0',  '-',  '=', 0x08, '\t',  'q',  'w',  'e',  'r',
-	    't',  'y',  'u',  'i',  'o',  'p',  '[',  ']', '\n', 0x00,
-	    'a',  's',  'd',  'f',  'g',  'h',  'j',  'k',  'l',  ';',
-	   '\'',  '`', 0x00, '\\',  'z',  'x',  'c',  'v',  'b',  'n',
-	    'm',  ',',  '.',  '/', 0x00,  '*', 0x00,  ' ', 0x00, 0x00,
-	   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-	   0x00,  '7',  '8',  '9',  '-',  '4',  '5',  '6',  '+',  '1',
-	    '2',  '3',  '0',  '.'
-};
-
-static char keys_to_ascii_shift[] = {
-	   0x00, 0x1b,  '!',  '@',  '#',  '$',  '%',  '^',  '&',  '*',
-	    '(',  ')',  '_',  '+', 0x08, '\t',  'Q',  'W',  'E',  'R',
-	    'T',  'Y',  'U',  'I',  'O',  'P',  '{',  '}', '\n', 0x00,
-	    'A',  'S',  'D',  'F',  'G',  'H',  'J',  'K',  'L',  ':',
-	    '"',  '~', 0x00,  '|',  'Z',  'X',  'C',  'V',  'B',  'N',
-	    'M',  '<',  '>',  '?', 0x00,  '*', 0x00,  ' ', 0x00, 0x00,
-	   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-	   0x00,  '7',  '8',  '9',  '-',  '4',  '5',  '6',  '+',  '1',
-	    '2',  '3',  '0',  '.'
-};
-
-static void key_to_ascii(gp_event_queue *self, gp_event *ev)
-{
-	unsigned int key = ev->key.key;
-
-	ev->key.ascii = 0;
-
-	if (gp_events_state_pressed(&self->state, GP_KEY_LEFT_SHIFT) ||
-	    gp_events_state_pressed(&self->state, GP_KEY_RIGHT_SHIFT)) {
-		if (ev->key.key < sizeof(keys_to_ascii_shift))
-			ev->key.ascii = keys_to_ascii_shift[key];
-	} else {
-		if (ev->key.key < sizeof(keys_to_ascii))
-			ev->key.ascii = keys_to_ascii[key];
-	}
-}
-
 static uint32_t clip_rel(uint32_t val, uint32_t max, int32_t rel)
 {
 	if (rel < 0) {
@@ -140,7 +104,8 @@ gp_event *gp_event_queue_get(gp_event_queue *self)
 		break;
 		}
 
-		key_to_ascii(self, ev);
+		// TODO: Add queue keymap
+		//key_to_ascii(self, ev);
 	break;
 	case GP_EV_REL:
 		/* Move the global cursor */
@@ -285,7 +250,8 @@ void gp_event_queue_push_abs(gp_event_queue *self,
 }
 
 void gp_event_queue_push_key(gp_event_queue *self,
-                             uint32_t key, uint8_t code, struct timeval *time)
+                             uint32_t key, uint8_t code,
+			     struct timeval *time)
 {
 	switch (code) {
 	case GP_EV_KEY_UP:
@@ -302,7 +268,26 @@ void gp_event_queue_push_key(gp_event_queue *self,
 	gp_event ev = {
 		.type = GP_EV_KEY,
 		.code = code,
-		.key = {.key = key},
+		.key = {.key = key}
+	};
+
+	set_time(&ev, time);
+
+	int dead_key = 0;
+
+	if (self->keymap)
+		dead_key = gp_keymap_event_key(self->keymap, self, &ev);
+
+	if (!dead_key)
+		event_put(self, &ev);
+}
+
+void gp_event_queue_push_utf(gp_event_queue *self, uint32_t utf_ch,
+                             struct timeval *time)
+{
+	gp_event ev = {
+		.type = GP_EV_UTF,
+		.utf = {.ch = utf_ch}
 	};
 
 	set_time(&ev, time);

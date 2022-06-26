@@ -1,7 +1,7 @@
 //SPDX-License-Identifier: LGPL-2.0-or-later
 /*
 
-  Copyright (C) 2020 Cyril Hrubis <metan@ucw.cz>
+  Copyright (C) 2022 Cyril Hrubis <metan@ucw.cz>
 
 */
 
@@ -9,6 +9,7 @@
 #define GP_VEC_STR_H
 
 #include <string.h>
+#include <utils/gp_utf.h>
 #include <utils/gp_vec.h>
 
 /*
@@ -123,6 +124,18 @@ static inline char *gp_vec_chins(char *self, size_t off, char ch)
 		return NULL;
 
 	ret[off] = ch;
+
+	return ret;
+}
+
+static inline char *gp_vec_ins_utf8(char *self, size_t off, uint32_t unicode)
+{
+	char *ret = gp_vec_ins(self, off, gp_utf8_bytes(unicode));
+
+	if (!ret)
+		return NULL;
+
+	gp_to_utf8(unicode, ret+off);
 
 	return ret;
 }

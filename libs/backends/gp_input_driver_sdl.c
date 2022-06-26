@@ -133,6 +133,11 @@ void gp_input_driver_sdl_event_put(gp_event_queue *event_queue, SDL_Event *ev)
 		}
 
 		gp_event_queue_push_key(event_queue, key, ev->key.state, NULL);
+
+#if LIBSDL_VERSION == 1
+		if (ev->key.keysym.unicode >= 0x20)
+			gp_event_queue_push_utf(event_queue, ev->key.keysym.unicode, NULL);
+#endif
 	break;
 #if LIBSDL_VERSION == 1
 	case SDL_VIDEORESIZE:

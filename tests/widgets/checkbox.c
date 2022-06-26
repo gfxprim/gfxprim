@@ -110,7 +110,7 @@ static int checkbox_event_key(void)
 
 	chbox = gp_widget_checkbox_new(NULL, 0, ev_handler, &flag);
 
-	send_keypress(chbox, GP_KEY_ENTER, '\n');
+	send_keypress(chbox, GP_KEY_ENTER);
 
 	if (!flag) {
 		tst_msg("Did not get event!");

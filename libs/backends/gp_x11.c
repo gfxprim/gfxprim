@@ -18,6 +18,7 @@
 #include <X11/Xutil.h>
 #include <X11/Xatom.h>
 #include <X11/Xmd.h>
+#include <X11/Xlocale.h>
 
 #ifdef HAVE_X_SHM
 #include <sys/ipc.h>
@@ -164,7 +165,7 @@ static void x11_ev(XEvent *ev)
 	/* fallthrough */
 	default:
 		//TODO: More accurate window w and h?
-		x11_input_event_put(&self->event_queue, ev,
+		x11_input_event_put(&self->event_queue, ev, win,
 		                    self->pixmap->w, self->pixmap->h);
 	break;
 	}
@@ -627,7 +628,7 @@ gp_backend *gp_x11_init(const char *display, int x, int y,
 		x11_win_fullscreen(win, 1);
 
 	/* Init the event queue, once we know the window size */
-	gp_event_queue_init(&backend->event_queue, wreq.w, wreq.h, 0);
+	gp_event_queue_init(&backend->event_queue, wreq.w, wreq.h, 0, 0);
 
 	backend->pixmap = NULL;
 

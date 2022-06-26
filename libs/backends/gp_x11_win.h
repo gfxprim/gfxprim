@@ -18,6 +18,10 @@ struct x11_win {
 	/* X11 Window */
 	Window win;
 
+	/* Unicode input */
+	XIM xim;
+	XIC xic;
+
 	/* Image info SHM or XImage */
 	XImage *img;
 
@@ -167,6 +171,9 @@ static void x11_get_screen_size(struct x11_wreq *wreq)
 	wreq->w = DisplayWidth(wreq->win->dpy, wreq->win->scr);
 	wreq->h = DisplayHeight(wreq->win->dpy, wreq->win->scr);
 }
+
+static void x11_input_init_im(struct x11_win *win);
+static void x11_input_exit_im(struct x11_win *win);
 
 static int x11_win_open(struct x11_wreq *wreq)
 {
@@ -372,6 +379,8 @@ static int x11_win_open(struct x11_wreq *wreq)
 	/* Make the window close button send event */
 	XSetWMProtocols(win->dpy, win->win, &x11_conn.A_WM_DELETE_WINDOW, 1);
 
+	x11_input_init_im(win);
+
 	win_list_add(win);
 
 	/* Show window */
@@ -383,6 +392,8 @@ static int x11_win_open(struct x11_wreq *wreq)
 static void x11_win_close(struct x11_win *win)
 {
 	GP_DEBUG(1, "Closing window");
+
+	x11_input_exit_im(win);
 
 	XLockDisplay(win->dpy);
 

@@ -43,7 +43,7 @@ static int button_event_key(void)
 
 	button = gp_widget_button_new("Button", 0, ev_handler, &flag);
 
-	send_keypress(button, GP_KEY_ENTER, '\n');
+	send_keypress(button, GP_KEY_ENTER);
 
 	if (!flag) {
 		tst_msg("Did not get event!");

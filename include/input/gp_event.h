@@ -28,7 +28,8 @@ enum gp_event_type {
 	GP_EV_ABS = 3, /* absolute event */
 	GP_EV_SYS = 4, /* system events window close, resize... */
 	GP_EV_TMR = 5, /* timer expired event */
-	GP_EV_MAX = 5, /* maximum, greater values are free */
+	GP_EV_UTF = 6, /* unicode character typed on a keyboard */
+	GP_EV_MAX = 6, /* maximum, greater values are free */
 };
 
 enum gp_event_key_code {
@@ -66,11 +67,14 @@ struct gp_ev_pos_abs {
 
 struct gp_ev_key {
 	uint32_t key;
-	char ascii;
 };
 
 struct gp_ev_sys {
 	uint32_t w, h;
+};
+
+struct gp_ev_utf {
+	uint32_t ch;
 };
 
 #define GP_EVENT_KEY_BITMAP_BYTES 56
@@ -99,6 +103,7 @@ struct gp_event {
 		struct gp_ev_pos_abs abs;
 		/* system event */
 		struct gp_ev_sys sys;
+		struct gp_ev_utf utf;
 		/* timer event */
 		gp_timer *tmr;
 	};

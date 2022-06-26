@@ -3,6 +3,7 @@
  * Copyright (C) 2009-2013 Cyril Hrubis <metan@ucw.cz>
  */
 
+#include <string.h>
 #include <errno.h>
 
 #include <core/gp_debug.h>
@@ -238,7 +239,7 @@ gp_backend *gp_aalib_init(void)
 	backend->wait = aalib_wait;
 	backend->exit = aalib_exit;
 	backend->fd = -1;
-	gp_event_queue_init(&backend->event_queue, w, h, 0);
+	gp_event_queue_init(&backend->event_queue, w, h, 0, GP_EVENT_QUEUE_LOAD_KEYMAP);
 
 	return backend;
 err2:
