@@ -12,6 +12,7 @@
 #include <stdarg.h>
 #include <stdint.h>
 
+#include <utils/gp_utf.h>
 #include <utils/gp_json.h>
 
 static inline int buf_empty(struct gp_json_buf *buf)
@@ -122,47 +123,6 @@ err:
 	return -1;
 }
 
-static unsigned int utf8_bytes(uint32_t ucode_cp)
-{
-	if (ucode_cp < 0x0080)
-		return 1;
-
-	if (ucode_cp < 0x0800)
-		return 2;
-
-	if (ucode_cp < 0x10000)
-		return 3;
-
-	return 4;
-}
-
-static int to_utf8(uint32_t ucode_cp, char *buf)
-{
-	if (ucode_cp < 0x0080) {
-		buf[0] = ucode_cp & 0x00f7;
-		return 1;
-	}
-
-	if (ucode_cp < 0x0800) {
-		buf[0] = 0xc0 | (0x1f & (ucode_cp>>6));
-		buf[1] = 0x80 | (0x3f & ucode_cp);
-		return 2;
-	}
-
-	if (ucode_cp < 0x10000) {
-		buf[0] = 0xe0 | (0x0f & (ucode_cp>>12));
-		buf[1] = 0x80 | (0x3f & (ucode_cp>>6));
-		buf[2] = 0x80 | (0x3f & ucode_cp);
-		return 3;
-	}
-
-	buf[0] = 0xf0 | (0x07 & (ucode_cp>>18));
-	buf[1] = 0x80 | (0x3f & (ucode_cp>>12));
-	buf[2] = 0x80 | (0x3f & (ucode_cp>>6));
-	buf[3] = 0x80 | (0x3f & ucode_cp);
-	return 4;
-}
-
 static unsigned int parse_ucode_esc(struct gp_json_buf *buf, char *str,
                                     size_t off, size_t len)
 {
@@ -174,12 +134,12 @@ static unsigned int parse_ucode_esc(struct gp_json_buf *buf, char *str,
 	if (!str)
 		return ucode;
 
-	if (utf8_bytes(ucode) + 1 >= len - off) {
+	if (gp_utf8_bytes(ucode) + 1 >= len - off) {
 		gp_json_err(buf, "String buffer too short!");
 		return 0;
 	}
 
-	return to_utf8(ucode, str+off);
+	return gp_to_utf8(ucode, str+off);
 }
 
 static int copy_str(struct gp_json_buf *buf, char *str, size_t len)

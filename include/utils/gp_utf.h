@@ -93,6 +93,60 @@ int8_t gp_utf8_prev_chsz(const char *str, size_t off);
 size_t gp_utf8_strlen(const char *str);
 
 /**
+ * @unicode A unicode character.
+ * @return Number of utf8 bytes required to store a unicode character.
+ */
+static inline unsigned int gp_utf8_bytes(uint32_t unicode)
+{
+	if (unicode < 0x0080)
+		return 1;
+
+	if (unicode < 0x0800)
+		return 2;
+
+	if (unicode < 0x10000)
+		return 3;
+
+	return 4;
+}
+
+/**
+ * Writes an unicode characters into a byte buffer.
+ *
+ * The buffer _must_ be large enough!
+ *
+ * @unicode A unicode character.
+ * @buf A byte buffer.
+ * @return A number of bytes written.
+ */
+static inline int gp_to_utf8(uint32_t unicode, char *buf)
+{
+	if (unicode < 0x0080) {
+		buf[0] = unicode & 0x007f;
+		return 1;
+	}
+
+	if (unicode < 0x0800) {
+		buf[0] = 0xc0 | (0x1f & (unicode>>6));
+		buf[1] = 0x80 | (0x3f & unicode);
+		return 2;
+	}
+
+	if (unicode < 0x10000) {
+		buf[0] = 0xe0 | (0x0f & (unicode>>12));
+		buf[1] = 0x80 | (0x3f & (unicode>>6));
+		buf[2] = 0x80 | (0x3f & unicode);
+		return 3;
+	}
+
+	buf[0] = 0xf0 | (0x07 & (unicode>>18));
+	buf[1] = 0x80 | (0x3f & (unicode>>12));
+	buf[2] = 0x80 | (0x3f & (unicode>>6));
+	buf[3] = 0x80 | (0x3f & unicode);
+	return 4;
+}
+
+/**
  * Attempts to strip diacritics and replace symbols with a similar meaning which
  * produces text that can be stil readable even with ascii only font.
  *
