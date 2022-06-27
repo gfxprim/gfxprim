@@ -116,6 +116,16 @@ size_t gp_widget_choice_sel_get(gp_widget *self);
 const char *gp_widget_choice_name_get(gp_widget *self, size_t idx);
 
 /**
+ * @brief Returns name of selected choice.
+ *
+ * @self A choice widget.
+ */
+static inline const char *gp_widget_choice_sel_name_get(gp_widget *self)
+{
+	return gp_widget_choice_name_get(self, gp_widget_choice_sel_get(self));
+}
+
+/**
  * @brief Parses JSON into a choice widget.
  *
  * @widget_type A widget type.
