@@ -201,6 +201,29 @@ static int8_t default_console_glyphs[] = {
 			0x32, 0x4c, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 };
 
+static int8_t default_glyphs_extra1[] = {
+	/* 0x00b0 */	7, 11, 0, 9, 8, /* console */
+			0x18, 0x24, 0x24, 0x18, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+	/* 0x00b0 */	4, 11, 0, 9, 5, /* proportional */
+			0x60, 0x90, 0x90, 0x60, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+	/* 0x00b1 */	7, 11, 0, 9, 8, /* both */
+			0x00, 0x10, 0x10, 0x10, 0xfe, 0x10, 0x10, 0x10, 0xfe, 0x00, 0x00,
+	/* 0x00d7 */	7, 11, 0, 9, 8, /* console */
+			0x00, 0x00, 0x44, 0x28, 0x10, 0x28, 0x44, 0x00, 0x00, 0x00, 0x00,
+	/* 0x00d7 */	6, 11, 0, 9, 7, /* proportional */
+			0x00, 0x00, 0x84, 0x48, 0x30, 0x48, 0x84, 0x00, 0x00, 0x00, 0x00,
+	/* 0x00f7 */	7, 11, 0, 9, 8, /* both */
+			0x00, 0x00, 0x10, 0x00, 0xfe, 0x00, 0x10, 0x00, 0x00, 0x00, 0x00,
+};
+
+static gp_glyph_offset default_console_extra1_offsets[] = {
+	0x0000, 0x0020,
+};
+
+static gp_glyph_offset default_proportional_extra1_offsets[] = {
+	0x0010, 0x0020,
+};
+
 const struct gp_font_face gp_default_font = {
 	.family_name = "gfxprim",
 	.style = GP_FONT_MONO,
@@ -209,12 +232,29 @@ const struct gp_font_face gp_default_font = {
 	.max_glyph_width = 8,
 	.max_glyph_advance = 8,
 	.glyph_bitmap_format = GP_FONT_BITMAP_1BPP,
+	.glyph_tables = 4,
 	.glyphs = {
 		{
 			.min_glyph = 0x20,
 			.max_glyph = 0x7f,
 			.glyphs = default_console_glyphs,
 			.offset = 16,
+		},
+		{
+			.min_glyph = 0xb0,
+			.max_glyph = 0xb1,
+			.glyphs = default_glyphs_extra1,
+			.offsets = default_console_extra1_offsets,
+		},
+		{
+			.min_glyph = 0xd7,
+			.max_glyph = 0xd7,
+			.glyphs = &default_glyphs_extra1[0x0030],
+		},
+		{
+			.min_glyph = 0xf7,
+			.max_glyph = 0xf7,
+			.glyphs = &default_glyphs_extra1[0x0050],
 		}
 	}
 };
@@ -420,12 +460,29 @@ static struct gp_font_face font_gfxprim = {
 	.max_glyph_width = 9,
 	.max_glyph_advance = 9,
 	.glyph_bitmap_format = GP_FONT_BITMAP_1BPP,
+	.glyph_tables = 4,
 	.glyphs = {
 		{
 			.min_glyph = 0x20,
 			.max_glyph = 0x7f,
 			.glyphs = default_proportional_glyphs,
 			.offset = 16,
+		},
+		{
+			.min_glyph = 0xb0,
+			.max_glyph = 0xb1,
+			.glyphs = default_glyphs_extra1,
+			.offsets = default_proportional_extra1_offsets,
+		},
+		{
+			.min_glyph = 0xd7,
+			.max_glyph = 0xd7,
+			.glyphs = &default_glyphs_extra1[0x0040],
+		},
+		{
+			.min_glyph = 0xf7,
+			.max_glyph = 0xf7,
+			.glyphs = &default_glyphs_extra1[0x0050],
 		}
 	}
 };
