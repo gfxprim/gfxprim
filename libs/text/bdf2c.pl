@@ -344,6 +344,13 @@ sub utf_to_iso8859_2
 	return -1;
 }
 
+sub utf_to_utf
+{
+	my ($utf) = @_;
+
+	return $utf;
+}
+
 sub convert_font
 {
 	my ($font, $name, $bold) = @_;
@@ -355,6 +362,7 @@ sub convert_font
 	my $last = 0x7f;
 
 	$last = 0xff if ($enc eq "iso8859-2");
+	$last = 0x17e if ($enc eq "ISO10646-1");
 	for (my $i = 0x20; $i <= $last; $i++) {
 		my $glyph = $glyphs->[$i];
 
@@ -367,7 +375,11 @@ sub convert_font
 	gen_glyph_table($glyphs, 0x20, 0x7e, $max_width, $font_id, $bold);
 
 	if ($enc eq "iso8859-2") {
-		gen_glyph_table($glyphs, 0xa4, 0x17e, $max_width, $font_id . "_latin_ext", $bold, \&utf_to_iso8859_2);
+		gen_glyph_table($glyphs, 0xa1, 0x17e, $max_width, $font_id . "_latin_ext", $bold, \&utf_to_iso8859_2);
+	}
+
+	if ($enc eq "ISO10646-1") {
+		gen_glyph_table($glyphs, 0xa1, 0x17e, $max_width, $font_id . "_latin_ext", $bold, \&utf_to_utf);
 	}
 
 	print("static struct gp_font_face $font_id = {\n");
@@ -381,7 +393,7 @@ sub convert_font
 
 	my $glyph_tables = 1;
 
-	$glyph_tables = 2 if ($enc eq "iso8859-2");
+	$glyph_tables = 2 if ($enc eq "iso8859-2" || $enc eq "ISO10646-1");
 
 	printf("\t.ascend = %i,\n", $font->{'ascend'});
 	printf("\t.descend = %i,\n", $font->{'descent'});
@@ -395,11 +407,11 @@ sub convert_font
 	print("\t\t\t.min_glyph = 0x20,\n");
 	print("\t\t\t.max_glyph = 0x7f,\n");
 	print("\t\t},\n");
-	if ($enc eq "iso8859-2") {
+	if ($enc eq "iso8859-2" || $enc eq "ISO10646-1") {
 		print("\t\t{\n");
 		print("\t\t\t.glyphs = ${font_id}_latin_ext_glyphs,\n");
 		print("\t\t\t.offsets = ${font_id}_latin_ext_offsets,\n");
-		print("\t\t\t.min_glyph = 0xa4,\n");
+		print("\t\t\t.min_glyph = 0xa1,\n");
 		print("\t\t\t.max_glyph = 0x17e,\n");
 		print("\t\t},\n");
 	}
