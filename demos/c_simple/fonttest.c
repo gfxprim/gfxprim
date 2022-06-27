@@ -25,7 +25,7 @@ static const char *test_strings[] = {
 	"ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`",
 	"abcdefghijklmnopqrstuvwxyz{|}~",
 	"Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor...",
-	"\u010cesk\u00e9 znaky \u00e1\u00e9\u011b\u00ed\u00fd\u00f3\u00fa\u016f\u017e\u0161\u010d\u0159\u010f\u0165\u0148",
+	"\u010cesk\u00e9 znaky \u00e1\u00e9\u011b\u00ed\u00fd\u00f3\u00fa\u016f\u017e\u0161\u010d\u0159\u010f\u0165\u0148 | \u00b110\u00b0C | 105\u00a5 | \u00c6on",
 };
 
 static int tracking = 0;
