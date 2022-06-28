@@ -16,6 +16,11 @@
 #include <utils/gp_types.h>
 #include <input/gp_types.h>
 
+/*
+ * Return this value from the callback to stop a periodical timer.
+ */
+#define GP_TIMER_PERIOD_STOP UINT32_MAX
+
 struct gp_timer {
 	gp_heap_head heap;
 

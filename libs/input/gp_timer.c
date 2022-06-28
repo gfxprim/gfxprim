@@ -90,8 +90,14 @@ static gp_timer *process_top(gp_timer *queue, uint64_t now)
 	period = timer->period;
 	ret = timer->callback(timer);
 
-	if (period)
-		ret = period;
+	if (period) {
+		if (ret == GP_TIMER_PERIOD_STOP) {
+			GP_DEBUG(3, "Disarming periodic timer %s", timer->id);
+			ret = 0;
+		} else {
+			ret = period;
+		}
+	}
 
 	if (ret) {
 		timer->expires = now + ret;
