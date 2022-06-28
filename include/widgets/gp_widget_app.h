@@ -44,7 +44,7 @@ gp_widget *gp_app_layout_fragment_load(const char *app_name,
  *
  * @handler An pointer to application event handler or NULL to disable it.
  */
-void gp_app_event_handler_set(int (*on_event)(gp_widget_event *ev));
+void gp_app_on_event_set(int (*on_event)(gp_widget_event *ev));
 
 #define GP_APP_DEFAULT_EVENT_MASK ( \
 	(1<<GP_WIDGET_EVENT_FREE)   \

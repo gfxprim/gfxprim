@@ -96,7 +96,7 @@ void gp_app_event_unmask(enum gp_widget_event_type ev_type)
 	app.ev_mask |= ev_type;
 }
 
-void gp_app_event_handler_set(int (*on_event)(gp_widget_event *ev))
+void gp_app_on_event_set(int (*on_event)(gp_widget_event *ev))
 {
 	app.on_event = on_event;
 }
