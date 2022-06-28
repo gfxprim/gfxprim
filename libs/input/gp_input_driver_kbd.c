@@ -23,7 +23,7 @@ static uint16_t keycode_table[] = {
 	GP_KEY_K,          GP_KEY_L,           GP_KEY_SEMICOLON,   GP_KEY_APOSTROPHE,
 	GP_KEY_GRAVE,      GP_KEY_LEFT_SHIFT,  GP_KEY_BACKSLASH,   GP_KEY_Z,
 	GP_KEY_X,          GP_KEY_C,           GP_KEY_V,           GP_KEY_B,
-	GP_KEY_N,          GP_KEY_M,           GP_KEY_COMMA,       0,
+	GP_KEY_N,          GP_KEY_M,           GP_KEY_COMMA,       GP_KEY_DOT,
 	GP_KEY_SLASH,      GP_KEY_RIGHT_SHIFT, GP_KEY_KP_ASTERISK, GP_KEY_LEFT_ALT,
 	GP_KEY_SPACE,      GP_KEY_CAPS_LOCK,   GP_KEY_F1,          GP_KEY_F2,
 	GP_KEY_F3,         GP_KEY_F4,          GP_KEY_F5,          GP_KEY_F6,
