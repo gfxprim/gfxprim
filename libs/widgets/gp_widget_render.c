@@ -74,6 +74,7 @@ struct gp_widget_render_ctx __attribute__((visibility ("hidden"))) ctx = {
 	.font_mono_bold = &font_mono_bold,
 	.padd = 4,
 	.dclick_ms = 500,
+	.color_scheme = GP_WIDGET_COLOR_SCHEME_DEFAULT,
 };
 
 static int font_size = 16;
@@ -364,8 +365,6 @@ void gp_widgets_layout_init(gp_widget *layout, const char *win_tittle)
 	ctx.buf = backend->pixmap;
 	ctx.pixel_type = backend->pixmap->pixel_type;
 
-	ctx.color_scheme = GP_WIDGET_COLOR_SCHEME_DEFAULT;
-
 	widgets_color_scheme_load();
 
 	gp_widget_calc_size(layout, &ctx, 0, 0, 1);
@@ -556,6 +555,7 @@ static void print_options(int exit_val)
 	printf("\t-b backend init string (pass -b help for options)\n");
 	printf("\t-f uint\n\t\tsets the true-type font size\n");
 	printf("\t-F font\n\t\tsets compiled-in font\n");
+	printf("\t-s color_scheme\n\t\tlight or dark\n");
 	printf("\t\tAvailable fonts:\n");
 
 	GP_FONT_FAMILY_FOREACH(&i, f)
@@ -569,7 +569,7 @@ void gp_widgets_getopt(int *argc, char **argv[])
 {
 	int opt;
 
-	while ((opt = getopt(*argc, *argv, "b:f:F:hi:")) != -1) {
+	while ((opt = getopt(*argc, *argv, "b:f:F:hi:s:")) != -1) {
 		switch (opt) {
 		case 'b':
 			backend_init_str = optarg;
@@ -582,6 +582,17 @@ void gp_widgets_getopt(int *argc, char **argv[])
 		break;
 		case 'F':
 			font_family = optarg;
+		break;
+		case 's':
+			if (!strcmp(optarg, "dark")) {
+				ctx.color_scheme = GP_WIDGET_COLOR_SCHEME_DARK;
+			} else if (!strcmp(optarg, "light")) {
+				ctx.color_scheme = GP_WIDGET_COLOR_SCHEME_LIGHT;
+			} else {
+				printf("Invalid color scheme '%s'!\n\n", optarg);
+				print_options(1);
+			}
+
 		break;
 		case 'i':
 			input_str = optarg;
