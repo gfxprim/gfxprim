@@ -47,6 +47,7 @@ struct gp_widget_tbox {
 	uint16_t type;
 
 	uint16_t alert:1;
+	uint16_t clear_on_input:1;
 
 	size_t max_size;
 	size_t cur_pos;
@@ -312,5 +313,12 @@ void gp_widget_tbox_sel_delim_set(gp_widget *self, const char *delim);
  * @type A tbox type.
  */
 void gp_widget_tbox_type_set(gp_widget *self, enum gp_widget_tbox_type type);
+
+/**
+ * @brief Sets one time flag that clears the text on next input event.
+ *
+ * @self A tbox widget.
+ */
+void gp_widget_tbox_clear_on_input(gp_widget *self);
 
 #endif /* GP_WIDGET_TBOX_H */

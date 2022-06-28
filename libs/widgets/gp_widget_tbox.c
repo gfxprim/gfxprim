@@ -647,6 +647,14 @@ static int mouse_drag(gp_widget *self, const gp_widget_render_ctx *ctx, gp_event
 	return 1;
 }
 
+static void clear_on_input(gp_widget *self)
+{
+	if (self->tbox->clear_on_input) {
+		self->tbox->clear_on_input = 0;
+		gp_widget_tbox_clear(self);
+	}
+}
+
 static int event(gp_widget *self, const gp_widget_render_ctx *ctx, gp_event *ev)
 {
 	(void)ctx;
@@ -657,6 +665,8 @@ static int event(gp_widget *self, const gp_widget_render_ctx *ctx, gp_event *ev)
 	case GP_EV_KEY:
 		if (ev->code == GP_EV_KEY_UP)
 			return 0;
+
+		clear_on_input(self);
 
 		switch (ev->val) {
 		case GP_KEY_ENTER:
@@ -744,6 +754,7 @@ static int event(gp_widget *self, const gp_widget_render_ctx *ctx, gp_event *ev)
 		return mouse_drag(self, ctx, ev);
 	break;
 	case GP_EV_UTF:
+		clear_on_input(self);
 		utf_key(self, ev->utf.ch);
 		return 1;
 	break;
@@ -1215,4 +1226,10 @@ void gp_widget_tbox_type_set(gp_widget *self, enum gp_widget_tbox_type type)
 	GP_WIDGET_ASSERT(self, GP_WIDGET_TBOX, );
 
 	set_type(self, type);
+}
+
+void gp_widget_tbox_clear_on_input(gp_widget *self)
+{
+	GP_WIDGET_ASSERT(self, GP_WIDGET_TBOX, );
+	self->tbox->clear_on_input = 1;
 }
