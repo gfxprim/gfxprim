@@ -66,3 +66,14 @@ void gp_widget_event_dump(gp_widget_event *ev)
 	break;
 	}
 }
+
+int gp_widget_input_inject(gp_widget *self, gp_widget_event *ev)
+{
+	if (ev->type != GP_WIDGET_EVENT_INPUT)
+		return 0;
+
+	if (ev->input_ev->type == GP_EV_REL || ev->input_ev->type == GP_EV_ABS)
+		return 0;
+
+	return gp_widget_ops_event(self, gp_widgets_render_ctx(), ev->input_ev);
+}

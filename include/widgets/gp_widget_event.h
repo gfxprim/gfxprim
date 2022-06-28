@@ -167,4 +167,21 @@ static inline int gp_widget_send_widget_event(gp_widget *self,
 	return self->on_event(&ev);
 }
 
+/**
+ * @brief A helper function to inject key and utf input events to a widget.
+ *
+ * This function takes a widget event and if the event type is
+ * GP_WIDGET_EVENT_INPUT the input event is injected to the widget input event
+ * handler, i.e. the widget will get the input as if it was focused.
+ *
+ * This of course works only for key presses and unicode input events as
+ * relative or absolute coordinates are normalized as events pass down the
+ * widget tree, i.e. for any event widget receives the widget top level corner
+ * has coordinate [0,0]. Hence these kinds of events are not injected.
+ *
+ * @self A widget to inject the input event to.
+ * @ev A widget event.
+ */
+int gp_widget_input_inject(gp_widget *self, gp_widget_event *ev);
+
 #endif /* GP_WIDGET_EVENT_H */

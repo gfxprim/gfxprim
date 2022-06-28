@@ -91,6 +91,27 @@ important. If input event was used by the handler it should return 1 and zero
 should be returned otherwise, so that the library knows if the event should be
 propagated to the upper layers or not.
 
+.Input event injection
+[source,c]
+-------------------------------------------------------------------------------
+int gp_widget_input_inject(gp_widget *self, gp_widget_event *ev);
+-------------------------------------------------------------------------------
+
+This function takes a widget event and if the event type is
+'GP_WIDGET_EVENT_INPUT' the input event is injected to the widget input event
+handler, i.e. the widget will get the input (e.g. keypresses) as if it was
+focused.
+
+This is useful in cases where we want to redirect unhandled input events to a
+specifid widget as a shorcut. For example when we have a file open dialog any
+text we type that is not processes by curently focused widget is redirected to
+the filter textbox.
+
+This of course works only for key presses and unicode input events as
+relative or absolute coordinates are normalized as events pass down the
+widget tree, i.e. for any event widget receives the widget top level corner
+has coordinate [0,0]. Hence these kinds of events are not injected.
+
 Application events
 ------------------
 
@@ -107,7 +128,7 @@ application events.
 
 The `ev->self` will be set to NULL for all application events.
 
-.Functions to manipulate widget event mask
+.Functions to manipulate app event mask
 [source,c]
 -------------------------------------------------------------------------------
 void gp_app_event_mask(enum gp_widget_event_type ev_type);
