@@ -50,9 +50,8 @@ static void render(gp_widget *self, const gp_offset *offset,
 	gp_fill_rrect_xywh(ctx->buf, x, y, w, h, ctx->bg_color, ctx->fg_color, ctx->text_color);
 
 	/* Figure out how many lines we can fit into the box first */
-	size_t box_lines = (h - ctx->padd) / (gp_text_avg_width(font, 1) + ctx->padd);
+	size_t box_lines = (h - ctx->padd) / line_h;
 	size_t logs = gp_vec_len(log->logs);
-
 	size_t cur_str = logs;
 	size_t cur_line = 0;
 
@@ -63,7 +62,7 @@ static void render(gp_widget *self, const gp_offset *offset,
 		if (!cur_str)
 			break;
 
-		if (cur_line+1 >= box_lines)
+		if (cur_line >= box_lines)
 			break;
 
 		cur_str--;
@@ -71,7 +70,7 @@ static void render(gp_widget *self, const gp_offset *offset,
 		const char *text = log->logs[cur_str];
 
 		size_t str_width = gp_text_wbbox(font, text);
-		size_t lines_per_str = str_width / line_w + !!(str_width % line_w);
+		size_t lines_per_str = GP_MAX((size_t)1, str_width / line_w + !!(str_width % line_w));
 
 		cur_line += lines_per_str;
 	}
