@@ -430,7 +430,7 @@ static int file_open_input_event(gp_dialog *self, gp_event *ev)
 		return 1;
 	}
 
-	if (ev->type == GP_EV_KEY)
+	if (ev->type == GP_EV_UTF)
 		return gp_widget_ops_event(dialog->filter, gp_widgets_render_ctx(), ev);
 
 	return 0;
