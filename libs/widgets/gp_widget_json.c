@@ -522,8 +522,6 @@ gp_widget *gp_widget_layout_json(const char *path,
 		return NULL;
 	}
 
-	json->msgf = stderr;
-
 	ret = gp_widgets_from_json(json, callbacks, uids);
 	if (gp_json_is_err(json))
 		gp_json_err_print(json);
@@ -546,7 +544,6 @@ gp_widget *gp_widget_from_json_str(const char *str,
 		.json = str,
 		.len = strlen(str),
 		.max_depth = GP_JSON_RECURSION_MAX,
-		.msgf = stderr,
 	};
 
 	if (uids)

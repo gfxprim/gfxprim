@@ -24,7 +24,9 @@ enum gp_json_type {
 	GP_JSON_ARR,
 };
 
-typedef struct gp_json_buf {
+typedef struct gp_json_buf gp_json_buf;
+
+struct gp_json_buf {
 	/** Pointer to a null terminated JSON string */
 	const char *json;
 	/** A length of the JSON string */
@@ -38,12 +40,13 @@ typedef struct gp_json_buf {
 	/** Maximal recursion depth */
 	unsigned int max_depth;
 
-	/** Where to print errors and warnings */
-	FILE *msgf;
+	/** Handler to print errors and warnings */
+	void (*print)(void *print_priv, const char *line);
+	void *print_priv;
 
 	char err[GP_JSON_ERR_MAX];
 	char buf[];
-} gp_json_buf;
+};
 
 typedef struct gp_json_val {
 	enum gp_json_type type;
@@ -67,6 +70,14 @@ typedef struct gp_json_val {
 	/** An ID for object values */
 	char id[GP_JSON_ID_MAX];
 } gp_json_val;
+
+/**
+ * @brief default error print handler
+ *
+ * @print_priv A json buffer print_priv pointer.
+ * @line A line of output to be printed
+ */
+void gp_json_print(void *print_priv, const char *line);
 
 /*
  * @brief Returns type name.

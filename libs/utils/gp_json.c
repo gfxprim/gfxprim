@@ -872,24 +872,57 @@ void gp_json_err(struct gp_json_buf *buf, const char *fmt, ...)
 	va_end(va);
 }
 
-static void print_line(FILE *f, const char *line)
+static void vprintf_line(gp_json_buf *buf, const char *fmt, va_list va)
 {
-	while (*line && *line != '\n')
-		fputc(*(line++), f);
+	char line[GP_JSON_ERR_MAX+1];
+
+	vsnprintf(line, sizeof(line), fmt, va);
+
+	line[GP_JSON_ERR_MAX] = 0;
+
+	buf->print(buf->print_priv, line);
 }
 
-static void print_spaces(FILE *f, size_t count)
+static void printf_line(gp_json_buf *buf, const char *fmt, ...)
 {
-	while (count--)
-		fputc(' ', f);
+	va_list va;
+
+	va_start(va, fmt);
+	vprintf_line(buf, fmt, va);
+	va_end(va);
 }
 
-static void print_spaceline(FILE *f, const char *line, size_t count)
+static void printf_json_line(gp_json_buf *buf, size_t line_nr, const char *buf_pos)
 {
+	char line[GP_JSON_ERR_MAX+1];
+	size_t plen, i;
+
+	plen = sprintf(line, "%03zu: ", line_nr);
+
+	for (i = 0; i < GP_JSON_ERR_MAX-plen && buf_pos[i] && buf_pos[i] != '\n'; i++)
+		line[i+plen] = buf_pos[i];
+
+	line[i+plen] = 0;
+
+	buf->print(buf->print_priv, line);
+}
+
+static void print_arrow(gp_json_buf *buf, const char *buf_pos, size_t count)
+{
+	char line[count + 7];
 	size_t i;
 
+	/* The '000: ' prefix */
+	for (i = 0; i <= 5; i++)
+		line[i] = ' ';
+
 	for (i = 0; i < count; i++)
-		fputc(line[i] == '\t' ? '\t' : ' ', f);
+		line[i+5] = buf_pos[i] == '\t' ? '\t' : ' ';
+
+	line[count+5] = '^';
+	line[count+6] = 0;
+
+	buf->print(buf->print_priv, line);
 }
 
 #define ERR_LINES 10
@@ -917,44 +950,46 @@ static void print_snippet(struct gp_json_buf *buf, const char *type)
 		last_off = buf->off - cur_off;
 	}
 
-	fprintf(buf->msgf, "%s at line %zu\n\n", type, cur_line);
+	printf_line(buf, "%s at line %03zu", type, cur_line);
+	buf->print(buf->print_priv, "");
 
 	size_t idx = 0;
 
 	for (i = MIN(ERR_LINES, cur_line); i > 0; i--) {
 		idx = (cur_line - i) % ERR_LINES;
-		fprintf(buf->msgf, "%03zu: ", cur_line - i + 1);
-		print_line(buf->msgf, lines[idx]);
-		fputc('\n', buf->msgf);
+		printf_json_line(buf, cur_line - i + 1, lines[idx]);
 	}
 
-	print_spaces(buf->msgf, 5);
-	print_spaceline(buf->msgf, lines[idx], last_off);
-	fprintf(buf->msgf, "^\n");
+	print_arrow(buf, lines[idx], last_off);
 }
 
 void gp_json_err_print(struct gp_json_buf *buf)
 {
-	if (!buf->msgf)
+	if (!buf->print)
 		return;
 
 	print_snippet(buf, "Parse error");
-	fprintf(buf->msgf, "%s\n", buf->err);
+	buf->print(buf->print_priv, buf->err);
 }
 
 void gp_json_warn(struct gp_json_buf *buf, const char *fmt, ...)
 {
 	va_list va;
 
-	if (!buf->msgf)
+	if (!buf->print)
 		return;
 
 	print_snippet(buf, "Warning");
 
 	va_start(va, fmt);
-	vfprintf(buf->msgf, fmt, va);
+	vprintf_line(buf, fmt, va);
 	va_end(va);
-	fputc('\n', buf->msgf);
+}
+
+void gp_json_print(void *print_priv, const char *line)
+{
+	fputs(line, print_priv);
+	putc('\n', print_priv);
 }
 
 struct gp_json_buf *gp_json_load(const char *path)
@@ -990,6 +1025,8 @@ struct gp_json_buf *gp_json_load(const char *path)
 	ret->len = len;
 	ret->max_depth = GP_JSON_RECURSION_MAX;
 	ret->json = ret->buf;
+	ret->print = gp_json_print;
+	ret->print_priv = stderr;
 
 	while (off < len) {
 		res = read(fd, ret->buf + off, len - off);
