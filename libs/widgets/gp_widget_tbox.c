@@ -1089,6 +1089,8 @@ void gp_widget_tbox_ins(gp_widget *self, ssize_t off,
 {
 	GP_WIDGET_ASSERT(self, GP_WIDGET_TBOX, );
 
+	clear_on_input(self);
+
 	size_t max_pos = gp_vec_strlen(self->tbox->buf);
 	size_t ins_pos = self->tbox->cur_pos;
 
