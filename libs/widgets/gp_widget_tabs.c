@@ -815,6 +815,37 @@ void gp_widget_tabs_active_set(gp_widget *self, unsigned int tab)
 	set_tab(self, tab);
 }
 
+void gp_widget_tabs_active_set_rel(gp_widget *self, int dir, int wrap_around)
+{
+	GP_WIDGET_ASSERT(self, GP_WIDGET_TABS, );
+
+	if (wrap_around > 1) {
+		GP_BUG("Invalid wrap_around value!");
+		return;
+	}
+
+	int64_t tab = (int64_t)self->tabs->active_tab + dir;
+	int64_t tabs = gp_vec_len(self->tabs->tabs);
+
+	if (tab < 0) {
+		if (wrap_around) {
+			tab %= tabs;
+			tab += tabs;
+		} else {
+			tab = 0;
+		}
+	}
+
+	if (tab >= tabs) {
+		if (wrap_around)
+			tab %= tabs;
+		else
+			tab = tabs - 1;
+	}
+
+	set_tab(self, tab);
+}
+
 static int child_to_tab(gp_widget *self, gp_widget *child)
 {
 	unsigned int i;

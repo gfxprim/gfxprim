@@ -212,6 +212,15 @@ gp_widget *gp_widget_tabs_active_child_get(gp_widget *self);
 void gp_widget_tabs_active_set(gp_widget *self, unsigned int tab);
 
 /**
+ * @brief Set active tab position relative to the currently active tab.
+ *
+ * @self A tabs widget
+ * @dir A direction to go to
+ * @wrap_around Continue to beginning if we reach end and the other way around.
+ */
+void gp_widget_tabs_active_set_rel(gp_widget *self, int dir, int wrap_around);
+
+/**
  * @brief Returns tab idx by child pointer.
  *
  * @self A tabs widget.
@@ -220,7 +229,6 @@ void gp_widget_tabs_active_set(gp_widget *self, unsigned int tab);
  * @return Tab index, if found, -1 otherwise.
  */
 int gp_widget_tabs_tab_by_child(gp_widget *self, gp_widget *child);
-
 
 /**
  * @brief Returns a tab label.
