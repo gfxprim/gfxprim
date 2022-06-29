@@ -11,9 +11,11 @@
 
 struct gp_keymap_us {
 	int (*event_key)(gp_keymap *self, gp_event_queue *queue, gp_event *ev);
-	uint8_t lshift_state;
-	uint8_t rshift_state;
-	uint8_t caps_state;
+	uint8_t lshift_state:1;
+	uint8_t rshift_state:1;
+	uint8_t caps_state:1;
+	uint8_t lctrl_state:1;
+	uint8_t rctrl_state:1;
 };
 
 static char keys_to_ascii[] = {
@@ -48,16 +50,25 @@ static int event_key_us(gp_keymap *self, gp_event_queue *queue, gp_event *ev)
 
 	switch (key) {
 	case GP_KEY_LEFT_SHIFT:
-		keymap_us->lshift_state = ev->code;
+		keymap_us->lshift_state = !!ev->code;
 	break;
 	case GP_KEY_RIGHT_SHIFT:
-		keymap_us->rshift_state = ev->code;
+		keymap_us->rshift_state = !!ev->code;
 	break;
 	case GP_KEY_CAPS_LOCK:
 		if (ev->code == GP_EV_KEY_DOWN)
 			keymap_us->caps_state = !keymap_us->caps_state;
 	break;
+	case GP_KEY_LEFT_CTRL:
+		keymap_us->lctrl_state = !!ev->code;
+	break;
+	case GP_KEY_RIGHT_CTRL:
+		keymap_us->rctrl_state = !!ev->code;
+	break;
 	}
+
+	if (keymap_us->lctrl_state || keymap_us->rctrl_state)
+		return 0;
 
 	if (ev->code != GP_EV_KEY_DOWN)
 		return 0;
