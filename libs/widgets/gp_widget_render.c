@@ -555,13 +555,13 @@ static void print_options(int exit_val)
 	printf("\t-b backend init string (pass -b help for options)\n");
 	printf("\t-f uint\n\t\tsets the true-type font size\n");
 	printf("\t-F font\n\t\tsets compiled-in font\n");
-	printf("\t-s color_scheme\n\t\tlight or dark\n");
 	printf("\t\tAvailable fonts:\n");
 
 	GP_FONT_FAMILY_FOREACH(&i, f)
 		printf("\t\t - %s\n", f->family_name);
 
 	printf("\t-i input_string\n");
+	printf("\t-s color_scheme\n\t\tlight or dark\n");
 	exit(exit_val);
 }
 
