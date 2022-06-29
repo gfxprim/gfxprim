@@ -24,4 +24,18 @@ static inline int gp_widget_key_mod_pressed(gp_event *ev)
 	                                    GP_KEY_LEFT_META, GP_KEY_RIGHT_META);
 }
 
+
+/* If defined widget focus can be moved with arrow keys when any of these keys is pressed */
+#define GP_WIDGET_KEYS_MOD_FOCUS GP_KEY_LEFT_CTRL, GP_KEY_RIGHT_CTRL
+/* Keys to move focus into a specified direction */
+#define GP_WIDGET_KEY_FOCUS_LEFT GP_KEY_LEFT
+#define GP_WIDGET_KEY_FOCUS_RIGHT GP_KEY_RIGHT
+#define GP_WIDGET_KEY_FOCUS_UP GP_KEY_UP
+#define GP_WIDGET_KEY_FOCUS_DOWN GP_KEY_DOWN
+
+/* Key to move focus to a next widget */
+#define GP_WIDGET_KEY_FOCUS_NEXT GP_KEY_TAB
+/* Keys to reverse the direction of previous key if any of these keys is pressed */
+#define GP_WIDGET_KEYS_MOD_FOCUS_PREV GP_KEY_LEFT_SHIFT, GP_KEY_RIGHT_SHIFT
+
 #endif /* GP_WIDGET_KEYS */

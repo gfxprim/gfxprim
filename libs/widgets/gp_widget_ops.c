@@ -14,6 +14,7 @@
 #include <widgets/gp_widget_ops.h>
 #include <widgets/gp_widget_render.h>
 #include <widgets/gp_widget_app.h>
+#include <widgets/gp_widget_keys.h>
 
 extern struct gp_widget_ops gp_widget_grid_ops;
 extern struct gp_widget_ops gp_widget_tabs_ops;
@@ -551,8 +552,8 @@ static int handle_focus(gp_widget *self, const gp_widget_render_ctx *ctx, gp_eve
 			return 0;
 
 		switch (ev->val) {
-		case GP_KEY_TAB:
-			if (gp_event_any_key_pressed(ev, GP_KEY_LEFT_SHIFT, GP_KEY_RIGHT_SHIFT))
+		case GP_WIDGET_KEY_FOCUS_NEXT:
+			if (gp_event_any_key_pressed(ev, GP_WIDGET_KEYS_MOD_FOCUS_PREV))
 				gp_widget_ops_render_focus(self, GP_FOCUS_PREV);
 			else
 				gp_widget_ops_render_focus(self, GP_FOCUS_NEXT);
@@ -564,23 +565,25 @@ static int handle_focus(gp_widget *self, const gp_widget_render_ctx *ctx, gp_eve
 			return 0;
 		}
 
-		if (!gp_event_any_key_pressed(ev, GP_KEY_LEFT_ALT, GP_KEY_RIGHT_ALT))
+#ifdef GP_WIDGET_KEYS_MOD_FOCUS
+		if (!gp_event_any_key_pressed(ev, GP_WIDGET_KEYS_MOD_FOCUS))
 			return 0;
 
 		switch (ev->val) {
-		case GP_KEY_LEFT:
+		case GP_WIDGET_KEY_FOCUS_LEFT:
 			gp_widget_ops_render_focus(self, GP_FOCUS_LEFT);
 			return 1;
-		case GP_KEY_RIGHT:
+		case GP_WIDGET_KEY_FOCUS_RIGHT:
 			gp_widget_ops_render_focus(self, GP_FOCUS_RIGHT);
 			return 1;
-		case GP_KEY_UP:
+		case GP_WIDGET_KEY_FOCUS_UP:
 			gp_widget_ops_render_focus(self, GP_FOCUS_UP);
 			return 1;
-		case GP_KEY_DOWN:
+		case GP_WIDGET_KEY_FOCUS_DOWN:
 			gp_widget_ops_render_focus(self, GP_FOCUS_DOWN);
 			return 1;
 		}
+#endif /* GP_WIDGET_KEYS_MOD_FOCUS */
 	break;
 	case GP_EV_REL:
 		if (ev->code == GP_EV_REL_WHEEL) {
