@@ -2,7 +2,7 @@
 
 /*
 
-   Copyright (c) 2014-2021 Cyril Hrubis <metan@ucw.cz>
+   Copyright (c) 2014-2022 Cyril Hrubis <metan@ucw.cz>
 
  */
 
@@ -365,6 +365,9 @@ static int event(gp_widget *self, const gp_widget_render_ctx *ctx, gp_event *ev)
 	switch (ev->type) {
 	case GP_EV_KEY:
 		if (ev->code == GP_EV_KEY_UP)
+			return 0;
+
+		if (gp_widget_key_mod_pressed(ev))
 			return 0;
 
 		switch (ev->val) {

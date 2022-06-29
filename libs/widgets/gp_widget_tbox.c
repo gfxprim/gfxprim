@@ -668,6 +668,35 @@ static int event(gp_widget *self, const gp_widget_render_ctx *ctx, gp_event *ev)
 
 		clear_on_input(self);
 
+		if (ctrl) {
+			switch (ev->val) {
+			case GP_KEY_A:
+				if (sel_all(self)) {
+					gp_widget_redraw(self);
+					return 1;
+				}
+			break;
+			case GP_KEY_X:
+				selection_to_clipboard(self);
+				if (sel_del(self)) {
+					gp_widget_redraw(self);
+					return 1;
+				}
+			break;
+			case GP_KEY_V:
+				gp_widgets_clipboard_request(self);
+			break;
+			case GP_KEY_C:
+				selection_to_clipboard(self);
+			break;
+			}
+
+			return 0;
+		}
+
+		if (gp_widget_key_mod_pressed(ev))
+			return 0;
+
 		switch (ev->val) {
 		case GP_KEY_ENTER:
 			if (ev->code == GP_EV_KEY_DOWN)
@@ -709,32 +738,6 @@ static int event(gp_widget *self, const gp_widget_render_ctx *ctx, gp_event *ev)
 		break;
 		}
 
-		if (ctrl) {
-			switch (ev->val) {
-			case GP_KEY_A:
-				if (sel_all(self)) {
-					gp_widget_redraw(self);
-					return 1;
-				}
-			break;
-			case GP_KEY_X:
-				selection_to_clipboard(self);
-				if (sel_del(self)) {
-					gp_widget_redraw(self);
-					return 1;
-				}
-			break;
-			case GP_KEY_V:
-				gp_widgets_clipboard_request(self);
-			break;
-			case GP_KEY_C:
-				selection_to_clipboard(self);
-			break;
-			}
-
-			return 0;
-		}
-
 	break;
 	case GP_EV_TMR:
 		self->tbox->alert = 0;
@@ -754,6 +757,9 @@ static int event(gp_widget *self, const gp_widget_render_ctx *ctx, gp_event *ev)
 		return mouse_drag(self, ctx, ev);
 	break;
 	case GP_EV_UTF:
+		if (gp_widget_key_mod_pressed(ev))
+			return 0;
+
 		clear_on_input(self);
 		utf_key(self, ev->utf.ch);
 		return 1;

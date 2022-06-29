@@ -2,7 +2,7 @@
 
 /*
 
-   Copyright (c) 2014-2021 Cyril Hrubis <metan@ucw.cz>
+   Copyright (c) 2014-2022 Cyril Hrubis <metan@ucw.cz>
 
  */
 
@@ -104,6 +104,9 @@ static void click(gp_widget *self, unsigned int padd, gp_event *ev)
 
 static int event(gp_widget *self, const gp_widget_render_ctx *ctx, gp_event *ev)
 {
+	if (gp_widget_key_mod_pressed(ev))
+		return 0;
+
 	switch (ev->type) {
 	case GP_EV_KEY:
 		if (ev->code != GP_EV_KEY_DOWN)
@@ -111,6 +114,7 @@ static int event(gp_widget *self, const gp_widget_render_ctx *ctx, gp_event *ev)
 
 		switch (ev->val) {
 		case GP_KEY_ENTER:
+		case GP_KEY_SPACE:
 			toggle(self);
 			return 1;
 		break;

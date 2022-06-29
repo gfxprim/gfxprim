@@ -1095,6 +1095,9 @@ static int stock_event(gp_widget *self, const gp_widget_render_ctx *ctx, gp_even
 	if (ev->code == GP_EV_KEY_UP)
 		return 0;
 
+	if (gp_widget_key_mod_pressed(ev))
+		return 0;
+
 	switch (ev->val) {
 	case GP_BTN_LEFT:
 	case GP_BTN_PEN:

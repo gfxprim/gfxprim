@@ -12,6 +12,8 @@
 #include <utils/gp_htable.h>
 #include <utils/gp_json.h>
 
+#include <widgets/gp_widget_keys.h>
+
 #include <widgets/gp_widget_cfg.h>
 
 #include <widgets/gp_widget_ops.h>

@@ -250,6 +250,9 @@ static int event(gp_widget *self, const gp_widget_render_ctx *ctx, gp_event *ev)
 		if (ev->code == GP_EV_KEY_UP)
 			return 0;
 
+		if (gp_widget_key_mod_pressed(ev))
+			return 0;
+
 		switch (ev->val) {
 		case GP_KEY_LEFT:
 			tab_left(self);

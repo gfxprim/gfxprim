@@ -120,6 +120,9 @@ static void radio_click(gp_widget *self, const gp_widget_render_ctx *ctx, gp_eve
 
 static int event(gp_widget *self, const gp_widget_render_ctx *ctx, gp_event *ev)
 {
+	if (gp_widget_key_mod_pressed(ev))
+		return 0;
+
 	switch (ev->type) {
 	case GP_EV_KEY:
 		if (ev->code == GP_EV_KEY_UP)

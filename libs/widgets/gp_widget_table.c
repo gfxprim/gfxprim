@@ -580,6 +580,12 @@ static int event(gp_widget *self, const gp_widget_render_ctx *ctx, gp_event *ev)
 
 			return move_up(self, ctx, 1);
 		break;
+		}
+
+		if (gp_widget_key_mod_pressed(ev))
+			return 0;
+
+		switch (ev->val) {
 		case GP_KEY_PAGE_UP:
 			return move_up(self, ctx, display_rows(self, ctx));
 		case GP_KEY_PAGE_DOWN:
@@ -591,6 +597,9 @@ static int event(gp_widget *self, const gp_widget_render_ctx *ctx, gp_event *ev)
 		}
 	break;
 	case GP_EV_REL:
+		if (gp_widget_key_mod_pressed(ev))
+			return 0;
+
 		if (ev->code != GP_EV_REL_WHEEL)
 			return 0;
 
