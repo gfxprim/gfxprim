@@ -66,7 +66,7 @@ static void x11_input_init_im(struct x11_win *win)
 		return;
 	}
 
-	XSetLocaleModifiers("");
+	XSetLocaleModifiers("@im=local");
 
 	win->xim = XOpenIM(win->dpy, 0, 0, 0);
 
