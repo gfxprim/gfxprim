@@ -18,6 +18,7 @@ static const char *ev_names[] = {
 	[GP_WIDGET_EVENT_INPUT] = "input",
 	[GP_WIDGET_EVENT_REDRAW] = "redraw",
 	[GP_WIDGET_EVENT_RESIZE] = "resize",
+	[GP_WIDGET_EVENT_COLOR_SCHEME] = "color_scheme",
 };
 
 void gp_widget_event_mask(gp_widget *self, enum gp_widget_event_type ev_type)

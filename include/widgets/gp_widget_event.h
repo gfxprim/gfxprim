@@ -36,6 +36,8 @@ enum gp_widget_event_type {
 	GP_WIDGET_EVENT_REDRAW,
 	/** Send by pixmap widget when pixmap has to be resized */
 	GP_WIDGET_EVENT_RESIZE,
+	/** Color scheme has changed */
+	GP_WIDGET_EVENT_COLOR_SCHEME,
 	/** The number of events, i.e. last event + 1. */
 	GP_WIDGET_EVENT_MAX,
 };
@@ -123,7 +125,8 @@ static inline int gp_widget_send_event(gp_widget *self,
 	va_start(va, type);
 	if (type == GP_WIDGET_EVENT_INPUT ||
 	    type == GP_WIDGET_EVENT_RESIZE ||
-	    type == GP_WIDGET_EVENT_REDRAW)
+	    type == GP_WIDGET_EVENT_REDRAW ||
+	    type == GP_WIDGET_EVENT_COLOR_SCHEME)
 		ctx = va_arg(va, void*);
 	long val = va_arg(va, long);
 	va_end(va);

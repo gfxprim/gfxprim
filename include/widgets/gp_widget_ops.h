@@ -36,6 +36,10 @@ typedef struct gp_offset {
 enum gp_widget_render_flags {
 	GP_WIDGET_REDRAW = 0x01,
 	GP_WIDGET_REDRAW_CHILDREN = 0x02,
+	/** Passed down when color scheme changed */
+	GP_WIDGET_COLOR_SCHEME = 0x04,
+	/** Layout needs to be resized */
+	GP_WIDGET_RESIZE = 0x08,
 };
 
 struct gp_widget_ops {

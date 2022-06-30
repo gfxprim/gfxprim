@@ -127,6 +127,9 @@ static void render(gp_widget *self, const gp_offset *offset,
 	gp_size w = self->w;
 	gp_size h = self->h;
 
+	if (flags & GP_WIDGET_COLOR_SCHEME)
+		gp_widget_send_event(self, GP_WIDGET_EVENT_COLOR_SCHEME, ctx);
+
 	if (!self->pixmap->pixmap)
 		redraw_passthrough(self, ctx, x, y, w, h);
 	else

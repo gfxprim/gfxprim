@@ -655,19 +655,19 @@ int gp_widget_ops_event_offset(gp_widget *self, const gp_widget_render_ctx *ctx,
 	return ret;
 }
 
-void gp_widget_render(gp_widget *self, const gp_widget_render_ctx *ctx, int new_wh)
+void gp_widget_render(gp_widget *self, const gp_widget_render_ctx *ctx, int flags)
 {
 	GP_DEBUG(1, "rendering layout %p", self);
 	gp_widget_calc_size(self, ctx,
 	                    gp_pixmap_w(ctx->buf),
-	                    gp_pixmap_h(ctx->buf), new_wh);
+	                    gp_pixmap_h(ctx->buf), !!(flags & GP_WIDGET_RESIZE));
 
 	gp_offset offset = {
 		.x = 0,
 		.y = 0,
 	};
 
-	gp_widget_ops_render(self, &offset, ctx, 0);
+	gp_widget_ops_render(self, &offset, ctx, flags & ~GP_WIDGET_RESIZE);
 }
 
 void gp_widget_redraw_child(gp_widget *self)

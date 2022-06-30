@@ -63,6 +63,9 @@ int pixmap_on_event(gp_widget_event *ev)
 	case GP_WIDGET_EVENT_RESIZE:
 		allocate_backing_pixmap(ev);
 	break;
+	case GP_WIDGET_EVENT_COLOR_SCHEME:
+		printf("Color scheme change!\n");
+	break;
 	default:
 	break;
 	}
@@ -159,6 +162,7 @@ int main(int argc, char *argv[])
 
 	gp_widget_event_unmask(pixmap, GP_WIDGET_EVENT_RESIZE);
 	gp_widget_event_unmask(pixmap, GP_WIDGET_EVENT_INPUT);
+	gp_widget_event_unmask(pixmap, GP_WIDGET_EVENT_COLOR_SCHEME);
 
 	gp_widgets_main_loop(layout, "Pixmap example", NULL, argc, argv);
 

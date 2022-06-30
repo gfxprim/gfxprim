@@ -239,7 +239,9 @@ static void render_and_flip(gp_widget *layout, int render_flags)
 
 void __attribute__ ((visibility ("hidden"))) widget_render_refresh(void)
 {
-	render_and_flip(app_layout, GP_WIDGET_REDRAW);
+	gp_app_send_event(GP_WIDGET_EVENT_COLOR_SCHEME, &ctx);
+
+	render_and_flip(app_layout, GP_WIDGET_REDRAW | GP_WIDGET_COLOR_SCHEME);
 }
 
 void gp_widget_render_zoom(int zoom_inc)
@@ -248,10 +250,9 @@ void gp_widget_render_zoom(int zoom_inc)
 		return;
 
 	font_size += zoom_inc;
-
 	render_ctx_init();
-	gp_widget_resize(app_layout);
-	gp_widget_redraw(app_layout);
+	//TODO: Broken!
+	gp_widget_render(app_layout, &ctx, GP_WIDGET_RESIZE);
 }
 
 static void timer_event(gp_event *ev)
@@ -496,7 +497,7 @@ int gp_widgets_event(gp_event *ev, gp_widget *layout)
 			gp_backend_resize_ack(backend);
 			ctx.buf = backend->pixmap;
 			gp_fill(backend->pixmap, ctx.fill_color);
-			gp_widget_render(layout, &ctx, 1);
+			gp_widget_render(layout, &ctx, GP_WIDGET_RESIZE);
 			gp_backend_flip(backend);
 			handled = 1;
 		break;
