@@ -655,6 +655,85 @@ static void render_stock_arrow(gp_pixmap *pix,
 	}
 }
 
+static void render_stock_rotate_cw(gp_pixmap *pix,
+                                   gp_coord x, gp_coord y,
+                                   gp_size w, gp_size h, gp_pixel bg_col,
+                                   const gp_widget_render_ctx *ctx)
+{
+	gp_coord cx = x + w/2;
+	gp_coord cy = y + h/2;
+
+	gp_size th = GP_MIN(w, h)/4;
+	gp_size s = GP_MAX((GP_MIN(w, h)+1)/4, 1u);
+	gp_size r = GP_MIN(w, h)/2-s;
+
+	gp_fill_rect_xywh(pix, x, y, w, h, bg_col);
+
+	gp_size sr = GP_MAX((s+1)/3, 1u);
+	gp_size lr = th/3;
+
+	gp_coord poly_1[] = {
+		cx+th-sr, cy-r-s,
+		cx+th, cy-r-s,
+		cx+th+s, cy-r,
+		cx+th, cy-r+s,
+		cx+th-sr, cy-r+s,
+
+		cx+th-sr, cy-r+lr,
+		cx-th, cy-r+lr,
+
+		cx-th, cy+r+s,
+
+		cx-th-2*lr, cy+r+s,
+		cx-th-2*lr, cy-r+lr,
+
+		cx-th, cy-r-lr,
+		cx+th-sr, cy-r-lr,
+	};
+
+	gp_fill_polygon(pix, GP_ARRAY_SIZE(poly_1)/2, poly_1, ctx->text_color);
+}
+
+static void render_stock_rotate_ccw(gp_pixmap *pix,
+                                    gp_coord x, gp_coord y,
+                                    gp_size w, gp_size h, gp_pixel bg_col,
+                                    const gp_widget_render_ctx *ctx)
+{
+	gp_coord cx = x + w/2;
+	gp_coord cy = y + h/2;
+
+	gp_size th = GP_MIN(w, h)/4;
+	gp_size s = GP_MAX((GP_MIN(w, h)+1)/4, 1u);
+	gp_size r = GP_MIN(w, h)/2-s;
+
+	gp_fill_rect_xywh(pix, x, y, w, h, bg_col);
+
+	gp_size sr = GP_MAX((s+1)/3, 1u);
+	gp_size lr = th/3;
+
+	gp_coord poly_1[] = {
+		cx-th+sr, cy-r-s,
+		cx-th, cy-r-s,
+		cx-th-s, cy-r,
+		cx-th, cy-r+s,
+		cx-th+sr, cy-r+s,
+
+		cx-th+sr, cy-r+lr,
+		cx+th, cy-r+lr,
+
+		cx+th, cy+r+s,
+
+		cx+th+2*lr, cy+r+s,
+		cx+th+2*lr, cy-r+lr,
+
+		cx+th, cy-r-lr,
+		cx-th+sr, cy-r-lr,
+	};
+
+	gp_fill_polygon(pix, GP_ARRAY_SIZE(poly_1)/2, poly_1, ctx->text_color);
+}
+
+
 static void render_stock_refresh(gp_pixmap *pix,
                                  gp_coord x, gp_coord y,
                                  gp_size w, gp_size h, gp_pixel bg_col,
@@ -917,6 +996,12 @@ static void widget_stock_render(gp_pixmap *pix, enum gp_widget_stock_type type,
 	case GP_WIDGET_STOCK_ARROW_RIGHT:
 		render_stock_arrow(pix, type, x, y, w, h, bg_col, ctx);
 	break;
+	case GP_WIDGET_STOCK_ROTATE_CW:
+		render_stock_rotate_cw(pix, x, y, w, h, bg_col, ctx);
+	break;
+	case GP_WIDGET_STOCK_ROTATE_CCW:
+		render_stock_rotate_ccw(pix, x, y, w, h, bg_col, ctx);
+	break;
 	case GP_WIDGET_STOCK_SHUFFLE_ON:
 		render_stock_shuffle_on(pix, x, y, w, h, bg_col, ctx);
 	break;
@@ -1012,6 +1097,9 @@ static struct stock_types {
 	{"arrow_down", GP_WIDGET_STOCK_ARROW_DOWN},
 	{"arrow_left", GP_WIDGET_STOCK_ARROW_LEFT},
 	{"arrow_right", GP_WIDGET_STOCK_ARROW_RIGHT},
+
+	{"rotate_cw", GP_WIDGET_STOCK_ROTATE_CW},
+	{"rotate_ccw", GP_WIDGET_STOCK_ROTATE_CCW},
 
 	{"day", GP_WIDGET_STOCK_DAY},
 	{"night", GP_WIDGET_STOCK_NIGHT},
