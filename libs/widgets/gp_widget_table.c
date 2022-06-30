@@ -186,8 +186,8 @@ static unsigned int header_render(gp_widget *self, gp_coord x, gp_coord y,
 				else
 					gp_symbol(ctx->buf, sx, sy, sym_size, sym_size, GP_TRIANGLE_UP, ctx->text_color);
 			} else {
-				gp_symbol(ctx->buf, sx, sy - sym_size, sym_size, sym_size/2, GP_TRIANGLE_UP, ctx->text_color);
-				gp_symbol(ctx->buf, sx, sy + sym_size, sym_size, sym_size/2, GP_TRIANGLE_DOWN, ctx->text_color);
+				gp_symbol(ctx->buf, sx, sy - 2*(sym_size/2), 2*(sym_size/2), sym_size/2, GP_TRIANGLE_UP, ctx->text_color);
+				gp_symbol(ctx->buf, sx, sy + 2*(sym_size/2), 2*(sym_size/2), sym_size/2, GP_TRIANGLE_DOWN, ctx->text_color);
 			}
 
 			ex -= gp_text_ascent(ctx->font) + ctx->padd;

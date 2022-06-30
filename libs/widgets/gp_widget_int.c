@@ -237,8 +237,8 @@ static void spin_render(gp_widget *self, const gp_offset *offset,
 	unsigned int w = self->w;
 	unsigned int h = self->h;
 	unsigned int s = spin_buttons_width(ctx);
-	unsigned int sx = (gp_text_ascent(ctx->font)/2 + ctx->padd)/3;
 	unsigned int sy = (gp_text_ascent(ctx->font)/2 + ctx->padd)/5;
+	unsigned int sx = 2 * sy;
 
 	(void)flags;
 
