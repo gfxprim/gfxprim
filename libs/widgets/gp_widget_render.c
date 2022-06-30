@@ -20,6 +20,7 @@
 #include <widgets/gp_dialog.h>
 #include <widgets/gp_widget_app.h>
 #include <widgets/gp_widgets_task.h>
+#include <widgets/gp_widget_keys.h>
 
 #include "gp_widgets_internal.h"
 
@@ -463,27 +464,28 @@ int gp_widgets_event(gp_event *ev, gp_widget *layout)
 
 	switch (ev->type) {
 	case GP_EV_KEY:
-		if (gp_event_key_pressed(ev, GP_KEY_LEFT_CTRL) &&
-		    ev->code == GP_EV_KEY_DOWN) {
-			switch (ev->val) {
-			case GP_KEY_UP:
-				gp_widget_render_zoom(1);
-				handled = 1;
-			break;
-			case GP_KEY_DOWN:
-				gp_widget_render_zoom(-1);
-				handled = 1;
-			break;
-			case GP_KEY_SPACE:
+		if (ev->code == GP_EV_KEY_DOWN) {
+			if (gp_event_any_key_pressed(ev, GP_WIDGET_KEYS_MOD_COLOR_SCHEME) &&
+			    ev->val == GP_WIDGET_KEY_COLOR_SCHEME) {
 				gp_widgets_color_scheme_toggle();
 				handled = 1;
-			break;
 			}
-		}
-		if (gp_event_any_key_pressed(ev, GP_KEY_LEFT_ALT, GP_KEY_RIGHT_ALT) &&
-		     ev->code == GP_EV_KEY_DOWN) {
-			switch (ev->val) {
-			case GP_KEY_F4:
+
+			if (gp_event_any_key_pressed(ev, GP_WIDGET_KEYS_MOD_ZOOM)) {
+				switch (ev->val) {
+				case GP_WIDGET_KEY_ZOOM_IN:
+					gp_widget_render_zoom(1);
+					handled = 1;
+				break;
+				case GP_WIDGET_KEY_ZOOM_OUT:
+					gp_widget_render_zoom(-1);
+					handled = 1;
+				break;
+				}
+			}
+
+			if (gp_event_any_key_pressed(ev, GP_WIDGET_KEYS_MOD_QUIT) &&
+			    ev->val == GP_WIDGET_KEY_QUIT) {
 				return 1;
 			}
 		}

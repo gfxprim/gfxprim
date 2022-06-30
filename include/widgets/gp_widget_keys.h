@@ -24,7 +24,6 @@ static inline int gp_widget_key_mod_pressed(gp_event *ev)
 	                                    GP_KEY_LEFT_META, GP_KEY_RIGHT_META);
 }
 
-
 /* If defined widget focus can be moved with arrow keys when any of these keys is pressed */
 #define GP_WIDGET_KEYS_MOD_FOCUS GP_KEY_LEFT_CTRL, GP_KEY_RIGHT_CTRL
 /* Keys to move focus into a specified direction */
@@ -37,5 +36,18 @@ static inline int gp_widget_key_mod_pressed(gp_event *ev)
 #define GP_WIDGET_KEY_FOCUS_NEXT GP_KEY_TAB
 /* Keys to reverse the direction of previous key if any of these keys is pressed */
 #define GP_WIDGET_KEYS_MOD_FOCUS_PREV GP_KEY_LEFT_SHIFT, GP_KEY_RIGHT_SHIFT
+
+/* Key to toggle color scheme */
+#define GP_WIDGET_KEYS_MOD_COLOR_SCHEME GP_KEY_LEFT_CTRL, GP_KEY_RIGHT_CTRL
+#define GP_WIDGET_KEY_COLOR_SCHEME GP_KEY_SPACE
+
+/* Keys to increase/decrease text size */
+#define GP_WIDGET_KEYS_MOD_ZOOM GP_KEY_LEFT_CTRL, GP_KEY_RIGHT_CTRL
+#define GP_WIDGET_KEY_ZOOM_IN GP_KEY_EQUAL
+#define GP_WIDGET_KEY_ZOOM_OUT GP_KEY_MINUS
+
+/* Key to quit the app */
+#define GP_WIDGET_KEYS_MOD_QUIT GP_KEY_LEFT_ALT, GP_KEY_RIGHT_ALT
+#define GP_WIDGET_KEY_QUIT GP_KEY_F4
 
 #endif /* GP_WIDGET_KEYS */
