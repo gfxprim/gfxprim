@@ -17,6 +17,7 @@
 #define INPUT_GP_EVENT_H
 
 #include <stdint.h>
+#include <string.h>
 #include <sys/time.h>
 
 #include <input/gp_types.h>
@@ -140,6 +141,11 @@ static inline void gp_events_state_release(gp_events_state *self, uint32_t key)
 		return;
 
 	self->keys_pressed[(key)/8] &= ~(1<<((key)%8));
+}
+
+static inline void gp_events_state_release_all(gp_events_state *self)
+{
+	memset(self->keys_pressed, 0, sizeof(self->keys_pressed));
 }
 
 static inline int gp_event_key_pressed(gp_event *ev, uint32_t key)

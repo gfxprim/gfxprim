@@ -234,6 +234,13 @@ static void xcb_input_event_put(gp_event_queue *event_queue,
 	case XCB_NO_EXPOSURE:
 		GP_DEBUG(1, "NoExposure event received");
 	break;
+	case XCB_FOCUS_OUT:
+		GP_DEBUG(1, "FocusOut event releasing all keys in events_state");
+		gp_events_state_release_all(&event_queue->state);
+	break;
+	case XCB_FOCUS_IN:
+		GP_DEBUG(1, "FocusIn event received");
+	break;
 	default:
 		if (ev_type == x_con.shm_completion_ev) {
 			xcb_shm_completion_event_t *sev = (xcb_shm_completion_event_t*)ev;

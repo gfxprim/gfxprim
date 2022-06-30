@@ -203,7 +203,7 @@ static int x11_win_open(struct x11_wreq *wreq)
 
 	/* Set event mask */
 	attrs.event_mask = ExposureMask | StructureNotifyMask | KeyPressMask |
-	                   KeyReleaseMask | PointerMotionMask;
+	                   KeyReleaseMask | PointerMotionMask | FocusChangeMask;
 	attr_mask |= CWEventMask;
 
 	/*

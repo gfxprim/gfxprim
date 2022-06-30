@@ -512,7 +512,8 @@ static int create_window(struct gp_backend *self, struct win *win,
 	                       XCB_EVENT_MASK_BUTTON_PRESS |
 			       XCB_EVENT_MASK_BUTTON_RELEASE |
 			       XCB_EVENT_MASK_POINTER_MOTION |
-			       XCB_EVENT_MASK_STRUCTURE_NOTIFY};
+			       XCB_EVENT_MASK_STRUCTURE_NOTIFY |
+	                       XCB_EVENT_MASK_FOCUS_CHANGE};
 
 	xcb_create_window(c,
 	                  XCB_COPY_FROM_PARENT,

@@ -258,6 +258,13 @@ static void x11_input_event_put(gp_event_queue *event_queue,
 	case UnmapNotify:
 		GP_DEBUG(1, "UnmapNotify event received");
 	break;
+	case FocusOut:
+		GP_DEBUG(1, "FocusOut event releasing all keys in events_state");
+		gp_events_state_release_all(&event_queue->state);
+	break;
+	case FocusIn:
+		GP_DEBUG(1, "FocusIn event received");
+	break;
 	default:
 		GP_WARN("Unhandled X11 event type %u", ev->type);
 	}
