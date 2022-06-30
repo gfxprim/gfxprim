@@ -1220,7 +1220,7 @@ gp_widget *gp_widget_stock_new(enum gp_widget_stock_type type, gp_widget_size mi
 	if (!ret)
 		return NULL;
 
-		GP_ODD_UP(gp_text_ascent(ctx->font) + 2 * ctx->padd);
+	GP_ODD_UP(gp_text_ascent(ctx->font) + 2 * ctx->padd);
 
 	if (GP_WIDGET_SIZE_EQ(min_size, GP_WIDGET_SIZE_DEFAULT))
 		ret->stock->min_size = GP_WIDGET_SIZE(0, 2, 1);
