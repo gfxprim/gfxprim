@@ -695,9 +695,6 @@ void gp_widgets_main_loop(gp_widget *layout, const char *label,
 
 	win_layout = layout;
 
-	if (init)
-		init(argc, argv);
-
 	gp_fds_add(&fds, backend->fd, POLLIN, backend_event, NULL);
 
 	if (input_str) {
@@ -706,6 +703,9 @@ void gp_widgets_main_loop(gp_widget *layout, const char *label,
 		if (input)
 			gp_fds_add(&fds, input->fd, POLLIN, input_event, input);
 	}
+
+	if (init)
+		init(argc, argv);
 
 	for (;;) {
 		int ret = gp_fds_poll(&fds, gp_backend_timer_timeout(backend));
