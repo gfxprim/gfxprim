@@ -685,7 +685,8 @@ long gp_dialog_run(gp_dialog *dialog)
 }
 
 void gp_widgets_main_loop(gp_widget *layout, const char *label,
-                          void (*init)(void), int argc, char *argv[])
+                          void (*init)(int argc, char *argv[]),
+                          int argc, char *argv[])
 {
 	if (argv)
 		gp_widgets_getopt(&argc, &argv);
@@ -695,7 +696,7 @@ void gp_widgets_main_loop(gp_widget *layout, const char *label,
 	win_layout = layout;
 
 	if (init)
-		init();
+		init(argc, argv);
 
 	gp_fds_add(&fds, backend->fd, POLLIN, backend_event, NULL);
 
