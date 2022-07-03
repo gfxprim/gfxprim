@@ -208,6 +208,15 @@ static int focus_child(gp_widget *self, gp_widget *child)
 	return self->frame->child == child;
 }
 
+static void for_each_child(gp_widget *self, void (*func)(gp_widget *child))
+{
+	size_t i;
+	gp_widget *child = self->frame->child;
+
+	if (child)
+		func(child);
+}
+
 struct gp_widget_ops gp_widget_frame_ops = {
 	.min_w = min_w,
 	.min_h = min_h,
@@ -217,6 +226,7 @@ struct gp_widget_ops gp_widget_frame_ops = {
 	.focus_xy = focus_xy,
 	.focus = focus,
 	.focus_child = focus_child,
+	.for_each_child = for_each_child,
 	.distribute_size = distribute_size,
 	.from_json = json_to_frame,
 	.id = "frame",
