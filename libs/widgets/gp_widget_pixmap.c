@@ -64,6 +64,9 @@ static inline void redraw_buffered(gp_widget *self,
 {
 	gp_bbox box = {};
 
+	GP_DEBUG(2, "Blitting buffered pixmap %ux%u",
+		 self->pixmap->pixmap->w, self->pixmap->pixmap->h);
+
 	/* Complete redraw requested by the application */
 	if (self->pixmap->redraw_all) {
 		box = gp_bbox_pack(x, y, w, h);

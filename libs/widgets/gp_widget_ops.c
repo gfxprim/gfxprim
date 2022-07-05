@@ -312,10 +312,14 @@ void gp_widget_calc_size(gp_widget *self, const gp_widget_render_ctx *ctx,
 	if (self->no_resize && !new_wh)
 		return;
 
-	GP_DEBUG(1, "Recalculating layout %p", self);
+	GP_DEBUG(1, "Recalculating layout %p %ux%u->%ux%u",
+	         self, self->w, self->h, w, h);
 
 	gp_widget_min_w(self, ctx);
 	gp_widget_min_h(self, ctx);
+
+	GP_DEBUG(1, "Recalculated layout %p to %ux%u",
+	         self, self->min_w, self->min_h);
 
 	w = GP_MAX(self->min_w, w);
 	h = GP_MAX(self->min_h, h);

@@ -328,6 +328,7 @@ void gp_widgets_redraw(struct gp_widget *layout)
 
 	if (back_from_dialog) {
 		back_from_dialog = 0;
+		gp_widget_calc_size(layout, &ctx, 0, 0, 1);
 		if (gp_pixmap_w(backend->pixmap) != layout->w ||
 		    gp_pixmap_h(backend->pixmap) != layout->h) {
 			gp_backend_resize(backend, layout->w, layout->h);
