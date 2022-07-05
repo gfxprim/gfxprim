@@ -210,7 +210,6 @@ static int focus_child(gp_widget *self, gp_widget *child)
 
 static void for_each_child(gp_widget *self, void (*func)(gp_widget *child))
 {
-	size_t i;
 	gp_widget *child = self->frame->child;
 
 	if (child)
