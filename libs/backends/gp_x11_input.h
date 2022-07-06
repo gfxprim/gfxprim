@@ -224,7 +224,7 @@ static void x11_input_event_put(gp_event_queue *event_queue,
 				unicode = gp_utf8_next(&s);
 
 				/* strip controll characters */
-				if (unicode >= 0x20)
+				if (unicode >= 0x20 && unicode != 0x7f)
 					gp_event_queue_push_utf(event_queue, unicode, NULL);
 			}
 		}
