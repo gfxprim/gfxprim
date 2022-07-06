@@ -140,7 +140,7 @@ gp_size gp_text_width_len(const gp_text_style *style, enum gp_text_len_type type
 	for (;;) {
 		ch = gp_utf8_next(&str);
 
-		if (!*str || cnt++ >= len)
+		if (!*str || ++cnt >= len)
 			break;
 
 		ret += glyph_advance_x(style, ch);
