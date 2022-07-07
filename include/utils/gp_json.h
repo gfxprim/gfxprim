@@ -13,6 +13,9 @@
 
 #define GP_JSON_RECURSION_MAX 128
 
+#define GP_JSON_PRINT gp_json_print
+#define GP_JSON_PRINT_PRIV stderr
+
 enum gp_json_type {
 	GP_JSON_VOID = 0,
 	GP_JSON_INT,

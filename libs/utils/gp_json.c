@@ -1025,8 +1025,8 @@ struct gp_json_buf *gp_json_load(const char *path)
 	ret->len = len;
 	ret->max_depth = GP_JSON_RECURSION_MAX;
 	ret->json = ret->buf;
-	ret->print = gp_json_print;
-	ret->print_priv = stderr;
+	ret->print = GP_JSON_PRINT;
+	ret->print_priv = GP_JSON_PRINT_PRIV;
 
 	while (off < len) {
 		res = read(fd, ret->buf + off, len - off);
