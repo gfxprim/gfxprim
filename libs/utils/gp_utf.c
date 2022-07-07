@@ -48,7 +48,12 @@ ret:
 
 int8_t gp_utf8_prev_chsz(const char *str, size_t off)
 {
-	char ch = str[off];
+	char ch;
+
+	if (!off)
+		return 0;
+
+	ch = str[--off];
 
 	if (GP_UTF8_IS_ASCII(ch))
 		return 1;
