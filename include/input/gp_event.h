@@ -182,7 +182,7 @@ const char *gp_event_key_name(enum gp_event_key_value key);
 /*
  * Retruns difference between two timeval structures in miliseconds
  */
-static inline int gp_timeval_diff_ms(struct timeval a, struct timeval b)
+static inline int64_t gp_timeval_diff_ms(struct timeval a, struct timeval b)
 {
 	return (a.tv_sec - b.tv_sec) * 1000 +
 	       (a.tv_usec - b.tv_usec + 500) / 1000;
