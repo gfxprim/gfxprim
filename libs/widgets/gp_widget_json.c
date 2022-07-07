@@ -544,6 +544,8 @@ gp_widget *gp_widget_from_json_str(const char *str,
 		.json = str,
 		.len = strlen(str),
 		.max_depth = GP_JSON_RECURSION_MAX,
+		.print = GP_JSON_PRINT,
+		.print_priv = GP_JSON_PRINT_PRIV,
 	};
 
 	if (uids)
