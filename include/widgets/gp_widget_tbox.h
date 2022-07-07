@@ -10,6 +10,7 @@
 #define GP_WIDGET_TBOX_H
 
 #include <core/gp_seek.h>
+#include <utils/gp_utf_pos.h>
 
 enum gp_widget_tbox_type {
 	/* default */
@@ -50,18 +51,22 @@ struct gp_widget_tbox {
 	uint16_t clear_on_input:1;
 
 	size_t max_size;
-	size_t cur_pos;
-	size_t cur_pos_saved;
+
+	/* Cursor position */
+	gp_utf8_pos cur_pos;
+	gp_utf8_pos cur_pos_saved;
+	/* Offset on left size, part of a string that is not shown */
+	gp_utf8_pos off_left;
+
 	size_t size;
 	char *buf;
 
 	/* Selection */
-	size_t sel_off;
-	size_t sel_len;
+	gp_utf8_pos sel_left;
+	gp_utf8_pos sel_right;
 
 	gp_widget_tattr tattr;
 
-	size_t off_left;
 
 	//TODO: Move to event state
 	struct timeval last_click;

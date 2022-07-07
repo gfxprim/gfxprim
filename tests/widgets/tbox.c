@@ -1007,6 +1007,75 @@ static int tbox_hidden_no_sel(void)
 	return TST_SUCCESS;
 }
 
+static int tbox_utf_del(void)
+{
+	gp_widget *tbox;
+
+	tbox = gp_widget_tbox_new("hello \u00d7", 0, 10, 0, NULL,
+	                          0, NULL, NULL);
+	if (!tbox) {
+		tst_msg("Allocation failure");
+		return TST_FAILED;
+	}
+
+	gp_widget_tbox_del(tbox, -1, GP_SEEK_CUR, 1);
+
+	if (strcmp(gp_widget_tbox_text(tbox), "hello ")) {
+		tst_msg("Wrong tbox text after deleting utf8 char '%s'",
+		        gp_widget_tbox_text(tbox));
+		return TST_FAILED;
+	}
+
+	return TST_SUCCESS;
+}
+
+static int tbox_utf_del_key(void)
+{
+	gp_widget *tbox;
+
+	tbox = gp_widget_tbox_new("hello \u00d7!", 0, 10, 0, NULL,
+	                          0, NULL, NULL);
+	if (!tbox) {
+		tst_msg("Allocation failure");
+		return TST_FAILED;
+	}
+
+	send_keypress(tbox, GP_KEY_LEFT);
+	send_keypress(tbox, GP_KEY_LEFT);
+	send_keypress(tbox, GP_KEY_DELETE);
+
+	if (strcmp(gp_widget_tbox_text(tbox), "hello !")) {
+		tst_msg("Wrong tbox text after deleting utf8 char '%s'",
+		        gp_widget_tbox_text(tbox));
+		return TST_FAILED;
+	}
+
+	return TST_SUCCESS;
+}
+
+static int tbox_utf_backspace_key(void)
+{
+	gp_widget *tbox;
+
+	tbox = gp_widget_tbox_new("hello \u00d7!", 0, 10, 0, NULL,
+	                          0, NULL, NULL);
+	if (!tbox) {
+		tst_msg("Allocation failure");
+		return TST_FAILED;
+	}
+
+	send_keypress(tbox, GP_KEY_LEFT);
+	send_keypress(tbox, GP_KEY_BACKSPACE);
+
+	if (strcmp(gp_widget_tbox_text(tbox), "hello !")) {
+		tst_msg("Wrong tbox text after deleting utf8 char '%s'",
+		        gp_widget_tbox_text(tbox));
+		return TST_FAILED;
+	}
+
+	return TST_SUCCESS;
+}
+
 const struct tst_suite tst_suite = {
 	.suite_name = "tbox testsuite",
 	.tests = {
@@ -1082,6 +1151,15 @@ const struct tst_suite tst_suite = {
 
 		{.name = "tbox hidden no sel",
 		 .tst_fn = tbox_hidden_no_sel},
+
+		{.name = "tbox utf del",
+		 .tst_fn = tbox_utf_del},
+
+		{.name = "tbox utf del key",
+		 .tst_fn = tbox_utf_del_key},
+
+		{.name = "tbox utf backspace key",
+		 .tst_fn = tbox_utf_backspace_key},
 
 		{.name = NULL},
 	}
