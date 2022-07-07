@@ -604,22 +604,19 @@ static int mouse_click(gp_widget *self, const gp_widget_render_ctx *ctx, int shi
 		sel_substr_cycle(self, cur_pos, 0);
 	} else {
 		if (shift) {
-/*			gp_utf8_pos sel_origin, sel_end;
+			gp_utf8_pos sel_origin;
 
 			if (!is_sel(self)) {
 				sel_origin = tbox->cur_pos;
 			} else {
-				if ((tbox->cur_pos == tbox->sel_off)
-					sel_origin = tbox->sel_off + tbox->sel_len;
+				if (gp_utf8_pos_eq(tbox->cur_pos, tbox->sel_left))
+					sel_origin = tbox->sel_right;
 				else
-					sel_origin = tbox->sel_off;
+					sel_origin = tbox->sel_left;
 			}
 
-			sel_end = GP_MAX(sel_origin, cur_pos);
-
-			tbox->sel_off = GP_MIN(sel_origin, cur_pos);
-			tbox->sel_len = sel_end - tbox->sel_off;
- */
+			tbox->sel_right = gp_utf8_pos_max(sel_origin, cur_pos);
+			tbox->sel_left = gp_utf8_pos_min(sel_origin, cur_pos);
 		} else {
 			sel_clr(self);
 		}
@@ -646,8 +643,7 @@ static int mouse_drag(gp_widget *self, const gp_widget_render_ctx *ctx, gp_event
 	if (GP_ABS_DIFF(ev->st->cursor_x, tbox->click_cursor_x) <= gp_text_wbbox(font, " ")/2)
 		return 1;
 
-	cur_pos_chars = tbox->off_left.chars + gp_text_cur_pos(font, str + tbox->off_left.bytes, ev->st->cursor_x - ctx->padd);
-
+	cur_pos_chars = gp_text_cur_pos(font, str + cur_pos.bytes, ev->st->cursor_x - ctx->padd);
 	if (cur_pos_chars == tbox->sel_right.chars)
 		return 1;
 
