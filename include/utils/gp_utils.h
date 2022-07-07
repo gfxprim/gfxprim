@@ -18,5 +18,6 @@
 #include <utils/gp_list.h>
 #include <utils/gp_json.h>
 #include <utils/gp_utf.h>
+#include <utils/gp_utf_pos.h>
 
 #endif /* GP_UTILS_H */

@@ -3,8 +3,8 @@
  * Copyright (C) 2022 Cyril Hrubis <metan@ucw.cz>
  */
 
-#ifndef TEXT_GP_UTF_H
-#define TEXT_GP_UTF_H
+#ifndef UTILS_GP_UTF_H
+#define UTILS_GP_UTF_H
 
 #include <stdint.h>
 #include <stddef.h>
@@ -156,4 +156,4 @@ static inline int gp_to_utf8(uint32_t unicode, char *buf)
  */
 uint32_t gp_utf_fallback(uint32_t ch);
 
-#endif /* TEXT_GP_UTF_H */
+#endif /* UTILS_GP_UTF_H */
