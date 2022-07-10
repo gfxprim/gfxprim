@@ -22,7 +22,8 @@ struct gp_keymap {
 	 * @return non-zero if event was dead-key zero otherwise.
 	 */
 	int (*event_key)(gp_keymap *self, gp_event_queue *queue, gp_event *ev);
-	char priv[];
+	void *priv;
+	void *priv2;
 };
 
 static inline int gp_keymap_event_key(gp_keymap *self, gp_event_queue *queue, gp_event *ev)
@@ -31,5 +32,9 @@ static inline int gp_keymap_event_key(gp_keymap *self, gp_event_queue *queue, gp
 }
 
 gp_keymap *gp_keymap_load(const char *name);
+
+gp_keymap *gp_keymap_json_load(const char *json_str);
+
+void gp_keymap_free(gp_keymap *self);
 
 #endif /* INPUT_GP_KEYMAP_H */

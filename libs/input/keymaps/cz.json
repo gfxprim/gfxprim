@@ -1,0 +1,191 @@
+{
+ "mods": {
+  "mod": "KeyLeftShift",
+  "mod": "KeyRightShift",
+  "lock": "KeyCapsLock",
+  "dead": "KeyEqual"
+ },
+ "map": {
+  "mods": [
+   [],
+   ["KeyCapsLock", "KeyLeftShift"],
+   ["KeyCapsLock", "KeyRightShift"],
+   ["KeyCapsLock", "KeyLeftShift", "KeyRightShift"]
+  ],
+  "keys": [
+   {"KeyGrave": ";"},
+   {"Key1": "+"},
+   {"Key2": "ě"},
+   {"Key3": "š"},
+   {"Key4": "č"},
+   {"Key5": "ř"},
+   {"Key6": "ž"},
+   {"Key7": "ý"},
+   {"Key8": "á"},
+   {"Key9": "í"},
+   {"Key0": "é"},
+   {"KeyMinus": "="},
+
+   {"KeyQ": "q"},
+   {"KeyW": "w"},
+   {"KeyE": "e"},
+   {"KeyR": "r"},
+   {"KeyT": "t"},
+   {"KeyY": "z"},
+   {"KeyU": "u"},
+   {"KeyI": "i"},
+   {"KeyO": "o"},
+   {"KeyP": "p"},
+   {"KeyLeftBrace": "ú"},
+   {"KeyRightBrace": ")"},
+
+   {"KeyA": "a"},
+   {"KeyS": "s"},
+   {"KeyD": "d"},
+   {"KeyF": "f"},
+   {"KeyG": "g"},
+   {"KeyH": "h"},
+   {"KeyJ": "j"},
+   {"KeyK": "k"},
+   {"KeyL": "l"},
+   {"KeySemicolon": "ů"},
+   {"KeyApostrophe": "§"},
+   {"KeyBackSlash": "\\"},
+
+   {"KeyZ": "y"},
+   {"KeyX": "x"},
+   {"KeyC": "c"},
+   {"KeyV": "v"},
+   {"KeyB": "b"},
+   {"KeyN": "n"},
+   {"KeyM": "m"},
+   {"KeyComma": ","},
+   {"KeyDot": "."},
+   {"KeySlash": "-"},
+   {"KeySpace": " "}
+  ]
+ },
+ "map": {
+  "mods": [
+   ["KeyLeftShift"],
+   ["KeyRightShift"],
+   ["KeyLeftShift", "KeyRightShift"],
+   ["KeyCapsLock"]
+  ],
+  "keys": [
+   {"Key1": "1"},
+   {"Key2": "2"},
+   {"Key3": "3"},
+   {"Key4": "4"},
+   {"Key5": "5"},
+   {"Key6": "6"},
+   {"Key7": "7"},
+   {"Key8": "8"},
+   {"Key9": "9"},
+   {"Key0": "0"},
+   {"KeyMinus": "%"},
+
+   {"KeyQ": "Q"},
+   {"KeyW": "W"},
+   {"KeyE": "E"},
+   {"KeyR": "R"},
+   {"KeyT": "T"},
+   {"KeyY": "Z"},
+   {"KeyU": "U"},
+   {"KeyI": "I"},
+   {"KeyO": "O"},
+   {"KeyP": "P"},
+   {"KeyLeftBrace": "/"},
+   {"KeyRightBrace": "("},
+
+   {"KeyA": "A"},
+   {"KeyS": "S"},
+   {"KeyD": "D"},
+   {"KeyF": "F"},
+   {"KeyG": "G"},
+   {"KeyH": "H"},
+   {"KeyJ": "J"},
+   {"KeyK": "K"},
+   {"KeyL": "L"},
+   {"KeySemicolon": "\""},
+   {"KeyApostrophe": "!"},
+   {"KeyBackSlash": "|"},
+
+   {"KeyZ": "Y"},
+   {"KeyX": "X"},
+   {"KeyC": "C"},
+   {"KeyV": "V"},
+   {"KeyB": "B"},
+   {"KeyN": "N"},
+   {"KeyM": "M"},
+   {"KeyComma": "?"},
+   {"KeyDot": ":"},
+   {"KeySlash": "_"},
+   {"KeySpace": " "}
+  ]
+ },
+ "map": {
+  "mods": [
+   ["KeyEqual"],
+   ["KeyEqual", "KeyCapsLock", "KeyLeftShift"],
+   ["KeyEqual", "KeyCapsLock", "KeyRightShift"],
+   ["KeyEqual", "KeyCapsLock", "KeyLeftShift", "KeyRightShift"]
+  ],
+  "keys": [
+   {"KeyE": "é"},
+   {"KeyU": "ú"},
+   {"KeyO": "ó"},
+   {"KeyA": "á"},
+   {"KeyZ": "ý"}
+  ]
+ },
+ "map": {
+  "mods": [
+   ["KeyEqual", "KeyLeftShift"],
+   ["KeyEqual", "KeyRightShift"],
+   ["KeyEqual", "KeyCapsLock"],
+   ["KeyEqual", "KeyLeftShift", "KeyRightShift"]
+  ],
+  "keys": [
+   {"KeyE": "É"},
+   {"KeyU": "Ú"},
+   {"KeyO": "Ó"},
+   {"KeyA": "Á"},
+   {"KeyZ": "Ý"}
+  ]
+ },
+ "map": {
+  "mods": [
+   ["KeyEqual", "KeyLeftShift"],
+   ["KeyEqual", "KeyRightShift"],
+   ["KeyEqual", "KeyCapsLock"],
+   ["KeyEqual", "KeyLeftShift", "KeyRightShift"]
+  ],
+  "keys": [
+   {"KeyC": "Č"},
+   {"KeyR": "Ř"},
+   {"KeyT": "Ť"},
+   {"KeyY": "Ž"},
+   {"KeyS": "Š"},
+   {"KeyD": "Ď"},
+   {"KeyN": "Ň"}
+  ]
+ },
+ "map": {
+  "mods": [
+   ["KeyEqual"],
+   ["KeyEqual", "KeyCapsLock", "KeyLeftShift"],
+   ["KeyEqual", "KeyCapsLock", "KeyRightShift"],
+   ["KeyEqual", "KeyCapsLock", "KeyLeftShift", "KeyRightShift"]
+  ],
+  "keys": [
+   {"KeyC": "č"},
+   {"KeyR": "ř"},
+   {"KeyT": "ť"},
+   {"KeyY": "ž"},
+   {"KeyS": "š"},
+   {"KeyD": "ď"},
+   {"KeyN": "ň"}
+  ]
+ }
+}
