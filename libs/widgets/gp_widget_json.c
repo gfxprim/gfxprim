@@ -204,8 +204,7 @@ gp_widget *gp_widget_from_json(gp_json_buf *json, gp_json_val *val, gp_widget_js
 	char *uid = NULL;
 	unsigned int halign = 0;
 	unsigned int valign = 0;
-	unsigned int shrink_set = 0;
-	unsigned int shrink;
+	int shrink = -1;
 	gp_htable **uids = ctx->uids;
 	int focus = 0;
 	struct on_event_addr on_event = {};
@@ -272,8 +271,6 @@ gp_widget *gp_widget_from_json(gp_json_buf *json, gp_json_val *val, gp_widget_js
 			shrink = val->val_bool;
 
 			GP_DEBUG(2, "Widget shrink '%i'", shrink);
-
-			shrink_set = 1;
 		break;
 		case TYPE:
 			if (val->type != GP_JSON_STR) {
@@ -368,7 +365,7 @@ ret:
 	if (on_event.on_event)
 		gp_widget_on_event_set(wid, on_event.on_event, on_event.priv);
 
-	if (shrink_set)
+	if (shrink != -1)
 		wid->no_shrink = !shrink;
 
 	gp_widget_send_event(wid, GP_WIDGET_EVENT_NEW);
