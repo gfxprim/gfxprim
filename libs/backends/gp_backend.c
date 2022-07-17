@@ -172,10 +172,12 @@ void gp_backend_task_rem(gp_backend *self, gp_task *task)
 
 void gp_backend_poll(gp_backend *self)
 {
-	self->poll(self);
+	if (self->timers) {
+		if (gp_timer_queue_process(&self->timers, gp_time_stamp()))
+			return;
+	}
 
-	if (self->timers)
-		gp_timer_queue_process(&self->timers, gp_time_stamp());
+	self->poll(self);
 }
 
 static void wait_timers_fd(gp_backend *self, uint64_t now)
@@ -186,10 +188,6 @@ static void wait_timers_fd(gp_backend *self, uint64_t now)
 
 	if (poll(&fd, 1, timeout))
 		self->poll(self);
-
-	now = gp_time_stamp();
-
-	gp_timer_queue_process(&self->timers, now);
 }
 
 /*
