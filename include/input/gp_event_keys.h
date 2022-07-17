@@ -272,7 +272,6 @@ enum gp_event_key_value {
 	GP_BTN_TASK           = 0x117,
 
 	GP_BTN_JOYSTICK       = 0x120,
-	GP_BTN_TRIGGER        = 0x120,
 	GP_BTN_THUMB          = 0x121,
 	GP_BTN_THUMB2         = 0x122,
 	GP_BTN_TOP            = 0x123,
@@ -286,7 +285,6 @@ enum gp_event_key_value {
 	GP_BTN_BASE6          = 0x12b,
 	GP_BTN_DEAD           = 0x12f,
 
-	GP_BTN_GAMEPAD        = 0x130,
 	GP_BTN_SOUTH          = 0x130,
 	GP_BTN_EAST           = 0x131,
 	GP_BTN_C              = 0x132,
@@ -303,7 +301,6 @@ enum gp_event_key_value {
 	GP_BTN_THUMBL         = 0x13d,
 	GP_BTN_THUMBR         = 0x13e,
 
-	GP_BTN_DIGI           = 0x140,
 	GP_BTN_TOOL_PEN       = 0x140,
 	GP_BTN_TOOL_RUBBER    = 0x141,
 	GP_BTN_TOOL_BRUSH     = 0x142,
@@ -323,7 +320,6 @@ enum gp_event_key_value {
 	GP_BTN_TOOL_QUAD_TAP  = 0x14f,
 
 	GP_BTN_WHEEL          = 0x150,
-	GP_BTN_GEAR_DOWN      = 0x150,
 	GP_BTN_GEAR_UP        = 0x151,
 
 	GP_KEY_OK             = 0x160,
