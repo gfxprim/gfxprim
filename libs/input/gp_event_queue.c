@@ -65,7 +65,7 @@ unsigned int gp_event_queue_events(gp_event_queue *self)
 	if (self->queue_first <= self->queue_last)
 		return self->queue_last - self->queue_first;
 
-	return self->queue_size - (self->queue_last - self->queue_first);
+	return self->queue_size - (self->queue_first - self->queue_last);
 }
 
 static uint32_t clip_rel(uint32_t val, uint32_t max, int32_t rel)
