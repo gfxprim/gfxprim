@@ -73,6 +73,19 @@ void gp_event_queue_set_cursor_pos(gp_event_queue *self,
  */
 unsigned int gp_event_queue_events(gp_event_queue *self);
 
+/**
+ * @brief Returns true if queue is full.
+ *
+ * @self An event queue.
+ * @return Non-zero if queue is full zero otherwise.
+ */
+static inline int gp_event_queue_full(gp_event_queue *self)
+{
+	unsigned int next = (self->queue_last + 1) % self->queue_size;
+
+	return next == self->queue_first;
+}
+
 /*
  * In case there are any events queued a pointer to a top event in the queue is
  * returned. The pointer is valid until next call to gp_event_queue_get().

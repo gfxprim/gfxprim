@@ -178,7 +178,7 @@ static void x11_poll(gp_backend *self)
 
 	XLockDisplay(win->dpy);
 
-	while (XPending(win->dpy)) {
+	while (XPending(win->dpy) && !gp_event_queue_full(&self->event_queue)) {
 		XNextEvent(win->dpy, &ev);
 		x11_ev(&ev);
 	}

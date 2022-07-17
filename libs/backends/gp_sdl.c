@@ -97,7 +97,7 @@ static void sdl_poll(struct gp_backend *self __attribute__((unused)))
 
 	SDL_mutexP(mutex);
 
-	while (SDL_PollEvent(&ev))
+	while (SDL_PollEvent(&ev) && !gp_event_queue_full(&backend.event_queue))
 		sdl_put_event(&ev);
 
 	SDL_mutexV(mutex);

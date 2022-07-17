@@ -309,7 +309,7 @@ static void x_poll(gp_backend *self)
 {
 	xcb_generic_event_t *ev;
 
-	while ((ev = xcb_poll_for_event(x_con.c))) {
+	while ((ev = xcb_poll_for_event(x_con.c)) && !gp_event_queue_full(&self->event_queue)) {
 		x_ev(self, ev);
 		free(ev);
 	}
