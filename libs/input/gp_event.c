@@ -56,13 +56,13 @@ const char *gp_event_key_name(enum gp_event_key_value key)
 		return "RightButton";
 	case GP_BTN_MIDDLE:
 		return "MiddleButton";
-	case GP_BTN_PEN:
+	case GP_BTN_TOUCH:
 		return "Pen";
-	case GP_KEY_NEXTSONG:
+	case GP_KEY_NEXT_SONG:
 		return "NextSong";
-	case GP_KEY_PREVIOUSSONG:
+	case GP_KEY_PREVIOUS_SONG:
 		return "PreviousSong";
-	case GP_KEY_PLAYPAUSE:
+	case GP_KEY_PLAY_PAUSE:
 		return "PlayPause";
 	default:
 		return "Unknown";

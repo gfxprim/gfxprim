@@ -735,7 +735,7 @@ static int event(gp_widget *self, const gp_widget_render_ctx *ctx, gp_event *ev)
 				gp_widget_redraw(self);
 			return 1;
 		case GP_BTN_LEFT:
-		case GP_BTN_PEN:
+		case GP_BTN_TOUCH:
 			if (ev->code != GP_EV_KEY_REPEAT)
 				return mouse_click(self, ctx, shift, ev);
 		break;
@@ -762,7 +762,7 @@ static int event(gp_widget *self, const gp_widget_render_ctx *ctx, gp_event *ev)
 	break;
 	case GP_EV_REL:
 	case GP_EV_ABS:
-		if (!gp_event_any_key_pressed(ev, GP_BTN_PEN, GP_BTN_LEFT))
+		if (!gp_event_any_key_pressed(ev, GP_BTN_TOUCH, GP_BTN_LEFT))
 			return 0;
 		return mouse_drag(self, ctx, ev);
 	break;

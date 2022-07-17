@@ -1188,7 +1188,7 @@ static int stock_event(gp_widget *self, const gp_widget_render_ctx *ctx, gp_even
 
 	switch (ev->val) {
 	case GP_BTN_LEFT:
-	case GP_BTN_PEN:
+	case GP_BTN_TOUCH:
 	case GP_KEY_ENTER:
 	        gp_widget_send_widget_event(self, 0);
 		return 1;

@@ -563,7 +563,7 @@ static int handle_focus(gp_widget *self, const gp_widget_render_ctx *ctx, gp_eve
 				gp_widget_ops_render_focus(self, GP_FOCUS_NEXT);
 
 			return 1;
-		case GP_BTN_PEN:
+		case GP_BTN_TOUCH:
 		case GP_BTN_LEFT:
 			gp_widget_ops_render_focus_xy(self, ctx, ev->st->cursor_x, ev->st->cursor_y);
 			return 0;

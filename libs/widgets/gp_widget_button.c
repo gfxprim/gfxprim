@@ -384,7 +384,7 @@ static int event(gp_widget *self, const gp_widget_render_ctx *ctx, gp_event *ev)
 			set(self);
 			return 1;
 		case GP_BTN_LEFT:
-		case GP_BTN_PEN:
+		case GP_BTN_TOUCH:
 			click(self, ev);
 			return 1;
 		}

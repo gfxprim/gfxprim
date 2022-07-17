@@ -139,7 +139,7 @@ static int event(gp_widget *self, const gp_widget_render_ctx *ctx, gp_event *ev)
 			return 0;
 
 		switch (ev->val) {
-		case GP_BTN_PEN:
+		case GP_BTN_TOUCH:
 		case GP_BTN_LEFT:
 			click(self, ctx, ev);
 			return 1;

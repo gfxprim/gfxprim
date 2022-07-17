@@ -343,7 +343,7 @@ static int spin_event(gp_widget *self, const gp_widget_render_ctx *ctx, gp_event
 			return 0;
 
 		switch (ev->val) {
-		case GP_BTN_PEN:
+		case GP_BTN_TOUCH:
 		case GP_BTN_LEFT:
 			spin_click(self, ctx, ev);
 			return 1;
@@ -540,7 +540,7 @@ static int slider_event(gp_widget *self, const gp_widget_render_ctx *ctx, gp_eve
 			return 0;
 
 		switch (ev->val) {
-		case GP_BTN_PEN:
+		case GP_BTN_TOUCH:
 		case GP_BTN_LEFT:
 			slider_set_val(self, asc, ev);
 			return 1;

@@ -45,7 +45,7 @@ static int key_to_idx(int key)
 	switch (key) {
 	case GP_BTN_LEFT:
 		return 0;
-	case GP_BTN_PEN:
+	case GP_BTN_TOUCH:
 		return 1;
 	default:
 		return -1;
@@ -62,8 +62,8 @@ static gp_timer timers[] = {
 	{
 		.period = 0,
 		.callback = btn_repeat_callback,
-		.id = "BTN_PEN repeat timer",
-		.priv = (void*)((long)GP_BTN_PEN)
+		.id = "BTN_TOUCH repeat timer",
+		.priv = (void*)((long)GP_BTN_TOUCH)
 	}
 };
 

@@ -67,12 +67,12 @@ static const struct keytable sym_to_key[] = {
 	{XK_KP_Multiply, GP_KEY_KP_ASTERISK},
 
 	/* Multimedia */
-	{XF86XK_AudioLowerVolume, GP_KEY_VOLUMEDOWN},
-	{XF86XK_AudioRaiseVolume, GP_KEY_VOLUMEUP},
+	{XF86XK_AudioLowerVolume, GP_KEY_VOLUME_DOWN},
+	{XF86XK_AudioRaiseVolume, GP_KEY_VOLUME_UP},
 	{XF86XK_AudioMute,        GP_KEY_MUTE},
-	{XF86XK_AudioNext,        GP_KEY_NEXTSONG},
-	{XF86XK_AudioPrev,        GP_KEY_PREVIOUSSONG},
-	{XF86XK_AudioPlay,        GP_KEY_PLAYPAUSE},
+	{XF86XK_AudioNext,        GP_KEY_NEXT_SONG},
+	{XF86XK_AudioPrev,        GP_KEY_PREVIOUS_SONG},
+	{XF86XK_AudioPlay,        GP_KEY_PLAY_PAUSE},
 };
 
 #endif /* BACKENDS_X_KEYSYMS_H */
