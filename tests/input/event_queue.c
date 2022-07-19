@@ -203,6 +203,51 @@ static int queue_init_test(void)
 	return TST_SUCCESS;
 }
 
+static int queue_events_test(void)
+{
+	unsigned int i;
+	gp_event_queue queue;
+
+	gp_event_queue_init(&queue, 1, 1, 0, 0);
+
+	for (i = 0; i < 2 * queue.queue_size; i++) {
+		if (gp_event_queue_events(&queue) != 0) {
+			tst_msg("Wrong number of events!");
+			return TST_FAILED;
+		}
+
+		gp_event_queue_push_key(&queue, GP_KEY_A, GP_EV_KEY_DOWN, NULL);
+		gp_event_queue_get(&queue);
+	}
+
+	gp_event_queue_push_key(&queue, GP_KEY_A, GP_EV_KEY_DOWN, NULL);
+
+	for (i = 0; i < 2 * queue.queue_size; i++) {
+		if (gp_event_queue_events(&queue) != 1) {
+			tst_msg("Wrong number of events!");
+			return TST_FAILED;
+		}
+
+		gp_event_queue_get(&queue);
+		gp_event_queue_push_key(&queue, GP_KEY_A, GP_EV_KEY_DOWN, NULL);
+	}
+
+	for (i = 0; i < queue.queue_size-1; i++)
+		gp_event_queue_push_key(&queue, GP_KEY_A, GP_EV_KEY_DOWN, NULL);
+
+	for (i = 0; i < 2 * queue.queue_size; i++) {
+		if (gp_event_queue_events(&queue) != queue.queue_size-1) {
+			tst_msg("Wrong number of events!");
+			return TST_FAILED;
+		}
+
+		gp_event_queue_get(&queue);
+		gp_event_queue_push_key(&queue, GP_KEY_A, GP_EV_KEY_DOWN, NULL);
+	}
+
+	return TST_SUCCESS;
+}
+
 const struct tst_suite tst_suite = {
 	.suite_name = "Event Queue Testsuite",
 	.tests = {
@@ -216,6 +261,8 @@ const struct tst_suite tst_suite = {
 		 .tst_fn = cursor_state_test},
 		{.name = "Pointer from get is preserved",
 		 .tst_fn = get_pointer_preserved},
+		{.name = "Queue events",
+		 .tst_fn = queue_events_test},
 		{.name = NULL},
 	}
 };
