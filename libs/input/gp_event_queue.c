@@ -23,6 +23,8 @@ void gp_event_queue_init(gp_event_queue *self,
 	self->state.cursor_x = screen_w / 2;
 	self->state.cursor_y = screen_h / 2;
 
+	self->keymap = NULL;
+
 	self->queue_first = 0;
 	self->queue_last = 0;
 	self->queue_size = queue_size ? queue_size : GP_EVENT_QUEUE_SIZE;
