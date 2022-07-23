@@ -850,6 +850,11 @@ static int child_to_tab(gp_widget *self, gp_widget *child)
 {
 	unsigned int i;
 
+	if (!child) {
+		GP_WARN("Lookup for NULL child");
+		return -1;
+	}
+
 	if (child->parent != self) {
 		GP_WARN("Child (%p) parent %p does not match self (%p)",
 			child, child->parent, self);
