@@ -16,6 +16,8 @@ jobs:
         run: ./configure -d V4L2 -d libpng -d jpeg -d tiff -d zlib -d libX11 -d freetype -d fontconfig -d pthread -d backtrace
       - name: make
         run: make
+      - name: tests
+        run: cd tests && ./runtests.py
 
   build-with-libs:
     runs-on: ubuntu-latest
@@ -36,6 +38,8 @@ jobs:
         run: ./configure
       - name: make
         run: make
+      - name: tests
+        run: cd tests && ./runtests.py
 
   build-with-sdl-1-2:
     runs-on: ubuntu-latest
@@ -50,3 +54,5 @@ jobs:
         run: ./configure
       - name: make
         run: make
+      - name: tests
+        run: cd tests && ./runtests.py
