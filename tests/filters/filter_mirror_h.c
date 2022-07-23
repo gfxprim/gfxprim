@@ -39,8 +39,7 @@ static int test_mirror_h(struct testcase *t)
 
 	/* Test with allocated destination */
 	c = gp_pixmap_alloc(t->w, t->h, t->pixel_type);
-
-	if (c == NULL) {
+	if (!c) {
 		tst_err("Failed to allocate pixmap");
 		return TST_UNTESTED;
 	}
@@ -89,8 +88,8 @@ struct testcase testcase_2x2 = {
 	},
 
 	.src = {
-		0, 1,
-		2, 3,
+		3, 2,
+		1, 0,
 	}
 };
 
@@ -101,8 +100,8 @@ struct testcase testcase_10x2 = {
 	.pixel_type = GP_PIXEL_G8,
 
 	.res = (const char[]) {
-		0,   1,  2,  3,  4,  5,  6,  7,  8,  9,
-		10, 11, 12, 13, 14, 15, 16, 17, 18, 19,
+		19, 18, 17, 16, 15, 14, 13, 12, 11, 10,
+		 9,  8,  7,  6,  5,  4,  3,  2,  1,  0,
 	},
 
 	.src = {
@@ -124,9 +123,9 @@ struct testcase testcase_2x3 = {
 	},
 
 	.src = {
-		0, 1,
-		2, 3,
-		4, 5,
+		5, 4,
+		3, 2,
+		1, 0,
 	}
 };
 
@@ -144,9 +143,9 @@ struct testcase testcase_3x3 = {
 	},
 
 	.src = {
-		0, 1, 2,
-		3, 4, 5,
-		6, 7, 8,
+		8, 7, 6,
+		5, 4, 3,
+		2, 1, 0,
 	}
 };
 
@@ -171,27 +170,6 @@ struct testcase testcase_4x4 = {
 	}
 };
 
-/* Now tests with pixel types that are not byte aligned */
-//TODO: Fix comparsion
-struct testcase testcase_G1_16x2 = {
-	.w = 3,
-	.h = 2,
-
-	.pixel_type = GP_PIXEL_G1,
-
-	.offset = 4,
-
-	.res = (const char[]) {
-		0x0f, 0xaa, 0xf0,
-		0xff, 0xff, 0xff,
-	},
-
-	.src = {
-		 0x0f,  0xff,  0xf0,
-		 0xff,  0xaa,  0xff,
-	}
-};
-
 static int abort_callback_fn(gp_progress_cb GP_UNUSED(*self))
 {
 	return 1;
@@ -207,8 +185,7 @@ static int test_abort(void)
 	gp_pixmap *c;
 
 	c = gp_pixmap_alloc(10, 10, GP_PIXEL_G8);
-
-	if (c == NULL) {
+	if (!c) {
 		tst_err("Failed to allocate pixmap");
 		return TST_UNTESTED;
 	}
@@ -221,7 +198,7 @@ static int test_abort(void)
 	}
 
 	if (errno != ECANCELED) {
-		tst_msg("Errno wasn't set to ECANCELED");
+		tst_msg("Errno wasn't set to ECANCELED but %i", errno);
 		return TST_FAILED;
 	}
 
@@ -238,8 +215,7 @@ static int all_pixels(void)
 		tst_msg("Trying pixel %s", gp_pixel_type_name(pixel_type));
 
 		c = gp_pixmap_alloc(10, 10, pixel_type);
-
-		if (c == NULL) {
+		if (!c) {
 			tst_err("Failed to allocate pixmap");
 			return TST_UNTESTED;
 		}
@@ -278,10 +254,6 @@ const struct tst_suite tst_suite = {
 		{.name = "Mirror h 4x4",
 		 .tst_fn = test_mirror_h,
 		 .data = &testcase_3x3},
-
-		{.name = "Mirror h G1 16x2",
-		 .tst_fn = test_mirror_h,
-		 .data = &testcase_G1_16x2},
 
 		{.name = "Mirror h Callback Abort",
 		 .tst_fn = test_abort},
