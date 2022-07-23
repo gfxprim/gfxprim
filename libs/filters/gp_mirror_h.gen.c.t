@@ -5,6 +5,7 @@
  * Copyright (C) 2009-2014 Cyril Hrubis <metan@ucw.cz>
  */
 
+#include <errno.h>
 #include <core/gp_get_put_pixel.h>
 #include <core/gp_debug.h>
 #include <filters/gp_rotate.h>
@@ -27,8 +28,10 @@ static int mirror_h_raw_{{ ps.suffix }}(const gp_pixmap *src,
 			gp_putpixel_raw_{{ ps.suffix }}(dst, xm, y, tmp);
 		}
 
-		if (gp_progress_cb_report(callback, 2 * x, src->w, src->h))
+		if (gp_progress_cb_report(callback, 2 * x, src->w, src->h)) {
+			errno = ECANCELED;
 			return 1;
+		}
 	}
 
 	/* Copy the middle odd line */
