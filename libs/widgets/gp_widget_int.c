@@ -239,6 +239,7 @@ static void spin_render(gp_widget *self, const gp_offset *offset,
 	unsigned int s = spin_buttons_width(ctx);
 	unsigned int sy = (gp_text_ascent(ctx->font)/2 + ctx->padd)/5;
 	unsigned int sx = 2 * sy;
+	struct gp_widget_int *spin = self->spin;
 
 	(void)flags;
 
@@ -246,7 +247,7 @@ static void spin_render(gp_widget *self, const gp_offset *offset,
 
 	gp_pixel color = self->focused ? ctx->sel_color : ctx->text_color;
 
-	if (self->spin->alert) {
+	if (spin->alert) {
 		color = ctx->alert_color;
 		gp_widget_render_timer(self, GP_TIMER_RESCHEDULE, 500);
 	}
@@ -256,7 +257,7 @@ static void spin_render(gp_widget *self, const gp_offset *offset,
 
 	gp_print(ctx->buf, ctx->font, x + w - s - ctx->padd, y + ctx->padd,
 		 GP_ALIGN_LEFT | GP_VALIGN_BELOW,
-		 ctx->text_color, ctx->bg_color, "%i", self->spin->val);
+		 ctx->text_color, ctx->bg_color, "%i", spin->val);
 
 
 	gp_coord rx = x + w - s;
@@ -264,8 +265,12 @@ static void spin_render(gp_widget *self, const gp_offset *offset,
 	gp_vline_xyh(ctx->buf, rx-1, y, h, color);
 	gp_hline_xyw(ctx->buf, rx, y + h/2, s, color);
 
-	gp_symbol(ctx->buf, x + w - s/2 - 1, y + h/4, sx, sy, GP_TRIANGLE_UP, ctx->text_color);
-	gp_symbol(ctx->buf, x + w - s/2 - 1, y + (3*h)/4, sx, sy, GP_TRIANGLE_DOWN, ctx->text_color);
+	gp_pixel arr_col;
+
+	arr_col = spin->val >= spin->max ? ctx->bg_color : ctx->text_color;
+	gp_symbol(ctx->buf, x + w - s/2 - 1, y + h/4, sx, sy, GP_TRIANGLE_UP, arr_col);
+	arr_col = spin->val <= spin->min ? ctx->bg_color : ctx->text_color;
+	gp_symbol(ctx->buf, x + w - s/2 - 1, y + (3*h)/4, sx, sy, GP_TRIANGLE_DOWN, arr_col);
 }
 
 static void schedule_alert(gp_widget *self)
