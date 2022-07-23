@@ -1,7 +1,7 @@
 TOPDIR=../..
 include $(TOPDIR)/pre.mk
 
-CSOURCES=vec.c matrix.c vec_str.c list.c htable.c
+CSOURCES=vec.c matrix.c vec_str.c list.c htable.c utf.c
 APPS=vec matrix vec_str list htable utf
 
 include ../tests.mk
