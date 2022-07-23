@@ -1005,7 +1005,7 @@ int gp_read_png_ex(gp_io *io, gp_pixmap **img,
 
 	if (ret != GP_ARRAY_SIZE(header) - 1) {
 		GP_DEBUG(1, "Failed to read IHDR chunk");
-		errno = EINVAL;
+		errno = EIO;
 		return 1;
 	}
 
