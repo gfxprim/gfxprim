@@ -31,7 +31,12 @@ static int test_load(struct test *test)
 	img = gp_container_load(zip, NULL);
 
 	if (!img) {
-		tst_msg("Failed to load image");
+		if (!errno) {
+			tst_msg("No images found, support not compiled in?");
+			return TST_UNTESTED;
+		}
+
+		tst_msg("Failed to load image: %s", strerror(errno));
 		return TST_FAILED;
 	}
 
@@ -85,11 +90,10 @@ static int no_images(const char *path)
 		ret = TST_FAILED;
 	}
 
-	//TODO: Redesign container interface
-//	if (errno) {
-//		tst_msg("Get errno %d (%s)", errno, strerror(errno));
-//		ret = TST_FAILED;
-//	}
+	if (errno) {
+		tst_msg("Get errno %d (%s)", errno, strerror(errno));
+		ret = TST_FAILED;
+	}
 
 	gp_container_close(zip);
 

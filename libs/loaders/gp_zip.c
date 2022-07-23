@@ -150,7 +150,7 @@ static int zip_load_header(gp_io *io, struct zip_local_header *header)
 	/* Central directory -> end of archive */
 	case 0x01:
 		GP_DEBUG(1, "Reached end of the archive");
-		return EINVAL;
+		return ENOENT;
 	break;
 	/* File header */
 	case 0x03:
@@ -360,7 +360,12 @@ static int zip_load_next(gp_container *self, gp_pixmap **img,
 
 	do {
 		err = zip_next_file(priv, img, storage, callback);
-	} while (!*img && errno == 0);
+	} while (!*img && err == 0);
+
+	if (err == ENOENT)
+		errno = 0;
+	else
+		errno = err;
 
 	if (err)
 		return 1;
