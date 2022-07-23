@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 #
 # Heavily based on http://sourceforge.net/projects/bmptestsuite/
 #                  by David Costanzo

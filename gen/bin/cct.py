@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 #
 # Distributed under GPLv2.1 or any later
 #
@@ -126,7 +126,7 @@ def transform(filename, lines, include_dirs, startindent, indent_depth):
     return out
 
 header = [
-    "#!/usr/bin/env python",
+    "#!/usr/bin/env python3",
     "#",
     "# Generated file do _not_ edit by hand!",
     "#",
