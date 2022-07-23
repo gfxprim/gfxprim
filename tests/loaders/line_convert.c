@@ -50,6 +50,11 @@ static int xRGB_to_BGR_jpg(void)
 	}
 
 	if (gp_save_jpg(src, "test.jpg", NULL)) {
+		if (errno == ENOSYS) {
+			tst_msg("jpeg not supported");
+			return TST_UNTESTED;
+		}
+
 		tst_msg("Saving failed");
 		return TST_FAILED;
 	}
