@@ -76,7 +76,7 @@ static inline void print(gp_pixmap *p)
 static inline int compare_pixmaps(gp_pixmap *p1, gp_pixmap *p2)
 {
 	gp_size x, y;
-	print(p1);
+
 	for (x = 0; x < p1->w; x++) {
 		for (y = 0; y < p1->h; y++) {
 			gp_pixel px1 = gp_getpixel_raw_8BPP(p1, x, y);
