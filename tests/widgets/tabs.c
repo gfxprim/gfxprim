@@ -212,20 +212,24 @@ static int tab_by_child(void)
 
 	gp_widget_tabs_put(tabs, 1, label);
 
+	tst_msg("Getting tab by child when present");
 	ret = gp_widget_tabs_tab_by_child(tabs, label);
 	if (ret != 1) {
 		tst_msg("gp_widget_tabs_tab_by_child() returned %i expected 1",  ret);
 		return TST_FAILED;
 	}
 
-	gp_widget_tabs_del(tabs, 1);
+	gp_widget_tabs_rem(tabs, 1);
 
+	tst_msg("Getting tab by child when not present");
 	ret = gp_widget_tabs_tab_by_child(tabs, label);
 	if (ret != -1) {
 		tst_msg("gp_widget_tabs_tab_by_child() returned %i expected 1",  ret);
 		return TST_FAILED;
 	}
 
+	tst_msg("Freeing tabs widget");
+	gp_widget_free(label);
 	gp_widget_free(tabs);
 
 	return TST_SUCCESS;
