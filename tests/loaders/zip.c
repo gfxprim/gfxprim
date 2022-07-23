@@ -24,6 +24,11 @@ static int test_load(struct test *test)
 	int ret = TST_SUCCESS;
 
 	if (!zip) {
+		if (errno == ENOSYS) {
+			tst_msg("Zlib support not compiled in?");
+			return TST_UNTESTED;
+		}
+
 		tst_msg("Failed to open zip");
 		return TST_FAILED;
 	}
@@ -80,6 +85,11 @@ static int no_images(const char *path)
 	int ret = TST_SUCCESS;
 
 	if (!zip) {
+		if (errno == ENOSYS) {
+			tst_msg("Zlib support not compiled in?");
+			return TST_UNTESTED;
+		}
+
 		tst_msg("Failed to open zip");
 		return TST_FAILED;
 	}
