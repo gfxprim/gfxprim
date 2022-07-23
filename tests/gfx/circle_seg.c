@@ -216,25 +216,18 @@ static int test_circle_r_2_s_1_4(void)
 	                   GP_CIRCLE_SEG1|GP_CIRCLE_SEG4);
 }
 
-static int test_circle_r__2_s_1_3(void)
-{
-	return test_circle(circle_r_2_s_1_3_11x11, 11, 11, 5, 5, -2,
-	                   GP_CIRCLE_SEG1|GP_CIRCLE_SEG3);
-}
-
 const struct tst_suite tst_suite = {
-	.suite_name = "GFX CircleSeg Testsuite",
+	.suite_name = "GFX circle_seg Testsuite",
 	.tests = {
-		{.name = "CircleSeg Seg0 r=0", .tst_fn = test_circle_r_0_s_0},
-		{.name = "CircleSeg Seg1 r=0", .tst_fn = test_circle_r_0_s_1},
-		{.name = "CircleSeg Seg1 r=1", .tst_fn = test_circle_r_1_s_1},
-		{.name = "CircleSeg Seg2 r=1", .tst_fn = test_circle_r_1_s_2},
-		{.name = "CircleSeg Seg3 r=1", .tst_fn = test_circle_r_1_s_3},
-		{.name = "CircleSeg Seg4 r=1", .tst_fn = test_circle_r_1_s_4},
-		{.name = "CircleSeg Seg1|2 r=2", .tst_fn = test_circle_r_2_s_1_2},
-		{.name = "CircleSeg Seg1|3 r=2", .tst_fn = test_circle_r_2_s_1_3},
-		{.name = "CircleSeg Seg1|4 r=2", .tst_fn = test_circle_r_2_s_1_4},
-		{.name = "CircleSeg Seg1|3 r=-2", .tst_fn = test_circle_r__2_s_1_3},
-		{.name = NULL}
+		{.name = "circle_seg Seg0 r=0", .tst_fn = test_circle_r_0_s_0},
+		{.name = "circle_seg Seg1 r=0", .tst_fn = test_circle_r_0_s_1},
+		{.name = "circle_seg Seg1 r=1", .tst_fn = test_circle_r_1_s_1},
+		{.name = "circle_seg Seg2 r=1", .tst_fn = test_circle_r_1_s_2},
+		{.name = "circle_seg Seg3 r=1", .tst_fn = test_circle_r_1_s_3},
+		{.name = "circle_seg Seg4 r=1", .tst_fn = test_circle_r_1_s_4},
+		{.name = "circle_seg Seg1|2 r=2", .tst_fn = test_circle_r_2_s_1_2},
+		{.name = "circle_seg Seg1|3 r=2", .tst_fn = test_circle_r_2_s_1_3},
+		{.name = "circle_seg Seg1|4 r=2", .tst_fn = test_circle_r_2_s_1_4},
+		{}
 	}
 };
