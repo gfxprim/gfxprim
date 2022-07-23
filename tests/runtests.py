@@ -117,5 +117,11 @@ def main():
 
     print('\nPoint your browser to "%s/index.html"\n' % resdir)
 
+    ret = os.system('cd framework && ./res2retval.sh "../%s"' % resdir)
+    if ret:
+        os._exit(1)
+
+    os._exit(0)
+
 if __name__ == '__main__':
     main()

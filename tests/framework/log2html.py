@@ -4,6 +4,7 @@
 # Script to convert testsuite JSON log into html page
 #
 from sys import argv
+from os import _exit
 import json
 
 #
@@ -285,6 +286,18 @@ class TestSuite:
 
         return res_dict
 
+    def retval(self):
+        res_dict = self.results()
+
+        succ = res_dict['Success']
+        skip = res_dict['Skipped']
+        untested = res_dict['Untested']
+        fail = res_dict['Failed']
+        if fail > 0:
+            return 1;
+
+        return 0;
+
     # Creates table row with a link to results page
     def html_summary(self, link):
         print('    <tr>')
@@ -320,13 +333,19 @@ class TestSuite:
 def main():
     filename = 'log.json'
     summary = False
+    just_exit = False
     pars = 1
     link = ''
 
-    if (len(argv) > 1 and argv[1] == '-s'):
-        link = argv[2]
-        pars = 3
-        summary = True
+    if (len(argv) > 1):
+        if (argv[1] == '-s'):
+            link = argv[2]
+            pars = 3
+            summary = True
+
+        if (argv[1] == '-e'):
+            pars = 2
+            just_exit = True
 
     if (len(argv) > pars):
         filename = argv[pars]
@@ -338,11 +357,15 @@ def main():
 
     # convert to python objects
     test_suite = TestSuite(data)
-   
+
+    if (just_exit):
+        retval = test_suite.retval();
+        _exit(retval);
+
     if (summary):
         test_suite.html_summary(link)
     else:
         test_suite.html()
 
-if __name__ == '__main__': 
+if __name__ == '__main__':
     main()
