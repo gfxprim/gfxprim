@@ -1,8 +1,12 @@
+GFXprim
+=======
+
 GFXprim is Open-source modular 2D bitmap graphics library with
 emphasis on speed and correctness. It comes batteries included, but
 free from bloat.
 
 It includes:
+
 * Graphical user interface widgets with object hierarchy and
   declarative layouts.
 * Clean and non-intrusive implementations of elementary data
