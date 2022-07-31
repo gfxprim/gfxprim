@@ -18,6 +18,11 @@ jobs:
         run: make
       - name: tests
         run: cd tests && ./runtests.py
+      - name: upload-test-results
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-results-without-libs
+          path: tests/results_*/
 
   build-with-libs:
     runs-on: ubuntu-latest
@@ -40,6 +45,11 @@ jobs:
         run: make
       - name: tests
         run: cd tests && ./runtests.py
+      - name: upload-test-results
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-results-with-libs
+          path: tests/results_*/
 
   build-with-sdl-1-2:
     runs-on: ubuntu-latest
@@ -56,3 +66,8 @@ jobs:
         run: make
       - name: tests
         run: cd tests && ./runtests.py
+      - name: upload-test-results
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-results-SDL-1.2
+          path: tests/results_*/
