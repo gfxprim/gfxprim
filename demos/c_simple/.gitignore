@@ -39,3 +39,4 @@ SDL2_glue
 /matrix
 bbox
 task_example
+json_writer

@@ -161,7 +161,7 @@ static int mod_idx(struct mods *mods, uint32_t key)
 	return -1;
 }
 
-static int get_key_char(gp_json_buf *json, gp_json_val *val,
+static int get_key_char(gp_json_reader *json, gp_json_val *val,
                         int *key, uint32_t *utf_ch)
 {
 	*key = 0;
@@ -196,7 +196,7 @@ static int get_key_char(gp_json_buf *json, gp_json_val *val,
 	return 0;
 }
 
-static struct map *load_map_keys(gp_json_buf *json, gp_json_val *val)
+static struct map *load_map_keys(gp_json_reader *json, gp_json_val *val)
 {
 	int min_key = -1;
 	int max_key = -1;
@@ -269,7 +269,7 @@ enum map_keys {
 	MAP_MODS,
 };
 
-static uint32_t parse_mod_state(gp_json_buf *json, gp_json_val *val, struct mods *mods)
+static uint32_t parse_mod_state(gp_json_reader *json, gp_json_val *val, struct mods *mods)
 {
 	uint32_t ret = 0;
 	int key, idx;
@@ -298,7 +298,7 @@ static uint32_t parse_mod_state(gp_json_buf *json, gp_json_val *val, struct mods
 	return ret;
 }
 
-static void load_map_mods(gp_json_buf *json, gp_json_val *val, struct mods *mods, struct map_mods *map_mods)
+static void load_map_mods(gp_json_reader *json, gp_json_val *val, struct mods *mods, struct map_mods *map_mods)
 {
 	uint32_t i = 0;
 
@@ -321,7 +321,7 @@ static void load_map_mods(gp_json_buf *json, gp_json_val *val, struct mods *mods
 	map_mods->cnt = i;
 }
 
-static struct map *load_map(gp_json_buf *json, gp_json_val *val, struct mods *mods)
+static struct map *load_map(gp_json_reader *json, gp_json_val *val, struct mods *mods)
 {
 	struct map *ret = NULL;
 	struct map_mods map_mods = {};
@@ -371,7 +371,7 @@ static struct gp_json_obj mods_obj_filter = {
 	.attr_cnt = GP_ARRAY_SIZE(mods_attrs),
 };
 
-static struct mods *load_mods(gp_json_buf *json, gp_json_val *val)
+static struct mods *load_mods(gp_json_reader *json, gp_json_val *val)
 {
 	unsigned int mods_cnt = 0, i = 0;
 	struct mods *ret;
@@ -441,7 +441,7 @@ enum keymap_keys {
 	MODS,
 };
 
-static int load_keymap(gp_json_buf *json, struct map **rmaps, struct mods **rmods)
+static int load_keymap(gp_json_reader *json, struct map **rmaps, struct mods **rmods)
 {
 	char buf[128];
 	gp_json_val val = {
@@ -480,7 +480,7 @@ static int load_keymap(gp_json_buf *json, struct map **rmaps, struct mods **rmod
 		}
 	}
 
-	err = gp_json_is_err(json);
+	err = gp_json_reader_err(json);
 	if (err)
 		gp_json_err_print(json);
 	else if (!gp_json_empty(json))
@@ -579,7 +579,7 @@ static int keymap_key(gp_keymap *self, gp_event_queue *queue, gp_event *ev)
 	return 0;
 }
 
-static gp_keymap *keymap_json_load(gp_json_buf *json)
+static gp_keymap *keymap_json_load(gp_json_reader *json)
 {
 	gp_keymap *keymap;
 
@@ -599,13 +599,7 @@ static gp_keymap *keymap_json_load(gp_json_buf *json)
 
 gp_keymap *gp_keymap_json_load(const char *json_str)
 {
-	gp_json_buf json = {
-		.json = json_str,
-		.len = strlen(json_str),
-		.max_depth = GP_JSON_RECURSION_MAX,
-		.print = GP_JSON_PRINT,
-		.print_priv = GP_JSON_PRINT_PRIV,
-	};
+	gp_json_reader json = GP_JSON_READER_INIT(json_str, strlen(json_str));
 
 	return keymap_json_load(&json);
 }

@@ -642,7 +642,7 @@ static const gp_json_obj_attr header_attrs[] = {
 	GP_JSON_OBJ_ATTR("tattr", GP_JSON_STR),
 };
 
-static int parse_order(gp_json_buf *json, gp_json_val *val, int *desc)
+static int parse_order(gp_json_reader *json, gp_json_val *val, int *desc)
 {
 	if (!strcmp(val->val_str, "asc")) {
 		*desc = 0;
@@ -676,7 +676,7 @@ static const gp_json_obj header_obj_filter = {
 	.attr_cnt = GP_ARRAY_SIZE(header_attrs),
 };
 
-static gp_widget_table_header *parse_header(gp_json_buf *json, gp_json_val *val,
+static gp_widget_table_header *parse_header(gp_json_reader *json, gp_json_val *val,
                                             gp_widget_table_col_dsc *col_map,
                                             int *cols, int *sort_by_col, int *desc)
 {
@@ -779,7 +779,7 @@ static const gp_json_obj obj_filter = {
 	.attr_cnt = GP_ARRAY_SIZE(attrs),
 };
 
-static gp_widget *json_to_table(gp_json_buf *json, gp_json_val *val, gp_widget_json_ctx *ctx)
+static gp_widget *json_to_table(gp_json_reader *json, gp_json_val *val, gp_widget_json_ctx *ctx)
 {
 	int cols = -1, min_rows = -1;
 	gp_widget_table_header *table_header = NULL;

@@ -28,7 +28,7 @@ APPS=backend_example loaders_example loaders filters_symmetry gfx_koch\
      loaders_register blittest textaligntest x11_windows\
      debug_handler gaussian_noise version pretty_print timers\
      zip_container backend_timers_example memory_io data_storage\
-     vector matrix proxy_backend bbox task_example
+     vector matrix proxy_backend bbox task_example json_writer
 
 ifneq ($(SDL_CONFIG),)
 APPS+=SDL_glue

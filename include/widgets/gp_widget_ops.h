@@ -120,7 +120,7 @@ struct gp_widget_ops {
 	/*
 	 * json_object -> widget converter.
 	 */
-	gp_widget *(*from_json)(gp_json_buf *json, gp_json_val *val, gp_widget_json_ctx *ctx);
+	gp_widget *(*from_json)(gp_json_reader *json, gp_json_val *val, gp_widget_json_ctx *ctx);
 
 	/* id used for JSON loader */
 	const char *id;

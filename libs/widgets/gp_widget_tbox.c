@@ -822,7 +822,7 @@ static const gp_json_obj obj_filter = {
 	.attr_cnt = GP_ARRAY_SIZE(attrs),
 };
 
-static gp_widget *json_to_tbox(gp_json_buf *json, gp_json_val *val, gp_widget_json_ctx *ctx)
+static gp_widget *json_to_tbox(gp_json_reader *json, gp_json_val *val, gp_widget_json_ctx *ctx)
 {
 	char *text = NULL, *sel_delim = NULL;
 	int len = 0;

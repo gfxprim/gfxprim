@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 /*
- * Copyright (C) 2021 Cyril Hrubis <metan@ucw.cz>
+ * Copyright (C) 2021-2022 Cyril Hrubis <metan@ucw.cz>
  */
 
 #include <sys/types.h>
@@ -13,14 +13,14 @@
 #include <stdint.h>
 
 #include <utils/gp_utf.h>
-#include <utils/gp_json.h>
+#include <utils/gp_json_reader.h>
 
-static inline int buf_empty(struct gp_json_buf *buf)
+static inline int buf_empty(gp_json_reader *buf)
 {
 	return buf->off >= buf->len;
 }
 
-static int eatws(struct gp_json_buf *buf)
+static int eatws(gp_json_reader *buf)
 {
 	while (!buf_empty(buf)) {
 		switch (buf->json[buf->off]) {
@@ -39,7 +39,7 @@ ret:
 	return buf_empty(buf);
 }
 
-static char getb(struct gp_json_buf *buf)
+static char getb(gp_json_reader *buf)
 {
 	if (buf_empty(buf))
 		return 0;
@@ -47,7 +47,7 @@ static char getb(struct gp_json_buf *buf)
 	return buf->json[buf->off++];
 }
 
-static char peekb_off(struct gp_json_buf *buf, size_t off)
+static char peekb_off(gp_json_reader *buf, size_t off)
 {
 	if (buf->off + off >= buf->len)
 		return 0;
@@ -55,7 +55,7 @@ static char peekb_off(struct gp_json_buf *buf, size_t off)
 	return buf->json[buf->off + off];
 }
 
-static char peekb(struct gp_json_buf *buf)
+static char peekb(gp_json_reader *buf)
 {
 	if (buf_empty(buf))
 		return 0;
@@ -63,7 +63,7 @@ static char peekb(struct gp_json_buf *buf)
 	return buf->json[buf->off];
 }
 
-static int eatb(struct gp_json_buf *buf, char ch)
+static int eatb(gp_json_reader *buf, char ch)
 {
 	if (peekb(buf) != ch)
 		return 0;
@@ -72,7 +72,7 @@ static int eatb(struct gp_json_buf *buf, char ch)
 	return 1;
 }
 
-static int eatb2(struct gp_json_buf *buf, char ch1, char ch2)
+static int eatb2(gp_json_reader *buf, char ch1, char ch2)
 {
 	if (peekb(buf) != ch1 && peekb(buf) != ch2)
 		return 0;
@@ -81,7 +81,7 @@ static int eatb2(struct gp_json_buf *buf, char ch1, char ch2)
 	return 1;
 }
 
-static int eatstr(struct gp_json_buf *buf, const char *str)
+static int eatstr(gp_json_reader *buf, const char *str)
 {
 	while (*str) {
 		if (!eatb(buf, *str))
@@ -106,7 +106,7 @@ static int hex2val(unsigned char b)
 	}
 }
 
-static int32_t parse_ucode_cp(struct gp_json_buf *buf)
+static int32_t parse_ucode_cp(gp_json_reader *buf)
 {
 	int ret = 0, v, i;
 
@@ -123,7 +123,7 @@ err:
 	return -1;
 }
 
-static unsigned int parse_ucode_esc(struct gp_json_buf *buf, char *str,
+static unsigned int parse_ucode_esc(gp_json_reader *buf, char *str,
                                     size_t off, size_t len)
 {
 	int32_t ucode = parse_ucode_cp(buf);
@@ -142,7 +142,7 @@ static unsigned int parse_ucode_esc(struct gp_json_buf *buf, char *str,
 	return gp_to_utf8(ucode, str+off);
 }
 
-static int copy_str(struct gp_json_buf *buf, char *str, size_t len)
+static int copy_str(gp_json_reader *buf, char *str, size_t len)
 {
 	size_t pos = 0;
 	int esc = 0;
@@ -224,7 +224,7 @@ static int copy_str(struct gp_json_buf *buf, char *str, size_t len)
 	return 1;
 }
 
-static int copy_id_str(struct gp_json_buf *buf, char *str, size_t len)
+static int copy_id_str(gp_json_reader *buf, char *str, size_t len)
 {
 	size_t pos = 0;
 
@@ -278,7 +278,7 @@ static int is_digit(char b)
 	}
 }
 
-static int get_int(struct gp_json_buf *buf, struct gp_json_val *res)
+static int get_int(gp_json_reader *buf, struct gp_json_val *res)
 {
 	long val = 0;
 	int sign = 1;
@@ -311,7 +311,7 @@ static int get_int(struct gp_json_buf *buf, struct gp_json_val *res)
 	return 0;
 }
 
-static int eat_digits(struct gp_json_buf *buf)
+static int eat_digits(gp_json_reader *buf)
 {
 	if (!is_digit(peekb(buf))) {
 		gp_json_err(buf, "Expected digit(s)");
@@ -324,7 +324,7 @@ static int eat_digits(struct gp_json_buf *buf)
 	return 0;
 }
 
-static int get_float(struct gp_json_buf *buf, struct gp_json_val *res)
+static int get_float(gp_json_reader *buf, struct gp_json_val *res)
 {
 	off_t start = buf->off;
 
@@ -368,7 +368,7 @@ static int get_float(struct gp_json_buf *buf, struct gp_json_val *res)
 	return 0;
 }
 
-static int get_bool(struct gp_json_buf *buf, struct gp_json_val *res)
+static int get_bool(gp_json_reader *buf, struct gp_json_val *res)
 {
 	switch (peekb(buf)) {
 	case 'f':
@@ -392,7 +392,7 @@ static int get_bool(struct gp_json_buf *buf, struct gp_json_val *res)
 	return 0;
 }
 
-static int get_null(struct gp_json_buf *buf)
+static int get_null(gp_json_reader *buf)
 {
 	if (!eatstr(buf, "null")) {
 		gp_json_err(buf, "Expected 'null'");
@@ -426,7 +426,7 @@ const char *gp_json_type_name(enum gp_json_type type)
 	}
 }
 
-int gp_json_obj_skip(struct gp_json_buf *buf)
+int gp_json_obj_skip(gp_json_reader *buf)
 {
 	struct gp_json_val res = {};
 
@@ -448,7 +448,7 @@ int gp_json_obj_skip(struct gp_json_buf *buf)
 	return 0;
 }
 
-int gp_json_arr_skip(struct gp_json_buf *buf)
+int gp_json_arr_skip(gp_json_reader *buf)
 {
 	struct gp_json_val res = {};
 
@@ -470,7 +470,7 @@ int gp_json_arr_skip(struct gp_json_buf *buf)
 	return 0;
 }
 
-static enum gp_json_type next_num_type(struct gp_json_buf *buf)
+static enum gp_json_type next_num_type(gp_json_reader *buf)
 {
 	size_t off = 0;
 
@@ -491,7 +491,7 @@ static enum gp_json_type next_num_type(struct gp_json_buf *buf)
 	return GP_JSON_VOID;
 }
 
-enum gp_json_type gp_json_next_type(struct gp_json_buf *buf)
+enum gp_json_type gp_json_next_type(gp_json_reader *buf)
 {
 	if (eatws(buf)) {
 		gp_json_err(buf, "Unexpected end");
@@ -523,7 +523,7 @@ enum gp_json_type gp_json_next_type(struct gp_json_buf *buf)
 	}
 }
 
-enum gp_json_type gp_json_start(struct gp_json_buf *buf)
+enum gp_json_type gp_json_start(gp_json_reader *buf)
 {
 	enum gp_json_type type = gp_json_next_type(buf);
 
@@ -541,7 +541,7 @@ enum gp_json_type gp_json_start(struct gp_json_buf *buf)
 	return type;
 }
 
-static int get_value(struct gp_json_buf *buf, struct gp_json_val *res)
+static int get_value(gp_json_reader *buf, struct gp_json_val *res)
 {
 	int ret = 0;
 
@@ -583,7 +583,7 @@ static int get_value(struct gp_json_buf *buf, struct gp_json_val *res)
 	return 1;
 }
 
-static int pre_next(struct gp_json_buf *buf, struct gp_json_val *res)
+static int pre_next(gp_json_reader *buf, struct gp_json_val *res)
 {
 	if (!eatb(buf, ',')) {
 		gp_json_err(buf, "Expected ','");
@@ -600,7 +600,7 @@ static int pre_next(struct gp_json_buf *buf, struct gp_json_val *res)
 	return 0;
 }
 
-static int check_end(struct gp_json_buf *buf, struct gp_json_val *res, char b)
+static int check_end(gp_json_reader *buf, struct gp_json_val *res, char b)
 {
 	if (eatws(buf)) {
 		gp_json_err(buf, "Unexpected end");
@@ -668,7 +668,7 @@ size_t gp_json_arr_lookup(const void *list, size_t memb_size, size_t list_len,
 	return -1;
 }
 
-static int skip_obj_val(struct gp_json_buf *buf)
+static int skip_obj_val(gp_json_reader *buf)
 {
 	struct gp_json_val dummy = {};
 
@@ -685,7 +685,7 @@ static int skip_obj_val(struct gp_json_buf *buf)
 	}
 }
 
-static int obj_next(struct gp_json_buf *buf, struct gp_json_val *res)
+static int obj_next(gp_json_reader *buf, struct gp_json_val *res)
 {
 	if (copy_id_str(buf, res->id, sizeof(res->id)))
 		return 0;
@@ -693,7 +693,7 @@ static int obj_next(struct gp_json_buf *buf, struct gp_json_val *res)
 	return get_value(buf, res);
 }
 
-static int obj_pre_next(struct gp_json_buf *buf, struct gp_json_val *res)
+static int obj_pre_next(gp_json_reader *buf, struct gp_json_val *res)
 {
 	if (check_end(buf, res, '}'))
 		return 1;
@@ -704,7 +704,7 @@ static int obj_pre_next(struct gp_json_buf *buf, struct gp_json_val *res)
 	return 0;
 }
 
-static int obj_next_filter(struct gp_json_buf *buf, struct gp_json_val *res,
+static int obj_next_filter(gp_json_reader *buf, struct gp_json_val *res,
                            const struct gp_json_obj *obj, const struct gp_json_obj *ign)
 {
 	const struct gp_json_obj_attr *attr;
@@ -746,9 +746,9 @@ static int obj_next_filter(struct gp_json_buf *buf, struct gp_json_val *res,
 	}
 }
 
-static int check_err(struct gp_json_buf *buf, struct gp_json_val *res)
+static int check_err(gp_json_reader *buf, struct gp_json_val *res)
 {
-	if (gp_json_is_err(buf)) {
+	if (gp_json_reader_err(buf)) {
 		res->type = GP_JSON_VOID;
 		return 1;
 	}
@@ -756,7 +756,7 @@ static int check_err(struct gp_json_buf *buf, struct gp_json_val *res)
 	return 0;
 }
 
-int gp_json_obj_next_filter(struct gp_json_buf *buf, struct gp_json_val *res,
+int gp_json_obj_next_filter(gp_json_reader *buf, struct gp_json_val *res,
                             const struct gp_json_obj *obj, const struct gp_json_obj *ign)
 {
 	if (check_err(buf, res))
@@ -768,7 +768,7 @@ int gp_json_obj_next_filter(struct gp_json_buf *buf, struct gp_json_val *res,
 	return obj_next_filter(buf, res, obj, ign);
 }
 
-int gp_json_obj_next(struct gp_json_buf *buf, struct gp_json_val *res)
+int gp_json_obj_next(gp_json_reader *buf, struct gp_json_val *res)
 {
 	if (check_err(buf, res))
 		return 0;
@@ -779,7 +779,7 @@ int gp_json_obj_next(struct gp_json_buf *buf, struct gp_json_val *res)
 	return obj_next(buf, res);
 }
 
-static int any_first(struct gp_json_buf *buf, char b)
+static int any_first(gp_json_reader *buf, char b)
 {
 	if (eatws(buf)) {
 		gp_json_err(buf, "Unexpected end");
@@ -801,7 +801,7 @@ static int any_first(struct gp_json_buf *buf, char b)
 	return 0;
 }
 
-int gp_json_obj_first_filter(struct gp_json_buf *buf, struct gp_json_val *res,
+int gp_json_obj_first_filter(gp_json_reader *buf, struct gp_json_val *res,
                              const struct gp_json_obj *obj, const struct gp_json_obj *ign)
 {
 	if (check_err(buf, res))
@@ -816,7 +816,7 @@ int gp_json_obj_first_filter(struct gp_json_buf *buf, struct gp_json_val *res,
 	return obj_next_filter(buf, res, obj, ign);
 }
 
-int gp_json_obj_first(struct gp_json_buf *buf, struct gp_json_val *res)
+int gp_json_obj_first(gp_json_reader *buf, struct gp_json_val *res)
 {
 	if (check_err(buf, res))
 		return 0;
@@ -830,12 +830,12 @@ int gp_json_obj_first(struct gp_json_buf *buf, struct gp_json_val *res)
 	return obj_next(buf, res);
 }
 
-static int arr_next(struct gp_json_buf *buf, struct gp_json_val *res)
+static int arr_next(gp_json_reader *buf, struct gp_json_val *res)
 {
 	return get_value(buf, res);
 }
 
-int gp_json_arr_first(struct gp_json_buf *buf, struct gp_json_val *res)
+int gp_json_arr_first(gp_json_reader *buf, struct gp_json_val *res)
 {
 	if (check_err(buf, res))
 		return 0;
@@ -849,7 +849,7 @@ int gp_json_arr_first(struct gp_json_buf *buf, struct gp_json_val *res)
 	return arr_next(buf, res);
 }
 
-int gp_json_arr_next(struct gp_json_buf *buf, struct gp_json_val *res)
+int gp_json_arr_next(gp_json_reader *buf, struct gp_json_val *res)
 {
 	if (check_err(buf, res))
 		return 0;
@@ -863,7 +863,7 @@ int gp_json_arr_next(struct gp_json_buf *buf, struct gp_json_val *res)
 	return arr_next(buf, res);
 }
 
-void gp_json_err(struct gp_json_buf *buf, const char *fmt, ...)
+void gp_json_err(gp_json_reader *buf, const char *fmt, ...)
 {
 	va_list va;
 
@@ -872,7 +872,7 @@ void gp_json_err(struct gp_json_buf *buf, const char *fmt, ...)
 	va_end(va);
 }
 
-static void vprintf_line(gp_json_buf *buf, const char *fmt, va_list va)
+static void vprintf_line(gp_json_reader *buf, const char *fmt, va_list va)
 {
 	char line[GP_JSON_ERR_MAX+1];
 
@@ -880,10 +880,10 @@ static void vprintf_line(gp_json_buf *buf, const char *fmt, va_list va)
 
 	line[GP_JSON_ERR_MAX] = 0;
 
-	buf->print(buf->print_priv, line);
+	buf->err_print(buf->err_print_priv, line);
 }
 
-static void printf_line(gp_json_buf *buf, const char *fmt, ...)
+static void printf_line(gp_json_reader *buf, const char *fmt, ...)
 {
 	va_list va;
 
@@ -892,7 +892,7 @@ static void printf_line(gp_json_buf *buf, const char *fmt, ...)
 	va_end(va);
 }
 
-static void printf_json_line(gp_json_buf *buf, size_t line_nr, const char *buf_pos)
+static void printf_json_line(gp_json_reader *buf, size_t line_nr, const char *buf_pos)
 {
 	char line[GP_JSON_ERR_MAX+1];
 	size_t plen, i;
@@ -904,10 +904,10 @@ static void printf_json_line(gp_json_buf *buf, size_t line_nr, const char *buf_p
 
 	line[i+plen] = 0;
 
-	buf->print(buf->print_priv, line);
+	buf->err_print(buf->err_print_priv, line);
 }
 
-static void print_arrow(gp_json_buf *buf, const char *buf_pos, size_t count)
+static void print_arrow(gp_json_reader *buf, const char *buf_pos, size_t count)
 {
 	char line[count + 7];
 	size_t i;
@@ -922,14 +922,14 @@ static void print_arrow(gp_json_buf *buf, const char *buf_pos, size_t count)
 	line[count+5] = '^';
 	line[count+6] = 0;
 
-	buf->print(buf->print_priv, line);
+	buf->err_print(buf->err_print_priv, line);
 }
 
 #define ERR_LINES 10
 
 #define MIN(A, B) ((A < B) ? (A) : (B))
 
-static void print_snippet(struct gp_json_buf *buf, const char *type)
+static void print_snippet(gp_json_reader *buf, const char *type)
 {
 	ssize_t i;
 	const char *lines[ERR_LINES] = {};
@@ -951,7 +951,7 @@ static void print_snippet(struct gp_json_buf *buf, const char *type)
 	}
 
 	printf_line(buf, "%s at line %03zu", type, cur_line);
-	buf->print(buf->print_priv, "");
+	buf->err_print(buf->err_print_priv, "");
 
 	size_t idx = 0;
 
@@ -963,20 +963,20 @@ static void print_snippet(struct gp_json_buf *buf, const char *type)
 	print_arrow(buf, lines[idx], last_off);
 }
 
-void gp_json_err_print(struct gp_json_buf *buf)
+void gp_json_err_print(gp_json_reader *buf)
 {
-	if (!buf->print)
+	if (!buf->err_print)
 		return;
 
 	print_snippet(buf, "Parse error");
-	buf->print(buf->print_priv, buf->err);
+	buf->err_print(buf->err_print_priv, buf->err);
 }
 
-void gp_json_warn(struct gp_json_buf *buf, const char *fmt, ...)
+void gp_json_warn(gp_json_reader *buf, const char *fmt, ...)
 {
 	va_list va;
 
-	if (!buf->print)
+	if (!buf->err_print)
 		return;
 
 	print_snippet(buf, "Warning");
@@ -986,16 +986,16 @@ void gp_json_warn(struct gp_json_buf *buf, const char *fmt, ...)
 	va_end(va);
 }
 
-void gp_json_print(void *print_priv, const char *line)
+void gp_json_print(void *err_print_priv, const char *line)
 {
-	fputs(line, print_priv);
-	putc('\n', print_priv);
+	fputs(line, err_print_priv);
+	putc('\n', err_print_priv);
 }
 
-struct gp_json_buf *gp_json_load(const char *path)
+gp_json_reader *gp_json_reader_load(const char *path)
 {
 	int fd = open(path, O_RDONLY);
-	struct gp_json_buf *ret;
+	gp_json_reader *ret;
 	ssize_t res;
 	off_t len, off = 0;
 
@@ -1013,7 +1013,7 @@ struct gp_json_buf *gp_json_load(const char *path)
 		goto err0;
 	}
 
-	ret = malloc(sizeof(struct gp_json_buf) + len + 1);
+	ret = malloc(sizeof(gp_json_reader) + len + 1);
 	if (!ret) {
 		fprintf(stderr, "malloc() failed\n");
 		goto err0;
@@ -1025,8 +1025,8 @@ struct gp_json_buf *gp_json_load(const char *path)
 	ret->len = len;
 	ret->max_depth = GP_JSON_RECURSION_MAX;
 	ret->json = ret->buf;
-	ret->print = GP_JSON_PRINT;
-	ret->print_priv = GP_JSON_PRINT_PRIV;
+	ret->err_print = GP_JSON_ERR_PRINT;
+	ret->err_print_priv = GP_JSON_ERR_PRINT_PRIV;
 
 	while (off < len) {
 		res = read(fd, ret->buf + off, len - off);
@@ -1048,7 +1048,7 @@ err0:
 	return NULL;
 }
 
-void gp_json_free(struct gp_json_buf *buf)
+void gp_json_reader_free(gp_json_reader *buf)
 {
 	free(buf);
 }

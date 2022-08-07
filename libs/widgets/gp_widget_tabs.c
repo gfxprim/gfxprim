@@ -476,7 +476,7 @@ static const gp_json_obj obj_filter = {
 	.attr_cnt = GP_ARRAY_SIZE(attrs),
 };
 
-static int parse_labels(gp_json_buf *json, gp_json_val *val, struct gp_widget_tab **tabs)
+static int parse_labels(gp_json_reader *json, gp_json_val *val, struct gp_widget_tab **tabs)
 {
 	struct gp_widget_tab *tmp;
 	size_t idx;
@@ -502,7 +502,7 @@ static int parse_labels(gp_json_buf *json, gp_json_val *val, struct gp_widget_ta
 	return 0;
 }
 
-static int parse_widgets(gp_json_buf *json, gp_json_val *val,
+static int parse_widgets(gp_json_reader *json, gp_json_val *val,
                          struct gp_widget_tab *tabs, gp_widget_json_ctx *ctx)
 {
 	size_t idx = 0;
@@ -533,7 +533,7 @@ static int parse_widgets(gp_json_buf *json, gp_json_val *val,
 	return 0;
 }
 
-static gp_widget *json_to_tabs(gp_json_buf *json, gp_json_val *val, gp_widget_json_ctx *ctx)
+static gp_widget *json_to_tabs(gp_json_reader *json, gp_json_val *val, gp_widget_json_ctx *ctx)
 {
 	int active = 0;
 	struct gp_widget_tab *tabs;

@@ -64,7 +64,7 @@ struct gp_widget_json_ctx {
  *
  * @return A widget layout or a NULL in case of a failure.
  */
-gp_widget *gp_widget_from_json(gp_json_buf *json, gp_json_val *val, gp_widget_json_ctx *ctx);
+gp_widget *gp_widget_from_json(gp_json_reader *json, gp_json_val *val, gp_widget_json_ctx *ctx);
 
 /**
  * @brief Loads a widget layout given a string with JSON layout.

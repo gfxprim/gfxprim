@@ -5,3 +5,6 @@ matrix
 list
 htable
 utf
+json
+json_reader
+json_writer

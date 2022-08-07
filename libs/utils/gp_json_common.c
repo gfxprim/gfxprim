@@ -3,11 +3,10 @@
  * Copyright (C) 2021-2022 Cyril Hrubis <metan@ucw.cz>
  */
 
-#ifndef GP_JSON_H
-#define GP_JSON_H
-
 #include <utils/gp_json_common.h>
-#include <utils/gp_json_reader.h>
-#include <utils/gp_json_writer.h>
 
-#endif /* GP_JSON_H */
+void gp_json_err_handler(void *err_print_priv, const char *line)
+{
+	fputs(line, err_print_priv);
+	putc('\n', err_print_priv);
+}

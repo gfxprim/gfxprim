@@ -1144,7 +1144,7 @@ static const gp_json_obj obj_filter = {
 	.attr_cnt = GP_ARRAY_SIZE(attrs),
 };
 
-static gp_widget *json_to_stock(gp_json_buf *json, gp_json_val *val, gp_widget_json_ctx *ctx)
+static gp_widget *json_to_stock(gp_json_reader *json, gp_json_val *val, gp_widget_json_ctx *ctx)
 {
 	gp_widget_size min_size = GP_WIDGET_SIZE_DEFAULT;
 	int type = -1;

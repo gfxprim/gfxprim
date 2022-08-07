@@ -151,7 +151,7 @@ static const gp_json_obj obj_filter = {
 	.attr_cnt = GP_ARRAY_SIZE(attrs),
 };
 
-static gp_widget *json_to_int(enum gp_widget_type type, gp_json_buf *json,
+static gp_widget *json_to_int(enum gp_widget_type type, gp_json_reader *json,
                               gp_json_val *val, gp_widget_json_ctx *ctx)
 {
 	int min = 0, max = 0, ival = 0, dir = 0, val_set = 0;
@@ -377,7 +377,7 @@ static int spin_event(gp_widget *self, const gp_widget_render_ctx *ctx, gp_event
 	return 0;
 }
 
-static gp_widget *json_to_spin(gp_json_buf *json, gp_json_val *val, gp_widget_json_ctx *ctx)
+static gp_widget *json_to_spin(gp_json_reader *json, gp_json_val *val, gp_widget_json_ctx *ctx)
 {
 	return json_to_int(GP_WIDGET_SPINNER, json, val, ctx);
 }
@@ -571,7 +571,7 @@ static int slider_event(gp_widget *self, const gp_widget_render_ctx *ctx, gp_eve
 	return 0;
 }
 
-static gp_widget *json_to_slider(gp_json_buf *json, gp_json_val *val, gp_widget_json_ctx *ctx)
+static gp_widget *json_to_slider(gp_json_reader *json, gp_json_val *val, gp_widget_json_ctx *ctx)
 {
 	return json_to_int(GP_WIDGET_SLIDER, json, val, ctx);
 }

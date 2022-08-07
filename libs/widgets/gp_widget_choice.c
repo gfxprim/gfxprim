@@ -85,7 +85,7 @@ static gp_widget *alloc_choice(unsigned int widget_type,
 }
 
 static gp_widget *parse_choices(unsigned int widget_type,
-                                gp_json_buf *json, gp_json_val *val)
+                                gp_json_reader *json, gp_json_val *val)
 {
 	gp_json_state state = gp_json_state_start(json);
 	gp_widget *ret;
@@ -128,7 +128,7 @@ static gp_widget *parse_choices(unsigned int widget_type,
 }
 
 gp_widget *gp_widget_choice_from_json(unsigned int widget_type,
-                                      gp_json_buf *json, gp_json_val *val,
+                                      gp_json_reader *json, gp_json_val *val,
                                       gp_widget_json_ctx *ctx)
 {
 	size_t sel = 0;

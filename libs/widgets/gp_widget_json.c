@@ -19,7 +19,7 @@
 #include <widgets/gp_widgets.h>
 #include <widgets/gp_widget_ops.h>
 
-static gp_widget *color_scheme_switch_from_json(gp_json_buf *json, gp_json_val *val, gp_widget_json_ctx *ctx)
+static gp_widget *color_scheme_switch_from_json(gp_json_reader *json, gp_json_val *val, gp_widget_json_ctx *ctx)
 {
 	(void) ctx;
 
@@ -37,7 +37,7 @@ static gp_widget *color_scheme_switch_from_json(gp_json_buf *json, gp_json_val *
  */
 static struct from_json {
 	const char *type;
-	gp_widget *(*from_json)(gp_json_buf *json, gp_json_val *val, gp_widget_json_ctx *ctx);
+	gp_widget *(*from_json)(gp_json_reader *json, gp_json_val *val, gp_widget_json_ctx *ctx);
 } json_loaders[] = {
 	{"color_scheme_switch", color_scheme_switch_from_json}
 };
@@ -198,7 +198,7 @@ void *gp_widget_struct_addr(const char *struct_name,
 #endif
 }
 
-gp_widget *gp_widget_from_json(gp_json_buf *json, gp_json_val *val, gp_widget_json_ctx *ctx)
+gp_widget *gp_widget_from_json(gp_json_reader *json, gp_json_val *val, gp_widget_json_ctx *ctx)
 {
 	const struct gp_widget_ops *ops;
 	char *uid = NULL;
@@ -208,7 +208,7 @@ gp_widget *gp_widget_from_json(gp_json_buf *json, gp_json_val *val, gp_widget_js
 	gp_htable **uids = ctx->uids;
 	int focus = 0;
 	struct on_event_addr on_event = {};
-	gp_widget *(*from_json)(gp_json_buf *, gp_json_val *, gp_widget_json_ctx *) = gp_widget_grid_ops.from_json;
+	gp_widget *(*from_json)(gp_json_reader *, gp_json_val *, gp_widget_json_ctx *) = gp_widget_grid_ops.from_json;
 
 	if (val->type == GP_JSON_NULL)
 		return NULL;
@@ -324,7 +324,7 @@ gp_widget *gp_widget_from_json(gp_json_buf *json, gp_json_val *val, gp_widget_js
 		}
 	}
 
-	if (gp_json_is_err(json))
+	if (gp_json_reader_err(json))
 		return NULL;
 
 	gp_json_state_load(json, obj_start);
@@ -420,7 +420,7 @@ static const gp_json_obj info_obj_filter = {
 	.attr_cnt = GP_ARRAY_SIZE(info_attrs),
 };
 
-static long parse_info_block(gp_json_buf *json, gp_json_val *val)
+static long parse_info_block(gp_json_reader *json, gp_json_val *val)
 {
 	long version = -1;
 	int license_set = 0;
@@ -447,7 +447,7 @@ static long parse_info_block(gp_json_buf *json, gp_json_val *val)
 	return version;
 }
 
-static gp_widget *gp_widgets_from_json(gp_json_buf *json,
+static gp_widget *gp_widgets_from_json(gp_json_reader *json,
                                        const gp_widget_json_callbacks *const callbacks,
                                        gp_htable **uids)
 {
@@ -508,26 +508,26 @@ gp_widget *gp_widget_layout_json(const char *path,
                                  gp_htable **uids)
 {
 	gp_widget *ret = NULL;
-	gp_json_buf *json;
+	gp_json_reader *json;
 
 	if (uids)
 		*uids = NULL;
 
-	json = gp_json_load(path);
+	json = gp_json_reader_load(path);
 	if (!json) {
 		GP_WARN("Failed to load '%s': %s", path, strerror(errno));
 		return NULL;
 	}
 
 	ret = gp_widgets_from_json(json, callbacks, uids);
-	if (gp_json_is_err(json))
+	if (gp_json_reader_err(json))
 		gp_json_err_print(json);
 	else if (!gp_json_empty(json))
 		gp_json_warn(json, "Garbage after JSON string!");
 
 
 
-	gp_json_free(json);
+	gp_json_reader_free(json);
 
 	return ret;
 }
@@ -537,20 +537,14 @@ gp_widget *gp_widget_from_json_str(const char *str,
                                    gp_htable **uids)
 {
 	gp_widget *ret = NULL;
-	gp_json_buf json = {
-		.json = str,
-		.len = strlen(str),
-		.max_depth = GP_JSON_RECURSION_MAX,
-		.print = GP_JSON_PRINT,
-		.print_priv = GP_JSON_PRINT_PRIV,
-	};
+	gp_json_reader json = GP_JSON_READER_INIT(str, strlen(str));
 
 	if (uids)
 		*uids = NULL;
 
 	ret = gp_widgets_from_json(&json, callbacks, uids);
 
-	if (gp_json_is_err(&json))
+	if (gp_json_reader_err(&json))
 		gp_json_err_print(&json);
 	else if (!gp_json_empty(&json))
 		gp_json_warn(&json, "Garbage after JSON string!");

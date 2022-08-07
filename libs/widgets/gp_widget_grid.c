@@ -890,7 +890,7 @@ static int alloc_grid(gp_widget **grid, unsigned int cols, unsigned int rows)
 	return 0;
 }
 
-static void set_border(gp_json_buf *json, gp_widget *grid, gp_json_val *val)
+static void set_border(gp_json_reader *json, gp_widget *grid, gp_json_val *val)
 {
 	if (val->type == GP_JSON_INT) {
 		if (val->val_int < 0)
@@ -955,7 +955,7 @@ static const gp_json_obj obj_filter = {
 	.attr_cnt = GP_ARRAY_SIZE(attrs),
 };
 
-static gp_widget *json_to_grid(gp_json_buf *json, gp_json_val *val, gp_widget_json_ctx *ctx)
+static gp_widget *json_to_grid(gp_json_reader *json, gp_json_val *val, gp_widget_json_ctx *ctx)
 {
 	int cols = 1, rows = 1;
 	int frame = 0, uniform = 0;
