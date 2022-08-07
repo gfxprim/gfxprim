@@ -10,6 +10,7 @@
 #define GP_WIDGET_JSON_H
 
 #include <utils/gp_json.h>
+#include <utils/gp_htable.h>
 #include <widgets/gp_widget.h>
 
 extern const gp_json_obj *gp_widget_json_attrs;

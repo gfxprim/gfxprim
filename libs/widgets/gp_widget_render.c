@@ -21,6 +21,7 @@
 #include <widgets/gp_widget_app.h>
 #include <widgets/gp_widgets_task.h>
 #include <widgets/gp_widget_keys.h>
+#include <widgets/gp_app_info.h>
 
 #include "gp_widgets_internal.h"
 
@@ -473,6 +474,12 @@ int gp_widgets_event(gp_event *ev, gp_widget *layout)
 				handled = 1;
 			}
 
+			if (gp_event_any_key_pressed(ev, GP_WIDGET_KEYS_MOD_ABOUT) &&
+			    ev->val == GP_WIDGET_KEY_ABOUT) {
+				gp_app_info_dialog_run();
+				handled = 1;
+			}
+
 			if (gp_event_any_key_pressed(ev, GP_WIDGET_KEYS_MOD_ZOOM)) {
 				switch (ev->val) {
 				case GP_WIDGET_KEY_ZOOM_IN:
@@ -564,8 +571,9 @@ static void print_options(int exit_val)
 	GP_FONT_FAMILY_FOREACH(&i, f)
 		printf("\t\t - %s\n", f->family_name);
 
-	printf("\t-i input_string\n");
+	printf("\t-I input_string\n");
 	printf("\t-s color_scheme\n\t\tlight or dark\n");
+	printf("\t-i print app info\n");
 	exit(exit_val);
 }
 
@@ -573,8 +581,12 @@ void gp_widgets_getopt(int *argc, char **argv[])
 {
 	int opt;
 
-	while ((opt = getopt(*argc, *argv, "b:f:F:hi:s:")) != -1) {
+	while ((opt = getopt(*argc, *argv, "b:f:F:hiI:s:")) != -1) {
 		switch (opt) {
+		case 'i':
+			gp_app_info_print();
+			exit(0);
+		break;
 		case 'b':
 			backend_init_str = optarg;
 		break;
@@ -598,7 +610,7 @@ void gp_widgets_getopt(int *argc, char **argv[])
 			}
 
 		break;
-		case 'i':
+		case 'I':
 			input_str = optarg;
 		break;
 		default:

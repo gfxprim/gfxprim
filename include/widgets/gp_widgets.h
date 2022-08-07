@@ -47,6 +47,7 @@
 #include <widgets/gp_widget_log.h>
 
 #include <widgets/gp_widget_app.h>
+#include <widgets/gp_app_info.h>
 
 #include <widgets/gp_widget_tattr.h>
 #include <widgets/gp_widget_size_units.h>

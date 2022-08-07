@@ -41,6 +41,10 @@ static inline int gp_widget_key_mod_pressed(gp_event *ev)
 #define GP_WIDGET_KEYS_MOD_COLOR_SCHEME GP_KEY_LEFT_CTRL, GP_KEY_RIGHT_CTRL
 #define GP_WIDGET_KEY_COLOR_SCHEME GP_KEY_SPACE
 
+/* Key to show about dialog */
+#define GP_WIDGET_KEYS_MOD_ABOUT GP_KEY_LEFT_CTRL, GP_KEY_RIGHT_CTRL
+#define GP_WIDGET_KEY_ABOUT GP_KEY_I
+
 /* Keys to increase/decrease text size */
 #define GP_WIDGET_KEYS_MOD_ZOOM GP_KEY_LEFT_CTRL, GP_KEY_RIGHT_CTRL
 #define GP_WIDGET_KEY_ZOOM_IN GP_KEY_EQUAL
