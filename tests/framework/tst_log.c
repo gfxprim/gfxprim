@@ -155,7 +155,7 @@ static void write_system_info_json(FILE *f)
 	/* lscpu is part of reasonably new util-linux */
 	FILE *cmd = popen("lscpu 2> /dev/null", "r");
 
-	if (cmd != NULL) {
+	if (cmd) {
 		char id[256], val[1024];
 		char *del = "\n";
 
@@ -164,7 +164,7 @@ static void write_system_info_json(FILE *f)
 			del = ",\n";
 		}
 
-		fclose(cmd);
+		pclose(cmd);
 		fprintf(f, "\n");
 	}
 
