@@ -214,6 +214,8 @@ static int8_t default_glyphs_extra1[] = {
 			0x00, 0x00, 0x84, 0x48, 0x30, 0x48, 0x84, 0x00, 0x00, 0x00, 0x00,
 	/* 0x00f7 */	7, 11, 0, 9, 8, /* both */
 			0x00, 0x00, 0x10, 0x00, 0xfe, 0x00, 0x10, 0x00, 0x00, 0x00, 0x00,
+	/* 0x00a9 */	7, 11, 0, 9, 8, /* both */
+			0x7c, 0x82, 0xba, 0xa2, 0xa2, 0xa2, 0xba, 0x82, 0x7c, 0x00, 0x00,
 };
 
 static gp_glyph_offset default_console_extra1_offsets[] = {
@@ -239,6 +241,11 @@ const struct gp_font_face gp_default_font = {
 			.max_glyph = 0x7f,
 			.glyphs = default_console_glyphs,
 			.offset = 16,
+		},
+		{
+			.min_glyph = 0xa9,
+			.max_glyph = 0xa9,
+			.glyphs = &default_glyphs_extra1[0x0060],
 		},
 		{
 			.min_glyph = 0xb0,
@@ -467,6 +474,11 @@ static struct gp_font_face font_gfxprim = {
 			.max_glyph = 0x7f,
 			.glyphs = default_proportional_glyphs,
 			.offset = 16,
+		},
+		{
+			.min_glyph = 0xa9,
+			.max_glyph = 0xa9,
+			.glyphs = &default_glyphs_extra1[0x0060],
 		},
 		{
 			.min_glyph = 0xb0,
