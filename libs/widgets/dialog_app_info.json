@@ -7,13 +7,15 @@
      "rows": 2,
      "widgets": [
       {
-       "rows": 4,
+       "rows": 6,
        "uid": "app_info",
        "widgets": [
-	{"type": "label", "uid": "app_name", "tattr": "bold"},
+	{"type": "stock", "stock": "star", "min_size": "3asc"},
+	{"type": "label", "uid": "app_name", "tattr": "bold|large"},
 	{"type": "label", "uid": "app_version"},
 	{"type": "label", "uid": "app_desc"},
-	{"type": "label", "uid": "app_url"}
+	{"type": "label", "uid": "app_url"},
+	{"type": "label", "uid": "app_license"}
        ]
       },
       {"type": "button", "label": "OK", "on_event": "ok", "focused": true}

@@ -105,6 +105,8 @@ static gp_widget *authors(gp_app_info_author *authors)
 		gp_widget_grid_put(ret, 0, i, author);
 	}
 
+	gp_widget_grid_border_set(ret, 0, 0);
+
 	return ret;
 }
 
@@ -134,7 +136,7 @@ void gp_app_info_dialog_run(void)
 
 	w = gp_widget_by_uid(uids, "app_version", GP_WIDGET_LABEL);
 	if (w)
-		gp_widget_label_set(w, app_info->version);
+		gp_widget_label_printf(w, "Ver: %s", app_info->version);
 
 	w = gp_widget_by_uid(uids, "app_desc", GP_WIDGET_LABEL);
 	if (w)
@@ -143,6 +145,10 @@ void gp_app_info_dialog_run(void)
 	w = gp_widget_by_uid(uids, "app_url", GP_WIDGET_LABEL);
 	if (w)
 		gp_widget_label_set(w, app_info->url);
+
+	w = gp_widget_by_uid(uids, "app_license", GP_WIDGET_LABEL);
+	if (w)
+		gp_widget_label_printf(w, "License: %s", app_info->license);
 
 	w = gp_widget_by_uid(uids, "app_info", GP_WIDGET_GRID);
 	if (w) {
