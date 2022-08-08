@@ -52,6 +52,8 @@ enum gp_widget_stock_type {
 	GP_WIDGET_STOCK_DAY,
 	GP_WIDGET_STOCK_NIGHT,
 
+	GP_WIDGET_STOCK_STAR,
+
 	/* Flags */
 	GP_WIDGET_STOCK_FOCUSED = 0x8000,
 };

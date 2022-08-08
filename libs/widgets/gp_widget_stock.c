@@ -938,6 +938,35 @@ static void render_stock_night(gp_pixmap *pix,
 	gp_fill_circle_seg(pix, cx+r, cy, r, GP_CIRCLE_SEG2 | GP_CIRCLE_SEG3, bg_col);
 }
 
+static void render_stock_star(gp_pixmap *pix,
+                              gp_coord x, gp_coord y,
+                              gp_size w, gp_size h, gp_pixel bg_col,
+                              const gp_widget_render_ctx *ctx)
+{
+	gp_coord cx = x + w/2;
+	gp_coord cy = y + h/2;
+
+	gp_coord co = GP_MIN(w/2, h/2);
+	gp_coord ci = co/2;
+
+	gp_fill_rect_xywh(pix, x, y, w, h, bg_col);
+
+	gp_coord poly[] = {
+		cx, cy - co,
+		ROTATE(0.588, 0.809, cx, 0, cy, -ci),
+		ROTATE(0.951, 0.309, cx, 0, cy, -co),
+		ROTATE(0.951, -0.309, cx, 0, cy, -ci),
+		ROTATE(0.588, -0.809, cx, 0, cy, -co),
+		cx, cy + ci,
+		ROTATE(-0.588, -0.809, cx, 0, cy, -co),
+		ROTATE(-0.951, -0.309, cx, 0, cy, -ci),
+		ROTATE(-0.951, 0.309, cx, 0, cy, -co),
+		ROTATE(-0.588, 0.809, cx, 0, cy, -ci),
+	};
+
+	gp_fill_polygon(pix, GP_ARRAY_SIZE(poly)/2, poly, ctx->warn_color);
+}
+
 static void widget_stock_render(gp_pixmap *pix, enum gp_widget_stock_type type,
                                 gp_coord x, gp_coord y, gp_size w, gp_size h,
                                 gp_pixel bg_col, const gp_widget_render_ctx *ctx)
@@ -1013,6 +1042,9 @@ static void widget_stock_render(gp_pixmap *pix, enum gp_widget_stock_type type,
 	break;
 	case GP_WIDGET_STOCK_NIGHT:
 		render_stock_night(pix, x, y, w, h, bg_col, type, ctx);
+	break;
+	case GP_WIDGET_STOCK_STAR:
+		render_stock_star(pix, x, y, w, h, bg_col, ctx);
 	break;
 	}
 
@@ -1103,6 +1135,8 @@ static struct stock_types {
 
 	{"day", GP_WIDGET_STOCK_DAY},
 	{"night", GP_WIDGET_STOCK_NIGHT},
+
+	{"star", GP_WIDGET_STOCK_STAR},
 };
 
 static int gp_widget_stock_type_from_str(const char *type)

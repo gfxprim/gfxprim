@@ -64,7 +64,7 @@
    {"type": "stock", "stock": "new_dir"},
    {"type": "stock", "stock": "day"},
    {"type": "stock", "stock": "night"},
-   {},
+   {"type": "stock", "stock": "star"},
    {},
 
    {"type": "label", "text": "STOCK_SAVE", "halign": "left"},
@@ -73,7 +73,7 @@
    {"type": "label", "text": "STOCK_NEW_DIR", "halign": "left"},
    {"type": "label", "text": "STOCK_DAY", "halign": "left"},
    {"type": "label", "text": "STOCK_NIGHT", "halign": "left"},
-   {},
+   {"type": "label", "text": "STOCK_STAR", "halign": "left"},
    {},
 
    {"type": "stock", "stock": "arrow_up"},
