@@ -319,5 +319,10 @@ uint32_t gp_utf_fallback(uint32_t ch)
 	if (ret != ch)
 		return ret;
 
+	switch (ch) {
+	case 0xa9: /* copyright */
+		return 'C';
+	}
+
 	return ch;
 }
