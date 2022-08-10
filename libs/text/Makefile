@@ -19,7 +19,7 @@ FONTS_DIR="../../../fonts/"
 
 fonts:
 	export LICENSE="SPDX-License-Identifier: LGPL-2.1-or-later" && \
-	./bdf2c.pl $(FONTS_DIR)/HaxorNarrow-15-utf.bdf haxor_narrow_15 haxor-narrow-15 14 > gp_haxor_narrow_15.c && \
+	GREEK=1 CYRILIC=1 ./bdf2c.pl $(FONTS_DIR)/HaxorNarrow-15-utf.bdf haxor_narrow_15 haxor-narrow-15 14 > gp_haxor_narrow_15.c && \
 	./bdf2c.pl $(FONTS_DIR)/HaxorNarrow-16-utf.bdf haxor_narrow_16 haxor-narrow-16 15 > gp_haxor_narrow_16.c && \
 	./bdf2c.pl $(FONTS_DIR)/HaxorNarrow-17-utf.bdf haxor_narrow_17 haxor-narrow-17 16 > gp_haxor_narrow_17.c && \
 	GREEK=1 CYRILIC=1 ./bdf2c.pl $(FONTS_DIR)/HaxorNarrow-18-utf.bdf haxor_narrow_18 haxor-narrow-18 17 > gp_font_haxor_narrow_18.c && \
