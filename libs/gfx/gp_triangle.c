@@ -45,5 +45,11 @@ void gp_fill_triangle(gp_pixmap *pixmap, gp_coord x0, gp_coord y0,
 	GP_TRANSFORM_POINT(pixmap, x1, y1);
 	GP_TRANSFORM_POINT(pixmap, x2, y2);
 
-	gp_fill_triangle_raw(pixmap, x0, y0, x1, y1, x2, y2, pixel);
+	gp_coord points[] = {
+		x0, y0,
+		x1, y1,
+		x2, y2,
+	};
+
+	gp_fill_polygon(pixmap, 3, points, pixel);
 }

@@ -24,8 +24,7 @@ for i in *; do
 		$BINDIR/log2html.py -e "$j"
 		ret=$?
 
-		if [ "$filename" = "Triangle fill testsuite.json" ] ||
-		   [ "$filename" = "Convert Scale Testsuite.json" ]; then
+		if [ "$filename" = "Convert Scale Testsuite.json" ]; then
 			echo "Skipping known failures in $filename"
 			continue
 		fi
