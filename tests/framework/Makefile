@@ -7,7 +7,7 @@ INCLUDE=
 LDFLAGS+=-L.
 LDLIBS=-ltst_preload -lm -ldl -ltst -lrt
 
-test: libtst.a
+test: libtst.a | libtst_preload.so
 
 APPS=test
 
