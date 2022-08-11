@@ -5,12 +5,13 @@
 
 NCPU=$(getconf _NPROCESSORS_ONLN)
 
-DATADIR=data/
+DATADIR=images/
 OUTDIR=result/
 EXEC="./loaders @@"
+export LD_LIBRARY_PATH=../../build/
 
 for i in $(seq -w 2 $NCPU); do
-	afl-fuzz -i "$DATADIR" -o "$OUTDIR" -S fuzzer$i $EXEC > /dev/null&
+	afl-fuzz -t 1000 -D -i "$DATADIR" -o "$OUTDIR" -S fuzzer$i $EXEC > /dev/null&
 done
 
-afl-fuzz -i "$DATADIR" -o "$OUTDIR" -M fuzzer01 $EXEC
+afl-fuzz -t 1000 -D -i "$DATADIR" -o "$OUTDIR" -M fuzzer01 $EXEC

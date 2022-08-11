@@ -5,10 +5,8 @@ APPS=loaders
 
 CSOURCES=$(shell echo *.c)
 
-# Link the binary statically
-LIBS=$(shell $(TOPDIR)/gfxprim-config --libs-loaders --libs)
-RLIBS=$(subst -lgfxprim-loaders,$(TOPDIR)/build/libgfxprim-loaders.a,$(LIBS))
-LDLIBS=$(subst -lgfxprim,$(TOPDIR)/build/libgfxprim.a,$(RLIBS))
+LDLIBS=$(shell $(TOPDIR)/gfxprim-config --libs-loaders --libs)
+LDFLAGS=$(shell $(TOPDIR)/gfxprim-config --ldflags)
 
 afl: loaders
 	./run_afl.sh

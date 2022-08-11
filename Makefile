@@ -49,7 +49,7 @@ afl:
 		echo "ERROR: afl-gcc not installed!"; \
 		exit 127; \
 	fi
-	CC=afl-gcc ./configure
+	CC=afl-gcc-fast ./configure
 	$(MAKE) -C include
 	$(MAKE) -C libs
 	$(MAKE) afl -C tests/afl
