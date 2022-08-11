@@ -310,20 +310,23 @@ int gp_read_gif_ex(gp_io *io, gp_pixmap **img,
 		}
 
 		/* Now finally read gif image data */
-		for (y = gf->Image.Top; y < gf->Image.Height; y++) {
+		for (y = gf->Image.Top; y < GP_MIN(gf->SHeight, gf->Image.Height); y++) {
 			uint8_t line[gf->Image.Width];
 
 			DGifGetLine(gf, line, gf->Image.Width);
 
-			unsigned int real_y = y;
+			int real_y = y;
 
 			if (gf->Image.Interlace) {
 				real_y = interlace_real_y(gf, y);
 				GP_DEBUG(3, "Interlace y -> real_y %u %u", y, real_y);
+
+				if (real_y >= gf->SHeight)
+					continue;
 			}
 
 			//TODO: just now we have only 8BPP
-			for (x = 0; gf->Image.Left + x < gf->Image.Width; x++)
+			for (x = 0; gf->Image.Left + x < GP_MIN(gf->SWidth, gf->Image.Width); x++)
 				gp_putpixel_raw_24BPP(res, x + gf->Image.Left, real_y, get_color(gf, line[x]));
 
 			if (gp_progress_cb_report(callback, y - gf->Image.Top,
