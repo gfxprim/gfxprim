@@ -150,13 +150,17 @@ static inline gp_pixel get_color(GifFileType *gf, uint32_t idx)
 {
 	GifColorType *color;
 
-	//TODO: no color map?
-	if (gf->SColorMap == NULL)
-		return 0;
+	if (gf->SColorMap) {
+		color = get_color_from_map(gf->SColorMap, idx);
+		return GP_PIXEL_CREATE_RGB888(color->Red, color->Green, color->Blue);
+	}
 
-	color = get_color_from_map(gf->SColorMap, idx);
+	if (gf->Image.ColorMap) {
+		color = get_color_from_map(gf->Image.ColorMap, idx);
+		return GP_PIXEL_CREATE_RGB888(color->Red, color->Green, color->Blue);
+	}
 
-	return  GP_PIXEL_CREATE_RGB888(color->Red, color->Green, color->Blue);
+	return 0;
 }
 
 static int get_bg_color(GifFileType *gf, gp_pixel *pixel)
