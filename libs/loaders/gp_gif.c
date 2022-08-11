@@ -323,7 +323,7 @@ int gp_read_gif_ex(gp_io *io, gp_pixmap **img,
 			}
 
 			//TODO: just now we have only 8BPP
-			for (x = 0; x < gf->Image.Width; x++)
+			for (x = 0; gf->Image.Left + x < gf->Image.Width; x++)
 				gp_putpixel_raw_24BPP(res, x + gf->Image.Left, real_y, get_color(gf, line[x]));
 
 			if (gp_progress_cb_report(callback, y - gf->Image.Top,
