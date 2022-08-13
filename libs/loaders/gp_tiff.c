@@ -426,7 +426,11 @@ static int tiff_read(TIFF *tiff, gp_pixmap *res, struct tiff_header *header,
 		return ENOSYS;
 	}
 
-	//ASSERT ScanlineSize == w!
+	if (TIFFScanlineSize(tiff) != header->w) {
+		GP_WARN("ScanlineSize %li width %i",
+		        TIFFScanlineSize(tiff), header->w);
+		return EINVAL;
+	}
 
 	/* Figure out number of planes */
 	if (!TIFFGetField(tiff, TIFFTAG_PLANARCONFIG, &planar_config))
