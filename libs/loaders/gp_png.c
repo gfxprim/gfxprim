@@ -19,6 +19,7 @@
 #include <core/gp_byte_order.h>
 #include <core/gp_debug.h>
 #include <core/gp_gamma_correction.h>
+#include <core/gp_temp_alloc.h>
 
 #include <loaders/gp_io.h>
 #include <loaders/gp_line_convert.h>
@@ -776,19 +777,26 @@ static int load_rgb888_image(gp_io *zlib_io, struct IHDR_chunk *IHDR, gp_pixmap 
 	uint32_t x, y;
 	uint32_t width = IHDR->width;
 	uint32_t scanline_len = 3 * width;
-	uint8_t scanline1[scanline_len + 3];
-	uint8_t scanline2[scanline_len + 3];
-	uint8_t *prev_scanline = scanline1 + 2;
-	uint8_t *cur_scanline = scanline2 + 2;
+	uint8_t *scanline1, *scanline2, *prev_scanline, *cur_scanline;
 	int err;
 	gp_pixmap *res;
 
-	memset(scanline1, 0, scanline_len + 3);
-	memset(scanline2, 0, scanline_len + 3);
+	gp_temp_alloc_create(tmpbuf, 2*((size_t)scanline_len+3));
+
+	scanline1 = gp_temp_alloc_get(tmpbuf, scanline_len+3);
+	scanline2 = gp_temp_alloc_get(tmpbuf, scanline_len+3);
+
+	memset(scanline1, 0, scanline_len+3);
+	memset(scanline2, 0, scanline_len+3);
+
+	prev_scanline = scanline1 + 2;
+	cur_scanline = scanline2 + 2;
 
 	res = gp_pixmap_alloc(IHDR->width, IHDR->height, GP_PIXEL_RGB888);
-	if (!res)
-		return errno;
+	if (!res) {
+		err = errno;
+		goto err;
+	}
 
 	for (y = 0; y < IHDR->height; y++) {
 		if (gp_io_fill(zlib_io, cur_scanline, scanline_len+1)) {
@@ -829,6 +837,7 @@ static int load_rgb888_image(gp_io *zlib_io, struct IHDR_chunk *IHDR, gp_pixmap 
 	*ret = res;
 	return 0;
 err:
+	gp_temp_alloc_free(tmpbuf);
 	gp_pixmap_free(res);
 	return err;
 }
