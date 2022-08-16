@@ -426,12 +426,6 @@ static int tiff_read(TIFF *tiff, gp_pixmap *res, struct tiff_header *header,
 		return ENOSYS;
 	}
 
-	if (TIFFScanlineSize(tiff) != header->w) {
-		GP_WARN("ScanlineSize %li width %i",
-		        TIFFScanlineSize(tiff), header->w);
-		return EINVAL;
-	}
-
 	/* Figure out number of planes */
 	if (!TIFFGetField(tiff, TIFFTAG_PLANARCONFIG, &planar_config))
 		planar_config = 1;
@@ -577,6 +571,12 @@ int gp_read_tiff_ex(gp_io *io, gp_pixmap **img, gp_storage *storage,
 		err = errno;
 		GP_DEBUG(1, "Malloc failed");
 		goto err1;
+	}
+
+	if (TIFFScanlineSize(tiff) > res->bytes_per_row) {
+		GP_WARN("ScanlineSize %li > bytes_per_row %i",
+		        TIFFScanlineSize(tiff), res->bytes_per_row);
+		return EINVAL;
 	}
 
 	switch (header.photometric) {
