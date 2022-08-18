@@ -21,46 +21,46 @@
  * Returns a minimum of the two numbers.
  */
 #define GP_MIN(a, b) ({ \
-	typeof(a) _a = (a); \
-	typeof(b) _b = (b); \
-	_a < _b ? _a : _b; \
+	typeof(a) gp_a__ = (a); \
+	typeof(b) gp_b__ = (b); \
+	gp_a__ < gp_b__ ? gp_a__ : gp_b__; \
 })
 
 /*
  * Returns maximum from three numbers.
  */
 #define GP_MIN3(a, b, c) ({ \
-	typeof(a) _a = (a); \
-	typeof(b) _b = (b); \
-	typeof(c) _c = (c); \
-	_a < _b ? (_a < _c ? _a : _c) : (_b < _c ? _b : _c); \
+	typeof(a) gp_a__ = (a); \
+	typeof(b) gp_b__ = (b); \
+	typeof(c) gp_c__ = (c); \
+	gp_a__ < gp_b__ ? (gp_a__ < gp_c__ ? gp_a__ : gp_c__) : (gp_b__ < gp_c__ ? gp_b__ : gp_c__); \
 })
 
 /*
  * Returns a maximum of the two numbers.
  */
 #define GP_MAX(a, b) ({ \
-	typeof(a) _a = (a); \
-	typeof(b) _b = (b); \
-	_a > _b ? _a : _b; \
+	typeof(a) gp_a__ = (a); \
+	typeof(b) gp_b__ = (b); \
+	gp_a__ > gp_b__ ? gp_a__ : gp_b__; \
 })
 
 /*
  * Returns maximum from three numbers.
  */
 #define GP_MAX3(a, b, c) ({ \
-	typeof(a) _a = (a); \
-	typeof(b) _b = (b); \
-	typeof(c) _c = (c); \
-	_a > _b ? (_a > _c ? _a : _c) : (_b > _c ? _b : _c); \
+	typeof(a) gp_a__ = (a); \
+	typeof(b) gp_b__ = (b); \
+	typeof(c) gp_c__ = (c); \
+	gp_a__ > gp_b__ ? (gp_a__ > gp_c__ ? gp_a__ : gp_c__) : (gp_b__ > gp_c__ ? gp_b__ : gp_c__); \
 })
 
 /*
  * Returns absolute value.
  */
 #define GP_ABS(a) ({ \
-	typeof(a) _a = a; \
-	_a > 0 ? _a : -_a; \
+	typeof(a) gp_a__ = a; \
+	gp_a__ > 0 ? gp_a__ : - gp_a__; \
 })
 
 /*
@@ -75,26 +75,26 @@
 /*
  * Aligns value to be even
  */
-#define GP_ALIGN2(a) ({   \
-	typeof(a) _a = a; \
-	_a + (_a%2);      \
+#define GP_ALIGN2(a) ({ \
+	typeof(a) gp_a__ = a; \
+	gp_a__ + (gp_a__%2); \
 })
 
 /*
  * Swap a and b using an intermediate variable
  */
 #define GP_SWAP(a, b) do { \
-	typeof(a) tmp = b; \
-	b = a;             \
-	a = tmp;           \
+	typeof(b) gp_b__ = b; \
+	b = a; \
+	a = gp_b__; \
 } while (0)
 
 /* Determines the sign of the integer value; it is +1 if value is positive,
  * -1 if negative, and 0 if it is zero.
  */
 #define GP_SIGN(a) ({ \
-	typeof(a) _a = a; \
-	(_a > 0) ? 1 : ((_a < 0) ? -1 : 0); \
+	typeof(a) gp_a__ = a; \
+	(gp_a__ > 0) ? 1 : ((gp_a__ < 0) ? -1 : 0); \
 })
 
 #define GP_ARRAY_SIZE(array) (sizeof(array) / sizeof(*array))

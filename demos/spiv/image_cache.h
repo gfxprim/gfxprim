@@ -9,8 +9,8 @@
 
   */
 
-#ifndef __IMAGE_CACHE_H__
-#define __IMAGE_CACHE_H__
+#ifndef IMAGE_CACHE_H__
+#define IMAGE_CACHE_H__
 
 struct image_cache;
 
@@ -62,4 +62,4 @@ void image_cache_destroy(struct image_cache *self);
  */
 void image_cache_print(struct image_cache *self);
 
-#endif /* __IMAGE_CACHE_H__ */
+#endif /* IMAGE_CACHE_H__ */

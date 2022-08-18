@@ -11,8 +11,8 @@
 
   */
 
-#ifndef __IMAGE_LOADER_H__
-#define __IMAGE_LOADER_H__
+#ifndef IMAGE_LOADER_H__
+#define IMAGE_LOADER_H__
 
 #include <core/gp_pixmap.h>
 #include <core/gp_progress_callback.h>
@@ -101,4 +101,4 @@ unsigned int image_loader_dir_count(void);
  */
 unsigned int image_loader_dir_pos(void);
 
-#endif /* __IMAGE_LOADER_H__ */
+#endif /* IMAGE_LOADER_H__ */

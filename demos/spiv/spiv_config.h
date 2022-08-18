@@ -3,8 +3,8 @@
  * Copyright (C) 2009-2014 Cyril Hrubis <metan@ucw.cz>
  */
 
-#ifndef __SPIV_CONFIG_H__
-#define __SPIV_CONFIG_H__
+#ifndef SPIV_CONFIG_H__
+#define SPIV_CONFIG_H__
 
 #include <gfxprim.h>
 
@@ -80,4 +80,4 @@ void spiv_config_print_help(void);
 
 void spiv_config_print_man(void);
 
-#endif /* __SPIV_CONFIG_H__ */
+#endif /* SPIV_CONFIG_H__ */

@@ -12,8 +12,8 @@
 
   */
 
-#ifndef __CFG_H__
-#define __CFG_H__
+#ifndef CFG_H__
+#define CFG_H__
 
 struct cfg_opt {
 	/* Could be NULL for global values */
@@ -59,4 +59,4 @@ void cfg_print_help(struct cfg_opt *opts);
  */
 void cfg_print_man(struct cfg_opt *opts);
 
-#endif /* __CFG_H__ */
+#endif /* CFG_H__ */

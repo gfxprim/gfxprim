@@ -851,7 +851,7 @@ err:
 	return NULL;
 }
 
-static void _free(gp_widget *self)
+static void free_(gp_widget *self)
 {
 	if (!self->tbl->free)
 		return;
@@ -866,7 +866,7 @@ struct gp_widget_ops gp_widget_table_ops = {
 	.render = render,
 	.event = event,
 	.from_json = json_to_table,
-	.free = _free,
+	.free = free_,
 	.id = "table",
 };
 

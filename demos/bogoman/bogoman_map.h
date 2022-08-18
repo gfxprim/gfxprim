@@ -3,8 +3,8 @@
  * Copyright (C) 2009-2015 Cyril Hrubis <metan@ucw.cz>
  */
 
-#ifndef __BOGOMAN_MAP_H__
-#define __BOGOMAN_MAP_H__
+#ifndef BOGOMAN_MAP_H__
+#define BOGOMAN_MAP_H__
 
 enum bogoman_map_elem_id {
 	/* empty walkable space */
@@ -131,4 +131,4 @@ void bogoman_map_timer_tick(struct bogoman_map *map);
  */
 void bogoman_map_dump(struct bogoman_map *map);
 
-#endif /* __BOGOMAN_MAP_H__ */
+#endif /* BOGOMAN_MAP_H__ */

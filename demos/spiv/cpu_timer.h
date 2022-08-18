@@ -9,8 +9,8 @@
 
   */
 
-#ifndef __CPU_TIMER_H__
-#define __CPU_TIMER_H__
+#ifndef CPU_TIMER_H__
+#define CPU_TIMER_H__
 
 #include <time.h>
 
@@ -37,4 +37,4 @@ void cpu_timer_start(struct cpu_timer *self, const char *name);
  */
 void cpu_timer_stop(struct cpu_timer *self);
 
-#endif /* __CPU_TIMER_H__ */
+#endif /* CPU_TIMER_H__ */

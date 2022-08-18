@@ -9,8 +9,8 @@
 
   */
 
-#ifndef __IMAGE_LIST_H__
-#define __IMAGE_LIST_H__
+#ifndef IMAGE_LIST_H__
+#define IMAGE_LIST_H__
 
 struct image_list;
 
@@ -72,4 +72,4 @@ unsigned int image_list_dir_count(struct image_list *self);
  */
 unsigned int image_list_dir_pos(struct image_list *self);
 
-#endif /* __IMAGE_LIST_H__ */
+#endif /* IMAGE_LIST_H__ */
