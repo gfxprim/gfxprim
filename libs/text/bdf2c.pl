@@ -353,6 +353,19 @@ sub utf_to_utf
 
 my $greek = $ENV{'GREEK'};
 my $cyrilic = $ENV{'GREEK'};
+my $katakana = $ENV{'KATAKANA'};
+
+sub add_block
+{
+	my ($min_glyph, $max_glyph, $font_id, $name) = @_;
+
+	print("\t\t{\n");
+	print("\t\t\t.glyphs = ${font_id}_${name}_glyphs,\n");
+	print("\t\t\t.offsets = ${font_id}_${name}_offsets,\n");
+	print("\t\t\t.min_glyph = $min_glyph,\n");
+	print("\t\t\t.max_glyph = $max_glyph,\n");
+	print("\t\t},\n");
+}
 
 sub convert_font
 {
@@ -393,6 +406,10 @@ sub convert_font
 		gen_glyph_table($glyphs, 0x400, 0x45f, $max_width, $font_id . "_cyrilic", $bold, \&utf_to_utf);
 	}
 
+	if ($enc eq "ISO10646-1" && $katakana) {
+		gen_glyph_table($glyphs, 0x30a0, 0x30ff, $max_width, $font_id . "_katakana", $bold, \&utf_to_utf);
+	}
+
 	print("static struct gp_font_face $font_id = {\n");
 	print("\t.family_name = \"$name\",\n");
 
@@ -407,6 +424,7 @@ sub convert_font
 	$glyph_tables+=1 if ($enc eq "iso8859-2" || $enc eq "ISO10646-1");
 	$glyph_tables+=1 if ($enc eq "ISO10646-1" && $greek);
 	$glyph_tables+=1 if ($enc eq "ISO10646-1" && $cyrilic);
+	$glyph_tables+=1 if ($enc eq "ISO10646-1" && $katakana);
 
 	printf("\t.ascend = %i,\n", $font->{'ascend'});
 	printf("\t.descend = %i,\n", $font->{'descent'});
@@ -421,28 +439,16 @@ sub convert_font
 	print("\t\t\t.max_glyph = 0x7f,\n");
 	print("\t\t},\n");
 	if ($enc eq "iso8859-2" || $enc eq "ISO10646-1") {
-		print("\t\t{\n");
-		print("\t\t\t.glyphs = ${font_id}_latin_ext_glyphs,\n");
-		print("\t\t\t.offsets = ${font_id}_latin_ext_offsets,\n");
-		print("\t\t\t.min_glyph = 0xa1,\n");
-		print("\t\t\t.max_glyph = 0x17e,\n");
-		print("\t\t},\n");
+		add_block("0xa1", "0x17e", $font_id, "latin_ext");
 	}
 	if ($enc eq "ISO10646-1" && $greek) {
-		print("\t\t{\n");
-		print("\t\t\t.glyphs = ${font_id}_greek_glyphs,\n");
-		print("\t\t\t.offsets = ${font_id}_greek_offsets,\n");
-		print("\t\t\t.min_glyph = 0x384,\n");
-		print("\t\t\t.max_glyph = 0x3ce,\n");
-		print("\t\t},\n");
+		add_block("0x384", "0x3ce", $font_id, "greek");
 	}
-	if ($enc eq "ISO10646-1" && $greek) {
-		print("\t\t{\n");
-		print("\t\t\t.glyphs = ${font_id}_cyrilic_glyphs,\n");
-		print("\t\t\t.offsets = ${font_id}_cyrilic_offsets,\n");
-		print("\t\t\t.min_glyph = 0x400,\n");
-		print("\t\t\t.max_glyph = 0x45f,\n");
-		print("\t\t},\n");
+	if ($enc eq "ISO10646-1" && $cyrilic) {
+		add_block("0x400", "0x45f", $font_id, "cyrilic");
+	}
+	if ($enc eq "ISO10646-1" && $katakana) {
+		add_block("0x30a0", "0x30ff", $font_id, "katakana");
 	}
 
 	printf("\n\t}\n");
