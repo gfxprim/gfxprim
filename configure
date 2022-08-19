@@ -52,7 +52,7 @@ def headers_exists(cfg, *filenames):
 def c_try_compile(cfg, code, msg, cflags=""):
     sys.stderr.write(msg)
 
-    ret = os.system("echo '%s' | %s %s -x c -o /dev/null - > /dev/null 2>&1" %
+    ret = os.system("echo '%s' | %s %s -c -x c -o /dev/null - > /dev/null 2>&1" %
                     (code, cfg['CC'][0], cfg['CFLAGS'][0]) + ' ' + cflags)
 
     if ret:
