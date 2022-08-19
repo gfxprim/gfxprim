@@ -6,7 +6,11 @@
 
  */
 
-#include <sys/mman.h>
+#include "../../config.h"
+
+#ifdef HAVE_MMAP
+# include <sys/mman.h>
+#endif
 #include <core/gp_debug.h>
 #include <utils/gp_block_alloc.h>
 
@@ -21,13 +25,21 @@ static size_t align(size_t size)
 
 static void *alloc_block(void)
 {
+#ifdef HAVE_MMAP
 	return mmap(NULL, block_size, PROT_READ|PROT_WRITE,
 	            MAP_ANONYMOUS|MAP_PRIVATE, -1, 0);
+#else
+	return malloc(block_size);
+#endif
 }
 
 static void free_block(void *addr)
 {
+#ifdef HAVE_MMAP
 	munmap(addr, block_size);
+#else
+	free(addr);
+#endif
 }
 
 static gp_block *new_block(void)
