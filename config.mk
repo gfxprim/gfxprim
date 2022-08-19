@@ -1,6 +1,6 @@
 -include $(TOPDIR)/config.gen.mk
 
-CFLAGS+=-fPIC -pthread
+CFLAGS+=-fPIC $(PTHREAD_CFLAGS)
 CFLAGS+=-I$(TOPDIR)/include/
 LDFLAGS+=-L$(TOPDIR)/build/
 
