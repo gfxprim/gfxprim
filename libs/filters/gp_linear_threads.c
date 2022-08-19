@@ -4,16 +4,21 @@
  */
 
 #include <unistd.h>
-#include <pthread.h>
 #include <string.h>
 #include <errno.h>
 
-#include "core/gp_common.h"
+#ifdef HAVE_PTHREAD
+# include <pthread.h>
+# include <core/gp_threads.h>
+#endif
+
+#include <core/gp_common.h>
 #include <core/gp_debug.h>
-#include <core/gp_threads.h>
 
 #include <filters/gp_linear.h>
 #include <filters/gp_linear_threads.h>
+
+#ifdef HAVE_PTHREAD
 
 static void *h_linear_convolution(void *arg)
 {
@@ -213,3 +218,22 @@ int gp_filter_convolution_mp_raw(const gp_convolution_params *params)
 
 	return 0;
 }
+
+#else
+
+int gp_filter_hconvolution_mp_raw(const gp_convolution_params *params)
+{
+	return gp_filter_hconvolution_raw(params);
+}
+
+int gp_filter_vconvolution_mp_raw(const gp_convolution_params *params)
+{
+	return gp_filter_vconvolution_raw(params);
+}
+
+int gp_filter_convolution_mp_raw(const gp_convolution_params *params)
+{
+	return gp_filter_convolution_raw(params);
+}
+
+#endif /* HAVE_PTHREAD */

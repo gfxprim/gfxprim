@@ -12,51 +12,28 @@
 
  */
 
-#ifndef GP_CORE_H
-#define GP_CORE_H
+#ifndef CORE_GP_CORE_H
+#define CORE_GP_CORE_H
 
-/* Library verson */
-#include "core/gp_version.h"
+#include "../../config.h"
 
-/* Common building blocks */
-#include "core/gp_common.h"
-
-/* Pixmap ... */
-#include "core/gp_pixmap.h"
-
-/* ... and it's trasformations */
+#include <core/gp_version.h>
+#include <core/gp_common.h>
+#include <core/gp_pixmap.h>
 #include <core/gp_transform.h>
-
-/* Gamma */
 #include <core/gp_gamma.h>
-
-/* Pixeltypes */
 #include <core/gp_pixel.h>
-
-/* Pixel conversions */
 #include <core/gp_convert.h>
-
-/* Individual pixel access */
 #include <core/gp_get_put_pixel.h>
-
-/* Writing pixel blocks */
 #include <core/gp_write_pixel.h>
-
-/* Blitting */
 #include <core/gp_blit.h>
-
-/* Debug and debug level */
-#include "core/gp_debug.h"
-
-/* Progress callback */
+#include <core/gp_debug.h>
+#include <core/gp_fill.h>
 #include <core/gp_progress_callback.h>
-
-/* Threads utils */
-#include <core/gp_threads.h>
-
-/* Mix Pixel */
 #include <core/gp_mix_pixels.h>
 
-#include "core/gp_fill.h"
+#ifdef HAVE_PTHREAD
+# include <core/gp_threads.h>
+#endif
 
-#endif /* GP_CORE_H */
+#endif /* CORE_GP_CORE_H */

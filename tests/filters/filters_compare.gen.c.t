@@ -15,6 +15,13 @@
 #include <filters/gp_filters.h>
 
 #include "tst_test.h"
+
+//TODO: Fix the library to enable malloc() tracking on demand
+__attribute__((weak)) void gp_nr_threads_set(unsigned int nr)
+{
+	(void) nr;
+}
+
 @
 @ # The format is [[name1, [fn1, [params]], [fn2, [params]], ...],
 @ #                [name2, [fn3, [params]], [fn4, [params]], ...],

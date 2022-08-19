@@ -6,6 +6,7 @@ CSOURCES=$(shell echo *.c)
 INCLUDE=
 LDFLAGS+=-L$(TOPDIR)/build/
 LDLIBS+=-lrt
+CFLAGS+=-pthread
 
 LDLIBS+=-lgfxprim-loaders -lgfxprim-backends -lgfxprim
 
