@@ -22,9 +22,14 @@ DYNAMIC_LIB=$(LIB_NAME).so.$(LIB_VERSION).$(LIB_RELEASE)
 SONAME=$(LIB_NAME).so.$(LIB_MAJOR)
 SYMLINKS=$(LIB_NAME).so.$(LIB_MAJOR) $(LIB_NAME).so
 
-LIBS=$(BUILD_DIR)$(STATIC_LIB) $(BUILD_DIR)$(DYNAMIC_LIB)
+ifeq ($(static-libs),yes)
+ALL+=$(BUILD_DIR)$(STATIC_LIB)
+endif
 
-ALL+=$(LIBS) $(SYMLINKS)
+ifeq ($(dynamic-libs),yes)
+ALL+=$(BUILD_DIR)$(DYNAMIC_LIB) $(SYMLINKS)
+endif
+
 CLEAN+=$(LIBS) $(addprefix $(BUILD_DIR),$(SYMLINKS))
 
 #

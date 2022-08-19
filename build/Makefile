@@ -13,7 +13,15 @@ DYNAMIC_LIB=$(LIB_NAME).so.$(LIB_VERSION).$(LIB_RELEASE)
 SONAME=$(LIB_NAME).so.$(LIB_MAJOR)
 SYMLINKS=$(LIB_NAME).so.$(LIB_MAJOR) $(LIB_NAME).so
 
-all: $(STATIC_LIB) $(DYNAMIC_LIB) $(SYMLINKS)
+ifeq ($(static-libs),yes)
+LIBS+=$(STATIC_LIB)
+endif
+
+ifeq ($(dynamic-libs),yes)
+LIBS+=$(DYNAMIC_LIB) $(SYMLINKS)
+endif
+
+all: $(LIBS)
 
 rebuild: all
 

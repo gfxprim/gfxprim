@@ -481,6 +481,11 @@ if __name__ ==  '__main__':
            'localstatedir' : ['local/var/', 'Where to place runtime modified datafiles'],
            'build'         : ['', 'WARNING not used'],
            'host'          : ['', 'WARNING not used'],
+           # Knobs to disable stuff
+           'static-libs'   : ['yes', "Build static libs"],
+           'dynamic-libs'  : ['yes', "Build dynamic libs"],
+           'build-tests'   : ['yes', "Build tests"],
+           'build-demos'   : ['yes', "Build demos"],
     }
 
     #

@@ -5,7 +5,13 @@ include $(TOPDIR)/pre.mk
 TOP_MAKE=1
 
 ifneq ($(MAKECMDGOALS),install)
-SUBDIRS=include libs tests pylib demos
+SUBDIRS=include libs pylib
+ifeq ($(build-tests),yes)
+SUBDIRS+=tests
+endif
+ifeq ($(build-demos),yes)
+SUBDIRS+=demos
+endif
 ifneq ($(MAKECMDGOALS),gen)
 SUBDIRS+=build
 endif
