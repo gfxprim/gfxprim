@@ -175,11 +175,6 @@ int gp_event_all_keys_pressed_(gp_event *ev, ...);
 void gp_event_dump(gp_event *ev);
 
 /*
- * Returns human-readable key name.
- */
-const char *gp_event_key_name(enum gp_event_key_value key);
-
-/*
  * Retruns difference between two timeval structures in miliseconds
  */
 static inline int64_t gp_timeval_diff_ms(struct timeval a, struct timeval b)
