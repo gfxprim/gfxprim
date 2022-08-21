@@ -1,7 +1,7 @@
 #!/bin/sh
 
 TOPDIR=..
-LIBDIRS="core gfx text filters input utils"
+LIBDIRS="core gfx text filters input utils $1"
 
 for i in $LIBDIRS; do
 	OBJECTS=`echo $TOPDIR/libs/$i/*.o`;

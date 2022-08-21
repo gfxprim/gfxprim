@@ -1,10 +1,10 @@
-LIB_OBJECTS=$(shell ./get_objs.sh)
-
 .SUFFIXES:
 
 TOPDIR=../
 include $(TOPDIR)/config.mk
 include $(TOPDIR)/libver.mk
+
+LIB_OBJECTS=$(shell ./get_objs.sh $(os))
 
 LIB_NAME=libgfxprim
 

@@ -486,6 +486,8 @@ if __name__ ==  '__main__':
            'dynamic-libs'  : ['yes', "Build dynamic libs"],
            'build-tests'   : ['yes', "Build tests"],
            'build-demos'   : ['yes', "Build demos"],
+           # OS to build for
+           'os'            : ['linux', 'OS to build the library for']
     }
 
     #
