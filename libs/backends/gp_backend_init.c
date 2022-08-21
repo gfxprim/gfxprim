@@ -1,7 +1,9 @@
 // SPDX-License-Identifier: LGPL-2.1-or-later
 /*
- * Copyright (C) 2009-2013 Cyril Hrubis <metan@ucw.cz>
+ * Copyright (C) 2009-2020 Cyril Hrubis <metan@ucw.cz>
  */
+
+#include "../../config.h"
 
 #include <string.h>
 #include <errno.h>
@@ -27,6 +29,7 @@ static char *next_param(char *params)
 	}
 }
 
+#ifdef HAVE_LIBX11
 static int parse_x11_params(char *params, gp_size *w, gp_size *h,
                             enum gp_x11_flags *flags)
 {
@@ -93,7 +96,9 @@ static gp_backend *x11_init(char *params, const char *caption)
 
 	return gp_x11_init(NULL, 0, 0, w, h, caption, flags);
 }
+#endif
 
+#ifdef HAVE_LIBSDL
 static int parse_sdl_params(char *params, gp_size *w, gp_size *h,
                             gp_size *bpp, uint8_t *flags)
 {
@@ -166,7 +171,9 @@ static gp_backend *sdl_init(char *params, const char *caption)
 
 	return gp_sdl_init(w, h, bpp, flags, caption);
 }
+#endif
 
+#ifdef OS_LINUX
 static int parse_fb_params(char *params, int *flags, const char **fb)
 {
 	char *param;
@@ -214,7 +221,9 @@ static gp_backend *fb_init(char *params, const char *caption)
 
 	return gp_linux_fb_init(fb, flags);
 }
+#endif
 
+#ifdef HAVE_AALIB
 static gp_backend *aa_init(char *params, const char *caption)
 {
 	(void) caption;
@@ -222,7 +231,9 @@ static gp_backend *aa_init(char *params, const char *caption)
 
 	return gp_aalib_init();
 }
+#endif
 
+#ifdef HAVE_LIBXCB
 static int parse_xcb_params(char *params, gp_size *w, gp_size *h)
 {
 	char *param;
@@ -263,11 +274,14 @@ static gp_backend *xcb_init(char *params, const char *caption)
 
 	return gp_xcb_init(NULL, 0, 0, w, h, caption);
 }
+#endif
 
+#ifdef OS_LINUX
 static gp_backend *proxy_init(char *params, const char *caption)
 {
 	return gp_proxy_init(params, caption);
 }
+#endif
 
 static gp_backend *init_backend(const char *name, char *params,
                                 const char *caption);
@@ -316,16 +330,21 @@ struct backend_init {
 static gp_backend *do_help(char *params, const char *caption);
 
 static struct backend_init backends[] = {
+#ifdef OS_LINUX
 	{.name = "proxy",
 	 .init = proxy_init,
 	 .usage = "path",
 	 .help = {"path - Path to an UNIX socket"}
 	},
+#endif
+#ifdef HAVE_LIBXCB
 	{.name  = "XCB",
 	 .init = xcb_init,
 	 .usage = "",
 	 .help = {NULL},
 	},
+#endif
+#ifdef HAVE_LIBX11
 	{.name  = "X11",
 	 .init  = x11_init,
 	 .usage = "X11:[WxH]:[use_root]:[create_root]:[disable_shm]",
@@ -337,6 +356,7 @@ static struct backend_init backends[] = {
 	           "fs          - start fullscreen",
 	           NULL}
 	},
+#endif
 	{
 	 .name = "virt",
 	 .init = virt_init,
@@ -347,6 +367,7 @@ static struct backend_init backends[] = {
 		  "              e.g. X11",
 		  NULL}
 	},
+#ifdef HAVE_LIBSDL
 	{.name  = "SDL",
 	 .init  = sdl_init,
 	 .usage = "SDL:[fs]:[8]:[16]:[24]:[32]:[WxH]",
@@ -358,6 +379,8 @@ static struct backend_init backends[] = {
 	           "WxH - Display Size",
 	           NULL}
 	},
+#endif
+#ifdef OS_LINUX
 	{.name  = "FB",
 	 .init  = fb_init,
 	 .usage = "fb:[no_shadow]:[new_console]:[/dev/fbX]",
@@ -365,11 +388,14 @@ static struct backend_init backends[] = {
 	           "new_console - allocate new console",
 	           NULL}
 	},
+#endif
+#ifdef HAVE_AALIB
 	{.name  = "AA",
 	 .init  = aa_init,
 	 .usage = "AA",
 	 .help  = {NULL}
 	},
+#endif
 	{.name = "help",
 	 .init = do_help
 	},
