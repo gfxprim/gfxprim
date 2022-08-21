@@ -21,6 +21,7 @@
 #include <sys/time.h>
 
 #include <input/gp_types.h>
+#include <input/gp_keys.h>
 #include <input/gp_event_keys.h>
 
 enum gp_event_type {
