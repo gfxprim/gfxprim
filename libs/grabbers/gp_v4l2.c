@@ -9,23 +9,24 @@
 
   */
 
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <sys/ioctl.h>
-#include <string.h>
 #include <errno.h>
-#include <sys/mman.h>
+#include <string.h>
 
-#include <stdint.h>
-
+#include <core/gp_debug.h>
 #include <core/gp_pixmap.h>
 #include <grabbers/gp_grabber.h>
-#include <core/gp_debug.h>
 
 #include "../../config.h"
 
 #ifdef HAVE_V4L2
+
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <sys/ioctl.h>
+#include <sys/mman.h>
+
+#include <stdint.h>
 
 #include <linux/videodev2.h>
 
