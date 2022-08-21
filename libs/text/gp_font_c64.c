@@ -218,6 +218,7 @@ static struct gp_font_face c64 = {
 
 const gp_font_family __attribute__((visibility ("hidden"))) font_family_c64 = {
 	.family_name = "c64",
+	.ucode_blocks = GP_UCODE_LATIN_BASIC,
 	.fonts = {
 		&c64,
 		NULL

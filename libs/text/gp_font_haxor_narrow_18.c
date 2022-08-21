@@ -2198,6 +2198,7 @@ static struct gp_font_face font_bold = {
 
 const gp_font_family __attribute__((visibility ("hidden"))) font_family_haxor_narrow_18 = {
 	.family_name = "haxor-narrow-18",
+	.ucode_blocks = GP_UCODE_LATIN_BASIC | GP_UCODE_LATIN_SUP | GP_UCODE_LATIN_EXT_A | GP_UCODE_GREEK | GP_UCODE_CYRILIC,
 	.fonts = {
 		&font,
 		&font_bold,

@@ -86,6 +86,28 @@ const char *gp_font_style_name(uint8_t style)
 	}
 }
 
+const char *gp_font_ucode_block_name(enum gp_font_ucode_block block)
+{
+	switch (block) {
+	case GP_UCODE_LATIN_BASIC:
+		return "Basic Latin";
+	case GP_UCODE_LATIN_SUP:
+		return "Latin Supplementary";
+	case GP_UCODE_LATIN_EXT_A:
+		return "Latin Extended A";
+	case GP_UCODE_GREEK:
+		return "Greek";
+	case GP_UCODE_CYRILIC:
+		return "Cyrilic";
+	case GP_UCODE_HIRAGANA:
+		return "Hiragana";
+	case GP_UCODE_KATAKANA:
+		return "Katakana";
+	}
+
+	return "???";
+}
+
 void gp_font_face_free(gp_font_face *self)
 {
 	if (!self)

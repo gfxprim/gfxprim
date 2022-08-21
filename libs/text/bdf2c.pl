@@ -367,6 +367,8 @@ sub add_block
 	print("\t\t},\n");
 }
 
+my $ucode_blocks;
+
 sub convert_font
 {
 	my ($font, $name, $bold) = @_;
@@ -390,24 +392,31 @@ sub convert_font
 
 	gen_glyph_table($glyphs, 0x20, 0x7e, $max_width, $font_id, $bold);
 
+	$ucode_blocks = "GP_UCODE_LATIN_BASIC";
+
 	if ($enc eq "iso8859-2") {
 		gen_glyph_table($glyphs, 0xa1, 0x17e, $max_width, $font_id . "_latin_ext", $bold, \&utf_to_iso8859_2);
+		$ucode_blocks .= " | GP_UCODE_LATIN_SUP | GP_UCODE_LATIN_EXT_A";
 	}
 
 	if ($enc eq "ISO10646-1") {
 		gen_glyph_table($glyphs, 0xa1, 0x17e, $max_width, $font_id . "_latin_ext", $bold, \&utf_to_utf);
+		$ucode_blocks .= " | GP_UCODE_LATIN_SUP | GP_UCODE_LATIN_EXT_A";
 	}
 
 	if ($enc eq "ISO10646-1" && $greek) {
 		gen_glyph_table($glyphs, 0x384, 0x3ce, $max_width, $font_id . "_greek", $bold, \&utf_to_utf);
+		$ucode_blocks .= " | GP_UCODE_GREEK";
 	}
 
 	if ($enc eq "ISO10646-1" && $cyrilic) {
 		gen_glyph_table($glyphs, 0x400, 0x45f, $max_width, $font_id . "_cyrilic", $bold, \&utf_to_utf);
+		$ucode_blocks .= " | GP_UCODE_CYRILIC";
 	}
 
 	if ($enc eq "ISO10646-1" && $katakana) {
 		gen_glyph_table($glyphs, 0x30a0, 0x30ff, $max_width, $font_id . "_katakana", $bold, \&utf_to_utf);
+		$ucode_blocks .= " | GP_UCODE_KATAKANA";
 	}
 
 	print("static struct gp_font_face $font_id = {\n");
@@ -468,6 +477,7 @@ convert_font($font, $ARGV[1] . "_bold", 1);
 
 print("const gp_font_family __attribute__((visibility (\"hidden\"))) font_family_$ARGV[1] = {\n");
 print("\t.family_name = \"$ARGV[2]\",\n");
+print("\t.ucode_blocks = $ucode_blocks,\n");
 print("\t.fonts = {\n");
 print("\t\t&font,\n");
 print("\t\t&font_bold,\n");

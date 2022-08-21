@@ -175,6 +175,27 @@ struct gp_font_face {
 };
 
 /*
+ * All fonts must include LATIN_BASIC and it has to be the first table
+ * in the font.
+ */
+typedef enum gp_font_ucode_block {
+	/* 0x20 - 0x7f */
+	GP_UCODE_LATIN_BASIC = 0x0001,
+	/* 0xa0 - 0xff */
+	GP_UCODE_LATIN_SUP = 0x0002,
+	/* 0x100 - 0x17e */
+	GP_UCODE_LATIN_EXT_A = 0x0004,
+	/* 0x384 - 0x3ce */
+	GP_UCODE_GREEK = 0x0008,
+	/* 0x340 - 0x45f */
+	GP_UCODE_CYRILIC = 0x0010,
+	/* 0x3041 - 0x3096 */
+	GP_UCODE_HIRAGANA= 0x0020,
+	/* 0x30a0 - 0x30aff */
+	GP_UCODE_KATAKANA = 0x0030,
+} gp_font_ucode_block;
+
+/*
  * Font family is a group of fonts of the same family and size but different
  * style i.e. monospace, bold, italic...
  *
@@ -182,6 +203,8 @@ struct gp_font_face {
  */
 typedef struct gp_font_family {
 	const char *family_name;
+	/* Bitmask of unicode blocks included in the font */
+	uint32_t ucode_blocks;
 	const gp_font_face *const fonts[];
 } gp_font_family;
 

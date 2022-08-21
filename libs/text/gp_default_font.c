@@ -501,6 +501,7 @@ static struct gp_font_face font_gfxprim = {
 
 const gp_font_family __attribute__((visibility ("hidden"))) font_family_gfxprim = {
 	.family_name = "gfxprim",
+	.ucode_blocks = GP_UCODE_LATIN_BASIC,
 	.fonts = {
 		&font_gfxprim,
 		&gp_default_font,

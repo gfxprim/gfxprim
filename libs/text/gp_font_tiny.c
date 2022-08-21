@@ -429,6 +429,7 @@ static struct gp_font_face tiny_mono = {
 
 const gp_font_family __attribute__((visibility ("hidden"))) font_family_tiny = {
 	.family_name = "tiny",
+	.ucode_blocks = GP_UCODE_LATIN_BASIC,
 	.fonts = {
 		&tiny,
 		&tiny_mono,
