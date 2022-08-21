@@ -334,6 +334,8 @@ def write_config_h(cfg, libs):
     f.write("/*\n * This file is genereated by configure script\n */\n");
     f.write("#ifndef CONFIG_H\n#define CONFIG_H\n\n")
     libs.write_config_h(f);
+    f.write("/*\n * OS to compile for\n */\n");
+    f.write("#define OS_%s 1\n\n" % (cfg['os'][0].upper()))
     f.write("#endif /* CONFIG_H */\n");
     sys.stderr.write("Config 'config.h' written\n")
     f.close()
