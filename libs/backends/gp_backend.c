@@ -94,7 +94,7 @@ static uint32_t pushevent_callback(gp_timer *self)
 	gp_event ev;
 
 	ev.type = GP_EV_TMR;
-	gettimeofday(&ev.time, NULL);
+	ev.time = gp_time_stamp();
 	ev.tmr = self;
 
 	gp_event_queue_put(self->_priv, &ev);

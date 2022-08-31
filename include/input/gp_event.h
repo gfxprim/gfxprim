@@ -111,7 +111,7 @@ struct gp_event {
 	};
 
 	/* event timestamp */
-	struct timeval time;
+	uint64_t time;
 
 	/** Pointer to overall state, pressed keys, cursor position etc. */
 	struct gp_events_state *st;

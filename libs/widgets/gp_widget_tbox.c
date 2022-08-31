@@ -600,7 +600,7 @@ static int mouse_click(gp_widget *self, const gp_widget_render_ctx *ctx, int shi
 
 	gp_utf8_pos_move(tbox->buf, &cur_pos, cur_pos_chars);
 
-	if (gp_timeval_diff_ms(ev->time, tbox->last_click) < ctx->dclick_ms) {
+	if (gp_widgets_is_dclick(ev->time, tbox->last_click, ctx)) {
 		sel_substr_cycle(self, cur_pos, 0);
 	} else {
 		if (shift) {

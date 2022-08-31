@@ -90,7 +90,7 @@ static int event_key_us(gp_keymap *self, gp_event_queue *queue, gp_event *ev)
 		utf = keys_to_ascii[key];
 
 	if (utf >= 0x20)
-		gp_event_queue_push_utf(queue, utf, &ev->time);
+		gp_event_queue_push_utf(queue, utf, ev->time);
 
 	return 0;
 }
@@ -510,7 +510,7 @@ static int map_key(struct map *map, struct mods *mods, gp_event_queue *queue, gp
 		if (map->mods.states[i] == mods->state) {
 			utf = map->map[ev->key.key - map->min_key];
 			if (utf) {
-				gp_event_queue_push_utf(queue, utf, &ev->time);
+				gp_event_queue_push_utf(queue, utf, ev->time);
 				GP_DEBUG(5, "Mapping %i to %u", ev->key.key,
 				         map->map[ev->key.key - map->min_key]);
 				return 0;

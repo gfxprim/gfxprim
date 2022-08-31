@@ -8,6 +8,7 @@
 #include <core/gp_common.h>
 #include <core/gp_debug.h>
 
+#include <input/gp_time_stamp.h>
 #include <input/gp_keymap.h>
 #include <input/gp_event_queue.h>
 
@@ -192,16 +193,16 @@ void gp_event_queue_put_back(gp_event_queue *self, gp_event *ev)
 	event_put_back(self, ev);
 }
 
-static void set_time(gp_event *ev, struct timeval *time)
+static void set_time(gp_event *ev, uint64_t time)
 {
 	if (!time)
-		gettimeofday(&ev->time, NULL);
+		ev->time = gp_time_stamp();
 	else
-		ev->time = *time;
+		ev->time = time;
 }
 
 void gp_event_queue_push_rel(gp_event_queue *self,
-                             int32_t rx, int32_t ry, struct timeval *time)
+                             int32_t rx, int32_t ry, uint64_t time)
 {
 	gp_event ev = {
 		.type = GP_EV_REL,
@@ -215,7 +216,7 @@ void gp_event_queue_push_rel(gp_event_queue *self,
 }
 
 void gp_event_queue_push_rel_to(gp_event_queue *self,
-                               uint32_t x, uint32_t y, struct timeval *time)
+                               uint32_t x, uint32_t y, uint64_t time)
 {
 	if (x > self->screen_w || y > self->screen_h) {
 		GP_WARN("x > screen_w or y > screen_h");
@@ -231,7 +232,7 @@ void gp_event_queue_push_rel_to(gp_event_queue *self,
 void gp_event_queue_push_abs(gp_event_queue *self,
                              uint32_t x, uint32_t y, uint32_t pressure,
                              uint32_t x_max, uint32_t y_max, uint32_t pressure_max,
-                             struct timeval *time)
+                             uint64_t time)
 {
 	gp_event ev = {
 		.type = GP_EV_ABS,
@@ -253,7 +254,7 @@ void gp_event_queue_push_abs(gp_event_queue *self,
 
 void gp_event_queue_push_key(gp_event_queue *self,
                              uint32_t key, uint8_t code,
-			     struct timeval *time)
+			     uint64_t time)
 {
 	switch (code) {
 	case GP_EV_KEY_UP:
@@ -285,7 +286,7 @@ void gp_event_queue_push_key(gp_event_queue *self,
 }
 
 void gp_event_queue_push_utf(gp_event_queue *self, uint32_t utf_ch,
-                             struct timeval *time)
+                             uint64_t time)
 {
 	gp_event ev = {
 		.type = GP_EV_UTF,
@@ -298,7 +299,7 @@ void gp_event_queue_push_utf(gp_event_queue *self, uint32_t utf_ch,
 }
 
 void gp_event_queue_push_resize(gp_event_queue *self,
-                                uint32_t w, uint32_t h, struct timeval *time)
+                                uint32_t w, uint32_t h, uint64_t time)
 {
 	gp_event ev = {
 		.type = GP_EV_SYS,
@@ -313,7 +314,7 @@ void gp_event_queue_push_resize(gp_event_queue *self,
 
 void gp_event_queue_push(gp_event_queue *self,
                          uint16_t type, uint32_t code, int32_t value,
-                         struct timeval *time)
+                         uint64_t time)
 {
 	if (type == GP_EV_KEY) {
 		gp_event_queue_push_key(self, code, value, time);

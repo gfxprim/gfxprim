@@ -341,7 +341,7 @@ static void input_key(gp_input_linux *self,
 			return;
 	}
 
-	gp_event_queue_push_key(event_queue, ev->code, ev->value, NULL);
+	gp_event_queue_push_key(event_queue, ev->code, ev->value, 0);
 }
 
 static void do_sync(gp_input_linux *self,
@@ -350,7 +350,7 @@ static void do_sync(gp_input_linux *self,
 	if (self->rel_flag) {
 		self->rel_flag = 0;
 		gp_event_queue_push_rel(event_queue, self->rel_x,
-		                        self->rel_y, NULL);
+		                        self->rel_y, 0);
 		self->rel_x = 0;
 		self->rel_y = 0;
 	}
@@ -398,12 +398,12 @@ static void do_sync(gp_input_linux *self,
 			y = y_max - y;
 
 		gp_event_queue_push_abs(event_queue, x, y, self->abs_press,
-		                        x_max, y_max, self->abs_press_max, NULL);
+		                        x_max, y_max, self->abs_press_max, 0);
 
 		self->abs_press = 0;
 
 		if (self->abs_pen_flag) {
-			gp_event_queue_push_key(event_queue, BTN_TOUCH, 1, NULL);
+			gp_event_queue_push_key(event_queue, BTN_TOUCH, 1, 0);
 			self->abs_pen_flag = 0;
 		}
 	}

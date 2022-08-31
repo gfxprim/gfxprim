@@ -89,7 +89,7 @@ static void visible(gp_backend *self)
 
 	priv->visible = 1;
 
-	gp_event_queue_push_resize(&self->event_queue, self->pixmap->w, self->pixmap->h, NULL);
+	gp_event_queue_push_resize(&self->event_queue, self->pixmap->w, self->pixmap->h, 0);
 }
 
 static void hidden(gp_backend *self)
@@ -174,7 +174,7 @@ static void proxy_poll(gp_backend *self)
 			break;
 			case GP_PROXY_EXIT:
 				gp_event_queue_push(&self->event_queue, GP_EV_SYS,
-				                    GP_EV_SYS_QUIT, 0, NULL);
+				                    GP_EV_SYS_QUIT, 0, 0);
 			break;
 			}
 		}
@@ -182,7 +182,7 @@ static void proxy_poll(gp_backend *self)
 
 	if (ret == 0) {
 		GP_WARN("Connection closed");
-		gp_event_queue_push(&self->event_queue, GP_EV_SYS, GP_EV_SYS_QUIT, 0, NULL);
+		gp_event_queue_push(&self->event_queue, GP_EV_SYS, GP_EV_SYS_QUIT, 0, 0);
 	}
 }
 

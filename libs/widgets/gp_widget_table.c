@@ -522,7 +522,7 @@ static int row_click(gp_widget *self, const gp_widget_render_ctx *ctx, gp_event 
 	row += tbl->start_row;
 
 	if (tbl->row_selected && tbl->selected_row == row) {
-		if (gp_timeval_diff_ms(ev->time, tbl->last_ev) < ctx->dclick_ms)
+		if (gp_widgets_is_dclick(ev->time, tbl->last_click, ctx))
 			gp_widget_send_widget_event(self, GP_WIDGET_TABLE_TRIGGER);
 		goto ret;
 	}
@@ -536,7 +536,7 @@ static int row_click(gp_widget *self, const gp_widget_render_ctx *ctx, gp_event 
 	gp_widget_redraw(self);
 
 ret:
-	tbl->last_ev = ev->time;
+	tbl->last_click = ev->time;
 	return 1;
 }
 

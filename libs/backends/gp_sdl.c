@@ -138,7 +138,7 @@ static int sdl_set_attr(struct gp_backend *self, enum gp_backend_attrs attr,
 	case GP_BACKEND_SIZE: {
 		const int *size = vals;
 		/* Send only resize event, the actual resize is done in resize_ack */
-		gp_event_queue_push_resize(&self->event_queue, size[0], size[1], NULL);
+		gp_event_queue_push_resize(&self->event_queue, size[0], size[1], 0);
 	}
 	break;
 	default:

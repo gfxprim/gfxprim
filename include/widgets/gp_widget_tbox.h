@@ -69,7 +69,7 @@ struct gp_widget_tbox {
 
 
 	//TODO: Move to event state
-	struct timeval last_click;
+	uint64_t last_click;
 	uint32_t click_cursor_x;
 
 	char payload[];

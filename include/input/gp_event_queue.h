@@ -128,7 +128,7 @@ struct timeval;
  * If timeval is NULL, current time is used.
  */
 void gp_event_queue_push_rel(gp_event_queue *self,
-                             int32_t rx, int32_t ry, struct timeval *time);
+                             int32_t rx, int32_t ry, uint64_t time);
 
 /*
  * Produces relative event that moves cursor to the point x, y.
@@ -136,7 +136,7 @@ void gp_event_queue_push_rel(gp_event_queue *self,
  * If timeval is NULL, current time is used.
  */
 void gp_event_queue_push_rel_to(gp_event_queue *self,
-                               uint32_t x, uint32_t y, struct timeval *time);
+                               uint32_t x, uint32_t y, uint64_t time);
 
 /*
  * Inject absolute event.
@@ -146,7 +146,7 @@ void gp_event_queue_push_rel_to(gp_event_queue *self,
 void gp_event_queue_push_abs(gp_event_queue *self,
                              uint32_t x, uint32_t y, uint32_t pressure,
                              uint32_t x_max, uint32_t y_max, uint32_t pressure_max,
-                             struct timeval *time);
+                             uint64_t time);
 
 /*
  * Inject event that changes key state (i.e. press, release, repeat).
@@ -158,7 +158,7 @@ void gp_event_queue_push_abs(gp_event_queue *self,
  */
 void gp_event_queue_push_key(gp_event_queue *self,
                              uint32_t key, uint8_t code,
-                             struct timeval *time);
+                             uint64_t time);
 
 /**
  * @brief Injects an unicode character typed on keyboard
@@ -168,19 +168,19 @@ void gp_event_queue_push_key(gp_event_queue *self,
  * @timeval A timestamp; if NULL current time is used
  */
 void gp_event_queue_push_utf(gp_event_queue *self, uint32_t utf_ch,
-                             struct timeval *time);
+                             uint64_t time);
 
 /*
  * Inject window resize event
  */
 void gp_event_queue_push_resize(gp_event_queue *self,
-                                uint32_t w, uint32_t h, struct timeval *time);
+                                uint32_t w, uint32_t h, uint64_t time);
 
 /*
  * Inject common event.
  */
 void gp_event_queue_push(gp_event_queue *self,
                          uint16_t type, uint32_t code, int32_t value,
-                         struct timeval *time);
+                         uint64_t time);
 
 #endif /* INPUT_GP_EVENT_QUEUE_H */

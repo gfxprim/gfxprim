@@ -86,7 +86,7 @@ typedef struct gp_widget_table {
 	int row_selected:1;
 	int sorted_desc:1;
 
-	struct timeval last_ev;
+	uint64_t last_click;
 
 	unsigned int start_row;
 	unsigned int last_rows;

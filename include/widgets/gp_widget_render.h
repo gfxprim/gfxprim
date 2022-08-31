@@ -63,8 +63,17 @@ struct gp_widget_render_ctx {
 	gp_bbox *bbox;
 
 	/* maximal delay between two clicks for a double click */
-	int dclick_ms;
+	unsigned int dclick_ms;
 };
+
+static inline int gp_widgets_is_dclick(uint64_t time_now, uint64_t time_prev,
+                                       const gp_widget_render_ctx *ctx)
+{
+	if (time_now - time_prev < (uint64_t)ctx->dclick_ms)
+		return 1;
+
+	return 0;
+}
 
 /*
  * @brief Initializes render context fonts and padding.

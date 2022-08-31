@@ -36,7 +36,7 @@ static uint32_t btn_repeat_callback(gp_timer *self)
 {
 	long key = (long)self->priv;
 
-	gp_event_queue_push_key(event_queue, key, GP_EV_KEY_REPEAT, NULL);
+	gp_event_queue_push_key(event_queue, key, GP_EV_KEY_REPEAT, 0);
 	return repeat_period;
 }
 

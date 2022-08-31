@@ -164,12 +164,12 @@ static void xcb_input_event_put(gp_event_queue *event_queue,
 		case 4:
 			if (press)
 				gp_event_queue_push(event_queue, GP_EV_REL,
-				                    GP_EV_REL_WHEEL, 1, NULL);
+				                    GP_EV_REL_WHEEL, 1, 0);
 			return;
 		case 5:
 			if (press)
 				gp_event_queue_push(event_queue, GP_EV_REL,
-				                  GP_EV_REL_WHEEL, -1, NULL);
+				                  GP_EV_REL_WHEEL, -1, 0);
 			return;
 		}
 
@@ -178,11 +178,11 @@ static void xcb_input_event_put(gp_event_queue *event_queue,
 			return;
 		}
 
-		gp_event_queue_push(event_queue, GP_EV_KEY, key, press, NULL);
+		gp_event_queue_push(event_queue, GP_EV_KEY, key, press, 0);
 	} break;
 	case XCB_CONFIGURE_NOTIFY: {
 		xcb_configure_notify_event_t *cev = (xcb_configure_notify_event_t *)ev;
-		gp_event_queue_push_resize(event_queue, cev->width, cev->height, NULL);
+		gp_event_queue_push_resize(event_queue, cev->width, cev->height, 0);
 	}
 	break;
 	break;
@@ -195,7 +195,7 @@ static void xcb_input_event_put(gp_event_queue *event_queue,
 			return;
 
 		gp_event_queue_push_rel_to(event_queue,
-		                           mev->event_x, mev->event_y, NULL);
+		                           mev->event_x, mev->event_y, 0);
 	}
 	break;
 	case XCB_KEY_PRESS:
@@ -207,14 +207,14 @@ static void xcb_input_event_put(gp_event_queue *event_queue,
 		if (key == 0)
 			return;
 
-		gp_event_queue_push_key(event_queue, key, press, NULL);
+		gp_event_queue_push_key(event_queue, key, press, 0);
 	} break;
 	/* events from WM */
 	case XCB_CLIENT_MESSAGE: {
 		xcb_client_message_event_t *cev = (xcb_client_message_event_t*)ev;
 		if (cev->data.data32[0] == x_con.wm_delete_window) {
 			gp_event_queue_push(event_queue, GP_EV_SYS,
-			                  GP_EV_SYS_QUIT, 0, NULL);
+			                  GP_EV_SYS_QUIT, 0, 0);
 			return;
 		}
 		GP_WARN("Unknown X Client Message");

@@ -83,7 +83,7 @@ void gp_input_driver_sdl_event_put(gp_event_queue *event_queue, SDL_Event *ev)
 	switch (ev->type) {
 	case SDL_MOUSEMOTION:
 		gp_event_queue_push_rel(event_queue, ev->motion.xrel,
-		                        ev->motion.yrel, NULL);
+		                        ev->motion.yrel, 0);
 	break;
 	case SDL_MOUSEBUTTONDOWN:
 	case SDL_MOUSEBUTTONUP:
@@ -101,12 +101,12 @@ void gp_input_driver_sdl_event_put(gp_event_queue *event_queue, SDL_Event *ev)
 		case 4:
 			if (ev->type == SDL_MOUSEBUTTONDOWN)
 				gp_event_queue_push(event_queue, GP_EV_REL,
-				                    GP_EV_REL_WHEEL, 1, NULL);
+				                    GP_EV_REL_WHEEL, 1, 0);
 			return;
 		case 5:
 			if (ev->type == SDL_MOUSEBUTTONDOWN)
 				gp_event_queue_push(event_queue, GP_EV_REL,
-				                    GP_EV_REL_WHEEL, -1, NULL);
+				                    GP_EV_REL_WHEEL, -1, 0);
 			return;
 		default:
 			GP_WARN("Unmapped SDL Mouse button %02x",
@@ -115,7 +115,7 @@ void gp_input_driver_sdl_event_put(gp_event_queue *event_queue, SDL_Event *ev)
 		}
 
 		gp_event_queue_push(event_queue, GP_EV_KEY,
-		                  key, ev->button.state, NULL);
+		                  key, ev->button.state, 0);
 	break;
 	case SDL_KEYDOWN:
 	case SDL_KEYUP:
@@ -132,30 +132,30 @@ void gp_input_driver_sdl_event_put(gp_event_queue *event_queue, SDL_Event *ev)
 			return;
 		}
 
-		gp_event_queue_push_key(event_queue, key, ev->key.state, NULL);
+		gp_event_queue_push_key(event_queue, key, ev->key.state, 0);
 
 #if LIBSDL_VERSION == 1
 		if (ev->key.keysym.unicode >= 0x20)
-			gp_event_queue_push_utf(event_queue, ev->key.keysym.unicode, NULL);
+			gp_event_queue_push_utf(event_queue, ev->key.keysym.unicode, 0);
 #endif
 	break;
 #if LIBSDL_VERSION == 1
 	case SDL_VIDEORESIZE:
 		gp_event_queue_push_resize(event_queue, ev->resize.w,
-		                           ev->resize.h, NULL);
+		                           ev->resize.h, 0);
 	break;
 #elif LIBSDL_VERSION == 2
 	case SDL_WINDOWEVENT:
 		if (ev->window.event == SDL_WINDOWEVENT_SIZE_CHANGED ||
 		    ev->window.event == SDL_WINDOWEVENT_RESIZED) {
 			gp_event_queue_push_resize(event_queue, ev->window.data1,
-			                           ev->window.data2, NULL);
+			                           ev->window.data2, 0);
 		}
 	break;
 #endif
 	case SDL_QUIT:
 		gp_event_queue_push(event_queue, GP_EV_SYS,
-		                  GP_EV_SYS_QUIT, 0, NULL);
+		                  GP_EV_SYS_QUIT, 0, 0);
 	break;
 	}
 }

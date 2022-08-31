@@ -7,6 +7,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdarg.h>
+#include <inttypes.h>
 
 #include <core/gp_debug.h>
 #include <core/gp_common.h>
@@ -112,7 +113,7 @@ static void dump_sys(gp_event *ev)
 
 void gp_event_dump(gp_event *ev)
 {
-	printf("Event (%u) ", (unsigned int)ev->time.tv_sec % 10000);
+	printf("Event (%"PRIu64") ", ev->time);
 
 	switch (ev->type) {
 	case GP_EV_KEY:
