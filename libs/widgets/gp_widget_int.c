@@ -176,6 +176,7 @@ static gp_widget *json_to_int(enum gp_widget_type type, gp_json_reader *json,
 			min = val->val_int;
 		break;
 		case VAL:
+			val_set = 1;
 			ival = val->val_int;
 		break;
 		}
