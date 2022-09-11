@@ -1,5 +1,10 @@
 #!/bin/sh
 
+if [ -z "$1" ]; then
+	echo "This is not the script you are looking for"
+	exit 1
+fi
+
 PREFIX="$1"
 LIBDIR="$2"
 BINDIR="$3"
