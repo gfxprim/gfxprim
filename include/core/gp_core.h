@@ -15,8 +15,6 @@
 #ifndef CORE_GP_CORE_H
 #define CORE_GP_CORE_H
 
-#include "../../config.h"
-
 #include <core/gp_version.h>
 #include <core/gp_common.h>
 #include <core/gp_pixmap.h>
@@ -31,9 +29,5 @@
 #include <core/gp_fill.h>
 #include <core/gp_progress_callback.h>
 #include <core/gp_mix_pixels.h>
-
-#ifdef HAVE_PTHREAD
-# include <core/gp_threads.h>
-#endif
 
 #endif /* CORE_GP_CORE_H */
