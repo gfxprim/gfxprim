@@ -6,7 +6,7 @@
 #include <string.h>
 #include <fcntl.h>
 #include <errno.h>
-#include <widgets/gp_widgets.h>
+#include <utils/gp_utils.h>
 #include "tst_test.h"
 
 static int cfg_path(void)
@@ -15,9 +15,9 @@ static int cfg_path(void)
 
 	setenv("HOME", "/tmp/", 1);
 
-	cfg_path = gp_widget_cfg_path("app_name", "cfg.txt");
+	cfg_path = gp_app_cfg_path("app_name", "cfg.txt");
 	if (!cfg_path) {
-		tst_msg("gp_widget_cfg_path() returned NULL");
+		tst_msg("gp_app_cfg_path() returned NULL");
 		return TST_FAILED;
 	}
 
@@ -38,8 +38,8 @@ static int cfg_mkpath(void)
 
 	setenv("HOME", getcwd(buf, sizeof(buf)), 1);
 
-	if (gp_widget_cfg_mkpath("app_name")) {
-		tst_msg("gp_widget_cfg_mkdirs() failed: %s", strerror(errno));
+	if (gp_app_cfg_mkpath("app_name")) {
+		tst_msg("gp_app_cfg_mkdirs() failed: %s", strerror(errno));
 		return TST_FAILED;
 	}
 
@@ -55,7 +55,7 @@ static int cfg_mkpath(void)
 }
 
 const struct tst_suite tst_suite = {
-	.suite_name = "widget cfg testsuite",
+	.suite_name = "app cfg testsuite",
 	.tests = {
 		{.name = "cfg path",
 		 .tst_fn = cfg_path},

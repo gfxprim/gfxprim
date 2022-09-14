@@ -1,8 +1,10 @@
 TOPDIR=../..
 include $(TOPDIR)/pre.mk
 
-CSOURCES=vec.c matrix.c vec_str.c list.c htable.c utf.c json.c json_reader.c json_writer.c
-APPS=vec matrix vec_str list htable utf json json_reader json_writer
+CSOURCES=vec.c matrix.c vec_str.c list.c htable.c utf.c json.c json_reader.c json_writer.c\
+	 cfg.c
+APPS=vec matrix vec_str list htable utf json json_reader json_writer\
+     cfg
 
 include ../tests.mk
 

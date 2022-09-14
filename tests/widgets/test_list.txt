@@ -15,6 +15,5 @@ label
 label_json
 grid
 grid_json
-cfg
 app_event
 frame

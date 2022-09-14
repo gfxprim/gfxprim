@@ -14,8 +14,6 @@
 
 #include <widgets/gp_widget_keys.h>
 
-#include <widgets/gp_widget_cfg.h>
-
 #include <widgets/gp_widget_ops.h>
 #include <widgets/gp_widget.h>
 #include <widgets/gp_widget_render.h>

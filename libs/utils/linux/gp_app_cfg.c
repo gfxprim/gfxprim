@@ -15,9 +15,10 @@
 #include <errno.h>
 #include <unistd.h>
 #include <sys/stat.h>
-#include "widgets/gp_widget_cfg.h"
 
-char *gp_widget_cfg_path(const char *app_name, const char *cfg_filename)
+#include <utils/gp_app_cfg.h>
+
+char *gp_app_cfg_path(const char *app_name, const char *cfg_filename)
 {
 	char *home_path, *full_path = NULL, *sep;
 	size_t home_len;
@@ -45,7 +46,7 @@ char *gp_widget_cfg_path(const char *app_name, const char *cfg_filename)
 	return full_path;
 }
 
-int gp_widget_cfg_mkpath(const char *app_name)
+int gp_app_cfg_mkpath(const char *app_name)
 {
 	char *home_path;
 	int home_fd, conf_fd, err;

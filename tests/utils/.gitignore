@@ -4,6 +4,7 @@ matrix
 list
 htable
 utf
+cfg
 json
 json_reader
 json_writer
