@@ -33,4 +33,31 @@ char *gp_app_cfg_path(const char *app_name, const char *cfg_filename);
  */
 int gp_app_cfg_mkpath(const char *app_name);
 
+/**
+ * Simplified interface for cases when we can read the config with single scanf.
+ *
+ * @app_name An application name
+ * @cfg_filename A config filename
+ * @fmt A scanf format string
+ * @... A scanf parameters
+ *
+ * @return Returns -1 if the config file does not exists otherwise the return
+ *         value from the final scanf().
+ */
+int gp_app_cfg_scanf(const char *app_name, const char *cfg_filename,
+                     const char *fmt, ...) __attribute__ ((format (scanf, 3, 4)));
+
+/**
+ * Simplified interface for cases when we can write the config with single printf.
+ *
+ * @app_name An application name
+ * @cfg_filename A config filename
+ * @fmt A printf format string
+ * @... A printf parameters
+ *
+ * @return Returns -1 on error and errno is set.
+ */
+int gp_app_cfg_printf(const char *app_name, const char *cfg_filename,
+                      const char *fmt, ...) __attribute__ ((format (printf, 3, 4)));
+
 #endif /* GP_APP_CFG_H */
