@@ -7,7 +7,9 @@
  */
 
 #include "../../config.h"
-#include <dlfcn.h>
+#ifdef HAVE_DL
+# include <dlfcn.h>
+#endif
 #include <errno.h>
 #include <string.h>
 #include <sys/types.h>
