@@ -57,9 +57,9 @@ const gp_pixel_type_desc gp_pixel_types[GP_PIXEL_MAX] = {
  */
 static void pixel_snprint_{{ pt.name }}(char *buf, size_t len, gp_pixel p)
 {
-	snprintf(buf, len, "{{ pt.name }} 0x%0{{ (pt.pixelsize.size+3)//4 }}x {{ '=%d '.join(pt.chan_names) + '=%d' }}",
-		GP_GET_BITS(0, {{ pt.pixelsize.size }}, p),
-		{{ arr_to_params(pt.chan_names, 'GP_PIXEL_GET_', '_' + pt.name + '(p)') }});
+	snprintf(buf, len, "{{ pt.name }} 0x%0{{ (pt.pixelsize.size+3)//4 }}lx {{ '=%li '.join(pt.chan_names) + '=%li' }}",
+		(unsigned long int)GP_GET_BITS(0, {{ pt.pixelsize.size }}, p),
+		{{ arr_to_params(pt.chan_names, '(long int) GP_PIXEL_GET_', '_' + pt.name + '(p)') }});
 }
 
 @ end
