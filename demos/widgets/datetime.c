@@ -9,12 +9,16 @@
 #include <time.h>
 #include <widgets/gp_widgets.h>
 
-static gp_widget *wday;
-static gp_widget *wmon;
-static gp_widget *wyear;
-static gp_widget *whour;
-static gp_widget *wmin;
-static gp_widget *wsec;
+struct widgets {
+	gp_widget *day;
+	gp_widget *mon;
+	gp_widget *year;
+	gp_widget *hour;
+	gp_widget *min;
+	gp_widget *sec;
+};
+
+static struct widgets widgets;
 
 static int is_leap(int year)
 {
@@ -51,9 +55,9 @@ int mon_year_on_event(gp_widget_event *ev)
 	if (ev->type != GP_WIDGET_EVENT_WIDGET)
 		return 0;
 
-	days = days_in_mon(gp_widget_int_val_get(wmon), gp_widget_int_val_get(wyear));
+	days = days_in_mon(gp_widget_int_val_get(widgets.mon), gp_widget_int_val_get(widgets.year));
 
-	gp_widget_int_max_set(wday, days);
+	gp_widget_int_max_set(widgets.day, days);
 
 	return 0;
 }
@@ -69,26 +73,36 @@ int load_sys_time(gp_widget_event *ev)
 	time(&t);
 	localtime_r(&t, &tm);
 
-	if (wsec)
-		gp_widget_int_val_set(wsec, tm.tm_sec);
+	if (widgets.sec)
+		gp_widget_int_val_set(widgets.sec, tm.tm_sec);
 
-	if (wmin)
-		gp_widget_int_val_set(wmin, tm.tm_min);
+	if (widgets.min)
+		gp_widget_int_val_set(widgets.min, tm.tm_min);
 
-	if (whour)
-		gp_widget_int_val_set(whour, tm.tm_hour);
+	if (widgets.hour)
+		gp_widget_int_val_set(widgets.hour, tm.tm_hour);
 
-	if (wday)
-		gp_widget_int_val_set(wday, tm.tm_mday);
+	if (widgets.day)
+		gp_widget_int_val_set(widgets.day, tm.tm_mday);
 
-	if (wmon)
-		gp_widget_int_val_set(wmon, tm.tm_mon + 1);
+	if (widgets.mon)
+		gp_widget_int_val_set(widgets.mon, tm.tm_mon + 1);
 
-	if (wyear)
-		gp_widget_int_val_set(wyear, tm.tm_year + 1900);
+	if (widgets.year)
+		gp_widget_int_val_set(widgets.year, tm.tm_year + 1900);
 
 	return 0;
 }
+
+static gp_widget_uid_map uid_map[] = {
+	GP_WIDGET_UID("day", GP_WIDGET_SPINNER, struct widgets, day),
+	GP_WIDGET_UID("mon", GP_WIDGET_SPINNER, struct widgets, mon),
+	GP_WIDGET_UID("year", GP_WIDGET_SPINNER, struct widgets, year),
+	GP_WIDGET_UID("hour", GP_WIDGET_SPINNER, struct widgets, hour),
+	GP_WIDGET_UID("min", GP_WIDGET_SPINNER, struct widgets, min),
+	GP_WIDGET_UID("sec", GP_WIDGET_SPINNER, struct widgets, sec),
+	{}
+};
 
 int main(int argc, char *argv[])
 {
@@ -98,12 +112,8 @@ int main(int argc, char *argv[])
 	if (!layout)
 		return 0;
 
-	wday  = gp_widget_by_uid(uids, "day", GP_WIDGET_SPINNER);
-	wmon  = gp_widget_by_uid(uids, "mon", GP_WIDGET_SPINNER);
-	wyear = gp_widget_by_uid(uids, "year", GP_WIDGET_SPINNER);
-	whour = gp_widget_by_uid(uids, "hour", GP_WIDGET_SPINNER);
-	wmin  = gp_widget_by_uid(uids, "min", GP_WIDGET_SPINNER);
-	wsec  = gp_widget_by_uid(uids, "sec", GP_WIDGET_SPINNER);
+	gp_widgets_by_uids(uids, uid_map, &widgets);
+	gp_htable_free(uids);
 
 	gp_widgets_main_loop(layout, "Date & Time", NULL, argc, argv);
 
