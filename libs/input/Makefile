@@ -1,7 +1,12 @@
 TOPDIR=../..
 include $(TOPDIR)/pre.mk
 
-CSOURCES=$(shell ls *.c)
+CSOURCES=$(wildcard *.c)
+
+#ifeq ($(wildcard $(os)),$(os))
+CSOURCES+=$(wildcard $(os)/*.c)
+#endif
+
 INCLUDE=core
 LIBNAME=input
 
