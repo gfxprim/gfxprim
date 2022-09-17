@@ -225,10 +225,10 @@ void gp_widget_pbar_set(gp_widget *self, float val)
 	if (check_val(val, self->pbar->max))
 		return;
 
-	if ((int)(100 * self->pbar->val) != (int)(100 * val)) {
-		gp_widget_redraw(self);
-		self->pbar->val = val;
-	}
+	self->pbar->val = val;
+
+	//TODO: check when we should redraw
+	gp_widget_redraw(self);
 }
 
 void gp_widget_pbar_set_max(gp_widget *self, float max)
