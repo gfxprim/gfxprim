@@ -26,14 +26,17 @@ struct gp_timer {
 
 	/* Expiration time */
 	uint64_t expires;
+
+	/* Timer id, showed in debug messages */
+	const char *id;
+
 	/*
 	 * If not zero return value from callback is ignored and
 	 * timer is rescheduled each time it expires.
 	 */
 	uint32_t period;
-
-	/* Timer id, showed in debug messages */
-	const char *id;
+	/* Set if timer is inserted into a queue */
+	uint32_t running:1;
 
 	/* Do not touch */
 	void *_priv;
@@ -56,14 +59,30 @@ struct gp_timer {
 		.callback = tcallback, \
 		.priv = tpriv \
 	}
+/**
+ * Returns if timer is running, i.e. inserted into a timer queue.
+ *
+ * @timer A timer.
+ * @return Non-zero if timer is running, zero otherwise.
+ */
+static inline int gp_timer_running(gp_timer *timer)
+{
+	return timer->running;
+}
 
 /*
  * Prints the structrue of binary heap into stdout, only for debugging.
  */
 void gp_timer_queue_dump(gp_timer *queue);
 
-/*
+/**
  * Inserts timer into the timer priority queue.
+ *
+ * If timer is already running nothing is done.
+ *
+ * @queue A timer queue.
+ * @now A timestamp, usually obtained by calling gp_time_stamp().
+ * @timer A timer to insert.
  */
 void gp_timer_queue_insert(gp_timer **queue, uint64_t now, gp_timer *timer);
 

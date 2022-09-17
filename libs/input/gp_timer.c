@@ -56,6 +56,12 @@ void gp_timer_queue_insert(gp_timer **queue, uint64_t now, gp_timer *timer)
 	GP_DEBUG(3, "Inserting timer %s (now is %"PRIu64") expires after %"
 	         PRIu32" at %"PRIu64, timer->id, now, after, expires);
 
+	if (timer->running) {
+		GP_DEBUG(3, "Timer %s already running!", timer->id);
+		return;
+	}
+
+	timer->running = 1;
 	timer->expires = expires;
 
 	gp_heap_head *head = gp_heap_ins(&(*queue)->heap, &timer->heap, timer_cmp);
@@ -67,9 +73,17 @@ void gp_timer_queue_remove(gp_timer **queue, gp_timer *timer)
 {
 	GP_DEBUG(3, "Removing timer %s from queue", timer->id);
 
+	if (!timer->running) {
+		GP_DEBUG(3, "Timer %s is not running!", timer->id);
+		return;
+	}
+
+	timer->running = 0;
+
 	if (!*queue) {
 		GP_WARN("Attempt to remove timer %s from empty queue",
 		        timer->id);
+		return;
 	}
 
 	gp_heap_head *head = gp_heap_rem(&(*queue)->heap, &timer->heap, timer_cmp);
@@ -106,6 +120,8 @@ static gp_timer *process_top(gp_timer *queue, uint64_t now)
 		         period ? "periodic " : "",
 		         timer->id, now, ret, timer->expires);
 		head = gp_heap_ins(head, &timer->heap, timer_cmp);
+	} else {
+		timer->running = 0;
 	}
 
 	return GP_HEAP_ENTRY(head, struct gp_timer, heap);
