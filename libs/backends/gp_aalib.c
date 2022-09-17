@@ -146,7 +146,7 @@ static void parse_event(gp_backend *self, int ev)
 	if (ev == AA_RESIZE) {
 		GP_DEBUG(1, "Resize event");
 		//TODO: Can we get the new size somehow?
-		gp_event_queue_push_resize(&self->event_queue, 0, 0, NULL);
+		gp_event_queue_push_resize(&self->event_queue, 0, 0, 0);
 		return;
 	}
 
@@ -162,8 +162,8 @@ static void parse_event(gp_backend *self, int ev)
 	}
 
 	/* emulate keyup events */
-	gp_event_queue_push_key(&self->event_queue, key, 1, NULL);
-	gp_event_queue_push_key(&self->event_queue, key, 0, NULL);
+	gp_event_queue_push_key(&self->event_queue, key, 1, 0);
+	gp_event_queue_push_key(&self->event_queue, key, 0, 0);
 }
 
 static void aalib_poll(gp_backend *self)
