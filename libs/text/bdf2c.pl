@@ -354,6 +354,7 @@ sub utf_to_utf
 my $greek = $ENV{'GREEK'};
 my $cyrilic = $ENV{'GREEK'};
 my $katakana = $ENV{'KATAKANA'};
+my $hiragana = $ENV{'HIRAGANA'};
 
 sub add_block
 {
@@ -419,6 +420,11 @@ sub convert_font
 		$ucode_blocks .= " | GP_UCODE_KATAKANA";
 	}
 
+	if ($enc eq "ISO10646-1" && $hiragana) {
+		gen_glyph_table($glyphs, 0x3041, 0x3096, $max_width, $font_id . "_hiragana", $bold, \&utf_to_utf);
+		$ucode_blocks .= " | GP_UCODE_KATAKANA";
+	}
+
 	print("static struct gp_font_face $font_id = {\n");
 	print("\t.family_name = \"$name\",\n");
 
@@ -434,6 +440,7 @@ sub convert_font
 	$glyph_tables+=1 if ($enc eq "ISO10646-1" && $greek);
 	$glyph_tables+=1 if ($enc eq "ISO10646-1" && $cyrilic);
 	$glyph_tables+=1 if ($enc eq "ISO10646-1" && $katakana);
+	$glyph_tables+=1 if ($enc eq "ISO10646-1" && $hiragana);
 
 	printf("\t.ascend = %i,\n", $font->{'ascend'});
 	printf("\t.descend = %i,\n", $font->{'descent'});
@@ -458,6 +465,9 @@ sub convert_font
 	}
 	if ($enc eq "ISO10646-1" && $katakana) {
 		add_block("0x30a0", "0x30ff", $font_id, "katakana");
+	}
+	if ($enc eq "ISO10646-1" && $hiragana) {
+		add_block("0x3041", "0x3096", $font_id, "hiragana");
 	}
 
 	printf("\n\t}\n");
