@@ -336,8 +336,13 @@ void gp_widget_ops_render(gp_widget *self, const gp_offset *offset,
 {
 	const struct gp_widget_ops *ops;
 
-	if (flags & GP_WIDGET_REDRAW_CHILDREN)
-		flags = GP_WIDGET_REDRAW;
+	if (flags & GP_WIDGET_REDRAW_CHILDREN) {
+		flags &= ~GP_WIDGET_REDRAW_CHILDREN;
+		flags |= GP_WIDGET_REDRAW;
+	}
+
+	if (self->disabled)
+		flags |= GP_WIDGET_DISABLED;
 
 	if (!self->redraw_child && !gp_widget_should_redraw(self, flags))
 		return;
@@ -419,6 +424,11 @@ static const char *focus_to_str(int flag)
 	return "???";
 }
 
+static int no_events(gp_widget *self)
+{
+	return self->no_events | self->disabled;
+}
+
 int gp_widget_ops_render_focus_xy(gp_widget *self, const gp_widget_render_ctx *ctx,
                                   unsigned int x, unsigned int y)
 {
@@ -430,7 +440,7 @@ int gp_widget_ops_render_focus_xy(gp_widget *self, const gp_widget_render_ctx *c
 	if (!self)
 		return 0;
 
-	if (self->no_events)
+	if (no_events(self))
 		return 0;
 
 	ops = gp_widget_ops(self);
@@ -457,7 +467,7 @@ static int widget_focusable(gp_widget *self)
 	if (!self)
 		return 0;
 
-	if (self->no_events)
+	if (no_events(self))
 		return 0;
 
 	ops = gp_widget_ops(self);
@@ -623,7 +633,7 @@ int gp_widget_ops_event(gp_widget *self, const gp_widget_render_ctx *ctx, gp_eve
 	if (!self)
 		return 0;
 
-	if (self->no_events)
+	if (no_events(self))
 		return 0;
 
 	ops = gp_widget_ops(self);

@@ -137,7 +137,7 @@ static gp_coord max_y_off(gp_widget *self)
 }
 
 static void draw_vert_scroll_bar(gp_widget *self, const gp_widget_render_ctx *ctx,
-                                 gp_coord x, gp_coord y, gp_size h, gp_size size)
+                                 gp_coord x, gp_coord y, gp_size h, gp_size size, gp_pixel color)
 {
 	struct gp_widget_scroll_area *area = self->scroll;
 	gp_size asc = gp_text_ascent(ctx->font);
@@ -146,18 +146,18 @@ static void draw_vert_scroll_bar(gp_widget *self, const gp_widget_render_ctx *ct
 
 	gp_size sh = scrollbar_h(self, ctx);
 
-	gp_vline_xyh(ctx->buf, x + ctx->padd + asc/2, y, sh, ctx->text_color);
+	gp_vline_xyh(ctx->buf, x + ctx->padd + asc/2, y, sh, color);
 
 	gp_size max_off = max_y_off(self);
 	gp_coord pos = ((sh - asc) * area->y_off + max_off/2) / max_off;
 
-	gp_pixel col = area->area_focused ? ctx->sel_color : ctx->text_color;
+	gp_pixel col = area->area_focused ? ctx->sel_color : color;
 
 	gp_fill_rrect_xywh(ctx->buf, x + ctx->padd, y + pos, asc, asc, ctx->bg_color, ctx->fg_color, col);
 }
 
 static void draw_horiz_scroll_bar(gp_widget *self, const gp_widget_render_ctx *ctx,
-                                  gp_coord x, gp_coord y, gp_size w, gp_size size)
+                                  gp_coord x, gp_coord y, gp_size w, gp_size size, gp_pixel color)
 {
 	struct gp_widget_scroll_area *area = self->scroll;
 	gp_size asc = gp_text_ascent(ctx->font);
@@ -166,12 +166,12 @@ static void draw_horiz_scroll_bar(gp_widget *self, const gp_widget_render_ctx *c
 
 	gp_size sw = scrollbar_w(self, ctx);
 
-	gp_hline_xyw(ctx->buf, x, y + ctx->padd + asc/2, sw, ctx->text_color);
+	gp_hline_xyw(ctx->buf, x, y + ctx->padd + asc/2, sw, color);
 
 	gp_size max_off = max_x_off(self);
 	gp_coord pos = ((sw - asc) * area->x_off + max_off/2) / max_off;
 
-	gp_pixel col = area->area_focused ? ctx->sel_color : ctx->text_color;
+	gp_pixel col = area->area_focused ? ctx->sel_color : color;
 
 	gp_fill_rrect_xywh(ctx->buf, x + pos, y + ctx->padd, asc, asc, ctx->bg_color, ctx->fg_color, col);
 }
@@ -186,6 +186,10 @@ static void render(gp_widget *self, const gp_offset *offset,
 		.x = -area->x_off,
 		.y = -area->y_off,
 	};
+	gp_pixel text_color = gp_widgets_color(ctx, self->label->text_color);
+
+	if (gp_widget_is_disabled(self, flags))
+		text_color = ctx->col_disabled;
 
 	//TODO!!!
 	gp_widget_ops_blit(ctx, self->x + offset->x, self->y + offset->y, self->w, self->h);
@@ -196,12 +200,12 @@ static void render(gp_widget *self, const gp_offset *offset,
 
 	if (area->scrollbar_x) {
 		w -= size;
-		draw_vert_scroll_bar(self, ctx, self->x + offset->x + w, self->y + offset->y, h, size);
+		draw_vert_scroll_bar(self, ctx, self->x + offset->x + w, self->y + offset->y, h, size, text_color);
 	}
 
 	if (area->scrollbar_y) {
 		h -= size;
-		draw_horiz_scroll_bar(self, ctx, self->x + offset->x, self->y + offset->y + h, w, size);
+		draw_horiz_scroll_bar(self, ctx, self->x + offset->x, self->y + offset->y + h, w, size, text_color);
 	}
 
 	gp_sub_pixmap(ctx->buf, &child_buf,
@@ -218,7 +222,7 @@ static void render(gp_widget *self, const gp_offset *offset,
 	child_ctx.flip = NULL;
 
 	gp_widget_ops_render(area->child, &child_offset, &child_ctx, flags);
-	gp_rect_xywh(ctx->buf, self->x + offset->x, self->y + offset->y, w, h, ctx->text_color);
+	gp_rect_xywh(ctx->buf, self->x + offset->x, self->y + offset->y, w, h, text_color);
 }
 
 static int is_in_scrollbar_x(gp_widget *self, const gp_widget_render_ctx *ctx, unsigned int x)

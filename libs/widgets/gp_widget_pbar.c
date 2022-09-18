@@ -48,8 +48,10 @@ static void pbar_render(gp_widget *self, const gp_offset *offset,
 	unsigned int y = self->y + offset->y;
 	unsigned int w = self->w;
 	unsigned int h = self->h;
+	gp_pixel text_color = gp_widgets_color(ctx, self->label->text_color);
 
-	(void)flags;
+	if (gp_widget_is_disabled(self, flags))
+		text_color = ctx->col_disabled;
 
 	gp_widget_ops_blit(ctx, x, y, w, h);
 
@@ -60,13 +62,13 @@ static void pbar_render(gp_widget *self, const gp_offset *offset,
 	gp_sub_pixmap(ctx->buf, &p, x, y, wd, h);
 	if (p.w > 0) {
 		gp_fill_rrect_xywh(&p, 0, 0, w, h, ctx->bg_color,
-		                   ctx->hl_color, ctx->text_color);
+		                   ctx->hl_color, text_color);
 	}
 
 	gp_sub_pixmap(ctx->buf, &p, x+wd, y, w-wd, h);
 	if (p.w > 0) {
 		gp_fill_rrect_xywh(&p, -wd, 0, w, h, ctx->bg_color,
-		                   ctx->fg_color, ctx->text_color);
+		                   ctx->fg_color, text_color);
 	}
 
 	char buf[64];
@@ -102,7 +104,7 @@ static void pbar_render(gp_widget *self, const gp_offset *offset,
 
 	gp_print(ctx->buf, ctx->font, x + w/2, y + ctx->padd,
 		 GP_ALIGN_CENTER | GP_VALIGN_BELOW | GP_TEXT_NOBG,
-		 ctx->text_color, ctx->bg_color, "%s", buf);
+		 text_color, ctx->bg_color, "%s", buf);
 }
 
 static int check_val(double val, double max)

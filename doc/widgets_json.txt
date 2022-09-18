@@ -69,6 +69,7 @@ resolved by the dynamic linker and called when the button has been pressed.
 |==============================================================================
 |  Attribute |  Type  | Default  | Description
 |   +uid+    | string |          | Widget universal id. Must be unique.
+| +disabled+ |  bool  |  false   | Disables (grays out) widget and all subwidgets.
 |   +type+   | string |   grid   | Widget type, e.g. button.
 |   +align+  |  enum  | +center+ | Sets both +haling+ and +valign+ {+center+, +fill+}
 |  +haling+  |  enum  | +center+ | Horizontal alignment {+center+, +left+, +right+, +fill+}

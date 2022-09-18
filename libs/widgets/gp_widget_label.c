@@ -49,6 +49,9 @@ static void render(gp_widget *self, const gp_offset *offset,
 	gp_pixel bg_color = gp_widgets_color(ctx, self->label->bg_color);
 	gp_pixel text_color = gp_widgets_color(ctx, self->label->text_color);
 
+	if (gp_widget_is_disabled(self, flags))
+		text_color = ctx->col_disabled;
+
 	gp_widget_ops_blit(ctx, x, y, w, h);
 
 	const gp_text_style *font = gp_widget_tattr_font(self->label->tattr, ctx);

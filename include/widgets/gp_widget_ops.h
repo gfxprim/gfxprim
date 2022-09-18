@@ -40,6 +40,8 @@ enum gp_widget_render_flags {
 	GP_WIDGET_COLOR_SCHEME = 0x04,
 	/** Layout needs to be resized */
 	GP_WIDGET_RESIZE = 0x08,
+	/** Widget is disabled */
+	GP_WIDGET_DISABLED = 0x10,
 };
 
 struct gp_widget_ops {
@@ -254,6 +256,11 @@ static inline void gp_widget_ops_blit(const gp_widget_render_ctx *ctx,
 static inline int gp_widget_should_redraw(gp_widget *self, int flags)
 {
 	return self->redraw || (flags & GP_WIDGET_REDRAW);
+}
+
+static inline int gp_widget_is_disabled(gp_widget *self, int flags)
+{
+	return self->disabled || (flags & GP_WIDGET_DISABLED);
 }
 
 /**

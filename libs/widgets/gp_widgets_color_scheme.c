@@ -31,6 +31,7 @@ struct color_scheme {
 	struct color warn_color;
 	struct color accept_color;
 	struct color fill_color;
+	struct color disabled_color;
 };
 
 static struct color_scheme dark_scheme = {
@@ -43,6 +44,7 @@ static struct color_scheme dark_scheme = {
 	.accept_color = {0x00, 0xbb, 0x00},
 	.warn_color   = {0x90, 0x80, 0x00},
 	.fill_color   = {0x00, 0x00, 0x00},
+	.disabled_color = {0xaa, 0xaa, 0xaa},
 };
 
 static struct color_scheme light_scheme = {
@@ -55,6 +57,7 @@ static struct color_scheme light_scheme = {
 	.accept_color = {0x00, 0xbb, 0x00},
 	.warn_color   = {0xdc, 0xb1, 0x0a},
 	.fill_color   = {0x44, 0x44, 0x44},
+	.disabled_color = {0x66, 0x66, 0x66},
 };
 
 static const char *color_names[] = {
@@ -151,6 +154,7 @@ void __attribute__((visibility ("hidden"))) widgets_color_scheme_load(void)
 	RGB_TO_PIXEL(ctx, scheme, alert_color, GP_WIDGETS_COL_ALERT);
 	RGB_TO_PIXEL(ctx, scheme, warn_color, GP_WIDGETS_COL_WARN);
 	RGB_TO_PIXEL(ctx, scheme, accept_color, GP_WIDGETS_COL_ACCEPT);
+	RGB_TO_PIXEL(ctx, scheme, disabled_color, GP_WIDGETS_COL_DISABLED);
 
 	/* 16 colors */
 	RGB_TO_PIXEL2(ctx, colors_16, GP_WIDGETS_COL_BLACK, 0x00, 0x00, 0x00);

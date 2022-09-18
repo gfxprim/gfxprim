@@ -1,0 +1,11 @@
+{
+ "info": {"version": 1, "license": "GPL-2.0-or-later"},
+ "layout": {
+   "cols": 2,
+   "uniform": true,
+   "widgets": [
+    {"type": "spinbutton", "choices": ["Disabled #1", "Disabled #2"], "disabled": true},
+    {"type": "spinbutton", "choices": ["Enabled #1", "Enabled #2"]}
+   ]
+ }
+}

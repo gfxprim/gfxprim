@@ -43,8 +43,10 @@ static void render(gp_widget *self, const gp_offset *offset,
 	unsigned int w = self->w;
 	unsigned int h = self->h;
 	unsigned int i;
+	gp_pixel text_color = ctx->text_color;
 
-	(void)flags;
+	if (gp_widget_is_disabled(self, flags))
+		text_color = ctx->col_disabled;
 
 	gp_widget_ops_blit(ctx, x, y, w, h);
 
@@ -58,18 +60,17 @@ static void render(gp_widget *self, const gp_offset *offset,
 		unsigned int cx = x + r;
 
 		gp_fill_circle(ctx->buf, cx, cy, r, ctx->fg_color);
-		gp_pixel color = self->focused ? ctx->sel_color : ctx->text_color;
+		gp_pixel color = self->focused ? ctx->sel_color : text_color;
 		gp_circle(ctx->buf, cx, cy, r, color);
 
 		if (i == self->choice->sel) {
-			gp_fill_circle(ctx->buf, cx, cy, r - 3,
-			              ctx->text_color);
+			gp_fill_circle(ctx->buf, cx, cy, r - 3, text_color);
 		}
 
 		gp_text(ctx->buf, ctx->font,
 			x + ctx->padd + text_a, y,
 		        GP_ALIGN_RIGHT|GP_VALIGN_BELOW,
-                        ctx->text_color, ctx->bg_color,
+                        text_color, ctx->bg_color,
 			self->choice->ops->get_choice(self, i));
 
 		y += text_a + ctx->padd;

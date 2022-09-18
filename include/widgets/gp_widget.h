@@ -78,6 +78,11 @@ struct gp_widget {
 	 */
 	unsigned int no_events:1;
 
+	/*
+	 * If set widget is 'grayed out' and no events are processed.
+	 */
+	unsigned int disabled:1;
+
 	uint32_t event_mask;
 
 	union {

@@ -37,6 +37,7 @@ struct gp_widget_render_ctx {
 			gp_pixel warn_color;
 			gp_pixel accept_color;
 			gp_pixel fill_color;
+			gp_pixel col_disabled;
 		};
 	};
 

@@ -80,6 +80,10 @@ static void render(gp_widget *self, const gp_offset *offset,
 	struct gp_widget_frame *frame = self->frame;
 	struct gp_widget *payload = frame->child;
 	const gp_text_style *font = gp_widget_tattr_font(self->frame->tattr, ctx);
+	gp_pixel text_color = ctx->text_color;
+
+	if (gp_widget_is_disabled(self, flags))
+		text_color = ctx->col_disabled;
 
 	if (gp_widget_should_redraw(self, flags)) {
 		gp_widget_ops_blit(ctx, x, y, w, h);
@@ -89,7 +93,7 @@ static void render(gp_widget *self, const gp_offset *offset,
 		gp_fill_rect_xywh(ctx->buf, x, y, w, gp_text_height(font)/2, ctx->bg_color);
 
 		gp_fill_rrect_xywh(ctx->buf, x, y + payload_off_y(self, ctx)/2, w,
-		              h - payload_off_y(self, ctx)/2, ctx->bg_color, fg_color, ctx->text_color);
+		              h - payload_off_y(self, ctx)/2, ctx->bg_color, fg_color, text_color);
 
 		if (frame->title) {
 			unsigned int sw = gp_text_wbbox(font, self->frame->title) + ctx->padd;
@@ -97,7 +101,7 @@ static void render(gp_widget *self, const gp_offset *offset,
 			gp_hline_xyw(ctx->buf, x + ctx->padd + ctx->padd/2, y + payload_off_y(self, ctx)/2, sw, fg_color);
 
 			gp_text(ctx->buf, font, x + 2 * ctx->padd, y, GP_ALIGN_RIGHT|GP_VALIGN_BELOW,
-				ctx->text_color, ctx->bg_color, self->frame->title);
+				text_color, ctx->bg_color, self->frame->title);
 		}
 	}
 

@@ -1,0 +1,11 @@
+{
+ "info": {"version": 1, "license": "GPL-2.0-or-later"},
+ "layout": {
+   "cols": 2,
+   "uniform": true,
+   "widgets": [
+    {"type": "checkbox", "label": "Disabled", "disabled": true},
+    {"type": "checkbox", "label": "Enabled"}
+   ]
+ }
+}

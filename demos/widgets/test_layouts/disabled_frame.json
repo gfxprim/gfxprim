@@ -1,0 +1,27 @@
+{
+ "info": {"version": 1, "license": "GPL-2.0-or-later"},
+ "layout": {
+   "cols": 2,
+   "uniform": true,
+   "widgets": [
+    {"type": "frame", "title": "Disabled", "disabled": true,
+     "widget": {
+      "rows": 2,
+      "widgets": [
+       {"type": "label", "text": "Disabled label"},
+       {"type": "button", "label": "Disabled button"}
+      ]
+     }
+    },
+    {"type": "frame", "title": "Enabled",
+     "widget": {
+      "rows": 2,
+      "widgets": [
+       {"type": "label", "text": "Enabled label"},
+       {"type": "button", "label": "Enabled button"}
+      ]
+     }
+    }
+   ]
+ }
+}

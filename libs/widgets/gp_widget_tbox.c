@@ -76,11 +76,14 @@ static void render(gp_widget *self, const gp_offset *offset,
 	unsigned int w = self->w;
 	unsigned int h = self->h;
 	const char *str = tbox_visible_str(tbox);
-	(void)flags;
+	gp_pixel text_color = gp_widgets_color(ctx, self->label->text_color);
+
+	if (gp_widget_is_disabled(self, flags))
+		text_color = ctx->col_disabled;
 
 	gp_widget_ops_blit(ctx, x, y, w, h);
 
-	gp_pixel color = self->focused ? ctx->sel_color : ctx->text_color;
+	gp_pixel color = self->focused ? ctx->sel_color : text_color;
 
 	if (tbox->alert) {
 		color = ctx->alert_color;
@@ -116,15 +119,15 @@ static void render(gp_widget *self, const gp_offset *offset,
 	if (left.bytes) {
 		gp_coord cx = x + ctx->padd/2;
 
-		gp_line(ctx->buf, cx-s, cy, cx, cy-s, ctx->text_color);
-		gp_line(ctx->buf, cx-s, cy, cx, cy+s, ctx->text_color);
+		gp_line(ctx->buf, cx-s, cy, cx, cy-s, text_color);
+		gp_line(ctx->buf, cx-s, cy, cx, cy+s, text_color);
 	}
 
 	if (right.bytes < gp_vec_strlen(tbox->buf)) {
 		gp_coord cx = x + w - 1 - ctx->padd/2;
 
-		gp_line(ctx->buf, cx+s, cy, cx, cy-s, ctx->text_color);
-		gp_line(ctx->buf, cx+s, cy, cx, cy+s, ctx->text_color);
+		gp_line(ctx->buf, cx+s, cy, cx, cy-s, text_color);
+		gp_line(ctx->buf, cx+s, cy, cx, cy+s, text_color);
 	}
 
 	if (self->focused && !is_sel(self)) {
@@ -133,14 +136,14 @@ static void render(gp_widget *self, const gp_offset *offset,
 		                              tbox->cur_pos.chars - left.chars);
 
 		gp_vline_xyh(ctx->buf, cursor_x, y + ctx->padd,
-			     gp_text_ascent(font), ctx->text_color);
+			     gp_text_ascent(font), text_color);
 	}
 
 	str += left.bytes;
 	gp_text_ext(ctx->buf, font,
 		    x + ctx->padd, y + ctx->padd,
 		    GP_ALIGN_RIGHT|GP_VALIGN_BELOW,
-		    ctx->text_color, ctx->bg_color, str, right.chars - left.chars);
+		    text_color, ctx->bg_color, str, right.chars - left.chars);
 
 	if (!is_sel(self))
 		return;
@@ -163,7 +166,7 @@ static void render(gp_widget *self, const gp_offset *offset,
 
 	gp_text_ext(ctx->buf, font, sel_x_off, y + ctx->padd,
 	            GP_ALIGN_RIGHT | GP_VALIGN_BELOW,
-	            ctx->text_color, ctx->sel_color, str,
+	            text_color, ctx->sel_color, str,
 		    sel_len);
 }
 

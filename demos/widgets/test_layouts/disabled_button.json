@@ -1,0 +1,11 @@
+{
+ "info": {"version": 1, "license": "GPL-2.0-or-later"},
+ "layout": {
+   "cols": 2,
+   "uniform": true,
+   "widgets": [
+    {"type": "button", "label": "Disabled", "disabled": true},
+    {"type": "button", "label": "Enabled"}
+   ]
+ }
+}

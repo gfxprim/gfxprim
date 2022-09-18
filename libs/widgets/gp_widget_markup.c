@@ -108,6 +108,10 @@ static void render(gp_widget *self, const gp_offset *offset,
 	unsigned int y = self->y + offset->y;
 	unsigned int w = self->w;
 	unsigned int h = self->h;
+	gp_pixel text_color = gp_widgets_color(ctx, self->label->text_color);
+
+	if (gp_widget_is_disabled(self, flags))
+		text_color = ctx->col_disabled;
 
 	gp_widget_ops_blit(ctx, x, y, w, h);
 	gp_fill_rect_xywh(ctx->buf, x, y, w, h, ctx->bg_color);
@@ -128,7 +132,7 @@ static void render(gp_widget *self, const gp_offset *offset,
 			if (e->type == GP_MARKUP_END)
 				return;
 
-			gp_pixel fg = ctx->text_color;
+			gp_pixel fg = text_color;
 			gp_pixel bg = ctx->bg_color;
 
 			if (e->attrs & GP_MARKUP_SUBSCRIPT)

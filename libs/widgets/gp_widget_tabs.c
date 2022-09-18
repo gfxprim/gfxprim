@@ -113,6 +113,10 @@ static void render(gp_widget *self, const gp_offset *offset,
 	unsigned int y = self->y + offset->y;
 	unsigned int tab_h = title_h(self, ctx);
 	unsigned int act_x = 0, act_w = 0;
+	gp_pixel text_color = gp_widgets_color(ctx, self->label->text_color);
+
+	if (gp_widget_is_disabled(self, flags))
+		text_color = ctx->col_disabled;
 
 	if (self->redraw)
 		gp_widget_ops_blit(ctx, x, y, self->w, self->h);
@@ -156,20 +160,20 @@ static void render(gp_widget *self, const gp_offset *offset,
 
 		gp_text(ctx->buf, font, cur_x + w/2, y + ctx->padd,
 			GP_ALIGN_CENTER|GP_VALIGN_BELOW,
-			ctx->text_color, ctx->bg_color, label);
+			text_color, ctx->bg_color, label);
 
 		cur_x += w;
 
 		if (cur_x < x + self->w)
-			gp_vline_xyh(ctx->buf, cur_x-1, y+1, tab_h-1, ctx->text_color);
+			gp_vline_xyh(ctx->buf, cur_x-1, y+1, tab_h-1, text_color);
 	}
 
 	if (!active_first(self))
-		gp_hline_xxy(ctx->buf, x, act_x-1, y + tab_h, ctx->text_color);
+		gp_hline_xxy(ctx->buf, x, act_x-1, y + tab_h, text_color);
 
-	gp_hline_xxy(ctx->buf, act_x + act_w - 1, x + self->w-1, y + tab_h, ctx->text_color);
+	gp_hline_xxy(ctx->buf, act_x + act_w - 1, x + self->w-1, y + tab_h, text_color);
 
-	gp_rrect_xywh(ctx->buf, x, y, self->w, self->h, ctx->text_color);
+	gp_rrect_xywh(ctx->buf, x, y, self->w, self->h, text_color);
 
 	if (!widget)
 		return;

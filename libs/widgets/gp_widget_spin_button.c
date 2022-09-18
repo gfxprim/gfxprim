@@ -48,19 +48,21 @@ static void render(gp_widget *self, const gp_offset *offset,
 	unsigned int s = buttons_width(ctx);
 	unsigned int sy = (gp_text_ascent(ctx->font)/2 + ctx->padd)/5;
 	unsigned int sx = 2*sy;
+	gp_pixel text_color = gp_widgets_color(ctx, self->label->text_color);
 
-	(void)flags;
+	if (gp_widget_is_disabled(self, flags))
+		text_color = ctx->col_disabled;
 
 	gp_widget_ops_blit(ctx, x, y, w, h);
 
-	gp_pixel color = self->focused ? ctx->sel_color : ctx->text_color;
+	gp_pixel color = self->focused ? ctx->sel_color : text_color;
 
 	gp_fill_rrect_xywh(ctx->buf, x, y, w, h,
 	                   ctx->bg_color, ctx->fg_color, color);
 
 	gp_print(ctx->buf, ctx->font, x + ctx->padd, y + ctx->padd,
 		 GP_ALIGN_RIGHT | GP_VALIGN_BELOW,
-		 ctx->text_color, ctx->bg_color, "%s",
+		 text_color, ctx->bg_color, "%s",
 		 self->choice->ops->get_choice(self, self->choice->sel));
 
 	gp_coord rx = x + w - s;
@@ -71,14 +73,14 @@ static void render(gp_widget *self, const gp_offset *offset,
 	if (self->choice->sel == 0)
 		color = ctx->bg_color;
 	else
-		color = ctx->text_color;
+		color = text_color;
 
 	gp_symbol(ctx->buf, x + w - s/2 - 1, y + h/4, sx, sy, GP_TRIANGLE_UP, color);
 
 	if (self->choice->sel + 1 >= gp_widget_choice_cnt_get(self))
 		color = ctx->bg_color;
 	else
-		color = ctx->text_color;
+		color = text_color;
 
 	gp_symbol(ctx->buf, x + w - s/2 - 1, y + (3*h)/4, sx, sy, GP_TRIANGLE_DOWN, color);
 }

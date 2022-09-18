@@ -58,6 +58,7 @@ static void *json_loader_by_type(const char *type)
 
 enum keys {
 	ALIGN,
+	DISABLED,
 	FOCUS,
 	HALIGN,
 	ON_EVENT,
@@ -69,6 +70,7 @@ enum keys {
 
 static const gp_json_obj_attr attrs[] = {
 	GP_JSON_OBJ_ATTR("align", GP_JSON_STR),
+	GP_JSON_OBJ_ATTR("disabled", GP_JSON_BOOL),
 	GP_JSON_OBJ_ATTR("focused", GP_JSON_BOOL),
 	GP_JSON_OBJ_ATTR("halign", GP_JSON_STR),
 	GP_JSON_OBJ_ATTR("on_event", GP_JSON_STR),
@@ -206,6 +208,7 @@ gp_widget *gp_widget_from_json(gp_json_reader *json, gp_json_val *val, gp_widget
 	char *uid = NULL;
 	unsigned int halign = 0;
 	unsigned int valign = 0;
+	unsigned int disabled = 0;
 	int shrink = -1;
 	gp_htable **uids = ctx->uids;
 	int focus = 0;
@@ -245,6 +248,9 @@ gp_widget *gp_widget_from_json(gp_json_reader *json, gp_json_val *val, gp_widget
 				             "Invalid align='%s'",
 				             val->val_str);
 			}
+		break;
+		case DISABLED:
+			disabled = val->val_bool;
 		break;
 		case FOCUS:
 			focus = val->val_bool;
@@ -371,6 +377,8 @@ ret:
 		wid->no_shrink = !shrink;
 
 	gp_widget_send_event(wid, GP_WIDGET_EVENT_NEW);
+
+	wid->disabled = disabled;
 
 	return wid;
 skip:
