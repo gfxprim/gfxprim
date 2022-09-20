@@ -33,9 +33,9 @@ Widgets can be loaded from JSON hash table by class.
 .Boolean class
 [source,c]
 -------------------------------------------------------------------------------
-int gp_widget_class_bool_get(gp_widget *self);
-void gp_widget_class_bool_set(gp_widget *self, int val);
-void gp_widget_class_bool_toggle(gp_widget *self);
+int gp_widget_bool_get(gp_widget *self);
+void gp_widget_bool_set(gp_widget *self, int val);
+void gp_widget_bool_toggle(gp_widget *self);
 -------------------------------------------------------------------------------
 
 Boolean class implements three functions for manipulating the boolean value.

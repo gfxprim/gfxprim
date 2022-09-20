@@ -22,7 +22,7 @@ struct gp_widget_bool {
  * @self A bool class widget.
  * @return A boolean value.
  */
-int gp_widget_class_bool_get(gp_widget *self);
+int gp_widget_bool_get(gp_widget *self);
 
 /**
  * @brief Sets a class bool widget value.
@@ -30,16 +30,16 @@ int gp_widget_class_bool_get(gp_widget *self);
  * @self A bool class widget.
  * @val A boolean value.
  */
-void gp_widget_class_bool_set(gp_widget *self, int val);
+void gp_widget_bool_set(gp_widget *self, int val);
 
 /**
  * @brief Toggles a class bool widget value.
  *
  * @self A bool class widget.
  */
-static inline void gp_widget_class_bool_toggle(gp_widget *self)
+static inline void gp_widget_bool_toggle(gp_widget *self)
 {
-	gp_widget_class_bool_set(self, !gp_widget_class_bool_get(self));
+	gp_widget_bool_set(self, !gp_widget_bool_get(self));
 }
 
 #endif /* GP_WIDGET_BOOL_H */
