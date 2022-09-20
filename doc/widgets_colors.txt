@@ -28,7 +28,7 @@ Label colors example
 
 image:label_colors.png[Label colors]
 
-[source,c]
+[source,json]
 ------------------------------------------------------------------
 include::../demos/widgets/test_layouts/label_colors.json[]
 ------------------------------------------------------------------
