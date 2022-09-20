@@ -2,7 +2,7 @@
 
 /*
 
-   Copyright (c) 2014-2021 Cyril Hrubis <metan@ucw.cz>
+   Copyright (c) 2014-2022 Cyril Hrubis <metan@ucw.cz>
 
  */
 
@@ -21,9 +21,6 @@ typedef struct gp_dir_entry {
 } gp_dir_entry;
 
 typedef struct gp_dir_cache {
-	DIR *dir;
-	int dirfd;
-	int inotify_fd;
 	int sort_type;
 	struct gp_block *allocator;
 	size_t filtered;
@@ -32,9 +29,63 @@ typedef struct gp_dir_cache {
 	struct gp_dir_entry **entries;
 } gp_dir_cache;
 
+/**
+ * Creates and populates a new directory cache
+ *
+ * @path A path to allocate the cache for
+ * @return Newly allocated and populated directory cache or NULL in case of
+ *         allocation failure
+ */
 gp_dir_cache *gp_dir_cache_new(const char *path);
 
-void gp_dir_cache_free(gp_dir_cache *self);
+/**
+ * Destroy a directory cache.
+ *
+ * @self A directory cache to destroy.
+ */
+void gp_dir_cache_destroy(gp_dir_cache *self);
+
+/**
+ * @brief Adds an entry to the directory cache.
+ *
+ * This function is called by the platform code.
+ *
+ * @self A directory cache to add the entry to
+ * @size A file size in bytes
+ * @name A file name
+ * @mode A file mode
+ * @mtime A modification timestamp
+ */
+gp_dir_entry *gp_dir_cache_add_entry(gp_dir_cache *self, size_t size,
+                                     const char *name, mode_t mode, time_t mtime);
+
+/**
+ * @brief Revoves an entry from directory cache.
+ *
+ * This function is called by the platform code.
+ *
+ * @self A directory cache to remove the entry from
+ * @name An entry name to be removed
+ */
+int gp_dir_cache_rem_entry_by_name(gp_dir_cache *self, const char *name);
+
+/**
+ * @brief Looks up an entry based on a file name
+ *
+ * @self A directory cache
+ * @name An entry name to look for
+ * @return An directory entry on NULL if there is no such entry
+ */
+gp_dir_entry *gp_dir_cache_entry_lookup(gp_dir_cache *self, const char *name);
+
+/**
+ * @brief Frees all entries from directory cache.
+ *
+ * This function is called by the platform code.
+ *
+ * @self A directory cache.
+ */
+void gp_dir_cache_free_entries(gp_dir_cache *self);
 
 enum gp_dir_cache_sort_type {
 	GP_DIR_SORT_ASC = 0x00,
@@ -101,16 +152,27 @@ static inline size_t gp_dir_cache_entries_filter(gp_dir_cache *self)
  */
 gp_dir_entry *gp_dir_cache_get_filtered(gp_dir_cache *self, unsigned int pos);
 
-/*
- * Inotify handler, should be called when there are data to be read on inotify_fd.
+/**
+ * @brief A change notify handler
  *
- * @self struct gp_dir_cache
- * @return Returns non-zeor if cache content changed.
+ * This function should be called to update the cache content when there are
+ * data to be read on inotify_fd.
+ *
+ * @self A directory cache
+ * @return Returns non-zero if cache content changed
  */
-int gp_dir_cache_inotify(gp_dir_cache *self);
+int gp_dir_cache_notify(gp_dir_cache *self);
 
 /**
- * Creates a directory and updates the cache.
+ * @brief Returns notify_fd if available.
+ *
+ * @self A direcotry cache
+ * @return A file descriptor or -1 if notify is not supported/available
+ */
+int gp_dir_cache_notify_fd(gp_dir_cache *self);
+
+/**
+ * @brief Creates a directory and updates the cache.
  *
  * @self A dir cache.
  * @dirname A directory name.
@@ -127,6 +189,8 @@ int gp_dir_cache_mkdir(gp_dir_cache *self, const char *dirname);
  */
 unsigned int gp_dir_cache_pos_by_name_filtered(gp_dir_cache *self, const char *name);
 
+
+
 enum gp_dir_cache_type {
 	GP_DIR_CACHE_NONE = 0,
 	GP_DIR_CACHE_FILE = 1,
@@ -134,7 +198,7 @@ enum gp_dir_cache_type {
 };
 
 /**
- * Looks for a file in the directory the cache operates in.
+ * @brief Looks for a file in the directory the cache operates in.
  *
  * @self A dir cache.
  * @name A filename.

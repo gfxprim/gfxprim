@@ -6,14 +6,10 @@
 
  */
 
-#include <sys/types.h>
-#include <sys/stat.h>
 #include <unistd.h>
 #include <string.h>
-#include <dirent.h>
 #include <stdlib.h>
 #include <time.h>
-#include <fcntl.h>
 #include <errno.h>
 
 #include <utils/gp_vec_str.h>
@@ -104,7 +100,7 @@ static int notify_callback(struct gp_fd *self, struct pollfd *pfd)
 	(void) pfd;
 	struct file_dialog *dialog = self->priv;
 
-	if (gp_dir_cache_inotify(dialog->file_table->tbl->priv))
+	if (gp_dir_cache_notify(dialog->file_table->tbl->priv))
 		gp_widget_redraw(dialog->file_table);
 
 	return 0;
@@ -112,20 +108,27 @@ static int notify_callback(struct gp_fd *self, struct pollfd *pfd)
 
 static gp_dir_cache *load_dir_cache(struct file_dialog *dialog)
 {
-	gp_dir_cache *cache = gp_dir_cache_new(dialog->dir_path->tbox->buf);
+	gp_dir_cache *cache;
+	int notify_fd;
 
-	if (cache->inotify_fd > 0)
-		gp_fds_add(gp_widgets_fds, cache->inotify_fd, POLLIN, notify_callback, dialog);
+	cache = gp_dir_cache_new(dialog->dir_path->tbox->buf);
+	if (!cache)
+		return NULL;
+
+	notify_fd = gp_dir_cache_notify_fd(cache);
+	if (notify_fd > 0)
+		gp_fds_add(gp_widgets_fds, notify_fd, POLLIN, notify_callback, dialog);
 
 	return cache;
 }
 
 static void free_dir_cache(gp_dir_cache *self)
 {
-	if (self->inotify_fd > 0)
-		gp_fds_rem(gp_widgets_fds, self->inotify_fd);
+	int notify_fd = gp_dir_cache_notify_fd(self);
+	if (notify_fd > 0)
+		gp_fds_rem(gp_widgets_fds, notify_fd);
 
-	gp_dir_cache_free(self);
+	gp_dir_cache_destroy(self);
 }
 
 static int files_seek_row(gp_widget *self, int op, unsigned int pos)
@@ -256,6 +259,8 @@ static void exit_dialog(struct file_dialog *dialog, int retval)
 			                         "Directory exists",
 			                         "Directory '%s' already exits!", name);
 			return;
+		break;
+		case GP_DIR_CACHE_NONE:
 		break;
 		}
 

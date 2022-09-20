@@ -5,7 +5,7 @@ gp_app_layout_fragment_load
 
 gp_dir_cache_free
 gp_dir_cache_get_filtered
-gp_dir_cache_inotify
+gp_dir_cache_notify
 gp_dir_cache_new
 gp_dir_cache_sort
 
