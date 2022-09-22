@@ -33,6 +33,7 @@ Widgets generic documetation
 * link:widget_classes.html[Widget classes]
 * link:widgets_color_scheme.html[Widget color scheme]
 * link:widgets_colors.html[Widget colors]
+* link:widgets_disable.html[Disable widgets]
 
 Individual widgets documentation
 --------------------------------

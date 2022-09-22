@@ -1,0 +1,22 @@
+Disabled widgets
+----------------
+
+Disabled widgets are widgets that does not react to user input and are "grayed
+out" in the GUI. Once widget is disabled all its subwidgets are disabled as
+well.
+
+image:widgets_disable.png[Disabled widget]
+
+.Functions to disable and enable widgets
+[source,c]
+-------------------------------------------------------------------------------
+void gp_widget_enable(gp_widget *self);
+
+void gp_widget_disable(gp_widget *self);
+-------------------------------------------------------------------------------
+
+.Example
+[source,c]
+------------------------------------------------------------------
+include::../demos/widgets/disable.c[]
+------------------------------------------------------------------

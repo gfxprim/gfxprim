@@ -253,6 +253,23 @@ void gp_widget_set_parent(gp_widget *self, gp_widget *parent);
  */
 int gp_widget_focus_set(gp_widget *self);
 
+/**
+ * @brief Disables widget and all its subwidgets.
+ *
+ * A disabled widget does not process any input events and is "grayed out".
+ *
+ * @self A widget to disable.
+ */
+void gp_widget_disable(gp_widget *self);
+
+/**
+ * @brief Enables widget and all its subwidgets.
+ *
+ * Enables a widget that has been disabled previously.
+ *
+ * @self A widget to enable.
+ */
+void gp_widget_enable(gp_widget *self);
 
 /**
  * @brief Sets widget event handler.

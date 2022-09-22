@@ -84,3 +84,31 @@ void gp_widget_free(gp_widget *self)
 
 	free(self);
 }
+
+void gp_widget_disable(gp_widget *self)
+{
+	if (!self)
+		return;
+
+	if (self->disabled)
+		return;
+
+	self->disabled = 1;
+
+	gp_widget_redraw(self);
+	gp_widget_redraw_children(self);
+}
+
+void gp_widget_enable(gp_widget *self)
+{
+	if (!self)
+		return;
+
+	if (!self->disabled)
+		return;
+
+	self->disabled = 0;
+
+	gp_widget_redraw(self);
+	gp_widget_redraw_children(self);
+}
