@@ -18,7 +18,6 @@
 
 #include <stdint.h>
 #include <string.h>
-#include <sys/time.h>
 
 #include <input/gp_types.h>
 #include <input/gp_keys.h>
@@ -174,14 +173,5 @@ int gp_event_all_keys_pressed_(gp_event *ev, ...);
  * Dumps event into stdout.
  */
 void gp_event_dump(gp_event *ev);
-
-/*
- * Retruns difference between two timeval structures in miliseconds
- */
-static inline int64_t gp_timeval_diff_ms(struct timeval a, struct timeval b)
-{
-	return (a.tv_sec - b.tv_sec) * 1000 +
-	       (a.tv_usec - b.tv_usec + 500) / 1000;
-}
 
 #endif /* INPUT_GP_EVENT_H */
