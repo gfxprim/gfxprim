@@ -183,4 +183,13 @@ void gp_event_queue_push(gp_event_queue *self,
                          uint16_t type, uint32_t code, int32_t value,
                          uint64_t time);
 
+/*
+ * Pushes mouse wheel movement.
+ */
+static inline void gp_event_queue_push_wheel(gp_event_queue *self,
+                                             int32_t val, uint64_t time)
+{
+	gp_event_queue_push(self, GP_EV_REL, GP_EV_REL_WHEEL, val, time);
+}
+
 #endif /* INPUT_GP_EVENT_QUEUE_H */
