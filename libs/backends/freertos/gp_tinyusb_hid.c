@@ -200,6 +200,39 @@ static void handle_keyboard(hid_keyboard_report_t const *report)
 	memcpy(&prev_report, report, sizeof(prev_report));
 }
 
+static void mouse_btn_report(uint8_t buttons_change, uint8_t buttons_prev,
+                             uint8_t button_mask, uint16_t button_scancode)
+{
+	if (!(button_mask & buttons_change))
+		return;
+
+	if (button_mask & buttons_prev)
+		gp_event_queue_push_key(gp_rtos_ev_queue, button_scancode, GP_EV_KEY_UP, 0);
+	else
+		gp_event_queue_push_key(gp_rtos_ev_queue, button_scancode, GP_EV_KEY_DOWN, 0);
+}
+
+static void handle_mouse(hid_mouse_report_t const *report)
+{
+	static uint8_t buttons_prev = 0;
+
+	uint8_t buttons_change = report->buttons ^ buttons_prev;
+
+	mouse_btn_report(buttons_change, buttons_prev, 0x01, GP_BTN_LEFT);
+	mouse_btn_report(buttons_change, buttons_prev, 0x02, GP_BTN_MIDDLE);
+	mouse_btn_report(buttons_change, buttons_prev, 0x04, GP_BTN_RIGHT);
+	mouse_btn_report(buttons_change, buttons_prev, 0x08, GP_BTN_SIDE);
+	mouse_btn_report(buttons_change, buttons_prev, 0x10, GP_BTN_EXTRA);
+
+	if (report->x || report->y)
+		gp_event_queue_push_rel(gp_rtos_ev_queue, report->x, report->y, 0);
+
+	if (report->wheel)
+		gp_event_queue_push_wheel(gp_rtos_ev_queue, report->wheel, 0);
+
+	buttons_prev = report->buttons;
+}
+
 void tuh_hid_report_received_cb(uint8_t dev_addr, uint8_t instance, uint8_t const* report, uint16_t len)
 {
 	uint8_t protocol = tuh_hid_interface_protocol(dev_addr, instance);
@@ -209,6 +242,7 @@ void tuh_hid_report_received_cb(uint8_t dev_addr, uint8_t instance, uint8_t cons
 		handle_keyboard((hid_keyboard_report_t const*)report);
 	break;
 	case HID_ITF_PROTOCOL_MOUSE:
+		handle_mouse((hid_mouse_report_t const*)report);
 	break;
 	}
 
