@@ -11,6 +11,57 @@
 
 extern gp_event_queue *gp_rtos_ev_queue;
 
+struct kbd_feedback {
+	uint8_t dev_addr;
+	uint8_t instance;
+	uint8_t leds;
+	gp_ev_feedback feedback;
+};
+
+static int kbd_feedback_set(gp_ev_feedback *self, gp_ev_feedback_op *op)
+{
+	struct kbd_feedback *kbd_feedback = GP_CONTAINER_OF(self, struct kbd_feedback, feedback);
+
+	switch (op->op) {
+	case GP_EV_LEDS_ON:
+		kbd_feedback->leds |= op->val;
+	break;
+	case GP_EV_LEDS_OFF:
+		kbd_feedback->leds &= ~(op->val);
+	break;
+	case GP_EV_LEDS_GET:
+		op->val = kbd_feedback->leds;
+		return 0;
+	default:
+		return -1;
+	}
+
+	tuh_hid_set_report(kbd_feedback->dev_addr, kbd_feedback->instance,
+                           0, HID_REPORT_TYPE_OUTPUT, &kbd_feedback->leds, 1);
+
+	return 0;
+}
+
+static struct kbd_feedback kbd_feedback = {
+	.feedback = {.set_get = kbd_feedback_set},
+};
+
+static void kbd_feedback_register(uint8_t dev_addr, uint8_t instance)
+{
+	kbd_feedback.dev_addr = dev_addr;
+	kbd_feedback.instance = instance;
+
+	gp_ev_queue_feedback_register(gp_rtos_ev_queue, &kbd_feedback.feedback);
+}
+
+static void kbd_feedback_unregister(uint8_t dev_addr, uint8_t instance)
+{
+	if (kbd_feedback.dev_addr != dev_addr || kbd_feedback.instance != instance)
+		return;
+
+	gp_ev_queue_feedback_unregister(gp_rtos_ev_queue, &kbd_feedback.feedback);
+}
+
 void tuh_hid_mount_cb(uint8_t dev_addr, uint8_t instance,
                       uint8_t const* desc_report, uint16_t desc_len)
 {
@@ -23,6 +74,7 @@ void tuh_hid_mount_cb(uint8_t dev_addr, uint8_t instance,
 	break;
 	case HID_ITF_PROTOCOL_KEYBOARD:
 		str_prot = "Keyboard";
+		kbd_feedback_register(dev_addr, instance);
 	break;
 	case HID_ITF_PROTOCOL_MOUSE:
 		str_prot = "Mouse";
@@ -252,5 +304,13 @@ void tuh_hid_report_received_cb(uint8_t dev_addr, uint8_t instance, uint8_t cons
 
 void tuh_hid_umount_cb(uint8_t dev_addr, uint8_t instance)
 {
+	uint8_t protocol = tuh_hid_interface_protocol(dev_addr, instance);
+
 	GP_DEBUG(1, "HID device unplugged addr=%" PRIu8 "inst=%" PRIu8, dev_addr, instance);
+
+	switch (protocol) {
+	case HID_ITF_PROTOCOL_KEYBOARD:
+		kbd_feedback_unregister(dev_addr, instance);
+	break;
+	}
 }
