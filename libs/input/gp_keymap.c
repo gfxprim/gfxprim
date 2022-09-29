@@ -60,8 +60,14 @@ static int event_key_us(gp_keymap *self, gp_event_queue *queue, gp_event *ev)
 		keymap_us->rshift_state = !!ev->code;
 	break;
 	case GP_KEY_CAPS_LOCK:
-		if (ev->code == GP_EV_KEY_DOWN)
+		if (ev->code == GP_EV_KEY_DOWN) {
 			keymap_us->caps_state = !keymap_us->caps_state;
+			gp_ev_feedback_op op = {
+				.op = keymap_us->caps_state ? GP_EV_LEDS_ON : GP_EV_LEDS_OFF,
+				.val = GP_KBD_LED_CAPS_LOCK,
+			};
+			gp_ev_queue_feedback_set_all(queue, &op);
+		}
 	break;
 	case GP_KEY_LEFT_CTRL:
 		keymap_us->lctrl_state = !!ev->code;

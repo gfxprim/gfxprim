@@ -15,6 +15,7 @@
 #ifndef INPUT_GP_EVENT_QUEUE_H
 #define INPUT_GP_EVENT_QUEUE_H
 
+#include <input/gp_ev_feedback.h>
 #include <input/gp_event.h>
 
 #define GP_EVENT_QUEUE_SIZE 32
@@ -31,6 +32,9 @@ struct gp_event_queue {
 
 	/* keymap needed only for framebuffer */
 	gp_keymap *keymap;
+
+	/* list of callbacks to turn on/off leds and other feedback */
+	gp_ev_feedback *feedbacks_list;
 
 	/*
 	 * Accumulated state, pressed keys, cursor position, etc.
@@ -61,6 +65,39 @@ void gp_event_queue_init(gp_event_queue *self,
  */
 void gp_event_queue_set_screen_size(gp_event_queue *self,
                                     unsigned int w, unsigned int h);
+
+/**
+ * @brief Registers an input device feedback callback.
+ *
+ * @self An event queue.
+ * @feedback An input device feedback callback.
+ */
+static inline void gp_ev_queue_feedback_register(gp_event_queue *self, gp_ev_feedback *feedback)
+{
+	gp_ev_feedback_register(&self->feedbacks_list, feedback);
+}
+
+/**
+ * @brief Unregisters an input device feedback callback.
+ *
+ * @self An event queue.
+ * @feedback An input device feedback callback.
+ */
+static inline void gp_ev_queue_feedback_unregister(gp_event_queue *self, gp_ev_feedback *feedback)
+{
+	gp_ev_feedback_unregister(&self->feedbacks_list, feedback);
+}
+
+/**
+ * @brief Calls a all feedback handlers with a specified value.
+ *
+ * @self And event queue
+ * @val A value to be set
+ */
+static inline void gp_ev_queue_feedback_set_all(gp_event_queue *self, gp_ev_feedback_op *op)
+{
+	gp_ev_feedback_set_all(self->feedbacks_list, op);
+}
 
 /*
  * Sets cursor postion.
