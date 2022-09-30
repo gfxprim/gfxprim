@@ -37,6 +37,9 @@ struct fb_priv {
 	int saved_kb_mode;
 	struct termios ts;
 	int restore_termios;
+	/* hook for the keymap to turn on/off keyboard leds */
+	int leds;
+	gp_ev_feedback feedback;
 
 	int fb_fd;
 	char path[];
@@ -59,6 +62,48 @@ static void exit_kbd(struct fb_priv *fb)
 			        strerror(errno));
 		}
 	}
+
+	if (ioctl(fb->con_fd, KDSETLED, 0))
+		GP_WARN("Failed to set kbd leds %s", strerror(errno));
+}
+
+static int leds_to_flags(int leds)
+{
+	int ret = 0;
+
+	if (leds & GP_KBD_LED_NUM_LOCK)
+		ret |= LED_NUM;
+
+	if (leds & GP_KBD_LED_CAPS_LOCK)
+		ret |= LED_CAP;
+
+	if (leds & GP_KBD_LED_SCROLL_LOCK)
+		ret |= LED_SCR;
+
+	return ret;
+}
+
+static int set_get_kbd_leds(gp_ev_feedback *self, gp_ev_feedback_op *op)
+{
+	struct fb_priv *fb_priv = GP_CONTAINER_OF(self, struct fb_priv, feedback);
+
+	switch (op->op) {
+	case GP_EV_LEDS_ON:
+		fb_priv->leds |= op->val;
+	break;
+	case GP_EV_LEDS_OFF:
+		fb_priv->leds &= ~(op->val);
+	break;
+	case GP_EV_LEDS_GET:
+		op->val = fb_priv->leds;
+		return 0;
+	break;
+	}
+
+	if (ioctl(fb_priv->con_fd, KDSETLED, leds_to_flags(fb_priv->leds)))
+		return -1;
+
+	return 0;
 }
 
 /*
@@ -381,6 +426,8 @@ gp_backend *gp_linux_fb_init(const char *path, int flags)
 	fb->pixmap.bytes_per_row  = fscri.line_length;
 	fb->pixmap.pixel_type = pixel_type;
 
+	fb->feedback.set_get = set_get_kbd_leds;
+
 	int shadow = flags & GP_FB_SHADOW;
 	int kbd = flags & GP_FB_INPUT_KBD;
 
@@ -395,6 +442,9 @@ gp_backend *gp_linux_fb_init(const char *path, int flags)
 	backend->fd = fb->con_fd;
 
 	gp_event_queue_init(&backend->event_queue, vscri.xres, vscri.yres, 0, GP_EVENT_QUEUE_LOAD_KEYMAP);
+
+	if (kbd)
+		gp_ev_queue_feedback_register(&backend->event_queue, &fb->feedback);
 
 	return backend;
 err4:
