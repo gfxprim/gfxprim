@@ -306,6 +306,20 @@ static void spin_dec(gp_widget *self)
 	gp_widget_redraw(self);
 }
 
+static void spin_add(gp_widget *self, int val)
+{
+	if (self->spin->val + val < self->spin->min ||
+	    self->spin->val + val > self->spin->max) {
+		schedule_alert(self);
+		return;
+	}
+
+	self->spin->val += val;
+
+	gp_widget_send_widget_event(self, 0);
+	gp_widget_redraw(self);
+}
+
 static void spin_click(gp_widget *self, const gp_widget_render_ctx *ctx, gp_event *ev)
 {
 	unsigned int s = spin_buttons_width(ctx);
@@ -367,6 +381,10 @@ static int spin_event(gp_widget *self, const gp_widget_render_ctx *ctx, gp_event
 			spin_max(self);
 			return 1;
 		}
+	break;
+	case GP_EV_REL:
+		if (ev->code == GP_EV_REL_WHEEL)
+			spin_add(self, ev->val);
 	break;
 	case GP_EV_TMR:
 		self->spin->alert = 0;
