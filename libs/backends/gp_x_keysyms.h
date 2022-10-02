@@ -73,6 +73,9 @@ static const struct keytable sym_to_key[] = {
 	{XF86XK_AudioNext,        GP_KEY_NEXT_SONG},
 	{XF86XK_AudioPrev,        GP_KEY_PREVIOUS_SONG},
 	{XF86XK_AudioPlay,        GP_KEY_PLAY_PAUSE},
+
+	/* Misc */
+	{XK_less, GP_KEY_102ND}
 };
 
 #endif /* BACKENDS_X_KEYSYMS_H */
