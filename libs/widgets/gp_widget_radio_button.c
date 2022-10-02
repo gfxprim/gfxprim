@@ -147,6 +147,15 @@ static int event(gp_widget *self, const gp_widget_render_ctx *ctx, gp_event *ev)
 			select_choice(self, gp_widget_choice_cnt_get(self) - 1);
 			return 1;
 		}
+	break;
+	case GP_EV_REL:
+		if (ev->code == GP_EV_REL_WHEEL) {
+			if (ev->val < 0)
+				key_down(self);
+			else
+				key_up(self);
+		}
+	break;
 	}
 
 	return 0;
