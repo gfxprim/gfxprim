@@ -48,6 +48,8 @@ static void draw_event(gp_event *ev)
 static void event_loop(void)
 {
 	gp_pixmap *win = backend->pixmap;
+	static int size = 0;
+	int align = GP_ALIGN_RIGHT|GP_VALIGN_BOTTOM;
 
 	for (;;) {
 		gp_backend_poll(backend);
@@ -86,13 +88,11 @@ static void event_loop(void)
 			break;
 			case GP_EV_REL:
 				switch (ev->code) {
-				static int size = 0;
 				case GP_EV_REL_POS:
 					if (gp_event_key_pressed(ev, GP_BTN_LEFT)) {
 						gp_putpixel(win, ev->st->cursor_x, ev->st->cursor_y,
 							    green);
 					}
-					int align = GP_ALIGN_RIGHT|GP_VALIGN_BOTTOM;
 
 					gp_text_clear(win, NULL, 20, 60, align,
 					              black, size);
@@ -100,6 +100,12 @@ static void event_loop(void)
 					                white, black, "X=%3u Y=%3u dX=%3i dY=%3i",
 						        ev->st->cursor_x, ev->st->cursor_y,
 							ev->rel.rx, ev->rel.ry);
+					gp_backend_flip(backend);
+				break;
+				case GP_EV_REL_WHEEL:
+					gp_text_clear(win, NULL, 20, 60, align, black, size);
+					size = gp_print(win, NULL, 20, 60, align, white, black,
+							"wheel=%i", ev->val);
 					gp_backend_flip(backend);
 				break;
 				}
